@@ -151,6 +151,7 @@ skip_white_space()
 	case ' ':
 	case '\t':
 	case '\f':
+	case '\15': /* JGM: needed for some bizarre reason */
 	  c = getc(finput);
 	  break;
 

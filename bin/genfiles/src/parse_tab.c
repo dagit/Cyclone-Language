@@ -8150,2736 +8150,2734 @@ _temp5244.curr +( yyvsp_offset - 1); if( _temp5244.base == 0? 1:( _temp5246 <
 _temp5244.base? 1: _temp5246 >= _temp5244.last_plus_one)){ _throw(
 Null_Exception);}* _temp5246;})); xprintf("`%.*s", _temp5247.last_plus_one -
 _temp5247.curr, _temp5247.curr);}); _temp5243;}); _temp5242->kind=(( struct Cyc_Absyn_Conref*(*)(
-void* x)) Cyc_Absyn_new_conref)(( void*) Cyc_Absyn_RgnKind); _temp5242;});({
-struct _tagged_string _temp5248=* tv->name; fprintf( Cyc_Stdio_stderr,"\nnew region's name is: \"%.*s\"\n",
-_temp5248.last_plus_one - _temp5248.curr, _temp5248.curr);});{ void* t=( void*)({
-struct Cyc_Absyn_VarType_struct* _temp5249=( struct Cyc_Absyn_VarType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_VarType_struct)); _temp5249[ 0]=({ struct
-Cyc_Absyn_VarType_struct _temp5250; _temp5250.tag= Cyc_Absyn_VarType_tag;
-_temp5250.f1= tv; _temp5250;}); _temp5249;}); yyval=( struct _xtunion_struct*)({
-struct Cyc_Stmt_tok_struct* _temp5251=( struct Cyc_Stmt_tok_struct*) GC_malloc(
-sizeof( struct Cyc_Stmt_tok_struct)); _temp5251[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5252; _temp5252.tag= Cyc_Stmt_tok_tag; _temp5252.f1= Cyc_Absyn_new_stmt((
-void*)({ struct Cyc_Absyn_Region_s_struct* _temp5253=( struct Cyc_Absyn_Region_s_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Region_s_struct)); _temp5253[ 0]=({ struct
-Cyc_Absyn_Region_s_struct _temp5254; _temp5254.tag= Cyc_Absyn_Region_s_tag;
-_temp5254.f1= tv; _temp5254.f2= Cyc_Absyn_new_vardecl(({ struct _tuple1*
-_temp5255=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp5255->f1=(
-void*) Cyc_Absyn_Loc_n; _temp5255->f2=({ struct _tagged_string* _temp5256=(
-struct _tagged_string*) GC_malloc( sizeof( struct _tagged_string)); _temp5256[ 0]=
-Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp5257= yyvs; struct
-_xtunion_struct** _temp5259= _temp5257.curr +( yyvsp_offset - 1); if( _temp5257.base
-== 0? 1:( _temp5259 < _temp5257.base? 1: _temp5259 >= _temp5257.last_plus_one)){
-_throw( Null_Exception);}* _temp5259;})); _temp5256;}); _temp5255;}),( void*)({
-struct Cyc_Absyn_RgnHandleType_struct* _temp5260=( struct Cyc_Absyn_RgnHandleType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_RgnHandleType_struct)); _temp5260[ 0]=({
-struct Cyc_Absyn_RgnHandleType_struct _temp5261; _temp5261.tag= Cyc_Absyn_RgnHandleType_tag;
-_temp5261.f1=( void*) t; _temp5261;}); _temp5260;}), 0); _temp5254.f3= Cyc_yyget_Stmt_tok(({
-struct _tagged_ptr2 _temp5262= yyvs; struct _xtunion_struct** _temp5264=
-_temp5262.curr + yyvsp_offset; if( _temp5262.base == 0? 1:( _temp5264 <
-_temp5262.base? 1: _temp5264 >= _temp5262.last_plus_one)){ _throw(
-Null_Exception);}* _temp5264;})); _temp5254;}); _temp5253;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp5265= yyls; struct Cyc_Yyltype* _temp5267= _temp5265.curr
-+( yylsp_offset - 2); if( _temp5265.base == 0? 1:( _temp5267 < _temp5265.base? 1:
-_temp5267 >= _temp5265.last_plus_one)){ _throw( Null_Exception);}* _temp5267;}).first_line,({
-struct _tagged_ptr3 _temp5268= yyls; struct Cyc_Yyltype* _temp5270= _temp5268.curr
-+ yylsp_offset; if( _temp5268.base == 0? 1:( _temp5270 < _temp5268.base? 1:
-_temp5270 >= _temp5268.last_plus_one)){ _throw( Null_Exception);}* _temp5270;}).last_line));
-_temp5252;}); _temp5251;}); break;}} case 220: _LL5228: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5272=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5272[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5273; _temp5273.tag= Cyc_Stmt_tok_tag; _temp5273.f1= Cyc_Absyn_new_stmt((
-void*)({ struct Cyc_Absyn_Cut_s_struct* _temp5274=( struct Cyc_Absyn_Cut_s_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Cut_s_struct)); _temp5274[ 0]=({ struct Cyc_Absyn_Cut_s_struct
-_temp5275; _temp5275.tag= Cyc_Absyn_Cut_s_tag; _temp5275.f1= Cyc_yyget_Stmt_tok(({
-struct _tagged_ptr2 _temp5276= yyvs; struct _xtunion_struct** _temp5278=
-_temp5276.curr + yyvsp_offset; if( _temp5276.base == 0? 1:( _temp5278 <
-_temp5276.base? 1: _temp5278 >= _temp5276.last_plus_one)){ _throw(
-Null_Exception);}* _temp5278;})); _temp5275;}); _temp5274;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp5279= yyls; struct Cyc_Yyltype* _temp5281= _temp5279.curr
-+( yylsp_offset - 1); if( _temp5279.base == 0? 1:( _temp5281 < _temp5279.base? 1:
-_temp5281 >= _temp5279.last_plus_one)){ _throw( Null_Exception);}* _temp5281;}).first_line,({
-struct _tagged_ptr3 _temp5282= yyls; struct Cyc_Yyltype* _temp5284= _temp5282.curr
-+ yylsp_offset; if( _temp5282.base == 0? 1:( _temp5284 < _temp5282.base? 1:
-_temp5284 >= _temp5282.last_plus_one)){ _throw( Null_Exception);}* _temp5284;}).last_line));
-_temp5273;}); _temp5272;}); break; case 221: _LL5271: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5286=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5286[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5287; _temp5287.tag= Cyc_Stmt_tok_tag; _temp5287.f1= Cyc_Absyn_new_stmt((
-void*)({ struct Cyc_Absyn_Splice_s_struct* _temp5288=( struct Cyc_Absyn_Splice_s_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Splice_s_struct)); _temp5288[ 0]=({ struct
-Cyc_Absyn_Splice_s_struct _temp5289; _temp5289.tag= Cyc_Absyn_Splice_s_tag;
-_temp5289.f1= Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5290= yyvs; struct
-_xtunion_struct** _temp5292= _temp5290.curr + yyvsp_offset; if( _temp5290.base
-== 0? 1:( _temp5292 < _temp5290.base? 1: _temp5292 >= _temp5290.last_plus_one)){
-_throw( Null_Exception);}* _temp5292;})); _temp5289;}); _temp5288;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp5293= yyls; struct Cyc_Yyltype* _temp5295= _temp5293.curr
-+( yylsp_offset - 1); if( _temp5293.base == 0? 1:( _temp5295 < _temp5293.base? 1:
-_temp5295 >= _temp5293.last_plus_one)){ _throw( Null_Exception);}* _temp5295;}).first_line,({
-struct _tagged_ptr3 _temp5296= yyls; struct Cyc_Yyltype* _temp5298= _temp5296.curr
-+ yylsp_offset; if( _temp5296.base == 0? 1:( _temp5298 < _temp5296.base? 1:
-_temp5298 >= _temp5296.last_plus_one)){ _throw( Null_Exception);}* _temp5298;}).last_line));
-_temp5287;}); _temp5286;}); break; case 222: _LL5285: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5300=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5300[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5301; _temp5301.tag= Cyc_Stmt_tok_tag; _temp5301.f1= Cyc_Absyn_new_stmt((
-void*)({ struct Cyc_Absyn_Label_s_struct* _temp5302=( struct Cyc_Absyn_Label_s_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Label_s_struct)); _temp5302[ 0]=({ struct
-Cyc_Absyn_Label_s_struct _temp5303; _temp5303.tag= Cyc_Absyn_Label_s_tag;
-_temp5303.f1=({ struct _tagged_string* _temp5304=( struct _tagged_string*)
-GC_malloc( sizeof( struct _tagged_string) * 1); _temp5304[ 0]= Cyc_yyget_String_tok(({
-struct _tagged_ptr2 _temp5305= yyvs; struct _xtunion_struct** _temp5307=
-_temp5305.curr +( yyvsp_offset - 2); if( _temp5305.base == 0? 1:( _temp5307 <
-_temp5305.base? 1: _temp5307 >= _temp5305.last_plus_one)){ _throw(
-Null_Exception);}* _temp5307;})); _temp5304;}); _temp5303.f2= Cyc_yyget_Stmt_tok(({
-struct _tagged_ptr2 _temp5308= yyvs; struct _xtunion_struct** _temp5310=
-_temp5308.curr + yyvsp_offset; if( _temp5308.base == 0? 1:( _temp5310 <
-_temp5308.base? 1: _temp5310 >= _temp5308.last_plus_one)){ _throw(
-Null_Exception);}* _temp5310;})); _temp5303;}); _temp5302;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp5311= yyls; struct Cyc_Yyltype* _temp5313= _temp5311.curr
-+( yylsp_offset - 2); if( _temp5311.base == 0? 1:( _temp5313 < _temp5311.base? 1:
-_temp5313 >= _temp5311.last_plus_one)){ _throw( Null_Exception);}* _temp5313;}).first_line,({
-struct _tagged_ptr3 _temp5314= yyls; struct Cyc_Yyltype* _temp5316= _temp5314.curr
-+ yylsp_offset; if( _temp5314.base == 0? 1:( _temp5316 < _temp5314.base? 1:
-_temp5316 >= _temp5314.last_plus_one)){ _throw( Null_Exception);}* _temp5316;}).last_line));
-_temp5301;}); _temp5300;}); break; case 223: _LL5299: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5318=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5318[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5319; _temp5319.tag= Cyc_Stmt_tok_tag; _temp5319.f1= Cyc_Absyn_skip_stmt(
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5320= yyls; struct Cyc_Yyltype*
-_temp5322= _temp5320.curr + yylsp_offset; if( _temp5320.base == 0? 1:( _temp5322
-< _temp5320.base? 1: _temp5322 >= _temp5320.last_plus_one)){ _throw(
-Null_Exception);}* _temp5322;}).first_line,({ struct _tagged_ptr3 _temp5323=
-yyls; struct Cyc_Yyltype* _temp5325= _temp5323.curr + yylsp_offset; if(
-_temp5323.base == 0? 1:( _temp5325 < _temp5323.base? 1: _temp5325 >= _temp5323.last_plus_one)){
-_throw( Null_Exception);}* _temp5325;}).last_line)); _temp5319;}); _temp5318;});
-break; case 224: _LL5317: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5327=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5327[ 0]=({ struct Cyc_Stmt_tok_struct _temp5328; _temp5328.tag= Cyc_Stmt_tok_tag;
-_temp5328.f1= Cyc_Absyn_exp_stmt( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp5329= yyvs; struct _xtunion_struct** _temp5331= _temp5329.curr +(
-yyvsp_offset - 1); if( _temp5329.base == 0? 1:( _temp5331 < _temp5329.base? 1:
-_temp5331 >= _temp5329.last_plus_one)){ _throw( Null_Exception);}* _temp5331;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5332= yyls; struct Cyc_Yyltype*
-_temp5334= _temp5332.curr +( yylsp_offset - 1); if( _temp5332.base == 0? 1:(
-_temp5334 < _temp5332.base? 1: _temp5334 >= _temp5332.last_plus_one)){ _throw(
-Null_Exception);}* _temp5334;}).first_line,({ struct _tagged_ptr3 _temp5335=
-yyls; struct Cyc_Yyltype* _temp5337= _temp5335.curr + yylsp_offset; if(
-_temp5335.base == 0? 1:( _temp5337 < _temp5335.base? 1: _temp5337 >= _temp5335.last_plus_one)){
-_throw( Null_Exception);}* _temp5337;}).last_line)); _temp5328;}); _temp5327;});
-break; case 225: _LL5326: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5339=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5339[ 0]=({ struct Cyc_Stmt_tok_struct _temp5340; _temp5340.tag= Cyc_Stmt_tok_tag;
-_temp5340.f1= Cyc_Absyn_skip_stmt( Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5341= yyls; struct Cyc_Yyltype* _temp5343= _temp5341.curr +(
-yylsp_offset - 1); if( _temp5341.base == 0? 1:( _temp5343 < _temp5341.base? 1:
-_temp5343 >= _temp5341.last_plus_one)){ _throw( Null_Exception);}* _temp5343;}).first_line,({
-struct _tagged_ptr3 _temp5344= yyls; struct Cyc_Yyltype* _temp5346= _temp5344.curr
-+ yylsp_offset; if( _temp5344.base == 0? 1:( _temp5346 < _temp5344.base? 1:
-_temp5346 >= _temp5344.last_plus_one)){ _throw( Null_Exception);}* _temp5346;}).last_line));
-_temp5340;}); _temp5339;}); break; case 226: _LL5338: yyval=({ struct
-_tagged_ptr2 _temp5348= yyvs; struct _xtunion_struct** _temp5350= _temp5348.curr
-+( yyvsp_offset - 1); if( _temp5348.base == 0? 1:( _temp5350 < _temp5348.base? 1:
-_temp5350 >= _temp5348.last_plus_one)){ _throw( Null_Exception);}* _temp5350;});
-break; case 227: _LL5347:{ void* _temp5355= Cyc_yyget_BlockItem_tok(({ struct
-_tagged_ptr2 _temp5352= yyvs; struct _xtunion_struct** _temp5354= _temp5352.curr
-+ yyvsp_offset; if( _temp5352.base == 0? 1:( _temp5354 < _temp5352.base? 1:
-_temp5354 >= _temp5352.last_plus_one)){ _throw( Null_Exception);}* _temp5354;}));
-struct Cyc_List_List* _temp5363; struct Cyc_Absyn_Fndecl* _temp5365; struct Cyc_Absyn_Stmt*
-_temp5367; _LL5357: if((( struct _tunion_struct*) _temp5355)->tag == Cyc_Parse_TopDecls_bl_tag){
-_LL5364: _temp5363=( struct Cyc_List_List*)(( struct Cyc_Parse_TopDecls_bl_struct*)
-_temp5355)->f1; goto _LL5358;} else{ goto _LL5359;} _LL5359: if((( struct
-_tunion_struct*) _temp5355)->tag == Cyc_Parse_FnDecl_bl_tag){ _LL5366: _temp5365=(
-struct Cyc_Absyn_Fndecl*)(( struct Cyc_Parse_FnDecl_bl_struct*) _temp5355)->f1;
-goto _LL5360;} else{ goto _LL5361;} _LL5361: if((( struct _tunion_struct*)
-_temp5355)->tag == Cyc_Parse_Stmt_bl_tag){ _LL5368: _temp5367=( struct Cyc_Absyn_Stmt*)((
-struct Cyc_Parse_Stmt_bl_struct*) _temp5355)->f1; goto _LL5362;} else{ goto
-_LL5356;} _LL5358: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5369=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5369[ 0]=({ struct Cyc_Stmt_tok_struct _temp5370; _temp5370.tag= Cyc_Stmt_tok_tag;
-_temp5370.f1= Cyc_Parse_flatten_declarations( _temp5363, Cyc_Absyn_skip_stmt(
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5371= yyls; struct Cyc_Yyltype*
-_temp5373= _temp5371.curr + yylsp_offset; if( _temp5371.base == 0? 1:( _temp5373
-< _temp5371.base? 1: _temp5373 >= _temp5371.last_plus_one)){ _throw(
-Null_Exception);}* _temp5373;}).first_line,({ struct _tagged_ptr3 _temp5374=
-yyls; struct Cyc_Yyltype* _temp5376= _temp5374.curr + yylsp_offset; if(
-_temp5374.base == 0? 1:( _temp5376 < _temp5374.base? 1: _temp5376 >= _temp5374.last_plus_one)){
-_throw( Null_Exception);}* _temp5376;}).last_line))); _temp5370;}); _temp5369;});
-goto _LL5356; _LL5360: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5377=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5377[ 0]=({ struct Cyc_Stmt_tok_struct _temp5378; _temp5378.tag= Cyc_Stmt_tok_tag;
-_temp5378.f1= Cyc_Parse_flatten_decl( Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Fn_d_struct*
-_temp5379=( struct Cyc_Absyn_Fn_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Fn_d_struct));
-_temp5379[ 0]=({ struct Cyc_Absyn_Fn_d_struct _temp5380; _temp5380.tag= Cyc_Absyn_Fn_d_tag;
-_temp5380.f1= _temp5365; _temp5380;}); _temp5379;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp5381= yyls; struct Cyc_Yyltype* _temp5383= _temp5381.curr
-+ yylsp_offset; if( _temp5381.base == 0? 1:( _temp5383 < _temp5381.base? 1:
-_temp5383 >= _temp5381.last_plus_one)){ _throw( Null_Exception);}* _temp5383;}).first_line,({
-struct _tagged_ptr3 _temp5384= yyls; struct Cyc_Yyltype* _temp5386= _temp5384.curr
-+ yylsp_offset; if( _temp5384.base == 0? 1:( _temp5386 < _temp5384.base? 1:
-_temp5386 >= _temp5384.last_plus_one)){ _throw( Null_Exception);}* _temp5386;}).last_line)),
+void* x)) Cyc_Absyn_new_conref)(( void*) Cyc_Absyn_RgnKind); _temp5242;}); void*
+t=( void*)({ struct Cyc_Absyn_VarType_struct* _temp5248=( struct Cyc_Absyn_VarType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_VarType_struct)); _temp5248[ 0]=({ struct
+Cyc_Absyn_VarType_struct _temp5249; _temp5249.tag= Cyc_Absyn_VarType_tag;
+_temp5249.f1= tv; _temp5249;}); _temp5248;}); yyval=( struct _xtunion_struct*)({
+struct Cyc_Stmt_tok_struct* _temp5250=( struct Cyc_Stmt_tok_struct*) GC_malloc(
+sizeof( struct Cyc_Stmt_tok_struct)); _temp5250[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5251; _temp5251.tag= Cyc_Stmt_tok_tag; _temp5251.f1= Cyc_Absyn_new_stmt((
+void*)({ struct Cyc_Absyn_Region_s_struct* _temp5252=( struct Cyc_Absyn_Region_s_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Region_s_struct)); _temp5252[ 0]=({ struct
+Cyc_Absyn_Region_s_struct _temp5253; _temp5253.tag= Cyc_Absyn_Region_s_tag;
+_temp5253.f1= tv; _temp5253.f2= Cyc_Absyn_new_vardecl(({ struct _tuple1*
+_temp5254=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp5254->f1=(
+void*) Cyc_Absyn_Loc_n; _temp5254->f2=({ struct _tagged_string* _temp5255=(
+struct _tagged_string*) GC_malloc( sizeof( struct _tagged_string)); _temp5255[ 0]=
+Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp5256= yyvs; struct
+_xtunion_struct** _temp5258= _temp5256.curr +( yyvsp_offset - 1); if( _temp5256.base
+== 0? 1:( _temp5258 < _temp5256.base? 1: _temp5258 >= _temp5256.last_plus_one)){
+_throw( Null_Exception);}* _temp5258;})); _temp5255;}); _temp5254;}),( void*)({
+struct Cyc_Absyn_RgnHandleType_struct* _temp5259=( struct Cyc_Absyn_RgnHandleType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_RgnHandleType_struct)); _temp5259[ 0]=({
+struct Cyc_Absyn_RgnHandleType_struct _temp5260; _temp5260.tag= Cyc_Absyn_RgnHandleType_tag;
+_temp5260.f1=( void*) t; _temp5260;}); _temp5259;}), 0); _temp5253.f3= Cyc_yyget_Stmt_tok(({
+struct _tagged_ptr2 _temp5261= yyvs; struct _xtunion_struct** _temp5263=
+_temp5261.curr + yyvsp_offset; if( _temp5261.base == 0? 1:( _temp5263 <
+_temp5261.base? 1: _temp5263 >= _temp5261.last_plus_one)){ _throw(
+Null_Exception);}* _temp5263;})); _temp5253;}); _temp5252;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp5264= yyls; struct Cyc_Yyltype* _temp5266= _temp5264.curr
++( yylsp_offset - 2); if( _temp5264.base == 0? 1:( _temp5266 < _temp5264.base? 1:
+_temp5266 >= _temp5264.last_plus_one)){ _throw( Null_Exception);}* _temp5266;}).first_line,({
+struct _tagged_ptr3 _temp5267= yyls; struct Cyc_Yyltype* _temp5269= _temp5267.curr
++ yylsp_offset; if( _temp5267.base == 0? 1:( _temp5269 < _temp5267.base? 1:
+_temp5269 >= _temp5267.last_plus_one)){ _throw( Null_Exception);}* _temp5269;}).last_line));
+_temp5251;}); _temp5250;}); break;} case 220: _LL5228: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5271=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5271[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5272; _temp5272.tag= Cyc_Stmt_tok_tag; _temp5272.f1= Cyc_Absyn_new_stmt((
+void*)({ struct Cyc_Absyn_Cut_s_struct* _temp5273=( struct Cyc_Absyn_Cut_s_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Cut_s_struct)); _temp5273[ 0]=({ struct Cyc_Absyn_Cut_s_struct
+_temp5274; _temp5274.tag= Cyc_Absyn_Cut_s_tag; _temp5274.f1= Cyc_yyget_Stmt_tok(({
+struct _tagged_ptr2 _temp5275= yyvs; struct _xtunion_struct** _temp5277=
+_temp5275.curr + yyvsp_offset; if( _temp5275.base == 0? 1:( _temp5277 <
+_temp5275.base? 1: _temp5277 >= _temp5275.last_plus_one)){ _throw(
+Null_Exception);}* _temp5277;})); _temp5274;}); _temp5273;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp5278= yyls; struct Cyc_Yyltype* _temp5280= _temp5278.curr
++( yylsp_offset - 1); if( _temp5278.base == 0? 1:( _temp5280 < _temp5278.base? 1:
+_temp5280 >= _temp5278.last_plus_one)){ _throw( Null_Exception);}* _temp5280;}).first_line,({
+struct _tagged_ptr3 _temp5281= yyls; struct Cyc_Yyltype* _temp5283= _temp5281.curr
++ yylsp_offset; if( _temp5281.base == 0? 1:( _temp5283 < _temp5281.base? 1:
+_temp5283 >= _temp5281.last_plus_one)){ _throw( Null_Exception);}* _temp5283;}).last_line));
+_temp5272;}); _temp5271;}); break; case 221: _LL5270: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5285=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5285[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5286; _temp5286.tag= Cyc_Stmt_tok_tag; _temp5286.f1= Cyc_Absyn_new_stmt((
+void*)({ struct Cyc_Absyn_Splice_s_struct* _temp5287=( struct Cyc_Absyn_Splice_s_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Splice_s_struct)); _temp5287[ 0]=({ struct
+Cyc_Absyn_Splice_s_struct _temp5288; _temp5288.tag= Cyc_Absyn_Splice_s_tag;
+_temp5288.f1= Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5289= yyvs; struct
+_xtunion_struct** _temp5291= _temp5289.curr + yyvsp_offset; if( _temp5289.base
+== 0? 1:( _temp5291 < _temp5289.base? 1: _temp5291 >= _temp5289.last_plus_one)){
+_throw( Null_Exception);}* _temp5291;})); _temp5288;}); _temp5287;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp5292= yyls; struct Cyc_Yyltype* _temp5294= _temp5292.curr
++( yylsp_offset - 1); if( _temp5292.base == 0? 1:( _temp5294 < _temp5292.base? 1:
+_temp5294 >= _temp5292.last_plus_one)){ _throw( Null_Exception);}* _temp5294;}).first_line,({
+struct _tagged_ptr3 _temp5295= yyls; struct Cyc_Yyltype* _temp5297= _temp5295.curr
++ yylsp_offset; if( _temp5295.base == 0? 1:( _temp5297 < _temp5295.base? 1:
+_temp5297 >= _temp5295.last_plus_one)){ _throw( Null_Exception);}* _temp5297;}).last_line));
+_temp5286;}); _temp5285;}); break; case 222: _LL5284: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5299=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5299[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5300; _temp5300.tag= Cyc_Stmt_tok_tag; _temp5300.f1= Cyc_Absyn_new_stmt((
+void*)({ struct Cyc_Absyn_Label_s_struct* _temp5301=( struct Cyc_Absyn_Label_s_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Label_s_struct)); _temp5301[ 0]=({ struct
+Cyc_Absyn_Label_s_struct _temp5302; _temp5302.tag= Cyc_Absyn_Label_s_tag;
+_temp5302.f1=({ struct _tagged_string* _temp5303=( struct _tagged_string*)
+GC_malloc( sizeof( struct _tagged_string) * 1); _temp5303[ 0]= Cyc_yyget_String_tok(({
+struct _tagged_ptr2 _temp5304= yyvs; struct _xtunion_struct** _temp5306=
+_temp5304.curr +( yyvsp_offset - 2); if( _temp5304.base == 0? 1:( _temp5306 <
+_temp5304.base? 1: _temp5306 >= _temp5304.last_plus_one)){ _throw(
+Null_Exception);}* _temp5306;})); _temp5303;}); _temp5302.f2= Cyc_yyget_Stmt_tok(({
+struct _tagged_ptr2 _temp5307= yyvs; struct _xtunion_struct** _temp5309=
+_temp5307.curr + yyvsp_offset; if( _temp5307.base == 0? 1:( _temp5309 <
+_temp5307.base? 1: _temp5309 >= _temp5307.last_plus_one)){ _throw(
+Null_Exception);}* _temp5309;})); _temp5302;}); _temp5301;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp5310= yyls; struct Cyc_Yyltype* _temp5312= _temp5310.curr
++( yylsp_offset - 2); if( _temp5310.base == 0? 1:( _temp5312 < _temp5310.base? 1:
+_temp5312 >= _temp5310.last_plus_one)){ _throw( Null_Exception);}* _temp5312;}).first_line,({
+struct _tagged_ptr3 _temp5313= yyls; struct Cyc_Yyltype* _temp5315= _temp5313.curr
++ yylsp_offset; if( _temp5313.base == 0? 1:( _temp5315 < _temp5313.base? 1:
+_temp5315 >= _temp5313.last_plus_one)){ _throw( Null_Exception);}* _temp5315;}).last_line));
+_temp5300;}); _temp5299;}); break; case 223: _LL5298: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5317=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5317[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5318; _temp5318.tag= Cyc_Stmt_tok_tag; _temp5318.f1= Cyc_Absyn_skip_stmt(
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5319= yyls; struct Cyc_Yyltype*
+_temp5321= _temp5319.curr + yylsp_offset; if( _temp5319.base == 0? 1:( _temp5321
+< _temp5319.base? 1: _temp5321 >= _temp5319.last_plus_one)){ _throw(
+Null_Exception);}* _temp5321;}).first_line,({ struct _tagged_ptr3 _temp5322=
+yyls; struct Cyc_Yyltype* _temp5324= _temp5322.curr + yylsp_offset; if(
+_temp5322.base == 0? 1:( _temp5324 < _temp5322.base? 1: _temp5324 >= _temp5322.last_plus_one)){
+_throw( Null_Exception);}* _temp5324;}).last_line)); _temp5318;}); _temp5317;});
+break; case 224: _LL5316: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5326=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5326[ 0]=({ struct Cyc_Stmt_tok_struct _temp5327; _temp5327.tag= Cyc_Stmt_tok_tag;
+_temp5327.f1= Cyc_Absyn_exp_stmt( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp5328= yyvs; struct _xtunion_struct** _temp5330= _temp5328.curr +(
+yyvsp_offset - 1); if( _temp5328.base == 0? 1:( _temp5330 < _temp5328.base? 1:
+_temp5330 >= _temp5328.last_plus_one)){ _throw( Null_Exception);}* _temp5330;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5331= yyls; struct Cyc_Yyltype*
+_temp5333= _temp5331.curr +( yylsp_offset - 1); if( _temp5331.base == 0? 1:(
+_temp5333 < _temp5331.base? 1: _temp5333 >= _temp5331.last_plus_one)){ _throw(
+Null_Exception);}* _temp5333;}).first_line,({ struct _tagged_ptr3 _temp5334=
+yyls; struct Cyc_Yyltype* _temp5336= _temp5334.curr + yylsp_offset; if(
+_temp5334.base == 0? 1:( _temp5336 < _temp5334.base? 1: _temp5336 >= _temp5334.last_plus_one)){
+_throw( Null_Exception);}* _temp5336;}).last_line)); _temp5327;}); _temp5326;});
+break; case 225: _LL5325: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5338=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5338[ 0]=({ struct Cyc_Stmt_tok_struct _temp5339; _temp5339.tag= Cyc_Stmt_tok_tag;
+_temp5339.f1= Cyc_Absyn_skip_stmt( Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5340= yyls; struct Cyc_Yyltype* _temp5342= _temp5340.curr +(
+yylsp_offset - 1); if( _temp5340.base == 0? 1:( _temp5342 < _temp5340.base? 1:
+_temp5342 >= _temp5340.last_plus_one)){ _throw( Null_Exception);}* _temp5342;}).first_line,({
+struct _tagged_ptr3 _temp5343= yyls; struct Cyc_Yyltype* _temp5345= _temp5343.curr
++ yylsp_offset; if( _temp5343.base == 0? 1:( _temp5345 < _temp5343.base? 1:
+_temp5345 >= _temp5343.last_plus_one)){ _throw( Null_Exception);}* _temp5345;}).last_line));
+_temp5339;}); _temp5338;}); break; case 226: _LL5337: yyval=({ struct
+_tagged_ptr2 _temp5347= yyvs; struct _xtunion_struct** _temp5349= _temp5347.curr
++( yyvsp_offset - 1); if( _temp5347.base == 0? 1:( _temp5349 < _temp5347.base? 1:
+_temp5349 >= _temp5347.last_plus_one)){ _throw( Null_Exception);}* _temp5349;});
+break; case 227: _LL5346:{ void* _temp5354= Cyc_yyget_BlockItem_tok(({ struct
+_tagged_ptr2 _temp5351= yyvs; struct _xtunion_struct** _temp5353= _temp5351.curr
++ yyvsp_offset; if( _temp5351.base == 0? 1:( _temp5353 < _temp5351.base? 1:
+_temp5353 >= _temp5351.last_plus_one)){ _throw( Null_Exception);}* _temp5353;}));
+struct Cyc_List_List* _temp5362; struct Cyc_Absyn_Fndecl* _temp5364; struct Cyc_Absyn_Stmt*
+_temp5366; _LL5356: if((( struct _tunion_struct*) _temp5354)->tag == Cyc_Parse_TopDecls_bl_tag){
+_LL5363: _temp5362=( struct Cyc_List_List*)(( struct Cyc_Parse_TopDecls_bl_struct*)
+_temp5354)->f1; goto _LL5357;} else{ goto _LL5358;} _LL5358: if((( struct
+_tunion_struct*) _temp5354)->tag == Cyc_Parse_FnDecl_bl_tag){ _LL5365: _temp5364=(
+struct Cyc_Absyn_Fndecl*)(( struct Cyc_Parse_FnDecl_bl_struct*) _temp5354)->f1;
+goto _LL5359;} else{ goto _LL5360;} _LL5360: if((( struct _tunion_struct*)
+_temp5354)->tag == Cyc_Parse_Stmt_bl_tag){ _LL5367: _temp5366=( struct Cyc_Absyn_Stmt*)((
+struct Cyc_Parse_Stmt_bl_struct*) _temp5354)->f1; goto _LL5361;} else{ goto
+_LL5355;} _LL5357: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5368=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5368[ 0]=({ struct Cyc_Stmt_tok_struct _temp5369; _temp5369.tag= Cyc_Stmt_tok_tag;
+_temp5369.f1= Cyc_Parse_flatten_declarations( _temp5362, Cyc_Absyn_skip_stmt(
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5370= yyls; struct Cyc_Yyltype*
+_temp5372= _temp5370.curr + yylsp_offset; if( _temp5370.base == 0? 1:( _temp5372
+< _temp5370.base? 1: _temp5372 >= _temp5370.last_plus_one)){ _throw(
+Null_Exception);}* _temp5372;}).first_line,({ struct _tagged_ptr3 _temp5373=
+yyls; struct Cyc_Yyltype* _temp5375= _temp5373.curr + yylsp_offset; if(
+_temp5373.base == 0? 1:( _temp5375 < _temp5373.base? 1: _temp5375 >= _temp5373.last_plus_one)){
+_throw( Null_Exception);}* _temp5375;}).last_line))); _temp5369;}); _temp5368;});
+goto _LL5355; _LL5359: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5376=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5376[ 0]=({ struct Cyc_Stmt_tok_struct _temp5377; _temp5377.tag= Cyc_Stmt_tok_tag;
+_temp5377.f1= Cyc_Parse_flatten_decl( Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Fn_d_struct*
+_temp5378=( struct Cyc_Absyn_Fn_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Fn_d_struct));
+_temp5378[ 0]=({ struct Cyc_Absyn_Fn_d_struct _temp5379; _temp5379.tag= Cyc_Absyn_Fn_d_tag;
+_temp5379.f1= _temp5364; _temp5379;}); _temp5378;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp5380= yyls; struct Cyc_Yyltype* _temp5382= _temp5380.curr
++ yylsp_offset; if( _temp5380.base == 0? 1:( _temp5382 < _temp5380.base? 1:
+_temp5382 >= _temp5380.last_plus_one)){ _throw( Null_Exception);}* _temp5382;}).first_line,({
+struct _tagged_ptr3 _temp5383= yyls; struct Cyc_Yyltype* _temp5385= _temp5383.curr
++ yylsp_offset; if( _temp5383.base == 0? 1:( _temp5385 < _temp5383.base? 1:
+_temp5385 >= _temp5383.last_plus_one)){ _throw( Null_Exception);}* _temp5385;}).last_line)),
 Cyc_Absyn_skip_stmt( Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp5387= yyls; struct Cyc_Yyltype* _temp5389= _temp5387.curr + yylsp_offset;
-if( _temp5387.base == 0? 1:( _temp5389 < _temp5387.base? 1: _temp5389 >=
-_temp5387.last_plus_one)){ _throw( Null_Exception);}* _temp5389;}).first_line,({
-struct _tagged_ptr3 _temp5390= yyls; struct Cyc_Yyltype* _temp5392= _temp5390.curr
-+ yylsp_offset; if( _temp5390.base == 0? 1:( _temp5392 < _temp5390.base? 1:
-_temp5392 >= _temp5390.last_plus_one)){ _throw( Null_Exception);}* _temp5392;}).last_line)));
-_temp5378;}); _temp5377;}); goto _LL5356; _LL5362: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5393=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5393[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5394; _temp5394.tag= Cyc_Stmt_tok_tag; _temp5394.f1= _temp5367; _temp5394;});
-_temp5393;}); goto _LL5356; _LL5356:;} break; case 228: _LL5351:{ void*
-_temp5399= Cyc_yyget_BlockItem_tok(({ struct _tagged_ptr2 _temp5396= yyvs;
-struct _xtunion_struct** _temp5398= _temp5396.curr +( yyvsp_offset - 1); if(
-_temp5396.base == 0? 1:( _temp5398 < _temp5396.base? 1: _temp5398 >= _temp5396.last_plus_one)){
-_throw( Null_Exception);}* _temp5398;})); struct Cyc_List_List* _temp5407;
-struct Cyc_Absyn_Fndecl* _temp5409; struct Cyc_Absyn_Stmt* _temp5411; _LL5401:
-if((( struct _tunion_struct*) _temp5399)->tag == Cyc_Parse_TopDecls_bl_tag){
-_LL5408: _temp5407=( struct Cyc_List_List*)(( struct Cyc_Parse_TopDecls_bl_struct*)
-_temp5399)->f1; goto _LL5402;} else{ goto _LL5403;} _LL5403: if((( struct
-_tunion_struct*) _temp5399)->tag == Cyc_Parse_FnDecl_bl_tag){ _LL5410: _temp5409=(
-struct Cyc_Absyn_Fndecl*)(( struct Cyc_Parse_FnDecl_bl_struct*) _temp5399)->f1;
-goto _LL5404;} else{ goto _LL5405;} _LL5405: if((( struct _tunion_struct*)
-_temp5399)->tag == Cyc_Parse_Stmt_bl_tag){ _LL5412: _temp5411=( struct Cyc_Absyn_Stmt*)((
-struct Cyc_Parse_Stmt_bl_struct*) _temp5399)->f1; goto _LL5406;} else{ goto
-_LL5400;} _LL5402: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5413=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5413[ 0]=({ struct Cyc_Stmt_tok_struct _temp5414; _temp5414.tag= Cyc_Stmt_tok_tag;
-_temp5414.f1= Cyc_Parse_flatten_declarations( _temp5407, Cyc_yyget_Stmt_tok(({
-struct _tagged_ptr2 _temp5415= yyvs; struct _xtunion_struct** _temp5417=
-_temp5415.curr + yyvsp_offset; if( _temp5415.base == 0? 1:( _temp5417 <
-_temp5415.base? 1: _temp5417 >= _temp5415.last_plus_one)){ _throw(
-Null_Exception);}* _temp5417;}))); _temp5414;}); _temp5413;}); goto _LL5400;
-_LL5404: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5418=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5418[ 0]=({ struct Cyc_Stmt_tok_struct _temp5419; _temp5419.tag= Cyc_Stmt_tok_tag;
-_temp5419.f1= Cyc_Parse_flatten_decl( Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Fn_d_struct*
-_temp5420=( struct Cyc_Absyn_Fn_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Fn_d_struct));
-_temp5420[ 0]=({ struct Cyc_Absyn_Fn_d_struct _temp5421; _temp5421.tag= Cyc_Absyn_Fn_d_tag;
-_temp5421.f1= _temp5409; _temp5421;}); _temp5420;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp5422= yyls; struct Cyc_Yyltype* _temp5424= _temp5422.curr
-+( yylsp_offset - 1); if( _temp5422.base == 0? 1:( _temp5424 < _temp5422.base? 1:
-_temp5424 >= _temp5422.last_plus_one)){ _throw( Null_Exception);}* _temp5424;}).first_line,({
-struct _tagged_ptr3 _temp5425= yyls; struct Cyc_Yyltype* _temp5427= _temp5425.curr
-+( yylsp_offset - 1); if( _temp5425.base == 0? 1:( _temp5427 < _temp5425.base? 1:
-_temp5427 >= _temp5425.last_plus_one)){ _throw( Null_Exception);}* _temp5427;}).last_line)),
-Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5428= yyvs; struct
-_xtunion_struct** _temp5430= _temp5428.curr + yyvsp_offset; if( _temp5428.base
-== 0? 1:( _temp5430 < _temp5428.base? 1: _temp5430 >= _temp5428.last_plus_one)){
-_throw( Null_Exception);}* _temp5430;}))); _temp5419;}); _temp5418;}); goto
-_LL5400; _LL5406: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5431=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5431[ 0]=({ struct Cyc_Stmt_tok_struct _temp5432; _temp5432.tag= Cyc_Stmt_tok_tag;
-_temp5432.f1= Cyc_Absyn_seq_stmt( _temp5411, Cyc_yyget_Stmt_tok(({ struct
-_tagged_ptr2 _temp5433= yyvs; struct _xtunion_struct** _temp5435= _temp5433.curr
-+ yyvsp_offset; if( _temp5433.base == 0? 1:( _temp5435 < _temp5433.base? 1:
-_temp5435 >= _temp5433.last_plus_one)){ _throw( Null_Exception);}* _temp5435;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5436= yyls; struct Cyc_Yyltype*
-_temp5438= _temp5436.curr +( yylsp_offset - 1); if( _temp5436.base == 0? 1:(
-_temp5438 < _temp5436.base? 1: _temp5438 >= _temp5436.last_plus_one)){ _throw(
-Null_Exception);}* _temp5438;}).first_line,({ struct _tagged_ptr3 _temp5439=
-yyls; struct Cyc_Yyltype* _temp5441= _temp5439.curr + yylsp_offset; if(
-_temp5439.base == 0? 1:( _temp5441 < _temp5439.base? 1: _temp5441 >= _temp5439.last_plus_one)){
-_throw( Null_Exception);}* _temp5441;}).last_line)); _temp5432;}); _temp5431;});
-goto _LL5400; _LL5400:;} break; case 229: _LL5395: yyval=( struct
-_xtunion_struct*)({ struct Cyc_BlockItem_tok_struct* _temp5443=( struct Cyc_BlockItem_tok_struct*)
-GC_malloc( sizeof( struct Cyc_BlockItem_tok_struct)); _temp5443[ 0]=({ struct
-Cyc_BlockItem_tok_struct _temp5444; _temp5444.tag= Cyc_BlockItem_tok_tag;
-_temp5444.f1=( void*)(( void*)({ struct Cyc_Parse_TopDecls_bl_struct* _temp5445=(
+_temp5386= yyls; struct Cyc_Yyltype* _temp5388= _temp5386.curr + yylsp_offset;
+if( _temp5386.base == 0? 1:( _temp5388 < _temp5386.base? 1: _temp5388 >=
+_temp5386.last_plus_one)){ _throw( Null_Exception);}* _temp5388;}).first_line,({
+struct _tagged_ptr3 _temp5389= yyls; struct Cyc_Yyltype* _temp5391= _temp5389.curr
++ yylsp_offset; if( _temp5389.base == 0? 1:( _temp5391 < _temp5389.base? 1:
+_temp5391 >= _temp5389.last_plus_one)){ _throw( Null_Exception);}* _temp5391;}).last_line)));
+_temp5377;}); _temp5376;}); goto _LL5355; _LL5361: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5392=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5392[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5393; _temp5393.tag= Cyc_Stmt_tok_tag; _temp5393.f1= _temp5366; _temp5393;});
+_temp5392;}); goto _LL5355; _LL5355:;} break; case 228: _LL5350:{ void*
+_temp5398= Cyc_yyget_BlockItem_tok(({ struct _tagged_ptr2 _temp5395= yyvs;
+struct _xtunion_struct** _temp5397= _temp5395.curr +( yyvsp_offset - 1); if(
+_temp5395.base == 0? 1:( _temp5397 < _temp5395.base? 1: _temp5397 >= _temp5395.last_plus_one)){
+_throw( Null_Exception);}* _temp5397;})); struct Cyc_List_List* _temp5406;
+struct Cyc_Absyn_Fndecl* _temp5408; struct Cyc_Absyn_Stmt* _temp5410; _LL5400:
+if((( struct _tunion_struct*) _temp5398)->tag == Cyc_Parse_TopDecls_bl_tag){
+_LL5407: _temp5406=( struct Cyc_List_List*)(( struct Cyc_Parse_TopDecls_bl_struct*)
+_temp5398)->f1; goto _LL5401;} else{ goto _LL5402;} _LL5402: if((( struct
+_tunion_struct*) _temp5398)->tag == Cyc_Parse_FnDecl_bl_tag){ _LL5409: _temp5408=(
+struct Cyc_Absyn_Fndecl*)(( struct Cyc_Parse_FnDecl_bl_struct*) _temp5398)->f1;
+goto _LL5403;} else{ goto _LL5404;} _LL5404: if((( struct _tunion_struct*)
+_temp5398)->tag == Cyc_Parse_Stmt_bl_tag){ _LL5411: _temp5410=( struct Cyc_Absyn_Stmt*)((
+struct Cyc_Parse_Stmt_bl_struct*) _temp5398)->f1; goto _LL5405;} else{ goto
+_LL5399;} _LL5401: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5412=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5412[ 0]=({ struct Cyc_Stmt_tok_struct _temp5413; _temp5413.tag= Cyc_Stmt_tok_tag;
+_temp5413.f1= Cyc_Parse_flatten_declarations( _temp5406, Cyc_yyget_Stmt_tok(({
+struct _tagged_ptr2 _temp5414= yyvs; struct _xtunion_struct** _temp5416=
+_temp5414.curr + yyvsp_offset; if( _temp5414.base == 0? 1:( _temp5416 <
+_temp5414.base? 1: _temp5416 >= _temp5414.last_plus_one)){ _throw(
+Null_Exception);}* _temp5416;}))); _temp5413;}); _temp5412;}); goto _LL5399;
+_LL5403: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5417=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5417[ 0]=({ struct Cyc_Stmt_tok_struct _temp5418; _temp5418.tag= Cyc_Stmt_tok_tag;
+_temp5418.f1= Cyc_Parse_flatten_decl( Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Fn_d_struct*
+_temp5419=( struct Cyc_Absyn_Fn_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Fn_d_struct));
+_temp5419[ 0]=({ struct Cyc_Absyn_Fn_d_struct _temp5420; _temp5420.tag= Cyc_Absyn_Fn_d_tag;
+_temp5420.f1= _temp5408; _temp5420;}); _temp5419;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp5421= yyls; struct Cyc_Yyltype* _temp5423= _temp5421.curr
++( yylsp_offset - 1); if( _temp5421.base == 0? 1:( _temp5423 < _temp5421.base? 1:
+_temp5423 >= _temp5421.last_plus_one)){ _throw( Null_Exception);}* _temp5423;}).first_line,({
+struct _tagged_ptr3 _temp5424= yyls; struct Cyc_Yyltype* _temp5426= _temp5424.curr
++( yylsp_offset - 1); if( _temp5424.base == 0? 1:( _temp5426 < _temp5424.base? 1:
+_temp5426 >= _temp5424.last_plus_one)){ _throw( Null_Exception);}* _temp5426;}).last_line)),
+Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5427= yyvs; struct
+_xtunion_struct** _temp5429= _temp5427.curr + yyvsp_offset; if( _temp5427.base
+== 0? 1:( _temp5429 < _temp5427.base? 1: _temp5429 >= _temp5427.last_plus_one)){
+_throw( Null_Exception);}* _temp5429;}))); _temp5418;}); _temp5417;}); goto
+_LL5399; _LL5405: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5430=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5430[ 0]=({ struct Cyc_Stmt_tok_struct _temp5431; _temp5431.tag= Cyc_Stmt_tok_tag;
+_temp5431.f1= Cyc_Absyn_seq_stmt( _temp5410, Cyc_yyget_Stmt_tok(({ struct
+_tagged_ptr2 _temp5432= yyvs; struct _xtunion_struct** _temp5434= _temp5432.curr
++ yyvsp_offset; if( _temp5432.base == 0? 1:( _temp5434 < _temp5432.base? 1:
+_temp5434 >= _temp5432.last_plus_one)){ _throw( Null_Exception);}* _temp5434;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5435= yyls; struct Cyc_Yyltype*
+_temp5437= _temp5435.curr +( yylsp_offset - 1); if( _temp5435.base == 0? 1:(
+_temp5437 < _temp5435.base? 1: _temp5437 >= _temp5435.last_plus_one)){ _throw(
+Null_Exception);}* _temp5437;}).first_line,({ struct _tagged_ptr3 _temp5438=
+yyls; struct Cyc_Yyltype* _temp5440= _temp5438.curr + yylsp_offset; if(
+_temp5438.base == 0? 1:( _temp5440 < _temp5438.base? 1: _temp5440 >= _temp5438.last_plus_one)){
+_throw( Null_Exception);}* _temp5440;}).last_line)); _temp5431;}); _temp5430;});
+goto _LL5399; _LL5399:;} break; case 229: _LL5394: yyval=( struct
+_xtunion_struct*)({ struct Cyc_BlockItem_tok_struct* _temp5442=( struct Cyc_BlockItem_tok_struct*)
+GC_malloc( sizeof( struct Cyc_BlockItem_tok_struct)); _temp5442[ 0]=({ struct
+Cyc_BlockItem_tok_struct _temp5443; _temp5443.tag= Cyc_BlockItem_tok_tag;
+_temp5443.f1=( void*)(( void*)({ struct Cyc_Parse_TopDecls_bl_struct* _temp5444=(
 struct Cyc_Parse_TopDecls_bl_struct*) GC_malloc( sizeof( struct Cyc_Parse_TopDecls_bl_struct));
-_temp5445[ 0]=({ struct Cyc_Parse_TopDecls_bl_struct _temp5446; _temp5446.tag=
-Cyc_Parse_TopDecls_bl_tag; _temp5446.f1= Cyc_yyget_DeclList_tok(({ struct
-_tagged_ptr2 _temp5447= yyvs; struct _xtunion_struct** _temp5449= _temp5447.curr
-+ yyvsp_offset; if( _temp5447.base == 0? 1:( _temp5449 < _temp5447.base? 1:
-_temp5449 >= _temp5447.last_plus_one)){ _throw( Null_Exception);}* _temp5449;}));
-_temp5446;}); _temp5445;})); _temp5444;}); _temp5443;}); break; case 230:
-_LL5442: yyval=( struct _xtunion_struct*)({ struct Cyc_BlockItem_tok_struct*
-_temp5451=( struct Cyc_BlockItem_tok_struct*) GC_malloc( sizeof( struct Cyc_BlockItem_tok_struct));
-_temp5451[ 0]=({ struct Cyc_BlockItem_tok_struct _temp5452; _temp5452.tag= Cyc_BlockItem_tok_tag;
-_temp5452.f1=( void*)(( void*)({ struct Cyc_Parse_Stmt_bl_struct* _temp5453=(
+_temp5444[ 0]=({ struct Cyc_Parse_TopDecls_bl_struct _temp5445; _temp5445.tag=
+Cyc_Parse_TopDecls_bl_tag; _temp5445.f1= Cyc_yyget_DeclList_tok(({ struct
+_tagged_ptr2 _temp5446= yyvs; struct _xtunion_struct** _temp5448= _temp5446.curr
++ yyvsp_offset; if( _temp5446.base == 0? 1:( _temp5448 < _temp5446.base? 1:
+_temp5448 >= _temp5446.last_plus_one)){ _throw( Null_Exception);}* _temp5448;}));
+_temp5445;}); _temp5444;})); _temp5443;}); _temp5442;}); break; case 230:
+_LL5441: yyval=( struct _xtunion_struct*)({ struct Cyc_BlockItem_tok_struct*
+_temp5450=( struct Cyc_BlockItem_tok_struct*) GC_malloc( sizeof( struct Cyc_BlockItem_tok_struct));
+_temp5450[ 0]=({ struct Cyc_BlockItem_tok_struct _temp5451; _temp5451.tag= Cyc_BlockItem_tok_tag;
+_temp5451.f1=( void*)(( void*)({ struct Cyc_Parse_Stmt_bl_struct* _temp5452=(
 struct Cyc_Parse_Stmt_bl_struct*) GC_malloc( sizeof( struct Cyc_Parse_Stmt_bl_struct));
-_temp5453[ 0]=({ struct Cyc_Parse_Stmt_bl_struct _temp5454; _temp5454.tag= Cyc_Parse_Stmt_bl_tag;
-_temp5454.f1= Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5455= yyvs; struct
-_xtunion_struct** _temp5457= _temp5455.curr + yyvsp_offset; if( _temp5455.base
-== 0? 1:( _temp5457 < _temp5455.base? 1: _temp5457 >= _temp5455.last_plus_one)){
-_throw( Null_Exception);}* _temp5457;})); _temp5454;}); _temp5453;})); _temp5452;});
-_temp5451;}); break; case 231: _LL5450: yyval=( struct _xtunion_struct*)({
-struct Cyc_BlockItem_tok_struct* _temp5459=( struct Cyc_BlockItem_tok_struct*)
-GC_malloc( sizeof( struct Cyc_BlockItem_tok_struct)); _temp5459[ 0]=({ struct
-Cyc_BlockItem_tok_struct _temp5460; _temp5460.tag= Cyc_BlockItem_tok_tag;
-_temp5460.f1=( void*)(( void*)({ struct Cyc_Parse_FnDecl_bl_struct* _temp5461=(
+_temp5452[ 0]=({ struct Cyc_Parse_Stmt_bl_struct _temp5453; _temp5453.tag= Cyc_Parse_Stmt_bl_tag;
+_temp5453.f1= Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5454= yyvs; struct
+_xtunion_struct** _temp5456= _temp5454.curr + yyvsp_offset; if( _temp5454.base
+== 0? 1:( _temp5456 < _temp5454.base? 1: _temp5456 >= _temp5454.last_plus_one)){
+_throw( Null_Exception);}* _temp5456;})); _temp5453;}); _temp5452;})); _temp5451;});
+_temp5450;}); break; case 231: _LL5449: yyval=( struct _xtunion_struct*)({
+struct Cyc_BlockItem_tok_struct* _temp5458=( struct Cyc_BlockItem_tok_struct*)
+GC_malloc( sizeof( struct Cyc_BlockItem_tok_struct)); _temp5458[ 0]=({ struct
+Cyc_BlockItem_tok_struct _temp5459; _temp5459.tag= Cyc_BlockItem_tok_tag;
+_temp5459.f1=( void*)(( void*)({ struct Cyc_Parse_FnDecl_bl_struct* _temp5460=(
 struct Cyc_Parse_FnDecl_bl_struct*) GC_malloc( sizeof( struct Cyc_Parse_FnDecl_bl_struct));
-_temp5461[ 0]=({ struct Cyc_Parse_FnDecl_bl_struct _temp5462; _temp5462.tag= Cyc_Parse_FnDecl_bl_tag;
-_temp5462.f1= Cyc_yyget_FnDecl_tok(({ struct _tagged_ptr2 _temp5463= yyvs;
-struct _xtunion_struct** _temp5465= _temp5463.curr + yyvsp_offset; if( _temp5463.base
-== 0? 1:( _temp5465 < _temp5463.base? 1: _temp5465 >= _temp5463.last_plus_one)){
-_throw( Null_Exception);}* _temp5465;})); _temp5462;}); _temp5461;})); _temp5460;});
-_temp5459;}); break; case 232: _LL5458: yyval=( struct _xtunion_struct*)({
-struct Cyc_Stmt_tok_struct* _temp5467=( struct Cyc_Stmt_tok_struct*) GC_malloc(
-sizeof( struct Cyc_Stmt_tok_struct)); _temp5467[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5468; _temp5468.tag= Cyc_Stmt_tok_tag; _temp5468.f1= Cyc_Absyn_ifthenelse_stmt(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5469= yyvs; struct _xtunion_struct**
-_temp5471= _temp5469.curr +( yyvsp_offset - 2); if( _temp5469.base == 0? 1:(
-_temp5471 < _temp5469.base? 1: _temp5471 >= _temp5469.last_plus_one)){ _throw(
-Null_Exception);}* _temp5471;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
-_temp5472= yyvs; struct _xtunion_struct** _temp5474= _temp5472.curr +
-yyvsp_offset; if( _temp5472.base == 0? 1:( _temp5474 < _temp5472.base? 1:
-_temp5474 >= _temp5472.last_plus_one)){ _throw( Null_Exception);}* _temp5474;})),
+_temp5460[ 0]=({ struct Cyc_Parse_FnDecl_bl_struct _temp5461; _temp5461.tag= Cyc_Parse_FnDecl_bl_tag;
+_temp5461.f1= Cyc_yyget_FnDecl_tok(({ struct _tagged_ptr2 _temp5462= yyvs;
+struct _xtunion_struct** _temp5464= _temp5462.curr + yyvsp_offset; if( _temp5462.base
+== 0? 1:( _temp5464 < _temp5462.base? 1: _temp5464 >= _temp5462.last_plus_one)){
+_throw( Null_Exception);}* _temp5464;})); _temp5461;}); _temp5460;})); _temp5459;});
+_temp5458;}); break; case 232: _LL5457: yyval=( struct _xtunion_struct*)({
+struct Cyc_Stmt_tok_struct* _temp5466=( struct Cyc_Stmt_tok_struct*) GC_malloc(
+sizeof( struct Cyc_Stmt_tok_struct)); _temp5466[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5467; _temp5467.tag= Cyc_Stmt_tok_tag; _temp5467.f1= Cyc_Absyn_ifthenelse_stmt(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5468= yyvs; struct _xtunion_struct**
+_temp5470= _temp5468.curr +( yyvsp_offset - 2); if( _temp5468.base == 0? 1:(
+_temp5470 < _temp5468.base? 1: _temp5470 >= _temp5468.last_plus_one)){ _throw(
+Null_Exception);}* _temp5470;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
+_temp5471= yyvs; struct _xtunion_struct** _temp5473= _temp5471.curr +
+yyvsp_offset; if( _temp5471.base == 0? 1:( _temp5473 < _temp5471.base? 1:
+_temp5473 >= _temp5471.last_plus_one)){ _throw( Null_Exception);}* _temp5473;})),
 Cyc_Absyn_skip_stmt( 0), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp5475= yyls; struct Cyc_Yyltype* _temp5477= _temp5475.curr +( yylsp_offset -
-4); if( _temp5475.base == 0? 1:( _temp5477 < _temp5475.base? 1: _temp5477 >=
-_temp5475.last_plus_one)){ _throw( Null_Exception);}* _temp5477;}).first_line,({
-struct _tagged_ptr3 _temp5478= yyls; struct Cyc_Yyltype* _temp5480= _temp5478.curr
-+ yylsp_offset; if( _temp5478.base == 0? 1:( _temp5480 < _temp5478.base? 1:
-_temp5480 >= _temp5478.last_plus_one)){ _throw( Null_Exception);}* _temp5480;}).last_line));
-_temp5468;}); _temp5467;}); break; case 233: _LL5466: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5482=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5482[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5483; _temp5483.tag= Cyc_Stmt_tok_tag; _temp5483.f1= Cyc_Absyn_ifthenelse_stmt(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5484= yyvs; struct _xtunion_struct**
-_temp5486= _temp5484.curr +( yyvsp_offset - 4); if( _temp5484.base == 0? 1:(
-_temp5486 < _temp5484.base? 1: _temp5486 >= _temp5484.last_plus_one)){ _throw(
-Null_Exception);}* _temp5486;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
-_temp5487= yyvs; struct _xtunion_struct** _temp5489= _temp5487.curr +(
-yyvsp_offset - 2); if( _temp5487.base == 0? 1:( _temp5489 < _temp5487.base? 1:
-_temp5489 >= _temp5487.last_plus_one)){ _throw( Null_Exception);}* _temp5489;})),
-Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5490= yyvs; struct
-_xtunion_struct** _temp5492= _temp5490.curr + yyvsp_offset; if( _temp5490.base
-== 0? 1:( _temp5492 < _temp5490.base? 1: _temp5492 >= _temp5490.last_plus_one)){
-_throw( Null_Exception);}* _temp5492;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5493= yyls; struct Cyc_Yyltype* _temp5495= _temp5493.curr +(
-yylsp_offset - 6); if( _temp5493.base == 0? 1:( _temp5495 < _temp5493.base? 1:
-_temp5495 >= _temp5493.last_plus_one)){ _throw( Null_Exception);}* _temp5495;}).first_line,({
-struct _tagged_ptr3 _temp5496= yyls; struct Cyc_Yyltype* _temp5498= _temp5496.curr
-+ yylsp_offset; if( _temp5496.base == 0? 1:( _temp5498 < _temp5496.base? 1:
-_temp5498 >= _temp5496.last_plus_one)){ _throw( Null_Exception);}* _temp5498;}).last_line));
-_temp5483;}); _temp5482;}); break; case 234: _LL5481: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5500=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5500[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5501; _temp5501.tag= Cyc_Stmt_tok_tag; _temp5501.f1= Cyc_Absyn_switch_stmt(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5502= yyvs; struct _xtunion_struct**
-_temp5504= _temp5502.curr +( yyvsp_offset - 4); if( _temp5502.base == 0? 1:(
-_temp5504 < _temp5502.base? 1: _temp5504 >= _temp5502.last_plus_one)){ _throw(
-Null_Exception);}* _temp5504;})), Cyc_yyget_SwitchClauseList_tok(({ struct
-_tagged_ptr2 _temp5505= yyvs; struct _xtunion_struct** _temp5507= _temp5505.curr
-+( yyvsp_offset - 1); if( _temp5505.base == 0? 1:( _temp5507 < _temp5505.base? 1:
-_temp5507 >= _temp5505.last_plus_one)){ _throw( Null_Exception);}* _temp5507;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5508= yyls; struct Cyc_Yyltype*
-_temp5510= _temp5508.curr +( yylsp_offset - 6); if( _temp5508.base == 0? 1:(
-_temp5510 < _temp5508.base? 1: _temp5510 >= _temp5508.last_plus_one)){ _throw(
-Null_Exception);}* _temp5510;}).first_line,({ struct _tagged_ptr3 _temp5511=
-yyls; struct Cyc_Yyltype* _temp5513= _temp5511.curr + yylsp_offset; if(
-_temp5511.base == 0? 1:( _temp5513 < _temp5511.base? 1: _temp5513 >= _temp5511.last_plus_one)){
-_throw( Null_Exception);}* _temp5513;}).last_line)); _temp5501;}); _temp5500;});
-break; case 235: _LL5499: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5515=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5515[ 0]=({ struct Cyc_Stmt_tok_struct _temp5516; _temp5516.tag= Cyc_Stmt_tok_tag;
-_temp5516.f1= Cyc_Absyn_trycatch_stmt( Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
-_temp5517= yyvs; struct _xtunion_struct** _temp5519= _temp5517.curr +(
-yyvsp_offset - 4); if( _temp5517.base == 0? 1:( _temp5519 < _temp5517.base? 1:
-_temp5519 >= _temp5517.last_plus_one)){ _throw( Null_Exception);}* _temp5519;})),
-Cyc_yyget_SwitchClauseList_tok(({ struct _tagged_ptr2 _temp5520= yyvs; struct
-_xtunion_struct** _temp5522= _temp5520.curr +( yyvsp_offset - 1); if( _temp5520.base
-== 0? 1:( _temp5522 < _temp5520.base? 1: _temp5522 >= _temp5520.last_plus_one)){
-_throw( Null_Exception);}* _temp5522;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5523= yyls; struct Cyc_Yyltype* _temp5525= _temp5523.curr +(
-yylsp_offset - 5); if( _temp5523.base == 0? 1:( _temp5525 < _temp5523.base? 1:
-_temp5525 >= _temp5523.last_plus_one)){ _throw( Null_Exception);}* _temp5525;}).first_line,({
-struct _tagged_ptr3 _temp5526= yyls; struct Cyc_Yyltype* _temp5528= _temp5526.curr
-+ yylsp_offset; if( _temp5526.base == 0? 1:( _temp5528 < _temp5526.base? 1:
-_temp5528 >= _temp5526.last_plus_one)){ _throw( Null_Exception);}* _temp5528;}).last_line));
-_temp5516;}); _temp5515;}); break; case 236: _LL5514: yyval=( struct
-_xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct* _temp5530=( struct
+_temp5474= yyls; struct Cyc_Yyltype* _temp5476= _temp5474.curr +( yylsp_offset -
+4); if( _temp5474.base == 0? 1:( _temp5476 < _temp5474.base? 1: _temp5476 >=
+_temp5474.last_plus_one)){ _throw( Null_Exception);}* _temp5476;}).first_line,({
+struct _tagged_ptr3 _temp5477= yyls; struct Cyc_Yyltype* _temp5479= _temp5477.curr
++ yylsp_offset; if( _temp5477.base == 0? 1:( _temp5479 < _temp5477.base? 1:
+_temp5479 >= _temp5477.last_plus_one)){ _throw( Null_Exception);}* _temp5479;}).last_line));
+_temp5467;}); _temp5466;}); break; case 233: _LL5465: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5481=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5481[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5482; _temp5482.tag= Cyc_Stmt_tok_tag; _temp5482.f1= Cyc_Absyn_ifthenelse_stmt(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5483= yyvs; struct _xtunion_struct**
+_temp5485= _temp5483.curr +( yyvsp_offset - 4); if( _temp5483.base == 0? 1:(
+_temp5485 < _temp5483.base? 1: _temp5485 >= _temp5483.last_plus_one)){ _throw(
+Null_Exception);}* _temp5485;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
+_temp5486= yyvs; struct _xtunion_struct** _temp5488= _temp5486.curr +(
+yyvsp_offset - 2); if( _temp5486.base == 0? 1:( _temp5488 < _temp5486.base? 1:
+_temp5488 >= _temp5486.last_plus_one)){ _throw( Null_Exception);}* _temp5488;})),
+Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5489= yyvs; struct
+_xtunion_struct** _temp5491= _temp5489.curr + yyvsp_offset; if( _temp5489.base
+== 0? 1:( _temp5491 < _temp5489.base? 1: _temp5491 >= _temp5489.last_plus_one)){
+_throw( Null_Exception);}* _temp5491;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5492= yyls; struct Cyc_Yyltype* _temp5494= _temp5492.curr +(
+yylsp_offset - 6); if( _temp5492.base == 0? 1:( _temp5494 < _temp5492.base? 1:
+_temp5494 >= _temp5492.last_plus_one)){ _throw( Null_Exception);}* _temp5494;}).first_line,({
+struct _tagged_ptr3 _temp5495= yyls; struct Cyc_Yyltype* _temp5497= _temp5495.curr
++ yylsp_offset; if( _temp5495.base == 0? 1:( _temp5497 < _temp5495.base? 1:
+_temp5497 >= _temp5495.last_plus_one)){ _throw( Null_Exception);}* _temp5497;}).last_line));
+_temp5482;}); _temp5481;}); break; case 234: _LL5480: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5499=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5499[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5500; _temp5500.tag= Cyc_Stmt_tok_tag; _temp5500.f1= Cyc_Absyn_switch_stmt(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5501= yyvs; struct _xtunion_struct**
+_temp5503= _temp5501.curr +( yyvsp_offset - 4); if( _temp5501.base == 0? 1:(
+_temp5503 < _temp5501.base? 1: _temp5503 >= _temp5501.last_plus_one)){ _throw(
+Null_Exception);}* _temp5503;})), Cyc_yyget_SwitchClauseList_tok(({ struct
+_tagged_ptr2 _temp5504= yyvs; struct _xtunion_struct** _temp5506= _temp5504.curr
++( yyvsp_offset - 1); if( _temp5504.base == 0? 1:( _temp5506 < _temp5504.base? 1:
+_temp5506 >= _temp5504.last_plus_one)){ _throw( Null_Exception);}* _temp5506;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5507= yyls; struct Cyc_Yyltype*
+_temp5509= _temp5507.curr +( yylsp_offset - 6); if( _temp5507.base == 0? 1:(
+_temp5509 < _temp5507.base? 1: _temp5509 >= _temp5507.last_plus_one)){ _throw(
+Null_Exception);}* _temp5509;}).first_line,({ struct _tagged_ptr3 _temp5510=
+yyls; struct Cyc_Yyltype* _temp5512= _temp5510.curr + yylsp_offset; if(
+_temp5510.base == 0? 1:( _temp5512 < _temp5510.base? 1: _temp5512 >= _temp5510.last_plus_one)){
+_throw( Null_Exception);}* _temp5512;}).last_line)); _temp5500;}); _temp5499;});
+break; case 235: _LL5498: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5514=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5514[ 0]=({ struct Cyc_Stmt_tok_struct _temp5515; _temp5515.tag= Cyc_Stmt_tok_tag;
+_temp5515.f1= Cyc_Absyn_trycatch_stmt( Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
+_temp5516= yyvs; struct _xtunion_struct** _temp5518= _temp5516.curr +(
+yyvsp_offset - 4); if( _temp5516.base == 0? 1:( _temp5518 < _temp5516.base? 1:
+_temp5518 >= _temp5516.last_plus_one)){ _throw( Null_Exception);}* _temp5518;})),
+Cyc_yyget_SwitchClauseList_tok(({ struct _tagged_ptr2 _temp5519= yyvs; struct
+_xtunion_struct** _temp5521= _temp5519.curr +( yyvsp_offset - 1); if( _temp5519.base
+== 0? 1:( _temp5521 < _temp5519.base? 1: _temp5521 >= _temp5519.last_plus_one)){
+_throw( Null_Exception);}* _temp5521;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5522= yyls; struct Cyc_Yyltype* _temp5524= _temp5522.curr +(
+yylsp_offset - 5); if( _temp5522.base == 0? 1:( _temp5524 < _temp5522.base? 1:
+_temp5524 >= _temp5522.last_plus_one)){ _throw( Null_Exception);}* _temp5524;}).first_line,({
+struct _tagged_ptr3 _temp5525= yyls; struct Cyc_Yyltype* _temp5527= _temp5525.curr
++ yylsp_offset; if( _temp5525.base == 0? 1:( _temp5527 < _temp5525.base? 1:
+_temp5527 >= _temp5525.last_plus_one)){ _throw( Null_Exception);}* _temp5527;}).last_line));
+_temp5515;}); _temp5514;}); break; case 236: _LL5513: yyval=( struct
+_xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct* _temp5529=( struct
 Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct Cyc_SwitchClauseList_tok_struct));
-_temp5530[ 0]=({ struct Cyc_SwitchClauseList_tok_struct _temp5531; _temp5531.tag=
-Cyc_SwitchClauseList_tok_tag; _temp5531.f1= 0; _temp5531;}); _temp5530;});
-break; case 237: _LL5529: yyval=( struct _xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct*
-_temp5533=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_SwitchClauseList_tok_struct)); _temp5533[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
-_temp5534; _temp5534.tag= Cyc_SwitchClauseList_tok_tag; _temp5534.f1=({ struct
-Cyc_List_List* _temp5535=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp5535->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp5536=( struct Cyc_Absyn_Switch_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp5536->pattern= Cyc_Absyn_new_pat((
+_temp5529[ 0]=({ struct Cyc_SwitchClauseList_tok_struct _temp5530; _temp5530.tag=
+Cyc_SwitchClauseList_tok_tag; _temp5530.f1= 0; _temp5530;}); _temp5529;});
+break; case 237: _LL5528: yyval=( struct _xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct*
+_temp5532=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_SwitchClauseList_tok_struct)); _temp5532[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
+_temp5533; _temp5533.tag= Cyc_SwitchClauseList_tok_tag; _temp5533.f1=({ struct
+Cyc_List_List* _temp5534=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp5534->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp5535=( struct Cyc_Absyn_Switch_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp5535->pattern= Cyc_Absyn_new_pat((
 void*) Cyc_Absyn_Wild_p, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp5546= yyls; struct Cyc_Yyltype* _temp5548= _temp5546.curr +( yylsp_offset -
-2); if( _temp5546.base == 0? 1:( _temp5548 < _temp5546.base? 1: _temp5548 >=
-_temp5546.last_plus_one)){ _throw( Null_Exception);}* _temp5548;}).first_line,({
-struct _tagged_ptr3 _temp5549= yyls; struct Cyc_Yyltype* _temp5551= _temp5549.curr
-+( yylsp_offset - 2); if( _temp5549.base == 0? 1:( _temp5551 < _temp5549.base? 1:
-_temp5551 >= _temp5549.last_plus_one)){ _throw( Null_Exception);}* _temp5551;}).last_line));
-_temp5536->pat_vars= 0; _temp5536->where_clause= 0; _temp5536->body= Cyc_yyget_Stmt_tok(({
-struct _tagged_ptr2 _temp5543= yyvs; struct _xtunion_struct** _temp5545=
-_temp5543.curr + yyvsp_offset; if( _temp5543.base == 0? 1:( _temp5545 <
-_temp5543.base? 1: _temp5545 >= _temp5543.last_plus_one)){ _throw(
-Null_Exception);}* _temp5545;})); _temp5536->loc= Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp5537= yyls; struct Cyc_Yyltype* _temp5539= _temp5537.curr
-+( yylsp_offset - 2); if( _temp5537.base == 0? 1:( _temp5539 < _temp5537.base? 1:
-_temp5539 >= _temp5537.last_plus_one)){ _throw( Null_Exception);}* _temp5539;}).first_line,({
-struct _tagged_ptr3 _temp5540= yyls; struct Cyc_Yyltype* _temp5542= _temp5540.curr
-+ yylsp_offset; if( _temp5540.base == 0? 1:( _temp5542 < _temp5540.base? 1:
-_temp5542 >= _temp5540.last_plus_one)){ _throw( Null_Exception);}* _temp5542;}).last_line);
-_temp5536;}); _temp5535->tl= 0; _temp5535;}); _temp5534;}); _temp5533;}); break;
-case 238: _LL5532: yyval=( struct _xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct*
-_temp5553=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_SwitchClauseList_tok_struct)); _temp5553[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
-_temp5554; _temp5554.tag= Cyc_SwitchClauseList_tok_tag; _temp5554.f1=({ struct
-Cyc_List_List* _temp5555=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp5555->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp5559=( struct Cyc_Absyn_Switch_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp5559->pattern= Cyc_yyget_Pattern_tok(({
-struct _tagged_ptr2 _temp5572= yyvs; struct _xtunion_struct** _temp5574=
-_temp5572.curr +( yyvsp_offset - 2); if( _temp5572.base == 0? 1:( _temp5574 <
-_temp5572.base? 1: _temp5574 >= _temp5572.last_plus_one)){ _throw(
-Null_Exception);}* _temp5574;})); _temp5559->pat_vars= 0; _temp5559->where_clause=
-0; _temp5559->body= Cyc_Absyn_skip_stmt( Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5566= yyls; struct Cyc_Yyltype* _temp5568= _temp5566.curr +(
-yylsp_offset - 1); if( _temp5566.base == 0? 1:( _temp5568 < _temp5566.base? 1:
-_temp5568 >= _temp5566.last_plus_one)){ _throw( Null_Exception);}* _temp5568;}).first_line,({
-struct _tagged_ptr3 _temp5569= yyls; struct Cyc_Yyltype* _temp5571= _temp5569.curr
-+( yylsp_offset - 1); if( _temp5569.base == 0? 1:( _temp5571 < _temp5569.base? 1:
-_temp5571 >= _temp5569.last_plus_one)){ _throw( Null_Exception);}* _temp5571;}).last_line));
-_temp5559->loc= Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5560=
-yyls; struct Cyc_Yyltype* _temp5562= _temp5560.curr +( yylsp_offset - 3); if(
-_temp5560.base == 0? 1:( _temp5562 < _temp5560.base? 1: _temp5562 >= _temp5560.last_plus_one)){
-_throw( Null_Exception);}* _temp5562;}).first_line,({ struct _tagged_ptr3
-_temp5563= yyls; struct Cyc_Yyltype* _temp5565= _temp5563.curr + yylsp_offset;
-if( _temp5563.base == 0? 1:( _temp5565 < _temp5563.base? 1: _temp5565 >=
-_temp5563.last_plus_one)){ _throw( Null_Exception);}* _temp5565;}).last_line);
-_temp5559;}); _temp5555->tl= Cyc_yyget_SwitchClauseList_tok(({ struct
-_tagged_ptr2 _temp5556= yyvs; struct _xtunion_struct** _temp5558= _temp5556.curr
-+ yyvsp_offset; if( _temp5556.base == 0? 1:( _temp5558 < _temp5556.base? 1:
-_temp5558 >= _temp5556.last_plus_one)){ _throw( Null_Exception);}* _temp5558;}));
-_temp5555;}); _temp5554;}); _temp5553;}); break; case 239: _LL5552: yyval=(
-struct _xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct* _temp5576=(
+_temp5545= yyls; struct Cyc_Yyltype* _temp5547= _temp5545.curr +( yylsp_offset -
+2); if( _temp5545.base == 0? 1:( _temp5547 < _temp5545.base? 1: _temp5547 >=
+_temp5545.last_plus_one)){ _throw( Null_Exception);}* _temp5547;}).first_line,({
+struct _tagged_ptr3 _temp5548= yyls; struct Cyc_Yyltype* _temp5550= _temp5548.curr
++( yylsp_offset - 2); if( _temp5548.base == 0? 1:( _temp5550 < _temp5548.base? 1:
+_temp5550 >= _temp5548.last_plus_one)){ _throw( Null_Exception);}* _temp5550;}).last_line));
+_temp5535->pat_vars= 0; _temp5535->where_clause= 0; _temp5535->body= Cyc_yyget_Stmt_tok(({
+struct _tagged_ptr2 _temp5542= yyvs; struct _xtunion_struct** _temp5544=
+_temp5542.curr + yyvsp_offset; if( _temp5542.base == 0? 1:( _temp5544 <
+_temp5542.base? 1: _temp5544 >= _temp5542.last_plus_one)){ _throw(
+Null_Exception);}* _temp5544;})); _temp5535->loc= Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp5536= yyls; struct Cyc_Yyltype* _temp5538= _temp5536.curr
++( yylsp_offset - 2); if( _temp5536.base == 0? 1:( _temp5538 < _temp5536.base? 1:
+_temp5538 >= _temp5536.last_plus_one)){ _throw( Null_Exception);}* _temp5538;}).first_line,({
+struct _tagged_ptr3 _temp5539= yyls; struct Cyc_Yyltype* _temp5541= _temp5539.curr
++ yylsp_offset; if( _temp5539.base == 0? 1:( _temp5541 < _temp5539.base? 1:
+_temp5541 >= _temp5539.last_plus_one)){ _throw( Null_Exception);}* _temp5541;}).last_line);
+_temp5535;}); _temp5534->tl= 0; _temp5534;}); _temp5533;}); _temp5532;}); break;
+case 238: _LL5531: yyval=( struct _xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct*
+_temp5552=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_SwitchClauseList_tok_struct)); _temp5552[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
+_temp5553; _temp5553.tag= Cyc_SwitchClauseList_tok_tag; _temp5553.f1=({ struct
+Cyc_List_List* _temp5554=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp5554->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp5558=( struct Cyc_Absyn_Switch_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp5558->pattern= Cyc_yyget_Pattern_tok(({
+struct _tagged_ptr2 _temp5571= yyvs; struct _xtunion_struct** _temp5573=
+_temp5571.curr +( yyvsp_offset - 2); if( _temp5571.base == 0? 1:( _temp5573 <
+_temp5571.base? 1: _temp5573 >= _temp5571.last_plus_one)){ _throw(
+Null_Exception);}* _temp5573;})); _temp5558->pat_vars= 0; _temp5558->where_clause=
+0; _temp5558->body= Cyc_Absyn_skip_stmt( Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5565= yyls; struct Cyc_Yyltype* _temp5567= _temp5565.curr +(
+yylsp_offset - 1); if( _temp5565.base == 0? 1:( _temp5567 < _temp5565.base? 1:
+_temp5567 >= _temp5565.last_plus_one)){ _throw( Null_Exception);}* _temp5567;}).first_line,({
+struct _tagged_ptr3 _temp5568= yyls; struct Cyc_Yyltype* _temp5570= _temp5568.curr
++( yylsp_offset - 1); if( _temp5568.base == 0? 1:( _temp5570 < _temp5568.base? 1:
+_temp5570 >= _temp5568.last_plus_one)){ _throw( Null_Exception);}* _temp5570;}).last_line));
+_temp5558->loc= Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5559=
+yyls; struct Cyc_Yyltype* _temp5561= _temp5559.curr +( yylsp_offset - 3); if(
+_temp5559.base == 0? 1:( _temp5561 < _temp5559.base? 1: _temp5561 >= _temp5559.last_plus_one)){
+_throw( Null_Exception);}* _temp5561;}).first_line,({ struct _tagged_ptr3
+_temp5562= yyls; struct Cyc_Yyltype* _temp5564= _temp5562.curr + yylsp_offset;
+if( _temp5562.base == 0? 1:( _temp5564 < _temp5562.base? 1: _temp5564 >=
+_temp5562.last_plus_one)){ _throw( Null_Exception);}* _temp5564;}).last_line);
+_temp5558;}); _temp5554->tl= Cyc_yyget_SwitchClauseList_tok(({ struct
+_tagged_ptr2 _temp5555= yyvs; struct _xtunion_struct** _temp5557= _temp5555.curr
++ yyvsp_offset; if( _temp5555.base == 0? 1:( _temp5557 < _temp5555.base? 1:
+_temp5557 >= _temp5555.last_plus_one)){ _throw( Null_Exception);}* _temp5557;}));
+_temp5554;}); _temp5553;}); _temp5552;}); break; case 239: _LL5551: yyval=(
+struct _xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct* _temp5575=(
 struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct Cyc_SwitchClauseList_tok_struct));
-_temp5576[ 0]=({ struct Cyc_SwitchClauseList_tok_struct _temp5577; _temp5577.tag=
-Cyc_SwitchClauseList_tok_tag; _temp5577.f1=({ struct Cyc_List_List* _temp5578=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp5578->hd=(
-void*)({ struct Cyc_Absyn_Switch_clause* _temp5582=( struct Cyc_Absyn_Switch_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp5582->pattern= Cyc_yyget_Pattern_tok(({
-struct _tagged_ptr2 _temp5592= yyvs; struct _xtunion_struct** _temp5594=
-_temp5592.curr +( yyvsp_offset - 3); if( _temp5592.base == 0? 1:( _temp5594 <
-_temp5592.base? 1: _temp5594 >= _temp5592.last_plus_one)){ _throw(
-Null_Exception);}* _temp5594;})); _temp5582->pat_vars= 0; _temp5582->where_clause=
-0; _temp5582->body= Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5589= yyvs;
-struct _xtunion_struct** _temp5591= _temp5589.curr +( yyvsp_offset - 1); if(
-_temp5589.base == 0? 1:( _temp5591 < _temp5589.base? 1: _temp5591 >= _temp5589.last_plus_one)){
-_throw( Null_Exception);}* _temp5591;})); _temp5582->loc= Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp5583= yyls; struct Cyc_Yyltype* _temp5585= _temp5583.curr
-+( yylsp_offset - 4); if( _temp5583.base == 0? 1:( _temp5585 < _temp5583.base? 1:
-_temp5585 >= _temp5583.last_plus_one)){ _throw( Null_Exception);}* _temp5585;}).first_line,({
-struct _tagged_ptr3 _temp5586= yyls; struct Cyc_Yyltype* _temp5588= _temp5586.curr
-+( yylsp_offset - 1); if( _temp5586.base == 0? 1:( _temp5588 < _temp5586.base? 1:
-_temp5588 >= _temp5586.last_plus_one)){ _throw( Null_Exception);}* _temp5588;}).last_line);
-_temp5582;}); _temp5578->tl= Cyc_yyget_SwitchClauseList_tok(({ struct
-_tagged_ptr2 _temp5579= yyvs; struct _xtunion_struct** _temp5581= _temp5579.curr
-+ yyvsp_offset; if( _temp5579.base == 0? 1:( _temp5581 < _temp5579.base? 1:
-_temp5581 >= _temp5579.last_plus_one)){ _throw( Null_Exception);}* _temp5581;}));
-_temp5578;}); _temp5577;}); _temp5576;}); break; case 240: _LL5575: yyval=(
-struct _xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct* _temp5596=(
+_temp5575[ 0]=({ struct Cyc_SwitchClauseList_tok_struct _temp5576; _temp5576.tag=
+Cyc_SwitchClauseList_tok_tag; _temp5576.f1=({ struct Cyc_List_List* _temp5577=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp5577->hd=(
+void*)({ struct Cyc_Absyn_Switch_clause* _temp5581=( struct Cyc_Absyn_Switch_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp5581->pattern= Cyc_yyget_Pattern_tok(({
+struct _tagged_ptr2 _temp5591= yyvs; struct _xtunion_struct** _temp5593=
+_temp5591.curr +( yyvsp_offset - 3); if( _temp5591.base == 0? 1:( _temp5593 <
+_temp5591.base? 1: _temp5593 >= _temp5591.last_plus_one)){ _throw(
+Null_Exception);}* _temp5593;})); _temp5581->pat_vars= 0; _temp5581->where_clause=
+0; _temp5581->body= Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5588= yyvs;
+struct _xtunion_struct** _temp5590= _temp5588.curr +( yyvsp_offset - 1); if(
+_temp5588.base == 0? 1:( _temp5590 < _temp5588.base? 1: _temp5590 >= _temp5588.last_plus_one)){
+_throw( Null_Exception);}* _temp5590;})); _temp5581->loc= Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp5582= yyls; struct Cyc_Yyltype* _temp5584= _temp5582.curr
++( yylsp_offset - 4); if( _temp5582.base == 0? 1:( _temp5584 < _temp5582.base? 1:
+_temp5584 >= _temp5582.last_plus_one)){ _throw( Null_Exception);}* _temp5584;}).first_line,({
+struct _tagged_ptr3 _temp5585= yyls; struct Cyc_Yyltype* _temp5587= _temp5585.curr
++( yylsp_offset - 1); if( _temp5585.base == 0? 1:( _temp5587 < _temp5585.base? 1:
+_temp5587 >= _temp5585.last_plus_one)){ _throw( Null_Exception);}* _temp5587;}).last_line);
+_temp5581;}); _temp5577->tl= Cyc_yyget_SwitchClauseList_tok(({ struct
+_tagged_ptr2 _temp5578= yyvs; struct _xtunion_struct** _temp5580= _temp5578.curr
++ yyvsp_offset; if( _temp5578.base == 0? 1:( _temp5580 < _temp5578.base? 1:
+_temp5580 >= _temp5578.last_plus_one)){ _throw( Null_Exception);}* _temp5580;}));
+_temp5577;}); _temp5576;}); _temp5575;}); break; case 240: _LL5574: yyval=(
+struct _xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct* _temp5595=(
 struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct Cyc_SwitchClauseList_tok_struct));
-_temp5596[ 0]=({ struct Cyc_SwitchClauseList_tok_struct _temp5597; _temp5597.tag=
-Cyc_SwitchClauseList_tok_tag; _temp5597.f1=({ struct Cyc_List_List* _temp5598=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp5598->hd=(
-void*)({ struct Cyc_Absyn_Switch_clause* _temp5602=( struct Cyc_Absyn_Switch_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp5602->pattern= Cyc_yyget_Pattern_tok(({
-struct _tagged_ptr2 _temp5618= yyvs; struct _xtunion_struct** _temp5620=
-_temp5618.curr +( yyvsp_offset - 4); if( _temp5618.base == 0? 1:( _temp5620 <
-_temp5618.base? 1: _temp5620 >= _temp5618.last_plus_one)){ _throw(
-Null_Exception);}* _temp5620;})); _temp5602->pat_vars= 0; _temp5602->where_clause=(
-struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5615= yyvs;
-struct _xtunion_struct** _temp5617= _temp5615.curr +( yyvsp_offset - 2); if(
-_temp5615.base == 0? 1:( _temp5617 < _temp5615.base? 1: _temp5617 >= _temp5615.last_plus_one)){
-_throw( Null_Exception);}* _temp5617;})); _temp5602->body= Cyc_Absyn_skip_stmt(
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5609= yyls; struct Cyc_Yyltype*
-_temp5611= _temp5609.curr +( yylsp_offset - 1); if( _temp5609.base == 0? 1:(
-_temp5611 < _temp5609.base? 1: _temp5611 >= _temp5609.last_plus_one)){ _throw(
-Null_Exception);}* _temp5611;}).first_line,({ struct _tagged_ptr3 _temp5612=
-yyls; struct Cyc_Yyltype* _temp5614= _temp5612.curr +( yylsp_offset - 1); if(
-_temp5612.base == 0? 1:( _temp5614 < _temp5612.base? 1: _temp5614 >= _temp5612.last_plus_one)){
-_throw( Null_Exception);}* _temp5614;}).last_line)); _temp5602->loc= Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp5603= yyls; struct Cyc_Yyltype* _temp5605= _temp5603.curr
-+( yylsp_offset - 5); if( _temp5603.base == 0? 1:( _temp5605 < _temp5603.base? 1:
-_temp5605 >= _temp5603.last_plus_one)){ _throw( Null_Exception);}* _temp5605;}).first_line,({
-struct _tagged_ptr3 _temp5606= yyls; struct Cyc_Yyltype* _temp5608= _temp5606.curr
-+ yylsp_offset; if( _temp5606.base == 0? 1:( _temp5608 < _temp5606.base? 1:
-_temp5608 >= _temp5606.last_plus_one)){ _throw( Null_Exception);}* _temp5608;}).last_line);
-_temp5602;}); _temp5598->tl= Cyc_yyget_SwitchClauseList_tok(({ struct
-_tagged_ptr2 _temp5599= yyvs; struct _xtunion_struct** _temp5601= _temp5599.curr
-+ yyvsp_offset; if( _temp5599.base == 0? 1:( _temp5601 < _temp5599.base? 1:
-_temp5601 >= _temp5599.last_plus_one)){ _throw( Null_Exception);}* _temp5601;}));
-_temp5598;}); _temp5597;}); _temp5596;}); break; case 241: _LL5595: yyval=(
-struct _xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct* _temp5622=(
+_temp5595[ 0]=({ struct Cyc_SwitchClauseList_tok_struct _temp5596; _temp5596.tag=
+Cyc_SwitchClauseList_tok_tag; _temp5596.f1=({ struct Cyc_List_List* _temp5597=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp5597->hd=(
+void*)({ struct Cyc_Absyn_Switch_clause* _temp5601=( struct Cyc_Absyn_Switch_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp5601->pattern= Cyc_yyget_Pattern_tok(({
+struct _tagged_ptr2 _temp5617= yyvs; struct _xtunion_struct** _temp5619=
+_temp5617.curr +( yyvsp_offset - 4); if( _temp5617.base == 0? 1:( _temp5619 <
+_temp5617.base? 1: _temp5619 >= _temp5617.last_plus_one)){ _throw(
+Null_Exception);}* _temp5619;})); _temp5601->pat_vars= 0; _temp5601->where_clause=(
+struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5614= yyvs;
+struct _xtunion_struct** _temp5616= _temp5614.curr +( yyvsp_offset - 2); if(
+_temp5614.base == 0? 1:( _temp5616 < _temp5614.base? 1: _temp5616 >= _temp5614.last_plus_one)){
+_throw( Null_Exception);}* _temp5616;})); _temp5601->body= Cyc_Absyn_skip_stmt(
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5608= yyls; struct Cyc_Yyltype*
+_temp5610= _temp5608.curr +( yylsp_offset - 1); if( _temp5608.base == 0? 1:(
+_temp5610 < _temp5608.base? 1: _temp5610 >= _temp5608.last_plus_one)){ _throw(
+Null_Exception);}* _temp5610;}).first_line,({ struct _tagged_ptr3 _temp5611=
+yyls; struct Cyc_Yyltype* _temp5613= _temp5611.curr +( yylsp_offset - 1); if(
+_temp5611.base == 0? 1:( _temp5613 < _temp5611.base? 1: _temp5613 >= _temp5611.last_plus_one)){
+_throw( Null_Exception);}* _temp5613;}).last_line)); _temp5601->loc= Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp5602= yyls; struct Cyc_Yyltype* _temp5604= _temp5602.curr
++( yylsp_offset - 5); if( _temp5602.base == 0? 1:( _temp5604 < _temp5602.base? 1:
+_temp5604 >= _temp5602.last_plus_one)){ _throw( Null_Exception);}* _temp5604;}).first_line,({
+struct _tagged_ptr3 _temp5605= yyls; struct Cyc_Yyltype* _temp5607= _temp5605.curr
++ yylsp_offset; if( _temp5605.base == 0? 1:( _temp5607 < _temp5605.base? 1:
+_temp5607 >= _temp5605.last_plus_one)){ _throw( Null_Exception);}* _temp5607;}).last_line);
+_temp5601;}); _temp5597->tl= Cyc_yyget_SwitchClauseList_tok(({ struct
+_tagged_ptr2 _temp5598= yyvs; struct _xtunion_struct** _temp5600= _temp5598.curr
++ yyvsp_offset; if( _temp5598.base == 0? 1:( _temp5600 < _temp5598.base? 1:
+_temp5600 >= _temp5598.last_plus_one)){ _throw( Null_Exception);}* _temp5600;}));
+_temp5597;}); _temp5596;}); _temp5595;}); break; case 241: _LL5594: yyval=(
+struct _xtunion_struct*)({ struct Cyc_SwitchClauseList_tok_struct* _temp5621=(
 struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct Cyc_SwitchClauseList_tok_struct));
-_temp5622[ 0]=({ struct Cyc_SwitchClauseList_tok_struct _temp5623; _temp5623.tag=
-Cyc_SwitchClauseList_tok_tag; _temp5623.f1=({ struct Cyc_List_List* _temp5624=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp5624->hd=(
-void*)({ struct Cyc_Absyn_Switch_clause* _temp5628=( struct Cyc_Absyn_Switch_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp5628->pattern= Cyc_yyget_Pattern_tok(({
-struct _tagged_ptr2 _temp5641= yyvs; struct _xtunion_struct** _temp5643=
-_temp5641.curr +( yyvsp_offset - 5); if( _temp5641.base == 0? 1:( _temp5643 <
-_temp5641.base? 1: _temp5643 >= _temp5641.last_plus_one)){ _throw(
-Null_Exception);}* _temp5643;})); _temp5628->pat_vars= 0; _temp5628->where_clause=(
-struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5638= yyvs;
-struct _xtunion_struct** _temp5640= _temp5638.curr +( yyvsp_offset - 3); if(
-_temp5638.base == 0? 1:( _temp5640 < _temp5638.base? 1: _temp5640 >= _temp5638.last_plus_one)){
-_throw( Null_Exception);}* _temp5640;})); _temp5628->body= Cyc_yyget_Stmt_tok(({
-struct _tagged_ptr2 _temp5635= yyvs; struct _xtunion_struct** _temp5637=
-_temp5635.curr +( yyvsp_offset - 1); if( _temp5635.base == 0? 1:( _temp5637 <
-_temp5635.base? 1: _temp5637 >= _temp5635.last_plus_one)){ _throw(
-Null_Exception);}* _temp5637;})); _temp5628->loc= Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp5629= yyls; struct Cyc_Yyltype* _temp5631= _temp5629.curr
-+( yylsp_offset - 6); if( _temp5629.base == 0? 1:( _temp5631 < _temp5629.base? 1:
-_temp5631 >= _temp5629.last_plus_one)){ _throw( Null_Exception);}* _temp5631;}).first_line,({
-struct _tagged_ptr3 _temp5632= yyls; struct Cyc_Yyltype* _temp5634= _temp5632.curr
-+ yylsp_offset; if( _temp5632.base == 0? 1:( _temp5634 < _temp5632.base? 1:
-_temp5634 >= _temp5632.last_plus_one)){ _throw( Null_Exception);}* _temp5634;}).last_line);
-_temp5628;}); _temp5624->tl= Cyc_yyget_SwitchClauseList_tok(({ struct
-_tagged_ptr2 _temp5625= yyvs; struct _xtunion_struct** _temp5627= _temp5625.curr
-+ yyvsp_offset; if( _temp5625.base == 0? 1:( _temp5627 < _temp5625.base? 1:
-_temp5627 >= _temp5625.last_plus_one)){ _throw( Null_Exception);}* _temp5627;}));
-_temp5624;}); _temp5623;}); _temp5622;}); break; case 242: _LL5621: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5645=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5645[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5646; _temp5646.tag= Cyc_Stmt_tok_tag; _temp5646.f1= Cyc_Absyn_while_stmt(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5647= yyvs; struct _xtunion_struct**
-_temp5649= _temp5647.curr +( yyvsp_offset - 2); if( _temp5647.base == 0? 1:(
-_temp5649 < _temp5647.base? 1: _temp5649 >= _temp5647.last_plus_one)){ _throw(
-Null_Exception);}* _temp5649;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
-_temp5650= yyvs; struct _xtunion_struct** _temp5652= _temp5650.curr +
-yyvsp_offset; if( _temp5650.base == 0? 1:( _temp5652 < _temp5650.base? 1:
-_temp5652 >= _temp5650.last_plus_one)){ _throw( Null_Exception);}* _temp5652;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5653= yyls; struct Cyc_Yyltype*
-_temp5655= _temp5653.curr +( yylsp_offset - 4); if( _temp5653.base == 0? 1:(
-_temp5655 < _temp5653.base? 1: _temp5655 >= _temp5653.last_plus_one)){ _throw(
-Null_Exception);}* _temp5655;}).first_line,({ struct _tagged_ptr3 _temp5656=
-yyls; struct Cyc_Yyltype* _temp5658= _temp5656.curr + yylsp_offset; if(
-_temp5656.base == 0? 1:( _temp5658 < _temp5656.base? 1: _temp5658 >= _temp5656.last_plus_one)){
-_throw( Null_Exception);}* _temp5658;}).last_line)); _temp5646;}); _temp5645;});
-break; case 243: _LL5644: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5660=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5660[ 0]=({ struct Cyc_Stmt_tok_struct _temp5661; _temp5661.tag= Cyc_Stmt_tok_tag;
-_temp5661.f1= Cyc_Absyn_do_stmt( Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
-_temp5662= yyvs; struct _xtunion_struct** _temp5664= _temp5662.curr +(
-yyvsp_offset - 5); if( _temp5662.base == 0? 1:( _temp5664 < _temp5662.base? 1:
-_temp5664 >= _temp5662.last_plus_one)){ _throw( Null_Exception);}* _temp5664;})),
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5665= yyvs; struct _xtunion_struct**
-_temp5667= _temp5665.curr +( yyvsp_offset - 2); if( _temp5665.base == 0? 1:(
-_temp5667 < _temp5665.base? 1: _temp5667 >= _temp5665.last_plus_one)){ _throw(
-Null_Exception);}* _temp5667;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5668= yyls; struct Cyc_Yyltype* _temp5670= _temp5668.curr +(
-yylsp_offset - 6); if( _temp5668.base == 0? 1:( _temp5670 < _temp5668.base? 1:
-_temp5670 >= _temp5668.last_plus_one)){ _throw( Null_Exception);}* _temp5670;}).first_line,({
-struct _tagged_ptr3 _temp5671= yyls; struct Cyc_Yyltype* _temp5673= _temp5671.curr
-+ yylsp_offset; if( _temp5671.base == 0? 1:( _temp5673 < _temp5671.base? 1:
-_temp5673 >= _temp5671.last_plus_one)){ _throw( Null_Exception);}* _temp5673;}).last_line));
-_temp5661;}); _temp5660;}); break; case 244: _LL5659: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5675=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5675[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5676; _temp5676.tag= Cyc_Stmt_tok_tag; _temp5676.f1= Cyc_Absyn_for_stmt(
+_temp5621[ 0]=({ struct Cyc_SwitchClauseList_tok_struct _temp5622; _temp5622.tag=
+Cyc_SwitchClauseList_tok_tag; _temp5622.f1=({ struct Cyc_List_List* _temp5623=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp5623->hd=(
+void*)({ struct Cyc_Absyn_Switch_clause* _temp5627=( struct Cyc_Absyn_Switch_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp5627->pattern= Cyc_yyget_Pattern_tok(({
+struct _tagged_ptr2 _temp5640= yyvs; struct _xtunion_struct** _temp5642=
+_temp5640.curr +( yyvsp_offset - 5); if( _temp5640.base == 0? 1:( _temp5642 <
+_temp5640.base? 1: _temp5642 >= _temp5640.last_plus_one)){ _throw(
+Null_Exception);}* _temp5642;})); _temp5627->pat_vars= 0; _temp5627->where_clause=(
+struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5637= yyvs;
+struct _xtunion_struct** _temp5639= _temp5637.curr +( yyvsp_offset - 3); if(
+_temp5637.base == 0? 1:( _temp5639 < _temp5637.base? 1: _temp5639 >= _temp5637.last_plus_one)){
+_throw( Null_Exception);}* _temp5639;})); _temp5627->body= Cyc_yyget_Stmt_tok(({
+struct _tagged_ptr2 _temp5634= yyvs; struct _xtunion_struct** _temp5636=
+_temp5634.curr +( yyvsp_offset - 1); if( _temp5634.base == 0? 1:( _temp5636 <
+_temp5634.base? 1: _temp5636 >= _temp5634.last_plus_one)){ _throw(
+Null_Exception);}* _temp5636;})); _temp5627->loc= Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp5628= yyls; struct Cyc_Yyltype* _temp5630= _temp5628.curr
++( yylsp_offset - 6); if( _temp5628.base == 0? 1:( _temp5630 < _temp5628.base? 1:
+_temp5630 >= _temp5628.last_plus_one)){ _throw( Null_Exception);}* _temp5630;}).first_line,({
+struct _tagged_ptr3 _temp5631= yyls; struct Cyc_Yyltype* _temp5633= _temp5631.curr
++ yylsp_offset; if( _temp5631.base == 0? 1:( _temp5633 < _temp5631.base? 1:
+_temp5633 >= _temp5631.last_plus_one)){ _throw( Null_Exception);}* _temp5633;}).last_line);
+_temp5627;}); _temp5623->tl= Cyc_yyget_SwitchClauseList_tok(({ struct
+_tagged_ptr2 _temp5624= yyvs; struct _xtunion_struct** _temp5626= _temp5624.curr
++ yyvsp_offset; if( _temp5624.base == 0? 1:( _temp5626 < _temp5624.base? 1:
+_temp5626 >= _temp5624.last_plus_one)){ _throw( Null_Exception);}* _temp5626;}));
+_temp5623;}); _temp5622;}); _temp5621;}); break; case 242: _LL5620: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5644=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5644[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5645; _temp5645.tag= Cyc_Stmt_tok_tag; _temp5645.f1= Cyc_Absyn_while_stmt(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5646= yyvs; struct _xtunion_struct**
+_temp5648= _temp5646.curr +( yyvsp_offset - 2); if( _temp5646.base == 0? 1:(
+_temp5648 < _temp5646.base? 1: _temp5648 >= _temp5646.last_plus_one)){ _throw(
+Null_Exception);}* _temp5648;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
+_temp5649= yyvs; struct _xtunion_struct** _temp5651= _temp5649.curr +
+yyvsp_offset; if( _temp5649.base == 0? 1:( _temp5651 < _temp5649.base? 1:
+_temp5651 >= _temp5649.last_plus_one)){ _throw( Null_Exception);}* _temp5651;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5652= yyls; struct Cyc_Yyltype*
+_temp5654= _temp5652.curr +( yylsp_offset - 4); if( _temp5652.base == 0? 1:(
+_temp5654 < _temp5652.base? 1: _temp5654 >= _temp5652.last_plus_one)){ _throw(
+Null_Exception);}* _temp5654;}).first_line,({ struct _tagged_ptr3 _temp5655=
+yyls; struct Cyc_Yyltype* _temp5657= _temp5655.curr + yylsp_offset; if(
+_temp5655.base == 0? 1:( _temp5657 < _temp5655.base? 1: _temp5657 >= _temp5655.last_plus_one)){
+_throw( Null_Exception);}* _temp5657;}).last_line)); _temp5645;}); _temp5644;});
+break; case 243: _LL5643: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5659=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5659[ 0]=({ struct Cyc_Stmt_tok_struct _temp5660; _temp5660.tag= Cyc_Stmt_tok_tag;
+_temp5660.f1= Cyc_Absyn_do_stmt( Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
+_temp5661= yyvs; struct _xtunion_struct** _temp5663= _temp5661.curr +(
+yyvsp_offset - 5); if( _temp5661.base == 0? 1:( _temp5663 < _temp5661.base? 1:
+_temp5663 >= _temp5661.last_plus_one)){ _throw( Null_Exception);}* _temp5663;})),
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5664= yyvs; struct _xtunion_struct**
+_temp5666= _temp5664.curr +( yyvsp_offset - 2); if( _temp5664.base == 0? 1:(
+_temp5666 < _temp5664.base? 1: _temp5666 >= _temp5664.last_plus_one)){ _throw(
+Null_Exception);}* _temp5666;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5667= yyls; struct Cyc_Yyltype* _temp5669= _temp5667.curr +(
+yylsp_offset - 6); if( _temp5667.base == 0? 1:( _temp5669 < _temp5667.base? 1:
+_temp5669 >= _temp5667.last_plus_one)){ _throw( Null_Exception);}* _temp5669;}).first_line,({
+struct _tagged_ptr3 _temp5670= yyls; struct Cyc_Yyltype* _temp5672= _temp5670.curr
++ yylsp_offset; if( _temp5670.base == 0? 1:( _temp5672 < _temp5670.base? 1:
+_temp5672 >= _temp5670.last_plus_one)){ _throw( Null_Exception);}* _temp5672;}).last_line));
+_temp5660;}); _temp5659;}); break; case 244: _LL5658: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5674=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5674[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5675; _temp5675.tag= Cyc_Stmt_tok_tag; _temp5675.f1= Cyc_Absyn_for_stmt(
 Cyc_Absyn_false_exp( 0), Cyc_Absyn_true_exp( 0), Cyc_Absyn_false_exp( 0), Cyc_yyget_Stmt_tok(({
-struct _tagged_ptr2 _temp5677= yyvs; struct _xtunion_struct** _temp5679=
-_temp5677.curr + yyvsp_offset; if( _temp5677.base == 0? 1:( _temp5679 <
-_temp5677.base? 1: _temp5679 >= _temp5677.last_plus_one)){ _throw(
-Null_Exception);}* _temp5679;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5680= yyls; struct Cyc_Yyltype* _temp5682= _temp5680.curr +(
-yylsp_offset - 5); if( _temp5680.base == 0? 1:( _temp5682 < _temp5680.base? 1:
-_temp5682 >= _temp5680.last_plus_one)){ _throw( Null_Exception);}* _temp5682;}).first_line,({
-struct _tagged_ptr3 _temp5683= yyls; struct Cyc_Yyltype* _temp5685= _temp5683.curr
-+ yylsp_offset; if( _temp5683.base == 0? 1:( _temp5685 < _temp5683.base? 1:
-_temp5685 >= _temp5683.last_plus_one)){ _throw( Null_Exception);}* _temp5685;}).last_line));
-_temp5676;}); _temp5675;}); break; case 245: _LL5674: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5687=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5687[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5688; _temp5688.tag= Cyc_Stmt_tok_tag; _temp5688.f1= Cyc_Absyn_for_stmt(
+struct _tagged_ptr2 _temp5676= yyvs; struct _xtunion_struct** _temp5678=
+_temp5676.curr + yyvsp_offset; if( _temp5676.base == 0? 1:( _temp5678 <
+_temp5676.base? 1: _temp5678 >= _temp5676.last_plus_one)){ _throw(
+Null_Exception);}* _temp5678;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5679= yyls; struct Cyc_Yyltype* _temp5681= _temp5679.curr +(
+yylsp_offset - 5); if( _temp5679.base == 0? 1:( _temp5681 < _temp5679.base? 1:
+_temp5681 >= _temp5679.last_plus_one)){ _throw( Null_Exception);}* _temp5681;}).first_line,({
+struct _tagged_ptr3 _temp5682= yyls; struct Cyc_Yyltype* _temp5684= _temp5682.curr
++ yylsp_offset; if( _temp5682.base == 0? 1:( _temp5684 < _temp5682.base? 1:
+_temp5684 >= _temp5682.last_plus_one)){ _throw( Null_Exception);}* _temp5684;}).last_line));
+_temp5675;}); _temp5674;}); break; case 245: _LL5673: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5686=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5686[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5687; _temp5687.tag= Cyc_Stmt_tok_tag; _temp5687.f1= Cyc_Absyn_for_stmt(
 Cyc_Absyn_false_exp( 0), Cyc_Absyn_true_exp( 0), Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp5689= yyvs; struct _xtunion_struct** _temp5691= _temp5689.curr
-+( yyvsp_offset - 2); if( _temp5689.base == 0? 1:( _temp5691 < _temp5689.base? 1:
-_temp5691 >= _temp5689.last_plus_one)){ _throw( Null_Exception);}* _temp5691;})),
-Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5692= yyvs; struct
-_xtunion_struct** _temp5694= _temp5692.curr + yyvsp_offset; if( _temp5692.base
-== 0? 1:( _temp5694 < _temp5692.base? 1: _temp5694 >= _temp5692.last_plus_one)){
-_throw( Null_Exception);}* _temp5694;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5695= yyls; struct Cyc_Yyltype* _temp5697= _temp5695.curr +(
-yylsp_offset - 6); if( _temp5695.base == 0? 1:( _temp5697 < _temp5695.base? 1:
-_temp5697 >= _temp5695.last_plus_one)){ _throw( Null_Exception);}* _temp5697;}).first_line,({
-struct _tagged_ptr3 _temp5698= yyls; struct Cyc_Yyltype* _temp5700= _temp5698.curr
-+ yylsp_offset; if( _temp5698.base == 0? 1:( _temp5700 < _temp5698.base? 1:
-_temp5700 >= _temp5698.last_plus_one)){ _throw( Null_Exception);}* _temp5700;}).last_line));
-_temp5688;}); _temp5687;}); break; case 246: _LL5686: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5702=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5702[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5703; _temp5703.tag= Cyc_Stmt_tok_tag; _temp5703.f1= Cyc_Absyn_for_stmt(
-Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5704=
-yyvs; struct _xtunion_struct** _temp5706= _temp5704.curr +( yyvsp_offset - 3);
-if( _temp5704.base == 0? 1:( _temp5706 < _temp5704.base? 1: _temp5706 >=
-_temp5704.last_plus_one)){ _throw( Null_Exception);}* _temp5706;})), Cyc_Absyn_false_exp(
-0), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5707= yyvs; struct
-_xtunion_struct** _temp5709= _temp5707.curr + yyvsp_offset; if( _temp5707.base
-== 0? 1:( _temp5709 < _temp5707.base? 1: _temp5709 >= _temp5707.last_plus_one)){
-_throw( Null_Exception);}* _temp5709;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5710= yyls; struct Cyc_Yyltype* _temp5712= _temp5710.curr +(
-yylsp_offset - 6); if( _temp5710.base == 0? 1:( _temp5712 < _temp5710.base? 1:
-_temp5712 >= _temp5710.last_plus_one)){ _throw( Null_Exception);}* _temp5712;}).first_line,({
-struct _tagged_ptr3 _temp5713= yyls; struct Cyc_Yyltype* _temp5715= _temp5713.curr
-+ yylsp_offset; if( _temp5713.base == 0? 1:( _temp5715 < _temp5713.base? 1:
-_temp5715 >= _temp5713.last_plus_one)){ _throw( Null_Exception);}* _temp5715;}).last_line));
-_temp5703;}); _temp5702;}); break; case 247: _LL5701: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5717=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5717[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5718; _temp5718.tag= Cyc_Stmt_tok_tag; _temp5718.f1= Cyc_Absyn_for_stmt(
-Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5719=
-yyvs; struct _xtunion_struct** _temp5721= _temp5719.curr +( yyvsp_offset - 4);
-if( _temp5719.base == 0? 1:( _temp5721 < _temp5719.base? 1: _temp5721 >=
-_temp5719.last_plus_one)){ _throw( Null_Exception);}* _temp5721;})), Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp5722= yyvs; struct _xtunion_struct** _temp5724=
-_temp5722.curr +( yyvsp_offset - 2); if( _temp5722.base == 0? 1:( _temp5724 <
-_temp5722.base? 1: _temp5724 >= _temp5722.last_plus_one)){ _throw(
-Null_Exception);}* _temp5724;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
-_temp5725= yyvs; struct _xtunion_struct** _temp5727= _temp5725.curr +
-yyvsp_offset; if( _temp5725.base == 0? 1:( _temp5727 < _temp5725.base? 1:
-_temp5727 >= _temp5725.last_plus_one)){ _throw( Null_Exception);}* _temp5727;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5728= yyls; struct Cyc_Yyltype*
-_temp5730= _temp5728.curr +( yylsp_offset - 7); if( _temp5728.base == 0? 1:(
-_temp5730 < _temp5728.base? 1: _temp5730 >= _temp5728.last_plus_one)){ _throw(
-Null_Exception);}* _temp5730;}).first_line,({ struct _tagged_ptr3 _temp5731=
-yyls; struct Cyc_Yyltype* _temp5733= _temp5731.curr +( yylsp_offset - 1); if(
-_temp5731.base == 0? 1:( _temp5733 < _temp5731.base? 1: _temp5733 >= _temp5731.last_plus_one)){
-_throw( Null_Exception);}* _temp5733;}).last_line)); _temp5718;}); _temp5717;});
-break; case 248: _LL5716: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5735=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5735[ 0]=({ struct Cyc_Stmt_tok_struct _temp5736; _temp5736.tag= Cyc_Stmt_tok_tag;
-_temp5736.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp5737= yyvs; struct _xtunion_struct** _temp5739= _temp5737.curr +(
-yyvsp_offset - 4); if( _temp5737.base == 0? 1:( _temp5739 < _temp5737.base? 1:
-_temp5739 >= _temp5737.last_plus_one)){ _throw( Null_Exception);}* _temp5739;})),
+_tagged_ptr2 _temp5688= yyvs; struct _xtunion_struct** _temp5690= _temp5688.curr
++( yyvsp_offset - 2); if( _temp5688.base == 0? 1:( _temp5690 < _temp5688.base? 1:
+_temp5690 >= _temp5688.last_plus_one)){ _throw( Null_Exception);}* _temp5690;})),
+Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5691= yyvs; struct
+_xtunion_struct** _temp5693= _temp5691.curr + yyvsp_offset; if( _temp5691.base
+== 0? 1:( _temp5693 < _temp5691.base? 1: _temp5693 >= _temp5691.last_plus_one)){
+_throw( Null_Exception);}* _temp5693;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5694= yyls; struct Cyc_Yyltype* _temp5696= _temp5694.curr +(
+yylsp_offset - 6); if( _temp5694.base == 0? 1:( _temp5696 < _temp5694.base? 1:
+_temp5696 >= _temp5694.last_plus_one)){ _throw( Null_Exception);}* _temp5696;}).first_line,({
+struct _tagged_ptr3 _temp5697= yyls; struct Cyc_Yyltype* _temp5699= _temp5697.curr
++ yylsp_offset; if( _temp5697.base == 0? 1:( _temp5699 < _temp5697.base? 1:
+_temp5699 >= _temp5697.last_plus_one)){ _throw( Null_Exception);}* _temp5699;}).last_line));
+_temp5687;}); _temp5686;}); break; case 246: _LL5685: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5701=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5701[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5702; _temp5702.tag= Cyc_Stmt_tok_tag; _temp5702.f1= Cyc_Absyn_for_stmt(
+Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5703=
+yyvs; struct _xtunion_struct** _temp5705= _temp5703.curr +( yyvsp_offset - 3);
+if( _temp5703.base == 0? 1:( _temp5705 < _temp5703.base? 1: _temp5705 >=
+_temp5703.last_plus_one)){ _throw( Null_Exception);}* _temp5705;})), Cyc_Absyn_false_exp(
+0), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5706= yyvs; struct
+_xtunion_struct** _temp5708= _temp5706.curr + yyvsp_offset; if( _temp5706.base
+== 0? 1:( _temp5708 < _temp5706.base? 1: _temp5708 >= _temp5706.last_plus_one)){
+_throw( Null_Exception);}* _temp5708;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5709= yyls; struct Cyc_Yyltype* _temp5711= _temp5709.curr +(
+yylsp_offset - 6); if( _temp5709.base == 0? 1:( _temp5711 < _temp5709.base? 1:
+_temp5711 >= _temp5709.last_plus_one)){ _throw( Null_Exception);}* _temp5711;}).first_line,({
+struct _tagged_ptr3 _temp5712= yyls; struct Cyc_Yyltype* _temp5714= _temp5712.curr
++ yylsp_offset; if( _temp5712.base == 0? 1:( _temp5714 < _temp5712.base? 1:
+_temp5714 >= _temp5712.last_plus_one)){ _throw( Null_Exception);}* _temp5714;}).last_line));
+_temp5702;}); _temp5701;}); break; case 247: _LL5700: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5716=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5716[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5717; _temp5717.tag= Cyc_Stmt_tok_tag; _temp5717.f1= Cyc_Absyn_for_stmt(
+Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5718=
+yyvs; struct _xtunion_struct** _temp5720= _temp5718.curr +( yyvsp_offset - 4);
+if( _temp5718.base == 0? 1:( _temp5720 < _temp5718.base? 1: _temp5720 >=
+_temp5718.last_plus_one)){ _throw( Null_Exception);}* _temp5720;})), Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp5721= yyvs; struct _xtunion_struct** _temp5723=
+_temp5721.curr +( yyvsp_offset - 2); if( _temp5721.base == 0? 1:( _temp5723 <
+_temp5721.base? 1: _temp5723 >= _temp5721.last_plus_one)){ _throw(
+Null_Exception);}* _temp5723;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
+_temp5724= yyvs; struct _xtunion_struct** _temp5726= _temp5724.curr +
+yyvsp_offset; if( _temp5724.base == 0? 1:( _temp5726 < _temp5724.base? 1:
+_temp5726 >= _temp5724.last_plus_one)){ _throw( Null_Exception);}* _temp5726;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5727= yyls; struct Cyc_Yyltype*
+_temp5729= _temp5727.curr +( yylsp_offset - 7); if( _temp5727.base == 0? 1:(
+_temp5729 < _temp5727.base? 1: _temp5729 >= _temp5727.last_plus_one)){ _throw(
+Null_Exception);}* _temp5729;}).first_line,({ struct _tagged_ptr3 _temp5730=
+yyls; struct Cyc_Yyltype* _temp5732= _temp5730.curr +( yylsp_offset - 1); if(
+_temp5730.base == 0? 1:( _temp5732 < _temp5730.base? 1: _temp5732 >= _temp5730.last_plus_one)){
+_throw( Null_Exception);}* _temp5732;}).last_line)); _temp5717;}); _temp5716;});
+break; case 248: _LL5715: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5734=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5734[ 0]=({ struct Cyc_Stmt_tok_struct _temp5735; _temp5735.tag= Cyc_Stmt_tok_tag;
+_temp5735.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp5736= yyvs; struct _xtunion_struct** _temp5738= _temp5736.curr +(
+yyvsp_offset - 4); if( _temp5736.base == 0? 1:( _temp5738 < _temp5736.base? 1:
+_temp5738 >= _temp5736.last_plus_one)){ _throw( Null_Exception);}* _temp5738;})),
 Cyc_Absyn_true_exp( 0), Cyc_Absyn_false_exp( 0), Cyc_yyget_Stmt_tok(({ struct
-_tagged_ptr2 _temp5740= yyvs; struct _xtunion_struct** _temp5742= _temp5740.curr
-+ yyvsp_offset; if( _temp5740.base == 0? 1:( _temp5742 < _temp5740.base? 1:
-_temp5742 >= _temp5740.last_plus_one)){ _throw( Null_Exception);}* _temp5742;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5743= yyls; struct Cyc_Yyltype*
-_temp5745= _temp5743.curr +( yylsp_offset - 6); if( _temp5743.base == 0? 1:(
-_temp5745 < _temp5743.base? 1: _temp5745 >= _temp5743.last_plus_one)){ _throw(
-Null_Exception);}* _temp5745;}).first_line,({ struct _tagged_ptr3 _temp5746=
-yyls; struct Cyc_Yyltype* _temp5748= _temp5746.curr + yylsp_offset; if(
-_temp5746.base == 0? 1:( _temp5748 < _temp5746.base? 1: _temp5748 >= _temp5746.last_plus_one)){
-_throw( Null_Exception);}* _temp5748;}).last_line)); _temp5736;}); _temp5735;});
-break; case 249: _LL5734: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5750=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5750[ 0]=({ struct Cyc_Stmt_tok_struct _temp5751; _temp5751.tag= Cyc_Stmt_tok_tag;
-_temp5751.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp5752= yyvs; struct _xtunion_struct** _temp5754= _temp5752.curr +(
-yyvsp_offset - 5); if( _temp5752.base == 0? 1:( _temp5754 < _temp5752.base? 1:
-_temp5754 >= _temp5752.last_plus_one)){ _throw( Null_Exception);}* _temp5754;})),
-Cyc_Absyn_true_exp( 0), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5755= yyvs;
-struct _xtunion_struct** _temp5757= _temp5755.curr +( yyvsp_offset - 2); if(
-_temp5755.base == 0? 1:( _temp5757 < _temp5755.base? 1: _temp5757 >= _temp5755.last_plus_one)){
-_throw( Null_Exception);}* _temp5757;})), Cyc_yyget_Stmt_tok(({ struct
-_tagged_ptr2 _temp5758= yyvs; struct _xtunion_struct** _temp5760= _temp5758.curr
-+ yyvsp_offset; if( _temp5758.base == 0? 1:( _temp5760 < _temp5758.base? 1:
-_temp5760 >= _temp5758.last_plus_one)){ _throw( Null_Exception);}* _temp5760;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5761= yyls; struct Cyc_Yyltype*
-_temp5763= _temp5761.curr +( yylsp_offset - 7); if( _temp5761.base == 0? 1:(
-_temp5763 < _temp5761.base? 1: _temp5763 >= _temp5761.last_plus_one)){ _throw(
-Null_Exception);}* _temp5763;}).first_line,({ struct _tagged_ptr3 _temp5764=
-yyls; struct Cyc_Yyltype* _temp5766= _temp5764.curr + yylsp_offset; if(
-_temp5764.base == 0? 1:( _temp5766 < _temp5764.base? 1: _temp5766 >= _temp5764.last_plus_one)){
-_throw( Null_Exception);}* _temp5766;}).last_line)); _temp5751;}); _temp5750;});
-break; case 250: _LL5749: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5768=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5768[ 0]=({ struct Cyc_Stmt_tok_struct _temp5769; _temp5769.tag= Cyc_Stmt_tok_tag;
-_temp5769.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp5770= yyvs; struct _xtunion_struct** _temp5772= _temp5770.curr +(
-yyvsp_offset - 5); if( _temp5770.base == 0? 1:( _temp5772 < _temp5770.base? 1:
-_temp5772 >= _temp5770.last_plus_one)){ _throw( Null_Exception);}* _temp5772;})),
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5773= yyvs; struct _xtunion_struct**
-_temp5775= _temp5773.curr +( yyvsp_offset - 3); if( _temp5773.base == 0? 1:(
-_temp5775 < _temp5773.base? 1: _temp5775 >= _temp5773.last_plus_one)){ _throw(
-Null_Exception);}* _temp5775;})), Cyc_Absyn_false_exp( 0), Cyc_yyget_Stmt_tok(({
-struct _tagged_ptr2 _temp5776= yyvs; struct _xtunion_struct** _temp5778=
-_temp5776.curr + yyvsp_offset; if( _temp5776.base == 0? 1:( _temp5778 <
-_temp5776.base? 1: _temp5778 >= _temp5776.last_plus_one)){ _throw(
-Null_Exception);}* _temp5778;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5779= yyls; struct Cyc_Yyltype* _temp5781= _temp5779.curr +(
-yylsp_offset - 7); if( _temp5779.base == 0? 1:( _temp5781 < _temp5779.base? 1:
-_temp5781 >= _temp5779.last_plus_one)){ _throw( Null_Exception);}* _temp5781;}).first_line,({
-struct _tagged_ptr3 _temp5782= yyls; struct Cyc_Yyltype* _temp5784= _temp5782.curr
-+ yylsp_offset; if( _temp5782.base == 0? 1:( _temp5784 < _temp5782.base? 1:
-_temp5784 >= _temp5782.last_plus_one)){ _throw( Null_Exception);}* _temp5784;}).last_line));
-_temp5769;}); _temp5768;}); break; case 251: _LL5767: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5786=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5786[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5787; _temp5787.tag= Cyc_Stmt_tok_tag; _temp5787.f1= Cyc_Absyn_for_stmt(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5788= yyvs; struct _xtunion_struct**
-_temp5790= _temp5788.curr +( yyvsp_offset - 6); if( _temp5788.base == 0? 1:(
-_temp5790 < _temp5788.base? 1: _temp5790 >= _temp5788.last_plus_one)){ _throw(
-Null_Exception);}* _temp5790;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp5791= yyvs; struct _xtunion_struct** _temp5793= _temp5791.curr +(
-yyvsp_offset - 4); if( _temp5791.base == 0? 1:( _temp5793 < _temp5791.base? 1:
-_temp5793 >= _temp5791.last_plus_one)){ _throw( Null_Exception);}* _temp5793;})),
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5794= yyvs; struct _xtunion_struct**
-_temp5796= _temp5794.curr +( yyvsp_offset - 2); if( _temp5794.base == 0? 1:(
-_temp5796 < _temp5794.base? 1: _temp5796 >= _temp5794.last_plus_one)){ _throw(
-Null_Exception);}* _temp5796;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
-_temp5797= yyvs; struct _xtunion_struct** _temp5799= _temp5797.curr +
-yyvsp_offset; if( _temp5797.base == 0? 1:( _temp5799 < _temp5797.base? 1:
-_temp5799 >= _temp5797.last_plus_one)){ _throw( Null_Exception);}* _temp5799;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5800= yyls; struct Cyc_Yyltype*
-_temp5802= _temp5800.curr +( yylsp_offset - 8); if( _temp5800.base == 0? 1:(
-_temp5802 < _temp5800.base? 1: _temp5802 >= _temp5800.last_plus_one)){ _throw(
-Null_Exception);}* _temp5802;}).first_line,({ struct _tagged_ptr3 _temp5803=
-yyls; struct Cyc_Yyltype* _temp5805= _temp5803.curr + yylsp_offset; if(
-_temp5803.base == 0? 1:( _temp5805 < _temp5803.base? 1: _temp5805 >= _temp5803.last_plus_one)){
-_throw( Null_Exception);}* _temp5805;}).last_line)); _temp5787;}); _temp5786;});
-break; case 252: _LL5785: { struct Cyc_List_List* decls= Cyc_yyget_DeclList_tok(({
-struct _tagged_ptr2 _temp5807= yyvs; struct _xtunion_struct** _temp5809=
-_temp5807.curr +( yyvsp_offset - 3); if( _temp5807.base == 0? 1:( _temp5809 <
-_temp5807.base? 1: _temp5809 >= _temp5807.last_plus_one)){ _throw(
-Null_Exception);}* _temp5809;})); struct Cyc_Absyn_Stmt* s= Cyc_Absyn_for_stmt(
+_tagged_ptr2 _temp5739= yyvs; struct _xtunion_struct** _temp5741= _temp5739.curr
++ yyvsp_offset; if( _temp5739.base == 0? 1:( _temp5741 < _temp5739.base? 1:
+_temp5741 >= _temp5739.last_plus_one)){ _throw( Null_Exception);}* _temp5741;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5742= yyls; struct Cyc_Yyltype*
+_temp5744= _temp5742.curr +( yylsp_offset - 6); if( _temp5742.base == 0? 1:(
+_temp5744 < _temp5742.base? 1: _temp5744 >= _temp5742.last_plus_one)){ _throw(
+Null_Exception);}* _temp5744;}).first_line,({ struct _tagged_ptr3 _temp5745=
+yyls; struct Cyc_Yyltype* _temp5747= _temp5745.curr + yylsp_offset; if(
+_temp5745.base == 0? 1:( _temp5747 < _temp5745.base? 1: _temp5747 >= _temp5745.last_plus_one)){
+_throw( Null_Exception);}* _temp5747;}).last_line)); _temp5735;}); _temp5734;});
+break; case 249: _LL5733: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5749=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5749[ 0]=({ struct Cyc_Stmt_tok_struct _temp5750; _temp5750.tag= Cyc_Stmt_tok_tag;
+_temp5750.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp5751= yyvs; struct _xtunion_struct** _temp5753= _temp5751.curr +(
+yyvsp_offset - 5); if( _temp5751.base == 0? 1:( _temp5753 < _temp5751.base? 1:
+_temp5753 >= _temp5751.last_plus_one)){ _throw( Null_Exception);}* _temp5753;})),
+Cyc_Absyn_true_exp( 0), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5754= yyvs;
+struct _xtunion_struct** _temp5756= _temp5754.curr +( yyvsp_offset - 2); if(
+_temp5754.base == 0? 1:( _temp5756 < _temp5754.base? 1: _temp5756 >= _temp5754.last_plus_one)){
+_throw( Null_Exception);}* _temp5756;})), Cyc_yyget_Stmt_tok(({ struct
+_tagged_ptr2 _temp5757= yyvs; struct _xtunion_struct** _temp5759= _temp5757.curr
++ yyvsp_offset; if( _temp5757.base == 0? 1:( _temp5759 < _temp5757.base? 1:
+_temp5759 >= _temp5757.last_plus_one)){ _throw( Null_Exception);}* _temp5759;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5760= yyls; struct Cyc_Yyltype*
+_temp5762= _temp5760.curr +( yylsp_offset - 7); if( _temp5760.base == 0? 1:(
+_temp5762 < _temp5760.base? 1: _temp5762 >= _temp5760.last_plus_one)){ _throw(
+Null_Exception);}* _temp5762;}).first_line,({ struct _tagged_ptr3 _temp5763=
+yyls; struct Cyc_Yyltype* _temp5765= _temp5763.curr + yylsp_offset; if(
+_temp5763.base == 0? 1:( _temp5765 < _temp5763.base? 1: _temp5765 >= _temp5763.last_plus_one)){
+_throw( Null_Exception);}* _temp5765;}).last_line)); _temp5750;}); _temp5749;});
+break; case 250: _LL5748: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5767=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5767[ 0]=({ struct Cyc_Stmt_tok_struct _temp5768; _temp5768.tag= Cyc_Stmt_tok_tag;
+_temp5768.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp5769= yyvs; struct _xtunion_struct** _temp5771= _temp5769.curr +(
+yyvsp_offset - 5); if( _temp5769.base == 0? 1:( _temp5771 < _temp5769.base? 1:
+_temp5771 >= _temp5769.last_plus_one)){ _throw( Null_Exception);}* _temp5771;})),
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5772= yyvs; struct _xtunion_struct**
+_temp5774= _temp5772.curr +( yyvsp_offset - 3); if( _temp5772.base == 0? 1:(
+_temp5774 < _temp5772.base? 1: _temp5774 >= _temp5772.last_plus_one)){ _throw(
+Null_Exception);}* _temp5774;})), Cyc_Absyn_false_exp( 0), Cyc_yyget_Stmt_tok(({
+struct _tagged_ptr2 _temp5775= yyvs; struct _xtunion_struct** _temp5777=
+_temp5775.curr + yyvsp_offset; if( _temp5775.base == 0? 1:( _temp5777 <
+_temp5775.base? 1: _temp5777 >= _temp5775.last_plus_one)){ _throw(
+Null_Exception);}* _temp5777;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5778= yyls; struct Cyc_Yyltype* _temp5780= _temp5778.curr +(
+yylsp_offset - 7); if( _temp5778.base == 0? 1:( _temp5780 < _temp5778.base? 1:
+_temp5780 >= _temp5778.last_plus_one)){ _throw( Null_Exception);}* _temp5780;}).first_line,({
+struct _tagged_ptr3 _temp5781= yyls; struct Cyc_Yyltype* _temp5783= _temp5781.curr
++ yylsp_offset; if( _temp5781.base == 0? 1:( _temp5783 < _temp5781.base? 1:
+_temp5783 >= _temp5781.last_plus_one)){ _throw( Null_Exception);}* _temp5783;}).last_line));
+_temp5768;}); _temp5767;}); break; case 251: _LL5766: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5785=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5785[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5786; _temp5786.tag= Cyc_Stmt_tok_tag; _temp5786.f1= Cyc_Absyn_for_stmt(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5787= yyvs; struct _xtunion_struct**
+_temp5789= _temp5787.curr +( yyvsp_offset - 6); if( _temp5787.base == 0? 1:(
+_temp5789 < _temp5787.base? 1: _temp5789 >= _temp5787.last_plus_one)){ _throw(
+Null_Exception);}* _temp5789;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp5790= yyvs; struct _xtunion_struct** _temp5792= _temp5790.curr +(
+yyvsp_offset - 4); if( _temp5790.base == 0? 1:( _temp5792 < _temp5790.base? 1:
+_temp5792 >= _temp5790.last_plus_one)){ _throw( Null_Exception);}* _temp5792;})),
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5793= yyvs; struct _xtunion_struct**
+_temp5795= _temp5793.curr +( yyvsp_offset - 2); if( _temp5793.base == 0? 1:(
+_temp5795 < _temp5793.base? 1: _temp5795 >= _temp5793.last_plus_one)){ _throw(
+Null_Exception);}* _temp5795;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
+_temp5796= yyvs; struct _xtunion_struct** _temp5798= _temp5796.curr +
+yyvsp_offset; if( _temp5796.base == 0? 1:( _temp5798 < _temp5796.base? 1:
+_temp5798 >= _temp5796.last_plus_one)){ _throw( Null_Exception);}* _temp5798;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5799= yyls; struct Cyc_Yyltype*
+_temp5801= _temp5799.curr +( yylsp_offset - 8); if( _temp5799.base == 0? 1:(
+_temp5801 < _temp5799.base? 1: _temp5801 >= _temp5799.last_plus_one)){ _throw(
+Null_Exception);}* _temp5801;}).first_line,({ struct _tagged_ptr3 _temp5802=
+yyls; struct Cyc_Yyltype* _temp5804= _temp5802.curr + yylsp_offset; if(
+_temp5802.base == 0? 1:( _temp5804 < _temp5802.base? 1: _temp5804 >= _temp5802.last_plus_one)){
+_throw( Null_Exception);}* _temp5804;}).last_line)); _temp5786;}); _temp5785;});
+break; case 252: _LL5784: { struct Cyc_List_List* decls= Cyc_yyget_DeclList_tok(({
+struct _tagged_ptr2 _temp5806= yyvs; struct _xtunion_struct** _temp5808=
+_temp5806.curr +( yyvsp_offset - 3); if( _temp5806.base == 0? 1:( _temp5808 <
+_temp5806.base? 1: _temp5808 >= _temp5806.last_plus_one)){ _throw(
+Null_Exception);}* _temp5808;})); struct Cyc_Absyn_Stmt* s= Cyc_Absyn_for_stmt(
 Cyc_Absyn_false_exp( 0), Cyc_Absyn_true_exp( 0), Cyc_Absyn_false_exp( 0), Cyc_yyget_Stmt_tok(({
-struct _tagged_ptr2 _temp5810= yyvs; struct _xtunion_struct** _temp5812=
-_temp5810.curr + yyvsp_offset; if( _temp5810.base == 0? 1:( _temp5812 <
-_temp5810.base? 1: _temp5812 >= _temp5810.last_plus_one)){ _throw(
-Null_Exception);}* _temp5812;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5813= yyls; struct Cyc_Yyltype* _temp5815= _temp5813.curr +(
-yylsp_offset - 5); if( _temp5813.base == 0? 1:( _temp5815 < _temp5813.base? 1:
-_temp5815 >= _temp5813.last_plus_one)){ _throw( Null_Exception);}* _temp5815;}).first_line,({
-struct _tagged_ptr3 _temp5816= yyls; struct Cyc_Yyltype* _temp5818= _temp5816.curr
-+ yylsp_offset; if( _temp5816.base == 0? 1:( _temp5818 < _temp5816.base? 1:
-_temp5818 >= _temp5816.last_plus_one)){ _throw( Null_Exception);}* _temp5818;}).last_line));
-yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5819=(
+struct _tagged_ptr2 _temp5809= yyvs; struct _xtunion_struct** _temp5811=
+_temp5809.curr + yyvsp_offset; if( _temp5809.base == 0? 1:( _temp5811 <
+_temp5809.base? 1: _temp5811 >= _temp5809.last_plus_one)){ _throw(
+Null_Exception);}* _temp5811;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5812= yyls; struct Cyc_Yyltype* _temp5814= _temp5812.curr +(
+yylsp_offset - 5); if( _temp5812.base == 0? 1:( _temp5814 < _temp5812.base? 1:
+_temp5814 >= _temp5812.last_plus_one)){ _throw( Null_Exception);}* _temp5814;}).first_line,({
+struct _tagged_ptr3 _temp5815= yyls; struct Cyc_Yyltype* _temp5817= _temp5815.curr
++ yylsp_offset; if( _temp5815.base == 0? 1:( _temp5817 < _temp5815.base? 1:
+_temp5817 >= _temp5815.last_plus_one)){ _throw( Null_Exception);}* _temp5817;}).last_line));
+yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5818=(
 struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5819[ 0]=({ struct Cyc_Stmt_tok_struct _temp5820; _temp5820.tag= Cyc_Stmt_tok_tag;
-_temp5820.f1= Cyc_Parse_flatten_declarations( decls, s); _temp5820;}); _temp5819;});
-break;} case 253: _LL5806: { struct Cyc_List_List* decls= Cyc_yyget_DeclList_tok(({
-struct _tagged_ptr2 _temp5822= yyvs; struct _xtunion_struct** _temp5824=
-_temp5822.curr +( yyvsp_offset - 4); if( _temp5822.base == 0? 1:( _temp5824 <
-_temp5822.base? 1: _temp5824 >= _temp5822.last_plus_one)){ _throw(
-Null_Exception);}* _temp5824;})); struct Cyc_Absyn_Stmt* s= Cyc_Absyn_for_stmt(
-Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5825=
-yyvs; struct _xtunion_struct** _temp5827= _temp5825.curr +( yyvsp_offset - 3);
-if( _temp5825.base == 0? 1:( _temp5827 < _temp5825.base? 1: _temp5827 >=
-_temp5825.last_plus_one)){ _throw( Null_Exception);}* _temp5827;})), Cyc_Absyn_false_exp(
-0), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5828= yyvs; struct
-_xtunion_struct** _temp5830= _temp5828.curr + yyvsp_offset; if( _temp5828.base
-== 0? 1:( _temp5830 < _temp5828.base? 1: _temp5830 >= _temp5828.last_plus_one)){
-_throw( Null_Exception);}* _temp5830;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5831= yyls; struct Cyc_Yyltype* _temp5833= _temp5831.curr +(
-yylsp_offset - 6); if( _temp5831.base == 0? 1:( _temp5833 < _temp5831.base? 1:
-_temp5833 >= _temp5831.last_plus_one)){ _throw( Null_Exception);}* _temp5833;}).first_line,({
-struct _tagged_ptr3 _temp5834= yyls; struct Cyc_Yyltype* _temp5836= _temp5834.curr
-+ yylsp_offset; if( _temp5834.base == 0? 1:( _temp5836 < _temp5834.base? 1:
-_temp5836 >= _temp5834.last_plus_one)){ _throw( Null_Exception);}* _temp5836;}).last_line));
-yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5837=(
+_temp5818[ 0]=({ struct Cyc_Stmt_tok_struct _temp5819; _temp5819.tag= Cyc_Stmt_tok_tag;
+_temp5819.f1= Cyc_Parse_flatten_declarations( decls, s); _temp5819;}); _temp5818;});
+break;} case 253: _LL5805: { struct Cyc_List_List* decls= Cyc_yyget_DeclList_tok(({
+struct _tagged_ptr2 _temp5821= yyvs; struct _xtunion_struct** _temp5823=
+_temp5821.curr +( yyvsp_offset - 4); if( _temp5821.base == 0? 1:( _temp5823 <
+_temp5821.base? 1: _temp5823 >= _temp5821.last_plus_one)){ _throw(
+Null_Exception);}* _temp5823;})); struct Cyc_Absyn_Stmt* s= Cyc_Absyn_for_stmt(
+Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5824=
+yyvs; struct _xtunion_struct** _temp5826= _temp5824.curr +( yyvsp_offset - 3);
+if( _temp5824.base == 0? 1:( _temp5826 < _temp5824.base? 1: _temp5826 >=
+_temp5824.last_plus_one)){ _throw( Null_Exception);}* _temp5826;})), Cyc_Absyn_false_exp(
+0), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5827= yyvs; struct
+_xtunion_struct** _temp5829= _temp5827.curr + yyvsp_offset; if( _temp5827.base
+== 0? 1:( _temp5829 < _temp5827.base? 1: _temp5829 >= _temp5827.last_plus_one)){
+_throw( Null_Exception);}* _temp5829;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5830= yyls; struct Cyc_Yyltype* _temp5832= _temp5830.curr +(
+yylsp_offset - 6); if( _temp5830.base == 0? 1:( _temp5832 < _temp5830.base? 1:
+_temp5832 >= _temp5830.last_plus_one)){ _throw( Null_Exception);}* _temp5832;}).first_line,({
+struct _tagged_ptr3 _temp5833= yyls; struct Cyc_Yyltype* _temp5835= _temp5833.curr
++ yylsp_offset; if( _temp5833.base == 0? 1:( _temp5835 < _temp5833.base? 1:
+_temp5835 >= _temp5833.last_plus_one)){ _throw( Null_Exception);}* _temp5835;}).last_line));
+yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5836=(
 struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5837[ 0]=({ struct Cyc_Stmt_tok_struct _temp5838; _temp5838.tag= Cyc_Stmt_tok_tag;
-_temp5838.f1= Cyc_Parse_flatten_declarations( decls, s); _temp5838;}); _temp5837;});
-break;} case 254: _LL5821: { struct Cyc_List_List* decls= Cyc_yyget_DeclList_tok(({
-struct _tagged_ptr2 _temp5840= yyvs; struct _xtunion_struct** _temp5842=
-_temp5840.curr +( yyvsp_offset - 4); if( _temp5840.base == 0? 1:( _temp5842 <
-_temp5840.base? 1: _temp5842 >= _temp5840.last_plus_one)){ _throw(
-Null_Exception);}* _temp5842;})); struct Cyc_Absyn_Stmt* s= Cyc_Absyn_for_stmt(
+_temp5836[ 0]=({ struct Cyc_Stmt_tok_struct _temp5837; _temp5837.tag= Cyc_Stmt_tok_tag;
+_temp5837.f1= Cyc_Parse_flatten_declarations( decls, s); _temp5837;}); _temp5836;});
+break;} case 254: _LL5820: { struct Cyc_List_List* decls= Cyc_yyget_DeclList_tok(({
+struct _tagged_ptr2 _temp5839= yyvs; struct _xtunion_struct** _temp5841=
+_temp5839.curr +( yyvsp_offset - 4); if( _temp5839.base == 0? 1:( _temp5841 <
+_temp5839.base? 1: _temp5841 >= _temp5839.last_plus_one)){ _throw(
+Null_Exception);}* _temp5841;})); struct Cyc_Absyn_Stmt* s= Cyc_Absyn_for_stmt(
 Cyc_Absyn_false_exp( 0), Cyc_Absyn_true_exp( 0), Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp5843= yyvs; struct _xtunion_struct** _temp5845= _temp5843.curr
-+( yyvsp_offset - 2); if( _temp5843.base == 0? 1:( _temp5845 < _temp5843.base? 1:
-_temp5845 >= _temp5843.last_plus_one)){ _throw( Null_Exception);}* _temp5845;})),
-Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5846= yyvs; struct
-_xtunion_struct** _temp5848= _temp5846.curr + yyvsp_offset; if( _temp5846.base
-== 0? 1:( _temp5848 < _temp5846.base? 1: _temp5848 >= _temp5846.last_plus_one)){
-_throw( Null_Exception);}* _temp5848;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5849= yyls; struct Cyc_Yyltype* _temp5851= _temp5849.curr +(
-yylsp_offset - 6); if( _temp5849.base == 0? 1:( _temp5851 < _temp5849.base? 1:
-_temp5851 >= _temp5849.last_plus_one)){ _throw( Null_Exception);}* _temp5851;}).first_line,({
-struct _tagged_ptr3 _temp5852= yyls; struct Cyc_Yyltype* _temp5854= _temp5852.curr
-+ yylsp_offset; if( _temp5852.base == 0? 1:( _temp5854 < _temp5852.base? 1:
-_temp5854 >= _temp5852.last_plus_one)){ _throw( Null_Exception);}* _temp5854;}).last_line));
-yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5855=(
+_tagged_ptr2 _temp5842= yyvs; struct _xtunion_struct** _temp5844= _temp5842.curr
++( yyvsp_offset - 2); if( _temp5842.base == 0? 1:( _temp5844 < _temp5842.base? 1:
+_temp5844 >= _temp5842.last_plus_one)){ _throw( Null_Exception);}* _temp5844;})),
+Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2 _temp5845= yyvs; struct
+_xtunion_struct** _temp5847= _temp5845.curr + yyvsp_offset; if( _temp5845.base
+== 0? 1:( _temp5847 < _temp5845.base? 1: _temp5847 >= _temp5845.last_plus_one)){
+_throw( Null_Exception);}* _temp5847;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5848= yyls; struct Cyc_Yyltype* _temp5850= _temp5848.curr +(
+yylsp_offset - 6); if( _temp5848.base == 0? 1:( _temp5850 < _temp5848.base? 1:
+_temp5850 >= _temp5848.last_plus_one)){ _throw( Null_Exception);}* _temp5850;}).first_line,({
+struct _tagged_ptr3 _temp5851= yyls; struct Cyc_Yyltype* _temp5853= _temp5851.curr
++ yylsp_offset; if( _temp5851.base == 0? 1:( _temp5853 < _temp5851.base? 1:
+_temp5853 >= _temp5851.last_plus_one)){ _throw( Null_Exception);}* _temp5853;}).last_line));
+yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5854=(
 struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5855[ 0]=({ struct Cyc_Stmt_tok_struct _temp5856; _temp5856.tag= Cyc_Stmt_tok_tag;
-_temp5856.f1= Cyc_Parse_flatten_declarations( decls, s); _temp5856;}); _temp5855;});
-break;} case 255: _LL5839: { struct Cyc_List_List* decls= Cyc_yyget_DeclList_tok(({
-struct _tagged_ptr2 _temp5858= yyvs; struct _xtunion_struct** _temp5860=
-_temp5858.curr +( yyvsp_offset - 5); if( _temp5858.base == 0? 1:( _temp5860 <
-_temp5858.base? 1: _temp5860 >= _temp5858.last_plus_one)){ _throw(
-Null_Exception);}* _temp5860;})); struct Cyc_Absyn_Stmt* s= Cyc_Absyn_for_stmt(
-Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5861=
-yyvs; struct _xtunion_struct** _temp5863= _temp5861.curr +( yyvsp_offset - 4);
-if( _temp5861.base == 0? 1:( _temp5863 < _temp5861.base? 1: _temp5863 >=
-_temp5861.last_plus_one)){ _throw( Null_Exception);}* _temp5863;})), Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp5864= yyvs; struct _xtunion_struct** _temp5866=
-_temp5864.curr +( yyvsp_offset - 2); if( _temp5864.base == 0? 1:( _temp5866 <
-_temp5864.base? 1: _temp5866 >= _temp5864.last_plus_one)){ _throw(
-Null_Exception);}* _temp5866;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
-_temp5867= yyvs; struct _xtunion_struct** _temp5869= _temp5867.curr +
-yyvsp_offset; if( _temp5867.base == 0? 1:( _temp5869 < _temp5867.base? 1:
-_temp5869 >= _temp5867.last_plus_one)){ _throw( Null_Exception);}* _temp5869;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5870= yyls; struct Cyc_Yyltype*
-_temp5872= _temp5870.curr +( yylsp_offset - 7); if( _temp5870.base == 0? 1:(
-_temp5872 < _temp5870.base? 1: _temp5872 >= _temp5870.last_plus_one)){ _throw(
-Null_Exception);}* _temp5872;}).first_line,({ struct _tagged_ptr3 _temp5873=
-yyls; struct Cyc_Yyltype* _temp5875= _temp5873.curr + yylsp_offset; if(
-_temp5873.base == 0? 1:( _temp5875 < _temp5873.base? 1: _temp5875 >= _temp5873.last_plus_one)){
-_throw( Null_Exception);}* _temp5875;}).last_line)); yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5876=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5876[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5877; _temp5877.tag= Cyc_Stmt_tok_tag; _temp5877.f1= Cyc_Parse_flatten_declarations(
-decls, s); _temp5877;}); _temp5876;}); break;} case 256: _LL5857: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5879=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5879[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5880; _temp5880.tag= Cyc_Stmt_tok_tag; _temp5880.f1= Cyc_Absyn_goto_stmt(({
-struct _tagged_string* _temp5881=( struct _tagged_string*) GC_malloc( sizeof(
-struct _tagged_string) * 1); _temp5881[ 0]= Cyc_yyget_String_tok(({ struct
-_tagged_ptr2 _temp5882= yyvs; struct _xtunion_struct** _temp5884= _temp5882.curr
-+( yyvsp_offset - 1); if( _temp5882.base == 0? 1:( _temp5884 < _temp5882.base? 1:
-_temp5884 >= _temp5882.last_plus_one)){ _throw( Null_Exception);}* _temp5884;}));
-_temp5881;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5885= yyls;
-struct Cyc_Yyltype* _temp5887= _temp5885.curr +( yylsp_offset - 2); if(
-_temp5885.base == 0? 1:( _temp5887 < _temp5885.base? 1: _temp5887 >= _temp5885.last_plus_one)){
-_throw( Null_Exception);}* _temp5887;}).first_line,({ struct _tagged_ptr3
-_temp5888= yyls; struct Cyc_Yyltype* _temp5890= _temp5888.curr +( yylsp_offset -
-1); if( _temp5888.base == 0? 1:( _temp5890 < _temp5888.base? 1: _temp5890 >=
-_temp5888.last_plus_one)){ _throw( Null_Exception);}* _temp5890;}).last_line));
-_temp5880;}); _temp5879;}); break; case 257: _LL5878: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5892=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5892[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5893; _temp5893.tag= Cyc_Stmt_tok_tag; _temp5893.f1= Cyc_Absyn_continue_stmt(
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5894= yyls; struct Cyc_Yyltype*
-_temp5896= _temp5894.curr +( yylsp_offset - 1); if( _temp5894.base == 0? 1:(
-_temp5896 < _temp5894.base? 1: _temp5896 >= _temp5894.last_plus_one)){ _throw(
-Null_Exception);}* _temp5896;}).first_line,({ struct _tagged_ptr3 _temp5897=
-yyls; struct Cyc_Yyltype* _temp5899= _temp5897.curr +( yylsp_offset - 1); if(
-_temp5897.base == 0? 1:( _temp5899 < _temp5897.base? 1: _temp5899 >= _temp5897.last_plus_one)){
-_throw( Null_Exception);}* _temp5899;}).last_line)); _temp5893;}); _temp5892;});
-break; case 258: _LL5891: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
-_temp5901=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp5901[ 0]=({ struct Cyc_Stmt_tok_struct _temp5902; _temp5902.tag= Cyc_Stmt_tok_tag;
-_temp5902.f1= Cyc_Absyn_break_stmt( Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5903= yyls; struct Cyc_Yyltype* _temp5905= _temp5903.curr +(
-yylsp_offset - 1); if( _temp5903.base == 0? 1:( _temp5905 < _temp5903.base? 1:
-_temp5905 >= _temp5903.last_plus_one)){ _throw( Null_Exception);}* _temp5905;}).first_line,({
-struct _tagged_ptr3 _temp5906= yyls; struct Cyc_Yyltype* _temp5908= _temp5906.curr
-+( yylsp_offset - 1); if( _temp5906.base == 0? 1:( _temp5908 < _temp5906.base? 1:
-_temp5908 >= _temp5906.last_plus_one)){ _throw( Null_Exception);}* _temp5908;}).last_line));
-_temp5902;}); _temp5901;}); break; case 259: _LL5900: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5910=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5910[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5911; _temp5911.tag= Cyc_Stmt_tok_tag; _temp5911.f1= Cyc_Absyn_return_stmt(
-0, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5912= yyls; struct
-Cyc_Yyltype* _temp5914= _temp5912.curr +( yylsp_offset - 1); if( _temp5912.base
-== 0? 1:( _temp5914 < _temp5912.base? 1: _temp5914 >= _temp5912.last_plus_one)){
-_throw( Null_Exception);}* _temp5914;}).first_line,({ struct _tagged_ptr3
-_temp5915= yyls; struct Cyc_Yyltype* _temp5917= _temp5915.curr +( yylsp_offset -
-1); if( _temp5915.base == 0? 1:( _temp5917 < _temp5915.base? 1: _temp5917 >=
-_temp5915.last_plus_one)){ _throw( Null_Exception);}* _temp5917;}).last_line));
-_temp5911;}); _temp5910;}); break; case 260: _LL5909: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5919=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5919[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5920; _temp5920.tag= Cyc_Stmt_tok_tag; _temp5920.f1= Cyc_Absyn_return_stmt((
-struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5921= yyvs;
-struct _xtunion_struct** _temp5923= _temp5921.curr +( yyvsp_offset - 1); if(
-_temp5921.base == 0? 1:( _temp5923 < _temp5921.base? 1: _temp5923 >= _temp5921.last_plus_one)){
-_throw( Null_Exception);}* _temp5923;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5924= yyls; struct Cyc_Yyltype* _temp5926= _temp5924.curr +(
-yylsp_offset - 2); if( _temp5924.base == 0? 1:( _temp5926 < _temp5924.base? 1:
-_temp5926 >= _temp5924.last_plus_one)){ _throw( Null_Exception);}* _temp5926;}).first_line,({
-struct _tagged_ptr3 _temp5927= yyls; struct Cyc_Yyltype* _temp5929= _temp5927.curr
-+( yylsp_offset - 1); if( _temp5927.base == 0? 1:( _temp5929 < _temp5927.base? 1:
-_temp5929 >= _temp5927.last_plus_one)){ _throw( Null_Exception);}* _temp5929;}).last_line));
-_temp5920;}); _temp5919;}); break; case 261: _LL5918: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5931=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5931[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5932; _temp5932.tag= Cyc_Stmt_tok_tag; _temp5932.f1= Cyc_Absyn_fallthru_stmt(
-0, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5933= yyls; struct
-Cyc_Yyltype* _temp5935= _temp5933.curr +( yylsp_offset - 1); if( _temp5933.base
-== 0? 1:( _temp5935 < _temp5933.base? 1: _temp5935 >= _temp5933.last_plus_one)){
-_throw( Null_Exception);}* _temp5935;}).first_line,({ struct _tagged_ptr3
-_temp5936= yyls; struct Cyc_Yyltype* _temp5938= _temp5936.curr +( yylsp_offset -
-1); if( _temp5936.base == 0? 1:( _temp5938 < _temp5936.base? 1: _temp5938 >=
-_temp5936.last_plus_one)){ _throw( Null_Exception);}* _temp5938;}).last_line));
-_temp5932;}); _temp5931;}); break; case 262: _LL5930: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5940=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5940[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5941; _temp5941.tag= Cyc_Stmt_tok_tag; _temp5941.f1= Cyc_Absyn_fallthru_stmt(
-0, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5942= yyls; struct
-Cyc_Yyltype* _temp5944= _temp5942.curr +( yylsp_offset - 3); if( _temp5942.base
-== 0? 1:( _temp5944 < _temp5942.base? 1: _temp5944 >= _temp5942.last_plus_one)){
-_throw( Null_Exception);}* _temp5944;}).first_line,({ struct _tagged_ptr3
-_temp5945= yyls; struct Cyc_Yyltype* _temp5947= _temp5945.curr +( yylsp_offset -
-3); if( _temp5945.base == 0? 1:( _temp5947 < _temp5945.base? 1: _temp5947 >=
-_temp5945.last_plus_one)){ _throw( Null_Exception);}* _temp5947;}).last_line));
-_temp5941;}); _temp5940;}); break; case 263: _LL5939: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5949=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5949[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp5950; _temp5950.tag= Cyc_Stmt_tok_tag; _temp5950.f1= Cyc_Absyn_fallthru_stmt(
-Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2 _temp5951= yyvs; struct
-_xtunion_struct** _temp5953= _temp5951.curr +( yyvsp_offset - 2); if( _temp5951.base
-== 0? 1:( _temp5953 < _temp5951.base? 1: _temp5953 >= _temp5951.last_plus_one)){
-_throw( Null_Exception);}* _temp5953;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp5954= yyls; struct Cyc_Yyltype* _temp5956= _temp5954.curr +(
-yylsp_offset - 4); if( _temp5954.base == 0? 1:( _temp5956 < _temp5954.base? 1:
-_temp5956 >= _temp5954.last_plus_one)){ _throw( Null_Exception);}* _temp5956;}).first_line,({
-struct _tagged_ptr3 _temp5957= yyls; struct Cyc_Yyltype* _temp5959= _temp5957.curr
-+( yylsp_offset - 4); if( _temp5957.base == 0? 1:( _temp5959 < _temp5957.base? 1:
-_temp5959 >= _temp5957.last_plus_one)){ _throw( Null_Exception);}* _temp5959;}).last_line));
-_temp5950;}); _temp5949;}); break; case 264: _LL5948: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp5961=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp5961[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp5962; _temp5962.tag= Cyc_Pattern_tok_tag; _temp5962.f1= Cyc_Absyn_new_pat((
+_temp5854[ 0]=({ struct Cyc_Stmt_tok_struct _temp5855; _temp5855.tag= Cyc_Stmt_tok_tag;
+_temp5855.f1= Cyc_Parse_flatten_declarations( decls, s); _temp5855;}); _temp5854;});
+break;} case 255: _LL5838: { struct Cyc_List_List* decls= Cyc_yyget_DeclList_tok(({
+struct _tagged_ptr2 _temp5857= yyvs; struct _xtunion_struct** _temp5859=
+_temp5857.curr +( yyvsp_offset - 5); if( _temp5857.base == 0? 1:( _temp5859 <
+_temp5857.base? 1: _temp5859 >= _temp5857.last_plus_one)){ _throw(
+Null_Exception);}* _temp5859;})); struct Cyc_Absyn_Stmt* s= Cyc_Absyn_for_stmt(
+Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5860=
+yyvs; struct _xtunion_struct** _temp5862= _temp5860.curr +( yyvsp_offset - 4);
+if( _temp5860.base == 0? 1:( _temp5862 < _temp5860.base? 1: _temp5862 >=
+_temp5860.last_plus_one)){ _throw( Null_Exception);}* _temp5862;})), Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp5863= yyvs; struct _xtunion_struct** _temp5865=
+_temp5863.curr +( yyvsp_offset - 2); if( _temp5863.base == 0? 1:( _temp5865 <
+_temp5863.base? 1: _temp5865 >= _temp5863.last_plus_one)){ _throw(
+Null_Exception);}* _temp5865;})), Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
+_temp5866= yyvs; struct _xtunion_struct** _temp5868= _temp5866.curr +
+yyvsp_offset; if( _temp5866.base == 0? 1:( _temp5868 < _temp5866.base? 1:
+_temp5868 >= _temp5866.last_plus_one)){ _throw( Null_Exception);}* _temp5868;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5869= yyls; struct Cyc_Yyltype*
+_temp5871= _temp5869.curr +( yylsp_offset - 7); if( _temp5869.base == 0? 1:(
+_temp5871 < _temp5869.base? 1: _temp5871 >= _temp5869.last_plus_one)){ _throw(
+Null_Exception);}* _temp5871;}).first_line,({ struct _tagged_ptr3 _temp5872=
+yyls; struct Cyc_Yyltype* _temp5874= _temp5872.curr + yylsp_offset; if(
+_temp5872.base == 0? 1:( _temp5874 < _temp5872.base? 1: _temp5874 >= _temp5872.last_plus_one)){
+_throw( Null_Exception);}* _temp5874;}).last_line)); yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5875=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5875[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5876; _temp5876.tag= Cyc_Stmt_tok_tag; _temp5876.f1= Cyc_Parse_flatten_declarations(
+decls, s); _temp5876;}); _temp5875;}); break;} case 256: _LL5856: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5878=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5878[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5879; _temp5879.tag= Cyc_Stmt_tok_tag; _temp5879.f1= Cyc_Absyn_goto_stmt(({
+struct _tagged_string* _temp5880=( struct _tagged_string*) GC_malloc( sizeof(
+struct _tagged_string) * 1); _temp5880[ 0]= Cyc_yyget_String_tok(({ struct
+_tagged_ptr2 _temp5881= yyvs; struct _xtunion_struct** _temp5883= _temp5881.curr
++( yyvsp_offset - 1); if( _temp5881.base == 0? 1:( _temp5883 < _temp5881.base? 1:
+_temp5883 >= _temp5881.last_plus_one)){ _throw( Null_Exception);}* _temp5883;}));
+_temp5880;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5884= yyls;
+struct Cyc_Yyltype* _temp5886= _temp5884.curr +( yylsp_offset - 2); if(
+_temp5884.base == 0? 1:( _temp5886 < _temp5884.base? 1: _temp5886 >= _temp5884.last_plus_one)){
+_throw( Null_Exception);}* _temp5886;}).first_line,({ struct _tagged_ptr3
+_temp5887= yyls; struct Cyc_Yyltype* _temp5889= _temp5887.curr +( yylsp_offset -
+1); if( _temp5887.base == 0? 1:( _temp5889 < _temp5887.base? 1: _temp5889 >=
+_temp5887.last_plus_one)){ _throw( Null_Exception);}* _temp5889;}).last_line));
+_temp5879;}); _temp5878;}); break; case 257: _LL5877: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5891=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5891[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5892; _temp5892.tag= Cyc_Stmt_tok_tag; _temp5892.f1= Cyc_Absyn_continue_stmt(
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5893= yyls; struct Cyc_Yyltype*
+_temp5895= _temp5893.curr +( yylsp_offset - 1); if( _temp5893.base == 0? 1:(
+_temp5895 < _temp5893.base? 1: _temp5895 >= _temp5893.last_plus_one)){ _throw(
+Null_Exception);}* _temp5895;}).first_line,({ struct _tagged_ptr3 _temp5896=
+yyls; struct Cyc_Yyltype* _temp5898= _temp5896.curr +( yylsp_offset - 1); if(
+_temp5896.base == 0? 1:( _temp5898 < _temp5896.base? 1: _temp5898 >= _temp5896.last_plus_one)){
+_throw( Null_Exception);}* _temp5898;}).last_line)); _temp5892;}); _temp5891;});
+break; case 258: _LL5890: yyval=( struct _xtunion_struct*)({ struct Cyc_Stmt_tok_struct*
+_temp5900=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp5900[ 0]=({ struct Cyc_Stmt_tok_struct _temp5901; _temp5901.tag= Cyc_Stmt_tok_tag;
+_temp5901.f1= Cyc_Absyn_break_stmt( Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5902= yyls; struct Cyc_Yyltype* _temp5904= _temp5902.curr +(
+yylsp_offset - 1); if( _temp5902.base == 0? 1:( _temp5904 < _temp5902.base? 1:
+_temp5904 >= _temp5902.last_plus_one)){ _throw( Null_Exception);}* _temp5904;}).first_line,({
+struct _tagged_ptr3 _temp5905= yyls; struct Cyc_Yyltype* _temp5907= _temp5905.curr
++( yylsp_offset - 1); if( _temp5905.base == 0? 1:( _temp5907 < _temp5905.base? 1:
+_temp5907 >= _temp5905.last_plus_one)){ _throw( Null_Exception);}* _temp5907;}).last_line));
+_temp5901;}); _temp5900;}); break; case 259: _LL5899: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5909=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5909[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5910; _temp5910.tag= Cyc_Stmt_tok_tag; _temp5910.f1= Cyc_Absyn_return_stmt(
+0, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5911= yyls; struct
+Cyc_Yyltype* _temp5913= _temp5911.curr +( yylsp_offset - 1); if( _temp5911.base
+== 0? 1:( _temp5913 < _temp5911.base? 1: _temp5913 >= _temp5911.last_plus_one)){
+_throw( Null_Exception);}* _temp5913;}).first_line,({ struct _tagged_ptr3
+_temp5914= yyls; struct Cyc_Yyltype* _temp5916= _temp5914.curr +( yylsp_offset -
+1); if( _temp5914.base == 0? 1:( _temp5916 < _temp5914.base? 1: _temp5916 >=
+_temp5914.last_plus_one)){ _throw( Null_Exception);}* _temp5916;}).last_line));
+_temp5910;}); _temp5909;}); break; case 260: _LL5908: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5918=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5918[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5919; _temp5919.tag= Cyc_Stmt_tok_tag; _temp5919.f1= Cyc_Absyn_return_stmt((
+struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp5920= yyvs;
+struct _xtunion_struct** _temp5922= _temp5920.curr +( yyvsp_offset - 1); if(
+_temp5920.base == 0? 1:( _temp5922 < _temp5920.base? 1: _temp5922 >= _temp5920.last_plus_one)){
+_throw( Null_Exception);}* _temp5922;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5923= yyls; struct Cyc_Yyltype* _temp5925= _temp5923.curr +(
+yylsp_offset - 2); if( _temp5923.base == 0? 1:( _temp5925 < _temp5923.base? 1:
+_temp5925 >= _temp5923.last_plus_one)){ _throw( Null_Exception);}* _temp5925;}).first_line,({
+struct _tagged_ptr3 _temp5926= yyls; struct Cyc_Yyltype* _temp5928= _temp5926.curr
++( yylsp_offset - 1); if( _temp5926.base == 0? 1:( _temp5928 < _temp5926.base? 1:
+_temp5928 >= _temp5926.last_plus_one)){ _throw( Null_Exception);}* _temp5928;}).last_line));
+_temp5919;}); _temp5918;}); break; case 261: _LL5917: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5930=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5930[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5931; _temp5931.tag= Cyc_Stmt_tok_tag; _temp5931.f1= Cyc_Absyn_fallthru_stmt(
+0, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5932= yyls; struct
+Cyc_Yyltype* _temp5934= _temp5932.curr +( yylsp_offset - 1); if( _temp5932.base
+== 0? 1:( _temp5934 < _temp5932.base? 1: _temp5934 >= _temp5932.last_plus_one)){
+_throw( Null_Exception);}* _temp5934;}).first_line,({ struct _tagged_ptr3
+_temp5935= yyls; struct Cyc_Yyltype* _temp5937= _temp5935.curr +( yylsp_offset -
+1); if( _temp5935.base == 0? 1:( _temp5937 < _temp5935.base? 1: _temp5937 >=
+_temp5935.last_plus_one)){ _throw( Null_Exception);}* _temp5937;}).last_line));
+_temp5931;}); _temp5930;}); break; case 262: _LL5929: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5939=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5939[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5940; _temp5940.tag= Cyc_Stmt_tok_tag; _temp5940.f1= Cyc_Absyn_fallthru_stmt(
+0, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp5941= yyls; struct
+Cyc_Yyltype* _temp5943= _temp5941.curr +( yylsp_offset - 3); if( _temp5941.base
+== 0? 1:( _temp5943 < _temp5941.base? 1: _temp5943 >= _temp5941.last_plus_one)){
+_throw( Null_Exception);}* _temp5943;}).first_line,({ struct _tagged_ptr3
+_temp5944= yyls; struct Cyc_Yyltype* _temp5946= _temp5944.curr +( yylsp_offset -
+3); if( _temp5944.base == 0? 1:( _temp5946 < _temp5944.base? 1: _temp5946 >=
+_temp5944.last_plus_one)){ _throw( Null_Exception);}* _temp5946;}).last_line));
+_temp5940;}); _temp5939;}); break; case 263: _LL5938: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Stmt_tok_struct* _temp5948=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp5948[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp5949; _temp5949.tag= Cyc_Stmt_tok_tag; _temp5949.f1= Cyc_Absyn_fallthru_stmt(
+Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2 _temp5950= yyvs; struct
+_xtunion_struct** _temp5952= _temp5950.curr +( yyvsp_offset - 2); if( _temp5950.base
+== 0? 1:( _temp5952 < _temp5950.base? 1: _temp5952 >= _temp5950.last_plus_one)){
+_throw( Null_Exception);}* _temp5952;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp5953= yyls; struct Cyc_Yyltype* _temp5955= _temp5953.curr +(
+yylsp_offset - 4); if( _temp5953.base == 0? 1:( _temp5955 < _temp5953.base? 1:
+_temp5955 >= _temp5953.last_plus_one)){ _throw( Null_Exception);}* _temp5955;}).first_line,({
+struct _tagged_ptr3 _temp5956= yyls; struct Cyc_Yyltype* _temp5958= _temp5956.curr
++( yylsp_offset - 4); if( _temp5956.base == 0? 1:( _temp5958 < _temp5956.base? 1:
+_temp5958 >= _temp5956.last_plus_one)){ _throw( Null_Exception);}* _temp5958;}).last_line));
+_temp5949;}); _temp5948;}); break; case 264: _LL5947: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp5960=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp5960[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp5961; _temp5961.tag= Cyc_Pattern_tok_tag; _temp5961.f1= Cyc_Absyn_new_pat((
 void*) Cyc_Absyn_Wild_p, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp5963= yyls; struct Cyc_Yyltype* _temp5965= _temp5963.curr + yylsp_offset;
-if( _temp5963.base == 0? 1:( _temp5965 < _temp5963.base? 1: _temp5965 >=
-_temp5963.last_plus_one)){ _throw( Null_Exception);}* _temp5965;}).first_line,({
-struct _tagged_ptr3 _temp5966= yyls; struct Cyc_Yyltype* _temp5968= _temp5966.curr
-+ yylsp_offset; if( _temp5966.base == 0? 1:( _temp5968 < _temp5966.base? 1:
-_temp5968 >= _temp5966.last_plus_one)){ _throw( Null_Exception);}* _temp5968;}).last_line));
-_temp5962;}); _temp5961;}); break; case 265: _LL5960: yyval=({ struct
-_tagged_ptr2 _temp5970= yyvs; struct _xtunion_struct** _temp5972= _temp5970.curr
-+( yyvsp_offset - 1); if( _temp5970.base == 0? 1:( _temp5972 < _temp5970.base? 1:
-_temp5972 >= _temp5970.last_plus_one)){ _throw( Null_Exception);}* _temp5972;});
-break; case 266: _LL5969: yyval=( struct _xtunion_struct*)({ struct Cyc_Pattern_tok_struct*
-_temp5974=( struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
-_temp5974[ 0]=({ struct Cyc_Pattern_tok_struct _temp5975; _temp5975.tag= Cyc_Pattern_tok_tag;
-_temp5975.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Int_p_struct*
-_temp5976=( struct Cyc_Absyn_Int_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Int_p_struct));
-_temp5976[ 0]=({ struct Cyc_Absyn_Int_p_struct _temp5977; _temp5977.tag= Cyc_Absyn_Int_p_tag;
-_temp5977.f1=( void*)(* Cyc_yyget_Int_tok(({ struct _tagged_ptr2 _temp5978= yyvs;
-struct _xtunion_struct** _temp5980= _temp5978.curr + yyvsp_offset; if( _temp5978.base
-== 0? 1:( _temp5980 < _temp5978.base? 1: _temp5980 >= _temp5978.last_plus_one)){
-_throw( Null_Exception);}* _temp5980;}))).f1; _temp5977.f2=(* Cyc_yyget_Int_tok(({
-struct _tagged_ptr2 _temp5981= yyvs; struct _xtunion_struct** _temp5983=
-_temp5981.curr + yyvsp_offset; if( _temp5981.base == 0? 1:( _temp5983 <
-_temp5981.base? 1: _temp5983 >= _temp5981.last_plus_one)){ _throw(
-Null_Exception);}* _temp5983;}))).f2; _temp5977;}); _temp5976;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp5984= yyls; struct Cyc_Yyltype* _temp5986= _temp5984.curr
-+ yylsp_offset; if( _temp5984.base == 0? 1:( _temp5986 < _temp5984.base? 1:
-_temp5986 >= _temp5984.last_plus_one)){ _throw( Null_Exception);}* _temp5986;}).first_line,({
-struct _tagged_ptr3 _temp5987= yyls; struct Cyc_Yyltype* _temp5989= _temp5987.curr
-+ yylsp_offset; if( _temp5987.base == 0? 1:( _temp5989 < _temp5987.base? 1:
-_temp5989 >= _temp5987.last_plus_one)){ _throw( Null_Exception);}* _temp5989;}).last_line));
-_temp5975;}); _temp5974;}); break; case 267: _LL5973: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp5991=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp5991[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp5992; _temp5992.tag= Cyc_Pattern_tok_tag; _temp5992.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_Int_p_struct* _temp5993=( struct Cyc_Absyn_Int_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Int_p_struct)); _temp5993[ 0]=({ struct Cyc_Absyn_Int_p_struct
-_temp5994; _temp5994.tag= Cyc_Absyn_Int_p_tag; _temp5994.f1=( void*)(( void*)
-Cyc_Absyn_Signed); _temp5994.f2= -(* Cyc_yyget_Int_tok(({ struct _tagged_ptr2
-_temp5995= yyvs; struct _xtunion_struct** _temp5997= _temp5995.curr +
-yyvsp_offset; if( _temp5995.base == 0? 1:( _temp5997 < _temp5995.base? 1:
-_temp5997 >= _temp5995.last_plus_one)){ _throw( Null_Exception);}* _temp5997;}))).f2;
-_temp5994;}); _temp5993;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp5998= yyls; struct Cyc_Yyltype* _temp6000= _temp5998.curr +( yylsp_offset -
-1); if( _temp5998.base == 0? 1:( _temp6000 < _temp5998.base? 1: _temp6000 >=
-_temp5998.last_plus_one)){ _throw( Null_Exception);}* _temp6000;}).first_line,({
-struct _tagged_ptr3 _temp6001= yyls; struct Cyc_Yyltype* _temp6003= _temp6001.curr
-+ yylsp_offset; if( _temp6001.base == 0? 1:( _temp6003 < _temp6001.base? 1:
-_temp6003 >= _temp6001.last_plus_one)){ _throw( Null_Exception);}* _temp6003;}).last_line));
-_temp5992;}); _temp5991;}); break; case 268: _LL5990: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6005=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6005[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp6006; _temp6006.tag= Cyc_Pattern_tok_tag; _temp6006.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_Float_p_struct* _temp6007=( struct Cyc_Absyn_Float_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Float_p_struct)); _temp6007[ 0]=({ struct
-Cyc_Absyn_Float_p_struct _temp6008; _temp6008.tag= Cyc_Absyn_Float_p_tag;
-_temp6008.f1= Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp6009= yyvs;
-struct _xtunion_struct** _temp6011= _temp6009.curr + yyvsp_offset; if( _temp6009.base
-== 0? 1:( _temp6011 < _temp6009.base? 1: _temp6011 >= _temp6009.last_plus_one)){
-_throw( Null_Exception);}* _temp6011;})); _temp6008;}); _temp6007;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6012= yyls; struct Cyc_Yyltype* _temp6014= _temp6012.curr
-+ yylsp_offset; if( _temp6012.base == 0? 1:( _temp6014 < _temp6012.base? 1:
-_temp6014 >= _temp6012.last_plus_one)){ _throw( Null_Exception);}* _temp6014;}).first_line,({
-struct _tagged_ptr3 _temp6015= yyls; struct Cyc_Yyltype* _temp6017= _temp6015.curr
-+ yylsp_offset; if( _temp6015.base == 0? 1:( _temp6017 < _temp6015.base? 1:
-_temp6017 >= _temp6015.last_plus_one)){ _throw( Null_Exception);}* _temp6017;}).last_line));
-_temp6006;}); _temp6005;}); break; case 269: _LL6004: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6019=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6019[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp6020; _temp6020.tag= Cyc_Pattern_tok_tag; _temp6020.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_Char_p_struct* _temp6021=( struct Cyc_Absyn_Char_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Char_p_struct)); _temp6021[ 0]=({ struct Cyc_Absyn_Char_p_struct
-_temp6022; _temp6022.tag= Cyc_Absyn_Char_p_tag; _temp6022.f1= Cyc_yyget_Char_tok(({
-struct _tagged_ptr2 _temp6023= yyvs; struct _xtunion_struct** _temp6025=
-_temp6023.curr + yyvsp_offset; if( _temp6023.base == 0? 1:( _temp6025 <
-_temp6023.base? 1: _temp6025 >= _temp6023.last_plus_one)){ _throw(
-Null_Exception);}* _temp6025;})); _temp6022;}); _temp6021;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6026= yyls; struct Cyc_Yyltype* _temp6028= _temp6026.curr
-+ yylsp_offset; if( _temp6026.base == 0? 1:( _temp6028 < _temp6026.base? 1:
-_temp6028 >= _temp6026.last_plus_one)){ _throw( Null_Exception);}* _temp6028;}).first_line,({
-struct _tagged_ptr3 _temp6029= yyls; struct Cyc_Yyltype* _temp6031= _temp6029.curr
-+ yylsp_offset; if( _temp6029.base == 0? 1:( _temp6031 < _temp6029.base? 1:
-_temp6031 >= _temp6029.last_plus_one)){ _throw( Null_Exception);}* _temp6031;}).last_line));
-_temp6020;}); _temp6019;}); break; case 270: _LL6018: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6033=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6033[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp6034; _temp6034.tag= Cyc_Pattern_tok_tag; _temp6034.f1= Cyc_Absyn_new_pat((
+_temp5962= yyls; struct Cyc_Yyltype* _temp5964= _temp5962.curr + yylsp_offset;
+if( _temp5962.base == 0? 1:( _temp5964 < _temp5962.base? 1: _temp5964 >=
+_temp5962.last_plus_one)){ _throw( Null_Exception);}* _temp5964;}).first_line,({
+struct _tagged_ptr3 _temp5965= yyls; struct Cyc_Yyltype* _temp5967= _temp5965.curr
++ yylsp_offset; if( _temp5965.base == 0? 1:( _temp5967 < _temp5965.base? 1:
+_temp5967 >= _temp5965.last_plus_one)){ _throw( Null_Exception);}* _temp5967;}).last_line));
+_temp5961;}); _temp5960;}); break; case 265: _LL5959: yyval=({ struct
+_tagged_ptr2 _temp5969= yyvs; struct _xtunion_struct** _temp5971= _temp5969.curr
++( yyvsp_offset - 1); if( _temp5969.base == 0? 1:( _temp5971 < _temp5969.base? 1:
+_temp5971 >= _temp5969.last_plus_one)){ _throw( Null_Exception);}* _temp5971;});
+break; case 266: _LL5968: yyval=( struct _xtunion_struct*)({ struct Cyc_Pattern_tok_struct*
+_temp5973=( struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
+_temp5973[ 0]=({ struct Cyc_Pattern_tok_struct _temp5974; _temp5974.tag= Cyc_Pattern_tok_tag;
+_temp5974.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Int_p_struct*
+_temp5975=( struct Cyc_Absyn_Int_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Int_p_struct));
+_temp5975[ 0]=({ struct Cyc_Absyn_Int_p_struct _temp5976; _temp5976.tag= Cyc_Absyn_Int_p_tag;
+_temp5976.f1=( void*)(* Cyc_yyget_Int_tok(({ struct _tagged_ptr2 _temp5977= yyvs;
+struct _xtunion_struct** _temp5979= _temp5977.curr + yyvsp_offset; if( _temp5977.base
+== 0? 1:( _temp5979 < _temp5977.base? 1: _temp5979 >= _temp5977.last_plus_one)){
+_throw( Null_Exception);}* _temp5979;}))).f1; _temp5976.f2=(* Cyc_yyget_Int_tok(({
+struct _tagged_ptr2 _temp5980= yyvs; struct _xtunion_struct** _temp5982=
+_temp5980.curr + yyvsp_offset; if( _temp5980.base == 0? 1:( _temp5982 <
+_temp5980.base? 1: _temp5982 >= _temp5980.last_plus_one)){ _throw(
+Null_Exception);}* _temp5982;}))).f2; _temp5976;}); _temp5975;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp5983= yyls; struct Cyc_Yyltype* _temp5985= _temp5983.curr
++ yylsp_offset; if( _temp5983.base == 0? 1:( _temp5985 < _temp5983.base? 1:
+_temp5985 >= _temp5983.last_plus_one)){ _throw( Null_Exception);}* _temp5985;}).first_line,({
+struct _tagged_ptr3 _temp5986= yyls; struct Cyc_Yyltype* _temp5988= _temp5986.curr
++ yylsp_offset; if( _temp5986.base == 0? 1:( _temp5988 < _temp5986.base? 1:
+_temp5988 >= _temp5986.last_plus_one)){ _throw( Null_Exception);}* _temp5988;}).last_line));
+_temp5974;}); _temp5973;}); break; case 267: _LL5972: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp5990=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp5990[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp5991; _temp5991.tag= Cyc_Pattern_tok_tag; _temp5991.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_Int_p_struct* _temp5992=( struct Cyc_Absyn_Int_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Int_p_struct)); _temp5992[ 0]=({ struct Cyc_Absyn_Int_p_struct
+_temp5993; _temp5993.tag= Cyc_Absyn_Int_p_tag; _temp5993.f1=( void*)(( void*)
+Cyc_Absyn_Signed); _temp5993.f2= -(* Cyc_yyget_Int_tok(({ struct _tagged_ptr2
+_temp5994= yyvs; struct _xtunion_struct** _temp5996= _temp5994.curr +
+yyvsp_offset; if( _temp5994.base == 0? 1:( _temp5996 < _temp5994.base? 1:
+_temp5996 >= _temp5994.last_plus_one)){ _throw( Null_Exception);}* _temp5996;}))).f2;
+_temp5993;}); _temp5992;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
+_temp5997= yyls; struct Cyc_Yyltype* _temp5999= _temp5997.curr +( yylsp_offset -
+1); if( _temp5997.base == 0? 1:( _temp5999 < _temp5997.base? 1: _temp5999 >=
+_temp5997.last_plus_one)){ _throw( Null_Exception);}* _temp5999;}).first_line,({
+struct _tagged_ptr3 _temp6000= yyls; struct Cyc_Yyltype* _temp6002= _temp6000.curr
++ yylsp_offset; if( _temp6000.base == 0? 1:( _temp6002 < _temp6000.base? 1:
+_temp6002 >= _temp6000.last_plus_one)){ _throw( Null_Exception);}* _temp6002;}).last_line));
+_temp5991;}); _temp5990;}); break; case 268: _LL5989: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6004=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6004[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp6005; _temp6005.tag= Cyc_Pattern_tok_tag; _temp6005.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_Float_p_struct* _temp6006=( struct Cyc_Absyn_Float_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Float_p_struct)); _temp6006[ 0]=({ struct
+Cyc_Absyn_Float_p_struct _temp6007; _temp6007.tag= Cyc_Absyn_Float_p_tag;
+_temp6007.f1= Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp6008= yyvs;
+struct _xtunion_struct** _temp6010= _temp6008.curr + yyvsp_offset; if( _temp6008.base
+== 0? 1:( _temp6010 < _temp6008.base? 1: _temp6010 >= _temp6008.last_plus_one)){
+_throw( Null_Exception);}* _temp6010;})); _temp6007;}); _temp6006;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6011= yyls; struct Cyc_Yyltype* _temp6013= _temp6011.curr
++ yylsp_offset; if( _temp6011.base == 0? 1:( _temp6013 < _temp6011.base? 1:
+_temp6013 >= _temp6011.last_plus_one)){ _throw( Null_Exception);}* _temp6013;}).first_line,({
+struct _tagged_ptr3 _temp6014= yyls; struct Cyc_Yyltype* _temp6016= _temp6014.curr
++ yylsp_offset; if( _temp6014.base == 0? 1:( _temp6016 < _temp6014.base? 1:
+_temp6016 >= _temp6014.last_plus_one)){ _throw( Null_Exception);}* _temp6016;}).last_line));
+_temp6005;}); _temp6004;}); break; case 269: _LL6003: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6018=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6018[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp6019; _temp6019.tag= Cyc_Pattern_tok_tag; _temp6019.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_Char_p_struct* _temp6020=( struct Cyc_Absyn_Char_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Char_p_struct)); _temp6020[ 0]=({ struct Cyc_Absyn_Char_p_struct
+_temp6021; _temp6021.tag= Cyc_Absyn_Char_p_tag; _temp6021.f1= Cyc_yyget_Char_tok(({
+struct _tagged_ptr2 _temp6022= yyvs; struct _xtunion_struct** _temp6024=
+_temp6022.curr + yyvsp_offset; if( _temp6022.base == 0? 1:( _temp6024 <
+_temp6022.base? 1: _temp6024 >= _temp6022.last_plus_one)){ _throw(
+Null_Exception);}* _temp6024;})); _temp6021;}); _temp6020;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6025= yyls; struct Cyc_Yyltype* _temp6027= _temp6025.curr
++ yylsp_offset; if( _temp6025.base == 0? 1:( _temp6027 < _temp6025.base? 1:
+_temp6027 >= _temp6025.last_plus_one)){ _throw( Null_Exception);}* _temp6027;}).first_line,({
+struct _tagged_ptr3 _temp6028= yyls; struct Cyc_Yyltype* _temp6030= _temp6028.curr
++ yylsp_offset; if( _temp6028.base == 0? 1:( _temp6030 < _temp6028.base? 1:
+_temp6030 >= _temp6028.last_plus_one)){ _throw( Null_Exception);}* _temp6030;}).last_line));
+_temp6019;}); _temp6018;}); break; case 270: _LL6017: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6032=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6032[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp6033; _temp6033.tag= Cyc_Pattern_tok_tag; _temp6033.f1= Cyc_Absyn_new_pat((
 void*) Cyc_Absyn_Null_p, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp6035= yyls; struct Cyc_Yyltype* _temp6037= _temp6035.curr + yylsp_offset;
-if( _temp6035.base == 0? 1:( _temp6037 < _temp6035.base? 1: _temp6037 >=
-_temp6035.last_plus_one)){ _throw( Null_Exception);}* _temp6037;}).first_line,({
-struct _tagged_ptr3 _temp6038= yyls; struct Cyc_Yyltype* _temp6040= _temp6038.curr
-+ yylsp_offset; if( _temp6038.base == 0? 1:( _temp6040 < _temp6038.base? 1:
-_temp6040 >= _temp6038.last_plus_one)){ _throw( Null_Exception);}* _temp6040;}).last_line));
-_temp6034;}); _temp6033;}); break; case 271: _LL6032: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6042=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6042[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp6043; _temp6043.tag= Cyc_Pattern_tok_tag; _temp6043.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_UnknownId_p_struct* _temp6044=( struct Cyc_Absyn_UnknownId_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_p_struct)); _temp6044[ 0]=({
-struct Cyc_Absyn_UnknownId_p_struct _temp6045; _temp6045.tag= Cyc_Absyn_UnknownId_p_tag;
-_temp6045.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp6046= yyvs;
-struct _xtunion_struct** _temp6048= _temp6046.curr + yyvsp_offset; if( _temp6046.base
-== 0? 1:( _temp6048 < _temp6046.base? 1: _temp6048 >= _temp6046.last_plus_one)){
-_throw( Null_Exception);}* _temp6048;})); _temp6045;}); _temp6044;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6049= yyls; struct Cyc_Yyltype* _temp6051= _temp6049.curr
-+ yylsp_offset; if( _temp6049.base == 0? 1:( _temp6051 < _temp6049.base? 1:
-_temp6051 >= _temp6049.last_plus_one)){ _throw( Null_Exception);}* _temp6051;}).first_line,({
-struct _tagged_ptr3 _temp6052= yyls; struct Cyc_Yyltype* _temp6054= _temp6052.curr
-+ yylsp_offset; if( _temp6052.base == 0? 1:( _temp6054 < _temp6052.base? 1:
-_temp6054 >= _temp6052.last_plus_one)){ _throw( Null_Exception);}* _temp6054;}).last_line));
-_temp6043;}); _temp6042;}); break; case 272: _LL6041: { struct Cyc_List_List*
+_temp6034= yyls; struct Cyc_Yyltype* _temp6036= _temp6034.curr + yylsp_offset;
+if( _temp6034.base == 0? 1:( _temp6036 < _temp6034.base? 1: _temp6036 >=
+_temp6034.last_plus_one)){ _throw( Null_Exception);}* _temp6036;}).first_line,({
+struct _tagged_ptr3 _temp6037= yyls; struct Cyc_Yyltype* _temp6039= _temp6037.curr
++ yylsp_offset; if( _temp6037.base == 0? 1:( _temp6039 < _temp6037.base? 1:
+_temp6039 >= _temp6037.last_plus_one)){ _throw( Null_Exception);}* _temp6039;}).last_line));
+_temp6033;}); _temp6032;}); break; case 271: _LL6031: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6041=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6041[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp6042; _temp6042.tag= Cyc_Pattern_tok_tag; _temp6042.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_UnknownId_p_struct* _temp6043=( struct Cyc_Absyn_UnknownId_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_p_struct)); _temp6043[ 0]=({
+struct Cyc_Absyn_UnknownId_p_struct _temp6044; _temp6044.tag= Cyc_Absyn_UnknownId_p_tag;
+_temp6044.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp6045= yyvs;
+struct _xtunion_struct** _temp6047= _temp6045.curr + yyvsp_offset; if( _temp6045.base
+== 0? 1:( _temp6047 < _temp6045.base? 1: _temp6047 >= _temp6045.last_plus_one)){
+_throw( Null_Exception);}* _temp6047;})); _temp6044;}); _temp6043;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6048= yyls; struct Cyc_Yyltype* _temp6050= _temp6048.curr
++ yylsp_offset; if( _temp6048.base == 0? 1:( _temp6050 < _temp6048.base? 1:
+_temp6050 >= _temp6048.last_plus_one)){ _throw( Null_Exception);}* _temp6050;}).first_line,({
+struct _tagged_ptr3 _temp6051= yyls; struct Cyc_Yyltype* _temp6053= _temp6051.curr
++ yylsp_offset; if( _temp6051.base == 0? 1:( _temp6053 < _temp6051.base? 1:
+_temp6053 >= _temp6051.last_plus_one)){ _throw( Null_Exception);}* _temp6053;}).last_line));
+_temp6042;}); _temp6041;}); break; case 272: _LL6040: { struct Cyc_List_List*
 tvs=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
 void*), struct Cyc_Position_Segment* env, struct Cyc_List_List* x)) Cyc_List_map_c)(
-Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6056=
-yyls; struct Cyc_Yyltype* _temp6058= _temp6056.curr +( yylsp_offset - 3); if(
-_temp6056.base == 0? 1:( _temp6058 < _temp6056.base? 1: _temp6058 >= _temp6056.last_plus_one)){
-_throw( Null_Exception);}* _temp6058;}).first_line,({ struct _tagged_ptr3
-_temp6059= yyls; struct Cyc_Yyltype* _temp6061= _temp6059.curr +( yylsp_offset -
-3); if( _temp6059.base == 0? 1:( _temp6061 < _temp6059.base? 1: _temp6061 >=
-_temp6059.last_plus_one)){ _throw( Null_Exception);}* _temp6061;}).last_line),
-Cyc_yyget_TypeList_tok(({ struct _tagged_ptr2 _temp6062= yyvs; struct
-_xtunion_struct** _temp6064= _temp6062.curr +( yyvsp_offset - 3); if( _temp6062.base
-== 0? 1:( _temp6064 < _temp6062.base? 1: _temp6064 >= _temp6062.last_plus_one)){
-_throw( Null_Exception);}* _temp6064;}))); yyval=( struct _xtunion_struct*)({
-struct Cyc_Pattern_tok_struct* _temp6065=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6065[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp6066; _temp6066.tag= Cyc_Pattern_tok_tag; _temp6066.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_UnknownCall_p_struct* _temp6067=( struct Cyc_Absyn_UnknownCall_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnknownCall_p_struct)); _temp6067[ 0]=({
-struct Cyc_Absyn_UnknownCall_p_struct _temp6068; _temp6068.tag= Cyc_Absyn_UnknownCall_p_tag;
-_temp6068.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp6069= yyvs;
-struct _xtunion_struct** _temp6071= _temp6069.curr +( yyvsp_offset - 4); if(
-_temp6069.base == 0? 1:( _temp6071 < _temp6069.base? 1: _temp6071 >= _temp6069.last_plus_one)){
-_throw( Null_Exception);}* _temp6071;})); _temp6068.f2= tvs; _temp6068.f3= Cyc_yyget_PatternList_tok(({
-struct _tagged_ptr2 _temp6072= yyvs; struct _xtunion_struct** _temp6074=
-_temp6072.curr +( yyvsp_offset - 1); if( _temp6072.base == 0? 1:( _temp6074 <
-_temp6072.base? 1: _temp6074 >= _temp6072.last_plus_one)){ _throw(
-Null_Exception);}* _temp6074;})); _temp6068;}); _temp6067;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6075= yyls; struct Cyc_Yyltype* _temp6077= _temp6075.curr
-+( yylsp_offset - 4); if( _temp6075.base == 0? 1:( _temp6077 < _temp6075.base? 1:
-_temp6077 >= _temp6075.last_plus_one)){ _throw( Null_Exception);}* _temp6077;}).first_line,({
-struct _tagged_ptr3 _temp6078= yyls; struct Cyc_Yyltype* _temp6080= _temp6078.curr
-+ yylsp_offset; if( _temp6078.base == 0? 1:( _temp6080 < _temp6078.base? 1:
-_temp6080 >= _temp6078.last_plus_one)){ _throw( Null_Exception);}* _temp6080;}).last_line));
-_temp6066;}); _temp6065;}); break;} case 273: _LL6055: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6082=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6082[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp6083; _temp6083.tag= Cyc_Pattern_tok_tag; _temp6083.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_Tuple_p_struct* _temp6084=( struct Cyc_Absyn_Tuple_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Tuple_p_struct)); _temp6084[ 0]=({ struct
-Cyc_Absyn_Tuple_p_struct _temp6085; _temp6085.tag= Cyc_Absyn_Tuple_p_tag;
-_temp6085.f1= Cyc_yyget_PatternList_tok(({ struct _tagged_ptr2 _temp6086= yyvs;
-struct _xtunion_struct** _temp6088= _temp6086.curr +( yyvsp_offset - 1); if(
-_temp6086.base == 0? 1:( _temp6088 < _temp6086.base? 1: _temp6088 >= _temp6086.last_plus_one)){
-_throw( Null_Exception);}* _temp6088;})); _temp6085;}); _temp6084;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6089= yyls; struct Cyc_Yyltype* _temp6091= _temp6089.curr
-+( yylsp_offset - 3); if( _temp6089.base == 0? 1:( _temp6091 < _temp6089.base? 1:
-_temp6091 >= _temp6089.last_plus_one)){ _throw( Null_Exception);}* _temp6091;}).first_line,({
-struct _tagged_ptr3 _temp6092= yyls; struct Cyc_Yyltype* _temp6094= _temp6092.curr
-+ yylsp_offset; if( _temp6092.base == 0? 1:( _temp6094 < _temp6092.base? 1:
-_temp6094 >= _temp6092.last_plus_one)){ _throw( Null_Exception);}* _temp6094;}).last_line));
-_temp6083;}); _temp6082;}); break; case 274: _LL6081: { struct Cyc_List_List*
+Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6055=
+yyls; struct Cyc_Yyltype* _temp6057= _temp6055.curr +( yylsp_offset - 3); if(
+_temp6055.base == 0? 1:( _temp6057 < _temp6055.base? 1: _temp6057 >= _temp6055.last_plus_one)){
+_throw( Null_Exception);}* _temp6057;}).first_line,({ struct _tagged_ptr3
+_temp6058= yyls; struct Cyc_Yyltype* _temp6060= _temp6058.curr +( yylsp_offset -
+3); if( _temp6058.base == 0? 1:( _temp6060 < _temp6058.base? 1: _temp6060 >=
+_temp6058.last_plus_one)){ _throw( Null_Exception);}* _temp6060;}).last_line),
+Cyc_yyget_TypeList_tok(({ struct _tagged_ptr2 _temp6061= yyvs; struct
+_xtunion_struct** _temp6063= _temp6061.curr +( yyvsp_offset - 3); if( _temp6061.base
+== 0? 1:( _temp6063 < _temp6061.base? 1: _temp6063 >= _temp6061.last_plus_one)){
+_throw( Null_Exception);}* _temp6063;}))); yyval=( struct _xtunion_struct*)({
+struct Cyc_Pattern_tok_struct* _temp6064=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6064[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp6065; _temp6065.tag= Cyc_Pattern_tok_tag; _temp6065.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_UnknownCall_p_struct* _temp6066=( struct Cyc_Absyn_UnknownCall_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_UnknownCall_p_struct)); _temp6066[ 0]=({
+struct Cyc_Absyn_UnknownCall_p_struct _temp6067; _temp6067.tag= Cyc_Absyn_UnknownCall_p_tag;
+_temp6067.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp6068= yyvs;
+struct _xtunion_struct** _temp6070= _temp6068.curr +( yyvsp_offset - 4); if(
+_temp6068.base == 0? 1:( _temp6070 < _temp6068.base? 1: _temp6070 >= _temp6068.last_plus_one)){
+_throw( Null_Exception);}* _temp6070;})); _temp6067.f2= tvs; _temp6067.f3= Cyc_yyget_PatternList_tok(({
+struct _tagged_ptr2 _temp6071= yyvs; struct _xtunion_struct** _temp6073=
+_temp6071.curr +( yyvsp_offset - 1); if( _temp6071.base == 0? 1:( _temp6073 <
+_temp6071.base? 1: _temp6073 >= _temp6071.last_plus_one)){ _throw(
+Null_Exception);}* _temp6073;})); _temp6067;}); _temp6066;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6074= yyls; struct Cyc_Yyltype* _temp6076= _temp6074.curr
++( yylsp_offset - 4); if( _temp6074.base == 0? 1:( _temp6076 < _temp6074.base? 1:
+_temp6076 >= _temp6074.last_plus_one)){ _throw( Null_Exception);}* _temp6076;}).first_line,({
+struct _tagged_ptr3 _temp6077= yyls; struct Cyc_Yyltype* _temp6079= _temp6077.curr
++ yylsp_offset; if( _temp6077.base == 0? 1:( _temp6079 < _temp6077.base? 1:
+_temp6079 >= _temp6077.last_plus_one)){ _throw( Null_Exception);}* _temp6079;}).last_line));
+_temp6065;}); _temp6064;}); break;} case 273: _LL6054: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6081=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6081[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp6082; _temp6082.tag= Cyc_Pattern_tok_tag; _temp6082.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_Tuple_p_struct* _temp6083=( struct Cyc_Absyn_Tuple_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Tuple_p_struct)); _temp6083[ 0]=({ struct
+Cyc_Absyn_Tuple_p_struct _temp6084; _temp6084.tag= Cyc_Absyn_Tuple_p_tag;
+_temp6084.f1= Cyc_yyget_PatternList_tok(({ struct _tagged_ptr2 _temp6085= yyvs;
+struct _xtunion_struct** _temp6087= _temp6085.curr +( yyvsp_offset - 1); if(
+_temp6085.base == 0? 1:( _temp6087 < _temp6085.base? 1: _temp6087 >= _temp6085.last_plus_one)){
+_throw( Null_Exception);}* _temp6087;})); _temp6084;}); _temp6083;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6088= yyls; struct Cyc_Yyltype* _temp6090= _temp6088.curr
++( yylsp_offset - 3); if( _temp6088.base == 0? 1:( _temp6090 < _temp6088.base? 1:
+_temp6090 >= _temp6088.last_plus_one)){ _throw( Null_Exception);}* _temp6090;}).first_line,({
+struct _tagged_ptr3 _temp6091= yyls; struct Cyc_Yyltype* _temp6093= _temp6091.curr
++ yylsp_offset; if( _temp6091.base == 0? 1:( _temp6093 < _temp6091.base? 1:
+_temp6093 >= _temp6091.last_plus_one)){ _throw( Null_Exception);}* _temp6093;}).last_line));
+_temp6082;}); _temp6081;}); break; case 274: _LL6080: { struct Cyc_List_List*
 tvs=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
 void*), struct Cyc_Position_Segment* env, struct Cyc_List_List* x)) Cyc_List_map_c)(
-Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6096=
-yyls; struct Cyc_Yyltype* _temp6098= _temp6096.curr +( yylsp_offset - 2); if(
-_temp6096.base == 0? 1:( _temp6098 < _temp6096.base? 1: _temp6098 >= _temp6096.last_plus_one)){
-_throw( Null_Exception);}* _temp6098;}).first_line,({ struct _tagged_ptr3
-_temp6099= yyls; struct Cyc_Yyltype* _temp6101= _temp6099.curr +( yylsp_offset -
-2); if( _temp6099.base == 0? 1:( _temp6101 < _temp6099.base? 1: _temp6101 >=
-_temp6099.last_plus_one)){ _throw( Null_Exception);}* _temp6101;}).last_line),
-Cyc_yyget_TypeList_tok(({ struct _tagged_ptr2 _temp6102= yyvs; struct
-_xtunion_struct** _temp6104= _temp6102.curr +( yyvsp_offset - 2); if( _temp6102.base
-== 0? 1:( _temp6104 < _temp6102.base? 1: _temp6104 >= _temp6102.last_plus_one)){
-_throw( Null_Exception);}* _temp6104;}))); yyval=( struct _xtunion_struct*)({
-struct Cyc_Pattern_tok_struct* _temp6105=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6105[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp6106; _temp6106.tag= Cyc_Pattern_tok_tag; _temp6106.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_UnknownFields_p_struct* _temp6107=( struct Cyc_Absyn_UnknownFields_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnknownFields_p_struct)); _temp6107[ 0]=({
-struct Cyc_Absyn_UnknownFields_p_struct _temp6108; _temp6108.tag= Cyc_Absyn_UnknownFields_p_tag;
-_temp6108.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp6109= yyvs;
-struct _xtunion_struct** _temp6111= _temp6109.curr +( yyvsp_offset - 3); if(
-_temp6109.base == 0? 1:( _temp6111 < _temp6109.base? 1: _temp6111 >= _temp6109.last_plus_one)){
-_throw( Null_Exception);}* _temp6111;})); _temp6108.f2= tvs; _temp6108.f3= 0;
-_temp6108;}); _temp6107;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp6112= yyls; struct Cyc_Yyltype* _temp6114= _temp6112.curr +( yylsp_offset -
-3); if( _temp6112.base == 0? 1:( _temp6114 < _temp6112.base? 1: _temp6114 >=
-_temp6112.last_plus_one)){ _throw( Null_Exception);}* _temp6114;}).first_line,({
-struct _tagged_ptr3 _temp6115= yyls; struct Cyc_Yyltype* _temp6117= _temp6115.curr
-+ yylsp_offset; if( _temp6115.base == 0? 1:( _temp6117 < _temp6115.base? 1:
-_temp6117 >= _temp6115.last_plus_one)){ _throw( Null_Exception);}* _temp6117;}).last_line));
-_temp6106;}); _temp6105;}); break;} case 275: _LL6095: { struct Cyc_List_List*
+Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6095=
+yyls; struct Cyc_Yyltype* _temp6097= _temp6095.curr +( yylsp_offset - 2); if(
+_temp6095.base == 0? 1:( _temp6097 < _temp6095.base? 1: _temp6097 >= _temp6095.last_plus_one)){
+_throw( Null_Exception);}* _temp6097;}).first_line,({ struct _tagged_ptr3
+_temp6098= yyls; struct Cyc_Yyltype* _temp6100= _temp6098.curr +( yylsp_offset -
+2); if( _temp6098.base == 0? 1:( _temp6100 < _temp6098.base? 1: _temp6100 >=
+_temp6098.last_plus_one)){ _throw( Null_Exception);}* _temp6100;}).last_line),
+Cyc_yyget_TypeList_tok(({ struct _tagged_ptr2 _temp6101= yyvs; struct
+_xtunion_struct** _temp6103= _temp6101.curr +( yyvsp_offset - 2); if( _temp6101.base
+== 0? 1:( _temp6103 < _temp6101.base? 1: _temp6103 >= _temp6101.last_plus_one)){
+_throw( Null_Exception);}* _temp6103;}))); yyval=( struct _xtunion_struct*)({
+struct Cyc_Pattern_tok_struct* _temp6104=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6104[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp6105; _temp6105.tag= Cyc_Pattern_tok_tag; _temp6105.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_UnknownFields_p_struct* _temp6106=( struct Cyc_Absyn_UnknownFields_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_UnknownFields_p_struct)); _temp6106[ 0]=({
+struct Cyc_Absyn_UnknownFields_p_struct _temp6107; _temp6107.tag= Cyc_Absyn_UnknownFields_p_tag;
+_temp6107.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp6108= yyvs;
+struct _xtunion_struct** _temp6110= _temp6108.curr +( yyvsp_offset - 3); if(
+_temp6108.base == 0? 1:( _temp6110 < _temp6108.base? 1: _temp6110 >= _temp6108.last_plus_one)){
+_throw( Null_Exception);}* _temp6110;})); _temp6107.f2= tvs; _temp6107.f3= 0;
+_temp6107;}); _temp6106;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
+_temp6111= yyls; struct Cyc_Yyltype* _temp6113= _temp6111.curr +( yylsp_offset -
+3); if( _temp6111.base == 0? 1:( _temp6113 < _temp6111.base? 1: _temp6113 >=
+_temp6111.last_plus_one)){ _throw( Null_Exception);}* _temp6113;}).first_line,({
+struct _tagged_ptr3 _temp6114= yyls; struct Cyc_Yyltype* _temp6116= _temp6114.curr
++ yylsp_offset; if( _temp6114.base == 0? 1:( _temp6116 < _temp6114.base? 1:
+_temp6116 >= _temp6114.last_plus_one)){ _throw( Null_Exception);}* _temp6116;}).last_line));
+_temp6105;}); _temp6104;}); break;} case 275: _LL6094: { struct Cyc_List_List*
 tvs=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
 void*), struct Cyc_Position_Segment* env, struct Cyc_List_List* x)) Cyc_List_map_c)(
-Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6119=
-yyls; struct Cyc_Yyltype* _temp6121= _temp6119.curr +( yylsp_offset - 3); if(
-_temp6119.base == 0? 1:( _temp6121 < _temp6119.base? 1: _temp6121 >= _temp6119.last_plus_one)){
-_throw( Null_Exception);}* _temp6121;}).first_line,({ struct _tagged_ptr3
-_temp6122= yyls; struct Cyc_Yyltype* _temp6124= _temp6122.curr +( yylsp_offset -
-3); if( _temp6122.base == 0? 1:( _temp6124 < _temp6122.base? 1: _temp6124 >=
-_temp6122.last_plus_one)){ _throw( Null_Exception);}* _temp6124;}).last_line),
-Cyc_yyget_TypeList_tok(({ struct _tagged_ptr2 _temp6125= yyvs; struct
-_xtunion_struct** _temp6127= _temp6125.curr +( yyvsp_offset - 3); if( _temp6125.base
-== 0? 1:( _temp6127 < _temp6125.base? 1: _temp6127 >= _temp6125.last_plus_one)){
-_throw( Null_Exception);}* _temp6127;}))); yyval=( struct _xtunion_struct*)({
-struct Cyc_Pattern_tok_struct* _temp6128=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6128[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp6129; _temp6129.tag= Cyc_Pattern_tok_tag; _temp6129.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_UnknownFields_p_struct* _temp6130=( struct Cyc_Absyn_UnknownFields_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnknownFields_p_struct)); _temp6130[ 0]=({
-struct Cyc_Absyn_UnknownFields_p_struct _temp6131; _temp6131.tag= Cyc_Absyn_UnknownFields_p_tag;
-_temp6131.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp6132= yyvs;
-struct _xtunion_struct** _temp6134= _temp6132.curr +( yyvsp_offset - 4); if(
-_temp6132.base == 0? 1:( _temp6134 < _temp6132.base? 1: _temp6134 >= _temp6132.last_plus_one)){
-_throw( Null_Exception);}* _temp6134;})); _temp6131.f2= tvs; _temp6131.f3= Cyc_yyget_FieldPatternList_tok(({
-struct _tagged_ptr2 _temp6135= yyvs; struct _xtunion_struct** _temp6137=
-_temp6135.curr +( yyvsp_offset - 1); if( _temp6135.base == 0? 1:( _temp6137 <
-_temp6135.base? 1: _temp6137 >= _temp6135.last_plus_one)){ _throw(
-Null_Exception);}* _temp6137;})); _temp6131;}); _temp6130;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6138= yyls; struct Cyc_Yyltype* _temp6140= _temp6138.curr
-+( yylsp_offset - 4); if( _temp6138.base == 0? 1:( _temp6140 < _temp6138.base? 1:
-_temp6140 >= _temp6138.last_plus_one)){ _throw( Null_Exception);}* _temp6140;}).first_line,({
-struct _tagged_ptr3 _temp6141= yyls; struct Cyc_Yyltype* _temp6143= _temp6141.curr
-+ yylsp_offset; if( _temp6141.base == 0? 1:( _temp6143 < _temp6141.base? 1:
-_temp6143 >= _temp6141.last_plus_one)){ _throw( Null_Exception);}* _temp6143;}).last_line));
-_temp6129;}); _temp6128;}); break;} case 276: _LL6118: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6145=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6145[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp6146; _temp6146.tag= Cyc_Pattern_tok_tag; _temp6146.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_Pointer_p_struct* _temp6147=( struct Cyc_Absyn_Pointer_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Pointer_p_struct)); _temp6147[ 0]=({ struct
-Cyc_Absyn_Pointer_p_struct _temp6148; _temp6148.tag= Cyc_Absyn_Pointer_p_tag;
-_temp6148.f1= Cyc_yyget_Pattern_tok(({ struct _tagged_ptr2 _temp6149= yyvs;
-struct _xtunion_struct** _temp6151= _temp6149.curr + yyvsp_offset; if( _temp6149.base
-== 0? 1:( _temp6151 < _temp6149.base? 1: _temp6151 >= _temp6149.last_plus_one)){
-_throw( Null_Exception);}* _temp6151;})); _temp6148;}); _temp6147;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6152= yyls; struct Cyc_Yyltype* _temp6154= _temp6152.curr
-+( yylsp_offset - 1); if( _temp6152.base == 0? 1:( _temp6154 < _temp6152.base? 1:
-_temp6154 >= _temp6152.last_plus_one)){ _throw( Null_Exception);}* _temp6154;}).first_line,({
-struct _tagged_ptr3 _temp6155= yyls; struct Cyc_Yyltype* _temp6157= _temp6155.curr
-+ yylsp_offset; if( _temp6155.base == 0? 1:( _temp6157 < _temp6155.base? 1:
-_temp6157 >= _temp6155.last_plus_one)){ _throw( Null_Exception);}* _temp6157;}).last_line));
-_temp6146;}); _temp6145;}); break; case 277: _LL6144: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6159=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6159[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp6160; _temp6160.tag= Cyc_Pattern_tok_tag; _temp6160.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_Reference_p_struct* _temp6161=( struct Cyc_Absyn_Reference_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Reference_p_struct)); _temp6161[ 0]=({
-struct Cyc_Absyn_Reference_p_struct _temp6162; _temp6162.tag= Cyc_Absyn_Reference_p_tag;
-_temp6162.f1= Cyc_Absyn_new_vardecl(({ struct _tuple1* _temp6163=( struct
-_tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp6163->f1=( void*) Cyc_Absyn_Loc_n;
-_temp6163->f2=({ struct _tagged_string* _temp6164=( struct _tagged_string*)
-GC_malloc( sizeof( struct _tagged_string) * 1); _temp6164[ 0]= Cyc_yyget_String_tok(({
-struct _tagged_ptr2 _temp6165= yyvs; struct _xtunion_struct** _temp6167=
-_temp6165.curr + yyvsp_offset; if( _temp6165.base == 0? 1:( _temp6167 <
-_temp6165.base? 1: _temp6167 >= _temp6165.last_plus_one)){ _throw(
-Null_Exception);}* _temp6167;})); _temp6164;}); _temp6163;}),( void*) Cyc_Absyn_VoidType,
-0); _temp6162;}); _temp6161;}), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6168= yyls; struct Cyc_Yyltype* _temp6170= _temp6168.curr +(
-yylsp_offset - 1); if( _temp6168.base == 0? 1:( _temp6170 < _temp6168.base? 1:
-_temp6170 >= _temp6168.last_plus_one)){ _throw( Null_Exception);}* _temp6170;}).first_line,({
-struct _tagged_ptr3 _temp6171= yyls; struct Cyc_Yyltype* _temp6173= _temp6171.curr
-+ yylsp_offset; if( _temp6171.base == 0? 1:( _temp6173 < _temp6171.base? 1:
-_temp6173 >= _temp6171.last_plus_one)){ _throw( Null_Exception);}* _temp6173;}).last_line));
-_temp6160;}); _temp6159;}); break; case 278: _LL6158: yyval=( struct
-_xtunion_struct*)({ struct Cyc_PatternList_tok_struct* _temp6175=( struct Cyc_PatternList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp6175[ 0]=({ struct
-Cyc_PatternList_tok_struct _temp6176; _temp6176.tag= Cyc_PatternList_tok_tag;
-_temp6176.f1= 0; _temp6176;}); _temp6175;}); break; case 279: _LL6174: yyval=(
-struct _xtunion_struct*)({ struct Cyc_PatternList_tok_struct* _temp6178=( struct
+Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6118=
+yyls; struct Cyc_Yyltype* _temp6120= _temp6118.curr +( yylsp_offset - 3); if(
+_temp6118.base == 0? 1:( _temp6120 < _temp6118.base? 1: _temp6120 >= _temp6118.last_plus_one)){
+_throw( Null_Exception);}* _temp6120;}).first_line,({ struct _tagged_ptr3
+_temp6121= yyls; struct Cyc_Yyltype* _temp6123= _temp6121.curr +( yylsp_offset -
+3); if( _temp6121.base == 0? 1:( _temp6123 < _temp6121.base? 1: _temp6123 >=
+_temp6121.last_plus_one)){ _throw( Null_Exception);}* _temp6123;}).last_line),
+Cyc_yyget_TypeList_tok(({ struct _tagged_ptr2 _temp6124= yyvs; struct
+_xtunion_struct** _temp6126= _temp6124.curr +( yyvsp_offset - 3); if( _temp6124.base
+== 0? 1:( _temp6126 < _temp6124.base? 1: _temp6126 >= _temp6124.last_plus_one)){
+_throw( Null_Exception);}* _temp6126;}))); yyval=( struct _xtunion_struct*)({
+struct Cyc_Pattern_tok_struct* _temp6127=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6127[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp6128; _temp6128.tag= Cyc_Pattern_tok_tag; _temp6128.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_UnknownFields_p_struct* _temp6129=( struct Cyc_Absyn_UnknownFields_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_UnknownFields_p_struct)); _temp6129[ 0]=({
+struct Cyc_Absyn_UnknownFields_p_struct _temp6130; _temp6130.tag= Cyc_Absyn_UnknownFields_p_tag;
+_temp6130.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp6131= yyvs;
+struct _xtunion_struct** _temp6133= _temp6131.curr +( yyvsp_offset - 4); if(
+_temp6131.base == 0? 1:( _temp6133 < _temp6131.base? 1: _temp6133 >= _temp6131.last_plus_one)){
+_throw( Null_Exception);}* _temp6133;})); _temp6130.f2= tvs; _temp6130.f3= Cyc_yyget_FieldPatternList_tok(({
+struct _tagged_ptr2 _temp6134= yyvs; struct _xtunion_struct** _temp6136=
+_temp6134.curr +( yyvsp_offset - 1); if( _temp6134.base == 0? 1:( _temp6136 <
+_temp6134.base? 1: _temp6136 >= _temp6134.last_plus_one)){ _throw(
+Null_Exception);}* _temp6136;})); _temp6130;}); _temp6129;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6137= yyls; struct Cyc_Yyltype* _temp6139= _temp6137.curr
++( yylsp_offset - 4); if( _temp6137.base == 0? 1:( _temp6139 < _temp6137.base? 1:
+_temp6139 >= _temp6137.last_plus_one)){ _throw( Null_Exception);}* _temp6139;}).first_line,({
+struct _tagged_ptr3 _temp6140= yyls; struct Cyc_Yyltype* _temp6142= _temp6140.curr
++ yylsp_offset; if( _temp6140.base == 0? 1:( _temp6142 < _temp6140.base? 1:
+_temp6142 >= _temp6140.last_plus_one)){ _throw( Null_Exception);}* _temp6142;}).last_line));
+_temp6128;}); _temp6127;}); break;} case 276: _LL6117: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6144=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6144[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp6145; _temp6145.tag= Cyc_Pattern_tok_tag; _temp6145.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_Pointer_p_struct* _temp6146=( struct Cyc_Absyn_Pointer_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Pointer_p_struct)); _temp6146[ 0]=({ struct
+Cyc_Absyn_Pointer_p_struct _temp6147; _temp6147.tag= Cyc_Absyn_Pointer_p_tag;
+_temp6147.f1= Cyc_yyget_Pattern_tok(({ struct _tagged_ptr2 _temp6148= yyvs;
+struct _xtunion_struct** _temp6150= _temp6148.curr + yyvsp_offset; if( _temp6148.base
+== 0? 1:( _temp6150 < _temp6148.base? 1: _temp6150 >= _temp6148.last_plus_one)){
+_throw( Null_Exception);}* _temp6150;})); _temp6147;}); _temp6146;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6151= yyls; struct Cyc_Yyltype* _temp6153= _temp6151.curr
++( yylsp_offset - 1); if( _temp6151.base == 0? 1:( _temp6153 < _temp6151.base? 1:
+_temp6153 >= _temp6151.last_plus_one)){ _throw( Null_Exception);}* _temp6153;}).first_line,({
+struct _tagged_ptr3 _temp6154= yyls; struct Cyc_Yyltype* _temp6156= _temp6154.curr
++ yylsp_offset; if( _temp6154.base == 0? 1:( _temp6156 < _temp6154.base? 1:
+_temp6156 >= _temp6154.last_plus_one)){ _throw( Null_Exception);}* _temp6156;}).last_line));
+_temp6145;}); _temp6144;}); break; case 277: _LL6143: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Pattern_tok_struct* _temp6158=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp6158[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp6159; _temp6159.tag= Cyc_Pattern_tok_tag; _temp6159.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_Reference_p_struct* _temp6160=( struct Cyc_Absyn_Reference_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Reference_p_struct)); _temp6160[ 0]=({
+struct Cyc_Absyn_Reference_p_struct _temp6161; _temp6161.tag= Cyc_Absyn_Reference_p_tag;
+_temp6161.f1= Cyc_Absyn_new_vardecl(({ struct _tuple1* _temp6162=( struct
+_tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp6162->f1=( void*) Cyc_Absyn_Loc_n;
+_temp6162->f2=({ struct _tagged_string* _temp6163=( struct _tagged_string*)
+GC_malloc( sizeof( struct _tagged_string) * 1); _temp6163[ 0]= Cyc_yyget_String_tok(({
+struct _tagged_ptr2 _temp6164= yyvs; struct _xtunion_struct** _temp6166=
+_temp6164.curr + yyvsp_offset; if( _temp6164.base == 0? 1:( _temp6166 <
+_temp6164.base? 1: _temp6166 >= _temp6164.last_plus_one)){ _throw(
+Null_Exception);}* _temp6166;})); _temp6163;}); _temp6162;}),( void*) Cyc_Absyn_VoidType,
+0); _temp6161;}); _temp6160;}), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6167= yyls; struct Cyc_Yyltype* _temp6169= _temp6167.curr +(
+yylsp_offset - 1); if( _temp6167.base == 0? 1:( _temp6169 < _temp6167.base? 1:
+_temp6169 >= _temp6167.last_plus_one)){ _throw( Null_Exception);}* _temp6169;}).first_line,({
+struct _tagged_ptr3 _temp6170= yyls; struct Cyc_Yyltype* _temp6172= _temp6170.curr
++ yylsp_offset; if( _temp6170.base == 0? 1:( _temp6172 < _temp6170.base? 1:
+_temp6172 >= _temp6170.last_plus_one)){ _throw( Null_Exception);}* _temp6172;}).last_line));
+_temp6159;}); _temp6158;}); break; case 278: _LL6157: yyval=( struct
+_xtunion_struct*)({ struct Cyc_PatternList_tok_struct* _temp6174=( struct Cyc_PatternList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp6174[ 0]=({ struct
+Cyc_PatternList_tok_struct _temp6175; _temp6175.tag= Cyc_PatternList_tok_tag;
+_temp6175.f1= 0; _temp6175;}); _temp6174;}); break; case 279: _LL6173: yyval=(
+struct _xtunion_struct*)({ struct Cyc_PatternList_tok_struct* _temp6177=( struct
 Cyc_PatternList_tok_struct*) GC_malloc( sizeof( struct Cyc_PatternList_tok_struct));
-_temp6178[ 0]=({ struct Cyc_PatternList_tok_struct _temp6179; _temp6179.tag= Cyc_PatternList_tok_tag;
-_temp6179.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
-Cyc_yyget_PatternList_tok(({ struct _tagged_ptr2 _temp6180= yyvs; struct
-_xtunion_struct** _temp6182= _temp6180.curr + yyvsp_offset; if( _temp6180.base
-== 0? 1:( _temp6182 < _temp6180.base? 1: _temp6182 >= _temp6180.last_plus_one)){
-_throw( Null_Exception);}* _temp6182;}))); _temp6179;}); _temp6178;}); break;
-case 280: _LL6177: yyval=( struct _xtunion_struct*)({ struct Cyc_PatternList_tok_struct*
-_temp6184=( struct Cyc_PatternList_tok_struct*) GC_malloc( sizeof( struct Cyc_PatternList_tok_struct));
-_temp6184[ 0]=({ struct Cyc_PatternList_tok_struct _temp6185; _temp6185.tag= Cyc_PatternList_tok_tag;
-_temp6185.f1=({ struct Cyc_List_List* _temp6186=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp6186->hd=( void*) Cyc_yyget_Pattern_tok(({
-struct _tagged_ptr2 _temp6187= yyvs; struct _xtunion_struct** _temp6189=
-_temp6187.curr + yyvsp_offset; if( _temp6187.base == 0? 1:( _temp6189 <
-_temp6187.base? 1: _temp6189 >= _temp6187.last_plus_one)){ _throw(
-Null_Exception);}* _temp6189;})); _temp6186->tl= 0; _temp6186;}); _temp6185;});
-_temp6184;}); break; case 281: _LL6183: yyval=( struct _xtunion_struct*)({
-struct Cyc_PatternList_tok_struct* _temp6191=( struct Cyc_PatternList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp6191[ 0]=({ struct
-Cyc_PatternList_tok_struct _temp6192; _temp6192.tag= Cyc_PatternList_tok_tag;
-_temp6192.f1=({ struct Cyc_List_List* _temp6193=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp6193->hd=( void*) Cyc_yyget_Pattern_tok(({
-struct _tagged_ptr2 _temp6197= yyvs; struct _xtunion_struct** _temp6199=
-_temp6197.curr + yyvsp_offset; if( _temp6197.base == 0? 1:( _temp6199 <
-_temp6197.base? 1: _temp6199 >= _temp6197.last_plus_one)){ _throw(
-Null_Exception);}* _temp6199;})); _temp6193->tl= Cyc_yyget_PatternList_tok(({
-struct _tagged_ptr2 _temp6194= yyvs; struct _xtunion_struct** _temp6196=
-_temp6194.curr +( yyvsp_offset - 2); if( _temp6194.base == 0? 1:( _temp6196 <
-_temp6194.base? 1: _temp6196 >= _temp6194.last_plus_one)){ _throw(
-Null_Exception);}* _temp6196;})); _temp6193;}); _temp6192;}); _temp6191;});
-break; case 282: _LL6190: yyval=( struct _xtunion_struct*)({ struct Cyc_FieldPattern_tok_struct*
-_temp6201=( struct Cyc_FieldPattern_tok_struct*) GC_malloc( sizeof( struct Cyc_FieldPattern_tok_struct));
-_temp6201[ 0]=({ struct Cyc_FieldPattern_tok_struct _temp6202; _temp6202.tag=
-Cyc_FieldPattern_tok_tag; _temp6202.f1=({ struct _tuple17* _temp6203=( struct
-_tuple17*) GC_malloc( sizeof( struct _tuple17)); _temp6203->f1= 0; _temp6203->f2=
-Cyc_yyget_Pattern_tok(({ struct _tagged_ptr2 _temp6204= yyvs; struct
-_xtunion_struct** _temp6206= _temp6204.curr + yyvsp_offset; if( _temp6204.base
-== 0? 1:( _temp6206 < _temp6204.base? 1: _temp6206 >= _temp6204.last_plus_one)){
-_throw( Null_Exception);}* _temp6206;})); _temp6203;}); _temp6202;}); _temp6201;});
-break; case 283: _LL6200: yyval=( struct _xtunion_struct*)({ struct Cyc_FieldPattern_tok_struct*
-_temp6208=( struct Cyc_FieldPattern_tok_struct*) GC_malloc( sizeof( struct Cyc_FieldPattern_tok_struct));
-_temp6208[ 0]=({ struct Cyc_FieldPattern_tok_struct _temp6209; _temp6209.tag=
-Cyc_FieldPattern_tok_tag; _temp6209.f1=({ struct _tuple17* _temp6210=( struct
-_tuple17*) GC_malloc( sizeof( struct _tuple17)); _temp6210->f1= Cyc_yyget_DesignatorList_tok(({
-struct _tagged_ptr2 _temp6214= yyvs; struct _xtunion_struct** _temp6216=
-_temp6214.curr +( yyvsp_offset - 1); if( _temp6214.base == 0? 1:( _temp6216 <
-_temp6214.base? 1: _temp6216 >= _temp6214.last_plus_one)){ _throw(
-Null_Exception);}* _temp6216;})); _temp6210->f2= Cyc_yyget_Pattern_tok(({ struct
-_tagged_ptr2 _temp6211= yyvs; struct _xtunion_struct** _temp6213= _temp6211.curr
-+ yyvsp_offset; if( _temp6211.base == 0? 1:( _temp6213 < _temp6211.base? 1:
-_temp6213 >= _temp6211.last_plus_one)){ _throw( Null_Exception);}* _temp6213;}));
-_temp6210;}); _temp6209;}); _temp6208;}); break; case 284: _LL6207: yyval=(
-struct _xtunion_struct*)({ struct Cyc_FieldPatternList_tok_struct* _temp6218=(
+_temp6177[ 0]=({ struct Cyc_PatternList_tok_struct _temp6178; _temp6178.tag= Cyc_PatternList_tok_tag;
+_temp6178.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+Cyc_yyget_PatternList_tok(({ struct _tagged_ptr2 _temp6179= yyvs; struct
+_xtunion_struct** _temp6181= _temp6179.curr + yyvsp_offset; if( _temp6179.base
+== 0? 1:( _temp6181 < _temp6179.base? 1: _temp6181 >= _temp6179.last_plus_one)){
+_throw( Null_Exception);}* _temp6181;}))); _temp6178;}); _temp6177;}); break;
+case 280: _LL6176: yyval=( struct _xtunion_struct*)({ struct Cyc_PatternList_tok_struct*
+_temp6183=( struct Cyc_PatternList_tok_struct*) GC_malloc( sizeof( struct Cyc_PatternList_tok_struct));
+_temp6183[ 0]=({ struct Cyc_PatternList_tok_struct _temp6184; _temp6184.tag= Cyc_PatternList_tok_tag;
+_temp6184.f1=({ struct Cyc_List_List* _temp6185=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp6185->hd=( void*) Cyc_yyget_Pattern_tok(({
+struct _tagged_ptr2 _temp6186= yyvs; struct _xtunion_struct** _temp6188=
+_temp6186.curr + yyvsp_offset; if( _temp6186.base == 0? 1:( _temp6188 <
+_temp6186.base? 1: _temp6188 >= _temp6186.last_plus_one)){ _throw(
+Null_Exception);}* _temp6188;})); _temp6185->tl= 0; _temp6185;}); _temp6184;});
+_temp6183;}); break; case 281: _LL6182: yyval=( struct _xtunion_struct*)({
+struct Cyc_PatternList_tok_struct* _temp6190=( struct Cyc_PatternList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp6190[ 0]=({ struct
+Cyc_PatternList_tok_struct _temp6191; _temp6191.tag= Cyc_PatternList_tok_tag;
+_temp6191.f1=({ struct Cyc_List_List* _temp6192=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp6192->hd=( void*) Cyc_yyget_Pattern_tok(({
+struct _tagged_ptr2 _temp6196= yyvs; struct _xtunion_struct** _temp6198=
+_temp6196.curr + yyvsp_offset; if( _temp6196.base == 0? 1:( _temp6198 <
+_temp6196.base? 1: _temp6198 >= _temp6196.last_plus_one)){ _throw(
+Null_Exception);}* _temp6198;})); _temp6192->tl= Cyc_yyget_PatternList_tok(({
+struct _tagged_ptr2 _temp6193= yyvs; struct _xtunion_struct** _temp6195=
+_temp6193.curr +( yyvsp_offset - 2); if( _temp6193.base == 0? 1:( _temp6195 <
+_temp6193.base? 1: _temp6195 >= _temp6193.last_plus_one)){ _throw(
+Null_Exception);}* _temp6195;})); _temp6192;}); _temp6191;}); _temp6190;});
+break; case 282: _LL6189: yyval=( struct _xtunion_struct*)({ struct Cyc_FieldPattern_tok_struct*
+_temp6200=( struct Cyc_FieldPattern_tok_struct*) GC_malloc( sizeof( struct Cyc_FieldPattern_tok_struct));
+_temp6200[ 0]=({ struct Cyc_FieldPattern_tok_struct _temp6201; _temp6201.tag=
+Cyc_FieldPattern_tok_tag; _temp6201.f1=({ struct _tuple17* _temp6202=( struct
+_tuple17*) GC_malloc( sizeof( struct _tuple17)); _temp6202->f1= 0; _temp6202->f2=
+Cyc_yyget_Pattern_tok(({ struct _tagged_ptr2 _temp6203= yyvs; struct
+_xtunion_struct** _temp6205= _temp6203.curr + yyvsp_offset; if( _temp6203.base
+== 0? 1:( _temp6205 < _temp6203.base? 1: _temp6205 >= _temp6203.last_plus_one)){
+_throw( Null_Exception);}* _temp6205;})); _temp6202;}); _temp6201;}); _temp6200;});
+break; case 283: _LL6199: yyval=( struct _xtunion_struct*)({ struct Cyc_FieldPattern_tok_struct*
+_temp6207=( struct Cyc_FieldPattern_tok_struct*) GC_malloc( sizeof( struct Cyc_FieldPattern_tok_struct));
+_temp6207[ 0]=({ struct Cyc_FieldPattern_tok_struct _temp6208; _temp6208.tag=
+Cyc_FieldPattern_tok_tag; _temp6208.f1=({ struct _tuple17* _temp6209=( struct
+_tuple17*) GC_malloc( sizeof( struct _tuple17)); _temp6209->f1= Cyc_yyget_DesignatorList_tok(({
+struct _tagged_ptr2 _temp6213= yyvs; struct _xtunion_struct** _temp6215=
+_temp6213.curr +( yyvsp_offset - 1); if( _temp6213.base == 0? 1:( _temp6215 <
+_temp6213.base? 1: _temp6215 >= _temp6213.last_plus_one)){ _throw(
+Null_Exception);}* _temp6215;})); _temp6209->f2= Cyc_yyget_Pattern_tok(({ struct
+_tagged_ptr2 _temp6210= yyvs; struct _xtunion_struct** _temp6212= _temp6210.curr
++ yyvsp_offset; if( _temp6210.base == 0? 1:( _temp6212 < _temp6210.base? 1:
+_temp6212 >= _temp6210.last_plus_one)){ _throw( Null_Exception);}* _temp6212;}));
+_temp6209;}); _temp6208;}); _temp6207;}); break; case 284: _LL6206: yyval=(
+struct _xtunion_struct*)({ struct Cyc_FieldPatternList_tok_struct* _temp6217=(
 struct Cyc_FieldPatternList_tok_struct*) GC_malloc( sizeof( struct Cyc_FieldPatternList_tok_struct));
-_temp6218[ 0]=({ struct Cyc_FieldPatternList_tok_struct _temp6219; _temp6219.tag=
-Cyc_FieldPatternList_tok_tag; _temp6219.f1=(( struct Cyc_List_List*(*)( struct
+_temp6217[ 0]=({ struct Cyc_FieldPatternList_tok_struct _temp6218; _temp6218.tag=
+Cyc_FieldPatternList_tok_tag; _temp6218.f1=(( struct Cyc_List_List*(*)( struct
 Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_FieldPatternList_tok(({ struct
-_tagged_ptr2 _temp6220= yyvs; struct _xtunion_struct** _temp6222= _temp6220.curr
-+ yyvsp_offset; if( _temp6220.base == 0? 1:( _temp6222 < _temp6220.base? 1:
-_temp6222 >= _temp6220.last_plus_one)){ _throw( Null_Exception);}* _temp6222;})));
-_temp6219;}); _temp6218;}); break; case 285: _LL6217: yyval=( struct
-_xtunion_struct*)({ struct Cyc_FieldPatternList_tok_struct* _temp6224=( struct
+_tagged_ptr2 _temp6219= yyvs; struct _xtunion_struct** _temp6221= _temp6219.curr
++ yyvsp_offset; if( _temp6219.base == 0? 1:( _temp6221 < _temp6219.base? 1:
+_temp6221 >= _temp6219.last_plus_one)){ _throw( Null_Exception);}* _temp6221;})));
+_temp6218;}); _temp6217;}); break; case 285: _LL6216: yyval=( struct
+_xtunion_struct*)({ struct Cyc_FieldPatternList_tok_struct* _temp6223=( struct
 Cyc_FieldPatternList_tok_struct*) GC_malloc( sizeof( struct Cyc_FieldPatternList_tok_struct));
-_temp6224[ 0]=({ struct Cyc_FieldPatternList_tok_struct _temp6225; _temp6225.tag=
-Cyc_FieldPatternList_tok_tag; _temp6225.f1=({ struct Cyc_List_List* _temp6226=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp6226->hd=(
-void*) Cyc_yyget_FieldPattern_tok(({ struct _tagged_ptr2 _temp6227= yyvs; struct
-_xtunion_struct** _temp6229= _temp6227.curr + yyvsp_offset; if( _temp6227.base
-== 0? 1:( _temp6229 < _temp6227.base? 1: _temp6229 >= _temp6227.last_plus_one)){
-_throw( Null_Exception);}* _temp6229;})); _temp6226->tl= 0; _temp6226;});
-_temp6225;}); _temp6224;}); break; case 286: _LL6223: yyval=( struct
-_xtunion_struct*)({ struct Cyc_FieldPatternList_tok_struct* _temp6231=( struct
+_temp6223[ 0]=({ struct Cyc_FieldPatternList_tok_struct _temp6224; _temp6224.tag=
+Cyc_FieldPatternList_tok_tag; _temp6224.f1=({ struct Cyc_List_List* _temp6225=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp6225->hd=(
+void*) Cyc_yyget_FieldPattern_tok(({ struct _tagged_ptr2 _temp6226= yyvs; struct
+_xtunion_struct** _temp6228= _temp6226.curr + yyvsp_offset; if( _temp6226.base
+== 0? 1:( _temp6228 < _temp6226.base? 1: _temp6228 >= _temp6226.last_plus_one)){
+_throw( Null_Exception);}* _temp6228;})); _temp6225->tl= 0; _temp6225;});
+_temp6224;}); _temp6223;}); break; case 286: _LL6222: yyval=( struct
+_xtunion_struct*)({ struct Cyc_FieldPatternList_tok_struct* _temp6230=( struct
 Cyc_FieldPatternList_tok_struct*) GC_malloc( sizeof( struct Cyc_FieldPatternList_tok_struct));
-_temp6231[ 0]=({ struct Cyc_FieldPatternList_tok_struct _temp6232; _temp6232.tag=
-Cyc_FieldPatternList_tok_tag; _temp6232.f1=({ struct Cyc_List_List* _temp6233=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp6233->hd=(
-void*) Cyc_yyget_FieldPattern_tok(({ struct _tagged_ptr2 _temp6237= yyvs; struct
-_xtunion_struct** _temp6239= _temp6237.curr + yyvsp_offset; if( _temp6237.base
-== 0? 1:( _temp6239 < _temp6237.base? 1: _temp6239 >= _temp6237.last_plus_one)){
-_throw( Null_Exception);}* _temp6239;})); _temp6233->tl= Cyc_yyget_FieldPatternList_tok(({
-struct _tagged_ptr2 _temp6234= yyvs; struct _xtunion_struct** _temp6236=
-_temp6234.curr +( yyvsp_offset - 2); if( _temp6234.base == 0? 1:( _temp6236 <
-_temp6234.base? 1: _temp6236 >= _temp6234.last_plus_one)){ _throw(
-Null_Exception);}* _temp6236;})); _temp6233;}); _temp6232;}); _temp6231;});
-break; case 287: _LL6230: yyval=({ struct _tagged_ptr2 _temp6241= yyvs; struct
-_xtunion_struct** _temp6243= _temp6241.curr + yyvsp_offset; if( _temp6241.base
-== 0? 1:( _temp6243 < _temp6241.base? 1: _temp6243 >= _temp6241.last_plus_one)){
-_throw( Null_Exception);}* _temp6243;}); break; case 288: _LL6240: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6245=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6245[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6246; _temp6246.tag= Cyc_Exp_tok_tag; _temp6246.f1= Cyc_Absyn_seq_exp( Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6247= yyvs; struct _xtunion_struct** _temp6249=
-_temp6247.curr +( yyvsp_offset - 2); if( _temp6247.base == 0? 1:( _temp6249 <
-_temp6247.base? 1: _temp6249 >= _temp6247.last_plus_one)){ _throw(
-Null_Exception);}* _temp6249;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6250= yyvs; struct _xtunion_struct** _temp6252= _temp6250.curr +
-yyvsp_offset; if( _temp6250.base == 0? 1:( _temp6252 < _temp6250.base? 1:
-_temp6252 >= _temp6250.last_plus_one)){ _throw( Null_Exception);}* _temp6252;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6253= yyls; struct Cyc_Yyltype*
-_temp6255= _temp6253.curr +( yylsp_offset - 2); if( _temp6253.base == 0? 1:(
-_temp6255 < _temp6253.base? 1: _temp6255 >= _temp6253.last_plus_one)){ _throw(
-Null_Exception);}* _temp6255;}).first_line,({ struct _tagged_ptr3 _temp6256=
-yyls; struct Cyc_Yyltype* _temp6258= _temp6256.curr + yylsp_offset; if(
-_temp6256.base == 0? 1:( _temp6258 < _temp6256.base? 1: _temp6258 >= _temp6256.last_plus_one)){
-_throw( Null_Exception);}* _temp6258;}).last_line)); _temp6246;}); _temp6245;});
-break; case 289: _LL6244: yyval=({ struct _tagged_ptr2 _temp6260= yyvs; struct
-_xtunion_struct** _temp6262= _temp6260.curr + yyvsp_offset; if( _temp6260.base
-== 0? 1:( _temp6262 < _temp6260.base? 1: _temp6262 >= _temp6260.last_plus_one)){
-_throw( Null_Exception);}* _temp6262;}); break; case 290: _LL6259: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6264=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6264[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6265; _temp6265.tag= Cyc_Exp_tok_tag; _temp6265.f1= Cyc_Absyn_assignop_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6266= yyvs; struct _xtunion_struct**
-_temp6268= _temp6266.curr +( yyvsp_offset - 2); if( _temp6266.base == 0? 1:(
-_temp6268 < _temp6266.base? 1: _temp6268 >= _temp6266.last_plus_one)){ _throw(
-Null_Exception);}* _temp6268;})), Cyc_yyget_Primopopt_tok(({ struct _tagged_ptr2
-_temp6269= yyvs; struct _xtunion_struct** _temp6271= _temp6269.curr +(
-yyvsp_offset - 1); if( _temp6269.base == 0? 1:( _temp6271 < _temp6269.base? 1:
-_temp6271 >= _temp6269.last_plus_one)){ _throw( Null_Exception);}* _temp6271;})),
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6272= yyvs; struct _xtunion_struct**
-_temp6274= _temp6272.curr + yyvsp_offset; if( _temp6272.base == 0? 1:( _temp6274
-< _temp6272.base? 1: _temp6274 >= _temp6272.last_plus_one)){ _throw(
-Null_Exception);}* _temp6274;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6275= yyls; struct Cyc_Yyltype* _temp6277= _temp6275.curr +(
-yylsp_offset - 2); if( _temp6275.base == 0? 1:( _temp6277 < _temp6275.base? 1:
-_temp6277 >= _temp6275.last_plus_one)){ _throw( Null_Exception);}* _temp6277;}).first_line,({
-struct _tagged_ptr3 _temp6278= yyls; struct Cyc_Yyltype* _temp6280= _temp6278.curr
-+ yylsp_offset; if( _temp6278.base == 0? 1:( _temp6280 < _temp6278.base? 1:
-_temp6280 >= _temp6278.last_plus_one)){ _throw( Null_Exception);}* _temp6280;}).last_line));
-_temp6265;}); _temp6264;}); break; case 291: _LL6263: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6282=( struct Cyc_Primopopt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp6282[ 0]=({ struct
-Cyc_Primopopt_tok_struct _temp6283; _temp6283.tag= Cyc_Primopopt_tok_tag;
-_temp6283.f1= 0; _temp6283;}); _temp6282;}); break; case 292: _LL6281: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6285=( struct
+_temp6230[ 0]=({ struct Cyc_FieldPatternList_tok_struct _temp6231; _temp6231.tag=
+Cyc_FieldPatternList_tok_tag; _temp6231.f1=({ struct Cyc_List_List* _temp6232=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp6232->hd=(
+void*) Cyc_yyget_FieldPattern_tok(({ struct _tagged_ptr2 _temp6236= yyvs; struct
+_xtunion_struct** _temp6238= _temp6236.curr + yyvsp_offset; if( _temp6236.base
+== 0? 1:( _temp6238 < _temp6236.base? 1: _temp6238 >= _temp6236.last_plus_one)){
+_throw( Null_Exception);}* _temp6238;})); _temp6232->tl= Cyc_yyget_FieldPatternList_tok(({
+struct _tagged_ptr2 _temp6233= yyvs; struct _xtunion_struct** _temp6235=
+_temp6233.curr +( yyvsp_offset - 2); if( _temp6233.base == 0? 1:( _temp6235 <
+_temp6233.base? 1: _temp6235 >= _temp6233.last_plus_one)){ _throw(
+Null_Exception);}* _temp6235;})); _temp6232;}); _temp6231;}); _temp6230;});
+break; case 287: _LL6229: yyval=({ struct _tagged_ptr2 _temp6240= yyvs; struct
+_xtunion_struct** _temp6242= _temp6240.curr + yyvsp_offset; if( _temp6240.base
+== 0? 1:( _temp6242 < _temp6240.base? 1: _temp6242 >= _temp6240.last_plus_one)){
+_throw( Null_Exception);}* _temp6242;}); break; case 288: _LL6239: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6244=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6244[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6245; _temp6245.tag= Cyc_Exp_tok_tag; _temp6245.f1= Cyc_Absyn_seq_exp( Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6246= yyvs; struct _xtunion_struct** _temp6248=
+_temp6246.curr +( yyvsp_offset - 2); if( _temp6246.base == 0? 1:( _temp6248 <
+_temp6246.base? 1: _temp6248 >= _temp6246.last_plus_one)){ _throw(
+Null_Exception);}* _temp6248;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6249= yyvs; struct _xtunion_struct** _temp6251= _temp6249.curr +
+yyvsp_offset; if( _temp6249.base == 0? 1:( _temp6251 < _temp6249.base? 1:
+_temp6251 >= _temp6249.last_plus_one)){ _throw( Null_Exception);}* _temp6251;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6252= yyls; struct Cyc_Yyltype*
+_temp6254= _temp6252.curr +( yylsp_offset - 2); if( _temp6252.base == 0? 1:(
+_temp6254 < _temp6252.base? 1: _temp6254 >= _temp6252.last_plus_one)){ _throw(
+Null_Exception);}* _temp6254;}).first_line,({ struct _tagged_ptr3 _temp6255=
+yyls; struct Cyc_Yyltype* _temp6257= _temp6255.curr + yylsp_offset; if(
+_temp6255.base == 0? 1:( _temp6257 < _temp6255.base? 1: _temp6257 >= _temp6255.last_plus_one)){
+_throw( Null_Exception);}* _temp6257;}).last_line)); _temp6245;}); _temp6244;});
+break; case 289: _LL6243: yyval=({ struct _tagged_ptr2 _temp6259= yyvs; struct
+_xtunion_struct** _temp6261= _temp6259.curr + yyvsp_offset; if( _temp6259.base
+== 0? 1:( _temp6261 < _temp6259.base? 1: _temp6261 >= _temp6259.last_plus_one)){
+_throw( Null_Exception);}* _temp6261;}); break; case 290: _LL6258: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6263=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6263[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6264; _temp6264.tag= Cyc_Exp_tok_tag; _temp6264.f1= Cyc_Absyn_assignop_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6265= yyvs; struct _xtunion_struct**
+_temp6267= _temp6265.curr +( yyvsp_offset - 2); if( _temp6265.base == 0? 1:(
+_temp6267 < _temp6265.base? 1: _temp6267 >= _temp6265.last_plus_one)){ _throw(
+Null_Exception);}* _temp6267;})), Cyc_yyget_Primopopt_tok(({ struct _tagged_ptr2
+_temp6268= yyvs; struct _xtunion_struct** _temp6270= _temp6268.curr +(
+yyvsp_offset - 1); if( _temp6268.base == 0? 1:( _temp6270 < _temp6268.base? 1:
+_temp6270 >= _temp6268.last_plus_one)){ _throw( Null_Exception);}* _temp6270;})),
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6271= yyvs; struct _xtunion_struct**
+_temp6273= _temp6271.curr + yyvsp_offset; if( _temp6271.base == 0? 1:( _temp6273
+< _temp6271.base? 1: _temp6273 >= _temp6271.last_plus_one)){ _throw(
+Null_Exception);}* _temp6273;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6274= yyls; struct Cyc_Yyltype* _temp6276= _temp6274.curr +(
+yylsp_offset - 2); if( _temp6274.base == 0? 1:( _temp6276 < _temp6274.base? 1:
+_temp6276 >= _temp6274.last_plus_one)){ _throw( Null_Exception);}* _temp6276;}).first_line,({
+struct _tagged_ptr3 _temp6277= yyls; struct Cyc_Yyltype* _temp6279= _temp6277.curr
++ yylsp_offset; if( _temp6277.base == 0? 1:( _temp6279 < _temp6277.base? 1:
+_temp6279 >= _temp6277.last_plus_one)){ _throw( Null_Exception);}* _temp6279;}).last_line));
+_temp6264;}); _temp6263;}); break; case 291: _LL6262: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6281=( struct Cyc_Primopopt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp6281[ 0]=({ struct
+Cyc_Primopopt_tok_struct _temp6282; _temp6282.tag= Cyc_Primopopt_tok_tag;
+_temp6282.f1= 0; _temp6282;}); _temp6281;}); break; case 292: _LL6280: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6284=( struct
 Cyc_Primopopt_tok_struct*) GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct));
-_temp6285[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6286; _temp6286.tag= Cyc_Primopopt_tok_tag;
-_temp6286.f1=({ struct Cyc_Core_Opt* _temp6287=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp6287->v=( void*)(( void*) Cyc_Absyn_Times);
-_temp6287;}); _temp6286;}); _temp6285;}); break; case 293: _LL6284: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6289=( struct
+_temp6284[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6285; _temp6285.tag= Cyc_Primopopt_tok_tag;
+_temp6285.f1=({ struct Cyc_Core_Opt* _temp6286=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp6286->v=( void*)(( void*) Cyc_Absyn_Times);
+_temp6286;}); _temp6285;}); _temp6284;}); break; case 293: _LL6283: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6288=( struct
 Cyc_Primopopt_tok_struct*) GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct));
-_temp6289[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6290; _temp6290.tag= Cyc_Primopopt_tok_tag;
-_temp6290.f1=({ struct Cyc_Core_Opt* _temp6291=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp6291->v=( void*)(( void*) Cyc_Absyn_Div);
-_temp6291;}); _temp6290;}); _temp6289;}); break; case 294: _LL6288: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6293=( struct
+_temp6288[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6289; _temp6289.tag= Cyc_Primopopt_tok_tag;
+_temp6289.f1=({ struct Cyc_Core_Opt* _temp6290=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp6290->v=( void*)(( void*) Cyc_Absyn_Div);
+_temp6290;}); _temp6289;}); _temp6288;}); break; case 294: _LL6287: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6292=( struct
 Cyc_Primopopt_tok_struct*) GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct));
-_temp6293[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6294; _temp6294.tag= Cyc_Primopopt_tok_tag;
-_temp6294.f1=({ struct Cyc_Core_Opt* _temp6295=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp6295->v=( void*)(( void*) Cyc_Absyn_Mod);
-_temp6295;}); _temp6294;}); _temp6293;}); break; case 295: _LL6292: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6297=( struct
+_temp6292[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6293; _temp6293.tag= Cyc_Primopopt_tok_tag;
+_temp6293.f1=({ struct Cyc_Core_Opt* _temp6294=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp6294->v=( void*)(( void*) Cyc_Absyn_Mod);
+_temp6294;}); _temp6293;}); _temp6292;}); break; case 295: _LL6291: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6296=( struct
 Cyc_Primopopt_tok_struct*) GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct));
-_temp6297[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6298; _temp6298.tag= Cyc_Primopopt_tok_tag;
-_temp6298.f1=({ struct Cyc_Core_Opt* _temp6299=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp6299->v=( void*)(( void*) Cyc_Absyn_Plus);
-_temp6299;}); _temp6298;}); _temp6297;}); break; case 296: _LL6296: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6301=( struct
+_temp6296[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6297; _temp6297.tag= Cyc_Primopopt_tok_tag;
+_temp6297.f1=({ struct Cyc_Core_Opt* _temp6298=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp6298->v=( void*)(( void*) Cyc_Absyn_Plus);
+_temp6298;}); _temp6297;}); _temp6296;}); break; case 296: _LL6295: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6300=( struct
 Cyc_Primopopt_tok_struct*) GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct));
-_temp6301[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6302; _temp6302.tag= Cyc_Primopopt_tok_tag;
-_temp6302.f1=({ struct Cyc_Core_Opt* _temp6303=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp6303->v=( void*)(( void*) Cyc_Absyn_Minus);
-_temp6303;}); _temp6302;}); _temp6301;}); break; case 297: _LL6300: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6305=( struct
+_temp6300[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6301; _temp6301.tag= Cyc_Primopopt_tok_tag;
+_temp6301.f1=({ struct Cyc_Core_Opt* _temp6302=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp6302->v=( void*)(( void*) Cyc_Absyn_Minus);
+_temp6302;}); _temp6301;}); _temp6300;}); break; case 297: _LL6299: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6304=( struct
 Cyc_Primopopt_tok_struct*) GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct));
-_temp6305[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6306; _temp6306.tag= Cyc_Primopopt_tok_tag;
-_temp6306.f1=({ struct Cyc_Core_Opt* _temp6307=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp6307->v=( void*)(( void*) Cyc_Absyn_Bitlshift);
-_temp6307;}); _temp6306;}); _temp6305;}); break; case 298: _LL6304: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6309=( struct
+_temp6304[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6305; _temp6305.tag= Cyc_Primopopt_tok_tag;
+_temp6305.f1=({ struct Cyc_Core_Opt* _temp6306=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp6306->v=( void*)(( void*) Cyc_Absyn_Bitlshift);
+_temp6306;}); _temp6305;}); _temp6304;}); break; case 298: _LL6303: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6308=( struct
 Cyc_Primopopt_tok_struct*) GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct));
-_temp6309[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6310; _temp6310.tag= Cyc_Primopopt_tok_tag;
-_temp6310.f1=({ struct Cyc_Core_Opt* _temp6311=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp6311->v=( void*)(( void*) Cyc_Absyn_Bitlrshift);
-_temp6311;}); _temp6310;}); _temp6309;}); break; case 299: _LL6308: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6313=( struct
+_temp6308[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6309; _temp6309.tag= Cyc_Primopopt_tok_tag;
+_temp6309.f1=({ struct Cyc_Core_Opt* _temp6310=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp6310->v=( void*)(( void*) Cyc_Absyn_Bitlrshift);
+_temp6310;}); _temp6309;}); _temp6308;}); break; case 299: _LL6307: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6312=( struct
 Cyc_Primopopt_tok_struct*) GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct));
-_temp6313[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6314; _temp6314.tag= Cyc_Primopopt_tok_tag;
-_temp6314.f1=({ struct Cyc_Core_Opt* _temp6315=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp6315->v=( void*)(( void*) Cyc_Absyn_Bitand);
-_temp6315;}); _temp6314;}); _temp6313;}); break; case 300: _LL6312: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6317=( struct
+_temp6312[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6313; _temp6313.tag= Cyc_Primopopt_tok_tag;
+_temp6313.f1=({ struct Cyc_Core_Opt* _temp6314=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp6314->v=( void*)(( void*) Cyc_Absyn_Bitand);
+_temp6314;}); _temp6313;}); _temp6312;}); break; case 300: _LL6311: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6316=( struct
 Cyc_Primopopt_tok_struct*) GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct));
-_temp6317[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6318; _temp6318.tag= Cyc_Primopopt_tok_tag;
-_temp6318.f1=({ struct Cyc_Core_Opt* _temp6319=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp6319->v=( void*)(( void*) Cyc_Absyn_Bitxor);
-_temp6319;}); _temp6318;}); _temp6317;}); break; case 301: _LL6316: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6321=( struct
+_temp6316[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6317; _temp6317.tag= Cyc_Primopopt_tok_tag;
+_temp6317.f1=({ struct Cyc_Core_Opt* _temp6318=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp6318->v=( void*)(( void*) Cyc_Absyn_Bitxor);
+_temp6318;}); _temp6317;}); _temp6316;}); break; case 301: _LL6315: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Primopopt_tok_struct* _temp6320=( struct
 Cyc_Primopopt_tok_struct*) GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct));
-_temp6321[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6322; _temp6322.tag= Cyc_Primopopt_tok_tag;
-_temp6322.f1=({ struct Cyc_Core_Opt* _temp6323=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp6323->v=( void*)(( void*) Cyc_Absyn_Bitor);
-_temp6323;}); _temp6322;}); _temp6321;}); break; case 302: _LL6320: yyval=({
-struct _tagged_ptr2 _temp6325= yyvs; struct _xtunion_struct** _temp6327=
-_temp6325.curr + yyvsp_offset; if( _temp6325.base == 0? 1:( _temp6327 <
-_temp6325.base? 1: _temp6327 >= _temp6325.last_plus_one)){ _throw(
-Null_Exception);}* _temp6327;}); break; case 303: _LL6324: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6329=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6329[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6330; _temp6330.tag= Cyc_Exp_tok_tag; _temp6330.f1= Cyc_Absyn_conditional_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6331= yyvs; struct _xtunion_struct**
-_temp6333= _temp6331.curr +( yyvsp_offset - 4); if( _temp6331.base == 0? 1:(
-_temp6333 < _temp6331.base? 1: _temp6333 >= _temp6331.last_plus_one)){ _throw(
-Null_Exception);}* _temp6333;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6334= yyvs; struct _xtunion_struct** _temp6336= _temp6334.curr +(
-yyvsp_offset - 2); if( _temp6334.base == 0? 1:( _temp6336 < _temp6334.base? 1:
-_temp6336 >= _temp6334.last_plus_one)){ _throw( Null_Exception);}* _temp6336;})),
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6337= yyvs; struct _xtunion_struct**
-_temp6339= _temp6337.curr + yyvsp_offset; if( _temp6337.base == 0? 1:( _temp6339
-< _temp6337.base? 1: _temp6339 >= _temp6337.last_plus_one)){ _throw(
-Null_Exception);}* _temp6339;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6340= yyls; struct Cyc_Yyltype* _temp6342= _temp6340.curr +(
-yylsp_offset - 4); if( _temp6340.base == 0? 1:( _temp6342 < _temp6340.base? 1:
-_temp6342 >= _temp6340.last_plus_one)){ _throw( Null_Exception);}* _temp6342;}).first_line,({
-struct _tagged_ptr3 _temp6343= yyls; struct Cyc_Yyltype* _temp6345= _temp6343.curr
-+ yylsp_offset; if( _temp6343.base == 0? 1:( _temp6345 < _temp6343.base? 1:
-_temp6345 >= _temp6343.last_plus_one)){ _throw( Null_Exception);}* _temp6345;}).last_line));
-_temp6330;}); _temp6329;}); break; case 304: _LL6328: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6347=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6347[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6348; _temp6348.tag= Cyc_Exp_tok_tag; _temp6348.f1= Cyc_Absyn_throw_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6349= yyvs; struct _xtunion_struct**
-_temp6351= _temp6349.curr + yyvsp_offset; if( _temp6349.base == 0? 1:( _temp6351
-< _temp6349.base? 1: _temp6351 >= _temp6349.last_plus_one)){ _throw(
-Null_Exception);}* _temp6351;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6352= yyls; struct Cyc_Yyltype* _temp6354= _temp6352.curr +(
-yylsp_offset - 1); if( _temp6352.base == 0? 1:( _temp6354 < _temp6352.base? 1:
-_temp6354 >= _temp6352.last_plus_one)){ _throw( Null_Exception);}* _temp6354;}).first_line,({
-struct _tagged_ptr3 _temp6355= yyls; struct Cyc_Yyltype* _temp6357= _temp6355.curr
-+ yylsp_offset; if( _temp6355.base == 0? 1:( _temp6357 < _temp6355.base? 1:
-_temp6357 >= _temp6355.last_plus_one)){ _throw( Null_Exception);}* _temp6357;}).last_line));
-_temp6348;}); _temp6347;}); break; case 305: _LL6346: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6359=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6359[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6360; _temp6360.tag= Cyc_Exp_tok_tag; _temp6360.f1= Cyc_Absyn_New_exp( 0,
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6361= yyvs; struct _xtunion_struct**
-_temp6363= _temp6361.curr + yyvsp_offset; if( _temp6361.base == 0? 1:( _temp6363
-< _temp6361.base? 1: _temp6363 >= _temp6361.last_plus_one)){ _throw(
-Null_Exception);}* _temp6363;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6364= yyls; struct Cyc_Yyltype* _temp6366= _temp6364.curr +(
-yylsp_offset - 1); if( _temp6364.base == 0? 1:( _temp6366 < _temp6364.base? 1:
-_temp6366 >= _temp6364.last_plus_one)){ _throw( Null_Exception);}* _temp6366;}).first_line,({
-struct _tagged_ptr3 _temp6367= yyls; struct Cyc_Yyltype* _temp6369= _temp6367.curr
-+( yylsp_offset + 1); if( _temp6367.base == 0? 1:( _temp6369 < _temp6367.base? 1:
-_temp6369 >= _temp6367.last_plus_one)){ _throw( Null_Exception);}* _temp6369;}).last_line));
-_temp6360;}); _temp6359;}); break; case 306: _LL6358: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6371=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6371[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6372; _temp6372.tag= Cyc_Exp_tok_tag; _temp6372.f1= Cyc_Absyn_New_exp( 0,
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6373= yyvs; struct _xtunion_struct**
-_temp6375= _temp6373.curr + yyvsp_offset; if( _temp6373.base == 0? 1:( _temp6375
-< _temp6373.base? 1: _temp6375 >= _temp6373.last_plus_one)){ _throw(
-Null_Exception);}* _temp6375;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6376= yyls; struct Cyc_Yyltype* _temp6378= _temp6376.curr +(
-yylsp_offset - 1); if( _temp6376.base == 0? 1:( _temp6378 < _temp6376.base? 1:
-_temp6378 >= _temp6376.last_plus_one)){ _throw( Null_Exception);}* _temp6378;}).first_line,({
-struct _tagged_ptr3 _temp6379= yyls; struct Cyc_Yyltype* _temp6381= _temp6379.curr
-+( yylsp_offset + 1); if( _temp6379.base == 0? 1:( _temp6381 < _temp6379.base? 1:
-_temp6381 >= _temp6379.last_plus_one)){ _throw( Null_Exception);}* _temp6381;}).last_line));
-_temp6372;}); _temp6371;}); break; case 307: _LL6370: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6383=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6383[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6384; _temp6384.tag= Cyc_Exp_tok_tag; _temp6384.f1= Cyc_Absyn_New_exp((
-struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6385= yyvs;
-struct _xtunion_struct** _temp6387= _temp6385.curr +( yyvsp_offset - 2); if(
-_temp6385.base == 0? 1:( _temp6387 < _temp6385.base? 1: _temp6387 >= _temp6385.last_plus_one)){
-_throw( Null_Exception);}* _temp6387;})), Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp6388= yyvs; struct _xtunion_struct** _temp6390= _temp6388.curr
-+ yyvsp_offset; if( _temp6388.base == 0? 1:( _temp6390 < _temp6388.base? 1:
-_temp6390 >= _temp6388.last_plus_one)){ _throw( Null_Exception);}* _temp6390;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6391= yyls; struct Cyc_Yyltype*
-_temp6393= _temp6391.curr +( yylsp_offset - 4); if( _temp6391.base == 0? 1:(
-_temp6393 < _temp6391.base? 1: _temp6393 >= _temp6391.last_plus_one)){ _throw(
-Null_Exception);}* _temp6393;}).first_line,({ struct _tagged_ptr3 _temp6394=
-yyls; struct Cyc_Yyltype* _temp6396= _temp6394.curr + yylsp_offset; if(
-_temp6394.base == 0? 1:( _temp6396 < _temp6394.base? 1: _temp6396 >= _temp6394.last_plus_one)){
-_throw( Null_Exception);}* _temp6396;}).last_line)); _temp6384;}); _temp6383;});
-break; case 308: _LL6382: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6398=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6398[ 0]=({ struct Cyc_Exp_tok_struct _temp6399; _temp6399.tag= Cyc_Exp_tok_tag;
-_temp6399.f1= Cyc_Absyn_New_exp(( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6400= yyvs; struct _xtunion_struct** _temp6402=
-_temp6400.curr +( yyvsp_offset - 2); if( _temp6400.base == 0? 1:( _temp6402 <
-_temp6400.base? 1: _temp6402 >= _temp6400.last_plus_one)){ _throw(
-Null_Exception);}* _temp6402;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6403= yyvs; struct _xtunion_struct** _temp6405= _temp6403.curr +
-yyvsp_offset; if( _temp6403.base == 0? 1:( _temp6405 < _temp6403.base? 1:
-_temp6405 >= _temp6403.last_plus_one)){ _throw( Null_Exception);}* _temp6405;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6406= yyls; struct Cyc_Yyltype*
-_temp6408= _temp6406.curr +( yylsp_offset - 4); if( _temp6406.base == 0? 1:(
-_temp6408 < _temp6406.base? 1: _temp6408 >= _temp6406.last_plus_one)){ _throw(
-Null_Exception);}* _temp6408;}).first_line,({ struct _tagged_ptr3 _temp6409=
-yyls; struct Cyc_Yyltype* _temp6411= _temp6409.curr + yylsp_offset; if(
-_temp6409.base == 0? 1:( _temp6411 < _temp6409.base? 1: _temp6411 >= _temp6409.last_plus_one)){
-_throw( Null_Exception);}* _temp6411;}).last_line)); _temp6399;}); _temp6398;});
-break; case 309: _LL6397: yyval=({ struct _tagged_ptr2 _temp6413= yyvs; struct
-_xtunion_struct** _temp6415= _temp6413.curr + yyvsp_offset; if( _temp6413.base
-== 0? 1:( _temp6415 < _temp6413.base? 1: _temp6415 >= _temp6413.last_plus_one)){
-_throw( Null_Exception);}* _temp6415;}); break; case 310: _LL6412: yyval=({
-struct _tagged_ptr2 _temp6417= yyvs; struct _xtunion_struct** _temp6419=
-_temp6417.curr + yyvsp_offset; if( _temp6417.base == 0? 1:( _temp6419 <
-_temp6417.base? 1: _temp6419 >= _temp6417.last_plus_one)){ _throw(
-Null_Exception);}* _temp6419;}); break; case 311: _LL6416: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6421=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6421[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6422; _temp6422.tag= Cyc_Exp_tok_tag; _temp6422.f1= Cyc_Absyn_or_exp( Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6423= yyvs; struct _xtunion_struct** _temp6425=
-_temp6423.curr +( yyvsp_offset - 2); if( _temp6423.base == 0? 1:( _temp6425 <
-_temp6423.base? 1: _temp6425 >= _temp6423.last_plus_one)){ _throw(
-Null_Exception);}* _temp6425;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6426= yyvs; struct _xtunion_struct** _temp6428= _temp6426.curr +
-yyvsp_offset; if( _temp6426.base == 0? 1:( _temp6428 < _temp6426.base? 1:
-_temp6428 >= _temp6426.last_plus_one)){ _throw( Null_Exception);}* _temp6428;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6429= yyls; struct Cyc_Yyltype*
-_temp6431= _temp6429.curr +( yylsp_offset - 2); if( _temp6429.base == 0? 1:(
-_temp6431 < _temp6429.base? 1: _temp6431 >= _temp6429.last_plus_one)){ _throw(
-Null_Exception);}* _temp6431;}).first_line,({ struct _tagged_ptr3 _temp6432=
-yyls; struct Cyc_Yyltype* _temp6434= _temp6432.curr + yylsp_offset; if(
-_temp6432.base == 0? 1:( _temp6434 < _temp6432.base? 1: _temp6434 >= _temp6432.last_plus_one)){
-_throw( Null_Exception);}* _temp6434;}).last_line)); _temp6422;}); _temp6421;});
-break; case 312: _LL6420: yyval=({ struct _tagged_ptr2 _temp6436= yyvs; struct
-_xtunion_struct** _temp6438= _temp6436.curr + yyvsp_offset; if( _temp6436.base
-== 0? 1:( _temp6438 < _temp6436.base? 1: _temp6438 >= _temp6436.last_plus_one)){
-_throw( Null_Exception);}* _temp6438;}); break; case 313: _LL6435: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6440=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6440[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6441; _temp6441.tag= Cyc_Exp_tok_tag; _temp6441.f1= Cyc_Absyn_and_exp( Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6442= yyvs; struct _xtunion_struct** _temp6444=
-_temp6442.curr +( yyvsp_offset - 2); if( _temp6442.base == 0? 1:( _temp6444 <
-_temp6442.base? 1: _temp6444 >= _temp6442.last_plus_one)){ _throw(
-Null_Exception);}* _temp6444;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6445= yyvs; struct _xtunion_struct** _temp6447= _temp6445.curr +
-yyvsp_offset; if( _temp6445.base == 0? 1:( _temp6447 < _temp6445.base? 1:
-_temp6447 >= _temp6445.last_plus_one)){ _throw( Null_Exception);}* _temp6447;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6448= yyls; struct Cyc_Yyltype*
-_temp6450= _temp6448.curr +( yylsp_offset - 2); if( _temp6448.base == 0? 1:(
-_temp6450 < _temp6448.base? 1: _temp6450 >= _temp6448.last_plus_one)){ _throw(
-Null_Exception);}* _temp6450;}).first_line,({ struct _tagged_ptr3 _temp6451=
-yyls; struct Cyc_Yyltype* _temp6453= _temp6451.curr + yylsp_offset; if(
-_temp6451.base == 0? 1:( _temp6453 < _temp6451.base? 1: _temp6453 >= _temp6451.last_plus_one)){
-_throw( Null_Exception);}* _temp6453;}).last_line)); _temp6441;}); _temp6440;});
-break; case 314: _LL6439: yyval=({ struct _tagged_ptr2 _temp6455= yyvs; struct
-_xtunion_struct** _temp6457= _temp6455.curr + yyvsp_offset; if( _temp6455.base
-== 0? 1:( _temp6457 < _temp6455.base? 1: _temp6457 >= _temp6455.last_plus_one)){
-_throw( Null_Exception);}* _temp6457;}); break; case 315: _LL6454: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6459=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6459[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6460; _temp6460.tag= Cyc_Exp_tok_tag; _temp6460.f1= Cyc_Absyn_prim2_exp((
-void*) Cyc_Absyn_Bitor, Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6461= yyvs;
-struct _xtunion_struct** _temp6463= _temp6461.curr +( yyvsp_offset - 2); if(
-_temp6461.base == 0? 1:( _temp6463 < _temp6461.base? 1: _temp6463 >= _temp6461.last_plus_one)){
-_throw( Null_Exception);}* _temp6463;})), Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp6464= yyvs; struct _xtunion_struct** _temp6466= _temp6464.curr
-+ yyvsp_offset; if( _temp6464.base == 0? 1:( _temp6466 < _temp6464.base? 1:
-_temp6466 >= _temp6464.last_plus_one)){ _throw( Null_Exception);}* _temp6466;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6467= yyls; struct Cyc_Yyltype*
-_temp6469= _temp6467.curr +( yylsp_offset - 2); if( _temp6467.base == 0? 1:(
-_temp6469 < _temp6467.base? 1: _temp6469 >= _temp6467.last_plus_one)){ _throw(
-Null_Exception);}* _temp6469;}).first_line,({ struct _tagged_ptr3 _temp6470=
-yyls; struct Cyc_Yyltype* _temp6472= _temp6470.curr + yylsp_offset; if(
-_temp6470.base == 0? 1:( _temp6472 < _temp6470.base? 1: _temp6472 >= _temp6470.last_plus_one)){
-_throw( Null_Exception);}* _temp6472;}).last_line)); _temp6460;}); _temp6459;});
-break; case 316: _LL6458: yyval=({ struct _tagged_ptr2 _temp6474= yyvs; struct
-_xtunion_struct** _temp6476= _temp6474.curr + yyvsp_offset; if( _temp6474.base
-== 0? 1:( _temp6476 < _temp6474.base? 1: _temp6476 >= _temp6474.last_plus_one)){
-_throw( Null_Exception);}* _temp6476;}); break; case 317: _LL6473: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6478=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6478[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6479; _temp6479.tag= Cyc_Exp_tok_tag; _temp6479.f1= Cyc_Absyn_prim2_exp((
-void*) Cyc_Absyn_Bitxor, Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6480=
-yyvs; struct _xtunion_struct** _temp6482= _temp6480.curr +( yyvsp_offset - 2);
-if( _temp6480.base == 0? 1:( _temp6482 < _temp6480.base? 1: _temp6482 >=
-_temp6480.last_plus_one)){ _throw( Null_Exception);}* _temp6482;})), Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6483= yyvs; struct _xtunion_struct** _temp6485=
-_temp6483.curr + yyvsp_offset; if( _temp6483.base == 0? 1:( _temp6485 <
-_temp6483.base? 1: _temp6485 >= _temp6483.last_plus_one)){ _throw(
-Null_Exception);}* _temp6485;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6486= yyls; struct Cyc_Yyltype* _temp6488= _temp6486.curr +(
-yylsp_offset - 2); if( _temp6486.base == 0? 1:( _temp6488 < _temp6486.base? 1:
-_temp6488 >= _temp6486.last_plus_one)){ _throw( Null_Exception);}* _temp6488;}).first_line,({
-struct _tagged_ptr3 _temp6489= yyls; struct Cyc_Yyltype* _temp6491= _temp6489.curr
-+ yylsp_offset; if( _temp6489.base == 0? 1:( _temp6491 < _temp6489.base? 1:
-_temp6491 >= _temp6489.last_plus_one)){ _throw( Null_Exception);}* _temp6491;}).last_line));
-_temp6479;}); _temp6478;}); break; case 318: _LL6477: yyval=({ struct
-_tagged_ptr2 _temp6493= yyvs; struct _xtunion_struct** _temp6495= _temp6493.curr
-+ yyvsp_offset; if( _temp6493.base == 0? 1:( _temp6495 < _temp6493.base? 1:
-_temp6495 >= _temp6493.last_plus_one)){ _throw( Null_Exception);}* _temp6495;});
-break; case 319: _LL6492: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6497=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6497[ 0]=({ struct Cyc_Exp_tok_struct _temp6498; _temp6498.tag= Cyc_Exp_tok_tag;
-_temp6498.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Bitand, Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6499= yyvs; struct _xtunion_struct** _temp6501=
-_temp6499.curr +( yyvsp_offset - 2); if( _temp6499.base == 0? 1:( _temp6501 <
-_temp6499.base? 1: _temp6501 >= _temp6499.last_plus_one)){ _throw(
-Null_Exception);}* _temp6501;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6502= yyvs; struct _xtunion_struct** _temp6504= _temp6502.curr +
-yyvsp_offset; if( _temp6502.base == 0? 1:( _temp6504 < _temp6502.base? 1:
-_temp6504 >= _temp6502.last_plus_one)){ _throw( Null_Exception);}* _temp6504;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6505= yyls; struct Cyc_Yyltype*
-_temp6507= _temp6505.curr +( yylsp_offset - 2); if( _temp6505.base == 0? 1:(
-_temp6507 < _temp6505.base? 1: _temp6507 >= _temp6505.last_plus_one)){ _throw(
-Null_Exception);}* _temp6507;}).first_line,({ struct _tagged_ptr3 _temp6508=
-yyls; struct Cyc_Yyltype* _temp6510= _temp6508.curr + yylsp_offset; if(
-_temp6508.base == 0? 1:( _temp6510 < _temp6508.base? 1: _temp6510 >= _temp6508.last_plus_one)){
-_throw( Null_Exception);}* _temp6510;}).last_line)); _temp6498;}); _temp6497;});
-break; case 320: _LL6496: yyval=({ struct _tagged_ptr2 _temp6512= yyvs; struct
-_xtunion_struct** _temp6514= _temp6512.curr + yyvsp_offset; if( _temp6512.base
-== 0? 1:( _temp6514 < _temp6512.base? 1: _temp6514 >= _temp6512.last_plus_one)){
-_throw( Null_Exception);}* _temp6514;}); break; case 321: _LL6511: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6516=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6516[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6517; _temp6517.tag= Cyc_Exp_tok_tag; _temp6517.f1= Cyc_Absyn_eq_exp( Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6518= yyvs; struct _xtunion_struct** _temp6520=
-_temp6518.curr +( yyvsp_offset - 2); if( _temp6518.base == 0? 1:( _temp6520 <
-_temp6518.base? 1: _temp6520 >= _temp6518.last_plus_one)){ _throw(
-Null_Exception);}* _temp6520;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6521= yyvs; struct _xtunion_struct** _temp6523= _temp6521.curr +
-yyvsp_offset; if( _temp6521.base == 0? 1:( _temp6523 < _temp6521.base? 1:
-_temp6523 >= _temp6521.last_plus_one)){ _throw( Null_Exception);}* _temp6523;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6524= yyls; struct Cyc_Yyltype*
-_temp6526= _temp6524.curr +( yylsp_offset - 2); if( _temp6524.base == 0? 1:(
-_temp6526 < _temp6524.base? 1: _temp6526 >= _temp6524.last_plus_one)){ _throw(
-Null_Exception);}* _temp6526;}).first_line,({ struct _tagged_ptr3 _temp6527=
-yyls; struct Cyc_Yyltype* _temp6529= _temp6527.curr + yylsp_offset; if(
-_temp6527.base == 0? 1:( _temp6529 < _temp6527.base? 1: _temp6529 >= _temp6527.last_plus_one)){
-_throw( Null_Exception);}* _temp6529;}).last_line)); _temp6517;}); _temp6516;});
-break; case 322: _LL6515: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6531=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6531[ 0]=({ struct Cyc_Exp_tok_struct _temp6532; _temp6532.tag= Cyc_Exp_tok_tag;
-_temp6532.f1= Cyc_Absyn_neq_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6533= yyvs; struct _xtunion_struct** _temp6535= _temp6533.curr +(
-yyvsp_offset - 2); if( _temp6533.base == 0? 1:( _temp6535 < _temp6533.base? 1:
-_temp6535 >= _temp6533.last_plus_one)){ _throw( Null_Exception);}* _temp6535;})),
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6536= yyvs; struct _xtunion_struct**
-_temp6538= _temp6536.curr + yyvsp_offset; if( _temp6536.base == 0? 1:( _temp6538
-< _temp6536.base? 1: _temp6538 >= _temp6536.last_plus_one)){ _throw(
-Null_Exception);}* _temp6538;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6539= yyls; struct Cyc_Yyltype* _temp6541= _temp6539.curr +(
-yylsp_offset - 2); if( _temp6539.base == 0? 1:( _temp6541 < _temp6539.base? 1:
-_temp6541 >= _temp6539.last_plus_one)){ _throw( Null_Exception);}* _temp6541;}).first_line,({
-struct _tagged_ptr3 _temp6542= yyls; struct Cyc_Yyltype* _temp6544= _temp6542.curr
-+ yylsp_offset; if( _temp6542.base == 0? 1:( _temp6544 < _temp6542.base? 1:
-_temp6544 >= _temp6542.last_plus_one)){ _throw( Null_Exception);}* _temp6544;}).last_line));
-_temp6532;}); _temp6531;}); break; case 323: _LL6530: yyval=({ struct
-_tagged_ptr2 _temp6546= yyvs; struct _xtunion_struct** _temp6548= _temp6546.curr
-+ yyvsp_offset; if( _temp6546.base == 0? 1:( _temp6548 < _temp6546.base? 1:
-_temp6548 >= _temp6546.last_plus_one)){ _throw( Null_Exception);}* _temp6548;});
-break; case 324: _LL6545: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6550=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6550[ 0]=({ struct Cyc_Exp_tok_struct _temp6551; _temp6551.tag= Cyc_Exp_tok_tag;
-_temp6551.f1= Cyc_Absyn_lt_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6552= yyvs; struct _xtunion_struct** _temp6554= _temp6552.curr +(
-yyvsp_offset - 2); if( _temp6552.base == 0? 1:( _temp6554 < _temp6552.base? 1:
-_temp6554 >= _temp6552.last_plus_one)){ _throw( Null_Exception);}* _temp6554;})),
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6555= yyvs; struct _xtunion_struct**
-_temp6557= _temp6555.curr + yyvsp_offset; if( _temp6555.base == 0? 1:( _temp6557
-< _temp6555.base? 1: _temp6557 >= _temp6555.last_plus_one)){ _throw(
-Null_Exception);}* _temp6557;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6558= yyls; struct Cyc_Yyltype* _temp6560= _temp6558.curr +(
-yylsp_offset - 2); if( _temp6558.base == 0? 1:( _temp6560 < _temp6558.base? 1:
-_temp6560 >= _temp6558.last_plus_one)){ _throw( Null_Exception);}* _temp6560;}).first_line,({
-struct _tagged_ptr3 _temp6561= yyls; struct Cyc_Yyltype* _temp6563= _temp6561.curr
-+ yylsp_offset; if( _temp6561.base == 0? 1:( _temp6563 < _temp6561.base? 1:
-_temp6563 >= _temp6561.last_plus_one)){ _throw( Null_Exception);}* _temp6563;}).last_line));
-_temp6551;}); _temp6550;}); break; case 325: _LL6549: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6565=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6565[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6566; _temp6566.tag= Cyc_Exp_tok_tag; _temp6566.f1= Cyc_Absyn_gt_exp( Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6567= yyvs; struct _xtunion_struct** _temp6569=
-_temp6567.curr +( yyvsp_offset - 2); if( _temp6567.base == 0? 1:( _temp6569 <
-_temp6567.base? 1: _temp6569 >= _temp6567.last_plus_one)){ _throw(
-Null_Exception);}* _temp6569;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6570= yyvs; struct _xtunion_struct** _temp6572= _temp6570.curr +
-yyvsp_offset; if( _temp6570.base == 0? 1:( _temp6572 < _temp6570.base? 1:
-_temp6572 >= _temp6570.last_plus_one)){ _throw( Null_Exception);}* _temp6572;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6573= yyls; struct Cyc_Yyltype*
-_temp6575= _temp6573.curr +( yylsp_offset - 2); if( _temp6573.base == 0? 1:(
-_temp6575 < _temp6573.base? 1: _temp6575 >= _temp6573.last_plus_one)){ _throw(
-Null_Exception);}* _temp6575;}).first_line,({ struct _tagged_ptr3 _temp6576=
-yyls; struct Cyc_Yyltype* _temp6578= _temp6576.curr + yylsp_offset; if(
-_temp6576.base == 0? 1:( _temp6578 < _temp6576.base? 1: _temp6578 >= _temp6576.last_plus_one)){
-_throw( Null_Exception);}* _temp6578;}).last_line)); _temp6566;}); _temp6565;});
-break; case 326: _LL6564: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6580=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6580[ 0]=({ struct Cyc_Exp_tok_struct _temp6581; _temp6581.tag= Cyc_Exp_tok_tag;
-_temp6581.f1= Cyc_Absyn_lte_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6582= yyvs; struct _xtunion_struct** _temp6584= _temp6582.curr +(
-yyvsp_offset - 2); if( _temp6582.base == 0? 1:( _temp6584 < _temp6582.base? 1:
-_temp6584 >= _temp6582.last_plus_one)){ _throw( Null_Exception);}* _temp6584;})),
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6585= yyvs; struct _xtunion_struct**
-_temp6587= _temp6585.curr + yyvsp_offset; if( _temp6585.base == 0? 1:( _temp6587
-< _temp6585.base? 1: _temp6587 >= _temp6585.last_plus_one)){ _throw(
-Null_Exception);}* _temp6587;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6588= yyls; struct Cyc_Yyltype* _temp6590= _temp6588.curr +(
-yylsp_offset - 2); if( _temp6588.base == 0? 1:( _temp6590 < _temp6588.base? 1:
-_temp6590 >= _temp6588.last_plus_one)){ _throw( Null_Exception);}* _temp6590;}).first_line,({
-struct _tagged_ptr3 _temp6591= yyls; struct Cyc_Yyltype* _temp6593= _temp6591.curr
-+ yylsp_offset; if( _temp6591.base == 0? 1:( _temp6593 < _temp6591.base? 1:
-_temp6593 >= _temp6591.last_plus_one)){ _throw( Null_Exception);}* _temp6593;}).last_line));
-_temp6581;}); _temp6580;}); break; case 327: _LL6579: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6595=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6595[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6596; _temp6596.tag= Cyc_Exp_tok_tag; _temp6596.f1= Cyc_Absyn_gte_exp( Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6597= yyvs; struct _xtunion_struct** _temp6599=
-_temp6597.curr +( yyvsp_offset - 2); if( _temp6597.base == 0? 1:( _temp6599 <
-_temp6597.base? 1: _temp6599 >= _temp6597.last_plus_one)){ _throw(
-Null_Exception);}* _temp6599;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6600= yyvs; struct _xtunion_struct** _temp6602= _temp6600.curr +
-yyvsp_offset; if( _temp6600.base == 0? 1:( _temp6602 < _temp6600.base? 1:
-_temp6602 >= _temp6600.last_plus_one)){ _throw( Null_Exception);}* _temp6602;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6603= yyls; struct Cyc_Yyltype*
-_temp6605= _temp6603.curr +( yylsp_offset - 2); if( _temp6603.base == 0? 1:(
-_temp6605 < _temp6603.base? 1: _temp6605 >= _temp6603.last_plus_one)){ _throw(
-Null_Exception);}* _temp6605;}).first_line,({ struct _tagged_ptr3 _temp6606=
-yyls; struct Cyc_Yyltype* _temp6608= _temp6606.curr + yylsp_offset; if(
-_temp6606.base == 0? 1:( _temp6608 < _temp6606.base? 1: _temp6608 >= _temp6606.last_plus_one)){
-_throw( Null_Exception);}* _temp6608;}).last_line)); _temp6596;}); _temp6595;});
-break; case 328: _LL6594: yyval=({ struct _tagged_ptr2 _temp6610= yyvs; struct
-_xtunion_struct** _temp6612= _temp6610.curr + yyvsp_offset; if( _temp6610.base
-== 0? 1:( _temp6612 < _temp6610.base? 1: _temp6612 >= _temp6610.last_plus_one)){
-_throw( Null_Exception);}* _temp6612;}); break; case 329: _LL6609: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6614=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6614[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6615; _temp6615.tag= Cyc_Exp_tok_tag; _temp6615.f1= Cyc_Absyn_prim2_exp((
-void*) Cyc_Absyn_Bitlshift, Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6616=
-yyvs; struct _xtunion_struct** _temp6618= _temp6616.curr +( yyvsp_offset - 2);
-if( _temp6616.base == 0? 1:( _temp6618 < _temp6616.base? 1: _temp6618 >=
-_temp6616.last_plus_one)){ _throw( Null_Exception);}* _temp6618;})), Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6619= yyvs; struct _xtunion_struct** _temp6621=
-_temp6619.curr + yyvsp_offset; if( _temp6619.base == 0? 1:( _temp6621 <
-_temp6619.base? 1: _temp6621 >= _temp6619.last_plus_one)){ _throw(
-Null_Exception);}* _temp6621;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6622= yyls; struct Cyc_Yyltype* _temp6624= _temp6622.curr +(
-yylsp_offset - 2); if( _temp6622.base == 0? 1:( _temp6624 < _temp6622.base? 1:
-_temp6624 >= _temp6622.last_plus_one)){ _throw( Null_Exception);}* _temp6624;}).first_line,({
-struct _tagged_ptr3 _temp6625= yyls; struct Cyc_Yyltype* _temp6627= _temp6625.curr
-+ yylsp_offset; if( _temp6625.base == 0? 1:( _temp6627 < _temp6625.base? 1:
-_temp6627 >= _temp6625.last_plus_one)){ _throw( Null_Exception);}* _temp6627;}).last_line));
-_temp6615;}); _temp6614;}); break; case 330: _LL6613: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6629=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6629[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6630; _temp6630.tag= Cyc_Exp_tok_tag; _temp6630.f1= Cyc_Absyn_prim2_exp((
-void*) Cyc_Absyn_Bitlrshift, Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6631=
-yyvs; struct _xtunion_struct** _temp6633= _temp6631.curr +( yyvsp_offset - 2);
-if( _temp6631.base == 0? 1:( _temp6633 < _temp6631.base? 1: _temp6633 >=
-_temp6631.last_plus_one)){ _throw( Null_Exception);}* _temp6633;})), Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6634= yyvs; struct _xtunion_struct** _temp6636=
-_temp6634.curr + yyvsp_offset; if( _temp6634.base == 0? 1:( _temp6636 <
-_temp6634.base? 1: _temp6636 >= _temp6634.last_plus_one)){ _throw(
-Null_Exception);}* _temp6636;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6637= yyls; struct Cyc_Yyltype* _temp6639= _temp6637.curr +(
-yylsp_offset - 2); if( _temp6637.base == 0? 1:( _temp6639 < _temp6637.base? 1:
-_temp6639 >= _temp6637.last_plus_one)){ _throw( Null_Exception);}* _temp6639;}).first_line,({
-struct _tagged_ptr3 _temp6640= yyls; struct Cyc_Yyltype* _temp6642= _temp6640.curr
-+ yylsp_offset; if( _temp6640.base == 0? 1:( _temp6642 < _temp6640.base? 1:
-_temp6642 >= _temp6640.last_plus_one)){ _throw( Null_Exception);}* _temp6642;}).last_line));
-_temp6630;}); _temp6629;}); break; case 331: _LL6628: yyval=({ struct
-_tagged_ptr2 _temp6644= yyvs; struct _xtunion_struct** _temp6646= _temp6644.curr
-+ yyvsp_offset; if( _temp6644.base == 0? 1:( _temp6646 < _temp6644.base? 1:
-_temp6646 >= _temp6644.last_plus_one)){ _throw( Null_Exception);}* _temp6646;});
-break; case 332: _LL6643: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6648=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6648[ 0]=({ struct Cyc_Exp_tok_struct _temp6649; _temp6649.tag= Cyc_Exp_tok_tag;
-_temp6649.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Plus, Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6650= yyvs; struct _xtunion_struct** _temp6652=
-_temp6650.curr +( yyvsp_offset - 2); if( _temp6650.base == 0? 1:( _temp6652 <
-_temp6650.base? 1: _temp6652 >= _temp6650.last_plus_one)){ _throw(
-Null_Exception);}* _temp6652;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6653= yyvs; struct _xtunion_struct** _temp6655= _temp6653.curr +
-yyvsp_offset; if( _temp6653.base == 0? 1:( _temp6655 < _temp6653.base? 1:
-_temp6655 >= _temp6653.last_plus_one)){ _throw( Null_Exception);}* _temp6655;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6656= yyls; struct Cyc_Yyltype*
-_temp6658= _temp6656.curr +( yylsp_offset - 2); if( _temp6656.base == 0? 1:(
-_temp6658 < _temp6656.base? 1: _temp6658 >= _temp6656.last_plus_one)){ _throw(
-Null_Exception);}* _temp6658;}).first_line,({ struct _tagged_ptr3 _temp6659=
-yyls; struct Cyc_Yyltype* _temp6661= _temp6659.curr + yylsp_offset; if(
-_temp6659.base == 0? 1:( _temp6661 < _temp6659.base? 1: _temp6661 >= _temp6659.last_plus_one)){
-_throw( Null_Exception);}* _temp6661;}).last_line)); _temp6649;}); _temp6648;});
-break; case 333: _LL6647: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6663=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6663[ 0]=({ struct Cyc_Exp_tok_struct _temp6664; _temp6664.tag= Cyc_Exp_tok_tag;
-_temp6664.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Minus, Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6665= yyvs; struct _xtunion_struct** _temp6667=
-_temp6665.curr +( yyvsp_offset - 2); if( _temp6665.base == 0? 1:( _temp6667 <
-_temp6665.base? 1: _temp6667 >= _temp6665.last_plus_one)){ _throw(
-Null_Exception);}* _temp6667;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6668= yyvs; struct _xtunion_struct** _temp6670= _temp6668.curr +
-yyvsp_offset; if( _temp6668.base == 0? 1:( _temp6670 < _temp6668.base? 1:
-_temp6670 >= _temp6668.last_plus_one)){ _throw( Null_Exception);}* _temp6670;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6671= yyls; struct Cyc_Yyltype*
-_temp6673= _temp6671.curr +( yylsp_offset - 2); if( _temp6671.base == 0? 1:(
-_temp6673 < _temp6671.base? 1: _temp6673 >= _temp6671.last_plus_one)){ _throw(
-Null_Exception);}* _temp6673;}).first_line,({ struct _tagged_ptr3 _temp6674=
-yyls; struct Cyc_Yyltype* _temp6676= _temp6674.curr + yylsp_offset; if(
-_temp6674.base == 0? 1:( _temp6676 < _temp6674.base? 1: _temp6676 >= _temp6674.last_plus_one)){
-_throw( Null_Exception);}* _temp6676;}).last_line)); _temp6664;}); _temp6663;});
-break; case 334: _LL6662: yyval=({ struct _tagged_ptr2 _temp6678= yyvs; struct
-_xtunion_struct** _temp6680= _temp6678.curr + yyvsp_offset; if( _temp6678.base
-== 0? 1:( _temp6680 < _temp6678.base? 1: _temp6680 >= _temp6678.last_plus_one)){
-_throw( Null_Exception);}* _temp6680;}); break; case 335: _LL6677: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6682=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6682[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6683; _temp6683.tag= Cyc_Exp_tok_tag; _temp6683.f1= Cyc_Absyn_prim2_exp((
-void*) Cyc_Absyn_Times, Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6684= yyvs;
-struct _xtunion_struct** _temp6686= _temp6684.curr +( yyvsp_offset - 2); if(
-_temp6684.base == 0? 1:( _temp6686 < _temp6684.base? 1: _temp6686 >= _temp6684.last_plus_one)){
-_throw( Null_Exception);}* _temp6686;})), Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp6687= yyvs; struct _xtunion_struct** _temp6689= _temp6687.curr
-+ yyvsp_offset; if( _temp6687.base == 0? 1:( _temp6689 < _temp6687.base? 1:
-_temp6689 >= _temp6687.last_plus_one)){ _throw( Null_Exception);}* _temp6689;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6690= yyls; struct Cyc_Yyltype*
-_temp6692= _temp6690.curr +( yylsp_offset - 2); if( _temp6690.base == 0? 1:(
-_temp6692 < _temp6690.base? 1: _temp6692 >= _temp6690.last_plus_one)){ _throw(
-Null_Exception);}* _temp6692;}).first_line,({ struct _tagged_ptr3 _temp6693=
-yyls; struct Cyc_Yyltype* _temp6695= _temp6693.curr + yylsp_offset; if(
-_temp6693.base == 0? 1:( _temp6695 < _temp6693.base? 1: _temp6695 >= _temp6693.last_plus_one)){
-_throw( Null_Exception);}* _temp6695;}).last_line)); _temp6683;}); _temp6682;});
-break; case 336: _LL6681: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6697=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6697[ 0]=({ struct Cyc_Exp_tok_struct _temp6698; _temp6698.tag= Cyc_Exp_tok_tag;
-_temp6698.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Div, Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6699= yyvs; struct _xtunion_struct** _temp6701=
-_temp6699.curr +( yyvsp_offset - 2); if( _temp6699.base == 0? 1:( _temp6701 <
-_temp6699.base? 1: _temp6701 >= _temp6699.last_plus_one)){ _throw(
-Null_Exception);}* _temp6701;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6702= yyvs; struct _xtunion_struct** _temp6704= _temp6702.curr +
-yyvsp_offset; if( _temp6702.base == 0? 1:( _temp6704 < _temp6702.base? 1:
-_temp6704 >= _temp6702.last_plus_one)){ _throw( Null_Exception);}* _temp6704;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6705= yyls; struct Cyc_Yyltype*
-_temp6707= _temp6705.curr +( yylsp_offset - 2); if( _temp6705.base == 0? 1:(
-_temp6707 < _temp6705.base? 1: _temp6707 >= _temp6705.last_plus_one)){ _throw(
-Null_Exception);}* _temp6707;}).first_line,({ struct _tagged_ptr3 _temp6708=
-yyls; struct Cyc_Yyltype* _temp6710= _temp6708.curr + yylsp_offset; if(
-_temp6708.base == 0? 1:( _temp6710 < _temp6708.base? 1: _temp6710 >= _temp6708.last_plus_one)){
-_throw( Null_Exception);}* _temp6710;}).last_line)); _temp6698;}); _temp6697;});
-break; case 337: _LL6696: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6712=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6712[ 0]=({ struct Cyc_Exp_tok_struct _temp6713; _temp6713.tag= Cyc_Exp_tok_tag;
-_temp6713.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Mod, Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp6714= yyvs; struct _xtunion_struct** _temp6716=
-_temp6714.curr +( yyvsp_offset - 2); if( _temp6714.base == 0? 1:( _temp6716 <
-_temp6714.base? 1: _temp6716 >= _temp6714.last_plus_one)){ _throw(
-Null_Exception);}* _temp6716;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6717= yyvs; struct _xtunion_struct** _temp6719= _temp6717.curr +
-yyvsp_offset; if( _temp6717.base == 0? 1:( _temp6719 < _temp6717.base? 1:
-_temp6719 >= _temp6717.last_plus_one)){ _throw( Null_Exception);}* _temp6719;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6720= yyls; struct Cyc_Yyltype*
-_temp6722= _temp6720.curr +( yylsp_offset - 2); if( _temp6720.base == 0? 1:(
-_temp6722 < _temp6720.base? 1: _temp6722 >= _temp6720.last_plus_one)){ _throw(
-Null_Exception);}* _temp6722;}).first_line,({ struct _tagged_ptr3 _temp6723=
-yyls; struct Cyc_Yyltype* _temp6725= _temp6723.curr + yylsp_offset; if(
-_temp6723.base == 0? 1:( _temp6725 < _temp6723.base? 1: _temp6725 >= _temp6723.last_plus_one)){
-_throw( Null_Exception);}* _temp6725;}).last_line)); _temp6713;}); _temp6712;});
-break; case 338: _LL6711: yyval=({ struct _tagged_ptr2 _temp6727= yyvs; struct
-_xtunion_struct** _temp6729= _temp6727.curr + yyvsp_offset; if( _temp6727.base
-== 0? 1:( _temp6729 < _temp6727.base? 1: _temp6729 >= _temp6727.last_plus_one)){
-_throw( Null_Exception);}* _temp6729;}); break; case 339: _LL6726: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6731=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6731[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6732; _temp6732.tag= Cyc_Exp_tok_tag; _temp6732.f1= Cyc_Absyn_cast_exp((*
-Cyc_yyget_ParamDecl_tok(({ struct _tagged_ptr2 _temp6733= yyvs; struct
-_xtunion_struct** _temp6735= _temp6733.curr +( yyvsp_offset - 2); if( _temp6733.base
-== 0? 1:( _temp6735 < _temp6733.base? 1: _temp6735 >= _temp6733.last_plus_one)){
-_throw( Null_Exception);}* _temp6735;}))).f3, Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp6736= yyvs; struct _xtunion_struct** _temp6738= _temp6736.curr
-+ yyvsp_offset; if( _temp6736.base == 0? 1:( _temp6738 < _temp6736.base? 1:
-_temp6738 >= _temp6736.last_plus_one)){ _throw( Null_Exception);}* _temp6738;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6739= yyls; struct Cyc_Yyltype*
-_temp6741= _temp6739.curr +( yylsp_offset - 3); if( _temp6739.base == 0? 1:(
-_temp6741 < _temp6739.base? 1: _temp6741 >= _temp6739.last_plus_one)){ _throw(
-Null_Exception);}* _temp6741;}).first_line,({ struct _tagged_ptr3 _temp6742=
-yyls; struct Cyc_Yyltype* _temp6744= _temp6742.curr + yylsp_offset; if(
-_temp6742.base == 0? 1:( _temp6744 < _temp6742.base? 1: _temp6744 >= _temp6742.last_plus_one)){
-_throw( Null_Exception);}* _temp6744;}).last_line)); _temp6732;}); _temp6731;});
-break; case 340: _LL6730: yyval=({ struct _tagged_ptr2 _temp6746= yyvs; struct
-_xtunion_struct** _temp6748= _temp6746.curr + yyvsp_offset; if( _temp6746.base
-== 0? 1:( _temp6748 < _temp6746.base? 1: _temp6748 >= _temp6746.last_plus_one)){
-_throw( Null_Exception);}* _temp6748;}); break; case 341: _LL6745: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6750=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6750[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6751; _temp6751.tag= Cyc_Exp_tok_tag; _temp6751.f1= Cyc_Absyn_pre_inc_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6752= yyvs; struct _xtunion_struct**
-_temp6754= _temp6752.curr + yyvsp_offset; if( _temp6752.base == 0? 1:( _temp6754
-< _temp6752.base? 1: _temp6754 >= _temp6752.last_plus_one)){ _throw(
-Null_Exception);}* _temp6754;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6755= yyls; struct Cyc_Yyltype* _temp6757= _temp6755.curr +(
-yylsp_offset - 1); if( _temp6755.base == 0? 1:( _temp6757 < _temp6755.base? 1:
-_temp6757 >= _temp6755.last_plus_one)){ _throw( Null_Exception);}* _temp6757;}).first_line,({
-struct _tagged_ptr3 _temp6758= yyls; struct Cyc_Yyltype* _temp6760= _temp6758.curr
-+ yylsp_offset; if( _temp6758.base == 0? 1:( _temp6760 < _temp6758.base? 1:
-_temp6760 >= _temp6758.last_plus_one)){ _throw( Null_Exception);}* _temp6760;}).last_line));
-_temp6751;}); _temp6750;}); break; case 342: _LL6749: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6762=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6762[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6763; _temp6763.tag= Cyc_Exp_tok_tag; _temp6763.f1= Cyc_Absyn_pre_dec_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6764= yyvs; struct _xtunion_struct**
-_temp6766= _temp6764.curr + yyvsp_offset; if( _temp6764.base == 0? 1:( _temp6766
-< _temp6764.base? 1: _temp6766 >= _temp6764.last_plus_one)){ _throw(
-Null_Exception);}* _temp6766;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6767= yyls; struct Cyc_Yyltype* _temp6769= _temp6767.curr +(
-yylsp_offset - 1); if( _temp6767.base == 0? 1:( _temp6769 < _temp6767.base? 1:
-_temp6769 >= _temp6767.last_plus_one)){ _throw( Null_Exception);}* _temp6769;}).first_line,({
-struct _tagged_ptr3 _temp6770= yyls; struct Cyc_Yyltype* _temp6772= _temp6770.curr
-+ yylsp_offset; if( _temp6770.base == 0? 1:( _temp6772 < _temp6770.base? 1:
-_temp6772 >= _temp6770.last_plus_one)){ _throw( Null_Exception);}* _temp6772;}).last_line));
-_temp6763;}); _temp6762;}); break; case 343: _LL6761: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6774=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6774[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6775; _temp6775.tag= Cyc_Exp_tok_tag; _temp6775.f1= Cyc_Absyn_address_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6776= yyvs; struct _xtunion_struct**
-_temp6778= _temp6776.curr + yyvsp_offset; if( _temp6776.base == 0? 1:( _temp6778
-< _temp6776.base? 1: _temp6778 >= _temp6776.last_plus_one)){ _throw(
-Null_Exception);}* _temp6778;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6779= yyls; struct Cyc_Yyltype* _temp6781= _temp6779.curr +(
-yylsp_offset - 1); if( _temp6779.base == 0? 1:( _temp6781 < _temp6779.base? 1:
-_temp6781 >= _temp6779.last_plus_one)){ _throw( Null_Exception);}* _temp6781;}).first_line,({
-struct _tagged_ptr3 _temp6782= yyls; struct Cyc_Yyltype* _temp6784= _temp6782.curr
-+ yylsp_offset; if( _temp6782.base == 0? 1:( _temp6784 < _temp6782.base? 1:
-_temp6784 >= _temp6782.last_plus_one)){ _throw( Null_Exception);}* _temp6784;}).last_line));
-_temp6775;}); _temp6774;}); break; case 344: _LL6773: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6786=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6786[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6787; _temp6787.tag= Cyc_Exp_tok_tag; _temp6787.f1= Cyc_Absyn_deref_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6788= yyvs; struct _xtunion_struct**
-_temp6790= _temp6788.curr + yyvsp_offset; if( _temp6788.base == 0? 1:( _temp6790
-< _temp6788.base? 1: _temp6790 >= _temp6788.last_plus_one)){ _throw(
-Null_Exception);}* _temp6790;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6791= yyls; struct Cyc_Yyltype* _temp6793= _temp6791.curr +(
-yylsp_offset - 1); if( _temp6791.base == 0? 1:( _temp6793 < _temp6791.base? 1:
-_temp6793 >= _temp6791.last_plus_one)){ _throw( Null_Exception);}* _temp6793;}).first_line,({
-struct _tagged_ptr3 _temp6794= yyls; struct Cyc_Yyltype* _temp6796= _temp6794.curr
-+ yylsp_offset; if( _temp6794.base == 0? 1:( _temp6796 < _temp6794.base? 1:
-_temp6796 >= _temp6794.last_plus_one)){ _throw( Null_Exception);}* _temp6796;}).last_line));
-_temp6787;}); _temp6786;}); break; case 345: _LL6785: yyval=({ struct
-_tagged_ptr2 _temp6798= yyvs; struct _xtunion_struct** _temp6800= _temp6798.curr
-+ yyvsp_offset; if( _temp6798.base == 0? 1:( _temp6800 < _temp6798.base? 1:
-_temp6800 >= _temp6798.last_plus_one)){ _throw( Null_Exception);}* _temp6800;});
-break; case 346: _LL6797: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6802=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6802[ 0]=({ struct Cyc_Exp_tok_struct _temp6803; _temp6803.tag= Cyc_Exp_tok_tag;
-_temp6803.f1= Cyc_Absyn_prim1_exp( Cyc_yyget_Primop_tok(({ struct _tagged_ptr2
-_temp6804= yyvs; struct _xtunion_struct** _temp6806= _temp6804.curr +(
-yyvsp_offset - 1); if( _temp6804.base == 0? 1:( _temp6806 < _temp6804.base? 1:
-_temp6806 >= _temp6804.last_plus_one)){ _throw( Null_Exception);}* _temp6806;})),
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6807= yyvs; struct _xtunion_struct**
-_temp6809= _temp6807.curr + yyvsp_offset; if( _temp6807.base == 0? 1:( _temp6809
-< _temp6807.base? 1: _temp6809 >= _temp6807.last_plus_one)){ _throw(
-Null_Exception);}* _temp6809;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6810= yyls; struct Cyc_Yyltype* _temp6812= _temp6810.curr +(
-yylsp_offset - 1); if( _temp6810.base == 0? 1:( _temp6812 < _temp6810.base? 1:
-_temp6812 >= _temp6810.last_plus_one)){ _throw( Null_Exception);}* _temp6812;}).first_line,({
-struct _tagged_ptr3 _temp6813= yyls; struct Cyc_Yyltype* _temp6815= _temp6813.curr
-+ yylsp_offset; if( _temp6813.base == 0? 1:( _temp6815 < _temp6813.base? 1:
-_temp6815 >= _temp6813.last_plus_one)){ _throw( Null_Exception);}* _temp6815;}).last_line));
-_temp6803;}); _temp6802;}); break; case 347: _LL6801: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6817=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6817[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6818; _temp6818.tag= Cyc_Exp_tok_tag; _temp6818.f1= Cyc_Absyn_sizeoftyp_exp((*
-Cyc_yyget_ParamDecl_tok(({ struct _tagged_ptr2 _temp6819= yyvs; struct
-_xtunion_struct** _temp6821= _temp6819.curr +( yyvsp_offset - 1); if( _temp6819.base
-== 0? 1:( _temp6821 < _temp6819.base? 1: _temp6821 >= _temp6819.last_plus_one)){
-_throw( Null_Exception);}* _temp6821;}))).f3, Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp6822= yyls; struct Cyc_Yyltype* _temp6824= _temp6822.curr
-+( yylsp_offset - 3); if( _temp6822.base == 0? 1:( _temp6824 < _temp6822.base? 1:
-_temp6824 >= _temp6822.last_plus_one)){ _throw( Null_Exception);}* _temp6824;}).first_line,({
-struct _tagged_ptr3 _temp6825= yyls; struct Cyc_Yyltype* _temp6827= _temp6825.curr
-+ yylsp_offset; if( _temp6825.base == 0? 1:( _temp6827 < _temp6825.base? 1:
-_temp6827 >= _temp6825.last_plus_one)){ _throw( Null_Exception);}* _temp6827;}).last_line));
-_temp6818;}); _temp6817;}); break; case 348: _LL6816: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6829=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6829[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6830; _temp6830.tag= Cyc_Exp_tok_tag; _temp6830.f1= Cyc_Absyn_sizeofexp_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6831= yyvs; struct _xtunion_struct**
-_temp6833= _temp6831.curr + yyvsp_offset; if( _temp6831.base == 0? 1:( _temp6833
-< _temp6831.base? 1: _temp6833 >= _temp6831.last_plus_one)){ _throw(
-Null_Exception);}* _temp6833;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6834= yyls; struct Cyc_Yyltype* _temp6836= _temp6834.curr +(
-yylsp_offset - 1); if( _temp6834.base == 0? 1:( _temp6836 < _temp6834.base? 1:
-_temp6836 >= _temp6834.last_plus_one)){ _throw( Null_Exception);}* _temp6836;}).first_line,({
-struct _tagged_ptr3 _temp6837= yyls; struct Cyc_Yyltype* _temp6839= _temp6837.curr
-+ yylsp_offset; if( _temp6837.base == 0? 1:( _temp6839 < _temp6837.base? 1:
-_temp6839 >= _temp6837.last_plus_one)){ _throw( Null_Exception);}* _temp6839;}).last_line));
-_temp6830;}); _temp6829;}); break; case 349: _LL6828: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6841=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6841[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6842; _temp6842.tag= Cyc_Exp_tok_tag; _temp6842.f1= Cyc_Absyn_primop_exp(
-Cyc_yyget_Primop_tok(({ struct _tagged_ptr2 _temp6843= yyvs; struct
-_xtunion_struct** _temp6845= _temp6843.curr +( yyvsp_offset - 3); if( _temp6843.base
-== 0? 1:( _temp6845 < _temp6843.base? 1: _temp6845 >= _temp6843.last_plus_one)){
-_throw( Null_Exception);}* _temp6845;})), Cyc_yyget_ExpList_tok(({ struct
-_tagged_ptr2 _temp6846= yyvs; struct _xtunion_struct** _temp6848= _temp6846.curr
-+( yyvsp_offset - 1); if( _temp6846.base == 0? 1:( _temp6848 < _temp6846.base? 1:
-_temp6848 >= _temp6846.last_plus_one)){ _throw( Null_Exception);}* _temp6848;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6849= yyls; struct Cyc_Yyltype*
-_temp6851= _temp6849.curr +( yylsp_offset - 3); if( _temp6849.base == 0? 1:(
-_temp6851 < _temp6849.base? 1: _temp6851 >= _temp6849.last_plus_one)){ _throw(
-Null_Exception);}* _temp6851;}).first_line,({ struct _tagged_ptr3 _temp6852=
-yyls; struct Cyc_Yyltype* _temp6854= _temp6852.curr + yylsp_offset; if(
-_temp6852.base == 0? 1:( _temp6854 < _temp6852.base? 1: _temp6854 >= _temp6852.last_plus_one)){
-_throw( Null_Exception);}* _temp6854;}).last_line)); _temp6842;}); _temp6841;});
-break; case 350: _LL6840: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6856=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6856[ 0]=({ struct Cyc_Exp_tok_struct _temp6857; _temp6857.tag= Cyc_Exp_tok_tag;
-_temp6857.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Malloc_e_struct*
-_temp6858=( struct Cyc_Absyn_Malloc_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Malloc_e_struct));
-_temp6858[ 0]=({ struct Cyc_Absyn_Malloc_e_struct _temp6859; _temp6859.tag= Cyc_Absyn_Malloc_e_tag;
-_temp6859.f1= 0; _temp6859.f2=( void*) Cyc_Parse_speclist2typ((* Cyc_yyget_QualSpecList_tok(({
-struct _tagged_ptr2 _temp6860= yyvs; struct _xtunion_struct** _temp6862=
-_temp6860.curr +( yyvsp_offset - 2); if( _temp6860.base == 0? 1:( _temp6862 <
-_temp6860.base? 1: _temp6862 >= _temp6860.last_plus_one)){ _throw(
-Null_Exception);}* _temp6862;}))).f2, Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6863= yyls; struct Cyc_Yyltype* _temp6865= _temp6863.curr +(
-yylsp_offset - 2); if( _temp6863.base == 0? 1:( _temp6865 < _temp6863.base? 1:
-_temp6865 >= _temp6863.last_plus_one)){ _throw( Null_Exception);}* _temp6865;}).first_line,({
-struct _tagged_ptr3 _temp6866= yyls; struct Cyc_Yyltype* _temp6868= _temp6866.curr
-+( yylsp_offset - 2); if( _temp6866.base == 0? 1:( _temp6868 < _temp6866.base? 1:
-_temp6868 >= _temp6866.last_plus_one)){ _throw( Null_Exception);}* _temp6868;}).last_line));
-_temp6859;}); _temp6858;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp6869= yyls; struct Cyc_Yyltype* _temp6871= _temp6869.curr +( yylsp_offset -
-6); if( _temp6869.base == 0? 1:( _temp6871 < _temp6869.base? 1: _temp6871 >=
-_temp6869.last_plus_one)){ _throw( Null_Exception);}* _temp6871;}).first_line,({
-struct _tagged_ptr3 _temp6872= yyls; struct Cyc_Yyltype* _temp6874= _temp6872.curr
-+ yylsp_offset; if( _temp6872.base == 0? 1:( _temp6874 < _temp6872.base? 1:
-_temp6874 >= _temp6872.last_plus_one)){ _throw( Null_Exception);}* _temp6874;}).last_line));
-_temp6857;}); _temp6856;}); break; case 351: _LL6855: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6876=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6876[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6877; _temp6877.tag= Cyc_Exp_tok_tag; _temp6877.f1= Cyc_Absyn_new_exp((
-void*)({ struct Cyc_Absyn_Malloc_e_struct* _temp6878=( struct Cyc_Absyn_Malloc_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Malloc_e_struct)); _temp6878[ 0]=({ struct
-Cyc_Absyn_Malloc_e_struct _temp6879; _temp6879.tag= Cyc_Absyn_Malloc_e_tag;
-_temp6879.f1=( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6880= yyvs; struct _xtunion_struct** _temp6882= _temp6880.curr +(
-yyvsp_offset - 6); if( _temp6880.base == 0? 1:( _temp6882 < _temp6880.base? 1:
-_temp6882 >= _temp6880.last_plus_one)){ _throw( Null_Exception);}* _temp6882;}));
-_temp6879.f2=( void*) Cyc_Parse_speclist2typ((* Cyc_yyget_QualSpecList_tok(({
-struct _tagged_ptr2 _temp6883= yyvs; struct _xtunion_struct** _temp6885=
-_temp6883.curr +( yyvsp_offset - 2); if( _temp6883.base == 0? 1:( _temp6885 <
-_temp6883.base? 1: _temp6885 >= _temp6883.last_plus_one)){ _throw(
-Null_Exception);}* _temp6885;}))).f2, Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6886= yyls; struct Cyc_Yyltype* _temp6888= _temp6886.curr +(
-yylsp_offset - 2); if( _temp6886.base == 0? 1:( _temp6888 < _temp6886.base? 1:
-_temp6888 >= _temp6886.last_plus_one)){ _throw( Null_Exception);}* _temp6888;}).first_line,({
-struct _tagged_ptr3 _temp6889= yyls; struct Cyc_Yyltype* _temp6891= _temp6889.curr
-+( yylsp_offset - 2); if( _temp6889.base == 0? 1:( _temp6891 < _temp6889.base? 1:
-_temp6891 >= _temp6889.last_plus_one)){ _throw( Null_Exception);}* _temp6891;}).last_line));
-_temp6879;}); _temp6878;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp6892= yyls; struct Cyc_Yyltype* _temp6894= _temp6892.curr +( yylsp_offset -
-8); if( _temp6892.base == 0? 1:( _temp6894 < _temp6892.base? 1: _temp6894 >=
-_temp6892.last_plus_one)){ _throw( Null_Exception);}* _temp6894;}).first_line,({
-struct _tagged_ptr3 _temp6895= yyls; struct Cyc_Yyltype* _temp6897= _temp6895.curr
-+ yylsp_offset; if( _temp6895.base == 0? 1:( _temp6897 < _temp6895.base? 1:
-_temp6897 >= _temp6895.last_plus_one)){ _throw( Null_Exception);}* _temp6897;}).last_line));
-_temp6877;}); _temp6876;}); break; case 352: _LL6875: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6899=( struct Cyc_Primop_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6899[ 0]=({ struct Cyc_Primop_tok_struct
-_temp6900; _temp6900.tag= Cyc_Primop_tok_tag; _temp6900.f1=( void*)(( void*) Cyc_Absyn_Printf);
-_temp6900;}); _temp6899;}); break; case 353: _LL6898: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6902=( struct Cyc_Primop_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6902[ 0]=({ struct Cyc_Primop_tok_struct
-_temp6903; _temp6903.tag= Cyc_Primop_tok_tag; _temp6903.f1=( void*)(( void*) Cyc_Absyn_Fprintf);
-_temp6903;}); _temp6902;}); break; case 354: _LL6901: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6905=( struct Cyc_Primop_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6905[ 0]=({ struct Cyc_Primop_tok_struct
-_temp6906; _temp6906.tag= Cyc_Primop_tok_tag; _temp6906.f1=( void*)(( void*) Cyc_Absyn_Xprintf);
-_temp6906;}); _temp6905;}); break; case 355: _LL6904: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6908=( struct Cyc_Primop_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6908[ 0]=({ struct Cyc_Primop_tok_struct
-_temp6909; _temp6909.tag= Cyc_Primop_tok_tag; _temp6909.f1=( void*)(( void*) Cyc_Absyn_Scanf);
-_temp6909;}); _temp6908;}); break; case 356: _LL6907: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6911=( struct Cyc_Primop_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6911[ 0]=({ struct Cyc_Primop_tok_struct
-_temp6912; _temp6912.tag= Cyc_Primop_tok_tag; _temp6912.f1=( void*)(( void*) Cyc_Absyn_Fscanf);
-_temp6912;}); _temp6911;}); break; case 357: _LL6910: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6914=( struct Cyc_Primop_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6914[ 0]=({ struct Cyc_Primop_tok_struct
-_temp6915; _temp6915.tag= Cyc_Primop_tok_tag; _temp6915.f1=( void*)(( void*) Cyc_Absyn_Sscanf);
-_temp6915;}); _temp6914;}); break; case 358: _LL6913: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6917=( struct Cyc_Primop_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6917[ 0]=({ struct Cyc_Primop_tok_struct
-_temp6918; _temp6918.tag= Cyc_Primop_tok_tag; _temp6918.f1=( void*)(( void*) Cyc_Absyn_Bitnot);
-_temp6918;}); _temp6917;}); break; case 359: _LL6916: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6920=( struct Cyc_Primop_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6920[ 0]=({ struct Cyc_Primop_tok_struct
-_temp6921; _temp6921.tag= Cyc_Primop_tok_tag; _temp6921.f1=( void*)(( void*) Cyc_Absyn_Not);
-_temp6921;}); _temp6920;}); break; case 360: _LL6919: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6923=( struct Cyc_Primop_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6923[ 0]=({ struct Cyc_Primop_tok_struct
-_temp6924; _temp6924.tag= Cyc_Primop_tok_tag; _temp6924.f1=( void*)(( void*) Cyc_Absyn_Minus);
-_temp6924;}); _temp6923;}); break; case 361: _LL6922: yyval=({ struct
-_tagged_ptr2 _temp6926= yyvs; struct _xtunion_struct** _temp6928= _temp6926.curr
-+ yyvsp_offset; if( _temp6926.base == 0? 1:( _temp6928 < _temp6926.base? 1:
-_temp6928 >= _temp6926.last_plus_one)){ _throw( Null_Exception);}* _temp6928;});
-break; case 362: _LL6925: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6930=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6930[ 0]=({ struct Cyc_Exp_tok_struct _temp6931; _temp6931.tag= Cyc_Exp_tok_tag;
-_temp6931.f1= Cyc_Absyn_subscript_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
-_temp6932= yyvs; struct _xtunion_struct** _temp6934= _temp6932.curr +(
-yyvsp_offset - 3); if( _temp6932.base == 0? 1:( _temp6934 < _temp6932.base? 1:
-_temp6934 >= _temp6932.last_plus_one)){ _throw( Null_Exception);}* _temp6934;})),
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6935= yyvs; struct _xtunion_struct**
-_temp6937= _temp6935.curr +( yyvsp_offset - 1); if( _temp6935.base == 0? 1:(
-_temp6937 < _temp6935.base? 1: _temp6937 >= _temp6935.last_plus_one)){ _throw(
-Null_Exception);}* _temp6937;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6938= yyls; struct Cyc_Yyltype* _temp6940= _temp6938.curr +(
-yylsp_offset - 3); if( _temp6938.base == 0? 1:( _temp6940 < _temp6938.base? 1:
-_temp6940 >= _temp6938.last_plus_one)){ _throw( Null_Exception);}* _temp6940;}).first_line,({
-struct _tagged_ptr3 _temp6941= yyls; struct Cyc_Yyltype* _temp6943= _temp6941.curr
-+ yylsp_offset; if( _temp6941.base == 0? 1:( _temp6943 < _temp6941.base? 1:
-_temp6943 >= _temp6941.last_plus_one)){ _throw( Null_Exception);}* _temp6943;}).last_line));
-_temp6931;}); _temp6930;}); break; case 363: _LL6929: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6945=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6945[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6946; _temp6946.tag= Cyc_Exp_tok_tag; _temp6946.f1= Cyc_Absyn_unknowncall_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6947= yyvs; struct _xtunion_struct**
-_temp6949= _temp6947.curr +( yyvsp_offset - 2); if( _temp6947.base == 0? 1:(
-_temp6949 < _temp6947.base? 1: _temp6949 >= _temp6947.last_plus_one)){ _throw(
-Null_Exception);}* _temp6949;})), 0, Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp6950= yyls; struct Cyc_Yyltype* _temp6952= _temp6950.curr +(
-yylsp_offset - 2); if( _temp6950.base == 0? 1:( _temp6952 < _temp6950.base? 1:
-_temp6952 >= _temp6950.last_plus_one)){ _throw( Null_Exception);}* _temp6952;}).first_line,({
-struct _tagged_ptr3 _temp6953= yyls; struct Cyc_Yyltype* _temp6955= _temp6953.curr
-+ yylsp_offset; if( _temp6953.base == 0? 1:( _temp6955 < _temp6953.base? 1:
-_temp6955 >= _temp6953.last_plus_one)){ _throw( Null_Exception);}* _temp6955;}).last_line));
-_temp6946;}); _temp6945;}); break; case 364: _LL6944: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6957=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6957[ 0]=({ struct Cyc_Exp_tok_struct
-_temp6958; _temp6958.tag= Cyc_Exp_tok_tag; _temp6958.f1= Cyc_Absyn_unknowncall_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6959= yyvs; struct _xtunion_struct**
-_temp6961= _temp6959.curr +( yyvsp_offset - 3); if( _temp6959.base == 0? 1:(
-_temp6961 < _temp6959.base? 1: _temp6961 >= _temp6959.last_plus_one)){ _throw(
-Null_Exception);}* _temp6961;})), Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2
-_temp6962= yyvs; struct _xtunion_struct** _temp6964= _temp6962.curr +(
-yyvsp_offset - 1); if( _temp6962.base == 0? 1:( _temp6964 < _temp6962.base? 1:
-_temp6964 >= _temp6962.last_plus_one)){ _throw( Null_Exception);}* _temp6964;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6965= yyls; struct Cyc_Yyltype*
-_temp6967= _temp6965.curr +( yylsp_offset - 3); if( _temp6965.base == 0? 1:(
-_temp6967 < _temp6965.base? 1: _temp6967 >= _temp6965.last_plus_one)){ _throw(
-Null_Exception);}* _temp6967;}).first_line,({ struct _tagged_ptr3 _temp6968=
-yyls; struct Cyc_Yyltype* _temp6970= _temp6968.curr + yylsp_offset; if(
-_temp6968.base == 0? 1:( _temp6970 < _temp6968.base? 1: _temp6970 >= _temp6968.last_plus_one)){
-_throw( Null_Exception);}* _temp6970;}).last_line)); _temp6958;}); _temp6957;});
-break; case 365: _LL6956: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp6972=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp6972[ 0]=({ struct Cyc_Exp_tok_struct _temp6973; _temp6973.tag= Cyc_Exp_tok_tag;
-_temp6973.f1= Cyc_Absyn_structmember_exp( Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp6974= yyvs; struct _xtunion_struct** _temp6976= _temp6974.curr
-+( yyvsp_offset - 2); if( _temp6974.base == 0? 1:( _temp6976 < _temp6974.base? 1:
-_temp6976 >= _temp6974.last_plus_one)){ _throw( Null_Exception);}* _temp6976;})),({
-struct _tagged_string* _temp6977=( struct _tagged_string*) GC_malloc( sizeof(
-struct _tagged_string) * 1); _temp6977[ 0]= Cyc_yyget_String_tok(({ struct
-_tagged_ptr2 _temp6978= yyvs; struct _xtunion_struct** _temp6980= _temp6978.curr
-+ yyvsp_offset; if( _temp6978.base == 0? 1:( _temp6980 < _temp6978.base? 1:
-_temp6980 >= _temp6978.last_plus_one)){ _throw( Null_Exception);}* _temp6980;}));
-_temp6977;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6981= yyls;
-struct Cyc_Yyltype* _temp6983= _temp6981.curr +( yylsp_offset - 2); if(
-_temp6981.base == 0? 1:( _temp6983 < _temp6981.base? 1: _temp6983 >= _temp6981.last_plus_one)){
-_throw( Null_Exception);}* _temp6983;}).first_line,({ struct _tagged_ptr3
-_temp6984= yyls; struct Cyc_Yyltype* _temp6986= _temp6984.curr + yylsp_offset;
-if( _temp6984.base == 0? 1:( _temp6986 < _temp6984.base? 1: _temp6986 >=
-_temp6984.last_plus_one)){ _throw( Null_Exception);}* _temp6986;}).last_line));
-_temp6973;}); _temp6972;}); break; case 366: _LL6971: { struct _tuple1* q= Cyc_yyget_QualId_tok(({
-struct _tagged_ptr2 _temp6988= yyvs; struct _xtunion_struct** _temp6990=
-_temp6988.curr + yyvsp_offset; if( _temp6988.base == 0? 1:( _temp6990 <
-_temp6988.base? 1: _temp6990 >= _temp6988.last_plus_one)){ _throw(
-Null_Exception);}* _temp6990;}));{ void* _temp6991=(* q).f1; struct Cyc_List_List*
-_temp7001; struct Cyc_List_List* _temp7003; _LL6993: if(( int) _temp6991 == Cyc_Absyn_Loc_n){
-goto _LL6994;} else{ goto _LL6995;} _LL6995: if(( unsigned int) _temp6991 > 1u?((
-struct _tunion_struct*) _temp6991)->tag == Cyc_Absyn_Rel_n_tag: 0){ _LL7002:
-_temp7001=( struct Cyc_List_List*)(( struct Cyc_Absyn_Rel_n_struct*) _temp6991)->f1;
-if( _temp7001 == 0){ goto _LL6996;} else{ goto _LL6997;}} else{ goto _LL6997;}
-_LL6997: if(( unsigned int) _temp6991 > 1u?(( struct _tunion_struct*) _temp6991)->tag
-== Cyc_Absyn_Abs_n_tag: 0){ _LL7004: _temp7003=( struct Cyc_List_List*)(( struct
-Cyc_Absyn_Abs_n_struct*) _temp6991)->f1; if( _temp7003 == 0){ goto _LL6998;}
-else{ goto _LL6999;}} else{ goto _LL6999;} _LL6999: goto _LL7000; _LL6994: goto
-_LL6992; _LL6996: goto _LL6992; _LL6998: goto _LL6992; _LL7000: Cyc_Parse_err((
-struct _tagged_string)({ char* _temp7005=( char*)"struct field name is qualified";
-struct _tagged_string _temp7006; _temp7006.curr= _temp7005; _temp7006.base=
-_temp7005; _temp7006.last_plus_one= _temp7005 + 31; _temp7006;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp7007= yyls; struct Cyc_Yyltype* _temp7009= _temp7007.curr
-+ yylsp_offset; if( _temp7007.base == 0? 1:( _temp7009 < _temp7007.base? 1:
-_temp7009 >= _temp7007.last_plus_one)){ _throw( Null_Exception);}* _temp7009;}).first_line,({
-struct _tagged_ptr3 _temp7010= yyls; struct Cyc_Yyltype* _temp7012= _temp7010.curr
-+ yylsp_offset; if( _temp7010.base == 0? 1:( _temp7012 < _temp7010.base? 1:
-_temp7012 >= _temp7010.last_plus_one)){ _throw( Null_Exception);}* _temp7012;}).last_line));
-goto _LL6992; _LL6992:;} yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7013=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7013[ 0]=({ struct Cyc_Exp_tok_struct _temp7014; _temp7014.tag= Cyc_Exp_tok_tag;
-_temp7014.f1= Cyc_Absyn_structmember_exp( Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp7015= yyvs; struct _xtunion_struct** _temp7017= _temp7015.curr
-+( yyvsp_offset - 2); if( _temp7015.base == 0? 1:( _temp7017 < _temp7015.base? 1:
-_temp7017 >= _temp7015.last_plus_one)){ _throw( Null_Exception);}* _temp7017;})),(*
-q).f2, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7018= yyls;
-struct Cyc_Yyltype* _temp7020= _temp7018.curr +( yylsp_offset - 2); if(
-_temp7018.base == 0? 1:( _temp7020 < _temp7018.base? 1: _temp7020 >= _temp7018.last_plus_one)){
-_throw( Null_Exception);}* _temp7020;}).first_line,({ struct _tagged_ptr3
-_temp7021= yyls; struct Cyc_Yyltype* _temp7023= _temp7021.curr + yylsp_offset;
-if( _temp7021.base == 0? 1:( _temp7023 < _temp7021.base? 1: _temp7023 >=
-_temp7021.last_plus_one)){ _throw( Null_Exception);}* _temp7023;}).last_line));
-_temp7014;}); _temp7013;}); break;} case 367: _LL6987: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7025=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7025[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7026; _temp7026.tag= Cyc_Exp_tok_tag; _temp7026.f1= Cyc_Absyn_structarrow_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7027= yyvs; struct _xtunion_struct**
-_temp7029= _temp7027.curr +( yyvsp_offset - 2); if( _temp7027.base == 0? 1:(
-_temp7029 < _temp7027.base? 1: _temp7029 >= _temp7027.last_plus_one)){ _throw(
-Null_Exception);}* _temp7029;})),({ struct _tagged_string* _temp7030=( struct
-_tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1); _temp7030[ 0]=
-Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp7031= yyvs; struct
-_xtunion_struct** _temp7033= _temp7031.curr + yyvsp_offset; if( _temp7031.base
-== 0? 1:( _temp7033 < _temp7031.base? 1: _temp7033 >= _temp7031.last_plus_one)){
-_throw( Null_Exception);}* _temp7033;})); _temp7030;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp7034= yyls; struct Cyc_Yyltype* _temp7036= _temp7034.curr
-+( yylsp_offset - 2); if( _temp7034.base == 0? 1:( _temp7036 < _temp7034.base? 1:
-_temp7036 >= _temp7034.last_plus_one)){ _throw( Null_Exception);}* _temp7036;}).first_line,({
-struct _tagged_ptr3 _temp7037= yyls; struct Cyc_Yyltype* _temp7039= _temp7037.curr
-+ yylsp_offset; if( _temp7037.base == 0? 1:( _temp7039 < _temp7037.base? 1:
-_temp7039 >= _temp7037.last_plus_one)){ _throw( Null_Exception);}* _temp7039;}).last_line));
-_temp7026;}); _temp7025;}); break; case 368: _LL7024: { struct _tuple1* q= Cyc_yyget_QualId_tok(({
-struct _tagged_ptr2 _temp7041= yyvs; struct _xtunion_struct** _temp7043=
-_temp7041.curr + yyvsp_offset; if( _temp7041.base == 0? 1:( _temp7043 <
-_temp7041.base? 1: _temp7043 >= _temp7041.last_plus_one)){ _throw(
-Null_Exception);}* _temp7043;}));{ void* _temp7044=(* q).f1; struct Cyc_List_List*
-_temp7054; struct Cyc_List_List* _temp7056; _LL7046: if(( int) _temp7044 == Cyc_Absyn_Loc_n){
-goto _LL7047;} else{ goto _LL7048;} _LL7048: if(( unsigned int) _temp7044 > 1u?((
-struct _tunion_struct*) _temp7044)->tag == Cyc_Absyn_Rel_n_tag: 0){ _LL7055:
-_temp7054=( struct Cyc_List_List*)(( struct Cyc_Absyn_Rel_n_struct*) _temp7044)->f1;
-if( _temp7054 == 0){ goto _LL7049;} else{ goto _LL7050;}} else{ goto _LL7050;}
-_LL7050: if(( unsigned int) _temp7044 > 1u?(( struct _tunion_struct*) _temp7044)->tag
-== Cyc_Absyn_Abs_n_tag: 0){ _LL7057: _temp7056=( struct Cyc_List_List*)(( struct
-Cyc_Absyn_Abs_n_struct*) _temp7044)->f1; if( _temp7056 == 0){ goto _LL7051;}
-else{ goto _LL7052;}} else{ goto _LL7052;} _LL7052: goto _LL7053; _LL7047: goto
-_LL7045; _LL7049: goto _LL7045; _LL7051: goto _LL7045; _LL7053: Cyc_Parse_err((
-struct _tagged_string)({ char* _temp7058=( char*)"struct field is qualified with module name";
-struct _tagged_string _temp7059; _temp7059.curr= _temp7058; _temp7059.base=
-_temp7058; _temp7059.last_plus_one= _temp7058 + 43; _temp7059;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp7060= yyls; struct Cyc_Yyltype* _temp7062= _temp7060.curr
-+ yylsp_offset; if( _temp7060.base == 0? 1:( _temp7062 < _temp7060.base? 1:
-_temp7062 >= _temp7060.last_plus_one)){ _throw( Null_Exception);}* _temp7062;}).first_line,({
-struct _tagged_ptr3 _temp7063= yyls; struct Cyc_Yyltype* _temp7065= _temp7063.curr
-+ yylsp_offset; if( _temp7063.base == 0? 1:( _temp7065 < _temp7063.base? 1:
-_temp7065 >= _temp7063.last_plus_one)){ _throw( Null_Exception);}* _temp7065;}).last_line));
-goto _LL7045; _LL7045:;} yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7066=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7066[ 0]=({ struct Cyc_Exp_tok_struct _temp7067; _temp7067.tag= Cyc_Exp_tok_tag;
-_temp7067.f1= Cyc_Absyn_structarrow_exp( Cyc_yyget_Exp_tok(({ struct
-_tagged_ptr2 _temp7068= yyvs; struct _xtunion_struct** _temp7070= _temp7068.curr
-+( yyvsp_offset - 2); if( _temp7068.base == 0? 1:( _temp7070 < _temp7068.base? 1:
-_temp7070 >= _temp7068.last_plus_one)){ _throw( Null_Exception);}* _temp7070;})),(*
-q).f2, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7071= yyls;
-struct Cyc_Yyltype* _temp7073= _temp7071.curr +( yylsp_offset - 2); if(
-_temp7071.base == 0? 1:( _temp7073 < _temp7071.base? 1: _temp7073 >= _temp7071.last_plus_one)){
-_throw( Null_Exception);}* _temp7073;}).first_line,({ struct _tagged_ptr3
-_temp7074= yyls; struct Cyc_Yyltype* _temp7076= _temp7074.curr + yylsp_offset;
-if( _temp7074.base == 0? 1:( _temp7076 < _temp7074.base? 1: _temp7076 >=
-_temp7074.last_plus_one)){ _throw( Null_Exception);}* _temp7076;}).last_line));
-_temp7067;}); _temp7066;}); break;} case 369: _LL7040: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7078=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7078[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7079; _temp7079.tag= Cyc_Exp_tok_tag; _temp7079.f1= Cyc_Absyn_post_inc_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7080= yyvs; struct _xtunion_struct**
-_temp7082= _temp7080.curr +( yyvsp_offset - 1); if( _temp7080.base == 0? 1:(
-_temp7082 < _temp7080.base? 1: _temp7082 >= _temp7080.last_plus_one)){ _throw(
-Null_Exception);}* _temp7082;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7083= yyls; struct Cyc_Yyltype* _temp7085= _temp7083.curr +(
-yylsp_offset - 1); if( _temp7083.base == 0? 1:( _temp7085 < _temp7083.base? 1:
-_temp7085 >= _temp7083.last_plus_one)){ _throw( Null_Exception);}* _temp7085;}).first_line,({
-struct _tagged_ptr3 _temp7086= yyls; struct Cyc_Yyltype* _temp7088= _temp7086.curr
-+ yylsp_offset; if( _temp7086.base == 0? 1:( _temp7088 < _temp7086.base? 1:
-_temp7088 >= _temp7086.last_plus_one)){ _throw( Null_Exception);}* _temp7088;}).last_line));
-_temp7079;}); _temp7078;}); break; case 370: _LL7077: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7090=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7090[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7091; _temp7091.tag= Cyc_Exp_tok_tag; _temp7091.f1= Cyc_Absyn_post_dec_exp(
-Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7092= yyvs; struct _xtunion_struct**
-_temp7094= _temp7092.curr +( yyvsp_offset - 1); if( _temp7092.base == 0? 1:(
-_temp7094 < _temp7092.base? 1: _temp7094 >= _temp7092.last_plus_one)){ _throw(
-Null_Exception);}* _temp7094;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7095= yyls; struct Cyc_Yyltype* _temp7097= _temp7095.curr +(
-yylsp_offset - 1); if( _temp7095.base == 0? 1:( _temp7097 < _temp7095.base? 1:
-_temp7097 >= _temp7095.last_plus_one)){ _throw( Null_Exception);}* _temp7097;}).first_line,({
-struct _tagged_ptr3 _temp7098= yyls; struct Cyc_Yyltype* _temp7100= _temp7098.curr
-+ yylsp_offset; if( _temp7098.base == 0? 1:( _temp7100 < _temp7098.base? 1:
-_temp7100 >= _temp7098.last_plus_one)){ _throw( Null_Exception);}* _temp7100;}).last_line));
-_temp7091;}); _temp7090;}); break; case 371: _LL7089: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7102=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7102[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7103; _temp7103.tag= Cyc_Exp_tok_tag; _temp7103.f1= Cyc_Absyn_new_exp((
-void*)({ struct Cyc_Absyn_CompoundLit_e_struct* _temp7104=( struct Cyc_Absyn_CompoundLit_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_CompoundLit_e_struct)); _temp7104[ 0]=({
-struct Cyc_Absyn_CompoundLit_e_struct _temp7105; _temp7105.tag= Cyc_Absyn_CompoundLit_e_tag;
-_temp7105.f1= Cyc_yyget_ParamDecl_tok(({ struct _tagged_ptr2 _temp7106= yyvs;
-struct _xtunion_struct** _temp7108= _temp7106.curr +( yyvsp_offset - 4); if(
-_temp7106.base == 0? 1:( _temp7108 < _temp7106.base? 1: _temp7108 >= _temp7106.last_plus_one)){
-_throw( Null_Exception);}* _temp7108;})); _temp7105.f2=(( struct Cyc_List_List*(*)(
+_temp6320[ 0]=({ struct Cyc_Primopopt_tok_struct _temp6321; _temp6321.tag= Cyc_Primopopt_tok_tag;
+_temp6321.f1=({ struct Cyc_Core_Opt* _temp6322=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp6322->v=( void*)(( void*) Cyc_Absyn_Bitor);
+_temp6322;}); _temp6321;}); _temp6320;}); break; case 302: _LL6319: yyval=({
+struct _tagged_ptr2 _temp6324= yyvs; struct _xtunion_struct** _temp6326=
+_temp6324.curr + yyvsp_offset; if( _temp6324.base == 0? 1:( _temp6326 <
+_temp6324.base? 1: _temp6326 >= _temp6324.last_plus_one)){ _throw(
+Null_Exception);}* _temp6326;}); break; case 303: _LL6323: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6328=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6328[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6329; _temp6329.tag= Cyc_Exp_tok_tag; _temp6329.f1= Cyc_Absyn_conditional_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6330= yyvs; struct _xtunion_struct**
+_temp6332= _temp6330.curr +( yyvsp_offset - 4); if( _temp6330.base == 0? 1:(
+_temp6332 < _temp6330.base? 1: _temp6332 >= _temp6330.last_plus_one)){ _throw(
+Null_Exception);}* _temp6332;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6333= yyvs; struct _xtunion_struct** _temp6335= _temp6333.curr +(
+yyvsp_offset - 2); if( _temp6333.base == 0? 1:( _temp6335 < _temp6333.base? 1:
+_temp6335 >= _temp6333.last_plus_one)){ _throw( Null_Exception);}* _temp6335;})),
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6336= yyvs; struct _xtunion_struct**
+_temp6338= _temp6336.curr + yyvsp_offset; if( _temp6336.base == 0? 1:( _temp6338
+< _temp6336.base? 1: _temp6338 >= _temp6336.last_plus_one)){ _throw(
+Null_Exception);}* _temp6338;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6339= yyls; struct Cyc_Yyltype* _temp6341= _temp6339.curr +(
+yylsp_offset - 4); if( _temp6339.base == 0? 1:( _temp6341 < _temp6339.base? 1:
+_temp6341 >= _temp6339.last_plus_one)){ _throw( Null_Exception);}* _temp6341;}).first_line,({
+struct _tagged_ptr3 _temp6342= yyls; struct Cyc_Yyltype* _temp6344= _temp6342.curr
++ yylsp_offset; if( _temp6342.base == 0? 1:( _temp6344 < _temp6342.base? 1:
+_temp6344 >= _temp6342.last_plus_one)){ _throw( Null_Exception);}* _temp6344;}).last_line));
+_temp6329;}); _temp6328;}); break; case 304: _LL6327: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6346=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6346[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6347; _temp6347.tag= Cyc_Exp_tok_tag; _temp6347.f1= Cyc_Absyn_throw_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6348= yyvs; struct _xtunion_struct**
+_temp6350= _temp6348.curr + yyvsp_offset; if( _temp6348.base == 0? 1:( _temp6350
+< _temp6348.base? 1: _temp6350 >= _temp6348.last_plus_one)){ _throw(
+Null_Exception);}* _temp6350;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6351= yyls; struct Cyc_Yyltype* _temp6353= _temp6351.curr +(
+yylsp_offset - 1); if( _temp6351.base == 0? 1:( _temp6353 < _temp6351.base? 1:
+_temp6353 >= _temp6351.last_plus_one)){ _throw( Null_Exception);}* _temp6353;}).first_line,({
+struct _tagged_ptr3 _temp6354= yyls; struct Cyc_Yyltype* _temp6356= _temp6354.curr
++ yylsp_offset; if( _temp6354.base == 0? 1:( _temp6356 < _temp6354.base? 1:
+_temp6356 >= _temp6354.last_plus_one)){ _throw( Null_Exception);}* _temp6356;}).last_line));
+_temp6347;}); _temp6346;}); break; case 305: _LL6345: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6358=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6358[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6359; _temp6359.tag= Cyc_Exp_tok_tag; _temp6359.f1= Cyc_Absyn_New_exp( 0,
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6360= yyvs; struct _xtunion_struct**
+_temp6362= _temp6360.curr + yyvsp_offset; if( _temp6360.base == 0? 1:( _temp6362
+< _temp6360.base? 1: _temp6362 >= _temp6360.last_plus_one)){ _throw(
+Null_Exception);}* _temp6362;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6363= yyls; struct Cyc_Yyltype* _temp6365= _temp6363.curr +(
+yylsp_offset - 1); if( _temp6363.base == 0? 1:( _temp6365 < _temp6363.base? 1:
+_temp6365 >= _temp6363.last_plus_one)){ _throw( Null_Exception);}* _temp6365;}).first_line,({
+struct _tagged_ptr3 _temp6366= yyls; struct Cyc_Yyltype* _temp6368= _temp6366.curr
++( yylsp_offset + 1); if( _temp6366.base == 0? 1:( _temp6368 < _temp6366.base? 1:
+_temp6368 >= _temp6366.last_plus_one)){ _throw( Null_Exception);}* _temp6368;}).last_line));
+_temp6359;}); _temp6358;}); break; case 306: _LL6357: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6370=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6370[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6371; _temp6371.tag= Cyc_Exp_tok_tag; _temp6371.f1= Cyc_Absyn_New_exp( 0,
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6372= yyvs; struct _xtunion_struct**
+_temp6374= _temp6372.curr + yyvsp_offset; if( _temp6372.base == 0? 1:( _temp6374
+< _temp6372.base? 1: _temp6374 >= _temp6372.last_plus_one)){ _throw(
+Null_Exception);}* _temp6374;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6375= yyls; struct Cyc_Yyltype* _temp6377= _temp6375.curr +(
+yylsp_offset - 1); if( _temp6375.base == 0? 1:( _temp6377 < _temp6375.base? 1:
+_temp6377 >= _temp6375.last_plus_one)){ _throw( Null_Exception);}* _temp6377;}).first_line,({
+struct _tagged_ptr3 _temp6378= yyls; struct Cyc_Yyltype* _temp6380= _temp6378.curr
++( yylsp_offset + 1); if( _temp6378.base == 0? 1:( _temp6380 < _temp6378.base? 1:
+_temp6380 >= _temp6378.last_plus_one)){ _throw( Null_Exception);}* _temp6380;}).last_line));
+_temp6371;}); _temp6370;}); break; case 307: _LL6369: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6382=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6382[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6383; _temp6383.tag= Cyc_Exp_tok_tag; _temp6383.f1= Cyc_Absyn_New_exp((
+struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6384= yyvs;
+struct _xtunion_struct** _temp6386= _temp6384.curr +( yyvsp_offset - 2); if(
+_temp6384.base == 0? 1:( _temp6386 < _temp6384.base? 1: _temp6386 >= _temp6384.last_plus_one)){
+_throw( Null_Exception);}* _temp6386;})), Cyc_yyget_Exp_tok(({ struct
+_tagged_ptr2 _temp6387= yyvs; struct _xtunion_struct** _temp6389= _temp6387.curr
++ yyvsp_offset; if( _temp6387.base == 0? 1:( _temp6389 < _temp6387.base? 1:
+_temp6389 >= _temp6387.last_plus_one)){ _throw( Null_Exception);}* _temp6389;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6390= yyls; struct Cyc_Yyltype*
+_temp6392= _temp6390.curr +( yylsp_offset - 4); if( _temp6390.base == 0? 1:(
+_temp6392 < _temp6390.base? 1: _temp6392 >= _temp6390.last_plus_one)){ _throw(
+Null_Exception);}* _temp6392;}).first_line,({ struct _tagged_ptr3 _temp6393=
+yyls; struct Cyc_Yyltype* _temp6395= _temp6393.curr + yylsp_offset; if(
+_temp6393.base == 0? 1:( _temp6395 < _temp6393.base? 1: _temp6395 >= _temp6393.last_plus_one)){
+_throw( Null_Exception);}* _temp6395;}).last_line)); _temp6383;}); _temp6382;});
+break; case 308: _LL6381: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6397=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6397[ 0]=({ struct Cyc_Exp_tok_struct _temp6398; _temp6398.tag= Cyc_Exp_tok_tag;
+_temp6398.f1= Cyc_Absyn_New_exp(( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6399= yyvs; struct _xtunion_struct** _temp6401=
+_temp6399.curr +( yyvsp_offset - 2); if( _temp6399.base == 0? 1:( _temp6401 <
+_temp6399.base? 1: _temp6401 >= _temp6399.last_plus_one)){ _throw(
+Null_Exception);}* _temp6401;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6402= yyvs; struct _xtunion_struct** _temp6404= _temp6402.curr +
+yyvsp_offset; if( _temp6402.base == 0? 1:( _temp6404 < _temp6402.base? 1:
+_temp6404 >= _temp6402.last_plus_one)){ _throw( Null_Exception);}* _temp6404;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6405= yyls; struct Cyc_Yyltype*
+_temp6407= _temp6405.curr +( yylsp_offset - 4); if( _temp6405.base == 0? 1:(
+_temp6407 < _temp6405.base? 1: _temp6407 >= _temp6405.last_plus_one)){ _throw(
+Null_Exception);}* _temp6407;}).first_line,({ struct _tagged_ptr3 _temp6408=
+yyls; struct Cyc_Yyltype* _temp6410= _temp6408.curr + yylsp_offset; if(
+_temp6408.base == 0? 1:( _temp6410 < _temp6408.base? 1: _temp6410 >= _temp6408.last_plus_one)){
+_throw( Null_Exception);}* _temp6410;}).last_line)); _temp6398;}); _temp6397;});
+break; case 309: _LL6396: yyval=({ struct _tagged_ptr2 _temp6412= yyvs; struct
+_xtunion_struct** _temp6414= _temp6412.curr + yyvsp_offset; if( _temp6412.base
+== 0? 1:( _temp6414 < _temp6412.base? 1: _temp6414 >= _temp6412.last_plus_one)){
+_throw( Null_Exception);}* _temp6414;}); break; case 310: _LL6411: yyval=({
+struct _tagged_ptr2 _temp6416= yyvs; struct _xtunion_struct** _temp6418=
+_temp6416.curr + yyvsp_offset; if( _temp6416.base == 0? 1:( _temp6418 <
+_temp6416.base? 1: _temp6418 >= _temp6416.last_plus_one)){ _throw(
+Null_Exception);}* _temp6418;}); break; case 311: _LL6415: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6420=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6420[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6421; _temp6421.tag= Cyc_Exp_tok_tag; _temp6421.f1= Cyc_Absyn_or_exp( Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6422= yyvs; struct _xtunion_struct** _temp6424=
+_temp6422.curr +( yyvsp_offset - 2); if( _temp6422.base == 0? 1:( _temp6424 <
+_temp6422.base? 1: _temp6424 >= _temp6422.last_plus_one)){ _throw(
+Null_Exception);}* _temp6424;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6425= yyvs; struct _xtunion_struct** _temp6427= _temp6425.curr +
+yyvsp_offset; if( _temp6425.base == 0? 1:( _temp6427 < _temp6425.base? 1:
+_temp6427 >= _temp6425.last_plus_one)){ _throw( Null_Exception);}* _temp6427;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6428= yyls; struct Cyc_Yyltype*
+_temp6430= _temp6428.curr +( yylsp_offset - 2); if( _temp6428.base == 0? 1:(
+_temp6430 < _temp6428.base? 1: _temp6430 >= _temp6428.last_plus_one)){ _throw(
+Null_Exception);}* _temp6430;}).first_line,({ struct _tagged_ptr3 _temp6431=
+yyls; struct Cyc_Yyltype* _temp6433= _temp6431.curr + yylsp_offset; if(
+_temp6431.base == 0? 1:( _temp6433 < _temp6431.base? 1: _temp6433 >= _temp6431.last_plus_one)){
+_throw( Null_Exception);}* _temp6433;}).last_line)); _temp6421;}); _temp6420;});
+break; case 312: _LL6419: yyval=({ struct _tagged_ptr2 _temp6435= yyvs; struct
+_xtunion_struct** _temp6437= _temp6435.curr + yyvsp_offset; if( _temp6435.base
+== 0? 1:( _temp6437 < _temp6435.base? 1: _temp6437 >= _temp6435.last_plus_one)){
+_throw( Null_Exception);}* _temp6437;}); break; case 313: _LL6434: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6439=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6439[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6440; _temp6440.tag= Cyc_Exp_tok_tag; _temp6440.f1= Cyc_Absyn_and_exp( Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6441= yyvs; struct _xtunion_struct** _temp6443=
+_temp6441.curr +( yyvsp_offset - 2); if( _temp6441.base == 0? 1:( _temp6443 <
+_temp6441.base? 1: _temp6443 >= _temp6441.last_plus_one)){ _throw(
+Null_Exception);}* _temp6443;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6444= yyvs; struct _xtunion_struct** _temp6446= _temp6444.curr +
+yyvsp_offset; if( _temp6444.base == 0? 1:( _temp6446 < _temp6444.base? 1:
+_temp6446 >= _temp6444.last_plus_one)){ _throw( Null_Exception);}* _temp6446;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6447= yyls; struct Cyc_Yyltype*
+_temp6449= _temp6447.curr +( yylsp_offset - 2); if( _temp6447.base == 0? 1:(
+_temp6449 < _temp6447.base? 1: _temp6449 >= _temp6447.last_plus_one)){ _throw(
+Null_Exception);}* _temp6449;}).first_line,({ struct _tagged_ptr3 _temp6450=
+yyls; struct Cyc_Yyltype* _temp6452= _temp6450.curr + yylsp_offset; if(
+_temp6450.base == 0? 1:( _temp6452 < _temp6450.base? 1: _temp6452 >= _temp6450.last_plus_one)){
+_throw( Null_Exception);}* _temp6452;}).last_line)); _temp6440;}); _temp6439;});
+break; case 314: _LL6438: yyval=({ struct _tagged_ptr2 _temp6454= yyvs; struct
+_xtunion_struct** _temp6456= _temp6454.curr + yyvsp_offset; if( _temp6454.base
+== 0? 1:( _temp6456 < _temp6454.base? 1: _temp6456 >= _temp6454.last_plus_one)){
+_throw( Null_Exception);}* _temp6456;}); break; case 315: _LL6453: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6458=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6458[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6459; _temp6459.tag= Cyc_Exp_tok_tag; _temp6459.f1= Cyc_Absyn_prim2_exp((
+void*) Cyc_Absyn_Bitor, Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6460= yyvs;
+struct _xtunion_struct** _temp6462= _temp6460.curr +( yyvsp_offset - 2); if(
+_temp6460.base == 0? 1:( _temp6462 < _temp6460.base? 1: _temp6462 >= _temp6460.last_plus_one)){
+_throw( Null_Exception);}* _temp6462;})), Cyc_yyget_Exp_tok(({ struct
+_tagged_ptr2 _temp6463= yyvs; struct _xtunion_struct** _temp6465= _temp6463.curr
++ yyvsp_offset; if( _temp6463.base == 0? 1:( _temp6465 < _temp6463.base? 1:
+_temp6465 >= _temp6463.last_plus_one)){ _throw( Null_Exception);}* _temp6465;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6466= yyls; struct Cyc_Yyltype*
+_temp6468= _temp6466.curr +( yylsp_offset - 2); if( _temp6466.base == 0? 1:(
+_temp6468 < _temp6466.base? 1: _temp6468 >= _temp6466.last_plus_one)){ _throw(
+Null_Exception);}* _temp6468;}).first_line,({ struct _tagged_ptr3 _temp6469=
+yyls; struct Cyc_Yyltype* _temp6471= _temp6469.curr + yylsp_offset; if(
+_temp6469.base == 0? 1:( _temp6471 < _temp6469.base? 1: _temp6471 >= _temp6469.last_plus_one)){
+_throw( Null_Exception);}* _temp6471;}).last_line)); _temp6459;}); _temp6458;});
+break; case 316: _LL6457: yyval=({ struct _tagged_ptr2 _temp6473= yyvs; struct
+_xtunion_struct** _temp6475= _temp6473.curr + yyvsp_offset; if( _temp6473.base
+== 0? 1:( _temp6475 < _temp6473.base? 1: _temp6475 >= _temp6473.last_plus_one)){
+_throw( Null_Exception);}* _temp6475;}); break; case 317: _LL6472: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6477=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6477[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6478; _temp6478.tag= Cyc_Exp_tok_tag; _temp6478.f1= Cyc_Absyn_prim2_exp((
+void*) Cyc_Absyn_Bitxor, Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6479=
+yyvs; struct _xtunion_struct** _temp6481= _temp6479.curr +( yyvsp_offset - 2);
+if( _temp6479.base == 0? 1:( _temp6481 < _temp6479.base? 1: _temp6481 >=
+_temp6479.last_plus_one)){ _throw( Null_Exception);}* _temp6481;})), Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6482= yyvs; struct _xtunion_struct** _temp6484=
+_temp6482.curr + yyvsp_offset; if( _temp6482.base == 0? 1:( _temp6484 <
+_temp6482.base? 1: _temp6484 >= _temp6482.last_plus_one)){ _throw(
+Null_Exception);}* _temp6484;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6485= yyls; struct Cyc_Yyltype* _temp6487= _temp6485.curr +(
+yylsp_offset - 2); if( _temp6485.base == 0? 1:( _temp6487 < _temp6485.base? 1:
+_temp6487 >= _temp6485.last_plus_one)){ _throw( Null_Exception);}* _temp6487;}).first_line,({
+struct _tagged_ptr3 _temp6488= yyls; struct Cyc_Yyltype* _temp6490= _temp6488.curr
++ yylsp_offset; if( _temp6488.base == 0? 1:( _temp6490 < _temp6488.base? 1:
+_temp6490 >= _temp6488.last_plus_one)){ _throw( Null_Exception);}* _temp6490;}).last_line));
+_temp6478;}); _temp6477;}); break; case 318: _LL6476: yyval=({ struct
+_tagged_ptr2 _temp6492= yyvs; struct _xtunion_struct** _temp6494= _temp6492.curr
++ yyvsp_offset; if( _temp6492.base == 0? 1:( _temp6494 < _temp6492.base? 1:
+_temp6494 >= _temp6492.last_plus_one)){ _throw( Null_Exception);}* _temp6494;});
+break; case 319: _LL6491: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6496=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6496[ 0]=({ struct Cyc_Exp_tok_struct _temp6497; _temp6497.tag= Cyc_Exp_tok_tag;
+_temp6497.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Bitand, Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6498= yyvs; struct _xtunion_struct** _temp6500=
+_temp6498.curr +( yyvsp_offset - 2); if( _temp6498.base == 0? 1:( _temp6500 <
+_temp6498.base? 1: _temp6500 >= _temp6498.last_plus_one)){ _throw(
+Null_Exception);}* _temp6500;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6501= yyvs; struct _xtunion_struct** _temp6503= _temp6501.curr +
+yyvsp_offset; if( _temp6501.base == 0? 1:( _temp6503 < _temp6501.base? 1:
+_temp6503 >= _temp6501.last_plus_one)){ _throw( Null_Exception);}* _temp6503;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6504= yyls; struct Cyc_Yyltype*
+_temp6506= _temp6504.curr +( yylsp_offset - 2); if( _temp6504.base == 0? 1:(
+_temp6506 < _temp6504.base? 1: _temp6506 >= _temp6504.last_plus_one)){ _throw(
+Null_Exception);}* _temp6506;}).first_line,({ struct _tagged_ptr3 _temp6507=
+yyls; struct Cyc_Yyltype* _temp6509= _temp6507.curr + yylsp_offset; if(
+_temp6507.base == 0? 1:( _temp6509 < _temp6507.base? 1: _temp6509 >= _temp6507.last_plus_one)){
+_throw( Null_Exception);}* _temp6509;}).last_line)); _temp6497;}); _temp6496;});
+break; case 320: _LL6495: yyval=({ struct _tagged_ptr2 _temp6511= yyvs; struct
+_xtunion_struct** _temp6513= _temp6511.curr + yyvsp_offset; if( _temp6511.base
+== 0? 1:( _temp6513 < _temp6511.base? 1: _temp6513 >= _temp6511.last_plus_one)){
+_throw( Null_Exception);}* _temp6513;}); break; case 321: _LL6510: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6515=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6515[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6516; _temp6516.tag= Cyc_Exp_tok_tag; _temp6516.f1= Cyc_Absyn_eq_exp( Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6517= yyvs; struct _xtunion_struct** _temp6519=
+_temp6517.curr +( yyvsp_offset - 2); if( _temp6517.base == 0? 1:( _temp6519 <
+_temp6517.base? 1: _temp6519 >= _temp6517.last_plus_one)){ _throw(
+Null_Exception);}* _temp6519;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6520= yyvs; struct _xtunion_struct** _temp6522= _temp6520.curr +
+yyvsp_offset; if( _temp6520.base == 0? 1:( _temp6522 < _temp6520.base? 1:
+_temp6522 >= _temp6520.last_plus_one)){ _throw( Null_Exception);}* _temp6522;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6523= yyls; struct Cyc_Yyltype*
+_temp6525= _temp6523.curr +( yylsp_offset - 2); if( _temp6523.base == 0? 1:(
+_temp6525 < _temp6523.base? 1: _temp6525 >= _temp6523.last_plus_one)){ _throw(
+Null_Exception);}* _temp6525;}).first_line,({ struct _tagged_ptr3 _temp6526=
+yyls; struct Cyc_Yyltype* _temp6528= _temp6526.curr + yylsp_offset; if(
+_temp6526.base == 0? 1:( _temp6528 < _temp6526.base? 1: _temp6528 >= _temp6526.last_plus_one)){
+_throw( Null_Exception);}* _temp6528;}).last_line)); _temp6516;}); _temp6515;});
+break; case 322: _LL6514: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6530=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6530[ 0]=({ struct Cyc_Exp_tok_struct _temp6531; _temp6531.tag= Cyc_Exp_tok_tag;
+_temp6531.f1= Cyc_Absyn_neq_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6532= yyvs; struct _xtunion_struct** _temp6534= _temp6532.curr +(
+yyvsp_offset - 2); if( _temp6532.base == 0? 1:( _temp6534 < _temp6532.base? 1:
+_temp6534 >= _temp6532.last_plus_one)){ _throw( Null_Exception);}* _temp6534;})),
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6535= yyvs; struct _xtunion_struct**
+_temp6537= _temp6535.curr + yyvsp_offset; if( _temp6535.base == 0? 1:( _temp6537
+< _temp6535.base? 1: _temp6537 >= _temp6535.last_plus_one)){ _throw(
+Null_Exception);}* _temp6537;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6538= yyls; struct Cyc_Yyltype* _temp6540= _temp6538.curr +(
+yylsp_offset - 2); if( _temp6538.base == 0? 1:( _temp6540 < _temp6538.base? 1:
+_temp6540 >= _temp6538.last_plus_one)){ _throw( Null_Exception);}* _temp6540;}).first_line,({
+struct _tagged_ptr3 _temp6541= yyls; struct Cyc_Yyltype* _temp6543= _temp6541.curr
++ yylsp_offset; if( _temp6541.base == 0? 1:( _temp6543 < _temp6541.base? 1:
+_temp6543 >= _temp6541.last_plus_one)){ _throw( Null_Exception);}* _temp6543;}).last_line));
+_temp6531;}); _temp6530;}); break; case 323: _LL6529: yyval=({ struct
+_tagged_ptr2 _temp6545= yyvs; struct _xtunion_struct** _temp6547= _temp6545.curr
++ yyvsp_offset; if( _temp6545.base == 0? 1:( _temp6547 < _temp6545.base? 1:
+_temp6547 >= _temp6545.last_plus_one)){ _throw( Null_Exception);}* _temp6547;});
+break; case 324: _LL6544: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6549=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6549[ 0]=({ struct Cyc_Exp_tok_struct _temp6550; _temp6550.tag= Cyc_Exp_tok_tag;
+_temp6550.f1= Cyc_Absyn_lt_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6551= yyvs; struct _xtunion_struct** _temp6553= _temp6551.curr +(
+yyvsp_offset - 2); if( _temp6551.base == 0? 1:( _temp6553 < _temp6551.base? 1:
+_temp6553 >= _temp6551.last_plus_one)){ _throw( Null_Exception);}* _temp6553;})),
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6554= yyvs; struct _xtunion_struct**
+_temp6556= _temp6554.curr + yyvsp_offset; if( _temp6554.base == 0? 1:( _temp6556
+< _temp6554.base? 1: _temp6556 >= _temp6554.last_plus_one)){ _throw(
+Null_Exception);}* _temp6556;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6557= yyls; struct Cyc_Yyltype* _temp6559= _temp6557.curr +(
+yylsp_offset - 2); if( _temp6557.base == 0? 1:( _temp6559 < _temp6557.base? 1:
+_temp6559 >= _temp6557.last_plus_one)){ _throw( Null_Exception);}* _temp6559;}).first_line,({
+struct _tagged_ptr3 _temp6560= yyls; struct Cyc_Yyltype* _temp6562= _temp6560.curr
++ yylsp_offset; if( _temp6560.base == 0? 1:( _temp6562 < _temp6560.base? 1:
+_temp6562 >= _temp6560.last_plus_one)){ _throw( Null_Exception);}* _temp6562;}).last_line));
+_temp6550;}); _temp6549;}); break; case 325: _LL6548: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6564=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6564[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6565; _temp6565.tag= Cyc_Exp_tok_tag; _temp6565.f1= Cyc_Absyn_gt_exp( Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6566= yyvs; struct _xtunion_struct** _temp6568=
+_temp6566.curr +( yyvsp_offset - 2); if( _temp6566.base == 0? 1:( _temp6568 <
+_temp6566.base? 1: _temp6568 >= _temp6566.last_plus_one)){ _throw(
+Null_Exception);}* _temp6568;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6569= yyvs; struct _xtunion_struct** _temp6571= _temp6569.curr +
+yyvsp_offset; if( _temp6569.base == 0? 1:( _temp6571 < _temp6569.base? 1:
+_temp6571 >= _temp6569.last_plus_one)){ _throw( Null_Exception);}* _temp6571;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6572= yyls; struct Cyc_Yyltype*
+_temp6574= _temp6572.curr +( yylsp_offset - 2); if( _temp6572.base == 0? 1:(
+_temp6574 < _temp6572.base? 1: _temp6574 >= _temp6572.last_plus_one)){ _throw(
+Null_Exception);}* _temp6574;}).first_line,({ struct _tagged_ptr3 _temp6575=
+yyls; struct Cyc_Yyltype* _temp6577= _temp6575.curr + yylsp_offset; if(
+_temp6575.base == 0? 1:( _temp6577 < _temp6575.base? 1: _temp6577 >= _temp6575.last_plus_one)){
+_throw( Null_Exception);}* _temp6577;}).last_line)); _temp6565;}); _temp6564;});
+break; case 326: _LL6563: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6579=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6579[ 0]=({ struct Cyc_Exp_tok_struct _temp6580; _temp6580.tag= Cyc_Exp_tok_tag;
+_temp6580.f1= Cyc_Absyn_lte_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6581= yyvs; struct _xtunion_struct** _temp6583= _temp6581.curr +(
+yyvsp_offset - 2); if( _temp6581.base == 0? 1:( _temp6583 < _temp6581.base? 1:
+_temp6583 >= _temp6581.last_plus_one)){ _throw( Null_Exception);}* _temp6583;})),
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6584= yyvs; struct _xtunion_struct**
+_temp6586= _temp6584.curr + yyvsp_offset; if( _temp6584.base == 0? 1:( _temp6586
+< _temp6584.base? 1: _temp6586 >= _temp6584.last_plus_one)){ _throw(
+Null_Exception);}* _temp6586;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6587= yyls; struct Cyc_Yyltype* _temp6589= _temp6587.curr +(
+yylsp_offset - 2); if( _temp6587.base == 0? 1:( _temp6589 < _temp6587.base? 1:
+_temp6589 >= _temp6587.last_plus_one)){ _throw( Null_Exception);}* _temp6589;}).first_line,({
+struct _tagged_ptr3 _temp6590= yyls; struct Cyc_Yyltype* _temp6592= _temp6590.curr
++ yylsp_offset; if( _temp6590.base == 0? 1:( _temp6592 < _temp6590.base? 1:
+_temp6592 >= _temp6590.last_plus_one)){ _throw( Null_Exception);}* _temp6592;}).last_line));
+_temp6580;}); _temp6579;}); break; case 327: _LL6578: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6594=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6594[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6595; _temp6595.tag= Cyc_Exp_tok_tag; _temp6595.f1= Cyc_Absyn_gte_exp( Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6596= yyvs; struct _xtunion_struct** _temp6598=
+_temp6596.curr +( yyvsp_offset - 2); if( _temp6596.base == 0? 1:( _temp6598 <
+_temp6596.base? 1: _temp6598 >= _temp6596.last_plus_one)){ _throw(
+Null_Exception);}* _temp6598;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6599= yyvs; struct _xtunion_struct** _temp6601= _temp6599.curr +
+yyvsp_offset; if( _temp6599.base == 0? 1:( _temp6601 < _temp6599.base? 1:
+_temp6601 >= _temp6599.last_plus_one)){ _throw( Null_Exception);}* _temp6601;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6602= yyls; struct Cyc_Yyltype*
+_temp6604= _temp6602.curr +( yylsp_offset - 2); if( _temp6602.base == 0? 1:(
+_temp6604 < _temp6602.base? 1: _temp6604 >= _temp6602.last_plus_one)){ _throw(
+Null_Exception);}* _temp6604;}).first_line,({ struct _tagged_ptr3 _temp6605=
+yyls; struct Cyc_Yyltype* _temp6607= _temp6605.curr + yylsp_offset; if(
+_temp6605.base == 0? 1:( _temp6607 < _temp6605.base? 1: _temp6607 >= _temp6605.last_plus_one)){
+_throw( Null_Exception);}* _temp6607;}).last_line)); _temp6595;}); _temp6594;});
+break; case 328: _LL6593: yyval=({ struct _tagged_ptr2 _temp6609= yyvs; struct
+_xtunion_struct** _temp6611= _temp6609.curr + yyvsp_offset; if( _temp6609.base
+== 0? 1:( _temp6611 < _temp6609.base? 1: _temp6611 >= _temp6609.last_plus_one)){
+_throw( Null_Exception);}* _temp6611;}); break; case 329: _LL6608: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6613=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6613[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6614; _temp6614.tag= Cyc_Exp_tok_tag; _temp6614.f1= Cyc_Absyn_prim2_exp((
+void*) Cyc_Absyn_Bitlshift, Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6615=
+yyvs; struct _xtunion_struct** _temp6617= _temp6615.curr +( yyvsp_offset - 2);
+if( _temp6615.base == 0? 1:( _temp6617 < _temp6615.base? 1: _temp6617 >=
+_temp6615.last_plus_one)){ _throw( Null_Exception);}* _temp6617;})), Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6618= yyvs; struct _xtunion_struct** _temp6620=
+_temp6618.curr + yyvsp_offset; if( _temp6618.base == 0? 1:( _temp6620 <
+_temp6618.base? 1: _temp6620 >= _temp6618.last_plus_one)){ _throw(
+Null_Exception);}* _temp6620;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6621= yyls; struct Cyc_Yyltype* _temp6623= _temp6621.curr +(
+yylsp_offset - 2); if( _temp6621.base == 0? 1:( _temp6623 < _temp6621.base? 1:
+_temp6623 >= _temp6621.last_plus_one)){ _throw( Null_Exception);}* _temp6623;}).first_line,({
+struct _tagged_ptr3 _temp6624= yyls; struct Cyc_Yyltype* _temp6626= _temp6624.curr
++ yylsp_offset; if( _temp6624.base == 0? 1:( _temp6626 < _temp6624.base? 1:
+_temp6626 >= _temp6624.last_plus_one)){ _throw( Null_Exception);}* _temp6626;}).last_line));
+_temp6614;}); _temp6613;}); break; case 330: _LL6612: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6628=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6628[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6629; _temp6629.tag= Cyc_Exp_tok_tag; _temp6629.f1= Cyc_Absyn_prim2_exp((
+void*) Cyc_Absyn_Bitlrshift, Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6630=
+yyvs; struct _xtunion_struct** _temp6632= _temp6630.curr +( yyvsp_offset - 2);
+if( _temp6630.base == 0? 1:( _temp6632 < _temp6630.base? 1: _temp6632 >=
+_temp6630.last_plus_one)){ _throw( Null_Exception);}* _temp6632;})), Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6633= yyvs; struct _xtunion_struct** _temp6635=
+_temp6633.curr + yyvsp_offset; if( _temp6633.base == 0? 1:( _temp6635 <
+_temp6633.base? 1: _temp6635 >= _temp6633.last_plus_one)){ _throw(
+Null_Exception);}* _temp6635;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6636= yyls; struct Cyc_Yyltype* _temp6638= _temp6636.curr +(
+yylsp_offset - 2); if( _temp6636.base == 0? 1:( _temp6638 < _temp6636.base? 1:
+_temp6638 >= _temp6636.last_plus_one)){ _throw( Null_Exception);}* _temp6638;}).first_line,({
+struct _tagged_ptr3 _temp6639= yyls; struct Cyc_Yyltype* _temp6641= _temp6639.curr
++ yylsp_offset; if( _temp6639.base == 0? 1:( _temp6641 < _temp6639.base? 1:
+_temp6641 >= _temp6639.last_plus_one)){ _throw( Null_Exception);}* _temp6641;}).last_line));
+_temp6629;}); _temp6628;}); break; case 331: _LL6627: yyval=({ struct
+_tagged_ptr2 _temp6643= yyvs; struct _xtunion_struct** _temp6645= _temp6643.curr
++ yyvsp_offset; if( _temp6643.base == 0? 1:( _temp6645 < _temp6643.base? 1:
+_temp6645 >= _temp6643.last_plus_one)){ _throw( Null_Exception);}* _temp6645;});
+break; case 332: _LL6642: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6647=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6647[ 0]=({ struct Cyc_Exp_tok_struct _temp6648; _temp6648.tag= Cyc_Exp_tok_tag;
+_temp6648.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Plus, Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6649= yyvs; struct _xtunion_struct** _temp6651=
+_temp6649.curr +( yyvsp_offset - 2); if( _temp6649.base == 0? 1:( _temp6651 <
+_temp6649.base? 1: _temp6651 >= _temp6649.last_plus_one)){ _throw(
+Null_Exception);}* _temp6651;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6652= yyvs; struct _xtunion_struct** _temp6654= _temp6652.curr +
+yyvsp_offset; if( _temp6652.base == 0? 1:( _temp6654 < _temp6652.base? 1:
+_temp6654 >= _temp6652.last_plus_one)){ _throw( Null_Exception);}* _temp6654;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6655= yyls; struct Cyc_Yyltype*
+_temp6657= _temp6655.curr +( yylsp_offset - 2); if( _temp6655.base == 0? 1:(
+_temp6657 < _temp6655.base? 1: _temp6657 >= _temp6655.last_plus_one)){ _throw(
+Null_Exception);}* _temp6657;}).first_line,({ struct _tagged_ptr3 _temp6658=
+yyls; struct Cyc_Yyltype* _temp6660= _temp6658.curr + yylsp_offset; if(
+_temp6658.base == 0? 1:( _temp6660 < _temp6658.base? 1: _temp6660 >= _temp6658.last_plus_one)){
+_throw( Null_Exception);}* _temp6660;}).last_line)); _temp6648;}); _temp6647;});
+break; case 333: _LL6646: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6662=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6662[ 0]=({ struct Cyc_Exp_tok_struct _temp6663; _temp6663.tag= Cyc_Exp_tok_tag;
+_temp6663.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Minus, Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6664= yyvs; struct _xtunion_struct** _temp6666=
+_temp6664.curr +( yyvsp_offset - 2); if( _temp6664.base == 0? 1:( _temp6666 <
+_temp6664.base? 1: _temp6666 >= _temp6664.last_plus_one)){ _throw(
+Null_Exception);}* _temp6666;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6667= yyvs; struct _xtunion_struct** _temp6669= _temp6667.curr +
+yyvsp_offset; if( _temp6667.base == 0? 1:( _temp6669 < _temp6667.base? 1:
+_temp6669 >= _temp6667.last_plus_one)){ _throw( Null_Exception);}* _temp6669;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6670= yyls; struct Cyc_Yyltype*
+_temp6672= _temp6670.curr +( yylsp_offset - 2); if( _temp6670.base == 0? 1:(
+_temp6672 < _temp6670.base? 1: _temp6672 >= _temp6670.last_plus_one)){ _throw(
+Null_Exception);}* _temp6672;}).first_line,({ struct _tagged_ptr3 _temp6673=
+yyls; struct Cyc_Yyltype* _temp6675= _temp6673.curr + yylsp_offset; if(
+_temp6673.base == 0? 1:( _temp6675 < _temp6673.base? 1: _temp6675 >= _temp6673.last_plus_one)){
+_throw( Null_Exception);}* _temp6675;}).last_line)); _temp6663;}); _temp6662;});
+break; case 334: _LL6661: yyval=({ struct _tagged_ptr2 _temp6677= yyvs; struct
+_xtunion_struct** _temp6679= _temp6677.curr + yyvsp_offset; if( _temp6677.base
+== 0? 1:( _temp6679 < _temp6677.base? 1: _temp6679 >= _temp6677.last_plus_one)){
+_throw( Null_Exception);}* _temp6679;}); break; case 335: _LL6676: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6681=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6681[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6682; _temp6682.tag= Cyc_Exp_tok_tag; _temp6682.f1= Cyc_Absyn_prim2_exp((
+void*) Cyc_Absyn_Times, Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6683= yyvs;
+struct _xtunion_struct** _temp6685= _temp6683.curr +( yyvsp_offset - 2); if(
+_temp6683.base == 0? 1:( _temp6685 < _temp6683.base? 1: _temp6685 >= _temp6683.last_plus_one)){
+_throw( Null_Exception);}* _temp6685;})), Cyc_yyget_Exp_tok(({ struct
+_tagged_ptr2 _temp6686= yyvs; struct _xtunion_struct** _temp6688= _temp6686.curr
++ yyvsp_offset; if( _temp6686.base == 0? 1:( _temp6688 < _temp6686.base? 1:
+_temp6688 >= _temp6686.last_plus_one)){ _throw( Null_Exception);}* _temp6688;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6689= yyls; struct Cyc_Yyltype*
+_temp6691= _temp6689.curr +( yylsp_offset - 2); if( _temp6689.base == 0? 1:(
+_temp6691 < _temp6689.base? 1: _temp6691 >= _temp6689.last_plus_one)){ _throw(
+Null_Exception);}* _temp6691;}).first_line,({ struct _tagged_ptr3 _temp6692=
+yyls; struct Cyc_Yyltype* _temp6694= _temp6692.curr + yylsp_offset; if(
+_temp6692.base == 0? 1:( _temp6694 < _temp6692.base? 1: _temp6694 >= _temp6692.last_plus_one)){
+_throw( Null_Exception);}* _temp6694;}).last_line)); _temp6682;}); _temp6681;});
+break; case 336: _LL6680: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6696=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6696[ 0]=({ struct Cyc_Exp_tok_struct _temp6697; _temp6697.tag= Cyc_Exp_tok_tag;
+_temp6697.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Div, Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6698= yyvs; struct _xtunion_struct** _temp6700=
+_temp6698.curr +( yyvsp_offset - 2); if( _temp6698.base == 0? 1:( _temp6700 <
+_temp6698.base? 1: _temp6700 >= _temp6698.last_plus_one)){ _throw(
+Null_Exception);}* _temp6700;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6701= yyvs; struct _xtunion_struct** _temp6703= _temp6701.curr +
+yyvsp_offset; if( _temp6701.base == 0? 1:( _temp6703 < _temp6701.base? 1:
+_temp6703 >= _temp6701.last_plus_one)){ _throw( Null_Exception);}* _temp6703;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6704= yyls; struct Cyc_Yyltype*
+_temp6706= _temp6704.curr +( yylsp_offset - 2); if( _temp6704.base == 0? 1:(
+_temp6706 < _temp6704.base? 1: _temp6706 >= _temp6704.last_plus_one)){ _throw(
+Null_Exception);}* _temp6706;}).first_line,({ struct _tagged_ptr3 _temp6707=
+yyls; struct Cyc_Yyltype* _temp6709= _temp6707.curr + yylsp_offset; if(
+_temp6707.base == 0? 1:( _temp6709 < _temp6707.base? 1: _temp6709 >= _temp6707.last_plus_one)){
+_throw( Null_Exception);}* _temp6709;}).last_line)); _temp6697;}); _temp6696;});
+break; case 337: _LL6695: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6711=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6711[ 0]=({ struct Cyc_Exp_tok_struct _temp6712; _temp6712.tag= Cyc_Exp_tok_tag;
+_temp6712.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Mod, Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp6713= yyvs; struct _xtunion_struct** _temp6715=
+_temp6713.curr +( yyvsp_offset - 2); if( _temp6713.base == 0? 1:( _temp6715 <
+_temp6713.base? 1: _temp6715 >= _temp6713.last_plus_one)){ _throw(
+Null_Exception);}* _temp6715;})), Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6716= yyvs; struct _xtunion_struct** _temp6718= _temp6716.curr +
+yyvsp_offset; if( _temp6716.base == 0? 1:( _temp6718 < _temp6716.base? 1:
+_temp6718 >= _temp6716.last_plus_one)){ _throw( Null_Exception);}* _temp6718;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6719= yyls; struct Cyc_Yyltype*
+_temp6721= _temp6719.curr +( yylsp_offset - 2); if( _temp6719.base == 0? 1:(
+_temp6721 < _temp6719.base? 1: _temp6721 >= _temp6719.last_plus_one)){ _throw(
+Null_Exception);}* _temp6721;}).first_line,({ struct _tagged_ptr3 _temp6722=
+yyls; struct Cyc_Yyltype* _temp6724= _temp6722.curr + yylsp_offset; if(
+_temp6722.base == 0? 1:( _temp6724 < _temp6722.base? 1: _temp6724 >= _temp6722.last_plus_one)){
+_throw( Null_Exception);}* _temp6724;}).last_line)); _temp6712;}); _temp6711;});
+break; case 338: _LL6710: yyval=({ struct _tagged_ptr2 _temp6726= yyvs; struct
+_xtunion_struct** _temp6728= _temp6726.curr + yyvsp_offset; if( _temp6726.base
+== 0? 1:( _temp6728 < _temp6726.base? 1: _temp6728 >= _temp6726.last_plus_one)){
+_throw( Null_Exception);}* _temp6728;}); break; case 339: _LL6725: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6730=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6730[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6731; _temp6731.tag= Cyc_Exp_tok_tag; _temp6731.f1= Cyc_Absyn_cast_exp((*
+Cyc_yyget_ParamDecl_tok(({ struct _tagged_ptr2 _temp6732= yyvs; struct
+_xtunion_struct** _temp6734= _temp6732.curr +( yyvsp_offset - 2); if( _temp6732.base
+== 0? 1:( _temp6734 < _temp6732.base? 1: _temp6734 >= _temp6732.last_plus_one)){
+_throw( Null_Exception);}* _temp6734;}))).f3, Cyc_yyget_Exp_tok(({ struct
+_tagged_ptr2 _temp6735= yyvs; struct _xtunion_struct** _temp6737= _temp6735.curr
++ yyvsp_offset; if( _temp6735.base == 0? 1:( _temp6737 < _temp6735.base? 1:
+_temp6737 >= _temp6735.last_plus_one)){ _throw( Null_Exception);}* _temp6737;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6738= yyls; struct Cyc_Yyltype*
+_temp6740= _temp6738.curr +( yylsp_offset - 3); if( _temp6738.base == 0? 1:(
+_temp6740 < _temp6738.base? 1: _temp6740 >= _temp6738.last_plus_one)){ _throw(
+Null_Exception);}* _temp6740;}).first_line,({ struct _tagged_ptr3 _temp6741=
+yyls; struct Cyc_Yyltype* _temp6743= _temp6741.curr + yylsp_offset; if(
+_temp6741.base == 0? 1:( _temp6743 < _temp6741.base? 1: _temp6743 >= _temp6741.last_plus_one)){
+_throw( Null_Exception);}* _temp6743;}).last_line)); _temp6731;}); _temp6730;});
+break; case 340: _LL6729: yyval=({ struct _tagged_ptr2 _temp6745= yyvs; struct
+_xtunion_struct** _temp6747= _temp6745.curr + yyvsp_offset; if( _temp6745.base
+== 0? 1:( _temp6747 < _temp6745.base? 1: _temp6747 >= _temp6745.last_plus_one)){
+_throw( Null_Exception);}* _temp6747;}); break; case 341: _LL6744: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6749=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6749[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6750; _temp6750.tag= Cyc_Exp_tok_tag; _temp6750.f1= Cyc_Absyn_pre_inc_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6751= yyvs; struct _xtunion_struct**
+_temp6753= _temp6751.curr + yyvsp_offset; if( _temp6751.base == 0? 1:( _temp6753
+< _temp6751.base? 1: _temp6753 >= _temp6751.last_plus_one)){ _throw(
+Null_Exception);}* _temp6753;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6754= yyls; struct Cyc_Yyltype* _temp6756= _temp6754.curr +(
+yylsp_offset - 1); if( _temp6754.base == 0? 1:( _temp6756 < _temp6754.base? 1:
+_temp6756 >= _temp6754.last_plus_one)){ _throw( Null_Exception);}* _temp6756;}).first_line,({
+struct _tagged_ptr3 _temp6757= yyls; struct Cyc_Yyltype* _temp6759= _temp6757.curr
++ yylsp_offset; if( _temp6757.base == 0? 1:( _temp6759 < _temp6757.base? 1:
+_temp6759 >= _temp6757.last_plus_one)){ _throw( Null_Exception);}* _temp6759;}).last_line));
+_temp6750;}); _temp6749;}); break; case 342: _LL6748: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6761=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6761[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6762; _temp6762.tag= Cyc_Exp_tok_tag; _temp6762.f1= Cyc_Absyn_pre_dec_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6763= yyvs; struct _xtunion_struct**
+_temp6765= _temp6763.curr + yyvsp_offset; if( _temp6763.base == 0? 1:( _temp6765
+< _temp6763.base? 1: _temp6765 >= _temp6763.last_plus_one)){ _throw(
+Null_Exception);}* _temp6765;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6766= yyls; struct Cyc_Yyltype* _temp6768= _temp6766.curr +(
+yylsp_offset - 1); if( _temp6766.base == 0? 1:( _temp6768 < _temp6766.base? 1:
+_temp6768 >= _temp6766.last_plus_one)){ _throw( Null_Exception);}* _temp6768;}).first_line,({
+struct _tagged_ptr3 _temp6769= yyls; struct Cyc_Yyltype* _temp6771= _temp6769.curr
++ yylsp_offset; if( _temp6769.base == 0? 1:( _temp6771 < _temp6769.base? 1:
+_temp6771 >= _temp6769.last_plus_one)){ _throw( Null_Exception);}* _temp6771;}).last_line));
+_temp6762;}); _temp6761;}); break; case 343: _LL6760: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6773=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6773[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6774; _temp6774.tag= Cyc_Exp_tok_tag; _temp6774.f1= Cyc_Absyn_address_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6775= yyvs; struct _xtunion_struct**
+_temp6777= _temp6775.curr + yyvsp_offset; if( _temp6775.base == 0? 1:( _temp6777
+< _temp6775.base? 1: _temp6777 >= _temp6775.last_plus_one)){ _throw(
+Null_Exception);}* _temp6777;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6778= yyls; struct Cyc_Yyltype* _temp6780= _temp6778.curr +(
+yylsp_offset - 1); if( _temp6778.base == 0? 1:( _temp6780 < _temp6778.base? 1:
+_temp6780 >= _temp6778.last_plus_one)){ _throw( Null_Exception);}* _temp6780;}).first_line,({
+struct _tagged_ptr3 _temp6781= yyls; struct Cyc_Yyltype* _temp6783= _temp6781.curr
++ yylsp_offset; if( _temp6781.base == 0? 1:( _temp6783 < _temp6781.base? 1:
+_temp6783 >= _temp6781.last_plus_one)){ _throw( Null_Exception);}* _temp6783;}).last_line));
+_temp6774;}); _temp6773;}); break; case 344: _LL6772: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6785=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6785[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6786; _temp6786.tag= Cyc_Exp_tok_tag; _temp6786.f1= Cyc_Absyn_deref_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6787= yyvs; struct _xtunion_struct**
+_temp6789= _temp6787.curr + yyvsp_offset; if( _temp6787.base == 0? 1:( _temp6789
+< _temp6787.base? 1: _temp6789 >= _temp6787.last_plus_one)){ _throw(
+Null_Exception);}* _temp6789;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6790= yyls; struct Cyc_Yyltype* _temp6792= _temp6790.curr +(
+yylsp_offset - 1); if( _temp6790.base == 0? 1:( _temp6792 < _temp6790.base? 1:
+_temp6792 >= _temp6790.last_plus_one)){ _throw( Null_Exception);}* _temp6792;}).first_line,({
+struct _tagged_ptr3 _temp6793= yyls; struct Cyc_Yyltype* _temp6795= _temp6793.curr
++ yylsp_offset; if( _temp6793.base == 0? 1:( _temp6795 < _temp6793.base? 1:
+_temp6795 >= _temp6793.last_plus_one)){ _throw( Null_Exception);}* _temp6795;}).last_line));
+_temp6786;}); _temp6785;}); break; case 345: _LL6784: yyval=({ struct
+_tagged_ptr2 _temp6797= yyvs; struct _xtunion_struct** _temp6799= _temp6797.curr
++ yyvsp_offset; if( _temp6797.base == 0? 1:( _temp6799 < _temp6797.base? 1:
+_temp6799 >= _temp6797.last_plus_one)){ _throw( Null_Exception);}* _temp6799;});
+break; case 346: _LL6796: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6801=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6801[ 0]=({ struct Cyc_Exp_tok_struct _temp6802; _temp6802.tag= Cyc_Exp_tok_tag;
+_temp6802.f1= Cyc_Absyn_prim1_exp( Cyc_yyget_Primop_tok(({ struct _tagged_ptr2
+_temp6803= yyvs; struct _xtunion_struct** _temp6805= _temp6803.curr +(
+yyvsp_offset - 1); if( _temp6803.base == 0? 1:( _temp6805 < _temp6803.base? 1:
+_temp6805 >= _temp6803.last_plus_one)){ _throw( Null_Exception);}* _temp6805;})),
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6806= yyvs; struct _xtunion_struct**
+_temp6808= _temp6806.curr + yyvsp_offset; if( _temp6806.base == 0? 1:( _temp6808
+< _temp6806.base? 1: _temp6808 >= _temp6806.last_plus_one)){ _throw(
+Null_Exception);}* _temp6808;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6809= yyls; struct Cyc_Yyltype* _temp6811= _temp6809.curr +(
+yylsp_offset - 1); if( _temp6809.base == 0? 1:( _temp6811 < _temp6809.base? 1:
+_temp6811 >= _temp6809.last_plus_one)){ _throw( Null_Exception);}* _temp6811;}).first_line,({
+struct _tagged_ptr3 _temp6812= yyls; struct Cyc_Yyltype* _temp6814= _temp6812.curr
++ yylsp_offset; if( _temp6812.base == 0? 1:( _temp6814 < _temp6812.base? 1:
+_temp6814 >= _temp6812.last_plus_one)){ _throw( Null_Exception);}* _temp6814;}).last_line));
+_temp6802;}); _temp6801;}); break; case 347: _LL6800: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6816=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6816[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6817; _temp6817.tag= Cyc_Exp_tok_tag; _temp6817.f1= Cyc_Absyn_sizeoftyp_exp((*
+Cyc_yyget_ParamDecl_tok(({ struct _tagged_ptr2 _temp6818= yyvs; struct
+_xtunion_struct** _temp6820= _temp6818.curr +( yyvsp_offset - 1); if( _temp6818.base
+== 0? 1:( _temp6820 < _temp6818.base? 1: _temp6820 >= _temp6818.last_plus_one)){
+_throw( Null_Exception);}* _temp6820;}))).f3, Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp6821= yyls; struct Cyc_Yyltype* _temp6823= _temp6821.curr
++( yylsp_offset - 3); if( _temp6821.base == 0? 1:( _temp6823 < _temp6821.base? 1:
+_temp6823 >= _temp6821.last_plus_one)){ _throw( Null_Exception);}* _temp6823;}).first_line,({
+struct _tagged_ptr3 _temp6824= yyls; struct Cyc_Yyltype* _temp6826= _temp6824.curr
++ yylsp_offset; if( _temp6824.base == 0? 1:( _temp6826 < _temp6824.base? 1:
+_temp6826 >= _temp6824.last_plus_one)){ _throw( Null_Exception);}* _temp6826;}).last_line));
+_temp6817;}); _temp6816;}); break; case 348: _LL6815: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6828=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6828[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6829; _temp6829.tag= Cyc_Exp_tok_tag; _temp6829.f1= Cyc_Absyn_sizeofexp_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6830= yyvs; struct _xtunion_struct**
+_temp6832= _temp6830.curr + yyvsp_offset; if( _temp6830.base == 0? 1:( _temp6832
+< _temp6830.base? 1: _temp6832 >= _temp6830.last_plus_one)){ _throw(
+Null_Exception);}* _temp6832;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6833= yyls; struct Cyc_Yyltype* _temp6835= _temp6833.curr +(
+yylsp_offset - 1); if( _temp6833.base == 0? 1:( _temp6835 < _temp6833.base? 1:
+_temp6835 >= _temp6833.last_plus_one)){ _throw( Null_Exception);}* _temp6835;}).first_line,({
+struct _tagged_ptr3 _temp6836= yyls; struct Cyc_Yyltype* _temp6838= _temp6836.curr
++ yylsp_offset; if( _temp6836.base == 0? 1:( _temp6838 < _temp6836.base? 1:
+_temp6838 >= _temp6836.last_plus_one)){ _throw( Null_Exception);}* _temp6838;}).last_line));
+_temp6829;}); _temp6828;}); break; case 349: _LL6827: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6840=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6840[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6841; _temp6841.tag= Cyc_Exp_tok_tag; _temp6841.f1= Cyc_Absyn_primop_exp(
+Cyc_yyget_Primop_tok(({ struct _tagged_ptr2 _temp6842= yyvs; struct
+_xtunion_struct** _temp6844= _temp6842.curr +( yyvsp_offset - 3); if( _temp6842.base
+== 0? 1:( _temp6844 < _temp6842.base? 1: _temp6844 >= _temp6842.last_plus_one)){
+_throw( Null_Exception);}* _temp6844;})), Cyc_yyget_ExpList_tok(({ struct
+_tagged_ptr2 _temp6845= yyvs; struct _xtunion_struct** _temp6847= _temp6845.curr
++( yyvsp_offset - 1); if( _temp6845.base == 0? 1:( _temp6847 < _temp6845.base? 1:
+_temp6847 >= _temp6845.last_plus_one)){ _throw( Null_Exception);}* _temp6847;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6848= yyls; struct Cyc_Yyltype*
+_temp6850= _temp6848.curr +( yylsp_offset - 3); if( _temp6848.base == 0? 1:(
+_temp6850 < _temp6848.base? 1: _temp6850 >= _temp6848.last_plus_one)){ _throw(
+Null_Exception);}* _temp6850;}).first_line,({ struct _tagged_ptr3 _temp6851=
+yyls; struct Cyc_Yyltype* _temp6853= _temp6851.curr + yylsp_offset; if(
+_temp6851.base == 0? 1:( _temp6853 < _temp6851.base? 1: _temp6853 >= _temp6851.last_plus_one)){
+_throw( Null_Exception);}* _temp6853;}).last_line)); _temp6841;}); _temp6840;});
+break; case 350: _LL6839: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6855=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6855[ 0]=({ struct Cyc_Exp_tok_struct _temp6856; _temp6856.tag= Cyc_Exp_tok_tag;
+_temp6856.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Malloc_e_struct*
+_temp6857=( struct Cyc_Absyn_Malloc_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Malloc_e_struct));
+_temp6857[ 0]=({ struct Cyc_Absyn_Malloc_e_struct _temp6858; _temp6858.tag= Cyc_Absyn_Malloc_e_tag;
+_temp6858.f1= 0; _temp6858.f2=( void*) Cyc_Parse_speclist2typ((* Cyc_yyget_QualSpecList_tok(({
+struct _tagged_ptr2 _temp6859= yyvs; struct _xtunion_struct** _temp6861=
+_temp6859.curr +( yyvsp_offset - 2); if( _temp6859.base == 0? 1:( _temp6861 <
+_temp6859.base? 1: _temp6861 >= _temp6859.last_plus_one)){ _throw(
+Null_Exception);}* _temp6861;}))).f2, Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6862= yyls; struct Cyc_Yyltype* _temp6864= _temp6862.curr +(
+yylsp_offset - 2); if( _temp6862.base == 0? 1:( _temp6864 < _temp6862.base? 1:
+_temp6864 >= _temp6862.last_plus_one)){ _throw( Null_Exception);}* _temp6864;}).first_line,({
+struct _tagged_ptr3 _temp6865= yyls; struct Cyc_Yyltype* _temp6867= _temp6865.curr
++( yylsp_offset - 2); if( _temp6865.base == 0? 1:( _temp6867 < _temp6865.base? 1:
+_temp6867 >= _temp6865.last_plus_one)){ _throw( Null_Exception);}* _temp6867;}).last_line));
+_temp6858;}); _temp6857;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
+_temp6868= yyls; struct Cyc_Yyltype* _temp6870= _temp6868.curr +( yylsp_offset -
+6); if( _temp6868.base == 0? 1:( _temp6870 < _temp6868.base? 1: _temp6870 >=
+_temp6868.last_plus_one)){ _throw( Null_Exception);}* _temp6870;}).first_line,({
+struct _tagged_ptr3 _temp6871= yyls; struct Cyc_Yyltype* _temp6873= _temp6871.curr
++ yylsp_offset; if( _temp6871.base == 0? 1:( _temp6873 < _temp6871.base? 1:
+_temp6873 >= _temp6871.last_plus_one)){ _throw( Null_Exception);}* _temp6873;}).last_line));
+_temp6856;}); _temp6855;}); break; case 351: _LL6854: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6875=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6875[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6876; _temp6876.tag= Cyc_Exp_tok_tag; _temp6876.f1= Cyc_Absyn_new_exp((
+void*)({ struct Cyc_Absyn_Malloc_e_struct* _temp6877=( struct Cyc_Absyn_Malloc_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Malloc_e_struct)); _temp6877[ 0]=({ struct
+Cyc_Absyn_Malloc_e_struct _temp6878; _temp6878.tag= Cyc_Absyn_Malloc_e_tag;
+_temp6878.f1=( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6879= yyvs; struct _xtunion_struct** _temp6881= _temp6879.curr +(
+yyvsp_offset - 6); if( _temp6879.base == 0? 1:( _temp6881 < _temp6879.base? 1:
+_temp6881 >= _temp6879.last_plus_one)){ _throw( Null_Exception);}* _temp6881;}));
+_temp6878.f2=( void*) Cyc_Parse_speclist2typ((* Cyc_yyget_QualSpecList_tok(({
+struct _tagged_ptr2 _temp6882= yyvs; struct _xtunion_struct** _temp6884=
+_temp6882.curr +( yyvsp_offset - 2); if( _temp6882.base == 0? 1:( _temp6884 <
+_temp6882.base? 1: _temp6884 >= _temp6882.last_plus_one)){ _throw(
+Null_Exception);}* _temp6884;}))).f2, Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6885= yyls; struct Cyc_Yyltype* _temp6887= _temp6885.curr +(
+yylsp_offset - 2); if( _temp6885.base == 0? 1:( _temp6887 < _temp6885.base? 1:
+_temp6887 >= _temp6885.last_plus_one)){ _throw( Null_Exception);}* _temp6887;}).first_line,({
+struct _tagged_ptr3 _temp6888= yyls; struct Cyc_Yyltype* _temp6890= _temp6888.curr
++( yylsp_offset - 2); if( _temp6888.base == 0? 1:( _temp6890 < _temp6888.base? 1:
+_temp6890 >= _temp6888.last_plus_one)){ _throw( Null_Exception);}* _temp6890;}).last_line));
+_temp6878;}); _temp6877;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
+_temp6891= yyls; struct Cyc_Yyltype* _temp6893= _temp6891.curr +( yylsp_offset -
+8); if( _temp6891.base == 0? 1:( _temp6893 < _temp6891.base? 1: _temp6893 >=
+_temp6891.last_plus_one)){ _throw( Null_Exception);}* _temp6893;}).first_line,({
+struct _tagged_ptr3 _temp6894= yyls; struct Cyc_Yyltype* _temp6896= _temp6894.curr
++ yylsp_offset; if( _temp6894.base == 0? 1:( _temp6896 < _temp6894.base? 1:
+_temp6896 >= _temp6894.last_plus_one)){ _throw( Null_Exception);}* _temp6896;}).last_line));
+_temp6876;}); _temp6875;}); break; case 352: _LL6874: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6898=( struct Cyc_Primop_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6898[ 0]=({ struct Cyc_Primop_tok_struct
+_temp6899; _temp6899.tag= Cyc_Primop_tok_tag; _temp6899.f1=( void*)(( void*) Cyc_Absyn_Printf);
+_temp6899;}); _temp6898;}); break; case 353: _LL6897: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6901=( struct Cyc_Primop_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6901[ 0]=({ struct Cyc_Primop_tok_struct
+_temp6902; _temp6902.tag= Cyc_Primop_tok_tag; _temp6902.f1=( void*)(( void*) Cyc_Absyn_Fprintf);
+_temp6902;}); _temp6901;}); break; case 354: _LL6900: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6904=( struct Cyc_Primop_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6904[ 0]=({ struct Cyc_Primop_tok_struct
+_temp6905; _temp6905.tag= Cyc_Primop_tok_tag; _temp6905.f1=( void*)(( void*) Cyc_Absyn_Xprintf);
+_temp6905;}); _temp6904;}); break; case 355: _LL6903: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6907=( struct Cyc_Primop_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6907[ 0]=({ struct Cyc_Primop_tok_struct
+_temp6908; _temp6908.tag= Cyc_Primop_tok_tag; _temp6908.f1=( void*)(( void*) Cyc_Absyn_Scanf);
+_temp6908;}); _temp6907;}); break; case 356: _LL6906: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6910=( struct Cyc_Primop_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6910[ 0]=({ struct Cyc_Primop_tok_struct
+_temp6911; _temp6911.tag= Cyc_Primop_tok_tag; _temp6911.f1=( void*)(( void*) Cyc_Absyn_Fscanf);
+_temp6911;}); _temp6910;}); break; case 357: _LL6909: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6913=( struct Cyc_Primop_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6913[ 0]=({ struct Cyc_Primop_tok_struct
+_temp6914; _temp6914.tag= Cyc_Primop_tok_tag; _temp6914.f1=( void*)(( void*) Cyc_Absyn_Sscanf);
+_temp6914;}); _temp6913;}); break; case 358: _LL6912: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6916=( struct Cyc_Primop_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6916[ 0]=({ struct Cyc_Primop_tok_struct
+_temp6917; _temp6917.tag= Cyc_Primop_tok_tag; _temp6917.f1=( void*)(( void*) Cyc_Absyn_Bitnot);
+_temp6917;}); _temp6916;}); break; case 359: _LL6915: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6919=( struct Cyc_Primop_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6919[ 0]=({ struct Cyc_Primop_tok_struct
+_temp6920; _temp6920.tag= Cyc_Primop_tok_tag; _temp6920.f1=( void*)(( void*) Cyc_Absyn_Not);
+_temp6920;}); _temp6919;}); break; case 360: _LL6918: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Primop_tok_struct* _temp6922=( struct Cyc_Primop_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primop_tok_struct)); _temp6922[ 0]=({ struct Cyc_Primop_tok_struct
+_temp6923; _temp6923.tag= Cyc_Primop_tok_tag; _temp6923.f1=( void*)(( void*) Cyc_Absyn_Minus);
+_temp6923;}); _temp6922;}); break; case 361: _LL6921: yyval=({ struct
+_tagged_ptr2 _temp6925= yyvs; struct _xtunion_struct** _temp6927= _temp6925.curr
++ yyvsp_offset; if( _temp6925.base == 0? 1:( _temp6927 < _temp6925.base? 1:
+_temp6927 >= _temp6925.last_plus_one)){ _throw( Null_Exception);}* _temp6927;});
+break; case 362: _LL6924: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6929=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6929[ 0]=({ struct Cyc_Exp_tok_struct _temp6930; _temp6930.tag= Cyc_Exp_tok_tag;
+_temp6930.f1= Cyc_Absyn_subscript_exp( Cyc_yyget_Exp_tok(({ struct _tagged_ptr2
+_temp6931= yyvs; struct _xtunion_struct** _temp6933= _temp6931.curr +(
+yyvsp_offset - 3); if( _temp6931.base == 0? 1:( _temp6933 < _temp6931.base? 1:
+_temp6933 >= _temp6931.last_plus_one)){ _throw( Null_Exception);}* _temp6933;})),
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6934= yyvs; struct _xtunion_struct**
+_temp6936= _temp6934.curr +( yyvsp_offset - 1); if( _temp6934.base == 0? 1:(
+_temp6936 < _temp6934.base? 1: _temp6936 >= _temp6934.last_plus_one)){ _throw(
+Null_Exception);}* _temp6936;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6937= yyls; struct Cyc_Yyltype* _temp6939= _temp6937.curr +(
+yylsp_offset - 3); if( _temp6937.base == 0? 1:( _temp6939 < _temp6937.base? 1:
+_temp6939 >= _temp6937.last_plus_one)){ _throw( Null_Exception);}* _temp6939;}).first_line,({
+struct _tagged_ptr3 _temp6940= yyls; struct Cyc_Yyltype* _temp6942= _temp6940.curr
++ yylsp_offset; if( _temp6940.base == 0? 1:( _temp6942 < _temp6940.base? 1:
+_temp6942 >= _temp6940.last_plus_one)){ _throw( Null_Exception);}* _temp6942;}).last_line));
+_temp6930;}); _temp6929;}); break; case 363: _LL6928: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6944=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6944[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6945; _temp6945.tag= Cyc_Exp_tok_tag; _temp6945.f1= Cyc_Absyn_unknowncall_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6946= yyvs; struct _xtunion_struct**
+_temp6948= _temp6946.curr +( yyvsp_offset - 2); if( _temp6946.base == 0? 1:(
+_temp6948 < _temp6946.base? 1: _temp6948 >= _temp6946.last_plus_one)){ _throw(
+Null_Exception);}* _temp6948;})), 0, Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp6949= yyls; struct Cyc_Yyltype* _temp6951= _temp6949.curr +(
+yylsp_offset - 2); if( _temp6949.base == 0? 1:( _temp6951 < _temp6949.base? 1:
+_temp6951 >= _temp6949.last_plus_one)){ _throw( Null_Exception);}* _temp6951;}).first_line,({
+struct _tagged_ptr3 _temp6952= yyls; struct Cyc_Yyltype* _temp6954= _temp6952.curr
++ yylsp_offset; if( _temp6952.base == 0? 1:( _temp6954 < _temp6952.base? 1:
+_temp6954 >= _temp6952.last_plus_one)){ _throw( Null_Exception);}* _temp6954;}).last_line));
+_temp6945;}); _temp6944;}); break; case 364: _LL6943: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp6956=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp6956[ 0]=({ struct Cyc_Exp_tok_struct
+_temp6957; _temp6957.tag= Cyc_Exp_tok_tag; _temp6957.f1= Cyc_Absyn_unknowncall_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp6958= yyvs; struct _xtunion_struct**
+_temp6960= _temp6958.curr +( yyvsp_offset - 3); if( _temp6958.base == 0? 1:(
+_temp6960 < _temp6958.base? 1: _temp6960 >= _temp6958.last_plus_one)){ _throw(
+Null_Exception);}* _temp6960;})), Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2
+_temp6961= yyvs; struct _xtunion_struct** _temp6963= _temp6961.curr +(
+yyvsp_offset - 1); if( _temp6961.base == 0? 1:( _temp6963 < _temp6961.base? 1:
+_temp6963 >= _temp6961.last_plus_one)){ _throw( Null_Exception);}* _temp6963;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6964= yyls; struct Cyc_Yyltype*
+_temp6966= _temp6964.curr +( yylsp_offset - 3); if( _temp6964.base == 0? 1:(
+_temp6966 < _temp6964.base? 1: _temp6966 >= _temp6964.last_plus_one)){ _throw(
+Null_Exception);}* _temp6966;}).first_line,({ struct _tagged_ptr3 _temp6967=
+yyls; struct Cyc_Yyltype* _temp6969= _temp6967.curr + yylsp_offset; if(
+_temp6967.base == 0? 1:( _temp6969 < _temp6967.base? 1: _temp6969 >= _temp6967.last_plus_one)){
+_throw( Null_Exception);}* _temp6969;}).last_line)); _temp6957;}); _temp6956;});
+break; case 365: _LL6955: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp6971=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp6971[ 0]=({ struct Cyc_Exp_tok_struct _temp6972; _temp6972.tag= Cyc_Exp_tok_tag;
+_temp6972.f1= Cyc_Absyn_structmember_exp( Cyc_yyget_Exp_tok(({ struct
+_tagged_ptr2 _temp6973= yyvs; struct _xtunion_struct** _temp6975= _temp6973.curr
++( yyvsp_offset - 2); if( _temp6973.base == 0? 1:( _temp6975 < _temp6973.base? 1:
+_temp6975 >= _temp6973.last_plus_one)){ _throw( Null_Exception);}* _temp6975;})),({
+struct _tagged_string* _temp6976=( struct _tagged_string*) GC_malloc( sizeof(
+struct _tagged_string) * 1); _temp6976[ 0]= Cyc_yyget_String_tok(({ struct
+_tagged_ptr2 _temp6977= yyvs; struct _xtunion_struct** _temp6979= _temp6977.curr
++ yyvsp_offset; if( _temp6977.base == 0? 1:( _temp6979 < _temp6977.base? 1:
+_temp6979 >= _temp6977.last_plus_one)){ _throw( Null_Exception);}* _temp6979;}));
+_temp6976;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp6980= yyls;
+struct Cyc_Yyltype* _temp6982= _temp6980.curr +( yylsp_offset - 2); if(
+_temp6980.base == 0? 1:( _temp6982 < _temp6980.base? 1: _temp6982 >= _temp6980.last_plus_one)){
+_throw( Null_Exception);}* _temp6982;}).first_line,({ struct _tagged_ptr3
+_temp6983= yyls; struct Cyc_Yyltype* _temp6985= _temp6983.curr + yylsp_offset;
+if( _temp6983.base == 0? 1:( _temp6985 < _temp6983.base? 1: _temp6985 >=
+_temp6983.last_plus_one)){ _throw( Null_Exception);}* _temp6985;}).last_line));
+_temp6972;}); _temp6971;}); break; case 366: _LL6970: { struct _tuple1* q= Cyc_yyget_QualId_tok(({
+struct _tagged_ptr2 _temp6987= yyvs; struct _xtunion_struct** _temp6989=
+_temp6987.curr + yyvsp_offset; if( _temp6987.base == 0? 1:( _temp6989 <
+_temp6987.base? 1: _temp6989 >= _temp6987.last_plus_one)){ _throw(
+Null_Exception);}* _temp6989;}));{ void* _temp6990=(* q).f1; struct Cyc_List_List*
+_temp7000; struct Cyc_List_List* _temp7002; _LL6992: if(( int) _temp6990 == Cyc_Absyn_Loc_n){
+goto _LL6993;} else{ goto _LL6994;} _LL6994: if(( unsigned int) _temp6990 > 1u?((
+struct _tunion_struct*) _temp6990)->tag == Cyc_Absyn_Rel_n_tag: 0){ _LL7001:
+_temp7000=( struct Cyc_List_List*)(( struct Cyc_Absyn_Rel_n_struct*) _temp6990)->f1;
+if( _temp7000 == 0){ goto _LL6995;} else{ goto _LL6996;}} else{ goto _LL6996;}
+_LL6996: if(( unsigned int) _temp6990 > 1u?(( struct _tunion_struct*) _temp6990)->tag
+== Cyc_Absyn_Abs_n_tag: 0){ _LL7003: _temp7002=( struct Cyc_List_List*)(( struct
+Cyc_Absyn_Abs_n_struct*) _temp6990)->f1; if( _temp7002 == 0){ goto _LL6997;}
+else{ goto _LL6998;}} else{ goto _LL6998;} _LL6998: goto _LL6999; _LL6993: goto
+_LL6991; _LL6995: goto _LL6991; _LL6997: goto _LL6991; _LL6999: Cyc_Parse_err((
+struct _tagged_string)({ char* _temp7004=( char*)"struct field name is qualified";
+struct _tagged_string _temp7005; _temp7005.curr= _temp7004; _temp7005.base=
+_temp7004; _temp7005.last_plus_one= _temp7004 + 31; _temp7005;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp7006= yyls; struct Cyc_Yyltype* _temp7008= _temp7006.curr
++ yylsp_offset; if( _temp7006.base == 0? 1:( _temp7008 < _temp7006.base? 1:
+_temp7008 >= _temp7006.last_plus_one)){ _throw( Null_Exception);}* _temp7008;}).first_line,({
+struct _tagged_ptr3 _temp7009= yyls; struct Cyc_Yyltype* _temp7011= _temp7009.curr
++ yylsp_offset; if( _temp7009.base == 0? 1:( _temp7011 < _temp7009.base? 1:
+_temp7011 >= _temp7009.last_plus_one)){ _throw( Null_Exception);}* _temp7011;}).last_line));
+goto _LL6991; _LL6991:;} yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp7012=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp7012[ 0]=({ struct Cyc_Exp_tok_struct _temp7013; _temp7013.tag= Cyc_Exp_tok_tag;
+_temp7013.f1= Cyc_Absyn_structmember_exp( Cyc_yyget_Exp_tok(({ struct
+_tagged_ptr2 _temp7014= yyvs; struct _xtunion_struct** _temp7016= _temp7014.curr
++( yyvsp_offset - 2); if( _temp7014.base == 0? 1:( _temp7016 < _temp7014.base? 1:
+_temp7016 >= _temp7014.last_plus_one)){ _throw( Null_Exception);}* _temp7016;})),(*
+q).f2, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7017= yyls;
+struct Cyc_Yyltype* _temp7019= _temp7017.curr +( yylsp_offset - 2); if(
+_temp7017.base == 0? 1:( _temp7019 < _temp7017.base? 1: _temp7019 >= _temp7017.last_plus_one)){
+_throw( Null_Exception);}* _temp7019;}).first_line,({ struct _tagged_ptr3
+_temp7020= yyls; struct Cyc_Yyltype* _temp7022= _temp7020.curr + yylsp_offset;
+if( _temp7020.base == 0? 1:( _temp7022 < _temp7020.base? 1: _temp7022 >=
+_temp7020.last_plus_one)){ _throw( Null_Exception);}* _temp7022;}).last_line));
+_temp7013;}); _temp7012;}); break;} case 367: _LL6986: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7024=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7024[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7025; _temp7025.tag= Cyc_Exp_tok_tag; _temp7025.f1= Cyc_Absyn_structarrow_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7026= yyvs; struct _xtunion_struct**
+_temp7028= _temp7026.curr +( yyvsp_offset - 2); if( _temp7026.base == 0? 1:(
+_temp7028 < _temp7026.base? 1: _temp7028 >= _temp7026.last_plus_one)){ _throw(
+Null_Exception);}* _temp7028;})),({ struct _tagged_string* _temp7029=( struct
+_tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1); _temp7029[ 0]=
+Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp7030= yyvs; struct
+_xtunion_struct** _temp7032= _temp7030.curr + yyvsp_offset; if( _temp7030.base
+== 0? 1:( _temp7032 < _temp7030.base? 1: _temp7032 >= _temp7030.last_plus_one)){
+_throw( Null_Exception);}* _temp7032;})); _temp7029;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp7033= yyls; struct Cyc_Yyltype* _temp7035= _temp7033.curr
++( yylsp_offset - 2); if( _temp7033.base == 0? 1:( _temp7035 < _temp7033.base? 1:
+_temp7035 >= _temp7033.last_plus_one)){ _throw( Null_Exception);}* _temp7035;}).first_line,({
+struct _tagged_ptr3 _temp7036= yyls; struct Cyc_Yyltype* _temp7038= _temp7036.curr
++ yylsp_offset; if( _temp7036.base == 0? 1:( _temp7038 < _temp7036.base? 1:
+_temp7038 >= _temp7036.last_plus_one)){ _throw( Null_Exception);}* _temp7038;}).last_line));
+_temp7025;}); _temp7024;}); break; case 368: _LL7023: { struct _tuple1* q= Cyc_yyget_QualId_tok(({
+struct _tagged_ptr2 _temp7040= yyvs; struct _xtunion_struct** _temp7042=
+_temp7040.curr + yyvsp_offset; if( _temp7040.base == 0? 1:( _temp7042 <
+_temp7040.base? 1: _temp7042 >= _temp7040.last_plus_one)){ _throw(
+Null_Exception);}* _temp7042;}));{ void* _temp7043=(* q).f1; struct Cyc_List_List*
+_temp7053; struct Cyc_List_List* _temp7055; _LL7045: if(( int) _temp7043 == Cyc_Absyn_Loc_n){
+goto _LL7046;} else{ goto _LL7047;} _LL7047: if(( unsigned int) _temp7043 > 1u?((
+struct _tunion_struct*) _temp7043)->tag == Cyc_Absyn_Rel_n_tag: 0){ _LL7054:
+_temp7053=( struct Cyc_List_List*)(( struct Cyc_Absyn_Rel_n_struct*) _temp7043)->f1;
+if( _temp7053 == 0){ goto _LL7048;} else{ goto _LL7049;}} else{ goto _LL7049;}
+_LL7049: if(( unsigned int) _temp7043 > 1u?(( struct _tunion_struct*) _temp7043)->tag
+== Cyc_Absyn_Abs_n_tag: 0){ _LL7056: _temp7055=( struct Cyc_List_List*)(( struct
+Cyc_Absyn_Abs_n_struct*) _temp7043)->f1; if( _temp7055 == 0){ goto _LL7050;}
+else{ goto _LL7051;}} else{ goto _LL7051;} _LL7051: goto _LL7052; _LL7046: goto
+_LL7044; _LL7048: goto _LL7044; _LL7050: goto _LL7044; _LL7052: Cyc_Parse_err((
+struct _tagged_string)({ char* _temp7057=( char*)"struct field is qualified with module name";
+struct _tagged_string _temp7058; _temp7058.curr= _temp7057; _temp7058.base=
+_temp7057; _temp7058.last_plus_one= _temp7057 + 43; _temp7058;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp7059= yyls; struct Cyc_Yyltype* _temp7061= _temp7059.curr
++ yylsp_offset; if( _temp7059.base == 0? 1:( _temp7061 < _temp7059.base? 1:
+_temp7061 >= _temp7059.last_plus_one)){ _throw( Null_Exception);}* _temp7061;}).first_line,({
+struct _tagged_ptr3 _temp7062= yyls; struct Cyc_Yyltype* _temp7064= _temp7062.curr
++ yylsp_offset; if( _temp7062.base == 0? 1:( _temp7064 < _temp7062.base? 1:
+_temp7064 >= _temp7062.last_plus_one)){ _throw( Null_Exception);}* _temp7064;}).last_line));
+goto _LL7044; _LL7044:;} yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp7065=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp7065[ 0]=({ struct Cyc_Exp_tok_struct _temp7066; _temp7066.tag= Cyc_Exp_tok_tag;
+_temp7066.f1= Cyc_Absyn_structarrow_exp( Cyc_yyget_Exp_tok(({ struct
+_tagged_ptr2 _temp7067= yyvs; struct _xtunion_struct** _temp7069= _temp7067.curr
++( yyvsp_offset - 2); if( _temp7067.base == 0? 1:( _temp7069 < _temp7067.base? 1:
+_temp7069 >= _temp7067.last_plus_one)){ _throw( Null_Exception);}* _temp7069;})),(*
+q).f2, Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7070= yyls;
+struct Cyc_Yyltype* _temp7072= _temp7070.curr +( yylsp_offset - 2); if(
+_temp7070.base == 0? 1:( _temp7072 < _temp7070.base? 1: _temp7072 >= _temp7070.last_plus_one)){
+_throw( Null_Exception);}* _temp7072;}).first_line,({ struct _tagged_ptr3
+_temp7073= yyls; struct Cyc_Yyltype* _temp7075= _temp7073.curr + yylsp_offset;
+if( _temp7073.base == 0? 1:( _temp7075 < _temp7073.base? 1: _temp7075 >=
+_temp7073.last_plus_one)){ _throw( Null_Exception);}* _temp7075;}).last_line));
+_temp7066;}); _temp7065;}); break;} case 369: _LL7039: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7077=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7077[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7078; _temp7078.tag= Cyc_Exp_tok_tag; _temp7078.f1= Cyc_Absyn_post_inc_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7079= yyvs; struct _xtunion_struct**
+_temp7081= _temp7079.curr +( yyvsp_offset - 1); if( _temp7079.base == 0? 1:(
+_temp7081 < _temp7079.base? 1: _temp7081 >= _temp7079.last_plus_one)){ _throw(
+Null_Exception);}* _temp7081;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp7082= yyls; struct Cyc_Yyltype* _temp7084= _temp7082.curr +(
+yylsp_offset - 1); if( _temp7082.base == 0? 1:( _temp7084 < _temp7082.base? 1:
+_temp7084 >= _temp7082.last_plus_one)){ _throw( Null_Exception);}* _temp7084;}).first_line,({
+struct _tagged_ptr3 _temp7085= yyls; struct Cyc_Yyltype* _temp7087= _temp7085.curr
++ yylsp_offset; if( _temp7085.base == 0? 1:( _temp7087 < _temp7085.base? 1:
+_temp7087 >= _temp7085.last_plus_one)){ _throw( Null_Exception);}* _temp7087;}).last_line));
+_temp7078;}); _temp7077;}); break; case 370: _LL7076: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7089=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7089[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7090; _temp7090.tag= Cyc_Exp_tok_tag; _temp7090.f1= Cyc_Absyn_post_dec_exp(
+Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7091= yyvs; struct _xtunion_struct**
+_temp7093= _temp7091.curr +( yyvsp_offset - 1); if( _temp7091.base == 0? 1:(
+_temp7093 < _temp7091.base? 1: _temp7093 >= _temp7091.last_plus_one)){ _throw(
+Null_Exception);}* _temp7093;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp7094= yyls; struct Cyc_Yyltype* _temp7096= _temp7094.curr +(
+yylsp_offset - 1); if( _temp7094.base == 0? 1:( _temp7096 < _temp7094.base? 1:
+_temp7096 >= _temp7094.last_plus_one)){ _throw( Null_Exception);}* _temp7096;}).first_line,({
+struct _tagged_ptr3 _temp7097= yyls; struct Cyc_Yyltype* _temp7099= _temp7097.curr
++ yylsp_offset; if( _temp7097.base == 0? 1:( _temp7099 < _temp7097.base? 1:
+_temp7099 >= _temp7097.last_plus_one)){ _throw( Null_Exception);}* _temp7099;}).last_line));
+_temp7090;}); _temp7089;}); break; case 371: _LL7088: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7101=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7101[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7102; _temp7102.tag= Cyc_Exp_tok_tag; _temp7102.f1= Cyc_Absyn_new_exp((
+void*)({ struct Cyc_Absyn_CompoundLit_e_struct* _temp7103=( struct Cyc_Absyn_CompoundLit_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_CompoundLit_e_struct)); _temp7103[ 0]=({
+struct Cyc_Absyn_CompoundLit_e_struct _temp7104; _temp7104.tag= Cyc_Absyn_CompoundLit_e_tag;
+_temp7104.f1= Cyc_yyget_ParamDecl_tok(({ struct _tagged_ptr2 _temp7105= yyvs;
+struct _xtunion_struct** _temp7107= _temp7105.curr +( yyvsp_offset - 4); if(
+_temp7105.base == 0? 1:( _temp7107 < _temp7105.base? 1: _temp7107 >= _temp7105.last_plus_one)){
+_throw( Null_Exception);}* _temp7107;})); _temp7104.f2=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_InitializerList_tok(({
-struct _tagged_ptr2 _temp7109= yyvs; struct _xtunion_struct** _temp7111=
-_temp7109.curr +( yyvsp_offset - 1); if( _temp7109.base == 0? 1:( _temp7111 <
-_temp7109.base? 1: _temp7111 >= _temp7109.last_plus_one)){ _throw(
-Null_Exception);}* _temp7111;}))); _temp7105;}); _temp7104;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp7112= yyls; struct Cyc_Yyltype* _temp7114= _temp7112.curr
-+( yylsp_offset - 5); if( _temp7112.base == 0? 1:( _temp7114 < _temp7112.base? 1:
-_temp7114 >= _temp7112.last_plus_one)){ _throw( Null_Exception);}* _temp7114;}).first_line,({
-struct _tagged_ptr3 _temp7115= yyls; struct Cyc_Yyltype* _temp7117= _temp7115.curr
-+ yylsp_offset; if( _temp7115.base == 0? 1:( _temp7117 < _temp7115.base? 1:
-_temp7117 >= _temp7115.last_plus_one)){ _throw( Null_Exception);}* _temp7117;}).last_line));
-_temp7103;}); _temp7102;}); break; case 372: _LL7101: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7119=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7119[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7120; _temp7120.tag= Cyc_Exp_tok_tag; _temp7120.f1= Cyc_Absyn_new_exp((
-void*)({ struct Cyc_Absyn_CompoundLit_e_struct* _temp7121=( struct Cyc_Absyn_CompoundLit_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_CompoundLit_e_struct)); _temp7121[ 0]=({
-struct Cyc_Absyn_CompoundLit_e_struct _temp7122; _temp7122.tag= Cyc_Absyn_CompoundLit_e_tag;
-_temp7122.f1= Cyc_yyget_ParamDecl_tok(({ struct _tagged_ptr2 _temp7123= yyvs;
-struct _xtunion_struct** _temp7125= _temp7123.curr +( yyvsp_offset - 5); if(
-_temp7123.base == 0? 1:( _temp7125 < _temp7123.base? 1: _temp7125 >= _temp7123.last_plus_one)){
-_throw( Null_Exception);}* _temp7125;})); _temp7122.f2=(( struct Cyc_List_List*(*)(
+struct _tagged_ptr2 _temp7108= yyvs; struct _xtunion_struct** _temp7110=
+_temp7108.curr +( yyvsp_offset - 1); if( _temp7108.base == 0? 1:( _temp7110 <
+_temp7108.base? 1: _temp7110 >= _temp7108.last_plus_one)){ _throw(
+Null_Exception);}* _temp7110;}))); _temp7104;}); _temp7103;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp7111= yyls; struct Cyc_Yyltype* _temp7113= _temp7111.curr
++( yylsp_offset - 5); if( _temp7111.base == 0? 1:( _temp7113 < _temp7111.base? 1:
+_temp7113 >= _temp7111.last_plus_one)){ _throw( Null_Exception);}* _temp7113;}).first_line,({
+struct _tagged_ptr3 _temp7114= yyls; struct Cyc_Yyltype* _temp7116= _temp7114.curr
++ yylsp_offset; if( _temp7114.base == 0? 1:( _temp7116 < _temp7114.base? 1:
+_temp7116 >= _temp7114.last_plus_one)){ _throw( Null_Exception);}* _temp7116;}).last_line));
+_temp7102;}); _temp7101;}); break; case 372: _LL7100: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7118=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7118[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7119; _temp7119.tag= Cyc_Exp_tok_tag; _temp7119.f1= Cyc_Absyn_new_exp((
+void*)({ struct Cyc_Absyn_CompoundLit_e_struct* _temp7120=( struct Cyc_Absyn_CompoundLit_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_CompoundLit_e_struct)); _temp7120[ 0]=({
+struct Cyc_Absyn_CompoundLit_e_struct _temp7121; _temp7121.tag= Cyc_Absyn_CompoundLit_e_tag;
+_temp7121.f1= Cyc_yyget_ParamDecl_tok(({ struct _tagged_ptr2 _temp7122= yyvs;
+struct _xtunion_struct** _temp7124= _temp7122.curr +( yyvsp_offset - 5); if(
+_temp7122.base == 0? 1:( _temp7124 < _temp7122.base? 1: _temp7124 >= _temp7122.last_plus_one)){
+_throw( Null_Exception);}* _temp7124;})); _temp7121.f2=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_InitializerList_tok(({
-struct _tagged_ptr2 _temp7126= yyvs; struct _xtunion_struct** _temp7128=
-_temp7126.curr +( yyvsp_offset - 2); if( _temp7126.base == 0? 1:( _temp7128 <
-_temp7126.base? 1: _temp7128 >= _temp7126.last_plus_one)){ _throw(
-Null_Exception);}* _temp7128;}))); _temp7122;}); _temp7121;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp7129= yyls; struct Cyc_Yyltype* _temp7131= _temp7129.curr
-+( yylsp_offset - 6); if( _temp7129.base == 0? 1:( _temp7131 < _temp7129.base? 1:
-_temp7131 >= _temp7129.last_plus_one)){ _throw( Null_Exception);}* _temp7131;}).first_line,({
-struct _tagged_ptr3 _temp7132= yyls; struct Cyc_Yyltype* _temp7134= _temp7132.curr
-+ yylsp_offset; if( _temp7132.base == 0? 1:( _temp7134 < _temp7132.base? 1:
-_temp7134 >= _temp7132.last_plus_one)){ _throw( Null_Exception);}* _temp7134;}).last_line));
-_temp7120;}); _temp7119;}); break; case 373: _LL7118: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7136=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7136[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7137; _temp7137.tag= Cyc_Exp_tok_tag; _temp7137.f1= Cyc_Absyn_new_exp((
-void*)({ struct Cyc_Absyn_Fill_e_struct* _temp7138=( struct Cyc_Absyn_Fill_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Fill_e_struct)); _temp7138[ 0]=({ struct Cyc_Absyn_Fill_e_struct
-_temp7139; _temp7139.tag= Cyc_Absyn_Fill_e_tag; _temp7139.f1= Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp7140= yyvs; struct _xtunion_struct** _temp7142=
-_temp7140.curr +( yyvsp_offset - 1); if( _temp7140.base == 0? 1:( _temp7142 <
-_temp7140.base? 1: _temp7142 >= _temp7140.last_plus_one)){ _throw(
-Null_Exception);}* _temp7142;})); _temp7139;}); _temp7138;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp7143= yyls; struct Cyc_Yyltype* _temp7145= _temp7143.curr
-+( yylsp_offset - 3); if( _temp7143.base == 0? 1:( _temp7145 < _temp7143.base? 1:
-_temp7145 >= _temp7143.last_plus_one)){ _throw( Null_Exception);}* _temp7145;}).first_line,({
-struct _tagged_ptr3 _temp7146= yyls; struct Cyc_Yyltype* _temp7148= _temp7146.curr
-+ yylsp_offset; if( _temp7146.base == 0? 1:( _temp7148 < _temp7146.base? 1:
-_temp7148 >= _temp7146.last_plus_one)){ _throw( Null_Exception);}* _temp7148;}).last_line));
-_temp7137;}); _temp7136;}); break; case 374: _LL7135: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7150=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7150[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7151; _temp7151.tag= Cyc_Exp_tok_tag; _temp7151.f1= Cyc_Absyn_new_exp((
-void*)({ struct Cyc_Absyn_Codegen_e_struct* _temp7152=( struct Cyc_Absyn_Codegen_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Codegen_e_struct)); _temp7152[ 0]=({ struct
-Cyc_Absyn_Codegen_e_struct _temp7153; _temp7153.tag= Cyc_Absyn_Codegen_e_tag;
-_temp7153.f1= Cyc_yyget_FnDecl_tok(({ struct _tagged_ptr2 _temp7154= yyvs;
-struct _xtunion_struct** _temp7156= _temp7154.curr +( yyvsp_offset - 1); if(
-_temp7154.base == 0? 1:( _temp7156 < _temp7154.base? 1: _temp7156 >= _temp7154.last_plus_one)){
-_throw( Null_Exception);}* _temp7156;})); _temp7153;}); _temp7152;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp7157= yyls; struct Cyc_Yyltype* _temp7159= _temp7157.curr
-+( yylsp_offset - 3); if( _temp7157.base == 0? 1:( _temp7159 < _temp7157.base? 1:
-_temp7159 >= _temp7157.last_plus_one)){ _throw( Null_Exception);}* _temp7159;}).first_line,({
-struct _tagged_ptr3 _temp7160= yyls; struct Cyc_Yyltype* _temp7162= _temp7160.curr
-+ yylsp_offset; if( _temp7160.base == 0? 1:( _temp7162 < _temp7160.base? 1:
-_temp7162 >= _temp7160.last_plus_one)){ _throw( Null_Exception);}* _temp7162;}).last_line));
-_temp7151;}); _temp7150;}); break; case 375: _LL7149: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7164=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7164[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7165; _temp7165.tag= Cyc_Exp_tok_tag; _temp7165.f1= Cyc_Absyn_new_exp((
-void*)({ struct Cyc_Absyn_UnknownId_e_struct* _temp7166=( struct Cyc_Absyn_UnknownId_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct)); _temp7166[ 0]=({
-struct Cyc_Absyn_UnknownId_e_struct _temp7167; _temp7167.tag= Cyc_Absyn_UnknownId_e_tag;
-_temp7167.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp7168= yyvs;
-struct _xtunion_struct** _temp7170= _temp7168.curr + yyvsp_offset; if( _temp7168.base
-== 0? 1:( _temp7170 < _temp7168.base? 1: _temp7170 >= _temp7168.last_plus_one)){
-_throw( Null_Exception);}* _temp7170;})); _temp7167;}); _temp7166;}), Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp7171= yyls; struct Cyc_Yyltype* _temp7173= _temp7171.curr
-+ yylsp_offset; if( _temp7171.base == 0? 1:( _temp7173 < _temp7171.base? 1:
-_temp7173 >= _temp7171.last_plus_one)){ _throw( Null_Exception);}* _temp7173;}).first_line,({
-struct _tagged_ptr3 _temp7174= yyls; struct Cyc_Yyltype* _temp7176= _temp7174.curr
-+ yylsp_offset; if( _temp7174.base == 0? 1:( _temp7176 < _temp7174.base? 1:
-_temp7176 >= _temp7174.last_plus_one)){ _throw( Null_Exception);}* _temp7176;}).last_line));
-_temp7165;}); _temp7164;}); break; case 376: _LL7163: yyval=({ struct
-_tagged_ptr2 _temp7178= yyvs; struct _xtunion_struct** _temp7180= _temp7178.curr
-+ yyvsp_offset; if( _temp7178.base == 0? 1:( _temp7180 < _temp7178.base? 1:
-_temp7180 >= _temp7178.last_plus_one)){ _throw( Null_Exception);}* _temp7180;});
-break; case 377: _LL7177: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7182=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7182[ 0]=({ struct Cyc_Exp_tok_struct _temp7183; _temp7183.tag= Cyc_Exp_tok_tag;
-_temp7183.f1= Cyc_Absyn_string_exp( Cyc_yyget_String_tok(({ struct _tagged_ptr2
-_temp7184= yyvs; struct _xtunion_struct** _temp7186= _temp7184.curr +
-yyvsp_offset; if( _temp7184.base == 0? 1:( _temp7186 < _temp7184.base? 1:
-_temp7186 >= _temp7184.last_plus_one)){ _throw( Null_Exception);}* _temp7186;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7187= yyls; struct Cyc_Yyltype*
-_temp7189= _temp7187.curr + yylsp_offset; if( _temp7187.base == 0? 1:( _temp7189
-< _temp7187.base? 1: _temp7189 >= _temp7187.last_plus_one)){ _throw(
-Null_Exception);}* _temp7189;}).first_line,({ struct _tagged_ptr3 _temp7190=
-yyls; struct Cyc_Yyltype* _temp7192= _temp7190.curr + yylsp_offset; if(
-_temp7190.base == 0? 1:( _temp7192 < _temp7190.base? 1: _temp7192 >= _temp7190.last_plus_one)){
-_throw( Null_Exception);}* _temp7192;}).last_line)); _temp7183;}); _temp7182;});
-break; case 378: _LL7181: yyval=({ struct _tagged_ptr2 _temp7194= yyvs; struct
-_xtunion_struct** _temp7196= _temp7194.curr +( yyvsp_offset - 1); if( _temp7194.base
-== 0? 1:( _temp7196 < _temp7194.base? 1: _temp7196 >= _temp7194.last_plus_one)){
-_throw( Null_Exception);}* _temp7196;}); break; case 379: _LL7193: yyval=(
-struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7198=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7198[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7199; _temp7199.tag= Cyc_Exp_tok_tag; _temp7199.f1= Cyc_Absyn_noinstantiate_exp(
-Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct* _temp7200=(
+struct _tagged_ptr2 _temp7125= yyvs; struct _xtunion_struct** _temp7127=
+_temp7125.curr +( yyvsp_offset - 2); if( _temp7125.base == 0? 1:( _temp7127 <
+_temp7125.base? 1: _temp7127 >= _temp7125.last_plus_one)){ _throw(
+Null_Exception);}* _temp7127;}))); _temp7121;}); _temp7120;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp7128= yyls; struct Cyc_Yyltype* _temp7130= _temp7128.curr
++( yylsp_offset - 6); if( _temp7128.base == 0? 1:( _temp7130 < _temp7128.base? 1:
+_temp7130 >= _temp7128.last_plus_one)){ _throw( Null_Exception);}* _temp7130;}).first_line,({
+struct _tagged_ptr3 _temp7131= yyls; struct Cyc_Yyltype* _temp7133= _temp7131.curr
++ yylsp_offset; if( _temp7131.base == 0? 1:( _temp7133 < _temp7131.base? 1:
+_temp7133 >= _temp7131.last_plus_one)){ _throw( Null_Exception);}* _temp7133;}).last_line));
+_temp7119;}); _temp7118;}); break; case 373: _LL7117: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7135=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7135[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7136; _temp7136.tag= Cyc_Exp_tok_tag; _temp7136.f1= Cyc_Absyn_new_exp((
+void*)({ struct Cyc_Absyn_Fill_e_struct* _temp7137=( struct Cyc_Absyn_Fill_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Fill_e_struct)); _temp7137[ 0]=({ struct Cyc_Absyn_Fill_e_struct
+_temp7138; _temp7138.tag= Cyc_Absyn_Fill_e_tag; _temp7138.f1= Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp7139= yyvs; struct _xtunion_struct** _temp7141=
+_temp7139.curr +( yyvsp_offset - 1); if( _temp7139.base == 0? 1:( _temp7141 <
+_temp7139.base? 1: _temp7141 >= _temp7139.last_plus_one)){ _throw(
+Null_Exception);}* _temp7141;})); _temp7138;}); _temp7137;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp7142= yyls; struct Cyc_Yyltype* _temp7144= _temp7142.curr
++( yylsp_offset - 3); if( _temp7142.base == 0? 1:( _temp7144 < _temp7142.base? 1:
+_temp7144 >= _temp7142.last_plus_one)){ _throw( Null_Exception);}* _temp7144;}).first_line,({
+struct _tagged_ptr3 _temp7145= yyls; struct Cyc_Yyltype* _temp7147= _temp7145.curr
++ yylsp_offset; if( _temp7145.base == 0? 1:( _temp7147 < _temp7145.base? 1:
+_temp7147 >= _temp7145.last_plus_one)){ _throw( Null_Exception);}* _temp7147;}).last_line));
+_temp7136;}); _temp7135;}); break; case 374: _LL7134: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7149=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7149[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7150; _temp7150.tag= Cyc_Exp_tok_tag; _temp7150.f1= Cyc_Absyn_new_exp((
+void*)({ struct Cyc_Absyn_Codegen_e_struct* _temp7151=( struct Cyc_Absyn_Codegen_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Codegen_e_struct)); _temp7151[ 0]=({ struct
+Cyc_Absyn_Codegen_e_struct _temp7152; _temp7152.tag= Cyc_Absyn_Codegen_e_tag;
+_temp7152.f1= Cyc_yyget_FnDecl_tok(({ struct _tagged_ptr2 _temp7153= yyvs;
+struct _xtunion_struct** _temp7155= _temp7153.curr +( yyvsp_offset - 1); if(
+_temp7153.base == 0? 1:( _temp7155 < _temp7153.base? 1: _temp7155 >= _temp7153.last_plus_one)){
+_throw( Null_Exception);}* _temp7155;})); _temp7152;}); _temp7151;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp7156= yyls; struct Cyc_Yyltype* _temp7158= _temp7156.curr
++( yylsp_offset - 3); if( _temp7156.base == 0? 1:( _temp7158 < _temp7156.base? 1:
+_temp7158 >= _temp7156.last_plus_one)){ _throw( Null_Exception);}* _temp7158;}).first_line,({
+struct _tagged_ptr3 _temp7159= yyls; struct Cyc_Yyltype* _temp7161= _temp7159.curr
++ yylsp_offset; if( _temp7159.base == 0? 1:( _temp7161 < _temp7159.base? 1:
+_temp7161 >= _temp7159.last_plus_one)){ _throw( Null_Exception);}* _temp7161;}).last_line));
+_temp7150;}); _temp7149;}); break; case 375: _LL7148: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7163=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7163[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7164; _temp7164.tag= Cyc_Exp_tok_tag; _temp7164.f1= Cyc_Absyn_new_exp((
+void*)({ struct Cyc_Absyn_UnknownId_e_struct* _temp7165=( struct Cyc_Absyn_UnknownId_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct)); _temp7165[ 0]=({
+struct Cyc_Absyn_UnknownId_e_struct _temp7166; _temp7166.tag= Cyc_Absyn_UnknownId_e_tag;
+_temp7166.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp7167= yyvs;
+struct _xtunion_struct** _temp7169= _temp7167.curr + yyvsp_offset; if( _temp7167.base
+== 0? 1:( _temp7169 < _temp7167.base? 1: _temp7169 >= _temp7167.last_plus_one)){
+_throw( Null_Exception);}* _temp7169;})); _temp7166;}); _temp7165;}), Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp7170= yyls; struct Cyc_Yyltype* _temp7172= _temp7170.curr
++ yylsp_offset; if( _temp7170.base == 0? 1:( _temp7172 < _temp7170.base? 1:
+_temp7172 >= _temp7170.last_plus_one)){ _throw( Null_Exception);}* _temp7172;}).first_line,({
+struct _tagged_ptr3 _temp7173= yyls; struct Cyc_Yyltype* _temp7175= _temp7173.curr
++ yylsp_offset; if( _temp7173.base == 0? 1:( _temp7175 < _temp7173.base? 1:
+_temp7175 >= _temp7173.last_plus_one)){ _throw( Null_Exception);}* _temp7175;}).last_line));
+_temp7164;}); _temp7163;}); break; case 376: _LL7162: yyval=({ struct
+_tagged_ptr2 _temp7177= yyvs; struct _xtunion_struct** _temp7179= _temp7177.curr
++ yyvsp_offset; if( _temp7177.base == 0? 1:( _temp7179 < _temp7177.base? 1:
+_temp7179 >= _temp7177.last_plus_one)){ _throw( Null_Exception);}* _temp7179;});
+break; case 377: _LL7176: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp7181=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp7181[ 0]=({ struct Cyc_Exp_tok_struct _temp7182; _temp7182.tag= Cyc_Exp_tok_tag;
+_temp7182.f1= Cyc_Absyn_string_exp( Cyc_yyget_String_tok(({ struct _tagged_ptr2
+_temp7183= yyvs; struct _xtunion_struct** _temp7185= _temp7183.curr +
+yyvsp_offset; if( _temp7183.base == 0? 1:( _temp7185 < _temp7183.base? 1:
+_temp7185 >= _temp7183.last_plus_one)){ _throw( Null_Exception);}* _temp7185;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7186= yyls; struct Cyc_Yyltype*
+_temp7188= _temp7186.curr + yylsp_offset; if( _temp7186.base == 0? 1:( _temp7188
+< _temp7186.base? 1: _temp7188 >= _temp7186.last_plus_one)){ _throw(
+Null_Exception);}* _temp7188;}).first_line,({ struct _tagged_ptr3 _temp7189=
+yyls; struct Cyc_Yyltype* _temp7191= _temp7189.curr + yylsp_offset; if(
+_temp7189.base == 0? 1:( _temp7191 < _temp7189.base? 1: _temp7191 >= _temp7189.last_plus_one)){
+_throw( Null_Exception);}* _temp7191;}).last_line)); _temp7182;}); _temp7181;});
+break; case 378: _LL7180: yyval=({ struct _tagged_ptr2 _temp7193= yyvs; struct
+_xtunion_struct** _temp7195= _temp7193.curr +( yyvsp_offset - 1); if( _temp7193.base
+== 0? 1:( _temp7195 < _temp7193.base? 1: _temp7195 >= _temp7193.last_plus_one)){
+_throw( Null_Exception);}* _temp7195;}); break; case 379: _LL7192: yyval=(
+struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7197=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7197[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7198; _temp7198.tag= Cyc_Exp_tok_tag; _temp7198.f1= Cyc_Absyn_noinstantiate_exp(
+Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct* _temp7199=(
 struct Cyc_Absyn_UnknownId_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct));
-_temp7200[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp7201; _temp7201.tag=
-Cyc_Absyn_UnknownId_e_tag; _temp7201.f1= Cyc_yyget_QualId_tok(({ struct
-_tagged_ptr2 _temp7202= yyvs; struct _xtunion_struct** _temp7204= _temp7202.curr
-+( yyvsp_offset - 1); if( _temp7202.base == 0? 1:( _temp7204 < _temp7202.base? 1:
-_temp7204 >= _temp7202.last_plus_one)){ _throw( Null_Exception);}* _temp7204;}));
-_temp7201;}); _temp7200;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp7205= yyls; struct Cyc_Yyltype* _temp7207= _temp7205.curr +( yylsp_offset -
-1); if( _temp7205.base == 0? 1:( _temp7207 < _temp7205.base? 1: _temp7207 >=
-_temp7205.last_plus_one)){ _throw( Null_Exception);}* _temp7207;}).first_line,({
-struct _tagged_ptr3 _temp7208= yyls; struct Cyc_Yyltype* _temp7210= _temp7208.curr
-+( yylsp_offset - 1); if( _temp7208.base == 0? 1:( _temp7210 < _temp7208.base? 1:
-_temp7210 >= _temp7208.last_plus_one)){ _throw( Null_Exception);}* _temp7210;}).last_line)),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7211= yyls; struct Cyc_Yyltype*
-_temp7213= _temp7211.curr +( yylsp_offset - 1); if( _temp7211.base == 0? 1:(
-_temp7213 < _temp7211.base? 1: _temp7213 >= _temp7211.last_plus_one)){ _throw(
-Null_Exception);}* _temp7213;}).first_line,({ struct _tagged_ptr3 _temp7214=
-yyls; struct Cyc_Yyltype* _temp7216= _temp7214.curr + yylsp_offset; if(
-_temp7214.base == 0? 1:( _temp7216 < _temp7214.base? 1: _temp7216 >= _temp7214.last_plus_one)){
-_throw( Null_Exception);}* _temp7216;}).last_line)); _temp7199;}); _temp7198;});
-break; case 380: _LL7197: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7218=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7218[ 0]=({ struct Cyc_Exp_tok_struct _temp7219; _temp7219.tag= Cyc_Exp_tok_tag;
-_temp7219.f1= Cyc_Absyn_instantiate_exp( Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct*
-_temp7220=( struct Cyc_Absyn_UnknownId_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct));
-_temp7220[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp7221; _temp7221.tag=
-Cyc_Absyn_UnknownId_e_tag; _temp7221.f1= Cyc_yyget_QualId_tok(({ struct
-_tagged_ptr2 _temp7222= yyvs; struct _xtunion_struct** _temp7224= _temp7222.curr
-+( yyvsp_offset - 4); if( _temp7222.base == 0? 1:( _temp7224 < _temp7222.base? 1:
-_temp7224 >= _temp7222.last_plus_one)){ _throw( Null_Exception);}* _temp7224;}));
-_temp7221;}); _temp7220;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
-_temp7225= yyls; struct Cyc_Yyltype* _temp7227= _temp7225.curr +( yylsp_offset -
-4); if( _temp7225.base == 0? 1:( _temp7227 < _temp7225.base? 1: _temp7227 >=
-_temp7225.last_plus_one)){ _throw( Null_Exception);}* _temp7227;}).first_line,({
-struct _tagged_ptr3 _temp7228= yyls; struct Cyc_Yyltype* _temp7230= _temp7228.curr
-+( yylsp_offset - 4); if( _temp7228.base == 0? 1:( _temp7230 < _temp7228.base? 1:
-_temp7230 >= _temp7228.last_plus_one)){ _throw( Null_Exception);}* _temp7230;}).last_line)),((
+_temp7199[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp7200; _temp7200.tag=
+Cyc_Absyn_UnknownId_e_tag; _temp7200.f1= Cyc_yyget_QualId_tok(({ struct
+_tagged_ptr2 _temp7201= yyvs; struct _xtunion_struct** _temp7203= _temp7201.curr
++( yyvsp_offset - 1); if( _temp7201.base == 0? 1:( _temp7203 < _temp7201.base? 1:
+_temp7203 >= _temp7201.last_plus_one)){ _throw( Null_Exception);}* _temp7203;}));
+_temp7200;}); _temp7199;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
+_temp7204= yyls; struct Cyc_Yyltype* _temp7206= _temp7204.curr +( yylsp_offset -
+1); if( _temp7204.base == 0? 1:( _temp7206 < _temp7204.base? 1: _temp7206 >=
+_temp7204.last_plus_one)){ _throw( Null_Exception);}* _temp7206;}).first_line,({
+struct _tagged_ptr3 _temp7207= yyls; struct Cyc_Yyltype* _temp7209= _temp7207.curr
++( yylsp_offset - 1); if( _temp7207.base == 0? 1:( _temp7209 < _temp7207.base? 1:
+_temp7209 >= _temp7207.last_plus_one)){ _throw( Null_Exception);}* _temp7209;}).last_line)),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7210= yyls; struct Cyc_Yyltype*
+_temp7212= _temp7210.curr +( yylsp_offset - 1); if( _temp7210.base == 0? 1:(
+_temp7212 < _temp7210.base? 1: _temp7212 >= _temp7210.last_plus_one)){ _throw(
+Null_Exception);}* _temp7212;}).first_line,({ struct _tagged_ptr3 _temp7213=
+yyls; struct Cyc_Yyltype* _temp7215= _temp7213.curr + yylsp_offset; if(
+_temp7213.base == 0? 1:( _temp7215 < _temp7213.base? 1: _temp7215 >= _temp7213.last_plus_one)){
+_throw( Null_Exception);}* _temp7215;}).last_line)); _temp7198;}); _temp7197;});
+break; case 380: _LL7196: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp7217=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp7217[ 0]=({ struct Cyc_Exp_tok_struct _temp7218; _temp7218.tag= Cyc_Exp_tok_tag;
+_temp7218.f1= Cyc_Absyn_instantiate_exp( Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct*
+_temp7219=( struct Cyc_Absyn_UnknownId_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct));
+_temp7219[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp7220; _temp7220.tag=
+Cyc_Absyn_UnknownId_e_tag; _temp7220.f1= Cyc_yyget_QualId_tok(({ struct
+_tagged_ptr2 _temp7221= yyvs; struct _xtunion_struct** _temp7223= _temp7221.curr
++( yyvsp_offset - 4); if( _temp7221.base == 0? 1:( _temp7223 < _temp7221.base? 1:
+_temp7223 >= _temp7221.last_plus_one)){ _throw( Null_Exception);}* _temp7223;}));
+_temp7220;}); _temp7219;}), Cyc_Position_segment_of_abs(({ struct _tagged_ptr3
+_temp7224= yyls; struct Cyc_Yyltype* _temp7226= _temp7224.curr +( yylsp_offset -
+4); if( _temp7224.base == 0? 1:( _temp7226 < _temp7224.base? 1: _temp7226 >=
+_temp7224.last_plus_one)){ _throw( Null_Exception);}* _temp7226;}).first_line,({
+struct _tagged_ptr3 _temp7227= yyls; struct Cyc_Yyltype* _temp7229= _temp7227.curr
++( yylsp_offset - 4); if( _temp7227.base == 0? 1:( _temp7229 < _temp7227.base? 1:
+_temp7229 >= _temp7227.last_plus_one)){ _throw( Null_Exception);}* _temp7229;}).last_line)),((
 struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_TypeList_tok(({
-struct _tagged_ptr2 _temp7231= yyvs; struct _xtunion_struct** _temp7233=
-_temp7231.curr +( yyvsp_offset - 1); if( _temp7231.base == 0? 1:( _temp7233 <
-_temp7231.base? 1: _temp7233 >= _temp7231.last_plus_one)){ _throw(
-Null_Exception);}* _temp7233;}))), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7234= yyls; struct Cyc_Yyltype* _temp7236= _temp7234.curr +(
-yylsp_offset - 4); if( _temp7234.base == 0? 1:( _temp7236 < _temp7234.base? 1:
-_temp7236 >= _temp7234.last_plus_one)){ _throw( Null_Exception);}* _temp7236;}).first_line,({
-struct _tagged_ptr3 _temp7237= yyls; struct Cyc_Yyltype* _temp7239= _temp7237.curr
-+ yylsp_offset; if( _temp7237.base == 0? 1:( _temp7239 < _temp7237.base? 1:
-_temp7239 >= _temp7237.last_plus_one)){ _throw( Null_Exception);}* _temp7239;}).last_line));
-_temp7219;}); _temp7218;}); break; case 381: _LL7217: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7241=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7241[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7242; _temp7242.tag= Cyc_Exp_tok_tag; _temp7242.f1= Cyc_Absyn_tuple_exp(
-Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2 _temp7243= yyvs; struct
-_xtunion_struct** _temp7245= _temp7243.curr +( yyvsp_offset - 1); if( _temp7243.base
-== 0? 1:( _temp7245 < _temp7243.base? 1: _temp7245 >= _temp7243.last_plus_one)){
-_throw( Null_Exception);}* _temp7245;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7246= yyls; struct Cyc_Yyltype* _temp7248= _temp7246.curr +(
-yylsp_offset - 3); if( _temp7246.base == 0? 1:( _temp7248 < _temp7246.base? 1:
-_temp7248 >= _temp7246.last_plus_one)){ _throw( Null_Exception);}* _temp7248;}).first_line,({
-struct _tagged_ptr3 _temp7249= yyls; struct Cyc_Yyltype* _temp7251= _temp7249.curr
-+ yylsp_offset; if( _temp7249.base == 0? 1:( _temp7251 < _temp7249.base? 1:
-_temp7251 >= _temp7249.last_plus_one)){ _throw( Null_Exception);}* _temp7251;}).last_line));
-_temp7242;}); _temp7241;}); break; case 382: _LL7240: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7253=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7253[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7254; _temp7254.tag= Cyc_Exp_tok_tag; _temp7254.f1= Cyc_Absyn_new_exp((
-void*)({ struct Cyc_Absyn_Struct_e_struct* _temp7255=( struct Cyc_Absyn_Struct_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Struct_e_struct)); _temp7255[ 0]=({ struct
-Cyc_Absyn_Struct_e_struct _temp7256; _temp7256.tag= Cyc_Absyn_Struct_e_tag;
-_temp7256.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp7257= yyvs;
-struct _xtunion_struct** _temp7259= _temp7257.curr +( yyvsp_offset - 3); if(
-_temp7257.base == 0? 1:( _temp7259 < _temp7257.base? 1: _temp7259 >= _temp7257.last_plus_one)){
-_throw( Null_Exception);}* _temp7259;})); _temp7256.f2= 0; _temp7256.f3=((
+struct _tagged_ptr2 _temp7230= yyvs; struct _xtunion_struct** _temp7232=
+_temp7230.curr +( yyvsp_offset - 1); if( _temp7230.base == 0? 1:( _temp7232 <
+_temp7230.base? 1: _temp7232 >= _temp7230.last_plus_one)){ _throw(
+Null_Exception);}* _temp7232;}))), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp7233= yyls; struct Cyc_Yyltype* _temp7235= _temp7233.curr +(
+yylsp_offset - 4); if( _temp7233.base == 0? 1:( _temp7235 < _temp7233.base? 1:
+_temp7235 >= _temp7233.last_plus_one)){ _throw( Null_Exception);}* _temp7235;}).first_line,({
+struct _tagged_ptr3 _temp7236= yyls; struct Cyc_Yyltype* _temp7238= _temp7236.curr
++ yylsp_offset; if( _temp7236.base == 0? 1:( _temp7238 < _temp7236.base? 1:
+_temp7238 >= _temp7236.last_plus_one)){ _throw( Null_Exception);}* _temp7238;}).last_line));
+_temp7218;}); _temp7217;}); break; case 381: _LL7216: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7240=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7240[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7241; _temp7241.tag= Cyc_Exp_tok_tag; _temp7241.f1= Cyc_Absyn_tuple_exp(
+Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2 _temp7242= yyvs; struct
+_xtunion_struct** _temp7244= _temp7242.curr +( yyvsp_offset - 1); if( _temp7242.base
+== 0? 1:( _temp7244 < _temp7242.base? 1: _temp7244 >= _temp7242.last_plus_one)){
+_throw( Null_Exception);}* _temp7244;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp7245= yyls; struct Cyc_Yyltype* _temp7247= _temp7245.curr +(
+yylsp_offset - 3); if( _temp7245.base == 0? 1:( _temp7247 < _temp7245.base? 1:
+_temp7247 >= _temp7245.last_plus_one)){ _throw( Null_Exception);}* _temp7247;}).first_line,({
+struct _tagged_ptr3 _temp7248= yyls; struct Cyc_Yyltype* _temp7250= _temp7248.curr
++ yylsp_offset; if( _temp7248.base == 0? 1:( _temp7250 < _temp7248.base? 1:
+_temp7250 >= _temp7248.last_plus_one)){ _throw( Null_Exception);}* _temp7250;}).last_line));
+_temp7241;}); _temp7240;}); break; case 382: _LL7239: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7252=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7252[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7253; _temp7253.tag= Cyc_Exp_tok_tag; _temp7253.f1= Cyc_Absyn_new_exp((
+void*)({ struct Cyc_Absyn_Struct_e_struct* _temp7254=( struct Cyc_Absyn_Struct_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Struct_e_struct)); _temp7254[ 0]=({ struct
+Cyc_Absyn_Struct_e_struct _temp7255; _temp7255.tag= Cyc_Absyn_Struct_e_tag;
+_temp7255.f1= Cyc_yyget_QualId_tok(({ struct _tagged_ptr2 _temp7256= yyvs;
+struct _xtunion_struct** _temp7258= _temp7256.curr +( yyvsp_offset - 3); if(
+_temp7256.base == 0? 1:( _temp7258 < _temp7256.base? 1: _temp7258 >= _temp7256.last_plus_one)){
+_throw( Null_Exception);}* _temp7258;})); _temp7255.f2= 0; _temp7255.f3=((
 struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_InitializerList_tok(({
-struct _tagged_ptr2 _temp7260= yyvs; struct _xtunion_struct** _temp7262=
-_temp7260.curr +( yyvsp_offset - 1); if( _temp7260.base == 0? 1:( _temp7262 <
-_temp7260.base? 1: _temp7262 >= _temp7260.last_plus_one)){ _throw(
-Null_Exception);}* _temp7262;}))); _temp7256.f4= 0; _temp7256;}); _temp7255;}),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7263= yyls; struct Cyc_Yyltype*
-_temp7265= _temp7263.curr +( yylsp_offset - 3); if( _temp7263.base == 0? 1:(
-_temp7265 < _temp7263.base? 1: _temp7265 >= _temp7263.last_plus_one)){ _throw(
-Null_Exception);}* _temp7265;}).first_line,({ struct _tagged_ptr3 _temp7266=
-yyls; struct Cyc_Yyltype* _temp7268= _temp7266.curr + yylsp_offset; if(
-_temp7266.base == 0? 1:( _temp7268 < _temp7266.base? 1: _temp7268 >= _temp7266.last_plus_one)){
-_throw( Null_Exception);}* _temp7268;}).last_line)); _temp7254;}); _temp7253;});
-break; case 383: _LL7252: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7270=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7270[ 0]=({ struct Cyc_Exp_tok_struct _temp7271; _temp7271.tag= Cyc_Exp_tok_tag;
-_temp7271.f1= Cyc_Absyn_stmt_exp( Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
-_temp7272= yyvs; struct _xtunion_struct** _temp7274= _temp7272.curr +(
-yyvsp_offset - 2); if( _temp7272.base == 0? 1:( _temp7274 < _temp7272.base? 1:
-_temp7274 >= _temp7272.last_plus_one)){ _throw( Null_Exception);}* _temp7274;})),
-Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7275= yyls; struct Cyc_Yyltype*
-_temp7277= _temp7275.curr +( yylsp_offset - 4); if( _temp7275.base == 0? 1:(
-_temp7277 < _temp7275.base? 1: _temp7277 >= _temp7275.last_plus_one)){ _throw(
-Null_Exception);}* _temp7277;}).first_line,({ struct _tagged_ptr3 _temp7278=
-yyls; struct Cyc_Yyltype* _temp7280= _temp7278.curr + yylsp_offset; if(
-_temp7278.base == 0? 1:( _temp7280 < _temp7278.base? 1: _temp7280 >= _temp7278.last_plus_one)){
-_throw( Null_Exception);}* _temp7280;}).last_line)); _temp7271;}); _temp7270;});
-break; case 384: _LL7269: yyval=( struct _xtunion_struct*)({ struct Cyc_ExpList_tok_struct*
-_temp7282=( struct Cyc_ExpList_tok_struct*) GC_malloc( sizeof( struct Cyc_ExpList_tok_struct));
-_temp7282[ 0]=({ struct Cyc_ExpList_tok_struct _temp7283; _temp7283.tag= Cyc_ExpList_tok_tag;
-_temp7283.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
-Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2 _temp7284= yyvs; struct
-_xtunion_struct** _temp7286= _temp7284.curr + yyvsp_offset; if( _temp7284.base
-== 0? 1:( _temp7286 < _temp7284.base? 1: _temp7286 >= _temp7284.last_plus_one)){
-_throw( Null_Exception);}* _temp7286;}))); _temp7283;}); _temp7282;}); break;
-case 385: _LL7281: yyval=( struct _xtunion_struct*)({ struct Cyc_ExpList_tok_struct*
-_temp7288=( struct Cyc_ExpList_tok_struct*) GC_malloc( sizeof( struct Cyc_ExpList_tok_struct));
-_temp7288[ 0]=({ struct Cyc_ExpList_tok_struct _temp7289; _temp7289.tag= Cyc_ExpList_tok_tag;
-_temp7289.f1=({ struct Cyc_List_List* _temp7290=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp7290->hd=( void*) Cyc_yyget_Exp_tok(({
-struct _tagged_ptr2 _temp7291= yyvs; struct _xtunion_struct** _temp7293=
-_temp7291.curr + yyvsp_offset; if( _temp7291.base == 0? 1:( _temp7293 <
-_temp7291.base? 1: _temp7293 >= _temp7291.last_plus_one)){ _throw(
-Null_Exception);}* _temp7293;})); _temp7290->tl= 0; _temp7290;}); _temp7289;});
-_temp7288;}); break; case 386: _LL7287: yyval=( struct _xtunion_struct*)({
-struct Cyc_ExpList_tok_struct* _temp7295=( struct Cyc_ExpList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_ExpList_tok_struct)); _temp7295[ 0]=({ struct Cyc_ExpList_tok_struct
-_temp7296; _temp7296.tag= Cyc_ExpList_tok_tag; _temp7296.f1=({ struct Cyc_List_List*
-_temp7297=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp7297->hd=( void*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7301= yyvs;
-struct _xtunion_struct** _temp7303= _temp7301.curr + yyvsp_offset; if( _temp7301.base
-== 0? 1:( _temp7303 < _temp7301.base? 1: _temp7303 >= _temp7301.last_plus_one)){
-_throw( Null_Exception);}* _temp7303;})); _temp7297->tl= Cyc_yyget_ExpList_tok(({
-struct _tagged_ptr2 _temp7298= yyvs; struct _xtunion_struct** _temp7300=
-_temp7298.curr +( yyvsp_offset - 2); if( _temp7298.base == 0? 1:( _temp7300 <
-_temp7298.base? 1: _temp7300 >= _temp7298.last_plus_one)){ _throw(
-Null_Exception);}* _temp7300;})); _temp7297;}); _temp7296;}); _temp7295;});
-break; case 387: _LL7294: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
-_temp7305=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp7305[ 0]=({ struct Cyc_Exp_tok_struct _temp7306; _temp7306.tag= Cyc_Exp_tok_tag;
-_temp7306.f1= Cyc_Absyn_int_exp((* Cyc_yyget_Int_tok(({ struct _tagged_ptr2
-_temp7307= yyvs; struct _xtunion_struct** _temp7309= _temp7307.curr +
-yyvsp_offset; if( _temp7307.base == 0? 1:( _temp7309 < _temp7307.base? 1:
-_temp7309 >= _temp7307.last_plus_one)){ _throw( Null_Exception);}* _temp7309;}))).f1,(*
-Cyc_yyget_Int_tok(({ struct _tagged_ptr2 _temp7310= yyvs; struct _xtunion_struct**
-_temp7312= _temp7310.curr + yyvsp_offset; if( _temp7310.base == 0? 1:( _temp7312
-< _temp7310.base? 1: _temp7312 >= _temp7310.last_plus_one)){ _throw(
-Null_Exception);}* _temp7312;}))).f2, Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7313= yyls; struct Cyc_Yyltype* _temp7315= _temp7313.curr +
-yylsp_offset; if( _temp7313.base == 0? 1:( _temp7315 < _temp7313.base? 1:
-_temp7315 >= _temp7313.last_plus_one)){ _throw( Null_Exception);}* _temp7315;}).first_line,({
-struct _tagged_ptr3 _temp7316= yyls; struct Cyc_Yyltype* _temp7318= _temp7316.curr
-+ yylsp_offset; if( _temp7316.base == 0? 1:( _temp7318 < _temp7316.base? 1:
-_temp7318 >= _temp7316.last_plus_one)){ _throw( Null_Exception);}* _temp7318;}).last_line));
-_temp7306;}); _temp7305;}); break; case 388: _LL7304: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7320=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7320[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7321; _temp7321.tag= Cyc_Exp_tok_tag; _temp7321.f1= Cyc_Absyn_char_exp( Cyc_yyget_Char_tok(({
-struct _tagged_ptr2 _temp7322= yyvs; struct _xtunion_struct** _temp7324=
-_temp7322.curr + yyvsp_offset; if( _temp7322.base == 0? 1:( _temp7324 <
-_temp7322.base? 1: _temp7324 >= _temp7322.last_plus_one)){ _throw(
-Null_Exception);}* _temp7324;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7325= yyls; struct Cyc_Yyltype* _temp7327= _temp7325.curr +
-yylsp_offset; if( _temp7325.base == 0? 1:( _temp7327 < _temp7325.base? 1:
-_temp7327 >= _temp7325.last_plus_one)){ _throw( Null_Exception);}* _temp7327;}).first_line,({
-struct _tagged_ptr3 _temp7328= yyls; struct Cyc_Yyltype* _temp7330= _temp7328.curr
-+ yylsp_offset; if( _temp7328.base == 0? 1:( _temp7330 < _temp7328.base? 1:
-_temp7330 >= _temp7328.last_plus_one)){ _throw( Null_Exception);}* _temp7330;}).last_line));
-_temp7321;}); _temp7320;}); break; case 389: _LL7319: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7332=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7332[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7333; _temp7333.tag= Cyc_Exp_tok_tag; _temp7333.f1= Cyc_Absyn_float_exp(
-Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp7334= yyvs; struct
-_xtunion_struct** _temp7336= _temp7334.curr + yyvsp_offset; if( _temp7334.base
-== 0? 1:( _temp7336 < _temp7334.base? 1: _temp7336 >= _temp7334.last_plus_one)){
-_throw( Null_Exception);}* _temp7336;})), Cyc_Position_segment_of_abs(({ struct
-_tagged_ptr3 _temp7337= yyls; struct Cyc_Yyltype* _temp7339= _temp7337.curr +
-yylsp_offset; if( _temp7337.base == 0? 1:( _temp7339 < _temp7337.base? 1:
-_temp7339 >= _temp7337.last_plus_one)){ _throw( Null_Exception);}* _temp7339;}).first_line,({
-struct _tagged_ptr3 _temp7340= yyls; struct Cyc_Yyltype* _temp7342= _temp7340.curr
-+ yylsp_offset; if( _temp7340.base == 0? 1:( _temp7342 < _temp7340.base? 1:
-_temp7342 >= _temp7340.last_plus_one)){ _throw( Null_Exception);}* _temp7342;}).last_line));
-_temp7333;}); _temp7332;}); break; case 390: _LL7331: yyval=( struct
-_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7344=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7344[ 0]=({ struct Cyc_Exp_tok_struct
-_temp7345; _temp7345.tag= Cyc_Exp_tok_tag; _temp7345.f1= Cyc_Absyn_null_exp( Cyc_Position_segment_of_abs(({
-struct _tagged_ptr3 _temp7346= yyls; struct Cyc_Yyltype* _temp7348= _temp7346.curr
-+ yylsp_offset; if( _temp7346.base == 0? 1:( _temp7348 < _temp7346.base? 1:
-_temp7348 >= _temp7346.last_plus_one)){ _throw( Null_Exception);}* _temp7348;}).first_line,({
-struct _tagged_ptr3 _temp7349= yyls; struct Cyc_Yyltype* _temp7351= _temp7349.curr
-+ yylsp_offset; if( _temp7349.base == 0? 1:( _temp7351 < _temp7349.base? 1:
-_temp7351 >= _temp7349.last_plus_one)){ _throw( Null_Exception);}* _temp7351;}).last_line));
-_temp7345;}); _temp7344;}); break; case 391: _LL7343: yyval=( struct
-_xtunion_struct*)({ struct Cyc_QualId_tok_struct* _temp7353=( struct Cyc_QualId_tok_struct*)
-GC_malloc( sizeof( struct Cyc_QualId_tok_struct)); _temp7353[ 0]=({ struct Cyc_QualId_tok_struct
-_temp7354; _temp7354.tag= Cyc_QualId_tok_tag; _temp7354.f1=({ struct _tuple1*
-_temp7355=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp7355->f1=(
-void*)({ struct Cyc_Absyn_Rel_n_struct* _temp7360=( struct Cyc_Absyn_Rel_n_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Rel_n_struct)); _temp7360[ 0]=({ struct Cyc_Absyn_Rel_n_struct
-_temp7361; _temp7361.tag= Cyc_Absyn_Rel_n_tag; _temp7361.f1= 0; _temp7361;});
-_temp7360;}); _temp7355->f2=({ struct _tagged_string* _temp7356=( struct
-_tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1); _temp7356[ 0]=
-Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp7357= yyvs; struct
-_xtunion_struct** _temp7359= _temp7357.curr + yyvsp_offset; if( _temp7357.base
-== 0? 1:( _temp7359 < _temp7357.base? 1: _temp7359 >= _temp7357.last_plus_one)){
-_throw( Null_Exception);}* _temp7359;})); _temp7356;}); _temp7355;}); _temp7354;});
-_temp7353;}); break; case 392: _LL7352: yyval=({ struct _tagged_ptr2 _temp7363=
-yyvs; struct _xtunion_struct** _temp7365= _temp7363.curr + yyvsp_offset; if(
-_temp7363.base == 0? 1:( _temp7365 < _temp7363.base? 1: _temp7365 >= _temp7363.last_plus_one)){
-_throw( Null_Exception);}* _temp7365;}); break; default: _LL7362:( void) _throw((
-struct _xtunion_struct*)({ struct Cyc_Yyimpossible_struct* _temp7367=( struct
+struct _tagged_ptr2 _temp7259= yyvs; struct _xtunion_struct** _temp7261=
+_temp7259.curr +( yyvsp_offset - 1); if( _temp7259.base == 0? 1:( _temp7261 <
+_temp7259.base? 1: _temp7261 >= _temp7259.last_plus_one)){ _throw(
+Null_Exception);}* _temp7261;}))); _temp7255.f4= 0; _temp7255;}); _temp7254;}),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7262= yyls; struct Cyc_Yyltype*
+_temp7264= _temp7262.curr +( yylsp_offset - 3); if( _temp7262.base == 0? 1:(
+_temp7264 < _temp7262.base? 1: _temp7264 >= _temp7262.last_plus_one)){ _throw(
+Null_Exception);}* _temp7264;}).first_line,({ struct _tagged_ptr3 _temp7265=
+yyls; struct Cyc_Yyltype* _temp7267= _temp7265.curr + yylsp_offset; if(
+_temp7265.base == 0? 1:( _temp7267 < _temp7265.base? 1: _temp7267 >= _temp7265.last_plus_one)){
+_throw( Null_Exception);}* _temp7267;}).last_line)); _temp7253;}); _temp7252;});
+break; case 383: _LL7251: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp7269=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp7269[ 0]=({ struct Cyc_Exp_tok_struct _temp7270; _temp7270.tag= Cyc_Exp_tok_tag;
+_temp7270.f1= Cyc_Absyn_stmt_exp( Cyc_yyget_Stmt_tok(({ struct _tagged_ptr2
+_temp7271= yyvs; struct _xtunion_struct** _temp7273= _temp7271.curr +(
+yyvsp_offset - 2); if( _temp7271.base == 0? 1:( _temp7273 < _temp7271.base? 1:
+_temp7273 >= _temp7271.last_plus_one)){ _throw( Null_Exception);}* _temp7273;})),
+Cyc_Position_segment_of_abs(({ struct _tagged_ptr3 _temp7274= yyls; struct Cyc_Yyltype*
+_temp7276= _temp7274.curr +( yylsp_offset - 4); if( _temp7274.base == 0? 1:(
+_temp7276 < _temp7274.base? 1: _temp7276 >= _temp7274.last_plus_one)){ _throw(
+Null_Exception);}* _temp7276;}).first_line,({ struct _tagged_ptr3 _temp7277=
+yyls; struct Cyc_Yyltype* _temp7279= _temp7277.curr + yylsp_offset; if(
+_temp7277.base == 0? 1:( _temp7279 < _temp7277.base? 1: _temp7279 >= _temp7277.last_plus_one)){
+_throw( Null_Exception);}* _temp7279;}).last_line)); _temp7270;}); _temp7269;});
+break; case 384: _LL7268: yyval=( struct _xtunion_struct*)({ struct Cyc_ExpList_tok_struct*
+_temp7281=( struct Cyc_ExpList_tok_struct*) GC_malloc( sizeof( struct Cyc_ExpList_tok_struct));
+_temp7281[ 0]=({ struct Cyc_ExpList_tok_struct _temp7282; _temp7282.tag= Cyc_ExpList_tok_tag;
+_temp7282.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+Cyc_yyget_ExpList_tok(({ struct _tagged_ptr2 _temp7283= yyvs; struct
+_xtunion_struct** _temp7285= _temp7283.curr + yyvsp_offset; if( _temp7283.base
+== 0? 1:( _temp7285 < _temp7283.base? 1: _temp7285 >= _temp7283.last_plus_one)){
+_throw( Null_Exception);}* _temp7285;}))); _temp7282;}); _temp7281;}); break;
+case 385: _LL7280: yyval=( struct _xtunion_struct*)({ struct Cyc_ExpList_tok_struct*
+_temp7287=( struct Cyc_ExpList_tok_struct*) GC_malloc( sizeof( struct Cyc_ExpList_tok_struct));
+_temp7287[ 0]=({ struct Cyc_ExpList_tok_struct _temp7288; _temp7288.tag= Cyc_ExpList_tok_tag;
+_temp7288.f1=({ struct Cyc_List_List* _temp7289=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp7289->hd=( void*) Cyc_yyget_Exp_tok(({
+struct _tagged_ptr2 _temp7290= yyvs; struct _xtunion_struct** _temp7292=
+_temp7290.curr + yyvsp_offset; if( _temp7290.base == 0? 1:( _temp7292 <
+_temp7290.base? 1: _temp7292 >= _temp7290.last_plus_one)){ _throw(
+Null_Exception);}* _temp7292;})); _temp7289->tl= 0; _temp7289;}); _temp7288;});
+_temp7287;}); break; case 386: _LL7286: yyval=( struct _xtunion_struct*)({
+struct Cyc_ExpList_tok_struct* _temp7294=( struct Cyc_ExpList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_ExpList_tok_struct)); _temp7294[ 0]=({ struct Cyc_ExpList_tok_struct
+_temp7295; _temp7295.tag= Cyc_ExpList_tok_tag; _temp7295.f1=({ struct Cyc_List_List*
+_temp7296=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp7296->hd=( void*) Cyc_yyget_Exp_tok(({ struct _tagged_ptr2 _temp7300= yyvs;
+struct _xtunion_struct** _temp7302= _temp7300.curr + yyvsp_offset; if( _temp7300.base
+== 0? 1:( _temp7302 < _temp7300.base? 1: _temp7302 >= _temp7300.last_plus_one)){
+_throw( Null_Exception);}* _temp7302;})); _temp7296->tl= Cyc_yyget_ExpList_tok(({
+struct _tagged_ptr2 _temp7297= yyvs; struct _xtunion_struct** _temp7299=
+_temp7297.curr +( yyvsp_offset - 2); if( _temp7297.base == 0? 1:( _temp7299 <
+_temp7297.base? 1: _temp7299 >= _temp7297.last_plus_one)){ _throw(
+Null_Exception);}* _temp7299;})); _temp7296;}); _temp7295;}); _temp7294;});
+break; case 387: _LL7293: yyval=( struct _xtunion_struct*)({ struct Cyc_Exp_tok_struct*
+_temp7304=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp7304[ 0]=({ struct Cyc_Exp_tok_struct _temp7305; _temp7305.tag= Cyc_Exp_tok_tag;
+_temp7305.f1= Cyc_Absyn_int_exp((* Cyc_yyget_Int_tok(({ struct _tagged_ptr2
+_temp7306= yyvs; struct _xtunion_struct** _temp7308= _temp7306.curr +
+yyvsp_offset; if( _temp7306.base == 0? 1:( _temp7308 < _temp7306.base? 1:
+_temp7308 >= _temp7306.last_plus_one)){ _throw( Null_Exception);}* _temp7308;}))).f1,(*
+Cyc_yyget_Int_tok(({ struct _tagged_ptr2 _temp7309= yyvs; struct _xtunion_struct**
+_temp7311= _temp7309.curr + yyvsp_offset; if( _temp7309.base == 0? 1:( _temp7311
+< _temp7309.base? 1: _temp7311 >= _temp7309.last_plus_one)){ _throw(
+Null_Exception);}* _temp7311;}))).f2, Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp7312= yyls; struct Cyc_Yyltype* _temp7314= _temp7312.curr +
+yylsp_offset; if( _temp7312.base == 0? 1:( _temp7314 < _temp7312.base? 1:
+_temp7314 >= _temp7312.last_plus_one)){ _throw( Null_Exception);}* _temp7314;}).first_line,({
+struct _tagged_ptr3 _temp7315= yyls; struct Cyc_Yyltype* _temp7317= _temp7315.curr
++ yylsp_offset; if( _temp7315.base == 0? 1:( _temp7317 < _temp7315.base? 1:
+_temp7317 >= _temp7315.last_plus_one)){ _throw( Null_Exception);}* _temp7317;}).last_line));
+_temp7305;}); _temp7304;}); break; case 388: _LL7303: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7319=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7319[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7320; _temp7320.tag= Cyc_Exp_tok_tag; _temp7320.f1= Cyc_Absyn_char_exp( Cyc_yyget_Char_tok(({
+struct _tagged_ptr2 _temp7321= yyvs; struct _xtunion_struct** _temp7323=
+_temp7321.curr + yyvsp_offset; if( _temp7321.base == 0? 1:( _temp7323 <
+_temp7321.base? 1: _temp7323 >= _temp7321.last_plus_one)){ _throw(
+Null_Exception);}* _temp7323;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp7324= yyls; struct Cyc_Yyltype* _temp7326= _temp7324.curr +
+yylsp_offset; if( _temp7324.base == 0? 1:( _temp7326 < _temp7324.base? 1:
+_temp7326 >= _temp7324.last_plus_one)){ _throw( Null_Exception);}* _temp7326;}).first_line,({
+struct _tagged_ptr3 _temp7327= yyls; struct Cyc_Yyltype* _temp7329= _temp7327.curr
++ yylsp_offset; if( _temp7327.base == 0? 1:( _temp7329 < _temp7327.base? 1:
+_temp7329 >= _temp7327.last_plus_one)){ _throw( Null_Exception);}* _temp7329;}).last_line));
+_temp7320;}); _temp7319;}); break; case 389: _LL7318: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7331=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7331[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7332; _temp7332.tag= Cyc_Exp_tok_tag; _temp7332.f1= Cyc_Absyn_float_exp(
+Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp7333= yyvs; struct
+_xtunion_struct** _temp7335= _temp7333.curr + yyvsp_offset; if( _temp7333.base
+== 0? 1:( _temp7335 < _temp7333.base? 1: _temp7335 >= _temp7333.last_plus_one)){
+_throw( Null_Exception);}* _temp7335;})), Cyc_Position_segment_of_abs(({ struct
+_tagged_ptr3 _temp7336= yyls; struct Cyc_Yyltype* _temp7338= _temp7336.curr +
+yylsp_offset; if( _temp7336.base == 0? 1:( _temp7338 < _temp7336.base? 1:
+_temp7338 >= _temp7336.last_plus_one)){ _throw( Null_Exception);}* _temp7338;}).first_line,({
+struct _tagged_ptr3 _temp7339= yyls; struct Cyc_Yyltype* _temp7341= _temp7339.curr
++ yylsp_offset; if( _temp7339.base == 0? 1:( _temp7341 < _temp7339.base? 1:
+_temp7341 >= _temp7339.last_plus_one)){ _throw( Null_Exception);}* _temp7341;}).last_line));
+_temp7332;}); _temp7331;}); break; case 390: _LL7330: yyval=( struct
+_xtunion_struct*)({ struct Cyc_Exp_tok_struct* _temp7343=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp7343[ 0]=({ struct Cyc_Exp_tok_struct
+_temp7344; _temp7344.tag= Cyc_Exp_tok_tag; _temp7344.f1= Cyc_Absyn_null_exp( Cyc_Position_segment_of_abs(({
+struct _tagged_ptr3 _temp7345= yyls; struct Cyc_Yyltype* _temp7347= _temp7345.curr
++ yylsp_offset; if( _temp7345.base == 0? 1:( _temp7347 < _temp7345.base? 1:
+_temp7347 >= _temp7345.last_plus_one)){ _throw( Null_Exception);}* _temp7347;}).first_line,({
+struct _tagged_ptr3 _temp7348= yyls; struct Cyc_Yyltype* _temp7350= _temp7348.curr
++ yylsp_offset; if( _temp7348.base == 0? 1:( _temp7350 < _temp7348.base? 1:
+_temp7350 >= _temp7348.last_plus_one)){ _throw( Null_Exception);}* _temp7350;}).last_line));
+_temp7344;}); _temp7343;}); break; case 391: _LL7342: yyval=( struct
+_xtunion_struct*)({ struct Cyc_QualId_tok_struct* _temp7352=( struct Cyc_QualId_tok_struct*)
+GC_malloc( sizeof( struct Cyc_QualId_tok_struct)); _temp7352[ 0]=({ struct Cyc_QualId_tok_struct
+_temp7353; _temp7353.tag= Cyc_QualId_tok_tag; _temp7353.f1=({ struct _tuple1*
+_temp7354=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp7354->f1=(
+void*)({ struct Cyc_Absyn_Rel_n_struct* _temp7359=( struct Cyc_Absyn_Rel_n_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Rel_n_struct)); _temp7359[ 0]=({ struct Cyc_Absyn_Rel_n_struct
+_temp7360; _temp7360.tag= Cyc_Absyn_Rel_n_tag; _temp7360.f1= 0; _temp7360;});
+_temp7359;}); _temp7354->f2=({ struct _tagged_string* _temp7355=( struct
+_tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1); _temp7355[ 0]=
+Cyc_yyget_String_tok(({ struct _tagged_ptr2 _temp7356= yyvs; struct
+_xtunion_struct** _temp7358= _temp7356.curr + yyvsp_offset; if( _temp7356.base
+== 0? 1:( _temp7358 < _temp7356.base? 1: _temp7358 >= _temp7356.last_plus_one)){
+_throw( Null_Exception);}* _temp7358;})); _temp7355;}); _temp7354;}); _temp7353;});
+_temp7352;}); break; case 392: _LL7351: yyval=({ struct _tagged_ptr2 _temp7362=
+yyvs; struct _xtunion_struct** _temp7364= _temp7362.curr + yyvsp_offset; if(
+_temp7362.base == 0? 1:( _temp7364 < _temp7362.base? 1: _temp7364 >= _temp7362.last_plus_one)){
+_throw( Null_Exception);}* _temp7364;}); break; default: _LL7361:( void) _throw((
+struct _xtunion_struct*)({ struct Cyc_Yyimpossible_struct* _temp7366=( struct
 Cyc_Yyimpossible_struct*) GC_malloc( sizeof( struct Cyc_Yyimpossible_struct));
-_temp7367[ 0]=({ struct Cyc_Yyimpossible_struct _temp7368; _temp7368.tag= Cyc_Yyimpossible_tag;
-_temp7368;}); _temp7367;}));} yyvsp_offset -= yylen; yyssp_offset -= yylen;
-yylsp_offset -= yylen;({ struct _tagged_ptr2 _temp7369= yyvs; struct
-_xtunion_struct** _temp7371= _temp7369.curr +( ++ yyvsp_offset); if( _temp7369.base
-== 0? 1:( _temp7371 < _temp7369.base? 1: _temp7371 >= _temp7369.last_plus_one)){
-_throw( Null_Exception);}* _temp7371= yyval;}); yylsp_offset ++; if( yylen == 0){({
-struct _tagged_ptr3 _temp7372= yyls; struct Cyc_Yyltype* _temp7374= _temp7372.curr
-+ yylsp_offset; if( _temp7372.base == 0? 1:( _temp7374 < _temp7372.base? 1:
-_temp7374 >= _temp7372.last_plus_one)){ _throw( Null_Exception);}(* _temp7374).first_line=
-Cyc_yylloc.first_line;});({ struct _tagged_ptr3 _temp7375= yyls; struct Cyc_Yyltype*
-_temp7377= _temp7375.curr + yylsp_offset; if( _temp7375.base == 0? 1:( _temp7377
-< _temp7375.base? 1: _temp7377 >= _temp7375.last_plus_one)){ _throw(
-Null_Exception);}(* _temp7377).first_column= Cyc_yylloc.first_column;});({
-struct _tagged_ptr3 _temp7378= yyls; struct Cyc_Yyltype* _temp7380= _temp7378.curr
-+ yylsp_offset; if( _temp7378.base == 0? 1:( _temp7380 < _temp7378.base? 1:
-_temp7380 >= _temp7378.last_plus_one)){ _throw( Null_Exception);}(* _temp7380).last_line=({
-struct _tagged_ptr3 _temp7381= yyls; struct Cyc_Yyltype* _temp7383= _temp7381.curr
-+( yylsp_offset - 1); if( _temp7381.base == 0? 1:( _temp7383 < _temp7381.base? 1:
-_temp7383 >= _temp7381.last_plus_one)){ _throw( Null_Exception);}* _temp7383;}).last_line;});({
-struct _tagged_ptr3 _temp7384= yyls; struct Cyc_Yyltype* _temp7386= _temp7384.curr
-+ yylsp_offset; if( _temp7384.base == 0? 1:( _temp7386 < _temp7384.base? 1:
-_temp7386 >= _temp7384.last_plus_one)){ _throw( Null_Exception);}(* _temp7386).last_column=({
-struct _tagged_ptr3 _temp7387= yyls; struct Cyc_Yyltype* _temp7389= _temp7387.curr
-+( yylsp_offset - 1); if( _temp7387.base == 0? 1:( _temp7389 < _temp7387.base? 1:
-_temp7389 >= _temp7387.last_plus_one)){ _throw( Null_Exception);}* _temp7389;}).last_column;});({
-struct _tagged_ptr3 _temp7390= yyls; struct Cyc_Yyltype* _temp7392= _temp7390.curr
-+ yylsp_offset; if( _temp7390.base == 0? 1:( _temp7392 < _temp7390.base? 1:
-_temp7392 >= _temp7390.last_plus_one)){ _throw( Null_Exception);}(* _temp7392).text=(
-struct _tagged_string)({ char* _temp7393=( char*)""; struct _tagged_string
-_temp7394; _temp7394.curr= _temp7393; _temp7394.base= _temp7393; _temp7394.last_plus_one=
-_temp7393 + 1; _temp7394;});});} else{({ struct _tagged_ptr3 _temp7395= yyls;
-struct Cyc_Yyltype* _temp7397= _temp7395.curr + yylsp_offset; if( _temp7395.base
-== 0? 1:( _temp7397 < _temp7395.base? 1: _temp7397 >= _temp7395.last_plus_one)){
-_throw( Null_Exception);}(* _temp7397).last_line=({ struct _tagged_ptr3
-_temp7398= yyls; struct Cyc_Yyltype* _temp7400= _temp7398.curr +(( yylsp_offset
-+ yylen) - 1); if( _temp7398.base == 0? 1:( _temp7400 < _temp7398.base? 1:
-_temp7400 >= _temp7398.last_plus_one)){ _throw( Null_Exception);}* _temp7400;}).last_line;});({
-struct _tagged_ptr3 _temp7401= yyls; struct Cyc_Yyltype* _temp7403= _temp7401.curr
-+ yylsp_offset; if( _temp7401.base == 0? 1:( _temp7403 < _temp7401.base? 1:
-_temp7403 >= _temp7401.last_plus_one)){ _throw( Null_Exception);}(* _temp7403).last_column=({
-struct _tagged_ptr3 _temp7404= yyls; struct Cyc_Yyltype* _temp7406= _temp7404.curr
-+(( yylsp_offset + yylen) - 1); if( _temp7404.base == 0? 1:( _temp7406 <
-_temp7404.base? 1: _temp7406 >= _temp7404.last_plus_one)){ _throw(
-Null_Exception);}* _temp7406;}).last_column;});} yyn=( int)({ short* _temp7407=(
-short*) Cyc_yyr1; unsigned int _temp7408= yyn; if( _temp7408 >= 393u){ _throw(
-Null_Exception);} _temp7407[ _temp7408];}); yystate=({ short* _temp7409=( short*)
-Cyc_yypgoto; unsigned int _temp7410= yyn - 124; if( _temp7410 >= 106u){ _throw(
-Null_Exception);} _temp7409[ _temp7410];}) +({ struct _tagged_ptr1 _temp7411=
-yyss; short* _temp7413= _temp7411.curr + yyssp_offset; if( _temp7411.base == 0?
-1:( _temp7413 < _temp7411.base? 1: _temp7413 >= _temp7411.last_plus_one)){
-_throw( Null_Exception);}* _temp7413;}); if(( yystate >= 0? yystate <= 4214: 0)?({
-short* _temp7414=( short*) Cyc_yycheck; unsigned int _temp7415= yystate; if(
-_temp7415 >= 4215u){ _throw( Null_Exception);} _temp7414[ _temp7415];}) ==({
-struct _tagged_ptr1 _temp7416= yyss; short* _temp7418= _temp7416.curr +
-yyssp_offset; if( _temp7416.base == 0? 1:( _temp7418 < _temp7416.base? 1:
-_temp7418 >= _temp7416.last_plus_one)){ _throw( Null_Exception);}* _temp7418;}):
-0){ yystate=( int)({ short* _temp7419=( short*) Cyc_yytable; unsigned int
-_temp7420= yystate; if( _temp7420 >= 4215u){ _throw( Null_Exception);} _temp7419[
-_temp7420];});} else{ yystate=( int)({ short* _temp7421=( short*) Cyc_yydefgoto;
-unsigned int _temp7422= yyn - 124; if( _temp7422 >= 106u){ _throw(
-Null_Exception);} _temp7421[ _temp7422];});} goto yynewstate; yyerrlab: if(
-yyerrstatus == 0){ ++ Cyc_yynerrs; yyn=( int)({ short* _temp7423=( short*) Cyc_yypact;
-unsigned int _temp7424= yystate; if( _temp7424 >= 755u){ _throw( Null_Exception);}
-_temp7423[ _temp7424];}); if( yyn > - 32768? yyn < 4214: 0){ int sze= 0; struct
+_temp7366[ 0]=({ struct Cyc_Yyimpossible_struct _temp7367; _temp7367.tag= Cyc_Yyimpossible_tag;
+_temp7367;}); _temp7366;}));} yyvsp_offset -= yylen; yyssp_offset -= yylen;
+yylsp_offset -= yylen;({ struct _tagged_ptr2 _temp7368= yyvs; struct
+_xtunion_struct** _temp7370= _temp7368.curr +( ++ yyvsp_offset); if( _temp7368.base
+== 0? 1:( _temp7370 < _temp7368.base? 1: _temp7370 >= _temp7368.last_plus_one)){
+_throw( Null_Exception);}* _temp7370= yyval;}); yylsp_offset ++; if( yylen == 0){({
+struct _tagged_ptr3 _temp7371= yyls; struct Cyc_Yyltype* _temp7373= _temp7371.curr
++ yylsp_offset; if( _temp7371.base == 0? 1:( _temp7373 < _temp7371.base? 1:
+_temp7373 >= _temp7371.last_plus_one)){ _throw( Null_Exception);}(* _temp7373).first_line=
+Cyc_yylloc.first_line;});({ struct _tagged_ptr3 _temp7374= yyls; struct Cyc_Yyltype*
+_temp7376= _temp7374.curr + yylsp_offset; if( _temp7374.base == 0? 1:( _temp7376
+< _temp7374.base? 1: _temp7376 >= _temp7374.last_plus_one)){ _throw(
+Null_Exception);}(* _temp7376).first_column= Cyc_yylloc.first_column;});({
+struct _tagged_ptr3 _temp7377= yyls; struct Cyc_Yyltype* _temp7379= _temp7377.curr
++ yylsp_offset; if( _temp7377.base == 0? 1:( _temp7379 < _temp7377.base? 1:
+_temp7379 >= _temp7377.last_plus_one)){ _throw( Null_Exception);}(* _temp7379).last_line=({
+struct _tagged_ptr3 _temp7380= yyls; struct Cyc_Yyltype* _temp7382= _temp7380.curr
++( yylsp_offset - 1); if( _temp7380.base == 0? 1:( _temp7382 < _temp7380.base? 1:
+_temp7382 >= _temp7380.last_plus_one)){ _throw( Null_Exception);}* _temp7382;}).last_line;});({
+struct _tagged_ptr3 _temp7383= yyls; struct Cyc_Yyltype* _temp7385= _temp7383.curr
++ yylsp_offset; if( _temp7383.base == 0? 1:( _temp7385 < _temp7383.base? 1:
+_temp7385 >= _temp7383.last_plus_one)){ _throw( Null_Exception);}(* _temp7385).last_column=({
+struct _tagged_ptr3 _temp7386= yyls; struct Cyc_Yyltype* _temp7388= _temp7386.curr
++( yylsp_offset - 1); if( _temp7386.base == 0? 1:( _temp7388 < _temp7386.base? 1:
+_temp7388 >= _temp7386.last_plus_one)){ _throw( Null_Exception);}* _temp7388;}).last_column;});({
+struct _tagged_ptr3 _temp7389= yyls; struct Cyc_Yyltype* _temp7391= _temp7389.curr
++ yylsp_offset; if( _temp7389.base == 0? 1:( _temp7391 < _temp7389.base? 1:
+_temp7391 >= _temp7389.last_plus_one)){ _throw( Null_Exception);}(* _temp7391).text=(
+struct _tagged_string)({ char* _temp7392=( char*)""; struct _tagged_string
+_temp7393; _temp7393.curr= _temp7392; _temp7393.base= _temp7392; _temp7393.last_plus_one=
+_temp7392 + 1; _temp7393;});});} else{({ struct _tagged_ptr3 _temp7394= yyls;
+struct Cyc_Yyltype* _temp7396= _temp7394.curr + yylsp_offset; if( _temp7394.base
+== 0? 1:( _temp7396 < _temp7394.base? 1: _temp7396 >= _temp7394.last_plus_one)){
+_throw( Null_Exception);}(* _temp7396).last_line=({ struct _tagged_ptr3
+_temp7397= yyls; struct Cyc_Yyltype* _temp7399= _temp7397.curr +(( yylsp_offset
++ yylen) - 1); if( _temp7397.base == 0? 1:( _temp7399 < _temp7397.base? 1:
+_temp7399 >= _temp7397.last_plus_one)){ _throw( Null_Exception);}* _temp7399;}).last_line;});({
+struct _tagged_ptr3 _temp7400= yyls; struct Cyc_Yyltype* _temp7402= _temp7400.curr
++ yylsp_offset; if( _temp7400.base == 0? 1:( _temp7402 < _temp7400.base? 1:
+_temp7402 >= _temp7400.last_plus_one)){ _throw( Null_Exception);}(* _temp7402).last_column=({
+struct _tagged_ptr3 _temp7403= yyls; struct Cyc_Yyltype* _temp7405= _temp7403.curr
++(( yylsp_offset + yylen) - 1); if( _temp7403.base == 0? 1:( _temp7405 <
+_temp7403.base? 1: _temp7405 >= _temp7403.last_plus_one)){ _throw(
+Null_Exception);}* _temp7405;}).last_column;});} yyn=( int)({ short* _temp7406=(
+short*) Cyc_yyr1; unsigned int _temp7407= yyn; if( _temp7407 >= 393u){ _throw(
+Null_Exception);} _temp7406[ _temp7407];}); yystate=({ short* _temp7408=( short*)
+Cyc_yypgoto; unsigned int _temp7409= yyn - 124; if( _temp7409 >= 106u){ _throw(
+Null_Exception);} _temp7408[ _temp7409];}) +({ struct _tagged_ptr1 _temp7410=
+yyss; short* _temp7412= _temp7410.curr + yyssp_offset; if( _temp7410.base == 0?
+1:( _temp7412 < _temp7410.base? 1: _temp7412 >= _temp7410.last_plus_one)){
+_throw( Null_Exception);}* _temp7412;}); if(( yystate >= 0? yystate <= 4214: 0)?({
+short* _temp7413=( short*) Cyc_yycheck; unsigned int _temp7414= yystate; if(
+_temp7414 >= 4215u){ _throw( Null_Exception);} _temp7413[ _temp7414];}) ==({
+struct _tagged_ptr1 _temp7415= yyss; short* _temp7417= _temp7415.curr +
+yyssp_offset; if( _temp7415.base == 0? 1:( _temp7417 < _temp7415.base? 1:
+_temp7417 >= _temp7415.last_plus_one)){ _throw( Null_Exception);}* _temp7417;}):
+0){ yystate=( int)({ short* _temp7418=( short*) Cyc_yytable; unsigned int
+_temp7419= yystate; if( _temp7419 >= 4215u){ _throw( Null_Exception);} _temp7418[
+_temp7419];});} else{ yystate=( int)({ short* _temp7420=( short*) Cyc_yydefgoto;
+unsigned int _temp7421= yyn - 124; if( _temp7421 >= 106u){ _throw(
+Null_Exception);} _temp7420[ _temp7421];});} goto yynewstate; yyerrlab: if(
+yyerrstatus == 0){ ++ Cyc_yynerrs; yyn=( int)({ short* _temp7422=( short*) Cyc_yypact;
+unsigned int _temp7423= yystate; if( _temp7423 >= 755u){ _throw( Null_Exception);}
+_temp7422[ _temp7423];}); if( yyn > - 32768? yyn < 4214: 0){ int sze= 0; struct
 _tagged_string msg; int x; int count; count= 0; for( x= yyn < 0? - yyn: 0; x <
-230u / sizeof( char*); x ++){ if(({ short* _temp7425=( short*) Cyc_yycheck;
-unsigned int _temp7426= x + yyn; if( _temp7426 >= 4215u){ _throw( Null_Exception);}
-_temp7425[ _temp7426];}) == x){ sze += Cyc_String_strlen(({ struct
-_tagged_string* _temp7427=( struct _tagged_string*) Cyc_yytname; unsigned int
-_temp7428= x; if( _temp7428 >= 230u){ _throw( Null_Exception);} _temp7427[
-_temp7428];})) + 15, count ++;}} msg=({ unsigned int _temp7429=( unsigned int)(
-sze + 15); char* _temp7430=( char*) GC_malloc_atomic( sizeof( char) * _temp7429);
-unsigned int i; struct _tagged_string _temp7431={ _temp7430, _temp7430,
-_temp7430 + _temp7429}; for( i= 0; i < _temp7429; i ++){ _temp7430[ i]='\000';}
-_temp7431;}); Cyc_String_strcpy( msg,( struct _tagged_string)({ char* _temp7432=(
-char*)"parse error"; struct _tagged_string _temp7433; _temp7433.curr= _temp7432;
-_temp7433.base= _temp7432; _temp7433.last_plus_one= _temp7432 + 12; _temp7433;}));
+230u / sizeof( char*); x ++){ if(({ short* _temp7424=( short*) Cyc_yycheck;
+unsigned int _temp7425= x + yyn; if( _temp7425 >= 4215u){ _throw( Null_Exception);}
+_temp7424[ _temp7425];}) == x){ sze += Cyc_String_strlen(({ struct
+_tagged_string* _temp7426=( struct _tagged_string*) Cyc_yytname; unsigned int
+_temp7427= x; if( _temp7427 >= 230u){ _throw( Null_Exception);} _temp7426[
+_temp7427];})) + 15, count ++;}} msg=({ unsigned int _temp7428=( unsigned int)(
+sze + 15); char* _temp7429=( char*) GC_malloc_atomic( sizeof( char) * _temp7428);
+unsigned int i; struct _tagged_string _temp7430={ _temp7429, _temp7429,
+_temp7429 + _temp7428}; for( i= 0; i < _temp7428; i ++){ _temp7429[ i]='\000';}
+_temp7430;}); Cyc_String_strcpy( msg,( struct _tagged_string)({ char* _temp7431=(
+char*)"parse error"; struct _tagged_string _temp7432; _temp7432.curr= _temp7431;
+_temp7432.base= _temp7431; _temp7432.last_plus_one= _temp7431 + 12; _temp7432;}));
 if( count < 5){ count= 0; for( x= yyn < 0? - yyn: 0; x < 230u / sizeof( char*);
-x ++){ if(({ short* _temp7434=( short*) Cyc_yycheck; unsigned int _temp7435= x +
-yyn; if( _temp7435 >= 4215u){ _throw( Null_Exception);} _temp7434[ _temp7435];})
+x ++){ if(({ short* _temp7433=( short*) Cyc_yycheck; unsigned int _temp7434= x +
+yyn; if( _temp7434 >= 4215u){ _throw( Null_Exception);} _temp7433[ _temp7434];})
 == x){ Cyc_String_strcat( msg, count == 0?( struct _tagged_string)({ char*
-_temp7436=( char*)", expecting `"; struct _tagged_string _temp7437; _temp7437.curr=
-_temp7436; _temp7437.base= _temp7436; _temp7437.last_plus_one= _temp7436 + 14;
-_temp7437;}):( struct _tagged_string)({ char* _temp7438=( char*)" or `"; struct
-_tagged_string _temp7439; _temp7439.curr= _temp7438; _temp7439.base= _temp7438;
-_temp7439.last_plus_one= _temp7438 + 6; _temp7439;})); Cyc_String_strcat( msg,({
-struct _tagged_string* _temp7440=( struct _tagged_string*) Cyc_yytname;
-unsigned int _temp7441= x; if( _temp7441 >= 230u){ _throw( Null_Exception);}
-_temp7440[ _temp7441];})); Cyc_String_strcat( msg,( struct _tagged_string)({
-char* _temp7442=( char*)"'"; struct _tagged_string _temp7443; _temp7443.curr=
-_temp7442; _temp7443.base= _temp7442; _temp7443.last_plus_one= _temp7442 + 2;
-_temp7443;})); count ++;}}} Cyc_yyerror( msg);} else{ Cyc_yyerror(( struct
-_tagged_string)({ char* _temp7444=( char*)"parse error"; struct _tagged_string
-_temp7445; _temp7445.curr= _temp7444; _temp7445.base= _temp7444; _temp7445.last_plus_one=
-_temp7444 + 12; _temp7445;}));}} goto yyerrlab1; yyerrlab1: if( yyerrstatus == 3){
+_temp7435=( char*)", expecting `"; struct _tagged_string _temp7436; _temp7436.curr=
+_temp7435; _temp7436.base= _temp7435; _temp7436.last_plus_one= _temp7435 + 14;
+_temp7436;}):( struct _tagged_string)({ char* _temp7437=( char*)" or `"; struct
+_tagged_string _temp7438; _temp7438.curr= _temp7437; _temp7438.base= _temp7437;
+_temp7438.last_plus_one= _temp7437 + 6; _temp7438;})); Cyc_String_strcat( msg,({
+struct _tagged_string* _temp7439=( struct _tagged_string*) Cyc_yytname;
+unsigned int _temp7440= x; if( _temp7440 >= 230u){ _throw( Null_Exception);}
+_temp7439[ _temp7440];})); Cyc_String_strcat( msg,( struct _tagged_string)({
+char* _temp7441=( char*)"'"; struct _tagged_string _temp7442; _temp7442.curr=
+_temp7441; _temp7442.base= _temp7441; _temp7442.last_plus_one= _temp7441 + 2;
+_temp7442;})); count ++;}}} Cyc_yyerror( msg);} else{ Cyc_yyerror(( struct
+_tagged_string)({ char* _temp7443=( char*)"parse error"; struct _tagged_string
+_temp7444; _temp7444.curr= _temp7443; _temp7444.base= _temp7443; _temp7444.last_plus_one=
+_temp7443 + 12; _temp7444;}));}} goto yyerrlab1; yyerrlab1: if( yyerrstatus == 3){
 if( Cyc_yychar == 0){ return 1;} Cyc_yychar= - 2;} yyerrstatus= 3; goto
 yyerrhandle; yyerrdefault: yyerrpop: if( yyssp_offset == 0){ return 1;}
-yyvsp_offset --; yystate=( int)({ struct _tagged_ptr1 _temp7446= yyss; short*
-_temp7448= _temp7446.curr +( -- yyssp_offset); if( _temp7446.base == 0? 1:(
-_temp7448 < _temp7446.base? 1: _temp7448 >= _temp7446.last_plus_one)){ _throw(
-Null_Exception);}* _temp7448;}); yylsp_offset --; yyerrhandle: yyn=( int)({
-short* _temp7449=( short*) Cyc_yypact; unsigned int _temp7450= yystate; if(
-_temp7450 >= 755u){ _throw( Null_Exception);} _temp7449[ _temp7450];}); if( yyn
+yyvsp_offset --; yystate=( int)({ struct _tagged_ptr1 _temp7445= yyss; short*
+_temp7447= _temp7445.curr +( -- yyssp_offset); if( _temp7445.base == 0? 1:(
+_temp7447 < _temp7445.base? 1: _temp7447 >= _temp7445.last_plus_one)){ _throw(
+Null_Exception);}* _temp7447;}); yylsp_offset --; yyerrhandle: yyn=( int)({
+short* _temp7448=( short*) Cyc_yypact; unsigned int _temp7449= yystate; if(
+_temp7449 >= 755u){ _throw( Null_Exception);} _temp7448[ _temp7449];}); if( yyn
 == - 32768){ goto yyerrdefault;} yyn += 1; if(( yyn < 0? 1: yyn > 4214)? 1:({
-short* _temp7451=( short*) Cyc_yycheck; unsigned int _temp7452= yyn; if(
-_temp7452 >= 4215u){ _throw( Null_Exception);} _temp7451[ _temp7452];}) != 1){
-goto yyerrdefault;} yyn=( int)({ short* _temp7453=( short*) Cyc_yytable;
-unsigned int _temp7454= yyn; if( _temp7454 >= 4215u){ _throw( Null_Exception);}
-_temp7453[ _temp7454];}); if( yyn < 0){ if( yyn == - 32768){ goto yyerrpop;} yyn=
+short* _temp7450=( short*) Cyc_yycheck; unsigned int _temp7451= yyn; if(
+_temp7451 >= 4215u){ _throw( Null_Exception);} _temp7450[ _temp7451];}) != 1){
+goto yyerrdefault;} yyn=( int)({ short* _temp7452=( short*) Cyc_yytable;
+unsigned int _temp7453= yyn; if( _temp7453 >= 4215u){ _throw( Null_Exception);}
+_temp7452[ _temp7453];}); if( yyn < 0){ if( yyn == - 32768){ goto yyerrpop;} yyn=
 - yyn; goto yyreduce;} else{ if( yyn == 0){ goto yyerrpop;}} if( yyn == 754){
-return 0;}({ struct _tagged_ptr2 _temp7455= yyvs; struct _xtunion_struct**
-_temp7457= _temp7455.curr +( ++ yyvsp_offset); if( _temp7455.base == 0? 1:(
-_temp7457 < _temp7455.base? 1: _temp7457 >= _temp7455.last_plus_one)){ _throw(
-Null_Exception);}* _temp7457= Cyc_yylval;});({ struct _tagged_ptr3 _temp7458=
-yyls; struct Cyc_Yyltype* _temp7460= _temp7458.curr +( ++ yylsp_offset); if(
-_temp7458.base == 0? 1:( _temp7460 < _temp7458.base? 1: _temp7460 >= _temp7458.last_plus_one)){
-_throw( Null_Exception);}* _temp7460= Cyc_yylloc;}); goto yynewstate;} void Cyc_yyprint(
-int i, struct _xtunion_struct* v){ struct _xtunion_struct* _temp7461= v; struct
-_tuple12* _temp7481; struct _tuple12 _temp7483; int _temp7484; void* _temp7486;
-char _temp7488; short _temp7490; struct _tagged_string _temp7492; struct Cyc_Core_Opt*
-_temp7494; struct Cyc_Core_Opt* _temp7496; struct Cyc_Core_Opt _temp7498; struct
-_tagged_string* _temp7499; struct _tuple1* _temp7501; struct _tuple1 _temp7503;
-struct _tagged_string* _temp7504; void* _temp7506; _LL7463: if( _temp7461->tag
-== Cyc_Okay_tok_tag){ goto _LL7464;} else{ goto _LL7465;} _LL7465: if((*((
-struct _xtunion_struct*) _temp7461)).tag == Cyc_Int_tok_tag){ _LL7482: _temp7481=((
-struct Cyc_Int_tok_struct*) _temp7461)->f1; _temp7483=* _temp7481; _LL7487:
-_temp7486= _temp7483.f1; goto _LL7485; _LL7485: _temp7484= _temp7483.f2; goto
-_LL7466;} else{ goto _LL7467;} _LL7467: if((*(( struct _xtunion_struct*)
-_temp7461)).tag == Cyc_Char_tok_tag){ _LL7489: _temp7488=(( struct Cyc_Char_tok_struct*)
-_temp7461)->f1; goto _LL7468;} else{ goto _LL7469;} _LL7469: if((*(( struct
-_xtunion_struct*) _temp7461)).tag == Cyc_Short_tok_tag){ _LL7491: _temp7490=((
-struct Cyc_Short_tok_struct*) _temp7461)->f1; goto _LL7470;} else{ goto _LL7471;}
-_LL7471: if((*(( struct _xtunion_struct*) _temp7461)).tag == Cyc_String_tok_tag){
-_LL7493: _temp7492=(( struct Cyc_String_tok_struct*) _temp7461)->f1; goto
-_LL7472;} else{ goto _LL7473;} _LL7473: if((*(( struct _xtunion_struct*)
-_temp7461)).tag == Cyc_Stringopt_tok_tag){ _LL7495: _temp7494=(( struct Cyc_Stringopt_tok_struct*)
-_temp7461)->f1; if( _temp7494 == 0){ goto _LL7474;} else{ goto _LL7475;}} else{
-goto _LL7475;} _LL7475: if((*(( struct _xtunion_struct*) _temp7461)).tag == Cyc_Stringopt_tok_tag){
-_LL7497: _temp7496=(( struct Cyc_Stringopt_tok_struct*) _temp7461)->f1; if(
-_temp7496 == 0){ goto _LL7477;} else{ _temp7498=* _temp7496; _LL7500: _temp7499=(
-struct _tagged_string*) _temp7498.v; goto _LL7476;}} else{ goto _LL7477;}
-_LL7477: if((*(( struct _xtunion_struct*) _temp7461)).tag == Cyc_QualId_tok_tag){
-_LL7502: _temp7501=(( struct Cyc_QualId_tok_struct*) _temp7461)->f1; _temp7503=*
-_temp7501; _LL7507: _temp7506= _temp7503.f1; goto _LL7505; _LL7505: _temp7504=
-_temp7503.f2; goto _LL7478;} else{ goto _LL7479;} _LL7479: goto _LL7480; _LL7464:
-fprintf( Cyc_Stdio_stderr,"ok"); goto _LL7462; _LL7466: fprintf( Cyc_Stdio_stderr,"%d",
-_temp7484); goto _LL7462; _LL7468: fprintf( Cyc_Stdio_stderr,"%c",( int)
-_temp7488); goto _LL7462; _LL7470: fprintf( Cyc_Stdio_stderr,"%ds",( int)
-_temp7490); goto _LL7462; _LL7472:({ struct _tagged_string _temp7508= _temp7492;
-fprintf( Cyc_Stdio_stderr,"\"%.*s\"", _temp7508.last_plus_one - _temp7508.curr,
-_temp7508.curr);}); goto _LL7462; _LL7474: fprintf( Cyc_Stdio_stderr,"null");
-goto _LL7462; _LL7476:({ struct _tagged_string _temp7509=* _temp7499; fprintf(
-Cyc_Stdio_stderr,"\"%.*s\"", _temp7509.last_plus_one - _temp7509.curr, _temp7509.curr);});
-goto _LL7462; _LL7478: { struct Cyc_List_List* prefix= 0;{ void* _temp7510=
-_temp7506; struct Cyc_List_List* _temp7518; struct Cyc_List_List* _temp7520;
-_LL7512: if(( unsigned int) _temp7510 > 1u?(( struct _tunion_struct*) _temp7510)->tag
-== Cyc_Absyn_Rel_n_tag: 0){ _LL7519: _temp7518=( struct Cyc_List_List*)(( struct
-Cyc_Absyn_Rel_n_struct*) _temp7510)->f1; goto _LL7513;} else{ goto _LL7514;}
-_LL7514: if(( unsigned int) _temp7510 > 1u?(( struct _tunion_struct*) _temp7510)->tag
-== Cyc_Absyn_Abs_n_tag: 0){ _LL7521: _temp7520=( struct Cyc_List_List*)(( struct
-Cyc_Absyn_Abs_n_struct*) _temp7510)->f1; goto _LL7515;} else{ goto _LL7516;}
-_LL7516: if(( int) _temp7510 == Cyc_Absyn_Loc_n){ goto _LL7517;} else{ goto
-_LL7511;} _LL7513: prefix= _temp7518; goto _LL7511; _LL7515: prefix= _temp7520;
-goto _LL7511; _LL7517: goto _LL7511; _LL7511:;} for( 0; prefix != 0; prefix=({
-struct Cyc_List_List* _temp7522= prefix; if( _temp7522 == 0){ _throw(
-Null_Exception);} _temp7522->tl;})){({ struct _tagged_string _temp7524=*((
-struct _tagged_string*)({ struct Cyc_List_List* _temp7523= prefix; if( _temp7523
-== 0){ _throw( Null_Exception);} _temp7523->hd;})); fprintf( Cyc_Stdio_stderr,"%.*s::",
-_temp7524.last_plus_one - _temp7524.curr, _temp7524.curr);});}({ struct
-_tagged_string _temp7525=* _temp7504; fprintf( Cyc_Stdio_stderr,"%.*s::",
-_temp7525.last_plus_one - _temp7525.curr, _temp7525.curr);}); goto _LL7462;}
-_LL7480: fprintf( Cyc_Stdio_stderr,"?"); goto _LL7462; _LL7462:;} struct Cyc_List_List*
+return 0;}({ struct _tagged_ptr2 _temp7454= yyvs; struct _xtunion_struct**
+_temp7456= _temp7454.curr +( ++ yyvsp_offset); if( _temp7454.base == 0? 1:(
+_temp7456 < _temp7454.base? 1: _temp7456 >= _temp7454.last_plus_one)){ _throw(
+Null_Exception);}* _temp7456= Cyc_yylval;});({ struct _tagged_ptr3 _temp7457=
+yyls; struct Cyc_Yyltype* _temp7459= _temp7457.curr +( ++ yylsp_offset); if(
+_temp7457.base == 0? 1:( _temp7459 < _temp7457.base? 1: _temp7459 >= _temp7457.last_plus_one)){
+_throw( Null_Exception);}* _temp7459= Cyc_yylloc;}); goto yynewstate;} void Cyc_yyprint(
+int i, struct _xtunion_struct* v){ struct _xtunion_struct* _temp7460= v; struct
+_tuple12* _temp7480; struct _tuple12 _temp7482; int _temp7483; void* _temp7485;
+char _temp7487; short _temp7489; struct _tagged_string _temp7491; struct Cyc_Core_Opt*
+_temp7493; struct Cyc_Core_Opt* _temp7495; struct Cyc_Core_Opt _temp7497; struct
+_tagged_string* _temp7498; struct _tuple1* _temp7500; struct _tuple1 _temp7502;
+struct _tagged_string* _temp7503; void* _temp7505; _LL7462: if( _temp7460->tag
+== Cyc_Okay_tok_tag){ goto _LL7463;} else{ goto _LL7464;} _LL7464: if((*((
+struct _xtunion_struct*) _temp7460)).tag == Cyc_Int_tok_tag){ _LL7481: _temp7480=((
+struct Cyc_Int_tok_struct*) _temp7460)->f1; _temp7482=* _temp7480; _LL7486:
+_temp7485= _temp7482.f1; goto _LL7484; _LL7484: _temp7483= _temp7482.f2; goto
+_LL7465;} else{ goto _LL7466;} _LL7466: if((*(( struct _xtunion_struct*)
+_temp7460)).tag == Cyc_Char_tok_tag){ _LL7488: _temp7487=(( struct Cyc_Char_tok_struct*)
+_temp7460)->f1; goto _LL7467;} else{ goto _LL7468;} _LL7468: if((*(( struct
+_xtunion_struct*) _temp7460)).tag == Cyc_Short_tok_tag){ _LL7490: _temp7489=((
+struct Cyc_Short_tok_struct*) _temp7460)->f1; goto _LL7469;} else{ goto _LL7470;}
+_LL7470: if((*(( struct _xtunion_struct*) _temp7460)).tag == Cyc_String_tok_tag){
+_LL7492: _temp7491=(( struct Cyc_String_tok_struct*) _temp7460)->f1; goto
+_LL7471;} else{ goto _LL7472;} _LL7472: if((*(( struct _xtunion_struct*)
+_temp7460)).tag == Cyc_Stringopt_tok_tag){ _LL7494: _temp7493=(( struct Cyc_Stringopt_tok_struct*)
+_temp7460)->f1; if( _temp7493 == 0){ goto _LL7473;} else{ goto _LL7474;}} else{
+goto _LL7474;} _LL7474: if((*(( struct _xtunion_struct*) _temp7460)).tag == Cyc_Stringopt_tok_tag){
+_LL7496: _temp7495=(( struct Cyc_Stringopt_tok_struct*) _temp7460)->f1; if(
+_temp7495 == 0){ goto _LL7476;} else{ _temp7497=* _temp7495; _LL7499: _temp7498=(
+struct _tagged_string*) _temp7497.v; goto _LL7475;}} else{ goto _LL7476;}
+_LL7476: if((*(( struct _xtunion_struct*) _temp7460)).tag == Cyc_QualId_tok_tag){
+_LL7501: _temp7500=(( struct Cyc_QualId_tok_struct*) _temp7460)->f1; _temp7502=*
+_temp7500; _LL7506: _temp7505= _temp7502.f1; goto _LL7504; _LL7504: _temp7503=
+_temp7502.f2; goto _LL7477;} else{ goto _LL7478;} _LL7478: goto _LL7479; _LL7463:
+fprintf( Cyc_Stdio_stderr,"ok"); goto _LL7461; _LL7465: fprintf( Cyc_Stdio_stderr,"%d",
+_temp7483); goto _LL7461; _LL7467: fprintf( Cyc_Stdio_stderr,"%c",( int)
+_temp7487); goto _LL7461; _LL7469: fprintf( Cyc_Stdio_stderr,"%ds",( int)
+_temp7489); goto _LL7461; _LL7471:({ struct _tagged_string _temp7507= _temp7491;
+fprintf( Cyc_Stdio_stderr,"\"%.*s\"", _temp7507.last_plus_one - _temp7507.curr,
+_temp7507.curr);}); goto _LL7461; _LL7473: fprintf( Cyc_Stdio_stderr,"null");
+goto _LL7461; _LL7475:({ struct _tagged_string _temp7508=* _temp7498; fprintf(
+Cyc_Stdio_stderr,"\"%.*s\"", _temp7508.last_plus_one - _temp7508.curr, _temp7508.curr);});
+goto _LL7461; _LL7477: { struct Cyc_List_List* prefix= 0;{ void* _temp7509=
+_temp7505; struct Cyc_List_List* _temp7517; struct Cyc_List_List* _temp7519;
+_LL7511: if(( unsigned int) _temp7509 > 1u?(( struct _tunion_struct*) _temp7509)->tag
+== Cyc_Absyn_Rel_n_tag: 0){ _LL7518: _temp7517=( struct Cyc_List_List*)(( struct
+Cyc_Absyn_Rel_n_struct*) _temp7509)->f1; goto _LL7512;} else{ goto _LL7513;}
+_LL7513: if(( unsigned int) _temp7509 > 1u?(( struct _tunion_struct*) _temp7509)->tag
+== Cyc_Absyn_Abs_n_tag: 0){ _LL7520: _temp7519=( struct Cyc_List_List*)(( struct
+Cyc_Absyn_Abs_n_struct*) _temp7509)->f1; goto _LL7514;} else{ goto _LL7515;}
+_LL7515: if(( int) _temp7509 == Cyc_Absyn_Loc_n){ goto _LL7516;} else{ goto
+_LL7510;} _LL7512: prefix= _temp7517; goto _LL7510; _LL7514: prefix= _temp7519;
+goto _LL7510; _LL7516: goto _LL7510; _LL7510:;} for( 0; prefix != 0; prefix=({
+struct Cyc_List_List* _temp7521= prefix; if( _temp7521 == 0){ _throw(
+Null_Exception);} _temp7521->tl;})){({ struct _tagged_string _temp7523=*((
+struct _tagged_string*)({ struct Cyc_List_List* _temp7522= prefix; if( _temp7522
+== 0){ _throw( Null_Exception);} _temp7522->hd;})); fprintf( Cyc_Stdio_stderr,"%.*s::",
+_temp7523.last_plus_one - _temp7523.curr, _temp7523.curr);});}({ struct
+_tagged_string _temp7524=* _temp7503; fprintf( Cyc_Stdio_stderr,"%.*s::",
+_temp7524.last_plus_one - _temp7524.curr, _temp7524.curr);}); goto _LL7461;}
+_LL7479: fprintf( Cyc_Stdio_stderr,"?"); goto _LL7461; _LL7461:;} struct Cyc_List_List*
 Cyc_Parse_parse_file( struct Cyc_Stdio___sFILE* f){ Cyc_Parse_parse_result= 0;
-Cyc_Parse_lbuf=({ struct Cyc_Core_Opt* _temp7526=( struct Cyc_Core_Opt*)
-GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp7526->v=( void*) Cyc_Lexing_from_file(
-f); _temp7526;}); Cyc_yyparse(); return Cyc_Parse_parse_result;}
+Cyc_Parse_lbuf=({ struct Cyc_Core_Opt* _temp7525=( struct Cyc_Core_Opt*)
+GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp7525->v=( void*) Cyc_Lexing_from_file(
+f); _temp7525;}); Cyc_yyparse(); return Cyc_Parse_parse_result;}

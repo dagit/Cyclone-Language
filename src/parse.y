@@ -1972,7 +1972,6 @@ statement:
   { if (zstrcmp($2,"H") == 0) 
       err("bad occurrence of heap region `H",LOC(@3,@3));
     tvar_t tv = new Tvar(new xprintf("`%s",$2),new_conref(RgnKind));
-    fprintf(stderr,"\nnew region's name is: \"%s\"\n",*tv->name);
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $((nmspace_t)Loc_n, new $2),
                                                new RgnHandleType(t),null),$3),
