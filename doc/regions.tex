@@ -30,7 +30,7 @@ deallocate its region, and when you deallocate a region, you deallocate all
 of the objects in the region.  Regions are sometimes called ``arenas'' or
 ``zones.''
 
-Cyclone has five kinds of regions:
+Cyclone has six kinds of region:
 \begin{description}
 \item[Stack regions] As in C, local variables are allocated on the
   runtime stack; the stack grows when a block is entered, and it
@@ -83,7 +83,7 @@ Cyclone has five kinds of regions:
   convenient for storing temporary data, but sometimes, the lifetime
   of data cannot be statically determined.  Such data can be allocated
   in a \emph{dynamic region}.  A dynamic region supports deallocation
-  at (esentially) any program point.  However, before the data in a
+  at (essentially) any program point.  However, before the data in a
   dynamic region may be accessed, the dynamic region must be \emph{opened}.
   The open operation fails by throwing an exception if the dynamic
   region has already been freed.  Note that each data access within
@@ -139,7 +139,8 @@ expression:
   result into the heap, and returns a pointer to the result.  It is
   roughly equivalent to
 \begin{alltt}
-  t @ temp = malloc(sizeof(t)); // where t is the type of expr
+  t @ temp = malloc(sizeof(t));
+  // where t is the type of expr
   *temp = {\it expr};
 \end{alltt}
   For example, \texttt{new 17} allocates space for an integer on the
@@ -260,9 +261,9 @@ Here, the first argument specifies a region handle.  The Cyclone library has
 global variables \texttt{Core::heap_region}, \texttt{Core::unique_region},
 and \texttt{Core::refcnt\_region}, which are handles for the heap, unique,
 and reference-counted regions, respectively.  So, for example, \texttt{rnew
-(refcnt_region,{\it expr})} allocates memory in the reference-counted region
+(refcnt_region) {\it expr}} allocates memory in the reference-counted region
 which is initialized with {\it expr}.  Moreover, \texttt{new {\it expr}} can
-be replaced with \texttt{rnew(heap_region,{\it expr})}.
+be replaced with \texttt{rnew(heap_region) {\it expr}}.
 %% We also define a macro
 %% \texttt{unew({\it expr})} that expands to \texttt{rnew(unique_region,{\it
 %% expr})}.
@@ -588,7 +589,7 @@ and 4 or after line 5, the flow analysis would reject the code, as in
   p.x = x;            // consumes x
   p.y = x;            // rejected! x has been consumed already
 \end{alltt}
-When a multi-word datastructure is assigned to another one, the all of the
+When a multi-word data structure is assigned to another one, all of the
 unique pointers it contains are consumed.  For example:
 \begin{alltt}
 {\small 1}  struct pair \{ int *`U x; int *`U y; \} p, q;
@@ -623,7 +624,7 @@ garbage collected.
 Unique pointers have some restrictions.  In particular:
 \begin{itemize}
 \item No pointer arithmetic is allowed on unique pointers.  This ensures
-  that all unique pointers are to the beginning of the object, so that the
+  that all unique pointers point to the beginning of the object, so that the
   allocator is not confused when a pointer is passed to \texttt{ufree}.
 \item Take the address of a unique pointer is not allowed.  This is because
   doing so effectively creates an alias to the original pointer that cannot
@@ -637,18 +638,18 @@ Unique pointers have some restrictions.  In particular:
 
 Directly reading a unique pointer is only allowed along a \emph{unique
 path}.  A unique path $u$ has the form
-\begin{alltt}
-\qquad  $u$ ::= $x$ | $u$.m | $u$->m | *$u$
-\end{alltt}
+\begin{center}
+$u$ \texttt{::=} $x$ $\mid$ $u$\texttt{.m} $\mid$ $u$\texttt{->m} $\mid$ \texttt{*}$u$
+\end{center}
 where $x$ is a local variable, and $u$ is a unique pointer.  To
 appreciate the unique-path restriction, consider this incorrect code:
 \begin{verbatim}
-int f(int *`U *`r x) \{
+int f(int *`U *`r x) {
   int *`U *`r y = x;  //x and y are aliases
   int *`U z = *y;
   ufree(z);
   return **x;  //accesses deallocated storage!
-\}
+}
 \end{verbatim}
 Here, \texttt{x} is a pointer into a conventional region \texttt{`r} and
 thus its value can be freely copied to \texttt{y}.  We then extract a unique
@@ -659,7 +660,7 @@ If a unique pointer is not accessible via a unique path, it must be
 \emph{swapped out} atomically to be used; in Cyclone this is expressed with
 syntax \texttt{:=:}.  In particular, the code \texttt{{\it a} :=:{\it b}}
 will swap the contents of {\it a} and {\it b}.  We can use this to swap out
-a nested unique pointer, and replace it will a different one; we will often
+a nested unique pointer, and replace it with a different one; we will often
 swap in NULL, since this is a unique pointer that is always unconsumed.  For
 example, in the code below, we define a queue type for queues that contain
 unique pointers, and a function \texttt{take} for removing the first element
@@ -761,7 +762,7 @@ This code is illegal because neither \texttt{p->x} nor \texttt{p->y} is a
 unique path.  We also do not allow \texttt{*} patterns to create aliases of
 the original unique pointer, for the same reason we forbid \texttt{\&}$e$
 when $e$ is a unique pointer.  Unfortunately, this means we don't provide a
-way to assign to matched-against fields.  However, in the case the
+way to assign to matched-against fields.  However, in the case of the
 matched-against struct, we can just do this with regular paths.  In the
 above example pattern block, we could do \texttt{p->y = new 1} or something
 like that (even within the scope of the pattern).
@@ -973,9 +974,9 @@ reasons we need polymorphism for arbitrary values which might be pointers
 into either unique or aliasable regions.  For example, consider the
 following code analogous to the \texttt{make\_pair} function above:
 \begin{verbatim}
-  $(`a,`a) pair(`a x) \{
+  $(`a,`a) pair(`a x) {
     return $(x,x);
-  \}
+  }
 \end{verbatim}
 Now consider what happens if we call \texttt{pair} with a unique pointer:
 \begin{verbatim}
@@ -994,9 +995,9 @@ occurs for kind M (memory-kinds, having arbitrary size), and kind A
 (any-kinds, for abstract, arbitrary-sized data).  With this, we can fix the
 \texttt{pair} function to be:
 \begin{verbatim}
-  $(`a,`a) pair(`a::B x) \{
+  $(`a,`a) pair(`a::B x) {
     return $(x,x);
-  \}
+  }
 \end{verbatim}
 This would prevent the call to \texttt{pair(p)} in the code snippet above.
 Actually, as with regions, aliasable kinds are the default, so the
@@ -1024,7 +1025,7 @@ can be accessed via the routine \texttt{Core::refptr_count}:
   int refptr_count(`a::TA ?`RC ptr)
     __attribute__((noconsume(1)));
 \end{verbatim} %$ <--- for syntax highlighting
-The constant NULL is allowed to have type \texttt{`a::A ?`RC}, and its
+The constant NULL is allowed to have type \verb+`a::A ?`RC+, and its
 reference count is always 0.  The \texttt{noconsume} attribute ensures that
 the pointer is not consumed by the call.  Like unique pointers, implicit
 aliasing is not allowed.  Aliases are created explicitly using the routine
@@ -1049,7 +1050,7 @@ GC will get it once it becomes unreachable.
 
 Just like unique pointers, reference-counted pointers can be stored in
 normal, aliasable datastructures, and accessed using swap (e.g. \texttt{x
-:=: y}).  Because NULL is a \verb+a::TA ?`RC+ pointer, we can always
+:=: y}).  Because NULL is a \verb+`a::TA ?`RC+ pointer, we can always
 cheaply construct a pointer to swap in.  Also, \texttt{alias} pattern
 variables can work to create temporary (non-counted) aliases of a
 reference-counted pointer.
@@ -1063,7 +1064,7 @@ unique header structures and reference-counted data structures.
 
 \subsection{Dynamic Regions}
 
-Dynamic regions combines reference-counted or unique pointers and lexical
+Dynamic regions combine reference-counted or unique pointers and lexical
 regions together to essentially create reference-counted or unique
 \emph{regions}; that is, the region is completely first class, and can be
 created or freed at conceptually any program point.  This is done by
@@ -1264,9 +1265,9 @@ program point that creates a region, as follows:
   then the region-name for the block is \texttt{`L}.
 \item If a block has no label, the compiler makes up a fresh
   region-name for the block.
-\item In region \texttt{r <`foo> s}, the region-name for the construct
+\item In \texttt{region r <`foo> $s$}, the region-name for the construct
   is \texttt{`foo}.
-\item In region \texttt{r s}, the region-name for the construct is
+\item In \texttt{region r $s$}, the region-name for the construct is
   \texttt{`r}.
 \item In region \texttt{h = open(k) s}, the region-name for the construct is
   \texttt{`r}, assuming \texttt{k} has type \texttt{region\_key\_t<`r,_>}

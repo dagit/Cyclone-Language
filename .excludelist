@@ -3,6 +3,7 @@
 .*\.o$
 .*\.output$
 /BUILDLIB\.OUT$
+/BUILDLIB\.LOG$
 /CVS$
 /Makefile\.inc$
 /NOTES$
@@ -23,6 +24,7 @@
 /build$
 /config/arch$
 /core$
+/config.log$
 /cyclone-.*\.tar\.gz$
 /doc$
 /doc/cyc_users_guide\.htm$
@@ -40,7 +42,7 @@
 /lib/netinet$
 /lib/sys$
 /makedist$
-/src/parse.output.old
+/src/parse.output
 /tests/benchmarks$
 /tests/boa-0\.94\.8\.3$
 /tests/compress$
@@ -50,5 +52,7 @@
 /tools/cycbison$
 /tools/cyclex/qdist$
 /tools/cycocamllex$
+/unupdate$
+/unupdate-backup$
 \.#
 ~

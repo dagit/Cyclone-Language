@@ -27,7 +27,7 @@ subdirectories are needed after installation, but the other ones
 contain Cyclone programs that are useful examples.)
 
 To get off the ground, you need /bin/sh, GNU make, and gcc.  If GNU
-make is not the default make on your system, if might be installed as
+make is not the default make on your system, it might be installed as
 "gmake" so just type gmake instead of make if things don't work.
 
 By default, binaries will be stored into /usr/local/bin, libraries
