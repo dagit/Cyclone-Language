@@ -1913,7 +1913,7 @@ yyvsp_offset=0;
 # 206
 yynewstate:
 # 208
-*((short*)_check_fat_subscript(yyss,sizeof(short),++ yyssp_offset))=(short)yystate;
+((short*)yyss.curr)[++ yyssp_offset]=(short)yystate;
 # 210
 if(yyssp_offset >= (yystacksize - 1)- 12){
 # 212
@@ -1969,7 +1969,7 @@ int _Tmp1=0;_npop_handler(0);return _Tmp1;}
 if(yychar!=0)
 yychar=-2;
 # 332
-({struct Cyc_Yystacktype _Tmp1=({struct Cyc_Yystacktype _Tmp2;_Tmp2.v=yylval,_Tmp2.l=yylloc;_Tmp2;});*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),++ yyvsp_offset))=_Tmp1;});
+({struct Cyc_Yystacktype _Tmp1=({struct Cyc_Yystacktype _Tmp2;_Tmp2.v=yylval,_Tmp2.l=yylloc;_Tmp2;});((struct Cyc_Yystacktype*)yyvs.curr)[++ yyvsp_offset]=_Tmp1;});
 # 338
 if(yyerrstatus!=0)-- yyerrstatus;
 # 340
@@ -4025,7 +4025,7 @@ goto _LL0;default:
 yyvsp_offset -=yylen;
 yyssp_offset -=yylen;
 # 389 "cycbison.simple"
-(*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),++ yyvsp_offset))).v=yyval;
+((struct Cyc_Yystacktype*)yyvs.curr)[++ yyvsp_offset].v=yyval;
 # 392
 if(yylen==0){
 struct Cyc_Yystacktype*p=(struct Cyc_Yystacktype*)_check_null(_untag_fat_ptr(_fat_ptr_plus(yyvs,sizeof(struct Cyc_Yystacktype),yyvsp_offset - 1),sizeof(struct Cyc_Yystacktype),2U));
@@ -4108,7 +4108,7 @@ yyerrdefault:
 # 505
  if(yyssp_offset==0){int _Tmp1=1;_npop_handler(0);return _Tmp1;}
 -- yyvsp_offset;
-yystate=(int)*((short*)_check_fat_subscript(yyss,sizeof(short),-- yyssp_offset));
+yystate=(int)((short*)yyss.curr)[-- yyssp_offset];
 # 521 "cycbison.simple"
 yyerrhandle:
  yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yypact,1073U,sizeof(short),yystate));
@@ -4129,7 +4129,7 @@ if(yyn==0)goto yyerrpop;}
 if(yyn==1072){
 int _Tmp1=0;_npop_handler(0);return _Tmp1;}
 # 546
-({struct Cyc_Yystacktype _Tmp1=({struct Cyc_Yystacktype _Tmp2;_Tmp2.v=yylval,_Tmp2.l=yylloc;_Tmp2;});*((struct Cyc_Yystacktype*)_check_fat_subscript(yyvs,sizeof(struct Cyc_Yystacktype),++ yyvsp_offset))=_Tmp1;});
+({struct Cyc_Yystacktype _Tmp1=({struct Cyc_Yystacktype _Tmp2;_Tmp2.v=yylval,_Tmp2.l=yylloc;_Tmp2;});((struct Cyc_Yystacktype*)yyvs.curr)[++ yyvsp_offset]=_Tmp1;});
 # 551
 goto yynewstate;}
 # 149 "cycbison.simple"
@@ -4152,7 +4152,7 @@ if(token==369)
 return Cyc_Lex_token_string;
 if(token==378)
 return Cyc_Absynpp_qvar2string(Cyc_Lex_token_qvar);{
-int z=token > 0 && token <= 381?(int)*((short*)_check_known_subscript_notnull(Cyc_yytranslate,382U,sizeof(short),token)): 321;
+int z=token > 0 && token <= 381?(int)Cyc_yytranslate[token]: 321;
 if((unsigned)z < 321U)
 return Cyc_yytname[z];
 return _tag_fat(0,0,0);}}

@@ -106,13 +106,20 @@ static node_t *term2node_opt(graph_t @g, term_t t);
 static bool set_distance(graph_t @g, term_t s, term_t t, int dist, bool is_signed);
 static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
 static bool add_eq(graph_t @g, term_t t1, term_t t2);
+static bool add_difference_const(graph_t @g, term_t t1, term_t t2, unsigned c);
 
 // check term to see if its type reveals its numelts is known and if so,
 // add the information to the graph.  similarly, check if term's type
 // is tag_t<valueof(e)> and if so, add term == e and if term is unsigned, 
-// then add term >= 0
+// then add term >= 0.  Finally, if term = t + c, then add edges
+// term -c-> t and t -(-c)-> term.  
 static int add_type_info(graph_t @g, term_t term) {
   switch (term) {
+  case &Binop(Absyn::Plus, t, &Uint(c),_):
+    // we have:    term = t + c
+    // add         term <= t+c && t+c <= term, both signed and unsigned.
+    if (!add_difference_const(g,term,t,c)) return false;
+    break;
   case &Unop(Absyn::Numelts, x, _):
     // add term s< MAXINT and term u< MAXINT and 0 u<= term
     if (!set_distance(g, term, zero(), MAXINT-1, true) ||
@@ -201,6 +208,8 @@ static int *lookup_dist(node_t @`H source, node_t @`H target, bool is_signed) {
 }
 
 // returns true iff t --0--> r and r --0--> t
+// or else          r --c--> zero and zero --(-c)--> r and
+//                  t --c--> zero and zero --(-c)--> t and
 static bool eq_nodes(node_t @`H r, node_t @`H t, bool is_signed) {
   let rt_dist = lookup_dist(r,t,is_signed);
   let tr_dist = lookup_dist(t,r,is_signed);
@@ -412,6 +421,22 @@ static graph_t *copy_graphs(graph_t *gopt) {
   return newg;
 }
 
+// when ok, the term t is equal to the value i in the graph g.
+static $(bool ok, unsigned i) find_eq_const(graph_t @g, node_t @`H n) {
+  let z = term2node(g,zero());
+  let n2z_s = lookup_dist(n,z,true);
+  if (n2z_s != NULL) {
+    let z2n_s = lookup_dist(z,n,true);
+    if (z2n_s != NULL && *n2z_s == -(*z2n_s)) return $(true,*n2z_s);
+  }
+  let n2z_u = lookup_dist(n,z,false);
+  if (n2z_u != NULL) {
+    let z2n_u = lookup_dist(z,n,false);
+    if (z2n_u != NULL && *n2z_u == -(*z2n_u)) return $(true,*n2z_u);
+  }
+  return $(false,0xbad);
+}
+
 // If we have two nodes with representatives of the form Prim(p,[t11,...,tn1])
 // and Prim(p,[t12,...,tn2]) and the sub-terms ti1 and ti2 map to equivalent
 // nodes, then we should equate these two terms.  We're relying on the fact
@@ -419,37 +444,75 @@ static graph_t *copy_graphs(graph_t *gopt) {
 // compound terms.
 static bool congruence_close_graph(graph_t @g) {
   for (let rs = g->rows; rs != NULL; rs = rs->next) {
-    for (let ts = rs->next; ts != NULL; ts = ts->next) {
-      switch $(rs->rep,ts->rep) {
-      case $(&Binop(p1,t11,t12,_),&Binop(p2,t21,t22,_)) && p1 == p2:
-        let n11 = term2node_opt(g,t11);
-        let n21 = term2node_opt(g,t21);
-        if (n11 == NULL || n21 == NULL) return false;
-        if (!equal_nodes(n11,n21)) break;
-        let n12 = term2node_opt(g,t12);
-        let n22 = term2node_opt(g,t22);
-        if (n12 == NULL || n22 == NULL) return false;
-        if (!equal_nodes(n12,n22)) break;
-        if (!add_eq(g,rs->rep,ts->rep)) return false;
-        break;
-      case $(&Unop(p1,t1,_),&Unop(p2,t2,_)) && p1 == p2:
-        let n1 = term2node_opt(g,t1);
-        let n2 = term2node_opt(g,t2);
-        if (n1 == NULL || n2 == NULL) return false;
-        if (!equal_nodes(n1,n2)) break;
-        if (!add_eq(g,rs->rep,ts->rep)) return false;
-        break;
-      case $(&Cast(tp1,t1),&Cast(tp2,t2)):
-        if (Tcutil::typecmp(tp1,tp2) == 0) {
-          let n1 = term2node_opt(g,t1);
-          let n2 = term2node_opt(g,t2);
-          if (n1 == NULL || n2 == NULL) return false;
-          if (!equal_nodes(n1,n2)) break;
-          if (!add_eq(g,rs->rep,ts->rep)) return false;
+    switch (rs->rep) {
+    case &Binop(p1,t11,t12,tp1):
+      let n11 = term2node_opt(g,t11);
+      let n12 = term2node_opt(g,t12);
+      if (n11 == NULL || n12 == NULL) return false;
+      // first see if t1 == c1 for some constant c1 
+      let $(ok1,c1) = find_eq_const(g,n11);
+      // if so, make t == c1 p t2
+      if (ok1 && !add_eq(g,rs->rep,binop(p1,uint(c1),t12,tp1))) return false;
+      // now do the same for t12
+      let $(ok2,c2) = find_eq_const(g,n12);
+      if (ok2 && !add_eq(g,rs->rep,binop(p1,t11,uint(c2),tp1))) return false;
+      // if their both constants, we can add t == c1 p c2
+      if (ok1 && ok2 && !add_eq(g,rs->rep,binop(p1,uint(c1),uint(c2),tp1))) 
+        return false;
+      // search for other binops that may be structurally equal
+      for (let ts = rs->next; ts != NULL; ts = ts->next) {
+        switch (ts->rep) {
+        case &Binop(p2,t21,t22,_) && p1 == p2:
+          let n12 = term2node_opt(g,t12);
+          let n22 = term2node_opt(g,t22);
+          if (n12 == NULL || n22 == NULL) return false;
+          if (equal_nodes(n12,n22) && !add_eq(g,rs->rep,ts->rep)) return false;
+          break;
+        default: break;
         }
-        break;
-      default: break;
       }
+      break;
+    case &Unop(p1,t1,tp1):
+      let n1 = term2node_opt(g,t1);
+      if (n1 == NULL) return false;
+      // first see if t1 == c1 for some constant c1 
+      let $(ok1,c1) = find_eq_const(g,n1);
+      // if so, make t == c1 p t2
+      if (ok1 && !add_eq(g,rs->rep,unop(p1,uint(c1),tp1))) return false;
+      // search for other unops that may be structurally equal
+      for (let ts = rs->next; ts != NULL; ts = ts->next) {
+        switch (ts->rep) {
+        case &Unop(p2,t2,_) && p1 == p2:
+          let n2 = term2node_opt(g,t2);
+          if (n2 == NULL) return false;
+          if (equal_nodes(n1,n2) && !add_eq(g,rs->rep,ts->rep)) return false;
+          break;
+        default: break;
+        }
+      }
+      break;
+    case &Cast(tp1,t1):
+      let n1 = term2node_opt(g,t1);
+      if (n1 == NULL) return false;
+      // first see if t1 == c1 for some constant c1 
+      let $(ok1,c1) = find_eq_const(g,n1);
+      // if so, make t == c1 p t2
+      if (ok1 && !add_eq(g,rs->rep,cast(tp1,uint(c1)))) return false;
+      // search for other casts that may be structurally equal
+      for (let ts = rs->next; ts != NULL; ts = ts->next) {
+        switch (ts->rep) {
+        case &Cast(tp2,t2):
+          if (Tcutil::typecmp(tp1,tp2) == 0) {
+            let n2 = term2node_opt(g,t2);
+            if (n2 == NULL) return false;
+            if (equal_nodes(n1,n2) && !add_eq(g,rs->rep,ts->rep)) return false;
+          } 
+          break;
+        default: break;
+        }
+      }
+      break;
+    default: break;
     }
   }
   return true;
@@ -470,62 +533,6 @@ static graph_t *congruence_close_graphs(graph_t *`H gs) {
     }
   }
   return gs;
-}
-
-// used in break_term and elsewhere to try to evaluate a term to a constant
-static $(unsigned int,bool) eval_term(term_t t) {
-  switch (t) {
-  case &Uint(i): return $(i, true);
-  case &Const(e): return Evexp::eval_const_uint_exp(e);
-  default: return $(0,false);
-  }
-}
-
-// break up a compound term that involves addition/subtraction of a constant
-static $(term_t, int) break_term(graph_t @g, bool is_signed, term_t t){
-  int c = 0;
-  unsigned cu = 0u;
-  term_t res = t;
-  switch (t) {
-  case &Binop(Absyn::Plus,t1,&Uint(c2),_):
-    res = t1;
-    c = (int)c2;
-    cu = (unsigned int)c2;
-    break;
-  default:
-    return $(t, 0);
-  }
-  //now we have t = res + c;
-  //check if value_s(res) + value_s(c) overflow or underflow
-  if (is_signed){
-    if (c == 0) return $(res, 0); //no over/underflow
-    else if (c > 0){
-      // only overflow could possibily happen
-      let dist = lookup_dist(term2node(g, res), term2node(g,zero()), true);
-      if (dist == NULL || *dist > MAXINT - c){
-	return $(t, 0);
-      }else {// dist->length <= MAXINT-c, so value_s(t) + value_s(c) in bound
-	return $(res, c);
-      }
-    } else {//c < 0 
-      let dist = lookup_dist(term2node(g,zero()), term2node(g,res), true);
-      if (dist == NULL || *dist > c - MININT){
-	return $(t, 0);
-      }else {
-	//dist->length <= c - MININT
-	// 0-v(res) <= dist->length  <= c - MININT
-	// then v(res) + c >= MININT, no underflow here
-	return $(res, c);
-      }
-    }
-  } else {//is unsigned
-    let dist = lookup_dist(term2node(g, res), term2node(g,zero()), false);
-    if (dist == NULL) return $(t,0);
-    if (*dist <=0) return $(res, cu);
-    if (*dist > 0 && (unsigned)(*dist) <= MAXUINT - cu)
-      return $(res, cu);
-  }
-  return $(t, 0);
 }
 
 // convert a primitive assertion to a constraint and add it to the graph.
@@ -628,69 +635,70 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
   }
   // nothing special about the terms -- have to add them as standard
   // sort of constraints.
-  // given t1 p t2, we want to find out if 
-  // v(t1) = v(t1')+c1, v(t2)=v(t2')+c2
   switch (p) {
   case ULt:
     // add t1 - t2 U<= -1
-    let $(tt1, c1) = break_term(g, false, t1);
-    let $(tt2, c2) = break_term(g, false, t2);
-    let $(of, dist) = is_unsigned_overflow((unsigned)c2, MINUS, (unsigned)c1);
-    if (!of) {
-      let $(of, dist) = is_unsigned_overflow((unsigned)dist, MINUS, 1u);
-      if (!of){
-	if (!set_distance(g, tt1, tt2, dist, false))
-	  return false;
-      }
-    }
     return set_distance(g,t1,t2,-1,false);
   case ULte:
     // add t1 - t2 U<= 0
-    let $(tt1, c1) = break_term(g, false, t1);
-    let $(tt2, c2) = break_term(g, false, t2);
-    let $(of, dist) = is_unsigned_overflow((unsigned)c2, MINUS, (unsigned)c1);
-    if (!of){
-      //      fprintf(stderr, "break terms into %s - %s <= %d\n",
-      //	      term2string(tt1), term2string(tt2), dist);
-      if (!set_distance(g, tt1, tt2, dist, false))
-	return false;
-    }
     return set_distance(g,t1,t2,0,false);
   case SLt:
-    let $(tt1, c1) = break_term(g, true, t1);
-    let $(tt2, c2) = break_term(g, true, t2);
-    let $(of, dist) = is_signed_overflow((int)c2, MINUS, (int)c1);
-    if (!of) {
-      let $(of, dist) = is_signed_overflow((int)dist, MINUS, 1);
-      if (!of){
-	if (!set_distance(g, tt1, tt2, dist, true))
-	  return false;
-      }
-    }
     return set_distance(g,t1,t2,-1,true);
   case SLte: 
     // add t1 - t2 S<= 0
-    let $(tt1, c1) = break_term(g, true,t1);
-    let $(tt2, c2) = break_term(g, true,t2);
-    let $(of, dist) = is_signed_overflow(c2, MINUS, c1);
-    if (!of){
-      if(!set_distance(g, tt1, tt2, dist, true))
-	return false;
-    }
     return set_distance(g,t1,t2,0,true);
   default: Tcutil::impos("Vcgen:found bad primop in add_constraint");
   }
 }
 
+// we have t1 - t2 == c:  we can safely add
+//     t1 ---c----> t2  to the signed edges.
+// we can also add
+//     t2 --(-c)--> t1  to the signed edges when c != MININT
+// we can also add
+//     t1 ---c----> t2  to the unsigned edges when c < MAXINT
+// we can also add
+//     t2 --(-c)--> t1  to the unsigned edges when c < MAXINT
+static bool add_difference_const(graph_t @g, term_t t1, term_t t2, unsigned c){
+  if (!set_distance(g, t1, t2, (int)c, true)) return false;
+  if (c != (unsigned)MININT && !set_distance(g, t2, t1, -((int)c), true))
+    return false;
+  if (c < (unsigned)MAXINT && !set_distance(g, t1, t2, (int)c, false))
+    return false;
+  if (c < (unsigned)MAXINT && !set_distance(g, t2, t1, -((int)c), false))
+    return false;
+  return true;
+}
+
+// try to set t1 == t2
 static bool add_eq(graph_t @g, term_t t1, term_t t2) {
-  let n1 = term2node_opt(g,t1);
-  let n2 = term2node_opt(g,t2);
-  if (n1 == NULL || n2 == NULL) return false;
-  return 
-    add_constraint(g, t1, ULte, t2) &&
-    add_constraint(g, t2, ULte, t1) &&
-    add_constraint(g, t1, SLte, t2) &&
-    add_constraint(g, t2, SLte, t1);
+  if (t1 == t2) return true;
+  switch $(t1,t2) {
+  case $(&Uint(c1),&Uint(c2)) && c1 != c2: return false;
+  case $(&Binop(Absyn::Plus,t,&Uint(c1),_),&Uint(c2)): fallthru(c2,t,c1);
+  case $(&Uint(c1),&Binop(Absyn::Plus,t,&Uint(c2),_)): 
+    // we have c1 = t+c2   -- same as zero+c1 = t+c2
+    fallthru(zero(),c1,t,c2);
+  case $(&Binop(Absyn::Plus,ta,&Uint(c1),_),&Binop(Absyn::Plus,tb,&Uint(c2),_)):
+    // we have ta+c1 == tb+c2  which simplifies to
+    //         ta - tb = c2-c1
+    // we have ta+c1 == tb+c2  -- simplify to ta == tb+c  where c == (c2-c1)
+    return add_difference_const(g, ta, tb, c2-c1);
+  case $(&Binop(Absyn::Minus,ta,tb,_),&Uint(c)): fallthru(c,ta,tb);
+  case $(&Uint(c),&Binop(Absyn::Minus,ta,tb,_)):
+    // we have ta - tb == c
+    return add_difference_const(g, ta, tb, c);
+  case $(t,&Uint(c)): fallthru(c,t);
+  case $(&Uint(c),t): 
+    // we have t == c which simplifies to t - zero == c
+    return add_difference_const(g, t, zero(), c);
+  default: 
+    return 
+      add_constraint(g, t1, ULte, t2) &&
+      add_constraint(g, t2, ULte, t1) &&
+      add_constraint(g, t1, SLte, t2) &&
+      add_constraint(g, t2, SLte, t1);
+  }
 }
 
 datatype exn { TooLarge };
@@ -796,12 +804,10 @@ static bool consistent(assn_t a) {
     gs = congruence_close_graphs(gs);
     // if we get back an empty list of disjuncts (false) then
     // the graph is not consistent.
-    /*
-    if (gs != NULL) {
-      fprintf(stderr,"resulting graphs are:\n");
-      print_graphs(gs);
-    }
-    */
+    //if (gs != NULL) {
+    //  fprintf(stderr,"resulting graphs are:\n");
+    //  print_graphs(gs);
+    //}
     return (gs != NULL);
   } catch {
     // if the graph has too many paths in it, we'll end up here.

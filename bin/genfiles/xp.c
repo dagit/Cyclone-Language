@@ -354,7 +354,7 @@ int i=(int)sizeof(u);
 if(i > n)
 i=n;
 while(-- i >= 0){
-u=256U * u + (unsigned long)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i));}
+u=256U * u + (unsigned long)((unsigned char*)x.curr)[i];}
 return u;}
 # 35
 int Cyc_XP_length(int n,struct _fat_ptr x){
