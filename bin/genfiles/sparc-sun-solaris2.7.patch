@@ -1,6 +1,373 @@
+diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c sparc-sun-solaris2.7/lib/arg.c
+*** i686-unknown-linux/lib/arg.c	Tue Dec 11 17:12:25 2001
+--- sparc-sun-solaris2.7/lib/arg.c	Tue Dec 11 17:52:54 2001
+***************
+*** 340,347 ****
+  0;}{ unsigned int _temp2= Cyc_Std_strlen( s); _temp2 <=  _get_arr_size( s,
+  sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct
+  _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("len <= s.size",
+! sizeof( unsigned char), 14u), _tag_arr("/home/trevor/cyclone/lib/arg.cyc",
+! sizeof( unsigned char), 33u), 94); if( howmuch >  _temp2){ Cyc_Buffer_add_string(
+  b, s); return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);}{ int i; for( i=
+  howmuch -  1; i >=  0? ! isspace(( int)(( const unsigned char*) s.curr)[ i]): 0;
+  i --){;} if( i <  0){ for( i= howmuch? howmuch -  1: 0;( i <  _temp2?( int)((
+--- 340,347 ----
+  0;}{ unsigned int _temp2= Cyc_Std_strlen( s); _temp2 <=  _get_arr_size( s,
+  sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct
+  _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("len <= s.size",
+! sizeof( unsigned char), 14u), _tag_arr("/home/jcheney/src/cyclone/lib/arg.cyc",
+! sizeof( unsigned char), 38u), 94); if( howmuch >  _temp2){ Cyc_Buffer_add_string(
+  b, s); return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);}{ int i; for( i=
+  howmuch -  1; i >=  0? ! isspace(( int)(( const unsigned char*) s.curr)[ i]): 0;
+  i --){;} if( i <  0){ for( i= howmuch? howmuch -  1: 0;( i <  _temp2?( int)((
+diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c sparc-sun-solaris2.7/lib/bitvec.c
+*** i686-unknown-linux/lib/bitvec.c	Tue Dec 11 17:12:25 2001
+--- sparc-sun-solaris2.7/lib/bitvec.c	Tue Dec 11 17:52:54 2001
+***************
+*** 317,346 ****
+  src1, sizeof( int))? len <=  _get_arr_size( src2, sizeof( int)): 0)? 0:(( int(*)(
+  struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("len <= src1.size && len <= src2.size", sizeof( unsigned char), 37u),
+! _tag_arr("/home/trevor/cyclone/lib/bitvec.cyc", sizeof( unsigned char), 36u), 71);{
+! int i= 0; for( 0; i <  len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[ i]
+! | (( int*) src2.curr)[ i];}}} void Cyc_Bitvec_intersect_two( struct _tagged_arr
+! dest, struct _tagged_arr src1, struct _tagged_arr src2){ unsigned int len=
+! _get_arr_size( dest, sizeof( int));( len <=  _get_arr_size( src1, sizeof( int))?
+! len <=  _get_arr_size( src2, sizeof( int)): 0)? 0:(( int(*)( struct _tagged_arr
+! assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("len <= src1.size && len <= src2.size", sizeof( unsigned char), 37u),
+! _tag_arr("/home/trevor/cyclone/lib/bitvec.cyc", sizeof( unsigned char), 36u), 78);{
+! int i= 0; for( 0; i <  len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[ i]
+! & (( int*) src2.curr)[ i];}}} void Cyc_Bitvec_diff_two( struct _tagged_arr dest,
+! struct _tagged_arr src1, struct _tagged_arr src2){ unsigned int len=
+  _get_arr_size( dest, sizeof( int));( len <=  _get_arr_size( src1, sizeof( int))?
+  len <=  _get_arr_size( src2, sizeof( int)): 0)? 0:(( int(*)( struct _tagged_arr
+  assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("len <= src1.size && len <= src2.size", sizeof( unsigned char), 37u),
+! _tag_arr("/home/trevor/cyclone/lib/bitvec.cyc", sizeof( unsigned char), 36u), 85);{
+! int i= 0; for( 0; i <  len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[ i]
+! &  ~(( int*) src2.curr)[ i];}}} int Cyc_Bitvec_compare_two( struct _tagged_arr
+! src1, struct _tagged_arr src2){ unsigned int len= _get_arr_size( src1, sizeof(
+! int)); len <=  _get_arr_size( src2, sizeof( int))? 0:(( int(*)( struct
+! _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+! _tag_arr("len <= src2.size", sizeof( unsigned char), 17u), _tag_arr("/home/trevor/cyclone/lib/bitvec.cyc",
+! sizeof( unsigned char), 36u), 92);{ int i= 0; for( 0; i <  len; ++ i){ if((( int*)
+  src1.curr)[ i] != (( int*) src2.curr)[ i]){ return 0;}}} return 1;} struct
+  _tagged_arr Cyc_Bitvec_new_empty( int sz){ struct _tagged_arr ans=({
+  unsigned int _temp0=( unsigned int)( sz /  32 +  1); int* _temp1=( int*)
+--- 317,346 ----
+  src1, sizeof( int))? len <=  _get_arr_size( src2, sizeof( int)): 0)? 0:(( int(*)(
+  struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("len <= src1.size && len <= src2.size", sizeof( unsigned char), 37u),
+! _tag_arr("/home/jcheney/src/cyclone/lib/bitvec.cyc", sizeof( unsigned char), 41u),
+! 71);{ int i= 0; for( 0; i <  len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[
+! i] | (( int*) src2.curr)[ i];}}} void Cyc_Bitvec_intersect_two( struct
+! _tagged_arr dest, struct _tagged_arr src1, struct _tagged_arr src2){
+! unsigned int len= _get_arr_size( dest, sizeof( int));( len <=  _get_arr_size(
+! src1, sizeof( int))? len <=  _get_arr_size( src2, sizeof( int)): 0)? 0:(( int(*)(
+! struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("len <= src1.size && len <= src2.size", sizeof( unsigned char), 37u),
+! _tag_arr("/home/jcheney/src/cyclone/lib/bitvec.cyc", sizeof( unsigned char), 41u),
+! 78);{ int i= 0; for( 0; i <  len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[
+! i] & (( int*) src2.curr)[ i];}}} void Cyc_Bitvec_diff_two( struct _tagged_arr
+! dest, struct _tagged_arr src1, struct _tagged_arr src2){ unsigned int len=
+  _get_arr_size( dest, sizeof( int));( len <=  _get_arr_size( src1, sizeof( int))?
+  len <=  _get_arr_size( src2, sizeof( int)): 0)? 0:(( int(*)( struct _tagged_arr
+  assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("len <= src1.size && len <= src2.size", sizeof( unsigned char), 37u),
+! _tag_arr("/home/jcheney/src/cyclone/lib/bitvec.cyc", sizeof( unsigned char), 41u),
+! 85);{ int i= 0; for( 0; i <  len; ++ i){(( int*) dest.curr)[ i]=(( int*) src1.curr)[
+! i] &  ~(( int*) src2.curr)[ i];}}} int Cyc_Bitvec_compare_two( struct
+! _tagged_arr src1, struct _tagged_arr src2){ unsigned int len= _get_arr_size(
+! src1, sizeof( int)); len <=  _get_arr_size( src2, sizeof( int))? 0:(( int(*)(
+! struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+! _tag_arr("len <= src2.size", sizeof( unsigned char), 17u), _tag_arr("/home/jcheney/src/cyclone/lib/bitvec.cyc",
+! sizeof( unsigned char), 41u), 92);{ int i= 0; for( 0; i <  len; ++ i){ if((( int*)
+  src1.curr)[ i] != (( int*) src2.curr)[ i]){ return 0;}}} return 1;} struct
+  _tagged_arr Cyc_Bitvec_new_empty( int sz){ struct _tagged_arr ans=({
+  unsigned int _temp0=( unsigned int)( sz /  32 +  1); int* _temp1=( int*)
+***************
+*** 377,386 ****
+  bvec, int sz){ int words= sz >>  5; words <  _get_arr_size( bvec, sizeof( int))?
+  0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int
+  line)) Cyc_Std___assert_fail)( _tag_arr("words < bvec.size", sizeof(
+! unsigned char), 18u), _tag_arr("/home/trevor/cyclone/lib/bitvec.cyc", sizeof(
+! unsigned char), 36u), 149);{ int i= 0; for( 0; i <  words; i ++){ if((( int*)
+! bvec.curr)[ i] !=  -1){ return 0;}}}{ int i= words *  32; for( 0; i <  sz; i ++){
+! if( ! Cyc_Bitvec_get( bvec, i)){ return 0;}}} return 1;} void Cyc_Bitvec_print_bvec(
+  struct _tagged_arr bvec){{ int i= 0; for( 0; i <  32 *  _get_arr_size( bvec,
+  sizeof( int)); ++ i){({ struct Cyc_Std_Int_pa_struct _temp15; _temp15.tag= Cyc_Std_Int_pa;
+  _temp15.f1=( int)(( unsigned int)( Cyc_Bitvec_get( bvec, i)? 1: 0));{ void*
+--- 377,386 ----
+  bvec, int sz){ int words= sz >>  5; words <  _get_arr_size( bvec, sizeof( int))?
+  0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int
+  line)) Cyc_Std___assert_fail)( _tag_arr("words < bvec.size", sizeof(
+! unsigned char), 18u), _tag_arr("/home/jcheney/src/cyclone/lib/bitvec.cyc",
+! sizeof( unsigned char), 41u), 149);{ int i= 0; for( 0; i <  words; i ++){ if(((
+! int*) bvec.curr)[ i] !=  -1){ return 0;}}}{ int i= words *  32; for( 0; i <  sz;
+! i ++){ if( ! Cyc_Bitvec_get( bvec, i)){ return 0;}}} return 1;} void Cyc_Bitvec_print_bvec(
+  struct _tagged_arr bvec){{ int i= 0; for( 0; i <  32 *  _get_arr_size( bvec,
+  sizeof( int)); ++ i){({ struct Cyc_Std_Int_pa_struct _temp15; _temp15.tag= Cyc_Std_Int_pa;
+  _temp15.f1=( int)(( unsigned int)( Cyc_Bitvec_get( bvec, i)? 1: 0));{ void*
+diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c sparc-sun-solaris2.7/lib/cstubs.c
+*** i686-unknown-linux/lib/cstubs.c	Tue Dec 11 17:29:35 2001
+--- sparc-sun-solaris2.7/lib/cstubs.c	Wed Dec 31 19:00:00 1969
+***************
+*** 1,250 ****
+- /* This file is part of the Cyclone Library.
+-    Copyright (C) 2001 Greg Morrisett, AT&T
+- 
+-    This library is free software; you can redistribute it and/or it
+-    under the terms of the GNU Lesser General Public License as
+-    published by the Free Software Foundation; either version 2.1 of
+-    the License, or (at your option) any later version.
+- 
+-    This library is distributed in the hope that it will be useful, but
+-    WITHOUT ANY WARRANTY; without even the implied warranty of
+-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+-    Lesser General Public License for more details.
+- 
+-    You should have received a copy of the GNU Lesser General Public
+-    License along with this library; see the file COPYING.LIB.  If not,
+-    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+-    330, Boston, MA 02111-1307 USA. */
+- 
+- #include <stdio.h>
+- #include <string.h> // for memcpy
+- #include <stdarg.h>
+- #include <signal.h>
+- 
+- // The C include file precore_c.h is produced (semi) automatically
+- // from the Cyclone include file precore.h.  Note, it now includes
+- // the contents of cyc_include.h
+- 
+- /* RUNTIME_CYC defined to prevent including parts of precore_c.h 
+-    that might cause problems, particularly relating to region profiling */
+- #define RUNTIME_CYC
+- #include "precore_c.h"
+- 
+- extern void exit(int);
+- 
+- struct Cyc_Std___sFILE {
+-   FILE *file; // Mirror any changes in stdio.cyc
+- } Cyc_Std_stdin_v, Cyc_Std_stdout_v, Cyc_Std_stderr_v,
+-   *Cyc_Std_stdin = &Cyc_Std_stdin_v,
+-   *Cyc_Std_stdout = &Cyc_Std_stdout_v,
+-   *Cyc_Std_stderr = &Cyc_Std_stderr_v;
+- 
+- FILE *_sfile_to_file(struct Cyc_Std___sFILE *sf) {
+-   if(!sf) {
+-     fprintf(stderr,"Attempt to access null file descriptor.\n");
+-     exit(255);
+-   }
+-   if(!sf->file)
+-     throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
+-   return sf->file;
+- }
+- FILE *sfile_to_file(struct Cyc_Std___sFILE *sf) {
+-   if(!sf) {
+-     fprintf(stderr,"Attempt to access null file descriptor.\n");
+-     exit(255);
+-   }
+-   if(!sf->file)
+-     throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
+-   return sf->file;
+- }
+- 
+- int Cyc_Std_file_string_read(struct Cyc_Std___sFILE *sf, 
+-                                struct _tagged_arr dest,
+-                                int dest_offset, int max_count) {
+-   unsigned char *new_curr = dest.curr + dest_offset;
+-   size_t sz = dest.last_plus_one - new_curr;
+-   FILE *fd = _sfile_to_file(sf);
+-   if (new_curr < dest.base || new_curr >= dest.last_plus_one)
+-     throw(Cyc_Null_Exception);
+-   if(dest_offset + max_count > sz) {
+-     fprintf(stderr,"Attempt to read off end of string.\n");
+-     exit(255);
+-   }
+-   return fread(new_curr, 1, max_count, fd);
+- }
+- int Cyc_Std_file_string_write(struct Cyc_Std___sFILE *sf, 
+-                                 struct _tagged_arr src,
+-                                 int src_offset, int max_count) {
+-   size_t sz = src.last_plus_one - src.curr;
+-   unsigned char *new_curr = src.curr + src_offset;
+-   FILE *fd = _sfile_to_file(sf);
+-   if (new_curr < src.base || new_curr >= src.last_plus_one)
+-     throw(Cyc_Null_Exception);
+-   if(src_offset + max_count > sz) {
+-     fprintf(stderr,"Attempt to write off end of string.\n");
+-     exit(255);
+-   } 
+-   return fwrite(new_curr, 1, max_count, fd);
+- }
+- 
+- ///////////////////////////////////////////////
+- // Sockets
+- 
+- // This really doesn't belong here; we should change the makefiles so
+- // C code can live with the libraries and be linked only as necessary.
+- 
+- // This function takes a const xtunion Socket::sockaddr and returns a
+- // pointer to the body of the union.  We'd return the size of the body
+- // if we could, but that information isn't available at runtime.
+- 
+- #include <sys/types.h>
+- /*
+- #include <sys/socket.h>
+- struct sa_xtunion {
+-   unsigned char *tag;
+-   struct sockaddr sa;
+- };
+- struct sockaddr *sockaddr_to_Csockaddr(struct sa_xtunion *xtunionaddr) {
+-   return &xtunionaddr->sa;
+- }
+- extern unsigned char *Cyc_Std_sockaddr_in;
+- 
+- // We handle Unix domain sockets properly here: the sa field is an
+- // argument, since it could be bigger (or smaller) than 16
+- struct sa_xtunion *Csockaddr_to_sockaddr(struct sockaddr *addr, int len) {
+-   // I hope structure alignment doesn't cause any problem here
+-   struct sa_xtunion *result = GC_malloc_atomic(sizeof(unsigned char*)+len);
+-   if (result == NULL) 
+-     _throw_badalloc();
+- 
+-   memcpy(&result->sa, addr, len);
+-   switch (addr->sa_family) {
+-   case AF_INET: result->tag = Cyc_Std_sockaddr_in; break;
+-   default:
+-     fprintf(stderr, "internal error: Csockaddr_to_sockaddr with unsupported socket type\n");
+-     exit(1);
+-   }
+-   return result;
+- }
+- */
+- 
+- /* For sockets.  This should be split out to a separate file. */
+- #include <sys/socket.h>
+- #include <netinet/in.h>
+- 
+- #ifdef __APPLE__
+- typedef int socklen_t;
+- #include <sys/time.h> // where struct timeval is defined
+- #endif
+- 
+- int accept_in(int a, const struct sockaddr_in *b, socklen_t *c) {
+-   return accept(a,(struct sockaddr *)b,c);
+- }
+- 
+- int bind_in(int a, const struct sockaddr_in *b, socklen_t c) {
+-   return bind(a,(struct sockaddr *)b,c);
+- }
+- 
+- int connect_in(int a, const struct sockaddr_in *b, socklen_t c) {
+-   return connect(a,(struct sockaddr *)b,c);
+- }
+- 
+- int getpeername_in(int a, const struct sockaddr_in *b, socklen_t *c) {
+-   return getpeername(a,(struct sockaddr *)b,c);
+- }
+- 
+- int getsockname_in(int a, const struct sockaddr_in *b, socklen_t *c) {
+-   return getsockname(a,(struct sockaddr *)b,c);
+- }
+- 
+- ssize_t recvfrom_in(int a, struct _tagged_arr b, size_t c, int d,
+-                     const struct sockaddr_in *e, socklen_t *f) {
+-   char *p = _check_unknown_subscript(b,1,0);
+-   unsigned n = _get_arr_size(b,1);  
+-   if (n<c) _throw_arraybounds();
+-   return recvfrom(a,p,c,d,(struct sockaddr *)e,f);
+- }
+- 
+- ssize_t sendto_in(int a, struct _tagged_arr b, size_t c, int d,
+-                   const struct sockaddr_in *e, socklen_t f) {
+-   char *p = _check_unknown_subscript(b,1,0);
+-   unsigned n = _get_arr_size(b,1);  
+-   if (n<c) _throw_arraybounds();
+-   return sendto(a,p,c,d,(struct sockaddr *)e,f);
+- }
+- 
+- ssize_t send_wrapped(int a, struct _tagged_arr b, size_t c, int d) {
+-   char *p = _check_unknown_subscript(b,1,0);
+-   unsigned n = _get_arr_size(b,1);  
+-   if (n<c) _throw_arraybounds();
+-   return send(a,p,c,d);
+- }
+- 
+- ssize_t recv_wrapped(int a, struct _tagged_arr b, size_t c, int d) {
+-   char *p = _check_unknown_subscript(b,1,0);
+-   unsigned n = _get_arr_size(b,1);  
+-   if (n<c) _throw_arraybounds();
+-   return recv(a,p,c,d);
+- }
+- 
+- int getsockopt_int(int a, int b, int c, int *d, socklen_t *e) {
+-   return getsockopt(a,b,c,d,e);
+- }
+- 
+- int setsockopt_int(int a, int b, int c, const int *d, socklen_t e) {
+-   return setsockopt(a,b,c,d,e);
+- }
+- 
+- int getsockopt_timeval(int a, int b, int c, struct timeval *d, socklen_t *e) {
+-   return getsockopt(a,b,c,d,e);
+- }
+- 
+- int setsockopt_timeval(int a, int b, int c, const struct timeval *d, socklen_t e) {
+-   return setsockopt(a,b,c,d,e);
+- }
+- 
+- ///////////////////////////////////////////////
+- // File locking
+- 
+- // Goes with fcntl.h
+- 
+- int fcntl_with_arg(int fd, int cmd, long arg) {
+-   return fcntl(fd, cmd, arg);
+- }
+- // We call lock a void* so we don't have to #include anything else
+- int fcntl_with_lock(int fd, int cmd, void *lock) {
+-   return fcntl(fd, cmd, lock);
+- }
+- 
+- int open_with_mode(const Cstring s, int flags, mode_t m) {
+-   return open(s,flags,m);
+- }
+- 
+- int open_without_mode(const Cstring s, int flags) {
+-   /* Use 0 as the mode argument, in case flags contains O_CREAT.  In
+-      that case the file will be created with 0 permissions; if we
+-      omitted the 0 it would be created with random permissions. */
+-   return open(s,flags,0);
+- }
+- 
+- ///////////////////////////////////////////////
+- // Signals (goes with signal.cyc)
+- 
+- extern void Cyc_Std__SIG_DFL(int);
+- extern void Cyc_Std__SIG_IGN(int);
+- extern void Cyc_Std__SIG_ERR(int);
+- typedef void (*signal_t)(int);
+- extern signal_t signal(int, signal_t);
+- 
+- signal_t signal_func(int sig, signal_t p) {
+-   if (p == Cyc_Std__SIG_DFL) p = ((void(*)(int)) 0);
+-   else if (p == Cyc_Std__SIG_IGN) p = ((void(*)(int)) 1);
+-   else if (p == Cyc_Std__SIG_ERR) p = ((void(*)(int))-1);
+- 
+-   p = signal(sig, p);
+- 
+-   if (p == (void(*)(int)) 0) p = Cyc_Std__SIG_DFL;
+-   else if (p == (void(*)(int)) 1) p = Cyc_Std__SIG_IGN;
+-   else if (p == (void(*)(int))-1) p = Cyc_Std__SIG_ERR;
+-   return p;
+- }
+--- 0 ----
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Tue Dec 11 11:43:15 2001
---- sparc-sun-solaris2.7/lib/execinfo.c	Tue Dec 11 16:24:37 2001
+*** i686-unknown-linux/lib/execinfo.c	Tue Dec 11 17:07:29 2001
+--- sparc-sun-solaris2.7/lib/execinfo.c	Tue Dec 11 17:52:55 2001
 ***************
 *** 265,382 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -167,7 +534,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c sparc-sun-solaris2.7/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/getopt.c	Tue Dec 11 16:24:37 2001
+--- sparc-sun-solaris2.7/lib/getopt.c	Tue Dec 11 17:52:55 2001
 ***************
 *** 297,309 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -195,7 +562,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c sparc-sun-solaris2.7/l
   _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind, int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c sparc-sun-solaris2.7/lib/in.c
 *** i686-unknown-linux/lib/in.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/in.c	Tue Dec 11 16:24:37 2001
+--- sparc-sun-solaris2.7/lib/in.c	Tue Dec 11 17:52:55 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -225,7 +592,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c sparc-sun-solaris2.7/lib/i
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c sparc-sun-solaris2.7/lib/inet.c
 *** i686-unknown-linux/lib/inet.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/inet.c	Tue Dec 11 16:24:37 2001
+--- sparc-sun-solaris2.7/lib/inet.c	Tue Dec 11 17:52:55 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -254,8 +621,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c sparc-sun-solaris2.7/lib
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c sparc-sun-solaris2.7/lib/marshal.c
-*** i686-unknown-linux/lib/marshal.c	Tue Dec 11 11:43:16 2001
---- sparc-sun-solaris2.7/lib/marshal.c	Tue Dec 11 16:24:37 2001
+*** i686-unknown-linux/lib/marshal.c	Tue Dec 11 17:07:29 2001
+--- sparc-sun-solaris2.7/lib/marshal.c	Tue Dec 11 17:52:55 2001
 ***************
 *** 539,547 ****
   _cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp166[ 0]=({ struct Cyc_Core_Failure_struct
@@ -279,7 +646,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c sparc-sun-solaris2.7/
   _LL174: if(*(( void**) _temp172) ==  Cyc_Core_Failure){ _LL179: _temp178=((
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c sparc-sun-solaris2.7/lib/netdb.c
 *** i686-unknown-linux/lib/netdb.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/netdb.c	Tue Dec 11 16:24:37 2001
+--- sparc-sun-solaris2.7/lib/netdb.c	Tue Dec 11 17:52:55 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -307,9 +674,252 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c sparc-sun-solaris2.7/li
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
+diff -rbBcN --exclude=CVS i686-unknown-linux/lib/runtime_cyc.c sparc-sun-solaris2.7/lib/runtime_cyc.c
+*** i686-unknown-linux/lib/runtime_cyc.c	Tue Dec 11 17:29:35 2001
+--- sparc-sun-solaris2.7/lib/runtime_cyc.c	Tue Dec 11 17:52:55 2001
+***************
+*** 279,284 ****
+--- 279,501 ----
+    return str;
+  }
+  
++ struct Cyc_Std___sFILE {
++   FILE *file; // Mirror any changes in stdio.cyc
++ } Cyc_Std_stdin_v, Cyc_Std_stdout_v, Cyc_Std_stderr_v,
++   *Cyc_Std_stdin = &Cyc_Std_stdin_v,
++   *Cyc_Std_stdout = &Cyc_Std_stdout_v,
++   *Cyc_Std_stderr = &Cyc_Std_stderr_v;
++ 
++ FILE *_sfile_to_file(struct Cyc_Std___sFILE *sf) {
++   if(!sf) {
++     fprintf(stderr,"Attempt to access null file descriptor.\n");
++     exit(255);
++   }
++   if(!sf->file)
++     throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
++   return sf->file;
++ }
++ FILE *sfile_to_file(struct Cyc_Std___sFILE *sf) {
++   if(!sf) {
++     fprintf(stderr,"Attempt to access null file descriptor.\n");
++     exit(255);
++   }
++   if(!sf->file)
++     throw(Cyc_Null_Exception); // FIX:  should be more descriptive?
++   return sf->file;
++ }
++ 
++ int Cyc_Std_file_string_read(struct Cyc_Std___sFILE *sf, 
++                                struct _tagged_arr dest,
++                                int dest_offset, int max_count) {
++   unsigned char *new_curr = dest.curr + dest_offset;
++   size_t sz = dest.last_plus_one - new_curr;
++   FILE *fd = _sfile_to_file(sf);
++   if (new_curr < dest.base || new_curr >= dest.last_plus_one)
++     throw(Cyc_Null_Exception);
++   if(dest_offset + max_count > sz) {
++     fprintf(stderr,"Attempt to read off end of string.\n");
++     exit(255);
++   }
++   return fread(new_curr, 1, max_count, fd);
++ }
++ int Cyc_Std_file_string_write(struct Cyc_Std___sFILE *sf, 
++                                 struct _tagged_arr src,
++                                 int src_offset, int max_count) {
++   size_t sz = src.last_plus_one - src.curr;
++   unsigned char *new_curr = src.curr + src_offset;
++   FILE *fd = _sfile_to_file(sf);
++   if (new_curr < src.base || new_curr >= src.last_plus_one)
++     throw(Cyc_Null_Exception);
++   if(src_offset + max_count > sz) {
++     fprintf(stderr,"Attempt to write off end of string.\n");
++     exit(255);
++   } 
++   return fwrite(new_curr, 1, max_count, fd);
++ }
++ 
++ ///////////////////////////////////////////////
++ // Sockets
++ 
++ // This really doesn't belong here; we should change the makefiles so
++ // C code can live with the libraries and be linked only as necessary.
++ 
++ // This function takes a const xtunion Socket::sockaddr and returns a
++ // pointer to the body of the union.  We'd return the size of the body
++ // if we could, but that information isn't available at runtime.
++ 
++ #include <sys/types.h>
++ /*
++ #include <sys/socket.h>
++ struct sa_xtunion {
++   unsigned char *tag;
++   struct sockaddr sa;
++ };
++ struct sockaddr *sockaddr_to_Csockaddr(struct sa_xtunion *xtunionaddr) {
++   return &xtunionaddr->sa;
++ }
++ extern unsigned char *Cyc_Std_sockaddr_in;
++ 
++ // We handle Unix domain sockets properly here: the sa field is an
++ // argument, since it could be bigger (or smaller) than 16
++ struct sa_xtunion *Csockaddr_to_sockaddr(struct sockaddr *addr, int len) {
++   // I hope structure alignment doesn't cause any problem here
++   struct sa_xtunion *result = GC_malloc_atomic(sizeof(unsigned char*)+len);
++   if (result == NULL) 
++     _throw_badalloc();
++ 
++   memcpy(&result->sa, addr, len);
++   switch (addr->sa_family) {
++   case AF_INET: result->tag = Cyc_Std_sockaddr_in; break;
++   default:
++     fprintf(stderr, "internal error: Csockaddr_to_sockaddr with unsupported socket type\n");
++     exit(1);
++   }
++   return result;
++ }
++ */
++ 
++ /* For sockets.  This should be split out to a separate file. */
++ #include <sys/socket.h>
++ #include <netinet/in.h>
++ 
++ #ifdef __APPLE__
++ typedef int socklen_t;
++ #include <sys/time.h> // where struct timeval is defined
++ #endif
++ 
++ int accept_in(int a, const struct sockaddr_in *b, socklen_t *c) {
++   return accept(a,(struct sockaddr *)b,c);
++ }
++ 
++ int bind_in(int a, const struct sockaddr_in *b, socklen_t c) {
++   return bind(a,(struct sockaddr *)b,c);
++ }
++ 
++ int connect_in(int a, const struct sockaddr_in *b, socklen_t c) {
++   return connect(a,(struct sockaddr *)b,c);
++ }
++ 
++ int getpeername_in(int a, const struct sockaddr_in *b, socklen_t *c) {
++   return getpeername(a,(struct sockaddr *)b,c);
++ }
++ 
++ int getsockname_in(int a, const struct sockaddr_in *b, socklen_t *c) {
++   return getsockname(a,(struct sockaddr *)b,c);
++ }
++ 
++ ssize_t recvfrom_in(int a, struct _tagged_arr b, size_t c, int d,
++                     const struct sockaddr_in *e, socklen_t *f) {
++   char *p = _check_unknown_subscript(b,1,0);
++   unsigned n = _get_arr_size(b,1);  
++   if (n<c) _throw_arraybounds();
++   return recvfrom(a,p,c,d,(struct sockaddr *)e,f);
++ }
++ 
++ ssize_t sendto_in(int a, struct _tagged_arr b, size_t c, int d,
++                   const struct sockaddr_in *e, socklen_t f) {
++   char *p = _check_unknown_subscript(b,1,0);
++   unsigned n = _get_arr_size(b,1);  
++   if (n<c) _throw_arraybounds();
++   return sendto(a,p,c,d,(struct sockaddr *)e,f);
++ }
++ 
++ ssize_t send_wrapped(int a, struct _tagged_arr b, size_t c, int d) {
++   char *p = _check_unknown_subscript(b,1,0);
++   unsigned n = _get_arr_size(b,1);  
++   if (n<c) _throw_arraybounds();
++   return send(a,p,c,d);
++ }
++ 
++ ssize_t recv_wrapped(int a, struct _tagged_arr b, size_t c, int d) {
++   char *p = _check_unknown_subscript(b,1,0);
++   unsigned n = _get_arr_size(b,1);  
++   if (n<c) _throw_arraybounds();
++   return recv(a,p,c,d);
++ }
++ 
++ int getsockopt_int(int a, int b, int c, int *d, socklen_t *e) {
++   return getsockopt(a,b,c,d,e);
++ }
++ 
++ int setsockopt_int(int a, int b, int c, const int *d, socklen_t e) {
++   return setsockopt(a,b,c,d,e);
++ }
++ 
++ int getsockopt_timeval(int a, int b, int c, struct timeval *d, socklen_t *e) {
++   return getsockopt(a,b,c,d,e);
++ }
++ 
++ int setsockopt_timeval(int a, int b, int c, const struct timeval *d, socklen_t e) {
++   return setsockopt(a,b,c,d,e);
++ }
++ 
++ ///////////////////////////////////////////////
++ // File locking
++ 
++ // Goes with fcntl.h
++ 
++ int fcntl_with_arg(int fd, int cmd, long arg) {
++   return fcntl(fd, cmd, arg);
++ }
++ // We call lock a void* so we don't have to #include anything else
++ int fcntl_with_lock(int fd, int cmd, void *lock) {
++   return fcntl(fd, cmd, lock);
++ }
++ 
++ int open_with_mode(const Cstring s, int flags, mode_t m) {
++   return open(s,flags,m);
++ }
++ 
++ int open_without_mode(const Cstring s, int flags) {
++   /* Use 0 as the mode argument, in case flags contains O_CREAT.  In
++      that case the file will be created with 0 permissions; if we
++      omitted the 0 it would be created with random permissions. */
++   return open(s,flags,0);
++ }
++ 
++ ///////////////////////////////////////////////
++ // Signals (goes with signal.cyc)
++ 
++ extern void Cyc_Std__SIG_DFL(int);
++ extern void Cyc_Std__SIG_IGN(int);
++ extern void Cyc_Std__SIG_ERR(int);
++ typedef void (*signal_t)(int);
++ extern signal_t signal(int, signal_t);
++ 
++ signal_t signal_func(int sig, signal_t p) {
++   if (p == Cyc_Std__SIG_DFL) p = ((void(*)(int)) 0);
++   else if (p == Cyc_Std__SIG_IGN) p = ((void(*)(int)) 1);
++   else if (p == Cyc_Std__SIG_ERR) p = ((void(*)(int))-1);
++ 
++   p = signal(sig, p);
++ 
++   if (p == (void(*)(int)) 0) p = Cyc_Std__SIG_DFL;
++   else if (p == (void(*)(int)) 1) p = Cyc_Std__SIG_IGN;
++   else if (p == (void(*)(int))-1) p = Cyc_Std__SIG_ERR;
++   return p;
++ }
++ 
+  ///////////////////////////////////////////////
+  // Regions
+  
+***************
+*** 344,354 ****
+    }
+    fprintf(stderr,"\n");
+  }  
+- 
+- // These are defined in cstubs.c
+- extern struct Cyc_Std___sFILE {
+-   FILE *file;
+- } *Cyc_Std_stdin, *Cyc_Std_stdout, *Cyc_Std_stderr;
+  
+  extern int Cyc_main(int argc, struct _tagged_argv argv);
+  
+--- 561,566 ----
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c sparc-sun-solaris2.7/lib/socket.c
-*** i686-unknown-linux/lib/socket.c	Tue Dec 11 11:43:16 2001
---- sparc-sun-solaris2.7/lib/socket.c	Tue Dec 11 16:24:37 2001
+*** i686-unknown-linux/lib/socket.c	Tue Dec 11 17:07:29 2001
+--- sparc-sun-solaris2.7/lib/socket.c	Tue Dec 11 17:52:55 2001
 ***************
 *** 290,303 ****
   Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -339,7 +949,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c sparc-sun-solaris2.7/l
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c sparc-sun-solaris2.7/lib/stat.c
 *** i686-unknown-linux/lib/stat.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/stat.c	Tue Dec 11 16:24:37 2001
+--- sparc-sun-solaris2.7/lib/stat.c	Tue Dec 11 17:52:55 2001
 ***************
 *** 268,279 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
@@ -365,9 +975,290 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c sparc-sun-solaris2.7/lib
   struct _tagged_arr filename, struct Cyc_Std_stat_t* buf); extern int fstat( int
   fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
+diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c sparc-sun-solaris2.7/lib/string.c
+*** i686-unknown-linux/lib/string.c	Tue Dec 11 17:12:25 2001
+--- sparc-sun-solaris2.7/lib/string.c	Tue Dec 11 17:52:55 2001
+***************
+*** 355,362 ****
+  minsz <=  _get_arr_size( s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct
+  _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("minsz <= s1.size && minsz <= s2.size", sizeof( unsigned char), 37u),
+! _tag_arr("/home/trevor/cyclone/lib/string.cyc", sizeof( unsigned char), 36u), 84);
+! while( i <  minsz) { unsigned char c1=(( const unsigned char*) s1.curr)[ i];
+  unsigned char c2=(( const unsigned char*) s2.curr)[ i]; if( c1 == '\000'){ if(
+  c2 == '\000'){ return 0;} else{ return - 1;}} else{ if( c2 == '\000'){ return 1;}
+  else{ int diff= c1 -  c2; if( diff !=  0){ return diff;}}} ++ i;} if( sz1 == 
+--- 355,362 ----
+  minsz <=  _get_arr_size( s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct
+  _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("minsz <= s1.size && minsz <= s2.size", sizeof( unsigned char), 37u),
+! _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc", sizeof( unsigned char), 41u),
+! 84); while( i <  minsz) { unsigned char c1=(( const unsigned char*) s1.curr)[ i];
+  unsigned char c2=(( const unsigned char*) s2.curr)[ i]; if( c1 == '\000'){ if(
+  c2 == '\000'){ return 0;} else{ return - 1;}} else{ if( c2 == '\000'){ return 1;}
+  else{ int diff= c1 -  c2; if( diff !=  0){ return diff;}}} ++ i;} if( sz1 == 
+***************
+*** 370,377 ****
+  bound <=  _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size(
+  s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion,
+  struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
+! sizeof( unsigned char), 37u), _tag_arr("/home/trevor/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 36u), 120);{ int i= 0; for( 0; i <  bound; i ++){ int
+  retc; if(( retc=(( const unsigned char*) s1.curr)[ i] - (( const unsigned char*)
+  s2.curr)[ i]) !=  0){ return retc;}}} if( len1 <  n? 1: len2 <  n){ return( int)
+  len1 - ( int) len2;} return 0;}} int Cyc_Std_strncmp( struct _tagged_arr s1,
+--- 370,377 ----
+  bound <=  _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size(
+  s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion,
+  struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
+! sizeof( unsigned char), 37u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 41u), 120);{ int i= 0; for( 0; i <  bound; i ++){ int
+  retc; if(( retc=(( const unsigned char*) s1.curr)[ i] - (( const unsigned char*)
+  s2.curr)[ i]) !=  0){ return retc;}}} if( len1 <  n? 1: len2 <  n){ return( int)
+  len1 - ( int) len2;} return 0;}} int Cyc_Std_strncmp( struct _tagged_arr s1,
+***************
+*** 386,418 ****
+  min_length <=  _get_arr_size( b, sizeof( unsigned char)): 0)? 0:(( int(*)(
+  struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("min_length <= a.size && min_length <= b.size", sizeof( unsigned char),
+! 45u), _tag_arr("/home/trevor/cyclone/lib/string.cyc", sizeof( unsigned char), 36u),
+! 150); while(( ++ i, i <  min_length)) { int diff=( int)(( const unsigned char*)
+! a.curr)[ i] - ( int)(( const unsigned char*) b.curr)[ i]; if( diff !=  0){
+! return diff;}} return( int) as - ( int) bs;}} int Cyc_Std_zstrncmp( struct
+! _tagged_arr s1, struct _tagged_arr s2, unsigned int n){ if( n <=  0){ return 0;}{
+! unsigned int s1size= _get_arr_size( s1, sizeof( unsigned char)); unsigned int
+! s2size= _get_arr_size( s2, sizeof( unsigned char)); unsigned int min_size=
+! s1size >  s2size? s2size: s1size; unsigned int bound= min_size >  n? n: min_size;(
+! bound <=  _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size(
+! s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion,
+! struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
+! sizeof( unsigned char), 37u), _tag_arr("/home/trevor/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 36u), 168);{ int i= 0; for( 0; i <  bound; i ++){ if(((
+! const unsigned char*) s1.curr)[ i] < (( const unsigned char*) s2.curr)[ i]){
+! return - 1;} else{ if((( const unsigned char*) s2.curr)[ i] < (( const
+! unsigned char*) s1.curr)[ i]){ return 1;}}}} if( min_size <=  bound){ return 0;}
+! if( s1size <  s2size){ return - 1;} else{ return 1;}}} int Cyc_Std_zstrptrcmp(
+! struct _tagged_arr* a, struct _tagged_arr* b){ return Cyc_Std_zstrcmp(* a,* b);}
+! inline static struct _tagged_arr Cyc_Std_int_strcato( struct _tagged_arr dest,
+! struct _tagged_arr src, struct _tagged_arr error){ int i; unsigned int dsize;
+! unsigned int slen; unsigned int dlen; dsize= _get_arr_size( dest, sizeof(
+! unsigned char)); dlen= Cyc_Std_strlen(( struct _tagged_arr) dest); slen= Cyc_Std_int_strleno(
+! src, error); if( slen +  dlen <=  dsize){ slen <=  _get_arr_size( src, sizeof(
+! unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr
+! file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("slen <= src.size",
+! sizeof( unsigned char), 17u), _tag_arr("/home/trevor/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 36u), 203); for( i= 0; i <  slen; i ++){*((
+  unsigned char*) _check_unknown_subscript( dest, sizeof( unsigned char),( int)( i
+  +  dlen)))=(( const unsigned char*) src.curr)[ i];} if( i !=  dsize){*((
+  unsigned char*) _check_unknown_subscript( dest, sizeof( unsigned char),( int)( i
+--- 386,418 ----
+  min_length <=  _get_arr_size( b, sizeof( unsigned char)): 0)? 0:(( int(*)(
+  struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("min_length <= a.size && min_length <= b.size", sizeof( unsigned char),
+! 45u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc", sizeof( unsigned char),
+! 41u), 150); while(( ++ i, i <  min_length)) { int diff=( int)(( const
+! unsigned char*) a.curr)[ i] - ( int)(( const unsigned char*) b.curr)[ i]; if(
+! diff !=  0){ return diff;}} return( int) as - ( int) bs;}} int Cyc_Std_zstrncmp(
+! struct _tagged_arr s1, struct _tagged_arr s2, unsigned int n){ if( n <=  0){
+! return 0;}{ unsigned int s1size= _get_arr_size( s1, sizeof( unsigned char));
+! unsigned int s2size= _get_arr_size( s2, sizeof( unsigned char)); unsigned int
+! min_size= s1size >  s2size? s2size: s1size; unsigned int bound= min_size >  n? n:
+! min_size;( bound <=  _get_arr_size( s1, sizeof( unsigned char))? bound <= 
+! _get_arr_size( s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr
+! assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+! _tag_arr("bound <= s1.size && bound <= s2.size", sizeof( unsigned char), 37u),
+! _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc", sizeof( unsigned char), 41u),
+! 168);{ int i= 0; for( 0; i <  bound; i ++){ if((( const unsigned char*) s1.curr)[
+! i] < (( const unsigned char*) s2.curr)[ i]){ return - 1;} else{ if((( const
+! unsigned char*) s2.curr)[ i] < (( const unsigned char*) s1.curr)[ i]){ return 1;}}}}
+! if( min_size <=  bound){ return 0;} if( s1size <  s2size){ return - 1;} else{
+! return 1;}}} int Cyc_Std_zstrptrcmp( struct _tagged_arr* a, struct _tagged_arr*
+! b){ return Cyc_Std_zstrcmp(* a,* b);} inline static struct _tagged_arr Cyc_Std_int_strcato(
+! struct _tagged_arr dest, struct _tagged_arr src, struct _tagged_arr error){ int
+! i; unsigned int dsize; unsigned int slen; unsigned int dlen; dsize=
+! _get_arr_size( dest, sizeof( unsigned char)); dlen= Cyc_Std_strlen(( struct
+! _tagged_arr) dest); slen= Cyc_Std_int_strleno( src, error); if( slen +  dlen <= 
+! dsize){ slen <=  _get_arr_size( src, sizeof( unsigned char))? 0:(( int(*)(
+! struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+! _tag_arr("slen <= src.size", sizeof( unsigned char), 17u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 41u), 203); for( i= 0; i <  slen; i ++){*((
+  unsigned char*) _check_unknown_subscript( dest, sizeof( unsigned char),( int)( i
+  +  dlen)))=(( const unsigned char*) src.curr)[ i];} if( i !=  dsize){*((
+  unsigned char*) _check_unknown_subscript( dest, sizeof( unsigned char),( int)( i
+***************
+*** 429,441 ****
+  unsigned char))? _temp2 <=  _get_arr_size( a, sizeof( unsigned char)): 0)? 0:((
+  int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line))
+  Cyc_Std___assert_fail)( _tag_arr("alen <= ans.size && alen <= a.size", sizeof(
+! unsigned char), 35u), _tag_arr("/home/trevor/cyclone/lib/string.cyc", sizeof(
+! unsigned char), 36u), 227); for( i= 0; i <  _temp2; ++ i){(( unsigned char*) ans.curr)[
+! i]=(( const unsigned char*) a.curr)[ i];} _temp3 <=  _get_arr_size( b, sizeof(
+! unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr
+! file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("blen <= b.size",
+! sizeof( unsigned char), 15u), _tag_arr("/home/trevor/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 36u), 229); for( j= 0; j <  _temp3; ++ j){*((
+  unsigned char*) _check_unknown_subscript( ans, sizeof( unsigned char), i +  j))=((
+  const unsigned char*) b.curr)[ j];} return ans;} struct _tagged_arr Cyc_Std_strconcat(
+  struct _tagged_arr a, struct _tagged_arr b){ return Cyc_Std_rstrconcat( Cyc_Core_heap_region,
+--- 429,441 ----
+  unsigned char))? _temp2 <=  _get_arr_size( a, sizeof( unsigned char)): 0)? 0:((
+  int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line))
+  Cyc_Std___assert_fail)( _tag_arr("alen <= ans.size && alen <= a.size", sizeof(
+! unsigned char), 35u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 41u), 227); for( i= 0; i <  _temp2; ++ i){((
+! unsigned char*) ans.curr)[ i]=(( const unsigned char*) a.curr)[ i];} _temp3 <= 
+! _get_arr_size( b, sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr
+! assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+! _tag_arr("blen <= b.size", sizeof( unsigned char), 15u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 41u), 229); for( j= 0; j <  _temp3; ++ j){*((
+  unsigned char*) _check_unknown_subscript( ans, sizeof( unsigned char), i +  j))=((
+  const unsigned char*) b.curr)[ j];} return ans;} struct _tagged_arr Cyc_Std_strconcat(
+  struct _tagged_arr a, struct _tagged_arr b){ return Cyc_Std_rstrconcat( Cyc_Core_heap_region,
+***************
+*** 489,496 ****
+  sizeof( unsigned char))? n <=  _get_arr_size( dest, sizeof( unsigned char)): 0)?
+  0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int
+  line)) Cyc_Std___assert_fail)( _tag_arr("n <= src.size && n <= dest.size",
+! sizeof( unsigned char), 32u), _tag_arr("/home/trevor/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 36u), 327); for( i= 0; i <  n; i ++){ unsigned char
+  _temp14=(( const unsigned char*) src.curr)[ i]; if( _temp14 == '\000'){ break;}((
+  unsigned char*) dest.curr)[ i]= _temp14;} for( 0; i <  n; i ++){(( unsigned char*)
+  dest.curr)[ i]='\000';} return dest;} struct _tagged_arr Cyc_Std_zstrncpy(
+--- 489,496 ----
+  sizeof( unsigned char))? n <=  _get_arr_size( dest, sizeof( unsigned char)): 0)?
+  0:(( int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int
+  line)) Cyc_Std___assert_fail)( _tag_arr("n <= src.size && n <= dest.size",
+! sizeof( unsigned char), 32u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 41u), 327); for( i= 0; i <  n; i ++){ unsigned char
+  _temp14=(( const unsigned char*) src.curr)[ i]; if( _temp14 == '\000'){ break;}((
+  unsigned char*) dest.curr)[ i]= _temp14;} for( 0; i <  n; i ++){(( unsigned char*)
+  dest.curr)[ i]='\000';} return dest;} struct _tagged_arr Cyc_Std_zstrncpy(
+***************
+*** 498,505 ****
+  _get_arr_size( dest, sizeof( unsigned char))? n <=  _get_arr_size( src, sizeof(
+  unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion, struct
+  _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("n <= dest.size && n <= src.size",
+! sizeof( unsigned char), 32u), _tag_arr("/home/trevor/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 36u), 365);{ int i; for( i= 0; i <  n; i ++){((
+  unsigned char*) dest.curr)[ i]=(( const unsigned char*) src.curr)[ i];} return
+  dest;}} struct _tagged_arr Cyc_Std_strcpy( struct _tagged_arr dest, struct
+  _tagged_arr src){ unsigned int len= Cyc_Std_strlen( src); Cyc_Std_strncpy( dest,
+--- 498,505 ----
+  _get_arr_size( dest, sizeof( unsigned char))? n <=  _get_arr_size( src, sizeof(
+  unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion, struct
+  _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("n <= dest.size && n <= src.size",
+! sizeof( unsigned char), 32u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 41u), 365);{ int i; for( i= 0; i <  n; i ++){((
+  unsigned char*) dest.curr)[ i]=(( const unsigned char*) src.curr)[ i];} return
+  dest;}} struct _tagged_arr Cyc_Std_strcpy( struct _tagged_arr dest, struct
+  _tagged_arr src){ unsigned int len= Cyc_Std_strlen( src); Cyc_Std_strncpy( dest,
+***************
+*** 535,542 ****
+  _temp15;}));}{ struct _tagged_arr ans= Cyc_Core_rnew_string( r, amt +  1); amt < 
+  _get_arr_size( ans, sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr
+  assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+! _tag_arr("amt < ans.size", sizeof( unsigned char), 15u), _tag_arr("/home/trevor/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 36u), 448);{ unsigned int i= 0; for( 0; i <  amt; ++ i){((
+  unsigned char*) ans.curr)[( int) i]=*(( const unsigned char*)
+  _check_unknown_subscript( s, sizeof( unsigned char),( int)( start +  i)));}}((
+  unsigned char*) ans.curr)[( int) amt]='\000'; return ans;}} struct _tagged_arr
+--- 535,542 ----
+  _temp15;}));}{ struct _tagged_arr ans= Cyc_Core_rnew_string( r, amt +  1); amt < 
+  _get_arr_size( ans, sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr
+  assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+! _tag_arr("amt < ans.size", sizeof( unsigned char), 15u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 41u), 448);{ unsigned int i= 0; for( 0; i <  amt; ++ i){((
+  unsigned char*) ans.curr)[( int) i]=*(( const unsigned char*)
+  _check_unknown_subscript( s, sizeof( unsigned char),( int)( start +  i)));}}((
+  unsigned char*) ans.curr)[( int) amt]='\000'; return ans;}} struct _tagged_arr
+***************
+*** 643,649 ****
+  sizeof( unsigned char)); len <=  _get_arr_size( s, sizeof( unsigned char))? 0:((
+  int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line))
+  Cyc_Std___assert_fail)( _tag_arr("len <= s.size", sizeof( unsigned char), 14u),
+! _tag_arr("/home/trevor/cyclone/lib/string.cyc", sizeof( unsigned char), 36u),
+  596);{ unsigned int i= 0; for( 0; i <  len; i ++){ int j; for( j= 0; j <  asize;
+  j ++){ if((( const unsigned char*) s.curr)[( int) i] == (( const unsigned char*)
+  accept.curr)[ j]){ break;}} if( j ==  asize){ return i;}}} return len;}
+--- 643,649 ----
+  sizeof( unsigned char)); len <=  _get_arr_size( s, sizeof( unsigned char))? 0:((
+  int(*)( struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line))
+  Cyc_Std___assert_fail)( _tag_arr("len <= s.size", sizeof( unsigned char), 14u),
+! _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc", sizeof( unsigned char), 41u),
+  596);{ unsigned int i= 0; for( 0; i <  len; i ++){ int j; for( j= 0; j <  asize;
+  j ++){ if((( const unsigned char*) s.curr)[( int) i] == (( const unsigned char*)
+  accept.curr)[ j]){ break;}} if( j ==  asize){ return i;}}} return len;}
+***************
+*** 652,659 ****
+  unsigned char), 12u)); unsigned int asize= _get_arr_size( accept, sizeof(
+  unsigned char)); len <=  _get_arr_size( s, sizeof( unsigned char))? 0:(( int(*)(
+  struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+! _tag_arr("len <= s.size", sizeof( unsigned char), 14u), _tag_arr("/home/trevor/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 36u), 616);{ unsigned int i= 0; for( 0; i <  len; i ++){
+  int j; for( j= 0; j <  asize; j ++){ if((( const unsigned char*) s.curr)[( int)
+  i] != (( const unsigned char*) accept.curr)[ j]){ break;}} if( j ==  asize){
+  return i;}}} return len;} struct _tagged_arr Cyc_Std_strtok( struct _tagged_arr
+--- 652,659 ----
+  unsigned char), 12u)); unsigned int asize= _get_arr_size( accept, sizeof(
+  unsigned char)); len <=  _get_arr_size( s, sizeof( unsigned char))? 0:(( int(*)(
+  struct _tagged_arr assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+! _tag_arr("len <= s.size", sizeof( unsigned char), 14u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 41u), 616);{ unsigned int i= 0; for( 0; i <  len; i ++){
+  int j; for( j= 0; j <  asize; j ++){ if((( const unsigned char*) s.curr)[( int)
+  i] != (( const unsigned char*) accept.curr)[ j]){ break;}} if( j ==  asize){
+  return i;}}} return len;} struct _tagged_arr Cyc_Std_strtok( struct _tagged_arr
+***************
+*** 687,709 ****
+  _get_arr_size( s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr
+  assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("min_length <= s1.size && min_length <= s2.size", sizeof( unsigned char),
+! 47u), _tag_arr("/home/trevor/cyclone/lib/string.cyc", sizeof( unsigned char), 36u),
+! 697);{ int i= - 1; while(( ++ i, i <  min_length)) { int diff= toupper(( int)((
+! const unsigned char*) s1.curr)[ i]) -  toupper(( int)(( const unsigned char*) s2.curr)[
+! i]); if( diff !=  0){ return diff;}} return( int) len1 - ( int) len2;}} int Cyc_Std_strcasecmp(
+! struct _tagged_arr s1, struct _tagged_arr s2){ if( s1.curr ==  s2.curr){ return
+! 0;}{ unsigned int len1= Cyc_Std_int_strleno( s1, _tag_arr("Std::strcasecmp",
+! sizeof( unsigned char), 16u)); unsigned int len2= Cyc_Std_int_strleno( s2,
+! _tag_arr("Std::strcasecmp", sizeof( unsigned char), 16u)); return Cyc_Std_casecmp(
+! s1, len1, s2, len2);}} inline static int Cyc_Std_caseless_ncmp( struct
+! _tagged_arr s1, unsigned int len1, struct _tagged_arr s2, unsigned int len2,
+! unsigned int n){ if( n <=  0){ return 0;}{ unsigned int min_len= len1 >  len2?
+! len2: len1; unsigned int bound= min_len >  n? n: min_len;( bound <= 
+  _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size( s2, sizeof(
+  unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion, struct
+  _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
+! sizeof( unsigned char), 37u), _tag_arr("/home/trevor/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 36u), 724);{ int i= 0; for( 0; i <  bound; i ++){ int
+  retc; if(( retc= toupper(( int)(( const unsigned char*) s1.curr)[ i]) -  toupper((
+  int)(( const unsigned char*) s2.curr)[ i])) !=  0){ return retc;}}} if( len1 < 
+  n? 1: len2 <  n){ return( int) len1 - ( int) len2;} return 0;}} int Cyc_Std_strncasecmp(
+--- 687,709 ----
+  _get_arr_size( s2, sizeof( unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr
+  assertion, struct _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)(
+  _tag_arr("min_length <= s1.size && min_length <= s2.size", sizeof( unsigned char),
+! 47u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc", sizeof( unsigned char),
+! 41u), 697);{ int i= - 1; while(( ++ i, i <  min_length)) { int diff= toupper((
+! int)(( const unsigned char*) s1.curr)[ i]) -  toupper(( int)(( const
+! unsigned char*) s2.curr)[ i]); if( diff !=  0){ return diff;}} return( int) len1
+! - ( int) len2;}} int Cyc_Std_strcasecmp( struct _tagged_arr s1, struct
+! _tagged_arr s2){ if( s1.curr ==  s2.curr){ return 0;}{ unsigned int len1= Cyc_Std_int_strleno(
+! s1, _tag_arr("Std::strcasecmp", sizeof( unsigned char), 16u)); unsigned int len2=
+! Cyc_Std_int_strleno( s2, _tag_arr("Std::strcasecmp", sizeof( unsigned char), 16u));
+! return Cyc_Std_casecmp( s1, len1, s2, len2);}} inline static int Cyc_Std_caseless_ncmp(
+! struct _tagged_arr s1, unsigned int len1, struct _tagged_arr s2, unsigned int
+! len2, unsigned int n){ if( n <=  0){ return 0;}{ unsigned int min_len= len1 > 
+! len2? len2: len1; unsigned int bound= min_len >  n? n: min_len;( bound <= 
+  _get_arr_size( s1, sizeof( unsigned char))? bound <=  _get_arr_size( s2, sizeof(
+  unsigned char)): 0)? 0:(( int(*)( struct _tagged_arr assertion, struct
+  _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("bound <= s1.size && bound <= s2.size",
+! sizeof( unsigned char), 37u), _tag_arr("/home/jcheney/src/cyclone/lib/string.cyc",
+! sizeof( unsigned char), 41u), 724);{ int i= 0; for( 0; i <  bound; i ++){ int
+  retc; if(( retc= toupper(( int)(( const unsigned char*) s1.curr)[ i]) -  toupper((
+  int)(( const unsigned char*) s2.curr)[ i])) !=  0){ return retc;}}} if( len1 < 
+  n? 1: len2 <  n){ return( int) len1 - ( int) len2;} return 0;}} int Cyc_Std_strncasecmp(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c sparc-sun-solaris2.7/lib/time.c
 *** i686-unknown-linux/lib/time.c	Sun Dec  2 16:30:56 2001
---- sparc-sun-solaris2.7/lib/time.c	Tue Dec 11 16:24:37 2001
+--- sparc-sun-solaris2.7/lib/time.c	Tue Dec 11 17:52:55 2001
 ***************
 *** 279,298 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -408,8 +1299,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c sparc-sun-solaris2.7/lib
   const int* timep){ return wrap_Cstring_as_string( ctime( timep), - 1);}
   unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c sparc-sun-solaris2.7/lib/unistd.c
-*** i686-unknown-linux/lib/unistd.c	Tue Dec 11 11:43:16 2001
---- sparc-sun-solaris2.7/lib/unistd.c	Tue Dec 11 16:24:37 2001
+*** i686-unknown-linux/lib/unistd.c	Tue Dec 11 17:07:29 2001
+--- sparc-sun-solaris2.7/lib/unistd.c	Tue Dec 11 17:52:55 2001
 ***************
 *** 269,312 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -497,8 +1388,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c sparc-sun-solaris2.7/l
   extern int symlink( unsigned char* path1, unsigned char* path2); extern int
   truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c sparc-sun-solaris2.7/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Tue Dec 11 11:43:17 2001
---- sparc-sun-solaris2.7/src/buildlib.c	Tue Dec 11 16:24:37 2001
+*** i686-unknown-linux/src/buildlib.c	Tue Dec 11 17:07:29 2001
+--- sparc-sun-solaris2.7/src/buildlib.c	Tue Dec 11 17:52:55 2001
 ***************
 *** 355,383 ****
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*

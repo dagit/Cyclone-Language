@@ -48,19 +48,19 @@ endef
 $(ARCH):
 	./extract_patch $(PATCH_ARCH) $(ARCH)
 
-$(ARCH)/lib/$(CYCLIB): $(addprefix $(ARCH)/lib/, $(O_LIBS) $(RUNTIME).o)
+$(ARCH)/lib/$(CYCLIB): $(addprefix $(ARCH)/lib/, $(O_LIBS) cstubs.$(O) $(RUNTIME).$(O))
 	$(create_lib)
 
-$(ARCH)/lib/libcyc_a.a: $(addprefix $(ARCH)/lib/, $(A_LIBS) a_$(RUNTIME).o)
+$(ARCH)/lib/libcyc_a.a: $(addprefix $(ARCH)/lib/, $(A_LIBS) a_cstubs.$(O) a_$(RUNTIME).$(O))
 	$(create_lib)
 
-$(ARCH)/lib/libcyc_nocheck.a: $(addprefix $(ARCH)/lib/, $(NOCHECK_LIBS) $(RUNTIME).o)
+$(ARCH)/lib/libcyc_nocheck.a: $(addprefix $(ARCH)/lib/, $(NOCHECK_LIBS) cstubs.$(O) $(RUNTIME).$(O))
 	$(create_lib)
 
-$(ARCH)/lib/nogc.a: $(ARCH)/lib/nogc.o
+$(ARCH)/lib/nogc.a: $(ARCH)/lib/nogc.$(O)
 	$(create_lib)
 
-$(ARCH)/lib/nogc_a.a: $(ARCH)/lib/a_nogc.o
+$(ARCH)/lib/nogc_a.a: $(ARCH)/lib/a_nogc.$(O)
 	$(create_lib)
 
 $(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.$(O)) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
@@ -81,8 +81,8 @@ $(ARCH)/src/install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
 	  echo "char *Cversion = \"$$version\";") > $@
 
 clean_arch:
-	$(RM) $(addprefix $(ARCH)/lib/, $(CYCLIB) libcyc_nocheck.a libcyc_a.a  $(O_LIBS) $(A_LIBS) $(NOCHECK_LIBS) nogc.[oa] a_nogc.o nogc_a.a $(RUNTIME).o a_$(RUNTIME).o nocheck_$(RUNTIME).o)
-	$(RM) $(addprefix $(ARCH)/src/, $(O_SRCS) cyclone$(EXE) cycdoc$(EXE) cycdoc.o buildlib$(EXE) buildlib.o install_path.*)
+	$(RM) $(addprefix $(ARCH)/lib/, $(CYCLIB) libcyc_nocheck.a libcyc_a.a  $(O_LIBS) $(A_LIBS) $(NOCHECK_LIBS) nogc.[oa] a_nogc.$(O) nogc_a.a a_cstubs.$(O) cstubs.$(O) $(RUNTIME).$(O) a_$(RUNTIME).$(O) nocheck_$(RUNTIME).$(O))
+	$(RM) $(addprefix $(ARCH)/src/, $(O_SRCS) cyclone$(EXE) cycdoc$(EXE) cycdoc.$(O) buildlib$(EXE) buildlib.$(O) install_path.*)
 
 clean:
 	for arch in $(ALL_ARCHS); do \
@@ -91,13 +91,13 @@ clean:
 
 # pattern rules
 
-$(ARCH)/src/%.o: $(ARCH)/src/%.c
+$(ARCH)/src/%.$(O): $(ARCH)/src/%.c
 	$(CC) $(OLDCFLAGS) -c -o $@ $<
 
-a_%.o: %.c
+a_%.$(O): %.c
 	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
 
-nocheck_%.o: %.c
+nocheck_%.$(O): %.c
 	$(CC) -c -o $@ -DNO_CYC_NULL_CHECKS -DNO_CYC_BOUNDS_CHECKS $(CFLAGS) $<
 
 # for creating genfiles from patches

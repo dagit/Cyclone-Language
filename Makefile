@@ -154,6 +154,8 @@ cmp:
               || echo $(XS) lib/$$i CHANGED) done
 	@cmp -s $(ARCHDIR)/lib/$(C_RUNTIME) lib/$(C_RUNTIME)\
               || echo $(XS) lib/$(C_RUNTIME) CHANGED
+	@cmp -s $(ARCHDIR)/lib/cstubs.c lib/cstubs.c \
+              || echo $(XS) lib/cstubs.c CHANGED
 	@cmp -s $(ARCHDIR)/lib/nogc.c lib/nogc.c\
               || echo $(XS) lib/nogc.c CHANGED
 	@cmp -s bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h\
@@ -186,6 +188,9 @@ update: cfiles
 	@cmp -s lib/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME)\
                || (echo UPDATING $(ARCHDIR)lib/$(C_RUNTIME);\
                    cp lib/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME))
+	@cmp -s lib/cstubs.c $(ARCHDIR)/lib/cstubs.c\
+               || (echo UPDATING $(ARCHDIR)lib/cstubs.c;\
+                   cp lib/cstubs.c $(ARCHDIR)/lib/cstubs.c)
 	@cmp -s lib/nogc.c $(ARCHDIR)/lib/nogc.c\
                || (echo UPDATING $(ARCHDIR)/lib/nogc.c;\
                    cp lib/nogc.c $(ARCHDIR)/lib/nogc.c)

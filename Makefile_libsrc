@@ -36,7 +36,7 @@ all: libs $(CYCCOMP) cycdoc$(EXE) buildlib$(EXE)
 # See kludge described below
 libs: cstdio.h csignal.h $(CYCLIB) nogc.a 
 
-cfiles: cstdio.h csignal.h $(C_SRCS) cycdoc.c buildlib.c $(C_LIBS) $(RUNTIME).c nogc.c precore_c.h
+cfiles: cstdio.h csignal.h $(C_SRCS) cycdoc.c buildlib.c $(C_LIBS) cstubs.c $(RUNTIME).c nogc.c precore_c.h
 
 $(CYCCOMP): $(O_SRCS) $(LIBR) install_path.$(O)
 ifdef MS
@@ -67,7 +67,7 @@ install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
 	  version=`cat $<`; \
 	  echo "char *Cversion = \"$$version\";") > $@
 
-$(CYCLIB): $(O_LIBS) $(RUNTIME).$(O)
+$(CYCLIB): $(O_LIBS) cstubs.$(O) $(RUNTIME).$(O)
 ifdef MS
 	lib /out:$@ $^
 else
@@ -99,7 +99,7 @@ precore_c.h: core.h $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYCFLAGS) -c -o $@ -stopafter-toc $<
 %.$(O): %.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYCFLAGS) -c -o $@ $<
-# For runtime_cyc.c and nogc.c
+# For runtime_cyc.c and nogc.c and cstubs.c
 %.$(O): %.c precore_c.h $(CYCINC_H)
 	$(CC) $(CFLAGS) -I. -c -o $@ $<
 # Always use the original compiler to avoid circularities
