@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7/lib/execinfo.c
 *** i686-unknown-linux/lib/execinfo.c	Mon Sep 10 12:33:26 2001
---- sparc-sun-solaris2.7/lib/execinfo.c	Tue Sep 18 15:10:36 2001
+--- sparc-sun-solaris2.7/lib/execinfo.c	Wed Sep 19 09:31:52 2001
 ***************
 *** 230,324 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -129,7 +129,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c sparc-sun-solaris2.7/lib/socket.c
 *** i686-unknown-linux/lib/socket.c	Mon Sep 10 12:33:26 2001
---- sparc-sun-solaris2.7/lib/socket.c	Tue Sep 18 15:10:36 2001
+--- sparc-sun-solaris2.7/lib/socket.c	Wed Sep 19 09:31:52 2001
 ***************
 *** 240,259 ****
   16u]; struct Cyc_Std_sockaddr_in_struct{ unsigned char* tag; struct Cyc_Std_sockaddr_in
