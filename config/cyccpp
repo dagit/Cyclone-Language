@@ -9,7 +9,7 @@
 #
 # Note: We are assuming (as is ../configure) that no architecture ends in .undef
 
-CPP="gcc -x c -E -U__GNUC__ -nostdinc"
+CPP="gcc -w -x c -E -U__GNUC__ -nostdinc"
 
 if [ $# -lt 3 ]; then
   echo usage: $0 this_architecture target_architecture
