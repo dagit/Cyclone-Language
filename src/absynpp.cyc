@@ -1045,10 +1045,10 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
       // topt should not be NULL for calloc's
       exp_t st = sizeoftyp_exp(*topt,NULL);
       if (rgnopt == NULL)
-        s = cat(text("calloc("),exp2doc(st),text(","),exp2doc(e),text(")"));
+        s = cat(text("calloc("),exp2doc(e),text(","),exp2doc(st),text(")"));
       else 
         s = cat(text("rcalloc("),exp2doc((exp_t)rgnopt),text(","),
-                exp2doc(st),text(","),exp2doc(e),text(")"));
+                exp2doc(e),text(","),exp2doc(st),text(")"));
     } else {
       exp_t new_e;
       // see comments in absyn.h

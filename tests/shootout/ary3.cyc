@@ -21,8 +21,8 @@ main(int argc, char ??argv) {
     int i, k, ?x, ?y;
 
     START_TIME
-    x = (int ?) calloc(sizeof(int), n);
-    y = (int ?) calloc(sizeof(int), n);
+    x = (int ?) calloc(n, sizeof(int));
+    y = (int ?) calloc(n, sizeof(int));
 
     for (i = 0; i < n; i++) {
 	x[i] = i + 1;

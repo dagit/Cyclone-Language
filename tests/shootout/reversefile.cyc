@@ -22,8 +22,8 @@ int main(int argc, char ??argv) {
 	    if (MAXREAD > (size - len)) {
               size <<= 1;
               if (0 == (buf = realloc(buf, size + 1))) {
-                fprintf(stderr, "realloc failed\n");
-                exit(1);
+                  fprintf(stderr, "realloc failed\n");
+                  exit(1);
               }
             }
 	} else {

@@ -220,14 +220,14 @@ static inline void * _cycalloc_atomic(int n) {
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc(unsigned int s, unsigned int n) {
-  void * ans = (void *)GC_calloc(s,n);
+static inline void * _cyccalloc(unsigned int n, unsigned int s) {
+  void * ans = (void *)GC_calloc(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc_atomic(unsigned int s, unsigned int n) {
-  void * ans = (void *)GC_calloc_atomic(s,n);
+static inline void * _cyccalloc_atomic(unsigned int n, unsigned int s) {
+  void * ans = (void *)GC_calloc_atomic(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
@@ -1638,18 +1638,18 @@ Cyc_Dump_dumpexp(( struct Cyc_Absyn_Exp*) _check_null( _temp658)); Cyc_Dump_dump
 _tag_arr(", ", sizeof( unsigned char), 3u));} else{ if( _temp660){ Cyc_Dump_dump_alpha(
 _tag_arr("calloc", sizeof( unsigned char), 7u));} else{ Cyc_Dump_dump_alpha(
 _tag_arr("malloc", sizeof( unsigned char), 7u));} Cyc_Dump_dump_char(( int)'(');}
-if( _temp656 !=  0){ Cyc_Dump_dump_alpha( _tag_arr("sizeof", sizeof(
-unsigned char), 7u)); Cyc_Dump_dump_char(( int)'('); Cyc_Dump_dumptyp(* _temp656);
-Cyc_Dump_dump_symbol( _tag_arr(")", sizeof( unsigned char), 2u)); if( _temp660){
-Cyc_Dump_dump_symbol( _tag_arr(", ", sizeof( unsigned char), 3u));} else{ Cyc_Dump_dump_symbol(
-_tag_arr(" * ", sizeof( unsigned char), 4u));}} Cyc_Dump_dumpexp( _temp654); Cyc_Dump_dump_symbol(
-_tag_arr(")", sizeof( unsigned char), 2u)); goto _LL387; _LL479:(( void(*)( void(*
-f)( struct _tuple13*), struct Cyc_List_List* l, struct _tagged_arr start, struct
-_tagged_arr end, struct _tagged_arr sep)) Cyc_Dump_group)( Cyc_Dump_dumpde,
-_temp662, _tag_arr("{", sizeof( unsigned char), 2u), _tag_arr("}", sizeof(
-unsigned char), 2u), _tag_arr(",", sizeof( unsigned char), 2u)); goto _LL387;
-_LL481: goto _LL387; _LL483: goto _LL387; _LL485: goto _LL387; _LL387:;} if(
-inprec >=  myprec){ Cyc_Dump_dump_char(( int)')');}} void Cyc_Dump_dumpexp(
+Cyc_Dump_dumpexp( _temp654); if( _temp656 !=  0){ if( _temp660){ Cyc_Dump_dump_symbol(
+_tag_arr(", ", sizeof( unsigned char), 3u));} else{ Cyc_Dump_dump_symbol(
+_tag_arr(" * ", sizeof( unsigned char), 4u));} Cyc_Dump_dump_alpha( _tag_arr("sizeof",
+sizeof( unsigned char), 7u)); Cyc_Dump_dump_char(( int)'('); Cyc_Dump_dumptyp(*
+_temp656); Cyc_Dump_dump_symbol( _tag_arr(")", sizeof( unsigned char), 2u));}
+Cyc_Dump_dump_symbol( _tag_arr(")", sizeof( unsigned char), 2u)); goto _LL387;
+_LL479:(( void(*)( void(* f)( struct _tuple13*), struct Cyc_List_List* l, struct
+_tagged_arr start, struct _tagged_arr end, struct _tagged_arr sep)) Cyc_Dump_group)(
+Cyc_Dump_dumpde, _temp662, _tag_arr("{", sizeof( unsigned char), 2u), _tag_arr("}",
+sizeof( unsigned char), 2u), _tag_arr(",", sizeof( unsigned char), 2u)); goto
+_LL387; _LL481: goto _LL387; _LL483: goto _LL387; _LL485: goto _LL387; _LL387:;}
+if( inprec >=  myprec){ Cyc_Dump_dump_char(( int)')');}} void Cyc_Dump_dumpexp(
 struct Cyc_Absyn_Exp* e){ Cyc_Dump_dumpexp_prec( 0, e);} void Cyc_Dump_dumptunionfield(
 struct Cyc_Absyn_Tunionfield* ef){ Cyc_Dump_dumpqvar( ef->name); if( ef->typs != 
 0){ Cyc_Dump_dumpargs( ef->typs);}} void Cyc_Dump_dumptunionfields( struct Cyc_List_List*

@@ -37,7 +37,7 @@ int main(int argc, char ?argv[]) {
 		wordbuf[i++] = *cp;
 		if (i == wordbufsize) {
 		    wordbufsize *= 2;
-                    wordbuf = realloc(wordbuf, wordbufsize + 1);
+		    wordbuf = realloc(wordbuf, wordbufsize + 1);
 		}
 	    }
         }

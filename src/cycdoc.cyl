@@ -686,14 +686,14 @@ void dumpexp_prec(int inprec, exp_t e) {
       if (iscalloc) dump_alpha("calloc"); else dump_alpha("malloc");
       dump_char('(');
     }
+    dumpexp(e);
     if (topt != NULL) {
+      if (iscalloc) dump_symbol(", "); else dump_symbol(" * ");
       dump_alpha("sizeof");
       dump_char('(');
       dumptyp(*topt); 
       dump_symbol(")");
-      if (iscalloc) dump_symbol(", "); else dump_symbol(" * ");
     }
-    dumpexp(e);
     dump_symbol(")");
     break;
 

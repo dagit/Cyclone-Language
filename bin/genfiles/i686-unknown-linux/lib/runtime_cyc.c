@@ -68,12 +68,12 @@ extern size_t GC_get_total_bytes();
 // FIX: I'm putting GC_calloc and GC_calloc_atomic in here as just
 // calls to GC_malloc and GC_malloc_atomic respectively.  This will
 // *not* work for the nogc option.
-void *GC_calloc(unsigned int t, unsigned int n) {
-  return (void *)GC_malloc(t*n);
+void *GC_calloc(unsigned int n, unsigned int t) {
+  return (void *)GC_malloc(n*t);
 }
 
-void *GC_calloc_atomic(unsigned int t, unsigned int n) {
-  return (void *)GC_malloc_atomic(t*n);
+void *GC_calloc_atomic(unsigned int n, unsigned int t) {
+  return (void *)GC_malloc_atomic(n*t);
 }
 
 // Need one of these per thread (we don't have threads)

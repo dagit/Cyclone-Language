@@ -17,7 +17,7 @@ main(int argc, char ?argv[]) {
     char ?strbuf, ?strend;
     int stufflen;
     START_TIME
-    strbuf = calloc(sizeof(char), buflen);
+    strbuf = calloc(buflen, sizeof(char));
     strend = strbuf;
     stufflen = strlen(STUFF);
 

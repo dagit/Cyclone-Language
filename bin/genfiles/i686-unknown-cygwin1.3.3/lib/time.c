@@ -220,14 +220,14 @@ static inline void * _cycalloc_atomic(int n) {
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc(unsigned int s, unsigned int n) {
-  void * ans = (void *)GC_calloc(s,n);
+static inline void * _cyccalloc(unsigned int n, unsigned int s) {
+  void * ans = (void *)GC_calloc(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void * _cyccalloc_atomic(unsigned int s, unsigned int n) {
-  void * ans = (void *)GC_calloc_atomic(s,n);
+static inline void * _cyccalloc_atomic(unsigned int n, unsigned int s) {
+  void * ans = (void *)GC_calloc_atomic(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;

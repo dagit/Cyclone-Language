@@ -2437,15 +2437,15 @@ unary_expression:
 | RMALLOC '(' assignment_expression ',' expression ')'
    { $$=^$(new_exp(new Malloc_e(MallocInfo{false,$3,NULL,$5,false}),
                    LOC(@1,@6))); }
-| CALLOC '(' SIZEOF '(' type_name ')' ',' expression ')'
-   { let $(_,_,t) = *($5);
-     $$=^$(new_exp(new Malloc_e(MallocInfo{true,NULL,new(t),$8,false}),
-                   LOC(@1,@4))); }
-| RCALLOC '(' assignment_expression ',' SIZEOF '(' type_name ')' ',' 
-               expression ')'
+| CALLOC '(' assignment_expression ',' SIZEOF '(' type_name ')' ')'
    { let $(_,_,t) = *($7);
-     $$=^$(new_exp(new Malloc_e(MallocInfo{true,$3,new(t),$10,false}),
-                   LOC(@1,@6))); }
+     $$=^$(new_exp(new Malloc_e(MallocInfo{true,NULL,new(t),$3,false}),
+                   LOC(@1,@9))); }
+| RCALLOC '(' assignment_expression ',' assignment_expression ',' 
+              SIZEOF '(' type_name ')' ')'
+   { let $(_,_,t) = *($9);
+     $$=^$(new_exp(new Malloc_e(MallocInfo{true,$3,new(t),$5,false}),
+                   LOC(@1,@11))); }
 ;
 
 unary_operator:

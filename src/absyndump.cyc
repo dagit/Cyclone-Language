@@ -675,9 +675,9 @@ void dumpexp_prec(int inprec, exp_t e) {
       } else {
         dump("calloc");
       }
-      dumpexp(sizeoftyp_exp(*topt,NULL));  
-      dump(",");
       dumpexp(e);
+      dump(",");
+      dumpexp(sizeoftyp_exp(*topt,NULL));  
       dump(")");
     } else {
       if (ropt != NULL) {
