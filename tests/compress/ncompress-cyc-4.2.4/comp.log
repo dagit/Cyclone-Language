@@ -1,0 +1,880 @@
+===============================================================================
+Directory: /home/jcheney/src/ncompress-4.2.4
+./compress -V
+Compress version: (N)compress 4.2.4, compiled: Wed Oct 24 14:17:45 EDT 2001
+Compile options:
+        USE_BYTEORDER, FAST, DIRENT, LSTAT, 
+        REGISTERS=20 IBUFSIZ=8192, OBUFSIZ=8192, BITS=16
+
+Author version 4.2 (Speed improvement & source cleanup):
+     Peter Jannesen  (peter@ncs.nl)
+
+Author version 4.1 (Added recursive directory compress):
+     Dave Mack  (csu@alembic.acs.com)
+
+Authors version 4.0 (World release in 1985):
+     Spencer W. Thomas, Jim McKie, Steve Davies,
+     Ken Turkowski, James A. Woods, Joe Orost
+/usr/bin/compress -V
+Compress version: (N)compress 4.2.4, compiled: Tue Dec 12 05:38:24 EST 2000
+Compile options:
+        FAST, DIRENT, 
+        REGISTERS=20 IBUFSIZ=1024, OBUFSIZ=1024, BITS=16
+
+Author version 4.2 (Speed improvement & source cleanup):
+     Peter Jannesen  (peter@ncs.nl)
+
+Author version 4.1 (Added recursive directory compress):
+     Dave Mack  (csu@alembic.acs.com)
+
+Authors version 4.0 (World release in 1985):
+     Spencer W. Thomas, Jim McKie, Steve Davies,
+     Ken Turkowski, James A. Woods, Joe Orost
+---------------- ./compress -> /usr/bin/compress ----------------
+246 blocks
+
+real	0m0.143s
+user	0m0.030s
+sys	0m0.010s
+
+real	0m0.146s
+user	0m0.020s
+sys	0m0.000s
+246 blocks
+/tmp/sh5388.fi /tmp/sh5388.foo differ: char 1, line 1
+------ ERROR
+1,17c1,17
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 1992
+> 1992
+> 14:17
+> 1992
+> 1992
+> 14:17
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   ./compress(Compression: 47.76%)
+decompress /usr/bin/compress()
+---------------- /usr/bin/compress -> ./compress ----------------
+246 blocks
+
+real	0m0.101s
+user	0m0.050s
+sys	0m0.000s
+246 blocks
+
+real	0m0.102s
+user	0m0.000s
+sys	0m0.010s
+/tmp/sh5388.fi /tmp/sh5388.foo differ: char 1, line 1
+------ ERROR
+1,17c1,17
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 1992
+> 1992
+> 14:17
+> 1992
+> 1992
+> 14:17
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   /usr/bin/compress(Compression: 47.76%)
+decompress ./compress()
+---------------- ./compress -> ./compress ----------------
+246 blocks
+
+real	0m0.094s
+user	0m0.020s
+sys	0m0.020s
+246 blocks
+
+real	0m0.102s
+user	0m0.020s
+sys	0m0.010s
+/tmp/sh5388.fi /tmp/sh5388.foo differ: char 1, line 1
+------ ERROR
+1,17c1,17
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 1992
+> 1992
+> 14:17
+> 1992
+> 1992
+> 14:17
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   ./compress(Compression: 47.76%)
+decompress ./compress()
+---------------- /usr/bin/compress -> /usr/bin/compress ----------------
+246 blocks
+
+real	0m0.101s
+user	0m0.030s
+sys	0m0.000s
+246 blocks
+
+real	0m0.106s
+user	0m0.040s
+sys	0m0.000s
+/tmp/sh5388.fi /tmp/sh5388.foo differ: char 1, line 1
+------ ERROR
+1,17c1,17
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 1992
+> 1992
+> 14:17
+> 1992
+> 1992
+> 14:17
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   /usr/bin/compress(Compression: 47.76%)
+decompress /usr/bin/compress()
+===============================================================================
+Directory: /home/jcheney/src/ncompress-4.2.4
+./compress -V
+Compress version: (N)compress 4.2.4, compiled: Thu Oct 25 14:24:49 EDT 2001
+Compile options:
+        USE_BYTEORDER, FAST, DIRENT, LSTAT, 
+        REGISTERS=20 IBUFSIZ=8192, OBUFSIZ=8192, BITS=16
+
+Author version 4.2 (Speed improvement & source cleanup):
+     Peter Jannesen  (peter@ncs.nl)
+
+Author version 4.1 (Added recursive directory compress):
+     Dave Mack  (csu@alembic.acs.com)
+
+Authors version 4.0 (World release in 1985):
+     Spencer W. Thomas, Jim McKie, Steve Davies,
+     Ken Turkowski, James A. Woods, Joe Orost
+/usr/bin/compress -V
+Compress version: (N)compress 4.2.4, compiled: Tue Dec 12 05:38:24 EST 2000
+Compile options:
+        FAST, DIRENT, 
+        REGISTERS=20 IBUFSIZ=1024, OBUFSIZ=1024, BITS=16
+
+Author version 4.2 (Speed improvement & source cleanup):
+     Peter Jannesen  (peter@ncs.nl)
+
+Author version 4.1 (Added recursive directory compress):
+     Dave Mack  (csu@alembic.acs.com)
+
+Authors version 4.0 (World release in 1985):
+     Spencer W. Thomas, Jim McKie, Steve Davies,
+     Ken Turkowski, James A. Woods, Joe Orost
+---------------- ./compress -> /usr/bin/compress ----------------
+845 blocks
+
+real	0m0.457s
+user	0m0.100s
+sys	0m0.020s
+845 blocks
+
+real	0m0.467s
+user	0m0.060s
+sys	0m0.010s
+/tmp/sh9621.fi /tmp/sh9621.foo differ: char 1, line 1
+------ ERROR
+1,27c1,27
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc~
+< /home/jcheney/src/ncompress-4.2.4/buf.o
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/comp.log
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress42.c~
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc~
+< /home/jcheney/src/ncompress-4.2.4/compress42.o
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/stat
+< /home/jcheney/src/ncompress-4.2.4/stat.cyc
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 16:05
+> 16:05
+> 16:05
+> 1992
+> 1992
+> 14:18
+> 14:24
+> 1992
+> 14:24
+> 15:12
+> 14:23
+> 15:41
+> 14:52
+> 14:24
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 14:16
+> 14:16
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   ./compress(Compression: 51.58%)
+decompress /usr/bin/compress()
+---------------- /usr/bin/compress -> ./compress ----------------
+845 blocks
+
+real	0m0.255s
+user	0m0.150s
+sys	0m0.010s
+845 blocks
+
+real	0m0.264s
+user	0m0.040s
+sys	0m0.000s
+/tmp/sh9621.fi /tmp/sh9621.foo differ: char 1, line 1
+------ ERROR
+1,27c1,27
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc~
+< /home/jcheney/src/ncompress-4.2.4/buf.o
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/comp.log
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress42.c~
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc~
+< /home/jcheney/src/ncompress-4.2.4/compress42.o
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/stat
+< /home/jcheney/src/ncompress-4.2.4/stat.cyc
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 16:05
+> 16:05
+> 16:05
+> 1992
+> 1992
+> 14:18
+> 14:24
+> 1992
+> 14:24
+> 15:12
+> 14:23
+> 15:41
+> 14:52
+> 14:24
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 14:16
+> 14:16
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   /usr/bin/compress(Compression: 51.58%)
+decompress ./compress()
+---------------- ./compress -> ./compress ----------------
+845 blocks
+
+real	0m0.247s
+user	0m0.150s
+sys	0m0.040s
+845 blocks
+
+real	0m0.257s
+user	0m0.050s
+sys	0m0.000s
+/tmp/sh9621.fi /tmp/sh9621.foo differ: char 1, line 1
+------ ERROR
+1,27c1,27
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc~
+< /home/jcheney/src/ncompress-4.2.4/buf.o
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/comp.log
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress42.c~
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc~
+< /home/jcheney/src/ncompress-4.2.4/compress42.o
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/stat
+< /home/jcheney/src/ncompress-4.2.4/stat.cyc
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 16:05
+> 16:05
+> 16:05
+> 1992
+> 1992
+> 14:18
+> 14:24
+> 1992
+> 14:24
+> 15:12
+> 14:23
+> 15:41
+> 14:52
+> 14:24
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 14:16
+> 14:16
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   ./compress(Compression: 51.58%)
+decompress ./compress()
+---------------- /usr/bin/compress -> /usr/bin/compress ----------------
+845 blocks
+
+real	0m0.258s
+user	0m0.190s
+sys	0m0.010s
+
+real	0m0.259s
+user	0m0.040s
+sys	0m0.010s
+845 blocks
+/tmp/sh9621.fi /tmp/sh9621.foo differ: char 1, line 1
+------ ERROR
+1,27c1,27
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc~
+< /home/jcheney/src/ncompress-4.2.4/buf.o
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/comp.log
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress42.c~
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc~
+< /home/jcheney/src/ncompress-4.2.4/compress42.o
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/stat
+< /home/jcheney/src/ncompress-4.2.4/stat.cyc
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 16:05
+> 16:05
+> 16:05
+> 1992
+> 1992
+> 14:18
+> 14:24
+> 1992
+> 14:24
+> 15:12
+> 14:23
+> 15:41
+> 14:52
+> 14:24
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 14:16
+> 14:16
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   /usr/bin/compress(Compression: 51.58%)
+decompress /usr/bin/compress()
+===============================================================================
+Directory: /home/jcheney/src/ncompress-4.2.4
+./compress -V
+Compress version: (N)compress 4.2.4, compiled: Thu Oct 25 14:30:40 EDT 2001
+Compile options:
+        USE_BYTEORDER, FAST, DIRENT, LSTAT, 
+        REGISTERS=20 IBUFSIZ=8192, OBUFSIZ=8192, BITS=16
+
+Author version 4.2 (Speed improvement & source cleanup):
+     Peter Jannesen  (peter@ncs.nl)
+
+Author version 4.1 (Added recursive directory compress):
+     Dave Mack  (csu@alembic.acs.com)
+
+Authors version 4.0 (World release in 1985):
+     Spencer W. Thomas, Jim McKie, Steve Davies,
+     Ken Turkowski, James A. Woods, Joe Orost
+/usr/bin/compress -V
+Compress version: (N)compress 4.2.4, compiled: Tue Dec 12 05:38:24 EST 2000
+Compile options:
+        FAST, DIRENT, 
+        REGISTERS=20 IBUFSIZ=1024, OBUFSIZ=1024, BITS=16
+
+Author version 4.2 (Speed improvement & source cleanup):
+     Peter Jannesen  (peter@ncs.nl)
+
+Author version 4.1 (Added recursive directory compress):
+     Dave Mack  (csu@alembic.acs.com)
+
+Authors version 4.0 (World release in 1985):
+     Spencer W. Thomas, Jim McKie, Steve Davies,
+     Ken Turkowski, James A. Woods, Joe Orost
+---------------- ./compress -> /usr/bin/compress ----------------
+862 blocks
+862 blocks
+
+real	0m0.279s
+user	0m0.100s
+sys	0m0.010s
+
+real	0m0.281s
+user	0m0.070s
+sys	0m0.030s
+/tmp/sh9791.fi /tmp/sh9791.foo differ: char 1, line 1
+------ ERROR
+1,27c1,27
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc~
+< /home/jcheney/src/ncompress-4.2.4/buf.o
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/comp.log
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress42.c~
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc~
+< /home/jcheney/src/ncompress-4.2.4/compress42.o
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/stat
+< /home/jcheney/src/ncompress-4.2.4/stat.cyc
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 16:05
+> 16:05
+> 16:05
+> 1992
+> 1992
+> 14:25
+> 14:30
+> 1992
+> 14:30
+> 15:12
+> 14:29
+> 15:41
+> 14:52
+> 14:30
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 14:16
+> 14:16
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   ./compress(Compression: 51.73%)
+decompress /usr/bin/compress()
+---------------- /usr/bin/compress -> ./compress ----------------
+862 blocks
+
+real	0m0.261s
+user	0m0.100s
+sys	0m0.010s
+862 blocks
+
+real	0m0.270s
+user	0m0.060s
+sys	0m0.020s
+/tmp/sh9791.fi /tmp/sh9791.foo differ: char 1, line 1
+------ ERROR
+1,27c1,27
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc~
+< /home/jcheney/src/ncompress-4.2.4/buf.o
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/comp.log
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress42.c~
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc~
+< /home/jcheney/src/ncompress-4.2.4/compress42.o
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/stat
+< /home/jcheney/src/ncompress-4.2.4/stat.cyc
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 16:05
+> 16:05
+> 16:05
+> 1992
+> 1992
+> 14:25
+> 14:30
+> 1992
+> 14:30
+> 15:12
+> 14:29
+> 15:41
+> 14:52
+> 14:30
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 14:16
+> 14:16
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   /usr/bin/compress(Compression: 51.73%)
+decompress ./compress()
+---------------- ./compress -> ./compress ----------------
+862 blocks
+
+real	0m0.253s
+user	0m0.160s
+sys	0m0.000s
+862 blocks
+
+real	0m0.264s
+user	0m0.030s
+sys	0m0.010s
+/tmp/sh9791.fi /tmp/sh9791.foo differ: char 1, line 1
+------ ERROR
+1,27c1,27
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc~
+< /home/jcheney/src/ncompress-4.2.4/buf.o
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/comp.log
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress42.c~
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc~
+< /home/jcheney/src/ncompress-4.2.4/compress42.o
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/stat
+< /home/jcheney/src/ncompress-4.2.4/stat.cyc
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 16:05
+> 16:05
+> 16:05
+> 1992
+> 1992
+> 14:25
+> 14:30
+> 1992
+> 14:30
+> 15:12
+> 14:29
+> 15:41
+> 14:52
+> 14:30
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 14:16
+> 14:16
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   ./compress(Compression: 51.73%)
+decompress ./compress()
+---------------- /usr/bin/compress -> /usr/bin/compress ----------------
+862 blocks
+862 blocks
+
+real	0m0.262s
+user	0m0.130s
+sys	0m0.020s
+
+real	0m0.250s
+user	0m0.030s
+sys	0m0.000s
+/tmp/sh9791.fi /tmp/sh9791.foo differ: char 1, line 1
+------ ERROR
+1,27c1,27
+< /home/jcheney/src/ncompress-4.2.4/Acknowleds
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc
+< /home/jcheney/src/ncompress-4.2.4/buf.cyc~
+< /home/jcheney/src/ncompress-4.2.4/buf.o
+< /home/jcheney/src/ncompress-4.2.4/build
+< /home/jcheney/src/ncompress-4.2.4/Changes
+< /home/jcheney/src/ncompress-4.2.4/comp.log
+< /home/jcheney/src/ncompress-4.2.4/compress
+< /home/jcheney/src/ncompress-4.2.4/compress.1
+< /home/jcheney/src/ncompress-4.2.4/compress42.c
+< /home/jcheney/src/ncompress-4.2.4/compress42.c~
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc
+< /home/jcheney/src/ncompress-4.2.4/compress42.cyc~
+< /home/jcheney/src/ncompress-4.2.4/compress42.o
+< /home/jcheney/src/ncompress-4.2.4/compress.def
+< /home/jcheney/src/ncompress-4.2.4/LZW.INFO
+< /home/jcheney/src/ncompress-4.2.4/Makefile.def
+< /home/jcheney/src/ncompress-4.2.4/MANIFEST
+< /home/jcheney/src/ncompress-4.2.4/patchlevel.h
+< /home/jcheney/src/ncompress-4.2.4/README
+< /home/jcheney/src/ncompress-4.2.4/stat
+< /home/jcheney/src/ncompress-4.2.4/stat.cyc
+< /home/jcheney/src/ncompress-4.2.4/zcmp
+< /home/jcheney/src/ncompress-4.2.4/zcmp.1
+< /home/jcheney/src/ncompress-4.2.4/zdiff
+< /home/jcheney/src/ncompress-4.2.4/zmore
+< /home/jcheney/src/ncompress-4.2.4/zmore.1
+---
+> 1992
+> 16:05
+> 16:05
+> 16:05
+> 1992
+> 1992
+> 14:25
+> 14:30
+> 1992
+> 14:30
+> 15:12
+> 14:29
+> 15:41
+> 14:52
+> 14:30
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+> 14:16
+> 14:16
+> 1992
+> 1992
+> 1992
+> 1992
+> 1992
+---------------
+compress   /usr/bin/compress(Compression: 51.73%)
+decompress /usr/bin/compress()
