@@ -217,24 +217,27 @@ namespace Absyn {
     segment    loc;
   };
 
+  // The $(exp,stmt) in loops are just a hack for holding the
+  // non-local predecessors of the exp.  The stmt should always be Skip_s
+  // and only the non_local_preds field is interesting.
   EXTERN_DEFINITION enum Raw_stmt {
     Skip_s;
     Exp_s(exp);
     Seq_s(stmt,stmt);
     Return_s(Opt_t<exp>);
     IfThenElse_s(exp,stmt,stmt);
-    While_s(exp,stmt);
+    While_s($(exp,stmt),stmt);
     Break_s(Opt_t<stmt>);    // stmt is dest, set by type-checking
     Continue_s(Opt_t<stmt>); // stmt is dest, set by type-checking
     Goto_s(var,Opt_t<stmt>); // stmt is dest, set by type-checking
-    For_s(exp,exp,exp,stmt);
+    For_s(exp,exp,$(exp,stmt),stmt); 
     Switch_s(exp,list<switch_clause>); 
     Fallthru_s(list<exp>,Opt_t<stmt>); // stmt is dest, set by type-checking
     Decl_s(decl,stmt);
     Cut_s(stmt);
     Splice_s(stmt);
     Label_s(var,stmt); 
-    Do_s(stmt,exp);
+    Do_s(stmt,$(exp,stmt));
     TryCatch_s(stmt,list<switch_clause>);
   };
 
@@ -510,5 +513,7 @@ namespace Absyn {
   extern typ pointer_expand(typ);
   // extern typ pointer_abbrev(typ);
   extern bool is_lvalue(exp);
+
+  extern $(tqual,typ) * lookup_struct_field(structdecl,var);
 }
 #endif

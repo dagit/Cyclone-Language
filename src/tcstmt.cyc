@@ -1,9 +1,5 @@
 /* Type checking for statements */
 
-/* Todo:
-   try/catch, cut/splice, fallthru, label/goto
- */
-
 #include "core.h"
 #include "string.h"
 #include "list.h"
@@ -32,17 +28,16 @@ using Tcexp;
 using Tcpat;
 
 static synth remove_local_vars(tenv te, list<vardecl> x, synth ssyn) {
-  Set::Set<var> vs = Set::empty(String::strcmp);
+  Set<var> vs = Set::empty(String::strcmp);
   for (; x != null; x = x->tl)
     vs = Set::insert(vs,x->hd->name[1]);
-  Set::Set<var> shadowed = Set::intersect(get_unassigned(te),vs);
+  Set<var> shadowed = Set::intersect(get_unassigned(te),vs);
   return add_var_synth(shadowed,ssyn);
 }
 
 // used to type-check Let_d, switch clauses, and catch clauses
 static synth pattern_synth(segment loc, tenv te, list<tvar> tvs, 
-			   list<vardecl> x, stmt s, Opt_t<exp> where_opt,
-			   bool s_in_switch, bool last_case) {
+			   list<vardecl> x, stmt s, Opt_t<exp> where_opt) {
   tenv te2 = add_type_vars(loc,te,tvs);
   for(; x != null; x = x->tl)
     te2 = add_pat_var(loc, te2, x->hd);
@@ -55,8 +50,6 @@ static synth pattern_synth(segment loc, tenv te, list<tvar> tvs,
     // could only have the "true" part of esyn propagated
     te2 = layer_synth(te2,esyn);
   }
-  if(s_in_switch)
-    te2 = set_in_switch(te2, last_case);
   return remove_local_vars(te,x,tcStmt(te2,s));
 }
 
@@ -68,14 +61,16 @@ synth tcStmt(tenv te, stmt s0) {
   case Exp_s(e): return tcExp(te,null,e);
 
   case Seq_s(s1,s2):
-    let ssyn1 = tcStmt(te,s1);
+    let te2   = set_next(te,Stmt_j(s2));
+    let ssyn1 = tcStmt(te2,s1);
     // JGM: try to treat sequences as "tail-calls" to avoid a deep stack.
     bool still_working = true;
     while (still_working) {
       switch (s2->r) {
       case Seq_s(s3,s4):
+	te2   = set_next(te,Stmt_j(s4));
 	ssyn1 = seq_synth(ssyn1,tcStmt(layer_synth(te,ssyn1),s3));
-	s2 = s4;
+	s2    = s4;
 	continue;
       default:
         still_working = false; // get out of loop
@@ -95,7 +90,7 @@ synth tcStmt(tenv te, stmt s0) {
         break;
       }
     } else {
-      exp e = eopt->v;
+      let e    = eopt->v;
       let esyn = tcExp(te,&Opt(t),e);
       if (!coerce_use(te,e,t))
 	terr(s0->loc, xprintf("returns value of type %s but requires %s",
@@ -117,45 +112,45 @@ synth tcStmt(tenv te, stmt s0) {
     let ssyn2 = tcStmt(false_te,s2);
     return join_synth(seq_synth(esyn,ssyn1),seq_synth(esyn,ssyn2));
 
-  case While_s(e,s):
+  case While_s($(e,cont_s),s):
     let esyn = tcExp(te,&Opt(bool_t),e);
     if (!coerce_to_bool(te,e))
       terr(e->loc,xprintf("test of while loop has type %s instead of bool",
                           typ2string(synth_typ(esyn))));
     let $(true_te,_) = bool_layer_synth(te,esyn);
-    let ssyn = tcStmt(set_in_loop(true_te),s);
+    let ssyn = tcStmt(set_in_loop(true_te,cont_s),s);
     return loop_synth(esyn,ssyn);
 
   case Break_s(_):
-    if (is_ok_break(te))
+    if (process_break(te,s0))
       return forward_jump_synth(te);
-    else {
-      terr(s0->loc,"break outside of loop/switch");
-      return skip_synth(te);
-    }
+    terr(s0->loc,"break outside of loop/switch");
+    return skip_synth(te);
 
   case Continue_s(_):
-    if (!is_ok_continue(te))
-      terr(s0->loc,"continue outside of loop");
+    if (process_continue(te,s0))
+      return forward_jump_synth(te);
+    terr(s0->loc,"continue outside of loop");
     return empty_synth(te);
 
   case Goto_s(_,_):
+    process_goto(te,s0);
     warn(s0->loc, "goto may be unsafe!!!");
     return forward_jump_synth(te);
 
-  case For_s(e1,e2,e3,s):
+  case For_s(e1,e2,$(e3,cont_s),s): // FIX for wiring
     let esyn1 = tcExp(te,null,e1);
     te = layer_synth(te,esyn1);
     let esyn2 = tcExp(te,&Opt(bool_t),e2);
-    let $(true_te,_) = bool_layer_synth(te,esyn2);
-    let te_body = set_in_loop(true_te);
     if (!coerce_to_bool(te,e2))
       terr(e2->loc,xprintf("test of for loop has type %s instead of bool",
 			   typ2string(synth_typ(esyn2))));
-    let ssyn = tcStmt(te_body,s);
+    let $(true_te,_) = bool_layer_synth(te,esyn2);
+    let te_body = set_in_loop(true_te,cont_s);
+    let ssyn    = tcStmt(te_body,s);
     te_body = layer_synth(te_body,ssyn);
-    let esyn3 = seq_synth(ssyn,tcExp(te_body,null,e3));
-    return seq_synth(esyn1,loop_synth(esyn2,esyn3));
+    let ssyn3 = seq_synth(ssyn,tcExp(te_body,null,e3));
+    return seq_synth(esyn1,loop_synth(esyn2,ssyn3));
 
   case Switch_s(e,scs0):
     let esyn = tcExp(te,null,e);
@@ -165,8 +160,9 @@ synth tcStmt(tenv te, stmt s0) {
     // control to the case most recently type-checked. For the last case,
     // we inherit the fallthru from above (i.e. from an outer switch).
 
+    te = set_in_switch(te);
+    te = clear_fallthru(te);
     synth swsyn = (scs0 == null) ? esyn : empty_synth(te);
-    bool last_case = true;
     for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
       let p       = scs->hd->pattern;
       let pat_typ = tcPat(te,p);
@@ -180,14 +176,13 @@ synth tcStmt(tenv te, stmt s0) {
       scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
       // type-checking the body will type-check any explicit fallthrus.
       let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
-			       scs->hd->where_clause, true, last_case);
+			       scs->hd->where_clause);
       if (synth_may_implicit_fallthru(ssyn))
 	terr(scs->hd->body->loc,
 	     "switch case must not implicitly fall through to next case");
       // FIX: Jump stuff is broken here, but it's leaving this pass soon anyway.
       swsyn = join_synth(swsyn, ssyn);
-      te    = set_fallthru_typ(te, pat_typ);
-      last_case = false;
+      te    = set_fallthru(te, pat_typ, scs->hd->body);
     } 
     check_switch_exhaustive(s0->loc,scs0);
     return seq_synth(esyn,switch_bottom(swsyn));
@@ -196,8 +191,9 @@ synth tcStmt(tenv te, stmt s0) {
     let ssyn1 = tcStmt(te,s);
 
     // similar to Switch_s -- check the patterns in reverse order:
+    te = set_in_switch(te);
+    te = clear_fallthru(te);
     synth swsyn = empty_synth(te);
-    bool last_case = true;
     for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
       let p       = scs->hd->pattern;
       let pat_typ = tcPat(te,p);
@@ -211,14 +207,13 @@ synth tcStmt(tenv te, stmt s0) {
       scs->hd->pat_vars = &Opt(List::imp_rev(pvs));
       // type-checking the body will type-check any explicit fallthrus
       let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
-			       scs->hd->where_clause, true, last_case);
+			       scs->hd->where_clause);
       if (synth_may_implicit_fallthru(ssyn))
 	terr(scs->hd->body->loc,
 	     "catch case must not implicitly fall through to next case");
       // FIX: Jump stuff is broken here, but it's leaving this pass soon anyway.
       swsyn = join_synth(swsyn, ssyn);
-      te    = set_fallthru_typ(te, pat_typ);
-      last_case = false;
+      te    = set_fallthru(te, pat_typ, scs->hd->body);
     } 
     check_catch_overlap(s0->loc,scs0);
     return join_synth(ssyn1,switch_bottom(swsyn));
@@ -245,27 +240,27 @@ synth tcStmt(tenv te, stmt s0) {
 */
 
   case Fallthru_s(es,_):
-    switch(get_fallthru_typ(te)) {
-    case null:
+    let trip_opt = process_fallthru(te,s0);
+    if(trip_opt == null) {
       terr(s0->loc,"fallthru not in a non-last case");
       return skip_synth(te);
-    case &$(tvs,ts):
-      list<$(var,typ)@> instantiation = List::map(make_inst_var,tvs);
-      ts = List::map_c(substitute,instantiation,ts);
-      for(; ts != null && es != null; ts = ts->tl, es = es->tl) {
-	te = layer_synth(te, tcExp(te, null, es->hd));
-	if(!coerce_arg(te,es->hd,ts->hd))
-	  terr(s0->loc, xprintf("fallthru argument has type %s "
-				"but pattern variable has type %s",
-				typ2string(es->hd->topt->v),
-				typ2string(ts->hd)));
-      }
-      if(es != null)
-	terr(s0->loc, "too many arguments to explicit fallthru");
-      else if (ts != null)
-	terr(s0->loc, "too few arguments to explicit fallthru");
-      return fallthru_synth(te); 
     }
+    let &$(_,tvs,ts) = trip_opt;
+    list<$(var,typ)@> instantiation = List::map(make_inst_var,tvs);
+    ts = List::map_c(substitute,instantiation,ts);
+    for(; ts != null && es != null; ts = ts->tl, es = es->tl) {
+      te = layer_synth(te, tcExp(te, null, es->hd));
+      if(!coerce_arg(te,es->hd,ts->hd))
+	terr(s0->loc, xprintf("fallthru argument has type %s "
+			      "but pattern variable has type %s",
+			      typ2string(es->hd->topt->v),
+			      typ2string(ts->hd)));
+    }
+    if(es != null)
+      terr(s0->loc, "too many arguments to explicit fallthru");
+    else if (ts != null)
+      terr(s0->loc, "too few arguments to explicit fallthru");
+    return fallthru_synth(te); 
 
   case Decl_s(d,s):
     switch (d->r) {
@@ -303,7 +298,7 @@ synth tcStmt(tenv te, stmt s0) {
 		     typ2string(p->topt->v),typ2string(synth_typ(esyn))));
       if(check_let_pat_exhaustive(s0->loc,p))
 	*exhaust = true; // side effect
-      return pattern_synth(s0->loc, te, null, x, s, null, false, true);
+      return pattern_synth(s0->loc, te, null, x, s, null);
 
     case Namespace_d(n,tds):
       terr(d->loc,"namespace is allowed at top level only");
@@ -329,7 +324,7 @@ synth tcStmt(tenv te, stmt s0) {
   case Label_s(x,s):
     // FIX:  interaction with goto and unassigned variables
     // deviates from Java as though immediate break
-    tcStmt(add_label(te,x),s);
+    tcStmt(add_label(te,x,s0),s);
     return skip_synth(te);
 
   case Cut_s(s):
@@ -374,8 +369,8 @@ synth tcStmt(tenv te, stmt s0) {
     }
 */
 
-  case Do_s(s,e):
-    let ssyn = tcStmt(set_in_loop(te),s);
+  case Do_s(s,$(e,cont_s)): // FIX for wiring
+    let ssyn = tcStmt(set_in_loop(te,cont_s),s);
     let te2  = layer_synth(te,ssyn);
     let esyn = tcExp(te2,&Opt(bool_t),e);
     if (!coerce_to_bool(te,e))

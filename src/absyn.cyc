@@ -282,12 +282,12 @@ stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,segment loc) {
   return new_stmt(IfThenElse_s(e,s1,s2),loc);
 }
 stmt while_stmt(exp e,stmt s,segment loc) { 
-  return new_stmt(While_s(e,s), loc); 
+  return new_stmt(While_s($(e,skip_stmt(e->loc)),s), loc);
 }
 stmt break_stmt   (segment loc) { return new_stmt(Break_s(null), loc); }
 stmt continue_stmt(segment loc) { return new_stmt(Continue_s(null), loc); }
 stmt for_stmt(exp e1,exp e2,exp e3,stmt s, segment loc) {
-  return new_stmt(For_s(e1,e2,e3,s), loc);
+  return new_stmt(For_s(e1,e2,$(e3,skip_stmt(e3->loc)),s),loc);
 }
 stmt switch_stmt(exp e, list<switch_clause> scs, segment loc) {
   return new_stmt(Switch_s(e,scs), loc);
@@ -308,7 +308,7 @@ stmt label_stmt(var v, stmt s, segment loc) {
   return new_stmt(Label_s(v,s), loc);
 }
 stmt do_stmt(stmt s, exp e, segment loc) {
-  return new_stmt(Do_s(s,e), loc);
+  return new_stmt(Do_s(s,$(e,skip_stmt(e->loc))), loc);
 }
 stmt trycatch_stmt(stmt s, list<switch_clause> scs, segment loc) {
   return new_stmt(TryCatch_s(s,scs), loc);
@@ -437,5 +437,16 @@ bool is_lvalue(exp e) {
     //  case NoInstantiate(e1): return is_lvalue(e1);
   default:                    return false;
   }
+}
+
+$(tqual,typ) * lookup_struct_field(structdecl sd, var v) {
+  if (sd->fields == null) 
+    return null;
+  for(let fs = sd->fields->v; fs != null; fs = fs->tl) {
+    let &$(name,tq,t) = fs->hd;
+    if (String::strcmp(name,v) == 0)
+      return &$(tq,t);
+  }
+  return null;
 }
 

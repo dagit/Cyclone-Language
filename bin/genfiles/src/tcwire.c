@@ -28,9 +28,17 @@ struct _tuple5 {
   void *f3;
 };
 struct _tuple6 {
+  struct Absyn_Exp *f1;
+  struct Absyn_Stmt *f2;
+};
+struct _tuple7 {
   struct _tagged_string *f1;
   struct Absyn_Tqual *f2;
   void *f3;
+};
+struct _tuple8 {
+  struct Absyn_Tqual *f1;
+  void *f2;
 };
 struct _tagged_array0 {
   unsigned int sz;
@@ -765,7 +773,7 @@ struct Absyn__IfThenElse_s__struct {
 extern const int Absyn__While_s__tag;
 struct Absyn__While_s__struct {
   int tag;
-  struct Absyn_Exp *f1;
+  struct _tuple6 f1;
   struct Absyn_Stmt *f2;
 };
 extern const int Absyn__Break_s__tag;
@@ -789,7 +797,7 @@ struct Absyn__For_s__struct {
   int tag;
   struct Absyn_Exp *f1;
   struct Absyn_Exp *f2;
-  struct Absyn_Exp *f3;
+  struct _tuple6 f3;
   struct Absyn_Stmt *f4;
 };
 extern const int Absyn__Switch_s__tag;
@@ -830,7 +838,7 @@ extern const int Absyn__Do_s__tag;
 struct Absyn__Do_s__struct {
   int tag;
   struct Absyn_Stmt *f1;
-  struct Absyn_Exp *f2;
+  struct _tuple6 f2;
 };
 extern const int Absyn__TryCatch_s__tag;
 struct Absyn__TryCatch_s__struct {
@@ -958,7 +966,7 @@ struct Absyn__Funname_b__struct {
 extern const int Absyn__Param_b__tag;
 struct Absyn__Param_b__struct {
   int tag;
-  struct _tuple6 *f1;
+  struct _tuple7 *f1;
 };
 extern const int Absyn__Local_b__tag;
 struct Absyn__Local_b__struct {
@@ -1248,6 +1256,8 @@ extern void *Absyn_function_typ(struct List_cons *,void *,struct List_cons *,
 				bool);
 extern void *Absyn_pointer_expand(void *);
 extern bool Absyn_is_lvalue(struct Absyn_Exp *);
+extern struct _tuple8 *Absyn_lookup_struct_field(struct Absyn_Structdecl *,
+						 struct _tagged_string *);
 void Tcwire_rewire(struct Absyn_Fndecl *fd) {
   ;
 }

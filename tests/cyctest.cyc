@@ -764,11 +764,10 @@ void arg_test() {
   if (size(args)<=0) fail();
   else if (size(args)==1) ok();
   else {
-    // FIX: all this explicit casting to string is real annoying
     let u = &$((string)"-u",Unit_spec(u_foo),(string)"unit");
-    let s_foo = Ref::new_ref((Bool)false); // FIX: annoying cast
+    let s_foo = (bool@)&$(false);
     let s = &$((string)"-s",Set_spec(s_foo),(string)"set");
-    let c_foo = Ref::new_ref((Bool)true);  // FIX: annoying cast
+    let c_foo = (bool@)&$(true);
     let c = &$((string)"-c",Clear_spec(c_foo),(string)"clear");
     let i = &$((string)"-i",Int_spec(i_foo),(string)"int");
     let r = &$((string)"-r",Rest_spec(r_foo),(string)"rest");
@@ -780,8 +779,8 @@ void arg_test() {
            "c_foo=%s, "
            "i_foo=%d\n",
            u_foo_foo,
-           (Ref::get(s_foo))?(string)"true":(string)"false",
-           (Ref::get(c_foo))?(string)"true":(string)"false",
+           (*s_foo)?(string)"true":(string)"false",
+           (*c_foo)?(string)"true":(string)"false",
            i_foo_foo);
   }
 

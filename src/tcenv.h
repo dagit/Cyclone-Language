@@ -17,10 +17,6 @@ using Dict;
 using Absyn;
 using Position;
 
-// Flags that control whether an operation (e.g., break) is okay 
-extern struct Ok_ctrl;
-typedef struct Ok_ctrl @ok_ctrl_t;
-
 // Used to tell what an ordinary identifer refers to 
 extern enum Resolved {
   VarRes(binding_t); // includes unresolved variant
@@ -28,7 +24,7 @@ extern enum Resolved {
   EnumRes(enumdecl,enumfield);
   XenumRes(xenumdecl,enumfield);
 };
-typedef enum Resolved resolved;
+typedef enum Resolved resolved_t;
 
 // Global environments -- what's declared in a global scope 
 extern struct Genv {
@@ -37,24 +33,21 @@ extern struct Genv {
   Dict<var,enumdecl>    enumdecls;
   Dict<var,xenumdecl>   xenumdecls;
   Dict<var,typedefdecl> typedefs;
-  Dict<var,resolved>    ordinaries;
+  Dict<var,resolved_t>  ordinaries;
   list<list<var>>       availables; // "using" namespaces
 };
 typedef struct Genv @genv;
 
-// Local function environments 
-extern struct Fenv {
-  list<var>           labels;
-  Dict<var,binding_t> locals;
-  ok_ctrl_t           ok;
-  Set<var>            uv; // maybe-unassigned variables
-  typ                 return_typ;
-  list<tvar>          type_vars; // type variables that can occur free
-  // for type-checking a fallthru -- null means fallthru not allowed,
-  // Opt(null) means fallthru must have 0 arguments.
-  $(list<tvar>,list<typ>) * fallthru_typ;
-};
+// Local function environments
+extern struct Fenv;
 typedef struct Fenv @fenv; 
+
+extern enum Jumpee { 
+  NotAllowed_j;
+  FnEnd_j;
+  Stmt_j(stmt);
+};
+typedef enum Jumpee jumpee_t;
 
 // Models the nesting of the RTCG constructs 
 extern enum Frames<`a> {
@@ -72,34 +65,34 @@ extern struct Tenv {
 };
 typedef struct Tenv @tenv;
 
-extern tenv set_in_loop(tenv);
-extern tenv set_in_switch(tenv,bool);
-extern bool is_ok_continue(tenv);
-extern bool is_ok_break(tenv);
+extern tenv set_in_loop(tenv te, stmt continue_dest);
+extern tenv set_in_switch(tenv);
+extern bool process_continue(tenv,stmt);
+extern bool process_break(tenv,stmt);
+extern void process_goto(tenv,stmt);
+extern $(stmt, list<tvar>,list<typ>)* process_fallthru(tenv, stmt);
 
-extern $(list<tvar>,list<typ>)* get_fallthru_typ(tenv);
-extern tenv set_fallthru_typ(tenv, $(list<tvar>,list<vardecl>) *);
+extern tenv set_fallthru(tenv te, 
+			 $(list<tvar>,list<vardecl>) * pat_typ,
+			 stmt body);
+extern tenv clear_fallthru(tenv);
+extern tenv set_next(tenv, jumpee_t);
 
-extern ok_ctrl_t default_ok_ctrl;
- 
 extern tenv enter_ns(tenv, var);
 extern genv genv_concat(genv, genv);
 
 // lookup functions 
 extern list<var>   resolve_namespace(tenv,segment,list<var>);
 extern genv        lookup_namespace(tenv,segment,list<var>);
-extern resolved    lookup_ordinary(tenv,segment,qvar);
+extern resolved_t  lookup_ordinary(tenv,segment,qvar);
 extern structdecl  lookup_structdecl(tenv,segment,qvar);
 extern enumdecl    lookup_enumdecl(tenv,segment,qvar);
 extern Opt_t<xenumdecl> lookup_xenumdecl(tenv,segment,qvar);
 extern typedefdecl lookup_typedefdecl(tenv,segment,qvar);
 extern list<tvar>  lookup_type_vars(tenv);
 
-extern Opt_t<$(tqual,typ)@> lookup_struct_field(structdecl,var);
-
 extern tenv add_local_var(segment,tenv,vardecl);
 extern tenv add_pat_var  (segment,tenv,vardecl);
-extern tenv add_param_var(segment,tenv,$(var,tqual,typ)@);
 
 extern tenv add_type_vars(segment,tenv,list<tvar>);
 
@@ -115,13 +108,8 @@ extern typ synth_typ(synth);
 // given a synth, set the type to t -- IMPERATIVE!!!
 extern synth synth_set_typ(synth s,typ t);
 
-// we refine the flow-through edge for boolean expressions to the "on true"
-// and "on false" cases.  
   // FIX: separate pass and include var id's
-extern enum Unassigned {
-  Always(Set<var>);  // unassigned after expression
-  Boolean(Set<var>,Set<var>); // unassigned when true, when false
-};
+extern enum Unassigned;
 typedef enum Unassigned unassigned_t;
 
 extern unassigned_t merge_unassigned(unassigned_t, unassigned_t);
@@ -173,13 +161,13 @@ extern $(Set<var>,Set<var>) maybe_unassigned_bool(synth);
 
 extern Set<var> get_unassigned(tenv);
 extern tenv     set_unassigned(tenv, Set<var>);
-extern tenv     add_label(tenv, var);
+extern tenv     add_label(tenv, var, stmt);
+extern bool     all_labels_resolved(tenv);
 extern typ      return_typ(tenv);
-
-extern tenv code_gen_tenv(fndecl, tenv);
 
 extern tenv tc_init();
 extern genv empty_genv();
+extern fenv new_fenv(fndecl);
 
 }
 #endif

@@ -4,7 +4,7 @@
 // Popcorn library, file dict.h                                           //
 // Copyright Greg Morrisett, Dan Grossman                                 //
 // January 1999, all rights reserved                                      //
-//                                                                         //
+//                                                                        //
 ////////////////////////////////////////////////////////////////////////////
 #include "core.h"
 #include "list.h"

@@ -1959,7 +1959,7 @@ static void stmt_to_c(env nv, stmt s) {
       stmt_to_c(nv,s1); 
       s = s2; 
       continue;
-    case While_s(e,s2):
+    case While_s($(e,_),s2):
       exp_to_c(nv,e); 
       stmt_to_c(loop_env(nv),s2);
       return;
@@ -1990,7 +1990,7 @@ static void stmt_to_c(env nv, stmt s) {
       }
       return;
     case Goto_s(_,_): return; 
-    case For_s(e1,e2,e3,s2): 
+    case For_s(e1,e2,$(e3,_),s2): 
       // FIX:  should e3 be translated in nv?
       exp_to_c(nv,e1); exp_to_c(nv,e2); exp_to_c(nv,e3); 
       stmt_to_c(loop_env(nv),s2);
@@ -2048,7 +2048,7 @@ static void stmt_to_c(env nv, stmt s) {
     case Splice_s(_): unimp("splice"); return;
     case Label_s(lab,s1): 
       s = s1; continue;
-    case Do_s(s2,e): 
+    case Do_s(s2,$(e,_)):
       stmt_to_c(loop_env(nv),s2);
       exp_to_c(nv,e);
       return;

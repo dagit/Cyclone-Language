@@ -778,7 +778,7 @@ static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt,
       return expr_err(te,loc,xprintf("struct %s has no %s field",
 				     qvar2string(n),f));
     let inst = List::zip(sd->tvs,ts);
-    let t2 = substitute(inst,finfo_opt->v[1]);
+    let t2 = substitute(inst,finfo_opt[1]);
     return synth_set_typ(esyn,t2);
   default:
     return expr_err(te,loc,xprintf("expecting struct, found %s",typ2string(t)));
@@ -802,7 +802,7 @@ static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt,
 				       qvar2string(n),f));
       }
       let inst = List::zip(sd->tvs,ts);
-      let t3 = substitute(inst,finfo_opt->v[1]);
+      let t3 = substitute(inst,finfo_opt[1]);
       return synth_set_typ(esyn,t3);
     default:
       return expr_err(te,loc, xprintf("expecting struct pointer, found %s", 
@@ -822,7 +822,7 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
   typ t2 = compress(e2->topt->v);
   // NOTE: we use unsigned int here, unlike C, because we do not support
   // negative indexing on arrays.
-  if (!coerce_uint_t(te,e2)) {
+  if (!coerce_uint_typ(te,e2)) {
     return expr_err(te,e2->loc,xprintf("expecting unsigned int, found %s",
                                        typ2string(t2)));
   }
@@ -950,11 +950,11 @@ static synth tcArray(tenv te,segment loc,Opt_t<typ> topt,
   return synth_set_typ(list_result,res_t2);
 }
 
-/* {for x < e1 : e2} */
+// {for x < e1 : e2} 
 static synth tcComprehension(tenv te,segment loc,Opt_t<typ> topt,
 			     vardecl vd,exp bound,exp body) {
   let esyn_bound = tcExp(te,null,bound);
-  if (!coerce_uint_t(te,bound))
+  if (!coerce_uint_typ(te,bound))
     terr(bound->loc,xprintf("expecting unsigned int, found %s",
                            typ2string(synth_typ(esyn_bound))));
   // add x to the environment with the type unsigned int, note it is inited
@@ -1158,13 +1158,14 @@ static synth tcStmtExp(tenv te, segment loc, Opt_t<typ> topt, stmt s) {
 
 // codegen(fd) 
 static synth tcCodegen(tenv te, segment loc, Opt_t<typ> topt, fndecl fd) {
-  typ t = fndecl2typ(fd);
+  return expr_err(te,loc,"tcCodegen");
+  //  typ t = fndecl2typ(fd);
   /*
   check_fundecl_valid_type(te,loc,fd);
   tenv te2 = code_gen_tenv(fd,te);
   tcFn_d(te2,loc,fd);
   */
-  return standard_synth(te,t);
+  //  return standard_synth(te,t);
 }
 
 static void tcFn_d(tenv te, segment loc, Opt_t<typ> topt, fndecl fd) {

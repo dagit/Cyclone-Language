@@ -25,7 +25,7 @@ using List;
 using Core;
 
 // check that the scope for a redeclaration of a type is okay
-static void scope_redecl_err(segment loc,
+static void redecl_err(segment loc,
 		       string t,string v,string new_sc,string old_sc) {
   terr(loc,
     xprintf("redeclaration of %s %s cannot be %s when earlier definition is %s",
@@ -34,33 +34,21 @@ static void scope_redecl_err(segment loc,
 static scope scope_redecl_okay<`a>(scope s1,Opt_t<`a> fields1,
                                    scope s2,Opt_t<`a> fields2,
                                    segment loc,string t,string v) {
-  switch (s2) {
-  case Static:
-    if (s1 != Static)
-      scope_redecl_err(loc, t, v, "non-static", "static");
-    break;
-  case Public:
-    if (s1 == Static)
-      scope_redecl_err(loc, t, v, "static", "public");
-    else if (s1 == Abstract)
-      scope_redecl_err(loc, t, v, "abstract", "public");
-    s1 = Public; // maintain original information
-    break;
-  case Extern:
-    if (s1 == Static)
-      scope_redecl_err(loc, t, v, "static", "extern");
-    else if (s1 == Abstract && fields2 != null)
-      scope_redecl_err(loc, t, v, "abstract", "transparent");
-    break;
-  case Abstract:
-    if (s1 == Static)
-      scope_redecl_err(loc, t, v, "static", "abstract");
-    else if (s1 == Public)
-      scope_redecl_err(loc, t, v, "public", "abstract");
-    else if (s1 == Extern && fields1 != null)
-      scope_redecl_err(loc, t, v, "[extern] transparent", "abstract");
-    s1 = Abstract; // maintain original information
-    break;
+  switch ($(s1,s2)) {
+  case $(Static,  Static): break;
+  case $(_,       Static): redecl_err(loc, t, v, "non-static", "static"); break;
+  case $(Static,  Public): redecl_err(loc, t, v, "static",     "public"); break;
+  case $(Abstract,Public): redecl_err(loc, t, v, "abstract",   "public"); break;
+  case $(_,       Public): s1 = Public; break;
+  case $(Static,  Extern): redecl_err(loc, t, v, "static",     "extern"); break;
+  case $(Abstract,Extern) where fields2 != null: 
+    redecl_err(loc,t,v, "abstract", "transparent"); break;
+  case $(_,       Extern): break;
+  case $(Static,Abstract): redecl_err(loc, t, v, "static", "abstract"); break;
+  case $(Public,Abstract): redecl_err(loc, t, v, "public", "abstract"); break;
+  case $(Extern,Abstract) where fields1 != null: 
+    redecl_err(loc,t,v, "[extern] transparent", "abstract"); break;
+  case $(_,     Abstract): s1 = Abstract; break;
   }
   return s1;
 }
@@ -236,24 +224,18 @@ static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
   // DAN: Here is where I'm assuming the te can be imperatively screwed with
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
-  te->le = &Opt(Outermost(&Fenv{ // FIX: deal with varargs
-                           .labels       = null,
-			   .locals       = Dict::empty(String::strcmp),
-			   .ok           = default_ok_ctrl,
-			   .uv           = Set::empty(String::strcmp),
-			   .return_typ   = fd->ret_type,
-			   .type_vars    = fd->tvs, // FIX: check unique
-			   .fallthru_typ = null
-                          }));
-  for (let args = fd->args; args != null; args = args->tl) 
-    te = add_param_var(loc,te,args->hd); // add_param_var is functional!
+  te->le = &Opt(Outermost(new_fenv(fd)));
   // check the body, then get rid of local environment
   let ssyn = tcStmt(te,fd->body);
-  te->le = null;
-  // check for return
+  // check for undefined labels FIX: get better error message
+  if(!all_labels_resolved(te))
+    terr(loc, "function has goto statements to undefined labels");
+
+  // check for return FIX: goes in a later pass
   if (fd->ret_type != VoidType && synth_may_implicit_fallthru(ssyn))
     terr(loc, xprintf("function may complete without returning a value of type"
 		      " %s", typ2string(fd->ret_type)));
+  te->le = null;
 }
 
 static void tcTypedefdecl(tenv te, genv ge, segment loc, typedefdecl td) {
@@ -573,9 +555,9 @@ void tc(tenv te, list<decl> ds0) {
       te->ns = ns;
       break;
       
-    case Using_d(q,ds2):
+    case Using_d(&$(nsl,v),ds2):
       // DAN: We're more imperative here too.
-      let ns2 = resolve_namespace(te,loc,List::append(q[0],&cons(q[1],null)));
+      let ns2 = resolve_namespace(te,loc,List::append(nsl,&cons(v,null)));
       ge->availables = &cons(ns2,ge->availables);
       tc(te,ds2);
       ge->availables = ge->availables->tl;

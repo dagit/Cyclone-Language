@@ -849,7 +849,7 @@ Doc stmt2doc(stmt st) {
 		  text("}"))
              : nil_doc());
     break;
-  case While_s(e,s1):
+  case While_s($(e,_),s1):
     s = cat6(text("while ("),
              exp2doc(e),
              text(") {"),
@@ -860,7 +860,7 @@ Doc stmt2doc(stmt st) {
   case Break_s(_):    s = text("break;"); break;
   case Continue_s(_): s = text("continue;"); break;
   case Goto_s(x,_):   s = text(xprintf("goto %s;",x)); break;
-  case For_s(e1,e2,e3,s1):
+  case For_s(e1,e2,$(e3,_),s1):
     s = cat10(text("for("),
 	      exp2doc(e1),
 	      text("; "),
@@ -911,7 +911,7 @@ Doc stmt2doc(stmt st) {
     } else
       s = cat3(text(x),text(": "),stmt2doc(s1));
     break;
-  case Do_s(s1,e): 
+  case Do_s(s1,$(e,_)):
     s = cat7(text("do {"),
              line_doc(),
              nest(2,stmt2doc(s1)),

@@ -25,10 +25,6 @@
    Also, we don't currently implement union.
 */
 
-/* FIX: the environment datatypes should be abstract.
-   Their representation is used in this file and in tc.pop; elsewhere
-   they are used abstractly, but this is not enforced. */
-
 /* During type checking we keep two parallel environments.  One is
    accessed by absolute name, the other by local name.  We need these
    two environments because what is defined in a namespace is
@@ -72,16 +68,18 @@ using Absyn;
 xenum exn {Env_error};
 
 `a env_err<`a>(string msg) {
-  printf("Error: %s\n",msg);
+  fprintf(cyc_stdout,"Error: %s\n",msg);
   fflush(cyc_stdout);
   throw Env_error();
 }
+
+/////////////////////////// Type Definitions /////////////////////////////////
 
 // Type environments 
 struct Tenv {
   list<var>            ns; // current namespace
   Dict<list<var>,genv> ae; // absolute environment
-  Opt_t<frames<fenv>>  le; // local environment, == null except in functions
+  Opt_t<frames<fenv>>  le; // local environment == null, except in functions
 };
 
 // Global environments -- what's declared in a global scope 
@@ -91,14 +89,67 @@ struct Genv {
   Dict<var,enumdecl>    enumdecls;
   Dict<var,xenumdecl>   xenumdecls;
   Dict<var,typedefdecl> typedefs;
-  Dict<var,resolved>    ordinaries;
+  Dict<var,resolved_t>  ordinaries;
   list<list<var>>       availables; // "using" namespaces
+};
+
+// Used to tell what an ordinary identifer refers to 
+enum Resolved {
+  VarRes(binding_t); // includes unresolved variant
+  StructRes(structdecl);
+  EnumRes(enumdecl,enumfield);
+  XenumRes(xenumdecl,enumfield);
+};
+
+// Models the nesting of the RTCG constructs 
+enum Frames<`a> {
+  Outermost(`a);
+  Frame(`a,enum Frames<`a>);
+  Hidden(`a,enum Frames<`a>);
 };
 
 enum Unassigned {
   Always(Set<var>);  // unassigned after expression
   Boolean(Set<var>,Set<var>); // unassigned when true, when false
 };
+
+enum Jumpee { 
+  NotAllowed_j;
+  FnEnd_j;
+  Stmt_j(stmt);
+};
+
+static struct CtrlEnv {
+  jumpee_t continue_stmt;
+  jumpee_t break_stmt;
+  $(stmt, list<tvar>, list<typ>) * fallthru_stmt; // null => not allowed
+  jumpee_t next_stmt; // needed to calculate break_stmt
+  // The next_stmt field needs to be correct only when we might enter
+  // a loop or switch. (i.e. when we call set_in_loop or set_in_switch)
+};
+typedef struct CtrlEnv @ ctrl_env_t;
+
+// This part is shared throughout type-checking of a function.
+// Hence mutations are seen by all subsequent type-checking, which is easier
+// than threading labels which must be function-wide unique anyway.
+static struct SharedFenv {
+  typ return_typ;
+  Dict<var,stmt>        seen_labels;
+  Dict<var,list<stmt>>  needed_labels; // FIX: check empty when done!
+};  
+
+// Local function environments 
+struct Fenv {
+  struct SharedFenv @   shared;
+  list<tvar>            type_vars; // type variables that can occur free
+  Dict<var,binding_t>   locals;    // binding will be Param_b, Local_b, or Pat_b
+  ctrl_env_t            ctrl_env;
+
+    // maybe-unassigned variables -- going away from this pass soon
+  Set<var>              uv; 
+};
+
+//////////////////////// Top-level Environment Manipulation //////////////////
 
 static Opt_t<unassigned_t> empty_unassigned = null;
 static Opt_t<Set<var>>     empty_var_set    = null;
@@ -118,91 +169,11 @@ tenv tc_init() {
   return &Tenv(top_ns,ae,null);
 }
 
-struct Ok_ctrl {
-  bool OK_continue;
-  bool OK_loop_break;
-  bool OK_switch_break;
-  bool OK_fallthru;
-};
-
-static struct Ok_ctrl def_ok_ctrl = {false,false,false,false};
-ok_ctrl_t default_ok_ctrl = &def_ok_ctrl;
-
-// Local function environments 
-struct Fenv {
-  list<var>             labels;
-  Dict<var,binding_t>   locals; // binding will be Param_b, Local_b, or Pat_b
-  ok_ctrl_t             ok;
-    // maybe-unassigned variables -- going away from this pass soon
-  Set<var>              uv; 
-  typ                   return_typ;
-  list<tvar>            type_vars; // type variables that can occur free
-  // for type-checking a fallthru -- null means fallthru not allowed,
-  // Opt(&$(_,null)) means fallthru must have 0 arguments.
-  $(list<tvar>,list<typ>) * fallthru_typ; 
-};
-
-// Models the nesting of the RTCG constructs 
-enum Frames<`a> {
-  Outermost(`a);
-  Frame(`a,enum Frames<`a>);
-  Hidden(`a,enum Frames<`a>);
-};
-
-`a get_visible<`a>(frames<`a> f) {
-  while(true)
-    switch (f) {
-    case Outermost(x): return x;
-    case Frame(x,_):   return x;
-    case Hidden(x,y):  f = y; break;
-    }
-  throw Unreachable("Tcenv::get_visible");
-}
-
-frames<`a> put_visible<`a>(frames<`a> f, `a x) {
-  switch (f) {
-  case Outermost(x2): return Outermost(x);
-  case Frame(x2,f2):  return Frame(x,f2);
-  case Hidden(x2,f2): return Hidden(x2,put_visible(f2,x));
-  }
-}
-
-frames<`a> apply_to_visible<`a>(`a g(`a), frames<`a> f) {
-  return put_visible(f,g(get_visible(f)));
-}
-
-frames<`b> map_frames<`a,`b>(`b g(`a), frames<`a> f) {
-  switch (f) {
-  case Outermost(x): return Outermost(g(x));
-  case Frame(x,f2):  return Frame(g(x),map_frames(g,f2));
-  case Hidden(x,f2): return Hidden(g(x),map_frames(g,f2));
-  }
-}
-
-fenv get_fenv(tenv te) {
-  if (te->le == null) throw Env_error();
-  return get_visible(te->le->v);
-}
-
-tenv put_fenv(tenv te, fenv fe) {
-  if (te->le == null) throw Env_error();
-  return &Tenv(te->ns, te->ae, &Opt(put_visible(te->le->v,fe)));
-}
-
-// Used to tell what an ordinary identifer refers to 
-enum Resolved {
-  VarRes(binding_t); // includes unresolved variant
-  StructRes(structdecl);
-  EnumRes(enumdecl,enumfield);
-  XenumRes(xenumdecl,enumfield);
-};
 
 // lookup functions 
 static list<var> outer_namespace(list<var> ns) {
-  if (ns == null) {
-    env_err("Tcenv::outer_namespace");
-    throw Impossible("Tcenv::outer_namespace");
-  }
+  if (ns == null) 
+    return env_err("Tcenv::outer_namespace");
   return List::rev(List::rev(ns)->tl);
 }
 
@@ -220,15 +191,13 @@ static $(list<var>,`a) * scoped_lookup<`a>(tenv te, segment loc,
       try {
 	result = &$(nss->hd,lookup(ge2,v));
 	++num_results;
-      }
-      catch { case Dict::Absent: break; /* ignore */}
+      } catch { case Dict::Absent: break; /* ignore */}
     }
     // Check current namespace
     try {
       result = &$(cns,lookup(ge,v));
       ++num_results;
-    }
-    catch { case Dict::Absent: break; /* ignore */ }
+    } catch { case Dict::Absent: break; /* ignore */ }
 
     if(num_results > 1) 
       Tcutil::terr(loc,xprintf("%s is ambiguous-",v));
@@ -243,27 +212,17 @@ static $(list<var>,`a) * scoped_lookup<`a>(tenv te, segment loc,
   throw Unreachable("Tcenv::scoped_lookup");
 }
 
-resolved lookup_ordinary_global_f(genv ge,var v) {
+static resolved_t lookup_ordinary_global_f(genv ge,var v) {
   return Dict::lookup(ge->ordinaries,v);
 }
-static resolved lookup_ordinary_global(tenv te,segment loc,qvar q) {
+static resolved_t lookup_ordinary_global(tenv te,segment loc,qvar q) {
+  let &$(nsl,v) = q;
   try {
-    if (q[0] == null)
-      return scoped_lookup(te, loc, lookup_ordinary_global_f, q[1])[1];
-    genv ge = lookup_namespace(te,loc,q[0]);
-    return Dict::lookup(ge->ordinaries,q[1]);
-  } catch {
-  case Dict::Absent: return VarRes(Unresolved_b);
-  }
-}
-
-resolved lookup_ordinary(tenv te,segment loc,qvar q) {
-  if (q[0] != null || te->le == null)
-    return lookup_ordinary_global(te,loc,q);
-  var  v  = q[1];
-  fenv fe = get_fenv(te);
-  try return VarRes(Dict::lookup(fe->locals,v));
-  catch {case Dict::Absent: return lookup_ordinary_global(te,loc,q);}
+    if (nsl == null)
+      return scoped_lookup(te, loc, lookup_ordinary_global_f, v)[1];
+    genv ge = lookup_namespace(te,loc,nsl);
+    return Dict::lookup(ge->ordinaries,v);
+  } catch { case Dict::Absent: return VarRes(Unresolved_b); }
 }
 
 // Lookup a namespace relative to the current namespace
@@ -360,60 +319,63 @@ typedefdecl lookup_typedefdecl(tenv te, segment loc, qvar q) {
   return Dict::lookup(ge->typedefs,v);
 }
 
-static int shadow_ctr = 1;
-
-tenv add_local_var(segment loc, tenv te, vardecl vd) {
-  if(te->le == null) env_err("Tcenv: unexpected add_local_var");
-  fenv fe = get_fenv(te);
-  var  v  = vd->name[1];
-  if(Dict::member(fe->locals,v))
-    vd->shadow = ++shadow_ctr;
-  Set<var> uv = fe->uv;
-  if(vd->initializer == null)
-    uv = Set::insert(uv,v);
-  fenv fe2 = &Fenv(fe->labels,
-		   Dict::insert(fe->locals,v,Local_b(vd)),
-                   fe->ok,
-                   uv,
-                   fe->return_typ, fe->type_vars, fe->fallthru_typ);
-  return put_fenv(te,fe2);
-}
-// assume uniqueness has been checked elsewhere, never uninitialized
-tenv add_param_var(segment loc, tenv te, $(var,tqual,typ)@ trip) {
-  if(te->le == null) env_err("Tcenv: unexpected add_param_var");
-  fenv fe  = get_fenv(te);
-  fenv fe2 = &Fenv(fe->labels,
-		   Dict::insert(fe->locals,trip[0],Param_b(trip)),
-                   fe->ok, fe->uv, fe->return_typ, fe->type_vars, 
-		   fe->fallthru_typ);
-  return put_fenv(te,fe2);
-}
-// assume uniqueness has been checked elsewhere, never uninitialized
-tenv add_pat_var(segment loc, tenv te, vardecl vd) {
-  if(te->le == null) env_err("Tcenv: unexpected add_param_var");
-  fenv fe = get_fenv(te);
-  var  v  = vd->name[1];
-  if(Dict::member(fe->locals,v))
-    vd->shadow = ++shadow_ctr;
-  fenv fe2 = &Fenv(fe->labels,
-		   Dict::insert(fe->locals,v,Pat_b(vd)),
-                   fe->ok, fe->uv, fe->return_typ, fe->type_vars,
-		   fe->fallthru_typ);
-  return put_fenv(te,fe2);
+genv empty_genv() { 
+  return &Genv{.namespaces  = empty_var_set->v,
+               .structdecls = Dict::empty(String::strcmp),
+               .enumdecls   = Dict::empty(String::strcmp),
+               .xenumdecls  = Dict::empty(String::strcmp),
+               .typedefs    = Dict::empty(String::strcmp),
+               .ordinaries  = Dict::empty(String::strcmp),
+               .availables  = null};
 }
 
-Opt_t<$(tqual,typ)@> lookup_struct_field(structdecl sd, var v) {
-  if (sd->fields == null) 
-    return null;
-  let fs = sd->fields->v;
-  while (fs != null) {
-    let &$(name,tq,t) = fs->hd;
-    if (String::strcmp(name,v) == 0)
-      return &Opt(&$(tq,t));
-    else
-      fs = fs->tl;
+////////////////////////////// Frames Manipulation //////////////////////////
+
+`a get_visible<`a>(frames<`a> f) {
+  while(true)
+    switch (f) {
+    case Outermost(x): return x;
+    case Frame(x,_):   return x;
+    case Hidden(x,y):  f = y; break;
+    }
+  throw Unreachable("Tcenv::get_visible");
+}
+
+frames<`a> put_visible<`a>(frames<`a> f, `a x) {
+  switch (f) {
+  case Outermost(x2): return Outermost(x);
+  case Frame(x2,f2):  return Frame(x,f2);
+  case Hidden(x2,f2): return Hidden(x2,put_visible(f2,x));
   }
-  return null;
+}
+
+frames<`a> apply_to_visible<`a>(`a g(`a), frames<`a> f) {
+  return put_visible(f,g(get_visible(f)));
+}
+
+frames<`b> map_frames<`a,`b>(`b g(`a), frames<`a> f) {
+  switch (f) {
+  case Outermost(x): return Outermost(g(x));
+  case Frame(x,f2):  return Frame(g(x),map_frames(g,f2));
+  case Hidden(x,f2): return Hidden(g(x),map_frames(g,f2));
+  }
+}
+
+fenv get_fenv(tenv te) {
+  if (te->le == null) throw Env_error();
+  return get_visible(te->le->v);
+}
+
+tenv put_fenv(tenv te, fenv fe) {
+  if (te->le == null) throw Env_error();
+  return &Tenv(te->ns, te->ae, &Opt(put_visible(te->le->v,fe)));
+}
+
+//////////////////// Function Environment Manipulation //////////////////////
+
+typ return_typ(tenv te) {
+  if (te->le == null) env_err("Tcenv: unexpected return_typ");
+  return get_fenv(te)->shared->return_typ;
 }
 
 list<tvar> lookup_type_vars(tenv te) {
@@ -424,12 +386,239 @@ list<tvar> lookup_type_vars(tenv te) {
 tenv add_type_vars(segment loc,tenv te,list<tvar> tvs) {
   list<tvar> new_tvs = List::append(tvs,lookup_type_vars(te));
   Tcutil::check_unique_tvars(loc,new_tvs);
-  fenv fe = get_fenv(te);
-  fenv fe2 = &Fenv(fe->labels, fe->locals, fe->ok, fe->uv, fe->return_typ,
-		   new_tvs,
-		   fe->fallthru_typ);
+  let fe  = get_fenv(te);
+  let fe2 = &Fenv(fe->shared,
+		  new_tvs,
+		  fe->locals, fe->ctrl_env, fe->uv);
   return put_fenv(te,fe2);
 }
+
+// FIX: This can cause clashes with other programmer variables!!!!
+static int shadow_ctr = 1;
+
+tenv add_local_var(segment loc, tenv te, vardecl vd) {
+  if(te->le == null) env_err("Tcenv: unexpected add_local_var");
+  let fe = get_fenv(te);
+  let v  = vd->name[1];
+  if(Dict::member(fe->locals,v))
+    vd->shadow = ++shadow_ctr;
+  Set<var> uv = fe->uv;
+  if(vd->initializer == null)
+    uv = Set::insert(uv,v);
+  let fe2 = &Fenv(fe->shared, fe->type_vars,
+		  Dict::insert(fe->locals,v,Local_b(vd)),
+		  fe->ctrl_env, fe->uv);
+  return put_fenv(te,fe2);
+}
+
+// assume uniqueness has been checked elsewhere, never uninitialized
+tenv add_pat_var(segment loc, tenv te, vardecl vd) {
+  if(te->le == null) env_err("Tcenv: unexpected add_param_var");
+  let fe = get_fenv(te);
+  let v  = vd->name[1];
+  if(Dict::member(fe->locals,v))
+    vd->shadow = ++shadow_ctr;
+  fenv fe2 = &Fenv(fe->shared, fe->type_vars,
+		   Dict::insert(fe->locals,v,Pat_b(vd)),
+                   fe->ctrl_env, fe->uv);
+  return put_fenv(te,fe2);
+}
+
+resolved_t lookup_ordinary(tenv te,segment loc,qvar q) {
+  let &$(nsl,v) = q;
+  if (nsl != null || te->le == null)
+    return lookup_ordinary_global(te,loc,q);
+  let fe = get_fenv(te);
+  try return VarRes(Dict::lookup(fe->locals,v));
+  catch {case Dict::Absent: return lookup_ordinary_global(te,loc,q);}
+}
+
+bool process_continue(tenv te, stmt s) {
+  if (te->le == null) env_err("Tcenv: unexpected process_continue");
+  let fe = get_fenv(te);
+  switch (fe->ctrl_env->continue_stmt) {
+  case NotAllowed_j: return false;
+  case FnEnd_j:      return true; // impossible in source language actually
+  case Stmt_j(s2):
+    s2->non_local_preds = &cons(s,s2->non_local_preds);
+    switch (s->r) {
+    case Continue_s(*so): *so = &Opt(s2); return true;
+    default: 
+      return (Bool)env_err("Tcenv: process_continue given a non-continue");
+    }
+  }
+}
+bool process_break(tenv te, stmt s) {
+  if (te->le == null) env_err("Tcenv: unexpected process_break");
+  fenv fe = get_fenv(te);
+  switch (fe->ctrl_env->break_stmt) {
+  case NotAllowed_j: return false;
+  case FnEnd_j:      return true; 
+  case Stmt_j(s2):
+    s2->non_local_preds = &cons(s,s2->non_local_preds);
+    switch (s->r) {
+    case Break_s(*so): *so = &Opt(s2); return true;
+    default: return (Bool)env_err("Tcenv: process_continue given a non-break");
+    }
+  }
+}
+void process_goto(tenv te, stmt s) {
+  if (te->le == null) env_err("Tcenv: unexpected process_goto");
+  switch (s->r) {
+  case Goto_s(l,*so): 
+    fenv fe = get_fenv(te);
+    let needed = fe->shared->needed_labels;
+    let sopt   = Dict::lookup_opt(fe->shared->seen_labels, l);
+    if(sopt == null) {
+      let slopt = Dict::lookup_opt(needed, l);
+      if(slopt == null)
+	slopt = &Opt(null);
+      fe->shared->needed_labels = Dict::insert(needed, l, &cons(s,slopt->v));
+    } else {
+      *so = sopt;
+      sopt->v->non_local_preds = &cons(s, sopt->v->non_local_preds);
+    }
+    break;
+  default: env_err("Tcenv: process_continue given a non-goto"); break;
+  }
+}
+
+$(stmt,list<tvar>,list<typ>)* process_fallthru(tenv te, stmt s) {
+  if (te->le == null) env_err("Tcenv: unexpected process_fallthru");
+  switch (s->r) {
+  case Fallthru_s(es,*so):
+    fenv fe = get_fenv(te);
+    let ans = fe->ctrl_env->fallthru_stmt;
+    if(ans != null) {
+      ans[0]->non_local_preds = &cons(s, ans[0]->non_local_preds);
+      *so = &Opt(ans[0]);
+    }
+    return ans;
+  default: return env_err("Tcenv: process_fallthru given a non-fallthru");
+  }
+}
+
+tenv set_fallthru(tenv te, $(list<tvar>,list<vardecl>) * pat_typ, stmt body) {
+  if(te->le == null) env_err("Tcenv: unexpected set_fallthru");
+  let ft_typ = null;
+  for(let vds = pat_typ[1]; vds!=null; vds=vds->tl)
+    ft_typ = &cons(vds->hd->type,ft_typ);
+  ft_typ = List::imp_rev(ft_typ);
+  let fe  = get_fenv(te);
+  let c   = fe->ctrl_env;
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals,
+		  &CtrlEnv(c->continue_stmt, c->break_stmt,
+			   &$(body,pat_typ[0],ft_typ),
+			   c->next_stmt),
+		  fe->uv);
+  return put_fenv(te,fe2);
+}
+
+// fallthru is illegal in the last case
+tenv clear_fallthru(tenv te) {
+  if(te->le == null) env_err("Tcenv: unexpected clear_fallthru");
+  let fe  = get_fenv(te);
+  let c   = fe->ctrl_env;
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals,
+		  &CtrlEnv(c->continue_stmt, c->break_stmt,
+			   null,
+			   c->next_stmt),
+		  fe->uv);
+  return put_fenv(te,fe2);
+}
+
+tenv set_in_loop(tenv te, stmt continue_dest) {
+  if (te->le == null) env_err("Tcenv: unexpected set_in_loop");
+  let fe  = get_fenv(te);
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals,
+		  &CtrlEnv(Stmt_j(continue_dest),
+			   fe->ctrl_env->next_stmt, // break goes to next
+			   fe->ctrl_env->fallthru_stmt,
+			   Stmt_j(continue_dest)),  // next starts same as cont
+		  fe->uv);
+  return put_fenv(te,fe2);
+}
+
+// each non-last case must also call set_fallthru, here we just 
+// change the break destination
+tenv set_in_switch(tenv te) {
+  if (te->le == null) env_err("Tcenv: unexpected set_in_switch");
+  let fe  = get_fenv(te);
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals,
+		  &CtrlEnv(fe->ctrl_env->continue_stmt,
+			   fe->ctrl_env->next_stmt, // break goes to next
+			   fe->ctrl_env->fallthru_stmt,
+			   fe->ctrl_env->next_stmt), 
+		  fe->uv);
+  return put_fenv(te,fe2);
+}
+
+tenv set_next(tenv te, jumpee_t j) {
+  let fe  = get_fenv(te);
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals,
+		  &CtrlEnv(fe->ctrl_env->continue_stmt,
+			   fe->ctrl_env->break_stmt, 
+			   fe->ctrl_env->fallthru_stmt,
+			   j),
+		  fe->uv);
+  return put_fenv(te,fe2);
+}
+
+tenv add_label(tenv te, var v, stmt s) {
+  if (te->le == null) env_err("Tcenv: unexpected add_label");
+  let fe     = get_fenv(te);
+  let needed = fe->shared->needed_labels;
+  let sl_opt = Dict::lookup_opt(needed, v);
+  if(sl_opt != null) {
+    fe->shared->needed_labels = Dict::delete(needed, v);
+    // backpatching
+    let sl = sl_opt->v;
+    s->non_local_preds = sl; 
+    for(; sl != null; sl = sl->tl)
+      switch (sl->hd->r) {
+      case Goto_s(_,*so): *so = &Opt(s); break;
+      default: env_err("Tcenv: add_label backpatching of non-goto"); break;
+      }
+  }
+  fe->shared->seen_labels = Dict::insert(fe->shared->seen_labels, v, s);
+  return te;
+}
+
+bool all_labels_resolved(tenv te) {
+  return Dict::is_empty(get_fenv(te)->shared->needed_labels);
+}
+
+Set<var> get_unassigned(tenv te) {
+  if (te->le == null) return empty_var_set->v;
+  let fe = get_fenv(te);
+  return fe->uv;
+}
+
+tenv set_unassigned(tenv te, Set<var> un) {
+  if (te->le == null) return te;
+  let fe  = get_fenv(te);
+  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, fe->ctrl_env,
+		  un);
+  return put_fenv(te,fe2);
+}
+
+fenv new_fenv(fndecl fd) {
+  let locals = Dict::empty(String::strcmp);
+  for(let args = fd->args; args != null; args = args->tl)
+    locals = Dict::insert(locals, args->hd[0], Param_b(args->hd));
+  return &Fenv{.shared        = &SharedFenv(fd->ret_type,
+					    Dict::empty(String::strcmp),
+					    Dict::empty(String::strcmp)),
+ 	       .type_vars     = fd->tvs, // assumed unique
+	       .locals        = locals,  // assumed unique
+	       .ctrl_env      = &CtrlEnv(NotAllowed_j,
+					 NotAllowed_j,
+					 null,
+					 FnEnd_j),
+	       .uv            = Set::empty(String::strcmp)};
+}
+
+///////////////////////////// Synthesis (CHANGING SOON) //////////////////////
 
 // When type-checking a statement or expression, we need to know
 // what kind of control flow it may have so that we can determine
@@ -476,12 +665,6 @@ static ctrl_t standard_ctrl = &standard_ctrl_v;
 static ctrl_t empty_ctrl    = &empty_ctrl_v;
 static ctrl_t forward_ctrl  = &forward_ctrl_v;
 static ctrl_t fallthru_ctrl = &fallthru_ctrl_v;
-
-Set<var> get_unassigned(tenv te) {
-  if (te->le == null) return empty_var_set->v;
-  fenv fe = get_fenv(te);
-  return fe->uv;
-}
 
 tenv layer_synth(tenv te, synth syn) {
   if (synth_may_implicit_fallthru(syn))
@@ -531,7 +714,6 @@ unassigned_t merge_unassigned(unassigned_t u1, unassigned_t u2) {
     return Boolean(Set::union_two(ts1,ts2), Set::union_two(fs1,fs2));
   }
 }
-
 
 // synth we get for most expressions and atomic statements -- implicit
 // fallthru with no forward jump, and all currently unassigned variables as
@@ -669,87 +851,3 @@ synth initialize_var_synth(synth s, var v) {
 }
 
 
-tenv set_unassigned(tenv te, Set<var> un) {
-  if (te->le == null) return te;
-  fenv fe = get_fenv(te);
-  fenv fe2 = &Fenv(fe->labels, fe->locals, fe->ok,
-		   un,
-                   fe->return_typ, fe->type_vars, fe->fallthru_typ);
-  return put_fenv(te,fe2);
-}
-
-bool is_ok_continue(tenv te) {
-  if (te->le == null) return false;
-  fenv fe = get_fenv(te);
-  return fe->ok->OK_continue;
-}
-bool is_ok_break(tenv te) {
-  if (te->le == null) return false;
-  fenv fe = get_fenv(te);
-  return (fe->ok->OK_switch_break || fe->ok->OK_loop_break);
-}
-
-$(list<tvar>,list<typ>)* get_fallthru_typ(tenv te) {
-  fenv fe = get_fenv(te);
-  if(!fe->ok->OK_fallthru)
-    return null;
-  return fe->fallthru_typ; // to be careful, we could copy
-}
-tenv set_fallthru_typ(tenv te, $(list<tvar>,list<vardecl>) * ft_binding) {
-  if(te->le == null) env_err("Tcenv: unexpected set_fallthru_typ");
-  let ft_typ = null;
-  for(let vds = ft_binding[1]; vds!=null; vds=vds->tl)
-    ft_typ = &cons(vds->hd->type,ft_typ);
-  ft_typ = List::imp_rev(ft_typ);
-  fenv fe  = get_fenv(te);
-  fenv fe2 = &Fenv(fe->labels, fe->locals, fe->ok,
-		   fe->uv, fe->return_typ, fe->type_vars,
-		   &$(ft_binding[0],ft_typ));
-  return put_fenv(te,fe2);
-}
-
-tenv set_in_loop(tenv te) {
-  if (te->le == null) env_err("Tcenv: unexpected set_in_loop");
-  fenv fe = get_fenv(te);
-  ok_ctrl_t c2 = &Ok_ctrl{.OK_continue=true,.OK_loop_break=true,
-			.OK_switch_break=false,.OK_fallthru=false};
-  fenv fe2 = &Fenv(fe->labels,fe->locals,
-		   c2,
-		   fe->uv, fe->return_typ, fe->type_vars, fe->fallthru_typ);
-  return put_fenv(te,fe2);
-}
-tenv set_in_switch(tenv te, bool last_case) {
-  if (te->le == null) env_err("Tcenv: unexpected set_in_switch");
-  fenv fe = get_fenv(te);
-  ok_ctrl_t c2 = &Ok_ctrl{.OK_continue=fe->ok->OK_continue,
-			  .OK_loop_break=false,
-			  .OK_switch_break=true,
-			  .OK_fallthru=!last_case};
-  fenv fe2 = &Fenv(fe->labels, fe->locals,
-		   c2,
-		   fe->uv, fe->return_typ, fe->type_vars, fe->fallthru_typ);
-  return put_fenv(te,fe2);
-}
-
-tenv add_label(tenv te,var v) {
-  if (te->le == null) env_err("Tcenv: unexpected add_label");
-  fenv fe  = get_fenv(te);
-  fenv fe2 = &Fenv(&cons(v,fe->labels),
-		   fe->locals, fe->ok, fe->uv, fe->return_typ, fe->type_vars,
-		   fe->fallthru_typ);
-  return put_fenv(te,fe2);
-}
-typ return_typ(tenv te) {
-  if (te->le == null) env_err("Tcenv: unexpected return_typ");
-  return get_fenv(te)->return_typ;
-}
-
-genv empty_genv() { 
-  return &Genv{.namespaces  = empty_var_set->v,
-               .structdecls = Dict::empty(String::strcmp),
-               .enumdecls   = Dict::empty(String::strcmp),
-               .xenumdecls  = Dict::empty(String::strcmp),
-               .typedefs    = Dict::empty(String::strcmp),
-               .ordinaries  = Dict::empty(String::strcmp),
-               .availables  = null};
-}
