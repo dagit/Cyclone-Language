@@ -251,13 +251,15 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 #endif
  struct Cyc_Std__types_fd_set{int fds_bits[2];};struct Cyc_Core_Opt{void*v;};extern
-char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{char*
-tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];struct Cyc_List_List*
-Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[8];struct Cyc_Fn_Function{
+unsigned char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Failure[12];
+struct Cyc_Core_Failure_struct{unsigned char*tag;struct _tagged_arr f1;};extern
+unsigned char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Not_found[14];
+extern unsigned char Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{
+unsigned char*tag;struct _tagged_arr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*
+tl;};extern unsigned char Cyc_List_List_mismatch[18];struct Cyc_List_List*Cyc_List_imp_rev(
+struct Cyc_List_List*x);extern unsigned char Cyc_List_Nth[8];struct Cyc_Fn_Function{
 void*(*f)(void*,void*);void*env;};struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(
 void*,void*),void*x);struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*));void*
 Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x);struct Cyc_Fn_Function*Cyc_Fn_compose(

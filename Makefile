@@ -276,7 +276,7 @@ test_boot:
 	$(MAKE) -C tests\
          CYCC=$(CYCDIR)/build/boot/cyclone$(EXE)\
          CYCBISON=$(CYCDIR)/bin/cycbison$(EXE)\
-         CYCFLAGS="-g -save-c -pp -I$(CYCDIR)/lib -B$(CYCDIR)/lib"
+         CYCFLAGS="-L$(CYCDIR)/build/boot -g -save-c -pp -I$(CYCDIR)/include -B$(CYCDIR)/bin/cyc-lib"
 
 clean_test:
 	$(MAKE) -C tests clean

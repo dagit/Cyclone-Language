@@ -250,17 +250,19 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};char*
-underlying_Cstring(struct _tagged_arr);struct _tagged_arr wrap_Cstring_as_string(
-char*,unsigned int);struct _tagged_arr Cyc_Std_mmap(unsigned int length,int prot,int
-flags,int fd,int offset);int Cyc_Std_munmap(struct _tagged_arr start,unsigned int
-length);char*mmap(char*start,unsigned int length,int prot,int flags,int fd,int offset);
-int munmap(char*start,unsigned int length);struct _tagged_arr Cyc_Std_mmap(
-unsigned int length,int prot,int flags,int fd,int offset){return
-wrap_Cstring_as_string(mmap(0,length,prot,flags,fd,offset),length);}int Cyc_Std_munmap(
-struct _tagged_arr start,unsigned int length){return munmap(underlying_Cstring((
-struct _tagged_arr)start),length);}
+ struct Cyc_Core_Opt{void*v;};extern unsigned char Cyc_Core_Invalid_argument[21];
+struct Cyc_Core_Invalid_argument_struct{unsigned char*tag;struct _tagged_arr f1;};
+extern unsigned char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Impossible[
+15];struct Cyc_Core_Impossible_struct{unsigned char*tag;struct _tagged_arr f1;};
+extern unsigned char Cyc_Core_Not_found[14];extern unsigned char Cyc_Core_Unreachable[
+16];struct Cyc_Core_Unreachable_struct{unsigned char*tag;struct _tagged_arr f1;};
+unsigned char*underlying_Cstring(struct _tagged_arr);struct _tagged_arr
+wrap_Cstring_as_string(unsigned char*,unsigned int);struct _tagged_arr Cyc_Std_mmap(
+unsigned int length,int prot,int flags,int fd,int offset);int Cyc_Std_munmap(struct
+_tagged_arr start,unsigned int length);unsigned char*mmap(unsigned char*start,
+unsigned int length,int prot,int flags,int fd,int offset);int munmap(unsigned char*
+start,unsigned int length);struct _tagged_arr Cyc_Std_mmap(unsigned int length,int
+prot,int flags,int fd,int offset){return wrap_Cstring_as_string(mmap(0,length,prot,
+flags,fd,offset),length);}int Cyc_Std_munmap(struct _tagged_arr start,unsigned int
+length){return munmap(underlying_Cstring((struct _tagged_arr)start),length);}

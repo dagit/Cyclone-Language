@@ -432,8 +432,8 @@ bool same_relop(reln_op_t r1,reln_op_t r2) {
 }
 relns_t join_relns(relns_t r1s, relns_t r2s) {
   if (r1s == r2s) return r1s;
-  //fprintf(stderr,"join on ["); print_relns(r1s); 
-  //fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]\n");
+  //  fprintf(stderr,"join on ["); print_relns(r1s); 
+  //  fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]\n");
   list_t<reln_t> res = NULL;
   bool diff = false;
   for (let r1s = r1s; r1s != NULL; r1s = r1s->tl) {
@@ -450,7 +450,7 @@ relns_t join_relns(relns_t r1s, relns_t r2s) {
     if (!found) diff = true;
   }
   if (!diff) res = r1s;
-  //fprintf(stderr,"result ["); print_relns(res); fprintf(stderr,"]\n");
+  //  fprintf(stderr,"result ["); print_relns(res); fprintf(stderr,"]\n");
   return res;
 }
 
@@ -627,8 +627,7 @@ relns_t reln_kill_var(relns_t rs, vardecl_t v) {
     switch (r->rop) {
     case &LessVar(v2):   fallthru(v2);
     case &LessSize(v2):  fallthru(v2);
-    case &LessEqSize(v2):
-      found = true; continue;
+    case &LessEqSize(v2): if(v==v2) found = true; break;
     default: break;
     }
   }
@@ -641,9 +640,8 @@ relns_t reln_kill_var(relns_t rs, vardecl_t v) {
       switch (r->rop) {
       case &LessVar(v2):   fallthru(v2);
       case &LessSize(v2):  fallthru(v2);
-      case &LessEqSize(v2):  
-        if (v == v2) continue; else break;
-      default: break;;
+      case &LessEqSize(v2): if (v == v2) continue; break;
+      default: break;
       }
       new_rs = new List(r,new_rs);
     }

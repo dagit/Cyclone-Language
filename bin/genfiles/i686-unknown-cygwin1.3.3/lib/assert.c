@@ -251,18 +251,21 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 #endif
  void exit(int);struct Cyc_Std__types_fd_set{int fds_bits[2];};struct Cyc_Core_Opt{
-void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};void*Cyc_Std___assert_fail(
-struct _tagged_arr assertion,struct _tagged_arr file,unsigned int line);struct Cyc_Cstdio___abstractFILE;
+void*v;};extern unsigned char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Failure[12];
+struct Cyc_Core_Failure_struct{unsigned char*tag;struct _tagged_arr f1;};extern
+unsigned char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+unsigned char*tag;struct _tagged_arr f1;};extern unsigned char Cyc_Core_Not_found[14];
+extern unsigned char Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{
+unsigned char*tag;struct _tagged_arr f1;};void*Cyc_Std___assert_fail(struct
+_tagged_arr assertion,struct _tagged_arr file,unsigned int line);struct Cyc_Cstdio___abstractFILE;
 struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;int Cyc_Std_fflush(
-struct Cyc_Std___cycFILE*);extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
-18];struct Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{
-int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;}
-;struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{
-int tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};int Cyc_Std_fprintf(
+struct Cyc_Std___cycFILE*);extern unsigned char Cyc_Std_FileCloseError[19];extern
+unsigned char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{
+unsigned char*tag;struct _tagged_arr f1;};struct Cyc_Std_String_pa_struct{int tag;
+struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct
+Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int
+tag;short*f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};int Cyc_Std_fprintf(
 struct Cyc_Std___cycFILE*,struct _tagged_arr fmt,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{
 int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
 struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
@@ -273,6 +276,6 @@ _tagged_arr file,unsigned int line){({struct Cyc_Std_String_pa_struct _tmp3;_tmp
 0;_tmp3.f1=(struct _tagged_arr)assertion;{struct Cyc_Std_Int_pa_struct _tmp2;_tmp2.tag=
 1;_tmp2.f1=line;{struct Cyc_Std_String_pa_struct _tmp1;_tmp1.tag=0;_tmp1.f1=(
 struct _tagged_arr)file;{void*_tmp0[3]={& _tmp1,& _tmp2,& _tmp3};Cyc_Std_fprintf(Cyc_Std_stderr,
-_tag_arr("%s:%u: Assertion `%s' failed.\n",sizeof(char),31),_tag_arr(_tmp0,
-sizeof(void*),3));}}}});Cyc_Std_fflush((struct Cyc_Std___cycFILE*)Cyc_Std_stderr);
+_tag_arr("%s:%u: Assertion `%s' failed.\n",sizeof(unsigned char),31),_tag_arr(
+_tmp0,sizeof(void*),3));}}}});Cyc_Std_fflush((struct Cyc_Std___cycFILE*)Cyc_Std_stderr);
 exit(- 1);}

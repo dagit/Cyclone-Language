@@ -586,7 +586,11 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       }
     default: break;
     }
-    return $(f2,anal_derefR(env,inflow,f,e1,rvals->hd)[1]);
+    let $(f3,r) = anal_derefR(env,inflow,f,e1,rvals->hd);
+    if(f3==BottomFL)
+      return $(f3,r);
+    else
+      return $(f2,r);
 
   case &Tunion_e(es,_,_): fallthru(es); // NULL case handled above
   case &Tuple_e(es):
@@ -800,18 +804,22 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
     default: break;
     }
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,list(e1,e2));
+    let f2 = f;
     switch(f) {
     case &ReachableFL(d2,relns):
       if(initlevel(d2,rvals->tl->hd)==NoneIL)
 	Tcutil::terr(e2->loc, "expression may not be initialized");
       let new_relns = add_subscript_reln(relns,e1,e2);
       if (relns != new_relns)
-        f = new ReachableFL(d2,new_relns);
+        f2 = new ReachableFL(d2,new_relns);
       break;
     default: break;
     }
-    // FIX: if we have x[i] then we can add i < x.size to the flow info
-    return anal_derefL(env,inflow,f,e1,rvals->hd,flds);
+    let $(f3,r) = anal_derefL(env,inflow,f,e1,rvals->hd,flds);
+    if(f3==BottomFL)
+      return $(f3,r);
+    else
+      return $(f2,r);
 
     // KLUDGE: unions (see comment at top of file)
   case &AggrMember_e(e1,fld): 

@@ -697,8 +697,9 @@ static bool need_null_check(exp_t e) { // e must be pre-translation!
   case &CfFlowInfo::IsZero(_): 
     Tcutil::terr(e->loc,"dereference of NULL pointer"); 
     return false;
-  case EmptyAnnot: fprintf(stderr,"!"); 
-    Tcutil::warn(e->loc,"unreachable dereference");
+  case EmptyAnnot:
+    // warning is unfounded under sizeof as in memcpy
+    // Tcutil::warn(e->loc,"unreachable dereference");
     return false;
   default: throw new Core::Impossible("need_null_check");
   }

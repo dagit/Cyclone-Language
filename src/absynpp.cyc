@@ -635,7 +635,7 @@ doc_t ntyp2doc(type_t t) {
     case B1:
       switch (sn) {
       case Signed:   sns = "signed "; break;
-      case Unsigned: sns = ""; break;
+      case Unsigned: sns = "unsigned "; break;
       }
       ts = "char";
       break;

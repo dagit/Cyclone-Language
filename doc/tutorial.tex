@@ -1451,19 +1451,23 @@ does not leak to a client.
 % struct \texttt{abstract}.  That way, clients are always given an
 % abstract struct to manipulate.
 
-\texttt{Typedef}s cannot be made abstract.  As in C, typedefs are type
-abbreviations and are expanded at compile time.  If we chose to make
-them (potentially) abstract, then we'd have to enforce a ``boxedness''
-restriction, similar to the restrictions on type variables.  To
-simplify the language, we chose to make structs abstract.
+\texttt{Typedef}s can be made abstract by writing:
+\begin{verbatim}
+typedef _ foo_t;
+\end{verbatim}
+However, our current implementation does not support later redefining
+\texttt{foo_t} as a non-abstract typedef.  The default kind for the
+type is B; you can write an explicit kind like this:
+\begin{verbatim}
+typedef _::A bar_t;
+\end{verbatim}
+Generally abstract structs are sufficient.  An abstract typedef is
+useful in some cases, though, such as when the abstracted type is
+actually \texttt{int}.
 
 It's also possible to code up ``first-class'' abstract data types
-using \texttt{tunion}s or \texttt{xtunion}s.  Individual [x]tunion
-constructors can be parameterized by additional type variables that
-are local to the type-constructor.  (From a type-theoretic point of
-view, these are existentially-quantified variables.)  Our current
-approach is quite similar to the treatment of existential types in
-Haskell.  Existential types are described in
+using \texttt{struct}s with \emph{existentially quantified type
+  variables}.  Existential types are described in
 \hyperref[{sec:taggedunions}]{Section~\ref{sec:taggedunions}}.
 
 % In particular, pattern matching one of these constructors

@@ -433,7 +433,7 @@ void dumpntyp(type_t t) {
     break;
   case &IntType(Signed,   B4): dump("int"); return;
   case &IntType(Signed,   B1): dump("signed char"); return;
-  case &IntType(Unsigned, B1): dump("char"); return;
+  case &IntType(Unsigned, B1): dump("unsigned char"); return;
   case &IntType(Signed,   B2): dump("short"); return;
   case &IntType(Unsigned, B2): dump("unsigned short"); return;
   case &IntType(Unsigned, B4): dump("unsigned int"); return;
