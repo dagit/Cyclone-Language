@@ -720,7 +720,7 @@ static flow_t restore_noconsume_arg(analenv_t env,
     break;
   case $({.BottomFL = _}, _): break;
   default:
-    Warn::impos("noconsume() parameters must be l-values");
+    Warn::impos("noconsume parameter %s must be l-values",exp2string(exp));
     break;
   }
   return inflow;
@@ -1052,6 +1052,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     // In essence, we're assuming the result absRval_t is not Aggregate.
   case &Cast_e(_,e1,_,_):    fallthru(e1);
   case &NoInstantiate_e(e1): fallthru(e1);
+  case &Extension_e(e1):     fallthru(e1);
   case &Instantiate_e(e1,_): return anal_Rexp(env,copy_ctxt,inflow,e1);
 
   case &Pragma_e(p):

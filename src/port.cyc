@@ -1481,6 +1481,7 @@ static ctype_t gen_exp(bool takeaddress,cenv_t env, exp_t e) {
     }
     return v;
   case &Throw_e(...): impos("throw");
+  case &Extension_e(e1): return gen_exp(false,env,e1);
   case &NoInstantiate_e(e1): return gen_exp(false,env,e1);
   case &Instantiate_e(_,_): impos("instantiate");
   case &Cast_e(t,e1,_,_):

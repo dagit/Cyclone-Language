@@ -952,8 +952,12 @@ type_t typ_to_c(type_t t) {
     // that might occur within.  So, for now, we don't do any translation.
     // This will bite me somewhere else...
   case &ValueofType(e): return t;
-    // FIX: we really need to translate e!
-  case &TypeofType(e): return t;
+  case &TypeofType(e): 
+    // JGM: we have to eliminate typeof(e)'s since these might
+    // occur within a type declaration and we will pull the
+    // type-declaration out of scope and put it to the top-level.
+    if (e->topt != NULL) return typ_to_c((type_t)e->topt);
+    else return t;
   case &BuiltinType(...): return t;
   case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
     aggrdecl_to_c(ad,true);
@@ -1914,6 +1918,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Const_e(_): break;
   case &Var_e(_):   break;
+  case &Extension_e(e1): exp_to_c(nv,e1); break;
   case &Primop_e(p,es):
     // Save Cyclone types -- needed for pointer arith stuff
     let old_typs = List::map(get_cyc_typ,es);
@@ -4510,6 +4515,7 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
 
 static void exptypes_to_c(exp_t e) {
   switch (e->r) {
+  case &Extension_e(e):      fallthru(e);
   case &Deref_e(e):          fallthru(e);
   case &AggrMember_e(e,...): fallthru(e);
   case &AggrArrow_e(e,...):  fallthru(e);

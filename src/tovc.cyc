@@ -528,6 +528,7 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
   case &AssignOp_e(e1, _, e2):
     exp_to_vc(env, e2);          fallthru(e1);
 
+  case &Extension_e(e1):     fallthru(e1);
   case &NoInstantiate_e(e1): fallthru(e1);
   case &Instantiate_e(e1,_): fallthru(e1);
   case &Cast_e(_,e1,_,_):    fallthru(e1);

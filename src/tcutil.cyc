@@ -371,6 +371,7 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   case &Offsetof_e(t,ofs):
     new_e = offsetof_exp(copy_type(t),ofs,e->loc); break;
   case &Deref_e(e1): new_e = deref_exp(DC(pt,e1),e->loc); break;
+  case &Extension_e(e1): new_e = extension_exp(DC(pt,e1),e->loc); break;
   case &AggrMember_e(e1,n,f1,f2):
     new_e = new_exp(new AggrMember_e(DC(pt,e1),n,f1,f2),e->loc); break;
   case &AggrArrow_e(e1,n,f1,f2):
@@ -3334,6 +3335,10 @@ exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
     let new_e1 = rsubsexp(r,inst,e1);
     if (new_e1 == e1) return e;
     return copye(e, new Sizeofexp_e(new_e1));
+  case &Extension_e(e1):
+    let new_e1 = rsubsexp(r,inst,e1);
+    if (new_e1 == e1) return e;
+    return copye(e, new Extension_e(new_e1));
   case &Offsetof_e(t,f):
     let new_t = rsubstitute(r,inst,t);
     if (new_t == t) return e;
@@ -4756,6 +4761,9 @@ i_check_valid_type_level_exp(exp_t e, tenv_t te, cvtenv_t<`r> cvtenv) {
   case &Sizeofexp_e(e):
     cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
     break;
+  case &Extension_e(e):
+    cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
+    break;
   default:
     impos("non-type-level-expression in Tcutil::i_check_valid_type_level_exp");
   }
@@ -5546,6 +5554,7 @@ static bool cnst_exp(bool var_okay, exp_t e) {
             && cnst_exp(false,e3));
   case &SeqExp_e(e1,e2):
     return (cnst_exp(false,e1) && cnst_exp(false,e2));
+  case &Extension_e(e2): fallthru(e2);
   case &NoInstantiate_e(e2): fallthru(e2);
   case &Instantiate_e(e2,_):
     return cnst_exp(var_okay,e2);

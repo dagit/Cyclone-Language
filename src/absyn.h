@@ -657,6 +657,8 @@ namespace Absyn {
     Asm_e(bool volatile_kw,string_t); // uninterpreted asm statement -- used
     // within extern "C include" -- the string is all of the gunk that goes
     // between the parens.
+    Extension_e(exp_t); 
+    // implements GCC's __extension__ (...) though we just pass it through.
   };
   // expression with auxiliary information
   EXTERN_ABSYN struct Exp {
@@ -1067,6 +1069,7 @@ namespace Absyn {
   extern exp_t array_exp(list_t<exp_t,`H>, seg_t);
   extern exp_t valueof_exp(type_t, seg_t);
   extern exp_t asm_exp(bool volatile_kw, string_t<`H> body, seg_t);
+  extern exp_t extension_exp(exp_t, seg_t);
   extern exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
                                  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
 				 seg_t);

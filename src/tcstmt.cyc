@@ -85,6 +85,7 @@ static bool noassign_exp(exp_t e) {
   case &Subscript_e(e1,e2): fallthru(e1,e2);
   case &SeqExp_e(e1,e2)   : return noassign_exp(e1) && noassign_exp(e2);
 
+  case &Extension_e(e)              : fallthru(e);
   case &Tagcheck_e(e,_)             : fallthru(e);
   case &Throw_e(e,...)              : fallthru(e);
   case &NoInstantiate_e(e)          : fallthru(e);

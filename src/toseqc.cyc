@@ -149,6 +149,7 @@ static enum SideEffect exp_effect(exp_t e) {
   case &SeqExp_e(e1,e2):
     return exps_effect(list(e1,e2));
 
+  case &Extension_e(e1):      fallthru(e1);
   case &NoInstantiate_e(e1):  fallthru(e1);
   case &Instantiate_e(e1,_):  fallthru(e1);
   case &Cast_e(_,e1,_,_):     fallthru(e1);
@@ -321,6 +322,7 @@ static void exp_to_seqc(exp_t e) {
   case &SeqExp_e(e1,e2):
     exp_to_seqc(e2);          fallthru(e1);
 
+  case &Extension_e(e1):      fallthru(e1);
   case &NoInstantiate_e(e1):  fallthru(e1);
   case &Instantiate_e(e1,_):  fallthru(e1);
   case &Cast_e(_,e1,_,_):     fallthru(e1);

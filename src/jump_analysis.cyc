@@ -121,6 +121,7 @@ static void anal_exp(senv_t env, exp_t e) { // only care about nested StmtExp_e
   case &FnCall_e(e1,es,_,_): anal_exp(env,e1); anal_exps(env,es); break;
 
   case &ComprehensionNoinit_e(e1,_,_): fallthru(e1);
+  case &Extension_e(e1):       fallthru(e1);
   case &Tagcheck_e(e1,_):      fallthru(e1);
   case &Address_e(e1):         fallthru(e1);
   case &Deref_e(e1):           fallthru(e1);

@@ -1062,7 +1062,7 @@ using Parse;
 %token DOUBLE SIGNED UNSIGNED CONST VOLATILE RESTRICT
 %token STRUCT UNION CASE DEFAULT INLINE SIZEOF OFFSETOF
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM TYPEOF
-%token BUILTIN_VA_LIST
+%token BUILTIN_VA_LIST EXTENSION
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH EXPORT
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
@@ -1425,6 +1425,10 @@ declaration_specifiers:
       $$=^$(Declaration_spec($1,two.tq,two.type_specs,
                              two.is_inline,
                              two.attributes));
+    }
+| EXTENSION declaration_specifiers
+    { Warn::warn(LOC(@1,@1), "__extension__ keyword ignored in declaration");
+      $$=$!2; 
     }
 | type_specifier
     { $$=^$(Declaration_spec(NULL,empty_tqual(SLOC(@1)),
@@ -3041,6 +3045,7 @@ unary_expression:
 | ASM
    { let $(v,s) = $1;
      $$=^$(asm_exp(v,s,SLOC(@1))); }
+| EXTENSION unary_expression { $$=^$(extension_exp($2,LOC(@1,@3))); }
 ;
 
 unary_operator:
