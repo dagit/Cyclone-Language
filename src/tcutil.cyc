@@ -371,7 +371,7 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   let pt = preserve_types;
   switch (e->r) {
   case &Const_e(c): new_e = const_exp(c,e->loc); break;
-  case &Var_e(qv,b): new_e = varb_exp(qv,b,e->loc); break;
+  case &Var_e(b):   new_e = varb_exp(b,e->loc);  break;
   case &Primop_e(p, es): new_e = primop_exp(p, map_c(DC,pt,es),e->loc); break;
   case &AssignOp_e(e1,po,e2):
     new_e=assignop_exp(DC(pt,e1),po ? new Opt(po->v) : NULL,DC(pt,e2),e->loc);
@@ -1609,7 +1609,7 @@ void unify_it(type_t t1, type_t t2) {
   case $(&FnType(FnInfo{tvs2,eff2,rt_tq2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2,req1,req_relns1,ens1,ens_relns1}),
          &FnType(FnInfo{tvs1,eff1,rt_tq1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1,req2,req_relns2,ens2,ens_relns2})):
     bool done = false;
-    region rgn; {
+    { region rgn; 
     list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = NULL;
     while (tvs1 != NULL) {
       if (tvs2 == NULL) {
@@ -2496,7 +2496,7 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ) {
   static int counter = 0;
   qvar_t v = new $(Loc_n, new ((string_t)aprintf("__aliasvar%d",counter++)));
   vardecl_t vd = new_vardecl(v,e_typ,e);
-  exp_t ve = varb_exp(v,new Local_b(vd),e->loc);
+  exp_t ve = varb_exp(new Local_b(vd),e->loc);
   // generate a fresh region variable for it and make the type
   // of the variable be as close to the instantiated type as we
   // can.  We achieve this by unifying the expected type, which
@@ -3094,14 +3094,6 @@ type_t max_arithmetic_type(type_t t1, type_t t2) {
   case $(&IntType(_,Long_sz),_):
   case $(_,&IntType(_,Long_sz)): return slong_typ;
   default: return sint_typ;
-  }
-}
-
-// used to warn when a while, for, if, or do test contains an assignment
-void check_contains_assign(exp_t e) {
-  switch (e->r) {
-  case &AssignOp_e(_,NULL,_): warn(e->loc,"assignment in test"); break;
-  default: break;
   }
 }
 
@@ -5214,9 +5206,8 @@ bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
       impos("found zero pointer instantiate/noinstantiate: %s",
 	    exp2string(e1));
     return false;
-  case &Var_e(_,_): return false;
-  default:
-    impos("found bad lhs in is_zero_ptr_deref: %s",exp2string(e1));
+  case &Var_e(...): return false;
+  default: impos("found bad lhs in is_zero_ptr_deref: %s",exp2string(e1));
   }
 }
 
@@ -5365,7 +5356,7 @@ static bool is_noalias_field(region_t<`r> r, type_t t, field_name_t f) {
 // int *`U*`H*`U x
 bool is_noalias_path(region_t<`r> r, exp_t e) {
   switch (e->r) {
-  case &Var_e(_,&Global_b(...)): return false;
+  case &Var_e(&Global_b(...)): return false;
   case &AggrArrow_e(e1,...): fallthru(e1);
   case &Deref_e(e1):
     return is_noalias_pointer((type_t)e1->topt,true) &&
@@ -5410,10 +5401,10 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
   // in some situations, the pointer must actually be const
   $(bool,type_t) bogus_ans = $(false, &HeapRgn_val);
   switch (e->r) {
-  case &Var_e(q,x):
+  case &Var_e(x):
     // where oh where does my variable live?
     switch(x) {
-    case &Unresolved_b:
+    case &Unresolved_b(_):
     case &Funname_b(_): return bogus_ans;
     case &Global_b(vd):
       switch (compress((type_t)e->topt)) {
@@ -5563,12 +5554,11 @@ bool bits_only(type_t t) {
     for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
       if (!bits_only(fs->hd->type)) { okay = false; break; }
     if (okay) return true;
-    region rgn; {
-      let inst = List::rzip(rgn,rgn,ad->tvs,ts);
-      for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
-	if (!bits_only(rsubstitute(rgn,inst,fs->hd->type))) return false;
-      return true;
-    }
+    region rgn; 
+    let inst = List::rzip(rgn,rgn,ad->tvs,ts);
+    for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
+      if (!bits_only(rsubstitute(rgn,inst,fs->hd->type))) return false;
+    return true;
   case &AnonAggrType(_,fs):
     for (; fs != NULL; fs = fs->tl)
       if (!bits_only(fs->hd->type)) return false;
@@ -5603,7 +5593,7 @@ static bool cnst_exp(bool var_okay, exp_t e) {
   case &Offsetof_e(_,_):
   case &Enum_e(_,_,_):
   case &AnonEnum_e(_,_,_): return true;
-  case &Var_e(qv,b):
+  case &Var_e(b):
     // NB: top-level function names and arrays are "constant"
     // Ignore unbound variables b/c should be reported elsewhere
     switch (b) {
@@ -5624,7 +5614,7 @@ static bool cnst_exp(bool var_okay, exp_t e) {
 	}
       else
 	return var_okay;
-    case &Unresolved_b: return false;
+    case &Unresolved_b(_): return false;
     default: return var_okay;
     }
 
@@ -5724,14 +5714,13 @@ void check_no_qual(seg_t loc, type_t t) {
 
 static bool fields_support_default(list_t<tvar_t> tvs, list_t<type_t> ts,
                                    list_t<aggrfield_t> fs) {
-  region rgn; {
-    let inst = List::rzip(rgn,rgn,tvs,ts);
-    for (; fs != NULL; fs = fs->tl) {
-      type_t t = fs->hd->type;
-      if (supports_default(t)) return true;
-      t = rsubstitute(rgn,inst,fs->hd->type);
-      if (!supports_default(t)) return false;
-    }
+  region rgn; 
+  let inst = List::rzip(rgn,rgn,tvs,ts);
+  for (; fs != NULL; fs = fs->tl) {
+    type_t t = fs->hd->type;
+    if (supports_default(t)) return true;
+    t = rsubstitute(rgn,inst,fs->hd->type);
+    if (!supports_default(t)) return false;
   }
   return true;
 }
@@ -5893,12 +5882,11 @@ bool zeroable_type(type_t t) {
     let ad = get_known_aggrdecl(info);
     if(ad->impl == NULL || ad->impl->exist_vars != NULL)
       return false;
-    region r; {
-      let inst = List::rzip(r,r,ad->tvs,ts);
-      for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
-        if (!zeroable_type(rsubstitute(r,inst,fs->hd->type))) return false;
-      return true;
-    }
+    region r; 
+    let inst = List::rzip(r,r,ad->tvs,ts);
+    for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
+      if (!zeroable_type(rsubstitute(r,inst,fs->hd->type))) return false;
+    return true;
   case &EnumType(_,_): return true; // FIX: explicit tags?
   case &TagType(_): return true; // FIX: true iff 0? Is sizeof right?
   case &AnonAggrType(_,fs):

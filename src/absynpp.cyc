@@ -1092,7 +1092,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   doc_t s;
   switch (e->r) {
   case &Const_e(c):     s = cnst2doc(c); break;
-  case &Var_e(x,_):     s = qvar2doc(x); break;
+  case &Var_e(b):       s = qvar2doc(binding2qvar(b)); break;
   case &Primop_e(p,es): s = primapp2doc(myprec,p,es); break;
   case &AssignOp_e(e1,popt,e2):
     s = cat(exp2doc_prec(myprec,e1),

@@ -329,7 +329,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
 		    s->loc)->r;
 
-    TEMP_RGN(te,r) {
+    { TEMP_RGN(te,r) 
       tcStmt(te,s,true);
     }
 
@@ -341,7 +341,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     let def_clause = new Switch_clause{def_pat, NULL, NULL, def_stmt, 0};
     *scs0 = List::append(*scs0,list(def_clause));
     
-    TEMP_RGN(te,r2) {
+    { TEMP_RGN(te,r2)
       // similar to Switch_s -- check the patterns in reverse order:
       let te = clear_fallthru(r2,te);
       for (let scs = List::rev(*scs0); scs != NULL; scs = scs->tl) {

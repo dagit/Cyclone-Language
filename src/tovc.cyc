@@ -107,47 +107,48 @@ typedef struct ToExpEnv<`r> toexpenv_t<`r>; // not boxed
 static exp_opt_t box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
   while(true)
   switch (e->r) {
-  case &Var_e(&$({.Loc_n = _},v),_):
-    // DO NOT MUTATE qvars -- They get shared in funky ways
-    // first apply the varmap
-    if (Dict::member(env.varmap,v)) {
-      e->r = Dict::lookup(env.varmap,v)->r;
-      continue;
-    }
-    // Don't box if it's a global (defined in cyc_include.h, inserted by toc)
-    for (int i = 0; i < numelts(Toc::globals); i++)
-      if (strptrcmp(v,Toc::globals[i])==0)
-	return NULL;
-    // now determine if it's free or bound
-    for (; env.boundvars != NULL; env.boundvars = env.boundvars->tl)
-      if (strptrcmp(v,(*env.boundvars->hd->name)[1])==0)
-	return NULL;
-    // okay, it's free
-    for (; env.all_locals != NULL; env.all_locals = env.all_locals->tl) {
-      let vd = env.all_locals->hd;
-      if (strptrcmp(v,(*vd->name)[1])==0) {
-	*env.freevars = Set::rinsert(env.rgn,*env.freevars,vd);
-	// don't deref if it's a stack-allocated array 
-	switch (vd->type) {
-	case &ArrayType(_): return NULL;
-	default: return deref_exp(var_exp(vd->name,DL),DL);
-        }
+  case &Var_e(b):
+    switch(binding2qvar(b)) {
+    case &$({.Loc_n = _},v):
+      // DO NOT MUTATE qvars -- They get shared in funky ways
+      // first apply the varmap
+      if (Dict::member(env.varmap,v)) {
+	e->r = Dict::lookup(env.varmap,v)->r;
+	continue;
       }
-    }
-
-    //FJS: if its a local var that does hit either of the previous cases 
-    //     (bound or free), throw exception
-    for (; env.all_locals != NULL; env.all_locals = env.all_locals->tl)
-      if (strptrcmp(v,(*env.all_locals->hd->name)[1])==0) {
-	throw new Impossible(aprintf("unbound variable %s found in box_free_vars_exp", *v));
+      // Don't box if it's a global (defined in cyc_include.h, inserted by toc)
+      for (int i = 0; i < numelts(Toc::globals); i++)
+	if (strptrcmp(v,Toc::globals[i])==0)
+	  return NULL;
+      // now determine if it's free or bound
+      for (; env.boundvars != NULL; env.boundvars = env.boundvars->tl)
+	if (strptrcmp(v,(*env.boundvars->hd->name)[1])==0)
+	  return NULL;
+      // okay, it's free
+      for (; env.all_locals != NULL; env.all_locals = env.all_locals->tl) {
+	let vd = env.all_locals->hd;
+	if (strptrcmp(v,(*vd->name)[1])==0) {
+	  *env.freevars = Set::rinsert(env.rgn,*env.freevars,vd);
+	  // don't deref if it's a stack-allocated array 
+	  switch (vd->type) {
+	  case &ArrayType(_): return NULL;
+	  default: return deref_exp(var_exp(vd->name,DL),DL);
+	  }
+	}
       }
-    
-    //FJS: if it's neither a local var or a global var, assume it is from the header file
-    //     (eg. _get_zero_arr_size_char)
-    return NULL;
-
-    //    throw new Impossible(aprintf("unbound variable %s found in box_free_vars_exp", *v));
-  case &Var_e(_,_): return NULL;
+      
+      //FJS: if its a local var that does hit either of the previous cases 
+      //     (bound or free), throw exception
+      for (; env.all_locals != NULL; env.all_locals = env.all_locals->tl)
+	if (strptrcmp(v,(*env.all_locals->hd->name)[1])==0) {
+	  throw new Impossible(aprintf("unbound variable %s found in box_free_vars_exp", *v));
+	}
+      
+      //FJS: if it's neither a local var or a global var, assume it is from the header file
+      //     (eg. _get_zero_arr_size_char)
+      return NULL;
+    default: return NULL;
+    }
 
     // the next group of expressions could possibly be in lvals, so
     // we copy them, rather than mutate them.
@@ -389,13 +390,14 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
 
 static void apply_varmap(Dict::dict_t<var_t,exp_t,`r> varmap, exp_t e) {
   switch (e->r) {
-  case &Var_e(&$({.Loc_n = _},v),_):
-    // DO NOT MUTATE qvars -- They get shared in funky ways
-    // first apply the varmap
-    if (Dict::member(varmap,v))
-      e->r = Dict::lookup(varmap,v)->r;
-    return;
-  case &Var_e(_,_): return;
+  case &Var_e(b):
+    switch(binding2qvar(b)) {
+    case &$({.Loc_n = _},v):
+      if (Dict::member(varmap,v))
+	e->r = Dict::lookup(varmap,v)->r;
+      return;
+    default: return;
+    }
 
     // everything else is just recursive descent
   case &Const_e(_): return;
@@ -516,7 +518,7 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
   string_t bad_form = "";
   switch (e->r) {
   case &Const_e(_): return;
-  case &Var_e(_,_): return;
+  case &Var_e(_): return;
 
   case &FnCall_e(e1,es,...):
     exp_to_vc(env, e1); fallthru(es);

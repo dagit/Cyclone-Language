@@ -45,11 +45,7 @@
 //      Abs_n is used for some globals (Null_Exception, etc).
 //      Loc_n is used for some locals (comprehension and pattern variables).
 // Here are some invariants after type checking:
-//  B1. None of the following are used:
-//        UnknownId_e, UnknownCall_e, UnresolvedMem_e
-//      They have all been replaced by
-//        Var_e, FnCall_e, Struct_e, Datatype_e, 
-//      In Var_e, Unresolved_b is not used.
+//  B1. UnresolvedMem_e and Unresolved_b are not used.
 //  B2. All qvars are either Loc_n, Abs_n or C_n.  Any Rel_n has been
 //      replaced by Loc_n, Abs_n or C_n.
 //  B3. All "dest fields" and non_local_preds fields in stmt objects
@@ -611,7 +607,7 @@ namespace Absyn {
   // "raw" expressions -- don't include location info or type
   EXTERN_ABSYN datatype Raw_exp {
     Const_e(cnst_t); // constants
-    Var_e(qvar_t,binding_t); // variables -- binding_t gets filled in
+    Var_e(binding_t); // variables -- binding_t gets filled in
     Primop_e(primop_t,list_t<exp_t>); // application of primitive
     AssignOp_e(exp_t,opt_t<primop_t>,exp_t); // e1 = e2, e1 += e2, etc.
     Increment_e(exp_t,incrementor_t);  // e++, ++e, --e, e--
@@ -765,14 +761,13 @@ namespace Absyn {
 
   // only local and pat cases need to worry about shadowing
   EXTERN_ABSYN datatype Binding {
-    Unresolved_b;        // don't know -- error or uninitialized
+    Unresolved_b(qvar_t);// don't know -- error or uninitialized
     Global_b(vardecl_t); // global variable
     Funname_b(fndecl_t); // distinction between functions and function ptrs
     Param_b(vardecl_t);  // local function parameter
     Local_b(vardecl_t);  // local variable
     Pat_b(vardecl_t);    // pattern variable
   };
-  extern_datacon(Binding,Unresolved_b);
 
   // Variable declarations.
   // re-factor this so different kinds of vardecls only have what they
@@ -1049,7 +1044,7 @@ namespace Absyn {
   extern exp_t string_exp(string_t<`H> s, seg_t);
   extern exp_t wstring_exp(string_t<`H> s, seg_t);
   extern exp_t var_exp(qvar_t, seg_t);
-  extern exp_t varb_exp(qvar_t, binding_t, seg_t);
+  extern exp_t varb_exp(binding_t, seg_t);
   extern exp_t unknownid_exp(qvar_t, seg_t);
   extern exp_t primop_exp(primop_t, list_t<exp_t,`H> es, seg_t);
   extern exp_t prim1_exp(primop_t, exp_t, seg_t);
@@ -1206,8 +1201,7 @@ namespace Absyn {
   // is a type an aggregate type (i.e. struct, tuple, etc.)
   extern bool is_aggr_type(type_t t);
 
-  // for testing typerep; temporary
-  // extern void print_decls(list_t<decl_t>);
+  extern qvar_t binding2qvar(binding_t);
 
   // used to control whether we're compiling or porting c code
   extern bool porting_c_code;

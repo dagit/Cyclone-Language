@@ -1321,7 +1321,7 @@ static struct _dyneither_ptr Cyc_sround(double fract,int*exp,struct _dyneither_p
 double tmp=0.0;
 # 738
 if(fract != 0.0)
-modf(fract * 10,& tmp);else{
+ modf(fract * 10,& tmp);else{
 # 741
 tmp=(double)(ch - '0');}
 if(tmp > 4)
@@ -1366,12 +1366,12 @@ number=- number;
 # 787
 *signp=0;}
 # 789
-fract=modf(number,& integer);
+fract= modf(number,& integer);
 # 792
 t=_dyneither_ptr_inplace_plus(& startp,sizeof(char),1);
 # 798
 for(p=_dyneither_ptr_plus(endp,sizeof(char),- 1);(char*)p.curr >= (char*)startp.curr  && integer != 0.0;++ expcnt){
-tmp=modf(integer / 10,& integer);
+tmp= modf(integer / 10,& integer);
 ({struct _dyneither_ptr _tmp7A=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),-1);char _tmp7B=*((char*)_check_dyneither_subscript(_tmp7A,sizeof(char),0));char _tmp7C=(char)((int)((tmp + .01)* 10)+ '0');if(_get_dyneither_size(_tmp7A,sizeof(char))== 1  && (_tmp7B == '\000'  && _tmp7C != '\000'))_throw_arraybounds();*((char*)_tmp7A.curr)=_tmp7C;});}
 # 802
 {int _tmp7D=fmtch;switch(_tmp7D){case 102: _LL8E: _LL8F:
@@ -1388,7 +1388,7 @@ if(prec  || flags & 8)
 if(fract != 0.0){
 if(prec)
 do{
-fract=modf(fract * 10,& tmp);
+fract= modf(fract * 10,& tmp);
 ({struct _dyneither_ptr _tmp87=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp88=*((char*)_check_dyneither_subscript(_tmp87,sizeof(char),0));char _tmp89=(char)((int)tmp + '0');if(_get_dyneither_size(_tmp87,sizeof(char))== 1  && (_tmp88 == '\000'  && _tmp89 != '\000'))_throw_arraybounds();*((char*)_tmp87.curr)=_tmp89;});}while(
 -- prec  && fract != 0.0);
 if(fract != 0.0)
@@ -1416,7 +1416,7 @@ _dyneither_ptr_plus(t,sizeof(char),- 1),*((char*)_check_dyneither_subscript(p,si
 if(fract != 0.0){
 # 852
 for(expcnt=- 1;1;-- expcnt){
-fract=modf(fract * 10,& tmp);
+fract= modf(fract * 10,& tmp);
 if(tmp != 0.0)
 break;}
 # 857
@@ -1431,7 +1431,7 @@ if(prec  || flags & 8)
 if(fract != 0.0){
 if(prec)
 do{
-fract=modf(fract * 10,& tmp);
+fract= modf(fract * 10,& tmp);
 ({struct _dyneither_ptr _tmpA2=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpA3=*((char*)_check_dyneither_subscript(_tmpA2,sizeof(char),0));char _tmpA4=(char)((int)tmp + '0');if(_get_dyneither_size(_tmpA2,sizeof(char))== 1  && (_tmpA3 == '\000'  && _tmpA4 != '\000'))_throw_arraybounds();*((char*)_tmpA2.curr)=_tmpA4;});}while(
 -- prec  && fract != 0.0);
 if(fract != 0.0)
@@ -1475,11 +1475,11 @@ if(fract != 0.0){
 if(prec){
 # 935
 do{
-fract=modf(fract * 10,& tmp);
+fract= modf(fract * 10,& tmp);
 ({struct _dyneither_ptr _tmpB1=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpB2=*((char*)_check_dyneither_subscript(_tmpB1,sizeof(char),0));char _tmpB3=(char)((int)tmp + '0');if(_get_dyneither_size(_tmpB1,sizeof(char))== 1  && (_tmpB2 == '\000'  && _tmpB3 != '\000'))_throw_arraybounds();*((char*)_tmpB1.curr)=_tmpB3;});}while(
 tmp == 0.0  && !expcnt);
 while(-- prec  && fract != 0.0){
-fract=modf(fract * 10,& tmp);
+fract= modf(fract * 10,& tmp);
 ({struct _dyneither_ptr _tmpB4=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpB5=*((char*)_check_dyneither_subscript(_tmpB4,sizeof(char),0));char _tmpB6=(char)((int)tmp + '0');if(_get_dyneither_size(_tmpB4,sizeof(char))== 1  && (_tmpB5 == '\000'  && _tmpB6 != '\000'))_throw_arraybounds();*((char*)_tmpB4.curr)=_tmpB6;});}}
 # 944
 if(fract != 0.0)

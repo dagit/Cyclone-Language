@@ -75,11 +75,12 @@ static $(list_t<designator_t>,exp_t)@ make_struct_arg(exp_t e) {
 // constructor.  Return false if an error occurs to prevent cascading errors.
 static bool resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es){
   switch (e1->r) {
-  case &Var_e(q,*b):
+  case &Var_e(*b):
+    let q = binding2qvar(*b);
     try {
       TEMP_RGN(te, r) {
         switch (lookup_ordinary(r,te,e1->loc,q,true)) {
-        case &VarRes(&Unresolved_b):
+        case &VarRes(&Unresolved_b(_)):
           terr(e1->loc,"undeclared identifier %s",qvar2string(q));
           return false;
         case &VarRes(bnd):
@@ -127,7 +128,7 @@ void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   case &AggrType(AggrInfo(info,_)):
     switch(info) {
     case {.UnknownAggr = _}: impos("struct type not properly set");
-    case {.KnownAggr = &ad}:   e->r = new Aggregate_e(ad->name,NULL,des,ad);
+    case {.KnownAggr = &ad}: e->r = new Aggregate_e(ad->name,NULL,des,ad);
     }
     break;
   case &ArrayType(ArrayInfo{at,aq,_,_,_}): e->r = new Array_e(des); break;
@@ -146,6 +147,14 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e);
 static void tcExpList(tenv_t te, list_t<exp_t> es) {
   for(; es != NULL; es = es->tl)
     tcExp(te,NULL,es->hd);
+}
+
+// used to warn when a while, for, if, do, !, &&, or || contains an assignment
+static void check_contains_assign(exp_t e) {
+  switch (e->r) {
+  case &AssignOp_e(_,NULL,_): warn(e->loc,"assignment in test"); break;
+  default: break;
+  }
 }
 
 // Type check the if expressions, the loop guards, and the where clauses
@@ -333,20 +342,19 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
                          datatypefield_t tuf);
 
 // variables
-static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, qvar_t q, 
-                    binding_t *b) {
+static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, binding_t *b){
   // this may actually be a variable, enum constructor, datatype constructor
   // (of no arguments).  Resolve and then continue as appropriate.
   switch(*b) {
-  case &Unresolved_b:
+  case &Unresolved_b(q):
     try {
       TEMP_RGN(te,r) {
         switch (lookup_ordinary(r,te,e->loc,q,true)) {
-        case &VarRes(&Unresolved_b): 
+        case &VarRes(&Unresolved_b(_)): 
           return expr_err(te,loc,NULL,"undeclared identifier %s",qvar2string(q));
         case &VarRes(bnd): 
           *b = bnd; 
-          return tcVar(te,loc,topt,e,q,b);
+          return tcVar(te,loc,topt,e,b);
         case &EnumRes(ed,ef):     
           e->r = new Enum_e(ef->name,ed,ef); 
           return new EnumType(ed->name,ed);
@@ -364,14 +372,11 @@ static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, qvar_t q,
     case &Dict::Absent:
       return expr_err(te,loc,NULL,"undeclared identifier %s",qvar2string(q));
     }
-  case &Global_b(vd):
-    *q = *vd->name;
-    return vd->type;
-  case &Funname_b(fd): *q = *fd->name; return fndecl2typ(fd);
+  case &Global_b(vd):  return vd->type;
+  case &Funname_b(fd): return fndecl2typ(fd);
   case &Pat_b(vd):     fallthru(vd);
   case &Local_b(vd):   fallthru(vd);
   case &Param_b(vd):
-    (*q)[0] = Nmspace{.Loc_n = 0};
     if (te->allow_valueof) {
       switch (compress(vd->type)) {
       case &TagType(i):
@@ -780,10 +785,10 @@ static void check_writable(tenv_t te, exp_t e) {
   // then it's not a valid updateable lvalue
   if (!check_writable_aggr(e->loc,(type_t)e->topt)) return;
   switch (e->r) {
-  case &Var_e(_,&Param_b(vd)): fallthru(vd);
-  case &Var_e(_,&Local_b(vd)): fallthru(vd);
-  case &Var_e(_,&Pat_b(vd)):   fallthru(vd);
-  case &Var_e(_,&Global_b(vd)): if (!vd->tq.real_const) return; break;
+  case &Var_e(&Param_b(vd)): fallthru(vd);
+  case &Var_e(&Local_b(vd)): fallthru(vd);
+  case &Var_e(&Pat_b(vd)):   fallthru(vd);
+  case &Var_e(&Global_b(vd)): if (!vd->tq.real_const) return; break;
   case &Subscript_e(e1,e2):
     switch (compress((type_t)e1->topt)) {
     case &PointerType(PtrInfo{_,tq,_}): fallthru(tq);
@@ -2822,8 +2827,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
 
   case &Const_e(*c):
     t = tcConst(te,loc,topt,c,e); break;
-  case &Var_e(q,*b):
-    t = tcVar(te,loc,topt,e,q,b); break;
+  case &Var_e(*b):
+    t = tcVar(te,loc,topt,e,b); break;
   case &Primop_e(p,es):
     t = tcPrimop(te,loc,topt,p,es); break;
   case &Increment_e(e1,i):

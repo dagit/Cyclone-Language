@@ -16,7 +16,6 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-
 #include <core.h>
 #include <string.h>
 #include <list.h>
@@ -280,8 +279,9 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
     switch ((*ans)[0]) {
     case &VarRes(b0):
       let b1 = new Global_b(vd);
-      let b = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
-      if (b == &Unresolved_b_val) return; // error in merging
+      let bp = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
+      if (bp == NULL) return; // error in merging
+      let b = *bp;
       // make the update if the variable is exported
       if (exports == NULL || export_member(vd->name,*exports)) 
         if (b != b0 || (*ans)[1]) 
@@ -358,8 +358,9 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
     switch ((*ans)[0]) {
     case &VarRes(b0):
       let b1 = new Funname_b(fd);
-      let b = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
-      if (b == &Unresolved_b_val) break; // error in merging
+      let bp = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
+      if (bp == NULL) break; // error in merging
+      let b = *bp;
       // make the update if the function is exported
       if (exports == NULL || export_member(fd->name,*exports))
         if (!(b == b0 && (*ans)[1])) // no need to reinsert the entry
@@ -392,7 +393,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   // DAN: Here is where I'm assuming the te can be imperatively screwed with
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
-  region fnrgn; {
+  { region fnrgn; 
     let fenv = new_fenv(fnrgn,loc,fd);
     let te = rnew(fnrgn) Tenv{te->ns, te->ae, fenv, false, false};
     // check the body, then get rid of local environment
@@ -516,79 +517,78 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc,
 		       list_t<aggrfield_t> fields) {
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   // (unless the field name is empty)
-  region uprev_rgn; {
-    // FIX?: forbid effect variables (but they're going away)
-    for(; rpo != NULL; rpo = rpo->tl) {
-      let &$(e,r) = rpo->hd;
-      check_type(loc,te,tvs,&ek,false,false,e);
-      check_type(loc,te,tvs,&trk,false,false,r); 
-   }
+  region uprev_rgn; 
+  // FIX?: forbid effect variables (but they're going away)
+  for(; rpo != NULL; rpo = rpo->tl) {
+    let &$(e,r) = rpo->hd;
+    check_type(loc,te,tvs,&ek,false,false,e);
+    check_type(loc,te,tvs,&trk,false,false,r); 
+  }
 
-    list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
-    list_t<Relations::relns_t<`uprev_rgn>,`uprev_rgn> prev_relations = NULL;
+  list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
+  list_t<Relations::relns_t<`uprev_rgn>,`uprev_rgn> prev_relations = NULL;
 
-    for (let fs = fields; fs != NULL; fs = fs->tl) {
-      let &Aggrfield(fn,tq,t,width,atts,requires_clause) = fs->hd;
+  for (let fs = fields; fs != NULL; fs = fs->tl) {
+    let &Aggrfield(fn,tq,t,width,atts,requires_clause) = fs->hd;
       
-      if (List::mem(strptrcmp,prev_fields,fn))
-	terr(loc, "duplicate member %s", *fn);
-      // add the field to previous fields only if it's not an empty name
-      // (empty names arise for bitfield padding.)
-      if (strcmp(*fn,"") != 0)
-	prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
+    if (List::mem(strptrcmp,prev_fields,fn))
+      terr(loc, "duplicate member %s", *fn);
+    // add the field to previous fields only if it's not an empty name
+    // (empty names arise for bitfield padding.)
+    if (strcmp(*fn,"") != 0)
+      prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
 
-      kind_t field_kind = &tmk;
-      // FIX:  we can get ill-founded cycles of the form
-      // struct Foo<`a::A> { struct Foo<`a> x; } here, and
-      // it can cut across multiple definitions...  
-      if (str_or_union == UnionA || 
-	  (fs->tl == NULL && str_or_union == StructA)) 
-        field_kind = &tak; // we allow abstract kind for the last field
-      check_type(loc,te,tvs,field_kind,false,false,t);
+    kind_t field_kind = &tmk;
+    // FIX:  we can get ill-founded cycles of the form
+    // struct Foo<`a::A> { struct Foo<`a> x; } here, and
+    // it can cut across multiple definitions...  
+    if (str_or_union == UnionA || 
+	(fs->tl == NULL && str_or_union == StructA)) 
+      field_kind = &tak; // we allow abstract kind for the last field
+    check_type(loc,te,tvs,field_kind,false,false,t);
 
-      fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
+    fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
 
-      // if width is non-NULL then t must be of integral type
-      check_bitfield(loc, te, t, width, fn);
-      // FIX : check for consistent tquals
-      if (requires_clause) {
-        if (str_or_union != UnionA)
-          terr(loc,"@requires clauses are only allowed on union members");
-        { region temp;
-          let te2 = allow_valueof(temp,te);
-          Tcexp::tcExp(te2,NULL,requires_clause);
-        }
-        if (!is_integral(requires_clause))
-          terr(requires_clause->loc,
-               "@requires clause has type %s instead of integral type",
-               typ2string((type_t)requires_clause->topt));
-        else {
-          check_type(requires_clause->loc,te,tvs,&ik,false,false,new ValueofType(requires_clause));
-        // convert the requires expression to a CNF formula
-          let relns = Relations::exp2relns(uprev_rgn,requires_clause);
-
-          //fprintf(stderr,"relations for %s: ",*fn);
-          //Relations::print_relns(stderr,relns);
-          //fprintf(stderr,"\n");
-
-          // warn if the relations aren't consistent
-          if (!Relations::consistent_relations(relns))
-            terr(requires_clause->loc,"@requires clause may be unsatisfiable");
-
-          // run through all of the previous formulae and see if
-          // this one is consistent with those.  If so, there may
-          // be an overlap and we must reject.
-          for (let p = prev_relations; p != NULL; p = p->tl) {
-            if (Relations::consistent_relations(rappend(uprev_rgn,relns,p->hd)))
-              terr(requires_clause->loc,
-                   "@requires clause may overlap with previous clauses");
-          }
-          prev_relations = rnew(uprev_rgn) List(relns,prev_relations);
-        }
-      } else /* no requires clause */ {
-        if (prev_relations != NULL)
-          terr(loc,"if one field has a @requires clause, they all must");
+    // if width is non-NULL then t must be of integral type
+    check_bitfield(loc, te, t, width, fn);
+    // FIX : check for consistent tquals
+    if (requires_clause) {
+      if (str_or_union != UnionA)
+	terr(loc,"@requires clauses are only allowed on union members");
+      { region temp;
+      let te2 = allow_valueof(temp,te);
+      Tcexp::tcExp(te2,NULL,requires_clause);
       }
+      if (!is_integral(requires_clause))
+	terr(requires_clause->loc,
+	     "@requires clause has type %s instead of integral type",
+	     typ2string((type_t)requires_clause->topt));
+      else {
+	check_type(requires_clause->loc,te,tvs,&ik,false,false,new ValueofType(requires_clause));
+        // convert the requires expression to a CNF formula
+	let relns = Relations::exp2relns(uprev_rgn,requires_clause);
+
+	//fprintf(stderr,"relations for %s: ",*fn);
+	//Relations::print_relns(stderr,relns);
+	//fprintf(stderr,"\n");
+
+	// warn if the relations aren't consistent
+	if (!Relations::consistent_relations(relns))
+	  terr(requires_clause->loc,"@requires clause may be unsatisfiable");
+
+	// run through all of the previous formulae and see if
+	// this one is consistent with those.  If so, there may
+	// be an overlap and we must reject.
+	for (let p = prev_relations; p != NULL; p = p->tl) {
+	  if (Relations::consistent_relations(rappend(uprev_rgn,relns,p->hd)))
+	    terr(requires_clause->loc,
+		 "@requires clause may overlap with previous clauses");
+	}
+	prev_relations = rnew(uprev_rgn) List(relns,prev_relations);
+      }
+    } else /* no requires clause */ {
+      if (prev_relations != NULL)
+	terr(loc,"if one field has a @requires clause, they all must");
     }
   }
 }
@@ -770,7 +770,6 @@ static void rule_out_mem_and_unique(seg_t loc, var_t v, list_t<tvar_t> tvs) {
     }
   }
 }
-
 
 static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge, 
                                             seg_t loc,
@@ -1218,9 +1217,9 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
     let &$(nsl,name) = vd->name;
     list_t<var_t> ns;
     switch (nsl) {
-    case {.Loc_n = _}:     ns = NULL; break;
+    case {.Loc_n = _}: ns = NULL; break;
     case {.Rel_n = y}: ns = y;    break;
-    case {.C_n = y}:   ns = y;    break;
+    case {.C_n   = y}: ns = y;    break;
     case {.Abs_n = y}: ns = y;    break;
     }
     let nsenv = Dict::lookup(env->nsdict,ns);
@@ -1257,19 +1256,18 @@ treeshake_make_env_f(region_t<`r> rgn, genv_t<`g> ge) {
 }
 
 list_t<decl_t> treeshake(tenv_t<`g,_> te, list_t<decl_t> ds) {
-  region rgn; {
-    let env = TreeshakeEnv(rgn, false,
-                           Dict::rmap_c(rgn,treeshake_make_env_f,rgn,te->ae));
-    let ds1 = treeshake_f(&env, ds);
-    if(Dict::is_empty(env.nsdict))
-      return ds1; // shouldn't be possible
-    // update the global environment
-    Iter::iter_t<_,`rgn> iter = Dict::make_iter(Core::heap_region,env.nsdict);
-    let pr = *Dict::rchoose(rgn,env.nsdict);
-    while(Iter::next(iter,&pr)) {
-      let $(_,&$(ge,set)) = pr;
-      ge->ordinaries = Dict::rfilter_c(ge->grgn, treeshake_remove_f, set, ge->ordinaries);
-    }
-    return ds1;
+  region rgn; 
+  let env = TreeshakeEnv(rgn, false,
+			 Dict::rmap_c(rgn,treeshake_make_env_f,rgn,te->ae));
+  let ds1 = treeshake_f(&env, ds);
+  if(Dict::is_empty(env.nsdict))
+    return ds1; // shouldn't be possible
+  // update the global environment
+  Iter::iter_t<_,`rgn> iter = Dict::make_iter(Core::heap_region,env.nsdict);
+  let pr = *Dict::rchoose(rgn,env.nsdict);
+  while(Iter::next(iter,&pr)) {
+    let $(_,&$(ge,set)) = pr;
+    ge->ordinaries = Dict::rfilter_c(ge->grgn, treeshake_remove_f, set, ge->ordinaries);
   }
+  return ds1;
 }

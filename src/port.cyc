@@ -1329,7 +1329,8 @@ static ctype_t gen_primop(cenv_t env, primop_t p, list_t<ctype_t> args) {
 // generate constraints for a LHS expression and return the qualifier & type
 static $(ctype_t qual,ctype_t type) gen_lhs(cenv_t env, exp_t e) {
   switch (e->r) {
-  case &Var_e(x,_):       
+  case &Var_e(b):
+    let x = binding2qvar(b);
     (*x)[0] = Loc_n;
     return lookup_var(env,x);
   case &Subscript_e(e1,e2):
@@ -1383,7 +1384,8 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
   case &Const_e({.Wstring_c = _}):
     return ptr_ct(arith_ct(),const_ct(),fat_ct(),heap_ct(),zterm_ct());
   case &Const_e({.Null_c = _}):  return zero_ct();
-  case &Var_e(x,_):       
+  case &Var_e(b):       
+    let x = binding2qvar(b);
     (*x)[0] = Loc_n;
     let $(_,t) = lookup_var(env,x);
     if (isfn(env,x)) {

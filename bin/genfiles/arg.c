@@ -913,18 +913,18 @@ Cyc_Buffer_add_string(b,s);
 return _tag_dyneither(0,0,0);}{
 # 100
 int i;
-for(i=howmuch - 1;i >= 0  && !isspace((int)*((const char*)_check_dyneither_subscript(s,sizeof(char),i)));-- i){
+for(i=howmuch - 1;i >= 0  && ! isspace((int)*((const char*)_check_dyneither_subscript(s,sizeof(char),i)));-- i){
 ;}
 # 105
 if(i < 0)
-for(i=howmuch?howmuch - 1: 0;(i < _tmp4  && (int)((const char*)s.curr)[i]) && !isspace((int)((const char*)s.curr)[i]);++ i){
+for(i=howmuch?howmuch - 1: 0;(i < _tmp4  && (int)((const char*)s.curr)[i]) && ! isspace((int)((const char*)s.curr)[i]);++ i){
 ;}
 # 111
 Cyc_Buffer_add_substring(b,s,0,i);{
 # 114
 struct _dyneither_ptr whatsleft=_tag_dyneither(0,0,0);
 # 116
-for(0;(i < _tmp4  && (int)((const char*)s.curr)[i]) && isspace((int)((const char*)s.curr)[i]);++ i){
+for(0;(i < _tmp4  && (int)((const char*)s.curr)[i]) &&  isspace((int)((const char*)s.curr)[i]);++ i){
 ;}
 if(i < _tmp4  && (int)((const char*)s.curr)[i])whatsleft=_dyneither_ptr_plus(s,sizeof(char),i);
 return whatsleft;};};};}

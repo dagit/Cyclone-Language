@@ -38,7 +38,6 @@
 // Note: unresolvedmem_exp should only be used (1) to build arrays; or
 // (2) to build other things (structs etc.) at top level only; Tovc relies on this.
 
-
 #include <core.h>
 #include <cycboot.h>
 #include <list.h>
@@ -225,12 +224,12 @@ MAKE_STRING(_DynRegionFrame);
    function init(), below. */
 stringptr_t ?globals = NULL;
 #define MAKE_VAR(str)\
-  static string_t              str##_str = #str;\
-  static $(nmspace_t, var_t)   str##_pr  = $(Nmspace{.Loc_n=0},&str##_str);\
-  static datatype Raw_exp.Var_e  str##_re  = Var_e(&str##_pr,&Unresolved_b_val);\
-  static struct Exp            str##_ev  = Exp{NULL,&str##_re,0,&EmptyAnnot_val};\
-  static exp_t                 str##_e   = &str##_ev
-
+  static string_t            str##_str = #str;\
+  static $(nmspace_t, var_t) str##_pr  = $(Nmspace{.Loc_n=0},&str##_str);\
+  static datatype Binding.Unresolved_b str##_bnd = Unresolved_b(&str##_pr);\
+  static datatype Raw_exp.Var_e        str##_re  = Var_e(&str##_bnd);\
+  static struct Exp          str##_ev  = Exp{NULL,&str##_re,0,&EmptyAnnot_val};\
+  static exp_t               str##_e   = &str##_ev
 
 MAKE_VAR(_throw);
 MAKE_VAR(setjmp);
@@ -1411,7 +1410,7 @@ static bool check_bounds(type_t a_typ, Relations::relns_t<`H> relns,
 
   vardecl_t x;
   switch (a->r) {
-  case &Var_e(_,b):
+  case &Var_e(b):
     let x1 = Tcutil::nonesc_vardecl(b);
     if (x1 == NULL) fallthru;
     x = (vardecl_t)x1;
@@ -1517,8 +1516,8 @@ static exp_t make_struct(env_t nv, exp_t x, type_t struct_typ, stmt_t s,
   }
   if (do_declare) {
     switch (x->r) {
-    case &Var_e(x,_):
-      return stmt_exp(declare_stmt(x,t,eo,s,DL),DL);
+    case &Var_e(b):
+      return stmt_exp(declare_stmt(binding2qvar(b),t,eo,s,DL),DL);
     default:
       toc_impos("bogus x to make_struct");
     }
@@ -1643,7 +1642,7 @@ static stmt_t init_comprehension(env_t nv,
   default: break;
   }
   TOC_RGN(nv,r2) {
-    env_t nv2 = add_varmap(r2,nv,x1,varb_exp(x1,new Local_b(vd),DL));
+    env_t nv2 = add_varmap(r2,nv,x1,varb_exp(new Local_b(vd),DL));
     qvar_t max = temp_var();
     exp_t ea = assign_exp(var_exp(x1,DL),signed_int_exp(0,DL),DL);
     exp_t eb = lt_exp(var_exp(x1,DL),var_exp(max,DL),DL);
@@ -2249,7 +2248,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     let nv = add_varmap(rgn2, nv, x, var_exp(x,DL));  // add x to the varmap
     let x_vd = new Vardecl {Public,x,mt_tq,c_fat_ptr_type,xinit,NULL,NULL,false};
     let x_bnd = new Local_b(x_vd);     // build *x -- need to translate here
-    let x_exp = varb_exp(x,x_bnd,DL);  // to check the bound and for NULL
+    let x_exp = varb_exp(x_bnd,DL);  // to check the bound and for NULL
     x_exp->topt = fat_ptr_type;
     let deref_x = deref_exp(x_exp,DL);
     deref_x->topt = elt_type;
@@ -2260,7 +2259,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     let y_bnd = new Local_b(y_vd);
     exp_t z_init = e2;                 // build y op e2 and translate
     if (popt != NULL) {
-      let y_exp = varb_exp(y,y_bnd,DL);
+      let y_exp = varb_exp(y_bnd,DL);
       y_exp->topt = deref_x->topt;
       z_init = prim2_exp(popt->v,y_exp,e2,DL);
       z_init->topt = y_exp->topt;
@@ -2272,19 +2271,19 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     nv = add_varmap(rgn2, nv, z, var_exp(z,DL));  // add z to the varmap
     // build y == zero and translate -- here, we need to know what
     // the element type is to generate the right zero.
-    let y2_exp = varb_exp(y,y_bnd,DL); y2_exp->topt = deref_x->topt;
+    let y2_exp = varb_exp(y_bnd,DL); y2_exp->topt = deref_x->topt;
     let zero1_exp = generate_zero(elt_type);
     let comp1_exp = prim2_exp(Eq,y2_exp,zero1_exp,DL);
     comp1_exp->topt = sint_typ;
     exp_to_c(nv,comp1_exp);
     // build z != zero and translate
-    let z_exp = varb_exp(z,z_bnd,DL); z_exp->topt = deref_x->topt;
+    let z_exp = varb_exp(z_bnd,DL); z_exp->topt = deref_x->topt;
     let zero2_exp = generate_zero(elt_type);
     let comp2_exp = prim2_exp(Neq,z_exp,zero2_exp,DL);
     comp2_exp->topt = sint_typ;
     exp_to_c(nv,comp2_exp);
     // build numelts(x) == 1 directly (no translation)
-    let xsizeargs = list(varb_exp(x,x_bnd,DL),
+    let xsizeargs = list(varb_exp(x_bnd,DL),
                          sizeoftyp_exp(typ_to_c(elt_type),DL));
     let oneexp = uint_exp(1,DL);
     exp_t xsize;
@@ -2293,7 +2292,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     // start assembling the statement
     let comp_exp = and_exp(xsize,and_exp(comp1_exp,comp2_exp,DL),DL);
     let thr_stmt = exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL);
-    let xcurr = member_exp(varb_exp(x,x_bnd,DL),curr_sp,DL);
+    let xcurr = member_exp(varb_exp(x_bnd,DL),curr_sp,DL);
     xcurr = cast_it(c_ptr_type,xcurr);
     let deref_xcurr = deref_exp(xcurr,DL);
     let asn_exp = assign_exp(deref_xcurr,var_exp(z,DL),DL);
@@ -2553,7 +2552,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     break;
   case &Const_e(_): break;
-  case &Var_e(qv,b):
+  case &Var_e(b):
+    let qv = binding2qvar(b);
     try e->r = lookup_varmap(nv,qv)->r;
     catch { case &Dict::Absent:
        toc_impos("Can't find %s in exp_to_c, Var\n", qvar2string(qv));
@@ -4563,7 +4563,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       case &Var_d(vd):
         TOC_RGN(nv, temp) {
           let nv2 = add_varmap(temp,nv,vd->name,
-                               varb_exp(vd->name,new Local_b(vd),DL));
+                               varb_exp(new Local_b(vd),DL));
           local_decl_to_c(nv2, nv2, vd, s1);
         }
 	break;
@@ -4578,9 +4578,9 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           vd->initializer = e;
           d->r = new Var_d(vd);
           TOC_RGN(nv, temp) {
-            let nv2 =
-              add_varmap(temp,nv,old_name,
-                         varb_exp(new_name,new Local_b(vd),DL));
+            let nv2 = // DJG: add new_name because of how bindings work now!
+              add_varmap(temp,nv,new_name, 
+                         varb_exp(new Local_b(vd),DL));
             local_decl_to_c(nv2, nv, vd, s1);
           }
           break;
@@ -4598,7 +4598,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         //  let vd = vds->hd;
         //  let c_name = vd->name;
         //  vd->type = typ_to_c(vd->type);
-        //  nv2 = add_varmap(nv2,c_name,varb_exp(c_name,new Local_b(vd),DL));
+        //  nv2 = add_varmap(nv2,c_name,varb_exp(new Local_b(vd),DL));
         //}
         //stmt_to_c(nv2,s1);
 
@@ -5226,11 +5226,11 @@ static void exptypes_to_c(exp_t e) {
       m->elt_type = new (typ_to_c(*m->elt_type));
     exptypes_to_c(m->num_elts);
     break;
-  case &Const_e(_):       fallthru;
-  case &Var_e(_,_):       fallthru;
-  case &Enum_e(_,_,_):    fallthru;
-  case &Asm_e(...):       fallthru;
-  case &AnonEnum_e(_,_,_):break;
+  case &Const_e(_):     
+  case &Var_e(_):       
+  case &Enum_e(_,_,_):  
+  case &Asm_e(...):     
+  case &AnonEnum_e(_,_,_): break;
 
   case &AnonStruct_e(_, _): fallthru;
   case &Datatype_e(_,_,_):    fallthru;
@@ -5334,7 +5334,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       let c_name = vd->name;
       // strip any namespace from an extern C declaration
       if (vd->sc == ExternC)
-	c_name = new $(Rel_n(NULL),(*c_name)[1]);
+	c_name = new $(Abs_n(NULL,true),(*c_name)[1]);
       if (vd->initializer != NULL) {
         if (vd->sc == ExternC) vd->sc = Public;
         if (cinclude)
@@ -5342,7 +5342,8 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
         else
           exp_to_c(nv, (exp_t)vd->initializer);
       }
-      nv = add_varmap(r,nv,vd->name,varb_exp(c_name,new Global_b(vd),DL));
+      // DJG: add c_name because of how bindings work now!
+      nv = add_varmap(r,nv,c_name,varb_exp(new Global_b(vd),DL));
       vd->name = c_name;
       vd->sc   = scope_to_c(vd->sc);
       vd->type = typ_to_c(vd->type);
@@ -5355,18 +5356,15 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
 	c_name = new $(Abs_n(NULL,true),(*c_name)[1]);
         fd->sc = Public; // function declarations can't be extern
       }
-      nv = add_varmap(r,nv,fd->name,var_exp(c_name,DL));
+      // DJG: add c_name because of how bindings work now
+      nv = add_varmap(r,nv,c_name,var_exp(c_name,DL));
       fd->name = c_name;
       fndecl_to_c(nv, fd, cinclude);
       result_decls = new List(d,result_decls);
       break;
     case &Let_d(...):
-    case &Letv_d(_):
-      toc_impos("letdecl at toplevel");
-    case &Region_d(...):
-      toc_impos("region decl at toplevel");
-//     case &Alias_d(...):
-//       toc_impos("alias decl at toplevel");
+    case &Letv_d(_):     toc_impos("letdecl at toplevel");
+    case &Region_d(...): toc_impos("region decl at toplevel");
     case &Aggr_d(sd):
       aggrdecl_to_c(sd,true);
       break;
@@ -5476,18 +5474,19 @@ list_t<decl_t> toc(table_t<fndecl_t,table_t<stmt_t,int>> pop_tables,
   init();
   region start; {
     decls_to_c(start,empty_env(start),ds,true,false);
-#ifdef BCE_DEBUG
-    fprintf(stderr,"***eliminated %d out of %d bounds checks\n",
-            bounds_checks_eliminated, total_bounds_checks);
-#endif
-    // free the state
-    toc_state_t ts = NULL;
-    ts :=: toc_state;
-    let TocStateWrap{dyn, s} = *ts;
-    open_region(dyn, s, destroy_labels);
-    Core::free_rckey(dyn);
-    Core::ufree(ts);
   }
+#ifdef BCE_DEBUG
+  fprintf(stderr,"***eliminated %d out of %d bounds checks\n",
+	  bounds_checks_eliminated, total_bounds_checks);
+#endif
+  // free the state
+  toc_state_t ts = NULL;
+  ts :=: toc_state;
+  let TocStateWrap{dyn, s} = *ts;
+  open_region(dyn, s, destroy_labels);
+  Core::free_rckey(dyn);
+  Core::ufree(ts);
+
   gpop_tables  = NULL;
   fn_pop_table = NULL;
   return imp_rev(result_decls);

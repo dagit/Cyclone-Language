@@ -787,7 +787,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   extern void scan_type(type_t t, dep_t dep);
   void scan_exp(exp_opt_t e, dep_t dep) {
     switch (e->r) {
-    case &Var_e(&$(_,v),_):
+    case &Var_e(b):
+      let v = (*binding2qvar(b))[1];
       add_target(v);
       return;
     case &Primop_e(_,x):

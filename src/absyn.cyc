@@ -399,8 +399,7 @@ static struct Vardecl uniquergn_var_d =
 	  &uniquergn_typ, NULL, NULL, NULL, false);
 static datatype Binding.Global_b uniquergn_bind_p = Global_b(&uniquergn_var_d);
 
-static datatype Raw_exp.Var_e uniquergn_exp_r =
-  Var_e(&uniquergn_qvar_p,&uniquergn_bind_p);
+static datatype Raw_exp.Var_e uniquergn_exp_r = Var_e(&uniquergn_bind_p);
 
 static struct Exp uniquergn_exp_p =
   Exp(&uniquergn_typ, &uniquergn_exp_r, 0, &EmptyAnnot_val);
@@ -594,18 +593,15 @@ exp_t float_exp(string_t<`H> f, int i, seg_t loc) { return const_exp(Float_c(f,i
 exp_t string_exp(string_t<`H> s, seg_t loc){ return const_exp(String_c(s),loc); }
 exp_t wstring_exp(string_t<`H> s, seg_t loc){ return const_exp(Wstring_c(s),loc); }
 
-datacon(Binding,Unresolved_b);
-
-// This should only be used after type checking.
 exp_t var_exp(qvar_t q, seg_t loc) {
-  return new_exp(new Var_e(q,&Unresolved_b_val), loc);
+  return new_exp(new Var_e(new Unresolved_b(q)), loc);
 }
-exp_t varb_exp(qvar_t q, binding_t b, seg_t loc) {
-  return new_exp(new Var_e(q, b), loc);
+exp_t varb_exp(binding_t b, seg_t loc) {
+  return new_exp(new Var_e(b), loc);
 }
-// Used for unresolved variables now
+// same as var_exp now
 exp_t unknownid_exp(qvar_t q, seg_t loc) { 
-  return new_exp(new Var_e(q,&Unresolved_b_val), loc);
+  return var_exp(q,loc);
 }
 exp_t primop_exp(primop_t p, list_t<exp_t,`H> es, seg_t loc) {
   return new_exp(new Primop_e(p,es),loc);
@@ -933,9 +929,9 @@ type_t pointer_expand(type_t t,bool fresh_evar) {
 bool is_lvalue(exp_t e) {
   switch (e->r) {
     // shouldn't allow assignment to function names or arrays
-  case &Var_e(_,&Funname_b(_)): return false;
-  case &Var_e(_,&Global_b(vd)): fallthru(vd);
-  case &Var_e(_,&Local_b(vd)):
+  case &Var_e(&Funname_b(_)): return false;
+  case &Var_e(&Global_b(vd)): fallthru(vd);
+  case &Var_e(&Local_b(vd)):
     switch (Tcutil::compress(vd->type)) {
     case &ArrayType(_): return false;
     default: return true; 
@@ -1128,6 +1124,17 @@ bool is_aggr_type(type_t t) {
   case &AggrType(_):
   case &AnonAggrType(_,_): return true;
   default: return false;
+  }
+}
+  
+qvar_t binding2qvar(binding_t b) {
+  switch (b) {
+  case &Unresolved_b(qv): return qv;
+  case &Global_b(vd):     fallthru(vd);
+  case &Param_b(vd):      fallthru(vd);
+  case &Local_b(vd):      fallthru(vd);
+  case &Pat_b(vd):        return vd->name;
+  case &Funname_b(fd):    return fd->name;
   }
 }
 

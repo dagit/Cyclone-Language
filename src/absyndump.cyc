@@ -672,7 +672,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump("L\""); dump_nospace(s); dump_char('"');
     break;
 
-  case &Var_e(x,_):     dumpqvar(x); break;
+  case &Var_e(b): dumpqvar(binding2qvar(b)); break;
 
   case &Primop_e(p,es):
     let pstr = Absynpp::prim2str(p);

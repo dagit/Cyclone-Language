@@ -936,14 +936,14 @@ for(0;1;0){
 c=(int)*((const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0));
 if(c == 0)
 goto done;
-if(isspace(c)){
+if( isspace(c)){
 for(0;1;0){
 c=_IO_getc(fp);
 if(c == - 1){
 ++ seen_eof;
 break;}
 # 236
-if(!isspace(c)){
+if(! isspace(c)){
 _IO_ungetc(c,fp);
 break;}
 # 240
@@ -1062,7 +1062,7 @@ continue;case 0: _LL69: _LL6A:
  nassigned=-1;
 goto done;default: _LL6B: _LL6C:
 # 380
- if(isupper(c))
+ if( isupper(c))
 flags |=1;
 c=3;
 use_strtoul=0;
@@ -1074,7 +1074,7 @@ goto eof_failure;
 # 398
 if((flags & 32)== 0){
 n=_IO_peekc(fp);
-while(isspace(n)){
+while( isspace(n)){
 n=_IO_getc(fp);
 ++ nread;
 n=_IO_peekc(fp);
@@ -1171,7 +1171,7 @@ width=(long long)4294967295;
 if(flags & 8){
 n=0;{
 int c=_IO_peekc(fp);
-while(!isspace((int)((unsigned char)c))){
+while(! isspace((int)((unsigned char)c))){
 ++ n;
 _IO_getc(fp);
 if(-- width == 0)
@@ -1185,7 +1185,7 @@ nread +=n;};}else{
 struct _dyneither_ptr _tmp25=Cyc_va_arg_string_ptr(*((void**)_check_dyneither_subscript(ap,sizeof(void*),0)));_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);{
 struct _dyneither_ptr _tmp26=_tmp25;
 int c=_IO_peekc(fp);
-while(!isspace((int)((unsigned char)c))){
+while(! isspace((int)((unsigned char)c))){
 c=_IO_getc(fp);
 if(_get_dyneither_size(_tmp26,sizeof(char))== 0)goto eof_failure;
 *((char*)_check_dyneither_subscript(_tmp26,sizeof(char),0))=(char)c;
@@ -1286,9 +1286,9 @@ unsigned long res;
 # 668
 ({struct _dyneither_ptr _tmp2C=p;char _tmp2D=*((char*)_check_dyneither_subscript(_tmp2C,sizeof(char),0));char _tmp2E='\000';if(_get_dyneither_size(_tmp2C,sizeof(char))== 1  && (_tmp2D == '\000'  && _tmp2E != '\000'))_throw_arraybounds();*((char*)_tmp2C.curr)=_tmp2E;});
 if(use_strtoul)
-res=strtoul(buf,0,base);else{
+res= strtoul(buf,0,base);else{
 # 672
-res=(unsigned long)strtol(buf,0,base);}
+res=(unsigned long) strtol(buf,0,base);}
 if(flags & 16)
 *Cyc_va_arg_int_ptr(*((void**)_check_dyneither_subscript(ap,sizeof(void*),0)))=(int)res;else{
 if(flags & 4)
@@ -1369,7 +1369,7 @@ _IO_ungetc(c,fp);}
 if((flags & 8)== 0){
 double res;
 ({struct _dyneither_ptr _tmp35=p;char _tmp36=*((char*)_check_dyneither_subscript(_tmp35,sizeof(char),0));char _tmp37='\000';if(_get_dyneither_size(_tmp35,sizeof(char))== 1  && (_tmp36 == '\000'  && _tmp37 != '\000'))_throw_arraybounds();*((char*)_tmp35.curr)=_tmp37;});
-res=atof((const char*)buf);
+res= atof((const char*)buf);
 if(flags & 1)
 *Cyc_va_arg_double_ptr(*((void**)_check_dyneither_subscript(ap,sizeof(void*),0)))=res;else{
 # 770

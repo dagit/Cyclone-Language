@@ -173,7 +173,7 @@ bool exp2relnop(Absyn::exp_t e, reln_op_t @p) {
   }
   switch (e->r) {
   case &Absyn::Cast_e(_,e,...): return exp2relnop(e,p);
-  case &Absyn::Var_e(_,b):
+  case &Absyn::Var_e(b):
     let v = Tcutil::nonesc_vardecl(b);
     if (v != NULL) {
       *p = RVar(v);
@@ -183,7 +183,7 @@ bool exp2relnop(Absyn::exp_t e, reln_op_t @p) {
   case &Absyn::Const_e({.Int_c = $(_,i)}):
     *p = RConst(i);
     return true;
-  case &Absyn::Primop_e(Absyn::Numelts,&List(&Absyn::Exp{.r=&Absyn::Var_e(_,b),...},_)):
+  case &Absyn::Primop_e(Absyn::Numelts,&List(&Absyn::Exp{.r=&Absyn::Var_e(b),...},_)):
     let v = Tcutil::nonesc_vardecl(b);
     if (v != NULL) {
       *p = RNumelts(v);
@@ -215,7 +215,7 @@ bool exp2relnop(Absyn::exp_t e, reln_op_t @p) {
 
 relns_t<`r> reln_kill_exp(region_t<`r> rgn, relns_t<`r> r, Absyn::exp_t e) {
   switch (e->r) {
-  case &Absyn::Var_e(_,b):
+  case &Absyn::Var_e(b):
     let v = Tcutil::nonesc_vardecl(b);
     if (v != NULL)
       return reln_kill_var(rgn, r, v);
@@ -262,7 +262,7 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, Absyn::vardecl_t v,
       malloc_loop:
       switch (e2->r) {
       case &Absyn::Cast_e(_,e3,_,_): e2 = e3; goto malloc_loop;
-      case &Absyn::Var_e(_,b): 
+      case &Absyn::Var_e(b): 
         let vd = Tcutil::nonesc_vardecl(b);
         if (vd != NULL) 
           return add_relation(rgn,RVar(vd),Req,RNumelts(v),r);
@@ -288,7 +288,7 @@ relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, Absyn::vardecl_t v,
 
 relns_t<`r> reln_assign_exp(region_t<`r> rgn, relns_t<`r> r, Absyn::exp_t e1, Absyn::exp_t e2) {
   switch (e1->r) {
-  case &Absyn::Var_e(_,b):
+  case &Absyn::Var_e(b):
     let v = Tcutil::nonesc_vardecl(b);
     if (v != NULL) 
       return reln_assign_var(rgn, r, v, e2);

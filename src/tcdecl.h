@@ -76,8 +76,8 @@ extern struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0,
 					      typedefdecl_t d1,
 					      seg_t loc, string_t * msg);
 
-extern binding_t            merge_binding    (binding_t d0, binding_t d1,
-					      seg_t loc, string_t * msg);
+extern binding_t * merge_binding(binding_t d0, binding_t d1,
+				 seg_t loc, string_t * msg);
   
 extern struct Xdatatypefielddecl * 
   merge_xdatatypefielddecl (xdatatypefielddecl_t d0, xdatatypefielddecl_t d1, 

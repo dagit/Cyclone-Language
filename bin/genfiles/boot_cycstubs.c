@@ -916,10 +916,10 @@ int fgetc(struct  __abstractFILE*);
 int Cyc_fgetc(struct Cyc___cycFILE*f){
 return fgetc(f->file);}
 # 79
-struct  __abstractFILE*fopen(const char*,const char*);
+struct  __abstractFILE* fopen(const char*,const char*);
 # 81
 struct Cyc___cycFILE*Cyc_fopen(const char*name,const char*type){
-struct  __abstractFILE*_tmp0=fopen(name,type);
+struct  __abstractFILE*_tmp0= fopen(name,type);
 # 84
 return(unsigned int)_tmp0?({struct Cyc___cycFILE*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->file=_tmp0;_tmp1;}): 0;}
 # 88
@@ -990,13 +990,13 @@ struct Cyc_FileCloseError_exn_struct Cyc_FileCloseError_val={Cyc_FileCloseError}
 void Cyc_file_close(struct Cyc___cycFILE*f){
 if(Cyc_fclose(f)!= 0)(int)_throw((void*)& Cyc_FileCloseError_val);}
 # 183
-char*getcwd(char*buf,unsigned long size);static char _tmp10[29]="getcwd: invalid buf argument";
+char* getcwd(char*buf,unsigned long size);static char _tmp10[29]="getcwd: invalid buf argument";
 # 185
 static struct Cyc_Core_Failure_exn_struct Cyc___getcwd_failure={Cyc_Core_Failure,{_tmp10,_tmp10,_tmp10 + 29}};
 # 187
 struct _dyneither_ptr Cyc_getcwd(struct _dyneither_ptr buf,unsigned long size){
 if(_get_dyneither_size(buf,sizeof(char))< size)(int)_throw((void*)& Cyc___getcwd_failure);{
-char*_tmp11=getcwd((char*)_check_null(_untag_dyneither_ptr(buf,sizeof(char),1)),size);
+char*_tmp11= getcwd((char*)_check_null(_untag_dyneither_ptr(buf,sizeof(char),1)),size);
 return(unsigned int)_tmp11?buf: _tag_dyneither(0,0,0);};}
 # 194
 int Cyc_Execinfo_bt(){

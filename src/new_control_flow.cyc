@@ -711,7 +711,7 @@ static relns_t<`r> add_subscript_reln(region_t<`r> rgn,
   bool e2_valid_op = exp2relnop(e2,&n2);
 
   switch (e1->r) {
-  case &Var_e(_,b1):
+  case &Var_e(b1):
     let x = Tcutil::nonesc_vardecl(b1);
     if (x != NULL) {
       reln_op_t n1 = RNumelts(x);
@@ -921,9 +921,9 @@ static flow_t<`r> initialize_pat_vars(flow_env_t<`r> fenv,
 static bool is_local_var_rooted_path(Absyn::exp_t e, bool cast_ok) {
 
   switch (e->r) {
-  case &Var_e(_,&Local_b(_)):
-  case &Var_e(_,&Param_b(_)): 
-  case &Var_e(_,&Pat_b(_)): return true;
+  case &Var_e(&Local_b(_)):
+  case &Var_e(&Param_b(_)): 
+  case &Var_e(&Pat_b(_)): return true;
   case &Deref_e(e): fallthru(e);
   case &AggrMember_e(e,...): fallthru(e);
   case &AggrArrow_e(e,...):
@@ -1089,7 +1089,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &Const_e({.Null_c = _}):
   case &Const_e({.Int_c = $(_,0)}): return $(inflow, fenv->zero);
   case &Const_e({.Int_c = $(_,_)}):
-  case &Var_e(_,&Funname_b(_)):    return $(inflow, fenv->notzeroall);
+  case &Var_e(&Funname_b(_)):    return $(inflow, fenv->notzeroall);
 
   case &Datatype_e(NULL,_,_): // FIX: distinguish zero/non-zero
   case &Const_e(_):
@@ -1099,13 +1099,13 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &AnonEnum_e(_,_,_): // FIX : distinguish tags that are/aren't 0
   case &Enum_e(_,_,_): return $(inflow, fenv->unknown_all);
 
-  case &Var_e(_,&Global_b(_)): // globals are init and may be aggregates
+  case &Var_e(&Global_b(_)): // globals are init and may be aggregates
     return $(inflow, typ_to_absrval(fenv,(type_t)e->topt, false,fenv->unknown_all));
     // Note: if Esc we return that even though it isn't an absRval.  That's
     //       okay b/c assign_place_inner does the right thing
-  case &Var_e(_,&Param_b(vd)): fallthru(vd);
-  case &Var_e(_,&Local_b(vd)): fallthru(vd);
-  case &Var_e(_,&Pat_b(vd)):
+  case &Var_e(&Param_b(vd)): fallthru(vd);
+  case &Var_e(&Local_b(vd)): fallthru(vd);
+  case &Var_e(&Pat_b(vd)):
     DEBUG_PRINT("in Rexp:Var_e for |%s|\n",Absynpp::exp2string(e));
     datatype Root.VarRoot vdroot = VarRoot(vd);
     return $(inflow, Dict::lookup_other(d, root_cmp, &vdroot));
@@ -1714,7 +1714,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     let f = anal_stmt(env,inflow,s,&rval_opt);
     return $(f,rval_opt[0]);
 
-  case &Var_e(_,&Unresolved_b):
+  case &Var_e(&Unresolved_b(_)):
   case &UnresolvedMem_e(_,_):
   case &CompoundLit_e(_,_):
   case &Valueof_e(_):
@@ -1828,12 +1828,12 @@ static $(flow_t<`r>,absLval_t<`r>)
   case &NoInstantiate_e(e1): fallthru(e1);
   case &Instantiate_e(e1,_): return anal_Lexp_rec(env,inflow,expand_unique,passthrough_consumes,e1,flds);
 
-  case &Var_e(_,&Param_b(vd)): fallthru(vd);
-  case &Var_e(_,&Local_b(vd)): fallthru(vd);
-  case &Var_e(_,&Pat_b(vd)):
+  case &Var_e(&Param_b(vd)): fallthru(vd);
+  case &Var_e(&Local_b(vd)): fallthru(vd);
+  case &Var_e(&Pat_b(vd)):
     return $(inflow, PlaceL(rnew(env->r) Place(rnew(env->r) VarRoot(vd), flds)));
 
-  case &Var_e(_,&Global_b(vd)): return $(inflow,UnknownL());
+  case &Var_e(&Global_b(vd)): return $(inflow,UnknownL());
 
   case &AggrArrow_e(e1,f,...):
     switch(Tcutil::compress((type_t)e1->topt)) {
@@ -2905,10 +2905,9 @@ static flow_t<`r> anal_decl(analenv_t<`r> env, flow_t<`r> inflow, decl_t decl) {
 //        check them on return and on fall off void)
 static void check_fun(JumpAnalysis::jump_anal_res_t tables, fndecl_t fd) {
   try {
-    region frgn; {
-      flow_env_t<`frgn> fenv = new_flow_env(frgn);
-      check_nested_fun(tables,fenv,ReachableFL(fenv->mt_flowdict,NULL),fd);
-    }
+    region frgn; 
+    flow_env_t<`frgn> fenv = new_flow_env(frgn);
+    check_nested_fun(tables,fenv,ReachableFL(fenv->mt_flowdict,NULL),fd);
   } catch {
     // this can happen due to cascading errors -- but be sure we found
     // an error first.

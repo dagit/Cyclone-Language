@@ -117,12 +117,11 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
     default:
       terr(p->loc, "pattern expects aggregate type instead of %s",
            typ2string(t));
-           
       break;
     }
     return;
     
-  case &Aggr_p(&AggrInfo({.UnknownAggr = $(k,n,_)},targs), *exist_ts, dps, dots):
+  case &Aggr_p(&AggrInfo({.UnknownAggr= $(k,n,_)},targs), *exist_ts, dps, dots):
     try { 
       let adp = lookup_aggrdecl(te,p->loc,n);
       let ad = *adp;

@@ -356,7 +356,7 @@ static list_t<$(var_t,type_t)@> get_argrfield_tags(list_t<aggrfield_t> x) {
 // given a mapping of variables to tags (x->`i), replace the variable x with `i
 static exp_t substitute_tags_exp(list_t<$(var_t,type_t)@> tags, exp_t e) {
   switch (e->r) {
-  case &Var_e(&$({.Rel_n = NULL},y),_): 
+  case &Var_e(&Unresolved_b(&$({.Rel_n = NULL},y))): 
     for (let ts = tags; ts != NULL; ts = ts->tl) {
       let &$(x,i) = ts->hd;
       if (strptrcmp(x,y) == 0) 
@@ -874,113 +874,112 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 					declarator_list_t ids,
                                         seg_t tqual_loc,
 					seg_t loc) {
- region mkrgn; {
-  let Declaration_spec(_,tq,tss,_,atts) = ds;
-  if (tq.loc == 0) tq.loc = tqual_loc;
-  if (ds.is_inline)
-    Tcutil::warn(loc,"inline qualifier on non-function definition");
+ region mkrgn;
+ let Declaration_spec(_,tq,tss,_,atts) = ds;
+ if (tq.loc == 0) tq.loc = tqual_loc;
+ if (ds.is_inline)
+   Tcutil::warn(loc,"inline qualifier on non-function definition");
 
-  scope_t s = Public;
-  bool istypedef = false;
-  if (ds.sc != NULL)
-    switch (*ds.sc) {
-    case Typedef_sc:  istypedef = true; break;
-    case Extern_sc:   s = Extern;   break;
-    case ExternC_sc:  s = ExternC;  break;
-    case Static_sc:   s = Static;   break;
-    case Auto_sc:     s = Public;   break;
-    case Register_sc: if(no_register) s = Public; else s = Register;   break;
-    case Abstract_sc: s = Abstract; break;
-    }
+ scope_t s = Public;
+ bool istypedef = false;
+ if (ds.sc != NULL)
+   switch (*ds.sc) {
+   case Typedef_sc:  istypedef = true; break;
+   case Extern_sc:   s = Extern;   break;
+   case ExternC_sc:  s = ExternC;  break;
+   case Static_sc:   s = Static;   break;
+   case Auto_sc:     s = Public;   break;
+   case Register_sc: if(no_register) s = Public; else s = Register;   break;
+   case Abstract_sc: s = Abstract; break;
+   }
 
-  // separate the declarators from their initializers
-  // FIX: should abstract this out, but the code generator produces
-  // bad code due to tuple return type.
-  declarators_t<`mkrgn> declarators = NULL;
-  list_t<exp_opt_t,`mkrgn> exprs = NULL;
-  decl_split(mkrgn,ids,&declarators,&exprs);
-  // check to see if there are no initializers -- useful later on
-  bool exps_empty = true;
-  for (list_t<exp_opt_t> es = exprs; es != NULL; es = es->tl)
-    if (es->hd != NULL) {
-      exps_empty = false;
-      break;
-    }
+ // separate the declarators from their initializers
+ // FIX: should abstract this out, but the code generator produces
+ // bad code due to tuple return type.
+ declarators_t<`mkrgn> declarators = NULL;
+ list_t<exp_opt_t,`mkrgn> exprs = NULL;
+ decl_split(mkrgn,ids,&declarators,&exprs);
+ // check to see if there are no initializers -- useful later on
+ bool exps_empty = true;
+ for (list_t<exp_opt_t> es = exprs; es != NULL; es = es->tl)
+   if (es->hd != NULL) {
+     exps_empty = false;
+     break;
+   }
 
-  // Collapse the type specifiers to get the base type.
-  let base_type = collapse_type_specifiers(tss,loc);
-  if (declarators == NULL) {
-    // here we should have a type declaration -- either a struct, union,
-    // or datatype as in: "struct Foo { ... };"
-    switch (base_type) {
-    case &TypeDeclType(&{.r = &Aggr_td(ad),...},_): 
-      ad->attributes = List::append(ad->attributes,atts);
-      ad->sc = s;
-      return new List(new_decl(new Aggr_d(ad),loc),NULL);
-    case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
-      if (atts != NULL) err("attributes on enum not supported",loc);
-      ed->sc = s;
-      return new List(new_decl(new Enum_d(ed),loc),NULL);
-    case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
-      if (atts != NULL) err("attributes on datatypes not supported",loc);
-      dd->sc = s;
-      return new List(new_decl(new Datatype_d(dd),loc),NULL);
-    case &AggrType(AggrInfo({.UnknownAggr = $(k,n,_)},ts)):
-      let ts2 = List::map_c(typ2tvar,loc,ts);
-      let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL,false);
-      if (atts != NULL) err("bad attributes on type declaration",loc);
-      return new List(new_decl(new Aggr_d(ad),loc),NULL);
-    case &DatatypeType(DatatypeInfo({.KnownDatatype = tudp},_)):
-      if(atts != NULL) err("bad attributes on datatype", loc);
-      return new List(new_decl(new Datatype_d(*tudp),loc),NULL);
-    case &DatatypeType(DatatypeInfo({.UnknownDatatype = UnknownDatatypeInfo(n,isx)},ts)):
-      let ts2 = List::map_c(typ2tvar,loc,ts);
-      let tud = datatype_decl(s, n, ts2, NULL, isx, loc);
-      if (atts != NULL) err("bad attributes on datatype",loc);
-      return new List(tud,NULL);
-    case &EnumType(n,_):
-      let ed = new Enumdecl{s,n,NULL};
-      if (atts != NULL) err("bad attributes on enum",loc);
-      return new List(new Decl(new Enum_d(ed),loc),NULL);
-    case &AnonEnumType(fs):
-      // someone's written:  enum {A,B,C}; which is a perfectly good
-      // way to declare symbolic constants A, B, and C.
-      let ed = new Enumdecl{s,gensym_enum(),new Opt(fs)};
-      if (atts != NULL) err("bad attributes on enum",loc);
-      return new List(new Decl(new Enum_d(ed),loc),NULL);
-    default: err("missing declarator",loc); return NULL;
-    }
-  } else {
-    // declarators != NULL
-    let fields = apply_tmss(mkrgn,tq,base_type,declarators,atts);
-    if (istypedef) {
-      // we can have a nested struct, union, or datatype
-      // declaration within the typedef as in:
-      // typedef struct Foo {...} t;
-      if (!exps_empty)
-	err("initializer in typedef declaration",loc);
-      list_t<decl_t> decls = List::map_c(v_typ_to_typedef,loc,fields);
-      return decls;
-    } else {
-      // here, we have a bunch of variable declarations
-      list_t<decl_t> decls = NULL;
-      for (let ds = fields; ds != NULL; ds = ds->tl, exprs = exprs->tl) {
-	let &$(x,tq2,t2,tvs2,atts2) = ds->hd;
-        if (tvs2 != NULL)
-          Tcutil::warn(loc,"bad type params, ignoring");
-        if (exprs == NULL)
-          parse_abort(loc,"unexpected NULL in parse!");
-        let eopt = exprs->hd;
-        let vd   = new_vardecl(x, t2, eopt);
-	vd->tq = tq2;
-	vd->sc = s;
-        vd->attributes = atts2;
-        let d = new Decl(new Var_d(vd),loc);
-        decls = new List(d,decls);
-      }
-      return List::imp_rev(decls);
-    }
-  }
+ // Collapse the type specifiers to get the base type.
+ let base_type = collapse_type_specifiers(tss,loc);
+ if (declarators == NULL) {
+   // here we should have a type declaration -- either a struct, union,
+   // or datatype as in: "struct Foo { ... };"
+   switch (base_type) {
+   case &TypeDeclType(&{.r = &Aggr_td(ad),...},_): 
+     ad->attributes = List::append(ad->attributes,atts);
+     ad->sc = s;
+     return new List(new_decl(new Aggr_d(ad),loc),NULL);
+   case &TypeDeclType(&{.r = &Enum_td(ed),...},_):
+     if (atts != NULL) err("attributes on enum not supported",loc);
+     ed->sc = s;
+     return new List(new_decl(new Enum_d(ed),loc),NULL);
+   case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
+     if (atts != NULL) err("attributes on datatypes not supported",loc);
+     dd->sc = s;
+     return new List(new_decl(new Datatype_d(dd),loc),NULL);
+   case &AggrType(AggrInfo({.UnknownAggr = $(k,n,_)},ts)):
+     let ts2 = List::map_c(typ2tvar,loc,ts);
+     let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL,false);
+     if (atts != NULL) err("bad attributes on type declaration",loc);
+     return new List(new_decl(new Aggr_d(ad),loc),NULL);
+   case &DatatypeType(DatatypeInfo({.KnownDatatype = tudp},_)):
+     if(atts != NULL) err("bad attributes on datatype", loc);
+     return new List(new_decl(new Datatype_d(*tudp),loc),NULL);
+   case &DatatypeType(DatatypeInfo({.UnknownDatatype = UnknownDatatypeInfo(n,isx)},ts)):
+     let ts2 = List::map_c(typ2tvar,loc,ts);
+     let tud = datatype_decl(s, n, ts2, NULL, isx, loc);
+     if (atts != NULL) err("bad attributes on datatype",loc);
+     return new List(tud,NULL);
+   case &EnumType(n,_):
+     let ed = new Enumdecl{s,n,NULL};
+     if (atts != NULL) err("bad attributes on enum",loc);
+     return new List(new Decl(new Enum_d(ed),loc),NULL);
+   case &AnonEnumType(fs):
+     // someone's written:  enum {A,B,C}; which is a perfectly good
+     // way to declare symbolic constants A, B, and C.
+     let ed = new Enumdecl{s,gensym_enum(),new Opt(fs)};
+     if (atts != NULL) err("bad attributes on enum",loc);
+     return new List(new Decl(new Enum_d(ed),loc),NULL);
+   default: err("missing declarator",loc); return NULL;
+   }
+ } else {
+   // declarators != NULL
+   let fields = apply_tmss(mkrgn,tq,base_type,declarators,atts);
+   if (istypedef) {
+     // we can have a nested struct, union, or datatype
+     // declaration within the typedef as in:
+     // typedef struct Foo {...} t;
+     if (!exps_empty)
+       err("initializer in typedef declaration",loc);
+     list_t<decl_t> decls = List::map_c(v_typ_to_typedef,loc,fields);
+     return decls;
+   } else {
+     // here, we have a bunch of variable declarations
+     list_t<decl_t> decls = NULL;
+     for (let ds = fields; ds != NULL; ds = ds->tl, exprs = exprs->tl) {
+       let &$(x,tq2,t2,tvs2,atts2) = ds->hd;
+       if (tvs2 != NULL)
+	 Tcutil::warn(loc,"bad type params, ignoring");
+       if (exprs == NULL)
+	 parse_abort(loc,"unexpected NULL in parse!");
+       let eopt = exprs->hd;
+       let vd   = new_vardecl(x, t2, eopt);
+       vd->tq = tq2;
+       vd->sc = s;
+       vd->attributes = atts2;
+       let d = new Decl(new Var_d(vd),loc);
+       decls = new List(d,decls);
+     }
+     return List::imp_rev(decls);
+   }
  }
 }
 
@@ -1828,26 +1827,25 @@ init_declarator:
 struct_declaration:
   specifier_qualifier_list struct_declarator_list ';'
     {
-      region temp; {
-        let $(tq,tspecs,atts) = $1;
-        if (tq.loc == 0) tq.loc = SLOC(@1);
-        declarators_t<`temp> decls = NULL;
-        list_t<$(exp_opt_t,exp_opt_t)@`temp,`temp> widths_and_reqs = NULL;
-        for (let x = $2; x != NULL; x = x->tl) {
-          let &$(d,wd,wh) = x->hd;
-          decls = rnew(temp) FlatList(decls,d);
-          widths_and_reqs = 
-            rnew(temp) List(rnew(temp) $(wd,wh),widths_and_reqs);
-        }
-        decls = flat_imp_rev(decls);
-        widths_and_reqs = imp_rev(widths_and_reqs);
-        let t = speclist2typ(tspecs, SLOC(@1));
-        let info = List::rzip(temp,temp,
-                              apply_tmss(temp,tq,t,decls,atts),
-                              widths_and_reqs);
-        $$=^$(List::map_c(make_aggr_field,LOC(@1,@2),info));
+      region temp; 
+      let $(tq,tspecs,atts) = $1;
+      if (tq.loc == 0) tq.loc = SLOC(@1);
+      declarators_t<`temp> decls = NULL;
+      list_t<$(exp_opt_t,exp_opt_t)@`temp,`temp> widths_and_reqs = NULL;
+      for (let x = $2; x != NULL; x = x->tl) {
+	let &$(d,wd,wh) = x->hd;
+	decls = rnew(temp) FlatList(decls,d);
+	widths_and_reqs = 
+	  rnew(temp) List(rnew(temp) $(wd,wh),widths_and_reqs);
       }
-    }
+      decls = flat_imp_rev(decls);
+      widths_and_reqs = imp_rev(widths_and_reqs);
+      let t = speclist2typ(tspecs, SLOC(@1));
+      let info = List::rzip(temp,temp,
+			    apply_tmss(temp,tq,t,decls,atts),
+			    widths_and_reqs);
+      $$=^$(List::map_c(make_aggr_field,LOC(@1,@2),info));
+   }
 ;
 
 // we do this slightly differently:  at most one typedef name can occur

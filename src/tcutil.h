@@ -198,9 +198,6 @@ extern $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@,tv
 extern void check_bitfield(seg_t loc, tenv_t te, type_t field_typ, 
                            exp_opt_t width, stringptr_t fn);
 
-// prints a warning when an expression contains an assignment
-extern void check_contains_assign(exp_t);
-
 // Checks that a type is well-formed and lives in kind k.  The input
 // list of type variables is used to constrain the kinds and identities
 // of the free type variables in the type.  Returns the list of free

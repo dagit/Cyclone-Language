@@ -16,8 +16,6 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-
-
 #include "tcdecl.h"
 
 #include <core.h>
@@ -644,31 +642,30 @@ struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, typedefdecl_t d1,
   return d0;
 }
 
-binding_t merge_binding(binding_t b0, binding_t b1, seg_t loc, string_t * msg) {
+binding_t* merge_binding(binding_t b0, binding_t b1, seg_t loc, string_t * msg){
   switch ($(b0, b1)) {
-  case $(&Unresolved_b,&Unresolved_b): return &Unresolved_b_val;
   case $(&Global_b(d0),  &Global_b(d1)):
     let d2 = merge_vardecl(d0, d1, loc, msg);
-    if (d2 == NULL) return &Unresolved_b_val;
-    if (d2 == d0) return b0;
-    if (d2 == d1) return b1;
-    return new Global_b((vardecl_t) d2);
+    if (d2 == NULL) return NULL;
+    if (d2 == d0) return new b0;
+    if (d2 == d1) return new b1;
+    return new (new Global_b((vardecl_t) d2));
   case $(&Global_b(d0),  &Funname_b(d1)):
     let $(_,res) = check_var_or_fn_decl(d0->sc,d0->type,d0->tq,d0->attributes,
 					d1->sc,(type_t)d1->cached_typ,empty_tqual(0), 
 					d1->attributes, "function", 
 					qvar2string(d0->name), loc, msg);
-    return res ? b1 : &Unresolved_b_val;
+    return res ? new b1 : NULL;
   case $(&Funname_b(_),  &Funname_b(d1)):
     merr(loc, msg, "redefinition of function %s", qvar2string(d1->name));
-    return &Unresolved_b_val;
+    return NULL;
   case $(&Funname_b(d0), &Global_b(d1)) :
     let $(_, res) = check_var_or_fn_decl(d0->sc,(type_t)d0->cached_typ,empty_tqual(0),
 					 d0->attributes, d1->sc, d1->type, 
 					 d1->tq, d1->attributes, "variable", 
 					 qvar2string(d0->name), loc, msg);
-    return res ? b0 : &Unresolved_b_val;
-  default: throw new Invalid_argument("Tcdecl::merge_binding");
+    return res ? new b0 : NULL;
+  default: return NULL;
   }
 }
 

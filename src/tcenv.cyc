@@ -150,8 +150,8 @@ typedef struct CtrlEnv<`r> @`r2 ctrl_env_t<`r,`r2>;
 // Hence mutations are seen by all subsequent type-checking, which is easier
 // than threading labels which must be function-wide unique anyway.
 static struct SharedFenv<`f::R> {
-  region_t<`f>  frgn;
-  type_t                              return_typ;
+  region_t<`f> frgn;
+  type_t       return_typ;
   list_t<$(type_t,type_t,rgn_po_t<`f>,seg_t)@`f,`f> delayed_effect_checks;
   list_t<$(rgn_po_t<`f>,list_t<$(type_t,type_t)@>,seg_t)@`f,`f> delayed_constraint_checks;
 };
@@ -206,9 +206,9 @@ datacon(exn,NoBinding);
 
 // lookup a binding, throwing NoBinding on failure.
 binding_t lookup_binding(bnds_t bs, var_t v) {
-  for (; bs; bs = bs->tl) {
-    if (strptrcmp(v,bs->v) == 0) return bs->b;
-  }
+  for (; bs; bs = bs->tl)
+    if (strptrcmp(v,bs->v) == 0) 
+      return bs->b;
   throw &NoBinding_val;
 }
 
@@ -378,7 +378,7 @@ static aggrdecl_t @ lookup_aggrdecl_f(genv_t ge,var_t v,bool ignore) {
 aggrdecl_t @ lookup_aggrdecl(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
-  case {.Loc_n = _}: fallthru;
+  case {.Loc_n = _}:
   case {.Rel_n = NULL}:
     return scoped_lookup(te, loc, lookup_aggrdecl_f, v, false);
   case {.C_n = y}: fallthru(y);
@@ -398,7 +398,7 @@ static datatypedecl_t @ lookup_datatypedecl_f(genv_t ge,var_t v,bool ignore) {
 datatypedecl_t @ lookup_datatypedecl(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
-  case {.Loc_n = _}: fallthru;
+  case {.Loc_n = _}:
   case {.Rel_n = NULL}:
     return scoped_lookup(te, loc, lookup_datatypedecl_f, v, false);
   case {.Rel_n = &List(x,y)}:
@@ -586,16 +586,14 @@ tenv_t<`g,`r> add_local_var(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te, vardec
     throw new Impossible("add_local_var: called with Rel_n");
   }
   if (Tcenv::warn_override)
-    try {
-      switch(lookup_ordinary(r,te,loc,vd->name,true))
-      {
-      case &VarRes(&Local_b(_)):  Tcutil::warn(loc,"declaration hides local"); break;
-      case &VarRes(&Global_b(_)): Tcutil::warn(loc,"declaration hides global"); break;
-      case &VarRes(&Pat_b(_)):    Tcutil::warn(loc,"declaration hides pattern variable"); break;
-      case &VarRes(&Param_b(_)):  Tcutil::warn(loc,"declaration hides parameter"); break;
-      default: break;
-      }
-    } catch { case &Dict::Absent: break; }
+    try switch(lookup_ordinary(r,te,loc,vd->name,true)) {
+    case &VarRes(&Local_b(_)):  Tcutil::warn(loc,"declaration hides local"); break;
+    case &VarRes(&Global_b(_)): Tcutil::warn(loc,"declaration hides global"); break;
+    case &VarRes(&Pat_b(_)):    Tcutil::warn(loc,"declaration hides pattern variable"); break;
+    case &VarRes(&Param_b(_)):  Tcutil::warn(loc,"declaration hides parameter"); break;
+    default: break;
+    }
+  catch { case &Dict::Absent: break; }
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,ctrl_env,
               capability,curr_rgn,flags,_} =
     get_fenv(te,"add_local_var");
@@ -759,15 +757,12 @@ resolved_t<`r> lookup_ordinary(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q,bool
   case {.Rel_n = NULL} && le != NULL:
     let &Fenv{<`f,`c> .locals = locals,...} = (fenv_t)le;
     // NB a local overrides any global, without an ambiguity warning
-    try {
-      return rnew(r) VarRes(lookup_binding(locals,v));
-    } catch {case &NoBinding: return lookup_ordinary_global(te,loc,q,is_use);}
+    try return rnew(r) VarRes(lookup_binding(locals,v));
+    catch {case &NoBinding: return lookup_ordinary_global(te,loc,q,is_use);}
   default:
     try return lookup_ordinary_global(te,loc,q,is_use);
-    catch {case &Dict::Absent:
-      // Print out the error message elsewhere.
-      // terr(loc,"unbound identifier: %s", Absynpp::qvar2string(q));
-      return rnew(r) VarRes(&Unresolved_b_val);
+    catch {case &Dict::Absent: // error message printed elsewhere
+      return rnew(r) VarRes(new Unresolved_b(q));
     }
   }
 }
