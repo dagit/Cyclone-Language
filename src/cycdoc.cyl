@@ -1,5 +1,3 @@
-/* This doesn't work yet. */
-
 /* Cycdoc: produce documentation from commented .h files.
    Copyright (C) 2001 Greg Morrisett, AT&T
    This file is part of the Cyclone compiler.
@@ -29,6 +27,7 @@
 #include <position.h>
 #include <stdlib.h>
 #include <pp.h>
+#include <arg.h>
 #include "parse.h"
 #include "absynpp.h"
 namespace Lex {
@@ -41,22 +40,959 @@ namespace Position {
 using Core;
 using List;
 
-extern $(int,mstringptr_t)* token(Lexing::Lexbuf<`a> lexbuf);
+tunion Comment {
+  MatchDecl(mstring_t);
+  Standalone(mstring_t);
+// Section(mstring_t);
+};
+ typedef tunion Comment comment_t;
+
+extern $(int,comment_t)* token(Lexing::Lexbuf<`a> lexbuf);
 }
 let nostar = [^'*']
 let okstar = '*'+[^'*''/']
 
-rule token "$(int,mstringptr_t)*" = parse
-"/*" (nostar|okstar)* '*'+'/'
-      { let start = lexbuf->lex_start_pos+2;
-	let len = lexbuf->lex_curr_pos-lexbuf->lex_start_pos-4;
+rule token "$(int,comment_t)*" = parse
+"/*** " (nostar|okstar)* "*/"
+      { let start = lexbuf->lex_start_pos+5;
+	let len = lexbuf->lex_curr_pos-lexbuf->lex_start_pos-7;
 	return new $(lexeme_start(lexbuf),
-                     new substring(lexbuf->lex_buffer, start, len)); }
+                     new Standalone(substring(lexbuf->lex_buffer, start, len))); }
+| "/** " (nostar|okstar)* "*/"
+      { let start = lexbuf->lex_start_pos+4;
+	let len = lexbuf->lex_curr_pos-lexbuf->lex_start_pos-6;
+	return new $(lexeme_start(lexbuf),
+                     new MatchDecl(substring(lexbuf->lex_buffer, start, len))); }
 | eof { return NULL; }
 | _   { return token(lexbuf); }
 
-
 {
+  #include "absyn.h"
+  #include "tcutil.h"
+  #include "evexp.h"
+  using Absyn;
+  namespace Dump {
+    typedef string_t<`r> dump_string_t<`r>;
+    tunion dump_class {
+      ALPHA, SYMBOL, POINTER
+    };
+    tunion dump_class last_dumped = SYMBOL;
+    void dump_alpha(dump_string_t s) {
+      if (last_dumped == ALPHA)
+        printf(" %s",s);
+      else {
+        printf("%s",s);
+        last_dumped = ALPHA;
+      }
+    }
+    void dump_alphastr(stringptr_t s) {
+      dump_alpha(*s);
+    }
+    void dump_symbol(dump_string_t s) {
+      printf("%s",s);
+      last_dumped = SYMBOL;
+    }
+    void dump_char(int c) {
+      printf("%c",c);
+      last_dumped = SYMBOL;
+    }
+    void dump_pointer(int c) {
+      if (last_dumped == ALPHA) printf(" %c",c);
+      else printf("%c",c);
+      last_dumped = POINTER;
+    }
+    void dump_boldalpha(string_t x) {
+      dump_alpha("");
+      dump_symbol("\\textbf{");
+      dump_alpha(x);
+      dump_symbol("}");
+      dump_alpha("");
+    }
+    void dump_lb() {
+      dump_symbol("{\\lb}");
+    }
+    void dump_rb() {
+      dump_symbol("{\\rb}");
+    }
+    void dump_begin() {
+      /* MUST START LINE */
+      dump_symbol("%%HEVEA \\begin{latexonly}\n"
+                  "\\begin{list}{}{"
+                  "\\setlength\\itemsep{0pt}"
+                  "\\setlength\\topsep{0pt}"
+                  "\\setlength\\leftmargin{\\parindent}"
+                  "\\setlength\\itemindent{-\\leftmargin}}"
+                  "\\item[]"
+                  "\\colorbox{cycdochighlight}{\\ttfamily"
+                  "\\begin{minipage}[b]{\\textwidth}\n"
+                  "%%HEVEA \\end{latexonly}\n"
+                  "%%HEVEA \\begin{rawhtml}<dl><dt>"
+                  "<table><tr><td bgcolor=\"c0d0ff\">\\end{rawhtml}\n"
+                  "\\begin{tabbing}\n");
+    }
+    void dump_middle() {
+      dump_symbol("\\end{tabbing}\n"
+                  "%%HEVEA \\begin{latexonly}\n"
+                  "\\end{minipage}}\\\\\\strut\n"
+                  "%%HEVEA \\end{latexonly}\n"
+                  "%%HEVEA \\begin{rawhtml}</td></tr></table><dd>\\end{rawhtml}\n");
+    }
+    void dump_end() {
+      /* MUST START LINE */
+     dump_symbol("%%HEVEA \\begin{latexonly}\n"
+                 "\\end{list}\\smallskip\n"
+                 "%%HEVEA \\end{latexonly}\n"
+                 "%%HEVEA \\begin{rawhtml}</dl>\\end{rawhtml}\n");
+    }
+    void dumpqvar(qvar_t v); // forward reference
+    void dump_boldqvar(qvar_t v) {
+      dump_alpha("");
+      dump_symbol("\\textbf{");
+      dumpqvar(v);
+      dump_symbol("}");
+      dump_alpha("");
+    }
+
+    static bool expand_typedefs = false;
+    static bool qvar_to_Cids = false;
+    static bool add_cyc_prefix = false;
+    static bool to_VC = false;
+
+void dumptyp(type_t);
+void dumpntyp(type_t t);
+void dumpexp(exp_t);
+void dumpexp_prec(int,exp_t);
+void dumpdecl(decl_t,string_t);
+void dumptms(list_t<type_modifier_t>, void f(`a), `a);
+void dumptqtd(tqual_t, type_t, void f(`a), `a);
+void dumpstructfields(list_t<structfield_t> fields);
+void ignore(`a x) { return; }
+
+void dump_semi() {
+  dump_char(';');
+}
+
+void dump_sep(void f(`a), list_t<`a> l, dump_string_t sep) {
+  if (l == NULL)
+    return;
+  for(; l->tl != NULL; l = l->tl) {
+    f(l->hd);
+    dump_symbol(sep); // still have the unnecessary space afterwards, though
+  }
+  f(l->hd);
+}
+void dump_sep_c(void f(`b,`a), `b env, list_t<`a> l, dump_string_t sep) {
+  if (l == NULL)
+    return;
+  for(; l->tl != NULL; l = l->tl) {
+    f(env,l->hd);
+    dump_symbol(sep); // still have the unnecessary space afterwards, though
+  }
+  f(env,l->hd);
+}
+void group(void f(`a), list_t<`a> l,
+           dump_string_t start, dump_string_t end, dump_string_t sep) {
+  dump_symbol(start);
+  dump_sep(f,l,sep);
+  dump_symbol(end);
+}
+void group_c(void f(`b,`a), `b env, list_t<`a> l,
+             dump_string_t start, dump_string_t end, dump_string_t sep) {
+  dump_symbol(start);
+  dump_sep_c(f,env,l,sep);
+  dump_symbol(end);
+}
+void egroup(void f(`a), list_t<`a> l,
+            dump_string_t start, dump_string_t end, dump_string_t sep) {
+  if (l != NULL)
+    group(f,l,start,end,sep);
+}
+
+// is this backwards for nested namespaces? Consistent either way, but
+// should do the right thing!
+void dumpqvar(qvar_t v) {
+  let nsl = NULL;
+  switch ((*v)[0]) {
+  case Loc_n:
+    fallthru(NULL);
+  case &Rel_n(x):
+    nsl = x;
+    break;
+  case &Abs_n(x):
+    nsl = qvar_to_Cids && add_cyc_prefix ? new List(Absynpp::cyc_stringptr, x) : x;
+    break;
+  }
+  if (nsl != NULL) {
+    dump_alphastr(nsl->hd);
+    for(nsl = nsl->tl; nsl != NULL; nsl = nsl->tl) {
+      // Note: This is the most common reason the result goes over 80 columns,
+      //       but who really cares.
+      if (qvar_to_Cids) dump_char('_');
+      else dump_symbol("::");
+      dump_alpha(*(nsl->hd));
+    }
+    if (qvar_to_Cids) dump_symbol("_");
+    else dump_symbol("::");
+    dump_alpha(*((*v)[1]));
+  } else {
+    dump_alpha(*((*v)[1]));
+  }
+}
+
+void dumptq(tqual_t tq) {
+  if (tq.q_restrict) dump_alpha("restrict");
+  if (tq.q_volatile) dump_alpha("volatile");
+  if (tq.q_const)    dump_alpha("const");
+}
+
+void dumpscope(scope_t sc) {
+  switch (sc) {
+  case Static:   dump_alpha("static"); return;
+  case Public:   return;
+  case Extern:   dump_alpha("extern"); return;
+  case ExternC:  dump_alpha("extern \"C\""); return;
+  case Abstract: dump_alpha("abstract"); return;
+  }
+}
+
+void dumpkind(kind_t k) {
+  switch (k) {
+  case AnyKind       : dump_alpha("A"); return;
+  case MemKind       : dump_alpha("M"); return;
+  case BoxKind       : dump_alpha("B"); return;
+  case RgnKind       : dump_alpha("R"); return;
+  case EffKind       : dump_alpha("E"); return;
+  }
+}
+
+void dumptps(list_t<type_t> ts) {
+  egroup(dumptyp,ts,"<",">",", ");
+  dump_alpha("");
+}
+void dumptvar(tvar_t tv) {
+  dump_alphastr(tv->name);
+}
+void dumpkindedtvar(tvar_t tv) {
+  dump_alphastr(tv->name);
+  switch (compress_conref(tv->kind)->v) {
+  case &Eq_constr(BoxKind): break;
+  case &Eq_constr(k): dump_symbol("::"); dumpkind(k); break;
+  default: dump_symbol("::?"); break;
+  }
+}
+void dumptvars(list_t<tvar_t> tvs) {
+  egroup(dumptvar,tvs,"<",">",",");
+  dump_alpha("");
+}
+void dumpkindedtvars(list_t<tvar_t> tvs) {
+  egroup(dumpkindedtvar,tvs,"<",">",",");
+  dump_alpha("");
+}
+
+void dumparg($(tqual_t,type_t)@ pr) {
+  dumptqtd((*pr)[0],(*pr)[1],ignore,0);
+}
+void dumpargs(list_t<$(tqual_t,type_t)@> ts) {
+  group(dumparg,ts,"(",")",", ");
+}
+
+bool next_is_pointer(list_t<type_modifier_t> tms) {
+  if (tms==NULL) return false;
+  switch (tms->hd) {
+  case &Pointer_mod(_,_,_): return true;
+  default: return false;
+  }
+}
+
+static void dumprgn(type_t t) {
+  switch (Tcutil::compress(t)) {
+  case HeapRgn: dump_alpha("`H"); break;
+  default: dumpntyp(t); break;
+  }
+}
+
+static $(list_t<type_t>, list_t<type_t>) effects_split(type_t t) {
+  list_t<type_t> rgions = NULL;
+  list_t<type_t> effects = NULL;
+
+  switch (Tcutil::compress(t)) {
+  case &AccessEff(r): rgions = new List(r,rgions); break;
+  case &JoinEff(ts):
+    for (; ts != NULL; ts = ts->tl) {
+      let $(rs,es) = effects_split(ts->hd);
+      rgions = List::imp_append(rs,rgions);
+      effects = List::imp_append(es,effects);
+    }
+    break;
+  default: effects = new List(t,effects); break;
+  }
+  return $(rgions, effects);
+}
+
+static void dumpeff(type_t t) {
+  let $(rgions,effects) = effects_split(t);
+  rgions = List::imp_rev(rgions);
+  effects = List::imp_rev(effects);
+  for (; effects != NULL; effects = effects->tl) {
+    dumpntyp(effects->hd);
+    dump_char('+');
+  }
+  dump_lb();
+  for (; rgions != NULL; rgions = rgions->tl) {
+    dumprgn(rgions->hd);
+    if (rgions->tl != NULL) dump_char(',');
+  }
+  dump_rb();
+}
+
+// Convert a normalized typ to a doc
+void dumpntyp(type_t t) {
+  switch (t) {
+    // The first three cases never turn up in normalized types.
+  case &ArrayType(_,_,_): return;
+  case &FnType(_)       : return;
+  case &PointerType(_)  : return;
+  case VoidType:         dump_alpha("void"); return;
+  case &VarType(tv): 
+    dump_alphastr(tv->name); return; // FIX: may want explicit kinds
+  case &Evar(k,NULL,i,_): 
+    dump_char('%'); 
+    if (k == NULL) dump_char('?'); else dumpkind(k->v); 
+    dump_symbol(aprintf("(%d)",i)); return;
+  case &Evar(k,&Opt(t),i,_): dumpntyp(t); return; // shouldn't happen!
+  case &TunionType(TunionInfo(tu_info,ts,r)):
+    switch(tu_info) {
+    case &UnknownTunion(UnknownTunionInfo(n,is_x)): fallthru(n,is_x);
+    case &KnownTunion(&Tuniondecl(_,n,_,_,is_x)):
+      if (is_x) dump_alpha("xtunion"); else dump_alpha("tunion");
+      switch (Tcutil::compress(r)) {
+      case HeapRgn: break;
+      default: dumptyp(r); break;
+      }
+      dumpqvar(n);
+      dumptps(ts);
+      break;
+    }
+    break;
+  case &TunionFieldType(TunionFieldInfo(tuf_info,ts)):
+    switch(tuf_info) {
+    case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
+      fallthru(tname,is_x,fname);
+    case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
+			   &Tunionfield(fname,_,_,_,_)):
+      if (is_x) dump_alpha("xtunion"); else dump_alpha("tunion");
+      dumpqvar(tname);
+      dump_char('.');
+      dumpqvar(fname);
+      dumptps(ts);
+      break;
+    }
+    break;
+  case &EnumType(n,_): dump_alpha("enum"); dumpqvar(n); return;
+  case &IntType(Signed,   B4): dump_alpha("int"); return;
+  case &IntType(Signed,   B1): dump_alpha("signed char"); return;
+  case &IntType(Unsigned, B1): dump_alpha("unsigned char"); return;
+  case &IntType(Signed,   B2): dump_alpha("short"); return;
+  case &IntType(Unsigned, B2): dump_alpha("unsigned short"); return;
+  case &IntType(Unsigned, B4): dump_alpha("unsigned int"); return;
+  case &IntType(Signed,   B8) && to_VC: dump_alpha("__int64"); return;
+  case &IntType(Signed,   B8): dump_alpha("long long"); return;
+  case &IntType(Unsigned,B8) && to_VC: dump_alpha("unsigned __int64");return;
+  case &IntType(Unsigned, B8): dump_alpha("unsigned long long");    return;
+  case FloatType:  dump_alpha("float");  return;
+  case DoubleType: dump_alpha("double"); return;
+  case &TupleType(ts): dump_symbol("\\$"); dumpargs(ts); return;
+  case &StructType(NULL,ts,_):   dump_alpha("struct"); dumptps(ts); return;
+  case &StructType(n,  ts,_):
+    dump_alpha("struct"); dumpqvar((qvar_t)n); dumptps(ts); return;
+  case &UnionType(NULL,ts,_):   dump_alpha("union"); dumptps(ts); return;
+  case &UnionType(n,  ts,_):
+    dump_alpha("union"); dumpqvar((qvar_t)n); dumptps(ts); return;
+  case &AnonStructType(fs):
+    dump_alpha("struct"); dump_lb();
+    dumpstructfields(fs); dump_rb(); return;
+  case &AnonUnionType(fs):
+    dump_alpha("union"); dump_lb();
+    dumpstructfields(fs); dump_rb(); return;
+  case &TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
+  case &RgnHandleType(rgn):
+    dumprgn(rgn); return;
+  case HeapRgn: return; 
+  case &AccessEff(_): return;
+  case &RgnsEff(_): return;
+  case &JoinEff(_): return;
+  }
+}
+
+void dumpvaropt(opt_t<var_t> vo) {
+  if (vo != NULL) dump_alphastr(vo->v);
+}
+void dumpfunarg($(opt_t<var_t>,tqual_t,type_t)@ t) {
+  dumptqtd((*t)[1],(*t)[2],dumpvaropt,(*t)[0]);
+}
+void dump_rgncmp($(type_t,type_t)@ cmp) {
+  let &$(r1,r2) = cmp;
+  dumptyp(r1); dump_char('<'); dumptyp(r2);
+}
+void dump_rgnpo(list_t<$(type_t,type_t)@> rgn_po) {
+  dump_sep(dump_rgncmp,rgn_po,",");
+}
+void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool c_varargs, 
+                 vararg_info_t *cyc_varargs, opt_t<type_t> effopt,
+                 list_t<$(type_t,type_t)@> rgn_po) {
+  dump_char('(');
+  for (; args != NULL; args = args->tl) {
+    dumpfunarg(args->hd);
+    if (args->tl != NULL || c_varargs || cyc_varargs != NULL)
+      dump_symbol(", ");
+  }
+  if (c_varargs) 
+    dump_symbol("...");
+  else if (cyc_varargs != NULL) {
+    let arg = new $(cyc_varargs->name, cyc_varargs->tq, cyc_varargs->type);
+    dump_symbol("...");
+    if (cyc_varargs->inject) dump_alpha(" inject");
+    dumpfunarg(arg);
+  }
+  if (effopt != NULL) {
+    dump_semi();
+    dumpeff(effopt->v);
+  }
+  if (rgn_po != NULL) {
+    dump_char(':');
+    dump_rgnpo(rgn_po);
+  }
+  dump_char(')');
+}
+
+void dumptyp(type_t t) {
+  dumptqtd(Tqual(false,false,false),t,ignore,0);
+}
+
+void dumpdesignator(designator_t d) {
+  switch (d) {
+  case &ArrayElement(e): dump_symbol(".["); dumpexp(e); dump_char(']'); break;
+  case &FieldName(v):    dump_char('.'); dump_alpha(*v); break;
+  }
+}
+
+void dumpde($(list_t<designator_t>,exp_t)@ de) {
+  egroup(dumpdesignator,(*de)[0],"","=","=");
+  dumpexp((*de)[1]);
+}
+
+void dumpexps_prec(int inprec, list_t<exp_t> es) {
+  group_c(dumpexp_prec, inprec, es, "", "", ",");
+}
+
+void dumpexp_prec(int inprec, exp_t e) {
+  int myprec = Absynpp::exp_prec(e);
+  if (inprec >= myprec)
+    dump_char('(');
+  switch (e->r) {
+  case &Const_e(&Char_c(sg,ch)):
+    dump_char('\''); dump_alpha(Absynpp::char_escape(ch)); dump_char('\''); 
+    break;
+  case &Const_e(&Short_c(sg,s)):
+    dump_alpha(aprintf("%d",s));
+    break;
+  case &Const_e(&Int_c(Signed,i)):
+    dump_alpha(aprintf("%d",i)); break;
+  case &Const_e(&Int_c(Unsigned,i)):
+    dump_alpha(aprintf("%du",i)); break;
+  case &Const_e(&LongLong_c(sg,i)):
+    dump_alpha("<<FIX LONG LONG CONSTANT>>"); break; // FIX
+  case &Const_e(&Float_c(x)):   dump_alpha(x);      break;
+  case &Const_e(Null_c):        dump_alpha("NULL"); break;
+  case &Const_e(&String_c(s)):
+    dump_char('"'); dump_alpha(Absynpp::string_escape(s)); dump_char('"');
+    break;
+
+  case &UnknownId_e(x): fallthru(x);
+  case &Var_e(x,_):     dumpqvar(x); break;
+
+  case &Primop_e(p,es):
+    let pstr = Absynpp::prim2str(p);
+    switch (List::length(es)) {
+    case 1:
+      if (p == (primop_t)Size) {
+        dumpexp_prec(myprec,es->hd);
+        dump_char('.');
+        dump_alpha("size");
+      } else {
+        dump_symbol(pstr);
+        dumpexp_prec(myprec,es->hd);
+      }
+      break;
+    case 2:
+      dumpexp_prec(myprec,es->hd);
+      dump_symbol(pstr);
+      dump_char(' '); // avoids problem with '/' followed by '*'
+      dumpexp_prec(myprec,es->tl->hd);
+      break;
+    default: 
+      throw new Failure("Absyndump -- Bad number of arguments to primop");
+    }
+    break;
+
+  case &AssignOp_e(e1,popt,e2):
+    dumpexp_prec(myprec,e1);
+    if (popt != NULL)
+      dump_symbol(Absynpp::prim2str(popt->v));
+    dump_symbol("=");
+    dumpexp_prec(myprec,e2);
+    break;
+
+  case &Increment_e(e2,PreInc):  dump_symbol("++"); dumpexp_prec(myprec,e2); break;
+  case &Increment_e(e2,PreDec):  dump_symbol("--"); dumpexp_prec(myprec,e2); break;
+  case &Increment_e(e2,PostInc): dumpexp_prec(myprec,e2); dump_symbol("++"); break;
+  case &Increment_e(e2,PostDec): dumpexp_prec(myprec,e2); dump_symbol("--"); break;
+
+  case &Conditional_e(e1,e2,e3):
+    dumpexp_prec(myprec,e1);
+    dump_char('?'); dumpexp_prec(0,e2);
+    dump_char(':'); dumpexp_prec(myprec,e3);
+    break;
+
+  case &SeqExp_e(e1,e2):
+    // DAN: put in parens because in initializers , doesn't mean SeqExp and
+    // our recursive descent doesn't know if we're in an initializer.
+    dump_char('(');
+    dumpexp_prec(myprec,e1); dump_char(','); dumpexp_prec(myprec,e2); 
+    dump_char(')');
+    break;
+
+  case &UnknownCall_e(e1,es): fallthru(e1,es);
+  case &FnCall_e(e1,es,_):
+    dumpexp_prec(myprec,e1);
+    dump_char('(');
+    dumpexps_prec(20,es);
+    dump_char(')');
+    break;
+
+  case &Throw_e(e1): dump_alpha("throw"); dumpexp_prec(myprec,e1); break;
+
+  case &NoInstantiate_e(e1): fallthru(e1);
+  case &Instantiate_e(e1,_): dumpexp_prec(inprec,e1); break;
+
+  case &Cast_e(t,e1):
+    dump_char('('); dumptyp(t); dump_char(')'); dumpexp_prec(myprec,e1);
+    break;
+
+  case &Address_e(e1):
+    dump_char('&'); dumpexp_prec(myprec,e1); break;
+
+  case &New_e(ropt,e1):
+    dump_alpha("new"); dumpexp_prec(myprec,e1); break;
+
+  case &Sizeoftyp_e(t):
+    dump_alpha("sizeof"); dump_char('(');
+    dumptyp(t); dump_char(')'); break;
+
+  case &Sizeofexp_e(e1):
+    dump_alpha("sizeof"); dump_char('(');
+    dumpexp_prec(myprec,e1); dump_char(')'); break;
+
+  case &Offsetof_e(t,n):
+    dump_alpha("offsetof"); dump_char('(');
+    dumptyp(t); dump_char(','); dump_alpha(*n);
+    dump_char(')'); 
+    break;
+
+  case &Deref_e(e1):
+    dump_char('*'); dumpexp_prec(myprec,e1); break;
+
+  case &StructMember_e(e1,n):
+    dumpexp_prec(myprec,e1); dump_char('.');  dump_alpha(*n);
+    break;
+
+  case &StructArrow_e(e1,n):
+    dumpexp_prec(myprec,e1); dump_symbol("->"); dump_alpha(*n);
+    break;
+
+  case &Subscript_e(e1,e2):
+    dumpexp_prec(myprec,e1);
+    dump_char('['); dumpexp(e2); dump_char(']'); break;
+
+  case &Tuple_e(es):
+    dump_symbol("\\$("); dumpexps_prec(20,es); dump_char(')'); break;
+
+  case &CompoundLit_e(vat,des):
+    dump_char('(');
+    dumptyp((*vat)[2]); // OK to ignore qualifiers??
+    dump_char(')');
+    group(dumpde,des,"{\\lb}","{\\rb}",",");
+    break;
+
+  case &Array_e(des):  
+    group(dumpde,des,"{\\lb}","{\\rb}",",");
+    break;
+
+  case &Comprehension_e(vd,e1,e2):
+    dump_alpha("new");
+    dump_char('{');
+    dump_alpha("for"); dump_alphastr((*vd->name)[1]); dump_char('<'); dumpexp(e1);
+    dump_char(':'); dumpexp(e2); dump_char('}');
+    break;
+
+  case &Struct_e(n,_,des,_):
+    dumpqvar(n);
+    group(dumpde,des,"{","}",",");
+    break;
+
+  case &AnonStruct_e(_,des):
+    group(dumpde,des,"{","}",",");
+    break;
+
+  case &Tunion_e(_,_,es,_,tuf):
+    dumpqvar(tuf->name);
+    if (es != NULL) group(dumpexp,es,"(",")",",");
+    break;
+
+  case &Enum_e(n,_,_): dumpqvar(n); break;
+
+  case &Malloc_e(ropt,t):
+    if (ropt != NULL) {
+      dump_alpha("rmalloc");
+      dump_char('(');
+      dumpexp((exp_t)ropt); dump_symbol(", ");
+    } else {
+      dump_alpha("malloc");
+      dump_char('(');
+    }
+    dump_alpha("sizeof");
+    dump_char('(');
+    dumptyp(t); 
+    dump_symbol("))");
+    break;
+
+  case &UnresolvedMem_e(n,des):
+    // Currently n is always NULL from the parser ???
+    group(dumpde, des, "{","}",",");
+    break;
+
+  case &StmtExp_e(s):
+    /* unsupported */
+    break;
+
+  case &Codegen_e(fd):
+    /* unsupported */
+    break;
+
+  case &Fill_e(e1):
+    /* unsupported */
+    break;
+  }
+  if (inprec >= myprec)
+    dump_char(')');
+}
+
+void dumpexp(exp_t e) {
+  dumpexp_prec(0,e);
+}
+
+void dumptunionfield(tunionfield_t ef) {
+  dumpqvar(ef->name);
+  if (ef->typs != NULL)
+    dumpargs(ef->typs);
+}
+void dumptunionfields(list_t<tunionfield_t> fields) {
+  dump_sep(dumptunionfield,fields,",\\\\\n~~");
+}
+void dumpenumfield(enumfield_t ef) {
+  dumpqvar(ef->name);
+  if (ef->tag != NULL) {
+    dump_symbol(" = ");
+    dumpexp((exp_t)ef->tag);
+  }
+}
+void dumpenumfields(list_t<enumfield_t> fields) {
+  dump_sep(dumpenumfield,fields,",\\\\\n~~");
+}
+
+void dumpstructfields(list_t<structfield_t> fields) {
+  for(; fields != NULL; fields = fields->tl) {
+    dump_symbol("~~");
+    let &Structfield{name,tq,type,width,atts} = fields->hd;
+    dumptqtd(tq,type,dump_alphastr,name);
+    if (width != NULL) {
+      dump_char(':');
+      dumpexp((exp_t)width);
+    }
+    dump_symbol(";\\\\\n");
+  }
+}
+
+void dumptypedefname(typedefdecl_t td) {
+  dumpqvar(td->name);
+  dumptvars(td->tvs);
+}
+
+void dump_boldtypedefname(typedefdecl_t td) {
+  dump_boldqvar(td->name);
+  dumptvars(td->tvs);
+}
+
+static void dumpids(list_t<vardecl_t> vds) {
+  for (; vds != NULL; vds = vds->tl) {
+    dumpqvar(vds->hd->name);
+    if (vds->tl != NULL) dump_char(',');
+  }
+}
+
+static void dump_upperbound(exp_t e) {
+  unsigned int i = Evexp::eval_const_uint_exp(e);
+  if (i != 1) {
+    dump_char('{'); dumpexp(e); dump_char('}');
+  }
+}
+
+void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
+  if (tms == NULL) {
+    f(a);
+    return;
+  }
+  switch(tms->hd) {
+    // FIX?? What about tq2?
+  case &Pointer_mod(&Nullable_ps(ue),  HeapRgn,  tq2):
+    dump_pointer('*'); dump_upperbound(ue); dump_alpha("`H");
+    dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(&NonNullable_ps(ue), HeapRgn,  tq2):
+    dump_pointer('@'); dump_upperbound(ue); dump_alpha("`H");
+    dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(TaggedArray_ps, HeapRgn,  tq2):
+    dump_pointer('?'); dump_alpha("`H");
+    dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(&Nullable_ps(ue),  &VarType(tv), tq2):
+    dump_pointer('*'); dump_upperbound(ue); dump_alphastr(tv->name);
+    dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(&NonNullable_ps(ue), &VarType(tv), tq2):
+    dump_pointer('@'); dump_upperbound(ue); dump_alphastr(tv->name);
+    dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(TaggedArray_ps, &VarType(tv), tq2):
+    dump_pointer('?'); dump_alphastr(tv->name);
+    dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(&Nullable_ps(ue),  _, tq2):
+    dump_pointer('*'); dump_upperbound(ue);
+    dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(&NonNullable_ps(ue), _, tq2):
+    dump_pointer('@'); dump_upperbound(ue);
+    dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(TaggedArray_ps, _, tq2):
+    dump_pointer('?');
+    dumptms(tms->tl,f,a); return;
+
+  default:
+    bool next_is_pointer = false;
+    if (tms->tl != NULL)
+      switch (tms->tl->hd) {
+      case &Pointer_mod(_,_,_): next_is_pointer = true; break;
+      default: break;
+      }
+    if (next_is_pointer)
+      dump_char('(');
+    dumptms(tms->tl, f, a);
+    if (next_is_pointer)
+      dump_char(')');
+    switch(tms->hd) {
+    case Carray_mod: dump_symbol("[]"); break;
+    case &ConstArray_mod(e):
+      dump_char('['); dumpexp(e); dump_char(']'); break;
+    case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po)):
+      dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po); break;
+    case &Function_mod(&NoTypes(sl,loc)):
+      group(dump_alphastr,sl,"(",")",", "); break;
+    case &TypeParams_mod(ts,loc,print_kinds): 
+      if (print_kinds) dumpkindedtvars(ts); else dumptvars(ts); break;
+    case &Attributes_mod(_,_): break;
+    case &Pointer_mod(nullable,tq2,_):
+      throw new Impossible("dumptms");
+    }
+    return;
+  }
+}
+
+void dumptqtd(tqual_t tq, type_t t, void f(`a), `a a) {
+  let $(tq,t,tms) = Absynpp::to_tms(tq,t);
+  dumptq(tq);
+  dumpntyp(t);
+  dumptms(List::imp_rev(tms),f,a);
+}
+
+/* Print s, replacing "..[..].." with "..\texttt{..}.."
+   Only outermost brackets are affected.  Brackets must
+   nest properly. */
+void pr_comment(FILE @outf, string_t s) {
+  int depth = 0;
+  int len = strlen(s);
+  for (int i = 0; i<len; i++) {
+    char c = s[i];
+    if (c != '[') { fputc(c,outf); continue; }
+    fputs("\\texttt{",outf);
+    i++;
+    depth++;
+    for (; i<len; i++) {
+      char c = s[i];
+      if (c == ']') {
+        depth--;
+        if (depth == 0) {
+          fputc('}',outf);
+          break; /* exit inner for-loop */
+        }
+      }
+      else if (c == '[') depth++;
+      fputc(c,outf);
+    }
+  }
+}
+void dump_comment(string_t s) {
+  pr_comment(stdout,s);
+}
+
+/* Dump a declaration followed by a comment */
+
+void dumpdecl(decl_t d, string_t comment) {
+  switch(d->r) {
+  case &Struct_d(sd):
+    dump_begin();
+    dump_alpha("struct");
+    if (sd->name != NULL) dump_boldqvar(sd->name->v);
+    dumptvars(sd->tvs);
+    if (sd->fields == NULL)
+      dump_symbol(";\n");
+    else {
+      dump_symbol(" ");
+      dump_lb();
+      dump_symbol("\\\\\n");
+      dumpstructfields(sd->fields->v);
+      dump_rb();
+      dump_symbol(";\n");
+    }
+    dump_middle();
+    dump_comment(comment);
+    dump_symbol("\n");
+    dump_end();
+    break;
+  case &Union_d(ud):
+    dump_begin();
+    dump_alpha("union");
+    if (ud->name != NULL) dump_boldqvar(ud->name->v);
+    dumptvars(ud->tvs);
+    if (ud->fields == NULL)
+      dump_symbol(";\n");
+    else {
+      dump_symbol(" ");
+      dump_lb();
+      dump_symbol("\\\\\n");
+      dumpstructfields(ud->fields->v);
+      dump_rb();
+      dump_symbol(";\n");
+    }
+    dump_middle();
+    dump_comment(comment);
+    dump_symbol("\n");
+    dump_end();
+    break;
+  case &Var_d(&Vardecl(_,name,tq,type,_,_,_)):
+//    switch (type) {
+//    case &FnType(_):
+//      dump_symbol("\\begin{defun2}{");
+//      let $(tq,t,tms) = Absynpp::to_tms(tq,type);
+//      dumptq(tq);
+//      dumpntyp(t);
+//      dump_symbol("}{");
+//      dumpqvar(name);
+//      dump_symbol("}{");
+//      dumptms(List::imp_rev(tms),ignore,0);
+//      dump_symbol(";}\n");
+//      dump_comment(comment);
+//      dump_symbol("\n");
+//      dump_symbol("\\end{defun2}\n");
+//      break;
+//    default:
+      dump_begin();
+      dumptqtd(tq, type, dump_boldqvar, name);
+      dump_symbol(";\n");
+      dump_middle();
+      dump_comment(comment);
+      dump_symbol("\n");
+      dump_end();
+//      break;
+//    }
+    break;
+  case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion)):
+    dump_begin();
+    if (is_xtunion)
+      dump_alpha("xtunion");
+    else
+      dump_alpha("tunion");
+    dump_boldqvar(name);
+    dumptvars(tvs);
+    if (fields == NULL)
+      dump_symbol(";\n");
+    else  {
+      dump_symbol(" ");
+      dump_lb();
+      dump_symbol("\\\\\n~~");
+      dumptunionfields(fields->v);
+      dump_symbol("\n");
+      dump_rb();
+      dump_symbol(";\n");
+    }
+    dump_middle();
+    dump_comment(comment);
+    dump_symbol("\n");
+    dump_end();
+    break;
+  case &Enum_d(&Enumdecl{sc,nm,fields}):
+    dump_begin();
+    dump_alpha("enum");
+    dump_boldqvar(nm);
+    if (fields == NULL)
+      dump_symbol(";\n");
+    else {
+      dump_symbol(" ");
+      dump_lb();
+      dump_symbol("\\\\\n~~");
+      dumpenumfields(fields->v);
+      dump_symbol("\n");
+      dump_rb();
+      dump_symbol(";\n");
+    }
+    dump_middle();
+    dump_comment(comment);
+    dump_symbol("\n");
+    dump_end();
+    break;
+  case &Typedef_d(td):
+    dump_begin();
+    dump_alpha("typedef");
+    dumptqtd(Tqual(false,false,false),td->defn,dump_boldtypedefname,td);
+    dump_symbol(";\n");
+    dump_middle();
+    dump_comment(comment);
+    dump_symbol("\n");
+    dump_end();
+    break;
+  /* The remaining cases won't appear in .h files or will be
+     eliminated by the main loop. */
+  case &Fn_d(_):
+    break;
+  case &Let_d(_,_,_,_,_):
+    break;
+  case &Letv_d(_):
+    break;
+  case &Namespace_d(_,_):
+    break;
+  case &Using_d(_,_):
+    break;
+  case &ExternC_d(_):
+    break;
+  }
+}
+
+  }
+
   /* Is a character special to /bin/sh (except for single quote)? */
   static bool is_other_special(char c) {
     switch (c) {
@@ -110,6 +1046,9 @@ rule token "$(int,mstringptr_t)*" = parse
     }
     return s2;
   }
+  static stringptr_t sh_escape_stringptr(stringptr_t<`H,`H> sp) {
+    return new sh_escape_string(*sp);
+  }
 
   /* Given a starting position (character number) return the
      character number paired with a pos_t that can be passed
@@ -127,12 +1066,6 @@ rule token "$(int,mstringptr_t)*" = parse
     return d->loc->start;
   }
 
-  static void printit($(Lineno::pos_t,Absyn::decl_t)@ x) {
-    printf("File %s, line %d:\n",(*x)[0]->logical_file,(*x)[0]->line_no);
-    PP::file_of_doc(Absynpp::decl2doc((*x)[1]),72,stdout);
-    printf("\n");
-  }
-
   /* Filter a list of (pos_t,`a) pairs by file name */
   static list_t<$(Lineno::pos_t,`a)@>
     this_file(string_t file, list_t<$(Lineno::pos_t,`a)@`H> x) {
@@ -145,14 +1078,64 @@ rule token "$(int,mstringptr_t)*" = parse
     return result;
   }
 
+  /* Return the line number of a pos_t */
+  static int lineno(Lineno::pos_t p) {
+    return p->line_no;
+  }
+
+  static list_t<decl_t> flatten_decls(list_t<decl_t,`H> decls) {
+    let result = NULL;
+    while (decls != NULL) {
+      switch(decls->hd->r) {
+      case &Namespace_d(_,tdl): fallthru(tdl);
+      case &Using_d(_,tdl): fallthru(tdl);
+      case &ExternC_d(tdl):
+        decls = append(tdl,decls->tl);
+        break;
+      case &Struct_d(_):
+      case &Union_d(_):
+      case &Var_d(_):
+      case &Tunion_d(_):
+      case &Enum_d(_):
+      case &Typedef_d(_):
+      case &Fn_d(_):
+      case &Let_d(_,_,_,_,_):
+      case &Letv_d(_):
+        result = new List(decls->hd,result);
+        decls = decls->tl;
+        break;
+
+      }
+    }
+    return imp_rev(result);
+  }
+
+  /* State variables for command-line args */
+  static list_t<stringptr_t> cycdoc_files = NULL;
+  static void add_other(string_t<`H> s) {
+    cycdoc_files = new List(new s,cycdoc_files);
+  }
+  static list_t<stringptr_t> cycargs = NULL;
+  static void add_cycarg(string_t<`H> s) {
+    cycargs = new List(new s,cycargs);
+  }
+
   /* Main loop */
   static void process_file(string_t<`H> filename) {
     let basename      = Filename::chop_extension(filename);
     /* Preprocess the file so we can parse it */
     let preprocfile   = strconcat(basename, ".cyp");
-    let cmd = aprintf("gcc -E -o %s -x c %s",
+    let cycargs_string =
+      str_sepstr(new List(new (string_t)"",
+                          List::map(sh_escape_stringptr,rev(cycargs))),
+                 " ");
+    let cmd = aprintf("./cyclone %s -E -o %s -x cyc %s",
+                      cycargs_string,
                       sh_escape_string(preprocfile),
                       sh_escape_string(filename));
+    //     let cmd = aprintf("gcc -E -B../lib -I../lib -D_PLATFORM_INCLUDES_=\\\"../include/arch/i686-unknown-cygwin1.3.2.h\\\" -nostdinc -o %s -x c %s",
+    //                       sh_escape_string(preprocfile),
+    //                       sh_escape_string(filename));
     if (system(string_to_Cstring(cmd)) != 0) {
       fprintf(stderr,"\nError: preprocessing\n");
       return;
@@ -164,15 +1147,15 @@ rule token "$(int,mstringptr_t)*" = parse
     let decls = Parse::parse_file(in_file);
     Lex::lex_init(); // garbage collect those big tries
     file_close((FILE@)in_file);
+    decls = flatten_decls(decls);
     /* Find the location (pos_t) of each declaration */
     let poss = map(start2pos,map(decl2start,decls));
     Lineno::poss_of_abss(preprocfile, poss);
-    // remove(preprocfile);
     let pos_decls = zip(map(snd,poss),decls);
     /* Filter out declarations from other files (from #include) */
-    //    pos_decls = this_file(filename,pos_decls);
-    /* Print out the decls */
-    iter(printit,pos_decls);
+    pos_decls = this_file(filename,pos_decls);
+    let lineno_decls = zip(map(lineno,map(fst,pos_decls)),
+                           map(snd,pos_decls));
     /* Scan the file again, this time for the comments */
     let f = (FILE @)fopen(filename,"r");
     let lb = Lexing::from_file(f);
@@ -180,7 +1163,7 @@ rule token "$(int,mstringptr_t)*" = parse
     let comment;
     while ((comment = token(lb)) != NULL) {
       /* The cast below is needed else comments gets the wrong type */
-      comments = new List(($(int,mstringptr_t)@)comment,
+      comments = new List(($(int,comment_t)@)comment,
                            comments);
     }
     fclose(f);
@@ -188,22 +1171,84 @@ rule token "$(int,mstringptr_t)*" = parse
     /* Find the location (pos_t) of each comment */
     let poss = map(start2pos,map(fst,comments));
     Lineno::poss_of_abss(filename,poss);
+    remove(preprocfile);
     let pos_comments = zip(map(snd,poss),map(snd,comments));
-    /* Filter out declarations from other files (from #include) */
+    /* Filter out comments from other files (from #include) */
     pos_comments = this_file(filename,pos_comments);
-    /* Print out the comments */
-    for (; pos_comments != NULL;
-         pos_comments = pos_comments->tl) {
-      printf("File %s, line %d, comment:\n%s\n",
-             (*pos_comments->hd)[0]->logical_file,
-             (*pos_comments->hd)[0]->line_no,
-             *(*pos_comments->hd)[1]);
+    let lineno_comments = zip(map(lineno,map(fst,pos_comments)),
+                              map(snd,pos_comments));
+
+    /* Print all decls followed immediately by comments;
+       discard all other decls and comments */
+    while (lineno_decls != NULL && lineno_comments != NULL) {
+      let &$(dline,decl)    = lineno_decls->hd;
+      let &$(cline,comment) = lineno_comments->hd;
+      switch (comment) {
+//      case &Section(cmt):
+//        Dump::dump_symbol("\\section{\\texttt{");
+//        let len = strlen(cmt);
+//        /* Quick hack to get rid of a single space at the end,
+//           ought to do better than this */
+//        let clean_cmt;
+//        if (len>0 && cmt[len-1] == ' ')
+//          clean_cmt = substring(cmt,0,len-1);
+//        else
+//          clean_cmt = cmt;
+//        Dump::dump_comment(clean_cmt);
+//        Dump::dump_symbol("}}\n");
+//        lineno_comments = lineno_comments->tl;
+//        break;
+      case &Standalone(cmt):
+        Dump::dump_comment(cmt);
+        Dump::dump_symbol("\n");
+        lineno_comments = lineno_comments->tl;
+        break;
+      case &MatchDecl(cmt):
+        if (cline < dline) {
+          /* comment comes before decl; discard it */
+          lineno_comments = lineno_comments->tl;
+          continue;
+        }
+        if (lineno_decls->tl != NULL) {
+          let &$(dline2,_) = lineno_decls->tl->hd;
+          if (dline2 < cline) {
+            /* comment comes after the second decl; discard first decl */
+            lineno_decls = lineno_decls->tl;
+            continue;
+          }
+        }
+        /* Print the decl and the comment */
+        //      printf("Decl on line %d, comment on line %d:\n",dline,cline);
+        Dump::dumpdecl(decl,cmt);
+        fflush(stdout);
+        lineno_decls = lineno_decls->tl;
+        lineno_comments = lineno_comments->tl;
+        break;
+      }
     }
   }
 
-  int main(int argc, char ??argv) {
-    let file = strdup(argv[1]); // need a version on the heap
-    process_file(file);
+  using Arg;
+  int main(int argc, string_t<`H> ?`H argv) {
+
+    Arg::speclist_t<`H,`H> options =
+      list(new $("-D",true,"<name>[=<value>]",
+                 new Flag_spec(add_cycarg),
+                 "Pass definition to preprocessor"),
+           new $("-I",true,"<dir>",
+                 new Flag_spec(add_cycarg),
+                 "Add to the list of directories to search for include files"),
+           new $("-B",true,"<file>",
+                 new Flag_spec(add_cycarg),
+                 "Add to the list of directories to search for compiler files")
+           );
+
+    Arg::parse(options, add_other, "Options:", argv);
+
+    for (let l = rev(cycdoc_files); l != NULL; l = l->tl) {
+      process_file(*(l->hd));
+    }
+
     return 0;
   }
 }

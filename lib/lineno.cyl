@@ -106,7 +106,10 @@ void poss_of_abss(string_t filename, List::list_t<$(int,pos_t)@,`H> places) {
 	  opt_t<$(mstring_t,int)@> fno = parse_linedef(this_line);
 	  if (fno == NULL) {
 	    ++line;
+            /* Commented out because it produces spurious warnings
+               in cycdoc.
 	    fprintf(stderr, "Unknown directive: %s\n", this_line);
+            */
 	  } else {
 	    source_file = (*fno->v)[0];
 	    line        = (*fno->v)[1];

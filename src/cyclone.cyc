@@ -170,11 +170,28 @@ static void set_stop_after_asmfile() {
   add_ccarg("-S");
 }
 
+/* This only works enough to support cycdoc so far */
+tunion inputtype {
+  DEFAULTINPUT;
+  CYCLONEFILE;
+};
+typedef tunion inputtype inputtype_t;
+static inputtype_t intype = DEFAULTINPUT;
+static void set_inputtype(string_t s) {
+  if (strcmp(s,"cyc") == 0)
+    intype = CYCLONEFILE;
+  else if (strcmp(s,"none") == 0)
+    intype = DEFAULTINPUT;
+  else {
+    fprintf(stderr,"Input type '%s' not supported\n",s);
+  }
+}
+
 // Cyclone files given on the command line
 static list_t<stringptr_t> cyclone_files = NULL;
 // Like add_ccarg but intercepts .cyc files for special handling
 static void add_other(string_t<`H> s) {
-  if (is_cyclone_sourcefile(s)) {
+  if (intype == CYCLONEFILE || is_cyclone_sourcefile(s)) {
     // For processing by Cyclone
     cyclone_files = new List(new s,cyclone_files);
 
@@ -680,6 +697,9 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-c",false,"",
                new Unit_spec(set_stop_after_objectfile),
                "Produce an object file instead of an executable; do not link"),
+	 new $("-x",false," <language>",
+               new String_spec(set_inputtype),
+               "Specify <language> for the following input files"),
          new $("-s",false,"",
                new Flag_spec(add_ccarg),
                "Remove all symbol table and relocation info from executable"),
