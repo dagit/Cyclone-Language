@@ -26,14 +26,98 @@ Chapter, we want to share with you the tips and tricks that we have
 developed for porting C code to Cyclone and interfacing Cyclone
 code against legacy C code.
 
-\subsection{Translating C to Cyclone}
+\subsection{Semi-Automatic Porting}
+
+The Cyclone compiler includes a simple porting mode which you can
+use to try to move your C code closer to Cyclone.  The porting
+tool is not perfect, but it's a start and we hope to develop it
+more in the future.  
+
+When porting a file, say \texttt{foo.c}, you'll first need to
+copy the file to \texttt{foo.cyc} and then edit it to
+add \texttt{__cyclone_port_on__;} and 
+\texttt{__cyclone_port_off__;} around the code that you want
+Cyclone to port.  For example, if after copying \texttt{foo.c},
+the file \texttt{foo.cyc} contains the
+following:
+\begin{verbatim}
+1.   #include <stdio.h>
+2. 
+3.   void foo(char *s) {
+4.     printf(s);
+5.   }
+6. 
+7.   int main(int argc, char **argv) {
+8.     argv++;
+9.     for (argc--; argc >= 0; argc--, argv++)
+10.      foo(*argv);
+11.  }
+\end{verbatim}
+then you'll want to insert \texttt{__cyclone_port_on__;} at line
+2 and \texttt{__cyclone_port_off__;} after line 11.  You do not
+want to port standard include files such as \texttt{stdio}, hence
+the need for the delimiters.
+
+Next compile the file with the \texttt{-port} flag:
+\begin{verbatim}
+  cyclone -port foo.cyc > rewrites.txt
+\end{verbatim}
+and pipe the output to a file, in this case \texttt{rewrites.txt}.
+If you edit the output file, you will see that the compiler has
+emitted a list of edits such as the following:
+\begin{verbatim}
+  foo.cyc(5:14-5:15): insert `?' for `*'
+  foo.cyc(9:24-9:25): insert `?' for `*'
+  foo.cyc(9:25-9:26): insert `?' for `*'
+\end{verbatim}
+You can apply these edits by running the \texttt{rewrite} program
+on the edits:
+\begin{verbatim}
+  rewrite -port foo.cyc > rewrites.txt
+\end{verbatim}
+(The \texttt{rewrite} program is written in Cyclone and included
+in the \texttt{tools} sub-directory.)  This will produce a new
+file called \texttt{foo_new.cyc} which should look like this:
+\begin{verbatim}
+#include <stdio.h>
+
+__cyclone_port_on__;
+
+void foo(char ?s) { 
+  printf(s);
+}
+
+int main(int argc, char ??argv) {
+  argv++;
+  for (argc--; argc >= 0; argc--, argv++) 
+    foo(*argv);
+}
+__cyclone_port_off__;
+\end{verbatim}
+Notice that the porting system has changed the pointers from
+thin pointers to fat pointers (\texttt{?}) to support the pointer
+arithmetic that is done in \texttt{main}, and that this 
+constraint has flowed to procedures that are called (e.g., \texttt{foo}).
+
+You'll need to strip out the port-on and port-off directives and
+then try to compile the file with the Cyclone compiler.  In this
+case, the rewritten code in \texttt{foo_new.cyc} compiles with
+a warning that \texttt{main} might not return an integer value.
+In general, you'll find that the porting tool doesn't always
+produce valid Cyclone code.  Usually, you'll have to go in and
+modify the code substantially to get it to compile.  Nonetheless,
+the porting tool can take care of lots of little details for
+you.  
+
+\subsection{Manually Translating C to Cyclone}
+
 To a first approximation, you can port a simple program
 from C to Cyclone by following these steps which are
 detailed below:
 \begin{itemize}
 \item \hyperlink{port:pointers}{Change pointer types to fat pointer types where necessary.}  
 \item \hyperlink{port:malloc}{Use comprehensions to heap-allocate arrays.}
-\item \hyperlink{port:unions}{Use tunions for unions with pointers.}
+\item \hyperlink{port:unions}{Use tagged unions for unions with pointers.}
 \item \hyperlink{port:initialize}{Initialize variables.}  
 \item \hyperlink{port:cases}{Put breaks or fallthrus in switch cases.} 
 \item \hyperlink{port:temp}{Replace one temporary with multiple temporaries.}  
@@ -41,7 +125,7 @@ detailed below:
 \item \hyperlink{port:types}{Insert type information to direct the type-checker.}
 \item \hyperlink{port:const}{Copy ``const'' code or values to make it non-const.}  
 \item \hyperlink{port:free}{Get rid of calls to free, calloc, etc.}
-\item \hyperlink{port:poly}{Use polymorphism or tunions to get rid of void*.}  
+\item \hyperlink{port:poly}{Use polymorphism or tagged unions to get rid of void*.}  
 \item \hyperlink{port:vararg}{Rewrite the bodies of vararg functions.}
 \item \hyperlink{port:setjmp}{Use exceptions instead of setjmp.}
 \end{itemize}
@@ -63,10 +147,11 @@ options when compiling your code.
 
 \begin{porta}{port:pointers}{Change pointer types to fat pointer types where necessary.}  
 Ideally, you should examine the code and use thin pointers (e.g., \texttt{int*}
-or better \texttt{int@}) wherever possible as these require fewer
+or better \texttt{int*@nonnull}) wherever possible as these require fewer
 run-time checks and less storage.  However, recall that thin pointers
 do not support pointer arithmetic.  In those situations, you'll need
-to use fat pointers (e.g., \texttt{int?}).  A particularly simple strategy 
+to use fat pointers (e.g., \texttt{int*@fat} which can also be written
+as \texttt{int?}).  A particularly simple strategy 
 when porting C code is to just change all pointers to fat pointers.
 The code is then more likely to compile, but will have greater overhead.
 After changing to use all fat pointers, you may wish to profile or reexamine
@@ -75,22 +160,23 @@ your code and figure out where you can profitably use thin pointers.
 
 \begin{porta}{port:malloc}{Use comprehensions to heap-allocate arrays.}
 Cyclone provides limited support for \texttt{malloc} and separated
-initialization but this really only works for \texttt{struct}s or
-tuples.  To heap- or region-allocate and initialize an array, use
+initialization but this really only works for bits-only objects.
+To heap- or region-allocate and initialize an array that might contain
+pointers, use
 \texttt{new} or \texttt{rnew} in conjunction with array comprehensions.  
 For example, to copy a string \texttt{s}, one might write:
 \begin{verbatim}
-  char ?t = new {for i < s.size : s[i]};
+  char *@fat t = new {for i < s.size : s[i]};
 \end{verbatim}
 \end{porta}
 
-\begin{porta}{port:unions}{Use tunions for unions with pointers.}
-Cyclone only accepts unions that contain ``bits'' (i.e., ints; chars;
+\begin{porta}{port:unions}{Use tagged unions for unions with pointers.}
+Cyclone only lets you read members of unions that 
+contain ``bits'' (i.e., ints; chars;
 shorts; floats; doubles; or tuples, structs, unions, or arrays of bits.)
 So if you have a C union with a pointer type in it, you'll have to
-code around it.  One way is to simply use a tagged union (\texttt{tunion}).
-Note that this adds a level of indirection and requires pattern
-matching to ensure type-safety.  
+code around it.  One way is to simply use a \texttt{@tagged} union.
+Note that this adds hidden tag and associated checks to ensure safety.
 \end{porta}
 
 \begin{porta}{port:initialize}{Initialize variables.}  
@@ -101,8 +187,8 @@ so that you can construct an appropriate initial value.  For instance,
 suppose you have the following declarations at top-level:
 \begin{verbatim}
 struct DICT; 
-struct DICT @new_dict();
-struct DICT @d;
+struct DICT *@nonnull new_dict();
+struct DICT *@nonnull d;
 void init() {
   d = new_dict();
 }
@@ -124,7 +210,7 @@ a ``possibly-null'' pointer to a dictionary and initialize it
 with \texttt{NULL}:
 \begin{verbatim}
 struct DICT; 
-struct DICT @new_dict();
+struct DICT *nonnull new_dict();
 struct DICT *d;
 void init() {
   d = new_dict();
@@ -144,8 +230,8 @@ fallthru in each case of a switch.
 \begin{porta}{port:temp}{Replace one temporary with multiple temporaries.}
 Consider the following code:
 \begin{verbatim}
-void foo(char ? x, char ? y) {
-  char ? temp;
+void foo(char * x, char * y) {
+  char * temp;
   temp = x;
   bar(temp);
   temp = y;
@@ -155,7 +241,7 @@ void foo(char ? x, char ? y) {
 
 When compiled, Cyclone generates an error message like this:
 \begin{verbatim}
-type mismatch: const unsigned char ?#0  != unsigned char ?#1 
+type mismatch: char *@zeroterm #0  != char *@zeroterm #1 
 \end{verbatim}
 
 The problem is that Cyclone thinks that \texttt{x} and \texttt{y}
@@ -166,9 +252,9 @@ there is no single region that we can say \texttt{temp} points into.
 The solution in this case is to use two different temporaries for
 the two different purposes:
 \begin{verbatim}
-void foo(char ? x, char ? y) {
-  char ? temp1;
-  char ? temp2;
+void foo(char * x, char * y) {
+  char * temp1;
+  char * temp2;
   temp1 = x;
   bar(temp1);
   temp2 = y;
@@ -187,7 +273,7 @@ point into distinct regions, and that output pointers, by default point
 into the heap.  Obviously, this won't always be the case.  Consider
 the following code:
 \begin{verbatim}
-int @foo(int @x, int @y, int b) {
+int *foo(int *x, int *y, int b) {
   if (b)
     return x;
   else
@@ -197,16 +283,16 @@ int @foo(int @x, int @y, int b) {
 
 Cyclone complains when we compile this code:
 \begin{verbatim}
-returns value of type int @#0  but requires int @
+returns value of type int *#0  but requires int *
         #0 and `H failed to unify. 
-returns value of type int @#1  but requires int @
+returns value of type int *#1  but requires int *
         #1 and `H failed to unify. 
 \end{verbatim}
 The problem is that neither \texttt{x} nor \texttt{y} is a pointer
 into the heap.  You can fix this problem by putting in explicit regions
 to connect the arguments and the result.  For instance, we might write:
 \begin{verbatim}
-int @`r foo(int @`r x, int @`r y, int b) {
+int *`r foo(int *`r x, int *`r y, int b) {
   if (b)
     return x;
   else
@@ -334,7 +420,7 @@ and \texttt{realloc} are supported, but in a limited fashion in
 order to preserve  type safety.  
 \end{porta}
 
-\begin{porta}{port:poly}{Use polymorphism or tunions to get rid of void*.}  
+\begin{porta}{port:poly}{Use polymorphism or tagged unions to get rid of void*.}  
 Often you'll find C code that uses \texttt{void*} to simulate
 polymorphism.  A typical example is something like swap:
 \begin{verbatim}
@@ -352,7 +438,7 @@ case that \texttt{void**} is a super-type of a pointer to a
 pointer type.  In this case, the solution is to use Cyclone's
 polymorphism:
 \begin{verbatim}
-void swap(`a @x, `a @y) {
+void swap(`a *x, `a *y) {
   `a t = x;
   x = y;
   y = t;
@@ -385,12 +471,15 @@ in bogus cominations of \texttt{x} and \texttt{y}.  The solution
 in Cylcone is to use a tagged union to represent the dependency
 and get rid of the variable \texttt{x}:
 \begin{verbatim}
-tunion IntOrString { Int(int), String(char ?) };
-typedef tunion IntOrString i_or_s;
+@tagged union IntOrString { 
+  int Int;
+  const char *@fat String;
+};
+typedef union IntOrString i_or_s;
 int foo(i_or_s y) {
   switch (y) {
-  case Int(i):  return i;
-  case String(s):  
+  case {.Int = i}:  return i;
+  case {.String = s}:  
     printf("%s\n",s);
     return -1;
   }

@@ -574,9 +574,10 @@ into the same region.  In addition, it is sometimes useful to put in
 the region annotations for documentation purposes, or to make type
 errors a little less cryptic.
 
-You need to understand at least four more details about regions to
+You need to understand a few more details about regions to
 be an effective Cyclone programmer:  the heap region, growable
-regions, region polymorphism, and default region annotations for
+regions, region polymorphism, dynamic regions, and default region 
+annotations for
 function parameters.  The following sections give a brief overview
 of these details.
 
@@ -602,7 +603,8 @@ As another example, the following function heap-allocates a point and
 returns it to the caller.  We put the regions in here to be explicit:
 \begin{verbatim}
 struct Point *@region(`H) good_newPoint(int x,int y) {
-  struct Point *@region(`H) p = malloc(sizeof(struct Point));
+  struct Point *@region(`H) p = 
+    malloc(sizeof(struct Point));
   p->x = x;
   p->y = y;
   return p;
@@ -625,18 +627,19 @@ Cyclone for explicitly freeing an object in the heap.  The reason is
 that Cyclone cannot accurately track the lifetimes of individual
 objects within the heap, so it can't be sure whether dereferencing a
 pointer into the heap would cause problems.  Instead, a conservative
-garbage collector reclaims the data allocated in the heap.
+garbage collector is used to reclaim the data allocated in the heap.
 
 Using a garbage collector to recycle memory is the right thing to do
 for most applications.  For instance, the Cyclone compiler uses
 heap-allocated data and relies upon the collector to recycle most
-objects it creates when compiling a program. But a garbage collector
+objects it creates when compiling a program.  But a garbage collector
 can introduce pauses in the program, and as a general purpose memory
 manager, might not be as space- or time-efficient as routines tailored
 to an application.
 
 To address these applications, Cyclone provides support for \emph{growable
-regions}.  A growable region is similar to the region associated with
+regions} and \emph{dynamic regions}.  A growable region is similar to the 
+region associated with
 a code block.  In particular, when you execute:
 \begin{verbatim}
 { region<`r> h;
@@ -680,6 +683,80 @@ with global scope, and you can use the global variable
 as a handle on the heap.  Indeed, \texttt{new} and \texttt{malloc(...)}
 are just abbreviations for \texttt{rnew(Core::heap_region)} and
 \texttt{rmalloc(Core::heap_region,...)} respectively.  
+
+\subsubsection*{Dynamic Regions}
+
+Block regions and growable regions allow you to create arenas that
+are lexically scoped.  The lifetimes of these regions begin and end
+in a last-in-first-out (LIFO) manner that follows the block structure
+of the code.  They are particularly good for allocating temporary
+data during a computation.  But they are not so good when we cannot
+statically bound the lifetime of an object that we wish to allocate.
+
+For example, consider an event loop where each event contains some
+data that should be passed to the event handler when the event is
+triggered.  And assume that the event handler wishes to deallocate
+the data when it is invoked.  Since we cannot determine when (or even
+if) the event handler will be invoked, we cannot statically determine
+the lifetime of its associated data.
+
+In these situations, you can use a \emph{dynamic region}.  A dynamic
+region can be deallocated at (almost) any point within a program.
+However, before the data within a dynamic region can be accessed
+and before you can allocate new data into a dynamic region, the
+region must be \emph{opened}.  When you open a dynamic region, this
+checks that the region has not been deallocated, and also prevents
+someone from deallocating the region as long as it is open.  In
+other words, once open, you are free to access or allocate data 
+within the region, but you cannot free the region.  
+
+If you attempt to open a dynamic region that has already been freed, then
+an exception will be thrown.  Dually, if you attempt to free a
+dynamic region that is currently open, then an exception will be
+thrown.  
+
+A dynamic region is created as follows:
+\begin{verbatim}
+  let NewRegion{<`d> dh} = Core::rnew_dynregion(rh);
+\end{verbatim}
+where \texttt{rh} is a handle for a region \texttt{`r}, \texttt{`d} is
+the name of the new dynamic, and \texttt{dh} is the dynamic region handle.
+The dynamic region handle \texttt{dh} has type \texttt{dynregion_t<`d,`r>}.
+We say that it is a handle for \texttt{`d} and is contained in the
+region \texttt{`r}.
+
+To access or allocate data within a dynamic region, you must
+open the region as follows:
+\begin{verbatim}
+  { region sh = open(dh);
+    ...
+  }
+\end{verbatim}
+In this case, the dynamic region handle \texttt{dh} is opened and we
+are given a \emph{static} region handle \texttt{sh}.  The region
+remains opened throughout the scope of the static region handle.
+That is, the code in the curly braces (\texttt{...}) can access
+the region, but outside the curly braces, the data within the
+region may not be accessed.  The static region
+handle \texttt{sh} can be used to allocate data within the dynamic 
+region \texttt{`d}.
+
+If the region \texttt{`d} has already been freed, then the 
+\texttt{open} will fail by throwing the exception \texttt{Core::Open_Region}.
+
+You can free a dynamic region (as long as it is not open) by 
+calling the following function and passing in the dynamic
+region handle:
+\begin{verbatim}
+  Core::free_dynregion(dh);
+\end{verbatim}
+If the dynamic region has already been freed or if it is currently
+open, the \texttt{free_dynregion} will throw the exception
+\texttt{Core::Free_Region}.
+
+The dynamic region handle \texttt{dh} is contained in the region
+\texttt{`r}.  When \texttt{`r} is deallocated, then \texttt{dh}
+becomes inaccessible and is thus deallocated as well.  
 
 \subsubsection*{Region Polymorphism}
 
@@ -853,8 +930,11 @@ type of region, and simply declaring a variable within that
 block allocates storage within the region.  The storage is
 deallocated upon exit of the block.  Growable regions are
 similar, except that a dynamic number of objects can be allocated
-within the region using the region's handle.  The heap is a
-special region that is garbage collected.  
+within the region using the region's handle.  Both block
+and growable regions have structured lifetimes.  Dynamic
+regions, in contrast, support arbitrary lifetimes, but
+must be opened to be accessed.  Finally, the heap is a
+special growable region that is garbage collected.  
 
 Region polymorphism and region inference make it possible to omit many
 region annotations on types.  Cyclone assumes that pointers passed to
@@ -874,7 +954,7 @@ garbage collection.
 For more information about regions, see
 \hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
 
-\subsection{Datatypes and Pattern Matching}
+\subsection{Tagged Unions and Datatypes}
 
 It's often necessary to write a function that accepts an argument with
 more than one possible type.  For example, in
@@ -904,146 +984,159 @@ call \texttt{printf} with arguments that don't match the format
 string.  This is called a \emph{format string attack}, and it's an
 increasingly common exploit.
 
-Cyclone provides \emph{datatypes} so that you can safely write
+Cyclone provides \emph{tagged unions} so that you can safely write
 functions that accept an argument with more than one possible type.
-Like a C \texttt{union}, a Cyclone \texttt{datatype} is a type that has
+Like a C \texttt{union}, a Cyclone \texttt{@tagged union} is a type that has
 several possible cases.  Here's a simple example:
 \begin{verbatim}
-    datatype t {
-      Integer(int);
-      String(const char ?);
+    @tagged union T {
+      int Integer;
+      const char *@fat String;
     };
-    datatype t @x = new Integer(3);
-    datatype t @y = new String("hello, world");
+    union T x = {.Integer = 3};
+    union T y = {.String = "hello, world"};
 \end{verbatim}
-This declares a new type, \texttt{datatype t}, that can hold either an
-integer or a string (remember, a string is a \texttt{char ?}\ in
-Cyclone).  \texttt{Integer} and \texttt{String} are \emph{tags} for
-the two possibilities.  The tags are used to build values of type
-\texttt{datatype t}.  For example, \texttt{x} is initialized with
-\texttt{new Integer(3)}, which allocates storage on the heap,
-initializes it with the tag \texttt{Integer} and the integer 3, and
-returns a pointer to the storage.  Therefore, \texttt{x} has type
-``non-NULL pointer to a value of type \texttt{datatype t}'', or
-\texttt{datatype t @} for short.  The next declaration is
-similar, except that \texttt{y} is initialized with the
-\texttt{String} case.
+This declares a new tagged union type \texttt{T}, that can hold either an
+integer or a string (remember, a string is a \texttt{char *@fat}\ in
+Cyclone).  It also declares to \texttt{union T} values \texttt{x} and
+\texttt{y} and initializes them with an integer and string respectively.
 
-\emph{Pattern matching} is used to determine the tag of a value of
-type \texttt{datatype t}, and to extract the underlying value.  For
-example, here is a function that will print either an integer or a
-string:
+Just as with C unions, you can read and write any member of a tagged 
+union.  However, to prevent security holes, Cyclone enforces the
+property that you can only read the last member written.  This
+prevents you from accidentally treating an integer as if it's
+a string or some other kind of pointer.  
+
+Cyclone enforces this safety property by inserting a hidden tag
+into the union (hence the \texttt{@tagged} qualifier.)  
+You can test the
+tag by using the built-in \texttt{tagcheck} function.  For
+instance, here is a function that uses the real \texttt{printf}
+to safely print out the contents of a \texttt{union T} value,
+regardless of its contents:
 \begin{verbatim}
-    void print(datatype t a) {
+    bool printT(union T w) {
+      if (tagcheck(w.Integer))
+        printf("%s",w);
+      else 
+        printf("%d",w);
+    }
+\end{verbatim}
+Note that \texttt{tagcheck(w.Integer)} does not return the
+value of the \texttt{Integer} member, but rather returns true
+if and only if the \texttt{Integer} member was the last member
+written (and is thus safe to read.)  
+
+Each write to a tagged union member causes the hidden tag to
+be updated, and each read is preceded by a 
+check to ensure that the member was the last one written.
+If you attempt to read some member other than the last one
+written, than the \texttt{Match}
+exception is thrown.  For example, the following code writes
+the \texttt{String} member and then attempts to read the
+\texttt{Integer} member, so it will throw a \texttt{Match}
+exception:
+\begin{verbatim}
+    union T a;
+    int x;
+    a.String = "hello, world";
+    /* Next line fails */
+    x = a.Integer + 3;
+\end{verbatim}
+
+When you have a big union, it can be awkward to use \texttt{tagcheck}
+to test the hidden tag.  You might accidentally test the wrong
+member or forget to cover a member.  In these cases, its probably
+best to use \emph{pattern matching} to determine the tag and 
+to extract the underlying value.  For
+example, here is the function \texttt{printT} coded with
+pattern matching:
+\begin{verbatim}
+    void printT(union T a) {
+      switch (a) {
+      case {.Integer = i}: printf("%d",i); return;
+      case {.String = s}: printf("%s",s); return;
+      }
+    }
+\end{verbatim}
+The argument \texttt{a} has type \texttt{union T}, so it is either
+an \texttt{Integer} or \texttt{String}.  Cyclone
+extends switch statements with \emph{patterns} that distinguish
+between the cases.  The first case,
+\begin{verbatim}
+   case {.Integer = i}: printf("%d",i); return;
+\end{verbatim}
+contains a pattern, \texttt{\{Integer = i\}}, that will match only 
+\texttt{T} values where the \texttt{Integer} member was the last
+one written.  The variable
+\texttt{i} is bound to the underlying integer, and it can be used in
+the body of the case.  For example, \texttt{printT(x)} will print 3,
+since \texttt{x} holds \texttt{\{.Integer = 3\}}, and
+\texttt{printT(y)} will print \texttt{hello, world}.
+You can find out more about patterns in
+\hyperref[{sec:patterns}]{Section~\ref{sec:patterns}}; 
+
+Cyclone also supports untagged unions, but there are restrictions
+on how they may be used to ensure safety.  In particular, you can
+write any value you like into a union, but you can only read out
+values that do not contain pointers.  This ensures that you don't
+``spoof'' a pointer with an integer or some other bogus value.
+So, the general rule is that you can use a normal C union if
+you aren't using pointers, but you must use a \texttt{@tagged}
+union if you are using pointers.  
+
+Cyclone provides another alternative to tagged unions for supporting
+hetrogenous values called a \emph{datatype}.  Tagged
+unions require space proportional to the largest member (plus room
+for the tag.)  In contrast, a datatype only requires space for the
+member being used.  However, datatypes cannot be updated with a
+different member and require a level of indirection. 
+
+Here is our example type re-coded using a \texttt{datatype} declaration:
+\begin{verbatim}
+    datatype T {
+      Integer(int);
+      String(const char *@fat);
+    };
+
+    datatype T.Integer x = Integer(3);
+    datatype T.String y = String("hello, world");
+
+    void printT(datatype T@ a) {
       switch (a) {
       case &Integer(i): printf("%d",i); return;
       case &String(s): printf("%s",s); return;
       }
     }
 \end{verbatim}
-The argument \texttt{a} has type \texttt{datatype t}, so it is either
-built with tag \texttt{Integer} or tag \texttt{String}.  Cyclone
-extends switch statements with \emph{patterns} that distinguish
-between the cases.  The first case,
-\begin{verbatim}
-   case &Integer(i): printf("%d",i); return;
-\end{verbatim}
-contains a pattern, \texttt{\&Integer(i)}, that will match only values
-that have been built with the \texttt{Integer} tag.  The variable
-\texttt{i} is bound to the underlying integer, and it can be used in
-the body of the case.  For example, \texttt{print(x)} will print 3,
-since \texttt{x} holds \texttt{new Integer(3)}, and
-\texttt{print(y)} will print \texttt{hello, world}.
+In general, a \texttt{datatype} declaration includes a set of
+\emph{constructors} which can be used to build datatype values.
+In this case, the constructors are \texttt{Integer} and \texttt{String}.
+The \texttt{Integer} constructor takes an \texttt{int} and returns
+a value of type \texttt{datatype T.Integer}.  The \texttt{String}
+constructor takes a string and returns a \texttt{datatype T.String}
+value.  
 
-The cases of a \texttt{datatype} can carry any number of values,
-including none, and they can be recursive.  For example, we can define
-a tree datatype as follows.
-\begin{verbatim}
-    datatype tree {
-      Empty;
-      Leaf(int);
-      Node(datatype tree @, datatype tree @);
-    };
-\end{verbatim}
-A tree can be empty, or it can be a single (leaf) node holding an
-integer, or it can be an internal node that points to a left and a
-right subtree.  In other words, \texttt{datatype tree} is the type of
-possibly empty binary trees with integer leaves.
+Note that the types of \texttt{x} and \texttt{y} are not 
+the same so we can't interchange them, nor can we pass them
+directly to the \texttt{printT} function.  In particular,
+their types reveal which constructor was used to build
+them.  However, we can manipulate pointers to these values
+in an abstract way.  In particular, 
+we can pass a pointer to a \texttt{datatype T.Integer} value
+or a pointer to a \texttt{datatype T.String} value 
+anywhere that expects a \texttt{datatype T}.  For instance,
+we can write \texttt{printT(\&x)} to print out the integer 
+value in \texttt{x}, and we can write \texttt{printT(\&y)}
+to print out the \texttt{"hello, world"} string in y.
 
-Here's a function, \texttt{sum}, that calculates the sum of the leaves
-of a tree:
-\begin{verbatim}
-    int sum(datatype tree @x) {
-      switch (x) {
-      case &Empty: return 0;
-      case &Leaf(i): return i;
-      case &Node(y,z): return sum(y)+sum(z);
-      }
-    }
-\end{verbatim}
-
-It's written in a straightforward way, with a case for each possible
-tag in the type \texttt{datatype tree}.  One thing to notice is that
-the argument \texttt{x} is passed as a \emph{pointer} to a
-\texttt{datatype t}, instead of just a \texttt{datatype t}.  This is
-because each case of a Cyclone datatype can occupy
-a different size in memory (in contrast to a C union).  For example,
-the \texttt{Empty} case only needs to hold a tag (\texttt{Empty}),
-while a value \texttt{Leaf(i)} must hold both a tag and an integer,
-and a value \texttt{Node(y,z)} must hold a tag and two pointers.
-So, \texttt{x} is passed as a function.
-
-Similarly, the subtrees \texttt{x} and \texttt{y} of
-\texttt{Node(x,y)} are pointers as well.  If we tried to make them
-just \texttt{datatype tree}, then the compiler would not know the size
-of a \texttt{Node} value.
-
-You can find out more about patterns in
-\hyperref[{sec:patterns}]{Section~\ref{sec:patterns}}; for more about
-\texttt{datatype} and memory management, see
-\hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
-
-%%% For example, \texttt{connect} is a C
-%%% library function used to initiate communication with a machine on the
-%%% Internet.  It can do so using a number of communication protocols,
-%%% including IPv4 (Internet Protocol Version 4) and IPv6.  Each protocol
-%%% uses a different form of address for machines on the Internet; to make
-%%% an IPv4 connection, you call \texttt{connect} with an IPv4 address,
-%%% and to make an IPv6 connection, you call \texttt{connect} with an IPv6
-%%% address.  In other words, \texttt{connect}'s address argument has
-%%% a different type depending on whether an IPv4 or IPv6 connection is
-%%% being made.
-%%%
-%%% To make this work in C, \texttt{connect} is given the following type:
-%%% \begin{alltt}
-%%%     int \textbf{connect}(int \textit{fd}, const struct sockaddr *\textit{a}, socklen_t \textit{len});
-%%% \end{alltt}
-%%% The address argument, \textit{\texttt{a}}, is declared with type
-%%% \texttt{struct sockaddr *}.  However, \texttt{connect} is never called
-%%% with an argument of that type.  Instead, it will be called with an
-%%% argument of type \texttt{struct sockaddr_in *} for an IPv4 connection,
-%%% or \texttt{struct sockaddr_in6 *} for an IPv6 connection.  The
-%%% \texttt{connect} function casts \textit{\texttt{a}} from type
-%%% \texttt{struct sockaddr *} to type \texttt{struct sockaddr_in *} or
-%%% type \texttt{struct sockaddr_in6 *} as appropriate.
-%%%
-%%% How does \texttt{connect} know whether to cast to an IPv4 address or
-%%% an IPv6 address?  It expects all address structures to have a common
-%%% field, at the same place in each structure, that gives the kind of
-%%% address.  So \texttt{connect} examines the field and does the
-%%% appropriate cast.  This can work quite well, but it isn't safe.  It's
-%%% possible to call \texttt{connect} with an address structure where the
-%%% common field is fill out incorrectly, either by accident or by
-%%% malicious intent.  C has no protections against this, and
-%%% \texttt{connect} has no way of detecting it; the cast will succeed and
-%%% \texttt{connect}'s ``address'' argument might be something very
-%%% different.
-
+For more on datatypes, see
+\hyperref[{sec:datatypes}]{Section~\ref{sec:datatypes}}.
 
 \subsection{Exceptions}
 
 So far we've glossed over what happens when you try to dereference a
-null pointer, or assign to an out-of-bounds \texttt{?}\ pointer.
+null pointer, or assign to an out-of-bounds \texttt{@fat} pointer.
 We've said that Cyclone inserts checks to make sure the operation is
 safe, but what if the checks fail?  For safety, it would be sufficient
 to halt the program and print an error message---a big improvement
@@ -1062,7 +1155,7 @@ message.  Consider our earlier example:
 \end{verbatim}
 Suppose that there is no file \texttt{/etc/passwd}; then
 \texttt{fopen} will return NULL, and when \texttt{f} is cast to
-\texttt{FILE @}, the implied null check will fail.  The program will
+\texttt{FILE *@nonnull}, the implied null check will fail.  The program will
 halt with an error message,
 \begin{verbatim}
     Uncaught exception Null_Exception
@@ -1077,7 +1170,7 @@ matching:
     FILE *f = fopen("/etc/passwd","r");
     int c;
     try {
-      c = getc((FILE @)f);
+      c = getc((FILE *@nonnull)f);
     }
     catch {
     case &Null_Exception:
@@ -1089,7 +1182,7 @@ matching:
     }
 \end{verbatim}
 Here we've ``wrapped'' the call to \texttt{getc} in a
-\texttt{try}-\texttt{catch} statement.  If \texttt{f} isn't NULL and
+\texttt{try}-\texttt{catch} statement.  If \texttt{f} isn't \texttt{NULL} and
 the \texttt{getc} succeeds, then execution just continues, ignoring
 the \texttt{catch}.  But if \texttt{f} is NULL, then the null check
 will fail and the exception \texttt{Null_Exception} will be thrown;
@@ -1099,7 +1192,7 @@ exception is pattern matched against the cases.  Since the thrown
 exception is \texttt{Null_Exception}, the first case is executed here.
 
 There is one important difference between an exception and a case of a
-\texttt{datatype}: with \texttt{datatype}, all of the cases have to be
+\texttt{datatype}: with a \texttt{datatype}, all of the cases have to be
 declared at once, while a new exception can be declared at any time.
 So, exceptions are an \emph{extensible} \texttt{datatype}.  You can
 specify that a datatype is extensible when you declare it, using the
@@ -1107,7 +1200,7 @@ specify that a datatype is extensible when you declare it, using the
 here's how to declare a new exception:
 \begin{verbatim}
     @extensible datatype exn {
-      My_Exception(char ?);
+      My_Exception(char *@fat);
     };
 \end{verbatim}
 The type \texttt{@extensible datatype exn} is the type of exceptions,
@@ -1152,7 +1245,8 @@ parametric polymorphism, (b) structural subtyping, and (c) some
 unification-based, local-type inference.  These features are necessary
 to type-check or port a number of (potentially) unsafe C idioms,
 usually involving ``\texttt{void *}'' or the like.  Similarly,
-\texttt{datatype} types can be used to code around many of the uses
+\texttt{@tagged union} types and \texttt{datatypes} 
+can be used to code around many of the uses
 for C's \texttt{union} types -- another potential source of
 unsoundness.  The rest of this section is a brief overview of these
 added features.
@@ -1168,10 +1262,11 @@ Cyclone. Some of the ones that we currently support are:
   \texttt{(\lb} \textit{statement} \textit{expression} \texttt{\rb)}.
   The statement is executed first, then the expression, and the value
   of the entire expression is the value of the expression
-\item Struct expressions:  If you've declared
+\item Struct and Union expressions:  If you've declared
   \texttt{struct point\{int x; int y;\};} then you can write
   \texttt{point\{.x=\textit{expression}, .y=\textit{expression}\}}
- to allocate and initialize a struct point
+ to allocate and initialize a struct point.  The same sort of
+ constructors may be used for unions, tagged or not.
 \item \texttt{//} comments as in Java or C++
 \item Declarations can appear in any statement position.  It is not
   necessary to wrap braces around the declaration of a local variable.
@@ -1668,37 +1763,37 @@ Here is a list of the major restrictions:
   very conservative about ``compatible'' because it does not know
   the size or alignment constraints of your C compiler.  
 
-\item Cyclone does not support pointer arithmetic on \texttt{*} or
-  \texttt{@} pointers unless they are zero-terminated and even then,
+\item Cyclone does not support pointer arithmetic on thin
+  pointers unless they are zero-terminated and even then,
   there are checks to make sure you can't go past a zero.  Pointer 
   arithmetic is not unsafe in itself, but
   it can lead to unsafe code when the resulting pointer is assigned or
-  dereferenced.  You can cast the \texttt{*} or \texttt{@} value to a
-  \texttt{?}\ value and then do the pointer arithmetic instead.
+  dereferenced.  You can cast the thin pointer value to a
+  \texttt{@fat} value and then do the pointer arithmetic instead.
 
-\item Cyclone inserts a NULL check when a \texttt{*} pointer is
+\item Cyclone inserts a NULL check when a possibly-NULL pointer is
   dereferenced and it cannot determine statically that the pointer is
   not NULL\@.
 
-\item Cyclone requires any function that is supposed to return a
-  non-\texttt{void} value to execute a return statement (or throw an
-  exception) on every possible execution path. This is needed to
+\item If a function's return type is not ``bits-only'' (i.e., contains
+  pointers), Cyclone requires that the function 
+  executes a return statement, throws an
+  exception, or calls a \texttt{noreturn} function on every possible 
+  execution path. This is needed to
   ensure that the value returned from the function has the right type,
   and is not just a random value left in a register or on the stack.
 
-\item Unions in Cyclone can only hold ``bits.''  In particular, they
-  can hold combinations of chars, ints, shorts, longs, floats,
+\item Untagged unions in Cyclone can hold arbitrary values, but you
+  can only read out ``bits.''  In particular, the members you can
+  read out can only have combinations of chars, ints, shorts, longs, floats,
   doubles, structs of bits, or tuples of bits. Pointer types are not
   supported.  This avoids the situation where an arbitrary bit pattern
   is cast to a pointer and then dereferenced. If you want to use
-  multiple types, then use tagged unions (\texttt{datatype}s).
+  multiple types, then use \texttt{@tagged union}s or \texttt{datatype}s.
 
-\item Cyclone only supports a limited form of \texttt{malloc} which is
-  baked in. Tuples and structs can be allocated via \texttt{malloc}
-  but this requires writing explicitly: \texttt{malloc(sizeof(t))}
-  where t is the type of the value that you are allocating.  You
-  can \texttt{malloc} arrays (e.g., \texttt{malloc(sizeof(int)*34)})
-  but the type must be ``bits-only'' (i.e., not contain pointer types.)
+\item Cyclone only supports limited forms of \texttt{malloc} (and
+  \texttt{calloc}).  You must write \texttt{malloc(sizeof(t)*n)}
+  and \texttt{t} must be a ``bits-only'' type.  
   You can use \texttt{calloc} to allocate arrays of (possibly NULL)
   pointers (e.g., \texttt{calloc(sizeof(char*),34)}).  
 
@@ -1731,8 +1826,16 @@ Here is a list of the major restrictions:
   with that type. In addition, access to C code will be restricted
   based on a notion of security roles.
 
-\item Cyclone has some new keywords (\texttt{let}, \texttt{abstract},
-  \texttt{region}, etc.) that can no longer be used as identifiers.
+\item Cyclone has some new keywords (beyond those of C99 and GCC)
+  that can no longer be used as identifiers.  The list includes:
+  \texttt{abstract}, \texttt{alias}, \texttt{calloc}, \texttt{datatype},
+  \texttt{dynregion_t}, \texttt{export}, \texttt{fallthru}, 
+  \texttt{__gen}, \texttt{let}, \texttt{malloc}, \texttt{namespace},
+  \texttt{numelts}, \texttt{__cyclone_port_on__}, 
+  \texttt{__cyclone_port_off__}, \texttt{region}, \texttt{regions},
+  \texttt{reset_region}, \texttt{rmalloc}, \texttt{rnew}, \texttt{tagcheck},
+  \texttt{tag_t}, \texttt{throw}, \texttt{try}, \texttt{using},
+  \texttt{valueof}, and \texttt{valueof_t}.
 
 \item Cyclone prevents you from using pointers to stack-allocated
   objects as freely as in C to avoid security holes. The reason is
@@ -1751,16 +1854,8 @@ instance:
 \begin{itemize}
 \item Cyclone currently does not support nested type declarations
   within a function. All \texttt{struct}, \texttt{union}, \texttt{enum},
-  \texttt{datatype}, \texttt{xdatatype}, and \texttt{typedef} definitions must
+  \texttt{datatype}, and \texttt{typedef} definitions must
   be at the top-level.
-
-\item Cyclone does not allow you to use a \texttt{struct}, \texttt{datatype},
-  \texttt{union}, \texttt{xdatatype}, or \texttt{enum} type without first
-  declaring it.  We do support one special case of this where you embed
-  a declaration within a typedef as in:
-\begin{verbatim}
-  typedef struct Point {int x,y} *point_t;
-\end{verbatim}
 
 \item Cyclone does not allow a typedef declaration to be shadowed by
 another declaration.
