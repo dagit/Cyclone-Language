@@ -87,6 +87,7 @@ EXTERN_CFFLOW @tagged union RelnOp {
   Absyn::vardecl_t LessNumelts; // < numelts(y)
   unsigned int LessConst; // < c
   Absyn::vardecl_t LessEqNumelts; // <= numelts(y)
+  unsigned int LessEqConst; // <= c
 };
 
 typedef union RelnOp reln_op_t;
@@ -97,7 +98,8 @@ extern reln_op_t
   LessVar(Absyn::vardecl_t,Absyn::type_t),
   LessNumelts(Absyn::vardecl_t),
   LessConst(unsigned int),
-  LessEqNumelts(Absyn::vardecl_t); 
+  LessEqNumelts(Absyn::vardecl_t),
+  LessEqConst(unsigned int);
 
 EXTERN_CFFLOW struct Reln {
   Absyn::vardecl_t vd; 

@@ -69,7 +69,7 @@ namespace Toc;
 // used for creation of all abstract syntax node locations created here
 #define DL NULL
 
-// #define BCE_DEBUG
+//#define BCE_DEBUG
 bool warn_bounds_checks = false;
 bool warn_all_null_deref = false;
 unsigned total_bounds_checks = 0;
@@ -1046,7 +1046,6 @@ static CfFlowInfo::relns_t get_relns(exp_t e) { // e must be pre-translation!
 
 // returns true when i is <= the number of elements in t
 static bool check_const_array(unsigned i, type_t t) {
-  //fprintf(stderr,"checking const array %d and %s\n",i,typ2string(t));
   switch (compress(t)) {
   case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,zt,_))):
     switch (conref_def(bounds_one,b)) {
@@ -1057,7 +1056,7 @@ static bool check_const_array(unsigned i, type_t t) {
     }
   case &ArrayType(ArrayInfo{_,_,e,_,_}):
     if (e == NULL) return false;
-    let $(j,known) = Evexp::eval_const_uint_exp((exp_t)e);
+    let $(j,known) = Evexp::eval_const_uint_exp(e);
     return known && i <= j;
   default: return false;
   }
@@ -1079,7 +1078,8 @@ static bool check_leq_size_var(CfFlowInfo::relns_t relns, vardecl_t v,
 }
 
 // see if e is <= numelts(v)
-static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e) {
+static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e,
+                           type_t vtype) {
   switch (e->r) {
   case &Var_e(_,&Pat_b(y)): fallthru(y);
   case &Var_e(_,&Local_b(y)): fallthru(y);
@@ -1089,6 +1089,11 @@ static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e) {
     // see if y <= numelts(v)
     if (check_leq_size_var(relns,v,y)) return true;
     break;
+  case &Const_e({.Int_c = $(None,i)}): fallthru(i);
+  case &Const_e({.Int_c = $(Signed,i)}): 
+    return ((i >= 0) && check_const_array(i,vtype));
+  case &Const_e({.Int_c = $(Unsigned,i)}): 
+    return check_const_array(i,vtype);
   case &Primop_e(Numelts,&List(e2,_)):
     // see if e2 is v
     switch (e2->r) {
@@ -1111,7 +1116,8 @@ static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e) {
 static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns, 
                          exp_t a, exp_t i) {
 #ifdef BCE_DEBUG
-  fprintf(stderr,"bounds check on %s and %s\n",exp2string(a),exp2string(i));
+  fprintf(stderr,"bounds check on %s:%s and %s\n",exp2string(a),
+          typ2string(a_typ),exp2string(i));
   fprintf(stderr,"relns: ["); CfFlowInfo::print_relns(relns); 
   fprintf(stderr,"]\n");
 #endif
@@ -1141,19 +1147,20 @@ static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
     x = &bogus_vardecl;
     x->type = a_typ;
   }
-
+  let xtype = a_typ;
+  
   inner_loop:
     switch (i->r) {
     case &Cast_e(t,e2,_,_): i = e2; goto inner_loop;
     case &Const_e({.Int_c = $(None,i)}): fallthru(i);
     case &Const_e({.Int_c = $(Signed,i)}): 
-      return ((i >= 0) && check_const_array(i+1,x->type));
+      return ((i >= 0) && check_const_array(i+1,xtype));
     case &Const_e({.Int_c = $(Unsigned,i)}): 
-      return check_const_array(i+1,x->type);
+      return check_const_array(i+1,xtype);
     case &Primop_e(Mod,&List(e1,&List(e2,_))):
       // we have x[e1 % e2]
       // if e2 is numelts(x) or z such that z <= numelts(x) then it's okay
-      return check_leq_size(relns, x, e2);
+      return check_leq_size(relns, x, e2, xtype);
     case &Var_e(_,&Pat_b(y)):    fallthru(y);
     case &Var_e(_,&Local_b(y)):  fallthru(y);
     case &Var_e(_,&Global_b(y)): fallthru(y);
@@ -1208,7 +1215,9 @@ static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
                   if (x == w) return true; 
 		  break;
                 case {.EqualConst = c}: 
-                  return check_const_array(c,x->type);
+                  return check_const_array(c,xtype);
+                case {.LessEqConst = c} && c > 0:
+                  return check_const_array(c,xtype);
                 case {.LessVar = $(w,_)}:
                   if (check_leq_size_var(relns, x, w)) return true; 
 		  break;
@@ -1218,7 +1227,10 @@ static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
             break;
           case {.LessConst = c}:
             // y < c -- see if c <= numelts(x)
-            return check_const_array(c,x->type);
+            return check_const_array(c,xtype);
+          case {.LessEqConst = c}:
+            // y <= c+1 -- see if c+1 <= numelts(x)
+            return check_const_array(c+1,xtype);
           default: break;
           }
         }
@@ -2864,7 +2876,8 @@ DynCast:
     case &PointerType(PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt,_)}):
       let relns = get_relns(e1);
 #ifdef BCE_DEBUG
-      fprintf(stderr,"subscript %s: relns:",exp2string(e));
+      fprintf(stderr,"subscript %s, array has type %s: relns:",exp2string(e),
+              typ2string(e1->topt->v));
       CfFlowInfo::print_relns(relns); fprintf(stderr,"\n");
 #endif
       bool in_bnds = false;

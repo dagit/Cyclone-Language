@@ -798,6 +798,7 @@ reln_op_t LessVar(Absyn::vardecl_t v,Absyn::type_t t) {
 }
 reln_op_t LessNumelts(Absyn::vardecl_t v) {return RelnOp{.LessNumelts=v};}
 reln_op_t LessConst(unsigned int i) { return RelnOp{.LessConst = i};}
+reln_op_t LessEqConst(unsigned int i) { return RelnOp{.LessEqConst = i};}
 reln_op_t LessEqNumelts(Absyn::vardecl_t v) {
   return RelnOp{.LessEqNumelts=v};
 }
@@ -809,6 +810,7 @@ static bool same_relop(reln_op_t r1,reln_op_t r2) {
   case $({.LessVar = $(v1,_)},{.LessVar = $(v2,_)}):    return v1 == v2;
   case $({.LessNumelts = v1},{.LessNumelts = v2}):   return v1 == v2;
   case $({.LessConst = c1},{.LessConst = c2}):  return c1 == c2;
+  case $({.LessEqConst = c1},{.LessEqConst = c2}):  return c1 == c2;
   case $({.LessEqNumelts = v1},{.LessEqNumelts = v2}): return v1 == v2;
   default: return false;
   }
@@ -1316,6 +1318,7 @@ static void print_reln(reln_t r) {
   case {.LessVar = $(vd,_)}:   fprintf(stderr,"<%s",qvar2string(vd->name)); break;
   case {.LessNumelts = vd}:  fprintf(stderr,"<numelts(%s)",qvar2string(vd->name)); break;
   case {.LessConst = c}:  fprintf(stderr,"<%d",c); break;
+  case {.LessEqConst = c}:  fprintf(stderr,"<=%d",c); break;
   case {.LessEqNumelts = vd}: fprintf(stderr,"<=numelts(%s)",qvar2string(vd->name));break;
   }
 }

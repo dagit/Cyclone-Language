@@ -1843,7 +1843,8 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
             let r = env->fenv->r;
             let relns_true = rnew(r) List(rnew(r) Reln(v1,LessVar(v2,v2->type)),relns);
             return $(ReachableFL(d,relns_true,cinfo), ff);
-          case &Const_e({.Int_c = $(_,i)}): 
+          case &Const_e({.Int_c = $(_,i)}): fallthru(i);
+          case &Cast_e(_,&Exp{.r = &Const_e({.Int_c = $(_,i)}),...},...):
             let r = env->fenv->r;
             let relns_true = rnew(r) List(rnew(r) Reln(v1,LessConst(i)),relns);
             return $(ReachableFL(d,relns_true,cinfo), ff);
@@ -1881,6 +1882,12 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
         case &Var_e(_,&Pat_b(v1))    && !v1->escapes: fallthru(v1);
         case &Var_e(_,&Param_b(v1))  && !v1->escapes:
           switch (e2->r) {
+          case &Const_e({.Int_c = $(_,i)}): fallthru(i);
+          case &Cast_e(_,&Exp{.r = &Const_e({.Int_c = $(_,i)}),...},...):
+            let r = env->fenv->r;
+            let relns_true = rnew(r)
+              List(rnew(r) Reln(v1,LessEqConst(i)),relns);
+            return $(ReachableFL(d,relns_true,cinfo), ff);
           case &Primop_e(Size,&List(e3,_)):
             switch (e3->r) {
             case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
