@@ -16,7 +16,8 @@ CYCBISON=../bin/cycbison$(EXE)
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
 
-CYC_FLAGS=-I../lib -B../lib -g
+LC_FLAG=
+CYC_FLAGS= $(LC_FLAG) -I../lib -B../lib -g
 
 LIB=../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 

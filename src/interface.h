@@ -53,6 +53,8 @@ namespace Interface {
   // try to merge a list of interfaces
   // use linfo (if long enough) for the error messages
   extern struct I * merge_list(list_t<i_t> li, list_t<string_t @> linfo);
+  // same but ask for the interfaces one by one
+  extern struct I * get_and_merge_list(i_t (@get)(`a), list_t<`a> la, list_t<string_t @> linfo);
 
   // pretty print to a text file 
   extern void print(i_t, FILE @);

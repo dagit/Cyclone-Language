@@ -325,7 +325,8 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       let ge = Dict::lookup(ae, ns);
       ed = *Dict::lookup(ge->enumdecls, v);
     } catch {
-    case Dict::Absent: invalid_arg("check_public_type");
+    case Dict::Absent: invalid_arg(xprintf("check_public_type (can't find enum %s)",
+					   qvar2string(name)));
     }
     if (ed->sc == Static) {
       static_err(obj, name, "enum", ed->name);
@@ -341,7 +342,8 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       let ge = Dict::lookup(ae, ns);
       tud = *Dict::lookup(ge->tuniondecls, v);
     } catch {
-    case Dict::Absent: invalid_arg("check_public_type");
+    case Dict::Absent: invalid_arg(xprintf("check_public_type (can't find [x]tunion %s)",
+					   qvar2string(tud0->name)));
     }
     if (tud->sc == Static) {
       static_err(obj, name, "[x]tunion", tud->name);
@@ -358,10 +360,11 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       let ge = Dict::lookup(ae, ns);
       tud = *Dict::lookup(ge->tuniondecls, v);
     } catch {
-    case Dict::Absent: invalid_arg(xprintf("check_public_type (can't find tunion %s)",
-					   qvar2string(tud0->name)));
+    case Dict::Absent:
+      invalid_arg(xprintf("check_public_type (can't find [x]tunion %s and search its fields)",
+			  qvar2string(tud0->name)));
     }
-    if (tud->fields == null) invalid_arg(xprintf("check_public_type (tunion %s has no fields)",
+    if (tud->fields == null) invalid_arg(xprintf("check_public_type ([x]tunion %s has no fields)",
 						 qvar2string(tud->name)));
 
     struct Tunionfield * tuf1 = null;
@@ -371,7 +374,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
 	  break;
 	}
   
-    if (tuf1 == null) invalid_arg(xprintf("check_public_type (can't find tunionfield %s)",
+    if (tuf1 == null) invalid_arg(xprintf("check_public_type (can't find [x]tunionfield %s)",
 					  qvar2string(tuf0->name)));
     tunionfield_t tuf = (tunionfield_t) tuf1;
 
@@ -1002,6 +1005,27 @@ struct I * merge_list(list_t<i_t> li, list_t<string_t @> linfo) {
 
   for (; li != null; li=li->tl) {
     let i = merge(curr_i, li->hd,
+		  (curr_info != null && linfo != null ? new $(*curr_info, *linfo->hd) : null) );
+    if (i == null) return null;
+    curr_i = (i_t) i;
+    if (curr_info != null) {
+      curr_info = (linfo != null ? new ((string_t)xprintf("%s+%s", *curr_info, *linfo->hd)) : null);
+    }
+    if (linfo != null) linfo = linfo->tl;
+  }
+  return curr_i;
+}
+
+struct I * get_and_merge_list(i_t (@get)(`a), list_t<`a> la, list_t<string_t @> linfo) {
+  if (la == null) return empty();
+
+  i_t curr_i = get(la->hd);
+  string_t * curr_info = (linfo != null ? (string_t *)linfo->hd : null);
+  la=la->tl;
+  if (linfo != null) linfo=linfo->tl;
+
+  for (; la != null; la=la->tl) {
+    let i = merge(curr_i, get(la->hd),
 		  (curr_info != null && linfo != null ? new $(*curr_info, *linfo->hd) : null) );
     if (i == null) return null;
     curr_i = (i_t) i;

@@ -27,7 +27,9 @@ else
 TOC_FLAG =
 endif
 
-CYC_FLAGS := -I../lib -B../lib -save-c $(TOC_FLAG) $(PROF_RGN_FLAG)
+LC_FLAG =
+
+CYC_FLAGS := -I../lib -B../lib -save-c $(LC_FLAG) $(TOC_FLAG) $(PROF_RGN_FLAG)
 
 LIBR:=../lib/$(OUT_PREFIX)$(CYCLIB)
 
@@ -42,7 +44,7 @@ $(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIBR)
 ifdef MS
 	cl /Fe$@ ../lib/snprintf.obj $^ ../bin/cyc-lib/gc.lib
 else
-	$(CYCC) -B../lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(LC_FLAG) -B../lib -o $@ $^ $(LDFLAGS)
 #	gcc -g -o $@ $^ ../bin/cyc-lib/gc.a $(LDFLAGS)
 #	gcc -o $@ $^ ../bin/cyc-lib/gc_pg.a -pg $(LDFLAGS)
 endif

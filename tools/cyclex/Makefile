@@ -14,7 +14,8 @@ BINDIR=../../bin
 CYCC=../../bin/cyclone$(EXE)
 CYCBISON=../../bin/cycbison$(EXE)
 
-CYC_FLAGS=
+LC_FLAG=
+CYC_FLAGS= $(LC_FLAG)
 
 SRCS=syntax parser_tab lexer lexgen compact output main
 
@@ -28,7 +29,7 @@ $(BINDIR)/$(PROG): $(PROG)
 all: $(PROG)
 
 $(PROG): $(O_SRCS)
-	$(CYCC) -g -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(LC_FLAG) -g -o $@ $^ $(LDFLAGS)
 
 boot:
 	-rm -f lexer.cyc

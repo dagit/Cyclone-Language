@@ -29,7 +29,9 @@ else
 TOC_FLAG =
 endif
 
-CYC_FLAGS := -I. -B. -save-c $(PROF_RGN_FLAG) $(TOC_FLAG)
+LC_FLAG =
+
+CYC_FLAGS := -I. -B. -save-c $(LC_FLAG) $(PROF_RGN_FLAG) $(TOC_FLAG)
 
 all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 
@@ -38,7 +40,11 @@ ifdef MS
 	lib /out:$@ $^
 else
 	-rm -f $@
+ifeq ($(LC_FLAG),)
 	ar rcs $@ $^
+else
+	$(CYCC) $(LC_FLAG) -o $@ $^
+endif
 endif
 
 precore_c.h: precore.h $(CYCC)

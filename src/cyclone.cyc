@@ -37,7 +37,7 @@ static bool noshake_r  = false;
 static bool stop_after_cpp_r = false;
 static bool parseonly_r = false;
 static bool tc_r       = false;
-static bool ic_r       = false;
+static bool lc_r       = false;
 static bool toc_r      = false;
 static bool stop_after_objectfile_r = false;
 static bool stop_after_asmfile_r = false;
@@ -415,7 +415,7 @@ void process_file(string_t filename) {
   if (compile_failure) return;
 
   // Interface checking
-  if (ic_r) {
+  if (lc_r) {
     FILE *inter_file = fopen(interfacefile, "r");
     FILE *inter_objfile = try_file_open(interfaceobjfile, "w", "interface object file");
     if (inter_objfile == null) {
@@ -469,7 +469,13 @@ void process_file(string_t filename) {
   }
 }
 
+static string_t final_str = "<final>";
+static stringptr_t final_strptr = &final_str;
+
 static interface_t read_cycio(string_t @ n) {
+  if (n == final_strptr) {
+    return Interface::final();
+  }
   string_t basename;
   try {
     basename = Filename::chop_extension(*n);
@@ -484,6 +490,7 @@ static interface_t read_cycio(string_t @ n) {
     exit(1);
   }
   Position::reset_position(nf); /* in case of parsing problems */
+  //printf("reading %s\n", nf);
   let i = Interface::load((FILE@) f);
   file_close((FILE@)f);
   return i;
@@ -537,7 +544,7 @@ int main(int argc, string_t ? argv) {
                   "   Stop after type checking"),
          new $("-toc",new Set_spec(&toc_r),
                    "  Stop after translation to C"),
-         new $("-ic",new Set_spec(&ic_r),
+         new $("-lc",new Set_spec(&lc_r),
                   "   Activate the link-checker"),
          new $("-pp",new Set_spec(&pp_r),
                   "   Pretty print"),
@@ -601,7 +608,12 @@ int main(int argc, string_t ? argv) {
 
   let stdlib;
   let stdlib_string;
-  if (stop_after_asmfile_r || stop_after_objectfile_r) {
+  let is_not_executable =
+    stop_after_asmfile_r ||
+    stop_after_objectfile_r ||
+    Filename::check_suffix(*output_file, ".a") ||
+    Filename::check_suffix(*output_file, ".lib"); // FIX: is that right ?
+  if (is_not_executable) {
     stdlib = null;
     stdlib_string = (string_t)"";
   } else {
@@ -612,24 +624,22 @@ int main(int argc, string_t ? argv) {
     stdlib_string = xprintf(" %s %s", cyclib, gc);
   }
 
-  if (ic_r) {
+  if (lc_r) try {
     ccargs = filter(is_cfile, ccargs);
     libargs = filter(is_cfile, libargs);
     let lf = append(stdlib, append(ccargs, libargs));
-    let li = map(read_cycio, lf);
-    if (! stop_after_objectfile_r) {
-      lf = new List(new ((string_t) "<final>"), lf);
-      li = new List(Interface::final(), li);
+    if (! is_not_executable) {
+      lf = new List(final_strptr, lf);
     }
 
-    let i = Interface::merge_list(li, lf);
+    let i = Interface::get_and_merge_list(read_cycio, lf, lf);
     if (i == null) {
       fprintf(stderr,"Error: interfaces incompatible\n");
       compile_failure = true;
       remove_cfiles();
       return 1;
     }
-    if (stop_after_asmfile_r || stop_after_objectfile_r) {
+    if (is_not_executable) {
       if (output_file != null) {
 	let output_file_io = xprintf("%s.cycio", Filename::chop_extension(*output_file));
 	let f = try_file_open(output_file_io, "w", "interface object file");
@@ -650,6 +660,27 @@ int main(int argc, string_t ? argv) {
 	return 1;
       }
     }
+  } catch {
+  case &Core::Impossible(s):
+    printf ("Exception Core::Impossible %s\n", s);
+    compile_failure = true;
+    remove_cfiles();
+    return 1;
+  case Dict::Absent:
+    printf("Exception Dict::Absent\n");
+    compile_failure = true;
+    remove_cfiles();
+    return 1;
+  case &InvalidArg(s):
+    printf ("Exception Core::InvalidArg %s\n", s);
+    compile_failure = true;
+    remove_cfiles();
+    return 1;
+  case _:
+    printf ("Uncaught exception\n");
+    compile_failure = true;
+    remove_cfiles();
+    return 1;
   }
 
   let cccmd =

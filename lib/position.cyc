@@ -40,7 +40,7 @@ static mstring_t string_of_pos_pr(Lineno::pos_t pos_s, Lineno::pos_t pos_e) {
 
 mstring_t string_of_segment(seg_t s) {
   if(s == null)
-    return xprintf("%s(unknown)",source);
+    return xprintf("%s",source);
   Lineno::pos_t pos_s = Lineno::pos_of_abs(source,s->start);
   Lineno::pos_t pos_e = Lineno::pos_of_abs(source,s->end);
   return string_of_pos_pr(pos_s,pos_e);
