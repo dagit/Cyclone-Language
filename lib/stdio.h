@@ -130,8 +130,8 @@ extern int	setlinebuf(FILE @);
 // Routines added for Cyclone
 //
 extern xtunion exn {
-  FileOpenError(string);
-  FileCloseError;
+  extern FileOpenError(string);
+  extern FileCloseError;
 };
 
 extern FILE @file_open(string fname, string mode);

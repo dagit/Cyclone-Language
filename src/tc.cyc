@@ -363,7 +363,7 @@ static void tcStructOrUniondecl(tenv_t te, genv_t ge, string obj, seg_t loc, str
   }
 
   // disallow MemKinds and set unconstrained kinds to BoxKind
-  for(_ tvs = sd -> tvs; tvs != null; tvs = tvs->tl) {
+  for(_ tvs = sd->tvs; tvs != null; tvs = tvs->tl) {
     let c = compress_conref(tvs->hd->kind);
     switch (c->v) {
     case No_constr:
@@ -398,7 +398,7 @@ static void tcStructdecl(tenv_t te, genv_t ge, seg_t loc, structdecl_t sd) {
 
   tcStructOrUniondecl(te, ge, obj, loc, sd);
 
-  let tvs = sd -> tvs;
+  let tvs = sd->tvs;
 
   // check the fields and update the environment
   // may not be the first declaration, so must not overwrite the dict entry!
@@ -450,7 +450,7 @@ static void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
 
   tcStructOrUniondecl(te, ge, obj, loc, (structdecl_t) ud);
 
-  let tvs = ud -> tvs;
+  let tvs = ud->tvs;
 
   // check the fields and update the environment
   // may not be the first declaration, so must not overwrite the dict entry!
@@ -566,7 +566,7 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge, seg_t loc,
   
   // finally add the variants
   // (for xtunion, only the new fields; this is important because tudres
-  // may not define the old ones)
+  // may not define the old ones or the tvars may not be the same)
   for(let fs = fields; fs != null; fs = fs->tl) {
     let f = fs->hd;
     ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
@@ -576,8 +576,6 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge, seg_t loc,
   return fields2;
 }
 
-// FIX: xtunion redeclaration must take enclosing namespaces into account.
-//      Bleach. (gotta document all these differences too)
 static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   var_t v = (*tud->name)[1];
   string obj;
@@ -606,8 +604,10 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   // reject ill-formed type
   check_unique_tvars(loc,tvs);
 
-  // determine [x]tunion type's qualified name -- xtunion's rules are different
-  _ tud_opt;
+  // determine [x]tunion type's qualified name
+  // set ge_decl to the namespace where the declaration 'lives'
+  // (for xtunions it may be different from ge)
+  opt_t<tuniondecl_t@> tud_opt;
   if(tud->is_xtunion) {
     try tud_opt = lookup_xtuniondecl(te,loc,tud->name);
     catch {
@@ -617,8 +617,11 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
 		   qvar2string(tud->name)));
       return;
     }
-    if(tud_opt != null)
+    if (tud_opt != null) {
       tud->name = (*(tud_opt->v))->name;
+    } else {
+      (*tud->name)[0] = new Abs_n(te->ns); 
+    }
   } else {
     switch ((*tud->name)[0]) {
     case &Rel_n(null): (*tud->name)[0] = new Abs_n(te->ns); break;
@@ -627,7 +630,7 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
       terr(loc,"qualified declarations are not implemented"); // FIX
       return;
     }
-    tud_opt = Dict::lookup_opt(ge->tuniondecls,v);
+    tud_opt = Dict::lookup_opt(ge->tuniondecls, v);
   }
 
   // check the fields and update the environment

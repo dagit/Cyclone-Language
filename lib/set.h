@@ -84,7 +84,7 @@ extern void app(`b f(`a),gset_t<`a,`r,`e> s);
 extern void iter(void f(`a),gset_t<`a,`r,`e> s);
 extern void iter_c(void f(`c,`a),`c env,gset_t<`a,`r,`e> s);
 
-extern xtunion exn {Absent};
+extern xtunion exn {extern Absent};
 extern `a choose(gset_t<`a,`r,`e> s);
 
 }

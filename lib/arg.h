@@ -5,7 +5,7 @@
 #include "core.h"
 
 namespace Arg {
-extern xtunion exn {Error, Bad(string)};
+extern xtunion exn {extern Error, extern Bad(string)};
 
 extern tunion Spec<`e::E> {
   Unit_spec(void (@f)(;`e)),        // Call the function with unit argument

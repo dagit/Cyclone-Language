@@ -15,7 +15,7 @@ using Position;
 using Set;
 using Tcenv;
 
-extern xtunion exn {TypeErr};
+extern xtunion exn {extern TypeErr};
 extern `a impos(string);
 extern void terr(seg_t, string);
 extern void warn(seg_t, string);

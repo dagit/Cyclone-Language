@@ -17,9 +17,9 @@ typedef struct Dict<`a,`b,`e> @ hdict_t<`a,`b,`e>;
 typedef hdict_t<`a,`b,{}> dict_t<`a,`b>;
 
 // Raised when a key is present but not expected (e.g., insert_new) 
-extern xtunion exn {Present};
+extern xtunion exn {extern Present};
 // Raised when a key is not present but expected (e.g., lookup) 
-extern xtunion exn {Absent};
+extern xtunion exn {extern Absent};
 
 // Given a comparison function, return an empty dict. 
 extern hdict_t<`a,`b,`e> empty(int comp(`a,`a;`e));

@@ -24,7 +24,7 @@ namespace List {
   extern int length(glist_t<`a,`r> x);
   
   // raised when some function expects a non-empty list
-  extern xtunion exn {List_empty};
+  extern xtunion exn {extern List_empty};
   
   // return the first element in a list, if any, raise List_empty otherwise. 
   extern `a hd(glist_t<`a,`r> x);
@@ -46,7 +46,7 @@ namespace List {
                                 glist_t<`a,`r> x);
   
   // raised when two lists don't have the same size 
-  extern xtunion exn {List_mismatch};
+  extern xtunion exn {extern List_mismatch};
   
   // Given two lists of the same length and a function, apply the function
   // to each pair of elements (in order) and collect the results in a new list.
@@ -130,7 +130,7 @@ namespace List {
                                   glist_t<`a,`r> a,glist_t<`a,`r> b);
   
   // raised when list_nth doesn't have enough elements in the list. 
-  extern xtunion exn {Nth};
+  extern xtunion exn {extern Nth};
 
   // Given [x0,x1,...,xn], return the ith element of the list (0 <= i <= n).
   // Raise Nth if the list doesn't have enough elements.  Notice that the

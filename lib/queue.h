@@ -21,7 +21,7 @@ typedef struct Queue<`a,`H> @queue_t<`a>;
 extern bool is_empty(gqueue_t<`a,`r>);
 
 // raised by queue_take and queue_peek
-extern xtunion exn { Empty };
+extern xtunion exn { extern Empty };
 
 // create a new queue
 extern queue_t<`a> create();

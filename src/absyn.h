@@ -574,7 +574,7 @@ namespace Absyn {
     FieldName(var_t);
   };
 
-  EXTERN_ABSYN xtunion StmtAnnot { EmptyAnnot; };
+  EXTERN_ABSYN xtunion StmtAnnot { EXTERN_ABSYN EmptyAnnot; };
 
   // compare variables 
   extern int qvar_cmp(qvar_t, qvar_t);

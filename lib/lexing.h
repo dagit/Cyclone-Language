@@ -9,7 +9,7 @@ namespace Lexing {
 using Core;
 using Stdio;
 
-extern xtunion exn { Error(string) };
+extern xtunion exn { extern Error(string) };
 
 extern struct lexbuf<`a::B>{ /* use 'a for state that refill_buff might need */
  

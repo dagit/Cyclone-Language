@@ -19,7 +19,7 @@ using Syntax;
 
 namespace Lexer {
   extern int lexmain(Lexing::Lexbuf<`a>);
-  extern xtunion exn { Lexical_error(string,int,int) };
+  extern xtunion exn { extern Lexical_error(string,int,int) };
   extern int line_num;
   extern int line_start_pos;
 }

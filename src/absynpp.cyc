@@ -1438,13 +1438,13 @@ doc_t decl2doc(decl_t d) {
     if (fields==null)
       s = cat5(scope2doc(sc),
                (is_xtunion ? text("xtunion ") : text("tunion ")),
-               typedef_name2doc(name),
+               (is_xtunion ? qvar2doc(name) : typedef_name2doc(name)),
                ktvars2doc(tvs),
                text(";"));
     else
       s = cat8(scope2doc(sc),
                (is_xtunion ? text("xtunion ") : text("tunion ")),
-               typedef_name2doc(name),
+	       (is_xtunion ? qvar2doc(name) : typedef_name2doc(name)),
                ktvars2doc(tvs),
                text(" {"),
                nest(2, cat2(line_doc(),tunionfields2doc(fields->v))),

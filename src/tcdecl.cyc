@@ -105,8 +105,8 @@ static inline bool check_atts(attributes_t atts0, attributes_t atts1,
 static inline list_t<$(tvar_t,type_t)@> build_tvs_map(list_t<tvar_t> tvs0, list_t<tvar_t> tvs1) {
   let inst = null;
 
-  for(; tvs0 != null; tvs0 = tvs0 -> tl, tvs1 = tvs1 -> tl)
-    inst = new List(new $(tvs1 -> hd, (type_t) (new VarType(tvs0 -> hd))), inst);
+  for(; tvs0 != null; tvs0 = tvs0->tl, tvs1 = tvs1->tl)
+    inst = new List(new $(tvs1->hd, (type_t) (new VarType(tvs0->hd))), inst);
   // the cast up there seems necessary, bug ?
   
   return inst;
@@ -114,32 +114,32 @@ static inline list_t<$(tvar_t,type_t)@> build_tvs_map(list_t<tvar_t> tvs0, list_
 
 static struct Structdecl * merge_struct_or_union_decl(structdecl_t d0, structdecl_t d1,
 						      string t, seg_t loc, string * `r msg) {
-  let v = Absynpp::qvar2string(d0 -> name -> v); // build the complete name
+  let v = Absynpp::qvar2string(d0->name->v); // build the complete name
   let res = true;
   // when an incompatibility is found, either we set res to false and continue,
   // or we return null immediately
 
   // check type variables
-  if (! check_tvs(d0 -> tvs, d1 -> tvs, t, v, loc, msg)) return null;
+  if (! check_tvs(d0->tvs, d1->tvs, t, v, loc, msg)) return null;
 
   // check scopes
-  let $(new_scope, res_scope) = merge_scope(d0 -> sc, d1 -> sc, t, v, loc, msg);
+  let $(new_scope, res_scope) = merge_scope(d0->sc, d1->sc, t, v, loc, msg);
   if (! res_scope) res = false;
 
   // check attributes
-  if (! check_atts(d0 -> attributes, d1 -> attributes, t, v, loc, msg)) res = false;
+  if (! check_atts(d0->attributes, d1->attributes, t, v, loc, msg)) res = false;
 
   structdecl_t d2;  // futur result
 
   // check fields
-  switch ($(d0 -> fields, d1 -> fields)) {
+  switch ($(d0->fields, d1->fields)) {
   case $(_, null): d2 = d0; break;
   case $(null, _): d2 = d1; break;
   case $(&Opt(f0s), &Opt(f1s)):
     // both declare fields, so they must agree (with renaming w.r.t. tyvars)
  
     // build the map
-    let inst = build_tvs_map(d0 -> tvs, d1 -> tvs);
+    let inst = build_tvs_map(d0->tvs, d1->tvs);
 
     // check each field under the map
     for(; f0s != null && f1s != null; f0s = f0s->tl, f1s = f1s->tl) {
@@ -197,11 +197,11 @@ static struct Structdecl * merge_struct_or_union_decl(structdecl_t d0, structdec
 
   if (! res) return null;
   
-  if (new_scope == d2 -> sc)
+  if (new_scope == d2->sc)
     return d2;
   else {
     d2 = new *d2;
-    d2 -> sc = new_scope; // update the scope
+    d2->sc = new_scope; // update the scope
     return d2;
   }
 }
@@ -223,6 +223,8 @@ static inline string is_x2string(bool is_x) {
   }
 }
 
+// try to merge the 2 fields, return null if something's wrong
+// otherwise return f0 or (if necessary) a copy of f0 with the right scope.
 static struct Tunionfield * merge_tunionfield(tunionfield_t f0, tunionfield_t f1,
 					      list_t<$(tvar_t,type_t)@> inst,
 					      string t, string v, string * `r msg) {
@@ -280,7 +282,7 @@ static struct Tunionfield * merge_tunionfield(tunionfield_t f0, tunionfield_t f1
   }
 
   if(! res) return null;
-  if(f0->sc == new_scope) {
+  if(f0->sc != new_scope) {
     let f2 = new *f0;
     f2->sc = new_scope;
     return f2;
@@ -297,6 +299,8 @@ static $(tqual_t,type_t)@ substitute_tunionfield_f2(list_t<$(tvar_t,type_t)@> in
   return new $(tq, substitute(inst, t));
 }
 
+// given d0->tvs and d1->tvs, given the maping inst1 = build_tvs_map(d0->tvs, d1->tvs),
+// rewrite the types of tunionfield f1 so that it could be added to d0
 static tunionfield_t substitute_tunionfield(list_t<tvar_t> d0tvs, list_t<tvar_t> d1tvs,
 					    list_t<$(tvar_t,type_t)@> inst1, tunionfield_t f1) {
   let f0 = new *f1;
@@ -307,7 +311,7 @@ static tunionfield_t substitute_tunionfield(list_t<tvar_t> d0tvs, list_t<tvar_t>
     if(List::exists_c(substitute_tunionfield_f1, tv->name, d0tvs) ||
        List::exists_c(substitute_tunionfield_f1, tv->name, d1tvs)) {
       int i = 0;
-      string base = *(tv -> name);
+      string base = *(tv->name);
       string @ new_name;
       do {
 	new_name = new strconcat(base, string_of_int(i));
@@ -321,15 +325,17 @@ static tunionfield_t substitute_tunionfield(list_t<tvar_t> d0tvs, list_t<tvar_t>
     tvs0 = new List(tv,tvs0);
   }
   tvs0 = imp_rev(tvs0);
-  f0 -> tvs = tvs0;
-  let inst2 = build_tvs_map(tvs0, f1 -> tvs);
+  f0->tvs = tvs0;
+  let inst2 = build_tvs_map(tvs0, f1->tvs);
   
   let inst = List::append(inst2, inst1);
-  f0 -> typs = List::map_c(substitute_tunionfield_f2, inst, f1 -> typs);
+  f0->typs = List::map_c(substitute_tunionfield_f2, inst, f1->typs);
 
   return f0;
 }
 
+// merge the fields of 2 tuniondecls d0 and d1 in a list that fits d0->tvs
+// the fields are supposed to be sorted
 // set *res to false if some duplicate fields are compatible
 // set *incl to false if f1s is not included in f0s
 static list_t<tunionfield_t>
@@ -353,7 +359,7 @@ merge_xtunion_fields(list_t<tunionfield_t> f0s,
       let node = new List(f0s->hd, null);
       *next = node;
       next = & node->tl;
-      f0s = f0s -> tl;
+      f0s = f0s->tl;
     }
     if (f0s == null || cmp > 0) {
       // f1s->hd is not in f0s, let's add it to f2s
@@ -372,7 +378,7 @@ merge_xtunion_fields(list_t<tunionfield_t> f0s,
       } else {
 	*res = false;
       }
-      f0s = f0s -> tl;
+      f0s = f0s->tl;
     }
   }
   
@@ -387,8 +393,10 @@ merge_xtunion_fields(list_t<tunionfield_t> f0s,
   return *f2sp;
 }
 
+/*
+// compute the difference between the fields of 2 tuniondecls
 // set res to false if something's not compatible
-// return f1s - f0s
+// return f1s - f0s (the result fits the tvars of f1)
 static list_t<tunionfield_t>
 sub_xtunion_fields(list_t<tunionfield_t> f0s,
 		   list_t<tunionfield_t> f1s,
@@ -402,7 +410,7 @@ sub_xtunion_fields(list_t<tunionfield_t> f0s,
   
   for(; f0s != null && f1s != null; f1s = f1s->tl) {
     while (f0s != null && (cmp = qvar_cmp(f0s->hd->name, f1s->hd->name)) < 0) {
-      f0s = f0s -> tl;
+      f0s = f0s->tl;
     }
     if (f0s == null || cmp > 0) {
       // f1s->hd is not in f0s, let's add it to f2s
@@ -423,7 +431,7 @@ sub_xtunion_fields(list_t<tunionfield_t> f0s,
 	  next = & node->tl;
  	}
       }
-      f0s = f0s -> tl;
+      f0s = f0s->tl;
     }
   }
   
@@ -434,7 +442,9 @@ sub_xtunion_fields(list_t<tunionfield_t> f0s,
 
   return *f2sp;
 }
+*/
 
+// FIX : a non recursive version ?
 static $(list_t<`a>, list_t<`a>)
 split(list_t<`a> f) {
   if (f == null) return $(null, null);
@@ -443,6 +453,8 @@ split(list_t<`a> f) {
   return $(new List(f->hd, f1), new List(f->tl->hd, f2));    
 }
 
+// sort the fields of a xtunion declaration
+// check for the consistency of duplicate fields
 list_t<tunionfield_t> sort_xtunion_fields(list_t<tunionfield_t> f,
 					  bool @ `r1 res,
 					  var_t v, seg_t loc, string * `r2 msg) {
@@ -455,32 +467,32 @@ list_t<tunionfield_t> sort_xtunion_fields(list_t<tunionfield_t> f,
 }
 
 struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1, seg_t loc, string * `r msg) {
-  let v = Absynpp::qvar2string(d0 -> name);// build the complete name
+  let v = Absynpp::qvar2string(d0->name);// build the complete name
   string t = "[x]tunion";
   let res = true;
   // when an incompatibility is found, either we set res to false and continue,
   // or we return null immediately
 
   // check is_xtunion
-  if(d0 -> is_xtunion != d1 -> is_xtunion) {
+  if(d0->is_xtunion != d1->is_xtunion) {
     merr(loc, msg, xprintf("expected %s to be a %s instead of a %s",
-			   v, is_x2string(d0 -> is_xtunion), is_x2string(d1 -> is_xtunion)));
+			   v, is_x2string(d0->is_xtunion), is_x2string(d1->is_xtunion)));
     res = false;
   } else {
-    t = is_x2string(d0 -> is_xtunion);
+    t = is_x2string(d0->is_xtunion);
   }
   
   // check type variables
-  if (! check_tvs(d0 -> tvs, d1 -> tvs, t, v, loc, msg)) return null;
+  if (! check_tvs(d0->tvs, d1->tvs, t, v, loc, msg)) return null;
 
   // check scopes
-  let $(new_scope, res_scope) = merge_scope(d0 -> sc, d1 -> sc, t, v, loc, msg);
+  let $(new_scope, res_scope) = merge_scope(d0->sc, d1->sc, t, v, loc, msg);
   if (! res_scope) res = false;
 
   tuniondecl_t d2; // futur result
 
   // check fields
-  switch ($(d0 -> fields, d1 -> fields)) {
+  switch ($(d0->fields, d1->fields)) {
   case $(_, null): d2 = d0; break;
   case $(null, _): d2 = d1; break;
   case $(&Opt(f0s), &Opt(f1s)):
@@ -494,10 +506,10 @@ struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1, seg_t loc
     //     and allow repeats in any order so long as they agree
     //     and implicit namespace is the current namespace
     // FIX: check the kinds match up?
-    let inst = build_tvs_map(d0 -> tvs, d1 -> tvs);
+    let inst = build_tvs_map(d0->tvs, d1->tvs);
     
     // check each field under the map
-    if(d0 -> is_xtunion) {
+    if(d0->is_xtunion) {
       // xtunion
       // we assume f0s and f1s are sorted and without repetition
       
@@ -508,8 +520,8 @@ struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1, seg_t loc
 	d2 = d0;
       } else {
 	d2 = new *d0;
-	d2 -> sc = new_scope; // to avoid the reallocation below
-	d2 -> fields = new Opt(f2s);
+	d2->sc = new_scope; // to avoid the reallocation below
+	d2->fields = new Opt(f2s);
       }
     } else {
       // tunion
@@ -534,27 +546,27 @@ struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1, seg_t loc
 
   if (! res) return null;
   
-  if (new_scope == d2 -> sc)
+  if (new_scope == d2->sc)
     return d2;
   else {
     d2 = new *d2;
-    d2 -> sc = new_scope;
+    d2->sc = new_scope;
     return d2;
   }
 }
 
 struct Enumdecl * merge_enumdecl (enumdecl_t d0, enumdecl_t d1, seg_t loc, string * `r msg) {
-  let v = Absynpp::qvar2string(d0 -> name); // build the complete name
+  let v = Absynpp::qvar2string(d0->name); // build the complete name
   let res = true;
 
   // check scopes
-  let $(new_scope, res_scope) = merge_scope(d0 -> sc, d1 -> sc, "enum", v, loc, msg);
+  let $(new_scope, res_scope) = merge_scope(d0->sc, d1->sc, "enum", v, loc, msg);
   if (! res_scope) res = false;
 
   enumdecl_t d2; //futur result
 
   // check fields
-  switch ($(d0 -> fields, d1 -> fields)) {
+  switch ($(d0->fields, d1->fields)) {
   case $(_, null): d2 = d0; break;
   case $(null, _): d2 = d1; break;
   case $(&Opt(f0s), &Opt(f1s)):
@@ -582,11 +594,11 @@ struct Enumdecl * merge_enumdecl (enumdecl_t d0, enumdecl_t d1, seg_t loc, strin
 
   if (! res) return null;
 
-  if (d2 -> sc == new_scope) {
+  if (d2->sc == new_scope) {
     return d2;
   } else {
     d2 = new *d2;
-    d2 -> sc = new_scope;
+    d2->sc = new_scope;
     return d2;
   }
 }
@@ -624,37 +636,37 @@ check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
 }
 
 struct Vardecl * merge_vardecl(vardecl_t d0, vardecl_t d1, seg_t loc, string * `r msg) {
-  let v = Absynpp::qvar2string(d0 -> name); // build the complete name
+  let v = Absynpp::qvar2string(d0->name); // build the complete name
 
   // check scopes, types, tquals and attributes
-  let $(new_scope, res) = check_var_or_fn_decl(d0 -> sc, d0 -> type, d0 -> tq, d0 -> attributes,
-					       d1 -> sc, d1 -> type, d1 -> tq, d1 -> attributes,
+  let $(new_scope, res) = check_var_or_fn_decl(d0->sc, d0->type, d0->tq, d0->attributes,
+					       d1->sc, d1->type, d1->tq, d1->attributes,
 					       "variable", v, loc, msg);
   if (! res) return null;
 
-  if (d0 -> sc == new_scope) {
+  if (d0->sc == new_scope) {
     return d0;
   } else {
     let d2 = new *d0;
-    d2 -> sc = new_scope;
+    d2->sc = new_scope;
     return d2;
   }
 }
 
 struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0, typedefdecl_t d1, seg_t loc, string * `r msg) {
-  let v = Absynpp::qvar2string(d0 -> name); // build the complete name
+  let v = Absynpp::qvar2string(d0->name); // build the complete name
   
   // check type variables
-  if (! check_tvs(d0 -> tvs, d1 -> tvs, "typedef", v, loc, msg)) return null;
+  if (! check_tvs(d0->tvs, d1->tvs, "typedef", v, loc, msg)) return null;
 
   // build the map
-  let inst = build_tvs_map(d0 -> tvs, d1 -> tvs);
+  let inst = build_tvs_map(d0->tvs, d1->tvs);
 
   // check types
-  type_t subst_defn1 = substitute(inst, d1 -> defn);
-  if(! check_type(d0 -> defn, subst_defn1)) {
+  type_t subst_defn1 = substitute(inst, d1->defn);
+  if(! check_type(d0->defn, subst_defn1)) {
     merr(loc, msg, xprintf("typedef %s does refer to the same type: %s != %s",
-			   v, typ2string(subst_defn1), typ2string(d0 -> defn)));
+			   v, typ2string(subst_defn1), typ2string(d0->defn)));
     return null;
   }
   
@@ -671,70 +683,52 @@ binding_t merge_binding(binding_t b0, binding_t b1, seg_t loc, string * `r msg) 
     else if (d1 == d2) return b1;
     else return new Global_b((vardecl_t) d2);
   case $(&Global_b(d0),  &Funname_b(d1)):
-    let $(_, res) = check_var_or_fn_decl(d0 -> sc, d0 -> type, d0 -> tq, d0 -> attributes,
-					 d1 -> sc, d1 -> cached_typ -> v, empty_tqual(), d1 -> attributes,
-					 "function", qvar2string(d0 -> name), loc, msg);
+    let $(_, res) = check_var_or_fn_decl(d0->sc, d0->type, d0->tq, d0->attributes,
+					 d1->sc, d1->cached_typ->v, empty_tqual(), d1->attributes,
+					 "function", qvar2string(d0->name), loc, msg);
     if (!res) return Unresolved_b;
     return b1;
   case $(&Funname_b(_),  &Funname_b(d1)):
-    merr(loc, msg, xprintf("redefinition of function %s", qvar2string(d1 -> name)));
+    merr(loc, msg, xprintf("redefinition of function %s", qvar2string(d1->name)));
     return Unresolved_b;
   case $(&Funname_b(d0), &Global_b(d1)) :
-    let $(_, res) = check_var_or_fn_decl(d0 -> sc, d0 -> cached_typ -> v, empty_tqual(), d0 -> attributes,
-					 d1 -> sc, d1 -> type, d1 -> tq, d1 -> attributes,
-					 "variable", qvar2string(d0 -> name), loc, msg);
+    let $(_, res) = check_var_or_fn_decl(d0->sc, d0->cached_typ->v, empty_tqual(), d0->attributes,
+					 d1->sc, d1->type, d1->tq, d1->attributes,
+					 "variable", qvar2string(d0->name), loc, msg);
     if (!res) return Unresolved_b;
     return b0;
   default: throw new InvalidArg("Tcdecl::merge_binding");
   }
 }
 
-/* ----- functions for substraction ----- */
-#define SUB_DECL(Obj, obj, nameopt) \
-struct Obj##decl * sub_##obj##decl(obj##decl_t ye, obj##decl_t y, \
-			           Position::seg_t loc, string * msg, bool @ `r res) { \
-  let yt = merge_##obj##decl(ye, y, loc, msg); \
-  if (yt != ye) { /* y must be included in ye */ \
-    if (yt == null) return null; /* problem during merging ? */ \
-    *res = false; \
-    /* we assume the scopes are always OK, which is true when y is extern*/ \
-    /* so the problem must come from the fields*/ \
-    merr(loc, msg, xprintf("abstract " #obj " %s is being used as non-abstract", \
-			   qvar2string(y->name nameopt))); \
-  } \
-  return null; \
-}
+struct Xtunionfielddecl * merge_xtunionfielddecl (xtunionfielddecl_t d0,
+						  xtunionfielddecl_t d1, 
+						  seg_t loc, string * `r msg) {
+  let &Xtunionfielddecl(b0,f0) = d0;
+  let &Xtunionfielddecl(b1,f1) = d1;
+  let v = qvar2string(f0->name);  
 
-SUB_DECL(Struct, struct, -> v)
-SUB_DECL(Union, union, -> v)
-SUB_DECL(Enum, enum, )
-SUB_DECL(Typedef, typedef, )
-SUB_DECL(Var, var, )
-
-void f () {}
-
-struct Tuniondecl * sub_tuniondecl(tuniondecl_t ye, tuniondecl_t y,
-				   Position::seg_t loc, string * msg, bool @ `r res) {
-  let yt = merge_tuniondecl(ye, y, loc, msg);
-  if (yt != ye) {
-    if (yt == null) return null; // problem during merging ?
-    // here y is not included in ye
-    if (y -> is_xtunion && ye -> fields != null) {
-      // compute the difference between y and ye
-      // we assume the scopes are always OK, which is true when y is extern
-      // so the problem must come from the fields
-      yt = new *y;
-      yt->fields = new Opt(sub_xtunion_fields(ye->fields->v, y->fields->v,
-					      build_tvs_map(ye->tvs, y->tvs), res,
-					      "xtunion", qvar2string(y->name),
-					      loc, msg));
-      return yt;
-    } else {
-      *res = false;
-      merr(loc, msg, xprintf("abstract [x]tunion %s is being used as non-abstract",
-			     qvar2string(y->name)));
-    }
+  // check names of xtunions
+  if (qvar_cmp(b0->name, b1->name) != 0) {
+    merr(loc, msg, xprintf("xtunions %s and %s have both a field named %s",
+			   qvar2string(b0->name), qvar2string(b1->name), v));
+    return null;
   }
-  return null;
+
+  // check tvars of xtunions
+  if (! check_tvs(b0->tvs, b1->tvs, "xtunion", qvar2string(b0->name), loc, msg)) {
+    return null;
+  }
+
+  let inst1 = build_tvs_map(b0->tvs, b1->tvs);
+
+  // try to merge the 2 fields
+  let f2 = merge_tunionfield(f0, f1, inst1, "xtunionfield", v, msg);
+
+  if (f2 == null) return null;
+  if (f2 == f0)
+    return d0;
+  else
+    return new Xtunionfielddecl(b0, (tunionfield_t) f2);
 }
 

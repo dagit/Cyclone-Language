@@ -3073,11 +3073,12 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
 //     (struct _Baz_struct*)malloc(sizeof(struct _Baz_struct));
 //   *t = (struct _Baz_struct){.tag=Baz, .f1 = e1, .f2 = e2};
 //   t;})
-// FIX: Broken if there's more than one non-extern definition
-static opt_t<Set::set_t<qvar_t>> xtunion_fields_so_far = null;
+static opt_t<Dict::dict_t<qvar_t, bool>> xtunion_fields_so_far = null;
+// true if already seen & initialized, false if already seen but non initialized (extern)
+
 static void xtuniondecl_to_c(tuniondecl_t xd) {
   if (xtunion_fields_so_far == null)
-    xtunion_fields_so_far = new Opt(Set::empty(qvar_cmp));
+    xtunion_fields_so_far = new Opt(Dict::empty(qvar_cmp));
   if(xd->fields == null)
     return;
   let n = xd->name;
@@ -3086,37 +3087,50 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
     stringptr     fn = (*f->name)[1];
     let       sz_exp  = uint_exp((*fn).size+4,DL);
     let       tag_typ = new ArrayType(uchar_t,mt_tq,sz_exp);
-    exp_opt_t initopt = null;
     // FIX: making bad alignment and pointer-size assumptions!
-    if (xd->sc != Extern && !Set::member(xtunion_fields_so_far->v,f->name))
-      initopt = string_exp(xprintf("%c%c%c%c%s",0,0,0,0,*fn),DL);
-    let tag_decl = new_vardecl(f->name, tag_typ, initopt);
-    tag_decl->sc = xd->sc;
-    result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-    if(Set::member(xtunion_fields_so_far->v,f->name))
-      continue;
-    xtunion_fields_so_far->v = Set::insert(xtunion_fields_so_far->v,f->name);
-
-    if(f->typs != null) {
-      list_t<structfield_t> fields = null;
-      int i = 1;
-      for (let tqts = f->typs; tqts != null; tqts = tqts->tl,i++) {
-	let field_n = (stringptr)(new {xprintf("f%d",i)});
-	let newf    = new Structfield(field_n,(*tqts->hd)[0],
-				      typ_to_c_array((*tqts->hd)[1]),null,null);
-	fields = new List(newf,fields);
+    switch (Dict::lookup_opt(xtunion_fields_so_far->v,f->name)) {
+    case null:
+      exp_opt_t initopt = null;
+      if (f->sc != Extern) {
+	initopt = string_exp(xprintf("%c%c%c%c%s",0,0,0,0,*fn),DL);
       }
-      fields = new List(new Structfield(tag_sp,mt_tq,
-					cstar_typ(uchar_t,mt_tq),null,null),
-			List::imp_rev(fields));
-      let strct_decl =
-	new Structdecl{.sc = Public,
-		       .name = new Opt(collapse_qvar_tag(f->name,"_struct")),
-		       .tvs    = null,
-		       .fields = new Opt(fields),
-		       .attributes = null};
-      result_decls = new List(new_decl(new Struct_d(strct_decl),DL),
-			      result_decls);
+      let tag_decl = new_vardecl(f->name, tag_typ, initopt);
+      tag_decl->sc = f->sc;
+      result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
+      xtunion_fields_so_far->v = Dict::insert(xtunion_fields_so_far->v, f->name, f->sc != Extern);
+      if(f->typs != null) {
+	list_t<structfield_t> fields = null;
+	int i = 1;
+	for (let tqts = f->typs; tqts != null; tqts = tqts->tl,i++) {
+	  let field_n = (stringptr)(new {xprintf("f%d",i)});
+	  let newf    = new Structfield(field_n,(*tqts->hd)[0],
+					typ_to_c_array((*tqts->hd)[1]),null,null);
+	  fields = new List(newf,fields);
+	}
+	fields = new List(new Structfield(tag_sp,mt_tq,
+					  cstar_typ(uchar_t,mt_tq),null,null),
+			  List::imp_rev(fields));
+	let strct_decl =
+	  new Structdecl{.sc = Public,
+			 .name = new Opt(collapse_qvar_tag(f->name,"_struct")),
+			 .tvs    = null,
+			 .fields = new Opt(fields),
+			 .attributes = null};
+	result_decls = new List(new_decl(new Struct_d(strct_decl),DL),
+				result_decls);
+      }
+      break;
+
+    case &Opt(false):
+      if (f->sc != Extern) {
+	let initopt = string_exp(xprintf("%c%c%c%c%s",0,0,0,0,*fn),DL);
+	let tag_decl = new_vardecl(f->name, tag_typ, initopt);
+	tag_decl->sc = f->sc;
+	result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
+	xtunion_fields_so_far->v = Dict::insert(xtunion_fields_so_far->v, f->name, true);
+      }
+      break;
+    default: break;
     }
   }
 }

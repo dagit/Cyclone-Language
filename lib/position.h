@@ -10,7 +10,7 @@ namespace Position {
   using List;
   using Lineno;
 
-  extern xtunion exn {Exit};
+  extern xtunion exn {extern Exit};
 
   extern void   reset_position(string);
   extern void   set_position_file(string);
@@ -40,7 +40,7 @@ namespace Position {
   extern error_t mk_err_elab(seg_t,string);
 
   //////// Error Reporting ///////////
-  extern xtunion exn {Nocontext};
+  extern xtunion exn {extern Nocontext};
   extern bool print_context;
   extern void post_error(error_t);
   extern bool error_p();

@@ -12,7 +12,7 @@ using Absyn;
 using CfFlowInfo;
 using NewControlFlow;
 
-extern xtunion exn {BadAbsexp};
+extern xtunion exn {extern BadAbsexp};
 
 extern tunion Absexp;
 extern tunion Absexpgroup { OrderedG; UnorderedG; OneofG };

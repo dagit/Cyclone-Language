@@ -854,6 +854,7 @@ parse_union_decl()
   register int count;
   register int in_comment;
   int cplus_comment;
+  char new_field;
 
   if (typed)
     warn("multiple %union declarations");
@@ -875,17 +876,27 @@ parse_union_decl()
 
   count = 0;
   in_comment = 0;
+  new_field = 1;
 
   c = getc(finput);
 
   while (c != EOF)
     {
       putc(c, fattrs);
-      if (fdefines)
+      if (fdefines) {
+	if (new_field && (c>='a' && c<='z' || c>='A' && c<='Z')) {
+	  fprintf(fdefines, "extern ");
+	  new_field=0;
+	}
 	putc(c, fdefines);
+      }
 
       switch (c)
 	{
+	case ';':
+	  new_field = 1;
+	  break;
+
 	case '\n':
 	  lineno++;
 	  break;

@@ -19,7 +19,7 @@ extern void output_lexdef(string sourcename,
 			  List::list_t<Lexgen::automata_entry_t> entry_points,
 			  Syntax::location_t    trailer);
 
-extern xtunion exn { Table_overflow };
+extern xtunion exn { extern Table_overflow };
 
 }
 #endif
