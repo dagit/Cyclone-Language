@@ -909,26 +909,35 @@ void*Cyc_Core_snd(struct _tuple0*pair){return(*pair).f2;}
 void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}
 # 68
 void*Cyc_Core_identity(void*x){
-return x;}
+return x;}struct _tuple2{void*f1;unsigned int f2;};
+# 72
+inline static struct _tuple2 Cyc_Core_mktuple(void*a,unsigned int b){
 # 75
+return({struct _tuple2 _tmp6;_tmp6.f1=a;_tmp6.f2=b;_tmp6;});}
+# 81
 struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){
-# 77
+# 83
 struct _dyneither_ptr res;
 res.curr=arr;
 res.base=arr;
 res.last_plus_one=arr + s * n;
 return res;}
-# 83
+# 89
 void* Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 88
+# 94
 if(bd >> 20  || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 95
+# 101
 return 0;
 return dyn.curr;};}
-# 101
+# 104
+struct _tuple2 Cyc_Core_mkthin(struct _dyneither_ptr dyn,unsigned int sz){
+# 106
+unsigned int bd=_get_dyneither_size(dyn,sz);
+return Cyc_Core_mktuple(dyn.curr,bd);}
+# 112
 unsigned int Cyc_Core_arr_prevsize(struct _dyneither_ptr arr,unsigned int elt_sz){
 unsigned char*_get_arr_size_curr=arr.curr;
 unsigned char*_get_arr_size_base=arr.base;

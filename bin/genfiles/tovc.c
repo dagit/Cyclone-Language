@@ -1094,6 +1094,8 @@ typedef struct Cyc_Hashtable_Table*Cyc_Hashtable_table_t;
 # 31 "toc.h"
 typedef struct Cyc_Hashtable_Table*Cyc_Toc_table_t;
 # 38
+void*Cyc_Toc_typ_to_c(void*t);
+# 41
 struct _tuple0*Cyc_Toc_temp_var();
 extern struct _dyneither_ptr Cyc_Toc_globals;
 # 27 "tovc.h"

@@ -915,12 +915,18 @@ ftw.h:
 glob.h:
 ;
 
-// This may need to be written entirely in Cyclone, since it manipulates
-// arrays of paths
 grp.h:
 include {
 gid_t
-group
+group {
+struct group
+  {
+    char @gr_name;		/* Group name.	*/
+    char @gr_passwd;		/* Password.	*/
+    gid_t gr_gid;		/* Group ID.	*/
+    char ** @zeroterm gr_mem;	/* Member list.	*/
+  };  
+}
 }
 hstub initgroups {
   extern "C" int initgroups(const char @ @zeroterm user, gid_t group);
@@ -932,8 +938,6 @@ hstub setgroups {
   extern "C" int setgroups(tag_t<`i> size, const gid_t @{valueof(`i)} list);
 }
 hstub getgrnam {
-  // This and getgrid won't work quite right, since the imported group type
-  // has a list of members; the * pointer will only reveal one of these.
   extern "C" struct group *getgrnam(const char @ name);
 }
 hstub getgrgid {
@@ -1172,9 +1176,44 @@ NZERO
 }
 ;
 
-// Defines a struct containing char *
-// Not supported yet
 locale.h:
+include {
+LC_CTYPE
+LC_NUMERIC
+LC_TIME
+LC_COLLATE
+LC_MONETARY
+LC_MESSAGES
+LC_ALL
+LC_PAPER
+LC_NAME
+LC_ADDRESS
+LC_TELEPHONE
+LC_MEASUREMENT
+LC_IDENTIFICATION
+LC_CTYPE_MASK
+LC_NUMERIC_MASK
+LC_TIME_MASK
+LC_COLLATE_MASK
+LC_MONETARY_MASK
+LC_MESSAGES_MASK
+LC_PAPER_MASK
+LC_NAME_MASK
+LC_ADDRESS_MASK
+LC_TELEPHONE_MASK
+LC_MEASUREMENT_MASK
+LC_IDENTIFICATION_MASK
+LC_ALL_MASK
+LC_GLOBAL_LOCALE
+locale_t
+lconv
+}
+hstub setlocale {
+  extern char *setlocale (int category, const char *locale);
+}
+hstub localeconv {
+  extern struct lconv *localeconv (void);
+}
 ;
 
 math.h:

@@ -1523,7 +1523,8 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     ANAL_RGN(env, temp) {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
                                             rlist(temp,e1,e2),false,true);
-      DEBUG_PRINT("in Rexp:subscript: after anal, flow is\n");
+      DEBUG_PRINT("in Rexp:subscript |%s|: after anal, flow is\n",
+		  Absynpp::exp2string(e));
       DEBUG_PRINT_F(print_flow,f);
       let f2 = f;
       switch(f) {
@@ -1733,51 +1734,52 @@ static $(flow_t<`r>,absLval_t<`r>)
     case {.BottomFL = _}: return $(f,UnknownL());
     case {.ReachableFL = $(outdict,relns)}:
       // else cannot be known: FIX: determine notzero as appropriate
-      if(Tcutil::is_bound_one(bd)) {
-	let $(r,names) = unname_rval(env->fenv->r,r);
-	retry: switch(r) {
-	case &NamedLocation(...): 
-	  throw new Core::Impossible("named location in anal_derefL");
-	case &NotZeroAll:
-	case &NotZeroThis:
-          e->annot = new NotZero(copy_relns(Core::heap_region,relns)); break;
-	case &AddressOf(&Place(root,flds2)):
-	  // if this place was expanded out, we can't be sure it's non-zero
-	  if (expanded_place) {
-	    DEBUG_PRINT("--requiring null check on expanded place for %s\n",
-			exp2string(e));
-	    e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
-	  }
-	  else {
-	    switch (e->annot) {
-	      // See if this was annotated as an expanded place before.
-	      // If so, we leave it that way.
-	    case &UnknownZ(_):
-	      e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
-	      break;
-	    default:
-	      e->annot = new NotZero(copy_relns(Core::heap_region,relns));
-	      break;
-	    }
-	  }
-	  return $(f, PlaceL(rnew(fenv->r) Place(root, rappend(fenv->r,flds2,flds))));
-	case &Zero:
-	  e->annot = &IsZero_val;
-	  return $(BottomFL(),UnknownL());
-	case &UnknownR(il): f = notzero(env,inflow,f,e,il,names); fallthru;
-	// Note: I think tag cmps aren't useful here
-	default: 
-	  if (passthrough_consumes) {
-	    switch (r) {
-	    case &Consumed(_,_,r2): r = r2; goto retry;
-	    default: break;
-	    }
-	  }
+      let $(r,names) = unname_rval(env->fenv->r,r);
+      retry: switch(r) {
+      case &NamedLocation(...): 
+	throw new Core::Impossible("named location in anal_derefL");
+      case &NotZeroAll:
+      case &NotZeroThis:
+	e->annot = new NotZero(copy_relns(Core::heap_region,relns)); break;
+      case &AddressOf(&Place(root,flds2)):
+	// if this place was expanded out, we can't be sure it's non-zero
+	if (expanded_place) {
+	  DEBUG_PRINT("--requiring null check on expanded place for %s\n",
+		      exp2string(e));
 	  e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
 	}
+	else {
+	  switch (e->annot) {
+	    // See if this was annotated as an expanded place before.
+	    // If so, we leave it that way.
+	  case &UnknownZ(_):
+	    e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
+	    break;
+	  default:
+	    e->annot = new NotZero(copy_relns(Core::heap_region,relns));
+	    break;
+	  }
+	}
+	if(Tcutil::is_bound_one(bd))
+	  return $(f, PlaceL(rnew(fenv->r) Place(root, rappend(fenv->r,flds2,flds))));
+	break;
+      case &Zero:
+	e->annot = &IsZero_val;
+	return $(BottomFL(),UnknownL());
+      case &UnknownR(il): 
+	if (Tcutil::is_bound_one(bd))
+	  f = notzero(env,inflow,f,e,il,names);
+	fallthru;
+      // Note: I think tag cmps aren't useful here
+      default: 
+	if (passthrough_consumes) {
+	  switch (r) {
+	  case &Consumed(_,_,r2): r = r2; goto retry;
+	  default: break;
+	  }
+	}
+	e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
       }
-      else
-	e->annot = new UnknownZ(copy_relns(Core::heap_region,relns)); // FIX: too conservative?
       if(initlevel(fenv,outdict,r)==NoneIL) {
 	let $(r,_) = unname_rval(env->fenv->r,r);
 	switch (r) {

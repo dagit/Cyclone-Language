@@ -175,6 +175,7 @@ BUILDLIB_SRCS:=buildlib\
         jump_analysis\
 	new_control_flow\
 	cf_flowinfo\
+        toc\
 	absyn
 
 NOOPT_SRCS:=parse_tab parse_tab_a parse_tab_pg

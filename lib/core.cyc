@@ -69,6 +69,12 @@ int ptrcmp(`a::TA @ `r a, `a @ `r b) {
   return x;
 }
 
+static inline
+$(__cyclone_internal_array_t<`a,`i,`r>,__cyclone_internal_singleton<`i>)
+  mktuple(__cyclone_internal_array_t<`a,`i,`r> a,__cyclone_internal_singleton<`i> b) {
+  return $(a,b);
+}
+
 /* convert a thin pointer, its element size, and the number of elements
  * to a fat pointer.  The interface for this is given in core.h. */
 extern "C include" {
@@ -94,6 +100,11 @@ extern "C include" {
        || (ptrbd > dyn.last_plus_one)) // check small enough
       return 0;
     return dyn.curr;
+  } 
+  $(__cyclone_internal_array_t<`a,`i,`r>,__cyclone_internal_singleton<`i>)
+  Cyc_Core_mkthin(`a ?`r dyn, sizeof_t<`a> sz) {
+    unsigned bd = _get_dyneither_size(dyn,sz);
+    return Cyc_Core_mktuple(dyn.curr,bd);
   } 
   // Returns the size of an array from the current pointer back to
   // its starting point.  If the curr pointer = start pointer, or 

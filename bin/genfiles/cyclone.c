@@ -1177,7 +1177,9 @@ typedef struct Cyc_Hashtable_Table*Cyc_Hashtable_table_t;
 typedef struct Cyc_Hashtable_Table*Cyc_Toc_table_t;
 # 34
 struct Cyc_List_List*Cyc_Toc_toc(struct Cyc_Hashtable_Table*pop_tables,struct Cyc_List_List*ds);
-# 41
+# 38
+void*Cyc_Toc_typ_to_c(void*t);
+# 44
 extern int Cyc_Toc_warn_bounds_checks;
 extern int Cyc_Toc_warn_all_null_deref;
 # 27 "tovc.h"

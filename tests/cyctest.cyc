@@ -4,6 +4,7 @@
 /* The test suites */
 
 #include "try_suite.h"
+#include "core_suite.h"
 #include "list_suite.h"
 #include "array_suite.h"
 #include "tuple_suite.h"
@@ -37,6 +38,7 @@
 CT_MAIN_BEGIN(print_level)
 
   CT_SUITE_REGISTER(Exception);
+  CT_SUITE_REGISTER(Core);
   CT_SUITE_REGISTER(Array);
   CT_SUITE_REGISTER(List);
   CT_SUITE_REGISTER(Tuple);

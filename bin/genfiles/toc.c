@@ -1349,9 +1349,11 @@ typedef struct Cyc_Hashtable_Table*Cyc_Toc_table_t;
 # 34
 struct Cyc_List_List*Cyc_Toc_toc(struct Cyc_Hashtable_Table*pop_tables,struct Cyc_List_List*ds);
 # 38
+void*Cyc_Toc_typ_to_c(void*t);
+# 41
 struct _tuple1*Cyc_Toc_temp_var();
 extern struct _dyneither_ptr Cyc_Toc_globals;
-# 41
+# 44
 extern int Cyc_Toc_warn_bounds_checks;
 extern int Cyc_Toc_warn_all_null_deref;struct Cyc_Tcpat_TcPatResult{struct _tuple0*tvars_and_bounds_opt;struct Cyc_List_List*patvars;};
 # 49 "tcpat.h"
@@ -1725,7 +1727,7 @@ static struct _tuple1*Cyc_Toc_collapse_qvars(struct _tuple1*fieldname,struct _tu
 struct _tuple14 env=({struct _tuple14 _tmp17B;_tmp17B.f1=fieldname;_tmp17B.f2=dtname;_tmp17B;});
 return((struct _tuple1*(*)(struct _tuple14*arg,struct _tuple1*(*f)(struct _RegionHandle*,struct _tuple20*)))Cyc_Toc_use_toc_state)(& env,Cyc_Toc_collapse_qvars_body);}
 # 568
-static void*Cyc_Toc_typ_to_c(void*t);struct _tuple21{struct Cyc_Toc_TocState*f1;struct Cyc_List_List*f2;};struct _tuple22{void*f1;struct Cyc_List_List*f2;};
+void*Cyc_Toc_typ_to_c(void*t);struct _tuple21{struct Cyc_Toc_TocState*f1;struct Cyc_List_List*f2;};struct _tuple22{void*f1;struct Cyc_List_List*f2;};
 # 572
 static void*Cyc_Toc_add_tuple_type_body(struct _RegionHandle*d,struct _tuple21*env){
 # 575
@@ -1916,7 +1918,7 @@ struct Cyc_Absyn_Kind*_tmp1EE=Cyc_Tcutil_typ_kind(t);struct Cyc_Absyn_Kind*_tmp1
  return 1;}else{_LL9C: _LL9D:
  return 0;}_LL99:;}
 # 841
-static void*Cyc_Toc_typ_to_c(void*t){
+void*Cyc_Toc_typ_to_c(void*t){
 void*_tmp1F0=t;struct Cyc_Absyn_Datatypedecl*_tmp23B;void**_tmp23A;struct Cyc_Absyn_Enumdecl*_tmp239;struct Cyc_Absyn_Aggrdecl*_tmp238;struct Cyc_Absyn_Exp*_tmp237;struct Cyc_Absyn_Exp*_tmp236;void*_tmp235;struct _tuple1*_tmp234;struct Cyc_List_List*_tmp233;struct Cyc_Absyn_Typedefdecl*_tmp232;void*_tmp231;struct Cyc_List_List*_tmp230;struct _tuple1*_tmp22F;union Cyc_Absyn_AggrInfoU _tmp22E;struct Cyc_List_List*_tmp22D;enum Cyc_Absyn_AggrKind _tmp22C;struct Cyc_List_List*_tmp22B;struct Cyc_List_List*_tmp22A;struct Cyc_Absyn_Tqual _tmp229;void*_tmp228;struct Cyc_List_List*_tmp227;int _tmp226;struct Cyc_Absyn_VarargInfo*_tmp225;struct Cyc_List_List*_tmp224;void*_tmp223;struct Cyc_Absyn_Tqual _tmp222;struct Cyc_Absyn_Exp*_tmp221;unsigned int _tmp220;void*_tmp21F;struct Cyc_Absyn_Tqual _tmp21E;union Cyc_Absyn_Constraint*_tmp21D;struct Cyc_Absyn_Datatypedecl*_tmp21C;struct Cyc_Absyn_Datatypefield*_tmp21B;struct Cyc_Absyn_Tvar*_tmp21A;void**_tmp219;switch(*((int*)_tmp1F0)){case 0: _LL9F: _LLA0:
  return t;case 1: _LLA1: _tmp219=(void**)&((struct Cyc_Absyn_Evar_Absyn_Type_struct*)_tmp1F0)->f2;_LLA2:
 # 845

@@ -304,6 +304,12 @@ extern `a?`r mkfat(__nn_cyclone_internal_array_t<`a,`i,`r::TR> arr,
       to a fat pointer (?).  It requires that you pass in the size of the
       element type, as well as the number of elements. */
 
+extern $(__cyclone_internal_array_t<`a,`i,`r>,__cyclone_internal_singleton<`i>)
+mkthin(`a ?`r dyn, sizeof_t<`a> sz);
+  /** mkthin is a special case of arrcast, which converts a fat
+      pointer to a thin pointer and its bound.  It requires that you
+      pass in the size of the element type. */
+
 extern unsigned int arr_prevsize(`a ?`r arr, sizeof_t<`a> elt_sz);
   /** Returns the distance, in terms of elements of size [elt_sz], to
       the start of the buffer pointed to by [arr]. */

@@ -34,6 +34,9 @@ typedef Hashtable::table_t<`a,`b> table_t<`a,`b>;
 extern list_t<decl_t> toc(table_t<fndecl_t,table_t<stmt_t,int>> pop_tables,
 			  list_t<decl_t> ds);
 
+// translate a Cyclone type to a C type (functionally)
+type_t typ_to_c(type_t t);
+
 // this is just for Tovc and tcStmt
 extern qvar_t temp_var();
 extern stringptr_t ?globals;

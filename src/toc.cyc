@@ -565,7 +565,7 @@ static qvar_t collapse_qvars(qvar_t fieldname,qvar_t dtname) {
   return use_toc_state(&env, (collapse_qvars_body@<`collapse_qvars>)<>);
 }
 
-static type_t typ_to_c(type_t t); // forward declarations
+type_t typ_to_c(type_t t); // forward declarations
 
 // used to generate struct definitions for tuple types
 // we share the struct definitions where possible.
@@ -838,7 +838,7 @@ static bool is_abstract_type(type_t t) {
   }
 }
 
-static type_t typ_to_c(type_t t) {
+type_t typ_to_c(type_t t) {
   switch (t) {
   case &VoidType: return t;
   case &Evar(_,*t2,_,_): 

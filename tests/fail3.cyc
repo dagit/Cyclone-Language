@@ -3,6 +3,11 @@ void a1() {
   // dereference of possibly uninitialized pointer
   *p = 0;
 }
+void a1a() {
+   char *{10}@nozeroterm x = 0;
+  // dereference of possibly uninitialized pointer
+   x[0] = 'a';
+}
 void a2a(int*p);
 void a2() {
   int *p1;

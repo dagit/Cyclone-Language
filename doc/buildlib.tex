@@ -43,7 +43,7 @@ The form of a spec file is given by the following grammar.
 \end{rules}
 \begin{rules}{ids}
   (empty)\\
-  \nt{id} \nt{ids}
+  \nt{id} \nt{balanced-braces}* \nt{ids}
 \end{rules}
 
 The non-terminal \hypertarget{id}{\textit{id}} refers
@@ -82,13 +82,51 @@ etc.  Again, these can differ from system to system.
 
 You can use \texttt{include} to obtain not just constants (macros) and
 typedefs, but struct and union definitions as well.  Furthermore, if a
-definition you \texttt{include} requires any other definitions that
-you do not explicitly \texttt{include}, those other definitions will
-be placed into the Cyclone header too.
+definition you \texttt{include} requires any other definitions that you do
+not explicitly \texttt{include}, those other definitions will be placed into
+the Cyclone header too.  Moreover, for all such definitions, you can include
+an optional, expected Cyclonedefinition that is ``equivalent'' to the C
+definition on your system.  By ``equivalent,'' we mean that your definition
+defines all of the same elements as the system definition (but possibly
+fewer), and each of these elements is ``representation-compatible'' in the
+sense that they use the same amount of storage when compiled.  As example,
+here is our spec for \texttt{grp.h}:
+\begin{verbatim}
+include {
+  gid_t
+  group {
+    struct group {
+      char @gr_name;
+      char @gr_passwd;
+      gid_t gr_gid;
+      char ** @zeroterm gr_mem;
+    };  
+  }
+}
+\end{verbatim}
+This provides richer information than the compatible definition on most
+systems.  Here is the Linux definition:
+\begin{verbatim}
+struct group {
+  char *gr_name;
+  char *gr_passwd;
+  gid_t gr_gid;
+  char **gr_mem;
+};  
+\end{verbatim}
+The user definition refines the system definition by indicating that for
+\texttt{group} strings \texttt{gr\_name} and \texttt{gr\_passwd} must be
+non-NULL, and indicates that the array of strings \texttt{gr\_mem}, is
+null-terminated.  But note that the two definitions are
+representation-compatible in that they have the same run-time storage
+requirements.  The Cyclone version simplifies provides more precise type
+information.  You can provide user definitions for enumerated types and
+\texttt{typedef}'s as well.
 
-Currently, \texttt{include} does not work for variable or function
-declarations.  You have to use the \texttt{hstub} directive to add
-variable and function declarations to your Cyclone header.
+Some refinements (such as polymorphism), are not yet supported for user
+definitions.  Also, \texttt{include} does not work for variable or function
+declarations.  You have to use the \texttt{hstub} directive to add variable
+and function declarations to your Cyclone header.
 
 \item[cstub]
 The \texttt{cstub} directive adds code (the \nt{balanced-braces})
