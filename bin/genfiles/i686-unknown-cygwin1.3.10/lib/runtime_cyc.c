@@ -24,7 +24,6 @@
 #include <stdarg.h>
 // #include <errno.h>
 #include <signal.h>
-#include <setjmp.h>
 
 // The C include file precore_c.h is produced (semi) automatically
 // from the Cyclone include file core.h.  Note, it now includes
@@ -34,6 +33,7 @@
    that might cause problems, particularly relating to region profiling */
 #define RUNTIME_CYC
 #include "precore_c.h"
+extern void longjmp(jmp_buf,int); // NB precore_c.h defines jmp_buf
 
 extern void exit(int);
 
