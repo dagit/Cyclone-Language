@@ -14,12 +14,12 @@ namespace Lineno;
 
 }
 
-let newline = ('\012' | '\015' | "\015\012")
+let newline = ('\n' | '\r' | "\r\n")
   
 rule token = parse 
-  "#" [^ '\012' '\015']* newline { return LINEDEF; }
-| [^ '\012' '\015']* newline     { return NEWLINE; }
-| [^ '\012' '\015']* eof         { return END;     }
+  "#" [^ '\n' '\r']* newline { return LINEDEF; }
+| [^ '\n' '\r']* newline     { return NEWLINE; }
+| [^ '\n' '\r']* eof         { return END;     }
 
 {
 

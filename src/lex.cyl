@@ -575,7 +575,7 @@ rule token = parse
 | "..." { return ELLIPSIS; }
 /* comments */
 | "#"[^ '\n' '\r']*(newline)      { return  token(lexbuf); }
-| [' ' '\011' '\013' '\014' '\n' '\r']+     { return  token(lexbuf); }
+| [' ' '\t' '\v' '\f' '\n' '\r']+     { return  token(lexbuf); }
 | "//"[^'\n' '\r']* newline       { return  token(lexbuf); }
 | "/*"  { comment_depth = 1; 
 	  runaway_start = lexeme_start(lexbuf); 
@@ -589,21 +589,17 @@ rule token = parse
     token_string = get_stored_string();
     return STRING; }
 /* character constants */
-| "'\\n'"   { token_char = '\n'; return CHARACTER_CONSTANT; }
-| "'\\t'"   { token_char = '\t'; return CHARACTER_CONSTANT; }
+| "'\\a'"   { token_char = '\a'; return CHARACTER_CONSTANT; }
 | "'\\b'"   { token_char = '\b'; return CHARACTER_CONSTANT; }
-| "'\\r'"   { token_char = '\r'; return CHARACTER_CONSTANT; }
 | "'\\f'"   { token_char = '\f'; return CHARACTER_CONSTANT; }
+| "'\\n'"   { token_char = '\n'; return CHARACTER_CONSTANT; }
+| "'\\r'"   { token_char = '\r'; return CHARACTER_CONSTANT; }
+| "'\\t'"   { token_char = '\t'; return CHARACTER_CONSTANT; }
 | "'\\v'"   { token_char = '\v'; return CHARACTER_CONSTANT; }
 | "'\\\\'"  { token_char = '\\'; return CHARACTER_CONSTANT; }
-/* single quote ('), decimal character code 39 - gcc doesn't like '\'' */
-| "'\\''"   { token_char = (char)39; return CHARACTER_CONSTANT; }
-| "'\\\"'"
-            { token_char = (char)34; return CHARACTER_CONSTANT; }
-/*| "'\\\034'"*/
-/*            { token_char = '\034'; return CHARACTER_CONSTANT; } */
-| "'\\a'"   { token_char = '\a'; return CHARACTER_CONSTANT; }
-| "'\\?'"   { token_char = '?'; return CHARACTER_CONSTANT; }
+| "'\\''"   { token_char = '\''; return CHARACTER_CONSTANT; }
+| "'\\\"'"  { token_char = '"';  return CHARACTER_CONSTANT; }
+| "'\\?'"   { token_char = '?';  return CHARACTER_CONSTANT; }
 /* octal character escapes */
 | "'\\" ['0'-'7']['0'-'7']['0'-'7'] "'"
             { token_char = char_for_octal_code(lexbuf,2,3);
@@ -637,17 +633,17 @@ and strng = parse
                     { return strng(lexbuf); }
   | "\""            { return 0; /* return value ignored */ }
   | "\\" newline    { return strng(lexbuf); }
-  | "\\n"           { store_string_char('\n');   return strng(lexbuf); }
-  | "\\t"           { store_string_char('\t');   return strng(lexbuf); }
-  | "\\b"           { store_string_char('\b');   return strng(lexbuf); }
-  | "\\r"           { store_string_char('\r');   return strng(lexbuf); }
-  | "\\f"           { store_string_char('\f');   return strng(lexbuf); }
-  | "\\v"           { store_string_char('\v');   return strng(lexbuf); }
-  | "\\\\"          { store_string_char('\\');   return strng(lexbuf); }
-  | "\\'"           { store_string_char('\'');   return strng(lexbuf); }
-  | "\\\""          { store_string_char('"');    return strng(lexbuf); }
-  | "\\a"           { store_string_char('\a');   return strng(lexbuf); }
-  | "\\?"           { store_string_char('?');    return strng(lexbuf); }
+  | "\\a"           { store_string_char('\a'); return strng(lexbuf); }
+  | "\\b"           { store_string_char('\b'); return strng(lexbuf); }
+  | "\\f"           { store_string_char('\f'); return strng(lexbuf); }
+  | "\\n"           { store_string_char('\n'); return strng(lexbuf); }
+  | "\\r"           { store_string_char('\r'); return strng(lexbuf); }
+  | "\\t"           { store_string_char('\t'); return strng(lexbuf); }
+  | "\\v"           { store_string_char('\v'); return strng(lexbuf); }
+  | "\\\\"          { store_string_char('\\'); return strng(lexbuf); }
+  | "\\'"           { store_string_char('\''); return strng(lexbuf); }
+  | "\\\""          { store_string_char('"');  return strng(lexbuf); }
+  | "\\?"           { store_string_char('?');  return strng(lexbuf); }
   /* octal character escapes */
   | "\\" ['0'-'7']['0'-'7']['0'-'7']
                     { store_string_char(char_for_octal_code(lexbuf,1,3));
@@ -666,7 +662,6 @@ and strng = parse
                     { store_string_char(char_for_hex_code(lexeme(lexbuf),2));
                       return strng(lexbuf);
                     }
-  /* THESE ARE ALL DECIMAL CODES */
   | [^ '"''\\''\n']   /* NOT double quote, backslash, or newline */
                     { /* for efficiency, should have a while loop here */
                       store_string_char (lexeme_char(lexbuf,0));

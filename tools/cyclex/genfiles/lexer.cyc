@@ -77,10 +77,13 @@ string get_stored_string() {
 
 char char_for_backslash(char c) {
   switch (c) {
-  case 'n': return '\n';
-  case 't': return '\t';
+  case 'a': return '\a';
   case 'b': return '\b';
+  case 'f': return '\f';
+  case 'n': return '\n';
   case 'r': return '\r';
+  case 't': return '\t';
+  case 'v': return '\v';
   default:  return c;
   }
 }
@@ -123,31 +126,31 @@ namespace Lexer;
 using Lexing {
 
 struct lex_tables *lt = null;
-int lbase[?] = {0,10,4,12,-10,-9,-3,53,1,8,-8,-1,-2,13,-4,88,14,98,106,16,-7,-6,-5,-6,-1,157,162,24,-3,165,173,134,-9,-3,33,16,-1,-2,21,190,23,182,226,25,251,-23,238,-2,-5,36,-18,-19,-15,-17,-21,84,-10,-16,329,-13,-14,-20,-12,-9,-11,-22,413,90,277,91,269,285,92,282};
+int lbase[?] = {0,10,4,12,-10,-9,-3,53,1,8,-8,-1,-2,13,-4,88,14,98,106,16,-7,-6,-5,-6,-1,157,162,24,-3,173,181,153,-9,-3,33,16,-1,-2,21,231,23,189,242,25,264,-23,164,-2,-5,52,-18,-19,-15,-17,-21,84,-10,-16,345,-13,-14,-20,-12,-9,-11,-22,429,89,265,90,282,300,91,169};
 int lbacktrk[?] = {-1,-1,-1,-1,-1,-1,-1,9,9,9,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,6,-1,1,-1,-1,-1,9,-1,-1,10,10,-1,-1,-1,-1,-1,-1,-1,-1,9,-1,0,-1,-1,22,-1,-1,-1,-1,-1,22,-1,-1,3,-1,-1,-1,-1,-1,-1,-1,3,-1,-1,-1,-1,-1,-1,0};
 int ldefault[?] = {45,31,20,4,0,0,0,13,-1,-1,0,0,0,-1,0,-1,-1,-1,-1,-1,0,0,0,0,0,-1,-1,-1,0,-1,-1,44,0,0,38,-1,0,0,-1,-1,-1,-1,-1,-1,44,0,-1,0,0,67,0,0,0,0,0,-1,0,0,-1,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1};
-int ltrans[?] = {0,0,0,0,0,0,0,0,0,46,47,0,46,46,23,0,0,0,0,0,32,0,5,0,0,0,0,0,0,0,0,0,46,27,48,0,27,27,24,49,50,51,52,53,33,54,6,55,12,34,11,7,22,21,8,20,27,35,20,9,14,56,22,57,21,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,59,14,60,61,62,25,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,63,64,39,28,16,68,21,20,10,0,36,0,37,17,17,17,17,17,17,17,17,-1,15,18,18,18,18,18,18,18,18,19,19,19,19,19,19,19,19,0,0,0,0,26,27,-1,26,26,26,27,-1,26,26,0,0,0,0,16,-1,0,0,0,0,16,0,0,26,0,28,0,0,26,0,0,0,16,0,0,0,16,0,16,29,29,29,29,29,29,29,29,30,30,30,30,30,30,30,30,14,14,14,14,14,14,14,14,40,42,42,42,42,42,42,42,42,41,41,41,41,41,41,41,41,0,73,0,28,73,73,0,0,0,28,65,-1,0,-1,22,-1,0,0,0,0,10,28,10,0,73,28,0,28,43,43,43,43,43,43,43,43,40,0,0,-1,0,0,40,-1,-1,73,-1,0,73,73,0,0,-1,0,40,0,0,0,40,0,40,0,0,-1,0,0,0,0,73,0,69,71,71,71,71,71,71,71,71,70,70,70,70,70,70,70,70,72,72,72,72,72,72,72,72,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,66,69,0,0,0,0,-1,69,-1,66,66,66,66,66,66,66,66,66,66,69,0,0,-1,69,0,69,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,66,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,0,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,-1,66,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
-int lcheck[?] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,-1,0,0,2,-1,-1,-1,-1,-1,1,-1,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,27,0,-1,27,27,2,0,0,0,0,0,1,0,3,0,8,1,9,3,13,16,3,19,27,1,35,3,38,0,40,0,43,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,55,15,49,67,69,72,-1,1,-1,1,15,15,15,15,15,15,15,15,31,7,17,17,17,17,17,17,17,17,18,18,18,18,18,18,18,18,-1,-1,-1,-1,25,25,31,25,25,26,26,31,26,26,-1,-1,-1,-1,15,31,-1,-1,-1,-1,15,-1,-1,25,-1,25,-1,-1,26,-1,-1,-1,15,-1,-1,-1,15,-1,15,25,25,25,25,25,25,25,25,29,29,29,29,29,29,29,29,30,30,30,30,30,30,30,30,39,41,41,41,41,41,41,41,41,39,39,39,39,39,39,39,39,-1,46,-1,25,46,46,-1,-1,-1,25,0,31,-1,31,2,44,-1,-1,-1,-1,1,25,3,-1,46,25,-1,25,42,42,42,42,42,42,42,42,39,-1,-1,44,-1,-1,39,34,44,73,49,-1,73,73,-1,-1,44,-1,39,-1,-1,-1,39,-1,39,-1,-1,7,-1,-1,-1,-1,73,-1,68,70,70,70,70,70,70,70,70,68,68,68,68,68,68,68,68,71,71,71,71,71,71,71,71,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,58,68,-1,-1,-1,-1,44,68,44,58,58,58,58,58,58,58,58,58,58,68,-1,-1,31,68,-1,68,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,-1,-1,-1,-1,58,-1,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,66,-1,-1,-1,-1,-1,-1,-1,-1,66,66,66,66,66,66,66,66,66,66,-1,-1,-1,-1,-1,-1,-1,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,-1,-1,-1,44,66,-1,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
+int ltrans[?] = {0,0,0,0,0,0,0,0,0,46,47,0,46,46,23,0,0,0,0,0,32,0,5,0,0,0,0,0,0,0,0,0,46,27,48,0,27,27,24,49,50,51,52,53,33,54,6,55,12,34,11,7,22,21,8,20,27,35,20,9,14,56,22,57,21,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,59,14,60,61,62,25,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,63,64,39,28,16,21,20,10,0,0,36,0,37,17,17,17,17,17,17,17,17,68,15,18,18,18,18,18,18,18,18,19,19,19,19,19,19,19,19,0,-1,0,0,26,27,0,26,26,26,27,73,26,26,73,73,73,0,16,73,73,0,0,0,16,-1,0,26,0,28,-1,0,26,0,73,0,16,0,-1,73,16,0,16,29,29,29,29,29,29,29,29,0,0,0,0,0,0,0,28,30,30,30,30,30,30,30,30,14,14,14,14,14,14,14,14,42,42,42,42,42,42,42,42,0,0,0,0,28,0,0,0,0,28,28,65,0,0,28,22,0,0,0,0,0,10,28,10,0,40,28,0,28,-1,28,-1,0,-1,41,41,41,41,41,41,41,41,0,0,-1,43,43,43,43,43,43,43,43,-1,0,0,0,0,-1,69,0,0,0,-1,-1,0,-1,0,70,70,70,70,70,70,70,70,0,0,40,0,0,0,0,69,40,71,71,71,71,71,71,71,71,0,0,0,40,0,0,0,40,0,40,72,72,72,72,72,72,72,72,0,69,0,0,0,0,69,69,0,0,0,69,0,0,0,0,0,0,0,69,0,0,0,69,0,69,0,69,66,0,0,-1,0,-1,0,0,0,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,-1,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,66,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,0,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,-1,0,0,0,66,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
+int lcheck[?] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,-1,0,0,2,-1,-1,-1,-1,-1,1,-1,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,27,0,-1,27,27,2,0,0,0,0,0,1,0,3,0,8,1,9,3,13,16,3,19,27,1,35,3,38,0,40,0,43,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,55,15,67,69,72,-1,-1,1,-1,1,15,15,15,15,15,15,15,15,49,7,17,17,17,17,17,17,17,17,18,18,18,18,18,18,18,18,-1,31,-1,-1,25,25,-1,25,25,26,26,46,26,26,46,46,73,-1,15,73,73,-1,-1,-1,15,31,-1,25,-1,25,31,-1,26,-1,46,-1,15,-1,31,73,15,-1,15,25,25,25,25,25,25,25,25,-1,-1,-1,-1,-1,-1,-1,25,29,29,29,29,29,29,29,29,30,30,30,30,30,30,30,30,41,41,41,41,41,41,41,41,-1,-1,-1,-1,25,-1,-1,-1,-1,25,25,0,-1,-1,25,2,-1,-1,-1,-1,-1,1,25,3,-1,39,25,-1,25,44,25,31,-1,31,39,39,39,39,39,39,39,39,-1,-1,34,42,42,42,42,42,42,42,42,44,-1,-1,-1,-1,44,68,-1,-1,-1,49,7,-1,44,-1,68,68,68,68,68,68,68,68,-1,-1,39,-1,-1,-1,-1,68,39,70,70,70,70,70,70,70,70,-1,-1,-1,39,-1,-1,-1,39,-1,39,71,71,71,71,71,71,71,71,-1,68,-1,-1,-1,-1,68,68,-1,-1,-1,68,-1,-1,-1,-1,-1,-1,-1,68,-1,-1,-1,68,-1,68,-1,68,58,-1,-1,44,-1,44,-1,-1,-1,58,58,58,58,58,58,58,58,58,58,-1,-1,-1,-1,-1,-1,31,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,-1,-1,-1,-1,58,-1,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,66,-1,-1,-1,-1,-1,-1,-1,-1,66,66,66,66,66,66,66,66,66,66,-1,-1,-1,-1,-1,-1,-1,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,44,-1,-1,-1,66,-1,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
 int lexmain_rec<`a>(Lexbuf<`a> lexbuf, int lexstate) {
   if (lt == null) lt = &lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);
   lexstate = lex_engine((LexTables)lt,lexstate,lexbuf);
   switch (lexstate) {
 
 case 0: 
-#line 125 "lexer.cyl"
-                                return lexmain(lexbuf); 
+#line 128 "lexer.cyl"
+                          return lexmain(lexbuf); 
 case 1: 
-#line 126 "lexer.cyl"
-           line_start_pos = lexeme_end(lexbuf);
-           ++line_num;
-           return lexmain(lexbuf); 
-case 2: 
 #line 129 "lexer.cyl"
+         line_start_pos = lexeme_end(lexbuf);
+         ++line_num;
+         return lexmain(lexbuf); 
+case 2: 
+#line 132 "lexer.cyl"
          comment_depth = 1;
          handle_lexical_error(comment<>,lexbuf); 
          return lexmain(lexbuf); 
 case 3: 
-#line 133 "lexer.cyl"
+#line 136 "lexer.cyl"
     string s = lexeme(lexbuf);
     if     (String::strcmp(s,"rule")  == 0) return TRULE;
     else if(String::strcmp(s,"parse") == 0) return TPARSE;
@@ -157,26 +160,26 @@ case 3:
     else { token_string = s; return TIDENT; }
   
 case 4: 
-#line 141 "lexer.cyl"
+#line 144 "lexer.cyl"
         reset_string_buffer();
         handle_lexical_error(strng<>, lexbuf);
 	token_string = get_stored_string();
 	return TSTRING;
       
 case 5: 
-#line 147 "lexer.cyl"
+#line 150 "lexer.cyl"
       token_char = (Char)lexeme_char(lexbuf,1); 
       return TCHAR; 
 case 6: 
-#line 150 "lexer.cyl"
+#line 153 "lexer.cyl"
       token_char = (Char)char_for_backslash(lexeme_char(lexbuf,2)); 
       return TCHAR; 
 case 7: 
-#line 153 "lexer.cyl"
+#line 156 "lexer.cyl"
       token_char = (Char)char_for_octal_code(lexbuf,2);
       return TCHAR; 
 case 8: 
-#line 156 "lexer.cyl"
+#line 159 "lexer.cyl"
       
      int n1 = lexeme_end(lexbuf);
      int l1 = line_num;
@@ -187,46 +190,46 @@ case 8:
      return TACTION;
    
 case 9: 
-#line 165 "lexer.cyl"
+#line 168 "lexer.cyl"
         return TEQUAL; 
 case 10: 
-#line 166 "lexer.cyl"
+#line 169 "lexer.cyl"
         return TOR; 
 case 11: 
-#line 167 "lexer.cyl"
+#line 170 "lexer.cyl"
         return TUNDERSCORE; 
 case 12: 
-#line 168 "lexer.cyl"
+#line 171 "lexer.cyl"
         return TLBRACKET; 
 case 13: 
-#line 169 "lexer.cyl"
+#line 172 "lexer.cyl"
         return TRBRACKET; 
 case 14: 
-#line 170 "lexer.cyl"
+#line 173 "lexer.cyl"
         return TSTAR; 
 case 15: 
-#line 171 "lexer.cyl"
+#line 174 "lexer.cyl"
         return TMAYBE; 
 case 16: 
-#line 172 "lexer.cyl"
+#line 175 "lexer.cyl"
         return TPLUS; 
 case 17: 
-#line 173 "lexer.cyl"
+#line 176 "lexer.cyl"
         return TLPAREN; 
 case 18: 
-#line 174 "lexer.cyl"
+#line 177 "lexer.cyl"
         return TRPAREN; 
 case 19: 
-#line 175 "lexer.cyl"
+#line 178 "lexer.cyl"
         return TCARET; 
 case 20: 
-#line 176 "lexer.cyl"
+#line 179 "lexer.cyl"
         return TDASH; 
 case 21: 
-#line 177 "lexer.cyl"
+#line 180 "lexer.cyl"
         return -1; 
 case 22: 
-#line 178 "lexer.cyl"
+#line 181 "lexer.cyl"
       throw Lexical_error(xprintf("illegal character %s", lexeme(lexbuf)),
 			  line_num, 
 			  lexeme_start(lexbuf) - line_start_pos);  default: lexbuf->refill_buff(lexbuf); return lexmain_rec(lexbuf,lexstate);
@@ -240,49 +243,49 @@ int action_rec<`a>(Lexbuf<`a> lexbuf, int lexstate) {
   switch (lexstate) {
 
 case 0: 
-#line 183 "lexer.cyl"
+#line 186 "lexer.cyl"
         ++brace_depth; return action(lexbuf); 
 case 1: 
-#line 184 "lexer.cyl"
+#line 187 "lexer.cyl"
         --brace_depth; 
         if(brace_depth == 0) return lexeme_start(lexbuf);
 	else return action(lexbuf); 
 case 2: 
-#line 187 "lexer.cyl"
+#line 190 "lexer.cyl"
         reset_string_buffer();
         strng(lexbuf);
         reset_string_buffer();
         return action(lexbuf);
       
 case 3: 
-#line 193 "lexer.cyl"
+#line 196 "lexer.cyl"
       return action(lexbuf); 
 case 4: 
-#line 195 "lexer.cyl"
+#line 198 "lexer.cyl"
       return action(lexbuf); 
 case 5: 
-#line 197 "lexer.cyl"
+#line 200 "lexer.cyl"
       return action(lexbuf); 
 case 6: 
-#line 198 "lexer.cyl"
+#line 201 "lexer.cyl"
          comment_depth = 1; /* FIX: Add // style too! */
          comment(lexbuf); 
          return action(lexbuf);
        
 case 7: 
-#line 202 "lexer.cyl"
-        throw Lexical_error("unterminated action", 0, 0); 
+#line 205 "lexer.cyl"
+         throw Lexical_error("unterminated action", 0, 0); 
 case 8: 
-#line 203 "lexer.cyl"
-           line_start_pos = lexeme_end(lexbuf);
-           ++line_num;
-           return action(lexbuf);
-         
+#line 206 "lexer.cyl"
+         line_start_pos = lexeme_end(lexbuf);
+         ++line_num;
+         return action(lexbuf);
+       
 case 9: 
-#line 207 "lexer.cyl"
-                                      return action(lexbuf); 
+#line 210 "lexer.cyl"
+                                    return action(lexbuf); 
 case 10: 
-#line 208 "lexer.cyl"
+#line 211 "lexer.cyl"
       return action(lexbuf);  default: lexbuf->refill_buff(lexbuf); return action_rec(lexbuf,lexstate);
   }
  throw Error("some action didn't return!");
@@ -294,34 +297,34 @@ int strng_rec<`a>(Lexbuf<`a> lexbuf, int lexstate) {
   switch (lexstate) {
 
 case 0: 
-#line 211 "lexer.cyl"
+#line 214 "lexer.cyl"
         return 0; /* ignored */ 
 case 1: 
-#line 213 "lexer.cyl"
+#line 216 "lexer.cyl"
     line_start_pos = lexeme_end(lexbuf);
     ++line_num;
     return strng(lexbuf);
   
 case 2: 
-#line 218 "lexer.cyl"
+#line 221 "lexer.cyl"
     store_string_char(char_for_backslash(lexeme_char(lexbuf,1)));
     return strng(lexbuf); 
 case 3: 
-#line 221 "lexer.cyl"
+#line 224 "lexer.cyl"
     store_string_char(char_for_octal_code(lexbuf,1)); 
     return strng(lexbuf); 
 case 4: 
-#line 224 "lexer.cyl"
+#line 227 "lexer.cyl"
     throw Lexical_error("unterminated string", 0, 0); 
 case 5: 
-#line 226 "lexer.cyl"
-    store_string_char('\012'); 
+#line 229 "lexer.cyl"
+    store_string_char('\n'); 
     line_start_pos = lexeme_end(lexbuf);
     ++line_num;
     return strng(lexbuf);
   
 case 6: 
-#line 231 "lexer.cyl"
+#line 234 "lexer.cyl"
       store_string_char(lexeme_char(lexbuf,0)); return strng(lexbuf);  default: lexbuf->refill_buff(lexbuf); return strng_rec(lexbuf,lexstate);
   }
  throw Error("some action didn't return!");
@@ -333,41 +336,41 @@ int comment_rec<`a>(Lexbuf<`a> lexbuf, int lexstate) {
   switch (lexstate) {
 
 case 0: 
-#line 234 "lexer.cyl"
+#line 237 "lexer.cyl"
          ++comment_depth; return comment(lexbuf); /* should we nest? */ 
 case 1: 
-#line 235 "lexer.cyl"
+#line 238 "lexer.cyl"
          --comment_depth; return ((comment_depth == 0) ? 0 : comment(lexbuf)); 
 case 2: 
-#line 236 "lexer.cyl"
+#line 239 "lexer.cyl"
          reset_string_buffer();
          strng(lexbuf);
          reset_string_buffer();
          return comment(lexbuf);
        
 case 3: 
-#line 241 "lexer.cyl"
-                                            return comment(lexbuf); 
-case 4: 
-#line 242 "lexer.cyl"
-                                            return comment(lexbuf); 
-case 5: 
-#line 243 "lexer.cyl"
-                                            return comment(lexbuf); 
-case 6: 
 #line 244 "lexer.cyl"
                                             return comment(lexbuf); 
-case 7: 
+case 4: 
 #line 245 "lexer.cyl"
+                                            return comment(lexbuf); 
+case 5: 
+#line 246 "lexer.cyl"
+                                            return comment(lexbuf); 
+case 6: 
+#line 247 "lexer.cyl"
+                                            return comment(lexbuf); 
+case 7: 
+#line 248 "lexer.cyl"
         throw Lexical_error("unterminated comment", 0, 0); 
 case 8: 
-#line 246 "lexer.cyl"
-           line_start_pos = lexeme_end(lexbuf);
-           ++line_num;
-           return comment(lexbuf);
-         
+#line 249 "lexer.cyl"
+         line_start_pos = lexeme_end(lexbuf);
+         ++line_num;
+         return comment(lexbuf);
+       
 case 9: 
-#line 250 "lexer.cyl"
+#line 253 "lexer.cyl"
       return comment(lexbuf);  default: lexbuf->refill_buff(lexbuf); return comment_rec(lexbuf,lexstate);
   }
  throw Error("some action didn't return!");
@@ -375,5 +378,5 @@ case 9:
 int comment<`a>(Lexbuf<`a> lexbuf) { return comment_rec(lexbuf,3); }
 
 }
-#line 252 "lexer.cyl"
+#line 255 "lexer.cyl"
  

@@ -76,10 +76,13 @@ string get_stored_string() {
 
 char char_for_backslash(char c) {
   switch (c) {
-  case 'n': return '\n';
-  case 't': return '\t';
+  case 'a': return '\a';
   case 'b': return '\b';
+  case 'f': return '\f';
+  case 'n': return '\n';
   case 'r': return '\r';
+  case 't': return '\t';
+  case 'v': return '\v';
   default:  return c;
   }
 }
@@ -122,10 +125,10 @@ namespace Lexer;
 }
 
 rule lexmain = parse
-  [' ' '\015' '\011' '\014']+ { return lexmain(lexbuf); }
-| '\012' { line_start_pos = lexeme_end(lexbuf);
-           ++line_num;
-           return lexmain(lexbuf); }
+  [' ' '\r' '\t' '\f']+ { return lexmain(lexbuf); }
+| '\n' { line_start_pos = lexeme_end(lexbuf);
+         ++line_num;
+         return lexmain(lexbuf); }
 | "/*" { comment_depth = 1;
          handle_lexical_error(comment<>,lexbuf); 
          return lexmain(lexbuf); }
@@ -146,7 +149,7 @@ rule lexmain = parse
 | "'" [^ '\\'] "'" 
     { token_char = (Char)lexeme_char(lexbuf,1); 
       return TCHAR; }
-| "'" '\\' ['\\' '\'' 'n' 't' 'b' 'r'] "'" 
+| "'" '\\' ['a' 'b' 'f' 'n' 'r' 't' 'v' '\\' '\'' '?'] "'" 
     { token_char = (Char)char_for_backslash(lexeme_char(lexbuf,2)); 
       return TCHAR; }
 | "'" '\\' ['0'-'7'] ['0'-'7'] ['0'-'7'] "'" 
@@ -199,22 +202,22 @@ and action = parse
          comment(lexbuf); 
          return action(lexbuf);
        }
-| eof { throw Lexical_error("unterminated action", 0, 0); }
-| '\012' { line_start_pos = lexeme_end(lexbuf);
-           ++line_num;
-           return action(lexbuf);
-         }
-| [^ '{' '}' '"' '\'' '/' '\012'] + { return action(lexbuf); }
+| eof  { throw Lexical_error("unterminated action", 0, 0); }
+| '\n' { line_start_pos = lexeme_end(lexbuf);
+         ++line_num;
+         return action(lexbuf);
+       }
+| [^ '{' '}' '"' '\'' '/' '\n'] + { return action(lexbuf); }
 | _ { return action(lexbuf); }
 
 and strng = parse
   '"' { return 0; /* ignored */ }
-| '\\' [' ' '\015' '\011' '\014'] * '\012' [' ' '\015' '\011' '\014'] *
+| '\\' [' ' '\r' '\t' '\f'] * '\n' [' ' '\r' '\t' '\f'] *
   { line_start_pos = lexeme_end(lexbuf);
     ++line_num;
     return strng(lexbuf);
   }
-| '\\' ['\\' '"' 'n' 't' 'b' 'r'] 
+| '\\' ['a' 'b' 'f' 'n' 'r' 't' 'v' '\\' '"' '?'] 
   { store_string_char(char_for_backslash(lexeme_char(lexbuf,1)));
     return strng(lexbuf); }
 | '\\' ['0'-'7'] ['0'-'7'] ['0'-'7'] 
@@ -222,8 +225,8 @@ and strng = parse
     return strng(lexbuf); }
 | eof
   { throw Lexical_error("unterminated string", 0, 0); }
-| '\012'
-  { store_string_char('\012'); 
+| '\n'
+  { store_string_char('\n'); 
     line_start_pos = lexeme_end(lexbuf);
     ++line_num;
     return strng(lexbuf);
@@ -243,10 +246,10 @@ and comment = parse
 | "'\\" ['\\' '\'' 'n' 't' 'b' 'r'] "'"   { return comment(lexbuf); }
 | "'\\" ['0'-'7'] ['0'-'7'] ['0'-'7'] "'" { return comment(lexbuf); }
 | eof { throw Lexical_error("unterminated comment", 0, 0); }
-| '\012' { line_start_pos = lexeme_end(lexbuf);
-           ++line_num;
-           return comment(lexbuf);
-         }
+| '\n' { line_start_pos = lexeme_end(lexbuf);
+         ++line_num;
+         return comment(lexbuf);
+       }
 | _ { return comment(lexbuf); }
 
 {
