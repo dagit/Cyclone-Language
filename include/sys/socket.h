@@ -1,6 +1,8 @@
 #ifndef _SYS_SOCKET_H
 #define _SYS_SOCKET_H
 
+#include <sys/types.h> // for socklet_t
+
 #define SOCK_STREAM 1
 #define SOCK_DGRAM 2
 #define SOCK_RAW 3
@@ -37,13 +39,12 @@
 namespace Socket {
 
 typedef unsigned short sa_family_t;
-typedef int socklen_t;
 
 xtunion sockaddr;
 
 extern "C" int socket(int domain, int type, int protocol);
 //extern int socketpair(int domain, int type, int protocol, int fds[2]);
-//extern int bind(int fd, const xtunion sockaddr my_addr);
+extern int bind(int fd, const xtunion sockaddr addr);
 //extern int getsockname(int fd, xtunion sockaddr @addr);
 extern int connect(int fd, const xtunion sockaddr addr);
 //extern int getpeername(int fd, xtunion sockaddr @addr);
@@ -57,10 +58,10 @@ extern int connect(int fd, const xtunion sockaddr addr);
 //extern ssize_t recvmsg(int fd, struct msghdr *message, int flags);
 //extern int getsockopt(int id, int level, int optname, void *optval,
 //                      socklen_t *optlen);
-//extern int setsockopt(int fd, int level, int optname, const void *optval,
-//                      socklen_t optlen);
+extern int setsockopt(int fd, int level, int optname, const char ?optval,
+                      socklen_t optlen);
 extern "C" int listen(int fd, int n);
-//extern int accept(int fd, xtunion sockaddr *addr);
+extern $(int, xtunion sockaddr addr) accept(int fd);
 extern "C" int shutdown(int fd, int how);
 
 }

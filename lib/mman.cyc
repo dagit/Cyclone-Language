@@ -1,0 +1,24 @@
+#include <core.h>
+#include <sys/mman.h>
+using Core;
+
+namespace Cmman {
+  extern "C" {
+    Cstring mmap(Cstring start, size_t length, int prot,
+                 int flags, int fd, off_t offset);
+    int munmap(Cstring start, size_t length);
+  }
+}
+
+namespace Mman;
+
+char ?mmap(size_t length, int prot, int flags, int fd, off_t offset) {
+  return
+    wrap_Cstring_as_string(Cmman::mmap(null, length, prot, flags, fd, offset),
+                           length);
+}
+
+int munmap(char ?start, size_t length) {
+  // We definitely do NOT want to copy the "string"
+  return Cmman::munmap(underlying_Cstring(start), length);
+}

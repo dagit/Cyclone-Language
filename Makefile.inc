@@ -1,3 +1,5 @@
+# -*- Makefile -*-
+
 CC=gcc
 
 # Assume with Windows
@@ -43,21 +45,25 @@ CYCLONE_LIBS:=arg\
         lexing\
         lineno\
         list\
+	mman\
         netdb\
         in\
         position\
         pp\
+	pwd\
         queue\
         ref\
         rope\
         set\
         slowdict\
         splay\
+	stat\
 	stdio\
         stdlib\
         string\
         socket\
         time\
+	unistd\
         xarray
 
 CYCLONE_H:=arg.h\
@@ -104,8 +110,10 @@ CYCLONE_H:=arg.h\
 	snprintf.h\
 	stddef.h\
 	sys/features.h\
+	sys/mman.h\
 	sys/reent.h\
 	sys/signal.h\
+	sys/stat.h\
 	sys/types.h\
 	types.h\
 	unistd.h

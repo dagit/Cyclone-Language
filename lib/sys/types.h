@@ -1,20 +1,3 @@
-/* unified sys/types.h: 
-   start with sef's sysvi386 version.
-   merge go32 version -- a few ifdefs.
-   h8300hms, h8300xray, and sysvnecv70 disagree on the following types:
-
-   typedef int gid_t;
-   typedef int uid_t;
-   typedef int dev_t;
-   typedef int ino_t;
-   typedef int mode_t;
-   typedef int caddr_t;
-
-   however, these aren't "reasonable" values, the sysvi386 ones make far 
-   more sense, and should work sufficiently well (in particular, h8300 
-   doesn't have a stat, and the necv70 doesn't matter.) -- eichin
- */
-
 #ifndef _SYS_TYPES_H
 #define _SYS_TYPES_H
 
@@ -57,7 +40,7 @@ typedef	unsigned long	u_long;
 #endif
 
 typedef	unsigned short	ushort;		/* System V compatibility */
-//typedef	unsigned int	uint;		/* System V compatibility */
+typedef	unsigned int	uint;		/* System V compatibility */
 # endif	/*!_POSIX_SOURCE */
 
 #ifndef __clock_t_defined
@@ -66,7 +49,7 @@ typedef _CLOCK_T_ clock_t;
 #endif
 
 #ifndef __time_t_defined
-typedef _TIME_T_ time_t;
+typedef unsigned long time_t;
 #define __time_t_defined
 
 /* Time Value Specification Structures, P1003.1b-1993, p. 261 */
@@ -112,19 +95,7 @@ typedef unsigned long long u_int64_t;
 typedef int32_t register_t;
 #endif /* __MS_types__ */
 
-/*
- * All these should be machine specific - right now they are all broken.
- * However, for all of Cygnus' embedded targets, we want them to all be
- * the same.  Otherwise things like sizeof (struct stat) might depend on
- * how the file was compiled (e.g. -mint16 vs -mint32, etc.).
- */
-
-#if defined(__rtems__)
-/* device numbers are 32-bit major and and 32-bit minor */
-typedef unsigned long long dev_t;
-#else
 typedef	short	dev_t;
-#endif
 
 typedef	long	off_t;
 
@@ -177,11 +148,11 @@ typedef	long	fd_mask;
 
 /* We use a macro for fd_set so that including Sockets.h afterwards
    can work.  */
-typedef	struct _types_fd_set {
-	fd_mask	fds_bits[howmany(FD_SETSIZE, NFDBITS)];
-} _types_fd_set;
+//typedef	struct _types_fd_set {
+//	fd_mask	fds_bits[howmany(FD_SETSIZE, NFDBITS)];
+//} _types_fd_set;
 
-#define fd_set _types_fd_set
+//#define fd_set _types_fd_set
 
 #  define	FD_SET(n, p)	((p)->fds_bits[(n)/NFDBITS] |= (1L << ((n) % NFDBITS)))
 #  define	FD_CLR(n, p)	((p)->fds_bits[(n)/NFDBITS] &= ~(1L << ((n) % NFDBITS)))

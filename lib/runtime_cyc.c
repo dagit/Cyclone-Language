@@ -2,6 +2,7 @@
 // Cyclone to C translator
 
 #include <stdio.h>
+#include <string.h> // for memcpy
 #include <stdarg.h>
 //#include "cyc_include.h"
 #include <errno.h>
@@ -141,6 +142,17 @@ int _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
 // The C include file precore_c.h is produced (semi) automatically
 // from the Cyclone include file precore.h.
 #include "precore_c.h"
+
+struct _tagged_arr wrap_Cstring_as_string(Cstring s, size_t len) {
+  struct _tagged_arr str;
+  if (s == NULL) {
+    str.base = str.curr = str.last_plus_one = NULL;
+  } else {
+    str.base = str.curr = s;
+    str.last_plus_one = str.base + len;
+  }
+  return str;
+}
 
 struct _tagged_arr Cstring_to_string(Cstring s) {
   struct _tagged_arr str;
@@ -302,6 +314,39 @@ struct sa_xtunion {
 };
 struct sockaddr *sockaddr_to_Csockaddr(struct sa_xtunion *xtunionaddr) {
   return &xtunionaddr->sa;
+}
+extern unsigned char *Cyc_Inet_sockaddr_in;
+
+// We handle Unix domain sockets properly here: the sa field is an
+// argument, since it could be bigger (or smaller) than 16
+struct sa_xtunion *Csockaddr_to_sockaddr(struct sockaddr *addr, socklen_t len) {
+  // I hope structure alignment doesn't cause any problem here
+  struct sa_xtunion *result = GC_malloc_atomic(sizeof(unsigned char*)+len);
+  if (result == NULL) {
+    fprintf(stderr, "internal error: out of memory in Csockaddr_to_sockaddr\n");
+    exit(1);
+  }
+  memcpy(&result->sa, addr, len);
+  switch (addr->sa_family) {
+  case AF_INET: result->tag = Cyc_Inet_sockaddr_in; break;
+  default:
+    fprintf(stderr, "internal error: Csockaddr_to_sockaddr with unsupported socket type\n");
+    exit(1);
+  }
+  return result;
+}
+
+///////////////////////////////////////////////
+// File locking
+
+// Goes with fcntl.h
+
+int fcntl_with_arg(int fd, int cmd, long arg) {
+  return fcntl(fd, cmd, arg);
+}
+// We call lock a void* so we don't have to #include anything else
+int fcntl_with_lock(int fd, int cmd, void *lock) {
+  return fcntl(fd, cmd, lock);
 }
 
 ///////////////////////////////////////////////

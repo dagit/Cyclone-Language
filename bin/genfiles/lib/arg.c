@@ -1,7 +1,7 @@
- struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct
-Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
-int fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
-void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+ struct Cyc_timespec{ unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{
+struct Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; extern void
+exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
+unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -11,17 +11,18 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern int Cyc_Core_int_of_string
 struct _tagged_arr); extern unsigned char* string_to_Cstring( struct _tagged_arr);
 extern unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
+wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
 ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int*
 __errno(); struct Cyc_Stdio___sFILE; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stderr;
 extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
 18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
 _tagged_arr f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; }
 ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_String_strlen(
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int Cyc_String_strlen(
 struct _tagged_arr s); extern int Cyc_String_strcmp( struct _tagged_arr s1,
 struct _tagged_arr s2); extern int Cyc_String_strncmp( struct _tagged_arr s1,
-struct _tagged_arr s2, unsigned int len); extern unsigned char Cyc_Arg_Bad[ 8u];
-struct Cyc_Arg_Bad_struct{ unsigned char* tag; struct _tagged_arr f1; } ; extern
+struct _tagged_arr s2, int len); extern unsigned char Cyc_Arg_Bad[ 8u]; struct
+Cyc_Arg_Bad_struct{ unsigned char* tag; struct _tagged_arr f1; } ; extern
 unsigned char Cyc_Arg_Error[ 10u]; static const int Cyc_Arg_Unit_spec= 0; struct
 Cyc_Arg_Unit_spec_struct{ int tag; void(* f1)(); } ; static const int Cyc_Arg_Flag_spec=
 1; struct Cyc_Arg_Flag_spec_struct{ int tag; void(* f1)( struct _tagged_arr); }
@@ -47,32 +48,31 @@ struct _tagged_arr f3; } ; struct _tuple0{ struct _tagged_arr f1; void* f2;
 struct _tagged_arr f3; } ; static void* Cyc_Arg_lookup( struct Cyc_List_List* l,
 struct _tagged_arr x){ while( l != 0) { struct _tagged_arr _temp0=(*(( struct
 _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f1; goto _LL1; _LL1: {
-unsigned int _temp2= Cyc_String_strlen( _temp0); goto _LL3; _LL3: if( _temp2 > 0?*((
-const unsigned char*) _check_unknown_subscript( _temp0, sizeof( unsigned char),(
-int)( _temp2 - 1))) =='*': 0){ if( Cyc_String_strncmp( x,(*(( struct _tuple0*)((
-struct Cyc_List_List*) _check_null( l))->hd)).f1, _temp2 - 1) == 0){ return(*((
-struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f2;}} else{ if(
-Cyc_String_strcmp( x,(*(( struct _tuple0*)(( struct Cyc_List_List*) _check_null(
-l))->hd)).f1) == 0){ return(*(( struct _tuple0*)(( struct Cyc_List_List*)
-_check_null( l))->hd)).f2;}} l=(( struct Cyc_List_List*) _check_null( l))->tl;}}(
-int) _throw(( void*) Cyc_Core_Not_found);} void Cyc_Arg_usage( struct Cyc_List_List*
-speclist, struct _tagged_arr errmsg){({ struct _tagged_arr _temp4= errmsg;
-fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s\n", _temp4.last_plus_one -
-_temp4.curr, _temp4.curr);}); while( speclist != 0) {({ struct _tagged_arr
-_temp5=(*(( struct _tuple0*)(( struct Cyc_List_List*) _check_null( speclist))->hd)).f1;
-struct _tagged_arr _temp6=(*(( struct _tuple0*)(( struct Cyc_List_List*)
-_check_null( speclist))->hd)).f3; fprintf( _sfile_to_file( Cyc_Stdio_stderr)," %.*s %.*s\n",
-_temp5.last_plus_one - _temp5.curr, _temp5.curr, _temp6.last_plus_one - _temp6.curr,
-_temp6.curr);}); speclist=(( struct Cyc_List_List*) _check_null( speclist))->tl;}}
-int Cyc_Arg_current= 0; static struct _tagged_arr Cyc_Arg_args={( void*) 0u,(
-void*) 0u,( void*) 0u + 0u}; static void Cyc_Arg_stop( int prog_pos, void* e,
-struct Cyc_List_List* speclist, struct _tagged_arr errmsg){ struct _tagged_arr
-progname= prog_pos < _get_arr_size( Cyc_Arg_args, sizeof( struct _tagged_arr))?*((
-struct _tagged_arr*) _check_unknown_subscript( Cyc_Arg_args, sizeof( struct
-_tagged_arr), prog_pos)): _tag_arr("(?)", sizeof( unsigned char), 4u);{ void*
-_temp7= e; struct _tagged_arr _temp17; struct _tagged_arr _temp19; struct
-_tagged_arr _temp21; struct _tagged_arr _temp23; struct _tagged_arr _temp25;
-struct _tagged_arr _temp27; _LL9: if(*(( int*) _temp7) == Cyc_Arg_Unknown){
+int _temp2= Cyc_String_strlen( _temp0); goto _LL3; _LL3: if( _temp2 > 0?*((
+const unsigned char*) _check_unknown_subscript( _temp0, sizeof( unsigned char),
+_temp2 - 1)) =='*': 0){ if( Cyc_String_strncmp( x,(*(( struct _tuple0*)(( struct
+Cyc_List_List*) _check_null( l))->hd)).f1, _temp2 - 1) == 0){ return(*(( struct
+_tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f2;}} else{ if( Cyc_String_strcmp(
+x,(*(( struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f1) == 0){
+return(*(( struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f2;}}
+l=(( struct Cyc_List_List*) _check_null( l))->tl;}}( int) _throw(( void*) Cyc_Core_Not_found);}
+void Cyc_Arg_usage( struct Cyc_List_List* speclist, struct _tagged_arr errmsg){({
+struct _tagged_arr _temp4= errmsg; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s\n",
+_temp4.last_plus_one - _temp4.curr, _temp4.curr);}); while( speclist != 0) {({
+struct _tagged_arr _temp5=(*(( struct _tuple0*)(( struct Cyc_List_List*)
+_check_null( speclist))->hd)).f1; struct _tagged_arr _temp6=(*(( struct _tuple0*)((
+struct Cyc_List_List*) _check_null( speclist))->hd)).f3; fprintf( _sfile_to_file(
+Cyc_Stdio_stderr)," %.*s %.*s\n", _temp5.last_plus_one - _temp5.curr, _temp5.curr,
+_temp6.last_plus_one - _temp6.curr, _temp6.curr);}); speclist=(( struct Cyc_List_List*)
+_check_null( speclist))->tl;}} int Cyc_Arg_current= 0; static struct _tagged_arr
+Cyc_Arg_args={( void*) 0u,( void*) 0u,( void*) 0u + 0u}; static void Cyc_Arg_stop(
+int prog_pos, void* e, struct Cyc_List_List* speclist, struct _tagged_arr errmsg){
+struct _tagged_arr progname= prog_pos < _get_arr_size( Cyc_Arg_args, sizeof(
+struct _tagged_arr))?*(( struct _tagged_arr*) _check_unknown_subscript( Cyc_Arg_args,
+sizeof( struct _tagged_arr), prog_pos)): _tag_arr("(?)", sizeof( unsigned char),
+4u);{ void* _temp7= e; struct _tagged_arr _temp17; struct _tagged_arr _temp19;
+struct _tagged_arr _temp21; struct _tagged_arr _temp23; struct _tagged_arr
+_temp25; struct _tagged_arr _temp27; _LL9: if(*(( int*) _temp7) == Cyc_Arg_Unknown){
 _LL18: _temp17=(( struct Cyc_Arg_Unknown_struct*) _temp7)->f1; goto _LL10;}
 else{ goto _LL11;} _LL11: if(*(( int*) _temp7) == Cyc_Arg_Missing){ _LL20:
 _temp19=(( struct Cyc_Arg_Missing_struct*) _temp7)->f1; goto _LL12;} else{ goto

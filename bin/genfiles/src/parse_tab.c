@@ -1,7 +1,7 @@
- struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct
-Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
-int fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
-void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+ struct Cyc_timespec{ unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{
+struct Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; extern void
+exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
+unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -10,7 +10,8 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
+extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
+struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_Stdio___sFILE; extern struct
 Cyc_Stdio___sFILE* Cyc_Stdio_stderr; extern unsigned char Cyc_Stdio_FileCloseError[
 19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
@@ -39,27 +40,26 @@ y); extern struct Cyc_List_List* Cyc_List_flatten( struct Cyc_List_List* x);
 extern unsigned char Cyc_List_Nth[ 8u]; extern struct Cyc_List_List* Cyc_List_zip(
 struct Cyc_List_List* x, struct Cyc_List_List* y); struct _tuple0{ struct Cyc_List_List*
 f1; struct Cyc_List_List* f2; } ; extern struct _tuple0 Cyc_List_split( struct
-Cyc_List_List* x); extern unsigned int Cyc_String_strlen( struct _tagged_arr s);
-extern int Cyc_String_strcmp( struct _tagged_arr s1, struct _tagged_arr s2);
-extern int Cyc_String_zstrcmp( struct _tagged_arr, struct _tagged_arr); extern
-int Cyc_String_zstrptrcmp( struct _tagged_arr*, struct _tagged_arr*); extern
-struct _tagged_arr Cyc_String_strcat( struct _tagged_arr dest, struct
-_tagged_arr src); extern struct _tagged_arr Cyc_String_strcpy( struct
-_tagged_arr dest, struct _tagged_arr src); extern struct _tagged_arr Cyc_String_substring(
-struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Set_Set; extern
-unsigned char Cyc_Set_Absent[ 11u]; struct Cyc_Lineno_Pos{ struct _tagged_arr
-logical_file; struct _tagged_arr line; int line_no; int col; } ; extern
-unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment; extern struct
-Cyc_Position_Segment* Cyc_Position_segment_of_abs( int, int); extern struct Cyc_Position_Segment*
-Cyc_Position_segment_join( struct Cyc_Position_Segment*, struct Cyc_Position_Segment*);
-extern struct _tagged_arr Cyc_Position_string_of_segment( struct Cyc_Position_Segment*);
-static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
-static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct
-_tagged_arr source; struct Cyc_Position_Segment* seg; void* kind; struct
-_tagged_arr desc; } ; extern struct Cyc_Position_Error* Cyc_Position_mk_err_parse(
-struct Cyc_Position_Segment*, struct _tagged_arr); extern unsigned char Cyc_Position_Nocontext[
-14u]; extern void Cyc_Position_post_error( struct Cyc_Position_Error*); struct
-_tuple1{ void* f1; struct _tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual;
+Cyc_List_List* x); extern int Cyc_String_strlen( struct _tagged_arr s); extern
+int Cyc_String_strcmp( struct _tagged_arr s1, struct _tagged_arr s2); extern int
+Cyc_String_zstrcmp( struct _tagged_arr, struct _tagged_arr); extern int Cyc_String_zstrptrcmp(
+struct _tagged_arr*, struct _tagged_arr*); extern struct _tagged_arr Cyc_String_strcat(
+struct _tagged_arr dest, struct _tagged_arr src); extern struct _tagged_arr Cyc_String_strcpy(
+struct _tagged_arr dest, struct _tagged_arr src); extern struct _tagged_arr Cyc_String_substring(
+struct _tagged_arr, int ofs, int n); struct Cyc_Set_Set; extern unsigned char
+Cyc_Set_Absent[ 11u]; struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file;
+struct _tagged_arr line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[
+9u]; struct Cyc_Position_Segment; extern struct Cyc_Position_Segment* Cyc_Position_segment_of_abs(
+int, int); extern struct Cyc_Position_Segment* Cyc_Position_segment_join( struct
+Cyc_Position_Segment*, struct Cyc_Position_Segment*); extern struct _tagged_arr
+Cyc_Position_string_of_segment( struct Cyc_Position_Segment*); static const int
+Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1; static const int
+Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct _tagged_arr source;
+struct Cyc_Position_Segment* seg; void* kind; struct _tagged_arr desc; } ;
+extern struct Cyc_Position_Error* Cyc_Position_mk_err_parse( struct Cyc_Position_Segment*,
+struct _tagged_arr); extern unsigned char Cyc_Position_Nocontext[ 14u]; extern
+void Cyc_Position_post_error( struct Cyc_Position_Error*); struct _tuple1{ void*
+f1; struct _tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual;
 struct Cyc_Absyn_Conref; struct Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo;
 struct Cyc_Absyn_FnInfo; struct Cyc_Absyn_TunionInfo; struct Cyc_Absyn_TunionFieldInfo;
 struct Cyc_Absyn_VarargCallInfo; struct Cyc_Absyn_Exp; struct Cyc_Absyn_Stmt;
@@ -3335,8 +3335,8 @@ sizeof( unsigned char),( int)( _get_arr_size( _temp1737, sizeof( unsigned char))
 - 2))) =='_': 0)?*(( const unsigned char*) _check_unknown_subscript( _temp1737,
 sizeof( unsigned char),( int)( _get_arr_size( _temp1737, sizeof( unsigned char))
 - 3))) =='_': 0){ _temp1737=( struct _tagged_arr) Cyc_String_substring(
-_temp1737, 2, _get_arr_size( _temp1737, sizeof( unsigned char)) - 5);}{ int i= 0;
-for( 0; i < 16u; ++ i){ if( Cyc_String_strcmp( _temp1737,( Cyc_Parse_att_map[
+_temp1737, 2,( int)( _get_arr_size( _temp1737, sizeof( unsigned char)) - 5));}{
+int i= 0; for( 0; i < 16u; ++ i){ if( Cyc_String_strcmp( _temp1737,( Cyc_Parse_att_map[
 _check_known_subscript_notnull( 16u, i)]).f1) == 0){ yyval=( void*)({ struct Cyc_Attribute_tok_struct*
 _temp1739=( struct Cyc_Attribute_tok_struct*) GC_malloc( sizeof( struct Cyc_Attribute_tok_struct));
 _temp1739[ 0]=({ struct Cyc_Attribute_tok_struct _temp1740; _temp1740.tag= Cyc_Attribute_tok;

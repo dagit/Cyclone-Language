@@ -1,0 +1,22 @@
+#include <core.h>
+#include <unistd.h>
+using Core;
+
+namespace Cunistd {
+  extern "C" int chdir(Cstring);
+  extern "C" Cstring getcwd(Cstring buf, size_t size);
+}
+
+namespace Unistd;
+
+int chdir(string_t path) {
+  return Cunistd::chdir(string_to_Cstring(path));
+}
+
+char ?getcwd(char ?buf, size_t size) {
+  if (!buf || buf.size < size) {
+    throw new Failure("getcwd: invalid buf argument");
+  }
+  Cstring response = Cunistd::getcwd((Cstring)buf, size);
+  return response ? buf : null;
+}

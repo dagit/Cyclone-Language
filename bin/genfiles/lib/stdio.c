@@ -1,7 +1,7 @@
- struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct
-Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; struct Cyc__types_fd_set{
-int fds_bits[ 2u]; } ; extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{
-void* v; } ; extern unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
+ struct Cyc_timespec{ unsigned int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{
+struct Cyc_timespec it_interval; struct Cyc_timespec it_value; } ; extern void
+exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; extern
+unsigned char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -10,7 +10,8 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
+extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
+struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_Stdio___sFILE; extern int Cyc_Stdio_remove(
 struct _tagged_arr); extern int Cyc_Stdio_rename( struct _tagged_arr, struct
 _tagged_arr); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_tmpfile(); extern int
@@ -44,18 +45,17 @@ unsigned char* tmpnam( unsigned char*); extern int fclose( struct Cyc_Cstdio___s
 extern int fflush( struct Cyc_Cstdio___sFILE*); extern struct Cyc_Cstdio___sFILE*
 freopen( unsigned char*, unsigned char*, struct Cyc_Cstdio___sFILE*); extern
 void setbuf( struct Cyc_Cstdio___sFILE*, unsigned char*); extern int setvbuf(
-struct Cyc_Cstdio___sFILE*, unsigned char*, int, unsigned int); extern int fgetc(
-struct Cyc_Cstdio___sFILE*); extern unsigned char* fgets( unsigned char*, int,
-struct Cyc_Cstdio___sFILE*); extern int fputc( int, struct Cyc_Cstdio___sFILE*);
-extern int fputs( unsigned char*, struct Cyc_Cstdio___sFILE*); extern int getc(
-struct Cyc_Cstdio___sFILE*); extern unsigned char* gets( unsigned char*); extern
-int putc( int, struct Cyc_Cstdio___sFILE*); extern int puts( unsigned char*);
-extern int ungetc( int, struct Cyc_Cstdio___sFILE*); extern unsigned int fread(
-unsigned char*, unsigned int _size, unsigned int _n, struct Cyc_Cstdio___sFILE*);
-extern unsigned int fwrite( unsigned char*, unsigned int _size, unsigned int _n,
-struct Cyc_Cstdio___sFILE*); extern int fgetpos( struct Cyc_Cstdio___sFILE*, int*);
-extern int fseek( struct Cyc_Cstdio___sFILE*, int, int); extern int fsetpos(
-struct Cyc_Cstdio___sFILE*, int*); extern int ftell( struct Cyc_Cstdio___sFILE*);
+struct Cyc_Cstdio___sFILE*, unsigned char*, int, int); extern int fgetc( struct
+Cyc_Cstdio___sFILE*); extern unsigned char* fgets( unsigned char*, int, struct
+Cyc_Cstdio___sFILE*); extern int fputc( int, struct Cyc_Cstdio___sFILE*); extern
+int fputs( unsigned char*, struct Cyc_Cstdio___sFILE*); extern int getc( struct
+Cyc_Cstdio___sFILE*); extern unsigned char* gets( unsigned char*); extern int
+putc( int, struct Cyc_Cstdio___sFILE*); extern int puts( unsigned char*); extern
+int ungetc( int, struct Cyc_Cstdio___sFILE*); extern int fread( unsigned char*,
+int _size, int _n, struct Cyc_Cstdio___sFILE*); extern int fwrite( unsigned char*,
+int _size, int _n, struct Cyc_Cstdio___sFILE*); extern int fgetpos( struct Cyc_Cstdio___sFILE*,
+int*); extern int fseek( struct Cyc_Cstdio___sFILE*, int, int); extern int
+fsetpos( struct Cyc_Cstdio___sFILE*, int*); extern int ftell( struct Cyc_Cstdio___sFILE*);
 extern void rewind( struct Cyc_Cstdio___sFILE*); extern void clearerr( struct
 Cyc_Cstdio___sFILE*); extern int feof( struct Cyc_Cstdio___sFILE*); extern int
 ferror( struct Cyc_Cstdio___sFILE*); extern void perror( unsigned char*); extern

@@ -6,7 +6,7 @@
 #define _PRECORE_H_
 
 #ifndef _CYC_GENERATE_PRECORE_C_
-#include <types.h>
+#include <sys/types.h>
 #endif 
 
 typedef char *{0} Cstring;

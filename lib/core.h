@@ -50,6 +50,7 @@ extern "C" Cstring string_to_Cstring(string_t);
 // when the string is empty
 extern "C" Cstring underlying_Cstring(string_t);
 extern "C" mstring_t Cstring_to_string(Cstring);
+extern "C" mstring_t wrap_Cstring_as_string(Cstring, size_t);
 extern "C" mstring_t ?ntCsl_to_ntsl(Cstring @);
 extern "C" int system(Cstring);
 extern "C" int @__errno(void);

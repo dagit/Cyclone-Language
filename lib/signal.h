@@ -1,23 +1,18 @@
-#ifndef _SIGNAL_H_
-extern "C" {
-#define _SIGNAL_H_
+#ifndef _SIGNAL_H
+#define _SIGNAL_H
 
 #include <config.h>
 #include <sys/signal.h>
+
+extern "C" {
 
 typedef int	sig_atomic_t;		/* Atomic entity type (ANSI) */
 
 // JGM: these macros are pretty useless since a use of them
 // will cause things not to type-check...
-#if defined(__STDC__) || defined(__cplusplus)
 #define SIG_DFL ((void (*)(int))0)	/* Default action */
 #define SIG_IGN ((void (*)(int))1)	/* Ignore action */
 #define SIG_ERR ((void (*)(int))-1)	/* Error return */
-#else
-#define SIG_DFL ((void (*)())0)		/* Default action */
-#define SIG_IGN ((void (*)())1)		/* Ignore action */
-#define SIG_ERR ((void (*)())-1)	/* Error return */
-#endif
 
 typedef void (*_sig_func_ptr) (int;{});
 
@@ -32,4 +27,5 @@ int	_EXFUN(raise, (int));
 #endif
 
 }
-#endif /* _SIGNAL_H_ */
+
+#endif
