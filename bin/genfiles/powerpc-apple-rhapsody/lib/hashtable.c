@@ -958,17 +958,17 @@ struct Cyc_FileOpenError_struct{char*tag;struct _dynforward_ptr f1;};struct Cyc_
 struct _RegionHandle*r;int(*cmp)(void*,void*);int(*hash)(void*);int max_len;struct
 _dynforward_ptr tab;};struct Cyc_Hashtable_Table*Cyc_Hashtable_rcreate(struct
 _RegionHandle*r,int sz,int(*cmp)(void*,void*),int(*hash)(void*));static void _tmp2B(
-struct Cyc_List_List**mt,unsigned int*_tmp2A,unsigned int*_tmp29,struct Cyc_List_List***
-_tmp27){for(*_tmp2A=0;*_tmp2A < *_tmp29;(*_tmp2A)++){(*_tmp27)[*_tmp2A]=*mt;}}
-struct Cyc_Hashtable_Table*Cyc_Hashtable_rcreate(struct _RegionHandle*r,int sz,int(*
-cmp)(void*,void*),int(*hash)(void*)){struct Cyc_List_List*mt=0;unsigned int _tmp31;
+unsigned int*_tmp2A,unsigned int*_tmp29,struct Cyc_List_List***_tmp27,struct Cyc_List_List**
+mt){for(*_tmp2A=0;*_tmp2A < *_tmp29;(*_tmp2A)++){(*_tmp27)[*_tmp2A]=*mt;}}struct
+Cyc_Hashtable_Table*Cyc_Hashtable_rcreate(struct _RegionHandle*r,int sz,int(*cmp)(
+void*,void*),int(*hash)(void*)){struct Cyc_List_List*mt=0;unsigned int _tmp31;
 struct Cyc_List_List**_tmp30;struct _dynforward_ptr _tmp2F;unsigned int _tmp2E;
 unsigned int _tmp2D;struct Cyc_Hashtable_Table*_tmp2C;return(_tmp2C=_region_malloc(
 r,sizeof(*_tmp2C)),((_tmp2C->r=r,((_tmp2C->cmp=cmp,((_tmp2C->hash=hash,((_tmp2C->max_len=
 3,((_tmp2C->tab=((_tmp31=(unsigned int)sz,((_tmp30=(struct Cyc_List_List**)
 _region_malloc(r,_check_times(sizeof(struct Cyc_List_List*),_tmp31)),((_tmp2F=
 _tag_dynforward(_tmp30,sizeof(struct Cyc_List_List*),_tmp31),((((_tmp2E=_tmp31,
-_tmp2B(& mt,& _tmp2D,& _tmp2E,& _tmp30))),_tmp2F)))))))),_tmp2C)))))))))));}struct
+_tmp2B(& _tmp2D,& _tmp2E,& _tmp30,& mt))),_tmp2F)))))))),_tmp2C)))))))))));}struct
 Cyc_Hashtable_Table*Cyc_Hashtable_create(int sz,int(*cmp)(void*,void*),int(*hash)(
 void*));struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int sz,int(*cmp)(void*,
 void*),int(*hash)(void*)){return Cyc_Hashtable_rcreate(Cyc_Core_heap_region,sz,
@@ -1028,8 +1028,8 @@ _tmp36=_region_malloc(r,sizeof(*_tmp36)),((_tmp36->hd=((_tmp37=_region_malloc(r,
 sizeof(*_tmp37)),((_tmp37->f1=key,((_tmp37->f2=val,_tmp37)))))),((_tmp36->tl=*((
 struct Cyc_List_List**)_check_dynforward_subscript(tab,sizeof(struct Cyc_List_List*),
 nidx)),_tmp36))))));}}void Cyc_Hashtable_resize(struct Cyc_Hashtable_Table*t);
-static void _tmp3D(struct Cyc_List_List**mt,unsigned int*_tmp3C,unsigned int*_tmp3B,
-struct Cyc_List_List***_tmp39){for(*_tmp3C=0;*_tmp3C < *_tmp3B;(*_tmp3C)++){(*
+static void _tmp3D(unsigned int*_tmp3C,unsigned int*_tmp3B,struct Cyc_List_List***
+_tmp39,struct Cyc_List_List**mt){for(*_tmp3C=0;*_tmp3C < *_tmp3B;(*_tmp3C)++){(*
 _tmp39)[*_tmp3C]=*mt;}}void Cyc_Hashtable_resize(struct Cyc_Hashtable_Table*t){
 struct _dynforward_ptr odata=t->tab;int osize=(int)_get_dynforward_size(odata,
 sizeof(struct Cyc_List_List*));int nsize=2 * osize + 1;struct Cyc_List_List*mt=0;
@@ -1037,7 +1037,7 @@ unsigned int _tmp3C;unsigned int _tmp3B;struct _dynforward_ptr _tmp3A;struct Cyc
 _tmp39;unsigned int _tmp38;struct _dynforward_ptr ndata=(_tmp38=(unsigned int)nsize,((
 _tmp39=(struct Cyc_List_List**)_region_malloc(t->r,_check_times(sizeof(struct Cyc_List_List*),
 _tmp38)),((_tmp3A=_tag_dynforward(_tmp39,sizeof(struct Cyc_List_List*),_tmp38),((((
-_tmp3B=_tmp38,_tmp3D(& mt,& _tmp3C,& _tmp3B,& _tmp39))),_tmp3A)))))));{int i=0;for(0;
+_tmp3B=_tmp38,_tmp3D(& _tmp3C,& _tmp3B,& _tmp39,& mt))),_tmp3A)))))));{int i=0;for(0;
 i < osize;i ++){Cyc_Hashtable_insert_bucket(t->r,ndata,t->hash,*((struct Cyc_List_List**)
 _check_dynforward_subscript(odata,sizeof(struct Cyc_List_List*),i)));}}t->tab=
 ndata;t->max_len=2 * t->max_len;}void Cyc_Hashtable_iter(void(*f)(void*,void*),

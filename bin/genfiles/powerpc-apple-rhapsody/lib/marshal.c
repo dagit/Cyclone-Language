@@ -1375,14 +1375,14 @@ _tmp391.f1=((_tmp390="Read failure",_tag_dynforward(_tmp390,sizeof(char),
 _get_zero_arr_size_char(_tmp390,13)))),_tmp391)))),_tmp38F)))));}{int*xx=((int*(*)(
 char*x))unsafe_cast)((char*)_check_null(_untag_dynforward_ptr(x,sizeof(char),1)));
 int _tmpEB=*xx;_npop_handler(0);return _tmpEB;}};_pop_region(r);}float Cyc_Marshal_cycgetfloat(
-struct Cyc___cycFILE*fp);static void _tmp396(unsigned int*_tmp395,unsigned int*
-_tmp394,char**_tmp393){for(*_tmp395=0;*_tmp395 < *_tmp394;(*_tmp395)++){(*_tmp393)[*
+struct Cyc___cycFILE*fp);static void _tmp396(unsigned int*_tmp394,char**_tmp393,
+unsigned int*_tmp395){for(*_tmp395=0;*_tmp395 < *_tmp394;(*_tmp395)++){(*_tmp393)[*
 _tmp395]='\000';}}float Cyc_Marshal_cycgetfloat(struct Cyc___cycFILE*fp){struct
 _RegionHandle _tmpEF=_new_region("r");struct _RegionHandle*r=& _tmpEF;_push_region(
 r);{unsigned int _tmp395;unsigned int _tmp394;char*_tmp393;unsigned int _tmp392;
 struct _dynforward_ptr x=_tag_dynforward(((_tmp392=sizeof(float),((_tmp393=(char*)
 _region_malloc(r,_check_times(sizeof(char),_tmp392)),((((_tmp394=_tmp392,_tmp396(&
-_tmp395,& _tmp394,& _tmp393))),_tmp393)))))),sizeof(char),sizeof(float));if(Cyc_fread(
+_tmp394,& _tmp393,& _tmp395))),_tmp393)))))),sizeof(char),sizeof(float));if(Cyc_fread(
 x,sizeof(float),1,fp)< 1){struct Cyc_Core_Failure_struct _tmp39C;const char*_tmp39B;
 struct Cyc_Core_Failure_struct*_tmp39A;(int)_throw((void*)((_tmp39A=_cycalloc(
 sizeof(*_tmp39A)),((_tmp39A[0]=((_tmp39C.tag=Cyc_Core_Failure,((_tmp39C.f1=((
@@ -1556,7 +1556,7 @@ _throw_arraybounds(): 1,*((char*)_tmp3E0.curr)=_tmp3E2)))))));}}struct _tuple7 C
 struct _RegionHandle*r,void*rep,struct _tuple7 env,struct Cyc___cycFILE*fp,void*
 result);static void _tmp3F3(unsigned int*_tmp3F2,unsigned int*_tmp3F1,char**
 _tmp3EF){for(*_tmp3F2=0;*_tmp3F2 < *_tmp3F1;(*_tmp3F2)++){(*_tmp3EF)[*_tmp3F2]='\000';}}
-static void _tmp3F9(unsigned int*_tmp3F8,unsigned int*_tmp3F7,char**_tmp3F5){for(*
+static void _tmp3F9(char**_tmp3F5,unsigned int*_tmp3F8,unsigned int*_tmp3F7){for(*
 _tmp3F8=0;*_tmp3F8 < *_tmp3F7;(*_tmp3F8)++){(*_tmp3F5)[*_tmp3F8]='\000';}}static
 void _tmp3FF(unsigned int*_tmp3FE,unsigned int*_tmp3FD,char**_tmp3FB){for(*
 _tmp3FE=0;*_tmp3FE < *_tmp3FD;(*_tmp3FE)++){(*_tmp3FB)[*_tmp3FE]='\000';}}static
@@ -1617,7 +1617,7 @@ env,(unsigned int)mem)){unsigned int _tmp3F8;unsigned int _tmp3F7;struct
 _dynforward_ptr _tmp3F6;char*_tmp3F5;unsigned int _tmp3F4;struct _dynforward_ptr buf=(
 _tmp3F4=(unsigned int)(sz * typ_szb),((_tmp3F5=(char*)_cycalloc_atomic(
 _check_times(sizeof(char),_tmp3F4 + 1)),((_tmp3F6=_tag_dynforward(_tmp3F5,sizeof(
-char),_tmp3F4 + 1),((((_tmp3F7=_tmp3F4,((_tmp3F9(& _tmp3F8,& _tmp3F7,& _tmp3F5),
+char),_tmp3F4 + 1),((((_tmp3F7=_tmp3F4,((_tmp3F9(& _tmp3F5,& _tmp3F8,& _tmp3F7),
 _tmp3F5[_tmp3F7]=(char)0)))),_tmp3F6)))))));unsigned int bufptr=(unsigned int)((
 char*)_check_null(_untag_dynforward_ptr(buf,sizeof(char),1 + 1)));struct _tuple9*x=((
 struct _tuple9*(*)(void*x))unsafe_cast)(result);(*x).f1=bufptr;(*x).f2=bufptr + 

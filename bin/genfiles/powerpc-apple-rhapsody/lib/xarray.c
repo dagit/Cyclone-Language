@@ -1057,20 +1057,21 @@ return ans;}}struct Cyc_Xarray_Xarray*Cyc_Xarray_from_array(struct _dynforward_p
 arr);struct Cyc_Xarray_Xarray*Cyc_Xarray_from_array(struct _dynforward_ptr arr){
 return Cyc_Xarray_rfrom_array(Cyc_Core_heap_region,arr);}struct Cyc_Xarray_Xarray*
 Cyc_Xarray_rappend(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*xarr1,struct Cyc_Xarray_Xarray*
-xarr2);static void _tmp82(void**init,unsigned int*_tmp81,unsigned int*_tmp80,void***
-_tmp7E){for(*_tmp81=0;*_tmp81 < *_tmp80;(*_tmp81)++){(*_tmp7E)[*_tmp81]=*init;}}
-struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*r,struct Cyc_Xarray_Xarray*
-xarr1,struct Cyc_Xarray_Xarray*xarr2){int newsz=(int)(_get_dynforward_size(xarr1->elmts,
-sizeof(void*))+ _get_dynforward_size(xarr2->elmts,sizeof(void*)));if(newsz == 0)
-return Cyc_Xarray_rcreate_empty(r);{void*init=_get_dynforward_size(xarr1->elmts,
-sizeof(void*))== 0?*((void**)_check_dynforward_subscript(xarr2->elmts,sizeof(
-void*),0)):*((void**)_check_dynforward_subscript(xarr1->elmts,sizeof(void*),0));
-unsigned int _tmp88;void**_tmp87;struct _dynforward_ptr _tmp86;unsigned int _tmp85;
-unsigned int _tmp84;struct Cyc_Xarray_Xarray*_tmp83;struct Cyc_Xarray_Xarray*ans=(
-_tmp83=_region_malloc(r,sizeof(*_tmp83)),((_tmp83->r=r,((_tmp83->elmts=((_tmp88=(
+xarr2);static void _tmp82(void**init,void***_tmp7E,unsigned int*_tmp81,
+unsigned int*_tmp80){for(*_tmp81=0;*_tmp81 < *_tmp80;(*_tmp81)++){(*_tmp7E)[*
+_tmp81]=*init;}}struct Cyc_Xarray_Xarray*Cyc_Xarray_rappend(struct _RegionHandle*r,
+struct Cyc_Xarray_Xarray*xarr1,struct Cyc_Xarray_Xarray*xarr2){int newsz=(int)(
+_get_dynforward_size(xarr1->elmts,sizeof(void*))+ _get_dynforward_size(xarr2->elmts,
+sizeof(void*)));if(newsz == 0)return Cyc_Xarray_rcreate_empty(r);{void*init=
+_get_dynforward_size(xarr1->elmts,sizeof(void*))== 0?*((void**)
+_check_dynforward_subscript(xarr2->elmts,sizeof(void*),0)):*((void**)
+_check_dynforward_subscript(xarr1->elmts,sizeof(void*),0));unsigned int _tmp88;
+void**_tmp87;struct _dynforward_ptr _tmp86;unsigned int _tmp85;unsigned int _tmp84;
+struct Cyc_Xarray_Xarray*_tmp83;struct Cyc_Xarray_Xarray*ans=(_tmp83=
+_region_malloc(r,sizeof(*_tmp83)),((_tmp83->r=r,((_tmp83->elmts=((_tmp88=(
 unsigned int)newsz,((_tmp87=(void**)_region_malloc(r,_check_times(sizeof(void*),
 _tmp88)),((_tmp86=_tag_dynforward(_tmp87,sizeof(void*),_tmp88),((((_tmp85=_tmp88,
-_tmp82(& init,& _tmp84,& _tmp85,& _tmp87))),_tmp86)))))))),((_tmp83->num_elmts=0,
+_tmp82(& init,& _tmp87,& _tmp84,& _tmp85))),_tmp86)))))))),((_tmp83->num_elmts=0,
 _tmp83)))))));{int i=0;for(0;i < xarr1->num_elmts;++ i){Cyc_Xarray_add(ans,*((void**)
 _check_dynforward_subscript(xarr1->elmts,sizeof(void*),i)));}}{int i=0;for(0;i < 
 xarr2->num_elmts;++ i){Cyc_Xarray_add(ans,*((void**)_check_dynforward_subscript(
@@ -1092,23 +1093,23 @@ Cyc_Xarray_Xarray*xarr);void Cyc_Xarray_iter_c(void(*f)(void*,void*),void*env,
 struct Cyc_Xarray_Xarray*xarr){int i=0;for(0;i < xarr->num_elmts;++ i){f(env,*((void**)
 _check_dynforward_subscript(xarr->elmts,sizeof(void*),i)));}}struct Cyc_Xarray_Xarray*
 Cyc_Xarray_rmap(struct _RegionHandle*r,void*(*f)(void*),struct Cyc_Xarray_Xarray*
-xarr);static void _tmp8E(unsigned int*_tmp8D,unsigned int*_tmp8C,void***_tmp8A,
-void*(**f)(void*),struct Cyc_Xarray_Xarray**xarr){for(*_tmp8D=0;*_tmp8D < *_tmp8C;(*
-_tmp8D)++){(*_tmp8A)[*_tmp8D]=(*f)(*((void**)_check_dynforward_subscript((*xarr)->elmts,
-sizeof(void*),0)));}}struct Cyc_Xarray_Xarray*Cyc_Xarray_rmap(struct _RegionHandle*
-r,void*(*f)(void*),struct Cyc_Xarray_Xarray*xarr){if(xarr->num_elmts == 0)return
-Cyc_Xarray_rcreate_empty(r);{unsigned int _tmp94;void**_tmp93;struct
-_dynforward_ptr _tmp92;unsigned int _tmp91;unsigned int _tmp90;struct Cyc_Xarray_Xarray*
-_tmp8F;struct Cyc_Xarray_Xarray*ans=(_tmp8F=_region_malloc(r,sizeof(*_tmp8F)),((
-_tmp8F->r=r,((_tmp8F->elmts=((_tmp94=_get_dynforward_size(xarr->elmts,sizeof(
-void*)),((_tmp93=(void**)_region_malloc(r,_check_times(sizeof(void*),_tmp94)),((
-_tmp92=_tag_dynforward(_tmp93,sizeof(void*),_tmp94),((((_tmp91=_tmp94,_tmp8E(&
-_tmp90,& _tmp91,& _tmp93,& f,& xarr))),_tmp92)))))))),((_tmp8F->num_elmts=xarr->num_elmts,
-_tmp8F)))))));{int i=1;for(0;i < xarr->num_elmts;++ i){*((void**)
-_check_dynforward_subscript(ans->elmts,sizeof(void*),i))=f(*((void**)
-_check_dynforward_subscript(xarr->elmts,sizeof(void*),i)));}}return ans;}}struct
-Cyc_Xarray_Xarray*Cyc_Xarray_map(void*(*f)(void*),struct Cyc_Xarray_Xarray*xarr);
-struct Cyc_Xarray_Xarray*Cyc_Xarray_map(void*(*f)(void*),struct Cyc_Xarray_Xarray*
+xarr);static void _tmp8E(void*(**f)(void*),struct Cyc_Xarray_Xarray**xarr,
+unsigned int*_tmp8D,unsigned int*_tmp8C,void***_tmp8A){for(*_tmp8D=0;*_tmp8D < *
+_tmp8C;(*_tmp8D)++){(*_tmp8A)[*_tmp8D]=(*f)(*((void**)
+_check_dynforward_subscript((*xarr)->elmts,sizeof(void*),0)));}}struct Cyc_Xarray_Xarray*
+Cyc_Xarray_rmap(struct _RegionHandle*r,void*(*f)(void*),struct Cyc_Xarray_Xarray*
+xarr){if(xarr->num_elmts == 0)return Cyc_Xarray_rcreate_empty(r);{unsigned int
+_tmp94;void**_tmp93;struct _dynforward_ptr _tmp92;unsigned int _tmp91;unsigned int
+_tmp90;struct Cyc_Xarray_Xarray*_tmp8F;struct Cyc_Xarray_Xarray*ans=(_tmp8F=
+_region_malloc(r,sizeof(*_tmp8F)),((_tmp8F->r=r,((_tmp8F->elmts=((_tmp94=
+_get_dynforward_size(xarr->elmts,sizeof(void*)),((_tmp93=(void**)_region_malloc(
+r,_check_times(sizeof(void*),_tmp94)),((_tmp92=_tag_dynforward(_tmp93,sizeof(
+void*),_tmp94),((((_tmp91=_tmp94,_tmp8E(& f,& xarr,& _tmp90,& _tmp91,& _tmp93))),
+_tmp92)))))))),((_tmp8F->num_elmts=xarr->num_elmts,_tmp8F)))))));{int i=1;for(0;i
+< xarr->num_elmts;++ i){*((void**)_check_dynforward_subscript(ans->elmts,sizeof(
+void*),i))=f(*((void**)_check_dynforward_subscript(xarr->elmts,sizeof(void*),i)));}}
+return ans;}}struct Cyc_Xarray_Xarray*Cyc_Xarray_map(void*(*f)(void*),struct Cyc_Xarray_Xarray*
+xarr);struct Cyc_Xarray_Xarray*Cyc_Xarray_map(void*(*f)(void*),struct Cyc_Xarray_Xarray*
 xarr){return Cyc_Xarray_rmap(Cyc_Core_heap_region,f,xarr);}struct Cyc_Xarray_Xarray*
 Cyc_Xarray_rmap_c(struct _RegionHandle*r,void*(*f)(void*,void*),void*env,struct
 Cyc_Xarray_Xarray*xarr);static void _tmp9A(unsigned int*_tmp99,unsigned int*_tmp98,

@@ -1444,28 +1444,27 @@ int)_tmp4E != 1)goto _LLA;_LL9: return 16;_LLA: if((int)_tmp4E != 2)goto _LLC;_L
 return 32;_LLC: if((int)_tmp4E != 3)goto _LLE;_LLD: return 32;_LLE: if((int)_tmp4E != 4)
 goto _LL5;_LLF: return 64;_LL5:;}static void*Cyc_Tcgenrep_tunion_typ(struct _tuple6*
 name);static void*Cyc_Tcgenrep_tunion_typ(struct _tuple6*name){struct Cyc_Absyn_TunionType_struct
-_tmp2E7;struct Cyc_Core_Opt*_tmp2E6;union Cyc_Absyn_TunionInfoU_union _tmp2E5;
-struct Cyc_Absyn_UnknownTunionInfo _tmp2E4;struct Cyc_Absyn_TunionInfo _tmp2E3;
-struct Cyc_Absyn_TunionType_struct*_tmp2E2;return(void*)((_tmp2E2=_cycalloc(
-sizeof(*_tmp2E2)),((_tmp2E2[0]=((_tmp2E7.tag=2,((_tmp2E7.f1=((_tmp2E3.tunion_info=(
-union Cyc_Absyn_TunionInfoU_union)(((_tmp2E5.UnknownTunion).tag=0,(((_tmp2E5.UnknownTunion).f1=((
-_tmp2E4.name=name,((_tmp2E4.is_xtunion=0,((_tmp2E4.is_flat=0,_tmp2E4)))))),
-_tmp2E5)))),((_tmp2E3.targs=0,((_tmp2E3.rgn=((_tmp2E6=_cycalloc(sizeof(*_tmp2E6)),((
-_tmp2E6->v=(void*)((void*)2),_tmp2E6)))),_tmp2E3)))))),_tmp2E7)))),_tmp2E2))));}
-static void*Cyc_Tcgenrep_tunionfield_typ(struct _tuple6*name,struct _tuple6*
-fieldname);static void*Cyc_Tcgenrep_tunionfield_typ(struct _tuple6*name,struct
-_tuple6*fieldname){struct Cyc_Absyn_TunionFieldType_struct _tmp2F6;union Cyc_Absyn_TunionFieldInfoU_union
-_tmp2F5;struct Cyc_Absyn_UnknownTunionFieldInfo _tmp2F4;struct Cyc_Absyn_TunionFieldInfo
-_tmp2F3;struct Cyc_Absyn_TunionFieldType_struct*_tmp2F2;return(void*)((_tmp2F2=
-_cycalloc(sizeof(*_tmp2F2)),((_tmp2F2[0]=((_tmp2F6.tag=3,((_tmp2F6.f1=((_tmp2F3.field_info=(
-union Cyc_Absyn_TunionFieldInfoU_union)(((_tmp2F5.UnknownTunionfield).tag=0,(((
-_tmp2F5.UnknownTunionfield).f1=((_tmp2F4.tunion_name=name,((_tmp2F4.field_name=
-fieldname,((_tmp2F4.is_xtunion=0,_tmp2F4)))))),_tmp2F5)))),((_tmp2F3.targs=0,
-_tmp2F3)))),_tmp2F6)))),_tmp2F2))));}static struct Cyc_Absyn_Exp*Cyc_Tcgenrep_call_exp(
-struct _tuple6*name,struct Cyc_List_List*args,struct Cyc_Position_Segment*loc);
-static struct Cyc_Absyn_Exp*Cyc_Tcgenrep_call_exp(struct _tuple6*name,struct Cyc_List_List*
-args,struct Cyc_Position_Segment*loc){return Cyc_Absyn_unknowncall_exp(Cyc_Absyn_unknownid_exp(
-name,loc),args,loc);}static struct Cyc_Absyn_Decl*Cyc_Tcgenrep_tunion_constructor_decl(
+_tmp2E7;union Cyc_Absyn_TunionInfoU_union _tmp2E6;struct Cyc_Absyn_UnknownTunionInfo
+_tmp2E5;struct Cyc_Core_Opt*_tmp2E4;struct Cyc_Absyn_TunionInfo _tmp2E3;struct Cyc_Absyn_TunionType_struct*
+_tmp2E2;return(void*)((_tmp2E2=_cycalloc(sizeof(*_tmp2E2)),((_tmp2E2[0]=((
+_tmp2E7.tag=2,((_tmp2E7.f1=((_tmp2E3.tunion_info=(union Cyc_Absyn_TunionInfoU_union)(((
+_tmp2E6.UnknownTunion).tag=0,(((_tmp2E6.UnknownTunion).f1=((_tmp2E5.name=name,((
+_tmp2E5.is_xtunion=0,((_tmp2E5.is_flat=0,_tmp2E5)))))),_tmp2E6)))),((_tmp2E3.targs=
+0,((_tmp2E3.rgn=((_tmp2E4=_cycalloc(sizeof(*_tmp2E4)),((_tmp2E4->v=(void*)((void*)
+2),_tmp2E4)))),_tmp2E3)))))),_tmp2E7)))),_tmp2E2))));}static void*Cyc_Tcgenrep_tunionfield_typ(
+struct _tuple6*name,struct _tuple6*fieldname);static void*Cyc_Tcgenrep_tunionfield_typ(
+struct _tuple6*name,struct _tuple6*fieldname){struct Cyc_Absyn_TunionFieldType_struct
+_tmp2F6;union Cyc_Absyn_TunionFieldInfoU_union _tmp2F5;struct Cyc_Absyn_UnknownTunionFieldInfo
+_tmp2F4;struct Cyc_Absyn_TunionFieldInfo _tmp2F3;struct Cyc_Absyn_TunionFieldType_struct*
+_tmp2F2;return(void*)((_tmp2F2=_cycalloc(sizeof(*_tmp2F2)),((_tmp2F2[0]=((
+_tmp2F6.tag=3,((_tmp2F6.f1=((_tmp2F3.field_info=(union Cyc_Absyn_TunionFieldInfoU_union)(((
+_tmp2F5.UnknownTunionfield).tag=0,(((_tmp2F5.UnknownTunionfield).f1=((_tmp2F4.tunion_name=
+name,((_tmp2F4.field_name=fieldname,((_tmp2F4.is_xtunion=0,_tmp2F4)))))),_tmp2F5)))),((
+_tmp2F3.targs=0,_tmp2F3)))),_tmp2F6)))),_tmp2F2))));}static struct Cyc_Absyn_Exp*
+Cyc_Tcgenrep_call_exp(struct _tuple6*name,struct Cyc_List_List*args,struct Cyc_Position_Segment*
+loc);static struct Cyc_Absyn_Exp*Cyc_Tcgenrep_call_exp(struct _tuple6*name,struct
+Cyc_List_List*args,struct Cyc_Position_Segment*loc){return Cyc_Absyn_unknowncall_exp(
+Cyc_Absyn_unknownid_exp(name,loc),args,loc);}static struct Cyc_Absyn_Decl*Cyc_Tcgenrep_tunion_constructor_decl(
 struct _tuple6*tunionname,struct _tuple6*fieldname,struct _tuple6*varname,struct Cyc_List_List*
 args,void*sc,struct Cyc_Position_Segment*loc);static struct Cyc_Absyn_Decl*Cyc_Tcgenrep_tunion_constructor_decl(
 struct _tuple6*tunionname,struct _tuple6*fieldname,struct _tuple6*varname,struct Cyc_List_List*

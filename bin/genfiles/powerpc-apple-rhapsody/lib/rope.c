@@ -961,27 +961,27 @@ _tmp30;struct Cyc_Rope_Array_rope_struct _tmp2F;struct Cyc_Rope_Rope_node*_tmp2E
 return(_tmp2E=_cycalloc(sizeof(*_tmp2E)),((_tmp2E->v=(void*)((void*)((_tmp30=
 _cycalloc(sizeof(*_tmp30)),((_tmp30[0]=((_tmp2F.tag=1,((_tmp2F.f1=rs,_tmp2F)))),
 _tmp30))))),_tmp2E)));}struct Cyc_Rope_Rope_node*Cyc_Rope_concatl(struct Cyc_List_List*
-l);static void _tmp37(struct Cyc_List_List**l,unsigned int*_tmp36,unsigned int*
-_tmp35,struct Cyc_Rope_Rope_node***_tmp33){for(*_tmp36=0;*_tmp36 < *_tmp35;(*
-_tmp36)++){struct Cyc_Rope_Rope_node*_tmp31;(*_tmp33)[*_tmp36]=((_tmp31=(struct
-Cyc_Rope_Rope_node*)((struct Cyc_List_List*)_check_null(*l))->hd,((*l=(*l)->tl,
-_tmp31))));}}struct Cyc_Rope_Rope_node*Cyc_Rope_concatl(struct Cyc_List_List*l){
-struct Cyc_Rope_Array_rope_struct*_tmp4C;unsigned int _tmp4B;struct Cyc_Rope_Rope_node**
-_tmp4A;struct _dynforward_ptr _tmp49;unsigned int _tmp48;unsigned int _tmp47;struct
-Cyc_Rope_Array_rope_struct _tmp46;struct Cyc_Rope_Rope_node*_tmp45;return(_tmp45=
-_cycalloc(sizeof(*_tmp45)),((_tmp45->v=(void*)((void*)((_tmp4C=_cycalloc(sizeof(*
-_tmp4C)),((_tmp4C[0]=((_tmp46.tag=1,((_tmp46.f1=((_tmp4B=(unsigned int)((int(*)(
-struct Cyc_List_List*x))Cyc_List_length)(l),((_tmp4A=(struct Cyc_Rope_Rope_node**)
-_cycalloc(_check_times(sizeof(struct Cyc_Rope_Rope_node*),_tmp4B)),((_tmp49=
-_tag_dynforward(_tmp4A,sizeof(struct Cyc_Rope_Rope_node*),_tmp4B),((((_tmp48=
-_tmp4B,_tmp37(& l,& _tmp47,& _tmp48,& _tmp4A))),_tmp49)))))))),_tmp46)))),_tmp4C))))),
-_tmp45)));}unsigned int Cyc_Rope_length(struct Cyc_Rope_Rope_node*r);unsigned int
-Cyc_Rope_length(struct Cyc_Rope_Rope_node*r){void*_tmp11=(void*)r->v;struct
-_dynforward_ptr _tmp12;struct _dynforward_ptr _tmp13;_LL1: if(*((int*)_tmp11)!= 0)
-goto _LL3;_tmp12=((struct Cyc_Rope_String_rope_struct*)_tmp11)->f1;_LL2: return(
-unsigned int)Cyc_strlen((struct _dynforward_ptr)_tmp12);_LL3: if(*((int*)_tmp11)!= 
-1)goto _LL0;_tmp13=((struct Cyc_Rope_Array_rope_struct*)_tmp11)->f1;_LL4: {
-unsigned int total=0;unsigned int sz=_get_dynforward_size(_tmp13,sizeof(struct Cyc_Rope_Rope_node*));{
+l);static void _tmp37(unsigned int*_tmp36,unsigned int*_tmp35,struct Cyc_Rope_Rope_node***
+_tmp33,struct Cyc_List_List**l){for(*_tmp36=0;*_tmp36 < *_tmp35;(*_tmp36)++){
+struct Cyc_Rope_Rope_node*_tmp31;(*_tmp33)[*_tmp36]=((_tmp31=(struct Cyc_Rope_Rope_node*)((
+struct Cyc_List_List*)_check_null(*l))->hd,((*l=(*l)->tl,_tmp31))));}}struct Cyc_Rope_Rope_node*
+Cyc_Rope_concatl(struct Cyc_List_List*l){struct Cyc_Rope_Array_rope_struct*_tmp4C;
+unsigned int _tmp4B;struct Cyc_Rope_Rope_node**_tmp4A;struct _dynforward_ptr _tmp49;
+unsigned int _tmp48;unsigned int _tmp47;struct Cyc_Rope_Array_rope_struct _tmp46;
+struct Cyc_Rope_Rope_node*_tmp45;return(_tmp45=_cycalloc(sizeof(*_tmp45)),((
+_tmp45->v=(void*)((void*)((_tmp4C=_cycalloc(sizeof(*_tmp4C)),((_tmp4C[0]=((
+_tmp46.tag=1,((_tmp46.f1=((_tmp4B=(unsigned int)((int(*)(struct Cyc_List_List*x))
+Cyc_List_length)(l),((_tmp4A=(struct Cyc_Rope_Rope_node**)_cycalloc(_check_times(
+sizeof(struct Cyc_Rope_Rope_node*),_tmp4B)),((_tmp49=_tag_dynforward(_tmp4A,
+sizeof(struct Cyc_Rope_Rope_node*),_tmp4B),((((_tmp48=_tmp4B,_tmp37(& _tmp47,&
+_tmp48,& _tmp4A,& l))),_tmp49)))))))),_tmp46)))),_tmp4C))))),_tmp45)));}
+unsigned int Cyc_Rope_length(struct Cyc_Rope_Rope_node*r);unsigned int Cyc_Rope_length(
+struct Cyc_Rope_Rope_node*r){void*_tmp11=(void*)r->v;struct _dynforward_ptr _tmp12;
+struct _dynforward_ptr _tmp13;_LL1: if(*((int*)_tmp11)!= 0)goto _LL3;_tmp12=((struct
+Cyc_Rope_String_rope_struct*)_tmp11)->f1;_LL2: return(unsigned int)Cyc_strlen((
+struct _dynforward_ptr)_tmp12);_LL3: if(*((int*)_tmp11)!= 1)goto _LL0;_tmp13=((
+struct Cyc_Rope_Array_rope_struct*)_tmp11)->f1;_LL4: {unsigned int total=0;
+unsigned int sz=_get_dynforward_size(_tmp13,sizeof(struct Cyc_Rope_Rope_node*));{
 unsigned int i=0;for(0;i < sz;i ++){total +=Cyc_Rope_length(*((struct Cyc_Rope_Rope_node**)
 _check_dynforward_subscript(_tmp13,sizeof(struct Cyc_Rope_Rope_node*),(int)i)));}}
 return total;}_LL0:;}static unsigned int Cyc_Rope_flatten_it(struct _dynforward_ptr s,

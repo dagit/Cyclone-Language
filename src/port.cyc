@@ -1166,9 +1166,10 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       // Trust the user if they explicitly wrote ZEROTERM or NOZEROTERM
       switch (zt->v) {
       case No_constr:
+        break;
+      default:
         unify_ct(czv, conref_val(zt) ? zterm_ct() : nozterm_ct());
         break;
-      default: break;
       }
       // Note that the type returned has unconstrained variables for
       // the qualifier, bounds, rgn, and zeroterm unless the user 
@@ -1206,8 +1207,10 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
       // Trust the user if they explicitly wrote ZEROTERM or NOZEROTERM
       switch (zt->v) {
       case No_constr:
-        unify_ct(czv, conref_val(zt) ? zterm_ct() : nozterm_ct()); break;
-      default: break;
+        break;
+      default:
+        unify_ct(czv, conref_val(zt) ? zterm_ct() : nozterm_ct());
+        break;
       }
       return array_ct(cet,cqv,czv);
     } else {

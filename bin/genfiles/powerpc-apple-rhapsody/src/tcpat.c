@@ -1524,14 +1524,14 @@ _tmpAD)!= 3)goto _LL72;_tmpAE=((struct Cyc_Absyn_TunionFieldType_struct*)_tmpAD)
 _tmpAF=_tmpAE.field_info;if((((((struct Cyc_Absyn_TunionFieldType_struct*)_tmpAD)->f1).field_info).KnownTunionfield).tag
 != 1)goto _LL72;_tmpB0=(_tmpAF.KnownTunionfield).f1;_tmpB1=(_tmpAF.KnownTunionfield).f2;
 _tmpB2=_tmpAE.targs;if(!(!_tmpB0->is_flat))goto _LL72;_LL71:{struct Cyc_Absyn_TunionType_struct
-_tmp391;struct Cyc_Core_Opt*_tmp390;union Cyc_Absyn_TunionInfoU_union _tmp38F;
-struct Cyc_Absyn_Tuniondecl**_tmp38E;struct Cyc_Absyn_TunionInfo _tmp38D;struct Cyc_Absyn_TunionType_struct*
+_tmp391;union Cyc_Absyn_TunionInfoU_union _tmp390;struct Cyc_Absyn_Tuniondecl**
+_tmp38F;struct Cyc_Core_Opt*_tmp38E;struct Cyc_Absyn_TunionInfo _tmp38D;struct Cyc_Absyn_TunionType_struct*
 _tmp38C;t=(void*)((_tmp38C=_cycalloc(sizeof(*_tmp38C)),((_tmp38C[0]=((_tmp391.tag=
 2,((_tmp391.f1=((_tmp38D.tunion_info=(union Cyc_Absyn_TunionInfoU_union)(((
-_tmp38F.KnownTunion).tag=1,(((_tmp38F.KnownTunion).f1=((_tmp38E=_cycalloc(
-sizeof(*_tmp38E)),((_tmp38E[0]=_tmpB0,_tmp38E)))),_tmp38F)))),((_tmp38D.targs=
-_tmpB2,((_tmp38D.rgn=((_tmp390=_cycalloc(sizeof(*_tmp390)),((_tmp390->v=(void*)
-ptr_rgn,_tmp390)))),_tmp38D)))))),_tmp391)))),_tmp38C))));}goto _LL6F;_LL72:;
+_tmp390.KnownTunion).tag=1,(((_tmp390.KnownTunion).f1=((_tmp38F=_cycalloc(
+sizeof(*_tmp38F)),((_tmp38F[0]=_tmpB0,_tmp38F)))),_tmp390)))),((_tmp38D.targs=
+_tmpB2,((_tmp38D.rgn=((_tmp38E=_cycalloc(sizeof(*_tmp38E)),((_tmp38E->v=(void*)
+ptr_rgn,_tmp38E)))),_tmp38D)))))),_tmp391)))),_tmp38C))));}goto _LL6F;_LL72:;
 _LL73:{struct Cyc_Absyn_PointerType_struct _tmp39B;struct Cyc_Absyn_PtrAtts _tmp39A;
 struct Cyc_Absyn_PtrInfo _tmp399;struct Cyc_Absyn_PointerType_struct*_tmp398;t=(
 void*)((_tmp398=_cycalloc(sizeof(*_tmp398)),((_tmp398[0]=((_tmp39B.tag=4,((
