@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Fri Aug 24 14:04:59 2001
---- sparc-sun-solaris2.7/lib/execinfo.c	Tue Sep  4 16:26:27 2001
+*** i686-unknown-linux/lib/execinfo.c	Fri Aug 31 16:57:09 2001
+--- sparc-sun-solaris2.7/lib/execinfo.c	Tue Sep  4 16:36:29 2001
 ***************
 *** 11,105 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -127,3 +127,12 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7
 ! _temp1.f1= _tag_arr("backtrace: unsupported except under Linux", sizeof(
 ! unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 ! return 1;}
+diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c sparc-sun-solaris2.7/src/install_path.c
+*** i686-unknown-linux/src/install_path.c	Tue Sep  4 16:33:44 2001
+--- sparc-sun-solaris2.7/src/install_path.c	Wed Dec 31 19:00:00 1969
+***************
+*** 1,3 ****
+- char *Cdef_inc_path = "/usr/include/cyclone";
+- char *Carch = "i686-unknown-linux";
+- char *Cdef_lib_path = "/usr/local/lib/cyclone";
+--- 0 ----

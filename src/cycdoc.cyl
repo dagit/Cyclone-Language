@@ -1129,7 +1129,7 @@ void dumpdecl(decl_t d, string_t comment) {
       str_sepstr(new List(new (string_t)"",
                           List::map(sh_escape_stringptr,rev(cycargs))),
                  " ");
-    let cmd = aprintf("./cyclone %s -E -o %s -x cyc %s",
+    let cmd = aprintf("cyclone %s -E -o %s -x cyc %s",
                       cycargs_string,
                       sh_escape_string(preprocfile),
                       sh_escape_string(filename));
