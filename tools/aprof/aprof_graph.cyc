@@ -363,7 +363,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
   env->cnt++;
   // process the event
   switch (event) {
-  case &CreateE(CreateEvent(_,rname,*rstats)):
+  case &CreateE(CreateEvent(time,_,rname,*rstats)):
     let rnameptr = new rname;
 
     assert(strcmp("unique",rname));
@@ -380,7 +380,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     update_heap_stats(env,rstats);
     break;
 
-  case &AllocE(AllocEvent(_,rname,count,*rstats,addr)):
+  case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
     if (!strcmp(rname,"unique")) {
       env->unique_live_bytes += count;
       env->unique_live =
@@ -432,7 +432,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     }
     break;
 
-  case &ReclaimE(ReclaimEvent(addr)):
+  case &ReclaimE(ReclaimEvent(time,addr)):
     // this is a unique pointer object that got garbage collected
     try {
       unsigned int count = Hashtable::lookup((Hashtable::table_t)tab,addr);
@@ -450,7 +450,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     }
     break;
 
-  case &FreeE(FreeEvent(rname,*rstats)):
+  case &FreeE(FreeEvent(time,rname,*rstats)):
     assert(strcmp("unique",rname));
     assert(strcmp("heap",rname));
     assert(strcmp("refcnt",rname));
@@ -483,7 +483,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     update_heap_stats(env,rstats);
     break;
 
-  case &ResizeE(ResizeEvent(rname,count,*rstats)):
+  case &ResizeE(ResizeEvent(time,rname,count,*rstats)):
     assert(strcmp("unique",rname));
     assert(strcmp("heap",rname));
     assert(strcmp("refcnt",rname));
@@ -524,7 +524,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     update_heap_stats(env,rstats);
     break;
 
-  case &GcE(GcEvent(n,*rstats)):
+  case &GcE(GcEvent(time,n,*rstats)):
     update_heap_stats(env,rstats);
     env->gc_points = new List(new $(env->cnt,env->total_heap_size),
 			      env->gc_points);

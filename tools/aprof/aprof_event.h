@@ -29,6 +29,7 @@
 
 #include <core.h>
 #include <fn.h>
+#include <time.h>
 
 namespace Aprof {
   using Core;
@@ -41,6 +42,7 @@ namespace Aprof {
     int total_alloc_bytes;
   };
   struct AllocEvent {
+    clock_t time;
     string_t location;
     string_t region_name;
     int amount;
@@ -48,23 +50,28 @@ namespace Aprof {
     unsigned int address;
   };
   struct GcEvent {
+    clock_t time;
     unsigned int num;
     struct RegionStats heap_region_stats;
   };
   struct ReclaimEvent {
+    clock_t time;
     unsigned int address;
   };
   struct CreateEvent {
+    clock_t time;
     string_t location;
     string_t region_name;
     struct RegionStats heap_region_stats;
   };
   struct ResizeEvent {
+    clock_t time;
     string_t region_name;
     int amount;
     struct RegionStats heap_region_stats;
   };
   struct FreeEvent {
+    clock_t time;
     string_t region_name;
     struct RegionStats heap_region_stats;
   };
@@ -106,6 +113,7 @@ namespace Aprof {
   extern int generate_graph(string_t<`H> file);
 
   extern int generate_newgraph(string_t<`H> file);
+  extern int generate_svg(string_t<`H> file);
 
   // Uses proc_file above to generate a tabular summary of per-region
   // allocation information.

@@ -46,6 +46,7 @@ int do_gnuplot = 0;
 int main(int argc, string_t<`H> ?`H argv) {
   bool do_graph = false;
   bool do_newgraph = false;
+  bool do_svg = false;
   string_t<`H> file;
 
   int argn = 1;
@@ -62,6 +63,9 @@ int main(int argc, string_t<`H> ?`H argv) {
     else if ( strcmp( argv[argn], "-ngp" ) == 0 ) {
       do_newgraph = true;
       do_gnuplot = true;
+    }
+    else if ( strcmp( argv[argn], "-svg" ) == 0 ) {
+      do_svg = true;
     }
     else if ( strcmp( argv[argn], "-q" ) == 0 ) {
       verbose = false;
@@ -89,6 +93,8 @@ int main(int argc, string_t<`H> ?`H argv) {
     ret = generate_graph(file);
   else if (do_newgraph)
     ret = generate_newgraph(file);
+  else if (do_svg)
+    ret = generate_svg(file);
   else
     ret = generate_summary(file);
   return ret;

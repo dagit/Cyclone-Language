@@ -1,4 +1,4 @@
-/* Graphical Allocation profiler
+/* SVG output for allocation profiler
    Copyright (C) 2001 Greg Morrisett, AT&T
    This file is part of the Cyclone compiler.
 
@@ -17,24 +17,42 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
+#include <stdio.h>
 #include <core.h>
 #include <string.h>
 #include <list.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <array.h>
 #include <fn.h>
 #include <assert.h>
 #include <hashtable.h>
 #include <xarray.h>
+#include <time.h>
 #include "aprof_event.h"
 
-//#define DEBUG_ME
+#define WIDTH 300.0
+#define HEIGHT 300.0
 
+#define XMAXRES 1000
+#define YMAXRES 1000
+unsigned int xres = 0;
+unsigned int yres = 0;
+typedef unsigned int coord_t;
+
+//#define DEBUG_ME
 using Core;
 using List;
 using Aprof;
 using Fn;
+
+static void output_comment(const char ?s) {
+  printf("<!-- %s -->\n",s);
+  if (verbose)
+    fprintf(stderr,"%s\n",s);
+}
+static int percent(unsigned int numerator, unsigned int denominator) {
+  return (int)((numerator * 100.0)/denominator);
+}
 
 typedef $(unsigned int,unsigned int) @point_t;
 struct Curve {
@@ -44,7 +62,7 @@ struct Curve {
   unsigned int max_y;
   unsigned int num_points;
   /* updated in phase 2 */
-  list_t<point_t> points;
+  coord_t ?points;
   /* auxilliary data for both phases */
   unsigned int last_x;
   unsigned int last_y;
@@ -52,7 +70,7 @@ struct Curve {
 typedef struct Curve @curve_t;
 static curve_t
 curve_init(const char ?`H name) {
-  return new Curve(name,0,0,0,new List(new $(0,0),NULL),0,0);
+  return new Curve(name,0,0,0,NULL,0,0);
 }
 
 // Data that is maintained/updated at each profiled event
@@ -65,143 +83,8 @@ struct ProcEnv {
   list_t<point_t> gc_points;
 };
 
-/////////////////////////////// GRAPH OUTPUT
-
-// We either output in jgraph syntax or gnuplot syntax
-extern int do_gnuplot; // defined in aprof.cyc
-/* Build a growable buffer in the unique region. */
-static char ?@nozeroterm `U buf_buf = NULL;
-static int buf_pos = 0;
-static int buf_len = 0;
-static void buf_append(const char ?s) {
-  let howmuch = strlen(s);
-  if (buf_pos+howmuch > buf_len) {
-    let newlen = (buf_len? buf_len*2: 17);
-    while (newlen <= buf_pos+howmuch) newlen *= 2;
-    char ?@nozeroterm `U newbuf = malloc(newlen * sizeof(char));
-    for (int i = 0; i<buf_pos; i++)
-      newbuf[i] = buf_buf[i];
-    buf_len = newlen;
-    buf_buf :=: newbuf;
-    if (newbuf) ufree(newbuf);
-  }
-  for (int i = 0; i < howmuch; i++,s++,buf_pos++) {
-    buf_buf[buf_pos] = *s;
-  }
-}
-static void buf_print_contents() {
-  if (buf_pos) printf("%.*s",buf_pos,buf_buf);
-}
-static void output_xy(int x, int y) {
-  region r;
-  if (do_gnuplot) buf_append(rprintf(r,"%d, %d\n",x,y));
-  else printf("%d %d ",x,y);
-}
-static void output_header(const char ?title,int xmax, int ymax) {
-  if (do_gnuplot) {
-    printf("set title \"%s\"\n"
-           "set xlabel \"allocation event #\"\n"
-           "set xrange [0:%d]\n"
-           "set ylabel \"bytes allocated/freed\"\n"
-           "set yrange [0:%d]\n",
-           title,
-           xmax,
-           ymax);
-  }
-  else {
-    printf("newgraph\n  xaxis min 0 max %d label : allocation event #\n",
-           xmax);
-    printf("  yaxis min 0 max %d label : bytes allocated/freed\n\n",
-           ymax);
-  }
-}
-
-static int percent(unsigned int numerator, unsigned int denominator) {
-  return (int)((numerator * 100.0)/denominator);
-}
-
-static void output_comment(const char ?s) {
-  if (do_gnuplot)
-    printf("# %s\n",s);
-  else
-    printf("(* %s *)\n",s);
-  if (verbose)
-    fprintf(stderr,"%s\n",s);
-}
-
-static list_t<char ?@> gnuplot_curves = NULL;
-static void output_points_header(const char ? name) {
-  if (do_gnuplot) {
-    gnuplot_curves =
-      new List(new aprintf("'-' title \"%s\" with points",name),
-               gnuplot_curves);
-  }
-  else {
-    printf("newcurve\n  label : %s\n  marktype circle\n linetype none\n",
-	   name);
-    printf("  pts ");
-  }
-}
-static void output_lines_header(const char ?name, const char ?curvekind) {
-  if (do_gnuplot) {
-    gnuplot_curves =
-      new List(new aprintf("'-' title \"%s\" with lines",name),
-               gnuplot_curves);
-  }
-  else {
-    printf("newcurve\n  label : %s\n  marktype none\n linetype %s\n",
-	   name, curvekind);
-    printf("  pts ");
-  }
-}
-static void output_curve_end() {
-  if (do_gnuplot)
-    buf_append("e\n");
-  else
-    printf("\n\n");
-}
-static void output_cleanup() {
-  if (do_gnuplot) {
-    printf("plot \\\n");
-    gnuplot_curves = imp_rev(gnuplot_curves);
-    for (let l = gnuplot_curves; l != NULL; l = l->tl) {
-      printf("%s",*(l->hd));
-      if (l->tl) printf(", \\");
-      printf("\n");
-    }
-    buf_print_contents();
-  }
-}
-
-static void output_point_no_stack(point_t point) {
-  let x = (*point)[0];
-  let y = (*point)[1];
-  output_xy(x,y);
-}
-
-// output a line representing the live data for a particular region.
-// Update the heap size as we go.
-static void output_line(string_t name,
-			int num,
-			list_t<point_t> points) {
-  static string_t linetypes[7] =
-    { "solid", "dotted", "dashed", "longdash", "dotdash",
-      "dotdotdash", "dotdotdashdash" };
-  if (points == NULL) return;
-  if (num < 0)
-    output_points_header(name);
-  else
-    output_lines_header(name,linetypes[num % 7]);
-  iter(output_point_no_stack,points);
-  output_curve_end();
-}
-static void output_curve(curve_t b) {
-  static int curve_num = 1;
-  output_line(b->name,curve_num++,b->points);
-}
-
 /* Nicely format f as a number of bytes */
-char ?print_bytes(double f) {
+static char ?print_bytes(double f) {
   $(double,const char ?) powers[] =
     { $(1099511627776.0,"TB"),
       $(1073741824.0,"GB"),
@@ -229,12 +112,12 @@ char ?print_bytes(double f) {
 
 /* Table for remembering how much was allocated at an address */
 static struct Hashtable::Table<unsigned int,$(const char ?,unsigned int)@> *
-allocation_at_address_table = NULL;
+  allocation_at_address_table = NULL;
 /* Table for remembering how much was allocated into a region */
 static struct Hashtable::Table<const char ?@,unsigned int> *
 allocation_in_region_table = NULL;
-/* Array of events -- (region name, delta_y) pairs */
-struct Xarray::Xarray<$(const char ?,int)@> *events = NULL;
+/* Array of events -- (region name, x, delta_y) pairs */
+static struct Xarray::Xarray<$(const char ?,int,int)@> *events = NULL;
 
 static int uint_cmp(unsigned int i, unsigned int j) {
   return (i<j)?(-1):((i>j)?1:0);
@@ -251,12 +134,42 @@ init_globals() {
   events = Xarray::create_empty();
 }
 
-static void mark_delta(curve_t b, int delta_y) {
+static clock_t max_time = 0;
+
+static bool inside_gc = false;
+static clock_t gc_start_time = 0;
+static clock_t gc_latest_time = 0;
+static list_t<$(clock_t,clock_t)@> gc_list = NULL;
+static void gc_mark(clock_t x) {
+  if (!inside_gc) {
+    gc_start_time = gc_latest_time = x;
+    inside_gc = true;
+  }
+  else
+    gc_latest_time = x;
+}
+static void gc_over() {
+  if (inside_gc) {
+    gc_list = new List(new $(gc_start_time,gc_latest_time),gc_list);
+    inside_gc = false;
+  }
+}
+static void gc_scale() {
+  for (let l = gc_list; l != NULL; l = l->tl) {
+    let &$(*x1,*x2) = l->hd;
+    double scale = ((double)xres)/((double)max_time+1);
+    *x1 = (clock_t)(*x1 * scale);
+    *x2 = (clock_t)(*x2 * scale);
+  }
+}
+
+/* phase 1 */
+static void mark_delta(curve_t b, clock_t x, int delta_y) {
   if (delta_y == 0) return;
   unsigned int y = b->last_y + delta_y;
   b->num_points++;
-  Xarray::add((_@)events,new $(b->name,delta_y));
-  unsigned int x = Xarray::length((_@)events);
+  Xarray::add((_@)events,new $(b->name,x,delta_y));
+  //  unsigned int x = Xarray::length((_@)events);
   b->area += ((double)(x - b->last_x)) * b->last_y;
   if (b->max_y < y) b->max_y = y;
 #ifdef DEBUG_ME
@@ -268,19 +181,11 @@ static void mark_delta(curve_t b, int delta_y) {
   b->last_x = x;
   b->last_y = y;
 }
-static void add_point(curve_t b, unsigned int y) {
-  mark_delta(b, (int)(y - b->last_y));
+static void mark_point(curve_t b, clock_t x, unsigned int y) {
+  mark_delta(b, x, (int)(y - b->last_y));
 }
-static void add_delta(curve_t b, unsigned int x, int delta_y) {
-  unsigned int y = b->last_y + delta_y;
-  if (b->last_x != x-1)
-    b->points = new List(new $(x-1,b->last_y),b->points);
-  b->points = new List(new $(x,y),b->points);
-  b->last_x = x;
-  b->last_y = y;
-}
-static void mark_finish(curve_t b) {
-  unsigned int x = Xarray::length((_@)events);
+static void mark_finish(curve_t b, clock_t x) {
+  //  unsigned int x = Xarray::length((_@)events);
   b->area += ((double)(x - b->last_x)) * b->last_y;
 #ifdef DEBUG_ME
   fprintf(stderr,"%s->area += %s*events\n",
@@ -289,21 +194,45 @@ static void mark_finish(curve_t b) {
 #endif
   b->last_x = 0;
   b->last_y = 0;
+  b->points = new {for i < xres: 0}; // xres must be set up before calling
 }
-static void add_finish(curve_t b) {
-  unsigned int x = Xarray::length((_@)events);
-  if (b->last_x != x)
-    b->points = new List(new $(x,b->last_y),b->points);
+static void update_heap_stats(struct ProcEnv @env,
+                              clock_t x,
+			      struct RegionStats @s) {
+  mark_point(env->mem_total,x,s->region_size_bytes);
+}
+
+/* phase 2 */
+static list_t<clock_t> marks = NULL;
+//static void mark(unsigned int unscaled_x) {
+//  double scale = ((double)xres)/((double)max_time+1);
+//  clock_t x = (clock_t)(unscaled_x * scale);
+//  marks = new List(x,marks);
+//}
+static void add_delta(curve_t b, unsigned int unscaled_x, int delta_y) {
+  double scale = ((double)xres)/((double)max_time+1);
+  clock_t x = (clock_t)(unscaled_x * scale);
+  unsigned int y = b->last_y + delta_y;
+  for (int i = b->last_x + 1; i <= x; i++) {
+    b->points[i] = b->last_y;
+  }
+  b->points[x] = y;
+  b->last_x = x;
+  b->last_y = y;
+}
+static void add_finish(curve_t b, unsigned int unscaled_x) {
+  // unsigned int x = Xarray::length((_@)events);
+  double scale = ((double)xres)/((double)max_time+1);
+  clock_t x = (clock_t)(unscaled_x * scale);
+  fprintf(stderr,"Finishing %u at scale %f giving %u\n",unscaled_x,scale,x);
+  if (b->last_x < x)
+    for (int i = b->last_x+1; i<=x; i++)
+      b->points[i] = b->last_y;
 }
 
 static void comment_stats(curve_t b) { // for debugging
   output_comment(aprintf("%s area: %s*events\tmax_y: %u",b->name,
                          print_bytes(b->area),b->max_y));
-}
-
-static void update_heap_stats(struct ProcEnv @env,
-			      struct RegionStats @s) {
-  add_point(env->mem_total,s->region_size_bytes);
 }
 
 static unsigned int num_create_events = 0;
@@ -328,6 +257,8 @@ static unsigned int bytes_reclaim_unique = 0;
 static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
   switch (event) {
   case &CreateE(CreateEvent(time,_,rname,*rstats)):
+    if (max_time < time) max_time = time;
+    gc_over();
     num_create_events++;
     let rnameptr = new rname;
 
@@ -335,14 +266,17 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     assert(strcmp("heap",rname));
     assert(strcmp("refcnt",rname));
 
-    update_heap_stats(env,rstats); // these rstats are for GC
+    update_heap_stats(env,time,rstats); // these rstats are for GC
+    if (max_time < time) max_time = time;
     break;
 
   case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
+    if (max_time < time) max_time = time;
+    gc_over();
     num_alloc_events++;
     if (!strcmp(rname,"unique")) {
-      mark_delta(env->unique_live,count);
-      update_heap_stats(env,rstats);
+      mark_delta(env->unique_live,time,count);
+      update_heap_stats(env,time,rstats);
       if (count>0) {
         // remember count for addr in case gc reclaims addr
         Hashtable::insert((_@)allocation_at_address_table,
@@ -358,19 +292,19 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       }
     }
     else if (!strcmp(rname,"refcnt")) {
-      mark_delta(env->refcnt_live,count);
-      update_heap_stats(env,rstats);
+      mark_delta(env->refcnt_live,time,count);
+      update_heap_stats(env,time,rstats);
     }
     else if (!strcmp(rname,"heap")) {
-      mark_delta(env->heap_live,count);
-      update_heap_stats(env,rstats);
+      mark_delta(env->heap_live,time,count);
+      update_heap_stats(env,time,rstats);
       Hashtable::insert((_@)allocation_at_address_table,
                         addr,new $("heap",(unsigned int)count));
       bytes_alloc_heap += count;
       num_alloc_heap++;
     }
     else {
-      mark_delta(env->other_live,count);
+      mark_delta(env->other_live,time,count);
       let rname_p = new rname;
       unsigned int x = 0;
       try {
@@ -383,11 +317,13 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       Hashtable::insert((_@)allocation_in_region_table,rname_p,x+count);
       // The rstats give info about the "other" region, not the
       // memory managed by the GC -- so don't update that.
-      // update_heap_stats(env,rstats);
+      // update_heap_stats(env,time,rstats);
     }
     break;
 
   case &ReclaimE(ReclaimEvent(time,addr)):
+    if (max_time < time) max_time = time;
+    gc_mark(time);
     num_reclaim_events++;
     // this is a unique pointer object that got garbage collected
     try {
@@ -396,12 +332,12 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       Hashtable::remove((_@)allocation_at_address_table,addr);
       int delta_y = -1*((int)count);
       if (strcmp("unique",rname) == 0) {
-        mark_delta(env->unique_live,delta_y);
+        mark_delta(env->unique_live,time,delta_y);
         bytes_reclaim_unique += count;
         num_reclaim_unique++;
       }
       else if (strcmp("heap",rname) == 0) {
-        mark_delta(env->heap_live,delta_y);
+        mark_delta(env->heap_live,time,delta_y);
         bytes_reclaim_heap += count;
         num_reclaim_heap++;
       }
@@ -420,6 +356,8 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     assert(strcmp("heap",rname));
     assert(strcmp("refcnt",rname));
 
+    if (max_time < time) max_time = time;
+    gc_over();
     num_free_events++;
     let rname_p = new rname;
     unsigned int x = 0;
@@ -430,8 +368,8 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     catch {
     case &Not_found: break; // region created but not allocated into
     }
-    mark_delta(env->other_live,-x);
-    update_heap_stats(env,rstats);
+    mark_delta(env->other_live,time,-x);
+    update_heap_stats(env,time,rstats);
     break;
 
   case &ResizeE(ResizeEvent(time,rname,count,*rstats)):
@@ -439,19 +377,23 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     assert(strcmp("heap",rname));
     assert(strcmp("refcnt",rname));
 
+    if (max_time < time) max_time = time;
+    gc_over();
     num_resize_events++;
     // The count is the new size of the region -- ignore
-    // mark_delta(env->other_live,count);
+    // mark_delta(env->other_live,time,count);
 
     // rstats measures GC
-    update_heap_stats(env,rstats);
+    update_heap_stats(env,time,rstats);
     break;
 
   case &GcE(GcEvent(time,n,*rstats)):
+    if (max_time < time) max_time = time;
+    gc_over();
     num_gc_events++;
-    update_heap_stats(env,rstats);
-    unsigned int x = Xarray::length((_@)events);
-    env->gc_points = new List(new $(x,rstats->region_size_bytes),
+    update_heap_stats(env,time,rstats);
+    //unsigned int x = Xarray::length((_@)events);
+    env->gc_points = new List(new $(time,rstats->region_size_bytes),
 			      env->gc_points);
     break;
   }
@@ -475,14 +417,15 @@ static void doit($(const char ?,int) @z) {
     }
   }
 }
-static void doit2($(const char ?,int) @z) {
-  static unsigned int x = 1;
-  let &$(name,delta_y) = z;
+static void doit2($(const char ?,int,int) @z) {
+  //  static unsigned int x = 1;
+  let &$(name,x,delta_y) = z;
   if (strcmp(name,"reserved") == 0) {
     for (let l = all_curves; l != NULL; l = l->tl) {
       let b = l->hd;
-      if (strcmp(b->name,name) == 0) {
-        add_delta(b,x++,delta_y);
+      if (strcmp("reserved",b->name) == 0) {
+        //        add_delta(b,x++,delta_y);
+        add_delta(b,x,delta_y);
         return;
       }
     }
@@ -491,24 +434,62 @@ static void doit2($(const char ?,int) @z) {
     /* increment the curve identified by name, as well as
        all subsequent curves in the list all_curves,
        except for the reserved curve */
+    // temporary for debugging...
+//    static int last_delta = 1;
+//    if (strcmp("heap",name) == 0 && (delta_y * last_delta)<0) {
+//      mark(x); last_delta = delta_y;
+//    }
     let saw_name = 0;
     for (let l = all_curves; l != NULL; l = l->tl) {
       let b = l->hd;
       if (!saw_name && strcmp(b->name,name) == 0) saw_name = 1;
       if (saw_name && strcmp(b->name,"reserved") != 0) add_delta(b,x,delta_y);
     }
-    x++;
+    //    x++;
   }
 }
 //////////////////////////////////////////////////////////////////////
 
-int curve_cmp(curve_t x, curve_t y) {
+static int curve_cmp(curve_t x, curve_t y) {
   if (x->area < y->area) return -1;
   else if (x->area == y->area) return 0;
   else return 1;
 }
 
-int generate_newgraph(string_t<`H> file) {
+const char ?colors[] =
+//  {"red", "orange", "yellow", "green", "blue", "indigo", "violet" };
+  {
+    "rgb(148,208,84)",
+    "rgb(0,104,96)",
+    "rgb(0,101,0)",
+    "rgb(88,80,0)",
+    "rgb(0,67,58)",
+    "rgb(0,56,0)",
+    "rgb(0,0,208)"
+  };
+
+static void try1(int xres, int num_curves, unsigned int, coord_t ?? yv);
+
+#define SEPARATION 15
+static void output_legend() {
+  let curves = rev(all_curves);
+  let num_curves = length(curves);
+  int i = 0;
+  for (let l = curves; l != NULL; i++, l = l->tl) {
+    printf("<rect x='0' y='%f' width='%f' height='%f'"
+           " fill='%s' stroke='none' opacity='0.7'/>\n",
+           i*SEPARATION-(0.125*SEPARATION),
+           (0.75*SEPARATION),
+           (0.75*SEPARATION),
+           colors[num_curves-i-1]);
+    printf("<text x='%f' y='%f' fill='black' text-anchor='start'>%s</text>\n",
+           SEPARATION+5,
+           i*SEPARATION+(0.5*SEPARATION),
+           l->hd->name);
+  }
+}
+
+int generate_svg(string_t<`H> file) {
   struct ProcEnv @`H env =
     new ProcEnv{.mem_total = curve_init("reserved"),
 		.heap_live = curve_init("heap"),
@@ -524,11 +505,13 @@ int generate_newgraph(string_t<`H> file) {
   int ret = proc_file(file,clos);
   if (ret != 0) return ret;
 
-  mark_finish(env->mem_total);
-  mark_finish(env->heap_live);
-  mark_finish(env->unique_live);
-  mark_finish(env->refcnt_live);
-  mark_finish(env->other_live);
+  if (max_time<XMAXRES) xres = max_time+1; else xres = XMAXRES;
+
+  mark_finish(env->mem_total,max_time);
+  mark_finish(env->heap_live,max_time);
+  mark_finish(env->unique_live,max_time);
+  mark_finish(env->refcnt_live,max_time);
+  mark_finish(env->other_live,max_time);
 
   if (env->mem_total->area > 0.0)
     all_curves = new List(env->mem_total,all_curves);
@@ -543,15 +526,16 @@ int generate_newgraph(string_t<`H> file) {
   all_curves = merge_sort(curve_cmp,all_curves);
   //  Xarray::iter(doit,(_@)events);
   Xarray::iter(doit2,(_@)events);
-  for (let l = all_curves; l != NULL; l = l->tl)
-    add_finish(l->hd);
-
+  for (let l = all_curves; l != NULL; l = l->tl) {
+    add_finish(l->hd,max_time);
+  }
   int max_y = 0;
-  if (max_y < env->mem_total->max_y) max_y = env->mem_total->max_y;
-  if (max_y < env->heap_live->max_y) max_y = env->heap_live->max_y;
-  if (max_y < env->unique_live->max_y) max_y = env->unique_live->max_y;
-  if (max_y < env->refcnt_live->max_y) max_y = env->refcnt_live->max_y;
-  if (max_y < env->other_live->max_y) max_y = env->other_live->max_y;
+  for (let l = all_curves; l != NULL; l = l->tl) {
+    if (strcmp(l->hd->name,"reserved") == 0) {
+      max_y = l->hd->max_y; break;
+    }
+    max_y += l->hd->max_y;
+  }
 
   double memory_footprint = env->mem_total->area;
   double data_footprint = 
@@ -567,6 +551,11 @@ int generate_newgraph(string_t<`H> file) {
   else
     /* With -nogc we don't get measurement of memory footprint */
     title = aprintf("Data footprint %s*events", print_bytes(data_footprint));
+
+  /* header */
+  printf("<?xml version='1.0' encoding='ISO-8859-1'?>\n"
+         "<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN'\n"
+         " 'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>\n");
 
   output_comment("Allocation profile produced by aprof");
   output_comment(aprintf("Total events:\t%u",
@@ -608,6 +597,31 @@ int generate_newgraph(string_t<`H> file) {
   comment_stats(env->refcnt_live);
   comment_stats(env->other_live);
 
+  int num_curves = length(all_curves);
+  coord_t ??zz = new {for i < num_curves: nth(all_curves,i)->points };
+  output_comment(aprintf("max_time = %u, max_y = %u\n",max_time,max_y));
+
+  /* start of svg stuff */
+  printf("<svg xmlns='http://www.w3.org/2000/svg'\n"
+         "     xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
+  try1(xres,num_curves,max_y,zz);
+
+  for (let l = all_curves; l != NULL; l = l->tl) {
+    curve_t b = l->hd;
+    if (strcmp("reserved",b->name) != 0)
+      b->name = aprintf("%s %s*events (%d%%)",b->name,
+                        print_bytes(b->area),
+                        (int)((b->area * 100.0)/data_footprint));
+  }
+  printf("<g transform='translate(%f,0)'>\n",WIDTH+20);
+  output_legend();
+  printf("</g>\n");
+
+  printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
+         WIDTH/2,HEIGHT+20,title);
+  printf("</svg>\n");
+
+  /*
   output_header(title,Xarray::length((_@)events),(int)(max_y * 1.05));
 
   output_line(aprintf("GC (%d total)",length(env->gc_points)),
@@ -623,7 +637,156 @@ int generate_newgraph(string_t<`H> file) {
   }
 
   output_cleanup();
+  */
 
 
   return 0;
+}
+
+coord_t yv[][11] =
+  { { 0, 5, 15, 10, 14, 20, 22, 13, 12, 8, 0 },
+    { 0, 5, 20, 20, 20, 20, 30, 25, 30, 20, 10 },
+    { 0, 10, 30, 35, 38, 40, 35, 30, 30, 25, 20 },
+    { 0, 20, 45, 75, 80, 72, 60, 55, 58, 65, 70 } };
+
+// or use rgb(0,0,255) etc.
+static void try1(int xres, int num_curves, unsigned int max_y, coord_t ?? yv) {
+
+  double xscale = WIDTH / xres; 
+  double yscale = -HEIGHT / max_y; 
+
+  printf("<g transform='translate(0,%f) scale(%.12f,%.12f)'>\n",
+         HEIGHT,xscale,yscale);
+
+  /* the fills */
+  // bottom curve first...
+  printf("<path d='M");
+  for (int x=0; x < xres; x++) {
+    printf("%d,%d ",x,yv[0][x]);
+  }
+  printf("%d,0 0,0 ",xres-1);
+  printf("' stroke='none' fill='%s' opacity='0.7'/>\n",colors[0]);
+
+  // ... then the other curves, going up
+  for (int i=1; i < num_curves; i++) {
+    printf("<path d='M");
+    for (int x=0; x < xres; x++) {
+      printf("%d,%d ",x,yv[i][x]);
+    }
+    for (int x=(xres-1); x >= 0; x--) {
+      printf("%d,%d ",x,yv[i-1][x]);
+    }
+    printf("0,%d ",yv[i][0]);
+    printf("' stroke='none' fill='%s' opacity='0.7'/>\n",colors[i]);
+  }
+
+  /* the garbage collections */
+  gc_scale();
+  for (let l = gc_list; l != NULL; l = l->tl) {
+    let &$(x1,x2) = l->hd;
+    printf("<rect x='%d' y='0' width='%d' height='%d'"
+           " fill='black' stroke='none' opacity='0.3'/>\n",
+           x1,x2-x1,max_y);
+  }
+  // temporary
+//  for (let l = marks; l != NULL; l = l->tl) {
+//    let x = l->hd;
+//    printf("<rect x='%u' y='0' width='0' height='%d'"
+//           " fill='yellow' stroke='none' opacity='0.9'/>\n",
+//           x,max_y);
+//  }
+  printf("</g>\n");
+
+  /* the lines */
+  /*
+  for (int i=0; i < num_curves; i++) {
+    printf("<path d='M");
+    for (int x=0; x < xres; x++) {
+     printf("%d,%d ",x*10,100-yv[i][x]);
+    }
+    printf("' stroke='black' stroke-linecap='round' stroke-linejoin='round' fill='none'/>\n");
+  }
+  */
+
+  /* x and y axes */
+  /*
+  printf("<path d='M0,0 0,100 100,100' fill='none'"
+         " stroke='black' stroke-linecap='round'/>\n");
+  // y axis tick marks
+  for (int y=0; y <= 100; y += 10) {
+    printf("<line x1='-3' y1='%d' x2='0' y2='%d'"
+           " stroke='black' stroke-linecap='round'/>\n",
+           100-y,100-y);
+    printf("<text x='-8' y='%d' fill='black' text-anchor='end'>%d</text>\n",
+           100-y,
+           y);
+  }
+  // x axis tick marks
+  for (int x=0; x <= 100; x += 10)
+    printf("<line x1='%d' y1='100' x2='%d' y2='103'"
+           " stroke='black' stroke-linecap='round'/>\n",x,x);
+  */
+}
+
+int f(int x) {
+  let sign = x%2;
+  if (sign) return x;
+  else return x+10;
+}
+
+/* Code to see how many points on a path can be handled by
+   an SVG viewer.  For Adobe Illustrator it seems to be about
+   30,000.
+*/
+/*
+void try2() {
+  printf("<?xml version='1.0' encoding='ISO-8859-1'?>\n"
+         "<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN'\n"
+         " 'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>\n"
+         "<svg xmlns='http://www.w3.org/2000/svg'\n"
+         "     xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
+
+  printf("<g transform='scale(0.005)'>\n");
+  printf("<path d='M");
+  for (int x=0; x <= 40000; x++) {
+    printf("%d,%d ",x,f(x));
+  }
+  printf("20000,0 0,0 ");
+  printf("' stroke='none' fill='blue' opacity='0.7'/>\n");
+
+  printf("</g>\n");
+  printf("</svg>\n");
+}
+
+int main() {
+  try1(11,4,yv);
+  return 0;
+}
+
+int foo() {
+  coord_t ??curves = new {for i < 4: (coord_t?)yv[i]};
+  try1(11,4,curves);
+  return 0;
+}
+*/
+
+void output_header(const char ?title,int xmax, int ymax) {
+  // FIX: title is ignored
+  printf("<?xml version='1.0' encoding='ISO-8859-1'?>\n"
+         "<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN'\n"
+         " 'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>\n"
+         "<svg xmlns='http://www.w3.org/2000/svg'\n"
+         "     xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
+}
+static void output_points_header(const char ? name) {
+  // TODO
+}
+static void output_lines_header(const char ?name, const char ?curvekind) {
+  printf("<path d='M");
+}
+static void output_curve_end() {
+  printf("' stroke='none' fill='%s' opacity='0.7'/>\n",colors[0]);
+}
+static void output_cleanup() {
+  // TODO
 }

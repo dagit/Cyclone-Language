@@ -24,6 +24,7 @@
 #include <stdarg.h>
 #include <signal.h>
 #include <setjmp.h>
+#include <time.h> // for clock()
 
 // The C include file precore_c.h is produced (semi) automatically
 // from the Cyclone include file core.h.  Note, it now includes
@@ -398,7 +399,8 @@ void Cyc_Core_ufree(struct _dyneither_ptr ptr) {
     unique_freed_bytes += sz;
     // output special "alloc" event here, where we have a negative size
     if (alloc_log != NULL) {
-      fprintf(alloc_log,"@\tunique\talloc\t-%d\t%d\t%d\t%d\t%x\n",
+      fprintf(alloc_log,"%u @\tunique\talloc\t-%d\t%d\t%d\t%d\t%x\n",
+              clock(),
 	      sz,
 	      region_get_heap_size(Cyc_Core_unique_region), 
 	      region_get_free_bytes(Cyc_Core_unique_region),
@@ -460,7 +462,8 @@ void Cyc_Core_drop_refptr(struct _dyneither_ptr ptr) {
       unsigned int sz = GC_size(ptr.base - sizeof(int));
       refcnt_freed_bytes += sz;
       if (alloc_log != NULL) {
-	fprintf(alloc_log,"@\trefcnt\talloc\t-%d\t%d\t%d\t%d\t%x\n",
+	fprintf(alloc_log,"%u @\trefcnt\talloc\t-%d\t%d\t%d\t%d\t%x\n",
+                clock(),
 		sz,
 		region_get_heap_size(Cyc_Core_refcnt_region), 
 		region_get_free_bytes(Cyc_Core_refcnt_region),
@@ -612,7 +615,8 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
   p->total_bytes = GC_size(p);
   p->free_bytes = next_size;
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"@\t%s\tresize\t%d\t%d\t%d\t%d\n",
+    fprintf(alloc_log,"%u @\t%s\tresize\t%d\t%d\t%d\t%d\n",
+            clock(),
 	    r->name,
 	    GC_size(p),
 	    GC_get_heap_size(), GC_get_free_bytes(), GC_get_total_bytes());
@@ -634,7 +638,8 @@ static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
   p->total_bytes = GC_size(p);
   p->free_bytes = page_size;
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"@\t%s\tresize\t%d\t%d\t%d\t%d\n",
+    fprintf(alloc_log,"%u @\t%s\tresize\t%d\t%d\t%d\t%d\n",
+            clock(),
 	    r->name,
 	    GC_size(p),
 	    GC_get_heap_size(), GC_get_free_bytes(), GC_get_total_bytes());
@@ -881,7 +886,8 @@ void _free_region(struct _RegionHandle *r) {
     GC_free(p);
     rgn_freed_bytes += sz;
     if (alloc_log != NULL) {
-      fprintf(alloc_log,"@\t%s\tresize\t-%d\t%d\t%d\t%d\n",
+      fprintf(alloc_log,"%u @\t%s\tresize\t-%d\t%d\t%d\t%d\n",
+              clock(),
 	      r->name, sz,
 	      GC_get_heap_size(), GC_get_free_bytes(), GC_get_total_bytes());
     }
@@ -918,7 +924,8 @@ static void _profile_check_gc() {
   if (GC_gc_no != last_GC_no) {
     last_GC_no = GC_gc_no;
     if (alloc_log != NULL) {
-      fprintf(alloc_log,"gc-%d\theap\tgc\t%d\t%d\t%d\n",
+      fprintf(alloc_log,"%u gc-%d\theap\tgc\t%d\t%d\t%d\n",
+              clock(),
 	      last_GC_no, GC_get_heap_size(),
 	      GC_get_free_bytes(), GC_get_total_bytes());
     }
@@ -997,7 +1004,8 @@ struct _RegionHandle _profile_new_region(const char *rgn_name,
     snprintf(buf,len,"%d-%s",cnt++,rgn_name);
 
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"%s:%s:%d\t%s\tcreate\t%d\t%d\t%d\n",
+    fprintf(alloc_log,"%u %s:%s:%d\t%s\tcreate\t%d\t%d\t%d\n",
+            clock(),
             file,func,
 	    lineno,buf,
 	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
@@ -1011,13 +1019,15 @@ void _profile_free_region(struct _RegionHandle *r, const char *file, const char 
   _free_region(r);
   if (alloc_log != NULL) {
     if (file == NULL)
-      fprintf(alloc_log,"@\t%s\tfree\t%d\t%d\t%d\n",
+      fprintf(alloc_log,"%u @\t%s\tfree\t%d\t%d\t%d\n",
+              clock(),
               (r == Cyc_Core_heap_region ? "heap" :
                (r == Cyc_Core_unique_region ? "unique" :
                 (r == Cyc_Core_refcnt_region ? "refcnt" : r->name))),
               GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
     else
-      fprintf(alloc_log,"%s:%s:%d\t%s\tfree\t%d\t%d\t%d\n",
+      fprintf(alloc_log,"%u %s:%s:%d\t%s\tfree\t%d\t%d\t%d\n",
+              clock(),
               file,func,lineno,
               (r == Cyc_Core_heap_region ? "heap" :
                (r == Cyc_Core_unique_region ? "unique" :
@@ -1032,7 +1042,8 @@ static void
 reclaim_finalizer(GC_PTR obj, GC_PTR client_data) {
   if (alloc_log != NULL)
     fprintf(alloc_log,
-            "@ @ reclaim \t%x\n",
+            "%u @ @ reclaim \t%x\n",
+            clock(),
             (unsigned int)obj);
 }
 
@@ -1057,7 +1068,8 @@ void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
     }
     else if (r == Cyc_Core_refcnt_region)
       s = GC_size(addr-1); // back up to before the refcnt
-    fprintf(alloc_log,"%s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
+    fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
+            clock(),
             file,func,lineno,
 	    (r == Cyc_Core_heap_region ? "heap" :
 	     (r == Cyc_Core_unique_region ? "unique" :
@@ -1080,7 +1092,8 @@ void * _profile_GC_malloc(int n, const char *file, const char *func, int lineno)
   n = GC_size(result);
   heap_total_bytes += n;
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"%s:%s:%d\theap\talloc\t%d\t%d\t%d\t%d\t%x\n",
+    fprintf(alloc_log,"%u %s:%s:%d\theap\talloc\t%d\t%d\t%d\t%d\t%x\n",
+            clock(),
             file,func,lineno,n,
 	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes(),
             (unsigned int)result);
@@ -1100,7 +1113,8 @@ void * _profile_GC_malloc_atomic(int n, const char *file, const char *func,
   heap_total_bytes += n;
   heap_total_atomic_bytes +=n;
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"%s:%s:%d\theap\talloc\t%d\t%d\t%d\t%d\t%x\n",
+    fprintf(alloc_log,"%u %s:%s:%d\theap\talloc\t%d\t%d\t%d\t%d\t%x\n",
+            clock(),
             file,func,lineno,n,
 	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes(),
             (unsigned int)result);
