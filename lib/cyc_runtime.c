@@ -41,7 +41,7 @@ struct _tagged_string *xprintf(char *fmt, ...) {
   result->contents[len1] = '\0';
 
   va_start(argp,fmt);
-  len2 = vsnprintf(result->contents,len1,fmt,argp);
+  len2 = vsnprintf(result->contents,len1+1,fmt,argp);
   va_end(argp);
 
   if (len1 != len2) {
