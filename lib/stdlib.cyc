@@ -21,14 +21,14 @@
 
 namespace Cstdlib {
   extern "C" {
-    double __cdecl atof(const Cstring);
-    int __cdecl atoi(const Cstring);
-    long __cdecl atol(const Cstring);
-    Cstring __cdecl getenv(const Cstring);
-    int __cdecl putenv(const Cstring);
-    double __cdecl strtod(Cstring, Cstring *`r);
-    long __cdecl strtol(Cstring, Cstring *`r, int);
-    unsigned long __cdecl strtoul(Cstring, Cstring *`r, int);
+    double atof(const Cstring);
+    int atoi(const Cstring);
+    long atol(const Cstring);
+    Cstring getenv(const Cstring);
+    int putenv(const Cstring);
+    double strtod(Cstring, Cstring *`r);
+    long strtol(Cstring, Cstring *`r, int);
+    unsigned long strtoul(Cstring, Cstring *`r, int);
 #define s2c(x) (string_to_Cstring(x))
   }
 }

@@ -28,14 +28,11 @@ struct _tagged_arr Cyc_Stdlib_getenv( struct _tagged_arr); extern double Cyc_Std
 struct _tagged_arr n, struct _tagged_arr* end); extern int Cyc_Stdlib_strtol(
 struct _tagged_arr n, struct _tagged_arr* end, int base); extern unsigned int
 Cyc_Stdlib_strtoul( struct _tagged_arr n, struct _tagged_arr* end, int base);
-extern double atof( unsigned char*)  __attribute__(( cdecl )) ; extern int atoi(
-unsigned char*)  __attribute__(( cdecl )) ; extern int atol( unsigned char*)
- __attribute__(( cdecl )) ; extern unsigned char* getenv( unsigned char*)
- __attribute__(( cdecl )) ; extern int putenv( unsigned char*)  __attribute__((
-cdecl )) ; extern double strtod( unsigned char*, unsigned char**)
- __attribute__(( cdecl )) ; extern int strtol( unsigned char*, unsigned char**,
-int)  __attribute__(( cdecl )) ; extern unsigned int strtoul( unsigned char*,
-unsigned char**, int)  __attribute__(( cdecl )) ; double Cyc_Stdlib_atof( struct
+extern double atof( unsigned char*); extern int atoi( unsigned char*); extern
+int atol( unsigned char*); extern unsigned char* getenv( unsigned char*); extern
+int putenv( unsigned char*); extern double strtod( unsigned char*, unsigned char**);
+extern int strtol( unsigned char*, unsigned char**, int); extern unsigned int
+strtoul( unsigned char*, unsigned char**, int); double Cyc_Stdlib_atof( struct
 _tagged_arr _nptr){ return atof( string_to_Cstring( _nptr));} int Cyc_Stdlib_atoi(
 struct _tagged_arr _nptr){ return atoi( string_to_Cstring( _nptr));} int Cyc_Stdlib_atol(
 struct _tagged_arr _nptr){ return atol( string_to_Cstring( _nptr));} struct
