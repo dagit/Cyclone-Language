@@ -418,7 +418,7 @@ If you want to write a function that creates new objects in a region
 determined by the caller, your function should take a region handle as one
 of its arguments.\footnote{The following discussion is not quite correct when
 allocating into the unique or reference-counted region; this will be
-described in Section~\ref{sec:poly-allocate}.}  The type of a handle is
+described in \sectionref{sec:poly-allocate}.}  The type of a handle is
 \texttt{region_t<`r>}, where \texttt{`r} is the region information
 associated with pointers into the region.  For example, this function
 allocates a pair of integers into the region whose handle is \texttt{r}:
@@ -694,12 +694,12 @@ the above queue definition requires its elements to be nullable unique
 pointers, when they could just as easily be non-unique pointers, or even
 reference-counted pointers (illustrated later), and the code for
 \texttt{take} would still work.  This problem can be addressed, and its
-solution is described in Section~\ref{sec:poly-allocate}.
+solution is described in \sectionref{sec:poly-allocate}.
 
 \subsubsection{Pattern Matching on Unique Pointers}
 \label{sec:unique-patterns}
 
-As described in Section~\ref{sec:patterns}, Cyclone supports pattern
+As described in \sectionref{sec:patterns}, Cyclone supports pattern
 matching on structured data with \texttt{let} declarations and
 \texttt{switch} statements.  Unique pointers, or structures containing
 unique pointers, can be matched against, while still ensuring that only one
@@ -871,7 +871,7 @@ future releases.
 \subsubsection{Polymorphism}
 \label{sec:poly-allocate}
 
-As described in Section~\ref{sec:common-use}, we can write functions that
+As described in \sectionref{sec:common-use}, we can write functions that
 take as arguments a region handle to allocate into.  For example, we wrote a
 function \texttt{rcopy} that copies a list into some region \texttt{`r2}.
 However, we didn't provide the full story that accounts for the unique
@@ -958,7 +958,7 @@ We have made three key changes to the prior version of \texttt{rcopy}:
 \item We have made \texttt{rcopy}'s implementation recursive.  This was
   necessary to avoid creating aliases to the newly created list.  In
   particular, if we were to have used a \texttt{prev} pointer as in the
-  version from Section~\ref{sec:common-use}, we would have two pointers to
+  version from \sectionref{sec:common-use}, we would have two pointers to
   the last-copied element: the \texttt{tl} field of the element before it in
   the list, and the current iterator variable \texttt{prev}.  The use of
   recursion allows us to iterate to the end of the list and construct it
@@ -1421,8 +1421,7 @@ bound.
 If the contents of existential packages contain only heap pointers,
 then \texttt{`H} is a fine choice for a region bound.
 
-These issues are discussed in
-\hyperref[sec:advanced]{Section~\ref{sec:advanced}.}
+These issues are discussed in \sectionref{sec:advanced}.
 
 % If you must write down a function type, then you have to understand
 % that we have been lying about the form of function types and

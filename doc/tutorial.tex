@@ -6,8 +6,7 @@ that Cyclone differs from C and some of the reasons why; you should
 come away with enough knowledge to start writing, compiling, and
 running your own Cyclone programs.  We assume that the Cyclone
 compiler is already installed on your system (see
-\hyperref[{sec:install}]{Appendix~\ref{sec:install}}
-if you need to install the compiler).
+\appendixref{sec:install} if you need to install the compiler).
 
 \subsection{Getting Started}
 
@@ -84,7 +83,7 @@ of pointers and either (a) puts some restrictions on how you can use pointers
 of a given kind or (b) places no restrictions but may insert additional
 run-time checks.  Here we present a basic overview of Cyclone
 pointers; they are summarized and covered in more detail in
-\hyperref[{sec:pointers}]{Section~\ref{sec:pointers}}.
+\sectionref{sec:pointers}.
 
 \subsubsection*{Nullable Pointers}
 
@@ -471,8 +470,7 @@ and the compiler will fill in the missing information.
 A bounded pointer paired with a \texttt{tag_t} is quite similar
 to a fat pointer.  Indeed, you can convert between the two using the
 library functions \texttt{mkfat} and \texttt{mkthin}.  See
-\hyperref[{sec:libraries}]{Section~\ref{sec:libraries}} for a further
-description.
+\appendixref{sec:libraries} for a further description.
 
 \subsubsection*{Initializing Pointers}
 
@@ -484,7 +482,7 @@ type need not be initialized before it is used, since doing so cannot result
 in a violation of safety.  This decision adheres to the philosophy of C, but
 diverges from that of traditional type-safe languages like Java and
 ML.  The rules for initialization of pointers used by Cyclone are
-described in \hyperref[{sec:definite}]{Section~\ref{sec:definite}}.
+described in \sectionref{sec:definite}.
 
 \subsection{Regions}
 \label{sec:tut-regions}
@@ -638,7 +636,7 @@ something points into a particular region, or that two things point
 into the same region.  In addition, it is sometimes useful to put in
 the region annotations for documentation purposes, or to make type
 errors less cryptic.  See
-Section~\hyperref[{sec:typeinference}]{Section~\ref{sec:typeinference}}
+\sectionref{sec:typeinference}
 for more information about region inference.
 
 
@@ -650,7 +648,7 @@ function parameters.  The following sections give a brief overview
 of these topics.  Information about additional region-based
 constructs, including the unique and reference-counted regions, and
 dynamic regions, can be found in
-\hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
+\sectionref{sec:regions}.
 
 \subsubsection*{The Heap Region}
 
@@ -703,7 +701,7 @@ garbage collector is used to reclaim the data allocated in the heap.
 We also support \emph{unique pointers} and \emph{reference-counted
   pointers} that programmers can safely free manually, but we defer
 discussion of these features until
-\hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
+\sectionref{sec:regions}.
 
 Using a garbage collector to recycle memory is the right thing to do
 for most applications.  For instance, the Cyclone compiler uses
@@ -788,7 +786,7 @@ and \texttt{new} and \texttt{malloc(...)}  are just abbreviations for
 %% \subsubsection*{Dynamic Regions}
 
 %% \emph{This section is out of date.  The new interface for dynamic
-%% regions is discussed in Section~\ref{sec:dynamic-regions}.}
+%% regions is discussed in \sectionref{sec:dynamic-regions}.}
 
 %% Block regions and growable regions allow you to create arenas that
 %% are lexically scoped.  The lifetimes of these regions begin and end
@@ -1099,7 +1097,7 @@ more work from the programmer, using the \emph{unique region} and
 create \emph{dynamic regions}, which support run-time allocation like
 LIFO regions, but have dynamic scope.  For more information on these,
 and regions in general, see
-\hyperref[{sec:regions}]{Section~\ref{sec:regions}}.
+\sectionref{sec:regions}.
 
 \subsection{Arrays}
 
@@ -1337,7 +1335,7 @@ the body of the case.  For example, \texttt{printT(x)} will print 3,
 since \texttt{x} holds \texttt{\{.Integer = 3\}}, and
 \texttt{printT(y)} will print \texttt{hello, world}.
 You can find out more about patterns in
-\hyperref[{sec:patterns}]{Section~\ref{sec:patterns}}; 
+\sectionref{sec:patterns}.
 
 \subsubsection*{Untagged Unions}
 
@@ -1399,9 +1397,9 @@ to print out the \texttt{"hello, world"} string in y.
 
 We can use datatypes to implement a safe form of variable arguments
 (or \emph{varargs}), as described in
-\hyperref[{sec:varargs}]{Section~\ref{sec:varargs}}.  More information
+\sectionref{sec:varargs}.  More information
 on Cyclone unions is presented in
-\hyperref[{sec:taggedunions}]{Section~\ref{sec:taggedunions}}.
+\sectionref{sec:taggedunions}.
 
 \subsection{C++, GCC and C99 Additions}
 
@@ -1413,8 +1411,7 @@ avoiding conflicts among library and program definitions.  In short,
 if a function \texttt{f} is defined in a namespace \texttt{Foo}, then
 we would access the function by referring to \texttt{Foo::f}.  The
 Cyclone standard libraries, such as \texttt{Core} or \texttt{List}
-(covered in detail in
-\hyperref[{sec:libraries}]{Section~\ref{sec:libraries}}) are defined
+(covered in detail in \sectionref{sec:libraries}) are defined
 each in their own namespace.  Cyclone also provides polymorphism
 similar to C++ templates.
 
@@ -1788,7 +1785,7 @@ in front of the tuple pattern.  Recall that we did something similar
 when matching exceptions in \texttt{catch} clauses, above.  The
 default case is for when \texttt{argsp} is NULL.  Many more details
 about pattern matching are presented in
-\hyperref[{sec:patterns}]{Section~\ref{sec:patterns}}.
+\sectionref{sec:patterns}.
 
 \subsection{Subtyping}
 Cyclone supports ``extension on the right'' and ``covariant depth on
@@ -1985,7 +1982,7 @@ actually \texttt{int}.
 It's also possible to code up ``first-class'' abstract data types
 using \texttt{struct}s with \emph{existentially quantified type
   variables}.  Existential types are described in
-\hyperref[{sec:advanced}]{Section~\ref{sec:advanced}}.
+\sectionref{sec:advanced}.
 
 % In particular, pattern matching one of these constructors
 % requires you to introduce explicit type variables into which the

@@ -54,6 +54,12 @@ urlcolor=bluegray]{hyperref}
 \fi %pdf
 \fi %screen
 
+%%% We use these instead of hyperref's autoref because HeVeA does not
+%%% support \autoref.  We use \ref instead of \ref* for the same
+%%% reason.
+\newcommand{\appendixref}[1]{\hyperref[#1]{Appendix~\ref{#1}}}
+\newcommand{\sectionref}[1]{\hyperref[#1]{Section~\ref{#1}}}
+
 %HEVEA \let\oldmeta=\@meta
 %HEVEA \renewcommand{\@meta}{\oldmeta \begin{rawhtml} <style type="text/css"> body {font-family: palatino, georgia, serif; margin-left: 7%; margin-right: 7%;} </style> \end{rawhtml}}
 

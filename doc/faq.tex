@@ -136,7 +136,7 @@ object is stored; different regions have different lifetimes and
 deallocation strategies, and the aliasing into certain regions may be
 restricted.  Cyclone uses
 this region information to prevent dereferencing a pointer whose
-storage has been deallocated.  See Section~\ref{sec:regions} for more
+storage has been deallocated.  See \sectionref{sec:regions} for more
 information on regions.
 %%   Regions can have a ``nested'' structure, for
 %% example, if the region for a function parameter is a variable, then
@@ -170,8 +170,7 @@ variable is used.  In function results and type definitions (including
 \texttt{typedef}), the heap region (\texttt{`H}) is used.  In function
 bodies, the compiler looks at the uses (using unification) to try to
 determine a region.
-See~\hyperref[{sec:tut-regions}]{Section~\ref{sec:regions}} 
-and~\hyperref[{sec:regions}]{Section~\ref{sec:regions}} for more information.
+See \sectionref{sec:tut-regions} and \sectionref{sec:regions} for more information.
 \end{faqa}
 
 \begin{faqa}{faq:questionable}{What does \texttt{int ?} mean?}
@@ -287,7 +286,7 @@ region types, R indicates ``normal'' regions like the heap, stack, and
 dynamic regions; UR indicates the unique region (i.e. only `U or an
 alias of it has kind UR); and TR indicates either; UR and TR kinds are
 used generally only in certain region-polymorphic functions; see
-Section~\ref{sec:poly-allocate}.  Effect types are sets of regions
+\sectionref{sec:poly-allocate}.  Effect types are sets of regions
 (these are explained elsewhere).
 \end{faqa}
 
