@@ -69,7 +69,7 @@
 #include "tcstmt.h"
 #include "evexp.h"
 #include "tc.h"
-#include <stdio.h>
+#include <cycboot.h>
 #include "tcdecl.h"
 #include <set.h>
 // cheat -- we know what positions are...

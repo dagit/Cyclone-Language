@@ -29,7 +29,7 @@
 #include "tcstmt.h"
 #include "evexp.h"
 #include "tc.h"
-#include <stdio.h>
+#include <cycboot.h>
 #include "tcdecl.h"
 
 using Core;

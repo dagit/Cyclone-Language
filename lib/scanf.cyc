@@ -74,9 +74,7 @@ static char sccsid[] = "%W% (Berkeley) %G%";
 #endif /* LIBC_SCCS and not lint */
 
 #include <core.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <stdio.h>
+#include <cycboot.h>
 using Core;
 
 typedef long long int _IO_ssize_t;

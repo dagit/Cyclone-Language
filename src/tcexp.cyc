@@ -30,7 +30,7 @@
 
 #include "absyn.h"
 #include <string.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include <position.h>
 #include "absynpp.h"
 #include "tcenv.h"

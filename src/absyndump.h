@@ -21,7 +21,7 @@
 #define _ABSYNDUMP_H_
 
 #include <core.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include <list.h>
 #include "absyn.h"
 

@@ -21,7 +21,7 @@
 
 #include <core.h>
 #include <list.h>
-#include <stddef.h> // for size_t
+#include <cycboot.h> // for size_t
 
 // A string is a char[?].  Most functions consider a zero (NUL)
 // character as an end of string marker, so we may have

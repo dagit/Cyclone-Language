@@ -19,7 +19,7 @@
 #include <core.h>
 #include <list.h>
 #include <dict.h>
-#include <stdio.h>
+#include <cycboot.h>
 
 namespace Dict;
 

@@ -20,7 +20,7 @@
 #ifndef _STRINGS_H
 #define _STRINGS_H
 
-#include <stddef.h>  // for size_t
+#include <cycboot.h>  // for size_t
 
 #ifndef __CYGWIN__
 extern int strcasecmp(buffer_t, buffer_t);

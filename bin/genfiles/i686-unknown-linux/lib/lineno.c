@@ -1,27 +1,4 @@
-#ifndef _SETJMP_H_
-#define _SETJMP_H_
-#ifndef ___sigset_t_def_
-#define ___sigset_t_def_
-typedef struct {unsigned long __val[1024 / (8 * sizeof(unsigned long))];} __sigset_t;
-#endif
-#ifndef ___jmp_buf_def_
-#define ___jmp_buf_def_
-typedef int __jmp_buf[6];
-#endif
-#ifndef ___jmp_buf_tag_def_
-#define ___jmp_buf_tag_def_
-struct __jmp_buf_tag{
-  __jmp_buf __jmpbuf;
-  int __mask_was_saved;
-  __sigset_t __saved_mask;
-};
-#endif
-#ifndef _jmp_buf_def_
-#define _jmp_buf_def_
-typedef struct __jmp_buf_tag jmp_buf[1];
-#endif
-extern int setjmp(jmp_buf);
-#endif
+#include <setjmp.h>
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -727,18 +704,7 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
-void*v;};struct _dyneither_ptr Cyc_Core_new_string(unsigned int);int Cyc_Core_intcmp(
-int,int);extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
-char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
-char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};typedef struct{int __count;union{unsigned int __wch;char __wchb[4];}
-__value;}Cyc___mbstate_t;typedef struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;
-typedef Cyc__G_fpos_t Cyc_fpos_t;struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc___cycFILE;
 struct Cyc_String_pa_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{
 int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
 int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
@@ -752,8 +718,16 @@ _dyneither_ptr,struct _dyneither_ptr);extern char Cyc_FileCloseError[15];struct 
 char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
 tag;struct _dyneither_ptr f1;};struct Cyc___cycFILE*Cyc_file_open(struct
 _dyneither_ptr,struct _dyneither_ptr);void Cyc_file_close(struct Cyc___cycFILE*);
-extern char Cyc_Lexing_Error[6];struct Cyc_Lexing_Error_struct{char*tag;struct
-_dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);
+struct Cyc_Core_Opt{void*v;};struct _dyneither_ptr Cyc_Core_new_string(unsigned int);
+int Cyc_Core_intcmp(int,int);extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};extern char Cyc_Lexing_Error[6];struct Cyc_Lexing_Error_struct{char*tag;
+struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);
 void*refill_state;struct _dyneither_ptr lex_buffer;int lex_buffer_len;int
 lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;
 int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(
@@ -765,10 +739,10 @@ struct _dyneither_ptr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*);int Cyc_Lexin
 struct Cyc_Lexing_lexbuf*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{char*
 tag;};struct Cyc_List_List*Cyc_List_merge_sort(int(*cmp)(void*,void*),struct Cyc_List_List*
-x);extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};unsigned int
+x);extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};unsigned long
 Cyc_strlen(struct _dyneither_ptr s);struct _dyneither_ptr Cyc_strdup(struct
 _dyneither_ptr src);struct _dyneither_ptr Cyc_substring(struct _dyneither_ptr,int ofs,
-unsigned int n);struct Cyc_Lineno_Pos{struct _dyneither_ptr logical_file;struct
+unsigned long n);struct Cyc_Lineno_Pos{struct _dyneither_ptr logical_file;struct
 _dyneither_ptr line;int line_no;int col;};struct Cyc_Lineno_Pos*Cyc_Lineno_pos_of_abs(
 struct _dyneither_ptr,int);void Cyc_Lineno_poss_of_abss(struct _dyneither_ptr
 filename,struct Cyc_List_List*places);enum Cyc_Lineno_token_val{Cyc_Lineno_NEWLINE
@@ -827,7 +801,7 @@ _get_dyneither_size(line,sizeof(char)) && ((char*)line.curr)[j]>= '0') && ((char
 line.curr)[j]<= '9'){++ j;}if(i == _get_dyneither_size(line,sizeof(char))){struct
 Cyc_Core_Opt*_tmp9=0;_npop_handler(0);return _tmp9;}{int number=0;if(({struct Cyc_IntPtr_sa_struct
 _tmpC;_tmpC.tag=2;_tmpC.f1=& number;({void*_tmpA[1]={& _tmpC};Cyc_sscanf((struct
-_dyneither_ptr)Cyc_substring((struct _dyneither_ptr)line,i,(unsigned int)(j - i)),({
+_dyneither_ptr)Cyc_substring((struct _dyneither_ptr)line,i,(unsigned long)(j - i)),({
 const char*_tmpB="%d";_tag_dyneither(_tmpB,sizeof(char),3);}),_tag_dyneither(
 _tmpA,sizeof(void*),1));});})!= 1){struct Cyc_Core_Opt*_tmpD=0;_npop_handler(0);
 return _tmpD;}while(j < _get_dyneither_size(line,sizeof(char)) && ((char*)line.curr)[
@@ -835,7 +809,7 @@ j]!= '"'){++ j;}{int k=++ j;while(k < _get_dyneither_size(line,sizeof(char)) && 
 char*)line.curr)[k]!= '"'){++ k;}if(j == _get_dyneither_size(line,sizeof(char))
  || k == _get_dyneither_size(line,sizeof(char))){struct Cyc_Core_Opt*_tmpE=0;
 _npop_handler(0);return _tmpE;}{struct _dyneither_ptr fname=Cyc_substring((struct
-_dyneither_ptr)line,j,(unsigned int)(k - j));struct Cyc_Core_Opt*_tmp11=({struct
+_dyneither_ptr)line,j,(unsigned long)(k - j));struct Cyc_Core_Opt*_tmp11=({struct
 Cyc_Core_Opt*_tmpF=_cycalloc(sizeof(*_tmpF));_tmpF->v=({struct _tuple0*_tmp10=
 _cycalloc(sizeof(*_tmp10));_tmp10->f1=fname;_tmp10->f2=number;_tmp10;});_tmpF;});
 _npop_handler(0);return _tmp11;};};};};};_pop_handler();}else{void*_tmp7=(void*)

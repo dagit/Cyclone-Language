@@ -21,7 +21,7 @@
 #define _ABSYNPP_H_
 
 #include <core.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include <list.h>
 #include <pp.h>
 #include "absyn.h"

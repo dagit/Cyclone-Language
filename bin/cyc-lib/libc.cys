@@ -2423,7 +2423,11 @@ hstub {
 }
 hstub {
   extern struct __cycFILE;  
+  // Be sure to use _def_ so we don't interfere with cycboot.h
+#ifndef _FILE_def_
+#define _FILE_def_
   typedef struct __cycFILE FILE;
+#endif
   extern FILE @stdout;
   extern FILE @stdin;
   extern FILE @stderr;
@@ -2472,7 +2476,11 @@ hstub {
     ShortPtr_pa(short @`r);
     IntPtr_pa(unsigned long @`r);
   };
+  // Be sure to use _def_ so we don't interfere with cycboot.h
+#ifndef _parg_t_def_
+#define _parg_t_def_
   typedef datatype PrintArg<`r> @`r parg_t<`r>;
+#endif
 
   // Cyclone specific.
   // Similar to sprintf but allocates a result of the right size on the heap.
@@ -2711,7 +2719,11 @@ hstub {
     FloatPtr_sa(float @`r);
     CharPtr_sa(char ? @nozeroterm`r)
   };
+  // Be sure to use _def_ so we don't interfere with cycboot.h
+#ifndef _sarg_t_def_
+#define _sarg_t_def_ 
   typedef datatype ScanfArg<`r1> @`r2 sarg_t<`r1,`r2>;
+#endif
 }
 hstub {
   extern int fscanf(FILE @, const char ?, ... inject sarg_t)

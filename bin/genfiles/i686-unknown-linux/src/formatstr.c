@@ -1,27 +1,4 @@
-#ifndef _SETJMP_H_
-#define _SETJMP_H_
-#ifndef ___sigset_t_def_
-#define ___sigset_t_def_
-typedef struct {unsigned long __val[1024 / (8 * sizeof(unsigned long))];} __sigset_t;
-#endif
-#ifndef ___jmp_buf_def_
-#define ___jmp_buf_def_
-typedef int __jmp_buf[6];
-#endif
-#ifndef ___jmp_buf_tag_def_
-#define ___jmp_buf_tag_def_
-struct __jmp_buf_tag{
-  __jmp_buf __jmpbuf;
-  int __mask_was_saved;
-  __sigset_t __saved_mask;
-};
-#endif
-#ifndef _jmp_buf_def_
-#define _jmp_buf_def_
-typedef struct __jmp_buf_tag jmp_buf[1];
-#endif
-extern int setjmp(jmp_buf);
-#endif
+#include <setjmp.h>
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -727,28 +704,7 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
-void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
-char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
-char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
-14];struct Cyc_List_List_mismatch_struct{char*tag;};struct Cyc_List_List*Cyc_List_imp_rev(
-struct Cyc_List_List*x);extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*
-tag;};int isdigit(int);unsigned int Cyc_strlen(struct _dyneither_ptr s);struct
-_dyneither_ptr Cyc_implode(struct Cyc_List_List*c);struct Cyc_Lineno_Pos{struct
-_dyneither_ptr logical_file;struct _dyneither_ptr line;int line_no;int col;};extern
-char Cyc_Position_Exit[5];struct Cyc_Position_Exit_struct{char*tag;};struct Cyc_Position_Segment;
-struct Cyc_Position_Lex_struct{int tag;};struct Cyc_Position_Parse_struct{int tag;};
-struct Cyc_Position_Elab_struct{int tag;};struct Cyc_Position_Error{struct
-_dyneither_ptr source;struct Cyc_Position_Segment*seg;void*kind;struct
-_dyneither_ptr desc;};extern char Cyc_Position_Nocontext[10];struct Cyc_Position_Nocontext_struct{
-char*tag;};typedef struct{int __count;union{unsigned int __wch;char __wchb[4];}
-__value;}Cyc___mbstate_t;typedef struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;
-typedef Cyc__G_fpos_t Cyc_fpos_t;struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc___cycFILE;
 struct Cyc_String_pa_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{
 int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
 int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
@@ -759,9 +715,27 @@ int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double
 ;struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
 tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
 char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
-tag;struct _dyneither_ptr f1;};struct _union_Nmspace_Rel_n{int tag;struct Cyc_List_List*
-val;};struct _union_Nmspace_Abs_n{int tag;struct Cyc_List_List*val;};struct
-_union_Nmspace_Loc_n{int tag;int val;};union Cyc_Absyn_Nmspace{struct
+tag;struct _dyneither_ptr f1;};int isdigit(int);struct Cyc_Core_Opt{void*v;};extern
+char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{char*
+tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
+14];struct Cyc_List_List_mismatch_struct{char*tag;};struct Cyc_List_List*Cyc_List_imp_rev(
+struct Cyc_List_List*x);extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*
+tag;};unsigned long Cyc_strlen(struct _dyneither_ptr s);struct _dyneither_ptr Cyc_implode(
+struct Cyc_List_List*c);struct Cyc_Lineno_Pos{struct _dyneither_ptr logical_file;
+struct _dyneither_ptr line;int line_no;int col;};extern char Cyc_Position_Exit[5];
+struct Cyc_Position_Exit_struct{char*tag;};struct Cyc_Position_Segment;struct Cyc_Position_Lex_struct{
+int tag;};struct Cyc_Position_Parse_struct{int tag;};struct Cyc_Position_Elab_struct{
+int tag;};struct Cyc_Position_Error{struct _dyneither_ptr source;struct Cyc_Position_Segment*
+seg;void*kind;struct _dyneither_ptr desc;};extern char Cyc_Position_Nocontext[10];
+struct Cyc_Position_Nocontext_struct{char*tag;};struct _union_Nmspace_Rel_n{int tag;
+struct Cyc_List_List*val;};struct _union_Nmspace_Abs_n{int tag;struct Cyc_List_List*
+val;};struct _union_Nmspace_Loc_n{int tag;int val;};union Cyc_Absyn_Nmspace{struct
 _union_Nmspace_Rel_n Rel_n;struct _union_Nmspace_Abs_n Abs_n;struct
 _union_Nmspace_Loc_n Loc_n;};union Cyc_Absyn_Nmspace Cyc_Absyn_Loc_n;union Cyc_Absyn_Nmspace
 Cyc_Absyn_Rel_n(struct Cyc_List_List*);union Cyc_Absyn_Nmspace Cyc_Absyn_Abs_n(
@@ -1057,7 +1031,7 @@ struct _dyneither_ptr,struct Cyc_Position_Segment*);struct Cyc_List_List*Cyc_For
 struct _RegionHandle*,struct Cyc_Tcenv_Tenv*,struct _dyneither_ptr,struct Cyc_Position_Segment*);
 struct _tuple9{struct Cyc_List_List*f1;struct Cyc_List_List*f2;struct Cyc_List_List*
 f3;struct Cyc_List_List*f4;char f5;int f6;};struct Cyc_Core_Opt*Cyc_Formatstr_parse_conversionspecification(
-struct _RegionHandle*r,struct _dyneither_ptr s,int i){unsigned int _tmp0=Cyc_strlen((
+struct _RegionHandle*r,struct _dyneither_ptr s,int i){unsigned long _tmp0=Cyc_strlen((
 struct _dyneither_ptr)s);if(i < 0  || i >= _tmp0)return 0;{struct Cyc_List_List*_tmp1=
 0;char c=' ';for(0;i < _tmp0;++ i){c=*((const char*)_check_dyneither_subscript(s,
 sizeof(char),i));switch(c){case '+': _LL0: goto _LL1;case '-': _LL1: goto _LL2;case ' ':
@@ -1108,7 +1082,7 @@ struct _tuple9*_tmp11=_region_malloc(r,sizeof(*_tmp11));_tmp11->f1=_tmp1;_tmp11-
 _tmp3;_tmp11->f3=_tmp6;_tmp11->f4=_tmpA;_tmp11->f5=c;_tmp11->f6=i + 1;_tmp11;});
 _tmp10;});};};};};}struct Cyc_List_List*Cyc_Formatstr_get_format_typs(struct
 _RegionHandle*r,struct Cyc_Tcenv_Tenv*te,struct _dyneither_ptr s,struct Cyc_Position_Segment*
-loc){unsigned int _tmp12=Cyc_strlen((struct _dyneither_ptr)s);struct Cyc_List_List*
+loc){unsigned long _tmp12=Cyc_strlen((struct _dyneither_ptr)s);struct Cyc_List_List*
 _tmp13=0;int i;struct _RegionHandle _tmp14=_new_region("temp");struct _RegionHandle*
 temp=& _tmp14;_push_region(temp);for(i=0;i < _tmp12;++ i){if(*((const char*)
 _check_dyneither_subscript(s,sizeof(char),i))!= '%')continue;{struct Cyc_Core_Opt*
@@ -1292,7 +1266,7 @@ struct Cyc_List_List*_tmpB2=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))C
 _tmp13);_npop_handler(0);return _tmpB2;};;_pop_region(temp);}struct _tuple10{int f1;
 struct Cyc_List_List*f2;struct Cyc_List_List*f3;char f4;int f5;};struct Cyc_Core_Opt*
 Cyc_Formatstr_parse_inputformat(struct _RegionHandle*r,struct _dyneither_ptr s,int i){
-unsigned int _tmpB3=Cyc_strlen((struct _dyneither_ptr)s);if(i < 0  || i >= _tmpB3)
+unsigned long _tmpB3=Cyc_strlen((struct _dyneither_ptr)s);if(i < 0  || i >= _tmpB3)
 return 0;{int _tmpB4=0;char _tmpB5=*((const char*)_check_dyneither_subscript(s,
 sizeof(char),i));if(_tmpB5 == '*'){_tmpB4=1;++ i;if(i >= _tmpB3)return 0;}{struct Cyc_List_List*
 _tmpB6=0;for(0;i < _tmpB3;++ i){_tmpB5=*((const char*)_check_dyneither_subscript(s,
@@ -1327,7 +1301,7 @@ _region_malloc(r,sizeof(*_tmpBE));_tmpBE->v=({struct _tuple10*_tmpBF=
 _region_malloc(r,sizeof(*_tmpBF));_tmpBF->f1=_tmpB4;_tmpBF->f2=_tmpB6;_tmpBF->f3=
 _tmpB8;_tmpBF->f4=_tmpB5;_tmpBF->f5=i + 1;_tmpBF;});_tmpBE;});};};};}struct Cyc_List_List*
 Cyc_Formatstr_get_scanf_typs(struct _RegionHandle*r,struct Cyc_Tcenv_Tenv*te,
-struct _dyneither_ptr s,struct Cyc_Position_Segment*loc){unsigned int _tmpC0=Cyc_strlen((
+struct _dyneither_ptr s,struct Cyc_Position_Segment*loc){unsigned long _tmpC0=Cyc_strlen((
 struct _dyneither_ptr)s);struct Cyc_List_List*_tmpC1=0;int i;struct _RegionHandle
 _tmpC2=_new_region("temp");struct _RegionHandle*temp=& _tmpC2;_push_region(temp);
 for(i=0;i < _tmpC0;++ i){if(*((const char*)_check_dyneither_subscript(s,sizeof(char),

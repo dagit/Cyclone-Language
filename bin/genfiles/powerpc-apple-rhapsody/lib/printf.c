@@ -1,11 +1,4 @@
-#ifndef _SETJMP_H_
-#define _SETJMP_H_
-#ifndef _jmp_buf_def_
-#define _jmp_buf_def_
-typedef int jmp_buf[192];
-#endif
-extern int setjmp(jmp_buf);
-#endif
+#include <setjmp.h>
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -711,20 +704,11 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- void exit(int);void*abort();struct Cyc_Core_NewRegion{struct _DynRegionHandle*
-dynregion;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17];
-struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dyneither_ptr f1;};extern
-char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{char*tag;struct
-_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
-char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
-char*tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
-extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{char*tag;};
-extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag;};
-struct Cyc___cycFILE;extern struct Cyc___cycFILE*Cyc_stdout;struct Cyc_Cstdio___abstractFILE;
-struct Cyc_String_pa_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{
-int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};double modf(double,
+double*);struct Cyc___cycFILE;extern struct Cyc___cycFILE*Cyc_stdout;struct Cyc_String_pa_struct{
+int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;}
+;struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
+tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
 int tag;unsigned long*f1;};struct _dyneither_ptr Cyc_aprintf(struct _dyneither_ptr,
 struct _dyneither_ptr);int Cyc_fprintf(struct Cyc___cycFILE*,struct _dyneither_ptr,
 struct _dyneither_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
@@ -734,21 +718,25 @@ _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cy
 int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
 int Cyc_printf(struct _dyneither_ptr,struct _dyneither_ptr);int Cyc_putc(int,struct
 Cyc___cycFILE*);struct _dyneither_ptr Cyc_rprintf(struct _RegionHandle*,struct
-_dyneither_ptr,struct _dyneither_ptr);int Cyc_snprintf(struct _dyneither_ptr,
-unsigned long,struct _dyneither_ptr,struct _dyneither_ptr);int Cyc_sprintf(struct
-_dyneither_ptr,struct _dyneither_ptr,struct _dyneither_ptr);int Cyc_vfprintf(struct
-Cyc___cycFILE*,struct _dyneither_ptr,struct _dyneither_ptr);int Cyc_vprintf(struct
-_dyneither_ptr,struct _dyneither_ptr);struct _dyneither_ptr Cyc_vrprintf(struct
-_RegionHandle*,struct _dyneither_ptr,struct _dyneither_ptr);int Cyc_vsnprintf(
-struct _dyneither_ptr,unsigned long,struct _dyneither_ptr,struct _dyneither_ptr);
-int Cyc_vsprintf(struct _dyneither_ptr,struct _dyneither_ptr,struct _dyneither_ptr);
-extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{char*tag;};
-extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*tag;struct
-_dyneither_ptr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern
-char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{char*tag;};
-extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};typedef struct{int
-quot;int rem;}Cyc_div_t;typedef struct{long quot;long rem;}Cyc_ldiv_t;void*abort();
-void exit(int);double modf(double,double*);static struct _dyneither_ptr Cyc_parg2string(
+_dyneither_ptr,struct _dyneither_ptr);int Cyc_vfprintf(struct Cyc___cycFILE*,struct
+_dyneither_ptr,struct _dyneither_ptr);int Cyc_vprintf(struct _dyneither_ptr,struct
+_dyneither_ptr);struct _dyneither_ptr Cyc_vrprintf(struct _RegionHandle*,struct
+_dyneither_ptr,struct _dyneither_ptr);int Cyc_vsnprintf(struct _dyneither_ptr,
+unsigned long,struct _dyneither_ptr,struct _dyneither_ptr);int Cyc_vsprintf(struct
+_dyneither_ptr,struct _dyneither_ptr,struct _dyneither_ptr);extern char Cyc_FileCloseError[
+15];struct Cyc_FileCloseError_struct{char*tag;};extern char Cyc_FileOpenError[14];
+struct Cyc_FileOpenError_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Core_Opt{
+void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
+extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{char*tag;};
+extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag;};
+struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
+14];struct Cyc_List_List_mismatch_struct{char*tag;};extern char Cyc_List_Nth[4];
+struct Cyc_List_Nth_struct{char*tag;};static struct _dyneither_ptr Cyc_parg2string(
 void*x){void*_tmp0=x;_LL1: {struct Cyc_String_pa_struct*_tmp1=(struct Cyc_String_pa_struct*)
 _tmp0;if(_tmp1->tag != 0)goto _LL3;}_LL2: return({const char*_tmp7="string";
 _tag_dyneither(_tmp7,sizeof(char),7);});_LL3: {struct Cyc_Int_pa_struct*_tmp2=(

@@ -20,7 +20,7 @@
 #define _PP_H_
 
 #include <core.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include <list.h>
 
 namespace PP {

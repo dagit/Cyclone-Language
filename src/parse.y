@@ -51,7 +51,7 @@ extern void yyprint(int i, union YYSTYPE v);
 #endif
 
 #include <core.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include <lexing.h>
 #include <list.h>
 #include <string.h>

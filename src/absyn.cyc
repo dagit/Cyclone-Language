@@ -20,12 +20,9 @@
 // we define ABSYN_CYC to avoid redeclaring the abstract syntax -- see absyn.h
 #define ABSYN_CYC 
 #include "absyn.h"
-#include "absynrep.h"
-#include <positionrep.h>
 #include <string.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include "tcutil.h"
-#include <marshal.h>
 #include "cyclone.h"
 using Core;
 using List;

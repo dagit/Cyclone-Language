@@ -19,9 +19,9 @@
 #ifndef _DICT_H_
 #define _DICT_H_
 
+#include <cycboot.h>
 #include <list.h>
 #include <iter.h>
-#include <stdio.h>
 
 namespace Dict {
 

@@ -31,8 +31,8 @@
 (***********************************************************************/
 
 #include <buffer.h>
+#include <cycboot.h> // for size_t
 #include <string.h>
-#include <stddef.h> // for size_t
 
 namespace Buffer;
 using Core;

@@ -1,11 +1,4 @@
-#ifndef _SETJMP_H_
-#define _SETJMP_H_
-#ifndef _jmp_buf_def_
-#define _jmp_buf_def_
-typedef int jmp_buf[192];
-#endif
-extern int setjmp(jmp_buf);
-#endif
+#include <setjmp.h>
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -711,12 +704,23 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
-void*v;};struct _dyneither_ptr Cyc_Core_new_string(unsigned int);struct
-_dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned int);extern char
-Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{char*tag;
-struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc___cycFILE;
+struct Cyc_String_pa_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{
+int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
+int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
+Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
+int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;}
+;struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
+tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
+char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
+tag;struct _dyneither_ptr f1;};int toupper(int);struct Cyc_Core_Opt{void*v;};struct
+_dyneither_ptr Cyc_Core_new_string(unsigned int);struct _dyneither_ptr Cyc_Core_rnew_string(
+struct _RegionHandle*,unsigned int);extern char Cyc_Core_Invalid_argument[17];
+struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dyneither_ptr f1;};extern
+char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{char*tag;struct
+_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
 char*tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
@@ -725,16 +729,16 @@ extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag
 struct _dyneither_ptr wrap_Cbuffer_as_buffer(char*,unsigned long);struct Cyc_List_List{
 void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(struct Cyc_List_List*x);
 extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{char*
-tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};int toupper(
-int);char*strerror(int errnum);unsigned long Cyc_strlen(struct _dyneither_ptr s);int
-Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2);int Cyc_strptrcmp(
-struct _dyneither_ptr*s1,struct _dyneither_ptr*s2);int Cyc_strncmp(struct
-_dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long len);int Cyc_zstrcmp(struct
-_dyneither_ptr,struct _dyneither_ptr);int Cyc_zstrncmp(struct _dyneither_ptr s1,
-struct _dyneither_ptr s2,unsigned long n);int Cyc_zstrptrcmp(struct _dyneither_ptr*,
-struct _dyneither_ptr*);int Cyc_strcasecmp(struct _dyneither_ptr,struct
-_dyneither_ptr);int Cyc_strncasecmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,
-unsigned long len);struct _dyneither_ptr Cyc_strcat(struct _dyneither_ptr dest,struct
+tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};char*
+strerror(int errnum);unsigned long Cyc_strlen(struct _dyneither_ptr s);int Cyc_strcmp(
+struct _dyneither_ptr s1,struct _dyneither_ptr s2);int Cyc_strptrcmp(struct
+_dyneither_ptr*s1,struct _dyneither_ptr*s2);int Cyc_strncmp(struct _dyneither_ptr s1,
+struct _dyneither_ptr s2,unsigned long len);int Cyc_zstrcmp(struct _dyneither_ptr,
+struct _dyneither_ptr);int Cyc_zstrncmp(struct _dyneither_ptr s1,struct
+_dyneither_ptr s2,unsigned long n);int Cyc_zstrptrcmp(struct _dyneither_ptr*,struct
+_dyneither_ptr*);int Cyc_strcasecmp(struct _dyneither_ptr,struct _dyneither_ptr);
+int Cyc_strncasecmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long
+len);struct _dyneither_ptr Cyc_strcat(struct _dyneither_ptr dest,struct
 _dyneither_ptr src);struct _dyneither_ptr Cyc_strconcat(struct _dyneither_ptr,struct
 _dyneither_ptr);struct _dyneither_ptr Cyc_rstrconcat(struct _RegionHandle*,struct
 _dyneither_ptr,struct _dyneither_ptr);struct _dyneither_ptr Cyc_strconcat_l(struct
@@ -792,7 +796,7 @@ _get_dyneither_size(s1,sizeof(char)) && minsz <= _get_dyneither_size(s2,sizeof(
 char))?0:((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,
 unsigned int line))Cyc___assert_fail)(({const char*_tmp0="minsz <= numelts(s1) && minsz <= numelts(s2)";
 _tag_dyneither(_tmp0,sizeof(char),45);}),({const char*_tmp1="string.cyc";
-_tag_dyneither(_tmp1,sizeof(char),11);}),60);while(i < minsz){char c1=((const char*)
+_tag_dyneither(_tmp1,sizeof(char),11);}),59);while(i < minsz){char c1=((const char*)
 s1.curr)[i];char c2=((const char*)s2.curr)[i];if(c1 == '\000'){if(c2 == '\000')
 return 0;else{return - 1;}}else{if(c2 == '\000')return 1;else{int diff=c1 - c2;if(diff
 != 0)return diff;}}++ i;}if(sz1 == sz2)return 0;if(minsz < sz2){if(*((const char*)
@@ -807,7 +811,7 @@ min_len > n?n: min_len;bound <= _get_dyneither_size(s1,sizeof(char)) && bound <=
 _get_dyneither_size(s2,sizeof(char))?0:((int(*)(struct _dyneither_ptr assertion,
 struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp2="bound <= numelts(s1) && bound <= numelts(s2)";
 _tag_dyneither(_tmp2,sizeof(char),45);}),({const char*_tmp3="string.cyc";
-_tag_dyneither(_tmp3,sizeof(char),11);}),96);{int i=0;for(0;i < bound;++ i){int retc;
+_tag_dyneither(_tmp3,sizeof(char),11);}),95);{int i=0;for(0;i < bound;++ i){int retc;
 if((retc=((const char*)s1.curr)[i]- ((const char*)s2.curr)[i])!= 0)return retc;}}
 if(len1 < n  || len2 < n)return(int)len1 - (int)len2;return 0;};}int Cyc_strncmp(
 struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long n){unsigned long len1=
@@ -819,7 +823,7 @@ min_length <= _get_dyneither_size(a,sizeof(char)) && min_length <=
 _get_dyneither_size(b,sizeof(char))?0:((int(*)(struct _dyneither_ptr assertion,
 struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp4="min_length <= numelts(a) && min_length <= numelts(b)";
 _tag_dyneither(_tmp4,sizeof(char),53);}),({const char*_tmp5="string.cyc";
-_tag_dyneither(_tmp5,sizeof(char),11);}),128);while((++ i,i < min_length)){int diff=(
+_tag_dyneither(_tmp5,sizeof(char),11);}),127);while((++ i,i < min_length)){int diff=(
 int)((const char*)a.curr)[i]- (int)((const char*)b.curr)[i];if(diff != 0)return diff;}
 return(int)as - (int)bs;};}int Cyc_zstrncmp(struct _dyneither_ptr s1,struct
 _dyneither_ptr s2,unsigned long n){if(n <= 0)return 0;{unsigned long s1size=
@@ -830,7 +834,7 @@ bound <= _get_dyneither_size(s2,sizeof(char))?0:((int(*)(struct _dyneither_ptr
 assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({const
 char*_tmp6="bound <= numelts(s1) && bound <= numelts(s2)";_tag_dyneither(_tmp6,
 sizeof(char),45);}),({const char*_tmp7="string.cyc";_tag_dyneither(_tmp7,sizeof(
-char),11);}),146);{int i=0;for(0;i < bound;++ i){if(((const char*)s1.curr)[i]< ((
+char),11);}),145);{int i=0;for(0;i < bound;++ i){if(((const char*)s1.curr)[i]< ((
 const char*)s2.curr)[i])return - 1;else{if(((const char*)s2.curr)[i]< ((const char*)
 s1.curr)[i])return 1;}}}if(min_size <= bound)return 0;if(s1size < s2size)return - 1;
 else{return 1;}};}int Cyc_zstrptrcmp(struct _dyneither_ptr*a,struct _dyneither_ptr*b){
@@ -842,7 +846,7 @@ dlen=Cyc_strlen((struct _dyneither_ptr)dest);slen=Cyc_strlen(src);if(slen + dlen
 dsize){slen <= _get_dyneither_size(src,sizeof(char))?0:((int(*)(struct
 _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({
 const char*_tmp8="slen <= numelts(src)";_tag_dyneither(_tmp8,sizeof(char),21);}),({
-const char*_tmp9="string.cyc";_tag_dyneither(_tmp9,sizeof(char),11);}),182);for(i=
+const char*_tmp9="string.cyc";_tag_dyneither(_tmp9,sizeof(char),11);}),181);for(i=
 0;i < slen;++ i){({struct _dyneither_ptr _tmpA=_dyneither_ptr_plus(dest,sizeof(char),(
 int)(i + dlen));char _tmpB=*((char*)_check_dyneither_subscript(_tmpA,sizeof(char),
 0));char _tmpC=((const char*)src.curr)[i];if(_get_dyneither_size(_tmpA,sizeof(char))
@@ -864,7 +868,7 @@ r,(_tmp13 + _tmp14)+ 1);int i;int j;_tmp13 <= _get_dyneither_size(ans,sizeof(cha
 assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({const
 char*_tmp15="alen <= numelts(ans) && alen <= numelts(a)";_tag_dyneither(_tmp15,
 sizeof(char),43);}),({const char*_tmp16="string.cyc";_tag_dyneither(_tmp16,
-sizeof(char),11);}),206);for(i=0;i < _tmp13;++ i){({struct _dyneither_ptr _tmp17=
+sizeof(char),11);}),205);for(i=0;i < _tmp13;++ i){({struct _dyneither_ptr _tmp17=
 _dyneither_ptr_plus(ans,sizeof(char),i);char _tmp18=*((char*)
 _check_dyneither_subscript(_tmp17,sizeof(char),0));char _tmp19=((const char*)a.curr)[
 i];if(_get_dyneither_size(_tmp17,sizeof(char))== 1  && (_tmp18 == '\000'  && _tmp19
@@ -872,7 +876,7 @@ i];if(_get_dyneither_size(_tmp17,sizeof(char))== 1  && (_tmp18 == '\000'  && _tm
 _get_dyneither_size(b,sizeof(char))?0:((int(*)(struct _dyneither_ptr assertion,
 struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp1A="blen <= numelts(b)";
 _tag_dyneither(_tmp1A,sizeof(char),19);}),({const char*_tmp1B="string.cyc";
-_tag_dyneither(_tmp1B,sizeof(char),11);}),208);for(j=0;j < _tmp14;++ j){({struct
+_tag_dyneither(_tmp1B,sizeof(char),11);}),207);for(j=0;j < _tmp14;++ j){({struct
 _dyneither_ptr _tmp1C=_dyneither_ptr_plus(ans,sizeof(char),i + j);char _tmp1D=*((
 char*)_check_dyneither_subscript(_tmp1C,sizeof(char),0));char _tmp1E=((const char*)
 b.curr)[j];if(_get_dyneither_size(_tmp1C,sizeof(char))== 1  && (_tmp1D == '\000'
@@ -928,7 +932,7 @@ unsigned long n){int i;n <= _get_dyneither_size(src,sizeof(char)) && n <=
 _get_dyneither_size(dest,sizeof(char))?0:((int(*)(struct _dyneither_ptr assertion,
 struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp2A="n <= numelts(src) && n <= numelts(dest)";
 _tag_dyneither(_tmp2A,sizeof(char),40);}),({const char*_tmp2B="string.cyc";
-_tag_dyneither(_tmp2B,sizeof(char),11);}),299);for(i=0;i < n;++ i){char _tmp2C=((
+_tag_dyneither(_tmp2B,sizeof(char),11);}),298);for(i=0;i < n;++ i){char _tmp2C=((
 const char*)src.curr)[i];if(_tmp2C == '\000')break;((char*)dest.curr)[i]=_tmp2C;}
 for(0;i < n;++ i){((char*)dest.curr)[i]='\000';}return dest;}struct _dyneither_ptr
 Cyc_zstrncpy(struct _dyneither_ptr dest,struct _dyneither_ptr src,unsigned long n){n
@@ -936,7 +940,7 @@ Cyc_zstrncpy(struct _dyneither_ptr dest,struct _dyneither_ptr src,unsigned long 
 char))?0:((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,
 unsigned int line))Cyc___assert_fail)(({const char*_tmp2D="n <= numelts(dest) && n <= numelts(src)";
 _tag_dyneither(_tmp2D,sizeof(char),40);}),({const char*_tmp2E="string.cyc";
-_tag_dyneither(_tmp2E,sizeof(char),11);}),313);{int i;for(i=0;i < n;++ i){((char*)
+_tag_dyneither(_tmp2E,sizeof(char),11);}),312);{int i;for(i=0;i < n;++ i){((char*)
 dest.curr)[i]=((const char*)src.curr)[i];}return dest;};}struct _dyneither_ptr Cyc_strcpy(
 struct _dyneither_ptr dest,struct _dyneither_ptr src){unsigned int ssz=
 _get_dyneither_size(src,sizeof(char));unsigned int dsz=_get_dyneither_size(dest,
@@ -984,7 +988,7 @@ ans,sizeof(char)) && amt <= _get_dyneither_size(s,sizeof(char))?0:((int(*)(struc
 _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({
 const char*_tmp3C="amt < numelts(ans) && amt <= numelts(s)";_tag_dyneither(_tmp3C,
 sizeof(char),40);}),({const char*_tmp3D="string.cyc";_tag_dyneither(_tmp3D,
-sizeof(char),11);}),409);{unsigned long i=0;for(0;i < amt;++ i){({struct
+sizeof(char),11);}),408);{unsigned long i=0;for(0;i < amt;++ i){({struct
 _dyneither_ptr _tmp3E=_dyneither_ptr_plus(ans,sizeof(char),(int)i);char _tmp3F=*((
 char*)_check_dyneither_subscript(_tmp3E,sizeof(char),0));char _tmp40=((const char*)
 s.curr)[(int)i];if(_get_dyneither_size(_tmp3E,sizeof(char))== 1  && (_tmp3F == '\000'
@@ -1076,7 +1080,7 @@ _get_dyneither_size(accept,sizeof(char));len <= _get_dyneither_size(s,sizeof(cha
 0:((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int
 line))Cyc___assert_fail)(({const char*_tmp4F="len <= numelts(s)";_tag_dyneither(
 _tmp4F,sizeof(char),18);}),({const char*_tmp50="string.cyc";_tag_dyneither(_tmp50,
-sizeof(char),11);}),559);{unsigned long i=0;for(0;i < len;++ i){int j;for(j=0;j < 
+sizeof(char),11);}),558);{unsigned long i=0;for(0;i < len;++ i){int j;for(j=0;j < 
 asize;++ j){if(((const char*)s.curr)[(int)i]== ((const char*)accept.curr)[j])break;}
 if(j == asize)return i;}}return len;}unsigned long Cyc_strcspn(struct _dyneither_ptr s,
 struct _dyneither_ptr accept){unsigned long len=Cyc_strlen((struct _dyneither_ptr)s);
@@ -1084,7 +1088,7 @@ unsigned int asize=_get_dyneither_size(accept,sizeof(char));len <=
 _get_dyneither_size(s,sizeof(char))?0:((int(*)(struct _dyneither_ptr assertion,
 struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp51="len <= numelts(s)";
 _tag_dyneither(_tmp51,sizeof(char),18);}),({const char*_tmp52="string.cyc";
-_tag_dyneither(_tmp52,sizeof(char),11);}),579);{unsigned long i=0;for(0;i < len;++
+_tag_dyneither(_tmp52,sizeof(char),11);}),578);{unsigned long i=0;for(0;i < len;++
 i){int j;for(j=0;j < asize;++ j){if(((const char*)s.curr)[(int)i]!= ((const char*)
 accept.curr)[j])break;}if(j == asize)return i;}}return len;}struct _dyneither_ptr Cyc_strtok(
 struct _dyneither_ptr s,struct _dyneither_ptr delim){static struct _dyneither_ptr olds={(
@@ -1120,7 +1124,7 @@ min_length=len1 < len2?len1: len2;min_length <= _get_dyneither_size(s1,sizeof(ch
 _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({
 const char*_tmp5A="min_length <= numelts(s1) && min_length <= numelts(s2)";
 _tag_dyneither(_tmp5A,sizeof(char),55);}),({const char*_tmp5B="string.cyc";
-_tag_dyneither(_tmp5B,sizeof(char),11);}),660);{int i=- 1;while((++ i,i < min_length)){
+_tag_dyneither(_tmp5B,sizeof(char),11);}),659);{int i=- 1;while((++ i,i < min_length)){
 int diff=toupper((int)((const char*)s1.curr)[i])- toupper((int)((const char*)s2.curr)[
 i]);if(diff != 0)return diff;}return(int)len1 - (int)len2;};}int Cyc_strcasecmp(
 struct _dyneither_ptr s1,struct _dyneither_ptr s2){if(s1.curr == s2.curr)return 0;{
@@ -1132,7 +1136,7 @@ min_len > n?n: min_len;bound <= _get_dyneither_size(s1,sizeof(char)) && bound <=
 _get_dyneither_size(s2,sizeof(char))?0:((int(*)(struct _dyneither_ptr assertion,
 struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(({const char*_tmp5C="bound <= numelts(s1) && bound <= numelts(s2)";
 _tag_dyneither(_tmp5C,sizeof(char),45);}),({const char*_tmp5D="string.cyc";
-_tag_dyneither(_tmp5D,sizeof(char),11);}),687);{int i=0;for(0;i < bound;++ i){int
+_tag_dyneither(_tmp5D,sizeof(char),11);}),686);{int i=0;for(0;i < bound;++ i){int
 retc;if((retc=toupper((int)((const char*)s1.curr)[i])- toupper((int)((const char*)
 s2.curr)[i]))!= 0)return retc;}}if(len1 < n  || len2 < n)return(int)len1 - (int)len2;
 return 0;};}int Cyc_strncasecmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,

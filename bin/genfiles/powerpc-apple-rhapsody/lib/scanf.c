@@ -1,11 +1,4 @@
-#ifndef _SETJMP_H_
-#define _SETJMP_H_
-#ifndef _jmp_buf_def_
-#define _jmp_buf_def_
-typedef int jmp_buf[192];
-#endif
-extern int setjmp(jmp_buf);
-#endif
+#include <setjmp.h>
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -711,43 +704,40 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- void exit(int);void*abort();struct Cyc_Core_NewRegion{struct _DynRegionHandle*
-dynregion;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17];
-struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dyneither_ptr f1;};extern
-char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{char*tag;struct
-_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
-char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
-char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};int isspace(int);int isupper(int);typedef struct{int quot;int rem;}Cyc_div_t;
-typedef struct{long quot;long rem;}Cyc_ldiv_t;void*abort();double atof(const char*);
-void exit(int);long strtol(char*,char**,int);unsigned long strtoul(char*,char**,int);
-struct Cyc___cycFILE;extern struct Cyc___cycFILE*Cyc_stdin;struct Cyc_Cstdio___abstractFILE;
-struct Cyc_String_pa_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{
-int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-int tag;unsigned long*f1;};int Cyc_fgetc(struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_struct{
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc___cycFILE;
+extern struct Cyc___cycFILE*Cyc_stdin;struct Cyc_String_pa_struct{int tag;struct
+_dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
+int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
+Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{int tag;
+unsigned long*f1;};int Cyc_fgetc(struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_struct{
 int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};
 struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;
 unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
 struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
 int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
-int Cyc_fscanf(struct Cyc___cycFILE*,struct _dyneither_ptr,struct _dyneither_ptr);
-int Cyc_getc(struct Cyc___cycFILE*);int Cyc_scanf(struct _dyneither_ptr,struct
-_dyneither_ptr);int Cyc_sscanf(struct _dyneither_ptr,struct _dyneither_ptr,struct
-_dyneither_ptr);int Cyc_ungetc(int,struct Cyc___cycFILE*);int Cyc_vsscanf(struct
-_dyneither_ptr,struct _dyneither_ptr,struct _dyneither_ptr);extern char Cyc_FileCloseError[
-15];struct Cyc_FileCloseError_struct{char*tag;};extern char Cyc_FileOpenError[14];
-struct Cyc_FileOpenError_struct{char*tag;struct _dyneither_ptr f1;};static struct
-_dyneither_ptr Cyc___sccl(char*tab,struct _dyneither_ptr fmt);static short*Cyc_va_arg_short_ptr(
-void*a){void*_tmp0=a;short*_tmp2;unsigned short*_tmp4;_LL1: {struct Cyc_ShortPtr_sa_struct*
-_tmp1=(struct Cyc_ShortPtr_sa_struct*)_tmp0;if(_tmp1->tag != 0)goto _LL3;else{_tmp2=
-_tmp1->f1;}}_LL2: return _tmp2;_LL3: {struct Cyc_UShortPtr_sa_struct*_tmp3=(struct
-Cyc_UShortPtr_sa_struct*)_tmp0;if(_tmp3->tag != 1)goto _LL5;else{_tmp4=_tmp3->f1;}}
-_LL4: return(short*)_tmp4;_LL5:;_LL6:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5[0]=({struct Cyc_Core_Invalid_argument_struct
-_tmp6;_tmp6.tag=Cyc_Core_Invalid_argument;_tmp6.f1=({const char*_tmp7="scan expects short pointer";
+int Cyc_getc(struct Cyc___cycFILE*);int Cyc_sscanf(struct _dyneither_ptr,struct
+_dyneither_ptr,struct _dyneither_ptr);int Cyc_ungetc(int,struct Cyc___cycFILE*);int
+Cyc_vsscanf(struct _dyneither_ptr,struct _dyneither_ptr,struct _dyneither_ptr);
+extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{char*tag;};
+extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*tag;struct
+_dyneither_ptr f1;};int isspace(int);int isupper(int);double atof(const char*);long
+strtol(char*,char**,int);unsigned long strtoul(char*,char**,int);struct Cyc_Core_Opt{
+void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};static struct _dyneither_ptr Cyc___sccl(char*tab,struct _dyneither_ptr fmt);
+static short*Cyc_va_arg_short_ptr(void*a){void*_tmp0=a;short*_tmp2;unsigned short*
+_tmp4;_LL1: {struct Cyc_ShortPtr_sa_struct*_tmp1=(struct Cyc_ShortPtr_sa_struct*)
+_tmp0;if(_tmp1->tag != 0)goto _LL3;else{_tmp2=_tmp1->f1;}}_LL2: return _tmp2;_LL3: {
+struct Cyc_UShortPtr_sa_struct*_tmp3=(struct Cyc_UShortPtr_sa_struct*)_tmp0;if(
+_tmp3->tag != 1)goto _LL5;else{_tmp4=_tmp3->f1;}}_LL4: return(short*)_tmp4;_LL5:;
+_LL6:(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp5=_cycalloc(
+sizeof(*_tmp5));_tmp5[0]=({struct Cyc_Core_Invalid_argument_struct _tmp6;_tmp6.tag=
+Cyc_Core_Invalid_argument;_tmp6.f1=({const char*_tmp7="scan expects short pointer";
 _tag_dyneither(_tmp7,sizeof(char),27);});_tmp6;});_tmp5;}));_LL0:;}static int*Cyc_va_arg_int_ptr(
 void*a){void*_tmp8=a;int*_tmpA;unsigned int*_tmpC;_LL8: {struct Cyc_IntPtr_sa_struct*
 _tmp9=(struct Cyc_IntPtr_sa_struct*)_tmp8;if(_tmp9->tag != 2)goto _LLA;else{_tmpA=

@@ -25,7 +25,7 @@
 #include <list.h>
 #include <filename.h>
 #include <position.h>
-#include <stdlib.h>
+#include <cycboot.h>
 #include <pp.h>
 #include <arg.h>
 #include "parse.h"

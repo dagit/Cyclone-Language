@@ -22,7 +22,7 @@ CYCLEX:=$(CYCDIR)/bin/cyclex$(EXE)
 CYCBISON:=$(CYCDIR)/bin/cycbison$(EXE)
 INC_PATH:=. include $(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)/include
 LIB_PATH:=$(CYCDIR)/lib
-LIBR:=$(CYCLIB)
+LIBR:=$(CYCBOOTLIB)
 export CYCC CYCLEX CYCBISON INC_PATH LIB_PATH LIBR
 
 # Note, the -B arguments ensure that we use the correct cyc_include.h.
@@ -64,9 +64,9 @@ CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
 
 all: libs $(CYCCOMP) cycdoc$(EXE) buildlib$(EXE) 
 
-libs: $(CYCLIB) nogc.a $(RUNTIME).$(O)
+libs: $(CYCBOOTLIB) $(CYCLIB) nogc.a $(RUNTIME).$(O)
 
-cfiles: cstubs.c $(C_SRCS) cycdoc.c buildlib.c $(C_LIBS) $(RUNTIME).c nogc.c precore_c.h
+cfiles: cstubs.c cycstubs.cyc $(C_SRCS) cycdoc.c buildlib.c $(C_BOOT_LIBS) boot_cycstubs.c $(C_LIBS) precore_c.h
 
 cyc_setjmp.h cstubs.c cycstubs.cyc: libc.cys
 	-mkdir include
@@ -85,7 +85,7 @@ ifdef MS
 #FIX: Ignore fewer flags.
 	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/lib/cyc-lib/gc.lib
 else
-	$(CYCC) $(CYCFLAGS) -v -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(CYCFLAGS) -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 endif
 
 # The -L. makes sure that we pick up the libcyc.a of the current
@@ -110,10 +110,10 @@ OTHER_CYCFLAGS += -noregions
 endif
 
 cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
-	$(CYCC) $(OTHER_CYCFLAGS) -v -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(OTHER_CYCFLAGS) -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 
 buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)
-	$(CYCC) $(OTHER_CYCFLAGS) -v -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(OTHER_CYCFLAGS) -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 
 install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
 	 (echo "char *Carch = \"$(ARCH)\";"; \
@@ -123,11 +123,25 @@ install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
 	  version=`cat $<`; \
 	  echo "char *Cversion = \"$$version\";") > $@
 
-$(CYCLIB): $(O_LIBS) cstubs.$(O)
+$(CYCLIB): $(O_LIBS) $(O_BOOT_LIBS) cstubs.$(O) cycstubs.$(O)
 ifdef MS
 	lib /out:$@ $^
 else
-	-$(RM) -f $@
+	-$(RM) $@
+ifdef LC_FLAG
+	$(CYCC) $(LC_FLAG) -o $@ $^
+else
+	ar rc $@ $^
+	@echo Trying ranlib, if not found, probably ok to ignore error messages
+	-ranlib $@
+endif
+endif
+
+$(CYCBOOTLIB): $(O_BOOT_LIBS) boot_cstubs.$(O) boot_cycstubs.$(O)
+ifdef MS
+	lib /out:$@ $^
+else
+	-$(RM) $@
 ifdef LC_FLAG
 	$(CYCC) $(LC_FLAG) -o $@ $^
 else
@@ -164,7 +178,7 @@ precore_c.h: core.h $(CYCC) cyc_include.h cycspecs
 	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ -stopafter-toc $<
 %.$(O): %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
 	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ $<
-# For runtime_cyc.c and nogc.c and cstubs.c
+# For runtime_cyc.c and nogc.c and cstubs.c and boot_cstubs.c
 %.$(O): %.c precore_c.h cyc_include.h cyc_setjmp.h cycspecs
 	$(CC) $(CFLAGS) -I. -c -o $@ $<
 
@@ -180,5 +194,5 @@ endif
 	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYCFLAGS) -B$(CYCDIR)/bin/lib/cyc-lib $< > $@
 
 ifndef NODEPS
--include $(addsuffix .d, $(CYCLONE_LIBS) $(CYCLONE_SRCS) cycdoc buildlib)
+-include $(addsuffix .d, $(CYCLONE_BOOT_LIBS) $(CYCLONE_LIBS) $(CYCLONE_SRCS) cycdoc buildlib)
 endif

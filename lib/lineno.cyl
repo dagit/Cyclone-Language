@@ -18,7 +18,7 @@
 
 {
 #include <core.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include <lexing.h>
 #include <string.h>
 #include <lineno.h>

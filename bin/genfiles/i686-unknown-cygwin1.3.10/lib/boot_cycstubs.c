@@ -1,11 +1,4 @@
-#ifndef _SETJMP_H_
-#define _SETJMP_H_
-#ifndef _jmp_buf_def_
-#define _jmp_buf_def_
-typedef int jmp_buf[52];
-#endif
-extern int setjmp(jmp_buf);
-#endif
+#include <setjmp.h>
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -711,57 +704,94 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
-void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};int Cyc_open(const
+char*,int,struct _dyneither_ptr);struct Cyc___cycFILE;struct Cyc_String_pa_struct{
+int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;}
+;struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
+tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+int tag;unsigned long*f1;};int Cyc_fclose(struct Cyc___cycFILE*);int Cyc_feof(struct
+Cyc___cycFILE*);int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fgetc(struct Cyc___cycFILE*);
+struct Cyc___cycFILE*Cyc_fopen(const char*,const char*);int Cyc_fputc(int,struct Cyc___cycFILE*);
+int Cyc_fputs(const char*,struct Cyc___cycFILE*);unsigned long Cyc_fread(struct
+_dyneither_ptr,unsigned long,unsigned long,struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_struct{
+int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};
+struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;
+unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
+struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
+int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
+unsigned long Cyc_fwrite(struct _dyneither_ptr,unsigned long,unsigned long,struct
+Cyc___cycFILE*);int Cyc_getc(struct Cyc___cycFILE*);int Cyc_putc(int,struct Cyc___cycFILE*);
+int Cyc_ungetc(int,struct Cyc___cycFILE*);int Cyc_getw(struct Cyc___cycFILE*);int Cyc_putw(
+int,struct Cyc___cycFILE*);extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
+char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
+tag;struct _dyneither_ptr f1;};struct Cyc___cycFILE*Cyc_file_open(struct
+_dyneither_ptr,struct _dyneither_ptr);void Cyc_file_close(struct Cyc___cycFILE*);
+struct _dyneither_ptr Cyc_getcwd(struct _dyneither_ptr buf,unsigned long size);struct
+Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
-char*tag;struct _dyneither_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;
-extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{char*tag;};
-extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{char*tag;};
-struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
-14];struct Cyc_List_List_mismatch_struct{char*tag;};extern char Cyc_List_Nth[4];
-struct Cyc_List_Nth_struct{char*tag;};struct Cyc_List_List*Cyc_List_rfilter_c(
-struct _RegionHandle*r,int(*f)(void*,void*),void*env,struct Cyc_List_List*x);
-struct Cyc_Queue_Queue;int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue*
-Cyc_Queue_create();void Cyc_Queue_add(struct Cyc_Queue_Queue*,void*x);void Cyc_Queue_radd(
-struct _RegionHandle*,struct Cyc_Queue_Queue*,void*x);void Cyc_Queue_push(struct Cyc_Queue_Queue*
-q,void*x);void Cyc_Queue_rpush(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*
-x);extern char Cyc_Queue_Empty[6];struct Cyc_Queue_Empty_struct{char*tag;};void*Cyc_Queue_take(
-struct Cyc_Queue_Queue*);void*Cyc_Queue_peek(struct Cyc_Queue_Queue*);void Cyc_Queue_clear(
-struct Cyc_Queue_Queue*);void Cyc_Queue_remove(struct Cyc_Queue_Queue*,void*);int
-Cyc_Queue_length(struct Cyc_Queue_Queue*);struct Cyc_List_List*Cyc_Queue_rfilter_c(
-struct _RegionHandle*,int(*f)(void*,void*),void*env,struct Cyc_Queue_Queue*q);void
-Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*);void Cyc_Queue_app(void*(*
-f)(void*),struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue{struct Cyc_List_List*
-front;struct Cyc_List_List*rear;unsigned int len;};int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*
-q){return q->front == 0;}char Cyc_Queue_Empty[6]="Empty";struct Cyc_Queue_Empty_struct
-Cyc_Queue_Empty_val={Cyc_Queue_Empty};struct Cyc_Queue_Queue*Cyc_Queue_create(){
-return({struct Cyc_Queue_Queue*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->front=0;
-_tmp1->rear=0;_tmp1->len=0;_tmp1;});}void Cyc_Queue_radd(struct _RegionHandle*r,
-struct Cyc_Queue_Queue*q,void*x){struct Cyc_List_List*cell=({struct Cyc_List_List*
-_tmp2=_region_malloc(r,sizeof(*_tmp2));_tmp2->hd=(void*)x;_tmp2->tl=0;_tmp2;});
-if(q->front == 0){q->front=cell;q->rear=cell;}else{((struct Cyc_List_List*)
-_check_null(q->rear))->tl=cell;q->rear=cell;}++ q->len;}void Cyc_Queue_add(struct
-Cyc_Queue_Queue*q,void*x){Cyc_Queue_radd(Cyc_Core_heap_region,q,x);}void Cyc_Queue_rpush(
-struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){q->front=({struct Cyc_List_List*
-_tmp3=_region_malloc(r,sizeof(*_tmp3));_tmp3->hd=(void*)x;_tmp3->tl=q->front;
-_tmp3;});if(q->rear == 0)q->rear=q->front;++ q->len;}void Cyc_Queue_push(struct Cyc_Queue_Queue*
-q,void*x){Cyc_Queue_rpush(Cyc_Core_heap_region,q,x);}void*Cyc_Queue_take(struct
-Cyc_Queue_Queue*q){if(q->front == 0)(int)_throw((void*)& Cyc_Queue_Empty_val);
-else{void*_tmp4=(void*)((struct Cyc_List_List*)_check_null(q->front))->hd;q->front=((
-struct Cyc_List_List*)_check_null(q->front))->tl;if(q->front == 0)q->rear=0;-- q->len;
-return _tmp4;}}void*Cyc_Queue_peek(struct Cyc_Queue_Queue*q){if(q->front == 0)(int)
-_throw((void*)& Cyc_Queue_Empty_val);else{return(void*)((struct Cyc_List_List*)
-_check_null(q->front))->hd;}}void Cyc_Queue_clear(struct Cyc_Queue_Queue*q){q->front=
-0;q->rear=0;q->len=0;}void Cyc_Queue_remove(struct Cyc_Queue_Queue*q,void*v){
-struct Cyc_List_List*x;struct Cyc_List_List*y;for((x=q->front,y=0);x != 0;(y=x,x=x->tl)){
-if((void*)x->hd == v){-- q->len;if(q->front == x)q->front=x->tl;else{((struct Cyc_List_List*)
-_check_null(y))->tl=x->tl;}if(q->rear == x)q->rear=y;break;}}}struct Cyc_List_List*
-Cyc_Queue_rfilter_c(struct _RegionHandle*r,int(*f)(void*,void*),void*env,struct
-Cyc_Queue_Queue*q){return Cyc_List_rfilter_c(r,f,env,q->front);}int Cyc_Queue_length(
-struct Cyc_Queue_Queue*q){return(int)q->len;}void Cyc_Queue_iter(void(*f)(void*),
-struct Cyc_Queue_Queue*q){struct Cyc_List_List*x=q->front;for(0;x != 0;x=x->tl){f((
-void*)x->hd);}}void Cyc_Queue_app(void*(*f)(void*),struct Cyc_Queue_Queue*q){
-struct Cyc_List_List*x=q->front;for(0;x != 0;x=x->tl){f((void*)x->hd);}}
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};int open_without_mode(const char*,int);int open_with_mode(const char*,int,
+unsigned short);int Cyc_open(const char*s,int i,struct _dyneither_ptr ms){if(
+_get_dyneither_size(ms,sizeof(unsigned short))>= 1)return open_with_mode(s,i,*((
+unsigned short*)_check_dyneither_subscript(ms,sizeof(unsigned short),0)));else{
+return open_without_mode(s,i);}}struct Cyc_Cstdio___abstractFILE;struct Cyc___cycFILE{
+struct Cyc_Cstdio___abstractFILE*file;};int fclose(struct Cyc_Cstdio___abstractFILE*);
+int Cyc_fclose(struct Cyc___cycFILE*f){return fclose(f->file);}int feof(struct Cyc_Cstdio___abstractFILE*);
+int Cyc_feof(struct Cyc___cycFILE*f){return feof(f->file);}int fflush(struct Cyc_Cstdio___abstractFILE*);
+int Cyc_fflush(struct Cyc___cycFILE*f){if((unsigned int)f)return fflush((struct Cyc_Cstdio___abstractFILE*)
+f->file);else{return fflush(0);}}int fgetc(struct Cyc_Cstdio___abstractFILE*);int
+Cyc_fgetc(struct Cyc___cycFILE*f){return fgetc(f->file);}struct Cyc_Cstdio___abstractFILE*
+fopen(const char*,const char*);struct Cyc___cycFILE*Cyc_fopen(const char*name,const
+char*type){struct Cyc_Cstdio___abstractFILE*_tmp0=fopen(name,type);return(
+unsigned int)_tmp0?({struct Cyc___cycFILE*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->file=(
+struct Cyc_Cstdio___abstractFILE*)_tmp0;_tmp1;}): 0;}int fputc(int,struct Cyc_Cstdio___abstractFILE*);
+int Cyc_fputc(int x,struct Cyc___cycFILE*f){return fputc(x,f->file);}int fputs(const
+char*,struct Cyc_Cstdio___abstractFILE*);int Cyc_fputs(const char*x,struct Cyc___cycFILE*
+f){return fputs(x,f->file);}unsigned long fread(char*,unsigned long,unsigned long,
+struct Cyc_Cstdio___abstractFILE*);static char _tmp3[27]="fread: buffer insufficient";
+static struct Cyc_Core_Failure_struct Cyc___fread_failure={Cyc_Core_Failure,{_tmp3,
+_tmp3,_tmp3 + 27}};unsigned long Cyc_fread(struct _dyneither_ptr ptr,unsigned long
+size,unsigned long nmemb,struct Cyc___cycFILE*f){if(size * nmemb > 
+_get_dyneither_size(ptr,sizeof(char)))(int)_throw((void*)& Cyc___fread_failure);
+return fread((char*)_check_null(_untag_dyneither_ptr(ptr,sizeof(char),1)),size,
+nmemb,f->file);}unsigned long fwrite(const char*,unsigned long,unsigned long,
+struct Cyc_Cstdio___abstractFILE*);static char _tmp5[31]="fwrite called with NULL string";
+static struct Cyc_Core_Failure_struct Cyc___fwrite_failure_1={Cyc_Core_Failure,{
+_tmp5,_tmp5,_tmp5 + 31}};static char _tmp7[28]="fwrite: buffer insufficient";static
+struct Cyc_Core_Failure_struct Cyc___fwrite_failure_2={Cyc_Core_Failure,{_tmp7,
+_tmp7,_tmp7 + 28}};unsigned long Cyc_fwrite(struct _dyneither_ptr ptr,unsigned long
+size,unsigned long nmemb,struct Cyc___cycFILE*f){if(!((unsigned int)ptr.curr))(int)
+_throw((void*)& Cyc___fwrite_failure_1);else{if(size * nmemb > _get_dyneither_size(
+ptr,sizeof(char)))(int)_throw((void*)& Cyc___fwrite_failure_2);return fwrite((
+const char*)_untag_dyneither_ptr(ptr,sizeof(char),1),size,nmemb,f->file);}}int
+getc(struct Cyc_Cstdio___abstractFILE*);int Cyc_getc(struct Cyc___cycFILE*f){return
+getc(f->file);}int putc(int,struct Cyc_Cstdio___abstractFILE*);int Cyc_putc(int x,
+struct Cyc___cycFILE*f){return putc(x,f->file);}int ungetc(int,struct Cyc_Cstdio___abstractFILE*);
+int Cyc_ungetc(int x,struct Cyc___cycFILE*f){return ungetc(x,f->file);}int getw(
+struct Cyc_Cstdio___abstractFILE*);int Cyc_getw(struct Cyc___cycFILE*f){return getw(
+f->file);}int putw(int,struct Cyc_Cstdio___abstractFILE*);int Cyc_putw(int x,struct
+Cyc___cycFILE*f){return putw(x,f->file);}char Cyc_FileCloseError[15]="FileCloseError";
+char Cyc_FileOpenError[14]="FileOpenError";struct Cyc___cycFILE*Cyc_file_open(
+struct _dyneither_ptr fname,struct _dyneither_ptr mode){struct Cyc___cycFILE*f=Cyc_fopen((
+const char*)_untag_dyneither_ptr(fname,sizeof(char),1),(const char*)
+_untag_dyneither_ptr(mode,sizeof(char),1));if(f == 0){struct _dyneither_ptr fn=({
+unsigned int _tmpA=_get_dyneither_size(fname,sizeof(char));char*_tmpB=(char*)
+_cycalloc_atomic(_check_times(sizeof(char),_tmpA + 1));struct _dyneither_ptr _tmpD=
+_tag_dyneither(_tmpB,sizeof(char),_tmpA + 1);{unsigned int _tmpC=_tmpA;
+unsigned int i;for(i=0;i < _tmpC;i ++){_tmpB[i]=((const char*)fname.curr)[(int)i];}
+_tmpB[_tmpC]=(char)0;}_tmpD;});(int)_throw((void*)({struct Cyc_FileOpenError_struct*
+_tmp8=_cycalloc(sizeof(*_tmp8));_tmp8[0]=({struct Cyc_FileOpenError_struct _tmp9;
+_tmp9.tag=Cyc_FileOpenError;_tmp9.f1=fn;_tmp9;});_tmp8;}));}return(struct Cyc___cycFILE*)
+f;}struct Cyc_FileCloseError_struct Cyc_FileCloseError_val={Cyc_FileCloseError};
+void Cyc_file_close(struct Cyc___cycFILE*f){if(Cyc_fclose(f)!= 0)(int)_throw((void*)&
+Cyc_FileCloseError_val);}char*getcwd(char*buf,unsigned long size);static char
+_tmp10[29]="getcwd: invalid buf argument";static struct Cyc_Core_Failure_struct Cyc___getcwd_failure={
+Cyc_Core_Failure,{_tmp10,_tmp10,_tmp10 + 29}};struct _dyneither_ptr Cyc_getcwd(
+struct _dyneither_ptr buf,unsigned long size){if(_get_dyneither_size(buf,sizeof(
+char))< size)(int)_throw((void*)& Cyc___getcwd_failure);{char*_tmp11=getcwd((char*)
+_check_null(_untag_dyneither_ptr(buf,sizeof(char),1)),size);return(unsigned int)
+_tmp11?buf: _tag_dyneither(0,0,0);};}

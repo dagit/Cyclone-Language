@@ -24,7 +24,7 @@
 #include <list.h>
 #include <dict.h>
 #include <string.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include "tcutil.h"
 #include "absynpp.h"
 

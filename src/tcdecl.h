@@ -21,7 +21,7 @@
 #ifndef _TCDECL_H_
 #define _TCDECL_H_
 
-#include <stdio.h>
+#include <cycboot.h>
 #include <position.h>
 #include <list.h>
 #include "absyn.h"

@@ -33,7 +33,7 @@
 #define _LEXING_H_
 
 #include <core.h>
-#include <stdio.h>
+#include <cycboot.h>
 
 namespace Lexing {
 using Core;

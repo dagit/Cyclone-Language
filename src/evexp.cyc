@@ -22,7 +22,7 @@
 #include <core.h>
 #include <list.h>
 #include <position.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include <string.h>
 #include "absyn.h"
 #include "absynpp.h"

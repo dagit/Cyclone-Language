@@ -1,0 +1,171 @@
+#include <core.h>
+using Core;
+
+#include <cycboot.h>
+
+  namespace Cfcntl {
+    extern "C" int open_without_mode(const char *,int);
+    extern "C" int open_with_mode(const char *,int,mode_t);
+  }
+  int open(const char * s, int i, ... mode_t ms) {
+    /* Note: if open is called with more than 3 arguments, the
+       additional args are simply ignored. */
+    if (numelts(ms) >= 1)
+      return Cfcntl::open_with_mode(s,i,ms[0]);
+    else
+      return Cfcntl::open_without_mode(s,i);
+  }
+
+  namespace Cstdio {
+    extern "C" struct __abstractFILE;
+    typedef struct __abstractFILE __cFILE;
+  }
+  abstract struct __cycFILE { // must match defn in c stub
+    Cstdio::__cFILE @file;
+  };
+
+  namespace Cstdio {
+    extern "C" int fclose(__cFILE @);
+  }
+  int fclose(FILE @f) {
+    return Cstdio::fclose(f->file);
+  }
+
+  namespace Cstdio {
+    extern "C" int feof(__cFILE @);
+  }
+  int feof(FILE @f) {
+    return Cstdio::feof(f->file);
+  }
+
+  namespace Cstdio {
+    extern "C" int fflush(__cFILE *);
+  }
+  int fflush(FILE *f) {
+    if (f)
+      return Cstdio::fflush(f->file);
+    else return Cstdio::fflush(NULL);
+  }
+
+  namespace Cstdio {
+    extern "C" int fgetc(__cFILE @);
+  }
+  int fgetc(FILE @f) {
+    return Cstdio::fgetc(f->file);
+  }
+
+  namespace Cstdio {
+    extern "C" __cFILE *fopen(const char @, const char @);
+  }
+  FILE *fopen(const char @ name, const char @ type) {
+    let cf = Cstdio::fopen(name, type);
+    // FIX: get rid of the heap allocation
+    return cf ? new __cycFILE((Cstdio::__cFILE @)cf) : NULL;
+  }
+
+  namespace Cstdio {
+    extern "C" int fputc(int, __cFILE @);
+  }
+  int fputc(int x, FILE @f) {
+    return Cstdio::fputc(x,f->file);
+  }
+
+  namespace Cstdio {
+    extern "C" int fputs(const char @, __cFILE @);
+  }
+  int fputs(const char @ x, FILE @f) {
+    return Cstdio::fputs(x,f->file);
+  }
+
+  namespace Cstdio {
+    extern "C" size_t fread(char * @nozeroterm, size_t, size_t, __cFILE @);
+  }
+  static datatype exn.Failure __fread_failure =
+    Failure("fread: buffer insufficient");
+  size_t fread(char ? @nozeroterm ptr, size_t size, size_t nmemb, FILE @f) {
+    if (size * nmemb > numelts(ptr)) throw &__fread_failure;
+    return Cstdio::fread((char * @nozeroterm)ptr, size, nmemb, f->file);
+  }
+
+  namespace Cstdio {
+    extern "C" size_t fwrite(const char @ @nozeroterm, size_t, size_t, __cFILE @);
+  }
+  static datatype exn.Failure __fwrite_failure_1 =
+    Failure("fwrite called with NULL string");
+  static datatype exn.Failure __fwrite_failure_2 =
+    Failure("fwrite: buffer insufficient");
+  size_t fwrite(const char ? @nozeroterm`r ptr, size_t size, size_t nmemb, FILE @f) {
+    if (!ptr) { throw &__fwrite_failure_1; } 
+    else {
+      if (size * nmemb > numelts(ptr)) throw &__fwrite_failure_2;
+      return Cstdio::fwrite((const char @ @nozeroterm)ptr, size, nmemb, f->file);
+    }
+  }
+
+  namespace Cstdio {
+    extern "C" int getc(__cFILE @);
+  }
+  int getc(FILE @f) {
+    return Cstdio::getc(f->file);
+  }
+
+  namespace Cstdio {
+    extern "C" int putc(int, __cFILE @);
+  }
+  int putc(int x, FILE @f) {
+    return Cstdio::putc(x,f->file);
+  }
+
+  namespace Cstdio {
+    extern "C" int ungetc(int, __cFILE @);
+  }
+  int ungetc(int x, FILE @f) {
+    return Cstdio::ungetc(x,f->file);
+  }
+
+  namespace Cstdio {
+    extern "C" int getw(__cFILE @);
+  }
+  int getw(FILE @f) {
+    return Cstdio::getw(f->file);
+  }
+
+  namespace Cstdio {
+    extern "C" int putw(int, __cFILE @);
+  }
+  int putw(int x, FILE @f) {
+    return Cstdio::putw(x,f->file);
+  }
+
+  datatype exn { 
+    FileOpenError(const char ?); 
+    FileCloseError;
+  };
+
+  FILE @file_open(const char ?fname, const char ?mode) {
+    FILE *f = fopen((const char @)fname, (const char @)mode);
+    if (f == NULL) {
+      const char ? fn = new {for i < numelts(fname) : fname[i]};
+      throw new FileOpenError(fn);
+    }
+    return (FILE @)f; // FIX: get rid of cast?
+  }
+
+  datatype exn.FileCloseError FileCloseError_val = FileCloseError;
+  void file_close(FILE @ f) {
+    if (fclose(f) != 0) throw &FileCloseError_val;
+  }
+
+  // FIX: this should really use a buffer, rather than a string, but
+  //   I can't get it to work otherwise
+  namespace Cunistd {
+    extern "C" char *`r getcwd(char *`r buf, size_t size);
+  }
+  static datatype exn.Failure __getcwd_failure =
+    Failure("getcwd: invalid buf argument");
+  char ?`r getcwd(char ?`r buf, size_t size) {
+    if (numelts(buf) < size) throw &__getcwd_failure;
+    let response = Cunistd::getcwd((char *)buf, size);
+    return response ? buf : NULL;
+  }
+

@@ -60,7 +60,7 @@
 */
 
 #include <core.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include <list.h>
 #include <dict.h>
 #include <set.h>

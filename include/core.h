@@ -82,7 +82,7 @@ struct NewRegion<`r2::R> {
 }
 
 #ifndef _CYC_GENERATE_PRECORE_C_
-#include <sys/types.h>
+#include <cycboot.h>
 
 /* The rest of these are implemented in Cyclone, in core.cyc. */
 namespace Core {

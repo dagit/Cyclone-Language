@@ -68,12 +68,8 @@ the executable file might be covered by the GNU General Public License. */
 
 /* Modified for Cyclone use */
 #include <core.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include <string.h>
-#include <ctype.h>
-#include <stdlib.h>
-#include <math.h>
-//#include <float.h>
 
 using Core;
 

@@ -24,7 +24,7 @@
 #include <list.h>
 #include <set.h>
 #include <position.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include "absyn.h"
 #include "tcenv.h"
 

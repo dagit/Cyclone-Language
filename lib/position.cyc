@@ -18,10 +18,9 @@
 
 #include <core.h>
 #include <list.h>
-#include <stdio.h>
-#include <position.h>
 #include <string.h>
-#include <positionrep.h>
+#include <cycboot.h>
+#include <position.h>
 
 namespace Position {
 using Core;

@@ -83,11 +83,7 @@
 #include "tcenv.h"
 #include "tc.h"
 
-#include <stdlib.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <unistd.h>
-#include <ctype.h>
+#include <cycboot.h>
 
 namespace Lex {
   extern void lex_init(bool use_cyclone_keywords);

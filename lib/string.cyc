@@ -20,10 +20,9 @@
 
 #include <core.h>
 #include <list.h>
-#include <ctype.h>
 #include <string.h>
 #include <strings.h>
-#include <stddef.h> // for size_t
+#include <cycboot.h> // for size_t
 #include <assert.h>
 
 // Need to undefine these so that we can refer to their C versions

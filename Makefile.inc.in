@@ -25,20 +25,14 @@ ifndef MS
   endif
 endif
 
-CYCLONE_LIBS:=arg\
-        array\
+# needed for booting
+CYCLONE_BOOT_LIBS:=arg\
         assert\
-        bitvec\
         buffer\
         core\
-	cycstubs\
         dict\
-	execinfo\
         filename\
         fn\
-        getopt\
-        getopt1\
-	grp\
         hashtable\
 	iter\
         lexing\
@@ -47,16 +41,24 @@ CYCLONE_LIBS:=arg\
         position\
         pp\
 	printf\
-	pwd\
-        queue\
-        rope\
 	scanf\
         set\
         slowdict\
-        splay\
         string\
-	tmp\
         xarray
+
+# other bits of the standard library
+CYCLONE_LIBS:=array\
+        bitvec\
+	execinfo\
+        getopt\
+        getopt1\
+	grp\
+	pwd\
+        queue\
+        rope\
+        splay\
+	tmp
 
 CYCLONE_H:=arg.h\
 	array.h\
@@ -77,7 +79,6 @@ CYCLONE_H:=arg.h\
 	lineno.h\
 	list.h\
 	position.h\
-	positionrep.h\
 	pp.h\
 	pwd.h\
 	queue.h\
@@ -159,14 +160,18 @@ endif
 RUNTIME:=runtime_cyc
 
 CYCLIB:=libcyc.$(A)
+CYCBOOTLIB:=libcycboot.$(A)
 CYCCOMP:=cyclone$(EXE)
 
-#jcheney: added cycdoc so that it gets included in update file list
 C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS))
+C_BOOT_LIBS:=$(addsuffix .c, $(CYCLONE_BOOT_LIBS))
 C_LIBS:=$(addsuffix .c, $(CYCLONE_LIBS))
 O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS))
+O_BOOT_LIBS:=$(addsuffix .$(O), $(CYCLONE_BOOT_LIBS))
 O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
+A_BOOT_LIBS:=$(addprefix a_, $(O_BOOT_LIBS))
 A_LIBS:=$(addprefix a_, $(O_LIBS))
+NOCHECK_BOOT_LIBS:=$(addprefix nocheck_, $(O_BOOT_LIBS))
 NOCHECK_LIBS:=$(addprefix nocheck_, $(O_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
 

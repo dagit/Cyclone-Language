@@ -21,7 +21,7 @@
 #ifndef _PARSE_H_
 #define _PARSE_H_
 #include "absyn.h"
-#include <stdio.h>
+#include <cycboot.h>
 #include <list.h>
 #include <lexing.h>
 using Core {

@@ -22,7 +22,7 @@
 // WARNING: lex_init must be called for each source file!
 
 #include <core.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include <list.h>
 #include <lexing.h>
 #include <set.h>
@@ -31,7 +31,7 @@
 #include "parse.h"
 #include <position.h>
 #include <dict.h>
-#include <tcutil.h>
+#include "tcutil.h"
 
 using Core;
 using List;

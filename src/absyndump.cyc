@@ -22,7 +22,7 @@
 // been tested.) 
 
 #include <core.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include <list.h>
 #include <string.h>
 #include "absyn.h"

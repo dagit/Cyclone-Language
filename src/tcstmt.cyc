@@ -30,7 +30,7 @@
 #include "tcstmt.h"
 #include "evexp.h"
 #include "toc.h" // for no_regions flag
-#include <stdio.h>
+#include <cycboot.h>
 
 #ifdef NO_PATHS
 #define UNIQUE_ERR_MSG "Cannot consume paths; do swap instead"

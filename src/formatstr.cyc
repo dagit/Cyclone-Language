@@ -19,10 +19,9 @@
 
 #include <core.h>
 #include <list.h>
-#include <ctype.h>
 #include <string.h>
 #include <position.h>
-#include <stdio.h>
+#include <cycboot.h>
 #include "absyn.h"
 #include "tcutil.h"
 #include "tcenv.h"

@@ -21,7 +21,7 @@
 
 #include <assert.h>
 #include <core.h>
-#include <stdio.h>
+#include <cycboot.h>
 
 `a
 __assert_fail (string_t assertion, string_t file, unsigned int line) 

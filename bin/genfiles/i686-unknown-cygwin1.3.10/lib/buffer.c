@@ -1,11 +1,4 @@
-#ifndef _SETJMP_H_
-#define _SETJMP_H_
-#ifndef _jmp_buf_def_
-#define _jmp_buf_def_
-typedef int jmp_buf[52];
-#endif
-extern int setjmp(jmp_buf);
-#endif
+#include <setjmp.h>
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -711,17 +704,27 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
-void*v;};struct _dyneither_ptr Cyc_Core_new_string(unsigned int);extern char Cyc_Core_Invalid_argument[
-17];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dyneither_ptr f1;};
-extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{char*tag;struct
-_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc___cycFILE;
+struct Cyc_String_pa_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{
+int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
+int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
+Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
+int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;}
+;struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
+tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{
+char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*
+tag;struct _dyneither_ptr f1;};struct Cyc_Core_Opt{void*v;};struct _dyneither_ptr Cyc_Core_new_string(
+unsigned int);extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
 char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
 char*tag;};struct Cyc_Buffer_t;struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n);
-struct _dyneither_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*);unsigned int Cyc_Buffer_length(
+struct _dyneither_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*);unsigned long Cyc_Buffer_length(
 struct Cyc_Buffer_t*);void Cyc_Buffer_clear(struct Cyc_Buffer_t*);void Cyc_Buffer_reset(
 struct Cyc_Buffer_t*);void Cyc_Buffer_add_char(struct Cyc_Buffer_t*,char);void Cyc_Buffer_add_substring(
 struct Cyc_Buffer_t*,struct _dyneither_ptr,int offset,int len);void Cyc_Buffer_add_string(
@@ -729,21 +732,21 @@ struct Cyc_Buffer_t*,struct _dyneither_ptr);void Cyc_Buffer_add_buffer(struct Cy
 buf_dest,struct Cyc_Buffer_t*buf_source);struct Cyc_List_List{void*hd;struct Cyc_List_List*
 tl;};extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_struct{
 char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_struct{char*tag;};
-unsigned int Cyc_strlen(struct _dyneither_ptr s);struct _dyneither_ptr Cyc_strncpy(
-struct _dyneither_ptr,struct _dyneither_ptr,unsigned int);struct _dyneither_ptr Cyc_zstrncpy(
-struct _dyneither_ptr,struct _dyneither_ptr,unsigned int);struct _dyneither_ptr Cyc_substring(
-struct _dyneither_ptr,int ofs,unsigned int n);struct Cyc_Buffer_t{struct
+unsigned long Cyc_strlen(struct _dyneither_ptr s);struct _dyneither_ptr Cyc_strncpy(
+struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);struct _dyneither_ptr Cyc_zstrncpy(
+struct _dyneither_ptr,struct _dyneither_ptr,unsigned long);struct _dyneither_ptr Cyc_substring(
+struct _dyneither_ptr,int ofs,unsigned long n);struct Cyc_Buffer_t{struct
 _dyneither_ptr buffer;unsigned int position;unsigned int length;struct
 _dyneither_ptr initial_buffer;};struct Cyc_Buffer_t*Cyc_Buffer_create(unsigned int
 n){if(n < 1)n=1;{struct _dyneither_ptr s=Cyc_Core_new_string(n + 1);return({struct
 Cyc_Buffer_t*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->buffer=s;_tmp0->position=0;
 _tmp0->length=n;_tmp0->initial_buffer=s;_tmp0;});};}struct _dyneither_ptr Cyc_Buffer_contents(
 struct Cyc_Buffer_t*b){return Cyc_substring((struct _dyneither_ptr)b->buffer,0,b->position);}
-unsigned int Cyc_Buffer_length(struct Cyc_Buffer_t*b){return(unsigned int)b->position;}
+unsigned long Cyc_Buffer_length(struct Cyc_Buffer_t*b){return(unsigned long)b->position;}
 void Cyc_Buffer_clear(struct Cyc_Buffer_t*b){b->position=0;return;}void Cyc_Buffer_reset(
 struct Cyc_Buffer_t*b){b->position=0;b->buffer=b->initial_buffer;b->length=
 _get_dyneither_size(b->buffer,sizeof(char))- 1;return;}static void Cyc_Buffer_resize(
-struct Cyc_Buffer_t*b,unsigned int more){unsigned int len=b->length;unsigned int
+struct Cyc_Buffer_t*b,unsigned int more){unsigned long len=b->length;unsigned long
 new_len=len;struct _dyneither_ptr new_buffer;while(b->position + more > new_len){
 new_len=2 * new_len;}new_buffer=Cyc_Core_new_string(new_len + 1);Cyc_strncpy(
 _dyneither_ptr_decrease_size(new_buffer,sizeof(char),1),(struct _dyneither_ptr)b->buffer,
@@ -762,13 +765,13 @@ _tag_dyneither(_tmp6,sizeof(char),22);});_tmp5;});_tmp4;}));{int new_position=(
 int)(b->position + len);if(new_position > b->length)Cyc_Buffer_resize(b,(
 unsigned int)len);Cyc_zstrncpy(_dyneither_ptr_decrease_size(_dyneither_ptr_plus(
 b->buffer,sizeof(char),(int)b->position),sizeof(char),1),(struct _dyneither_ptr)
-_dyneither_ptr_plus(s,sizeof(char),offset),(unsigned int)len);b->position=(
+_dyneither_ptr_plus(s,sizeof(char),offset),(unsigned long)len);b->position=(
 unsigned int)new_position;return;};}void Cyc_Buffer_add_string(struct Cyc_Buffer_t*
 b,struct _dyneither_ptr s){int len=(int)Cyc_strlen((struct _dyneither_ptr)s);int
 new_position=(int)(b->position + len);if(new_position > b->length)Cyc_Buffer_resize(
 b,(unsigned int)len);Cyc_strncpy(_dyneither_ptr_plus(
 _dyneither_ptr_decrease_size(b->buffer,sizeof(char),1),sizeof(char),(int)b->position),(
-struct _dyneither_ptr)s,(unsigned int)len);b->position=(unsigned int)new_position;
-return;}void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*b,struct Cyc_Buffer_t*bs){
-Cyc_Buffer_add_substring(b,(struct _dyneither_ptr)bs->buffer,0,(int)bs->position);
+struct _dyneither_ptr)s,(unsigned long)len);b->position=(unsigned int)
+new_position;return;}void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*b,struct Cyc_Buffer_t*
+bs){Cyc_Buffer_add_substring(b,(struct _dyneither_ptr)bs->buffer,0,(int)bs->position);
 return;}

@@ -30,7 +30,7 @@
 #include "tcexp.h"
 #include "tcpat.h"
 #include "evexp.h"
-#include <stdio.h>
+#include <cycboot.h>
 
 using Core;
 using List;

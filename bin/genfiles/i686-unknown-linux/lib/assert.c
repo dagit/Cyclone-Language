@@ -1,27 +1,4 @@
-#ifndef _SETJMP_H_
-#define _SETJMP_H_
-#ifndef ___sigset_t_def_
-#define ___sigset_t_def_
-typedef struct {unsigned long __val[1024 / (8 * sizeof(unsigned long))];} __sigset_t;
-#endif
-#ifndef ___jmp_buf_def_
-#define ___jmp_buf_def_
-typedef int __jmp_buf[6];
-#endif
-#ifndef ___jmp_buf_tag_def_
-#define ___jmp_buf_tag_def_
-struct __jmp_buf_tag{
-  __jmp_buf __jmpbuf;
-  int __mask_was_saved;
-  __sigset_t __saved_mask;
-};
-#endif
-#ifndef _jmp_buf_def_
-#define _jmp_buf_def_
-typedef struct __jmp_buf_tag jmp_buf[1];
-#endif
-extern int setjmp(jmp_buf);
-#endif
+#include <setjmp.h>
 /* This is a C header file to be used by the output of the Cyclone to
    C translator.  The corresponding definitions are in file
    lib/runtime_cyc.c
@@ -728,18 +705,7 @@ static _INLINE void _swap_dyneither(struct _dyneither_ptr *x,
   *y = tmp;
 }
  void exit(int);struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct
-Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
-char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
-char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
-char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct
-_dyneither_ptr file,unsigned int line);typedef struct{int __count;union{unsigned int
-__wch;char __wchb[4];}__value;}Cyc___mbstate_t;typedef struct{long __pos;Cyc___mbstate_t
-__state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t Cyc_fpos_t;struct Cyc___cycFILE;extern
-struct Cyc___cycFILE*Cyc_stderr;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
+Cyc___cycFILE;extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_struct{
 int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;}
 ;struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{int
 tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
@@ -752,11 +718,20 @@ struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct
 int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dyneither_ptr f1;};
 extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_struct{char*tag;};
 extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_struct{char*tag;struct
-_dyneither_ptr f1;};void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct
-_dyneither_ptr file,unsigned int line){({struct Cyc_String_pa_struct _tmp4;_tmp4.tag=
-0;_tmp4.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)assertion);({struct Cyc_Int_pa_struct
-_tmp3;_tmp3.tag=1;_tmp3.f1=line;({struct Cyc_String_pa_struct _tmp2;_tmp2.tag=0;
-_tmp2.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file);({void*_tmp0[3]={&
-_tmp2,& _tmp3,& _tmp4};Cyc_fprintf(Cyc_stderr,({const char*_tmp1="%s:%u: Assertion `%s' failed.\n";
+_dyneither_ptr f1;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
+17];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dyneither_ptr f1;};
+extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_struct{char*tag;struct
+_dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_struct{
+char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
+char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
+char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
+char*tag;};void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct
+_dyneither_ptr file,unsigned int line);void*Cyc___assert_fail(struct _dyneither_ptr
+assertion,struct _dyneither_ptr file,unsigned int line){({struct Cyc_String_pa_struct
+_tmp4;_tmp4.tag=0;_tmp4.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)
+assertion);({struct Cyc_Int_pa_struct _tmp3;_tmp3.tag=1;_tmp3.f1=line;({struct Cyc_String_pa_struct
+_tmp2;_tmp2.tag=0;_tmp2.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file);({
+void*_tmp0[3]={& _tmp2,& _tmp3,& _tmp4};Cyc_fprintf(Cyc_stderr,({const char*_tmp1="%s:%u: Assertion `%s' failed.\n";
 _tag_dyneither(_tmp1,sizeof(char),31);}),_tag_dyneither(_tmp0,sizeof(void*),3));});});});});
 Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);exit(- 1);}

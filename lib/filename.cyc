@@ -18,7 +18,9 @@
 
 
 #include <filename.h>
+#include <list.h>
 #include <string.h>
+#include <cycboot.h>
 #define DIR_SEPARATOR '/'
 #define DIR_SEPARATOR_STR ("/")
 
