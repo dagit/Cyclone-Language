@@ -2157,8 +2157,9 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   // FIX: cannot have Float_p in any cases.
   bool leave_as_switch;
   switch (compress(t)) {
-  case &IntType(_,_): leave_as_switch = true;  break;
-  default:            leave_as_switch = false; break;
+  case &IntType(_,_):  fallthru;
+  case &EnumType(_,_): leave_as_switch = true;  break;
+  default:             leave_as_switch = false; break;
   }
   for(let scs1 = scs; scs1 != null; scs1 = scs1->tl)
     if(scs1->hd->pat_vars->v != null || scs1->hd->where_clause != null) {

@@ -1,5 +1,5 @@
 
 namespace TagElim {
-extern void tag_elim_test();
+extern void up_opt_test();
 }
 

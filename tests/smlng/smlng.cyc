@@ -154,7 +154,7 @@ doc_t down_opt(context_t ctxt, doc_t d) {
 
 
 int main(int argc, char ??argv) {
-  TagElim::tag_elim_test();
+  TagElim::up_opt_test();
   printf("hello\n");
   return 0;
 }

@@ -6,7 +6,7 @@
 namespace TagElim;
 
 // field is true if all text in the doc is guarded by an appropriate tag,
-// making an outer tag unnecessary.  Hopefully, the parser or another pass
+// making an outer tag unnecessary.  Another pass
 // gets the top-down things.  (Eg. This pass makes <r><r>x</r><r><y></r> into
 // <r>x</r><r><y></r> instead of <r>xy</r>)
 struct SynthS {
@@ -24,12 +24,12 @@ struct SynthS {
 };
 union Synth {
   struct SynthS s;
-  short i;
+  unsigned short i;
 };
 typedef union Synth synth_t; // not a pointer
 
 // currently destructive (of doc), but could easily be made functional
-$(doc_t, synth_t) tag_elim(doc_t doc) {
+$(doc_t, synth_t) up_opt(doc_t doc) {
   switch(doc) {
   case &Seq(ds): 
     synth_t synth;
@@ -37,7 +37,7 @@ $(doc_t, synth_t) tag_elim(doc_t doc) {
     if(ds.size == 0)
       return $(doc,synth);
     for(int i=0; i < ds.size; ++i) {
-      let $(newd, inner_synth) = tag_elim(ds[i]);
+      let $(newd, inner_synth) = up_opt(ds[i]);
       ds[i] = newd; // destructive here
       synth.i = (short)(synth.i & inner_synth.i); // cast avoids warning
     }
@@ -47,7 +47,7 @@ $(doc_t, synth_t) tag_elim(doc_t doc) {
     synth.i = 0;
     return $(doc,synth);
   case &Tagged(tag,d):
-    let $(d2, synth) = tag_elim(d);
+    let $(d2, synth) = up_opt(d);
     bool useless = false;
 #define OPT(FIELD) do { useless = synth.s.FIELD; synth.s.FIELD = true;} while(0)
     switch(tag) {
@@ -66,7 +66,7 @@ $(doc_t, synth_t) tag_elim(doc_t doc) {
       OPT(plain);
       int color = synth.s.color;
       int sz    = synth.s.sz;
-      synth.i = (short)~0; // cast avoids warning
+      synth.i = (unsigned short)~0; // cast avoids warning
       synth.s.color = color;
       synth.s.sz    = sz;
       break;
@@ -83,22 +83,27 @@ $(doc_t, synth_t) tag_elim(doc_t doc) {
 #undef OPT
     if(useless)
       return $(d2,synth);
-    else
+    else if(d2 == d)
       return $(doc,synth);
+    else
+      return $(new Tagged(tag,d2),synth);
   }
 }
 
-void tag_elim_test() {
+void up_opt_test1(doc_t d) {
+  Stdio::fputs("\n\n", Stdio::stdout);
+  dump(d);
+  d = up_opt(d)[0];
+  Stdio::fputs("\n\n", Stdio::stdout);
+  dump(d);
+}
+
+void up_opt_test() {
   unsigned char ? s = new {for i < 3: 'a'};
-  doc_t d1 = new Tagged(U_tag, new Tagged(U_tag, new Text(s)));
-  doc_t d2 =  new Tagged(U_tag, new Tagged(U_tag, d1));
-  dump(d1);
-  Stdio::fputs("\n\n", Stdio::stdout);
-  d1 = tag_elim(d1)[0];
-  dump(d1);
-  Stdio::fputs("\n\n", Stdio::stdout);
-  dump(d2);
-  Stdio::fputs("\n\n", Stdio::stdout);
-  d2 = tag_elim(d2)[0];
-  dump(d2);
+  doc_t d1 = new Tagged(U_tag, new Tagged(PL_tag, new Text(s)));
+  doc_t d2 = new Tagged(r_tag, new Tagged(w_tag, d1));
+  doc_t d3 = new Seq(new {d2,d1,d2});
+  up_opt_test1(d1);
+  up_opt_test1(d2);
+  up_opt_test1(d3);
 }

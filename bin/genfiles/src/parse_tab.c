@@ -811,309 +811,306 @@ tq=(( struct Cyc_Parse_Declaration_spec*)(( struct Cyc_Core_Opt*) _check_null(
 dso))->v)->tq; is_inline=(( struct Cyc_Parse_Declaration_spec*)(( struct Cyc_Core_Opt*)
 _check_null( dso))->v)->is_inline; atts=(( struct Cyc_Parse_Declaration_spec*)((
 struct Cyc_Core_Opt*) _check_null( dso))->v)->attributes; if((( struct Cyc_Parse_Declaration_spec*)((
-struct Cyc_Core_Opt*) _check_null( dso))->v)->sc != 0){ enum  Cyc_Parse_Storage_class
-_temp200=( enum  Cyc_Parse_Storage_class)(( struct Cyc_Core_Opt*) _check_null(((
-struct Cyc_Parse_Declaration_spec*)(( struct Cyc_Core_Opt*) _check_null( dso))->v)->sc))->v;
-_LL202: if( _temp200 == Cyc_Parse_Extern_sc){ goto _LL203;} else{ goto _LL204;}
-_LL204: if( _temp200 == Cyc_Parse_ExternC_sc){ goto _LL205;} else{ goto _LL206;}
-_LL206: if( _temp200 == Cyc_Parse_Static_sc){ goto _LL207;} else{ goto _LL208;}
-_LL208: goto _LL209; _LL203: sc=( void*) Cyc_Absyn_Extern; goto _LL201; _LL205:
-sc=( void*) Cyc_Absyn_ExternC; goto _LL201; _LL207: sc=( void*) Cyc_Absyn_Static;
-goto _LL201; _LL209: Cyc_Parse_err( _tag_arr("bad storage class on function",
-sizeof( unsigned char), 30u), loc); goto _LL201; _LL201:;}}{ struct Cyc_Core_Opt*
-_temp212; void* _temp214; struct _tuple5 _temp210= Cyc_Parse_collapse_type_specifiers(
-tss, loc); _LL215: _temp214= _temp210.f1; goto _LL213; _LL213: _temp212=
-_temp210.f2; goto _LL211; _LL211: { struct Cyc_List_List* _temp218; struct Cyc_List_List*
-_temp220; void* _temp222; struct Cyc_Absyn_Tqual _temp224; struct _tuple6
-_temp216= Cyc_Parse_apply_tms( tq, _temp214, atts, d->tms); _LL225: _temp224=
-_temp216.f1; goto _LL223; _LL223: _temp222= _temp216.f2; goto _LL221; _LL221:
-_temp220= _temp216.f3; goto _LL219; _LL219: _temp218= _temp216.f4; goto _LL217;
-_LL217: if( _temp212 != 0){ Cyc_Parse_warn( _tag_arr("nested type declaration within function prototype",
-sizeof( unsigned char), 50u), loc);} if( _temp220 != 0){ Cyc_Parse_warn(
+struct Cyc_Core_Opt*) _check_null( dso))->v)->sc != 0){ switch(( enum  Cyc_Parse_Storage_class)((
+struct Cyc_Core_Opt*) _check_null((( struct Cyc_Parse_Declaration_spec*)((
+struct Cyc_Core_Opt*) _check_null( dso))->v)->sc))->v){ case Cyc_Parse_Extern_sc:
+_LL200: sc=( void*) Cyc_Absyn_Extern; break; case Cyc_Parse_ExternC_sc: _LL201:
+sc=( void*) Cyc_Absyn_ExternC; break; case Cyc_Parse_Static_sc: _LL202: sc=(
+void*) Cyc_Absyn_Static; break; default: _LL203: Cyc_Parse_err( _tag_arr("bad storage class on function",
+sizeof( unsigned char), 30u), loc); break;}}}{ struct Cyc_Core_Opt* _temp207;
+void* _temp209; struct _tuple5 _temp205= Cyc_Parse_collapse_type_specifiers( tss,
+loc); _LL210: _temp209= _temp205.f1; goto _LL208; _LL208: _temp207= _temp205.f2;
+goto _LL206; _LL206: { struct Cyc_List_List* _temp213; struct Cyc_List_List*
+_temp215; void* _temp217; struct Cyc_Absyn_Tqual _temp219; struct _tuple6
+_temp211= Cyc_Parse_apply_tms( tq, _temp209, atts, d->tms); _LL220: _temp219=
+_temp211.f1; goto _LL218; _LL218: _temp217= _temp211.f2; goto _LL216; _LL216:
+_temp215= _temp211.f3; goto _LL214; _LL214: _temp213= _temp211.f4; goto _LL212;
+_LL212: if( _temp207 != 0){ Cyc_Parse_warn( _tag_arr("nested type declaration within function prototype",
+sizeof( unsigned char), 50u), loc);} if( _temp215 != 0){ Cyc_Parse_warn(
 _tag_arr("bad type params, ignoring", sizeof( unsigned char), 26u), loc);}{ void*
-_temp226= _temp222; struct Cyc_Absyn_FnInfo _temp232; struct Cyc_List_List*
-_temp234; struct Cyc_List_List* _temp236; struct Cyc_Absyn_VarargInfo* _temp238;
-int _temp240; struct Cyc_List_List* _temp242; void* _temp244; struct Cyc_Core_Opt*
-_temp246; struct Cyc_List_List* _temp248; _LL228: if(( unsigned int) _temp226 >
-4u?*(( int*) _temp226) == Cyc_Absyn_FnType: 0){ _LL233: _temp232=(( struct Cyc_Absyn_FnType_struct*)
-_temp226)->f1; _LL249: _temp248= _temp232.tvars; goto _LL247; _LL247: _temp246=
-_temp232.effect; goto _LL245; _LL245: _temp244=( void*) _temp232.ret_typ; goto
-_LL243; _LL243: _temp242= _temp232.args; goto _LL241; _LL241: _temp240= _temp232.c_varargs;
-goto _LL239; _LL239: _temp238= _temp232.cyc_varargs; goto _LL237; _LL237:
-_temp236= _temp232.rgn_po; goto _LL235; _LL235: _temp234= _temp232.attributes;
-goto _LL229;} else{ goto _LL230;} _LL230: goto _LL231; _LL229: { struct Cyc_List_List*
-_temp250=(( struct Cyc_List_List*(*)( struct _tuple4*(* f)( struct Cyc_Position_Segment*,
+_temp221= _temp217; struct Cyc_Absyn_FnInfo _temp227; struct Cyc_List_List*
+_temp229; struct Cyc_List_List* _temp231; struct Cyc_Absyn_VarargInfo* _temp233;
+int _temp235; struct Cyc_List_List* _temp237; void* _temp239; struct Cyc_Core_Opt*
+_temp241; struct Cyc_List_List* _temp243; _LL223: if(( unsigned int) _temp221 >
+4u?*(( int*) _temp221) == Cyc_Absyn_FnType: 0){ _LL228: _temp227=(( struct Cyc_Absyn_FnType_struct*)
+_temp221)->f1; _LL244: _temp243= _temp227.tvars; goto _LL242; _LL242: _temp241=
+_temp227.effect; goto _LL240; _LL240: _temp239=( void*) _temp227.ret_typ; goto
+_LL238; _LL238: _temp237= _temp227.args; goto _LL236; _LL236: _temp235= _temp227.c_varargs;
+goto _LL234; _LL234: _temp233= _temp227.cyc_varargs; goto _LL232; _LL232:
+_temp231= _temp227.rgn_po; goto _LL230; _LL230: _temp229= _temp227.attributes;
+goto _LL224;} else{ goto _LL225;} _LL225: goto _LL226; _LL224: { struct Cyc_List_List*
+_temp245=(( struct Cyc_List_List*(*)( struct _tuple4*(* f)( struct Cyc_Position_Segment*,
 struct _tuple2*), struct Cyc_Position_Segment* env, struct Cyc_List_List* x))
-Cyc_List_map_c)( Cyc_Parse_fnargspec_to_arg, loc, _temp242); return({ struct Cyc_Absyn_Fndecl*
-_temp251=( struct Cyc_Absyn_Fndecl*) GC_malloc( sizeof( struct Cyc_Absyn_Fndecl));
-_temp251->sc=( void*) sc; _temp251->name= d->id; _temp251->tvs= _temp248;
-_temp251->is_inline= is_inline; _temp251->effect= _temp246; _temp251->ret_type=(
-void*) _temp244; _temp251->args= _temp250; _temp251->c_varargs= _temp240;
-_temp251->cyc_varargs= _temp238; _temp251->rgn_po= _temp236; _temp251->body=
-body; _temp251->cached_typ= 0; _temp251->param_vardecls= 0; _temp251->attributes=
-Cyc_List_append( _temp234, _temp218); _temp251;});} _LL231: return(( struct Cyc_Absyn_Fndecl*(*)(
+Cyc_List_map_c)( Cyc_Parse_fnargspec_to_arg, loc, _temp237); return({ struct Cyc_Absyn_Fndecl*
+_temp246=( struct Cyc_Absyn_Fndecl*) GC_malloc( sizeof( struct Cyc_Absyn_Fndecl));
+_temp246->sc=( void*) sc; _temp246->name= d->id; _temp246->tvs= _temp243;
+_temp246->is_inline= is_inline; _temp246->effect= _temp241; _temp246->ret_type=(
+void*) _temp239; _temp246->args= _temp245; _temp246->c_varargs= _temp235;
+_temp246->cyc_varargs= _temp233; _temp246->rgn_po= _temp231; _temp246->body=
+body; _temp246->cached_typ= 0; _temp246->param_vardecls= 0; _temp246->attributes=
+Cyc_List_append( _temp229, _temp213); _temp246;});} _LL226: return(( struct Cyc_Absyn_Fndecl*(*)(
 struct _tagged_arr msg, struct Cyc_Position_Segment* sg)) Cyc_Parse_abort)(
 _tag_arr("declarator is not a function prototype", sizeof( unsigned char), 39u),
-loc); _LL227:;}}}}} static struct _tuple4* Cyc_Parse_fnargspec_to_arg( struct
+loc); _LL222:;}}}}} static struct _tuple4* Cyc_Parse_fnargspec_to_arg( struct
 Cyc_Position_Segment* loc, struct _tuple2* t){ if((* t).f1 == 0){ Cyc_Parse_err(
 _tag_arr("missing argument variable in function prototype", sizeof(
-unsigned char), 48u), loc); return({ struct _tuple4* _temp252=( struct _tuple4*)
-GC_malloc( sizeof( struct _tuple4)); _temp252->f1= _init_tag_arr(( struct
+unsigned char), 48u), loc); return({ struct _tuple4* _temp247=( struct _tuple4*)
+GC_malloc( sizeof( struct _tuple4)); _temp247->f1= _init_tag_arr(( struct
 _tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)),"?", sizeof( unsigned char),
-2u); _temp252->f2=(* t).f2; _temp252->f3=(* t).f3; _temp252;});} else{ return({
-struct _tuple4* _temp253=( struct _tuple4*) GC_malloc( sizeof( struct _tuple4));
-_temp253->f1=( struct _tagged_arr*)(( struct Cyc_Core_Opt*) _check_null((* t).f1))->v;
-_temp253->f2=(* t).f2; _temp253->f3=(* t).f3; _temp253;});}} static
-unsigned char _temp254[ 52u]="at most one type may appear within a type specifier";
-static struct _tagged_arr Cyc_Parse_msg1={ _temp254, _temp254, _temp254 + 52u};
-static unsigned char _temp255[ 63u]="const or volatile may appear only once within a type specifier";
-static struct _tagged_arr Cyc_Parse_msg2={ _temp255, _temp255, _temp255 + 63u};
-static unsigned char _temp256[ 50u]="type specifier includes more than one declaration";
-static struct _tagged_arr Cyc_Parse_msg3={ _temp256, _temp256, _temp256 + 50u};
-static unsigned char _temp257[ 60u]="sign specifier may appear only once within a type specifier";
-static struct _tagged_arr Cyc_Parse_msg4={ _temp257, _temp257, _temp257 + 60u};
+2u); _temp247->f2=(* t).f2; _temp247->f3=(* t).f3; _temp247;});} else{ return({
+struct _tuple4* _temp248=( struct _tuple4*) GC_malloc( sizeof( struct _tuple4));
+_temp248->f1=( struct _tagged_arr*)(( struct Cyc_Core_Opt*) _check_null((* t).f1))->v;
+_temp248->f2=(* t).f2; _temp248->f3=(* t).f3; _temp248;});}} static
+unsigned char _temp249[ 52u]="at most one type may appear within a type specifier";
+static struct _tagged_arr Cyc_Parse_msg1={ _temp249, _temp249, _temp249 + 52u};
+static unsigned char _temp250[ 63u]="const or volatile may appear only once within a type specifier";
+static struct _tagged_arr Cyc_Parse_msg2={ _temp250, _temp250, _temp250 + 63u};
+static unsigned char _temp251[ 50u]="type specifier includes more than one declaration";
+static struct _tagged_arr Cyc_Parse_msg3={ _temp251, _temp251, _temp251 + 50u};
+static unsigned char _temp252[ 60u]="sign specifier may appear only once within a type specifier";
+static struct _tagged_arr Cyc_Parse_msg4={ _temp252, _temp252, _temp252 + 60u};
 static struct _tuple5 Cyc_Parse_collapse_type_specifiers( struct Cyc_List_List*
 ts, struct Cyc_Position_Segment* loc){ struct Cyc_Core_Opt* declopt= 0; int
 seen_type= 0; int seen_sign= 0; int seen_size= 0; void* t=( void*) Cyc_Absyn_VoidType;
 void* sz=( void*) Cyc_Absyn_B4; void* sgn=( void*) Cyc_Absyn_Signed; struct Cyc_Position_Segment*
 last_loc= loc; for( 0; ts != 0; ts=(( struct Cyc_List_List*) _check_null( ts))->tl){
-void* _temp258=( void*)(( struct Cyc_List_List*) _check_null( ts))->hd; struct
-Cyc_Position_Segment* _temp272; void* _temp274; struct Cyc_Position_Segment*
-_temp276; struct Cyc_Position_Segment* _temp278; struct Cyc_Position_Segment*
-_temp280; struct Cyc_Position_Segment* _temp282; struct Cyc_Absyn_Decl* _temp284;
-_LL260: if(*(( int*) _temp258) == Cyc_Parse_Type_spec){ _LL275: _temp274=( void*)((
-struct Cyc_Parse_Type_spec_struct*) _temp258)->f1; goto _LL273; _LL273: _temp272=((
-struct Cyc_Parse_Type_spec_struct*) _temp258)->f2; goto _LL261;} else{ goto
-_LL262;} _LL262: if(*(( int*) _temp258) == Cyc_Parse_Signed_spec){ _LL277:
-_temp276=(( struct Cyc_Parse_Signed_spec_struct*) _temp258)->f1; goto _LL263;}
-else{ goto _LL264;} _LL264: if(*(( int*) _temp258) == Cyc_Parse_Unsigned_spec){
-_LL279: _temp278=(( struct Cyc_Parse_Unsigned_spec_struct*) _temp258)->f1; goto
-_LL265;} else{ goto _LL266;} _LL266: if(*(( int*) _temp258) == Cyc_Parse_Short_spec){
-_LL281: _temp280=(( struct Cyc_Parse_Short_spec_struct*) _temp258)->f1; goto
-_LL267;} else{ goto _LL268;} _LL268: if(*(( int*) _temp258) == Cyc_Parse_Long_spec){
-_LL283: _temp282=(( struct Cyc_Parse_Long_spec_struct*) _temp258)->f1; goto
-_LL269;} else{ goto _LL270;} _LL270: if(*(( int*) _temp258) == Cyc_Parse_Decl_spec){
-_LL285: _temp284=(( struct Cyc_Parse_Decl_spec_struct*) _temp258)->f1; goto
-_LL271;} else{ goto _LL259;} _LL261: if( seen_type){ Cyc_Parse_err( Cyc_Parse_msg1,
-_temp272);} last_loc= _temp272; seen_type= 1; t= _temp274; goto _LL259; _LL263:
-if( seen_sign){ Cyc_Parse_err( Cyc_Parse_msg4, _temp276);} if( seen_type){ Cyc_Parse_err(
+void* _temp253=( void*)(( struct Cyc_List_List*) _check_null( ts))->hd; struct
+Cyc_Position_Segment* _temp267; void* _temp269; struct Cyc_Position_Segment*
+_temp271; struct Cyc_Position_Segment* _temp273; struct Cyc_Position_Segment*
+_temp275; struct Cyc_Position_Segment* _temp277; struct Cyc_Absyn_Decl* _temp279;
+_LL255: if(*(( int*) _temp253) == Cyc_Parse_Type_spec){ _LL270: _temp269=( void*)((
+struct Cyc_Parse_Type_spec_struct*) _temp253)->f1; goto _LL268; _LL268: _temp267=((
+struct Cyc_Parse_Type_spec_struct*) _temp253)->f2; goto _LL256;} else{ goto
+_LL257;} _LL257: if(*(( int*) _temp253) == Cyc_Parse_Signed_spec){ _LL272:
+_temp271=(( struct Cyc_Parse_Signed_spec_struct*) _temp253)->f1; goto _LL258;}
+else{ goto _LL259;} _LL259: if(*(( int*) _temp253) == Cyc_Parse_Unsigned_spec){
+_LL274: _temp273=(( struct Cyc_Parse_Unsigned_spec_struct*) _temp253)->f1; goto
+_LL260;} else{ goto _LL261;} _LL261: if(*(( int*) _temp253) == Cyc_Parse_Short_spec){
+_LL276: _temp275=(( struct Cyc_Parse_Short_spec_struct*) _temp253)->f1; goto
+_LL262;} else{ goto _LL263;} _LL263: if(*(( int*) _temp253) == Cyc_Parse_Long_spec){
+_LL278: _temp277=(( struct Cyc_Parse_Long_spec_struct*) _temp253)->f1; goto
+_LL264;} else{ goto _LL265;} _LL265: if(*(( int*) _temp253) == Cyc_Parse_Decl_spec){
+_LL280: _temp279=(( struct Cyc_Parse_Decl_spec_struct*) _temp253)->f1; goto
+_LL266;} else{ goto _LL254;} _LL256: if( seen_type){ Cyc_Parse_err( Cyc_Parse_msg1,
+_temp267);} last_loc= _temp267; seen_type= 1; t= _temp269; goto _LL254; _LL258:
+if( seen_sign){ Cyc_Parse_err( Cyc_Parse_msg4, _temp271);} if( seen_type){ Cyc_Parse_err(
 _tag_arr("signed qualifier must come before type", sizeof( unsigned char), 39u),
-_temp276);} last_loc= _temp276; seen_sign= 1; sgn=( void*) Cyc_Absyn_Signed;
-goto _LL259; _LL265: if( seen_sign){ Cyc_Parse_err( Cyc_Parse_msg4, _temp278);}
+_temp271);} last_loc= _temp271; seen_sign= 1; sgn=( void*) Cyc_Absyn_Signed;
+goto _LL254; _LL260: if( seen_sign){ Cyc_Parse_err( Cyc_Parse_msg4, _temp273);}
 if( seen_type){ Cyc_Parse_err( _tag_arr("signed qualifier must come before type",
-sizeof( unsigned char), 39u), _temp278);} last_loc= _temp278; seen_sign= 1; sgn=(
-void*) Cyc_Absyn_Unsigned; goto _LL259; _LL267: if( seen_size){ Cyc_Parse_err(
+sizeof( unsigned char), 39u), _temp273);} last_loc= _temp273; seen_sign= 1; sgn=(
+void*) Cyc_Absyn_Unsigned; goto _LL254; _LL262: if( seen_size){ Cyc_Parse_err(
 _tag_arr("integral size may appear only once within a type specifier", sizeof(
-unsigned char), 59u), _temp280);} if( seen_type){ Cyc_Parse_err( _tag_arr("short modifier must come before base type",
-sizeof( unsigned char), 42u), _temp280);} last_loc= _temp280; seen_size= 1; sz=(
-void*) Cyc_Absyn_B2; goto _LL259; _LL269: if( seen_type){ Cyc_Parse_err(
+unsigned char), 59u), _temp275);} if( seen_type){ Cyc_Parse_err( _tag_arr("short modifier must come before base type",
+sizeof( unsigned char), 42u), _temp275);} last_loc= _temp275; seen_size= 1; sz=(
+void*) Cyc_Absyn_B2; goto _LL254; _LL264: if( seen_type){ Cyc_Parse_err(
 _tag_arr("long modifier must come before base type", sizeof( unsigned char), 41u),
-_temp282);} if( seen_size){ void* _temp286= sz; _LL288: if( _temp286 ==( void*)
-Cyc_Absyn_B4){ goto _LL289;} else{ goto _LL290;} _LL290: goto _LL291; _LL289: sz=(
-void*) Cyc_Absyn_B8; goto _LL287; _LL291: Cyc_Parse_err( _tag_arr("extra long in type specifier",
-sizeof( unsigned char), 29u), _temp282); goto _LL287; _LL287:;} last_loc=
-_temp282; seen_size= 1; goto _LL259; _LL271: last_loc= _temp284->loc; if(
-declopt == 0? ! seen_type: 0){ seen_type= 1;{ void* _temp292=( void*) _temp284->r;
-struct Cyc_Absyn_Structdecl* _temp304; struct Cyc_Absyn_Tuniondecl* _temp306;
-struct Cyc_Absyn_Uniondecl* _temp308; struct Cyc_Absyn_Enumdecl* _temp310;
-_LL294: if(*(( int*) _temp292) == Cyc_Absyn_Struct_d){ _LL305: _temp304=((
-struct Cyc_Absyn_Struct_d_struct*) _temp292)->f1; goto _LL295;} else{ goto
-_LL296;} _LL296: if(*(( int*) _temp292) == Cyc_Absyn_Tunion_d){ _LL307: _temp306=((
-struct Cyc_Absyn_Tunion_d_struct*) _temp292)->f1; goto _LL297;} else{ goto
-_LL298;} _LL298: if(*(( int*) _temp292) == Cyc_Absyn_Union_d){ _LL309: _temp308=((
-struct Cyc_Absyn_Union_d_struct*) _temp292)->f1; goto _LL299;} else{ goto _LL300;}
-_LL300: if(*(( int*) _temp292) == Cyc_Absyn_Enum_d){ _LL311: _temp310=(( struct
-Cyc_Absyn_Enum_d_struct*) _temp292)->f1; goto _LL301;} else{ goto _LL302;}
-_LL302: goto _LL303; _LL295: { struct Cyc_List_List* _temp312=(( struct Cyc_List_List*(*)(
+_temp277);} if( seen_size){ void* _temp281= sz; _LL283: if( _temp281 ==( void*)
+Cyc_Absyn_B4){ goto _LL284;} else{ goto _LL285;} _LL285: goto _LL286; _LL284: sz=(
+void*) Cyc_Absyn_B8; goto _LL282; _LL286: Cyc_Parse_err( _tag_arr("extra long in type specifier",
+sizeof( unsigned char), 29u), _temp277); goto _LL282; _LL282:;} last_loc=
+_temp277; seen_size= 1; goto _LL254; _LL266: last_loc= _temp279->loc; if(
+declopt == 0? ! seen_type: 0){ seen_type= 1;{ void* _temp287=( void*) _temp279->r;
+struct Cyc_Absyn_Structdecl* _temp299; struct Cyc_Absyn_Tuniondecl* _temp301;
+struct Cyc_Absyn_Uniondecl* _temp303; struct Cyc_Absyn_Enumdecl* _temp305;
+_LL289: if(*(( int*) _temp287) == Cyc_Absyn_Struct_d){ _LL300: _temp299=((
+struct Cyc_Absyn_Struct_d_struct*) _temp287)->f1; goto _LL290;} else{ goto
+_LL291;} _LL291: if(*(( int*) _temp287) == Cyc_Absyn_Tunion_d){ _LL302: _temp301=((
+struct Cyc_Absyn_Tunion_d_struct*) _temp287)->f1; goto _LL292;} else{ goto
+_LL293;} _LL293: if(*(( int*) _temp287) == Cyc_Absyn_Union_d){ _LL304: _temp303=((
+struct Cyc_Absyn_Union_d_struct*) _temp287)->f1; goto _LL294;} else{ goto _LL295;}
+_LL295: if(*(( int*) _temp287) == Cyc_Absyn_Enum_d){ _LL306: _temp305=(( struct
+Cyc_Absyn_Enum_d_struct*) _temp287)->f1; goto _LL296;} else{ goto _LL297;}
+_LL297: goto _LL298; _LL290: { struct Cyc_List_List* _temp307=(( struct Cyc_List_List*(*)(
 void*(* f)( struct Cyc_Absyn_Tvar*), struct Cyc_List_List* x)) Cyc_List_map)(
-Cyc_Parse_tvar2typ, _temp304->tvs); t=( void*)({ struct Cyc_Absyn_StructType_struct*
-_temp313=( struct Cyc_Absyn_StructType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_StructType_struct));
-_temp313[ 0]=({ struct Cyc_Absyn_StructType_struct _temp314; _temp314.tag= Cyc_Absyn_StructType;
-_temp314.f1=( struct _tuple1*)(( struct _tuple1*)(( struct Cyc_Core_Opt*)
-_check_null( _temp304->name))->v); _temp314.f2= _temp312; _temp314.f3= 0;
-_temp314;}); _temp313;}); if( _temp304->fields != 0){ declopt=({ struct Cyc_Core_Opt*
-_temp315=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp315->v=( void*) _temp284; _temp315;});} goto _LL293;} _LL297: { struct Cyc_List_List*
-_temp316=(( struct Cyc_List_List*(*)( void*(* f)( struct Cyc_Absyn_Tvar*),
-struct Cyc_List_List* x)) Cyc_List_map)( Cyc_Parse_tvar2typ, _temp306->tvs); t=(
-void*)({ struct Cyc_Absyn_TunionType_struct* _temp317=( struct Cyc_Absyn_TunionType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_TunionType_struct)); _temp317[ 0]=({ struct
-Cyc_Absyn_TunionType_struct _temp318; _temp318.tag= Cyc_Absyn_TunionType;
-_temp318.f1=({ struct Cyc_Absyn_TunionInfo _temp319; _temp319.tunion_info=( void*)((
-void*)({ struct Cyc_Absyn_KnownTunion_struct* _temp320=( struct Cyc_Absyn_KnownTunion_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_KnownTunion_struct)); _temp320[ 0]=({ struct
-Cyc_Absyn_KnownTunion_struct _temp321; _temp321.tag= Cyc_Absyn_KnownTunion;
-_temp321.f1= _temp306; _temp321;}); _temp320;})); _temp319.targs= _temp316;
-_temp319.rgn=( void*)(( void*) Cyc_Absyn_HeapRgn); _temp319;}); _temp318;});
-_temp317;}); if( _temp306->fields != 0){ declopt=({ struct Cyc_Core_Opt*
-_temp322=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp322->v=( void*) _temp284; _temp322;});} goto _LL293;} _LL299: { struct Cyc_List_List*
-_temp323=(( struct Cyc_List_List*(*)( void*(* f)( struct Cyc_Absyn_Tvar*),
-struct Cyc_List_List* x)) Cyc_List_map)( Cyc_Parse_tvar2typ, _temp308->tvs); t=(
-void*)({ struct Cyc_Absyn_UnionType_struct* _temp324=( struct Cyc_Absyn_UnionType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnionType_struct)); _temp324[ 0]=({ struct
-Cyc_Absyn_UnionType_struct _temp325; _temp325.tag= Cyc_Absyn_UnionType; _temp325.f1=(
+Cyc_Parse_tvar2typ, _temp299->tvs); t=( void*)({ struct Cyc_Absyn_StructType_struct*
+_temp308=( struct Cyc_Absyn_StructType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_StructType_struct));
+_temp308[ 0]=({ struct Cyc_Absyn_StructType_struct _temp309; _temp309.tag= Cyc_Absyn_StructType;
+_temp309.f1=( struct _tuple1*)(( struct _tuple1*)(( struct Cyc_Core_Opt*)
+_check_null( _temp299->name))->v); _temp309.f2= _temp307; _temp309.f3= 0;
+_temp309;}); _temp308;}); if( _temp299->fields != 0){ declopt=({ struct Cyc_Core_Opt*
+_temp310=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp310->v=( void*) _temp279; _temp310;});} goto _LL288;} _LL292: { struct Cyc_List_List*
+_temp311=(( struct Cyc_List_List*(*)( void*(* f)( struct Cyc_Absyn_Tvar*),
+struct Cyc_List_List* x)) Cyc_List_map)( Cyc_Parse_tvar2typ, _temp301->tvs); t=(
+void*)({ struct Cyc_Absyn_TunionType_struct* _temp312=( struct Cyc_Absyn_TunionType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_TunionType_struct)); _temp312[ 0]=({ struct
+Cyc_Absyn_TunionType_struct _temp313; _temp313.tag= Cyc_Absyn_TunionType;
+_temp313.f1=({ struct Cyc_Absyn_TunionInfo _temp314; _temp314.tunion_info=( void*)((
+void*)({ struct Cyc_Absyn_KnownTunion_struct* _temp315=( struct Cyc_Absyn_KnownTunion_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_KnownTunion_struct)); _temp315[ 0]=({ struct
+Cyc_Absyn_KnownTunion_struct _temp316; _temp316.tag= Cyc_Absyn_KnownTunion;
+_temp316.f1= _temp301; _temp316;}); _temp315;})); _temp314.targs= _temp311;
+_temp314.rgn=( void*)(( void*) Cyc_Absyn_HeapRgn); _temp314;}); _temp313;});
+_temp312;}); if( _temp301->fields != 0){ declopt=({ struct Cyc_Core_Opt*
+_temp317=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp317->v=( void*) _temp279; _temp317;});} goto _LL288;} _LL294: { struct Cyc_List_List*
+_temp318=(( struct Cyc_List_List*(*)( void*(* f)( struct Cyc_Absyn_Tvar*),
+struct Cyc_List_List* x)) Cyc_List_map)( Cyc_Parse_tvar2typ, _temp303->tvs); t=(
+void*)({ struct Cyc_Absyn_UnionType_struct* _temp319=( struct Cyc_Absyn_UnionType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_UnionType_struct)); _temp319[ 0]=({ struct
+Cyc_Absyn_UnionType_struct _temp320; _temp320.tag= Cyc_Absyn_UnionType; _temp320.f1=(
 struct _tuple1*)(( struct _tuple1*)(( struct Cyc_Core_Opt*) _check_null(
-_temp308->name))->v); _temp325.f2= _temp323; _temp325.f3= 0; _temp325;});
-_temp324;}); if( _temp308->fields != 0){ declopt=({ struct Cyc_Core_Opt*
-_temp326=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp326->v=( void*) _temp284; _temp326;});} goto _LL293;} _LL301: t=( void*)({
-struct Cyc_Absyn_EnumType_struct* _temp327=( struct Cyc_Absyn_EnumType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_EnumType_struct)); _temp327[ 0]=({ struct
-Cyc_Absyn_EnumType_struct _temp328; _temp328.tag= Cyc_Absyn_EnumType; _temp328.f1=
-_temp310->name; _temp328.f2= 0; _temp328;}); _temp327;}); declopt=({ struct Cyc_Core_Opt*
-_temp329=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp329->v=( void*) _temp284; _temp329;}); goto _LL293; _LL303:(( int(*)(
+_temp303->name))->v); _temp320.f2= _temp318; _temp320.f3= 0; _temp320;});
+_temp319;}); if( _temp303->fields != 0){ declopt=({ struct Cyc_Core_Opt*
+_temp321=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp321->v=( void*) _temp279; _temp321;});} goto _LL288;} _LL296: t=( void*)({
+struct Cyc_Absyn_EnumType_struct* _temp322=( struct Cyc_Absyn_EnumType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_EnumType_struct)); _temp322[ 0]=({ struct
+Cyc_Absyn_EnumType_struct _temp323; _temp323.tag= Cyc_Absyn_EnumType; _temp323.f1=
+_temp305->name; _temp323.f2= 0; _temp323;}); _temp322;}); declopt=({ struct Cyc_Core_Opt*
+_temp324=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp324->v=( void*) _temp279; _temp324;}); goto _LL288; _LL298:(( int(*)(
 struct _tagged_arr msg, struct Cyc_Position_Segment* sg)) Cyc_Parse_abort)(
 _tag_arr("bad declaration within type specifier", sizeof( unsigned char), 38u),
-_temp284->loc); goto _LL293; _LL293:;}} else{ Cyc_Parse_err( Cyc_Parse_msg3,
-_temp284->loc);} goto _LL259; _LL259:;} if( ! seen_type){ if( ! seen_sign? !
+_temp279->loc); goto _LL288; _LL288:;}} else{ Cyc_Parse_err( Cyc_Parse_msg3,
+_temp279->loc);} goto _LL254; _LL254:;} if( ! seen_type){ if( ! seen_sign? !
 seen_size: 0){ Cyc_Parse_err( _tag_arr("missing type withing specifier", sizeof(
 unsigned char), 31u), last_loc);} t=( void*)({ struct Cyc_Absyn_IntType_struct*
-_temp330=( struct Cyc_Absyn_IntType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_IntType_struct));
-_temp330[ 0]=({ struct Cyc_Absyn_IntType_struct _temp331; _temp331.tag= Cyc_Absyn_IntType;
-_temp331.f1=( void*) sgn; _temp331.f2=( void*) sz; _temp331;}); _temp330;});}
-else{ if( seen_sign){ void* _temp332= t; void* _temp338; _LL334: if((
-unsigned int) _temp332 > 4u?*(( int*) _temp332) == Cyc_Absyn_IntType: 0){ _LL339:
-_temp338=( void*)(( struct Cyc_Absyn_IntType_struct*) _temp332)->f2; goto _LL335;}
-else{ goto _LL336;} _LL336: goto _LL337; _LL335: t=( void*)({ struct Cyc_Absyn_IntType_struct*
-_temp340=( struct Cyc_Absyn_IntType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_IntType_struct));
-_temp340[ 0]=({ struct Cyc_Absyn_IntType_struct _temp341; _temp341.tag= Cyc_Absyn_IntType;
-_temp341.f1=( void*) sgn; _temp341.f2=( void*) _temp338; _temp341;}); _temp340;});
-goto _LL333; _LL337: Cyc_Parse_err( _tag_arr("sign specification on non-integral type",
-sizeof( unsigned char), 40u), last_loc); goto _LL333; _LL333:;} if( seen_size){
-void* _temp342= t; void* _temp348; _LL344: if(( unsigned int) _temp342 > 4u?*((
-int*) _temp342) == Cyc_Absyn_IntType: 0){ _LL349: _temp348=( void*)(( struct Cyc_Absyn_IntType_struct*)
-_temp342)->f1; goto _LL345;} else{ goto _LL346;} _LL346: goto _LL347; _LL345: t=(
-void*)({ struct Cyc_Absyn_IntType_struct* _temp350=( struct Cyc_Absyn_IntType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_IntType_struct)); _temp350[ 0]=({ struct Cyc_Absyn_IntType_struct
-_temp351; _temp351.tag= Cyc_Absyn_IntType; _temp351.f1=( void*) _temp348;
-_temp351.f2=( void*) sz; _temp351;}); _temp350;}); goto _LL343; _LL347: Cyc_Parse_err(
+_temp325=( struct Cyc_Absyn_IntType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_IntType_struct));
+_temp325[ 0]=({ struct Cyc_Absyn_IntType_struct _temp326; _temp326.tag= Cyc_Absyn_IntType;
+_temp326.f1=( void*) sgn; _temp326.f2=( void*) sz; _temp326;}); _temp325;});}
+else{ if( seen_sign){ void* _temp327= t; void* _temp333; _LL329: if((
+unsigned int) _temp327 > 4u?*(( int*) _temp327) == Cyc_Absyn_IntType: 0){ _LL334:
+_temp333=( void*)(( struct Cyc_Absyn_IntType_struct*) _temp327)->f2; goto _LL330;}
+else{ goto _LL331;} _LL331: goto _LL332; _LL330: t=( void*)({ struct Cyc_Absyn_IntType_struct*
+_temp335=( struct Cyc_Absyn_IntType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_IntType_struct));
+_temp335[ 0]=({ struct Cyc_Absyn_IntType_struct _temp336; _temp336.tag= Cyc_Absyn_IntType;
+_temp336.f1=( void*) sgn; _temp336.f2=( void*) _temp333; _temp336;}); _temp335;});
+goto _LL328; _LL332: Cyc_Parse_err( _tag_arr("sign specification on non-integral type",
+sizeof( unsigned char), 40u), last_loc); goto _LL328; _LL328:;} if( seen_size){
+void* _temp337= t; void* _temp343; _LL339: if(( unsigned int) _temp337 > 4u?*((
+int*) _temp337) == Cyc_Absyn_IntType: 0){ _LL344: _temp343=( void*)(( struct Cyc_Absyn_IntType_struct*)
+_temp337)->f1; goto _LL340;} else{ goto _LL341;} _LL341: goto _LL342; _LL340: t=(
+void*)({ struct Cyc_Absyn_IntType_struct* _temp345=( struct Cyc_Absyn_IntType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_IntType_struct)); _temp345[ 0]=({ struct Cyc_Absyn_IntType_struct
+_temp346; _temp346.tag= Cyc_Absyn_IntType; _temp346.f1=( void*) _temp343;
+_temp346.f2=( void*) sz; _temp346;}); _temp345;}); goto _LL338; _LL342: Cyc_Parse_err(
 _tag_arr("size qualifier on non-integral type", sizeof( unsigned char), 36u),
-last_loc); goto _LL343; _LL343:;}} return({ struct _tuple5 _temp352; _temp352.f1=
-t; _temp352.f2= declopt; _temp352;});} static struct Cyc_List_List* Cyc_Parse_apply_tmss(
+last_loc); goto _LL338; _LL338:;}} return({ struct _tuple5 _temp347; _temp347.f1=
+t; _temp347.f2= declopt; _temp347;});} static struct Cyc_List_List* Cyc_Parse_apply_tmss(
 struct Cyc_Absyn_Tqual tq, void* t, struct Cyc_List_List* ds, struct Cyc_List_List*
-shared_atts){ if( ds == 0){ return 0;}{ struct Cyc_Parse_Declarator* _temp353=(
+shared_atts){ if( ds == 0){ return 0;}{ struct Cyc_Parse_Declarator* _temp348=(
 struct Cyc_Parse_Declarator*)(( struct Cyc_List_List*) _check_null( ds))->hd;
-struct _tuple1* _temp354= _temp353->id; struct Cyc_List_List* _temp357; struct
-Cyc_List_List* _temp359; void* _temp361; struct Cyc_Absyn_Tqual _temp363; struct
-_tuple6 _temp355= Cyc_Parse_apply_tms( tq, t, shared_atts, _temp353->tms);
-_LL364: _temp363= _temp355.f1; goto _LL362; _LL362: _temp361= _temp355.f2; goto
-_LL360; _LL360: _temp359= _temp355.f3; goto _LL358; _LL358: _temp357= _temp355.f4;
-goto _LL356; _LL356: return({ struct Cyc_List_List* _temp365=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp365->hd=( void*)({ struct
-_tuple7* _temp366=( struct _tuple7*) GC_malloc( sizeof( struct _tuple7));
-_temp366->f1= _temp354; _temp366->f2= _temp363; _temp366->f3= _temp361; _temp366->f4=
-_temp359; _temp366->f5= _temp357; _temp366;}); _temp365->tl= Cyc_Parse_apply_tmss(
-_temp363, Cyc_Tcutil_copy_type( t),(( struct Cyc_List_List*) _check_null( ds))->tl,
-shared_atts); _temp365;});}} static struct _tuple6 Cyc_Parse_apply_tms( struct
+struct _tuple1* _temp349= _temp348->id; struct Cyc_List_List* _temp352; struct
+Cyc_List_List* _temp354; void* _temp356; struct Cyc_Absyn_Tqual _temp358; struct
+_tuple6 _temp350= Cyc_Parse_apply_tms( tq, t, shared_atts, _temp348->tms);
+_LL359: _temp358= _temp350.f1; goto _LL357; _LL357: _temp356= _temp350.f2; goto
+_LL355; _LL355: _temp354= _temp350.f3; goto _LL353; _LL353: _temp352= _temp350.f4;
+goto _LL351; _LL351: return({ struct Cyc_List_List* _temp360=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp360->hd=( void*)({ struct
+_tuple7* _temp361=( struct _tuple7*) GC_malloc( sizeof( struct _tuple7));
+_temp361->f1= _temp349; _temp361->f2= _temp358; _temp361->f3= _temp356; _temp361->f4=
+_temp354; _temp361->f5= _temp352; _temp361;}); _temp360->tl= Cyc_Parse_apply_tmss(
+_temp358, Cyc_Tcutil_copy_type( t),(( struct Cyc_List_List*) _check_null( ds))->tl,
+shared_atts); _temp360;});}} static struct _tuple6 Cyc_Parse_apply_tms( struct
 Cyc_Absyn_Tqual tq, void* t, struct Cyc_List_List* atts, struct Cyc_List_List*
-tms){ if( tms == 0){ return({ struct _tuple6 _temp367; _temp367.f1= tq; _temp367.f2=
-t; _temp367.f3= 0; _temp367.f4= atts; _temp367;});}{ void* _temp368=( void*)((
-struct Cyc_List_List*) _check_null( tms))->hd; struct Cyc_Absyn_Exp* _temp382;
-void* _temp384; struct Cyc_Position_Segment* _temp386; struct Cyc_List_List*
-_temp388; struct Cyc_Absyn_Tqual _temp390; void* _temp392; void* _temp394;
-struct Cyc_List_List* _temp396; struct Cyc_Position_Segment* _temp398; _LL370:
-if( _temp368 ==( void*) Cyc_Absyn_Carray_mod){ goto _LL371;} else{ goto _LL372;}
-_LL372: if(( unsigned int) _temp368 > 1u?*(( int*) _temp368) == Cyc_Absyn_ConstArray_mod:
-0){ _LL383: _temp382=(( struct Cyc_Absyn_ConstArray_mod_struct*) _temp368)->f1;
-goto _LL373;} else{ goto _LL374;} _LL374: if(( unsigned int) _temp368 > 1u?*((
-int*) _temp368) == Cyc_Absyn_Function_mod: 0){ _LL385: _temp384=( void*)((
-struct Cyc_Absyn_Function_mod_struct*) _temp368)->f1; goto _LL375;} else{ goto
-_LL376;} _LL376: if(( unsigned int) _temp368 > 1u?*(( int*) _temp368) == Cyc_Absyn_TypeParams_mod:
-0){ _LL389: _temp388=(( struct Cyc_Absyn_TypeParams_mod_struct*) _temp368)->f1;
-goto _LL387; _LL387: _temp386=(( struct Cyc_Absyn_TypeParams_mod_struct*)
-_temp368)->f2; goto _LL377;} else{ goto _LL378;} _LL378: if(( unsigned int)
-_temp368 > 1u?*(( int*) _temp368) == Cyc_Absyn_Pointer_mod: 0){ _LL395: _temp394=(
-void*)(( struct Cyc_Absyn_Pointer_mod_struct*) _temp368)->f1; goto _LL393;
-_LL393: _temp392=( void*)(( struct Cyc_Absyn_Pointer_mod_struct*) _temp368)->f2;
-goto _LL391; _LL391: _temp390=(( struct Cyc_Absyn_Pointer_mod_struct*) _temp368)->f3;
-goto _LL379;} else{ goto _LL380;} _LL380: if(( unsigned int) _temp368 > 1u?*((
-int*) _temp368) == Cyc_Absyn_Attributes_mod: 0){ _LL399: _temp398=(( struct Cyc_Absyn_Attributes_mod_struct*)
-_temp368)->f1; goto _LL397; _LL397: _temp396=(( struct Cyc_Absyn_Attributes_mod_struct*)
-_temp368)->f2; goto _LL381;} else{ goto _LL369;} _LL371: return Cyc_Parse_apply_tms(
-Cyc_Absyn_empty_tqual(),( void*)({ struct Cyc_Absyn_ArrayType_struct* _temp400=(
+tms){ if( tms == 0){ return({ struct _tuple6 _temp362; _temp362.f1= tq; _temp362.f2=
+t; _temp362.f3= 0; _temp362.f4= atts; _temp362;});}{ void* _temp363=( void*)((
+struct Cyc_List_List*) _check_null( tms))->hd; struct Cyc_Absyn_Exp* _temp377;
+void* _temp379; struct Cyc_Position_Segment* _temp381; struct Cyc_List_List*
+_temp383; struct Cyc_Absyn_Tqual _temp385; void* _temp387; void* _temp389;
+struct Cyc_List_List* _temp391; struct Cyc_Position_Segment* _temp393; _LL365:
+if( _temp363 ==( void*) Cyc_Absyn_Carray_mod){ goto _LL366;} else{ goto _LL367;}
+_LL367: if(( unsigned int) _temp363 > 1u?*(( int*) _temp363) == Cyc_Absyn_ConstArray_mod:
+0){ _LL378: _temp377=(( struct Cyc_Absyn_ConstArray_mod_struct*) _temp363)->f1;
+goto _LL368;} else{ goto _LL369;} _LL369: if(( unsigned int) _temp363 > 1u?*((
+int*) _temp363) == Cyc_Absyn_Function_mod: 0){ _LL380: _temp379=( void*)((
+struct Cyc_Absyn_Function_mod_struct*) _temp363)->f1; goto _LL370;} else{ goto
+_LL371;} _LL371: if(( unsigned int) _temp363 > 1u?*(( int*) _temp363) == Cyc_Absyn_TypeParams_mod:
+0){ _LL384: _temp383=(( struct Cyc_Absyn_TypeParams_mod_struct*) _temp363)->f1;
+goto _LL382; _LL382: _temp381=(( struct Cyc_Absyn_TypeParams_mod_struct*)
+_temp363)->f2; goto _LL372;} else{ goto _LL373;} _LL373: if(( unsigned int)
+_temp363 > 1u?*(( int*) _temp363) == Cyc_Absyn_Pointer_mod: 0){ _LL390: _temp389=(
+void*)(( struct Cyc_Absyn_Pointer_mod_struct*) _temp363)->f1; goto _LL388;
+_LL388: _temp387=( void*)(( struct Cyc_Absyn_Pointer_mod_struct*) _temp363)->f2;
+goto _LL386; _LL386: _temp385=(( struct Cyc_Absyn_Pointer_mod_struct*) _temp363)->f3;
+goto _LL374;} else{ goto _LL375;} _LL375: if(( unsigned int) _temp363 > 1u?*((
+int*) _temp363) == Cyc_Absyn_Attributes_mod: 0){ _LL394: _temp393=(( struct Cyc_Absyn_Attributes_mod_struct*)
+_temp363)->f1; goto _LL392; _LL392: _temp391=(( struct Cyc_Absyn_Attributes_mod_struct*)
+_temp363)->f2; goto _LL376;} else{ goto _LL364;} _LL366: return Cyc_Parse_apply_tms(
+Cyc_Absyn_empty_tqual(),( void*)({ struct Cyc_Absyn_ArrayType_struct* _temp395=(
 struct Cyc_Absyn_ArrayType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_ArrayType_struct));
-_temp400[ 0]=({ struct Cyc_Absyn_ArrayType_struct _temp401; _temp401.tag= Cyc_Absyn_ArrayType;
-_temp401.f1=( void*) t; _temp401.f2= tq; _temp401.f3= 0; _temp401;}); _temp400;}),
-atts,(( struct Cyc_List_List*) _check_null( tms))->tl); _LL373: return Cyc_Parse_apply_tms(
-Cyc_Absyn_empty_tqual(),( void*)({ struct Cyc_Absyn_ArrayType_struct* _temp402=(
+_temp395[ 0]=({ struct Cyc_Absyn_ArrayType_struct _temp396; _temp396.tag= Cyc_Absyn_ArrayType;
+_temp396.f1=( void*) t; _temp396.f2= tq; _temp396.f3= 0; _temp396;}); _temp395;}),
+atts,(( struct Cyc_List_List*) _check_null( tms))->tl); _LL368: return Cyc_Parse_apply_tms(
+Cyc_Absyn_empty_tqual(),( void*)({ struct Cyc_Absyn_ArrayType_struct* _temp397=(
 struct Cyc_Absyn_ArrayType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_ArrayType_struct));
-_temp402[ 0]=({ struct Cyc_Absyn_ArrayType_struct _temp403; _temp403.tag= Cyc_Absyn_ArrayType;
-_temp403.f1=( void*) t; _temp403.f2= tq; _temp403.f3=( struct Cyc_Absyn_Exp*)
-_temp382; _temp403;}); _temp402;}), atts,(( struct Cyc_List_List*) _check_null(
-tms))->tl); _LL375: { void* _temp404= _temp384; struct Cyc_List_List* _temp410;
-struct Cyc_Core_Opt* _temp412; struct Cyc_Absyn_VarargInfo* _temp414; int
-_temp416; struct Cyc_List_List* _temp418; struct Cyc_Position_Segment* _temp420;
-_LL406: if(*(( int*) _temp404) == Cyc_Absyn_WithTypes){ _LL419: _temp418=((
-struct Cyc_Absyn_WithTypes_struct*) _temp404)->f1; goto _LL417; _LL417: _temp416=((
-struct Cyc_Absyn_WithTypes_struct*) _temp404)->f2; goto _LL415; _LL415: _temp414=((
-struct Cyc_Absyn_WithTypes_struct*) _temp404)->f3; goto _LL413; _LL413: _temp412=((
-struct Cyc_Absyn_WithTypes_struct*) _temp404)->f4; goto _LL411; _LL411: _temp410=((
-struct Cyc_Absyn_WithTypes_struct*) _temp404)->f5; goto _LL407;} else{ goto
-_LL408;} _LL408: if(*(( int*) _temp404) == Cyc_Absyn_NoTypes){ _LL421: _temp420=((
-struct Cyc_Absyn_NoTypes_struct*) _temp404)->f2; goto _LL409;} else{ goto _LL405;}
-_LL407: { struct Cyc_List_List* typvars= 0; struct Cyc_List_List* fn_atts= 0;
+_temp397[ 0]=({ struct Cyc_Absyn_ArrayType_struct _temp398; _temp398.tag= Cyc_Absyn_ArrayType;
+_temp398.f1=( void*) t; _temp398.f2= tq; _temp398.f3=( struct Cyc_Absyn_Exp*)
+_temp377; _temp398;}); _temp397;}), atts,(( struct Cyc_List_List*) _check_null(
+tms))->tl); _LL370: { void* _temp399= _temp379; struct Cyc_List_List* _temp405;
+struct Cyc_Core_Opt* _temp407; struct Cyc_Absyn_VarargInfo* _temp409; int
+_temp411; struct Cyc_List_List* _temp413; struct Cyc_Position_Segment* _temp415;
+_LL401: if(*(( int*) _temp399) == Cyc_Absyn_WithTypes){ _LL414: _temp413=((
+struct Cyc_Absyn_WithTypes_struct*) _temp399)->f1; goto _LL412; _LL412: _temp411=((
+struct Cyc_Absyn_WithTypes_struct*) _temp399)->f2; goto _LL410; _LL410: _temp409=((
+struct Cyc_Absyn_WithTypes_struct*) _temp399)->f3; goto _LL408; _LL408: _temp407=((
+struct Cyc_Absyn_WithTypes_struct*) _temp399)->f4; goto _LL406; _LL406: _temp405=((
+struct Cyc_Absyn_WithTypes_struct*) _temp399)->f5; goto _LL402;} else{ goto
+_LL403;} _LL403: if(*(( int*) _temp399) == Cyc_Absyn_NoTypes){ _LL416: _temp415=((
+struct Cyc_Absyn_NoTypes_struct*) _temp399)->f2; goto _LL404;} else{ goto _LL400;}
+_LL402: { struct Cyc_List_List* typvars= 0; struct Cyc_List_List* fn_atts= 0;
 struct Cyc_List_List* new_atts= 0;{ struct Cyc_List_List* as= atts; for( 0; as
 != 0; as=(( struct Cyc_List_List*) _check_null( as))->tl){ if( Cyc_Absyn_fntype_att((
 void*)(( struct Cyc_List_List*) _check_null( as))->hd)){ fn_atts=({ struct Cyc_List_List*
-_temp422=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp422->hd=( void*)(( void*)(( struct Cyc_List_List*) _check_null( as))->hd);
-_temp422->tl= fn_atts; _temp422;});} else{ new_atts=({ struct Cyc_List_List*
-_temp423=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp423->hd=( void*)(( void*)(( struct Cyc_List_List*) _check_null( as))->hd);
-_temp423->tl= new_atts; _temp423;});}}} if((( struct Cyc_List_List*) _check_null(
-tms))->tl != 0){ void* _temp424=( void*)(( struct Cyc_List_List*) _check_null(((
+_temp417=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp417->hd=( void*)(( void*)(( struct Cyc_List_List*) _check_null( as))->hd);
+_temp417->tl= fn_atts; _temp417;});} else{ new_atts=({ struct Cyc_List_List*
+_temp418=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp418->hd=( void*)(( void*)(( struct Cyc_List_List*) _check_null( as))->hd);
+_temp418->tl= new_atts; _temp418;});}}} if((( struct Cyc_List_List*) _check_null(
+tms))->tl != 0){ void* _temp419=( void*)(( struct Cyc_List_List*) _check_null(((
 struct Cyc_List_List*) _check_null( tms))->tl))->hd; struct Cyc_List_List*
-_temp430; _LL426: if(( unsigned int) _temp424 > 1u?*(( int*) _temp424) == Cyc_Absyn_TypeParams_mod:
-0){ _LL431: _temp430=(( struct Cyc_Absyn_TypeParams_mod_struct*) _temp424)->f1;
-goto _LL427;} else{ goto _LL428;} _LL428: goto _LL429; _LL427: typvars= _temp430;
-tms=(( struct Cyc_List_List*) _check_null( tms))->tl; goto _LL425; _LL429: goto
-_LL425; _LL425:;} if((((( ! _temp416? _temp414 == 0: 0)? _temp418 != 0: 0)?((
-struct Cyc_List_List*) _check_null( _temp418))->tl == 0: 0)?(*(( struct _tuple2*)((
-struct Cyc_List_List*) _check_null( _temp418))->hd)).f1 == 0: 0)?(*(( struct
-_tuple2*)(( struct Cyc_List_List*) _check_null( _temp418))->hd)).f3 ==( void*)
-Cyc_Absyn_VoidType: 0){ _temp418= 0;} t= Cyc_Parse_array2ptr( t);(( void(*)(
+_temp425; _LL421: if(( unsigned int) _temp419 > 1u?*(( int*) _temp419) == Cyc_Absyn_TypeParams_mod:
+0){ _LL426: _temp425=(( struct Cyc_Absyn_TypeParams_mod_struct*) _temp419)->f1;
+goto _LL422;} else{ goto _LL423;} _LL423: goto _LL424; _LL422: typvars= _temp425;
+tms=(( struct Cyc_List_List*) _check_null( tms))->tl; goto _LL420; _LL424: goto
+_LL420; _LL420:;} if((((( ! _temp411? _temp409 == 0: 0)? _temp413 != 0: 0)?((
+struct Cyc_List_List*) _check_null( _temp413))->tl == 0: 0)?(*(( struct _tuple2*)((
+struct Cyc_List_List*) _check_null( _temp413))->hd)).f1 == 0: 0)?(*(( struct
+_tuple2*)(( struct Cyc_List_List*) _check_null( _temp413))->hd)).f3 ==( void*)
+Cyc_Absyn_VoidType: 0){ _temp413= 0;} t= Cyc_Parse_array2ptr( t);(( void(*)(
 void(* f)( struct _tuple2*), struct Cyc_List_List* x)) Cyc_List_iter)( Cyc_Parse_arg_array2ptr,
-_temp418); return Cyc_Parse_apply_tms( Cyc_Absyn_empty_tqual(), Cyc_Absyn_function_typ(
-typvars, _temp412, t, _temp418, _temp416, _temp414, _temp410, fn_atts), new_atts,((
-struct Cyc_List_List*) _check_null( tms))->tl);} _LL409:( int) _throw( Cyc_Parse_abort(
+_temp413); return Cyc_Parse_apply_tms( Cyc_Absyn_empty_tqual(), Cyc_Absyn_function_typ(
+typvars, _temp407, t, _temp413, _temp411, _temp409, _temp405, fn_atts), new_atts,((
+struct Cyc_List_List*) _check_null( tms))->tl);} _LL404:( int) _throw( Cyc_Parse_abort(
 _tag_arr("function declaration without parameter types", sizeof( unsigned char),
-45u), _temp420)); _LL405:;} _LL377: if((( struct Cyc_List_List*) _check_null(
-tms))->tl == 0){ return({ struct _tuple6 _temp432; _temp432.f1= tq; _temp432.f2=
-t; _temp432.f3= _temp388; _temp432.f4= atts; _temp432;});}( int) _throw( Cyc_Parse_abort(
+45u), _temp415)); _LL400:;} _LL372: if((( struct Cyc_List_List*) _check_null(
+tms))->tl == 0){ return({ struct _tuple6 _temp427; _temp427.f1= tq; _temp427.f2=
+t; _temp427.f3= _temp383; _temp427.f4= atts; _temp427;});}( int) _throw( Cyc_Parse_abort(
 _tag_arr("type parameters must appear before function arguments in declarator",
-sizeof( unsigned char), 68u), _temp386)); _LL379: { void* _temp433= _temp394;
-struct Cyc_Absyn_Exp* _temp441; struct Cyc_Absyn_Exp* _temp443; _LL435: if((
-unsigned int) _temp433 > 1u?*(( int*) _temp433) == Cyc_Absyn_NonNullable_ps: 0){
-_LL442: _temp441=(( struct Cyc_Absyn_NonNullable_ps_struct*) _temp433)->f1; goto
-_LL436;} else{ goto _LL437;} _LL437: if(( unsigned int) _temp433 > 1u?*(( int*)
-_temp433) == Cyc_Absyn_Nullable_ps: 0){ _LL444: _temp443=(( struct Cyc_Absyn_Nullable_ps_struct*)
-_temp433)->f1; goto _LL438;} else{ goto _LL439;} _LL439: if( _temp433 ==( void*)
-Cyc_Absyn_TaggedArray_ps){ goto _LL440;} else{ goto _LL434;} _LL436: return Cyc_Parse_apply_tms(
-_temp390, Cyc_Absyn_atb_typ( t, _temp392, tq,( void*)({ struct Cyc_Absyn_Upper_b_struct*
-_temp445=( struct Cyc_Absyn_Upper_b_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Upper_b_struct));
-_temp445[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp446; _temp446.tag= Cyc_Absyn_Upper_b;
-_temp446.f1= _temp441; _temp446;}); _temp445;})), atts,(( struct Cyc_List_List*)
-_check_null( tms))->tl); _LL438: return Cyc_Parse_apply_tms( _temp390, Cyc_Absyn_starb_typ(
-t, _temp392, tq,( void*)({ struct Cyc_Absyn_Upper_b_struct* _temp447=( struct
+sizeof( unsigned char), 68u), _temp381)); _LL374: { void* _temp428= _temp389;
+struct Cyc_Absyn_Exp* _temp436; struct Cyc_Absyn_Exp* _temp438; _LL430: if((
+unsigned int) _temp428 > 1u?*(( int*) _temp428) == Cyc_Absyn_NonNullable_ps: 0){
+_LL437: _temp436=(( struct Cyc_Absyn_NonNullable_ps_struct*) _temp428)->f1; goto
+_LL431;} else{ goto _LL432;} _LL432: if(( unsigned int) _temp428 > 1u?*(( int*)
+_temp428) == Cyc_Absyn_Nullable_ps: 0){ _LL439: _temp438=(( struct Cyc_Absyn_Nullable_ps_struct*)
+_temp428)->f1; goto _LL433;} else{ goto _LL434;} _LL434: if( _temp428 ==( void*)
+Cyc_Absyn_TaggedArray_ps){ goto _LL435;} else{ goto _LL429;} _LL431: return Cyc_Parse_apply_tms(
+_temp385, Cyc_Absyn_atb_typ( t, _temp387, tq,( void*)({ struct Cyc_Absyn_Upper_b_struct*
+_temp440=( struct Cyc_Absyn_Upper_b_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Upper_b_struct));
+_temp440[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp441; _temp441.tag= Cyc_Absyn_Upper_b;
+_temp441.f1= _temp436; _temp441;}); _temp440;})), atts,(( struct Cyc_List_List*)
+_check_null( tms))->tl); _LL433: return Cyc_Parse_apply_tms( _temp385, Cyc_Absyn_starb_typ(
+t, _temp387, tq,( void*)({ struct Cyc_Absyn_Upper_b_struct* _temp442=( struct
 Cyc_Absyn_Upper_b_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Upper_b_struct));
-_temp447[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp448; _temp448.tag= Cyc_Absyn_Upper_b;
-_temp448.f1= _temp443; _temp448;}); _temp447;})), atts,(( struct Cyc_List_List*)
-_check_null( tms))->tl); _LL440: return Cyc_Parse_apply_tms( _temp390, Cyc_Absyn_tagged_typ(
-t, _temp392, tq), atts,(( struct Cyc_List_List*) _check_null( tms))->tl); _LL434:;}
-_LL381: return Cyc_Parse_apply_tms( tq, t, Cyc_List_append( atts, _temp396),((
-struct Cyc_List_List*) _check_null( tms))->tl); _LL369:;}} void* Cyc_Parse_speclist2typ(
+_temp442[ 0]=({ struct Cyc_Absyn_Upper_b_struct _temp443; _temp443.tag= Cyc_Absyn_Upper_b;
+_temp443.f1= _temp438; _temp443;}); _temp442;})), atts,(( struct Cyc_List_List*)
+_check_null( tms))->tl); _LL435: return Cyc_Parse_apply_tms( _temp385, Cyc_Absyn_tagged_typ(
+t, _temp387, tq), atts,(( struct Cyc_List_List*) _check_null( tms))->tl); _LL429:;}
+_LL376: return Cyc_Parse_apply_tms( tq, t, Cyc_List_append( atts, _temp391),((
+struct Cyc_List_List*) _check_null( tms))->tl); _LL364:;}} void* Cyc_Parse_speclist2typ(
 struct Cyc_List_List* tss, struct Cyc_Position_Segment* loc){ struct Cyc_Core_Opt*
-_temp451; void* _temp453; struct _tuple5 _temp449= Cyc_Parse_collapse_type_specifiers(
-tss, loc); _LL454: _temp453= _temp449.f1; goto _LL452; _LL452: _temp451=
-_temp449.f2; goto _LL450; _LL450: if( _temp451 != 0){ Cyc_Parse_warn( _tag_arr("ignoring nested type declaration(s) in specifier list",
-sizeof( unsigned char), 54u), loc);} return _temp453;} static struct Cyc_Absyn_Stmt*
+_temp446; void* _temp448; struct _tuple5 _temp444= Cyc_Parse_collapse_type_specifiers(
+tss, loc); _LL449: _temp448= _temp444.f1; goto _LL447; _LL447: _temp446=
+_temp444.f2; goto _LL445; _LL445: if( _temp446 != 0){ Cyc_Parse_warn( _tag_arr("ignoring nested type declaration(s) in specifier list",
+sizeof( unsigned char), 54u), loc);} return _temp448;} static struct Cyc_Absyn_Stmt*
 Cyc_Parse_flatten_decl( struct Cyc_Absyn_Decl* d, struct Cyc_Absyn_Stmt* s){
-return Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Decl_s_struct* _temp455=(
+return Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Decl_s_struct* _temp450=(
 struct Cyc_Absyn_Decl_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Decl_s_struct));
-_temp455[ 0]=({ struct Cyc_Absyn_Decl_s_struct _temp456; _temp456.tag= Cyc_Absyn_Decl_s;
-_temp456.f1= d; _temp456.f2= s; _temp456;}); _temp455;}), Cyc_Position_segment_join(
+_temp450[ 0]=({ struct Cyc_Absyn_Decl_s_struct _temp451; _temp451.tag= Cyc_Absyn_Decl_s;
+_temp451.f1= d; _temp451.f2= s; _temp451;}); _temp450;}), Cyc_Position_segment_join(
 d->loc, s->loc));} static struct Cyc_Absyn_Stmt* Cyc_Parse_flatten_declarations(
 struct Cyc_List_List* ds, struct Cyc_Absyn_Stmt* s){ return(( struct Cyc_Absyn_Stmt*(*)(
 struct Cyc_Absyn_Stmt*(* f)( struct Cyc_Absyn_Decl*, struct Cyc_Absyn_Stmt*),
@@ -1124,236 +1121,231 @@ loc){ struct Cyc_List_List* tss= ds->type_specs; struct Cyc_Absyn_Tqual tq= ds->
 int istypedef= 0; void* s=( void*) Cyc_Absyn_Public; struct Cyc_List_List* atts=
 ds->attributes; if( ds->is_inline){ Cyc_Parse_err( _tag_arr("inline is only allowed on function definitions",
 sizeof( unsigned char), 47u), loc);} if( tss == 0){ Cyc_Parse_err( _tag_arr("missing type specifiers in declaration",
-sizeof( unsigned char), 39u), loc); return 0;} if( ds->sc != 0){ enum  Cyc_Parse_Storage_class
-_temp457=( enum  Cyc_Parse_Storage_class)(( struct Cyc_Core_Opt*) _check_null(
-ds->sc))->v; _LL459: if( _temp457 == Cyc_Parse_Typedef_sc){ goto _LL460;} else{
-goto _LL461;} _LL461: if( _temp457 == Cyc_Parse_Extern_sc){ goto _LL462;} else{
-goto _LL463;} _LL463: if( _temp457 == Cyc_Parse_ExternC_sc){ goto _LL464;} else{
-goto _LL465;} _LL465: if( _temp457 == Cyc_Parse_Static_sc){ goto _LL466;} else{
-goto _LL467;} _LL467: if( _temp457 == Cyc_Parse_Auto_sc){ goto _LL468;} else{
-goto _LL469;} _LL469: if( _temp457 == Cyc_Parse_Register_sc){ goto _LL470;}
-else{ goto _LL471;} _LL471: if( _temp457 == Cyc_Parse_Abstract_sc){ goto _LL472;}
-else{ goto _LL458;} _LL460: istypedef= 1; goto _LL458; _LL462: s=( void*) Cyc_Absyn_Extern;
-goto _LL458; _LL464: s=( void*) Cyc_Absyn_ExternC; goto _LL458; _LL466: s=( void*)
-Cyc_Absyn_Static; goto _LL458; _LL468: s=( void*) Cyc_Absyn_Public; goto _LL458;
-_LL470: s=( void*) Cyc_Absyn_Public; goto _LL458; _LL472: s=( void*) Cyc_Absyn_Abstract;
-goto _LL458; _LL458:;}{ struct Cyc_List_List* _temp475; struct Cyc_List_List*
-_temp477; struct _tuple0 _temp473=(( struct _tuple0(*)( struct Cyc_List_List* x))
-Cyc_List_split)( ids); _LL478: _temp477= _temp473.f1; goto _LL476; _LL476:
-_temp475= _temp473.f2; goto _LL474; _LL474: { int exps_empty= 1;{ struct Cyc_List_List*
-es= _temp475; for( 0; es != 0; es=(( struct Cyc_List_List*) _check_null( es))->tl){
-if(( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( es))->hd != 0){
-exps_empty= 0; break;}}}{ struct _tuple5 _temp479= Cyc_Parse_collapse_type_specifiers(
-tss, loc); if( _temp477 == 0){ struct Cyc_Core_Opt* _temp482; void* _temp484;
-struct _tuple5 _temp480= _temp479; _LL485: _temp484= _temp480.f1; goto _LL483;
-_LL483: _temp482= _temp480.f2; goto _LL481; _LL481: if( _temp482 != 0){ struct
-Cyc_Absyn_Decl* d=( struct Cyc_Absyn_Decl*)(( struct Cyc_Core_Opt*) _check_null(
-_temp482))->v;{ void* _temp486=( void*) d->r; struct Cyc_Absyn_Enumdecl*
-_temp498; struct Cyc_Absyn_Structdecl* _temp500; struct Cyc_Absyn_Uniondecl*
-_temp502; struct Cyc_Absyn_Tuniondecl* _temp504; _LL488: if(*(( int*) _temp486)
-== Cyc_Absyn_Enum_d){ _LL499: _temp498=(( struct Cyc_Absyn_Enum_d_struct*)
-_temp486)->f1; goto _LL489;} else{ goto _LL490;} _LL490: if(*(( int*) _temp486)
-== Cyc_Absyn_Struct_d){ _LL501: _temp500=(( struct Cyc_Absyn_Struct_d_struct*)
-_temp486)->f1; goto _LL491;} else{ goto _LL492;} _LL492: if(*(( int*) _temp486)
-== Cyc_Absyn_Union_d){ _LL503: _temp502=(( struct Cyc_Absyn_Union_d_struct*)
-_temp486)->f1; goto _LL493;} else{ goto _LL494;} _LL494: if(*(( int*) _temp486)
-== Cyc_Absyn_Tunion_d){ _LL505: _temp504=(( struct Cyc_Absyn_Tunion_d_struct*)
-_temp486)->f1; goto _LL495;} else{ goto _LL496;} _LL496: goto _LL497; _LL489:(
-void*)( _temp498->sc=( void*) s); if( atts != 0){ Cyc_Parse_err( _tag_arr("bad attributes on enum",
-sizeof( unsigned char), 23u), loc);} goto _LL487; _LL491:( void*)( _temp500->sc=(
-void*) s); _temp500->attributes= atts; goto _LL487; _LL493:( void*)( _temp502->sc=(
-void*) s); _temp502->attributes= atts; goto _LL487; _LL495:( void*)( _temp504->sc=(
+sizeof( unsigned char), 39u), loc); return 0;} if( ds->sc != 0){ switch(( enum 
+Cyc_Parse_Storage_class)(( struct Cyc_Core_Opt*) _check_null( ds->sc))->v){ case
+Cyc_Parse_Typedef_sc: _LL452: istypedef= 1; break; case Cyc_Parse_Extern_sc:
+_LL453: s=( void*) Cyc_Absyn_Extern; break; case Cyc_Parse_ExternC_sc: _LL454: s=(
+void*) Cyc_Absyn_ExternC; break; case Cyc_Parse_Static_sc: _LL455: s=( void*)
+Cyc_Absyn_Static; break; case Cyc_Parse_Auto_sc: _LL456: s=( void*) Cyc_Absyn_Public;
+break; case Cyc_Parse_Register_sc: _LL457: s=( void*) Cyc_Absyn_Public; break;
+case Cyc_Parse_Abstract_sc: _LL458: s=( void*) Cyc_Absyn_Abstract; break;}}{
+struct Cyc_List_List* _temp462; struct Cyc_List_List* _temp464; struct _tuple0
+_temp460=(( struct _tuple0(*)( struct Cyc_List_List* x)) Cyc_List_split)( ids);
+_LL465: _temp464= _temp460.f1; goto _LL463; _LL463: _temp462= _temp460.f2; goto
+_LL461; _LL461: { int exps_empty= 1;{ struct Cyc_List_List* es= _temp462; for( 0;
+es != 0; es=(( struct Cyc_List_List*) _check_null( es))->tl){ if(( struct Cyc_Absyn_Exp*)((
+struct Cyc_List_List*) _check_null( es))->hd != 0){ exps_empty= 0; break;}}}{
+struct _tuple5 _temp466= Cyc_Parse_collapse_type_specifiers( tss, loc); if(
+_temp464 == 0){ struct Cyc_Core_Opt* _temp469; void* _temp471; struct _tuple5
+_temp467= _temp466; _LL472: _temp471= _temp467.f1; goto _LL470; _LL470: _temp469=
+_temp467.f2; goto _LL468; _LL468: if( _temp469 != 0){ struct Cyc_Absyn_Decl* d=(
+struct Cyc_Absyn_Decl*)(( struct Cyc_Core_Opt*) _check_null( _temp469))->v;{
+void* _temp473=( void*) d->r; struct Cyc_Absyn_Enumdecl* _temp485; struct Cyc_Absyn_Structdecl*
+_temp487; struct Cyc_Absyn_Uniondecl* _temp489; struct Cyc_Absyn_Tuniondecl*
+_temp491; _LL475: if(*(( int*) _temp473) == Cyc_Absyn_Enum_d){ _LL486: _temp485=((
+struct Cyc_Absyn_Enum_d_struct*) _temp473)->f1; goto _LL476;} else{ goto _LL477;}
+_LL477: if(*(( int*) _temp473) == Cyc_Absyn_Struct_d){ _LL488: _temp487=((
+struct Cyc_Absyn_Struct_d_struct*) _temp473)->f1; goto _LL478;} else{ goto
+_LL479;} _LL479: if(*(( int*) _temp473) == Cyc_Absyn_Union_d){ _LL490: _temp489=((
+struct Cyc_Absyn_Union_d_struct*) _temp473)->f1; goto _LL480;} else{ goto _LL481;}
+_LL481: if(*(( int*) _temp473) == Cyc_Absyn_Tunion_d){ _LL492: _temp491=((
+struct Cyc_Absyn_Tunion_d_struct*) _temp473)->f1; goto _LL482;} else{ goto
+_LL483;} _LL483: goto _LL484; _LL476:( void*)( _temp485->sc=( void*) s); if(
+atts != 0){ Cyc_Parse_err( _tag_arr("bad attributes on enum", sizeof(
+unsigned char), 23u), loc);} goto _LL474; _LL478:( void*)( _temp487->sc=( void*)
+s); _temp487->attributes= atts; goto _LL474; _LL480:( void*)( _temp489->sc=(
+void*) s); _temp489->attributes= atts; goto _LL474; _LL482:( void*)( _temp491->sc=(
 void*) s); if( atts != 0){ Cyc_Parse_err( _tag_arr("bad attributes on tunion",
-sizeof( unsigned char), 25u), loc);} goto _LL487; _LL497: Cyc_Parse_err(
-_tag_arr("bad declaration", sizeof( unsigned char), 16u), loc); return 0; _LL487:;}
-return({ struct Cyc_List_List* _temp506=( struct Cyc_List_List*) GC_malloc(
-sizeof( struct Cyc_List_List)); _temp506->hd=( void*) d; _temp506->tl= 0;
-_temp506;});} else{ void* _temp507= _temp484; struct Cyc_List_List* _temp521;
-struct _tuple1* _temp523; struct Cyc_Absyn_TunionInfo _temp525; void* _temp527;
-struct Cyc_Absyn_Tuniondecl* _temp529; struct Cyc_Absyn_TunionInfo _temp531;
-struct Cyc_List_List* _temp533; void* _temp535; struct Cyc_Absyn_UnknownTunionInfo
-_temp537; int _temp539; struct _tuple1* _temp541; struct Cyc_List_List* _temp543;
-struct _tuple1* _temp545; struct _tuple1* _temp547; _LL509: if(( unsigned int)
-_temp507 > 4u?*(( int*) _temp507) == Cyc_Absyn_StructType: 0){ _LL524: _temp523=((
-struct Cyc_Absyn_StructType_struct*) _temp507)->f1; goto _LL522; _LL522:
-_temp521=(( struct Cyc_Absyn_StructType_struct*) _temp507)->f2; goto _LL510;}
-else{ goto _LL511;} _LL511: if(( unsigned int) _temp507 > 4u?*(( int*) _temp507)
-== Cyc_Absyn_TunionType: 0){ _LL526: _temp525=(( struct Cyc_Absyn_TunionType_struct*)
-_temp507)->f1; _LL528: _temp527=( void*) _temp525.tunion_info; if(*(( int*)
-_temp527) == Cyc_Absyn_KnownTunion){ _LL530: _temp529=(( struct Cyc_Absyn_KnownTunion_struct*)
-_temp527)->f1; goto _LL512;} else{ goto _LL513;}} else{ goto _LL513;} _LL513:
-if(( unsigned int) _temp507 > 4u?*(( int*) _temp507) == Cyc_Absyn_TunionType: 0){
-_LL532: _temp531=(( struct Cyc_Absyn_TunionType_struct*) _temp507)->f1; _LL536:
-_temp535=( void*) _temp531.tunion_info; if(*(( int*) _temp535) == Cyc_Absyn_UnknownTunion){
-_LL538: _temp537=(( struct Cyc_Absyn_UnknownTunion_struct*) _temp535)->f1;
-_LL542: _temp541= _temp537.name; goto _LL540; _LL540: _temp539= _temp537.is_xtunion;
-goto _LL534;} else{ goto _LL515;} _LL534: _temp533= _temp531.targs; goto _LL514;}
-else{ goto _LL515;} _LL515: if(( unsigned int) _temp507 > 4u?*(( int*) _temp507)
-== Cyc_Absyn_UnionType: 0){ _LL546: _temp545=(( struct Cyc_Absyn_UnionType_struct*)
-_temp507)->f1; goto _LL544; _LL544: _temp543=(( struct Cyc_Absyn_UnionType_struct*)
-_temp507)->f2; goto _LL516;} else{ goto _LL517;} _LL517: if(( unsigned int)
-_temp507 > 4u?*(( int*) _temp507) == Cyc_Absyn_EnumType: 0){ _LL548: _temp547=((
-struct Cyc_Absyn_EnumType_struct*) _temp507)->f1; goto _LL518;} else{ goto
-_LL519;} _LL519: goto _LL520; _LL510: { struct Cyc_List_List* _temp549=(( struct
+sizeof( unsigned char), 25u), loc);} goto _LL474; _LL484: Cyc_Parse_err(
+_tag_arr("bad declaration", sizeof( unsigned char), 16u), loc); return 0; _LL474:;}
+return({ struct Cyc_List_List* _temp493=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp493->hd=( void*) d; _temp493->tl= 0;
+_temp493;});} else{ void* _temp494= _temp471; struct Cyc_List_List* _temp508;
+struct _tuple1* _temp510; struct Cyc_Absyn_TunionInfo _temp512; void* _temp514;
+struct Cyc_Absyn_Tuniondecl* _temp516; struct Cyc_Absyn_TunionInfo _temp518;
+struct Cyc_List_List* _temp520; void* _temp522; struct Cyc_Absyn_UnknownTunionInfo
+_temp524; int _temp526; struct _tuple1* _temp528; struct Cyc_List_List* _temp530;
+struct _tuple1* _temp532; struct _tuple1* _temp534; _LL496: if(( unsigned int)
+_temp494 > 4u?*(( int*) _temp494) == Cyc_Absyn_StructType: 0){ _LL511: _temp510=((
+struct Cyc_Absyn_StructType_struct*) _temp494)->f1; goto _LL509; _LL509:
+_temp508=(( struct Cyc_Absyn_StructType_struct*) _temp494)->f2; goto _LL497;}
+else{ goto _LL498;} _LL498: if(( unsigned int) _temp494 > 4u?*(( int*) _temp494)
+== Cyc_Absyn_TunionType: 0){ _LL513: _temp512=(( struct Cyc_Absyn_TunionType_struct*)
+_temp494)->f1; _LL515: _temp514=( void*) _temp512.tunion_info; if(*(( int*)
+_temp514) == Cyc_Absyn_KnownTunion){ _LL517: _temp516=(( struct Cyc_Absyn_KnownTunion_struct*)
+_temp514)->f1; goto _LL499;} else{ goto _LL500;}} else{ goto _LL500;} _LL500:
+if(( unsigned int) _temp494 > 4u?*(( int*) _temp494) == Cyc_Absyn_TunionType: 0){
+_LL519: _temp518=(( struct Cyc_Absyn_TunionType_struct*) _temp494)->f1; _LL523:
+_temp522=( void*) _temp518.tunion_info; if(*(( int*) _temp522) == Cyc_Absyn_UnknownTunion){
+_LL525: _temp524=(( struct Cyc_Absyn_UnknownTunion_struct*) _temp522)->f1;
+_LL529: _temp528= _temp524.name; goto _LL527; _LL527: _temp526= _temp524.is_xtunion;
+goto _LL521;} else{ goto _LL502;} _LL521: _temp520= _temp518.targs; goto _LL501;}
+else{ goto _LL502;} _LL502: if(( unsigned int) _temp494 > 4u?*(( int*) _temp494)
+== Cyc_Absyn_UnionType: 0){ _LL533: _temp532=(( struct Cyc_Absyn_UnionType_struct*)
+_temp494)->f1; goto _LL531; _LL531: _temp530=(( struct Cyc_Absyn_UnionType_struct*)
+_temp494)->f2; goto _LL503;} else{ goto _LL504;} _LL504: if(( unsigned int)
+_temp494 > 4u?*(( int*) _temp494) == Cyc_Absyn_EnumType: 0){ _LL535: _temp534=((
+struct Cyc_Absyn_EnumType_struct*) _temp494)->f1; goto _LL505;} else{ goto
+_LL506;} _LL506: goto _LL507; _LL497: { struct Cyc_List_List* _temp536=(( struct
 Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
 void*), struct Cyc_Position_Segment* env, struct Cyc_List_List* x)) Cyc_List_map_c)(
-Cyc_Parse_typ2tvar, loc, _temp521); struct Cyc_Absyn_Structdecl* _temp550=({
-struct Cyc_Absyn_Structdecl* _temp554=( struct Cyc_Absyn_Structdecl*) GC_malloc(
-sizeof( struct Cyc_Absyn_Structdecl)); _temp554->sc=( void*) s; _temp554->name=({
-struct Cyc_Core_Opt* _temp555=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp555->v=( void*)(( struct _tuple1*) _check_null( _temp523));
-_temp555;}); _temp554->tvs= _temp549; _temp554->fields= 0; _temp554->attributes=
-0; _temp554;}); if( atts != 0){ Cyc_Parse_err( _tag_arr("bad attributes on struct",
-sizeof( unsigned char), 25u), loc);} return({ struct Cyc_List_List* _temp551=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp551->hd=(
-void*) Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Struct_d_struct* _temp552=(
+Cyc_Parse_typ2tvar, loc, _temp508); struct Cyc_Absyn_Structdecl* _temp537=({
+struct Cyc_Absyn_Structdecl* _temp541=( struct Cyc_Absyn_Structdecl*) GC_malloc(
+sizeof( struct Cyc_Absyn_Structdecl)); _temp541->sc=( void*) s; _temp541->name=({
+struct Cyc_Core_Opt* _temp542=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp542->v=( void*)(( struct _tuple1*) _check_null( _temp510));
+_temp542;}); _temp541->tvs= _temp536; _temp541->fields= 0; _temp541->attributes=
+0; _temp541;}); if( atts != 0){ Cyc_Parse_err( _tag_arr("bad attributes on struct",
+sizeof( unsigned char), 25u), loc);} return({ struct Cyc_List_List* _temp538=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp538->hd=(
+void*) Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Struct_d_struct* _temp539=(
 struct Cyc_Absyn_Struct_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Struct_d_struct));
-_temp552[ 0]=({ struct Cyc_Absyn_Struct_d_struct _temp553; _temp553.tag= Cyc_Absyn_Struct_d;
-_temp553.f1= _temp550; _temp553;}); _temp552;}), loc); _temp551->tl= 0; _temp551;});}
-_LL512: if( atts != 0){ Cyc_Parse_err( _tag_arr("bad attributes on tunion",
-sizeof( unsigned char), 25u), loc);} return({ struct Cyc_List_List* _temp556=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp556->hd=(
-void*) Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Tunion_d_struct* _temp557=(
+_temp539[ 0]=({ struct Cyc_Absyn_Struct_d_struct _temp540; _temp540.tag= Cyc_Absyn_Struct_d;
+_temp540.f1= _temp537; _temp540;}); _temp539;}), loc); _temp538->tl= 0; _temp538;});}
+_LL499: if( atts != 0){ Cyc_Parse_err( _tag_arr("bad attributes on tunion",
+sizeof( unsigned char), 25u), loc);} return({ struct Cyc_List_List* _temp543=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp543->hd=(
+void*) Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Tunion_d_struct* _temp544=(
 struct Cyc_Absyn_Tunion_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Tunion_d_struct));
-_temp557[ 0]=({ struct Cyc_Absyn_Tunion_d_struct _temp558; _temp558.tag= Cyc_Absyn_Tunion_d;
-_temp558.f1= _temp529; _temp558;}); _temp557;}), loc); _temp556->tl= 0; _temp556;});
-_LL514: { struct Cyc_List_List* _temp559=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(*
+_temp544[ 0]=({ struct Cyc_Absyn_Tunion_d_struct _temp545; _temp545.tag= Cyc_Absyn_Tunion_d;
+_temp545.f1= _temp516; _temp545;}); _temp544;}), loc); _temp543->tl= 0; _temp543;});
+_LL501: { struct Cyc_List_List* _temp546=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(*
 f)( struct Cyc_Position_Segment*, void*), struct Cyc_Position_Segment* env,
-struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_typ2tvar, loc, _temp533);
-struct Cyc_Absyn_Decl* _temp560= Cyc_Absyn_tunion_decl( s, _temp541, _temp559, 0,
-_temp539, loc); if( atts != 0){ Cyc_Parse_err( _tag_arr("bad attributes on tunion",
-sizeof( unsigned char), 25u), loc);} return({ struct Cyc_List_List* _temp561=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp561->hd=(
-void*) _temp560; _temp561->tl= 0; _temp561;});} _LL516: { struct Cyc_List_List*
-_temp562=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
+struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_typ2tvar, loc, _temp520);
+struct Cyc_Absyn_Decl* _temp547= Cyc_Absyn_tunion_decl( s, _temp528, _temp546, 0,
+_temp526, loc); if( atts != 0){ Cyc_Parse_err( _tag_arr("bad attributes on tunion",
+sizeof( unsigned char), 25u), loc);} return({ struct Cyc_List_List* _temp548=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp548->hd=(
+void*) _temp547; _temp548->tl= 0; _temp548;});} _LL503: { struct Cyc_List_List*
+_temp549=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
 void*), struct Cyc_Position_Segment* env, struct Cyc_List_List* x)) Cyc_List_map_c)(
-Cyc_Parse_typ2tvar, loc, _temp543); struct Cyc_Absyn_Uniondecl* _temp563=({
-struct Cyc_Absyn_Uniondecl* _temp568=( struct Cyc_Absyn_Uniondecl*) GC_malloc(
-sizeof( struct Cyc_Absyn_Uniondecl)); _temp568->sc=( void*) s; _temp568->name=({
-struct Cyc_Core_Opt* _temp569=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp569->v=( void*)(( struct _tuple1*) _check_null( _temp545));
-_temp569;}); _temp568->tvs= _temp562; _temp568->fields= 0; _temp568->attributes=
-0; _temp568;}); if( atts != 0){ Cyc_Parse_err( _tag_arr("bad attributes on union",
-sizeof( unsigned char), 24u), loc);} return({ struct Cyc_List_List* _temp564=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp564->hd=(
-void*)({ struct Cyc_Absyn_Decl* _temp565=( struct Cyc_Absyn_Decl*) GC_malloc(
-sizeof( struct Cyc_Absyn_Decl)); _temp565->r=( void*)(( void*)({ struct Cyc_Absyn_Union_d_struct*
-_temp566=( struct Cyc_Absyn_Union_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Union_d_struct));
-_temp566[ 0]=({ struct Cyc_Absyn_Union_d_struct _temp567; _temp567.tag= Cyc_Absyn_Union_d;
-_temp567.f1= _temp563; _temp567;}); _temp566;})); _temp565->loc= loc; _temp565;});
-_temp564->tl= 0; _temp564;});} _LL518: { struct Cyc_Absyn_Enumdecl* _temp570=({
-struct Cyc_Absyn_Enumdecl* _temp575=( struct Cyc_Absyn_Enumdecl*) GC_malloc(
-sizeof( struct Cyc_Absyn_Enumdecl)); _temp575->sc=( void*) s; _temp575->name=
-_temp547; _temp575->fields= 0; _temp575;}); if( atts != 0){ Cyc_Parse_err(
+Cyc_Parse_typ2tvar, loc, _temp530); struct Cyc_Absyn_Uniondecl* _temp550=({
+struct Cyc_Absyn_Uniondecl* _temp555=( struct Cyc_Absyn_Uniondecl*) GC_malloc(
+sizeof( struct Cyc_Absyn_Uniondecl)); _temp555->sc=( void*) s; _temp555->name=({
+struct Cyc_Core_Opt* _temp556=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp556->v=( void*)(( struct _tuple1*) _check_null( _temp532));
+_temp556;}); _temp555->tvs= _temp549; _temp555->fields= 0; _temp555->attributes=
+0; _temp555;}); if( atts != 0){ Cyc_Parse_err( _tag_arr("bad attributes on union",
+sizeof( unsigned char), 24u), loc);} return({ struct Cyc_List_List* _temp551=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp551->hd=(
+void*)({ struct Cyc_Absyn_Decl* _temp552=( struct Cyc_Absyn_Decl*) GC_malloc(
+sizeof( struct Cyc_Absyn_Decl)); _temp552->r=( void*)(( void*)({ struct Cyc_Absyn_Union_d_struct*
+_temp553=( struct Cyc_Absyn_Union_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Union_d_struct));
+_temp553[ 0]=({ struct Cyc_Absyn_Union_d_struct _temp554; _temp554.tag= Cyc_Absyn_Union_d;
+_temp554.f1= _temp550; _temp554;}); _temp553;})); _temp552->loc= loc; _temp552;});
+_temp551->tl= 0; _temp551;});} _LL505: { struct Cyc_Absyn_Enumdecl* _temp557=({
+struct Cyc_Absyn_Enumdecl* _temp562=( struct Cyc_Absyn_Enumdecl*) GC_malloc(
+sizeof( struct Cyc_Absyn_Enumdecl)); _temp562->sc=( void*) s; _temp562->name=
+_temp534; _temp562->fields= 0; _temp562;}); if( atts != 0){ Cyc_Parse_err(
 _tag_arr("bad attributes on enum", sizeof( unsigned char), 23u), loc);} return({
-struct Cyc_List_List* _temp571=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp571->hd=( void*)({ struct Cyc_Absyn_Decl* _temp572=(
-struct Cyc_Absyn_Decl*) GC_malloc( sizeof( struct Cyc_Absyn_Decl)); _temp572->r=(
-void*)(( void*)({ struct Cyc_Absyn_Enum_d_struct* _temp573=( struct Cyc_Absyn_Enum_d_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Enum_d_struct)); _temp573[ 0]=({ struct Cyc_Absyn_Enum_d_struct
-_temp574; _temp574.tag= Cyc_Absyn_Enum_d; _temp574.f1= _temp570; _temp574;});
-_temp573;})); _temp572->loc= loc; _temp572;}); _temp571->tl= 0; _temp571;});}
-_LL520: Cyc_Parse_err( _tag_arr("missing declarator", sizeof( unsigned char), 19u),
-loc); return 0; _LL508:;}} else{ void* t= _temp479.f1; struct Cyc_List_List*
-_temp576= Cyc_Parse_apply_tmss( tq, t, _temp477, atts); if( istypedef){ if( !
+struct Cyc_List_List* _temp558=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp558->hd=( void*)({ struct Cyc_Absyn_Decl* _temp559=(
+struct Cyc_Absyn_Decl*) GC_malloc( sizeof( struct Cyc_Absyn_Decl)); _temp559->r=(
+void*)(( void*)({ struct Cyc_Absyn_Enum_d_struct* _temp560=( struct Cyc_Absyn_Enum_d_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Enum_d_struct)); _temp560[ 0]=({ struct Cyc_Absyn_Enum_d_struct
+_temp561; _temp561.tag= Cyc_Absyn_Enum_d; _temp561.f1= _temp557; _temp561;});
+_temp560;})); _temp559->loc= loc; _temp559;}); _temp558->tl= 0; _temp558;});}
+_LL507: Cyc_Parse_err( _tag_arr("missing declarator", sizeof( unsigned char), 19u),
+loc); return 0; _LL495:;}} else{ void* t= _temp466.f1; struct Cyc_List_List*
+_temp563= Cyc_Parse_apply_tmss( tq, t, _temp464, atts); if( istypedef){ if( !
 exps_empty){ Cyc_Parse_err( _tag_arr("initializer in typedef declaration",
 sizeof( unsigned char), 35u), loc);}{ struct Cyc_List_List* decls=(( struct Cyc_List_List*(*)(
 struct Cyc_Absyn_Decl*(* f)( struct Cyc_Position_Segment*, struct _tuple7*),
 struct Cyc_Position_Segment* env, struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_v_typ_to_typedef,
-loc, _temp576); if( _temp479.f2 != 0){ struct Cyc_Absyn_Decl* d=( struct Cyc_Absyn_Decl*)((
-struct Cyc_Core_Opt*) _check_null( _temp479.f2))->v;{ void* _temp577=( void*) d->r;
-struct Cyc_Absyn_Structdecl* _temp589; struct Cyc_Absyn_Tuniondecl* _temp591;
-struct Cyc_Absyn_Uniondecl* _temp593; struct Cyc_Absyn_Enumdecl* _temp595;
-_LL579: if(*(( int*) _temp577) == Cyc_Absyn_Struct_d){ _LL590: _temp589=((
-struct Cyc_Absyn_Struct_d_struct*) _temp577)->f1; goto _LL580;} else{ goto
-_LL581;} _LL581: if(*(( int*) _temp577) == Cyc_Absyn_Tunion_d){ _LL592: _temp591=((
-struct Cyc_Absyn_Tunion_d_struct*) _temp577)->f1; goto _LL582;} else{ goto
-_LL583;} _LL583: if(*(( int*) _temp577) == Cyc_Absyn_Union_d){ _LL594: _temp593=((
-struct Cyc_Absyn_Union_d_struct*) _temp577)->f1; goto _LL584;} else{ goto _LL585;}
-_LL585: if(*(( int*) _temp577) == Cyc_Absyn_Enum_d){ _LL596: _temp595=(( struct
-Cyc_Absyn_Enum_d_struct*) _temp577)->f1; goto _LL586;} else{ goto _LL587;}
-_LL587: goto _LL588; _LL580:( void*)( _temp589->sc=( void*) s); _temp589->attributes=
-atts; atts= 0; goto _LL578; _LL582:( void*)( _temp591->sc=( void*) s); goto
-_LL578; _LL584:( void*)( _temp593->sc=( void*) s); goto _LL578; _LL586:( void*)(
-_temp595->sc=( void*) s); goto _LL578; _LL588: Cyc_Parse_err( _tag_arr("declaration within typedef is not a struct, union, tunion, or xtunion",
-sizeof( unsigned char), 70u), loc); goto _LL578; _LL578:;} decls=({ struct Cyc_List_List*
-_temp597=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp597->hd=( void*) d; _temp597->tl= decls; _temp597;});} if( atts != 0){ Cyc_Parse_err((
-struct _tagged_arr)({ struct Cyc_Stdio_String_pa_struct _temp599; _temp599.tag=
-Cyc_Stdio_String_pa; _temp599.f1=( struct _tagged_arr) Cyc_Absyn_attribute2string((
-void*)(( struct Cyc_List_List*) _check_null( atts))->hd);{ void* _temp598[ 1u]={&
-_temp599}; Cyc_Stdio_aprintf( _tag_arr("bad attribute %s in typedef", sizeof(
-unsigned char), 28u), _tag_arr( _temp598, sizeof( void*), 1u));}}), loc);}
-return decls;}} else{ if( _temp479.f2 != 0){ Cyc_Parse_unimp2( _tag_arr("nested type declaration within declarator",
+loc, _temp563); if( _temp466.f2 != 0){ struct Cyc_Absyn_Decl* d=( struct Cyc_Absyn_Decl*)((
+struct Cyc_Core_Opt*) _check_null( _temp466.f2))->v;{ void* _temp564=( void*) d->r;
+struct Cyc_Absyn_Structdecl* _temp576; struct Cyc_Absyn_Tuniondecl* _temp578;
+struct Cyc_Absyn_Uniondecl* _temp580; struct Cyc_Absyn_Enumdecl* _temp582;
+_LL566: if(*(( int*) _temp564) == Cyc_Absyn_Struct_d){ _LL577: _temp576=((
+struct Cyc_Absyn_Struct_d_struct*) _temp564)->f1; goto _LL567;} else{ goto
+_LL568;} _LL568: if(*(( int*) _temp564) == Cyc_Absyn_Tunion_d){ _LL579: _temp578=((
+struct Cyc_Absyn_Tunion_d_struct*) _temp564)->f1; goto _LL569;} else{ goto
+_LL570;} _LL570: if(*(( int*) _temp564) == Cyc_Absyn_Union_d){ _LL581: _temp580=((
+struct Cyc_Absyn_Union_d_struct*) _temp564)->f1; goto _LL571;} else{ goto _LL572;}
+_LL572: if(*(( int*) _temp564) == Cyc_Absyn_Enum_d){ _LL583: _temp582=(( struct
+Cyc_Absyn_Enum_d_struct*) _temp564)->f1; goto _LL573;} else{ goto _LL574;}
+_LL574: goto _LL575; _LL567:( void*)( _temp576->sc=( void*) s); _temp576->attributes=
+atts; atts= 0; goto _LL565; _LL569:( void*)( _temp578->sc=( void*) s); goto
+_LL565; _LL571:( void*)( _temp580->sc=( void*) s); goto _LL565; _LL573:( void*)(
+_temp582->sc=( void*) s); goto _LL565; _LL575: Cyc_Parse_err( _tag_arr("declaration within typedef is not a struct, union, tunion, or xtunion",
+sizeof( unsigned char), 70u), loc); goto _LL565; _LL565:;} decls=({ struct Cyc_List_List*
+_temp584=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp584->hd=( void*) d; _temp584->tl= decls; _temp584;});} if( atts != 0){ Cyc_Parse_err((
+struct _tagged_arr)({ struct Cyc_Stdio_String_pa_struct _temp586; _temp586.tag=
+Cyc_Stdio_String_pa; _temp586.f1=( struct _tagged_arr) Cyc_Absyn_attribute2string((
+void*)(( struct Cyc_List_List*) _check_null( atts))->hd);{ void* _temp585[ 1u]={&
+_temp586}; Cyc_Stdio_aprintf( _tag_arr("bad attribute %s in typedef", sizeof(
+unsigned char), 28u), _tag_arr( _temp585, sizeof( void*), 1u));}}), loc);}
+return decls;}} else{ if( _temp466.f2 != 0){ Cyc_Parse_unimp2( _tag_arr("nested type declaration within declarator",
 sizeof( unsigned char), 42u), loc);}{ struct Cyc_List_List* decls= 0;{ struct
-Cyc_List_List* _temp600= _temp576; for( 0; _temp600 != 0;( _temp600=(( struct
-Cyc_List_List*) _check_null( _temp600))->tl, _temp475=(( struct Cyc_List_List*)
-_check_null( _temp475))->tl)){ struct _tuple7 _temp603; struct Cyc_List_List*
-_temp604; struct Cyc_List_List* _temp606; void* _temp608; struct Cyc_Absyn_Tqual
-_temp610; struct _tuple1* _temp612; struct _tuple7* _temp601=( struct _tuple7*)((
-struct Cyc_List_List*) _check_null( _temp600))->hd; _temp603=* _temp601; _LL613:
-_temp612= _temp603.f1; goto _LL611; _LL611: _temp610= _temp603.f2; goto _LL609;
-_LL609: _temp608= _temp603.f3; goto _LL607; _LL607: _temp606= _temp603.f4; goto
-_LL605; _LL605: _temp604= _temp603.f5; goto _LL602; _LL602: if( _temp606 != 0){
+Cyc_List_List* _temp587= _temp563; for( 0; _temp587 != 0;( _temp587=(( struct
+Cyc_List_List*) _check_null( _temp587))->tl, _temp462=(( struct Cyc_List_List*)
+_check_null( _temp462))->tl)){ struct _tuple7 _temp590; struct Cyc_List_List*
+_temp591; struct Cyc_List_List* _temp593; void* _temp595; struct Cyc_Absyn_Tqual
+_temp597; struct _tuple1* _temp599; struct _tuple7* _temp588=( struct _tuple7*)((
+struct Cyc_List_List*) _check_null( _temp587))->hd; _temp590=* _temp588; _LL600:
+_temp599= _temp590.f1; goto _LL598; _LL598: _temp597= _temp590.f2; goto _LL596;
+_LL596: _temp595= _temp590.f3; goto _LL594; _LL594: _temp593= _temp590.f4; goto
+_LL592; _LL592: _temp591= _temp590.f5; goto _LL589; _LL589: if( _temp593 != 0){
 Cyc_Parse_warn( _tag_arr("bad type params, ignoring", sizeof( unsigned char), 26u),
-loc);} if( _temp475 == 0){(( int(*)( struct _tagged_arr msg, struct Cyc_Position_Segment*
+loc);} if( _temp462 == 0){(( int(*)( struct _tagged_arr msg, struct Cyc_Position_Segment*
 sg)) Cyc_Parse_abort)( _tag_arr("unexpected null in parse!", sizeof(
-unsigned char), 26u), loc);}{ struct Cyc_Absyn_Exp* _temp614=( struct Cyc_Absyn_Exp*)((
-struct Cyc_List_List*) _check_null( _temp475))->hd; struct Cyc_Absyn_Vardecl*
-_temp615= Cyc_Absyn_new_vardecl( _temp612, _temp608, _temp614); _temp615->tq=
-_temp610;( void*)( _temp615->sc=( void*) s); _temp615->attributes= _temp604;{
-struct Cyc_Absyn_Decl* _temp616=({ struct Cyc_Absyn_Decl* _temp618=( struct Cyc_Absyn_Decl*)
-GC_malloc( sizeof( struct Cyc_Absyn_Decl)); _temp618->r=( void*)(( void*)({
-struct Cyc_Absyn_Var_d_struct* _temp619=( struct Cyc_Absyn_Var_d_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Var_d_struct)); _temp619[ 0]=({ struct Cyc_Absyn_Var_d_struct
-_temp620; _temp620.tag= Cyc_Absyn_Var_d; _temp620.f1= _temp615; _temp620;});
-_temp619;})); _temp618->loc= loc; _temp618;}); decls=({ struct Cyc_List_List*
-_temp617=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp617->hd=( void*) _temp616; _temp617->tl= decls; _temp617;});}}}} return((
+unsigned char), 26u), loc);}{ struct Cyc_Absyn_Exp* _temp601=( struct Cyc_Absyn_Exp*)((
+struct Cyc_List_List*) _check_null( _temp462))->hd; struct Cyc_Absyn_Vardecl*
+_temp602= Cyc_Absyn_new_vardecl( _temp599, _temp595, _temp601); _temp602->tq=
+_temp597;( void*)( _temp602->sc=( void*) s); _temp602->attributes= _temp591;{
+struct Cyc_Absyn_Decl* _temp603=({ struct Cyc_Absyn_Decl* _temp605=( struct Cyc_Absyn_Decl*)
+GC_malloc( sizeof( struct Cyc_Absyn_Decl)); _temp605->r=( void*)(( void*)({
+struct Cyc_Absyn_Var_d_struct* _temp606=( struct Cyc_Absyn_Var_d_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Var_d_struct)); _temp606[ 0]=({ struct Cyc_Absyn_Var_d_struct
+_temp607; _temp607.tag= Cyc_Absyn_Var_d; _temp607.f1= _temp602; _temp607;});
+_temp606;})); _temp605->loc= loc; _temp605;}); decls=({ struct Cyc_List_List*
+_temp604=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp604->hd=( void*) _temp603; _temp604->tl= decls; _temp604;});}}}} return((
 struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( decls);}}}}}}}
 static void* Cyc_Parse_id_to_kind( struct _tagged_arr s, struct Cyc_Position_Segment*
 loc){ if( Cyc_String_strlen( s) != 1){ Cyc_Parse_err(( struct _tagged_arr)({
-struct Cyc_Stdio_String_pa_struct _temp622; _temp622.tag= Cyc_Stdio_String_pa;
-_temp622.f1=( struct _tagged_arr) s;{ void* _temp621[ 1u]={& _temp622}; Cyc_Stdio_aprintf(
-_tag_arr("bad kind: %s", sizeof( unsigned char), 13u), _tag_arr( _temp621,
+struct Cyc_Stdio_String_pa_struct _temp609; _temp609.tag= Cyc_Stdio_String_pa;
+_temp609.f1=( struct _tagged_arr) s;{ void* _temp608[ 1u]={& _temp609}; Cyc_Stdio_aprintf(
+_tag_arr("bad kind: %s", sizeof( unsigned char), 13u), _tag_arr( _temp608,
 sizeof( void*), 1u));}}), loc); return( void*) Cyc_Absyn_BoxKind;} else{ switch(*((
 const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), 0))){
-case 'A': _LL623: return( void*) Cyc_Absyn_AnyKind; case 'M': _LL624: return(
-void*) Cyc_Absyn_MemKind; case 'B': _LL625: return( void*) Cyc_Absyn_BoxKind;
-case 'R': _LL626: return( void*) Cyc_Absyn_RgnKind; case 'E': _LL627: return(
-void*) Cyc_Absyn_EffKind; default: _LL628: Cyc_Parse_err(( struct _tagged_arr)({
-struct Cyc_Stdio_String_pa_struct _temp631; _temp631.tag= Cyc_Stdio_String_pa;
-_temp631.f1=( struct _tagged_arr) s;{ void* _temp630[ 1u]={& _temp631}; Cyc_Stdio_aprintf(
-_tag_arr("bad kind: %s", sizeof( unsigned char), 13u), _tag_arr( _temp630,
+case 'A': _LL610: return( void*) Cyc_Absyn_AnyKind; case 'M': _LL611: return(
+void*) Cyc_Absyn_MemKind; case 'B': _LL612: return( void*) Cyc_Absyn_BoxKind;
+case 'R': _LL613: return( void*) Cyc_Absyn_RgnKind; case 'E': _LL614: return(
+void*) Cyc_Absyn_EffKind; default: _LL615: Cyc_Parse_err(( struct _tagged_arr)({
+struct Cyc_Stdio_String_pa_struct _temp618; _temp618.tag= Cyc_Stdio_String_pa;
+_temp618.f1=( struct _tagged_arr) s;{ void* _temp617[ 1u]={& _temp618}; Cyc_Stdio_aprintf(
+_tag_arr("bad kind: %s", sizeof( unsigned char), 13u), _tag_arr( _temp617,
 sizeof( void*), 1u));}}), loc); return( void*) Cyc_Absyn_BoxKind;}}} static
 struct Cyc_List_List* Cyc_Parse_attopt_to_tms( struct Cyc_Position_Segment* loc,
 struct Cyc_List_List* atts, struct Cyc_List_List* tms){ if( atts == 0){ return
-tms;} else{ return({ struct Cyc_List_List* _temp632=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp632->hd=( void*)(( void*)({
-struct Cyc_Absyn_Attributes_mod_struct* _temp633=( struct Cyc_Absyn_Attributes_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Attributes_mod_struct)); _temp633[ 0]=({
-struct Cyc_Absyn_Attributes_mod_struct _temp634; _temp634.tag= Cyc_Absyn_Attributes_mod;
-_temp634.f1= loc; _temp634.f2= atts; _temp634;}); _temp633;})); _temp632->tl=
-tms; _temp632;});}} static struct Cyc_Absyn_Decl* Cyc_Parse_v_typ_to_typedef(
-struct Cyc_Position_Segment* loc, struct _tuple7* t){ struct _tuple7 _temp637;
-struct Cyc_List_List* _temp638; struct Cyc_List_List* _temp640; void* _temp642;
-struct Cyc_Absyn_Tqual _temp644; struct _tuple1* _temp646; struct _tuple7*
-_temp635= t; _temp637=* _temp635; _LL647: _temp646= _temp637.f1; goto _LL645;
-_LL645: _temp644= _temp637.f2; goto _LL643; _LL643: _temp642= _temp637.f3; goto
-_LL641; _LL641: _temp640= _temp637.f4; goto _LL639; _LL639: _temp638= _temp637.f5;
-goto _LL636; _LL636: Cyc_Lex_register_typedef( _temp646); if( _temp638 != 0){
-Cyc_Parse_err(( struct _tagged_arr)({ struct Cyc_Stdio_String_pa_struct _temp649;
-_temp649.tag= Cyc_Stdio_String_pa; _temp649.f1=( struct _tagged_arr) Cyc_Absyn_attribute2string((
-void*)(( struct Cyc_List_List*) _check_null( _temp638))->hd);{ void* _temp648[ 1u]={&
-_temp649}; Cyc_Stdio_aprintf( _tag_arr("bad attribute %s within typedef",
-sizeof( unsigned char), 32u), _tag_arr( _temp648, sizeof( void*), 1u));}}), loc);}
-return Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Typedef_d_struct* _temp650=(
+tms;} else{ return({ struct Cyc_List_List* _temp619=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp619->hd=( void*)(( void*)({
+struct Cyc_Absyn_Attributes_mod_struct* _temp620=( struct Cyc_Absyn_Attributes_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Attributes_mod_struct)); _temp620[ 0]=({
+struct Cyc_Absyn_Attributes_mod_struct _temp621; _temp621.tag= Cyc_Absyn_Attributes_mod;
+_temp621.f1= loc; _temp621.f2= atts; _temp621;}); _temp620;})); _temp619->tl=
+tms; _temp619;});}} static struct Cyc_Absyn_Decl* Cyc_Parse_v_typ_to_typedef(
+struct Cyc_Position_Segment* loc, struct _tuple7* t){ struct _tuple7 _temp624;
+struct Cyc_List_List* _temp625; struct Cyc_List_List* _temp627; void* _temp629;
+struct Cyc_Absyn_Tqual _temp631; struct _tuple1* _temp633; struct _tuple7*
+_temp622= t; _temp624=* _temp622; _LL634: _temp633= _temp624.f1; goto _LL632;
+_LL632: _temp631= _temp624.f2; goto _LL630; _LL630: _temp629= _temp624.f3; goto
+_LL628; _LL628: _temp627= _temp624.f4; goto _LL626; _LL626: _temp625= _temp624.f5;
+goto _LL623; _LL623: Cyc_Lex_register_typedef( _temp633); if( _temp625 != 0){
+Cyc_Parse_err(( struct _tagged_arr)({ struct Cyc_Stdio_String_pa_struct _temp636;
+_temp636.tag= Cyc_Stdio_String_pa; _temp636.f1=( struct _tagged_arr) Cyc_Absyn_attribute2string((
+void*)(( struct Cyc_List_List*) _check_null( _temp625))->hd);{ void* _temp635[ 1u]={&
+_temp636}; Cyc_Stdio_aprintf( _tag_arr("bad attribute %s within typedef",
+sizeof( unsigned char), 32u), _tag_arr( _temp635, sizeof( void*), 1u));}}), loc);}
+return Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Typedef_d_struct* _temp637=(
 struct Cyc_Absyn_Typedef_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Typedef_d_struct));
-_temp650[ 0]=({ struct Cyc_Absyn_Typedef_d_struct _temp651; _temp651.tag= Cyc_Absyn_Typedef_d;
-_temp651.f1=({ struct Cyc_Absyn_Typedefdecl* _temp652=( struct Cyc_Absyn_Typedefdecl*)
-GC_malloc( sizeof( struct Cyc_Absyn_Typedefdecl)); _temp652->name= _temp646;
-_temp652->tvs= _temp640; _temp652->defn=( void*) _temp642; _temp652;}); _temp651;});
-_temp650;}), loc);} unsigned char Cyc_AbstractDeclarator_tok[ 27u]="\000\000\000\000AbstractDeclarator_tok";
+_temp637[ 0]=({ struct Cyc_Absyn_Typedef_d_struct _temp638; _temp638.tag= Cyc_Absyn_Typedef_d;
+_temp638.f1=({ struct Cyc_Absyn_Typedefdecl* _temp639=( struct Cyc_Absyn_Typedefdecl*)
+GC_malloc( sizeof( struct Cyc_Absyn_Typedefdecl)); _temp639->name= _temp633;
+_temp639->tvs= _temp627; _temp639->defn=( void*) _temp629; _temp639;}); _temp638;});
+_temp637;}), loc);} unsigned char Cyc_AbstractDeclarator_tok[ 27u]="\000\000\000\000AbstractDeclarator_tok";
 struct Cyc_AbstractDeclarator_tok_struct{ unsigned char* tag; struct Cyc_Parse_Abstractdeclarator*
 f1; } ; unsigned char Cyc_AttributeList_tok[ 22u]="\000\000\000\000AttributeList_tok";
 struct Cyc_AttributeList_tok_struct{ unsigned char* tag; struct Cyc_List_List*
@@ -1459,376 +1451,375 @@ unsigned char* tag; struct Cyc_Absyn_Tqual f1; } ; unsigned char Cyc_TypeSpecifi
 22u]="\000\000\000\000TypeSpecifier_tok"; struct Cyc_TypeSpecifier_tok_struct{
 unsigned char* tag; void* f1; } ; unsigned char Cyc_Type_tok[ 13u]="\000\000\000\000Type_tok";
 struct Cyc_Type_tok_struct{ unsigned char* tag; void* f1; } ; static
-unsigned char _temp654[ 8u]="Int_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_Int_tok={
-Cyc_Core_Failure,{ _temp654, _temp654, _temp654 + 8u}}; struct _tuple16* Cyc_yyget_Int_tok(
-void* yy1){ void* _temp655= yy1; struct _tuple16* _temp661; _LL657: if(*(( void**)
-_temp655) == Cyc_Int_tok){ _LL662: _temp661=(( struct Cyc_Int_tok_struct*)
-_temp655)->f1; goto _LL658;} else{ goto _LL659;} _LL659: goto _LL660; _LL658:
-return _temp661; _LL660:( int) _throw(( void*)& Cyc_yyfail_Int_tok); _LL656:;}
-static unsigned char _temp664[ 11u]="String_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_String_tok={ Cyc_Core_Failure,{ _temp664, _temp664, _temp664 + 11u}};
-struct _tagged_arr Cyc_yyget_String_tok( void* yy1){ void* _temp665= yy1; struct
-_tagged_arr _temp671; _LL667: if(*(( void**) _temp665) == Cyc_String_tok){
-_LL672: _temp671=(( struct Cyc_String_tok_struct*) _temp665)->f1; goto _LL668;}
-else{ goto _LL669;} _LL669: goto _LL670; _LL668: return _temp671; _LL670:( int)
-_throw(( void*)& Cyc_yyfail_String_tok); _LL666:;} static unsigned char _temp674[
+unsigned char _temp641[ 8u]="Int_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_Int_tok={
+Cyc_Core_Failure,{ _temp641, _temp641, _temp641 + 8u}}; struct _tuple16* Cyc_yyget_Int_tok(
+void* yy1){ void* _temp642= yy1; struct _tuple16* _temp648; _LL644: if(*(( void**)
+_temp642) == Cyc_Int_tok){ _LL649: _temp648=(( struct Cyc_Int_tok_struct*)
+_temp642)->f1; goto _LL645;} else{ goto _LL646;} _LL646: goto _LL647; _LL645:
+return _temp648; _LL647:( int) _throw(( void*)& Cyc_yyfail_Int_tok); _LL643:;}
+static unsigned char _temp651[ 11u]="String_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_String_tok={ Cyc_Core_Failure,{ _temp651, _temp651, _temp651 + 11u}};
+struct _tagged_arr Cyc_yyget_String_tok( void* yy1){ void* _temp652= yy1; struct
+_tagged_arr _temp658; _LL654: if(*(( void**) _temp652) == Cyc_String_tok){
+_LL659: _temp658=(( struct Cyc_String_tok_struct*) _temp652)->f1; goto _LL655;}
+else{ goto _LL656;} _LL656: goto _LL657; _LL655: return _temp658; _LL657:( int)
+_throw(( void*)& Cyc_yyfail_String_tok); _LL653:;} static unsigned char _temp661[
 9u]="Char_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_Char_tok={ Cyc_Core_Failure,{
-_temp674, _temp674, _temp674 + 9u}}; unsigned char Cyc_yyget_Char_tok( void* yy1){
-void* _temp675= yy1; unsigned char _temp681; _LL677: if(*(( void**) _temp675) ==
-Cyc_Char_tok){ _LL682: _temp681=(( struct Cyc_Char_tok_struct*) _temp675)->f1;
-goto _LL678;} else{ goto _LL679;} _LL679: goto _LL680; _LL678: return _temp681;
-_LL680:( int) _throw(( void*)& Cyc_yyfail_Char_tok); _LL676:;} static
-unsigned char _temp684[ 17u]="Pointer_Sort_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_Pointer_Sort_tok={ Cyc_Core_Failure,{ _temp684, _temp684, _temp684 +
-17u}}; void* Cyc_yyget_Pointer_Sort_tok( void* yy1){ void* _temp685= yy1; void*
-_temp691; _LL687: if(*(( void**) _temp685) == Cyc_Pointer_Sort_tok){ _LL692:
-_temp691=( void*)(( struct Cyc_Pointer_Sort_tok_struct*) _temp685)->f1; goto
-_LL688;} else{ goto _LL689;} _LL689: goto _LL690; _LL688: return _temp691;
-_LL690:( int) _throw(( void*)& Cyc_yyfail_Pointer_Sort_tok); _LL686:;} static
-unsigned char _temp694[ 8u]="Exp_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_Exp_tok={
-Cyc_Core_Failure,{ _temp694, _temp694, _temp694 + 8u}}; struct Cyc_Absyn_Exp*
-Cyc_yyget_Exp_tok( void* yy1){ void* _temp695= yy1; struct Cyc_Absyn_Exp*
-_temp701; _LL697: if(*(( void**) _temp695) == Cyc_Exp_tok){ _LL702: _temp701=((
-struct Cyc_Exp_tok_struct*) _temp695)->f1; goto _LL698;} else{ goto _LL699;}
-_LL699: goto _LL700; _LL698: return _temp701; _LL700:( int) _throw(( void*)& Cyc_yyfail_Exp_tok);
-_LL696:;} static unsigned char _temp704[ 12u]="ExpList_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_ExpList_tok={ Cyc_Core_Failure,{ _temp704, _temp704, _temp704 + 12u}};
-struct Cyc_List_List* Cyc_yyget_ExpList_tok( void* yy1){ void* _temp705= yy1;
-struct Cyc_List_List* _temp711; _LL707: if(*(( void**) _temp705) == Cyc_ExpList_tok){
-_LL712: _temp711=(( struct Cyc_ExpList_tok_struct*) _temp705)->f1; goto _LL708;}
-else{ goto _LL709;} _LL709: goto _LL710; _LL708: return _temp711; _LL710:( int)
-_throw(( void*)& Cyc_yyfail_ExpList_tok); _LL706:;} static unsigned char
-_temp714[ 20u]="InitializerList_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_InitializerList_tok={
-Cyc_Core_Failure,{ _temp714, _temp714, _temp714 + 20u}}; struct Cyc_List_List*
-Cyc_yyget_InitializerList_tok( void* yy1){ void* _temp715= yy1; struct Cyc_List_List*
-_temp721; _LL717: if(*(( void**) _temp715) == Cyc_InitializerList_tok){ _LL722:
-_temp721=(( struct Cyc_InitializerList_tok_struct*) _temp715)->f1; goto _LL718;}
-else{ goto _LL719;} _LL719: goto _LL720; _LL718: return _temp721; _LL720:( int)
-_throw(( void*)& Cyc_yyfail_InitializerList_tok); _LL716:;} static unsigned char
-_temp724[ 11u]="Primop_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_Primop_tok={
-Cyc_Core_Failure,{ _temp724, _temp724, _temp724 + 11u}}; void* Cyc_yyget_Primop_tok(
-void* yy1){ void* _temp725= yy1; void* _temp731; _LL727: if(*(( void**) _temp725)
-== Cyc_Primop_tok){ _LL732: _temp731=( void*)(( struct Cyc_Primop_tok_struct*)
-_temp725)->f1; goto _LL728;} else{ goto _LL729;} _LL729: goto _LL730; _LL728:
-return _temp731; _LL730:( int) _throw(( void*)& Cyc_yyfail_Primop_tok); _LL726:;}
-static unsigned char _temp734[ 14u]="Primopopt_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_Primopopt_tok={ Cyc_Core_Failure,{ _temp734, _temp734, _temp734 + 14u}};
-struct Cyc_Core_Opt* Cyc_yyget_Primopopt_tok( void* yy1){ void* _temp735= yy1;
-struct Cyc_Core_Opt* _temp741; _LL737: if(*(( void**) _temp735) == Cyc_Primopopt_tok){
-_LL742: _temp741=(( struct Cyc_Primopopt_tok_struct*) _temp735)->f1; goto _LL738;}
-else{ goto _LL739;} _LL739: goto _LL740; _LL738: return _temp741; _LL740:( int)
-_throw(( void*)& Cyc_yyfail_Primopopt_tok); _LL736:;} static unsigned char
-_temp744[ 11u]="QualId_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_QualId_tok={
-Cyc_Core_Failure,{ _temp744, _temp744, _temp744 + 11u}}; struct _tuple1* Cyc_yyget_QualId_tok(
-void* yy1){ void* _temp745= yy1; struct _tuple1* _temp751; _LL747: if(*(( void**)
-_temp745) == Cyc_QualId_tok){ _LL752: _temp751=(( struct Cyc_QualId_tok_struct*)
-_temp745)->f1; goto _LL748;} else{ goto _LL749;} _LL749: goto _LL750; _LL748:
-return _temp751; _LL750:( int) _throw(( void*)& Cyc_yyfail_QualId_tok); _LL746:;}
-static unsigned char _temp754[ 9u]="Stmt_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_Stmt_tok={ Cyc_Core_Failure,{ _temp754, _temp754, _temp754 + 9u}};
-struct Cyc_Absyn_Stmt* Cyc_yyget_Stmt_tok( void* yy1){ void* _temp755= yy1;
-struct Cyc_Absyn_Stmt* _temp761; _LL757: if(*(( void**) _temp755) == Cyc_Stmt_tok){
-_LL762: _temp761=(( struct Cyc_Stmt_tok_struct*) _temp755)->f1; goto _LL758;}
-else{ goto _LL759;} _LL759: goto _LL760; _LL758: return _temp761; _LL760:( int)
-_throw(( void*)& Cyc_yyfail_Stmt_tok); _LL756:;} static unsigned char _temp764[
+_temp661, _temp661, _temp661 + 9u}}; unsigned char Cyc_yyget_Char_tok( void* yy1){
+void* _temp662= yy1; unsigned char _temp668; _LL664: if(*(( void**) _temp662) ==
+Cyc_Char_tok){ _LL669: _temp668=(( struct Cyc_Char_tok_struct*) _temp662)->f1;
+goto _LL665;} else{ goto _LL666;} _LL666: goto _LL667; _LL665: return _temp668;
+_LL667:( int) _throw(( void*)& Cyc_yyfail_Char_tok); _LL663:;} static
+unsigned char _temp671[ 17u]="Pointer_Sort_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_Pointer_Sort_tok={ Cyc_Core_Failure,{ _temp671, _temp671, _temp671 +
+17u}}; void* Cyc_yyget_Pointer_Sort_tok( void* yy1){ void* _temp672= yy1; void*
+_temp678; _LL674: if(*(( void**) _temp672) == Cyc_Pointer_Sort_tok){ _LL679:
+_temp678=( void*)(( struct Cyc_Pointer_Sort_tok_struct*) _temp672)->f1; goto
+_LL675;} else{ goto _LL676;} _LL676: goto _LL677; _LL675: return _temp678;
+_LL677:( int) _throw(( void*)& Cyc_yyfail_Pointer_Sort_tok); _LL673:;} static
+unsigned char _temp681[ 8u]="Exp_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_Exp_tok={
+Cyc_Core_Failure,{ _temp681, _temp681, _temp681 + 8u}}; struct Cyc_Absyn_Exp*
+Cyc_yyget_Exp_tok( void* yy1){ void* _temp682= yy1; struct Cyc_Absyn_Exp*
+_temp688; _LL684: if(*(( void**) _temp682) == Cyc_Exp_tok){ _LL689: _temp688=((
+struct Cyc_Exp_tok_struct*) _temp682)->f1; goto _LL685;} else{ goto _LL686;}
+_LL686: goto _LL687; _LL685: return _temp688; _LL687:( int) _throw(( void*)& Cyc_yyfail_Exp_tok);
+_LL683:;} static unsigned char _temp691[ 12u]="ExpList_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_ExpList_tok={ Cyc_Core_Failure,{ _temp691, _temp691, _temp691 + 12u}};
+struct Cyc_List_List* Cyc_yyget_ExpList_tok( void* yy1){ void* _temp692= yy1;
+struct Cyc_List_List* _temp698; _LL694: if(*(( void**) _temp692) == Cyc_ExpList_tok){
+_LL699: _temp698=(( struct Cyc_ExpList_tok_struct*) _temp692)->f1; goto _LL695;}
+else{ goto _LL696;} _LL696: goto _LL697; _LL695: return _temp698; _LL697:( int)
+_throw(( void*)& Cyc_yyfail_ExpList_tok); _LL693:;} static unsigned char
+_temp701[ 20u]="InitializerList_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_InitializerList_tok={
+Cyc_Core_Failure,{ _temp701, _temp701, _temp701 + 20u}}; struct Cyc_List_List*
+Cyc_yyget_InitializerList_tok( void* yy1){ void* _temp702= yy1; struct Cyc_List_List*
+_temp708; _LL704: if(*(( void**) _temp702) == Cyc_InitializerList_tok){ _LL709:
+_temp708=(( struct Cyc_InitializerList_tok_struct*) _temp702)->f1; goto _LL705;}
+else{ goto _LL706;} _LL706: goto _LL707; _LL705: return _temp708; _LL707:( int)
+_throw(( void*)& Cyc_yyfail_InitializerList_tok); _LL703:;} static unsigned char
+_temp711[ 11u]="Primop_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_Primop_tok={
+Cyc_Core_Failure,{ _temp711, _temp711, _temp711 + 11u}}; void* Cyc_yyget_Primop_tok(
+void* yy1){ void* _temp712= yy1; void* _temp718; _LL714: if(*(( void**) _temp712)
+== Cyc_Primop_tok){ _LL719: _temp718=( void*)(( struct Cyc_Primop_tok_struct*)
+_temp712)->f1; goto _LL715;} else{ goto _LL716;} _LL716: goto _LL717; _LL715:
+return _temp718; _LL717:( int) _throw(( void*)& Cyc_yyfail_Primop_tok); _LL713:;}
+static unsigned char _temp721[ 14u]="Primopopt_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_Primopopt_tok={ Cyc_Core_Failure,{ _temp721, _temp721, _temp721 + 14u}};
+struct Cyc_Core_Opt* Cyc_yyget_Primopopt_tok( void* yy1){ void* _temp722= yy1;
+struct Cyc_Core_Opt* _temp728; _LL724: if(*(( void**) _temp722) == Cyc_Primopopt_tok){
+_LL729: _temp728=(( struct Cyc_Primopopt_tok_struct*) _temp722)->f1; goto _LL725;}
+else{ goto _LL726;} _LL726: goto _LL727; _LL725: return _temp728; _LL727:( int)
+_throw(( void*)& Cyc_yyfail_Primopopt_tok); _LL723:;} static unsigned char
+_temp731[ 11u]="QualId_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_QualId_tok={
+Cyc_Core_Failure,{ _temp731, _temp731, _temp731 + 11u}}; struct _tuple1* Cyc_yyget_QualId_tok(
+void* yy1){ void* _temp732= yy1; struct _tuple1* _temp738; _LL734: if(*(( void**)
+_temp732) == Cyc_QualId_tok){ _LL739: _temp738=(( struct Cyc_QualId_tok_struct*)
+_temp732)->f1; goto _LL735;} else{ goto _LL736;} _LL736: goto _LL737; _LL735:
+return _temp738; _LL737:( int) _throw(( void*)& Cyc_yyfail_QualId_tok); _LL733:;}
+static unsigned char _temp741[ 9u]="Stmt_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_Stmt_tok={ Cyc_Core_Failure,{ _temp741, _temp741, _temp741 + 9u}};
+struct Cyc_Absyn_Stmt* Cyc_yyget_Stmt_tok( void* yy1){ void* _temp742= yy1;
+struct Cyc_Absyn_Stmt* _temp748; _LL744: if(*(( void**) _temp742) == Cyc_Stmt_tok){
+_LL749: _temp748=(( struct Cyc_Stmt_tok_struct*) _temp742)->f1; goto _LL745;}
+else{ goto _LL746;} _LL746: goto _LL747; _LL745: return _temp748; _LL747:( int)
+_throw(( void*)& Cyc_yyfail_Stmt_tok); _LL743:;} static unsigned char _temp751[
 21u]="SwitchClauseList_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_SwitchClauseList_tok={
-Cyc_Core_Failure,{ _temp764, _temp764, _temp764 + 21u}}; struct Cyc_List_List*
-Cyc_yyget_SwitchClauseList_tok( void* yy1){ void* _temp765= yy1; struct Cyc_List_List*
-_temp771; _LL767: if(*(( void**) _temp765) == Cyc_SwitchClauseList_tok){ _LL772:
-_temp771=(( struct Cyc_SwitchClauseList_tok_struct*) _temp765)->f1; goto _LL768;}
-else{ goto _LL769;} _LL769: goto _LL770; _LL768: return _temp771; _LL770:( int)
-_throw(( void*)& Cyc_yyfail_SwitchClauseList_tok); _LL766:;} static
-unsigned char _temp774[ 22u]="SwitchCClauseList_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_SwitchCClauseList_tok={ Cyc_Core_Failure,{ _temp774, _temp774,
-_temp774 + 22u}}; struct Cyc_List_List* Cyc_yyget_SwitchCClauseList_tok( void*
-yy1){ void* _temp775= yy1; struct Cyc_List_List* _temp781; _LL777: if(*(( void**)
-_temp775) == Cyc_SwitchCClauseList_tok){ _LL782: _temp781=(( struct Cyc_SwitchCClauseList_tok_struct*)
-_temp775)->f1; goto _LL778;} else{ goto _LL779;} _LL779: goto _LL780; _LL778:
-return _temp781; _LL780:( int) _throw(( void*)& Cyc_yyfail_SwitchCClauseList_tok);
-_LL776:;} static unsigned char _temp784[ 12u]="Pattern_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_Pattern_tok={ Cyc_Core_Failure,{ _temp784, _temp784, _temp784 + 12u}};
-struct Cyc_Absyn_Pat* Cyc_yyget_Pattern_tok( void* yy1){ void* _temp785= yy1;
-struct Cyc_Absyn_Pat* _temp791; _LL787: if(*(( void**) _temp785) == Cyc_Pattern_tok){
-_LL792: _temp791=(( struct Cyc_Pattern_tok_struct*) _temp785)->f1; goto _LL788;}
-else{ goto _LL789;} _LL789: goto _LL790; _LL788: return _temp791; _LL790:( int)
-_throw(( void*)& Cyc_yyfail_Pattern_tok); _LL786:;} static unsigned char
-_temp794[ 16u]="PatternList_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_PatternList_tok={
-Cyc_Core_Failure,{ _temp794, _temp794, _temp794 + 16u}}; struct Cyc_List_List*
-Cyc_yyget_PatternList_tok( void* yy1){ void* _temp795= yy1; struct Cyc_List_List*
-_temp801; _LL797: if(*(( void**) _temp795) == Cyc_PatternList_tok){ _LL802:
-_temp801=(( struct Cyc_PatternList_tok_struct*) _temp795)->f1; goto _LL798;}
-else{ goto _LL799;} _LL799: goto _LL800; _LL798: return _temp801; _LL800:( int)
-_throw(( void*)& Cyc_yyfail_PatternList_tok); _LL796:;} static unsigned char
-_temp804[ 17u]="FieldPattern_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_FieldPattern_tok={
-Cyc_Core_Failure,{ _temp804, _temp804, _temp804 + 17u}}; struct _tuple14* Cyc_yyget_FieldPattern_tok(
-void* yy1){ void* _temp805= yy1; struct _tuple14* _temp811; _LL807: if(*(( void**)
-_temp805) == Cyc_FieldPattern_tok){ _LL812: _temp811=(( struct Cyc_FieldPattern_tok_struct*)
-_temp805)->f1; goto _LL808;} else{ goto _LL809;} _LL809: goto _LL810; _LL808:
-return _temp811; _LL810:( int) _throw(( void*)& Cyc_yyfail_FieldPattern_tok);
-_LL806:;} static unsigned char _temp814[ 21u]="FieldPatternList_tok"; static
+Cyc_Core_Failure,{ _temp751, _temp751, _temp751 + 21u}}; struct Cyc_List_List*
+Cyc_yyget_SwitchClauseList_tok( void* yy1){ void* _temp752= yy1; struct Cyc_List_List*
+_temp758; _LL754: if(*(( void**) _temp752) == Cyc_SwitchClauseList_tok){ _LL759:
+_temp758=(( struct Cyc_SwitchClauseList_tok_struct*) _temp752)->f1; goto _LL755;}
+else{ goto _LL756;} _LL756: goto _LL757; _LL755: return _temp758; _LL757:( int)
+_throw(( void*)& Cyc_yyfail_SwitchClauseList_tok); _LL753:;} static
+unsigned char _temp761[ 22u]="SwitchCClauseList_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_SwitchCClauseList_tok={ Cyc_Core_Failure,{ _temp761, _temp761,
+_temp761 + 22u}}; struct Cyc_List_List* Cyc_yyget_SwitchCClauseList_tok( void*
+yy1){ void* _temp762= yy1; struct Cyc_List_List* _temp768; _LL764: if(*(( void**)
+_temp762) == Cyc_SwitchCClauseList_tok){ _LL769: _temp768=(( struct Cyc_SwitchCClauseList_tok_struct*)
+_temp762)->f1; goto _LL765;} else{ goto _LL766;} _LL766: goto _LL767; _LL765:
+return _temp768; _LL767:( int) _throw(( void*)& Cyc_yyfail_SwitchCClauseList_tok);
+_LL763:;} static unsigned char _temp771[ 12u]="Pattern_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_Pattern_tok={ Cyc_Core_Failure,{ _temp771, _temp771, _temp771 + 12u}};
+struct Cyc_Absyn_Pat* Cyc_yyget_Pattern_tok( void* yy1){ void* _temp772= yy1;
+struct Cyc_Absyn_Pat* _temp778; _LL774: if(*(( void**) _temp772) == Cyc_Pattern_tok){
+_LL779: _temp778=(( struct Cyc_Pattern_tok_struct*) _temp772)->f1; goto _LL775;}
+else{ goto _LL776;} _LL776: goto _LL777; _LL775: return _temp778; _LL777:( int)
+_throw(( void*)& Cyc_yyfail_Pattern_tok); _LL773:;} static unsigned char
+_temp781[ 16u]="PatternList_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_PatternList_tok={
+Cyc_Core_Failure,{ _temp781, _temp781, _temp781 + 16u}}; struct Cyc_List_List*
+Cyc_yyget_PatternList_tok( void* yy1){ void* _temp782= yy1; struct Cyc_List_List*
+_temp788; _LL784: if(*(( void**) _temp782) == Cyc_PatternList_tok){ _LL789:
+_temp788=(( struct Cyc_PatternList_tok_struct*) _temp782)->f1; goto _LL785;}
+else{ goto _LL786;} _LL786: goto _LL787; _LL785: return _temp788; _LL787:( int)
+_throw(( void*)& Cyc_yyfail_PatternList_tok); _LL783:;} static unsigned char
+_temp791[ 17u]="FieldPattern_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_FieldPattern_tok={
+Cyc_Core_Failure,{ _temp791, _temp791, _temp791 + 17u}}; struct _tuple14* Cyc_yyget_FieldPattern_tok(
+void* yy1){ void* _temp792= yy1; struct _tuple14* _temp798; _LL794: if(*(( void**)
+_temp792) == Cyc_FieldPattern_tok){ _LL799: _temp798=(( struct Cyc_FieldPattern_tok_struct*)
+_temp792)->f1; goto _LL795;} else{ goto _LL796;} _LL796: goto _LL797; _LL795:
+return _temp798; _LL797:( int) _throw(( void*)& Cyc_yyfail_FieldPattern_tok);
+_LL793:;} static unsigned char _temp801[ 21u]="FieldPatternList_tok"; static
 struct Cyc_Core_Failure_struct Cyc_yyfail_FieldPatternList_tok={ Cyc_Core_Failure,{
-_temp814, _temp814, _temp814 + 21u}}; struct Cyc_List_List* Cyc_yyget_FieldPatternList_tok(
-void* yy1){ void* _temp815= yy1; struct Cyc_List_List* _temp821; _LL817: if(*((
-void**) _temp815) == Cyc_FieldPatternList_tok){ _LL822: _temp821=(( struct Cyc_FieldPatternList_tok_struct*)
-_temp815)->f1; goto _LL818;} else{ goto _LL819;} _LL819: goto _LL820; _LL818:
-return _temp821; _LL820:( int) _throw(( void*)& Cyc_yyfail_FieldPatternList_tok);
-_LL816:;} static unsigned char _temp824[ 11u]="FnDecl_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_FnDecl_tok={ Cyc_Core_Failure,{ _temp824, _temp824, _temp824 + 11u}};
-struct Cyc_Absyn_Fndecl* Cyc_yyget_FnDecl_tok( void* yy1){ void* _temp825= yy1;
-struct Cyc_Absyn_Fndecl* _temp831; _LL827: if(*(( void**) _temp825) == Cyc_FnDecl_tok){
-_LL832: _temp831=(( struct Cyc_FnDecl_tok_struct*) _temp825)->f1; goto _LL828;}
-else{ goto _LL829;} _LL829: goto _LL830; _LL828: return _temp831; _LL830:( int)
-_throw(( void*)& Cyc_yyfail_FnDecl_tok); _LL826:;} static unsigned char _temp834[
+_temp801, _temp801, _temp801 + 21u}}; struct Cyc_List_List* Cyc_yyget_FieldPatternList_tok(
+void* yy1){ void* _temp802= yy1; struct Cyc_List_List* _temp808; _LL804: if(*((
+void**) _temp802) == Cyc_FieldPatternList_tok){ _LL809: _temp808=(( struct Cyc_FieldPatternList_tok_struct*)
+_temp802)->f1; goto _LL805;} else{ goto _LL806;} _LL806: goto _LL807; _LL805:
+return _temp808; _LL807:( int) _throw(( void*)& Cyc_yyfail_FieldPatternList_tok);
+_LL803:;} static unsigned char _temp811[ 11u]="FnDecl_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_FnDecl_tok={ Cyc_Core_Failure,{ _temp811, _temp811, _temp811 + 11u}};
+struct Cyc_Absyn_Fndecl* Cyc_yyget_FnDecl_tok( void* yy1){ void* _temp812= yy1;
+struct Cyc_Absyn_Fndecl* _temp818; _LL814: if(*(( void**) _temp812) == Cyc_FnDecl_tok){
+_LL819: _temp818=(( struct Cyc_FnDecl_tok_struct*) _temp812)->f1; goto _LL815;}
+else{ goto _LL816;} _LL816: goto _LL817; _LL815: return _temp818; _LL817:( int)
+_throw(( void*)& Cyc_yyfail_FnDecl_tok); _LL813:;} static unsigned char _temp821[
 13u]="DeclList_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_DeclList_tok={
-Cyc_Core_Failure,{ _temp834, _temp834, _temp834 + 13u}}; struct Cyc_List_List*
-Cyc_yyget_DeclList_tok( void* yy1){ void* _temp835= yy1; struct Cyc_List_List*
-_temp841; _LL837: if(*(( void**) _temp835) == Cyc_DeclList_tok){ _LL842:
-_temp841=(( struct Cyc_DeclList_tok_struct*) _temp835)->f1; goto _LL838;} else{
-goto _LL839;} _LL839: goto _LL840; _LL838: return _temp841; _LL840:( int) _throw((
-void*)& Cyc_yyfail_DeclList_tok); _LL836:;} static unsigned char _temp844[ 13u]="DeclSpec_tok";
+Cyc_Core_Failure,{ _temp821, _temp821, _temp821 + 13u}}; struct Cyc_List_List*
+Cyc_yyget_DeclList_tok( void* yy1){ void* _temp822= yy1; struct Cyc_List_List*
+_temp828; _LL824: if(*(( void**) _temp822) == Cyc_DeclList_tok){ _LL829:
+_temp828=(( struct Cyc_DeclList_tok_struct*) _temp822)->f1; goto _LL825;} else{
+goto _LL826;} _LL826: goto _LL827; _LL825: return _temp828; _LL827:( int) _throw((
+void*)& Cyc_yyfail_DeclList_tok); _LL823:;} static unsigned char _temp831[ 13u]="DeclSpec_tok";
 static struct Cyc_Core_Failure_struct Cyc_yyfail_DeclSpec_tok={ Cyc_Core_Failure,{
-_temp844, _temp844, _temp844 + 13u}}; struct Cyc_Parse_Declaration_spec* Cyc_yyget_DeclSpec_tok(
-void* yy1){ void* _temp845= yy1; struct Cyc_Parse_Declaration_spec* _temp851;
-_LL847: if(*(( void**) _temp845) == Cyc_DeclSpec_tok){ _LL852: _temp851=((
-struct Cyc_DeclSpec_tok_struct*) _temp845)->f1; goto _LL848;} else{ goto _LL849;}
-_LL849: goto _LL850; _LL848: return _temp851; _LL850:( int) _throw(( void*)& Cyc_yyfail_DeclSpec_tok);
-_LL846:;} static unsigned char _temp854[ 13u]="InitDecl_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_InitDecl_tok={ Cyc_Core_Failure,{ _temp854, _temp854, _temp854 + 13u}};
-struct _tuple15* Cyc_yyget_InitDecl_tok( void* yy1){ void* _temp855= yy1; struct
-_tuple15* _temp861; _LL857: if(*(( void**) _temp855) == Cyc_InitDecl_tok){
-_LL862: _temp861=(( struct Cyc_InitDecl_tok_struct*) _temp855)->f1; goto _LL858;}
-else{ goto _LL859;} _LL859: goto _LL860; _LL858: return _temp861; _LL860:( int)
-_throw(( void*)& Cyc_yyfail_InitDecl_tok); _LL856:;} static unsigned char
-_temp864[ 17u]="InitDeclList_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_InitDeclList_tok={
-Cyc_Core_Failure,{ _temp864, _temp864, _temp864 + 17u}}; struct Cyc_List_List*
-Cyc_yyget_InitDeclList_tok( void* yy1){ void* _temp865= yy1; struct Cyc_List_List*
-_temp871; _LL867: if(*(( void**) _temp865) == Cyc_InitDeclList_tok){ _LL872:
-_temp871=(( struct Cyc_InitDeclList_tok_struct*) _temp865)->f1; goto _LL868;}
-else{ goto _LL869;} _LL869: goto _LL870; _LL868: return _temp871; _LL870:( int)
-_throw(( void*)& Cyc_yyfail_InitDeclList_tok); _LL866:;} static unsigned char
-_temp874[ 17u]="StorageClass_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_StorageClass_tok={
-Cyc_Core_Failure,{ _temp874, _temp874, _temp874 + 17u}}; enum  Cyc_Parse_Storage_class
-Cyc_yyget_StorageClass_tok( void* yy1){ void* _temp875= yy1; enum  Cyc_Parse_Storage_class
-_temp881; _LL877: if(*(( void**) _temp875) == Cyc_StorageClass_tok){ _LL882:
-_temp881=(( struct Cyc_StorageClass_tok_struct*) _temp875)->f1; goto _LL878;}
-else{ goto _LL879;} _LL879: goto _LL880; _LL878: return _temp881; _LL880:( int)
-_throw(( void*)& Cyc_yyfail_StorageClass_tok); _LL876:;} static unsigned char
-_temp884[ 18u]="TypeSpecifier_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_TypeSpecifier_tok={
-Cyc_Core_Failure,{ _temp884, _temp884, _temp884 + 18u}}; void* Cyc_yyget_TypeSpecifier_tok(
-void* yy1){ void* _temp885= yy1; void* _temp891; _LL887: if(*(( void**) _temp885)
-== Cyc_TypeSpecifier_tok){ _LL892: _temp891=( void*)(( struct Cyc_TypeSpecifier_tok_struct*)
-_temp885)->f1; goto _LL888;} else{ goto _LL889;} _LL889: goto _LL890; _LL888:
-return _temp891; _LL890:( int) _throw(( void*)& Cyc_yyfail_TypeSpecifier_tok);
-_LL886:;} static unsigned char _temp894[ 18u]="StructOrUnion_tok"; static struct
+_temp831, _temp831, _temp831 + 13u}}; struct Cyc_Parse_Declaration_spec* Cyc_yyget_DeclSpec_tok(
+void* yy1){ void* _temp832= yy1; struct Cyc_Parse_Declaration_spec* _temp838;
+_LL834: if(*(( void**) _temp832) == Cyc_DeclSpec_tok){ _LL839: _temp838=((
+struct Cyc_DeclSpec_tok_struct*) _temp832)->f1; goto _LL835;} else{ goto _LL836;}
+_LL836: goto _LL837; _LL835: return _temp838; _LL837:( int) _throw(( void*)& Cyc_yyfail_DeclSpec_tok);
+_LL833:;} static unsigned char _temp841[ 13u]="InitDecl_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_InitDecl_tok={ Cyc_Core_Failure,{ _temp841, _temp841, _temp841 + 13u}};
+struct _tuple15* Cyc_yyget_InitDecl_tok( void* yy1){ void* _temp842= yy1; struct
+_tuple15* _temp848; _LL844: if(*(( void**) _temp842) == Cyc_InitDecl_tok){
+_LL849: _temp848=(( struct Cyc_InitDecl_tok_struct*) _temp842)->f1; goto _LL845;}
+else{ goto _LL846;} _LL846: goto _LL847; _LL845: return _temp848; _LL847:( int)
+_throw(( void*)& Cyc_yyfail_InitDecl_tok); _LL843:;} static unsigned char
+_temp851[ 17u]="InitDeclList_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_InitDeclList_tok={
+Cyc_Core_Failure,{ _temp851, _temp851, _temp851 + 17u}}; struct Cyc_List_List*
+Cyc_yyget_InitDeclList_tok( void* yy1){ void* _temp852= yy1; struct Cyc_List_List*
+_temp858; _LL854: if(*(( void**) _temp852) == Cyc_InitDeclList_tok){ _LL859:
+_temp858=(( struct Cyc_InitDeclList_tok_struct*) _temp852)->f1; goto _LL855;}
+else{ goto _LL856;} _LL856: goto _LL857; _LL855: return _temp858; _LL857:( int)
+_throw(( void*)& Cyc_yyfail_InitDeclList_tok); _LL853:;} static unsigned char
+_temp861[ 17u]="StorageClass_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_StorageClass_tok={
+Cyc_Core_Failure,{ _temp861, _temp861, _temp861 + 17u}}; enum  Cyc_Parse_Storage_class
+Cyc_yyget_StorageClass_tok( void* yy1){ void* _temp862= yy1; enum  Cyc_Parse_Storage_class
+_temp868; _LL864: if(*(( void**) _temp862) == Cyc_StorageClass_tok){ _LL869:
+_temp868=(( struct Cyc_StorageClass_tok_struct*) _temp862)->f1; goto _LL865;}
+else{ goto _LL866;} _LL866: goto _LL867; _LL865: return _temp868; _LL867:( int)
+_throw(( void*)& Cyc_yyfail_StorageClass_tok); _LL863:;} static unsigned char
+_temp871[ 18u]="TypeSpecifier_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_TypeSpecifier_tok={
+Cyc_Core_Failure,{ _temp871, _temp871, _temp871 + 18u}}; void* Cyc_yyget_TypeSpecifier_tok(
+void* yy1){ void* _temp872= yy1; void* _temp878; _LL874: if(*(( void**) _temp872)
+== Cyc_TypeSpecifier_tok){ _LL879: _temp878=( void*)(( struct Cyc_TypeSpecifier_tok_struct*)
+_temp872)->f1; goto _LL875;} else{ goto _LL876;} _LL876: goto _LL877; _LL875:
+return _temp878; _LL877:( int) _throw(( void*)& Cyc_yyfail_TypeSpecifier_tok);
+_LL873:;} static unsigned char _temp881[ 18u]="StructOrUnion_tok"; static struct
 Cyc_Core_Failure_struct Cyc_yyfail_StructOrUnion_tok={ Cyc_Core_Failure,{
-_temp894, _temp894, _temp894 + 18u}}; enum  Cyc_Parse_Struct_or_union Cyc_yyget_StructOrUnion_tok(
-void* yy1){ void* _temp895= yy1; enum  Cyc_Parse_Struct_or_union _temp901;
-_LL897: if(*(( void**) _temp895) == Cyc_StructOrUnion_tok){ _LL902: _temp901=((
-struct Cyc_StructOrUnion_tok_struct*) _temp895)->f1; goto _LL898;} else{ goto
-_LL899;} _LL899: goto _LL900; _LL898: return _temp901; _LL900:( int) _throw((
-void*)& Cyc_yyfail_StructOrUnion_tok); _LL896:;} static unsigned char _temp904[
+_temp881, _temp881, _temp881 + 18u}}; enum  Cyc_Parse_Struct_or_union Cyc_yyget_StructOrUnion_tok(
+void* yy1){ void* _temp882= yy1; enum  Cyc_Parse_Struct_or_union _temp888;
+_LL884: if(*(( void**) _temp882) == Cyc_StructOrUnion_tok){ _LL889: _temp888=((
+struct Cyc_StructOrUnion_tok_struct*) _temp882)->f1; goto _LL885;} else{ goto
+_LL886;} _LL886: goto _LL887; _LL885: return _temp888; _LL887:( int) _throw((
+void*)& Cyc_yyfail_StructOrUnion_tok); _LL883:;} static unsigned char _temp891[
 13u]="TypeQual_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_TypeQual_tok={
-Cyc_Core_Failure,{ _temp904, _temp904, _temp904 + 13u}}; struct Cyc_Absyn_Tqual
-Cyc_yyget_TypeQual_tok( void* yy1){ void* _temp905= yy1; struct Cyc_Absyn_Tqual
-_temp911; _LL907: if(*(( void**) _temp905) == Cyc_TypeQual_tok){ _LL912:
-_temp911=(( struct Cyc_TypeQual_tok_struct*) _temp905)->f1; goto _LL908;} else{
-goto _LL909;} _LL909: goto _LL910; _LL908: return _temp911; _LL910:( int) _throw((
-void*)& Cyc_yyfail_TypeQual_tok); _LL906:;} static unsigned char _temp914[ 24u]="StructFieldDeclList_tok";
+Cyc_Core_Failure,{ _temp891, _temp891, _temp891 + 13u}}; struct Cyc_Absyn_Tqual
+Cyc_yyget_TypeQual_tok( void* yy1){ void* _temp892= yy1; struct Cyc_Absyn_Tqual
+_temp898; _LL894: if(*(( void**) _temp892) == Cyc_TypeQual_tok){ _LL899:
+_temp898=(( struct Cyc_TypeQual_tok_struct*) _temp892)->f1; goto _LL895;} else{
+goto _LL896;} _LL896: goto _LL897; _LL895: return _temp898; _LL897:( int) _throw((
+void*)& Cyc_yyfail_TypeQual_tok); _LL893:;} static unsigned char _temp901[ 24u]="StructFieldDeclList_tok";
 static struct Cyc_Core_Failure_struct Cyc_yyfail_StructFieldDeclList_tok={ Cyc_Core_Failure,{
-_temp914, _temp914, _temp914 + 24u}}; struct Cyc_List_List* Cyc_yyget_StructFieldDeclList_tok(
-void* yy1){ void* _temp915= yy1; struct Cyc_List_List* _temp921; _LL917: if(*((
-void**) _temp915) == Cyc_StructFieldDeclList_tok){ _LL922: _temp921=(( struct
-Cyc_StructFieldDeclList_tok_struct*) _temp915)->f1; goto _LL918;} else{ goto
-_LL919;} _LL919: goto _LL920; _LL918: return _temp921; _LL920:( int) _throw((
-void*)& Cyc_yyfail_StructFieldDeclList_tok); _LL916:;} static unsigned char
-_temp924[ 28u]="StructFieldDeclListList_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_StructFieldDeclListList_tok={ Cyc_Core_Failure,{ _temp924, _temp924,
-_temp924 + 28u}}; struct Cyc_List_List* Cyc_yyget_StructFieldDeclListList_tok(
-void* yy1){ void* _temp925= yy1; struct Cyc_List_List* _temp931; _LL927: if(*((
-void**) _temp925) == Cyc_StructFieldDeclListList_tok){ _LL932: _temp931=((
-struct Cyc_StructFieldDeclListList_tok_struct*) _temp925)->f1; goto _LL928;}
-else{ goto _LL929;} _LL929: goto _LL930; _LL928: return _temp931; _LL930:( int)
-_throw(( void*)& Cyc_yyfail_StructFieldDeclListList_tok); _LL926:;} static
-unsigned char _temp934[ 21u]="TypeModifierList_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_TypeModifierList_tok={ Cyc_Core_Failure,{ _temp934, _temp934,
-_temp934 + 21u}}; struct Cyc_List_List* Cyc_yyget_TypeModifierList_tok( void*
-yy1){ void* _temp935= yy1; struct Cyc_List_List* _temp941; _LL937: if(*(( void**)
-_temp935) == Cyc_TypeModifierList_tok){ _LL942: _temp941=(( struct Cyc_TypeModifierList_tok_struct*)
-_temp935)->f1; goto _LL938;} else{ goto _LL939;} _LL939: goto _LL940; _LL938:
-return _temp941; _LL940:( int) _throw(( void*)& Cyc_yyfail_TypeModifierList_tok);
-_LL936:;} static unsigned char _temp944[ 15u]="Declarator_tok"; static struct
-Cyc_Core_Failure_struct Cyc_yyfail_Declarator_tok={ Cyc_Core_Failure,{ _temp944,
-_temp944, _temp944 + 15u}}; struct Cyc_Parse_Declarator* Cyc_yyget_Declarator_tok(
-void* yy1){ void* _temp945= yy1; struct Cyc_Parse_Declarator* _temp951; _LL947:
-if(*(( void**) _temp945) == Cyc_Declarator_tok){ _LL952: _temp951=(( struct Cyc_Declarator_tok_struct*)
-_temp945)->f1; goto _LL948;} else{ goto _LL949;} _LL949: goto _LL950; _LL948:
-return _temp951; _LL950:( int) _throw(( void*)& Cyc_yyfail_Declarator_tok);
-_LL946:;} static unsigned char _temp954[ 21u]="DeclaratorExpopt_tok"; static
+_temp901, _temp901, _temp901 + 24u}}; struct Cyc_List_List* Cyc_yyget_StructFieldDeclList_tok(
+void* yy1){ void* _temp902= yy1; struct Cyc_List_List* _temp908; _LL904: if(*((
+void**) _temp902) == Cyc_StructFieldDeclList_tok){ _LL909: _temp908=(( struct
+Cyc_StructFieldDeclList_tok_struct*) _temp902)->f1; goto _LL905;} else{ goto
+_LL906;} _LL906: goto _LL907; _LL905: return _temp908; _LL907:( int) _throw((
+void*)& Cyc_yyfail_StructFieldDeclList_tok); _LL903:;} static unsigned char
+_temp911[ 28u]="StructFieldDeclListList_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_StructFieldDeclListList_tok={ Cyc_Core_Failure,{ _temp911, _temp911,
+_temp911 + 28u}}; struct Cyc_List_List* Cyc_yyget_StructFieldDeclListList_tok(
+void* yy1){ void* _temp912= yy1; struct Cyc_List_List* _temp918; _LL914: if(*((
+void**) _temp912) == Cyc_StructFieldDeclListList_tok){ _LL919: _temp918=((
+struct Cyc_StructFieldDeclListList_tok_struct*) _temp912)->f1; goto _LL915;}
+else{ goto _LL916;} _LL916: goto _LL917; _LL915: return _temp918; _LL917:( int)
+_throw(( void*)& Cyc_yyfail_StructFieldDeclListList_tok); _LL913:;} static
+unsigned char _temp921[ 21u]="TypeModifierList_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_TypeModifierList_tok={ Cyc_Core_Failure,{ _temp921, _temp921,
+_temp921 + 21u}}; struct Cyc_List_List* Cyc_yyget_TypeModifierList_tok( void*
+yy1){ void* _temp922= yy1; struct Cyc_List_List* _temp928; _LL924: if(*(( void**)
+_temp922) == Cyc_TypeModifierList_tok){ _LL929: _temp928=(( struct Cyc_TypeModifierList_tok_struct*)
+_temp922)->f1; goto _LL925;} else{ goto _LL926;} _LL926: goto _LL927; _LL925:
+return _temp928; _LL927:( int) _throw(( void*)& Cyc_yyfail_TypeModifierList_tok);
+_LL923:;} static unsigned char _temp931[ 15u]="Declarator_tok"; static struct
+Cyc_Core_Failure_struct Cyc_yyfail_Declarator_tok={ Cyc_Core_Failure,{ _temp931,
+_temp931, _temp931 + 15u}}; struct Cyc_Parse_Declarator* Cyc_yyget_Declarator_tok(
+void* yy1){ void* _temp932= yy1; struct Cyc_Parse_Declarator* _temp938; _LL934:
+if(*(( void**) _temp932) == Cyc_Declarator_tok){ _LL939: _temp938=(( struct Cyc_Declarator_tok_struct*)
+_temp932)->f1; goto _LL935;} else{ goto _LL936;} _LL936: goto _LL937; _LL935:
+return _temp938; _LL937:( int) _throw(( void*)& Cyc_yyfail_Declarator_tok);
+_LL933:;} static unsigned char _temp941[ 21u]="DeclaratorExpopt_tok"; static
 struct Cyc_Core_Failure_struct Cyc_yyfail_DeclaratorExpopt_tok={ Cyc_Core_Failure,{
-_temp954, _temp954, _temp954 + 21u}}; struct _tuple13* Cyc_yyget_DeclaratorExpopt_tok(
-void* yy1){ void* _temp955= yy1; struct _tuple13* _temp961; _LL957: if(*(( void**)
-_temp955) == Cyc_DeclaratorExpopt_tok){ _LL962: _temp961=(( struct Cyc_DeclaratorExpopt_tok_struct*)
-_temp955)->f1; goto _LL958;} else{ goto _LL959;} _LL959: goto _LL960; _LL958:
-return _temp961; _LL960:( int) _throw(( void*)& Cyc_yyfail_DeclaratorExpopt_tok);
-_LL956:;} static unsigned char _temp964[ 25u]="DeclaratorExpoptList_tok"; static
+_temp941, _temp941, _temp941 + 21u}}; struct _tuple13* Cyc_yyget_DeclaratorExpopt_tok(
+void* yy1){ void* _temp942= yy1; struct _tuple13* _temp948; _LL944: if(*(( void**)
+_temp942) == Cyc_DeclaratorExpopt_tok){ _LL949: _temp948=(( struct Cyc_DeclaratorExpopt_tok_struct*)
+_temp942)->f1; goto _LL945;} else{ goto _LL946;} _LL946: goto _LL947; _LL945:
+return _temp948; _LL947:( int) _throw(( void*)& Cyc_yyfail_DeclaratorExpopt_tok);
+_LL943:;} static unsigned char _temp951[ 25u]="DeclaratorExpoptList_tok"; static
 struct Cyc_Core_Failure_struct Cyc_yyfail_DeclaratorExpoptList_tok={ Cyc_Core_Failure,{
-_temp964, _temp964, _temp964 + 25u}}; struct Cyc_List_List* Cyc_yyget_DeclaratorExpoptList_tok(
-void* yy1){ void* _temp965= yy1; struct Cyc_List_List* _temp971; _LL967: if(*((
-void**) _temp965) == Cyc_DeclaratorExpoptList_tok){ _LL972: _temp971=(( struct
-Cyc_DeclaratorExpoptList_tok_struct*) _temp965)->f1; goto _LL968;} else{ goto
-_LL969;} _LL969: goto _LL970; _LL968: return _temp971; _LL970:( int) _throw((
-void*)& Cyc_yyfail_DeclaratorExpoptList_tok); _LL966:;} static unsigned char
-_temp974[ 23u]="AbstractDeclarator_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_AbstractDeclarator_tok={ Cyc_Core_Failure,{ _temp974, _temp974,
-_temp974 + 23u}}; struct Cyc_Parse_Abstractdeclarator* Cyc_yyget_AbstractDeclarator_tok(
-void* yy1){ void* _temp975= yy1; struct Cyc_Parse_Abstractdeclarator* _temp981;
-_LL977: if(*(( void**) _temp975) == Cyc_AbstractDeclarator_tok){ _LL982:
-_temp981=(( struct Cyc_AbstractDeclarator_tok_struct*) _temp975)->f1; goto
-_LL978;} else{ goto _LL979;} _LL979: goto _LL980; _LL978: return _temp981;
-_LL980:( int) _throw(( void*)& Cyc_yyfail_AbstractDeclarator_tok); _LL976:;}
-static unsigned char _temp984[ 9u]="Bool_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_Bool_tok={ Cyc_Core_Failure,{ _temp984, _temp984, _temp984 + 9u}};
-int Cyc_yyget_Bool_tok( void* yy1){ void* _temp985= yy1; int _temp991; _LL987:
-if(*(( void**) _temp985) == Cyc_Bool_tok){ _LL992: _temp991=(( struct Cyc_Bool_tok_struct*)
-_temp985)->f1; goto _LL988;} else{ goto _LL989;} _LL989: goto _LL990; _LL988:
-return _temp991; _LL990:( int) _throw(( void*)& Cyc_yyfail_Bool_tok); _LL986:;}
-static unsigned char _temp994[ 10u]="Scope_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_Scope_tok={ Cyc_Core_Failure,{ _temp994, _temp994, _temp994 + 10u}};
-void* Cyc_yyget_Scope_tok( void* yy1){ void* _temp995= yy1; void* _temp1001;
-_LL997: if(*(( void**) _temp995) == Cyc_Scope_tok){ _LL1002: _temp1001=( void*)((
-struct Cyc_Scope_tok_struct*) _temp995)->f1; goto _LL998;} else{ goto _LL999;}
-_LL999: goto _LL1000; _LL998: return _temp1001; _LL1000:( int) _throw(( void*)&
-Cyc_yyfail_Scope_tok); _LL996:;} static unsigned char _temp1004[ 16u]="TunionField_tok";
-static struct Cyc_Core_Failure_struct Cyc_yyfail_TunionField_tok={ Cyc_Core_Failure,{
-_temp1004, _temp1004, _temp1004 + 16u}}; struct Cyc_Absyn_Tunionfield* Cyc_yyget_TunionField_tok(
-void* yy1){ void* _temp1005= yy1; struct Cyc_Absyn_Tunionfield* _temp1011;
-_LL1007: if(*(( void**) _temp1005) == Cyc_TunionField_tok){ _LL1012: _temp1011=((
-struct Cyc_TunionField_tok_struct*) _temp1005)->f1; goto _LL1008;} else{ goto
-_LL1009;} _LL1009: goto _LL1010; _LL1008: return _temp1011; _LL1010:( int)
-_throw(( void*)& Cyc_yyfail_TunionField_tok); _LL1006:;} static unsigned char
-_temp1014[ 20u]="TunionFieldList_tok"; static struct Cyc_Core_Failure_struct Cyc_yyfail_TunionFieldList_tok={
-Cyc_Core_Failure,{ _temp1014, _temp1014, _temp1014 + 20u}}; struct Cyc_List_List*
-Cyc_yyget_TunionFieldList_tok( void* yy1){ void* _temp1015= yy1; struct Cyc_List_List*
-_temp1021; _LL1017: if(*(( void**) _temp1015) == Cyc_TunionFieldList_tok){
-_LL1022: _temp1021=(( struct Cyc_TunionFieldList_tok_struct*) _temp1015)->f1;
-goto _LL1018;} else{ goto _LL1019;} _LL1019: goto _LL1020; _LL1018: return
-_temp1021; _LL1020:( int) _throw(( void*)& Cyc_yyfail_TunionFieldList_tok);
-_LL1016:;} static unsigned char _temp1024[ 17u]="QualSpecList_tok"; static
+_temp951, _temp951, _temp951 + 25u}}; struct Cyc_List_List* Cyc_yyget_DeclaratorExpoptList_tok(
+void* yy1){ void* _temp952= yy1; struct Cyc_List_List* _temp958; _LL954: if(*((
+void**) _temp952) == Cyc_DeclaratorExpoptList_tok){ _LL959: _temp958=(( struct
+Cyc_DeclaratorExpoptList_tok_struct*) _temp952)->f1; goto _LL955;} else{ goto
+_LL956;} _LL956: goto _LL957; _LL955: return _temp958; _LL957:( int) _throw((
+void*)& Cyc_yyfail_DeclaratorExpoptList_tok); _LL953:;} static unsigned char
+_temp961[ 23u]="AbstractDeclarator_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_AbstractDeclarator_tok={ Cyc_Core_Failure,{ _temp961, _temp961,
+_temp961 + 23u}}; struct Cyc_Parse_Abstractdeclarator* Cyc_yyget_AbstractDeclarator_tok(
+void* yy1){ void* _temp962= yy1; struct Cyc_Parse_Abstractdeclarator* _temp968;
+_LL964: if(*(( void**) _temp962) == Cyc_AbstractDeclarator_tok){ _LL969:
+_temp968=(( struct Cyc_AbstractDeclarator_tok_struct*) _temp962)->f1; goto
+_LL965;} else{ goto _LL966;} _LL966: goto _LL967; _LL965: return _temp968;
+_LL967:( int) _throw(( void*)& Cyc_yyfail_AbstractDeclarator_tok); _LL963:;}
+static unsigned char _temp971[ 9u]="Bool_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_Bool_tok={ Cyc_Core_Failure,{ _temp971, _temp971, _temp971 + 9u}};
+int Cyc_yyget_Bool_tok( void* yy1){ void* _temp972= yy1; int _temp978; _LL974:
+if(*(( void**) _temp972) == Cyc_Bool_tok){ _LL979: _temp978=(( struct Cyc_Bool_tok_struct*)
+_temp972)->f1; goto _LL975;} else{ goto _LL976;} _LL976: goto _LL977; _LL975:
+return _temp978; _LL977:( int) _throw(( void*)& Cyc_yyfail_Bool_tok); _LL973:;}
+static unsigned char _temp981[ 10u]="Scope_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_Scope_tok={ Cyc_Core_Failure,{ _temp981, _temp981, _temp981 + 10u}};
+void* Cyc_yyget_Scope_tok( void* yy1){ void* _temp982= yy1; void* _temp988;
+_LL984: if(*(( void**) _temp982) == Cyc_Scope_tok){ _LL989: _temp988=( void*)((
+struct Cyc_Scope_tok_struct*) _temp982)->f1; goto _LL985;} else{ goto _LL986;}
+_LL986: goto _LL987; _LL985: return _temp988; _LL987:( int) _throw(( void*)& Cyc_yyfail_Scope_tok);
+_LL983:;} static unsigned char _temp991[ 16u]="TunionField_tok"; static struct
+Cyc_Core_Failure_struct Cyc_yyfail_TunionField_tok={ Cyc_Core_Failure,{ _temp991,
+_temp991, _temp991 + 16u}}; struct Cyc_Absyn_Tunionfield* Cyc_yyget_TunionField_tok(
+void* yy1){ void* _temp992= yy1; struct Cyc_Absyn_Tunionfield* _temp998; _LL994:
+if(*(( void**) _temp992) == Cyc_TunionField_tok){ _LL999: _temp998=(( struct Cyc_TunionField_tok_struct*)
+_temp992)->f1; goto _LL995;} else{ goto _LL996;} _LL996: goto _LL997; _LL995:
+return _temp998; _LL997:( int) _throw(( void*)& Cyc_yyfail_TunionField_tok);
+_LL993:;} static unsigned char _temp1001[ 20u]="TunionFieldList_tok"; static
+struct Cyc_Core_Failure_struct Cyc_yyfail_TunionFieldList_tok={ Cyc_Core_Failure,{
+_temp1001, _temp1001, _temp1001 + 20u}}; struct Cyc_List_List* Cyc_yyget_TunionFieldList_tok(
+void* yy1){ void* _temp1002= yy1; struct Cyc_List_List* _temp1008; _LL1004: if(*((
+void**) _temp1002) == Cyc_TunionFieldList_tok){ _LL1009: _temp1008=(( struct Cyc_TunionFieldList_tok_struct*)
+_temp1002)->f1; goto _LL1005;} else{ goto _LL1006;} _LL1006: goto _LL1007;
+_LL1005: return _temp1008; _LL1007:( int) _throw(( void*)& Cyc_yyfail_TunionFieldList_tok);
+_LL1003:;} static unsigned char _temp1011[ 17u]="QualSpecList_tok"; static
 struct Cyc_Core_Failure_struct Cyc_yyfail_QualSpecList_tok={ Cyc_Core_Failure,{
-_temp1024, _temp1024, _temp1024 + 17u}}; struct _tuple18* Cyc_yyget_QualSpecList_tok(
-void* yy1){ void* _temp1025= yy1; struct _tuple18* _temp1031; _LL1027: if(*((
-void**) _temp1025) == Cyc_QualSpecList_tok){ _LL1032: _temp1031=(( struct Cyc_QualSpecList_tok_struct*)
-_temp1025)->f1; goto _LL1028;} else{ goto _LL1029;} _LL1029: goto _LL1030;
-_LL1028: return _temp1031; _LL1030:( int) _throw(( void*)& Cyc_yyfail_QualSpecList_tok);
-_LL1026:;} static unsigned char _temp1034[ 11u]="IdList_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_IdList_tok={ Cyc_Core_Failure,{ _temp1034, _temp1034, _temp1034 + 11u}};
-struct Cyc_List_List* Cyc_yyget_IdList_tok( void* yy1){ void* _temp1035= yy1;
-struct Cyc_List_List* _temp1041; _LL1037: if(*(( void**) _temp1035) == Cyc_IdList_tok){
-_LL1042: _temp1041=(( struct Cyc_IdList_tok_struct*) _temp1035)->f1; goto
-_LL1038;} else{ goto _LL1039;} _LL1039: goto _LL1040; _LL1038: return _temp1041;
-_LL1040:( int) _throw(( void*)& Cyc_yyfail_IdList_tok); _LL1036:;} static
-unsigned char _temp1044[ 14u]="ParamDecl_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_ParamDecl_tok={ Cyc_Core_Failure,{ _temp1044, _temp1044, _temp1044 +
-14u}}; struct _tuple2* Cyc_yyget_ParamDecl_tok( void* yy1){ void* _temp1045= yy1;
-struct _tuple2* _temp1051; _LL1047: if(*(( void**) _temp1045) == Cyc_ParamDecl_tok){
-_LL1052: _temp1051=(( struct Cyc_ParamDecl_tok_struct*) _temp1045)->f1; goto
-_LL1048;} else{ goto _LL1049;} _LL1049: goto _LL1050; _LL1048: return _temp1051;
-_LL1050:( int) _throw(( void*)& Cyc_yyfail_ParamDecl_tok); _LL1046:;} static
-unsigned char _temp1054[ 18u]="ParamDeclList_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_ParamDeclList_tok={ Cyc_Core_Failure,{ _temp1054, _temp1054,
-_temp1054 + 18u}}; struct Cyc_List_List* Cyc_yyget_ParamDeclList_tok( void* yy1){
-void* _temp1055= yy1; struct Cyc_List_List* _temp1061; _LL1057: if(*(( void**)
-_temp1055) == Cyc_ParamDeclList_tok){ _LL1062: _temp1061=(( struct Cyc_ParamDeclList_tok_struct*)
-_temp1055)->f1; goto _LL1058;} else{ goto _LL1059;} _LL1059: goto _LL1060;
-_LL1058: return _temp1061; _LL1060:( int) _throw(( void*)& Cyc_yyfail_ParamDeclList_tok);
-_LL1056:;} static unsigned char _temp1064[ 22u]="ParamDeclListBool_tok"; static
+_temp1011, _temp1011, _temp1011 + 17u}}; struct _tuple18* Cyc_yyget_QualSpecList_tok(
+void* yy1){ void* _temp1012= yy1; struct _tuple18* _temp1018; _LL1014: if(*((
+void**) _temp1012) == Cyc_QualSpecList_tok){ _LL1019: _temp1018=(( struct Cyc_QualSpecList_tok_struct*)
+_temp1012)->f1; goto _LL1015;} else{ goto _LL1016;} _LL1016: goto _LL1017;
+_LL1015: return _temp1018; _LL1017:( int) _throw(( void*)& Cyc_yyfail_QualSpecList_tok);
+_LL1013:;} static unsigned char _temp1021[ 11u]="IdList_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_IdList_tok={ Cyc_Core_Failure,{ _temp1021, _temp1021, _temp1021 + 11u}};
+struct Cyc_List_List* Cyc_yyget_IdList_tok( void* yy1){ void* _temp1022= yy1;
+struct Cyc_List_List* _temp1028; _LL1024: if(*(( void**) _temp1022) == Cyc_IdList_tok){
+_LL1029: _temp1028=(( struct Cyc_IdList_tok_struct*) _temp1022)->f1; goto
+_LL1025;} else{ goto _LL1026;} _LL1026: goto _LL1027; _LL1025: return _temp1028;
+_LL1027:( int) _throw(( void*)& Cyc_yyfail_IdList_tok); _LL1023:;} static
+unsigned char _temp1031[ 14u]="ParamDecl_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_ParamDecl_tok={ Cyc_Core_Failure,{ _temp1031, _temp1031, _temp1031 +
+14u}}; struct _tuple2* Cyc_yyget_ParamDecl_tok( void* yy1){ void* _temp1032= yy1;
+struct _tuple2* _temp1038; _LL1034: if(*(( void**) _temp1032) == Cyc_ParamDecl_tok){
+_LL1039: _temp1038=(( struct Cyc_ParamDecl_tok_struct*) _temp1032)->f1; goto
+_LL1035;} else{ goto _LL1036;} _LL1036: goto _LL1037; _LL1035: return _temp1038;
+_LL1037:( int) _throw(( void*)& Cyc_yyfail_ParamDecl_tok); _LL1033:;} static
+unsigned char _temp1041[ 18u]="ParamDeclList_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_ParamDeclList_tok={ Cyc_Core_Failure,{ _temp1041, _temp1041,
+_temp1041 + 18u}}; struct Cyc_List_List* Cyc_yyget_ParamDeclList_tok( void* yy1){
+void* _temp1042= yy1; struct Cyc_List_List* _temp1048; _LL1044: if(*(( void**)
+_temp1042) == Cyc_ParamDeclList_tok){ _LL1049: _temp1048=(( struct Cyc_ParamDeclList_tok_struct*)
+_temp1042)->f1; goto _LL1045;} else{ goto _LL1046;} _LL1046: goto _LL1047;
+_LL1045: return _temp1048; _LL1047:( int) _throw(( void*)& Cyc_yyfail_ParamDeclList_tok);
+_LL1043:;} static unsigned char _temp1051[ 22u]="ParamDeclListBool_tok"; static
 struct Cyc_Core_Failure_struct Cyc_yyfail_ParamDeclListBool_tok={ Cyc_Core_Failure,{
-_temp1064, _temp1064, _temp1064 + 22u}}; struct _tuple17* Cyc_yyget_ParamDeclListBool_tok(
-void* yy1){ void* _temp1065= yy1; struct _tuple17* _temp1071; _LL1067: if(*((
-void**) _temp1065) == Cyc_ParamDeclListBool_tok){ _LL1072: _temp1071=(( struct
-Cyc_ParamDeclListBool_tok_struct*) _temp1065)->f1; goto _LL1068;} else{ goto
-_LL1069;} _LL1069: goto _LL1070; _LL1068: return _temp1071; _LL1070:( int)
-_throw(( void*)& Cyc_yyfail_ParamDeclListBool_tok); _LL1066:;} static
-unsigned char _temp1074[ 13u]="TypeList_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_TypeList_tok={ Cyc_Core_Failure,{ _temp1074, _temp1074, _temp1074 +
-13u}}; struct Cyc_List_List* Cyc_yyget_TypeList_tok( void* yy1){ void* _temp1075=
-yy1; struct Cyc_List_List* _temp1081; _LL1077: if(*(( void**) _temp1075) == Cyc_TypeList_tok){
-_LL1082: _temp1081=(( struct Cyc_TypeList_tok_struct*) _temp1075)->f1; goto
-_LL1078;} else{ goto _LL1079;} _LL1079: goto _LL1080; _LL1078: return _temp1081;
-_LL1080:( int) _throw(( void*)& Cyc_yyfail_TypeList_tok); _LL1076:;} static
-unsigned char _temp1084[ 19u]="DesignatorList_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_DesignatorList_tok={ Cyc_Core_Failure,{ _temp1084, _temp1084,
-_temp1084 + 19u}}; struct Cyc_List_List* Cyc_yyget_DesignatorList_tok( void* yy1){
-void* _temp1085= yy1; struct Cyc_List_List* _temp1091; _LL1087: if(*(( void**)
-_temp1085) == Cyc_DesignatorList_tok){ _LL1092: _temp1091=(( struct Cyc_DesignatorList_tok_struct*)
-_temp1085)->f1; goto _LL1088;} else{ goto _LL1089;} _LL1089: goto _LL1090;
-_LL1088: return _temp1091; _LL1090:( int) _throw(( void*)& Cyc_yyfail_DesignatorList_tok);
-_LL1086:;} static unsigned char _temp1094[ 15u]="Designator_tok"; static struct
-Cyc_Core_Failure_struct Cyc_yyfail_Designator_tok={ Cyc_Core_Failure,{ _temp1094,
-_temp1094, _temp1094 + 15u}}; void* Cyc_yyget_Designator_tok( void* yy1){ void*
-_temp1095= yy1; void* _temp1101; _LL1097: if(*(( void**) _temp1095) == Cyc_Designator_tok){
-_LL1102: _temp1101=( void*)(( struct Cyc_Designator_tok_struct*) _temp1095)->f1;
-goto _LL1098;} else{ goto _LL1099;} _LL1099: goto _LL1100; _LL1098: return
-_temp1101; _LL1100:( int) _throw(( void*)& Cyc_yyfail_Designator_tok); _LL1096:;}
-static unsigned char _temp1104[ 9u]="Kind_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_Kind_tok={ Cyc_Core_Failure,{ _temp1104, _temp1104, _temp1104 + 9u}};
-void* Cyc_yyget_Kind_tok( void* yy1){ void* _temp1105= yy1; void* _temp1111;
-_LL1107: if(*(( void**) _temp1105) == Cyc_Kind_tok){ _LL1112: _temp1111=( void*)((
-struct Cyc_Kind_tok_struct*) _temp1105)->f1; goto _LL1108;} else{ goto _LL1109;}
-_LL1109: goto _LL1110; _LL1108: return _temp1111; _LL1110:( int) _throw(( void*)&
-Cyc_yyfail_Kind_tok); _LL1106:;} static unsigned char _temp1114[ 9u]="Type_tok";
+_temp1051, _temp1051, _temp1051 + 22u}}; struct _tuple17* Cyc_yyget_ParamDeclListBool_tok(
+void* yy1){ void* _temp1052= yy1; struct _tuple17* _temp1058; _LL1054: if(*((
+void**) _temp1052) == Cyc_ParamDeclListBool_tok){ _LL1059: _temp1058=(( struct
+Cyc_ParamDeclListBool_tok_struct*) _temp1052)->f1; goto _LL1055;} else{ goto
+_LL1056;} _LL1056: goto _LL1057; _LL1055: return _temp1058; _LL1057:( int)
+_throw(( void*)& Cyc_yyfail_ParamDeclListBool_tok); _LL1053:;} static
+unsigned char _temp1061[ 13u]="TypeList_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_TypeList_tok={ Cyc_Core_Failure,{ _temp1061, _temp1061, _temp1061 +
+13u}}; struct Cyc_List_List* Cyc_yyget_TypeList_tok( void* yy1){ void* _temp1062=
+yy1; struct Cyc_List_List* _temp1068; _LL1064: if(*(( void**) _temp1062) == Cyc_TypeList_tok){
+_LL1069: _temp1068=(( struct Cyc_TypeList_tok_struct*) _temp1062)->f1; goto
+_LL1065;} else{ goto _LL1066;} _LL1066: goto _LL1067; _LL1065: return _temp1068;
+_LL1067:( int) _throw(( void*)& Cyc_yyfail_TypeList_tok); _LL1063:;} static
+unsigned char _temp1071[ 19u]="DesignatorList_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_DesignatorList_tok={ Cyc_Core_Failure,{ _temp1071, _temp1071,
+_temp1071 + 19u}}; struct Cyc_List_List* Cyc_yyget_DesignatorList_tok( void* yy1){
+void* _temp1072= yy1; struct Cyc_List_List* _temp1078; _LL1074: if(*(( void**)
+_temp1072) == Cyc_DesignatorList_tok){ _LL1079: _temp1078=(( struct Cyc_DesignatorList_tok_struct*)
+_temp1072)->f1; goto _LL1075;} else{ goto _LL1076;} _LL1076: goto _LL1077;
+_LL1075: return _temp1078; _LL1077:( int) _throw(( void*)& Cyc_yyfail_DesignatorList_tok);
+_LL1073:;} static unsigned char _temp1081[ 15u]="Designator_tok"; static struct
+Cyc_Core_Failure_struct Cyc_yyfail_Designator_tok={ Cyc_Core_Failure,{ _temp1081,
+_temp1081, _temp1081 + 15u}}; void* Cyc_yyget_Designator_tok( void* yy1){ void*
+_temp1082= yy1; void* _temp1088; _LL1084: if(*(( void**) _temp1082) == Cyc_Designator_tok){
+_LL1089: _temp1088=( void*)(( struct Cyc_Designator_tok_struct*) _temp1082)->f1;
+goto _LL1085;} else{ goto _LL1086;} _LL1086: goto _LL1087; _LL1085: return
+_temp1088; _LL1087:( int) _throw(( void*)& Cyc_yyfail_Designator_tok); _LL1083:;}
+static unsigned char _temp1091[ 9u]="Kind_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_Kind_tok={ Cyc_Core_Failure,{ _temp1091, _temp1091, _temp1091 + 9u}};
+void* Cyc_yyget_Kind_tok( void* yy1){ void* _temp1092= yy1; void* _temp1098;
+_LL1094: if(*(( void**) _temp1092) == Cyc_Kind_tok){ _LL1099: _temp1098=( void*)((
+struct Cyc_Kind_tok_struct*) _temp1092)->f1; goto _LL1095;} else{ goto _LL1096;}
+_LL1096: goto _LL1097; _LL1095: return _temp1098; _LL1097:( int) _throw(( void*)&
+Cyc_yyfail_Kind_tok); _LL1093:;} static unsigned char _temp1101[ 9u]="Type_tok";
 static struct Cyc_Core_Failure_struct Cyc_yyfail_Type_tok={ Cyc_Core_Failure,{
-_temp1114, _temp1114, _temp1114 + 9u}}; void* Cyc_yyget_Type_tok( void* yy1){
-void* _temp1115= yy1; void* _temp1121; _LL1117: if(*(( void**) _temp1115) == Cyc_Type_tok){
-_LL1122: _temp1121=( void*)(( struct Cyc_Type_tok_struct*) _temp1115)->f1; goto
-_LL1118;} else{ goto _LL1119;} _LL1119: goto _LL1120; _LL1118: return _temp1121;
-_LL1120:( int) _throw(( void*)& Cyc_yyfail_Type_tok); _LL1116:;} static
-unsigned char _temp1124[ 18u]="AttributeList_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_AttributeList_tok={ Cyc_Core_Failure,{ _temp1124, _temp1124,
-_temp1124 + 18u}}; struct Cyc_List_List* Cyc_yyget_AttributeList_tok( void* yy1){
-void* _temp1125= yy1; struct Cyc_List_List* _temp1131; _LL1127: if(*(( void**)
-_temp1125) == Cyc_AttributeList_tok){ _LL1132: _temp1131=(( struct Cyc_AttributeList_tok_struct*)
-_temp1125)->f1; goto _LL1128;} else{ goto _LL1129;} _LL1129: goto _LL1130;
-_LL1128: return _temp1131; _LL1130:( int) _throw(( void*)& Cyc_yyfail_AttributeList_tok);
-_LL1126:;} static unsigned char _temp1134[ 14u]="Attribute_tok"; static struct
-Cyc_Core_Failure_struct Cyc_yyfail_Attribute_tok={ Cyc_Core_Failure,{ _temp1134,
-_temp1134, _temp1134 + 14u}}; void* Cyc_yyget_Attribute_tok( void* yy1){ void*
-_temp1135= yy1; void* _temp1141; _LL1137: if(*(( void**) _temp1135) == Cyc_Attribute_tok){
-_LL1142: _temp1141=( void*)(( struct Cyc_Attribute_tok_struct*) _temp1135)->f1;
-goto _LL1138;} else{ goto _LL1139;} _LL1139: goto _LL1140; _LL1138: return
-_temp1141; _LL1140:( int) _throw(( void*)& Cyc_yyfail_Attribute_tok); _LL1136:;}
-static unsigned char _temp1144[ 14u]="Enumfield_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_Enumfield_tok={ Cyc_Core_Failure,{ _temp1144, _temp1144, _temp1144 +
+_temp1101, _temp1101, _temp1101 + 9u}}; void* Cyc_yyget_Type_tok( void* yy1){
+void* _temp1102= yy1; void* _temp1108; _LL1104: if(*(( void**) _temp1102) == Cyc_Type_tok){
+_LL1109: _temp1108=( void*)(( struct Cyc_Type_tok_struct*) _temp1102)->f1; goto
+_LL1105;} else{ goto _LL1106;} _LL1106: goto _LL1107; _LL1105: return _temp1108;
+_LL1107:( int) _throw(( void*)& Cyc_yyfail_Type_tok); _LL1103:;} static
+unsigned char _temp1111[ 18u]="AttributeList_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_AttributeList_tok={ Cyc_Core_Failure,{ _temp1111, _temp1111,
+_temp1111 + 18u}}; struct Cyc_List_List* Cyc_yyget_AttributeList_tok( void* yy1){
+void* _temp1112= yy1; struct Cyc_List_List* _temp1118; _LL1114: if(*(( void**)
+_temp1112) == Cyc_AttributeList_tok){ _LL1119: _temp1118=(( struct Cyc_AttributeList_tok_struct*)
+_temp1112)->f1; goto _LL1115;} else{ goto _LL1116;} _LL1116: goto _LL1117;
+_LL1115: return _temp1118; _LL1117:( int) _throw(( void*)& Cyc_yyfail_AttributeList_tok);
+_LL1113:;} static unsigned char _temp1121[ 14u]="Attribute_tok"; static struct
+Cyc_Core_Failure_struct Cyc_yyfail_Attribute_tok={ Cyc_Core_Failure,{ _temp1121,
+_temp1121, _temp1121 + 14u}}; void* Cyc_yyget_Attribute_tok( void* yy1){ void*
+_temp1122= yy1; void* _temp1128; _LL1124: if(*(( void**) _temp1122) == Cyc_Attribute_tok){
+_LL1129: _temp1128=( void*)(( struct Cyc_Attribute_tok_struct*) _temp1122)->f1;
+goto _LL1125;} else{ goto _LL1126;} _LL1126: goto _LL1127; _LL1125: return
+_temp1128; _LL1127:( int) _throw(( void*)& Cyc_yyfail_Attribute_tok); _LL1123:;}
+static unsigned char _temp1131[ 14u]="Enumfield_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_Enumfield_tok={ Cyc_Core_Failure,{ _temp1131, _temp1131, _temp1131 +
 14u}}; struct Cyc_Absyn_Enumfield* Cyc_yyget_Enumfield_tok( void* yy1){ void*
-_temp1145= yy1; struct Cyc_Absyn_Enumfield* _temp1151; _LL1147: if(*(( void**)
-_temp1145) == Cyc_Enumfield_tok){ _LL1152: _temp1151=(( struct Cyc_Enumfield_tok_struct*)
-_temp1145)->f1; goto _LL1148;} else{ goto _LL1149;} _LL1149: goto _LL1150;
-_LL1148: return _temp1151; _LL1150:( int) _throw(( void*)& Cyc_yyfail_Enumfield_tok);
-_LL1146:;} static unsigned char _temp1154[ 18u]="EnumfieldList_tok"; static
+_temp1132= yy1; struct Cyc_Absyn_Enumfield* _temp1138; _LL1134: if(*(( void**)
+_temp1132) == Cyc_Enumfield_tok){ _LL1139: _temp1138=(( struct Cyc_Enumfield_tok_struct*)
+_temp1132)->f1; goto _LL1135;} else{ goto _LL1136;} _LL1136: goto _LL1137;
+_LL1135: return _temp1138; _LL1137:( int) _throw(( void*)& Cyc_yyfail_Enumfield_tok);
+_LL1133:;} static unsigned char _temp1141[ 18u]="EnumfieldList_tok"; static
 struct Cyc_Core_Failure_struct Cyc_yyfail_EnumfieldList_tok={ Cyc_Core_Failure,{
-_temp1154, _temp1154, _temp1154 + 18u}}; struct Cyc_List_List* Cyc_yyget_EnumfieldList_tok(
-void* yy1){ void* _temp1155= yy1; struct Cyc_List_List* _temp1161; _LL1157: if(*((
-void**) _temp1155) == Cyc_EnumfieldList_tok){ _LL1162: _temp1161=(( struct Cyc_EnumfieldList_tok_struct*)
-_temp1155)->f1; goto _LL1158;} else{ goto _LL1159;} _LL1159: goto _LL1160;
-_LL1158: return _temp1161; _LL1160:( int) _throw(( void*)& Cyc_yyfail_EnumfieldList_tok);
-_LL1156:;} static unsigned char _temp1164[ 12u]="TypeOpt_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_TypeOpt_tok={ Cyc_Core_Failure,{ _temp1164, _temp1164, _temp1164 + 12u}};
-struct Cyc_Core_Opt* Cyc_yyget_TypeOpt_tok( void* yy1){ void* _temp1165= yy1;
-struct Cyc_Core_Opt* _temp1171; _LL1167: if(*(( void**) _temp1165) == Cyc_TypeOpt_tok){
-_LL1172: _temp1171=(( struct Cyc_TypeOpt_tok_struct*) _temp1165)->f1; goto
-_LL1168;} else{ goto _LL1169;} _LL1169: goto _LL1170; _LL1168: return _temp1171;
-_LL1170:( int) _throw(( void*)& Cyc_yyfail_TypeOpt_tok); _LL1166:;} static
-unsigned char _temp1174[ 13u]="Rgnorder_tok"; static struct Cyc_Core_Failure_struct
-Cyc_yyfail_Rgnorder_tok={ Cyc_Core_Failure,{ _temp1174, _temp1174, _temp1174 +
-13u}}; struct Cyc_List_List* Cyc_yyget_Rgnorder_tok( void* yy1){ void* _temp1175=
-yy1; struct Cyc_List_List* _temp1181; _LL1177: if(*(( void**) _temp1175) == Cyc_Rgnorder_tok){
-_LL1182: _temp1181=(( struct Cyc_Rgnorder_tok_struct*) _temp1175)->f1; goto
-_LL1178;} else{ goto _LL1179;} _LL1179: goto _LL1180; _LL1178: return _temp1181;
-_LL1180:( int) _throw(( void*)& Cyc_yyfail_Rgnorder_tok); _LL1176:;} struct Cyc_Yyltype{
+_temp1141, _temp1141, _temp1141 + 18u}}; struct Cyc_List_List* Cyc_yyget_EnumfieldList_tok(
+void* yy1){ void* _temp1142= yy1; struct Cyc_List_List* _temp1148; _LL1144: if(*((
+void**) _temp1142) == Cyc_EnumfieldList_tok){ _LL1149: _temp1148=(( struct Cyc_EnumfieldList_tok_struct*)
+_temp1142)->f1; goto _LL1145;} else{ goto _LL1146;} _LL1146: goto _LL1147;
+_LL1145: return _temp1148; _LL1147:( int) _throw(( void*)& Cyc_yyfail_EnumfieldList_tok);
+_LL1143:;} static unsigned char _temp1151[ 12u]="TypeOpt_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_TypeOpt_tok={ Cyc_Core_Failure,{ _temp1151, _temp1151, _temp1151 + 12u}};
+struct Cyc_Core_Opt* Cyc_yyget_TypeOpt_tok( void* yy1){ void* _temp1152= yy1;
+struct Cyc_Core_Opt* _temp1158; _LL1154: if(*(( void**) _temp1152) == Cyc_TypeOpt_tok){
+_LL1159: _temp1158=(( struct Cyc_TypeOpt_tok_struct*) _temp1152)->f1; goto
+_LL1155;} else{ goto _LL1156;} _LL1156: goto _LL1157; _LL1155: return _temp1158;
+_LL1157:( int) _throw(( void*)& Cyc_yyfail_TypeOpt_tok); _LL1153:;} static
+unsigned char _temp1161[ 13u]="Rgnorder_tok"; static struct Cyc_Core_Failure_struct
+Cyc_yyfail_Rgnorder_tok={ Cyc_Core_Failure,{ _temp1161, _temp1161, _temp1161 +
+13u}}; struct Cyc_List_List* Cyc_yyget_Rgnorder_tok( void* yy1){ void* _temp1162=
+yy1; struct Cyc_List_List* _temp1168; _LL1164: if(*(( void**) _temp1162) == Cyc_Rgnorder_tok){
+_LL1169: _temp1168=(( struct Cyc_Rgnorder_tok_struct*) _temp1162)->f1; goto
+_LL1165;} else{ goto _LL1166;} _LL1166: goto _LL1167; _LL1165: return _temp1168;
+_LL1167:( int) _throw(( void*)& Cyc_yyfail_Rgnorder_tok); _LL1163:;} struct Cyc_Yyltype{
 int timestamp; int first_line; int first_column; int last_line; int last_column;
-} ; struct Cyc_Yyltype Cyc_yynewloc(){ return({ struct Cyc_Yyltype _temp1183;
-_temp1183.timestamp= 0; _temp1183.first_line= 0; _temp1183.first_column= 0;
-_temp1183.last_line= 0; _temp1183.last_column= 0; _temp1183;});} struct Cyc_Yyltype
+} ; struct Cyc_Yyltype Cyc_yynewloc(){ return({ struct Cyc_Yyltype _temp1170;
+_temp1170.timestamp= 0; _temp1170.first_line= 0; _temp1170.first_column= 0;
+_temp1170.last_line= 0; _temp1170.last_column= 0; _temp1170;});} struct Cyc_Yyltype
 Cyc_yylloc={ 0, 0, 0, 0, 0}; static short Cyc_yytranslate[ 347u]={ 0, 2, 2, 2, 2,
 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2,
 2, 118, 2, 2, 100, 116, 112, 2, 96, 97, 107, 110, 98, 111, 104, 115, 2, 2, 2, 2,
@@ -1844,264 +1835,264 @@ Cyc_yylloc={ 0, 0, 0, 0, 0}; static short Cyc_yytranslate[ 347u]={ 0, 2, 2, 2, 2
 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40, 41, 42, 43, 44, 45,
 46, 47, 48, 49, 50, 51, 52, 53, 54, 55, 56, 57, 58, 59, 60, 61, 62, 63, 64, 65,
 66, 67, 68, 69, 70, 71, 72, 73, 74, 75, 76, 77, 78, 79, 80, 81, 82, 83, 84, 85,
-86, 87, 88, 89, 90, 91}; static unsigned char _temp1184[ 2u]="$"; static
-unsigned char _temp1185[ 6u]="error"; static unsigned char _temp1186[ 12u]="$undefined.";
-static unsigned char _temp1187[ 5u]="AUTO"; static unsigned char _temp1188[ 9u]="REGISTER";
-static unsigned char _temp1189[ 7u]="STATIC"; static unsigned char _temp1190[ 7u]="EXTERN";
-static unsigned char _temp1191[ 8u]="TYPEDEF"; static unsigned char _temp1192[ 5u]="VOID";
-static unsigned char _temp1193[ 5u]="CHAR"; static unsigned char _temp1194[ 6u]="SHORT";
-static unsigned char _temp1195[ 4u]="INT"; static unsigned char _temp1196[ 5u]="LONG";
-static unsigned char _temp1197[ 6u]="FLOAT"; static unsigned char _temp1198[ 7u]="DOUBLE";
-static unsigned char _temp1199[ 7u]="SIGNED"; static unsigned char _temp1200[ 9u]="UNSIGNED";
-static unsigned char _temp1201[ 6u]="CONST"; static unsigned char _temp1202[ 9u]="VOLATILE";
-static unsigned char _temp1203[ 9u]="RESTRICT"; static unsigned char _temp1204[
-7u]="STRUCT"; static unsigned char _temp1205[ 6u]="UNION"; static unsigned char
-_temp1206[ 5u]="CASE"; static unsigned char _temp1207[ 8u]="DEFAULT"; static
-unsigned char _temp1208[ 7u]="INLINE"; static unsigned char _temp1209[ 7u]="SIZEOF";
-static unsigned char _temp1210[ 9u]="OFFSETOF"; static unsigned char _temp1211[
-3u]="IF"; static unsigned char _temp1212[ 5u]="ELSE"; static unsigned char
-_temp1213[ 7u]="SWITCH"; static unsigned char _temp1214[ 6u]="WHILE"; static
-unsigned char _temp1215[ 3u]="DO"; static unsigned char _temp1216[ 4u]="FOR";
-static unsigned char _temp1217[ 5u]="GOTO"; static unsigned char _temp1218[ 9u]="CONTINUE";
-static unsigned char _temp1219[ 6u]="BREAK"; static unsigned char _temp1220[ 7u]="RETURN";
-static unsigned char _temp1221[ 5u]="ENUM"; static unsigned char _temp1222[ 8u]="NULL_kw";
-static unsigned char _temp1223[ 4u]="LET"; static unsigned char _temp1224[ 6u]="THROW";
-static unsigned char _temp1225[ 4u]="TRY"; static unsigned char _temp1226[ 6u]="CATCH";
-static unsigned char _temp1227[ 4u]="NEW"; static unsigned char _temp1228[ 9u]="ABSTRACT";
-static unsigned char _temp1229[ 9u]="FALLTHRU"; static unsigned char _temp1230[
-6u]="USING"; static unsigned char _temp1231[ 10u]="NAMESPACE"; static
-unsigned char _temp1232[ 7u]="TUNION"; static unsigned char _temp1233[ 8u]="XTUNION";
-static unsigned char _temp1234[ 5u]="FILL"; static unsigned char _temp1235[ 8u]="CODEGEN";
-static unsigned char _temp1236[ 4u]="CUT"; static unsigned char _temp1237[ 7u]="SPLICE";
-static unsigned char _temp1238[ 7u]="MALLOC"; static unsigned char _temp1239[ 9u]="REGION_T";
-static unsigned char _temp1240[ 7u]="REGION"; static unsigned char _temp1241[ 5u]="RNEW";
-static unsigned char _temp1242[ 8u]="RMALLOC"; static unsigned char _temp1243[ 7u]="PTR_OP";
-static unsigned char _temp1244[ 7u]="INC_OP"; static unsigned char _temp1245[ 7u]="DEC_OP";
-static unsigned char _temp1246[ 8u]="LEFT_OP"; static unsigned char _temp1247[ 9u]="RIGHT_OP";
-static unsigned char _temp1248[ 6u]="LE_OP"; static unsigned char _temp1249[ 6u]="GE_OP";
-static unsigned char _temp1250[ 6u]="EQ_OP"; static unsigned char _temp1251[ 6u]="NE_OP";
-static unsigned char _temp1252[ 7u]="AND_OP"; static unsigned char _temp1253[ 6u]="OR_OP";
-static unsigned char _temp1254[ 11u]="MUL_ASSIGN"; static unsigned char
-_temp1255[ 11u]="DIV_ASSIGN"; static unsigned char _temp1256[ 11u]="MOD_ASSIGN";
-static unsigned char _temp1257[ 11u]="ADD_ASSIGN"; static unsigned char
-_temp1258[ 11u]="SUB_ASSIGN"; static unsigned char _temp1259[ 12u]="LEFT_ASSIGN";
-static unsigned char _temp1260[ 13u]="RIGHT_ASSIGN"; static unsigned char
-_temp1261[ 11u]="AND_ASSIGN"; static unsigned char _temp1262[ 11u]="XOR_ASSIGN";
-static unsigned char _temp1263[ 10u]="OR_ASSIGN"; static unsigned char _temp1264[
-9u]="ELLIPSIS"; static unsigned char _temp1265[ 11u]="LEFT_RIGHT"; static
-unsigned char _temp1266[ 12u]="COLON_COLON"; static unsigned char _temp1267[ 11u]="IDENTIFIER";
-static unsigned char _temp1268[ 17u]="INTEGER_CONSTANT"; static unsigned char
-_temp1269[ 7u]="STRING"; static unsigned char _temp1270[ 19u]="CHARACTER_CONSTANT";
-static unsigned char _temp1271[ 18u]="FLOATING_CONSTANT"; static unsigned char
-_temp1272[ 9u]="TYPE_VAR"; static unsigned char _temp1273[ 16u]="QUAL_IDENTIFIER";
-static unsigned char _temp1274[ 18u]="QUAL_TYPEDEF_NAME"; static unsigned char
-_temp1275[ 10u]="ATTRIBUTE"; static unsigned char _temp1276[ 4u]="';'"; static
-unsigned char _temp1277[ 4u]="'{'"; static unsigned char _temp1278[ 4u]="'}'";
-static unsigned char _temp1279[ 4u]="'='"; static unsigned char _temp1280[ 4u]="'('";
-static unsigned char _temp1281[ 4u]="')'"; static unsigned char _temp1282[ 4u]="','";
-static unsigned char _temp1283[ 4u]="'_'"; static unsigned char _temp1284[ 4u]="'$'";
-static unsigned char _temp1285[ 4u]="'<'"; static unsigned char _temp1286[ 4u]="'>'";
-static unsigned char _temp1287[ 4u]="':'"; static unsigned char _temp1288[ 4u]="'.'";
-static unsigned char _temp1289[ 4u]="'['"; static unsigned char _temp1290[ 4u]="']'";
-static unsigned char _temp1291[ 4u]="'*'"; static unsigned char _temp1292[ 4u]="'@'";
-static unsigned char _temp1293[ 4u]="'?'"; static unsigned char _temp1294[ 4u]="'+'";
-static unsigned char _temp1295[ 4u]="'-'"; static unsigned char _temp1296[ 4u]="'&'";
-static unsigned char _temp1297[ 4u]="'|'"; static unsigned char _temp1298[ 4u]="'^'";
-static unsigned char _temp1299[ 4u]="'/'"; static unsigned char _temp1300[ 4u]="'%'";
-static unsigned char _temp1301[ 4u]="'~'"; static unsigned char _temp1302[ 4u]="'!'";
-static unsigned char _temp1303[ 5u]="prog"; static unsigned char _temp1304[ 17u]="translation_unit";
-static unsigned char _temp1305[ 21u]="external_declaration"; static
-unsigned char _temp1306[ 20u]="function_definition"; static unsigned char
-_temp1307[ 21u]="function_definition2"; static unsigned char _temp1308[ 13u]="using_action";
-static unsigned char _temp1309[ 15u]="unusing_action"; static unsigned char
-_temp1310[ 17u]="namespace_action"; static unsigned char _temp1311[ 19u]="unnamespace_action";
-static unsigned char _temp1312[ 12u]="declaration"; static unsigned char
-_temp1313[ 17u]="declaration_list"; static unsigned char _temp1314[ 23u]="declaration_specifiers";
-static unsigned char _temp1315[ 24u]="storage_class_specifier"; static
-unsigned char _temp1316[ 15u]="attributes_opt"; static unsigned char _temp1317[
-11u]="attributes"; static unsigned char _temp1318[ 15u]="attribute_list"; static
-unsigned char _temp1319[ 10u]="attribute"; static unsigned char _temp1320[ 15u]="type_specifier";
-static unsigned char _temp1321[ 5u]="kind"; static unsigned char _temp1322[ 15u]="type_qualifier";
-static unsigned char _temp1323[ 15u]="enum_specifier"; static unsigned char
-_temp1324[ 11u]="enum_field"; static unsigned char _temp1325[ 22u]="enum_declaration_list";
-static unsigned char _temp1326[ 26u]="struct_or_union_specifier"; static
-unsigned char _temp1327[ 16u]="type_params_opt"; static unsigned char _temp1328[
-16u]="struct_or_union"; static unsigned char _temp1329[ 24u]="struct_declaration_list";
-static unsigned char _temp1330[ 25u]="struct_declaration_list0"; static
-unsigned char _temp1331[ 21u]="init_declarator_list"; static unsigned char
-_temp1332[ 22u]="init_declarator_list0"; static unsigned char _temp1333[ 16u]="init_declarator";
-static unsigned char _temp1334[ 19u]="struct_declaration"; static unsigned char
-_temp1335[ 25u]="specifier_qualifier_list"; static unsigned char _temp1336[ 23u]="struct_declarator_list";
-static unsigned char _temp1337[ 24u]="struct_declarator_list0"; static
-unsigned char _temp1338[ 18u]="struct_declarator"; static unsigned char
-_temp1339[ 17u]="tunion_specifier"; static unsigned char _temp1340[ 18u]="tunion_or_xtunion";
-static unsigned char _temp1341[ 17u]="tunionfield_list"; static unsigned char
-_temp1342[ 18u]="tunionfield_scope"; static unsigned char _temp1343[ 12u]="tunionfield";
-static unsigned char _temp1344[ 11u]="declarator"; static unsigned char
-_temp1345[ 18u]="direct_declarator"; static unsigned char _temp1346[ 8u]="pointer";
-static unsigned char _temp1347[ 13u]="pointer_char"; static unsigned char
-_temp1348[ 8u]="rgn_opt"; static unsigned char _temp1349[ 4u]="rgn"; static
-unsigned char _temp1350[ 20u]="type_qualifier_list"; static unsigned char
-_temp1351[ 20u]="parameter_type_list"; static unsigned char _temp1352[ 9u]="type_var";
-static unsigned char _temp1353[ 16u]="optional_effect"; static unsigned char
-_temp1354[ 19u]="optional_rgn_order"; static unsigned char _temp1355[ 10u]="rgn_order";
-static unsigned char _temp1356[ 16u]="optional_inject"; static unsigned char
-_temp1357[ 11u]="effect_set"; static unsigned char _temp1358[ 14u]="atomic_effect";
-static unsigned char _temp1359[ 11u]="region_set"; static unsigned char
-_temp1360[ 15u]="parameter_list"; static unsigned char _temp1361[ 22u]="parameter_declaration";
-static unsigned char _temp1362[ 16u]="identifier_list"; static unsigned char
-_temp1363[ 17u]="identifier_list0"; static unsigned char _temp1364[ 12u]="initializer";
-static unsigned char _temp1365[ 18u]="array_initializer"; static unsigned char
-_temp1366[ 17u]="initializer_list"; static unsigned char _temp1367[ 12u]="designation";
-static unsigned char _temp1368[ 16u]="designator_list"; static unsigned char
-_temp1369[ 11u]="designator"; static unsigned char _temp1370[ 10u]="type_name";
-static unsigned char _temp1371[ 14u]="any_type_name"; static unsigned char
-_temp1372[ 15u]="type_name_list"; static unsigned char _temp1373[ 20u]="abstract_declarator";
-static unsigned char _temp1374[ 27u]="direct_abstract_declarator"; static
-unsigned char _temp1375[ 10u]="statement"; static unsigned char _temp1376[ 18u]="labeled_statement";
-static unsigned char _temp1377[ 21u]="expression_statement"; static
-unsigned char _temp1378[ 19u]="compound_statement"; static unsigned char
-_temp1379[ 16u]="block_item_list"; static unsigned char _temp1380[ 20u]="selection_statement";
-static unsigned char _temp1381[ 15u]="switch_clauses"; static unsigned char
-_temp1382[ 16u]="switchC_clauses"; static unsigned char _temp1383[ 20u]="iteration_statement";
-static unsigned char _temp1384[ 15u]="jump_statement"; static unsigned char
-_temp1385[ 8u]="pattern"; static unsigned char _temp1386[ 19u]="tuple_pattern_list";
-static unsigned char _temp1387[ 20u]="tuple_pattern_list0"; static unsigned char
-_temp1388[ 14u]="field_pattern"; static unsigned char _temp1389[ 19u]="field_pattern_list";
-static unsigned char _temp1390[ 20u]="field_pattern_list0"; static unsigned char
-_temp1391[ 11u]="expression"; static unsigned char _temp1392[ 22u]="assignment_expression";
-static unsigned char _temp1393[ 20u]="assignment_operator"; static unsigned char
-_temp1394[ 23u]="conditional_expression"; static unsigned char _temp1395[ 20u]="constant_expression";
-static unsigned char _temp1396[ 22u]="logical_or_expression"; static
-unsigned char _temp1397[ 23u]="logical_and_expression"; static unsigned char
-_temp1398[ 24u]="inclusive_or_expression"; static unsigned char _temp1399[ 24u]="exclusive_or_expression";
-static unsigned char _temp1400[ 15u]="and_expression"; static unsigned char
-_temp1401[ 20u]="equality_expression"; static unsigned char _temp1402[ 22u]="relational_expression";
-static unsigned char _temp1403[ 17u]="shift_expression"; static unsigned char
-_temp1404[ 20u]="additive_expression"; static unsigned char _temp1405[ 26u]="multiplicative_expression";
-static unsigned char _temp1406[ 16u]="cast_expression"; static unsigned char
-_temp1407[ 17u]="unary_expression"; static unsigned char _temp1408[ 15u]="unary_operator";
-static unsigned char _temp1409[ 19u]="postfix_expression"; static unsigned char
-_temp1410[ 19u]="primary_expression"; static unsigned char _temp1411[ 25u]="argument_expression_list";
-static unsigned char _temp1412[ 26u]="argument_expression_list0"; static
-unsigned char _temp1413[ 9u]="constant"; static unsigned char _temp1414[ 20u]="qual_opt_identifier";
-static struct _tagged_arr Cyc_yytname[ 231u]={{ _temp1184, _temp1184, _temp1184
-+ 2u},{ _temp1185, _temp1185, _temp1185 + 6u},{ _temp1186, _temp1186, _temp1186
-+ 12u},{ _temp1187, _temp1187, _temp1187 + 5u},{ _temp1188, _temp1188, _temp1188
-+ 9u},{ _temp1189, _temp1189, _temp1189 + 7u},{ _temp1190, _temp1190, _temp1190
-+ 7u},{ _temp1191, _temp1191, _temp1191 + 8u},{ _temp1192, _temp1192, _temp1192
-+ 5u},{ _temp1193, _temp1193, _temp1193 + 5u},{ _temp1194, _temp1194, _temp1194
-+ 6u},{ _temp1195, _temp1195, _temp1195 + 4u},{ _temp1196, _temp1196, _temp1196
-+ 5u},{ _temp1197, _temp1197, _temp1197 + 6u},{ _temp1198, _temp1198, _temp1198
-+ 7u},{ _temp1199, _temp1199, _temp1199 + 7u},{ _temp1200, _temp1200, _temp1200
-+ 9u},{ _temp1201, _temp1201, _temp1201 + 6u},{ _temp1202, _temp1202, _temp1202
-+ 9u},{ _temp1203, _temp1203, _temp1203 + 9u},{ _temp1204, _temp1204, _temp1204
-+ 7u},{ _temp1205, _temp1205, _temp1205 + 6u},{ _temp1206, _temp1206, _temp1206
-+ 5u},{ _temp1207, _temp1207, _temp1207 + 8u},{ _temp1208, _temp1208, _temp1208
-+ 7u},{ _temp1209, _temp1209, _temp1209 + 7u},{ _temp1210, _temp1210, _temp1210
-+ 9u},{ _temp1211, _temp1211, _temp1211 + 3u},{ _temp1212, _temp1212, _temp1212
-+ 5u},{ _temp1213, _temp1213, _temp1213 + 7u},{ _temp1214, _temp1214, _temp1214
-+ 6u},{ _temp1215, _temp1215, _temp1215 + 3u},{ _temp1216, _temp1216, _temp1216
-+ 4u},{ _temp1217, _temp1217, _temp1217 + 5u},{ _temp1218, _temp1218, _temp1218
-+ 9u},{ _temp1219, _temp1219, _temp1219 + 6u},{ _temp1220, _temp1220, _temp1220
-+ 7u},{ _temp1221, _temp1221, _temp1221 + 5u},{ _temp1222, _temp1222, _temp1222
-+ 8u},{ _temp1223, _temp1223, _temp1223 + 4u},{ _temp1224, _temp1224, _temp1224
-+ 6u},{ _temp1225, _temp1225, _temp1225 + 4u},{ _temp1226, _temp1226, _temp1226
-+ 6u},{ _temp1227, _temp1227, _temp1227 + 4u},{ _temp1228, _temp1228, _temp1228
-+ 9u},{ _temp1229, _temp1229, _temp1229 + 9u},{ _temp1230, _temp1230, _temp1230
-+ 6u},{ _temp1231, _temp1231, _temp1231 + 10u},{ _temp1232, _temp1232, _temp1232
-+ 7u},{ _temp1233, _temp1233, _temp1233 + 8u},{ _temp1234, _temp1234, _temp1234
-+ 5u},{ _temp1235, _temp1235, _temp1235 + 8u},{ _temp1236, _temp1236, _temp1236
-+ 4u},{ _temp1237, _temp1237, _temp1237 + 7u},{ _temp1238, _temp1238, _temp1238
-+ 7u},{ _temp1239, _temp1239, _temp1239 + 9u},{ _temp1240, _temp1240, _temp1240
-+ 7u},{ _temp1241, _temp1241, _temp1241 + 5u},{ _temp1242, _temp1242, _temp1242
-+ 8u},{ _temp1243, _temp1243, _temp1243 + 7u},{ _temp1244, _temp1244, _temp1244
-+ 7u},{ _temp1245, _temp1245, _temp1245 + 7u},{ _temp1246, _temp1246, _temp1246
-+ 8u},{ _temp1247, _temp1247, _temp1247 + 9u},{ _temp1248, _temp1248, _temp1248
-+ 6u},{ _temp1249, _temp1249, _temp1249 + 6u},{ _temp1250, _temp1250, _temp1250
-+ 6u},{ _temp1251, _temp1251, _temp1251 + 6u},{ _temp1252, _temp1252, _temp1252
-+ 7u},{ _temp1253, _temp1253, _temp1253 + 6u},{ _temp1254, _temp1254, _temp1254
-+ 11u},{ _temp1255, _temp1255, _temp1255 + 11u},{ _temp1256, _temp1256,
-_temp1256 + 11u},{ _temp1257, _temp1257, _temp1257 + 11u},{ _temp1258, _temp1258,
-_temp1258 + 11u},{ _temp1259, _temp1259, _temp1259 + 12u},{ _temp1260, _temp1260,
-_temp1260 + 13u},{ _temp1261, _temp1261, _temp1261 + 11u},{ _temp1262, _temp1262,
-_temp1262 + 11u},{ _temp1263, _temp1263, _temp1263 + 10u},{ _temp1264, _temp1264,
-_temp1264 + 9u},{ _temp1265, _temp1265, _temp1265 + 11u},{ _temp1266, _temp1266,
-_temp1266 + 12u},{ _temp1267, _temp1267, _temp1267 + 11u},{ _temp1268, _temp1268,
-_temp1268 + 17u},{ _temp1269, _temp1269, _temp1269 + 7u},{ _temp1270, _temp1270,
-_temp1270 + 19u},{ _temp1271, _temp1271, _temp1271 + 18u},{ _temp1272, _temp1272,
-_temp1272 + 9u},{ _temp1273, _temp1273, _temp1273 + 16u},{ _temp1274, _temp1274,
-_temp1274 + 18u},{ _temp1275, _temp1275, _temp1275 + 10u},{ _temp1276, _temp1276,
-_temp1276 + 4u},{ _temp1277, _temp1277, _temp1277 + 4u},{ _temp1278, _temp1278,
-_temp1278 + 4u},{ _temp1279, _temp1279, _temp1279 + 4u},{ _temp1280, _temp1280,
-_temp1280 + 4u},{ _temp1281, _temp1281, _temp1281 + 4u},{ _temp1282, _temp1282,
-_temp1282 + 4u},{ _temp1283, _temp1283, _temp1283 + 4u},{ _temp1284, _temp1284,
-_temp1284 + 4u},{ _temp1285, _temp1285, _temp1285 + 4u},{ _temp1286, _temp1286,
-_temp1286 + 4u},{ _temp1287, _temp1287, _temp1287 + 4u},{ _temp1288, _temp1288,
-_temp1288 + 4u},{ _temp1289, _temp1289, _temp1289 + 4u},{ _temp1290, _temp1290,
-_temp1290 + 4u},{ _temp1291, _temp1291, _temp1291 + 4u},{ _temp1292, _temp1292,
-_temp1292 + 4u},{ _temp1293, _temp1293, _temp1293 + 4u},{ _temp1294, _temp1294,
-_temp1294 + 4u},{ _temp1295, _temp1295, _temp1295 + 4u},{ _temp1296, _temp1296,
-_temp1296 + 4u},{ _temp1297, _temp1297, _temp1297 + 4u},{ _temp1298, _temp1298,
-_temp1298 + 4u},{ _temp1299, _temp1299, _temp1299 + 4u},{ _temp1300, _temp1300,
-_temp1300 + 4u},{ _temp1301, _temp1301, _temp1301 + 4u},{ _temp1302, _temp1302,
-_temp1302 + 4u},{ _temp1303, _temp1303, _temp1303 + 5u},{ _temp1304, _temp1304,
-_temp1304 + 17u},{ _temp1305, _temp1305, _temp1305 + 21u},{ _temp1306, _temp1306,
-_temp1306 + 20u},{ _temp1307, _temp1307, _temp1307 + 21u},{ _temp1308, _temp1308,
-_temp1308 + 13u},{ _temp1309, _temp1309, _temp1309 + 15u},{ _temp1310, _temp1310,
-_temp1310 + 17u},{ _temp1311, _temp1311, _temp1311 + 19u},{ _temp1312, _temp1312,
-_temp1312 + 12u},{ _temp1313, _temp1313, _temp1313 + 17u},{ _temp1314, _temp1314,
-_temp1314 + 23u},{ _temp1315, _temp1315, _temp1315 + 24u},{ _temp1316, _temp1316,
-_temp1316 + 15u},{ _temp1317, _temp1317, _temp1317 + 11u},{ _temp1318, _temp1318,
-_temp1318 + 15u},{ _temp1319, _temp1319, _temp1319 + 10u},{ _temp1320, _temp1320,
-_temp1320 + 15u},{ _temp1321, _temp1321, _temp1321 + 5u},{ _temp1322, _temp1322,
-_temp1322 + 15u},{ _temp1323, _temp1323, _temp1323 + 15u},{ _temp1324, _temp1324,
-_temp1324 + 11u},{ _temp1325, _temp1325, _temp1325 + 22u},{ _temp1326, _temp1326,
-_temp1326 + 26u},{ _temp1327, _temp1327, _temp1327 + 16u},{ _temp1328, _temp1328,
-_temp1328 + 16u},{ _temp1329, _temp1329, _temp1329 + 24u},{ _temp1330, _temp1330,
-_temp1330 + 25u},{ _temp1331, _temp1331, _temp1331 + 21u},{ _temp1332, _temp1332,
-_temp1332 + 22u},{ _temp1333, _temp1333, _temp1333 + 16u},{ _temp1334, _temp1334,
-_temp1334 + 19u},{ _temp1335, _temp1335, _temp1335 + 25u},{ _temp1336, _temp1336,
-_temp1336 + 23u},{ _temp1337, _temp1337, _temp1337 + 24u},{ _temp1338, _temp1338,
-_temp1338 + 18u},{ _temp1339, _temp1339, _temp1339 + 17u},{ _temp1340, _temp1340,
-_temp1340 + 18u},{ _temp1341, _temp1341, _temp1341 + 17u},{ _temp1342, _temp1342,
-_temp1342 + 18u},{ _temp1343, _temp1343, _temp1343 + 12u},{ _temp1344, _temp1344,
-_temp1344 + 11u},{ _temp1345, _temp1345, _temp1345 + 18u},{ _temp1346, _temp1346,
-_temp1346 + 8u},{ _temp1347, _temp1347, _temp1347 + 13u},{ _temp1348, _temp1348,
-_temp1348 + 8u},{ _temp1349, _temp1349, _temp1349 + 4u},{ _temp1350, _temp1350,
-_temp1350 + 20u},{ _temp1351, _temp1351, _temp1351 + 20u},{ _temp1352, _temp1352,
-_temp1352 + 9u},{ _temp1353, _temp1353, _temp1353 + 16u},{ _temp1354, _temp1354,
-_temp1354 + 19u},{ _temp1355, _temp1355, _temp1355 + 10u},{ _temp1356, _temp1356,
-_temp1356 + 16u},{ _temp1357, _temp1357, _temp1357 + 11u},{ _temp1358, _temp1358,
-_temp1358 + 14u},{ _temp1359, _temp1359, _temp1359 + 11u},{ _temp1360, _temp1360,
-_temp1360 + 15u},{ _temp1361, _temp1361, _temp1361 + 22u},{ _temp1362, _temp1362,
-_temp1362 + 16u},{ _temp1363, _temp1363, _temp1363 + 17u},{ _temp1364, _temp1364,
-_temp1364 + 12u},{ _temp1365, _temp1365, _temp1365 + 18u},{ _temp1366, _temp1366,
-_temp1366 + 17u},{ _temp1367, _temp1367, _temp1367 + 12u},{ _temp1368, _temp1368,
-_temp1368 + 16u},{ _temp1369, _temp1369, _temp1369 + 11u},{ _temp1370, _temp1370,
-_temp1370 + 10u},{ _temp1371, _temp1371, _temp1371 + 14u},{ _temp1372, _temp1372,
-_temp1372 + 15u},{ _temp1373, _temp1373, _temp1373 + 20u},{ _temp1374, _temp1374,
-_temp1374 + 27u},{ _temp1375, _temp1375, _temp1375 + 10u},{ _temp1376, _temp1376,
-_temp1376 + 18u},{ _temp1377, _temp1377, _temp1377 + 21u},{ _temp1378, _temp1378,
-_temp1378 + 19u},{ _temp1379, _temp1379, _temp1379 + 16u},{ _temp1380, _temp1380,
-_temp1380 + 20u},{ _temp1381, _temp1381, _temp1381 + 15u},{ _temp1382, _temp1382,
-_temp1382 + 16u},{ _temp1383, _temp1383, _temp1383 + 20u},{ _temp1384, _temp1384,
-_temp1384 + 15u},{ _temp1385, _temp1385, _temp1385 + 8u},{ _temp1386, _temp1386,
-_temp1386 + 19u},{ _temp1387, _temp1387, _temp1387 + 20u},{ _temp1388, _temp1388,
-_temp1388 + 14u},{ _temp1389, _temp1389, _temp1389 + 19u},{ _temp1390, _temp1390,
-_temp1390 + 20u},{ _temp1391, _temp1391, _temp1391 + 11u},{ _temp1392, _temp1392,
-_temp1392 + 22u},{ _temp1393, _temp1393, _temp1393 + 20u},{ _temp1394, _temp1394,
-_temp1394 + 23u},{ _temp1395, _temp1395, _temp1395 + 20u},{ _temp1396, _temp1396,
-_temp1396 + 22u},{ _temp1397, _temp1397, _temp1397 + 23u},{ _temp1398, _temp1398,
-_temp1398 + 24u},{ _temp1399, _temp1399, _temp1399 + 24u},{ _temp1400, _temp1400,
-_temp1400 + 15u},{ _temp1401, _temp1401, _temp1401 + 20u},{ _temp1402, _temp1402,
-_temp1402 + 22u},{ _temp1403, _temp1403, _temp1403 + 17u},{ _temp1404, _temp1404,
-_temp1404 + 20u},{ _temp1405, _temp1405, _temp1405 + 26u},{ _temp1406, _temp1406,
-_temp1406 + 16u},{ _temp1407, _temp1407, _temp1407 + 17u},{ _temp1408, _temp1408,
-_temp1408 + 15u},{ _temp1409, _temp1409, _temp1409 + 19u},{ _temp1410, _temp1410,
-_temp1410 + 19u},{ _temp1411, _temp1411, _temp1411 + 25u},{ _temp1412, _temp1412,
-_temp1412 + 26u},{ _temp1413, _temp1413, _temp1413 + 9u},{ _temp1414, _temp1414,
-_temp1414 + 20u}}; static short Cyc_yyr1[ 401u]={ 0, 119, 120, 120, 120, 120,
+86, 87, 88, 89, 90, 91}; static unsigned char _temp1171[ 2u]="$"; static
+unsigned char _temp1172[ 6u]="error"; static unsigned char _temp1173[ 12u]="$undefined.";
+static unsigned char _temp1174[ 5u]="AUTO"; static unsigned char _temp1175[ 9u]="REGISTER";
+static unsigned char _temp1176[ 7u]="STATIC"; static unsigned char _temp1177[ 7u]="EXTERN";
+static unsigned char _temp1178[ 8u]="TYPEDEF"; static unsigned char _temp1179[ 5u]="VOID";
+static unsigned char _temp1180[ 5u]="CHAR"; static unsigned char _temp1181[ 6u]="SHORT";
+static unsigned char _temp1182[ 4u]="INT"; static unsigned char _temp1183[ 5u]="LONG";
+static unsigned char _temp1184[ 6u]="FLOAT"; static unsigned char _temp1185[ 7u]="DOUBLE";
+static unsigned char _temp1186[ 7u]="SIGNED"; static unsigned char _temp1187[ 9u]="UNSIGNED";
+static unsigned char _temp1188[ 6u]="CONST"; static unsigned char _temp1189[ 9u]="VOLATILE";
+static unsigned char _temp1190[ 9u]="RESTRICT"; static unsigned char _temp1191[
+7u]="STRUCT"; static unsigned char _temp1192[ 6u]="UNION"; static unsigned char
+_temp1193[ 5u]="CASE"; static unsigned char _temp1194[ 8u]="DEFAULT"; static
+unsigned char _temp1195[ 7u]="INLINE"; static unsigned char _temp1196[ 7u]="SIZEOF";
+static unsigned char _temp1197[ 9u]="OFFSETOF"; static unsigned char _temp1198[
+3u]="IF"; static unsigned char _temp1199[ 5u]="ELSE"; static unsigned char
+_temp1200[ 7u]="SWITCH"; static unsigned char _temp1201[ 6u]="WHILE"; static
+unsigned char _temp1202[ 3u]="DO"; static unsigned char _temp1203[ 4u]="FOR";
+static unsigned char _temp1204[ 5u]="GOTO"; static unsigned char _temp1205[ 9u]="CONTINUE";
+static unsigned char _temp1206[ 6u]="BREAK"; static unsigned char _temp1207[ 7u]="RETURN";
+static unsigned char _temp1208[ 5u]="ENUM"; static unsigned char _temp1209[ 8u]="NULL_kw";
+static unsigned char _temp1210[ 4u]="LET"; static unsigned char _temp1211[ 6u]="THROW";
+static unsigned char _temp1212[ 4u]="TRY"; static unsigned char _temp1213[ 6u]="CATCH";
+static unsigned char _temp1214[ 4u]="NEW"; static unsigned char _temp1215[ 9u]="ABSTRACT";
+static unsigned char _temp1216[ 9u]="FALLTHRU"; static unsigned char _temp1217[
+6u]="USING"; static unsigned char _temp1218[ 10u]="NAMESPACE"; static
+unsigned char _temp1219[ 7u]="TUNION"; static unsigned char _temp1220[ 8u]="XTUNION";
+static unsigned char _temp1221[ 5u]="FILL"; static unsigned char _temp1222[ 8u]="CODEGEN";
+static unsigned char _temp1223[ 4u]="CUT"; static unsigned char _temp1224[ 7u]="SPLICE";
+static unsigned char _temp1225[ 7u]="MALLOC"; static unsigned char _temp1226[ 9u]="REGION_T";
+static unsigned char _temp1227[ 7u]="REGION"; static unsigned char _temp1228[ 5u]="RNEW";
+static unsigned char _temp1229[ 8u]="RMALLOC"; static unsigned char _temp1230[ 7u]="PTR_OP";
+static unsigned char _temp1231[ 7u]="INC_OP"; static unsigned char _temp1232[ 7u]="DEC_OP";
+static unsigned char _temp1233[ 8u]="LEFT_OP"; static unsigned char _temp1234[ 9u]="RIGHT_OP";
+static unsigned char _temp1235[ 6u]="LE_OP"; static unsigned char _temp1236[ 6u]="GE_OP";
+static unsigned char _temp1237[ 6u]="EQ_OP"; static unsigned char _temp1238[ 6u]="NE_OP";
+static unsigned char _temp1239[ 7u]="AND_OP"; static unsigned char _temp1240[ 6u]="OR_OP";
+static unsigned char _temp1241[ 11u]="MUL_ASSIGN"; static unsigned char
+_temp1242[ 11u]="DIV_ASSIGN"; static unsigned char _temp1243[ 11u]="MOD_ASSIGN";
+static unsigned char _temp1244[ 11u]="ADD_ASSIGN"; static unsigned char
+_temp1245[ 11u]="SUB_ASSIGN"; static unsigned char _temp1246[ 12u]="LEFT_ASSIGN";
+static unsigned char _temp1247[ 13u]="RIGHT_ASSIGN"; static unsigned char
+_temp1248[ 11u]="AND_ASSIGN"; static unsigned char _temp1249[ 11u]="XOR_ASSIGN";
+static unsigned char _temp1250[ 10u]="OR_ASSIGN"; static unsigned char _temp1251[
+9u]="ELLIPSIS"; static unsigned char _temp1252[ 11u]="LEFT_RIGHT"; static
+unsigned char _temp1253[ 12u]="COLON_COLON"; static unsigned char _temp1254[ 11u]="IDENTIFIER";
+static unsigned char _temp1255[ 17u]="INTEGER_CONSTANT"; static unsigned char
+_temp1256[ 7u]="STRING"; static unsigned char _temp1257[ 19u]="CHARACTER_CONSTANT";
+static unsigned char _temp1258[ 18u]="FLOATING_CONSTANT"; static unsigned char
+_temp1259[ 9u]="TYPE_VAR"; static unsigned char _temp1260[ 16u]="QUAL_IDENTIFIER";
+static unsigned char _temp1261[ 18u]="QUAL_TYPEDEF_NAME"; static unsigned char
+_temp1262[ 10u]="ATTRIBUTE"; static unsigned char _temp1263[ 4u]="';'"; static
+unsigned char _temp1264[ 4u]="'{'"; static unsigned char _temp1265[ 4u]="'}'";
+static unsigned char _temp1266[ 4u]="'='"; static unsigned char _temp1267[ 4u]="'('";
+static unsigned char _temp1268[ 4u]="')'"; static unsigned char _temp1269[ 4u]="','";
+static unsigned char _temp1270[ 4u]="'_'"; static unsigned char _temp1271[ 4u]="'$'";
+static unsigned char _temp1272[ 4u]="'<'"; static unsigned char _temp1273[ 4u]="'>'";
+static unsigned char _temp1274[ 4u]="':'"; static unsigned char _temp1275[ 4u]="'.'";
+static unsigned char _temp1276[ 4u]="'['"; static unsigned char _temp1277[ 4u]="']'";
+static unsigned char _temp1278[ 4u]="'*'"; static unsigned char _temp1279[ 4u]="'@'";
+static unsigned char _temp1280[ 4u]="'?'"; static unsigned char _temp1281[ 4u]="'+'";
+static unsigned char _temp1282[ 4u]="'-'"; static unsigned char _temp1283[ 4u]="'&'";
+static unsigned char _temp1284[ 4u]="'|'"; static unsigned char _temp1285[ 4u]="'^'";
+static unsigned char _temp1286[ 4u]="'/'"; static unsigned char _temp1287[ 4u]="'%'";
+static unsigned char _temp1288[ 4u]="'~'"; static unsigned char _temp1289[ 4u]="'!'";
+static unsigned char _temp1290[ 5u]="prog"; static unsigned char _temp1291[ 17u]="translation_unit";
+static unsigned char _temp1292[ 21u]="external_declaration"; static
+unsigned char _temp1293[ 20u]="function_definition"; static unsigned char
+_temp1294[ 21u]="function_definition2"; static unsigned char _temp1295[ 13u]="using_action";
+static unsigned char _temp1296[ 15u]="unusing_action"; static unsigned char
+_temp1297[ 17u]="namespace_action"; static unsigned char _temp1298[ 19u]="unnamespace_action";
+static unsigned char _temp1299[ 12u]="declaration"; static unsigned char
+_temp1300[ 17u]="declaration_list"; static unsigned char _temp1301[ 23u]="declaration_specifiers";
+static unsigned char _temp1302[ 24u]="storage_class_specifier"; static
+unsigned char _temp1303[ 15u]="attributes_opt"; static unsigned char _temp1304[
+11u]="attributes"; static unsigned char _temp1305[ 15u]="attribute_list"; static
+unsigned char _temp1306[ 10u]="attribute"; static unsigned char _temp1307[ 15u]="type_specifier";
+static unsigned char _temp1308[ 5u]="kind"; static unsigned char _temp1309[ 15u]="type_qualifier";
+static unsigned char _temp1310[ 15u]="enum_specifier"; static unsigned char
+_temp1311[ 11u]="enum_field"; static unsigned char _temp1312[ 22u]="enum_declaration_list";
+static unsigned char _temp1313[ 26u]="struct_or_union_specifier"; static
+unsigned char _temp1314[ 16u]="type_params_opt"; static unsigned char _temp1315[
+16u]="struct_or_union"; static unsigned char _temp1316[ 24u]="struct_declaration_list";
+static unsigned char _temp1317[ 25u]="struct_declaration_list0"; static
+unsigned char _temp1318[ 21u]="init_declarator_list"; static unsigned char
+_temp1319[ 22u]="init_declarator_list0"; static unsigned char _temp1320[ 16u]="init_declarator";
+static unsigned char _temp1321[ 19u]="struct_declaration"; static unsigned char
+_temp1322[ 25u]="specifier_qualifier_list"; static unsigned char _temp1323[ 23u]="struct_declarator_list";
+static unsigned char _temp1324[ 24u]="struct_declarator_list0"; static
+unsigned char _temp1325[ 18u]="struct_declarator"; static unsigned char
+_temp1326[ 17u]="tunion_specifier"; static unsigned char _temp1327[ 18u]="tunion_or_xtunion";
+static unsigned char _temp1328[ 17u]="tunionfield_list"; static unsigned char
+_temp1329[ 18u]="tunionfield_scope"; static unsigned char _temp1330[ 12u]="tunionfield";
+static unsigned char _temp1331[ 11u]="declarator"; static unsigned char
+_temp1332[ 18u]="direct_declarator"; static unsigned char _temp1333[ 8u]="pointer";
+static unsigned char _temp1334[ 13u]="pointer_char"; static unsigned char
+_temp1335[ 8u]="rgn_opt"; static unsigned char _temp1336[ 4u]="rgn"; static
+unsigned char _temp1337[ 20u]="type_qualifier_list"; static unsigned char
+_temp1338[ 20u]="parameter_type_list"; static unsigned char _temp1339[ 9u]="type_var";
+static unsigned char _temp1340[ 16u]="optional_effect"; static unsigned char
+_temp1341[ 19u]="optional_rgn_order"; static unsigned char _temp1342[ 10u]="rgn_order";
+static unsigned char _temp1343[ 16u]="optional_inject"; static unsigned char
+_temp1344[ 11u]="effect_set"; static unsigned char _temp1345[ 14u]="atomic_effect";
+static unsigned char _temp1346[ 11u]="region_set"; static unsigned char
+_temp1347[ 15u]="parameter_list"; static unsigned char _temp1348[ 22u]="parameter_declaration";
+static unsigned char _temp1349[ 16u]="identifier_list"; static unsigned char
+_temp1350[ 17u]="identifier_list0"; static unsigned char _temp1351[ 12u]="initializer";
+static unsigned char _temp1352[ 18u]="array_initializer"; static unsigned char
+_temp1353[ 17u]="initializer_list"; static unsigned char _temp1354[ 12u]="designation";
+static unsigned char _temp1355[ 16u]="designator_list"; static unsigned char
+_temp1356[ 11u]="designator"; static unsigned char _temp1357[ 10u]="type_name";
+static unsigned char _temp1358[ 14u]="any_type_name"; static unsigned char
+_temp1359[ 15u]="type_name_list"; static unsigned char _temp1360[ 20u]="abstract_declarator";
+static unsigned char _temp1361[ 27u]="direct_abstract_declarator"; static
+unsigned char _temp1362[ 10u]="statement"; static unsigned char _temp1363[ 18u]="labeled_statement";
+static unsigned char _temp1364[ 21u]="expression_statement"; static
+unsigned char _temp1365[ 19u]="compound_statement"; static unsigned char
+_temp1366[ 16u]="block_item_list"; static unsigned char _temp1367[ 20u]="selection_statement";
+static unsigned char _temp1368[ 15u]="switch_clauses"; static unsigned char
+_temp1369[ 16u]="switchC_clauses"; static unsigned char _temp1370[ 20u]="iteration_statement";
+static unsigned char _temp1371[ 15u]="jump_statement"; static unsigned char
+_temp1372[ 8u]="pattern"; static unsigned char _temp1373[ 19u]="tuple_pattern_list";
+static unsigned char _temp1374[ 20u]="tuple_pattern_list0"; static unsigned char
+_temp1375[ 14u]="field_pattern"; static unsigned char _temp1376[ 19u]="field_pattern_list";
+static unsigned char _temp1377[ 20u]="field_pattern_list0"; static unsigned char
+_temp1378[ 11u]="expression"; static unsigned char _temp1379[ 22u]="assignment_expression";
+static unsigned char _temp1380[ 20u]="assignment_operator"; static unsigned char
+_temp1381[ 23u]="conditional_expression"; static unsigned char _temp1382[ 20u]="constant_expression";
+static unsigned char _temp1383[ 22u]="logical_or_expression"; static
+unsigned char _temp1384[ 23u]="logical_and_expression"; static unsigned char
+_temp1385[ 24u]="inclusive_or_expression"; static unsigned char _temp1386[ 24u]="exclusive_or_expression";
+static unsigned char _temp1387[ 15u]="and_expression"; static unsigned char
+_temp1388[ 20u]="equality_expression"; static unsigned char _temp1389[ 22u]="relational_expression";
+static unsigned char _temp1390[ 17u]="shift_expression"; static unsigned char
+_temp1391[ 20u]="additive_expression"; static unsigned char _temp1392[ 26u]="multiplicative_expression";
+static unsigned char _temp1393[ 16u]="cast_expression"; static unsigned char
+_temp1394[ 17u]="unary_expression"; static unsigned char _temp1395[ 15u]="unary_operator";
+static unsigned char _temp1396[ 19u]="postfix_expression"; static unsigned char
+_temp1397[ 19u]="primary_expression"; static unsigned char _temp1398[ 25u]="argument_expression_list";
+static unsigned char _temp1399[ 26u]="argument_expression_list0"; static
+unsigned char _temp1400[ 9u]="constant"; static unsigned char _temp1401[ 20u]="qual_opt_identifier";
+static struct _tagged_arr Cyc_yytname[ 231u]={{ _temp1171, _temp1171, _temp1171
++ 2u},{ _temp1172, _temp1172, _temp1172 + 6u},{ _temp1173, _temp1173, _temp1173
++ 12u},{ _temp1174, _temp1174, _temp1174 + 5u},{ _temp1175, _temp1175, _temp1175
++ 9u},{ _temp1176, _temp1176, _temp1176 + 7u},{ _temp1177, _temp1177, _temp1177
++ 7u},{ _temp1178, _temp1178, _temp1178 + 8u},{ _temp1179, _temp1179, _temp1179
++ 5u},{ _temp1180, _temp1180, _temp1180 + 5u},{ _temp1181, _temp1181, _temp1181
++ 6u},{ _temp1182, _temp1182, _temp1182 + 4u},{ _temp1183, _temp1183, _temp1183
++ 5u},{ _temp1184, _temp1184, _temp1184 + 6u},{ _temp1185, _temp1185, _temp1185
++ 7u},{ _temp1186, _temp1186, _temp1186 + 7u},{ _temp1187, _temp1187, _temp1187
++ 9u},{ _temp1188, _temp1188, _temp1188 + 6u},{ _temp1189, _temp1189, _temp1189
++ 9u},{ _temp1190, _temp1190, _temp1190 + 9u},{ _temp1191, _temp1191, _temp1191
++ 7u},{ _temp1192, _temp1192, _temp1192 + 6u},{ _temp1193, _temp1193, _temp1193
++ 5u},{ _temp1194, _temp1194, _temp1194 + 8u},{ _temp1195, _temp1195, _temp1195
++ 7u},{ _temp1196, _temp1196, _temp1196 + 7u},{ _temp1197, _temp1197, _temp1197
++ 9u},{ _temp1198, _temp1198, _temp1198 + 3u},{ _temp1199, _temp1199, _temp1199
++ 5u},{ _temp1200, _temp1200, _temp1200 + 7u},{ _temp1201, _temp1201, _temp1201
++ 6u},{ _temp1202, _temp1202, _temp1202 + 3u},{ _temp1203, _temp1203, _temp1203
++ 4u},{ _temp1204, _temp1204, _temp1204 + 5u},{ _temp1205, _temp1205, _temp1205
++ 9u},{ _temp1206, _temp1206, _temp1206 + 6u},{ _temp1207, _temp1207, _temp1207
++ 7u},{ _temp1208, _temp1208, _temp1208 + 5u},{ _temp1209, _temp1209, _temp1209
++ 8u},{ _temp1210, _temp1210, _temp1210 + 4u},{ _temp1211, _temp1211, _temp1211
++ 6u},{ _temp1212, _temp1212, _temp1212 + 4u},{ _temp1213, _temp1213, _temp1213
++ 6u},{ _temp1214, _temp1214, _temp1214 + 4u},{ _temp1215, _temp1215, _temp1215
++ 9u},{ _temp1216, _temp1216, _temp1216 + 9u},{ _temp1217, _temp1217, _temp1217
++ 6u},{ _temp1218, _temp1218, _temp1218 + 10u},{ _temp1219, _temp1219, _temp1219
++ 7u},{ _temp1220, _temp1220, _temp1220 + 8u},{ _temp1221, _temp1221, _temp1221
++ 5u},{ _temp1222, _temp1222, _temp1222 + 8u},{ _temp1223, _temp1223, _temp1223
++ 4u},{ _temp1224, _temp1224, _temp1224 + 7u},{ _temp1225, _temp1225, _temp1225
++ 7u},{ _temp1226, _temp1226, _temp1226 + 9u},{ _temp1227, _temp1227, _temp1227
++ 7u},{ _temp1228, _temp1228, _temp1228 + 5u},{ _temp1229, _temp1229, _temp1229
++ 8u},{ _temp1230, _temp1230, _temp1230 + 7u},{ _temp1231, _temp1231, _temp1231
++ 7u},{ _temp1232, _temp1232, _temp1232 + 7u},{ _temp1233, _temp1233, _temp1233
++ 8u},{ _temp1234, _temp1234, _temp1234 + 9u},{ _temp1235, _temp1235, _temp1235
++ 6u},{ _temp1236, _temp1236, _temp1236 + 6u},{ _temp1237, _temp1237, _temp1237
++ 6u},{ _temp1238, _temp1238, _temp1238 + 6u},{ _temp1239, _temp1239, _temp1239
++ 7u},{ _temp1240, _temp1240, _temp1240 + 6u},{ _temp1241, _temp1241, _temp1241
++ 11u},{ _temp1242, _temp1242, _temp1242 + 11u},{ _temp1243, _temp1243,
+_temp1243 + 11u},{ _temp1244, _temp1244, _temp1244 + 11u},{ _temp1245, _temp1245,
+_temp1245 + 11u},{ _temp1246, _temp1246, _temp1246 + 12u},{ _temp1247, _temp1247,
+_temp1247 + 13u},{ _temp1248, _temp1248, _temp1248 + 11u},{ _temp1249, _temp1249,
+_temp1249 + 11u},{ _temp1250, _temp1250, _temp1250 + 10u},{ _temp1251, _temp1251,
+_temp1251 + 9u},{ _temp1252, _temp1252, _temp1252 + 11u},{ _temp1253, _temp1253,
+_temp1253 + 12u},{ _temp1254, _temp1254, _temp1254 + 11u},{ _temp1255, _temp1255,
+_temp1255 + 17u},{ _temp1256, _temp1256, _temp1256 + 7u},{ _temp1257, _temp1257,
+_temp1257 + 19u},{ _temp1258, _temp1258, _temp1258 + 18u},{ _temp1259, _temp1259,
+_temp1259 + 9u},{ _temp1260, _temp1260, _temp1260 + 16u},{ _temp1261, _temp1261,
+_temp1261 + 18u},{ _temp1262, _temp1262, _temp1262 + 10u},{ _temp1263, _temp1263,
+_temp1263 + 4u},{ _temp1264, _temp1264, _temp1264 + 4u},{ _temp1265, _temp1265,
+_temp1265 + 4u},{ _temp1266, _temp1266, _temp1266 + 4u},{ _temp1267, _temp1267,
+_temp1267 + 4u},{ _temp1268, _temp1268, _temp1268 + 4u},{ _temp1269, _temp1269,
+_temp1269 + 4u},{ _temp1270, _temp1270, _temp1270 + 4u},{ _temp1271, _temp1271,
+_temp1271 + 4u},{ _temp1272, _temp1272, _temp1272 + 4u},{ _temp1273, _temp1273,
+_temp1273 + 4u},{ _temp1274, _temp1274, _temp1274 + 4u},{ _temp1275, _temp1275,
+_temp1275 + 4u},{ _temp1276, _temp1276, _temp1276 + 4u},{ _temp1277, _temp1277,
+_temp1277 + 4u},{ _temp1278, _temp1278, _temp1278 + 4u},{ _temp1279, _temp1279,
+_temp1279 + 4u},{ _temp1280, _temp1280, _temp1280 + 4u},{ _temp1281, _temp1281,
+_temp1281 + 4u},{ _temp1282, _temp1282, _temp1282 + 4u},{ _temp1283, _temp1283,
+_temp1283 + 4u},{ _temp1284, _temp1284, _temp1284 + 4u},{ _temp1285, _temp1285,
+_temp1285 + 4u},{ _temp1286, _temp1286, _temp1286 + 4u},{ _temp1287, _temp1287,
+_temp1287 + 4u},{ _temp1288, _temp1288, _temp1288 + 4u},{ _temp1289, _temp1289,
+_temp1289 + 4u},{ _temp1290, _temp1290, _temp1290 + 5u},{ _temp1291, _temp1291,
+_temp1291 + 17u},{ _temp1292, _temp1292, _temp1292 + 21u},{ _temp1293, _temp1293,
+_temp1293 + 20u},{ _temp1294, _temp1294, _temp1294 + 21u},{ _temp1295, _temp1295,
+_temp1295 + 13u},{ _temp1296, _temp1296, _temp1296 + 15u},{ _temp1297, _temp1297,
+_temp1297 + 17u},{ _temp1298, _temp1298, _temp1298 + 19u},{ _temp1299, _temp1299,
+_temp1299 + 12u},{ _temp1300, _temp1300, _temp1300 + 17u},{ _temp1301, _temp1301,
+_temp1301 + 23u},{ _temp1302, _temp1302, _temp1302 + 24u},{ _temp1303, _temp1303,
+_temp1303 + 15u},{ _temp1304, _temp1304, _temp1304 + 11u},{ _temp1305, _temp1305,
+_temp1305 + 15u},{ _temp1306, _temp1306, _temp1306 + 10u},{ _temp1307, _temp1307,
+_temp1307 + 15u},{ _temp1308, _temp1308, _temp1308 + 5u},{ _temp1309, _temp1309,
+_temp1309 + 15u},{ _temp1310, _temp1310, _temp1310 + 15u},{ _temp1311, _temp1311,
+_temp1311 + 11u},{ _temp1312, _temp1312, _temp1312 + 22u},{ _temp1313, _temp1313,
+_temp1313 + 26u},{ _temp1314, _temp1314, _temp1314 + 16u},{ _temp1315, _temp1315,
+_temp1315 + 16u},{ _temp1316, _temp1316, _temp1316 + 24u},{ _temp1317, _temp1317,
+_temp1317 + 25u},{ _temp1318, _temp1318, _temp1318 + 21u},{ _temp1319, _temp1319,
+_temp1319 + 22u},{ _temp1320, _temp1320, _temp1320 + 16u},{ _temp1321, _temp1321,
+_temp1321 + 19u},{ _temp1322, _temp1322, _temp1322 + 25u},{ _temp1323, _temp1323,
+_temp1323 + 23u},{ _temp1324, _temp1324, _temp1324 + 24u},{ _temp1325, _temp1325,
+_temp1325 + 18u},{ _temp1326, _temp1326, _temp1326 + 17u},{ _temp1327, _temp1327,
+_temp1327 + 18u},{ _temp1328, _temp1328, _temp1328 + 17u},{ _temp1329, _temp1329,
+_temp1329 + 18u},{ _temp1330, _temp1330, _temp1330 + 12u},{ _temp1331, _temp1331,
+_temp1331 + 11u},{ _temp1332, _temp1332, _temp1332 + 18u},{ _temp1333, _temp1333,
+_temp1333 + 8u},{ _temp1334, _temp1334, _temp1334 + 13u},{ _temp1335, _temp1335,
+_temp1335 + 8u},{ _temp1336, _temp1336, _temp1336 + 4u},{ _temp1337, _temp1337,
+_temp1337 + 20u},{ _temp1338, _temp1338, _temp1338 + 20u},{ _temp1339, _temp1339,
+_temp1339 + 9u},{ _temp1340, _temp1340, _temp1340 + 16u},{ _temp1341, _temp1341,
+_temp1341 + 19u},{ _temp1342, _temp1342, _temp1342 + 10u},{ _temp1343, _temp1343,
+_temp1343 + 16u},{ _temp1344, _temp1344, _temp1344 + 11u},{ _temp1345, _temp1345,
+_temp1345 + 14u},{ _temp1346, _temp1346, _temp1346 + 11u},{ _temp1347, _temp1347,
+_temp1347 + 15u},{ _temp1348, _temp1348, _temp1348 + 22u},{ _temp1349, _temp1349,
+_temp1349 + 16u},{ _temp1350, _temp1350, _temp1350 + 17u},{ _temp1351, _temp1351,
+_temp1351 + 12u},{ _temp1352, _temp1352, _temp1352 + 18u},{ _temp1353, _temp1353,
+_temp1353 + 17u},{ _temp1354, _temp1354, _temp1354 + 12u},{ _temp1355, _temp1355,
+_temp1355 + 16u},{ _temp1356, _temp1356, _temp1356 + 11u},{ _temp1357, _temp1357,
+_temp1357 + 10u},{ _temp1358, _temp1358, _temp1358 + 14u},{ _temp1359, _temp1359,
+_temp1359 + 15u},{ _temp1360, _temp1360, _temp1360 + 20u},{ _temp1361, _temp1361,
+_temp1361 + 27u},{ _temp1362, _temp1362, _temp1362 + 10u},{ _temp1363, _temp1363,
+_temp1363 + 18u},{ _temp1364, _temp1364, _temp1364 + 21u},{ _temp1365, _temp1365,
+_temp1365 + 19u},{ _temp1366, _temp1366, _temp1366 + 16u},{ _temp1367, _temp1367,
+_temp1367 + 20u},{ _temp1368, _temp1368, _temp1368 + 15u},{ _temp1369, _temp1369,
+_temp1369 + 16u},{ _temp1370, _temp1370, _temp1370 + 20u},{ _temp1371, _temp1371,
+_temp1371 + 15u},{ _temp1372, _temp1372, _temp1372 + 8u},{ _temp1373, _temp1373,
+_temp1373 + 19u},{ _temp1374, _temp1374, _temp1374 + 20u},{ _temp1375, _temp1375,
+_temp1375 + 14u},{ _temp1376, _temp1376, _temp1376 + 19u},{ _temp1377, _temp1377,
+_temp1377 + 20u},{ _temp1378, _temp1378, _temp1378 + 11u},{ _temp1379, _temp1379,
+_temp1379 + 22u},{ _temp1380, _temp1380, _temp1380 + 20u},{ _temp1381, _temp1381,
+_temp1381 + 23u},{ _temp1382, _temp1382, _temp1382 + 20u},{ _temp1383, _temp1383,
+_temp1383 + 22u},{ _temp1384, _temp1384, _temp1384 + 23u},{ _temp1385, _temp1385,
+_temp1385 + 24u},{ _temp1386, _temp1386, _temp1386 + 24u},{ _temp1387, _temp1387,
+_temp1387 + 15u},{ _temp1388, _temp1388, _temp1388 + 20u},{ _temp1389, _temp1389,
+_temp1389 + 22u},{ _temp1390, _temp1390, _temp1390 + 17u},{ _temp1391, _temp1391,
+_temp1391 + 20u},{ _temp1392, _temp1392, _temp1392 + 26u},{ _temp1393, _temp1393,
+_temp1393 + 16u},{ _temp1394, _temp1394, _temp1394 + 17u},{ _temp1395, _temp1395,
+_temp1395 + 15u},{ _temp1396, _temp1396, _temp1396 + 19u},{ _temp1397, _temp1397,
+_temp1397 + 19u},{ _temp1398, _temp1398, _temp1398 + 25u},{ _temp1399, _temp1399,
+_temp1399 + 26u},{ _temp1400, _temp1400, _temp1400 + 9u},{ _temp1401, _temp1401,
+_temp1401 + 20u}}; static short Cyc_yyr1[ 401u]={ 0, 119, 120, 120, 120, 120,
 120, 120, 120, 121, 121, 122, 122, 122, 122, 123, 123, 124, 125, 126, 127, 128,
 128, 128, 128, 129, 129, 130, 130, 130, 130, 130, 130, 130, 130, 131, 131, 131,
 131, 131, 131, 131, 132, 132, 133, 134, 134, 135, 135, 135, 135, 135, 136, 136,
@@ -2743,18 +2734,18 @@ int Cyc_yychar=( int)'\000'; void* Cyc_yylval=( void*) Cyc_YYINITIALSVAL; static
 int Cyc_yynerrs= 0; struct _tuple19{ void* f1; void* f2; } ; struct _tuple20{
 struct Cyc_List_List* f1; struct Cyc_Absyn_Exp* f2; } ; int Cyc_yyparse(){ int
 yystate; int yyn= 0; int yyerrstatus; int yychar1= 0; int yyssp_offset; short*
-yyss=( short*)({ unsigned int _temp3211= 10000u; short* _temp3212=( short*)
-GC_malloc_atomic( sizeof( short) * _temp3211);{ unsigned int _temp3213=
-_temp3211; unsigned int i; for( i= 0; i < _temp3213; i ++){ _temp3212[ i]=(
-short) 0;}}; _temp3212;}); int yyvsp_offset; void** yyvs=( void**)({
-unsigned int _temp3208= 10000u; void** _temp3209=( void**) GC_malloc( sizeof(
-void*) * _temp3208);{ unsigned int _temp3210= _temp3208; unsigned int i; for( i=
-0; i < _temp3210; i ++){ _temp3209[ i]= Cyc_yylval;}}; _temp3209;}); int
+yyss=( short*)({ unsigned int _temp3183= 10000u; short* _temp3184=( short*)
+GC_malloc_atomic( sizeof( short) * _temp3183);{ unsigned int _temp3185=
+_temp3183; unsigned int i; for( i= 0; i < _temp3185; i ++){ _temp3184[ i]=(
+short) 0;}}; _temp3184;}); int yyvsp_offset; void** yyvs=( void**)({
+unsigned int _temp3180= 10000u; void** _temp3181=( void**) GC_malloc( sizeof(
+void*) * _temp3180);{ unsigned int _temp3182= _temp3180; unsigned int i; for( i=
+0; i < _temp3182; i ++){ _temp3181[ i]= Cyc_yylval;}}; _temp3181;}); int
 yylsp_offset; struct Cyc_Yyltype* yyls=( struct Cyc_Yyltype*)({ unsigned int
-_temp3205= 10000u; struct Cyc_Yyltype* _temp3206=( struct Cyc_Yyltype*)
-GC_malloc_atomic( sizeof( struct Cyc_Yyltype) * _temp3205);{ unsigned int
-_temp3207= _temp3205; unsigned int i; for( i= 0; i < _temp3207; i ++){ _temp3206[
-i]= Cyc_yynewloc();}}; _temp3206;}); int yystacksize= 10000; void* yyval= Cyc_yylval;
+_temp3177= 10000u; struct Cyc_Yyltype* _temp3178=( struct Cyc_Yyltype*)
+GC_malloc_atomic( sizeof( struct Cyc_Yyltype) * _temp3177);{ unsigned int
+_temp3179= _temp3177; unsigned int i; for( i= 0; i < _temp3179; i ++){ _temp3178[
+i]= Cyc_yynewloc();}}; _temp3178;}); int yystacksize= 10000; void* yyval= Cyc_yylval;
 int yylen; yystate= 0; yyerrstatus= 0; Cyc_yynerrs= 0; Cyc_yychar= - 2;
 yyssp_offset= - 1; yyvsp_offset= 0; yylsp_offset= 0; yynewstate: yyss[
 _check_known_subscript_notnull( 10000u, ++ yyssp_offset)]=( short) yystate; if(
@@ -2777,515 +2768,515 @@ yyn=( int) Cyc_yydefact[ _check_known_subscript_notnull( 788u, yystate)]; if(
 yyn == 0){ goto yyerrlab;} yyreduce: yylen=( int) Cyc_yyr2[
 _check_known_subscript_notnull( 401u, yyn)]; if( yylen > 0){ yyval= yyvs[
 _check_known_subscript_notnull( 10000u,( yyvsp_offset + 1) - yylen)];} switch(
-yyn){ case 1: _LL1415: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
+yyn){ case 1: _LL1402: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset)]; Cyc_Parse_parse_result= Cyc_yyget_DeclList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); break; case 2: _LL1416:
-yyval=( void*)({ struct Cyc_DeclList_tok_struct* _temp1418=( struct Cyc_DeclList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclList_tok_struct)); _temp1418[ 0]=({ struct Cyc_DeclList_tok_struct
-_temp1419; _temp1419.tag= Cyc_DeclList_tok; _temp1419.f1=(( struct Cyc_List_List*(*)(
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); break; case 2: _LL1403:
+yyval=( void*)({ struct Cyc_DeclList_tok_struct* _temp1405=( struct Cyc_DeclList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclList_tok_struct)); _temp1405[ 0]=({ struct Cyc_DeclList_tok_struct
+_temp1406; _temp1406.tag= Cyc_DeclList_tok; _temp1406.f1=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_imp_append)( Cyc_yyget_DeclList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_yyget_DeclList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp1419;});
-_temp1418;}); break; case 3: _LL1417: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
-_temp1421=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
-_temp1421[ 0]=({ struct Cyc_DeclList_tok_struct _temp1422; _temp1422.tag= Cyc_DeclList_tok;
-_temp1422.f1=({ struct Cyc_List_List* _temp1423=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1423->hd=( void*)({ struct Cyc_Absyn_Decl*
-_temp1424=( struct Cyc_Absyn_Decl*) GC_malloc( sizeof( struct Cyc_Absyn_Decl));
-_temp1424->r=( void*)(( void*)({ struct Cyc_Absyn_Using_d_struct* _temp1425=(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp1406;});
+_temp1405;}); break; case 3: _LL1404: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
+_temp1408=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
+_temp1408[ 0]=({ struct Cyc_DeclList_tok_struct _temp1409; _temp1409.tag= Cyc_DeclList_tok;
+_temp1409.f1=({ struct Cyc_List_List* _temp1410=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1410->hd=( void*)({ struct Cyc_Absyn_Decl*
+_temp1411=( struct Cyc_Absyn_Decl*) GC_malloc( sizeof( struct Cyc_Absyn_Decl));
+_temp1411->r=( void*)(( void*)({ struct Cyc_Absyn_Using_d_struct* _temp1412=(
 struct Cyc_Absyn_Using_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Using_d_struct));
-_temp1425[ 0]=({ struct Cyc_Absyn_Using_d_struct _temp1426; _temp1426.tag= Cyc_Absyn_Using_d;
-_temp1426.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp1426.f2= Cyc_yyget_DeclList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1426;}); _temp1425;}));
-_temp1424->loc= Cyc_Position_segment_of_abs(( yyls[
+_temp1412[ 0]=({ struct Cyc_Absyn_Using_d_struct _temp1413; _temp1413.tag= Cyc_Absyn_Using_d;
+_temp1413.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 2)]); _temp1413.f2= Cyc_yyget_DeclList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1413;}); _temp1412;}));
+_temp1411->loc= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1424;});
-_temp1423->tl= 0; _temp1423;}); _temp1422;}); _temp1421;}); Cyc_Lex_leave_using();
-break; case 4: _LL1420: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
-_temp1428=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
-_temp1428[ 0]=({ struct Cyc_DeclList_tok_struct _temp1429; _temp1429.tag= Cyc_DeclList_tok;
-_temp1429.f1=({ struct Cyc_List_List* _temp1430=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1430->hd=( void*)({ struct Cyc_Absyn_Decl*
-_temp1431=( struct Cyc_Absyn_Decl*) GC_malloc( sizeof( struct Cyc_Absyn_Decl));
-_temp1431->r=( void*)(( void*)({ struct Cyc_Absyn_Using_d_struct* _temp1432=(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1411;});
+_temp1410->tl= 0; _temp1410;}); _temp1409;}); _temp1408;}); Cyc_Lex_leave_using();
+break; case 4: _LL1407: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
+_temp1415=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
+_temp1415[ 0]=({ struct Cyc_DeclList_tok_struct _temp1416; _temp1416.tag= Cyc_DeclList_tok;
+_temp1416.f1=({ struct Cyc_List_List* _temp1417=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1417->hd=( void*)({ struct Cyc_Absyn_Decl*
+_temp1418=( struct Cyc_Absyn_Decl*) GC_malloc( sizeof( struct Cyc_Absyn_Decl));
+_temp1418->r=( void*)(( void*)({ struct Cyc_Absyn_Using_d_struct* _temp1419=(
 struct Cyc_Absyn_Using_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Using_d_struct));
-_temp1432[ 0]=({ struct Cyc_Absyn_Using_d_struct _temp1433; _temp1433.tag= Cyc_Absyn_Using_d;
-_temp1433.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 4)]); _temp1433.f2= Cyc_yyget_DeclList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1433;});
-_temp1432;})); _temp1431->loc= Cyc_Position_segment_of_abs(( yyls[
+_temp1419[ 0]=({ struct Cyc_Absyn_Using_d_struct _temp1420; _temp1420.tag= Cyc_Absyn_Using_d;
+_temp1420.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 4)]); _temp1420.f2= Cyc_yyget_DeclList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1420;});
+_temp1419;})); _temp1418->loc= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line);
-_temp1431;}); _temp1430->tl= Cyc_yyget_DeclList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1430;}); _temp1429;});
-_temp1428;}); break; case 5: _LL1427: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
-_temp1435=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
-_temp1435[ 0]=({ struct Cyc_DeclList_tok_struct _temp1436; _temp1436.tag= Cyc_DeclList_tok;
-_temp1436.f1=({ struct Cyc_List_List* _temp1437=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1437->hd=( void*)({ struct Cyc_Absyn_Decl*
-_temp1438=( struct Cyc_Absyn_Decl*) GC_malloc( sizeof( struct Cyc_Absyn_Decl));
-_temp1438->r=( void*)(( void*)({ struct Cyc_Absyn_Namespace_d_struct* _temp1439=(
+_temp1418;}); _temp1417->tl= Cyc_yyget_DeclList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1417;}); _temp1416;});
+_temp1415;}); break; case 5: _LL1414: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
+_temp1422=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
+_temp1422[ 0]=({ struct Cyc_DeclList_tok_struct _temp1423; _temp1423.tag= Cyc_DeclList_tok;
+_temp1423.f1=({ struct Cyc_List_List* _temp1424=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1424->hd=( void*)({ struct Cyc_Absyn_Decl*
+_temp1425=( struct Cyc_Absyn_Decl*) GC_malloc( sizeof( struct Cyc_Absyn_Decl));
+_temp1425->r=( void*)(( void*)({ struct Cyc_Absyn_Namespace_d_struct* _temp1426=(
 struct Cyc_Absyn_Namespace_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Namespace_d_struct));
-_temp1439[ 0]=({ struct Cyc_Absyn_Namespace_d_struct _temp1440; _temp1440.tag=
-Cyc_Absyn_Namespace_d; _temp1440.f1=({ struct _tagged_arr* _temp1441=( struct
-_tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp1441[ 0]= Cyc_yyget_String_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1441;});
-_temp1440.f2= Cyc_yyget_DeclList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset)]); _temp1440;}); _temp1439;})); _temp1438->loc= Cyc_Position_segment_of_abs((
+_temp1426[ 0]=({ struct Cyc_Absyn_Namespace_d_struct _temp1427; _temp1427.tag=
+Cyc_Absyn_Namespace_d; _temp1427.f1=({ struct _tagged_arr* _temp1428=( struct
+_tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp1428[ 0]= Cyc_yyget_String_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1428;});
+_temp1427.f2= Cyc_yyget_DeclList_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset)]); _temp1427;}); _temp1426;})); _temp1425->loc= Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line);
-_temp1438;}); _temp1437->tl= 0; _temp1437;}); _temp1436;}); _temp1435;}); Cyc_Lex_leave_namespace();
-break; case 6: _LL1434: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
-_temp1443=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
-_temp1443[ 0]=({ struct Cyc_DeclList_tok_struct _temp1444; _temp1444.tag= Cyc_DeclList_tok;
-_temp1444.f1=({ struct Cyc_List_List* _temp1445=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1445->hd=( void*)({ struct Cyc_Absyn_Decl*
-_temp1446=( struct Cyc_Absyn_Decl*) GC_malloc( sizeof( struct Cyc_Absyn_Decl));
-_temp1446->r=( void*)(( void*)({ struct Cyc_Absyn_Namespace_d_struct* _temp1447=(
+_temp1425;}); _temp1424->tl= 0; _temp1424;}); _temp1423;}); _temp1422;}); Cyc_Lex_leave_namespace();
+break; case 6: _LL1421: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
+_temp1430=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
+_temp1430[ 0]=({ struct Cyc_DeclList_tok_struct _temp1431; _temp1431.tag= Cyc_DeclList_tok;
+_temp1431.f1=({ struct Cyc_List_List* _temp1432=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1432->hd=( void*)({ struct Cyc_Absyn_Decl*
+_temp1433=( struct Cyc_Absyn_Decl*) GC_malloc( sizeof( struct Cyc_Absyn_Decl));
+_temp1433->r=( void*)(( void*)({ struct Cyc_Absyn_Namespace_d_struct* _temp1434=(
 struct Cyc_Absyn_Namespace_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Namespace_d_struct));
-_temp1447[ 0]=({ struct Cyc_Absyn_Namespace_d_struct _temp1448; _temp1448.tag=
-Cyc_Absyn_Namespace_d; _temp1448.f1=({ struct _tagged_arr* _temp1449=( struct
-_tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp1449[ 0]= Cyc_yyget_String_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp1449;});
-_temp1448.f2= Cyc_yyget_DeclList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 2)]); _temp1448;}); _temp1447;})); _temp1446->loc= Cyc_Position_segment_of_abs((
+_temp1434[ 0]=({ struct Cyc_Absyn_Namespace_d_struct _temp1435; _temp1435.tag=
+Cyc_Absyn_Namespace_d; _temp1435.f1=({ struct _tagged_arr* _temp1436=( struct
+_tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp1436[ 0]= Cyc_yyget_String_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp1436;});
+_temp1435.f2= Cyc_yyget_DeclList_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 2)]); _temp1435;}); _temp1434;})); _temp1433->loc= Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line);
-_temp1446;}); _temp1445->tl= Cyc_yyget_DeclList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1445;}); _temp1444;});
-_temp1443;}); break; case 7: _LL1442: if( Cyc_String_strcmp( Cyc_yyget_String_tok(
+_temp1433;}); _temp1432->tl= Cyc_yyget_DeclList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1432;}); _temp1431;});
+_temp1430;}); break; case 7: _LL1429: if( Cyc_String_strcmp( Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]), _tag_arr("C",
 sizeof( unsigned char), 2u)) != 0){ Cyc_Parse_err( _tag_arr("only extern \"C\" { ... } is allowed",
 sizeof( unsigned char), 35u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).last_line));} yyval=(
-void*)({ struct Cyc_DeclList_tok_struct* _temp1451=( struct Cyc_DeclList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclList_tok_struct)); _temp1451[ 0]=({ struct Cyc_DeclList_tok_struct
-_temp1452; _temp1452.tag= Cyc_DeclList_tok; _temp1452.f1=({ struct Cyc_List_List*
-_temp1453=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp1453->hd=( void*)({ struct Cyc_Absyn_Decl* _temp1454=( struct Cyc_Absyn_Decl*)
-GC_malloc( sizeof( struct Cyc_Absyn_Decl)); _temp1454->r=( void*)(( void*)({
-struct Cyc_Absyn_ExternC_d_struct* _temp1455=( struct Cyc_Absyn_ExternC_d_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_ExternC_d_struct)); _temp1455[ 0]=({ struct
-Cyc_Absyn_ExternC_d_struct _temp1456; _temp1456.tag= Cyc_Absyn_ExternC_d;
-_temp1456.f1= Cyc_yyget_DeclList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 2)]); _temp1456;}); _temp1455;})); _temp1454->loc= Cyc_Position_segment_of_abs((
+void*)({ struct Cyc_DeclList_tok_struct* _temp1438=( struct Cyc_DeclList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclList_tok_struct)); _temp1438[ 0]=({ struct Cyc_DeclList_tok_struct
+_temp1439; _temp1439.tag= Cyc_DeclList_tok; _temp1439.f1=({ struct Cyc_List_List*
+_temp1440=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp1440->hd=( void*)({ struct Cyc_Absyn_Decl* _temp1441=( struct Cyc_Absyn_Decl*)
+GC_malloc( sizeof( struct Cyc_Absyn_Decl)); _temp1441->r=( void*)(( void*)({
+struct Cyc_Absyn_ExternC_d_struct* _temp1442=( struct Cyc_Absyn_ExternC_d_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_ExternC_d_struct)); _temp1442[ 0]=({ struct
+Cyc_Absyn_ExternC_d_struct _temp1443; _temp1443.tag= Cyc_Absyn_ExternC_d;
+_temp1443.f1= Cyc_yyget_DeclList_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 2)]); _temp1443;}); _temp1442;})); _temp1441->loc= Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line);
-_temp1454;}); _temp1453->tl= Cyc_yyget_DeclList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1453;}); _temp1452;});
-_temp1451;}); break; case 8: _LL1450: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
-_temp1458=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
-_temp1458[ 0]=({ struct Cyc_DeclList_tok_struct _temp1459; _temp1459.tag= Cyc_DeclList_tok;
-_temp1459.f1= 0; _temp1459;}); _temp1458;}); break; case 9: _LL1457: yyval=(
-void*)({ struct Cyc_DeclList_tok_struct* _temp1461=( struct Cyc_DeclList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclList_tok_struct)); _temp1461[ 0]=({ struct Cyc_DeclList_tok_struct
-_temp1462; _temp1462.tag= Cyc_DeclList_tok; _temp1462.f1=({ struct Cyc_List_List*
-_temp1463=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp1463->hd=( void*) Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Fn_d_struct*
-_temp1464=( struct Cyc_Absyn_Fn_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Fn_d_struct));
-_temp1464[ 0]=({ struct Cyc_Absyn_Fn_d_struct _temp1465; _temp1465.tag= Cyc_Absyn_Fn_d;
-_temp1465.f1= Cyc_yyget_FnDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp1465;}); _temp1464;}), Cyc_Position_segment_of_abs(( yyls[
+_temp1441;}); _temp1440->tl= Cyc_yyget_DeclList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1440;}); _temp1439;});
+_temp1438;}); break; case 8: _LL1437: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
+_temp1445=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
+_temp1445[ 0]=({ struct Cyc_DeclList_tok_struct _temp1446; _temp1446.tag= Cyc_DeclList_tok;
+_temp1446.f1= 0; _temp1446;}); _temp1445;}); break; case 9: _LL1444: yyval=(
+void*)({ struct Cyc_DeclList_tok_struct* _temp1448=( struct Cyc_DeclList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclList_tok_struct)); _temp1448[ 0]=({ struct Cyc_DeclList_tok_struct
+_temp1449; _temp1449.tag= Cyc_DeclList_tok; _temp1449.f1=({ struct Cyc_List_List*
+_temp1450=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp1450->hd=( void*) Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Fn_d_struct*
+_temp1451=( struct Cyc_Absyn_Fn_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Fn_d_struct));
+_temp1451[ 0]=({ struct Cyc_Absyn_Fn_d_struct _temp1452; _temp1452.tag= Cyc_Absyn_Fn_d;
+_temp1452.f1= Cyc_yyget_FnDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]); _temp1452;}); _temp1451;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1463->tl=
-0; _temp1463;}); _temp1462;}); _temp1461;}); break; case 10: _LL1460: yyval=
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1450->tl=
+0; _temp1450;}); _temp1449;}); _temp1448;}); break; case 10: _LL1447: yyval=
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 11:
-_LL1466: yyval=( void*)({ struct Cyc_FnDecl_tok_struct* _temp1468=( struct Cyc_FnDecl_tok_struct*)
-GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct)); _temp1468[ 0]=({ struct Cyc_FnDecl_tok_struct
-_temp1469; _temp1469.tag= Cyc_FnDecl_tok; _temp1469.f1= Cyc_Parse_make_function(
+_LL1453: yyval=( void*)({ struct Cyc_FnDecl_tok_struct* _temp1455=( struct Cyc_FnDecl_tok_struct*)
+GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct)); _temp1455[ 0]=({ struct Cyc_FnDecl_tok_struct
+_temp1456; _temp1456.tag= Cyc_FnDecl_tok; _temp1456.f1= Cyc_Parse_make_function(
 0, Cyc_yyget_Declarator_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 1)]), 0, Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1469;});
-_temp1468;}); break; case 12: _LL1467: yyval=( void*)({ struct Cyc_FnDecl_tok_struct*
-_temp1471=( struct Cyc_FnDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct));
-_temp1471[ 0]=({ struct Cyc_FnDecl_tok_struct _temp1472; _temp1472.tag= Cyc_FnDecl_tok;
-_temp1472.f1= Cyc_Parse_make_function(({ struct Cyc_Core_Opt* _temp1473=( struct
-Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1473->v=( void*)
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1456;});
+_temp1455;}); break; case 12: _LL1454: yyval=( void*)({ struct Cyc_FnDecl_tok_struct*
+_temp1458=( struct Cyc_FnDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct));
+_temp1458[ 0]=({ struct Cyc_FnDecl_tok_struct _temp1459; _temp1459.tag= Cyc_FnDecl_tok;
+_temp1459.f1= Cyc_Parse_make_function(({ struct Cyc_Core_Opt* _temp1460=( struct
+Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1460->v=( void*)
 Cyc_yyget_DeclSpec_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp1473;}), Cyc_yyget_Declarator_tok( yyvs[
+yyvsp_offset - 2)]); _temp1460;}), Cyc_yyget_Declarator_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), 0, Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp1472;}); _temp1471;}); break; case 13: _LL1470: yyval=( void*)({ struct Cyc_FnDecl_tok_struct*
-_temp1475=( struct Cyc_FnDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct));
-_temp1475[ 0]=({ struct Cyc_FnDecl_tok_struct _temp1476; _temp1476.tag= Cyc_FnDecl_tok;
-_temp1476.f1= Cyc_Parse_make_function( 0, Cyc_yyget_Declarator_tok( yyvs[
+_temp1459;}); _temp1458;}); break; case 13: _LL1457: yyval=( void*)({ struct Cyc_FnDecl_tok_struct*
+_temp1462=( struct Cyc_FnDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct));
+_temp1462[ 0]=({ struct Cyc_FnDecl_tok_struct _temp1463; _temp1463.tag= Cyc_FnDecl_tok;
+_temp1463.f1= Cyc_Parse_make_function( 0, Cyc_yyget_Declarator_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_DeclList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp1476;}); _temp1475;}); break; case 14: _LL1474: yyval=( void*)({ struct Cyc_FnDecl_tok_struct*
-_temp1478=( struct Cyc_FnDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct));
-_temp1478[ 0]=({ struct Cyc_FnDecl_tok_struct _temp1479; _temp1479.tag= Cyc_FnDecl_tok;
-_temp1479.f1= Cyc_Parse_make_function(({ struct Cyc_Core_Opt* _temp1480=( struct
-Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1480->v=( void*)
+_temp1463;}); _temp1462;}); break; case 14: _LL1461: yyval=( void*)({ struct Cyc_FnDecl_tok_struct*
+_temp1465=( struct Cyc_FnDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct));
+_temp1465[ 0]=({ struct Cyc_FnDecl_tok_struct _temp1466; _temp1466.tag= Cyc_FnDecl_tok;
+_temp1466.f1= Cyc_Parse_make_function(({ struct Cyc_Core_Opt* _temp1467=( struct
+Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1467->v=( void*)
 Cyc_yyget_DeclSpec_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 3)]); _temp1480;}), Cyc_yyget_Declarator_tok( yyvs[
+yyvsp_offset - 3)]); _temp1467;}), Cyc_yyget_Declarator_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_DeclList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp1479;}); _temp1478;}); break; case 15: _LL1477: yyval=( void*)({ struct Cyc_FnDecl_tok_struct*
-_temp1482=( struct Cyc_FnDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct));
-_temp1482[ 0]=({ struct Cyc_FnDecl_tok_struct _temp1483; _temp1483.tag= Cyc_FnDecl_tok;
-_temp1483.f1= Cyc_Parse_make_function(({ struct Cyc_Core_Opt* _temp1484=( struct
-Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1484->v=( void*)
+_temp1466;}); _temp1465;}); break; case 15: _LL1464: yyval=( void*)({ struct Cyc_FnDecl_tok_struct*
+_temp1469=( struct Cyc_FnDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct));
+_temp1469[ 0]=({ struct Cyc_FnDecl_tok_struct _temp1470; _temp1470.tag= Cyc_FnDecl_tok;
+_temp1470.f1= Cyc_Parse_make_function(({ struct Cyc_Core_Opt* _temp1471=( struct
+Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1471->v=( void*)
 Cyc_yyget_DeclSpec_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp1484;}), Cyc_yyget_Declarator_tok( yyvs[
+yyvsp_offset - 2)]); _temp1471;}), Cyc_yyget_Declarator_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), 0, Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp1483;}); _temp1482;}); break; case 16: _LL1481: yyval=( void*)({ struct Cyc_FnDecl_tok_struct*
-_temp1486=( struct Cyc_FnDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct));
-_temp1486[ 0]=({ struct Cyc_FnDecl_tok_struct _temp1487; _temp1487.tag= Cyc_FnDecl_tok;
-_temp1487.f1= Cyc_Parse_make_function(({ struct Cyc_Core_Opt* _temp1488=( struct
-Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1488->v=( void*)
+_temp1470;}); _temp1469;}); break; case 16: _LL1468: yyval=( void*)({ struct Cyc_FnDecl_tok_struct*
+_temp1473=( struct Cyc_FnDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_FnDecl_tok_struct));
+_temp1473[ 0]=({ struct Cyc_FnDecl_tok_struct _temp1474; _temp1474.tag= Cyc_FnDecl_tok;
+_temp1474.f1= Cyc_Parse_make_function(({ struct Cyc_Core_Opt* _temp1475=( struct
+Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1475->v=( void*)
 Cyc_yyget_DeclSpec_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 3)]); _temp1488;}), Cyc_yyget_Declarator_tok( yyvs[
+yyvsp_offset - 3)]); _temp1475;}), Cyc_yyget_Declarator_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_DeclList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp1487;}); _temp1486;}); break; case 17: _LL1485: Cyc_Lex_enter_using( Cyc_yyget_QualId_tok(
+_temp1474;}); _temp1473;}); break; case 17: _LL1472: Cyc_Lex_enter_using( Cyc_yyget_QualId_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])); yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 18: _LL1489:
-Cyc_Lex_leave_using(); break; case 19: _LL1490: Cyc_Lex_enter_namespace(({
-struct _tagged_arr* _temp1492=( struct _tagged_arr*) GC_malloc( sizeof( struct
-_tagged_arr)); _temp1492[ 0]= Cyc_yyget_String_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1492;})); yyval=
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 18: _LL1476:
+Cyc_Lex_leave_using(); break; case 19: _LL1477: Cyc_Lex_enter_namespace(({
+struct _tagged_arr* _temp1479=( struct _tagged_arr*) GC_malloc( sizeof( struct
+_tagged_arr)); _temp1479[ 0]= Cyc_yyget_String_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1479;})); yyval=
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 20:
-_LL1491: Cyc_Lex_leave_namespace(); break; case 21: _LL1493: yyval=( void*)({
-struct Cyc_DeclList_tok_struct* _temp1495=( struct Cyc_DeclList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclList_tok_struct)); _temp1495[ 0]=({ struct Cyc_DeclList_tok_struct
-_temp1496; _temp1496.tag= Cyc_DeclList_tok; _temp1496.f1= Cyc_Parse_make_declarations(
+_LL1478: Cyc_Lex_leave_namespace(); break; case 21: _LL1480: yyval=( void*)({
+struct Cyc_DeclList_tok_struct* _temp1482=( struct Cyc_DeclList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclList_tok_struct)); _temp1482[ 0]=({ struct Cyc_DeclList_tok_struct
+_temp1483; _temp1483.tag= Cyc_DeclList_tok; _temp1483.f1= Cyc_Parse_make_declarations(
 Cyc_yyget_DeclSpec_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 1)]), 0, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));
-_temp1496;}); _temp1495;}); break; case 22: _LL1494: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
-_temp1498=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
-_temp1498[ 0]=({ struct Cyc_DeclList_tok_struct _temp1499; _temp1499.tag= Cyc_DeclList_tok;
-_temp1499.f1= Cyc_Parse_make_declarations( Cyc_yyget_DeclSpec_tok( yyvs[
+_temp1483;}); _temp1482;}); break; case 22: _LL1481: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
+_temp1485=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
+_temp1485[ 0]=({ struct Cyc_DeclList_tok_struct _temp1486; _temp1486.tag= Cyc_DeclList_tok;
+_temp1486.f1= Cyc_Parse_make_declarations( Cyc_yyget_DeclSpec_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_InitDeclList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp1499;}); _temp1498;}); break; case 23: _LL1497: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
-_temp1501=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
-_temp1501[ 0]=({ struct Cyc_DeclList_tok_struct _temp1502; _temp1502.tag= Cyc_DeclList_tok;
-_temp1502.f1=({ struct Cyc_List_List* _temp1503=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1503->hd=( void*) Cyc_Absyn_let_decl(
+_temp1486;}); _temp1485;}); break; case 23: _LL1484: yyval=( void*)({ struct Cyc_DeclList_tok_struct*
+_temp1488=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
+_temp1488[ 0]=({ struct Cyc_DeclList_tok_struct _temp1489; _temp1489.tag= Cyc_DeclList_tok;
+_temp1489.f1=({ struct Cyc_List_List* _temp1490=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1490->hd=( void*) Cyc_Absyn_let_decl(
 Cyc_yyget_Pattern_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 3)]), 0, Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset - 1)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1503->tl=
-0; _temp1503;}); _temp1502;}); _temp1501;}); break; case 24: _LL1500: { struct
-Cyc_List_List* _temp1505= 0;{ struct Cyc_List_List* _temp1506= Cyc_yyget_IdList_tok(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1490->tl=
+0; _temp1490;}); _temp1489;}); _temp1488;}); break; case 24: _LL1487: { struct
+Cyc_List_List* _temp1492= 0;{ struct Cyc_List_List* _temp1493= Cyc_yyget_IdList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); for( 0;
-_temp1506 != 0; _temp1506=(( struct Cyc_List_List*) _check_null( _temp1506))->tl){
-struct _tagged_arr* _temp1507=( struct _tagged_arr*)(( struct Cyc_List_List*)
-_check_null( _temp1506))->hd; struct _tuple1* _temp1508=({ struct _tuple1*
-_temp1511=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp1511->f1=
-Cyc_Absyn_rel_ns_null; _temp1511->f2= _temp1507; _temp1511;}); struct Cyc_Absyn_Vardecl*
-_temp1509= Cyc_Absyn_new_vardecl( _temp1508, Cyc_Absyn_wildtyp( 0), 0);
-_temp1505=({ struct Cyc_List_List* _temp1510=( struct Cyc_List_List*) GC_malloc(
-sizeof( struct Cyc_List_List)); _temp1510->hd=( void*) _temp1509; _temp1510->tl=
-_temp1505; _temp1510;});}} _temp1505=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
-x)) Cyc_List_imp_rev)( _temp1505); yyval=( void*)({ struct Cyc_DeclList_tok_struct*
-_temp1512=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
-_temp1512[ 0]=({ struct Cyc_DeclList_tok_struct _temp1513; _temp1513.tag= Cyc_DeclList_tok;
-_temp1513.f1=({ struct Cyc_List_List* _temp1514=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1514->hd=( void*) Cyc_Absyn_letv_decl(
-_temp1505, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_temp1493 != 0; _temp1493=(( struct Cyc_List_List*) _check_null( _temp1493))->tl){
+struct _tagged_arr* _temp1494=( struct _tagged_arr*)(( struct Cyc_List_List*)
+_check_null( _temp1493))->hd; struct _tuple1* _temp1495=({ struct _tuple1*
+_temp1498=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp1498->f1=
+Cyc_Absyn_rel_ns_null; _temp1498->f2= _temp1494; _temp1498;}); struct Cyc_Absyn_Vardecl*
+_temp1496= Cyc_Absyn_new_vardecl( _temp1495, Cyc_Absyn_wildtyp( 0), 0);
+_temp1492=({ struct Cyc_List_List* _temp1497=( struct Cyc_List_List*) GC_malloc(
+sizeof( struct Cyc_List_List)); _temp1497->hd=( void*) _temp1496; _temp1497->tl=
+_temp1492; _temp1497;});}} _temp1492=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
+x)) Cyc_List_imp_rev)( _temp1492); yyval=( void*)({ struct Cyc_DeclList_tok_struct*
+_temp1499=( struct Cyc_DeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclList_tok_struct));
+_temp1499[ 0]=({ struct Cyc_DeclList_tok_struct _temp1500; _temp1500.tag= Cyc_DeclList_tok;
+_temp1500.f1=({ struct Cyc_List_List* _temp1501=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1501->hd=( void*) Cyc_Absyn_letv_decl(
+_temp1492, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 2)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp1514->tl= 0; _temp1514;}); _temp1513;});
-_temp1512;}); break;} case 25: _LL1504: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 26: _LL1515:
-yyval=( void*)({ struct Cyc_DeclList_tok_struct* _temp1517=( struct Cyc_DeclList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclList_tok_struct)); _temp1517[ 0]=({ struct Cyc_DeclList_tok_struct
-_temp1518; _temp1518.tag= Cyc_DeclList_tok; _temp1518.f1=(( struct Cyc_List_List*(*)(
+10000u, yylsp_offset)]).last_line)); _temp1501->tl= 0; _temp1501;}); _temp1500;});
+_temp1499;}); break;} case 25: _LL1491: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 26: _LL1502:
+yyval=( void*)({ struct Cyc_DeclList_tok_struct* _temp1504=( struct Cyc_DeclList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclList_tok_struct)); _temp1504[ 0]=({ struct Cyc_DeclList_tok_struct
+_temp1505; _temp1505.tag= Cyc_DeclList_tok; _temp1505.f1=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_imp_append)( Cyc_yyget_DeclList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_yyget_DeclList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp1518;});
-_temp1517;}); break; case 27: _LL1516: yyval=( void*)({ struct Cyc_DeclSpec_tok_struct*
-_temp1520=( struct Cyc_DeclSpec_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct));
-_temp1520[ 0]=({ struct Cyc_DeclSpec_tok_struct _temp1521; _temp1521.tag= Cyc_DeclSpec_tok;
-_temp1521.f1=({ struct Cyc_Parse_Declaration_spec* _temp1522=( struct Cyc_Parse_Declaration_spec*)
-GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec)); _temp1522->sc=({ struct
-Cyc_Core_Opt* _temp1523=( struct Cyc_Core_Opt*) GC_malloc_atomic( sizeof( struct
-Cyc_Core_Opt)); _temp1523->v=( void*) Cyc_yyget_StorageClass_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1523;});
-_temp1522->tq= Cyc_Absyn_empty_tqual(); _temp1522->type_specs= 0; _temp1522->is_inline=
-0; _temp1522->attributes= Cyc_yyget_AttributeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1522;}); _temp1521;});
-_temp1520;}); break; case 28: _LL1519: if(( Cyc_yyget_DeclSpec_tok( yyvs[
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp1505;});
+_temp1504;}); break; case 27: _LL1503: yyval=( void*)({ struct Cyc_DeclSpec_tok_struct*
+_temp1507=( struct Cyc_DeclSpec_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct));
+_temp1507[ 0]=({ struct Cyc_DeclSpec_tok_struct _temp1508; _temp1508.tag= Cyc_DeclSpec_tok;
+_temp1508.f1=({ struct Cyc_Parse_Declaration_spec* _temp1509=( struct Cyc_Parse_Declaration_spec*)
+GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec)); _temp1509->sc=({ struct
+Cyc_Core_Opt* _temp1510=( struct Cyc_Core_Opt*) GC_malloc_atomic( sizeof( struct
+Cyc_Core_Opt)); _temp1510->v=( void*) Cyc_yyget_StorageClass_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1510;});
+_temp1509->tq= Cyc_Absyn_empty_tqual(); _temp1509->type_specs= 0; _temp1509->is_inline=
+0; _temp1509->attributes= Cyc_yyget_AttributeList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1509;}); _temp1508;});
+_temp1507;}); break; case 28: _LL1506: if(( Cyc_yyget_DeclSpec_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->sc != 0){ Cyc_Parse_warn(
 _tag_arr("Only one storage class is allowed in a declaration", sizeof(
 unsigned char), 51u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));} yyval=(
-void*)({ struct Cyc_DeclSpec_tok_struct* _temp1525=( struct Cyc_DeclSpec_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct)); _temp1525[ 0]=({ struct Cyc_DeclSpec_tok_struct
-_temp1526; _temp1526.tag= Cyc_DeclSpec_tok; _temp1526.f1=({ struct Cyc_Parse_Declaration_spec*
-_temp1527=( struct Cyc_Parse_Declaration_spec*) GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec));
-_temp1527->sc=({ struct Cyc_Core_Opt* _temp1528=( struct Cyc_Core_Opt*)
-GC_malloc_atomic( sizeof( struct Cyc_Core_Opt)); _temp1528->v=( void*) Cyc_yyget_StorageClass_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1528;});
-_temp1527->tq=( Cyc_yyget_DeclSpec_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset)]))->tq; _temp1527->type_specs=( Cyc_yyget_DeclSpec_tok(
+void*)({ struct Cyc_DeclSpec_tok_struct* _temp1512=( struct Cyc_DeclSpec_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct)); _temp1512[ 0]=({ struct Cyc_DeclSpec_tok_struct
+_temp1513; _temp1513.tag= Cyc_DeclSpec_tok; _temp1513.f1=({ struct Cyc_Parse_Declaration_spec*
+_temp1514=( struct Cyc_Parse_Declaration_spec*) GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec));
+_temp1514->sc=({ struct Cyc_Core_Opt* _temp1515=( struct Cyc_Core_Opt*)
+GC_malloc_atomic( sizeof( struct Cyc_Core_Opt)); _temp1515->v=( void*) Cyc_yyget_StorageClass_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1515;});
+_temp1514->tq=( Cyc_yyget_DeclSpec_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset)]))->tq; _temp1514->type_specs=( Cyc_yyget_DeclSpec_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->type_specs;
-_temp1527->is_inline=( Cyc_yyget_DeclSpec_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]))->is_inline; _temp1527->attributes=
+_temp1514->is_inline=( Cyc_yyget_DeclSpec_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]))->is_inline; _temp1514->attributes=
 Cyc_List_imp_append( Cyc_yyget_AttributeList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]),( Cyc_yyget_DeclSpec_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->attributes);
-_temp1527;}); _temp1526;}); _temp1525;}); break; case 29: _LL1524: yyval=( void*)({
-struct Cyc_DeclSpec_tok_struct* _temp1530=( struct Cyc_DeclSpec_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct)); _temp1530[ 0]=({ struct Cyc_DeclSpec_tok_struct
-_temp1531; _temp1531.tag= Cyc_DeclSpec_tok; _temp1531.f1=({ struct Cyc_Parse_Declaration_spec*
-_temp1532=( struct Cyc_Parse_Declaration_spec*) GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec));
-_temp1532->sc= 0; _temp1532->tq= Cyc_Absyn_empty_tqual(); _temp1532->type_specs=({
-struct Cyc_List_List* _temp1533=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp1533->hd=( void*) Cyc_yyget_TypeSpecifier_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1533->tl= 0;
-_temp1533;}); _temp1532->is_inline= 0; _temp1532->attributes= Cyc_yyget_AttributeList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1532;});
-_temp1531;}); _temp1530;}); break; case 30: _LL1529: yyval=( void*)({ struct Cyc_DeclSpec_tok_struct*
-_temp1535=( struct Cyc_DeclSpec_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct));
-_temp1535[ 0]=({ struct Cyc_DeclSpec_tok_struct _temp1536; _temp1536.tag= Cyc_DeclSpec_tok;
-_temp1536.f1=({ struct Cyc_Parse_Declaration_spec* _temp1537=( struct Cyc_Parse_Declaration_spec*)
-GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec)); _temp1537->sc=( Cyc_yyget_DeclSpec_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->sc; _temp1537->tq=(
+_temp1514;}); _temp1513;}); _temp1512;}); break; case 29: _LL1511: yyval=( void*)({
+struct Cyc_DeclSpec_tok_struct* _temp1517=( struct Cyc_DeclSpec_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct)); _temp1517[ 0]=({ struct Cyc_DeclSpec_tok_struct
+_temp1518; _temp1518.tag= Cyc_DeclSpec_tok; _temp1518.f1=({ struct Cyc_Parse_Declaration_spec*
+_temp1519=( struct Cyc_Parse_Declaration_spec*) GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec));
+_temp1519->sc= 0; _temp1519->tq= Cyc_Absyn_empty_tqual(); _temp1519->type_specs=({
+struct Cyc_List_List* _temp1520=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp1520->hd=( void*) Cyc_yyget_TypeSpecifier_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1520->tl= 0;
+_temp1520;}); _temp1519->is_inline= 0; _temp1519->attributes= Cyc_yyget_AttributeList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1519;});
+_temp1518;}); _temp1517;}); break; case 30: _LL1516: yyval=( void*)({ struct Cyc_DeclSpec_tok_struct*
+_temp1522=( struct Cyc_DeclSpec_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct));
+_temp1522[ 0]=({ struct Cyc_DeclSpec_tok_struct _temp1523; _temp1523.tag= Cyc_DeclSpec_tok;
+_temp1523.f1=({ struct Cyc_Parse_Declaration_spec* _temp1524=( struct Cyc_Parse_Declaration_spec*)
+GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec)); _temp1524->sc=( Cyc_yyget_DeclSpec_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->sc; _temp1524->tq=(
 Cyc_yyget_DeclSpec_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]))->tq; _temp1537->type_specs=({ struct Cyc_List_List* _temp1538=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1538->hd=(
+yyvsp_offset)]))->tq; _temp1524->type_specs=({ struct Cyc_List_List* _temp1525=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1525->hd=(
 void*) Cyc_yyget_TypeSpecifier_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp1538->tl=( Cyc_yyget_DeclSpec_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]))->type_specs; _temp1538;});
-_temp1537->is_inline=( Cyc_yyget_DeclSpec_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]))->is_inline; _temp1537->attributes=
+yyvsp_offset - 2)]); _temp1525->tl=( Cyc_yyget_DeclSpec_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]))->type_specs; _temp1525;});
+_temp1524->is_inline=( Cyc_yyget_DeclSpec_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]))->is_inline; _temp1524->attributes=
 Cyc_List_imp_append( Cyc_yyget_AttributeList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]),( Cyc_yyget_DeclSpec_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->attributes);
-_temp1537;}); _temp1536;}); _temp1535;}); break; case 31: _LL1534: yyval=( void*)({
-struct Cyc_DeclSpec_tok_struct* _temp1540=( struct Cyc_DeclSpec_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct)); _temp1540[ 0]=({ struct Cyc_DeclSpec_tok_struct
-_temp1541; _temp1541.tag= Cyc_DeclSpec_tok; _temp1541.f1=({ struct Cyc_Parse_Declaration_spec*
-_temp1542=( struct Cyc_Parse_Declaration_spec*) GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec));
-_temp1542->sc= 0; _temp1542->tq= Cyc_yyget_TypeQual_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1542->type_specs=
-0; _temp1542->is_inline= 0; _temp1542->attributes= Cyc_yyget_AttributeList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1542;});
-_temp1541;}); _temp1540;}); break; case 32: _LL1539: yyval=( void*)({ struct Cyc_DeclSpec_tok_struct*
-_temp1544=( struct Cyc_DeclSpec_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct));
-_temp1544[ 0]=({ struct Cyc_DeclSpec_tok_struct _temp1545; _temp1545.tag= Cyc_DeclSpec_tok;
-_temp1545.f1=({ struct Cyc_Parse_Declaration_spec* _temp1546=( struct Cyc_Parse_Declaration_spec*)
-GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec)); _temp1546->sc=( Cyc_yyget_DeclSpec_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->sc; _temp1546->tq=
+_temp1524;}); _temp1523;}); _temp1522;}); break; case 31: _LL1521: yyval=( void*)({
+struct Cyc_DeclSpec_tok_struct* _temp1527=( struct Cyc_DeclSpec_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct)); _temp1527[ 0]=({ struct Cyc_DeclSpec_tok_struct
+_temp1528; _temp1528.tag= Cyc_DeclSpec_tok; _temp1528.f1=({ struct Cyc_Parse_Declaration_spec*
+_temp1529=( struct Cyc_Parse_Declaration_spec*) GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec));
+_temp1529->sc= 0; _temp1529->tq= Cyc_yyget_TypeQual_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1529->type_specs=
+0; _temp1529->is_inline= 0; _temp1529->attributes= Cyc_yyget_AttributeList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1529;});
+_temp1528;}); _temp1527;}); break; case 32: _LL1526: yyval=( void*)({ struct Cyc_DeclSpec_tok_struct*
+_temp1531=( struct Cyc_DeclSpec_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct));
+_temp1531[ 0]=({ struct Cyc_DeclSpec_tok_struct _temp1532; _temp1532.tag= Cyc_DeclSpec_tok;
+_temp1532.f1=({ struct Cyc_Parse_Declaration_spec* _temp1533=( struct Cyc_Parse_Declaration_spec*)
+GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec)); _temp1533->sc=( Cyc_yyget_DeclSpec_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->sc; _temp1533->tq=
 Cyc_Absyn_combine_tqual( Cyc_yyget_TypeQual_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]),( Cyc_yyget_DeclSpec_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->tq); _temp1546->type_specs=(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->tq); _temp1533->type_specs=(
 Cyc_yyget_DeclSpec_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]))->type_specs; _temp1546->is_inline=( Cyc_yyget_DeclSpec_tok(
+yyvsp_offset)]))->type_specs; _temp1533->is_inline=( Cyc_yyget_DeclSpec_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->is_inline;
-_temp1546->attributes= Cyc_List_imp_append( Cyc_yyget_AttributeList_tok( yyvs[
+_temp1533->attributes= Cyc_List_imp_append( Cyc_yyget_AttributeList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]),( Cyc_yyget_DeclSpec_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->attributes);
-_temp1546;}); _temp1545;}); _temp1544;}); break; case 33: _LL1543: yyval=( void*)({
-struct Cyc_DeclSpec_tok_struct* _temp1548=( struct Cyc_DeclSpec_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct)); _temp1548[ 0]=({ struct Cyc_DeclSpec_tok_struct
-_temp1549; _temp1549.tag= Cyc_DeclSpec_tok; _temp1549.f1=({ struct Cyc_Parse_Declaration_spec*
-_temp1550=( struct Cyc_Parse_Declaration_spec*) GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec));
-_temp1550->sc= 0; _temp1550->tq= Cyc_Absyn_empty_tqual(); _temp1550->type_specs=
-0; _temp1550->is_inline= 1; _temp1550->attributes= Cyc_yyget_AttributeList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1550;});
-_temp1549;}); _temp1548;}); break; case 34: _LL1547: yyval=( void*)({ struct Cyc_DeclSpec_tok_struct*
-_temp1552=( struct Cyc_DeclSpec_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct));
-_temp1552[ 0]=({ struct Cyc_DeclSpec_tok_struct _temp1553; _temp1553.tag= Cyc_DeclSpec_tok;
-_temp1553.f1=({ struct Cyc_Parse_Declaration_spec* _temp1554=( struct Cyc_Parse_Declaration_spec*)
-GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec)); _temp1554->sc=( Cyc_yyget_DeclSpec_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->sc; _temp1554->tq=(
+_temp1533;}); _temp1532;}); _temp1531;}); break; case 33: _LL1530: yyval=( void*)({
+struct Cyc_DeclSpec_tok_struct* _temp1535=( struct Cyc_DeclSpec_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct)); _temp1535[ 0]=({ struct Cyc_DeclSpec_tok_struct
+_temp1536; _temp1536.tag= Cyc_DeclSpec_tok; _temp1536.f1=({ struct Cyc_Parse_Declaration_spec*
+_temp1537=( struct Cyc_Parse_Declaration_spec*) GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec));
+_temp1537->sc= 0; _temp1537->tq= Cyc_Absyn_empty_tqual(); _temp1537->type_specs=
+0; _temp1537->is_inline= 1; _temp1537->attributes= Cyc_yyget_AttributeList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1537;});
+_temp1536;}); _temp1535;}); break; case 34: _LL1534: yyval=( void*)({ struct Cyc_DeclSpec_tok_struct*
+_temp1539=( struct Cyc_DeclSpec_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclSpec_tok_struct));
+_temp1539[ 0]=({ struct Cyc_DeclSpec_tok_struct _temp1540; _temp1540.tag= Cyc_DeclSpec_tok;
+_temp1540.f1=({ struct Cyc_Parse_Declaration_spec* _temp1541=( struct Cyc_Parse_Declaration_spec*)
+GC_malloc( sizeof( struct Cyc_Parse_Declaration_spec)); _temp1541->sc=( Cyc_yyget_DeclSpec_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->sc; _temp1541->tq=(
 Cyc_yyget_DeclSpec_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]))->tq; _temp1554->type_specs=( Cyc_yyget_DeclSpec_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]))->type_specs; _temp1554->is_inline=
-1; _temp1554->attributes= Cyc_List_imp_append( Cyc_yyget_AttributeList_tok( yyvs[
+yyvsp_offset)]))->tq; _temp1541->type_specs=( Cyc_yyget_DeclSpec_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]))->type_specs; _temp1541->is_inline=
+1; _temp1541->attributes= Cyc_List_imp_append( Cyc_yyget_AttributeList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]),( Cyc_yyget_DeclSpec_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->attributes);
-_temp1554;}); _temp1553;}); _temp1552;}); break; case 35: _LL1551: yyval=( void*)({
-struct Cyc_StorageClass_tok_struct* _temp1556=( struct Cyc_StorageClass_tok_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_StorageClass_tok_struct)); _temp1556[ 0]=({
-struct Cyc_StorageClass_tok_struct _temp1557; _temp1557.tag= Cyc_StorageClass_tok;
-_temp1557.f1= Cyc_Parse_Auto_sc; _temp1557;}); _temp1556;}); break; case 36:
-_LL1555: yyval=( void*)({ struct Cyc_StorageClass_tok_struct* _temp1559=( struct
+_temp1541;}); _temp1540;}); _temp1539;}); break; case 35: _LL1538: yyval=( void*)({
+struct Cyc_StorageClass_tok_struct* _temp1543=( struct Cyc_StorageClass_tok_struct*)
+GC_malloc_atomic( sizeof( struct Cyc_StorageClass_tok_struct)); _temp1543[ 0]=({
+struct Cyc_StorageClass_tok_struct _temp1544; _temp1544.tag= Cyc_StorageClass_tok;
+_temp1544.f1= Cyc_Parse_Auto_sc; _temp1544;}); _temp1543;}); break; case 36:
+_LL1542: yyval=( void*)({ struct Cyc_StorageClass_tok_struct* _temp1546=( struct
 Cyc_StorageClass_tok_struct*) GC_malloc_atomic( sizeof( struct Cyc_StorageClass_tok_struct));
-_temp1559[ 0]=({ struct Cyc_StorageClass_tok_struct _temp1560; _temp1560.tag=
-Cyc_StorageClass_tok; _temp1560.f1= Cyc_Parse_Register_sc; _temp1560;});
-_temp1559;}); break; case 37: _LL1558: yyval=( void*)({ struct Cyc_StorageClass_tok_struct*
-_temp1562=( struct Cyc_StorageClass_tok_struct*) GC_malloc_atomic( sizeof(
-struct Cyc_StorageClass_tok_struct)); _temp1562[ 0]=({ struct Cyc_StorageClass_tok_struct
-_temp1563; _temp1563.tag= Cyc_StorageClass_tok; _temp1563.f1= Cyc_Parse_Static_sc;
-_temp1563;}); _temp1562;}); break; case 38: _LL1561: yyval=( void*)({ struct Cyc_StorageClass_tok_struct*
-_temp1565=( struct Cyc_StorageClass_tok_struct*) GC_malloc_atomic( sizeof(
-struct Cyc_StorageClass_tok_struct)); _temp1565[ 0]=({ struct Cyc_StorageClass_tok_struct
-_temp1566; _temp1566.tag= Cyc_StorageClass_tok; _temp1566.f1= Cyc_Parse_Extern_sc;
-_temp1566;}); _temp1565;}); break; case 39: _LL1564: if( Cyc_String_strcmp( Cyc_yyget_String_tok(
+_temp1546[ 0]=({ struct Cyc_StorageClass_tok_struct _temp1547; _temp1547.tag=
+Cyc_StorageClass_tok; _temp1547.f1= Cyc_Parse_Register_sc; _temp1547;});
+_temp1546;}); break; case 37: _LL1545: yyval=( void*)({ struct Cyc_StorageClass_tok_struct*
+_temp1549=( struct Cyc_StorageClass_tok_struct*) GC_malloc_atomic( sizeof(
+struct Cyc_StorageClass_tok_struct)); _temp1549[ 0]=({ struct Cyc_StorageClass_tok_struct
+_temp1550; _temp1550.tag= Cyc_StorageClass_tok; _temp1550.f1= Cyc_Parse_Static_sc;
+_temp1550;}); _temp1549;}); break; case 38: _LL1548: yyval=( void*)({ struct Cyc_StorageClass_tok_struct*
+_temp1552=( struct Cyc_StorageClass_tok_struct*) GC_malloc_atomic( sizeof(
+struct Cyc_StorageClass_tok_struct)); _temp1552[ 0]=({ struct Cyc_StorageClass_tok_struct
+_temp1553; _temp1553.tag= Cyc_StorageClass_tok; _temp1553.f1= Cyc_Parse_Extern_sc;
+_temp1553;}); _temp1552;}); break; case 39: _LL1551: if( Cyc_String_strcmp( Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), _tag_arr("C",
 sizeof( unsigned char), 2u)) != 0){ Cyc_Parse_err( _tag_arr("only extern or extern \"C\" is allowed",
 sizeof( unsigned char), 37u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} yyval=(
-void*)({ struct Cyc_StorageClass_tok_struct* _temp1568=( struct Cyc_StorageClass_tok_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_StorageClass_tok_struct)); _temp1568[ 0]=({
-struct Cyc_StorageClass_tok_struct _temp1569; _temp1569.tag= Cyc_StorageClass_tok;
-_temp1569.f1= Cyc_Parse_ExternC_sc; _temp1569;}); _temp1568;}); break; case 40:
-_LL1567: yyval=( void*)({ struct Cyc_StorageClass_tok_struct* _temp1571=( struct
+void*)({ struct Cyc_StorageClass_tok_struct* _temp1555=( struct Cyc_StorageClass_tok_struct*)
+GC_malloc_atomic( sizeof( struct Cyc_StorageClass_tok_struct)); _temp1555[ 0]=({
+struct Cyc_StorageClass_tok_struct _temp1556; _temp1556.tag= Cyc_StorageClass_tok;
+_temp1556.f1= Cyc_Parse_ExternC_sc; _temp1556;}); _temp1555;}); break; case 40:
+_LL1554: yyval=( void*)({ struct Cyc_StorageClass_tok_struct* _temp1558=( struct
 Cyc_StorageClass_tok_struct*) GC_malloc_atomic( sizeof( struct Cyc_StorageClass_tok_struct));
-_temp1571[ 0]=({ struct Cyc_StorageClass_tok_struct _temp1572; _temp1572.tag=
-Cyc_StorageClass_tok; _temp1572.f1= Cyc_Parse_Typedef_sc; _temp1572;});
-_temp1571;}); break; case 41: _LL1570: yyval=( void*)({ struct Cyc_StorageClass_tok_struct*
-_temp1574=( struct Cyc_StorageClass_tok_struct*) GC_malloc_atomic( sizeof(
-struct Cyc_StorageClass_tok_struct)); _temp1574[ 0]=({ struct Cyc_StorageClass_tok_struct
-_temp1575; _temp1575.tag= Cyc_StorageClass_tok; _temp1575.f1= Cyc_Parse_Abstract_sc;
-_temp1575;}); _temp1574;}); break; case 42: _LL1573: yyval=( void*)({ struct Cyc_AttributeList_tok_struct*
-_temp1577=( struct Cyc_AttributeList_tok_struct*) GC_malloc( sizeof( struct Cyc_AttributeList_tok_struct));
-_temp1577[ 0]=({ struct Cyc_AttributeList_tok_struct _temp1578; _temp1578.tag=
-Cyc_AttributeList_tok; _temp1578.f1= 0; _temp1578;}); _temp1577;}); break; case
-43: _LL1576: yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)];
-break; case 44: _LL1579: yyval=( void*)({ struct Cyc_AttributeList_tok_struct*
-_temp1581=( struct Cyc_AttributeList_tok_struct*) GC_malloc( sizeof( struct Cyc_AttributeList_tok_struct));
-_temp1581[ 0]=({ struct Cyc_AttributeList_tok_struct _temp1582; _temp1582.tag=
-Cyc_AttributeList_tok; _temp1582.f1= Cyc_yyget_AttributeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1582;});
-_temp1581;}); break; case 45: _LL1580: yyval=( void*)({ struct Cyc_AttributeList_tok_struct*
-_temp1584=( struct Cyc_AttributeList_tok_struct*) GC_malloc( sizeof( struct Cyc_AttributeList_tok_struct));
-_temp1584[ 0]=({ struct Cyc_AttributeList_tok_struct _temp1585; _temp1585.tag=
-Cyc_AttributeList_tok; _temp1585.f1=({ struct Cyc_List_List* _temp1586=( struct
-Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1586->hd=( void*)
+_temp1558[ 0]=({ struct Cyc_StorageClass_tok_struct _temp1559; _temp1559.tag=
+Cyc_StorageClass_tok; _temp1559.f1= Cyc_Parse_Typedef_sc; _temp1559;});
+_temp1558;}); break; case 41: _LL1557: yyval=( void*)({ struct Cyc_StorageClass_tok_struct*
+_temp1561=( struct Cyc_StorageClass_tok_struct*) GC_malloc_atomic( sizeof(
+struct Cyc_StorageClass_tok_struct)); _temp1561[ 0]=({ struct Cyc_StorageClass_tok_struct
+_temp1562; _temp1562.tag= Cyc_StorageClass_tok; _temp1562.f1= Cyc_Parse_Abstract_sc;
+_temp1562;}); _temp1561;}); break; case 42: _LL1560: yyval=( void*)({ struct Cyc_AttributeList_tok_struct*
+_temp1564=( struct Cyc_AttributeList_tok_struct*) GC_malloc( sizeof( struct Cyc_AttributeList_tok_struct));
+_temp1564[ 0]=({ struct Cyc_AttributeList_tok_struct _temp1565; _temp1565.tag=
+Cyc_AttributeList_tok; _temp1565.f1= 0; _temp1565;}); _temp1564;}); break; case
+43: _LL1563: yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)];
+break; case 44: _LL1566: yyval=( void*)({ struct Cyc_AttributeList_tok_struct*
+_temp1568=( struct Cyc_AttributeList_tok_struct*) GC_malloc( sizeof( struct Cyc_AttributeList_tok_struct));
+_temp1568[ 0]=({ struct Cyc_AttributeList_tok_struct _temp1569; _temp1569.tag=
+Cyc_AttributeList_tok; _temp1569.f1= Cyc_yyget_AttributeList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1569;});
+_temp1568;}); break; case 45: _LL1567: yyval=( void*)({ struct Cyc_AttributeList_tok_struct*
+_temp1571=( struct Cyc_AttributeList_tok_struct*) GC_malloc( sizeof( struct Cyc_AttributeList_tok_struct));
+_temp1571[ 0]=({ struct Cyc_AttributeList_tok_struct _temp1572; _temp1572.tag=
+Cyc_AttributeList_tok; _temp1572.f1=({ struct Cyc_List_List* _temp1573=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1573->hd=( void*)
 Cyc_yyget_Attribute_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp1586->tl= 0; _temp1586;}); _temp1585;}); _temp1584;});
-break; case 46: _LL1583: yyval=( void*)({ struct Cyc_AttributeList_tok_struct*
-_temp1588=( struct Cyc_AttributeList_tok_struct*) GC_malloc( sizeof( struct Cyc_AttributeList_tok_struct));
-_temp1588[ 0]=({ struct Cyc_AttributeList_tok_struct _temp1589; _temp1589.tag=
-Cyc_AttributeList_tok; _temp1589.f1=({ struct Cyc_List_List* _temp1590=( struct
-Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1590->hd=( void*)
+yyvsp_offset)]); _temp1573->tl= 0; _temp1573;}); _temp1572;}); _temp1571;});
+break; case 46: _LL1570: yyval=( void*)({ struct Cyc_AttributeList_tok_struct*
+_temp1575=( struct Cyc_AttributeList_tok_struct*) GC_malloc( sizeof( struct Cyc_AttributeList_tok_struct));
+_temp1575[ 0]=({ struct Cyc_AttributeList_tok_struct _temp1576; _temp1576.tag=
+Cyc_AttributeList_tok; _temp1576.f1=({ struct Cyc_List_List* _temp1577=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1577->hd=( void*)
 Cyc_yyget_Attribute_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp1590->tl= Cyc_yyget_AttributeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1590;}); _temp1589;});
-_temp1588;}); break; case 47: _LL1587: { struct _tagged_arr _temp1592= Cyc_yyget_String_tok(
+yyvsp_offset - 2)]); _temp1577->tl= Cyc_yyget_AttributeList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1577;}); _temp1576;});
+_temp1575;}); break; case 47: _LL1574: { struct _tagged_arr _temp1579= Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); if((((
-_get_arr_size( _temp1592, sizeof( unsigned char)) > 4?*(( const unsigned char*)
-_check_unknown_subscript( _temp1592, sizeof( unsigned char), 0)) =='_': 0)?*((
-const unsigned char*) _check_unknown_subscript( _temp1592, sizeof( unsigned char),
-1)) =='_': 0)?*(( const unsigned char*) _check_unknown_subscript( _temp1592,
-sizeof( unsigned char),( int)( _get_arr_size( _temp1592, sizeof( unsigned char))
-- 2))) =='_': 0)?*(( const unsigned char*) _check_unknown_subscript( _temp1592,
-sizeof( unsigned char),( int)( _get_arr_size( _temp1592, sizeof( unsigned char))
-- 3))) =='_': 0){ _temp1592=( struct _tagged_arr) Cyc_String_substring(
-_temp1592, 2,( int)( _get_arr_size( _temp1592, sizeof( unsigned char)) - 5));}{
-int i= 0; for( 0; i < 16u; ++ i){ if( Cyc_String_strcmp( _temp1592,( Cyc_Parse_att_map[
+_get_arr_size( _temp1579, sizeof( unsigned char)) > 4?*(( const unsigned char*)
+_check_unknown_subscript( _temp1579, sizeof( unsigned char), 0)) =='_': 0)?*((
+const unsigned char*) _check_unknown_subscript( _temp1579, sizeof( unsigned char),
+1)) =='_': 0)?*(( const unsigned char*) _check_unknown_subscript( _temp1579,
+sizeof( unsigned char),( int)( _get_arr_size( _temp1579, sizeof( unsigned char))
+- 2))) =='_': 0)?*(( const unsigned char*) _check_unknown_subscript( _temp1579,
+sizeof( unsigned char),( int)( _get_arr_size( _temp1579, sizeof( unsigned char))
+- 3))) =='_': 0){ _temp1579=( struct _tagged_arr) Cyc_String_substring(
+_temp1579, 2,( int)( _get_arr_size( _temp1579, sizeof( unsigned char)) - 5));}{
+int i= 0; for( 0; i < 16u; ++ i){ if( Cyc_String_strcmp( _temp1579,( Cyc_Parse_att_map[
 _check_known_subscript_notnull( 16u, i)]).f1) == 0){ yyval=( void*)({ struct Cyc_Attribute_tok_struct*
-_temp1593=( struct Cyc_Attribute_tok_struct*) GC_malloc( sizeof( struct Cyc_Attribute_tok_struct));
-_temp1593[ 0]=({ struct Cyc_Attribute_tok_struct _temp1594; _temp1594.tag= Cyc_Attribute_tok;
-_temp1594.f1=( void*)( Cyc_Parse_att_map[ _check_known_subscript_notnull( 16u, i)]).f2;
-_temp1594;}); _temp1593;}); break;}} if( i == 16u){ Cyc_Parse_err( _tag_arr("unrecognized attribute",
+_temp1580=( struct Cyc_Attribute_tok_struct*) GC_malloc( sizeof( struct Cyc_Attribute_tok_struct));
+_temp1580[ 0]=({ struct Cyc_Attribute_tok_struct _temp1581; _temp1581.tag= Cyc_Attribute_tok;
+_temp1581.f1=( void*)( Cyc_Parse_att_map[ _check_known_subscript_notnull( 16u, i)]).f2;
+_temp1581;}); _temp1580;}); break;}} if( i == 16u){ Cyc_Parse_err( _tag_arr("unrecognized attribute",
 sizeof( unsigned char), 23u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); yyval=(
-void*)({ struct Cyc_Attribute_tok_struct* _temp1595=( struct Cyc_Attribute_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Attribute_tok_struct)); _temp1595[ 0]=({ struct
-Cyc_Attribute_tok_struct _temp1596; _temp1596.tag= Cyc_Attribute_tok; _temp1596.f1=(
-void*)(( void*) Cyc_Absyn_Cdecl_att); _temp1596;}); _temp1595;});} break;}} case
-48: _LL1591: yyval=( void*)({ struct Cyc_Attribute_tok_struct* _temp1598=(
+void*)({ struct Cyc_Attribute_tok_struct* _temp1582=( struct Cyc_Attribute_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Attribute_tok_struct)); _temp1582[ 0]=({ struct
+Cyc_Attribute_tok_struct _temp1583; _temp1583.tag= Cyc_Attribute_tok; _temp1583.f1=(
+void*)(( void*) Cyc_Absyn_Cdecl_att); _temp1583;}); _temp1582;});} break;}} case
+48: _LL1578: yyval=( void*)({ struct Cyc_Attribute_tok_struct* _temp1585=(
 struct Cyc_Attribute_tok_struct*) GC_malloc( sizeof( struct Cyc_Attribute_tok_struct));
-_temp1598[ 0]=({ struct Cyc_Attribute_tok_struct _temp1599; _temp1599.tag= Cyc_Attribute_tok;
-_temp1599.f1=( void*)(( void*) Cyc_Absyn_Const_att); _temp1599;}); _temp1598;});
-break; case 49: _LL1597: { struct _tagged_arr _temp1601= Cyc_yyget_String_tok(
+_temp1585[ 0]=({ struct Cyc_Attribute_tok_struct _temp1586; _temp1586.tag= Cyc_Attribute_tok;
+_temp1586.f1=( void*)(( void*) Cyc_Absyn_Const_att); _temp1586;}); _temp1585;});
+break; case 49: _LL1584: { struct _tagged_arr _temp1588= Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); struct
-_tuple16 _temp1604; int _temp1605; struct _tuple16* _temp1602= Cyc_yyget_Int_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1604=*
-_temp1602; _LL1606: _temp1605= _temp1604.f2; goto _LL1603; _LL1603: { void* a;
-if( Cyc_String_zstrcmp( _temp1601, _tag_arr("regparm", sizeof( unsigned char), 8u))
-== 0? 1: Cyc_String_zstrcmp( _temp1601, _tag_arr("__regparm__", sizeof(
-unsigned char), 12u)) == 0){ if( _temp1605 <= 0? 1: _temp1605 > 3){ Cyc_Parse_err(
+_tuple16 _temp1591; int _temp1592; struct _tuple16* _temp1589= Cyc_yyget_Int_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1591=*
+_temp1589; _LL1593: _temp1592= _temp1591.f2; goto _LL1590; _LL1590: { void* a;
+if( Cyc_String_zstrcmp( _temp1588, _tag_arr("regparm", sizeof( unsigned char), 8u))
+== 0? 1: Cyc_String_zstrcmp( _temp1588, _tag_arr("__regparm__", sizeof(
+unsigned char), 12u)) == 0){ if( _temp1592 <= 0? 1: _temp1592 > 3){ Cyc_Parse_err(
 _tag_arr("regparm requires value between 1 and 3", sizeof( unsigned char), 39u),
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 1)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 1)]).last_line));} a=( void*)({ struct Cyc_Absyn_Regparm_att_struct*
-_temp1607=( struct Cyc_Absyn_Regparm_att_struct*) GC_malloc_atomic( sizeof(
-struct Cyc_Absyn_Regparm_att_struct)); _temp1607[ 0]=({ struct Cyc_Absyn_Regparm_att_struct
-_temp1608; _temp1608.tag= Cyc_Absyn_Regparm_att; _temp1608.f1= _temp1605;
-_temp1608;}); _temp1607;});} else{ if( Cyc_String_zstrcmp( _temp1601, _tag_arr("aligned",
-sizeof( unsigned char), 8u)) == 0? 1: Cyc_String_zstrcmp( _temp1601, _tag_arr("__aligned__",
-sizeof( unsigned char), 12u)) == 0){ if( _temp1605 < 0){ Cyc_Parse_err( _tag_arr("aligned requires positive power of two",
+_temp1594=( struct Cyc_Absyn_Regparm_att_struct*) GC_malloc_atomic( sizeof(
+struct Cyc_Absyn_Regparm_att_struct)); _temp1594[ 0]=({ struct Cyc_Absyn_Regparm_att_struct
+_temp1595; _temp1595.tag= Cyc_Absyn_Regparm_att; _temp1595.f1= _temp1592;
+_temp1595;}); _temp1594;});} else{ if( Cyc_String_zstrcmp( _temp1588, _tag_arr("aligned",
+sizeof( unsigned char), 8u)) == 0? 1: Cyc_String_zstrcmp( _temp1588, _tag_arr("__aligned__",
+sizeof( unsigned char), 12u)) == 0){ if( _temp1592 < 0){ Cyc_Parse_err( _tag_arr("aligned requires positive power of two",
 sizeof( unsigned char), 39u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));}{
-unsigned int j=( unsigned int) _temp1605; for( 0;( j & 1) == 0; j= j >> 1){;} j=
+unsigned int j=( unsigned int) _temp1592; for( 0;( j & 1) == 0; j= j >> 1){;} j=
 j >> 1; if( j != 0){ Cyc_Parse_err( _tag_arr("aligned requires positive power of two",
 sizeof( unsigned char), 39u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));} a=(
-void*)({ struct Cyc_Absyn_Aligned_att_struct* _temp1609=( struct Cyc_Absyn_Aligned_att_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_Absyn_Aligned_att_struct)); _temp1609[ 0]=({
-struct Cyc_Absyn_Aligned_att_struct _temp1610; _temp1610.tag= Cyc_Absyn_Aligned_att;
-_temp1610.f1= _temp1605; _temp1610;}); _temp1609;});}} else{ Cyc_Parse_err(
+void*)({ struct Cyc_Absyn_Aligned_att_struct* _temp1596=( struct Cyc_Absyn_Aligned_att_struct*)
+GC_malloc_atomic( sizeof( struct Cyc_Absyn_Aligned_att_struct)); _temp1596[ 0]=({
+struct Cyc_Absyn_Aligned_att_struct _temp1597; _temp1597.tag= Cyc_Absyn_Aligned_att;
+_temp1597.f1= _temp1592; _temp1597;}); _temp1596;});}} else{ Cyc_Parse_err(
 _tag_arr("unrecognized attribute", sizeof( unsigned char), 23u), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).last_line)); a=(
 void*) Cyc_Absyn_Cdecl_att;}} yyval=( void*)({ struct Cyc_Attribute_tok_struct*
-_temp1611=( struct Cyc_Attribute_tok_struct*) GC_malloc( sizeof( struct Cyc_Attribute_tok_struct));
-_temp1611[ 0]=({ struct Cyc_Attribute_tok_struct _temp1612; _temp1612.tag= Cyc_Attribute_tok;
-_temp1612.f1=( void*) a; _temp1612;}); _temp1611;}); break;}} case 50: _LL1600: {
-struct _tagged_arr _temp1614= Cyc_yyget_String_tok( yyvs[
+_temp1598=( struct Cyc_Attribute_tok_struct*) GC_malloc( sizeof( struct Cyc_Attribute_tok_struct));
+_temp1598[ 0]=({ struct Cyc_Attribute_tok_struct _temp1599; _temp1599.tag= Cyc_Attribute_tok;
+_temp1599.f1=( void*) a; _temp1599;}); _temp1598;}); break;}} case 50: _LL1587: {
+struct _tagged_arr _temp1601= Cyc_yyget_String_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); struct _tagged_arr
-_temp1615= Cyc_yyget_String_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); void* a; if( Cyc_String_zstrcmp( _temp1614, _tag_arr("section",
-sizeof( unsigned char), 8u)) == 0? 1: Cyc_String_zstrcmp( _temp1614, _tag_arr("__section__",
+_temp1602= Cyc_yyget_String_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 1)]); void* a; if( Cyc_String_zstrcmp( _temp1601, _tag_arr("section",
+sizeof( unsigned char), 8u)) == 0? 1: Cyc_String_zstrcmp( _temp1601, _tag_arr("__section__",
 sizeof( unsigned char), 12u)) == 0){ a=( void*)({ struct Cyc_Absyn_Section_att_struct*
-_temp1616=( struct Cyc_Absyn_Section_att_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Section_att_struct));
-_temp1616[ 0]=({ struct Cyc_Absyn_Section_att_struct _temp1617; _temp1617.tag=
-Cyc_Absyn_Section_att; _temp1617.f1= _temp1615; _temp1617;}); _temp1616;});}
+_temp1603=( struct Cyc_Absyn_Section_att_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Section_att_struct));
+_temp1603[ 0]=({ struct Cyc_Absyn_Section_att_struct _temp1604; _temp1604.tag=
+Cyc_Absyn_Section_att; _temp1604.f1= _temp1602; _temp1604;}); _temp1603;});}
 else{ Cyc_Parse_err( _tag_arr("unrecognized attribute", sizeof( unsigned char),
 23u), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 3)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 3)]).last_line)); a=( void*) Cyc_Absyn_Cdecl_att;} yyval=( void*)({
-struct Cyc_Attribute_tok_struct* _temp1618=( struct Cyc_Attribute_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Attribute_tok_struct)); _temp1618[ 0]=({ struct
-Cyc_Attribute_tok_struct _temp1619; _temp1619.tag= Cyc_Attribute_tok; _temp1619.f1=(
-void*) a; _temp1619;}); _temp1618;}); break;} case 51: _LL1613: { struct
-_tagged_arr _temp1621= Cyc_yyget_String_tok( yyvs[
+struct Cyc_Attribute_tok_struct* _temp1605=( struct Cyc_Attribute_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Attribute_tok_struct)); _temp1605[ 0]=({ struct
+Cyc_Attribute_tok_struct _temp1606; _temp1606.tag= Cyc_Attribute_tok; _temp1606.f1=(
+void*) a; _temp1606;}); _temp1605;}); break;} case 51: _LL1600: { struct
+_tagged_arr _temp1608= Cyc_yyget_String_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 7)]); struct _tagged_arr
-_temp1622= Cyc_yyget_String_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 5)]); int _temp1625; struct _tuple16 _temp1623=* Cyc_yyget_Int_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _LL1626:
-_temp1625= _temp1623.f2; goto _LL1624; _LL1624: { int _temp1629; struct _tuple16
-_temp1627=* Cyc_yyget_Int_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _LL1630: _temp1629= _temp1627.f2; goto _LL1628; _LL1628: {
-void* a=( void*) Cyc_Absyn_Cdecl_att; if( Cyc_String_zstrcmp( _temp1621,
+_temp1609= Cyc_yyget_String_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 5)]); int _temp1612; struct _tuple16 _temp1610=* Cyc_yyget_Int_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _LL1613:
+_temp1612= _temp1610.f2; goto _LL1611; _LL1611: { int _temp1616; struct _tuple16
+_temp1614=* Cyc_yyget_Int_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 1)]); _LL1617: _temp1616= _temp1614.f2; goto _LL1615; _LL1615: {
+void* a=( void*) Cyc_Absyn_Cdecl_att; if( Cyc_String_zstrcmp( _temp1608,
 _tag_arr("format", sizeof( unsigned char), 7u)) == 0? 1: Cyc_String_zstrcmp(
-_temp1621, _tag_arr("__format__", sizeof( unsigned char), 11u)) == 0){ if( Cyc_String_zstrcmp(
-_temp1622, _tag_arr("printf", sizeof( unsigned char), 7u)) == 0){ a=( void*)({
-struct Cyc_Absyn_Format_att_struct* _temp1631=( struct Cyc_Absyn_Format_att_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Format_att_struct)); _temp1631[ 0]=({ struct
-Cyc_Absyn_Format_att_struct _temp1632; _temp1632.tag= Cyc_Absyn_Format_att;
-_temp1632.f1=( void*)(( void*) Cyc_Absyn_Printf_ft); _temp1632.f2= _temp1625;
-_temp1632.f3= _temp1629; _temp1632;}); _temp1631;});} else{ if( Cyc_String_zstrcmp(
-_temp1622, _tag_arr("scanf", sizeof( unsigned char), 6u)) == 0){ a=( void*)({
-struct Cyc_Absyn_Format_att_struct* _temp1633=( struct Cyc_Absyn_Format_att_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Format_att_struct)); _temp1633[ 0]=({ struct
-Cyc_Absyn_Format_att_struct _temp1634; _temp1634.tag= Cyc_Absyn_Format_att;
-_temp1634.f1=( void*)(( void*) Cyc_Absyn_Scanf_ft); _temp1634.f2= _temp1625;
-_temp1634.f3= _temp1629; _temp1634;}); _temp1633;});} else{ Cyc_Parse_err(
+_temp1608, _tag_arr("__format__", sizeof( unsigned char), 11u)) == 0){ if( Cyc_String_zstrcmp(
+_temp1609, _tag_arr("printf", sizeof( unsigned char), 7u)) == 0){ a=( void*)({
+struct Cyc_Absyn_Format_att_struct* _temp1618=( struct Cyc_Absyn_Format_att_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Format_att_struct)); _temp1618[ 0]=({ struct
+Cyc_Absyn_Format_att_struct _temp1619; _temp1619.tag= Cyc_Absyn_Format_att;
+_temp1619.f1=( void*)(( void*) Cyc_Absyn_Printf_ft); _temp1619.f2= _temp1612;
+_temp1619.f3= _temp1616; _temp1619;}); _temp1618;});} else{ if( Cyc_String_zstrcmp(
+_temp1609, _tag_arr("scanf", sizeof( unsigned char), 6u)) == 0){ a=( void*)({
+struct Cyc_Absyn_Format_att_struct* _temp1620=( struct Cyc_Absyn_Format_att_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Format_att_struct)); _temp1620[ 0]=({ struct
+Cyc_Absyn_Format_att_struct _temp1621; _temp1621.tag= Cyc_Absyn_Format_att;
+_temp1621.f1=( void*)(( void*) Cyc_Absyn_Scanf_ft); _temp1621.f2= _temp1612;
+_temp1621.f3= _temp1616; _temp1621;}); _temp1620;});} else{ Cyc_Parse_err(
 _tag_arr("unrecognized format type", sizeof( unsigned char), 25u), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).last_line));}}}
@@ -3293,821 +3284,874 @@ else{ Cyc_Parse_err( _tag_arr("unrecognized attribute", sizeof( unsigned char),
 23u), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 7)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset)]).last_line));} yyval=( void*)({ struct Cyc_Attribute_tok_struct*
-_temp1635=( struct Cyc_Attribute_tok_struct*) GC_malloc( sizeof( struct Cyc_Attribute_tok_struct));
-_temp1635[ 0]=({ struct Cyc_Attribute_tok_struct _temp1636; _temp1636.tag= Cyc_Attribute_tok;
-_temp1636.f1=( void*) a; _temp1636;}); _temp1635;}); break;}}} case 52: _LL1620:
-yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1638=( struct Cyc_TypeSpecifier_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1638[ 0]=({
-struct Cyc_TypeSpecifier_tok_struct _temp1639; _temp1639.tag= Cyc_TypeSpecifier_tok;
-_temp1639.f1=( void*) Cyc_Parse_type_spec(( void*) Cyc_Absyn_VoidType, Cyc_Position_segment_of_abs((
+_temp1622=( struct Cyc_Attribute_tok_struct*) GC_malloc( sizeof( struct Cyc_Attribute_tok_struct));
+_temp1622[ 0]=({ struct Cyc_Attribute_tok_struct _temp1623; _temp1623.tag= Cyc_Attribute_tok;
+_temp1623.f1=( void*) a; _temp1623;}); _temp1622;}); break;}}} case 52: _LL1607:
+yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1625=( struct Cyc_TypeSpecifier_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1625[ 0]=({
+struct Cyc_TypeSpecifier_tok_struct _temp1626; _temp1626.tag= Cyc_TypeSpecifier_tok;
+_temp1626.f1=( void*) Cyc_Parse_type_spec(( void*) Cyc_Absyn_VoidType, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1639;});
-_temp1638;}); break; case 53: _LL1637: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1641=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1641[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1642; _temp1642.tag=
-Cyc_TypeSpecifier_tok; _temp1642.f1=( void*) Cyc_Parse_type_spec( Cyc_Absyn_new_evar(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1626;});
+_temp1625;}); break; case 53: _LL1624: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_temp1628=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1628[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1629; _temp1629.tag=
+Cyc_TypeSpecifier_tok; _temp1629.f1=( void*) Cyc_Parse_type_spec( Cyc_Absyn_new_evar(
 0, 0), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); _temp1642;}); _temp1641;}); break; case 54: _LL1640:
-yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1644=( struct Cyc_TypeSpecifier_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1644[ 0]=({
-struct Cyc_TypeSpecifier_tok_struct _temp1645; _temp1645.tag= Cyc_TypeSpecifier_tok;
-_temp1645.f1=( void*) Cyc_Parse_type_spec( Cyc_Absyn_uchar_t, Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line)); _temp1629;}); _temp1628;}); break; case 54: _LL1627:
+yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1631=( struct Cyc_TypeSpecifier_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1631[ 0]=({
+struct Cyc_TypeSpecifier_tok_struct _temp1632; _temp1632.tag= Cyc_TypeSpecifier_tok;
+_temp1632.f1=( void*) Cyc_Parse_type_spec( Cyc_Absyn_uchar_t, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1645;});
-_temp1644;}); break; case 55: _LL1643: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1632;});
+_temp1631;}); break; case 55: _LL1630: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_temp1634=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1634[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1635; _temp1635.tag=
+Cyc_TypeSpecifier_tok; _temp1635.f1=( void*)(( void*)({ struct Cyc_Parse_Short_spec_struct*
+_temp1636=( struct Cyc_Parse_Short_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Short_spec_struct));
+_temp1636[ 0]=({ struct Cyc_Parse_Short_spec_struct _temp1637; _temp1637.tag=
+Cyc_Parse_Short_spec; _temp1637.f1= Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1637;});
+_temp1636;})); _temp1635;}); _temp1634;}); break; case 56: _LL1633: yyval=( void*)({
+struct Cyc_TypeSpecifier_tok_struct* _temp1639=( struct Cyc_TypeSpecifier_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1639[ 0]=({
+struct Cyc_TypeSpecifier_tok_struct _temp1640; _temp1640.tag= Cyc_TypeSpecifier_tok;
+_temp1640.f1=( void*) Cyc_Parse_type_spec( Cyc_Absyn_sint_t, Cyc_Position_segment_of_abs((
+yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1640;});
+_temp1639;}); break; case 57: _LL1638: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_temp1642=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1642[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1643; _temp1643.tag=
+Cyc_TypeSpecifier_tok; _temp1643.f1=( void*)(( void*)({ struct Cyc_Parse_Long_spec_struct*
+_temp1644=( struct Cyc_Parse_Long_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Long_spec_struct));
+_temp1644[ 0]=({ struct Cyc_Parse_Long_spec_struct _temp1645; _temp1645.tag= Cyc_Parse_Long_spec;
+_temp1645.f1= Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+10000u, yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
+yylsp_offset)]).last_line); _temp1645;}); _temp1644;})); _temp1643;}); _temp1642;});
+break; case 58: _LL1641: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
 _temp1647=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
 _temp1647[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1648; _temp1648.tag=
-Cyc_TypeSpecifier_tok; _temp1648.f1=( void*)(( void*)({ struct Cyc_Parse_Short_spec_struct*
-_temp1649=( struct Cyc_Parse_Short_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Short_spec_struct));
-_temp1649[ 0]=({ struct Cyc_Parse_Short_spec_struct _temp1650; _temp1650.tag=
-Cyc_Parse_Short_spec; _temp1650.f1= Cyc_Position_segment_of_abs(( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1650;});
-_temp1649;})); _temp1648;}); _temp1647;}); break; case 56: _LL1646: yyval=( void*)({
-struct Cyc_TypeSpecifier_tok_struct* _temp1652=( struct Cyc_TypeSpecifier_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1652[ 0]=({
-struct Cyc_TypeSpecifier_tok_struct _temp1653; _temp1653.tag= Cyc_TypeSpecifier_tok;
-_temp1653.f1=( void*) Cyc_Parse_type_spec( Cyc_Absyn_sint_t, Cyc_Position_segment_of_abs((
-yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1653;});
-_temp1652;}); break; case 57: _LL1651: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1655=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1655[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1656; _temp1656.tag=
-Cyc_TypeSpecifier_tok; _temp1656.f1=( void*)(( void*)({ struct Cyc_Parse_Long_spec_struct*
-_temp1657=( struct Cyc_Parse_Long_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Long_spec_struct));
-_temp1657[ 0]=({ struct Cyc_Parse_Long_spec_struct _temp1658; _temp1658.tag= Cyc_Parse_Long_spec;
-_temp1658.f1= Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line); _temp1658;}); _temp1657;})); _temp1656;}); _temp1655;});
-break; case 58: _LL1654: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1660=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1660[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1661; _temp1661.tag=
-Cyc_TypeSpecifier_tok; _temp1661.f1=( void*) Cyc_Parse_type_spec( Cyc_Absyn_float_t,
+Cyc_TypeSpecifier_tok; _temp1648.f1=( void*) Cyc_Parse_type_spec( Cyc_Absyn_float_t,
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); _temp1661;}); _temp1660;}); break; case 59: _LL1659:
-yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1663=( struct Cyc_TypeSpecifier_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1663[ 0]=({
-struct Cyc_TypeSpecifier_tok_struct _temp1664; _temp1664.tag= Cyc_TypeSpecifier_tok;
-_temp1664.f1=( void*) Cyc_Parse_type_spec( Cyc_Absyn_double_t, Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line)); _temp1648;}); _temp1647;}); break; case 59: _LL1646:
+yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1650=( struct Cyc_TypeSpecifier_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1650[ 0]=({
+struct Cyc_TypeSpecifier_tok_struct _temp1651; _temp1651.tag= Cyc_TypeSpecifier_tok;
+_temp1651.f1=( void*) Cyc_Parse_type_spec( Cyc_Absyn_double_t, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1664;});
-_temp1663;}); break; case 60: _LL1662: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1651;});
+_temp1650;}); break; case 60: _LL1649: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_temp1653=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1653[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1654; _temp1654.tag=
+Cyc_TypeSpecifier_tok; _temp1654.f1=( void*)(( void*)({ struct Cyc_Parse_Signed_spec_struct*
+_temp1655=( struct Cyc_Parse_Signed_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Signed_spec_struct));
+_temp1655[ 0]=({ struct Cyc_Parse_Signed_spec_struct _temp1656; _temp1656.tag=
+Cyc_Parse_Signed_spec; _temp1656.f1= Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1656;});
+_temp1655;})); _temp1654;}); _temp1653;}); break; case 61: _LL1652: yyval=( void*)({
+struct Cyc_TypeSpecifier_tok_struct* _temp1658=( struct Cyc_TypeSpecifier_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1658[ 0]=({
+struct Cyc_TypeSpecifier_tok_struct _temp1659; _temp1659.tag= Cyc_TypeSpecifier_tok;
+_temp1659.f1=( void*)(( void*)({ struct Cyc_Parse_Unsigned_spec_struct*
+_temp1660=( struct Cyc_Parse_Unsigned_spec_struct*) GC_malloc( sizeof( struct
+Cyc_Parse_Unsigned_spec_struct)); _temp1660[ 0]=({ struct Cyc_Parse_Unsigned_spec_struct
+_temp1661; _temp1661.tag= Cyc_Parse_Unsigned_spec; _temp1661.f1= Cyc_Position_segment_of_abs((
+yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1661;});
+_temp1660;})); _temp1659;}); _temp1658;}); break; case 62: _LL1657: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 63: _LL1662:
+yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case
+64: _LL1663: yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)];
+break; case 65: _LL1664: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
 _temp1666=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
 _temp1666[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1667; _temp1667.tag=
-Cyc_TypeSpecifier_tok; _temp1667.f1=( void*)(( void*)({ struct Cyc_Parse_Signed_spec_struct*
-_temp1668=( struct Cyc_Parse_Signed_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Signed_spec_struct));
-_temp1668[ 0]=({ struct Cyc_Parse_Signed_spec_struct _temp1669; _temp1669.tag=
-Cyc_Parse_Signed_spec; _temp1669.f1= Cyc_Position_segment_of_abs(( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1669;});
-_temp1668;})); _temp1667;}); _temp1666;}); break; case 61: _LL1665: yyval=( void*)({
-struct Cyc_TypeSpecifier_tok_struct* _temp1671=( struct Cyc_TypeSpecifier_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1671[ 0]=({
-struct Cyc_TypeSpecifier_tok_struct _temp1672; _temp1672.tag= Cyc_TypeSpecifier_tok;
-_temp1672.f1=( void*)(( void*)({ struct Cyc_Parse_Unsigned_spec_struct*
-_temp1673=( struct Cyc_Parse_Unsigned_spec_struct*) GC_malloc( sizeof( struct
-Cyc_Parse_Unsigned_spec_struct)); _temp1673[ 0]=({ struct Cyc_Parse_Unsigned_spec_struct
-_temp1674; _temp1674.tag= Cyc_Parse_Unsigned_spec; _temp1674.f1= Cyc_Position_segment_of_abs((
-yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1674;});
-_temp1673;})); _temp1672;}); _temp1671;}); break; case 62: _LL1670: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 63: _LL1675:
-yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case
-64: _LL1676: yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)];
-break; case 65: _LL1677: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1679=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1679[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1680; _temp1680.tag=
-Cyc_TypeSpecifier_tok; _temp1680.f1=( void*) Cyc_Parse_type_spec( Cyc_yyget_Type_tok(
+Cyc_TypeSpecifier_tok; _temp1667.f1=( void*) Cyc_Parse_type_spec( Cyc_yyget_Type_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1680;});
-_temp1679;}); break; case 66: _LL1678: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1682=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1682[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1683; _temp1683.tag=
-Cyc_TypeSpecifier_tok; _temp1683.f1=( void*) Cyc_Parse_type_spec(( void*)({
-struct Cyc_Absyn_TypedefType_struct* _temp1684=( struct Cyc_Absyn_TypedefType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_TypedefType_struct)); _temp1684[ 0]=({
-struct Cyc_Absyn_TypedefType_struct _temp1685; _temp1685.tag= Cyc_Absyn_TypedefType;
-_temp1685.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _temp1685.f2= Cyc_yyget_TypeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1685.f3= 0;
-_temp1685;}); _temp1684;}), Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1667;});
+_temp1666;}); break; case 66: _LL1665: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_temp1669=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1669[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1670; _temp1670.tag=
+Cyc_TypeSpecifier_tok; _temp1670.f1=( void*) Cyc_Parse_type_spec(( void*)({
+struct Cyc_Absyn_TypedefType_struct* _temp1671=( struct Cyc_Absyn_TypedefType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_TypedefType_struct)); _temp1671[ 0]=({
+struct Cyc_Absyn_TypedefType_struct _temp1672; _temp1672.tag= Cyc_Absyn_TypedefType;
+_temp1672.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 1)]); _temp1672.f2= Cyc_yyget_TypeList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1672.f3= 0;
+_temp1672;}); _temp1671;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1683;});
-_temp1682;}); break; case 67: _LL1681: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1687=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1687[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1688; _temp1688.tag=
-Cyc_TypeSpecifier_tok; _temp1688.f1=( void*) Cyc_Parse_type_spec(( void*)({
-struct Cyc_Absyn_TupleType_struct* _temp1689=( struct Cyc_Absyn_TupleType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_TupleType_struct)); _temp1689[ 0]=({ struct
-Cyc_Absyn_TupleType_struct _temp1690; _temp1690.tag= Cyc_Absyn_TupleType;
-_temp1690.f1=(( struct Cyc_List_List*(*)( struct _tuple11*(* f)( struct Cyc_Position_Segment*,
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1670;});
+_temp1669;}); break; case 67: _LL1668: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_temp1674=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1674[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1675; _temp1675.tag=
+Cyc_TypeSpecifier_tok; _temp1675.f1=( void*) Cyc_Parse_type_spec(( void*)({
+struct Cyc_Absyn_TupleType_struct* _temp1676=( struct Cyc_Absyn_TupleType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_TupleType_struct)); _temp1676[ 0]=({ struct
+Cyc_Absyn_TupleType_struct _temp1677; _temp1677.tag= Cyc_Absyn_TupleType;
+_temp1677.f1=(( struct Cyc_List_List*(*)( struct _tuple11*(* f)( struct Cyc_Position_Segment*,
 struct _tuple2*), struct Cyc_Position_Segment* env, struct Cyc_List_List* x))
 Cyc_List_map_c)( Cyc_Parse_get_tqual_typ, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line),(( struct
 Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_ParamDeclList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]))); _temp1690;});
-_temp1689;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]))); _temp1677;});
+_temp1676;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 3)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp1688;}); _temp1687;}); break; case 68:
-_LL1686: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1692=(
+10000u, yylsp_offset)]).last_line)); _temp1675;}); _temp1674;}); break; case 68:
+_LL1673: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1679=(
 struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1692[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1693; _temp1693.tag=
-Cyc_TypeSpecifier_tok; _temp1693.f1=( void*) Cyc_Parse_type_spec(( void*)({
-struct Cyc_Absyn_RgnHandleType_struct* _temp1694=( struct Cyc_Absyn_RgnHandleType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_RgnHandleType_struct)); _temp1694[ 0]=({
-struct Cyc_Absyn_RgnHandleType_struct _temp1695; _temp1695.tag= Cyc_Absyn_RgnHandleType;
-_temp1695.f1=( void*) Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 1)]); _temp1695;}); _temp1694;}), Cyc_Position_segment_of_abs((
+_temp1679[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1680; _temp1680.tag=
+Cyc_TypeSpecifier_tok; _temp1680.f1=( void*) Cyc_Parse_type_spec(( void*)({
+struct Cyc_Absyn_RgnHandleType_struct* _temp1681=( struct Cyc_Absyn_RgnHandleType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_RgnHandleType_struct)); _temp1681[ 0]=({
+struct Cyc_Absyn_RgnHandleType_struct _temp1682; _temp1682.tag= Cyc_Absyn_RgnHandleType;
+_temp1682.f1=( void*) Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 1)]); _temp1682;}); _temp1681;}), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp1693;}); _temp1692;}); break; case 69: _LL1691: yyval=( void*)({ struct Cyc_Kind_tok_struct*
-_temp1697=( struct Cyc_Kind_tok_struct*) GC_malloc( sizeof( struct Cyc_Kind_tok_struct));
-_temp1697[ 0]=({ struct Cyc_Kind_tok_struct _temp1698; _temp1698.tag= Cyc_Kind_tok;
-_temp1698.f1=( void*) Cyc_Parse_id_to_kind( Cyc_yyget_String_tok( yyvs[
+_temp1680;}); _temp1679;}); break; case 69: _LL1678: yyval=( void*)({ struct Cyc_Kind_tok_struct*
+_temp1684=( struct Cyc_Kind_tok_struct*) GC_malloc( sizeof( struct Cyc_Kind_tok_struct));
+_temp1684[ 0]=({ struct Cyc_Kind_tok_struct _temp1685; _temp1685.tag= Cyc_Kind_tok;
+_temp1685.f1=( void*) Cyc_Parse_id_to_kind( Cyc_yyget_String_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1698;});
-_temp1697;}); break; case 70: _LL1696: { struct _tagged_arr* _temp1702; void*
-_temp1704; struct _tuple1 _temp1700=* Cyc_yyget_QualId_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _LL1705: _temp1704=
-_temp1700.f1; goto _LL1703; _LL1703: _temp1702= _temp1700.f2; goto _LL1701;
-_LL1701: if( _temp1704 !=( void*) Cyc_Absyn_Loc_n){ Cyc_Parse_err( _tag_arr("bad kind in type specifier",
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1685;});
+_temp1684;}); break; case 70: _LL1683: { struct _tagged_arr* _temp1689; void*
+_temp1691; struct _tuple1 _temp1687=* Cyc_yyget_QualId_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _LL1692: _temp1691=
+_temp1687.f1; goto _LL1690; _LL1690: _temp1689= _temp1687.f2; goto _LL1688;
+_LL1688: if( _temp1691 !=( void*) Cyc_Absyn_Loc_n){ Cyc_Parse_err( _tag_arr("bad kind in type specifier",
 sizeof( unsigned char), 27u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} yyval=(
-void*)({ struct Cyc_Kind_tok_struct* _temp1706=( struct Cyc_Kind_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Kind_tok_struct)); _temp1706[ 0]=({ struct Cyc_Kind_tok_struct
-_temp1707; _temp1707.tag= Cyc_Kind_tok; _temp1707.f1=( void*) Cyc_Parse_id_to_kind(*
-_temp1702, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+void*)({ struct Cyc_Kind_tok_struct* _temp1693=( struct Cyc_Kind_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Kind_tok_struct)); _temp1693[ 0]=({ struct Cyc_Kind_tok_struct
+_temp1694; _temp1694.tag= Cyc_Kind_tok; _temp1694.f1=( void*) Cyc_Parse_id_to_kind(*
+_temp1689, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); _temp1707;}); _temp1706;}); break;} case 71:
-_LL1699: yyval=( void*)({ struct Cyc_TypeQual_tok_struct* _temp1709=( struct Cyc_TypeQual_tok_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_TypeQual_tok_struct)); _temp1709[ 0]=({
-struct Cyc_TypeQual_tok_struct _temp1710; _temp1710.tag= Cyc_TypeQual_tok;
-_temp1710.f1=({ struct Cyc_Absyn_Tqual _temp1711; _temp1711.q_const= 1;
-_temp1711.q_volatile= 0; _temp1711.q_restrict= 0; _temp1711;}); _temp1710;});
-_temp1709;}); break; case 72: _LL1708: yyval=( void*)({ struct Cyc_TypeQual_tok_struct*
-_temp1713=( struct Cyc_TypeQual_tok_struct*) GC_malloc_atomic( sizeof( struct
-Cyc_TypeQual_tok_struct)); _temp1713[ 0]=({ struct Cyc_TypeQual_tok_struct
-_temp1714; _temp1714.tag= Cyc_TypeQual_tok; _temp1714.f1=({ struct Cyc_Absyn_Tqual
-_temp1715; _temp1715.q_const= 0; _temp1715.q_volatile= 1; _temp1715.q_restrict=
-0; _temp1715;}); _temp1714;}); _temp1713;}); break; case 73: _LL1712: yyval=(
-void*)({ struct Cyc_TypeQual_tok_struct* _temp1717=( struct Cyc_TypeQual_tok_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_TypeQual_tok_struct)); _temp1717[ 0]=({
-struct Cyc_TypeQual_tok_struct _temp1718; _temp1718.tag= Cyc_TypeQual_tok;
-_temp1718.f1=({ struct Cyc_Absyn_Tqual _temp1719; _temp1719.q_const= 0;
-_temp1719.q_volatile= 0; _temp1719.q_restrict= 1; _temp1719;}); _temp1718;});
-_temp1717;}); break; case 74: _LL1716: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1721=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1721[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1722; _temp1722.tag=
-Cyc_TypeSpecifier_tok; _temp1722.f1=( void*)(( void*)({ struct Cyc_Parse_Decl_spec_struct*
-_temp1723=( struct Cyc_Parse_Decl_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Decl_spec_struct));
-_temp1723[ 0]=({ struct Cyc_Parse_Decl_spec_struct _temp1724; _temp1724.tag= Cyc_Parse_Decl_spec;
-_temp1724.f1=({ struct Cyc_Absyn_Decl* _temp1725=( struct Cyc_Absyn_Decl*)
-GC_malloc( sizeof( struct Cyc_Absyn_Decl)); _temp1725->r=( void*)(( void*)({
-struct Cyc_Absyn_Enum_d_struct* _temp1726=( struct Cyc_Absyn_Enum_d_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Enum_d_struct)); _temp1726[ 0]=({ struct Cyc_Absyn_Enum_d_struct
-_temp1727; _temp1727.tag= Cyc_Absyn_Enum_d; _temp1727.f1=({ struct Cyc_Absyn_Enumdecl*
-_temp1728=( struct Cyc_Absyn_Enumdecl*) GC_malloc( sizeof( struct Cyc_Absyn_Enumdecl));
-_temp1728->sc=( void*)(( void*) Cyc_Absyn_Public); _temp1728->name= Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp1728->fields=({
-struct Cyc_Core_Opt* _temp1729=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp1729->v=( void*) Cyc_yyget_EnumfieldList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1729;});
-_temp1728;}); _temp1727;}); _temp1726;})); _temp1725->loc= Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line)); _temp1694;}); _temp1693;}); break;} case 71:
+_LL1686: yyval=( void*)({ struct Cyc_TypeQual_tok_struct* _temp1696=( struct Cyc_TypeQual_tok_struct*)
+GC_malloc_atomic( sizeof( struct Cyc_TypeQual_tok_struct)); _temp1696[ 0]=({
+struct Cyc_TypeQual_tok_struct _temp1697; _temp1697.tag= Cyc_TypeQual_tok;
+_temp1697.f1=({ struct Cyc_Absyn_Tqual _temp1698; _temp1698.q_const= 1;
+_temp1698.q_volatile= 0; _temp1698.q_restrict= 0; _temp1698;}); _temp1697;});
+_temp1696;}); break; case 72: _LL1695: yyval=( void*)({ struct Cyc_TypeQual_tok_struct*
+_temp1700=( struct Cyc_TypeQual_tok_struct*) GC_malloc_atomic( sizeof( struct
+Cyc_TypeQual_tok_struct)); _temp1700[ 0]=({ struct Cyc_TypeQual_tok_struct
+_temp1701; _temp1701.tag= Cyc_TypeQual_tok; _temp1701.f1=({ struct Cyc_Absyn_Tqual
+_temp1702; _temp1702.q_const= 0; _temp1702.q_volatile= 1; _temp1702.q_restrict=
+0; _temp1702;}); _temp1701;}); _temp1700;}); break; case 73: _LL1699: yyval=(
+void*)({ struct Cyc_TypeQual_tok_struct* _temp1704=( struct Cyc_TypeQual_tok_struct*)
+GC_malloc_atomic( sizeof( struct Cyc_TypeQual_tok_struct)); _temp1704[ 0]=({
+struct Cyc_TypeQual_tok_struct _temp1705; _temp1705.tag= Cyc_TypeQual_tok;
+_temp1705.f1=({ struct Cyc_Absyn_Tqual _temp1706; _temp1706.q_const= 0;
+_temp1706.q_volatile= 0; _temp1706.q_restrict= 1; _temp1706;}); _temp1705;});
+_temp1704;}); break; case 74: _LL1703: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_temp1708=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1708[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1709; _temp1709.tag=
+Cyc_TypeSpecifier_tok; _temp1709.f1=( void*)(( void*)({ struct Cyc_Parse_Decl_spec_struct*
+_temp1710=( struct Cyc_Parse_Decl_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Decl_spec_struct));
+_temp1710[ 0]=({ struct Cyc_Parse_Decl_spec_struct _temp1711; _temp1711.tag= Cyc_Parse_Decl_spec;
+_temp1711.f1=({ struct Cyc_Absyn_Decl* _temp1712=( struct Cyc_Absyn_Decl*)
+GC_malloc( sizeof( struct Cyc_Absyn_Decl)); _temp1712->r=( void*)(( void*)({
+struct Cyc_Absyn_Enum_d_struct* _temp1713=( struct Cyc_Absyn_Enum_d_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Enum_d_struct)); _temp1713[ 0]=({ struct Cyc_Absyn_Enum_d_struct
+_temp1714; _temp1714.tag= Cyc_Absyn_Enum_d; _temp1714.f1=({ struct Cyc_Absyn_Enumdecl*
+_temp1715=( struct Cyc_Absyn_Enumdecl*) GC_malloc( sizeof( struct Cyc_Absyn_Enumdecl));
+_temp1715->sc=( void*)(( void*) Cyc_Absyn_Public); _temp1715->name= Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp1715->fields=({
+struct Cyc_Core_Opt* _temp1716=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp1716->v=( void*) Cyc_yyget_EnumfieldList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1716;});
+_temp1715;}); _temp1714;}); _temp1713;})); _temp1712->loc= Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line);
-_temp1725;}); _temp1724;}); _temp1723;})); _temp1722;}); _temp1721;}); break;
-case 75: _LL1720: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1731=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1731[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1732; _temp1732.tag=
-Cyc_TypeSpecifier_tok; _temp1732.f1=( void*) Cyc_Parse_type_spec(( void*)({
-struct Cyc_Absyn_EnumType_struct* _temp1733=( struct Cyc_Absyn_EnumType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_EnumType_struct)); _temp1733[ 0]=({ struct
-Cyc_Absyn_EnumType_struct _temp1734; _temp1734.tag= Cyc_Absyn_EnumType;
-_temp1734.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp1734.f2= 0; _temp1734;}); _temp1733;}), Cyc_Position_segment_of_abs((
+_temp1712;}); _temp1711;}); _temp1710;})); _temp1709;}); _temp1708;}); break;
+case 75: _LL1707: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_temp1718=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1718[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1719; _temp1719.tag=
+Cyc_TypeSpecifier_tok; _temp1719.f1=( void*) Cyc_Parse_type_spec(( void*)({
+struct Cyc_Absyn_EnumType_struct* _temp1720=( struct Cyc_Absyn_EnumType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_EnumType_struct)); _temp1720[ 0]=({ struct
+Cyc_Absyn_EnumType_struct _temp1721; _temp1721.tag= Cyc_Absyn_EnumType;
+_temp1721.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]); _temp1721.f2= 0; _temp1721;}); _temp1720;}), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp1732;}); _temp1731;}); break; case 76: _LL1730: yyval=( void*)({ struct Cyc_Enumfield_tok_struct*
-_temp1736=( struct Cyc_Enumfield_tok_struct*) GC_malloc( sizeof( struct Cyc_Enumfield_tok_struct));
-_temp1736[ 0]=({ struct Cyc_Enumfield_tok_struct _temp1737; _temp1737.tag= Cyc_Enumfield_tok;
-_temp1737.f1=({ struct Cyc_Absyn_Enumfield* _temp1738=( struct Cyc_Absyn_Enumfield*)
-GC_malloc( sizeof( struct Cyc_Absyn_Enumfield)); _temp1738->name= Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1738->tag= 0;
-_temp1738->loc= Cyc_Position_segment_of_abs(( yyls[
+_temp1719;}); _temp1718;}); break; case 76: _LL1717: yyval=( void*)({ struct Cyc_Enumfield_tok_struct*
+_temp1723=( struct Cyc_Enumfield_tok_struct*) GC_malloc( sizeof( struct Cyc_Enumfield_tok_struct));
+_temp1723[ 0]=({ struct Cyc_Enumfield_tok_struct _temp1724; _temp1724.tag= Cyc_Enumfield_tok;
+_temp1724.f1=({ struct Cyc_Absyn_Enumfield* _temp1725=( struct Cyc_Absyn_Enumfield*)
+GC_malloc( sizeof( struct Cyc_Absyn_Enumfield)); _temp1725->name= Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1725->tag= 0;
+_temp1725->loc= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1738;});
-_temp1737;}); _temp1736;}); break; case 77: _LL1735: yyval=( void*)({ struct Cyc_Enumfield_tok_struct*
-_temp1740=( struct Cyc_Enumfield_tok_struct*) GC_malloc( sizeof( struct Cyc_Enumfield_tok_struct));
-_temp1740[ 0]=({ struct Cyc_Enumfield_tok_struct _temp1741; _temp1741.tag= Cyc_Enumfield_tok;
-_temp1741.f1=({ struct Cyc_Absyn_Enumfield* _temp1742=( struct Cyc_Absyn_Enumfield*)
-GC_malloc( sizeof( struct Cyc_Absyn_Enumfield)); _temp1742->name= Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1742->tag=(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1725;});
+_temp1724;}); _temp1723;}); break; case 77: _LL1722: yyval=( void*)({ struct Cyc_Enumfield_tok_struct*
+_temp1727=( struct Cyc_Enumfield_tok_struct*) GC_malloc( sizeof( struct Cyc_Enumfield_tok_struct));
+_temp1727[ 0]=({ struct Cyc_Enumfield_tok_struct _temp1728; _temp1728.tag= Cyc_Enumfield_tok;
+_temp1728.f1=({ struct Cyc_Absyn_Enumfield* _temp1729=( struct Cyc_Absyn_Enumfield*)
+GC_malloc( sizeof( struct Cyc_Absyn_Enumfield)); _temp1729->name= Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1729->tag=(
 struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset)]); _temp1742->loc= Cyc_Position_segment_of_abs(( yyls[
+10000u, yyvsp_offset)]); _temp1729->loc= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1742;});
-_temp1741;}); _temp1740;}); break; case 78: _LL1739: yyval=( void*)({ struct Cyc_EnumfieldList_tok_struct*
-_temp1744=( struct Cyc_EnumfieldList_tok_struct*) GC_malloc( sizeof( struct Cyc_EnumfieldList_tok_struct));
-_temp1744[ 0]=({ struct Cyc_EnumfieldList_tok_struct _temp1745; _temp1745.tag=
-Cyc_EnumfieldList_tok; _temp1745.f1=({ struct Cyc_List_List* _temp1746=( struct
-Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1746->hd=( void*)
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1729;});
+_temp1728;}); _temp1727;}); break; case 78: _LL1726: yyval=( void*)({ struct Cyc_EnumfieldList_tok_struct*
+_temp1731=( struct Cyc_EnumfieldList_tok_struct*) GC_malloc( sizeof( struct Cyc_EnumfieldList_tok_struct));
+_temp1731[ 0]=({ struct Cyc_EnumfieldList_tok_struct _temp1732; _temp1732.tag=
+Cyc_EnumfieldList_tok; _temp1732.f1=({ struct Cyc_List_List* _temp1733=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1733->hd=( void*)
 Cyc_yyget_Enumfield_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp1746->tl= 0; _temp1746;}); _temp1745;}); _temp1744;});
-break; case 79: _LL1743: yyval=( void*)({ struct Cyc_EnumfieldList_tok_struct*
-_temp1748=( struct Cyc_EnumfieldList_tok_struct*) GC_malloc( sizeof( struct Cyc_EnumfieldList_tok_struct));
-_temp1748[ 0]=({ struct Cyc_EnumfieldList_tok_struct _temp1749; _temp1749.tag=
-Cyc_EnumfieldList_tok; _temp1749.f1=({ struct Cyc_List_List* _temp1750=( struct
-Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1750->hd=( void*)
+yyvsp_offset)]); _temp1733->tl= 0; _temp1733;}); _temp1732;}); _temp1731;});
+break; case 79: _LL1730: yyval=( void*)({ struct Cyc_EnumfieldList_tok_struct*
+_temp1735=( struct Cyc_EnumfieldList_tok_struct*) GC_malloc( sizeof( struct Cyc_EnumfieldList_tok_struct));
+_temp1735[ 0]=({ struct Cyc_EnumfieldList_tok_struct _temp1736; _temp1736.tag=
+Cyc_EnumfieldList_tok; _temp1736.f1=({ struct Cyc_List_List* _temp1737=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1737->hd=( void*)
 Cyc_yyget_Enumfield_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp1750->tl= Cyc_yyget_EnumfieldList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1750;}); _temp1749;});
-_temp1748;}); break; case 80: _LL1747: { void* t;{ enum  Cyc_Parse_Struct_or_union
-_temp1752= Cyc_yyget_StructOrUnion_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 3)]); _LL1754: if( _temp1752 == Cyc_Parse_Struct_su){
-goto _LL1755;} else{ goto _LL1756;} _LL1756: if( _temp1752 == Cyc_Parse_Union_su){
-goto _LL1757;} else{ goto _LL1753;} _LL1755: t=( void*)({ struct Cyc_Absyn_AnonStructType_struct*
-_temp1758=( struct Cyc_Absyn_AnonStructType_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_AnonStructType_struct)); _temp1758[ 0]=({ struct Cyc_Absyn_AnonStructType_struct
-_temp1759; _temp1759.tag= Cyc_Absyn_AnonStructType; _temp1759.f1= Cyc_yyget_StructFieldDeclList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1759;});
-_temp1758;}); goto _LL1753; _LL1757: t=( void*)({ struct Cyc_Absyn_AnonUnionType_struct*
-_temp1760=( struct Cyc_Absyn_AnonUnionType_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_AnonUnionType_struct)); _temp1760[ 0]=({ struct Cyc_Absyn_AnonUnionType_struct
-_temp1761; _temp1761.tag= Cyc_Absyn_AnonUnionType; _temp1761.f1= Cyc_yyget_StructFieldDeclList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1761;});
-_temp1760;}); goto _LL1753; _LL1753:;} yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1762=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1762[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1763; _temp1763.tag=
-Cyc_TypeSpecifier_tok; _temp1763.f1=( void*)(( void*)({ struct Cyc_Parse_Type_spec_struct*
-_temp1764=( struct Cyc_Parse_Type_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Type_spec_struct));
-_temp1764[ 0]=({ struct Cyc_Parse_Type_spec_struct _temp1765; _temp1765.tag= Cyc_Parse_Type_spec;
-_temp1765.f1=( void*) t; _temp1765.f2= Cyc_Position_segment_of_abs(( yyls[
+yyvsp_offset - 2)]); _temp1737->tl= Cyc_yyget_EnumfieldList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1737;}); _temp1736;});
+_temp1735;}); break; case 80: _LL1734: { void* t; switch( Cyc_yyget_StructOrUnion_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)])){ case Cyc_Parse_Struct_su:
+_LL1739: t=( void*)({ struct Cyc_Absyn_AnonStructType_struct* _temp1741=( struct
+Cyc_Absyn_AnonStructType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_AnonStructType_struct));
+_temp1741[ 0]=({ struct Cyc_Absyn_AnonStructType_struct _temp1742; _temp1742.tag=
+Cyc_Absyn_AnonStructType; _temp1742.f1= Cyc_yyget_StructFieldDeclList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1742;});
+_temp1741;}); break; case Cyc_Parse_Union_su: _LL1740: t=( void*)({ struct Cyc_Absyn_AnonUnionType_struct*
+_temp1744=( struct Cyc_Absyn_AnonUnionType_struct*) GC_malloc( sizeof( struct
+Cyc_Absyn_AnonUnionType_struct)); _temp1744[ 0]=({ struct Cyc_Absyn_AnonUnionType_struct
+_temp1745; _temp1745.tag= Cyc_Absyn_AnonUnionType; _temp1745.f1= Cyc_yyget_StructFieldDeclList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1745;});
+_temp1744;}); break;} yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_temp1746=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1746[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1747; _temp1747.tag=
+Cyc_TypeSpecifier_tok; _temp1747.f1=( void*)(( void*)({ struct Cyc_Parse_Type_spec_struct*
+_temp1748=( struct Cyc_Parse_Type_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Type_spec_struct));
+_temp1748[ 0]=({ struct Cyc_Parse_Type_spec_struct _temp1749; _temp1749.tag= Cyc_Parse_Type_spec;
+_temp1749.f1=( void*) t; _temp1749.f2= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1765;});
-_temp1764;})); _temp1763;}); _temp1762;}); break;} case 81: _LL1751: { struct
-Cyc_List_List* _temp1767=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1749;});
+_temp1748;})); _temp1747;}); _temp1746;}); break;} case 81: _LL1738: { struct
+Cyc_List_List* _temp1751=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)(
 struct Cyc_Position_Segment*, void*), struct Cyc_Position_Segment* env, struct
 Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).last_line),
 Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 3)])); struct Cyc_Absyn_Decl* d;{ enum  Cyc_Parse_Struct_or_union
-_temp1768= Cyc_yyget_StructOrUnion_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 5)]); _LL1770: if( _temp1768 == Cyc_Parse_Struct_su){
-goto _LL1771;} else{ goto _LL1772;} _LL1772: if( _temp1768 == Cyc_Parse_Union_su){
-goto _LL1773;} else{ goto _LL1769;} _LL1771: d= Cyc_Absyn_struct_decl(( void*)
-Cyc_Absyn_Public,({ struct Cyc_Core_Opt* _temp1774=( struct Cyc_Core_Opt*)
-GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1774->v=( void*) Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp1774;}),
-_temp1767,({ struct Cyc_Core_Opt* _temp1775=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp1775->v=( void*) Cyc_yyget_StructFieldDeclList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1775;}),
+yyvsp_offset - 3)])); struct Cyc_Absyn_Decl* d; switch( Cyc_yyget_StructOrUnion_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 5)])){ case Cyc_Parse_Struct_su:
+_LL1752: d= Cyc_Absyn_struct_decl(( void*) Cyc_Absyn_Public,({ struct Cyc_Core_Opt*
+_temp1754=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp1754->v=( void*) Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 4)]); _temp1754;}), _temp1751,({ struct Cyc_Core_Opt*
+_temp1755=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp1755->v=( void*) Cyc_yyget_StructFieldDeclList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1755;}), 0,
+Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
+yylsp_offset - 5)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
+yylsp_offset)]).last_line)); break; case Cyc_Parse_Union_su: _LL1753: d= Cyc_Absyn_union_decl((
+void*) Cyc_Absyn_Public,({ struct Cyc_Core_Opt* _temp1757=( struct Cyc_Core_Opt*)
+GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1757->v=( void*) Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp1757;}),
+_temp1751,({ struct Cyc_Core_Opt* _temp1758=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp1758->v=( void*) Cyc_yyget_StructFieldDeclList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1758;}),
 0, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 5)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); goto _LL1769; _LL1773: d= Cyc_Absyn_union_decl((
-void*) Cyc_Absyn_Public,({ struct Cyc_Core_Opt* _temp1776=( struct Cyc_Core_Opt*)
-GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1776->v=( void*) Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp1776;}),
-_temp1767,({ struct Cyc_Core_Opt* _temp1777=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp1777->v=( void*) Cyc_yyget_StructFieldDeclList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1777;}),
-0, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset - 5)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); goto _LL1769; _LL1769:;} yyval=( void*)({ struct
-Cyc_TypeSpecifier_tok_struct* _temp1778=( struct Cyc_TypeSpecifier_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1778[ 0]=({
-struct Cyc_TypeSpecifier_tok_struct _temp1779; _temp1779.tag= Cyc_TypeSpecifier_tok;
-_temp1779.f1=( void*)(( void*)({ struct Cyc_Parse_Decl_spec_struct* _temp1780=(
-struct Cyc_Parse_Decl_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Decl_spec_struct));
-_temp1780[ 0]=({ struct Cyc_Parse_Decl_spec_struct _temp1781; _temp1781.tag= Cyc_Parse_Decl_spec;
-_temp1781.f1= d; _temp1781;}); _temp1780;})); _temp1779;}); _temp1778;}); break;}
-case 82: _LL1766: { struct Cyc_List_List* _temp1783=(( struct Cyc_List_List*(*)(
+yylsp_offset)]).last_line)); break;} yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_temp1759=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1759[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1760; _temp1760.tag=
+Cyc_TypeSpecifier_tok; _temp1760.f1=( void*)(( void*)({ struct Cyc_Parse_Decl_spec_struct*
+_temp1761=( struct Cyc_Parse_Decl_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Decl_spec_struct));
+_temp1761[ 0]=({ struct Cyc_Parse_Decl_spec_struct _temp1762; _temp1762.tag= Cyc_Parse_Decl_spec;
+_temp1762.f1= d; _temp1762;}); _temp1761;})); _temp1760;}); _temp1759;}); break;}
+case 82: _LL1750: { struct Cyc_List_List* _temp1764=(( struct Cyc_List_List*(*)(
 struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*, void*), struct Cyc_Position_Segment*
 env, struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).last_line),
 Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 3)])); struct Cyc_Absyn_Decl* d;{ enum  Cyc_Parse_Struct_or_union
-_temp1784= Cyc_yyget_StructOrUnion_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 5)]); _LL1786: if( _temp1784 == Cyc_Parse_Struct_su){
-goto _LL1787;} else{ goto _LL1788;} _LL1788: if( _temp1784 == Cyc_Parse_Union_su){
-goto _LL1789;} else{ goto _LL1785;} _LL1787: d= Cyc_Absyn_struct_decl(( void*)
-Cyc_Absyn_Public,({ struct Cyc_Core_Opt* _temp1790=( struct Cyc_Core_Opt*)
-GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1790->v=( void*) Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp1790;}),
-_temp1783,({ struct Cyc_Core_Opt* _temp1791=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp1791->v=( void*) Cyc_yyget_StructFieldDeclList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1791;}),
+yyvsp_offset - 3)])); struct Cyc_Absyn_Decl* d; switch( Cyc_yyget_StructOrUnion_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 5)])){ case Cyc_Parse_Struct_su:
+_LL1765: d= Cyc_Absyn_struct_decl(( void*) Cyc_Absyn_Public,({ struct Cyc_Core_Opt*
+_temp1767=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp1767->v=( void*) Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 4)]); _temp1767;}), _temp1764,({ struct Cyc_Core_Opt*
+_temp1768=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp1768->v=( void*) Cyc_yyget_StructFieldDeclList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1768;}), 0,
+Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
+yylsp_offset - 5)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
+yylsp_offset)]).last_line)); break; case Cyc_Parse_Union_su: _LL1766: d= Cyc_Absyn_union_decl((
+void*) Cyc_Absyn_Public,({ struct Cyc_Core_Opt* _temp1770=( struct Cyc_Core_Opt*)
+GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1770->v=( void*) Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp1770;}),
+_temp1764,({ struct Cyc_Core_Opt* _temp1771=( struct Cyc_Core_Opt*) GC_malloc(
+sizeof( struct Cyc_Core_Opt)); _temp1771->v=( void*) Cyc_yyget_StructFieldDeclList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1771;}),
 0, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 5)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); goto _LL1785; _LL1789: d= Cyc_Absyn_union_decl((
-void*) Cyc_Absyn_Public,({ struct Cyc_Core_Opt* _temp1792=( struct Cyc_Core_Opt*)
-GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1792->v=( void*) Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp1792;}),
-_temp1783,({ struct Cyc_Core_Opt* _temp1793=( struct Cyc_Core_Opt*) GC_malloc(
-sizeof( struct Cyc_Core_Opt)); _temp1793->v=( void*) Cyc_yyget_StructFieldDeclList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1793;}),
-0, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset - 5)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); goto _LL1785; _LL1785:;} yyval=( void*)({ struct
-Cyc_TypeSpecifier_tok_struct* _temp1794=( struct Cyc_TypeSpecifier_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1794[ 0]=({
-struct Cyc_TypeSpecifier_tok_struct _temp1795; _temp1795.tag= Cyc_TypeSpecifier_tok;
-_temp1795.f1=( void*)(( void*)({ struct Cyc_Parse_Decl_spec_struct* _temp1796=(
-struct Cyc_Parse_Decl_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Decl_spec_struct));
-_temp1796[ 0]=({ struct Cyc_Parse_Decl_spec_struct _temp1797; _temp1797.tag= Cyc_Parse_Decl_spec;
-_temp1797.f1= d; _temp1797;}); _temp1796;})); _temp1795;}); _temp1794;}); break;}
-case 83: _LL1782:{ enum  Cyc_Parse_Struct_or_union _temp1799= Cyc_yyget_StructOrUnion_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _LL1801: if(
-_temp1799 == Cyc_Parse_Struct_su){ goto _LL1802;} else{ goto _LL1803;} _LL1803:
-if( _temp1799 == Cyc_Parse_Union_su){ goto _LL1804;} else{ goto _LL1800;}
-_LL1802: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1805=(
+yylsp_offset)]).last_line)); break;} yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
+_temp1772=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1772[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1773; _temp1773.tag=
+Cyc_TypeSpecifier_tok; _temp1773.f1=( void*)(( void*)({ struct Cyc_Parse_Decl_spec_struct*
+_temp1774=( struct Cyc_Parse_Decl_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Decl_spec_struct));
+_temp1774[ 0]=({ struct Cyc_Parse_Decl_spec_struct _temp1775; _temp1775.tag= Cyc_Parse_Decl_spec;
+_temp1775.f1= d; _temp1775;}); _temp1774;})); _temp1773;}); _temp1772;}); break;}
+case 83: _LL1763: switch( Cyc_yyget_StructOrUnion_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)])){ case Cyc_Parse_Struct_su:
+_LL1777: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1779=(
 struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1805[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1806; _temp1806.tag=
-Cyc_TypeSpecifier_tok; _temp1806.f1=( void*) Cyc_Parse_type_spec(( void*)({
-struct Cyc_Absyn_StructType_struct* _temp1807=( struct Cyc_Absyn_StructType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_StructType_struct)); _temp1807[ 0]=({ struct
-Cyc_Absyn_StructType_struct _temp1808; _temp1808.tag= Cyc_Absyn_StructType;
-_temp1808.f1=( struct _tuple1*) Cyc_yyget_QualId_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1808.f2= Cyc_yyget_TypeList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1808.f3= 0;
-_temp1808;}); _temp1807;}), Cyc_Position_segment_of_abs(( yyls[
+_temp1779[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1780; _temp1780.tag=
+Cyc_TypeSpecifier_tok; _temp1780.f1=( void*) Cyc_Parse_type_spec(( void*)({
+struct Cyc_Absyn_StructType_struct* _temp1781=( struct Cyc_Absyn_StructType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_StructType_struct)); _temp1781[ 0]=({ struct
+Cyc_Absyn_StructType_struct _temp1782; _temp1782.tag= Cyc_Absyn_StructType;
+_temp1782.f1=( struct _tuple1*) Cyc_yyget_QualId_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1782.f2= Cyc_yyget_TypeList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1782.f3= 0;
+_temp1782;}); _temp1781;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1806;});
-_temp1805;}); goto _LL1800; _LL1804: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1809=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1809[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1810; _temp1810.tag=
-Cyc_TypeSpecifier_tok; _temp1810.f1=( void*) Cyc_Parse_type_spec(( void*)({
-struct Cyc_Absyn_UnionType_struct* _temp1811=( struct Cyc_Absyn_UnionType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnionType_struct)); _temp1811[ 0]=({ struct
-Cyc_Absyn_UnionType_struct _temp1812; _temp1812.tag= Cyc_Absyn_UnionType;
-_temp1812.f1=( struct _tuple1*) Cyc_yyget_QualId_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1812.f2= Cyc_yyget_TypeList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1812.f3= 0;
-_temp1812;}); _temp1811;}), Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1780;});
+_temp1779;}); break; case Cyc_Parse_Union_su: _LL1778: yyval=( void*)({ struct
+Cyc_TypeSpecifier_tok_struct* _temp1784=( struct Cyc_TypeSpecifier_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1784[ 0]=({
+struct Cyc_TypeSpecifier_tok_struct _temp1785; _temp1785.tag= Cyc_TypeSpecifier_tok;
+_temp1785.f1=( void*) Cyc_Parse_type_spec(( void*)({ struct Cyc_Absyn_UnionType_struct*
+_temp1786=( struct Cyc_Absyn_UnionType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnionType_struct));
+_temp1786[ 0]=({ struct Cyc_Absyn_UnionType_struct _temp1787; _temp1787.tag= Cyc_Absyn_UnionType;
+_temp1787.f1=( struct _tuple1*) Cyc_yyget_QualId_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1787.f2= Cyc_yyget_TypeList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1787.f3= 0;
+_temp1787;}); _temp1786;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1810;});
-_temp1809;}); goto _LL1800; _LL1800:;} break; case 84: _LL1798:{ enum  Cyc_Parse_Struct_or_union
-_temp1814= Cyc_yyget_StructOrUnion_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 2)]); _LL1816: if( _temp1814 == Cyc_Parse_Struct_su){
-goto _LL1817;} else{ goto _LL1818;} _LL1818: if( _temp1814 == Cyc_Parse_Union_su){
-goto _LL1819;} else{ goto _LL1815;} _LL1817: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1820=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1820[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1821; _temp1821.tag=
-Cyc_TypeSpecifier_tok; _temp1821.f1=( void*) Cyc_Parse_type_spec(( void*)({
-struct Cyc_Absyn_StructType_struct* _temp1822=( struct Cyc_Absyn_StructType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_StructType_struct)); _temp1822[ 0]=({ struct
-Cyc_Absyn_StructType_struct _temp1823; _temp1823.tag= Cyc_Absyn_StructType;
-_temp1823.f1=( struct _tuple1*) Cyc_yyget_QualId_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1823.f2= Cyc_yyget_TypeList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1823.f3= 0;
-_temp1823;}); _temp1822;}), Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1785;});
+_temp1784;}); break;} break; case 84: _LL1776: switch( Cyc_yyget_StructOrUnion_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)])){ case Cyc_Parse_Struct_su:
+_LL1789: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1791=(
+struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
+_temp1791[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1792; _temp1792.tag=
+Cyc_TypeSpecifier_tok; _temp1792.f1=( void*) Cyc_Parse_type_spec(( void*)({
+struct Cyc_Absyn_StructType_struct* _temp1793=( struct Cyc_Absyn_StructType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_StructType_struct)); _temp1793[ 0]=({ struct
+Cyc_Absyn_StructType_struct _temp1794; _temp1794.tag= Cyc_Absyn_StructType;
+_temp1794.f1=( struct _tuple1*) Cyc_yyget_QualId_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1794.f2= Cyc_yyget_TypeList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1794.f3= 0;
+_temp1794;}); _temp1793;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1821;});
-_temp1820;}); goto _LL1815; _LL1819: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct*
-_temp1824=( struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1824[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1825; _temp1825.tag=
-Cyc_TypeSpecifier_tok; _temp1825.f1=( void*) Cyc_Parse_type_spec(( void*)({
-struct Cyc_Absyn_UnionType_struct* _temp1826=( struct Cyc_Absyn_UnionType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnionType_struct)); _temp1826[ 0]=({ struct
-Cyc_Absyn_UnionType_struct _temp1827; _temp1827.tag= Cyc_Absyn_UnionType;
-_temp1827.f1=( struct _tuple1*) Cyc_yyget_QualId_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1827.f2= Cyc_yyget_TypeList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1827.f3= 0;
-_temp1827;}); _temp1826;}), Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1792;});
+_temp1791;}); break; case Cyc_Parse_Union_su: _LL1790: yyval=( void*)({ struct
+Cyc_TypeSpecifier_tok_struct* _temp1796=( struct Cyc_TypeSpecifier_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1796[ 0]=({
+struct Cyc_TypeSpecifier_tok_struct _temp1797; _temp1797.tag= Cyc_TypeSpecifier_tok;
+_temp1797.f1=( void*) Cyc_Parse_type_spec(( void*)({ struct Cyc_Absyn_UnionType_struct*
+_temp1798=( struct Cyc_Absyn_UnionType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnionType_struct));
+_temp1798[ 0]=({ struct Cyc_Absyn_UnionType_struct _temp1799; _temp1799.tag= Cyc_Absyn_UnionType;
+_temp1799.f1=( struct _tuple1*) Cyc_yyget_QualId_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1799.f2= Cyc_yyget_TypeList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1799.f3= 0;
+_temp1799;}); _temp1798;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1825;});
-_temp1824;}); goto _LL1815; _LL1815:;} break; case 85: _LL1813: yyval=( void*)({
-struct Cyc_TypeList_tok_struct* _temp1829=( struct Cyc_TypeList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeList_tok_struct)); _temp1829[ 0]=({ struct Cyc_TypeList_tok_struct
-_temp1830; _temp1830.tag= Cyc_TypeList_tok; _temp1830.f1= 0; _temp1830;});
-_temp1829;}); break; case 86: _LL1828: yyval=( void*)({ struct Cyc_TypeList_tok_struct*
-_temp1832=( struct Cyc_TypeList_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeList_tok_struct));
-_temp1832[ 0]=({ struct Cyc_TypeList_tok_struct _temp1833; _temp1833.tag= Cyc_TypeList_tok;
-_temp1833.f1= Cyc_List_imp_rev( Cyc_yyget_TypeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp1833;});
-_temp1832;}); break; case 87: _LL1831:(( struct Cyc_Lexing_lexbuf*)(( struct Cyc_Core_Opt*)
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp1797;});
+_temp1796;}); break;} break; case 85: _LL1788: yyval=( void*)({ struct Cyc_TypeList_tok_struct*
+_temp1801=( struct Cyc_TypeList_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeList_tok_struct));
+_temp1801[ 0]=({ struct Cyc_TypeList_tok_struct _temp1802; _temp1802.tag= Cyc_TypeList_tok;
+_temp1802.f1= 0; _temp1802;}); _temp1801;}); break; case 86: _LL1800: yyval=(
+void*)({ struct Cyc_TypeList_tok_struct* _temp1804=( struct Cyc_TypeList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeList_tok_struct)); _temp1804[ 0]=({ struct Cyc_TypeList_tok_struct
+_temp1805; _temp1805.tag= Cyc_TypeList_tok; _temp1805.f1= Cyc_List_imp_rev( Cyc_yyget_TypeList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp1805;});
+_temp1804;}); break; case 87: _LL1803:(( struct Cyc_Lexing_lexbuf*)(( struct Cyc_Core_Opt*)
 _check_null( Cyc_Parse_lbuf))->v)->lex_curr_pos -= 1; yyval=( void*)({ struct
-Cyc_TypeList_tok_struct* _temp1835=( struct Cyc_TypeList_tok_struct*) GC_malloc(
-sizeof( struct Cyc_TypeList_tok_struct)); _temp1835[ 0]=({ struct Cyc_TypeList_tok_struct
-_temp1836; _temp1836.tag= Cyc_TypeList_tok; _temp1836.f1= Cyc_List_imp_rev( Cyc_yyget_TypeList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp1836;});
-_temp1835;}); break; case 88: _LL1834: yyval=( void*)({ struct Cyc_StructOrUnion_tok_struct*
-_temp1838=( struct Cyc_StructOrUnion_tok_struct*) GC_malloc_atomic( sizeof(
-struct Cyc_StructOrUnion_tok_struct)); _temp1838[ 0]=({ struct Cyc_StructOrUnion_tok_struct
-_temp1839; _temp1839.tag= Cyc_StructOrUnion_tok; _temp1839.f1= Cyc_Parse_Struct_su;
-_temp1839;}); _temp1838;}); break; case 89: _LL1837: yyval=( void*)({ struct Cyc_StructOrUnion_tok_struct*
-_temp1841=( struct Cyc_StructOrUnion_tok_struct*) GC_malloc_atomic( sizeof(
-struct Cyc_StructOrUnion_tok_struct)); _temp1841[ 0]=({ struct Cyc_StructOrUnion_tok_struct
-_temp1842; _temp1842.tag= Cyc_StructOrUnion_tok; _temp1842.f1= Cyc_Parse_Union_su;
-_temp1842;}); _temp1841;}); break; case 90: _LL1840: yyval=( void*)({ struct Cyc_StructFieldDeclList_tok_struct*
-_temp1844=( struct Cyc_StructFieldDeclList_tok_struct*) GC_malloc( sizeof(
-struct Cyc_StructFieldDeclList_tok_struct)); _temp1844[ 0]=({ struct Cyc_StructFieldDeclList_tok_struct
-_temp1845; _temp1845.tag= Cyc_StructFieldDeclList_tok; _temp1845.f1=(( struct
+Cyc_TypeList_tok_struct* _temp1807=( struct Cyc_TypeList_tok_struct*) GC_malloc(
+sizeof( struct Cyc_TypeList_tok_struct)); _temp1807[ 0]=({ struct Cyc_TypeList_tok_struct
+_temp1808; _temp1808.tag= Cyc_TypeList_tok; _temp1808.f1= Cyc_List_imp_rev( Cyc_yyget_TypeList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp1808;});
+_temp1807;}); break; case 88: _LL1806: yyval=( void*)({ struct Cyc_StructOrUnion_tok_struct*
+_temp1810=( struct Cyc_StructOrUnion_tok_struct*) GC_malloc_atomic( sizeof(
+struct Cyc_StructOrUnion_tok_struct)); _temp1810[ 0]=({ struct Cyc_StructOrUnion_tok_struct
+_temp1811; _temp1811.tag= Cyc_StructOrUnion_tok; _temp1811.f1= Cyc_Parse_Struct_su;
+_temp1811;}); _temp1810;}); break; case 89: _LL1809: yyval=( void*)({ struct Cyc_StructOrUnion_tok_struct*
+_temp1813=( struct Cyc_StructOrUnion_tok_struct*) GC_malloc_atomic( sizeof(
+struct Cyc_StructOrUnion_tok_struct)); _temp1813[ 0]=({ struct Cyc_StructOrUnion_tok_struct
+_temp1814; _temp1814.tag= Cyc_StructOrUnion_tok; _temp1814.f1= Cyc_Parse_Union_su;
+_temp1814;}); _temp1813;}); break; case 90: _LL1812: yyval=( void*)({ struct Cyc_StructFieldDeclList_tok_struct*
+_temp1816=( struct Cyc_StructFieldDeclList_tok_struct*) GC_malloc( sizeof(
+struct Cyc_StructFieldDeclList_tok_struct)); _temp1816[ 0]=({ struct Cyc_StructFieldDeclList_tok_struct
+_temp1817; _temp1817.tag= Cyc_StructFieldDeclList_tok; _temp1817.f1=(( struct
 Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_flatten)((( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_StructFieldDeclListList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))); _temp1845;});
-_temp1844;}); break; case 91: _LL1843: yyval=( void*)({ struct Cyc_StructFieldDeclListList_tok_struct*
-_temp1847=( struct Cyc_StructFieldDeclListList_tok_struct*) GC_malloc( sizeof(
-struct Cyc_StructFieldDeclListList_tok_struct)); _temp1847[ 0]=({ struct Cyc_StructFieldDeclListList_tok_struct
-_temp1848; _temp1848.tag= Cyc_StructFieldDeclListList_tok; _temp1848.f1=({
-struct Cyc_List_List* _temp1849=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp1849->hd=( void*) Cyc_yyget_StructFieldDeclList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1849->tl= 0;
-_temp1849;}); _temp1848;}); _temp1847;}); break; case 92: _LL1846: yyval=( void*)({
-struct Cyc_StructFieldDeclListList_tok_struct* _temp1851=( struct Cyc_StructFieldDeclListList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_StructFieldDeclListList_tok_struct)); _temp1851[ 0]=({
-struct Cyc_StructFieldDeclListList_tok_struct _temp1852; _temp1852.tag= Cyc_StructFieldDeclListList_tok;
-_temp1852.f1=({ struct Cyc_List_List* _temp1853=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1853->hd=( void*) Cyc_yyget_StructFieldDeclList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1853->tl=
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))); _temp1817;});
+_temp1816;}); break; case 91: _LL1815: yyval=( void*)({ struct Cyc_StructFieldDeclListList_tok_struct*
+_temp1819=( struct Cyc_StructFieldDeclListList_tok_struct*) GC_malloc( sizeof(
+struct Cyc_StructFieldDeclListList_tok_struct)); _temp1819[ 0]=({ struct Cyc_StructFieldDeclListList_tok_struct
+_temp1820; _temp1820.tag= Cyc_StructFieldDeclListList_tok; _temp1820.f1=({
+struct Cyc_List_List* _temp1821=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp1821->hd=( void*) Cyc_yyget_StructFieldDeclList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1821->tl= 0;
+_temp1821;}); _temp1820;}); _temp1819;}); break; case 92: _LL1818: yyval=( void*)({
+struct Cyc_StructFieldDeclListList_tok_struct* _temp1823=( struct Cyc_StructFieldDeclListList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_StructFieldDeclListList_tok_struct)); _temp1823[ 0]=({
+struct Cyc_StructFieldDeclListList_tok_struct _temp1824; _temp1824.tag= Cyc_StructFieldDeclListList_tok;
+_temp1824.f1=({ struct Cyc_List_List* _temp1825=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1825->hd=( void*) Cyc_yyget_StructFieldDeclList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1825->tl=
 Cyc_yyget_StructFieldDeclListList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 1)]); _temp1853;}); _temp1852;}); _temp1851;}); break;
-case 93: _LL1850: yyval=( void*)({ struct Cyc_InitDeclList_tok_struct* _temp1855=(
+10000u, yyvsp_offset - 1)]); _temp1825;}); _temp1824;}); _temp1823;}); break;
+case 93: _LL1822: yyval=( void*)({ struct Cyc_InitDeclList_tok_struct* _temp1827=(
 struct Cyc_InitDeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_InitDeclList_tok_struct));
-_temp1855[ 0]=({ struct Cyc_InitDeclList_tok_struct _temp1856; _temp1856.tag=
-Cyc_InitDeclList_tok; _temp1856.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
+_temp1827[ 0]=({ struct Cyc_InitDeclList_tok_struct _temp1828; _temp1828.tag=
+Cyc_InitDeclList_tok; _temp1828.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
 x)) Cyc_List_imp_rev)( Cyc_yyget_InitDeclList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp1856;});
-_temp1855;}); break; case 94: _LL1854: yyval=( void*)({ struct Cyc_InitDeclList_tok_struct*
-_temp1858=( struct Cyc_InitDeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_InitDeclList_tok_struct));
-_temp1858[ 0]=({ struct Cyc_InitDeclList_tok_struct _temp1859; _temp1859.tag=
-Cyc_InitDeclList_tok; _temp1859.f1=({ struct Cyc_List_List* _temp1860=( struct
-Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1860->hd=( void*)
+_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp1828;});
+_temp1827;}); break; case 94: _LL1826: yyval=( void*)({ struct Cyc_InitDeclList_tok_struct*
+_temp1830=( struct Cyc_InitDeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_InitDeclList_tok_struct));
+_temp1830[ 0]=({ struct Cyc_InitDeclList_tok_struct _temp1831; _temp1831.tag=
+Cyc_InitDeclList_tok; _temp1831.f1=({ struct Cyc_List_List* _temp1832=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1832->hd=( void*)
 Cyc_yyget_InitDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp1860->tl= 0; _temp1860;}); _temp1859;}); _temp1858;});
-break; case 95: _LL1857: yyval=( void*)({ struct Cyc_InitDeclList_tok_struct*
-_temp1862=( struct Cyc_InitDeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_InitDeclList_tok_struct));
-_temp1862[ 0]=({ struct Cyc_InitDeclList_tok_struct _temp1863; _temp1863.tag=
-Cyc_InitDeclList_tok; _temp1863.f1=({ struct Cyc_List_List* _temp1864=( struct
-Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1864->hd=( void*)
+yyvsp_offset)]); _temp1832->tl= 0; _temp1832;}); _temp1831;}); _temp1830;});
+break; case 95: _LL1829: yyval=( void*)({ struct Cyc_InitDeclList_tok_struct*
+_temp1834=( struct Cyc_InitDeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_InitDeclList_tok_struct));
+_temp1834[ 0]=({ struct Cyc_InitDeclList_tok_struct _temp1835; _temp1835.tag=
+Cyc_InitDeclList_tok; _temp1835.f1=({ struct Cyc_List_List* _temp1836=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1836->hd=( void*)
 Cyc_yyget_InitDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp1864->tl= Cyc_yyget_InitDeclList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1864;});
-_temp1863;}); _temp1862;}); break; case 96: _LL1861: yyval=( void*)({ struct Cyc_InitDecl_tok_struct*
-_temp1866=( struct Cyc_InitDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_InitDecl_tok_struct));
-_temp1866[ 0]=({ struct Cyc_InitDecl_tok_struct _temp1867; _temp1867.tag= Cyc_InitDecl_tok;
-_temp1867.f1=({ struct _tuple15* _temp1868=( struct _tuple15*) GC_malloc(
-sizeof( struct _tuple15)); _temp1868->f1= Cyc_yyget_Declarator_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1868->f2= 0;
-_temp1868;}); _temp1867;}); _temp1866;}); break; case 97: _LL1865: yyval=( void*)({
-struct Cyc_InitDecl_tok_struct* _temp1870=( struct Cyc_InitDecl_tok_struct*)
-GC_malloc( sizeof( struct Cyc_InitDecl_tok_struct)); _temp1870[ 0]=({ struct Cyc_InitDecl_tok_struct
-_temp1871; _temp1871.tag= Cyc_InitDecl_tok; _temp1871.f1=({ struct _tuple15*
-_temp1872=( struct _tuple15*) GC_malloc( sizeof( struct _tuple15)); _temp1872->f1=
+yyvsp_offset)]); _temp1836->tl= Cyc_yyget_InitDeclList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1836;});
+_temp1835;}); _temp1834;}); break; case 96: _LL1833: yyval=( void*)({ struct Cyc_InitDecl_tok_struct*
+_temp1838=( struct Cyc_InitDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_InitDecl_tok_struct));
+_temp1838[ 0]=({ struct Cyc_InitDecl_tok_struct _temp1839; _temp1839.tag= Cyc_InitDecl_tok;
+_temp1839.f1=({ struct _tuple15* _temp1840=( struct _tuple15*) GC_malloc(
+sizeof( struct _tuple15)); _temp1840->f1= Cyc_yyget_Declarator_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1840->f2= 0;
+_temp1840;}); _temp1839;}); _temp1838;}); break; case 97: _LL1837: yyval=( void*)({
+struct Cyc_InitDecl_tok_struct* _temp1842=( struct Cyc_InitDecl_tok_struct*)
+GC_malloc( sizeof( struct Cyc_InitDecl_tok_struct)); _temp1842[ 0]=({ struct Cyc_InitDecl_tok_struct
+_temp1843; _temp1843.tag= Cyc_InitDecl_tok; _temp1843.f1=({ struct _tuple15*
+_temp1844=( struct _tuple15*) GC_malloc( sizeof( struct _tuple15)); _temp1844->f1=
 Cyc_yyget_Declarator_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp1872->f2=( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1872;});
-_temp1871;}); _temp1870;}); break; case 98: _LL1869: { struct _tuple18 _temp1876;
-struct Cyc_List_List* _temp1877; struct Cyc_List_List* _temp1879; struct Cyc_Absyn_Tqual
-_temp1881; struct _tuple18* _temp1874= Cyc_yyget_QualSpecList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1876=*
-_temp1874; _LL1882: _temp1881= _temp1876.f1; goto _LL1880; _LL1880: _temp1879=
-_temp1876.f2; goto _LL1878; _LL1878: _temp1877= _temp1876.f3; goto _LL1875;
-_LL1875: { struct Cyc_List_List* _temp1885; struct Cyc_List_List* _temp1887;
-struct _tuple0 _temp1883=(( struct _tuple0(*)( struct Cyc_List_List* x)) Cyc_List_split)(
+yyvsp_offset - 2)]); _temp1844->f2=( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1844;});
+_temp1843;}); _temp1842;}); break; case 98: _LL1841: { struct _tuple18 _temp1848;
+struct Cyc_List_List* _temp1849; struct Cyc_List_List* _temp1851; struct Cyc_Absyn_Tqual
+_temp1853; struct _tuple18* _temp1846= Cyc_yyget_QualSpecList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1848=*
+_temp1846; _LL1854: _temp1853= _temp1848.f1; goto _LL1852; _LL1852: _temp1851=
+_temp1848.f2; goto _LL1850; _LL1850: _temp1849= _temp1848.f3; goto _LL1847;
+_LL1847: { struct Cyc_List_List* _temp1857; struct Cyc_List_List* _temp1859;
+struct _tuple0 _temp1855=(( struct _tuple0(*)( struct Cyc_List_List* x)) Cyc_List_split)(
 Cyc_yyget_DeclaratorExpoptList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)])); _LL1888: _temp1887= _temp1883.f1; goto _LL1886; _LL1886:
-_temp1885= _temp1883.f2; goto _LL1884; _LL1884: { void* _temp1889= Cyc_Parse_speclist2typ(
-_temp1879, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+yyvsp_offset - 1)])); _LL1860: _temp1859= _temp1855.f1; goto _LL1858; _LL1858:
+_temp1857= _temp1855.f2; goto _LL1856; _LL1856: { void* _temp1861= Cyc_Parse_speclist2typ(
+_temp1851, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 2)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset - 2)]).last_line)); struct Cyc_List_List* _temp1890=((
+10000u, yylsp_offset - 2)]).last_line)); struct Cyc_List_List* _temp1862=((
 struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_zip)(
-Cyc_Parse_apply_tmss( _temp1881, _temp1889, _temp1887, _temp1877), _temp1885);
-yyval=( void*)({ struct Cyc_StructFieldDeclList_tok_struct* _temp1891=( struct
+Cyc_Parse_apply_tmss( _temp1853, _temp1861, _temp1859, _temp1849), _temp1857);
+yyval=( void*)({ struct Cyc_StructFieldDeclList_tok_struct* _temp1863=( struct
 Cyc_StructFieldDeclList_tok_struct*) GC_malloc( sizeof( struct Cyc_StructFieldDeclList_tok_struct));
-_temp1891[ 0]=({ struct Cyc_StructFieldDeclList_tok_struct _temp1892; _temp1892.tag=
-Cyc_StructFieldDeclList_tok; _temp1892.f1=(( struct Cyc_List_List*(*)( struct
+_temp1863[ 0]=({ struct Cyc_StructFieldDeclList_tok_struct _temp1864; _temp1864.tag=
+Cyc_StructFieldDeclList_tok; _temp1864.f1=(( struct Cyc_List_List*(*)( struct
 Cyc_Absyn_Structfield*(* f)( struct Cyc_Position_Segment*, struct _tuple9*),
 struct Cyc_Position_Segment* env, struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_make_struct_field,
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 2)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset - 1)]).last_line), _temp1890); _temp1892;}); _temp1891;}); break;}}}
-case 99: _LL1873: yyval=( void*)({ struct Cyc_QualSpecList_tok_struct* _temp1894=(
+yylsp_offset - 1)]).last_line), _temp1862); _temp1864;}); _temp1863;}); break;}}}
+case 99: _LL1845: yyval=( void*)({ struct Cyc_QualSpecList_tok_struct* _temp1866=(
 struct Cyc_QualSpecList_tok_struct*) GC_malloc( sizeof( struct Cyc_QualSpecList_tok_struct));
-_temp1894[ 0]=({ struct Cyc_QualSpecList_tok_struct _temp1895; _temp1895.tag=
-Cyc_QualSpecList_tok; _temp1895.f1=({ struct _tuple18* _temp1896=( struct
-_tuple18*) GC_malloc( sizeof( struct _tuple18)); _temp1896->f1= Cyc_Absyn_empty_tqual();
-_temp1896->f2=({ struct Cyc_List_List* _temp1897=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1897->hd=( void*) Cyc_yyget_TypeSpecifier_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1897->tl=
-0; _temp1897;}); _temp1896->f3= Cyc_yyget_AttributeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1896;}); _temp1895;});
-_temp1894;}); break; case 100: _LL1893: yyval=( void*)({ struct Cyc_QualSpecList_tok_struct*
-_temp1899=( struct Cyc_QualSpecList_tok_struct*) GC_malloc( sizeof( struct Cyc_QualSpecList_tok_struct));
-_temp1899[ 0]=({ struct Cyc_QualSpecList_tok_struct _temp1900; _temp1900.tag=
-Cyc_QualSpecList_tok; _temp1900.f1=({ struct _tuple18* _temp1901=( struct
-_tuple18*) GC_malloc( sizeof( struct _tuple18)); _temp1901->f1=(* Cyc_yyget_QualSpecList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f1; _temp1901->f2=({
-struct Cyc_List_List* _temp1902=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp1902->hd=( void*) Cyc_yyget_TypeSpecifier_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1902->tl=(*
+_temp1866[ 0]=({ struct Cyc_QualSpecList_tok_struct _temp1867; _temp1867.tag=
+Cyc_QualSpecList_tok; _temp1867.f1=({ struct _tuple18* _temp1868=( struct
+_tuple18*) GC_malloc( sizeof( struct _tuple18)); _temp1868->f1= Cyc_Absyn_empty_tqual();
+_temp1868->f2=({ struct Cyc_List_List* _temp1869=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1869->hd=( void*) Cyc_yyget_TypeSpecifier_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1869->tl=
+0; _temp1869;}); _temp1868->f3= Cyc_yyget_AttributeList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1868;}); _temp1867;});
+_temp1866;}); break; case 100: _LL1865: yyval=( void*)({ struct Cyc_QualSpecList_tok_struct*
+_temp1871=( struct Cyc_QualSpecList_tok_struct*) GC_malloc( sizeof( struct Cyc_QualSpecList_tok_struct));
+_temp1871[ 0]=({ struct Cyc_QualSpecList_tok_struct _temp1872; _temp1872.tag=
+Cyc_QualSpecList_tok; _temp1872.f1=({ struct _tuple18* _temp1873=( struct
+_tuple18*) GC_malloc( sizeof( struct _tuple18)); _temp1873->f1=(* Cyc_yyget_QualSpecList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f1; _temp1873->f2=({
+struct Cyc_List_List* _temp1874=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp1874->hd=( void*) Cyc_yyget_TypeSpecifier_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1874->tl=(*
 Cyc_yyget_QualSpecList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)])).f2; _temp1902;}); _temp1901->f3= Cyc_List_append( Cyc_yyget_AttributeList_tok(
+yyvsp_offset)])).f2; _temp1874;}); _temp1873->f3= Cyc_List_append( Cyc_yyget_AttributeList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]),(* Cyc_yyget_QualSpecList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f3); _temp1901;});
-_temp1900;}); _temp1899;}); break; case 101: _LL1898: yyval=( void*)({ struct
-Cyc_QualSpecList_tok_struct* _temp1904=( struct Cyc_QualSpecList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_QualSpecList_tok_struct)); _temp1904[ 0]=({ struct
-Cyc_QualSpecList_tok_struct _temp1905; _temp1905.tag= Cyc_QualSpecList_tok;
-_temp1905.f1=({ struct _tuple18* _temp1906=( struct _tuple18*) GC_malloc(
-sizeof( struct _tuple18)); _temp1906->f1= Cyc_yyget_TypeQual_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1906->f2= 0;
-_temp1906->f3= Cyc_yyget_AttributeList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset)]); _temp1906;}); _temp1905;}); _temp1904;}); break; case
-102: _LL1903: yyval=( void*)({ struct Cyc_QualSpecList_tok_struct* _temp1908=(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f3); _temp1873;});
+_temp1872;}); _temp1871;}); break; case 101: _LL1870: yyval=( void*)({ struct
+Cyc_QualSpecList_tok_struct* _temp1876=( struct Cyc_QualSpecList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_QualSpecList_tok_struct)); _temp1876[ 0]=({ struct
+Cyc_QualSpecList_tok_struct _temp1877; _temp1877.tag= Cyc_QualSpecList_tok;
+_temp1877.f1=({ struct _tuple18* _temp1878=( struct _tuple18*) GC_malloc(
+sizeof( struct _tuple18)); _temp1878->f1= Cyc_yyget_TypeQual_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1878->f2= 0;
+_temp1878->f3= Cyc_yyget_AttributeList_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset)]); _temp1878;}); _temp1877;}); _temp1876;}); break; case
+102: _LL1875: yyval=( void*)({ struct Cyc_QualSpecList_tok_struct* _temp1880=(
 struct Cyc_QualSpecList_tok_struct*) GC_malloc( sizeof( struct Cyc_QualSpecList_tok_struct));
-_temp1908[ 0]=({ struct Cyc_QualSpecList_tok_struct _temp1909; _temp1909.tag=
-Cyc_QualSpecList_tok; _temp1909.f1=({ struct _tuple18* _temp1910=( struct
-_tuple18*) GC_malloc( sizeof( struct _tuple18)); _temp1910->f1= Cyc_Absyn_combine_tqual(
+_temp1880[ 0]=({ struct Cyc_QualSpecList_tok_struct _temp1881; _temp1881.tag=
+Cyc_QualSpecList_tok; _temp1881.f1=({ struct _tuple18* _temp1882=( struct
+_tuple18*) GC_malloc( sizeof( struct _tuple18)); _temp1882->f1= Cyc_Absyn_combine_tqual(
 Cyc_yyget_TypeQual_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]),(* Cyc_yyget_QualSpecList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)])).f1); _temp1910->f2=(*
+_check_known_subscript_notnull( 10000u, yyvsp_offset)])).f1); _temp1882->f2=(*
 Cyc_yyget_QualSpecList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)])).f2; _temp1910->f3= Cyc_List_append( Cyc_yyget_AttributeList_tok(
+yyvsp_offset)])).f2; _temp1882->f3= Cyc_List_append( Cyc_yyget_AttributeList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]),(* Cyc_yyget_QualSpecList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f3); _temp1910;});
-_temp1909;}); _temp1908;}); break; case 103: _LL1907: yyval=( void*)({ struct
-Cyc_DeclaratorExpoptList_tok_struct* _temp1912=( struct Cyc_DeclaratorExpoptList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclaratorExpoptList_tok_struct)); _temp1912[ 0]=({
-struct Cyc_DeclaratorExpoptList_tok_struct _temp1913; _temp1913.tag= Cyc_DeclaratorExpoptList_tok;
-_temp1913.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f3); _temp1882;});
+_temp1881;}); _temp1880;}); break; case 103: _LL1879: yyval=( void*)({ struct
+Cyc_DeclaratorExpoptList_tok_struct* _temp1884=( struct Cyc_DeclaratorExpoptList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclaratorExpoptList_tok_struct)); _temp1884[ 0]=({
+struct Cyc_DeclaratorExpoptList_tok_struct _temp1885; _temp1885.tag= Cyc_DeclaratorExpoptList_tok;
+_temp1885.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
 Cyc_yyget_DeclaratorExpoptList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)])); _temp1913;}); _temp1912;}); break; case 104: _LL1911: yyval=(
-void*)({ struct Cyc_DeclaratorExpoptList_tok_struct* _temp1915=( struct Cyc_DeclaratorExpoptList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclaratorExpoptList_tok_struct)); _temp1915[ 0]=({
-struct Cyc_DeclaratorExpoptList_tok_struct _temp1916; _temp1916.tag= Cyc_DeclaratorExpoptList_tok;
-_temp1916.f1=({ struct Cyc_List_List* _temp1917=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1917->hd=( void*) Cyc_yyget_DeclaratorExpopt_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1917->tl= 0;
-_temp1917;}); _temp1916;}); _temp1915;}); break; case 105: _LL1914: yyval=( void*)({
-struct Cyc_DeclaratorExpoptList_tok_struct* _temp1919=( struct Cyc_DeclaratorExpoptList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclaratorExpoptList_tok_struct)); _temp1919[ 0]=({
-struct Cyc_DeclaratorExpoptList_tok_struct _temp1920; _temp1920.tag= Cyc_DeclaratorExpoptList_tok;
-_temp1920.f1=({ struct Cyc_List_List* _temp1921=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1921->hd=( void*) Cyc_yyget_DeclaratorExpopt_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1921->tl=
+yyvsp_offset)])); _temp1885;}); _temp1884;}); break; case 104: _LL1883: yyval=(
+void*)({ struct Cyc_DeclaratorExpoptList_tok_struct* _temp1887=( struct Cyc_DeclaratorExpoptList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclaratorExpoptList_tok_struct)); _temp1887[ 0]=({
+struct Cyc_DeclaratorExpoptList_tok_struct _temp1888; _temp1888.tag= Cyc_DeclaratorExpoptList_tok;
+_temp1888.f1=({ struct Cyc_List_List* _temp1889=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1889->hd=( void*) Cyc_yyget_DeclaratorExpopt_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1889->tl= 0;
+_temp1889;}); _temp1888;}); _temp1887;}); break; case 105: _LL1886: yyval=( void*)({
+struct Cyc_DeclaratorExpoptList_tok_struct* _temp1891=( struct Cyc_DeclaratorExpoptList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclaratorExpoptList_tok_struct)); _temp1891[ 0]=({
+struct Cyc_DeclaratorExpoptList_tok_struct _temp1892; _temp1892.tag= Cyc_DeclaratorExpoptList_tok;
+_temp1892.f1=({ struct Cyc_List_List* _temp1893=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1893->hd=( void*) Cyc_yyget_DeclaratorExpopt_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1893->tl=
 Cyc_yyget_DeclaratorExpoptList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp1921;}); _temp1920;}); _temp1919;}); break; case 106:
-_LL1918: yyval=( void*)({ struct Cyc_DeclaratorExpopt_tok_struct* _temp1923=(
+yyvsp_offset - 2)]); _temp1893;}); _temp1892;}); _temp1891;}); break; case 106:
+_LL1890: yyval=( void*)({ struct Cyc_DeclaratorExpopt_tok_struct* _temp1895=(
 struct Cyc_DeclaratorExpopt_tok_struct*) GC_malloc( sizeof( struct Cyc_DeclaratorExpopt_tok_struct));
-_temp1923[ 0]=({ struct Cyc_DeclaratorExpopt_tok_struct _temp1924; _temp1924.tag=
-Cyc_DeclaratorExpopt_tok; _temp1924.f1=({ struct _tuple13* _temp1925=( struct
-_tuple13*) GC_malloc( sizeof( struct _tuple13)); _temp1925->f1= Cyc_yyget_Declarator_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1925->f2= 0;
-_temp1925;}); _temp1924;}); _temp1923;}); break; case 107: _LL1922: yyval=( void*)({
-struct Cyc_DeclaratorExpopt_tok_struct* _temp1927=( struct Cyc_DeclaratorExpopt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclaratorExpopt_tok_struct)); _temp1927[ 0]=({
-struct Cyc_DeclaratorExpopt_tok_struct _temp1928; _temp1928.tag= Cyc_DeclaratorExpopt_tok;
-_temp1928.f1=({ struct _tuple13* _temp1929=( struct _tuple13*) GC_malloc(
-sizeof( struct _tuple13)); _temp1929->f1=({ struct Cyc_Parse_Declarator*
-_temp1931=( struct Cyc_Parse_Declarator*) GC_malloc( sizeof( struct Cyc_Parse_Declarator));
-_temp1931->id=({ struct _tuple1* _temp1932=( struct _tuple1*) GC_malloc( sizeof(
-struct _tuple1)); _temp1932->f1= Cyc_Absyn_rel_ns_null; _temp1932->f2=
+_temp1895[ 0]=({ struct Cyc_DeclaratorExpopt_tok_struct _temp1896; _temp1896.tag=
+Cyc_DeclaratorExpopt_tok; _temp1896.f1=({ struct _tuple13* _temp1897=( struct
+_tuple13*) GC_malloc( sizeof( struct _tuple13)); _temp1897->f1= Cyc_yyget_Declarator_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1897->f2= 0;
+_temp1897;}); _temp1896;}); _temp1895;}); break; case 107: _LL1894: yyval=( void*)({
+struct Cyc_DeclaratorExpopt_tok_struct* _temp1899=( struct Cyc_DeclaratorExpopt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclaratorExpopt_tok_struct)); _temp1899[ 0]=({
+struct Cyc_DeclaratorExpopt_tok_struct _temp1900; _temp1900.tag= Cyc_DeclaratorExpopt_tok;
+_temp1900.f1=({ struct _tuple13* _temp1901=( struct _tuple13*) GC_malloc(
+sizeof( struct _tuple13)); _temp1901->f1=({ struct Cyc_Parse_Declarator*
+_temp1903=( struct Cyc_Parse_Declarator*) GC_malloc( sizeof( struct Cyc_Parse_Declarator));
+_temp1903->id=({ struct _tuple1* _temp1904=( struct _tuple1*) GC_malloc( sizeof(
+struct _tuple1)); _temp1904->f1= Cyc_Absyn_rel_ns_null; _temp1904->f2=
 _init_tag_arr(( struct _tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)),"",
-sizeof( unsigned char), 1u); _temp1932;}); _temp1931->tms= 0; _temp1931;});
-_temp1929->f2=({ struct Cyc_Core_Opt* _temp1930=( struct Cyc_Core_Opt*)
-GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1930->v=( void*) Cyc_yyget_Exp_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1930;});
-_temp1929;}); _temp1928;}); _temp1927;}); break; case 108: _LL1926: yyval=( void*)({
-struct Cyc_DeclaratorExpopt_tok_struct* _temp1934=( struct Cyc_DeclaratorExpopt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DeclaratorExpopt_tok_struct)); _temp1934[ 0]=({
-struct Cyc_DeclaratorExpopt_tok_struct _temp1935; _temp1935.tag= Cyc_DeclaratorExpopt_tok;
-_temp1935.f1=({ struct _tuple13* _temp1936=( struct _tuple13*) GC_malloc(
-sizeof( struct _tuple13)); _temp1936->f1= Cyc_yyget_Declarator_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1936->f2=({
-struct Cyc_Core_Opt* _temp1937=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp1937->v=( void*) Cyc_yyget_Exp_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1937;}); _temp1936;});
-_temp1935;}); _temp1934;}); break; case 109: _LL1933: { struct Cyc_List_List*
-_temp1939=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
+sizeof( unsigned char), 1u); _temp1904;}); _temp1903->tms= 0; _temp1903;});
+_temp1901->f2=({ struct Cyc_Core_Opt* _temp1902=( struct Cyc_Core_Opt*)
+GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1902->v=( void*) Cyc_yyget_Exp_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1902;});
+_temp1901;}); _temp1900;}); _temp1899;}); break; case 108: _LL1898: yyval=( void*)({
+struct Cyc_DeclaratorExpopt_tok_struct* _temp1906=( struct Cyc_DeclaratorExpopt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DeclaratorExpopt_tok_struct)); _temp1906[ 0]=({
+struct Cyc_DeclaratorExpopt_tok_struct _temp1907; _temp1907.tag= Cyc_DeclaratorExpopt_tok;
+_temp1907.f1=({ struct _tuple13* _temp1908=( struct _tuple13*) GC_malloc(
+sizeof( struct _tuple13)); _temp1908->f1= Cyc_yyget_Declarator_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1908->f2=({
+struct Cyc_Core_Opt* _temp1909=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp1909->v=( void*) Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1909;}); _temp1908;});
+_temp1907;}); _temp1906;}); break; case 109: _LL1905: { struct Cyc_List_List*
+_temp1911=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
 void*), struct Cyc_Position_Segment* env, struct Cyc_List_List* x)) Cyc_List_map_c)(
 Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).last_line), Cyc_yyget_TypeList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)])); yyval=( void*)({
-struct Cyc_TypeSpecifier_tok_struct* _temp1940=( struct Cyc_TypeSpecifier_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1940[ 0]=({
-struct Cyc_TypeSpecifier_tok_struct _temp1941; _temp1941.tag= Cyc_TypeSpecifier_tok;
-_temp1941.f1=( void*)(( void*)({ struct Cyc_Parse_Decl_spec_struct* _temp1942=(
+struct Cyc_TypeSpecifier_tok_struct* _temp1912=( struct Cyc_TypeSpecifier_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1912[ 0]=({
+struct Cyc_TypeSpecifier_tok_struct _temp1913; _temp1913.tag= Cyc_TypeSpecifier_tok;
+_temp1913.f1=( void*)(( void*)({ struct Cyc_Parse_Decl_spec_struct* _temp1914=(
 struct Cyc_Parse_Decl_spec_struct*) GC_malloc( sizeof( struct Cyc_Parse_Decl_spec_struct));
-_temp1942[ 0]=({ struct Cyc_Parse_Decl_spec_struct _temp1943; _temp1943.tag= Cyc_Parse_Decl_spec;
-_temp1943.f1= Cyc_Absyn_tunion_decl(( void*) Cyc_Absyn_Public, Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]), _temp1939,({
-struct Cyc_Core_Opt* _temp1944=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp1944->v=( void*) Cyc_yyget_TunionFieldList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1944;}), Cyc_yyget_Bool_tok(
+_temp1914[ 0]=({ struct Cyc_Parse_Decl_spec_struct _temp1915; _temp1915.tag= Cyc_Parse_Decl_spec;
+_temp1915.f1= Cyc_Absyn_tunion_decl(( void*) Cyc_Absyn_Public, Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]), _temp1911,({
+struct Cyc_Core_Opt* _temp1916=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp1916->v=( void*) Cyc_yyget_TunionFieldList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1916;}), Cyc_yyget_Bool_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 5)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp1943;}); _temp1942;})); _temp1941;}); _temp1940;}); break;} case 110:
-_LL1938: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1946=(
+_temp1915;}); _temp1914;})); _temp1913;}); _temp1912;}); break;} case 110:
+_LL1910: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1918=(
 struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1946[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1947; _temp1947.tag=
-Cyc_TypeSpecifier_tok; _temp1947.f1=( void*) Cyc_Parse_type_spec(( void*)({
-struct Cyc_Absyn_TunionType_struct* _temp1948=( struct Cyc_Absyn_TunionType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_TunionType_struct)); _temp1948[ 0]=({ struct
-Cyc_Absyn_TunionType_struct _temp1949; _temp1949.tag= Cyc_Absyn_TunionType;
-_temp1949.f1=({ struct Cyc_Absyn_TunionInfo _temp1950; _temp1950.tunion_info=(
-void*)(( void*)({ struct Cyc_Absyn_UnknownTunion_struct* _temp1951=( struct Cyc_Absyn_UnknownTunion_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnknownTunion_struct)); _temp1951[ 0]=({
-struct Cyc_Absyn_UnknownTunion_struct _temp1952; _temp1952.tag= Cyc_Absyn_UnknownTunion;
-_temp1952.f1=({ struct Cyc_Absyn_UnknownTunionInfo _temp1953; _temp1953.name=
+_temp1918[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1919; _temp1919.tag=
+Cyc_TypeSpecifier_tok; _temp1919.f1=( void*) Cyc_Parse_type_spec(( void*)({
+struct Cyc_Absyn_TunionType_struct* _temp1920=( struct Cyc_Absyn_TunionType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_TunionType_struct)); _temp1920[ 0]=({ struct
+Cyc_Absyn_TunionType_struct _temp1921; _temp1921.tag= Cyc_Absyn_TunionType;
+_temp1921.f1=({ struct Cyc_Absyn_TunionInfo _temp1922; _temp1922.tunion_info=(
+void*)(( void*)({ struct Cyc_Absyn_UnknownTunion_struct* _temp1923=( struct Cyc_Absyn_UnknownTunion_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_UnknownTunion_struct)); _temp1923[ 0]=({
+struct Cyc_Absyn_UnknownTunion_struct _temp1924; _temp1924.tag= Cyc_Absyn_UnknownTunion;
+_temp1924.f1=({ struct Cyc_Absyn_UnknownTunionInfo _temp1925; _temp1925.name=
 Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset
-- 1)]); _temp1953.is_xtunion= Cyc_yyget_Bool_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp1953;});
-_temp1952;}); _temp1951;})); _temp1950.targs= Cyc_yyget_TypeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1950.rgn=( void*)
+- 1)]); _temp1925.is_xtunion= Cyc_yyget_Bool_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp1925;});
+_temp1924;}); _temp1923;})); _temp1922.targs= Cyc_yyget_TypeList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1922.rgn=( void*)
 Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
-2)]); _temp1950;}); _temp1949;}); _temp1948;}), Cyc_Position_segment_of_abs((
+2)]); _temp1922;}); _temp1921;}); _temp1920;}), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp1947;}); _temp1946;}); break; case 111: _LL1945: yyval=( void*)({ struct
-Cyc_TypeSpecifier_tok_struct* _temp1955=( struct Cyc_TypeSpecifier_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1955[ 0]=({
-struct Cyc_TypeSpecifier_tok_struct _temp1956; _temp1956.tag= Cyc_TypeSpecifier_tok;
-_temp1956.f1=( void*) Cyc_Parse_type_spec(( void*)({ struct Cyc_Absyn_TunionType_struct*
-_temp1957=( struct Cyc_Absyn_TunionType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_TunionType_struct));
-_temp1957[ 0]=({ struct Cyc_Absyn_TunionType_struct _temp1958; _temp1958.tag=
-Cyc_Absyn_TunionType; _temp1958.f1=({ struct Cyc_Absyn_TunionInfo _temp1959;
-_temp1959.tunion_info=( void*)(( void*)({ struct Cyc_Absyn_UnknownTunion_struct*
-_temp1960=( struct Cyc_Absyn_UnknownTunion_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_UnknownTunion_struct)); _temp1960[ 0]=({ struct Cyc_Absyn_UnknownTunion_struct
-_temp1961; _temp1961.tag= Cyc_Absyn_UnknownTunion; _temp1961.f1=({ struct Cyc_Absyn_UnknownTunionInfo
-_temp1962; _temp1962.name= Cyc_yyget_QualId_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1962.is_xtunion=
+_temp1919;}); _temp1918;}); break; case 111: _LL1917: yyval=( void*)({ struct
+Cyc_TypeSpecifier_tok_struct* _temp1927=( struct Cyc_TypeSpecifier_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct)); _temp1927[ 0]=({
+struct Cyc_TypeSpecifier_tok_struct _temp1928; _temp1928.tag= Cyc_TypeSpecifier_tok;
+_temp1928.f1=( void*) Cyc_Parse_type_spec(( void*)({ struct Cyc_Absyn_TunionType_struct*
+_temp1929=( struct Cyc_Absyn_TunionType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_TunionType_struct));
+_temp1929[ 0]=({ struct Cyc_Absyn_TunionType_struct _temp1930; _temp1930.tag=
+Cyc_Absyn_TunionType; _temp1930.f1=({ struct Cyc_Absyn_TunionInfo _temp1931;
+_temp1931.tunion_info=( void*)(( void*)({ struct Cyc_Absyn_UnknownTunion_struct*
+_temp1932=( struct Cyc_Absyn_UnknownTunion_struct*) GC_malloc( sizeof( struct
+Cyc_Absyn_UnknownTunion_struct)); _temp1932[ 0]=({ struct Cyc_Absyn_UnknownTunion_struct
+_temp1933; _temp1933.tag= Cyc_Absyn_UnknownTunion; _temp1933.f1=({ struct Cyc_Absyn_UnknownTunionInfo
+_temp1934; _temp1934.name= Cyc_yyget_QualId_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1934.is_xtunion=
 Cyc_yyget_Bool_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
-2)]); _temp1962;}); _temp1961;}); _temp1960;})); _temp1959.targs= Cyc_yyget_TypeList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1959.rgn=(
-void*)(( void*) Cyc_Absyn_HeapRgn); _temp1959;}); _temp1958;}); _temp1957;}),
+2)]); _temp1934;}); _temp1933;}); _temp1932;})); _temp1931.targs= Cyc_yyget_TypeList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1931.rgn=(
+void*)(( void*) Cyc_Absyn_HeapRgn); _temp1931;}); _temp1930;}); _temp1929;}),
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 2)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); _temp1956;}); _temp1955;}); break; case 112:
-_LL1954: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1964=(
+yylsp_offset)]).last_line)); _temp1928;}); _temp1927;}); break; case 112:
+_LL1926: yyval=( void*)({ struct Cyc_TypeSpecifier_tok_struct* _temp1936=(
 struct Cyc_TypeSpecifier_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeSpecifier_tok_struct));
-_temp1964[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1965; _temp1965.tag=
-Cyc_TypeSpecifier_tok; _temp1965.f1=( void*) Cyc_Parse_type_spec(( void*)({
-struct Cyc_Absyn_TunionFieldType_struct* _temp1966=( struct Cyc_Absyn_TunionFieldType_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_TunionFieldType_struct)); _temp1966[ 0]=({
-struct Cyc_Absyn_TunionFieldType_struct _temp1967; _temp1967.tag= Cyc_Absyn_TunionFieldType;
-_temp1967.f1=({ struct Cyc_Absyn_TunionFieldInfo _temp1968; _temp1968.field_info=(
-void*)(( void*)({ struct Cyc_Absyn_UnknownTunionfield_struct* _temp1969=( struct
+_temp1936[ 0]=({ struct Cyc_TypeSpecifier_tok_struct _temp1937; _temp1937.tag=
+Cyc_TypeSpecifier_tok; _temp1937.f1=( void*) Cyc_Parse_type_spec(( void*)({
+struct Cyc_Absyn_TunionFieldType_struct* _temp1938=( struct Cyc_Absyn_TunionFieldType_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_TunionFieldType_struct)); _temp1938[ 0]=({
+struct Cyc_Absyn_TunionFieldType_struct _temp1939; _temp1939.tag= Cyc_Absyn_TunionFieldType;
+_temp1939.f1=({ struct Cyc_Absyn_TunionFieldInfo _temp1940; _temp1940.field_info=(
+void*)(( void*)({ struct Cyc_Absyn_UnknownTunionfield_struct* _temp1941=( struct
 Cyc_Absyn_UnknownTunionfield_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownTunionfield_struct));
-_temp1969[ 0]=({ struct Cyc_Absyn_UnknownTunionfield_struct _temp1970; _temp1970.tag=
-Cyc_Absyn_UnknownTunionfield; _temp1970.f1=({ struct Cyc_Absyn_UnknownTunionFieldInfo
-_temp1971; _temp1971.tunion_name= Cyc_yyget_QualId_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp1971.field_name=
+_temp1941[ 0]=({ struct Cyc_Absyn_UnknownTunionfield_struct _temp1942; _temp1942.tag=
+Cyc_Absyn_UnknownTunionfield; _temp1942.f1=({ struct Cyc_Absyn_UnknownTunionFieldInfo
+_temp1943; _temp1943.tunion_name= Cyc_yyget_QualId_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp1943.field_name=
 Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset
-- 1)]); _temp1971.is_xtunion= Cyc_yyget_Bool_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp1971;});
-_temp1970;}); _temp1969;})); _temp1968.targs= Cyc_yyget_TypeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1968;}); _temp1967;});
-_temp1966;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+- 1)]); _temp1943.is_xtunion= Cyc_yyget_Bool_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp1943;});
+_temp1942;}); _temp1941;})); _temp1940.targs= Cyc_yyget_TypeList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1940;}); _temp1939;});
+_temp1938;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 4)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp1965;}); _temp1964;}); break; case 113:
-_LL1963: yyval=( void*)({ struct Cyc_Bool_tok_struct* _temp1973=( struct Cyc_Bool_tok_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_Bool_tok_struct)); _temp1973[ 0]=({ struct
-Cyc_Bool_tok_struct _temp1974; _temp1974.tag= Cyc_Bool_tok; _temp1974.f1= 0;
-_temp1974;}); _temp1973;}); break; case 114: _LL1972: yyval=( void*)({ struct
-Cyc_Bool_tok_struct* _temp1976=( struct Cyc_Bool_tok_struct*) GC_malloc_atomic(
-sizeof( struct Cyc_Bool_tok_struct)); _temp1976[ 0]=({ struct Cyc_Bool_tok_struct
-_temp1977; _temp1977.tag= Cyc_Bool_tok; _temp1977.f1= 1; _temp1977;}); _temp1976;});
-break; case 115: _LL1975: yyval=( void*)({ struct Cyc_TunionFieldList_tok_struct*
-_temp1979=( struct Cyc_TunionFieldList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_TunionFieldList_tok_struct)); _temp1979[ 0]=({ struct Cyc_TunionFieldList_tok_struct
-_temp1980; _temp1980.tag= Cyc_TunionFieldList_tok; _temp1980.f1=({ struct Cyc_List_List*
-_temp1981=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp1981->hd=( void*) Cyc_yyget_TunionField_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1981->tl= 0;
-_temp1981;}); _temp1980;}); _temp1979;}); break; case 116: _LL1978: yyval=( void*)({
-struct Cyc_TunionFieldList_tok_struct* _temp1983=( struct Cyc_TunionFieldList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TunionFieldList_tok_struct)); _temp1983[ 0]=({
-struct Cyc_TunionFieldList_tok_struct _temp1984; _temp1984.tag= Cyc_TunionFieldList_tok;
-_temp1984.f1=({ struct Cyc_List_List* _temp1985=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1985->hd=( void*) Cyc_yyget_TunionField_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1985->tl=
-0; _temp1985;}); _temp1984;}); _temp1983;}); break; case 117: _LL1982: yyval=(
-void*)({ struct Cyc_TunionFieldList_tok_struct* _temp1987=( struct Cyc_TunionFieldList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TunionFieldList_tok_struct)); _temp1987[ 0]=({
-struct Cyc_TunionFieldList_tok_struct _temp1988; _temp1988.tag= Cyc_TunionFieldList_tok;
-_temp1988.f1=({ struct Cyc_List_List* _temp1989=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1989->hd=( void*) Cyc_yyget_TunionField_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1989->tl=
+10000u, yylsp_offset)]).last_line)); _temp1937;}); _temp1936;}); break; case 113:
+_LL1935: yyval=( void*)({ struct Cyc_Bool_tok_struct* _temp1945=( struct Cyc_Bool_tok_struct*)
+GC_malloc_atomic( sizeof( struct Cyc_Bool_tok_struct)); _temp1945[ 0]=({ struct
+Cyc_Bool_tok_struct _temp1946; _temp1946.tag= Cyc_Bool_tok; _temp1946.f1= 0;
+_temp1946;}); _temp1945;}); break; case 114: _LL1944: yyval=( void*)({ struct
+Cyc_Bool_tok_struct* _temp1948=( struct Cyc_Bool_tok_struct*) GC_malloc_atomic(
+sizeof( struct Cyc_Bool_tok_struct)); _temp1948[ 0]=({ struct Cyc_Bool_tok_struct
+_temp1949; _temp1949.tag= Cyc_Bool_tok; _temp1949.f1= 1; _temp1949;}); _temp1948;});
+break; case 115: _LL1947: yyval=( void*)({ struct Cyc_TunionFieldList_tok_struct*
+_temp1951=( struct Cyc_TunionFieldList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_TunionFieldList_tok_struct)); _temp1951[ 0]=({ struct Cyc_TunionFieldList_tok_struct
+_temp1952; _temp1952.tag= Cyc_TunionFieldList_tok; _temp1952.f1=({ struct Cyc_List_List*
+_temp1953=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp1953->hd=( void*) Cyc_yyget_TunionField_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1953->tl= 0;
+_temp1953;}); _temp1952;}); _temp1951;}); break; case 116: _LL1950: yyval=( void*)({
+struct Cyc_TunionFieldList_tok_struct* _temp1955=( struct Cyc_TunionFieldList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TunionFieldList_tok_struct)); _temp1955[ 0]=({
+struct Cyc_TunionFieldList_tok_struct _temp1956; _temp1956.tag= Cyc_TunionFieldList_tok;
+_temp1956.f1=({ struct Cyc_List_List* _temp1957=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1957->hd=( void*) Cyc_yyget_TunionField_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp1957->tl=
+0; _temp1957;}); _temp1956;}); _temp1955;}); break; case 117: _LL1954: yyval=(
+void*)({ struct Cyc_TunionFieldList_tok_struct* _temp1959=( struct Cyc_TunionFieldList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TunionFieldList_tok_struct)); _temp1959[ 0]=({
+struct Cyc_TunionFieldList_tok_struct _temp1960; _temp1960.tag= Cyc_TunionFieldList_tok;
+_temp1960.f1=({ struct Cyc_List_List* _temp1961=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1961->hd=( void*) Cyc_yyget_TunionField_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp1961->tl=
 Cyc_yyget_TunionFieldList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp1989;}); _temp1988;}); _temp1987;}); break; case 118:
-_LL1986: yyval=( void*)({ struct Cyc_TunionFieldList_tok_struct* _temp1991=(
+yyvsp_offset)]); _temp1961;}); _temp1960;}); _temp1959;}); break; case 118:
+_LL1958: yyval=( void*)({ struct Cyc_TunionFieldList_tok_struct* _temp1963=(
 struct Cyc_TunionFieldList_tok_struct*) GC_malloc( sizeof( struct Cyc_TunionFieldList_tok_struct));
-_temp1991[ 0]=({ struct Cyc_TunionFieldList_tok_struct _temp1992; _temp1992.tag=
-Cyc_TunionFieldList_tok; _temp1992.f1=({ struct Cyc_List_List* _temp1993=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1993->hd=(
+_temp1963[ 0]=({ struct Cyc_TunionFieldList_tok_struct _temp1964; _temp1964.tag=
+Cyc_TunionFieldList_tok; _temp1964.f1=({ struct Cyc_List_List* _temp1965=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1965->hd=(
 void*) Cyc_yyget_TunionField_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp1993->tl= Cyc_yyget_TunionFieldList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1993;}); _temp1992;});
-_temp1991;}); break; case 119: _LL1990: yyval=( void*)({ struct Cyc_Scope_tok_struct*
-_temp1995=( struct Cyc_Scope_tok_struct*) GC_malloc( sizeof( struct Cyc_Scope_tok_struct));
-_temp1995[ 0]=({ struct Cyc_Scope_tok_struct _temp1996; _temp1996.tag= Cyc_Scope_tok;
-_temp1996.f1=( void*)(( void*) Cyc_Absyn_Public); _temp1996;}); _temp1995;});
-break; case 120: _LL1994: yyval=( void*)({ struct Cyc_Scope_tok_struct*
-_temp1998=( struct Cyc_Scope_tok_struct*) GC_malloc( sizeof( struct Cyc_Scope_tok_struct));
-_temp1998[ 0]=({ struct Cyc_Scope_tok_struct _temp1999; _temp1999.tag= Cyc_Scope_tok;
-_temp1999.f1=( void*)(( void*) Cyc_Absyn_Extern); _temp1999;}); _temp1998;});
-break; case 121: _LL1997: yyval=( void*)({ struct Cyc_Scope_tok_struct*
-_temp2001=( struct Cyc_Scope_tok_struct*) GC_malloc( sizeof( struct Cyc_Scope_tok_struct));
-_temp2001[ 0]=({ struct Cyc_Scope_tok_struct _temp2002; _temp2002.tag= Cyc_Scope_tok;
-_temp2002.f1=( void*)(( void*) Cyc_Absyn_Static); _temp2002;}); _temp2001;});
-break; case 122: _LL2000: yyval=( void*)({ struct Cyc_TunionField_tok_struct*
-_temp2004=( struct Cyc_TunionField_tok_struct*) GC_malloc( sizeof( struct Cyc_TunionField_tok_struct));
-_temp2004[ 0]=({ struct Cyc_TunionField_tok_struct _temp2005; _temp2005.tag= Cyc_TunionField_tok;
-_temp2005.f1=({ struct Cyc_Absyn_Tunionfield* _temp2006=( struct Cyc_Absyn_Tunionfield*)
-GC_malloc( sizeof( struct Cyc_Absyn_Tunionfield)); _temp2006->name= Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2006->tvs= 0;
-_temp2006->typs= 0; _temp2006->loc= Cyc_Position_segment_of_abs(( yyls[
+yyvsp_offset - 2)]); _temp1965->tl= Cyc_yyget_TunionFieldList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1965;}); _temp1964;});
+_temp1963;}); break; case 119: _LL1962: yyval=( void*)({ struct Cyc_Scope_tok_struct*
+_temp1967=( struct Cyc_Scope_tok_struct*) GC_malloc( sizeof( struct Cyc_Scope_tok_struct));
+_temp1967[ 0]=({ struct Cyc_Scope_tok_struct _temp1968; _temp1968.tag= Cyc_Scope_tok;
+_temp1968.f1=( void*)(( void*) Cyc_Absyn_Public); _temp1968;}); _temp1967;});
+break; case 120: _LL1966: yyval=( void*)({ struct Cyc_Scope_tok_struct*
+_temp1970=( struct Cyc_Scope_tok_struct*) GC_malloc( sizeof( struct Cyc_Scope_tok_struct));
+_temp1970[ 0]=({ struct Cyc_Scope_tok_struct _temp1971; _temp1971.tag= Cyc_Scope_tok;
+_temp1971.f1=( void*)(( void*) Cyc_Absyn_Extern); _temp1971;}); _temp1970;});
+break; case 121: _LL1969: yyval=( void*)({ struct Cyc_Scope_tok_struct*
+_temp1973=( struct Cyc_Scope_tok_struct*) GC_malloc( sizeof( struct Cyc_Scope_tok_struct));
+_temp1973[ 0]=({ struct Cyc_Scope_tok_struct _temp1974; _temp1974.tag= Cyc_Scope_tok;
+_temp1974.f1=( void*)(( void*) Cyc_Absyn_Static); _temp1974;}); _temp1973;});
+break; case 122: _LL1972: yyval=( void*)({ struct Cyc_TunionField_tok_struct*
+_temp1976=( struct Cyc_TunionField_tok_struct*) GC_malloc( sizeof( struct Cyc_TunionField_tok_struct));
+_temp1976[ 0]=({ struct Cyc_TunionField_tok_struct _temp1977; _temp1977.tag= Cyc_TunionField_tok;
+_temp1977.f1=({ struct Cyc_Absyn_Tunionfield* _temp1978=( struct Cyc_Absyn_Tunionfield*)
+GC_malloc( sizeof( struct Cyc_Absyn_Tunionfield)); _temp1978->name= Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1978->tvs= 0;
+_temp1978->typs= 0; _temp1978->loc= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2006->sc=(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp1978->sc=(
 void*) Cyc_yyget_Scope_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _temp2006;}); _temp2005;}); _temp2004;}); break; case 123:
-_LL2003: { struct Cyc_List_List* _temp2008=(( struct Cyc_List_List*(*)( struct
+yyvsp_offset - 1)]); _temp1978;}); _temp1977;}); _temp1976;}); break; case 123:
+_LL1975: { struct Cyc_List_List* _temp1980=(( struct Cyc_List_List*(*)( struct
 _tuple11*(* f)( struct Cyc_Position_Segment*, struct _tuple2*), struct Cyc_Position_Segment*
 env, struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_get_tqual_typ, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line),((
 struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_ParamDeclList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]))); struct Cyc_List_List*
-_temp2009=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
+_temp1981=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
 void*), struct Cyc_Position_Segment* env, struct Cyc_List_List* x)) Cyc_List_map_c)(
 Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).last_line), Cyc_yyget_TypeList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)])); yyval=( void*)({
-struct Cyc_TunionField_tok_struct* _temp2010=( struct Cyc_TunionField_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TunionField_tok_struct)); _temp2010[ 0]=({ struct
-Cyc_TunionField_tok_struct _temp2011; _temp2011.tag= Cyc_TunionField_tok;
-_temp2011.f1=({ struct Cyc_Absyn_Tunionfield* _temp2012=( struct Cyc_Absyn_Tunionfield*)
-GC_malloc( sizeof( struct Cyc_Absyn_Tunionfield)); _temp2012->name= Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2012->tvs=
-_temp2009; _temp2012->typs= _temp2008; _temp2012->loc= Cyc_Position_segment_of_abs((
+struct Cyc_TunionField_tok_struct* _temp1982=( struct Cyc_TunionField_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TunionField_tok_struct)); _temp1982[ 0]=({ struct
+Cyc_TunionField_tok_struct _temp1983; _temp1983.tag= Cyc_TunionField_tok;
+_temp1983.f1=({ struct Cyc_Absyn_Tunionfield* _temp1984=( struct Cyc_Absyn_Tunionfield*)
+GC_malloc( sizeof( struct Cyc_Absyn_Tunionfield)); _temp1984->name= Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp1984->tvs=
+_temp1981; _temp1984->typs= _temp1980; _temp1984->loc= Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line);
-_temp2012->sc=( void*) Cyc_yyget_Scope_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 5)]); _temp2012;}); _temp2011;}); _temp2010;}); break;}
-case 124: _LL2007: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]; break; case 125: _LL2013: yyval=( void*)({ struct Cyc_Declarator_tok_struct*
-_temp2015=( struct Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
-_temp2015[ 0]=({ struct Cyc_Declarator_tok_struct _temp2016; _temp2016.tag= Cyc_Declarator_tok;
-_temp2016.f1=({ struct Cyc_Parse_Declarator* _temp2017=( struct Cyc_Parse_Declarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2017->id=( Cyc_yyget_Declarator_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->id; _temp2017->tms=
+_temp1984->sc=( void*) Cyc_yyget_Scope_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 5)]); _temp1984;}); _temp1983;}); _temp1982;}); break;}
+case 124: _LL1979: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]; break; case 125: _LL1985: yyval=( void*)({ struct Cyc_Declarator_tok_struct*
+_temp1987=( struct Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
+_temp1987[ 0]=({ struct Cyc_Declarator_tok_struct _temp1988; _temp1988.tag= Cyc_Declarator_tok;
+_temp1988.f1=({ struct Cyc_Parse_Declarator* _temp1989=( struct Cyc_Parse_Declarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp1989->id=( Cyc_yyget_Declarator_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->id; _temp1989->tms=
 Cyc_List_imp_append( Cyc_yyget_TypeModifierList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]),( Cyc_yyget_Declarator_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->tms); _temp2017;});
-_temp2016;}); _temp2015;}); break; case 126: _LL2014: yyval=( void*)({ struct
-Cyc_Declarator_tok_struct* _temp2019=( struct Cyc_Declarator_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Declarator_tok_struct)); _temp2019[ 0]=({ struct
-Cyc_Declarator_tok_struct _temp2020; _temp2020.tag= Cyc_Declarator_tok;
-_temp2020.f1=({ struct Cyc_Parse_Declarator* _temp2021=( struct Cyc_Parse_Declarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2021->id= Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2021->tms= 0;
-_temp2021;}); _temp2020;}); _temp2019;}); break; case 127: _LL2018: yyval= yyvs[
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->tms); _temp1989;});
+_temp1988;}); _temp1987;}); break; case 126: _LL1986: yyval=( void*)({ struct
+Cyc_Declarator_tok_struct* _temp1991=( struct Cyc_Declarator_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Declarator_tok_struct)); _temp1991[ 0]=({ struct
+Cyc_Declarator_tok_struct _temp1992; _temp1992.tag= Cyc_Declarator_tok;
+_temp1992.f1=({ struct Cyc_Parse_Declarator* _temp1993=( struct Cyc_Parse_Declarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp1993->id= Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp1993->tms= 0;
+_temp1993;}); _temp1992;}); _temp1991;}); break; case 127: _LL1990: yyval= yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]; break; case 128:
-_LL2022: yyval=( void*)({ struct Cyc_Declarator_tok_struct* _temp2024=( struct
+_LL1994: yyval=( void*)({ struct Cyc_Declarator_tok_struct* _temp1996=( struct
 Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
-_temp2024[ 0]=({ struct Cyc_Declarator_tok_struct _temp2025; _temp2025.tag= Cyc_Declarator_tok;
-_temp2025.f1=({ struct Cyc_Parse_Declarator* _temp2026=( struct Cyc_Parse_Declarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2026->id=( Cyc_yyget_Declarator_tok(
+_temp1996[ 0]=({ struct Cyc_Declarator_tok_struct _temp1997; _temp1997.tag= Cyc_Declarator_tok;
+_temp1997.f1=({ struct Cyc_Parse_Declarator* _temp1998=( struct Cyc_Parse_Declarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp1998->id=( Cyc_yyget_Declarator_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]))->id;
-_temp2026->tms=({ struct Cyc_List_List* _temp2027=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2027->hd=( void*)(( void*) Cyc_Absyn_Carray_mod);
-_temp2027->tl=( Cyc_yyget_Declarator_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 2)]))->tms; _temp2027;}); _temp2026;}); _temp2025;});
-_temp2024;}); break; case 129: _LL2023: yyval=( void*)({ struct Cyc_Declarator_tok_struct*
-_temp2029=( struct Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
-_temp2029[ 0]=({ struct Cyc_Declarator_tok_struct _temp2030; _temp2030.tag= Cyc_Declarator_tok;
-_temp2030.f1=({ struct Cyc_Parse_Declarator* _temp2031=( struct Cyc_Parse_Declarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2031->id=( Cyc_yyget_Declarator_tok(
+_temp1998->tms=({ struct Cyc_List_List* _temp1999=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp1999->hd=( void*)(( void*) Cyc_Absyn_Carray_mod);
+_temp1999->tl=( Cyc_yyget_Declarator_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 2)]))->tms; _temp1999;}); _temp1998;}); _temp1997;});
+_temp1996;}); break; case 129: _LL1995: yyval=( void*)({ struct Cyc_Declarator_tok_struct*
+_temp2001=( struct Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
+_temp2001[ 0]=({ struct Cyc_Declarator_tok_struct _temp2002; _temp2002.tag= Cyc_Declarator_tok;
+_temp2002.f1=({ struct Cyc_Parse_Declarator* _temp2003=( struct Cyc_Parse_Declarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2003->id=( Cyc_yyget_Declarator_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->id;
-_temp2031->tms=({ struct Cyc_List_List* _temp2032=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2032->hd=( void*)(( void*)({
-struct Cyc_Absyn_ConstArray_mod_struct* _temp2033=( struct Cyc_Absyn_ConstArray_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_ConstArray_mod_struct)); _temp2033[ 0]=({
-struct Cyc_Absyn_ConstArray_mod_struct _temp2034; _temp2034.tag= Cyc_Absyn_ConstArray_mod;
-_temp2034.f1= Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _temp2034;}); _temp2033;})); _temp2032->tl=( Cyc_yyget_Declarator_tok(
+_temp2003->tms=({ struct Cyc_List_List* _temp2004=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2004->hd=( void*)(( void*)({
+struct Cyc_Absyn_ConstArray_mod_struct* _temp2005=( struct Cyc_Absyn_ConstArray_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_ConstArray_mod_struct)); _temp2005[ 0]=({
+struct Cyc_Absyn_ConstArray_mod_struct _temp2006; _temp2006.tag= Cyc_Absyn_ConstArray_mod;
+_temp2006.f1= Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 1)]); _temp2006;}); _temp2005;})); _temp2004->tl=( Cyc_yyget_Declarator_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms;
-_temp2032;}); _temp2031;}); _temp2030;}); _temp2029;}); break; case 130: _LL2028: {
-struct _tuple17 _temp2038; struct Cyc_List_List* _temp2039; struct Cyc_Core_Opt*
-_temp2041; struct Cyc_Absyn_VarargInfo* _temp2043; int _temp2045; struct Cyc_List_List*
-_temp2047; struct _tuple17* _temp2036= Cyc_yyget_ParamDeclListBool_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2038=*
-_temp2036; _LL2048: _temp2047= _temp2038.f1; goto _LL2046; _LL2046: _temp2045=
-_temp2038.f2; goto _LL2044; _LL2044: _temp2043= _temp2038.f3; goto _LL2042;
-_LL2042: _temp2041= _temp2038.f4; goto _LL2040; _LL2040: _temp2039= _temp2038.f5;
-goto _LL2037; _LL2037: yyval=( void*)({ struct Cyc_Declarator_tok_struct*
+_temp2004;}); _temp2003;}); _temp2002;}); _temp2001;}); break; case 130: _LL2000: {
+struct _tuple17 _temp2010; struct Cyc_List_List* _temp2011; struct Cyc_Core_Opt*
+_temp2013; struct Cyc_Absyn_VarargInfo* _temp2015; int _temp2017; struct Cyc_List_List*
+_temp2019; struct _tuple17* _temp2008= Cyc_yyget_ParamDeclListBool_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2010=*
+_temp2008; _LL2020: _temp2019= _temp2010.f1; goto _LL2018; _LL2018: _temp2017=
+_temp2010.f2; goto _LL2016; _LL2016: _temp2015= _temp2010.f3; goto _LL2014;
+_LL2014: _temp2013= _temp2010.f4; goto _LL2012; _LL2012: _temp2011= _temp2010.f5;
+goto _LL2009; _LL2009: yyval=( void*)({ struct Cyc_Declarator_tok_struct*
+_temp2021=( struct Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
+_temp2021[ 0]=({ struct Cyc_Declarator_tok_struct _temp2022; _temp2022.tag= Cyc_Declarator_tok;
+_temp2022.f1=({ struct Cyc_Parse_Declarator* _temp2023=( struct Cyc_Parse_Declarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2023->id=( Cyc_yyget_Declarator_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->id;
+_temp2023->tms=({ struct Cyc_List_List* _temp2024=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2024->hd=( void*)(( void*)({
+struct Cyc_Absyn_Function_mod_struct* _temp2025=( struct Cyc_Absyn_Function_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2025[ 0]=({
+struct Cyc_Absyn_Function_mod_struct _temp2026; _temp2026.tag= Cyc_Absyn_Function_mod;
+_temp2026.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct* _temp2027=(
+struct Cyc_Absyn_WithTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_WithTypes_struct));
+_temp2027[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2028; _temp2028.tag= Cyc_Absyn_WithTypes;
+_temp2028.f1= _temp2019; _temp2028.f2= _temp2017; _temp2028.f3= _temp2015;
+_temp2028.f4= _temp2013; _temp2028.f5= _temp2011; _temp2028;}); _temp2027;}));
+_temp2026;}); _temp2025;})); _temp2024->tl=( Cyc_yyget_Declarator_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms; _temp2024;});
+_temp2023;}); _temp2022;}); _temp2021;}); break;} case 131: _LL2007: yyval=(
+void*)({ struct Cyc_Declarator_tok_struct* _temp2030=( struct Cyc_Declarator_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Declarator_tok_struct)); _temp2030[ 0]=({ struct
+Cyc_Declarator_tok_struct _temp2031; _temp2031.tag= Cyc_Declarator_tok;
+_temp2031.f1=({ struct Cyc_Parse_Declarator* _temp2032=( struct Cyc_Parse_Declarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2032->id=( Cyc_yyget_Declarator_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]))->id;
+_temp2032->tms=({ struct Cyc_List_List* _temp2033=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2033->hd=( void*)(( void*)({
+struct Cyc_Absyn_Function_mod_struct* _temp2034=( struct Cyc_Absyn_Function_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2034[ 0]=({
+struct Cyc_Absyn_Function_mod_struct _temp2035; _temp2035.tag= Cyc_Absyn_Function_mod;
+_temp2035.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct* _temp2036=(
+struct Cyc_Absyn_WithTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_WithTypes_struct));
+_temp2036[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2037; _temp2037.tag= Cyc_Absyn_WithTypes;
+_temp2037.f1= 0; _temp2037.f2= 0; _temp2037.f3= 0; _temp2037.f4= Cyc_yyget_TypeOpt_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2037.f5=
+Cyc_yyget_Rgnorder_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 1)]); _temp2037;}); _temp2036;})); _temp2035;}); _temp2034;}));
+_temp2033->tl=( Cyc_yyget_Declarator_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 4)]))->tms; _temp2033;}); _temp2032;}); _temp2031;});
+_temp2030;}); break; case 132: _LL2029: yyval=( void*)({ struct Cyc_Declarator_tok_struct*
+_temp2039=( struct Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
+_temp2039[ 0]=({ struct Cyc_Declarator_tok_struct _temp2040; _temp2040.tag= Cyc_Declarator_tok;
+_temp2040.f1=({ struct Cyc_Parse_Declarator* _temp2041=( struct Cyc_Parse_Declarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2041->id=( Cyc_yyget_Declarator_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->id;
+_temp2041->tms=({ struct Cyc_List_List* _temp2042=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2042->hd=( void*)(( void*)({
+struct Cyc_Absyn_Function_mod_struct* _temp2043=( struct Cyc_Absyn_Function_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2043[ 0]=({
+struct Cyc_Absyn_Function_mod_struct _temp2044; _temp2044.tag= Cyc_Absyn_Function_mod;
+_temp2044.f1=( void*)(( void*)({ struct Cyc_Absyn_NoTypes_struct* _temp2045=(
+struct Cyc_Absyn_NoTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_NoTypes_struct));
+_temp2045[ 0]=({ struct Cyc_Absyn_NoTypes_struct _temp2046; _temp2046.tag= Cyc_Absyn_NoTypes;
+_temp2046.f1= Cyc_yyget_IdList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 1)]); _temp2046.f2= Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2046;});
+_temp2045;})); _temp2044;}); _temp2043;})); _temp2042->tl=( Cyc_yyget_Declarator_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms;
+_temp2042;}); _temp2041;}); _temp2040;}); _temp2039;}); break; case 133: _LL2038: {
+struct Cyc_List_List* _temp2048=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(*
+f)( struct Cyc_Position_Segment*, void*), struct Cyc_Position_Segment* env,
+struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs((
+yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
+yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line), Cyc_List_imp_rev(
+Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 1)]))); yyval=( void*)({ struct Cyc_Declarator_tok_struct*
 _temp2049=( struct Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
 _temp2049[ 0]=({ struct Cyc_Declarator_tok_struct _temp2050; _temp2050.tag= Cyc_Declarator_tok;
 _temp2050.f1=({ struct Cyc_Parse_Declarator* _temp2051=( struct Cyc_Parse_Declarator*)
@@ -4115,2463 +4159,2397 @@ GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2051->id=( Cyc_yyget_Decl
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->id;
 _temp2051->tms=({ struct Cyc_List_List* _temp2052=( struct Cyc_List_List*)
 GC_malloc( sizeof( struct Cyc_List_List)); _temp2052->hd=( void*)(( void*)({
-struct Cyc_Absyn_Function_mod_struct* _temp2053=( struct Cyc_Absyn_Function_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2053[ 0]=({
-struct Cyc_Absyn_Function_mod_struct _temp2054; _temp2054.tag= Cyc_Absyn_Function_mod;
-_temp2054.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct* _temp2055=(
-struct Cyc_Absyn_WithTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_WithTypes_struct));
-_temp2055[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2056; _temp2056.tag= Cyc_Absyn_WithTypes;
-_temp2056.f1= _temp2047; _temp2056.f2= _temp2045; _temp2056.f3= _temp2043;
-_temp2056.f4= _temp2041; _temp2056.f5= _temp2039; _temp2056;}); _temp2055;}));
-_temp2054;}); _temp2053;})); _temp2052->tl=( Cyc_yyget_Declarator_tok( yyvs[
+struct Cyc_Absyn_TypeParams_mod_struct* _temp2053=( struct Cyc_Absyn_TypeParams_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_TypeParams_mod_struct)); _temp2053[ 0]=({
+struct Cyc_Absyn_TypeParams_mod_struct _temp2054; _temp2054.tag= Cyc_Absyn_TypeParams_mod;
+_temp2054.f1= _temp2048; _temp2054.f2= Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2054.f3=
+0; _temp2054;}); _temp2053;})); _temp2052->tl=( Cyc_yyget_Declarator_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms; _temp2052;});
-_temp2051;}); _temp2050;}); _temp2049;}); break;} case 131: _LL2035: yyval=(
-void*)({ struct Cyc_Declarator_tok_struct* _temp2058=( struct Cyc_Declarator_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Declarator_tok_struct)); _temp2058[ 0]=({ struct
-Cyc_Declarator_tok_struct _temp2059; _temp2059.tag= Cyc_Declarator_tok;
-_temp2059.f1=({ struct Cyc_Parse_Declarator* _temp2060=( struct Cyc_Parse_Declarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2060->id=( Cyc_yyget_Declarator_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]))->id;
-_temp2060->tms=({ struct Cyc_List_List* _temp2061=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2061->hd=( void*)(( void*)({
-struct Cyc_Absyn_Function_mod_struct* _temp2062=( struct Cyc_Absyn_Function_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2062[ 0]=({
-struct Cyc_Absyn_Function_mod_struct _temp2063; _temp2063.tag= Cyc_Absyn_Function_mod;
-_temp2063.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct* _temp2064=(
-struct Cyc_Absyn_WithTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_WithTypes_struct));
-_temp2064[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2065; _temp2065.tag= Cyc_Absyn_WithTypes;
-_temp2065.f1= 0; _temp2065.f2= 0; _temp2065.f3= 0; _temp2065.f4= Cyc_yyget_TypeOpt_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2065.f5=
-Cyc_yyget_Rgnorder_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _temp2065;}); _temp2064;})); _temp2063;}); _temp2062;}));
-_temp2061->tl=( Cyc_yyget_Declarator_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 4)]))->tms; _temp2061;}); _temp2060;}); _temp2059;});
-_temp2058;}); break; case 132: _LL2057: yyval=( void*)({ struct Cyc_Declarator_tok_struct*
-_temp2067=( struct Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
-_temp2067[ 0]=({ struct Cyc_Declarator_tok_struct _temp2068; _temp2068.tag= Cyc_Declarator_tok;
-_temp2068.f1=({ struct Cyc_Parse_Declarator* _temp2069=( struct Cyc_Parse_Declarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2069->id=( Cyc_yyget_Declarator_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->id;
-_temp2069->tms=({ struct Cyc_List_List* _temp2070=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2070->hd=( void*)(( void*)({
-struct Cyc_Absyn_Function_mod_struct* _temp2071=( struct Cyc_Absyn_Function_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2071[ 0]=({
-struct Cyc_Absyn_Function_mod_struct _temp2072; _temp2072.tag= Cyc_Absyn_Function_mod;
-_temp2072.f1=( void*)(( void*)({ struct Cyc_Absyn_NoTypes_struct* _temp2073=(
-struct Cyc_Absyn_NoTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_NoTypes_struct));
-_temp2073[ 0]=({ struct Cyc_Absyn_NoTypes_struct _temp2074; _temp2074.tag= Cyc_Absyn_NoTypes;
-_temp2074.f1= Cyc_yyget_IdList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _temp2074.f2= Cyc_Position_segment_of_abs(( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2074;});
-_temp2073;})); _temp2072;}); _temp2071;})); _temp2070->tl=( Cyc_yyget_Declarator_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms;
-_temp2070;}); _temp2069;}); _temp2068;}); _temp2067;}); break; case 133: _LL2066: {
-struct Cyc_List_List* _temp2076=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(*
-f)( struct Cyc_Position_Segment*, void*), struct Cyc_Position_Segment* env,
-struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs((
-yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
-yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line), Cyc_List_imp_rev(
-Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]))); yyval=( void*)({ struct Cyc_Declarator_tok_struct*
-_temp2077=( struct Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
-_temp2077[ 0]=({ struct Cyc_Declarator_tok_struct _temp2078; _temp2078.tag= Cyc_Declarator_tok;
-_temp2078.f1=({ struct Cyc_Parse_Declarator* _temp2079=( struct Cyc_Parse_Declarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2079->id=( Cyc_yyget_Declarator_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->id;
-_temp2079->tms=({ struct Cyc_List_List* _temp2080=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2080->hd=( void*)(( void*)({
-struct Cyc_Absyn_TypeParams_mod_struct* _temp2081=( struct Cyc_Absyn_TypeParams_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_TypeParams_mod_struct)); _temp2081[ 0]=({
-struct Cyc_Absyn_TypeParams_mod_struct _temp2082; _temp2082.tag= Cyc_Absyn_TypeParams_mod;
-_temp2082.f1= _temp2076; _temp2082.f2= Cyc_Position_segment_of_abs(( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2082.f3=
-0; _temp2082;}); _temp2081;})); _temp2080->tl=( Cyc_yyget_Declarator_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms; _temp2080;});
-_temp2079;}); _temp2078;}); _temp2077;}); break;} case 134: _LL2075:(( struct
+_temp2051;}); _temp2050;}); _temp2049;}); break;} case 134: _LL2047:(( struct
 Cyc_Lexing_lexbuf*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Parse_lbuf))->v)->lex_curr_pos
--= 1;{ struct Cyc_List_List* _temp2084=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(*
+-= 1;{ struct Cyc_List_List* _temp2056=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(*
 f)( struct Cyc_Position_Segment*, void*), struct Cyc_Position_Segment* env,
 struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line), Cyc_List_imp_rev(
 Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 1)]))); yyval=( void*)({ struct Cyc_Declarator_tok_struct*
-_temp2085=( struct Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
-_temp2085[ 0]=({ struct Cyc_Declarator_tok_struct _temp2086; _temp2086.tag= Cyc_Declarator_tok;
-_temp2086.f1=({ struct Cyc_Parse_Declarator* _temp2087=( struct Cyc_Parse_Declarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2087->id=( Cyc_yyget_Declarator_tok(
+_temp2057=( struct Cyc_Declarator_tok_struct*) GC_malloc( sizeof( struct Cyc_Declarator_tok_struct));
+_temp2057[ 0]=({ struct Cyc_Declarator_tok_struct _temp2058; _temp2058.tag= Cyc_Declarator_tok;
+_temp2058.f1=({ struct Cyc_Parse_Declarator* _temp2059=( struct Cyc_Parse_Declarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2059->id=( Cyc_yyget_Declarator_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->id;
-_temp2087->tms=({ struct Cyc_List_List* _temp2088=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2088->hd=( void*)(( void*)({
-struct Cyc_Absyn_TypeParams_mod_struct* _temp2089=( struct Cyc_Absyn_TypeParams_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_TypeParams_mod_struct)); _temp2089[ 0]=({
-struct Cyc_Absyn_TypeParams_mod_struct _temp2090; _temp2090.tag= Cyc_Absyn_TypeParams_mod;
-_temp2090.f1= _temp2084; _temp2090.f2= Cyc_Position_segment_of_abs(( yyls[
+_temp2059->tms=({ struct Cyc_List_List* _temp2060=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2060->hd=( void*)(( void*)({
+struct Cyc_Absyn_TypeParams_mod_struct* _temp2061=( struct Cyc_Absyn_TypeParams_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_TypeParams_mod_struct)); _temp2061[ 0]=({
+struct Cyc_Absyn_TypeParams_mod_struct _temp2062; _temp2062.tag= Cyc_Absyn_TypeParams_mod;
+_temp2062.f1= _temp2056; _temp2062.f2= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2090.f3=
-0; _temp2090;}); _temp2089;})); _temp2088->tl=( Cyc_yyget_Declarator_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms; _temp2088;});
-_temp2087;}); _temp2086;}); _temp2085;}); break;} case 135: _LL2083: yyval=(
-void*)({ struct Cyc_Declarator_tok_struct* _temp2092=( struct Cyc_Declarator_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Declarator_tok_struct)); _temp2092[ 0]=({ struct
-Cyc_Declarator_tok_struct _temp2093; _temp2093.tag= Cyc_Declarator_tok;
-_temp2093.f1=({ struct Cyc_Parse_Declarator* _temp2094=( struct Cyc_Parse_Declarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2094->id=( Cyc_yyget_Declarator_tok(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2062.f3=
+0; _temp2062;}); _temp2061;})); _temp2060->tl=( Cyc_yyget_Declarator_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms; _temp2060;});
+_temp2059;}); _temp2058;}); _temp2057;}); break;} case 135: _LL2055: yyval=(
+void*)({ struct Cyc_Declarator_tok_struct* _temp2064=( struct Cyc_Declarator_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Declarator_tok_struct)); _temp2064[ 0]=({ struct
+Cyc_Declarator_tok_struct _temp2065; _temp2065.tag= Cyc_Declarator_tok;
+_temp2065.f1=({ struct Cyc_Parse_Declarator* _temp2066=( struct Cyc_Parse_Declarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2066->id=( Cyc_yyget_Declarator_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]))->id;
-_temp2094->tms=({ struct Cyc_List_List* _temp2095=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2095->hd=( void*)(( void*)({
-struct Cyc_Absyn_Attributes_mod_struct* _temp2096=( struct Cyc_Absyn_Attributes_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Attributes_mod_struct)); _temp2096[ 0]=({
-struct Cyc_Absyn_Attributes_mod_struct _temp2097; _temp2097.tag= Cyc_Absyn_Attributes_mod;
-_temp2097.f1= Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_temp2066->tms=({ struct Cyc_List_List* _temp2067=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2067->hd=( void*)(( void*)({
+struct Cyc_Absyn_Attributes_mod_struct* _temp2068=( struct Cyc_Absyn_Attributes_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Attributes_mod_struct)); _temp2068[ 0]=({
+struct Cyc_Absyn_Attributes_mod_struct _temp2069; _temp2069.tag= Cyc_Absyn_Attributes_mod;
+_temp2069.f1= Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line); _temp2097.f2= Cyc_yyget_AttributeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2097;}); _temp2096;}));
-_temp2095->tl=( Cyc_yyget_Declarator_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 1)]))->tms; _temp2095;}); _temp2094;}); _temp2093;});
-_temp2092;}); break; case 136: _LL2091: Cyc_Parse_err( _tag_arr("identifier has not been declared as a typedef",
+yylsp_offset)]).last_line); _temp2069.f2= Cyc_yyget_AttributeList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2069;}); _temp2068;}));
+_temp2067->tl=( Cyc_yyget_Declarator_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 1)]))->tms; _temp2067;}); _temp2066;}); _temp2065;});
+_temp2064;}); break; case 136: _LL2063: Cyc_Parse_err( _tag_arr("identifier has not been declared as a typedef",
 sizeof( unsigned char), 46u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line)); yyval=(
-void*)({ struct Cyc_Declarator_tok_struct* _temp2099=( struct Cyc_Declarator_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Declarator_tok_struct)); _temp2099[ 0]=({ struct
-Cyc_Declarator_tok_struct _temp2100; _temp2100.tag= Cyc_Declarator_tok;
-_temp2100.f1=({ struct Cyc_Parse_Declarator* _temp2101=( struct Cyc_Parse_Declarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2101->id= Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2101->tms= 0;
-_temp2101;}); _temp2100;}); _temp2099;}); break; case 137: _LL2098: yyval=( void*)({
-struct Cyc_Declarator_tok_struct* _temp2103=( struct Cyc_Declarator_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Declarator_tok_struct)); _temp2103[ 0]=({ struct
-Cyc_Declarator_tok_struct _temp2104; _temp2104.tag= Cyc_Declarator_tok;
-_temp2104.f1=({ struct Cyc_Parse_Declarator* _temp2105=( struct Cyc_Parse_Declarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2105->id= Cyc_Absyn_exn_name;
-_temp2105->tms= 0; _temp2105;}); _temp2104;}); _temp2103;}); break; case 138:
-_LL2102: yyval=( void*)({ struct Cyc_TypeModifierList_tok_struct* _temp2107=(
+void*)({ struct Cyc_Declarator_tok_struct* _temp2071=( struct Cyc_Declarator_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Declarator_tok_struct)); _temp2071[ 0]=({ struct
+Cyc_Declarator_tok_struct _temp2072; _temp2072.tag= Cyc_Declarator_tok;
+_temp2072.f1=({ struct Cyc_Parse_Declarator* _temp2073=( struct Cyc_Parse_Declarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2073->id= Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2073->tms= 0;
+_temp2073;}); _temp2072;}); _temp2071;}); break; case 137: _LL2070: yyval=( void*)({
+struct Cyc_Declarator_tok_struct* _temp2075=( struct Cyc_Declarator_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Declarator_tok_struct)); _temp2075[ 0]=({ struct
+Cyc_Declarator_tok_struct _temp2076; _temp2076.tag= Cyc_Declarator_tok;
+_temp2076.f1=({ struct Cyc_Parse_Declarator* _temp2077=( struct Cyc_Parse_Declarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Declarator)); _temp2077->id= Cyc_Absyn_exn_name;
+_temp2077->tms= 0; _temp2077;}); _temp2076;}); _temp2075;}); break; case 138:
+_LL2074: yyval=( void*)({ struct Cyc_TypeModifierList_tok_struct* _temp2079=(
 struct Cyc_TypeModifierList_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeModifierList_tok_struct));
-_temp2107[ 0]=({ struct Cyc_TypeModifierList_tok_struct _temp2108; _temp2108.tag=
-Cyc_TypeModifierList_tok; _temp2108.f1=({ struct Cyc_List_List* _temp2109=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2109->hd=(
-void*)(( void*)({ struct Cyc_Absyn_Pointer_mod_struct* _temp2110=( struct Cyc_Absyn_Pointer_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Pointer_mod_struct)); _temp2110[ 0]=({
-struct Cyc_Absyn_Pointer_mod_struct _temp2111; _temp2111.tag= Cyc_Absyn_Pointer_mod;
-_temp2111.f1=( void*) Cyc_yyget_Pointer_Sort_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2111.f2=( void*)
+_temp2079[ 0]=({ struct Cyc_TypeModifierList_tok_struct _temp2080; _temp2080.tag=
+Cyc_TypeModifierList_tok; _temp2080.f1=({ struct Cyc_List_List* _temp2081=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2081->hd=(
+void*)(( void*)({ struct Cyc_Absyn_Pointer_mod_struct* _temp2082=( struct Cyc_Absyn_Pointer_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Pointer_mod_struct)); _temp2082[ 0]=({
+struct Cyc_Absyn_Pointer_mod_struct _temp2083; _temp2083.tag= Cyc_Absyn_Pointer_mod;
+_temp2083.f1=( void*) Cyc_yyget_Pointer_Sort_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2083.f2=( void*)
 Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
-1)]); _temp2111.f3= Cyc_Absyn_empty_tqual(); _temp2111;}); _temp2110;}));
-_temp2109->tl= Cyc_Parse_attopt_to_tms( Cyc_Position_segment_of_abs(( yyls[
+1)]); _temp2083.f3= Cyc_Absyn_empty_tqual(); _temp2083;}); _temp2082;}));
+_temp2081->tl= Cyc_Parse_attopt_to_tms( Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line), Cyc_yyget_AttributeList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), 0); _temp2109;});
-_temp2108;}); _temp2107;}); break; case 139: _LL2106: yyval=( void*)({ struct
-Cyc_TypeModifierList_tok_struct* _temp2113=( struct Cyc_TypeModifierList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeModifierList_tok_struct)); _temp2113[ 0]=({
-struct Cyc_TypeModifierList_tok_struct _temp2114; _temp2114.tag= Cyc_TypeModifierList_tok;
-_temp2114.f1=({ struct Cyc_List_List* _temp2115=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2115->hd=( void*)(( void*)({
-struct Cyc_Absyn_Pointer_mod_struct* _temp2116=( struct Cyc_Absyn_Pointer_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Pointer_mod_struct)); _temp2116[ 0]=({
-struct Cyc_Absyn_Pointer_mod_struct _temp2117; _temp2117.tag= Cyc_Absyn_Pointer_mod;
-_temp2117.f1=( void*) Cyc_yyget_Pointer_Sort_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2117.f2=( void*)
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), 0); _temp2081;});
+_temp2080;}); _temp2079;}); break; case 139: _LL2078: yyval=( void*)({ struct
+Cyc_TypeModifierList_tok_struct* _temp2085=( struct Cyc_TypeModifierList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeModifierList_tok_struct)); _temp2085[ 0]=({
+struct Cyc_TypeModifierList_tok_struct _temp2086; _temp2086.tag= Cyc_TypeModifierList_tok;
+_temp2086.f1=({ struct Cyc_List_List* _temp2087=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2087->hd=( void*)(( void*)({
+struct Cyc_Absyn_Pointer_mod_struct* _temp2088=( struct Cyc_Absyn_Pointer_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Pointer_mod_struct)); _temp2088[ 0]=({
+struct Cyc_Absyn_Pointer_mod_struct _temp2089; _temp2089.tag= Cyc_Absyn_Pointer_mod;
+_temp2089.f1=( void*) Cyc_yyget_Pointer_Sort_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2089.f2=( void*)
 Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
-2)]); _temp2117.f3= Cyc_yyget_TypeQual_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset)]); _temp2117;}); _temp2116;})); _temp2115->tl= Cyc_Parse_attopt_to_tms(
+2)]); _temp2089.f3= Cyc_yyget_TypeQual_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset)]); _temp2089;}); _temp2088;})); _temp2087->tl= Cyc_Parse_attopt_to_tms(
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 1)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 1)]).last_line), Cyc_yyget_AttributeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), 0); _temp2115;});
-_temp2114;}); _temp2113;}); break; case 140: _LL2112: yyval=( void*)({ struct
-Cyc_TypeModifierList_tok_struct* _temp2119=( struct Cyc_TypeModifierList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeModifierList_tok_struct)); _temp2119[ 0]=({
-struct Cyc_TypeModifierList_tok_struct _temp2120; _temp2120.tag= Cyc_TypeModifierList_tok;
-_temp2120.f1=({ struct Cyc_List_List* _temp2121=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2121->hd=( void*)(( void*)({
-struct Cyc_Absyn_Pointer_mod_struct* _temp2122=( struct Cyc_Absyn_Pointer_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Pointer_mod_struct)); _temp2122[ 0]=({
-struct Cyc_Absyn_Pointer_mod_struct _temp2123; _temp2123.tag= Cyc_Absyn_Pointer_mod;
-_temp2123.f1=( void*) Cyc_yyget_Pointer_Sort_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2123.f2=( void*)
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), 0); _temp2087;});
+_temp2086;}); _temp2085;}); break; case 140: _LL2084: yyval=( void*)({ struct
+Cyc_TypeModifierList_tok_struct* _temp2091=( struct Cyc_TypeModifierList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeModifierList_tok_struct)); _temp2091[ 0]=({
+struct Cyc_TypeModifierList_tok_struct _temp2092; _temp2092.tag= Cyc_TypeModifierList_tok;
+_temp2092.f1=({ struct Cyc_List_List* _temp2093=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2093->hd=( void*)(( void*)({
+struct Cyc_Absyn_Pointer_mod_struct* _temp2094=( struct Cyc_Absyn_Pointer_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Pointer_mod_struct)); _temp2094[ 0]=({
+struct Cyc_Absyn_Pointer_mod_struct _temp2095; _temp2095.tag= Cyc_Absyn_Pointer_mod;
+_temp2095.f1=( void*) Cyc_yyget_Pointer_Sort_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2095.f2=( void*)
 Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
-2)]); _temp2123.f3= Cyc_Absyn_empty_tqual(); _temp2123;}); _temp2122;}));
-_temp2121->tl= Cyc_Parse_attopt_to_tms( Cyc_Position_segment_of_abs(( yyls[
+2)]); _temp2095.f3= Cyc_Absyn_empty_tqual(); _temp2095;}); _temp2094;}));
+_temp2093->tl= Cyc_Parse_attopt_to_tms( Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line), Cyc_yyget_AttributeList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_yyget_TypeModifierList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2121;});
-_temp2120;}); _temp2119;}); break; case 141: _LL2118: yyval=( void*)({ struct
-Cyc_TypeModifierList_tok_struct* _temp2125=( struct Cyc_TypeModifierList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeModifierList_tok_struct)); _temp2125[ 0]=({
-struct Cyc_TypeModifierList_tok_struct _temp2126; _temp2126.tag= Cyc_TypeModifierList_tok;
-_temp2126.f1=({ struct Cyc_List_List* _temp2127=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2127->hd=( void*)(( void*)({
-struct Cyc_Absyn_Pointer_mod_struct* _temp2128=( struct Cyc_Absyn_Pointer_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Pointer_mod_struct)); _temp2128[ 0]=({
-struct Cyc_Absyn_Pointer_mod_struct _temp2129; _temp2129.tag= Cyc_Absyn_Pointer_mod;
-_temp2129.f1=( void*) Cyc_yyget_Pointer_Sort_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2129.f2=( void*)
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2093;});
+_temp2092;}); _temp2091;}); break; case 141: _LL2090: yyval=( void*)({ struct
+Cyc_TypeModifierList_tok_struct* _temp2097=( struct Cyc_TypeModifierList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeModifierList_tok_struct)); _temp2097[ 0]=({
+struct Cyc_TypeModifierList_tok_struct _temp2098; _temp2098.tag= Cyc_TypeModifierList_tok;
+_temp2098.f1=({ struct Cyc_List_List* _temp2099=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2099->hd=( void*)(( void*)({
+struct Cyc_Absyn_Pointer_mod_struct* _temp2100=( struct Cyc_Absyn_Pointer_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Pointer_mod_struct)); _temp2100[ 0]=({
+struct Cyc_Absyn_Pointer_mod_struct _temp2101; _temp2101.tag= Cyc_Absyn_Pointer_mod;
+_temp2101.f1=( void*) Cyc_yyget_Pointer_Sort_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2101.f2=( void*)
 Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
-3)]); _temp2129.f3= Cyc_yyget_TypeQual_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 1)]); _temp2129;}); _temp2128;})); _temp2127->tl= Cyc_Parse_attopt_to_tms(
+3)]); _temp2101.f3= Cyc_yyget_TypeQual_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 1)]); _temp2101;}); _temp2100;})); _temp2099->tl= Cyc_Parse_attopt_to_tms(
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 2)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 2)]).last_line), Cyc_yyget_AttributeList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_TypeModifierList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2127;});
-_temp2126;}); _temp2125;}); break; case 142: _LL2124: yyval=( void*)({ struct
-Cyc_Pointer_Sort_tok_struct* _temp2131=( struct Cyc_Pointer_Sort_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pointer_Sort_tok_struct)); _temp2131[ 0]=({ struct
-Cyc_Pointer_Sort_tok_struct _temp2132; _temp2132.tag= Cyc_Pointer_Sort_tok;
-_temp2132.f1=( void*)(( void*)({ struct Cyc_Absyn_Nullable_ps_struct* _temp2133=(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2099;});
+_temp2098;}); _temp2097;}); break; case 142: _LL2096: yyval=( void*)({ struct
+Cyc_Pointer_Sort_tok_struct* _temp2103=( struct Cyc_Pointer_Sort_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pointer_Sort_tok_struct)); _temp2103[ 0]=({ struct
+Cyc_Pointer_Sort_tok_struct _temp2104; _temp2104.tag= Cyc_Pointer_Sort_tok;
+_temp2104.f1=( void*)(( void*)({ struct Cyc_Absyn_Nullable_ps_struct* _temp2105=(
 struct Cyc_Absyn_Nullable_ps_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Nullable_ps_struct));
-_temp2133[ 0]=({ struct Cyc_Absyn_Nullable_ps_struct _temp2134; _temp2134.tag=
-Cyc_Absyn_Nullable_ps; _temp2134.f1= Cyc_Absyn_exp_unsigned_one; _temp2134;});
-_temp2133;})); _temp2132;}); _temp2131;}); break; case 143: _LL2130: yyval=(
-void*)({ struct Cyc_Pointer_Sort_tok_struct* _temp2136=( struct Cyc_Pointer_Sort_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pointer_Sort_tok_struct)); _temp2136[ 0]=({ struct
-Cyc_Pointer_Sort_tok_struct _temp2137; _temp2137.tag= Cyc_Pointer_Sort_tok;
-_temp2137.f1=( void*)(( void*)({ struct Cyc_Absyn_NonNullable_ps_struct*
-_temp2138=( struct Cyc_Absyn_NonNullable_ps_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_NonNullable_ps_struct)); _temp2138[ 0]=({ struct Cyc_Absyn_NonNullable_ps_struct
-_temp2139; _temp2139.tag= Cyc_Absyn_NonNullable_ps; _temp2139.f1= Cyc_Absyn_exp_unsigned_one;
-_temp2139;}); _temp2138;})); _temp2137;}); _temp2136;}); break; case 144:
-_LL2135: yyval=( void*)({ struct Cyc_Pointer_Sort_tok_struct* _temp2141=( struct
+_temp2105[ 0]=({ struct Cyc_Absyn_Nullable_ps_struct _temp2106; _temp2106.tag=
+Cyc_Absyn_Nullable_ps; _temp2106.f1= Cyc_Absyn_exp_unsigned_one; _temp2106;});
+_temp2105;})); _temp2104;}); _temp2103;}); break; case 143: _LL2102: yyval=(
+void*)({ struct Cyc_Pointer_Sort_tok_struct* _temp2108=( struct Cyc_Pointer_Sort_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pointer_Sort_tok_struct)); _temp2108[ 0]=({ struct
+Cyc_Pointer_Sort_tok_struct _temp2109; _temp2109.tag= Cyc_Pointer_Sort_tok;
+_temp2109.f1=( void*)(( void*)({ struct Cyc_Absyn_NonNullable_ps_struct*
+_temp2110=( struct Cyc_Absyn_NonNullable_ps_struct*) GC_malloc( sizeof( struct
+Cyc_Absyn_NonNullable_ps_struct)); _temp2110[ 0]=({ struct Cyc_Absyn_NonNullable_ps_struct
+_temp2111; _temp2111.tag= Cyc_Absyn_NonNullable_ps; _temp2111.f1= Cyc_Absyn_exp_unsigned_one;
+_temp2111;}); _temp2110;})); _temp2109;}); _temp2108;}); break; case 144:
+_LL2107: yyval=( void*)({ struct Cyc_Pointer_Sort_tok_struct* _temp2113=( struct
 Cyc_Pointer_Sort_tok_struct*) GC_malloc( sizeof( struct Cyc_Pointer_Sort_tok_struct));
-_temp2141[ 0]=({ struct Cyc_Pointer_Sort_tok_struct _temp2142; _temp2142.tag=
-Cyc_Pointer_Sort_tok; _temp2142.f1=( void*)(( void*)({ struct Cyc_Absyn_Nullable_ps_struct*
-_temp2143=( struct Cyc_Absyn_Nullable_ps_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Nullable_ps_struct));
-_temp2143[ 0]=({ struct Cyc_Absyn_Nullable_ps_struct _temp2144; _temp2144.tag=
-Cyc_Absyn_Nullable_ps; _temp2144.f1= Cyc_yyget_Exp_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2144;});
-_temp2143;})); _temp2142;}); _temp2141;}); break; case 145: _LL2140: yyval=(
-void*)({ struct Cyc_Pointer_Sort_tok_struct* _temp2146=( struct Cyc_Pointer_Sort_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pointer_Sort_tok_struct)); _temp2146[ 0]=({ struct
-Cyc_Pointer_Sort_tok_struct _temp2147; _temp2147.tag= Cyc_Pointer_Sort_tok;
-_temp2147.f1=( void*)(( void*)({ struct Cyc_Absyn_NonNullable_ps_struct*
-_temp2148=( struct Cyc_Absyn_NonNullable_ps_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_NonNullable_ps_struct)); _temp2148[ 0]=({ struct Cyc_Absyn_NonNullable_ps_struct
-_temp2149; _temp2149.tag= Cyc_Absyn_NonNullable_ps; _temp2149.f1= Cyc_yyget_Exp_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2149;});
-_temp2148;})); _temp2147;}); _temp2146;}); break; case 146: _LL2145: yyval=(
-void*)({ struct Cyc_Pointer_Sort_tok_struct* _temp2151=( struct Cyc_Pointer_Sort_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pointer_Sort_tok_struct)); _temp2151[ 0]=({ struct
-Cyc_Pointer_Sort_tok_struct _temp2152; _temp2152.tag= Cyc_Pointer_Sort_tok;
-_temp2152.f1=( void*)(( void*) Cyc_Absyn_TaggedArray_ps); _temp2152;});
-_temp2151;}); break; case 147: _LL2150: yyval=( void*)({ struct Cyc_Type_tok_struct*
-_temp2154=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof( struct Cyc_Type_tok_struct));
-_temp2154[ 0]=({ struct Cyc_Type_tok_struct _temp2155; _temp2155.tag= Cyc_Type_tok;
-_temp2155.f1=( void*)(( void*) Cyc_Absyn_HeapRgn); _temp2155;}); _temp2154;});
-break; case 148: _LL2153: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]; break; case 149: _LL2156: if( ! Cyc_Parse_set_vartyp_kind( Cyc_yyget_Type_tok(
+_temp2113[ 0]=({ struct Cyc_Pointer_Sort_tok_struct _temp2114; _temp2114.tag=
+Cyc_Pointer_Sort_tok; _temp2114.f1=( void*)(( void*)({ struct Cyc_Absyn_Nullable_ps_struct*
+_temp2115=( struct Cyc_Absyn_Nullable_ps_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Nullable_ps_struct));
+_temp2115[ 0]=({ struct Cyc_Absyn_Nullable_ps_struct _temp2116; _temp2116.tag=
+Cyc_Absyn_Nullable_ps; _temp2116.f1= Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2116;});
+_temp2115;})); _temp2114;}); _temp2113;}); break; case 145: _LL2112: yyval=(
+void*)({ struct Cyc_Pointer_Sort_tok_struct* _temp2118=( struct Cyc_Pointer_Sort_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pointer_Sort_tok_struct)); _temp2118[ 0]=({ struct
+Cyc_Pointer_Sort_tok_struct _temp2119; _temp2119.tag= Cyc_Pointer_Sort_tok;
+_temp2119.f1=( void*)(( void*)({ struct Cyc_Absyn_NonNullable_ps_struct*
+_temp2120=( struct Cyc_Absyn_NonNullable_ps_struct*) GC_malloc( sizeof( struct
+Cyc_Absyn_NonNullable_ps_struct)); _temp2120[ 0]=({ struct Cyc_Absyn_NonNullable_ps_struct
+_temp2121; _temp2121.tag= Cyc_Absyn_NonNullable_ps; _temp2121.f1= Cyc_yyget_Exp_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2121;});
+_temp2120;})); _temp2119;}); _temp2118;}); break; case 146: _LL2117: yyval=(
+void*)({ struct Cyc_Pointer_Sort_tok_struct* _temp2123=( struct Cyc_Pointer_Sort_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pointer_Sort_tok_struct)); _temp2123[ 0]=({ struct
+Cyc_Pointer_Sort_tok_struct _temp2124; _temp2124.tag= Cyc_Pointer_Sort_tok;
+_temp2124.f1=( void*)(( void*) Cyc_Absyn_TaggedArray_ps); _temp2124;});
+_temp2123;}); break; case 147: _LL2122: yyval=( void*)({ struct Cyc_Type_tok_struct*
+_temp2126=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof( struct Cyc_Type_tok_struct));
+_temp2126[ 0]=({ struct Cyc_Type_tok_struct _temp2127; _temp2127.tag= Cyc_Type_tok;
+_temp2127.f1=( void*)(( void*) Cyc_Absyn_HeapRgn); _temp2127;}); _temp2126;});
+break; case 148: _LL2125: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]; break; case 149: _LL2128: if( ! Cyc_Parse_set_vartyp_kind( Cyc_yyget_Type_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]),( void*) Cyc_Absyn_RgnKind)){
 Cyc_Parse_err( _tag_arr("expecting region kind", sizeof( unsigned char), 22u),
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset)]).last_line));} yyval= yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]; break; case 150: _LL2157: yyval=( void*)({ struct Cyc_Type_tok_struct*
-_temp2159=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof( struct Cyc_Type_tok_struct));
-_temp2159[ 0]=({ struct Cyc_Type_tok_struct _temp2160; _temp2160.tag= Cyc_Type_tok;
-_temp2160.f1=( void*) Cyc_Absyn_new_evar(({ struct Cyc_Core_Opt* _temp2161=(
-struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp2161->v=(
-void*)(( void*) Cyc_Absyn_RgnKind); _temp2161;}), 0); _temp2160;}); _temp2159;});
-break; case 151: _LL2158: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]; break; case 152: _LL2162: yyval=( void*)({ struct Cyc_TypeQual_tok_struct*
-_temp2164=( struct Cyc_TypeQual_tok_struct*) GC_malloc_atomic( sizeof( struct
-Cyc_TypeQual_tok_struct)); _temp2164[ 0]=({ struct Cyc_TypeQual_tok_struct
-_temp2165; _temp2165.tag= Cyc_TypeQual_tok; _temp2165.f1= Cyc_Absyn_combine_tqual(
+yyvsp_offset)]; break; case 150: _LL2129: yyval=( void*)({ struct Cyc_Type_tok_struct*
+_temp2131=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof( struct Cyc_Type_tok_struct));
+_temp2131[ 0]=({ struct Cyc_Type_tok_struct _temp2132; _temp2132.tag= Cyc_Type_tok;
+_temp2132.f1=( void*) Cyc_Absyn_new_evar(({ struct Cyc_Core_Opt* _temp2133=(
+struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp2133->v=(
+void*)(( void*) Cyc_Absyn_RgnKind); _temp2133;}), 0); _temp2132;}); _temp2131;});
+break; case 151: _LL2130: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]; break; case 152: _LL2134: yyval=( void*)({ struct Cyc_TypeQual_tok_struct*
+_temp2136=( struct Cyc_TypeQual_tok_struct*) GC_malloc_atomic( sizeof( struct
+Cyc_TypeQual_tok_struct)); _temp2136[ 0]=({ struct Cyc_TypeQual_tok_struct
+_temp2137; _temp2137.tag= Cyc_TypeQual_tok; _temp2137.f1= Cyc_Absyn_combine_tqual(
 Cyc_yyget_TypeQual_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 1)]), Cyc_yyget_TypeQual_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2165;});
-_temp2164;}); break; case 153: _LL2163: yyval=( void*)({ struct Cyc_ParamDeclListBool_tok_struct*
-_temp2167=( struct Cyc_ParamDeclListBool_tok_struct*) GC_malloc( sizeof( struct
-Cyc_ParamDeclListBool_tok_struct)); _temp2167[ 0]=({ struct Cyc_ParamDeclListBool_tok_struct
-_temp2168; _temp2168.tag= Cyc_ParamDeclListBool_tok; _temp2168.f1=({ struct
-_tuple17* _temp2169=( struct _tuple17*) GC_malloc( sizeof( struct _tuple17));
-_temp2169->f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2137;});
+_temp2136;}); break; case 153: _LL2135: yyval=( void*)({ struct Cyc_ParamDeclListBool_tok_struct*
+_temp2139=( struct Cyc_ParamDeclListBool_tok_struct*) GC_malloc( sizeof( struct
+Cyc_ParamDeclListBool_tok_struct)); _temp2139[ 0]=({ struct Cyc_ParamDeclListBool_tok_struct
+_temp2140; _temp2140.tag= Cyc_ParamDeclListBool_tok; _temp2140.f1=({ struct
+_tuple17* _temp2141=( struct _tuple17*) GC_malloc( sizeof( struct _tuple17));
+_temp2141->f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
 Cyc_yyget_ParamDeclList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)])); _temp2169->f2= 0; _temp2169->f3= 0; _temp2169->f4= Cyc_yyget_TypeOpt_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2169->f5=
+yyvsp_offset - 2)])); _temp2141->f2= 0; _temp2141->f3= 0; _temp2141->f4= Cyc_yyget_TypeOpt_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2141->f5=
 Cyc_yyget_Rgnorder_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2169;}); _temp2168;}); _temp2167;}); break; case 154:
-_LL2166: yyval=( void*)({ struct Cyc_ParamDeclListBool_tok_struct* _temp2171=(
+yyvsp_offset)]); _temp2141;}); _temp2140;}); _temp2139;}); break; case 154:
+_LL2138: yyval=( void*)({ struct Cyc_ParamDeclListBool_tok_struct* _temp2143=(
 struct Cyc_ParamDeclListBool_tok_struct*) GC_malloc( sizeof( struct Cyc_ParamDeclListBool_tok_struct));
-_temp2171[ 0]=({ struct Cyc_ParamDeclListBool_tok_struct _temp2172; _temp2172.tag=
-Cyc_ParamDeclListBool_tok; _temp2172.f1=({ struct _tuple17* _temp2173=( struct
-_tuple17*) GC_malloc( sizeof( struct _tuple17)); _temp2173->f1=(( struct Cyc_List_List*(*)(
+_temp2143[ 0]=({ struct Cyc_ParamDeclListBool_tok_struct _temp2144; _temp2144.tag=
+Cyc_ParamDeclListBool_tok; _temp2144.f1=({ struct _tuple17* _temp2145=( struct
+_tuple17*) GC_malloc( sizeof( struct _tuple17)); _temp2145->f1=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_ParamDeclList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)])); _temp2173->f2= 1;
-_temp2173->f3= 0; _temp2173->f4= Cyc_yyget_TypeOpt_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2173->f5= Cyc_yyget_Rgnorder_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2173;});
-_temp2172;}); _temp2171;}); break; case 155: _LL2170: { struct _tuple2 _temp2177;
-void* _temp2178; struct Cyc_Absyn_Tqual _temp2180; struct Cyc_Core_Opt*
-_temp2182; struct _tuple2* _temp2175= Cyc_yyget_ParamDecl_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2177=*
-_temp2175; _LL2183: _temp2182= _temp2177.f1; goto _LL2181; _LL2181: _temp2180=
-_temp2177.f2; goto _LL2179; _LL2179: _temp2178= _temp2177.f3; goto _LL2176;
-_LL2176: { struct Cyc_Absyn_VarargInfo* _temp2184=({ struct Cyc_Absyn_VarargInfo*
-_temp2188=( struct Cyc_Absyn_VarargInfo*) GC_malloc( sizeof( struct Cyc_Absyn_VarargInfo));
-_temp2188->name= _temp2182; _temp2188->tq= _temp2180; _temp2188->type=( void*)
-_temp2178; _temp2188->rgn=( void*) Cyc_yyget_Type_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2188->inject=
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)])); _temp2145->f2= 1;
+_temp2145->f3= 0; _temp2145->f4= Cyc_yyget_TypeOpt_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2145->f5= Cyc_yyget_Rgnorder_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2145;});
+_temp2144;}); _temp2143;}); break; case 155: _LL2142: { struct _tuple2 _temp2149;
+void* _temp2150; struct Cyc_Absyn_Tqual _temp2152; struct Cyc_Core_Opt*
+_temp2154; struct _tuple2* _temp2147= Cyc_yyget_ParamDecl_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2149=*
+_temp2147; _LL2155: _temp2154= _temp2149.f1; goto _LL2153; _LL2153: _temp2152=
+_temp2149.f2; goto _LL2151; _LL2151: _temp2150= _temp2149.f3; goto _LL2148;
+_LL2148: { struct Cyc_Absyn_VarargInfo* _temp2156=({ struct Cyc_Absyn_VarargInfo*
+_temp2160=( struct Cyc_Absyn_VarargInfo*) GC_malloc( sizeof( struct Cyc_Absyn_VarargInfo));
+_temp2160->name= _temp2154; _temp2160->tq= _temp2152; _temp2160->type=( void*)
+_temp2150; _temp2160->rgn=( void*) Cyc_yyget_Type_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2160->inject=
 Cyc_yyget_Bool_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
-3)]); _temp2188;}); yyval=( void*)({ struct Cyc_ParamDeclListBool_tok_struct*
-_temp2185=( struct Cyc_ParamDeclListBool_tok_struct*) GC_malloc( sizeof( struct
-Cyc_ParamDeclListBool_tok_struct)); _temp2185[ 0]=({ struct Cyc_ParamDeclListBool_tok_struct
-_temp2186; _temp2186.tag= Cyc_ParamDeclListBool_tok; _temp2186.f1=({ struct
-_tuple17* _temp2187=( struct _tuple17*) GC_malloc( sizeof( struct _tuple17));
-_temp2187->f1= 0; _temp2187->f2= 0; _temp2187->f3= _temp2184; _temp2187->f4= Cyc_yyget_TypeOpt_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2187->f5=
+3)]); _temp2160;}); yyval=( void*)({ struct Cyc_ParamDeclListBool_tok_struct*
+_temp2157=( struct Cyc_ParamDeclListBool_tok_struct*) GC_malloc( sizeof( struct
+Cyc_ParamDeclListBool_tok_struct)); _temp2157[ 0]=({ struct Cyc_ParamDeclListBool_tok_struct
+_temp2158; _temp2158.tag= Cyc_ParamDeclListBool_tok; _temp2158.f1=({ struct
+_tuple17* _temp2159=( struct _tuple17*) GC_malloc( sizeof( struct _tuple17));
+_temp2159->f1= 0; _temp2159->f2= 0; _temp2159->f3= _temp2156; _temp2159->f4= Cyc_yyget_TypeOpt_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2159->f5=
 Cyc_yyget_Rgnorder_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2187;}); _temp2186;}); _temp2185;}); break;}} case 156:
-_LL2174: { struct _tuple2 _temp2192; void* _temp2193; struct Cyc_Absyn_Tqual
-_temp2195; struct Cyc_Core_Opt* _temp2197; struct _tuple2* _temp2190= Cyc_yyget_ParamDecl_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2192=*
-_temp2190; _LL2198: _temp2197= _temp2192.f1; goto _LL2196; _LL2196: _temp2195=
-_temp2192.f2; goto _LL2194; _LL2194: _temp2193= _temp2192.f3; goto _LL2191;
-_LL2191: { struct Cyc_Absyn_VarargInfo* _temp2199=({ struct Cyc_Absyn_VarargInfo*
-_temp2203=( struct Cyc_Absyn_VarargInfo*) GC_malloc( sizeof( struct Cyc_Absyn_VarargInfo));
-_temp2203->name= _temp2197; _temp2203->tq= _temp2195; _temp2203->type=( void*)
-_temp2193; _temp2203->rgn=( void*) Cyc_yyget_Type_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2203->inject=
+yyvsp_offset)]); _temp2159;}); _temp2158;}); _temp2157;}); break;}} case 156:
+_LL2146: { struct _tuple2 _temp2164; void* _temp2165; struct Cyc_Absyn_Tqual
+_temp2167; struct Cyc_Core_Opt* _temp2169; struct _tuple2* _temp2162= Cyc_yyget_ParamDecl_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2164=*
+_temp2162; _LL2170: _temp2169= _temp2164.f1; goto _LL2168; _LL2168: _temp2167=
+_temp2164.f2; goto _LL2166; _LL2166: _temp2165= _temp2164.f3; goto _LL2163;
+_LL2163: { struct Cyc_Absyn_VarargInfo* _temp2171=({ struct Cyc_Absyn_VarargInfo*
+_temp2175=( struct Cyc_Absyn_VarargInfo*) GC_malloc( sizeof( struct Cyc_Absyn_VarargInfo));
+_temp2175->name= _temp2169; _temp2175->tq= _temp2167; _temp2175->type=( void*)
+_temp2165; _temp2175->rgn=( void*) Cyc_yyget_Type_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2175->inject=
 Cyc_yyget_Bool_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
-3)]); _temp2203;}); yyval=( void*)({ struct Cyc_ParamDeclListBool_tok_struct*
-_temp2200=( struct Cyc_ParamDeclListBool_tok_struct*) GC_malloc( sizeof( struct
-Cyc_ParamDeclListBool_tok_struct)); _temp2200[ 0]=({ struct Cyc_ParamDeclListBool_tok_struct
-_temp2201; _temp2201.tag= Cyc_ParamDeclListBool_tok; _temp2201.f1=({ struct
-_tuple17* _temp2202=( struct _tuple17*) GC_malloc( sizeof( struct _tuple17));
-_temp2202->f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+3)]); _temp2175;}); yyval=( void*)({ struct Cyc_ParamDeclListBool_tok_struct*
+_temp2172=( struct Cyc_ParamDeclListBool_tok_struct*) GC_malloc( sizeof( struct
+Cyc_ParamDeclListBool_tok_struct)); _temp2172[ 0]=({ struct Cyc_ParamDeclListBool_tok_struct
+_temp2173; _temp2173.tag= Cyc_ParamDeclListBool_tok; _temp2173.f1=({ struct
+_tuple17* _temp2174=( struct _tuple17*) GC_malloc( sizeof( struct _tuple17));
+_temp2174->f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
 Cyc_yyget_ParamDeclList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 7)])); _temp2202->f2= 0; _temp2202->f3= _temp2199; _temp2202->f4=
+yyvsp_offset - 7)])); _temp2174->f2= 0; _temp2174->f3= _temp2171; _temp2174->f4=
 Cyc_yyget_TypeOpt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _temp2202->f5= Cyc_yyget_Rgnorder_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2202;}); _temp2201;});
-_temp2200;}); break;}} case 157: _LL2189: yyval=( void*)({ struct Cyc_Type_tok_struct*
-_temp2205=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof( struct Cyc_Type_tok_struct));
-_temp2205[ 0]=({ struct Cyc_Type_tok_struct _temp2206; _temp2206.tag= Cyc_Type_tok;
-_temp2206.f1=( void*) Cyc_Parse_id2type( Cyc_yyget_String_tok( yyvs[
+yyvsp_offset - 1)]); _temp2174->f5= Cyc_yyget_Rgnorder_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2174;}); _temp2173;});
+_temp2172;}); break;}} case 157: _LL2161: yyval=( void*)({ struct Cyc_Type_tok_struct*
+_temp2177=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof( struct Cyc_Type_tok_struct));
+_temp2177[ 0]=({ struct Cyc_Type_tok_struct _temp2178; _temp2178.tag= Cyc_Type_tok;
+_temp2178.f1=( void*) Cyc_Parse_id2type( Cyc_yyget_String_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Absyn_empty_conref());
-_temp2206;}); _temp2205;}); break; case 158: _LL2204: yyval=( void*)({ struct
-Cyc_Type_tok_struct* _temp2208=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Type_tok_struct)); _temp2208[ 0]=({ struct Cyc_Type_tok_struct
-_temp2209; _temp2209.tag= Cyc_Type_tok; _temp2209.f1=( void*) Cyc_Parse_id2type(
+_temp2178;}); _temp2177;}); break; case 158: _LL2176: yyval=( void*)({ struct
+Cyc_Type_tok_struct* _temp2180=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Type_tok_struct)); _temp2180[ 0]=({ struct Cyc_Type_tok_struct
+_temp2181; _temp2181.tag= Cyc_Type_tok; _temp2181.f1=( void*) Cyc_Parse_id2type(
 Cyc_yyget_String_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset
 - 2)]), Cyc_Absyn_new_conref( Cyc_yyget_Kind_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]))); _temp2209;});
-_temp2208;}); break; case 159: _LL2207: yyval=( void*)({ struct Cyc_TypeOpt_tok_struct*
-_temp2211=( struct Cyc_TypeOpt_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeOpt_tok_struct));
-_temp2211[ 0]=({ struct Cyc_TypeOpt_tok_struct _temp2212; _temp2212.tag= Cyc_TypeOpt_tok;
-_temp2212.f1= 0; _temp2212;}); _temp2211;}); break; case 160: _LL2210: yyval=(
-void*)({ struct Cyc_TypeOpt_tok_struct* _temp2214=( struct Cyc_TypeOpt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeOpt_tok_struct)); _temp2214[ 0]=({ struct Cyc_TypeOpt_tok_struct
-_temp2215; _temp2215.tag= Cyc_TypeOpt_tok; _temp2215.f1=({ struct Cyc_Core_Opt*
-_temp2216=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp2216->v=( void*)(( void*)({ struct Cyc_Absyn_JoinEff_struct* _temp2217=(
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]))); _temp2181;});
+_temp2180;}); break; case 159: _LL2179: yyval=( void*)({ struct Cyc_TypeOpt_tok_struct*
+_temp2183=( struct Cyc_TypeOpt_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeOpt_tok_struct));
+_temp2183[ 0]=({ struct Cyc_TypeOpt_tok_struct _temp2184; _temp2184.tag= Cyc_TypeOpt_tok;
+_temp2184.f1= 0; _temp2184;}); _temp2183;}); break; case 160: _LL2182: yyval=(
+void*)({ struct Cyc_TypeOpt_tok_struct* _temp2186=( struct Cyc_TypeOpt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeOpt_tok_struct)); _temp2186[ 0]=({ struct Cyc_TypeOpt_tok_struct
+_temp2187; _temp2187.tag= Cyc_TypeOpt_tok; _temp2187.f1=({ struct Cyc_Core_Opt*
+_temp2188=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp2188->v=( void*)(( void*)({ struct Cyc_Absyn_JoinEff_struct* _temp2189=(
 struct Cyc_Absyn_JoinEff_struct*) GC_malloc( sizeof( struct Cyc_Absyn_JoinEff_struct));
-_temp2217[ 0]=({ struct Cyc_Absyn_JoinEff_struct _temp2218; _temp2218.tag= Cyc_Absyn_JoinEff;
-_temp2218.f1= Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset)]); _temp2218;}); _temp2217;})); _temp2216;}); _temp2215;});
-_temp2214;}); break; case 161: _LL2213: yyval=( void*)({ struct Cyc_Rgnorder_tok_struct*
-_temp2220=( struct Cyc_Rgnorder_tok_struct*) GC_malloc( sizeof( struct Cyc_Rgnorder_tok_struct));
-_temp2220[ 0]=({ struct Cyc_Rgnorder_tok_struct _temp2221; _temp2221.tag= Cyc_Rgnorder_tok;
-_temp2221.f1= 0; _temp2221;}); _temp2220;}); break; case 162: _LL2219: yyval=
+_temp2189[ 0]=({ struct Cyc_Absyn_JoinEff_struct _temp2190; _temp2190.tag= Cyc_Absyn_JoinEff;
+_temp2190.f1= Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset)]); _temp2190;}); _temp2189;})); _temp2188;}); _temp2187;});
+_temp2186;}); break; case 161: _LL2185: yyval=( void*)({ struct Cyc_Rgnorder_tok_struct*
+_temp2192=( struct Cyc_Rgnorder_tok_struct*) GC_malloc( sizeof( struct Cyc_Rgnorder_tok_struct));
+_temp2192[ 0]=({ struct Cyc_Rgnorder_tok_struct _temp2193; _temp2193.tag= Cyc_Rgnorder_tok;
+_temp2193.f1= 0; _temp2193;}); _temp2192;}); break; case 162: _LL2191: yyval=
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 163:
-_LL2222: yyval=( void*)({ struct Cyc_Rgnorder_tok_struct* _temp2224=( struct Cyc_Rgnorder_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Rgnorder_tok_struct)); _temp2224[ 0]=({ struct Cyc_Rgnorder_tok_struct
-_temp2225; _temp2225.tag= Cyc_Rgnorder_tok; _temp2225.f1=({ struct Cyc_List_List*
-_temp2226=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2226->hd=( void*)({ struct _tuple19* _temp2227=( struct _tuple19*)
-GC_malloc( sizeof( struct _tuple19)); _temp2227->f1= Cyc_Parse_id2type( Cyc_yyget_String_tok(
+_LL2194: yyval=( void*)({ struct Cyc_Rgnorder_tok_struct* _temp2196=( struct Cyc_Rgnorder_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Rgnorder_tok_struct)); _temp2196[ 0]=({ struct Cyc_Rgnorder_tok_struct
+_temp2197; _temp2197.tag= Cyc_Rgnorder_tok; _temp2197.f1=({ struct Cyc_List_List*
+_temp2198=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2198->hd=( void*)({ struct _tuple19* _temp2199=( struct _tuple19*)
+GC_malloc( sizeof( struct _tuple19)); _temp2199->f1= Cyc_Parse_id2type( Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_Absyn_new_conref((
-void*) Cyc_Absyn_RgnKind)); _temp2227->f2= Cyc_Parse_id2type( Cyc_yyget_String_tok(
+void*) Cyc_Absyn_RgnKind)); _temp2199->f2= Cyc_Parse_id2type( Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Absyn_new_conref((
-void*) Cyc_Absyn_RgnKind)); _temp2227;}); _temp2226->tl= 0; _temp2226;});
-_temp2225;}); _temp2224;}); break; case 164: _LL2223: yyval=( void*)({ struct
-Cyc_Rgnorder_tok_struct* _temp2229=( struct Cyc_Rgnorder_tok_struct*) GC_malloc(
-sizeof( struct Cyc_Rgnorder_tok_struct)); _temp2229[ 0]=({ struct Cyc_Rgnorder_tok_struct
-_temp2230; _temp2230.tag= Cyc_Rgnorder_tok; _temp2230.f1=({ struct Cyc_List_List*
-_temp2231=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2231->hd=( void*)({ struct _tuple19* _temp2232=( struct _tuple19*)
-GC_malloc( sizeof( struct _tuple19)); _temp2232->f1= Cyc_Parse_id2type( Cyc_yyget_String_tok(
+void*) Cyc_Absyn_RgnKind)); _temp2199;}); _temp2198->tl= 0; _temp2198;});
+_temp2197;}); _temp2196;}); break; case 164: _LL2195: yyval=( void*)({ struct
+Cyc_Rgnorder_tok_struct* _temp2201=( struct Cyc_Rgnorder_tok_struct*) GC_malloc(
+sizeof( struct Cyc_Rgnorder_tok_struct)); _temp2201[ 0]=({ struct Cyc_Rgnorder_tok_struct
+_temp2202; _temp2202.tag= Cyc_Rgnorder_tok; _temp2202.f1=({ struct Cyc_List_List*
+_temp2203=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2203->hd=( void*)({ struct _tuple19* _temp2204=( struct _tuple19*)
+GC_malloc( sizeof( struct _tuple19)); _temp2204->f1= Cyc_Parse_id2type( Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]), Cyc_Absyn_new_conref((
-void*) Cyc_Absyn_RgnKind)); _temp2232->f2= Cyc_Parse_id2type( Cyc_yyget_String_tok(
+void*) Cyc_Absyn_RgnKind)); _temp2204->f2= Cyc_Parse_id2type( Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_Absyn_new_conref((
-void*) Cyc_Absyn_RgnKind)); _temp2232;}); _temp2231->tl= Cyc_yyget_Rgnorder_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2231;});
-_temp2230;}); _temp2229;}); break; case 165: _LL2228: yyval=( void*)({ struct
-Cyc_Bool_tok_struct* _temp2234=( struct Cyc_Bool_tok_struct*) GC_malloc_atomic(
-sizeof( struct Cyc_Bool_tok_struct)); _temp2234[ 0]=({ struct Cyc_Bool_tok_struct
-_temp2235; _temp2235.tag= Cyc_Bool_tok; _temp2235.f1= 0; _temp2235;}); _temp2234;});
-break; case 166: _LL2233: { struct _tagged_arr _temp2237= Cyc_yyget_String_tok(
+void*) Cyc_Absyn_RgnKind)); _temp2204;}); _temp2203->tl= Cyc_yyget_Rgnorder_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2203;});
+_temp2202;}); _temp2201;}); break; case 165: _LL2200: yyval=( void*)({ struct
+Cyc_Bool_tok_struct* _temp2206=( struct Cyc_Bool_tok_struct*) GC_malloc_atomic(
+sizeof( struct Cyc_Bool_tok_struct)); _temp2206[ 0]=({ struct Cyc_Bool_tok_struct
+_temp2207; _temp2207.tag= Cyc_Bool_tok; _temp2207.f1= 0; _temp2207;}); _temp2206;});
+break; case 166: _LL2205: { struct _tagged_arr _temp2209= Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); if( Cyc_String_zstrcmp(
-_temp2237, _tag_arr("inject", sizeof( unsigned char), 7u)) != 0){ Cyc_Parse_err(
+_temp2209, _tag_arr("inject", sizeof( unsigned char), 7u)) != 0){ Cyc_Parse_err(
 _tag_arr("missing type in function declaration", sizeof( unsigned char), 37u),
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset)]).last_line));} yyval=( void*)({ struct Cyc_Bool_tok_struct*
-_temp2238=( struct Cyc_Bool_tok_struct*) GC_malloc_atomic( sizeof( struct Cyc_Bool_tok_struct));
-_temp2238[ 0]=({ struct Cyc_Bool_tok_struct _temp2239; _temp2239.tag= Cyc_Bool_tok;
-_temp2239.f1= 1; _temp2239;}); _temp2238;}); break;} case 167: _LL2236: yyval=
+_temp2210=( struct Cyc_Bool_tok_struct*) GC_malloc_atomic( sizeof( struct Cyc_Bool_tok_struct));
+_temp2210[ 0]=({ struct Cyc_Bool_tok_struct _temp2211; _temp2211.tag= Cyc_Bool_tok;
+_temp2211.f1= 1; _temp2211;}); _temp2210;}); break;} case 167: _LL2208: yyval=
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 168:
-_LL2240: yyval=( void*)({ struct Cyc_TypeList_tok_struct* _temp2242=( struct Cyc_TypeList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeList_tok_struct)); _temp2242[ 0]=({ struct Cyc_TypeList_tok_struct
-_temp2243; _temp2243.tag= Cyc_TypeList_tok; _temp2243.f1= Cyc_List_imp_append(
+_LL2212: yyval=( void*)({ struct Cyc_TypeList_tok_struct* _temp2214=( struct Cyc_TypeList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeList_tok_struct)); _temp2214[ 0]=({ struct Cyc_TypeList_tok_struct
+_temp2215; _temp2215.tag= Cyc_TypeList_tok; _temp2215.f1= Cyc_List_imp_append(
 Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]), Cyc_yyget_TypeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2243;});
-_temp2242;}); break; case 169: _LL2241: yyval=( void*)({ struct Cyc_TypeList_tok_struct*
-_temp2245=( struct Cyc_TypeList_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeList_tok_struct));
-_temp2245[ 0]=({ struct Cyc_TypeList_tok_struct _temp2246; _temp2246.tag= Cyc_TypeList_tok;
-_temp2246.f1= 0; _temp2246;}); _temp2245;}); break; case 170: _LL2244: yyval=
+_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2215;});
+_temp2214;}); break; case 169: _LL2213: yyval=( void*)({ struct Cyc_TypeList_tok_struct*
+_temp2217=( struct Cyc_TypeList_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeList_tok_struct));
+_temp2217[ 0]=({ struct Cyc_TypeList_tok_struct _temp2218; _temp2218.tag= Cyc_TypeList_tok;
+_temp2218.f1= 0; _temp2218;}); _temp2217;}); break; case 170: _LL2216: yyval=
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]; break; case
-171: _LL2247: if( ! Cyc_Parse_set_vartyp_kind( Cyc_yyget_Type_tok( yyvs[
+171: _LL2219: if( ! Cyc_Parse_set_vartyp_kind( Cyc_yyget_Type_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]),( void*) Cyc_Absyn_EffKind)){
 Cyc_Parse_err( _tag_arr("expecting effect kind", sizeof( unsigned char), 22u),
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset)]).last_line));} yyval=( void*)({ struct Cyc_TypeList_tok_struct*
-_temp2249=( struct Cyc_TypeList_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeList_tok_struct));
-_temp2249[ 0]=({ struct Cyc_TypeList_tok_struct _temp2250; _temp2250.tag= Cyc_TypeList_tok;
-_temp2250.f1=({ struct Cyc_List_List* _temp2251=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2251->hd=( void*) Cyc_yyget_Type_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2251->tl= 0;
-_temp2251;}); _temp2250;}); _temp2249;}); break; case 172: _LL2248: if( ! Cyc_Parse_set_vartyp_kind(
+_temp2221=( struct Cyc_TypeList_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeList_tok_struct));
+_temp2221[ 0]=({ struct Cyc_TypeList_tok_struct _temp2222; _temp2222.tag= Cyc_TypeList_tok;
+_temp2222.f1=({ struct Cyc_List_List* _temp2223=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2223->hd=( void*) Cyc_yyget_Type_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2223->tl= 0;
+_temp2223;}); _temp2222;}); _temp2221;}); break; case 172: _LL2220: if( ! Cyc_Parse_set_vartyp_kind(
 Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]),(
 void*) Cyc_Absyn_RgnKind)){ Cyc_Parse_err( _tag_arr("expecting region kind",
 sizeof( unsigned char), 22u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} yyval=(
-void*)({ struct Cyc_TypeList_tok_struct* _temp2253=( struct Cyc_TypeList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeList_tok_struct)); _temp2253[ 0]=({ struct Cyc_TypeList_tok_struct
-_temp2254; _temp2254.tag= Cyc_TypeList_tok; _temp2254.f1=({ struct Cyc_List_List*
-_temp2255=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2255->hd=( void*)(( void*)({ struct Cyc_Absyn_AccessEff_struct* _temp2256=(
+void*)({ struct Cyc_TypeList_tok_struct* _temp2225=( struct Cyc_TypeList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeList_tok_struct)); _temp2225[ 0]=({ struct Cyc_TypeList_tok_struct
+_temp2226; _temp2226.tag= Cyc_TypeList_tok; _temp2226.f1=({ struct Cyc_List_List*
+_temp2227=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2227->hd=( void*)(( void*)({ struct Cyc_Absyn_AccessEff_struct* _temp2228=(
 struct Cyc_Absyn_AccessEff_struct*) GC_malloc( sizeof( struct Cyc_Absyn_AccessEff_struct));
-_temp2256[ 0]=({ struct Cyc_Absyn_AccessEff_struct _temp2257; _temp2257.tag= Cyc_Absyn_AccessEff;
-_temp2257.f1=( void*) Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset)]); _temp2257;}); _temp2256;})); _temp2255->tl= 0;
-_temp2255;}); _temp2254;}); _temp2253;}); break; case 173: _LL2252: if( ! Cyc_Parse_set_vartyp_kind(
+_temp2228[ 0]=({ struct Cyc_Absyn_AccessEff_struct _temp2229; _temp2229.tag= Cyc_Absyn_AccessEff;
+_temp2229.f1=( void*) Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset)]); _temp2229;}); _temp2228;})); _temp2227->tl= 0;
+_temp2227;}); _temp2226;}); _temp2225;}); break; case 173: _LL2224: if( ! Cyc_Parse_set_vartyp_kind(
 Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
 2)]),( void*) Cyc_Absyn_RgnKind)){ Cyc_Parse_err( _tag_arr("expecting region kind",
 sizeof( unsigned char), 22u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).last_line));} yyval=(
-void*)({ struct Cyc_TypeList_tok_struct* _temp2259=( struct Cyc_TypeList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeList_tok_struct)); _temp2259[ 0]=({ struct Cyc_TypeList_tok_struct
-_temp2260; _temp2260.tag= Cyc_TypeList_tok; _temp2260.f1=({ struct Cyc_List_List*
-_temp2261=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2261->hd=( void*)(( void*)({ struct Cyc_Absyn_AccessEff_struct* _temp2262=(
+void*)({ struct Cyc_TypeList_tok_struct* _temp2231=( struct Cyc_TypeList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeList_tok_struct)); _temp2231[ 0]=({ struct Cyc_TypeList_tok_struct
+_temp2232; _temp2232.tag= Cyc_TypeList_tok; _temp2232.f1=({ struct Cyc_List_List*
+_temp2233=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2233->hd=( void*)(( void*)({ struct Cyc_Absyn_AccessEff_struct* _temp2234=(
 struct Cyc_Absyn_AccessEff_struct*) GC_malloc( sizeof( struct Cyc_Absyn_AccessEff_struct));
-_temp2262[ 0]=({ struct Cyc_Absyn_AccessEff_struct _temp2263; _temp2263.tag= Cyc_Absyn_AccessEff;
-_temp2263.f1=( void*) Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 2)]); _temp2263;}); _temp2262;})); _temp2261->tl= Cyc_yyget_TypeList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2261;});
-_temp2260;}); _temp2259;}); break; case 174: _LL2258: yyval=( void*)({ struct
-Cyc_ParamDeclList_tok_struct* _temp2265=( struct Cyc_ParamDeclList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_ParamDeclList_tok_struct)); _temp2265[ 0]=({
-struct Cyc_ParamDeclList_tok_struct _temp2266; _temp2266.tag= Cyc_ParamDeclList_tok;
-_temp2266.f1=({ struct Cyc_List_List* _temp2267=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2267->hd=( void*) Cyc_yyget_ParamDecl_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2267->tl= 0;
-_temp2267;}); _temp2266;}); _temp2265;}); break; case 175: _LL2264: yyval=( void*)({
-struct Cyc_ParamDeclList_tok_struct* _temp2269=( struct Cyc_ParamDeclList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_ParamDeclList_tok_struct)); _temp2269[ 0]=({
-struct Cyc_ParamDeclList_tok_struct _temp2270; _temp2270.tag= Cyc_ParamDeclList_tok;
-_temp2270.f1=({ struct Cyc_List_List* _temp2271=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2271->hd=( void*) Cyc_yyget_ParamDecl_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2271->tl=
+_temp2234[ 0]=({ struct Cyc_Absyn_AccessEff_struct _temp2235; _temp2235.tag= Cyc_Absyn_AccessEff;
+_temp2235.f1=( void*) Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 2)]); _temp2235;}); _temp2234;})); _temp2233->tl= Cyc_yyget_TypeList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2233;});
+_temp2232;}); _temp2231;}); break; case 174: _LL2230: yyval=( void*)({ struct
+Cyc_ParamDeclList_tok_struct* _temp2237=( struct Cyc_ParamDeclList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_ParamDeclList_tok_struct)); _temp2237[ 0]=({
+struct Cyc_ParamDeclList_tok_struct _temp2238; _temp2238.tag= Cyc_ParamDeclList_tok;
+_temp2238.f1=({ struct Cyc_List_List* _temp2239=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2239->hd=( void*) Cyc_yyget_ParamDecl_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2239->tl= 0;
+_temp2239;}); _temp2238;}); _temp2237;}); break; case 175: _LL2236: yyval=( void*)({
+struct Cyc_ParamDeclList_tok_struct* _temp2241=( struct Cyc_ParamDeclList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_ParamDeclList_tok_struct)); _temp2241[ 0]=({
+struct Cyc_ParamDeclList_tok_struct _temp2242; _temp2242.tag= Cyc_ParamDeclList_tok;
+_temp2242.f1=({ struct Cyc_List_List* _temp2243=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2243->hd=( void*) Cyc_yyget_ParamDecl_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2243->tl=
 Cyc_yyget_ParamDeclList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp2271;}); _temp2270;}); _temp2269;}); break; case 176:
-_LL2268: { struct _tuple18 _temp2275; struct Cyc_List_List* _temp2276; struct
-Cyc_List_List* _temp2278; struct Cyc_Absyn_Tqual _temp2280; struct _tuple18*
-_temp2273= Cyc_yyget_QualSpecList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 1)]); _temp2275=* _temp2273; _LL2281: _temp2280=
-_temp2275.f1; goto _LL2279; _LL2279: _temp2278= _temp2275.f2; goto _LL2277;
-_LL2277: _temp2276= _temp2275.f3; goto _LL2274; _LL2274: { struct Cyc_Parse_Declarator
-_temp2284; struct Cyc_List_List* _temp2285; struct _tuple1* _temp2287; struct
-Cyc_Parse_Declarator* _temp2282= Cyc_yyget_Declarator_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2284=* _temp2282;
-_LL2288: _temp2287= _temp2284.id; goto _LL2286; _LL2286: _temp2285= _temp2284.tms;
-goto _LL2283; _LL2283: { void* _temp2289= Cyc_Parse_speclist2typ( _temp2278, Cyc_Position_segment_of_abs((
+yyvsp_offset - 2)]); _temp2243;}); _temp2242;}); _temp2241;}); break; case 176:
+_LL2240: { struct _tuple18 _temp2247; struct Cyc_List_List* _temp2248; struct
+Cyc_List_List* _temp2250; struct Cyc_Absyn_Tqual _temp2252; struct _tuple18*
+_temp2245= Cyc_yyget_QualSpecList_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 1)]); _temp2247=* _temp2245; _LL2253: _temp2252=
+_temp2247.f1; goto _LL2251; _LL2251: _temp2250= _temp2247.f2; goto _LL2249;
+_LL2249: _temp2248= _temp2247.f3; goto _LL2246; _LL2246: { struct Cyc_Parse_Declarator
+_temp2256; struct Cyc_List_List* _temp2257; struct _tuple1* _temp2259; struct
+Cyc_Parse_Declarator* _temp2254= Cyc_yyget_Declarator_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2256=* _temp2254;
+_LL2260: _temp2259= _temp2256.id; goto _LL2258; _LL2258: _temp2257= _temp2256.tms;
+goto _LL2255; _LL2255: { void* _temp2261= Cyc_Parse_speclist2typ( _temp2250, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));
-struct Cyc_List_List* _temp2292; struct Cyc_List_List* _temp2294; void*
-_temp2296; struct Cyc_Absyn_Tqual _temp2298; struct _tuple6 _temp2290= Cyc_Parse_apply_tms(
-_temp2280, _temp2289, _temp2276, _temp2285); _LL2299: _temp2298= _temp2290.f1;
-goto _LL2297; _LL2297: _temp2296= _temp2290.f2; goto _LL2295; _LL2295: _temp2294=
-_temp2290.f3; goto _LL2293; _LL2293: _temp2292= _temp2290.f4; goto _LL2291;
-_LL2291: if( _temp2294 != 0){ Cyc_Parse_err( _tag_arr("parameter with bad type params",
+struct Cyc_List_List* _temp2264; struct Cyc_List_List* _temp2266; void*
+_temp2268; struct Cyc_Absyn_Tqual _temp2270; struct _tuple6 _temp2262= Cyc_Parse_apply_tms(
+_temp2252, _temp2261, _temp2248, _temp2257); _LL2271: _temp2270= _temp2262.f1;
+goto _LL2269; _LL2269: _temp2268= _temp2262.f2; goto _LL2267; _LL2267: _temp2266=
+_temp2262.f3; goto _LL2265; _LL2265: _temp2264= _temp2262.f4; goto _LL2263;
+_LL2263: if( _temp2266 != 0){ Cyc_Parse_err( _tag_arr("parameter with bad type params",
 sizeof( unsigned char), 31u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} if( Cyc_Absyn_is_qvar_qualified(
-_temp2287)){ Cyc_Parse_err( _tag_arr("parameter cannot be qualified with a namespace",
+_temp2259)){ Cyc_Parse_err( _tag_arr("parameter cannot be qualified with a namespace",
 sizeof( unsigned char), 47u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));}{
-struct Cyc_Core_Opt* _temp2300=( struct Cyc_Core_Opt*)({ struct Cyc_Core_Opt*
-_temp2304=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp2304->v=( void*)(* _temp2287).f2; _temp2304;}); if( _temp2292 != 0){ Cyc_Parse_warn(
+struct Cyc_Core_Opt* _temp2272=( struct Cyc_Core_Opt*)({ struct Cyc_Core_Opt*
+_temp2276=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp2276->v=( void*)(* _temp2259).f2; _temp2276;}); if( _temp2264 != 0){ Cyc_Parse_warn(
 _tag_arr("extra attributes on parameter, ignoring", sizeof( unsigned char), 40u),
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 1)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset)]).last_line));} yyval=( void*)({ struct Cyc_ParamDecl_tok_struct*
-_temp2301=( struct Cyc_ParamDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_ParamDecl_tok_struct));
-_temp2301[ 0]=({ struct Cyc_ParamDecl_tok_struct _temp2302; _temp2302.tag= Cyc_ParamDecl_tok;
-_temp2302.f1=({ struct _tuple2* _temp2303=( struct _tuple2*) GC_malloc( sizeof(
-struct _tuple2)); _temp2303->f1= _temp2300; _temp2303->f2= _temp2298; _temp2303->f3=
-_temp2296; _temp2303;}); _temp2302;}); _temp2301;}); break;}}}} case 177:
-_LL2272: { struct _tuple18 _temp2308; struct Cyc_List_List* _temp2309; struct
-Cyc_List_List* _temp2311; struct Cyc_Absyn_Tqual _temp2313; struct _tuple18*
-_temp2306= Cyc_yyget_QualSpecList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset)]); _temp2308=* _temp2306; _LL2314: _temp2313= _temp2308.f1;
-goto _LL2312; _LL2312: _temp2311= _temp2308.f2; goto _LL2310; _LL2310: _temp2309=
-_temp2308.f3; goto _LL2307; _LL2307: { void* _temp2315= Cyc_Parse_speclist2typ(
-_temp2311, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_temp2273=( struct Cyc_ParamDecl_tok_struct*) GC_malloc( sizeof( struct Cyc_ParamDecl_tok_struct));
+_temp2273[ 0]=({ struct Cyc_ParamDecl_tok_struct _temp2274; _temp2274.tag= Cyc_ParamDecl_tok;
+_temp2274.f1=({ struct _tuple2* _temp2275=( struct _tuple2*) GC_malloc( sizeof(
+struct _tuple2)); _temp2275->f1= _temp2272; _temp2275->f2= _temp2270; _temp2275->f3=
+_temp2268; _temp2275;}); _temp2274;}); _temp2273;}); break;}}}} case 177:
+_LL2244: { struct _tuple18 _temp2280; struct Cyc_List_List* _temp2281; struct
+Cyc_List_List* _temp2283; struct Cyc_Absyn_Tqual _temp2285; struct _tuple18*
+_temp2278= Cyc_yyget_QualSpecList_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset)]); _temp2280=* _temp2278; _LL2286: _temp2285= _temp2280.f1;
+goto _LL2284; _LL2284: _temp2283= _temp2280.f2; goto _LL2282; _LL2282: _temp2281=
+_temp2280.f3; goto _LL2279; _LL2279: { void* _temp2287= Cyc_Parse_speclist2typ(
+_temp2283, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); if( _temp2309 != 0){ Cyc_Parse_warn( _tag_arr("bad attributes on parameter, ignoring",
+yylsp_offset)]).last_line)); if( _temp2281 != 0){ Cyc_Parse_warn( _tag_arr("bad attributes on parameter, ignoring",
 sizeof( unsigned char), 38u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} yyval=(
-void*)({ struct Cyc_ParamDecl_tok_struct* _temp2316=( struct Cyc_ParamDecl_tok_struct*)
-GC_malloc( sizeof( struct Cyc_ParamDecl_tok_struct)); _temp2316[ 0]=({ struct
-Cyc_ParamDecl_tok_struct _temp2317; _temp2317.tag= Cyc_ParamDecl_tok; _temp2317.f1=({
-struct _tuple2* _temp2318=( struct _tuple2*) GC_malloc( sizeof( struct _tuple2));
-_temp2318->f1= 0; _temp2318->f2= _temp2313; _temp2318->f3= _temp2315; _temp2318;});
-_temp2317;}); _temp2316;}); break;}} case 178: _LL2305: { struct _tuple18
-_temp2322; struct Cyc_List_List* _temp2323; struct Cyc_List_List* _temp2325;
-struct Cyc_Absyn_Tqual _temp2327; struct _tuple18* _temp2320= Cyc_yyget_QualSpecList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2322=*
-_temp2320; _LL2328: _temp2327= _temp2322.f1; goto _LL2326; _LL2326: _temp2325=
-_temp2322.f2; goto _LL2324; _LL2324: _temp2323= _temp2322.f3; goto _LL2321;
-_LL2321: { void* _temp2329= Cyc_Parse_speclist2typ( _temp2325, Cyc_Position_segment_of_abs((
+void*)({ struct Cyc_ParamDecl_tok_struct* _temp2288=( struct Cyc_ParamDecl_tok_struct*)
+GC_malloc( sizeof( struct Cyc_ParamDecl_tok_struct)); _temp2288[ 0]=({ struct
+Cyc_ParamDecl_tok_struct _temp2289; _temp2289.tag= Cyc_ParamDecl_tok; _temp2289.f1=({
+struct _tuple2* _temp2290=( struct _tuple2*) GC_malloc( sizeof( struct _tuple2));
+_temp2290->f1= 0; _temp2290->f2= _temp2285; _temp2290->f3= _temp2287; _temp2290;});
+_temp2289;}); _temp2288;}); break;}} case 178: _LL2277: { struct _tuple18
+_temp2294; struct Cyc_List_List* _temp2295; struct Cyc_List_List* _temp2297;
+struct Cyc_Absyn_Tqual _temp2299; struct _tuple18* _temp2292= Cyc_yyget_QualSpecList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2294=*
+_temp2292; _LL2300: _temp2299= _temp2294.f1; goto _LL2298; _LL2298: _temp2297=
+_temp2294.f2; goto _LL2296; _LL2296: _temp2295= _temp2294.f3; goto _LL2293;
+_LL2293: { void* _temp2301= Cyc_Parse_speclist2typ( _temp2297, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));
-struct Cyc_List_List* _temp2330=( Cyc_yyget_AbstractDeclarator_tok( yyvs[
+struct Cyc_List_List* _temp2302=( Cyc_yyget_AbstractDeclarator_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->tms; struct Cyc_List_List*
-_temp2333; struct Cyc_List_List* _temp2335; void* _temp2337; struct Cyc_Absyn_Tqual
-_temp2339; struct _tuple6 _temp2331= Cyc_Parse_apply_tms( _temp2327, _temp2329,
-_temp2323, _temp2330); _LL2340: _temp2339= _temp2331.f1; goto _LL2338; _LL2338:
-_temp2337= _temp2331.f2; goto _LL2336; _LL2336: _temp2335= _temp2331.f3; goto
-_LL2334; _LL2334: _temp2333= _temp2331.f4; goto _LL2332; _LL2332: if( _temp2335
+_temp2305; struct Cyc_List_List* _temp2307; void* _temp2309; struct Cyc_Absyn_Tqual
+_temp2311; struct _tuple6 _temp2303= Cyc_Parse_apply_tms( _temp2299, _temp2301,
+_temp2295, _temp2302); _LL2312: _temp2311= _temp2303.f1; goto _LL2310; _LL2310:
+_temp2309= _temp2303.f2; goto _LL2308; _LL2308: _temp2307= _temp2303.f3; goto
+_LL2306; _LL2306: _temp2305= _temp2303.f4; goto _LL2304; _LL2304: if( _temp2307
 != 0){ Cyc_Parse_warn( _tag_arr("bad type parameters on formal argument, ignoring",
 sizeof( unsigned char), 49u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} if(
-_temp2333 != 0){ Cyc_Parse_warn( _tag_arr("bad attributes on parameter, ignoring",
+_temp2305 != 0){ Cyc_Parse_warn( _tag_arr("bad attributes on parameter, ignoring",
 sizeof( unsigned char), 38u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} yyval=(
-void*)({ struct Cyc_ParamDecl_tok_struct* _temp2341=( struct Cyc_ParamDecl_tok_struct*)
-GC_malloc( sizeof( struct Cyc_ParamDecl_tok_struct)); _temp2341[ 0]=({ struct
-Cyc_ParamDecl_tok_struct _temp2342; _temp2342.tag= Cyc_ParamDecl_tok; _temp2342.f1=({
-struct _tuple2* _temp2343=( struct _tuple2*) GC_malloc( sizeof( struct _tuple2));
-_temp2343->f1= 0; _temp2343->f2= _temp2339; _temp2343->f3= _temp2337; _temp2343;});
-_temp2342;}); _temp2341;}); break;}} case 179: _LL2319: yyval=( void*)({ struct
-Cyc_IdList_tok_struct* _temp2345=( struct Cyc_IdList_tok_struct*) GC_malloc(
-sizeof( struct Cyc_IdList_tok_struct)); _temp2345[ 0]=({ struct Cyc_IdList_tok_struct
-_temp2346; _temp2346.tag= Cyc_IdList_tok; _temp2346.f1=(( struct Cyc_List_List*(*)(
+void*)({ struct Cyc_ParamDecl_tok_struct* _temp2313=( struct Cyc_ParamDecl_tok_struct*)
+GC_malloc( sizeof( struct Cyc_ParamDecl_tok_struct)); _temp2313[ 0]=({ struct
+Cyc_ParamDecl_tok_struct _temp2314; _temp2314.tag= Cyc_ParamDecl_tok; _temp2314.f1=({
+struct _tuple2* _temp2315=( struct _tuple2*) GC_malloc( sizeof( struct _tuple2));
+_temp2315->f1= 0; _temp2315->f2= _temp2311; _temp2315->f3= _temp2309; _temp2315;});
+_temp2314;}); _temp2313;}); break;}} case 179: _LL2291: yyval=( void*)({ struct
+Cyc_IdList_tok_struct* _temp2317=( struct Cyc_IdList_tok_struct*) GC_malloc(
+sizeof( struct Cyc_IdList_tok_struct)); _temp2317[ 0]=({ struct Cyc_IdList_tok_struct
+_temp2318; _temp2318.tag= Cyc_IdList_tok; _temp2318.f1=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_IdList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2346;});
-_temp2345;}); break; case 180: _LL2344: yyval=( void*)({ struct Cyc_IdList_tok_struct*
-_temp2348=( struct Cyc_IdList_tok_struct*) GC_malloc( sizeof( struct Cyc_IdList_tok_struct));
-_temp2348[ 0]=({ struct Cyc_IdList_tok_struct _temp2349; _temp2349.tag= Cyc_IdList_tok;
-_temp2349.f1=({ struct Cyc_List_List* _temp2350=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2350->hd=( void*)({ struct
-_tagged_arr* _temp2351=( struct _tagged_arr*) GC_malloc( sizeof( struct
-_tagged_arr)); _temp2351[ 0]= Cyc_yyget_String_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2351;}); _temp2350->tl=
-0; _temp2350;}); _temp2349;}); _temp2348;}); break; case 181: _LL2347: yyval=(
-void*)({ struct Cyc_IdList_tok_struct* _temp2353=( struct Cyc_IdList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_IdList_tok_struct)); _temp2353[ 0]=({ struct Cyc_IdList_tok_struct
-_temp2354; _temp2354.tag= Cyc_IdList_tok; _temp2354.f1=({ struct Cyc_List_List*
-_temp2355=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2355->hd=( void*)({ struct _tagged_arr* _temp2356=( struct _tagged_arr*)
-GC_malloc( sizeof( struct _tagged_arr)); _temp2356[ 0]= Cyc_yyget_String_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2356;});
-_temp2355->tl= Cyc_yyget_IdList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp2355;}); _temp2354;}); _temp2353;}); break; case 182:
-_LL2352: yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)];
-break; case 183: _LL2357: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]; break; case 184: _LL2358: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp2360=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp2360[ 0]=({ struct Cyc_Exp_tok_struct _temp2361; _temp2361.tag= Cyc_Exp_tok;
-_temp2361.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnresolvedMem_e_struct*
-_temp2362=( struct Cyc_Absyn_UnresolvedMem_e_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_UnresolvedMem_e_struct)); _temp2362[ 0]=({ struct Cyc_Absyn_UnresolvedMem_e_struct
-_temp2363; _temp2363.tag= Cyc_Absyn_UnresolvedMem_e; _temp2363.f1= 0; _temp2363.f2=
-0; _temp2363;}); _temp2362;}), Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2318;});
+_temp2317;}); break; case 180: _LL2316: yyval=( void*)({ struct Cyc_IdList_tok_struct*
+_temp2320=( struct Cyc_IdList_tok_struct*) GC_malloc( sizeof( struct Cyc_IdList_tok_struct));
+_temp2320[ 0]=({ struct Cyc_IdList_tok_struct _temp2321; _temp2321.tag= Cyc_IdList_tok;
+_temp2321.f1=({ struct Cyc_List_List* _temp2322=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2322->hd=( void*)({ struct
+_tagged_arr* _temp2323=( struct _tagged_arr*) GC_malloc( sizeof( struct
+_tagged_arr)); _temp2323[ 0]= Cyc_yyget_String_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2323;}); _temp2322->tl=
+0; _temp2322;}); _temp2321;}); _temp2320;}); break; case 181: _LL2319: yyval=(
+void*)({ struct Cyc_IdList_tok_struct* _temp2325=( struct Cyc_IdList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_IdList_tok_struct)); _temp2325[ 0]=({ struct Cyc_IdList_tok_struct
+_temp2326; _temp2326.tag= Cyc_IdList_tok; _temp2326.f1=({ struct Cyc_List_List*
+_temp2327=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2327->hd=( void*)({ struct _tagged_arr* _temp2328=( struct _tagged_arr*)
+GC_malloc( sizeof( struct _tagged_arr)); _temp2328[ 0]= Cyc_yyget_String_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2328;});
+_temp2327->tl= Cyc_yyget_IdList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 2)]); _temp2327;}); _temp2326;}); _temp2325;}); break; case 182:
+_LL2324: yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)];
+break; case 183: _LL2329: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]; break; case 184: _LL2330: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp2332=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp2332[ 0]=({ struct Cyc_Exp_tok_struct _temp2333; _temp2333.tag= Cyc_Exp_tok;
+_temp2333.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnresolvedMem_e_struct*
+_temp2334=( struct Cyc_Absyn_UnresolvedMem_e_struct*) GC_malloc( sizeof( struct
+Cyc_Absyn_UnresolvedMem_e_struct)); _temp2334[ 0]=({ struct Cyc_Absyn_UnresolvedMem_e_struct
+_temp2335; _temp2335.tag= Cyc_Absyn_UnresolvedMem_e; _temp2335.f1= 0; _temp2335.f2=
+0; _temp2335;}); _temp2334;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2361;});
-_temp2360;}); break; case 185: _LL2359: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp2365=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp2365[ 0]=({ struct Cyc_Exp_tok_struct _temp2366; _temp2366.tag= Cyc_Exp_tok;
-_temp2366.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnresolvedMem_e_struct*
-_temp2367=( struct Cyc_Absyn_UnresolvedMem_e_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_UnresolvedMem_e_struct)); _temp2367[ 0]=({ struct Cyc_Absyn_UnresolvedMem_e_struct
-_temp2368; _temp2368.tag= Cyc_Absyn_UnresolvedMem_e; _temp2368.f1= 0; _temp2368.f2=((
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2333;});
+_temp2332;}); break; case 185: _LL2331: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp2337=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp2337[ 0]=({ struct Cyc_Exp_tok_struct _temp2338; _temp2338.tag= Cyc_Exp_tok;
+_temp2338.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnresolvedMem_e_struct*
+_temp2339=( struct Cyc_Absyn_UnresolvedMem_e_struct*) GC_malloc( sizeof( struct
+Cyc_Absyn_UnresolvedMem_e_struct)); _temp2339[ 0]=({ struct Cyc_Absyn_UnresolvedMem_e_struct
+_temp2340; _temp2340.tag= Cyc_Absyn_UnresolvedMem_e; _temp2340.f1= 0; _temp2340.f2=((
 struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_InitializerList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp2368;});
-_temp2367;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp2340;});
+_temp2339;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 2)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp2366;}); _temp2365;}); break; case 186:
-_LL2364: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2370=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2370[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2371; _temp2371.tag= Cyc_Exp_tok; _temp2371.f1= Cyc_Absyn_new_exp(( void*)({
-struct Cyc_Absyn_UnresolvedMem_e_struct* _temp2372=( struct Cyc_Absyn_UnresolvedMem_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnresolvedMem_e_struct)); _temp2372[ 0]=({
-struct Cyc_Absyn_UnresolvedMem_e_struct _temp2373; _temp2373.tag= Cyc_Absyn_UnresolvedMem_e;
-_temp2373.f1= 0; _temp2373.f2=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
+10000u, yylsp_offset)]).last_line)); _temp2338;}); _temp2337;}); break; case 186:
+_LL2336: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2342=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2342[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2343; _temp2343.tag= Cyc_Exp_tok; _temp2343.f1= Cyc_Absyn_new_exp(( void*)({
+struct Cyc_Absyn_UnresolvedMem_e_struct* _temp2344=( struct Cyc_Absyn_UnresolvedMem_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_UnresolvedMem_e_struct)); _temp2344[ 0]=({
+struct Cyc_Absyn_UnresolvedMem_e_struct _temp2345; _temp2345.tag= Cyc_Absyn_UnresolvedMem_e;
+_temp2345.f1= 0; _temp2345.f2=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
 x)) Cyc_List_imp_rev)( Cyc_yyget_InitializerList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)])); _temp2373;});
-_temp2372;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)])); _temp2345;});
+_temp2344;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 3)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp2371;}); _temp2370;}); break; case 187:
-_LL2369: { struct Cyc_Absyn_Vardecl* _temp2375= Cyc_Absyn_new_vardecl(({ struct
-_tuple1* _temp2381=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1));
-_temp2381->f1=( void*) Cyc_Absyn_Loc_n; _temp2381->f2=({ struct _tagged_arr*
-_temp2382=( struct _tagged_arr*) GC_malloc( sizeof( struct _tagged_arr));
-_temp2382[ 0]= Cyc_yyget_String_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 5)]); _temp2382;}); _temp2381;}), Cyc_Absyn_uint_t,( struct Cyc_Absyn_Exp*)
+10000u, yylsp_offset)]).last_line)); _temp2343;}); _temp2342;}); break; case 187:
+_LL2341: { struct Cyc_Absyn_Vardecl* _temp2347= Cyc_Absyn_new_vardecl(({ struct
+_tuple1* _temp2353=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1));
+_temp2353->f1=( void*) Cyc_Absyn_Loc_n; _temp2353->f2=({ struct _tagged_arr*
+_temp2354=( struct _tagged_arr*) GC_malloc( sizeof( struct _tagged_arr));
+_temp2354[ 0]= Cyc_yyget_String_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 5)]); _temp2354;}); _temp2353;}), Cyc_Absyn_uint_t,( struct Cyc_Absyn_Exp*)
 Cyc_Absyn_uint_exp( 0, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).last_line)));
-_temp2375->tq=({ struct Cyc_Absyn_Tqual _temp2376; _temp2376.q_const= 1;
-_temp2376.q_volatile= 0; _temp2376.q_restrict= 1; _temp2376;}); yyval=( void*)({
-struct Cyc_Exp_tok_struct* _temp2377=( struct Cyc_Exp_tok_struct*) GC_malloc(
-sizeof( struct Cyc_Exp_tok_struct)); _temp2377[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2378; _temp2378.tag= Cyc_Exp_tok; _temp2378.f1= Cyc_Absyn_new_exp(( void*)({
-struct Cyc_Absyn_Comprehension_e_struct* _temp2379=( struct Cyc_Absyn_Comprehension_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Comprehension_e_struct)); _temp2379[ 0]=({
-struct Cyc_Absyn_Comprehension_e_struct _temp2380; _temp2380.tag= Cyc_Absyn_Comprehension_e;
-_temp2380.f1= _temp2375; _temp2380.f2= Cyc_yyget_Exp_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2380.f3= Cyc_yyget_Exp_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2380;});
-_temp2379;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_temp2347->tq=({ struct Cyc_Absyn_Tqual _temp2348; _temp2348.q_const= 1;
+_temp2348.q_volatile= 0; _temp2348.q_restrict= 1; _temp2348;}); yyval=( void*)({
+struct Cyc_Exp_tok_struct* _temp2349=( struct Cyc_Exp_tok_struct*) GC_malloc(
+sizeof( struct Cyc_Exp_tok_struct)); _temp2349[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2350; _temp2350.tag= Cyc_Exp_tok; _temp2350.f1= Cyc_Absyn_new_exp(( void*)({
+struct Cyc_Absyn_Comprehension_e_struct* _temp2351=( struct Cyc_Absyn_Comprehension_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Comprehension_e_struct)); _temp2351[ 0]=({
+struct Cyc_Absyn_Comprehension_e_struct _temp2352; _temp2352.tag= Cyc_Absyn_Comprehension_e;
+_temp2352.f1= _temp2347; _temp2352.f2= Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2352.f3= Cyc_yyget_Exp_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2352;});
+_temp2351;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 7)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp2378;}); _temp2377;}); break;} case
-188: _LL2374: yyval=( void*)({ struct Cyc_InitializerList_tok_struct* _temp2384=(
+10000u, yylsp_offset)]).last_line)); _temp2350;}); _temp2349;}); break;} case
+188: _LL2346: yyval=( void*)({ struct Cyc_InitializerList_tok_struct* _temp2356=(
 struct Cyc_InitializerList_tok_struct*) GC_malloc( sizeof( struct Cyc_InitializerList_tok_struct));
-_temp2384[ 0]=({ struct Cyc_InitializerList_tok_struct _temp2385; _temp2385.tag=
-Cyc_InitializerList_tok; _temp2385.f1=({ struct Cyc_List_List* _temp2386=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2386->hd=(
-void*)({ struct _tuple20* _temp2387=( struct _tuple20*) GC_malloc( sizeof(
-struct _tuple20)); _temp2387->f1= 0; _temp2387->f2= Cyc_yyget_Exp_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2387;}); _temp2386->tl=
-0; _temp2386;}); _temp2385;}); _temp2384;}); break; case 189: _LL2383: yyval=(
-void*)({ struct Cyc_InitializerList_tok_struct* _temp2389=( struct Cyc_InitializerList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_InitializerList_tok_struct)); _temp2389[ 0]=({
-struct Cyc_InitializerList_tok_struct _temp2390; _temp2390.tag= Cyc_InitializerList_tok;
-_temp2390.f1=({ struct Cyc_List_List* _temp2391=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2391->hd=( void*)({ struct
-_tuple20* _temp2392=( struct _tuple20*) GC_malloc( sizeof( struct _tuple20));
-_temp2392->f1= Cyc_yyget_DesignatorList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2392->f2= Cyc_yyget_Exp_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2392;});
-_temp2391->tl= 0; _temp2391;}); _temp2390;}); _temp2389;}); break; case 190:
-_LL2388: yyval=( void*)({ struct Cyc_InitializerList_tok_struct* _temp2394=(
+_temp2356[ 0]=({ struct Cyc_InitializerList_tok_struct _temp2357; _temp2357.tag=
+Cyc_InitializerList_tok; _temp2357.f1=({ struct Cyc_List_List* _temp2358=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2358->hd=(
+void*)({ struct _tuple20* _temp2359=( struct _tuple20*) GC_malloc( sizeof(
+struct _tuple20)); _temp2359->f1= 0; _temp2359->f2= Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2359;}); _temp2358->tl=
+0; _temp2358;}); _temp2357;}); _temp2356;}); break; case 189: _LL2355: yyval=(
+void*)({ struct Cyc_InitializerList_tok_struct* _temp2361=( struct Cyc_InitializerList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_InitializerList_tok_struct)); _temp2361[ 0]=({
+struct Cyc_InitializerList_tok_struct _temp2362; _temp2362.tag= Cyc_InitializerList_tok;
+_temp2362.f1=({ struct Cyc_List_List* _temp2363=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2363->hd=( void*)({ struct
+_tuple20* _temp2364=( struct _tuple20*) GC_malloc( sizeof( struct _tuple20));
+_temp2364->f1= Cyc_yyget_DesignatorList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2364->f2= Cyc_yyget_Exp_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2364;});
+_temp2363->tl= 0; _temp2363;}); _temp2362;}); _temp2361;}); break; case 190:
+_LL2360: yyval=( void*)({ struct Cyc_InitializerList_tok_struct* _temp2366=(
 struct Cyc_InitializerList_tok_struct*) GC_malloc( sizeof( struct Cyc_InitializerList_tok_struct));
-_temp2394[ 0]=({ struct Cyc_InitializerList_tok_struct _temp2395; _temp2395.tag=
-Cyc_InitializerList_tok; _temp2395.f1=({ struct Cyc_List_List* _temp2396=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2396->hd=(
-void*)({ struct _tuple20* _temp2397=( struct _tuple20*) GC_malloc( sizeof(
-struct _tuple20)); _temp2397->f1= 0; _temp2397->f2= Cyc_yyget_Exp_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2397;}); _temp2396->tl=
+_temp2366[ 0]=({ struct Cyc_InitializerList_tok_struct _temp2367; _temp2367.tag=
+Cyc_InitializerList_tok; _temp2367.f1=({ struct Cyc_List_List* _temp2368=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2368->hd=(
+void*)({ struct _tuple20* _temp2369=( struct _tuple20*) GC_malloc( sizeof(
+struct _tuple20)); _temp2369->f1= 0; _temp2369->f2= Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2369;}); _temp2368->tl=
 Cyc_yyget_InitializerList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp2396;}); _temp2395;}); _temp2394;}); break; case 191:
-_LL2393: yyval=( void*)({ struct Cyc_InitializerList_tok_struct* _temp2399=(
+yyvsp_offset - 2)]); _temp2368;}); _temp2367;}); _temp2366;}); break; case 191:
+_LL2365: yyval=( void*)({ struct Cyc_InitializerList_tok_struct* _temp2371=(
 struct Cyc_InitializerList_tok_struct*) GC_malloc( sizeof( struct Cyc_InitializerList_tok_struct));
-_temp2399[ 0]=({ struct Cyc_InitializerList_tok_struct _temp2400; _temp2400.tag=
-Cyc_InitializerList_tok; _temp2400.f1=({ struct Cyc_List_List* _temp2401=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2401->hd=(
-void*)({ struct _tuple20* _temp2402=( struct _tuple20*) GC_malloc( sizeof(
-struct _tuple20)); _temp2402->f1= Cyc_yyget_DesignatorList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2402->f2= Cyc_yyget_Exp_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2402;});
-_temp2401->tl= Cyc_yyget_InitializerList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2401;});
-_temp2400;}); _temp2399;}); break; case 192: _LL2398: yyval=( void*)({ struct
-Cyc_DesignatorList_tok_struct* _temp2404=( struct Cyc_DesignatorList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_DesignatorList_tok_struct)); _temp2404[ 0]=({
-struct Cyc_DesignatorList_tok_struct _temp2405; _temp2405.tag= Cyc_DesignatorList_tok;
-_temp2405.f1= Cyc_List_imp_rev( Cyc_yyget_DesignatorList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp2405;});
-_temp2404;}); break; case 193: _LL2403: yyval=( void*)({ struct Cyc_DesignatorList_tok_struct*
-_temp2407=( struct Cyc_DesignatorList_tok_struct*) GC_malloc( sizeof( struct Cyc_DesignatorList_tok_struct));
-_temp2407[ 0]=({ struct Cyc_DesignatorList_tok_struct _temp2408; _temp2408.tag=
-Cyc_DesignatorList_tok; _temp2408.f1=({ struct Cyc_List_List* _temp2409=( struct
-Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2409->hd=( void*)
+_temp2371[ 0]=({ struct Cyc_InitializerList_tok_struct _temp2372; _temp2372.tag=
+Cyc_InitializerList_tok; _temp2372.f1=({ struct Cyc_List_List* _temp2373=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2373->hd=(
+void*)({ struct _tuple20* _temp2374=( struct _tuple20*) GC_malloc( sizeof(
+struct _tuple20)); _temp2374->f1= Cyc_yyget_DesignatorList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2374->f2= Cyc_yyget_Exp_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2374;});
+_temp2373->tl= Cyc_yyget_InitializerList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2373;});
+_temp2372;}); _temp2371;}); break; case 192: _LL2370: yyval=( void*)({ struct
+Cyc_DesignatorList_tok_struct* _temp2376=( struct Cyc_DesignatorList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_DesignatorList_tok_struct)); _temp2376[ 0]=({
+struct Cyc_DesignatorList_tok_struct _temp2377; _temp2377.tag= Cyc_DesignatorList_tok;
+_temp2377.f1= Cyc_List_imp_rev( Cyc_yyget_DesignatorList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp2377;});
+_temp2376;}); break; case 193: _LL2375: yyval=( void*)({ struct Cyc_DesignatorList_tok_struct*
+_temp2379=( struct Cyc_DesignatorList_tok_struct*) GC_malloc( sizeof( struct Cyc_DesignatorList_tok_struct));
+_temp2379[ 0]=({ struct Cyc_DesignatorList_tok_struct _temp2380; _temp2380.tag=
+Cyc_DesignatorList_tok; _temp2380.f1=({ struct Cyc_List_List* _temp2381=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2381->hd=( void*)
 Cyc_yyget_Designator_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2409->tl= 0; _temp2409;}); _temp2408;}); _temp2407;});
-break; case 194: _LL2406: yyval=( void*)({ struct Cyc_DesignatorList_tok_struct*
-_temp2411=( struct Cyc_DesignatorList_tok_struct*) GC_malloc( sizeof( struct Cyc_DesignatorList_tok_struct));
-_temp2411[ 0]=({ struct Cyc_DesignatorList_tok_struct _temp2412; _temp2412.tag=
-Cyc_DesignatorList_tok; _temp2412.f1=({ struct Cyc_List_List* _temp2413=( struct
-Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2413->hd=( void*)
+yyvsp_offset)]); _temp2381->tl= 0; _temp2381;}); _temp2380;}); _temp2379;});
+break; case 194: _LL2378: yyval=( void*)({ struct Cyc_DesignatorList_tok_struct*
+_temp2383=( struct Cyc_DesignatorList_tok_struct*) GC_malloc( sizeof( struct Cyc_DesignatorList_tok_struct));
+_temp2383[ 0]=({ struct Cyc_DesignatorList_tok_struct _temp2384; _temp2384.tag=
+Cyc_DesignatorList_tok; _temp2384.f1=({ struct Cyc_List_List* _temp2385=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2385->hd=( void*)
 Cyc_yyget_Designator_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2413->tl= Cyc_yyget_DesignatorList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2413;});
-_temp2412;}); _temp2411;}); break; case 195: _LL2410: yyval=( void*)({ struct
-Cyc_Designator_tok_struct* _temp2415=( struct Cyc_Designator_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Designator_tok_struct)); _temp2415[ 0]=({ struct
-Cyc_Designator_tok_struct _temp2416; _temp2416.tag= Cyc_Designator_tok;
-_temp2416.f1=( void*)(( void*)({ struct Cyc_Absyn_ArrayElement_struct* _temp2417=(
+yyvsp_offset)]); _temp2385->tl= Cyc_yyget_DesignatorList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2385;});
+_temp2384;}); _temp2383;}); break; case 195: _LL2382: yyval=( void*)({ struct
+Cyc_Designator_tok_struct* _temp2387=( struct Cyc_Designator_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Designator_tok_struct)); _temp2387[ 0]=({ struct
+Cyc_Designator_tok_struct _temp2388; _temp2388.tag= Cyc_Designator_tok;
+_temp2388.f1=( void*)(( void*)({ struct Cyc_Absyn_ArrayElement_struct* _temp2389=(
 struct Cyc_Absyn_ArrayElement_struct*) GC_malloc( sizeof( struct Cyc_Absyn_ArrayElement_struct));
-_temp2417[ 0]=({ struct Cyc_Absyn_ArrayElement_struct _temp2418; _temp2418.tag=
-Cyc_Absyn_ArrayElement; _temp2418.f1= Cyc_yyget_Exp_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2418;});
-_temp2417;})); _temp2416;}); _temp2415;}); break; case 196: _LL2414: yyval=(
-void*)({ struct Cyc_Designator_tok_struct* _temp2420=( struct Cyc_Designator_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Designator_tok_struct)); _temp2420[ 0]=({ struct
-Cyc_Designator_tok_struct _temp2421; _temp2421.tag= Cyc_Designator_tok;
-_temp2421.f1=( void*)(( void*)({ struct Cyc_Absyn_FieldName_struct* _temp2422=(
+_temp2389[ 0]=({ struct Cyc_Absyn_ArrayElement_struct _temp2390; _temp2390.tag=
+Cyc_Absyn_ArrayElement; _temp2390.f1= Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2390;});
+_temp2389;})); _temp2388;}); _temp2387;}); break; case 196: _LL2386: yyval=(
+void*)({ struct Cyc_Designator_tok_struct* _temp2392=( struct Cyc_Designator_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Designator_tok_struct)); _temp2392[ 0]=({ struct
+Cyc_Designator_tok_struct _temp2393; _temp2393.tag= Cyc_Designator_tok;
+_temp2393.f1=( void*)(( void*)({ struct Cyc_Absyn_FieldName_struct* _temp2394=(
 struct Cyc_Absyn_FieldName_struct*) GC_malloc( sizeof( struct Cyc_Absyn_FieldName_struct));
-_temp2422[ 0]=({ struct Cyc_Absyn_FieldName_struct _temp2423; _temp2423.tag= Cyc_Absyn_FieldName;
-_temp2423.f1=({ struct _tagged_arr* _temp2424=( struct _tagged_arr*) GC_malloc(
-sizeof( struct _tagged_arr)); _temp2424[ 0]= Cyc_yyget_String_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2424;}); _temp2423;});
-_temp2422;})); _temp2421;}); _temp2420;}); break; case 197: _LL2419: { void*
-_temp2426= Cyc_Parse_speclist2typ((* Cyc_yyget_QualSpecList_tok( yyvs[
+_temp2394[ 0]=({ struct Cyc_Absyn_FieldName_struct _temp2395; _temp2395.tag= Cyc_Absyn_FieldName;
+_temp2395.f1=({ struct _tagged_arr* _temp2396=( struct _tagged_arr*) GC_malloc(
+sizeof( struct _tagged_arr)); _temp2396[ 0]= Cyc_yyget_String_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2396;}); _temp2395;});
+_temp2394;})); _temp2393;}); _temp2392;}); break; case 197: _LL2391: { void*
+_temp2398= Cyc_Parse_speclist2typ((* Cyc_yyget_QualSpecList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f2, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); struct Cyc_List_List*
-_temp2427=(* Cyc_yyget_QualSpecList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset)])).f3; if( _temp2427 != 0){ Cyc_Parse_warn( _tag_arr("ignoring attributes in type",
+_temp2399=(* Cyc_yyget_QualSpecList_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset)])).f3; if( _temp2399 != 0){ Cyc_Parse_warn( _tag_arr("ignoring attributes in type",
 sizeof( unsigned char), 28u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));}{ struct
-Cyc_Absyn_Tqual _temp2428=(* Cyc_yyget_QualSpecList_tok( yyvs[
+Cyc_Absyn_Tqual _temp2400=(* Cyc_yyget_QualSpecList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f1; yyval=( void*)({
-struct Cyc_ParamDecl_tok_struct* _temp2429=( struct Cyc_ParamDecl_tok_struct*)
-GC_malloc( sizeof( struct Cyc_ParamDecl_tok_struct)); _temp2429[ 0]=({ struct
-Cyc_ParamDecl_tok_struct _temp2430; _temp2430.tag= Cyc_ParamDecl_tok; _temp2430.f1=({
-struct _tuple2* _temp2431=( struct _tuple2*) GC_malloc( sizeof( struct _tuple2));
-_temp2431->f1= 0; _temp2431->f2= _temp2428; _temp2431->f3= _temp2426; _temp2431;});
-_temp2430;}); _temp2429;}); break;}} case 198: _LL2425: { void* _temp2433= Cyc_Parse_speclist2typ((*
+struct Cyc_ParamDecl_tok_struct* _temp2401=( struct Cyc_ParamDecl_tok_struct*)
+GC_malloc( sizeof( struct Cyc_ParamDecl_tok_struct)); _temp2401[ 0]=({ struct
+Cyc_ParamDecl_tok_struct _temp2402; _temp2402.tag= Cyc_ParamDecl_tok; _temp2402.f1=({
+struct _tuple2* _temp2403=( struct _tuple2*) GC_malloc( sizeof( struct _tuple2));
+_temp2403->f1= 0; _temp2403->f2= _temp2400; _temp2403->f3= _temp2398; _temp2403;});
+_temp2402;}); _temp2401;}); break;}} case 198: _LL2397: { void* _temp2405= Cyc_Parse_speclist2typ((*
 Cyc_yyget_QualSpecList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 1)])).f2, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line)); struct
-Cyc_List_List* _temp2434=(* Cyc_yyget_QualSpecList_tok( yyvs[
+Cyc_List_List* _temp2406=(* Cyc_yyget_QualSpecList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])).f3; struct Cyc_Absyn_Tqual
-_temp2435=(* Cyc_yyget_QualSpecList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 1)])).f1; struct Cyc_List_List* _temp2436=( Cyc_yyget_AbstractDeclarator_tok(
+_temp2407=(* Cyc_yyget_QualSpecList_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 1)])).f1; struct Cyc_List_List* _temp2408=( Cyc_yyget_AbstractDeclarator_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->tms; struct
-_tuple6 _temp2437= Cyc_Parse_apply_tms( _temp2435, _temp2433, _temp2434,
-_temp2436); if( _temp2437.f3 != 0){ Cyc_Parse_warn( _tag_arr("bad type params, ignoring",
+_tuple6 _temp2409= Cyc_Parse_apply_tms( _temp2407, _temp2405, _temp2406,
+_temp2408); if( _temp2409.f3 != 0){ Cyc_Parse_warn( _tag_arr("bad type params, ignoring",
 sizeof( unsigned char), 26u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} if(
-_temp2437.f4 != 0){ Cyc_Parse_warn( _tag_arr("bad specifiers, ignoring", sizeof(
+_temp2409.f4 != 0){ Cyc_Parse_warn( _tag_arr("bad specifiers, ignoring", sizeof(
 unsigned char), 25u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} yyval=(
-void*)({ struct Cyc_ParamDecl_tok_struct* _temp2438=( struct Cyc_ParamDecl_tok_struct*)
-GC_malloc( sizeof( struct Cyc_ParamDecl_tok_struct)); _temp2438[ 0]=({ struct
-Cyc_ParamDecl_tok_struct _temp2439; _temp2439.tag= Cyc_ParamDecl_tok; _temp2439.f1=({
-struct _tuple2* _temp2440=( struct _tuple2*) GC_malloc( sizeof( struct _tuple2));
-_temp2440->f1= 0; _temp2440->f2= _temp2437.f1; _temp2440->f3= _temp2437.f2;
-_temp2440;}); _temp2439;}); _temp2438;}); break;} case 199: _LL2432: yyval=(
-void*)({ struct Cyc_Type_tok_struct* _temp2442=( struct Cyc_Type_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Type_tok_struct)); _temp2442[ 0]=({ struct Cyc_Type_tok_struct
-_temp2443; _temp2443.tag= Cyc_Type_tok; _temp2443.f1=( void*)(* Cyc_yyget_ParamDecl_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f3; _temp2443;});
-_temp2442;}); break; case 200: _LL2441: yyval=( void*)({ struct Cyc_Type_tok_struct*
-_temp2445=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof( struct Cyc_Type_tok_struct));
-_temp2445[ 0]=({ struct Cyc_Type_tok_struct _temp2446; _temp2446.tag= Cyc_Type_tok;
-_temp2446.f1=( void*)(( void*)({ struct Cyc_Absyn_JoinEff_struct* _temp2447=(
+void*)({ struct Cyc_ParamDecl_tok_struct* _temp2410=( struct Cyc_ParamDecl_tok_struct*)
+GC_malloc( sizeof( struct Cyc_ParamDecl_tok_struct)); _temp2410[ 0]=({ struct
+Cyc_ParamDecl_tok_struct _temp2411; _temp2411.tag= Cyc_ParamDecl_tok; _temp2411.f1=({
+struct _tuple2* _temp2412=( struct _tuple2*) GC_malloc( sizeof( struct _tuple2));
+_temp2412->f1= 0; _temp2412->f2= _temp2409.f1; _temp2412->f3= _temp2409.f2;
+_temp2412;}); _temp2411;}); _temp2410;}); break;} case 199: _LL2404: yyval=(
+void*)({ struct Cyc_Type_tok_struct* _temp2414=( struct Cyc_Type_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Type_tok_struct)); _temp2414[ 0]=({ struct Cyc_Type_tok_struct
+_temp2415; _temp2415.tag= Cyc_Type_tok; _temp2415.f1=( void*)(* Cyc_yyget_ParamDecl_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f3; _temp2415;});
+_temp2414;}); break; case 200: _LL2413: yyval=( void*)({ struct Cyc_Type_tok_struct*
+_temp2417=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof( struct Cyc_Type_tok_struct));
+_temp2417[ 0]=({ struct Cyc_Type_tok_struct _temp2418; _temp2418.tag= Cyc_Type_tok;
+_temp2418.f1=( void*)(( void*)({ struct Cyc_Absyn_JoinEff_struct* _temp2419=(
 struct Cyc_Absyn_JoinEff_struct*) GC_malloc( sizeof( struct Cyc_Absyn_JoinEff_struct));
-_temp2447[ 0]=({ struct Cyc_Absyn_JoinEff_struct _temp2448; _temp2448.tag= Cyc_Absyn_JoinEff;
-_temp2448.f1= 0; _temp2448;}); _temp2447;})); _temp2446;}); _temp2445;}); break;
-case 201: _LL2444: yyval=( void*)({ struct Cyc_Type_tok_struct* _temp2450=(
+_temp2419[ 0]=({ struct Cyc_Absyn_JoinEff_struct _temp2420; _temp2420.tag= Cyc_Absyn_JoinEff;
+_temp2420.f1= 0; _temp2420;}); _temp2419;})); _temp2418;}); _temp2417;}); break;
+case 201: _LL2416: yyval=( void*)({ struct Cyc_Type_tok_struct* _temp2422=(
 struct Cyc_Type_tok_struct*) GC_malloc( sizeof( struct Cyc_Type_tok_struct));
-_temp2450[ 0]=({ struct Cyc_Type_tok_struct _temp2451; _temp2451.tag= Cyc_Type_tok;
-_temp2451.f1=( void*)(( void*)({ struct Cyc_Absyn_JoinEff_struct* _temp2452=(
+_temp2422[ 0]=({ struct Cyc_Type_tok_struct _temp2423; _temp2423.tag= Cyc_Type_tok;
+_temp2423.f1=( void*)(( void*)({ struct Cyc_Absyn_JoinEff_struct* _temp2424=(
 struct Cyc_Absyn_JoinEff_struct*) GC_malloc( sizeof( struct Cyc_Absyn_JoinEff_struct));
-_temp2452[ 0]=({ struct Cyc_Absyn_JoinEff_struct _temp2453; _temp2453.tag= Cyc_Absyn_JoinEff;
-_temp2453.f1= Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 1)]); _temp2453;}); _temp2452;})); _temp2451;});
-_temp2450;}); break; case 202: _LL2449: yyval=( void*)({ struct Cyc_Type_tok_struct*
-_temp2455=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof( struct Cyc_Type_tok_struct));
-_temp2455[ 0]=({ struct Cyc_Type_tok_struct _temp2456; _temp2456.tag= Cyc_Type_tok;
-_temp2456.f1=( void*)(( void*)({ struct Cyc_Absyn_JoinEff_struct* _temp2457=(
+_temp2424[ 0]=({ struct Cyc_Absyn_JoinEff_struct _temp2425; _temp2425.tag= Cyc_Absyn_JoinEff;
+_temp2425.f1= Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 1)]); _temp2425;}); _temp2424;})); _temp2423;});
+_temp2422;}); break; case 202: _LL2421: yyval=( void*)({ struct Cyc_Type_tok_struct*
+_temp2427=( struct Cyc_Type_tok_struct*) GC_malloc( sizeof( struct Cyc_Type_tok_struct));
+_temp2427[ 0]=({ struct Cyc_Type_tok_struct _temp2428; _temp2428.tag= Cyc_Type_tok;
+_temp2428.f1=( void*)(( void*)({ struct Cyc_Absyn_JoinEff_struct* _temp2429=(
 struct Cyc_Absyn_JoinEff_struct*) GC_malloc( sizeof( struct Cyc_Absyn_JoinEff_struct));
-_temp2457[ 0]=({ struct Cyc_Absyn_JoinEff_struct _temp2458; _temp2458.tag= Cyc_Absyn_JoinEff;
-_temp2458.f1=({ struct Cyc_List_List* _temp2459=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2459->hd=( void*) Cyc_yyget_Type_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2459->tl=
+_temp2429[ 0]=({ struct Cyc_Absyn_JoinEff_struct _temp2430; _temp2430.tag= Cyc_Absyn_JoinEff;
+_temp2430.f1=({ struct Cyc_List_List* _temp2431=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2431->hd=( void*) Cyc_yyget_Type_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2431->tl=
 Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2459;}); _temp2458;}); _temp2457;})); _temp2456;});
-_temp2455;}); break; case 203: _LL2454: yyval=( void*)({ struct Cyc_TypeList_tok_struct*
-_temp2461=( struct Cyc_TypeList_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeList_tok_struct));
-_temp2461[ 0]=({ struct Cyc_TypeList_tok_struct _temp2462; _temp2462.tag= Cyc_TypeList_tok;
-_temp2462.f1=({ struct Cyc_List_List* _temp2463=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2463->hd=( void*) Cyc_yyget_Type_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2463->tl= 0;
-_temp2463;}); _temp2462;}); _temp2461;}); break; case 204: _LL2460: yyval=( void*)({
-struct Cyc_TypeList_tok_struct* _temp2465=( struct Cyc_TypeList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_TypeList_tok_struct)); _temp2465[ 0]=({ struct Cyc_TypeList_tok_struct
-_temp2466; _temp2466.tag= Cyc_TypeList_tok; _temp2466.f1=({ struct Cyc_List_List*
-_temp2467=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2467->hd=( void*) Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset)]); _temp2467->tl= Cyc_yyget_TypeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2467;});
-_temp2466;}); _temp2465;}); break; case 205: _LL2464: yyval=( void*)({ struct
-Cyc_AbstractDeclarator_tok_struct* _temp2469=( struct Cyc_AbstractDeclarator_tok_struct*)
-GC_malloc( sizeof( struct Cyc_AbstractDeclarator_tok_struct)); _temp2469[ 0]=({
-struct Cyc_AbstractDeclarator_tok_struct _temp2470; _temp2470.tag= Cyc_AbstractDeclarator_tok;
-_temp2470.f1=({ struct Cyc_Parse_Abstractdeclarator* _temp2471=( struct Cyc_Parse_Abstractdeclarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator)); _temp2471->tms= Cyc_yyget_TypeModifierList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2471;});
-_temp2470;}); _temp2469;}); break; case 206: _LL2468: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 207: _LL2472:
-yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct* _temp2474=( struct
+yyvsp_offset)]); _temp2431;}); _temp2430;}); _temp2429;})); _temp2428;});
+_temp2427;}); break; case 203: _LL2426: yyval=( void*)({ struct Cyc_TypeList_tok_struct*
+_temp2433=( struct Cyc_TypeList_tok_struct*) GC_malloc( sizeof( struct Cyc_TypeList_tok_struct));
+_temp2433[ 0]=({ struct Cyc_TypeList_tok_struct _temp2434; _temp2434.tag= Cyc_TypeList_tok;
+_temp2434.f1=({ struct Cyc_List_List* _temp2435=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2435->hd=( void*) Cyc_yyget_Type_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2435->tl= 0;
+_temp2435;}); _temp2434;}); _temp2433;}); break; case 204: _LL2432: yyval=( void*)({
+struct Cyc_TypeList_tok_struct* _temp2437=( struct Cyc_TypeList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_TypeList_tok_struct)); _temp2437[ 0]=({ struct Cyc_TypeList_tok_struct
+_temp2438; _temp2438.tag= Cyc_TypeList_tok; _temp2438.f1=({ struct Cyc_List_List*
+_temp2439=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2439->hd=( void*) Cyc_yyget_Type_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset)]); _temp2439->tl= Cyc_yyget_TypeList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2439;});
+_temp2438;}); _temp2437;}); break; case 205: _LL2436: yyval=( void*)({ struct
+Cyc_AbstractDeclarator_tok_struct* _temp2441=( struct Cyc_AbstractDeclarator_tok_struct*)
+GC_malloc( sizeof( struct Cyc_AbstractDeclarator_tok_struct)); _temp2441[ 0]=({
+struct Cyc_AbstractDeclarator_tok_struct _temp2442; _temp2442.tag= Cyc_AbstractDeclarator_tok;
+_temp2442.f1=({ struct Cyc_Parse_Abstractdeclarator* _temp2443=( struct Cyc_Parse_Abstractdeclarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator)); _temp2443->tms= Cyc_yyget_TypeModifierList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2443;});
+_temp2442;}); _temp2441;}); break; case 206: _LL2440: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 207: _LL2444:
+yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct* _temp2446=( struct
 Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct Cyc_AbstractDeclarator_tok_struct));
-_temp2474[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct _temp2475; _temp2475.tag=
-Cyc_AbstractDeclarator_tok; _temp2475.f1=({ struct Cyc_Parse_Abstractdeclarator*
-_temp2476=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
-_temp2476->tms= Cyc_List_imp_append( Cyc_yyget_TypeModifierList_tok( yyvs[
+_temp2446[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct _temp2447; _temp2447.tag=
+Cyc_AbstractDeclarator_tok; _temp2447.f1=({ struct Cyc_Parse_Abstractdeclarator*
+_temp2448=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
+_temp2448->tms= Cyc_List_imp_append( Cyc_yyget_TypeModifierList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]),( Cyc_yyget_AbstractDeclarator_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->tms); _temp2476;});
-_temp2475;}); _temp2474;}); break; case 208: _LL2473: yyval= yyvs[
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]))->tms); _temp2448;});
+_temp2447;}); _temp2446;}); break; case 208: _LL2445: yyval= yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]; break; case 209:
-_LL2477: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct* _temp2479=(
+_LL2449: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct* _temp2451=(
 struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct Cyc_AbstractDeclarator_tok_struct));
-_temp2479[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct _temp2480; _temp2480.tag=
-Cyc_AbstractDeclarator_tok; _temp2480.f1=({ struct Cyc_Parse_Abstractdeclarator*
-_temp2481=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
-_temp2481->tms=({ struct Cyc_List_List* _temp2482=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2482->hd=( void*)(( void*) Cyc_Absyn_Carray_mod);
-_temp2482->tl= 0; _temp2482;}); _temp2481;}); _temp2480;}); _temp2479;}); break;
-case 210: _LL2478: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct*
-_temp2484=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
-Cyc_AbstractDeclarator_tok_struct)); _temp2484[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
-_temp2485; _temp2485.tag= Cyc_AbstractDeclarator_tok; _temp2485.f1=({ struct Cyc_Parse_Abstractdeclarator*
-_temp2486=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
-_temp2486->tms=({ struct Cyc_List_List* _temp2487=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2487->hd=( void*)(( void*) Cyc_Absyn_Carray_mod);
-_temp2487->tl=( Cyc_yyget_AbstractDeclarator_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]))->tms; _temp2487;});
-_temp2486;}); _temp2485;}); _temp2484;}); break; case 211: _LL2483: yyval=( void*)({
-struct Cyc_AbstractDeclarator_tok_struct* _temp2489=( struct Cyc_AbstractDeclarator_tok_struct*)
-GC_malloc( sizeof( struct Cyc_AbstractDeclarator_tok_struct)); _temp2489[ 0]=({
-struct Cyc_AbstractDeclarator_tok_struct _temp2490; _temp2490.tag= Cyc_AbstractDeclarator_tok;
-_temp2490.f1=({ struct Cyc_Parse_Abstractdeclarator* _temp2491=( struct Cyc_Parse_Abstractdeclarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator)); _temp2491->tms=({
-struct Cyc_List_List* _temp2492=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp2492->hd=( void*)(( void*)({ struct Cyc_Absyn_ConstArray_mod_struct*
-_temp2493=( struct Cyc_Absyn_ConstArray_mod_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_ConstArray_mod_struct)); _temp2493[ 0]=({ struct Cyc_Absyn_ConstArray_mod_struct
-_temp2494; _temp2494.tag= Cyc_Absyn_ConstArray_mod; _temp2494.f1= Cyc_yyget_Exp_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2494;});
-_temp2493;})); _temp2492->tl= 0; _temp2492;}); _temp2491;}); _temp2490;});
-_temp2489;}); break; case 212: _LL2488: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct*
-_temp2496=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
-Cyc_AbstractDeclarator_tok_struct)); _temp2496[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
-_temp2497; _temp2497.tag= Cyc_AbstractDeclarator_tok; _temp2497.f1=({ struct Cyc_Parse_Abstractdeclarator*
-_temp2498=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
-_temp2498->tms=({ struct Cyc_List_List* _temp2499=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2499->hd=( void*)(( void*)({
-struct Cyc_Absyn_ConstArray_mod_struct* _temp2500=( struct Cyc_Absyn_ConstArray_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_ConstArray_mod_struct)); _temp2500[ 0]=({
-struct Cyc_Absyn_ConstArray_mod_struct _temp2501; _temp2501.tag= Cyc_Absyn_ConstArray_mod;
-_temp2501.f1= Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _temp2501;}); _temp2500;})); _temp2499->tl=( Cyc_yyget_AbstractDeclarator_tok(
+_temp2451[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct _temp2452; _temp2452.tag=
+Cyc_AbstractDeclarator_tok; _temp2452.f1=({ struct Cyc_Parse_Abstractdeclarator*
+_temp2453=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
+_temp2453->tms=({ struct Cyc_List_List* _temp2454=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2454->hd=( void*)(( void*) Cyc_Absyn_Carray_mod);
+_temp2454->tl= 0; _temp2454;}); _temp2453;}); _temp2452;}); _temp2451;}); break;
+case 210: _LL2450: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct*
+_temp2456=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
+Cyc_AbstractDeclarator_tok_struct)); _temp2456[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
+_temp2457; _temp2457.tag= Cyc_AbstractDeclarator_tok; _temp2457.f1=({ struct Cyc_Parse_Abstractdeclarator*
+_temp2458=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
+_temp2458->tms=({ struct Cyc_List_List* _temp2459=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2459->hd=( void*)(( void*) Cyc_Absyn_Carray_mod);
+_temp2459->tl=( Cyc_yyget_AbstractDeclarator_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]))->tms; _temp2459;});
+_temp2458;}); _temp2457;}); _temp2456;}); break; case 211: _LL2455: yyval=( void*)({
+struct Cyc_AbstractDeclarator_tok_struct* _temp2461=( struct Cyc_AbstractDeclarator_tok_struct*)
+GC_malloc( sizeof( struct Cyc_AbstractDeclarator_tok_struct)); _temp2461[ 0]=({
+struct Cyc_AbstractDeclarator_tok_struct _temp2462; _temp2462.tag= Cyc_AbstractDeclarator_tok;
+_temp2462.f1=({ struct Cyc_Parse_Abstractdeclarator* _temp2463=( struct Cyc_Parse_Abstractdeclarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator)); _temp2463->tms=({
+struct Cyc_List_List* _temp2464=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp2464->hd=( void*)(( void*)({ struct Cyc_Absyn_ConstArray_mod_struct*
+_temp2465=( struct Cyc_Absyn_ConstArray_mod_struct*) GC_malloc( sizeof( struct
+Cyc_Absyn_ConstArray_mod_struct)); _temp2465[ 0]=({ struct Cyc_Absyn_ConstArray_mod_struct
+_temp2466; _temp2466.tag= Cyc_Absyn_ConstArray_mod; _temp2466.f1= Cyc_yyget_Exp_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2466;});
+_temp2465;})); _temp2464->tl= 0; _temp2464;}); _temp2463;}); _temp2462;});
+_temp2461;}); break; case 212: _LL2460: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct*
+_temp2468=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
+Cyc_AbstractDeclarator_tok_struct)); _temp2468[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
+_temp2469; _temp2469.tag= Cyc_AbstractDeclarator_tok; _temp2469.f1=({ struct Cyc_Parse_Abstractdeclarator*
+_temp2470=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
+_temp2470->tms=({ struct Cyc_List_List* _temp2471=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2471->hd=( void*)(( void*)({
+struct Cyc_Absyn_ConstArray_mod_struct* _temp2472=( struct Cyc_Absyn_ConstArray_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_ConstArray_mod_struct)); _temp2472[ 0]=({
+struct Cyc_Absyn_ConstArray_mod_struct _temp2473; _temp2473.tag= Cyc_Absyn_ConstArray_mod;
+_temp2473.f1= Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 1)]); _temp2473;}); _temp2472;})); _temp2471->tl=( Cyc_yyget_AbstractDeclarator_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms;
-_temp2499;}); _temp2498;}); _temp2497;}); _temp2496;}); break; case 213: _LL2495:
-yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct* _temp2503=( struct
+_temp2471;}); _temp2470;}); _temp2469;}); _temp2468;}); break; case 213: _LL2467:
+yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct* _temp2475=( struct
 Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct Cyc_AbstractDeclarator_tok_struct));
-_temp2503[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct _temp2504; _temp2504.tag=
-Cyc_AbstractDeclarator_tok; _temp2504.f1=({ struct Cyc_Parse_Abstractdeclarator*
-_temp2505=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
-_temp2505->tms=({ struct Cyc_List_List* _temp2506=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2506->hd=( void*)(( void*)({
-struct Cyc_Absyn_Function_mod_struct* _temp2507=( struct Cyc_Absyn_Function_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2507[ 0]=({
-struct Cyc_Absyn_Function_mod_struct _temp2508; _temp2508.tag= Cyc_Absyn_Function_mod;
-_temp2508.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct* _temp2509=(
+_temp2475[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct _temp2476; _temp2476.tag=
+Cyc_AbstractDeclarator_tok; _temp2476.f1=({ struct Cyc_Parse_Abstractdeclarator*
+_temp2477=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
+_temp2477->tms=({ struct Cyc_List_List* _temp2478=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2478->hd=( void*)(( void*)({
+struct Cyc_Absyn_Function_mod_struct* _temp2479=( struct Cyc_Absyn_Function_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2479[ 0]=({
+struct Cyc_Absyn_Function_mod_struct _temp2480; _temp2480.tag= Cyc_Absyn_Function_mod;
+_temp2480.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct* _temp2481=(
 struct Cyc_Absyn_WithTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_WithTypes_struct));
-_temp2509[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2510; _temp2510.tag= Cyc_Absyn_WithTypes;
-_temp2510.f1= 0; _temp2510.f2= 0; _temp2510.f3= 0; _temp2510.f4= Cyc_yyget_TypeOpt_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2510.f5=
+_temp2481[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2482; _temp2482.tag= Cyc_Absyn_WithTypes;
+_temp2482.f1= 0; _temp2482.f2= 0; _temp2482.f3= 0; _temp2482.f4= Cyc_yyget_TypeOpt_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2482.f5=
 Cyc_yyget_Rgnorder_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _temp2510;}); _temp2509;})); _temp2508;}); _temp2507;}));
-_temp2506->tl= 0; _temp2506;}); _temp2505;}); _temp2504;}); _temp2503;}); break;
-case 214: _LL2502: { struct _tuple17 _temp2514; struct Cyc_List_List* _temp2515;
-struct Cyc_Core_Opt* _temp2517; struct Cyc_Absyn_VarargInfo* _temp2519; int
-_temp2521; struct Cyc_List_List* _temp2523; struct _tuple17* _temp2512= Cyc_yyget_ParamDeclListBool_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2514=*
-_temp2512; _LL2524: _temp2523= _temp2514.f1; goto _LL2522; _LL2522: _temp2521=
-_temp2514.f2; goto _LL2520; _LL2520: _temp2519= _temp2514.f3; goto _LL2518;
-_LL2518: _temp2517= _temp2514.f4; goto _LL2516; _LL2516: _temp2515= _temp2514.f5;
-goto _LL2513; _LL2513: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct*
-_temp2525=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
-Cyc_AbstractDeclarator_tok_struct)); _temp2525[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
-_temp2526; _temp2526.tag= Cyc_AbstractDeclarator_tok; _temp2526.f1=({ struct Cyc_Parse_Abstractdeclarator*
-_temp2527=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
-_temp2527->tms=({ struct Cyc_List_List* _temp2528=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2528->hd=( void*)(( void*)({
-struct Cyc_Absyn_Function_mod_struct* _temp2529=( struct Cyc_Absyn_Function_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2529[ 0]=({
-struct Cyc_Absyn_Function_mod_struct _temp2530; _temp2530.tag= Cyc_Absyn_Function_mod;
-_temp2530.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct* _temp2531=(
+yyvsp_offset - 1)]); _temp2482;}); _temp2481;})); _temp2480;}); _temp2479;}));
+_temp2478->tl= 0; _temp2478;}); _temp2477;}); _temp2476;}); _temp2475;}); break;
+case 214: _LL2474: { struct _tuple17 _temp2486; struct Cyc_List_List* _temp2487;
+struct Cyc_Core_Opt* _temp2489; struct Cyc_Absyn_VarargInfo* _temp2491; int
+_temp2493; struct Cyc_List_List* _temp2495; struct _tuple17* _temp2484= Cyc_yyget_ParamDeclListBool_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2486=*
+_temp2484; _LL2496: _temp2495= _temp2486.f1; goto _LL2494; _LL2494: _temp2493=
+_temp2486.f2; goto _LL2492; _LL2492: _temp2491= _temp2486.f3; goto _LL2490;
+_LL2490: _temp2489= _temp2486.f4; goto _LL2488; _LL2488: _temp2487= _temp2486.f5;
+goto _LL2485; _LL2485: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct*
+_temp2497=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
+Cyc_AbstractDeclarator_tok_struct)); _temp2497[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
+_temp2498; _temp2498.tag= Cyc_AbstractDeclarator_tok; _temp2498.f1=({ struct Cyc_Parse_Abstractdeclarator*
+_temp2499=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
+_temp2499->tms=({ struct Cyc_List_List* _temp2500=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2500->hd=( void*)(( void*)({
+struct Cyc_Absyn_Function_mod_struct* _temp2501=( struct Cyc_Absyn_Function_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2501[ 0]=({
+struct Cyc_Absyn_Function_mod_struct _temp2502; _temp2502.tag= Cyc_Absyn_Function_mod;
+_temp2502.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct* _temp2503=(
 struct Cyc_Absyn_WithTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_WithTypes_struct));
-_temp2531[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2532; _temp2532.tag= Cyc_Absyn_WithTypes;
-_temp2532.f1= _temp2523; _temp2532.f2= _temp2521; _temp2532.f3= _temp2519;
-_temp2532.f4= _temp2517; _temp2532.f5= _temp2515; _temp2532;}); _temp2531;}));
-_temp2530;}); _temp2529;})); _temp2528->tl= 0; _temp2528;}); _temp2527;});
-_temp2526;}); _temp2525;}); break;} case 215: _LL2511: yyval=( void*)({ struct
-Cyc_AbstractDeclarator_tok_struct* _temp2534=( struct Cyc_AbstractDeclarator_tok_struct*)
-GC_malloc( sizeof( struct Cyc_AbstractDeclarator_tok_struct)); _temp2534[ 0]=({
-struct Cyc_AbstractDeclarator_tok_struct _temp2535; _temp2535.tag= Cyc_AbstractDeclarator_tok;
-_temp2535.f1=({ struct Cyc_Parse_Abstractdeclarator* _temp2536=( struct Cyc_Parse_Abstractdeclarator*)
-GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator)); _temp2536->tms=({
-struct Cyc_List_List* _temp2537=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp2537->hd=( void*)(( void*)({ struct Cyc_Absyn_Function_mod_struct*
-_temp2538=( struct Cyc_Absyn_Function_mod_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct));
-_temp2538[ 0]=({ struct Cyc_Absyn_Function_mod_struct _temp2539; _temp2539.tag=
-Cyc_Absyn_Function_mod; _temp2539.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct*
-_temp2540=( struct Cyc_Absyn_WithTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_WithTypes_struct));
-_temp2540[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2541; _temp2541.tag= Cyc_Absyn_WithTypes;
-_temp2541.f1= 0; _temp2541.f2= 0; _temp2541.f3= 0; _temp2541.f4= Cyc_yyget_TypeOpt_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2541.f5=
+_temp2503[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2504; _temp2504.tag= Cyc_Absyn_WithTypes;
+_temp2504.f1= _temp2495; _temp2504.f2= _temp2493; _temp2504.f3= _temp2491;
+_temp2504.f4= _temp2489; _temp2504.f5= _temp2487; _temp2504;}); _temp2503;}));
+_temp2502;}); _temp2501;})); _temp2500->tl= 0; _temp2500;}); _temp2499;});
+_temp2498;}); _temp2497;}); break;} case 215: _LL2483: yyval=( void*)({ struct
+Cyc_AbstractDeclarator_tok_struct* _temp2506=( struct Cyc_AbstractDeclarator_tok_struct*)
+GC_malloc( sizeof( struct Cyc_AbstractDeclarator_tok_struct)); _temp2506[ 0]=({
+struct Cyc_AbstractDeclarator_tok_struct _temp2507; _temp2507.tag= Cyc_AbstractDeclarator_tok;
+_temp2507.f1=({ struct Cyc_Parse_Abstractdeclarator* _temp2508=( struct Cyc_Parse_Abstractdeclarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator)); _temp2508->tms=({
+struct Cyc_List_List* _temp2509=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp2509->hd=( void*)(( void*)({ struct Cyc_Absyn_Function_mod_struct*
+_temp2510=( struct Cyc_Absyn_Function_mod_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct));
+_temp2510[ 0]=({ struct Cyc_Absyn_Function_mod_struct _temp2511; _temp2511.tag=
+Cyc_Absyn_Function_mod; _temp2511.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct*
+_temp2512=( struct Cyc_Absyn_WithTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_WithTypes_struct));
+_temp2512[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2513; _temp2513.tag= Cyc_Absyn_WithTypes;
+_temp2513.f1= 0; _temp2513.f2= 0; _temp2513.f3= 0; _temp2513.f4= Cyc_yyget_TypeOpt_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2513.f5=
 Cyc_yyget_Rgnorder_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _temp2541;}); _temp2540;})); _temp2539;}); _temp2538;}));
-_temp2537->tl=( Cyc_yyget_AbstractDeclarator_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]))->tms; _temp2537;});
-_temp2536;}); _temp2535;}); _temp2534;}); break; case 216: _LL2533: { struct
-_tuple17 _temp2545; struct Cyc_List_List* _temp2546; struct Cyc_Core_Opt*
-_temp2548; struct Cyc_Absyn_VarargInfo* _temp2550; int _temp2552; struct Cyc_List_List*
-_temp2554; struct _tuple17* _temp2543= Cyc_yyget_ParamDeclListBool_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2545=*
-_temp2543; _LL2555: _temp2554= _temp2545.f1; goto _LL2553; _LL2553: _temp2552=
-_temp2545.f2; goto _LL2551; _LL2551: _temp2550= _temp2545.f3; goto _LL2549;
-_LL2549: _temp2548= _temp2545.f4; goto _LL2547; _LL2547: _temp2546= _temp2545.f5;
-goto _LL2544; _LL2544: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct*
-_temp2556=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
-Cyc_AbstractDeclarator_tok_struct)); _temp2556[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
-_temp2557; _temp2557.tag= Cyc_AbstractDeclarator_tok; _temp2557.f1=({ struct Cyc_Parse_Abstractdeclarator*
-_temp2558=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
-_temp2558->tms=({ struct Cyc_List_List* _temp2559=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2559->hd=( void*)(( void*)({
-struct Cyc_Absyn_Function_mod_struct* _temp2560=( struct Cyc_Absyn_Function_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2560[ 0]=({
-struct Cyc_Absyn_Function_mod_struct _temp2561; _temp2561.tag= Cyc_Absyn_Function_mod;
-_temp2561.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct* _temp2562=(
+yyvsp_offset - 1)]); _temp2513;}); _temp2512;})); _temp2511;}); _temp2510;}));
+_temp2509->tl=( Cyc_yyget_AbstractDeclarator_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]))->tms; _temp2509;});
+_temp2508;}); _temp2507;}); _temp2506;}); break; case 216: _LL2505: { struct
+_tuple17 _temp2517; struct Cyc_List_List* _temp2518; struct Cyc_Core_Opt*
+_temp2520; struct Cyc_Absyn_VarargInfo* _temp2522; int _temp2524; struct Cyc_List_List*
+_temp2526; struct _tuple17* _temp2515= Cyc_yyget_ParamDeclListBool_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2517=*
+_temp2515; _LL2527: _temp2526= _temp2517.f1; goto _LL2525; _LL2525: _temp2524=
+_temp2517.f2; goto _LL2523; _LL2523: _temp2522= _temp2517.f3; goto _LL2521;
+_LL2521: _temp2520= _temp2517.f4; goto _LL2519; _LL2519: _temp2518= _temp2517.f5;
+goto _LL2516; _LL2516: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct*
+_temp2528=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
+Cyc_AbstractDeclarator_tok_struct)); _temp2528[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
+_temp2529; _temp2529.tag= Cyc_AbstractDeclarator_tok; _temp2529.f1=({ struct Cyc_Parse_Abstractdeclarator*
+_temp2530=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
+_temp2530->tms=({ struct Cyc_List_List* _temp2531=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2531->hd=( void*)(( void*)({
+struct Cyc_Absyn_Function_mod_struct* _temp2532=( struct Cyc_Absyn_Function_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct)); _temp2532[ 0]=({
+struct Cyc_Absyn_Function_mod_struct _temp2533; _temp2533.tag= Cyc_Absyn_Function_mod;
+_temp2533.f1=( void*)(( void*)({ struct Cyc_Absyn_WithTypes_struct* _temp2534=(
 struct Cyc_Absyn_WithTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_WithTypes_struct));
-_temp2562[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2563; _temp2563.tag= Cyc_Absyn_WithTypes;
-_temp2563.f1= _temp2554; _temp2563.f2= _temp2552; _temp2563.f3= _temp2550;
-_temp2563.f4= _temp2548; _temp2563.f5= _temp2546; _temp2563;}); _temp2562;}));
-_temp2561;}); _temp2560;})); _temp2559->tl=( Cyc_yyget_AbstractDeclarator_tok(
+_temp2534[ 0]=({ struct Cyc_Absyn_WithTypes_struct _temp2535; _temp2535.tag= Cyc_Absyn_WithTypes;
+_temp2535.f1= _temp2526; _temp2535.f2= _temp2524; _temp2535.f3= _temp2522;
+_temp2535.f4= _temp2520; _temp2535.f5= _temp2518; _temp2535;}); _temp2534;}));
+_temp2533;}); _temp2532;})); _temp2531->tl=( Cyc_yyget_AbstractDeclarator_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms;
-_temp2559;}); _temp2558;}); _temp2557;}); _temp2556;}); break;} case 217:
-_LL2542: { struct Cyc_List_List* _temp2565=(( struct Cyc_List_List*(*)( struct
+_temp2531;}); _temp2530;}); _temp2529;}); _temp2528;}); break;} case 217:
+_LL2514: { struct Cyc_List_List* _temp2537=(( struct Cyc_List_List*(*)( struct
 Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*, void*), struct Cyc_Position_Segment*
 env, struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line), Cyc_List_imp_rev(
 Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 1)]))); yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct*
-_temp2566=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
-Cyc_AbstractDeclarator_tok_struct)); _temp2566[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
-_temp2567; _temp2567.tag= Cyc_AbstractDeclarator_tok; _temp2567.f1=({ struct Cyc_Parse_Abstractdeclarator*
-_temp2568=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
-_temp2568->tms=({ struct Cyc_List_List* _temp2569=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2569->hd=( void*)(( void*)({
-struct Cyc_Absyn_TypeParams_mod_struct* _temp2570=( struct Cyc_Absyn_TypeParams_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_TypeParams_mod_struct)); _temp2570[ 0]=({
-struct Cyc_Absyn_TypeParams_mod_struct _temp2571; _temp2571.tag= Cyc_Absyn_TypeParams_mod;
-_temp2571.f1= _temp2565; _temp2571.f2= Cyc_Position_segment_of_abs(( yyls[
+_temp2538=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
+Cyc_AbstractDeclarator_tok_struct)); _temp2538[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
+_temp2539; _temp2539.tag= Cyc_AbstractDeclarator_tok; _temp2539.f1=({ struct Cyc_Parse_Abstractdeclarator*
+_temp2540=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
+_temp2540->tms=({ struct Cyc_List_List* _temp2541=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2541->hd=( void*)(( void*)({
+struct Cyc_Absyn_TypeParams_mod_struct* _temp2542=( struct Cyc_Absyn_TypeParams_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_TypeParams_mod_struct)); _temp2542[ 0]=({
+struct Cyc_Absyn_TypeParams_mod_struct _temp2543; _temp2543.tag= Cyc_Absyn_TypeParams_mod;
+_temp2543.f1= _temp2537; _temp2543.f2= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2571.f3=
-0; _temp2571;}); _temp2570;})); _temp2569->tl=( Cyc_yyget_AbstractDeclarator_tok(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2543.f3=
+0; _temp2543;}); _temp2542;})); _temp2541->tl=( Cyc_yyget_AbstractDeclarator_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms;
-_temp2569;}); _temp2568;}); _temp2567;}); _temp2566;}); break;} case 218:
-_LL2564:(( struct Cyc_Lexing_lexbuf*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Parse_lbuf))->v)->lex_curr_pos
--= 1;{ struct Cyc_List_List* _temp2573=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(*
+_temp2541;}); _temp2540;}); _temp2539;}); _temp2538;}); break;} case 218:
+_LL2536:(( struct Cyc_Lexing_lexbuf*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Parse_lbuf))->v)->lex_curr_pos
+-= 1;{ struct Cyc_List_List* _temp2545=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(*
 f)( struct Cyc_Position_Segment*, void*), struct Cyc_Position_Segment* env,
 struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line), Cyc_List_imp_rev(
 Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 1)]))); yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct*
-_temp2574=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
-Cyc_AbstractDeclarator_tok_struct)); _temp2574[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
-_temp2575; _temp2575.tag= Cyc_AbstractDeclarator_tok; _temp2575.f1=({ struct Cyc_Parse_Abstractdeclarator*
-_temp2576=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
-_temp2576->tms=({ struct Cyc_List_List* _temp2577=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2577->hd=( void*)(( void*)({
-struct Cyc_Absyn_TypeParams_mod_struct* _temp2578=( struct Cyc_Absyn_TypeParams_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_TypeParams_mod_struct)); _temp2578[ 0]=({
-struct Cyc_Absyn_TypeParams_mod_struct _temp2579; _temp2579.tag= Cyc_Absyn_TypeParams_mod;
-_temp2579.f1= _temp2573; _temp2579.f2= Cyc_Position_segment_of_abs(( yyls[
+_temp2546=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
+Cyc_AbstractDeclarator_tok_struct)); _temp2546[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct
+_temp2547; _temp2547.tag= Cyc_AbstractDeclarator_tok; _temp2547.f1=({ struct Cyc_Parse_Abstractdeclarator*
+_temp2548=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
+_temp2548->tms=({ struct Cyc_List_List* _temp2549=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2549->hd=( void*)(( void*)({
+struct Cyc_Absyn_TypeParams_mod_struct* _temp2550=( struct Cyc_Absyn_TypeParams_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_TypeParams_mod_struct)); _temp2550[ 0]=({
+struct Cyc_Absyn_TypeParams_mod_struct _temp2551; _temp2551.tag= Cyc_Absyn_TypeParams_mod;
+_temp2551.f1= _temp2545; _temp2551.f2= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2579.f3=
-0; _temp2579;}); _temp2578;})); _temp2577->tl=( Cyc_yyget_AbstractDeclarator_tok(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2551.f3=
+0; _temp2551;}); _temp2550;})); _temp2549->tl=( Cyc_yyget_AbstractDeclarator_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]))->tms;
-_temp2577;}); _temp2576;}); _temp2575;}); _temp2574;}); break;} case 219:
-_LL2572: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct* _temp2581=(
+_temp2549;}); _temp2548;}); _temp2547;}); _temp2546;}); break;} case 219:
+_LL2544: yyval=( void*)({ struct Cyc_AbstractDeclarator_tok_struct* _temp2553=(
 struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct Cyc_AbstractDeclarator_tok_struct));
-_temp2581[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct _temp2582; _temp2582.tag=
-Cyc_AbstractDeclarator_tok; _temp2582.f1=({ struct Cyc_Parse_Abstractdeclarator*
-_temp2583=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
-_temp2583->tms=({ struct Cyc_List_List* _temp2584=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2584->hd=( void*)(( void*)({
-struct Cyc_Absyn_Attributes_mod_struct* _temp2585=( struct Cyc_Absyn_Attributes_mod_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Attributes_mod_struct)); _temp2585[ 0]=({
-struct Cyc_Absyn_Attributes_mod_struct _temp2586; _temp2586.tag= Cyc_Absyn_Attributes_mod;
-_temp2586.f1= Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_temp2553[ 0]=({ struct Cyc_AbstractDeclarator_tok_struct _temp2554; _temp2554.tag=
+Cyc_AbstractDeclarator_tok; _temp2554.f1=({ struct Cyc_Parse_Abstractdeclarator*
+_temp2555=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
+_temp2555->tms=({ struct Cyc_List_List* _temp2556=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2556->hd=( void*)(( void*)({
+struct Cyc_Absyn_Attributes_mod_struct* _temp2557=( struct Cyc_Absyn_Attributes_mod_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Attributes_mod_struct)); _temp2557[ 0]=({
+struct Cyc_Absyn_Attributes_mod_struct _temp2558; _temp2558.tag= Cyc_Absyn_Attributes_mod;
+_temp2558.f1= Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line); _temp2586.f2= Cyc_yyget_AttributeList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2586;}); _temp2585;}));
-_temp2584->tl=( Cyc_yyget_AbstractDeclarator_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]))->tms; _temp2584;});
-_temp2583;}); _temp2582;}); _temp2581;}); break; case 220: _LL2580: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 221: _LL2587:
+yylsp_offset)]).last_line); _temp2558.f2= Cyc_yyget_AttributeList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2558;}); _temp2557;}));
+_temp2556->tl=( Cyc_yyget_AbstractDeclarator_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]))->tms; _temp2556;});
+_temp2555;}); _temp2554;}); _temp2553;}); break; case 220: _LL2552: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 221: _LL2559:
 yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case
-222: _LL2588: yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)];
-break; case 223: _LL2589: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]; break; case 224: _LL2590: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 225: _LL2591:
+222: _LL2560: yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)];
+break; case 223: _LL2561: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]; break; case 224: _LL2562: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 225: _LL2563:
 yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case
-226: _LL2592: if( Cyc_String_zstrcmp( Cyc_yyget_String_tok( yyvs[
+226: _LL2564: if( Cyc_String_zstrcmp( Cyc_yyget_String_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]), _tag_arr("`H",
 sizeof( unsigned char), 3u)) == 0){ Cyc_Parse_err( _tag_arr("bad occurrence of heap region `H",
 sizeof( unsigned char), 33u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).last_line));}{
-struct Cyc_Absyn_Tvar* tv=({ struct Cyc_Absyn_Tvar* _temp2604=( struct Cyc_Absyn_Tvar*)
-GC_malloc( sizeof( struct Cyc_Absyn_Tvar)); _temp2604->name=({ struct
-_tagged_arr* _temp2605=( struct _tagged_arr*) GC_malloc( sizeof( struct
-_tagged_arr)); _temp2605[ 0]= Cyc_yyget_String_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2605;});
-_temp2604->identity= 0; _temp2604->kind= Cyc_Absyn_new_conref(( void*) Cyc_Absyn_RgnKind);
-_temp2604;}); void* t=( void*)({ struct Cyc_Absyn_VarType_struct* _temp2602=(
+struct Cyc_Absyn_Tvar* tv=({ struct Cyc_Absyn_Tvar* _temp2576=( struct Cyc_Absyn_Tvar*)
+GC_malloc( sizeof( struct Cyc_Absyn_Tvar)); _temp2576->name=({ struct
+_tagged_arr* _temp2577=( struct _tagged_arr*) GC_malloc( sizeof( struct
+_tagged_arr)); _temp2577[ 0]= Cyc_yyget_String_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2577;});
+_temp2576->identity= 0; _temp2576->kind= Cyc_Absyn_new_conref(( void*) Cyc_Absyn_RgnKind);
+_temp2576;}); void* t=( void*)({ struct Cyc_Absyn_VarType_struct* _temp2574=(
 struct Cyc_Absyn_VarType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_VarType_struct));
-_temp2602[ 0]=({ struct Cyc_Absyn_VarType_struct _temp2603; _temp2603.tag= Cyc_Absyn_VarType;
-_temp2603.f1= tv; _temp2603;}); _temp2602;}); yyval=( void*)({ struct Cyc_Stmt_tok_struct*
-_temp2594=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2594[ 0]=({ struct Cyc_Stmt_tok_struct _temp2595; _temp2595.tag= Cyc_Stmt_tok;
-_temp2595.f1= Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Region_s_struct*
-_temp2596=( struct Cyc_Absyn_Region_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Region_s_struct));
-_temp2596[ 0]=({ struct Cyc_Absyn_Region_s_struct _temp2597; _temp2597.tag= Cyc_Absyn_Region_s;
-_temp2597.f1= tv; _temp2597.f2= Cyc_Absyn_new_vardecl(({ struct _tuple1*
-_temp2598=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp2598->f1=(
-void*) Cyc_Absyn_Loc_n; _temp2598->f2=({ struct _tagged_arr* _temp2599=( struct
-_tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp2599[ 0]= Cyc_yyget_String_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2599;});
-_temp2598;}),( void*)({ struct Cyc_Absyn_RgnHandleType_struct* _temp2600=(
+_temp2574[ 0]=({ struct Cyc_Absyn_VarType_struct _temp2575; _temp2575.tag= Cyc_Absyn_VarType;
+_temp2575.f1= tv; _temp2575;}); _temp2574;}); yyval=( void*)({ struct Cyc_Stmt_tok_struct*
+_temp2566=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp2566[ 0]=({ struct Cyc_Stmt_tok_struct _temp2567; _temp2567.tag= Cyc_Stmt_tok;
+_temp2567.f1= Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Region_s_struct*
+_temp2568=( struct Cyc_Absyn_Region_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Region_s_struct));
+_temp2568[ 0]=({ struct Cyc_Absyn_Region_s_struct _temp2569; _temp2569.tag= Cyc_Absyn_Region_s;
+_temp2569.f1= tv; _temp2569.f2= Cyc_Absyn_new_vardecl(({ struct _tuple1*
+_temp2570=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp2570->f1=(
+void*) Cyc_Absyn_Loc_n; _temp2570->f2=({ struct _tagged_arr* _temp2571=( struct
+_tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp2571[ 0]= Cyc_yyget_String_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2571;});
+_temp2570;}),( void*)({ struct Cyc_Absyn_RgnHandleType_struct* _temp2572=(
 struct Cyc_Absyn_RgnHandleType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_RgnHandleType_struct));
-_temp2600[ 0]=({ struct Cyc_Absyn_RgnHandleType_struct _temp2601; _temp2601.tag=
-Cyc_Absyn_RgnHandleType; _temp2601.f1=( void*) t; _temp2601;}); _temp2600;}), 0);
-_temp2597.f3= Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2597;}); _temp2596;}), Cyc_Position_segment_of_abs(( yyls[
+_temp2572[ 0]=({ struct Cyc_Absyn_RgnHandleType_struct _temp2573; _temp2573.tag=
+Cyc_Absyn_RgnHandleType; _temp2573.f1=( void*) t; _temp2573;}); _temp2572;}), 0);
+_temp2569.f3= Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]); _temp2569;}); _temp2568;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2595;});
-_temp2594;}); break;} case 227: _LL2593: if( Cyc_String_zstrcmp( Cyc_yyget_String_tok(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2567;});
+_temp2566;}); break;} case 227: _LL2565: if( Cyc_String_zstrcmp( Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), _tag_arr("H",
 sizeof( unsigned char), 2u)) == 0){ Cyc_Parse_err( _tag_arr("bad occurrence of heap region `H",
 sizeof( unsigned char), 33u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));}{
-struct Cyc_Absyn_Tvar* tv=({ struct Cyc_Absyn_Tvar* _temp2617=( struct Cyc_Absyn_Tvar*)
-GC_malloc( sizeof( struct Cyc_Absyn_Tvar)); _temp2617->name=({ struct
-_tagged_arr* _temp2618=( struct _tagged_arr*) GC_malloc( sizeof( struct
-_tagged_arr)); _temp2618[ 0]=( struct _tagged_arr)({ struct Cyc_Stdio_String_pa_struct
-_temp2620; _temp2620.tag= Cyc_Stdio_String_pa; _temp2620.f1=( struct _tagged_arr)
+struct Cyc_Absyn_Tvar* tv=({ struct Cyc_Absyn_Tvar* _temp2589=( struct Cyc_Absyn_Tvar*)
+GC_malloc( sizeof( struct Cyc_Absyn_Tvar)); _temp2589->name=({ struct
+_tagged_arr* _temp2590=( struct _tagged_arr*) GC_malloc( sizeof( struct
+_tagged_arr)); _temp2590[ 0]=( struct _tagged_arr)({ struct Cyc_Stdio_String_pa_struct
+_temp2592; _temp2592.tag= Cyc_Stdio_String_pa; _temp2592.f1=( struct _tagged_arr)
 Cyc_yyget_String_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset
-- 1)]);{ void* _temp2619[ 1u]={& _temp2620}; Cyc_Stdio_aprintf( _tag_arr("`%s",
-sizeof( unsigned char), 4u), _tag_arr( _temp2619, sizeof( void*), 1u));}});
-_temp2618;}); _temp2617->identity= 0; _temp2617->kind= Cyc_Absyn_new_conref((
-void*) Cyc_Absyn_RgnKind); _temp2617;}); void* t=( void*)({ struct Cyc_Absyn_VarType_struct*
-_temp2615=( struct Cyc_Absyn_VarType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_VarType_struct));
-_temp2615[ 0]=({ struct Cyc_Absyn_VarType_struct _temp2616; _temp2616.tag= Cyc_Absyn_VarType;
-_temp2616.f1= tv; _temp2616;}); _temp2615;}); yyval=( void*)({ struct Cyc_Stmt_tok_struct*
-_temp2607=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2607[ 0]=({ struct Cyc_Stmt_tok_struct _temp2608; _temp2608.tag= Cyc_Stmt_tok;
-_temp2608.f1= Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Region_s_struct*
-_temp2609=( struct Cyc_Absyn_Region_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Region_s_struct));
-_temp2609[ 0]=({ struct Cyc_Absyn_Region_s_struct _temp2610; _temp2610.tag= Cyc_Absyn_Region_s;
-_temp2610.f1= tv; _temp2610.f2= Cyc_Absyn_new_vardecl(({ struct _tuple1*
-_temp2611=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp2611->f1=(
-void*) Cyc_Absyn_Loc_n; _temp2611->f2=({ struct _tagged_arr* _temp2612=( struct
-_tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp2612[ 0]= Cyc_yyget_String_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2612;});
-_temp2611;}),( void*)({ struct Cyc_Absyn_RgnHandleType_struct* _temp2613=(
+- 1)]);{ void* _temp2591[ 1u]={& _temp2592}; Cyc_Stdio_aprintf( _tag_arr("`%s",
+sizeof( unsigned char), 4u), _tag_arr( _temp2591, sizeof( void*), 1u));}});
+_temp2590;}); _temp2589->identity= 0; _temp2589->kind= Cyc_Absyn_new_conref((
+void*) Cyc_Absyn_RgnKind); _temp2589;}); void* t=( void*)({ struct Cyc_Absyn_VarType_struct*
+_temp2587=( struct Cyc_Absyn_VarType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_VarType_struct));
+_temp2587[ 0]=({ struct Cyc_Absyn_VarType_struct _temp2588; _temp2588.tag= Cyc_Absyn_VarType;
+_temp2588.f1= tv; _temp2588;}); _temp2587;}); yyval=( void*)({ struct Cyc_Stmt_tok_struct*
+_temp2579=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp2579[ 0]=({ struct Cyc_Stmt_tok_struct _temp2580; _temp2580.tag= Cyc_Stmt_tok;
+_temp2580.f1= Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Region_s_struct*
+_temp2581=( struct Cyc_Absyn_Region_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Region_s_struct));
+_temp2581[ 0]=({ struct Cyc_Absyn_Region_s_struct _temp2582; _temp2582.tag= Cyc_Absyn_Region_s;
+_temp2582.f1= tv; _temp2582.f2= Cyc_Absyn_new_vardecl(({ struct _tuple1*
+_temp2583=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp2583->f1=(
+void*) Cyc_Absyn_Loc_n; _temp2583->f2=({ struct _tagged_arr* _temp2584=( struct
+_tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp2584[ 0]= Cyc_yyget_String_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2584;});
+_temp2583;}),( void*)({ struct Cyc_Absyn_RgnHandleType_struct* _temp2585=(
 struct Cyc_Absyn_RgnHandleType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_RgnHandleType_struct));
-_temp2613[ 0]=({ struct Cyc_Absyn_RgnHandleType_struct _temp2614; _temp2614.tag=
-Cyc_Absyn_RgnHandleType; _temp2614.f1=( void*) t; _temp2614;}); _temp2613;}), 0);
-_temp2610.f3= Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2610;}); _temp2609;}), Cyc_Position_segment_of_abs(( yyls[
+_temp2585[ 0]=({ struct Cyc_Absyn_RgnHandleType_struct _temp2586; _temp2586.tag=
+Cyc_Absyn_RgnHandleType; _temp2586.f1=( void*) t; _temp2586;}); _temp2585;}), 0);
+_temp2582.f3= Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]); _temp2582;}); _temp2581;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2608;});
-_temp2607;}); break;} case 228: _LL2606: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
-_temp2622=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2622[ 0]=({ struct Cyc_Stmt_tok_struct _temp2623; _temp2623.tag= Cyc_Stmt_tok;
-_temp2623.f1= Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Cut_s_struct*
-_temp2624=( struct Cyc_Absyn_Cut_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Cut_s_struct));
-_temp2624[ 0]=({ struct Cyc_Absyn_Cut_s_struct _temp2625; _temp2625.tag= Cyc_Absyn_Cut_s;
-_temp2625.f1= Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2625;}); _temp2624;}), Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2580;});
+_temp2579;}); break;} case 228: _LL2578: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
+_temp2594=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp2594[ 0]=({ struct Cyc_Stmt_tok_struct _temp2595; _temp2595.tag= Cyc_Stmt_tok;
+_temp2595.f1= Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Cut_s_struct*
+_temp2596=( struct Cyc_Absyn_Cut_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Cut_s_struct));
+_temp2596[ 0]=({ struct Cyc_Absyn_Cut_s_struct _temp2597; _temp2597.tag= Cyc_Absyn_Cut_s;
+_temp2597.f1= Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]); _temp2597;}); _temp2596;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2623;});
-_temp2622;}); break; case 229: _LL2621: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
-_temp2627=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2627[ 0]=({ struct Cyc_Stmt_tok_struct _temp2628; _temp2628.tag= Cyc_Stmt_tok;
-_temp2628.f1= Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Splice_s_struct*
-_temp2629=( struct Cyc_Absyn_Splice_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Splice_s_struct));
-_temp2629[ 0]=({ struct Cyc_Absyn_Splice_s_struct _temp2630; _temp2630.tag= Cyc_Absyn_Splice_s;
-_temp2630.f1= Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2630;}); _temp2629;}), Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2595;});
+_temp2594;}); break; case 229: _LL2593: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
+_temp2599=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp2599[ 0]=({ struct Cyc_Stmt_tok_struct _temp2600; _temp2600.tag= Cyc_Stmt_tok;
+_temp2600.f1= Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Splice_s_struct*
+_temp2601=( struct Cyc_Absyn_Splice_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Splice_s_struct));
+_temp2601[ 0]=({ struct Cyc_Absyn_Splice_s_struct _temp2602; _temp2602.tag= Cyc_Absyn_Splice_s;
+_temp2602.f1= Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]); _temp2602;}); _temp2601;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2628;});
-_temp2627;}); break; case 230: _LL2626: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
-_temp2632=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2632[ 0]=({ struct Cyc_Stmt_tok_struct _temp2633; _temp2633.tag= Cyc_Stmt_tok;
-_temp2633.f1= Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Label_s_struct*
-_temp2634=( struct Cyc_Absyn_Label_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Label_s_struct));
-_temp2634[ 0]=({ struct Cyc_Absyn_Label_s_struct _temp2635; _temp2635.tag= Cyc_Absyn_Label_s;
-_temp2635.f1=({ struct _tagged_arr* _temp2636=( struct _tagged_arr*) GC_malloc(
-sizeof( struct _tagged_arr)); _temp2636[ 0]= Cyc_yyget_String_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2636;});
-_temp2635.f2= Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2635;}); _temp2634;}), Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2600;});
+_temp2599;}); break; case 230: _LL2598: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
+_temp2604=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp2604[ 0]=({ struct Cyc_Stmt_tok_struct _temp2605; _temp2605.tag= Cyc_Stmt_tok;
+_temp2605.f1= Cyc_Absyn_new_stmt(( void*)({ struct Cyc_Absyn_Label_s_struct*
+_temp2606=( struct Cyc_Absyn_Label_s_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Label_s_struct));
+_temp2606[ 0]=({ struct Cyc_Absyn_Label_s_struct _temp2607; _temp2607.tag= Cyc_Absyn_Label_s;
+_temp2607.f1=({ struct _tagged_arr* _temp2608=( struct _tagged_arr*) GC_malloc(
+sizeof( struct _tagged_arr)); _temp2608[ 0]= Cyc_yyget_String_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2608;});
+_temp2607.f2= Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]); _temp2607;}); _temp2606;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2633;});
-_temp2632;}); break; case 231: _LL2631: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
-_temp2638=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2638[ 0]=({ struct Cyc_Stmt_tok_struct _temp2639; _temp2639.tag= Cyc_Stmt_tok;
-_temp2639.f1= Cyc_Absyn_skip_stmt( Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2605;});
+_temp2604;}); break; case 231: _LL2603: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
+_temp2610=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp2610[ 0]=({ struct Cyc_Stmt_tok_struct _temp2611; _temp2611.tag= Cyc_Stmt_tok;
+_temp2611.f1= Cyc_Absyn_skip_stmt( Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2639;});
-_temp2638;}); break; case 232: _LL2637: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
-_temp2641=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2641[ 0]=({ struct Cyc_Stmt_tok_struct _temp2642; _temp2642.tag= Cyc_Stmt_tok;
-_temp2642.f1= Cyc_Absyn_exp_stmt( Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2611;});
+_temp2610;}); break; case 232: _LL2609: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
+_temp2613=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp2613[ 0]=({ struct Cyc_Stmt_tok_struct _temp2614; _temp2614.tag= Cyc_Stmt_tok;
+_temp2614.f1= Cyc_Absyn_exp_stmt( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2642;}); _temp2641;}); break; case 233: _LL2640: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2644=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2644[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2645; _temp2645.tag= Cyc_Stmt_tok; _temp2645.f1= Cyc_Absyn_skip_stmt( Cyc_Position_segment_of_abs((
+_temp2614;}); _temp2613;}); break; case 233: _LL2612: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2616=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2616[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2617; _temp2617.tag= Cyc_Stmt_tok; _temp2617.f1= Cyc_Absyn_skip_stmt( Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2645;}); _temp2644;}); break; case 234: _LL2643: yyval= yyvs[
+_temp2617;}); _temp2616;}); break; case 234: _LL2615: yyval= yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]; break; case 235:
-_LL2646: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2648=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2648[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2649; _temp2649.tag= Cyc_Stmt_tok; _temp2649.f1= Cyc_Parse_flatten_declarations(
+_LL2618: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2620=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2620[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2621; _temp2621.tag= Cyc_Stmt_tok; _temp2621.f1= Cyc_Parse_flatten_declarations(
 Cyc_yyget_DeclList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]), Cyc_Absyn_skip_stmt( 0)); _temp2649;}); _temp2648;}); break;
-case 236: _LL2647: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2651=(
+yyvsp_offset)]), Cyc_Absyn_skip_stmt( 0)); _temp2621;}); _temp2620;}); break;
+case 236: _LL2619: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2623=(
 struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2651[ 0]=({ struct Cyc_Stmt_tok_struct _temp2652; _temp2652.tag= Cyc_Stmt_tok;
-_temp2652.f1= Cyc_Parse_flatten_declarations( Cyc_yyget_DeclList_tok( yyvs[
+_temp2623[ 0]=({ struct Cyc_Stmt_tok_struct _temp2624; _temp2624.tag= Cyc_Stmt_tok;
+_temp2624.f1= Cyc_Parse_flatten_declarations( Cyc_yyget_DeclList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_yyget_Stmt_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2652;});
-_temp2651;}); break; case 237: _LL2650: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 238: _LL2653:
-yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2655=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2655[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2656; _temp2656.tag= Cyc_Stmt_tok; _temp2656.f1= Cyc_Absyn_seq_stmt( Cyc_yyget_Stmt_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2624;});
+_temp2623;}); break; case 237: _LL2622: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 238: _LL2625:
+yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2627=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2627[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2628; _temp2628.tag= Cyc_Stmt_tok; _temp2628.f1= Cyc_Absyn_seq_stmt( Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2656;}); _temp2655;}); break; case 239: _LL2654: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2658=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2658[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2659; _temp2659.tag= Cyc_Stmt_tok; _temp2659.f1= Cyc_Parse_flatten_decl(
-Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Fn_d_struct* _temp2660=( struct
+_temp2628;}); _temp2627;}); break; case 239: _LL2626: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2630=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2630[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2631; _temp2631.tag= Cyc_Stmt_tok; _temp2631.f1= Cyc_Parse_flatten_decl(
+Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Fn_d_struct* _temp2632=( struct
 Cyc_Absyn_Fn_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Fn_d_struct));
-_temp2660[ 0]=({ struct Cyc_Absyn_Fn_d_struct _temp2661; _temp2661.tag= Cyc_Absyn_Fn_d;
-_temp2661.f1= Cyc_yyget_FnDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2661;}); _temp2660;}), Cyc_Position_segment_of_abs(( yyls[
+_temp2632[ 0]=({ struct Cyc_Absyn_Fn_d_struct _temp2633; _temp2633.tag= Cyc_Absyn_Fn_d;
+_temp2633.f1= Cyc_yyget_FnDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]); _temp2633;}); _temp2632;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)), Cyc_Absyn_skip_stmt(
-0)); _temp2659;}); _temp2658;}); break; case 240: _LL2657: yyval=( void*)({
-struct Cyc_Stmt_tok_struct* _temp2663=( struct Cyc_Stmt_tok_struct*) GC_malloc(
-sizeof( struct Cyc_Stmt_tok_struct)); _temp2663[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2664; _temp2664.tag= Cyc_Stmt_tok; _temp2664.f1= Cyc_Parse_flatten_decl(
-Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Fn_d_struct* _temp2665=( struct
+0)); _temp2631;}); _temp2630;}); break; case 240: _LL2629: yyval=( void*)({
+struct Cyc_Stmt_tok_struct* _temp2635=( struct Cyc_Stmt_tok_struct*) GC_malloc(
+sizeof( struct Cyc_Stmt_tok_struct)); _temp2635[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2636; _temp2636.tag= Cyc_Stmt_tok; _temp2636.f1= Cyc_Parse_flatten_decl(
+Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Fn_d_struct* _temp2637=( struct
 Cyc_Absyn_Fn_d_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Fn_d_struct));
-_temp2665[ 0]=({ struct Cyc_Absyn_Fn_d_struct _temp2666; _temp2666.tag= Cyc_Absyn_Fn_d;
-_temp2666.f1= Cyc_yyget_FnDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _temp2666;}); _temp2665;}), Cyc_Position_segment_of_abs((
+_temp2637[ 0]=({ struct Cyc_Absyn_Fn_d_struct _temp2638; _temp2638.tag= Cyc_Absyn_Fn_d;
+_temp2638.f1= Cyc_yyget_FnDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 1)]); _temp2638;}); _temp2637;}), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line)),
 Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]));
-_temp2664;}); _temp2663;}); break; case 241: _LL2662: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2668=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2668[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2669; _temp2669.tag= Cyc_Stmt_tok; _temp2669.f1= Cyc_Absyn_ifthenelse_stmt(
+_temp2636;}); _temp2635;}); break; case 241: _LL2634: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2640=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2640[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2641; _temp2641.tag= Cyc_Stmt_tok; _temp2641.f1= Cyc_Absyn_ifthenelse_stmt(
 Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
 2)]), Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset)]), Cyc_Absyn_skip_stmt( 0), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2669;});
-_temp2668;}); break; case 242: _LL2667: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
-_temp2671=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2671[ 0]=({ struct Cyc_Stmt_tok_struct _temp2672; _temp2672.tag= Cyc_Stmt_tok;
-_temp2672.f1= Cyc_Absyn_ifthenelse_stmt( Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2641;});
+_temp2640;}); break; case 242: _LL2639: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
+_temp2643=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp2643[ 0]=({ struct Cyc_Stmt_tok_struct _temp2644; _temp2644.tag= Cyc_Stmt_tok;
+_temp2644.f1= Cyc_Absyn_ifthenelse_stmt( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]), Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 6)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2672;}); _temp2671;}); break; case 243: _LL2670: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2674=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2674[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2675; _temp2675.tag= Cyc_Stmt_tok; _temp2675.f1= Cyc_Absyn_switch_stmt( Cyc_yyget_Exp_tok(
+_temp2644;}); _temp2643;}); break; case 243: _LL2642: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2646=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2646[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2647; _temp2647.tag= Cyc_Stmt_tok; _temp2647.f1= Cyc_Absyn_switch_stmt( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]), Cyc_yyget_SwitchClauseList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 6)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2675;}); _temp2674;}); break; case 244: _LL2673: if( Cyc_String_strcmp( Cyc_yyget_String_tok(
+_temp2647;}); _temp2646;}); break; case 244: _LL2645: if( Cyc_String_strcmp( Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 6)]), _tag_arr("C",
 sizeof( unsigned char), 2u)) != 0){ Cyc_Parse_err( _tag_arr("only switch \"C\" { ... } is allowed",
 sizeof( unsigned char), 35u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 7)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} yyval=(
-void*)({ struct Cyc_Stmt_tok_struct* _temp2677=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2677[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2678; _temp2678.tag= Cyc_Stmt_tok; _temp2678.f1= Cyc_Absyn_new_stmt(( void*)({
-struct Cyc_Absyn_SwitchC_s_struct* _temp2679=( struct Cyc_Absyn_SwitchC_s_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_SwitchC_s_struct)); _temp2679[ 0]=({ struct
-Cyc_Absyn_SwitchC_s_struct _temp2680; _temp2680.tag= Cyc_Absyn_SwitchC_s;
-_temp2680.f1= Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 4)]); _temp2680.f2= Cyc_yyget_SwitchCClauseList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2680;});
-_temp2679;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+void*)({ struct Cyc_Stmt_tok_struct* _temp2649=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2649[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2650; _temp2650.tag= Cyc_Stmt_tok; _temp2650.f1= Cyc_Absyn_new_stmt(( void*)({
+struct Cyc_Absyn_SwitchC_s_struct* _temp2651=( struct Cyc_Absyn_SwitchC_s_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_SwitchC_s_struct)); _temp2651[ 0]=({ struct
+Cyc_Absyn_SwitchC_s_struct _temp2652; _temp2652.tag= Cyc_Absyn_SwitchC_s;
+_temp2652.f1= Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 4)]); _temp2652.f2= Cyc_yyget_SwitchCClauseList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2652;});
+_temp2651;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 7)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp2678;}); _temp2677;}); break; case 245:
-_LL2676: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2682=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2682[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2683; _temp2683.tag= Cyc_Stmt_tok; _temp2683.f1= Cyc_Absyn_trycatch_stmt(
+10000u, yylsp_offset)]).last_line)); _temp2650;}); _temp2649;}); break; case 245:
+_LL2648: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2654=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2654[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2655; _temp2655.tag= Cyc_Stmt_tok; _temp2655.f1= Cyc_Absyn_trycatch_stmt(
 Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
 4)]), Cyc_yyget_SwitchClauseList_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset - 1)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2683;});
-_temp2682;}); break; case 246: _LL2681: yyval=( void*)({ struct Cyc_SwitchClauseList_tok_struct*
-_temp2685=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_SwitchClauseList_tok_struct)); _temp2685[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
-_temp2686; _temp2686.tag= Cyc_SwitchClauseList_tok; _temp2686.f1= 0; _temp2686;});
-_temp2685;}); break; case 247: _LL2684: yyval=( void*)({ struct Cyc_SwitchClauseList_tok_struct*
-_temp2688=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_SwitchClauseList_tok_struct)); _temp2688[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
-_temp2689; _temp2689.tag= Cyc_SwitchClauseList_tok; _temp2689.f1=({ struct Cyc_List_List*
-_temp2690=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2690->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp2691=( struct Cyc_Absyn_Switch_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp2691->pattern= Cyc_Absyn_new_pat((
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2655;});
+_temp2654;}); break; case 246: _LL2653: yyval=( void*)({ struct Cyc_SwitchClauseList_tok_struct*
+_temp2657=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_SwitchClauseList_tok_struct)); _temp2657[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
+_temp2658; _temp2658.tag= Cyc_SwitchClauseList_tok; _temp2658.f1= 0; _temp2658;});
+_temp2657;}); break; case 247: _LL2656: yyval=( void*)({ struct Cyc_SwitchClauseList_tok_struct*
+_temp2660=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_SwitchClauseList_tok_struct)); _temp2660[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
+_temp2661; _temp2661.tag= Cyc_SwitchClauseList_tok; _temp2661.f1=({ struct Cyc_List_List*
+_temp2662=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2662->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp2663=( struct Cyc_Absyn_Switch_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp2663->pattern= Cyc_Absyn_new_pat((
 void*) Cyc_Absyn_Wild_p, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).last_line));
-_temp2691->pat_vars= 0; _temp2691->where_clause= 0; _temp2691->body= Cyc_yyget_Stmt_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2691->loc=
+_temp2663->pat_vars= 0; _temp2663->where_clause= 0; _temp2663->body= Cyc_yyget_Stmt_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2663->loc=
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 2)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line); _temp2691;}); _temp2690->tl= 0; _temp2690;});
-_temp2689;}); _temp2688;}); break; case 248: _LL2687: yyval=( void*)({ struct
-Cyc_SwitchClauseList_tok_struct* _temp2693=( struct Cyc_SwitchClauseList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_SwitchClauseList_tok_struct)); _temp2693[ 0]=({
-struct Cyc_SwitchClauseList_tok_struct _temp2694; _temp2694.tag= Cyc_SwitchClauseList_tok;
-_temp2694.f1=({ struct Cyc_List_List* _temp2695=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2695->hd=( void*)({ struct Cyc_Absyn_Switch_clause*
-_temp2696=( struct Cyc_Absyn_Switch_clause*) GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause));
-_temp2696->pattern= Cyc_yyget_Pattern_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 2)]); _temp2696->pat_vars= 0; _temp2696->where_clause= 0;
-_temp2696->body= Cyc_Absyn_fallthru_stmt( 0, Cyc_Position_segment_of_abs(( yyls[
+yylsp_offset)]).last_line); _temp2663;}); _temp2662->tl= 0; _temp2662;});
+_temp2661;}); _temp2660;}); break; case 248: _LL2659: yyval=( void*)({ struct
+Cyc_SwitchClauseList_tok_struct* _temp2665=( struct Cyc_SwitchClauseList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_SwitchClauseList_tok_struct)); _temp2665[ 0]=({
+struct Cyc_SwitchClauseList_tok_struct _temp2666; _temp2666.tag= Cyc_SwitchClauseList_tok;
+_temp2666.f1=({ struct Cyc_List_List* _temp2667=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2667->hd=( void*)({ struct Cyc_Absyn_Switch_clause*
+_temp2668=( struct Cyc_Absyn_Switch_clause*) GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause));
+_temp2668->pattern= Cyc_yyget_Pattern_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 2)]); _temp2668->pat_vars= 0; _temp2668->where_clause= 0;
+_temp2668->body= Cyc_Absyn_fallthru_stmt( 0, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));
-_temp2696->loc= Cyc_Position_segment_of_abs(( yyls[
+_temp2668->loc= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2696;});
-_temp2695->tl= Cyc_yyget_SwitchClauseList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2695;}); _temp2694;});
-_temp2693;}); break; case 249: _LL2692: yyval=( void*)({ struct Cyc_SwitchClauseList_tok_struct*
-_temp2698=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_SwitchClauseList_tok_struct)); _temp2698[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
-_temp2699; _temp2699.tag= Cyc_SwitchClauseList_tok; _temp2699.f1=({ struct Cyc_List_List*
-_temp2700=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2700->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp2701=( struct Cyc_Absyn_Switch_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp2701->pattern= Cyc_yyget_Pattern_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2701->pat_vars=
-0; _temp2701->where_clause= 0; _temp2701->body= Cyc_yyget_Stmt_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2701->loc= Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2668;});
+_temp2667->tl= Cyc_yyget_SwitchClauseList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2667;}); _temp2666;});
+_temp2665;}); break; case 249: _LL2664: yyval=( void*)({ struct Cyc_SwitchClauseList_tok_struct*
+_temp2670=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_SwitchClauseList_tok_struct)); _temp2670[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
+_temp2671; _temp2671.tag= Cyc_SwitchClauseList_tok; _temp2671.f1=({ struct Cyc_List_List*
+_temp2672=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2672->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp2673=( struct Cyc_Absyn_Switch_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp2673->pattern= Cyc_yyget_Pattern_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2673->pat_vars=
+0; _temp2673->where_clause= 0; _temp2673->body= Cyc_yyget_Stmt_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2673->loc= Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line);
-_temp2701;}); _temp2700->tl= Cyc_yyget_SwitchClauseList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2700;}); _temp2699;});
-_temp2698;}); break; case 250: _LL2697: yyval=( void*)({ struct Cyc_SwitchClauseList_tok_struct*
-_temp2703=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_SwitchClauseList_tok_struct)); _temp2703[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
-_temp2704; _temp2704.tag= Cyc_SwitchClauseList_tok; _temp2704.f1=({ struct Cyc_List_List*
-_temp2705=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2705->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp2706=( struct Cyc_Absyn_Switch_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp2706->pattern= Cyc_yyget_Pattern_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2706->pat_vars=
-0; _temp2706->where_clause=( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2706->body=
+_temp2673;}); _temp2672->tl= Cyc_yyget_SwitchClauseList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2672;}); _temp2671;});
+_temp2670;}); break; case 250: _LL2669: yyval=( void*)({ struct Cyc_SwitchClauseList_tok_struct*
+_temp2675=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_SwitchClauseList_tok_struct)); _temp2675[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
+_temp2676; _temp2676.tag= Cyc_SwitchClauseList_tok; _temp2676.f1=({ struct Cyc_List_List*
+_temp2677=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2677->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp2678=( struct Cyc_Absyn_Switch_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp2678->pattern= Cyc_yyget_Pattern_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2678->pat_vars=
+0; _temp2678->where_clause=( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp2678->body=
 Cyc_Absyn_fallthru_stmt( 0, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));
-_temp2706->loc= Cyc_Position_segment_of_abs(( yyls[
+_temp2678->loc= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2706;});
-_temp2705->tl= Cyc_yyget_SwitchClauseList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2705;}); _temp2704;});
-_temp2703;}); break; case 251: _LL2702: yyval=( void*)({ struct Cyc_SwitchClauseList_tok_struct*
-_temp2708=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_SwitchClauseList_tok_struct)); _temp2708[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
-_temp2709; _temp2709.tag= Cyc_SwitchClauseList_tok; _temp2709.f1=({ struct Cyc_List_List*
-_temp2710=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2710->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp2711=( struct Cyc_Absyn_Switch_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp2711->pattern= Cyc_yyget_Pattern_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 5)]); _temp2711->pat_vars=
-0; _temp2711->where_clause=( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2711->body=
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2678;});
+_temp2677->tl= Cyc_yyget_SwitchClauseList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2677;}); _temp2676;});
+_temp2675;}); break; case 251: _LL2674: yyval=( void*)({ struct Cyc_SwitchClauseList_tok_struct*
+_temp2680=( struct Cyc_SwitchClauseList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_SwitchClauseList_tok_struct)); _temp2680[ 0]=({ struct Cyc_SwitchClauseList_tok_struct
+_temp2681; _temp2681.tag= Cyc_SwitchClauseList_tok; _temp2681.f1=({ struct Cyc_List_List*
+_temp2682=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2682->hd=( void*)({ struct Cyc_Absyn_Switch_clause* _temp2683=( struct Cyc_Absyn_Switch_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_Switch_clause)); _temp2683->pattern= Cyc_yyget_Pattern_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 5)]); _temp2683->pat_vars=
+0; _temp2683->where_clause=( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]); _temp2683->body=
 Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
-1)]); _temp2711->loc= Cyc_Position_segment_of_abs(( yyls[
+1)]); _temp2683->loc= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 6)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2711;});
-_temp2710->tl= Cyc_yyget_SwitchClauseList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2710;}); _temp2709;});
-_temp2708;}); break; case 252: _LL2707: yyval=( void*)({ struct Cyc_SwitchCClauseList_tok_struct*
-_temp2713=( struct Cyc_SwitchCClauseList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_SwitchCClauseList_tok_struct)); _temp2713[ 0]=({ struct Cyc_SwitchCClauseList_tok_struct
-_temp2714; _temp2714.tag= Cyc_SwitchCClauseList_tok; _temp2714.f1= 0; _temp2714;});
-_temp2713;}); break; case 253: _LL2712: yyval=( void*)({ struct Cyc_SwitchCClauseList_tok_struct*
-_temp2716=( struct Cyc_SwitchCClauseList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_SwitchCClauseList_tok_struct)); _temp2716[ 0]=({ struct Cyc_SwitchCClauseList_tok_struct
-_temp2717; _temp2717.tag= Cyc_SwitchCClauseList_tok; _temp2717.f1=({ struct Cyc_List_List*
-_temp2718=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2718->hd=( void*)({ struct Cyc_Absyn_SwitchC_clause* _temp2719=( struct Cyc_Absyn_SwitchC_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_SwitchC_clause)); _temp2719->cnst_exp= 0;
-_temp2719->body= Cyc_Absyn_seq_stmt( Cyc_yyget_Stmt_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2683;});
+_temp2682->tl= Cyc_yyget_SwitchClauseList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2682;}); _temp2681;});
+_temp2680;}); break; case 252: _LL2679: yyval=( void*)({ struct Cyc_SwitchCClauseList_tok_struct*
+_temp2685=( struct Cyc_SwitchCClauseList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_SwitchCClauseList_tok_struct)); _temp2685[ 0]=({ struct Cyc_SwitchCClauseList_tok_struct
+_temp2686; _temp2686.tag= Cyc_SwitchCClauseList_tok; _temp2686.f1= 0; _temp2686;});
+_temp2685;}); break; case 253: _LL2684: yyval=( void*)({ struct Cyc_SwitchCClauseList_tok_struct*
+_temp2688=( struct Cyc_SwitchCClauseList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_SwitchCClauseList_tok_struct)); _temp2688[ 0]=({ struct Cyc_SwitchCClauseList_tok_struct
+_temp2689; _temp2689.tag= Cyc_SwitchCClauseList_tok; _temp2689.f1=({ struct Cyc_List_List*
+_temp2690=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2690->hd=( void*)({ struct Cyc_Absyn_SwitchC_clause* _temp2691=( struct Cyc_Absyn_SwitchC_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_SwitchC_clause)); _temp2691->cnst_exp= 0;
+_temp2691->body= Cyc_Absyn_seq_stmt( Cyc_yyget_Stmt_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Absyn_break_stmt( 0),
-0); _temp2719->loc= Cyc_Position_segment_of_abs(( yyls[
+0); _temp2691->loc= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2719;});
-_temp2718->tl= 0; _temp2718;}); _temp2717;}); _temp2716;}); break; case 254:
-_LL2715: yyval=( void*)({ struct Cyc_SwitchCClauseList_tok_struct* _temp2721=(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2691;});
+_temp2690->tl= 0; _temp2690;}); _temp2689;}); _temp2688;}); break; case 254:
+_LL2687: yyval=( void*)({ struct Cyc_SwitchCClauseList_tok_struct* _temp2693=(
 struct Cyc_SwitchCClauseList_tok_struct*) GC_malloc( sizeof( struct Cyc_SwitchCClauseList_tok_struct));
-_temp2721[ 0]=({ struct Cyc_SwitchCClauseList_tok_struct _temp2722; _temp2722.tag=
-Cyc_SwitchCClauseList_tok; _temp2722.f1=({ struct Cyc_List_List* _temp2723=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2723->hd=(
-void*)({ struct Cyc_Absyn_SwitchC_clause* _temp2724=( struct Cyc_Absyn_SwitchC_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_SwitchC_clause)); _temp2724->cnst_exp=(
+_temp2693[ 0]=({ struct Cyc_SwitchCClauseList_tok_struct _temp2694; _temp2694.tag=
+Cyc_SwitchCClauseList_tok; _temp2694.f1=({ struct Cyc_List_List* _temp2695=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2695->hd=(
+void*)({ struct Cyc_Absyn_SwitchC_clause* _temp2696=( struct Cyc_Absyn_SwitchC_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_SwitchC_clause)); _temp2696->cnst_exp=(
 struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 2)]); _temp2724->body= Cyc_Absyn_fallthru_stmt( 0, 0);
-_temp2724->loc= Cyc_Position_segment_of_abs(( yyls[
+10000u, yyvsp_offset - 2)]); _temp2696->body= Cyc_Absyn_fallthru_stmt( 0, 0);
+_temp2696->loc= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2724;});
-_temp2723->tl= Cyc_yyget_SwitchCClauseList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2723;}); _temp2722;});
-_temp2721;}); break; case 255: _LL2720: yyval=( void*)({ struct Cyc_SwitchCClauseList_tok_struct*
-_temp2726=( struct Cyc_SwitchCClauseList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_SwitchCClauseList_tok_struct)); _temp2726[ 0]=({ struct Cyc_SwitchCClauseList_tok_struct
-_temp2727; _temp2727.tag= Cyc_SwitchCClauseList_tok; _temp2727.f1=({ struct Cyc_List_List*
-_temp2728=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2728->hd=( void*)({ struct Cyc_Absyn_SwitchC_clause* _temp2729=( struct Cyc_Absyn_SwitchC_clause*)
-GC_malloc( sizeof( struct Cyc_Absyn_SwitchC_clause)); _temp2729->cnst_exp=(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2696;});
+_temp2695->tl= Cyc_yyget_SwitchCClauseList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2695;}); _temp2694;});
+_temp2693;}); break; case 255: _LL2692: yyval=( void*)({ struct Cyc_SwitchCClauseList_tok_struct*
+_temp2698=( struct Cyc_SwitchCClauseList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_SwitchCClauseList_tok_struct)); _temp2698[ 0]=({ struct Cyc_SwitchCClauseList_tok_struct
+_temp2699; _temp2699.tag= Cyc_SwitchCClauseList_tok; _temp2699.f1=({ struct Cyc_List_List*
+_temp2700=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2700->hd=( void*)({ struct Cyc_Absyn_SwitchC_clause* _temp2701=( struct Cyc_Absyn_SwitchC_clause*)
+GC_malloc( sizeof( struct Cyc_Absyn_SwitchC_clause)); _temp2701->cnst_exp=(
 struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 3)]); _temp2729->body= Cyc_Absyn_seq_stmt( Cyc_yyget_Stmt_tok(
+10000u, yyvsp_offset - 3)]); _temp2701->body= Cyc_Absyn_seq_stmt( Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_Absyn_fallthru_stmt(
-0, 0), 0); _temp2729->loc= Cyc_Position_segment_of_abs(( yyls[
+0, 0), 0); _temp2701->loc= Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2729;});
-_temp2728->tl= Cyc_yyget_SwitchCClauseList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2728;}); _temp2727;});
-_temp2726;}); break; case 256: _LL2725: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
-_temp2731=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2731[ 0]=({ struct Cyc_Stmt_tok_struct _temp2732; _temp2732.tag= Cyc_Stmt_tok;
-_temp2732.f1= Cyc_Absyn_while_stmt( Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line); _temp2701;});
+_temp2700->tl= Cyc_yyget_SwitchCClauseList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2700;}); _temp2699;});
+_temp2698;}); break; case 256: _LL2697: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
+_temp2703=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp2703[ 0]=({ struct Cyc_Stmt_tok_struct _temp2704; _temp2704.tag= Cyc_Stmt_tok;
+_temp2704.f1= Cyc_Absyn_while_stmt( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2732;}); _temp2731;}); break; case 257: _LL2730: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2734=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2734[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2735; _temp2735.tag= Cyc_Stmt_tok; _temp2735.f1= Cyc_Absyn_do_stmt( Cyc_yyget_Stmt_tok(
+_temp2704;}); _temp2703;}); break; case 257: _LL2702: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2706=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2706[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2707; _temp2707.tag= Cyc_Stmt_tok; _temp2707.f1= Cyc_Absyn_do_stmt( Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 5)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 6)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2735;}); _temp2734;}); break; case 258: _LL2733: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2737=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2737[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2738; _temp2738.tag= Cyc_Stmt_tok; _temp2738.f1= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp(
+_temp2707;}); _temp2706;}); break; case 258: _LL2705: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2709=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2709[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2710; _temp2710.tag= Cyc_Stmt_tok; _temp2710.f1= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp(
 0), Cyc_Absyn_true_exp( 0), Cyc_Absyn_false_exp( 0), Cyc_yyget_Stmt_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2738;}); _temp2737;}); break; case 259: _LL2736: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2740=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2740[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2741; _temp2741.tag= Cyc_Stmt_tok; _temp2741.f1= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp(
+_temp2710;}); _temp2709;}); break; case 259: _LL2708: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2712=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2712[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2713; _temp2713.tag= Cyc_Stmt_tok; _temp2713.f1= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp(
 0), Cyc_Absyn_true_exp( 0), Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 6)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2741;}); _temp2740;}); break; case 260: _LL2739: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2743=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2743[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2744; _temp2744.tag= Cyc_Stmt_tok; _temp2744.f1= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp(
+_temp2713;}); _temp2712;}); break; case 260: _LL2711: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2715=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2715[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2716; _temp2716.tag= Cyc_Stmt_tok; _temp2716.f1= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp(
 0), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 3)]), Cyc_Absyn_false_exp( 0), Cyc_yyget_Stmt_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 6)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2744;}); _temp2743;}); break; case 261: _LL2742: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2746=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2746[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2747; _temp2747.tag= Cyc_Stmt_tok; _temp2747.f1= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp(
+_temp2716;}); _temp2715;}); break; case 261: _LL2714: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2718=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2718[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2719; _temp2719.tag= Cyc_Stmt_tok; _temp2719.f1= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp(
 0), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 4)]), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset - 2)]), Cyc_yyget_Stmt_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 7)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));
-_temp2747;}); _temp2746;}); break; case 262: _LL2745: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2749=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2749[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2750; _temp2750.tag= Cyc_Stmt_tok; _temp2750.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok(
+_temp2719;}); _temp2718;}); break; case 262: _LL2717: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2721=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2721[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2722; _temp2722.tag= Cyc_Stmt_tok; _temp2722.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]), Cyc_Absyn_true_exp(
 0), Cyc_Absyn_false_exp( 0), Cyc_yyget_Stmt_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 6)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2750;}); _temp2749;}); break; case 263: _LL2748: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2752=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2752[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2753; _temp2753.tag= Cyc_Stmt_tok; _temp2753.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok(
+_temp2722;}); _temp2721;}); break; case 263: _LL2720: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2724=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2724[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2725; _temp2725.tag= Cyc_Stmt_tok; _temp2725.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 5)]), Cyc_Absyn_true_exp(
 0), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]), Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 7)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2753;});
-_temp2752;}); break; case 264: _LL2751: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
-_temp2755=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2755[ 0]=({ struct Cyc_Stmt_tok_struct _temp2756; _temp2756.tag= Cyc_Stmt_tok;
-_temp2756.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2725;});
+_temp2724;}); break; case 264: _LL2723: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
+_temp2727=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp2727[ 0]=({ struct Cyc_Stmt_tok_struct _temp2728; _temp2728.tag= Cyc_Stmt_tok;
+_temp2728.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 5)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]), Cyc_Absyn_false_exp(
 0), Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 7)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2756;});
-_temp2755;}); break; case 265: _LL2754: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
-_temp2758=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
-_temp2758[ 0]=({ struct Cyc_Stmt_tok_struct _temp2759; _temp2759.tag= Cyc_Stmt_tok;
-_temp2759.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2728;});
+_temp2727;}); break; case 265: _LL2726: yyval=( void*)({ struct Cyc_Stmt_tok_struct*
+_temp2730=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof( struct Cyc_Stmt_tok_struct));
+_temp2730[ 0]=({ struct Cyc_Stmt_tok_struct _temp2731; _temp2731.tag= Cyc_Stmt_tok;
+_temp2731.f1= Cyc_Absyn_for_stmt( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 6)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 8)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2759;}); _temp2758;}); break; case 266: _LL2757: { struct Cyc_List_List*
-_temp2761= Cyc_yyget_DeclList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 3)]); struct Cyc_Absyn_Stmt* _temp2762= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp(
+_temp2731;}); _temp2730;}); break; case 266: _LL2729: { struct Cyc_List_List*
+_temp2733= Cyc_yyget_DeclList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 3)]); struct Cyc_Absyn_Stmt* _temp2734= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp(
 0), Cyc_Absyn_true_exp( 0), Cyc_Absyn_false_exp( 0), Cyc_yyget_Stmt_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 5)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); yyval=(
-void*)({ struct Cyc_Stmt_tok_struct* _temp2763=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2763[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2764; _temp2764.tag= Cyc_Stmt_tok; _temp2764.f1= Cyc_Parse_flatten_declarations(
-_temp2761, _temp2762); _temp2764;}); _temp2763;}); break;} case 267: _LL2760: {
-struct Cyc_List_List* _temp2766= Cyc_yyget_DeclList_tok( yyvs[
+void*)({ struct Cyc_Stmt_tok_struct* _temp2735=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2735[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2736; _temp2736.tag= Cyc_Stmt_tok; _temp2736.f1= Cyc_Parse_flatten_declarations(
+_temp2733, _temp2734); _temp2736;}); _temp2735;}); break;} case 267: _LL2732: {
+struct Cyc_List_List* _temp2738= Cyc_yyget_DeclList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); struct Cyc_Absyn_Stmt*
-_temp2767= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok( yyvs[
+_temp2739= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]), Cyc_Absyn_false_exp(
 0), Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 6)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); yyval=(
-void*)({ struct Cyc_Stmt_tok_struct* _temp2768=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2768[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2769; _temp2769.tag= Cyc_Stmt_tok; _temp2769.f1= Cyc_Parse_flatten_declarations(
-_temp2766, _temp2767); _temp2769;}); _temp2768;}); break;} case 268: _LL2765: {
-struct Cyc_List_List* _temp2771= Cyc_yyget_DeclList_tok( yyvs[
+void*)({ struct Cyc_Stmt_tok_struct* _temp2740=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2740[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2741; _temp2741.tag= Cyc_Stmt_tok; _temp2741.f1= Cyc_Parse_flatten_declarations(
+_temp2738, _temp2739); _temp2741;}); _temp2740;}); break;} case 268: _LL2737: {
+struct Cyc_List_List* _temp2743= Cyc_yyget_DeclList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); struct Cyc_Absyn_Stmt*
-_temp2772= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp( 0), Cyc_Absyn_true_exp( 0),
+_temp2744= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp( 0), Cyc_Absyn_true_exp( 0),
 Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
 2)]), Cyc_yyget_Stmt_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 6)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); yyval=(
-void*)({ struct Cyc_Stmt_tok_struct* _temp2773=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2773[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2774; _temp2774.tag= Cyc_Stmt_tok; _temp2774.f1= Cyc_Parse_flatten_declarations(
-_temp2771, _temp2772); _temp2774;}); _temp2773;}); break;} case 269: _LL2770: {
-struct Cyc_List_List* _temp2776= Cyc_yyget_DeclList_tok( yyvs[
+void*)({ struct Cyc_Stmt_tok_struct* _temp2745=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2745[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2746; _temp2746.tag= Cyc_Stmt_tok; _temp2746.f1= Cyc_Parse_flatten_declarations(
+_temp2743, _temp2744); _temp2746;}); _temp2745;}); break;} case 269: _LL2742: {
+struct Cyc_List_List* _temp2748= Cyc_yyget_DeclList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 5)]); struct Cyc_Absyn_Stmt*
-_temp2777= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok( yyvs[
+_temp2749= Cyc_Absyn_for_stmt( Cyc_Absyn_false_exp( 0), Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Stmt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 7)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); yyval=(
-void*)({ struct Cyc_Stmt_tok_struct* _temp2778=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2778[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2779; _temp2779.tag= Cyc_Stmt_tok; _temp2779.f1= Cyc_Parse_flatten_declarations(
-_temp2776, _temp2777); _temp2779;}); _temp2778;}); break;} case 270: _LL2775:
-yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2781=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2781[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2782; _temp2782.tag= Cyc_Stmt_tok; _temp2782.f1= Cyc_Absyn_goto_stmt(({
-struct _tagged_arr* _temp2783=( struct _tagged_arr*) GC_malloc( sizeof( struct
-_tagged_arr)); _temp2783[ 0]= Cyc_yyget_String_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2783;}), Cyc_Position_segment_of_abs((
+void*)({ struct Cyc_Stmt_tok_struct* _temp2750=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2750[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2751; _temp2751.tag= Cyc_Stmt_tok; _temp2751.f1= Cyc_Parse_flatten_declarations(
+_temp2748, _temp2749); _temp2751;}); _temp2750;}); break;} case 270: _LL2747:
+yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2753=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2753[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2754; _temp2754.tag= Cyc_Stmt_tok; _temp2754.f1= Cyc_Absyn_goto_stmt(({
+struct _tagged_arr* _temp2755=( struct _tagged_arr*) GC_malloc( sizeof( struct
+_tagged_arr)); _temp2755[ 0]= Cyc_yyget_String_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2755;}), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));
-_temp2782;}); _temp2781;}); break; case 271: _LL2780: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2785=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2785[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2786; _temp2786.tag= Cyc_Stmt_tok; _temp2786.f1= Cyc_Absyn_continue_stmt(
+_temp2754;}); _temp2753;}); break; case 271: _LL2752: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2757=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2757[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2758; _temp2758.tag= Cyc_Stmt_tok; _temp2758.f1= Cyc_Absyn_continue_stmt(
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 1)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset - 1)]).last_line)); _temp2786;}); _temp2785;}); break; case 272:
-_LL2784: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2788=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2788[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2789; _temp2789.tag= Cyc_Stmt_tok; _temp2789.f1= Cyc_Absyn_break_stmt( Cyc_Position_segment_of_abs((
+yylsp_offset - 1)]).last_line)); _temp2758;}); _temp2757;}); break; case 272:
+_LL2756: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2760=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2760[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2761; _temp2761.tag= Cyc_Stmt_tok; _temp2761.f1= Cyc_Absyn_break_stmt( Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));
-_temp2789;}); _temp2788;}); break; case 273: _LL2787: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2791=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2791[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2792; _temp2792.tag= Cyc_Stmt_tok; _temp2792.f1= Cyc_Absyn_return_stmt( 0,
+_temp2761;}); _temp2760;}); break; case 273: _LL2759: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2763=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2763[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2764; _temp2764.tag= Cyc_Stmt_tok; _temp2764.f1= Cyc_Absyn_return_stmt( 0,
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 1)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset - 1)]).last_line)); _temp2792;}); _temp2791;}); break; case 274:
-_LL2790: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2794=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2794[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2795; _temp2795.tag= Cyc_Stmt_tok; _temp2795.f1= Cyc_Absyn_return_stmt((
+yylsp_offset - 1)]).last_line)); _temp2764;}); _temp2763;}); break; case 274:
+_LL2762: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2766=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2766[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2767; _temp2767.tag= Cyc_Stmt_tok; _temp2767.f1= Cyc_Absyn_return_stmt((
 struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset - 1)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).last_line));
-_temp2795;}); _temp2794;}); break; case 275: _LL2793: yyval=( void*)({ struct
-Cyc_Stmt_tok_struct* _temp2797=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Stmt_tok_struct)); _temp2797[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2798; _temp2798.tag= Cyc_Stmt_tok; _temp2798.f1= Cyc_Absyn_fallthru_stmt( 0,
+_temp2767;}); _temp2766;}); break; case 275: _LL2765: yyval=( void*)({ struct
+Cyc_Stmt_tok_struct* _temp2769=( struct Cyc_Stmt_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Stmt_tok_struct)); _temp2769[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2770; _temp2770.tag= Cyc_Stmt_tok; _temp2770.f1= Cyc_Absyn_fallthru_stmt( 0,
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 1)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset - 1)]).last_line)); _temp2798;}); _temp2797;}); break; case 276:
-_LL2796: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2800=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2800[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2801; _temp2801.tag= Cyc_Stmt_tok; _temp2801.f1= Cyc_Absyn_fallthru_stmt( 0,
+yylsp_offset - 1)]).last_line)); _temp2770;}); _temp2769;}); break; case 276:
+_LL2768: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2772=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2772[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2773; _temp2773.tag= Cyc_Stmt_tok; _temp2773.f1= Cyc_Absyn_fallthru_stmt( 0,
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 3)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset - 3)]).last_line)); _temp2801;}); _temp2800;}); break; case 277:
-_LL2799: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2803=( struct Cyc_Stmt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2803[ 0]=({ struct Cyc_Stmt_tok_struct
-_temp2804; _temp2804.tag= Cyc_Stmt_tok; _temp2804.f1= Cyc_Absyn_fallthru_stmt(
+yylsp_offset - 3)]).last_line)); _temp2773;}); _temp2772;}); break; case 277:
+_LL2771: yyval=( void*)({ struct Cyc_Stmt_tok_struct* _temp2775=( struct Cyc_Stmt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Stmt_tok_struct)); _temp2775[ 0]=({ struct Cyc_Stmt_tok_struct
+_temp2776; _temp2776.tag= Cyc_Stmt_tok; _temp2776.f1= Cyc_Absyn_fallthru_stmt(
 Cyc_yyget_ExpList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).last_line));
-_temp2804;}); _temp2803;}); break; case 278: _LL2802: yyval=( void*)({ struct
-Cyc_Pattern_tok_struct* _temp2806=( struct Cyc_Pattern_tok_struct*) GC_malloc(
-sizeof( struct Cyc_Pattern_tok_struct)); _temp2806[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp2807; _temp2807.tag= Cyc_Pattern_tok; _temp2807.f1= Cyc_Absyn_new_pat((
+_temp2776;}); _temp2775;}); break; case 278: _LL2774: yyval=( void*)({ struct
+Cyc_Pattern_tok_struct* _temp2778=( struct Cyc_Pattern_tok_struct*) GC_malloc(
+sizeof( struct Cyc_Pattern_tok_struct)); _temp2778[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp2779; _temp2779.tag= Cyc_Pattern_tok; _temp2779.f1= Cyc_Absyn_new_pat((
 void*) Cyc_Absyn_Wild_p, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2807;});
-_temp2806;}); break; case 279: _LL2805: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2779;});
+_temp2778;}); break; case 279: _LL2777: yyval= yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]; break; case 280:
-_LL2808: yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2810=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp2810[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp2811; _temp2811.tag= Cyc_Pattern_tok; _temp2811.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_Int_p_struct* _temp2812=( struct Cyc_Absyn_Int_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Int_p_struct)); _temp2812[ 0]=({ struct Cyc_Absyn_Int_p_struct
-_temp2813; _temp2813.tag= Cyc_Absyn_Int_p; _temp2813.f1=( void*)(* Cyc_yyget_Int_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f1; _temp2813.f2=(*
+_LL2780: yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2782=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp2782[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp2783; _temp2783.tag= Cyc_Pattern_tok; _temp2783.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_Int_p_struct* _temp2784=( struct Cyc_Absyn_Int_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Int_p_struct)); _temp2784[ 0]=({ struct Cyc_Absyn_Int_p_struct
+_temp2785; _temp2785.tag= Cyc_Absyn_Int_p; _temp2785.f1=( void*)(* Cyc_yyget_Int_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f1; _temp2785.f2=(*
 Cyc_yyget_Int_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f2;
-_temp2813;}); _temp2812;}), Cyc_Position_segment_of_abs(( yyls[
+_temp2785;}); _temp2784;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2811;});
-_temp2810;}); break; case 281: _LL2809: yyval=( void*)({ struct Cyc_Pattern_tok_struct*
-_temp2815=( struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
-_temp2815[ 0]=({ struct Cyc_Pattern_tok_struct _temp2816; _temp2816.tag= Cyc_Pattern_tok;
-_temp2816.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Int_p_struct*
-_temp2817=( struct Cyc_Absyn_Int_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Int_p_struct));
-_temp2817[ 0]=({ struct Cyc_Absyn_Int_p_struct _temp2818; _temp2818.tag= Cyc_Absyn_Int_p;
-_temp2818.f1=( void*)(( void*) Cyc_Absyn_Signed); _temp2818.f2= -(* Cyc_yyget_Int_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f2; _temp2818;});
-_temp2817;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2783;});
+_temp2782;}); break; case 281: _LL2781: yyval=( void*)({ struct Cyc_Pattern_tok_struct*
+_temp2787=( struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
+_temp2787[ 0]=({ struct Cyc_Pattern_tok_struct _temp2788; _temp2788.tag= Cyc_Pattern_tok;
+_temp2788.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Int_p_struct*
+_temp2789=( struct Cyc_Absyn_Int_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Int_p_struct));
+_temp2789[ 0]=({ struct Cyc_Absyn_Int_p_struct _temp2790; _temp2790.tag= Cyc_Absyn_Int_p;
+_temp2790.f1=( void*)(( void*) Cyc_Absyn_Signed); _temp2790.f2= -(* Cyc_yyget_Int_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f2; _temp2790;});
+_temp2789;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 1)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp2816;}); _temp2815;}); break; case 282:
-_LL2814: yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2820=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp2820[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp2821; _temp2821.tag= Cyc_Pattern_tok; _temp2821.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_Float_p_struct* _temp2822=( struct Cyc_Absyn_Float_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Float_p_struct)); _temp2822[ 0]=({ struct
-Cyc_Absyn_Float_p_struct _temp2823; _temp2823.tag= Cyc_Absyn_Float_p; _temp2823.f1=
+10000u, yylsp_offset)]).last_line)); _temp2788;}); _temp2787;}); break; case 282:
+_LL2786: yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2792=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp2792[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp2793; _temp2793.tag= Cyc_Pattern_tok; _temp2793.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_Float_p_struct* _temp2794=( struct Cyc_Absyn_Float_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Float_p_struct)); _temp2794[ 0]=({ struct
+Cyc_Absyn_Float_p_struct _temp2795; _temp2795.tag= Cyc_Absyn_Float_p; _temp2795.f1=
 Cyc_yyget_String_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]);
-_temp2823;}); _temp2822;}), Cyc_Position_segment_of_abs(( yyls[
+_temp2795;}); _temp2794;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2821;});
-_temp2820;}); break; case 283: _LL2819: yyval=( void*)({ struct Cyc_Pattern_tok_struct*
-_temp2825=( struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
-_temp2825[ 0]=({ struct Cyc_Pattern_tok_struct _temp2826; _temp2826.tag= Cyc_Pattern_tok;
-_temp2826.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Char_p_struct*
-_temp2827=( struct Cyc_Absyn_Char_p_struct*) GC_malloc_atomic( sizeof( struct
-Cyc_Absyn_Char_p_struct)); _temp2827[ 0]=({ struct Cyc_Absyn_Char_p_struct
-_temp2828; _temp2828.tag= Cyc_Absyn_Char_p; _temp2828.f1= Cyc_yyget_Char_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2828;});
-_temp2827;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2793;});
+_temp2792;}); break; case 283: _LL2791: yyval=( void*)({ struct Cyc_Pattern_tok_struct*
+_temp2797=( struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
+_temp2797[ 0]=({ struct Cyc_Pattern_tok_struct _temp2798; _temp2798.tag= Cyc_Pattern_tok;
+_temp2798.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Char_p_struct*
+_temp2799=( struct Cyc_Absyn_Char_p_struct*) GC_malloc_atomic( sizeof( struct
+Cyc_Absyn_Char_p_struct)); _temp2799[ 0]=({ struct Cyc_Absyn_Char_p_struct
+_temp2800; _temp2800.tag= Cyc_Absyn_Char_p; _temp2800.f1= Cyc_yyget_Char_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2800;});
+_temp2799;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); _temp2826;}); _temp2825;}); break; case 284:
-_LL2824: yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2830=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp2830[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp2831; _temp2831.tag= Cyc_Pattern_tok; _temp2831.f1= Cyc_Absyn_new_pat((
+yylsp_offset)]).last_line)); _temp2798;}); _temp2797;}); break; case 284:
+_LL2796: yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2802=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp2802[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp2803; _temp2803.tag= Cyc_Pattern_tok; _temp2803.f1= Cyc_Absyn_new_pat((
 void*) Cyc_Absyn_Null_p, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2831;});
-_temp2830;}); break; case 285: _LL2829: yyval=( void*)({ struct Cyc_Pattern_tok_struct*
-_temp2833=( struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
-_temp2833[ 0]=({ struct Cyc_Pattern_tok_struct _temp2834; _temp2834.tag= Cyc_Pattern_tok;
-_temp2834.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_UnknownId_p_struct*
-_temp2835=( struct Cyc_Absyn_UnknownId_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_p_struct));
-_temp2835[ 0]=({ struct Cyc_Absyn_UnknownId_p_struct _temp2836; _temp2836.tag=
-Cyc_Absyn_UnknownId_p; _temp2836.f1= Cyc_yyget_QualId_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2836;}); _temp2835;}),
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2803;});
+_temp2802;}); break; case 285: _LL2801: yyval=( void*)({ struct Cyc_Pattern_tok_struct*
+_temp2805=( struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
+_temp2805[ 0]=({ struct Cyc_Pattern_tok_struct _temp2806; _temp2806.tag= Cyc_Pattern_tok;
+_temp2806.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_UnknownId_p_struct*
+_temp2807=( struct Cyc_Absyn_UnknownId_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_p_struct));
+_temp2807[ 0]=({ struct Cyc_Absyn_UnknownId_p_struct _temp2808; _temp2808.tag=
+Cyc_Absyn_UnknownId_p; _temp2808.f1= Cyc_yyget_QualId_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2808;}); _temp2807;}),
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); _temp2834;}); _temp2833;}); break; case 286:
-_LL2832: { struct Cyc_List_List* _temp2838=(( struct Cyc_List_List*(*)( struct
+yylsp_offset)]).last_line)); _temp2806;}); _temp2805;}); break; case 286:
+_LL2804: { struct Cyc_List_List* _temp2810=(( struct Cyc_List_List*(*)( struct
 Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*, void*), struct Cyc_Position_Segment*
 env, struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).last_line),
 Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 3)])); yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2839=(
+yyvsp_offset - 3)])); yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2811=(
 struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
-_temp2839[ 0]=({ struct Cyc_Pattern_tok_struct _temp2840; _temp2840.tag= Cyc_Pattern_tok;
-_temp2840.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_UnknownCall_p_struct*
-_temp2841=( struct Cyc_Absyn_UnknownCall_p_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_UnknownCall_p_struct)); _temp2841[ 0]=({ struct Cyc_Absyn_UnknownCall_p_struct
-_temp2842; _temp2842.tag= Cyc_Absyn_UnknownCall_p; _temp2842.f1= Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2842.f2=
-_temp2838; _temp2842.f3= Cyc_yyget_PatternList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2842;});
-_temp2841;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_temp2811[ 0]=({ struct Cyc_Pattern_tok_struct _temp2812; _temp2812.tag= Cyc_Pattern_tok;
+_temp2812.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_UnknownCall_p_struct*
+_temp2813=( struct Cyc_Absyn_UnknownCall_p_struct*) GC_malloc( sizeof( struct
+Cyc_Absyn_UnknownCall_p_struct)); _temp2813[ 0]=({ struct Cyc_Absyn_UnknownCall_p_struct
+_temp2814; _temp2814.tag= Cyc_Absyn_UnknownCall_p; _temp2814.f1= Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2814.f2=
+_temp2810; _temp2814.f3= Cyc_yyget_PatternList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2814;});
+_temp2813;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 4)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp2840;}); _temp2839;}); break;} case
-287: _LL2837: yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2844=( struct
+10000u, yylsp_offset)]).last_line)); _temp2812;}); _temp2811;}); break;} case
+287: _LL2809: yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2816=( struct
 Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
-_temp2844[ 0]=({ struct Cyc_Pattern_tok_struct _temp2845; _temp2845.tag= Cyc_Pattern_tok;
-_temp2845.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Tuple_p_struct*
-_temp2846=( struct Cyc_Absyn_Tuple_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Tuple_p_struct));
-_temp2846[ 0]=({ struct Cyc_Absyn_Tuple_p_struct _temp2847; _temp2847.tag= Cyc_Absyn_Tuple_p;
-_temp2847.f1= Cyc_yyget_PatternList_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 1)]); _temp2847;}); _temp2846;}), Cyc_Position_segment_of_abs((
+_temp2816[ 0]=({ struct Cyc_Pattern_tok_struct _temp2817; _temp2817.tag= Cyc_Pattern_tok;
+_temp2817.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Tuple_p_struct*
+_temp2818=( struct Cyc_Absyn_Tuple_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Tuple_p_struct));
+_temp2818[ 0]=({ struct Cyc_Absyn_Tuple_p_struct _temp2819; _temp2819.tag= Cyc_Absyn_Tuple_p;
+_temp2819.f1= Cyc_yyget_PatternList_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 1)]); _temp2819;}); _temp2818;}), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2845;}); _temp2844;}); break; case 288: _LL2843: { struct Cyc_List_List*
-_temp2849=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
+_temp2817;}); _temp2816;}); break; case 288: _LL2815: { struct Cyc_List_List*
+_temp2821=(( struct Cyc_List_List*(*)( struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*,
 void*), struct Cyc_Position_Segment* env, struct Cyc_List_List* x)) Cyc_List_map_c)(
 Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).last_line), Cyc_yyget_TypeList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)])); yyval=( void*)({
-struct Cyc_Pattern_tok_struct* _temp2850=( struct Cyc_Pattern_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp2850[ 0]=({ struct Cyc_Pattern_tok_struct
-_temp2851; _temp2851.tag= Cyc_Pattern_tok; _temp2851.f1= Cyc_Absyn_new_pat((
-void*)({ struct Cyc_Absyn_UnknownFields_p_struct* _temp2852=( struct Cyc_Absyn_UnknownFields_p_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnknownFields_p_struct)); _temp2852[ 0]=({
-struct Cyc_Absyn_UnknownFields_p_struct _temp2853; _temp2853.tag= Cyc_Absyn_UnknownFields_p;
-_temp2853.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 3)]); _temp2853.f2= _temp2849; _temp2853.f3= 0; _temp2853;});
-_temp2852;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+struct Cyc_Pattern_tok_struct* _temp2822=( struct Cyc_Pattern_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Pattern_tok_struct)); _temp2822[ 0]=({ struct Cyc_Pattern_tok_struct
+_temp2823; _temp2823.tag= Cyc_Pattern_tok; _temp2823.f1= Cyc_Absyn_new_pat((
+void*)({ struct Cyc_Absyn_UnknownFields_p_struct* _temp2824=( struct Cyc_Absyn_UnknownFields_p_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_UnknownFields_p_struct)); _temp2824[ 0]=({
+struct Cyc_Absyn_UnknownFields_p_struct _temp2825; _temp2825.tag= Cyc_Absyn_UnknownFields_p;
+_temp2825.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 3)]); _temp2825.f2= _temp2821; _temp2825.f3= 0; _temp2825;});
+_temp2824;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 3)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp2851;}); _temp2850;}); break;} case
-289: _LL2848: { struct Cyc_List_List* _temp2855=(( struct Cyc_List_List*(*)(
+10000u, yylsp_offset)]).last_line)); _temp2823;}); _temp2822;}); break;} case
+289: _LL2820: { struct Cyc_List_List* _temp2827=(( struct Cyc_List_List*(*)(
 struct Cyc_Absyn_Tvar*(* f)( struct Cyc_Position_Segment*, void*), struct Cyc_Position_Segment*
 env, struct Cyc_List_List* x)) Cyc_List_map_c)( Cyc_Parse_typ2tvar, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).last_line),
 Cyc_yyget_TypeList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 3)])); yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2856=(
+yyvsp_offset - 3)])); yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2828=(
 struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
-_temp2856[ 0]=({ struct Cyc_Pattern_tok_struct _temp2857; _temp2857.tag= Cyc_Pattern_tok;
-_temp2857.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_UnknownFields_p_struct*
-_temp2858=( struct Cyc_Absyn_UnknownFields_p_struct*) GC_malloc( sizeof( struct
-Cyc_Absyn_UnknownFields_p_struct)); _temp2858[ 0]=({ struct Cyc_Absyn_UnknownFields_p_struct
-_temp2859; _temp2859.tag= Cyc_Absyn_UnknownFields_p; _temp2859.f1= Cyc_yyget_QualId_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2859.f2=
-_temp2855; _temp2859.f3= Cyc_yyget_FieldPatternList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2859;});
-_temp2858;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_temp2828[ 0]=({ struct Cyc_Pattern_tok_struct _temp2829; _temp2829.tag= Cyc_Pattern_tok;
+_temp2829.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_UnknownFields_p_struct*
+_temp2830=( struct Cyc_Absyn_UnknownFields_p_struct*) GC_malloc( sizeof( struct
+Cyc_Absyn_UnknownFields_p_struct)); _temp2830[ 0]=({ struct Cyc_Absyn_UnknownFields_p_struct
+_temp2831; _temp2831.tag= Cyc_Absyn_UnknownFields_p; _temp2831.f1= Cyc_yyget_QualId_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp2831.f2=
+_temp2827; _temp2831.f3= Cyc_yyget_FieldPatternList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2831;});
+_temp2830;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 4)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp2857;}); _temp2856;}); break;} case
-290: _LL2854: yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2861=( struct
+10000u, yylsp_offset)]).last_line)); _temp2829;}); _temp2828;}); break;} case
+290: _LL2826: yyval=( void*)({ struct Cyc_Pattern_tok_struct* _temp2833=( struct
 Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
-_temp2861[ 0]=({ struct Cyc_Pattern_tok_struct _temp2862; _temp2862.tag= Cyc_Pattern_tok;
-_temp2862.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Pointer_p_struct*
-_temp2863=( struct Cyc_Absyn_Pointer_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Pointer_p_struct));
-_temp2863[ 0]=({ struct Cyc_Absyn_Pointer_p_struct _temp2864; _temp2864.tag= Cyc_Absyn_Pointer_p;
-_temp2864.f1= Cyc_yyget_Pattern_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2864;}); _temp2863;}), Cyc_Position_segment_of_abs(( yyls[
+_temp2833[ 0]=({ struct Cyc_Pattern_tok_struct _temp2834; _temp2834.tag= Cyc_Pattern_tok;
+_temp2834.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Pointer_p_struct*
+_temp2835=( struct Cyc_Absyn_Pointer_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Pointer_p_struct));
+_temp2835[ 0]=({ struct Cyc_Absyn_Pointer_p_struct _temp2836; _temp2836.tag= Cyc_Absyn_Pointer_p;
+_temp2836.f1= Cyc_yyget_Pattern_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]); _temp2836;}); _temp2835;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2862;});
-_temp2861;}); break; case 291: _LL2860: yyval=( void*)({ struct Cyc_Pattern_tok_struct*
-_temp2866=( struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
-_temp2866[ 0]=({ struct Cyc_Pattern_tok_struct _temp2867; _temp2867.tag= Cyc_Pattern_tok;
-_temp2867.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Reference_p_struct*
-_temp2868=( struct Cyc_Absyn_Reference_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Reference_p_struct));
-_temp2868[ 0]=({ struct Cyc_Absyn_Reference_p_struct _temp2869; _temp2869.tag=
-Cyc_Absyn_Reference_p; _temp2869.f1= Cyc_Absyn_new_vardecl(({ struct _tuple1*
-_temp2870=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp2870->f1=(
-void*) Cyc_Absyn_Loc_n; _temp2870->f2=({ struct _tagged_arr* _temp2871=( struct
-_tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp2871[ 0]= Cyc_yyget_String_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2871;});
-_temp2870;}),( void*) Cyc_Absyn_VoidType, 0); _temp2869;}); _temp2868;}), Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2834;});
+_temp2833;}); break; case 291: _LL2832: yyval=( void*)({ struct Cyc_Pattern_tok_struct*
+_temp2838=( struct Cyc_Pattern_tok_struct*) GC_malloc( sizeof( struct Cyc_Pattern_tok_struct));
+_temp2838[ 0]=({ struct Cyc_Pattern_tok_struct _temp2839; _temp2839.tag= Cyc_Pattern_tok;
+_temp2839.f1= Cyc_Absyn_new_pat(( void*)({ struct Cyc_Absyn_Reference_p_struct*
+_temp2840=( struct Cyc_Absyn_Reference_p_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Reference_p_struct));
+_temp2840[ 0]=({ struct Cyc_Absyn_Reference_p_struct _temp2841; _temp2841.tag=
+Cyc_Absyn_Reference_p; _temp2841.f1= Cyc_Absyn_new_vardecl(({ struct _tuple1*
+_temp2842=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp2842->f1=(
+void*) Cyc_Absyn_Loc_n; _temp2842->f2=({ struct _tagged_arr* _temp2843=( struct
+_tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp2843[ 0]= Cyc_yyget_String_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2843;});
+_temp2842;}),( void*) Cyc_Absyn_VoidType, 0); _temp2841;}); _temp2840;}), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2867;}); _temp2866;}); break; case 292: _LL2865: yyval=( void*)({ struct
-Cyc_PatternList_tok_struct* _temp2873=( struct Cyc_PatternList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp2873[ 0]=({ struct
-Cyc_PatternList_tok_struct _temp2874; _temp2874.tag= Cyc_PatternList_tok;
-_temp2874.f1= 0; _temp2874;}); _temp2873;}); break; case 293: _LL2872: yyval=(
-void*)({ struct Cyc_PatternList_tok_struct* _temp2876=( struct Cyc_PatternList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp2876[ 0]=({ struct
-Cyc_PatternList_tok_struct _temp2877; _temp2877.tag= Cyc_PatternList_tok;
-_temp2877.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+_temp2839;}); _temp2838;}); break; case 292: _LL2837: yyval=( void*)({ struct
+Cyc_PatternList_tok_struct* _temp2845=( struct Cyc_PatternList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp2845[ 0]=({ struct
+Cyc_PatternList_tok_struct _temp2846; _temp2846.tag= Cyc_PatternList_tok;
+_temp2846.f1= 0; _temp2846;}); _temp2845;}); break; case 293: _LL2844: yyval=(
+void*)({ struct Cyc_PatternList_tok_struct* _temp2848=( struct Cyc_PatternList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp2848[ 0]=({ struct
+Cyc_PatternList_tok_struct _temp2849; _temp2849.tag= Cyc_PatternList_tok;
+_temp2849.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
 Cyc_yyget_PatternList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)])); _temp2877;}); _temp2876;}); break; case 294: _LL2875: yyval=(
-void*)({ struct Cyc_PatternList_tok_struct* _temp2879=( struct Cyc_PatternList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp2879[ 0]=({ struct
-Cyc_PatternList_tok_struct _temp2880; _temp2880.tag= Cyc_PatternList_tok;
-_temp2880.f1=({ struct Cyc_List_List* _temp2881=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2881->hd=( void*) Cyc_yyget_Pattern_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2881->tl= 0;
-_temp2881;}); _temp2880;}); _temp2879;}); break; case 295: _LL2878: yyval=( void*)({
-struct Cyc_PatternList_tok_struct* _temp2883=( struct Cyc_PatternList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp2883[ 0]=({ struct
-Cyc_PatternList_tok_struct _temp2884; _temp2884.tag= Cyc_PatternList_tok;
-_temp2884.f1=({ struct Cyc_List_List* _temp2885=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2885->hd=( void*) Cyc_yyget_Pattern_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2885->tl=
+yyvsp_offset)])); _temp2849;}); _temp2848;}); break; case 294: _LL2847: yyval=(
+void*)({ struct Cyc_PatternList_tok_struct* _temp2851=( struct Cyc_PatternList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp2851[ 0]=({ struct
+Cyc_PatternList_tok_struct _temp2852; _temp2852.tag= Cyc_PatternList_tok;
+_temp2852.f1=({ struct Cyc_List_List* _temp2853=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2853->hd=( void*) Cyc_yyget_Pattern_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2853->tl= 0;
+_temp2853;}); _temp2852;}); _temp2851;}); break; case 295: _LL2850: yyval=( void*)({
+struct Cyc_PatternList_tok_struct* _temp2855=( struct Cyc_PatternList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_PatternList_tok_struct)); _temp2855[ 0]=({ struct
+Cyc_PatternList_tok_struct _temp2856; _temp2856.tag= Cyc_PatternList_tok;
+_temp2856.f1=({ struct Cyc_List_List* _temp2857=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2857->hd=( void*) Cyc_yyget_Pattern_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2857->tl=
 Cyc_yyget_PatternList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp2885;}); _temp2884;}); _temp2883;}); break; case 296:
-_LL2882: yyval=( void*)({ struct Cyc_FieldPattern_tok_struct* _temp2887=( struct
+yyvsp_offset - 2)]); _temp2857;}); _temp2856;}); _temp2855;}); break; case 296:
+_LL2854: yyval=( void*)({ struct Cyc_FieldPattern_tok_struct* _temp2859=( struct
 Cyc_FieldPattern_tok_struct*) GC_malloc( sizeof( struct Cyc_FieldPattern_tok_struct));
-_temp2887[ 0]=({ struct Cyc_FieldPattern_tok_struct _temp2888; _temp2888.tag=
-Cyc_FieldPattern_tok; _temp2888.f1=({ struct _tuple14* _temp2889=( struct
-_tuple14*) GC_malloc( sizeof( struct _tuple14)); _temp2889->f1= 0; _temp2889->f2=
+_temp2859[ 0]=({ struct Cyc_FieldPattern_tok_struct _temp2860; _temp2860.tag=
+Cyc_FieldPattern_tok; _temp2860.f1=({ struct _tuple14* _temp2861=( struct
+_tuple14*) GC_malloc( sizeof( struct _tuple14)); _temp2861->f1= 0; _temp2861->f2=
 Cyc_yyget_Pattern_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2889;}); _temp2888;}); _temp2887;}); break; case 297:
-_LL2886: yyval=( void*)({ struct Cyc_FieldPattern_tok_struct* _temp2891=( struct
+yyvsp_offset)]); _temp2861;}); _temp2860;}); _temp2859;}); break; case 297:
+_LL2858: yyval=( void*)({ struct Cyc_FieldPattern_tok_struct* _temp2863=( struct
 Cyc_FieldPattern_tok_struct*) GC_malloc( sizeof( struct Cyc_FieldPattern_tok_struct));
-_temp2891[ 0]=({ struct Cyc_FieldPattern_tok_struct _temp2892; _temp2892.tag=
-Cyc_FieldPattern_tok; _temp2892.f1=({ struct _tuple14* _temp2893=( struct
-_tuple14*) GC_malloc( sizeof( struct _tuple14)); _temp2893->f1= Cyc_yyget_DesignatorList_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2893->f2=
+_temp2863[ 0]=({ struct Cyc_FieldPattern_tok_struct _temp2864; _temp2864.tag=
+Cyc_FieldPattern_tok; _temp2864.f1=({ struct _tuple14* _temp2865=( struct
+_tuple14*) GC_malloc( sizeof( struct _tuple14)); _temp2865->f1= Cyc_yyget_DesignatorList_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp2865->f2=
 Cyc_yyget_Pattern_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp2893;}); _temp2892;}); _temp2891;}); break; case 298:
-_LL2890: yyval=( void*)({ struct Cyc_FieldPatternList_tok_struct* _temp2895=(
+yyvsp_offset)]); _temp2865;}); _temp2864;}); _temp2863;}); break; case 298:
+_LL2862: yyval=( void*)({ struct Cyc_FieldPatternList_tok_struct* _temp2867=(
 struct Cyc_FieldPatternList_tok_struct*) GC_malloc( sizeof( struct Cyc_FieldPatternList_tok_struct));
-_temp2895[ 0]=({ struct Cyc_FieldPatternList_tok_struct _temp2896; _temp2896.tag=
-Cyc_FieldPatternList_tok; _temp2896.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
+_temp2867[ 0]=({ struct Cyc_FieldPatternList_tok_struct _temp2868; _temp2868.tag=
+Cyc_FieldPatternList_tok; _temp2868.f1=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
 x)) Cyc_List_imp_rev)( Cyc_yyget_FieldPatternList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2896;});
-_temp2895;}); break; case 299: _LL2894: yyval=( void*)({ struct Cyc_FieldPatternList_tok_struct*
-_temp2898=( struct Cyc_FieldPatternList_tok_struct*) GC_malloc( sizeof( struct
-Cyc_FieldPatternList_tok_struct)); _temp2898[ 0]=({ struct Cyc_FieldPatternList_tok_struct
-_temp2899; _temp2899.tag= Cyc_FieldPatternList_tok; _temp2899.f1=({ struct Cyc_List_List*
-_temp2900=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp2900->hd=( void*) Cyc_yyget_FieldPattern_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2900->tl= 0;
-_temp2900;}); _temp2899;}); _temp2898;}); break; case 300: _LL2897: yyval=( void*)({
-struct Cyc_FieldPatternList_tok_struct* _temp2902=( struct Cyc_FieldPatternList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_FieldPatternList_tok_struct)); _temp2902[ 0]=({
-struct Cyc_FieldPatternList_tok_struct _temp2903; _temp2903.tag= Cyc_FieldPatternList_tok;
-_temp2903.f1=({ struct Cyc_List_List* _temp2904=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp2904->hd=( void*) Cyc_yyget_FieldPattern_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2904->tl=
+_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp2868;});
+_temp2867;}); break; case 299: _LL2866: yyval=( void*)({ struct Cyc_FieldPatternList_tok_struct*
+_temp2870=( struct Cyc_FieldPatternList_tok_struct*) GC_malloc( sizeof( struct
+Cyc_FieldPatternList_tok_struct)); _temp2870[ 0]=({ struct Cyc_FieldPatternList_tok_struct
+_temp2871; _temp2871.tag= Cyc_FieldPatternList_tok; _temp2871.f1=({ struct Cyc_List_List*
+_temp2872=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp2872->hd=( void*) Cyc_yyget_FieldPattern_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2872->tl= 0;
+_temp2872;}); _temp2871;}); _temp2870;}); break; case 300: _LL2869: yyval=( void*)({
+struct Cyc_FieldPatternList_tok_struct* _temp2874=( struct Cyc_FieldPatternList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_FieldPatternList_tok_struct)); _temp2874[ 0]=({
+struct Cyc_FieldPatternList_tok_struct _temp2875; _temp2875.tag= Cyc_FieldPatternList_tok;
+_temp2875.f1=({ struct Cyc_List_List* _temp2876=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp2876->hd=( void*) Cyc_yyget_FieldPattern_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp2876->tl=
 Cyc_yyget_FieldPatternList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 2)]); _temp2904;}); _temp2903;}); _temp2902;}); break; case 301:
-_LL2901: yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)];
-break; case 302: _LL2905: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2907=(
+yyvsp_offset - 2)]); _temp2876;}); _temp2875;}); _temp2874;}); break; case 301:
+_LL2873: yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)];
+break; case 302: _LL2877: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2879=(
 struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp2907[ 0]=({ struct Cyc_Exp_tok_struct _temp2908; _temp2908.tag= Cyc_Exp_tok;
-_temp2908.f1= Cyc_Absyn_seq_exp( Cyc_yyget_Exp_tok( yyvs[
+_temp2879[ 0]=({ struct Cyc_Exp_tok_struct _temp2880; _temp2880.tag= Cyc_Exp_tok;
+_temp2880.f1= Cyc_Absyn_seq_exp( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2908;}); _temp2907;}); break; case 303: _LL2906: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 304: _LL2909:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2911=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2911[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2912; _temp2912.tag= Cyc_Exp_tok; _temp2912.f1= Cyc_Absyn_assignop_exp( Cyc_yyget_Exp_tok(
+_temp2880;}); _temp2879;}); break; case 303: _LL2878: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 304: _LL2881:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2883=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2883[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2884; _temp2884.tag= Cyc_Exp_tok; _temp2884.f1= Cyc_Absyn_assignop_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Primopopt_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2912;}); _temp2911;}); break; case 305: _LL2910: yyval=( void*)({ struct
-Cyc_Primopopt_tok_struct* _temp2914=( struct Cyc_Primopopt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2914[ 0]=({ struct
-Cyc_Primopopt_tok_struct _temp2915; _temp2915.tag= Cyc_Primopopt_tok; _temp2915.f1=
-0; _temp2915;}); _temp2914;}); break; case 306: _LL2913: yyval=( void*)({ struct
+_temp2884;}); _temp2883;}); break; case 305: _LL2882: yyval=( void*)({ struct
+Cyc_Primopopt_tok_struct* _temp2886=( struct Cyc_Primopopt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2886[ 0]=({ struct
+Cyc_Primopopt_tok_struct _temp2887; _temp2887.tag= Cyc_Primopopt_tok; _temp2887.f1=
+0; _temp2887;}); _temp2886;}); break; case 306: _LL2885: yyval=( void*)({ struct
+Cyc_Primopopt_tok_struct* _temp2889=( struct Cyc_Primopopt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2889[ 0]=({ struct
+Cyc_Primopopt_tok_struct _temp2890; _temp2890.tag= Cyc_Primopopt_tok; _temp2890.f1=({
+struct Cyc_Core_Opt* _temp2891=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp2891->v=( void*)(( void*) Cyc_Absyn_Times); _temp2891;});
+_temp2890;}); _temp2889;}); break; case 307: _LL2888: yyval=( void*)({ struct
+Cyc_Primopopt_tok_struct* _temp2893=( struct Cyc_Primopopt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2893[ 0]=({ struct
+Cyc_Primopopt_tok_struct _temp2894; _temp2894.tag= Cyc_Primopopt_tok; _temp2894.f1=({
+struct Cyc_Core_Opt* _temp2895=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp2895->v=( void*)(( void*) Cyc_Absyn_Div); _temp2895;});
+_temp2894;}); _temp2893;}); break; case 308: _LL2892: yyval=( void*)({ struct
+Cyc_Primopopt_tok_struct* _temp2897=( struct Cyc_Primopopt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2897[ 0]=({ struct
+Cyc_Primopopt_tok_struct _temp2898; _temp2898.tag= Cyc_Primopopt_tok; _temp2898.f1=({
+struct Cyc_Core_Opt* _temp2899=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp2899->v=( void*)(( void*) Cyc_Absyn_Mod); _temp2899;});
+_temp2898;}); _temp2897;}); break; case 309: _LL2896: yyval=( void*)({ struct
+Cyc_Primopopt_tok_struct* _temp2901=( struct Cyc_Primopopt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2901[ 0]=({ struct
+Cyc_Primopopt_tok_struct _temp2902; _temp2902.tag= Cyc_Primopopt_tok; _temp2902.f1=({
+struct Cyc_Core_Opt* _temp2903=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp2903->v=( void*)(( void*) Cyc_Absyn_Plus); _temp2903;});
+_temp2902;}); _temp2901;}); break; case 310: _LL2900: yyval=( void*)({ struct
+Cyc_Primopopt_tok_struct* _temp2905=( struct Cyc_Primopopt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2905[ 0]=({ struct
+Cyc_Primopopt_tok_struct _temp2906; _temp2906.tag= Cyc_Primopopt_tok; _temp2906.f1=({
+struct Cyc_Core_Opt* _temp2907=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp2907->v=( void*)(( void*) Cyc_Absyn_Minus); _temp2907;});
+_temp2906;}); _temp2905;}); break; case 311: _LL2904: yyval=( void*)({ struct
+Cyc_Primopopt_tok_struct* _temp2909=( struct Cyc_Primopopt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2909[ 0]=({ struct
+Cyc_Primopopt_tok_struct _temp2910; _temp2910.tag= Cyc_Primopopt_tok; _temp2910.f1=({
+struct Cyc_Core_Opt* _temp2911=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp2911->v=( void*)(( void*) Cyc_Absyn_Bitlshift); _temp2911;});
+_temp2910;}); _temp2909;}); break; case 312: _LL2908: yyval=( void*)({ struct
+Cyc_Primopopt_tok_struct* _temp2913=( struct Cyc_Primopopt_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2913[ 0]=({ struct
+Cyc_Primopopt_tok_struct _temp2914; _temp2914.tag= Cyc_Primopopt_tok; _temp2914.f1=({
+struct Cyc_Core_Opt* _temp2915=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp2915->v=( void*)(( void*) Cyc_Absyn_Bitlrshift); _temp2915;});
+_temp2914;}); _temp2913;}); break; case 313: _LL2912: yyval=( void*)({ struct
 Cyc_Primopopt_tok_struct* _temp2917=( struct Cyc_Primopopt_tok_struct*)
 GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2917[ 0]=({ struct
 Cyc_Primopopt_tok_struct _temp2918; _temp2918.tag= Cyc_Primopopt_tok; _temp2918.f1=({
 struct Cyc_Core_Opt* _temp2919=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp2919->v=( void*)(( void*) Cyc_Absyn_Times); _temp2919;});
-_temp2918;}); _temp2917;}); break; case 307: _LL2916: yyval=( void*)({ struct
+Cyc_Core_Opt)); _temp2919->v=( void*)(( void*) Cyc_Absyn_Bitand); _temp2919;});
+_temp2918;}); _temp2917;}); break; case 314: _LL2916: yyval=( void*)({ struct
 Cyc_Primopopt_tok_struct* _temp2921=( struct Cyc_Primopopt_tok_struct*)
 GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2921[ 0]=({ struct
 Cyc_Primopopt_tok_struct _temp2922; _temp2922.tag= Cyc_Primopopt_tok; _temp2922.f1=({
 struct Cyc_Core_Opt* _temp2923=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp2923->v=( void*)(( void*) Cyc_Absyn_Div); _temp2923;});
-_temp2922;}); _temp2921;}); break; case 308: _LL2920: yyval=( void*)({ struct
+Cyc_Core_Opt)); _temp2923->v=( void*)(( void*) Cyc_Absyn_Bitxor); _temp2923;});
+_temp2922;}); _temp2921;}); break; case 315: _LL2920: yyval=( void*)({ struct
 Cyc_Primopopt_tok_struct* _temp2925=( struct Cyc_Primopopt_tok_struct*)
 GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2925[ 0]=({ struct
 Cyc_Primopopt_tok_struct _temp2926; _temp2926.tag= Cyc_Primopopt_tok; _temp2926.f1=({
 struct Cyc_Core_Opt* _temp2927=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp2927->v=( void*)(( void*) Cyc_Absyn_Mod); _temp2927;});
-_temp2926;}); _temp2925;}); break; case 309: _LL2924: yyval=( void*)({ struct
-Cyc_Primopopt_tok_struct* _temp2929=( struct Cyc_Primopopt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2929[ 0]=({ struct
-Cyc_Primopopt_tok_struct _temp2930; _temp2930.tag= Cyc_Primopopt_tok; _temp2930.f1=({
-struct Cyc_Core_Opt* _temp2931=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp2931->v=( void*)(( void*) Cyc_Absyn_Plus); _temp2931;});
-_temp2930;}); _temp2929;}); break; case 310: _LL2928: yyval=( void*)({ struct
-Cyc_Primopopt_tok_struct* _temp2933=( struct Cyc_Primopopt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2933[ 0]=({ struct
-Cyc_Primopopt_tok_struct _temp2934; _temp2934.tag= Cyc_Primopopt_tok; _temp2934.f1=({
-struct Cyc_Core_Opt* _temp2935=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp2935->v=( void*)(( void*) Cyc_Absyn_Minus); _temp2935;});
-_temp2934;}); _temp2933;}); break; case 311: _LL2932: yyval=( void*)({ struct
-Cyc_Primopopt_tok_struct* _temp2937=( struct Cyc_Primopopt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2937[ 0]=({ struct
-Cyc_Primopopt_tok_struct _temp2938; _temp2938.tag= Cyc_Primopopt_tok; _temp2938.f1=({
-struct Cyc_Core_Opt* _temp2939=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp2939->v=( void*)(( void*) Cyc_Absyn_Bitlshift); _temp2939;});
-_temp2938;}); _temp2937;}); break; case 312: _LL2936: yyval=( void*)({ struct
-Cyc_Primopopt_tok_struct* _temp2941=( struct Cyc_Primopopt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2941[ 0]=({ struct
-Cyc_Primopopt_tok_struct _temp2942; _temp2942.tag= Cyc_Primopopt_tok; _temp2942.f1=({
-struct Cyc_Core_Opt* _temp2943=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp2943->v=( void*)(( void*) Cyc_Absyn_Bitlrshift); _temp2943;});
-_temp2942;}); _temp2941;}); break; case 313: _LL2940: yyval=( void*)({ struct
-Cyc_Primopopt_tok_struct* _temp2945=( struct Cyc_Primopopt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2945[ 0]=({ struct
-Cyc_Primopopt_tok_struct _temp2946; _temp2946.tag= Cyc_Primopopt_tok; _temp2946.f1=({
-struct Cyc_Core_Opt* _temp2947=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp2947->v=( void*)(( void*) Cyc_Absyn_Bitand); _temp2947;});
-_temp2946;}); _temp2945;}); break; case 314: _LL2944: yyval=( void*)({ struct
-Cyc_Primopopt_tok_struct* _temp2949=( struct Cyc_Primopopt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2949[ 0]=({ struct
-Cyc_Primopopt_tok_struct _temp2950; _temp2950.tag= Cyc_Primopopt_tok; _temp2950.f1=({
-struct Cyc_Core_Opt* _temp2951=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp2951->v=( void*)(( void*) Cyc_Absyn_Bitxor); _temp2951;});
-_temp2950;}); _temp2949;}); break; case 315: _LL2948: yyval=( void*)({ struct
-Cyc_Primopopt_tok_struct* _temp2953=( struct Cyc_Primopopt_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Primopopt_tok_struct)); _temp2953[ 0]=({ struct
-Cyc_Primopopt_tok_struct _temp2954; _temp2954.tag= Cyc_Primopopt_tok; _temp2954.f1=({
-struct Cyc_Core_Opt* _temp2955=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp2955->v=( void*)(( void*) Cyc_Absyn_Bitor); _temp2955;});
-_temp2954;}); _temp2953;}); break; case 316: _LL2952: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 317: _LL2956:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2958=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2958[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2959; _temp2959.tag= Cyc_Exp_tok; _temp2959.f1= Cyc_Absyn_conditional_exp(
+Cyc_Core_Opt)); _temp2927->v=( void*)(( void*) Cyc_Absyn_Bitor); _temp2927;});
+_temp2926;}); _temp2925;}); break; case 316: _LL2924: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 317: _LL2928:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2930=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2930[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2931; _temp2931.tag= Cyc_Exp_tok; _temp2931.f1= Cyc_Absyn_conditional_exp(
 Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
 4)]), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2959;});
-_temp2958;}); break; case 318: _LL2957: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp2961=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp2961[ 0]=({ struct Cyc_Exp_tok_struct _temp2962; _temp2962.tag= Cyc_Exp_tok;
-_temp2962.f1= Cyc_Absyn_throw_exp( Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2931;});
+_temp2930;}); break; case 318: _LL2929: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp2933=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp2933[ 0]=({ struct Cyc_Exp_tok_struct _temp2934; _temp2934.tag= Cyc_Exp_tok;
+_temp2934.f1= Cyc_Absyn_throw_exp( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2962;}); _temp2961;}); break; case 319: _LL2960: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp2964=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp2964[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2965; _temp2965.tag= Cyc_Exp_tok; _temp2965.f1= Cyc_Absyn_New_exp( 0, Cyc_yyget_Exp_tok(
+_temp2934;}); _temp2933;}); break; case 319: _LL2932: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp2936=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp2936[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2937; _temp2937.tag= Cyc_Exp_tok; _temp2937.f1= Cyc_Absyn_New_exp( 0, Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset + 1)]).last_line));
-_temp2965;}); _temp2964;}); break; case 320: _LL2963: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp2967=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp2967[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2968; _temp2968.tag= Cyc_Exp_tok; _temp2968.f1= Cyc_Absyn_New_exp( 0, Cyc_yyget_Exp_tok(
+_temp2937;}); _temp2936;}); break; case 320: _LL2935: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp2939=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp2939[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2940; _temp2940.tag= Cyc_Exp_tok; _temp2940.f1= Cyc_Absyn_New_exp( 0, Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset + 1)]).last_line));
-_temp2968;}); _temp2967;}); break; case 321: _LL2966: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp2970=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp2970[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2971; _temp2971.tag= Cyc_Exp_tok; _temp2971.f1= Cyc_Absyn_New_exp(( struct
+_temp2940;}); _temp2939;}); break; case 321: _LL2938: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp2942=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp2942[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2943; _temp2943.tag= Cyc_Exp_tok; _temp2943.f1= Cyc_Absyn_New_exp(( struct
 Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2971;});
-_temp2970;}); break; case 322: _LL2969: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp2973=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp2973[ 0]=({ struct Cyc_Exp_tok_struct _temp2974; _temp2974.tag= Cyc_Exp_tok;
-_temp2974.f1= Cyc_Absyn_New_exp(( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2943;});
+_temp2942;}); break; case 322: _LL2941: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp2945=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp2945[ 0]=({ struct Cyc_Exp_tok_struct _temp2946; _temp2946.tag= Cyc_Exp_tok;
+_temp2946.f1= Cyc_Absyn_New_exp(( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2974;}); _temp2973;}); break; case 323: _LL2972: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 324: _LL2975:
+_temp2946;}); _temp2945;}); break; case 323: _LL2944: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 324: _LL2947:
 yyval= yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case
-325: _LL2976: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2978=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2978[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2979; _temp2979.tag= Cyc_Exp_tok; _temp2979.f1= Cyc_Absyn_or_exp( Cyc_yyget_Exp_tok(
+325: _LL2948: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2950=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2950[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2951; _temp2951.tag= Cyc_Exp_tok; _temp2951.f1= Cyc_Absyn_or_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2979;}); _temp2978;}); break; case 326: _LL2977: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 327: _LL2980:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2982=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2982[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2983; _temp2983.tag= Cyc_Exp_tok; _temp2983.f1= Cyc_Absyn_and_exp( Cyc_yyget_Exp_tok(
+_temp2951;}); _temp2950;}); break; case 326: _LL2949: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 327: _LL2952:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2954=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2954[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2955; _temp2955.tag= Cyc_Exp_tok; _temp2955.f1= Cyc_Absyn_and_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2983;}); _temp2982;}); break; case 328: _LL2981: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 329: _LL2984:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2986=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2986[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2987; _temp2987.tag= Cyc_Exp_tok; _temp2987.f1= Cyc_Absyn_prim2_exp(( void*)
+_temp2955;}); _temp2954;}); break; case 328: _LL2953: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 329: _LL2956:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2958=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2958[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2959; _temp2959.tag= Cyc_Exp_tok; _temp2959.f1= Cyc_Absyn_prim2_exp(( void*)
 Cyc_Absyn_Bitor, Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2987;});
-_temp2986;}); break; case 330: _LL2985: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 331: _LL2988:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2990=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2990[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2991; _temp2991.tag= Cyc_Exp_tok; _temp2991.f1= Cyc_Absyn_prim2_exp(( void*)
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2959;});
+_temp2958;}); break; case 330: _LL2957: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 331: _LL2960:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2962=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2962[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2963; _temp2963.tag= Cyc_Exp_tok; _temp2963.f1= Cyc_Absyn_prim2_exp(( void*)
 Cyc_Absyn_Bitxor, Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2991;});
-_temp2990;}); break; case 332: _LL2989: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 333: _LL2992:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2994=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2994[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2995; _temp2995.tag= Cyc_Exp_tok; _temp2995.f1= Cyc_Absyn_prim2_exp(( void*)
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2963;});
+_temp2962;}); break; case 332: _LL2961: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 333: _LL2964:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2966=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2966[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2967; _temp2967.tag= Cyc_Exp_tok; _temp2967.f1= Cyc_Absyn_prim2_exp(( void*)
 Cyc_Absyn_Bitand, Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2995;});
-_temp2994;}); break; case 334: _LL2993: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 335: _LL2996:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2998=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2998[ 0]=({ struct Cyc_Exp_tok_struct
-_temp2999; _temp2999.tag= Cyc_Exp_tok; _temp2999.f1= Cyc_Absyn_eq_exp( Cyc_yyget_Exp_tok(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2967;});
+_temp2966;}); break; case 334: _LL2965: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 335: _LL2968:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2970=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2970[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2971; _temp2971.tag= Cyc_Exp_tok; _temp2971.f1= Cyc_Absyn_eq_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp2999;}); _temp2998;}); break; case 336: _LL2997: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3001=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3001[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3002; _temp3002.tag= Cyc_Exp_tok; _temp3002.f1= Cyc_Absyn_neq_exp( Cyc_yyget_Exp_tok(
+_temp2971;}); _temp2970;}); break; case 336: _LL2969: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp2973=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp2973[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2974; _temp2974.tag= Cyc_Exp_tok; _temp2974.f1= Cyc_Absyn_neq_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3002;}); _temp3001;}); break; case 337: _LL3000: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 338: _LL3003:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3005=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3005[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3006; _temp3006.tag= Cyc_Exp_tok; _temp3006.f1= Cyc_Absyn_lt_exp( Cyc_yyget_Exp_tok(
+_temp2974;}); _temp2973;}); break; case 337: _LL2972: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 338: _LL2975:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2977=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2977[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2978; _temp2978.tag= Cyc_Exp_tok; _temp2978.f1= Cyc_Absyn_lt_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3006;}); _temp3005;}); break; case 339: _LL3004: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3008=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3008[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3009; _temp3009.tag= Cyc_Exp_tok; _temp3009.f1= Cyc_Absyn_gt_exp( Cyc_yyget_Exp_tok(
+_temp2978;}); _temp2977;}); break; case 339: _LL2976: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp2980=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp2980[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2981; _temp2981.tag= Cyc_Exp_tok; _temp2981.f1= Cyc_Absyn_gt_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3009;}); _temp3008;}); break; case 340: _LL3007: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3011=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3011[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3012; _temp3012.tag= Cyc_Exp_tok; _temp3012.f1= Cyc_Absyn_lte_exp( Cyc_yyget_Exp_tok(
+_temp2981;}); _temp2980;}); break; case 340: _LL2979: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp2983=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp2983[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2984; _temp2984.tag= Cyc_Exp_tok; _temp2984.f1= Cyc_Absyn_lte_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3012;}); _temp3011;}); break; case 341: _LL3010: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3014=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3014[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3015; _temp3015.tag= Cyc_Exp_tok; _temp3015.f1= Cyc_Absyn_gte_exp( Cyc_yyget_Exp_tok(
+_temp2984;}); _temp2983;}); break; case 341: _LL2982: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp2986=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp2986[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2987; _temp2987.tag= Cyc_Exp_tok; _temp2987.f1= Cyc_Absyn_gte_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3015;}); _temp3014;}); break; case 342: _LL3013: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 343: _LL3016:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3018=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3018[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3019; _temp3019.tag= Cyc_Exp_tok; _temp3019.f1= Cyc_Absyn_prim2_exp(( void*)
+_temp2987;}); _temp2986;}); break; case 342: _LL2985: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 343: _LL2988:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2990=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2990[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2991; _temp2991.tag= Cyc_Exp_tok; _temp2991.f1= Cyc_Absyn_prim2_exp(( void*)
 Cyc_Absyn_Bitlshift, Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3019;}); _temp3018;}); break; case 344: _LL3017: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3021=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3021[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3022; _temp3022.tag= Cyc_Exp_tok; _temp3022.f1= Cyc_Absyn_prim2_exp(( void*)
+_temp2991;}); _temp2990;}); break; case 344: _LL2989: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp2993=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp2993[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2994; _temp2994.tag= Cyc_Exp_tok; _temp2994.f1= Cyc_Absyn_prim2_exp(( void*)
 Cyc_Absyn_Bitlrshift, Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3022;}); _temp3021;}); break; case 345: _LL3020: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 346: _LL3023:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3025=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3025[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3026; _temp3026.tag= Cyc_Exp_tok; _temp3026.f1= Cyc_Absyn_prim2_exp(( void*)
+_temp2994;}); _temp2993;}); break; case 345: _LL2992: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 346: _LL2995:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp2997=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp2997[ 0]=({ struct Cyc_Exp_tok_struct
+_temp2998; _temp2998.tag= Cyc_Exp_tok; _temp2998.f1= Cyc_Absyn_prim2_exp(( void*)
 Cyc_Absyn_Plus, Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3026;});
-_temp3025;}); break; case 347: _LL3024: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3028=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3028[ 0]=({ struct Cyc_Exp_tok_struct _temp3029; _temp3029.tag= Cyc_Exp_tok;
-_temp3029.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Minus, Cyc_yyget_Exp_tok(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp2998;});
+_temp2997;}); break; case 347: _LL2996: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3000=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3000[ 0]=({ struct Cyc_Exp_tok_struct _temp3001; _temp3001.tag= Cyc_Exp_tok;
+_temp3001.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Minus, Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3029;}); _temp3028;}); break; case 348: _LL3027: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 349: _LL3030:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3032=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3032[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3033; _temp3033.tag= Cyc_Exp_tok; _temp3033.f1= Cyc_Absyn_prim2_exp(( void*)
+_temp3001;}); _temp3000;}); break; case 348: _LL2999: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 349: _LL3002:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3004=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3004[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3005; _temp3005.tag= Cyc_Exp_tok; _temp3005.f1= Cyc_Absyn_prim2_exp(( void*)
 Cyc_Absyn_Times, Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3033;});
-_temp3032;}); break; case 350: _LL3031: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3035=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3035[ 0]=({ struct Cyc_Exp_tok_struct _temp3036; _temp3036.tag= Cyc_Exp_tok;
-_temp3036.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Div, Cyc_yyget_Exp_tok(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3005;});
+_temp3004;}); break; case 350: _LL3003: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3007=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3007[ 0]=({ struct Cyc_Exp_tok_struct _temp3008; _temp3008.tag= Cyc_Exp_tok;
+_temp3008.f1= Cyc_Absyn_prim2_exp(( void*) Cyc_Absyn_Div, Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3036;}); _temp3035;}); break; case 351: _LL3034: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3038=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3038[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3039; _temp3039.tag= Cyc_Exp_tok; _temp3039.f1= Cyc_Absyn_prim2_exp(( void*)
+_temp3008;}); _temp3007;}); break; case 351: _LL3006: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3010=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3010[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3011; _temp3011.tag= Cyc_Exp_tok; _temp3011.f1= Cyc_Absyn_prim2_exp(( void*)
 Cyc_Absyn_Mod, Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 2)]), Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3039;});
-_temp3038;}); break; case 352: _LL3037: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 353: _LL3040:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3042=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3042[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3043; _temp3043.tag= Cyc_Exp_tok; _temp3043.f1= Cyc_Absyn_cast_exp((* Cyc_yyget_ParamDecl_tok(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3011;});
+_temp3010;}); break; case 352: _LL3009: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 353: _LL3012:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3014=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3014[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3015; _temp3015.tag= Cyc_Exp_tok; _temp3015.f1= Cyc_Absyn_cast_exp((* Cyc_yyget_ParamDecl_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)])).f3, Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3043;}); _temp3042;}); break; case 354: _LL3041: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 355: _LL3044:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3046=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3046[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3047; _temp3047.tag= Cyc_Exp_tok; _temp3047.f1= Cyc_Absyn_pre_inc_exp( Cyc_yyget_Exp_tok(
+_temp3015;}); _temp3014;}); break; case 354: _LL3013: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 355: _LL3016:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3018=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3018[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3019; _temp3019.tag= Cyc_Exp_tok; _temp3019.f1= Cyc_Absyn_pre_inc_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3047;}); _temp3046;}); break; case 356: _LL3045: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3049=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3049[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3050; _temp3050.tag= Cyc_Exp_tok; _temp3050.f1= Cyc_Absyn_pre_dec_exp( Cyc_yyget_Exp_tok(
+_temp3019;}); _temp3018;}); break; case 356: _LL3017: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3021=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3021[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3022; _temp3022.tag= Cyc_Exp_tok; _temp3022.f1= Cyc_Absyn_pre_dec_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3050;}); _temp3049;}); break; case 357: _LL3048: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3052=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3052[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3053; _temp3053.tag= Cyc_Exp_tok; _temp3053.f1= Cyc_Absyn_address_exp( Cyc_yyget_Exp_tok(
+_temp3022;}); _temp3021;}); break; case 357: _LL3020: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3024=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3024[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3025; _temp3025.tag= Cyc_Exp_tok; _temp3025.f1= Cyc_Absyn_address_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3053;}); _temp3052;}); break; case 358: _LL3051: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3055=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3055[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3056; _temp3056.tag= Cyc_Exp_tok; _temp3056.f1= Cyc_Absyn_deref_exp( Cyc_yyget_Exp_tok(
+_temp3025;}); _temp3024;}); break; case 358: _LL3023: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3027=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3027[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3028; _temp3028.tag= Cyc_Exp_tok; _temp3028.f1= Cyc_Absyn_deref_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3056;}); _temp3055;}); break; case 359: _LL3054: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 360: _LL3057:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3059=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3059[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3060; _temp3060.tag= Cyc_Exp_tok; _temp3060.f1= Cyc_Absyn_prim1_exp( Cyc_yyget_Primop_tok(
+_temp3028;}); _temp3027;}); break; case 359: _LL3026: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 360: _LL3029:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3031=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3031[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3032; _temp3032.tag= Cyc_Exp_tok; _temp3032.f1= Cyc_Absyn_prim1_exp( Cyc_yyget_Primop_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3060;}); _temp3059;}); break; case 361: _LL3058: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3062=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3062[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3063; _temp3063.tag= Cyc_Exp_tok; _temp3063.f1= Cyc_Absyn_sizeoftyp_exp((*
+_temp3032;}); _temp3031;}); break; case 361: _LL3030: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3034=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3034[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3035; _temp3035.tag= Cyc_Exp_tok; _temp3035.f1= Cyc_Absyn_sizeoftyp_exp((*
 Cyc_yyget_ParamDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 1)])).f3, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3063;});
-_temp3062;}); break; case 362: _LL3061: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3065=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3065[ 0]=({ struct Cyc_Exp_tok_struct _temp3066; _temp3066.tag= Cyc_Exp_tok;
-_temp3066.f1= Cyc_Absyn_sizeofexp_exp( Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3035;});
+_temp3034;}); break; case 362: _LL3033: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3037=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3037[ 0]=({ struct Cyc_Exp_tok_struct _temp3038; _temp3038.tag= Cyc_Exp_tok;
+_temp3038.f1= Cyc_Absyn_sizeofexp_exp( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3066;}); _temp3065;}); break; case 363: _LL3064: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3068=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3068[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3069; _temp3069.tag= Cyc_Exp_tok; _temp3069.f1= Cyc_Absyn_offsetof_exp((*
+_temp3038;}); _temp3037;}); break; case 363: _LL3036: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3040=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3040[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3041; _temp3041.tag= Cyc_Exp_tok; _temp3041.f1= Cyc_Absyn_offsetof_exp((*
 Cyc_yyget_ParamDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 3)])).f3,({ struct _tagged_arr* _temp3070=( struct _tagged_arr*)
-GC_malloc( sizeof( struct _tagged_arr)); _temp3070[ 0]= Cyc_yyget_String_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp3070;}),
+yyvsp_offset - 3)])).f3,({ struct _tagged_arr* _temp3042=( struct _tagged_arr*)
+GC_malloc( sizeof( struct _tagged_arr)); _temp3042[ 0]= Cyc_yyget_String_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp3042;}),
 Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull( 10000u,
 yylsp_offset - 5)]).first_line,( yyls[ _check_known_subscript_notnull( 10000u,
-yylsp_offset)]).last_line)); _temp3069;}); _temp3068;}); break; case 364:
-_LL3067: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3072=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3072[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3073; _temp3073.tag= Cyc_Exp_tok; _temp3073.f1= Cyc_Absyn_new_exp(( void*)({
-struct Cyc_Absyn_Malloc_e_struct* _temp3074=( struct Cyc_Absyn_Malloc_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Malloc_e_struct)); _temp3074[ 0]=({ struct
-Cyc_Absyn_Malloc_e_struct _temp3075; _temp3075.tag= Cyc_Absyn_Malloc_e;
-_temp3075.f1= 0; _temp3075.f2=( void*) Cyc_Parse_speclist2typ((* Cyc_yyget_QualSpecList_tok(
+yylsp_offset)]).last_line)); _temp3041;}); _temp3040;}); break; case 364:
+_LL3039: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3044=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3044[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3045; _temp3045.tag= Cyc_Exp_tok; _temp3045.f1= Cyc_Absyn_new_exp(( void*)({
+struct Cyc_Absyn_Malloc_e_struct* _temp3046=( struct Cyc_Absyn_Malloc_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Malloc_e_struct)); _temp3046[ 0]=({ struct
+Cyc_Absyn_Malloc_e_struct _temp3047; _temp3047.tag= Cyc_Absyn_Malloc_e;
+_temp3047.f1= 0; _temp3047.f2=( void*) Cyc_Parse_speclist2typ((* Cyc_yyget_QualSpecList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)])).f2, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).last_line));
-_temp3075;}); _temp3074;}), Cyc_Position_segment_of_abs(( yyls[
+_temp3047;}); _temp3046;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 6)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3073;});
-_temp3072;}); break; case 365: _LL3071: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3077=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3077[ 0]=({ struct Cyc_Exp_tok_struct _temp3078; _temp3078.tag= Cyc_Exp_tok;
-_temp3078.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Malloc_e_struct*
-_temp3079=( struct Cyc_Absyn_Malloc_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Malloc_e_struct));
-_temp3079[ 0]=({ struct Cyc_Absyn_Malloc_e_struct _temp3080; _temp3080.tag= Cyc_Absyn_Malloc_e;
-_temp3080.f1=( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 6)]); _temp3080.f2=( void*)
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3045;});
+_temp3044;}); break; case 365: _LL3043: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3049=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3049[ 0]=({ struct Cyc_Exp_tok_struct _temp3050; _temp3050.tag= Cyc_Exp_tok;
+_temp3050.f1= Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_Malloc_e_struct*
+_temp3051=( struct Cyc_Absyn_Malloc_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Malloc_e_struct));
+_temp3051[ 0]=({ struct Cyc_Absyn_Malloc_e_struct _temp3052; _temp3052.tag= Cyc_Absyn_Malloc_e;
+_temp3052.f1=( struct Cyc_Absyn_Exp*) Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 6)]); _temp3052.f2=( void*)
 Cyc_Parse_speclist2typ((* Cyc_yyget_QualSpecList_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)])).f2, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).last_line));
-_temp3080;}); _temp3079;}), Cyc_Position_segment_of_abs(( yyls[
+_temp3052;}); _temp3051;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 8)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3078;});
-_temp3077;}); break; case 366: _LL3076: yyval=( void*)({ struct Cyc_Primop_tok_struct*
-_temp3082=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
-_temp3082[ 0]=({ struct Cyc_Primop_tok_struct _temp3083; _temp3083.tag= Cyc_Primop_tok;
-_temp3083.f1=( void*)(( void*) Cyc_Absyn_Bitnot); _temp3083;}); _temp3082;});
-break; case 367: _LL3081: yyval=( void*)({ struct Cyc_Primop_tok_struct*
-_temp3085=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
-_temp3085[ 0]=({ struct Cyc_Primop_tok_struct _temp3086; _temp3086.tag= Cyc_Primop_tok;
-_temp3086.f1=( void*)(( void*) Cyc_Absyn_Not); _temp3086;}); _temp3085;});
-break; case 368: _LL3084: yyval=( void*)({ struct Cyc_Primop_tok_struct*
-_temp3088=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
-_temp3088[ 0]=({ struct Cyc_Primop_tok_struct _temp3089; _temp3089.tag= Cyc_Primop_tok;
-_temp3089.f1=( void*)(( void*) Cyc_Absyn_Minus); _temp3089;}); _temp3088;});
-break; case 369: _LL3087: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]; break; case 370: _LL3090: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3092=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3092[ 0]=({ struct Cyc_Exp_tok_struct _temp3093; _temp3093.tag= Cyc_Exp_tok;
-_temp3093.f1= Cyc_Absyn_subscript_exp( Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3050;});
+_temp3049;}); break; case 366: _LL3048: yyval=( void*)({ struct Cyc_Primop_tok_struct*
+_temp3054=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
+_temp3054[ 0]=({ struct Cyc_Primop_tok_struct _temp3055; _temp3055.tag= Cyc_Primop_tok;
+_temp3055.f1=( void*)(( void*) Cyc_Absyn_Bitnot); _temp3055;}); _temp3054;});
+break; case 367: _LL3053: yyval=( void*)({ struct Cyc_Primop_tok_struct*
+_temp3057=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
+_temp3057[ 0]=({ struct Cyc_Primop_tok_struct _temp3058; _temp3058.tag= Cyc_Primop_tok;
+_temp3058.f1=( void*)(( void*) Cyc_Absyn_Not); _temp3058;}); _temp3057;});
+break; case 368: _LL3056: yyval=( void*)({ struct Cyc_Primop_tok_struct*
+_temp3060=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
+_temp3060[ 0]=({ struct Cyc_Primop_tok_struct _temp3061; _temp3061.tag= Cyc_Primop_tok;
+_temp3061.f1=( void*)(( void*) Cyc_Absyn_Minus); _temp3061;}); _temp3060;});
+break; case 369: _LL3059: yyval= yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]; break; case 370: _LL3062: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3064=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3064[ 0]=({ struct Cyc_Exp_tok_struct _temp3065; _temp3065.tag= Cyc_Exp_tok;
+_temp3065.f1= Cyc_Absyn_subscript_exp( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 3)]), Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3093;}); _temp3092;}); break; case 371: _LL3091: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3095=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3095[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3096; _temp3096.tag= Cyc_Exp_tok; _temp3096.f1= Cyc_Absyn_unknowncall_exp(
+_temp3065;}); _temp3064;}); break; case 371: _LL3063: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3067=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3067[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3068; _temp3068.tag= Cyc_Exp_tok; _temp3068.f1= Cyc_Absyn_unknowncall_exp(
 Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
 2)]), 0, Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 2)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp3096;}); _temp3095;}); break; case 372:
-_LL3094: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3098=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3098[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3099; _temp3099.tag= Cyc_Exp_tok; _temp3099.f1= Cyc_Absyn_unknowncall_exp(
+10000u, yylsp_offset)]).last_line)); _temp3068;}); _temp3067;}); break; case 372:
+_LL3066: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3070=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3070[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3071; _temp3071.tag= Cyc_Exp_tok; _temp3071.f1= Cyc_Absyn_unknowncall_exp(
 Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
 3)]), Cyc_yyget_ExpList_tok( yyvs[ _check_known_subscript_notnull( 10000u,
 yyvsp_offset - 1)]), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3099;});
-_temp3098;}); break; case 373: _LL3097: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3101=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3101[ 0]=({ struct Cyc_Exp_tok_struct _temp3102; _temp3102.tag= Cyc_Exp_tok;
-_temp3102.f1= Cyc_Absyn_structmember_exp( Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3071;});
+_temp3070;}); break; case 373: _LL3069: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3073=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3073[ 0]=({ struct Cyc_Exp_tok_struct _temp3074; _temp3074.tag= Cyc_Exp_tok;
+_temp3074.f1= Cyc_Absyn_structmember_exp( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]),({ struct
-_tagged_arr* _temp3103=( struct _tagged_arr*) GC_malloc( sizeof( struct
-_tagged_arr)); _temp3103[ 0]= Cyc_yyget_String_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp3103;}), Cyc_Position_segment_of_abs((
+_tagged_arr* _temp3075=( struct _tagged_arr*) GC_malloc( sizeof( struct
+_tagged_arr)); _temp3075[ 0]= Cyc_yyget_String_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp3075;}), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3102;}); _temp3101;}); break; case 374: _LL3100: { struct _tuple1* q= Cyc_yyget_QualId_tok(
+_temp3074;}); _temp3073;}); break; case 374: _LL3072: { struct _tuple1* q= Cyc_yyget_QualId_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); if( Cyc_Absyn_is_qvar_qualified(
 q)){ Cyc_Parse_err( _tag_arr("struct field name is qualified", sizeof(
 unsigned char), 31u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} yyval=(
-void*)({ struct Cyc_Exp_tok_struct* _temp3105=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3105[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3106; _temp3106.tag= Cyc_Exp_tok; _temp3106.f1= Cyc_Absyn_structmember_exp(
+void*)({ struct Cyc_Exp_tok_struct* _temp3077=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3077[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3078; _temp3078.tag= Cyc_Exp_tok; _temp3078.f1= Cyc_Absyn_structmember_exp(
 Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
 2)]),(* q).f2, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3106;});
-_temp3105;}); break;} case 375: _LL3104: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3108=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3108[ 0]=({ struct Cyc_Exp_tok_struct _temp3109; _temp3109.tag= Cyc_Exp_tok;
-_temp3109.f1= Cyc_Absyn_structarrow_exp( Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3078;});
+_temp3077;}); break;} case 375: _LL3076: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3080=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3080[ 0]=({ struct Cyc_Exp_tok_struct _temp3081; _temp3081.tag= Cyc_Exp_tok;
+_temp3081.f1= Cyc_Absyn_structarrow_exp( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]),({ struct
-_tagged_arr* _temp3110=( struct _tagged_arr*) GC_malloc( sizeof( struct
-_tagged_arr)); _temp3110[ 0]= Cyc_yyget_String_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp3110;}), Cyc_Position_segment_of_abs((
+_tagged_arr* _temp3082=( struct _tagged_arr*) GC_malloc( sizeof( struct
+_tagged_arr)); _temp3082[ 0]= Cyc_yyget_String_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp3082;}), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3109;}); _temp3108;}); break; case 376: _LL3107: { struct _tuple1* q= Cyc_yyget_QualId_tok(
+_temp3081;}); _temp3080;}); break; case 376: _LL3079: { struct _tuple1* q= Cyc_yyget_QualId_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); if( Cyc_Absyn_is_qvar_qualified(
 q)){ Cyc_Parse_err( _tag_arr("struct field name is qualified", sizeof(
 unsigned char), 31u), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));} yyval=(
-void*)({ struct Cyc_Exp_tok_struct* _temp3112=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3112[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3113; _temp3113.tag= Cyc_Exp_tok; _temp3113.f1= Cyc_Absyn_structarrow_exp(
+void*)({ struct Cyc_Exp_tok_struct* _temp3084=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3084[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3085; _temp3085.tag= Cyc_Exp_tok; _temp3085.f1= Cyc_Absyn_structarrow_exp(
 Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset -
 2)]),(* q).f2, Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 2)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3113;});
-_temp3112;}); break;} case 377: _LL3111: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3115=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3115[ 0]=({ struct Cyc_Exp_tok_struct _temp3116; _temp3116.tag= Cyc_Exp_tok;
-_temp3116.f1= Cyc_Absyn_post_inc_exp( Cyc_yyget_Exp_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3085;});
+_temp3084;}); break;} case 377: _LL3083: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3087=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3087[ 0]=({ struct Cyc_Exp_tok_struct _temp3088; _temp3088.tag= Cyc_Exp_tok;
+_temp3088.f1= Cyc_Absyn_post_inc_exp( Cyc_yyget_Exp_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3116;}); _temp3115;}); break; case 378: _LL3114: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3118=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3118[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3119; _temp3119.tag= Cyc_Exp_tok; _temp3119.f1= Cyc_Absyn_post_dec_exp( Cyc_yyget_Exp_tok(
+_temp3088;}); _temp3087;}); break; case 378: _LL3086: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3090=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3090[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3091; _temp3091.tag= Cyc_Exp_tok; _temp3091.f1= Cyc_Absyn_post_dec_exp( Cyc_yyget_Exp_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3119;}); _temp3118;}); break; case 379: _LL3117: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3121=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3121[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3122; _temp3122.tag= Cyc_Exp_tok; _temp3122.f1= Cyc_Absyn_new_exp(( void*)({
-struct Cyc_Absyn_CompoundLit_e_struct* _temp3123=( struct Cyc_Absyn_CompoundLit_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_CompoundLit_e_struct)); _temp3123[ 0]=({
-struct Cyc_Absyn_CompoundLit_e_struct _temp3124; _temp3124.tag= Cyc_Absyn_CompoundLit_e;
-_temp3124.f1= Cyc_yyget_ParamDecl_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 4)]); _temp3124.f2=(( struct Cyc_List_List*(*)( struct
+_temp3091;}); _temp3090;}); break; case 379: _LL3089: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3093=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3093[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3094; _temp3094.tag= Cyc_Exp_tok; _temp3094.f1= Cyc_Absyn_new_exp(( void*)({
+struct Cyc_Absyn_CompoundLit_e_struct* _temp3095=( struct Cyc_Absyn_CompoundLit_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_CompoundLit_e_struct)); _temp3095[ 0]=({
+struct Cyc_Absyn_CompoundLit_e_struct _temp3096; _temp3096.tag= Cyc_Absyn_CompoundLit_e;
+_temp3096.f1= Cyc_yyget_ParamDecl_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 4)]); _temp3096.f2=(( struct Cyc_List_List*(*)( struct
 Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_InitializerList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp3124;});
-_temp3123;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp3096;});
+_temp3095;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 5)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp3122;}); _temp3121;}); break; case 380:
-_LL3120: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3126=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3126[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3127; _temp3127.tag= Cyc_Exp_tok; _temp3127.f1= Cyc_Absyn_new_exp(( void*)({
-struct Cyc_Absyn_CompoundLit_e_struct* _temp3128=( struct Cyc_Absyn_CompoundLit_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_CompoundLit_e_struct)); _temp3128[ 0]=({
-struct Cyc_Absyn_CompoundLit_e_struct _temp3129; _temp3129.tag= Cyc_Absyn_CompoundLit_e;
-_temp3129.f1= Cyc_yyget_ParamDecl_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset - 5)]); _temp3129.f2=(( struct Cyc_List_List*(*)( struct
+10000u, yylsp_offset)]).last_line)); _temp3094;}); _temp3093;}); break; case 380:
+_LL3092: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3098=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3098[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3099; _temp3099.tag= Cyc_Exp_tok; _temp3099.f1= Cyc_Absyn_new_exp(( void*)({
+struct Cyc_Absyn_CompoundLit_e_struct* _temp3100=( struct Cyc_Absyn_CompoundLit_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_CompoundLit_e_struct)); _temp3100[ 0]=({
+struct Cyc_Absyn_CompoundLit_e_struct _temp3101; _temp3101.tag= Cyc_Absyn_CompoundLit_e;
+_temp3101.f1= Cyc_yyget_ParamDecl_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset - 5)]); _temp3101.f2=(( struct Cyc_List_List*(*)( struct
 Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_InitializerList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)])); _temp3129;});
-_temp3128;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)])); _temp3101;});
+_temp3100;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 6)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp3127;}); _temp3126;}); break; case 381:
-_LL3125: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3131=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3131[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3132; _temp3132.tag= Cyc_Exp_tok; _temp3132.f1= Cyc_Absyn_new_exp(( void*)({
-struct Cyc_Absyn_Fill_e_struct* _temp3133=( struct Cyc_Absyn_Fill_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Fill_e_struct)); _temp3133[ 0]=({ struct Cyc_Absyn_Fill_e_struct
-_temp3134; _temp3134.tag= Cyc_Absyn_Fill_e; _temp3134.f1= Cyc_yyget_Exp_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp3134;});
-_temp3133;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+10000u, yylsp_offset)]).last_line)); _temp3099;}); _temp3098;}); break; case 381:
+_LL3097: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3103=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3103[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3104; _temp3104.tag= Cyc_Exp_tok; _temp3104.f1= Cyc_Absyn_new_exp(( void*)({
+struct Cyc_Absyn_Fill_e_struct* _temp3105=( struct Cyc_Absyn_Fill_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Fill_e_struct)); _temp3105[ 0]=({ struct Cyc_Absyn_Fill_e_struct
+_temp3106; _temp3106.tag= Cyc_Absyn_Fill_e; _temp3106.f1= Cyc_yyget_Exp_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp3106;});
+_temp3105;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 3)]).first_line,( yyls[ _check_known_subscript_notnull(
-10000u, yylsp_offset)]).last_line)); _temp3132;}); _temp3131;}); break; case 382:
-_LL3130: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3136=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3136[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3137; _temp3137.tag= Cyc_Exp_tok; _temp3137.f1= Cyc_Absyn_new_exp(( void*)({
-struct Cyc_Absyn_Codegen_e_struct* _temp3138=( struct Cyc_Absyn_Codegen_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Codegen_e_struct)); _temp3138[ 0]=({ struct
-Cyc_Absyn_Codegen_e_struct _temp3139; _temp3139.tag= Cyc_Absyn_Codegen_e;
-_temp3139.f1= Cyc_yyget_FnDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 1)]); _temp3139;}); _temp3138;}), Cyc_Position_segment_of_abs((
+10000u, yylsp_offset)]).last_line)); _temp3104;}); _temp3103;}); break; case 382:
+_LL3102: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3108=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3108[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3109; _temp3109.tag= Cyc_Exp_tok; _temp3109.f1= Cyc_Absyn_new_exp(( void*)({
+struct Cyc_Absyn_Codegen_e_struct* _temp3110=( struct Cyc_Absyn_Codegen_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Codegen_e_struct)); _temp3110[ 0]=({ struct
+Cyc_Absyn_Codegen_e_struct _temp3111; _temp3111.tag= Cyc_Absyn_Codegen_e;
+_temp3111.f1= Cyc_yyget_FnDecl_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 1)]); _temp3111;}); _temp3110;}), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3137;}); _temp3136;}); break; case 383: _LL3135: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3141=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3141[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3142; _temp3142.tag= Cyc_Exp_tok; _temp3142.f1= Cyc_Absyn_new_exp(( void*)({
-struct Cyc_Absyn_UnknownId_e_struct* _temp3143=( struct Cyc_Absyn_UnknownId_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct)); _temp3143[ 0]=({
-struct Cyc_Absyn_UnknownId_e_struct _temp3144; _temp3144.tag= Cyc_Absyn_UnknownId_e;
-_temp3144.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset)]); _temp3144;}); _temp3143;}), Cyc_Position_segment_of_abs(( yyls[
+_temp3109;}); _temp3108;}); break; case 383: _LL3107: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3113=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3113[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3114; _temp3114.tag= Cyc_Exp_tok; _temp3114.f1= Cyc_Absyn_new_exp(( void*)({
+struct Cyc_Absyn_UnknownId_e_struct* _temp3115=( struct Cyc_Absyn_UnknownId_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct)); _temp3115[ 0]=({
+struct Cyc_Absyn_UnknownId_e_struct _temp3116; _temp3116.tag= Cyc_Absyn_UnknownId_e;
+_temp3116.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset)]); _temp3116;}); _temp3115;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3142;});
-_temp3141;}); break; case 384: _LL3140: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 385: _LL3145:
-yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3147=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3147[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3148; _temp3148.tag= Cyc_Exp_tok; _temp3148.f1= Cyc_Absyn_string_exp( Cyc_yyget_String_tok(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3114;});
+_temp3113;}); break; case 384: _LL3112: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; case 385: _LL3117:
+yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3119=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3119[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3120; _temp3120.tag= Cyc_Exp_tok; _temp3120.f1= Cyc_Absyn_string_exp( Cyc_yyget_String_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3148;});
-_temp3147;}); break; case 386: _LL3146: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3120;});
+_temp3119;}); break; case 386: _LL3118: yyval= yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]; break; case 387:
-_LL3149: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3151=( struct Cyc_Exp_tok_struct*)
-GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3151[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3152; _temp3152.tag= Cyc_Exp_tok; _temp3152.f1= Cyc_Absyn_noinstantiate_exp(
-Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct* _temp3153=(
+_LL3121: yyval=( void*)({ struct Cyc_Exp_tok_struct* _temp3123=( struct Cyc_Exp_tok_struct*)
+GC_malloc( sizeof( struct Cyc_Exp_tok_struct)); _temp3123[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3124; _temp3124.tag= Cyc_Exp_tok; _temp3124.f1= Cyc_Absyn_noinstantiate_exp(
+Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct* _temp3125=(
 struct Cyc_Absyn_UnknownId_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct));
-_temp3153[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp3154; _temp3154.tag=
-Cyc_Absyn_UnknownId_e; _temp3154.f1= Cyc_yyget_QualId_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp3154;});
-_temp3153;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_temp3125[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp3126; _temp3126.tag=
+Cyc_Absyn_UnknownId_e; _temp3126.f1= Cyc_yyget_QualId_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]); _temp3126;});
+_temp3125;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 1)]).first_line,( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 1)]).last_line)), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 1)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3152;});
-_temp3151;}); break; case 388: _LL3150: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3156=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3156[ 0]=({ struct Cyc_Exp_tok_struct _temp3157; _temp3157.tag= Cyc_Exp_tok;
-_temp3157.f1= Cyc_Absyn_instantiate_exp( Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct*
-_temp3158=( struct Cyc_Absyn_UnknownId_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct));
-_temp3158[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp3159; _temp3159.tag=
-Cyc_Absyn_UnknownId_e; _temp3159.f1= Cyc_yyget_QualId_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp3159;});
-_temp3158;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3124;});
+_temp3123;}); break; case 388: _LL3122: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3128=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3128[ 0]=({ struct Cyc_Exp_tok_struct _temp3129; _temp3129.tag= Cyc_Exp_tok;
+_temp3129.f1= Cyc_Absyn_instantiate_exp( Cyc_Absyn_new_exp(( void*)({ struct Cyc_Absyn_UnknownId_e_struct*
+_temp3130=( struct Cyc_Absyn_UnknownId_e_struct*) GC_malloc( sizeof( struct Cyc_Absyn_UnknownId_e_struct));
+_temp3130[ 0]=({ struct Cyc_Absyn_UnknownId_e_struct _temp3131; _temp3131.tag=
+Cyc_Absyn_UnknownId_e; _temp3131.f1= Cyc_yyget_QualId_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 4)]); _temp3131;});
+_temp3130;}), Cyc_Position_segment_of_abs(( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 4)]).first_line,( yyls[ _check_known_subscript_notnull(
 10000u, yylsp_offset - 4)]).last_line)), Cyc_List_imp_rev( Cyc_yyget_TypeList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3157;}); _temp3156;}); break; case 389: _LL3155: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3161=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3161[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3162; _temp3162.tag= Cyc_Exp_tok; _temp3162.f1= Cyc_Absyn_tuple_exp( Cyc_yyget_ExpList_tok(
+_temp3129;}); _temp3128;}); break; case 389: _LL3127: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3133=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3133[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3134; _temp3134.tag= Cyc_Exp_tok; _temp3134.f1= Cyc_Absyn_tuple_exp( Cyc_yyget_ExpList_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset - 1)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3162;}); _temp3161;}); break; case 390: _LL3160: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3164=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3164[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3165; _temp3165.tag= Cyc_Exp_tok; _temp3165.f1= Cyc_Absyn_new_exp(( void*)({
-struct Cyc_Absyn_Struct_e_struct* _temp3166=( struct Cyc_Absyn_Struct_e_struct*)
-GC_malloc( sizeof( struct Cyc_Absyn_Struct_e_struct)); _temp3166[ 0]=({ struct
-Cyc_Absyn_Struct_e_struct _temp3167; _temp3167.tag= Cyc_Absyn_Struct_e;
-_temp3167.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
-yyvsp_offset - 3)]); _temp3167.f2= 0; _temp3167.f3=(( struct Cyc_List_List*(*)(
+_temp3134;}); _temp3133;}); break; case 390: _LL3132: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3136=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3136[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3137; _temp3137.tag= Cyc_Exp_tok; _temp3137.f1= Cyc_Absyn_new_exp(( void*)({
+struct Cyc_Absyn_Struct_e_struct* _temp3138=( struct Cyc_Absyn_Struct_e_struct*)
+GC_malloc( sizeof( struct Cyc_Absyn_Struct_e_struct)); _temp3138[ 0]=({ struct
+Cyc_Absyn_Struct_e_struct _temp3139; _temp3139.tag= Cyc_Absyn_Struct_e;
+_temp3139.f1= Cyc_yyget_QualId_tok( yyvs[ _check_known_subscript_notnull( 10000u,
+yyvsp_offset - 3)]); _temp3139.f2= 0; _temp3139.f3=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_InitializerList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp3167.f4= 0;
-_temp3167;}); _temp3166;}), Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 1)])); _temp3139.f4= 0;
+_temp3139;}); _temp3138;}), Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset - 3)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3165;});
-_temp3164;}); break; case 391: _LL3163: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3169=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3169[ 0]=({ struct Cyc_Exp_tok_struct _temp3170; _temp3170.tag= Cyc_Exp_tok;
-_temp3170.f1= Cyc_Absyn_stmt_exp( Cyc_yyget_Stmt_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3137;});
+_temp3136;}); break; case 391: _LL3135: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3141=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3141[ 0]=({ struct Cyc_Exp_tok_struct _temp3142; _temp3142.tag= Cyc_Exp_tok;
+_temp3142.f1= Cyc_Absyn_stmt_exp( Cyc_yyget_Stmt_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset - 4)]).first_line,(
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line));
-_temp3170;}); _temp3169;}); break; case 392: _LL3168: yyval=( void*)({ struct
-Cyc_ExpList_tok_struct* _temp3172=( struct Cyc_ExpList_tok_struct*) GC_malloc(
-sizeof( struct Cyc_ExpList_tok_struct)); _temp3172[ 0]=({ struct Cyc_ExpList_tok_struct
-_temp3173; _temp3173.tag= Cyc_ExpList_tok; _temp3173.f1=(( struct Cyc_List_List*(*)(
+_temp3142;}); _temp3141;}); break; case 392: _LL3140: yyval=( void*)({ struct
+Cyc_ExpList_tok_struct* _temp3144=( struct Cyc_ExpList_tok_struct*) GC_malloc(
+sizeof( struct Cyc_ExpList_tok_struct)); _temp3144[ 0]=({ struct Cyc_ExpList_tok_struct
+_temp3145; _temp3145.tag= Cyc_ExpList_tok; _temp3145.f1=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_yyget_ExpList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp3173;});
-_temp3172;}); break; case 393: _LL3171: yyval=( void*)({ struct Cyc_ExpList_tok_struct*
-_temp3175=( struct Cyc_ExpList_tok_struct*) GC_malloc( sizeof( struct Cyc_ExpList_tok_struct));
-_temp3175[ 0]=({ struct Cyc_ExpList_tok_struct _temp3176; _temp3176.tag= Cyc_ExpList_tok;
-_temp3176.f1=({ struct Cyc_List_List* _temp3177=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp3177->hd=( void*) Cyc_yyget_Exp_tok(
-yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp3177->tl= 0;
-_temp3177;}); _temp3176;}); _temp3175;}); break; case 394: _LL3174: yyval=( void*)({
-struct Cyc_ExpList_tok_struct* _temp3179=( struct Cyc_ExpList_tok_struct*)
-GC_malloc( sizeof( struct Cyc_ExpList_tok_struct)); _temp3179[ 0]=({ struct Cyc_ExpList_tok_struct
-_temp3180; _temp3180.tag= Cyc_ExpList_tok; _temp3180.f1=({ struct Cyc_List_List*
-_temp3181=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp3181->hd=( void*) Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
-10000u, yyvsp_offset)]); _temp3181->tl= Cyc_yyget_ExpList_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp3181;});
-_temp3180;}); _temp3179;}); break; case 395: _LL3178: yyval=( void*)({ struct
-Cyc_Exp_tok_struct* _temp3183=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
-struct Cyc_Exp_tok_struct)); _temp3183[ 0]=({ struct Cyc_Exp_tok_struct
-_temp3184; _temp3184.tag= Cyc_Exp_tok; _temp3184.f1= Cyc_Absyn_int_exp((* Cyc_yyget_Int_tok(
+_check_known_subscript_notnull( 10000u, yyvsp_offset)])); _temp3145;});
+_temp3144;}); break; case 393: _LL3143: yyval=( void*)({ struct Cyc_ExpList_tok_struct*
+_temp3147=( struct Cyc_ExpList_tok_struct*) GC_malloc( sizeof( struct Cyc_ExpList_tok_struct));
+_temp3147[ 0]=({ struct Cyc_ExpList_tok_struct _temp3148; _temp3148.tag= Cyc_ExpList_tok;
+_temp3148.f1=({ struct Cyc_List_List* _temp3149=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp3149->hd=( void*) Cyc_yyget_Exp_tok(
+yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp3149->tl= 0;
+_temp3149;}); _temp3148;}); _temp3147;}); break; case 394: _LL3146: yyval=( void*)({
+struct Cyc_ExpList_tok_struct* _temp3151=( struct Cyc_ExpList_tok_struct*)
+GC_malloc( sizeof( struct Cyc_ExpList_tok_struct)); _temp3151[ 0]=({ struct Cyc_ExpList_tok_struct
+_temp3152; _temp3152.tag= Cyc_ExpList_tok; _temp3152.f1=({ struct Cyc_List_List*
+_temp3153=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp3153->hd=( void*) Cyc_yyget_Exp_tok( yyvs[ _check_known_subscript_notnull(
+10000u, yyvsp_offset)]); _temp3153->tl= Cyc_yyget_ExpList_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset - 2)]); _temp3153;});
+_temp3152;}); _temp3151;}); break; case 395: _LL3150: yyval=( void*)({ struct
+Cyc_Exp_tok_struct* _temp3155=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof(
+struct Cyc_Exp_tok_struct)); _temp3155[ 0]=({ struct Cyc_Exp_tok_struct
+_temp3156; _temp3156.tag= Cyc_Exp_tok; _temp3156.f1= Cyc_Absyn_int_exp((* Cyc_yyget_Int_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f1,(* Cyc_yyget_Int_tok(
 yyvs[ _check_known_subscript_notnull( 10000u, yyvsp_offset)])).f2, Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3184;});
-_temp3183;}); break; case 396: _LL3182: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3186=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3186[ 0]=({ struct Cyc_Exp_tok_struct _temp3187; _temp3187.tag= Cyc_Exp_tok;
-_temp3187.f1= Cyc_Absyn_char_exp( Cyc_yyget_Char_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3156;});
+_temp3155;}); break; case 396: _LL3154: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3158=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3158[ 0]=({ struct Cyc_Exp_tok_struct _temp3159; _temp3159.tag= Cyc_Exp_tok;
+_temp3159.f1= Cyc_Absyn_char_exp( Cyc_yyget_Char_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3187;});
-_temp3186;}); break; case 397: _LL3185: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3189=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3189[ 0]=({ struct Cyc_Exp_tok_struct _temp3190; _temp3190.tag= Cyc_Exp_tok;
-_temp3190.f1= Cyc_Absyn_float_exp( Cyc_yyget_String_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3159;});
+_temp3158;}); break; case 397: _LL3157: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3161=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3161[ 0]=({ struct Cyc_Exp_tok_struct _temp3162; _temp3162.tag= Cyc_Exp_tok;
+_temp3162.f1= Cyc_Absyn_float_exp( Cyc_yyget_String_tok( yyvs[
 _check_known_subscript_notnull( 10000u, yyvsp_offset)]), Cyc_Position_segment_of_abs((
 yyls[ _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3190;});
-_temp3189;}); break; case 398: _LL3188: yyval=( void*)({ struct Cyc_Exp_tok_struct*
-_temp3192=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
-_temp3192[ 0]=({ struct Cyc_Exp_tok_struct _temp3193; _temp3193.tag= Cyc_Exp_tok;
-_temp3193.f1= Cyc_Absyn_null_exp( Cyc_Position_segment_of_abs(( yyls[
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3162;});
+_temp3161;}); break; case 398: _LL3160: yyval=( void*)({ struct Cyc_Exp_tok_struct*
+_temp3164=( struct Cyc_Exp_tok_struct*) GC_malloc( sizeof( struct Cyc_Exp_tok_struct));
+_temp3164[ 0]=({ struct Cyc_Exp_tok_struct _temp3165; _temp3165.tag= Cyc_Exp_tok;
+_temp3165.f1= Cyc_Absyn_null_exp( Cyc_Position_segment_of_abs(( yyls[
 _check_known_subscript_notnull( 10000u, yylsp_offset)]).first_line,( yyls[
-_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3193;});
-_temp3192;}); break; case 399: _LL3191: yyval=( void*)({ struct Cyc_QualId_tok_struct*
-_temp3195=( struct Cyc_QualId_tok_struct*) GC_malloc( sizeof( struct Cyc_QualId_tok_struct));
-_temp3195[ 0]=({ struct Cyc_QualId_tok_struct _temp3196; _temp3196.tag= Cyc_QualId_tok;
-_temp3196.f1=({ struct _tuple1* _temp3197=( struct _tuple1*) GC_malloc( sizeof(
-struct _tuple1)); _temp3197->f1= Cyc_Absyn_rel_ns_null; _temp3197->f2=({ struct
-_tagged_arr* _temp3198=( struct _tagged_arr*) GC_malloc( sizeof( struct
-_tagged_arr)); _temp3198[ 0]= Cyc_yyget_String_tok( yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp3198;}); _temp3197;});
-_temp3196;}); _temp3195;}); break; case 400: _LL3194: yyval= yyvs[
-_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; default: _LL3199:(
+_check_known_subscript_notnull( 10000u, yylsp_offset)]).last_line)); _temp3165;});
+_temp3164;}); break; case 399: _LL3163: yyval=( void*)({ struct Cyc_QualId_tok_struct*
+_temp3167=( struct Cyc_QualId_tok_struct*) GC_malloc( sizeof( struct Cyc_QualId_tok_struct));
+_temp3167[ 0]=({ struct Cyc_QualId_tok_struct _temp3168; _temp3168.tag= Cyc_QualId_tok;
+_temp3168.f1=({ struct _tuple1* _temp3169=( struct _tuple1*) GC_malloc( sizeof(
+struct _tuple1)); _temp3169->f1= Cyc_Absyn_rel_ns_null; _temp3169->f2=({ struct
+_tagged_arr* _temp3170=( struct _tagged_arr*) GC_malloc( sizeof( struct
+_tagged_arr)); _temp3170[ 0]= Cyc_yyget_String_tok( yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]); _temp3170;}); _temp3169;});
+_temp3168;}); _temp3167;}); break; case 400: _LL3166: yyval= yyvs[
+_check_known_subscript_notnull( 10000u, yyvsp_offset)]; break; default: _LL3171:(
 int) _throw(( void*) Cyc_Yyimpossible);} yyvsp_offset -= yylen; yyssp_offset -=
 yylen; yylsp_offset -= yylen; yyvs[ _check_known_subscript_notnull( 10000u, ++
 yyvsp_offset)]= yyval; yylsp_offset ++; if( yylen == 0){( yyls[
@@ -6598,11 +6576,11 @@ _check_known_subscript_notnull( 788u, yystate)]; if( yyn > - 32768? yyn < 4376:
 < 0? - yyn: 0; x < 231u / sizeof( unsigned char*); x ++){ if( Cyc_yycheck[
 _check_known_subscript_notnull( 4377u, x + yyn)] == x){( sze += Cyc_String_strlen(
 Cyc_yytname[ _check_known_subscript_notnull( 231u, x)]) + 15, count ++);}} msg=({
-unsigned int _temp3201=( unsigned int)( sze + 15); unsigned char* _temp3202=(
-unsigned char*) GC_malloc_atomic( sizeof( unsigned char) * _temp3201); struct
-_tagged_arr _temp3204= _tag_arr( _temp3202, sizeof( unsigned char),(
-unsigned int)( sze + 15));{ unsigned int _temp3203= _temp3201; unsigned int i;
-for( i= 0; i < _temp3203; i ++){ _temp3202[ i]='\000';}}; _temp3204;}); Cyc_String_strcpy(
+unsigned int _temp3173=( unsigned int)( sze + 15); unsigned char* _temp3174=(
+unsigned char*) GC_malloc_atomic( sizeof( unsigned char) * _temp3173); struct
+_tagged_arr _temp3176= _tag_arr( _temp3174, sizeof( unsigned char),(
+unsigned int)( sze + 15));{ unsigned int _temp3175= _temp3173; unsigned int i;
+for( i= 0; i < _temp3175; i ++){ _temp3174[ i]='\000';}}; _temp3176;}); Cyc_String_strcpy(
 msg, _tag_arr("parse error", sizeof( unsigned char), 12u)); if( count < 5){
 count= 0; for( x= yyn < 0? - yyn: 0; x < 231u / sizeof( unsigned char*); x ++){
 if( Cyc_yycheck[ _check_known_subscript_notnull( 4377u, x + yyn)] == x){ Cyc_String_strcat(
@@ -6623,75 +6601,75 @@ yyn)]; if( yyn < 0){ if( yyn == - 32768){ goto yyerrpop;} yyn= - yyn; goto
 yyreduce;} else{ if( yyn == 0){ goto yyerrpop;}} if( yyn == 787){ return 0;}
 yyvs[ _check_known_subscript_notnull( 10000u, ++ yyvsp_offset)]= Cyc_yylval;
 yyls[ _check_known_subscript_notnull( 10000u, ++ yylsp_offset)]= Cyc_yylloc;
-goto yynewstate;} void Cyc_yyprint( int i, void* v){ void* _temp3214= v; struct
-_tuple16* _temp3232; struct _tuple16 _temp3234; int _temp3235; unsigned char
-_temp3237; short _temp3239; struct _tagged_arr _temp3241; struct Cyc_Core_Opt*
-_temp3243; struct Cyc_Core_Opt* _temp3245; struct Cyc_Core_Opt _temp3247; struct
-_tagged_arr* _temp3248; struct _tuple1* _temp3250; struct _tuple1 _temp3252;
-struct _tagged_arr* _temp3253; void* _temp3255; _LL3216: if(*(( void**)
-_temp3214) == Cyc_Int_tok){ _LL3233: _temp3232=(( struct Cyc_Int_tok_struct*)
-_temp3214)->f1; _temp3234=* _temp3232; _LL3236: _temp3235= _temp3234.f2; goto
-_LL3217;} else{ goto _LL3218;} _LL3218: if(*(( void**) _temp3214) == Cyc_Char_tok){
-_LL3238: _temp3237=(( struct Cyc_Char_tok_struct*) _temp3214)->f1; goto _LL3219;}
-else{ goto _LL3220;} _LL3220: if(*(( void**) _temp3214) == Cyc_Short_tok){
-_LL3240: _temp3239=(( struct Cyc_Short_tok_struct*) _temp3214)->f1; goto _LL3221;}
-else{ goto _LL3222;} _LL3222: if(*(( void**) _temp3214) == Cyc_String_tok){
-_LL3242: _temp3241=(( struct Cyc_String_tok_struct*) _temp3214)->f1; goto
-_LL3223;} else{ goto _LL3224;} _LL3224: if(*(( void**) _temp3214) == Cyc_Stringopt_tok){
-_LL3244: _temp3243=(( struct Cyc_Stringopt_tok_struct*) _temp3214)->f1; if(
-_temp3243 == 0){ goto _LL3225;} else{ goto _LL3226;}} else{ goto _LL3226;}
-_LL3226: if(*(( void**) _temp3214) == Cyc_Stringopt_tok){ _LL3246: _temp3245=((
-struct Cyc_Stringopt_tok_struct*) _temp3214)->f1; if( _temp3245 == 0){ goto
-_LL3228;} else{ _temp3247=* _temp3245; _LL3249: _temp3248=( struct _tagged_arr*)
-_temp3247.v; goto _LL3227;}} else{ goto _LL3228;} _LL3228: if(*(( void**)
-_temp3214) == Cyc_QualId_tok){ _LL3251: _temp3250=(( struct Cyc_QualId_tok_struct*)
-_temp3214)->f1; _temp3252=* _temp3250; _LL3256: _temp3255= _temp3252.f1; goto
-_LL3254; _LL3254: _temp3253= _temp3252.f2; goto _LL3229;} else{ goto _LL3230;}
-_LL3230: goto _LL3231; _LL3217:({ struct Cyc_Stdio_Int_pa_struct _temp3258;
-_temp3258.tag= Cyc_Stdio_Int_pa; _temp3258.f1=( int)(( unsigned int) _temp3235);{
-void* _temp3257[ 1u]={& _temp3258}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
-_tag_arr("%d", sizeof( unsigned char), 3u), _tag_arr( _temp3257, sizeof( void*),
-1u));}}); goto _LL3215; _LL3219:({ struct Cyc_Stdio_Int_pa_struct _temp3260;
-_temp3260.tag= Cyc_Stdio_Int_pa; _temp3260.f1=( int)(( unsigned int)(( int)
-_temp3237));{ void* _temp3259[ 1u]={& _temp3260}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
-_tag_arr("%c", sizeof( unsigned char), 3u), _tag_arr( _temp3259, sizeof( void*),
-1u));}}); goto _LL3215; _LL3221:({ struct Cyc_Stdio_Int_pa_struct _temp3262;
-_temp3262.tag= Cyc_Stdio_Int_pa; _temp3262.f1=( int)(( unsigned int)(( int)
-_temp3239));{ void* _temp3261[ 1u]={& _temp3262}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
-_tag_arr("%ds", sizeof( unsigned char), 4u), _tag_arr( _temp3261, sizeof( void*),
-1u));}}); goto _LL3215; _LL3223:({ struct Cyc_Stdio_String_pa_struct _temp3264;
-_temp3264.tag= Cyc_Stdio_String_pa; _temp3264.f1=( struct _tagged_arr) _temp3241;{
-void* _temp3263[ 1u]={& _temp3264}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
-_tag_arr("\"%s\"", sizeof( unsigned char), 5u), _tag_arr( _temp3263, sizeof(
-void*), 1u));}}); goto _LL3215; _LL3225:({ void* _temp3265[ 0u]={}; Cyc_Stdio_fprintf(
+goto yynewstate;} void Cyc_yyprint( int i, void* v){ void* _temp3186= v; struct
+_tuple16* _temp3204; struct _tuple16 _temp3206; int _temp3207; unsigned char
+_temp3209; short _temp3211; struct _tagged_arr _temp3213; struct Cyc_Core_Opt*
+_temp3215; struct Cyc_Core_Opt* _temp3217; struct Cyc_Core_Opt _temp3219; struct
+_tagged_arr* _temp3220; struct _tuple1* _temp3222; struct _tuple1 _temp3224;
+struct _tagged_arr* _temp3225; void* _temp3227; _LL3188: if(*(( void**)
+_temp3186) == Cyc_Int_tok){ _LL3205: _temp3204=(( struct Cyc_Int_tok_struct*)
+_temp3186)->f1; _temp3206=* _temp3204; _LL3208: _temp3207= _temp3206.f2; goto
+_LL3189;} else{ goto _LL3190;} _LL3190: if(*(( void**) _temp3186) == Cyc_Char_tok){
+_LL3210: _temp3209=(( struct Cyc_Char_tok_struct*) _temp3186)->f1; goto _LL3191;}
+else{ goto _LL3192;} _LL3192: if(*(( void**) _temp3186) == Cyc_Short_tok){
+_LL3212: _temp3211=(( struct Cyc_Short_tok_struct*) _temp3186)->f1; goto _LL3193;}
+else{ goto _LL3194;} _LL3194: if(*(( void**) _temp3186) == Cyc_String_tok){
+_LL3214: _temp3213=(( struct Cyc_String_tok_struct*) _temp3186)->f1; goto
+_LL3195;} else{ goto _LL3196;} _LL3196: if(*(( void**) _temp3186) == Cyc_Stringopt_tok){
+_LL3216: _temp3215=(( struct Cyc_Stringopt_tok_struct*) _temp3186)->f1; if(
+_temp3215 == 0){ goto _LL3197;} else{ goto _LL3198;}} else{ goto _LL3198;}
+_LL3198: if(*(( void**) _temp3186) == Cyc_Stringopt_tok){ _LL3218: _temp3217=((
+struct Cyc_Stringopt_tok_struct*) _temp3186)->f1; if( _temp3217 == 0){ goto
+_LL3200;} else{ _temp3219=* _temp3217; _LL3221: _temp3220=( struct _tagged_arr*)
+_temp3219.v; goto _LL3199;}} else{ goto _LL3200;} _LL3200: if(*(( void**)
+_temp3186) == Cyc_QualId_tok){ _LL3223: _temp3222=(( struct Cyc_QualId_tok_struct*)
+_temp3186)->f1; _temp3224=* _temp3222; _LL3228: _temp3227= _temp3224.f1; goto
+_LL3226; _LL3226: _temp3225= _temp3224.f2; goto _LL3201;} else{ goto _LL3202;}
+_LL3202: goto _LL3203; _LL3189:({ struct Cyc_Stdio_Int_pa_struct _temp3230;
+_temp3230.tag= Cyc_Stdio_Int_pa; _temp3230.f1=( int)(( unsigned int) _temp3207);{
+void* _temp3229[ 1u]={& _temp3230}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
+_tag_arr("%d", sizeof( unsigned char), 3u), _tag_arr( _temp3229, sizeof( void*),
+1u));}}); goto _LL3187; _LL3191:({ struct Cyc_Stdio_Int_pa_struct _temp3232;
+_temp3232.tag= Cyc_Stdio_Int_pa; _temp3232.f1=( int)(( unsigned int)(( int)
+_temp3209));{ void* _temp3231[ 1u]={& _temp3232}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
+_tag_arr("%c", sizeof( unsigned char), 3u), _tag_arr( _temp3231, sizeof( void*),
+1u));}}); goto _LL3187; _LL3193:({ struct Cyc_Stdio_Int_pa_struct _temp3234;
+_temp3234.tag= Cyc_Stdio_Int_pa; _temp3234.f1=( int)(( unsigned int)(( int)
+_temp3211));{ void* _temp3233[ 1u]={& _temp3234}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
+_tag_arr("%ds", sizeof( unsigned char), 4u), _tag_arr( _temp3233, sizeof( void*),
+1u));}}); goto _LL3187; _LL3195:({ struct Cyc_Stdio_String_pa_struct _temp3236;
+_temp3236.tag= Cyc_Stdio_String_pa; _temp3236.f1=( struct _tagged_arr) _temp3213;{
+void* _temp3235[ 1u]={& _temp3236}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
+_tag_arr("\"%s\"", sizeof( unsigned char), 5u), _tag_arr( _temp3235, sizeof(
+void*), 1u));}}); goto _LL3187; _LL3197:({ void* _temp3237[ 0u]={}; Cyc_Stdio_fprintf(
 Cyc_Stdio_stderr, _tag_arr("null", sizeof( unsigned char), 5u), _tag_arr(
-_temp3265, sizeof( void*), 0u));}); goto _LL3215; _LL3227:({ struct Cyc_Stdio_String_pa_struct
-_temp3267; _temp3267.tag= Cyc_Stdio_String_pa; _temp3267.f1=( struct _tagged_arr)*
-_temp3248;{ void* _temp3266[ 1u]={& _temp3267}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
-_tag_arr("\"%s\"", sizeof( unsigned char), 5u), _tag_arr( _temp3266, sizeof(
-void*), 1u));}}); goto _LL3215; _LL3229: { struct Cyc_List_List* _temp3268= 0;{
-void* _temp3269= _temp3255; struct Cyc_List_List* _temp3277; struct Cyc_List_List*
-_temp3279; _LL3271: if(( unsigned int) _temp3269 > 1u?*(( int*) _temp3269) ==
-Cyc_Absyn_Rel_n: 0){ _LL3278: _temp3277=(( struct Cyc_Absyn_Rel_n_struct*)
-_temp3269)->f1; goto _LL3272;} else{ goto _LL3273;} _LL3273: if(( unsigned int)
-_temp3269 > 1u?*(( int*) _temp3269) == Cyc_Absyn_Abs_n: 0){ _LL3280: _temp3279=((
-struct Cyc_Absyn_Abs_n_struct*) _temp3269)->f1; goto _LL3274;} else{ goto
-_LL3275;} _LL3275: if( _temp3269 ==( void*) Cyc_Absyn_Loc_n){ goto _LL3276;}
-else{ goto _LL3270;} _LL3272: _temp3268= _temp3277; goto _LL3270; _LL3274:
-_temp3268= _temp3279; goto _LL3270; _LL3276: goto _LL3270; _LL3270:;} for( 0;
-_temp3268 != 0; _temp3268=(( struct Cyc_List_List*) _check_null( _temp3268))->tl){({
-struct Cyc_Stdio_String_pa_struct _temp3282; _temp3282.tag= Cyc_Stdio_String_pa;
-_temp3282.f1=( struct _tagged_arr)*(( struct _tagged_arr*)(( struct Cyc_List_List*)
-_check_null( _temp3268))->hd);{ void* _temp3281[ 1u]={& _temp3282}; Cyc_Stdio_fprintf(
+_temp3237, sizeof( void*), 0u));}); goto _LL3187; _LL3199:({ struct Cyc_Stdio_String_pa_struct
+_temp3239; _temp3239.tag= Cyc_Stdio_String_pa; _temp3239.f1=( struct _tagged_arr)*
+_temp3220;{ void* _temp3238[ 1u]={& _temp3239}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
+_tag_arr("\"%s\"", sizeof( unsigned char), 5u), _tag_arr( _temp3238, sizeof(
+void*), 1u));}}); goto _LL3187; _LL3201: { struct Cyc_List_List* _temp3240= 0;{
+void* _temp3241= _temp3227; struct Cyc_List_List* _temp3249; struct Cyc_List_List*
+_temp3251; _LL3243: if(( unsigned int) _temp3241 > 1u?*(( int*) _temp3241) ==
+Cyc_Absyn_Rel_n: 0){ _LL3250: _temp3249=(( struct Cyc_Absyn_Rel_n_struct*)
+_temp3241)->f1; goto _LL3244;} else{ goto _LL3245;} _LL3245: if(( unsigned int)
+_temp3241 > 1u?*(( int*) _temp3241) == Cyc_Absyn_Abs_n: 0){ _LL3252: _temp3251=((
+struct Cyc_Absyn_Abs_n_struct*) _temp3241)->f1; goto _LL3246;} else{ goto
+_LL3247;} _LL3247: if( _temp3241 ==( void*) Cyc_Absyn_Loc_n){ goto _LL3248;}
+else{ goto _LL3242;} _LL3244: _temp3240= _temp3249; goto _LL3242; _LL3246:
+_temp3240= _temp3251; goto _LL3242; _LL3248: goto _LL3242; _LL3242:;} for( 0;
+_temp3240 != 0; _temp3240=(( struct Cyc_List_List*) _check_null( _temp3240))->tl){({
+struct Cyc_Stdio_String_pa_struct _temp3254; _temp3254.tag= Cyc_Stdio_String_pa;
+_temp3254.f1=( struct _tagged_arr)*(( struct _tagged_arr*)(( struct Cyc_List_List*)
+_check_null( _temp3240))->hd);{ void* _temp3253[ 1u]={& _temp3254}; Cyc_Stdio_fprintf(
 Cyc_Stdio_stderr, _tag_arr("%s::", sizeof( unsigned char), 5u), _tag_arr(
-_temp3281, sizeof( void*), 1u));}});}({ struct Cyc_Stdio_String_pa_struct
-_temp3284; _temp3284.tag= Cyc_Stdio_String_pa; _temp3284.f1=( struct _tagged_arr)*
-_temp3253;{ void* _temp3283[ 1u]={& _temp3284}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
-_tag_arr("%s::", sizeof( unsigned char), 5u), _tag_arr( _temp3283, sizeof( void*),
-1u));}}); goto _LL3215;} _LL3231:({ void* _temp3285[ 0u]={}; Cyc_Stdio_fprintf(
-Cyc_Stdio_stderr, _tag_arr("?", sizeof( unsigned char), 2u), _tag_arr( _temp3285,
-sizeof( void*), 0u));}); goto _LL3215; _LL3215:;} struct Cyc_List_List* Cyc_Parse_parse_file(
+_temp3253, sizeof( void*), 1u));}});}({ struct Cyc_Stdio_String_pa_struct
+_temp3256; _temp3256.tag= Cyc_Stdio_String_pa; _temp3256.f1=( struct _tagged_arr)*
+_temp3225;{ void* _temp3255[ 1u]={& _temp3256}; Cyc_Stdio_fprintf( Cyc_Stdio_stderr,
+_tag_arr("%s::", sizeof( unsigned char), 5u), _tag_arr( _temp3255, sizeof( void*),
+1u));}}); goto _LL3187;} _LL3203:({ void* _temp3257[ 0u]={}; Cyc_Stdio_fprintf(
+Cyc_Stdio_stderr, _tag_arr("?", sizeof( unsigned char), 2u), _tag_arr( _temp3257,
+sizeof( void*), 0u));}); goto _LL3187; _LL3187:;} struct Cyc_List_List* Cyc_Parse_parse_file(
 struct Cyc_Stdio___sFILE* f){ Cyc_Parse_parse_result= 0; Cyc_Parse_lbuf=({
-struct Cyc_Core_Opt* _temp3286=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
-Cyc_Core_Opt)); _temp3286->v=( void*) Cyc_Lexing_from_file( f); _temp3286;});
+struct Cyc_Core_Opt* _temp3258=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp3258->v=( void*) Cyc_Lexing_from_file( f); _temp3258;});
 Cyc_yyparse(); return Cyc_Parse_parse_result;}
