@@ -112,7 +112,6 @@ static Set::set_t<stringptr_t> *current_targets = NULL;
 static void add_target(stringptr_t<`H,`H> sptr) {
   current_targets = new Set::insert(*current_targets,sptr);
 }
-
 /* Forward declarations of lexing functions */
 typedef $(stringptr_t,Set::set_t<stringptr_t>) *line_t;
 extern line_t line(Lexbuf<`a>);
@@ -778,8 +777,12 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 //    log(" %s\n",*sptr);
 //  }
 
-  extern void scan_type(type_t t);
-  void scan_exp(exp_opt_t e) {
+  /* Type for representing dependencies */
+  typedef Hashtable::table_t<stringptr_t<`H,`H>,
+                             Set::set_t<stringptr_t<`H,`H>,`H>> dep_t;
+
+  extern void scan_type(type_t t, dep_t dep);
+  void scan_exp(exp_opt_t e, dep_t dep) {
     switch (e->r) {
     case &Var_e(&$(_,v),_):
       // This case is actually impossible after only parse
@@ -789,7 +792,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       return;
     case &Primop_e(_,x):
       for (; x != NULL; x = x->tl) {
-        scan_exp(x->hd);
+        scan_exp(x->hd,dep);
       }
       return;
     case &Subscript_e(e1,e2):
@@ -797,8 +800,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &SeqExp_e(e1,e2):
       fallthru(e1,e2);
     case &AssignOp_e(e1,_,e2):
-      scan_exp(e1);
-      scan_exp(e2);
+      scan_exp(e1,dep);
+      scan_exp(e2,dep);
       return;
     case &Deref_e(e1):
       fallthru(e1);
@@ -807,50 +810,50 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Address_e(e1):
       fallthru(e1);
     case &Increment_e(e1,_):
-      scan_exp(e1);
+      scan_exp(e1,dep);
       return;
     case &Conditional_e(e1,e2,e3):
-      scan_exp(e1);
-      scan_exp(e2);
-      scan_exp(e3);
+      scan_exp(e1,dep);
+      scan_exp(e2,dep);
+      scan_exp(e3,dep);
       return;
     case &And_e(e1,e2): fallthru(e1,e2);
     case &Or_e(e1,e2): 
-      scan_exp(e1);
-      scan_exp(e2);
+      scan_exp(e1,dep);
+      scan_exp(e2,dep);
       return;
     case &FnCall_e(e1,x,_):
       // This case is actually impossible after only parse
       fallthru(e1,x);
     case &UnknownCall_e(e1,x):
-      scan_exp(e1);
+      scan_exp(e1,dep);
       for (; x != NULL; x = x->tl) {
-        scan_exp(x->hd);
+        scan_exp(x->hd,dep);
       }
       return;
     case &Cast_e(t1,e1,_,_):
-      scan_type(t1);
-      scan_exp(e1);
+      scan_type(t1,dep);
+      scan_exp(e1,dep);
       return;
     case &Malloc_e(MallocInfo{iscalloc,ropt,topt,e,_}):
-      if (ropt != NULL) scan_exp((exp_t)ropt);
-      if (topt != NULL) scan_type(*topt);
-      scan_exp(e);
+      if (ropt != NULL) scan_exp((exp_t)ropt,dep);
+      if (topt != NULL) scan_type(*topt,dep);
+      scan_exp(e,dep);
       return;
     case &Tagcheck_e(e,_):
-      scan_exp(e); return;
+      scan_exp(e,dep); return;
     case &Valueof_e(t1): fallthru(t1);
     case &Sizeoftyp_e(t1):
-      scan_type(t1);
+      scan_type(t1,dep);
       return;
     case &AggrMember_e(e1,fn,...):
       fallthru(e1,fn);
     case &AggrArrow_e(e1,fn,...):
-      scan_exp(e1);
+      scan_exp(e1,dep);
       add_target(fn);
       return;
     case &Offsetof_e(t1,f):
-      scan_type(t1);
+      scan_type(t1,dep);
       switch (f) {
       case &StructField(fn): add_target(fn); break;
       case &TupleIndex(_): break;
@@ -861,7 +864,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &UnresolvedMem_e(_,x):
       for (; x != NULL; x = x->tl) {
         let &$(_,e1) = x->hd;
-        scan_exp(e1);
+        scan_exp(e1,dep);
       }
       return;
     case &Asm_e(...): return;
@@ -913,12 +916,13 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
   }
 
-  void scan_exp_opt(exp_opt_t eo) {
-    if (eo) scan_exp(eo);
+  void scan_exp_opt(exp_opt_t eo, dep_t dep) {
+    if (eo) scan_exp(eo,dep);
     return;
   }
 
-  void scan_type(type_t t) {
+  extern void scan_decl(decl_t d, dep_t dep);
+  void scan_type(type_t t, dep_t dep) {
     switch (t) {
     case &VoidType:
     case &IntType(_,_):
@@ -927,25 +931,25 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       return;
 
     case &PointerType(x):
-      scan_type(x.elt_typ);
+      scan_type(x.elt_typ,dep);
       return;
     case &ArrayType(ArrayInfo{t,_,sz,zt,_}):
-      scan_type(t);
-      scan_exp_opt(sz);
+      scan_type(t,dep);
+      scan_exp_opt(sz,dep);
       return;
     case &FnType(x):
-      scan_type(x.ret_typ);
+      scan_type(x.ret_typ,dep);
       for (let a = x.args; a != NULL; a = a->tl) {
         let &$(_,_,argt) = a->hd;
-        scan_type(argt);
+        scan_type(argt,dep);
       }
       if (x.cyc_varargs != NULL)
-        scan_type(x.cyc_varargs->type);
+        scan_type(x.cyc_varargs->type,dep);
       return;
     case &AnonAggrType(_,sfs):
       for (; sfs != NULL; sfs = sfs->tl) {
-        scan_type(sfs->hd->type);
-        scan_exp_opt(sfs->hd->width);
+        scan_type(sfs->hd->type,dep);
+        scan_exp_opt(sfs->hd->width,dep);
       }
       return;
     case &AnonEnumType(_):
@@ -960,40 +964,15 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       return;
 
     case &TypeDeclType(&{.r = &Aggr_td(x),...},_):
-      // TREVOR:  look at me please
-      // same as in scan_decl below, but I doubt this is doing what you want 
-      let &$(_,v) = x->name;
-      current_source = v;
-      if (x->impl) {
-        for (let fs = x->impl->fields; fs != NULL; fs = fs->tl) {
-          let f = fs->hd;
-          scan_type(f->type);
-          scan_exp_opt(f->width);
-        }
-        // That takes care of what the decl depends on.  Now must add
-        // that each field depends on the decl.
-        for (let fs = x->impl->fields; fs != NULL; fs = fs->tl) {
-          // FIX!!
-        }
-      }
+      scan_decl(new_decl(new Aggr_d(x),NULL),dep);
+      let &$(_,n) = x->name;
+      add_target(n);
       return;
 
     case &TypeDeclType(&{.r = &Enum_td(x),...},_):
-      // TREVOR:  look at me please
-      // same as in scan_decl below, but I doubt this is doing what you want 
-      let &$(_,v) = x->name;
-      current_source = v;
-      if (x->fields) {
-        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
-          let f = fs->hd;
-          scan_exp_opt(f->tag);
-        }
-        // That takes care of what the decl depends on.  Now must add
-        // that each field depends on the decl.
-        for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
-          // FIX!!
-        }
-      }
+      scan_decl(new_decl(new Enum_d(x),NULL),dep);
+      let &$(_,n) = x->name;
+      add_target(n);
       return;
 
     case &TypeDeclType(&{.r = &Datatype_td(dd),...},_):
@@ -1044,25 +1023,27 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
   }
 
-  line_t scan_decl(decl_t d) {
+  void scan_decl(decl_t d, dep_t dep) {
+    let saved_targets = current_targets;
+    let saved_source = current_source;
     current_targets = new Set::empty(strptrcmp);
     switch (d->r) {
     case &Var_d(x):
       let &$(_,v) = x->name;
       current_source = v;
-      scan_type(x->type);
-      scan_exp_opt(x->initializer);
+      scan_type(x->type,dep);
+      scan_exp_opt(x->initializer,dep);
       break;
     case &Fn_d(x):
       let &$(_,v) = x->name;
       current_source = v;
-      scan_type(x->ret_type);
+      scan_type(x->ret_type,dep);
       for (let a = x->args; a != NULL; a = a->tl) {
         let &$(_,_,t1) = a->hd;
-        scan_type(t1);
+        scan_type(t1,dep);
       }
       if (x->cyc_varargs != NULL)
-        scan_type(x->cyc_varargs->type);
+        scan_type(x->cyc_varargs->type,dep);
       if (x->is_inline) {
         fprintf(stderr,"Warning: ignoring inline function\n");
       }
@@ -1073,8 +1054,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       if (x->impl) {
         for (let fs = x->impl->fields; fs != NULL; fs = fs->tl) {
           let f = fs->hd;
-          scan_type(f->type);
-          scan_exp_opt(f->width);
+          scan_type(f->type,dep);
+          scan_exp_opt(f->width,dep);
         }
         // That takes care of what the decl depends on.  Now must add
         // that each field depends on the decl.
@@ -1089,7 +1070,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       if (x->fields) {
         for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
           let f = fs->hd;
-          scan_exp_opt(f->tag);
+          scan_exp_opt(f->tag,dep);
         }
         // That takes care of what the decl depends on.  Now must add
         // that each field depends on the decl.
@@ -1102,7 +1083,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       let &$(_,v) = x->name;
       current_source = v;
       if (x->defn)
-        scan_type(x->defn->v);
+        scan_type(x->defn->v,dep);
       break;
     case &Region_d(...):
       fprintf(stderr,"Error: unexpected region declaration");
@@ -1112,40 +1093,50 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       exit(1); 
     case &Porton_d:
       fprintf(stderr,"Error: unexpected __cyclone_port_on__");
-      exit(1); return NULL;
+      exit(1);
     case &Portoff_d:
       fprintf(stderr,"Error: unexpected __cyclone_port_off__");
-      exit(1); return NULL;
+      exit(1);
     case &Let_d(_,_,_):
       fprintf(stderr,"Error: unexpected let declaration\n");
-      exit(1); return NULL;
+      exit(1);
     case &Datatype_d(_):
       fprintf(stderr,"Error: unexpected datatype declaration\n");
-      exit(1); return NULL;
+      exit(1);
     case &Letv_d(_):
       fprintf(stderr,"Error: unexpected let declaration\n");
-      exit(1); return NULL;
+      exit(1);
     case &Namespace_d(_,_):
       fprintf(stderr,"Error: unexpected namespace declaration\n");
-      exit(1); return NULL;
+      exit(1);
     case &Using_d(_,_):
       fprintf(stderr,"Error: unexpected using declaration\n");
-      exit(1); return NULL;
+      exit(1);
     case &ExternC_d(_):
       fprintf(stderr,"Error: unexpected extern \"C\" declaration\n");
-      exit(1); return NULL;
+      exit(1);
     case &ExternCinclude_d(_,_):
       fprintf(stderr,"Error: unexpected extern \"C include\" declaration\n");
-      exit(1); return NULL;
+      exit(1);
     }
 
-    /* The cast is needed so the return type matches */
-    return new $((_ @)current_source,*current_targets);
-  }
+    /* Add the dependencies to the table.  Note that name might
+       already have an entry in the table -- there can be more than
+       one declaration for a name, e.g., struct stat and function
+       stat in sys/stat.h. */
+    let old;
+    let name = (_@)current_source;
+    try
+      old = Hashtable::lookup(dep,name);
+    catch {
+    case &Not_found: old = Set::empty(strptrcmp); break;
+    }
+    let targets = Set::union_two(*current_targets,old);
+    Hashtable::insert(dep,name,targets);
 
-  /* Type for representing dependencies */
-  typedef Hashtable::table_t<stringptr_t<`H,`H>,
-                             Set::set_t<stringptr_t<`H,`H>,`H>> dep_t;
+    current_targets = saved_targets;
+    current_source = saved_source;
+  }
 
   dep_t new_deps() {
     return Hashtable::create(107,strptrcmp,Hashtable::hash_stringptr);
@@ -1376,22 +1367,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     fclose(in_file);
     remove(filtereddeclsfile);
 
-    for (let d = decls; d != NULL; d = d->tl) {
-      let entry = scan_decl(d->hd);
-      if (entry == NULL) continue;
-      let &$(name,uses) = (_ @)entry; // force NULL check to get rid of warning
-      /* Add the dependencies to the table.  Note that name might
-         already have an entry in the table -- there can be more than
-         one declaration for a name, e.g., struct stat and function
-         stat in sys/stat.h. */
-      let old;
-      try
-        old = Hashtable::lookup(t,name);
-      catch {
-      case &Not_found: old = Set::empty(strptrcmp); break;
-      }
-      Hashtable::insert(t,name,Set::union_two(uses,old));
-    }
+    for (let d = decls; d != NULL; d = d->tl)
+      scan_decl(d->hd,t);
 
     /* Compute reachable symbols */
     let reachable_set = reachable(start_symbols,t);
@@ -1462,6 +1439,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       if (name != NULL && Set::member(reachable_set,(stringptr_t)name))
         reachable_decls = new List(decl,reachable_decls);
     }
+
     // reachable_decls = imp_rev(reachable_decls);
     if (!do_setjmp) {
       maybe = fopen(filename,"w");
@@ -1529,10 +1507,16 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
 
     /* make the declarations are well-formed */
-    region tc_rgn; {
-      let te = Tcenv::tc_init(tc_rgn);
-      Tc::tc(tc_rgn, te, true, print_decls);
-    }
+    try {
+      region tc_rgn; {
+	let te = Tcenv::tc_init(tc_rgn);
+	Tc::tc(tc_rgn, te, true, print_decls);
+      }
+    } catch {
+    default:
+      throw new NO_SUPPORT("can't typecheck acquired declarations");
+      break;
+    }    
 
     /* print them */
     for (let $(d,n) = $(print_decls, names); 
@@ -1619,10 +1603,21 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     return 0;
 
     } catch {
+    case &Core::Impossible(s):
+      fprintf(stderr,"Got Core::Impossible(%s)\n",s); break;
+    case &Dict::Absent:
+      fprintf(stderr,"Got Dict::Absent\n"); break;
+    case &Core::Failure(s):
+      fprintf(stderr,"Got Core::Failure(%s)\n",s); break;
+    case &Invalid_argument(s):
+      fprintf(stderr,"Got Invalid_argument(%s)\n",s); break;
+    case &Not_found:
+      fprintf(stderr,"Got Not_found\n"); break;
     case &NO_SUPPORT(s): 
-      fprintf(stderr,"No support because %s\n",s);
-      fallthru;
+      fprintf(stderr,"No support because %s\n",s); break;
     default:
+      fprintf(stderr,"Got unknown exception\n"); break;
+    }
       /* We could get here because of a throw NO_SUPPORT or because of
          a parse error or other error.  In either case, we create a
          default header and don't otherwise signal an error. */
@@ -1646,7 +1641,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       remove(filtereddeclsfile);
 
       return 0;
-    }
   }
 
   /* Return 1 on fatal error, else 0 */

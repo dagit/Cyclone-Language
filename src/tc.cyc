@@ -929,7 +929,7 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
 
   genv_t ge = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
   list_t<decl_t,`H> last = NULL;
-  
+
   for (let ds = ds0; ds != NULL; last = ds, ds = ds->tl) {
     decl_t d   = ds->hd;
     seg_t  loc = d->loc;

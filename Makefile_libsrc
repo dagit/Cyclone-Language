@@ -23,6 +23,7 @@ CYCBISON:=$(CYCDIR)/bin/cycbison$(EXE)
 INC_PATH:=. include $(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)/include
 LIB_PATH:=$(CYCDIR)/lib
 LIBR:=$(CYCBOOTLIB)
+BUILDLIB:=$(CYCDIR)/bin/buildlib 
 export CYCC CYCLEX CYCBISON INC_PATH LIB_PATH LIBR
 
 # Note, the -B arguments ensure that we use the correct cyc_include.h.
@@ -75,8 +76,8 @@ other_cfiles: cyc_setjmp.h cstubs.c cycstubs.cyc $(C_LIBS)
 
 cyc_setjmp.h cstubs.c cycstubs.cyc: libc.cys
 	-mkdir include
-	$(CYCDIR)/bin/buildlib -d include -setjmp > cyc_setjmp.h
-	$(CYCDIR)/bin/buildlib -d include $<
+	$(BUILDLIB) -d include -setjmp > cyc_setjmp.h
+	$(BUILDLIB) -d include $<
 	mv include/cstubs.c .
 	mv include/cycstubs.cyc .
 
