@@ -218,6 +218,17 @@ static void set_inputtype(string_t s) {
   }
 }
 
+string_t make_base_filename(string_t<`r> s, string_t<`r>* output_file) {
+  let outdir = Filename::dirname(output_file == NULL ?  s : *output_file);
+  let base = Filename::chop_extension(Filename::basename(s));
+  // if outdir is empty, then just use base
+  // otherwise, use outdir/base.
+  // note that ""/base gets translated to /base, which is not what we wanted
+  let basename = strlen(outdir) > 0 ? Filename::concat(outdir, base) : base;
+  return (string_t)basename;
+}
+
+
 // Cyclone files given on the command line
 static list_t<stringptr_t> cyclone_files = NULL;
 // Like add_ccarg but intercepts .cyc files for special handling
@@ -227,8 +238,7 @@ static void add_other(string_t<`H> s) {
     cyclone_files = new List(new s,cyclone_files);
 
     // The C compiler wants the .c file, not the .cyc files
-    let basename = 
-      output_file==NULL ?  (string_t)Filename::chop_extension(s)  : *output_file;
+    let basename = make_base_filename(s,output_file);
     let cfile    = strconcat(basename, ".c");
     add_ccarg(cfile);
   }
@@ -542,8 +552,7 @@ static stringptr_t sh_escape_stringptr(stringptr_t<`H,`H> sp) {
 
 static void process_file(string_t<`H> filename) {
 
-  let basename = 
-    output_file==NULL ? (string_t)Filename::chop_extension(filename)  : *output_file;
+  let basename = make_base_filename(filename, output_file);
   let preprocfile   = strconcat(basename, ".cyp");
   let interfacefile = strconcat(basename, ".cyci");
   let interfaceobjfile = strconcat(basename, ".cycio");

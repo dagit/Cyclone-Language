@@ -341,8 +341,8 @@ return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);} if( howmuch <  0){ howmuch=
 0;}{ unsigned int _temp2= Cyc_Std_strlen( s); _temp2 <=  _get_arr_size( s,
 sizeof( unsigned char))? 0:(( int(*)( struct _tagged_arr assertion, struct
 _tagged_arr file, unsigned int line)) Cyc_Std___assert_fail)( _tag_arr("len <= s.size",
-sizeof( unsigned char), 14u), _tag_arr("/home/trevor/cyclone/lib/arg.cyc",
-sizeof( unsigned char), 33u), 94); if( howmuch >  _temp2){ Cyc_Buffer_add_string(
+sizeof( unsigned char), 14u), _tag_arr("/home/jcheney/src/cyclone/lib/arg.cyc",
+sizeof( unsigned char), 38u), 94); if( howmuch >  _temp2){ Cyc_Buffer_add_string(
 b, s); return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);}{ int i; for( i=
 howmuch -  1; i >=  0? ! isspace(( int)(( const unsigned char*) s.curr)[ i]): 0;
 i --){;} if( i <  0){ for( i= howmuch? howmuch -  1: 0;( i <  _temp2?( int)((

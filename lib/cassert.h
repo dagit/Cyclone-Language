@@ -30,6 +30,14 @@ __assert_fail (string_t assertion, string_t file, unsigned int line)
   __attribute__((noreturn));
 }
 #define __STRING(x) #x
+#ifdef __BASE_FILE__
+#define assert(expr) ((expr) ? 0 : \
+  (Std::__assert_fail(__STRING(expr), __BASE_FILE__, __LINE__)))
+#else
+#ifdef __FILE__
 #define assert(expr) ((expr) ? 0 : \
   (Std::__assert_fail(__STRING(expr), __FILE__, __LINE__)))
 #endif
+#endif
+#endif
+
