@@ -79,7 +79,7 @@ extern int	rename(string, string);
 extern FILE *	tmpfile();
 // extern string	tmpnam(string);
 extern int	fclose(FILE @);
-extern int	fflush(FILE @);
+extern int	fflush(FILE *);
 extern FILE *	freopen(string, string, FILE @);
 //extern void	setbuf(FILE *, string);
 //extern int	setvbuf(FILE *, string, int, size_t);
