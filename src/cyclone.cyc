@@ -1267,6 +1267,8 @@ int main(int argc, string_t<`H> ?`H argv) {
   }
   let target_cflags = Specsfile::get_spec(specs,"cyclone_target_cflags");
   let cyclone_cc = Specsfile::get_spec(specs,"cyclone_cc");
+  let target_libs = Specsfile::get_spec(specs,"cyclone_target_libs");
+  if (!target_libs) target_libs = "";
   if (!cyclone_cc) cyclone_cc = "gcc";
   def_inc_path = Specsfile::get_spec(specs,"cyclone_inc_path");
 
@@ -1386,11 +1388,7 @@ int main(int argc, string_t<`H> ?`H argv) {
 
     // FIX: temporarily removed from interface check below
     stdlib = NULL;     //stdlib = list(new libcyc_flag);
-#ifdef _HAVE_PTHREAD_
-    stdlib_string = aprintf(" %s %s %s -lpthread ", libcyc_flag, runtime, gc);
-#else
-    stdlib_string = aprintf(" %s %s %s ", libcyc_flag, runtime, gc);
-#endif
+    stdlib_string = aprintf(" %s %s %s %s ", libcyc_flag, runtime, gc, target_libs);
     
   }
 

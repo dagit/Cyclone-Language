@@ -233,6 +233,11 @@ $(BL)/cyc-lib/$(build)/cycspecs: $(CYCDIR)/config/buildspecs
 	echo "*cyclone_inc_path:" >> $@
 	echo "  $(INC_INSTALL)" >> $@
 	echo "" >> $@
+	if [ -n "$(HAVE_PTHREAD)" ]; then \
+	echo "*cyclone_target_libs:" >> $@; \
+	echo "  -lpthread" >> $@; \
+	echo "" >> $@; \
+	fi
 	$(CYCDIR)/config/buildspecs >> $@
 
 $(BL)/cyc-lib/$(build)/cyc_setjmp.h: bin/cyc-lib/libc.cys bin/buildlib$(EXE)
