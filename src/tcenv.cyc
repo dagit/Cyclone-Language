@@ -45,6 +45,7 @@
 */
 
 #include "core.h"
+#include "stdio.h"
 #include "list.h"
 #include "dict.h"
 #include "set.h"
@@ -60,6 +61,7 @@
 namespace Tcenv;
 
 using Core;
+using Stdio;
 using List;
 using Set;
 using Position;
@@ -69,8 +71,8 @@ using Tcutil;
 xenum exn {Env_error};
 
 `a env_err<`a>(string msg) {
-  fprintf(cyc_stdout,"Error: %s\n",msg);
-  fflush(cyc_stdout);
+  fprintf(stderr,"Error: %s\n",msg);
+  fflush(stderr);
   throw Env_error();
 }
 

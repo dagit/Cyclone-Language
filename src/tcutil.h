@@ -1,5 +1,5 @@
-#ifndef TCUTIL_H
-#define TCUTIL_H
+#ifndef _TCUTIL_H_
+#define _TCUTIL_H_
 
 //#include "core.h"
 #include "list.h"

@@ -1,5 +1,5 @@
-#ifndef SPLAY_H
-#define SPLAY_H
+#ifndef _SPLAY_H_
+#define _SPLAY_H_
 
 #include "core.h"
 #include "list.h"

@@ -4,13 +4,13 @@
 #include "list.h"
 #include "character.h"
 #include "string.h"
-// from math.h
-extern "C" double pow(double,double);
-
+#include "stdio.h" // for size_t
+#include "math.h" //  for pow
 
 namespace String;
 using Core;
 using List;
+using Stdio; // for size_t
 
 ///////////////////////// LENGTH
 size_t strlen(string s) {
@@ -568,7 +568,7 @@ double to_double<`r>(string s, int *`r offset) {
       i++;
     }
     if (!digit_seen) throw InvalidArg("String::to_double");
-    ans = ans * pow(10.0, (double)(exponent*exp_sign));
+    ans = ans * Math::pow(10.0, (double)(exponent*exp_sign));
   }
   if (offset != null) *offset = i;
   return ans*sn;

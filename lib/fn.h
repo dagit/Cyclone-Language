@@ -1,5 +1,5 @@
-#ifndef FN_H
-#define FN_H
+#ifndef _FN_H_
+#define _FN_H_
 ////////////////////////////////////////////////////////////////////////////
 // Cylone library, file fn.cyc                                            //
 // Copyright Greg Morrisett, Trevor Jim                                   //

@@ -1,8 +1,12 @@
+#include "core.h"
+#include "list.h"
+#include "stdio.h"
 #include "position.h"
 #include "string.h"
 namespace Position;
 using Core;
 using List;
+using Stdio;
 using String;
 
 xenum exn {Exit};
@@ -160,7 +164,7 @@ bool print_context = false;
 void post_error(error_t e) {
   error_b = true;
   // why are we not using the source stored in e????
-  fprintf(cyc_stderr, "%s: %s\n", string_of_segment(e->seg), e->desc);
+  fprintf(stderr, "%s: %s\n", string_of_segment(e->seg), e->desc);
   if (print_context) {
     try {
       $(string,int,int)@ x = get_context(e->seg);
@@ -168,12 +172,12 @@ void post_error(error_t e) {
       int i = -1;
       while (++i < x[1]) marker_str[i] = ' ';
       while (++i < x[2]) marker_str[i] = '^';
-      fprintf(cyc_stderr, "  %s\n  %s\n", x[0], marker_str);
+      fprintf(stderr, "  %s\n  %s\n", x[0], marker_str);
     } catch {
     case Nocontext: break; 
     }
   }
-  fflush(cyc_stderr);
+  fflush(stderr);
 }
 
 //////////// Overall Control ///////////

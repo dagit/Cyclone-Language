@@ -1,5 +1,5 @@
-#ifndef FILENAME_H
-#define FILENAME_H
+#ifndef _FILENAME_H_
+#define _FILENAME_H_
 #include "core.h"
 
 namespace Filename {

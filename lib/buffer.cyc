@@ -3,6 +3,7 @@
 
 namespace Buffer;
 using Core;
+using Stdio; // for size_t
 
 // ported from
 //(***********************************************************************)

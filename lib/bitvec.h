@@ -1,5 +1,5 @@
-#ifndef BITVEC_H
-#define BITVEC_H
+#ifndef _BITVEC_H_
+#define _BITVEC_H_
 #include "core.h"
 #include "list.h"
 #include "set.h"

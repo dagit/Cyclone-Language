@@ -1,5 +1,5 @@
-#ifndef XARRAY_H
-#define XARRAY_H
+#ifndef _XARRAY_H_
+#define _XARRAY_H_
 
 // Re-sizing arrays.  Ported with some modification by Dan from xarray.ml, 
 // which was written by Steve

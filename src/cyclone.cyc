@@ -2,6 +2,7 @@
 
 #include "arg.h"
 #include "core.h"
+#include "stdio.h"
 #include "list.h"
 #include "string.h"
 #include "dict.h"
@@ -23,11 +24,12 @@ extern void lex_init();
 }
 
 using Core;
+using Stdio;
 using List;
 using Arg;
 using String;
 
-#define PRINT_STAGE(s) { if (*v) fprintf(cyc_stderr,s); else if (!*q) fprintf(cyc_stderr,"."); fflush(cyc_stderr); }
+#define PRINT_STAGE(s) { if (*v) fprintf(stderr,s); else if (!*q) fprintf(stderr,"."); fflush(stderr); }
 
 static bool pp_r       = false;
 static bool up_r       = false;
@@ -73,8 +75,8 @@ void compile_file(string filename) {
 
   string basename = Filename::chop_extension(filename);
 
-  if (!*q||*v) fprintf(cyc_stderr,"Compiling file: %s", basename);
-  if (*v) fprintf(cyc_stderr,"\n");
+  if (!*q||*v) fprintf(stderr,"Compiling file: %s", basename);
+  if (*v) fprintf(stderr,"\n");
 
   // establish filenames
   string preprocfile = strconcat(basename,  ".i");
@@ -85,7 +87,7 @@ void compile_file(string filename) {
   string def_string = String::str_sepstr(&cons((string)"",rev(defines)), " -D");
   string cmd = xprintf("gcc -x c -E -U__GNUC__ %s %s %s > %s",
                        inc_string, def_string, filename, preprocfile);
-  if (*v) fprintf(cyc_stderr,"%s\n",cmd);
+  if (*v) fprintf(stderr,"%s\n",cmd);
   system(string_to_Cstring(cmd));
 
   // reset front-end -- necessary for good error messages!
@@ -96,7 +98,7 @@ void compile_file(string filename) {
   try f = file_open(preprocfile, "r");
   catch {
   default:
-    fprintf(cyc_stderr, "couldn't open %s\n", preprocfile);
+    fprintf(stderr, "couldn't open %s\n", preprocfile);
     compile_failure=true;
     return;
   }
@@ -105,7 +107,7 @@ void compile_file(string filename) {
   list<Absyn::decl> tds = null;
   tds = Parse::parse_file(f);
   PRINT_STAGE("Parsing completed\n");
-  fflush(cyc_stderr);
+  fflush(stderr);
   // typecheck
   if (tds != null && *tc) try {
     Absynpp::expand_typedefs = ! *noexpand;
@@ -118,15 +120,15 @@ void compile_file(string filename) {
     PRINT_STAGE("Control-flow checking completed\n");
   } catch {
   case Tcutil::TypeErr: 
-    fprintf(cyc_stderr,"Type error!\n");
+    fprintf(stderr,"Type error!\n");
     compile_failure=true;
     break;
   case Dict::Absent:
-    fprintf(cyc_stderr,"Dict::Absent occurred during type checking!\n");
+    fprintf(stderr,"Dict::Absent occurred during type checking!\n");
     compile_failure=true;
     break;
   case Impossible(s):
-    fprintf(cyc_stderr,"Impossible: %s\n", s);
+    fprintf(stderr,"Impossible: %s\n", s);
     compile_failure=true;
     break;
   }
@@ -139,13 +141,13 @@ void compile_file(string filename) {
   FILE @out_file;
   try {
     if (out_file_name_opt == null)
-      out_file = cyc_stdout;
+      out_file = stdout;
     else 
       out_file = file_open(*out_file_name_opt, "w");
   } catch {
   case FileOpenError(_): 
-    fprintf(cyc_stderr,"could not open output file: %s\n",*out_file_name_opt);
-    fflush(cyc_stderr);
+    fprintf(stderr,"could not open output file: %s\n",*out_file_name_opt);
+    fflush(stderr);
     compile_failure=true;
     return;
   }
@@ -161,17 +163,17 @@ void compile_file(string filename) {
       Absyndump::dumpdecllist2file(tds,out_file);
     fflush(out_file);
     PRINT_STAGE("Printing completed\n");
-    if (!(*v || *q)) fprintf(cyc_stderr,"\n"); // for "...." progress indicator
+    if (!(*v || *q)) fprintf(stderr,"\n"); // for "...." progress indicator
   }
   if (Position::error_p()) {
-    fprintf(cyc_stderr,"COMPILATION FAILED!\n");
-    fflush(cyc_stderr);
+    fprintf(stderr,"COMPILATION FAILED!\n");
+    fflush(stderr);
     compile_failure=true;
   } else {
     Tcutil::flush_warnings();
   }
   file_close(f);
-  file_delete(preprocfile);
+  Stdio::remove(preprocfile);
   if (out_file_name_opt != null) file_close(out_file);
   return;
 }

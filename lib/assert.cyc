@@ -1,0 +1,12 @@
+#include "assert.h"
+#include "core.h"
+#include "stdio.h"
+
+namespace Assert {
+  using Stdio;
+  `a AssertFail<`a>(string mesg) {
+    fputs(mesg, stderr);
+    fputs(" -- assertion failed\n", stderr);
+    return exit(-1);
+  }
+}

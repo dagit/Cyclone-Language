@@ -1,8 +1,8 @@
-#ifndef ARG_H
-#define ARG_H
+#ifndef _ARG_H_
+#define _ARG_H_
 
-#include "core.h"
 #include "list.h"
+#include "core.h"
 
 namespace Arg {
 extern xenum exn {Error, Bad(string)};

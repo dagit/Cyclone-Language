@@ -59,29 +59,32 @@ clean:
 # dependencies -- maintained by hand for now
 PRECORE_H   = precore.h
 CORE_H      = core.h       $(PRECORE_H)
+STDIO_H     = $(CORE_H)
 LIST_H      = list.h       $(CORE_H)
 ARRAY_H     = array.h 
-BUFFER_H    = buffer.h     $(CORE_H)
+BUFFER_H    = buffer.h     $(CORE_H) $(STDIO_H)
 CHARACTER_H = character.h 
 SLOWDICT_H  = slowdict.h   $(CORE_H) $(LIST_H)
 DICT_H      = dict.h       $(CORE_H) $(LIST_H)
 FILENAME_H  = filename.h   $(CORE_H)
 FN_H        = fn.h         $(LIST_H)
 HASHTABLE_H = hashtable.h
-ID_H        = id.h         $(CORE_H)
-LEXING_H    = lexing.h     $(CORE_H)
+ID_H        = id.h         $(CORE_H) $(STDIO_H)
+LEXING_H    = lexing.h     $(CORE_H) $(STDIO_H)
 LINENO_H    = lineno.h     $(LIST_H)
-PP_H        = pp.h         $(CORE_H) $(LIST_H)
+PP_H        = pp.h         $(CORE_H) $(LIST_H) $(STDIO_H)
 QUEUE_H     = queue.h
 REF_H       = ref.h
 ROPE_H      = rope.h       $(CORE_H) $(LIST_H)
 SET_H       = set.h        $(LIST_H)
 SPLAY_H     = splay.h      $(CORE_H) $(LIST_H)
-STRING_H    = string.h     $(CORE_H) $(LIST_H)
+STRING_H    = string.h     $(CORE_H) $(LIST_H) $(STDIO_H)
 XARRAY_H    = xarray.h     $(CORE_H)
 ARG_H       = arg.h        $(CORE_H) $(LIST_H)
 POSITION_H  = position.h   $(CORE_H) $(LIST_H) $(LINENO_H)
 BITVEC_H    = bitvec.h     $(CORE_H) $(LIST_H) $(SET_H)    $(DICT_H)
+MATH_H      = math.h
+ASSERT_H    = assert.h     $(CORE_H)
 
 $(OUT_PREFIX)arg.c: $(ARG_H) $(STRING_H)
 $(OUT_PREFIX)bitvec.c: $(BITVEC_H)
@@ -98,7 +101,7 @@ $(OUT_PREFIX)ref.c: $(REF_H)
 $(OUT_PREFIX)rope.c: $(ROPE_H) $(STRING_H)
 $(OUT_PREFIX)set.c: $(LIST_H) $(SET_H)
 $(OUT_PREFIX)splay.c: $(CORE_H) $(LIST_H) $(SPLAY_H)
-$(OUT_PREFIX)string.c: $(CORE_H) $(LIST_H) $(CHARACTER_H) $(STRING_H)
+$(OUT_PREFIX)string.c: $(CORE_H) $(LIST_H) $(CHARACTER_H) $(STRING_H) $(MATH_H)
 $(OUT_PREFIX)lexing.c: $(CORE_H) $(LEXING_H) $(STRING_H)
 $(OUT_PREFIX)id.c: $(CORE_H) $(STRING_H) $(LIST_H) $(ID_H)
 $(OUT_PREFIX)xarray.c: $(CORE_H) $(XARRAY_H)
@@ -107,3 +110,5 @@ $(OUT_PREFIX)array.c: $(CORE_H)
 $(OUT_PREFIX)position.c: $(POSITION_H) $(STRING_H)
 $(OUT_PREFIX)pp.c: $(CORE_H) $(LIST_H) $(STRING_H) $(HASHTABLE_H) $(FN_H) $(PP_H)
 $(OUT_PREFIX)lineno.c: $(CORE_H) $(LEXING_H) $(STRING_H) $(LINENO_H) $(LEXING_H)
+$(OUT_PREFIX)stdio.c: $(STDIO_H)
+$(OUT_PREFIX)assert.c: $(ASSERT_H) $(CORE_H) $(STDIO_H)

@@ -2,12 +2,14 @@
 #define OUTPUT_H
 
 #include "core.h"
+#include "stdio.h"
 #include "list.h"
 #include "syntax.h"
 #include "lexgen.h"
 #include "compact.h"
 
 namespace Output {
+using Stdio;
 
 extern void output_lexdef(string sourcename, 
 			  FILE @ infile, 

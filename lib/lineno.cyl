@@ -2,6 +2,7 @@
 { 
   /* Ported by Dan from the ocaml implementation */
 #include "core.h"
+#include "stdio.h"
 #include "lexing.h"
 #include "string.h"
 #include "lineno.h"
@@ -24,6 +25,7 @@ rule token = parse
 {
 
 using Core;
+using Stdio;
 using Lexing;
 using String;
 
@@ -85,7 +87,7 @@ void poss_of_abss(string filename, List::list<$(int,Pos)@> places) {
 	  Opt_t<$(string,int)@> fno = parse_linedef(this_line);
 	  if (fno == null) {
 	    ++line;
-	    fprintf(cyc_stderr, "Unknown directive: %s\n", this_line);
+	    fprintf(stderr, "Unknown directive: %s\n", this_line);
 	  } else {
 	    source_file = fno->v[0]; 
 	    line        = fno->v[1];

@@ -6,10 +6,12 @@
 // basically coming first 
 
 #include "core.h"
+#include "stdio.h"
 #include "lexing.h"
 #include "string.h"
 
 using Core;
+using Stdio;
 
 namespace Lexing;
 
@@ -96,7 +98,7 @@ from_function<`b>(int read_fun(string,int,`b),
 
 int read_from_file(string aux, int n, FILE @f) {
 //                           <<FILE>function_lexbuf_state>lexbuf lbuf) {
-  return f_string_read(f, aux, 0, n);
+  return file_string_read(f, aux, 0, n);
 }
 
 // corresponds to ocaml's from_channel

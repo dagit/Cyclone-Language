@@ -1,5 +1,5 @@
-#ifndef TC_H
-#define TC_H
+#ifndef _TC_H_
+#define _TC_H_
 
 #include "list.h"
 #include "absyn.h"

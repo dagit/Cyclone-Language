@@ -1,9 +1,11 @@
-#ifndef PARSE_H
-#define PARSE_H
+#ifndef _PARSE_H_
+#define _PARSE_H_
 #include "absyn.h"
+#include "stdio.h"
 #include "list.h"
 #include "lexing.h"
 using Core {
+using Stdio {
 using Absyn {
 using List {
 using Lexing {
@@ -26,5 +28,5 @@ typedef struct Declarator @declarator_t;
 extern struct Abstractdeclarator;
 typedef struct Abstractdeclarator @abstractdeclarator_t;
 #include "parse_tab.h"
-}}}}
+}}}}}
 #endif

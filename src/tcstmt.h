@@ -1,5 +1,5 @@
-#ifndef TCSTMT_H
-#define TCSTMT_H
+#ifndef _TCSTMT_H_
+#define _TCSTMT_H_
 
 #include "absyn.h"
 #include "tcenv.h"

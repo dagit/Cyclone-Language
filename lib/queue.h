@@ -1,5 +1,5 @@
-#ifndef QUEUE_H
-#define QUEUE_H
+#ifndef _QUEUE_H_
+#define _QUEUE_H_
 ////////////////////////////////////////////////////////////////////////////
 // Popcorn library, file queue.h                                          //
 // Copyright Greg Morrisett, Dan Grossman                                 //

@@ -1,4 +1,5 @@
 #include "core.h"
+#include "stdio.h"
 #include "pp.h"
 #include "absyn.h"
 #include "list.h"
@@ -9,6 +10,7 @@
 namespace Absynpp;
 
 using Core;
+using Stdio;
 using PP;
 using Absyn;
 using List;

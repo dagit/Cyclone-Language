@@ -20,6 +20,7 @@ extern void yyprint(int i, xenum YYSTYPE v);
 
 
 #include "core.h"
+#include "stdio.h"
 #include "lexing.h"
 #include "list.h"
 #include "string.h"
@@ -29,6 +30,7 @@ extern void yyprint(int i, xenum YYSTYPE v);
 #include "pp.h"
 #include "fn.h"
 using Core;
+using Stdio;
 using Lexing;
 using List;
 using Absyn;
@@ -123,14 +125,14 @@ static `a abort<`a>(string msg,segment sg) {
   throw Exit;
 }
 static void warn(string msg,segment sg) {
-  fprintf(cyc_stderr,"%s: Warning: %s\n",string_of_segment(sg),msg);
+  fprintf(stderr,"%s: Warning: %s\n",string_of_segment(sg),msg);
   return;
 }
 static `a unimp<`a>(string msg,segment sg) {
   return abort(xprintf("%s unimplemented",msg),sg);
 }
 static void unimp2(string msg,segment sg) {
-  fprintf(cyc_stderr,"%s: Warning: Cyclone does not yet support %s\n",
+  fprintf(stderr,"%s: Warning: Cyclone does not yet support %s\n",
 	  string_of_segment(sg),msg);
   return;
 }
@@ -727,7 +729,7 @@ using Parse;
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN SIZEOF ENUM
 /* Cyc:  CYCLONE additional keywords */
 %token BOXED_CHAR BOXED_SHORT BOXED_INT BOXED_LONG
-%token BOXED_FLOAT BOXED_DOUBLE NULL LET THROW TRY CATCH
+%token BOXED_FLOAT BOXED_DOUBLE NULL_kw LET THROW TRY CATCH
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE XENUM
 %token FILL CODEGEN CUT SPLICE
 %token PRINTF FPRINTF XPRINTF SCANF FSCANF SSCANF
@@ -1713,7 +1715,7 @@ pattern:
 /* TODO: we should allow negated floating constants too */
 | CHARACTER_CONSTANT
     {$$=^$(new_pat(Char_p($1),LOC(@1,@1)));}
-| NULL
+| NULL_kw
     {$$=^$(new_pat(Null_p,LOC(@1,@1)));}
 | qual_opt_identifier
     { $$=^$(new_pat(UnknownId_p($1),LOC(@1,@1))); }
@@ -2062,7 +2064,7 @@ constant:
 | CHARACTER_CONSTANT { $$=^$(char_exp($1,        LOC(@1,@1))); }
 | FLOATING_CONSTANT  { $$=^$(float_exp($1,       LOC(@1,@1))); }
 /* Cyc: null */
-| NULL               { $$=^$(null_exp(LOC(@1,@1)));}
+| NULL_kw            { $$=^$(null_exp(LOC(@1,@1)));}
 ;
 
 qual_opt_identifier:
@@ -2074,19 +2076,19 @@ qual_opt_identifier:
 
 void yyprint(int i, xenum YYSTYPE v) {
   switch (v) {
-  case Okay_tok:          fprintf(cyc_stderr,"ok");         break;
-  case Int_tok(&$(_,i2)): fprintf(cyc_stderr,"%d",i2);      break;
-  case Char_tok(c):       fprintf(cyc_stderr,"%c",c);       break;
-  case Short_tok(s):      fprintf(cyc_stderr,"%ds",(int)s); break;
-  case String_tok(s):          fprintf(cyc_stderr,"\"%s\"",s); break;
-  case StringOpt_tok(null):    fprintf(cyc_stderr,"null");     break;
-  case StringOpt_tok(&Opt(s)): fprintf(cyc_stderr,"\"%s\"",s); break;
+  case Okay_tok:          fprintf(stderr,"ok");         break;
+  case Int_tok(&$(_,i2)): fprintf(stderr,"%d",i2);      break;
+  case Char_tok(c):       fprintf(stderr,"%c",c);       break;
+  case Short_tok(s):      fprintf(stderr,"%ds",(int)s); break;
+  case String_tok(s):          fprintf(stderr,"\"%s\"",s); break;
+  case StringOpt_tok(null):    fprintf(stderr,"null");     break;
+  case StringOpt_tok(&Opt(s)): fprintf(stderr,"\"%s\"",s); break;
   case QualId_tok(&$(prefix,v2)):
     for (; prefix != null; prefix = prefix->tl)
-      fprintf(cyc_stderr,"%s::",prefix->hd);
-    fprintf(cyc_stderr,"%s::",v2);
+      fprintf(stderr,"%s::",prefix->hd);
+    fprintf(stderr,"%s::",v2);
     break;
-  default: fprintf(cyc_stderr,"?"); break;
+  default: fprintf(stderr,"?"); break;
   }
 }
 

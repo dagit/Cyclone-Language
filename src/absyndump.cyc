@@ -5,11 +5,13 @@
 // I'm guessing "very".
 
 #include "core.h"
+#include "stdio.h"
 #include "list.h"
 #include "absyn.h"
 #include "absynpp.h"
 
 using Core;
+using Stdio;
 using List;
 using Absyn;
 

@@ -1,5 +1,5 @@
-#ifndef ROPE_H
-#define ROPE_H
+#ifndef _ROPE_H_
+#define _ROPE_H_
 #include "core.h"
 #include "list.h"
 

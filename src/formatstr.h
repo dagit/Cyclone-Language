@@ -1,5 +1,5 @@
-#ifndef TCFORMATSTR_H
-#define TCFORMATSTR_H
+#ifndef _FORMATSTR_H_
+#define _FORMATSTR_H_
 
 #include "core.h"
 #include "list.h"

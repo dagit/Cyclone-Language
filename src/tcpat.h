@@ -1,5 +1,5 @@
-#ifndef TCPAT_H
-#define TCPAT_H
+#ifndef _TCPAT_H_
+#define _TCPAT_H_
 
 #include "list.h"
 #include "position.h"

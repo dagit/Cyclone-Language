@@ -1,5 +1,5 @@
-#ifndef SET_H
-#define SET_H
+#ifndef _SET_H_
+#define _SET_H_
 ////////////////////////////////////////////////////////////////////////////
 // Popcorn library, file set.h                                            //
 // Copyright Greg Morrisett, Dan Grossman                                 //

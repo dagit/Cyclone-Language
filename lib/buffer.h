@@ -1,6 +1,8 @@
-#ifndef BUFFER_H
-#define BUFFER_H
+#ifndef _BUFFER_H_
+#define _BUFFER_H_
 #include "core.h"
+#include "stdio.h"
+#include "buffer.h"
 namespace Buffer {
 // Ported from the standard library of 
 //(***********************************************************************)
@@ -38,7 +40,7 @@ extern T create(uint n);
 extern string contents(T);
 //     (* Return a copy of the current contents of the buffer.
 //        The buffer itself is unchanged. *)
-extern Core::size_t length(T);
+extern Stdio::size_t length(T);
 //     (* Return the number of characters currently contained in the buffer. *)
 extern void clear(T);
 //     (* Empty the buffer. *)

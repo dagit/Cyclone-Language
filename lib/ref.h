@@ -1,5 +1,5 @@
-#ifndef REF_H
-#define REF_H
+#ifndef _REF_H_
+#define _REF_H_
 namespace Ref {
 extern struct Reference<`a> {`a v;};
 typedef struct Reference<`a> @ ref<`a>;

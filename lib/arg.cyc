@@ -13,10 +13,12 @@
 (*  Automatique.  Distributed only by permission.                      *)
 (*                                                                     *)
 (***********************************************************************/
-#include "arg.h"
+#include "stdio.h"
 #include "string.h"
+#include "arg.h"
 namespace Arg;
 using Core;
+using Stdio;
 using List;
 
 xenum exn {Error, Bad(string)};
@@ -48,9 +50,9 @@ static spec lookup (list<$(string,spec,string)@> l, string x) {
 }
 
 void usage(list<$(string,spec,string)@> speclist, string errmsg) {
-  fprintf(cyc_stderr, "%s\n", errmsg);
+  fprintf(stderr, "%s\n", errmsg);
   while (speclist != null) {
-    fprintf(cyc_stderr, " %s %s\n", speclist->hd[0], speclist->hd[2]);
+    fprintf(stderr, " %s %s\n", speclist->hd[0], speclist->hd[2]);
     speclist = speclist->tl;
   }
 }
@@ -64,17 +66,17 @@ static void stop(int prog_pos, enum error e,
   switch (e) {
   case Unknown(s):
      if (String::strcmp(s,"-help")!=0)
-       fprintf(cyc_stderr, "%s: unknown option `%s'.\n", progname, s);
+       fprintf(stderr, "%s: unknown option `%s'.\n", progname, s);
      break;
   case Missing(s):
-     fprintf(cyc_stderr, "%s: option `%s' needs an argument.\n", progname, s);
+     fprintf(stderr, "%s: option `%s' needs an argument.\n", progname, s);
      break;
   case Wrong(flag,cmd,t):
-     fprintf(cyc_stderr, "%s: wrong argument `%s'; option `%s' expects %s.\n",
+     fprintf(stderr, "%s: wrong argument `%s'; option `%s' expects %s.\n",
              progname, cmd, flag, t);
      break;
   case Message(s):
-     fprintf(cyc_stderr, "%s: %s.\n", progname, s);
+     fprintf(stderr, "%s: %s.\n", progname, s);
      break;
   }
   usage(speclist, errmsg);

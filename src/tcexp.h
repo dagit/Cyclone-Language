@@ -1,5 +1,5 @@
-#ifndef TCEXP_H
-#define TCEXP_H
+#ifndef _TCEXP_H_
+#define _TCEXP_H_
 
 #include "absyn.h"
 #include "tcenv.h"

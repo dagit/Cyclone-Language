@@ -1,5 +1,5 @@
-#ifndef POSITION_H
-#define POSITION_H
+#ifndef _POSITION_H_
+#define _POSITION_H_
 // operations for tracking positions (locations) within source code
 #include "core.h"
 #include "list.h"

@@ -1,11 +1,13 @@
 
-#ifndef LEXING_H
-#define LEXING_H
+#ifndef _LEXING_H_
+#define _LEXING_H_
 
 #include "core.h"
+#include "stdio.h"
 
 namespace Lexing {
 using Core;
+using Stdio;
 
 extern xenum exn { Error(string) };
 

@@ -7,6 +7,7 @@
  */
 
 #include "core.h"
+#include "stdio.h"
 #include "list.h"
 #include "string.h"
 #include "hashtable.h"
@@ -15,6 +16,7 @@
 #include "xarray.h"
 
 using Core;
+using Stdio;
 using List;
 using String;
 using Hashtable;
@@ -290,7 +292,7 @@ static Out long_concats_f(list<Doc> ds0, Ppstate st) {
 }
 static Doc long_concats(list<Doc> doclist) {
 #ifdef DEBUG
-  fprintf(tal_stderr,"doing long concats %d\n",List::length(doclist));
+  fprintf(stderr,"doing long concats %d\n",List::length(doclist));
 #endif
   list<Doc> orig = doclist;
   Doc d = doclist->hd;

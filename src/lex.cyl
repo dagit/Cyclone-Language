@@ -2,6 +2,7 @@
 // WARNING: Because we now intern identifiers, you better never mutate them!!!
 
 #include "core.h"
+#include "stdio.h"
 #include "list.h"
 #include "lexing.h"
 #include "set.h"
@@ -12,6 +13,7 @@
 #include "dict.h"
 
 using Core;
+using Stdio;
 using List;
 using Lexing;
 using Parse;
@@ -67,7 +69,7 @@ static $(string,short) rw_array[61] = {
   $((string)"long", LONG),
   $((string)"namespace", NAMESPACE),
   $((string)"new", NEW),
-  $((string)"null", NULL),
+  $((string)"null", NULL_kw),
   $((string)"printf", PRINTF),
   $((string)"register", REGISTER),
   $((string)"restrict", RESTRICT),

@@ -1,5 +1,5 @@
-#ifndef SLOWDICT_H
-#define SLOWDICT_H
+#ifndef _SLOWDICT_H_
+#define _SLOWDICT_H_
 ////////////////////////////////////////////////////////////////////////////
 // Popcorn library, file slowdict.h                                       //
 // Copyright Greg Morrisett, Dan Grossman                                 //

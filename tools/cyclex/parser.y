@@ -3,6 +3,7 @@
 #define YYDEBUG 0
 
 #include "core.h"
+#include "stdio.h"
 #include "list.h"
 #include "hashtable.h"
 #include "lexing.h"
@@ -11,6 +12,7 @@
 #include "syntax.h"
 
 using Core;
+using Stdio;
 using List;
 
 using Syntax;

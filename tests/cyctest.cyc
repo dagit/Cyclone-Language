@@ -1,3 +1,4 @@
+#include "stdio.h"
 #include "list.h"
 #include "set.h"
 #include "hashtable.h"
@@ -17,6 +18,7 @@
 #include "id.h"
 #include "arg.h"
 
+using Stdio;
 using List;
 using Set;
 using Dict;

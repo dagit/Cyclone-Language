@@ -1,10 +1,13 @@
-#ifndef PP_H
-#define PP_H
+#ifndef _PP_H_
+#define _PP_H_
 
 #include "core.h"
+#include "stdio.h"
 #include "list.h"
 
 namespace PP {
+using Core;
+using Stdio;
 using List;
 extern struct ppstate;
 typedef struct ppstate @Ppstate;
@@ -32,4 +35,4 @@ extern Doc seq(string sep, list<Doc> l0);
 extern Doc ppseql<`a>(Doc pp(`a), string sep, list<`a> l0);
 extern Doc seql(string sep, list<Doc> l0);
 }
-#endif
+#endif /* _PP_H_ */

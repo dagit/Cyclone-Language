@@ -1,5 +1,5 @@
-#ifndef DICT_H
-#define DICT_H
+#ifndef _DICT_H_
+#define _DICT_H_
 
 #include "list.h"
 

@@ -120,9 +120,10 @@ static Opt_t<typ> file_t_opt = null;
 // If so, we'll need a rgn_t argument.
 typ file_typ() {
   if (file_t_opt == null) {
-    typedef_name_t file_t_name     = &$((list<string>)&cons((string)"Cyc",
-							    null),
-					(string)"__sFILE");
+    // struct Cyc::Stdio::__sFILE *
+    typedef_name_t file_t_name = 
+      &$((list<string>)&cons((string)"Cyc",
+			     &cons((string)"Stdio",null)),(string)"__sFILE");
     structdecl     sd              = &Structdecl(Abstract,&Opt(file_t_name),
 						 null, null);
     typ            file_struct_typ = StructType(&Opt(file_t_name),

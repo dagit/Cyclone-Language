@@ -1,12 +1,14 @@
-#ifndef STRING_H
-#define STRING_H
+#ifndef _STRING_H_
+#define _STRING_H_
 
 #include "core.h"
 #include "list.h"
+#include "stdio.h" // for size_t
 
 namespace String {
 using Core;
 using List;
+using Stdio; // for size_t
 
 // A string is a char[?].  Most functions consider a zero (null)
 // character as an end of string marker, so we may have

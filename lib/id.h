@@ -1,5 +1,5 @@
-#ifndef ID_H
-#define ID_H
+#ifndef _ID_H_
+#define _ID_H_
 ////////////////////////////////////////////////////////////////////////////
 // Popcorn library, file id.h                                             //
 // Copyright Greg Morrisett, Dan Grossman                                 //
@@ -8,9 +8,11 @@
 ////////////////////////////////////////////////////////////////////////////
 
 #include "core.h"
+#include "stdio.h"
 
 namespace Id {
 using Core;
+using Stdio;
 
 // id.h:    defines an identifiers used in compilers, type-checkers, etc.
 

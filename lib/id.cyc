@@ -13,6 +13,7 @@
 //    code.  Could probably live without this one
 
 #include "core.h"
+#include "stdio.h"
 #include "string.h"
 #include "list.h"
 #include "id.h"
@@ -20,6 +21,7 @@
 using Core;
 using String;
 using List;
+using Stdio;
 
 namespace Id;
 

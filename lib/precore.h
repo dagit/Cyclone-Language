@@ -2,37 +2,25 @@
 // made in C code.  So, this file is used to automatically produce
 // a C include file, for use with the C definitions.
 
-#ifndef PRECORE_H
-#define PRECORE_H
+#ifndef _PRECORE_H_
+#define _PRECORE_H_
 
 // Core.cyc uses some additional C routines, but they are not
 // declared here because they are internal to Core, whereas the
 // routines below can be used by any Cyclone program.
 
-// These two type definitions are actually made in stdio.h and
-// should be removed from precore_c.h
-struct __sFILE; // This is what gcc uses
-typedef struct __sFILE FILE;
-
-extern "C" FILE @cyc_stdout;
-extern "C" FILE @cyc_stdin;
-extern "C" FILE @cyc_stderr;
-
 typedef unsigned int uint;
-//typedef unsigned int size_t;
 typedef char *Cstring;
 // a boxed and tagged string: struct {uint sz; Cstring *contents;}@
 typedef char string[?];
 typedef int bool;
+#ifndef false 
 #define false (0)
-#define true (1)
-extern "C" Cstring string_to_Cstring(string);
-extern "C" int system(Cstring);
-
-extern "C" int f_string_read  (FILE *,string,int,int);
-extern "C" int f_string_write (FILE *,string,int,int);
-extern "C" int f_seek         (FILE *,int);
-extern "C" int fflush         (FILE *);
-extern "C" int fgetc          (FILE *);
-
 #endif
+#ifndef true
+#define true (1)
+#endif
+extern "C" `a exit<`a>(int);
+extern "C" `a abort<`a>();
+
+#endif /* _PRECORE_H_ */

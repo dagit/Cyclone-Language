@@ -1,5 +1,7 @@
 /* Utility functions for type checking */
 
+#include "core.h"
+#include "stdio.h"
 #include "absyn.h"
 #include "absynpp.h"
 #include "set.h"
@@ -9,6 +11,7 @@
 #include "evexp.h"
 #include "tcutil.h"
 using Core;
+using Stdio;
 using List;
 using Set;
 using Position;
@@ -27,8 +30,8 @@ void terr(segment loc, string s) {
 }
 
 `a impos<`a>(string msg) {
-  fprintf(cyc_stderr,"Error: %s\n",msg);
-  fflush(cyc_stderr);
+  fprintf(stderr,"Error: %s\n",msg);
+  fflush(stderr);
   throw TypeErr;
 }
 
@@ -44,17 +47,17 @@ void warn(segment sg, string msg) {
 void flush_warnings() {
   if(warning_segs == null)
     return;
-  fprintf(cyc_stderr,"***Warnings***\n");
+  fprintf(stderr,"***Warnings***\n");
   list<string> seg_strs = strings_of_segments(warning_segs);
   warning_segs = null;
   warning_msgs = List::imp_rev(warning_msgs);
   while(warning_msgs != null) {
-    fprintf(cyc_stderr,"%s: %s\n", seg_strs->hd, warning_msgs->hd);
+    fprintf(stderr,"%s: %s\n", seg_strs->hd, warning_msgs->hd);
     seg_strs     = seg_strs->tl;
     warning_msgs = warning_msgs->tl;
   }
-  fprintf(cyc_stderr,"**************\n");
-  fflush(cyc_stderr);
+  fprintf(stderr,"**************\n");
+  fflush(stderr);
 }
 
 // set by by Tcenv::tc_init, used to reduce allocation and calls to Set::empty.

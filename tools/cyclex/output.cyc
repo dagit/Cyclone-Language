@@ -1,8 +1,10 @@
 
 #include "core.h"
 #include "output.h"
+#include "stdio.h"
 
 namespace Output;
+using Stdio;
 
 static string copy_buffer = ""; // initialized in output_lexdef
 
@@ -27,7 +29,7 @@ void copy_chunk(string sourcename, FILE @ ic, FILE @ oc, Syntax::location_t loc)
     fprintf(oc, "#line %d \"%s\"\n", loc->start_line, sourcename);
     for(int i=1; i <= loc->start_col; ++i)
       fprintf(oc, "%c", ' ');
-    f_seek(ic, loc->start_pos);
+    fseek(ic, loc->start_pos, SEEK_SET);
     copy_chars(ic, oc, loc->start_pos, loc->end_pos);
   }
 }
@@ -80,7 +82,7 @@ void output_lexdef(string sourcename,
 		   List::list<Lexgen::automata_entry_t> entry_points,
 		   Syntax::location_t    trailer) {
   copy_buffer = Core::new_string(1024);
-  fprintf(cyc_stderr, "%d states, %d transitions, table size %d bytes\n",
+  fprintf(stderr, "%d states, %d transitions, table size %d bytes\n",
 	  tables->base.size,
 	  tables->trans.size,
 	  2 * ((tables->base).size + (tables->backtrk).size

@@ -1,6 +1,8 @@
 #include "core.h"  
+#include "stdio.h"
 
 using Core;
+using Stdio;
 
 // "main" is always called cyc_main in Cyclone
 int main() {

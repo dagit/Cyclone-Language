@@ -1,5 +1,5 @@
-#ifndef EVEXP_H
-#define EVEXP_H
+#ifndef _EVEXP_H_
+#define _EVEXP_H_
 
 #include "absyn.h"
 #include "position.h"

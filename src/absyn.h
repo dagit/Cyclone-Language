@@ -1,5 +1,5 @@
-#ifndef ABSYN_H
-#define ABSYN_H
+#ifndef _ABSYN_H_
+#define _ABSYN_H_
 
 // The abstract syntax has (at last count) three different "stages":
 // A. Result of parsing

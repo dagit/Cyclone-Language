@@ -9,8 +9,7 @@
 
 // These are supplied by C; they do not appear in core.h, we want them
 // to be used only from the functions in this file.
-extern "C" FILE   *fopen(Cstring,Cstring);
-extern "C" int    f_close(FILE *);
+
 extern "C" int    cyc_argc;
 extern "C" void   start_args();
 extern "C" string next_arg();
@@ -21,41 +20,27 @@ extern string strconcat(string,string);
 // The rest is all Cyclone
 namespace Core;
 
-xenum exn { FileOpenError(string) };
-xenum exn { FileCloseError };
 xenum exn { InvalidArg(string) };
 xenum exn { SysError(int) };
 
-FILE @ file_open(string fname, string mode) {
-  FILE *f = fopen(string_to_Cstring(fname), string_to_Cstring(mode));
-  if (f == null) throw FileOpenError(fname);
-  return (FILE @)f;  // FIX: get rid of cast ??
-}
-void file_close(FILE @f) {
-  if (f_close(f) != 0) throw FileCloseError();
-}
-int file_delete(string fname) { // this should be added to the runtime
-  int i = system(string_to_Cstring(String::strconcat("rm ", fname))); 
-  if (i != 0) throw SysError(i);
-  return i;
-}
-
 /* Popcorn version of fgets; returns the # of chars read */
+/*
 int file_gets(string buf,int ofs,FILE @f) {
   int i, len = buf.size, retc;
   if (ofs < 0 || ofs >= len)
     throw InvalidArg("file_gets");
-  /* built on f_string_read; pretty inefficient but oh well */
+  // built on f_string_read; pretty inefficient but oh well 
   for (i = ofs; i<len; i++) {
     retc = f_string_read(f,buf,i,1);
-    if (retc   !=   1 || /* assume EOF */ 
-	buf[i] == '\n') { /* end-of-line */
+    if (retc   !=   1 || // assume EOF 
+	buf[i] == '\n') { // end-of-line 
       buf[i] = '\000';
       break;
     }
   }
   return i-ofs;
 }
+*/
 
 string std_args()[?] {
   string args[?] = new { for i < cyc_argc : (string)"" };

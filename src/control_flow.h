@@ -1,5 +1,5 @@
-#ifndef CONTROL_FLOW_H
-#define CONTROL_FLOW_H
+#ifndef _CONTROL_FLOW_H_
+#define _CONTROL_FLOW_H_
 
 #include "list.h"
 #include "absyn.h"

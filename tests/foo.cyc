@@ -1,5 +1,7 @@
 #include "core.h"
+#include "stdio.h"
 #include "foo_tab.h"
+using Stdio;
 
 int c = (int)' ';
 
@@ -12,19 +14,19 @@ void yyerror(string s) {
 
 int yylex() {
   if (c == EOF) return -1;
-  while (c == ' ' || c == '\n' || c == '\t') c = fgetc(cyc_stdin);
+  while (c == ' ' || c == '\n' || c == '\t') c = fgetc(stdin);
   if (c >= (int)'0' && c <= (int)'9') {
     int i = c - ((int)'0');
-    c = fgetc(cyc_stdin);
+    c = fgetc(stdin);
     while (c >= (int)'0' && c <= (int)'9') {
       i = i*10 + (c - ((int)'0'));
-      c = fgetc(cyc_stdin);
+      c = fgetc(stdin);
     }
     yylval = Integer(i);
     return INT;
   } else {
     int old_c = c;
-    c = fgetc(cyc_stdin);
+    c = fgetc(stdin);
     return old_c;
   }
 }

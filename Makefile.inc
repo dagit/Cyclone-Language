@@ -22,7 +22,9 @@ CYCLONE_LIBS=arg\
          array\
          position\
          pp\
-         lineno
+         lineno\
+	 stdio\
+         assert
 
 CYCLONE_SRCS=absyn\
          parse_tab\

@@ -185,6 +185,13 @@ Cstring string_to_Cstring(string s) {
   return str;
 }
 
+Cstring underlying_Cstring(string s) {
+  char *str=s->contents;
+  if (s->sz == 0) 
+    str = NULL;
+  return str;
+}
+
 extern int system(Cstring);
 
 static void check_fd(FILE *fd) {
@@ -193,7 +200,8 @@ static void check_fd(FILE *fd) {
     exit(255);
   }
 }
-int f_string_read(FILE *fd, string dest, int dest_offset, int max_count) {
+int Cyc_Stdio_file_string_read(FILE *fd, string dest, int dest_offset, 
+			       int max_count) {
   check_fd(fd);
   if(dest_offset + max_count > dest->sz) {
     fprintf(stderr,"Attempt to read off end of string.\n");
@@ -201,7 +209,8 @@ int f_string_read(FILE *fd, string dest, int dest_offset, int max_count) {
   }
   return fread((dest->contents)+dest_offset, 1, max_count, fd);
 }
-int f_string_write(FILE *fd, string src, int src_offset, int max_count) {
+int Cyc_Stdio_file_string_write(FILE *fd, string src, int src_offset, 
+				int max_count) {
   check_fd(fd);
   if(src_offset + max_count > src->sz) {
     fprintf(stderr,"Attempt to write off end of string.\n");
@@ -226,6 +235,7 @@ int f_seek(FILE *fd, int offset) {
 // THIS SECTION ONLY USED IN CORE.CYC
 
 // extern FILE    *fopen            (Cstring,Cstring);  // supplied by stdio
+/*
 int f_close(FILE *fd) {
   if(!fd) {
     fprintf(stderr,"Attempt to close null file descriptor.\n");
@@ -233,19 +243,20 @@ int f_close(FILE *fd) {
   }
   return fclose(fd);
 }
+*/
 ///////////////////////////////////////////////
 
 
 #include <stdio.h>
 
-FILE *cyc_stdin = NULL;
-FILE *cyc_stdout = NULL;
-FILE *cyc_stderr = NULL;
+FILE *Cyc_Stdio_stdin = NULL;
+FILE *Cyc_Stdio_stdout = NULL;
+FILE *Cyc_Stdio_stderr = NULL;
 
 void init_stdlib_io() {
-  cyc_stdin = stdin;
-  cyc_stdout = stdout;
-  cyc_stderr = stderr;
+  Cyc_Stdio_stdin = stdin;
+  Cyc_Stdio_stdout = stdout;
+  Cyc_Stdio_stderr = stderr;
 }
 
 

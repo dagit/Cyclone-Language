@@ -34,6 +34,7 @@
 //       pointers, else we need to set them.
 
 #include "core.h"
+#include "stdio.h"
 #include "list.h"
 #include "string.h"
 #include "set.h"
@@ -46,6 +47,7 @@
 #include "formatstr.h"
 #include "toc.h"
 using Core;
+using Stdio;
 using List;
 using Set;
 using Position;
@@ -65,11 +67,13 @@ bool check_for_null = false;
 xenum exn {Toc_Unimplemented};
 xenum exn {Toc_Impossible};
 static `a unimp<`a>(string s) {
-  fprintf(cyc_stderr,"%s\n",s);
+  fprintf(stderr,"%s\n",s);
+  fflush(stderr);
   throw Toc_Unimplemented();
 }
 static `a toc_impos<`a>(string s) {
-  fprintf(cyc_stderr,"%s\n",s);
+  fprintf(stderr,"%s\n",s);
+  fflush(stderr);
   throw Toc_Impossible();
 }
 xenum exn {Match_error};

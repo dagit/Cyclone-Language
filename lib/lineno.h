@@ -1,5 +1,5 @@
-#ifndef LINENO_H
-#define LINENO_H
+#ifndef _LINENO_H_
+#define _LINENO_H_
 
 #include "list.h"
 

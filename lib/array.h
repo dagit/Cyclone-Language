@@ -1,5 +1,5 @@
-#ifndef ARRAY_H
-#define ARRAY_H
+#ifndef _ARRAY_H_
+#define _ARRAY_H_
 
 #include "list.h"
 

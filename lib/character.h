@@ -1,5 +1,5 @@
-#ifndef CHARACTER_H
-#define CHARACTER_H 
+#ifndef _CHARACTER_H_
+#define _CHARACTER_H_
 namespace Character {
 
 extern bool isupper(char c);
