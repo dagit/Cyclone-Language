@@ -36,7 +36,7 @@
 
 #ifndef lint
 /*static char sccsid[] = "from: @(#)net.c	5.5 (Berkeley) 6/1/90";*/
-char net_rcsid[] = "$Id: finger.cyc,v 1.8 2001-10-26 19:41:25 danieljg Exp $";
+char net_rcsid[] = "$Id: finger.cyc,v 1.9 2002-02-12 22:07:11 tjim Exp $";
 #endif /* not lint */
 
 #include <core.h>
@@ -58,7 +58,11 @@ int main(int argc, char ?`H argv[]) {
   int c, sawret, ateol;
   struct hostent *`main hp, def;
   struct servent *sp;
+#ifdef __APPLE__
+  struct sockaddr_in sn = { 0, 0, 0, {0}, { for i < 8: 0 }};
+#else
   struct sockaddr_in sn = { 0, 0, {0}, { for i < 8: 0 }};
+#endif
   int s;
   struct in_addr *@alist = new { NULL };
   char ?`H host;

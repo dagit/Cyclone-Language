@@ -1795,9 +1795,142 @@ ndbm.h:
 net/if.h:
 ;
 
-// Defines a structure containing a char *
-// Not supported yet
+// FIX: netdb.h defines a bunch of structs that contain char *
+// or char ** elements.  This is a hand-coded translation of
+// some of those structs to Cyclone structs using ?.  This is
+// error-prone since POSIX says that the structs can have additional
+// elements; and if they do, this code won't work.
 netdb.h:
+include {
+in_port_t
+in_addr
+uint32_t
+IPPORT_RESERVED
+HOST_NOT_FOUND
+NO_DATA
+NO_RECOVERY
+TRY_AGAIN
+socklen_t
+}
+epilogue {
+  #ifdef __APPLE__
+  /* Not defined in OS X so we guess :-( */
+  #ifndef _in_port_t_def_
+  #define _in_port_t_def_
+  typedef unsigned short in_port_t;
+  #endif
+  #endif
+}
+epilogue {
+  struct servent {
+    char ?s_name;
+    char ??s_aliases;
+    in_port_t s_port;
+    char ?s_proto;
+  };
+}
+epilogue {
+  struct hostent {
+    char ?h_name;
+    char ??h_aliases;
+    int h_addrtype;
+    int h_length; // always 4
+    struct in_addr *?h_addr_list;
+#define h_addr h_addr_list[0]
+  };
+}
+epilogue {
+  struct protoent {
+    char ?p_name;
+    char ??p_aliases;
+    int p_proto;
+   };
+}
+epilogue getservbyname {
+  extern struct servent *getservbyname(const char ?name, const char ?proto);
+}
+cycstub getservbyname {
+  namespace Cnetdb {
+    abstract struct Cservent {
+      Cstring s_name;
+      Cstring @s_aliases;
+      Std::in_port_t s_port;
+      Cstring s_proto;
+    };
+    extern "C" struct Cservent *getservbyname(const Cstring name,
+                                              const Cstring proto);
+  }
+  struct servent *getservbyname(const char ?name, const char ?proto) {
+    struct Cnetdb::Cservent *src = Cnetdb::getservbyname(s2c(name),s2c(proto));
+    return src ? new servent{.s_name = Cstring_to_string(src->s_name),
+                             .s_aliases = ntCsl_to_ntsl(src->s_aliases),
+                             .s_port = src->s_port,
+                             .s_proto = Cstring_to_string(src->s_proto)}
+      : NULL;
+  }
+}
+epilogue gethostbyname {
+  extern struct hostent *gethostbyname(const char ?name);
+}
+cycstub gethostbyname {
+  namespace Cnetdb {
+    abstract struct Chostent {
+      Cstring h_name;
+      Cstring @h_aliases;
+#if defined(__CYGWIN32__) || defined(__CYGWIN__)
+      short h_addrtype;
+      short h_length; B  // always 4
+#else
+      int h_addrtype;
+      int h_length;   // always 4
+#endif
+      struct Std::in_addr *@h_addr_list;
+    };
+    extern "C" struct Chostent *gethostbyname(const Cstring name);
+    extern "C" struct Std::in_addr *?pntlp_toCyc(struct Std::in_addr *@);
+  }
+  struct hostent *gethostbyname(string_t name) {
+    struct Cnetdb::Chostent *src = Cnetdb::gethostbyname(s2c(name));
+    return src ? new hostent{.h_name = Cstring_to_string(src->h_name),
+                             .h_aliases = ntCsl_to_ntsl(src->h_aliases),
+                             .h_addrtype = src->h_addrtype,
+                             .h_length = src->h_length,
+                             .h_addr_list = Cnetdb::pntlp_toCyc(src->h_addr_list)}
+      : NULL;
+  }
+}
+epilogue getprotobyname {
+  extern struct protoent * getprotobyname(const char ?name);
+}
+cycstub getprotobyname {
+  namespace Cnetdb {
+    abstract struct Cprotoent {
+      Cstring p_name;
+      Cstring @p_aliases;
+      int   p_proto;
+    };
+    extern "C" struct Cprotoent * getprotobyname(const Cstring name);
+  }
+  struct protoent * getprotobyname(string_t name) {
+    struct Cnetdb::Cprotoent *src = Cnetdb::getprotobyname(s2c(name));
+    return src ? new protoent{.p_name = Cstring_to_string(src->p_name),
+                              .p_aliases = ntCsl_to_ntsl(src->p_aliases),
+                              .p_proto=src->p_proto} 
+      : NULL;
+  }
+}
+epilogue herror {
+  extern void herror(const char ?);
+}
+cycstub herror {
+  namespace Cnetdb {
+    extern "C" void herror(Cstring);
+  }
+  void herror(const char ?`r s) { Cnetdb::herror(s2c(s)); }
+}
+
+
+
 ;
 
 netinet/in.h:
@@ -1857,18 +1990,32 @@ epilogue {
      conflict with the declarations below.
   */
 }
-epilogue htonl {
-  extern "C" uint32_t htonl(uint32_t);
+epilogue {
+  #ifdef __APPLE__
+  /* These aren't defined in OS X so we guess :-( */
+  #ifndef _in_port_t_def_
+  #define _in_port_t_def_
+  typedef unsigned short in_port_t;
+  #endif
+  #ifndef _in_addr_t_def_
+  #define _in_addr_t_def_
+  typedef unsigned int in_addr_t;
+  #endif
+  #endif
 }
-epilogue htons {
-  extern "C" uint16_t htons(uint16_t);
-}
-epilogue ntohl {
-  extern "C" uint32_t ntohl(uint32_t);
-}
-epilogue ntohs {
-  extern "C" uint16_t ntohs(uint16_t);
-}
+// Not sure why these were here -- they aren't according to POSIX
+// epilogue htonl {
+//   extern "C" uint32_t htonl(uint32_t);
+// }
+// epilogue htons {
+//   extern "C" uint16_t htons(uint16_t);
+// }
+// epilogue ntohl {
+//   extern "C" uint32_t ntohl(uint32_t);
+// }
+// epilogue ntohs {
+//   extern "C" uint16_t ntohs(uint16_t);
+// }
 ;
 
 netinet/tcp.h:
@@ -1901,6 +2048,7 @@ epilogue {
   /* Cygwin does not define this type so we take a guess :-( */
   /* FIX: make this specific to cygwin ?? */
   #ifndef _nfds_t_def_
+  #define _nfds_t_def_
   typedef unsigned int nfds_t;
   #endif
 }
@@ -2035,6 +2183,9 @@ epilogue {
 epilogue kill {
   extern "C" int kill(pid_t, int);
 }
+epilogue raise {
+  extern "C" int raise(int);
+}
 epilogue sigaddset {
   #ifndef __CYGWIN__
   /* In Cygwin, the #include <setjmp.h> in precore_c.h pollutes
@@ -2092,7 +2243,7 @@ epilogue {
     __SIG_BUILTIN(tunion SigBuiltin);
     __SIG_HANDLER(void (@)(int)); // Note, must be heap allocated
   };
-  typedef tunion SigArg sigarg_t;
+  typedef tunion `r SigArg sigarg_t<`r>;
 }
 cycstub {
   #include <csignal.h>
@@ -2190,7 +2341,7 @@ cstub sigset {
 }
 epilogue signal {
   #ifndef __CYGWIN__
-  sigarg_t signal(int, ... inject sigarg_t);
+  extern sigarg_t signal(int, ... inject sigarg_t);
   #endif
 }
 cycstub signal {
@@ -4962,6 +5113,7 @@ epilogue {
   /* Cygwin does not define this type so we take a guess :-( */
   /* FIX: make this specific to cygwin ?? */
   #ifndef _useconds_t_def_
+  #define _useconds_t_def_
   typedef unsigned int useconds_t;
   #endif
 }

@@ -281,9 +281,9 @@ int ru_nivcsw;};int waitpid(int,int*,int);typedef struct{unsigned int __val[32];
 typedef Cyc_Std___sigset_t Cyc_Std_sigset_t;enum Cyc_Std___anonymous_enum_181__{
 Cyc_Std_SIGEV_SIGNAL  = 0,Cyc_Std_SIGEV_NONE  = 1,Cyc_Std_SIGEV_THREAD  = 2};int
 kill(int,int);struct Cyc_Std___SIG_BUILTIN_struct{int tag;void*f1;};struct Cyc_Std___SIG_HANDLER_struct{
-int tag;void(*f1)(int);};void*Cyc_Std_signal(int,struct _tagged_arr);enum Cyc_Std___anonymous_enum_362__{
-Cyc_Std__PC_LINK_MAX  = 0,Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX
- = 3,Cyc_Std__PC_PATH_MAX  = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED
+int tag;void(*f1)(int);};enum Cyc_Std___anonymous_enum_362__{Cyc_Std__PC_LINK_MAX
+ = 0,Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 
+3,Cyc_Std__PC_PATH_MAX  = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED
  = 6,Cyc_Std__PC_NO_TRUNC  = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,
 Cyc_Std__PC_ASYNC_IO  = 10,Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,
 Cyc_Std__PC_FILESIZEBITS  = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE
