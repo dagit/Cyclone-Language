@@ -20,7 +20,7 @@
  *
  */
 
-/* $Id: globals.h,v 1.1 2001-09-24 21:59:18 mharris Exp $*/
+/* $Id: globals.h,v 1.2 2001-09-27 22:04:43 tjim Exp $*/
 
 #ifndef _GLOBALS_H
 #define _GLOBALS_H
@@ -28,10 +28,7 @@
 #include <stdio.h>
 #include <sys/types.h>
 #include <netinet/in.h>
-//using Stdio;   Should uncomment and remove Stdio:: qualifier once
-//               Cyclone can handle this
-using Inet;
-
+#include <sys/select.h>
 #include "defines.h"
 #include "compat.h"
 
@@ -117,16 +114,16 @@ struct request {                /* pending requests */
 
 typedef struct request request;
 
-struct alias {
+struct Alias {
     char ?fakename;             /* URI path to file */
     char ?realname;             /* Actual path to file */
     int type;                   /* ALIAS, SCRIPTALIAS, REDIRECT */
     int fake_len;               /* strlen of fakename */
     int real_len;               /* strlen of realname */
-    struct alias *next;
+    struct Alias *next;
 };
 
-typedef struct alias alias;
+typedef struct Alias alias;
 
 struct status {
     long requests;
@@ -138,7 +135,7 @@ struct status status;
 struct mmap_entry mmap_list[MMAP_LIST_SIZE];
 
 extern char ?optarg;            /* For getopt */
-extern Stdio::FILE *yyin;              /* yacc input */
+extern FILE *yyin;              /* yacc input */
 
 extern request *request_ready;  /* first in ready list */
 extern request *request_block;  /* first in blocked list */

@@ -21,9 +21,11 @@
  *
  */
 
-/* $Id: alias.cyc,v 1.1 2001-09-24 21:59:18 mharris Exp $ */
+/* $Id: alias.cyc,v 1.2 2001-09-27 22:04:43 tjim Exp $ */
 
 #include "boa.h"
+#include <sys/stat.h>
+#include <unistd.h>
 
 static alias *alias_hashtable[ALIAS_HASHTABLE_SIZE];
 
@@ -72,7 +74,7 @@ void add_alias(char ?fakename, char ?realname, int type)
                 return;
             old = old->next;
         }
-    anew = new alias{.fakename = strdup(fakename),
+    anew = new Alias{.fakename = strdup(fakename),
                      .fake_len = strlen(fakename),
                      .realname = strdup(realname),
                      .real_len = strlen(realname),
@@ -146,7 +148,10 @@ alias *find_alias(char ?uri)
 
 int translate_uri(request @ req)
 {
-    static char buffer[MAX_HEADER_LENGTH + 1];
+    static char buffer[MAX_HEADER_LENGTH + 1]
+      /* FIX: annoying to have to initialize this, also since it's static
+        potentially we are introducing a bug */
+      = {for i < MAX_HEADER_LENGTH + 1 : '\0' };
     char ?req_urip;
     alias *current;
     char c, ?p;
@@ -256,7 +261,7 @@ int translate_uri(request @ req)
 
         req_urip = req->request_uri + 2;
 
-        p = strchr(req_urip, '/');
+        p = mstrchr(req_urip, '/');
         if (p)
             *p = '\0';
 
@@ -280,11 +285,11 @@ int translate_uri(request @ req)
                 return 0;
             }
 
-            memcpy(buffer, user_homedir, l1);
+            strncpy(buffer, user_homedir, l1);
             buffer[l1] = '/';
-            memcpy(buffer + l1 + 1, user_dir, l2 + 1);
+            strncpy(buffer + l1 + 1, user_dir, l2 + 1);
             if (p)
-                memcpy(buffer + l1 + 1 + l2, p, l3 + 1);
+                strncpy(buffer + l1 + 1 + l2, p, l3 + 1);
         }
         /*
            sprintf(buffer, "%s/%s", user_homedir, user_dir);
@@ -368,9 +373,17 @@ int translate_uri(request @ req)
 
 int init_script_alias(request @ req, alias @ current1, int uri_len)
 {
-    static char pathname[MAX_HEADER_LENGTH + 1];
-    struct stat statbuf;
-    static char buffer[MAX_HEADER_LENGTH + 1];
+    static char pathname[MAX_HEADER_LENGTH + 1]
+      /* FIX: annoying to have to initialize this, also since it's static
+        potentially we are introducing a bug */
+      = {for i < MAX_HEADER_LENGTH + 1 : '\0' };
+    struct stat_t statbuf
+      /* FIX: annoying to have to initialize this */
+      = {0,0,0,0,0,0,0,0,0,0,0,0,0};
+    static char buffer[MAX_HEADER_LENGTH + 1]
+      /* FIX: annoying to have to initialize this, also since it's static
+        potentially we are introducing a bug */
+      = {for i < MAX_HEADER_LENGTH + 1 : '\0' };
 
     int index = 0;
     char c;
@@ -454,7 +467,7 @@ int init_script_alias(request @ req, alias @ current1, int uri_len)
             char ?user_homedir;
             char ?p;
 
-            p = strchr(pathname + index + 1, '/');
+            p = mstrchr(pathname + index + 1, '/');
             if (p)
                 *p = '\0';
 
@@ -545,24 +558,26 @@ int init_script_alias(request @ req, alias @ current1, int uri_len)
 
 void dump_alias(void)
 {
-    int i;
-    alias *temp;
+  /* We're using the garbage collector in Cyclone, so we don't need this */
 
-    for (i = 0; i < ALIAS_HASHTABLE_SIZE; ++i) { /* these limits OK? */
-        if (alias_hashtable[i]) {
-            temp = alias_hashtable[i];
-            while (temp) {
-                alias *temp_next;
-
-                if (temp->fakename)
-                    free(temp->fakename);
-                if (temp->realname)
-                    free(temp->realname);
-                temp_next = temp->next;
-                free(temp);
-                temp = temp_next;
-            }
-            alias_hashtable[i] = NULL;
-        }
-    }
+  //    int i;
+  //    alias *temp;
+  //
+  //    for (i = 0; i < ALIAS_HASHTABLE_SIZE; ++i) { /* these limits OK? */
+  //        if (alias_hashtable[i]) {
+  //            temp = alias_hashtable[i];
+  //            while (temp) {
+  //                alias *temp_next;
+  //
+  //                if (temp->fakename)
+  //                    free(temp->fakename);
+  //                if (temp->realname)
+  //                    free(temp->realname);
+  //                temp_next = temp->next;
+  //                free(temp);
+  //                temp = temp_next;
+  //            }
+  //            alias_hashtable[i] = NULL;
+  //        }
+  //    }
 }

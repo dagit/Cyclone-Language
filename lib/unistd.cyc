@@ -22,6 +22,7 @@ using Core;
 
 namespace Cunistd {
   extern "C" {
+    int access(Cstring,int);
     int chdir(Cstring);
     Cstring<`r> getcwd(Cstring<`r> buf, size_t size);
     int execv(Cstring path, Cstring *argv);
@@ -34,6 +35,10 @@ namespace Cunistd {
 }
 
 namespace Std;
+
+int access(string_t path, int mode) {
+  return Cunistd::access(string_to_Cstring(path),mode);
+}
 
 int chdir(string_t path) {
   return Cunistd::chdir(string_to_Cstring(path));

@@ -20,7 +20,7 @@
  *
  */
 
-/* $Id: response.cyc,v 1.1 2001-09-24 21:59:19 mharris Exp $*/
+/* $Id: response.cyc,v 1.2 2001-09-27 22:04:43 tjim Exp $*/
 
 #include "boa.h"
 #define HTML "text/html; charset=ISO-8859-1"
@@ -119,7 +119,7 @@ void send_redirect_perm(request @ req, char ?url)
 }
 
 /* R_MOVED_TEMP: 302 */
-void send_redirect_temp(request @ req, char ?url, char ?more_hdr)
+void send_redirect_temp(request @ req, char ?url, const char ?more_hdr)
 {
     SQUASH_KA(req);
     req->response_status = R_MOVED_TEMP;

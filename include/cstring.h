@@ -95,6 +95,7 @@ extern mstring_t<`r> rreplace_suffix (region_t<`r> r,string_t src,
 
 ////////////////////////// SEARCHING
 extern string_t<`r>  strchr(string_t<`r> s, char c);
+extern mstring_t<`r> mstrchr(mstring_t<`r> s, char c);
 extern mstring_t<`r> strrchr(mstring_t<`r> s, char c);
 extern string_t<`r>  strstr(string_t<`r> haystack, string_t needle);
 extern mstring_t<`r> strpbrk(mstring_t<`r> s, string_t accept);

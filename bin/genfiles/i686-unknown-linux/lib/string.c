@@ -272,7 +272,8 @@ struct _tagged_arr Cyc_Std_replace_suffix( struct _tagged_arr, struct
 _tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Std_rreplace_suffix(
 struct _RegionHandle* r, struct _tagged_arr src, struct _tagged_arr curr_suffix,
 struct _tagged_arr new_suffix); extern struct _tagged_arr Cyc_Std_strchr( struct
-_tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_strrchr(
+_tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_mstrchr(
+struct _tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_strrchr(
 struct _tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_strstr(
 struct _tagged_arr haystack, struct _tagged_arr needle); extern struct
 _tagged_arr Cyc_Std_strpbrk( struct _tagged_arr s, struct _tagged_arr accept);
@@ -508,7 +509,13 @@ _check_unknown_subscript( s, sizeof( unsigned char), 0u))) !=  0: 0;( len --,
 _tagged_arr_inplace_plus_post(& s, sizeof( unsigned char), 1))){ int j= 0; for(
 0; j <  _get_arr_size( accept, sizeof( unsigned char)); j ++){ if( c == *((
 const unsigned char*) _check_unknown_subscript( accept, sizeof( unsigned char),
-j))){ return s;}}} return _tag_arr( 0u, 0u, 0u);} struct _tagged_arr Cyc_Std_strchr(
+j))){ return s;}}} return _tag_arr( 0u, 0u, 0u);} struct _tagged_arr Cyc_Std_mstrchr(
+struct _tagged_arr s, unsigned char c){ int len=( int) Cyc_Std_int_strleno((
+struct _tagged_arr) s, _tag_arr("Std::strchr", sizeof( unsigned char), 12u));
+unsigned char c2='\000'; for( 0; len >  0?( c2=*(( unsigned char*)
+_check_unknown_subscript( s, sizeof( unsigned char), 0u))) !=  0: 0;( len --,
+_tagged_arr_inplace_plus_post(& s, sizeof( unsigned char), 1))){ if( c2 ==  c){
+return s;}} return _tag_arr( 0u, 0u, 0u);} struct _tagged_arr Cyc_Std_strchr(
 struct _tagged_arr s, unsigned char c){ int len=( int) Cyc_Std_int_strleno( s,
 _tag_arr("Std::strchr", sizeof( unsigned char), 12u)); unsigned char c2='\000';
 for( 0; len >  0?( c2=*(( const unsigned char*) _check_unknown_subscript( s,

@@ -238,24 +238,27 @@ unsigned short geteuid(); extern int seteuid( unsigned short euid); extern
 unsigned short getgid(); extern int setgid( unsigned short gid); extern
 unsigned short getegid(); extern int setegid( unsigned short egid); extern int
 pipe( int* filedes); extern int lseek( int filedes, int offset, int whence); int
-Cyc_Std_chdir( struct _tagged_arr); struct _tagged_arr Cyc_Std_getcwd( struct
-_tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct _tagged_arr path,
-struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp( struct
-_tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execve(
-struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp);
-int Cyc_Std_read( int fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_write(
-int fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
-_tagged_arr pathname); extern int chdir( unsigned char*); extern unsigned char*
-getcwd( unsigned char* buf, unsigned int size); extern int execv( unsigned char*
-path, unsigned char** argv); extern int execvp( unsigned char* file,
-unsigned char** argv); extern int execve( unsigned char* path, unsigned char**
-argv, unsigned char** envp); extern int read( int fd, unsigned char* buf,
-unsigned int count); extern int write( int fd, unsigned char* buf, unsigned int
-count); extern int unlink( unsigned char* pathname); int Cyc_Std_chdir( struct
-_tagged_arr path){ return chdir( string_to_Cstring( path));} struct _tagged_arr
-Cyc_Std_getcwd( struct _tagged_arr buf, unsigned int size){ if( !(( unsigned int)
-buf.curr)? 1: _get_arr_size( buf, sizeof( unsigned char)) <  size){( int) _throw((
-void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
+Cyc_Std_access( struct _tagged_arr, int); int Cyc_Std_chdir( struct _tagged_arr);
+struct _tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf, unsigned int size);
+int Cyc_Std_execl( struct _tagged_arr path, struct _tagged_arr arg0, struct
+_tagged_arr argv); int Cyc_Std_execlp( struct _tagged_arr file, struct
+_tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execve( struct
+_tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp); int Cyc_Std_read(
+int fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_write( int fd,
+struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
+_tagged_arr pathname); extern int access( unsigned char*, int); extern int chdir(
+unsigned char*); extern unsigned char* getcwd( unsigned char* buf, unsigned int
+size); extern int execv( unsigned char* path, unsigned char** argv); extern int
+execvp( unsigned char* file, unsigned char** argv); extern int execve(
+unsigned char* path, unsigned char** argv, unsigned char** envp); extern int
+read( int fd, unsigned char* buf, unsigned int count); extern int write( int fd,
+unsigned char* buf, unsigned int count); extern int unlink( unsigned char*
+pathname); int Cyc_Std_access( struct _tagged_arr path, int mode){ return access(
+string_to_Cstring( path), mode);} int Cyc_Std_chdir( struct _tagged_arr path){
+return chdir( string_to_Cstring( path));} struct _tagged_arr Cyc_Std_getcwd(
+struct _tagged_arr buf, unsigned int size){ if( !(( unsigned int) buf.curr)? 1:
+_get_arr_size( buf, sizeof( unsigned char)) <  size){( int) _throw(( void*)({
+struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
 _cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
 _temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("getcwd: invalid buf argument",
 sizeof( unsigned char), 29u); _temp1;}); _temp0;}));}{ unsigned char* response=

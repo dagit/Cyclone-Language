@@ -20,7 +20,7 @@
  *
  */
 
-/* $Id: boa.h,v 1.1 2001-09-24 21:59:18 mharris Exp $*/
+/* $Id: boa.h,v 1.2 2001-09-27 22:04:43 tjim Exp $*/
 
 #ifndef _BOA_H
 #define _BOA_H
@@ -48,15 +48,6 @@
 #include <sys/stat.h>           /* open */
 
 using Core;
-using Errno;
-using Stdlib;
-using Stdio;
-using String;
-using Ctype;
-using Time;
-using Pwd;
-using Socket;
-using Stat;
 
 /* alias */
 
@@ -128,7 +119,7 @@ void print_http_headers(request @ req);
 
 void send_r_request_ok(request @ req); /* 200 */
 void send_redirect_perm(request @ req, char ?url); /* 301 */
-void send_redirect_temp(request @ req, char ?url, char ?more_hdr); /* 302 */
+void send_redirect_temp(request @ req, char ?url, const char ?more_hdr); /* 302 */
 void send_r_not_modified(request @ req); /* 304 */
 void send_r_bad_request(request @ req); /* 400 */
 void send_r_unauthorized(request @ req, char ?name); /* 401 */
@@ -166,7 +157,6 @@ int month2int(const char ?month);
 int modified_since(time_t * mtime, const char ?if_modified_since);
 char ?to_upper(char ?str);
 int unescape_uri(const char ?uri);
-char ?`r mstrchr(char ?`r s, char c); // Cyclone-specific
 char ?`r mstrstr(char ?`r haystack, const char ?`r2 needle); // Cyclone-specific
 char ?`r memmove(char ?`r dest, const char ?`r2 src, size_t n); // Cyclone-specific
 

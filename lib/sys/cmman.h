@@ -19,7 +19,7 @@
 #ifndef _SYS_MMAN_H
 #define _SYS_MMAN_H
 
-#include <cstddef.h> // get size_t
+#include <sys/ctypes.h> // get size_t, off_t
 
 namespace Std {
 

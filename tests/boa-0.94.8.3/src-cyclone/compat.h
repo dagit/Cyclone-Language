@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: compat.h,v 1.1 2001-09-24 21:59:18 mharris Exp $*/
+/* $Id: compat.h,v 1.2 2001-09-27 22:04:43 tjim Exp $*/
 
 #ifndef _COMPAT_H
 #define _COMPAT_H
@@ -26,12 +26,9 @@
 #include "config.h"
 #ifdef HAVE_UNISTD_H
 #include <unistd.h>
-using Unistd;
-using Getopt;
 #endif
 #ifdef HAVE_FCNTL_H
 #include <fcntl.h>
-using Fcntl;
 #endif
 #ifdef HAVE_LIMITS_H
 #include <limits.h>             /* OPEN_MAX */
@@ -54,9 +51,7 @@ char *strdup(char *s);
 #endif
 
 #include <sys/mman.h>
-using Mman;
 #include <netdb.h>
-using NetDB;
 
 #ifndef OPEN_MAX
 #define OPEN_MAX 256

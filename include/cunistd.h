@@ -40,6 +40,12 @@ namespace Std {
 #define STDOUT_FILENO 1
 #define STDERR_FILENO 2
 
+/* For second arg of access */
+#define	R_OK 4
+#define	W_OK 2
+#define	X_OK 1
+#define	F_OK 0
+
   extern "C" {
     unsigned alarm(unsigned seconds);
     int close(int);
@@ -57,6 +63,7 @@ namespace Std {
     off_t lseek(int filedes, off_t offset, int whence);
   }
 
+  int access(string_t,int);
   int chdir(string_t);
   char ?`r getcwd(char ?`r buf, size_t size);
   int execl(string_t path, string_t arg0, ... string_t argv);

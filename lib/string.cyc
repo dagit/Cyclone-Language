@@ -466,6 +466,17 @@ mstring_t<`r> strpbrk(mstring_t<`r> s, string_t accept) {
 
 // Return a pointer to the first occurrence of c in s, 
 // or NULL if none.
+mstring_t<`r> mstrchr(mstring_t<`r> s, char c) {
+  int len = int_strleno(s,"Std::strchr");
+  char c2 = '\000';
+
+  for (; len>0 && (c2=*s)!=0; len--,s++) {
+    if (c2 == c)
+      return s;
+  }
+  return NULL;
+}
+
 string_t<`r> strchr(string_t<`r> s, char c) {
   int len = int_strleno(s,"Std::strchr");
   char c2 = '\000';
