@@ -129,12 +129,20 @@ static int yynerrs = 0;
 #define YYPARSE_PARAM_ARG 
 #endif
 
-/* If type variables (e.g., regions) are used with YYSTYPE this
-   will already be set.
-*/
 #ifndef YYSTYPEVARS
 #define YYSTYPEVARS
 #endif
+
+struct Yystacktype YYSTYPEVARS {
+  union YYSTYPE YYSTYPEVARS v;
+#ifdef YYLSP_NEEDED
+  YYLTYPE       l;
+#endif
+};
+
+/* If type variables (e.g., regions) are used with YYSTYPE this
+   will already be set.
+*/
 int yyparse(YYPARSE_PARAM_ARG)
 {
   // the arrays are allocated in this region
@@ -157,16 +165,14 @@ region yyregion; {
   short ?yyss = rcalloc(yyregion, YYINITDEPTH, sizeof(short));
   /*  the semantic value stack */
   int yyvsp_offset;
-  union YYSTYPE ? yyvs = rnew(yyregion) {for i < YYINITDEPTH : yylval}; 
-
 #ifdef YYLSP_NEEDED
-  /*  the location stack */
-  int yylsp_offset;
-  YYLTYPE ? yyls = rnew(yyregion) {for i < YYINITDEPTH: yynewloc()};
-#define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--, yylsp_offset--)
+  struct Yystacktype ? yyvs = 
+    rnew(yyregion) {for i < YYINITDEPTH : Yystacktype(yylval,yynewloc())}; 
 #else
-#define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--)
+  struct Yystacktype ? yyvs = 
+    rnew(yyregion) {for i < YYINITDEPTH : Yystacktype(yylval)}; 
 #endif
+#define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--)
 
   int yystacksize = YYINITDEPTH;
 
@@ -193,9 +199,6 @@ region yyregion; {
 
   yyssp_offset = -1;
   yyvsp_offset = 0;
-#ifdef YYLSP_NEEDED
-  yylsp_offset = 0;
-#endif
 
 /* Push a new state, which is found in  yystate  .  */
 /* In all cases, when you get here, the value and location stacks
@@ -215,19 +218,17 @@ yynewstate:
       yystacksize = YYMAXDEPTH;
     short ?yyss1 = rnew(yyregion) {for i < yystacksize : 
 				   (i <= yyssp_offset ? yyss[i] : 0)};
-    union YYSTYPE ?yyvs1 =
-      rnew(yyregion) {for i < yystacksize : 
-		      (i <= yyssp_offset ? yyvs[i] : yylval)};
 #ifdef YYLSP_NEEDED
-    YYLTYPE ?yyls1 = rnew(yyregion) {for i < yystacksize : 
-				     (i <= yyssp_offset ? yyls[i] : 
-				      yynewloc())};
+    struct Yystacktype ? yyvs1 = 
+      rnew(yyregion) {for i < yystacksize :
+		      (i <= yyssp_offset ? yyvs[i] : yyvs[0])};
+#else
+    struct Yystacktype ? yyvs1 = 
+      rnew(yyregion) {for i < yystacksize : 
+		      (i <= yyssp_offset ? yyvs[i] : yyvs[0])};
 #endif
     yyss = yyss1;
     yyvs = yyvs1;
-#ifdef YYLSP_NEEDED
-    yyls = yyls1;
-#endif
   }
     
 #if YYDEBUG != 0
@@ -327,10 +328,10 @@ yybackup:
   if (yychar != YYEOF)
     yychar = YYEMPTY;
 
-  yyvs[++yyvsp_offset] = yylval;
 #ifdef YYLSP_NEEDED
-  yyls[++yylsp_offset] = yylloc;
-  
+  yyvs[++yyvsp_offset] = Yystacktype(yylval,yylloc);
+#else  
+  yyvs[++yyvsp_offset] = Yystacktype(yylval);
 #endif
 
   /* count tokens shifted since error; after three, turn off error status.  */
@@ -351,7 +352,7 @@ yyreduce:
 
   yylen = yyr2[yyn];
   if (yylen > 0)
-    yyval = yyvs[yyvsp_offset+1-yylen]; /* implement default value of the action */
+    yyval = yyvs[yyvsp_offset+1-yylen].v; /* implement default value of the action */
 
 #if YYDEBUG != 0
   if (yydebug)
@@ -374,9 +375,6 @@ $    /* the action file gets copied in place of this dollarsign */
 #line 375 "cycbison.simple"
   yyvsp_offset -= yylen;
   yyssp_offset -= yylen;
-#ifdef YYLSP_NEEDED
-  yylsp_offset -= yylen;
-#endif
 
 #if YYDEBUG != 0
   if (yydebug)
@@ -389,22 +387,19 @@ $    /* the action file gets copied in place of this dollarsign */
     }
 #endif
 
-  yyvs[++yyvsp_offset] = yyval;
+  yyvs[++yyvsp_offset].v = yyval;
 
 #ifdef YYLSP_NEEDED
-  yylsp_offset++;
-  if (yylen == 0)
-    {
-      yyls[yylsp_offset].first_line   = yylloc.first_line;
-      yyls[yylsp_offset].first_column = yylloc.first_column;
-      yyls[yylsp_offset].last_line    = yyls[yylsp_offset-1].last_line; 
-      yyls[yylsp_offset].last_column  = yyls[yylsp_offset-1].last_column;  
-    }
-  else
-    {
-      yyls[yylsp_offset].last_line   =yyls[yylsp_offset+yylen-1].last_line;  
-      yyls[yylsp_offset].last_column =yyls[yylsp_offset+yylen-1].last_column; 
-    }
+  if (yylen == 0) {
+    _ @{2} p = (_ @{2})(yyvs + (yyvsp_offset - 1));
+    p[1].l.first_line   = yylloc.first_line;
+    p[1].l.first_column = yylloc.first_column;
+    p[1].l.last_line    = p[0].l.last_line; 
+    p[1].l.last_column  = p[0].l.last_column;  
+  } else {
+    yyvs[yyvsp_offset].l.last_line   =yyvs[yyvsp_offset+yylen-1].l.last_line; 
+    yyvs[yyvsp_offset].l.last_column =yyvs[yyvsp_offset+yylen-1].l.last_column;
+  }
 #endif
 
   /* Now "shift" the result of the reduction.
@@ -511,9 +506,6 @@ yyerrpop:   /* pop the current state because it cannot handle the error token */
   if (yyssp_offset == 0) YYABORT;
   yyvsp_offset--;
   yystate = yyss[--yyssp_offset];
-#ifdef YYLSP_NEEDED
-  yylsp_offset--;
-#endif
 
 #if YYDEBUG != 0
   if (yydebug)
@@ -551,9 +543,10 @@ yyerrhandle:
     fprintf(stderr,"Shifting error token, ");
 #endif
 
-  yyvs[++yyvsp_offset] = yylval;
 #ifdef YYLSP_NEEDED
-  yyls[++yylsp_offset] = yylloc;
+  yyvs[++yyvsp_offset] = Yystacktype(yylval,yylloc);
+#else
+  yyvs[++yyvsp_offset] = Yystacktype(yylval);
 #endif
 
   goto yynewstate;

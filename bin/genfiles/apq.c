@@ -419,7 +419,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
  struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
 # 73 "cycboot.h"
-struct _dyneither_ptr Cyc_aprintf(struct _dyneither_ptr,struct _dyneither_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
+struct _dyneither_ptr Cyc_aprintf(struct _dyneither_ptr,struct _dyneither_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 7 "ap.h"
 extern struct Cyc_AP_T*Cyc_AP_zero;
 extern struct Cyc_AP_T*Cyc_AP_one;
@@ -481,7 +481,7 @@ return Cyc_reduce(q);};}
 struct Cyc_APQ_T*Cyc_APQ_fromstr(struct _dyneither_ptr str,int base){
 struct Cyc_APQ_T*q=_cycalloc(sizeof(struct Cyc_APQ_T));
 struct _dyneither_ptr _tmp2=str;
-while((int)*((const char*)_check_dyneither_subscript(_tmp2,sizeof(char),0U)) && (int)*((const char*)_check_dyneither_subscript(_tmp2,sizeof(char),0U))!= (int)'/'){_dyneither_ptr_inplace_plus(& _tmp2,sizeof(char),1);}
+while((int)*((const char*)_check_dyneither_subscript(_tmp2,sizeof(char),0U))&&(int)*((const char*)_check_dyneither_subscript(_tmp2,sizeof(char),0U))!= (int)'/'){_dyneither_ptr_inplace_plus(& _tmp2,sizeof(char),1);}
 ({struct Cyc_AP_T*_tmp21=Cyc_AP_fromstr((const char*)_untag_dyneither_ptr(str,sizeof(char),1U),base);q->n=_tmp21;});
 if((int)*((const char*)_check_dyneither_subscript(_tmp2,sizeof(char),0U))){
 struct Cyc_AP_T*_tmp3=Cyc_AP_fromstr((const char*)_untag_dyneither_ptr(_dyneither_ptr_plus(_tmp2,sizeof(char),1),sizeof(char),1U),base);

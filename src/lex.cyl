@@ -238,10 +238,12 @@ static int trie_char(int c) {
 }
 
 static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t, 
-                              string_t buff, int offset, int len) {
-  int    i    = offset;
-  int    last = offset + len - 1;
-  while(i <= last) {
+                              string_t buff, int offset, unsigned len) {
+  unsigned i    = 0;
+  buff = buff + offset;
+  if(!(len < numelts(buff)))
+    Warn::impos("array bounds in trie_lookup");
+  while(i < len) {
     switch(t->children) {
     case {.Many = arr}:
       // walk down one level
@@ -267,7 +269,7 @@ static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t,
       break;
     case {.Zero = _}:
       // new string -- extend the trie
-      while(i <= last) {
+      while(i < len) {
 	let next = rnew(r) Trie(Zero(),0);
 	t->children = One(buff[i++], next);
 	t = next;

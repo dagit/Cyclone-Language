@@ -775,33 +775,21 @@ parse_type_decl ()
   /* DAN -- spit out the strip function */
   char ? deconstructor = has_been_seen(name);
   if(deconstructor) {
-    if(!nolinesflag)
-      fprintf((FILE @)fattrs, "\n#line %d \"%s\"", lineno, infile);
-    fprintf((FILE @)fattrs, "\n static @extensible datatype exn.Core::Failure yyfail_%s = Core::Failure(\"%s\");\n",deconstructor,name);
-    // JGM: the new type system does not allow evars in function types so I am
-    // going back to a macro like we used to have.  The right solution is to
-    // modify bison so that we get rid of the union definition and gensym
-    // tokens appropriately.
-    //fprintf((FILE @)fattrs, "\n_ yyget_%s(datatype @extensible YYSTYPE yy1) {switch(yy1) {case &%s(yy2): return yy2; default: throw &yyfail_%s;}}\n", name, name, name);
+    fprintf((FILE @)fattrs, "\n#line %d \"%s\"", lineno, infile);
     region pr;
     let vars = NULL;
-    if (union_typename != NULL)
-      vars = rprintf(pr,"<%s> ",union_typename);
+    if(union_typename != NULL)
+      vars = rprintf(pr,"<%s>",union_typename);
     fprintf((FILE @)fattrs,
-            "\n%s yyget_%s(union YYSTYPE %syy1) {\n"
-            "_ yyzzz; \n"
+            "\nstatic %s yyget_%s(union YYSTYPE %s@yy1 ) {\n"
+            "  static string_t s = \"%s\";\n"
             "  switch(yy1) {\n"
-            "    case {.%s = yyzzzz}: \n"
-            "      yyzzz = yyzzzz;\n"
-            "      break;\n"
-            "    default: throw &yyfail_%s;\n"
-            "  }; \n"
-            "  return yyzzz;\n"
+            "  case &{.%s = yy}: return yy;\n"
+            "  default: yythrowfail(s);\n"
+            "  } \n"
             "}",
-            name,deconstructor,vars,
-            deconstructor,deconstructor);
-    fprintf((FILE @)fattrs, "\nunion YYSTYPE %s%s(%s yy1) { return YYSTYPE{.%s = yy1}; }",vars,deconstructor,name,deconstructor);
-    fprintf((FILE @)fattrs,"\n#define YYSTYPEVARS %s\n",vars);
+            name,deconstructor,vars,name,deconstructor);
+    fprintf((FILE @)fattrs, "\nstatic union YYSTYPE %s %s(%s yy1) { return YYSTYPE{.%s = yy1}; }",vars,deconstructor,name,deconstructor);
   }
 
   for (;;)
@@ -1210,6 +1198,11 @@ print_union_decl()
   }
   fprintf((FILE @)fattrs0,"\n  int YYINITIALSVAL;");
   fprintf((FILE @)fattrs0,"\n};\n");
+  if(union_typename != NULL)
+    fprintf((FILE @)fattrs0,"\n#define YYSTYPEVARS %s\n",vars);
+  fprintf((FILE @)fattrs0,
+	  "\nstatic void yythrowfail(string_t<`H> s) __attribute__((noreturn)) {\n"
+	  " throw new Core::Failure(s);\n } ");
   if (fdefines){
 // TJ: YYPARSE_PARAM_ARG DOESN'T APPEAR IN .h FILE !
 //    fprintf((FILE @)fdefines,"\nextern int yyparse(YYPARSE_PARAM_ARG);");
@@ -1223,6 +1216,7 @@ print_union_decl()
     }
     fprintf((FILE @)fdefines,"\n  int  YYINITIALSVAL;");
     fprintf((FILE @)fdefines,"\n};\n");
+    //    fprintf((FILE @)fattrs0, "
   }
 
   
@@ -1475,7 +1469,7 @@ copy_guard(symbol_list *rule, int stack_offset)
 		type_name = strdup("BOGUS");
 	      }
               
-	      fprintf((FILE @)fguard, "yyget_%s(yyvsp[%d])", type2nth(type_name), n-stack_offset);
+	      fprintf((FILE @)fguard, "yyget_%s(&yyvsp[%d].v)", type2nth(type_name), n-stack_offset);
 	      continue;
 	    }
 	  else if (c == '(') {
@@ -1507,7 +1501,7 @@ copy_guard(symbol_list *rule, int stack_offset)
 	      */
 	    }
 
-	  fprintf((FILE @)fguard, "yylsp[%d]", n - stack_offset);
+	  fprintf((FILE @)fguard, "yyvsp[%d].l", n - stack_offset);
 	  yylsp_needed = 1;
 
 	  continue;
@@ -1574,12 +1568,9 @@ copy_action(symbol_list *rule, int stack_offset)
    * bounds-check on each dereference of these arrays.  
    */
   if (stack_offset > 0) {
-    fprintf((FILE @)faction, "union YYSTYPE @{%d}yyyyvsp = "
+    fprintf((FILE @)faction, "struct Yystacktype @{%d}yyyyvsp = "
             "(_ @{%d})(yyvs+(yyvsp_offset - %d));\n",
             stack_offset,stack_offset,stack_offset - 1);
-    fprintf((FILE @)faction, "#ifdef YYLSP_NEEDED\n"
-            "YYLTYPE @{%d} yyyylsp = (_ @{%d})(yyls+(yylsp_offset - %d));\n"
-            "#endif\n",stack_offset,stack_offset,stack_offset - 1);
   }
   if (!nolinesflag)
     fprintf((FILE @)faction, "#line %d \"%s\"\n", lineno, infile);
@@ -1770,28 +1761,28 @@ copy_action(symbol_list *rule, int stack_offset)
 			     int_to_string(n), rule->sym->tag);
 		    */
 		    if (m==0)
-                      fprintf((FILE @)faction, "(yyyyvsp[%d])",n-1);
+                      fprintf((FILE @)faction, "(yyyyvsp[%d].v)",n-1);
 		    else if (m > 0) 
                       /* JGM: we'll get a compile-time type error if we
                        * try to convert this to a use of yyyyvsp, because
                        * the value needs to be negative...
                        */
-		      fprintf((FILE @)faction, "(yyvs[yyvsp_offset+%d])", m);
+		      fprintf((FILE @)faction, "(yyvs[yyvsp_offset+%d].v)", m);
 		    else 
-		      fprintf((FILE @)faction, "(yyyyvsp[%d])",n-1);
+		      fprintf((FILE @)faction, "(yyyyvsp[%d].v)",n-1);
 		  } else {
 		    /* DAN: calling functions makes for smaller files. */
 		    fprintf((FILE @)faction," yyget_%s",type2nth(type_name));
 		    if (m==0)
-		      fprintf((FILE @)faction, "(yyyyvsp[%d])",n-1);
+		      fprintf((FILE @)faction, "(&yyyyvsp[%d].v)",n-1);
 		    else if (m > 0) 
                       /* JGM: we'll get a compile-time type error if we
                        * try to convert this to a use of yyyyvsp, because
                        * the value needs to be negative...
                        */
-		      fprintf((FILE @)faction, "(yyvs[yyvsp_offset+%d])", m);
+		      fprintf((FILE @)faction, "(&yyvs[yyvsp_offset+%d].v)", m);
 		    else 
-		      fprintf((FILE @)faction, "(yyyyvsp[%d])",n-1);
+		      fprintf((FILE @)faction, "(&yyyyvsp[%d].v)",n-1);
 
 		    /*
 		    fprintf(faction,"; yyinternal;})");
@@ -1832,15 +1823,15 @@ copy_action(symbol_list *rule, int stack_offset)
 		  */
 		}
 	      if (m == 0)
-		fprintf((FILE @)faction, "yyyylsp[%d]",n-1);
+		fprintf((FILE @)faction, "yyyyvsp[%d].l",n-1);
 	      else if (m > 0) 
                 /* JGM: we'll get a compile-time type error if we
                  * try to convert this to a use of yyyylsp, because
                  * the value needs to be negative...
                  */
-		fprintf((FILE @)faction, "yyls[yylsp_offset+%d]", m);
+		fprintf((FILE @)faction, "yyvs[yyvsp_offset+%d].l", m);
 	      else /* DJG make Popcorn parser happy */
-		fprintf((FILE @)faction, "yyyylsp[%d]",n-1);
+		fprintf((FILE @)faction, "yyyyvsp[%d].l",n-1);
 
 	      yylsp_needed = 1;
 

@@ -421,11 +421,11 @@ extern void _profile_free_region(struct _RegionHandle *,
 # 119 "core.h"
 int Cyc_Core_intcmp(int,int);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 168
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned int nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 61 "list.h"
 int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
 # 100 "cycboot.h"
-int Cyc_fprintf(struct Cyc___cycFILE*,struct _dyneither_ptr,struct _dyneither_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
+int Cyc_fprintf(struct Cyc___cycFILE*,struct _dyneither_ptr,struct _dyneither_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
 # 37 "iter.h"
 int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;
 # 51 "set.h"
@@ -533,11 +533,11 @@ struct Cyc_Set_Set**_tmpA=((struct Cyc_Set_Set**(*)(struct Cyc_Dict_Dict d,void*
 void Cyc_Graph_print(struct Cyc___cycFILE*f,struct Cyc_Dict_Dict g,void(*nodeprint)(struct Cyc___cycFILE*,void*)){
 ({void*_tmpD=0U;({struct Cyc___cycFILE*_tmpA1=f;struct _dyneither_ptr _tmpA0=({const char*_tmpE="digraph {\n";_tag_dyneither(_tmpE,sizeof(char),11U);});Cyc_fprintf(_tmpA1,_tmpA0,_tag_dyneither(_tmpD,sizeof(void*),0U));});});{
 struct Cyc_List_List*_tmpF=((struct Cyc_List_List*(*)(struct Cyc_Dict_Dict d))Cyc_Dict_to_list)(g);
-for(0;(unsigned int)_tmpF;_tmpF=_tmpF->tl){
+for(0;(unsigned)_tmpF;_tmpF=_tmpF->tl){
 struct _tuple0*_tmp10=(struct _tuple0*)_tmpF->hd;struct _tuple0*_tmp11=_tmp10;void*_tmp1C;struct Cyc_Set_Set*_tmp1B;_LL1: _tmp1C=_tmp11->f1;_tmp1B=_tmp11->f2;_LL2:;{
 struct Cyc_List_List*_tmp12=Cyc_Graph_to_list(_tmp1B);
-if((unsigned int)_tmp12)
-for(0;(unsigned int)_tmp12;_tmp12=_tmp12->tl){
+if((unsigned)_tmp12)
+for(0;(unsigned)_tmp12;_tmp12=_tmp12->tl){
 nodeprint(f,_tmp1C);
 ({void*_tmp13=0U;({struct Cyc___cycFILE*_tmpA3=f;struct _dyneither_ptr _tmpA2=({const char*_tmp14=" -> ";_tag_dyneither(_tmp14,sizeof(char),5U);});Cyc_fprintf(_tmpA3,_tmpA2,_tag_dyneither(_tmp13,sizeof(void*),0U));});});
 nodeprint(f,_tmp12->hd);
@@ -552,7 +552,7 @@ nodeprint(f,_tmp1C);
 static struct Cyc_List_List*Cyc_Graph_sourcesOf(struct Cyc_Dict_Dict g,void*node){
 struct Cyc_List_List*_tmp1F=0;
 # 144
-{struct Cyc_List_List*_tmp20=((struct Cyc_List_List*(*)(struct Cyc_Dict_Dict d))Cyc_Dict_to_list)(g);for(0;(unsigned int)_tmp20;_tmp20=_tmp20->tl){
+{struct Cyc_List_List*_tmp20=((struct Cyc_List_List*(*)(struct Cyc_Dict_Dict d))Cyc_Dict_to_list)(g);for(0;(unsigned)_tmp20;_tmp20=_tmp20->tl){
 struct _tuple0*_tmp21=(struct _tuple0*)_tmp20->hd;struct _tuple0*_tmp22=_tmp21;void*_tmp25;struct Cyc_Set_Set*_tmp24;_LL1: _tmp25=_tmp22->f1;_tmp24=_tmp22->f2;_LL2:;
 if(Cyc_Set_member(_tmp24,node))_tmp1F=({struct Cyc_List_List*_tmp23=_cycalloc(sizeof(*_tmp23));_tmp23->hd=_tmp25,_tmp23->tl=_tmp1F;_tmp23;});}}
 # 148
@@ -570,7 +570,7 @@ struct _tuple1 _tmp2A=Cyc_Graph_divideGraph(g,source);struct _tuple1 _tmp2B=_tmp
 struct Cyc_List_List*_tmp2C=Cyc_Graph_sourcesOf(_tmp30,source);
 struct Cyc_Set_Set*_tmp2D=({struct Cyc_Set_Set*_tmpAE=Cyc_Set_union_two(_tmp31,_tmp29);Cyc_Set_insert(_tmpAE,target);});
 struct Cyc_Dict_Dict _tmp2E=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,struct Cyc_Set_Set*v))Cyc_Dict_insert)(_tmp30,source,_tmp2D);
-{struct Cyc_List_List*_tmp2F=_tmp2C;for(0;(unsigned int)_tmp2F;_tmp2F=_tmp2F->tl){
+{struct Cyc_List_List*_tmp2F=_tmp2C;for(0;(unsigned)_tmp2F;_tmp2F=_tmp2F->tl){
 _tmp2E=Cyc_Graph_add_edges(_tmp2E,_tmp2F->hd,_tmp2D);}}
 # 178
 return _tmp2E;};}
@@ -578,11 +578,11 @@ return _tmp2E;};}
 struct Cyc_Dict_Dict Cyc_Graph_tc_slow(struct Cyc_Dict_Dict g){
 struct Cyc_Dict_Dict _tmp32=Cyc_Graph_empty(g.rel);
 struct Cyc_List_List*_tmp33=((struct Cyc_List_List*(*)(struct Cyc_Dict_Dict d))Cyc_Dict_to_list)(g);
-for(0;(unsigned int)_tmp33;_tmp33=_tmp33->tl){
+for(0;(unsigned)_tmp33;_tmp33=_tmp33->tl){
 struct _tuple0*_tmp34=(struct _tuple0*)_tmp33->hd;struct _tuple0*_tmp35=_tmp34;void*_tmp39;struct Cyc_Set_Set*_tmp38;_LL1: _tmp39=_tmp35->f1;_tmp38=_tmp35->f2;_LL2:;{
 struct Cyc_List_List*_tmp36=Cyc_Graph_to_list(_tmp38);
-if((unsigned int)_tmp36){
-struct Cyc_List_List*_tmp37=_tmp36;for(0;(unsigned int)_tmp37;_tmp37=_tmp37->tl){
+if((unsigned)_tmp36){
+struct Cyc_List_List*_tmp37=_tmp36;for(0;(unsigned)_tmp37;_tmp37=_tmp37->tl){
 _tmp32=Cyc_Graph_add_edgeTc(_tmp32,_tmp39,_tmp37->hd);}}else{
 _tmp32=Cyc_Graph_add_node(_tmp32,_tmp39);}};}
 # 191
@@ -592,7 +592,7 @@ struct Cyc_Dict_Dict Cyc_Graph_tkernel(struct Cyc_Dict_Dict g){
 int(*_tmp3A)(void*,void*)=g.rel;
 struct Cyc_Dict_Dict _tmp3B=Cyc_Graph_empty(_tmp3A);
 struct Cyc_Dict_Dict _tmp3C=Cyc_Graph_empty(_tmp3A);
-{struct Cyc_List_List*_tmp3D=((struct Cyc_List_List*(*)(struct Cyc_Dict_Dict d))Cyc_Dict_to_list)(g);for(0;(unsigned int)_tmp3D;_tmp3D=_tmp3D->tl){
+{struct Cyc_List_List*_tmp3D=((struct Cyc_List_List*(*)(struct Cyc_Dict_Dict d))Cyc_Dict_to_list)(g);for(0;(unsigned)_tmp3D;_tmp3D=_tmp3D->tl){
 struct _tuple0*_tmp3E=(struct _tuple0*)_tmp3D->hd;struct _tuple0*_tmp3F=_tmp3E;void*_tmp42;struct Cyc_Set_Set*_tmp41;_LL1: _tmp42=_tmp3F->f1;_tmp41=_tmp3F->f2;_LL2:;
 while(!Cyc_Set_is_empty(_tmp41)){
 void*_tmp40=Cyc_Set_choose(_tmp41);
@@ -647,8 +647,8 @@ struct Cyc_Set_Set*_tmpB3=Cyc_Set_empty(_tmp43);_tmp57->nodes=_tmpB3;});_tmp57;}
 {struct Cyc_List_List*_tmp4F=ts->nstack;struct Cyc_List_List*_tmp50=_tmp4F;void*_tmp51;if(_tmp50 == 0){_LL1: _LL2:
  goto _LL0;}else{_LL3: _tmp51=(void*)_tmp50->hd;_LL4:
 # 284
- if(_tmp43(_tmp51,v)!= 0  || 
-Cyc_Graph_is_edge(g,v,v))
+ if(_tmp43(_tmp51,v)!= 0 ||
+ Cyc_Graph_is_edge(g,v,v))
 ({struct Cyc_Set_Set*_tmpB6=((struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*s,int elt))Cyc_Set_insert)(_tmp4E->Succ,_tmp4D);_tmp4E->Succ=_tmpB6;});
 # 288
 goto _LL0;}_LL0:;}
@@ -661,7 +661,7 @@ struct Cyc_Set_Set*_tmp54=((struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*s,int elt)
 _tmp54=({struct Cyc_Set_Set*_tmpB7=_tmp54;((struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*s1,struct Cyc_Set_Set*s2))Cyc_Set_union_two)(_tmpB7,(((struct Cyc_Graph_componentstate*(*)(struct Cyc_Dict_Dict d,int k))Cyc_Dict_lookup)(ts->cs,_tmp53))->Succ);});
 _tmp4E->Succ=_tmp54;}}}
 # 299
-while((unsigned int)ts->nstack){
+while((unsigned)ts->nstack){
 void*_tmp55=((struct Cyc_List_List*)_check_null(ts->nstack))->hd;
 ts->nstack=((struct Cyc_List_List*)_check_null(ts->nstack))->tl;{
 struct Cyc_Graph_nodestate*_tmp56=((struct Cyc_Graph_nodestate*(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(ts->ns,_tmp55);
@@ -678,7 +678,7 @@ struct Cyc_Set_Set*_tmpBB=Cyc_Set_empty(_tmp59);_tmp68->visited=_tmpBB;}),_tmp68
 struct Cyc_Dict_Dict _tmpBA=((struct Cyc_Dict_Dict(*)(int(*cmp)(void*,void*)))Cyc_Dict_empty)(_tmp59);_tmp68->ns=_tmpBA;}),({
 struct Cyc_Dict_Dict _tmpB9=((struct Cyc_Dict_Dict(*)(int(*cmp)(int,int)))Cyc_Dict_empty)(Cyc_Core_intcmp);_tmp68->cs=_tmpB9;}),_tmp68->Cindex=1,_tmp68->nstack=0,_tmp68->cstack=0;_tmp68;});
 # 320
-{struct Cyc_List_List*_tmp5B=((struct Cyc_List_List*(*)(struct Cyc_Dict_Dict d))Cyc_Dict_to_list)(g);for(0;(unsigned int)_tmp5B;_tmp5B=_tmp5B->tl){
+{struct Cyc_List_List*_tmp5B=((struct Cyc_List_List*(*)(struct Cyc_Dict_Dict d))Cyc_Dict_to_list)(g);for(0;(unsigned)_tmp5B;_tmp5B=_tmp5B->tl){
 struct _tuple0*_tmp5C=(struct _tuple0*)_tmp5B->hd;struct _tuple0*_tmp5D=_tmp5C;void*_tmp5F;struct Cyc_Set_Set*_tmp5E;_LL1: _tmp5F=_tmp5D->f1;_tmp5E=_tmp5D->f2;_LL2:;
 if(!Cyc_Set_member(_tmp5A->visited,_tmp5F))Cyc_Graph_comp_tc(_tmp5A,g,_tmp5F);}}{
 # 325
@@ -701,30 +701,30 @@ _tmp60=Cyc_Graph_add_edges(_tmp60,_tmp67,_tmp63);}};}}
 # 343
 return _tmp60;};}
 # 356 "graph.cyc"
-static void Cyc_Graph_traverse(struct Cyc_Dict_Dict input,struct Cyc_Dict_Dict*output,struct Cyc_Dict_Dict*N,struct Cyc_List_List**S,void*x,unsigned int k){
+static void Cyc_Graph_traverse(struct Cyc_Dict_Dict input,struct Cyc_Dict_Dict*output,struct Cyc_Dict_Dict*N,struct Cyc_List_List**S,void*x,unsigned k){
 # 360
 ({struct Cyc_List_List*_tmpBD=({struct Cyc_List_List*_tmp69=_cycalloc(sizeof(*_tmp69));_tmp69->hd=x,_tmp69->tl=*S;_tmp69;});*S=_tmpBD;});
-({struct Cyc_Dict_Dict _tmpBE=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned int v))Cyc_Dict_insert)(*N,x,k);*N=_tmpBE;});
+({struct Cyc_Dict_Dict _tmpBE=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned v))Cyc_Dict_insert)(*N,x,k);*N=_tmpBE;});
 {struct Cyc_Set_Set*_tmp6A=Cyc_Graph_get_targets(input,x);for(0;!Cyc_Set_is_empty(_tmp6A);0){
 void*_tmp6B=Cyc_Set_choose(_tmp6A);
 _tmp6A=Cyc_Set_delete(_tmp6A,_tmp6B);
-if(((unsigned int(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,_tmp6B)== (unsigned int)0)
-Cyc_Graph_traverse(input,output,N,S,_tmp6B,k + (unsigned int)1);{
-unsigned int _tmp6C=((unsigned int(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,_tmp6B);
-if(({unsigned int _tmpBF=_tmp6C;_tmpBF < ((unsigned int(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,x);}))
-({struct Cyc_Dict_Dict _tmpC0=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned int v))Cyc_Dict_insert)(*N,x,_tmp6C);*N=_tmpC0;});};}}
+if(((unsigned(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,_tmp6B)== (unsigned)0)
+Cyc_Graph_traverse(input,output,N,S,_tmp6B,k + (unsigned)1);{
+unsigned _tmp6C=((unsigned(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,_tmp6B);
+if(({unsigned _tmpBF=_tmp6C;_tmpBF < ((unsigned(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,x);}))
+({struct Cyc_Dict_Dict _tmpC0=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned v))Cyc_Dict_insert)(*N,x,_tmp6C);*N=_tmpC0;});};}}
 # 371
-if(({unsigned int _tmpC1=((unsigned int(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,x);_tmpC1 == k;})){
+if(({unsigned _tmpC1=((unsigned(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,x);_tmpC1 == k;})){
 int(*_tmp6D)(void*,void*)=(*output).rel;
 struct Cyc_Set_Set*_tmp6E=Cyc_Set_empty(_tmp6D);
-{struct Cyc_List_List*_tmp6F=*S;for(0;(unsigned int)_tmp6F;_tmp6F=_tmp6F->tl){
+{struct Cyc_List_List*_tmp6F=*S;for(0;(unsigned)_tmp6F;_tmp6F=_tmp6F->tl){
 void*_tmp70=_tmp6F->hd;
 _tmp6E=Cyc_Set_insert(_tmp6E,_tmp70);
 if(_tmp6D(_tmp70,x)== 0)break;}}
 # 379
-for(0;(unsigned int)*S;*S=((struct Cyc_List_List*)_check_null(*S))->tl){
+for(0;(unsigned)*S;*S=((struct Cyc_List_List*)_check_null(*S))->tl){
 void*_tmp71=((struct Cyc_List_List*)_check_null(*S))->hd;
-({struct Cyc_Dict_Dict _tmpC2=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned int v))Cyc_Dict_insert)(*N,_tmp71,- 1U);*N=_tmpC2;});
+({struct Cyc_Dict_Dict _tmpC2=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned v))Cyc_Dict_insert)(*N,_tmp71,- 1U);*N=_tmpC2;});
 ({struct Cyc_Dict_Dict _tmpC3=Cyc_Graph_add_node(*output,_tmp71);*output=_tmpC3;});
 ({struct Cyc_Dict_Dict _tmpC4=Cyc_Graph_add_edges(*output,_tmp71,_tmp6E);*output=_tmpC4;});
 if(_tmp6D(_tmp71,x)== 0){
@@ -737,41 +737,41 @@ struct Cyc_List_List*_tmp73=((struct Cyc_List_List*(*)(struct Cyc_Dict_Dict d))C
 struct Cyc_Dict_Dict _tmp74=Cyc_Graph_empty(_tmp72);
 struct Cyc_List_List*_tmp75=0;
 struct Cyc_Dict_Dict N=((struct Cyc_Dict_Dict(*)(int(*cmp)(void*,void*)))Cyc_Dict_empty)(_tmp72);
-{struct Cyc_List_List*_tmp76=_tmp73;for(0;(unsigned int)_tmp76;_tmp76=_tmp76->tl){
+{struct Cyc_List_List*_tmp76=_tmp73;for(0;(unsigned)_tmp76;_tmp76=_tmp76->tl){
 struct _tuple0*_tmp77=(struct _tuple0*)_tmp76->hd;struct _tuple0*_tmp78=_tmp77;void*_tmp79;_LL1: _tmp79=_tmp78->f1;_LL2:;
-N=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned int v))Cyc_Dict_insert)(N,_tmp79,0U);}}
+N=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned v))Cyc_Dict_insert)(N,_tmp79,0U);}}
 # 401
-{struct Cyc_List_List*_tmp7A=_tmp73;for(0;(unsigned int)_tmp7A;_tmp7A=_tmp7A->tl){
+{struct Cyc_List_List*_tmp7A=_tmp73;for(0;(unsigned)_tmp7A;_tmp7A=_tmp7A->tl){
 struct _tuple0*_tmp7B=(struct _tuple0*)_tmp7A->hd;struct _tuple0*_tmp7C=_tmp7B;void*_tmp7D;_LL4: _tmp7D=_tmp7C->f1;_LL5:;
-if(((unsigned int(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(N,_tmp7D)== (unsigned int)0)
+if(((unsigned(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(N,_tmp7D)== (unsigned)0)
 Cyc_Graph_traverse(input,& _tmp74,& N,& _tmp75,_tmp7D,1U);}}
 # 406
 return _tmp74;}
 # 410
-static void Cyc_Graph_tsort0(struct Cyc_Dict_Dict input,struct Cyc_List_List**output,struct Cyc_Dict_Dict*N,struct Cyc_List_List**S,void*x,unsigned int k){
+static void Cyc_Graph_tsort0(struct Cyc_Dict_Dict input,struct Cyc_List_List**output,struct Cyc_Dict_Dict*N,struct Cyc_List_List**S,void*x,unsigned k){
 # 414
 ({struct Cyc_List_List*_tmpC5=({struct Cyc_List_List*_tmp7E=_cycalloc(sizeof(*_tmp7E));_tmp7E->hd=x,_tmp7E->tl=*S;_tmp7E;});*S=_tmpC5;});
-({struct Cyc_Dict_Dict _tmpC6=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned int v))Cyc_Dict_insert)(*N,x,k);*N=_tmpC6;});
+({struct Cyc_Dict_Dict _tmpC6=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned v))Cyc_Dict_insert)(*N,x,k);*N=_tmpC6;});
 {struct Cyc_Set_Set*_tmp7F=Cyc_Graph_get_targets(input,x);for(0;!Cyc_Set_is_empty(_tmp7F);0){
 void*_tmp80=Cyc_Set_choose(_tmp7F);
 _tmp7F=Cyc_Set_delete(_tmp7F,_tmp80);
-if(((unsigned int(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,_tmp80)== (unsigned int)0)
-Cyc_Graph_tsort0(input,output,N,S,_tmp80,k + (unsigned int)1);{
-unsigned int _tmp81=((unsigned int(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,_tmp80);
-if(({unsigned int _tmpC7=_tmp81;_tmpC7 < ((unsigned int(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,x);}))
-({struct Cyc_Dict_Dict _tmpC8=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned int v))Cyc_Dict_insert)(*N,x,_tmp81);*N=_tmpC8;});};}}
+if(((unsigned(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,_tmp80)== (unsigned)0)
+Cyc_Graph_tsort0(input,output,N,S,_tmp80,k + (unsigned)1);{
+unsigned _tmp81=((unsigned(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,_tmp80);
+if(({unsigned _tmpC7=_tmp81;_tmpC7 < ((unsigned(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,x);}))
+({struct Cyc_Dict_Dict _tmpC8=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned v))Cyc_Dict_insert)(*N,x,_tmp81);*N=_tmpC8;});};}}
 # 425
-if(({unsigned int _tmpC9=((unsigned int(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,x);_tmpC9 == k;})){
+if(({unsigned _tmpC9=((unsigned(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(*N,x);_tmpC9 == k;})){
 int(*_tmp82)(void*,void*)=input.rel;
 struct Cyc_Set_Set*_tmp83=Cyc_Set_empty(_tmp82);
-{struct Cyc_List_List*_tmp84=*S;for(0;(unsigned int)_tmp84;_tmp84=_tmp84->tl){
+{struct Cyc_List_List*_tmp84=*S;for(0;(unsigned)_tmp84;_tmp84=_tmp84->tl){
 void*_tmp85=_tmp84->hd;
 _tmp83=Cyc_Set_insert(_tmp83,_tmp85);
 if(_tmp82(_tmp85,x)== 0)break;}}
 # 433
-for(0;(unsigned int)*S;*S=((struct Cyc_List_List*)_check_null(*S))->tl){
+for(0;(unsigned)*S;*S=((struct Cyc_List_List*)_check_null(*S))->tl){
 void*_tmp86=((struct Cyc_List_List*)_check_null(*S))->hd;
-({struct Cyc_Dict_Dict _tmpCA=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned int v))Cyc_Dict_insert)(*N,_tmp86,- 1U);*N=_tmpCA;});
+({struct Cyc_Dict_Dict _tmpCA=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned v))Cyc_Dict_insert)(*N,_tmp86,- 1U);*N=_tmpCA;});
 ({struct Cyc_List_List*_tmpCB=({struct Cyc_List_List*_tmp87=_cycalloc(sizeof(*_tmp87));_tmp87->hd=_tmp86,_tmp87->tl=*output;_tmp87;});*output=_tmpCB;});
 if(_tmp82(_tmp86,x)== 0){
 *S=((struct Cyc_List_List*)_check_null(*S))->tl;
@@ -783,13 +783,13 @@ struct Cyc_List_List*_tmp89=((struct Cyc_List_List*(*)(struct Cyc_Dict_Dict d))C
 struct Cyc_List_List*_tmp8A=0;
 struct Cyc_List_List*_tmp8B=0;
 struct Cyc_Dict_Dict N=((struct Cyc_Dict_Dict(*)(int(*cmp)(void*,void*)))Cyc_Dict_empty)(_tmp88);
-{struct Cyc_List_List*_tmp8C=_tmp89;for(0;(unsigned int)_tmp8C;_tmp8C=_tmp8C->tl){
+{struct Cyc_List_List*_tmp8C=_tmp89;for(0;(unsigned)_tmp8C;_tmp8C=_tmp8C->tl){
 struct _tuple0*_tmp8D=(struct _tuple0*)_tmp8C->hd;struct _tuple0*_tmp8E=_tmp8D;void*_tmp8F;_LL1: _tmp8F=_tmp8E->f1;_LL2:;
-N=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned int v))Cyc_Dict_insert)(N,_tmp8F,0U);}}
+N=((struct Cyc_Dict_Dict(*)(struct Cyc_Dict_Dict d,void*k,unsigned v))Cyc_Dict_insert)(N,_tmp8F,0U);}}
 # 454
-{struct Cyc_List_List*_tmp90=_tmp89;for(0;(unsigned int)_tmp90;_tmp90=_tmp90->tl){
+{struct Cyc_List_List*_tmp90=_tmp89;for(0;(unsigned)_tmp90;_tmp90=_tmp90->tl){
 struct _tuple0*_tmp91=(struct _tuple0*)_tmp90->hd;struct _tuple0*_tmp92=_tmp91;void*_tmp93;_LL4: _tmp93=_tmp92->f1;_LL5:;
-if(((unsigned int(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(N,_tmp93)== (unsigned int)0)
+if(((unsigned(*)(struct Cyc_Dict_Dict d,void*k))Cyc_Dict_lookup)(N,_tmp93)== (unsigned)0)
 Cyc_Graph_tsort0(input,& _tmp8A,& N,& _tmp8B,_tmp93,1U);}}
 # 459
 return _tmp8A;}

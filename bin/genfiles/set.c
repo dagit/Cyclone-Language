@@ -421,7 +421,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 # 165 "core.h"
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 168
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned int nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 61 "list.h"
 int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};
 # 117
@@ -526,7 +526,7 @@ return({struct Cyc_List_List*_tmp5=_region_malloc(rgn,sizeof(*_tmp5));_tmp5->hd=
 struct Cyc_List_List*result=({struct Cyc_List_List*_tmp8=_region_malloc(rgn,sizeof(*_tmp8));_tmp8->hd=n->hd,_tmp8->tl=0;_tmp8;});
 struct Cyc_List_List*prev=result;
 n=n->tl;
-while(n != 0  && (i=cmp(n->hd,elt))< 0){
+while(n != 0 &&(i=cmp(n->hd,elt))< 0){
 ({struct Cyc_List_List*_tmp1E=({struct Cyc_List_List*_tmp6=_region_malloc(rgn,sizeof(*_tmp6));_tmp6->hd=n->hd,_tmp6->tl=0;_tmp6;});((struct Cyc_List_List*)_check_null(prev))->tl=_tmp1E;});
 prev=prev->tl;
 n=n->tl;}
@@ -555,7 +555,7 @@ return({struct Cyc_List_List*_tmpC=_region_malloc(rgn,sizeof(*_tmpC));_tmpC->hd=
 # 127
 struct Cyc_List_List*prev=n;struct Cyc_List_List*res=n;
 n=n->tl;
-while(n != 0  && (i=cmp(n->hd,elt))< 0){
+while(n != 0 &&(i=cmp(n->hd,elt))< 0){
 prev=((struct Cyc_List_List*)_check_null(prev))->tl;
 n=n->tl;}
 # 133
@@ -588,7 +588,7 @@ struct Cyc_List_List*x1=s1->nodes;
 struct Cyc_List_List*x2=s2->nodes;
 struct Cyc_List_List*curr=0;
 # 168
-while(x1 != 0  && x2 != 0){
+while(x1 != 0 && x2 != 0){
 int i=comp(x1->hd,x2->hd);
 if(i == 0)
 # 172
@@ -638,7 +638,7 @@ if(cmp(((struct Cyc_List_List*)_check_null(n))->hd,elt)== 0)return n->tl;{
 struct Cyc_List_List*result=({struct Cyc_List_List*_tmp14=_cycalloc(sizeof(*_tmp14));_tmp14->hd=n->hd,_tmp14->tl=0;_tmp14;});
 struct Cyc_List_List*prev=result;
 n=n->tl;
-while(n != 0  && cmp(n->hd,elt)!= 0){
+while(n != 0 && cmp(n->hd,elt)!= 0){
 ({struct Cyc_List_List*_tmp29=({struct Cyc_List_List*_tmp13=_cycalloc(sizeof(*_tmp13));_tmp13->hd=n->hd,_tmp13->tl=0;_tmp13;});((struct Cyc_List_List*)_check_null(prev))->tl=_tmp29;});
 prev=prev->tl;
 n=n->tl;}
@@ -657,7 +657,7 @@ if(cmp(((struct Cyc_List_List*)_check_null(n))->hd,elt)== 0)return n->tl;{
 # 248
 struct Cyc_List_List*prev=n;struct Cyc_List_List*res=n;
 n=n->tl;
-while(n != 0  && cmp(n->hd,elt)!= 0){
+while(n != 0 && cmp(n->hd,elt)!= 0){
 prev=((struct Cyc_List_List*)_check_null(prev))->tl;
 n=n->tl;}
 # 254
@@ -711,7 +711,7 @@ return s1;
 if(x2 == 0)
 return s2;
 # 315
-while(x1 != 0  && x2 != 0){
+while(x1 != 0 && x2 != 0){
 int i=comp(x1->hd,x2->hd);
 if(i == 0){
 if(result == 0){
@@ -735,7 +735,7 @@ struct Cyc_Set_Set*Cyc_Set_from_list(int(*comp)(void*,void*),struct Cyc_List_Lis
 struct Cyc_List_List*z=Cyc_List_merge_sort(comp,x);
 # 340
 {struct Cyc_List_List*y=z;for(0;y != 0;y=y->tl){
-if(y->tl != 0  && comp(y->hd,((struct Cyc_List_List*)_check_null(y->tl))->hd)== 0)
+if(y->tl != 0 && comp(y->hd,((struct Cyc_List_List*)_check_null(y->tl))->hd)== 0)
 y->tl=((struct Cyc_List_List*)_check_null(y->tl))->tl;}}
 # 344
 return({struct Cyc_Set_Set*_tmp19=_cycalloc(sizeof(*_tmp19));_tmp19->cmp=comp,({int _tmp2F=Cyc_List_length(z);_tmp19->cardinality=_tmp2F;}),_tmp19->nodes=z;_tmp19;});}
@@ -802,7 +802,7 @@ if(s->nodes == 0)(int)_throw((void*)& Cyc_Set_Absent_val);
 return((struct Cyc_List_List*)_check_null(s->nodes))->hd;}
 # 418
 int Cyc_Set_iter_f(struct Cyc_List_List**elts_left,void**dest){
-if(!((unsigned int)*elts_left))
+if(!((unsigned)*elts_left))
 return 0;
 *dest=((struct Cyc_List_List*)_check_null(*elts_left))->hd;
 *elts_left=((struct Cyc_List_List*)_check_null(*elts_left))->tl;

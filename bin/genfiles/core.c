@@ -421,9 +421,9 @@ extern void _profile_free_region(struct _RegionHandle *,
 # 91 "core.h"
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*x);
 # 95
-struct _dyneither_ptr Cyc_Core_new_string(unsigned int);
+struct _dyneither_ptr Cyc_Core_new_string(unsigned);
 # 99
-struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned int);
+struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned);
 # 103
 int Cyc_Core_true_f(void*);
 # 106
@@ -447,7 +447,7 @@ int Cyc_Core_nptrcmp(void*,void*);extern char Cyc_Core_Invalid_argument[17U];str
 # 146
 extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 168
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned int nelts;};char Cyc_Core_Invalid_argument[17U]="Invalid_argument";char Cyc_Core_SysError[9U]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8U]="Failure";char Cyc_Core_Impossible[11U]="Impossible";char Cyc_Core_Not_found[10U]="Not_found";
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};char Cyc_Core_Invalid_argument[17U]="Invalid_argument";char Cyc_Core_SysError[9U]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8U]="Failure";char Cyc_Core_Impossible[11U]="Impossible";char Cyc_Core_Not_found[10U]="Not_found";
 # 31 "core.cyc"
 struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12U]="Unreachable";
 # 34
@@ -456,11 +456,11 @@ if(o == 0)
 return 0;
 return({struct Cyc_Core_Opt*_tmp0=_region_malloc(Cyc_Core_unique_region,sizeof(*_tmp0));({void*_tmp4=f(o->v);_tmp0->v=_tmp4;});_tmp0;});}
 # 40
-struct _dyneither_ptr Cyc_Core_new_string(unsigned int i){
-return({unsigned int _tmp1=i;_tag_dyneither(_cyccalloc_atomic(sizeof(char),_tmp1),sizeof(char),_tmp1);});}
+struct _dyneither_ptr Cyc_Core_new_string(unsigned i){
+return({unsigned _tmp1=i;_tag_dyneither(_cyccalloc_atomic(sizeof(char),_tmp1),sizeof(char),_tmp1);});}
 # 44
-struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned int i){
-return({unsigned int _tmp2=i;_tag_dyneither(_region_calloc(r,sizeof(char),_tmp2),sizeof(char),_tmp2);});}
+struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned i){
+return({unsigned _tmp2=i;_tag_dyneither(_region_calloc(r,sizeof(char),_tmp2),sizeof(char),_tmp2);});}
 # 48
 int Cyc_Core_true_f(void*x){return 1;}
 int Cyc_Core_false_f(void*x){return 0;}
@@ -482,13 +482,13 @@ void*Cyc_Core_snd(struct _tuple0*pair){return(*pair).f2;}
 void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}
 # 68
 void*Cyc_Core_identity(void*x){
-return x;}struct _tuple2{void*f1;unsigned int f2;};
+return x;}struct _tuple2{void*f1;unsigned f2;};
 # 72
-inline static struct _tuple2 Cyc_Core_mktuple(void*a,unsigned int b){
+inline static struct _tuple2 Cyc_Core_mktuple(void*a,unsigned b){
 # 75
 return({struct _tuple2 _tmp3;_tmp3.f1=a,_tmp3.f2=b;_tmp3;});}
 # 81
-struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){
+struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned s,unsigned n){
 # 83
 struct _dyneither_ptr res;
 res.curr=arr;
@@ -496,25 +496,25 @@ res.base=arr;
 res.last_plus_one=arr + s * n;
 return res;}
 # 89
-void* Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
+void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned bd,unsigned sz){
 # 94
-if(bd >> 20  || sz >> 12)
+if(bd >> 20 || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
-if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
+if(((ptrbd < dyn.curr || dyn.curr == 0)|| dyn.curr < dyn.base)|| ptrbd > dyn.last_plus_one)
 # 101
 return 0;
 return dyn.curr;};}
 # 104
-struct Cyc_Core_ThinRes Cyc_Core_mkthin(struct _dyneither_ptr dyn,unsigned int sz){
-unsigned int bd=_get_dyneither_size(dyn,sz);
+struct Cyc_Core_ThinRes Cyc_Core_mkthin(struct _dyneither_ptr dyn,unsigned sz){
+unsigned bd=_get_dyneither_size(dyn,sz);
 struct Cyc_Core_ThinRes res;
 res.arr=dyn.curr;
 res.nelts=bd;
 return res;}
 # 114
-unsigned int Cyc_Core_arr_prevsize(struct _dyneither_ptr arr,unsigned int elt_sz){
+unsigned Cyc_Core_arr_prevsize(struct _dyneither_ptr arr,unsigned elt_sz){
 unsigned char*_get_arr_size_curr=arr.curr;
 unsigned char*_get_arr_size_base=arr.base;
 return
-(_get_arr_size_curr < _get_arr_size_base  || _get_arr_size_curr >= arr.last_plus_one)?0:(_get_arr_size_curr - _get_arr_size_base)/ elt_sz;}
+(_get_arr_size_curr < _get_arr_size_base || _get_arr_size_curr >= arr.last_plus_one)?0:(_get_arr_size_curr - _get_arr_size_base)/ elt_sz;}

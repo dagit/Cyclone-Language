@@ -23,7 +23,6 @@
 #include "tcutil.h"
 #include "warn.h"
 #include "cyclone.h"
-
 namespace Lex {
   extern $(const char ?, unsigned int) xlate_pos(Position::seg_t);
 }
@@ -32,7 +31,6 @@ using Cyclone;
 using Core;
 using List;
 using Absyn;
-
 namespace Absyndump;
 
 // Flag controlling whether typedefs are expanded during printing
@@ -93,10 +91,6 @@ static void dumploc(Position::seg_t); // dumps a #line directive
 
 // set by dumpdecllist2file (this module is not re-entrant)
 FILE @@ dump_file = &stdout; 
-
-static void ignore(`a x) { }
-
-static unsigned int pos = 0;
 static char prev_char = 'x';
 
 static bool need_space_before() {
@@ -168,9 +162,12 @@ static void dumploc(Position::seg_t loc) {
   // dump(s);
 }
 
-// this needs to take a boxed type b/c it's used to instantiate `a
+// these needs to take a boxed type b/c it's used to instantiate `a
 static void dump_str(stringptr_t s) {
   dump(*s);
+}
+static void dump_str_nospace(stringptr_t s) {
+  dump_nospace(*s);
 }
 
 static void dump_semi() {
@@ -213,51 +210,31 @@ static void egroup(void f(`a), list_t<`a> l,
     group(f,l,start,end,sep);
 }
 
-// is this backwards for nested namespaces? Consistent either way, but
-// should do the right thing!
+static void ignore(`a x) { }
+
 static void dumpqvar(qvar_t v) {
   let nsl = NULL;
   stringptr_t *prefix = NULL;
   switch ((*v)[0]) {
-  case {.Loc_n = _}: fallthru(NULL);
-  case {.Rel_n = x}:
-    nsl = x;
-    break;
-  case {.C_n = x}:
-    // No namespaces included in the C namespace.  
-    // We need a separator space here, because the rest of the name is 
-    // printed without spaces!
-    dump_char(' ');
-    break;
+  case {.Loc_n = _}: break;
+  case {.Rel_n = x}: nsl = x; break;
+  case {.C_n = x}:   break; // do _not_ print C namespaces
   case {.Abs_n = x}:
     if (qvar_to_Cids || add_cyc_prefix) 
       prefix = &Absynpp::cyc_stringptr;
     nsl = x;
     break;
   }
+  if(need_space_before())
+    dump_char(' ');
+  string_t sep = qvar_to_Cids ? "_" : "::";
   if (prefix != NULL) {
-    dump_str(*prefix);
-    if(qvar_to_Cids) dump_char('_');
-    else dump_nospace("::");
+    dump_nospace(**prefix); dump_nospace(sep);
   }
-  if (nsl != NULL) {
-    dump_nospace(*(nsl->hd));
-    for(nsl = nsl->tl; nsl != NULL; nsl = nsl->tl) {
-      // Note: This is the most common reason the result goes over 80 columns,
-      //       but who really cares.
-      if(qvar_to_Cids) dump_char('_');
-      else dump_nospace("::");
-      dump_nospace(*(nsl->hd));
-    }
-    if(qvar_to_Cids) dump_nospace("_");
-    else dump_nospace("::");
-    dump_nospace(*((*v)[1]));
-  } else {
-    if (prefix != NULL)
-      dump_nospace(*((*v)[1]));
-    else 
-      dump_str((*v)[1]);
+  if(nsl != NULL) {
+    dump_sep(dump_str_nospace,nsl,sep); dump_nospace(sep);
   }
+  dump_nospace(*((*v)[1]));
 }
 
 static void dumptq(tqual_t tq) {
@@ -279,34 +256,12 @@ static void dumpscope(scope_t sc) {
 static void dumpaggr_kind(aggr_kind_t k) {
   switch(k) {
   case StructA: dump("struct"); return;
-  case UnionA:  
   default:      dump("union");  return;
   }
 }
 
 static void dumpkind(kind_t ka) {
-  let &Kind(k,a) = ka;
-  switch (k) {
-  case EffKind:    dump("E");      return;
-  case IntKind:    dump("I");      return;
-  case BoolKind:   dump("BOOL");   return;
-  case PtrBndKind: dump("PTRBND"); return;
-  default:
-    let dumper = dump;
-    switch (a) {
-    case Aliasable: break;
-    case Unique:   dump_char('U'); dumper = dump_nospace; break;
-    case Top:      dump_char('T'); dumper = dump_nospace; break;
-    default: Warn::impos("Absyndump::dumpkind");
-    }
-    switch(k) {
-    case AnyKind: dumper("A"); return;
-    case MemKind: dumper("M"); return;
-    case BoxKind: dumper("B"); return;
-    case RgnKind: dumper("R"); return;
-    default: Warn::impos("Absyndump::dumpkind");
-    }
-  }
+  dump(Absynpp::kind2string(ka));
 }
 
 static void dumptps(list_t<type_t> ts) {
@@ -340,7 +295,6 @@ static void dumptvars(list_t<tvar_t> tvs) {
 static void dumpkindedtvars(list_t<tvar_t> tvs) {
   egroup(dumpkindedtvar,tvs,"<",">",",");
 }
-
 static void dumparg($(tqual_t,type_t)@ pr) {
   dumptqtd((*pr)[0],(*pr)[1],ignore,0);
 }
@@ -431,7 +385,7 @@ static void dumpeff(type_t t) {
     group(dumprgn,rgions,"{","}",",");
 }
 
-// Convert a normalized typ to a doc
+// Print a normalized typ to a doc
 static void dumpntyp(type_t t) {
   switch (t) {
     // The first three cases never turn up in normalized types.
@@ -487,7 +441,7 @@ static void dumpntyp(type_t t) {
     case &IntCon(None,     Short_sz):
     case &IntCon(Signed,   Short_sz): dump("short");          return;
     case &IntCon(Unsigned, Short_sz): dump("unsigned short"); return;
-    case &IntCon(Unsigned, Int_sz):   dump("unsigned int");   return;
+    case &IntCon(Unsigned, Int_sz):   dump("unsigned");       return;
     case &IntCon(Unsigned, Long_sz):  dump("unsigned long");  return;
     case &IntCon(Unsigned, LongLong_sz): dump("unsigned"); fallthru;
     case &IntCon(None,   LongLong_sz):
@@ -533,8 +487,7 @@ static void dumpfunarg($(var_opt_t,tqual_t,type_t)@ t) {
   dumptqtd((*t)[1],(*t)[2],dumpvaropt,(*t)[0]);
 }
 static void dump_rgncmp($(type_t,type_t)@ cmp) {
-  let &$(r1,r2) = cmp;
-  dumpeff(r1); dump_char('>'); dumprgn(r2);
+  dumpeff((*cmp)[0]); dump_char('>'); dumprgn((*cmp)[1]);
 }
 static void dump_rgnpo(list_t<$(type_t,type_t)@> rgn_po) {
   dump_sep(dump_rgncmp,rgn_po,",");
@@ -551,23 +504,17 @@ static void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args,
     dumpfunarg(new $(cyc_varargs->name, cyc_varargs->tq, cyc_varargs->type));
   }
   if (effopt != NULL) {
-    dump_semi();
-    dumpeff(effopt);
+    dump_semi(); dumpeff(effopt);
   }
   if (rgn_po != NULL) {
-    dump_char(':');
-    dump_rgnpo(rgn_po);
+    dump_char(':'); dump_rgnpo(rgn_po);
   }
   dump_char(')');
   if (req != NULL) {
-    dump(" @requires(");
-    dumpexp(req);
-    dump_char(')');
+    dump(" @requires("); dumpexp(req); dump_char(')');
   }
   if (ens != NULL) {
-    dump(" @ensures(");
-    dumpexp(ens);
-    dump_char(')');
+    dump(" @ensures(");  dumpexp(ens); dump_char(')');
   }
 }
 
@@ -581,16 +528,16 @@ static void dumpdesignator(designator_t d) {
   case &FieldName(v):    dump_char('.'); dump_nospace(*v);           break;
   }
 }
+static void dumpde($(list_t<designator_t>,exp_t)@ de) {
+  egroup(dumpdesignator,(*de)[0],"","=","=");
+  dumpexp((*de)[1]);
+}
+
 static void dumpoffset_field(offsetof_field_t f) {
   switch(f) {
   case &StructField(n): dump_nospace(*n);      return;
   case &TupleIndex(n):  dump(aprintf("%d",n)); return;
   }
-}
-
-static void dumpde($(list_t<designator_t>,exp_t)@ de) {
-  egroup(dumpdesignator,(*de)[0],"","=","=");
-  dumpexp((*de)[1]);
 }
 
 static void dumpexps_prec(int inprec, list_t<exp_t> es) {
@@ -671,11 +618,11 @@ static void dumpexp_prec(int inprec, exp_t e) {
 
   case &And_e(e1,e2):
     dumploc(e->loc);
-    dumpexp_prec(myprec,e1); dump(" && "); dumpexp_prec(myprec,e2); break;
+    dumpexp_prec(myprec,e1); dump("&&"); dumpexp_prec(myprec,e2); break;
 
   case &Or_e(e1,e2):
     dumploc(e->loc);
-    dumpexp_prec(myprec,e1); dump(" || "); dumpexp_prec(myprec,e2); break;
+    dumpexp_prec(myprec,e1); dump("||"); dumpexp_prec(myprec,e2); break;
 
   case &SeqExp_e(e1,e2):
     // DJG: put in parens because in initializers , doesn't mean SeqExp and
@@ -690,9 +637,8 @@ static void dumpexp_prec(int inprec, exp_t e) {
     dumploc(e->loc);
     dumpexp_prec(myprec,e1);
     dump_nospace("(");
-    // JGM: can't dump locations inside macro arguments, so we turn
-    // this off if the location of the function call (or the function
-    // itself) is 0.
+    // JGM: can't dump locations inside macro arguments, so we turn this
+    // off if the location of the function call (or the function itself) is 0.
     bool old_generate_line_directives = generate_line_directives;
     generate_line_directives = 
       old_generate_line_directives && !(e->loc == 0) && !(e1->loc == 0);
@@ -713,7 +659,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
 
   case &Address_e(e1):   dump_char('&');   dumpexp_prec(myprec,e1);     break;
   case &Deref_e(e1):     dump_char('*');   dumpexp_prec(myprec,e1);     break;
-  case &New_e(ropt,e1):  dump("new ");     dumpexp_prec(myprec,e1);     break;
+  case &New_e(ropt,e1):  dump("new");      dumpexp_prec(myprec,e1);     break;
   case &Sizeoftype_e(t): dump("sizeof(");  dumptyp(t);  dump_char(')'); break;
   case &Sizeofexp_e(e1): dump("sizeof(");  dumpexp(e1); dump_char(')'); break;
   case &Valueof_e(t):    dump("valueof("); dumptyp(t);  dump_char(')'); break;
@@ -723,7 +669,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
 
   case &Asm_e(vol,s):
     dump("__asm__");
-    if (vol) dump(" volatile ");
+    if (vol) dump("volatile");
     dump_char('('); dump_nospace(s); dump_char(')');
     break;
 
@@ -785,22 +731,15 @@ static void dumpexp_prec(int inprec, exp_t e) {
     dumploc(e->loc);
     if (is_calloc) {
       if (ropt != NULL) {
-        dump("rcalloc(");
-        dumpexp((exp_t)ropt); dump(",");
+        dump("rcalloc("); dumpexp(ropt); dump(",");
       } else {
-        dump("calloc");
+        dump("calloc(");
       }
-      dumpexp(e);
-      dump(",");
-      dumpexp(sizeoftype_exp(*topt,0));  
-      dump(")");
+      dumpexp(e); dump(","); dumpexp(sizeoftype_exp(*topt,0)); dump(")");
     } else {
       if (ropt != NULL) {
-        if (inline_call)
-          dump("rmalloc_inline(");
-        else
-          dump("rmalloc(");
-        dumpexp((exp_t)ropt); dump(",");
+	dump((inline_call ? "rmalloc_inline(" : "rmalloc(")); 
+        dumpexp(ropt); dump(",");
       } else {
         dump("malloc(");
       }
@@ -996,8 +935,7 @@ static void dumpdatatypefields(list_t<datatypefield_t> fields) {
 static void dumpenumfield(enumfield_t ef) {
   dumpqvar(ef->name);
   if (ef->tag != NULL) {
-    dump("=");
-    dumpexp((exp_t)ef->tag);
+    dump("="); dumpexp((exp_t)ef->tag);
   }
 }
 static void dumpenumfields(list_t<enumfield_t> fields) {
@@ -1012,12 +950,10 @@ static void dumpaggrfields(list_t<aggrfield_t> fields) {
     default:    dumpatts(atts); dumptqtd(tq,type,dump_str,name); break;
     }
     if (req) {
-      dump("@requires ");
-      dumpexp(req);
+      dump("@requires "); dumpexp(req);
     }
     if (width != NULL) {
-      dump_char(':');
-      dumpexp((exp_t)width);
+      dump_char(':'); dumpexp(width);
     }
     dump_semi();
   }
@@ -1119,43 +1055,33 @@ static void dump_aggrdecl(aggrdecl_t ad) {
   dumpscope(ad->sc);
   if (ad->impl != NULL && ad->impl->tagged)
     dump("@tagged ");
-  dumpaggr_kind(ad->kind); 
-  dumpqvar(ad->name);
-  dumpkindedtvars(ad->tvs);
+  dumpaggr_kind(ad->kind); dumpqvar(ad->name); dumpkindedtvars(ad->tvs);
   if(ad->impl != NULL) {
     dump_char('{');
     egroup(dumpkindedtvar,ad->impl->exist_vars,"<",">",",");
     if(ad->impl->rgn_po != NULL) {
-      dump_char(':');
-      dump_rgnpo(ad->impl->rgn_po);
+      dump_char(':'); dump_rgnpo(ad->impl->rgn_po);
     }
     dumpaggrfields(ad->impl->fields);
-    dump("}");
+    dump_char('}');
     dumpatts(ad->attributes);
   }
 }
 static void dump_enumdecl(enumdecl_t ed) {
   let &Enumdecl{sc,nm,fields} = ed;
-  dumpscope(sc);
-  dump("enum ");
-  dumpqvar(nm);
+  dumpscope(sc); dump("enum "); dumpqvar(nm);
   if (fields != NULL) {
-    dump_char('{');
-    dumpenumfields(fields->v);
-    dump_nospace("}");
+    dump_char('{'); dumpenumfields(fields->v); dump_char('}');
   }
 }
 static void dump_datatypedecl(datatypedecl_t dd) {
   let &Datatypedecl(sc,name,tvs,fields,is_x) = dd;
   dumpscope(sc);
-  if (is_x) dump("@extensible ");
-  dump("datatype ");
-  dumpqvar(name);
-  dumptvars(tvs);
+  if (is_x) 
+    dump("@extensible ");
+  dump("datatype "); dumpqvar(name); dumptvars(tvs);
   if(fields != NULL) {
-    dump_char('{');
-    dumpdatatypefields(fields->v);
-    dump_nospace("}");
+    dump_char('{'); dumpdatatypefields(fields->v); dump_char('}');
   }
 }
 

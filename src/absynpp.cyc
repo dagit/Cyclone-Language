@@ -36,33 +36,33 @@ using Tcutil;
 
 
 // forward references
-extern doc_t dp2doc($(list_t<designator_t>,pat_t)@ dp);
-extern doc_t switchclauses2doc(list_t<switch_clause_t> cs);
-extern doc_t typ2doc(type_t);
-extern doc_t aggrfields2doc(list_t<aggrfield_t> fields);
-extern doc_t scope2doc(scope_t);
-extern doc_t stmt2doc(stmt_t,bool expstmt);
-extern doc_t exp2doc(exp_t);
-extern doc_t exp2doc_prec(int inprec, exp_t e);
-extern doc_t exps2doc_prec(int inprec, list_t<exp_t> es);
-extern doc_t qvar2doc(qvar_t);
-extern doc_t typedef_name2doc(qvar_t);
-extern doc_t cnst2doc(cnst_t);
-extern doc_t prim2doc(primop_t);
-extern doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es);
-extern doc_t de2doc($(list_t<designator_t>,exp_t)@ de);
-extern doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt);
-extern doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,
-                         bool c_varargs,vararg_info_t *cyc_varargs,
-                         type_opt_t effopt,
-                         list_t<$(type_t,type_t)@> rgn_po,
-                         exp_opt_t requires, exp_opt_t ensures);
-extern doc_t datatypefields2doc(list_t<datatypefield_t> fields);
-extern doc_t enumfields2doc(list_t<enumfield_t> fs);
-extern doc_t vardecl2doc(vardecl_t vd);
-extern doc_t aggrdecl2doc(aggrdecl_t ad);
-extern doc_t enumdecl2doc(enumdecl_t ad);
-extern doc_t datatypedecl2doc(datatypedecl_t ad);
+doc_t dp2doc($(list_t<designator_t>,pat_t)@ dp);
+doc_t switchclauses2doc(list_t<switch_clause_t> cs);
+doc_t typ2doc(type_t);
+doc_t aggrfields2doc(list_t<aggrfield_t> fields);
+doc_t scope2doc(scope_t);
+doc_t stmt2doc(stmt_t,bool expstmt);
+doc_t exp2doc(exp_t);
+doc_t exp2doc_prec(int inprec, exp_t e);
+doc_t exps2doc_prec(int inprec, list_t<exp_t> es);
+doc_t qvar2doc(qvar_t);
+doc_t typedef_name2doc(qvar_t);
+doc_t cnst2doc(cnst_t);
+doc_t prim2doc(primop_t);
+doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es);
+doc_t de2doc($(list_t<designator_t>,exp_t)@ de);
+doc_t tqtd2doc(tqual_t tq, type_t t, opt_t<doc_t> dopt);
+doc_t funargs2doc(list_t<$(var_opt_t,tqual_t,type_t)@> args,
+		  bool c_varargs,vararg_info_t *cyc_varargs,
+		  type_opt_t effopt,
+		  list_t<$(type_t,type_t)@> rgn_po,
+		  exp_opt_t requires, exp_opt_t ensures);
+doc_t datatypefields2doc(list_t<datatypefield_t> fields);
+doc_t enumfields2doc(list_t<enumfield_t> fs);
+doc_t vardecl2doc(vardecl_t vd);
+doc_t aggrdecl2doc(aggrdecl_t ad);
+doc_t enumdecl2doc(enumdecl_t ad);
+doc_t datatypedecl2doc(datatypedecl_t ad);
 // Flag controlling whether typedefs are expanded during printing
 static bool expand_typedefs;
 
@@ -245,11 +245,11 @@ static void curr_namespace_add(var_t v) {
   curr_namespace = imp_append(curr_namespace, new List(v, NULL));
 }
 
-static void suppr_last(list_t<`a> @ l) {// could be in List
-  if ((*l) -> tl == NULL) {
+static void suppr_last(list_t @ l) {// could be in List
+  if ((*l)->tl == NULL) {
     *l = NULL;
   } else {
-    suppr_last(&((*l) -> tl));
+    suppr_last(&((*l)->tl));
   }
 }
 
@@ -992,6 +992,13 @@ doc_t typ2doc(type_t t) {
   return tqtd2doc(empty_tqual(0), t, NULL);
 }
 
+static doc_t offsetof_field_to_doc(offsetof_field_t f) {
+  switch(f) {
+  case &StructField(n): return textptr(n);
+  case &TupleIndex(n):  return text(aprintf("%d",n));
+  }
+}
+
 // higher precedence means binds more tightly
 // not quite right b/c unary operators allow cast expressions,
 //   but that just means we put extra parens in.
@@ -1096,7 +1103,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     case PreDec:  s = cat(text("--"),es); break;
     case PostInc: s = cat(es,text("++")); break;
     case PostDec: 
-    default: s = cat(es,text("--")); break;
+    default:      s = cat(es,text("--")); break;
     }
     break;
   case &Conditional_e(e1,e2,e3):
@@ -1120,35 +1127,22 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
             exps2doc_prec(20,es),
             text(")"));
     break;
-  case &Throw_e(e1,_):
-    s = cat(text("throw "), exp2doc_prec(myprec,e1));
-    break;
-  case &NoInstantiate_e(e1):
-    s = exp2doc_prec(inprec,e1);
-    break;
-  case &Instantiate_e(e1,_):
-    s = exp2doc_prec(inprec,e1);
-    break;
-  case &Cast_e(t,e1,_,_):
-    s = cat(text("("),
-            typ2doc(t),
-            text(")"),
-            exp2doc_prec(myprec,e1));
-    break;
-  case &Address_e(e1):
-    s = cat(text("&"),
-            exp2doc_prec(myprec,e1));
-    break;
+  case &Throw_e(e1,_): s = cat(text("throw "), exp2doc_prec(myprec,e1)); break;
+  case &NoInstantiate_e(e1): s = exp2doc_prec(inprec,e1); break;
+  case &Instantiate_e(e1,_): s = exp2doc_prec(inprec,e1); break;
+  case &Cast_e(t,e1,_,_): 
+    s = cat(text("("), typ2doc(t), text(")"), exp2doc_prec(myprec,e1)); break;
+  case &Address_e(e1): s = cat(text("&"), exp2doc_prec(myprec,e1)); break;
   case &New_e(ropt,e1):
     if (ropt == NULL)
       s = cat(text("new "),exp2doc_prec(myprec,e1));
     else
-      s = cat(text("rnew("),exp2doc((exp_t)ropt),text(") "),
-              exp2doc_prec(myprec,e1));
+      s = cat(text("rnew("),exp2doc(ropt),text(") "), exp2doc_prec(myprec,e1));
     break;
-  case &Sizeoftype_e(t):  s = cat(text("sizeof("), typ2doc(t), text(")")); break;
+  case &Sizeoftype_e(t): s = cat(text("sizeof("), typ2doc(t), text(")")); break;
   case &Sizeofexp_e(e1): s = cat(text("sizeof("),exp2doc(e1), text(")")); break;
-  case &Extension_e(e):  s = cat(text("__extension__("),exp2doc(e),text(")")); break;
+  case &Extension_e(e):  
+    s = cat(text("__extension__("),exp2doc(e),text(")")); break;
   case &Valueof_e(t): s = cat(text("valueof("), typ2doc(t), text(")")); break;
   case &Asm_e(vol,body):
     if (vol)
@@ -1160,56 +1154,27 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     s = cat(text("tagcheck("), exp2doc(e), text("."), textptr(f), text(")"));
     break;
   case &Offsetof_e(t,l):
-    s = cat(text("offsetof("), typ2doc(t), text(","));
-    for (;l != NULL; l = l->tl)
-      switch (l->hd) {
-      case &StructField(n): s = cat(s,textptr(n),
-				    l->tl != NULL ? text(".") : nil_doc());
-	break;
-      case &TupleIndex(n):  s = cat(s,text(aprintf("%d",n)),
-				    l->tl != NULL ? text(".") : nil_doc());
-	break;
-      }
-    s = cat(s,text(")"));
+    s = cat(text("offsetof("), typ2doc(t), text(","),
+	    seq(".",List::map(offsetof_field_to_doc,l)), text(")"));
     break;
-  case &Deref_e(e1):
-    s = cat(text("*"), exp2doc_prec(myprec,e1));
-    break;
+  case &Deref_e(e1): s = cat(text("*"), exp2doc_prec(myprec,e1)); break;
   case &AggrMember_e(e1,n,...):
-    s = cat(exp2doc_prec(myprec,e1), text("."), textptr(n));
-    break;
+    s = cat(exp2doc_prec(myprec,e1), text("."), textptr(n)); break;
   case &AggrArrow_e(e1,n,...):
-    s = cat(exp2doc_prec(myprec,e1), text("->"), textptr(n));
-    break;
+    s = cat(exp2doc_prec(myprec,e1), text("->"), textptr(n)); break;
   case &Subscript_e(e1,e2):
-    s = cat(exp2doc_prec(myprec,e1),
-            text("["),
-            exp2doc(e2),
-            text("]"));
-    break;
+    s = cat(exp2doc_prec(myprec,e1), text("["), exp2doc(e2), text("]")); break;
   case &Tuple_e(es):
-    s = cat(dollar(),
-            text("("),
-            exps2doc_prec(20,es),
-            text(")"));
-    break;
-  case &CompoundLit_e(vat,des):
-    s = cat(text("("),
-            typ2doc((*vat)[2]), // OK to ignore qualifiers??
-            text(")"),
+    s = cat(dollar(), text("("), exps2doc_prec(20,es), text(")")); break;
+  case &CompoundLit_e(vat,des): // OK to ignore qualifiers??
+    s = cat(text("("), typ2doc((*vat)[2]), text(")"),
             group_braces(",",List::map(de2doc,des)));
     break;
-  case &Array_e(des):
-    s = group_braces(",",List::map(de2doc,des));
-    break;
+  case &Array_e(des): s = group_braces(",",List::map(de2doc,des)); break;
   case &Comprehension_e(vd,e1,e2,_):
-    s = cat(lb(), text("for "),
-            text(*((*vd->name)[1])),
-            text(" < "),
-            exp2doc(e1),
-            text(" : "),
-            exp2doc(e2),
-            rb());
+    s = cat(lb(), text("for "), 
+	    text(*((*vd->name)[1])), text(" < "), exp2doc(e1), text(" : "), 
+	    exp2doc(e2), rb());
     break;
   case &ComprehensionNoinit_e(e,t,_):
     s = cat(lb(), text("for x "),
@@ -1225,9 +1190,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
             group_braces(",",
 		  (ts != NULL ? new List(tps2doc(ts), des_doc) : des_doc)));
     break;
-  case &AnonStruct_e(_,des):
-    s = group_braces(",",List::map(de2doc,des));
-    break;
+  case &AnonStruct_e(_,des): s = group_braces(",",List::map(de2doc,des)); break;
   case &Datatype_e(es,_,tuf):
     if (es == NULL)
       // special case: a nullary datatype constant is printed "foo" not "foo()"
@@ -1236,12 +1199,8 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
       s = cat(qvar2doc(tuf->name),
               egroup("(",")",",",List::map(exp2doc,es)));
     break;
-  case &Enum_e(_,ef):
-    s = qvar2doc(ef->name);
-    break;
-  case &AnonEnum_e(_,ef):
-    s = qvar2doc(ef->name);
-    break;
+  case &Enum_e(_,ef):     fallthru(ef);
+  case &AnonEnum_e(_,ef): s = qvar2doc(ef->name); break;
   case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,e,_,inline_call}):
     // Note: This is for Cyclone's malloc, not the mallocs introduced during
     //       translation to C, which are function calls.
@@ -1274,12 +1233,9 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     }
     break;
   case &Swap_e(e1,e2):
-    s = cat(exp2doc_prec(myprec,e1),
-            text(" :=: "),
-            exp2doc_prec(myprec,e2));
+    s = cat(exp2doc_prec(myprec,e1), text(" :=: "), exp2doc_prec(myprec,e2));
     break;
-  case &UnresolvedMem_e(n,des):
-    // Currently n is always NULL from the parser
+  case &UnresolvedMem_e(n,des): // Currently n is always NULL from the parser
     s = group_braces(",",List::map(de2doc,des));
     break;
   case &StmtExp_e(s2):
@@ -1330,23 +1286,19 @@ string_t longlong2string(unsigned long long i) {
 // FIX: take care of sign for Char_c and Short_c
 doc_t cnst2doc(cnst_t c) {
   switch (c) {
-  case {.Char_c = $(sg,ch)}:     return text(aprintf("'%s'",char_escape(ch)));
-  case {.Wchar_c = s}:           return text(aprintf("L'%s'",s));
-  case {.Short_c = $(sg,s)}:     return text(aprintf("%d",(int)s));
+  case {.Char_c = $(sg,ch)}: return text(aprintf("'%s'",char_escape(ch)));
+  case {.Wchar_c = s}:       return text(aprintf("L'%s'",s));
+  case {.Short_c = $(sg,s)}: return text(aprintf("%d",(int)s));
   case {.Int_c = $(sn,i)}:
-    if (sn == Unsigned) 
-      return text(aprintf("%uU",(unsigned)i));
-    else 
-      return text(aprintf("%d",i));
+    if (sn == Unsigned) return text(aprintf("%uU",(unsigned)i));
+    else                return text(aprintf("%d",i));
   case {.LongLong_c = $(sg,i)}:
     // FIX -- take account of sign!
     return text(longlong2string(i));
-  case {.Float_c = $(x,_)}:  return text(x);
-  case {.Null_c = _}:      return text("NULL");
-  case {.String_c = s}:
-    return cat(text("\""), text(string_escape(s)), text("\""));
-  case {.Wstring_c = s}:
-    return cat(text("L\""), text(s), text("\""));
+  case {.Float_c = $(x,_)}: return text(x);
+  case {.Null_c = _}:       return text("NULL");
+  case {.String_c=s}:  return cat(text("\""),text(string_escape(s)),text("\""));
+  case {.Wstring_c=s}: return cat(text("L\""), text(s), text("\""));
   }
 }
 
@@ -2232,8 +2184,7 @@ string_t decllist2string(list_t<decl_t> tdl) {
 string_t exp2string(exp_t e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
 string_t stmt2string(stmt_t s)   {return string_of_doc(stmt2doc(s,false), PP_WIDTH);}
 string_t typ2string(type_t t)    {return string_of_doc(typ2doc(t),  PP_WIDTH);}
-//string_t qvar2string(qvar_t v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
-string_t tvar2string(tvar_t t) {return string_of_doc(tvar2doc(t), PP_WIDTH);}
+string_t tvar2string(tvar_t t)   {return string_of_doc(tvar2doc(t), PP_WIDTH);}
 string_t typ2cstring(type_t t) {
   bool old_qvar_to_Cids = qvar_to_Cids;
   bool old_add_cyc_prefix = add_cyc_prefix;
@@ -2244,7 +2195,7 @@ string_t typ2cstring(type_t t) {
   add_cyc_prefix = old_add_cyc_prefix;
   return s;
 }
-string_t prim2string(primop_t p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
-string_t pat2string(pat_t p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}
+string_t prim2string(primop_t p) {return string_of_doc(prim2doc(p),  PP_WIDTH);}
+string_t pat2string(pat_t p)     {return string_of_doc(pat2doc(p),   PP_WIDTH);}
 string_t scope2string(scope_t sc){return string_of_doc(scope2doc(sc),PP_WIDTH);}
-string_t cnst2string(cnst_t c) {return string_of_doc(cnst2doc(c),PP_WIDTH);}
+string_t cnst2string(cnst_t c)   {return string_of_doc(cnst2doc(c),  PP_WIDTH);}

@@ -419,7 +419,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
  struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 168 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned int nelts;};
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};
 # 38 "cycboot.h"
 int Cyc_open(const char*,int,struct _dyneither_ptr);struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
 # 79
@@ -437,7 +437,7 @@ int Cyc_fputc(int,struct Cyc___cycFILE*);
 # 106
 int Cyc_fputs(const char*,struct Cyc___cycFILE*);
 # 108
-unsigned long Cyc_fread(struct _dyneither_ptr,unsigned long,unsigned long,struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
+unsigned long Cyc_fread(struct _dyneither_ptr,unsigned long,unsigned long,struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
 # 140 "cycboot.h"
 unsigned long Cyc_fwrite(struct _dyneither_ptr,unsigned long,unsigned long,struct Cyc___cycFILE*);
 # 142
@@ -461,7 +461,7 @@ int open_with_mode(const char*,int,unsigned short);
 # 31
 int Cyc_open(const char*s,int i,struct _dyneither_ptr ms){
 # 34
-if(_get_dyneither_size(ms,sizeof(unsigned short))>= (unsigned int)1)
+if(_get_dyneither_size(ms,sizeof(unsigned short))>= (unsigned)1)
 return open_with_mode(s,i,((unsigned short*)ms.curr)[0]);else{
 # 37
 return open_without_mode(s,i);}}struct __abstractFILE;struct Cyc___cycFILE{struct __abstractFILE*file;};
@@ -479,7 +479,7 @@ return feof(f->file);}
 int fflush(struct __abstractFILE*);
 # 65
 int Cyc_fflush(struct Cyc___cycFILE*f){
-if((unsigned int)f)
+if((unsigned)f)
 return fflush(f->file);else{
 return fflush(0);}}
 # 72
@@ -488,12 +488,12 @@ int fgetc(struct __abstractFILE*);
 int Cyc_fgetc(struct Cyc___cycFILE*f){
 return fgetc(f->file);}
 # 79
-struct __abstractFILE* fopen(const char*,const char*);
+struct __abstractFILE*fopen(const char*,const char*);
 # 81
 struct Cyc___cycFILE*Cyc_fopen(const char*name,const char*type){
-struct __abstractFILE*_tmp0= fopen(name,type);
+struct __abstractFILE*_tmp0=fopen(name,type);
 # 84
-return(unsigned int)_tmp0?({struct Cyc___cycFILE*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->file=_tmp0;_tmp1;}): 0;}
+return(unsigned)_tmp0?({struct Cyc___cycFILE*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->file=_tmp0;_tmp1;}): 0;}
 # 88
 int fputc(int,struct __abstractFILE*);
 # 90
@@ -520,7 +520,7 @@ static struct Cyc_Core_Failure_exn_struct Cyc___fwrite_failure_1={Cyc_Core_Failu
 static struct Cyc_Core_Failure_exn_struct Cyc___fwrite_failure_2={Cyc_Core_Failure,{_tmp4,_tmp4,_tmp4 + 28U}};
 # 118
 unsigned long Cyc_fwrite(struct _dyneither_ptr ptr,unsigned long size,unsigned long nmemb,struct Cyc___cycFILE*f){
-if(!((unsigned int)ptr.curr))(int)_throw((void*)& Cyc___fwrite_failure_1);else{
+if(!((unsigned)ptr.curr))(int)_throw((void*)& Cyc___fwrite_failure_1);else{
 # 121
 if(size * nmemb > _get_dyneither_size(ptr,sizeof(char)))(int)_throw((void*)& Cyc___fwrite_failure_2);
 return fwrite((const char*)_untag_dyneither_ptr(ptr,sizeof(char),1U),size,nmemb,f->file);}}
@@ -553,7 +553,7 @@ return putw(x,f->file);}char Cyc_FileCloseError[15U]="FileCloseError";char Cyc_F
 struct Cyc___cycFILE*Cyc_file_open(struct _dyneither_ptr fname,struct _dyneither_ptr mode){
 struct Cyc___cycFILE*f=({const char*_tmpB=(const char*)_check_null(_untag_dyneither_ptr(fname,sizeof(char),1U));Cyc_fopen(_tmpB,(const char*)_check_null(_untag_dyneither_ptr(mode,sizeof(char),1U)));});
 if(f == 0){
-struct _dyneither_ptr fn=({unsigned int _tmp7=_get_dyneither_size(fname,sizeof(char))+ 1U;char*_tmp6=_cycalloc_atomic(_check_times(_tmp7,sizeof(char)));({{unsigned int _tmpA=_get_dyneither_size(fname,sizeof(char));unsigned int i;for(i=0;i < _tmpA;++ i){_tmp6[i]=((const char*)fname.curr)[(int)i];}_tmp6[_tmpA]=0;}0;});_tag_dyneither(_tmp6,sizeof(char),_tmp7);});
+struct _dyneither_ptr fn=({unsigned _tmp7=_get_dyneither_size(fname,sizeof(char))+ 1U;char*_tmp6=_cycalloc_atomic(_check_times(_tmp7,sizeof(char)));({{unsigned _tmpA=_get_dyneither_size(fname,sizeof(char));unsigned i;for(i=0;i < _tmpA;++ i){_tmp6[i]=((const char*)fname.curr)[(int)i];}_tmp6[_tmpA]=0;}0;});_tag_dyneither(_tmp6,sizeof(char),_tmp7);});
 (int)_throw((void*)({struct Cyc_FileOpenError_exn_struct*_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5->tag=Cyc_FileOpenError,_tmp5->f1=fn;_tmp5;}));}
 # 172
 return f;}
@@ -562,14 +562,14 @@ struct Cyc_FileCloseError_exn_struct Cyc_FileCloseError_val={Cyc_FileCloseError}
 void Cyc_file_close(struct Cyc___cycFILE*f){
 if(Cyc_fclose(f)!= 0)(int)_throw((void*)& Cyc_FileCloseError_val);}
 # 183
-char* getcwd(char*buf,unsigned long size);static char _tmp8[29U]="getcwd: invalid buf argument";
+char*getcwd(char*buf,unsigned long size);static char _tmp8[29U]="getcwd: invalid buf argument";
 # 185
 static struct Cyc_Core_Failure_exn_struct Cyc___getcwd_failure={Cyc_Core_Failure,{_tmp8,_tmp8,_tmp8 + 29U}};
 # 187
 struct _dyneither_ptr Cyc_getcwd(struct _dyneither_ptr buf,unsigned long size){
 if(_get_dyneither_size(buf,sizeof(char))< size)(int)_throw((void*)& Cyc___getcwd_failure);{
-char*_tmp9= getcwd((char*)_untag_dyneither_ptr(buf,sizeof(char),1U),size);
-return(unsigned int)_tmp9?buf: _tag_dyneither(0,0,0);};}
+char*_tmp9=getcwd((char*)_untag_dyneither_ptr(buf,sizeof(char),1U),size);
+return(unsigned)_tmp9?buf: _tag_dyneither(0,0,0);};}
 # 194
 int Cyc_Execinfo_bt(){
 return 1;}

@@ -421,7 +421,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 # 165 "core.h"
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 168
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned int nelts;};
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};
 # 41 "cycboot.h"
 double modf(double,double*);struct Cyc___cycFILE;
 # 51
@@ -429,7 +429,7 @@ extern struct Cyc___cycFILE*Cyc_stdout;struct Cyc_String_pa_PrintArg_struct{int 
 # 73
 struct _dyneither_ptr Cyc_aprintf(struct _dyneither_ptr,struct _dyneither_ptr);
 # 100
-int Cyc_fprintf(struct Cyc___cycFILE*,struct _dyneither_ptr,struct _dyneither_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
+int Cyc_fprintf(struct Cyc___cycFILE*,struct _dyneither_ptr,struct _dyneither_ptr);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
 # 157 "cycboot.h"
 int Cyc_printf(struct _dyneither_ptr,struct _dyneither_ptr);
 # 161
@@ -523,7 +523,7 @@ static int Cyc__IO_nzsputn(int(*ioputc)(int,void*),void*ioputc_env,struct _dynei
 int i=0;
 while(i < howmany){
 char c;
-if((int)(c=*((const char*)_check_dyneither_subscript(s,sizeof(char),0U)))== 0  || ioputc((int)c,ioputc_env)== - 1)return i;
+if((int)(c=*((const char*)_check_dyneither_subscript(s,sizeof(char),0U)))== 0 || ioputc((int)c,ioputc_env)== - 1)return i;
 _dyneither_ptr_inplace_plus(& s,sizeof(char),1);
 ++ i;}
 # 232
@@ -555,9 +555,9 @@ if((int)*((const char*)_check_dyneither_subscript(s,sizeof(char),0U))== (int)c)r
 return _tag_dyneither(0,0,0);}
 # 267
 inline static const unsigned long Cyc_my_strlen(struct _dyneither_ptr s){
-unsigned int sz=_get_dyneither_size(s,sizeof(char));
-unsigned int i=0U;
-while(i < sz  && (int)((const char*)s.curr)[(int)i]!= 0){++ i;}
+unsigned sz=_get_dyneither_size(s,sizeof(char));
+unsigned i=0U;
+while(i < sz &&(int)((const char*)s.curr)[(int)i]!= 0){++ i;}
 return i;}
 # 278
 int Cyc__IO_vfprintf(int(*ioputc)(int,void*),void*ioputc_env,struct _dyneither_ptr fmt0,struct _dyneither_ptr ap){
@@ -591,7 +591,7 @@ int fieldsz;
 # 314
 int size=0;
 # 316
-char buf[349U];({{unsigned int _tmpC2=348U;unsigned int i;for(i=0;i < _tmpC2;++ i){buf[i]='\000';}buf[_tmpC2]=0;}0;});{
+char buf[349U];({{unsigned _tmpC2=348U;unsigned i;for(i=0;i < _tmpC2;++ i){buf[i]='\000';}buf[_tmpC2]=0;}0;});{
 char ox[2U];ox[0]='\000',ox[1]='\000';{
 enum Cyc_BASE base;
 # 342 "printf.cyc"
@@ -601,8 +601,8 @@ ret=0;
 for(0;1;0){
 # 351
 fmark=fmt;{
-unsigned int fmt_sz=_get_dyneither_size(fmt,sizeof(char));
-for(n=0;((unsigned int)n < fmt_sz  && (ch=(int)((const char*)fmt.curr)[n])!= (int)'\000') && ch != (int)'%';++ n){
+unsigned fmt_sz=_get_dyneither_size(fmt,sizeof(char));
+for(n=0;((unsigned)n < fmt_sz &&(ch=(int)((const char*)fmt.curr)[n])!= (int)'\000')&& ch != (int)'%';++ n){
 ;}
 fmt=_dyneither_ptr_plus(fmt,sizeof(char),n);
 # 357
@@ -651,7 +651,7 @@ prec=n < 0?- 1: n;
 goto rflag;}
 # 412
 n=0;
-while((unsigned int)(ch - (int)'0')<= (unsigned int)9){
+while((unsigned)(ch - (int)'0')<= (unsigned)9){
 n=10 * n + (ch - (int)'0');
 ch=(int)*((const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}
 # 417
@@ -666,7 +666,7 @@ goto rflag;case 49U: _LLF: _LL10:
  n=0;
 do{
 n=10 * n + (ch - (int)'0');
-ch=(int)*((const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}while((unsigned int)(ch - (int)'0')<= (unsigned int)9);
+ch=(int)*((const char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}while((unsigned)(ch - (int)'0')<= (unsigned)9);
 # 435
 width=n;
 goto reswitch;case 76U: _LL21: _LL22:
@@ -681,7 +681,7 @@ goto rflag;case 108U: _LL25: _LL26:
 goto rflag;case 99U: _LL27: _LL28:
 # 447
  cp=({char*_tmp2C=buf;_tag_dyneither(_tmp2C,sizeof(char),349U);});
-({struct _dyneither_ptr _tmp2D=cp;char _tmp2E=*((char*)_check_dyneither_subscript(_tmp2D,sizeof(char),0U));char _tmp2F=(char)Cyc_va_arg_int(ap);if(_get_dyneither_size(_tmp2D,sizeof(char))== 1U  && (_tmp2E == 0  && _tmp2F != 0))_throw_arraybounds();*((char*)_tmp2D.curr)=_tmp2F;});_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
+({struct _dyneither_ptr _tmp2D=cp;char _tmp2E=*((char*)_check_dyneither_subscript(_tmp2D,sizeof(char),0U));char _tmp2F=(char)Cyc_va_arg_int(ap);if(_get_dyneither_size(_tmp2D,sizeof(char))== 1U &&(_tmp2E == 0 && _tmp2F != 0))_throw_arraybounds();*((char*)_tmp2D.curr)=_tmp2F;});_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
 size=1;
 sign='\000';
 goto _LL0;case 68U: _LL29: _LL2A:
@@ -701,17 +701,17 @@ goto number;case 101U: _LL2F: _LL30:
  _double=Cyc_va_arg_double(ap);_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
 # 470
 if(prec > 39){
-if(ch != (int)'g'  && ch != (int)'G'  || flags & 8)
+if(ch != (int)'g' && ch != (int)'G' || flags & 8)
 fpprec=prec - 39;
 prec=39;}else{
 if(prec == -1)
 prec=6;}
 # 482
 cp=({char*_tmp30=buf;_tag_dyneither(_tmp30,sizeof(char),349U);});
-({struct _dyneither_ptr _tmp31=cp;char _tmp32=*((char*)_check_dyneither_subscript(_tmp31,sizeof(char),0U));char _tmp33='\000';if(_get_dyneither_size(_tmp31,sizeof(char))== 1U  && (_tmp32 == 0  && _tmp33 != 0))_throw_arraybounds();*((char*)_tmp31.curr)=_tmp33;});
+({struct _dyneither_ptr _tmp31=cp;char _tmp32=*((char*)_check_dyneither_subscript(_tmp31,sizeof(char),0U));char _tmp33='\000';if(_get_dyneither_size(_tmp31,sizeof(char))== 1U &&(_tmp32 == 0 && _tmp33 != 0))_throw_arraybounds();*((char*)_tmp31.curr)=_tmp33;});
 size=({double _tmpCC=_double;int _tmpCB=prec;int _tmpCA=flags;int _tmpC9=ch;struct _dyneither_ptr _tmpC8=cp;Cyc___cvt_double(_tmpCC,_tmpCB,_tmpCA,& softsign,_tmpC9,_tmpC8,
 # 486
-_dyneither_ptr_plus(({char*_tmp34=buf;_tag_dyneither(_tmp34,sizeof(char),349U);}),sizeof(char),(int)(sizeof(buf)- (unsigned int)1)));});
+_dyneither_ptr_plus(({char*_tmp34=buf;_tag_dyneither(_tmp34,sizeof(char),349U);}),sizeof(char),(int)(sizeof(buf)- (unsigned)1)));});
 if(softsign)
 sign='-';
 if((int)*((char*)_check_dyneither_subscript(cp,sizeof(char),0U))== (int)'\000')
@@ -765,7 +765,7 @@ goto nosign;case 88U: _LL49: _LL4A:
  _ulong=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)): Cyc_va_arg_uint(ap));_dyneither_ptr_inplace_plus(& ap,sizeof(void*),1);
 base=2U;
 # 548
-if(flags & 8  && _ulong != (unsigned long)0)
+if(flags & 8 && _ulong != (unsigned long)0)
 flags |=64;
 # 552
 nosign: sign='\000';
@@ -774,24 +774,24 @@ number: if((dprec=prec)>= 0)
 flags &=~ 32;
 # 566
 cp=_dyneither_ptr_plus(({char*_tmp35=buf;_tag_dyneither(_tmp35,sizeof(char),349U);}),sizeof(char),(308 + 39)+ 1);
-if(_ulong != (unsigned long)0  || prec != 0){
+if(_ulong != (unsigned long)0 || prec != 0){
 struct _dyneither_ptr xdigs;
 # 574
 enum Cyc_BASE _tmp36=base;switch(_tmp36){case Cyc_OCT: _LL50: _LL51:
 # 576
  do{
-({struct _dyneither_ptr _tmp37=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp38=*((char*)_check_dyneither_subscript(_tmp37,sizeof(char),0U));char _tmp39=(char)((_ulong & (unsigned long)7)+ (unsigned long)'0');if(_get_dyneither_size(_tmp37,sizeof(char))== 1U  && (_tmp38 == 0  && _tmp39 != 0))_throw_arraybounds();*((char*)_tmp37.curr)=_tmp39;});
+({struct _dyneither_ptr _tmp37=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp38=*((char*)_check_dyneither_subscript(_tmp37,sizeof(char),0U));char _tmp39=(char)((_ulong & (unsigned long)7)+ (unsigned long)'0');if(_get_dyneither_size(_tmp37,sizeof(char))== 1U &&(_tmp38 == 0 && _tmp39 != 0))_throw_arraybounds();*((char*)_tmp37.curr)=_tmp39;});
 _ulong >>=3U;}while((int)_ulong);
 # 581
-if(flags & 8  && (int)*((char*)_check_dyneither_subscript(cp,sizeof(char),0U))!= (int)'0')
-({struct _dyneither_ptr _tmp3A=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp3B=*((char*)_check_dyneither_subscript(_tmp3A,sizeof(char),0U));char _tmp3C='0';if(_get_dyneither_size(_tmp3A,sizeof(char))== 1U  && (_tmp3B == 0  && _tmp3C != 0))_throw_arraybounds();*((char*)_tmp3A.curr)=_tmp3C;});
+if(flags & 8 &&(int)*((char*)_check_dyneither_subscript(cp,sizeof(char),0U))!= (int)'0')
+({struct _dyneither_ptr _tmp3A=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp3B=*((char*)_check_dyneither_subscript(_tmp3A,sizeof(char),0U));char _tmp3C='0';if(_get_dyneither_size(_tmp3A,sizeof(char))== 1U &&(_tmp3B == 0 && _tmp3C != 0))_throw_arraybounds();*((char*)_tmp3A.curr)=_tmp3C;});
 goto _LL4F;case Cyc_DEC: _LL52: _LL53:
 # 587
  while(_ulong >= (unsigned long)10){
-({struct _dyneither_ptr _tmp3D=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp3E=*((char*)_check_dyneither_subscript(_tmp3D,sizeof(char),0U));char _tmp3F=(char)(_ulong % (unsigned long)10 + (unsigned long)'0');if(_get_dyneither_size(_tmp3D,sizeof(char))== 1U  && (_tmp3E == 0  && _tmp3F != 0))_throw_arraybounds();*((char*)_tmp3D.curr)=_tmp3F;});
+({struct _dyneither_ptr _tmp3D=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp3E=*((char*)_check_dyneither_subscript(_tmp3D,sizeof(char),0U));char _tmp3F=(char)(_ulong % (unsigned long)10 + (unsigned long)'0');if(_get_dyneither_size(_tmp3D,sizeof(char))== 1U &&(_tmp3E == 0 && _tmp3F != 0))_throw_arraybounds();*((char*)_tmp3D.curr)=_tmp3F;});
 _ulong /=10U;}
 # 591
-({struct _dyneither_ptr _tmp40=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp41=*((char*)_check_dyneither_subscript(_tmp40,sizeof(char),0U));char _tmp42=(char)(_ulong + (unsigned long)'0');if(_get_dyneither_size(_tmp40,sizeof(char))== 1U  && (_tmp41 == 0  && _tmp42 != 0))_throw_arraybounds();*((char*)_tmp40.curr)=_tmp42;});
+({struct _dyneither_ptr _tmp40=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp41=*((char*)_check_dyneither_subscript(_tmp40,sizeof(char),0U));char _tmp42=(char)(_ulong + (unsigned long)'0');if(_get_dyneither_size(_tmp40,sizeof(char))== 1U &&(_tmp41 == 0 && _tmp42 != 0))_throw_arraybounds();*((char*)_tmp40.curr)=_tmp42;});
 goto _LL4F;case Cyc_HEX: _LL54: _LL55:
 # 595
  if(ch == (int)'X')
@@ -799,7 +799,7 @@ xdigs=({const char*_tmp43="0123456789ABCDEF";_tag_dyneither(_tmp43,sizeof(char),
 # 598
 xdigs=({const char*_tmp44="0123456789abcdef";_tag_dyneither(_tmp44,sizeof(char),17U);});}
 do{
-({struct _dyneither_ptr _tmp45=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp46=*((char*)_check_dyneither_subscript(_tmp45,sizeof(char),0U));char _tmp47=*((const char*)_check_dyneither_subscript(xdigs,sizeof(char),(int)(_ulong & (unsigned long)15)));if(_get_dyneither_size(_tmp45,sizeof(char))== 1U  && (_tmp46 == 0  && _tmp47 != 0))_throw_arraybounds();*((char*)_tmp45.curr)=_tmp47;});
+({struct _dyneither_ptr _tmp45=_dyneither_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp46=*((char*)_check_dyneither_subscript(_tmp45,sizeof(char),0U));char _tmp47=*((const char*)_check_dyneither_subscript(xdigs,sizeof(char),(int)(_ulong & (unsigned long)15)));if(_get_dyneither_size(_tmp45,sizeof(char))== 1U &&(_tmp46 == 0 && _tmp47 != 0))_throw_arraybounds();*((char*)_tmp45.curr)=_tmp47;});
 _ulong >>=4U;}while((int)_ulong);
 # 603
 goto _LL4F;default: _LL56: _LL57:
@@ -815,7 +815,7 @@ skipsize:
 goto done;
 # 616
 cp=({char*_tmp4A=buf;_tag_dyneither(_tmp4A,sizeof(char),349U);});
-({struct _dyneither_ptr _tmp4B=cp;char _tmp4C=*((char*)_check_dyneither_subscript(_tmp4B,sizeof(char),0U));char _tmp4D=(char)ch;if(_get_dyneither_size(_tmp4B,sizeof(char))== 1U  && (_tmp4C == 0  && _tmp4D != 0))_throw_arraybounds();*((char*)_tmp4B.curr)=_tmp4D;});
+({struct _dyneither_ptr _tmp4B=cp;char _tmp4C=*((char*)_check_dyneither_subscript(_tmp4B,sizeof(char),0U));char _tmp4D=(char)ch;if(_get_dyneither_size(_tmp4B,sizeof(char))== 1U &&(_tmp4C == 0 && _tmp4D != 0))_throw_arraybounds();*((char*)_tmp4B.curr)=_tmp4D;});
 size=1;
 sign='\000';
 goto _LL0;}_LL0:;}
@@ -835,7 +835,7 @@ if((flags & (16 | 32))== 0){
 if(({int _tmpD2=Cyc__IO_padn(ioputc,ioputc_env,' ',width - fieldsz);_tmpD2 < width - fieldsz;}))goto error;}
 # 661
 if((int)sign){
-({struct _dyneither_ptr _tmp4F=_dyneither_ptr_plus(({char*_tmp4E=sign_string;_tag_dyneither(_tmp4E,sizeof(char),2U);}),sizeof(char),0);char _tmp50=*((char*)_check_dyneither_subscript(_tmp4F,sizeof(char),0U));char _tmp51=sign;if(_get_dyneither_size(_tmp4F,sizeof(char))== 1U  && (_tmp50 == 0  && _tmp51 != 0))_throw_arraybounds();*((char*)_tmp4F.curr)=_tmp51;});
+({struct _dyneither_ptr _tmp4F=_dyneither_ptr_plus(({char*_tmp4E=sign_string;_tag_dyneither(_tmp4E,sizeof(char),2U);}),sizeof(char),0);char _tmp50=*((char*)_check_dyneither_subscript(_tmp4F,sizeof(char),0U));char _tmp51=sign;if(_get_dyneither_size(_tmp4F,sizeof(char))== 1U &&(_tmp50 == 0 && _tmp51 != 0))_throw_arraybounds();*((char*)_tmp4F.curr)=_tmp51;});
 do{if(({int(*_tmpD4)(int,void*)=ioputc;void*_tmpD3=ioputc_env;Cyc__IO_sputn(_tmpD4,_tmpD3,(struct _dyneither_ptr)({char*_tmp52=sign_string;_tag_dyneither(_tmp52,sizeof(char),2U);}),1);})!= 1)goto error;}while(0);}else{
 if(flags & 64){
 ox[0]='0';
@@ -869,24 +869,24 @@ error:
 static struct _dyneither_ptr Cyc_exponent(struct _dyneither_ptr p,int exp,int fmtch){
 # 705
 struct _dyneither_ptr t;
-char expbuffer[309U];({{unsigned int _tmpC3=308U;unsigned int i;for(i=0;i < _tmpC3;++ i){expbuffer[i]='0';}expbuffer[_tmpC3]=0;}0;});{
+char expbuffer[309U];({{unsigned _tmpC3=308U;unsigned i;for(i=0;i < _tmpC3;++ i){expbuffer[i]='0';}expbuffer[_tmpC3]=0;}0;});{
 struct _dyneither_ptr expbuf=({char*_tmp6B=(char*)expbuffer;_tag_dyneither(_tmp6B,sizeof(char),309U);});
-({struct _dyneither_ptr _tmp53=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp54=*((char*)_check_dyneither_subscript(_tmp53,sizeof(char),0U));char _tmp55=(char)fmtch;if(_get_dyneither_size(_tmp53,sizeof(char))== 1U  && (_tmp54 == 0  && _tmp55 != 0))_throw_arraybounds();*((char*)_tmp53.curr)=_tmp55;});
+({struct _dyneither_ptr _tmp53=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp54=*((char*)_check_dyneither_subscript(_tmp53,sizeof(char),0U));char _tmp55=(char)fmtch;if(_get_dyneither_size(_tmp53,sizeof(char))== 1U &&(_tmp54 == 0 && _tmp55 != 0))_throw_arraybounds();*((char*)_tmp53.curr)=_tmp55;});
 if(exp < 0){
 exp=- exp;
-({struct _dyneither_ptr _tmp56=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp57=*((char*)_check_dyneither_subscript(_tmp56,sizeof(char),0U));char _tmp58='-';if(_get_dyneither_size(_tmp56,sizeof(char))== 1U  && (_tmp57 == 0  && _tmp58 != 0))_throw_arraybounds();*((char*)_tmp56.curr)=_tmp58;});}else{
+({struct _dyneither_ptr _tmp56=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp57=*((char*)_check_dyneither_subscript(_tmp56,sizeof(char),0U));char _tmp58='-';if(_get_dyneither_size(_tmp56,sizeof(char))== 1U &&(_tmp57 == 0 && _tmp58 != 0))_throw_arraybounds();*((char*)_tmp56.curr)=_tmp58;});}else{
 # 714
-({struct _dyneither_ptr _tmp59=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp5A=*((char*)_check_dyneither_subscript(_tmp59,sizeof(char),0U));char _tmp5B='+';if(_get_dyneither_size(_tmp59,sizeof(char))== 1U  && (_tmp5A == 0  && _tmp5B != 0))_throw_arraybounds();*((char*)_tmp59.curr)=_tmp5B;});}
+({struct _dyneither_ptr _tmp59=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp5A=*((char*)_check_dyneither_subscript(_tmp59,sizeof(char),0U));char _tmp5B='+';if(_get_dyneither_size(_tmp59,sizeof(char))== 1U &&(_tmp5A == 0 && _tmp5B != 0))_throw_arraybounds();*((char*)_tmp59.curr)=_tmp5B;});}
 t=_dyneither_ptr_plus(expbuf,sizeof(char),308);
 if(exp > 9){
 do{
-({struct _dyneither_ptr _tmp5C=_dyneither_ptr_inplace_plus(& t,sizeof(char),-1);char _tmp5D=*((char*)_check_dyneither_subscript(_tmp5C,sizeof(char),0U));char _tmp5E=(char)(exp % 10 + (int)'0');if(_get_dyneither_size(_tmp5C,sizeof(char))== 1U  && (_tmp5D == 0  && _tmp5E != 0))_throw_arraybounds();*((char*)_tmp5C.curr)=_tmp5E;});}while((exp /=10)> 9);
+({struct _dyneither_ptr _tmp5C=_dyneither_ptr_inplace_plus(& t,sizeof(char),-1);char _tmp5D=*((char*)_check_dyneither_subscript(_tmp5C,sizeof(char),0U));char _tmp5E=(char)(exp % 10 + (int)'0');if(_get_dyneither_size(_tmp5C,sizeof(char))== 1U &&(_tmp5D == 0 && _tmp5E != 0))_throw_arraybounds();*((char*)_tmp5C.curr)=_tmp5E;});}while((exp /=10)> 9);
 # 720
-({struct _dyneither_ptr _tmp5F=_dyneither_ptr_inplace_plus(& t,sizeof(char),-1);char _tmp60=*((char*)_check_dyneither_subscript(_tmp5F,sizeof(char),0U));char _tmp61=(char)(exp + (int)'0');if(_get_dyneither_size(_tmp5F,sizeof(char))== 1U  && (_tmp60 == 0  && _tmp61 != 0))_throw_arraybounds();*((char*)_tmp5F.curr)=_tmp61;});
-for(0;({char*_tmpDE=(char*)t.curr;_tmpDE < (char*)(_dyneither_ptr_plus(expbuf,sizeof(char),308)).curr;});({struct _dyneither_ptr _tmp62=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp63=*((char*)_check_dyneither_subscript(_tmp62,sizeof(char),0U));char _tmp64=*((char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1),sizeof(char),0U));if(_get_dyneither_size(_tmp62,sizeof(char))== 1U  && (_tmp63 == 0  && _tmp64 != 0))_throw_arraybounds();*((char*)_tmp62.curr)=_tmp64;})){;}}else{
+({struct _dyneither_ptr _tmp5F=_dyneither_ptr_inplace_plus(& t,sizeof(char),-1);char _tmp60=*((char*)_check_dyneither_subscript(_tmp5F,sizeof(char),0U));char _tmp61=(char)(exp + (int)'0');if(_get_dyneither_size(_tmp5F,sizeof(char))== 1U &&(_tmp60 == 0 && _tmp61 != 0))_throw_arraybounds();*((char*)_tmp5F.curr)=_tmp61;});
+for(0;({char*_tmpDE=(char*)t.curr;_tmpDE < (char*)(_dyneither_ptr_plus(expbuf,sizeof(char),308)).curr;});({struct _dyneither_ptr _tmp62=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp63=*((char*)_check_dyneither_subscript(_tmp62,sizeof(char),0U));char _tmp64=*((char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1),sizeof(char),0U));if(_get_dyneither_size(_tmp62,sizeof(char))== 1U &&(_tmp63 == 0 && _tmp64 != 0))_throw_arraybounds();*((char*)_tmp62.curr)=_tmp64;})){;}}else{
 # 724
-({struct _dyneither_ptr _tmp65=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp66=*((char*)_check_dyneither_subscript(_tmp65,sizeof(char),0U));char _tmp67='0';if(_get_dyneither_size(_tmp65,sizeof(char))== 1U  && (_tmp66 == 0  && _tmp67 != 0))_throw_arraybounds();*((char*)_tmp65.curr)=_tmp67;});
-({struct _dyneither_ptr _tmp68=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp69=*((char*)_check_dyneither_subscript(_tmp68,sizeof(char),0U));char _tmp6A=(char)(exp + (int)'0');if(_get_dyneither_size(_tmp68,sizeof(char))== 1U  && (_tmp69 == 0  && _tmp6A != 0))_throw_arraybounds();*((char*)_tmp68.curr)=_tmp6A;});}
+({struct _dyneither_ptr _tmp65=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp66=*((char*)_check_dyneither_subscript(_tmp65,sizeof(char),0U));char _tmp67='0';if(_get_dyneither_size(_tmp65,sizeof(char))== 1U &&(_tmp66 == 0 && _tmp67 != 0))_throw_arraybounds();*((char*)_tmp65.curr)=_tmp67;});
+({struct _dyneither_ptr _tmp68=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp69=*((char*)_check_dyneither_subscript(_tmp68,sizeof(char),0U));char _tmp6A=(char)(exp + (int)'0');if(_get_dyneither_size(_tmp68,sizeof(char))== 1U &&(_tmp69 == 0 && _tmp6A != 0))_throw_arraybounds();*((char*)_tmp68.curr)=_tmp6A;});}
 # 727
 return p;};}
 # 730
@@ -895,22 +895,22 @@ static struct _dyneither_ptr Cyc_sround(double fract,int*exp,struct _dyneither_p
 double tmp=0.0;
 # 736
 if(fract != 0.0)
- modf(fract * (double)10,& tmp);else{
+modf(fract * (double)10,& tmp);else{
 # 739
 tmp=(double)((int)ch - (int)'0');}
 if(tmp > (double)4)
 for(0;1;_dyneither_ptr_inplace_plus(& end,sizeof(char),-1)){
 if((int)*((char*)_check_dyneither_subscript(end,sizeof(char),0U))== (int)'.')
 _dyneither_ptr_inplace_plus(& end,sizeof(char),-1);
-if((int)({struct _dyneither_ptr _tmp6C=end;char _tmp6D=*((char*)_check_dyneither_subscript(_tmp6C,sizeof(char),0U));char _tmp6E=_tmp6D + (int)'\001';if(_get_dyneither_size(_tmp6C,sizeof(char))== 1U  && (_tmp6D == 0  && _tmp6E != 0))_throw_arraybounds();*((char*)_tmp6C.curr)=_tmp6E;})<= (int)'9')
+if((int)({struct _dyneither_ptr _tmp6C=end;char _tmp6D=*((char*)_check_dyneither_subscript(_tmp6C,sizeof(char),0U));char _tmp6E=_tmp6D + (int)'\001';if(_get_dyneither_size(_tmp6C,sizeof(char))== 1U &&(_tmp6D == 0 && _tmp6E != 0))_throw_arraybounds();*((char*)_tmp6C.curr)=_tmp6E;})<= (int)'9')
 break;
-({struct _dyneither_ptr _tmp6F=end;char _tmp70=*((char*)_check_dyneither_subscript(_tmp6F,sizeof(char),0U));char _tmp71='0';if(_get_dyneither_size(_tmp6F,sizeof(char))== 1U  && (_tmp70 == 0  && _tmp71 != 0))_throw_arraybounds();*((char*)_tmp6F.curr)=_tmp71;});
+({struct _dyneither_ptr _tmp6F=end;char _tmp70=*((char*)_check_dyneither_subscript(_tmp6F,sizeof(char),0U));char _tmp71='0';if(_get_dyneither_size(_tmp6F,sizeof(char))== 1U &&(_tmp70 == 0 && _tmp71 != 0))_throw_arraybounds();*((char*)_tmp6F.curr)=_tmp71;});
 if((char*)end.curr == (char*)start.curr){
-if((unsigned int)exp){
-({struct _dyneither_ptr _tmp72=end;char _tmp73=*((char*)_check_dyneither_subscript(_tmp72,sizeof(char),0U));char _tmp74='1';if(_get_dyneither_size(_tmp72,sizeof(char))== 1U  && (_tmp73 == 0  && _tmp74 != 0))_throw_arraybounds();*((char*)_tmp72.curr)=_tmp74;});
+if((unsigned)exp){
+({struct _dyneither_ptr _tmp72=end;char _tmp73=*((char*)_check_dyneither_subscript(_tmp72,sizeof(char),0U));char _tmp74='1';if(_get_dyneither_size(_tmp72,sizeof(char))== 1U &&(_tmp73 == 0 && _tmp74 != 0))_throw_arraybounds();*((char*)_tmp72.curr)=_tmp74;});
 ++(*exp);}else{
 # 753
-({struct _dyneither_ptr _tmp75=_dyneither_ptr_inplace_plus(& end,sizeof(char),-1);char _tmp76=*((char*)_check_dyneither_subscript(_tmp75,sizeof(char),0U));char _tmp77='1';if(_get_dyneither_size(_tmp75,sizeof(char))== 1U  && (_tmp76 == 0  && _tmp77 != 0))_throw_arraybounds();*((char*)_tmp75.curr)=_tmp77;});
+({struct _dyneither_ptr _tmp75=_dyneither_ptr_inplace_plus(& end,sizeof(char),-1);char _tmp76=*((char*)_check_dyneither_subscript(_tmp75,sizeof(char),0U));char _tmp77='1';if(_get_dyneither_size(_tmp75,sizeof(char))== 1U &&(_tmp76 == 0 && _tmp77 != 0))_throw_arraybounds();*((char*)_tmp75.curr)=_tmp77;});
 _dyneither_ptr_inplace_plus(& start,sizeof(char),-1);}
 # 756
 break;}}else{
@@ -940,49 +940,49 @@ number=- number;
 # 785
 *signp=0;}
 # 787
-fract= modf(number,& integer);
+fract=modf(number,& integer);
 # 790
 t=_dyneither_ptr_inplace_plus(& startp,sizeof(char),1);
 # 796
-for(p=_dyneither_ptr_plus(endp,sizeof(char),- 1);(char*)p.curr >= (char*)startp.curr  && integer != 0.0;++ expcnt){
-tmp= modf(integer / (double)10,& integer);
-({struct _dyneither_ptr _tmp78=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),-1);char _tmp79=*((char*)_check_dyneither_subscript(_tmp78,sizeof(char),0U));char _tmp7A=(char)((int)((tmp + .01)* (double)10)+ (int)'0');if(_get_dyneither_size(_tmp78,sizeof(char))== 1U  && (_tmp79 == 0  && _tmp7A != 0))_throw_arraybounds();*((char*)_tmp78.curr)=_tmp7A;});}
+for(p=_dyneither_ptr_plus(endp,sizeof(char),- 1);(char*)p.curr >= (char*)startp.curr && integer != 0.0;++ expcnt){
+tmp=modf(integer / (double)10,& integer);
+({struct _dyneither_ptr _tmp78=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),-1);char _tmp79=*((char*)_check_dyneither_subscript(_tmp78,sizeof(char),0U));char _tmp7A=(char)((int)((tmp + .01)* (double)10)+ (int)'0');if(_get_dyneither_size(_tmp78,sizeof(char))== 1U &&(_tmp79 == 0 && _tmp7A != 0))_throw_arraybounds();*((char*)_tmp78.curr)=_tmp7A;});}
 # 800
 {int _tmp7B=fmtch;switch(_tmp7B){case 102U: _LL1: _LL2:
  goto _LL4;case 70U: _LL3: _LL4:
 # 803
  if(expcnt)
-for(0;({char*_tmpDF=(char*)(_dyneither_ptr_inplace_plus(& p,sizeof(char),1)).curr;_tmpDF < (char*)endp.curr;});({struct _dyneither_ptr _tmp7C=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp7D=*((char*)_check_dyneither_subscript(_tmp7C,sizeof(char),0U));char _tmp7E=*((char*)_check_dyneither_subscript(p,sizeof(char),0U));if(_get_dyneither_size(_tmp7C,sizeof(char))== 1U  && (_tmp7D == 0  && _tmp7E != 0))_throw_arraybounds();*((char*)_tmp7C.curr)=_tmp7E;})){;}else{
+for(0;({char*_tmpDF=(char*)(_dyneither_ptr_inplace_plus(& p,sizeof(char),1)).curr;_tmpDF < (char*)endp.curr;});({struct _dyneither_ptr _tmp7C=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp7D=*((char*)_check_dyneither_subscript(_tmp7C,sizeof(char),0U));char _tmp7E=*((char*)_check_dyneither_subscript(p,sizeof(char),0U));if(_get_dyneither_size(_tmp7C,sizeof(char))== 1U &&(_tmp7D == 0 && _tmp7E != 0))_throw_arraybounds();*((char*)_tmp7C.curr)=_tmp7E;})){;}else{
 # 806
-({struct _dyneither_ptr _tmp7F=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp80=*((char*)_check_dyneither_subscript(_tmp7F,sizeof(char),0U));char _tmp81='0';if(_get_dyneither_size(_tmp7F,sizeof(char))== 1U  && (_tmp80 == 0  && _tmp81 != 0))_throw_arraybounds();*((char*)_tmp7F.curr)=_tmp81;});}
+({struct _dyneither_ptr _tmp7F=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp80=*((char*)_check_dyneither_subscript(_tmp7F,sizeof(char),0U));char _tmp81='0';if(_get_dyneither_size(_tmp7F,sizeof(char))== 1U &&(_tmp80 == 0 && _tmp81 != 0))_throw_arraybounds();*((char*)_tmp7F.curr)=_tmp81;});}
 # 811
-if(prec  || flags & 8)
-({struct _dyneither_ptr _tmp82=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp83=*((char*)_check_dyneither_subscript(_tmp82,sizeof(char),0U));char _tmp84='.';if(_get_dyneither_size(_tmp82,sizeof(char))== 1U  && (_tmp83 == 0  && _tmp84 != 0))_throw_arraybounds();*((char*)_tmp82.curr)=_tmp84;});
+if(prec || flags & 8)
+({struct _dyneither_ptr _tmp82=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp83=*((char*)_check_dyneither_subscript(_tmp82,sizeof(char),0U));char _tmp84='.';if(_get_dyneither_size(_tmp82,sizeof(char))== 1U &&(_tmp83 == 0 && _tmp84 != 0))_throw_arraybounds();*((char*)_tmp82.curr)=_tmp84;});
 # 814
 if(fract != 0.0){
 if(prec)
 do{
-fract= modf(fract * (double)10,& tmp);
-({struct _dyneither_ptr _tmp85=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp86=*((char*)_check_dyneither_subscript(_tmp85,sizeof(char),0U));char _tmp87=(char)((int)tmp + (int)'0');if(_get_dyneither_size(_tmp85,sizeof(char))== 1U  && (_tmp86 == 0  && _tmp87 != 0))_throw_arraybounds();*((char*)_tmp85.curr)=_tmp87;});}while(
--- prec  && fract != 0.0);
+fract=modf(fract * (double)10,& tmp);
+({struct _dyneither_ptr _tmp85=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp86=*((char*)_check_dyneither_subscript(_tmp85,sizeof(char),0U));char _tmp87=(char)((int)tmp + (int)'0');if(_get_dyneither_size(_tmp85,sizeof(char))== 1U &&(_tmp86 == 0 && _tmp87 != 0))_throw_arraybounds();*((char*)_tmp85.curr)=_tmp87;});}while(
+-- prec && fract != 0.0);
 if(fract != 0.0)
 startp=({double _tmpE2=fract;struct _dyneither_ptr _tmpE1=startp;struct _dyneither_ptr _tmpE0=
 _dyneither_ptr_plus(t,sizeof(char),- 1);
 # 821
 Cyc_sround(_tmpE2,0,_tmpE1,_tmpE0,'\000',signp);});}
 # 824
-for(0;prec --;({struct _dyneither_ptr _tmp88=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp89=*((char*)_check_dyneither_subscript(_tmp88,sizeof(char),0U));char _tmp8A='0';if(_get_dyneither_size(_tmp88,sizeof(char))== 1U  && (_tmp89 == 0  && _tmp8A != 0))_throw_arraybounds();*((char*)_tmp88.curr)=_tmp8A;})){;}
+for(0;prec --;({struct _dyneither_ptr _tmp88=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp89=*((char*)_check_dyneither_subscript(_tmp88,sizeof(char),0U));char _tmp8A='0';if(_get_dyneither_size(_tmp88,sizeof(char))== 1U &&(_tmp89 == 0 && _tmp8A != 0))_throw_arraybounds();*((char*)_tmp88.curr)=_tmp8A;})){;}
 goto _LL0;case 101U: _LL5: _LL6:
  goto _LL8;case 69U: _LL7: _LL8:
  eformat: if(expcnt){
-({struct _dyneither_ptr _tmp8B=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp8C=*((char*)_check_dyneither_subscript(_tmp8B,sizeof(char),0U));char _tmp8D=*((char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus(& p,sizeof(char),1),sizeof(char),0U));if(_get_dyneither_size(_tmp8B,sizeof(char))== 1U  && (_tmp8C == 0  && _tmp8D != 0))_throw_arraybounds();*((char*)_tmp8B.curr)=_tmp8D;});
-if(prec  || flags & 8)
-({struct _dyneither_ptr _tmp8E=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp8F=*((char*)_check_dyneither_subscript(_tmp8E,sizeof(char),0U));char _tmp90='.';if(_get_dyneither_size(_tmp8E,sizeof(char))== 1U  && (_tmp8F == 0  && _tmp90 != 0))_throw_arraybounds();*((char*)_tmp8E.curr)=_tmp90;});
+({struct _dyneither_ptr _tmp8B=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp8C=*((char*)_check_dyneither_subscript(_tmp8B,sizeof(char),0U));char _tmp8D=*((char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus(& p,sizeof(char),1),sizeof(char),0U));if(_get_dyneither_size(_tmp8B,sizeof(char))== 1U &&(_tmp8C == 0 && _tmp8D != 0))_throw_arraybounds();*((char*)_tmp8B.curr)=_tmp8D;});
+if(prec || flags & 8)
+({struct _dyneither_ptr _tmp8E=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp8F=*((char*)_check_dyneither_subscript(_tmp8E,sizeof(char),0U));char _tmp90='.';if(_get_dyneither_size(_tmp8E,sizeof(char))== 1U &&(_tmp8F == 0 && _tmp90 != 0))_throw_arraybounds();*((char*)_tmp8E.curr)=_tmp90;});
 # 832
-for(0;prec  && ({char*_tmpE3=(char*)(_dyneither_ptr_inplace_plus(& p,sizeof(char),1)).curr;_tmpE3 < (char*)endp.curr;});-- prec){
-({struct _dyneither_ptr _tmp91=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp92=*((char*)_check_dyneither_subscript(_tmp91,sizeof(char),0U));char _tmp93=*((char*)_check_dyneither_subscript(p,sizeof(char),0U));if(_get_dyneither_size(_tmp91,sizeof(char))== 1U  && (_tmp92 == 0  && _tmp93 != 0))_throw_arraybounds();*((char*)_tmp91.curr)=_tmp93;});}
+for(0;prec &&({char*_tmpE3=(char*)(_dyneither_ptr_inplace_plus(& p,sizeof(char),1)).curr;_tmpE3 < (char*)endp.curr;});-- prec){
+({struct _dyneither_ptr _tmp91=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp92=*((char*)_check_dyneither_subscript(_tmp91,sizeof(char),0U));char _tmp93=*((char*)_check_dyneither_subscript(p,sizeof(char),0U));if(_get_dyneither_size(_tmp91,sizeof(char))== 1U &&(_tmp92 == 0 && _tmp93 != 0))_throw_arraybounds();*((char*)_tmp91.curr)=_tmp93;});}
 # 839
-if(!prec  && ({char*_tmpE4=(char*)(_dyneither_ptr_inplace_plus(& p,sizeof(char),1)).curr;_tmpE4 < (char*)endp.curr;})){
+if(!prec &&({char*_tmpE4=(char*)(_dyneither_ptr_inplace_plus(& p,sizeof(char),1)).curr;_tmpE4 < (char*)endp.curr;})){
 fract=(double)0;
 startp=({struct _dyneither_ptr _tmpE7=startp;struct _dyneither_ptr _tmpE6=
 _dyneither_ptr_plus(t,sizeof(char),- 1);
@@ -994,34 +994,34 @@ char _tmpE5=*((char*)_check_dyneither_subscript(p,sizeof(char),0U));Cyc_sround((
 if(fract != 0.0){
 # 850
 for(expcnt=- 1;1;-- expcnt){
-fract= modf(fract * (double)10,& tmp);
+fract=modf(fract * (double)10,& tmp);
 if(tmp != 0.0)
 break;}
 # 855
-({struct _dyneither_ptr _tmp94=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp95=*((char*)_check_dyneither_subscript(_tmp94,sizeof(char),0U));char _tmp96=(char)((int)tmp + (int)'0');if(_get_dyneither_size(_tmp94,sizeof(char))== 1U  && (_tmp95 == 0  && _tmp96 != 0))_throw_arraybounds();*((char*)_tmp94.curr)=_tmp96;});
-if(prec  || flags & 8)
-({struct _dyneither_ptr _tmp97=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp98=*((char*)_check_dyneither_subscript(_tmp97,sizeof(char),0U));char _tmp99='.';if(_get_dyneither_size(_tmp97,sizeof(char))== 1U  && (_tmp98 == 0  && _tmp99 != 0))_throw_arraybounds();*((char*)_tmp97.curr)=_tmp99;});}else{
+({struct _dyneither_ptr _tmp94=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp95=*((char*)_check_dyneither_subscript(_tmp94,sizeof(char),0U));char _tmp96=(char)((int)tmp + (int)'0');if(_get_dyneither_size(_tmp94,sizeof(char))== 1U &&(_tmp95 == 0 && _tmp96 != 0))_throw_arraybounds();*((char*)_tmp94.curr)=_tmp96;});
+if(prec || flags & 8)
+({struct _dyneither_ptr _tmp97=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp98=*((char*)_check_dyneither_subscript(_tmp97,sizeof(char),0U));char _tmp99='.';if(_get_dyneither_size(_tmp97,sizeof(char))== 1U &&(_tmp98 == 0 && _tmp99 != 0))_throw_arraybounds();*((char*)_tmp97.curr)=_tmp99;});}else{
 # 860
-({struct _dyneither_ptr _tmp9A=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp9B=*((char*)_check_dyneither_subscript(_tmp9A,sizeof(char),0U));char _tmp9C='0';if(_get_dyneither_size(_tmp9A,sizeof(char))== 1U  && (_tmp9B == 0  && _tmp9C != 0))_throw_arraybounds();*((char*)_tmp9A.curr)=_tmp9C;});
-if(prec  || flags & 8)
-({struct _dyneither_ptr _tmp9D=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp9E=*((char*)_check_dyneither_subscript(_tmp9D,sizeof(char),0U));char _tmp9F='.';if(_get_dyneither_size(_tmp9D,sizeof(char))== 1U  && (_tmp9E == 0  && _tmp9F != 0))_throw_arraybounds();*((char*)_tmp9D.curr)=_tmp9F;});}}
+({struct _dyneither_ptr _tmp9A=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp9B=*((char*)_check_dyneither_subscript(_tmp9A,sizeof(char),0U));char _tmp9C='0';if(_get_dyneither_size(_tmp9A,sizeof(char))== 1U &&(_tmp9B == 0 && _tmp9C != 0))_throw_arraybounds();*((char*)_tmp9A.curr)=_tmp9C;});
+if(prec || flags & 8)
+({struct _dyneither_ptr _tmp9D=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp9E=*((char*)_check_dyneither_subscript(_tmp9D,sizeof(char),0U));char _tmp9F='.';if(_get_dyneither_size(_tmp9D,sizeof(char))== 1U &&(_tmp9E == 0 && _tmp9F != 0))_throw_arraybounds();*((char*)_tmp9D.curr)=_tmp9F;});}}
 # 865
 if(fract != 0.0){
 if(prec)
 do{
-fract= modf(fract * (double)10,& tmp);
-({struct _dyneither_ptr _tmpA0=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpA1=*((char*)_check_dyneither_subscript(_tmpA0,sizeof(char),0U));char _tmpA2=(char)((int)tmp + (int)'0');if(_get_dyneither_size(_tmpA0,sizeof(char))== 1U  && (_tmpA1 == 0  && _tmpA2 != 0))_throw_arraybounds();*((char*)_tmpA0.curr)=_tmpA2;});}while(
--- prec  && fract != 0.0);
+fract=modf(fract * (double)10,& tmp);
+({struct _dyneither_ptr _tmpA0=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpA1=*((char*)_check_dyneither_subscript(_tmpA0,sizeof(char),0U));char _tmpA2=(char)((int)tmp + (int)'0');if(_get_dyneither_size(_tmpA0,sizeof(char))== 1U &&(_tmpA1 == 0 && _tmpA2 != 0))_throw_arraybounds();*((char*)_tmpA0.curr)=_tmpA2;});}while(
+-- prec && fract != 0.0);
 if(fract != 0.0)
 startp=({double _tmpEA=fract;struct _dyneither_ptr _tmpE9=startp;struct _dyneither_ptr _tmpE8=
 _dyneither_ptr_plus(t,sizeof(char),- 1);
 # 872
 Cyc_sround(_tmpEA,& expcnt,_tmpE9,_tmpE8,'\000',signp);});}
 # 876
-for(0;prec --;({struct _dyneither_ptr _tmpA3=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpA4=*((char*)_check_dyneither_subscript(_tmpA3,sizeof(char),0U));char _tmpA5='0';if(_get_dyneither_size(_tmpA3,sizeof(char))== 1U  && (_tmpA4 == 0  && _tmpA5 != 0))_throw_arraybounds();*((char*)_tmpA3.curr)=_tmpA5;})){;}
+for(0;prec --;({struct _dyneither_ptr _tmpA3=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpA4=*((char*)_check_dyneither_subscript(_tmpA3,sizeof(char),0U));char _tmpA5='0';if(_get_dyneither_size(_tmpA3,sizeof(char))== 1U &&(_tmpA4 == 0 && _tmpA5 != 0))_throw_arraybounds();*((char*)_tmpA3.curr)=_tmpA5;})){;}
 # 879
-if(gformat  && !(flags & 8)){
-while((char*)t.curr > (char*)startp.curr  && (int)*((char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus(& t,sizeof(char),-1),sizeof(char),0U))== (int)'0'){;}
+if(gformat && !(flags & 8)){
+while((char*)t.curr > (char*)startp.curr &&(int)*((char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus(& t,sizeof(char),-1),sizeof(char),0U))== (int)'0'){;}
 if((int)*((char*)_check_dyneither_subscript(t,sizeof(char),0U))== (int)'.')
 _dyneither_ptr_inplace_plus(& t,sizeof(char),-1);
 _dyneither_ptr_inplace_plus(& t,sizeof(char),1);}
@@ -1033,7 +1033,7 @@ goto _LL0;case 103U: _LL9: _LLA:
  if(!prec)
 ++ prec;
 # 897
-if(expcnt > prec  || (!expcnt  && fract != 0.0) && fract < .0001){
+if(expcnt > prec ||(!expcnt && fract != 0.0)&& fract < .0001){
 # 905
 -- prec;
 fmtch -=2;
@@ -1041,13 +1041,13 @@ gformat=1;
 goto eformat;}
 # 914
 if(expcnt)
-for(0;({char*_tmpEB=(char*)(_dyneither_ptr_inplace_plus(& p,sizeof(char),1)).curr;_tmpEB < (char*)endp.curr;});(({struct _dyneither_ptr _tmpA6=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpA7=*((char*)_check_dyneither_subscript(_tmpA6,sizeof(char),0U));char _tmpA8=*((char*)_check_dyneither_subscript(p,sizeof(char),0U));if(_get_dyneither_size(_tmpA6,sizeof(char))== 1U  && (_tmpA7 == 0  && _tmpA8 != 0))_throw_arraybounds();*((char*)_tmpA6.curr)=_tmpA8;}),-- prec)){;}else{
+for(0;({char*_tmpEB=(char*)(_dyneither_ptr_inplace_plus(& p,sizeof(char),1)).curr;_tmpEB < (char*)endp.curr;});(({struct _dyneither_ptr _tmpA6=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpA7=*((char*)_check_dyneither_subscript(_tmpA6,sizeof(char),0U));char _tmpA8=*((char*)_check_dyneither_subscript(p,sizeof(char),0U));if(_get_dyneither_size(_tmpA6,sizeof(char))== 1U &&(_tmpA7 == 0 && _tmpA8 != 0))_throw_arraybounds();*((char*)_tmpA6.curr)=_tmpA8;}),-- prec)){;}else{
 # 917
-({struct _dyneither_ptr _tmpA9=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpAA=*((char*)_check_dyneither_subscript(_tmpA9,sizeof(char),0U));char _tmpAB='0';if(_get_dyneither_size(_tmpA9,sizeof(char))== 1U  && (_tmpAA == 0  && _tmpAB != 0))_throw_arraybounds();*((char*)_tmpA9.curr)=_tmpAB;});}
+({struct _dyneither_ptr _tmpA9=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpAA=*((char*)_check_dyneither_subscript(_tmpA9,sizeof(char),0U));char _tmpAB='0';if(_get_dyneither_size(_tmpA9,sizeof(char))== 1U &&(_tmpAA == 0 && _tmpAB != 0))_throw_arraybounds();*((char*)_tmpA9.curr)=_tmpAB;});}
 # 922
-if(prec  || flags & 8){
+if(prec || flags & 8){
 dotrim=1;
-({struct _dyneither_ptr _tmpAC=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpAD=*((char*)_check_dyneither_subscript(_tmpAC,sizeof(char),0U));char _tmpAE='.';if(_get_dyneither_size(_tmpAC,sizeof(char))== 1U  && (_tmpAD == 0  && _tmpAE != 0))_throw_arraybounds();*((char*)_tmpAC.curr)=_tmpAE;});}else{
+({struct _dyneither_ptr _tmpAC=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpAD=*((char*)_check_dyneither_subscript(_tmpAC,sizeof(char),0U));char _tmpAE='.';if(_get_dyneither_size(_tmpAC,sizeof(char))== 1U &&(_tmpAD == 0 && _tmpAE != 0))_throw_arraybounds();*((char*)_tmpAC.curr)=_tmpAE;});}else{
 # 927
 dotrim=0;}
 # 929
@@ -1055,12 +1055,12 @@ if(fract != 0.0){
 if(prec){
 # 933
 do{
-fract= modf(fract * (double)10,& tmp);
-({struct _dyneither_ptr _tmpAF=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpB0=*((char*)_check_dyneither_subscript(_tmpAF,sizeof(char),0U));char _tmpB1=(char)((int)tmp + (int)'0');if(_get_dyneither_size(_tmpAF,sizeof(char))== 1U  && (_tmpB0 == 0  && _tmpB1 != 0))_throw_arraybounds();*((char*)_tmpAF.curr)=_tmpB1;});}while(
-tmp == 0.0  && !expcnt);
-while(-- prec  && fract != 0.0){
-fract= modf(fract * (double)10,& tmp);
-({struct _dyneither_ptr _tmpB2=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpB3=*((char*)_check_dyneither_subscript(_tmpB2,sizeof(char),0U));char _tmpB4=(char)((int)tmp + (int)'0');if(_get_dyneither_size(_tmpB2,sizeof(char))== 1U  && (_tmpB3 == 0  && _tmpB4 != 0))_throw_arraybounds();*((char*)_tmpB2.curr)=_tmpB4;});}}
+fract=modf(fract * (double)10,& tmp);
+({struct _dyneither_ptr _tmpAF=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpB0=*((char*)_check_dyneither_subscript(_tmpAF,sizeof(char),0U));char _tmpB1=(char)((int)tmp + (int)'0');if(_get_dyneither_size(_tmpAF,sizeof(char))== 1U &&(_tmpB0 == 0 && _tmpB1 != 0))_throw_arraybounds();*((char*)_tmpAF.curr)=_tmpB1;});}while(
+tmp == 0.0 && !expcnt);
+while(-- prec && fract != 0.0){
+fract=modf(fract * (double)10,& tmp);
+({struct _dyneither_ptr _tmpB2=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpB3=*((char*)_check_dyneither_subscript(_tmpB2,sizeof(char),0U));char _tmpB4=(char)((int)tmp + (int)'0');if(_get_dyneither_size(_tmpB2,sizeof(char))== 1U &&(_tmpB3 == 0 && _tmpB4 != 0))_throw_arraybounds();*((char*)_tmpB2.curr)=_tmpB4;});}}
 # 942
 if(fract != 0.0)
 startp=({double _tmpEE=fract;struct _dyneither_ptr _tmpED=startp;struct _dyneither_ptr _tmpEC=
@@ -1069,9 +1069,9 @@ _dyneither_ptr_plus(t,sizeof(char),- 1);
 Cyc_sround(_tmpEE,0,_tmpED,_tmpEC,'\000',signp);});}
 # 947
 if(flags & 8)
-for(0;prec --;({struct _dyneither_ptr _tmpB5=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpB6=*((char*)_check_dyneither_subscript(_tmpB5,sizeof(char),0U));char _tmpB7='0';if(_get_dyneither_size(_tmpB5,sizeof(char))== 1U  && (_tmpB6 == 0  && _tmpB7 != 0))_throw_arraybounds();*((char*)_tmpB5.curr)=_tmpB7;})){;}else{
+for(0;prec --;({struct _dyneither_ptr _tmpB5=_dyneither_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmpB6=*((char*)_check_dyneither_subscript(_tmpB5,sizeof(char),0U));char _tmpB7='0';if(_get_dyneither_size(_tmpB5,sizeof(char))== 1U &&(_tmpB6 == 0 && _tmpB7 != 0))_throw_arraybounds();*((char*)_tmpB5.curr)=_tmpB7;})){;}else{
 if(dotrim){
-while((char*)t.curr > (char*)startp.curr  && (int)*((char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus(& t,sizeof(char),-1),sizeof(char),0U))== (int)'0'){;}
+while((char*)t.curr > (char*)startp.curr &&(int)*((char*)_check_dyneither_subscript(_dyneither_ptr_inplace_plus(& t,sizeof(char),-1),sizeof(char),0U))== (int)'0'){;}
 if((int)*((char*)_check_dyneither_subscript(t,sizeof(char),0U))!= (int)'.')
 _dyneither_ptr_inplace_plus(& t,sizeof(char),1);}}
 # 954
@@ -1141,7 +1141,7 @@ return 1;}
 struct _dyneither_ptr Cyc_vrprintf(struct _RegionHandle*r1,struct _dyneither_ptr fmt,struct _dyneither_ptr ap){
 # 1042
 int size=((int(*)(int(*ioputc)(int,int),int ioputc_env,struct _dyneither_ptr fmt0,struct _dyneither_ptr ap))Cyc__IO_vfprintf)(Cyc_putc_void,0,fmt,ap)+ 1;
-struct _dyneither_ptr s=(struct _dyneither_ptr)({unsigned int _tmpC0=size + 1;_tag_dyneither(_cyccalloc_atomic(sizeof(char),_tmpC0),sizeof(char),_tmpC0);});
+struct _dyneither_ptr s=(struct _dyneither_ptr)({unsigned _tmpC0=size + 1;_tag_dyneither(_cyccalloc_atomic(sizeof(char),_tmpC0),sizeof(char),_tmpC0);});
 ({struct _dyneither_ptr _tmpF1=_dyneither_ptr_decrease_size(s,sizeof(char),1U);struct _dyneither_ptr _tmpF0=fmt;Cyc_vsprintf(_tmpF1,_tmpF0,ap);});
 return s;}
 # 1048
