@@ -288,8 +288,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let curr_bl = Tcenv::curr_rgn(te);
       bool is_local;
       switch (sc) {
-      case Static: fallthru;
-      case Extern: fallthru;
+      case Static: 
+      case Extern: 
       case ExternC: is_local = false; break;
       case Abstract: 
         terr(d->loc,"bad abstract scope for local variable"); 
@@ -342,6 +342,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       //        terr(d->loc,"static local declaration requires an initializer");
       if (initializer != NULL) {
         tcExpInitializer(te2,&t,(exp_t)initializer);
+	// te is only used by is_const_exp for globals and function names
+	if(!is_local && !is_const_exp(te,(exp_t)initializer))
+	  terr(d->loc, "initializer needs to be a constant expression");
         if (!coerce_assign(te2,(exp_t)initializer,t))
 	  terr(d->loc, "%s declared with type %s, initialized with type %s",
                *x, typ2string(t), typ2string(initializer->topt->v));

@@ -155,17 +155,17 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
     for (; atts != NULL; atts = atts->tl) {
       switch (atts->hd) {
       // these attributes should be in the function's type
-      case &Regparm_att(_): fallthru;
-      case Stdcall_att:    fallthru;
-      case Cdecl_att:      fallthru;
-      case Fastcall_att:   fallthru;
-      case Noreturn_att:   fallthru;
+      case &Regparm_att(_):
+      case Stdcall_att:   
+      case Cdecl_att:     
+      case Fastcall_att: 
+      case Noreturn_att: 
       case &Format_att(_,_,_): fallthru;
       case Const_att:
         impos("tcVardecl: fn type attributes in function var decl");
         break;
       // C doesn't allow these attributes on functions
-      case &Aligned_att(_): fallthru;
+      case &Aligned_att(_):
       case Packed_att:
         terr(loc,"bad attribute %s in function declaration",
              attribute2string(atts->hd));

@@ -457,18 +457,18 @@ static string_t do_find(list_t<stringptr_t> dirs, string_t file) {
 /* Is a character special to /bin/sh (except for single quote)? */
 static bool is_other_special(char c) {
   switch (c) {
-  case '\\': fallthru;
-  case '"': fallthru;
-  case ';': fallthru;
-  case '&': fallthru;
-  case '(': fallthru;
-  case ')': fallthru;
-  case '|': fallthru;
-  case '^': fallthru;
-  case '<': fallthru;
-  case '>': fallthru;
-  case ' ': fallthru;
-  case '\n': fallthru;
+  case '\\':
+  case '"': 
+  case ';': 
+  case '&': 
+  case '(': 
+  case ')': 
+  case '|': 
+  case '^': 
+  case '<': 
+  case '>': 
+  case ' ': 
+  case '\n': 
   case '\t': return true;
   default: return false;
   }
