@@ -682,35 +682,35 @@ static inline void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
+void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];struct Cyc_List_List*
-Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[8];int isdigit(int);
-unsigned int Cyc_strlen(struct _dynforward_ptr s);struct _dynforward_ptr Cyc_implode(
-struct Cyc_List_List*c);struct Cyc_Lineno_Pos{struct _dynforward_ptr logical_file;
-struct _dynforward_ptr line;int line_no;int col;};extern char Cyc_Position_Exit[9];
-struct Cyc_Position_Segment;struct Cyc_Position_Error{struct _dynforward_ptr source;
-struct Cyc_Position_Segment*seg;void*kind;struct _dynforward_ptr desc;};extern char
-Cyc_Position_Nocontext[14];typedef struct{int __count;union{unsigned int __wch;char
-__wchb[4];}__value;}Cyc___mbstate_t;typedef struct{long __pos;Cyc___mbstate_t
-__state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t Cyc_fpos_t;struct Cyc___cycFILE;struct
-Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{int tag;struct
-_dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
-int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
-Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{int tag;
-unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
-int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
-int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
-_dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dynforward_ptr f1;};
-extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{
-char*tag;struct _dynforward_ptr f1;};struct Cyc_Absyn_Loc_n_struct{int tag;};struct
-Cyc_Absyn_Rel_n_struct{int tag;struct Cyc_List_List*f1;};struct Cyc_Absyn_Abs_n_struct{
+_dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
+16];struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
+18];struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[
+8];int isdigit(int);unsigned int Cyc_strlen(struct _dynforward_ptr s);struct
+_dynforward_ptr Cyc_implode(struct Cyc_List_List*c);struct Cyc_Lineno_Pos{struct
+_dynforward_ptr logical_file;struct _dynforward_ptr line;int line_no;int col;};extern
+char Cyc_Position_Exit[9];struct Cyc_Position_Segment;struct Cyc_Position_Error{
+struct _dynforward_ptr source;struct Cyc_Position_Segment*seg;void*kind;struct
+_dynforward_ptr desc;};extern char Cyc_Position_Nocontext[14];typedef struct{int
+__count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc___mbstate_t;typedef
+struct{long __pos;Cyc___mbstate_t __state;}Cyc__G_fpos_t;typedef Cyc__G_fpos_t Cyc_fpos_t;
+struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
+int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
+};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
+int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
+Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
+int tag;struct _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;
+};struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
+tag;struct _dynforward_ptr f1;};extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[
+18];struct Cyc_FileOpenError_struct{char*tag;struct _dynforward_ptr f1;};struct Cyc_Absyn_Loc_n_struct{
+int tag;};struct Cyc_Absyn_Rel_n_struct{int tag;struct Cyc_List_List*f1;};struct Cyc_Absyn_Abs_n_struct{
 int tag;struct Cyc_List_List*f1;};union Cyc_Absyn_Nmspace_union{struct Cyc_Absyn_Loc_n_struct
 Loc_n;struct Cyc_Absyn_Rel_n_struct Rel_n;struct Cyc_Absyn_Abs_n_struct Abs_n;};
 struct _tuple0{union Cyc_Absyn_Nmspace_union f1;struct _dynforward_ptr*f2;};struct

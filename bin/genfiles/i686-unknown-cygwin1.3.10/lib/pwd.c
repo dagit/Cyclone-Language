@@ -682,21 +682,21 @@ static inline void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
+void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];char*
-string_to_Cstring(struct _dynforward_ptr);struct _dynforward_ptr Cstring_to_string(
-char*);struct Cyc_passwd{struct _dynforward_ptr pw_name;struct _dynforward_ptr
-pw_passwd;unsigned short pw_uid;unsigned short pw_gid;struct _dynforward_ptr
-pw_gecos;struct _dynforward_ptr pw_dir;struct _dynforward_ptr pw_shell;};struct Cyc_passwd*
-Cyc_getpwnam(struct _dynforward_ptr name);struct Cyc_passwd*Cyc_getpwuid(
-unsigned short uid);struct Cyc_Cpwd_Cpasswd{char*pw_name;char*pw_passwd;
-unsigned short pw_uid;unsigned short pw_gid;char*pw_gecos;char*pw_dir;char*
-pw_shell;};struct Cyc_Cpwd_Cpasswd*getpwnam(char*const name);struct Cyc_Cpwd_Cpasswd*
+_dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
+16];char*string_to_Cstring(struct _dynforward_ptr);struct _dynforward_ptr
+Cstring_to_string(char*);struct Cyc_passwd{struct _dynforward_ptr pw_name;struct
+_dynforward_ptr pw_passwd;unsigned short pw_uid;unsigned short pw_gid;struct
+_dynforward_ptr pw_gecos;struct _dynforward_ptr pw_dir;struct _dynforward_ptr
+pw_shell;};struct Cyc_passwd*Cyc_getpwnam(struct _dynforward_ptr name);struct Cyc_passwd*
+Cyc_getpwuid(unsigned short uid);struct Cyc_Cpwd_Cpasswd{char*pw_name;char*
+pw_passwd;unsigned short pw_uid;unsigned short pw_gid;char*pw_gecos;char*pw_dir;
+char*pw_shell;};struct Cyc_Cpwd_Cpasswd*getpwnam(char*const name);struct Cyc_Cpwd_Cpasswd*
 getpwuid(unsigned short uid);struct Cyc_passwd*Cyc_getpwnam(struct _dynforward_ptr
 name){struct Cyc_Cpwd_Cpasswd*src=getpwnam(string_to_Cstring(name));struct Cyc_passwd*
 _tmp0=(unsigned int)src?({struct Cyc_passwd*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->pw_name=(

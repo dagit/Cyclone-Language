@@ -682,35 +682,35 @@ static inline void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_Opt{void*v;};struct _dynforward_ptr Cyc_Core_new_string(
-unsigned int);void*Cyc_Core_identity(void*);int Cyc_Core_intcmp(int,int);extern
-char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{char*
-tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
+void*v;};struct _dynforward_ptr Cyc_Core_new_string(unsigned int);void*Cyc_Core_identity(
+void*);int Cyc_Core_intcmp(int,int);extern char Cyc_Core_Invalid_argument[21];
+struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dynforward_ptr f1;};extern
+char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+_dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct Cyc___cycFILE;
-struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{int tag;struct
-_dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
-int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
-Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{int tag;
-unsigned long*f1;};int Cyc_fprintf(struct Cyc___cycFILE*,struct _dynforward_ptr,
-struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
-int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
-int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
-_dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dynforward_ptr f1;};
-extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{
-char*tag;struct _dynforward_ptr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*
-tl;};int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[
-18];extern char Cyc_List_Nth[8];unsigned int Cyc_strlen(struct _dynforward_ptr s);int
-Cyc_zstrptrcmp(struct _dynforward_ptr*,struct _dynforward_ptr*);struct
-_dynforward_ptr Cyc_str_sepstr(struct Cyc_List_List*,struct _dynforward_ptr);struct
-Cyc_Hashtable_Table;struct Cyc_Hashtable_Table*Cyc_Hashtable_create(int sz,int(*
-cmp)(void*,void*),int(*hash)(void*));void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*
-t,void*key,void*val);void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,void*
-key);int Cyc_Hashtable_hash_stringptr(struct _dynforward_ptr*p);struct Cyc_Fn_Function{
+_dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
+16];struct Cyc___cycFILE;struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{
+int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
+};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
+int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+int tag;unsigned long*f1;};int Cyc_fprintf(struct Cyc___cycFILE*,struct
+_dynforward_ptr,struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*
+f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
+int tag;struct _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;
+};struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
+tag;struct _dynforward_ptr f1;};extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[
+18];struct Cyc_FileOpenError_struct{char*tag;struct _dynforward_ptr f1;};struct Cyc_List_List{
+void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(struct Cyc_List_List*x);
+extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];unsigned int Cyc_strlen(
+struct _dynforward_ptr s);int Cyc_zstrptrcmp(struct _dynforward_ptr*,struct
+_dynforward_ptr*);struct _dynforward_ptr Cyc_str_sepstr(struct Cyc_List_List*,
+struct _dynforward_ptr);struct Cyc_Hashtable_Table;struct Cyc_Hashtable_Table*Cyc_Hashtable_create(
+int sz,int(*cmp)(void*,void*),int(*hash)(void*));void Cyc_Hashtable_insert(struct
+Cyc_Hashtable_Table*t,void*key,void*val);void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*
+t,void*key);int Cyc_Hashtable_hash_stringptr(struct _dynforward_ptr*p);struct Cyc_Fn_Function{
 void*(*f)(void*,void*);void*env;};struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(
 void*,void*),void*x);struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*));void*
 Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x);extern int Cyc_PP_tex_output;struct

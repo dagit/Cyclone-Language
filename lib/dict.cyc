@@ -424,7 +424,8 @@ dict_t<`a,`b,`r1> union_two_c(`b (@f)(`c,`a,`b,`b), `c env,
   if ((int)d1.t == (int)d2.t) return d1;
   if (d1.t == NULL) return d2;
   if (d2.t == NULL) return d1;
-  Dict::fold_c(union_f, new $(f,env), d2, &d1);
+  let fenvpair = $(f,env);
+  Dict::fold_c(union_f, &fenvpair, d2, &d1);
   return d1;
 }
 

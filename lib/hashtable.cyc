@@ -66,6 +66,31 @@ void insert(table_t<`a,`b> t, `a key, `b val) {
   return assoc_cmp(t->cmp, l, key);
 }
 
+`b*`r lookup_opt(table_t<`a,`b,`r> t, `a key) {
+  let tab = t->tab;
+  let l = tab[(*t->hash)(key) % tab.size];
+  let cmp = t->cmp;
+  for (; l != NULL; l = l->tl) {
+    let &$(k,*v) = l->hd;
+    if (cmp(key,k) == 0) return v;
+  }
+  return NULL;
+}
+
+bool try_lookup(table_t<`a,`b> t, `a key, `b@ data) {
+  let tab = t->tab;
+  let l = tab[(*t->hash)(key) % tab.size];
+  let cmp = t->cmp;
+  for (; l != NULL; l = l->tl) {
+    let $(k,v) = *l->hd;
+    if (cmp(key,k) == 0) {
+      *data = v;
+      return true;
+    }
+  }
+  return false;
+}
+
 void remove(table_t<`a,`b> t, `a key) {
   // remove only most recent binding.  Silently return if none.
   // does a destructive list update since this data structure is not functional

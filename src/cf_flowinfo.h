@@ -46,11 +46,12 @@ EXTERN_CFFLOW tunion Root {
   MallocPt(Absyn::exp_t,Absyn::type_t); // misnamed when do other analyses??
   InitParam(int,Absyn::type_t); // int is parameter number, type is w/o @
 };
-typedef tunion Root root_t;
+typedef tunion `r Root root_t<`r>;
 
 EXTERN_CFFLOW struct Place<`r::R> {
-  root_t root; 
-  List::list_t<int,`r> fields; // projections off the root -- these correspond
+  root_t<`r> root; 
+  List::list_t<int,`r> fields; 
+  // projections off the root -- these correspond
   //to either tuple offsets or field names.  For field names, we use the order
   //in the struct declaration to determine the index.
 };
@@ -76,68 +77,69 @@ EXTERN_CFFLOW struct Reln {
   Absyn::vardecl_t vd; 
   reln_op_t rop;
 };
-typedef struct Reln @reln_t;
-typedef List::list_t<reln_t> relns_t;
+typedef struct Reln @`r reln_t<`r>;
+typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
 
 EXTERN_CFFLOW struct TagCmp {
   Absyn::primop_t cmp; // for now, MUST be Lt, Lte, or Eq
   Absyn::type_t   bd;  // IntKind
 };
-typedef struct TagCmp @tag_cmp_t;
+typedef struct TagCmp @`r tag_cmp_t<`r>;
 
   // as with AbsRVal below, HasTagCmps forgets zero-ness which technically
   // is bad but shouldn't matter in practice.
 xtunion Absyn::AbsynAnnot { 
   EXTERN_CFFLOW IsZero;
-  EXTERN_CFFLOW NotZero(relns_t);
-  EXTERN_CFFLOW UnknownZ(relns_t);
-  EXTERN_CFFLOW HasTagCmps(List::list_t<tag_cmp_t>);
+  EXTERN_CFFLOW NotZero(relns_t<`H>);
+  EXTERN_CFFLOW UnknownZ(relns_t<`H>);
+  EXTERN_CFFLOW HasTagCmps(List::list_t<tag_cmp_t<`H>,`H>);
 };
+extern List::list_t<tag_cmp_t<`r2>,`r2> copy_tagcmps(region_t<`r2>,
+                                                     List::list_t<tag_cmp_t>);
 
-EXTERN_CFFLOW __flat__ tunion AbsLVal { PlaceL(place_t); UnknownL; };
-typedef tunion AbsLVal absLval_t;
+EXTERN_CFFLOW __flat__ tunion AbsLVal<`r::R> {
+  PlaceL(place_t<`r,`r>);
+  UnknownL;
+};
+typedef tunion AbsLVal<`r> absLval_t<`r>;
 
-typedef tunion AbsRVal absRval_t;
-typedef Dict::dict_t<root_t,             absRval_t> flowdict_t;
-typedef absRval_t ?aggrdict_t;
-extern aggrdict_t aggrfields_to_aggrdict(List::list_t<Absyn::aggrfield_t>, absRval_t);
-extern flowdict_t empty_flowdict();
-EXTERN_CFFLOW tunion AbsRVal {
+EXTERN_CFFLOW tunion AbsRVal<`r::R>;
+typedef tunion `r AbsRVal<`r> absRval_t<`r>;
+typedef Dict::dict_t<root_t<`r>,absRval_t<`r>,`r> flowdict_t<`r>;
+typedef absRval_t<`r> ?`r aggrdict_t<`r>;
+EXTERN_CFFLOW tunion AbsRVal<`r::R> {
   Zero;      // the value is zero and initialized
   NotZeroAll; // the value is not zero & everything reachable from it is init
   NotZeroThis; // the value is not zero, it is initialized, but not necessarily
                // what it points to
   UnknownR(initlevel_t); // don't know what the value is
   Esc(initlevel_t); // as an rval means same thing as UnknownR!!
-  AddressOf(place_t); // I am a pointer to this place (implies not zero)
+  AddressOf(place_t<`r,`r>); // I am a pointer to this place (implies not zero)
   // TagCmps forgets zero-ness which technically is bad but shouldn't
   // matter in practice (why would an array index also be used in tests?)
   // and joins punt to UnknownR/Esc when comparing a TagCmp w/ something else
   // Can always add zero-ness as another field.
-  TagCmps(List::list_t<tag_cmp_t>);
-  Aggregate(aggrdict_t); // if you're a struct or tuple, you should always
+  TagCmps(List::list_t<tag_cmp_t<`r>,`r>);
+  Aggregate(aggrdict_t<`r>); // if you're a struct or tuple, you should always
   // evaluate to an Aggregate in the abstract interpretation (tunion?)
 };
-
-typedef Dict::dict_t<place_t,Position::seg_t> place_set_t;
-extern place_set_t mt_place_set();
-extern bool update_place_set(place_set_t *set, place_t<`H,`H> place,
+typedef Dict::dict_t<place_t<`r,`r>,Position::seg_t,`r> place_set_t<`r>;
+extern bool update_place_set(place_set_t<`r> *set, place_t<`r,`r> place,
 			     Position::seg_t loc);
-extern place_set_t union_place_set(place_set_t s1, place_set_t s2, bool disjoint);
-extern bool place_set_subset(place_set_t s1, place_set_t s2);
-extern bool place_set_equals(place_set_t s1, place_set_t s2);
+extern place_set_t<`r> union_place_set(place_set_t<`r> s1, place_set_t<`r> s2, bool disjoint);
+extern bool place_set_subset(place_set_t<`r> s1, place_set_t<`r> s2);
+extern bool place_set_equals(place_set_t<`r> s1, place_set_t<`r> s2);
 
-EXTERN_CFFLOW struct ConsumeInfo {
-  place_set_t consumed;              // variables consumed by this flow
-  List::list_t<place_t> may_consume; // variables to possibly consume
+EXTERN_CFFLOW struct ConsumeInfo<`r::R> {
+  place_set_t<`r> consumed;              // variables consumed by this flow
+  List::list_t<place_t<`r,`r>,`r> may_consume; // variables to possibly consume
     // INVARIANT: should be sorted at all times!
 };
-typedef struct ConsumeInfo consume_t;
+typedef struct ConsumeInfo<`r::R> consume_t<`r>;
 
-extern consume_t and_consume(consume_t c1, consume_t c2);
+extern consume_t<`r> and_consume(region_t<`r>, consume_t<`r> c1, consume_t<`r> c2);
   // checks that the same variables are not consumed
-extern bool consume_approx(consume_t c1, consume_t c2);
-
+extern bool consume_approx(consume_t<`r> c1, consume_t<`r> c2);
 // Note: It would be correct to make the domain of the flowdict_t
 //       constant (all roots in the function), but it easy to argue
 //       that we at program point p, we only need those roots that
@@ -146,28 +148,37 @@ extern bool consume_approx(consume_t c1, consume_t c2);
 //       of the analysis must be that at least these roots stay in the dict;
 //       for scalability, we don't have others.
 // join takes the intersection of the dictionaries.
-EXTERN_CFFLOW __flat__ tunion FlowInfo {
+EXTERN_CFFLOW __flat__ tunion FlowInfo<`r::R> {
   BottomFL;
-  ReachableFL(flowdict_t,relns_t,consume_t);
+  ReachableFL(flowdict_t<`r>,relns_t<`r>,consume_t<`r>);
 };
-typedef tunion FlowInfo flow_t;
+typedef tunion FlowInfo<`r> flow_t<`r>;
 
-extern absRval_t unknown_none;
-extern absRval_t unknown_this;
-extern absRval_t unknown_all;
-extern absRval_t esc_none;
-extern absRval_t esc_this;
-extern absRval_t esc_all;
+EXTERN_CFFLOW struct FlowEnv<`r::R> {
+  region_t<`r>    r;
+  absRval_t<`r>   unknown_none;
+  absRval_t<`r>   unknown_this;
+  absRval_t<`r>   unknown_all;
+  absRval_t<`r>   esc_none;
+  absRval_t<`r>   esc_this;
+  absRval_t<`r>   esc_all;
+  flowdict_t<`r>  mt_flowdict;
+  place_set_t<`r> mt_place_set;
+  place_t<`r,`r>  dummy_place;
+};
+typedef struct FlowEnv<`r> @`r flow_env_t<`r>;
+extern flow_env_t<`r> new_flow_env(region_t<`r> r);
 
 extern int root_cmp(root_t, root_t);
 extern int place_cmp(place_t, place_t);
 
-extern absRval_t typ_to_absrval(Absyn::type_t t, absRval_t leafval);
+extern aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r>, List::list_t<Absyn::aggrfield_t>, absRval_t<`r>);
+extern absRval_t<`r> typ_to_absrval(flow_env_t<`r>, Absyn::type_t t, absRval_t<`r> leafval);
 
-extern initlevel_t initlevel   (flowdict_t d, absRval_t r);
-extern absRval_t   lookup_place(flowdict_t d, place_t place);
-extern bool        is_unescaped(flowdict_t d, place_t place);
-extern bool flow_lessthan_approx(flow_t f1, flow_t f2);
+extern initlevel_t initlevel(flowdict_t<`r> d, absRval_t<`r> r);
+extern absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place);
+extern bool        is_unescaped(flowdict_t<`r> d, place_t<`r,`r> place);
+extern bool flow_lessthan_approx(flow_t<`r> f1, flow_t<`r> f2);
 
 extern void print_absrval(absRval_t rval);
 extern void print_initlevel(initlevel_t il);
@@ -179,7 +190,7 @@ extern void print_flowdict(flowdict_t d);
 extern void print_flow(flow_t f);
 
 // debugging
-// #define DEBUG_FLOW
+  // #define DEBUG_FLOW
 #ifdef DEBUG_FLOW
 #define DEBUG_PRINT(arg...) fprintf(stderr,##arg)
 #define DEBUG_PRINT_F(f,arg...) f ## (##arg)
@@ -188,27 +199,37 @@ extern void print_flow(flow_t f);
 #define DEBUG_PRINT(arg...) {}
 #endif
 
-extern relns_t reln_assign_var(relns_t, Absyn::vardecl_t, Absyn::exp_t);
-extern relns_t reln_assign_exp(relns_t, Absyn::exp_t, Absyn::exp_t);
-extern relns_t reln_kill_var(relns_t, Absyn::vardecl_t);
-extern relns_t reln_kill_exp(relns_t, Absyn::exp_t);
+extern relns_t<`r> reln_assign_var(region_t<`r>, relns_t<`r>, Absyn::vardecl_t, Absyn::exp_t);
+extern relns_t<`r> reln_assign_exp(region_t<`r>, relns_t<`r>, Absyn::exp_t, Absyn::exp_t);
+extern relns_t<`r> reln_kill_var(region_t<`r>,relns_t<`r>, Absyn::vardecl_t);
+extern relns_t<`r> reln_kill_exp(region_t<`r>,relns_t<`r>, Absyn::exp_t);
+extern relns_t<`r2> copy_relns(region_t<`r2>, relns_t<`r>);
 extern void print_relns(relns_t);
 
   // all of the following throw EscNotInit as appropriate
   // the field list in the thrown place_t might be empty even if it shouldn't be
-extern flowdict_t escape_deref(flowdict_t d, place_set_t * all_changed,
-			       absRval_t r);
-extern flowdict_t assign_place(Position::seg_t loc, flowdict_t d,
-			       place_set_t * all_changed, place_t<`H,`H> place,
-			       absRval_t r);
-extern flow_t join_flow(place_set_t*,flow_t,flow_t,bool); 
-extern $(flow_t,absRval_t) join_flow_and_rval(place_set_t* all_changed,
-					      $(flow_t,absRval_t) pr1,
-					      $(flow_t,absRval_t) pr2,
-					      bool);
-extern flow_t after_flow(place_set_t*,flow_t,flow_t,place_set_t,place_set_t);
+extern flowdict_t<`r> escape_deref(flow_env_t<`r> fenv,
+                                   flowdict_t<`r> d, 
+                                   place_set_t<`r> * all_changed,
+                                   absRval_t<`r> r);
+extern flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
+                                   Position::seg_t loc, flowdict_t<`r> d,
+                                   place_set_t<`r> * all_changed, 
+                                   place_t<`r,`r> place,
+                                   absRval_t<`r> r);
+extern flow_t<`r> join_flow(flow_env_t<`r>,place_set_t<`r>*,flow_t<`r>,flow_t<`r>,bool); 
+extern $(flow_t<`r>,absRval_t<`r>) 
+  join_flow_and_rval(flow_env_t<`r>,
+                     place_set_t<`r>* all_changed,
+                     $(flow_t<`r>,absRval_t<`r>) pr1,
+                     $(flow_t<`r>,absRval_t<`r>) pr2,
+                     bool);
+extern flow_t<`r> after_flow(flow_env_t<`r>,place_set_t<`r>*,
+                             flow_t<`r>,flow_t<`r>,
+                             place_set_t<`r>,place_set_t<`r>);
+                             
   // reset anything that points into rgn to be uninitialized
-extern flow_t kill_flow_region(flow_t f, Absyn::type_t rgn);
+extern flow_t<`r> kill_flow_region(flow_env_t<`r> fenv, flow_t<`r> f, Absyn::type_t rgn);
 
 tunion KillRgn {
   UniqueRgn_k;
@@ -218,13 +239,13 @@ typedef tunion `r KillRgn killrgn_t<`r::R>;
 
 extern bool contains_region(killrgn_t rgn, Absyn::type_t t);
 
-extern flow_t consume_unique_rvals(Position::seg_t loc,flow_t f);
-extern void check_unique_rvals(Position::seg_t loc, flow_t f);
-extern flow_t readthrough_unique_rvals(Position::seg_t loc,flow_t f);
-extern flow_t drop_unique_rvals(Position::seg_t loc,flow_t f);
+extern flow_t<`r> consume_unique_rvals(Position::seg_t loc,flow_t<`r> f);
+extern void check_unique_rvals(Position::seg_t loc, flow_t<`r> f);
+extern flow_t<`r> readthrough_unique_rvals(Position::seg_t loc,flow_t<`r> f);
+extern flow_t<`r> drop_unique_rvals(Position::seg_t loc,flow_t<`r> f);
 
-extern $(consume_t,flow_t) save_consume_info(flow_t f, bool clear);
-extern flow_t restore_consume_info(flow_t f, consume_t c);
-extern string_t place_err_string(place_t place);
+extern $(consume_t<`r>,flow_t<`r>) save_consume_info(flow_env_t<`r>,flow_t<`r> f, bool clear);
+extern flow_t<`r> restore_consume_info(flow_t<`r> f, consume_t<`r> c);
+  extern string_t place_err_string(place_t place);
 }
 #endif

@@ -682,18 +682,18 @@ static inline void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
+void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];char*
-string_to_Cstring(struct _dynforward_ptr);struct _dynforward_ptr Cstring_to_string(
-char*);struct _dynforward_ptr ntCsl_to_ntsl(char**);struct Cyc_group{struct
-_dynforward_ptr gr_name;struct _dynforward_ptr gr_passwd;unsigned int gr_gid;struct
-_dynforward_ptr gr_mem;};struct Cyc_group*Cyc_getgrnam(struct _dynforward_ptr name);
-struct Cyc_group*Cyc_getgrgid(unsigned int uid);int Cyc_initgroups(struct
+_dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
+16];char*string_to_Cstring(struct _dynforward_ptr);struct _dynforward_ptr
+Cstring_to_string(char*);struct _dynforward_ptr ntCsl_to_ntsl(char**);struct Cyc_group{
+struct _dynforward_ptr gr_name;struct _dynforward_ptr gr_passwd;unsigned int gr_gid;
+struct _dynforward_ptr gr_mem;};struct Cyc_group*Cyc_getgrnam(struct _dynforward_ptr
+name);struct Cyc_group*Cyc_getgrgid(unsigned int uid);int Cyc_initgroups(struct
 _dynforward_ptr user,unsigned int group);int Cyc_setgroups(struct _dynforward_ptr
 groups);struct Cyc_Cgrp_Cgroup{char*gr_name;char*gr_passwd;unsigned int gr_gid;
 char**gr_mem;};struct Cyc_Cgrp_Cgroup*getgrnam(char*const name);struct Cyc_Cgrp_Cgroup*

@@ -682,26 +682,26 @@ static inline void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_Opt{void*v;};struct _dynforward_ptr Cyc_Core_new_string(
-unsigned int);extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
+void*v;};struct _dynforward_ptr Cyc_Core_new_string(unsigned int);extern char Cyc_Core_Invalid_argument[
+21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dynforward_ptr f1;};
+extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+_dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(struct Cyc_List_List*x);
-extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct Cyc_Rope_Rope_node;
-struct Cyc_Rope_Rope_node*Cyc_Rope_from_string(struct _dynforward_ptr);struct
-_dynforward_ptr Cyc_Rope_to_string(struct Cyc_Rope_Rope_node*);struct Cyc_Rope_Rope_node*
-Cyc_Rope_concat(struct Cyc_Rope_Rope_node*,struct Cyc_Rope_Rope_node*);struct Cyc_Rope_Rope_node*
-Cyc_Rope_concata(struct _dynforward_ptr);struct Cyc_Rope_Rope_node*Cyc_Rope_concatl(
-struct Cyc_List_List*);unsigned int Cyc_Rope_length(struct Cyc_Rope_Rope_node*);int
-Cyc_Rope_cmp(struct Cyc_Rope_Rope_node*,struct Cyc_Rope_Rope_node*);unsigned int
-Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(struct _dynforward_ptr s1,struct
-_dynforward_ptr s2);struct _dynforward_ptr Cyc_strncpy(struct _dynforward_ptr,struct
-_dynforward_ptr,unsigned int);struct Cyc_Rope_String_rope_struct{int tag;struct
-_dynforward_ptr f1;};struct Cyc_Rope_Array_rope_struct{int tag;struct
+_dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
+16];struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(
+struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[
+8];struct Cyc_Rope_Rope_node;struct Cyc_Rope_Rope_node*Cyc_Rope_from_string(struct
+_dynforward_ptr);struct _dynforward_ptr Cyc_Rope_to_string(struct Cyc_Rope_Rope_node*);
+struct Cyc_Rope_Rope_node*Cyc_Rope_concat(struct Cyc_Rope_Rope_node*,struct Cyc_Rope_Rope_node*);
+struct Cyc_Rope_Rope_node*Cyc_Rope_concata(struct _dynforward_ptr);struct Cyc_Rope_Rope_node*
+Cyc_Rope_concatl(struct Cyc_List_List*);unsigned int Cyc_Rope_length(struct Cyc_Rope_Rope_node*);
+int Cyc_Rope_cmp(struct Cyc_Rope_Rope_node*,struct Cyc_Rope_Rope_node*);
+unsigned int Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(struct
+_dynforward_ptr s1,struct _dynforward_ptr s2);struct _dynforward_ptr Cyc_strncpy(
+struct _dynforward_ptr,struct _dynforward_ptr,unsigned int);struct Cyc_Rope_String_rope_struct{
+int tag;struct _dynforward_ptr f1;};struct Cyc_Rope_Array_rope_struct{int tag;struct
 _dynforward_ptr f1;};struct Cyc_Rope_Rope_node{void*v;};struct Cyc_Rope_Rope_node*
 Cyc_Rope_from_string(struct _dynforward_ptr s){return({struct Cyc_Rope_Rope_node*
 _tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->v=(void*)((void*)({struct Cyc_Rope_String_rope_struct*

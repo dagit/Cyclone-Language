@@ -682,33 +682,33 @@ static inline void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- void exit(int);struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];
-struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dynforward_ptr f1;};extern
-char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
-_dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+ void exit(int);struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct
+Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];void*Cyc___assert_fail(
-struct _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line);
-struct Cyc___cycFILE;extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_Cstdio___abstractFILE;
-struct Cyc_String_pa_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{
-int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
-int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
-int tag;unsigned long*f1;};int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fprintf(
-struct Cyc___cycFILE*,struct _dynforward_ptr,struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{
-int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};
-struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;
-unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _dynforward_ptr f1;}
-;struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
-int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dynforward_ptr f1;};
-extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{
-char*tag;struct _dynforward_ptr f1;};void*Cyc___assert_fail(struct _dynforward_ptr
-assertion,struct _dynforward_ptr file,unsigned int line){({struct Cyc_String_pa_struct
-_tmp4;_tmp4.tag=0;_tmp4.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)
-assertion);{struct Cyc_Int_pa_struct _tmp3;_tmp3.tag=1;_tmp3.f1=line;{struct Cyc_String_pa_struct
-_tmp2;_tmp2.tag=0;_tmp2.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)file);{
-void*_tmp0[3]={& _tmp2,& _tmp3,& _tmp4};Cyc_fprintf(Cyc_stderr,({const char*_tmp1="%s:%u: Assertion `%s' failed.\n";
+_dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
+16];void*Cyc___assert_fail(struct _dynforward_ptr assertion,struct _dynforward_ptr
+file,unsigned int line);struct Cyc___cycFILE;extern struct Cyc___cycFILE*Cyc_stderr;
+struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{int tag;struct
+_dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
+int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
+Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{int tag;
+unsigned long*f1;};int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fprintf(struct Cyc___cycFILE*,
+struct _dynforward_ptr,struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;
+short*f1;};struct Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
+int tag;struct _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;
+};struct Cyc_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int
+tag;struct _dynforward_ptr f1;};extern char Cyc_FileCloseError[19];extern char Cyc_FileOpenError[
+18];struct Cyc_FileOpenError_struct{char*tag;struct _dynforward_ptr f1;};void*Cyc___assert_fail(
+struct _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line){({
+struct Cyc_String_pa_struct _tmp4;_tmp4.tag=0;_tmp4.f1=(struct _dynforward_ptr)((
+struct _dynforward_ptr)assertion);{struct Cyc_Int_pa_struct _tmp3;_tmp3.tag=1;_tmp3.f1=
+line;{struct Cyc_String_pa_struct _tmp2;_tmp2.tag=0;_tmp2.f1=(struct
+_dynforward_ptr)((struct _dynforward_ptr)file);{void*_tmp0[3]={& _tmp2,& _tmp3,&
+_tmp4};Cyc_fprintf(Cyc_stderr,({const char*_tmp1="%s:%u: Assertion `%s' failed.\n";
 _tag_dynforward(_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,31));}),
 _tag_dynforward(_tmp0,sizeof(void*),3));}}}});Cyc_fflush((struct Cyc___cycFILE*)
 Cyc_stderr);exit(- 1);}

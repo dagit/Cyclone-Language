@@ -682,15 +682,15 @@ static inline void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- void exit(int);void*abort();struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
-21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dynforward_ptr f1;};
-extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+ void exit(int);void*abort();struct Cyc_Core_NewRegion{struct _DynRegionHandle*
+dynregion;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];
+struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dynforward_ptr f1;};extern
+char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
 _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct
-_dynforward_ptr wrap_Cbuffer_as_buffer(char*,unsigned int);struct Cyc_in_addr{
+_dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
+16];struct _dynforward_ptr wrap_Cbuffer_as_buffer(char*,unsigned int);struct Cyc_in_addr{
 unsigned int s_addr;};unsigned long Cyc_htonl(unsigned long x);unsigned short Cyc_htons(
 unsigned short x);unsigned long Cyc_ntohl(unsigned long x);unsigned short Cyc_ntohs(
 unsigned short x);unsigned long __stub_htonl(unsigned long x);unsigned short

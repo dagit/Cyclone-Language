@@ -54,7 +54,7 @@ void inctotal(stringptr_t pos, $(int,int) @rtotals)
 }
 
 void inccount(stringptr_t<`H,`H> rname, 
-	      table_t<stringptr_t<`H,`H>,$(int,int)@`H> tab)
+	      table_t<stringptr_t<`H,`H>,$(int,int)@`H,`H> tab)
 {
   let rtotals = new $(rname,new $(tab,0),0,0,0);
   totals = new List::List(rtotals,totals);

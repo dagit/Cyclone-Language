@@ -682,28 +682,28 @@ static inline void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- void exit(int);struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];
-struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dynforward_ptr f1;};extern
-char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
-_dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+ void exit(int);struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct
+Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_Core_NewRegion{
-struct _DynRegionHandle*dynregion;};extern char Cyc_Core_Open_Region[16];extern char
-Cyc_Core_Free_Region[16];struct _dynforward_ptr Cstring_to_string(char*);struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char
-Cyc_List_Nth[8];struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
-int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;struct Cyc_Set_Set*
-Cyc_Set_empty(int(*cmp)(void*,void*));struct Cyc_Set_Set*Cyc_Set_insert(struct Cyc_Set_Set*
-s,void*elt);int Cyc_Set_member(struct Cyc_Set_Set*s,void*elt);extern char Cyc_Set_Absent[
-11];struct Cyc_Typerep_Int_struct{int tag;int f1;unsigned int f2;};struct Cyc_Typerep_ThinPtr_struct{
-int tag;unsigned int f1;void*f2;};struct Cyc_Typerep_FatPtr_struct{int tag;void*f1;}
-;struct _tuple0{unsigned int f1;struct _dynforward_ptr f2;void*f3;};struct Cyc_Typerep_Struct_struct{
-int tag;struct _dynforward_ptr*f1;unsigned int f2;struct _dynforward_ptr f3;};struct
-_tuple1{unsigned int f1;void*f2;};struct Cyc_Typerep_Tuple_struct{int tag;
-unsigned int f1;struct _dynforward_ptr f2;};struct _tuple2{unsigned int f1;struct
-_dynforward_ptr f2;};struct Cyc_Typerep_TUnion_struct{int tag;struct _dynforward_ptr
-f1;struct _dynforward_ptr f2;struct _dynforward_ptr f3;};struct Cyc_Typerep_TUnionField_struct{
+_dynforward_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;extern char Cyc_Core_Open_Region[
+16];extern char Cyc_Core_Free_Region[16];struct _dynforward_ptr Cstring_to_string(
+char*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
+18];extern char Cyc_List_Nth[8];struct Cyc_Iter_Iter{void*env;int(*next)(void*env,
+void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,void*);struct Cyc_Set_Set;
+struct Cyc_Set_Set*Cyc_Set_empty(int(*cmp)(void*,void*));struct Cyc_Set_Set*Cyc_Set_insert(
+struct Cyc_Set_Set*s,void*elt);int Cyc_Set_member(struct Cyc_Set_Set*s,void*elt);
+extern char Cyc_Set_Absent[11];struct Cyc_Typerep_Int_struct{int tag;int f1;
+unsigned int f2;};struct Cyc_Typerep_ThinPtr_struct{int tag;unsigned int f1;void*f2;
+};struct Cyc_Typerep_FatPtr_struct{int tag;void*f1;};struct _tuple0{unsigned int f1;
+struct _dynforward_ptr f2;void*f3;};struct Cyc_Typerep_Struct_struct{int tag;struct
+_dynforward_ptr*f1;unsigned int f2;struct _dynforward_ptr f3;};struct _tuple1{
+unsigned int f1;void*f2;};struct Cyc_Typerep_Tuple_struct{int tag;unsigned int f1;
+struct _dynforward_ptr f2;};struct _tuple2{unsigned int f1;struct _dynforward_ptr f2;}
+;struct Cyc_Typerep_TUnion_struct{int tag;struct _dynforward_ptr f1;struct
+_dynforward_ptr f2;struct _dynforward_ptr f3;};struct Cyc_Typerep_TUnionField_struct{
 int tag;struct _dynforward_ptr f1;struct _dynforward_ptr f2;unsigned int f3;struct
 _dynforward_ptr f4;};struct _tuple3{struct _dynforward_ptr f1;void*f2;};struct Cyc_Typerep_XTUnion_struct{
 int tag;struct _dynforward_ptr f1;struct _dynforward_ptr f2;};struct Cyc_Typerep_Union_struct{

@@ -682,23 +682,23 @@ static inline void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_Opt{void*v;};struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),
-struct Cyc_Core_Opt*x);struct _dynforward_ptr Cyc_Core_new_string(unsigned int);
-struct _dynforward_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned int);int
-Cyc_Core_true_f(void*);int Cyc_Core_false_f(void*);struct _tuple0{void*f1;void*f2;
-};void*Cyc_Core_fst(struct _tuple0*);void*Cyc_Core_snd(struct _tuple0*);struct
-_tuple1{void*f1;void*f2;void*f3;};void*Cyc_Core_third(struct _tuple1*);void*Cyc_Core_identity(
-void*);int Cyc_Core_intcmp(int,int);int Cyc_Core_charcmp(char,char);int Cyc_Core_ptrcmp(
-void*,void*);int Cyc_Core_nptrcmp(void*,void*);extern char Cyc_Core_Invalid_argument[
-21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dynforward_ptr f1;};
-extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
+void*v;};struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*
+x);struct _dynforward_ptr Cyc_Core_new_string(unsigned int);struct _dynforward_ptr
+Cyc_Core_rnew_string(struct _RegionHandle*,unsigned int);int Cyc_Core_true_f(void*);
+int Cyc_Core_false_f(void*);struct _tuple0{void*f1;void*f2;};void*Cyc_Core_fst(
+struct _tuple0*);void*Cyc_Core_snd(struct _tuple0*);struct _tuple1{void*f1;void*f2;
+void*f3;};void*Cyc_Core_third(struct _tuple1*);void*Cyc_Core_identity(void*);int
+Cyc_Core_intcmp(int,int);int Cyc_Core_charcmp(char,char);int Cyc_Core_ptrcmp(void*,
+void*);int Cyc_Core_nptrcmp(void*,void*);extern char Cyc_Core_Invalid_argument[21];
+struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dynforward_ptr f1;};extern
+char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
 _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_Core_NewRegion{
-struct _DynRegionHandle*dynregion;};struct Cyc_Core_NewRegion Cyc_Core_rnew_dynregion(
-struct _RegionHandle*);struct Cyc_Core_NewRegion Cyc_Core_new_dynregion();extern
-char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];char Cyc_Core_Invalid_argument[
+_dynforward_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_Core_NewRegion
+Cyc_Core_rnew_dynregion(struct _RegionHandle*);struct Cyc_Core_NewRegion Cyc_Core_new_dynregion();
+extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];char Cyc_Core_Invalid_argument[
 21]="\000\000\000\000Invalid_argument\000";char Cyc_Core_SysError[13]="\000\000\000\000SysError\000";
 struct Cyc_Core_SysError_struct{char*tag;int f1;};char Cyc_Core_Failure[12]="\000\000\000\000Failure\000";
 char Cyc_Core_Impossible[15]="\000\000\000\000Impossible\000";char Cyc_Core_Not_found[

@@ -682,18 +682,18 @@ static inline void _swap_dyneither(struct _dyneither_ptr *x,
   *x = *y;
   *y = tmp;
 }
- struct Cyc_Core_Opt{void*v;};void*Cyc_Core_identity(void*);extern char Cyc_Core_Invalid_argument[
-21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dynforward_ptr f1;};
-extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+ struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};struct Cyc_Core_Opt{
+void*v;};void*Cyc_Core_identity(void*);extern char Cyc_Core_Invalid_argument[21];
+struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dynforward_ptr f1;};extern
+char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
 _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];int isalnum(
-int);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};struct Cyc_List_List*
-Cyc_List_list(struct _dynforward_ptr);int Cyc_List_length(struct Cyc_List_List*x);
-struct Cyc_List_List*Cyc_List_map(void*(*f)(void*),struct Cyc_List_List*x);struct
-Cyc_List_List*Cyc_List_map_c(void*(*f)(void*,void*),void*env,struct Cyc_List_List*
+_dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
+16];int isalnum(int);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};struct
+Cyc_List_List*Cyc_List_list(struct _dynforward_ptr);int Cyc_List_length(struct Cyc_List_List*
+x);struct Cyc_List_List*Cyc_List_map(void*(*f)(void*),struct Cyc_List_List*x);
+struct Cyc_List_List*Cyc_List_map_c(void*(*f)(void*,void*),void*env,struct Cyc_List_List*
 x);extern char Cyc_List_List_mismatch[18];void*Cyc_List_fold_left(void*(*f)(void*,
 void*),void*accum,struct Cyc_List_List*x);void*Cyc_List_fold_right_c(void*(*f)(
 void*,void*,void*),void*,struct Cyc_List_List*x,void*accum);struct Cyc_List_List*

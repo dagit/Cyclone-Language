@@ -51,8 +51,16 @@ extern void insert(table_t<`a,`b> t, `a key, `b val);
   /** [insert(t,key,val)] binds [key] to [value] in [t]. */
 extern `b lookup(table_t<`a,`b> t, `a key);
   /** [lookup(t,key)] returns the value associated with [key] in [t],
-      or throws [Not_found] if there is no value associate with [key]
+      or throws [Not_found] if there is no value associated with [key]
       in [t]. */
+extern `b*`r lookup_opt(table_t<`a,`b,`r> t, `a key);
+  /** [rlookup_opt(t,key)] returns a pointer to the value associated 
+      with [key] in [t], or NULL if there is no value associated with [key].*/
+extern bool try_lookup(table_t<`a,`b> t, `a key, `b@data);
+  /** [try_lookup(t,key,p)] tries to find the [key] in the table [t].
+      If successful, it sets [*p] to the value associated with [key]
+      and returns true.  If the [key] is not found, then try_lookup
+      returns false. */
 extern void resize(table_t<`a,`b> t);
   /** [resize(t)] increases the size (number of buckets) in table [t].
       [resize] is called automatically by functions like [insert] when

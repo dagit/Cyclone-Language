@@ -695,43 +695,42 @@ int tag;struct _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;doubl
 tag;struct _dynforward_ptr f1;};int Cyc_sscanf(struct _dynforward_ptr,struct
 _dynforward_ptr,struct _dynforward_ptr);extern char Cyc_FileCloseError[19];extern
 char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
-21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _dynforward_ptr f1;};
-extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
-_dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
+struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
 Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
-_dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
-extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct Cyc_List_List{
-void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char
-Cyc_List_Nth[8];unsigned int Cyc_strlen(struct _dynforward_ptr s);int Cyc_strcmp(
-struct _dynforward_ptr s1,struct _dynforward_ptr s2);int Cyc_strncmp(struct
-_dynforward_ptr s1,struct _dynforward_ptr s2,unsigned int len);struct _dynforward_ptr
-Cyc_strconcat(struct _dynforward_ptr,struct _dynforward_ptr);extern char Cyc_Arg_Bad[
-8];struct Cyc_Arg_Bad_struct{char*tag;struct _dynforward_ptr f1;};extern char Cyc_Arg_Error[
-10];struct Cyc_Arg_Unit_spec_struct{int tag;void(*f1)();};struct Cyc_Arg_Flag_spec_struct{
-int tag;void(*f1)(struct _dynforward_ptr);};struct Cyc_Arg_FlagString_spec_struct{
-int tag;void(*f1)(struct _dynforward_ptr,struct _dynforward_ptr);};struct Cyc_Arg_Set_spec_struct{
-int tag;int*f1;};struct Cyc_Arg_Clear_spec_struct{int tag;int*f1;};struct Cyc_Arg_String_spec_struct{
-int tag;void(*f1)(struct _dynforward_ptr);};struct Cyc_Arg_Int_spec_struct{int tag;
-void(*f1)(int);};struct Cyc_Arg_Rest_spec_struct{int tag;void(*f1)(struct
-_dynforward_ptr);};void Cyc_Arg_usage(struct Cyc_List_List*,struct _dynforward_ptr);
-extern int Cyc_Arg_current;void Cyc_Arg_parse(struct Cyc_List_List*specs,void(*
-anonfun)(struct _dynforward_ptr),struct _dynforward_ptr errmsg,struct
-_dynforward_ptr args);struct Cyc_Buffer_t;struct Cyc_Buffer_t*Cyc_Buffer_create(
-unsigned int n);struct _dynforward_ptr Cyc_Buffer_contents(struct Cyc_Buffer_t*);
-void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,struct _dynforward_ptr,int offset,
-int len);void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,struct _dynforward_ptr);int
-isspace(int);void*Cyc___assert_fail(struct _dynforward_ptr assertion,struct
-_dynforward_ptr file,unsigned int line);char Cyc_Arg_Bad[8]="\000\000\000\000Bad\000";
-char Cyc_Arg_Error[10]="\000\000\000\000Error\000";struct Cyc_Arg_Prefix_struct{
-int tag;struct _dynforward_ptr f1;};struct Cyc_Arg_Exact_struct{int tag;struct
-_dynforward_ptr f1;};struct Cyc_Arg_Unknown_struct{int tag;struct _dynforward_ptr f1;
-};struct Cyc_Arg_Missing_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Arg_Message_struct{
-int tag;struct _dynforward_ptr f1;};struct Cyc_Arg_Wrong_struct{int tag;struct
-_dynforward_ptr f1;struct _dynforward_ptr f2;struct _dynforward_ptr f3;};struct
-_tuple0{struct _dynforward_ptr f1;int f2;struct _dynforward_ptr f3;void*f4;struct
-_dynforward_ptr f5;};static void*Cyc_Arg_lookup(struct Cyc_List_List*l,struct
+_dynforward_ptr f1;};extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[
+16];struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[
+18];extern char Cyc_List_Nth[8];unsigned int Cyc_strlen(struct _dynforward_ptr s);int
+Cyc_strcmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2);int Cyc_strncmp(
+struct _dynforward_ptr s1,struct _dynforward_ptr s2,unsigned int len);struct
+_dynforward_ptr Cyc_strconcat(struct _dynforward_ptr,struct _dynforward_ptr);extern
+char Cyc_Arg_Bad[8];struct Cyc_Arg_Bad_struct{char*tag;struct _dynforward_ptr f1;};
+extern char Cyc_Arg_Error[10];struct Cyc_Arg_Unit_spec_struct{int tag;void(*f1)();};
+struct Cyc_Arg_Flag_spec_struct{int tag;void(*f1)(struct _dynforward_ptr);};struct
+Cyc_Arg_FlagString_spec_struct{int tag;void(*f1)(struct _dynforward_ptr,struct
+_dynforward_ptr);};struct Cyc_Arg_Set_spec_struct{int tag;int*f1;};struct Cyc_Arg_Clear_spec_struct{
+int tag;int*f1;};struct Cyc_Arg_String_spec_struct{int tag;void(*f1)(struct
+_dynforward_ptr);};struct Cyc_Arg_Int_spec_struct{int tag;void(*f1)(int);};struct
+Cyc_Arg_Rest_spec_struct{int tag;void(*f1)(struct _dynforward_ptr);};void Cyc_Arg_usage(
+struct Cyc_List_List*,struct _dynforward_ptr);extern int Cyc_Arg_current;void Cyc_Arg_parse(
+struct Cyc_List_List*specs,void(*anonfun)(struct _dynforward_ptr),struct
+_dynforward_ptr errmsg,struct _dynforward_ptr args);struct Cyc_Buffer_t;struct Cyc_Buffer_t*
+Cyc_Buffer_create(unsigned int n);struct _dynforward_ptr Cyc_Buffer_contents(struct
+Cyc_Buffer_t*);void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*,struct
+_dynforward_ptr,int offset,int len);void Cyc_Buffer_add_string(struct Cyc_Buffer_t*,
+struct _dynforward_ptr);int isspace(int);void*Cyc___assert_fail(struct
+_dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line);char Cyc_Arg_Bad[
+8]="\000\000\000\000Bad\000";char Cyc_Arg_Error[10]="\000\000\000\000Error\000";
+struct Cyc_Arg_Prefix_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Arg_Exact_struct{
+int tag;struct _dynforward_ptr f1;};struct Cyc_Arg_Unknown_struct{int tag;struct
+_dynforward_ptr f1;};struct Cyc_Arg_Missing_struct{int tag;struct _dynforward_ptr f1;
+};struct Cyc_Arg_Message_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Arg_Wrong_struct{
+int tag;struct _dynforward_ptr f1;struct _dynforward_ptr f2;struct _dynforward_ptr f3;}
+;struct _tuple0{struct _dynforward_ptr f1;int f2;struct _dynforward_ptr f3;void*f4;
+struct _dynforward_ptr f5;};static void*Cyc_Arg_lookup(struct Cyc_List_List*l,struct
 _dynforward_ptr x){while(l != 0){struct _dynforward_ptr _tmp0=(*((struct _tuple0*)l->hd)).f1;
 unsigned int _tmp1=Cyc_strlen((struct _dynforward_ptr)_tmp0);if(_tmp1 > 0  && (*((
 struct _tuple0*)l->hd)).f2){if(Cyc_strncmp((struct _dynforward_ptr)x,(struct

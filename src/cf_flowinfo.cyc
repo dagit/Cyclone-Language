@@ -33,30 +33,28 @@ using Absynpp;
 namespace CfFlowInfo;
 
 ////////////////////////// Shared Constants //////////////////////////
-static tunion AbsRVal.UnknownR unknown_none_v = UnknownR(NoneIL);
-static tunion AbsRVal.UnknownR unknown_this_v = UnknownR(ThisIL);
-static tunion AbsRVal.UnknownR unknown_all_v  = UnknownR(AllIL);
-static tunion AbsRVal.Esc      esc_none_v     = Esc(NoneIL);
-static tunion AbsRVal.Esc      esc_this_v     = Esc(ThisIL);
-static tunion AbsRVal.Esc      esc_all_v      = Esc(AllIL);
-absRval_t unknown_none = &unknown_none_v;
-absRval_t unknown_this = &unknown_this_v;
-absRval_t unknown_all  = &unknown_all_v;
-absRval_t esc_none     = &esc_none_v;
-absRval_t esc_this     = &esc_this_v;
-absRval_t esc_all      = &esc_all_v;
-
-place_set_t mt_place_set() {
-  static place_set_t * mt_place_set_opt = NULL;
-
-  if(mt_place_set_opt == NULL)
-    mt_place_set_opt = new Dict::empty(place_cmp);
-  return *mt_place_set_opt;
+int place_cmp(place_t p1, place_t p2);
+int root_cmp(root_t r1, root_t r2);
+flow_env_t<`r> new_flow_env(region_t<`r> r) {
+  static tunion Raw_exp.Const_e dummy_rawexp = Const_e(Null_c);
+  static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL,EmptyAnnot);
+  return rnew(r) 
+    FlowEnv { .r = r,
+              .unknown_none = rnew(r) UnknownR(NoneIL),
+              .unknown_this = rnew(r) UnknownR(ThisIL),
+              .unknown_all  = rnew(r) UnknownR(AllIL),
+              .esc_none = rnew(r) Esc(NoneIL),
+              .esc_this = rnew(r) Esc(ThisIL),
+              .esc_all = rnew(r) Esc(AllIL),
+              .mt_flowdict = Dict::rempty(r,root_cmp),
+              .mt_place_set = Dict::rempty(r,place_cmp),
+              .dummy_place = rnew(r) Place(rnew(r) MallocPt(&dummy_exp,VoidType),NULL)
+            };
 }
 
 // updates the given set if not NULL.  Returns true if the place
 // is already in the set.
-bool update_place_set(place_set_t *set, place_t<`H,`H> place,
+bool update_place_set(place_set_t<`r> *set, place_t<`r,`r> place,
 		      Position::seg_t loc) {
   if (set != NULL) {
     // see if there's already an entry here
@@ -70,7 +68,7 @@ bool update_place_set(place_set_t *set, place_t<`H,`H> place,
 
 // creates a string to identify the given place in error messages
 string_t place_err_string(place_t place) {
-  let &Place(root,_) = place;
+  let Place{root,_} = *place;
   switch (root) {
   case &VarRoot(vd): return Absynpp::qvar2string(vd->name);
   default: Tcutil::impos("error locations not for VarRoots");
@@ -92,7 +90,7 @@ static void unique_err(place_t place,
 
 // checks for conflicts when merging consumed sets
 static Position::seg_t combine_consume_f(bool isErr,
-					 place_t<`H,`H> place,
+					 place_t<`r> place,
 					 Position::seg_t loc1,
 					 Position::seg_t loc2) {
   if (isErr)
@@ -103,7 +101,8 @@ static Position::seg_t combine_consume_f(bool isErr,
 
 // updates the given set if not NULL.  Returns true if the place
 // is already in the set.
-place_set_t union_place_set(place_set_t s1, place_set_t s2, bool disjoint) {
+place_set_t<`r> union_place_set(place_set_t<`r> s1, place_set_t<`r> s2, 
+                                bool disjoint) {
 //    DEBUG_PRINT("**union_place_set:\n");
 //    DEBUG_PRINT("  s1= ");
 //    print_place_set(s1);
@@ -117,12 +116,12 @@ place_set_t union_place_set(place_set_t s1, place_set_t s2, bool disjoint) {
 }
 
 void print_place(place_t p);
-bool place_set_subset(place_set_t s1, place_set_t s2) {
-  if (s1.t == s2.t) return true;
+bool place_set_subset(place_set_t<`r> s1, place_set_t<`r> s2) {
+  if ((int)s1.t == (int)s2.t) return true;
   try {
-    region r { 
-      let iter = Dict::make_iter(r,s1);
-      let elem = *Dict::rchoose(r,s1);
+    region temp { 
+      let iter = Dict::make_iter(temp,s1);
+      let elem = *Dict::rchoose(temp,s1);
       while(Iter::next(iter,&elem)) {
 	let place = elem[0];
 	if (!Dict::member(s2,place)) {
@@ -140,7 +139,7 @@ bool place_set_subset(place_set_t s1, place_set_t s2) {
   }
 }
 
-bool place_set_equals(place_set_t s1, place_set_t s2) {
+bool place_set_equals(place_set_t<`r> s1, place_set_t<`r> s2) {
 //    let sz1 = Dict::cardinality(s1);
 //    let sz2 = Dict::cardinality(s2);
 //    if (sz1 == sz2) {
@@ -166,32 +165,27 @@ int root_cmp(root_t r1, root_t r2) {
   }
 }
 
-flowdict_t empty_flowdict() {
-  static flowdict_t *fd = NULL;
-  if (fd == NULL) {
-    fd = new Dict::empty(root_cmp);
-  }
-  return *fd;
-}
-
 int place_cmp(place_t p1, place_t p2) {
   if(((int)p1) == ((int)p2))
     return 0;
-  int i = root_cmp(p1->root,p2->root);
+  let Place{root1,fields1} = *p1;
+  let Place{root2,fields2} = *p2;
+  int i = root_cmp(root1,root2);
   if(i != 0)
     return i;
-  return list_cmp(Core::intcmp,p1->fields,p2->fields);
+  return list_cmp(Core::intcmp,fields1,fields2);
 }
 
 // for debugging
 static mstringptr_t place2string(place_t p) {
   list_t<mstringptr_t> sl = NULL;
-  switch(p->root) {
+  let Place{root,fields} = *p;
+  switch(root) {
   case &VarRoot(vd): sl = new List(new aprintf("%s",*(*vd->name)[1]),sl); break;
   case &MallocPt(e,_):  sl = new List(new aprintf("mpt%d",(int)e),sl); break;
   case &InitParam(i,_): sl = new List(new aprintf("param%d",i),sl); break;
   }
-  for(_ fields = p->fields; fields != NULL; fields = fields->tl)
+  for(; fields != NULL; fields = fields->tl)
     sl = new List(new aprintf("%d", fields->hd), sl);
   let ans = new aprintf("%s","");
   for(; sl != NULL; sl = sl->tl)
@@ -209,27 +203,31 @@ static mstringptr_t place2string(place_t p) {
 // Note: We could memoize answers here.
 
 // forward declaration
-static absRval_t i_typ_to_absrval(bool allow_zeroterm,
-				  type_t t, absRval_t leafval);
+static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
+                                      bool allow_zeroterm,
+                                      type_t t, absRval_t<`r> leafval);
 
 
-aggrdict_t aggrfields_to_aggrdict(list_t<aggrfield_t> fs, absRval_t leafval) {
+aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r> fenv,
+                                      list_t<aggrfield_t> fs, 
+                                      absRval_t<`r> leafval) {
   // we treat bitfields as if always initialized -- those are fields with
   // names that are of size 1 ("\0").
   unsigned sz = List::length(fs);
-  aggrdict_t d = new { for i < sz: unknown_all };
+  aggrdict_t<`r> d = rnew(fenv->r) { for i < sz: fenv->unknown_all };
   for(int i = 0; i < sz; i++, fs = fs->tl) {
     let &Aggrfield(n,_,t2,_,_) = fs->hd;
     if((*n).size != 1) 
-      d[i] = i_typ_to_absrval(false, t2,leafval);
+      d[i] = i_typ_to_absrval(fenv, false, t2,leafval);
   }
   return d;
 }
 
-static absRval_t i_typ_to_absrval(bool allow_zeroterm,
-				  type_t t, absRval_t leafval) {
+static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
+                                      bool allow_zeroterm,
+                                      type_t t, absRval_t<`r> leafval) {
   if(is_union_type(t))
-    return unknown_all;
+    return fenv->unknown_all;
 
   switch(Tcutil::compress(t)) {
   case &TunionFieldType(TunionFieldInfo(KnownTunionfield(_,tuf),_)):
@@ -240,23 +238,23 @@ static absRval_t i_typ_to_absrval(bool allow_zeroterm,
     unsigned sz = List::length(tqts);
     // we use *bogus* for all of the field names since they're looked up
     // by index, not name.  Avoids creating the field names...
-    aggrdict_t d = new { for i < sz : unknown_all };
+    aggrdict_t d = rnew(fenv->r) { for i < sz : fenv->unknown_all };
     for (int i = 0; i < sz; i++) { 
-      d[i] = i_typ_to_absrval(false,(*tqts->hd)[1],leafval);
+      d[i] = i_typ_to_absrval(fenv,false,(*tqts->hd)[1],leafval);
       tqts = tqts->tl;
     }
-    return new Aggregate(d);
+    return rnew(fenv->r) Aggregate(d);
   case &AggrType(AggrInfo(info,_)):
     let ad = get_known_aggrdecl(info);
     if(ad->impl==NULL)
       break;
     fallthru(ad->impl->fields);
   case &AnonAggrType(StructA,fs):
-    return new Aggregate(aggrfields_to_aggrdict(fs,leafval));
+    return rnew(fenv->r) Aggregate(aggrfields_to_aggrdict(fenv,fs,leafval));
   case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}) && conref_def(false,zeroterm):
     // special case for zero-terminated arrays of bits-only things -- 
     // here, we initialize them at translation by putting a 0 in at the end.
-    return (allow_zeroterm && Tcutil::bits_only(et)) ? unknown_all : leafval;
+    return (allow_zeroterm && Tcutil::bits_only(et)) ? fenv->unknown_all : leafval;
   case &TagType(t):
     // KLUDGE: if a singleton is initialized, we know the value
     // Note: It is unsound to use TagCmps if the value is uninitialized!
@@ -264,7 +262,8 @@ static absRval_t i_typ_to_absrval(bool allow_zeroterm,
     case &UnknownR(AllIL):
     case &Esc(AllIL):
     case Zero:
-    case NotZeroAll: return new TagCmps(list(new TagCmp(Eq,t)));
+    case NotZeroAll: 
+      return rnew(fenv->r) TagCmps(rlist(fenv->r, rnew(fenv->r) TagCmp(Eq,t)));
     default: return leafval;
     }
     case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_}}) 
@@ -278,29 +277,32 @@ static absRval_t i_typ_to_absrval(bool allow_zeroterm,
   default: break;
   }
   
-  return Tcutil::bits_only(t) ? unknown_all : leafval;
+  return Tcutil::bits_only(t) ? fenv->unknown_all : leafval;
 }
 
-absRval_t typ_to_absrval(type_t t, absRval_t leafval) {
-  return i_typ_to_absrval(true, t, leafval);
+absRval_t<`r> typ_to_absrval(flow_env_t<`r> fenv, type_t t, absRval_t<`r> leafval) {
+  return i_typ_to_absrval(fenv, true, t, leafval);
 }
 
-static bool prefix_of_member(region_t<`r> r, place_t<`r2,`r3> place,
-			     Dict::dict_t<place_t<`r2,`r3>,Position::seg_t,`H> set) {
-  let elem = $(place,NULL);
-  let iter = Dict::make_iter(r,set);
-  while(Iter::next(iter,&elem)) {
-    let place2 = elem[0];
-    if(root_cmp(place->root, place2->root) != 0)
-      continue;
-    let fs1 = place->fields;
-    let fs2 = place2->fields;
-    for(; fs1 != NULL && fs2 != NULL; fs1 = fs1->tl, fs2 = fs2->tl)
-      if (fs1->hd != fs2->hd) break;
-    if(fs1 == NULL)
-      return true;
+static bool 
+prefix_of_member(place_t<`r2,`r3> place,
+                 Dict::dict_t<place_t<`r2,`r3>,Position::seg_t,`r4> set) {
+  region r {
+    let elem = $(place,NULL);
+    let iter = Dict::make_iter(r,set);
+    while(Iter::next(iter,&elem)) {
+      let place2 = elem[0];
+      let Place{root1,fs1} = *place;
+      let Place{root2,fs2} = *place2;
+      if(root_cmp(root1, root2) != 0)
+        continue;
+      for(; fs1 != NULL && fs2 != NULL; fs1 = fs1->tl, fs2 = fs2->tl)
+        if (fs1->hd != fs2->hd) break;
+      if(fs1 == NULL)
+        return true;
+    }
+    return false;
   }
-  return false;
 }
 
 //////////////////////// Managing Escapes ///////////////////////////
@@ -308,19 +310,19 @@ static bool prefix_of_member(region_t<`r> r, place_t<`r2,`r3> place,
 // Note: This would be a great place to delay an idempotent genregion
 //       because we often won't have any places! (Also would want to pick
 //       a very small initial region size.)
-static struct EscPile<`r::R> {
-  region_t<`r>       rgn;
-  list_t<place_t,`r> places;
+static struct EscPile<`rplace::R,`rplaceptr::R,`rpile::R> {
+  region_t<`rpile>       rgn;
+  list_t<place_t<`rplace,`rplaceptr>,`rpile> places;
 };
-typedef struct EscPile<`r1> @`r2 escpile_t<`r1,`r2>;
+typedef struct EscPile<`r3,`r4,`r1> @`r2 escpile_t<`r3,`r4,`r1,`r2>;
 
-static void add_place(escpile_t pile, place_t<`H,`H> place) {
+static void add_place(escpile_t<`r,`r2,`rpile> pile, place_t<`r,`r2> place) {
   // we expect lots of inserts and short lists, so we don't bother to sort
   // we check for repeats to avoid a very unlikely exponential blowup
   if(!List::mem(place_cmp, pile->places, place))
     pile->places = rnew(pile->rgn) List(place, pile->places);
 }
-static void add_places(escpile_t pile, absRval_t r) {
+static void add_places(escpile_t<`r,`r> pile, absRval_t<`r> r) {
   switch(r) {
   case &AddressOf(p): add_place(pile, p); return;
   case &Aggregate(d): 
@@ -332,34 +334,38 @@ static void add_places(escpile_t pile, absRval_t r) {
 }
 
 // WARNING: do not use this to clobber with an Esc unless that's the point!
-static absRval_t insert_place_inner(absRval_t new_val,absRval_t old_val) {
+static absRval_t<`r> insert_place_inner(region_t<`r> r, absRval_t<`r> new_val,
+                                        absRval_t<`r> old_val) {
   switch(old_val) {
   case &Aggregate(d): 
-    aggrdict_t d2 = new { for i < d.size : 
-                          insert_place_inner(new_val,d[i]) };
-    return new Aggregate(d2);
+    aggrdict_t d2 = rnew(r) { for i < d.size : 
+                              insert_place_inner(r,new_val,d[i]) };
+    return rnew(r) Aggregate(d2);
   default: return new_val;
   }
 }
 
-static aggrdict_t aggr_dict_insert(aggrdict_t d, int n, absRval_t r) {
-  let old_r = d[n];
-  if (old_r == r) return d;
-  aggrdict_t res = new {for i < d.size : d[i]};
-  res[n] = r;
+static aggrdict_t<`r> aggr_dict_insert(region_t<`r> r, aggrdict_t<`r> d, 
+                                       int n, absRval_t<`r> rval) {
+  let old_rval = d[n];
+  if (old_rval == rval) return d;
+  aggrdict_t res = rnew(r) {for i < d.size : d[i]};
+  res[n] = rval;
   return res;
 }
 
-static absRval_t insert_place_outer(list_t<int> fs,
-				    absRval_t old_val, absRval_t new_val) {
+static absRval_t<`r> insert_place_outer(region_t<`r> r,
+                                        list_t<int> fs,
+                                        absRval_t<`r> old_val, 
+                                        absRval_t<`r> new_val) {
   if(fs==NULL) 
-    return insert_place_inner(new_val,old_val);
+    return insert_place_inner(r,new_val,old_val);
   switch($(fs,old_val)) {
   case $(&List(hd,tl),&Aggregate(d)):
-    let new_child = insert_place_outer(tl,d[hd],new_val);
-    let new_child_agg = aggr_dict_insert(d, hd,new_child);
+    let new_child = insert_place_outer(r,tl,d[hd],new_val);
+    let new_child_agg = aggr_dict_insert(r, d, hd,new_child);
     if (new_child_agg == d) return old_val;
-    else return new Aggregate(new_child_agg);
+    else return rnew(r) Aggregate(new_child_agg);
   default: throw new Core::Impossible("bad insert place");
   }
 }
@@ -367,8 +373,10 @@ static absRval_t insert_place_outer(list_t<int> fs,
 // Note: we need to catch not in the dict b/c of how join_flow uses this code?
 // Note: we should only be escaping leaves now -- never Aggregate!
 // Note: There's a quadratic behavior here that won't be a problem in practice.
-static flowdict_t escape_these(escpile_t pile, place_set_t * all_changed,
-			       flowdict_t d) {
+static flowdict_t<`r> escape_these(flow_env_t<`r> fenv,
+                                   escpile_t<`r,`r> pile, 
+                                   place_set_t<`r> * all_changed,
+                                   flowdict_t<`r> d) {
   while(pile->places != NULL) {
     let place = pile->places->hd;
     pile->places = pile->places->tl;
@@ -377,14 +385,16 @@ static flowdict_t escape_these(escpile_t pile, place_set_t * all_changed,
     try oldval = lookup_place(d,place); 
     catch { case Dict::Absent: continue; }
     switch(initlevel(d,oldval)) {
-    case AllIL:  newval = esc_all;  break;
-    case ThisIL: newval = esc_this; break;
-    case NoneIL: newval = esc_none; break;
+    case AllIL:  newval = fenv->esc_all;  break;
+    case ThisIL: newval = fenv->esc_this; break;
+    case NoneIL: newval = fenv->esc_none; break;
     }
     add_places(pile, oldval);
-    d = Dict::insert(d,place->root,
-		     insert_place_outer(place->fields,
-					Dict::lookup(d,place->root),
+    let Place{root,fields} = *place;
+    d = Dict::insert(d,root,
+		     insert_place_outer(fenv->r,
+                                        fields,
+					Dict::lookup(d,root),
 					newval));
   }
   return d;
@@ -394,9 +404,10 @@ static flowdict_t escape_these(escpile_t pile, place_set_t * all_changed,
 
 // We must detect cycles in the MustPointTo graph or we won't terminate.
 // We heap-allocate the seen list b/c we expect it to be very very short.
-static struct InitlevelEnv {
-  flowdict_t d;
-  list_t<place_t> seen;
+static struct InitlevelEnv<`r::R,`e::R> {
+  region_t<`e> e;
+  flowdict_t<`r> d;
+  list_t<place_t<`r,`r>,`e> seen;
 };
 static initlevel_t initlevel_approx(absRval_t r) {
   switch(r) {
@@ -412,8 +423,8 @@ static initlevel_t initlevel_approx(absRval_t r) {
   default: throw new Core::Impossible("initlevel_approx");
   }
 }
-static initlevel_t initlevel_rec(struct InitlevelEnv @ env, 
-				 absRval_t r, initlevel_t acc) {
+static initlevel_t initlevel_rec(struct InitlevelEnv<`r,`e> @ env, 
+				 absRval_t<`r> r, initlevel_t acc) {
   initlevel_t this_ans;
   if(acc == NoneIL) return NoneIL;
   switch(r) {
@@ -427,7 +438,7 @@ static initlevel_t initlevel_rec(struct InitlevelEnv @ env,
     if(List::mem(place_cmp, env->seen, p))
       this_ans = AllIL;
     else {
-      env->seen = new List(p, env->seen);
+      env->seen = rnew(env->e) List(p, env->seen);
       this_ans  = initlevel_rec(env,lookup_place(env->d,p),AllIL);
       env->seen = env->seen->tl;
       if(this_ans == NoneIL)
@@ -440,13 +451,15 @@ static initlevel_t initlevel_rec(struct InitlevelEnv @ env,
   if(this_ans == ThisIL || acc == ThisIL) return ThisIL;
   return AllIL;
 }
-initlevel_t initlevel(flowdict_t d, absRval_t r) {
-  let env = InitlevelEnv(d,NULL);
-  return initlevel_rec(&env,r,AllIL);
+initlevel_t initlevel(flowdict_t<`r> d, absRval_t<`r> r) {
+  region env_rgn {
+    let env = InitlevelEnv(env_rgn,d,NULL);
+    return initlevel_rec(&env,r,AllIL);
+  }
 }
 
-absRval_t lookup_place(flowdict_t d, place_t place) {
-  let &Place(root,fields) = place;
+absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place) {
+  let Place{root,fields} = *place;
   let ans = Dict::lookup(d,root);
   for(; fields != NULL; fields = fields->tl)
     switch($(ans,fields->hd)) {
@@ -469,26 +482,28 @@ static bool is_rval_unescaped(absRval_t rval) {
   default:            return true;
   }
 }
-bool is_unescaped(flowdict_t d, place_t place) {
+bool is_unescaped(flowdict_t<`r> d, place_t<`r,`r> place) {
   return is_rval_unescaped(lookup_place(d,place));
 }
 
 // only things pointed to escape
-flowdict_t escape_deref(flowdict_t d, place_set_t * all_changed, absRval_t r) {
+flowdict_t<`r> escape_deref(flow_env_t<`r> fenv, flowdict_t<`r> d, place_set_t<`r> * all_changed, absRval_t<`r> r) {
   region rgn {
     escpile_t pile = rnew(rgn) EscPile(rgn,NULL);
     add_places(pile, r);
-    return escape_these(pile, all_changed, d);
+    return escape_these(fenv, pile, all_changed, d);
   }
 }
 
-static struct AssignEnv<`r::R> {
-  escpile_t<`r,`r> pile;
-  flowdict_t       d;
+static struct AssignEnv<`r::R,`r2::R> {
+  flow_env_t<`r2>   fenv;
+  escpile_t<`r2,`r2,`r,`r> pile;
+  flowdict_t<`r2>   d;
   Position::seg_t  loc;
 };
-static absRval_t assign_place_inner(struct AssignEnv @ env, 
-				    absRval_t oldval, absRval_t newval) {
+static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env, 
+                                         absRval_t<`r2> oldval, 
+                                         absRval_t<`r2> newval) {
   // assignments to escaped places must be fully-init because other aliases
   // might assume fully-init.  Always causes place to be added for same reason.
   switch($(oldval,newval)) {
@@ -497,10 +512,10 @@ static absRval_t assign_place_inner(struct AssignEnv @ env,
     if(initlevel(env->d,newval) != AllIL)
       Tcutil::terr(env->loc, "assignment puts possibly-uninitialized data in "
 		   "an escaped location");
-    return esc_all;
+    return env->fenv->esc_all;
   case $(&Aggregate(d1), &Aggregate(d2)):
     aggrdict_t new_d = 
-      new {for i < d1.size : assign_place_inner(env,d1[i],d2[i]) };
+      rnew(env->fenv->r) {for i < d1.size : assign_place_inner(env,d1[i],d2[i]) };
     // try to preserve sharing by returning one of the original arrays
     // if there was no change
     bool change = false;
@@ -517,63 +532,69 @@ static absRval_t assign_place_inner(struct AssignEnv @ env,
       }
     if (!change)
       return newval;
-    return new Aggregate(new_d);
+    return rnew(env->fenv->r) Aggregate(new_d);
   case $(_, &Esc(il)): // we already know we don't have an escaped location
     switch(il) {
-    case NoneIL: return unknown_none;
-    case ThisIL: return unknown_this;
-    case AllIL:  return unknown_all;
+    case NoneIL: return env->fenv->unknown_none;
+    case ThisIL: return env->fenv->unknown_this;
+    case AllIL:  return env->fenv->unknown_all;
     }
   default: return newval;
   }
 }
-static absRval_t assign_place_outer(struct AssignEnv @ env, 
-				    list_t<int> fs,
-				    absRval_t oldval, absRval_t newval) {
+static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env, 
+                                         list_t<int> fs,
+                                         absRval_t<`r2> oldval, 
+                                         absRval_t<`r2> newval) {
   if(fs == NULL) return assign_place_inner(env,oldval,newval);
   switch($(fs,oldval)) {
   case $(&List(hd,tl),&Aggregate(d)):
     let new_child = assign_place_outer(env,tl,d[hd],newval);
-    let new_child_agg = aggr_dict_insert(d, hd, new_child);
+    let new_child_agg = aggr_dict_insert(env->fenv->r, d, hd, new_child);
     if (new_child_agg == d) return oldval;
-    else return new Aggregate(new_child_agg);
+    else return rnew(env->fenv->r) Aggregate(new_child_agg);
   default: throw new Core::Impossible("bad assign place");
   }
 }
-flowdict_t assign_place(Position::seg_t loc, flowdict_t d,
-			place_set_t * all_changed, place_t<`H,`H> place, 
-			absRval_t r) {
+flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
+                            Position::seg_t loc, flowdict_t<`r> d,
+                            place_set_t<`r> * all_changed, 
+                            place_t<`r,`r> place, 
+                            absRval_t<`r> r) {
   update_place_set(all_changed,place,NULL);
   region rgn {
-    let &Place(root,fs) = place;
-    struct AssignEnv<`rgn> env = AssignEnv(rnew(rgn) EscPile(rgn,NULL), d, loc);
+    let &Place{root,fs} = place;
+    struct AssignEnv<`rgn> env = AssignEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d, loc);
     absRval_t newval= assign_place_outer(&env,fs,Dict::lookup(d,root),r);
-    return escape_these(env.pile, all_changed, Dict::insert(d, root, newval));
+    return escape_these(fenv, env.pile, all_changed, Dict::insert(d, root, newval));
   }
 }
 
 /////////////////// Join, After, and Lessthan ///////////////////////////////
-static struct JoinEnv<`r::R> {
-  escpile_t<`r,`r> pile;
-  flowdict_t       d1;
-  flowdict_t       d2;
+static struct JoinEnv<`r::R,`r2::R> {
+  flow_env_t<`r2> fenv;
+  escpile_t<`r2,`r2,`r,`r> pile;
+  flowdict_t<`r2>  d1;
+  flowdict_t<`r2>  d2;
 };
-typedef struct JoinEnv<`r1> @`r2 joinenv_t<`r1,`r2>;
+typedef struct JoinEnv<`r1,`r2> @`r3 joinenv_t<`r1,`r2,`r3>;
 static enum WhoIsChanged { Neither, One, Two }; // if both changed, take join
-static struct AfterEnv<`r::R> {
-  struct JoinEnv<`r> joinenv;
-  place_set_t chg1; // should region-allocate!
-  place_set_t chg2; // should region-allocate!
-  place_t curr_place; // a pain to stack-allocate, but should!
-  list_t<int> @ last_field_cell;
+static struct AfterEnv<`r::R,`r2::R> {
+  struct JoinEnv<`r,`r2> joinenv;
+  place_set_t<`r2> chg1; // should region-allocate!
+  place_set_t<`r2> chg2; // should region-allocate!
+  place_t<`r2,`r2> curr_place; // a pain to stack-allocate, but should!
+  list_t<int,`r2> @`r last_field_cell;
   enum WhoIsChanged changed;
 };
-typedef struct AfterEnv<`r1> @`r2 afterenv_t<`r1,`r2>;
+typedef struct AfterEnv<`r1,`r3> @`r2 afterenv_t<`r1,`r2,`r3>;
 
-static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2);
+static bool absRval_lessthan_approx(`a ignore, absRval_t<`r> r1, absRval_t<`r> r2);
 
-static list_t<tag_cmp_t> join_tag_cmps(list_t<tag_cmp_t,`H> l1, 
-				       list_t<tag_cmp_t,`H> l2) {
+static list_t<tag_cmp_t<`r>,`r> 
+join_tag_cmps(region_t<`r> r,
+              list_t<tag_cmp_t<`r>,`r> l1, 
+              list_t<tag_cmp_t<`r>,`r> l2) {
   if(l1==l2) return l1; // if not ptr-equal, just build a new list
   let res = NULL;
   for(; l2 != NULL; l2 = l2->tl) {
@@ -593,7 +614,7 @@ static list_t<tag_cmp_t> join_tag_cmps(list_t<tag_cmp_t,`H> l1,
       }
     }
     if(found)
-      res = new List(new TagCmp(joined_cmp,bd2), res);
+      res = rnew(r) List(rnew(r) TagCmp(joined_cmp,bd2), res);
   }
   return res;
 }
@@ -606,8 +627,9 @@ static list_t<tag_cmp_t> join_tag_cmps(list_t<tag_cmp_t,`H> l1,
 //   Note that the two policies are incomparable in what they accept.
 // note: we don't have to record changes because anything changed would
 //       have to have already been added as a change by r1 or r2!
-static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
+static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,absRval_t<`r> r2) {
   if(r1==r2) return r1;
+  let rgn = env->fenv->r;
 
   switch($(r1,r2)) { // only break when the answer should be Unknown or Esc!
 
@@ -624,7 +646,7 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
 
   case $(&Aggregate(d1), &Aggregate(d2)):
     aggrdict_t new_d = 
-      new {for i < d1.size : join_absRval(env,0,d1[i],d2[i]) };
+      rnew(rgn) {for i < d1.size : join_absRval(env,0,d1[i],d2[i]) };
 
     // try to preserve sharing by returning one of the original arrays
     // if there was no change
@@ -642,11 +664,11 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
       }
     if (!change)
       return r2;
-    return new Aggregate(new_d);
+    return rnew(rgn) Aggregate(new_d);
   case $(&TagCmps(l1),&TagCmps(l2)):
-    let new_l = join_tag_cmps(l1,l2);
+    let new_l = join_tag_cmps(rgn,l1,l2);
     if(new_l==l1) return r1;
-    return new TagCmps(new_l);
+    return rnew(rgn) TagCmps(new_l);
 
     // KLUDGE: see above -- TagCmps are fully initialized
   case $(&TagCmps(_),_): return r2;
@@ -660,15 +682,15 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
   case $(&Esc(_),_):
   case $(_,&Esc(_)):
     switch($(il1,il2)) {
-    case $(_,NoneIL): case $(NoneIL,_): return esc_none;
-    case $(_,ThisIL): case $(ThisIL,_): return esc_this;
-    default: return esc_all;
+    case $(_,NoneIL): case $(NoneIL,_): return env->fenv->esc_none;
+    case $(_,ThisIL): case $(ThisIL,_): return env->fenv->esc_this;
+    default: return env->fenv->esc_all;
     }
   default:
     switch($(il1,il2)) {
-    case $(_,NoneIL): case $(NoneIL,_): return unknown_none;
-    case $(_,ThisIL): case $(ThisIL,_): return unknown_this;
-    default: return unknown_all;
+    case $(_,NoneIL): case $(NoneIL,_): return env->fenv->unknown_none;
+    case $(_,ThisIL): case $(ThisIL,_): return env->fenv->unknown_this;
+    default: return env->fenv->unknown_all;
     }
   }
 }
@@ -683,7 +705,7 @@ static bool same_relop(reln_op_t r1,reln_op_t r2) {
   default: return false;
   }
 }
-static relns_t join_relns(relns_t r1s, relns_t r2s) {
+static relns_t<`r> join_relns(region_t<`r> r, relns_t<`r> r1s, relns_t<`r> r2s){
   if (r1s == r2s) return r1s;
   //  fprintf(stderr,"join on ["); print_relns(r1s); 
   //  fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]\n");
@@ -695,7 +717,7 @@ static relns_t join_relns(relns_t r1s, relns_t r2s) {
     for (let r2s = r2s; r2s != NULL; r2s = r2s->tl) {
       let r2 = r2s->hd;
       if (r1 == r2 || ((r1->vd == r2->vd) && same_relop(r1->rop,r2->rop))) {
-        res = new List(r1,res);
+        res = rnew(r) List(r1,res);
         found = true;
         break;
       }
@@ -707,8 +729,7 @@ static relns_t join_relns(relns_t r1s, relns_t r2s) {
   return res;
 }
 // for merging the "may consume" lists of two flows.
-static void remove_f(List::list_t<place_t<`H,`H>> @l,
-		     place_t<`H,`H> place) {
+static void remove_f(List::list_t<place_t<`r,`r2>> @l,place_t<`r,`r2> place) {
   try {
     *l = List::delete_cmp(place_cmp,*l,place);
     DEBUG_PRINT("  --deleted elem\n");
@@ -727,21 +748,22 @@ void print_place_list(List::list_t<place_t> x) {
   fprintf(stderr,"\n");
 }
 
-static consume_t or_consume(consume_t c1, consume_t c2) {
+static consume_t<`r> or_consume(region_t<`r> r,
+                                consume_t<`r> c1, consume_t<`r> c2) {
   DEBUG_PRINT("in or_consume:\n");
   DEBUG_PRINT("  c1.may_consume = ");
   DEBUG_PRINT_F(print_place_list,c1.may_consume);
   DEBUG_PRINT("  c2.may_consume = ");
   DEBUG_PRINT_F(print_place_list,c2.may_consume);
   // merge the may_consume lists
-  List::list_t<place_t<`H,`H>,`H> mc = c2.may_consume;
-  region r {
+  List::list_t<place_t<`r>,`r> mc = c2.may_consume;
+  region temp {
     // duplicate the first list, since it will be side-effected by delete.
-    let x = rcopy(r,c1.may_consume);
+    let x = rcopy(temp,c1.may_consume);
     List::iter_c(remove_f,&x,c2.may_consume);
     // now concatenate the two lists
     while (x != NULL) {
-      mc = new List::List(x->hd, mc);
+      mc = rnew(r) List::List(x->hd, mc);
       x = x->tl;
     }
   }
@@ -753,15 +775,16 @@ static consume_t or_consume(consume_t c1, consume_t c2) {
 
 // the join above treats things like "or"; this is treating them
 //   like "and"
-consume_t and_consume(consume_t c1, consume_t c2) {
+consume_t<`r> and_consume(region_t<`r> r, consume_t<`r> c1, consume_t<`r> c2) {
   // concatenate the may_consume lists
-  let mc = List::append(c1.may_consume, c2.may_consume);
+  let mc = List::rappend(r, c1.may_consume, c2.may_consume);
   // merge the consume sets; duplicates indicate an error
   return ConsumeInfo(union_place_set(c1.consumed,c2.consumed,true),mc);
 }
 
-flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
-		 bool or_consumed){
+flow_t<`r> join_flow(flow_env_t<`r> fenv,
+                     place_set_t<`r>* all_changed, flow_t<`r> f1, flow_t<`r> f2,
+                     bool or_consumed){
   // if(f1 == f2) return f1;
   switch($(f1,f2)) {
   case $(BottomFL,_): return f2;
@@ -775,24 +798,26 @@ flow_t join_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
     if(flow_lessthan_approx(f1,f2)) return f2;
     if(flow_lessthan_approx(f2,f1)) return f1;
     region rgn {
-      let env     = JoinEnv(rnew(rgn) EscPile(rgn,NULL),d1,d2);
+      let env     = JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL),d1,d2);
       let outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
-      let r       = join_relns(r1,r2);
-      let c       = or_consumed ? or_consume(c1,c2) : and_consume(c1,c2);
-      return ReachableFL(escape_these(env.pile, all_changed, outdict),r,c);
+      let r       = join_relns(fenv->r,r1,r2);
+      let c = or_consumed ? or_consume(fenv->r,c1,c2) : and_consume(fenv->r,c1,c2);
+      return ReachableFL(escape_these(fenv, env.pile, all_changed, outdict),r,c);
     }
   }
 }
 
-$(flow_t,absRval_t) join_flow_and_rval(place_set_t* all_changed,
-				       $(flow_t,absRval_t) pr1,
-				       $(flow_t,absRval_t) pr2,
-				       bool or_consumed) {
+$(flow_t<`r>,absRval_t<`r>) 
+join_flow_and_rval(flow_env_t<`r> fenv,
+                   place_set_t<`r>* all_changed,
+                   $(flow_t<`r>,absRval_t<`r>) pr1,
+                   $(flow_t<`r>,absRval_t<`r>) pr2,
+                   bool or_consumed) {
   // possibly wasteful because it could do the escape shtuff twice
   // and it can because of && and || using 0 which abstracts to Zero. Sigh.
   let $(f1,r1) = pr1;
   let $(f2,r2) = pr2;
-  flow_t outflow = join_flow(all_changed,f1,f2,or_consumed);
+  flow_t outflow = join_flow(fenv,all_changed,f1,f2,or_consumed);
   switch($(f1,f2,outflow)) {
   case $(BottomFL,_,_): return $(outflow,r2);
   case $(_,BottomFL,_): return $(outflow,r1);
@@ -801,17 +826,17 @@ $(flow_t,absRval_t) join_flow_and_rval(place_set_t* all_changed,
     if(absRval_lessthan_approx(0,r1,r2)) return $(outflow,r2);
     if(absRval_lessthan_approx(0,r2,r1)) return $(outflow,r1);
     region rgn {
-      let env  = JoinEnv(rnew(rgn) EscPile(rgn,NULL),d1,d2);
+      let env  = JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL),d1,d2);
       let outr = join_absRval(&env,0,r1,r2);
-      return $(ReachableFL(escape_these(env.pile,all_changed,outd),
+      return $(ReachableFL(escape_these(fenv, env.pile,all_changed,outd),
                            relns,cinfo), outr);
     }
   default: throw new Core::Impossible("join_flow_and_rval: BottomFL outflow");
   }
 }
 
-static absRval_t after_absRval_d(afterenv_t,int,absRval_t,absRval_t);
-static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
+static absRval_t<`r> after_absRval_d(afterenv_t<`r1,`r2,`r>,int,absRval_t<`r>,absRval_t<`r>);
+static absRval_t<`r> after_absRval(afterenv_t<`r1,`r2,`r> env, absRval_t<`r> r1, absRval_t<`r> r2) {
   bool changed1 = env->changed == One || Dict::member(env->chg1,env->curr_place);
   bool changed2 = env->changed == Two || Dict::member(env->chg2,env->curr_place);
   if(changed1 && changed2)
@@ -820,12 +845,12 @@ static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
   // quadratic because we'll do it "all the way down", but in practice
   // "all the way down" is small.
   if(changed1) {
-    if(!prefix_of_member(env->joinenv.pile->rgn, env->curr_place, env->chg2))
+    if(!prefix_of_member(env->curr_place, env->chg2))
       return r1;
     env->changed = One;
   }
   if(changed2) {
-    if(!prefix_of_member(env->joinenv.pile->rgn, env->curr_place, env->chg1))
+    if(!prefix_of_member(env->curr_place, env->chg1))
       return r2;
     env->changed = Two;
   }
@@ -834,7 +859,8 @@ static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
   switch($(r1,r2)) {
   case $(&Aggregate(d1),&Aggregate(d2)):
     aggrdict_t new_d = 
-      new {for i < d1.size : after_absRval_d(env,i,d1[i],d2[i]) };
+      rnew(env->joinenv.fenv->r) 
+        {for i < d1.size : after_absRval_d(env,i,d1[i],d2[i]) };
                                                          
     // try to preserve sharing by returning one of the original arrays
     // if there was no change
@@ -852,16 +878,17 @@ static absRval_t after_absRval(afterenv_t env, absRval_t r1, absRval_t r2) {
       }
     if (!change)
       return r2;
-    return new Aggregate(new_d);
+    return rnew(env->joinenv.fenv->r) Aggregate(new_d);
   default: throw new Core::Impossible("after_absRval -- non-aggregates!");
   }
 }
-static absRval_t after_absRval_d(afterenv_t env, int key, 
-                                 absRval_t r1, absRval_t r2) {
+static absRval_t<`r> 
+after_absRval_d(afterenv_t<`r1,`r2,`r> env, int key, 
+                absRval_t<`r> r1, absRval_t<`r> r2) {
   if(r1 == r2) return r1;
   let old_last_field = env->last_field_cell; 
   let old_changed    = env->changed;
-  *env->last_field_cell = new List(key,NULL);
+  *env->last_field_cell = rnew(env->joinenv.fenv->r) List(key,NULL);
   env->last_field_cell  = &(*env->last_field_cell)->tl;
   let ans = after_absRval(env,r1,r2);
   env->last_field_cell        = old_last_field;
@@ -869,8 +896,8 @@ static absRval_t after_absRval_d(afterenv_t env, int key,
   env->changed                = old_changed;
   return ans;
 }
-static absRval_t after_root(afterenv_t env, root_t root,
-			    absRval_t r1, absRval_t r2) {
+static absRval_t<`r> after_root(afterenv_t<`r1,`r2,`r> env, root_t<`r> root,
+                                absRval_t<`r> r1, absRval_t<`r> r2) {
   if(r1 == r2) return r1;
   *env->curr_place     = Place(root,NULL);
   env->last_field_cell = &env->curr_place->fields;
@@ -878,12 +905,10 @@ static absRval_t after_root(afterenv_t env, root_t root,
   return after_absRval(env, r1, r2);
 }
 // FIX: region-allocate chg1 and chg2
-flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
-		  place_set_t chg1, place_set_t chg2) {
-  static tunion Raw_exp.Const_e dummy_rawexp = Const_e(Null_c);
-  static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL,EmptyAnnot);
-  static tunion Root.MallocPt dummy_root = MallocPt(&dummy_exp,VoidType);
-  static struct Place<`H> dummy_place = Place(&dummy_root,NULL);
+flow_t<`r> after_flow(flow_env_t<`r> fenv,
+                      place_set_t<`r>* all_changed, 
+                      flow_t<`r> f1, flow_t<`r> f2,
+                      place_set_t<`r> chg1, place_set_t<`r> chg2) {
 
   //if(f1 == f2) return f1;
   switch($(f1,f2)) {
@@ -896,16 +921,16 @@ flow_t after_flow(place_set_t* all_changed, flow_t f1, flow_t f2,
     // Should think about ways to avoid allocation here: (curr_place and
     // cut-off in presence of changes)
     region rgn {
-      let curr_place = &dummy_place; // new Place(&dummy_root,NULL);
-      let env  = AfterEnv(JoinEnv(rnew(rgn) EscPile(rgn,NULL), d1, d2), 
+      let curr_place = fenv->dummy_place;
+      let env  = AfterEnv(JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d1, d2), 
 			  chg1, chg2, 
 			  curr_place, &curr_place->fields,
 			  Neither);
       let new_d = Dict::union_two_c(after_root,&env,d1,d2);
-      let new_r = join_relns(r1,r2);
-      let new_c = and_consume(c1,c2);
-      return ReachableFL(escape_these(env.joinenv.pile,all_changed,new_d),
-                             new_r,new_c);
+      let new_r = join_relns(fenv->r,r1,r2);
+      let new_c = and_consume(fenv->r,c1,c2);
+      return ReachableFL(escape_these(fenv,env.joinenv.pile,all_changed,new_d),
+                         new_r,new_c);
     }
   }
 }
@@ -929,7 +954,7 @@ static bool tag_cmps_lessthan_approx(list_t<tag_cmp_t> l1,
 }
 
 // WARNING: This is where we cheat ("approx") for performance.
-static bool absRval_lessthan_approx(`a::B ignore, absRval_t r1, absRval_t r2) {
+static bool absRval_lessthan_approx(`a::B ignore, absRval_t<`r> r1, absRval_t<`r> r2) {
   if(r1 == r2) return true;
 
   switch ($(r1,r2)) {
@@ -959,7 +984,7 @@ static bool absRval_lessthan_approx(`a::B ignore, absRval_t r1, absRval_t r2) {
   }
 }
 
-static bool relns_approx(relns_t r2s, relns_t r1s) {
+static bool relns_approx(relns_t<`r> r2s, relns_t<`r> r1s) {
   if (r1s == r2s) return true;
   //fprintf(stderr,"approx on ["); print_relns(r1s); 
   //fprintf(stderr,"] and ["); print_relns(r2s); fprintf(stderr,"]");
@@ -979,7 +1004,7 @@ static bool relns_approx(relns_t r2s, relns_t r1s) {
   return true;
 }
 
-bool consume_approx(consume_t c1, consume_t c2) {
+bool consume_approx(consume_t<`r> c1, consume_t<`r> c2) {
   // first check that c1 is a sublist of c2; assumes they are sorted
   if (c1.may_consume != c2.may_consume) {
     let l1 = c1.may_consume;
@@ -1004,7 +1029,7 @@ bool consume_approx(consume_t c1, consume_t c2) {
 //  that will just cause clients to take joins/afters and we always return true
 //  when the two flows are equal.  That's what the approx means.
 // (As a result of the approx, we don't have to allocate here.)
-bool flow_lessthan_approx(flow_t f1, flow_t f2) {
+bool flow_lessthan_approx(flow_t<`r> f1, flow_t<`r> f2) {
   //if(f1 == f2) return true;
   switch($(f1,f2)) {
   case $(BottomFL,_): return true;
@@ -1018,7 +1043,7 @@ bool flow_lessthan_approx(flow_t f1, flow_t f2) {
   }
 }
 
-relns_t reln_kill_var(relns_t rs, vardecl_t v) {
+relns_t<`r> reln_kill_var(region_t<`r> rgn, relns_t<`r> rs, vardecl_t v) {
   relns_t p;
   bool found = false;
   for (p = rs; !found && p != NULL; p = p->tl) {
@@ -1043,34 +1068,49 @@ relns_t reln_kill_var(relns_t rs, vardecl_t v) {
       case LessEqSize(v2): if (v == v2) continue; break;
       default: break;
       }
-      new_rs = new List(r,new_rs);
+      new_rs = rnew(rgn) List(r,new_rs);
     }
   }
   return new_rs;
 }
 
-relns_t reln_kill_exp(relns_t r, exp_t e) {
+relns_t<`r> reln_kill_exp(region_t<`r> rgn, relns_t<`r> r, exp_t e) {
   switch (e->r) {
   case &Var_e(_,&Global_b(vd)): fallthru(vd);
   case &Var_e(_,&Param_b(vd)):  fallthru(vd);
   case &Var_e(_,&Local_b(vd)):  fallthru(vd);
   case &Var_e(_,&Pat_b(vd)):
     if (!vd->escapes)
-      return reln_kill_var(r, vd);
+      return reln_kill_var(rgn, r, vd);
     break;
   default: break;
   }
   return r;
 }
 
+tag_cmp_t<`r2> copy_tagcmp(region_t<`r2> r2, tag_cmp_t t) {
+  return rnew(r2)(*t);
+}
+list_t<tag_cmp_t<`r2>,`r2> copy_tagcmps(region_t<`r2> r2,
+                                        list_t<tag_cmp_t> ts) {
+  return List::rmap_c(r2,copy_tagcmp,r2,ts);
+}
 
-relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
+reln_t<`r2> copy_reln(region_t<`r2> r2, reln_t r) {
+  return rnew(r2)(*r);
+}
+
+relns_t<`r2> copy_relns(region_t<`r2> r2, relns_t<`r> relns) {
+  return List::rmap_c(r2,copy_reln,r2,relns);
+}
+
+relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, vardecl_t v, exp_t e) {
   //fprintf(stderr,"assigning %s to %s: \n", Absynpp::qvar2string(v->name),
   //        Absynpp::exp2string(e));
   if (v->escapes) return r;
   // even if v isn't an integral type, it might be an array in which case
   // we need to kill it.
-  r = reln_kill_var(r, v);
+  r = reln_kill_var(rgn, r, v);
   // if e is malloc(n*sizeof(t)) or a calloc(n,sizeof(t)) 
   // then we can add n <= v.size.  Note that we can't easily
   // do this for comprehensions (i.e., rnew(e1) {for i < n : e2})
@@ -1085,7 +1125,7 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
     case &Var_e(_,&Param_b(n)): fallthru(n);
     case &Var_e(_,&Global_b(n)): 
       if (n->escapes) return r;
-      return new List(new Reln{n,LessEqSize(v)},r);
+      return rnew(rgn) List(rnew(rgn) Reln{n,LessEqSize(v)},r);
     default: return r;
     }
   default: break;
@@ -1102,7 +1142,7 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
   switch (e->r) {
   case &Cast_e(_,e1,_,_): e = e1; goto loop;
   case &Const_e(Int_c(_,i)): 
-    return new List(new Reln(v,EqualConst(i)),r);
+    return rnew(rgn) List(rnew(rgn) Reln(v,EqualConst(i)),r);
   case &Primop_e(Mod, &List(_,&List(e2,_))):
     // FIX: is this safe?  what if e modifies v2?
     // when we have x = e % v2.size, add x < v2.size
@@ -1114,7 +1154,7 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
       case &Var_e(_,&Param_b(v2)):  fallthru(v2);
       case &Var_e(_,&Pat_b(v2)):
         if (v2->escapes) return r;
-        return new List(new Reln(v,LessSize(v2)),r);
+        return rnew(rgn) List(rnew(rgn) Reln(v,LessSize(v2)),r);
       default: break;
       }
       break;
@@ -1128,7 +1168,7 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
     case &Var_e(_,&Param_b(v2)):  fallthru(v2);
     case &Var_e(_,&Pat_b(v2)):
       if (v2->escapes) return r;
-      return new List(new Reln(v,LessEqSize(v2)),r);
+      return rnew(rgn) List(rnew(rgn) Reln(v,LessEqSize(v2)),r);
     default: break;
     }
     break;
@@ -1137,14 +1177,14 @@ relns_t reln_assign_var(relns_t r, vardecl_t v, exp_t e) {
   return r;
 }
 
-relns_t reln_assign_exp(relns_t r, exp_t e1, exp_t e2) {
+relns_t<`r> reln_assign_exp(region_t<`r> rgn, relns_t<`r> r, exp_t e1, exp_t e2) {
   switch (e1->r) {
   case &Var_e(_,&Global_b(vd)): fallthru(vd);
   case &Var_e(_,&Param_b(vd)):  fallthru(vd);
   case &Var_e(_,&Local_b(vd)):  fallthru(vd);
   case &Var_e(_,&Pat_b(vd)):
     if (!vd->escapes)
-      return reln_assign_var(r, vd, e2);
+      return reln_assign_var(rgn, r, vd, e2);
     break;
   default: break;
   }
@@ -1337,14 +1377,14 @@ bool contains_region(killrgn_t rgn, type_t t) {
 }
 
 // used by kill_flowdict_region below
-static void kill_root($(flowdict_t,killrgn_t)@ env, root_t root, absRval_t rval) {
-  let &$(*fd,rgn) = env;
+static void kill_root($(flow_env_t<`r>, flowdict_t<`r>,killrgn_t)@ env, root_t<`r> root, absRval_t<`r> rval) {
+  let &$(fenv,*fd,rgn) = env;
   switch (root) {
   case &VarRoot(vd): 
     // if the variable's type contains the region
     if (contains_region(rgn,vd->type))
       // set it to uninitialized in the new dictionary
-      rval = typ_to_absrval(vd->type, unknown_none);
+      rval = typ_to_absrval(fenv, vd->type, fenv->unknown_none);
     *fd = Dict::insert(*fd,root,rval);
     break;
   case &MallocPt(_,t): 
@@ -1360,45 +1400,46 @@ static void kill_root($(flowdict_t,killrgn_t)@ env, root_t root, absRval_t rval)
 }
 
 // "kill" all roots in the flowdict that have rgn in their type
-static flowdict_t kill_flowdict_region(flowdict_t fd, type_t rgn) {
+static flowdict_t<`r> 
+kill_flowdict_region(flow_env_t<`r> fenv, flowdict_t<`r> fd, type_t rgn) {
   switch (Tcutil::compress(rgn)) {
   case &VarType(tv): 
     tunion KillRgn.Region_k v = Region_k(tv);
     tunion _ KillRgn v2 = &v;
-    $(flowdict_t,killrgn_t) env = $(empty_flowdict(),v2);
+    $(flow_env_t,flowdict_t,killrgn_t) env = $(fenv,fenv->mt_flowdict,v2);
     Dict::iter_c(kill_root,&env,fd);
-    return env[0];
+    return env[1];
     
   case UniqueRgn: 
-    $(flowdict_t,killrgn_t) env = $(empty_flowdict(),UniqueRgn_k);
+    $(flow_env_t,flowdict_t,killrgn_t) env = $(fenv,fenv->mt_flowdict,UniqueRgn_k);
     Dict::iter_c(kill_root,&env,fd);
-    return env[0];
+    return env[1];
 
   default: throw new Core::Impossible("kill_flowdict_region");
   }
 }
 
 // "kill" all relations in the flow analysis that involve the given region
-static relns_t kill_relns_region(relns_t relns, type_t rgn) {
+static relns_t<`r> kill_relns_region(relns_t<`r> relns, type_t rgn) {
   // FIX: too conservative
   return NULL;
 }
 
 // the region rgn has been reset -- produce an outflow where the 
 // roots involving rgn are now uninitialized.
-flow_t kill_flow_region(flow_t f, type_t rgn) {
+flow_t<`r> kill_flow_region(flow_env_t<`r> fenv, flow_t<`r> f, type_t rgn) {
   switch (f) {
   case BottomFL: return f;
   case ReachableFL(fd,r,c): 
-    let fd2 = kill_flowdict_region(fd,rgn);
+    let fd2 = kill_flowdict_region(fenv,fd,rgn);
     let r2 = kill_relns_region(r,rgn);
     // FIX: deal with killing consumed values?
     return ReachableFL(fd2,r2,c);
   }
 }
 
-static void consume_f($(place_set_t @, Position::seg_t) @env, 
-		      place_t<`H,`H> place) {
+static void consume_f($(place_set_t<`r> @, Position::seg_t) @env, 
+		      place_t<`r,`r> place) {
   let &$(consume, loc) = env;
   DEBUG_PRINT("  adding ");
   DEBUG_PRINT_F(print_place,place);
@@ -1413,13 +1454,14 @@ static void consume_f($(place_set_t @, Position::seg_t) @env,
 
 // for each place in the may consume list, add it to the consume list;
 //   if it's already there, then this is a conflict
-flow_t consume_unique_rvals(Position::seg_t loc, flow_t f) {
+flow_t<`r> consume_unique_rvals(Position::seg_t loc, flow_t<`r> f) {
   switch(f) {
   case BottomFL: return f;
   case ReachableFL(fd,relns,cinfo):
     if (cinfo.may_consume == NULL) return f;
     let x = cinfo.consumed;
-    List::iter_c(consume_f,new $(&x,loc),cinfo.may_consume);
+    let env = $(&x,loc);
+    List::iter_c(consume_f,&env,cinfo.may_consume);
     return ReachableFL(fd,relns,ConsumeInfo(x,NULL));
   }
 }
@@ -1449,7 +1491,7 @@ void check_unique_rvals(Position::seg_t loc, flow_t f) {
 
 // drop unique rvals.  This is the case where they are in read position,
 // but we don't do anything with them (i.e. x;)
-flow_t drop_unique_rvals(Position::seg_t loc, flow_t f) {
+flow_t<`r> drop_unique_rvals(Position::seg_t loc, flow_t<`r> f) {
   switch (f) {
   case BottomFL: return f;
   case ReachableFL(d,r,c):
@@ -1460,7 +1502,7 @@ flow_t drop_unique_rvals(Position::seg_t loc, flow_t f) {
 
 // When reading through a variable, simply make sure that the unique
 // pointers are OK, and then purge the may_consume list
-flow_t readthrough_unique_rvals(Position::seg_t loc, flow_t f) {
+flow_t<`r> readthrough_unique_rvals(Position::seg_t loc, flow_t<`r> f) {
   check_unique_rvals(loc,f);
   switch (f) {
   case BottomFL: return f;
@@ -1470,22 +1512,20 @@ flow_t readthrough_unique_rvals(Position::seg_t loc, flow_t f) {
   }
 }
 
-$(consume_t,flow_t) save_consume_info(flow_t f, bool clear) {
-  static place_set_t *empty_info = NULL;
+$(consume_t<`r>,flow_t<`r>) save_consume_info(flow_env_t<`r> fenv,
+                                              flow_t<`r> f, bool clear) {
   switch (f) {
   case BottomFL: 
-    if (empty_info == NULL)
-      empty_info = new mt_place_set();
-    return $(ConsumeInfo(*empty_info,NULL),f);
+    return $(ConsumeInfo(fenv->mt_place_set,NULL),f);
   case ReachableFL(d,r,c):
     if (clear)
-      return $(c,ReachableFL(d,r,ConsumeInfo(mt_place_set(),NULL)));
+      return $(c,ReachableFL(d,r,ConsumeInfo(fenv->mt_place_set,NULL)));
     else
       return $(c,f);
   }
 }
 
-flow_t restore_consume_info(flow_t f, consume_t c) {
+flow_t<`r> restore_consume_info(flow_t<`r> f, consume_t<`r> c) {
   switch (f) {
   case BottomFL: return f;
   case ReachableFL(d,r,_):
@@ -1540,3 +1580,4 @@ bool is_unique_pointer(type_t t) {
   }
 }
 #endif
+
