@@ -19,7 +19,7 @@
 #ifndef _XARRAY_H_
 #define _XARRAY_H_
 
-// Re-sizing arrays.  Ported with some modification by Dan from xarray.ml, 
+// Re-sizing arrays.  Ported with some modification by Dan from xarray.ml,
 // which was written by Steve
 
 // Note these arrays never shrink in size.
@@ -73,8 +73,6 @@ extern xarray_t<`a> append(xarray_t<`a>, xarray_t<`a>);
   /** [append(a1,a2)] returns a new extensible array whose elements
       are the elements of [a1] followed by [a2].  The inputs [a1] and
       [a2] are not modified. */
-extern void imp_append(xarray_t<`a>, xarray_t<`a>); // imperative
-  /** [imp_append(a1,a2)] DOES NOT EXIST! */
 extern void app(`b f(`a), xarray_t<`a>);
   /** [app(f,a)] applies [f] to each element of [a], in order
       from lowest to highest.  Note that [f] returns [`a], unlike
@@ -93,18 +91,17 @@ extern xarray_t<`b> map(`b f(`a), xarray_t<`a>);
   /** [map(f,a)] returns a new extensible array whose elements are
       obtained by applying [f] to each element of [a]. */
 extern xarray_t<`b> map_c(`b f(`c,`a), `c, xarray_t<`a>);
-  /** [map_c(f,e,a)] returns a new extensible array whose elements are 
+  /** [map_c(f,e,a)] returns a new extensible array whose elements are
       obtained by applying [f] to [e] and each element of [a]. */
 extern void reuse(xarray_t<`a> xarr);
   /** [reuse(a)] sets the number of elements of [a] to zero, but
       does not free the underlying array. */
 extern void delete(xarray_t<`a> xarr, int num);
   /** [delete(a,n)] deletes the last [n] elements of [a]. */
-extern void remove(xarray_t<`a> xarr, int i); 
+extern void remove(xarray_t<`a> xarr, int i);
   /** [remove(a,i)] removes the element at position [i] from [a];
-      all higher elements are moved down one position. */
+      elements at positions greater than [i] are moved down one position. */
 
 }
 
 #endif
-

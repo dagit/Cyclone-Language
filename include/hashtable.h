@@ -19,26 +19,47 @@
 #ifndef _HASHTABLE_H_
 #define _HASHTABLE_H_
 
+#include <core.h>
+
 // TODO: add region support
 
 namespace Hashtable {
 
+  /*** \subsection{\texttt{<hashtable.h>}} */
+  /*** Defines namespace Hashtable, which implements an imperative
+       hash table datatype. */
+
 extern struct Table<`a,`b>;
 typedef struct Table<`a,`b> @table_t<`a,`b>;
+  /** A [table_t<`a,`b>] is a hash table with keys of type [`a]
+      and values of type [`b]. */
 
-// if cmp(x,y) is 0 then it better be that hash(x) == hash(y) 
 extern table_t<`a,`b> create(int sz, int cmp(`a,`a), int hash(`a));
+  /** [create(sz,cmp,hash)] returns a new hash table that starts out
+      with [sz] buckets.  [cmp] should be a comparison function on
+      keys: [cmp(k1,k2)] should return a number less than, equal to,
+      or greater than 0 according to whether [k1] is less than, equal
+      to, or greater than [k2].  [hash] should be a hash function on
+      keys, and if [cmp(k1,k2)] is 0, then [hash(k1)] must equal
+      [hash(k2)]. */
 extern void insert(table_t<`a,`b> t, `a key, `b val);
-extern `b lookup(table_t<`a,`b> t, `a key); // raises Not_found
+  /** [insert(t,key,val)] binds [key] to [value] in [t]. */
+extern `b lookup(table_t<`a,`b> t, `a key);
+  /** [lookup(t,key)] returns the value associated with [key] in [t],
+      or throws [Not_found] if there is no value associate with [key]
+      in [t]. */
 extern void resize(table_t<`a,`b> t);
-
-// remove only most recent binding.  Silently return if none.  Does a
-// destructive list update since this data structure is not functional
+  /** [resize(t)] increases the size (number of buckets) in table [t]. */
 extern void remove(table_t<`a,`b> t, `a key);
-
+  /** [remove(t,key)] removes the most recent binding of [key] from
+      [t].  If there is no value associated with [key] in [t],
+      [remove] returns silently. */
 extern int hash_string(string_t s);
+  /** A hash function for strings. */
 extern int hash_stringptr(stringptr_t s);
+  /** A hash function for string pointers. */
 extern void iter(void f(`a,`b), table_t<`a,`b> t);
+  /** [iter(f,t)] applies [f] to each [(key,val)] pair in [t]. */
 
 // debugging
 extern 

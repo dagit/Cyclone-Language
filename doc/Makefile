@@ -35,7 +35,8 @@ main-a4.pdf: gen-libdoc.tex
 	pdflatex '\nonstopmode\input' main-a4
 	pdflatex '\nonstopmode\input' main-a4
 
-gen-libdoc.tex: ../include/xarray.h
+gen-libdoc.tex: ../include/buffer.h ../include/hashtable.h \
+  ../include/xarray.h
 	../src/cycdoc $^ > gen-libdoc.tex
 
 clean:
