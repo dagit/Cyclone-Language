@@ -231,10 +231,6 @@ static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
   if(!all_labels_resolved(te))
     terr(loc, "function has goto statements to undefined labels");
 
-  // check for return FIX: goes in a later pass
-  if (fd->ret_type != VoidType && synth_may_implicit_fallthru(ssyn))
-    terr(loc, xprintf("function may complete without returning a value of type"
-		      " %s", typ2string(fd->ret_type)));
   te->le = null;
 }
 

@@ -679,25 +679,25 @@ typedef struct Env @env;
 
 // the empty environment
 static env empty_env() {
-  return &Env{.break_lab = null,
-              .continue_lab = null,
+  return &Env{.break_lab     = null,
+              .continue_lab  = null,
 	      .fallthru_info = null,
               .varmap = Dict::empty(qvar_cmp),
-              .to_pop_break = 0,
+              .to_pop_break    = 0,
               .to_pop_continue = 0,
-              .to_pop_return = 0,
+              .to_pop_return   = 0,
 	      .to_pop_fallthru = 0,
 	      .toplevel = true};
 }
 
 static env clear_toplevel(env e) {
-  return &Env{ .break_lab = e->break_lab,
-               .continue_lab = e->continue_lab,
+  return &Env{ .break_lab     = e->break_lab,
+               .continue_lab  = e->continue_lab,
 	       .fallthru_info = e->fallthru_info,
                .varmap = e->varmap,
-               .to_pop_break = e->to_pop_break,
+               .to_pop_break    = e->to_pop_break,
                .to_pop_continue = e->to_pop_continue,
-               .to_pop_return = e->to_pop_return,
+               .to_pop_return   = e->to_pop_return,
 	       .to_pop_fallthru = e->to_pop_fallthru,
                .toplevel = false};
 }
@@ -706,8 +706,8 @@ static env clear_toplevel(env e) {
 // The type allows y to be a general exp, but in practice it is always
 // a var_exp
 static env add_varmap(env e, qvar x, exp y) {
-  return &Env{ .break_lab = e->break_lab,
-               .continue_lab = e->continue_lab,
+  return &Env{ .break_lab     = e->break_lab,
+               .continue_lab  = e->continue_lab,
                .fallthru_info = e->fallthru_info,
                .varmap = Dict::insert(e->varmap, x, y),
                .to_pop_break    = e->to_pop_break,
@@ -720,26 +720,26 @@ static env add_varmap(env e, qvar x, exp y) {
 // env for loop body: break and continue labels are set to null,
 // exception handler pop counters for break and continue are zeroed
 static env loop_env(env e) {
-  return &Env{.break_lab = null,
-              .continue_lab = null,
+  return &Env{.break_lab     = null,
+              .continue_lab  = null,
               .fallthru_info = e->fallthru_info,
               .varmap = e->varmap,
-              .to_pop_break = 0,
+              .to_pop_break    = 0,
               .to_pop_continue = 0,
-              .to_pop_return = e->to_pop_return,
+              .to_pop_return   = e->to_pop_return,
 	      .to_pop_fallthru = e->to_pop_fallthru,
               .toplevel = e->toplevel};
 }
 
 // env for try: increment exception handler pop counters
 static env try_env(env e) {
-  return &Env{.break_lab = e->break_lab,
-              .continue_lab = e->continue_lab,
+  return &Env{.break_lab     = e->break_lab,
+              .continue_lab  = e->continue_lab,
               .fallthru_info = e->fallthru_info,
               .varmap = e->varmap,
-              .to_pop_break = e->to_pop_break+1,
+              .to_pop_break    = e->to_pop_break+1,
               .to_pop_continue = e->to_pop_continue+1,
-              .to_pop_return = e->to_pop_return+1,
+              .to_pop_return   = e->to_pop_return+1,
 	      .to_pop_fallthru = e->to_pop_fallthru+1,
               .toplevel = e->toplevel};
 }
@@ -748,27 +748,42 @@ static env try_env(env e) {
 static env non_last_switchclause_env(env e, var break_l, var fallthru_l, 
 				     list<qvar> fallthru_binders,
 				     env next_case_env) {
-  return &Env{.break_lab = &Opt(break_l),
-              .continue_lab = e->continue_lab,
+  return &Env{.break_lab     = &Opt(break_l),
+              .continue_lab  = e->continue_lab,
 	      .fallthru_info = &Opt(&$(fallthru_l, 
 				       fallthru_binders,
 				       next_case_env->varmap)),
               .varmap = e->varmap,
-              .to_pop_break = 0,
+              .to_pop_break    = 0,
               .to_pop_continue = e->to_pop_continue,
-              .to_pop_return = e->to_pop_return,
+              .to_pop_return   = e->to_pop_return,
 	      .to_pop_fallthru = 0,
               .toplevel = e->toplevel};
 }
 static env last_switchclause_env(env e, var break_l) {
-  return &Env{.break_lab = &Opt(break_l),
-              .continue_lab = e->continue_lab,
-	      .fallthru_info = e->fallthru_info,
+  return &Env{.break_lab     = &Opt(break_l),
+              .continue_lab  = e->continue_lab,
+	      .fallthru_info = null, // not allowed in last case
               .varmap = e->varmap,
-              .to_pop_break = 0,
+              .to_pop_break    = 0,
               .to_pop_continue = e->to_pop_continue,
-              .to_pop_return = e->to_pop_return,
-	      .to_pop_fallthru = e->to_pop_fallthru, // impossible
+              .to_pop_return   = e->to_pop_return,
+	      .to_pop_fallthru = 0, // impossible
+              .toplevel = e->toplevel};
+}
+
+// must have no pattern vars and type is int, char, or enum of a type
+// with no value constructors. (If it weren't for allowing fallthru
+// anywhere, we wouldn't need the next_l.)
+static env switch_as_switch_env(env e, var next_l) {
+  return &Env{.break_lab     = null,
+	      .continue_lab  = e->continue_lab,
+	      .fallthru_info = &Opt(&$(next_l,null,Dict::empty(qvar_cmp))),
+	      .varmap = e->varmap,
+	      .to_pop_break    = 0,
+              .to_pop_continue = e->to_pop_continue,
+              .to_pop_return   = e->to_pop_return,
+	      .to_pop_fallthru = 0,
               .toplevel = e->toplevel};
 }
 
@@ -1814,10 +1829,22 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
 ///////////////////////////////////////////////////////////////
 //              Translation of Switch Statements             //
 ///////////////////////////////////////////////////////////////
-// FIX:  Should try to preserve
-// switch statements that C can handle (e.g., all integer 
-// cases.)  Should use decision tree stuff from tcpat.
+// FIX:  Should use decision tree stuff from tcpat.
 //
+// For performance, we try to leave switches as switches.  We do this when
+// all of the following hold:
+// * We are switching on a char or int type.
+//   (Could also do enum without value contructors, but we didn't pass in
+//    access to the type definitions!)
+// * No switch_clause has any variables. (reject switch(3) { case x: ... }
+// The hitch is we could still have something like 
+//    switch(e) { case 0: if(b) fallthru; else return; }
+// Therefore, we give each case body 
+// a fresh label so we can translate fallthru to
+// goto.  Then we just hope gcc cleans up the mess and can still use jump
+// tables.
+//
+// For all other switches, 
 // switch (e) { case p1: s1 ... case pn:sn } turns into (roughly)
 //
 //  x = e;
@@ -1838,8 +1865,38 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
 static $(var,var,switch_clause)@ gen_label(switch_clause sc) {
   return &$(fresh_label(),fresh_label(),sc);
 }
-static stmt xlate_switch(typ t,exp r,exp path,env nv,list<switch_clause> scs) {
-  var end_label = fresh_label();
+static void xlate_switch(env nv, stmt whole_s, exp e, list<switch_clause> scs) {
+  exp_to_c(nv,e);
+  let t = e->topt->v;
+
+  // decide if we can leave it as a switch
+  bool leave_as_switch;
+  switch (compress(t)) {
+  case IntType(_,_,Unboxed): leave_as_switch = true;  break;
+  default:                   leave_as_switch = false; break;
+  }
+  for(let scs1 = scs; scs1 != null; scs1 = scs1->tl)
+    if(scs1->hd->pat_vars->v != null) {
+      leave_as_switch = false;
+      break;
+    }
+  if(leave_as_switch) {
+    // note: fallthru in last case can't happen, else this is busted
+    var next_l = fresh_label();
+    for(let scs1 = scs; scs1 != null; scs1 = scs1->tl) {
+      let s = scs1->hd->body;
+      scs1->hd->body = label_stmt(next_l,s,DL);
+      next_l = fresh_label();
+      stmt_to_c(switch_as_switch_env(nv,next_l),s);
+    }
+    return;
+  }
+
+  // no dice, translate to a nest of gotos...
+  qvar v     = temp_var();
+  exp  r     = var_exp(v,DL);
+  exp  path  = address_exp(var_exp(v,DL),DL);
+  var  end_l = fresh_label();
   // for each case, generate a test label and an entry label
   list<$(var,var,switch_clause)@> lscs = List::map(gen_label,scs); 
   list<stmt>                test_stmts = null;
@@ -1850,7 +1907,7 @@ static stmt xlate_switch(typ t,exp r,exp path,env nv,list<switch_clause> scs) {
   // do tests backwards so as to get vars for fallthrus
   for (let lscs2 = lscs; lscs2 != null; lscs2 = lscs2->tl) {
     switch_clause sc = lscs2->hd[2];
-    var fail_lab = (lscs2->tl == null) ? end_label : lscs2->tl->hd[0];
+    var fail_lab = (lscs2->tl == null) ? end_l : lscs2->tl->hd[0];
     var succ_lab = lscs2->hd[1];
     if (sc->where_clause == null) {
       let res = xlate_pat(nv,t,r,path,sc->pattern,succ_lab,fail_lab,decls);
@@ -1858,8 +1915,8 @@ static stmt xlate_switch(typ t,exp r,exp path,env nv,list<switch_clause> scs) {
       decls = res[1];
       test_stmts = &cons(label_stmt(lscs2->hd[0],res[2],DL),test_stmts);
     } else {
-      exp e = sc->where_clause->v;
-      var intermed_lab = fresh_label();
+      let e = sc->where_clause->v;
+      let intermed_lab = fresh_label();
       let res = xlate_pat(nv,t,r,path,sc->pattern,intermed_lab,fail_lab,decls);
       exp_to_c(res[0], e); // Translate where clause with pattern vars in scope
       nvs   = &cons(res[0],nvs);
@@ -1880,7 +1937,7 @@ static stmt xlate_switch(typ t,exp r,exp path,env nv,list<switch_clause> scs) {
       let  e = nvs->hd;
       stmt s = lscs->hd[2]->body;
       stmt_to_c(non_last_switchclause_env(e,
-					  end_label,
+					  end_l,
 					  lscs->tl->hd[1],
 					  lscs->tl->hd[2]->pat_vars->v,
 					  nvs->tl->hd),
@@ -1889,19 +1946,21 @@ static stmt xlate_switch(typ t,exp r,exp path,env nv,list<switch_clause> scs) {
     }
     let  e = nvs->hd;
     stmt s = lscs->hd[2]->body;
-    stmt_to_c(last_switchclause_env(e, end_label), s);
+    stmt_to_c(last_switchclause_env(e, end_l), s);
     clauses = seq_stmt(clauses, label_stmt(lscs->hd[1], s, DL), DL);
   }
   // glue the test statements, the case statements, and the end label together
   stmt res = seq_stmt(test_stmt, 
 		      seq_stmt(clauses, 
-			       label_stmt(end_label, skip_stmt(DL),DL),DL),DL);
+			       label_stmt(end_l, skip_stmt(DL),DL),DL),DL);
   // add in all of the variable declarations with a wide enough scope
   for (decls; decls != null; decls = decls->tl) {
     let &$(qv,t) = decls->hd;
     res = declare_stmt(qv, t, null, res, DL);
   }
-  return res;
+  // and finally add in the variable that holds the test and clobber
+  // the abstract syntax
+  whole_s->r = declare_stmt(v,typ_to_c(e->topt->v),&Opt(e), res, DL)->r;
 }
 
 extern stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e,
@@ -1996,11 +2055,7 @@ static void stmt_to_c(env nv, stmt s) {
       stmt_to_c(loop_env(nv),s2);
       return;
     case Switch_s(e,scs): 
-      qvar r = temp_var();
-      exp_to_c(nv,e);
-      let new_s = xlate_switch(e->topt->v,var_exp(r,DL),
-			       address_exp(var_exp(r,DL),DL),nv,scs);
-      s->r = declare_stmt(r,typ_to_c(e->topt->v),&Opt(e), new_s, DL)->r;
+      xlate_switch(nv,s,e,scs);
       return;
     case Fallthru_s(es,_): 
       if(nv->fallthru_info == null) {

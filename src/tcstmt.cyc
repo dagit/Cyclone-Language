@@ -28,12 +28,9 @@ using Tcenv;
 using Tcexp;
 using Tcpat;
 
+// can be deleted
 static synth remove_local_vars(tenv te, list<vardecl> x, synth ssyn) {
-  Set<var> vs = Set::empty(String::zstrcmp);
-  for (; x != null; x = x->tl)
-    vs = Set::insert(vs,x->hd->name[1]);
-  Set<var> shadowed = Set::intersect(get_unassigned(te),vs);
-  return add_var_synth(shadowed,ssyn);
+  return ssyn;
 }
 
 // used to type-check Let_d, switch clauses, and catch clauses
@@ -191,9 +188,6 @@ synth tcStmt(tenv te, stmt s0) {
       // type-checking the body will type-check any explicit fallthrus.
       let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
 			       scs->hd->where_clause);
-      if (synth_may_implicit_fallthru(ssyn))
-	terr(scs->hd->body->loc,
-	     "switch case must not implicitly fall through to next case");
       // FIX: Jump stuff is broken here, but it's leaving this pass soon anyway.
       swsyn = join_synth(swsyn, ssyn);
       te    = set_fallthru(te, pat_typ, scs->hd->body);
@@ -223,9 +217,6 @@ synth tcStmt(tenv te, stmt s0) {
       // type-checking the body will type-check any explicit fallthrus
       let ssyn = pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body, 
 			       scs->hd->where_clause);
-      if (synth_may_implicit_fallthru(ssyn))
-	terr(scs->hd->body->loc,
-	     "catch case must not implicitly fall through to next case");
       // FIX: Jump stuff is broken here, but it's leaving this pass soon anyway.
       swsyn = join_synth(swsyn, ssyn);
       te    = set_fallthru(te, pat_typ, scs->hd->body);
@@ -290,7 +281,6 @@ synth tcStmt(tenv te, stmt s0) {
             terr(d->loc,
                  xprintf("%s declared with type %s, initialized with type %s",
                          x, typ2string(t), typ2string(synth_typ(esyn))));
-        te = set_unassigned(te,maybe_unassigned(esyn));
       }
       tenv  te2  = add_local_var(s->loc, te, vd);
       synth ssyn = tcStmt(set_encloser(te2,s0),s);

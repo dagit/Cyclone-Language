@@ -186,8 +186,6 @@ static synth tcVar(tenv te, segment loc, Opt_t<typ> topt, qvar q, exp e) {
     case Param_b(&$(v,tq,t)):
       return standard_synth(te,t);
     case Local_b(vd):
-      if (Set::member(get_unassigned(te),vd->name[1]))
-	terr(loc,xprintf("identifier %s might not be initialized",q[1]));
       return standard_synth(te,vd->type);
     case Pat_b(vd):
       return standard_synth(te,vd->type);
@@ -473,16 +471,10 @@ static synth tcConditional(tenv te, segment loc, Opt_t<typ> topt,
 // allowed to be undefined. 
 static synth tcAssignOp(tenv te,segment loc, Opt_t<typ> topt, exp e0, exp e1,
 			Opt_t<primop> po, exp e2) {
-  tenv te_lhs;
+  tenv te_lhs = te;
   resolve_any_unknown_id(te,e1);
   resolve_any_unknown_id(te,e2);
-  switch ($(e1->r, po)) {
-  case $(Var_e(&$(null,v),b), null): 
-    // assignment without an operator to a variable
-    te_lhs = set_unassigned(te,Set::delete(get_unassigned(te),v)); break;
-  default:
-    te_lhs = te; break;
-  }
+
   let esyn_lhs = tcExp(te_lhs, null, e1);
   let t1       = synth_typ(esyn_lhs);
   // Check to see if e1 is an lvalue after typechecking, so that

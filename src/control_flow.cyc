@@ -10,10 +10,10 @@
 // * Decorated all exp things with their correct type
 // * Decorated all stmts with their correct non_local_preds
 //   (and filled in the correct field for jumpers to their destination)
-// * TO DO: The annot field of statements is properly initialized.
+// * The annot field of statements is properly initialized.
 //   (Of course, this step could be a trivial walk to find all the
 //    statements and initialize this field.)
-// * TO DO: May have the previous pass set the "enclosing decl or try"
+// * Set the "enclosing decl or try"
 //   field on statements that we use to do "goto doesn't enter"
 //   WARNING: The implicit list ends with a self-loop, not a null.
 
@@ -40,9 +40,6 @@ using Absynpp;
 using Tcutil;
 
 namespace ControlFlow;
-
-// NOTE: We assume vardecl are always shared, so pointer comparison
-//       suffices on them.
 
 // The set of variables that may be unassigned.
 // (Could avoid allocation and pointer-chasing via a bitvector or
@@ -127,7 +124,7 @@ static cfexpsyn_t meet_expsynth(cfexpsyn_t syn1, cfexpsyn_t syn2) {
   return CFExpSyn(f,f);
 }
 
-// Global control variable -- to be re-entrant, we'd need to replace this
+// Global control variables -- to be re-entrant, we'd need to replace this
 // with a shared variable in an environment passed to cf_check_stmt
 static bool iterate_cf_check = false;
 static int  iteration_num    = 0;
@@ -247,10 +244,15 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
     return accum;
 
     // I'm assuming C insists e1 before e2, but I didn't look it up.
-  case Comprehension_e(_,e1,e2): fallthru(e1,e2);
+    // Note that e2 does not execute when e1 evaluates to 0.
+    // Monotonicity is why we can ignore the result of e2.
+  case Comprehension_e(_,e1,e2): 
+    let syn1 = cf_check_exp(env,e1);
+    cf_check_exp(expsynth_to_flow(syn1),e2);
+    return syn1;
+
   case SeqExp_e(e1,e2): 
     return cf_check_exp(expsynth_to_flow(cf_check_exp(env,e1)), e2);
-    
 
   // Technically we're being too conservative here because we could
   // have different when_true/when_false on the last expression.
@@ -293,10 +295,10 @@ void cf_check_switch_clauses(flow_info_t env, list<switch_clause> scs) {
 //       (If you don't visit, then a descendant with non_local_preds
 //        gets treated incorrectly!)
 // NOTE: On a non-local jump, we must iterate again whenever we change
-//       the destination's environment and the destination has alredy been
+//       the destination's environment and the destination has already been
 //       traversed on the current pass. 
 flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
-  //  fprintf(cyc_stderr,"!");
+
   env = pre_stmt_check(env,s);
 
   switch(s->r) {
@@ -328,10 +330,10 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
     let syn_e3 = expsynth_to_flow(cf_check_exp(pre_stmt_check(syn_b,cont),e3));
     update_flow(guard, syn_e3);
     return syn_e2.when_false;
+
   case Goto_s(_,&Opt(dest)):  
     // must make sure not into scope 
     // doesn't change, so can just do the first time.
-    // notice how many xenum destructions we're doing -- bleach.
     if(iteration_num == 1) {
       let my_encloser   = get_stmt_annot(s)->encloser;
       let dest_encloser = get_stmt_annot(dest)->encloser;
@@ -346,7 +348,7 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
     }
     fallthru(dest);
 
-  case Break_s(&Opt(dest)): 
+  case Break_s(&Opt(dest)):    
     fallthru(dest);
   case Continue_s(&Opt(dest)):
     update_flow(dest, env);
@@ -391,11 +393,9 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
 }
 
 void cf_check_fun(fndecl fd) {
-  //  fprintf(cyc_stderr, "\n%s", fd->name[1]);
   iterate_cf_check = true;
   iteration_num    = 0;
   while(iterate_cf_check) {
-    //    fprintf(cyc_stderr, "I");
     ++iteration_num;
     iterate_cf_check = false;
     if(fd->ret_type != VoidType) {

@@ -372,11 +372,6 @@ namespace Absyn {
     FieldName(var);
   };
 
-  // Doing this with xenum is the "right" architecture, but it's probably
-  // too slow to do dataflow analysis while constantly doing string compares
-  // on qualified tags.  So we'll probably change this back to an enum
-  // and analyses will just have to modify this definition here rather than
-  // in their own modules.
   EXTERN_DEFINITION xenum StmtAnnot { EmptyAnnot; };
 
   // compare variables 

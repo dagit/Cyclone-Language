@@ -134,7 +134,7 @@ typedef struct CtrlEnv @ ctrl_env_t;
 // Hence mutations are seen by all subsequent type-checking, which is easier
 // than threading labels which must be function-wide unique anyway.
 static struct SharedFenv {
-  typ return_typ;
+  typ                   return_typ;
   Dict<var,stmt>        seen_labels;
   Dict<var,list<stmt>>  needed_labels; // FIX: check empty when done!
 };  
@@ -146,18 +146,13 @@ struct Fenv {
   Dict<var,binding_t>   locals;    // binding will be Param_b, Local_b, or Pat_b
   stmt                  encloser;  // nearest stmt with a binder or a try
   ctrl_env_t            ctrl_env;
-
-    // maybe-unassigned variables -- going away from this pass soon
-  Set<var>              uv; 
 };
 
 //////////////////////// Top-level Environment Manipulation //////////////////
-static Opt_t<unassigned_t> empty_unassigned = null;
 
 tenv tc_init() {
   // Initialize globals
   empty_var_set    = &Opt(Set::empty(String::zstrcmp));
-  empty_unassigned = &Opt(Always(empty_var_set->v));
 
   // Set up initial environment so that xenum exn is defined
   string exn_v  = "exn";
@@ -389,7 +384,7 @@ tenv add_type_vars(segment loc,tenv te,list<tvar> tvs) {
   let fe  = get_fenv(te);
   let fe2 = &Fenv(fe->shared,
 		  new_tvs,
-		  fe->locals, fe->encloser, fe->ctrl_env, fe->uv);
+		  fe->locals, fe->encloser, fe->ctrl_env);
   return put_fenv(te,fe2);
 }
 
@@ -402,16 +397,13 @@ tenv add_local_var(segment loc, tenv te, vardecl vd) {
   let v  = vd->name[1];
   if(Dict::member(fe->locals,v))
     vd->shadow = ++shadow_ctr;
-  Set<var> uv = fe->uv;
-  if(vd->initializer == null)
-    uv = Set::insert(uv,v);
   let fe2 = &Fenv(fe->shared, fe->type_vars,
 		  Dict::insert(fe->locals,v,Local_b(vd)),
-		  fe->encloser, fe->ctrl_env, fe->uv);
+		  fe->encloser, fe->ctrl_env);
   return put_fenv(te,fe2);
 }
 
-// assume uniqueness has been checked elsewhere, never uninitialized
+// assume uniqueness has been checked elsewhere
 tenv add_pat_var(segment loc, tenv te, vardecl vd) {
   if(te->le == null) env_err("Tcenv: unexpected add_param_var");
   let fe = get_fenv(te);
@@ -420,7 +412,7 @@ tenv add_pat_var(segment loc, tenv te, vardecl vd) {
     vd->shadow = ++shadow_ctr;
   fenv fe2 = &Fenv(fe->shared, fe->type_vars,
 		   Dict::insert(fe->locals,v,Pat_b(vd)),
-                   fe->encloser, fe->ctrl_env, fe->uv);
+                   fe->encloser, fe->ctrl_env);
   return put_fenv(te,fe2);
 }
 
@@ -482,7 +474,6 @@ void process_goto(tenv te, stmt s) {
   default: env_err("Tcenv: process_continue given a non-goto"); break;
   }
 }
-
 $(stmt,list<tvar>,list<typ>)* process_fallthru(tenv te, stmt s) {
   if (te->le == null) env_err("Tcenv: unexpected process_fallthru");
   switch (s->r) {
@@ -509,8 +500,7 @@ tenv set_fallthru(tenv te, $(list<tvar>,list<vardecl>) * pat_typ, stmt body) {
   let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, fe->encloser,
 		  &CtrlEnv(c->continue_stmt, c->break_stmt,
 			   &$(body,pat_typ[0],ft_typ),
-			   c->next_stmt),
-		  fe->uv);
+			   c->next_stmt));
   return put_fenv(te,fe2);
 }
 
@@ -522,8 +512,7 @@ tenv clear_fallthru(tenv te) {
   let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, fe->encloser,
 		  &CtrlEnv(c->continue_stmt, c->break_stmt,
 			   null,
-			   c->next_stmt),
-		  fe->uv);
+			   c->next_stmt));
   return put_fenv(te,fe2);
 }
 
@@ -534,8 +523,7 @@ tenv set_in_loop(tenv te, stmt continue_dest) {
 		  &CtrlEnv(Stmt_j(continue_dest),
 			   fe->ctrl_env->next_stmt, // break goes to next
 			   fe->ctrl_env->fallthru_stmt,
-			   Stmt_j(continue_dest)),  // next starts same as cont
-		  fe->uv);
+			   Stmt_j(continue_dest))); // next starts same as cont
   return put_fenv(te,fe2);
 }
 
@@ -548,8 +536,7 @@ tenv set_in_switch(tenv te) {
 		  &CtrlEnv(fe->ctrl_env->continue_stmt,
 			   fe->ctrl_env->next_stmt, // break goes to next
 			   fe->ctrl_env->fallthru_stmt,
-			   fe->ctrl_env->next_stmt), 
-		  fe->uv);
+			   fe->ctrl_env->next_stmt));
   return put_fenv(te,fe2);
 }
 
@@ -559,8 +546,7 @@ tenv set_next(tenv te, jumpee_t j) {
 		  &CtrlEnv(fe->ctrl_env->continue_stmt,
 			   fe->ctrl_env->break_stmt, 
 			   fe->ctrl_env->fallthru_stmt,
-			   j),
-		  fe->uv);
+			   j));
   return put_fenv(te,fe2);
 }
 
@@ -590,21 +576,6 @@ bool all_labels_resolved(tenv te) {
   return Dict::is_empty(get_fenv(te)->shared->needed_labels);
 }
 
-Set<var> get_unassigned(tenv te) {
-  if (te->le == null) return empty_var_set->v;
-  let fe = get_fenv(te);
-  return fe->uv;
-}
-
-tenv set_unassigned(tenv te, Set<var> un) {
-  if (te->le == null) return te;
-  let fe  = get_fenv(te);
-  let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, fe->encloser,
-		  fe->ctrl_env,
-		  un);
-  return put_fenv(te,fe2);
-}
-
 stmt get_encloser(tenv te) {
   if (te->le == null) env_err("Tcenv: unexpected get_encloser");
   let fe = get_fenv(te);
@@ -616,7 +587,7 @@ tenv set_encloser(tenv te, stmt s) {
   let fe  = get_fenv(te);
   let fe2 = &Fenv(fe->shared, fe->type_vars, fe->locals, 
 		  s,
-		  fe->ctrl_env, fe->uv);
+		  fe->ctrl_env);
   return put_fenv(te,fe2);
 }
 
@@ -633,39 +604,12 @@ fenv new_fenv(fndecl fd) {
 	       .ctrl_env      = &CtrlEnv(NotAllowed_j,
 					 NotAllowed_j,
 					 null,
-					 FnEnd_j),
-	       .uv            = Set::empty(String::zstrcmp)};
+					 FnEnd_j)};
 }
 
 ///////////////////////////// Synthesis (CHANGING SOON) //////////////////////
 
-// When type-checking a statement or expression, we need to know
-// what kind of control flow it may have so that we can determine
-// whether code "falls off" a function, implicitly falls through
-// in a switch branch, etc.  We also use this information to better
-// approximate the set of variables that have not yet been initialized.
-// The lattice contains 3 bits of information represented as follows:
-static struct Ctrl {
-  bool implicit_fallthru;     // stmt/exp may fall-through
-  bool explicit_fallthru;     // stmt does an explicit fallthru
-  bool forward_jump;          // stmt/exp may do a forward jump
-};
-typedef struct Ctrl @ctrl_t;
-
-struct Synth {
-  typ          type;      // only valid on expressions
-  ctrl_t       control;   // how the stmt/expr may flow
-  unassigned_t norm_unas; // uninitialized variables on fall-through edge
-  Set<var>     jump_unas; // uninitialized variables on forward jump edge
-};
-
-bool synth_may_implicit_fallthru(synth s) {
-  return s->control->implicit_fallthru;
-}
-
-bool synth_may_explicit_fallthru(synth s) {
-  return s->control->explicit_fallthru;
-}
+struct Synth { typ type; };
 
 typ synth_typ(synth s) {
   return s->type;
@@ -676,195 +620,41 @@ synth synth_set_typ(synth s, typ t) {
   return s;
 }
 
-static struct Ctrl standard_ctrl_v = {true,false,false};
-static struct Ctrl empty_ctrl_v    = {false,false,false};
-static struct Ctrl forward_ctrl_v  = {false,false,true};
-static struct Ctrl fallthru_ctrl_v = {false,true,false};
-static ctrl_t standard_ctrl = &standard_ctrl_v;
-static ctrl_t empty_ctrl    = &empty_ctrl_v;
-static ctrl_t forward_ctrl  = &forward_ctrl_v;
-static ctrl_t fallthru_ctrl = &fallthru_ctrl_v;
+tenv layer_synth(tenv te, synth syn) { return te; }
 
-tenv layer_synth(tenv te, synth syn) {
-  if (synth_may_implicit_fallthru(syn))
-    return set_unassigned(te,maybe_unassigned(syn));
-  else
-    return set_unassigned(te,empty_var_set->v);
-}
+$(tenv,tenv) bool_layer_synth(tenv te, synth syn) { return $(te,te); }
 
-$(tenv,tenv) bool_layer_synth(tenv te, synth syn) {
-  if (synth_may_implicit_fallthru(syn)) {
-    switch (syn->norm_unas) {
-    case Always(v):
-      te = set_unassigned(te,v);
-      return $(te,te);
-    case Boolean(tv,fv):
-      return $(set_unassigned(te,tv), set_unassigned(te,fv));
-    }
-  } else {
-    te = set_unassigned(te,empty_var_set->v);
-    return $(te,te);
-  }
-}
-
-Set<var> maybe_unassigned(synth es) {
-  switch (es->norm_unas) {
-  case Always(s):      return s;
-  case Boolean(s1,s2): return Set::union_two(s1,s2);
-  }
-}
-
-$(Set<var>,Set<var>) maybe_unassigned_bool(synth es) {
-  switch (es->norm_unas) {
-  case Always(s):    return $(s,s);
-  case Boolean(x,y): return $(x,y);
-  }
-}
-
-unassigned_t merge_unassigned(unassigned_t u1, unassigned_t u2) {
-  switch ($(u1,u2)) {
-  case $(Always(s1),  Always(s2)):       
-    return Always(Set::union_two(s1,s2));
-  case $(Always(s1),  Boolean(ts2,fs2)): 
-    return Boolean(Set::union_two(s1,ts2),  Set::union_two(s1,fs2));
-  case $(Boolean(ts1,fs1), Always(s2)):  
-    return Boolean(Set::union_two(s2,ts1),  Set::union_two(s2,fs1));
-  case $(Boolean(ts1,fs1), Boolean(ts2,fs2)): 
-    return Boolean(Set::union_two(ts1,ts2), Set::union_two(fs1,fs2));
-  }
-}
-
-// synth we get for most expressions and atomic statements -- implicit
-// fallthru with no forward jump, and all currently unassigned variables as
-// unassigned on the normal edge, empty set of unassigned variables on
-// the forward jump edge.
-synth standard_synth(tenv te, typ t) {
-  return &Synth{.type = t, .control = standard_ctrl,
-		.norm_unas = Always(get_unassigned(te)),
-	        .jump_unas = empty_var_set->v};
-}
+synth standard_synth(tenv te, typ t) { return &Synth(t); }
 
 // useful for error expressions
 synth wild_synth(tenv te) {
-  return standard_synth(te, wildtyp());
+  return standard_synth(te,wildtyp());
 }
 
 // synth we get for more statements -- standard_synth with void type
 synth skip_synth(tenv te) { return standard_synth(te, VoidType); }
 
-// synth we get upon return or continue -- no fallthru or forward jump,
-// no unassigned variables on either the normal or forward jump edge.
-synth empty_synth(tenv te) {
-  let j = empty_var_set->v;
-  let u = Always(j);
-  return &Synth{.type = wildtyp(), .control = empty_ctrl,
-                .norm_unas = u,    .jump_unas = j};
-}
+// synth we get upon return or continue
+synth empty_synth(tenv te) { return wild_synth(te); }
 
-// synth we get upon a break, goto, or throw -- forward jump with no
-// fallthru, all currently unassigned variables on the forward jump edge, the
-// empty set on the normal edge.
-synth forward_jump_synth(tenv te) {
-  let j = get_unassigned(te);
-  let u = empty_unassigned->v;
-  return &Synth{.type = wildtyp(), .control = forward_ctrl, 
-		.norm_unas = u,    .jump_unas = j};
-}
+// synth we get upon a break, goto, or throw 
+synth forward_jump_synth(tenv te) { return wild_synth(te); }
 
-// synth we get for sequencing.  We merge the normal and jump edges
-// according to whether or not s1 may fallthru to s2.
-synth seq_synth(synth s1, synth s2) {
-  if (!s1->control->implicit_fallthru) {
-    // control can't get to s2
-    // HACK:  we want to return s1 but the type must be draw from s2
-    // I'm using in place update instead of allocating a new record...
-    // bet this bites me someday.
-    s1->type = s2->type;
-    return s1;
-  } else if (!s1->control->forward_jump)
-    // control can only flow through s2
-    return s2;
-  else {
-    // control may or may not flow through s2
-    ctrl_t c = &Ctrl{.forward_jump =
-		          s1->control->forward_jump || s2->control->forward_jump,
-		     .implicit_fallthru = s2->control->implicit_fallthru,
-		     .explicit_fallthru = s2->control->explicit_fallthru};
-    unassigned_t nu = s2->norm_unas;
-    Set<var> ju = Set::union_two(s1->jump_unas, s2->jump_unas);
-    return &Synth{.type = s2->type, .control = c,
-                  .norm_unas = nu, .jump_unas = ju};
-  }
-}
+// synth we get for sequencing.  
+synth seq_synth(synth s1, synth s2) { return &Synth(s2->type); }
 
 // synth we get upon join of two if statements or switch cases etc.
-synth join_synth(synth s1, synth s2) {
-  ctrl_t c = 
-    &Ctrl{.implicit_fallthru = 
-	      s1->control->implicit_fallthru || s2->control->implicit_fallthru,
-	  .forward_jump = 
-	       s1->control->forward_jump || s2->control->forward_jump,
-	  .explicit_fallthru = false
-         };
-  let norm = merge_unassigned(s1->norm_unas,s2->norm_unas);
-  let jump = Set::union_two(s1->jump_unas,s2->jump_unas);
-  return &Synth{.type = s1->type, .control = c,
-                   .norm_unas = norm, .jump_unas = jump};
-}
+synth join_synth(synth s1, synth s2) { return &Synth(s1->type); }
 
-// after joining all of the switch cases' synths, we treat the
-// unassigned variables on the "forward jump" edge as unassigned
-// on the outgoing normal control flow edge, because any case's break is
-// a forward jump to the bottom of the switch statement.
-synth switch_bottom(synth s) {
-  let n = Always(Set::union_two(s->jump_unas,maybe_unassigned(s)));
-  ctrl_t c = 
-    &Ctrl{.implicit_fallthru =
-	        s->control->forward_jump || s->control->explicit_fallthru,
-	  //		 forward_jump = s->control->forward_jump,
-	  // When a switch is followed by other statements, the result
-	  // of the above is a statement with a forward jump, even
-	  // though the forward jump comes from break statements.
-	  .forward_jump = false,
-	  .explicit_fallthru = false};
-  return &Synth{.type = s->type, 
-		.control = c, 
-                .norm_unas = n, 
-                .jump_unas = empty_var_set->v};
-}
+synth switch_bottom(synth s) { return &Synth(s->type); }
 
-// after a loop, the synth is the join of the "false" part of the
-// test expression, and the forward_jump part of the statement
-synth loop_synth(synth e, synth s) {
-  ctrl_t c = &Ctrl{.implicit_fallthru = e->control->implicit_fallthru,
-		   .explicit_fallthru = false,
-		   .forward_jump = 
-		      e->control->forward_jump || s->control->forward_jump};
-  let $(_,un_false) = maybe_unassigned_bool(e);
-  let nu = Set::union_two(un_false, s->jump_unas);
-  let ju = Set::union_two(e->jump_unas, s->jump_unas);
-  return &Synth{.type = VoidType, .control = c,
-		.norm_unas = Always(nu), .jump_unas = ju};
-}
+synth loop_synth(synth e, synth s) { return &Synth(VoidType); }
 
 // an explicit fallthru -- similar to forward jump
-synth fallthru_synth(tenv te) {
-  return &Synth{.type      = VoidType, 
-		.control   = fallthru_ctrl,
- 	        .norm_unas = empty_unassigned->v,
-  	        .jump_unas = get_unassigned(te)};
-}
+synth fallthru_synth(tenv te) { return &Synth(VoidType); }
 
 // add the set v to both edges of the synth
-synth add_var_synth(Set<var> v, synth s) {
-  unassigned_t nu = Always(Set::union_two(maybe_unassigned(s),v));
-  return &Synth{.type = s->type, .control = s->control,
-		.norm_unas = nu, .jump_unas = Set::union_two(s->jump_unas,v)};
-}
+synth add_var_synth(Set<var> v, synth s) { return &Synth(s->type); }
 
 // remove v from the fallthru edge of the synth
-synth initialize_var_synth(synth s, var v) {
-  let vs = Set::delete(maybe_unassigned(s),v);
-  return &Synth{.type = s->type, .control = s->control,
-		.norm_unas = Always(vs), .jump_unas = s->jump_unas};
-}
+synth initialize_var_synth(synth s, var v) { return &Synth(s->type); }
