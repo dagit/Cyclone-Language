@@ -89,7 +89,8 @@ static void print_results(stringptr_t rgn_name, int num_rgns, int count,
 			  $(stringptr_t<`H,`H>,int,int) @?results,
 			  int total_bytes, int total_calls) 
 {
-  printf("\n%s (created %d times):\n",*rgn_name,num_rgns);
+  printf("\n%s (created %d time%s):\n",*rgn_name,num_rgns,
+         (num_rgns==1)?"":"s");
   printf("   Bytes     %%    Calls     %%\n");
   printf("-----------------------------\n");
   for (int i = 0; i < count; i++) {

@@ -30,8 +30,7 @@
 /***** This file is used to process the amon.out file.  It uses callbacks
        to actually process the data in that file.  We have two processors
        at the moment: one that prints tabular allocation data, and the
-       other that outputs jgraph coordinates to show an allocation
-       graph.
+       other that outputs an allocation graph in jgraph or gnuplot format.
 *****/
 
 namespace Aprof;

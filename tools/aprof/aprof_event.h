@@ -95,7 +95,8 @@ namespace Aprof {
 
   // Uses proc_file above to generate a graph of the system's memory
   // usage.  The output graph is printed to stdout as a jgraph graph
-  // (see http://www.cs.utk.edu/~plank/plank/jgraph/jgraph.html).
+  // (see http://www.cs.utk.edu/~plank/plank/jgraph/jgraph.html)
+  // or a gnuplot graph (http://www.gnuplot.info/).
   extern int generate_graph(string_t<`H> file);
 
   // Uses proc_file above to generate a tabular summary of per-region

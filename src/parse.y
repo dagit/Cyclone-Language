@@ -2862,10 +2862,10 @@ unary_expression:
      $$=^$(offsetof_exp(t,new TupleIndex($5[1]), LOC(@1,@6))); 
     }
 /* Cyc: malloc, rmalloc, numelts, swap, etc. */
-| MALLOC '(' expression ')'
+| MALLOC '(' assignment_expression ')'
    { $$=^$(new_exp(new Malloc_e(MallocInfo{false,NULL,NULL,$3,false}),
                    LOC(@1,@4))); }
-| RMALLOC '(' assignment_expression ',' expression ')'
+| RMALLOC '(' assignment_expression ',' assignment_expression ')'
    { $$=^$(new_exp(new Malloc_e(MallocInfo{false,$3,NULL,$5,false}),
                    LOC(@1,@6))); }
 | CALLOC '(' assignment_expression ',' SIZEOF '(' type_name ')' ')'
@@ -2877,7 +2877,7 @@ unary_expression:
    { let t = type_name_to_type($9,LOC(@9,@9));
      $$=^$(new_exp(new Malloc_e(MallocInfo{true,$3,new(t),$5,false}),
                    LOC(@1,@11))); }
-| NUMELTS '(' expression ')'
+| NUMELTS '(' assignment_expression ')'
    { $$=^$(primop_exp(Numelts, list($3), LOC(@1,@4))); }
 | TAGCHECK '(' postfix_expression '.' field_name ')'
    { $$=^$(new_exp(new Tagcheck_e($3,new $5),LOC(@1,@6))); }

@@ -29,7 +29,15 @@ namespace Aprof {
 using Aprof;
 
 static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
-  fprintf(stderr,"usage: %s [-g] [-q] [-d X] [-h] [profile]\n  by default, generates an allocation summary for file amon.out\n  -g   generate graph of dynamic memory usage over time\n  -q   quiet output\n  -d X show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n",argv0,dyn_threshhold);
+  fprintf(stderr,
+          "usage: %s [-g] [-gp] [-q] [-d X] [-h] [profile]\n"
+          "  by default, generates an allocation summary for file amon.out\n"
+          "  -g   generate jgraph graph of dynamic memory usage over time\n"
+          "  -gp  generate gnuplot graph of dynamic memory usage over time\n"
+          "  -q   quiet output\n"
+          "  -d X show dynamic regions that are >= X (a fraction) of the total heap (def=%g)\n",
+          argv0,
+          dyn_threshhold);
   exit(1);
 }
 
