@@ -149,7 +149,7 @@ struct Fenv {
   Dict::Dict<var,binding_t> locals;// binding will be Param_b, Local_b, or Pat_b
   stmt                  encloser;  // nearest stmt with a binder or a try
   ctrl_env_t            ctrl_env;
-  int                   curr_block_num;
+  List<int>             curr_blocks;
 };
 
 //////////////////////// Top-level Environment Manipulation //////////////////
@@ -383,7 +383,7 @@ tenv put_fenv(tenv te, fenv_t fe) {
 
 static fenv_t copy_fenv_old_ctrl(fenv_t f) {
   return &Fenv(f->shared, f->type_vars, f->locals, f->encloser, f->ctrl_env,
-	       f->curr_block_num);
+	       f->curr_blocks);
 }
 static fenv_t copy_fenv_new_ctrl(fenv_t f) {
   // WARNING: fallthru_stmt shared with old
@@ -391,7 +391,7 @@ static fenv_t copy_fenv_new_ctrl(fenv_t f) {
   return &Fenv(f->shared, f->type_vars, f->locals, f->encloser,
 	       &CtrlEnv(c->continue_stmt, c->break_stmt, c->fallthru_stmt,
 			c->next_stmt),
-	       f->curr_block_num);
+	       f->curr_blocks);
 }
 
 typ return_typ(tenv te) {
@@ -592,13 +592,12 @@ tenv set_encloser(tenv te, stmt s) {
 tenv new_block(tenv te) {
   if (te->le == null) env_err("Tcenv: unexpected new_block");
   fenv_t fe = copy_fenv_old_ctrl(get_fenv(te));
-  ++fe->shared->next_block_num;
-  fe->curr_block_num = fe->shared->next_block_num;
+  fe->curr_blocks = &cons(++fe->shared->next_block_num, fe->curr_blocks);
   return put_fenv(te,fe);
 }
 int curr_block(tenv te) {
   if (te->le == null) env_err("Tcenv: unexpected curr_block");
-  return get_fenv(te)->curr_block_num;
+  return get_fenv(te)->curr_blocks->hd;
 }
 typ block_to_typ(tenv te, int block_num) {
   // NOTE: should only be called with the block field of a non-global!
@@ -614,6 +613,28 @@ typ block_to_typ(tenv te, int block_num) {
     Dict::insert(fe->shared->block_to_rgn,block_num,ans);
   return ans;
 }
+// KLUDGE: Should really not confuse type variables and ints like this. 
+// I'll clean it up later. Sorry.
+void check_rgn_accessible(tenv te, segment loc, typ rgn_typ) {
+  if (te->le == null) env_err("Tcenv: unexpected rgn_accessible");
+  _ fe = get_fenv(te);
+  switch (compress(rgn_typ)) {
+  case HeapRgnType: return;
+  case VarType(tv):
+    if(List::mem(tvar_cmp, fe->type_vars, tv))
+      return;
+    // here's the kludge
+    try
+      if(List::mem(intcmp, fe->curr_blocks, int_of_string(tv[0])))
+	return;
+    catch { case InvalidArg(_): break; }
+    terr(loc, xprintf("Expression accesses unavailable region %s", tv[0]));
+    return;
+  default:
+    terr(loc,"Region of pointer cannot be determined");
+    return;
+  }
+}
 
 // KLUDGE: Tcexp::lhs_const assumes the outermost block is 0 and
 // decides that the parameters live in that block!
@@ -621,58 +642,30 @@ fenv_t new_fenv(fndecl fd) {
   _ locals = Dict::empty(String::zstrcmp);
   for(_ args = fd->args; args != null; args = args->tl)
     locals = Dict::insert(locals, args->hd[0], Param_b(args->hd));
-  return &Fenv{.shared        = &SharedFenv(fd->ret_type,
-					    Dict::empty(String::zstrcmp),
-					    SlowDict::empty(String::zstrcmp),
-					    Dict::empty(Core::intcmp),
-					    0),
- 	       .type_vars     = fd->tvs, // assumed unique
-	       .locals        = locals,  // assumed unique
-	       .encloser      = fd->body, // careful -- self loop at top!!!
-	       .ctrl_env      = &CtrlEnv(NotLoop_j,
-					 NotLoop_j,
-					 null,
-					 FnEnd_j),
-	       .curr_block_num = 0};
+  return &Fenv{.shared      = &SharedFenv(fd->ret_type,
+					  Dict::empty(String::zstrcmp),
+					  SlowDict::empty(String::zstrcmp),
+					  Dict::empty(Core::intcmp),
+					  0),
+ 	       .type_vars   = fd->tvs, // assumed unique
+	       .locals      = locals,  // assumed unique
+	       .encloser    = fd->body, // careful -- self loop at top!!!
+	       .ctrl_env    = &CtrlEnv(NotLoop_j, NotLoop_j, null, FnEnd_j),
+	       .curr_blocks = &cons(0,null)};
 }
 
-///////////////////////////// Synthesis (CHANGING SOON) //////////////////////
+///////////////////////////// Synthesis Stubs  //////////////////////
 
 struct Synth { typ type; };
 
 typ synth_typ(synth s) {
   return s.type;
 }
-
 synth synth_set_typ(synth s, typ t) {
   s.type = t;
   return s;
 }
-
-tenv layer_synth(tenv te, synth syn) { return te; }
-
-$(tenv,tenv) bool_layer_synth(tenv te, synth syn) { return $(te,te); }
-
 synth standard_synth(tenv te, typ t) { return Synth(t); }
-
 // useful for error expressions
 synth wild_synth(tenv te) { return standard_synth(te,wildtyp()); }
 
-// synth we get for more statements -- standard_synth with void type
-synth skip_synth(tenv te) { return standard_synth(te, VoidType); }
-
-// synth we get upon return or continue
-synth empty_synth(tenv te) { return wild_synth(te); }
-
-// synth we get upon a break, goto, or throw 
-synth forward_jump_synth(tenv te) { return wild_synth(te); }
-
-// synth we get for sequencing.  
-synth seq_synth(synth s1, synth s2) { return s2; }
-
-// synth we get upon join of two if statements or switch cases etc.
-synth join_synth(synth s1, synth s2) { return s2; }
-
-synth switch_bottom(synth s) { return s; }
-
-synth loop_synth(synth e, synth s) { return Synth(VoidType); }

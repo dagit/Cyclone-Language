@@ -67,7 +67,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
   case Exp_s(e): tcExp(te,null,e); return;
 
   case Seq_s(s1,s2):
-    let te2 = set_next(te,Stmt_j(s2));
+    _ te2 = set_next(te,Stmt_j(s2));
     tcStmt(te2,s1,true); // pass new_block in case of weird associativity??
     // JGM: try to treat sequences as "tail-calls" to avoid a deep stack.
     // (Of course, this depends on the parser's associativity.)
@@ -157,9 +157,9 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
 			      "but pattern variable has type %s",
 			      typ2string(es->hd->topt->v), typ2string(ts->hd)));
     }
-    if(es != null)
+    if (es != null)
       terr(s0->loc, "too many arguments to explicit fallthru");
-    else if (ts != null)
+    if (ts != null)
       terr(s0->loc, "too few arguments to explicit fallthru");
     return;
 
@@ -177,7 +177,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     // fallthru is not allowed.
     te = set_in_switch(te);
     te = clear_fallthru(te);
-    for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
+    for (_ scs = List::rev(scs0); scs != null; scs = scs->tl) {
       _ p       = scs->hd->pattern;
       _ pat_typ = tcPat(te,p);
       let &$(new_tvs,x) = pat_typ;
@@ -203,7 +203,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     // similar to Switch_s -- check the patterns in reverse order:
     te = set_in_switch(te);
     te = clear_fallthru(te);
-    for (let scs = List::rev(scs0); scs != null; scs = scs->tl) {
+    for (_ scs = List::rev(scs0); scs != null; scs = scs->tl) {
       _ p       = scs->hd->pattern;
       _ pat_typ = tcPat(te,p);
       let &$(new_tvs,x) = pat_typ;
@@ -232,7 +232,6 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     case Var_d(vd):
       let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*block_ptr) = vd;
       *block_ptr = Tcenv::curr_block(te); // side effect
-      //      vd->block = Tcenv::curr_block(te);
       if (nsl != null)
         terr(d->loc, "local variables cannot be qualified");
       check_valid_type(s0->loc,te,lookup_type_vars(te),t);

@@ -117,6 +117,7 @@ extern bool all_labels_resolved(tenv);
 extern tenv new_block(tenv);
 extern int  curr_block(tenv);
 extern typ  block_to_typ(tenv,int);
+extern void check_rgn_accessible(tenv,segment,typ);
 
 // what we synthesize when type-checking a statement or expression:
 // This should be abstract, but I'm saving an allocation and a level of
@@ -127,44 +128,9 @@ typedef struct Synth synth; // no longer a pointer (only one field)
 extern typ synth_typ(synth);
 // given a synth, imperatively set the type to t
 extern synth synth_set_typ(synth s,typ t);
-
-// make the unassigned set in the resulting tenv come from the 
-// "fallthrough" edge of the synth
-extern tenv layer_synth(tenv,synth);
-// give back two environments -- one when the exp is true and one when false
-extern $(tenv,tenv) bool_layer_synth(tenv,synth);
-// synth we get for most expressions and atomic statements -- implicit 
-// fallthru with no forward jump, and all currently unassigned variables as
-// unassigned on the normal edge, empty set of unassigned variables on
-// the forward jump edge.
+// synth for an exp that has this type
 extern synth standard_synth(tenv, typ);
-// synth we get on error in expressions (type is wild)
+// synth we get on error in expressions (type is wild) or on throw
 extern synth wild_synth(tenv);
-// synth we get for most statements -- standard_synth with void type
-extern synth skip_synth(tenv te);
-// synth we get upon return, continue, raise -- no fallthru or forward jump,
-// no unassigned variables on either the normal or forward jump edge.
-extern synth empty_synth(tenv te);
-// synth we get upon a break, goto, or raise -- forward jump with no 
-// fallthru, all currently unassigned variables on the forward jump edge, the
-// empty set on the normal edge.
-extern synth forward_jump_synth(tenv te);
-// synth we get for sequencing.  We merge the normal and jump edges
-// according to whether or not s1 may fallthru to s2.
-extern synth seq_synth(synth s1, synth s2);
-// synth we get upon join of two if statements or switch cases etc.
-extern synth join_synth(synth s1, synth s2);
-// after joining all of the switch cases' synths, we treat the 
-// unassigned variables on the "forward jump" edge as unassigned
-// on the outgoing normal control flow edge, because any case's break is
-// a forward jump to the bottom of the switch statement.  
-extern synth switch_bottom(synth s);
-// after a loop, the synth is the join of the "false" part of the
-// test expression, and the forward_jump part of the statement
-extern synth loop_synth(synth e, synth s);
-// set of variables unassigned on fallthru edge
-extern Set<var> maybe_unassigned(synth);
-// set of variables unassigned on "true"/"false" branches respectively
-extern $(Set<var>,Set<var>) maybe_unassigned_bool(synth);
 }
 #endif
