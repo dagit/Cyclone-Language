@@ -123,6 +123,45 @@ context_t init_context = {
   .size = DONT_KNOW, .color = DONT_KNOW
 };
 
+/*filtering out Mt's in a list of docs
+ *used in remove_Mt(doc_t d) */
+static List::list_t<doc_t> filter_Mt(List::list_t<doc_t> ds){
+  while(ds != null && ds->hd == Mt)
+    ds = ds->tl;
+  if(ds == null)
+    return null;
+  let prev = ds;
+  let ds2 = ds->tl;
+  for(; ds2 != null; ds2 = ds2->tl) {
+    if(ds2->hd == Mt)
+      prev->tl = ds2->tl;
+    else
+      prev = ds2;
+
+  }
+  return ds;
+}
+
+//getting rid of Mt branches
+doc_t remove_Mt(doc_t d){
+  switch(d){
+  case &Seq(ds):
+    let oldds = ds;
+    for(; ds!=null; ds=ds->tl)
+      ds->hd = remove_Mt(ds->hd);
+    ds = filter_Mt(oldds);
+    if (ds==null) return Mt;
+    if (ds->tl==null) return ds->hd;//size 1
+    return new Seq(ds);
+  case &Text(_): return d;
+  case &Tagged(tag,*d2):
+    let d3 = remove_Mt(*d2);
+    if (d3 == Mt) return Mt;
+    else return new Tagged(tag,d3);
+  case Mt: return Mt;
+  }
+}
+
 // gets rid of redundant tags in a top-down fashion
 doc_t down_opt(context_t ctxt, doc_t d) {
   switch (d) {
@@ -139,6 +178,13 @@ doc_t down_opt(context_t ctxt, doc_t d) {
       break;
     case EM_tag:
       if (ctxt.S) {is_change = true; return down_opt(ctxt,*d2);} 
+      switch(*d2){
+      case &Tagged(tag_in_EM,*d3):
+        if (tag_in_EM==EM_tag) return down_opt(ctxt, *d3);
+        break;
+      default:
+        break;
+      }
       ctxt.EM = !ctxt.EM; 
       break;
     case I_tag:
@@ -275,6 +321,7 @@ int main(int argc, char ??argv) {
   // fprintf(stderr,"%d\ncopying docs...",check_time()); fflush(stderr);
   // doc_t d = copy_doc(orig);
   doc_t d = get_docs(init_context,b,f);
+  d = remove_Mt(d);
 
    // JGM: uncomment to try the bottom up approach
   // fprintf(stderr,"%d\nflatten into array...", check_time());
