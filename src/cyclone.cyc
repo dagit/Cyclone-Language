@@ -38,6 +38,7 @@
 #include "tovc.h"
 #include "new_control_flow.h"
 #include "interface.h"
+#include "cyclone.h"
 
 namespace Port {
   extern void port(List::list_t<Absyn::decl_t>);
@@ -50,6 +51,8 @@ namespace Toc {
   bool warn_all_null_deref;
 }
 
+
+using Cyclone;
 using Core;
 using List;
 using Arg;
@@ -68,7 +71,6 @@ static bool stop_after_objectfile_r = false;
 static bool stop_after_asmfile_r = false;
 static bool inline_functions_r = false;
 static bool elim_se_r    = false;
-static bool tovc_r     = false;
 static bool v_r        = false;
 static bool save_temps_r = false;
 static bool save_c_r   = false;
@@ -82,6 +84,28 @@ static bool print_full_evars_r = false;
 static bool print_all_tvars_r = false;
 static bool print_all_kinds_r = false;
 static bool print_all_effects_r = false;
+
+// Arguments to pass to the C compiler
+static list_t<stringptr_t> ccargs = NULL;
+static void add_ccarg(string_t<`H> s) {
+  ccargs = new List(new s,ccargs);
+}
+
+// set which c compiler to use
+// (affects how attributes, 64-bit integers, etc. are translated)
+// defaults to gcc
+void set_c_compiler(string_t<`H> s){
+  if (strcmp(s,"vc") == 0) {
+    c_compiler = Vc_c;
+    add_ccarg("-DVC_C");
+  }
+  else if (strcmp(s,"gcc") == 0) {
+    c_compiler = Gcc_c;
+    add_ccarg("-DGCC_C");
+  }
+  // else invalid compiler -- warn? throw exception? 
+}
+
 
 void set_port_c_code() {
   Absyn::porting_c_code = true;
@@ -137,12 +161,6 @@ static bool is_cyclone_sourcefile(string_t s) {
   let len = strlen(s);
   if (len <= 4) return false;
   else return (strcmp(s+(len-4),".cyc") == 0);
-}
-
-// Arguments to pass to the C compiler
-static list_t<stringptr_t> ccargs = NULL;
-static void add_ccarg(string_t<`H> s) {
-  ccargs = new List(new s,ccargs);
 }
 
 static list_t<stringptr_t> cyclone_exec_path = NULL;
@@ -210,6 +228,7 @@ static void set_elim_se() {
 }
 static void set_tovc() {
   tovc_r = true;
+  add_ccarg("-DCYC_ANSI_OUTPUT");
   set_elim_se();
 }
 static void set_noboundschecks() {
@@ -937,6 +956,7 @@ static void process_file(string_t<`H> filename) {
     remove_file(preprocfile); // Can't flush warnings after removal
     return;
   } 
+
   if (!compile_failure)
     Tcutil::flush_warnings();
   remove_file(preprocfile);
@@ -947,6 +967,7 @@ static void process_file(string_t<`H> filename) {
     // we aren't using VC
     tds = do_stage("post-pass to VC", do_tovc, true, tds);
   if (compile_failure) return;
+
 
   // jcheney: we should make a (empty) .c file even if the .cyc file produced no decls
   /*PRINTC:
@@ -1167,12 +1188,15 @@ int main(int argc, string_t<`H> ?`H argv) {
                rnew(r)Clear_spec(&pp_r),
                "Ugly print"),
          rnew(r)$("-elim-statement-expressions",false,"",
-                rnew(r)Unit_spec(set_elim_se),
+               rnew(r)Set_spec(&elim_se_r),
                "Avoid statement expressions in C output"
                " (implies --inline-checks)"),
-         rnew(r)$("-tovc",false,"",
+         rnew(r)$("-un-gcc",false,"",
                rnew(r)Unit_spec(set_tovc),
                "Avoid gcc extensions in C output"),
+         rnew(r) $("-c-comp",false," <compiler>",
+               rnew(r)String_spec(set_c_compiler),
+               "Produce C output for the given compiler"),
          rnew(r)$("-save-temps",false,"",
                rnew(r)Unit_spec(set_save_temps),
                "Don't delete temporary files"),

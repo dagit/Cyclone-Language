@@ -29,6 +29,8 @@
 #include "tcutil.h"
 #include "tcexp.h"
 #include "tc.h"
+#include "cyclone.h"
+
 using Core;
 using List;
 using Set;
@@ -36,6 +38,7 @@ using Position;
 using Absyn;
 using Absynpp;
 using Tcenv;
+using Cyclone;
 
 namespace Tcutil;
 
@@ -3311,8 +3314,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         *eptr = e = uint_exp(1,NULL);
       } else {
         // warn that this array is essentially useless
-        warn(loc,"array bound defaults to 0 here");
-        *eptr = e = uint_exp(0,NULL);
+        warn(loc,"array bound defaults to 1 here");
+        *eptr = e = uint_exp(1,NULL);
       }
     }
     Tcexp::tcExp(te,NULL,(exp_t)e);
@@ -3324,6 +3327,11 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // FIX: if we have an unknown size then it might not be zero-terminated!
     if (is_zero_terminated && known && sz < 1)
       warn(loc,"zero terminated array cannot have zero elements");
+    // FIX: if we have an unknown size then it might turn out to be zero!
+    if (known && sz < 1 && tovc_r) {
+      warn(loc,"arrays with 0 elements are not supported except with gcc -- changing to 1.");
+      *eptr = uint_exp(1,NULL);
+    }
     break;
   case &FnType(FnInfo{*btvs,*eff,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
     // This is an unusual and complicated case because (a) we may have to

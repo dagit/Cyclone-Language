@@ -48,7 +48,7 @@ struct _RegionPage {
   unsigned free_bytes;
 #endif
   struct _RegionPage *next;
-  char data[0];
+  char data[1];  /*FJS: used to be size 0, but that's forbidden in ansi c*/
 };
 
 struct _RegionHandle {
@@ -107,11 +107,32 @@ extern struct _xtunion_struct ADD_PREFIX(Bad_alloc_struct);
 extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 /* Built-in Run-time Checks and company */
+#ifdef __APPLE__
+#define _INLINE_FUNCTIONS
+#endif
+
+#ifdef CYC_ANSI_OUTPUT
+#define _INLINE  
+#define _INLINE_FUNCTIONS
+#else
+#define _INLINE inline
+#endif
+
+#ifdef VC_C
+#define _CYC_U_LONG_LONG_T __int64
+#else
+#ifdef GCC_C
+#define _CYC_U_LONG_LONG_T unsigned long long
+#else
+#define _CYC_U_LONG_LONG_T unsigned long long
+#endif
+#endif
+
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline void *
+static _INLINE void *
 _check_null(void *ptr) {
   void*_check_null_temp = (void*)(ptr);
   if (!_check_null_temp) _throw_null();
@@ -130,7 +151,7 @@ _check_null(void *ptr) {
   ((char *)ptr) + (elt_sz)*(index); })
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline char *
+static _INLINE char *
 _check_known_subscript_null(void *ptr, unsigned bound, unsigned elt_sz, unsigned index) {
   void*_cks_ptr = (void*)(ptr);
   unsigned _cks_bound = (bound);
@@ -156,7 +177,7 @@ _check_known_subscript_null(void *ptr, unsigned bound, unsigned elt_sz, unsigned
 #define _check_known_subscript_notnull(bound,index) (index)
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned
+static _INLINE unsigned
 _check_known_subscript_notnull(unsigned bound,unsigned index) { 
   unsigned _cksnn_bound = (bound); 
   unsigned _cksnn_index = (index); 
@@ -175,56 +196,272 @@ _check_known_subscript_notnull(unsigned bound,unsigned index) {
 /* Add i to zero-terminated pointer x.  Checks for x being null and
    ensures that x[0..i-1] are not 0. */
 #ifdef NO_CYC_BOUNDS_CHECK
-#define _zero_arr_plus(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_char(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_short(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_int(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_float(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_double(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_longdouble(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_voidstar(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
 #else
-#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
-  typedef _czs_tx = (*orig_x); \
-  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
-  unsigned int _czs_sz = (orig_sz); \
-  int _czs_i = (orig_i); \
-  unsigned int _czs_temp; \
-  if ((_czs_x) == 0) _throw_null(); \
-  if (_czs_i < 0) _throw_arraybounds(); \
-  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
-    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
-  _czs_x+_czs_i; })
+static _INLINE char *
+_zero_arr_plus_char(char *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE short *
+_zero_arr_plus_short(short *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE int *
+_zero_arr_plus_int(int *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE float *
+_zero_arr_plus_float(float *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE double *
+_zero_arr_plus_double(double *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE long double *
+_zero_arr_plus_longdouble(long double *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE void *
+_zero_arr_plus_voidstar(void **orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
 #endif
+
 
 /* Calculates the number of elements in a zero-terminated, thin array.
    If non-null, the array is guaranteed to have orig_offset elements. */
-#define _get_zero_arr_size(orig_x,orig_offset) ({ \
-  typedef _gres_tx = (*orig_x); \
-  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
-  unsigned int _gres_offset = (orig_offset); \
-  unsigned int _gres = 0; \
-  if (_gres_x != 0) { \
-     _gres = _gres_offset; \
-     _gres_x += _gres_offset - 1; \
-     while (*_gres_x != 0) { _gres_x++; _gres++; } \
-  } _gres; })
+static _INLINE int
+_get_zero_arr_size_char(const char *orig_x, unsigned int orig_offset) {
+  const char *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_short(const short *orig_x, unsigned int orig_offset) {
+  const short *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_int(const int *orig_x, unsigned int orig_offset) {
+  const int *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_float(const float *orig_x, unsigned int orig_offset) {
+  const float *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_double(const double *orig_x, unsigned int orig_offset) {
+  const double *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_longdouble(const long double *orig_x, unsigned int orig_offset) {
+  const long double *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_voidstar(const void **orig_x, unsigned int orig_offset) {
+  const void **_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+
 
 /* Does in-place addition of a zero-terminated pointer (x += e and ++x).  
    Note that this expands to call _zero_arr_plus. */
-#define _zero_arr_inplace_plus(x,orig_i) ({ \
+/*#define _zero_arr_inplace_plus(x,orig_i) ({ \
   typedef _zap_tx = (*x); \
   _zap_tx **_zap_x = &((_zap_tx*)x); \
   *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+  */
+static _INLINE void 
+_zero_arr_inplace_plus_char(char *x, int orig_i) {
+  char **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_char(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_short(short *x, int orig_i) {
+  short **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_short(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_int(int *x, int orig_i) {
+  int **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_int(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_float(float *x, int orig_i) {
+  float **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_float(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_double(double *x, int orig_i) {
+  double **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_double(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_longdouble(long double *x, int orig_i) {
+  long double **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_longdouble(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_voidstar(void **x, int orig_i) {
+  void ***_zap_x = &x;
+  *_zap_x = _zero_arr_plus_voidstar(*_zap_x,1,orig_i);
+}
+
+
+
 
 /* Does in-place increment of a zero-terminated pointer (e.g., x++).
    Note that this expands to call _zero_arr_plus. */
-#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+/*#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
   typedef _zap_tx = (*x); \
   _zap_tx **_zap_x = &((_zap_tx*)x); \
   _zap_tx *_zap_res = *_zap_x; \
   *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
-  _zap_res; })
+  _zap_res; })*/
   
+static _INLINE char *
+_zero_arr_inplace_plus_post_char(char *x, int orig_i){
+  char ** _zap_x = &x;
+  char * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_char(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE short *
+_zero_arr_inplace_plus_post_short(short *x, int orig_i){
+  short **_zap_x = &x;
+  short * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_short(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE int *
+_zero_arr_inplace_plus_post_int(int *x, int orig_i){
+  int **_zap_x = &x;
+  int * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_int(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE float *
+_zero_arr_inplace_plus_post_float(float *x, int orig_i){
+  float **_zap_x = &x;
+  float * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_float(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE double *
+_zero_arr_inplace_plus_post_double(double *x, int orig_i){
+  double **_zap_x = &x;
+  double * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_double(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE long double *
+_zero_arr_inplace_plus_post_longdouble(long double *x, int orig_i){
+  long double **_zap_x = &x;
+  long double * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_longdouble(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE void **
+_zero_arr_inplace_plus_post_voidstar(void **x, int orig_i){
+  void ***_zap_x = &x;
+  void ** _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_voidstar(_zap_res,1,orig_i);
+  return _zap_res;
+}
+
 
 
 /* functions for dealing with dynamically sized pointers */
 #ifdef NO_CYC_BOUNDS_CHECKS
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dyneither_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -232,7 +469,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   return _cus_ans;
 }
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -256,7 +493,7 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
 #endif
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dyneither_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -267,7 +504,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
     _throw_arraybounds();
   return _cus_ans;
 }
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -301,14 +538,14 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _tag_dyneither(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
   struct _dyneither_ptr _tag_arr_ans;
   _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr);
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts);
   return _tag_arr_ans;
 }
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _tag_dynforward(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
   struct _dynforward_ptr _tag_arr_ans;
   _tag_arr_ans.curr = (void*)(tcurr);
@@ -329,22 +566,22 @@ _tag_dynforward(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr *
+static _INLINE struct _dyneither_ptr *
 _init_dyneither_ptr(struct _dyneither_ptr *arr_ptr,
                     void *arr, unsigned elt_sz, unsigned num_elts) {
   struct _dyneither_ptr *_itarr_ptr = (arr_ptr);
   void* _itarr = (arr);
   _itarr_ptr->base = _itarr_ptr->curr = _itarr;
-  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts);
+  _itarr_ptr->last_plus_one = ((unsigned char *)_itarr) + (elt_sz) * (num_elts);
   return _itarr_ptr;
 }
-static inline struct _dynforward_ptr *
+static _INLINE struct _dynforward_ptr *
 _init_dynforward_ptr(struct _dynforward_ptr *arr_ptr,
                     void *arr, unsigned elt_sz, unsigned num_elts) {
   struct _dynforward_ptr *_itarr_ptr = (arr_ptr);
   void* _itarr = (arr);
   _itarr_ptr->curr = _itarr;
-  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts);
+  _itarr_ptr->last_plus_one = ((unsigned char *)_itarr) + (elt_sz) * (num_elts);
   return _itarr_ptr;
 }
 #else
@@ -367,7 +604,7 @@ _init_dynforward_ptr(struct _dynforward_ptr *arr_ptr,
 #define _untag_dyneither_ptr(arr,elt_sz,num_elts) ((arr).curr)
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned char *
+static _INLINE unsigned char *
 _untag_dyneither_ptr(struct _dyneither_ptr arr, 
                      unsigned elt_sz,unsigned num_elts) {
   struct _dyneither_ptr _arr = (arr);
@@ -376,7 +613,7 @@ _untag_dyneither_ptr(struct _dyneither_ptr arr,
     _throw_arraybounds();
   return _curr;
 }
-static inline unsigned char *
+static _INLINE unsigned char *
 _untag_dynforward_ptr(struct _dynforward_ptr arr, 
                       unsigned elt_sz,unsigned num_elts) {
   struct _dynforward_ptr _arr = (arr);
@@ -402,7 +639,7 @@ _untag_dynforward_ptr(struct _dynforward_ptr arr,
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned
+static _INLINE unsigned
 _get_dyneither_size(struct _dyneither_ptr arr,unsigned elt_sz) {
   struct _dyneither_ptr _get_arr_size_temp = (arr);
   unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr;
@@ -411,7 +648,7 @@ _get_dyneither_size(struct _dyneither_ptr arr,unsigned elt_sz) {
           _get_arr_size_curr >= _get_arr_size_last) ? 0 :
     ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));
 }
-static inline unsigned
+static _INLINE unsigned
 _get_dynforward_size(struct _dynforward_ptr arr,unsigned elt_sz) {
   struct _dynforward_ptr _get_arr_size_temp = (arr);
   unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr;
@@ -436,7 +673,7 @@ _get_dynforward_size(struct _dynforward_ptr arr,unsigned elt_sz) {
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _dyneither_ptr_plus(struct _dyneither_ptr arr,unsigned elt_sz,int change) {
   struct _dyneither_ptr _ans = (arr);
   _ans.curr += ((int)(elt_sz))*(change);
@@ -444,7 +681,7 @@ _dyneither_ptr_plus(struct _dyneither_ptr arr,unsigned elt_sz,int change) {
 }
 /* Here we have to worry about wrapping around, so if we go past the
  * end, we set the end to 0. */
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _dynforward_ptr_plus(struct _dynforward_ptr arr,unsigned elt_sz,int change) {
   struct _dynforward_ptr _ans = (arr);
   unsigned int _dfpp_elts = (((unsigned)_ans.last_plus_one) - 
@@ -472,14 +709,14 @@ _dynforward_ptr_plus(struct _dynforward_ptr arr,unsigned elt_sz,int change) {
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _dyneither_ptr_inplace_plus(struct _dyneither_ptr *arr_ptr,unsigned elt_sz,
                             int change) {
   struct _dyneither_ptr * _arr_ptr = (arr_ptr);
   _arr_ptr->curr += ((int)(elt_sz))*(change);
   return *_arr_ptr;
 }
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _dynforward_ptr_inplace_plus(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,
                              int change) {
   struct _dynforward_ptr * _arr_ptr = (arr_ptr);
@@ -508,14 +745,14 @@ _dynforward_ptr_inplace_plus(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _dyneither_ptr_inplace_plus_post(struct _dyneither_ptr *arr_ptr,unsigned elt_sz,int change) {
   struct _dyneither_ptr * _arr_ptr = (arr_ptr);
   struct _dyneither_ptr _ans = *_arr_ptr;
   _arr_ptr->curr += ((int)(elt_sz))*(change);
   return _ans;
 }
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _dynforward_ptr_inplace_plus_post(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,int change) {
   struct _dynforward_ptr * _arr_ptr = (arr_ptr);
   struct _dynforward_ptr _ans = *_arr_ptr;
@@ -545,9 +782,9 @@ _dynforward_ptr_inplace_plus_post(struct _dynforward_ptr *arr_ptr,unsigned elt_s
   _ans; })
 #endif
 
-// Decrease the upper bound on a fat pointer by numelts where sz is
-// the size of the pointer's type.  Note that this can't be a macro
-// if we're to get initializers right.
+/* Decrease the upper bound on a fat pointer by numelts where sz is
+   the size of the pointer's type.  Note that this can't be a macro
+   if we're to get initializers right. */
 static struct 
 _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
                                             unsigned int sz,
@@ -599,41 +836,40 @@ _dynforward_to_dyneither(struct _dynforward_ptr p) {
   _dfnres; })
 #endif 
 
-
-//// Allocation
+/* Allocation */
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
 extern void* GC_calloc(unsigned,unsigned);
 extern void* GC_calloc_atomic(unsigned,unsigned);
 
-static inline void* _cycalloc(int n) {
+static _INLINE void* _cycalloc(int n) {
   void * ans = (void *)GC_malloc(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void* _cycalloc_atomic(int n) {
+static _INLINE void* _cycalloc_atomic(int n) {
   void * ans = (void *)GC_malloc_atomic(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void* _cyccalloc(unsigned n, unsigned s) {
+static _INLINE void* _cyccalloc(unsigned n, unsigned s) {
   void* ans = (void*)GC_calloc(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void* _cyccalloc_atomic(unsigned n, unsigned s) {
+static _INLINE void* _cyccalloc_atomic(unsigned n, unsigned s) {
   void* ans = (void*)GC_calloc_atomic(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
 #define MAX_MALLOC_SIZE (1 << 28)
-static inline unsigned int _check_times(unsigned x, unsigned y) {
-  unsigned long long whole_ans = 
-    ((unsigned long long)x)*((unsigned long long)y);
+static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
+  _CYC_U_LONG_LONG_T whole_ans = 
+    ((_CYC_U_LONG_LONG_T)x)*((_CYC_U_LONG_LONG_T)y);
   unsigned word_ans = (unsigned)whole_ans;
   if(word_ans < whole_ans || word_ans > MAX_MALLOC_SIZE)
     _throw_badalloc();
@@ -660,19 +896,19 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 
 /* the next three routines swap [x] and [y]; not thread safe! */
-static inline void _swap_word(void *x, void *y) {
+static _INLINE void _swap_word(void *x, void *y) {
   unsigned long *lx = (unsigned long *)x, *ly = (unsigned long *)y, tmp;
   tmp = *lx;
   *lx = *ly;
   *ly = tmp;
 }
-static inline void _swap_dynforward(struct _dynforward_ptr *x, 
+static _INLINE void _swap_dynforward(struct _dynforward_ptr *x, 
 				    struct _dynforward_ptr *y) {
   struct _dynforward_ptr tmp = *x;
   *x = *y;
   *y = tmp;
 }
-static inline void _swap_dyneither(struct _dyneither_ptr *x, 
+static _INLINE void _swap_dyneither(struct _dyneither_ptr *x, 
 				   struct _dyneither_ptr *y) {
   struct _dyneither_ptr tmp = *x;
   *x = *y;
@@ -972,7 +1208,7 @@ Cyc_Tcutil_typ_kind(_tmp4),_tmp0);_LLB:;_LLC:({struct Cyc_String_pa_struct _tmp7
 _tmp7.tag=0;_tmp7.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_Absynpp_typ2string(
 eff));{void*_tmp5[1]={& _tmp7};((int(*)(struct _dynforward_ptr fmt,struct
 _dynforward_ptr ap))Cyc_Tcutil_impos)(({const char*_tmp6="bad effect |%s| passed to add_outlives_constraint";
-_tag_dynforward(_tmp6,sizeof(char),_get_zero_arr_size(_tmp6,50));}),
+_tag_dynforward(_tmp6,sizeof(char),_get_zero_arr_size_char(_tmp6,50));}),
 _tag_dynforward(_tmp5,sizeof(void*),1));}});_LL0:;}static void*Cyc_RgnOrder_filter_effect(
 void*eff,void*k){void*_tmp8=Cyc_Tcutil_compress(eff);void*_tmp9=_tmp8;struct Cyc_List_List*
 _tmpA;void*_tmpB;_LLE: if(_tmp9 <= (void*)4)goto _LL16;if(*((int*)_tmp9)!= 21)goto
@@ -986,15 +1222,15 @@ _tmpF;});_tmpE;});}_LL10: if(*((int*)_tmp9)!= 0)goto _LL12;_LL11: goto _LL13;_LL
 if(*((int*)_tmp9)!= 22)goto _LL14;_LL13: return _tmp8;_LL14: if(*((int*)_tmp9)!= 20)
 goto _LL16;_tmpB=(void*)((struct Cyc_Absyn_AccessEff_struct*)_tmp9)->f1;_LL15: if(
 Cyc_Tcutil_typ_kind(_tmpB)!= k)return _tmp8;else{return(void*)0;}_LL16:;_LL17:({
-void*_tmp10[0]={};((int(*)(struct _dynforward_ptr fmt,struct _dynforward_ptr ap))Cyc_Tcutil_impos)(({
+void*_tmp10=0;((int(*)(struct _dynforward_ptr fmt,struct _dynforward_ptr ap))Cyc_Tcutil_impos)(({
 const char*_tmp11="bad effect passed to filter_effect";_tag_dynforward(_tmp11,
-sizeof(char),_get_zero_arr_size(_tmp11,35));}),_tag_dynforward(_tmp10,sizeof(
-void*),0));});_LLD:;}struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_outlives_constraint(
+sizeof(char),_get_zero_arr_size_char(_tmp11,35));}),_tag_dynforward(_tmp10,
+sizeof(void*),0));});_LLD:;}struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_outlives_constraint(
 struct _RegionHandle*r,struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn,struct Cyc_Position_Segment*
 loc){struct Cyc_RgnOrder_RgnPO*_tmp12=({struct Cyc_RgnOrder_RgnPO*_tmp26=
 _region_malloc(r,sizeof(*_tmp26));_tmp26[0]=*po;_tmp26;});if(!Cyc_RgnOrder_valid_constraint(
-eff,rgn)){({void*_tmp13[0]={};Cyc_Tcutil_terr(loc,({const char*_tmp14="Invalid region ordering constraint; kind mismatch";
-_tag_dynforward(_tmp14,sizeof(char),_get_zero_arr_size(_tmp14,50));}),
+eff,rgn)){({void*_tmp13=0;Cyc_Tcutil_terr(loc,({const char*_tmp14="Invalid region ordering constraint; kind mismatch";
+_tag_dynforward(_tmp14,sizeof(char),_get_zero_arr_size_char(_tmp14,50));}),
 _tag_dynforward(_tmp13,sizeof(void*),0));});return _tmp12;}{void*_tmp15=Cyc_Tcutil_compress(
 rgn);struct Cyc_Absyn_Tvar*_tmp16;_LL19: if(_tmp15 <= (void*)4)goto _LL1D;if(*((int*)
 _tmp15)!= 1)goto _LL1B;_tmp16=((struct Cyc_Absyn_VarType_struct*)_tmp15)->f1;_LL1A: {
@@ -1022,17 +1258,17 @@ void*)((void*)({struct Cyc_Absyn_JoinEff_struct*_tmp21=_cycalloc(sizeof(*_tmp21)
 _tmp21[0]=({struct Cyc_Absyn_JoinEff_struct _tmp22;_tmp22.tag=21;_tmp22.f1=({void*
 _tmp23[2];_tmp23[1]=(void*)po->these_outlive_unique;_tmp23[0]=eff;Cyc_List_list(
 _tag_dynforward(_tmp23,sizeof(void*),2));});_tmp22;});_tmp21;})));return _tmp12;
-_LL21:;_LL22:({void*_tmp24[0]={};((int(*)(struct _dynforward_ptr fmt,struct
+_LL21:;_LL22:({void*_tmp24=0;((int(*)(struct _dynforward_ptr fmt,struct
 _dynforward_ptr ap))Cyc_Tcutil_impos)(({const char*_tmp25="RgnOrder::add_outlives_constraint passed a bad region";
-_tag_dynforward(_tmp25,sizeof(char),_get_zero_arr_size(_tmp25,54));}),
+_tag_dynforward(_tmp25,sizeof(char),_get_zero_arr_size_char(_tmp25,54));}),
 _tag_dynforward(_tmp24,sizeof(void*),0));});_LL18:;}}struct Cyc_RgnOrder_RgnPO*
 Cyc_RgnOrder_add_youngest(struct _RegionHandle*r,struct Cyc_RgnOrder_RgnPO*po,
 struct Cyc_Absyn_Tvar*rgn,int resettable,int opened){if(!opened  && ((int(*)(struct
-Cyc_Dict_Dict d,struct Cyc_Absyn_Tvar*k))Cyc_Dict_member)(po->d,rgn))({void*_tmp27[
-0]={};((int(*)(struct _dynforward_ptr fmt,struct _dynforward_ptr ap))Cyc_Tcutil_impos)(({
+Cyc_Dict_Dict d,struct Cyc_Absyn_Tvar*k))Cyc_Dict_member)(po->d,rgn))({void*_tmp27=
+0;((int(*)(struct _dynforward_ptr fmt,struct _dynforward_ptr ap))Cyc_Tcutil_impos)(({
 const char*_tmp28="RgnOrder::add_youngest: repeated region";_tag_dynforward(
-_tmp28,sizeof(char),_get_zero_arr_size(_tmp28,40));}),_tag_dynforward(_tmp27,
-sizeof(void*),0));});{struct Cyc_RgnOrder_RgnPO*_tmp29=({struct Cyc_RgnOrder_RgnPO*
+_tmp28,sizeof(char),_get_zero_arr_size_char(_tmp28,40));}),_tag_dynforward(
+_tmp27,sizeof(void*),0));});{struct Cyc_RgnOrder_RgnPO*_tmp29=({struct Cyc_RgnOrder_RgnPO*
 _tmp30=_region_malloc(r,sizeof(*_tmp30));_tmp30[0]=*po;_tmp30;});struct Cyc_Absyn_AccessEff_struct*
 _tmp2A=({struct Cyc_Absyn_AccessEff_struct*_tmp2C=_cycalloc(sizeof(*_tmp2C));
 _tmp2C[0]=({struct Cyc_Absyn_AccessEff_struct _tmp2D;_tmp2D.tag=20;_tmp2D.f1=(void*)((
@@ -1104,9 +1340,9 @@ _LL3F;_LL42: if((int)_tmp46 != 4)goto _LL44;_LL43: Cyc_RgnOrder_add_to_search(&
 _tmp45,(void*)po->these_outlive_unique);goto _LL3F;_LL44: if((int)_tmp46 != 5)goto
 _LL46;_LL45: Cyc_RgnOrder_add_to_search(& _tmp45,(void*)po->these_outlive_heap);
 Cyc_RgnOrder_add_to_search(& _tmp45,(void*)po->these_outlive_unique);goto _LL3F;
-_LL46:;_LL47:({void*_tmp47[0]={};((int(*)(struct _dynforward_ptr fmt,struct
+_LL46:;_LL47:({void*_tmp47=0;((int(*)(struct _dynforward_ptr fmt,struct
 _dynforward_ptr ap))Cyc_Tcutil_impos)(({const char*_tmp48="RgnOrder: rgn not of correct kind";
-_tag_dynforward(_tmp48,sizeof(char),_get_zero_arr_size(_tmp48,34));}),
+_tag_dynforward(_tmp48,sizeof(char),_get_zero_arr_size_char(_tmp48,34));}),
 _tag_dynforward(_tmp47,sizeof(void*),0));});_LL3F:;}{void*_tmp49=r;struct Cyc_Absyn_Tvar*
 _tmp4A;_LL49: if(_tmp49 <= (void*)4)goto _LL4B;if(*((int*)_tmp49)!= 1)goto _LL4B;
 _tmp4A=((struct Cyc_Absyn_VarType_struct*)_tmp49)->f1;_LL4A: _tmp45.seen=({struct
@@ -1134,15 +1370,15 @@ _tmp5A.todo=((struct Cyc_List_List*)_check_null(_tmp5A.todo))->tl;if(Cyc_Absyn_t
 _tmp5B,_tmp53)== 0){int _tmp5C=1;_npop_handler(0);return _tmp5C;}if(((int(*)(
 struct Cyc_Dict_Dict d,struct Cyc_Absyn_Tvar*k))Cyc_Dict_member)(po->d,_tmp5B))Cyc_RgnOrder_add_to_search(&
 _tmp5A,(void*)(((struct Cyc_RgnOrder_RgnInfo*(*)(struct Cyc_Dict_Dict d,struct Cyc_Absyn_Tvar*
-k))Cyc_Dict_lookup)(po->d,_tmp5B))->these_outlive);else{({void*_tmp5D[0]={};((
-int(*)(struct _dynforward_ptr fmt,struct _dynforward_ptr ap))Cyc_Tcutil_impos)(({
-const char*_tmp5E="RgnOrder: type variable not in dict";_tag_dynforward(_tmp5E,
-sizeof(char),_get_zero_arr_size(_tmp5E,36));}),_tag_dynforward(_tmp5D,sizeof(
-void*),0));});}}{int _tmp5F=0;_npop_handler(0);return _tmp5F;}}_LL5B:;_LL5C: {int
-_tmp60=0;_npop_handler(0);return _tmp60;}_LL54:;}_LL50: if(*((int*)_tmp4F)!= 22)
-goto _LL52;_tmp51=(void*)((struct Cyc_Absyn_RgnsEff_struct*)_tmp4F)->f1;_LL51: {
-void*_tmp61=Cyc_Tcutil_compress(_tmp51);struct Cyc_Absyn_Tvar*_tmp62;_LL65: if(
-_tmp61 <= (void*)4)goto _LL67;if(*((int*)_tmp61)!= 1)goto _LL67;_tmp62=((struct Cyc_Absyn_VarType_struct*)
+k))Cyc_Dict_lookup)(po->d,_tmp5B))->these_outlive);else{({void*_tmp5D=0;((int(*)(
+struct _dynforward_ptr fmt,struct _dynforward_ptr ap))Cyc_Tcutil_impos)(({const char*
+_tmp5E="RgnOrder: type variable not in dict";_tag_dynforward(_tmp5E,sizeof(char),
+_get_zero_arr_size_char(_tmp5E,36));}),_tag_dynforward(_tmp5D,sizeof(void*),0));});}}{
+int _tmp5F=0;_npop_handler(0);return _tmp5F;}}_LL5B:;_LL5C: {int _tmp60=0;
+_npop_handler(0);return _tmp60;}_LL54:;}_LL50: if(*((int*)_tmp4F)!= 22)goto _LL52;
+_tmp51=(void*)((struct Cyc_Absyn_RgnsEff_struct*)_tmp4F)->f1;_LL51: {void*_tmp61=
+Cyc_Tcutil_compress(_tmp51);struct Cyc_Absyn_Tvar*_tmp62;_LL65: if(_tmp61 <= (void*)
+4)goto _LL67;if(*((int*)_tmp61)!= 1)goto _LL67;_tmp62=((struct Cyc_Absyn_VarType_struct*)
 _tmp61)->f1;_LL66: {struct Cyc_RgnOrder_OutlivesEnv _tmp63=Cyc_RgnOrder_initial_env(
 listrgn,po,rgn);void*_tmp64=Cyc_Tcutil_typ_kind(rgn);if(_tmp64 == (void*)3  || 
 _tmp64 == (void*)5){if(Cyc_RgnOrder_contains_rgnseff(_tmp62,(void*)po->these_outlive_heap)){
@@ -1155,9 +1391,9 @@ struct Cyc_Dict_Dict d,struct Cyc_Absyn_Tvar*k))Cyc_Dict_member)(po->d,_tmp67)){
 void*_tmp68=(void*)(((struct Cyc_RgnOrder_RgnInfo*(*)(struct Cyc_Dict_Dict d,struct
 Cyc_Absyn_Tvar*k))Cyc_Dict_lookup)(po->d,_tmp67))->these_outlive;if(Cyc_RgnOrder_contains_rgnseff(
 _tmp62,_tmp68)){int _tmp69=1;_npop_handler(0);return _tmp69;}Cyc_RgnOrder_add_to_search(&
-_tmp63,_tmp68);}else{({void*_tmp6A[0]={};((int(*)(struct _dynforward_ptr fmt,
-struct _dynforward_ptr ap))Cyc_Tcutil_impos)(({const char*_tmp6B="RgnOrder: type variable not in dict";
-_tag_dynforward(_tmp6B,sizeof(char),_get_zero_arr_size(_tmp6B,36));}),
+_tmp63,_tmp68);}else{({void*_tmp6A=0;((int(*)(struct _dynforward_ptr fmt,struct
+_dynforward_ptr ap))Cyc_Tcutil_impos)(({const char*_tmp6B="RgnOrder: type variable not in dict";
+_tag_dynforward(_tmp6B,sizeof(char),_get_zero_arr_size_char(_tmp6B,36));}),
 _tag_dynforward(_tmp6A,sizeof(void*),0));});}}{int _tmp6C=0;_npop_handler(0);
 return _tmp6C;}}_LL67:;_LL68: {int _tmp6D=0;_npop_handler(0);return _tmp6D;}_LL64:;}
 _LL52:;_LL53: {int _tmp6E=0;_npop_handler(0);return _tmp6E;}_LL4D:;};_pop_region(
@@ -1221,22 +1457,22 @@ _RegionHandle _tmp8F=_new_region("r");struct _RegionHandle*r=& _tmp8F;_push_regi
 r);{struct Cyc_Iter_Iter _tmp90=((struct Cyc_Iter_Iter(*)(struct _RegionHandle*rgn,
 struct Cyc_Dict_Dict d))Cyc_Dict_make_iter)(r,po->d);struct _tuple4 _tmp91=*((struct
 _tuple4*(*)(struct _RegionHandle*r,struct Cyc_Dict_Dict d))Cyc_Dict_rchoose)(r,po->d);({
-void*_tmp92[0]={};Cyc_fprintf(Cyc_stderr,({const char*_tmp93="region po:\n";
-_tag_dynforward(_tmp93,sizeof(char),_get_zero_arr_size(_tmp93,12));}),
+void*_tmp92=0;Cyc_fprintf(Cyc_stderr,({const char*_tmp93="region po:\n";
+_tag_dynforward(_tmp93,sizeof(char),_get_zero_arr_size_char(_tmp93,12));}),
 _tag_dynforward(_tmp92,sizeof(void*),0));});while(((int(*)(struct Cyc_Iter_Iter,
 struct _tuple4*))Cyc_Iter_next)(_tmp90,& _tmp91)){({struct Cyc_String_pa_struct
 _tmp97;_tmp97.tag=0;_tmp97.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_Absynpp_typ2string((
 void*)(_tmp91.f2)->these_outlive));{struct Cyc_String_pa_struct _tmp96;_tmp96.tag=
 0;_tmp96.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)*(_tmp91.f1)->name);{
 void*_tmp94[2]={& _tmp96,& _tmp97};Cyc_fprintf(Cyc_stderr,({const char*_tmp95="  %s outlived by %s\n";
-_tag_dynforward(_tmp95,sizeof(char),_get_zero_arr_size(_tmp95,21));}),
+_tag_dynforward(_tmp95,sizeof(char),_get_zero_arr_size_char(_tmp95,21));}),
 _tag_dynforward(_tmp94,sizeof(void*),2));}}});}({struct Cyc_String_pa_struct
 _tmp9A;_tmp9A.tag=0;_tmp9A.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_Absynpp_typ2string((
 void*)po->these_outlive_heap));{void*_tmp98[1]={& _tmp9A};Cyc_fprintf(Cyc_stderr,({
 const char*_tmp99="  these outlive heap: %s\n";_tag_dynforward(_tmp99,sizeof(char),
-_get_zero_arr_size(_tmp99,26));}),_tag_dynforward(_tmp98,sizeof(void*),1));}});({
+_get_zero_arr_size_char(_tmp99,26));}),_tag_dynforward(_tmp98,sizeof(void*),1));}});({
 struct Cyc_String_pa_struct _tmp9D;_tmp9D.tag=0;_tmp9D.f1=(struct _dynforward_ptr)((
 struct _dynforward_ptr)Cyc_Absynpp_typ2string((void*)po->these_outlive_unique));{
 void*_tmp9B[1]={& _tmp9D};Cyc_fprintf(Cyc_stderr,({const char*_tmp9C="  these outlive unique: %s\n";
-_tag_dynforward(_tmp9C,sizeof(char),_get_zero_arr_size(_tmp9C,28));}),
+_tag_dynforward(_tmp9C,sizeof(char),_get_zero_arr_size_char(_tmp9C,28));}),
 _tag_dynforward(_tmp9B,sizeof(void*),1));}});};_pop_region(r);}

@@ -27,14 +27,17 @@
 #include "evexp.h"
 #include "tcutil.h"
 #include "absynpp.h"
+#include "cyclone.h"
 
 namespace Absynpp;
 
+using Cyclone;
 using Core;
 using PP;
 using Absyn;
 using List;
 using Tcutil;
+
 
 // forward references
 extern doc_t dp2doc($(list_t<designator_t>,pat_t)@ dp);
@@ -459,7 +462,7 @@ doc_t noncallconv2doc(attributes_t atts) { // for MS only
     }
   if(!hasatt)
     return nil_doc();
-  return cat(text("__declspec("), 
+  return cat(text(" __declspec("), 
 	     group("",""," ",List::map(noncallatt2doc,atts)),
 	     text(")"));
 }
@@ -470,10 +473,11 @@ doc_t att2doc(attribute_t a) { // for gcc only
 
 doc_t atts2doc(attributes_t atts) {
   if (atts == NULL) return nil_doc();
-  if(Absynpp::to_VC)
-    return noncallconv2doc(atts);
-  return(cat(text(" __attribute__"),
-             group("((","))",",",List::map(att2doc,atts))));
+  switch(c_compiler) {
+  case Vc_c:  return noncallconv2doc(atts);
+  case Gcc_c: return(cat(text(" __attribute__"),
+                        group("((","))",",",List::map(att2doc,atts))));
+  }
 }
 
 bool next_is_pointer(list_t<type_modifier_t> tms) {
@@ -481,10 +485,10 @@ bool next_is_pointer(list_t<type_modifier_t> tms) {
   switch (tms->hd) {
   case &Pointer_mod(_,_): return true;
   case &Attributes_mod(_,_): 
-    if(!to_VC) return false;
-    // KLUDGE for VC calling conventions
-    // FIX -- not sure this is right
-    return next_is_pointer(tms->tl);
+    switch(c_compiler){
+    case Gcc_c: return false;
+    default:   return next_is_pointer(tms->tl);
+    } 
   default: return false;
   }
 }
@@ -579,17 +583,15 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
       return cat(rest,group("(",")",",",List::map(textptr,sl)));
     }
   case &Attributes_mod(_, atts):
-    if(!to_VC) {
+    switch(c_compiler){
+    case Gcc_c: 
       if (next_is_pointer(tms->tl)) rest = p_rest;
       return cat(rest, atts2doc(atts));
-    } else {
-      // KLUDGE for VC calling conventions
-      // FIX -- not sure this is right
-      if(next_is_pointer(tms->tl))
+    case Vc_c:
+     if(next_is_pointer(tms->tl))
 	return cat(callconv2doc(atts), rest);
-      return rest;
+     return rest;
     }
-
   case &TypeParams_mod(ts,loc,print_kinds):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     if (print_kinds)
@@ -763,7 +765,12 @@ doc_t ntyp2doc(type_t t) {
     case Short_sz: ts = "short"; break;
     case Int_sz: ts = "int";   break;
     case Long_sz: ts = "long";   break;
-    case LongLong_sz: ts = (to_VC ? "__int64" : "long long"); break;
+    case LongLong_sz: 
+      switch(c_compiler) {
+      case Gcc_c: ts = "long long"; break;
+      case Vc_c:  ts = "__int64";   break;
+      }
+      break;
     }
     s = text(aprintf("%s%s",sns,ts));
     break;
@@ -1499,6 +1506,7 @@ doc_t pat2doc(pat_t p) {
   case &Var_p(vd,&Pat{.r = Wild_p,...}):  
     s = qvar2doc(vd->name); break;
   case &Var_p(vd,p2):
+
     s = cat(qvar2doc(vd->name),text(" as "),pat2doc(p2)); break;
   case &TagInt_p(tv,vd):
     s = cat(qvar2doc(vd->name), text("<"), textptr(get_name(tv)), text(">"));
@@ -1595,17 +1603,25 @@ doc_t vardecl2doc(vardecl_t vd) {
   doc_t sn = typedef_name2bolddoc(name);
   doc_t attsdoc   = atts2doc(atts);
   doc_t beforenamedoc;
-  if(!to_VC)
-    beforenamedoc = attsdoc;
-  else
-    // lots of VC calling convention KLUDGE here -- atts doesn't have
-    // the calling convention -- it's in type
+  switch(c_compiler){
+  case Gcc_c: beforenamedoc = attsdoc; break;
+  case Vc_c:  
     switch(compress(type)) {
     case &FnType(FnInfo(_,_,_,_,_,_,_,atts2)): 
-      beforenamedoc = callconv2doc(atts2); break;
+      beforenamedoc = callconv2doc(atts2);
+      break;
     default: beforenamedoc = nil_doc(); break;
     }
-  s = cat((to_VC ? attsdoc : nil_doc()),
+    break;
+  }
+
+  doc_t tmp_doc;
+  switch(c_compiler){
+  case Gcc_c: tmp_doc = nil_doc(); break;
+  case Vc_c:  tmp_doc = attsdoc;   break;
+  }
+  s = cat(/*(to_VC ? attsdoc : nil_doc()),*/
+          tmp_doc,
           scope2doc(sc),
           tqtd2doc(tq,type,new Opt(cat(beforenamedoc,sn))),
           (initializer == NULL)
@@ -1634,14 +1650,18 @@ doc_t decl2doc(decl_t d) {
     doc_t attsdoc   = atts2doc(fd->attributes);
     doc_t inlinedoc;
     if(fd->is_inline)
-      if(to_VC)
-	inlinedoc = text("__inline ");
-      else
-	inlinedoc = text("inline ");
+      switch(c_compiler) {
+      case Gcc_c:  inlinedoc = text("inline ");    break;
+      case Vc_c:   inlinedoc = text("__inline ");  break;
+      }
     else
       inlinedoc = nil_doc();
     doc_t scopedoc  = scope2doc(fd->sc);
-    doc_t beforenamedoc = (to_VC ? callconv2doc(fd->attributes) : attsdoc);
+    doc_t beforenamedoc;
+    switch(c_compiler){
+    case Gcc_c: beforenamedoc = attsdoc; break;
+    case Vc_c:  beforenamedoc = callconv2doc(fd->attributes); break;
+    }
     doc_t namedoc   = typedef_name2doc(fd->name);
     doc_t tqtddoc   = tqtd2doc(empty_tqual(NULL), t,
 			       new Opt(cat(beforenamedoc,namedoc)));
@@ -1650,8 +1670,12 @@ doc_t decl2doc(decl_t d) {
 			  line_doc(),
 			  rb());
     s = cat(inlinedoc,scopedoc,tqtddoc,bodydoc);
-    if(to_VC)
-      s = cat(attsdoc,s);
+    
+    switch(c_compiler){
+    case Vc_c:  s = cat(attsdoc,s); break;
+    default: break;
+    }
+
     break;
     
   case &Aggr_d(ad):
@@ -1931,16 +1955,24 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
     //   o for calling conventions, we put them before the args and rely
     //     on the caller to move them to the right place. KLUDGE! FIX!
     //     (I doubt this is right in all cases.)
-    if (fn_atts != NULL && !to_VC) {
-      // if the return type is a function pointer, then we have to
-      // move the attributes past that function modifier and so forth
-      tms = bubble_attributes(r,rnew(r) Attributes_mod(NULL,fn_atts),tms);
-    }
-    tms = rnew(r) List(rnew(r) 
-                       Function_mod(rnew(r) WithTypes(args,c_varargs,
-                                                      cyc_varargs,effopt,
+
+    switch(c_compiler){
+    case Gcc_c: 
+      if (fn_atts != NULL){
+        // if the return type is a function pointer, then we have to
+        // move the attributes past that function modifier and so forth
+        tms = bubble_attributes(r,rnew(r) Attributes_mod(NULL,fn_atts),tms);
+      }
+      tms = rnew(r) List(rnew(r) 
+                         Function_mod(rnew(r) WithTypes(args,c_varargs,
+                                                        cyc_varargs,effopt,
+                                                        rgn_po)),tms);
+      break;
+    case Vc_c:
+      tms = rnew(r) List(rnew(r) 
+                         Function_mod(rnew(r) WithTypes(args,c_varargs,
+                                                        cyc_varargs,effopt,
                                                       rgn_po)),tms);
-    if(to_VC)
       for(; fn_atts != NULL; fn_atts = fn_atts->tl)
 	switch(fn_atts->hd) {
 	case Stdcall_att: 
@@ -1950,6 +1982,9 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
 	  goto AfterAtts;
 	default: break;
 	}
+        break;
+    }
+
   AfterAtts:
     if (typvars != NULL)
       tms = rnew(r) List(rnew(r) TypeParams_mod(typvars,NULL,true),tms);
@@ -2003,13 +2038,25 @@ doc_t tqtd2doc(tqual_t tq, type_t typ, opt_t<doc_t> dopt) {
 }
 
 doc_t aggrfield2doc(aggrfield_t f) {
-  if (f->width != NULL)
-    return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
-               text(":"), exp2doc((exp_t)f->width),
-               atts2doc(f->attributes), text(";"));
-  else
-    return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
-               atts2doc(f->attributes), text(";"));
+  switch(c_compiler){
+  case Gcc_c:
+    if (f->width != NULL)
+      return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
+                 text(":"), exp2doc((exp_t)f->width),
+                 atts2doc(f->attributes), text(";"));
+    else
+      return cat(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
+                 atts2doc(f->attributes), text(";"));
+  case Vc_c:
+    if (f->width != NULL)
+      return cat(atts2doc(f->attributes),
+                 tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
+                 text(":"), exp2doc((exp_t)f->width),text(";"));
+    else
+      return cat(atts2doc(f->attributes),
+                 tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),text(";"));
+\
+  }
 }
 
 doc_t aggrfields2doc(list_t<aggrfield_t> fields) {

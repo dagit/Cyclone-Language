@@ -4,7 +4,7 @@
 
    The Cyclone compiler is free software; you can redistribute it
    and/or modify it under the terms of the GNU General Public License
-   as published by the Free Software Foundation; either version 2 of
+   as published by the free Software Foundation; either version 2 of
    the License, or (at your option) any later version.
 
    The Cyclone compiler is distributed in the hope that it will be
@@ -202,21 +202,50 @@ MAKE_VAR(_untag_dyneither_ptr);
 // MAKE_VAR(_get_arr_size);
 MAKE_VAR(_get_dynforward_size);
 MAKE_VAR(_get_dyneither_size);
+
 MAKE_VAR(_get_zero_arr_size); // NOT SURE WHETHER WE NEED BOTH?
+MAKE_VAR(_get_zero_arr_size_char);
+MAKE_VAR(_get_zero_arr_size_short);
+MAKE_VAR(_get_zero_arr_size_int);
+MAKE_VAR(_get_zero_arr_size_float);
+MAKE_VAR(_get_zero_arr_size_double);
+MAKE_VAR(_get_zero_arr_size_longdouble);
+MAKE_VAR(_get_zero_arr_size_voidstar);
 // MAKE_VAR(_tagged_arr_plus);
 MAKE_VAR(_dynforward_ptr_plus);
 MAKE_VAR(_dyneither_ptr_plus);
 MAKE_VAR(_zero_arr_plus);     // NOT SURE WHETHER WE NEED BOTH?
+MAKE_VAR(_zero_arr_plus_char);
+MAKE_VAR(_zero_arr_plus_short);
+MAKE_VAR(_zero_arr_plus_int);
+MAKE_VAR(_zero_arr_plus_float);
+MAKE_VAR(_zero_arr_plus_double);
+MAKE_VAR(_zero_arr_plus_longdouble);
+MAKE_VAR(_zero_arr_plus_voidstar);
 // MAKE_VAR(_tagged_arr_inplace_plus);
 MAKE_VAR(_dynforward_ptr_inplace_plus);
 MAKE_VAR(_dyneither_ptr_inplace_plus);
 MAKE_VAR(_zero_arr_inplace_plus); // NOT SURE WHETHER WE NEED BOTH?
+MAKE_VAR(_zero_arr_inplace_plus_char);
+MAKE_VAR(_zero_arr_inplace_plus_short);
+MAKE_VAR(_zero_arr_inplace_plus_int);
+MAKE_VAR(_zero_arr_inplace_plus_float);
+MAKE_VAR(_zero_arr_inplace_plus_double);
+MAKE_VAR(_zero_arr_inplace_plus_longdouble);
+MAKE_VAR(_zero_arr_inplace_plus_voidstar);
 // MAKE_VAR(_tagged_arr_inplace_plus_post);
 MAKE_VAR(_dynforward_ptr_inplace_plus_post);
 MAKE_VAR(_dyneither_ptr_inplace_plus_post);
 MAKE_VAR(_dynforward_to_dyneither);
 MAKE_VAR(_dyneither_to_dynforward);
 MAKE_VAR(_zero_arr_inplace_plus_post); // NOT SURE WHETHER WE NEED BOTH?
+MAKE_VAR(_zero_arr_inplace_plus_post_char);
+MAKE_VAR(_zero_arr_inplace_plus_post_short);
+MAKE_VAR(_zero_arr_inplace_plus_post_int);
+MAKE_VAR(_zero_arr_inplace_plus_post_float);
+MAKE_VAR(_zero_arr_inplace_plus_post_double);
+MAKE_VAR(_zero_arr_inplace_plus_post_longdouble);
+MAKE_VAR(_zero_arr_inplace_plus_post_voidstar);
 MAKE_VAR(_cycalloc);
 MAKE_VAR(_cyccalloc);
 MAKE_VAR(_cycalloc_atomic);
@@ -308,6 +337,94 @@ static raw_stmt_t goto_stmt_r(var_t v, stmt_opt_t s) {
   return new Goto_s(v,s);
 }
 static tunion Raw_exp.Const_e zero_exp = Const_e(Int_c(Signed,0));
+
+
+/* functionSets are used to call the appropriate function from
+ * cyc_include.h by casing on the type of the arguments
+ */
+struct functionSet {
+  exp_t fchar; exp_t fshort; 
+  exp_t fint; exp_t ffloat;
+  exp_t fdouble; exp_t flongdouble; 
+  exp_t fvoidstar;
+};
+
+struct functionSet _zero_arr_plus_functionSet = functionSet {
+  .fchar = &_zero_arr_plus_char_ev, 
+  .fshort = &_zero_arr_plus_short_ev, 
+  .fint = &_zero_arr_plus_int_ev, 
+  .ffloat = &_zero_arr_plus_float_ev, 
+  .fdouble = &_zero_arr_plus_double_ev, 
+  .flongdouble = &_zero_arr_plus_longdouble_ev, 
+  .fvoidstar = &_zero_arr_plus_voidstar_ev
+};
+struct functionSet _get_zero_arr_size_functionSet = {
+  .fchar = &_get_zero_arr_size_char_ev, 
+  .fshort = &_get_zero_arr_size_short_ev,
+  .fint = &_get_zero_arr_size_int_ev, 
+  .ffloat = &_get_zero_arr_size_float_ev,
+  .fdouble = &_get_zero_arr_size_double_ev, 
+  .flongdouble = &_get_zero_arr_size_longdouble_ev,
+  .fvoidstar = &_get_zero_arr_size_voidstar_ev
+};
+struct functionSet _zero_arr_inplace_plus_functionSet = {
+  .fchar = &_zero_arr_inplace_plus_char_ev, 
+  .fshort = &_zero_arr_inplace_plus_short_ev,
+  .fint = &_zero_arr_inplace_plus_int_ev, 
+  .ffloat = &_zero_arr_inplace_plus_float_ev,
+  .fdouble = &_zero_arr_inplace_plus_double_ev, 
+  .flongdouble = &_zero_arr_inplace_plus_longdouble_ev,
+  .fvoidstar = &_zero_arr_inplace_plus_voidstar_ev
+};
+struct functionSet _zero_arr_inplace_plus_post_functionSet = {
+  .fchar = &_zero_arr_inplace_plus_post_char_ev, 
+  .fshort = &_zero_arr_inplace_plus_post_short_ev,
+  .fint = &_zero_arr_inplace_plus_post_int_ev, 
+  .ffloat = &_zero_arr_inplace_plus_post_float_ev,
+  .fdouble = &_zero_arr_inplace_plus_post_double_ev, 
+  .flongdouble = &_zero_arr_inplace_plus_post_longdouble_ev,
+  .fvoidstar = &_zero_arr_inplace_plus_post_voidstar_ev
+};
+
+// choose which function to call based on argument type
+static exp_t getFunctionType(struct functionSet @fS, type_t t) {
+  exp_t function;
+  switch(t) {
+  case &IntType(_,sz):
+    switch(sz) {
+    case Char_sz:  function = fS->fchar;  break;
+    case Short_sz: function = fS->fshort; break;
+    case Int_sz:   function = fS->fint;   break;
+    default: throw new Impossible("impossible IntType (not char, short or int)");
+    }
+    break;
+  case FloatType: 
+    function = fS->ffloat;
+    break;
+  case &DoubleType(longBool): 
+    switch(longBool){
+    case true: function = fS->flongdouble; break;
+    default:   function = fS->fdouble;
+    }
+    break;
+  case &PointerType(_):
+    function = fS->fvoidstar;
+    break;
+  default:
+    throw new Impossible("impossible expression type (not int, float, double, or pointer)");
+  }
+  return function;
+}
+exp_t getFunction(struct functionSet @fS, exp_t arr) {
+  return getFunctionType(fS, compress(arr->topt->v));
+}
+exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
+  switch (compress(arr->topt->v)) {
+  case &PointerType(PtrInfo{.elt_typ = et,...}):
+      return getFunctionType(fS,et);
+  default: throw new Impossible("impossible type (not pointer)");
+  }
+}
 
 ///////////////////////////// Various Utilities /////////////////////////////
 
@@ -1233,6 +1350,7 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
     return seq_stmt(declare_stmt(max,uint_typ,e1,
                                  declare_stmt(x1,uint_typ,NULL,s2,DL),DL),s,DL);
   }
+
 }
 
 static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
@@ -1497,7 +1615,7 @@ static exp_t generate_zero(type_t t) {
 
 // We're translating e which is of the form e_1 op= e_2 where e_1 
 // involves a zero-terminated pointer and is of the form *ea or
-// ea[eb].  We need to prevent overwriting the last zero in the array.  
+// ea[eb].  We need to prevent overwriting the last zero in the array.  unary & applied to non-lvalue
 static void zero_ptr_assign_to_c(env_t nv, exp_t e, 
                                  exp_t e1, opt_t<primop_t> popt, exp_t e2,
                                  type_t ptr_type, 
@@ -1589,7 +1707,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
                          sizeoftyp_exp(typ_to_c(elt_type),DL));
     let oneexp = uint_exp(1,DL);
     exp_t xsize;
-    if (is_dynforward) 
+    if (is_dynforward)
       xsize = prim2_exp(Eq,fncall_exp(_get_dynforward_size_e,xsizeargs,DL),
                         oneexp,DL);
     else 
@@ -1670,7 +1788,9 @@ static void exp_to_c(env_t nv, exp_t e) {
 	case &Upper_b(e2): 
           // when zero-terminated, we have to call "strlen"
           if (conref_def(false,zt)) {
-            e->r = fncall_exp_r(_get_zero_arr_size_e,list(es->hd,e2));
+            exp_t function_e = getFunction(&_get_zero_arr_size_functionSet,
+                                           es->hd);
+            e->r = fncall_exp_r(function_e,list(es->hd,e2));
           } else if (conref_def(false,nbl)) {
             // careful! when this is a nullable pointer, the size might be 0
             e->r = conditional_exp_r(arg,e2,uint_exp(0,DL));
@@ -1709,7 +1829,7 @@ static void exp_to_c(env_t nv, exp_t e) {
           if (conref_def(false,zt)) {
             exp_t e1 = es->hd;
             exp_t e2 = es->tl->hd;
-            e->r = fncall_exp_r(_zero_arr_plus_e,list(e1,esz,e2));
+            e->r = fncall_exp(getFunction(&_zero_arr_plus_functionSet,e1),list(e1,esz,e2),DL)->r;
           }
           break;
 	case &AbsUpper_b(_): unimp("toc: plus on AbsUpper_b");
@@ -1805,8 +1925,50 @@ static void exp_to_c(env_t nv, exp_t e) {
                                      signed_int_exp(change,DL)));
     } else if (is_zero_pointer_typ_elt(old_typ,&elt_typ)) {
       // e.g, x++ becomes _zero_arr_inplace_plus_post(x,1)
-      let fn_e = (incr == PostInc) ? _zero_arr_inplace_plus_post_e :
-        _zero_arr_inplace_plus_e;
+      //let fn_e = (incr == PostInc) ? _zero_arr_inplace_plus_post_e :
+      //  _zero_arr_inplace_plus_e;
+      exp_t fn_e;
+      switch(compress(e2->topt->v)) { 
+      case &IntType(_,sz):
+        switch(sz) {
+        case Char_sz:  
+          fn_e = (incr == PostInc) ? 
+            _zero_arr_inplace_plus_post_char_e : _zero_arr_inplace_plus_char_e;
+          break;
+        case Short_sz:
+          fn_e = (incr == PostInc) ? 
+            _zero_arr_inplace_plus_post_short_e : _zero_arr_inplace_plus_short_e;
+          break;
+        case Int_sz:
+          fn_e = (incr == PostInc) ? 
+            _zero_arr_inplace_plus_post_int_e : _zero_arr_inplace_plus_int_e;  
+          break;
+        default: throw new Impossible("impossible IntType (not char, short or int)");
+        }
+        break;
+      case FloatType: 
+        fn_e = (incr == PostInc) ? 
+          _zero_arr_inplace_plus_post_float_e : _zero_arr_inplace_plus_float_e;
+        break; 
+      case &DoubleType(longBool): 
+        switch(longBool){
+        case true: 
+          fn_e = (incr == PostInc) ? 
+            _zero_arr_inplace_plus_post_longdouble_e : _zero_arr_inplace_plus_longdouble_e;
+          break;
+        default:  
+          fn_e = (incr == PostInc) ? 
+            _zero_arr_inplace_plus_post_double_e : _zero_arr_inplace_plus_double_e;
+        }
+        break;
+      case &PointerType(_):
+        fn_e = (incr == PostInc) ? 
+          _zero_arr_inplace_plus_post_voidstar_e : _zero_arr_inplace_plus_voidstar_e;
+        break;
+      default:
+        throw new Impossible("impossible expression type (not int, float, double, or pointer)");
+      }
+      
       e->r = fncall_exp_r(fn_e, list(e2,signed_int_exp(1,DL)));
     } else if(elt_typ == VoidType && !is_lvalue(e2)) {
       lvalue_assign(e2,NULL,incr_lvalue,incr);
@@ -1870,7 +2032,7 @@ static void exp_to_c(env_t nv, exp_t e) {
         switch (popt->v) {
         case Plus: 
           done = true;
-          e->r = fncall_exp_r(_zero_arr_inplace_plus_e,list(e1,e2));
+          e->r = fncall_exp_r(getFunction(&_zero_arr_inplace_plus_functionSet,e1),list(e1,e2));
           break;
         default: toc_impos("bad zero-terminated pointer arithmetic");
         }
@@ -1922,8 +2084,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     //    t argv[num_varargs] = {es[n-num_varargs+1], ..., es[n]};
     // e1(es[0], ..., es[n-num_varargs], tag_dynforward(argv, sizeof(t), num_varargs));
     region r {
-      qvar_t argv     = temp_var();
-      exp_t  argvexp  = var_exp(argv,DL);
+      qvar_t argv = temp_var();
+      exp_t argvexp = var_exp(argv,DL);
       exp_t  num_varargs_exp = uint_exp(num_varargs,DL);
       type_t cva_type = typ_to_c(vai->type);
       type_t arr_type = array_typ(cva_type,mt_tq,num_varargs_exp,false_conref,
@@ -1956,37 +2118,48 @@ static void exp_to_c(env_t nv, exp_t e) {
 	default: toc_impos("toc: unknown tunion in vararg with inject");
 	}
 	qvar_t ? vs = rnew(r) {for i < num_varargs : temp_var()};
-	// declare argv = {&v1,&v2,...,&vnum_varargs}
-	let array_args = NULL;
-	for(int i=num_varargs-1; i >= 0; --i)
-	  array_args = new List(make_dle(address_exp(var_exp(vs[i],DL),DL)),
-				array_args);
-	s = declare_stmt(argv, arr_type, unresolvedmem_exp(NULL,array_args,DL),
-			 s,DL);
-	// evaluate varargs (notice we're using a screwy evaluation order now)
-	for (int i=0; es != NULL; es = es->tl, injectors = injectors->tl, ++i) {
-	  exp_t  arg      = es->hd;
-	  type_t arg_type = arg->topt->v;
-	  qvar_t var      = vs[i];
-	  exp_t  varexp   = var_exp(var,DL);
-          let &Tunionfield{qv,tqts,_,_} = injectors->hd;
-          type_t field_typ = typ_to_c((*tqts->hd)[1]);
-	  exp_to_c(nv,arg);
-          if (is_void_star(field_typ))
-            arg = cast_it(field_typ,arg);
-	  // DAN: We don't use an initializer b/c we're afraid of the GCC bug,
-	  //   but I doubt it would happen and it causes a lot of gunk. :-(
-          // struct qv_tag temp x;
-          // x.tag = i; 
-	  // x.f1  = arg;
-          s = seq_stmt(assign_stmt(aggrmember_exp(varexp,fieldname(1),DL),
-				   arg,DL),
-		       s,DL);
-          s = seq_stmt(assign_stmt(aggrmember_exp(varexp,tag_sp,DL),
-				   tunion_tag(tud,qv,true),DL),
-		       s,DL);
-          s = declare_stmt(var,strctq(collapse_qvar_tag(qv,"_struct")), NULL,
-			   s,DL);
+	
+        if (num_varargs != 0) {
+          // declare argv = {&v1,&v2,...,&vnum_varargs}
+          let array_args = NULL;
+          for(int i=num_varargs-1; i >= 0; --i)
+            array_args = new List(make_dle(address_exp(var_exp(vs[i],DL),DL)),
+                                  array_args);
+          s = declare_stmt(argv, arr_type, unresolvedmem_exp(NULL,array_args,DL),
+                           s,DL);
+          // evaluate varargs (notice we're using a screwy evaluation order now)
+          for (int i=0; es != NULL; es = es->tl, injectors = injectors->tl, ++i) {
+            exp_t  arg      = es->hd;
+            type_t arg_type = arg->topt->v;
+            qvar_t var      = vs[i];
+            exp_t  varexp   = var_exp(var,DL);
+            let &Tunionfield{qv,tqts,_,_} = injectors->hd;
+            type_t field_typ = typ_to_c((*tqts->hd)[1]);
+            exp_to_c(nv,arg);
+            if (is_void_star(field_typ))
+              arg = cast_it(field_typ,arg);
+            // DAN: We don't use an initializer b/c we're afraid of the GCC bug,
+            //   but I doubt it would happen and it causes a lot of gunk. :-(
+            // struct qv_tag temp x;
+            // x.tag = i; 
+            // x.f1  = arg;
+            s = seq_stmt(assign_stmt(aggrmember_exp(varexp,fieldname(1),DL),
+                                     arg,DL),
+                         s,DL);
+            s = seq_stmt(assign_stmt(aggrmember_exp(varexp,tag_sp,DL),
+                                     tunion_tag(tud,qv,true),DL),
+                         s,DL);
+            s = declare_stmt(var,strctq(collapse_qvar_tag(qv,"_struct")), NULL,
+                             s,DL);
+          }
+        } 
+        // if there are no var args, then set argv to the empty fat pointer 
+        // instead of an array of 0 elements to keep ansi c compilers happy
+        else {
+          let array_args = list(make_dle(uint_exp(0,DL)),make_dle(uint_exp(0,DL)),
+                                make_dle(uint_exp(0,DL)));
+          s = declare_stmt(argv,void_star_typ(),uint_exp(0,DL),
+                           s,DL);
         }
       } else {
 	// we'd like: argv = { e1, ..., en} where ei is the ith vararg, but
@@ -2113,7 +2286,10 @@ static void exp_to_c(env_t nv, exp_t e) {
             //   })
             let x = temp_var();
             let x_exp = var_exp(x,DL);
-            let arg3 = fncall_exp(_get_zero_arr_size_e,list(x_exp,e2),DL);
+            let arg3 = fncall_exp(getFunctionRemovePointer(
+                                     &_get_zero_arr_size_functionSet,e1),
+                                  list(x_exp,e2),DL);
+
             if (!zt2 && !p2.elt_tq.real_const) {
               // If p2 is not zero-terminated and not const, then we subtract
               // one from the size so that no one can write the last location.
@@ -2603,12 +2779,13 @@ DynCast:
         if (in_bnds)
 	  bounds_checks_eliminated++;
         // check if zero terminated
-        else if (conref_def(false,zt))
+        else if (conref_def(false,zt)) {
           // *((ta2)_zero_arr_plus(e1, esz, e2)
+          exp_t function_e = getFunction(&_zero_arr_plus_functionSet,e1);
           e->r = deref_exp_r(cast_it(ta2,
-                                     fncall_exp(_zero_arr_plus_e,
+                                     fncall_exp(function_e,
                                                 list(e1,esz,e2),DL)));
-	else if(possibly_null) {
+        } else if(possibly_null) {
           if (warn_all_null_deref)
             warn(e->loc, "inserted null check due to dereference");
 	  // *((ta2)_check_known_subscript_null(e1, esz, sizeof(ta), e2)

@@ -48,7 +48,7 @@ struct _RegionPage {
   unsigned free_bytes;
 #endif
   struct _RegionPage *next;
-  char data[0];
+  char data[1];  /*FJS: used to be size 0, but that's forbidden in ansi c*/
 };
 
 struct _RegionHandle {
@@ -107,11 +107,32 @@ extern struct _xtunion_struct ADD_PREFIX(Bad_alloc_struct);
 extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 /* Built-in Run-time Checks and company */
+#ifdef __APPLE__
+#define _INLINE_FUNCTIONS
+#endif
+
+#ifdef CYC_ANSI_OUTPUT
+#define _INLINE  
+#define _INLINE_FUNCTIONS
+#else
+#define _INLINE inline
+#endif
+
+#ifdef VC_C
+#define _CYC_U_LONG_LONG_T __int64
+#else
+#ifdef GCC_C
+#define _CYC_U_LONG_LONG_T unsigned long long
+#else
+#define _CYC_U_LONG_LONG_T unsigned long long
+#endif
+#endif
+
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline void *
+static _INLINE void *
 _check_null(void *ptr) {
   void*_check_null_temp = (void*)(ptr);
   if (!_check_null_temp) _throw_null();
@@ -130,7 +151,7 @@ _check_null(void *ptr) {
   ((char *)ptr) + (elt_sz)*(index); })
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline char *
+static _INLINE char *
 _check_known_subscript_null(void *ptr, unsigned bound, unsigned elt_sz, unsigned index) {
   void*_cks_ptr = (void*)(ptr);
   unsigned _cks_bound = (bound);
@@ -156,7 +177,7 @@ _check_known_subscript_null(void *ptr, unsigned bound, unsigned elt_sz, unsigned
 #define _check_known_subscript_notnull(bound,index) (index)
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned
+static _INLINE unsigned
 _check_known_subscript_notnull(unsigned bound,unsigned index) { 
   unsigned _cksnn_bound = (bound); 
   unsigned _cksnn_index = (index); 
@@ -175,56 +196,272 @@ _check_known_subscript_notnull(unsigned bound,unsigned index) {
 /* Add i to zero-terminated pointer x.  Checks for x being null and
    ensures that x[0..i-1] are not 0. */
 #ifdef NO_CYC_BOUNDS_CHECK
-#define _zero_arr_plus(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_char(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_short(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_int(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_float(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_double(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_longdouble(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_voidstar(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
 #else
-#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
-  typedef _czs_tx = (*orig_x); \
-  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
-  unsigned int _czs_sz = (orig_sz); \
-  int _czs_i = (orig_i); \
-  unsigned int _czs_temp; \
-  if ((_czs_x) == 0) _throw_null(); \
-  if (_czs_i < 0) _throw_arraybounds(); \
-  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
-    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
-  _czs_x+_czs_i; })
+static _INLINE char *
+_zero_arr_plus_char(char *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE short *
+_zero_arr_plus_short(short *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE int *
+_zero_arr_plus_int(int *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE float *
+_zero_arr_plus_float(float *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE double *
+_zero_arr_plus_double(double *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE long double *
+_zero_arr_plus_longdouble(long double *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE void *
+_zero_arr_plus_voidstar(void **orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
 #endif
+
 
 /* Calculates the number of elements in a zero-terminated, thin array.
    If non-null, the array is guaranteed to have orig_offset elements. */
-#define _get_zero_arr_size(orig_x,orig_offset) ({ \
-  typedef _gres_tx = (*orig_x); \
-  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
-  unsigned int _gres_offset = (orig_offset); \
-  unsigned int _gres = 0; \
-  if (_gres_x != 0) { \
-     _gres = _gres_offset; \
-     _gres_x += _gres_offset - 1; \
-     while (*_gres_x != 0) { _gres_x++; _gres++; } \
-  } _gres; })
+static _INLINE int
+_get_zero_arr_size_char(const char *orig_x, unsigned int orig_offset) {
+  const char *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_short(const short *orig_x, unsigned int orig_offset) {
+  const short *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_int(const int *orig_x, unsigned int orig_offset) {
+  const int *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_float(const float *orig_x, unsigned int orig_offset) {
+  const float *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_double(const double *orig_x, unsigned int orig_offset) {
+  const double *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_longdouble(const long double *orig_x, unsigned int orig_offset) {
+  const long double *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_voidstar(const void **orig_x, unsigned int orig_offset) {
+  const void **_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+
 
 /* Does in-place addition of a zero-terminated pointer (x += e and ++x).  
    Note that this expands to call _zero_arr_plus. */
-#define _zero_arr_inplace_plus(x,orig_i) ({ \
+/*#define _zero_arr_inplace_plus(x,orig_i) ({ \
   typedef _zap_tx = (*x); \
   _zap_tx **_zap_x = &((_zap_tx*)x); \
   *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+  */
+static _INLINE void 
+_zero_arr_inplace_plus_char(char *x, int orig_i) {
+  char **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_char(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_short(short *x, int orig_i) {
+  short **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_short(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_int(int *x, int orig_i) {
+  int **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_int(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_float(float *x, int orig_i) {
+  float **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_float(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_double(double *x, int orig_i) {
+  double **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_double(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_longdouble(long double *x, int orig_i) {
+  long double **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_longdouble(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_voidstar(void **x, int orig_i) {
+  void ***_zap_x = &x;
+  *_zap_x = _zero_arr_plus_voidstar(*_zap_x,1,orig_i);
+}
+
+
+
 
 /* Does in-place increment of a zero-terminated pointer (e.g., x++).
    Note that this expands to call _zero_arr_plus. */
-#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+/*#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
   typedef _zap_tx = (*x); \
   _zap_tx **_zap_x = &((_zap_tx*)x); \
   _zap_tx *_zap_res = *_zap_x; \
   *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
-  _zap_res; })
+  _zap_res; })*/
   
+static _INLINE char *
+_zero_arr_inplace_plus_post_char(char *x, int orig_i){
+  char ** _zap_x = &x;
+  char * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_char(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE short *
+_zero_arr_inplace_plus_post_short(short *x, int orig_i){
+  short **_zap_x = &x;
+  short * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_short(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE int *
+_zero_arr_inplace_plus_post_int(int *x, int orig_i){
+  int **_zap_x = &x;
+  int * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_int(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE float *
+_zero_arr_inplace_plus_post_float(float *x, int orig_i){
+  float **_zap_x = &x;
+  float * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_float(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE double *
+_zero_arr_inplace_plus_post_double(double *x, int orig_i){
+  double **_zap_x = &x;
+  double * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_double(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE long double *
+_zero_arr_inplace_plus_post_longdouble(long double *x, int orig_i){
+  long double **_zap_x = &x;
+  long double * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_longdouble(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE void **
+_zero_arr_inplace_plus_post_voidstar(void **x, int orig_i){
+  void ***_zap_x = &x;
+  void ** _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_voidstar(_zap_res,1,orig_i);
+  return _zap_res;
+}
+
 
 
 /* functions for dealing with dynamically sized pointers */
 #ifdef NO_CYC_BOUNDS_CHECKS
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dyneither_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -232,7 +469,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   return _cus_ans;
 }
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -256,7 +493,7 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
 #endif
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dyneither_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -267,7 +504,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
     _throw_arraybounds();
   return _cus_ans;
 }
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -301,14 +538,14 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _tag_dyneither(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
   struct _dyneither_ptr _tag_arr_ans;
   _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr);
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts);
   return _tag_arr_ans;
 }
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _tag_dynforward(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
   struct _dynforward_ptr _tag_arr_ans;
   _tag_arr_ans.curr = (void*)(tcurr);
@@ -329,22 +566,22 @@ _tag_dynforward(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr *
+static _INLINE struct _dyneither_ptr *
 _init_dyneither_ptr(struct _dyneither_ptr *arr_ptr,
                     void *arr, unsigned elt_sz, unsigned num_elts) {
   struct _dyneither_ptr *_itarr_ptr = (arr_ptr);
   void* _itarr = (arr);
   _itarr_ptr->base = _itarr_ptr->curr = _itarr;
-  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts);
+  _itarr_ptr->last_plus_one = ((unsigned char *)_itarr) + (elt_sz) * (num_elts);
   return _itarr_ptr;
 }
-static inline struct _dynforward_ptr *
+static _INLINE struct _dynforward_ptr *
 _init_dynforward_ptr(struct _dynforward_ptr *arr_ptr,
                     void *arr, unsigned elt_sz, unsigned num_elts) {
   struct _dynforward_ptr *_itarr_ptr = (arr_ptr);
   void* _itarr = (arr);
   _itarr_ptr->curr = _itarr;
-  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts);
+  _itarr_ptr->last_plus_one = ((unsigned char *)_itarr) + (elt_sz) * (num_elts);
   return _itarr_ptr;
 }
 #else
@@ -367,7 +604,7 @@ _init_dynforward_ptr(struct _dynforward_ptr *arr_ptr,
 #define _untag_dyneither_ptr(arr,elt_sz,num_elts) ((arr).curr)
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned char *
+static _INLINE unsigned char *
 _untag_dyneither_ptr(struct _dyneither_ptr arr, 
                      unsigned elt_sz,unsigned num_elts) {
   struct _dyneither_ptr _arr = (arr);
@@ -376,7 +613,7 @@ _untag_dyneither_ptr(struct _dyneither_ptr arr,
     _throw_arraybounds();
   return _curr;
 }
-static inline unsigned char *
+static _INLINE unsigned char *
 _untag_dynforward_ptr(struct _dynforward_ptr arr, 
                       unsigned elt_sz,unsigned num_elts) {
   struct _dynforward_ptr _arr = (arr);
@@ -402,7 +639,7 @@ _untag_dynforward_ptr(struct _dynforward_ptr arr,
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned
+static _INLINE unsigned
 _get_dyneither_size(struct _dyneither_ptr arr,unsigned elt_sz) {
   struct _dyneither_ptr _get_arr_size_temp = (arr);
   unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr;
@@ -411,7 +648,7 @@ _get_dyneither_size(struct _dyneither_ptr arr,unsigned elt_sz) {
           _get_arr_size_curr >= _get_arr_size_last) ? 0 :
     ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));
 }
-static inline unsigned
+static _INLINE unsigned
 _get_dynforward_size(struct _dynforward_ptr arr,unsigned elt_sz) {
   struct _dynforward_ptr _get_arr_size_temp = (arr);
   unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr;
@@ -436,7 +673,7 @@ _get_dynforward_size(struct _dynforward_ptr arr,unsigned elt_sz) {
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _dyneither_ptr_plus(struct _dyneither_ptr arr,unsigned elt_sz,int change) {
   struct _dyneither_ptr _ans = (arr);
   _ans.curr += ((int)(elt_sz))*(change);
@@ -444,7 +681,7 @@ _dyneither_ptr_plus(struct _dyneither_ptr arr,unsigned elt_sz,int change) {
 }
 /* Here we have to worry about wrapping around, so if we go past the
  * end, we set the end to 0. */
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _dynforward_ptr_plus(struct _dynforward_ptr arr,unsigned elt_sz,int change) {
   struct _dynforward_ptr _ans = (arr);
   unsigned int _dfpp_elts = (((unsigned)_ans.last_plus_one) - 
@@ -472,14 +709,14 @@ _dynforward_ptr_plus(struct _dynforward_ptr arr,unsigned elt_sz,int change) {
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _dyneither_ptr_inplace_plus(struct _dyneither_ptr *arr_ptr,unsigned elt_sz,
                             int change) {
   struct _dyneither_ptr * _arr_ptr = (arr_ptr);
   _arr_ptr->curr += ((int)(elt_sz))*(change);
   return *_arr_ptr;
 }
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _dynforward_ptr_inplace_plus(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,
                              int change) {
   struct _dynforward_ptr * _arr_ptr = (arr_ptr);
@@ -508,14 +745,14 @@ _dynforward_ptr_inplace_plus(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _dyneither_ptr_inplace_plus_post(struct _dyneither_ptr *arr_ptr,unsigned elt_sz,int change) {
   struct _dyneither_ptr * _arr_ptr = (arr_ptr);
   struct _dyneither_ptr _ans = *_arr_ptr;
   _arr_ptr->curr += ((int)(elt_sz))*(change);
   return _ans;
 }
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _dynforward_ptr_inplace_plus_post(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,int change) {
   struct _dynforward_ptr * _arr_ptr = (arr_ptr);
   struct _dynforward_ptr _ans = *_arr_ptr;
@@ -545,9 +782,9 @@ _dynforward_ptr_inplace_plus_post(struct _dynforward_ptr *arr_ptr,unsigned elt_s
   _ans; })
 #endif
 
-// Decrease the upper bound on a fat pointer by numelts where sz is
-// the size of the pointer's type.  Note that this can't be a macro
-// if we're to get initializers right.
+/* Decrease the upper bound on a fat pointer by numelts where sz is
+   the size of the pointer's type.  Note that this can't be a macro
+   if we're to get initializers right. */
 static struct 
 _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
                                             unsigned int sz,
@@ -599,41 +836,40 @@ _dynforward_to_dyneither(struct _dynforward_ptr p) {
   _dfnres; })
 #endif 
 
-
-//// Allocation
+/* Allocation */
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
 extern void* GC_calloc(unsigned,unsigned);
 extern void* GC_calloc_atomic(unsigned,unsigned);
 
-static inline void* _cycalloc(int n) {
+static _INLINE void* _cycalloc(int n) {
   void * ans = (void *)GC_malloc(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void* _cycalloc_atomic(int n) {
+static _INLINE void* _cycalloc_atomic(int n) {
   void * ans = (void *)GC_malloc_atomic(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void* _cyccalloc(unsigned n, unsigned s) {
+static _INLINE void* _cyccalloc(unsigned n, unsigned s) {
   void* ans = (void*)GC_calloc(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void* _cyccalloc_atomic(unsigned n, unsigned s) {
+static _INLINE void* _cyccalloc_atomic(unsigned n, unsigned s) {
   void* ans = (void*)GC_calloc_atomic(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
 #define MAX_MALLOC_SIZE (1 << 28)
-static inline unsigned int _check_times(unsigned x, unsigned y) {
-  unsigned long long whole_ans = 
-    ((unsigned long long)x)*((unsigned long long)y);
+static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
+  _CYC_U_LONG_LONG_T whole_ans = 
+    ((_CYC_U_LONG_LONG_T)x)*((_CYC_U_LONG_LONG_T)y);
   unsigned word_ans = (unsigned)whole_ans;
   if(word_ans < whole_ans || word_ans > MAX_MALLOC_SIZE)
     _throw_badalloc();
@@ -660,19 +896,19 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 
 /* the next three routines swap [x] and [y]; not thread safe! */
-static inline void _swap_word(void *x, void *y) {
+static _INLINE void _swap_word(void *x, void *y) {
   unsigned long *lx = (unsigned long *)x, *ly = (unsigned long *)y, tmp;
   tmp = *lx;
   *lx = *ly;
   *ly = tmp;
 }
-static inline void _swap_dynforward(struct _dynforward_ptr *x, 
+static _INLINE void _swap_dynforward(struct _dynforward_ptr *x, 
 				    struct _dynforward_ptr *y) {
   struct _dynforward_ptr tmp = *x;
   *x = *y;
   *y = tmp;
 }
-static inline void _swap_dyneither(struct _dyneither_ptr *x, 
+static _INLINE void _swap_dyneither(struct _dyneither_ptr *x, 
 				   struct _dyneither_ptr *y) {
   struct _dyneither_ptr tmp = *x;
   *x = *y;
@@ -1062,12 +1298,12 @@ state=Cyc_lex_default[_check_known_subscript_notnull(15,state)];}if(state < 0){
 lbuf->lex_curr_pos=lbuf->lex_last_pos;if(lbuf->lex_last_action == - 1)(int)_throw((
 void*)({struct Cyc_Lexing_Error_struct*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({
 struct Cyc_Lexing_Error_struct _tmp1;_tmp1.tag=Cyc_Lexing_Error;_tmp1.f1=({const
-char*_tmp2="empty token";_tag_dynforward(_tmp2,sizeof(char),_get_zero_arr_size(
-_tmp2,12));});_tmp1;});_tmp0;}));else{return lbuf->lex_last_action;}}else{if(c == 
-256)lbuf->lex_eof_reached=0;}}}struct _tuple11*Cyc_token_rec(struct Cyc_Lexing_lexbuf*
-lexbuf,int lexstate){lexstate=Cyc_lex_engine(lexstate,lexbuf);switch(lexstate){
-case 0: _LL0: {int _tmp3=lexbuf->lex_start_pos + 5;int _tmp4=(lexbuf->lex_curr_pos - 
-lexbuf->lex_start_pos)- 7;return({struct _tuple11*_tmp5=_cycalloc(sizeof(*_tmp5));
+char*_tmp2="empty token";_tag_dynforward(_tmp2,sizeof(char),
+_get_zero_arr_size_char(_tmp2,12));});_tmp1;});_tmp0;}));else{return lbuf->lex_last_action;}}
+else{if(c == 256)lbuf->lex_eof_reached=0;}}}struct _tuple11*Cyc_token_rec(struct
+Cyc_Lexing_lexbuf*lexbuf,int lexstate){lexstate=Cyc_lex_engine(lexstate,lexbuf);
+switch(lexstate){case 0: _LL0: {int _tmp3=lexbuf->lex_start_pos + 5;int _tmp4=(lexbuf->lex_curr_pos
+- lexbuf->lex_start_pos)- 7;return({struct _tuple11*_tmp5=_cycalloc(sizeof(*_tmp5));
 _tmp5->f1=Cyc_Lexing_lexeme_start(lexbuf);_tmp5->f2=(void*)({struct Cyc_Standalone_struct*
 _tmp6=_cycalloc(sizeof(*_tmp6));_tmp6[0]=({struct Cyc_Standalone_struct _tmp7;
 _tmp7.tag=1;_tmp7.f1=Cyc_substring((struct _dynforward_ptr)lexbuf->lex_buffer,
@@ -1082,7 +1318,7 @@ default: _LL4:(lexbuf->refill_buff)(lexbuf);return Cyc_token_rec(lexbuf,lexstate
 int)_throw((void*)({struct Cyc_Lexing_Error_struct*_tmpD=_cycalloc(sizeof(*_tmpD));
 _tmpD[0]=({struct Cyc_Lexing_Error_struct _tmpE;_tmpE.tag=Cyc_Lexing_Error;_tmpE.f1=({
 const char*_tmpF="some action didn't return!";_tag_dynforward(_tmpF,sizeof(char),
-_get_zero_arr_size(_tmpF,27));});_tmpE;});_tmpD;}));}struct _tuple11*Cyc_token(
+_get_zero_arr_size_char(_tmpF,27));});_tmpE;});_tmpD;}));}struct _tuple11*Cyc_token(
 struct Cyc_Lexing_lexbuf*lexbuf){return Cyc_token_rec(lexbuf,0);}struct Cyc_Iter_Iter{
 void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(struct Cyc_Iter_Iter,
 void*);struct Cyc_Set_Set;extern char Cyc_Set_Absent[11];struct Cyc_Dict_T;struct Cyc_Dict_Dict{
@@ -1136,35 +1372,36 @@ static void Cyc_dumpdecl(struct Cyc_Absyn_Decl*d,struct _dynforward_ptr comment)
 struct Cyc_String_pa_struct _tmp17;_tmp17.tag=0;_tmp17.f1=(struct _dynforward_ptr)((
 struct _dynforward_ptr)Cyc_PP_string_of_doc(Cyc_Absynpp_decl2doc(d),50));{void*
 _tmp15[1]={& _tmp17};Cyc_printf(({const char*_tmp16="%s";_tag_dynforward(_tmp16,
-sizeof(char),_get_zero_arr_size(_tmp16,3));}),_tag_dynforward(_tmp15,sizeof(void*),
-1));}});Cyc_dump_middle();Cyc_pr_comment(Cyc_stdout,comment);({void*_tmp18[0]={};
-Cyc_printf(({const char*_tmp19="\n";_tag_dynforward(_tmp19,sizeof(char),
-_get_zero_arr_size(_tmp19,2));}),_tag_dynforward(_tmp18,sizeof(void*),0));});Cyc_dump_end();}
-static int Cyc_is_other_special(char c){switch(c){case '\\': _LL6: goto _LL7;case '"':
-_LL7: goto _LL8;case ';': _LL8: goto _LL9;case '&': _LL9: goto _LLA;case '(': _LLA: goto _LLB;
-case ')': _LLB: goto _LLC;case '|': _LLC: goto _LLD;case '^': _LLD: goto _LLE;case '<': _LLE:
-goto _LLF;case '>': _LLF: goto _LL10;case ' ': _LL10: goto _LL11;case '\n': _LL11: goto _LL12;
-case '\t': _LL12: return 1;default: _LL13: return 0;}}static struct _dynforward_ptr Cyc_sh_escape_string(
-struct _dynforward_ptr s){unsigned int _tmp1A=Cyc_strlen((struct _dynforward_ptr)s);
-int _tmp1B=0;int _tmp1C=0;{int i=0;for(0;i < _tmp1A;i ++){char _tmp1D=*((const char*)
-_check_dynforward_subscript(s,sizeof(char),i));if(_tmp1D == '\'')_tmp1B ++;else{
-if(Cyc_is_other_special(_tmp1D))_tmp1C ++;}}}if(_tmp1B == 0  && _tmp1C == 0)return s;
-if(_tmp1B == 0)return(struct _dynforward_ptr)Cyc_strconcat_l(({struct
-_dynforward_ptr*_tmp1E[3];_tmp1E[2]=_init_dynforward_ptr(_cycalloc(sizeof(struct
-_dynforward_ptr)),"'",sizeof(char),2);_tmp1E[1]=({struct _dynforward_ptr*_tmp20=
-_cycalloc(sizeof(*_tmp20));_tmp20[0]=(struct _dynforward_ptr)s;_tmp20;});_tmp1E[0]=
-_init_dynforward_ptr(_cycalloc(sizeof(struct _dynforward_ptr)),"'",sizeof(char),2);((
-struct Cyc_List_List*(*)(struct _dynforward_ptr))Cyc_List_list)(_tag_dynforward(
-_tmp1E,sizeof(struct _dynforward_ptr*),3));}));{unsigned int _tmp22=(_tmp1A + 
-_tmp1B)+ _tmp1C;struct _dynforward_ptr s2=({unsigned int _tmp2C=_tmp22 + 1;char*
-_tmp2D=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp2C + 1));struct
-_dynforward_ptr _tmp2F=_tag_dynforward(_tmp2D,sizeof(char),_tmp2C + 1);{
-unsigned int _tmp2E=_tmp2C;unsigned int i;for(i=0;i < _tmp2E;i ++){_tmp2D[i]='\000';}
-_tmp2D[_tmp2E]=(char)0;}_tmp2F;});int _tmp23=0;int _tmp24=0;for(0;_tmp23 < _tmp1A;
-_tmp23 ++){char _tmp25=*((const char*)_check_dynforward_subscript(s,sizeof(char),
-_tmp23));if(_tmp25 == '\''  || Cyc_is_other_special(_tmp25))({struct
-_dynforward_ptr _tmp26=_dynforward_ptr_plus(s2,sizeof(char),_tmp24 ++);char _tmp27=*((
-char*)_check_dynforward_subscript(_tmp26,sizeof(char),0));char _tmp28='\\';if(
+sizeof(char),_get_zero_arr_size_char(_tmp16,3));}),_tag_dynforward(_tmp15,
+sizeof(void*),1));}});Cyc_dump_middle();Cyc_pr_comment(Cyc_stdout,comment);({
+void*_tmp18=0;Cyc_printf(({const char*_tmp19="\n";_tag_dynforward(_tmp19,sizeof(
+char),_get_zero_arr_size_char(_tmp19,2));}),_tag_dynforward(_tmp18,sizeof(void*),
+0));});Cyc_dump_end();}static int Cyc_is_other_special(char c){switch(c){case '\\':
+_LL6: goto _LL7;case '"': _LL7: goto _LL8;case ';': _LL8: goto _LL9;case '&': _LL9: goto _LLA;
+case '(': _LLA: goto _LLB;case ')': _LLB: goto _LLC;case '|': _LLC: goto _LLD;case '^': _LLD:
+goto _LLE;case '<': _LLE: goto _LLF;case '>': _LLF: goto _LL10;case ' ': _LL10: goto _LL11;
+case '\n': _LL11: goto _LL12;case '\t': _LL12: return 1;default: _LL13: return 0;}}static
+struct _dynforward_ptr Cyc_sh_escape_string(struct _dynforward_ptr s){unsigned int
+_tmp1A=Cyc_strlen((struct _dynforward_ptr)s);int _tmp1B=0;int _tmp1C=0;{int i=0;for(
+0;i < _tmp1A;i ++){char _tmp1D=*((const char*)_check_dynforward_subscript(s,sizeof(
+char),i));if(_tmp1D == '\'')_tmp1B ++;else{if(Cyc_is_other_special(_tmp1D))_tmp1C
+++;}}}if(_tmp1B == 0  && _tmp1C == 0)return s;if(_tmp1B == 0)return(struct
+_dynforward_ptr)Cyc_strconcat_l(({struct _dynforward_ptr*_tmp1E[3];_tmp1E[2]=
+_init_dynforward_ptr(_cycalloc(sizeof(struct _dynforward_ptr)),"'",sizeof(char),2);
+_tmp1E[1]=({struct _dynforward_ptr*_tmp20=_cycalloc(sizeof(*_tmp20));_tmp20[0]=(
+struct _dynforward_ptr)s;_tmp20;});_tmp1E[0]=_init_dynforward_ptr(_cycalloc(
+sizeof(struct _dynforward_ptr)),"'",sizeof(char),2);((struct Cyc_List_List*(*)(
+struct _dynforward_ptr))Cyc_List_list)(_tag_dynforward(_tmp1E,sizeof(struct
+_dynforward_ptr*),3));}));{unsigned int _tmp22=(_tmp1A + _tmp1B)+ _tmp1C;struct
+_dynforward_ptr s2=({unsigned int _tmp2C=_tmp22 + 1;char*_tmp2D=(char*)
+_cycalloc_atomic(_check_times(sizeof(char),_tmp2C + 1));struct _dynforward_ptr
+_tmp2F=_tag_dynforward(_tmp2D,sizeof(char),_tmp2C + 1);{unsigned int _tmp2E=_tmp2C;
+unsigned int i;for(i=0;i < _tmp2E;i ++){_tmp2D[i]='\000';}_tmp2D[_tmp2E]=(char)0;}
+_tmp2F;});int _tmp23=0;int _tmp24=0;for(0;_tmp23 < _tmp1A;_tmp23 ++){char _tmp25=*((
+const char*)_check_dynforward_subscript(s,sizeof(char),_tmp23));if(_tmp25 == '\''
+ || Cyc_is_other_special(_tmp25))({struct _dynforward_ptr _tmp26=
+_dynforward_ptr_plus(s2,sizeof(char),_tmp24 ++);char _tmp27=*((char*)
+_check_dynforward_subscript(_tmp26,sizeof(char),0));char _tmp28='\\';if(
 _get_dynforward_size(_tmp26,sizeof(char))== 1  && (_tmp27 == '\000'  && _tmp28 != '\000'))
 _throw_arraybounds();*((char*)_tmp26.curr)=_tmp28;});({struct _dynforward_ptr
 _tmp29=_dynforward_ptr_plus(s2,sizeof(char),_tmp24 ++);char _tmp2A=*((char*)
@@ -1176,7 +1413,7 @@ _dynforward_ptr*sp){return({struct _dynforward_ptr*_tmp30=_cycalloc(sizeof(*
 _tmp30));_tmp30[0]=Cyc_sh_escape_string(*sp);_tmp30;});}static struct Cyc_Lineno_Pos*
 Cyc_new_pos(){return({struct Cyc_Lineno_Pos*_tmp31=_cycalloc(sizeof(*_tmp31));
 _tmp31->logical_file=({const char*_tmp32="";_tag_dynforward(_tmp32,sizeof(char),
-_get_zero_arr_size(_tmp32,1));});_tmp31->line=Cyc_Core_new_string(0);_tmp31->line_no=
+_get_zero_arr_size_char(_tmp32,1));});_tmp31->line=Cyc_Core_new_string(0);_tmp31->line_no=
 0;_tmp31->col=0;_tmp31;});}struct _tuple12{int f1;struct Cyc_Lineno_Pos*f2;};static
 struct _tuple12*Cyc_start2pos(int x){return({struct _tuple12*_tmp33=_cycalloc(
 sizeof(*_tmp33));_tmp33->f1=x;_tmp33->f2=Cyc_new_pos();_tmp33;});}static int Cyc_decl2start(
@@ -1214,47 +1451,48 @@ struct _tuple15{struct Cyc_Lineno_Pos*f1;struct Cyc_Absyn_Decl*f2;};static void 
 struct _dynforward_ptr filename){struct _dynforward_ptr _tmp3D=Cyc_Filename_chop_extension(
 filename);const char*_tmp3E=(const char*)_untag_dynforward_ptr(Cyc_strconcat((
 struct _dynforward_ptr)_tmp3D,({const char*_tmp6B=".cyp";_tag_dynforward(_tmp6B,
-sizeof(char),_get_zero_arr_size(_tmp6B,5));})),sizeof(char),1);struct
+sizeof(char),_get_zero_arr_size_char(_tmp6B,5));})),sizeof(char),1);struct
 _dynforward_ptr _tmp3F=Cyc_str_sepstr(({struct Cyc_List_List*_tmp67=_cycalloc(
 sizeof(*_tmp67));_tmp67->hd=({struct _dynforward_ptr*_tmp68=_cycalloc(sizeof(*
 _tmp68));_tmp68[0]=(struct _dynforward_ptr)({const char*_tmp69="";_tag_dynforward(
-_tmp69,sizeof(char),_get_zero_arr_size(_tmp69,1));});_tmp68;});_tmp67->tl=((
+_tmp69,sizeof(char),_get_zero_arr_size_char(_tmp69,1));});_tmp68;});_tmp67->tl=((
 struct Cyc_List_List*(*)(struct _dynforward_ptr*(*f)(struct _dynforward_ptr*),
 struct Cyc_List_List*x))Cyc_List_map)(Cyc_sh_escape_stringptr,((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_rev)(Cyc_cycargs));_tmp67;}),({const char*_tmp6A=" ";
-_tag_dynforward(_tmp6A,sizeof(char),_get_zero_arr_size(_tmp6A,2));}));const char*
-_tmp40=(const char*)_untag_dynforward_ptr(({struct Cyc_String_pa_struct _tmp65;
+_tag_dynforward(_tmp6A,sizeof(char),_get_zero_arr_size_char(_tmp6A,2));}));const
+char*_tmp40=(const char*)_untag_dynforward_ptr(({struct Cyc_String_pa_struct _tmp65;
 _tmp65.tag=0;_tmp65.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_sh_escape_string(
 filename));{struct Cyc_String_pa_struct _tmp64;_tmp64.tag=0;_tmp64.f1=(struct
 _dynforward_ptr)((struct _dynforward_ptr)Cyc_sh_escape_string(({const char*_tmp66=
-_tmp3E;_tag_dynforward(_tmp66,sizeof(char),_get_zero_arr_size(_tmp66,1));})));{
+_tmp3E;_tag_dynforward(_tmp66,sizeof(char),_get_zero_arr_size_char(_tmp66,1));})));{
 struct Cyc_String_pa_struct _tmp63;_tmp63.tag=0;_tmp63.f1=(struct _dynforward_ptr)((
 struct _dynforward_ptr)_tmp3F);{struct Cyc_String_pa_struct _tmp62;_tmp62.tag=0;
 _tmp62.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)Cyc_cyclone_file);{void*
 _tmp60[4]={& _tmp62,& _tmp63,& _tmp64,& _tmp65};Cyc_aprintf(({const char*_tmp61="%s %s -E -o %s -x cyc %s";
-_tag_dynforward(_tmp61,sizeof(char),_get_zero_arr_size(_tmp61,25));}),
+_tag_dynforward(_tmp61,sizeof(char),_get_zero_arr_size_char(_tmp61,25));}),
 _tag_dynforward(_tmp60,sizeof(void*),4));}}}}}),sizeof(char),1);if(system(_tmp40)
-!= 0){({void*_tmp41[0]={};Cyc_fprintf(Cyc_stderr,({const char*_tmp42="\nError: preprocessing\n";
-_tag_dynforward(_tmp42,sizeof(char),_get_zero_arr_size(_tmp42,23));}),
+!= 0){({void*_tmp41=0;Cyc_fprintf(Cyc_stderr,({const char*_tmp42="\nError: preprocessing\n";
+_tag_dynforward(_tmp42,sizeof(char),_get_zero_arr_size_char(_tmp42,23));}),
 _tag_dynforward(_tmp41,sizeof(void*),0));});return;}Cyc_Position_reset_position(({
-const char*_tmp43=_tmp3E;_tag_dynforward(_tmp43,sizeof(char),_get_zero_arr_size(
-_tmp43,1));}));{struct Cyc___cycFILE*in_file=(struct Cyc___cycFILE*)_check_null(
-Cyc_fopen(_tmp3E,(const char*)"r"));Cyc_Lex_lex_init(1);{struct Cyc_List_List*
+const char*_tmp43=_tmp3E;_tag_dynforward(_tmp43,sizeof(char),
+_get_zero_arr_size_char(_tmp43,1));}));{struct Cyc___cycFILE*in_file=(struct Cyc___cycFILE*)
+_check_null(Cyc_fopen(_tmp3E,(const char*)"r"));Cyc_Lex_lex_init(1);{struct Cyc_List_List*
 _tmp44=Cyc_Parse_parse_file(in_file);Cyc_Lex_lex_init(1);Cyc_file_close((struct
 Cyc___cycFILE*)in_file);_tmp44=Cyc_flatten_decls(_tmp44);{struct Cyc_List_List*
 _tmp45=((struct Cyc_List_List*(*)(struct _tuple12*(*f)(int),struct Cyc_List_List*x))
 Cyc_List_map)(Cyc_start2pos,((struct Cyc_List_List*(*)(int(*f)(struct Cyc_Absyn_Decl*),
 struct Cyc_List_List*x))Cyc_List_map)(Cyc_decl2start,_tmp44));Cyc_Lineno_poss_of_abss(({
-const char*_tmp46=_tmp3E;_tag_dynforward(_tmp46,sizeof(char),_get_zero_arr_size(
-_tmp46,1));}),_tmp45);remove(_tmp3E);{struct Cyc_List_List*_tmp47=((struct Cyc_List_List*(*)(
-struct Cyc_List_List*x,struct Cyc_List_List*y))Cyc_List_zip)(((struct Cyc_List_List*(*)(
-struct Cyc_Lineno_Pos*(*f)(struct _tuple12*),struct Cyc_List_List*x))Cyc_List_map)((
-struct Cyc_Lineno_Pos*(*)(struct _tuple12*))Cyc_Core_snd,_tmp45),_tmp44);_tmp47=((
-struct Cyc_List_List*(*)(struct _dynforward_ptr file,struct Cyc_List_List*x))Cyc_this_file)(
-filename,_tmp47);{struct Cyc_List_List*_tmp48=((struct Cyc_List_List*(*)(struct Cyc_List_List*
-x,struct Cyc_List_List*y))Cyc_List_zip)(((struct Cyc_List_List*(*)(int(*f)(struct
-Cyc_Lineno_Pos*),struct Cyc_List_List*x))Cyc_List_map)(Cyc_lineno,((struct Cyc_List_List*(*)(
-struct Cyc_Lineno_Pos*(*f)(struct _tuple15*),struct Cyc_List_List*x))Cyc_List_map)((
+const char*_tmp46=_tmp3E;_tag_dynforward(_tmp46,sizeof(char),
+_get_zero_arr_size_char(_tmp46,1));}),_tmp45);remove(_tmp3E);{struct Cyc_List_List*
+_tmp47=((struct Cyc_List_List*(*)(struct Cyc_List_List*x,struct Cyc_List_List*y))
+Cyc_List_zip)(((struct Cyc_List_List*(*)(struct Cyc_Lineno_Pos*(*f)(struct _tuple12*),
+struct Cyc_List_List*x))Cyc_List_map)((struct Cyc_Lineno_Pos*(*)(struct _tuple12*))
+Cyc_Core_snd,_tmp45),_tmp44);_tmp47=((struct Cyc_List_List*(*)(struct
+_dynforward_ptr file,struct Cyc_List_List*x))Cyc_this_file)(filename,_tmp47);{
+struct Cyc_List_List*_tmp48=((struct Cyc_List_List*(*)(struct Cyc_List_List*x,
+struct Cyc_List_List*y))Cyc_List_zip)(((struct Cyc_List_List*(*)(int(*f)(struct Cyc_Lineno_Pos*),
+struct Cyc_List_List*x))Cyc_List_map)(Cyc_lineno,((struct Cyc_List_List*(*)(struct
+Cyc_Lineno_Pos*(*f)(struct _tuple15*),struct Cyc_List_List*x))Cyc_List_map)((
 struct Cyc_Lineno_Pos*(*)(struct _tuple15*))Cyc_Core_fst,_tmp47)),((struct Cyc_List_List*(*)(
 struct Cyc_Absyn_Decl*(*f)(struct _tuple15*),struct Cyc_List_List*x))Cyc_List_map)((
 struct Cyc_Absyn_Decl*(*)(struct _tuple15*))Cyc_Core_snd,_tmp47));struct Cyc___cycFILE*
@@ -1288,8 +1526,8 @@ void*_tmp57;struct _tuple11*_tmp54=(struct _tuple11*)_tmp4F->hd;_tmp55=*_tmp54;
 _tmp56=_tmp55.f1;_tmp57=_tmp55.f2;{void*_tmp58=_tmp57;struct _dynforward_ptr
 _tmp59;struct _dynforward_ptr _tmp5A;_LL33: if(*((int*)_tmp58)!= 1)goto _LL35;_tmp59=((
 struct Cyc_Standalone_struct*)_tmp58)->f1;_LL34: Cyc_pr_comment(Cyc_stdout,(struct
-_dynforward_ptr)_tmp59);({void*_tmp5B[0]={};Cyc_printf(({const char*_tmp5C="\n";
-_tag_dynforward(_tmp5C,sizeof(char),_get_zero_arr_size(_tmp5C,2));}),
+_dynforward_ptr)_tmp59);({void*_tmp5B=0;Cyc_printf(({const char*_tmp5C="\n";
+_tag_dynforward(_tmp5C,sizeof(char),_get_zero_arr_size_char(_tmp5C,2));}),
 _tag_dynforward(_tmp5B,sizeof(void*),0));});_tmp4F=_tmp4F->tl;goto _LL32;_LL35:
 if(*((int*)_tmp58)!= 0)goto _LL32;_tmp5A=((struct Cyc_MatchDecl_struct*)_tmp58)->f1;
 _LL36: if(_tmp56 < _tmp52){_tmp4F=_tmp4F->tl;continue;}if(_tmp48->tl != 0){struct
@@ -1302,52 +1540,52 @@ _dynforward_ptr f1;int f2;struct _dynforward_ptr f3;void*f4;struct _dynforward_p
 };int Cyc_main(int argc,struct _dynforward_ptr argv){GC_blacklist_warn_clear();{
 struct Cyc_List_List*options=({struct _tuple16*_tmp6F[5];_tmp6F[4]=({struct
 _tuple16*_tmp88=_cycalloc(sizeof(*_tmp88));_tmp88->f1=({const char*_tmp8D="-B";
-_tag_dynforward(_tmp8D,sizeof(char),_get_zero_arr_size(_tmp8D,3));});_tmp88->f2=
+_tag_dynforward(_tmp8D,sizeof(char),_get_zero_arr_size_char(_tmp8D,3));});_tmp88->f2=
 1;_tmp88->f3=({const char*_tmp8C="<file>";_tag_dynforward(_tmp8C,sizeof(char),
-_get_zero_arr_size(_tmp8C,7));});_tmp88->f4=(void*)({struct Cyc_Arg_Flag_spec_struct*
+_get_zero_arr_size_char(_tmp8C,7));});_tmp88->f4=(void*)({struct Cyc_Arg_Flag_spec_struct*
 _tmp8A=_cycalloc(sizeof(*_tmp8A));_tmp8A[0]=({struct Cyc_Arg_Flag_spec_struct
 _tmp8B;_tmp8B.tag=1;_tmp8B.f1=Cyc_add_cycarg;_tmp8B;});_tmp8A;});_tmp88->f5=({
 const char*_tmp89="Add to the list of directories to search for compiler files";
-_tag_dynforward(_tmp89,sizeof(char),_get_zero_arr_size(_tmp89,60));});_tmp88;});
-_tmp6F[3]=({struct _tuple16*_tmp82=_cycalloc(sizeof(*_tmp82));_tmp82->f1=({const
-char*_tmp87="-I";_tag_dynforward(_tmp87,sizeof(char),_get_zero_arr_size(_tmp87,3));});
-_tmp82->f2=1;_tmp82->f3=({const char*_tmp86="<dir>";_tag_dynforward(_tmp86,
-sizeof(char),_get_zero_arr_size(_tmp86,6));});_tmp82->f4=(void*)({struct Cyc_Arg_Flag_spec_struct*
-_tmp84=_cycalloc(sizeof(*_tmp84));_tmp84[0]=({struct Cyc_Arg_Flag_spec_struct
-_tmp85;_tmp85.tag=1;_tmp85.f1=Cyc_add_cycarg;_tmp85;});_tmp84;});_tmp82->f5=({
-const char*_tmp83="Add to the list of directories to search for include files";
-_tag_dynforward(_tmp83,sizeof(char),_get_zero_arr_size(_tmp83,59));});_tmp82;});
-_tmp6F[2]=({struct _tuple16*_tmp7C=_cycalloc(sizeof(*_tmp7C));_tmp7C->f1=({const
-char*_tmp81="-D";_tag_dynforward(_tmp81,sizeof(char),_get_zero_arr_size(_tmp81,3));});
-_tmp7C->f2=1;_tmp7C->f3=({const char*_tmp80="<name>[=<value>]";_tag_dynforward(
-_tmp80,sizeof(char),_get_zero_arr_size(_tmp80,17));});_tmp7C->f4=(void*)({struct
-Cyc_Arg_Flag_spec_struct*_tmp7E=_cycalloc(sizeof(*_tmp7E));_tmp7E[0]=({struct Cyc_Arg_Flag_spec_struct
-_tmp7F;_tmp7F.tag=1;_tmp7F.f1=Cyc_add_cycarg;_tmp7F;});_tmp7E;});_tmp7C->f5=({
-const char*_tmp7D="Pass definition to preprocessor";_tag_dynforward(_tmp7D,
-sizeof(char),_get_zero_arr_size(_tmp7D,32));});_tmp7C;});_tmp6F[1]=({struct
-_tuple16*_tmp76=_cycalloc(sizeof(*_tmp76));_tmp76->f1=({const char*_tmp7B="-w";
-_tag_dynforward(_tmp7B,sizeof(char),_get_zero_arr_size(_tmp7B,3));});_tmp76->f2=
-0;_tmp76->f3=({const char*_tmp7A=" <width>";_tag_dynforward(_tmp7A,sizeof(char),
-_get_zero_arr_size(_tmp7A,9));});_tmp76->f4=(void*)({struct Cyc_Arg_Int_spec_struct*
-_tmp78=_cycalloc(sizeof(*_tmp78));_tmp78[0]=({struct Cyc_Arg_Int_spec_struct
-_tmp79;_tmp79.tag=6;_tmp79.f1=Cyc_set_width;_tmp79;});_tmp78;});_tmp76->f5=({
-const char*_tmp77="Use <width> as the max width for printing declarations";
-_tag_dynforward(_tmp77,sizeof(char),_get_zero_arr_size(_tmp77,55));});_tmp76;});
-_tmp6F[0]=({struct _tuple16*_tmp70=_cycalloc(sizeof(*_tmp70));_tmp70->f1=({const
-char*_tmp75="-cyclone";_tag_dynforward(_tmp75,sizeof(char),_get_zero_arr_size(
-_tmp75,9));});_tmp70->f2=0;_tmp70->f3=({const char*_tmp74=" <file>";
-_tag_dynforward(_tmp74,sizeof(char),_get_zero_arr_size(_tmp74,8));});_tmp70->f4=(
+_tag_dynforward(_tmp89,sizeof(char),_get_zero_arr_size_char(_tmp89,60));});
+_tmp88;});_tmp6F[3]=({struct _tuple16*_tmp82=_cycalloc(sizeof(*_tmp82));_tmp82->f1=({
+const char*_tmp87="-I";_tag_dynforward(_tmp87,sizeof(char),
+_get_zero_arr_size_char(_tmp87,3));});_tmp82->f2=1;_tmp82->f3=({const char*_tmp86="<dir>";
+_tag_dynforward(_tmp86,sizeof(char),_get_zero_arr_size_char(_tmp86,6));});_tmp82->f4=(
+void*)({struct Cyc_Arg_Flag_spec_struct*_tmp84=_cycalloc(sizeof(*_tmp84));_tmp84[
+0]=({struct Cyc_Arg_Flag_spec_struct _tmp85;_tmp85.tag=1;_tmp85.f1=Cyc_add_cycarg;
+_tmp85;});_tmp84;});_tmp82->f5=({const char*_tmp83="Add to the list of directories to search for include files";
+_tag_dynforward(_tmp83,sizeof(char),_get_zero_arr_size_char(_tmp83,59));});
+_tmp82;});_tmp6F[2]=({struct _tuple16*_tmp7C=_cycalloc(sizeof(*_tmp7C));_tmp7C->f1=({
+const char*_tmp81="-D";_tag_dynforward(_tmp81,sizeof(char),
+_get_zero_arr_size_char(_tmp81,3));});_tmp7C->f2=1;_tmp7C->f3=({const char*_tmp80="<name>[=<value>]";
+_tag_dynforward(_tmp80,sizeof(char),_get_zero_arr_size_char(_tmp80,17));});
+_tmp7C->f4=(void*)({struct Cyc_Arg_Flag_spec_struct*_tmp7E=_cycalloc(sizeof(*
+_tmp7E));_tmp7E[0]=({struct Cyc_Arg_Flag_spec_struct _tmp7F;_tmp7F.tag=1;_tmp7F.f1=
+Cyc_add_cycarg;_tmp7F;});_tmp7E;});_tmp7C->f5=({const char*_tmp7D="Pass definition to preprocessor";
+_tag_dynforward(_tmp7D,sizeof(char),_get_zero_arr_size_char(_tmp7D,32));});
+_tmp7C;});_tmp6F[1]=({struct _tuple16*_tmp76=_cycalloc(sizeof(*_tmp76));_tmp76->f1=({
+const char*_tmp7B="-w";_tag_dynforward(_tmp7B,sizeof(char),
+_get_zero_arr_size_char(_tmp7B,3));});_tmp76->f2=0;_tmp76->f3=({const char*_tmp7A=" <width>";
+_tag_dynforward(_tmp7A,sizeof(char),_get_zero_arr_size_char(_tmp7A,9));});_tmp76->f4=(
+void*)({struct Cyc_Arg_Int_spec_struct*_tmp78=_cycalloc(sizeof(*_tmp78));_tmp78[0]=({
+struct Cyc_Arg_Int_spec_struct _tmp79;_tmp79.tag=6;_tmp79.f1=Cyc_set_width;_tmp79;});
+_tmp78;});_tmp76->f5=({const char*_tmp77="Use <width> as the max width for printing declarations";
+_tag_dynforward(_tmp77,sizeof(char),_get_zero_arr_size_char(_tmp77,55));});
+_tmp76;});_tmp6F[0]=({struct _tuple16*_tmp70=_cycalloc(sizeof(*_tmp70));_tmp70->f1=({
+const char*_tmp75="-cyclone";_tag_dynforward(_tmp75,sizeof(char),
+_get_zero_arr_size_char(_tmp75,9));});_tmp70->f2=0;_tmp70->f3=({const char*_tmp74=" <file>";
+_tag_dynforward(_tmp74,sizeof(char),_get_zero_arr_size_char(_tmp74,8));});_tmp70->f4=(
 void*)({struct Cyc_Arg_String_spec_struct*_tmp72=_cycalloc(sizeof(*_tmp72));
 _tmp72[0]=({struct Cyc_Arg_String_spec_struct _tmp73;_tmp73.tag=5;_tmp73.f1=Cyc_set_cyclone_file;
 _tmp73;});_tmp72;});_tmp70->f5=({const char*_tmp71="Use <file> as the cyclone compiler";
-_tag_dynforward(_tmp71,sizeof(char),_get_zero_arr_size(_tmp71,35));});_tmp70;});((
-struct Cyc_List_List*(*)(struct _dynforward_ptr))Cyc_List_list)(_tag_dynforward(
-_tmp6F,sizeof(struct _tuple16*),5));});Cyc_Arg_parse(options,Cyc_add_other,({
+_tag_dynforward(_tmp71,sizeof(char),_get_zero_arr_size_char(_tmp71,35));});
+_tmp70;});((struct Cyc_List_List*(*)(struct _dynforward_ptr))Cyc_List_list)(
+_tag_dynforward(_tmp6F,sizeof(struct _tuple16*),5));});Cyc_Arg_parse(options,Cyc_add_other,({
 const char*_tmp6C="Options:";_tag_dynforward(_tmp6C,sizeof(char),
-_get_zero_arr_size(_tmp6C,9));}),argv);if(Cyc_cycdoc_files == 0){Cyc_Arg_usage(
+_get_zero_arr_size_char(_tmp6C,9));}),argv);if(Cyc_cycdoc_files == 0){Cyc_Arg_usage(
 options,({const char*_tmp6D="Usage: cycdoc [options] file1 file2 ...\nOptions:";
-_tag_dynforward(_tmp6D,sizeof(char),_get_zero_arr_size(_tmp6D,49));}));exit(1);}
-Cyc_PP_tex_output=1;Cyc_Absynpp_print_scopes=0;{struct Cyc_List_List*_tmp6E=((
+_tag_dynforward(_tmp6D,sizeof(char),_get_zero_arr_size_char(_tmp6D,49));}));exit(
+1);}Cyc_PP_tex_output=1;Cyc_Absynpp_print_scopes=0;{struct Cyc_List_List*_tmp6E=((
 struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_rev)(Cyc_cycdoc_files);
 for(0;_tmp6E != 0;_tmp6E=_tmp6E->tl){Cyc_process_file(*((struct _dynforward_ptr*)
 _tmp6E->hd));}}return 0;}}

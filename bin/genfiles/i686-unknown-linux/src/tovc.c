@@ -48,7 +48,7 @@ struct _RegionPage {
   unsigned free_bytes;
 #endif
   struct _RegionPage *next;
-  char data[0];
+  char data[1];  /*FJS: used to be size 0, but that's forbidden in ansi c*/
 };
 
 struct _RegionHandle {
@@ -107,11 +107,32 @@ extern struct _xtunion_struct ADD_PREFIX(Bad_alloc_struct);
 extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 /* Built-in Run-time Checks and company */
+#ifdef __APPLE__
+#define _INLINE_FUNCTIONS
+#endif
+
+#ifdef CYC_ANSI_OUTPUT
+#define _INLINE  
+#define _INLINE_FUNCTIONS
+#else
+#define _INLINE inline
+#endif
+
+#ifdef VC_C
+#define _CYC_U_LONG_LONG_T __int64
+#else
+#ifdef GCC_C
+#define _CYC_U_LONG_LONG_T unsigned long long
+#else
+#define _CYC_U_LONG_LONG_T unsigned long long
+#endif
+#endif
+
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_null(ptr) (ptr)
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline void *
+static _INLINE void *
 _check_null(void *ptr) {
   void*_check_null_temp = (void*)(ptr);
   if (!_check_null_temp) _throw_null();
@@ -130,7 +151,7 @@ _check_null(void *ptr) {
   ((char *)ptr) + (elt_sz)*(index); })
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline char *
+static _INLINE char *
 _check_known_subscript_null(void *ptr, unsigned bound, unsigned elt_sz, unsigned index) {
   void*_cks_ptr = (void*)(ptr);
   unsigned _cks_bound = (bound);
@@ -156,7 +177,7 @@ _check_known_subscript_null(void *ptr, unsigned bound, unsigned elt_sz, unsigned
 #define _check_known_subscript_notnull(bound,index) (index)
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned
+static _INLINE unsigned
 _check_known_subscript_notnull(unsigned bound,unsigned index) { 
   unsigned _cksnn_bound = (bound); 
   unsigned _cksnn_index = (index); 
@@ -175,56 +196,272 @@ _check_known_subscript_notnull(unsigned bound,unsigned index) {
 /* Add i to zero-terminated pointer x.  Checks for x being null and
    ensures that x[0..i-1] are not 0. */
 #ifdef NO_CYC_BOUNDS_CHECK
-#define _zero_arr_plus(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_char(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_short(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_int(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_float(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_double(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_longdouble(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#define _zero_arr_plus_voidstar(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
 #else
-#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
-  typedef _czs_tx = (*orig_x); \
-  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
-  unsigned int _czs_sz = (orig_sz); \
-  int _czs_i = (orig_i); \
-  unsigned int _czs_temp; \
-  if ((_czs_x) == 0) _throw_null(); \
-  if (_czs_i < 0) _throw_arraybounds(); \
-  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
-    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
-  _czs_x+_czs_i; })
+static _INLINE char *
+_zero_arr_plus_char(char *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE short *
+_zero_arr_plus_short(short *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE int *
+_zero_arr_plus_int(int *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE float *
+_zero_arr_plus_float(float *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE double *
+_zero_arr_plus_double(double *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE long double *
+_zero_arr_plus_longdouble(long double *orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
+static _INLINE void *
+_zero_arr_plus_voidstar(void **orig_x, int orig_sz, int orig_i) {
+  unsigned int _czs_temp;
+  if ((orig_x) == 0) _throw_null();
+  if (orig_i < 0) _throw_arraybounds();
+  for (_czs_temp=orig_sz; _czs_temp < orig_i; _czs_temp++)
+    if (orig_x[_czs_temp] == 0) _throw_arraybounds();
+  return orig_x + orig_i;
+}
 #endif
+
 
 /* Calculates the number of elements in a zero-terminated, thin array.
    If non-null, the array is guaranteed to have orig_offset elements. */
-#define _get_zero_arr_size(orig_x,orig_offset) ({ \
-  typedef _gres_tx = (*orig_x); \
-  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
-  unsigned int _gres_offset = (orig_offset); \
-  unsigned int _gres = 0; \
-  if (_gres_x != 0) { \
-     _gres = _gres_offset; \
-     _gres_x += _gres_offset - 1; \
-     while (*_gres_x != 0) { _gres_x++; _gres++; } \
-  } _gres; })
+static _INLINE int
+_get_zero_arr_size_char(const char *orig_x, unsigned int orig_offset) {
+  const char *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_short(const short *orig_x, unsigned int orig_offset) {
+  const short *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_int(const int *orig_x, unsigned int orig_offset) {
+  const int *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_float(const float *orig_x, unsigned int orig_offset) {
+  const float *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_double(const double *orig_x, unsigned int orig_offset) {
+  const double *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_longdouble(const long double *orig_x, unsigned int orig_offset) {
+  const long double *_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+static _INLINE int
+_get_zero_arr_size_voidstar(const void **orig_x, unsigned int orig_offset) {
+  const void **_gres_x = orig_x;
+  unsigned int _gres = 0;
+  if (_gres_x != 0) {
+     _gres = orig_offset;
+     _gres_x += orig_offset - 1;
+     while (*_gres_x != 0) { _gres_x++; _gres++; }
+  }
+  return _gres; 
+}
+
 
 /* Does in-place addition of a zero-terminated pointer (x += e and ++x).  
    Note that this expands to call _zero_arr_plus. */
-#define _zero_arr_inplace_plus(x,orig_i) ({ \
+/*#define _zero_arr_inplace_plus(x,orig_i) ({ \
   typedef _zap_tx = (*x); \
   _zap_tx **_zap_x = &((_zap_tx*)x); \
   *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+  */
+static _INLINE void 
+_zero_arr_inplace_plus_char(char *x, int orig_i) {
+  char **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_char(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_short(short *x, int orig_i) {
+  short **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_short(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_int(int *x, int orig_i) {
+  int **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_int(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_float(float *x, int orig_i) {
+  float **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_float(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_double(double *x, int orig_i) {
+  double **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_double(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_longdouble(long double *x, int orig_i) {
+  long double **_zap_x = &x;
+  *_zap_x = _zero_arr_plus_longdouble(*_zap_x,1,orig_i);
+}
+static _INLINE void 
+_zero_arr_inplace_plus_voidstar(void **x, int orig_i) {
+  void ***_zap_x = &x;
+  *_zap_x = _zero_arr_plus_voidstar(*_zap_x,1,orig_i);
+}
+
+
+
 
 /* Does in-place increment of a zero-terminated pointer (e.g., x++).
    Note that this expands to call _zero_arr_plus. */
-#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+/*#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
   typedef _zap_tx = (*x); \
   _zap_tx **_zap_x = &((_zap_tx*)x); \
   _zap_tx *_zap_res = *_zap_x; \
   *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
-  _zap_res; })
+  _zap_res; })*/
   
+static _INLINE char *
+_zero_arr_inplace_plus_post_char(char *x, int orig_i){
+  char ** _zap_x = &x;
+  char * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_char(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE short *
+_zero_arr_inplace_plus_post_short(short *x, int orig_i){
+  short **_zap_x = &x;
+  short * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_short(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE int *
+_zero_arr_inplace_plus_post_int(int *x, int orig_i){
+  int **_zap_x = &x;
+  int * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_int(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE float *
+_zero_arr_inplace_plus_post_float(float *x, int orig_i){
+  float **_zap_x = &x;
+  float * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_float(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE double *
+_zero_arr_inplace_plus_post_double(double *x, int orig_i){
+  double **_zap_x = &x;
+  double * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_double(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE long double *
+_zero_arr_inplace_plus_post_longdouble(long double *x, int orig_i){
+  long double **_zap_x = &x;
+  long double * _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_longdouble(_zap_res,1,orig_i);
+  return _zap_res;
+}
+static _INLINE void **
+_zero_arr_inplace_plus_post_voidstar(void **x, int orig_i){
+  void ***_zap_x = &x;
+  void ** _zap_res = *_zap_x;
+  *_zap_x = _zero_arr_plus_voidstar(_zap_res,1,orig_i);
+  return _zap_res;
+}
+
 
 
 /* functions for dealing with dynamically sized pointers */
 #ifdef NO_CYC_BOUNDS_CHECKS
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dyneither_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -232,7 +469,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
   unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index;
   return _cus_ans;
 }
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -256,7 +493,7 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
 #endif
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dyneither_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -267,7 +504,7 @@ _check_dyneither_subscript(struct _dyneither_ptr arr,unsigned elt_sz,unsigned in
     _throw_arraybounds();
   return _cus_ans;
 }
-static inline unsigned char *
+static _INLINE unsigned char *
 _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned index) {
   struct _dynforward_ptr _cus_arr = (arr);
   unsigned _cus_elt_sz = (elt_sz);
@@ -301,14 +538,14 @@ _check_dynforward_subscript(struct _dynforward_ptr arr,unsigned elt_sz,unsigned 
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _tag_dyneither(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
   struct _dyneither_ptr _tag_arr_ans;
   _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr);
   _tag_arr_ans.last_plus_one = _tag_arr_ans.base + (elt_sz) * (num_elts);
   return _tag_arr_ans;
 }
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _tag_dynforward(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
   struct _dynforward_ptr _tag_arr_ans;
   _tag_arr_ans.curr = (void*)(tcurr);
@@ -329,22 +566,22 @@ _tag_dynforward(const void *tcurr,unsigned elt_sz,unsigned num_elts) {
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr *
+static _INLINE struct _dyneither_ptr *
 _init_dyneither_ptr(struct _dyneither_ptr *arr_ptr,
                     void *arr, unsigned elt_sz, unsigned num_elts) {
   struct _dyneither_ptr *_itarr_ptr = (arr_ptr);
   void* _itarr = (arr);
   _itarr_ptr->base = _itarr_ptr->curr = _itarr;
-  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts);
+  _itarr_ptr->last_plus_one = ((unsigned char *)_itarr) + (elt_sz) * (num_elts);
   return _itarr_ptr;
 }
-static inline struct _dynforward_ptr *
+static _INLINE struct _dynforward_ptr *
 _init_dynforward_ptr(struct _dynforward_ptr *arr_ptr,
                     void *arr, unsigned elt_sz, unsigned num_elts) {
   struct _dynforward_ptr *_itarr_ptr = (arr_ptr);
   void* _itarr = (arr);
   _itarr_ptr->curr = _itarr;
-  _itarr_ptr->last_plus_one = ((char *)_itarr) + (elt_sz) * (num_elts);
+  _itarr_ptr->last_plus_one = ((unsigned char *)_itarr) + (elt_sz) * (num_elts);
   return _itarr_ptr;
 }
 #else
@@ -367,7 +604,7 @@ _init_dynforward_ptr(struct _dynforward_ptr *arr_ptr,
 #define _untag_dyneither_ptr(arr,elt_sz,num_elts) ((arr).curr)
 #else
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned char *
+static _INLINE unsigned char *
 _untag_dyneither_ptr(struct _dyneither_ptr arr, 
                      unsigned elt_sz,unsigned num_elts) {
   struct _dyneither_ptr _arr = (arr);
@@ -376,7 +613,7 @@ _untag_dyneither_ptr(struct _dyneither_ptr arr,
     _throw_arraybounds();
   return _curr;
 }
-static inline unsigned char *
+static _INLINE unsigned char *
 _untag_dynforward_ptr(struct _dynforward_ptr arr, 
                       unsigned elt_sz,unsigned num_elts) {
   struct _dynforward_ptr _arr = (arr);
@@ -402,7 +639,7 @@ _untag_dynforward_ptr(struct _dynforward_ptr arr,
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline unsigned
+static _INLINE unsigned
 _get_dyneither_size(struct _dyneither_ptr arr,unsigned elt_sz) {
   struct _dyneither_ptr _get_arr_size_temp = (arr);
   unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr;
@@ -411,7 +648,7 @@ _get_dyneither_size(struct _dyneither_ptr arr,unsigned elt_sz) {
           _get_arr_size_curr >= _get_arr_size_last) ? 0 :
     ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));
 }
-static inline unsigned
+static _INLINE unsigned
 _get_dynforward_size(struct _dynforward_ptr arr,unsigned elt_sz) {
   struct _dynforward_ptr _get_arr_size_temp = (arr);
   unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr;
@@ -436,7 +673,7 @@ _get_dynforward_size(struct _dynforward_ptr arr,unsigned elt_sz) {
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _dyneither_ptr_plus(struct _dyneither_ptr arr,unsigned elt_sz,int change) {
   struct _dyneither_ptr _ans = (arr);
   _ans.curr += ((int)(elt_sz))*(change);
@@ -444,7 +681,7 @@ _dyneither_ptr_plus(struct _dyneither_ptr arr,unsigned elt_sz,int change) {
 }
 /* Here we have to worry about wrapping around, so if we go past the
  * end, we set the end to 0. */
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _dynforward_ptr_plus(struct _dynforward_ptr arr,unsigned elt_sz,int change) {
   struct _dynforward_ptr _ans = (arr);
   unsigned int _dfpp_elts = (((unsigned)_ans.last_plus_one) - 
@@ -472,14 +709,14 @@ _dynforward_ptr_plus(struct _dynforward_ptr arr,unsigned elt_sz,int change) {
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _dyneither_ptr_inplace_plus(struct _dyneither_ptr *arr_ptr,unsigned elt_sz,
                             int change) {
   struct _dyneither_ptr * _arr_ptr = (arr_ptr);
   _arr_ptr->curr += ((int)(elt_sz))*(change);
   return *_arr_ptr;
 }
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _dynforward_ptr_inplace_plus(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,
                              int change) {
   struct _dynforward_ptr * _arr_ptr = (arr_ptr);
@@ -508,14 +745,14 @@ _dynforward_ptr_inplace_plus(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,
 #endif
 
 #ifdef _INLINE_FUNCTIONS
-static inline struct _dyneither_ptr
+static _INLINE struct _dyneither_ptr
 _dyneither_ptr_inplace_plus_post(struct _dyneither_ptr *arr_ptr,unsigned elt_sz,int change) {
   struct _dyneither_ptr * _arr_ptr = (arr_ptr);
   struct _dyneither_ptr _ans = *_arr_ptr;
   _arr_ptr->curr += ((int)(elt_sz))*(change);
   return _ans;
 }
-static inline struct _dynforward_ptr
+static _INLINE struct _dynforward_ptr
 _dynforward_ptr_inplace_plus_post(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,int change) {
   struct _dynforward_ptr * _arr_ptr = (arr_ptr);
   struct _dynforward_ptr _ans = *_arr_ptr;
@@ -545,9 +782,9 @@ _dynforward_ptr_inplace_plus_post(struct _dynforward_ptr *arr_ptr,unsigned elt_s
   _ans; })
 #endif
 
-// Decrease the upper bound on a fat pointer by numelts where sz is
-// the size of the pointer's type.  Note that this can't be a macro
-// if we're to get initializers right.
+/* Decrease the upper bound on a fat pointer by numelts where sz is
+   the size of the pointer's type.  Note that this can't be a macro
+   if we're to get initializers right. */
 static struct 
 _dyneither_ptr _dyneither_ptr_decrease_size(struct _dyneither_ptr x,
                                             unsigned int sz,
@@ -599,41 +836,40 @@ _dynforward_to_dyneither(struct _dynforward_ptr p) {
   _dfnres; })
 #endif 
 
-
-//// Allocation
+/* Allocation */
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
 extern void* GC_calloc(unsigned,unsigned);
 extern void* GC_calloc_atomic(unsigned,unsigned);
 
-static inline void* _cycalloc(int n) {
+static _INLINE void* _cycalloc(int n) {
   void * ans = (void *)GC_malloc(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void* _cycalloc_atomic(int n) {
+static _INLINE void* _cycalloc_atomic(int n) {
   void * ans = (void *)GC_malloc_atomic(n);
   if(!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void* _cyccalloc(unsigned n, unsigned s) {
+static _INLINE void* _cyccalloc(unsigned n, unsigned s) {
   void* ans = (void*)GC_calloc(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
-static inline void* _cyccalloc_atomic(unsigned n, unsigned s) {
+static _INLINE void* _cyccalloc_atomic(unsigned n, unsigned s) {
   void* ans = (void*)GC_calloc_atomic(n,s);
   if (!ans)
     _throw_badalloc();
   return ans;
 }
 #define MAX_MALLOC_SIZE (1 << 28)
-static inline unsigned int _check_times(unsigned x, unsigned y) {
-  unsigned long long whole_ans = 
-    ((unsigned long long)x)*((unsigned long long)y);
+static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
+  _CYC_U_LONG_LONG_T whole_ans = 
+    ((_CYC_U_LONG_LONG_T)x)*((_CYC_U_LONG_LONG_T)y);
   unsigned word_ans = (unsigned)whole_ans;
   if(word_ans < whole_ans || word_ans > MAX_MALLOC_SIZE)
     _throw_badalloc();
@@ -660,19 +896,19 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 
 /* the next three routines swap [x] and [y]; not thread safe! */
-static inline void _swap_word(void *x, void *y) {
+static _INLINE void _swap_word(void *x, void *y) {
   unsigned long *lx = (unsigned long *)x, *ly = (unsigned long *)y, tmp;
   tmp = *lx;
   *lx = *ly;
   *ly = tmp;
 }
-static inline void _swap_dynforward(struct _dynforward_ptr *x, 
+static _INLINE void _swap_dynforward(struct _dynforward_ptr *x, 
 				    struct _dynforward_ptr *y) {
   struct _dynforward_ptr tmp = *x;
   *x = *y;
   *y = tmp;
 }
-static inline void _swap_dyneither(struct _dyneither_ptr *x, 
+static _INLINE void _swap_dyneither(struct _dyneither_ptr *x, 
 				   struct _dyneither_ptr *y) {
   struct _dyneither_ptr tmp = *x;
   *x = *y;
@@ -1011,60 +1247,62 @@ _LL36: if(_tmp20 <= (void*)4)goto _LL38;if(*((int*)_tmp20)!= 7)goto _LL38;_LL37:
 _LL35;_LL38:;_LL39:(void*)(e->r=(void*)((void*)(Cyc_Absyn_deref_exp(Cyc_Absyn_var_exp(
 _tmp1F->name,0),0))->r));goto _LL35;_LL35:;}*env.freevars=((struct Cyc_Set_Set*(*)(
 struct _RegionHandle*r,struct Cyc_Set_Set*s,struct Cyc_Absyn_Vardecl*elt))Cyc_Set_rinsert)(
-env.rgn,*env.freevars,_tmp1F);return;}}(int)_throw((void*)({struct Cyc_Core_Impossible_struct*
-_tmp21=_cycalloc(sizeof(*_tmp21));_tmp21[0]=({struct Cyc_Core_Impossible_struct
-_tmp22;_tmp22.tag=Cyc_Core_Impossible;_tmp22.f1=(struct _dynforward_ptr)({struct
-Cyc_String_pa_struct _tmp25;_tmp25.tag=0;_tmp25.f1=(struct _dynforward_ptr)((
-struct _dynforward_ptr)*_tmp4);{void*_tmp23[1]={& _tmp25};Cyc_aprintf(({const char*
-_tmp24="unbound variable %s found in box_free_vars_exp";_tag_dynforward(_tmp24,
-sizeof(char),_get_zero_arr_size(_tmp24,47));}),_tag_dynforward(_tmp23,sizeof(
-void*),1));}});_tmp22;});_tmp21;}));_LL3: if(*((int*)_tmp0)!= 1)goto _LL5;_LL4:
-return;_LL5: if(*((int*)_tmp0)!= 0)goto _LL7;_LL6: return;_LL7: if(*((int*)_tmp0)!= 
-11)goto _LL9;_tmp5=((struct Cyc_Absyn_FnCall_e_struct*)_tmp0)->f1;_tmp6=((struct
-Cyc_Absyn_FnCall_e_struct*)_tmp0)->f2;_LL8: Cyc_Tovc_box_free_vars_exp(env,_tmp5);
-_tmp7=_tmp6;goto _LLA;_LL9: if(*((int*)_tmp0)!= 3)goto _LLB;_tmp7=((struct Cyc_Absyn_Primop_e_struct*)
-_tmp0)->f2;_LLA: for(0;_tmp7 != 0;_tmp7=_tmp7->tl){Cyc_Tovc_box_free_vars_exp(env,(
-struct Cyc_Absyn_Exp*)_tmp7->hd);}return;_LLB: if(*((int*)_tmp0)!= 6)goto _LLD;
-_tmp8=((struct Cyc_Absyn_Conditional_e_struct*)_tmp0)->f1;_tmp9=((struct Cyc_Absyn_Conditional_e_struct*)
-_tmp0)->f2;_tmpA=((struct Cyc_Absyn_Conditional_e_struct*)_tmp0)->f3;_LLC: Cyc_Tovc_box_free_vars_exp(
-env,_tmpA);_tmpB=_tmp8;_tmpC=_tmp9;goto _LLE;_LLD: if(*((int*)_tmp0)!= 7)goto _LLF;
-_tmpB=((struct Cyc_Absyn_And_e_struct*)_tmp0)->f1;_tmpC=((struct Cyc_Absyn_And_e_struct*)
-_tmp0)->f2;_LLE: _tmpD=_tmpB;_tmpE=_tmpC;goto _LL10;_LLF: if(*((int*)_tmp0)!= 8)
-goto _LL11;_tmpD=((struct Cyc_Absyn_Or_e_struct*)_tmp0)->f1;_tmpE=((struct Cyc_Absyn_Or_e_struct*)
-_tmp0)->f2;_LL10: _tmpF=_tmpD;_tmp10=_tmpE;goto _LL12;_LL11: if(*((int*)_tmp0)!= 25)
-goto _LL13;_tmpF=((struct Cyc_Absyn_Subscript_e_struct*)_tmp0)->f1;_tmp10=((struct
-Cyc_Absyn_Subscript_e_struct*)_tmp0)->f2;_LL12: _tmp11=_tmpF;_tmp12=_tmp10;goto
-_LL14;_LL13: if(*((int*)_tmp0)!= 9)goto _LL15;_tmp11=((struct Cyc_Absyn_SeqExp_e_struct*)
-_tmp0)->f1;_tmp12=((struct Cyc_Absyn_SeqExp_e_struct*)_tmp0)->f2;_LL14: _tmp13=
-_tmp11;_tmp14=_tmp12;goto _LL16;_LL15: if(*((int*)_tmp0)!= 4)goto _LL17;_tmp13=((
-struct Cyc_Absyn_AssignOp_e_struct*)_tmp0)->f1;_tmp14=((struct Cyc_Absyn_AssignOp_e_struct*)
-_tmp0)->f3;_LL16: Cyc_Tovc_box_free_vars_exp(env,_tmp14);_tmp15=_tmp13;goto _LL18;
-_LL17: if(*((int*)_tmp0)!= 13)goto _LL19;_tmp15=((struct Cyc_Absyn_NoInstantiate_e_struct*)
-_tmp0)->f1;_LL18: _tmp16=_tmp15;goto _LL1A;_LL19: if(*((int*)_tmp0)!= 14)goto _LL1B;
-_tmp16=((struct Cyc_Absyn_Instantiate_e_struct*)_tmp0)->f1;_LL1A: _tmp17=_tmp16;
-goto _LL1C;_LL1B: if(*((int*)_tmp0)!= 15)goto _LL1D;_tmp17=((struct Cyc_Absyn_Cast_e_struct*)
-_tmp0)->f2;_LL1C: _tmp18=_tmp17;goto _LL1E;_LL1D: if(*((int*)_tmp0)!= 16)goto _LL1F;
-_tmp18=((struct Cyc_Absyn_Address_e_struct*)_tmp0)->f1;_LL1E: _tmp19=_tmp18;goto
-_LL20;_LL1F: if(*((int*)_tmp0)!= 19)goto _LL21;_tmp19=((struct Cyc_Absyn_Sizeofexp_e_struct*)
-_tmp0)->f1;_LL20: _tmp1A=_tmp19;goto _LL22;_LL21: if(*((int*)_tmp0)!= 22)goto _LL23;
-_tmp1A=((struct Cyc_Absyn_Deref_e_struct*)_tmp0)->f1;_LL22: _tmp1B=_tmp1A;goto
-_LL24;_LL23: if(*((int*)_tmp0)!= 23)goto _LL25;_tmp1B=((struct Cyc_Absyn_AggrMember_e_struct*)
-_tmp0)->f1;_LL24: _tmp1C=_tmp1B;goto _LL26;_LL25: if(*((int*)_tmp0)!= 24)goto _LL27;
-_tmp1C=((struct Cyc_Absyn_AggrArrow_e_struct*)_tmp0)->f1;_LL26: _tmp1D=_tmp1C;goto
-_LL28;_LL27: if(*((int*)_tmp0)!= 5)goto _LL29;_tmp1D=((struct Cyc_Absyn_Increment_e_struct*)
-_tmp0)->f1;_LL28: Cyc_Tovc_box_free_vars_exp(env,_tmp1D);return;_LL29: if(*((int*)
-_tmp0)!= 18)goto _LL2B;_LL2A: goto _LL2C;_LL2B: if(*((int*)_tmp0)!= 20)goto _LL2D;
-_LL2C: goto _LL2E;_LL2D: if(*((int*)_tmp0)!= 21)goto _LL2F;_LL2E: goto _LL30;_LL2F: if(*((
-int*)_tmp0)!= 33)goto _LL31;_LL30: return;_LL31: if(*((int*)_tmp0)!= 37)goto _LL33;
-_tmp1E=((struct Cyc_Absyn_UnresolvedMem_e_struct*)_tmp0)->f2;_LL32: for(0;_tmp1E != 
-0;_tmp1E=_tmp1E->tl){Cyc_Tovc_box_free_vars_exp(env,(*((struct _tuple4*)_tmp1E->hd)).f2);}
-return;_LL33:;_LL34:(int)_throw((void*)({struct Cyc_Core_Impossible_struct*_tmp26=
-_cycalloc(sizeof(*_tmp26));_tmp26[0]=({struct Cyc_Core_Impossible_struct _tmp27;
-_tmp27.tag=Cyc_Core_Impossible;_tmp27.f1=({const char*_tmp28="bad exp form in Tocv::box_free_vars_exp";
-_tag_dynforward(_tmp28,sizeof(char),_get_zero_arr_size(_tmp28,40));});_tmp27;});
-_tmp26;}));_LL0:;}}static void Cyc_Tovc_box_free_vars_stmt(struct Cyc_Tovc_BoxingEnv
-env,struct Cyc_Absyn_Stmt*s){while(1){void*_tmp29=(void*)s->r;struct Cyc_Absyn_Stmt*
-_tmp2A;struct Cyc_Absyn_Exp*_tmp2B;struct Cyc_Absyn_Exp*_tmp2C;struct Cyc_Absyn_Stmt*
+env.rgn,*env.freevars,_tmp1F);return;}}for(0;env.all_locals != 0;env.all_locals=(
+env.all_locals)->tl){if(Cyc_strptrcmp(_tmp4,(*((struct Cyc_Absyn_Vardecl*)(env.all_locals)->hd)->name).f2)
+== 0)(int)_throw((void*)({struct Cyc_Core_Impossible_struct*_tmp21=_cycalloc(
+sizeof(*_tmp21));_tmp21[0]=({struct Cyc_Core_Impossible_struct _tmp22;_tmp22.tag=
+Cyc_Core_Impossible;_tmp22.f1=(struct _dynforward_ptr)({struct Cyc_String_pa_struct
+_tmp25;_tmp25.tag=0;_tmp25.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)*
+_tmp4);{void*_tmp23[1]={& _tmp25};Cyc_aprintf(({const char*_tmp24="unbound variable %s found in box_free_vars_exp";
+_tag_dynforward(_tmp24,sizeof(char),_get_zero_arr_size_char(_tmp24,47));}),
+_tag_dynforward(_tmp23,sizeof(void*),1));}});_tmp22;});_tmp21;}));}return;_LL3:
+if(*((int*)_tmp0)!= 1)goto _LL5;_LL4: return;_LL5: if(*((int*)_tmp0)!= 0)goto _LL7;
+_LL6: return;_LL7: if(*((int*)_tmp0)!= 11)goto _LL9;_tmp5=((struct Cyc_Absyn_FnCall_e_struct*)
+_tmp0)->f1;_tmp6=((struct Cyc_Absyn_FnCall_e_struct*)_tmp0)->f2;_LL8: Cyc_Tovc_box_free_vars_exp(
+env,_tmp5);_tmp7=_tmp6;goto _LLA;_LL9: if(*((int*)_tmp0)!= 3)goto _LLB;_tmp7=((
+struct Cyc_Absyn_Primop_e_struct*)_tmp0)->f2;_LLA: for(0;_tmp7 != 0;_tmp7=_tmp7->tl){
+Cyc_Tovc_box_free_vars_exp(env,(struct Cyc_Absyn_Exp*)_tmp7->hd);}return;_LLB: if(*((
+int*)_tmp0)!= 6)goto _LLD;_tmp8=((struct Cyc_Absyn_Conditional_e_struct*)_tmp0)->f1;
+_tmp9=((struct Cyc_Absyn_Conditional_e_struct*)_tmp0)->f2;_tmpA=((struct Cyc_Absyn_Conditional_e_struct*)
+_tmp0)->f3;_LLC: Cyc_Tovc_box_free_vars_exp(env,_tmpA);_tmpB=_tmp8;_tmpC=_tmp9;
+goto _LLE;_LLD: if(*((int*)_tmp0)!= 7)goto _LLF;_tmpB=((struct Cyc_Absyn_And_e_struct*)
+_tmp0)->f1;_tmpC=((struct Cyc_Absyn_And_e_struct*)_tmp0)->f2;_LLE: _tmpD=_tmpB;
+_tmpE=_tmpC;goto _LL10;_LLF: if(*((int*)_tmp0)!= 8)goto _LL11;_tmpD=((struct Cyc_Absyn_Or_e_struct*)
+_tmp0)->f1;_tmpE=((struct Cyc_Absyn_Or_e_struct*)_tmp0)->f2;_LL10: _tmpF=_tmpD;
+_tmp10=_tmpE;goto _LL12;_LL11: if(*((int*)_tmp0)!= 25)goto _LL13;_tmpF=((struct Cyc_Absyn_Subscript_e_struct*)
+_tmp0)->f1;_tmp10=((struct Cyc_Absyn_Subscript_e_struct*)_tmp0)->f2;_LL12: _tmp11=
+_tmpF;_tmp12=_tmp10;goto _LL14;_LL13: if(*((int*)_tmp0)!= 9)goto _LL15;_tmp11=((
+struct Cyc_Absyn_SeqExp_e_struct*)_tmp0)->f1;_tmp12=((struct Cyc_Absyn_SeqExp_e_struct*)
+_tmp0)->f2;_LL14: _tmp13=_tmp11;_tmp14=_tmp12;goto _LL16;_LL15: if(*((int*)_tmp0)!= 
+4)goto _LL17;_tmp13=((struct Cyc_Absyn_AssignOp_e_struct*)_tmp0)->f1;_tmp14=((
+struct Cyc_Absyn_AssignOp_e_struct*)_tmp0)->f3;_LL16: Cyc_Tovc_box_free_vars_exp(
+env,_tmp14);_tmp15=_tmp13;goto _LL18;_LL17: if(*((int*)_tmp0)!= 13)goto _LL19;
+_tmp15=((struct Cyc_Absyn_NoInstantiate_e_struct*)_tmp0)->f1;_LL18: _tmp16=_tmp15;
+goto _LL1A;_LL19: if(*((int*)_tmp0)!= 14)goto _LL1B;_tmp16=((struct Cyc_Absyn_Instantiate_e_struct*)
+_tmp0)->f1;_LL1A: _tmp17=_tmp16;goto _LL1C;_LL1B: if(*((int*)_tmp0)!= 15)goto _LL1D;
+_tmp17=((struct Cyc_Absyn_Cast_e_struct*)_tmp0)->f2;_LL1C: _tmp18=_tmp17;goto _LL1E;
+_LL1D: if(*((int*)_tmp0)!= 16)goto _LL1F;_tmp18=((struct Cyc_Absyn_Address_e_struct*)
+_tmp0)->f1;_LL1E: _tmp19=_tmp18;goto _LL20;_LL1F: if(*((int*)_tmp0)!= 19)goto _LL21;
+_tmp19=((struct Cyc_Absyn_Sizeofexp_e_struct*)_tmp0)->f1;_LL20: _tmp1A=_tmp19;goto
+_LL22;_LL21: if(*((int*)_tmp0)!= 22)goto _LL23;_tmp1A=((struct Cyc_Absyn_Deref_e_struct*)
+_tmp0)->f1;_LL22: _tmp1B=_tmp1A;goto _LL24;_LL23: if(*((int*)_tmp0)!= 23)goto _LL25;
+_tmp1B=((struct Cyc_Absyn_AggrMember_e_struct*)_tmp0)->f1;_LL24: _tmp1C=_tmp1B;
+goto _LL26;_LL25: if(*((int*)_tmp0)!= 24)goto _LL27;_tmp1C=((struct Cyc_Absyn_AggrArrow_e_struct*)
+_tmp0)->f1;_LL26: _tmp1D=_tmp1C;goto _LL28;_LL27: if(*((int*)_tmp0)!= 5)goto _LL29;
+_tmp1D=((struct Cyc_Absyn_Increment_e_struct*)_tmp0)->f1;_LL28: Cyc_Tovc_box_free_vars_exp(
+env,_tmp1D);return;_LL29: if(*((int*)_tmp0)!= 18)goto _LL2B;_LL2A: goto _LL2C;_LL2B:
+if(*((int*)_tmp0)!= 20)goto _LL2D;_LL2C: goto _LL2E;_LL2D: if(*((int*)_tmp0)!= 21)
+goto _LL2F;_LL2E: goto _LL30;_LL2F: if(*((int*)_tmp0)!= 33)goto _LL31;_LL30: return;
+_LL31: if(*((int*)_tmp0)!= 37)goto _LL33;_tmp1E=((struct Cyc_Absyn_UnresolvedMem_e_struct*)
+_tmp0)->f2;_LL32: for(0;_tmp1E != 0;_tmp1E=_tmp1E->tl){Cyc_Tovc_box_free_vars_exp(
+env,(*((struct _tuple4*)_tmp1E->hd)).f2);}return;_LL33:;_LL34:(int)_throw((void*)({
+struct Cyc_Core_Impossible_struct*_tmp26=_cycalloc(sizeof(*_tmp26));_tmp26[0]=({
+struct Cyc_Core_Impossible_struct _tmp27;_tmp27.tag=Cyc_Core_Impossible;_tmp27.f1=({
+const char*_tmp28="bad exp form in Tocv::box_free_vars_exp";_tag_dynforward(
+_tmp28,sizeof(char),_get_zero_arr_size_char(_tmp28,40));});_tmp27;});_tmp26;}));
+_LL0:;}}static void Cyc_Tovc_box_free_vars_stmt(struct Cyc_Tovc_BoxingEnv env,struct
+Cyc_Absyn_Stmt*s){while(1){void*_tmp29=(void*)s->r;struct Cyc_Absyn_Stmt*_tmp2A;
+struct Cyc_Absyn_Exp*_tmp2B;struct Cyc_Absyn_Exp*_tmp2C;struct Cyc_Absyn_Stmt*
 _tmp2D;struct Cyc_Absyn_Stmt*_tmp2E;struct Cyc_Absyn_Exp*_tmp2F;struct Cyc_Absyn_Stmt*
 _tmp30;struct Cyc_Absyn_Stmt*_tmp31;struct _tuple3 _tmp32;struct Cyc_Absyn_Exp*
 _tmp33;struct Cyc_Absyn_Stmt*_tmp34;struct Cyc_Absyn_Exp*_tmp35;struct _tuple3
@@ -1113,9 +1351,9 @@ _LL5C:;_LL5D: goto _LL59;_LL59:;}goto _LL58;_LL57:;_LL58:(int)_throw((void*)({
 struct Cyc_Core_Impossible_struct*_tmp45=_cycalloc(sizeof(*_tmp45));_tmp45[0]=({
 struct Cyc_Core_Impossible_struct _tmp46;_tmp46.tag=Cyc_Core_Impossible;_tmp46.f1=({
 const char*_tmp47="bad stmt after xlation to C";_tag_dynforward(_tmp47,sizeof(
-char),_get_zero_arr_size(_tmp47,28));});_tmp46;});_tmp45;}));_LL3A:;}}struct
-_tuple5{struct _dynforward_ptr*f1;struct Cyc_Absyn_Tqual f2;void*f3;};static struct
-Cyc_Absyn_Exp*Cyc_Tovc_stmt_to_fun(struct Cyc_Tovc_ToExpEnv env,struct Cyc_Absyn_Stmt*
+char),_get_zero_arr_size_char(_tmp47,28));});_tmp46;});_tmp45;}));_LL3A:;}}
+struct _tuple5{struct _dynforward_ptr*f1;struct Cyc_Absyn_Tqual f2;void*f3;};static
+struct Cyc_Absyn_Exp*Cyc_Tovc_stmt_to_fun(struct Cyc_Tovc_ToExpEnv env,struct Cyc_Absyn_Stmt*
 s,void*rettype){struct Cyc_Set_Set*freevars=((struct Cyc_Set_Set*(*)(struct
 _RegionHandle*r,int(*cmp)(struct Cyc_Absyn_Vardecl*,struct Cyc_Absyn_Vardecl*)))
 Cyc_Set_rempty)(env.rgn,(int(*)(struct Cyc_Absyn_Vardecl*,struct Cyc_Absyn_Vardecl*))
@@ -1147,7 +1385,7 @@ struct _tuple1*funname=Cyc_Toc_temp_var();*env.gen_ds=({struct Cyc_List_List*
 _tmp54=_cycalloc(sizeof(*_tmp54));_tmp54->hd=Cyc_Absyn_new_decl((void*)({struct
 Cyc_Absyn_Fn_d_struct*_tmp55=_cycalloc(sizeof(*_tmp55));_tmp55[0]=({struct Cyc_Absyn_Fn_d_struct
 _tmp56;_tmp56.tag=1;_tmp56.f1=({struct Cyc_Absyn_Fndecl*_tmp57=_cycalloc(sizeof(*
-_tmp57));_tmp57->sc=(void*)((void*)0);_tmp57->is_inline=1;_tmp57->name=funname;
+_tmp57));_tmp57->sc=(void*)((void*)0);_tmp57->is_inline=0;_tmp57->name=funname;
 _tmp57->tvs=0;_tmp57->effect=0;_tmp57->ret_type=(void*)rettype;_tmp57->args=
 params;_tmp57->c_varargs=0;_tmp57->cyc_varargs=0;_tmp57->rgn_po=0;_tmp57->body=s;
 _tmp57->cached_typ=0;_tmp57->param_vardecls=0;_tmp57->fn_vardecl=0;_tmp57->attributes=
@@ -1214,20 +1452,20 @@ varmap,(*((struct _tuple4*)_tmp78->hd)).f2);}return;_LL96:;_LL97:(int)_throw((
 void*)({struct Cyc_Core_Impossible_struct*_tmp79=_cycalloc(sizeof(*_tmp79));
 _tmp79[0]=({struct Cyc_Core_Impossible_struct _tmp7A;_tmp7A.tag=Cyc_Core_Impossible;
 _tmp7A.f1=({const char*_tmp7B="bad exp form in Tocv::apply_varmap";
-_tag_dynforward(_tmp7B,sizeof(char),_get_zero_arr_size(_tmp7B,35));});_tmp7A;});
-_tmp79;}));_LL63:;}static struct Cyc_Absyn_Exp*Cyc_Tovc_stmt_to_exp(struct Cyc_Tovc_ToExpEnv
-env,struct Cyc_Absyn_Stmt*s){void*_tmp7C=(void*)s->r;struct Cyc_Absyn_Exp*_tmp7D;
-struct Cyc_Absyn_Stmt*_tmp7E;struct Cyc_Absyn_Stmt*_tmp7F;struct Cyc_Absyn_Exp*
-_tmp80;struct Cyc_Absyn_Stmt*_tmp81;struct Cyc_Absyn_Stmt*_tmp82;struct Cyc_Absyn_Decl*
-_tmp83;struct Cyc_Absyn_Stmt*_tmp84;_LL99: if((int)_tmp7C != 0)goto _LL9B;_LL9A:
-return Cyc_Absyn_true_exp(0);_LL9B: if(_tmp7C <= (void*)1)goto _LLA3;if(*((int*)
-_tmp7C)!= 0)goto _LL9D;_tmp7D=((struct Cyc_Absyn_Exp_s_struct*)_tmp7C)->f1;_LL9C:
-Cyc_Tovc_apply_varmap(env.varmap,_tmp7D);return _tmp7D;_LL9D: if(*((int*)_tmp7C)!= 
-1)goto _LL9F;_tmp7E=((struct Cyc_Absyn_Seq_s_struct*)_tmp7C)->f1;_tmp7F=((struct
-Cyc_Absyn_Seq_s_struct*)_tmp7C)->f2;_LL9E: return Cyc_Absyn_seq_exp(Cyc_Tovc_stmt_to_exp(
-env,_tmp7E),Cyc_Tovc_stmt_to_exp(env,_tmp7F),0);_LL9F: if(*((int*)_tmp7C)!= 3)
-goto _LLA1;_tmp80=((struct Cyc_Absyn_IfThenElse_s_struct*)_tmp7C)->f1;_tmp81=((
-struct Cyc_Absyn_IfThenElse_s_struct*)_tmp7C)->f2;_tmp82=((struct Cyc_Absyn_IfThenElse_s_struct*)
+_tag_dynforward(_tmp7B,sizeof(char),_get_zero_arr_size_char(_tmp7B,35));});
+_tmp7A;});_tmp79;}));_LL63:;}static struct Cyc_Absyn_Exp*Cyc_Tovc_stmt_to_exp(
+struct Cyc_Tovc_ToExpEnv env,struct Cyc_Absyn_Stmt*s){void*_tmp7C=(void*)s->r;
+struct Cyc_Absyn_Exp*_tmp7D;struct Cyc_Absyn_Stmt*_tmp7E;struct Cyc_Absyn_Stmt*
+_tmp7F;struct Cyc_Absyn_Exp*_tmp80;struct Cyc_Absyn_Stmt*_tmp81;struct Cyc_Absyn_Stmt*
+_tmp82;struct Cyc_Absyn_Decl*_tmp83;struct Cyc_Absyn_Stmt*_tmp84;_LL99: if((int)
+_tmp7C != 0)goto _LL9B;_LL9A: return Cyc_Absyn_true_exp(0);_LL9B: if(_tmp7C <= (void*)
+1)goto _LLA3;if(*((int*)_tmp7C)!= 0)goto _LL9D;_tmp7D=((struct Cyc_Absyn_Exp_s_struct*)
+_tmp7C)->f1;_LL9C: Cyc_Tovc_apply_varmap(env.varmap,_tmp7D);return _tmp7D;_LL9D:
+if(*((int*)_tmp7C)!= 1)goto _LL9F;_tmp7E=((struct Cyc_Absyn_Seq_s_struct*)_tmp7C)->f1;
+_tmp7F=((struct Cyc_Absyn_Seq_s_struct*)_tmp7C)->f2;_LL9E: return Cyc_Absyn_seq_exp(
+Cyc_Tovc_stmt_to_exp(env,_tmp7E),Cyc_Tovc_stmt_to_exp(env,_tmp7F),0);_LL9F: if(*((
+int*)_tmp7C)!= 3)goto _LLA1;_tmp80=((struct Cyc_Absyn_IfThenElse_s_struct*)_tmp7C)->f1;
+_tmp81=((struct Cyc_Absyn_IfThenElse_s_struct*)_tmp7C)->f2;_tmp82=((struct Cyc_Absyn_IfThenElse_s_struct*)
 _tmp7C)->f3;_LLA0: Cyc_Tovc_apply_varmap(env.varmap,_tmp80);return Cyc_Absyn_conditional_exp(
 _tmp80,Cyc_Tovc_stmt_to_exp(env,_tmp81),Cyc_Tovc_stmt_to_exp(env,_tmp82),0);
 _LLA1: if(*((int*)_tmp7C)!= 11)goto _LLA3;_tmp83=((struct Cyc_Absyn_Decl_s_struct*)
@@ -1258,10 +1496,10 @@ struct Cyc_Absyn_Exp*)_tmp89->hd,_tmp8F,0);}return _tmp8F;}}}_LLA8:;_LLA9:(int)
 _throw((void*)({struct Cyc_Core_Impossible_struct*_tmp90=_cycalloc(sizeof(*_tmp90));
 _tmp90[0]=({struct Cyc_Core_Impossible_struct _tmp91;_tmp91.tag=Cyc_Core_Impossible;
 _tmp91.f1=({const char*_tmp92="bad local decl in Tovc::stmt_to_exp";
-_tag_dynforward(_tmp92,sizeof(char),_get_zero_arr_size(_tmp92,36));});_tmp91;});
-_tmp90;}));_LLA5:;}_LLA3:;_LLA4: return Cyc_Tovc_stmt_to_fun(env,s,(void*)0);_LL98:;}
-static void Cyc_Tovc_stmt_to_vc(struct Cyc_Tovc_ToExpEnv env,struct Cyc_Absyn_Stmt*s);
-static void Cyc_Tovc_exp_to_vc(struct Cyc_Tovc_ToExpEnv env,struct Cyc_Absyn_Exp*e){
+_tag_dynforward(_tmp92,sizeof(char),_get_zero_arr_size_char(_tmp92,36));});
+_tmp91;});_tmp90;}));_LLA5:;}_LLA3:;_LLA4: return Cyc_Tovc_stmt_to_fun(env,s,(void*)
+0);_LL98:;}static void Cyc_Tovc_stmt_to_vc(struct Cyc_Tovc_ToExpEnv env,struct Cyc_Absyn_Stmt*
+s);static void Cyc_Tovc_exp_to_vc(struct Cyc_Tovc_ToExpEnv env,struct Cyc_Absyn_Exp*e){
 void*_tmp93=(void*)e->r;struct Cyc_Absyn_Exp*_tmp94;struct Cyc_List_List*_tmp95;
 struct Cyc_List_List*_tmp96;struct Cyc_Absyn_Exp*_tmp97;struct Cyc_Absyn_Exp*_tmp98;
 struct Cyc_Absyn_Exp*_tmp99;struct Cyc_Absyn_Exp*_tmp9A;struct Cyc_Absyn_Exp*_tmp9B;
@@ -1318,7 +1556,7 @@ Cyc_Tovc_stmt_to_exp(env,_tmpAE))->r));return;_LLE2:;_LLE3:(int)_throw((void*)({
 struct Cyc_Core_Impossible_struct*_tmpAF=_cycalloc(sizeof(*_tmpAF));_tmpAF[0]=({
 struct Cyc_Core_Impossible_struct _tmpB0;_tmpB0.tag=Cyc_Core_Impossible;_tmpB0.f1=({
 const char*_tmpB1="bad exp form after xlation to C";_tag_dynforward(_tmpB1,
-sizeof(char),_get_zero_arr_size(_tmpB1,32));});_tmpB0;});_tmpAF;}));_LLAF:;}
+sizeof(char),_get_zero_arr_size_char(_tmpB1,32));});_tmpB0;});_tmpAF;}));_LLAF:;}
 static void Cyc_Tovc_stmt_to_vc(struct Cyc_Tovc_ToExpEnv env,struct Cyc_Absyn_Stmt*s){
 while(1){env.encloser=s;{void*_tmpB2=(void*)s->r;struct Cyc_Absyn_Stmt*_tmpB3;
 struct Cyc_Absyn_Exp*_tmpB4;struct Cyc_Absyn_Exp*_tmpB5;struct Cyc_Absyn_Stmt*
@@ -1374,19 +1612,19 @@ Cyc_Absyn_subscript_exp(arr,Cyc_Absyn_uint_exp(i,0),0),(*((struct _tuple4*)_tmpC
 _LL111:(int)_throw((void*)({struct Cyc_Core_Impossible_struct*_tmpD0=_cycalloc(
 sizeof(*_tmpD0));_tmpD0[0]=({struct Cyc_Core_Impossible_struct _tmpD1;_tmpD1.tag=
 Cyc_Core_Impossible;_tmpD1.f1=({const char*_tmpD2="array type bad initializer";
-_tag_dynforward(_tmpD2,sizeof(char),_get_zero_arr_size(_tmpD2,27));});_tmpD1;});
-_tmpD0;}));_LL10D:;}goto _LL108;_LL10B:;_LL10C: goto _LL108;_LL108:;}if(_tmpCC->initializer
-!= 0)Cyc_Tovc_exp_to_vc(env,(struct Cyc_Absyn_Exp*)_check_null(_tmpCC->initializer));
-env.all_locals=({struct Cyc_List_List*_tmpD3=_region_malloc(env.rgn,sizeof(*
-_tmpD3));_tmpD3->hd=_tmpCC;_tmpD3->tl=env.all_locals;_tmpD3;});s=_tmpCA;
-continue;_LL106:;_LL107: goto _LL103;_LL103:;}goto _LL102;_LL101:;_LL102:(int)
-_throw((void*)({struct Cyc_Core_Impossible_struct*_tmpD4=_cycalloc(sizeof(*_tmpD4));
-_tmpD4[0]=({struct Cyc_Core_Impossible_struct _tmpD5;_tmpD5.tag=Cyc_Core_Impossible;
+_tag_dynforward(_tmpD2,sizeof(char),_get_zero_arr_size_char(_tmpD2,27));});
+_tmpD1;});_tmpD0;}));_LL10D:;}goto _LL108;_LL10B:;_LL10C: goto _LL108;_LL108:;}if(
+_tmpCC->initializer != 0)Cyc_Tovc_exp_to_vc(env,(struct Cyc_Absyn_Exp*)_check_null(
+_tmpCC->initializer));env.all_locals=({struct Cyc_List_List*_tmpD3=_region_malloc(
+env.rgn,sizeof(*_tmpD3));_tmpD3->hd=_tmpCC;_tmpD3->tl=env.all_locals;_tmpD3;});s=
+_tmpCA;continue;_LL106:;_LL107: goto _LL103;_LL103:;}goto _LL102;_LL101:;_LL102:(
+int)_throw((void*)({struct Cyc_Core_Impossible_struct*_tmpD4=_cycalloc(sizeof(*
+_tmpD4));_tmpD4[0]=({struct Cyc_Core_Impossible_struct _tmpD5;_tmpD5.tag=Cyc_Core_Impossible;
 _tmpD5.f1=({const char*_tmpD6="bad stmt after xlation to C";_tag_dynforward(
-_tmpD6,sizeof(char),_get_zero_arr_size(_tmpD6,28));});_tmpD5;});_tmpD4;}));_LLE4:;}}}
-struct Cyc_List_List*Cyc_Tovc_tovc(struct Cyc_List_List*old_ds){struct Cyc_List_List*
-_tmpD7=0;for(0;old_ds != 0;old_ds=old_ds->tl){struct Cyc_Absyn_Decl*_tmpD8=(struct
-Cyc_Absyn_Decl*)old_ds->hd;void*_tmpD9=(void*)_tmpD8->r;struct Cyc_Absyn_Fndecl*
+_tmpD6,sizeof(char),_get_zero_arr_size_char(_tmpD6,28));});_tmpD5;});_tmpD4;}));
+_LLE4:;}}}struct Cyc_List_List*Cyc_Tovc_tovc(struct Cyc_List_List*old_ds){struct
+Cyc_List_List*_tmpD7=0;for(0;old_ds != 0;old_ds=old_ds->tl){struct Cyc_Absyn_Decl*
+_tmpD8=(struct Cyc_Absyn_Decl*)old_ds->hd;void*_tmpD9=(void*)_tmpD8->r;struct Cyc_Absyn_Fndecl*
 _tmpDA;struct Cyc_List_List*_tmpDB;struct Cyc_List_List*_tmpDC;struct Cyc_List_List*
 _tmpDD;struct Cyc_List_List*_tmpDE;_LL113: if(_tmpD9 <= (void*)2)goto _LL12B;if(*((
 int*)_tmpD9)!= 1)goto _LL115;_tmpDA=((struct Cyc_Absyn_Fn_d_struct*)_tmpD9)->f1;
@@ -1425,6 +1663,6 @@ _LL12C;_LL12B: if((int)_tmpD9 != 0)goto _LL12D;_LL12C: goto _LL12E;_LL12D: if((i
 _tmpD9 != 1)goto _LL112;_LL12E:(int)_throw((void*)({struct Cyc_Core_Impossible_struct*
 _tmpE8=_cycalloc(sizeof(*_tmpE8));_tmpE8[0]=({struct Cyc_Core_Impossible_struct
 _tmpE9;_tmpE9.tag=Cyc_Core_Impossible;_tmpE9.f1=({const char*_tmpEA="nested translation unit after translation to C";
-_tag_dynforward(_tmpEA,sizeof(char),_get_zero_arr_size(_tmpEA,47));});_tmpE9;});
-_tmpE8;}));_LL112:;}return((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(
-_tmpD7);}
+_tag_dynforward(_tmpEA,sizeof(char),_get_zero_arr_size_char(_tmpEA,47));});
+_tmpE9;});_tmpE8;}));_LL112:;}return((struct Cyc_List_List*(*)(struct Cyc_List_List*
+x))Cyc_List_imp_rev)(_tmpD7);}

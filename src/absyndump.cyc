@@ -29,7 +29,9 @@
 #include "absynpp.h"
 #include "evexp.h"
 #include "tcutil.h"
+#include "cyclone.h"
 
+using Cyclone;
 using Core;
 using List;
 using Absyn;
@@ -339,16 +341,19 @@ void dump_noncallconv(attributes_t atts) {
 
 void dumpatts(attributes_t atts) {
   if (atts == NULL) return;
-  if(to_VC) {
+  switch(c_compiler){
+  case Gcc_c:
+    dump(" __attribute__((");
+    for (; atts != NULL; atts = atts->tl) {
+      dump(attribute2string(atts->hd));
+      if (atts->tl != NULL) dump(",");
+    }
+    dump(")) ");
+    return;
+  case Vc_c:
     dump_noncallconv(atts);
     return;
   }
-  dump(" __attribute__((");
-  for (; atts != NULL; atts = atts->tl) {
-    dump(attribute2string(atts->hd));
-    if (atts->tl != NULL) dump(",");
-  }
-  dump(")) ");
 }
 
 bool next_is_pointer(list_t<type_modifier_t> tms) {
@@ -456,13 +461,17 @@ void dumpntyp(type_t t) {
   case &IntType(Unsigned, Short_sz): dump("unsigned short"); return;
   case &IntType(Unsigned, Int_sz): dump("unsigned int"); return;
   case &IntType(Unsigned, Long_sz): dump("unsigned long"); return;
-  case &IntType(None, LongLong_sz) && to_VC:
-  case &IntType(Signed, LongLong_sz) && to_VC: dump("__int64"); return;
   case &IntType(None, LongLong_sz):
-  case &IntType(Signed, LongLong_sz): dump("long long"); return;
-  case &IntType(Unsigned, LongLong_sz) && to_VC: 
-    dump("unsigned __int64");return;
-  case &IntType(Unsigned, LongLong_sz): dump("unsigned long long"); return;
+  case &IntType(Signed, LongLong_sz): 
+    switch(c_compiler){
+    case Gcc_c: dump("long long"); return;
+    case Vc_c: dump("__int64"); return;
+    }
+  case &IntType(Unsigned, LongLong_sz): 
+    switch(c_compiler){
+    case Vc_c:  dump("unsigned __int64");return;
+    case Gcc_c: dump("unsigned long long"); return;
+    }
   case FloatType:  dump("float");  return;
   case &DoubleType(b): 
     if (b) 
@@ -974,8 +983,18 @@ void dumpenumfields(list_t<enumfield_t> fields) {
 void dumpaggrfields(list_t<aggrfield_t> fields) {
   for(; fields != NULL; fields = fields->tl) {
     let &Aggrfield{name,tq,type,width,atts} = fields->hd;
-    dumptqtd(tq,type,dump_str,name);
-    dumpatts(atts);
+
+    switch(c_compiler){
+    case Gcc_c:
+      dumptqtd(tq,type,dump_str,name);
+      dumpatts(atts);
+      break;
+    case Vc_c:
+      dumpatts(atts);
+      dumptqtd(tq,type,dump_str,name);
+      break;
+    }
+
     if (width != NULL) {
       dump_char(':');
       dumpexp((exp_t)width);
@@ -1018,7 +1037,20 @@ static void dumpids(list_t<vardecl_t> vds) {
 void dumpvardecl(vardecl_t vd,Position::seg_t loc) {
   let &Vardecl{sc,name,tq,type,initializer,_,atts,_} = vd;
   dumploc(loc);
-  if(to_VC) {
+  switch(c_compiler){
+  case Gcc_c:
+    // hack to avoid writing so many useless externs:
+    if(sc == Extern && qvar_to_Cids)
+      switch(Tcutil::compress(type)) {
+      case &FnType(_): break;
+      default: dumpscope(sc);
+      }
+    else
+      dumpscope(sc);
+    dumptqtd(tq, type, dumpqvar, name);
+    dumpatts(atts);
+    break;
+  case Vc_c:
     dumpatts(atts);
     dumpscope(sc);
     region temp {
@@ -1043,18 +1075,9 @@ void dumpvardecl(vardecl_t vd,Position::seg_t loc) {
       let pr = $(call_conv,name);
       dumptms(List::imp_rev(tms), dump_callconv_qvar, &pr);
     }
-  } else {
-    // hack to avoid writing so many useless externs:
-    if(sc == Extern && qvar_to_Cids)
-      switch(Tcutil::compress(type)) {
-      case &FnType(_): break;
-      default: dumpscope(sc);
-      }
-    else
-      dumpscope(sc);
-    dumptqtd(tq, type, dumpqvar, name);
-    dumpatts(atts);
+    break;
   }
+
   if(initializer != NULL) {
     dump_char('=');
     dumpexp((exp_t)initializer);
@@ -1071,20 +1094,28 @@ void dumpdecl(decl_t d) {
   case &Fn_d(fd):
     dumploc(d->loc);
     //    fprintf(stderr,"%s",*(*fd->name)[1]); fflush(stdout);
-    if(to_VC)
-      dumpatts(fd->attributes);
+    switch(c_compiler) {
+    case Vc_c: dumpatts(fd->attributes); break;
+    case Gcc_c: break;
+    }
     if(fd->is_inline) 
-      if(to_VC)
-	dump("__inline");
-      else
-	dump("inline");
+      switch(c_compiler){
+      case Vc_c: dump("__inline"); break;
+      case Gc_c: dump("inline");   break;
+      }
     dumpscope(fd->sc);
     type_t t = new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                                  List::map(Absynpp::arg_mk_opt,fd->args), 
                                  fd->c_varargs, fd->cyc_varargs,
                                  fd->rgn_po, NULL});
-    dumptqtd(empty_tqual(NULL), t,
-	     to_VC ? dump_callconv_fdqvar : dump_atts_qvar,fd);
+    switch(c_compiler){
+    case Gcc_c:
+      dumptqtd(empty_tqual(NULL), t, dump_atts_qvar,fd);
+      break;
+    case Vc_c:
+      dumptqtd(empty_tqual(NULL), t, dump_callconv_fdqvar,fd);
+      break;  
+    }
     dump_char('{');
     dumpstmt(fd->body);
     dump_char('}');

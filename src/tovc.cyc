@@ -126,12 +126,24 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
 	switch (vd->type) {
 	case &ArrayType(_): break;
 	default: e->r = deref_exp(var_exp(vd->name,DL),DL)->r; break;
-	}
+        }
 	*env.freevars = Set::rinsert(env.rgn,*env.freevars,vd);
 	return;
       }
     }
-    throw new Impossible(aprintf("unbound variable %s found in box_free_vars_exp", *v));
+
+    //FJS: if its a local var that does hit either of the previous cases 
+    //     (bound or free), throw exception
+    for (; env.all_locals != NULL; env.all_locals = env.all_locals->tl)
+      if (strptrcmp(v,(*env.all_locals->hd->name)[1])==0) {
+	throw new Impossible(aprintf("unbound variable %s found in box_free_vars_exp", *v));
+      }
+    
+    //FJS: if it's neither a local var or a global var, assume it is from the header file
+    //     (eg. _get_zero_arr_size_char)
+    return;
+
+    //    throw new Impossible(aprintf("unbound variable %s found in box_free_vars_exp", *v));
   case &Var_e(_,_): return;
 
     // everything else is just recursive descent
@@ -277,7 +289,7 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
       break;
     }
   qvar_t funname = Toc::temp_var();
-  *env.gen_ds=new List(new_decl(new Fn_d(new Fndecl(Static,true,funname,
+  *env.gen_ds=new List(new_decl(new Fn_d(new Fndecl(Static,false,funname,
 					    NULL,NULL,rettype,params,
                                             false,NULL,NULL,s,NULL,NULL,NULL,
                                             NULL)),DL),

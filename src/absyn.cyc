@@ -26,9 +26,25 @@
 #include <stdio.h>
 #include "tcutil.h"
 #include <marshal.h>
+#include "cyclone.h"
 using Core;
 using List;
 using Position;
+
+//FJS -- hack this in here until we create a file such as flags.cyc
+namespace Cyclone{ 
+  bool tovc_r = false;
+
+  tunion C_Compilers {
+    Gcc_c;  // gcc (default)
+    Vc_c;   // visual c 
+  };
+
+  tunion C_Compilers c_compiler = Gcc_c;
+}
+using Cyclone; 
+
+
 namespace Absyn {
 
 // return a negative, zero, or positive int according to whether the
@@ -772,7 +788,11 @@ string_t attribute2string(attribute_t a) {
   case Const_att: return "const";
   case &Aligned_att(i): 
     if (i == -1) return "aligned";
-    else return aprintf("aligned(%d)",i);
+    else /* return aprintf("aligned(%d)",i);*/
+      switch(c_compiler){
+      case Gcc_c: return aprintf("aligned(%d)",i);
+      case Vc_c:  return aprintf("align(%d)",i);
+      }
   case Packed_att: return "packed";
   case &Section_att(s): return aprintf("section(\"%s\")",s);
   case Nocommon_att: return "nocommon";
