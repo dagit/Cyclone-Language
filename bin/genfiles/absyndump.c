@@ -1258,78 +1258,77 @@ rgions=0;struct Cyc_List_List*effects=0;{void*_tmp57=Cyc_Tcutil_compress(t);void
 _tmp59;struct Cyc_List_List*_tmp5B;_LL6C: {struct Cyc_Absyn_AccessEff_struct*
 _tmp58=(struct Cyc_Absyn_AccessEff_struct*)_tmp57;if(_tmp58->tag != 24)goto _LL6E;
 else{_tmp59=(void*)_tmp58->f1;}}_LL6D:{struct Cyc_List_List*_tmp3EF;rgions=((
-_tmp3EF=_region_malloc(Cyc_Core_unique_region,sizeof(*_tmp3EF)),((_tmp3EF->hd=
-_tmp59,((_tmp3EF->tl=rgions,_tmp3EF))))));}goto _LL6B;_LL6E: {struct Cyc_Absyn_JoinEff_struct*
-_tmp5A=(struct Cyc_Absyn_JoinEff_struct*)_tmp57;if(_tmp5A->tag != 25)goto _LL70;
-else{_tmp5B=_tmp5A->f1;}}_LL6F: for(0;_tmp5B != 0;_tmp5B=_tmp5B->tl){struct Cyc_List_List*
+_tmp3EF=_cycalloc(sizeof(*_tmp3EF)),((_tmp3EF->hd=_tmp59,((_tmp3EF->tl=rgions,
+_tmp3EF))))));}goto _LL6B;_LL6E: {struct Cyc_Absyn_JoinEff_struct*_tmp5A=(struct
+Cyc_Absyn_JoinEff_struct*)_tmp57;if(_tmp5A->tag != 25)goto _LL70;else{_tmp5B=
+_tmp5A->f1;}}_LL6F: for(0;_tmp5B != 0;_tmp5B=_tmp5B->tl){struct Cyc_List_List*
 _tmp5E;struct Cyc_List_List*_tmp5F;struct _tuple14 _tmp5D=Cyc_Absyndump_effects_split((
 void*)_tmp5B->hd);_tmp5E=_tmp5D.f1;_tmp5F=_tmp5D.f2;rgions=((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x,struct Cyc_List_List*y))Cyc_List_imp_append)(_tmp5E,rgions);
 effects=((struct Cyc_List_List*(*)(struct Cyc_List_List*x,struct Cyc_List_List*y))
 Cyc_List_imp_append)(_tmp5F,effects);}goto _LL6B;_LL70:;_LL71:{struct Cyc_List_List*
-_tmp3F0;effects=((_tmp3F0=_region_malloc(Cyc_Core_unique_region,sizeof(*_tmp3F0)),((
-_tmp3F0->hd=t,((_tmp3F0->tl=effects,_tmp3F0))))));}goto _LL6B;_LL6B:;}{struct
-_tuple14 _tmp3F1;return(_tmp3F1.f1=rgions,((_tmp3F1.f2=effects,_tmp3F1)));};}
-static void Cyc_Absyndump_dumpeff(void*t){struct Cyc_List_List*_tmp63;struct Cyc_List_List*
-_tmp64;struct _tuple14 _tmp62=Cyc_Absyndump_effects_split(t);_tmp63=_tmp62.f1;
-_tmp64=_tmp62.f2;_tmp63=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(
-_tmp63);_tmp64=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(
-_tmp64);for(0;_tmp64 != 0;_tmp64=_tmp64->tl){Cyc_Absyndump_dumpntyp((void*)_tmp64->hd);
-Cyc_Absyndump_dump_char((int)'+');}Cyc_Absyndump_dump_char((int)'{');for(0;
-_tmp63 != 0;_tmp63=_tmp63->tl){Cyc_Absyndump_dumprgn((void*)_tmp63->hd);if(_tmp63->tl
-!= 0)Cyc_Absyndump_dump_char((int)',');}Cyc_Absyndump_dump_char((int)'}');}
-static void Cyc_Absyndump_dump_aggrdecl(struct Cyc_Absyn_Aggrdecl*);static void Cyc_Absyndump_dump_enumdecl(
-struct Cyc_Absyn_Enumdecl*);static void Cyc_Absyndump_dump_datatypedecl(struct Cyc_Absyn_Datatypedecl*);
-void Cyc_Absyndump_dumpntyp(void*t){void*_tmp65=t;struct Cyc_Absyn_Tvar*_tmp6B;
-struct Cyc_Core_Opt*_tmp6D;struct Cyc_Core_Opt*_tmp6E;int _tmp6F;struct Cyc_Core_Opt*
-_tmp71;struct Cyc_Core_Opt*_tmp72;struct Cyc_Core_Opt _tmp73;void*_tmp74;int _tmp75;
-struct Cyc_Absyn_DatatypeInfo _tmp77;union Cyc_Absyn_DatatypeInfoU _tmp78;struct Cyc_List_List*
-_tmp79;struct Cyc_Absyn_DatatypeFieldInfo _tmp7B;union Cyc_Absyn_DatatypeFieldInfoU
-_tmp7C;struct Cyc_List_List*_tmp7D;enum Cyc_Absyn_Sign _tmp7F;enum Cyc_Absyn_Size_of
-_tmp80;enum Cyc_Absyn_Sign _tmp82;enum Cyc_Absyn_Size_of _tmp83;enum Cyc_Absyn_Sign
-_tmp85;enum Cyc_Absyn_Size_of _tmp86;enum Cyc_Absyn_Sign _tmp88;enum Cyc_Absyn_Size_of
-_tmp89;enum Cyc_Absyn_Sign _tmp8B;enum Cyc_Absyn_Size_of _tmp8C;enum Cyc_Absyn_Sign
-_tmp8E;enum Cyc_Absyn_Size_of _tmp8F;enum Cyc_Absyn_Sign _tmp91;enum Cyc_Absyn_Size_of
-_tmp92;enum Cyc_Absyn_Sign _tmp94;enum Cyc_Absyn_Size_of _tmp95;enum Cyc_Absyn_Sign
-_tmp97;enum Cyc_Absyn_Size_of _tmp98;enum Cyc_Absyn_Sign _tmp9A;enum Cyc_Absyn_Size_of
-_tmp9B;enum Cyc_Absyn_Sign _tmp9D;enum Cyc_Absyn_Size_of _tmp9E;enum Cyc_Absyn_Sign
-_tmpA0;enum Cyc_Absyn_Size_of _tmpA1;enum Cyc_Absyn_Sign _tmpA3;enum Cyc_Absyn_Size_of
-_tmpA4;enum Cyc_Absyn_Sign _tmpA6;enum Cyc_Absyn_Size_of _tmpA7;enum Cyc_Absyn_Sign
-_tmpA9;enum Cyc_Absyn_Size_of _tmpAA;int _tmpAD;struct Cyc_List_List*_tmpAF;struct
-Cyc_Absyn_AggrInfo _tmpB1;union Cyc_Absyn_AggrInfoU _tmpB2;struct Cyc_List_List*
-_tmpB3;enum Cyc_Absyn_AggrKind _tmpB5;struct Cyc_List_List*_tmpB6;struct _tuple0*
-_tmpB8;struct Cyc_List_List*_tmpBA;struct _tuple0*_tmpBC;struct Cyc_List_List*
-_tmpBD;struct Cyc_Absyn_Exp*_tmpBF;void*_tmpC1;void*_tmpC3;void*_tmpC4;void*
-_tmpC6;struct Cyc_Absyn_TypeDecl*_tmpCA;struct Cyc_Absyn_TypeDecl _tmpCB;void*
-_tmpCC;struct Cyc_Absyn_Aggrdecl*_tmpCE;struct Cyc_Absyn_TypeDecl*_tmpD0;struct Cyc_Absyn_TypeDecl
-_tmpD1;void*_tmpD2;struct Cyc_Absyn_Enumdecl*_tmpD4;struct Cyc_Absyn_TypeDecl*
-_tmpD6;struct Cyc_Absyn_TypeDecl _tmpD7;void*_tmpD8;struct Cyc_Absyn_Datatypedecl*
-_tmpDA;_LL73: {struct Cyc_Absyn_ArrayType_struct*_tmp66=(struct Cyc_Absyn_ArrayType_struct*)
-_tmp65;if(_tmp66->tag != 9)goto _LL75;}_LL74: goto _LL76;_LL75: {struct Cyc_Absyn_FnType_struct*
-_tmp67=(struct Cyc_Absyn_FnType_struct*)_tmp65;if(_tmp67->tag != 10)goto _LL77;}
-_LL76: goto _LL78;_LL77: {struct Cyc_Absyn_PointerType_struct*_tmp68=(struct Cyc_Absyn_PointerType_struct*)
-_tmp65;if(_tmp68->tag != 5)goto _LL79;}_LL78: return;_LL79: {struct Cyc_Absyn_VoidType_struct*
-_tmp69=(struct Cyc_Absyn_VoidType_struct*)_tmp65;if(_tmp69->tag != 0)goto _LL7B;}
-_LL7A:{const char*_tmp3F2;Cyc_Absyndump_dump(((_tmp3F2="void",_tag_dyneither(
-_tmp3F2,sizeof(char),5))));}return;_LL7B: {struct Cyc_Absyn_VarType_struct*_tmp6A=(
-struct Cyc_Absyn_VarType_struct*)_tmp65;if(_tmp6A->tag != 2)goto _LL7D;else{_tmp6B=
-_tmp6A->f1;}}_LL7C: Cyc_Absyndump_dump_str(_tmp6B->name);return;_LL7D: {struct Cyc_Absyn_Evar_struct*
-_tmp6C=(struct Cyc_Absyn_Evar_struct*)_tmp65;if(_tmp6C->tag != 1)goto _LL7F;else{
-_tmp6D=_tmp6C->f1;_tmp6E=_tmp6C->f2;if(_tmp6E != 0)goto _LL7F;_tmp6F=_tmp6C->f3;}}
-_LL7E:{const char*_tmp3F3;Cyc_Absyndump_dump(((_tmp3F3="%",_tag_dyneither(_tmp3F3,
-sizeof(char),2))));}if(_tmp6D == 0){const char*_tmp3F4;Cyc_Absyndump_dump(((
-_tmp3F4="?",_tag_dyneither(_tmp3F4,sizeof(char),2))));}else{Cyc_Absyndump_dumpkind((
-struct Cyc_Absyn_Kind*)_tmp6D->v);}{const char*_tmp3F8;void*_tmp3F7[1];struct Cyc_Int_pa_struct
-_tmp3F6;Cyc_Absyndump_dump((struct _dyneither_ptr)((_tmp3F6.tag=1,((_tmp3F6.f1=(
-unsigned long)_tmp6F,((_tmp3F7[0]=& _tmp3F6,Cyc_aprintf(((_tmp3F8="(%d)",
-_tag_dyneither(_tmp3F8,sizeof(char),5))),_tag_dyneither(_tmp3F7,sizeof(void*),1)))))))));}
-return;_LL7F: {struct Cyc_Absyn_Evar_struct*_tmp70=(struct Cyc_Absyn_Evar_struct*)
-_tmp65;if(_tmp70->tag != 1)goto _LL81;else{_tmp71=_tmp70->f1;_tmp72=_tmp70->f2;if(
-_tmp72 == 0)goto _LL81;_tmp73=*_tmp72;_tmp74=(void*)_tmp73.v;_tmp75=_tmp70->f3;}}
-_LL80: Cyc_Absyndump_dumpntyp(_tmp74);return;_LL81: {struct Cyc_Absyn_DatatypeType_struct*
-_tmp76=(struct Cyc_Absyn_DatatypeType_struct*)_tmp65;if(_tmp76->tag != 3)goto _LL83;
-else{_tmp77=_tmp76->f1;_tmp78=_tmp77.datatype_info;_tmp79=_tmp77.targs;}}_LL82:{
-union Cyc_Absyn_DatatypeInfoU _tmpE5=_tmp78;struct Cyc_Absyn_UnknownDatatypeInfo
+_tmp3F0;effects=((_tmp3F0=_cycalloc(sizeof(*_tmp3F0)),((_tmp3F0->hd=t,((_tmp3F0->tl=
+effects,_tmp3F0))))));}goto _LL6B;_LL6B:;}{struct _tuple14 _tmp3F1;return(_tmp3F1.f1=
+rgions,((_tmp3F1.f2=effects,_tmp3F1)));};}static void Cyc_Absyndump_dumpeff(void*t){
+struct Cyc_List_List*_tmp63;struct Cyc_List_List*_tmp64;struct _tuple14 _tmp62=Cyc_Absyndump_effects_split(
+t);_tmp63=_tmp62.f1;_tmp64=_tmp62.f2;_tmp63=((struct Cyc_List_List*(*)(struct Cyc_List_List*
+x))Cyc_List_imp_rev)(_tmp63);_tmp64=((struct Cyc_List_List*(*)(struct Cyc_List_List*
+x))Cyc_List_imp_rev)(_tmp64);for(0;_tmp64 != 0;_tmp64=_tmp64->tl){Cyc_Absyndump_dumpntyp((
+void*)_tmp64->hd);Cyc_Absyndump_dump_char((int)'+');}Cyc_Absyndump_dump_char((
+int)'{');for(0;_tmp63 != 0;_tmp63=_tmp63->tl){Cyc_Absyndump_dumprgn((void*)_tmp63->hd);
+if(_tmp63->tl != 0)Cyc_Absyndump_dump_char((int)',');}Cyc_Absyndump_dump_char((
+int)'}');}static void Cyc_Absyndump_dump_aggrdecl(struct Cyc_Absyn_Aggrdecl*);
+static void Cyc_Absyndump_dump_enumdecl(struct Cyc_Absyn_Enumdecl*);static void Cyc_Absyndump_dump_datatypedecl(
+struct Cyc_Absyn_Datatypedecl*);void Cyc_Absyndump_dumpntyp(void*t){void*_tmp65=t;
+struct Cyc_Absyn_Tvar*_tmp6B;struct Cyc_Core_Opt*_tmp6D;struct Cyc_Core_Opt*_tmp6E;
+int _tmp6F;struct Cyc_Core_Opt*_tmp71;struct Cyc_Core_Opt*_tmp72;struct Cyc_Core_Opt
+_tmp73;void*_tmp74;int _tmp75;struct Cyc_Absyn_DatatypeInfo _tmp77;union Cyc_Absyn_DatatypeInfoU
+_tmp78;struct Cyc_List_List*_tmp79;struct Cyc_Absyn_DatatypeFieldInfo _tmp7B;union
+Cyc_Absyn_DatatypeFieldInfoU _tmp7C;struct Cyc_List_List*_tmp7D;enum Cyc_Absyn_Sign
+_tmp7F;enum Cyc_Absyn_Size_of _tmp80;enum Cyc_Absyn_Sign _tmp82;enum Cyc_Absyn_Size_of
+_tmp83;enum Cyc_Absyn_Sign _tmp85;enum Cyc_Absyn_Size_of _tmp86;enum Cyc_Absyn_Sign
+_tmp88;enum Cyc_Absyn_Size_of _tmp89;enum Cyc_Absyn_Sign _tmp8B;enum Cyc_Absyn_Size_of
+_tmp8C;enum Cyc_Absyn_Sign _tmp8E;enum Cyc_Absyn_Size_of _tmp8F;enum Cyc_Absyn_Sign
+_tmp91;enum Cyc_Absyn_Size_of _tmp92;enum Cyc_Absyn_Sign _tmp94;enum Cyc_Absyn_Size_of
+_tmp95;enum Cyc_Absyn_Sign _tmp97;enum Cyc_Absyn_Size_of _tmp98;enum Cyc_Absyn_Sign
+_tmp9A;enum Cyc_Absyn_Size_of _tmp9B;enum Cyc_Absyn_Sign _tmp9D;enum Cyc_Absyn_Size_of
+_tmp9E;enum Cyc_Absyn_Sign _tmpA0;enum Cyc_Absyn_Size_of _tmpA1;enum Cyc_Absyn_Sign
+_tmpA3;enum Cyc_Absyn_Size_of _tmpA4;enum Cyc_Absyn_Sign _tmpA6;enum Cyc_Absyn_Size_of
+_tmpA7;enum Cyc_Absyn_Sign _tmpA9;enum Cyc_Absyn_Size_of _tmpAA;int _tmpAD;struct
+Cyc_List_List*_tmpAF;struct Cyc_Absyn_AggrInfo _tmpB1;union Cyc_Absyn_AggrInfoU
+_tmpB2;struct Cyc_List_List*_tmpB3;enum Cyc_Absyn_AggrKind _tmpB5;struct Cyc_List_List*
+_tmpB6;struct _tuple0*_tmpB8;struct Cyc_List_List*_tmpBA;struct _tuple0*_tmpBC;
+struct Cyc_List_List*_tmpBD;struct Cyc_Absyn_Exp*_tmpBF;void*_tmpC1;void*_tmpC3;
+void*_tmpC4;void*_tmpC6;struct Cyc_Absyn_TypeDecl*_tmpCA;struct Cyc_Absyn_TypeDecl
+_tmpCB;void*_tmpCC;struct Cyc_Absyn_Aggrdecl*_tmpCE;struct Cyc_Absyn_TypeDecl*
+_tmpD0;struct Cyc_Absyn_TypeDecl _tmpD1;void*_tmpD2;struct Cyc_Absyn_Enumdecl*
+_tmpD4;struct Cyc_Absyn_TypeDecl*_tmpD6;struct Cyc_Absyn_TypeDecl _tmpD7;void*
+_tmpD8;struct Cyc_Absyn_Datatypedecl*_tmpDA;_LL73: {struct Cyc_Absyn_ArrayType_struct*
+_tmp66=(struct Cyc_Absyn_ArrayType_struct*)_tmp65;if(_tmp66->tag != 9)goto _LL75;}
+_LL74: goto _LL76;_LL75: {struct Cyc_Absyn_FnType_struct*_tmp67=(struct Cyc_Absyn_FnType_struct*)
+_tmp65;if(_tmp67->tag != 10)goto _LL77;}_LL76: goto _LL78;_LL77: {struct Cyc_Absyn_PointerType_struct*
+_tmp68=(struct Cyc_Absyn_PointerType_struct*)_tmp65;if(_tmp68->tag != 5)goto _LL79;}
+_LL78: return;_LL79: {struct Cyc_Absyn_VoidType_struct*_tmp69=(struct Cyc_Absyn_VoidType_struct*)
+_tmp65;if(_tmp69->tag != 0)goto _LL7B;}_LL7A:{const char*_tmp3F2;Cyc_Absyndump_dump(((
+_tmp3F2="void",_tag_dyneither(_tmp3F2,sizeof(char),5))));}return;_LL7B: {struct
+Cyc_Absyn_VarType_struct*_tmp6A=(struct Cyc_Absyn_VarType_struct*)_tmp65;if(
+_tmp6A->tag != 2)goto _LL7D;else{_tmp6B=_tmp6A->f1;}}_LL7C: Cyc_Absyndump_dump_str(
+_tmp6B->name);return;_LL7D: {struct Cyc_Absyn_Evar_struct*_tmp6C=(struct Cyc_Absyn_Evar_struct*)
+_tmp65;if(_tmp6C->tag != 1)goto _LL7F;else{_tmp6D=_tmp6C->f1;_tmp6E=_tmp6C->f2;if(
+_tmp6E != 0)goto _LL7F;_tmp6F=_tmp6C->f3;}}_LL7E:{const char*_tmp3F3;Cyc_Absyndump_dump(((
+_tmp3F3="%",_tag_dyneither(_tmp3F3,sizeof(char),2))));}if(_tmp6D == 0){const char*
+_tmp3F4;Cyc_Absyndump_dump(((_tmp3F4="?",_tag_dyneither(_tmp3F4,sizeof(char),2))));}
+else{Cyc_Absyndump_dumpkind((struct Cyc_Absyn_Kind*)_tmp6D->v);}{const char*
+_tmp3F8;void*_tmp3F7[1];struct Cyc_Int_pa_struct _tmp3F6;Cyc_Absyndump_dump((
+struct _dyneither_ptr)((_tmp3F6.tag=1,((_tmp3F6.f1=(unsigned long)_tmp6F,((
+_tmp3F7[0]=& _tmp3F6,Cyc_aprintf(((_tmp3F8="(%d)",_tag_dyneither(_tmp3F8,sizeof(
+char),5))),_tag_dyneither(_tmp3F7,sizeof(void*),1)))))))));}return;_LL7F: {
+struct Cyc_Absyn_Evar_struct*_tmp70=(struct Cyc_Absyn_Evar_struct*)_tmp65;if(
+_tmp70->tag != 1)goto _LL81;else{_tmp71=_tmp70->f1;_tmp72=_tmp70->f2;if(_tmp72 == 0)
+goto _LL81;_tmp73=*_tmp72;_tmp74=(void*)_tmp73.v;_tmp75=_tmp70->f3;}}_LL80: Cyc_Absyndump_dumpntyp(
+_tmp74);return;_LL81: {struct Cyc_Absyn_DatatypeType_struct*_tmp76=(struct Cyc_Absyn_DatatypeType_struct*)
+_tmp65;if(_tmp76->tag != 3)goto _LL83;else{_tmp77=_tmp76->f1;_tmp78=_tmp77.datatype_info;
+_tmp79=_tmp77.targs;}}_LL82:{union Cyc_Absyn_DatatypeInfoU _tmpE5=_tmp78;struct Cyc_Absyn_UnknownDatatypeInfo
 _tmpE6;struct _tuple0*_tmpE7;int _tmpE8;struct Cyc_Absyn_Datatypedecl**_tmpE9;
 struct Cyc_Absyn_Datatypedecl*_tmpEA;struct Cyc_Absyn_Datatypedecl _tmpEB;struct
 _tuple0*_tmpEC;int _tmpED;_LLCE: if((_tmpE5.UnknownDatatype).tag != 1)goto _LLD0;
@@ -1654,8 +1653,8 @@ _check_null(_tmp166))->hd);Cyc_Absyndump_dump(_tmp1EA);Cyc_Absyndump_dump_char((
 int)' ');Cyc_Absyndump_dumpexp_prec(myprec,(struct Cyc_Absyn_Exp*)((struct Cyc_List_List*)
 _check_null(_tmp166->tl))->hd);break;default: _LL14F: {struct Cyc_Core_Failure_struct
 _tmp43E;const char*_tmp43D;struct Cyc_Core_Failure_struct*_tmp43C;(int)_throw((
-void*)((_tmp43C=_region_malloc(Cyc_Core_unique_region,sizeof(*_tmp43C)),((
-_tmp43C[0]=((_tmp43E.tag=Cyc_Core_Failure,((_tmp43E.f1=((_tmp43D="Absyndump -- Bad number of arguments to primop",
+void*)((_tmp43C=_cycalloc(sizeof(*_tmp43C)),((_tmp43C[0]=((_tmp43E.tag=Cyc_Core_Failure,((
+_tmp43E.f1=((_tmp43D="Absyndump -- Bad number of arguments to primop",
 _tag_dyneither(_tmp43D,sizeof(char),47))),_tmp43E)))),_tmp43C)))));}}goto _LLE2;}
 _LLFB: {struct Cyc_Absyn_AssignOp_e_struct*_tmp167=(struct Cyc_Absyn_AssignOp_e_struct*)
 _tmp138;if(_tmp167->tag != 4)goto _LLFD;else{_tmp168=_tmp167->f1;_tmp169=_tmp167->f2;
@@ -2299,26 +2298,26 @@ _tmp4D3="__inline",_tag_dyneither(_tmp4D3,sizeof(char),9))));}goto _LL1FD;_LL200
 _LL201:{const char*_tmp4D4;Cyc_Absyndump_dump(((_tmp4D4="inline",_tag_dyneither(
 _tmp4D4,sizeof(char),7))));}goto _LL1FD;_LL1FD:;}Cyc_Absyndump_dumpscope(_tmp338->sc);{
 struct Cyc_Absyn_FnType_struct _tmp4DA;struct Cyc_Absyn_FnInfo _tmp4D9;struct Cyc_Absyn_FnType_struct*
-_tmp4D8;void*t=(void*)((_tmp4D8=_region_malloc(Cyc_Core_unique_region,sizeof(*
-_tmp4D8)),((_tmp4D8[0]=((_tmp4DA.tag=10,((_tmp4DA.f1=((_tmp4D9.tvars=_tmp338->tvs,((
-_tmp4D9.effect=_tmp338->effect,((_tmp4D9.ret_tqual=_tmp338->ret_tqual,((_tmp4D9.ret_typ=
-_tmp338->ret_type,((_tmp4D9.args=((struct Cyc_List_List*(*)(struct _tuple7*(*f)(
-struct _tuple10*),struct Cyc_List_List*x))Cyc_List_map)(Cyc_Absynpp_arg_mk_opt,
-_tmp338->args),((_tmp4D9.c_varargs=_tmp338->c_varargs,((_tmp4D9.cyc_varargs=
-_tmp338->cyc_varargs,((_tmp4D9.rgn_po=_tmp338->rgn_po,((_tmp4D9.attributes=0,
-_tmp4D9)))))))))))))))))),_tmp4DA)))),_tmp4D8))));switch(Cyc_Cyclone_c_compiler){
-case Cyc_Cyclone_Gcc_c: _LL202:((void(*)(struct Cyc_Absyn_Tqual,void*,void(*f)(
-struct Cyc_Absyn_Fndecl*),struct Cyc_Absyn_Fndecl*))Cyc_Absyndump_dumptqtd)(Cyc_Absyn_empty_tqual(
-0),t,Cyc_Absyndump_dump_atts_qvar,_tmp338);break;case Cyc_Cyclone_Vc_c: _LL203:((
-void(*)(struct Cyc_Absyn_Tqual,void*,void(*f)(struct Cyc_Absyn_Fndecl*),struct Cyc_Absyn_Fndecl*))
-Cyc_Absyndump_dumptqtd)(Cyc_Absyn_empty_tqual(0),t,Cyc_Absyndump_dump_callconv_fdqvar,
-_tmp338);break;}Cyc_Absyndump_dump_char((int)'{');Cyc_Absyndump_dumpstmt(_tmp338->body,
-0);Cyc_Absyndump_dump_char((int)'}');goto _LL1D9;};_LL1DE: {struct Cyc_Absyn_Aggr_d_struct*
-_tmp339=(struct Cyc_Absyn_Aggr_d_struct*)_tmp334;if(_tmp339->tag != 6)goto _LL1E0;
-else{_tmp33A=_tmp339->f1;}}_LL1DF: Cyc_Absyndump_dump_aggrdecl(_tmp33A);Cyc_Absyndump_dump_semi();
-goto _LL1D9;_LL1E0: {struct Cyc_Absyn_Datatype_d_struct*_tmp33B=(struct Cyc_Absyn_Datatype_d_struct*)
-_tmp334;if(_tmp33B->tag != 7)goto _LL1E2;else{_tmp33C=_tmp33B->f1;}}_LL1E1: Cyc_Absyndump_dump_datatypedecl(
-_tmp33C);Cyc_Absyndump_dump_semi();goto _LL1D9;_LL1E2: {struct Cyc_Absyn_Enum_d_struct*
+_tmp4D8;void*t=(void*)((_tmp4D8=_cycalloc(sizeof(*_tmp4D8)),((_tmp4D8[0]=((
+_tmp4DA.tag=10,((_tmp4DA.f1=((_tmp4D9.tvars=_tmp338->tvs,((_tmp4D9.effect=
+_tmp338->effect,((_tmp4D9.ret_tqual=_tmp338->ret_tqual,((_tmp4D9.ret_typ=_tmp338->ret_type,((
+_tmp4D9.args=((struct Cyc_List_List*(*)(struct _tuple7*(*f)(struct _tuple10*),
+struct Cyc_List_List*x))Cyc_List_map)(Cyc_Absynpp_arg_mk_opt,_tmp338->args),((
+_tmp4D9.c_varargs=_tmp338->c_varargs,((_tmp4D9.cyc_varargs=_tmp338->cyc_varargs,((
+_tmp4D9.rgn_po=_tmp338->rgn_po,((_tmp4D9.attributes=0,_tmp4D9)))))))))))))))))),
+_tmp4DA)))),_tmp4D8))));switch(Cyc_Cyclone_c_compiler){case Cyc_Cyclone_Gcc_c:
+_LL202:((void(*)(struct Cyc_Absyn_Tqual,void*,void(*f)(struct Cyc_Absyn_Fndecl*),
+struct Cyc_Absyn_Fndecl*))Cyc_Absyndump_dumptqtd)(Cyc_Absyn_empty_tqual(0),t,Cyc_Absyndump_dump_atts_qvar,
+_tmp338);break;case Cyc_Cyclone_Vc_c: _LL203:((void(*)(struct Cyc_Absyn_Tqual,void*,
+void(*f)(struct Cyc_Absyn_Fndecl*),struct Cyc_Absyn_Fndecl*))Cyc_Absyndump_dumptqtd)(
+Cyc_Absyn_empty_tqual(0),t,Cyc_Absyndump_dump_callconv_fdqvar,_tmp338);break;}
+Cyc_Absyndump_dump_char((int)'{');Cyc_Absyndump_dumpstmt(_tmp338->body,0);Cyc_Absyndump_dump_char((
+int)'}');goto _LL1D9;};_LL1DE: {struct Cyc_Absyn_Aggr_d_struct*_tmp339=(struct Cyc_Absyn_Aggr_d_struct*)
+_tmp334;if(_tmp339->tag != 6)goto _LL1E0;else{_tmp33A=_tmp339->f1;}}_LL1DF: Cyc_Absyndump_dump_aggrdecl(
+_tmp33A);Cyc_Absyndump_dump_semi();goto _LL1D9;_LL1E0: {struct Cyc_Absyn_Datatype_d_struct*
+_tmp33B=(struct Cyc_Absyn_Datatype_d_struct*)_tmp334;if(_tmp33B->tag != 7)goto
+_LL1E2;else{_tmp33C=_tmp33B->f1;}}_LL1E1: Cyc_Absyndump_dump_datatypedecl(_tmp33C);
+Cyc_Absyndump_dump_semi();goto _LL1D9;_LL1E2: {struct Cyc_Absyn_Enum_d_struct*
 _tmp33D=(struct Cyc_Absyn_Enum_d_struct*)_tmp334;if(_tmp33D->tag != 8)goto _LL1E4;
 else{_tmp33E=_tmp33D->f1;}}_LL1E3: Cyc_Absyndump_dump_enumdecl(_tmp33E);Cyc_Absyndump_dump_semi();
 goto _LL1D9;_LL1E4: {struct Cyc_Absyn_Let_d_struct*_tmp33F=(struct Cyc_Absyn_Let_d_struct*)

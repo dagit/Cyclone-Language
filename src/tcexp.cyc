@@ -2246,7 +2246,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     type_t optrgn = &VoidType_val;
     if (rgn_of_pointer(*topt,&optrgn)) {
       rgn = mallocRgn(optrgn);
-      if (rgn != &UniqueRgn_val) *rgn_handle = uniquergn_exp;
+      if (rgn == &UniqueRgn_val) *rgn_handle = uniquergn_exp;
     }
   }
 

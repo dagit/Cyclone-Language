@@ -940,11 +940,9 @@ void _profile_free_region(struct _RegionHandle *r, char *file, int lineno) {
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
     fprintf(alloc_log,":%d\t%s\tfree\n",lineno,
-	    (r != Cyc_Core_heap_region ?
-	     (r != Cyc_Core_unique_region ? 
-	      (r != Cyc_Core_refcnt_region ? r->name : "refcnt") : 
-	      "unique") :
-	     "heap"));
+	    (r == Cyc_Core_heap_region ? "heap" :
+	     (r == Cyc_Core_unique_region ? "unique" :
+	      (r == Cyc_Core_refcnt_region ? "refcnt" : r->name))));
   }
   _free_region(r);
 }
@@ -954,11 +952,9 @@ void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
     fprintf(alloc_log,":%d\t%s\t%d\t%d\t%d\t%d\n",lineno,
-	    (r != Cyc_Core_heap_region ?
-	     (r != Cyc_Core_unique_region ? 
-	      (r != Cyc_Core_refcnt_region ? r->name : "refcnt") :
-	      "unique") :
-	     "heap"), s,
+	    (r == Cyc_Core_heap_region ? "heap" :
+	     (r == Cyc_Core_unique_region ? "unique" :
+	      (r == Cyc_Core_refcnt_region ? "refcnt" : r->name))), s,
 	    region_get_heap_size(r), 
 	    region_get_free_bytes(r),
 	    region_get_total_bytes(r));
