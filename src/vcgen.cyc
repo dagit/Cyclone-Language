@@ -1312,7 +1312,7 @@ static void check_requires(env_t env, list_t<term_t> inputs,
                                      .name = qv,.varloc = 0,.tq = tq,
                                      .type = t,.initializer = NULL,
                                      .rgn = NULL,.attributes = NULL,
-                                     .escapes = false};
+                                     .escapes = false, .is_proto=false};
           a = and(a,eq(new Var(vd),inputs->hd));
         }
     }

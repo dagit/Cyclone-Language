@@ -18,8 +18,17 @@ extern "C include" {
     ENUM_KEY_1,
   } tenum_t;
 
+  typedef struct spinlock {
+    unsigned int a;
+  } spinlock_t;
+  
   struct tsz {
     void *fld;
+  };
+
+  struct recursive_tvar {
+    struct tsz *t;
+    struct recursive_tvar *rec;
   };
 
   struct tsz* alloc(unsigned int a) {
@@ -29,6 +38,113 @@ extern "C include" {
   void do_tsz(struct tsz *arg) { //should get a tvar automatically
     return;
   }
+
+  struct pci_dev {//seed
+    int a;
+    void *fld;
+  };
+  
+  struct use_pci_dev {//recursion okay 
+    int b;
+    struct pci_dev *dev;
+    struct use_pci_dev *self;
+    struct use_pci_dev *self2;
+  };
+  
+  struct use_use_pci_dev {//multiple phase test
+    int a;
+    struct pci_dev *dev;
+    struct use_pci_dev *use;
+  };
+
+  struct mut_rec1 { //mut rec should fail if not manually overridden
+    struct pci_dev *a;
+    struct mut_rec2 *b;
+  };
+
+  struct mut_rec2 {
+    int a;
+    struct mut_rec1 *b;
+  };
+  
+  struct pci_ops{//update function pointer types
+    int (* read_byte)(struct pci_dev *,int where);
+    int (* read_word)(struct pci_dev *,int where);
+    int (* read_dword)(struct pci_dev *,int where);
+    int (* write_byte)(struct pci_dev *,int where);
+    int (* write_word)(struct pci_dev *,int where);
+    int (* write_dword)(struct pci_dev *,int where);
+  };
+
+  struct sk_buff {//other mut rec/fp/fld case
+    struct sk_buff *next;
+    struct sk_buff *prev;
+    struct sk_buff_head *hd;
+    struct pci_dev *pci;
+    void (*fn)(struct sk_buff *a);
+  };
+  
+  //more cases ... don't exercise anything very different that the cases above
+  struct sk_buff_head { //multi tvar
+    struct sk_buff *p;
+    struct sk_buff *n;
+    int a;
+  };
+
+  struct netlink_callback //multi tvar + fnptr
+  {
+    struct sk_buff *skb;
+    int (*dump)(struct sk_buff * skb, struct netlink_callback *cb);
+    int (*done)(struct netlink_callback *cb);
+  };
+  
+  struct rtnetlink_link//multi tvar + fnptr
+  {
+    int (*doit)(struct sk_buff *);
+    int (*dumpit)(struct sk_buff *);
+  };
+
+  struct softnet_data //multi phase, multi tvar
+  {
+    int throttle;
+    int cng_level;
+    int avg_blog;
+    struct sk_buff_head input_pkt_queue;
+    struct pci_dev *output_queue;
+    struct sk_buff *completion_queue;
+    
+    struct pci_dev blog_dev;
+  };
+
+  struct packet_type
+  {
+    unsigned short type;
+    struct pci_dev *dev;
+    int (*func) (struct sk_buff *, struct pci_dev *,
+		 struct packet_type *);
+    void *data;
+    struct packet_type *next;
+  };
+
+  struct hh_cache
+  {
+    struct hh_cache *hh_next;
+    unsigned short hh_type;
+    int hh_len;
+    int (*hh_output)(struct sk_buff *skb);
+    unsigned long hh_data[16/sizeof(unsigned long)];
+  };
+
+  struct skb_shared_info {
+    unsigned int nr_frags;
+    struct sk_buff *frag_list;
+  };
+  
+  void foobar(struct use_use_pci_dev *d);
+  void use_only_pci_ops(struct pci_ops *foo);
+  void use_both(struct pci_ops *foo, struct pci_dev *bar);
+
+  struct use_use_pci_dev uupd[100];
 }
 cyclone_override {
   struct list<`a> { `a x; struct list<`a> *tl; };
@@ -46,6 +162,33 @@ cyclone_override {
   
   struct tsz<`a*> *alloc(Core::sizeof_t<`a> a); //typedef should be expanded before merging
 
+  //seed the fixed point stuff by introducing one tvar
+  struct pci_dev<`a> {
+    int a;
+    `a fld;
+  };
+  //fix the mutual recursion manually
+  struct mut_rec1<`a> {
+    struct pci_dev<`a> *a;
+    struct mut_rec2<`a> *b;
+  };
+  
+  //fix other mutual recursion manually,
+  //setting tvar dependency as desired
+  struct sk_buff<`a> {
+    struct sk_buff<`a> *next;
+    struct sk_buff<`a> *prev;
+    struct sk_buff_head<`a> *hd;
+    struct pci_dev<`a> *pci;
+    void (*fn)(struct sk_buff<`a> *a);
+  };
+  
+  struct sk_buff_head<`a> {
+    struct sk_buff<`a> *p;
+    struct sk_buff<`a> *n;
+    int a;
+  };
+
 }
 export { * }
 hide { GC_malloc }
@@ -56,6 +199,7 @@ int main() {
   struct list *x = new list{new 1,NULL};
   struct list *y = new list{new 1,NULL};
   struct list *z = new_list();
+  spinlock_t spin = (spinlock_t){1}; //test compound literal
   if (*x->x == *y->x && *x->x == z->x) return ENUM_KEY_0;
   else return -ENUM_KEY_1;
 }

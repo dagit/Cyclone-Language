@@ -33,7 +33,7 @@ using Tcenv;
      changed in place. */
 void merge_sys_user_decl(seg_t, tenv_t, bool is_buildlib,decl_t user_decl,decl_t c_decl);
 
-void user_overrides(seg_t, tenv_t, list_t<decl_t> *ds, list_t<decl_t> ovrs);
+void user_overrides(seg_t, tenv_t, list_t<decl_t,`H> *ds, list_t<decl_t> ovrs);
 }
 
 #endif /* _CIFC_H_ */

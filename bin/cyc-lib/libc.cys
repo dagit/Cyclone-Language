@@ -2486,8 +2486,14 @@ spawn.h:
 ;
 
 // We have safe ways of handling varargs in Cyclone already
-// Not supported
+// need for linux kernel protos
 stdarg.h:
+include {
+va_list
+}
+hstub {
+
+}
 ;
 
 // Maybe this should replace Cyclone's treatment of bool?

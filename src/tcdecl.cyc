@@ -651,7 +651,10 @@ datatype Binding* merge_binding(binding_t b0, binding_t b1,
 					d1->sc,(type_t)d1->cached_type,empty_tqual(0), 
 					d1->i.attributes, "function", 
 					qvar2string(d0->name), loc, msg);
-    if(res) return b1;
+    if(res) {
+      d0->is_proto = true; //seen a decl ... so var binding is a prototype
+      return b1;
+    }
     return NULL;
   case $(&Funname_b(_),  &Funname_b(d1)):
     merr(loc, msg, "redefinition of function %s", qvar2string(d1->name));
@@ -661,7 +664,10 @@ datatype Binding* merge_binding(binding_t b0, binding_t b1,
 					 d0->i.attributes, d1->sc, d1->type, 
 					 d1->tq, d1->attributes, "variable", 
 					 qvar2string(d0->name), loc, msg);
-    if(res) return b0;
+    if(res) {
+      d1->is_proto = true;
+      return b0;
+    }
     return NULL;
   default: return NULL;
   }

@@ -1133,7 +1133,7 @@ void resolve_decl(env_t env, decl_t d) {
 	    (*f->name)[0] = (*tud->name)[0];
 	  break;
 	case {.Rel_n = _}:
-	  err2(f->loc,"qualified datatype field declaratations not allowed");
+	  err2(f->loc,"qualified datatype field declarations not allowed");
 	  return;
 	case {.Abs_n = _}: break;
 	default: impos("datatype field Loc_n or C_n");

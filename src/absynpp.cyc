@@ -1224,9 +1224,9 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Valueof_e(t): s = cat(text("valueof("), typ2doc(t), text(")")); break;
   case &Asm_e(vol,t,o,i,cl):
     if (vol)
-      s = cat(text("__asm__"),text(" volatile ("),text("\""),text(t),text("\""),asm_iolist_doc(o,i,cl),text(")"));
+      s = cat(text("__asm__"),text(" volatile ("),text("\""),text(string_escape(t)),text("\""),asm_iolist_doc(o,i,cl),text(")"));
     else
-      s = cat(text("__asm__("),text("\""),text(t),text("\""),asm_iolist_doc(o,i,cl),text(")"));
+      s = cat(text("__asm__("),text("\""),text(string_escape(t)),text("\""),asm_iolist_doc(o,i,cl),text(")"));
     break;
   case &Tagcheck_e(e,f):
     s = cat(text("tagcheck("), exp2doc(e), text("."), textptr(f), text(")"));
@@ -1693,7 +1693,7 @@ static doc_t ids2doc(list_t<vardecl_t> vds) {
 }
 
 doc_t vardecl2doc(vardecl_t vd) {
-  let &Vardecl{sc,name,varloc,tq,type,initializer,_,atts,_} = vd;
+  let &Vardecl{sc,name,varloc,tq,type,initializer,_,atts,...} = vd;
   doc_t s;
   doc_t sn = typedef_name2bolddoc(name);
   doc_t attsdoc   = atts2doc(atts);

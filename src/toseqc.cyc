@@ -451,7 +451,10 @@ list_t<decl_t> toseqc(list_t<decl_t,`H> ds) {
   let old_ds = ds;
   for (; old_ds != NULL; old_ds = old_ds->tl)
     switch (old_ds->hd->r) {
-    case &Fn_d(fd): stmt_to_seqc(fd->body); break;
+    case &Fn_d(fd): 
+      if(fd->orig_scope == ExternC)
+	break;
+      stmt_to_seqc(fd->body); break;
     case &Var_d(_):         
     case &Let_d(...): 
     case &Letv_d(_):        

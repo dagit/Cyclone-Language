@@ -354,7 +354,7 @@ static exp_t stmt_to_fun(toexpenv_t env, stmt_t s, type_t rettype) {
   Iter::iter_t<_,`stmt_to_fun> iter = Set::make_iter(Core::heap_region, freevars);
   // having to initialize is a pain :-(
   let vd = new Vardecl(Public,exn_name,0,empty_tqual(0),void_type,
-		       NULL,NULL,NULL,false);
+		       NULL,NULL,NULL,false,false);
     // don't box if it's a stack-allocated array
   while(Iter::next(iter,&vd))
     switch (vd->type) {
@@ -378,8 +378,8 @@ static exp_t stmt_to_fun(toexpenv_t env, stmt_t s, type_t rettype) {
 						 rettype,params,false,NULL,
 						 NULL,NULL,
 						 NULL,NULL,NULL,NULL,NULL),
-					  NULL,NULL,NULL)),DL),
-		       *env.gen_ds);
+					  NULL,NULL,NULL,Static)),DL),
+	     *env.gen_ds);
   return fncall_exp(var_exp(funname,DL), args, DL);
 }
 
@@ -718,7 +718,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
           if (*gen_ds != NULL) {
             vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
                                         Tcutil::fndecl2type(fd), NULL, NULL, 
-					fd->i.attributes, false};
+					fd->i.attributes, false,(fd->body!=NULL)};
             new_ds = new List(new_decl(new Var_d(vd),DL),new_ds);
             // fprintf(Stdio::stderr,"%s",*(*fd->name)[1]); Stdio::fflush(Stdio::stdout);
             new_ds = append(*gen_ds,new_ds);

@@ -744,6 +744,8 @@ namespace Absyn {
     // flow analyses, means that &x is taken in some way so there can be
     // aliasing going on. (should go away since flow analysis already does
     // a less syntactic escapes analysis)
+    bool               is_proto; //used for suppression of gcc warnings ...
+    //by inserting extern kw appropriately
   };
 
   // Function declarations.
@@ -758,6 +760,7 @@ namespace Absyn {
     type_opt_t cached_type; // cached type of the function
     opt_t<list_t<vardecl_t>>   param_vardecls;// so we can use pointer equality
     struct Vardecl            *fn_vardecl; // used only for inner functions
+    scope_t    orig_scope; //after toc, this field is used to flag extern C functions ... ignore bodies
   };
 
   EXTERN_ABSYN struct Aggrfield {

@@ -45,6 +45,7 @@
 #include "insert_checks.h"
 #include "toc.h"
 #include "tcpat.h"
+
 using Core;
 using List;
 using Absyn;
@@ -775,6 +776,8 @@ static bool is_pointer_or_boxed_tvar(type_t t) {
   return is_pointer_type(t) || is_boxed_tvar(t);
 }
 
+static void exptypes_to_c(exp_t e); // forward declaration
+
 type_t typ_to_c(type_t t) {
   switch (t) {
   case &AppType(&VoidCon,_): return t;
@@ -906,6 +909,7 @@ type_t typ_to_c(type_t t) {
     // JGM: we have to eliminate typeof(e)'s since these might
     // occur within a type declaration and we will pull the
     // type-declaration out of scope and put it to the top-level.
+    exptypes_to_c(e);
     if (e->topt != NULL) 
       return typ_to_c((type_t)e->topt);
     return t;
@@ -1179,6 +1183,22 @@ switch_as_switch_env(region_t<`r> r, env_t<`r2> e, var_t next_l : {`r2} > `r) {
 ///////////////////////////////////////////////////////////////
 static void exp_to_c(env_t nv, exp_t e); // forward declaration
 static void stmt_to_c(env_t nv, stmt_t s); // forward declaration
+
+static void asm_iolist_types_toc(list_t<$(string_t, exp_t)@> l) {
+  while(l) {
+    let &$(_,e) = l->hd;
+    exptypes_to_c(e);
+    l = l->tl;
+  }
+}
+
+static void asm_iolist_toc(env_t nv, list_t<$(string_t, exp_t)@> l) {
+  while(l) {
+    let &$(_,e) = l->hd;
+    exp_to_c(nv, e);
+    l = l->tl;
+  }
+}
 
 static bool do_null_check(exp_t e) { 
   switch(e->annot) {
@@ -1515,7 +1535,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   }
   let x = temp_var();                // build ptr_type x = ea + eb;
   TOC_RGN(nv, rgn2) {
-    let x_vd = new Vardecl {Public,x,0,mt_tq,c_fat_ptr_type,xinit,NULL,NULL,false};
+    let x_vd = new Vardecl {Public,x,0,mt_tq,c_fat_ptr_type,xinit,NULL,NULL,false,false};
     let x_bnd = new Local_b(x_vd);     // build *x -- need to translate here
     let x_exp = varb_exp(x_bnd,DL);  // to check the bound and for NULL
     x_exp->topt = fat_ptr_type;
@@ -1524,7 +1544,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     deref_x->annot = &InsertChecks::NullAndFatBound_val; //check bound and NULL
     exp_to_c(nv,deref_x);
     let y = temp_var();                // build elt_type y = *x;
-    let y_vd = new Vardecl {Public,y,0,mt_tq,c_elt_type,deref_x,NULL,NULL,false};
+    let y_vd = new Vardecl {Public,y,0,mt_tq,c_elt_type,deref_x,NULL,NULL,false,false};
     let y_bnd = new Local_b(y_vd);
     exp_t z_init = e2;                 // build y op e2 and translate
     if (popt != NULL) {
@@ -1536,7 +1556,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     }
     exp_to_c(nv,z_init);
     let z = temp_var();                // build z = y op e2;
-    let z_vd = new Vardecl {Public,z,0,mt_tq,c_elt_type,z_init,NULL,NULL,false};
+    let z_vd = new Vardecl {Public,z,0,mt_tq,c_elt_type,z_init,NULL,NULL,false,false};
     let z_bnd = new Local_b(z_vd);
     // build y == zero and translate -- here, we need to know what
     // the element type is to generate the right zero.
@@ -1688,6 +1708,7 @@ static raw_exp_t tagged_union_assignop(exp_t e1, type_t e1_cyc_type,
                            seq_stmt(s2,s3,DL),DL);
   return stmt_exp_r(s1);
 }
+
 
 static void exp_to_c(env_t nv, exp_t e) {
   if(e->topt == NULL)
@@ -2825,11 +2846,15 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &UnresolvedMem_e(_,_): toc_impos2("UnresolvedMem");
   case &CompoundLit_e(_,_):   toc_impos2("compoundlit");
   case &Valueof_e(_):         toc_impos2("valueof(-)");
-  case &Asm_e(...): break;//<-- no transformation needed toc_impos2("__asm__"); 
+  case &Asm_e(_,_,o,i,_): 
+    asm_iolist_types_toc(o);
+    asm_iolist_types_toc(i);
+    break;
   }
   if(!did_inserted_checks)
     Warn::impos_loc2(e->loc,"Toc did not examine an inserted check: ", e);
 }
+
 
 ///////////////////////////////////////////////////////////////
 //              Translation of Switch Statements             //
@@ -3611,8 +3636,8 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                  declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
 		 seq_stmt(exp_stmt(fncall_exp_dl(_push_region_e, x_exp),DL),
                  seq_stmt(body, 
-		 exp_stmt(fncall_exp_dl(_pop_region_e),
-			  DL),DL),DL),DL),DL)->r;
+			  exp_stmt(fncall_exp_dl(_pop_region_e),
+				   DL),DL),DL),DL),DL)->r;
         } 
         return;
       default: Warn::impos2("bad nested declaration within function");
@@ -4079,6 +4104,7 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
   }
 }
 
+
 // These next few functions clean up the types in C code, getting
 // rid of stuff inserted by the parser (e.g., region evars).
 
@@ -4121,10 +4147,13 @@ static void exptypes_to_c(exp_t e) {
       m->elt_type = new (typ_to_c(*m->elt_type));
     exptypes_to_c(m->num_elts);
     break;
+  case &Asm_e(_,_,o,i,_):     
+    asm_iolist_types_toc(o);
+    asm_iolist_types_toc(i);
+    break;
   case &Const_e(_):     
   case &Var_e(_):       
   case &Enum_e(...):  
-  case &Asm_e(...):     
   case &AnonEnum_e(...): break;
 
   case &Assert_e(...):
@@ -4238,7 +4267,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds,
       break;
     case &Fn_d(fd):
       // strip any namespace from an extern C declaration
-      if (fd->sc == ExternC) {
+      if (fd->sc == ExternC) { //but subsequent phases should ignore the body
 	fd->name = new $(Abs_n(NULL,true),(*fd->name)[1]);
         fd->sc = Public; // function declarations can't be extern
       }

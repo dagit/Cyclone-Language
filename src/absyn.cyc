@@ -388,7 +388,7 @@ exp_t uniquergn_exp() {
     e = new Exp{.topt = t, .loc = 0, .annot = &EmptyAnnot_val, .r = 
 		new Var_e(new Global_b(new Vardecl(Extern, uniquergn_qvar(),
 						   0, empty_tqual(0), t, 
-						   NULL, NULL, NULL, false)))};
+						   NULL, NULL, NULL, false, false)))};
   }
   return (exp_t)e;
 }
@@ -735,12 +735,14 @@ vardecl_t new_vardecl(seg_t varloc, qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Public, .name=x, .varloc = varloc,
 			.tq=empty_tqual(0),
                         .type=t, .initializer=init, .rgn=NULL, 
-                        .attributes=NULL, .escapes=false};
+                        .attributes=NULL, .escapes=false, 
+			.is_proto=false};
 }
 vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Static, .name=x, .varloc = 0,.tq=empty_tqual(0),
                         .type=t, .initializer=init, .rgn=NULL,
-                        .attributes=NULL, .escapes=false};
+                        .attributes=NULL, .escapes=false,
+			.is_proto=false};
 }
 struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,
 				    list_t<$(type_t,type_t)@`H,`H> po,

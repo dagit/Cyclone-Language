@@ -113,6 +113,12 @@ bool is_function_type(type_t t) {
   default: return false;
   }
 }
+bool is_typedef_type(type_t t) {
+  switch (compress(t)) {
+  case &TypedefType(...): return true;
+  default: return false;
+  }
+}
 bool is_boxed(type_t t) {
   return type_kind(t)->kind == BoxKind;
 }
@@ -770,7 +776,7 @@ bool equiv_fn_atts(attributes_t a1, attributes_t a2) {
     if (!List::exists_c(equal_att,a->hd,a2) && !is_regparm0_att(a->hd))return false;
   for (_ a = a2; a != NULL; a = a->tl)
     if (!List::exists_c(equal_att,a->hd,a1)&& !is_regparm0_att(a->hd)) return false;
-  return true;
+  return true; 
 }
 
 // forward declarations

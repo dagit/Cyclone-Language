@@ -23,6 +23,7 @@
 #include "tcutil.h"
 #include "warn.h"
 #include "cyclone.h"
+#include "toc.h"
 namespace Lex {
   extern $(const char ?, unsigned int) xlate_pos(Position::seg_t);
 }
@@ -496,20 +497,26 @@ static void dumpfunargs(list_t<$(var_opt_t,tqual_t,type_t)@> args,
 			bool c_varargs, vararg_info_t *cyc_varargs, 
 			type_opt_t effopt, list_t<$(type_t,type_t)@> rgn_po,
 			exp_opt_t req, exp_opt_t ens) {
-  group(dumpfunarg,args,"(","",",");
-  if (c_varargs || cyc_varargs != NULL) 
-    dump(",...");
-  if (cyc_varargs != NULL) {
-    if (cyc_varargs->inject) dump(" inject ");
-    dumpfunarg(new $(cyc_varargs->name, cyc_varargs->tq, cyc_varargs->type));
+  if(args == NULL && !c_varargs && cyc_varargs == NULL && 
+     effopt == NULL && rgn_po == NULL) {
+    dump("(void)"); //when compiling for the linux kernel, expect -Wstrict-prototypes
   }
-  if (effopt != NULL) {
-    dump_semi(); dumpeff(effopt);
+  else {
+    group(dumpfunarg,args,"(","",",");
+    if (c_varargs || cyc_varargs != NULL) 
+      dump(",...");
+    if (cyc_varargs != NULL) {
+      if (cyc_varargs->inject) dump(" inject ");
+      dumpfunarg(new $(cyc_varargs->name, cyc_varargs->tq, cyc_varargs->type));
+    }
+    if (effopt != NULL) {
+      dump_semi(); dumpeff(effopt);
+    }
+    if (rgn_po != NULL) {
+      dump_char(':'); dump_rgnpo(rgn_po);
+    }
+    dump_char(')');
   }
-  if (rgn_po != NULL) {
-    dump_char(':'); dump_rgnpo(rgn_po);
-  }
-  dump_char(')');
   if (req != NULL) {
     dump(" @requires("); dumpexp(req); dump_char(')');
   }
@@ -540,14 +547,24 @@ static void dumpoffset_field(offsetof_field_t f) {
   }
 }
 
-static void dump_asm_iolist(list_t<$(string_t, exp_t)@> iolist) {
+static void dump_asm_iolist(list_t<$(string_t<`H>, exp_t)@> iolist) {
   while(iolist) {
     let &$(constr, e1) = iolist->hd;
-    dump_char('"');dump_nospace(constr);dump_char('"');
+    dump_char('"');dump_nospace(Absynpp::string_escape(constr));dump_char('"');
     dump_char('(');dumpexp(e1);dump_char(')');
     iolist = iolist->tl;
     if(iolist)
       dump_char(',');
+    /*
+      switch(e1->r) {
+      case &Cast_e(t,e,b,c):
+      fprintf(stderr, "Got cast exp in asm: (%s, %s, %s)\n",
+      Absynpp::typ2string(t), Absynpp::typ2string(Toc::typ_to_c(t)), Absynpp::exp2string(e));
+      break;
+      default:
+      break;
+      }
+    */
   }
 }
 
@@ -683,7 +700,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
   case &Asm_e(vol,t,o,i,cl):
     dump("__asm__");
     if (vol) dump(" volatile ");
-    dump_nospace("(\""); dump_nospace(t); dump_char('"');
+    dump_nospace("(\""); dump_nospace(Absynpp::string_escape(t)); dump_char('"');
     if(o) {
       dump_char(':');
       dump_asm_iolist(o);
@@ -700,7 +717,7 @@ static void dumpexp_prec(int inprec, exp_t e) {
 	dump_nospace(" :");	
       while(cl) {
 	dump_char('"');
-	dump_nospace(*cl->hd);
+	dump_nospace(Absynpp::string_escape(*cl->hd));
 	dump_char('"');
 	cl = cl->tl;
 	if(cl)
@@ -1054,13 +1071,16 @@ static bool is_char_ptr(type_t t) {
 }
 
 static void dumpvardecl(vardecl_t vd,Position::seg_t loc,bool do_semi) {
-  let &Vardecl{sc,name,varloc,tq,type,initializer,_,atts,_} = vd;
+  let &Vardecl{sc,name,varloc,tq,type,initializer,_,atts,_,is_proto} = vd;
   switch(c_compiler){
   case Gcc_c:
     // hack to avoid writing so many useless externs:
     if(sc == Extern && qvar_to_Cids)
       switch(Tcutil::compress(type)) {
-      case &FnType(_): break;
+      case &FnType(_): 
+	if(!is_proto) //finer grained control -- write extern only if not a proto, makes -Wall happier
+	  dumpscope(sc);
+	break;
       default: dumpscope(sc);
       }
     else
@@ -1331,7 +1351,8 @@ static void dump_decl_interface(decl_t d) {
     if (vd->sc == Static) return;
     exp_opt_t init = vd->initializer;
     vd->initializer = NULL;
-    if (vd->sc == Public)
+    if ((vd->sc == Public) || 
+	(Tcutil::is_function_type(vd->type) && !vd->is_proto))
       dump("extern ");
     dumpvardecl(vd,d->loc,true);
     dump("\n");

@@ -24,6 +24,7 @@
 #include "warn.h"
 #include "tctyp.h"
 #include "tcutil.h"
+#include <string.h>
 
 using Absyn;
 using List;
@@ -143,19 +144,27 @@ static type_t expand_c_type(seg_t loc, tenv_t te, type_t ctyp) {
 //   an int where an unsigned int is expected.
 static bool c_types_ok(seg_t loc, tenv_t te, type_t ctyp, type_t cyctyp) {
   tqual_t tq;
-  
-  let c_typ = Toc::typ_to_c(Tcutil::copy_type(ctyp));
-  let u_typ = Toc::typ_to_c(Tcutil::copy_type(cyctyp));
-  if(Tcutil::is_function_type(c_typ) && Tcutil::is_function_type(u_typ)) {
+
+  let ctyp_cp = Tcutil::copy_type(ctyp);
+  let utyp_cp = Tcutil::copy_type(cyctyp);
+
+  let c_typ = Toc::typ_to_c(ctyp_cp);
+  let u_typ = Toc::typ_to_c(utyp_cp);
+  if(!Unify::unify(c_typ, u_typ)) { 
     c_typ = expand_c_type(loc, te, c_typ);
     u_typ = expand_c_type(loc, te, u_typ);
+    return Unify::unify(c_typ,u_typ);
   }
+  return true;
+
+  /*  if((Tcutil::is_function_type(c_typ) && Tcutil::is_function_type(u_typ)) ||
+      (Tcutil::is_typedef_type(c_typ) ^ Tcutil::is_typedef_type(u_typ))) {*/
+  
   /*  fprintf(stderr, "\n Converted types --> \n\t c_typ = %s-->%s,\n\t u_typ = %s-->%s\n",
       Absynpp::typ2string(ctyp),
       Absynpp::typ2string(c_typ),
       Absynpp::typ2string(cyctyp),
       Absynpp::typ2string(u_typ)); */
-  return Unify::unify(c_typ,u_typ);
 }
 
 // Merge two attribute lists into a freshly-allocated list.  
@@ -247,7 +256,7 @@ void merge_sys_user_decl(seg_t loc, tenv_t te, bool is_buildlib,
 	let ufield = lookup_field(ufields,cfield->name);
 	// if no user version, just keep the C version
 	if (ufield != NULL) {
-	  // make sure these are representation-compatible.  To so this, convert
+	  // make sure these are representation-compatible.  To do this, convert
 	  // them to C types, and then unify these.  If they match, we're OK.
 	  if (!c_types_ok(loc, te, cfield->type,ufield->type)) {
 	    FAIL_MERGE(false,loc,is_buildlib,cd->name,
@@ -452,7 +461,23 @@ static list_t<tvar_t> extract_tvars(types_t ts) {
   return res;
 }
 
-static $(list_t<tvar_t>, list_t<tvar_t>)* update_tvars(tenv_t te, list_t<decl_t> tv_ovrs, type_t t) {
+static type_t instantiate_tvar(seg_t loc, tvar_t tv) {
+  switch(tv->kind) {
+  case &Eq_kb(k): fallthru(k);
+  case &Less_kb(_, k):
+    if(k->kind == BoxKind || k->kind == AnyKind)
+      return cstar_type(void_type, empty_tqual(loc));
+    break;
+  case &Unknown_kb(_): 
+    return cstar_type(void_type, empty_tqual(loc));
+  }
+  err2(loc, "Unable to instantiate tvar %s", Absynpp::tvar2string(tv));
+  return void_type;
+}
+
+static $(list_t<tvar_t>, list_t<tvar_t>)* update_tvars(tenv_t te, list_t<decl_t> tv_ovrs, 
+						       type_t t, decl_t enclosing_decl,
+						       bool instantiate) {
   //  fprintf(stderr, "!!!!update_tvars for %s -- (%s)\n", Absynpp::typ2string(t), Absynpp::get_type_kind(t));
   switch(t) {
   case &AppType(tc, *ts):
@@ -469,35 +494,38 @@ static $(list_t<tvar_t>, list_t<tvar_t>)* update_tvars(tenv_t te, list_t<decl_t>
 	  //		  Absynpp::decllist2string(new List(ovd, NULL)));
 	  switch(ovd->r) {
 	  case &Aggr_d(ad):
-	    /*	    let tvs = get_tvar_difference(ad->tvs, copy(*ts));
-		    if((length(tvs) + length(*ts)) != length(ad->tvs)) {
-		    impos("Tvar list lengths don't match (%s, %s, %s)", list2string(tvs, Absynpp::tvar2string),  
-		    list2string(*ts, Absynpp::typ2string), list2string(tvs, Absynpp::tvar2string));
-		    }
-	    */
 	    list_t<tvar_t> removed_tvars = NULL;
 	    try {
 	      removed_tvars = extract_tvars(*ts);
 	    }catch {
 	    case &Contains_nontvar: 
 	      //don't attempt to introduce new tvars -- the tvar has been instantiated by the user 
-	      return NULL;
+		return NULL;
 	    }
-	    if(*ts) 
-	      *ts = NULL; //nuke any existing tvars
+	    *ts = NULL; //nuke any existing tvars
 	    list_t<tvar_t> added_tvars=NULL;
 	    let tvs = ad->tvs;
 	    while(tvs) {
 	      let tv = tvs->hd;
-	      let tvcpy = new *tv;
-	      let tvn = new ((string_t)aprintf("`ovr_%d", ++glob_tvar_id));
-	      tvcpy->name = tvn;
-	      added_tvars = new List(tvcpy, added_tvars);
-	      *ts = new List(new VarType(tvcpy), *ts);
+	      if(enclosing_decl == ovd) {
+		*ts = new  List(new VarType(tv), *ts);
+	      }
+	      else {
+		if(instantiate) {
+		  *ts = new List(instantiate_tvar(enclosing_decl->loc, tv), *ts);
+		}
+		else {
+		  let tvcpy = new *tv;
+		  let tvn = new ((string_t)aprintf("`ovr_%d", ++glob_tvar_id));
+		  tvcpy->name = tvn;
+		  added_tvars = new List(tvcpy, added_tvars);
+		  *ts = new List(new VarType(tvcpy), *ts);
+		}
+	      }
 	      tvs = tvs->tl;
 	    }
 	    *ts = imp_rev(*ts);
-	    return new $(added_tvars, removed_tvars);
+	    return (enclosing_decl == ovd) ? NULL : new $(added_tvars, removed_tvars);
 	  default:
 	    impos("ovd must be an aggr type");
 	  }
@@ -512,63 +540,227 @@ static $(list_t<tvar_t>, list_t<tvar_t>)* update_tvars(tenv_t te, list_t<decl_t>
     }
     return NULL;
   case &PointerType(*pi): 
-    return update_tvars(te, tv_ovrs, pi->elt_type);
+    return update_tvars(te, tv_ovrs, pi->elt_type, enclosing_decl, instantiate);
+  case &FnType(fi)://this case is only possible in function pointer cases ... no need to add tvars at this level
+    let added_tvars = NULL;
+    let removed_tvars = NULL; //ignore return type ... bound variable; no reasonable binding strategy-- use manual override in that case
+    let argit = fi.args;
+    while(argit) {
+      let &$(_,_,at) = argit->hd;
+      let ar_tup = update_tvars(te, tv_ovrs, at, enclosing_decl, instantiate);
+      if(ar_tup) {
+	if((*ar_tup)[0])
+	  added_tvars = List::append((*ar_tup)[0], added_tvars);
+	if((*ar_tup)[1])
+	  removed_tvars = List::append((*ar_tup)[1], removed_tvars);
+      }
+      argit=argit->tl;
+    }
+    if(added_tvars || removed_tvars) 
+      return new $(added_tvars, removed_tvars);
+    return NULL;
   default:
     return NULL;
   }
   return NULL;
 }
 
+static bool update_fninfo_usage(seg_t loc, tenv_t te, list_t<decl_t> tv_ovrs, fn_info_t *fi, decl_t enclosing_decl) {
+  let ad = update_tvars(te, tv_ovrs, fi->ret_type, enclosing_decl, false); 
+  //how to bind the dependent tvar in the return type?  -- Revisit
+  let argit = fi->args;
+  list_t<tvar_t> added_tvars = ad ? (*ad)[0] : NULL;
+  list_t<tvar_t> removed_tvars = ad ? (*ad)[1] : NULL;
+  bool change = false;
+  while(argit) {
+    let &$(_,_,*at) = argit->hd;
+    let ad = update_tvars(te, tv_ovrs, *at, enclosing_decl, false);
+    if(ad) {
+      added_tvars = append((*ad)[0], added_tvars);
+      removed_tvars = append((*ad)[1], removed_tvars);
+    }
+    argit=argit->tl;
+  }
+  while(removed_tvars) {
+      change = true;
+      let rtv = removed_tvars->hd;
+      try {
+	fi->tvars = List::delete(fi->tvars, rtv);
+      }
+      catch {
+    case  &Core::Not_found: 
+      warn(loc, "Removed tvar %s not found", Absynpp::tvar2string(rtv));
+      break;
+      }
+      removed_tvars = removed_tvars->tl;
+    }
+    if(added_tvars) {
+      change = true;
+      fi->tvars = append(added_tvars, fi->tvars);
+    }
+    //nuke the effect, tvar names may have changed ... recomputed in phase2
+    fi->effect = NULL;
+  return change;
+}
+
+static list_t<decl_t,`H> remove_cur(list_t<decl_t,`H> head, list_t<decl_t,`H> cur, list_t<decl_t,`H> prev) {
+  if(prev)
+    prev->tl = cur->tl;
+  else 
+    head = cur->tl;
+  //  cur->tl = NULL;
+  return head;
+}
+
+static int decl_name_cmp(decl_t a, decl_t b) {
+  let na = decl_name(a);
+  let nb = decl_name(b);
+  if(na==NULL ^ nb==NULL)
+    return 1;
+  if(na) 
+    return strcmp(*na, *nb);
+  return 1;
+}
+
 //if a type struct foo {..} --override--> struct foo<`a>{...}
 //then usages of struct foo require the additional tvar inserted 
 // for instance void func(struct foo *a) ----> void func<`ovr_1>(struct foo<`ovr_1> *a)
-static void update_usages(seg_t loc, tenv_t te, list_t<decl_t> tv_ovrs, list_t<decl_t> ds) {
-  while(ds) {
-    let d=ds->hd;
-    switch(d->r) {
-    case &Var_d(vd):
-      break;
-    case &Fn_d(fd):
-      update_tvars(te, tv_ovrs, fd->i.ret_type); //how to bind the dependent tvar in the return type?  -- Revisit
-      let argit = fd->i.args;
-      list_t<tvar_t> added_tvars = NULL;
-      list_t<tvar_t> removed_tvars = NULL;
-      while(argit) {
-	let &$(_,_,*at) = argit->hd;
-	let ad = update_tvars(te, tv_ovrs, *at);
-	if(ad) {
- 	  added_tvars = append((*ad)[0], added_tvars);
- 	  removed_tvars = append((*ad)[1], removed_tvars);
-	}
- 	argit=argit->tl;
-      }
-      while(removed_tvars) {
-	let rtv = removed_tvars->hd;
-	try {
-	  fd->i.tvars = List::delete(fd->i.tvars, rtv);
-	}
-	catch {
-	case  &Core::Not_found: 
-	  warn(loc, "Removed tvar %s not found", Absynpp::tvar2string(rtv));
+static list_t<decl_t, `H> update_usages(seg_t loc, tenv_t te, list_t<decl_t,`H> in_tv_ovrs, list_t<decl_t> dsmm) {
+  unsigned niter = 0;
+  list_t<decl_t> abs_decls = NULL;
+  bool some_change = false;
+  list_t<decl_t,`H> tv_ovrs = in_tv_ovrs;
+  let dsm = List::copy(dsmm);
+  list_t<decl_t> changed_decls = NULL;
+  do {
+    changed_decls = NULL;
+    let ds = dsm;
+    let prev=NULL;
+    some_change = false;
+    while(ds) {
+      bool changed = false;
+      let d=ds->hd;
+      let dname = decl_name(d);
+      /*      if(dname!=NULL && !strcmp(*dname, "sk_buff"))
+	      fprintf(stderr, "Breakpoint"); */
+      switch(d->r) {
+      case &Var_d(vd):
+	switch(vd->type) {
+	case &FnType(*fi):
+	  changed = update_fninfo_usage(loc, te, tv_ovrs, fi, d);
+	  /*	  if(changed)
+		  dsm = remove_cur(dsm, ds, prev); */
+	  /*	fprintf(stderr, "~~~~~~~~~After updating usage for %s -- tvar list is <%s>\n", Absynpp::qvar2string(vd->name),
+		list2string(fi->tvars, Absynpp::tvar2string));
+		fprintf(stderr, "~~~~~~~~~Decl is <%s>\n", Absynpp::decllist2string(new List(d, NULL))); */
+	  break;
+	case &AppType(tc,ts):
+	  changed = (update_tvars(te, tv_ovrs, vd->type, d, true) != NULL);
+	  break;
+	case &PointerType(PtrInfo(et, _, _)): fallthru(et);
+	case &ArrayType(ArrayInfo(et,_,_,_,_)):
+	  changed = (update_tvars(te, tv_ovrs, et, d, true) != NULL);
+	  break;
+	default:
 	  break;
 	}
-	removed_tvars = removed_tvars->tl;
+	break;
+      case &Fn_d(fd):
+	changed = update_fninfo_usage(loc, te, tv_ovrs, &fd->i, d);
+	//	if(changed)
+	//	  dsm = remove_cur(dsm, ds, prev);
+	//      fprintf(stderr, "Result tvarlist <%s>\n", list2string(fd->i.tvars, Absynpp::tvar2string));
+	break;
+      case &Aggr_d(ad):
+	if(ad->impl) {
+	  let fit = ad->impl->fields;
+	  list_t<tvar_t> added_tvars = NULL;
+	  list_t<tvar_t> removed_tvars = NULL;
+	  while(fit) {
+	    let fld = fit->hd;
+	    let tvtup = update_tvars(te, tv_ovrs, fld->type, d, false);
+	    if(tvtup) {
+	      changed = true;
+	      let ad = (*tvtup)[0];
+	      if(ad)
+		added_tvars = List::append(ad, added_tvars);
+	      let rm = (*tvtup)[1];
+	      if(rm)
+		removed_tvars = List::append(rm, removed_tvars);
+	    }
+	    fit = fit->tl;
+	  }
+	  while(removed_tvars) {
+	    let rtv = removed_tvars->hd;
+	    try {
+	      ad->tvs = List::delete(ad->tvs, rtv);
+	    }
+	    catch {
+	    case  &Core::Not_found: 
+	      warn(loc, "Removed tvar %s not found", Absynpp::tvar2string(rtv));
+	      break;
+	    }
+	    removed_tvars = removed_tvars->tl;
+	  }
+	  if(added_tvars) {
+	    ad->tvs = append(added_tvars, ad->tvs);
+	    let absdecl = make_abstract_decl(d);
+	    try {
+	      abs_decls = List::delete_cmp(decl_name_cmp, abs_decls, absdecl);
+	    }
+	    catch {
+	    case &Core::Not_found: break; 
+	    }
+	    abs_decls = new List(absdecl, abs_decls);
+	  }
+	  if(changed)
+	    changed_decls = new List(d, changed_decls);
+	}
+	else { //abstract declaration ... may need type vars added
+	  let &$(_, name) = ad->name;
+	  let ovd = lookup_decl(tv_ovrs, name);
+	  if(ovd) {
+	    changed = true;
+	    switch(ovd->r) {
+	    case &Aggr_d(ovd_ad):
+	      list_t<tvar_t> added_tvars=NULL;
+	      let tvs = ovd_ad->tvs;
+	      while(tvs) {
+		let tv = tvs->hd;
+		let tvcpy = new *tv;
+		let tvn = new ((string_t)aprintf("`ovr_%d", ++glob_tvar_id));
+		tvcpy->name = tvn;
+		ad->tvs = new List(tvcpy, ad->tvs);
+		tvs = tvs->tl;
+	      }
+	      ad->tvs = imp_rev(ad->tvs);
+	      break;
+	    default:
+	      impos("ovd must be an aggr type");
+	    }
+	  }
+	}
+	//	if(changed)
+	//	  dsm = remove_cur(dsm, ds, prev);
+	break;
+      case &Typedef_d(td):
+	break;
+      default: //ds are extern C include decls ... the other cases are impos or cannot contain tvars
+	break;
       }
-      if(added_tvars) 
- 	fd->i.tvars = append(added_tvars, fd->i.tvars);
-      //nuke the effect, tvar names may have changed ... recomputed in phase2
-      fd->i.effect = NULL;
-      //      fprintf(stderr, "Result tvarlist <%s>\n", list2string(fd->i.tvars, Absynpp::tvar2string));
-      break;
-    case &Aggr_d(ad):
-      break;
-    case &Typedef_d(td):
-      break;
-    default: //ds are extern C include decls ... the other cases are impos or cannot contain tvars
-      break;
+      prev = ds;
+      ds = ds->tl;
+      if(changed)
+	some_change = true;
     }
-    ds = ds->tl;
+    tv_ovrs = changed_decls;
+  } while(some_change && ++niter < 10);
+  if(niter >= 10) {
+    fprintf(stderr, "Suspected mutually recursive structs involving the following decls \n %s", 
+	    Absynpp::decllist2string(changed_decls));
+    err2(loc, "Suspected mutually recursive structs -- abandoning cifc");
   }
+  return abs_decls;
 }
 
 static void i_clear_vartype_ids(type_t t) {
@@ -644,8 +836,18 @@ static void clear_vartype_ids(decl_t d) {
   }
 }
 
-void user_overrides(seg_t loc, tenv_t te, list_t<decl_t> *ds, list_t<decl_t> ovrs) {
+static bool eq(`a a, `a b) {
+  return a==b;
+}
+
+static bool decl_not_present(list_t<decl_t> l, decl_t a) {
+  return !List::exists_c(eq, a, l);
+}
+
+void user_overrides(seg_t loc, tenv_t te, list_t<decl_t, `H> *ds, list_t<decl_t> ovrs) {
   list_t<decl_t> type_overrides = NULL;
+  list_t<decl_t> overriden_decls = NULL;
+  list_t<decl_t> abs_decls = NULL;
   for (let x = ovrs; x != NULL; x = x->tl) {
     let ud = x->hd;
     let un = decl_name(ud);
@@ -654,19 +856,26 @@ void user_overrides(seg_t loc, tenv_t te, list_t<decl_t> *ds, list_t<decl_t> ovr
       let d = lookup_decl(*ds,un);
       if (!d)  warn(ud->loc,"%s is overridden but not defined",*un);
       else {    
+	overriden_decls = new List(d, overriden_decls);
 	let pre_tvars_d =contains_type_vars(d);
 	merge_sys_user_decl(loc, te, false, ud, d);
 	clear_vartype_ids(ud);
 	if(contains_type_vars(ud) && !pre_tvars_d) {
-	  let absdecl = make_abstract_decl(ud);
+	  abs_decls = new List(make_abstract_decl(ud), abs_decls);
 	  type_overrides = new List(d, type_overrides);
-	  *ds = new List(absdecl, *ds);
+	  //	  *ds = new List(absdecl, *ds);
 	}
       }
     }
   }
-  update_usages(loc, te, type_overrides, *ds);
+  let unoverriden_decls = List::filter_c(decl_not_present, overriden_decls, *ds);
+  abs_decls = List::append(abs_decls, 
+			   update_usages(loc, te, type_overrides, unoverriden_decls));
+  if(abs_decls) {
+    *ds = List::append(abs_decls, *ds);
+  }
 }
+
 
 
 

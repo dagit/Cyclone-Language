@@ -41,9 +41,20 @@
 #define create_tlocal_key Tlocal_Create
 #define get_tlocal Tlocal_Get
 #define put_tlocal Tlocal_Put
+#define DO_THREAD_UNREG 
+#elif (defined(__linux__) && defined(__KERNEL__)) //change to CYC_LINUX_KERNEL
 
+#include <linux/kernel.h>
+#define bzero(_addr,_szb) memset(_addr,'\0',_szb)
+
+#include "runtime_tls.h"
+
+#undef HAVE_THREADS
+#define USE_CYC_TLS 1
+
+#define errprintf(arg...) printk("<3>" arg)
+#define errquit(arg...) { printk("<3>" arg); }
 #else
-
 #include <setjmp.h> // precore_c.h uses jmp_buf without defining it
 #include <stdio.h>  // for error printing
 #include <limits.h> // for magic numbers
@@ -62,7 +73,8 @@
 #define errprintf(arg...) fprintf(stderr,##arg)
 #define errquit(arg...) { fprintf(stderr,##arg); exit(1); }
 
-#endif
+#endif //geekos
+
 
 #define MAX_ALLOC_SIZE INT_MAX
 
@@ -76,7 +88,9 @@
 /* RUNTIME_CYC defined to prevent including parts of precore_c.h that
    might cause problems, particularly relating to region profiling */
 #define RUNTIME_CYC
+#ifndef USE_CYC_TLS 
 #include "precore_c.h"
+#endif
 
 /************** INIT and FINI ROUTINES ************/
 

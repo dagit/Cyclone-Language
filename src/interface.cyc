@@ -527,7 +527,8 @@ static void extract_ordinarie($(ienv_t,ienv_t,bool,genv_t,seen_t,i_t) @ env,
       .initializer = NULL,
       .rgn = NULL,
       .attributes = NULL,
-      .escapes = false
+      .escapes = false,
+      .is_proto = (fd->body != NULL)
     };
     check_complete_defs = false; // the body of the function has been defined
     fallthru(vd);

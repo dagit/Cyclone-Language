@@ -338,7 +338,7 @@ mstring_t<`r> strcpy(mstring_t<`r> dest, buffer_t src) {
 
 // Allocating functions
 
-// Not an ISO function, but available in gcc
+// Not an ISO function, but available in gcGc
 mstring_t<`r> rstrdup(region_t<`r::TR> r, buffer_t src) {
   size_t len;
   mstring_t<`r> temp;
@@ -732,14 +732,16 @@ namespace Cstr {
     void * @nozeroterm `r memset(void * @nozeroterm `r, int c, size_t n);
     void bcopy (const `a::A*src, `a *dest, size_t n);
     void bzero(`a::A*s, size_t n);
-    __cyclone_buf<`i> GC_realloc(char * @nozeroterm`H,
-				 __cyclone_internal_singleton<`i> n);
+    __cyclone_buf<`i> GC_realloc_hint(char * @nozeroterm`H,
+				      __cyclone_internal_singleton<`i> oldsz,
+				      __cyclone_internal_singleton<`i> newsz);
   }
 }
 
 char ? @nozeroterm realloc(char ? @nozeroterm`H s, size_t n) {
+  let oldsz<`i> = numelts(s);
   let l<`i> = n;
-  let res = Cstr::GC_realloc((char * @nozeroterm)s, l);
+  let res = Cstr::GC_realloc_hint((char * @nozeroterm)s, oldsz, l);
   return Core::mkfat(res, sizeof(char), l);
 }
 

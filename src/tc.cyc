@@ -132,7 +132,7 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
 
 static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init, 
                       bool in_cinclude, list_t<$(seg_t,qvar_t,bool)@>* exports){
-  let &Vardecl(sc,q,_,_,t,initializer,_,atts,_) = vd;
+  let &Vardecl(sc,q,_,_,t,initializer,_,atts,_,*is_proto) = vd;
 #ifdef DEBUG
   fprintf(stderr,"type-checking vardecl_t %s, type %s\n",*((*q)[1]), 
           typ2string(vd->type)); fflush(stderr);
@@ -171,6 +171,7 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
   vd->escapes = !is_array_type(t);
   // move any function type attributes into the function's type
   if (is_function_type(t)) {
+    *is_proto = false; //by default this is extern -- if we say a decl later, we flip this flag
     atts = transfer_fn_type_atts(t,atts);
     fnTypeAttsOK(te, t, loc);
   }
@@ -959,6 +960,8 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
     case &Fn_d(fd):
       if (in_externC && okay_externC(d->loc,fd->sc,te->in_extern_c_include,te->in_extern_c_inc_repeat))
 	fd->sc = ExternC;
+      if(te->in_extern_c_include)
+	fd->orig_scope = ExternC;
       tcFndecl(te,loc,fd,exports);
       break;
     case &Typedef_d(td):
@@ -1008,10 +1011,6 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
 	let tecpy = copy_tenv_dicts(te);
 	tecpy->in_extern_c_include = true;
 	tc_decls(tecpy,*ds2,true,check_var_init,NULL);
-	
-	//      fprintf(stderr, "Done tc extern C include phase 1\n");
-	//	fprintf(stderr, "Before overrides extern C include: \n\t %s\n", Absynpp::decllist2string(*ds2));
-	
 	Toc::init();
 	set_scopes(ovrs, ExternC); //ow scope mismatch warnings -- ovrs are not typechecked independently
 	Cifc::user_overrides(d->loc, tecpy, ds2, ovrs);

@@ -298,9 +298,11 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
   case &StmtExp_e(s): // we do not bother threading through a dest
     remove_aggrs_stmt(s);
     break;
-  
-  default: Warn::impos("bad exp after translation to C: %s",
-		       Absynpp::exp2string(e));
+    
+  default: 
+    Warn::err2(e->loc, "bad exp after translation to C: ", e);
+    Warn::impos("bad exp after translation to C: %s",
+		Absynpp::exp2string(e));
   }
   if(env.ctxt == AggrField && !did_assign)
     e->r = assign_exp((exp_t)env.dest,copy_exp(e),DL)->r;
@@ -388,7 +390,10 @@ static void remove_aggrs_stmt(stmt_t s) {
 list_t<decl_t> remove_aggrs(list_t<decl_t,`H> ds) {
   for(let ds2 = ds; ds2 != NULL; ds2 = ds2->tl)
     switch(ds2->hd->r) {
-    case &Fn_d(fd):  remove_aggrs_stmt(fd->body); break;
+    case &Fn_d(fd):  
+      if(fd->orig_scope == ExternC) //ignore extern C bodies
+	break;
+      remove_aggrs_stmt(fd->body); break;
     case &Var_d(vd): massage_toplevel_aggr(vd->initializer); break;
     case &Aggr_d(ad): 
     case &Enum_d(_): // assuming no aggregates in tag-expressions

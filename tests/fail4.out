@@ -7,7 +7,6 @@ fail4.cyc:22: F41 is a constant, not a function
 fail4.cyc:27: F42 is an enum constructor, not a function
 fail4.cyc:31: undeclared identifier x
 fail4.cyc:35: unbound struct/union name F102
-fail4.cyc:39: asm expressions cannot occur within Cyclone code
 fail4.cyc:44: bad occurrence of type name F122
 fail4.cyc:46: F88 is not a datatype field
 
