@@ -10,14 +10,18 @@ struct _tagged_string { char *curr; char *base; char *last_plus_one; };
 extern struct _tagged_string xprintf(char *fmt, ...);
 
 ///////////////////// Exceptions
-struct _enum_struct { int tag; };
-struct _xenum_struct { char *tag; };
-typedef struct _xenum_struct *exn;
+//struct _enum_struct { int tag; };
+//struct _xenum_struct { char *tag; };
+//typedef struct _xtunion_struct *exn;
+struct _tunion_struct { int tag; };
+struct _xtunion_struct { char *tag; };
+typedef struct _xtunion_struct *exn;
+
 extern char _Null_Exception_tag[15];
-extern struct _xenum_struct _Null_Exception_struct;
+extern struct _xtunion_struct _Null_Exception_struct;
 extern exn Null_Exception;
 extern char _Match_Exception_tag[16];
-extern struct _xenum_struct _Match_Exception_struct;
+extern struct _xtunion_struct _Match_Exception_struct;
 extern exn Match_Exception;
 
 #include <setjmp.h>

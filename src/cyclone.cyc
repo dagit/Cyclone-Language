@@ -76,23 +76,24 @@ FILE * try_file_open(string filename, string mode, string msg_part) {
   }
 }
 
-list_t<Absyn::decl> do_stage(string stage_name,
-			     list_t<Absyn::decl> f(`a, list_t<Absyn::decl>), 
-			     `a env, list_t<Absyn::decl> tds, 
-			     string preprocfile) {
+list_t<Absyn::decl_t> 
+  do_stage(string stage_name,
+           list_t<Absyn::decl_t> f(`a, list_t<Absyn::decl_t>), 
+           `a env, list_t<Absyn::decl_t> tds, 
+           string preprocfile) {
   string exn_string     = "";
   string explain_string = "";
   bool other_exn = false;
-  xenum exn ex = Core::Impossible(""); // definite assignment doesn't track data
+  xtunion exn ex = new Core::Impossible(""); // definite assignment doesn't track data
   let ans = null;
 
   try ans = f(env,tds);
   catch {
-  case Core::Impossible(s): 
+  case &Core::Impossible(s): 
     exn_string = "Exception Core::Impossible"; 
     explain_string = s; 
     break;
-  case Dict::Absent:  
+  case &Dict::Absent:  
     exn_string = "Exception Dict::Absent"; 
     break;
   case x: 
@@ -123,25 +124,25 @@ list_t<Absyn::decl> do_stage(string stage_name,
   fflush(stderr);
   return ans;
 }
-list_t<Absyn::decl> do_parse(FILE @ f, list_t<Absyn::decl> ignore) {
+list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
   Lex::lex_init(); // must forget typedefs, may as well flush symbols too
   return Parse::parse_file(f);
 }
-list_t<Absyn::decl> do_typecheck(Tcenv::tenv te, list_t<Absyn::decl> tds) {
+list_t<Absyn::decl_t> do_typecheck(Tcenv::tenv_t te,list_t<Absyn::decl_t> tds){
   Absynpp::expand_typedefs = ! *noexpand;
   Tc::tc(te,add_cyc_namespace_r && toc_r,tds); //don't add namespaces if we don't translate to C
   if(!*noshake)
     tds = Tc::treeshake(te,tds);
   return tds;
 }
-list_t<Absyn::decl> do_cfcheck(bool ignore, list_t<Absyn::decl> tds) {
+list_t<Absyn::decl_t> do_cfcheck(bool ignore, list_t<Absyn::decl_t> tds) {
   NewControlFlow::cf_check(tds);
   return tds;
 }
-list_t<Absyn::decl> do_translate(bool ignore, list_t<Absyn::decl> tds) {
+list_t<Absyn::decl_t> do_translate(bool ignore, list_t<Absyn::decl_t> tds) {
   return Toc::toc(tds);
 }
-list_t<Absyn::decl> do_print(FILE @ out_file, list_t<Absyn::decl> tds) {
+list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t> tds) {
   Absynpp::expand_typedefs = ! *noexpand;
   Absynpp::decls_first = Absynpp::qvar_to_Cids = *toc;
   Absynpp::print_using_stmts = Absynpp::print_externC_stmts = ! *tc;
@@ -196,7 +197,7 @@ void compile_file(string filename) {
   FILE * out_file = stdout; // possibly changed below
   if(compile_failure)
     return;
-  list_t<Absyn::decl> tds = null;
+  list_t<Absyn::decl_t> tds = null;
   if(!compile_failure) {
     tds = do_stage("parsing", do_parse, (FILE@)in_file, tds,
 		   preprocfile);
@@ -227,35 +228,35 @@ void compile_file(string filename) {
 
 int main() {
   $(string,spec_t,string) specs[15] = 
-    {$("-nocyc",Clear_spec(add_cyc_namespace),
+    {$("-nocyc",new Clear_spec(add_cyc_namespace),
        "does not add implicit namespace Cyc"),
-     $("-q",Set_spec(q),
+     $("-q",new Set_spec(q),
        "compile quietly"),
-     $("-v",Set_spec(v), 
+     $("-v",new Set_spec(v), 
        "print compilation stages verbosely"),
-     $("-check_null",Unit_spec(set_check_null), 
+     $("-check_null",new Unit_spec(set_check_null), 
        "turn on null-checking in generated C code"),
-     $("-D",String_spec(add_define), 
+     $("-D",new String_spec(add_define), 
        "pass definition to pre-processor"),
-     $("-I",String_spec(add_include), 
+     $("-I",new String_spec(add_include), 
        "include directory"), 
-     $("-toc",Set_spec(toc), 
+     $("-toc",new Set_spec(toc), 
        "translate to C"),
-     $("-tc",Set_spec(tc), 
+     $("-tc",new Set_spec(tc), 
        "type check"),
-     $("-noremoveunused",Set_spec(noshake),
+     $("-noremoveunused",new Set_spec(noshake),
        "don't remove externed variables that aren't used"),
-     $("-noexpandtypedefs",Set_spec(noexpand),
+     $("-noexpandtypedefs",new Set_spec(noexpand),
        "don't expand typedefs in pretty printing"),
-     $("-printalltvars", Set_spec(&Absynpp::print_all_tvars),
+     $("-printalltvars", new Set_spec(&Absynpp::print_all_tvars),
        "print all type variables (even implicit default effects)"),
-     $("-printallkinds", Set_spec(&Absynpp::print_all_kinds),
+     $("-printallkinds", new Set_spec(&Absynpp::print_all_kinds),
        "always print kinds of type variables"),
-     $("-up",Set_spec(up), 
+     $("-up",new Set_spec(up), 
        "ugly print"),
-     $("-pp",Set_spec(pp), 
+     $("-pp",new Set_spec(pp), 
        "pretty print"),
-     $("-o",String_spec(set_out_file_name),
+     $("-o",new String_spec(set_out_file_name),
        "Output file name")};
   let l1  = List(&specs[0], null);
   let l2  = List(&specs[1], &l1);

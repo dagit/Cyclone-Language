@@ -13,10 +13,10 @@
 //////////////////////////////////////////////////////////
 
 char _Null_Exception_tag[15] = "Null_Exception";
-struct _xenum_struct _Null_Exception_struct = { _Null_Exception_tag };
+struct _xtunion_struct _Null_Exception_struct = { _Null_Exception_tag };
 exn Null_Exception = &_Null_Exception_struct;
 char _Match_Exception_tag[16] = "Match_Exception";
-struct _xenum_struct _Match_Exception_struct = { _Match_Exception_tag };
+struct _xtunion_struct _Match_Exception_struct = { _Match_Exception_tag };
 exn Match_Exception = &_Match_Exception_struct;
 
 struct _tagged_string xprintf(char *fmt, ...) {

@@ -18,12 +18,25 @@ namespace CfFlowInfo;
 // Note we're careful to avoid allocation when replacing something with itself.
 
 ////////////////////////// Shared Constants //////////////////////////
-path_info_t leaf_unesc_none = LeafPI(UnknownIS(Unesc,NoneIL));
-path_info_t leaf_unesc_this = LeafPI(UnknownIS(Unesc,ThisIL));
-path_info_t leaf_unesc_all  = LeafPI(UnknownIS(Unesc,AllIL));
-path_info_t leaf_esc_none   = LeafPI(UnknownIS(Esc,  NoneIL));
-path_info_t leaf_esc_this   = LeafPI(UnknownIS(Esc,  ThisIL));
-path_info_t leaf_esc_all    = LeafPI(UnknownIS(Esc,  AllIL));
+static tunion InitState.UnknownIS unknownis_unes_noneil = UnknownIS(Unesc,NoneIL);
+static tunion InitState.UnknownIS unknownis_unes_thisil = UnknownIS(Unesc,ThisIL);
+static tunion InitState.UnknownIS unknownis_unes_allil = UnknownIS(Unesc,AllIL);
+static tunion InitState.UnknownIS unknownis_esc_noneil = UnknownIS(Esc,NoneIL);
+static tunion InitState.UnknownIS unknownis_esc_thisil = UnknownIS(Esc,ThisIL);
+static tunion InitState.UnknownIS unknownis_esc_allil = UnknownIS(Esc,AllIL);
+
+static tunion PathInfo.LeafPI leaf_unesc_none_v = LeafPI(&unknownis_unes_noneil);
+static tunion PathInfo.LeafPI leaf_unesc_this_v = LeafPI(&unknownis_unes_thisil);
+static tunion PathInfo.LeafPI leaf_unesc_all_v = LeafPI(&unknownis_unes_allil);
+static tunion PathInfo.LeafPI leaf_esc_none_v = LeafPI(&unknownis_esc_noneil);
+static tunion PathInfo.LeafPI leaf_esc_this_v = LeafPI(&unknownis_esc_thisil);
+static tunion PathInfo.LeafPI leaf_esc_all_v = LeafPI(&unknownis_esc_allil);
+path_info_t leaf_unesc_none = &leaf_unesc_all_v;
+path_info_t leaf_unesc_this = &leaf_unesc_this_v;
+path_info_t leaf_unesc_all  = &leaf_unesc_all_v;
+path_info_t leaf_esc_none   = &leaf_esc_none_v;
+path_info_t leaf_esc_this   = &leaf_esc_this_v;
+path_info_t leaf_esc_all    = &leaf_esc_all_v;
 
 path_info_t mkLeafPI(escaped_t esc, init_level_t il) {
   switch ($(esc,il)) {
@@ -41,20 +54,20 @@ int local_root_cmp(local_root_t r1, local_root_t r2) {
   if(r1 == r2)
     return 0;
   switch ($(r1,r2)) {
-  case $(VarRoot(_), MallocPt(_)): return 1;
-  case $(MallocPt(_),VarRoot(_)):  return -1;
-  case $(VarRoot(x), VarRoot(y)):  return Core::ptrcmp(x,y);
-  case $(MallocPt(x),MallocPt(y)): return Core::ptrcmp(x,y);
+  case $(&VarRoot(_), &MallocPt(_)): return 1;
+  case $(&MallocPt(_),&VarRoot(_)):  return -1;
+  case $(&VarRoot(x), &VarRoot(y)):  return Core::ptrcmp(x,y);
+  case $(&MallocPt(x),&MallocPt(y)): return Core::ptrcmp(x,y);
   }
 }
 int field_cmp(field_t f1, field_t f2) {
   if(f1 == f2)
     return 0;
   switch($(f1,f2)) {
-  case $(StructF(_), TupleF(_)):  return 1;
-  case $(TupleF(_),  StructF(_)): return -1;
-  case $(StructF(x), StructF(y)): return Core::ptrcmp(x,y);
-  case $(TupleF(x),  TupleF(y)):  return x-y;
+  case $(&StructF(_), &TupleF(_)):  return 1;
+  case $(&TupleF(_),  &StructF(_)): return -1;
+  case $(&StructF(x), &StructF(y)): return Core::ptrcmp(x,y);
+  case $(&TupleF(x),  &TupleF(y)):  return x-y;
   }
 }
 int place_cmp(place_t p1, place_t p2) {
@@ -71,16 +84,16 @@ int place_cmp(place_t p1, place_t p2) {
 //   (If we ever have memory kinds, then we either need to figure out field's
 //    instantiated types or not allow partial initialization of such fields.)
 // Note: We could memoize answers here, but it doesn't seem important.
-path_info_t typ_to_unesc_none_pinfo(typ t) {
+path_info_t typ_to_unesc_none_pinfo(type_t t) {
   switch(Tcutil::compress(t)) {
-  case TupleType(tqts):
+  case &TupleType(tqts):
     let d = Dict::empty(Core::intcmp);
     for(int i=0; tqts != null; tqts = tqts->tl, ++i) {
       let &$(_,t2) = tqts->hd;
       d = Dict::insert(d, i, typ_to_unesc_none_pinfo(t2));
     }
-    return TuplePI(d);
-  case StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs),_)):
+    return new TuplePI(d);
+  case &StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs),_)):
     let d = Dict::empty(String::zstrptrcmp);
     for(; fs != null; fs = fs->tl) {
       let &Structfield{n,_,t2,_,_} = fs->hd;
@@ -88,7 +101,7 @@ path_info_t typ_to_unesc_none_pinfo(typ t) {
       if (String::strcmp(*n,"") != 0)
         d = Dict::insert(d, n, typ_to_unesc_none_pinfo(t2));
     }
-    return StructPI(d);
+    return new StructPI(d);
   default: 
     return leaf_unesc_none;
   }
@@ -101,9 +114,9 @@ path_info_t lookup_place(pinfo_dict_t<local_root_t> d, place_t place) {
   let ans = Dict::lookup(d,root);
   for(; fields != null; fields = fields->tl)
     switch($(ans,fields->hd)) {
-    case $(TuplePI(d2), TupleF(i)):  ans = Dict::lookup(d2,i); break;
-    case $(StructPI(d2),StructF(n)): ans = Dict::lookup(d2,n); break;
-    default: throw Core::Impossible("bad lookup_place");
+    case $(&TuplePI(d2), &TupleF(i)):  ans = Dict::lookup(d2,i); break;
+    case $(&StructPI(d2),&StructF(n)): ans = Dict::lookup(d2,n); break;
+    default: throw new Core::Impossible("bad lookup_place");
     }
   return ans;
 }
@@ -115,14 +128,16 @@ path_info_t insert_place_rec(path_info_t insert_path,
   if(fields == null)
     return pinfo;
   switch($(insert_path,fields)) {
-  case $(TuplePI(d), &List(TupleF(i), tl)): 
+  case $(&TuplePI(d), &List(&TupleF(i), tl)): 
     let next_path = Dict::lookup(d,i);
-    return TuplePI(Dict::insert(d, i, insert_place_rec(next_path,tl,pinfo)));
-  case $(StructPI(d),&List(StructF(n),tl)):
+    return 
+      new TuplePI(Dict::insert(d, i, insert_place_rec(next_path,tl,pinfo)));
+  case $(&StructPI(d),&List(&StructF(n),tl)):
     let next_path = Dict::lookup(d,n);
-    return StructPI(Dict::insert(d, n, insert_place_rec(next_path,tl,pinfo)));
+    return 
+      new StructPI(Dict::insert(d, n, insert_place_rec(next_path,tl,pinfo)));
   default: 
-    throw Core::Impossible("bad insert_place");
+    throw new Core::Impossible("bad insert_place");
   }
 }
 pinfo_dict_t<local_root_t> insert_place(pinfo_dict_t<local_root_t> d, 
@@ -137,9 +152,9 @@ bool isAllInit_pinfo($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env,
 bool isAllInit_is ($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env,
 		   init_state_t state) {
   switch(state) {
-  case UnknownIS(_,AllIL): return true;
-  case UnknownIS(_,_):     return false;
-  case MustPointTo(place):
+  case &UnknownIS(_,AllIL): return true;
+  case &UnknownIS(_,_):     return false;
+  case &MustPointTo(place):
     let &$(d,*seen) = env;
     if (List::mem(place_cmp, *seen, place))
       return true;
@@ -154,9 +169,9 @@ bool isAllInit_f($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env, `a a,
 bool isAllInit_pinfo($(pinfo_dict_t<local_root_t>,list_t<place_t>)@`r env,
 	       path_info_t path) {
   switch(path) {
-  case LeafPI(is):   return isAllInit_is(env,is);
-  case TuplePI(d2):  return Dict::forall_c(isAllInit_f,env,d2);
-  case StructPI(d2): return Dict::forall_c(isAllInit_f,env,d2);
+  case &LeafPI(is):   return isAllInit_is(env,is);
+  case &TuplePI(d2):  return Dict::forall_c(isAllInit_f,env,d2);
+  case &StructPI(d2): return Dict::forall_c(isAllInit_f,env,d2);
   }
 }
 
@@ -171,31 +186,31 @@ path_info_t pinfo_getplaces_esc($(pinfo_dict_t<local_root_t>,
 				path_info_t pinfo) {
   let &$(rootd,places_ptr) = env;
   switch(pinfo) {
-  case LeafPI(MustPointTo(place)): 
+  case &LeafPI(&MustPointTo(place)): 
     *places_ptr = Set::insert(*places_ptr, place); 
     if(isAllInit(rootd,lookup_place(rootd,place)))
       return mkLeafPI(Esc,AllIL);
     return mkLeafPI(Esc,ThisIL);
-  case LeafPI(UnknownIS(_,il)): 
+  case &LeafPI(&UnknownIS(_,il)): 
     return mkLeafPI(Esc,il);
-  case TuplePI(d):  
-    return TuplePI(Dict::map_c(pinfo_getplaces_esc, env, d));
-  case StructPI(d): 
-    return StructPI(Dict::map_c(pinfo_getplaces_esc, env, d));
+  case &TuplePI(d):  
+    return new TuplePI(Dict::map_c(pinfo_getplaces_esc, env, d));
+  case &StructPI(d): 
+    return new StructPI(Dict::map_c(pinfo_getplaces_esc, env, d));
   }
 }
 void pinfo_getplaces(Set::set_t<place_t> @`r places_ptr, `a a, 
 		     path_info_t pinfo){
   switch(pinfo) {
-  case LeafPI(UnknownIS(_,_)):     
+  case &LeafPI(&UnknownIS(_,_)):     
     return;
-  case LeafPI(MustPointTo(place)): 
+  case &LeafPI(&MustPointTo(place)): 
     *places_ptr = Set::insert(*places_ptr, place); 
     return;
-  case TuplePI(d):  
+  case &TuplePI(d):  
     Dict::iter_c(pinfo_getplaces, places_ptr, d);  
     return;
-  case StructPI(d): 
+  case &StructPI(d): 
     Dict::iter_c(pinfo_getplaces, places_ptr, d);  
     return;
   }
@@ -210,7 +225,7 @@ pinfo_dict_t<local_root_t> escape_these(Set::set_t<place_t> places,
     places = Set::delete(places,place);
     path_info_t place_old_pinfo;
     try place_old_pinfo = lookup_place(d,place);
-    catch { case Dict::Absent: continue; }
+    catch { case &Dict::Absent: continue; }
     let places_env = $(d,&places);
     let place_new_pinfo = pinfo_getplaces_esc(&places_env, place_old_pinfo);
     if(place_old_pinfo != place_new_pinfo) 
@@ -235,10 +250,12 @@ pinfo_dict_t<local_root_t> escape_pointsto(path_info_t pinfo,
 // To do: try to avoid allocation here
 path_info_t assign_unknown_dict(init_level_t level, path_info_t pinfo) {
   switch(pinfo) {
-  case LeafPI(UnknownIS(Esc,_)): return mkLeafPI(Esc,   level);
-  case LeafPI(_):                return mkLeafPI(Unesc, level);
-  case TuplePI(d):  return TuplePI(Dict::map_c(assign_unknown_dict, level, d));
-  case StructPI(d): return StructPI(Dict::map_c(assign_unknown_dict, level, d));
+  case &LeafPI(&UnknownIS(Esc,_)): return mkLeafPI(Esc,   level);
+  case &LeafPI(_):                return mkLeafPI(Unesc, level);
+  case &TuplePI(d):  
+    return new TuplePI(Dict::map_c(assign_unknown_dict, level, d));
+  case &StructPI(d): 
+    return new StructPI(Dict::map_c(assign_unknown_dict, level, d));
   }
 }
 //////////////////////////// Joins  and Lessthan ///////////////////////////////
@@ -278,31 +295,31 @@ path_info_t join_initstate(join_env_t<`r1,`r2> env,
 			   init_state_t state1, 
 			   init_state_t state2) {
   switch($(state1,state2)) {
-  case $(UnknownIS(esc1,il1),UnknownIS(esc2,il2)): 
+  case $(&UnknownIS(esc1,il1),&UnknownIS(esc2,il2)): 
     return mkLeafPI(join_escape(esc1,esc2), join_initlevel(il1,il2));
 
-  case $(UnknownIS(esc1,il1),MustPointTo(place2)):
+  case $(&UnknownIS(esc1,il1),&MustPointTo(place2)):
     // note: esc1 is irrelevant in the sense that place2 and downstream
     //       escapes b/c we no longer know all the pointers to it.
     let isInitEnv = $(env->d2,null);
-    if(il1==AllIL && isAllInit_pinfo(&isInitEnv,lookup_place(env->d2,place2))) {
+    if(il1==(init_level_t)AllIL && isAllInit_pinfo(&isInitEnv,lookup_place(env->d2,place2))) {
       *(env->places) = Set::insert(*(env->places), place2);
       return mkLeafPI(esc1,il1);
     }
     return mkLeafPI(esc1, join_initlevel(il1, ThisIL));
 
-  case $(MustPointTo(place1),UnknownIS(esc2,il2)):
+  case $(&MustPointTo(place1),&UnknownIS(esc2,il2)):
     // note: esc2 is irrelevant in the sense that place2 and downstream
     //       escapes b/c we no longer know all the pointers to it.
     let isInitEnv = $(env->d1,null);
-    if(il2==AllIL && isAllInit_pinfo(&isInitEnv,lookup_place(env->d1,place1))) {
+    if(il2==(init_level_t)AllIL && isAllInit_pinfo(&isInitEnv,lookup_place(env->d1,place1))) {
       *(env->places) = Set::insert(*(env->places), place1);
       return mkLeafPI(esc2,il2);
     }
     return mkLeafPI(esc2, join_initlevel(ThisIL, il2));
 
-  case $(MustPointTo(place1),MustPointTo(place2)):
-    if(place_cmp(place1,place2) == 0) return LeafPI(state1);
+  case $(&MustPointTo(place1),&MustPointTo(place2)):
+    if(place_cmp(place1,place2) == 0) return new LeafPI(state1);
     let isInitEnv1 = $(env->d1,null);
     let isInitEnv2 = $(env->d2,null);
     if(isAllInit_pinfo(&isInitEnv1, lookup_place(env->d1,place1))
@@ -321,16 +338,16 @@ path_info_t join_pathinfo(join_env_t<`r1,`r2> env,
 			  path_info_t pinfo1, path_info_t pinfo2) {
   if(pinfo1 == pinfo2) return pinfo1;
   switch($(pinfo1,pinfo2)) {
-  case $(LeafPI(is1),LeafPI(is2)):
+  case $(&LeafPI(is1),&LeafPI(is2)):
     if(is1 == is2) return pinfo1;
     return join_initstate(env,is1,is2);
-  case $(TuplePI(d1),TuplePI(d2)):
+  case $(&TuplePI(d1),&TuplePI(d2)):
     if (d1 == d2) return pinfo1;
-    return TuplePI(Dict::intersect_c(join_pathinfo,env,d1,d2));
-  case $(StructPI(d1),StructPI(d2)):
+    return new TuplePI(Dict::intersect_c(join_pathinfo,env,d1,d2));
+  case $(&StructPI(d1),&StructPI(d2)):
     if (d1 == d2) return pinfo1;
-    return StructPI(Dict::intersect_c(join_pathinfo,env,d1,d2));
-  default: throw Core::Impossible("join_pathinfo");
+    return new StructPI(Dict::intersect_c(join_pathinfo,env,d1,d2));
+  default: throw new Core::Impossible("join_pathinfo");
   }
 }
 flow_info_t join_flow(flow_info_t f1, flow_info_t f2) { 
@@ -341,21 +358,21 @@ flow_info_t join_flow(flow_info_t f1, flow_info_t f2) {
   switch($(f1,f2)) {
   case $(BottomFL,_): return f2;
   case $(_,BottomFL): return f1;
-  case $(InitsFL(d1),InitsFL(d2)):
+  case $(&InitsFL(d1),&InitsFL(d2)):
     if(d1 == d2) return f1;
     let places  = *empty_place_set_ptr;
     let joinenv = JoinEnv(d1,d2,&places);
     let outdict = Dict::intersect_c(join_pathinfo,&joinenv,d1,d2);
-    return InitsFL(escape_these(places,outdict));
+    return new InitsFL(escape_these(places,outdict));
   }
 }
 
 // WARNING: This is where we cheat ("approx") for performance (see below).
 bool initstate_lessthan_approx(init_state_t state1, init_state_t state2) {
   switch ($(state1,state2)) {
-  case $(UnknownIS(esc1,il1),UnknownIS(esc2,il2)): 
+  case $(&UnknownIS(esc1,il1),&UnknownIS(esc2,il2)): 
     return (join_escape(esc1,esc2)==esc2) && (join_initlevel(il1,il2)==il2);
-  case $(MustPointTo(place1),MustPointTo(place2)):
+  case $(&MustPointTo(place1),&MustPointTo(place2)):
     return place_cmp(place1,place2) == 0; // APPROXIMATE
   default: 
     return false; // APPROXIMATE
@@ -364,13 +381,13 @@ bool initstate_lessthan_approx(init_state_t state1, init_state_t state2) {
 bool pinfo_lessthan_approx(`a ignore, path_info_t pinfo1, path_info_t pinfo2) {
   if(pinfo1 == pinfo2) return true;
   switch ($(pinfo1,pinfo2)) {
-  case $(LeafPI(s1),LeafPI(s2)):
+  case $(&LeafPI(s1),&LeafPI(s2)):
     return (s1 == s2) || initstate_lessthan_approx(s1,s2);
-  case $(TuplePI(d1),TuplePI(d2)):
+  case $(&TuplePI(d1),&TuplePI(d2)):
     return (d1 == d2) || Dict::forall_intersect(pinfo_lessthan_approx,d1,d2);
-  case $(StructPI(d1),StructPI(d2)):
+  case $(&StructPI(d1),&StructPI(d2)):
     return (d1 == d2) || Dict::forall_intersect(pinfo_lessthan_approx,d1,d2);
-  default: throw Core::Impossible("pinfo_lessthan");
+  default: throw new Core::Impossible("pinfo_lessthan");
   }
 }
 
@@ -384,7 +401,7 @@ bool flow_lessthan_approx(flow_info_t f1, flow_info_t f2) {
   switch($(f1,f2)) {
   case $(BottomFL,_): return true;
   case $(_,BottomFL): return false;
-  case $(InitsFL(d1),InitsFL(d2)):
+  case $(&InitsFL(d1),&InitsFL(d2)):
     if(d1 == d2) return true;
     return Dict::forall_intersect(pinfo_lessthan_approx, d2, d1);
   }

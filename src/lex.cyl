@@ -52,14 +52,16 @@ static trie_t typedefs_trie = null;//int field true iff path is a typedef
 static int comment_depth = 0;
 
 // These needn't be set by lex_init -- they're set while finding a token.
-static $(sign_t,int)    token_int_pair = $(Signed,0);
+static $(sign_t,int)    token_int_pair = $((sign_t)Signed,0);
 static string           bogus_string   = "*bogus*";
-static $(enum Nmspace,var) token_id_pair  = $(Abs_n(null),&bogus_string);
+static tunion Nmspace.Abs_n absn_null  = Abs_n(null);
+static $(nmspace_t,var_t) token_id_pair  = $((nmspace_t)(&absn_null),
+                                           &bogus_string);
 
 static char             token_char     = '\000';
 static string           token_string   = "";
 static $(sign_t,int)@   token_int      = &token_int_pair;
-static qvar             token_qvar     = &token_id_pair;
+static qvar_t           token_qvar     = &token_id_pair;
 
 static int runaway_start = 0;
 
@@ -123,6 +125,7 @@ static $(string,short) rw_array[] = {
   $("switch", SWITCH),
   $("throw", THROW),
   $("try", TRY),
+  $("tunion", TUNION),
   $("typedef", TYPEDEF),
   $("union", UNION),
   $("unsigned", UNSIGNED),
@@ -130,7 +133,7 @@ static $(string,short) rw_array[] = {
   $("void", VOID),
   $("volatile", VOLATILE),
   $("while", WHILE),
-  $("xenum", XENUM),
+  $("xtunion", XTUNION),
   $("xprintf", XPRINTF)
 };
 
@@ -225,7 +228,7 @@ static int int_of_char(char c) {
   if ('0'<=c && c<='9')      return c-'0';
   else if ('a'<=c && c<='f') return 10+c-'a';
   else if ('A'<=c && c<='F') return 10+c-'A';
-  else throw InvalidArg("string to integer conversion");
+  else throw new InvalidArg("string to integer conversion");
 }
 
  
@@ -241,13 +244,13 @@ $(sign_t, int)@ intconst(Lexbuf<`a> lbuf, int start, int base) {
     switch (c) {
         // incorrect to return as soon as we see 'u' 'U' if l isn't ignored
     case 'u': fallthru;
-    case 'U': return new {$(Unsigned,(signed int)n)}; 
+    case 'U': return new {$((sign_t)Unsigned,(signed int)n)}; 
     case 'l': break;
     case 'L': break;
     default: n = n*base + (unsigned int)int_of_char(c); break;
     }
   }
-  return new{$(Signed, (signed int)n)};
+  return new{$((sign_t)Signed, (signed int)n)};
 }
 
 // *********************** CHARACTER CONSTANTS ***********************
@@ -300,15 +303,15 @@ string get_stored_string () {
 
 static struct Ldecls {
   // records typedefs and namespaces declared in a scope
-  Set::set_t<var> typedefs;
-  Set::set_t<var> namespaces;
+  Set::set_t<var_t> typedefs;
+  Set::set_t<var_t> namespaces;
 };
 typedef struct Ldecls @ldecls_t;
 
 static struct Lvis {  // the King lives!
   // records the namespaces whose declarations are visible in a scope
-  list_t<var>       current_namespace;
-  list_t<list_t<var>> imported_namespaces;
+  list_t<var_t>       current_namespace;
+  list_t<list_t<var_t>> imported_namespaces;
 };
 typedef struct Lvis @lvis;
 
@@ -316,7 +319,7 @@ static struct Lstate {
   // lstack is the current nested scope structure,
   // decls is the global declaration mapping
   List_t<lvis>                     lstack; 
-  Dict::dict_t<list_t<var>,ldecls_t> decls;
+  Dict::dict_t<list_t<var_t>,ldecls_t> decls;
 };
 typedef struct Lstate @lstate_t;
 
@@ -334,16 +337,16 @@ static void typedef_init() {
   lstate = new Opt(new Lstate{.lstack=init_lstack,.decls=init_decls});
 }
 
-static list_t<var> get_absolute_namespace(struct List<var,`H> @ns) {
+static list_t<var_t> get_absolute_namespace(struct List<var_t,`H> @ns) {
   // ns is a relative namespace, we return the absolute namespace
   // Invariant: ns != null -- in the type!
-  var n = ns->hd;
+  var_t n = ns->hd;
   // For each enclosing scope...
   for (list_t<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
     lvis lv = ls->hd; // ... see what namespaces are visible
     // ... and look in each such visible namespace
-    list_t<list_t<var>> x = new List(lv->current_namespace,
-                                     lv->imported_namespaces);
+    list_t<list_t<var_t>> x = new List(lv->current_namespace,
+                                       lv->imported_namespaces);
     for (; x != null; x = x->tl) {
       ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
       // ... for namespace n
@@ -365,8 +368,8 @@ static void recompute_typedefs() {
   // of their typedefs
   for (list_t<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
     lvis lv = ls->hd; 
-    list_t<list_t<var>> x = new List(lv->current_namespace, 
-                                     lv->imported_namespaces);
+    list_t<list_t<var_t>> x = new List(lv->current_namespace, 
+                                       lv->imported_namespaces);
     for (; x != null; x = x->tl) {
       ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
       Set::iter(insert_typedef,ld->typedefs);
@@ -375,16 +378,16 @@ static void recompute_typedefs() {
 }
 
 // This can stay the slow way because most identifiers are not qualified.
-static bool is_typedef_in_namespace(List_t<var> ns, var v) {
-  list_t<var> ans = get_absolute_namespace(ns);
+static bool is_typedef_in_namespace(List_t<var_t> ns, var_t v) {
+  list_t<var_t> ans = get_absolute_namespace(ns);
   try {
     ldecls_t ld = Dict::lookup(lstate->v->decls,ans);
     return Set::member(ld->typedefs,v);
-  } catch { case Dict::Absent:
+  } catch { case &Dict::Absent:
     return false;
   }
 }
-static bool is_typedef(List::list_t<var> ns, var v) {
+static bool is_typedef(List::list_t<var_t> ns, var_t v) {
   if (ns != null)
     return is_typedef_in_namespace((List_t<stringptr>)ns,v);
   // all unqualified typedefs must be in the trie 
@@ -402,9 +405,9 @@ static bool is_typedef(List::list_t<var> ns, var v) {
   return t->shared_str;
 }
 
-void enter_namespace(var s) {
-  list_t<var> ns = lstate->v->lstack->hd->current_namespace;
-  list_t<var> new_ns = List::append(ns,new List(s,null));
+void enter_namespace(var_t s) {
+  list_t<var_t> ns = lstate->v->lstack->hd->current_namespace;
+  list_t<var_t> new_ns = List::append(ns,new List(s,null));
   // Push the new namespace on the stack
   lstate->v->lstack =
     new List(new Lvis{.current_namespace = new_ns,.imported_namespaces = null},
@@ -436,14 +439,14 @@ void leave_namespace() {
   lstate->v->lstack = (List_t<lvis>)lstate->v->lstack->tl;
   recompute_typedefs();
 }
-void enter_using(qvar q) {
+void enter_using(qvar_t q) {
   _ ns;
   switch ((*q)[0]) {
   case Loc_n:
     ns = (List_t<stringptr>)(new List((*q)[1],null));
     break;
-  case Rel_n(y): fallthru(y);
-  case Abs_n(y):
+  case &Rel_n(y): fallthru(y);
+  case &Abs_n(y):
     ns = (List_t<stringptr>)List::append(y,new List((*q)[1],null));
     break;
   }
@@ -464,7 +467,7 @@ void leave_using() {
   recompute_typedefs();
 }
 
-void register_typedef(qvar q) {
+void register_typedef(qvar_t q) {
   // FIX: we assume that q is not in fact qualified
   let current = lstate->v->lstack->hd->current_namespace;
   let ds      = lstate->v->decls;
@@ -489,7 +492,7 @@ static short process_id(Lexbuf<`a> lbuf) {
 
   // maybe it's a typedef
   if (is_typedef(null,s)) {
-    token_qvar = new $(Rel_n(null),s);
+    token_qvar = new $((nmspace_t)(new Rel_n(null)),s);
     return QUAL_TYPEDEF_NAME;
   }
 
@@ -503,24 +506,24 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
   int    end = lbuf->lex_curr_pos;
   string s   = lbuf->lex_buffer;
 
-  list_t<var> rev_vs = null;
+  list_t<var_t> rev_vs = null;
 
   while (i<end) {
     int start = i;
     for (; i < end && s[i] != ':'; i++) 
       ; // skip
     if (start == i) // no progress -- first char is ':'
-      throw Impossible("bad namespace");
+      throw new Impossible("bad namespace");
     int vlen = i - start;
-    var v    = get_symbol(str_index(s, start, vlen));
+    var_t v    = get_symbol(str_index(s, start, vlen));
     rev_vs = new List(v,rev_vs);
     i += 2;
   }
   if (rev_vs == null)
-    throw Impossible("bad namespace");
-  var       v  = rev_vs->hd;
-  list_t<var> vs = List::imp_rev(rev_vs->tl);
-  token_qvar = new $(Rel_n(vs),v);
+    throw new Impossible("bad namespace");
+  var_t          v = rev_vs->hd;
+  list_t<var_t> vs = List::imp_rev(rev_vs->tl);
+  token_qvar = new $((nmspace_t)(new Rel_n(vs)),v);
   if (is_typedef(vs,v))
     return QUAL_TYPEDEF_NAME;
   else 
@@ -539,14 +542,14 @@ int yylex() {
  yylloc.first_line = lexeme_start(lbuf->v);
  yylloc.last_line  = lexeme_end(lbuf->v);
  switch (ans) {
- case IDENTIFIER        : yylval = String_tok(Lex::token_string); break;
- case QUAL_IDENTIFIER   : yylval = QualId_tok(Lex::token_qvar);   break;
- case QUAL_TYPEDEF_NAME : yylval = QualId_tok(Lex::token_qvar);   break;
- case TYPE_VAR          : yylval = String_tok(Lex::token_string); break;
- case INTEGER_CONSTANT  : yylval = Int_tok(Lex::token_int);       break;
- case CHARACTER_CONSTANT: yylval = Char_tok(Lex::token_char);     break;
- case FLOATING_CONSTANT : yylval = String_tok(Lex::token_string); break;
- case STRING            : yylval = String_tok(Lex::token_string); break;
+ case IDENTIFIER        : yylval = new String_tok(Lex::token_string); break;
+ case QUAL_IDENTIFIER   : yylval = new QualId_tok(Lex::token_qvar);   break;
+ case QUAL_TYPEDEF_NAME : yylval = new QualId_tok(Lex::token_qvar);   break;
+ case TYPE_VAR          : yylval = new String_tok(Lex::token_string); break;
+ case INTEGER_CONSTANT  : yylval = new Int_tok(Lex::token_int);       break;
+ case CHARACTER_CONSTANT: yylval = new Char_tok(Lex::token_char);     break;
+ case FLOATING_CONSTANT : yylval = new String_tok(Lex::token_string); break;
+ case STRING            : yylval = new String_tok(Lex::token_string); break;
  default: break;
  }
  return ans;

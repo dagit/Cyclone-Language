@@ -130,7 +130,7 @@ extern int	setlinebuf(FILE *);
 // 
 // Routines added for Cyclone
 //
-extern xenum exn {
+extern xtunion exn {
   FileOpenError(string);
   FileCloseError;
 };

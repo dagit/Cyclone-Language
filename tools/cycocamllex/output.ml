@@ -10,7 +10,7 @@
 (*                                                                     *)
 (***********************************************************************)
 
-(* $Id: output.ml,v 1.5 2001-04-20 23:36:44 jgm Exp $ *)
+(* $Id: output.ml,v 1.6 2001-05-02 13:00:12 jgm Exp $ *)
 
 (* Output the DFA tables and its entry points *)
 
@@ -102,7 +102,7 @@ let output_entry sourcefile ic oc e =
   fprintf oc 
     " default: lexbuf->refill_buff(lexbuf); return %s_rec(lexbuf,lexstate);\n"
     e.auto_name;
-  fprintf oc "  }\n throw Error(\"some action didn't return!\");\n}\n";
+  fprintf oc "  }\n throw new Error(\"some action didn't return!\");\n}\n";
   fprintf oc "int %s(Lexbuf<`a> lexbuf) { return %s_rec(lexbuf,%d); }\n"
           e.auto_name e.auto_name e.auto_initial_state
 

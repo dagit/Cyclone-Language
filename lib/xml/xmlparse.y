@@ -17,21 +17,21 @@ namespace XmlParse {
 Core::opt_t<Lexbuf<Function_lexbuf_state<Stdio::FILE@>>> lbuf = null;
 static list_t<content_t> parse_result = null;
 void error(string msg) {
-  throw Core::Failure(msg);
+  throw new Core::Failure(msg);
 }
 
-enum context {
+tunion context {
   InTag,
   Normal
 };
 
-static enum context current = Normal;
+static tunion context current = Normal;
 
-void setContext(enum context c) {
+void setContext(tunion context c) {
   current = c;
 }
 
-enum context getContext() {
+tunion context getContext() {
   return current;
 } 
 
@@ -99,11 +99,11 @@ using XmlParse;
 content0: content     { $$ = $!1; XmlParse::parse_result = $1; }
 
 element:
-  emptyElemTag      { let $(n,a) = *($1); $$ = ^$(Empty(n,a)); }
+  emptyElemTag      { let $(n,a) = *($1); $$ = ^$(new Empty(n,a)); }
 | sTag content eTag { let $(sn,a) = *($1);
                       let en = $3;
                       if (String::strcmp(sn,en) == 0)
-                        $$ = ^$(StartEnd(sn,a,$2));
+                        $$ = ^$(new StartEnd(sn,a,$2));
                       else error("tag mismatch");
                     }
 
@@ -118,20 +118,20 @@ attributes:
 | attribute attributes { $$ = ^$(new List($1,$2)); }
 
 attribute:
-  NAME EQ ATTVALUE1 { $$ = ^$(new $($1,Attvalue1($3))); }
-| NAME EQ ATTVALUE2 { $$ = ^$(new $($1,Attvalue2($3))); }
+  NAME EQ ATTVALUE1 { $$ = ^$(new $($1,new Attvalue1($3))); }
+| NAME EQ ATTVALUE2 { $$ = ^$(new $($1,new Attvalue2($3))); }
 
 cls:
   CLOSE { setContext(Normal); }
 
 content:
   /* empty */       { $$ = ^$(null); }
-| element content   { $$ = ^$(new List(Element($1),$2)); }
-| CHARDATA content  { $$ = ^$(new List(Chardata($1),$2)); }
-| REFERENCE content { $$ = ^$(new List(Reference($1),$2)); }
-| CDSECT content    { $$ = ^$(new List(Cdsect($1),$2)); }
-| PI content        { $$ = ^$(new List(Pi($1),$2)); }
-| COMMENT content   { $$ = ^$(new List(Comment($1),$2)); }
+| element content   { $$ = ^$(new List(new Element($1),$2)); }
+| CHARDATA content  { $$ = ^$(new List(new Chardata($1),$2)); }
+| REFERENCE content { $$ = ^$(new List(new Reference($1),$2)); }
+| CDSECT content    { $$ = ^$(new List(new Cdsect($1),$2)); }
+| PI content        { $$ = ^$(new List(new Pi($1),$2)); }
+| COMMENT content   { $$ = ^$(new List(new Comment($1),$2)); }
 
 eTag:
   opnslash cls { $$ = $!1; }

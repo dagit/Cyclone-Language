@@ -79,7 +79,7 @@ void add_char(T b, char c) {
 // null terminators within the specified substring
 void add_substring(T b, string s, int offset, int len) {
   if (offset < 0 || len < 0 || offset + len > s.size)
-    throw InvalidArg("Buffer::add_substring");
+    throw new InvalidArg("Buffer::add_substring");
   int new_position = b->position + len;
   if (new_position > b->length) resize (b, len);
   String::zstrncpy(b->buffer, b->position, s, offset, len);

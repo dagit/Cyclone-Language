@@ -10,7 +10,7 @@ namespace Position {
   using List;
   using Lineno;
 
-  extern xenum exn {Exit};
+  extern xtunion exn {Exit};
 
   extern void   reset_position(string);
   extern void   set_position_file(string);
@@ -26,8 +26,8 @@ namespace Position {
   extern list_t<stringptr> strings_of_segments(glist_t<seg_t,`r>);
 
   //////// Errors ////////////////////
-  extern enum Error_kind { Lex, Parse, Elab };
-  typedef enum Error_kind error_kind_t;
+  extern tunion Error_kind { Lex, Parse, Elab };
+  typedef tunion Error_kind error_kind_t;
   extern struct Error {
     string       source;
     seg_t        seg;
@@ -40,7 +40,7 @@ namespace Position {
   extern error_t mk_err_elab(seg_t,string);
 
   //////// Error Reporting ///////////
-  extern xenum exn {Nocontext};
+  extern xtunion exn {Nocontext};
   extern bool print_context;
   extern void post_error(error_t);
   extern bool error_p();

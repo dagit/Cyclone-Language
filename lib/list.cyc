@@ -29,17 +29,17 @@ int length(glist_t<`a,`r> x) {
 // Note that there's no need to declare a type with the exception.
 // If we wanted List_empty to carry an int value, we would write:
 // exception int List_empty;
-xenum exn {List_empty};
+xtunion exn {List_empty};
 
 // return the first element in a list, if any, throw List_empty otherwise. 
 `a hd(glist_t<`a,`r> x) {
-  if (x == null) throw List_empty;
+  if (x == null) throw new List_empty;
   return x->hd;
 }
 
 // return the tail of a list, if any, throw List_empty otherwise. 
 glist_t<`a,`r> tl(glist_t<`a,`r> x) {
-  if (x == null) throw List_empty;
+  if (x == null) throw new List_empty;
   return x->tl;
 }
 
@@ -87,7 +87,7 @@ list_t<`b> map_c(`b f(`c,`a),`c env,glist_t<`a,`r> x) {
 }
 
 // thrown when two lists don't have the same size 
-xenum exn {List_mismatch};
+xtunion exn {List_mismatch};
 
 // Given two lists of the same length and a function, apply the function
 // to each pair of elements (in order) and collect the results in a new list.
@@ -96,7 +96,7 @@ list_t<`c> map2(`c f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
   list_t<`c> result, prev;
 
   if (x == null && y == null) return null;
-  if (x == null || y == null) throw List_mismatch;
+  if (x == null || y == null) throw new List_mismatch;
 
   result = new List(f(x->hd,y->hd),null);
   prev = result;
@@ -110,7 +110,7 @@ list_t<`c> map2(`c f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
     x = x->tl;
     y = y->tl;
   }
-  if (x != null || y != null) throw List_mismatch;
+  if (x != null || y != null) throw new List_mismatch;
   return(result);
 }
 
@@ -156,7 +156,7 @@ void app2(`c f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
     x = x->tl;
     y = y->tl;
   }
-  if (x != null || y != null) throw List_mismatch;
+  if (x != null || y != null) throw new List_mismatch;
 }
 
 void app2_c(`d f(`a,`b,`c),`a env,glist_t<`b,`r1> x,glist_t<`c,`r2> y) {
@@ -165,7 +165,7 @@ void app2_c(`d f(`a,`b,`c),`a env,glist_t<`b,`r1> x,glist_t<`c,`r2> y) {
     x = x->tl;
     y = y->tl;
   }
-  if (x != null || y != null) throw List_mismatch;
+  if (x != null || y != null) throw new List_mismatch;
 }
 
 // Same as iter, but generalized to a pair of lists.  Throws List_mismatch
@@ -176,7 +176,7 @@ void iter2(void f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
     x = x->tl;
     y = y->tl;
   }
-  if (x != null || y != null) throw List_mismatch;
+  if (x != null || y != null) throw new List_mismatch;
 }
 void iter2_c(void f(`a,`b,`c),`a env,glist_t<`b,`r1> x,glist_t<`c,`r2> y) {
   while (x != null && y != null) {
@@ -184,7 +184,7 @@ void iter2_c(void f(`a,`b,`c),`a env,glist_t<`b,`r1> x,glist_t<`c,`r2> y) {
     x = x->tl;
     y = y->tl;
   }
-  if (x != null || y != null) throw List_mismatch;
+  if (x != null || y != null) throw new List_mismatch;
 }
 
 // Given a list [x1,x2,...,xn-1,xn], a function f, and an accumulator a,
@@ -352,7 +352,7 @@ list_t<`a> merge(int less_eq(`a,`a),list_t<`a> a,list_t<`a> b) {
 }
 
 // thrown when nth doesn't have enough elements in the list. 
-xenum exn {Nth};
+xtunion exn {Nth};
 
 // Given [x0,x1,...,xn], return the ith element of the list (0 <= i <= n).
 // Throw Nth if the list doesn't have enough elements.  Notice that the
@@ -363,7 +363,7 @@ xenum exn {Nth};
     --i;
     x = x->tl;
   }
-  if (i < 0 || x == null) throw Nth;
+  if (i < 0 || x == null) throw new Nth;
   return(x->hd);
 }
 
@@ -395,7 +395,7 @@ list_t<$(`a,`b)@> zip(glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
   list_t<$(`a,`b)@> result, prev;
   
   if (x == null && y == null) return null;
-  if (x == null || y == null) throw List_mismatch;
+  if (x == null || y == null) throw new List_mismatch;
 
   result = new List(new $(x->hd,y->hd),null);
   prev = result;
@@ -409,7 +409,7 @@ list_t<$(`a,`b)@> zip(glist_t<`a,`r1> x,glist_t<`b,`r2> y) {
     x = x->tl;
     y = y->tl;
   }
-  if (x != null || y != null) throw List_mismatch;
+  if (x != null || y != null) throw new List_mismatch;
   return(result);
 }
 
@@ -486,7 +486,7 @@ bool mem(int compare(`a,`a), glist_t<`a,`r> l, `a x) {
     if (l->hd[0][0] == x) return(l->hd[0][1]);
     l = l->tl;
   }
-  throw Core::Not_found;
+  throw new Core::Not_found;
 }
 
 `b assoc_cmp(int compare(`a,`a),glist_t<$(`a,`b)@`r1,`r2> l,`a x) {
@@ -494,7 +494,7 @@ bool mem(int compare(`a,`a), glist_t<`a,`r> l, `a x) {
     if (compare(x,l->hd[0][0]) == 0) return(l->hd[0][1]);
     l = l->tl;
   }
-  throw Core::Not_found;
+  throw new Core::Not_found;
 }
 
 // Given an association list [(k1,d1),...,(kn,dn)] and a key x,

@@ -10,7 +10,7 @@ int main() {
   string ?args = std_args();  
 
   if (args.size <= 1) 
-    throw Failure("missing name!");
+    throw new Failure("missing name!");
   else
     printf("Hello, %s.\n",args[1]);
   return 0;

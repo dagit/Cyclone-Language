@@ -21,9 +21,9 @@ using Core;
 using Stdio;
 using List;
 
-xenum exn {Error, Bad(string)};
+xtunion exn {Error, Bad(string)};
 
-enum Spec<`e::E> {
+tunion Spec<`e::E> {
   Unit_spec(void (@f)(;`e)),        // Call the function with unit argument
   Set_spec(bool@),                  // Set the reference to true
   Clear_spec(bool@),                // Set the reference to false
@@ -33,7 +33,7 @@ enum Spec<`e::E> {
                                     // function with each remaining argument
 };
 
-static enum error {
+static tunion error {
   Unknown(string),
   Missing(string),
   Message(string),
@@ -41,13 +41,13 @@ static enum error {
 };
 
 static gspec_t<`e> lookup (glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> l, 
-                         string x) {
+                           string x) {
   while (l != null) {
     if (String::strcmp(x,(*l->hd)[0]) == 0)
       return (*l->hd)[1];
     l = l->tl;
   }
-  throw Not_found;
+  throw new Not_found;
 }
 
 void usage(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist, 
@@ -62,23 +62,23 @@ void usage(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist,
 int current = 0;
 static string ?args = null;
 
-static void stop(int prog_pos, enum error e,
+static void stop(int prog_pos, tunion error e,
 		 glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist, 
                  string errmsg) {
   string progname = prog_pos < args.size ? args[prog_pos] : "(?)";
   switch (e) {
-  case Unknown(s):
+  case &Unknown(s):
      if (String::strcmp(s,"-help")!=0)
        fprintf(stderr, "%s: unknown option `%s'.\n", progname, s);
      break;
-  case Missing(s):
+  case &Missing(s):
      fprintf(stderr, "%s: option `%s' needs an argument.\n", progname, s);
      break;
-  case Wrong(flag,cmd,t):
+  case &Wrong(flag,cmd,t):
      fprintf(stderr, "%s: wrong argument `%s'; option `%s' expects %s.\n",
              progname, cmd, flag, t);
      break;
-  case Message(s):
+  case &Message(s):
      fprintf(stderr, "%s: %s.\n", progname, s);
      break;
   }
@@ -100,33 +100,33 @@ void parse(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist,
       gspec_t<`e> action;
       try action = lookup(speclist, s);
       catch {
-      case Not_found: stop(initpos, Unknown(s), speclist, errmsg); return;
+      case &Not_found: stop(initpos, new Unknown(s), speclist, errmsg); return;
       }
       try
 	switch (action) {
-	case Unit_spec(f)  : f();        break;
-	case Set_spec(r)   : *r = true;  break;
-	case Clear_spec(r) : *r = false; break;
-	case String_spec(f):
+	case &Unit_spec(f)  : f();        break;
+	case &Set_spec(r)   : *r = true;  break;
+	case &Clear_spec(r) : *r = false; break;
+	case &String_spec(f):
 	  if (current+1 < l) {
 	    f(args[current+1]);
 	    ++current;
 	  } else
-	    stop(initpos, Missing(s), speclist, errmsg);
+	    stop(initpos, new Missing(s), speclist, errmsg);
 	  break;
-	case Int_spec(f):
+	case &Int_spec(f):
 	  string arg = args[current+1];
 	  int n;
 	  try n = int_of_string(arg);
 	  catch {
-	  case InvalidArg(x):
-	    stop(initpos,Wrong(s,arg,"an integer"),speclist,errmsg);
+	  case &InvalidArg(x):
+	    stop(initpos,new Wrong(s,arg,"an integer"),speclist,errmsg);
 	    return;
 	  }
 	  f(n);
 	  ++current;
 	  break;
-	case Rest_spec(f):
+	case &Rest_spec(f):
 	  while (current < l-1) {
 	    f(args[current+1]);
 	    ++current;
@@ -134,14 +134,14 @@ void parse(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist,
 	  break;
 	}
       catch {
-      case Bad(s2): stop(initpos, Message(s2), speclist, errmsg); break;
+      case &Bad(s2): stop(initpos, new Message(s2), speclist, errmsg); break;
       }
       ++current;
     }
     else {
       try anonfun(s);
       catch {
-      case Bad(s2): stop(initpos, Message(s2), speclist, errmsg); break;
+      case &Bad(s2): stop(initpos, new Message(s2), speclist, errmsg); break;
       }
       ++current;
     }

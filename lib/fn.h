@@ -11,11 +11,11 @@
 
 namespace Fn {
 
-extern enum Function<`arg,`res,`eff::E> {
+extern tunion Function<`arg,`res,`eff::E> {
   Fun<`env>(`res (@)(`env,`arg;`eff), `env)
 };
 
-typedef enum Function<`arg,`res,`eff> fn<`arg,`res,`eff>;
+typedef tunion Function<`arg,`res,`eff> fn<`arg,`res,`eff>;
 
 // make a closure out of a function pointer and environment
 extern fn<`arg,`res,`e1> make_fn(`res f(`env,`arg;`e1), `env x; `e2);

@@ -138,7 +138,7 @@ void break_in_try_test() {
         break;
       }
     }
-    throw List::List_mismatch;
+    throw new List::List_mismatch;
   }
   catch {
   default:
@@ -158,7 +158,7 @@ void continue_in_try_test() {
         break;
       }
     }
-    throw List::List_mismatch;
+    throw new List::List_mismatch;
   }
   catch {
   default:
@@ -214,7 +214,7 @@ void list_test() {
                        List::map2(my_add,xx,List::rev(xx))));
   }
   catch {
-  case List_mismatch:
+  case &List_mismatch:
     fail();
     break;
   }
@@ -223,7 +223,7 @@ void list_test() {
     fail();
   }
   catch {
-  case List_mismatch:
+  case &List_mismatch:
     ok();
     break;
   }
@@ -626,12 +626,12 @@ void xarray_test() {
   okfail(Xarray::get(xa,0)=='a');
   okfail(Xarray::get(xa,1)=='b');
   okfail(Xarray::get(xa,2)=='c');
-  try { Xarray::get(xa,3); fail(); } catch { case Core::InvalidArg(x): ok(); break; }
+  try { Xarray::get(xa,3); fail(); } catch { case &Core::InvalidArg(x): ok(); break; }
   Xarray::set(xa,1,'B');
   okfail(Xarray::get(xa,1)=='B');
   Xarray::add(xa,'d');
   okfail(Xarray::get(xa,3)=='d');
-  try { Xarray::get(xa,4); fail(); } catch { case Core::InvalidArg(x): ok(); break; }
+  try { Xarray::get(xa,4); fail(); } catch { case &Core::InvalidArg(x): ok(); break; }
   test_end();;
 }
 
@@ -753,22 +753,22 @@ void fn_test() {
 
 //////////////////////////// Pretty-printer test
 using PP {
-enum term {
+tunion term {
   Var(string),
-  App(enum term,enum term),
-  Lam(string,enum term)
+  App(tunion term,tunion term),
+  Lam(string,tunion term)
 };
-bool is_lam(enum term t) {
+bool is_lam(tunion term t) {
   switch (t) {
-  case Lam(x,t1): return true;
+  case &Lam(x,t1): return true;
   default: return false;
   }
 }
-doc_t pp_term(enum term t) {
+doc_t pp_term(tunion term t) {
   switch (t) {
-  case Var(x):
+  case &Var(x):
     return text(x);
-  case App(t1,t2):
+  case &App(t1,t2):
     if (is_lam(t1))
       return
         concat(text("("),
@@ -782,7 +782,7 @@ doc_t pp_term(enum term t) {
                     concat(text("("),
                            concat(pp_term(t2),
                                   text(")"))));
-  case Lam(x,t1):
+  case &Lam(x,t1):
     return
       concat(text("\\"),
              concat(text(x),
@@ -792,11 +792,11 @@ doc_t pp_term(enum term t) {
 }
 void pp_test() {
   test_begin("PP");
-  let x = Var("x");
-  let y = Var("y");
-  let z = Var("z");
-  let t1 = Lam("x",App(x,x));
-  let t2 = App(t1,t1);
+  let x = new Var("x");
+  let y = new Var("y");
+  let z = new Var("z");
+  let t1 = new Lam("x",new App(x,x));
+  let t2 = new App(t1,t1);
   okfail(0==String::strcmp("\\x.x(x)",string_of_doc(pp_term(t1),72)));
   okfail(0==String::strcmp("(\\x.x(x))(\\x.x(x))",
                            string_of_doc(pp_term(t2),72)));
@@ -850,13 +850,13 @@ void arg_test() {
   if (args.size<=0) fail();
   else if (args.size==1) ok();
   else {
-    let u = new $((string)"-u",Unit_spec(u_foo),(string)"unit");
+    let u = new $((string)"-u",(spec_t)(new Unit_spec(u_foo)),(string)"unit");
     let s_foo = new false;
-    let s = new $((string)"-s",Set_spec(s_foo),(string)"set");
+    let s = new $((string)"-s",(spec_t)(new Set_spec(s_foo)),(string)"set");
     let c_foo = new true;
-    let c = new $((string)"-c",Clear_spec(c_foo),(string)"clear");
-    let i = new $((string)"-i",Int_spec(i_foo),(string)"int");
-    let r = new $((string)"-r",Rest_spec(r_foo),(string)"rest");
+    let c = new $((string)"-c",(spec_t)(new Clear_spec(c_foo)),(string)"clear");
+    let i = new $((string)"-i",(spec_t)(new Int_spec(i_foo)),(string)"int");
+    let r = new $((string)"-r",(spec_t)(new Rest_spec(r_foo)),(string)"rest");
     parse(new List(u,new List(s,new List(c,new List(i,new List(r,null))))),
           a_foo,
           "Usage:");
@@ -1023,10 +1023,10 @@ int main() {
   try {
     printf("Testing return in try: ");
     return_from_try_test();
-    throw List_mismatch;
+    throw new List_mismatch;
   }
   catch {
-  case List_mismatch:
+  case &List_mismatch:
     printf("return in try found\n");
     break;
   }

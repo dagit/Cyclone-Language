@@ -126,19 +126,19 @@ FILE *popen(string s, string m) {
 
 int putw(int i, FILE *f) { return Cstdio::putw(i,f); }
 
-xenum exn { 
+xtunion exn { 
   FileOpenError(string); 
   FileCloseError;
 };
 
 FILE @ file_open(string fname, string mode) {
   FILE *f = fopen(fname, mode);
-  if (f == null) throw FileOpenError(fname);
+  if (f == null) throw new FileOpenError(fname);
   return (FILE @)f; // FIX: get rid of cast?
 }
 
 void file_close(FILE @f) {
-  if (fclose(f) != 0) throw FileCloseError;
+  if (fclose(f) != 0) throw new FileCloseError;
 }
 
 

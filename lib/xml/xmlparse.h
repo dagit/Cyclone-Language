@@ -21,14 +21,14 @@ extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
 extern void error(string msg);
 
 extern
-enum context {
+tunion context {
   InTag,
   Normal
 };
 
-extern void setContext(enum context c);
+extern void setContext(tunion context c);
 
-extern enum context getContext();
+extern tunion context getContext();
 
 }
 

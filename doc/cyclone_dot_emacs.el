@@ -11,7 +11,8 @@
       auto-mode-alist))))))
 (font-lock-add-keywords 'c++-mode ; reserved words not in C++ and not types
     (list 
-      "\\\<xenum\\\>" 
+      "\\\<xtunion\\\>" 
+      "\\\<tunion\\\>" 
       "\\\<fallthru\\\>"
       "\\\<default\\\>"
       "\\\<abstract\\\>"

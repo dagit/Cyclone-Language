@@ -47,9 +47,9 @@ int yylex() {
   case OPEN: fallthru;
   case OPENSLASH: fallthru;
   case REFERENCE:
-    yylval = String_tok(XmlScan::token_string); break;
+    yylval = new String_tok(XmlScan::token_string); break;
   case PI:
-    yylval = Pi_tok(new $(XmlScan::token_pi,XmlScan::token_string)); break;
+    yylval = new Pi_tok(new $(XmlScan::token_pi,XmlScan::token_string)); break;
   default: break;
   }
   return ans;
@@ -79,7 +79,7 @@ static string after(int n,string s) {
   try
     return String::substring(s,n,String::strlen(s)-n);
   catch {
-    case Core::InvalidArg(_):
+    case &Core::InvalidArg(_):
       error("internal lexing error");
       return ""; // Unreachable
   }

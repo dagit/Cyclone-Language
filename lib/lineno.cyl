@@ -81,7 +81,7 @@ void poss_of_abss(string filename, List::list_t<$(int,pos_t)@> places) {
 	  break;
 	
 	switch (next) {
-	case END:     throw Failure("Lineno: Invalid file position");
+	case END:     throw new Failure("Lineno: Invalid file position");
 	case NEWLINE: ++line; break;
 	case LINEDEF: 
 	  opt_t<$(string,int)@> fno = parse_linedef(this_line);
@@ -93,7 +93,7 @@ void poss_of_abss(string filename, List::list_t<$(int,pos_t)@> places) {
 	    line        = (*fno->v)[1];
 	  }
 	  break;
-	default: throw Failure("Lineno: Impossible");
+	default: throw new Failure("Lineno: Impossible");
 	}
       }
       while(places != null && eol >= (*places->hd)[0]) {

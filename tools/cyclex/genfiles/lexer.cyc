@@ -37,12 +37,12 @@ int line_start_pos = 0;
 
 void yyerror(string s) {
   fprintf(stderr, "%s, line:%d", s, line_num);
-  throw Parser_error(s);
+  throw new Parser_error(s);
 }
 
 namespace Lexer {
 
-xenum exn { Lexical_error(string,int,int); };
+xtunion exn { Lexical_error(string,int,int); };
 
 static string                  token_string = (string)"";
 static char                    token_char   = (char)'D';
@@ -102,7 +102,7 @@ static int handle_lexical_error(int fn(Lexbuf<`a>), Lexbuf<`a>lbuf) {
   int line = line_num;
   int column = lexeme_start(lbuf) - line_start_pos;
   try return fn(lbuf);
-  catch { case Lexical_error(msg,_,_): throw Lexical_error(msg,line,column); }
+  catch { case &Lexical_error(msg,_,_): throw new Lexical_error(msg,line,column); }
 }
 
 // Forward declarations of lexing functions
@@ -118,10 +118,10 @@ int comment(Lexbuf<`a>);
 int yylex() {
   int ans = Lexer::lexmain(lbuf->v);
   switch (ans) {
-  case TIDENT:  yylval = String_tok(Lexer::token_string);   break;
-  case TSTRING: yylval = String_tok(Lexer::token_string);   break;
-  case TCHAR:   yylval = Char_tok(Lexer::token_char);       break;
-  case TACTION: yylval = Location_tok(Lexer::token_action); break;
+  case TIDENT:  yylval = new String_tok(Lexer::token_string);   break;
+  case TSTRING: yylval = new String_tok(Lexer::token_string);   break;
+  case TCHAR:   yylval = new Char_tok(Lexer::token_char);       break;
+  case TACTION: yylval = new Location_tok(Lexer::token_action); break;
   default: break;
   }
   return ans;
@@ -236,11 +236,11 @@ case 21:
         return -1; 
 case 22: 
 #line 181 "lexer.cyl"
-      throw Lexical_error(xprintf("illegal character %s", lexeme(lexbuf)),
+      throw new Lexical_error(xprintf("illegal character %s", lexeme(lexbuf)),
 			  line_num, 
 			  lexeme_start(lexbuf) - line_start_pos);  default: lexbuf->refill_buff(lexbuf); return lexmain_rec(lexbuf,lexstate);
   }
- throw Error("some action didn't return!");
+ throw new Error("some action didn't return!");
 }
 int lexmain(Lexbuf<`a> lexbuf) { return lexmain_rec(lexbuf,0); }
 int action_rec(Lexbuf<`a> lexbuf, int lexstate) {
@@ -280,7 +280,7 @@ case 6:
        
 case 7: 
 #line 205 "lexer.cyl"
-         throw Lexical_error("unterminated action", 0, 0); 
+         throw new Lexical_error("unterminated action", 0, 0); 
 case 8: 
 #line 206 "lexer.cyl"
          line_start_pos = lexeme_end(lexbuf);
@@ -294,7 +294,7 @@ case 10:
 #line 211 "lexer.cyl"
       return action(lexbuf);  default: lexbuf->refill_buff(lexbuf); return action_rec(lexbuf,lexstate);
   }
- throw Error("some action didn't return!");
+ throw new Error("some action didn't return!");
 }
 int action(Lexbuf<`a> lexbuf) { return action_rec(lexbuf,1); }
 int strng_rec(Lexbuf<`a> lexbuf, int lexstate) {
@@ -321,7 +321,7 @@ case 3:
     return strng(lexbuf); 
 case 4: 
 #line 227 "lexer.cyl"
-    throw Lexical_error("unterminated string", 0, 0); 
+    throw new Lexical_error("unterminated string", 0, 0); 
 case 5: 
 #line 229 "lexer.cyl"
     store_string_char('\n'); 
@@ -333,7 +333,7 @@ case 6:
 #line 234 "lexer.cyl"
       store_string_char(lexeme_char(lexbuf,0)); return strng(lexbuf);  default: lexbuf->refill_buff(lexbuf); return strng_rec(lexbuf,lexstate);
   }
- throw Error("some action didn't return!");
+ throw new Error("some action didn't return!");
 }
 int strng(Lexbuf<`a> lexbuf) { return strng_rec(lexbuf,2); }
 int comment_rec(Lexbuf<`a> lexbuf, int lexstate) {
@@ -368,7 +368,7 @@ case 6:
                                             return comment(lexbuf); 
 case 7: 
 #line 248 "lexer.cyl"
-        throw Lexical_error("unterminated comment", 0, 0); 
+        throw new Lexical_error("unterminated comment", 0, 0); 
 case 8: 
 #line 249 "lexer.cyl"
          line_start_pos = lexeme_end(lexbuf);
@@ -379,7 +379,7 @@ case 9:
 #line 253 "lexer.cyl"
       return comment(lexbuf);  default: lexbuf->refill_buff(lexbuf); return comment_rec(lexbuf,lexstate);
   }
- throw Error("some action didn't return!");
+ throw new Error("some action didn't return!");
 }
 int comment(Lexbuf<`a> lexbuf) { return comment_rec(lexbuf,3); }
 

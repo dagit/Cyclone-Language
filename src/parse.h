@@ -10,17 +10,17 @@ using Absyn {
 using List {
 using Lexing {
 namespace Parse {
-extern list_t<decl> parse_file(FILE @f);
+extern list_t<decl_t> parse_file(FILE @f);
 extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
 }
-extern enum Struct_or_union;
-typedef enum Struct_or_union struct_or_union_t;
-extern enum Blockitem;
-typedef enum Blockitem blockitem_t;
-extern enum Type_specifier;
-typedef enum Type_specifier type_specifier_t;
-extern enum Storage_class;
-typedef enum Storage_class storage_class_t;
+extern tunion Struct_or_union;
+typedef tunion Struct_or_union struct_or_union_t;
+extern tunion Blockitem;
+typedef tunion Blockitem blockitem_t;
+extern tunion Type_specifier;
+typedef tunion Type_specifier type_specifier_t;
+extern tunion Storage_class;
+typedef tunion Storage_class storage_class_t;
 extern struct Declaration_spec;
 typedef struct Declaration_spec @decl_spec_t;
 extern struct Declarator;

@@ -27,18 +27,18 @@ using Tcexp;
 using Tcpat;
 using Stdio;
 
-static void decorate_stmt(tenv_t te, stmt s) {
+static void decorate_stmt(tenv_t te, stmt_t s) {
   NewControlFlow::set_encloser(s, get_encloser(te));
   s->try_depth = get_try_depth(te);
 }
 
 // used to type-check Let_d, switch clauses, and catch clauses
-static void pattern_synth(seg_t loc, tenv_t te, list_t<tvar> tvs,
-			  list_t<vardecl> vs, stmt s, exp_opt_t where_opt,
+static void pattern_synth(seg_t loc, tenv_t te, list_t<tvar_t> tvs,
+			  list_t<vardecl_t> vs, stmt_t s, exp_opt_t where_opt,
 			  bool new_block) {
-  tenv te2 = add_type_vars(loc,te,tvs);
+  tenv_t te2 = add_type_vars(loc,te,tvs);
   if(new_block)
-    te2 = Tcenv::new_block(te2);
+    te2 = Tcenv::new_block(loc,te2);
   let ropt = new Opt(Tcenv::curr_rgn(te2));
   for(let vs2 = vs; vs2 != null; vs2 = vs2->tl) {
     te2 = add_pat_var(loc, te2, vs2->hd);
@@ -46,7 +46,7 @@ static void pattern_synth(seg_t loc, tenv_t te, list_t<tvar> tvs,
   }
 
   if(where_opt != null)
-    tcTest(te2,(exp)where_opt,"switch clause guard");
+    tcTest(te2,(exp_t)where_opt,"switch clause guard");
 
   if(vs != null)
     te2 = set_encloser(te2,s); // for substatements inside of s
@@ -64,7 +64,7 @@ static void pattern_synth(seg_t loc, tenv_t te, list_t<tvar> tvs,
 // rules.  We may revisit some of these semi-arbitrary decisions.)
 // Note: With these adjacency rules, you can't just throw skip statements in
 //       anywhere because they end regions.
-void tcStmt(tenv_t te, stmt s0, bool new_block) {
+void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   
   decorate_stmt(te,s0);
 
@@ -72,18 +72,18 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
 
   case Skip_s: return;
 
-  case Exp_s(e): tcExp(te,null,e); return;
+  case &Exp_s(e): tcExp(te,null,e); return;
 
-  case Seq_s(s1,s2):
-    let te2 = set_next(te,Stmt_j(s2));
+  case &Seq_s(s1,s2):
+    let te2 = set_next(te,new Stmt_j(s2));
     tcStmt(te2,s1,true); // pass new_block in case of weird associativity??
     // JGM: try to treat sequences as "tail-calls" to avoid a deep stack.
     // (Of course, this depends on the parser's associativity.)
     while (true)
       switch (s2->r) {
-      case Seq_s(s3,s4):
+      case &Seq_s(s3,s4):
 	decorate_stmt(te,s2);
-	te2 = set_next(te,Stmt_j(s4));
+	te2 = set_next(te,new Stmt_j(s4));
 	tcStmt(te2,s3,true);
 	s2  = s4;
 	continue;
@@ -93,8 +93,8 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
     tcStmt(te,s2,true);
     return;
 
-  case Return_s(eopt):
-    typ t = return_typ(te);
+  case &Return_s(eopt):
+    type_t t = return_typ(te);
     if (eopt == null) {
       switch (compress(t)) {
       case VoidType: break;
@@ -103,7 +103,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
         break;
       }
     } else {
-      exp e = (exp)eopt;
+      exp_t e = (exp_t)eopt;
       tcExp(te,&t,e);
       if (!coerce_use(te,e,t))
 	terr(s0->loc, xprintf("returns value of type %s but requires %s",
@@ -115,19 +115,19 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
     }
     return;
 
-  case IfThenElse_s(e,s1,s2):
+  case &IfThenElse_s(e,s1,s2):
     tcTest(te,e,"if statement"); // passing string causes allocation :-(
     tcStmt(te,s1,true);
     tcStmt(te,s2,true);
     return;
 
-  case While_s($(e,cont_s),s):
+  case &While_s($(e,cont_s),s):
     decorate_stmt(te,cont_s);
     tcTest(te,e,"while loop");
     tcStmt(set_in_loop(te,cont_s),s,true);
     return;
 
-  case For_s(e1,$(e2,guard_s),$(e3,cont_s),s):
+  case &For_s(e1,$(e2,guard_s),$(e3,cont_s),s):
     decorate_stmt(te,guard_s);
     decorate_stmt(te,cont_s);
     tcExp(te,null,e1);
@@ -137,7 +137,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
     tcExp(te,null,e3); // ??? what does a break/continue in e3 mean ???
     return;
 
-  case Do_s(s,$(e,cont_s)):
+  case &Do_s(s,$(e,cont_s)):
     decorate_stmt(te,cont_s);
     tcStmt(set_in_loop(te,cont_s),s,true);
     tcTest(te,e,"do loop");
@@ -145,18 +145,18 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
 
     // In the next 4 cases, the function call assigns through sopt
     // We leave the work to Tcenv b/c it has all the control information
-  case Break_s(*sopt):    process_break(te,s0,sopt);    return;
-  case Continue_s(*sopt): process_continue(te,s0,sopt); return;
-  case Goto_s(l,*sopt):   process_goto(te,s0,l,sopt);   return;
+  case &Break_s(*sopt):    process_break(te,s0,sopt);    return;
+  case &Continue_s(*sopt): process_continue(te,s0,sopt); return;
+  case &Goto_s(l,*sopt):   process_goto(te,s0,l,sopt);   return;
 
-  case Fallthru_s(es,*clauseopt):
+  case &Fallthru_s(es,*clauseopt):
     let trip_opt = process_fallthru(te,s0,clauseopt);
     if(trip_opt == null) {
       terr(s0->loc,"fallthru not in a non-last case");
       return;
     }
     let &$(_,tvs,ts) = (_@)(trip_opt);
-    list_t<$(tvar,typ)@> instantiation = List::map(make_inst_var,tvs);
+    list_t<$(tvar_t,type_t)@> instantiation = List::map(make_inst_var,tvs);
     ts = List::map_c(substitute,instantiation,ts);
     for(; ts != null && es != null; ts = ts->tl, es = es->tl) {
       tcExp(te,null,es->hd);
@@ -175,9 +175,15 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
   //       (That way, we can use switch_clause bodies and stmtExp stmt's
   //       as enclosers and get the right behavior!!!)
     // FIX: should use l for the region name.
-  case Label_s(l,s): tcStmt(add_label(te,l,s),s,true); return;
+  case &Label_s(l,s): 
+    // Note that we set new_block to false because we're explicitly creating
+    // a new named block here.
+    tcStmt(Tcenv::new_named_block(s0->loc,add_label(te,l,s),
+                                  new Tvar(new xprintf("`%s",*l),
+                                           new_conref(RgnKind))),s,false); 
+    return;
 
-  case Switch_s(e,scs0):
+  case &Switch_s(e,scs0):
     tcExp(te,null,e);
     let t = e->topt->v;
     // type-check the cases in reverse order, a fallthru therefore transfers
@@ -203,7 +209,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
     check_switch_exhaustive(s0->loc,scs0);
     return;
 
-  case TryCatch_s(s,scs0):
+  case &TryCatch_s(s,scs0):
     // This is a KLUDGE so that we have a next statement that is not
     // outside of the handler, eg. for try while(b) break; catch ...
     // We have to do this b/c the translation to C uses the destinations
@@ -221,7 +227,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
       let pat_typ = tcPat(te,p,null);
       let &$(new_tvs,x) = pat_typ;
       if (!unify(p->topt->v,exn_typ))
-        terr(scs->hd->loc, xprintf("expected xenum exn but found %s",
+        terr(scs->hd->loc, xprintf("expected xtunion exn but found %s",
 				   typ2string(p->topt->v)));
       else
 	check_pat_regions(te,p);
@@ -234,23 +240,23 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
     check_catch_overlap(s0->loc,scs0);
     return;
 
-  case Decl_s(d,s):
+  case &Decl_s(d,s):
     string unimp_msg_part;
 
     if(new_block)
-      te = Tcenv::new_block(te);
+      te = Tcenv::new_block(s0->loc,te);
 
     switch (d->r) {
-    case Var_d(vd):
+    case &Var_d(vd):
       let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*rgn_ptr,atts) = vd;
       let curr_bl = Tcenv::curr_rgn(te);
       *rgn_ptr = new Opt(curr_bl); // side effect
       switch (nsl) {
       case Loc_n: break;
-      case Rel_n(null):
+      case &Rel_n(null):
         (*vd->name)[0] = Loc_n;
         break;
-      case Abs_n(y): throw impos("tcstmt: Abs_n declaration");
+      case &Abs_n(y): throw impos("tcstmt: Abs_n declaration");
       default:
         terr(d->loc, "cannot declare a qualified local variable");
         break;
@@ -259,15 +265,16 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
       if (initializer != null) {
 	// special case -- fill in the size for t[] arrays
 	switch (compress(t)) {
-	case ArrayType(telt,tq,sz):
+	case &ArrayType(telt,tq,sz):
           if (sz == null) {
 	    switch (initializer->r) {
-	    case Const_e(String_c(s)):
-	      t = vd->type = ArrayType(telt,tq,uint_exp(s.size,null)); break;
-	    case UnresolvedMem_e(_,es): fallthru(es);
-	    case Array_e(es):
+	    case &Const_e(&String_c(s)):
 	      t = vd->type = 
-                ArrayType(telt,tq,uint_exp(List::length(es),null));
+                new ArrayType(telt,tq,uint_exp(s.size,null)); break;
+	    case &UnresolvedMem_e(_,es): fallthru(es);
+	    case &Array_e(es):
+	      t = vd->type = 
+                new ArrayType(telt,tq,uint_exp(List::length(es),null));
 	      break;
 	    default: break;
 	    }
@@ -275,8 +282,8 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
 	  break;
 	default: break;
 	}
-        tcExpInitializer(te,&t,(exp)initializer);
-        if (!coerce_assign(te,(exp)initializer,t))
+        tcExpInitializer(te,&t,(exp_t)initializer);
+        if (!coerce_assign(te,(exp_t)initializer,t))
 	  terr(d->loc,
 	       xprintf("%s declared with type %s, initialized with type %s",
 		       *x, typ2string(t),
@@ -285,7 +292,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
       tcStmt(set_encloser(add_local_var(s->loc,te,vd),s0),s,false);
       return;
 
-    case Let_d(p,*vds,*topt_ref,e,*exhaust):
+    case &Let_d(p,*vds,*topt_ref,e,*exhaust):
       let topt = *topt_ref;
       tcExpInitializer(te,null,e);
       *topt_ref = e->topt; // side effect
@@ -306,20 +313,21 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
       pattern_synth(s0->loc, te, null, x, s, null, false);
       return;
 
-    case Namespace_d(n,tds): unimp_msg_part = "namespace"; break;
-    case Using_d(q,tds):     unimp_msg_part = "using";     break; //FIX: allow
-    case Fn_d(_):            unimp_msg_part = "function";  break;
-    case Struct_d(_):        unimp_msg_part = "struct";    break;
-    case Union_d(_):         unimp_msg_part = "union";     break;
-    case Enum_d(_):          unimp_msg_part = "enum";      break;
-    case Xenum_d(_):         unimp_msg_part = "xenum";     break;
-    case Typedef_d(_):       unimp_msg_part = "typedef";   break;
-    case ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;
+    case &Namespace_d(n,tds): unimp_msg_part = "namespace"; break;
+    case &Using_d(q,tds):     unimp_msg_part = "using";     break; //FIX: allow
+    case &Fn_d(_):            unimp_msg_part = "function";  break;
+    case &Struct_d(_):        unimp_msg_part = "struct";    break;
+    case &Union_d(_):         unimp_msg_part = "union";     break;
+    case &Tunion_d(_):        unimp_msg_part = "tunion";    break;
+    case &XTunion_d(_):       unimp_msg_part = "xtunion";   break;
+    case &Enum_d(_):          unimp_msg_part = "enum";   break;
+    case &Typedef_d(_):       unimp_msg_part = "typedef";   break;
+    case &ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;
     }
     throw impos(xprintf("tcStmt: nested %s declarations unimplemented",
 			unimp_msg_part));
 
-  case Cut_s(s):    throw impos("tcStmt: cut is not implemented");    // FIX
-  case Splice_s(s): throw impos("tcStmt: splice is not implemented"); // FIX
+  case &Cut_s(s):    throw impos("tcStmt: cut is not implemented");    // FIX
+  case &Splice_s(s): throw impos("tcStmt: splice is not implemented"); // FIX
   }
 }

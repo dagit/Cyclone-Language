@@ -14,7 +14,7 @@ struct noderef<`a,`b> {
   struct node<`a,`b> @v;
 };
 
-extern enum tree<`a,`b> {
+extern tunion tree<`a,`b> {
   Leaf,
   Node(struct noderef<`a,`b> @)
 };
@@ -22,11 +22,11 @@ extern enum tree<`a,`b> {
 struct node<`a,`b> {
   `a key;
   `b data;
-  enum tree<`a,`b> left;
-  enum tree<`a,`b> right;
+  tunion tree<`a,`b> left;
+  tunion tree<`a,`b> right;
 };
 
-extern bool splay(int f(`a,`a), `a, enum tree<`a,`b>);
+extern bool splay(int f(`a,`a), `a, tunion tree<`a,`b>);
 
 }
 #endif

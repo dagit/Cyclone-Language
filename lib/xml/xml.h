@@ -23,29 +23,29 @@ typedef string comment;
 typedef string name;
 
 EXTERN_DEFINITION
-enum attvalue {
+tunion attvalue {
   Attvalue1(string), // should be delimited by single quotes
   Attvalue2(string)  // should be delimited by double quotes
 };
-typedef enum attvalue attvalue_t;
+typedef tunion attvalue attvalue_t;
 
 typedef $(name,attvalue_t)@ attribute_t;
 
 typedef $(name,string)@ pi_t;
 
-extern enum content;
-typedef enum content content_t;
+extern tunion content;
+typedef tunion content content_t;
 
 EXTERN_DEFINITION
-enum element {
+tunion element {
   StartEnd(name,list_t<attribute_t>, // Element with start and end tags
            list_t<content_t>);
   Empty(name,list_t<attribute_t>);   // Element with no content
 };
-typedef enum element element_t;
+typedef tunion element element_t;
 
 EXTERN_DEFINITION
-enum content {
+tunion content {
   Element(element_t);   // A nested element
   Chardata(chardata);   // Character data
   Reference(reference); // Character reference: &foo; or &#0;

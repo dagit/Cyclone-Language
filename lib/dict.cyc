@@ -5,13 +5,13 @@
 
 namespace Dict;
 
-xenum exn {Absent,Present};
+xtunion exn {Absent,Present};
 
-static enum Color { R, B };
+static tunion Color { R, B };
 
 // JGM: we need to put the kinds in explicitly here to avoid a warning
 static struct T<`a::B,`b::B> {
-  enum   Color color;
+  tunion   Color color;
   struct T<`a,`b> *   left;
   struct T<`a,`b> *   right;
   $(`a,`b)     key_val; // flattened, but tuple convenient for patterns
@@ -54,7 +54,7 @@ bool member(hdict_t<`a,`b,`e> d, `a key) {
     else if (i > 0) t = t->right;
     else return t->key_val[1];
   }
-  throw Absent;
+  throw new Absent;
 }
 Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d, `a key) {
   let rel = d->rel;
@@ -83,7 +83,7 @@ bool lookup_bool(hdict_t<`a,`b,`d> d, `a key, `b @`r ans_place) {
 } 
 
 static tree<`a,`b> 
-balance($(enum Color, tree<`a,`b>, tree<`a,`b>, $(`a,`b)) quad) {
+balance($(tunion Color, tree<`a,`b>, tree<`a,`b>, $(`a,`b)) quad) {
   switch(quad) {
   case $(B,&T(R,&T(R,a,b,x),c,y),d,z): return new T(R,new T(B,a,b,x),new T(B,c,d,z),y);
   case $(B,&T(R,a,&T(R,b,c,y),x),d,z): return new T(R,new T(B,a,b,x),new T(B,c,d,z),y);
@@ -113,7 +113,7 @@ hdict_t<`a,`b,`e> insert(hdict_t<`a,`b,`e> d,`a key,`b data) {
 // notice we descend twice -- we can live
 hdict_t<`a,`b,`e> insert_new(hdict_t<`a,`b,`e> d,`a key,`b data) {
   if(member(d,key))
-    throw Absent;
+    throw new Absent;
   return insert(d, key, data);
 }
 
@@ -240,7 +240,7 @@ hdict_t<`a,`c,`e> map_c(`c f(`d,`b),`d env,hdict_t<`a,`b,`e> d) {
 
 $(`a,`b)@ choose(hdict_t<`a,`b,`e> d) {
   if(d->t == null)
-    throw Absent;
+    throw new Absent;
   return new $(d->t->key_val[0], d->t->key_val[1]);
 }
 

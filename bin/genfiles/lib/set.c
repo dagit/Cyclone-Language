@@ -177,7 +177,8 @@ diff= comp(( void*) x1->hd,( void*) x2->hd); if( diff != 0){ return diff;} x1=
 x1->tl; x2= x2->tl;} return 0;}} int Cyc_Set_equals( struct Cyc_Set_Set* s1,
 struct Cyc_Set_Set* s2){ return(( int(*)( struct Cyc_Set_Set* s1, struct Cyc_Set_Set*
 s2)) Cyc_Set_compare)( s1, s2) == 0;} char Cyc_Set_Absent_tag[ 7u]="Absent";
-void* Cyc_Set_choose( struct Cyc_Set_Set* s){ if( s->nodes == 0){( void) _throw(({
-struct Cyc_Set_Absent_struct* _temp22=( struct Cyc_Set_Absent_struct*)
-GC_malloc_atomic( sizeof( struct Cyc_Set_Absent_struct)); _temp22->tag= Cyc_Set_Absent_tag;(
-struct _xenum_struct*) _temp22;}));} return( void*)( s->nodes)->hd;}
+void* Cyc_Set_choose( struct Cyc_Set_Set* s){ if( s->nodes == 0){( void) _throw((
+struct _xtunion_struct*)({ struct Cyc_Set_Absent_struct* _temp22=( struct Cyc_Set_Absent_struct*)
+GC_malloc( sizeof( struct Cyc_Set_Absent_struct)); _temp22[ 0]=({ struct Cyc_Set_Absent_struct
+_temp23; _temp23.tag= Cyc_Set_Absent_tag; _temp23;}); _temp22;}));} return( void*)(
+s->nodes)->hd;}

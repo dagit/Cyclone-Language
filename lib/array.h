@@ -42,7 +42,7 @@ extern void imp_map(`a f(`a),`a ?`r x);
 extern void imp_map_c(`a f(`b,`a),`b env,`a ?`r x);
 
 // thrown when two arrays don't have the same size 
-extern xenum exn {Array_mismatch};
+extern xtunion exn {Array_mismatch};
 
 // Given two arrays of the same length and a function, apply the function
 // to each pair of elements (in order) and collect the results in a new array.

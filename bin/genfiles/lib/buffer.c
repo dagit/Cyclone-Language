@@ -62,12 +62,13 @@ _throw( Null_Exception);}* _temp4= c;}); b->position=( unsigned int)( pos + 1);
 return;} void Cyc_Buffer_add_substring( struct Cyc_Buffer_t* b, struct
 _tagged_string s, int offset, int len){ if(( offset < 0? 1: len < 0)? 1:(
 unsigned int)( offset + len) >({ struct _tagged_string _temp5= s;( unsigned int)(
-_temp5.last_plus_one - _temp5.curr);})){( void) _throw(({ struct Cyc_Core_InvalidArg_struct*
-_temp6=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp6->tag= Cyc_Core_InvalidArg_tag; _temp6->f1=( struct _tagged_string)({ char*
-_temp7=( char*)"Buffer::add_substring"; struct _tagged_string _temp8; _temp8.curr=
-_temp7; _temp8.base= _temp7; _temp8.last_plus_one= _temp7 + 22; _temp8;});(
-struct _xenum_struct*) _temp6;}));}{ int new_position=( int)( b->position +(
+_temp5.last_plus_one - _temp5.curr);})){( void) _throw(( struct _xtunion_struct*)({
+struct Cyc_Core_InvalidArg_struct* _temp6=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp6[ 0]=({ struct Cyc_Core_InvalidArg_struct
+_temp7; _temp7.tag= Cyc_Core_InvalidArg_tag; _temp7.f1=( struct _tagged_string)({
+char* _temp8=( char*)"Buffer::add_substring"; struct _tagged_string _temp9;
+_temp9.curr= _temp8; _temp9.base= _temp8; _temp9.last_plus_one= _temp8 + 22;
+_temp9;}); _temp7;}); _temp6;}));}{ int new_position=( int)( b->position +(
 unsigned int) len); if(( unsigned int) new_position > b->length){ Cyc_Buffer_resize(
 b,( unsigned int) len);} Cyc_String_zstrncpy( b->buffer,( int) b->position, s,
 offset,( unsigned int) len); b->position=( unsigned int) new_position; return;}}

@@ -726,7 +726,8 @@ parse_type_decl ()
   if(!has_been_seen(name)) {
     if(!nolinesflag)
       fprintf(fattrs, "\n#line %d \"%s\"", lineno, infile);
-    fprintf(fattrs, "\n_ yyget_%s(xenum YYSTYPE yy1) {switch(yy1) {case %s(yy2): return yy2; default: throw Core::Failure(\"%s\");}}\n", name, name, name);
+    fprintf(fattrs, "\n static xtunion exn.Core::Failure yyfail_%s = Core::Failure(\"%s\");\n",name);
+    fprintf(fattrs, "\n_ yyget_%s(xtunion YYSTYPE yy1) {switch(yy1) {case &%s(yy2): return yy2; default: throw &yyfail_%s;}}\n", name, name, name);
   }
 
   for (;;)
@@ -864,11 +865,11 @@ parse_union_decl()
   else
     fprintf(fattrs, "\n");
 
-  fprintf(fattrs, "\nxenum YYSTYPE;\nxenum YYSTYPE "); 
+  fprintf(fattrs, "\nxtunion YYSTYPE;\nxtunion YYSTYPE "); 
   if (fdefines)
     fprintf(fdefines, 
-	"\nextern int yyparse();\nextern xenum YYSTYPE; "
-	    "\nextern xenum YYSTYPE ");
+	"\nextern int yyparse();\nextern xtunion YYSTYPE; "
+	    "\nextern xtunion YYSTYPE ");
     /* DAN */
     /* fprintf(fdefines, "\nextern int yyparse();\nextern union YYSTYPE "); */
 
@@ -1405,7 +1406,7 @@ int stack_offset;
 
 	      break;
 	      /* JGM: we use ^$ to abbreviate <typename> where
-	       * <typename> is the xenum field name that's associated with
+	       * <typename> is the xtunion field name that's associated with
 	       * the rule via the type declaration.  
 	       */
 	    case '^':
@@ -1414,7 +1415,7 @@ int stack_offset;
 		c = getc(finput);
 		type_name = get_type_name(0,rule);
 		if (type_name)
-		  fprintf(faction,"%s",type_name);
+		  fprintf(faction,"new %s",type_name);
 		else
 		  fatal("rule has no type for ^$");
 		continue;
@@ -2085,7 +2086,7 @@ packsymbols()
 	  if (spec_name_prefix)
 	    fprintf(fdefines, "\nextern YYSTYPE %slval;\n", spec_name_prefix);
 	  else
-	    fprintf(fdefines, "\nextern xenum YYSTYPE yylval;\n");
+	    fprintf(fdefines, "\nextern xtunion YYSTYPE yylval;\n");
 	}
 
       if (semantic_parser)

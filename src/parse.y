@@ -15,8 +15,8 @@
 #define YYERROR_VERBOSE
 
 #if YYDEBUG==1
-extern xenum YYSTYPE;
-extern void yyprint(int i, xenum YYSTYPE v);
+extern xtunion YYSTYPE;
+extern void yyprint(int i, xtunion YYSTYPE v);
 #endif
 
 
@@ -42,10 +42,10 @@ using String;
 // to the lexer, so that the lexer can distinguish typedef names from
 // identifiers. 
 namespace Lex {
-  extern void register_typedef(qvar s);
-  extern void enter_namespace(var);
+  extern void register_typedef(qvar_t s);
+  extern void enter_namespace(var_t);
   extern void leave_namespace();
-  extern void enter_using(qvar);
+  extern void enter_using(qvar_t);
   extern void leave_using();
 }
 
@@ -56,35 +56,35 @@ namespace Parse {
 
 // Type definitions only needed during parsing. 
 
-enum Struct_or_union { Struct_su, Union_su; };
-typedef enum Struct_or_union struct_or_union_t;
+tunion Struct_or_union { Struct_su, Union_su; };
+typedef tunion Struct_or_union struct_or_union_t;
 
-enum Blockitem {
-  TopDecls_bl(list_t<decl>);
-  Stmt_bl(stmt);
-  FnDecl_bl(fndecl);
+tunion Blockitem {
+  TopDecls_bl(list_t<decl_t>);
+  Stmt_bl(stmt_t);
+  FnDecl_bl(fndecl_t);
 };
-typedef enum Blockitem blockitem_t;
+typedef tunion Blockitem blockitem_t;
 
-enum Type_specifier {
+tunion Type_specifier {
   Signed_spec(seg_t);
   Unsigned_spec(seg_t);
   Short_spec(seg_t);
   Long_spec(seg_t);
-  Type_spec(typ,seg_t);    // int, `a, list_t<`a>, etc. 
-  Decl_spec(decl);
+  Type_spec(type_t,seg_t);    // int, `a, list_t<`a>, etc. 
+  Decl_spec(decl_t);
 };
-typedef enum Type_specifier type_specifier_t;
+typedef tunion Type_specifier type_specifier_t;
 
-enum Storage_class {
+tunion Storage_class {
   Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, 
   Register_sc, Abstract_sc;
 };
-typedef enum Storage_class storage_class_t;
+typedef tunion Storage_class storage_class_t;
 
 struct Declaration_spec {
   opt_t<storage_class_t>   sc;
-  tqual                    tq;
+  tqual_t                  tq;
   list_t<type_specifier_t> type_specs;
   bool                     is_inline;
   list_t<attribute_t>      attributes;
@@ -92,29 +92,30 @@ struct Declaration_spec {
 typedef struct Declaration_spec @decl_spec_t;
 
 struct Declarator {
-  qvar                  id;
-  list_t<type_modifier> tms;
+  qvar_t                  id;
+  list_t<type_modifier_t> tms;
 };
 typedef struct Declarator @declarator_t;
 
 struct Abstractdeclarator {
-  list_t<type_modifier> tms;
+  list_t<type_modifier_t> tms;
 };
 typedef struct Abstractdeclarator @abstractdeclarator_t;
 
 // forward references
-static $(var,tqual,typ)@ fnargspec_to_arg(seg_t loc,
-					  $(opt_t<var>,tqual,typ)@ t);
-static $(typ,opt_t<decl>) 
+static $(var_t,tqual_t,type_t)@ 
+  fnargspec_to_arg(seg_t loc,$(opt_t<var_t>,tqual_t,type_t)@ t);
+static $(type_t,opt_t<decl_t>) 
   collapse_type_specifiers(list_t<type_specifier_t> ts, seg_t loc);
-static $(tqual,typ,list_t<tvar>,list_t<attribute_t>) 
-  apply_tms(tqual,typ,list_t<attribute_t>,list_t<type_modifier>);
-static decl v_typ_to_typedef(seg_t loc, $(qvar,tqual,typ,list_t<tvar>,
-                                          list_t<attribute_t>)@ t);
+static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>) 
+  apply_tms(tqual_t,type_t,list_t<attribute_t>,list_t<type_modifier_t>);
+static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,
+                                            list_t<tvar_t>,
+                                            list_t<attribute_t>)@ t);
 
 // global state (we're not re-entrant)
 opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf = null;
-static list_t<decl> parse_result = null;
+static list_t<decl_t> parse_result = null;
 
 // Definitions and Helper Functions
 
@@ -124,7 +125,7 @@ static void err(string msg, seg_t sg) {
 }
 static `a abort(string msg,seg_t sg) {
   err(msg,sg);
-  throw Exit;
+  throw new Exit;
 }
 static void warn(string msg,seg_t sg) {
   fprintf(stderr,"%s: Warning: %s\n",string_of_segment(sg),msg);
@@ -142,15 +143,16 @@ static void unimp2(string msg,seg_t sg) {
 // Functions for creating abstract syntax 
 static structfield_t 
 make_struct_field(seg_t loc,
-                  $($(qvar,tqual,typ,list_t<tvar>,list_t<attribute_t>)@,
-                    opt_t<exp>)@ field_info) {
+                  $($(qvar_t,tqual_t,type_t,list_t<tvar_t>,
+                      list_t<attribute_t>)@,
+                    opt_t<exp_t>)@ field_info) {
   let $(field,expopt) = *field_info;
   if ((*field)[3] != null)
     err("bad type params in struct field",loc);
   let qid = (*field)[0];
   switch ((*qid)[0]) {
-  case Rel_n(null): break;
-  case Abs_n(null): break;
+  case &Rel_n(null): break;
+  case &Abs_n(null): break;
   case Loc_n: break;
   default:
     err("struct field cannot be qualified with a module name",loc);    
@@ -163,15 +165,15 @@ make_struct_field(seg_t loc,
                             .attributes = atts};
 }
 
-static $(opt_t<var>,tqual,typ)@ 
-make_param(seg_t loc, $(opt_t<qvar>,tqual,typ,list_t<tvar>)@ field){
+static $(opt_t<var_t>,tqual_t,type_t)@ 
+make_param(seg_t loc, $(opt_t<qvar_t>,tqual_t,type_t,list_t<tvar_t>)@ field){
   let &$(qv_opt,tq,t,tvs) = field;
   let idopt = null;
   if (qv_opt != null) {
     idopt = new Opt((*qv_opt->v)[1]);
     switch ((*qv_opt->v)[0]) {
-    case Rel_n(null): break;
-    case Abs_n(null): break;
+    case &Rel_n(null): break;
+    case &Abs_n(null): break;
     case Loc_n: break;
     default:
       err("parameter cannot be qualified with a module name",loc);
@@ -183,42 +185,43 @@ make_param(seg_t loc, $(opt_t<qvar>,tqual,typ,list_t<tvar>)@ field){
   return new $(idopt,tq,t);
 }
 
-static type_specifier_t type_spec(typ t,seg_t loc) {
-  return Type_spec(t,loc);
+static type_specifier_t type_spec(type_t t,seg_t loc) {
+  return new Type_spec(t,loc);
 }
 
 // convert any array types to pointer types 
-static typ array2ptr(typ t) {
+static type_t array2ptr(type_t t) {
   switch (t) {
-  case ArrayType(t1,tq,eopt):
+  case &ArrayType(t1,tq,eopt):
     return starb_typ(t1,HeapRgn,tq,
-                     eopt == null ? Unknown_b : Upper_b((exp)eopt));
+                     eopt == null ? Unknown_b : new Upper_b((exp_t)eopt));
   default: return t;
   }
 }
 
 // convert an argument's type from arrays to pointers 
-static void arg_array2ptr($(opt_t<var>,tqual,typ) @x) {
+static void arg_array2ptr($(opt_t<var_t>,tqual_t,type_t) @x) {
   (*x)[2] = array2ptr((*x)[2]);
 }
 
 // given an optional variable, tqual, type, and list of type
 // variables, return the tqual and type and check that the type
 // variables are null -- used when we have a tuple type specification. 
-static $(tqual,typ)@ get_tqual_typ(seg_t loc,$(opt_t<var>,tqual,typ) @t) {
+static $(tqual_t,type_t)@ 
+  get_tqual_typ(seg_t loc,$(opt_t<var_t>,tqual_t,type_t) @t) {
   return new $((*t)[1],(*t)[2]);
 }
 
-static void only_vardecl(list_t<stringptr> params,decl x) {
+static void only_vardecl(list_t<stringptr> params,decl_t x) {
   string decl_kind;
   switch (x->r) {
-  case Var_d(vd):
+  case &Var_d(vd):
     if (vd->initializer != null)
       abort("initializers are not allowed in parameter declarations",x->loc);
     switch ((*vd->name)[0]) {
     case Loc_n: break;
-    case Rel_n(null): break;
-    case Abs_n(null): break;
+    case &Rel_n(null): break;
+    case &Abs_n(null): break;
     default:
       err("module names not allowed on parameter declarations",x->loc);
       break;
@@ -234,16 +237,17 @@ static void only_vardecl(list_t<stringptr> params,decl x) {
       abort(xprintf("%s is not listed as a parameter",
 		    *((*vd->name)[1])),x->loc);
     return;
-  case Let_d(_,_,_,_,_): decl_kind = "let declaration";        break;
-  case Fn_d(_):          decl_kind = "function declaration";   break;
-  case Struct_d(_):      decl_kind = "struct declaration";     break;
-  case Union_d(_):       decl_kind = "union declaration";      break;
-  case Enum_d(_):        decl_kind = "enum declaration";       break;
-  case Typedef_d(_):     decl_kind = "typedef";                break;
-  case Xenum_d(_):       decl_kind = "xenum declaration";      break;
-  case Namespace_d(_,_): decl_kind = "namespace declaration";  break;
-  case Using_d(_,_):     decl_kind = "using declaration";      break;
-  case ExternC_d(_):     decl_kind = "extern C declaration";   break;
+  case &Let_d(_,_,_,_,_): decl_kind = "let declaration";        break;
+  case &Fn_d(_):          decl_kind = "function declaration";   break;
+  case &Struct_d(_):      decl_kind = "struct declaration";     break;
+  case &Union_d(_):       decl_kind = "union declaration";      break;
+  case &Tunion_d(_):      decl_kind = "tunion declaration";     break;
+  case &Typedef_d(_):     decl_kind = "typedef";                break;
+  case &XTunion_d(_):     decl_kind = "xtunion declaration";    break;
+  case &Enum_d(_):        decl_kind = "enum declaration";       break;
+  case &Namespace_d(_,_): decl_kind = "namespace declaration";  break;
+  case &Using_d(_,_):     decl_kind = "using declaration";      break;
+  case &ExternC_d(_):     decl_kind = "extern C declaration";   break;
   }
   abort(xprintf("%s appears in parameter type", decl_kind), x->loc);
   return;
@@ -251,17 +255,17 @@ static void only_vardecl(list_t<stringptr> params,decl x) {
 
 // For old-style function definitions,
 // get a parameter type from a list of declarations
-static $(opt_t<var>,tqual,typ)@ get_param_type($(list_t<decl>,seg_t)@ env,
-					       stringptr x) {
+static $(opt_t<var_t>,tqual_t,type_t)@ 
+  get_param_type($(list_t<decl_t>,seg_t)@ env, stringptr x) {
   let &$(tdl,loc) = env;
   if (tdl==null)
     return(abort(xprintf("missing type for parameter %s",*x),loc));
   switch (tdl->hd->r) {
-  case Var_d(vd):
+  case &Var_d(vd):
     switch ((*vd->name)[0]) {
     case Loc_n: break;
-    case Rel_n(null): break;
-    case Abs_n(null): break;
+    case &Rel_n(null): break;
+    case &Abs_n(null): break;
     default:
       err("module name not allowed on parameter",loc);
       break;
@@ -276,39 +280,40 @@ static $(opt_t<var>,tqual,typ)@ get_param_type($(list_t<decl>,seg_t)@ env,
   }
 }
 
-static bool is_typeparam(type_modifier tm) {
+static bool is_typeparam(type_modifier_t tm) {
   switch (tm) {
-  case TypeParams_mod(_,_,_): return true;
+  case &TypeParams_mod(_,_,_): return true;
   default: return false;
   }
 }
 
 // convert an identifier to a type -- if it's the special identifier
 // `H then return HeapRgn, otherwise, return a type variable.  
-static typ id2type(string s, conref_t<kind_t> k) {
+static type_t id2type(string s, conref_t<kind_t> k) {
   if (zstrcmp(s,"`H") == 0)
     return HeapRgn;
   else 
-    return VarType(new Tvar(new {s},k));
+    return new VarType(new Tvar(new {s},k));
 }
 
 // convert a list of types to a list of typevars -- the parser can't
 // tell lists of types apart from lists of typevars easily so we parse
 // them as types and then convert them back to typevars.  See
-// productions "struct_or_union_specifier" and "enum_specifier"; 
-static tvar typ2tvar(seg_t loc, typ t) {
+// productions "struct_or_union_specifier" and "tunion_specifier"; 
+static tvar_t typ2tvar(seg_t loc, type_t t) {
   switch (t) {
-  case VarType(pr): return pr;
+  case &VarType(pr): return pr;
   default: return abort("expecting a list of type variables, not types",loc);
   }
 }
-static typ tvar2typ(tvar pr) {
-  return VarType(pr);
+static type_t tvar2typ(tvar_t pr) {
+  return new VarType(pr);
 }
 
 // Convert an old-style function into a new-style function
-static list_t<type_modifier> oldstyle2newstyle(list_t<type_modifier> tms, 
-                                               list_t<decl> tds, seg_t loc) {
+static list_t<type_modifier_t> 
+  oldstyle2newstyle(list_t<type_modifier_t> tms, 
+                    list_t<decl_t> tds, seg_t loc) {
   // Not an old-style function
   if (tds==null) return tms;
 
@@ -318,23 +323,23 @@ static list_t<type_modifier> oldstyle2newstyle(list_t<type_modifier> tms,
   if (tms==null) return null;
 
   switch (tms->hd) {
-    case Function_mod(args): {
+    case &Function_mod(args): {
       // Is this the innermost function??
       if (tms->tl==null ||
           (is_typeparam(tms->tl->hd) && tms->tl->tl==null)) {
         // Yes
         switch (args) {
-        case WithTypes(_,_,_):
+        case &WithTypes(_,_,_):
           warn("function declaration with both new- and old-style parameter"
 	       "declarations; ignoring old-style",loc);
           return tms;
-        case NoTypes(ids,_):
+        case &NoTypes(ids,_):
           List::iter_c(only_vardecl,ids,tds);
           let env = new $(tds,loc);
           return
-            new List(Function_mod(WithTypes(List::map_c(get_param_type,
-                                                        env,ids),
-                                            false,null)),null);
+            new List(new Function_mod(new WithTypes(List::map_c(get_param_type,
+                                                                env,ids),
+                                                    false,null)),null);
         }
       } else
         // No, keep looking for the innermost function
@@ -347,15 +352,15 @@ static list_t<type_modifier> oldstyle2newstyle(list_t<type_modifier> tms,
 // make a top-level function declaration out of a declaration-specifier 
 // (return type, etc.), a declarator (the function name and args),
 // a declaration list (for old-style function definitions), and a statement.
-static fndecl make_function(opt_t<decl_spec_t> dso, declarator_t d,
-			    list_t<decl> tds, stmt body, seg_t loc) {
+static fndecl_t make_function(opt_t<decl_spec_t> dso, declarator_t d,
+                              list_t<decl_t> tds, stmt_t body, seg_t loc) {
   // Handle old-style parameter declarations
   if (tds!=null) 
     d = new Declarator(d->id,oldstyle2newstyle(d->tms,tds,loc));
 
-  scope sc = Public;
+  scope_t sc = Public;
   list_t<type_specifier_t> tss = null;
-  tqual tq = empty_tqual();
+  tqual_t tq = empty_tqual();
   bool is_inline = false;
   list_t<attribute_t> atts = null;
 
@@ -386,7 +391,7 @@ static fndecl make_function(opt_t<decl_spec_t> dso, declarator_t d,
     warn("bad type params, ignoring",loc);
   // fn_type had better be a FnType
   switch (fn_type) {
-    case FnType(FnInfo{tvs,eff,ret_type,args,varargs,attributes}):
+    case &FnType(FnInfo{tvs,eff,ret_type,args,varargs,attributes}):
       let args2 = List::map_c(fnargspec_to_arg,loc,args);
       // We don't fill in the cached type here because we may need
       // to figure out the bound type variables and the effect.  
@@ -401,8 +406,8 @@ static fndecl make_function(opt_t<decl_spec_t> dso, declarator_t d,
   }
 }
 
-static $(var,tqual,typ)@ fnargspec_to_arg(seg_t loc,
-					  $(opt_t<var>,tqual,typ)@ t) {
+static $(var_t,tqual_t,type_t)@ 
+  fnargspec_to_arg(seg_t loc,$(opt_t<var_t>,tqual_t,type_t)@ t) {
   if ((*t)[0] == null) {
     err("missing argument variable in function prototype",loc);
     return new $(new{(string)"?"},(*t)[1],(*t)[2]);
@@ -411,7 +416,7 @@ static $(var,tqual,typ)@ fnargspec_to_arg(seg_t loc,
 }
 
 // Given a type-specifier list, determines the type and any declared
-// structs, unions, or enums.  Most of this is just collapsing
+// structs, unions, or [x]tunions.  Most of this is just collapsing
 // combinations of [un]signed, short, long, int, char, etc.  We're
 // probably more permissive than is strictly legal here.  For
 // instance, one can write "unsigned const int" instead of "const
@@ -424,15 +429,15 @@ static string msg3 = "type specifier includes more than one declaration";
 static string msg4 = 
   "sign specifier may appear only once within a type specifier";
 
-static $(typ,opt_t<decl>) 
+static $(type_t,opt_t<decl_t>) 
   collapse_type_specifiers(list_t<type_specifier_t> ts, seg_t loc) {
 
-  opt_t<decl> declopt = null;    // any hidden declarations 
+  opt_t<decl_t> declopt = null;    // any hidden declarations 
 
   bool      seen_type = false;
   bool      seen_sign = false;
   bool      seen_size = false;
-  typ       t         = VoidType;
+  type_t    t         = VoidType;
   size_of_t sz        = B4;
   sign_t    sgn       = Signed;
 
@@ -440,27 +445,27 @@ static $(typ,opt_t<decl>)
 
   for(; ts != null; ts = ts->tl)
     switch (ts->hd) {
-    case Type_spec(t2,loc2):
+    case &Type_spec(t2,loc2):
       if(seen_type) err(msg1,loc2);
       last_loc  = loc2;
       seen_type = true;
       t         = t2;
       break;
-    case Signed_spec(loc2):
+    case &Signed_spec(loc2):
       if(seen_sign) err(msg4,loc2);
       if(seen_type) err("signed qualifier must come before type",loc2);
       last_loc  = loc2;
       seen_sign = true;
       sgn       = Signed;
       break;
-    case Unsigned_spec(loc2):
+    case &Unsigned_spec(loc2):
       if(seen_sign) err(msg4,loc2);
       if(seen_type) err("signed qualifier must come before type",loc2);
       last_loc  = loc2;
       seen_sign = true;
       sgn       = Unsigned;
       break;
-    case Short_spec(loc2):
+    case &Short_spec(loc2):
       if(seen_size)
         err("integral size may appear only once within a type specifier",loc2);
       if(seen_type) err("short modifier must come before base type",loc2);
@@ -468,7 +473,7 @@ static $(typ,opt_t<decl>)
       seen_size = true;
       sz        = B2;
       break;
-    case Long_spec(loc2):
+    case &Long_spec(loc2):
       if(seen_type) err("long modifier must come before base type",loc2);
       // okay to have seen a size so long as it was long (means long long)
       // That happens when we've seen a size yet we're B4
@@ -483,8 +488,8 @@ static $(typ,opt_t<decl>)
       // the rest is is necessary if it's long and harmless if long long
       seen_size = true;
       break;
-    case Decl_spec(d):
-      // we've got a struct or enum declaration embedded in here -- return
+    case &Decl_spec(d):
+      // we've got a struct or [xt]union declaration embedded in here -- return
       // the declaration as well as a copy of the type -- this allows
       // us to declare structs as a side effect inside typedefs
       // Note: Leave the last fields null so check_valid_type knows the type
@@ -493,25 +498,29 @@ static $(typ,opt_t<decl>)
       if (declopt == null && !seen_type) {
 	seen_type = true;
         switch (d->r) {
-        case Struct_d(sd):
+        case &Struct_d(sd):
           let args = List::map(tvar2typ,sd->tvs);
-          t = StructType(sd->name->v,args,null);
+          t = new StructType(sd->name->v,args,null);
           if (sd->fields!=null) declopt = new Opt(d);
 	  break;
-        case Enum_d(ed):
-          let args = List::map(tvar2typ,ed->tvs);
-          t = EnumType(ed->name->v,args,null);
-          if (ed->fields!=null) declopt = new Opt(d);
+        case &Tunion_d(tud):
+          let args = List::map(tvar2typ,tud->tvs);
+          t = new TunionType(TunionInfo(tud->name->v,args,HeapRgn,null));
+          if (tud->fields!=null) declopt = new Opt(d);
 	  break;
-        case Xenum_d(xed):
-          t = XenumType(xed->name,null);
-          if (xed->fields != null) declopt = new Opt(d);
+        case &XTunion_d(xtud):
+          t = new XTunionType(XTunionInfo(xtud->name,HeapRgn,null));
+          if (xtud->fields != null) declopt = new Opt(d);
 	  break;
-        case Union_d(ud):
+        case &Union_d(ud):
           let args = List::map(tvar2typ,ud->tvs);
-          t = UnionType(ud->name->v,args,null);
+          t = new UnionType(ud->name->v,args,null);
           if (ud->fields!=null) declopt = new Opt(d);
 	  break;
+        case &Enum_d(ed):
+          t = new EnumType(ed->name,null);
+          declopt = new Opt(d);
+          break;
         default:
 	  abort("bad declaration within type specifier",d->loc);
 	  break;
@@ -524,17 +533,17 @@ static $(typ,opt_t<decl>)
   // combination of signed, unsigned, short, long, or longlong 
   if (!seen_type) {
     if(!seen_sign && !seen_size) err("missing type withing specifier",last_loc);
-    t = IntType(sgn, sz);
+    t = new IntType(sgn, sz);
   } else {
     if(seen_sign)
       switch (t) {
-      case IntType(_,sz2): t = IntType(sgn,sz2); break;
+      case &IntType(_,sz2): t = new IntType(sgn,sz2); break;
       default: err("sign specification on non-integral type",last_loc); break;
       }
     if(seen_size)
       switch (t) {
-      case IntType(sgn2,_):
-	t = IntType(sgn2,sz);
+      case &IntType(sgn2,_):
+	t = new IntType(sgn2,sz);
 	break;
       default: err("size qualifier on non-integral type",last_loc); break;
       }
@@ -542,8 +551,9 @@ static $(typ,opt_t<decl>)
   return $(t, declopt);
 }
 
-static list_t<$(qvar,tqual,typ,list_t<tvar>,list_t<attribute_t>)@> 
-  apply_tmss(tqual tq, typ t,list_t<declarator_t> ds,attributes_t shared_atts)
+static list_t<$(qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)@> 
+  apply_tmss(tqual_t tq, type_t t,list_t<declarator_t> ds,
+             attributes_t shared_atts)
 {
   if (ds==null) return null;
   let d = ds->hd;
@@ -555,7 +565,7 @@ static list_t<$(qvar,tqual,typ,list_t<tvar>,list_t<attribute_t>)@>
 
 static bool fn_type_att(attribute_t a) {
   switch (a) {
-  case Regparm_att(_): fallthru;
+  case &Regparm_att(_): fallthru;
   case Stdcall_att: fallthru;
   case Cdecl_att: fallthru;
   case Noreturn_att: fallthru;
@@ -564,19 +574,19 @@ static bool fn_type_att(attribute_t a) {
   }
 }
 
-static $(tqual,typ,list_t<tvar>,list_t<attribute_t>) 
-  apply_tms(tqual tq, typ t, list_t<attribute_t> atts,
-            list_t<type_modifier> tms) {
+static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>) 
+  apply_tms(tqual_t tq, type_t t, list_t<attribute_t> atts,
+            list_t<type_modifier_t> tms) {
   if (tms==null) return $(tq,t,null,atts);
   switch (tms->hd) {
     case Carray_mod:
-      return apply_tms(empty_tqual(),ArrayType(t,tq,null),atts,tms->tl);
-    case ConstArray_mod(e):
-      return apply_tms(empty_tqual(),ArrayType(t,tq,e),atts,tms->tl);
-    case Function_mod(args): {
+      return apply_tms(empty_tqual(),new ArrayType(t,tq,null),atts,tms->tl);
+    case &ConstArray_mod(e):
+      return apply_tms(empty_tqual(),new ArrayType(t,tq,e),atts,tms->tl);
+    case &Function_mod(args): {
       switch (args) {
-      case WithTypes(args2,vararg,eff):
-        list_t<tvar> typvars = null;
+      case &WithTypes(args2,vararg,eff):
+        list_t<tvar_t> typvars = null;
         // any function type attributes seen thus far get put in the function
         // type
         attributes_t fn_atts = null, new_atts = null;
@@ -589,7 +599,7 @@ static $(tqual,typ,list_t<tvar>,list_t<attribute_t>)
         // functions consume type parameters
         if (tms->tl != null) {
           switch (tms->tl->hd) {
-          case TypeParams_mod(ts,_,_):
+          case &TypeParams_mod(ts,_,_):
             typvars = ts;
             tms=tms->tl; // skip TypeParams on call of apply_tms below
 	    break;
@@ -620,11 +630,11 @@ static $(tqual,typ,list_t<tvar>,list_t<attribute_t>)
 			 function_typ(typvars,eff,t,args2,vararg,fn_atts),
                          new_atts,
                          tms->tl);
-      case NoTypes(_,loc):
+      case &NoTypes(_,loc):
         throw abort("function declaration without parameter types",loc);
       }
     }
-    case TypeParams_mod(ts,loc,_): {
+    case &TypeParams_mod(ts,loc,_): {
       // If we are the last type modifier, this could be the list of
       // type parameters to a typedef:
       // typedef struct foo<`a,int> foo_t<`a>
@@ -636,17 +646,19 @@ static $(tqual,typ,list_t<tvar>,list_t<attribute_t>)
       throw abort("type parameters must appear before function arguments "
 		  "in declarator",loc);
     }
-    case Pointer_mod(ps,rgntyp,tq2): {
+    case &Pointer_mod(ps,rgntyp,tq2): {
       switch (ps) {
-      case NonNullable_ps(ue):
-	return apply_tms(tq2,atb_typ(t,rgntyp,tq,Upper_b(ue)),atts,tms->tl);
-      case Nullable_ps(ue):
-	return apply_tms(tq2,starb_typ(t,rgntyp,tq,Upper_b(ue)),atts,tms->tl);
+      case &NonNullable_ps(ue):
+	return apply_tms(tq2,atb_typ(t,rgntyp,tq,
+                                     new Upper_b(ue)),atts,tms->tl);
+      case &Nullable_ps(ue):
+	return apply_tms(tq2,starb_typ(t,rgntyp,tq,
+                                       new Upper_b(ue)),atts,tms->tl);
       case TaggedArray_ps:
 	return apply_tms(tq2,tagged_typ(t,rgntyp,tq),atts,tms->tl);
       }
     }
-    case Attributes_mod(loc,atts2):
+    case &Attributes_mod(loc,atts2):
       // FIX: get this in line with GCC
       // attributes get attached to function types -- I doubt that this
       // is GCC's behavior but what else to do?
@@ -657,7 +669,7 @@ static $(tqual,typ,list_t<tvar>,list_t<attribute_t>)
 // given a specifier-qualifier list, warn and ignore about any nested type
 // definitions and return the collapsed type.
 // FIX: We should somehow deal with the nested type definitions.
-typ speclist2typ(list_t<type_specifier_t> tss, seg_t loc) {
+type_t speclist2typ(list_t<type_specifier_t> tss, seg_t loc) {
   let $(t,decls_opt) = collapse_type_specifiers(tss,loc);
   if(decls_opt != null)
     warn("ignoring nested type declaration(s) in specifier list",loc);
@@ -666,13 +678,13 @@ typ speclist2typ(list_t<type_specifier_t> tss, seg_t loc) {
 
 
 // given a local declaration and a statement produce a decl statement 
-static stmt flatten_decl(decl d,stmt s) {
-  return new_stmt(Decl_s(d,s),segment_join(d->loc,s->loc));
+static stmt_t flatten_decl(decl_t d,stmt_t s) {
+  return new_stmt(new Decl_s(d,s),segment_join(d->loc,s->loc));
 }
 
 // given a list of local declarations and a statement, produce a big
 // decl statement.
-static stmt flatten_declarations(list_t<decl> ds, stmt s){
+static stmt_t flatten_declarations(list_t<decl_t> ds, stmt_t s){
   return List::fold_right(flatten_decl,ds,s);
 }
 
@@ -681,13 +693,13 @@ static stmt flatten_declarations(list_t<decl> ds, stmt s){
 // `a, const, etc.), and a list of declarators and initializers,
 // produce a list of top-level declarations.  By far, this is the most
 // involved function and thus I expect a number of subtle errors. 
-static list_t<decl> make_declarations(decl_spec_t ds,
-                                      list_t<$(declarator_t,exp_opt_t)@> ids,
-                                      seg_t loc) {
+static list_t<decl_t> make_declarations(decl_spec_t ds,
+                                        list_t<$(declarator_t,exp_opt_t)@> ids,
+                                        seg_t loc) {
   list_t<type_specifier_t> tss       = ds->type_specs;
-  tqual                  tq        = ds->tq;
+  tqual_t                tq        = ds->tq;
   bool                   istypedef = false;  // updated below if necessary
-  scope                  s         = Public; // updated below if necessary
+  scope_t                s         = Public; // updated below if necessary
   list_t<attribute_t>    atts      = ds->attributes;
 
   if (ds->is_inline)
@@ -723,69 +735,77 @@ static list_t<decl> make_declarations(decl_spec_t ds,
   let ts_info = collapse_type_specifiers(tss,loc);
   if (declarators == null) {
     // here we have a type declaration -- either a struct, union,
-    // enum, or xenum as in: "struct Foo { ... };" 
+    // tunion, or xtunion as in: "struct Foo { ... };" 
     let $(t,declopt) = ts_info;
     if (declopt != null) {
-      decl d = declopt->v;
+      decl_t d = declopt->v;
       switch (d->r) {
-      case Struct_d(sd): sd->sc = s; sd->attributes = atts; break;
-      case Union_d(ud): ud->sc = s; ud->attributes = atts; break;
-      case Enum_d(ed)  : 
+      case &Enum_d(ed):
         ed->sc = s; 
         if (atts != null) err("bad attributes on enum",loc); break;
-      case Xenum_d(ed) : 
-        ed->sc = s; 
-        if (atts != null) err("bad attributes on xenum",loc); break;
+      case &Struct_d(sd): sd->sc = s; sd->attributes = atts; break;
+      case &Union_d(ud): ud->sc = s; ud->attributes = atts; break;
+      case &Tunion_d(tud): 
+        tud->sc = s; 
+        if (atts != null) err("bad attributes on tunion",loc); break;
+      case &XTunion_d(xtud) : 
+        xtud->sc = s; 
+        if (atts != null) err("bad attributes on xtunion",loc); break;
       default: err("bad declaration",loc); return null;
       }
       return new List(d,null);
     } else {
       switch (t) {
-      case StructType(n,ts,_):
+      case &StructType(n,ts,_):
         let ts2 = List::map_c(typ2tvar,loc,ts);
         let sd = new Structdecl{s,new Opt((typedef_name_t)n),ts2,null,null};
         if (atts != null) err("bad attributes on struct",loc);
-        return new List(new Decl(Struct_d(sd),loc),null);
-      case EnumType(n,ts,_):
+        return new List(new Decl(new Struct_d(sd),loc),null);
+      case &TunionType(TunionInfo{n,ts,_,_}):
         let ts2 = List::map_c(typ2tvar,loc,ts);
-        let ed  = enum_decl(s,new Opt((typedef_name_t)n),ts2,null,loc);
-        if (atts != null) err("bad attributes on enum",loc);
-        return new List(ed,null);
-      case XenumType(n,_):
-        let ed = new Xenumdecl{.sc=s, .name=n, .fields=null};
-        if (atts != null) err("bad attributes on xenum",loc);
-        return new List(new Decl(Xenum_d(ed),loc),null);
-      case UnionType(n,ts,_):
+        let tud = tunion_decl(s,new Opt((typedef_name_t)n),ts2,null,loc);
+        if (atts != null) err("bad attributes on tunion",loc);
+        return new List(tud,null);
+      case &XTunionType(XTunionInfo{n,_,_}):
+        let xtud = new XTuniondecl{.sc=s, .name=n, .fields=null};
+        if (atts != null) err("bad attributes on xtunion",loc);
+        return new List(new Decl(new XTunion_d(xtud),loc),null);
+      case &UnionType(n,ts,_):
         let ts2 = List::map_c(typ2tvar,loc,ts);
         let ud = new Uniondecl{s,new Opt((typedef_name_t)n),ts2,null,null};
         if (atts != null) err("bad attributes on union",loc);
-        return new List(new Decl(Union_d(ud),loc),null);
+        return new List(new Decl(new Union_d(ud),loc),null);
+      case &EnumType(n,_):
+        let ed = new Enumdecl{s,n,null};
+        if (atts != null) err("bad attributes on enum",loc);
+        return new List(new Decl(new Enum_d(ed),loc),null);
       default: err("missing declarator",loc); return null;
       }
     }
   } else {
     // declarators != null 
-    typ t      = ts_info[0];
+    type_t t      = ts_info[0];
     let fields = apply_tmss(tq,t,declarators,atts);
     if (istypedef) {
-      // we can have a nested struct, union, enum, or xenum
+      // we can have a nested struct, union, tunion, or xtunion
       // declaration within the typedef as in:
       // typedef struct Foo {...} t; 
       if (!exps_empty) 
 	err("initializer in typedef declaration",loc);
-      list_t<decl> decls = List::map_c(v_typ_to_typedef,loc,fields);
+      list_t<decl_t> decls = List::map_c(v_typ_to_typedef,loc,fields);
       if (ts_info[1] != null) {
-        decl d = ts_info[1]->v;
+        decl_t d = ts_info[1]->v;
         switch (d->r) {
-        case Struct_d(sd): 
+        case &Struct_d(sd): 
           sd->sc = s; sd->attributes = atts; atts = null; 
           break;
-        case Enum_d(ed)  : ed->sc = s; break;
-        case Xenum_d(ed) : ed->sc = s; break;
-        case Union_d(ud) : ud->sc = s; break;
+        case &Tunion_d(tud)  : tud->sc = s; break;
+        case &XTunion_d(xtud): xtud->sc = s; break;
+        case &Union_d(ud)    : ud->sc = s; break;
+        case &Enum_d(ed)     : ed->sc = s; break;
         default:
-          err("declaration within typedef is not a struct, union, enum, "
-              "or xenum",loc);
+          err("declaration within typedef is not a struct, union, tunion, "
+              "or xtunion",loc);
 	  break;
         }
         decls = new List(d,decls);
@@ -798,7 +818,7 @@ static list_t<decl> make_declarations(decl_spec_t ds,
       // here, we have a bunch of variable declarations 
       if (ts_info[1] != null)
         unimp2("nested type declaration within declarator",loc);
-      list_t<decl> decls = null;
+      list_t<decl_t> decls = null;
       for (let ds = fields; ds != null; ds = ds->tl, exprs = exprs->tl) {
 	let &$(x,tq2,t2,tvs2,atts2) = ds->hd;
         if (tvs2 != null)
@@ -810,7 +830,7 @@ static list_t<decl> make_declarations(decl_spec_t ds,
 	vd->tq = tq2;
 	vd->sc = s;
         vd->attributes = atts2;
-        let d = new Decl(Var_d(vd),loc);
+        let d = new Decl(new Var_d(vd),loc);
         decls = new List(d,decls);
       }
       return List::imp_rev(decls);
@@ -843,15 +863,15 @@ static kind_t id_to_kind(string s, seg_t loc) {
 // the typedef with the lexer.  
 // TJ: the tqual should make it into the typedef as well,
 // e.g., typedef const int CI; 
-static decl v_typ_to_typedef(seg_t loc, $(qvar,tqual,typ,list_t<tvar>,list_t<attribute_t>)@ t) {
-  qvar x = (*t)[0];
+static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)@ t) {
+  qvar_t x = (*t)[0];
   // tell the lexer that x is a typedef identifier
   Lex::register_typedef(x);
   if ((*t)[4] != null)
     err(xprintf("bad attribute %s within typedef",
                 attribute2string((*t)[4]->hd)),loc);
-  return new_decl(Typedef_d(new Typedefdecl{.name=x, .tvs=(*t)[3], 
-                                               .defn=(*t)[2]}),loc);
+  return new_decl(new Typedef_d(new Typedefdecl{.name=x, .tvs=(*t)[3], 
+                                                   .defn=(*t)[2]}),loc);
 }
 } // end namespace Parse
 using Parse;
@@ -864,7 +884,7 @@ using Parse;
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN SIZEOF ENUM
 // Cyc:  CYCLONE additional keywords 
 %token NULL_kw LET THROW TRY CATCH
-%token NEW ABSTRACT FALLTHRU USING NAMESPACE XENUM
+%token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION
 %token FILL CODEGEN CUT SPLICE
 %token PRINTF FPRINTF XPRINTF SCANF FSCANF SSCANF MALLOC
 // double and triple-character tokens 
@@ -886,54 +906,57 @@ using Parse;
   Okay_tok;
   Int_tok($(sign_t,int)@);
   Char_tok(char);
-  Pointer_Sort_tok(enum Pointer_Sort);
+  Pointer_Sort_tok(tunion Pointer_Sort);
   Short_tok(short);
   String_tok(string);
   Stringopt_tok(opt_t<stringptr>);
-  Type_tok(typ);
-  TypeList_tok(list_t<typ>);
-  Exp_tok(exp);
-  ExpList_tok(list_t<exp>);
-  Primop_tok(primop);
-  Primopopt_tok(opt_t<primop>);
-  QualId_tok(qvar);
-  Stmt_tok(stmt);
-  SwitchClauseList_tok(list_t<switch_clause>);
-  Pattern_tok(pat);
-  PatternList_tok(list_t<pat>);
-  FnDecl_tok(fndecl);
-  DeclList_tok(list_t<decl>);
+  Type_tok(type_t);
+  TypeList_tok(list_t<type_t>);
+  Exp_tok(exp_t);
+  ExpList_tok(list_t<exp_t>);
+  Primop_tok(primop_t);
+  Primopopt_tok(opt_t<primop_t>);
+  QualId_tok(qvar_t);
+  Stmt_tok(stmt_t);
+  SwitchClauseList_tok(list_t<switch_clause_t>);
+  Pattern_tok(pat_t);
+  PatternList_tok(list_t<pat_t>);
+  FnDecl_tok(fndecl_t);
+  DeclList_tok(list_t<decl_t>);
   DeclSpec_tok(decl_spec_t);
   InitDecl_tok($(declarator_t,exp_opt_t)@);
   InitDeclList_tok(list_t<$(declarator_t,exp_opt_t)@>);
   StorageClass_tok(storage_class_t);
   TypeSpecifier_tok(type_specifier_t);
-  QualSpecList_tok($(tqual,list_t<type_specifier_t>,attributes_t)@);
-  TypeQual_tok(tqual);
+  QualSpecList_tok($(tqual_t,list_t<type_specifier_t>,attributes_t)@);
+  TypeQual_tok(tqual_t);
   StructFieldDeclList_tok(list_t<structfield_t>);
   StructFieldDeclListList_tok(list_t<list_t<structfield_t>>);
   Declarator_tok(declarator_t);
-  DeclaratorExpopt_tok($(declarator_t,opt_t<exp>)@);
-  DeclaratorExpoptList_tok(list_t<$(declarator_t,opt_t<exp>)@>);
+  DeclaratorExpopt_tok($(declarator_t,opt_t<exp_t>)@);
+  DeclaratorExpoptList_tok(list_t<$(declarator_t,opt_t<exp_t>)@>);
   AbstractDeclarator_tok(abstractdeclarator_t);
-  EnumeratorField_tok(enumfield);
-  EnumeratorFieldList_tok(list_t<enumfield>);
-  ParamDecl_tok($(opt_t<var>,tqual,typ)@);
-  ParamDeclList_tok(list_t<$(opt_t<var>,tqual,typ)@>);
-  ParamDeclListBool_tok($(list_t<$(opt_t<var>,tqual,typ)@>,bool,opt_t<typ>)@);
+  TunionField_tok(tunionfield_t);
+  TunionFieldList_tok(list_t<tunionfield_t>);
+  ParamDecl_tok($(opt_t<var_t>,tqual_t,type_t)@);
+  ParamDeclList_tok(list_t<$(opt_t<var_t>,tqual_t,type_t)@>);
+  ParamDeclListBool_tok($(list_t<$(opt_t<var_t>,tqual_t,type_t)@>,
+                          bool,opt_t<type_t>)@);
   StructOrUnion_tok(struct_or_union_t);
-  IdList_tok(list_t<var>);
-  Designator_tok(designator);
-  DesignatorList_tok(list_t<designator>);
-  TypeModifierList_tok(list_t<type_modifier>);
-  Rgn_tok(typ);
-  InitializerList_tok(list_t<$(list_t<designator>,exp)@>);
-  FieldPattern_tok($(list_t<designator>,pat)@);
-  FieldPatternList_tok(list_t<$(list_t<designator>,pat)@>);
+  IdList_tok(list_t<var_t>);
+  Designator_tok(designator_t);
+  DesignatorList_tok(list_t<designator_t>);
+  TypeModifierList_tok(list_t<type_modifier_t>);
+  Rgn_tok(type_t);
+  InitializerList_tok(list_t<$(list_t<designator_t>,exp_t)@>);
+  FieldPattern_tok($(list_t<designator_t>,pat_t)@);
+  FieldPatternList_tok(list_t<$(list_t<designator_t>,pat_t)@>);
   BlockItem_tok(blockitem_t);
   Kind_tok(kind_t);
   Attribute_tok(attribute_t);
   AttributeList_tok(list_t<attribute_t>);
+  Enumfield_tok(enumfield_t);
+  EnumfieldList_tok(list_t<enumfield_t>);
 }
 /* types for productions */
 %type <Int_tok> INTEGER_CONSTANT
@@ -949,7 +972,7 @@ using Parse;
 %type <Exp_tok> inclusive_or_expression logical_and_expression
 %type <Exp_tok> logical_or_expression conditional_expression
 %type <Exp_tok> assignment_expression expression constant_expression
-%type <Exp_tok> initializer
+%type <Exp_tok> initializer array_initializer
 %type <ExpList_tok> argument_expression_list argument_expression_list0
 %type <InitializerList_tok> initializer_list
 %type <Primop_tok> unary_operator format_primop
@@ -974,20 +997,20 @@ using Parse;
 %type <InitDecl_tok> init_declarator
 %type <InitDeclList_tok> init_declarator_list init_declarator_list0
 %type <StorageClass_tok> storage_class_specifier
-%type <TypeSpecifier_tok> type_specifier
-%type <TypeSpecifier_tok> struct_or_union_specifier enum_specifier
+%type <TypeSpecifier_tok> type_specifier enum_specifier
+%type <TypeSpecifier_tok> struct_or_union_specifier tunion_specifier
 %type <StructOrUnion_tok> struct_or_union
 %type <TypeQual_tok> type_qualifier type_qualifier_list
 %type <StructFieldDeclList_tok> struct_declaration_list struct_declaration
 %type <StructFieldDeclListList_tok> struct_declaration_list0
 %type <TypeModifierList_tok> pointer
-%type <Rgn_tok> rgn_opt
+%type <Rgn_tok> rgn_opt rgn
 %type <Declarator_tok> declarator direct_declarator 
 %type <DeclaratorExpopt_tok> struct_declarator
 %type <DeclaratorExpoptList_tok> struct_declarator_list struct_declarator_list0
 %type <AbstractDeclarator_tok> abstract_declarator direct_abstract_declarator
-%type <EnumeratorField_tok> enumerator
-%type <EnumeratorFieldList_tok> enumerator_list
+%type <TunionField_tok> tunionfield
+%type <TunionFieldList_tok> tunionfield_list
 %type <QualSpecList_tok> specifier_qualifier_list
 %type <IdList_tok> identifier_list identifier_list0
 %type <ParamDecl_tok> parameter_declaration type_name
@@ -1001,6 +1024,8 @@ using Parse;
 %type <Type_tok> any_type_name
 %type <AttributeList_tok> attributes_opt attributes attribute_list
 %type <Attribute_tok> attribute
+%type <Enumfield_tok> enum_field
+%type <EnumfieldList_tok> enum_declaration_list
 /* start production */
 %start prog
 %%
@@ -1019,24 +1044,24 @@ translation_unit:
 /* Cyc: added using and namespace */
 /* NB: using_action calls Lex::enter_using */
 | using_action ';' translation_unit
-    { $$=^$(new List(new Decl(Using_d($1,$3),LOC(@1,@3)),null));
+    { $$=^$(new List(new Decl(new Using_d($1,$3),LOC(@1,@3)),null));
       Lex::leave_using();
     }
 | using_action '{' translation_unit unusing_action translation_unit_opt
-    { $$=^$(new List(new Decl(Using_d($1,$3),LOC(@1,@4)),$5));
+    { $$=^$(new List(new Decl(new Using_d($1,$3),LOC(@1,@4)),$5));
     }
 /* NB: namespace_action calls Lex::enter_namespace */
 | namespace_action ';' translation_unit
-    { $$=^$(new List(new Decl(Namespace_d(new {$1},$3),LOC(@1,@3)),null));
+    { $$=^$(new List(new Decl(new Namespace_d(new {$1},$3),LOC(@1,@3)),null));
       Lex::leave_namespace();
     }
 | namespace_action '{' translation_unit unnamespace_action translation_unit_opt
-    { $$=^$(new List(new Decl(Namespace_d(new {$1},$3),LOC(@1,@4)),$5));
+    { $$=^$(new List(new Decl(new Namespace_d(new {$1},$3),LOC(@1,@4)),$5));
     }
 | EXTERN STRING '{' translation_unit '}' translation_unit_opt
     { if (String::strcmp($2,"C") != 0)
         err("only extern \"C\" { ... } is allowed",LOC(@1,@2));
-      $$=^$(new List(new Decl(ExternC_d($4),LOC(@1,@5)),$6));
+      $$=^$(new List(new Decl(new ExternC_d($4),LOC(@1,@5)),$6));
     }
 ;
 
@@ -1045,7 +1070,8 @@ translation_unit_opt:
 | translation_unit { $$=$!1; }
 
 external_declaration:
-  function_definition { $$=^$(new List(new_decl(Fn_d($1),LOC(@1,@1)),null)); }
+  function_definition 
+  { $$=^$(new List(new_decl(new Fn_d($1),LOC(@1,@1)),null)); }
 | declaration         { $$=$!1; }
 ;
 
@@ -1182,7 +1208,7 @@ attribute:
     else if (zstrcmp(s,"__const__") == 0)
       a = Const_att;
     else if (zstrcmp(s,"aligned") == 0 || zstrcmp(s,"__aligned__") == 0)
-      a = Aligned_att(-1);
+      a = new Aligned_att(-1);
     else if (zstrcmp(s,"packed") == 0 || zstrcmp(s,"__packed__") == 0)
       a = Packed_att;
     else if (zstrcmp(s,"shared") == 0 || zstrcmp(s,"__shared__") == 0)
@@ -1220,7 +1246,7 @@ attribute:
     if (zstrcmp(s,"regparm") == 0 || zstrcmp(s,"__regparm__") == 0) {
       if (n <= 0 || n > 3) err("regparm requires value between 1 and 3",
                                LOC(@3,@3));
-      a = Regparm_att(n);
+      a = new Regparm_att(n);
     } else if (zstrcmp(s,"aligned") == 0 || zstrcmp(s,"__aligned__") == 0) {
       if (n < 0) err("aligned requires positive power of two",
                      LOC(@3,@3));
@@ -1228,7 +1254,7 @@ attribute:
       for (; (j & 1) == 0; j = j >> 1);
       j = j >> 1;
       if (j != 0) err("aligned requires positive power of two",LOC(@3,@3));
-      a = Aligned_att(n);
+      a = new Aligned_att(n);
     }
     else {
       err("unrecognized attribute",LOC(@1,@1));
@@ -1241,7 +1267,7 @@ attribute:
     let str = $3;
     attribute_t a;
     if (zstrcmp(s,"section") == 0 || zstrcmp(s,"__section__"))
-      a = Section_att(str);
+      a = new Section_att(str);
     else {
       err("unrecognized attribute",LOC(@1,@1));
       a = Cdecl_att;
@@ -1260,26 +1286,28 @@ type_specifier:
   VOID      { $$=^$(type_spec(VoidType,LOC(@1,@1))); }
 | '_'       { $$=^$(type_spec(new_evar(MemKind),LOC(@1,@1))); }
 | CHAR      { $$=^$(type_spec(uchar_t,LOC(@1,@1))); }
-| SHORT     { $$=^$(Short_spec(LOC(@1,@1))); }
+| SHORT     { $$=^$(new Short_spec(LOC(@1,@1))); }
 | INT       { $$=^$(type_spec(sint_t,LOC(@1,@1))); }
-| LONG      { $$=^$(Long_spec(LOC(@1,@1))); }
+| LONG      { $$=^$(new Long_spec(LOC(@1,@1))); }
 | FLOAT     { $$=^$(type_spec(float_t,LOC(@1,@1))); }
 | DOUBLE    { $$=^$(type_spec(double_t,LOC(@1,@1))); }
-| SIGNED    { $$=^$(Signed_spec(LOC(@1,@1))); }
-| UNSIGNED  { $$=^$(Unsigned_spec(LOC(@1,@1))); }
-| struct_or_union_specifier { $$=$!1; }
+| SIGNED    { $$=^$(new Signed_spec(LOC(@1,@1))); }
+| UNSIGNED  { $$=^$(new Unsigned_spec(LOC(@1,@1))); }
 | enum_specifier { $$=$!1; }
+| struct_or_union_specifier { $$=$!1; }
+/* Cyc: added [x]tunions */
+| tunion_specifier { $$=$!1; }
 /* Cyc: added type variables and optional type parameters to typedef'd names */
 | TYPE_VAR 
   { $$=^$(type_spec(id2type($1,empty_conref()), LOC(@1,@1))); }
 | TYPE_VAR COLON_COLON kind 
    { $$=^$(type_spec(id2type($1,new_conref($3)),LOC(@1,@3))); }
 | QUAL_TYPEDEF_NAME type_params_opt
-    { $$=^$(type_spec(TypedefType($1,$2,null),LOC(@1,@2))); }
+    { $$=^$(type_spec(new TypedefType($1,$2,null),LOC(@1,@2))); }
 /* Cyc: everything below here is an addition */
 | '$' '(' parameter_list ')'
-    { $$=^$(type_spec(TupleType(List::map_c(get_tqual_typ,
-					    LOC(@3,@3),List::imp_rev($3))),
+    { $$=^$(type_spec(new TupleType(List::map_c(get_tqual_typ,
+                                                LOC(@3,@3),List::imp_rev($3))),
                       LOC(@1,@4))); }
 ;
 
@@ -1288,7 +1316,7 @@ kind:
   IDENTIFIER { $$=^$(id_to_kind($1,LOC(@1,@1))); }
 | QUAL_TYPEDEF_NAME 
 { let $(nm, v) = *($1);
-  if (nm != Loc_n) err("bad kind in type specifier",LOC(@1,@1));
+  if (nm != (nmspace_t)Loc_n) err("bad kind in type specifier",LOC(@1,@1));
   $$=^$(id_to_kind(*v,LOC(@1,@1)));
 }
 ;
@@ -1299,10 +1327,32 @@ type_qualifier:
 | RESTRICT { $$=^$(new Tqual(false,false,true)); }
 ;
 
+/* parsing of enum specifiers */
+enum_specifier:
+  ENUM qual_opt_identifier '{' enum_declaration_list '}'
+  { $$=^$(new Decl_spec(new Decl{new Enum_d(new Enumdecl(Public,$2,$4)), 
+                                 LOC(@1,@5)})); }
+| ENUM qual_opt_identifier
+  { $$=^$(type_spec(new EnumType($2,null),LOC(@1,@2))); }
+;
+
+/* enum fields */
+enum_field:
+  qual_opt_identifier
+  { $$ = ^$(new Enumfield($1,null,LOC(@1,@1))); }
+| qual_opt_identifier '=' constant_expression
+  { $$ = ^$(new Enumfield($1,$3,LOC(@1,@3))); }
+;
+
+enum_declaration_list:
+  enum_field { $$ = ^$(new List($1,null)); }
+| enum_field ',' enum_declaration_list { $$ = ^$(new List($1,$3)); }
+;
+
 /* parsing of struct and union specifiers. */
 struct_or_union_specifier:
   struct_or_union '{' struct_declaration_list '}' 
-    { decl d;
+    { decl_t d;
       switch ($1) {
       case Struct_su:
         d = struct_decl(Public,null,null,new Opt($3),null,LOC(@1,@4));
@@ -1311,14 +1361,14 @@ struct_or_union_specifier:
         d = union_decl(Public,null,null,new Opt($3),null,LOC(@1,@4));
 	break;
       }
-      $$=^$(Decl_spec(d));
+      $$=^$(new Decl_spec(d));
       unimp2("anonymous structs/unions",LOC(@1,@4));
     }
 /* Cyc:  type_params_opt are added */
 | struct_or_union qual_opt_identifier type_params_opt
   '{' struct_declaration_list '}' 
     { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      decl d;
+      decl_t d;
       switch ($1) {
       case Struct_su:
         d = struct_decl(Public,new Opt($2),ts,new Opt($5),null,LOC(@1,@6));
@@ -1327,13 +1377,13 @@ struct_or_union_specifier:
         d = union_decl(Public,new Opt($2),ts,new Opt($5),null,LOC(@1,@6));
 	break;
       }
-      $$=^$(Decl_spec(d));
+      $$=^$(new Decl_spec(d));
     }
 // Hack to allow struct/union names and typedef names to overlap
 | struct_or_union QUAL_TYPEDEF_NAME type_params_opt
   '{' struct_declaration_list '}' 
     { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      decl d;
+      decl_t d;
       switch ($1) {
       case Struct_su:
         d = struct_decl(Public,new Opt($2),ts,new Opt($5),null,LOC(@1,@6));
@@ -1342,16 +1392,16 @@ struct_or_union_specifier:
         d = union_decl(Public,new Opt($2),ts,new Opt($5),null,LOC(@1,@6));
 	break;
       }
-      $$=^$(Decl_spec(d));
+      $$=^$(new Decl_spec(d));
     }
 /* Cyc:  type_params_opt are added */
 | struct_or_union qual_opt_identifier type_params_opt
     { switch ($1) {
       case Struct_su:
-	$$=^$(type_spec(StructType($2,$3,null),LOC(@1,@3)));
+	$$=^$(type_spec(new StructType($2,$3,null),LOC(@1,@3)));
 	break;
       case Union_su:
-	$$=^$(type_spec(UnionType($2,$3,null),LOC(@1,@3)));
+	$$=^$(type_spec(new UnionType($2,$3,null),LOC(@1,@3)));
 	break;
       }
     }
@@ -1359,10 +1409,10 @@ struct_or_union_specifier:
 | struct_or_union QUAL_TYPEDEF_NAME type_params_opt
     { switch ($1) {
       case Struct_su:
-        $$=^$(type_spec(StructType($2,$3,null),LOC(@1,@3)));
+        $$=^$(type_spec(new StructType($2,$3,null),LOC(@1,@3)));
 	break;
       case Union_su:
-        $$=^$(type_spec(UnionType($2,$3,null),LOC(@1,@3)));
+        $$=^$(type_spec(new UnionType($2,$3,null),LOC(@1,@3)));
 	break;
       }
     }
@@ -1421,11 +1471,11 @@ struct_declaration:
       /* when we collapse the specifier_qualifier_list and
        * struct_declarator_list, we get a list of (1) optional id,
        * (2) type, and (3) in addition any nested struct, union,
-       * or enum declarations.  For now, we warn about the nested
+       * or [x]tunion declarations.  For now, we warn about the nested
        * declarations.  We must check that each id is actually present
        * and then convert this to a list of struct fields: (1) id,
        * (2) tqual, (3) type. */
-      tqual tq = (*$1)[0];
+      tqual_t tq = (*$1)[0];
       let atts = (*$1)[2];
       let t = speclist2typ((*$1)[1], LOC(@1,@1));
       let $(decls, widths) = List::split($2);
@@ -1467,49 +1517,57 @@ struct_declarator:
     { 
       // HACK: give the field an empty name -- see elsewhere in the
       // compiler where we use this invariant
-      $$=^$(new $((new Declarator(new $(Rel_n(null),new ""),null)),
+      $$=^$(new $((new Declarator(new $((nmspace_t)(new Rel_n(null)),new ""),
+                                  null)),
                   new Opt($2))); 
     }
 | declarator ':' constant_expression
     { $$=^$(new $($1,new Opt($3))); }
 ;
 
-enum_specifier:
-  ENUM '{' enumerator_list '}'
-    { $$ = ^$(Decl_spec(enum_decl(Public,null,null,new Opt($3),LOC(@1,@4))));
-      unimp2("anonymous enums",LOC(@1,@4));
-    }
-/* Cyc: added type params */
-| ENUM qual_opt_identifier type_params_opt '{' enumerator_list '}'
+tunion_specifier:
+  TUNION qual_opt_identifier type_params_opt '{' tunionfield_list '}'
     { let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      $$ = ^$(Decl_spec(enum_decl(Public,new Opt($2),ts,new Opt($5),
-                                  LOC(@1,@6))));
+      $$ = ^$(new Decl_spec(tunion_decl(Public,new Opt($2),ts,new Opt($5),
+                                    LOC(@1,@6))));
     }
-| ENUM qual_opt_identifier type_params_opt
-    { $$=^$(type_spec(EnumType($2,$3,null),LOC(@1,@3))); }
-| XENUM qual_opt_identifier '{' enumerator_list '}'
-    { $$ = ^$(Decl_spec(xenum_decl(Public,$2,$4,LOC(@1,@5)))); }
-| XENUM qual_opt_identifier
-    { $$=^$(type_spec(XenumType($2,null),LOC(@1,@2))); }
+| TUNION qual_opt_identifier type_params_opt 
+    { $$=^$(type_spec(new TunionType(TunionInfo{$2,$3,HeapRgn,null}),LOC(@1,@3)));
+    }
+| TUNION rgn qual_opt_identifier type_params_opt 
+    { $$=^$(type_spec(new TunionType(TunionInfo{$3,$4,$2,null}),LOC(@1,@4)));
+    }
+| TUNION qual_opt_identifier '.' qual_opt_identifier type_params_opt
+    { $$=^$(type_spec(new TunionFieldType(TunionFieldInfo{$2,$5,$4,null,null}),
+                      LOC(@1,@5))); 
+    }
+| XTUNION qual_opt_identifier '{' tunionfield_list '}'
+    { $$ = ^$(new Decl_spec(xtunion_decl(Public,$2,$4,LOC(@1,@5)))); }
+| XTUNION qual_opt_identifier 
+    { $$=^$(type_spec(new XTunionType(XTunionInfo{$2,HeapRgn,null}),LOC(@1,@2))); }
+| XTUNION rgn qual_opt_identifier 
+    { $$=^$(type_spec(new XTunionType(XTunionInfo{$3,$2,null}),LOC(@1,@3))); }
+| XTUNION qual_opt_identifier '.' qual_opt_identifier
+    { $$=^$(type_spec(new XTunionFieldType(XTunionFieldInfo{$2,$4,null,null}),
+                      LOC(@1,@4))); 
+    }
 ;
 
-enumerator_list:
-  enumerator                     { $$=^$(new List($1,null)); }
-| enumerator ';'                 { $$=^$(new List($1,null)); }
-| enumerator ',' enumerator_list { $$=^$(new List($1,$3)); }
-| enumerator ';' enumerator_list { $$=^$(new List($1,$3)); }
+tunionfield_list:
+  tunionfield                      { $$=^$(new List($1,null)); }
+| tunionfield ';'                  { $$=^$(new List($1,null)); }
+| tunionfield ',' tunionfield_list { $$=^$(new List($1,$3)); }
+| tunionfield ';' tunionfield_list { $$=^$(new List($1,$3)); }
 ;
 
-enumerator:
+tunionfield:
   qual_opt_identifier
-    { $$=^$(new Enumfield($1,null,null,null,LOC(@1,@1))); }
-| qual_opt_identifier '=' constant_expression
-    { $$=^$(new Enumfield($1,$3,null,null,LOC(@1,@3))); }
-/* Cyc: value-carrying enumerators */
+    { $$=^$(new Tunionfield($1,null,null,LOC(@1,@1))); }
 | qual_opt_identifier type_params_opt '(' parameter_list ')'
     { let typs = List::map_c(get_tqual_typ,LOC(@4,@4),List::imp_rev($4));
       let tvs  = List::map_c(typ2tvar,LOC(@2,@2),$2);
-      $$=^$(new Enumfield($1,null,tvs,typs,LOC(@1,@5))); }
+      $$=^$(new Tunionfield($1,tvs,typs,LOC(@1,@5))); }
+;
 
 declarator:
   direct_declarator
@@ -1527,44 +1585,39 @@ direct_declarator:
     { $$=^$(new Declarator($1->id,new List(Carray_mod,$1->tms)));
     }
 | direct_declarator '[' assignment_expression ']' 
-    { $$=^$(new Declarator($1->id,new List(ConstArray_mod($3),$1->tms)));
+    { $$=^$(new Declarator($1->id,new List(new ConstArray_mod($3),$1->tms)));
     }
 | direct_declarator '(' parameter_type_list ')'
     { let &$(lis,b,eff) = $3;
-      $$=^$(new Declarator($1->id,new List(Function_mod(WithTypes(lis,b,eff)),
-                                           $1->tms)));
+      $$=^$(new Declarator($1->id,new List(new Function_mod(new WithTypes(lis,b,eff)),$1->tms)));
     }
 | direct_declarator '(' ')'
-    { $$=^$(new Declarator($1->id,new List(Function_mod(WithTypes(null,
-                                                                  false,null)),
-                                           $1->tms)));
+    { $$=^$(new Declarator($1->id,
+                           new List(new Function_mod(new WithTypes(null,
+                                                                   false,
+                                                                   null)),
+                                    $1->tms)));
     }
 | direct_declarator '(' ';' effect_set ')'
     { $$=^$(new Declarator($1->id,
-                           new List(Function_mod(WithTypes(null,false,
-                                                           new Opt(JoinEff($4)))),
-                              $1->tms)));
+                           new List(new Function_mod(new WithTypes(null,false,new Opt(new JoinEff($4)))),$1->tms)));
     }
 | direct_declarator '(' identifier_list ')'
-    { $$=^$(new Declarator($1->id,new List(Function_mod(NoTypes($3,
-                                                                LOC(@1,@4))),
-                                           $1->tms))); }
+    { $$=^$(new Declarator($1->id,new List(new Function_mod(new NoTypes($3,LOC(@1,@4))),$1->tms))); }
 /* Cyc: added type parameters */
 | direct_declarator '<' type_name_list '>'
     { let ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
-      $$=^$(new Declarator($1->id,new List(TypeParams_mod(ts,LOC(@1,@4),false),
-                                           $1->tms)));
+      $$=^$(new Declarator($1->id,new List(new TypeParams_mod(ts,LOC(@1,@4),false),$1->tms)));
     }
 | direct_declarator '<' type_name_list RIGHT_OP
     { /* RIGHT_OP is >>, we've seen one char too much, step back */
       lbuf->v->lex_curr_pos -= 1;
       let ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
-      $$=^$(new Declarator($1->id,new List(TypeParams_mod(ts,LOC(@1,@4),false),
-                                           $1->tms)));
+      $$=^$(new Declarator($1->id,new List(new TypeParams_mod(ts,LOC(@1,@4),false),$1->tms)));
     }
 | direct_declarator attributes
   { 
-    $$=^$(new Declarator($1->id,new List(Attributes_mod(LOC(@2,@2),$2),
+    $$=^$(new Declarator($1->id,new List(new Attributes_mod(LOC(@2,@2),$2),
                                          $1->tms)));
   }
 ;
@@ -1572,36 +1625,39 @@ direct_declarator:
 /* CYC: region annotations allowed */
 pointer:
   pointer_char rgn_opt
-    { $$=^$(new List(Pointer_mod($1,$2,empty_tqual()),null)); }
+    { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),null)); }
 | pointer_char rgn_opt type_qualifier_list
-    { $$=^$(new List(Pointer_mod($1,$2,$3),null)); }
+    { $$=^$(new List(new Pointer_mod($1,$2,$3),null)); }
 | pointer_char rgn_opt pointer
-    { $$=^$(new List(Pointer_mod($1,$2,empty_tqual()),$3)); }
+    { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),$3)); }
 | pointer_char rgn_opt type_qualifier_list pointer
-    { $$=^$(new List(Pointer_mod($1,$2,$3),$4)); }
+    { $$=^$(new List(new Pointer_mod($1,$2,$3),$4)); }
 ;
 
 pointer_char:
-  '*' { $$=^$(Nullable_ps(signed_int_exp(1,LOC(@1,@1))));  }
+  '*' { $$=^$(new Nullable_ps(signed_int_exp(1,LOC(@1,@1))));  }
 /* CYC: pointers that cannot be null */
-| '@' { $$=^$(NonNullable_ps(signed_int_exp(1,LOC(@1,@1)))); }
+| '@' { $$=^$(new NonNullable_ps(signed_int_exp(1,LOC(@1,@1)))); }
 /* possibly null, with array bound given by the expresion */
-| '*' '{' assignment_expression '}' {$$=^$(Nullable_ps($3));}
+| '*' '{' assignment_expression '}' {$$=^$(new Nullable_ps($3));}
 /* not null, with array bound given by the expresion */
-| '@' '{' assignment_expression '}' {$$=^$(NonNullable_ps($3));}
+| '@' '{' assignment_expression '}' {$$=^$(new NonNullable_ps($3));}
 /* tagged pointer -- bounds maintained dynamically */
 | '?' { $$=^$(TaggedArray_ps); }
 
 rgn_opt:
     /* empty */ { $$ = ^$(HeapRgn); }
-| TYPE_VAR      
+| rgn { $$ = $!1; };
+
+rgn:
+  TYPE_VAR      
   { $$ = ^$(id2type($1,new_conref(RgnKind))); }
 | TYPE_VAR COLON_COLON kind
-  { if ($3 != RgnKind) err("expecting region kind\n",LOC(@3,@3));
+  { if ($3 != (kind_t)RgnKind) err("expecting region kind\n",LOC(@3,@3));
     $$ = ^$(id2type($1,new_conref(RgnKind))); 
   }
 | '_' { $$ = ^$(new_evar(RgnKind)); }
-;
+
 
 type_qualifier_list:
   type_qualifier
@@ -1617,7 +1673,8 @@ parameter_type_list:
     { $$=^$(new $(List::imp_rev($1),true,null)); }
 /* Cyc: add effect */
 | parameter_list ';' effect_set
-    { $$=^$(new $(List::imp_rev($1),false,(opt_t<typ>)(new Opt(JoinEff($3)))));
+    { $$=^$(new $(List::imp_rev($1),false,
+                  (opt_t<type_t>)(new Opt((type_t)(new JoinEff($3))))));
     }
 ;
 
@@ -1633,7 +1690,7 @@ atomic_effect:
 | TYPE_VAR                  
   { $$=^$(new List(id2type($1,new_conref(EffKind)),null)); }
 | TYPE_VAR COLON_COLON kind 
-  { if ($3 != EffKind) err("expecing effect kind (E)",LOC(@3,@3));
+  { if ($3 != (kind_t)EffKind) err("expecing effect kind (E)",LOC(@3,@3));
     $$=^$(new List(id2type($1,new_conref(EffKind)),null));
   }
 ; 
@@ -1641,15 +1698,15 @@ atomic_effect:
 /* CYC:  new */
 region_set:
   TYPE_VAR 
-  { $$=^$(new List(AccessEff(id2type($1,new_conref(RgnKind))),null)); }
+  { $$=^$(new List(new AccessEff(id2type($1,new_conref(RgnKind))),null)); }
 | TYPE_VAR ',' region_set 
-  { $$=^$(new List(AccessEff(id2type($1,new_conref(RgnKind))),$3)); }
+  { $$=^$(new List(new AccessEff(id2type($1,new_conref(RgnKind))),$3)); }
 | TYPE_VAR COLON_COLON kind 
-  { if ($3 != RgnKind) err("expecting region kind (R)", LOC(@3,@3));
-    $$=^$(new List(AccessEff(id2type($1,new_conref(RgnKind))),null)); }
+  { if ($3 != (kind_t)RgnKind) err("expecting region kind (R)", LOC(@3,@3));
+    $$=^$(new List(new AccessEff(id2type($1,new_conref(RgnKind))),null)); }
 | TYPE_VAR COLON_COLON kind ',' region_set 
-  { if ($3 != RgnKind) err("expecting region kind (R)", LOC(@3,@3));
-    $$=^$(new List(AccessEff(id2type($1,new_conref(RgnKind))),$5)); }
+  { if ($3 != (kind_t)RgnKind) err("expecting region kind (R)", LOC(@3,@3));
+    $$=^$(new List(new AccessEff(id2type($1,new_conref(RgnKind))),$5)); }
 ;
 
 /* NB: returns list in reverse order */
@@ -1673,13 +1730,13 @@ parameter_declaration:
       let q = $2->id;
       switch ((*q)[0]) {
       case Loc_n: break;
-      case Rel_n(null): break;
-      case Abs_n(null): break;
+      case &Rel_n(null): break;
+      case &Abs_n(null): break;
       default:
         err("parameter cannot be qualified with a module name",LOC(@1,@1));
         break;
       }
-      let idopt = (opt_t<var>)(new Opt((*q)[1]));
+      let idopt = (opt_t<var_t>)(new Opt((*q)[1]));
       if (t_info[3] != null) 
         warn("extra attributes on parameter, ignoring",LOC(@1,@2));
       if (t_info[2] != null)
@@ -1729,17 +1786,23 @@ identifier_list0:
 initializer:
   assignment_expression
     { $$=$!1; }
-| '{' '}'
-    { $$=^$(new_exp(UnresolvedMem_e(null,null),LOC(@1,@2))); }
+| array_initializer
+    { $$=$!1; }
+;
+
+array_initializer:
+  '{' '}'
+    { $$=^$(new_exp(new UnresolvedMem_e(null,null),LOC(@1,@2))); }
 | '{' initializer_list '}'
-    { $$=^$(new_exp(UnresolvedMem_e(null,List::imp_rev($2)),LOC(@1,@3))); }
+    { $$=^$(new_exp(new UnresolvedMem_e(null,List::imp_rev($2)),LOC(@1,@3))); }
 | '{' initializer_list ',' '}'
-    { $$=^$(new_exp(UnresolvedMem_e(null,List::imp_rev($2)),LOC(@1,@4))); }
+    { $$=^$(new_exp(new UnresolvedMem_e(null,List::imp_rev($2)),LOC(@1,@4))); }
 | '{' FOR IDENTIFIER '<' expression ':' expression '}'
-    { $$=^$(new_exp(Comprehension_e(new_vardecl(new $(Loc_n,new {$3}),
-                                                uint_t,
-						uint_exp(0,LOC(@3,@3))),
-				    $5, $7),LOC(@1,@8))); 
+    { $$=^$(new_exp(new Comprehension_e(new_vardecl(new $((nmspace_t)Loc_n,
+                                                          new {$3}),
+                                                    uint_t,
+                                                    uint_exp(0,LOC(@3,@3))),
+                                        $5, $7),LOC(@1,@8))); 
     }
 
 ;
@@ -1769,8 +1832,8 @@ designator_list:
 ;
 
 designator:
-  '[' constant_expression ']' {$$ = ^$(ArrayElement($2));}
-| '.' IDENTIFIER              {$$ = ^$(FieldName(new {$2}));}
+  '[' constant_expression ']' {$$ = ^$(new ArrayElement($2));}
+| '.' IDENTIFIER              {$$ = ^$(new FieldName(new {$2}));}
 ;
 
 type_name:
@@ -1799,9 +1862,9 @@ type_name:
 
 any_type_name:
   type_name { $$ = ^$((*$1)[2]); }
-| '{' '}' { $$ = ^$(JoinEff(null)); }
-| '{' region_set '}' { $$ = ^$(JoinEff($2)); }
-| any_type_name '+' atomic_effect { $$ = ^$(JoinEff(new List($1,$3))); }
+| '{' '}' { $$ = ^$(new JoinEff(null)); }
+| '{' region_set '}' { $$ = ^$(new JoinEff($2)); }
+| any_type_name '+' atomic_effect { $$ = ^$(new JoinEff(new List($1,$3))); }
 ;
 
 /* Cyc: new */
@@ -1828,56 +1891,51 @@ direct_abstract_declarator:
 | direct_abstract_declarator '[' ']'
     { $$=^$(new Abstractdeclarator(new List(Carray_mod,$1->tms))); }
 | '[' assignment_expression ']'
-    { $$=^$(new Abstractdeclarator(new List(ConstArray_mod($2),null))); }
+    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($2),null))); }
 | direct_abstract_declarator '[' assignment_expression ']'
-    { $$=^$(new Abstractdeclarator(new List(ConstArray_mod($3),$1->tms))); 
+    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($3),$1->tms))); 
     }
 | '(' ')'
-    { $$=^$(new Abstractdeclarator(new List(Function_mod(WithTypes(null,
-                                                                   false,
-                                                                   null)),
-                                            null)));
+    { $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,null)),null)));
     }
 | '(' ';' effect_set ')'
-    { $$=^$(new Abstractdeclarator(new List(Function_mod(WithTypes(null,false,
-                                                             new Opt(JoinEff($3)))
-                                                   ),null)));
+    { $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,new Opt(new JoinEff($3)))),null)));
     }
 | '(' parameter_type_list ')'
     { let &$(lis,b,eff) = $2;
-      $$=^$(new Abstractdeclarator(new List(Function_mod(WithTypes(lis,b,eff)),null)));
+      $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(lis,b,eff)),null)));
     }
 | direct_abstract_declarator '(' ')'
-    { $$=^$(new Abstractdeclarator(new List(Function_mod(WithTypes(null,false,null)),
+    { $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,null)),
 				      $1->tms)));
     }
 | direct_abstract_declarator '(' ';' effect_set ')'
-   { let eff = new Opt(JoinEff($4));
-      $$=^$(new Abstractdeclarator(new List(Function_mod(WithTypes(null,false,eff)),
-				      $1->tms)));
+   { let eff = new Opt((type_t)(new JoinEff($4)));
+      $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(null,false,eff)),$1->tms)));
     }
 | direct_abstract_declarator '(' parameter_type_list ')'
     { let &$(lis,b,eff) = $3;
-      $$=^$(new Abstractdeclarator(new List(Function_mod(WithTypes(lis,b,eff)),
-                                            $1->tms)));
+      $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(lis,
+                                                                           b,eff)),$1->tms)));
     }
 /* Cyc: new */
 | direct_abstract_declarator '<' type_name_list '>'
     { let ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
-      $$=^$(new Abstractdeclarator(new List(TypeParams_mod(ts,LOC(@2,@4),false),
+      $$=^$(new Abstractdeclarator(new List(new TypeParams_mod(ts,LOC(@2,@4),
+                                                               false),
                                       $1->tms)));
     }
 | direct_abstract_declarator '<' type_name_list RIGHT_OP
     { /* RIGHT_OP is >>, we've seen one char too much, step back */
       lbuf->v->lex_curr_pos -= 1;
       let ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
-      $$=^$(new Abstractdeclarator(new List(TypeParams_mod(ts,LOC(@2,@4),
-                                                           false),
+      $$=^$(new Abstractdeclarator(new List(new TypeParams_mod(ts,LOC(@2,@4),
+                                                               false),
                                             $1->tms)));
     }
 | direct_abstract_declarator attributes
     {
-      $$=^$(new Abstractdeclarator(new List(Attributes_mod(LOC(@2,@2),$2),
+      $$=^$(new Abstractdeclarator(new List(new Attributes_mod(LOC(@2,@2),$2),
                                             $1->tms)));
     }
 ;
@@ -1891,15 +1949,15 @@ statement:
 | iteration_statement   { $$=$!1; }
 | jump_statement        { $$=$!1; }
 /* Cyc: cut and splice */
-| CUT statement         { $$=^$(new_stmt(Cut_s($2),LOC(@1,@2))); }
-| SPLICE statement      { $$=^$(new_stmt(Splice_s($2),LOC(@1,@2))); }
+| CUT statement         { $$=^$(new_stmt(new Cut_s($2),LOC(@1,@2))); }
+| SPLICE statement      { $$=^$(new_stmt(new Splice_s($2),LOC(@1,@2))); }
 ;
 
 /* Cyc: Unlike C, we do not treat case and default statements as
    labeled */
 labeled_statement:
   IDENTIFIER ':' statement
-    { $$=^$(new_stmt(Label_s(new {$1},$3),LOC(@1,@3))); }
+    { $$=^$(new_stmt(new Label_s(new {$1},$3),LOC(@1,@3))); }
 ;
 
 expression_statement:
@@ -1915,27 +1973,27 @@ compound_statement:
 block_item_list:
   block_item
     { switch ($1) {
-      case TopDecls_bl(ds):
+      case &TopDecls_bl(ds):
         $$=^$(flatten_declarations(ds,skip_stmt(LOC(@1,@1))));
 	break;
-      case FnDecl_bl(fd):
-        $$=^$(flatten_decl(new_decl(Fn_d(fd),LOC(@1,@1)),
+      case &FnDecl_bl(fd):
+        $$=^$(flatten_decl(new_decl(new Fn_d(fd),LOC(@1,@1)),
 			   skip_stmt(LOC(@1,@1))));
 	break;
-      case Stmt_bl(s):
+      case &Stmt_bl(s):
         $$=^$(s);
 	break;
       }
     }
 | block_item block_item_list
     { switch ($1) {
-      case TopDecls_bl(ds):
+      case &TopDecls_bl(ds):
         $$=^$(flatten_declarations(ds,$2));
 	break;
-      case FnDecl_bl(fd):
-	$$=^$(flatten_decl(new_decl(Fn_d(fd),LOC(@1,@1)),$2));
+      case &FnDecl_bl(fd):
+	$$=^$(flatten_decl(new_decl(new Fn_d(fd),LOC(@1,@1)),$2));
 	break;
-      case Stmt_bl(s):
+      case &Stmt_bl(s):
         $$=^$(seq_stmt(s,$2,LOC(@1,@2)));
 	break;
       }
@@ -1943,12 +2001,12 @@ block_item_list:
 ;
 
 block_item:
-  declaration { $$=^$(TopDecls_bl($1)); }
-| statement   { $$=^$(Stmt_bl($1)); }
+  declaration { $$=^$(new TopDecls_bl($1)); }
+| statement   { $$=^$(new Stmt_bl($1)); }
 /* Cyc: nested function definitions.
    The initial (return) type is required,
    to avoid parser conflicts. */
-| function_definition2 { $$=^$(FnDecl_bl($1)); }
+| function_definition2 { $$=^$(new FnDecl_bl($1)); }
 
 /* This has the standard shift-reduce conflict which is properly resolved. */
 selection_statement:
@@ -2062,37 +2120,38 @@ pattern:
 | '(' pattern ')'
     { $$=$!2; }
 | INTEGER_CONSTANT
-    { $$=^$(new_pat(Int_p((*$1)[0],(*$1)[1]),LOC(@1,@1))); }
+    { $$=^$(new_pat(new Int_p((*$1)[0],(*$1)[1]),LOC(@1,@1))); }
 | '-' INTEGER_CONSTANT
-    { $$=^$(new_pat(Int_p(Signed,-((*$2)[1])),LOC(@1,@2))); }
+    { $$=^$(new_pat(new Int_p(Signed,-((*$2)[1])),LOC(@1,@2))); }
 | FLOATING_CONSTANT
-    { $$=^$(new_pat(Float_p($1),LOC(@1,@1)));}
+    { $$=^$(new_pat(new Float_p($1),LOC(@1,@1)));}
 /* TODO: we should allow negated floating constants too */
 | CHARACTER_CONSTANT
-    {$$=^$(new_pat(Char_p($1),LOC(@1,@1)));}
+    {$$=^$(new_pat(new Char_p($1),LOC(@1,@1)));}
 | NULL_kw
     {$$=^$(new_pat(Null_p,LOC(@1,@1)));}
 | qual_opt_identifier
-    { $$=^$(new_pat(UnknownId_p($1),LOC(@1,@1))); }
+    { $$=^$(new_pat(new UnknownId_p($1),LOC(@1,@1))); }
 | qual_opt_identifier type_params_opt '(' tuple_pattern_list ')'
     { let tvs = List::map_c(typ2tvar,LOC(@2,@2),$2);
-      $$=^$(new_pat(UnknownCall_p($1,tvs,$4),LOC(@1,@5)));
+      $$=^$(new_pat(new UnknownCall_p($1,tvs,$4),LOC(@1,@5)));
     }
 | '$' '(' tuple_pattern_list ')'
-    {$$=^$(new_pat(Tuple_p($3),LOC(@1,@4)));}
+    {$$=^$(new_pat(new Tuple_p($3),LOC(@1,@4)));}
 | qual_opt_identifier type_params_opt '{' '}'
     { let tvs = List::map_c(typ2tvar,LOC(@2,@2),$2);
-      $$=^$(new_pat(UnknownFields_p($1,tvs,null),LOC(@1,@4)));
+      $$=^$(new_pat(new UnknownFields_p($1,tvs,null),LOC(@1,@4)));
     }
 | qual_opt_identifier type_params_opt '{' field_pattern_list '}'
     { let tvs = List::map_c(typ2tvar,LOC(@2,@2),$2);
-      $$=^$(new_pat(UnknownFields_p($1,tvs,$4),LOC(@1,@5)));
+      $$=^$(new_pat(new UnknownFields_p($1,tvs,$4),LOC(@1,@5)));
     }
 | '&' pattern
-    {$$=^$(new_pat(Pointer_p($2),LOC(@1,@2)));}
+    {$$=^$(new_pat(new Pointer_p($2),LOC(@1,@2)));}
 | '*' IDENTIFIER
-    {$$=^$(new_pat(Reference_p(new_vardecl(new $(Loc_n,new {$2}),
-					   VoidType,null)),
+    {$$=^$(new_pat(new Reference_p(new_vardecl(new $((nmspace_t)Loc_n,
+                                                     new {$2}),
+                                               VoidType,null)),
 		   LOC(@1,@2)));}
 ;
 
@@ -2162,9 +2221,6 @@ assignment_expression:
     { $$=$!1; }
 | unary_expression assignment_operator assignment_expression
     { $$=^$(assignop_exp($1,$2,$3,LOC(@1,@3))); }
-/* Cyc: expressions to build heap-allocated objects and arrays */
-| NEW initializer
-    { $$=^$(New_exp($2,LOC(@1,@3))); }
 ;
 
 assignment_operator:
@@ -2186,6 +2242,14 @@ conditional_expression:
     { $$=$!1; }
 | logical_or_expression '?' expression ':' conditional_expression
     { $$=^$(conditional_exp($1,$3,$5,LOC(@1,@5))); }
+/* Cyc: throw expressions */
+| THROW conditional_expression
+    { $$=^$(throw_exp($2,LOC(@1,@2))); }
+/* Cyc: expressions to build heap-allocated objects and arrays, throw */
+| NEW array_initializer
+    { $$=^$(New_exp($2,LOC(@1,@3))); }
+| NEW logical_or_expression
+    { $$=^$(New_exp($2,LOC(@1,@3))); }
 ;
 
 constant_expression:
@@ -2297,15 +2361,13 @@ unary_expression:
 | SIZEOF '(' type_name ')'       { $$=^$(sizeoftyp_exp((*$3)[2],LOC(@1,@4))); }
 | SIZEOF unary_expression        { $$=^$(sizeofexp_exp($2,LOC(@1,@2))); }
 /* Cyc: throw, printf, fprintf, sprintf */
-| THROW unary_expression
-    { $$=^$(throw_exp($2,LOC(@1,@2))); }
 | format_primop '(' argument_expression_list ')'
     { $$=^$(primop_exp($1,$3,LOC(@1,@4))); }
 | MALLOC '(' SIZEOF '(' specifier_qualifier_list ')' ')'
-{ $$=^$(new_exp(Malloc_e(Typ_m(speclist2typ((*$5)[1],LOC(@5,@5)))), 
-			 LOC(@1,@7))); }
+{ $$=^$(new_exp(new Malloc_e(new Typ_m(speclist2typ((*$5)[1],LOC(@5,@5)))), 
+                LOC(@1,@7))); }
 | MALLOC '(' SIZEOF '(' qual_opt_identifier ')' ')'
-{ $$=^$(new_exp(Malloc_e(Unresolved_m($5)),LOC(@1,@7))); }
+{ $$=^$(new_exp(new Malloc_e(new Unresolved_m($5)),LOC(@1,@7))); }
 ;
 
 format_primop:
@@ -2336,11 +2398,11 @@ postfix_expression:
     { $$=^$(structmember_exp($1,new {$3},LOC(@1,@3))); }
 // Hack to allow typedef names and field names to overlap
 | postfix_expression '.' QUAL_TYPEDEF_NAME
-    { qvar q = $3;
+    { qvar_t q = $3;
       switch ((*q)[0]) {
       case Loc_n: break;
-      case Rel_n(null): break;
-      case Abs_n(null): break;
+      case &Rel_n(null): break;
+      case &Abs_n(null): break;
       default:
         err("struct field name is qualified",LOC(@3,@3));
         break;
@@ -2351,11 +2413,11 @@ postfix_expression:
     { $$=^$(structarrow_exp($1,new {$3},LOC(@1,@3))); }
 // Hack to allow typedef names and field names to overlap
 | postfix_expression PTR_OP QUAL_TYPEDEF_NAME
-    { qvar q = $3;
+    { qvar_t q = $3;
       switch ((*q)[0]) {
       case Loc_n: break;
-      case Rel_n(null): break;
-      case Abs_n(null): break;
+      case &Rel_n(null): break;
+      case &Abs_n(null): break;
       default:
         err("struct field is qualified with module name",LOC(@3,@3));
         break;
@@ -2367,21 +2429,21 @@ postfix_expression:
 | postfix_expression DEC_OP
     { $$=^$(post_dec_exp($1,LOC(@1,@2))); }
 | '(' type_name ')' '{' initializer_list '}'
-    { $$=^$(new_exp(CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@6))); }
+    { $$=^$(new_exp(new CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@6))); }
 | '(' type_name ')' '{' initializer_list ',' '}'
-    { $$=^$(new_exp(CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@7))); }
+    { $$=^$(new_exp(new CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@7))); }
 /* Cyc: added fill and codegen */
 | FILL '(' expression ')'
-    { $$=^$(new_exp(Fill_e($3),LOC(@1,@4))); }
+    { $$=^$(new_exp(new Fill_e($3),LOC(@1,@4))); }
 | CODEGEN '(' function_definition ')'
-    { $$=^$(new_exp(Codegen_e($3),LOC(@1,@4))); }
+    { $$=^$(new_exp(new Codegen_e($3),LOC(@1,@4))); }
 ;
 
 primary_expression:
   qual_opt_identifier
-    /* This could be an ordinary identifier, a struct tag, or an enum or
-       xenum constructor */
-    { $$=^$(new_exp(UnknownId_e($1),LOC(@1,@1))); }
+    /* This could be an ordinary identifier, a struct tag, or a tunion or
+       xtunion constructor */
+    { $$=^$(new_exp(new UnknownId_e($1),LOC(@1,@1))); }
 | constant
     { $$= $!1; }
 | STRING
@@ -2390,16 +2452,18 @@ primary_expression:
     { $$= $!2; }
 /* Cyc: stop instantiation */
 | qual_opt_identifier LEFT_RIGHT
-    { $$=^$(noinstantiate_exp(new_exp(UnknownId_e($1),LOC(@1,@1)),LOC(@1,@2)));}
+    { $$=^$(noinstantiate_exp(new_exp(new UnknownId_e($1),
+                                      LOC(@1,@1)),LOC(@1,@2)));}
 | qual_opt_identifier '@' '<' type_name_list '>'
-    { $$=^$(instantiate_exp(new_exp(UnknownId_e($1),LOC(@1,@1)),
+    { $$=^$(instantiate_exp(new_exp(new UnknownId_e($1),LOC(@1,@1)),
 			    List::imp_rev($4),LOC(@1,@5))); }
 /* Cyc: tuple expressions */
 | '$' '(' argument_expression_list ')'
     { $$=^$(tuple_exp($3,LOC(@1,@4))); }
 /* Cyc: structure expressions */
 | qual_opt_identifier '{' initializer_list '}'
-    { $$=^$(new_exp(Struct_e($1,null,List::imp_rev($3),null),LOC(@1,@4))); }
+    { $$=^$(new_exp(new Struct_e($1,null,List::imp_rev($3),null),LOC(@1,@4)));
+    }
 /* Cyc: compound statement expressions, as in gcc */
 | '(' '{' block_item_list '}' ')'
     { $$=^$(stmt_exp($3,LOC(@1,@5))); }
@@ -2417,7 +2481,7 @@ argument_expression_list0:
     { $$=^$(new List($3,$1)); }
 ;
 
-/* NB: We've had to move enumeration constants into primary_expression
+/* NB: We've had to move tunioneration constants into primary_expression
    because the lexer can't tell them from ordinary identifiers */
 constant:
   INTEGER_CONSTANT   { $$=^$(int_exp((*$1)[0],(*$1)[1],LOC(@1,@1))); }
@@ -2428,26 +2492,26 @@ constant:
 ;
 
 qual_opt_identifier:
-  IDENTIFIER      { $$=^$(new $(Rel_n(null),new {$1})); }
+  IDENTIFIER      { $$=^$(new $((nmspace_t)(new Rel_n(null)),new {$1})); }
 | QUAL_IDENTIFIER { $$=$!1; }
 ;
 
 %%
 
-void yyprint(int i, xenum YYSTYPE v) {
+void yyprint(int i, xtunion YYSTYPE v) {
   switch (v) {
-  case Okay_tok:          fprintf(stderr,"ok");         break;
-  case Int_tok(&$(_,i2)): fprintf(stderr,"%d",i2);      break;
-  case Char_tok(c):       fprintf(stderr,"%c",c);       break;
-  case Short_tok(s):      fprintf(stderr,"%ds",(int)s); break;
-  case String_tok(s):          fprintf(stderr,"\"%s\"",s); break;
-  case Stringopt_tok(null):    fprintf(stderr,"null");     break;
-  case Stringopt_tok(&Opt(s)): fprintf(stderr,"\"%s\"",*s); break;
-  case QualId_tok(&$(p,v2)):
+  case &Okay_tok:          fprintf(stderr,"ok");         break;
+  case &Int_tok(&$(_,i2)): fprintf(stderr,"%d",i2);      break;
+  case &Char_tok(c):       fprintf(stderr,"%c",c);       break;
+  case &Short_tok(s):      fprintf(stderr,"%ds",(int)s); break;
+  case &String_tok(s):          fprintf(stderr,"\"%s\"",s); break;
+  case &Stringopt_tok(null):    fprintf(stderr,"null");     break;
+  case &Stringopt_tok(&Opt(s)): fprintf(stderr,"\"%s\"",*s); break;
+  case &QualId_tok(&$(p,v2)):
     let prefix = null;
     switch (p) {
-    case Rel_n(x): prefix = x; break;
-    case Abs_n(x): prefix = x; break;
+    case &Rel_n(x): prefix = x; break;
+    case &Abs_n(x): prefix = x; break;
     case Loc_n: break;
     }
     for (; prefix != null; prefix = prefix->tl)
@@ -2459,7 +2523,7 @@ void yyprint(int i, xenum YYSTYPE v) {
 }
 
 namespace Parse{
-list_t<decl> parse_file(FILE @f) {
+list_t<decl_t> parse_file(FILE @f) {
   parse_result = null;
   lbuf = new Opt(from_file(f));
   yyparse();

@@ -42,8 +42,8 @@
 
 /* Dan: Do not define YYERROR_VERBOSE -- it has not been ported */
 
-xenum exn {Yyimpossible};     // used in various weird cases
-xenum exn {Yystack_overflow}; // thrown if the parsing stack overflows
+xtunion exn {Yyimpossible};     // used in various weird cases
+xtunion exn {Yystack_overflow}; // thrown if the parsing stack overflows
 
 #define yyerrok		(yyerrstatus = 0)
 #define yyclearin	(yychar = YYEMPTY)
@@ -74,10 +74,11 @@ extern void yyerror(string);
 // no support for YYLEX_PARAM 
 extern int yylex();
 
-xenum YYSTYPE { YYINITIALSVAL };
+xtunion YYSTYPE { YYINITIALSVAL };
 
 static int	yychar = '\000';       /*  the lookahead symbol		*/
-xenum YYSTYPE	yylval = YYINITIALSVAL;/*  the semantic value of the	*/
+xtunion YYSTYPE.YYINITIALSVAL yyinitval = YYINITIALSVAL;
+xtunion YYSTYPE	yylval = &yyinitval;/*  the semantic value of the	*/
  				       /*  lookahead symbol		*/
 
 
@@ -124,7 +125,7 @@ int yyparse(YYPARSE_PARAM_ARG)
   short ?yyss = new {for i < YYINITDEPTH : 0};
   /*  the semantic value stack */
   int yyvsp_offset;
-  xenum YYSTYPE ?yyvs = new {for i < YYINITDEPTH : yylval}; 
+  xtunion YYSTYPE ?yyvs = new {for i < YYINITDEPTH : yylval}; 
 
 #ifdef YYLSP_NEEDED
   /*  the location stack */
@@ -139,14 +140,14 @@ int yyparse(YYPARSE_PARAM_ARG)
 
 #ifdef YYPURE
   int yychar;
-  xenum YYSTYPE yylval;
+  xtunion YYSTYPE yylval;
   int yynerrs;
 #ifdef YYLSP_NEEDED
   YYLTYPE yylloc;
 #endif
 #endif
 
-  xenum YYSTYPE yyval = yylval;	/*  the variable used to return		*/
+  xtunion YYSTYPE yyval = yylval;/* the variable used to return		*/
 				/*  semantic values from the action	*/
 				/*  routines				*/
 
@@ -184,13 +185,13 @@ yynewstate:
     // grow the stacks
     if (yystacksize >= YYMAXDEPTH) {
       yyerror("parser stack overflow");
-      throw Yystack_overflow;
+      throw new Yystack_overflow;
     }
     yystacksize *= 2;
     if (yystacksize > YYMAXDEPTH)
       yystacksize = YYMAXDEPTH;
     short ?yyss1 = new {for i < yystacksize : 0};
-    xenum YYSTYPE ?yyvs1 = new {for i < yystacksize : yylval};
+    xtunion YYSTYPE ?yyvs1 = new {for i < yystacksize : yylval};
 #ifdef YYLSP_NEEDED
     YYLTYPE ?yyls1 = new {for i < yystacksize : yynewloc()};
 #endif
@@ -345,7 +346,7 @@ yyreduce:
 #endif
 
 $    /* the action file gets copied in place of this dollarsign */
-  default: throw Yyimpossible;
+  default: throw new Yyimpossible;
   }
 
 #line 371 "cyc_bison.simple"

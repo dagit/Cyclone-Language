@@ -23,7 +23,7 @@ bool is_empty(gqueue_t<`a,`r> q)  {
 }
 
 // raised by take and peek
-xenum exn { Empty };
+xtunion exn { Empty };
 
 // create a new queue
 queue_t<`a> create() {
@@ -46,7 +46,7 @@ void add(queue_t<`a> q,`a x) {
 // get and remove an element from the front of the queue (side effect)
 `a take(gqueue_t<`a,`r> q) {
   if (q->front == null)
-    throw Empty; // FIX: toc problems if we try to return this.
+    throw new Empty; // FIX: toc problems if we try to return this.
   //    return (throw Empty);
   else {
     let x = q->front->hd;
@@ -61,7 +61,7 @@ void add(queue_t<`a> q,`a x) {
 // return the first element in the queue without removing it
 `a peek(gqueue_t<`a,`r> q) {
   if (q->front == null)
-    throw Empty; // FIX: toc problems if we try to return this.
+    throw new Empty; // FIX: toc problems if we try to return this.
   else {
     return(q->front->hd);
   }

@@ -19,7 +19,7 @@ using Syntax;
 
 namespace Lexer {
   extern int lexmain(Lexing::Lexbuf<`a>);
-  extern xenum exn { Lexical_error(string,int,int) };
+  extern xtunion exn { Lexical_error(string,int,int) };
   extern int line_num;
   extern int line_start_pos;
 }
@@ -28,7 +28,7 @@ namespace Parser {
 
 opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = null;
 
-xenum exn {Parser_error(string)};
+xtunion exn {Parser_error(string)};
 typedef struct Hashtable::Table<stringptr,regular_expression_t,{},{}> htbl;
   // must be initialized!
 htbl * named_regexps = null;
@@ -38,9 +38,9 @@ regular_expression_t regexp_for_string(string s) {
   int len = String::strlen(s);
   if(len == 0)
     return Epsilon;
-  regular_expression_t ans = Characters(new List((int)(s[len-1]), null));
+  regular_expression_t ans = new Characters(new List((int)(s[len-1]), null));
   for(int n = len - 2; n >= 0; --n)
-    ans = Sequence(Characters(new List((int)(s[n]), null)), ans);
+    ans = new Sequence(new Characters(new List((int)(s[n]), null)), ans);
   return ans;
 }
 
@@ -146,22 +146,22 @@ rest_of_entry:
 acase: regexp TACTION { $$=^$(new $($1,$2)); }
 
 regexp:
-  TUNDERSCORE { $$=^$(Characters(all_chars())); }
+  TUNDERSCORE { $$=^$(new Characters(all_chars())); }
 | TEOF        { /* FIX: may change to -1 like C library? */ 
-                $$=^$(Characters(new List(256,null))); }
-| TCHAR       { $$=^$(Characters(new List((int)($1),null))); }
+                $$=^$(new Characters(new List(256,null))); }
+| TCHAR       { $$=^$(new Characters(new List((int)($1),null))); }
 | TSTRING     { $$=^$(regexp_for_string($1)); }
-| TLBRACKET char_class TRBRACKET { $$=^$(Characters($2)); }
-| regexp TSTAR      { $$=^$(Repetition($1)); }
-| regexp TMAYBE     { $$=^$(Alternative($1,Epsilon)); }
-| regexp TPLUS      { $$=^$(Sequence($1, Repetition($1))); }
-| regexp TOR regexp { $$=^$(Alternative($1,$3)); }
-| regexp regexp %prec CONCAT { $$=^$(Sequence($1,$2)); }
+| TLBRACKET char_class TRBRACKET { $$=^$(new Characters($2)); }
+| regexp TSTAR      { $$=^$(new Repetition($1)); }
+| regexp TMAYBE     { $$=^$(new Alternative($1,Epsilon)); }
+| regexp TPLUS      { $$=^$(new Sequence($1, new Repetition($1))); }
+| regexp TOR regexp { $$=^$(new Alternative($1,$3)); }
+| regexp regexp %prec CONCAT { $$=^$(new Sequence($1,$2)); }
 | TLPAREN regexp TRPAREN { $$=^$($2); }
 | TIDENT { try $$=^$(Hashtable::lookup((Parser::htbl @)named_regexps,
 				       new {$1}));
 	   catch { 
-	     case Not_found:
+	     case &Not_found:
 	     yyerror(xprintf("Reference to unbound regexp name `%s'", $1));
 	     break;
 	   }

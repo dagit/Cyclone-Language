@@ -25,7 +25,7 @@ size_t strlen(string s) {
 // Internal length after offset function, parameterized by what
 // to throw if the offset is out of range.
 static size_t int_strleno(string s, int ofs, string error) {
-  if (ofs > s.size || ofs < 0) throw InvalidArg(error);
+  if (ofs > s.size || ofs < 0) throw new InvalidArg(error);
   int i;
   for (i = ofs; i<s.size; i++) {
     if (s[i] == '\000')
@@ -168,7 +168,7 @@ static string int_strcato(string dest,string src,int srcOfs,string error) {
       dest[i+dlen] = '\000';
   }
   else
-    throw InvalidArg(error);
+    throw new InvalidArg(error);
   return dest;
 }
 
@@ -263,12 +263,12 @@ string strncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
   let destSz = dest.size;
   let srcSz = src.size;
   if (destOfs < 0)
-    throw InvalidArg("String::strncpy");
+    throw new InvalidArg("String::strncpy");
   if (srcOfs < 0 || (n > 0 && srcOfs >= srcSz))
-    throw InvalidArg("String::strncpy");
+    throw new InvalidArg("String::strncpy");
   if (n <= 0) return dest;
   if (destOfs + n > destSz || srcOfs + n > srcSz)
-    throw InvalidArg("String::strncpy");
+    throw new InvalidArg("String::strncpy");
   int i;
   for (i=0; i<n; i++) {
     let srcChar = src[srcOfs+i];
@@ -305,12 +305,12 @@ string zstrncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
   let destSz = dest.size;
   let srcSz  = src.size;
   if (destOfs < 0)
-    throw InvalidArg("String::zstrncpy");
+    throw new InvalidArg("String::zstrncpy");
   if (srcOfs < 0 || (n > 0 && srcOfs >= srcSz))
-    throw InvalidArg("String::zstrncpy");
+    throw new InvalidArg("String::zstrncpy");
   if (n <= 0) return dest;
   if (destOfs + n > destSz || srcOfs + n > srcSz)
-    throw InvalidArg("String::zstrncpy");
+    throw new InvalidArg("String::zstrncpy");
   int i;
   for (i=0; i<n; i++) 
     dest[destOfs+i] = src[srcOfs+i];
@@ -378,7 +378,7 @@ string realloc_str(string str, size_t sz)
 // I'd like to remove it but it causes a bug in the lexer on bootstrapping.
 string substring(string s, int start, size_t amt) {
   if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)(s.size))
-    throw InvalidArg("String::substring");
+    throw new InvalidArg("String::substring");
   string ans = new_string(amt+1);
   for(size_t i=0; i<amt; ++i)
     ans[i] = s[start+i];
@@ -393,10 +393,10 @@ string replace_suffix (string src, string curr_suffix, string new_suffix) {
   size_t n = curr_suffix.size;
   string err = "String::replace_suffix";
   if (m < n) 
-    throw InvalidArg(err);
+    throw new InvalidArg(err);
   for (size_t i = 1; i <= n; ++i)
     if (src[m-i] != curr_suffix[n-i])
-      throw InvalidArg(err);
+      throw new InvalidArg(err);
   string ans = new_string(m-n+new_suffix.size);
   strncpy(ans,0,src,0,m-n);
   strncpy(ans,m-n,new_suffix,0,new_suffix.size);
@@ -506,7 +506,7 @@ int to_int(string s, int *`r offset) {
     i++;
   }
   ans = ans*sn;
-  if (!digit_seen) throw InvalidArg("String::to_int");
+  if (!digit_seen) throw new InvalidArg("String::to_int");
   if (offset != null) *offset = i;
   return ans;
 }
@@ -546,7 +546,7 @@ double to_double(string s, int *`r offset) {
       i++;
     }
   }
-  if (!digit_seen) throw InvalidArg("String::to_double");
+  if (!digit_seen) throw new InvalidArg("String::to_double");
   // look for exponent
   if (i < s.size && (s[i] == 'e' || s[i] == 'E')) {
     i++;
@@ -564,7 +564,7 @@ double to_double(string s, int *`r offset) {
       exponent = exponent * 10 + ((int)(s[i] - '0'));
       i++;
     }
-    if (!digit_seen) throw InvalidArg("String::to_double");
+    if (!digit_seen) throw new InvalidArg("String::to_double");
     ans = ans * Math::pow(10.0, (double)(exponent*exp_sign));
   }
   if (offset != null) *offset = i;

@@ -9,7 +9,7 @@ using List;
 using Stdio;
 using String;
 
-xenum exn {Exit};
+xtunion exn {Exit};
 
 /////////// Location tracking///////////
 static string source = ""; // initialized by overall control
@@ -76,7 +76,7 @@ list_t<stringptr> strings_of_segments(glist_t<seg_t,`r> segs) {
 
 ///////////// Errors ////////////
 
-enum Error_kind { Lex, Parse, Elab };
+tunion Error_kind { Lex, Parse, Elab };
 struct Error {
   string       source;
   seg_t        seg;
@@ -98,7 +98,7 @@ error_t mk_err_elab(seg_t l, string desc) {
 // If there are errors getting stuff from the source file then raise Nocontext
 // and just don't print the source context
 
-xenum exn {Nocontext};
+xtunion exn {Nocontext};
 
 static string trunc(int n, string s) {
   int len = strlen(s);
@@ -119,13 +119,13 @@ static int line_length = 76;
 // the error; return also the column numbers the error starts and finishes at.
 static $(string,int,int)@ get_context(seg_t seg) {
   if(seg == null)
-    throw Nocontext;
+    throw new Nocontext;
   Lineno::pos_t pos_s, pos_e;
   try {
     pos_s = Lineno::pos_of_abs(source,seg->start);
     pos_e = Lineno::pos_of_abs(source,seg->end);
   } catch {
-  default: throw Nocontext;
+  default: throw new Nocontext;
   }
   
   let &Lineno::Pos(_,sline,sl,sc) = pos_s;
@@ -158,7 +158,7 @@ static $(string,int,int)@ get_context(seg_t seg) {
 static bool error_b = false;
 bool error_p() { return error_b; }
 
-xenum exn {Error(error_t)};
+xtunion exn {Error(error_t)};
 
 bool print_context = false;
 
@@ -182,7 +182,7 @@ void post_error(error_t e) {
       while (++i < (*x)[2]) marker_str[i] = '^';
       fprintf(stderr, "  %s\n  %s\n", (*x)[0], marker_str);
     } catch {
-    case Nocontext: break; 
+    case &Nocontext: break; 
     }
   }
   fflush(stderr);

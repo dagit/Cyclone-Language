@@ -37,12 +37,12 @@ int line_start_pos = 0;
 void yyerror(string s) {
   fprintf(stderr, "%s, line:%d", s, line_num);
   fflush(stderr);
-  throw Parser_error(s);
+  throw new Parser_error(s);
 }
 
 namespace Lexer {
 
-xenum exn { Lexical_error(string,int,int); };
+xtunion exn { Lexical_error(string,int,int); };
 
 static string                  token_string = (string)"";
 static int                     token_char   = (int)'D';
@@ -103,7 +103,7 @@ static int handle_lexical_error(int fn<`b,`e>(Lexing::Lexbuf<`b>;`e),
   int line = line_num;
   int column = lexeme_start(lbuf) - line_start_pos;
   try return fn(lbuf);
-  catch { case Lexical_error(msg,_,_): throw Lexical_error(msg,line,column); }
+  catch { case &Lexical_error(msg,_,_): throw new Lexical_error(msg,line,column); }
 }
 
 // Forward declarations of lexing functions
@@ -119,10 +119,10 @@ extern int comment(Lexing::Lexbuf<`a>);
 int yylex() {
   int ans = Lexer::lexmain(lbuf->v);
   switch (ans) {
-  case TIDENT:  yylval = String_tok(Lexer::token_string);   break;
-  case TSTRING: yylval = String_tok(Lexer::token_string);   break;
-  case TCHAR:   yylval = Char_tok(Lexer::token_char);       break;
-  case TACTION: yylval = Location_tok(Lexer::token_action); break;
+  case TIDENT:  yylval = new String_tok(Lexer::token_string);   break;
+  case TSTRING: yylval = new String_tok(Lexer::token_string);   break;
+  case TCHAR:   yylval = new Char_tok(Lexer::token_char);       break;
+  case TACTION: yylval = new Location_tok(Lexer::token_action); break;
   default: break;
   }
   return ans;

@@ -24,24 +24,24 @@ using Fn;
 
 namespace PP;
 
-enum Alist<`a> {
+tunion Alist<`a> {
   Empty;
   Single(`a);
-  Append(enum Alist<`a>,enum Alist<`a>);
+  Append(tunion Alist<`a>,tunion Alist<`a>);
 };
-typedef enum Alist<`a> alist_t<`a>;
+typedef tunion Alist<`a> alist_t<`a>;
 
 alist_t<`a> append(alist_t<`a> a1, alist_t<`a> a2) {
-  if (a1==Empty) return a2;
-  else if (a2==Empty) return a1;
-  else return Append(a1,a2);
+  if (a1==(alist_t<`a>)Empty) return a2;
+  else if (a2==(alist_t<`a>)Empty) return a1;
+  else return new Append(a1,a2);
 }
 
 list_t<`a> list_of_alist_f(alist_t<`a> y,list_t<`a> l) {
   switch (y) {
   case Empty:         return l;
-  case Single(z):     return new List(z,l);
-  case Append(a1,a2): return list_of_alist_f(a1,list_of_alist_f(a2,l));
+  case &Single(z):     return new List(z,l);
+  case &Append(a1,a2): return list_of_alist_f(a1,list_of_alist_f(a2,l));
   }
 }
 list_t<`a> list_of_alist(alist_t<`a> x) {
@@ -80,8 +80,8 @@ static void dump_out(FILE @f, alist_t<stringptr> al) {
   while(last >= 0) {
     switch(Xarray::get(xarr,last)) {
     case Empty:     --last;                    break;
-    case Single(s): --last; fprintf(f,"%s",*s); break;
-    case Append(a1,a2): 
+    case &Single(s): --last; fprintf(f,"%s",*s); break;
+    case &Append(a1,a2): 
       Xarray::set(xarr,last,a2); 
       if(last == Xarray::length(xarr)-1)
 	Xarray::add(xarr,a1);
@@ -118,11 +118,11 @@ static opt_t<table_t<int,stringptr,{},{}>> bhashtbl = null;
 string nlblanks(int i) {  // a newline followed by i blanks
   if (bhashtbl == null)
     bhashtbl = new Opt(Hashtable::create(61,intcmp,identity));
-  if (i<0) throw Failure("nlblanks");
+  if (i<0) throw new Failure("nlblanks");
   try
     return *(Hashtable::lookup(bhashtbl->v,i));
   catch {
-  case Not_found:
+  case &Not_found:
     let num_tabs   = i / 8;
     let num_spaces = i % 8;
     let total = 1 + num_tabs + num_spaces;
@@ -146,7 +146,7 @@ static out_t text_doc_f($(int,string) @clo,ppstate_t st) {
   let &$(slen,s) = clo;
   return new Out(st->cc+slen,
                  st->cl,
-                 Single(new {s}),
+                 new Single(new {s}),
                  Empty);
 }
 static doc_t text_doc(string s) {
@@ -169,7 +169,7 @@ doc_t text(string s) {
   try
     return Hashtable::lookup(t,new {s});
   catch {
-  case Not_found:
+  case &Not_found:
     doc_t d = text_doc(s);
     Hashtable::insert(t,new {s},d);
     return d;
@@ -199,8 +199,8 @@ static out_t hyperlink_f($(int,string,string) @clo, ppstate_t st) {
   let &$(slen,shrt,full) = clo;
   return new Out(st->cc+slen,
               st->cl,
-              Single(new {shrt}),
-              Single(new $(st->cl,st->cc,slen,full)));
+              new Single(new {shrt}),
+              new Single(new $(st->cl,st->cc,slen,full)));
 }
 doc_t hyperlink(string shrt, string full) {
   int slen = String::strlen(shrt);
@@ -213,7 +213,7 @@ doc_t hyperlink(string shrt, string full) {
 static out_t line_f(ppstate_t st) {
   return new Out(st->ci,
                  st->cl+1,
-                 Single(new {nlblanks(st->ci)}),
+                 new Single(new {nlblanks(st->ci)}),
                  Empty);
 }
 doc_t line_doc() {
@@ -282,7 +282,7 @@ static out_t long_concats_f(list_t<doc_t> ds0, ppstate_t st) {
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
   alist_t<stringptr> s = Empty;
-  let links = Empty;
+  alist_t<$(int,int,int,string)@> links = Empty;
   for(; os != null; os = os->tl) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);
@@ -329,7 +329,7 @@ static out_t concats_arr_f(doc_t ?@docs_ptr, ppstate_t st) {
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
   alist_t<stringptr> s = Empty;
-  let links = Empty;
+  alist_t<$(int,int,int,string)@> links = Empty;
   for(; os != null; os = os->tl) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);
@@ -340,7 +340,7 @@ static out_t concats_arr_f(doc_t ?@docs_ptr, ppstate_t st) {
 doc_t concats_arr(doc_t ?docs) {
   int sz = docs.size;
   if(sz==0)
-    throw Failure("concats_arr -- size zero array");
+    throw new Failure("concats_arr -- size zero array");
   doc_t d = docs[0];
   int mw  = d->mw;
   int mwo = d->mw;

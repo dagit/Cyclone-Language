@@ -20,8 +20,8 @@ extern string strconcat(string,string);
 // The rest is all Cyclone
 namespace Core;
 
-xenum exn { InvalidArg(string) };
-xenum exn { SysError(int) };
+xtunion exn { InvalidArg(string) };
+xtunion exn { SysError(int) };
 
 /* Popcorn version of fgets; returns the # of chars read */
 /*
@@ -51,10 +51,10 @@ string ?std_args() {
 }
 
 /////////////////////////////Generally Useful Things//////////////
-xenum exn { Failure(string) };
-xenum exn { Impossible(string) };
-xenum exn { Not_found };
-xenum exn { Unreachable(string) };
+xtunion exn { Failure(string) };
+xtunion exn { Impossible(string) };
+xtunion exn { Not_found };
+xtunion exn { Unreachable(string) };
 
 opt_t<`b> opt_map(`b f(`a), opt_t<`a> o) {
   if (o==null)
@@ -104,7 +104,7 @@ static int int_of_char(char c) {
   if ('0'<=c && c<='9')      return c-'0';
   else if ('a'<=c && c<='f') return 10+c-'a';
   else if ('A'<=c && c<='F') return 10+c-'A';
-  else throw InvalidArg("string to integer conversion");
+  else throw new InvalidArg("string to integer conversion");
 }
 
 int int_of_string(string s)
@@ -120,7 +120,7 @@ int int_of_string(string s)
     i++;
   } 
   if (i==s.size) 
-    throw InvalidArg("string to integer conversion");
+    throw new InvalidArg("string to integer conversion");
 
   // determine the base
   if (i+1 == s.size || s[i]!='0') 
@@ -137,7 +137,7 @@ int int_of_string(string s)
   for(n=0; i<s.size && s[i] != '\000'; ++i) {
     int digit = int_of_char(s[i]);
     if (digit >= base) 
-      throw InvalidArg("string to integer conversion");
+      throw new InvalidArg("string to integer conversion");
     n = n*base+digit;
   }
   return sign*n;

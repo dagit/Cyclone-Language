@@ -11,11 +11,11 @@ using List;
 using Absyn;
 using Tcenv;
 
-extern void tc(tenv te, bool add_cyc_namespace, list_t<decl> ds);
+extern void tc(tenv_t te, bool add_cyc_namespace, list_t<decl_t> ds);
 
   // if called, must be after tc is called
   // removes extern variables that are never referred to
-extern list_t<decl> treeshake(tenv te, list_t<decl>);
+extern list_t<decl_t> treeshake(tenv_t te, list_t<decl_t>);
 
 }
 #endif

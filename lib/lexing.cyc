@@ -19,7 +19,7 @@ namespace Lexing;
 #define BUFFER_SIZE 8192
 #define AUX_SIZE    4096
 
-xenum exn { Error(string) };
+xtunion exn { Error(string) };
 
 struct lexbuf<`a> { // use `a for state that refill_buff might need 
 
@@ -191,7 +191,7 @@ int lex_engine(LexTables tbl, int start_state, Lexbuf<`a> lbuf) {
      if (state < 0) {
         lbuf->lex_curr_pos = lbuf->lex_last_pos;
 	if (lbuf->lex_last_action == -1)
-	   throw Error("empty token");
+	   throw new Error("empty token");
         else {
 	  return lbuf->lex_last_action;
 	}

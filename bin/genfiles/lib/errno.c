@@ -17,11 +17,12 @@ Cstring_to_string( char*); extern int system( char*); extern struct
 _tagged_string Cyc_Errno_sys_err( int); extern int* __errno()  __attribute__((
 dllimport )) ; extern int _sys_nerr  __attribute__(( dllimport )) ; extern char*
 _sys_errlist[ 135]  __attribute__(( dllimport )) ; struct _tagged_string Cyc_Errno_sys_err(
-int i){ if( i < 0? 1: i > _sys_nerr){( void) _throw(({ struct Cyc_Core_InvalidArg_struct*
-_temp0=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
-_temp0->tag= Cyc_Core_InvalidArg_tag; _temp0->f1=( struct _tagged_string)({ char*
-_temp1=( char*)"sys_err: integer argument out of range"; struct _tagged_string
-_temp2; _temp2.curr= _temp1; _temp2.base= _temp1; _temp2.last_plus_one= _temp1 +
-39; _temp2;});( struct _xenum_struct*) _temp0;}));} return Cstring_to_string(({
-char** _temp3=( char**) _sys_errlist; unsigned int _temp4= i; if( _temp4 >= 135u){
-_throw( Null_Exception);} _temp3[ _temp4];}));}
+int i){ if( i < 0? 1: i > _sys_nerr){( void) _throw(( struct _xtunion_struct*)({
+struct Cyc_Core_InvalidArg_struct* _temp0=( struct Cyc_Core_InvalidArg_struct*)
+GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct
+_temp1; _temp1.tag= Cyc_Core_InvalidArg_tag; _temp1.f1=( struct _tagged_string)({
+char* _temp2=( char*)"sys_err: integer argument out of range"; struct
+_tagged_string _temp3; _temp3.curr= _temp2; _temp3.base= _temp2; _temp3.last_plus_one=
+_temp2 + 39; _temp3;}); _temp1;}); _temp0;}));} return Cstring_to_string(({ char**
+_temp4=( char**) _sys_errlist; unsigned int _temp5= i; if( _temp5 >= 135u){
+_throw( Null_Exception);} _temp4[ _temp5];}));}

@@ -21,38 +21,38 @@ using List;
 
 namespace Splay;
 
-enum tree<`a,`b> {
+tunion tree<`a,`b> {
   Leaf,
   Node(struct noderef<`a,`b> @)
 };
 
-static enum direction {
+static tunion direction {
   LEFT, RIGHT
 };
 
 static void rotate_left(struct noderef<`a,`b> @nr) {
   let n = nr->v;
   switch (n->left) {
-  case Node(nr2):
+  case &Node(nr2):
     let n2 = nr2->v;
-    let t = Node(new noderef(new node(n->key, n->data, n2->right, n->right)));
+    let t = new Node(new noderef(new node(n->key,n->data,n2->right,n->right)));
     nr->v = new node(n2->key, n2->data, n2->left, t);
     break;
   default:
-    throw InvalidArg("Splay::rotate_left");
+    throw new InvalidArg("Splay::rotate_left");
   }
 }
 
 static void rotate_right(struct noderef<`a,`b> @nr) {
   let n = nr->v;
   switch (n->right) {
-  case Node(nr2):
+  case &Node(nr2):
     let n2 = nr2->v;
-    let t = Node(new noderef(new node(n->key, n->data, n->left, n2->left)));
+    let t = new Node(new noderef(new node(n->key,n->data,n->left,n2->left)));
     nr->v = new node(n2->key, n2->data, t, n2->right);
     break;
   default:
-    throw InvalidArg("Splay::rotate_right");
+    throw new InvalidArg("Splay::rotate_right");
   }
 }
 
@@ -87,7 +87,7 @@ static void rotate_right(struct noderef<`a,`b> @nr) {
 //   }
 // }
 
-static void lift(list_t<$(enum direction,struct noderef<`a,`b> @)@> dnl) {
+static void lift(list_t<$(tunion direction,struct noderef<`a,`b> @)@> dnl) {
   while (dnl != null) {
     if (dnl->tl == null) {
       switch (dnl->hd) {
@@ -118,21 +118,21 @@ static void lift(list_t<$(enum direction,struct noderef<`a,`b> @)@> dnl) {
 
 // maybe want a splay_c too, but dict doesn't need it and that's the immediate
 // concern
-bool splay(int reln(`a,`a), `a reln_first_arg, enum tree<`a,`b> tree) {
-  list_t<$(enum direction, struct noderef<`a,`b>@)@> path = null;
+bool splay(int reln(`a,`a), `a reln_first_arg, tunion tree<`a,`b> tree) {
+  list_t<$(tunion direction, struct noderef<`a,`b>@)@> path = null;
   while(true) {
     switch (tree) {
-    case Node(nr):
+    case &Node(nr):
       let n = nr->v;
       let comp = reln(reln_first_arg, n->key);
       if (comp == 0) {
 	lift(path);
 	return true;
       } else if (comp < 0) {
-	path = new List(new $(LEFT, nr), path);
+	path = new List(new $((tunion direction)LEFT, nr), path);
 	tree = n->left;
       } else {
-	path = new List(new $(RIGHT, nr), path);
+	path = new List(new $((tunion direction)RIGHT, nr), path);
 	tree = n->right;
       }
       break;

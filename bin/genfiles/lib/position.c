@@ -42,15 +42,16 @@ extern struct Cyc_Position_Segment* Cyc_Position_segment_join( struct Cyc_Positi
 struct Cyc_Position_Segment*); extern struct _tagged_string Cyc_Position_string_of_loc(
 int); extern struct _tagged_string Cyc_Position_string_of_segment( struct Cyc_Position_Segment*);
 extern struct Cyc_List_List* Cyc_Position_strings_of_segments( struct Cyc_List_List*);
-typedef void* Cyc_Position_Error_kind; extern void* Cyc_Position_Lex; extern
-void* Cyc_Position_Parse; extern void* Cyc_Position_Elab; typedef void* Cyc_Position_error_kind_t;
-struct Cyc_Position_Error{ struct _tagged_string source; struct Cyc_Position_Segment*
-seg; void* kind; struct _tagged_string desc; } ; typedef struct Cyc_Position_Error*
-Cyc_Position_error_t; extern struct Cyc_Position_Error* Cyc_Position_mk_err_lex(
+typedef void* Cyc_Position_Error_kind; extern const unsigned int Cyc_Position_Lex;
+extern const unsigned int Cyc_Position_Parse; extern const unsigned int Cyc_Position_Elab;
+typedef void* Cyc_Position_error_kind_t; struct Cyc_Position_Error{ struct
+_tagged_string source; struct Cyc_Position_Segment* seg; void* kind; struct
+_tagged_string desc; } ; typedef struct Cyc_Position_Error* Cyc_Position_error_t;
+extern struct Cyc_Position_Error* Cyc_Position_mk_err_lex( struct Cyc_Position_Segment*,
+struct _tagged_string); extern struct Cyc_Position_Error* Cyc_Position_mk_err_parse(
 struct Cyc_Position_Segment*, struct _tagged_string); extern struct Cyc_Position_Error*
-Cyc_Position_mk_err_parse( struct Cyc_Position_Segment*, struct _tagged_string);
-extern struct Cyc_Position_Error* Cyc_Position_mk_err_elab( struct Cyc_Position_Segment*,
-struct _tagged_string); extern char Cyc_Position_Nocontext_tag[ 10u]; struct Cyc_Position_Nocontext_struct{
+Cyc_Position_mk_err_elab( struct Cyc_Position_Segment*, struct _tagged_string);
+extern char Cyc_Position_Nocontext_tag[ 10u]; struct Cyc_Position_Nocontext_struct{
 char* tag; } ; extern int Cyc_Position_print_context; extern void Cyc_Position_post_error(
 struct Cyc_Position_Error*); extern int Cyc_Position_error_p(); extern
 unsigned int Cyc_String_strlen( struct _tagged_string s); extern int Cyc_String_strcmp(
@@ -122,113 +123,113 @@ GC_malloc( sizeof( struct Cyc_List_List)); _temp35->hd=( void*)({ struct
 _tagged_string* _temp36=( struct _tagged_string*) GC_malloc( sizeof( struct
 _tagged_string) * 1); _temp36[ 0]= Cyc_Position_string_of_pos_pr((*(( struct
 _tuple0*) places->hd)).f2,(*(( struct _tuple0*)( places->tl)->hd)).f2); _temp36;});
-_temp35->tl= ans; _temp35;}); places=( places->tl)->tl;}} return ans;}} void*
-Cyc_Position_Lex=( void*) 0; void* Cyc_Position_Parse=( void*) 1; void* Cyc_Position_Elab=(
-void*) 2; struct Cyc_Position_Error; struct Cyc_Position_Error* Cyc_Position_mk_err_lex(
-struct Cyc_Position_Segment* l, struct _tagged_string desc){ return({ struct Cyc_Position_Error*
-_temp37=( struct Cyc_Position_Error*) GC_malloc( sizeof( struct Cyc_Position_Error));
-_temp37->source= Cyc_Position_source; _temp37->seg= l; _temp37->kind=( void*)
-Cyc_Position_Lex; _temp37->desc= desc; _temp37;});} struct Cyc_Position_Error*
-Cyc_Position_mk_err_parse( struct Cyc_Position_Segment* l, struct _tagged_string
-desc){ return({ struct Cyc_Position_Error* _temp38=( struct Cyc_Position_Error*)
-GC_malloc( sizeof( struct Cyc_Position_Error)); _temp38->source= Cyc_Position_source;
-_temp38->seg= l; _temp38->kind=( void*) Cyc_Position_Parse; _temp38->desc= desc;
-_temp38;});} struct Cyc_Position_Error* Cyc_Position_mk_err_elab( struct Cyc_Position_Segment*
-l, struct _tagged_string desc){ return({ struct Cyc_Position_Error* _temp39=(
-struct Cyc_Position_Error*) GC_malloc( sizeof( struct Cyc_Position_Error));
-_temp39->source= Cyc_Position_source; _temp39->seg= l; _temp39->kind=( void*)
-Cyc_Position_Elab; _temp39->desc= desc; _temp39;});} char Cyc_Position_Nocontext_tag[
-10u]="Nocontext"; static struct _tagged_string Cyc_Position_trunc( int n, struct
-_tagged_string s){ int len=( int) Cyc_String_strlen( s); if( len < n){ return s;}{
-int len_one=( n - 3) / 2; int len_two=( n - 3) - len_one; struct _tagged_string
-ans= Cyc_Core_new_string( n + 1); Cyc_String_strncpy( ans, 0, s, 0,(
-unsigned int) len_one); Cyc_String_strncpy( ans, len_one,( struct _tagged_string)({
-char* _temp40=( char*)"..."; struct _tagged_string _temp41; _temp41.curr=
-_temp40; _temp41.base= _temp40; _temp41.last_plus_one= _temp40 + 4; _temp41;}),
-0,( unsigned int) 3); Cyc_String_strncpy( ans, len_one + 3, s, len - len_two,(
-unsigned int) len_two); return ans;}} static int Cyc_Position_line_length= 76;
-static struct _tuple1* Cyc_Position_get_context( struct Cyc_Position_Segment*
-seg){ if( seg == 0){( void) _throw(({ struct Cyc_Position_Nocontext_struct*
-_temp42=( struct Cyc_Position_Nocontext_struct*) GC_malloc_atomic( sizeof(
-struct Cyc_Position_Nocontext_struct)); _temp42->tag= Cyc_Position_Nocontext_tag;(
-struct _xenum_struct*) _temp42;}));}{ struct Cyc_Lineno_Pos* pos_s; struct Cyc_Lineno_Pos*
-pos_e;{ struct _handler_cons _temp43; _push_handler(& _temp43);{ struct
-_xenum_struct* _temp44=( struct _xenum_struct*) setjmp( _temp43.handler); if( !
-_temp44){ pos_s= Cyc_Lineno_pos_of_abs( Cyc_Position_source, seg->start); pos_e=
-Cyc_Lineno_pos_of_abs( Cyc_Position_source, seg->end);; _pop_handler();} else{
-struct _xenum_struct* _temp46= _temp44; _LL48: goto _LL49; _LL50: goto _LL51;
-_LL49:( void) _throw(({ struct Cyc_Position_Nocontext_struct* _temp52=( struct
-Cyc_Position_Nocontext_struct*) GC_malloc_atomic( sizeof( struct Cyc_Position_Nocontext_struct));
-_temp52->tag= Cyc_Position_Nocontext_tag;( struct _xenum_struct*) _temp52;}));
-_LL51:( void) _throw( _temp46); _LL47:;}}}{ struct Cyc_Lineno_Pos _temp55; int
-_temp56; int _temp58; struct _tagged_string _temp60; struct _tagged_string
-_temp62; struct Cyc_Lineno_Pos* _temp53= pos_s; _temp55=* _temp53; _LL63:
-_temp62=( struct _tagged_string) _temp55.logical_file; goto _LL61; _LL61:
-_temp60=( struct _tagged_string) _temp55.line; goto _LL59; _LL59: _temp58=( int)
-_temp55.line_no; goto _LL57; _LL57: _temp56=( int) _temp55.col; goto _LL54;
-_LL54: { struct Cyc_Lineno_Pos _temp66; int _temp67; int _temp69; struct
-_tagged_string _temp71; struct _tagged_string _temp73; struct Cyc_Lineno_Pos*
-_temp64= pos_e; _temp66=* _temp64; _LL74: _temp73=( struct _tagged_string)
-_temp66.logical_file; goto _LL72; _LL72: _temp71=( struct _tagged_string)
-_temp66.line; goto _LL70; _LL70: _temp69=( int) _temp66.line_no; goto _LL68;
-_LL68: _temp67=( int) _temp66.col; goto _LL65; _LL65: if( _temp58 == _temp69){
+_temp35->tl= ans; _temp35;}); places=( places->tl)->tl;}} return ans;}} const
+unsigned int Cyc_Position_Lex= 0; const unsigned int Cyc_Position_Parse= 1;
+const unsigned int Cyc_Position_Elab= 2; struct Cyc_Position_Error; struct Cyc_Position_Error*
+Cyc_Position_mk_err_lex( struct Cyc_Position_Segment* l, struct _tagged_string
+desc){ return({ struct Cyc_Position_Error* _temp37=( struct Cyc_Position_Error*)
+GC_malloc( sizeof( struct Cyc_Position_Error)); _temp37->source= Cyc_Position_source;
+_temp37->seg= l; _temp37->kind=( void*)(( void*) Cyc_Position_Lex); _temp37->desc=
+desc; _temp37;});} struct Cyc_Position_Error* Cyc_Position_mk_err_parse( struct
+Cyc_Position_Segment* l, struct _tagged_string desc){ return({ struct Cyc_Position_Error*
+_temp38=( struct Cyc_Position_Error*) GC_malloc( sizeof( struct Cyc_Position_Error));
+_temp38->source= Cyc_Position_source; _temp38->seg= l; _temp38->kind=( void*)((
+void*) Cyc_Position_Parse); _temp38->desc= desc; _temp38;});} struct Cyc_Position_Error*
+Cyc_Position_mk_err_elab( struct Cyc_Position_Segment* l, struct _tagged_string
+desc){ return({ struct Cyc_Position_Error* _temp39=( struct Cyc_Position_Error*)
+GC_malloc( sizeof( struct Cyc_Position_Error)); _temp39->source= Cyc_Position_source;
+_temp39->seg= l; _temp39->kind=( void*)(( void*) Cyc_Position_Elab); _temp39->desc=
+desc; _temp39;});} char Cyc_Position_Nocontext_tag[ 10u]="Nocontext"; static
+struct _tagged_string Cyc_Position_trunc( int n, struct _tagged_string s){ int
+len=( int) Cyc_String_strlen( s); if( len < n){ return s;}{ int len_one=( n - 3)
+/ 2; int len_two=( n - 3) - len_one; struct _tagged_string ans= Cyc_Core_new_string(
+n + 1); Cyc_String_strncpy( ans, 0, s, 0,( unsigned int) len_one); Cyc_String_strncpy(
+ans, len_one,( struct _tagged_string)({ char* _temp40=( char*)"..."; struct
+_tagged_string _temp41; _temp41.curr= _temp40; _temp41.base= _temp40; _temp41.last_plus_one=
+_temp40 + 4; _temp41;}), 0,( unsigned int) 3); Cyc_String_strncpy( ans, len_one
++ 3, s, len - len_two,( unsigned int) len_two); return ans;}} static int Cyc_Position_line_length=
+76; static struct _tuple1* Cyc_Position_get_context( struct Cyc_Position_Segment*
+seg){ if( seg == 0){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Position_Nocontext_struct*
+_temp42=( struct Cyc_Position_Nocontext_struct*) GC_malloc( sizeof( struct Cyc_Position_Nocontext_struct));
+_temp42[ 0]=({ struct Cyc_Position_Nocontext_struct _temp43; _temp43.tag= Cyc_Position_Nocontext_tag;
+_temp43;}); _temp42;}));}{ struct Cyc_Lineno_Pos* pos_s; struct Cyc_Lineno_Pos*
+pos_e;{ struct _handler_cons _temp44; _push_handler(& _temp44);{ struct
+_xtunion_struct* _temp45=( struct _xtunion_struct*) setjmp( _temp44.handler);
+if( ! _temp45){ pos_s= Cyc_Lineno_pos_of_abs( Cyc_Position_source, seg->start);
+pos_e= Cyc_Lineno_pos_of_abs( Cyc_Position_source, seg->end);; _pop_handler();}
+else{ struct _xtunion_struct* _temp47= _temp45; _LL49: goto _LL50; _LL51: goto
+_LL52; _LL50:( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Position_Nocontext_struct*
+_temp53=( struct Cyc_Position_Nocontext_struct*) GC_malloc( sizeof( struct Cyc_Position_Nocontext_struct));
+_temp53[ 0]=({ struct Cyc_Position_Nocontext_struct _temp54; _temp54.tag= Cyc_Position_Nocontext_tag;
+_temp54;}); _temp53;})); _LL52:( void) _throw( _temp47); _LL48:;}}}{ struct Cyc_Lineno_Pos
+_temp57; int _temp58; int _temp60; struct _tagged_string _temp62; struct
+_tagged_string _temp64; struct Cyc_Lineno_Pos* _temp55= pos_s; _temp57=* _temp55;
+_LL65: _temp64=( struct _tagged_string) _temp57.logical_file; goto _LL63; _LL63:
+_temp62=( struct _tagged_string) _temp57.line; goto _LL61; _LL61: _temp60=( int)
+_temp57.line_no; goto _LL59; _LL59: _temp58=( int) _temp57.col; goto _LL56;
+_LL56: { struct Cyc_Lineno_Pos _temp68; int _temp69; int _temp71; struct
+_tagged_string _temp73; struct _tagged_string _temp75; struct Cyc_Lineno_Pos*
+_temp66= pos_e; _temp68=* _temp66; _LL76: _temp75=( struct _tagged_string)
+_temp68.logical_file; goto _LL74; _LL74: _temp73=( struct _tagged_string)
+_temp68.line; goto _LL72; _LL72: _temp71=( int) _temp68.line_no; goto _LL70;
+_LL70: _temp69=( int) _temp68.col; goto _LL67; _LL67: if( _temp60 == _temp71){
 int n= Cyc_Position_line_length / 3; struct _tagged_string sec_one= Cyc_Position_trunc(
-n, Cyc_String_substring( _temp60, 0,( unsigned int) _temp56)); struct
-_tagged_string sec_two= Cyc_Position_trunc( n, Cyc_String_substring( _temp60,
-_temp56,( unsigned int)( _temp67 - _temp56))); struct _tagged_string sec_three=
-Cyc_Position_trunc( n, Cyc_String_substring( _temp60, _temp56, Cyc_String_strlen(
-_temp60) -( unsigned int) _temp67)); return({ struct _tuple1* _temp75=( struct
-_tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp75->f1=({ struct
-_tagged_string _temp76= sec_one; struct _tagged_string _temp77= sec_two; struct
-_tagged_string _temp78= sec_three; xprintf("%.*s%.*s%.*s", _temp76.last_plus_one
-- _temp76.curr, _temp76.curr, _temp77.last_plus_one - _temp77.curr, _temp77.curr,
-_temp78.last_plus_one - _temp78.curr, _temp78.curr);}); _temp75->f2=( int) Cyc_String_strlen(
-sec_one); _temp75->f3=( int)( Cyc_String_strlen( sec_one) + Cyc_String_strlen(
-sec_two)); _temp75;});} else{ int n=( Cyc_Position_line_length - 3) / 4; struct
-_tagged_string sec_one= Cyc_Position_trunc( n, Cyc_String_substring( _temp60, 0,(
-unsigned int) _temp56)); struct _tagged_string sec_two= Cyc_Position_trunc( n,
-Cyc_String_substring( _temp60, _temp56, Cyc_String_strlen( _temp60) -(
-unsigned int) _temp56)); struct _tagged_string sec_three= Cyc_Position_trunc( n,
-Cyc_String_substring( _temp71, 0,( unsigned int) _temp67)); struct
-_tagged_string sec_four= Cyc_Position_trunc( n, Cyc_String_substring( _temp71,
-_temp67, Cyc_String_strlen( _temp71) -( unsigned int) _temp67)); return({ struct
-_tuple1* _temp79=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp79->f1=({
-struct _tagged_string _temp80= sec_one; struct _tagged_string _temp81= sec_two;
-struct _tagged_string _temp82= sec_three; struct _tagged_string _temp83=
-sec_four; xprintf("%.*s%.*s.\\.%.*s%.*s", _temp80.last_plus_one - _temp80.curr,
-_temp80.curr, _temp81.last_plus_one - _temp81.curr, _temp81.curr, _temp82.last_plus_one
-- _temp82.curr, _temp82.curr, _temp83.last_plus_one - _temp83.curr, _temp83.curr);});
-_temp79->f2=( int) Cyc_String_strlen( sec_one); _temp79->f3=( int)((( Cyc_String_strlen(
+n, Cyc_String_substring( _temp62, 0,( unsigned int) _temp58)); struct
+_tagged_string sec_two= Cyc_Position_trunc( n, Cyc_String_substring( _temp62,
+_temp58,( unsigned int)( _temp69 - _temp58))); struct _tagged_string sec_three=
+Cyc_Position_trunc( n, Cyc_String_substring( _temp62, _temp58, Cyc_String_strlen(
+_temp62) -( unsigned int) _temp69)); return({ struct _tuple1* _temp77=( struct
+_tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp77->f1=({ struct
+_tagged_string _temp78= sec_one; struct _tagged_string _temp79= sec_two; struct
+_tagged_string _temp80= sec_three; xprintf("%.*s%.*s%.*s", _temp78.last_plus_one
+- _temp78.curr, _temp78.curr, _temp79.last_plus_one - _temp79.curr, _temp79.curr,
+_temp80.last_plus_one - _temp80.curr, _temp80.curr);}); _temp77->f2=( int) Cyc_String_strlen(
+sec_one); _temp77->f3=( int)( Cyc_String_strlen( sec_one) + Cyc_String_strlen(
+sec_two)); _temp77;});} else{ int n=( Cyc_Position_line_length - 3) / 4; struct
+_tagged_string sec_one= Cyc_Position_trunc( n, Cyc_String_substring( _temp62, 0,(
+unsigned int) _temp58)); struct _tagged_string sec_two= Cyc_Position_trunc( n,
+Cyc_String_substring( _temp62, _temp58, Cyc_String_strlen( _temp62) -(
+unsigned int) _temp58)); struct _tagged_string sec_three= Cyc_Position_trunc( n,
+Cyc_String_substring( _temp73, 0,( unsigned int) _temp69)); struct
+_tagged_string sec_four= Cyc_Position_trunc( n, Cyc_String_substring( _temp73,
+_temp69, Cyc_String_strlen( _temp73) -( unsigned int) _temp69)); return({ struct
+_tuple1* _temp81=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp81->f1=({
+struct _tagged_string _temp82= sec_one; struct _tagged_string _temp83= sec_two;
+struct _tagged_string _temp84= sec_three; struct _tagged_string _temp85=
+sec_four; xprintf("%.*s%.*s.\\.%.*s%.*s", _temp82.last_plus_one - _temp82.curr,
+_temp82.curr, _temp83.last_plus_one - _temp83.curr, _temp83.curr, _temp84.last_plus_one
+- _temp84.curr, _temp84.curr, _temp85.last_plus_one - _temp85.curr, _temp85.curr);});
+_temp81->f2=( int) Cyc_String_strlen( sec_one); _temp81->f3=( int)((( Cyc_String_strlen(
 sec_one) + Cyc_String_strlen( sec_two)) +( unsigned int) 3) + Cyc_String_strlen(
-sec_three)); _temp79;});}}}}} static int Cyc_Position_error_b= 0; int Cyc_Position_error_p(){
+sec_three)); _temp81;});}}}}} static int Cyc_Position_error_b= 0; int Cyc_Position_error_p(){
 return Cyc_Position_error_b;} char Cyc_Position_Error_tag[ 6u]="Error"; struct
 Cyc_Position_Error_struct{ char* tag; struct Cyc_Position_Error* f1; } ; int Cyc_Position_print_context=
 0; int Cyc_Position_first_error= 1; void Cyc_Position_post_error( struct Cyc_Position_Error*
 e){ Cyc_Position_error_b= 1; Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stdout);
 if( Cyc_Position_first_error){ fprintf( Cyc_Stdio_stderr,"\n"); Cyc_Position_first_error=
-0;}({ struct _tagged_string _temp84= Cyc_Position_string_of_segment( e->seg);
-struct _tagged_string _temp85= e->desc; fprintf( Cyc_Stdio_stderr,"%.*s: %.*s\n",
-_temp84.last_plus_one - _temp84.curr, _temp84.curr, _temp85.last_plus_one -
-_temp85.curr, _temp85.curr);}); if( Cyc_Position_print_context){ struct
-_handler_cons _temp86; _push_handler(& _temp86);{ struct _xenum_struct* _temp87=(
-struct _xenum_struct*) setjmp( _temp86.handler); if( ! _temp87){{ struct _tuple1*
-x= Cyc_Position_get_context( e->seg); struct _tagged_string marker_str=({
-unsigned int _temp88=( unsigned int)((* x).f3 + 1); char* _temp89=( char*)
-GC_malloc_atomic( sizeof( char) * _temp88); unsigned int i; struct
-_tagged_string _temp90={ _temp89, _temp89, _temp89 + _temp88}; for( i= 0; i <
-_temp88; i ++){ _temp89[ i]='\000';} _temp90;}); int i= - 1; while(( ++ i) <(* x).f2) {({
-struct _tagged_string _temp91= marker_str; char* _temp93= _temp91.curr + i; if(
-_temp93 < _temp91.base? 1: _temp93 >= _temp91.last_plus_one){ _throw(
-Null_Exception);}* _temp93=' ';});} while(( ++ i) <(* x).f3) {({ struct
-_tagged_string _temp94= marker_str; char* _temp96= _temp94.curr + i; if( _temp96
-< _temp94.base? 1: _temp96 >= _temp94.last_plus_one){ _throw( Null_Exception);}*
-_temp96='^';});}({ struct _tagged_string _temp97=(* x).f1; struct _tagged_string
-_temp98= marker_str; fprintf( Cyc_Stdio_stderr,"  %.*s\n  %.*s\n", _temp97.last_plus_one
-- _temp97.curr, _temp97.curr, _temp98.last_plus_one - _temp98.curr, _temp98.curr);});};
-_pop_handler();} else{ struct _xenum_struct* _temp100= _temp87; _LL102: if(
-_temp100->tag == Cyc_Position_Nocontext_tag){ goto _LL103;} else{ goto _LL104;}
-_LL104: goto _LL105; _LL103: goto _LL101; _LL105:( void) _throw( _temp100);
-_LL101:;}}} Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);}
+0;}({ struct _tagged_string _temp86= Cyc_Position_string_of_segment( e->seg);
+struct _tagged_string _temp87= e->desc; fprintf( Cyc_Stdio_stderr,"%.*s: %.*s\n",
+_temp86.last_plus_one - _temp86.curr, _temp86.curr, _temp87.last_plus_one -
+_temp87.curr, _temp87.curr);}); if( Cyc_Position_print_context){ struct
+_handler_cons _temp88; _push_handler(& _temp88);{ struct _xtunion_struct*
+_temp89=( struct _xtunion_struct*) setjmp( _temp88.handler); if( ! _temp89){{
+struct _tuple1* x= Cyc_Position_get_context( e->seg); struct _tagged_string
+marker_str=({ unsigned int _temp90=( unsigned int)((* x).f3 + 1); char* _temp91=(
+char*) GC_malloc_atomic( sizeof( char) * _temp90); unsigned int i; struct
+_tagged_string _temp92={ _temp91, _temp91, _temp91 + _temp90}; for( i= 0; i <
+_temp90; i ++){ _temp91[ i]='\000';} _temp92;}); int i= - 1; while(( ++ i) <(* x).f2) {({
+struct _tagged_string _temp93= marker_str; char* _temp95= _temp93.curr + i; if(
+_temp95 < _temp93.base? 1: _temp95 >= _temp93.last_plus_one){ _throw(
+Null_Exception);}* _temp95=' ';});} while(( ++ i) <(* x).f3) {({ struct
+_tagged_string _temp96= marker_str; char* _temp98= _temp96.curr + i; if( _temp98
+< _temp96.base? 1: _temp98 >= _temp96.last_plus_one){ _throw( Null_Exception);}*
+_temp98='^';});}({ struct _tagged_string _temp99=(* x).f1; struct _tagged_string
+_temp100= marker_str; fprintf( Cyc_Stdio_stderr,"  %.*s\n  %.*s\n", _temp99.last_plus_one
+- _temp99.curr, _temp99.curr, _temp100.last_plus_one - _temp100.curr, _temp100.curr);});};
+_pop_handler();} else{ struct _xtunion_struct* _temp102= _temp89; _LL104: if(
+_temp102->tag == Cyc_Position_Nocontext_tag){ goto _LL105;} else{ goto _LL106;}
+_LL106: goto _LL107; _LL105: goto _LL103; _LL107:( void) _throw( _temp102);
+_LL103:;}}} Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);}
 void Cyc_Position_reset_position( struct _tagged_string s){ Cyc_Position_source=
 s; Cyc_Position_error_b= 0;} void Cyc_Position_set_position_file( struct
 _tagged_string s){ Cyc_Position_source= s; Cyc_Position_error_b= 0;} struct

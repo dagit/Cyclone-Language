@@ -5,9 +5,9 @@
 #include "core.h"
 
 namespace Arg {
-extern xenum exn {Error, Bad(string)};
+extern xtunion exn {Error, Bad(string)};
 
-extern enum Spec<`e::E> {
+extern tunion Spec<`e::E> {
   Unit_spec(void (@f)(;`e)),        // Call the function with unit argument
   Set_spec(bool@),                  // Set the reference to true
   Clear_spec(bool@),                // Set the reference to false
@@ -17,8 +17,8 @@ extern enum Spec<`e::E> {
                                     // function with each remaining argument
 };
 
-typedef enum Spec<`e> gspec_t<`e>;
-typedef enum Spec<{}> spec_t;
+typedef tunion Spec<`e> gspec_t<`e>;
+typedef tunion Spec<{}> spec_t;
 
 extern void usage (List::glist_t<$(string,gspec_t<`e>,string)@`r1,`r2>,string);
 

@@ -31,6 +31,7 @@ all: $(OUT_PREFIX)$(CYCCOMP)
 
 $(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIB)
 	gcc -o $@ $^ ../bin/gc.a $(LDFLAGS)
+#	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 #	gcc -o $@ $^ ../bin/gc_pg.a -pg $(LDFLAGS)
 
 # For machine-generated we need special targets (the .cyc is prefixed)

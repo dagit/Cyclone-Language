@@ -11,8 +11,8 @@ using Stdio;
 
 void dumpAttvalue(FILE @fd, attvalue_t av) {
   switch (av) {
-  case Attvalue1(s): fprintf(fd,"'%s'",s); break;
-  case Attvalue2(s): fprintf(fd,"\"%s\"",s); break;
+  case &Attvalue1(s): fprintf(fd,"'%s'",s); break;
+  case &Attvalue2(s): fprintf(fd,"\"%s\"",s); break;
   }
 }
 
@@ -36,7 +36,7 @@ void dumpAttributes(FILE @fd, list_t<attribute_t> al) {
 
 void dumpElement(FILE @fd, element_t e) {
   switch (e) {
-  case StartEnd(n,al,cl):
+  case &StartEnd(n,al,cl):
     fprintf(fd,"<%s",n);
     if (al != null) fprintf(fd," ");
     dumpAttributes(fd,al);
@@ -44,7 +44,7 @@ void dumpElement(FILE @fd, element_t e) {
     dumpContents(fd,cl);
     fprintf(fd,"</%s>",n);
     break;
-  case Empty(n,al):
+  case &Empty(n,al):
     fprintf(fd,"<%s",n);
     if (al != null) fprintf(fd," ");
     dumpAttributes(fd,al);
@@ -55,22 +55,22 @@ void dumpElement(FILE @fd, element_t e) {
 
 void dumpContent(FILE @fd, content_t c) {
   switch(c) {
-  case Element(e):
+  case &Element(e):
     dumpElement(fd,e);
     break;
-  case Chardata(cd):
+  case &Chardata(cd):
     fprintf(fd,"%s",cd);
     break;
-  case Reference(r):
+  case &Reference(r):
     fprintf(fd,"%s",r);
     break;
-  case Cdsect(cd):
+  case &Cdsect(cd):
     fprintf(fd,"<![CDATA[%s]]>",cd);
     break;
-  case Pi(&$(n,s)):
+  case &Pi(&$(n,s)):
     fprintf(fd,"<?%s%s?>",n,s);
     break;
-  case Comment(c):
+  case &Comment(c):
     fprintf(fd,"<!--%s-->",c);
     break;
   }

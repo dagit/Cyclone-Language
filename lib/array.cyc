@@ -54,7 +54,7 @@ void qsort(int less_eq(`a,`a),`a ?arr,int base_ofs, int len)
   int i, j, limit_ofs;         /* scan and limit pointers        */
 
   if (base_ofs < 0 || base_ofs + len > arr.size || len < 0)
-    throw Core::InvalidArg("Array::qsort");
+    throw new Core::InvalidArg("Array::qsort");
 
   limit_ofs = base_ofs + len;
   sp_ofs = 0;
@@ -127,7 +127,7 @@ void qsort(int less_eq(`a,`a),`a ?arr,int base_ofs, int len)
 void msort(int less_eq(`a,`a),`a ?arr,int base_ofs, int len) {
 
   if (base_ofs < 0 || base_ofs + len > arr.size || len < 0)
-    throw Core::InvalidArg("Array::msort");
+    throw new Core::InvalidArg("Array::msort");
 
   int limit_ofs = base_ofs + len; // This is one past the last elt to sort
 
@@ -233,14 +233,14 @@ void imp_map_c(`a f(`b,`a),`b env,`a ?`r x) {
 }
 
 // thrown when two arrays don't have the same size 
-xenum exn {Array_mismatch};
+xtunion exn {Array_mismatch};
 
 // Given two arrays of the same length and a function, apply the function
 // to each pair of elements (in order) and collect the results in a new array.
 // Throws Array_mismatch if the sizes of the arrays aren't the same.
 `c ?map2(`c f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  if (sx != y.size) throw new Array_mismatch;
   return new {for i < sx : f(x[i],y[i])};
 }
 
@@ -276,13 +276,13 @@ void iter_c(void f(`b,`a),`b env,`a ?`r x) {
 // if the lengths of the arrays aren't the same.  
 void app2(`c f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  if (sx != y.size) throw new Array_mismatch;
   for (int i=0; i < sx; i++) f(x[i],y[i]);
 }
 
 void app2_c(`d f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  if (sx != y.size) throw new Array_mismatch;
   for (int i=0; i < sx; i++) f(env,x[i],y[i]);
 } 
 
@@ -290,13 +290,13 @@ void app2_c(`d f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
 // if the lengths of the arrays aren't the same.  
 void iter2(void f(`a,`b),`a ?`r1 x,`b ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  if (sx != y.size) throw new Array_mismatch;
   for (int i=0; i < sx; i++) f(x[i],y[i]);
 }
 
 void iter2_c(void f(`a,`b,`c),`a env,`b ?`r1 x,`c ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  if (sx != y.size) throw new Array_mismatch;
   for (int i=0; i < sx; i++) f(env,x[i],y[i]);
 }
 
@@ -396,7 +396,7 @@ bool exists_c(bool pred(`a,`b),`a env,`b ?`r x) {
 // Throws Array_mismatch if the lengths are not the same.
 $(`a,`b)? zip(`a ?`r1 x,`b ?`r2 y) {
   int sx = x.size;
-  if (sx != y.size) throw Array_mismatch;
+  if (sx != y.size) throw new Array_mismatch;
 
   return new { for i < sx : $(x[i],y[i]) };
 }
@@ -435,7 +435,7 @@ bool mem(int compare(`a,`a), `a ?`r l, `a x) {
   int n = (n_opt == null ? sx - start : *n_opt);
 
   if (start < 0 || n <= 0 || start + (n_opt == null ? 0 : n) > sx)
-    throw Core::InvalidArg("Array::extract");
+    throw new Core::InvalidArg("Array::extract");
 
   return new {for i < n : x[start+i]};
 }

@@ -65,7 +65,7 @@ clean::
 beforedepend:: lexer.ml
 
 .SUFFIXES:
-.SUFFIXES: .ml .cmx .mli .cmi
+.SUFFIXES: .ml .cmx .mli .cmi .cmo
 
 .ml.cmo:
 	$(CAMLC) -c $(COMPFLAGS) $<

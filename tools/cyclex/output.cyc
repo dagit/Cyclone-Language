@@ -67,12 +67,12 @@ void output_entry(string sourcename, FILE @ ic, FILE @ oc,
   fprintf(oc,
     " default: lexbuf->refill_buff(lexbuf); return %s_rec(lexbuf,lexstate);\n",
 	  e->name);
-  fprintf(oc, "  }\n throw Error(\"some action didn't return!\");\n}\n");
+  fprintf(oc, "  }\n throw new Error(\"some action didn't return!\");\n}\n");
   fprintf(oc, "int %s(Lexbuf<`a> lexbuf) { return %s_rec(lexbuf,%d); }\n",
           e->name, e->name, e->initial_state);
 }
 
-xenum exn { Table_overflow };
+xtunion exn { Table_overflow };
 
 void output_lexdef(string sourcename, 
 		   FILE @ ic, 
@@ -89,7 +89,7 @@ void output_lexdef(string sourcename,
 	       + (tables->defaultX).size + (tables->trans).size
 	       + (tables->check).size));
   if((tables->trans).size > 0x8000)
-    throw Table_overflow;
+    throw new Table_overflow;
   copy_chunk(sourcename, ic, oc, header);
   fprintf(oc, "using Lexing {\n\n");
   output_tables(oc, tables);

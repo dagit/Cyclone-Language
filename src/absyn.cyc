@@ -20,50 +20,50 @@ namespace Absyn;
 static int zstrlist_cmp(list_t<stringptr> ss1,list_t<stringptr> ss2) {
   return list_cmp(zstrptrcmp,ss1,ss2);
 }
-int varlist_cmp(list_t<var> vs1, list_t<var> vs2) {
+int varlist_cmp(list_t<var_t> vs1, list_t<var_t> vs2) {
   return zstrlist_cmp(vs1,vs2);
 }
-int qvar_cmp(qvar q1, qvar q2) {
+int qvar_cmp(qvar_t q1, qvar_t q2) {
   let n1 = (*q1)[0];
   let n2 = (*q2)[0];
   switch ($(n1,n2)) {
   case $(Loc_n,    Loc_n):     break;
-  case $(Rel_n(x1),Rel_n(x2)): fallthru(x1,x2);
-  case $(Abs_n(x1),Abs_n(x2)):
+  case $(&Rel_n(x1),&Rel_n(x2)): fallthru(x1,x2);
+  case $(&Abs_n(x1),&Abs_n(x2)):
     int i = zstrlist_cmp(x1,x2);
     if (i != 0) return i;
     break;
   // we arbitrarily decide that Loc_n < Rel_n < Abs_n
   case $(Loc_n,_): return -1;
   case $(_,Loc_n): return 1;
-  case $(Rel_n(_),_): return -1;
-  case $(_,Rel_n(_)): return 1;
+  case $(&Rel_n(_),_): return -1;
+  case $(_,&Rel_n(_)): return 1;
   }
   return zstrptrcmp((*q1)[1],(*q2)[1]);
 }
 // WARNING: Ignores the kinds.
-int tvar_cmp(tvar tv1, tvar tv2) {
+int tvar_cmp(tvar_t tv1, tvar_t tv2) {
   return String::zstrptrcmp(tv1->name,tv2->name);
 }
 
 static int new_type_counter = 0;
 
-typ new_evar(kind_t k) {
-  return Evar(k,null,new_type_counter++);
+type_t new_evar(kind_t k) {
+  return new Evar(k,null,new_type_counter++);
 }
-typ wildtyp() {
+type_t wildtyp() {
   return new_evar(MemKind); 
 }
 
-tqual combine_tqual(tqual x,tqual y) { 
+tqual_t combine_tqual(tqual_t x,tqual_t y) { 
   return new Tqual(x->q_const    || y->q_const,
                    x->q_volatile || y->q_volatile,
                    x->q_restrict || y->q_restrict);
 }
 
-tqual empty_tqual() { return new Tqual(false,false,false); }
+tqual_t empty_tqual() { return new Tqual(false,false,false); }
 
-bool is_format_prim(primop p) {
+bool is_format_prim(primop_t p) {
   switch (p) {
   case Printf:  return true;
   case Fprintf: return true;
@@ -77,14 +77,16 @@ bool is_format_prim(primop p) {
 
 //////////////////////////// Constraints /////////////////////////
 conref_t<`a> new_conref(`a x) {
-  return new Conref{.v = Eq_constr(x)};
+  return new Conref{.v = new Eq_constr(x)};
 }
 conref_t<`a> empty_conref() {
   return new Conref{.v = No_constr};
 }
 // just to avoid some unnecessary allocation:
-struct Conref<bool> true_conref_v  = Conref(Eq_constr(true));
-struct Conref<bool> false_conref_v = Conref(Eq_constr(false));
+static tunion Constraint.Eq_constr<bool> true_constraint = Eq_constr(true);
+static tunion Constraint.Eq_constr<bool> false_constraint = Eq_constr(false);
+struct Conref<bool> true_conref_v  = Conref(&true_constraint);
+struct Conref<bool> false_conref_v = Conref(&false_constraint);
 conref_t<bool> true_conref  = &true_conref_v;
 conref_t<bool> false_conref = &false_conref_v;
 
@@ -92,8 +94,8 @@ conref_t<bool> false_conref = &false_conref_v;
 conref_t<`a> compress_conref(conref_t<`a> x) {
   switch (x->v) {
   case No_constr:    return x;
-  case Eq_constr(_): return x;
-  case Forward_constr(*y):
+  case &Eq_constr(_): return x;
+  case &Forward_constr(*y):
     let z = compress_conref(*y);
     *y = z;
     return z;
@@ -102,7 +104,7 @@ conref_t<`a> compress_conref(conref_t<`a> x) {
 
 `a conref_val(conref_t<`a> x) {
   switch (compress_conref(x)->v) {
-  case Eq_constr(v): return v;
+  case &Eq_constr(v): return v;
   default:
     return Tcutil::impos("conref_val");
   }
@@ -110,65 +112,78 @@ conref_t<`a> compress_conref(conref_t<`a> x) {
 
 //////////////////////////// Types ///////////////////////////////
 // unsigned types
-typ uchar_t  = IntType(Unsigned,B1);
-typ ushort_t = IntType(Unsigned,B2);
-typ uint_t   = IntType(Unsigned,B4);
-typ ulong_t  = IntType(Unsigned,B8);
+static tunion Type.IntType uchar_tt  = IntType(Unsigned,B1);
+static tunion Type.IntType ushort_tt = IntType(Unsigned,B2);
+static tunion Type.IntType uint_tt   = IntType(Unsigned,B4);
+static tunion Type.IntType ulong_tt  = IntType(Unsigned,B8);
+
+type_t uchar_t  = &uchar_tt;
+type_t ushort_t = &ushort_tt;
+type_t uint_t   = &uint_tt;
+type_t ulong_t  = &ulong_tt;
 // signed types
-typ schar_t  = IntType(Signed,B1);
-typ sshort_t = IntType(Signed,B2);
-typ sint_t   = IntType(Signed,B4);
-typ slong_t  = IntType(Signed,B8);
+static tunion Type.IntType schar_tt  = IntType(Signed,B1);
+static tunion Type.IntType sshort_tt = IntType(Signed,B2);
+static tunion Type.IntType sint_tt   = IntType(Signed,B4);
+static tunion Type.IntType slong_tt  = IntType(Signed,B8);
+
+type_t schar_t  = &schar_tt;
+type_t sshort_t = &sshort_tt;
+type_t sint_t   = &sint_tt;
+type_t slong_t  = &slong_tt;
 // float, double
-typ float_t  = FloatType;
-typ double_t = DoubleType;
+type_t float_t  = FloatType;
+type_t double_t = DoubleType;
 // exceptions
 static string exn_string = "exn";
-static $(enum Nmspace,var) exn_name_v = $(Abs_n(null),&exn_string);
-qvar exn_name   = &exn_name_v;
-static struct Xenumdecl exn_xed_v  = Xenumdecl(Extern,&exn_name_v,null);
-xenumdecl               exn_xed    = &exn_xed_v;
-typ                     exn_typ    = XenumType(&exn_name_v,&exn_xed);
+static tunion Nmspace.Abs_n abs_null = Abs_n(null);
+static $(nmspace_t,var_t) exn_name_v = $((nmspace_t)&abs_null,&exn_string);
+qvar_t exn_name   = &exn_name_v;
+static struct XTuniondecl exn_xed_v  = XTuniondecl(Extern,&exn_name_v,null);
+xtuniondecl_t             exn_xed    = &exn_xed_v;
+static tunion Type.XTunionType exn_typ_tt = 
+  XTunionType(XTunionInfo(&exn_name_v,HeapRgn,&exn_xed_v));
+type_t exn_typ = &exn_typ_tt;
 // string
-static opt_t<typ> string_t_opt = null;
-typ string_typ(typ rgn) {
+static opt_t<type_t> string_t_opt = null;
+type_t string_typ(type_t rgn) {
   if (string_t_opt == null) {
-    typ t = starb_typ(uchar_t,rgn,empty_tqual(),Unknown_b);
+    type_t t = starb_typ(uchar_t,rgn,empty_tqual(),Unknown_b);
     string_t_opt = new Opt(t);
   }
   return string_t_opt->v;
 }
 // pointers
 
-typ starb_typ(typ t, typ r, tqual tq, bounds_t b) {
-  return PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r,
-				 .nullable = true_conref, .tq = tq, 
-				 .bounds = new_conref(b)});
+type_t starb_typ(type_t t, type_t r, tqual_t tq, bounds_t b) {
+  return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r,
+                                     .nullable = true_conref, .tq = tq, 
+                                     .bounds = new_conref(b)});
 }
-typ atb_typ(typ t, typ r, tqual tq, bounds_t b) {
+type_t atb_typ(type_t t, type_t r, tqual_t tq, bounds_t b) {
   return 
-    PointerType(PtrInfo {
+    new PointerType(PtrInfo {
       .elt_typ = t, .rgn_typ = r, .nullable = false_conref, .tq = tq, 
 	 .bounds = new_conref(b)});
 }
-typ star_typ(typ t, typ r, tqual tq) { 
-  return starb_typ(t, r, tq, Upper_b(signed_int_exp(1,null)));
+type_t star_typ(type_t t, type_t r, tqual_t tq) { 
+  return starb_typ(t, r, tq, new Upper_b(signed_int_exp(1,null)));
 }
-typ cstar_typ(typ t, tqual tq) { 
-  return starb_typ(t, HeapRgn, tq, Upper_b(signed_int_exp(1,null)));
+type_t cstar_typ(type_t t, tqual_t tq) { 
+  return starb_typ(t, HeapRgn, tq, new Upper_b(signed_int_exp(1,null)));
 }
-typ at_typ(typ t, typ r, tqual tq) {
-  return atb_typ(t, r, tq, Upper_b(signed_int_exp(1,null)));
+type_t at_typ(type_t t, type_t r, tqual_t tq) {
+  return atb_typ(t, r, tq, new Upper_b(signed_int_exp(1,null)));
 }
-typ tagged_typ(typ t, typ r, tqual tq) {
+type_t tagged_typ(type_t t, type_t r, tqual_t tq) {
   return 
-    PointerType(PtrInfo {
+    new PointerType(PtrInfo {
       .elt_typ = t, .rgn_typ = r, .nullable = true_conref, .tq = tq,
 	 .bounds = new_conref(Unknown_b) });
 }
 
 // FILE
-static opt_t<typ> file_t_opt = null;
+static opt_t<type_t> file_t_opt = null;
 // Maybe someday we'll allow FILE objects to live somewhere other than
 // in the heap (by making the runtime interface more flexible).  
 // If so, we'll need a rgn_t argument.
@@ -179,21 +194,21 @@ static stringptr cyc = &cyc_str;
 static string st_str = "Stdio";
 static stringptr st = &st_str;
 
-typ file_typ() {
+type_t file_typ() {
   if (file_t_opt == null) {
     // struct Cyc::Stdio::__sFILE *
     typedef_name_t file_t_name = 
-      new $(Abs_n((list_t<var>)(new List(cyc,new List(st,null)))), sf);
-    structdecl sd = new Structdecl(Abstract,new Opt(file_t_name),null,
+      new $(new Abs_n((list_t<var_t>)(new List(cyc,new List(st,null)))), sf);
+    structdecl_t sd = new Structdecl(Abstract,new Opt(file_t_name),null,
                                    null,null);
-    typ file_struct_typ = StructType(file_t_name, null, new {sd});
+    type_t file_struct_typ = new StructType(file_t_name, null, new {sd});
     file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
   }
   return file_t_opt->v;
 }
 
-static opt_t<typ> void_star_t_opt = null;
-typ void_star_typ() {
+static opt_t<type_t> void_star_t_opt = null;
+type_t void_star_typ() {
   if (void_star_t_opt == null)
     void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual()));
   return void_star_t_opt->v;
@@ -203,252 +218,264 @@ typ void_star_typ() {
 // WARNING: currently only Toc calls these, so we don't need to set
 //          the structdecl field.  Beware using them anywhere else!
 // (Probably we should require setting the third field even in Toc.)
-typ strct(var name) {
-  return StructType(new {$(Abs_n(null),name)},null,null);
+type_t strct(var_t name) {
+  return new StructType(new {$((nmspace_t)(new Abs_n(null)),name)},null,null);
 }
-typ union_typ(var name) {
-  return UnionType(new {$(Abs_n(null),name)},null,null);
+type_t union_typ(var_t name) {
+  return new UnionType(new {$((nmspace_t)(new Abs_n(null)),name)},null,null);
 }
-typ strctq(qvar name) {
-  return StructType(name,null,null);
+type_t strctq(qvar_t name) {
+  return new StructType(name,null,null);
 }
-typ unionq_typ(qvar name) {
-  return UnionType(name,null,null);
+type_t unionq_typ(qvar_t name) {
+  return new UnionType(name,null,null);
 }
 
 ///////////////////////// Expressions //////////////////////////////
-exp new_exp(raw_exp_t r, seg_t loc) {
+exp_t new_exp(raw_exp_t r, seg_t loc) {
   return new Exp{.topt=null, .r=r, .loc=loc};
 }
-exp New_exp(exp e, seg_t loc) {
-  return new_exp(New_e(e), loc);
+exp_t New_exp(exp_t e, seg_t loc) {
+  return new_exp(new New_e(e), loc);
 }
-exp copy_exp(exp e) {
+exp_t copy_exp(exp_t e) {
   return new Exp{.topt=e->topt, .r=e->r, .loc=e->loc};
 }
-exp const_exp(cnst_t c, seg_t loc) { return new_exp(Const_e(c), loc); }
-exp null_exp(seg_t loc) { return new_exp(Const_e(Null_c), loc); }
-exp int_exp(sign_t s,int i,seg_t seg) { 
-  return const_exp(Int_c(s,i),seg);
+exp_t const_exp(cnst_t c, seg_t loc) { return new_exp(new Const_e(c), loc); }
+exp_t null_exp(seg_t loc) { return new_exp(new Const_e(Null_c), loc); }
+exp_t int_exp(sign_t s,int i,seg_t seg) { 
+  return const_exp(new Int_c(s,i),seg);
 }
-exp signed_int_exp(int i,    seg_t loc) {return int_exp(Signed,i,loc);}
-exp uint_exp(unsigned int i, seg_t loc) {return int_exp(Unsigned,i,loc);}
-exp bool_exp(bool b, seg_t loc) { return signed_int_exp(b ? 1 : 0, loc); }
-exp true_exp(seg_t loc)  { return bool_exp(true, loc); }
-exp false_exp(seg_t loc) { return bool_exp(false, loc); }
-exp char_exp(char c, seg_t loc)    {return const_exp(Char_c(Unsigned,c),loc);}
-exp float_exp(string f, seg_t loc) {return const_exp(Float_c(f),loc);}
-exp string_exp(string s, seg_t loc){ return const_exp(String_c(s),loc); }
+exp_t signed_int_exp(int i,    seg_t loc) {return int_exp(Signed,i,loc);}
+exp_t uint_exp(unsigned int i, seg_t loc) {return int_exp(Unsigned,i,loc);}
+exp_t bool_exp(bool b, seg_t loc) { return signed_int_exp(b ? 1 : 0, loc); }
+exp_t true_exp(seg_t loc)  { return bool_exp(true, loc); }
+exp_t false_exp(seg_t loc) { return bool_exp(false, loc); }
+exp_t char_exp(char c, seg_t loc) {
+  return const_exp(new Char_c(Unsigned,c),loc);
+}
+exp_t float_exp(string f, seg_t loc) {return const_exp(new Float_c(f),loc);}
+exp_t string_exp(string s, seg_t loc){ return const_exp(new String_c(s),loc); }
 
 // This should only be used after type checking.
 // Right now it's only used in Toc and is the only source of Unresolved_b.
-exp var_exp(qvar q, seg_t loc) {
-  return new_exp(Var_e(q,Unresolved_b), loc);
+exp_t var_exp(qvar_t q, seg_t loc) {
+  return new_exp(new Var_e(q,Unresolved_b), loc);
 }
-exp varb_exp(qvar q, binding_t b, seg_t loc) {
-  return new_exp(Var_e(q, b), loc);
+exp_t varb_exp(qvar_t q, binding_t b, seg_t loc) {
+  return new_exp(new Var_e(q, b), loc);
 }
-exp unknownid_exp(qvar q, seg_t loc) { 
-  return new_exp(UnknownId_e(q), loc); 
+exp_t unknownid_exp(qvar_t q, seg_t loc) { 
+  return new_exp(new UnknownId_e(q), loc); 
 }
-exp primop_exp(primop p, list_t<exp> es, seg_t loc) {
-  return new_exp(Primop_e(p,es),loc);
+exp_t primop_exp(primop_t p, list_t<exp_t> es, seg_t loc) {
+  return new_exp(new Primop_e(p,es),loc);
 }
-exp prim1_exp(primop p, exp e, seg_t loc) {
+exp_t prim1_exp(primop_t p, exp_t e, seg_t loc) {
   return primop_exp(p, new List(e,null), loc);
 }
-exp prim2_exp(primop p, exp e1, exp e2, seg_t loc) {
+exp_t prim2_exp(primop_t p, exp_t e1, exp_t e2, seg_t loc) {
   return primop_exp(p, new List(e1,new List(e2,null)), loc);
 }
-exp add_exp(exp e1,exp e2,seg_t loc){return prim2_exp(Plus, e1, e2, loc);}
-exp subtract_exp(exp e1,exp e2,seg_t loc) {
+exp_t add_exp(exp_t e1,exp_t e2,seg_t loc) {
+  return prim2_exp(Plus, e1, e2, loc);
+}
+exp_t subtract_exp(exp_t e1,exp_t e2,seg_t loc) {
   return prim2_exp(Minus, e1, e2, loc);
 }
-exp times_exp(exp e1,exp e2,seg_t loc){return prim2_exp(Times, e1, e2, loc);}
-exp divide_exp(exp e1,exp e2,seg_t loc){return prim2_exp(Div, e1, e2, loc);}
-exp eq_exp(exp e1,  exp e2, seg_t loc) {return prim2_exp(Eq,  e1, e2, loc);}
-exp neq_exp(exp e1, exp e2, seg_t loc) {return prim2_exp(Neq, e1, e2, loc);}
-exp gt_exp(exp e1,  exp e2, seg_t loc) {return prim2_exp(Gt,  e1, e2, loc);}
-exp lt_exp(exp e1,  exp e2, seg_t loc) {return prim2_exp(Lt,  e1, e2, loc);}
-exp gte_exp(exp e1, exp e2, seg_t loc) {return prim2_exp(Gte, e1, e2, loc);}
-exp lte_exp(exp e1, exp e2, seg_t loc) {return prim2_exp(Lte, e1, e2, loc);}
-exp assignop_exp(exp e1, opt_t<primop> popt, exp e2, seg_t loc) {
-  return new_exp(AssignOp_e(e1,popt,e2),loc);
+exp_t times_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(Times, e1, e2, loc);}
+exp_t divide_exp(exp_t e1,exp_t e2,seg_t loc){return prim2_exp(Div, e1, e2, loc);}
+exp_t eq_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Eq,  e1, e2, loc);}
+exp_t neq_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Neq, e1, e2, loc);}
+exp_t gt_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Gt,  e1, e2, loc);}
+exp_t lt_exp(exp_t e1,  exp_t e2, seg_t loc) {return prim2_exp(Lt,  e1, e2, loc);}
+exp_t gte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Gte, e1, e2, loc);}
+exp_t lte_exp(exp_t e1, exp_t e2, seg_t loc) {return prim2_exp(Lte, e1, e2, loc);}
+exp_t assignop_exp(exp_t e1, opt_t<primop_t> popt, exp_t e2, seg_t loc) {
+  return new_exp(new AssignOp_e(e1,popt,e2),loc);
 }
-exp assign_exp(exp e1, exp e2, seg_t loc) {
+exp_t assign_exp(exp_t e1, exp_t e2, seg_t loc) {
   return assignop_exp(e1,null,e2,loc);
 }
-exp increment_exp(exp e,incrementor_t i,seg_t loc) {
-  return new_exp(Increment_e(e,i),loc);
+exp_t increment_exp(exp_t e,incrementor_t i,seg_t loc) {
+  return new_exp(new Increment_e(e,i),loc);
 }
-exp post_inc_exp(exp e,seg_t loc){return increment_exp(e,PostInc,loc);}
-exp pre_inc_exp(exp e, seg_t loc){return increment_exp(e,PreInc,loc);}
-exp pre_dec_exp(exp e, seg_t loc){return increment_exp(e,PreDec,loc);}
-exp post_dec_exp(exp e,seg_t loc){return increment_exp(e,PostDec,loc);}
-exp conditional_exp(exp e1,exp e2,exp e3,seg_t loc) {
-  return new_exp(Conditional_e(e1,e2,e3), loc);
+exp_t post_inc_exp(exp_t e,seg_t loc){return increment_exp(e,PostInc,loc);}
+exp_t pre_inc_exp(exp_t e, seg_t loc){return increment_exp(e,PreInc,loc);}
+exp_t pre_dec_exp(exp_t e, seg_t loc){return increment_exp(e,PreDec,loc);}
+exp_t post_dec_exp(exp_t e,seg_t loc){return increment_exp(e,PostDec,loc);}
+exp_t conditional_exp(exp_t e1,exp_t e2,exp_t e3,seg_t loc) {
+  return new_exp(new Conditional_e(e1,e2,e3), loc);
 }
-exp and_exp(exp e1, exp e2, seg_t loc) {
+exp_t and_exp(exp_t e1, exp_t e2, seg_t loc) {
   return conditional_exp(e1,e2,false_exp(loc), loc);
 }
-exp or_exp(exp e1, exp e2, seg_t loc) {
+exp_t or_exp(exp_t e1, exp_t e2, seg_t loc) {
   return conditional_exp(e1,true_exp(loc),e2, loc);
 }
-exp seq_exp(exp e1, exp e2, seg_t loc) {
-  return new_exp(SeqExp_e(e1,e2), loc);
+exp_t seq_exp(exp_t e1, exp_t e2, seg_t loc) {
+  return new_exp(new SeqExp_e(e1,e2), loc);
 }
-exp unknowncall_exp(exp e, list_t<exp> es, seg_t loc) {
-  return new_exp(UnknownCall_e(e,es), loc);
+exp_t unknowncall_exp(exp_t e, list_t<exp_t> es, seg_t loc) {
+  return new_exp(new UnknownCall_e(e,es), loc);
 }
-exp fncall_exp(exp e, list_t<exp> es, seg_t loc) {
-  return new_exp(FnCall_e(e,es), loc);
+exp_t fncall_exp(exp_t e, list_t<exp_t> es, seg_t loc) {
+  return new_exp(new FnCall_e(e,es), loc);
 }
-exp noinstantiate_exp(exp e, seg_t loc) {
-  return new_exp(NoInstantiate_e(e), loc);
+exp_t noinstantiate_exp(exp_t e, seg_t loc) {
+  return new_exp(new NoInstantiate_e(e), loc);
 }
-exp instantiate_exp(exp e, list_t<typ> ts, seg_t loc) {
-  return new_exp(Instantiate_e(e,ts), loc);
+exp_t instantiate_exp(exp_t e, list_t<type_t> ts, seg_t loc) {
+  return new_exp(new Instantiate_e(e,ts), loc);
 }
-exp cast_exp(typ t, exp e, seg_t loc) { 
-  return new_exp(Cast_e(t,e), loc);
+exp_t cast_exp(type_t t, exp_t e, seg_t loc) { 
+  return new_exp(new Cast_e(t,e), loc);
 }
-exp throw_exp(exp e,   seg_t loc) { return new_exp(Throw_e(e), loc); }
-exp address_exp(exp e, seg_t loc) { return new_exp(Address_e(e), loc); }
-exp sizeoftyp_exp(typ t, seg_t loc) { return new_exp(Sizeoftyp_e(t), loc); }
-exp sizeofexp_exp(exp e, seg_t loc) { return new_exp(Sizeofexp_e(e), loc); }
-exp deref_exp(exp e,   seg_t loc) { return new_exp(Deref_e(e), loc); }
-exp structmember_exp(exp e, field_name n, seg_t loc) {
-  return new_exp(StructMember_e(e,n), loc); 
+exp_t throw_exp(exp_t e,   seg_t loc) { return new_exp(new Throw_e(e), loc); }
+exp_t address_exp(exp_t e, seg_t loc) { return new_exp(new Address_e(e), loc); }
+exp_t sizeoftyp_exp(type_t t, seg_t loc) { 
+  return new_exp(new Sizeoftyp_e(t), loc); 
 }
-exp structarrow_exp(exp e, field_name n, seg_t loc) {
-  return new_exp(StructArrow_e(e,n), loc); 
+exp_t sizeofexp_exp(exp_t e, seg_t loc) { 
+  return new_exp(new Sizeofexp_e(e), loc); 
 }
-exp arrow_exp(exp e, field_name n, seg_t loc) {
+exp_t deref_exp(exp_t e,   seg_t loc) { return new_exp(new Deref_e(e), loc); }
+exp_t structmember_exp(exp_t e, field_name_t n, seg_t loc) {
+  return new_exp(new StructMember_e(e,n), loc); 
+}
+exp_t structarrow_exp(exp_t e, field_name_t n, seg_t loc) {
+  return new_exp(new StructArrow_e(e,n), loc); 
+}
+exp_t arrow_exp(exp_t e, field_name_t n, seg_t loc) {
   return deref_exp(structmember_exp(e, n, loc), loc);
 }
-exp subscript_exp(exp e1, exp e2, seg_t loc) {
-  return new_exp(Subscript_e(e1,e2), loc); 
+exp_t subscript_exp(exp_t e1, exp_t e2, seg_t loc) {
+  return new_exp(new Subscript_e(e1,e2), loc); 
 }
-exp tuple_exp(list_t<exp> es, seg_t loc) {
-  return new_exp(Tuple_e(es), loc); 
+exp_t tuple_exp(list_t<exp_t> es, seg_t loc) {
+  return new_exp(new Tuple_e(es), loc); 
 }
-exp stmt_exp(stmt s,seg_t loc) { return new_exp(StmtExp_e(s), loc); }
+exp_t stmt_exp(stmt_t s,seg_t loc) { return new_exp(new StmtExp_e(s), loc); }
 
 static string ne_str = "Null_Exception";
 static stringptr ne = &ne_str;
-exp null_pointer_exn_exp(seg_t loc) { 
-  return var_exp(new $(Abs_n(null),ne), loc); 
+exp_t null_pointer_exn_exp(seg_t loc) { 
+  return var_exp(new $(new Abs_n(null),ne), loc); 
 }
-exp array_exp(list_t<exp> es, seg_t loc) {
+exp_t array_exp(list_t<exp_t> es, seg_t loc) {
   let dles = null;
   for (; es != null; es = es->tl)
     dles = new List(new $(null,es->hd),dles);
   dles = List::imp_rev(dles);
-  return new_exp(Array_e(dles),loc);
+  return new_exp(new Array_e(dles),loc);
 }
-exp unresolvedmem_exp(opt_t<typedef_name_t> n,
-                      list_t<$(list_t<designator>,exp)@> dles,seg_t loc) {
-  return new_exp(UnresolvedMem_e(n,dles),loc);
+exp_t unresolvedmem_exp(opt_t<typedef_name_t> n,
+                      list_t<$(list_t<designator_t>,exp_t)@> dles,seg_t loc) {
+  return new_exp(new UnresolvedMem_e(n,dles),loc);
 }
 ///////////////////////// Statements ///////////////////////////////
-stmt new_stmt(raw_stmt_t s, seg_t loc) { 
+stmt_t new_stmt(raw_stmt_t s, seg_t loc) { 
   return new Stmt{.r=s, .loc=loc, .non_local_preds=null, .try_depth = 0,
-                     .annot=EmptyAnnot }; }
-stmt skip_stmt(seg_t loc) { return new_stmt(Skip_s, loc); }
-stmt exp_stmt(exp e,seg_t loc) { return new_stmt(Exp_s(e),loc); }
-stmt seq_stmts(list_t<stmt> ss, seg_t loc) {
+                     .annot=new EmptyAnnot }; }
+stmt_t skip_stmt(seg_t loc) { return new_stmt(Skip_s, loc); }
+stmt_t exp_stmt(exp_t e,seg_t loc) { return new_stmt(new Exp_s(e),loc); }
+stmt_t seq_stmts(list_t<stmt_t> ss, seg_t loc) {
   if (ss == null) return skip_stmt(loc);
   else if (ss->tl == null) return ss->hd;
   else return seq_stmt(ss->hd,seq_stmts(ss->tl,loc),loc);
 }
-stmt return_stmt(exp_opt_t e,seg_t loc) { 
-  return new_stmt(Return_s(e),loc); 
+stmt_t return_stmt(exp_opt_t e,seg_t loc) { 
+  return new_stmt(new Return_s(e),loc); 
 }
-stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,seg_t loc) {
-  return new_stmt(IfThenElse_s(e,s1,s2),loc);
+stmt_t ifthenelse_stmt(exp_t e,stmt_t s1,stmt_t s2,seg_t loc) {
+  return new_stmt(new IfThenElse_s(e,s1,s2),loc);
 }
-stmt while_stmt(exp e,stmt s,seg_t loc) { 
-  return new_stmt(While_s($(e,skip_stmt(e->loc)),s), loc);
+stmt_t while_stmt(exp_t e,stmt_t s,seg_t loc) { 
+  return new_stmt(new While_s($(e,skip_stmt(e->loc)),s), loc);
 }
-stmt break_stmt   (seg_t loc) { return new_stmt(Break_s(null), loc); }
-stmt continue_stmt(seg_t loc) { return new_stmt(Continue_s(null), loc); }
-stmt for_stmt(exp e1,exp e2,exp e3,stmt s,seg_t loc) {
-  return new_stmt(For_s(e1,$(e2,skip_stmt(e3->loc)),$(e3,skip_stmt(e3->loc)),s),
+stmt_t break_stmt   (seg_t loc) { return new_stmt(new Break_s(null), loc); }
+stmt_t continue_stmt(seg_t loc) { return new_stmt(new Continue_s(null), loc); }
+stmt_t for_stmt(exp_t e1,exp_t e2,exp_t e3,stmt_t s,seg_t loc) {
+  return new_stmt(new For_s(e1,$(e2,skip_stmt(e3->loc)),
+                            $(e3,skip_stmt(e3->loc)),s),
 		  loc);
 }
-stmt switch_stmt(exp e, list_t<switch_clause> scs, seg_t loc) {
-  return new_stmt(Switch_s(e,scs), loc);
+stmt_t switch_stmt(exp_t e, list_t<switch_clause_t> scs, seg_t loc) {
+  return new_stmt(new Switch_s(e,scs), loc);
 }
-stmt seq_stmt(stmt s1, stmt s2, seg_t loc) { 
+stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc) { 
   switch (s1->r) {
   case Skip_s: return s2;
-  default:     return new_stmt(Seq_s(s1,s2), loc); 
+  default:     return new_stmt(new Seq_s(s1,s2), loc); 
   }
 }
-stmt fallthru_stmt(list_t<exp> el, seg_t loc) { 
-  return new_stmt(Fallthru_s(el,null), loc); 
+stmt_t fallthru_stmt(list_t<exp_t> el, seg_t loc) { 
+  return new_stmt(new Fallthru_s(el,null), loc); 
 }
-stmt decl_stmt(decl d, stmt s, seg_t loc) {
-  return new_stmt(Decl_s(d,s), loc);
+stmt_t decl_stmt(decl_t d, stmt_t s, seg_t loc) {
+  return new_stmt(new Decl_s(d,s), loc);
 }
-stmt declare_stmt(qvar x, typ t, exp_opt_t init, stmt s, seg_t loc) {
-  decl d = new_decl(Var_d(new_vardecl(x,t,init)),loc);
-  return new_stmt(Decl_s(d,s),loc);
+stmt_t declare_stmt(qvar_t x, type_t t, exp_opt_t init, stmt_t s, seg_t loc) {
+  decl_t d = new_decl(new Var_d(new_vardecl(x,t,init)),loc);
+  return new_stmt(new Decl_s(d,s),loc);
 }
-stmt cut_stmt   (stmt s, seg_t loc) { return new_stmt(Cut_s(s),    loc); }
-stmt splice_stmt(stmt s, seg_t loc) { return new_stmt(Splice_s(s), loc); }
-stmt label_stmt(var v, stmt s, seg_t loc) {
-  return new_stmt(Label_s(v,s), loc);
+stmt_t cut_stmt   (stmt_t s, seg_t loc) { return new_stmt(new Cut_s(s),    loc); }
+stmt_t splice_stmt(stmt_t s, seg_t loc) { return new_stmt(new Splice_s(s), loc); }
+stmt_t label_stmt(var_t v, stmt_t s, seg_t loc) {
+  return new_stmt(new Label_s(v,s), loc);
 }
-stmt do_stmt(stmt s, exp e, seg_t loc) {
-  return new_stmt(Do_s(s,$(e,skip_stmt(e->loc))), loc);
+stmt_t do_stmt(stmt_t s, exp_t e, seg_t loc) {
+  return new_stmt(new Do_s(s,$(e,skip_stmt(e->loc))), loc);
 }
-stmt trycatch_stmt(stmt s, list_t<switch_clause> scs, seg_t loc) {
-  return new_stmt(TryCatch_s(s,scs), loc);
+stmt_t trycatch_stmt(stmt_t s, list_t<switch_clause_t> scs, seg_t loc) {
+  return new_stmt(new TryCatch_s(s,scs), loc);
 }
-stmt goto_stmt(var lab, seg_t loc) {
-  return new_stmt(Goto_s(lab,null), loc);
+stmt_t goto_stmt(var_t lab, seg_t loc) {
+  return new_stmt(new Goto_s(lab,null), loc);
 }
-stmt assign_stmt(exp e1, exp e2, seg_t loc) {
+stmt_t assign_stmt(exp_t e1, exp_t e2, seg_t loc) {
   return exp_stmt(assign_exp(e1,e2,loc),loc);
 }
 /////////////////////////// Patterns //////////////////////////////
-pat new_pat(raw_pat_t p, seg_t s) { return new Pat(p,null,s); }
+pat_t new_pat(raw_pat_t p, seg_t s) { return new Pat(p,null,s); }
 
 ////////////////////////// Declarations ///////////////////////////
-decl new_decl(raw_decl r, seg_t loc) { return new Decl{.r=r, .loc=loc}; }
-decl let_decl(pat p, opt_t<typ> t_opt, exp e, seg_t loc) {
-  return new_decl(Let_d(p,null,t_opt,e,false),loc);
+decl_t new_decl(raw_decl_t r, seg_t loc) { return new Decl{.r=r, .loc=loc}; }
+decl_t let_decl(pat_t p, opt_t<type_t> t_opt, exp_t e, seg_t loc) {
+  return new_decl(new Let_d(p,null,t_opt,e,false),loc);
 }
-vardecl new_vardecl(qvar x, typ t, exp_opt_t init) {
+vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
                         .type=t, .initializer=init, .shadow=0, .region=null, 
                         .attributes=null};
 }
-vardecl static_vardecl(qvar x, typ t, exp_opt_t init) {
+vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
                         .type=t, .initializer=init, .shadow=0, .region=null,
                         .attributes=null};
 }
-decl struct_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
-		 opt_t<list_t<structfield_t>> fs, attributes_t atts,
-                 seg_t loc) {
-  return new_decl(Struct_d(new Structdecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
-                                              .attributes = atts}),loc);
+decl_t struct_decl(scope_t s,opt_t<typedef_name_t> n,list_t<tvar_t> ts,
+                   opt_t<list_t<structfield_t>> fs, attributes_t atts,
+                   seg_t loc) {
+  return new_decl(new Struct_d(new Structdecl {.sc=s,.name=n,
+                                                  .tvs=ts,.fields=fs,
+                                                  .attributes = atts}),loc);
 }
-decl union_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
-                opt_t<list_t<structfield_t>> fs, attributes_t atts,
-                seg_t loc) {
-  return new_decl(Union_d(new Uniondecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
-                                            .attributes = atts}),loc);
+decl_t union_decl(scope_t s,opt_t<typedef_name_t> n,list_t<tvar_t> ts,
+                  opt_t<list_t<structfield_t>> fs, attributes_t atts,
+                  seg_t loc) {
+  return new_decl(new Union_d(new Uniondecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
+                                                .attributes = atts}),loc);
 }
-decl enum_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
-	       opt_t<list_t<enumfield>> fs,seg_t loc) {
-  return new_decl(Enum_d(new Enumdecl{.sc=s, .name=n, 
-                                         .tvs=ts, .fields=fs}),loc);
+decl_t tunion_decl(scope_t s,opt_t<typedef_name_t> n,list_t<tvar_t> ts,
+                   opt_t<list_t<tunionfield_t>> fs,seg_t loc) {
+  return new_decl(new Tunion_d(new Tuniondecl{.sc=s, .name=n, 
+                                                 .tvs=ts, .fields=fs}),loc);
 }
-decl xenum_decl(scope s,typedef_name_t n,list_t<enumfield> fs,seg_t loc) {
- return new_decl(Xenum_d(new Xenumdecl{.sc=s, .name=n, .fields=fs}),loc);
+decl_t xtunion_decl(scope_t s,typedef_name_t n,list_t<tunionfield_t> fs,
+                    seg_t loc){
+ return new_decl(new XTunion_d(new XTuniondecl{.sc=s, .name=n, 
+                                                  .fields=fs}),loc);
 }
 
 // We treat function types in argument or return position as an
@@ -458,21 +485,22 @@ decl xenum_decl(scope s,typedef_name_t n,list_t<enumfield> fs,seg_t loc) {
 //   int (@f(void (@g)()))(float)
 // We do this by constructing every function type using function_typ,
 // rather than mucking with the typechecker/unifier/etc.
-static $(opt_t<var>,tqual,typ)@ expand_arg($(opt_t<var>,tqual,typ)@ a) {
+static $(opt_t<var_t>,tqual_t,type_t)@ expand_arg($(opt_t<var_t>,tqual_t,type_t)@ a) {
   return new $((*a)[0],(*a)[1],pointer_expand((*a)[2]));
 }
 
-typ function_typ(list_t<tvar> tvs, opt_t<typ> eff_typ, typ ret_typ, 
-                 list_t<$(opt_t<var>,tqual,typ)@> args, bool varargs,
+type_t function_typ(list_t<tvar_t> tvs, opt_t<type_t> eff_typ, type_t ret_typ, 
+                 list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool varargs,
                  attributes_t atts) {
-  return FnType(FnInfo{.tvars = tvs, .ret_typ = pointer_expand(ret_typ),
-                       .effect = eff_typ, .args = List::map(expand_arg,args), 
-                       .varargs = varargs, .attributes=atts});
+  return new FnType(FnInfo{.tvars = tvs, .ret_typ = pointer_expand(ret_typ),
+                              .effect = eff_typ, 
+                              .args = List::map(expand_arg,args), 
+                              .varargs = varargs, .attributes=atts});
 }
-typ pointer_expand(typ t) {
+type_t pointer_expand(type_t t) {
   //  switch (compress(t)) {
   switch (t) {
-  case FnType(_): return at_typ(t,HeapRgn,empty_tqual());
+  case &FnType(_): return at_typ(t,HeapRgn,empty_tqual());
 // Disabled for now because it is incompatible with C
 //  case ArrayType*(_,_,ak): 
 //    return
@@ -497,28 +525,28 @@ typ pointer_expand(typ t) {
 // (We may have more in Cyclone...)
 
 // must be called after the expression is type-checked.
-bool is_lvalue(exp e) {
+bool is_lvalue(exp_t e) {
   switch (e->r) {
     // shouldn't allow assignment to function names or arrays
-  case Var_e(_,Funname_b(_)): return false;
-  case Var_e(_,Global_b(vd)): fallthru(vd);
-  case Var_e(_,Local_b(vd)):
+  case &Var_e(_,&Funname_b(_)): return false;
+  case &Var_e(_,&Global_b(vd)): fallthru(vd);
+  case &Var_e(_,&Local_b(vd)):
     switch (Tcutil::compress(vd->type)) {
-    case ArrayType(_,_,_): return false;
+    case &ArrayType(_,_,_): return false;
     default: return true; 
     }
-  case Var_e(_,_): return true;
-  case Subscript_e(e1,e2):    return true;
-  case StructMember_e(e1,f):  return is_lvalue(e1);
-  case StructArrow_e(e1,f):   return true;
-  case Deref_e(e1):           return true;
-    //  case Instantiate(e1,_): return is_lvalue(e1);
-    //  case NoInstantiate(e1): return is_lvalue(e1);
+  case &Var_e(_,_): return true;
+  case &Subscript_e(e1,e2):    return true;
+  case &StructMember_e(e1,f):  return is_lvalue(e1);
+  case &StructArrow_e(e1,f):   return true;
+  case &Deref_e(e1):           return true;
+    //  case &Instantiate(e1,_): return is_lvalue(e1);
+    //  case &NoInstantiate(e1): return is_lvalue(e1);
   default:                    return false;
   }
 }
 
-struct Structfield * lookup_field(opt_t<list_t<structfield_t>> fields, var v) {
+struct Structfield * lookup_field(opt_t<list_t<structfield_t>> fields, var_t v) {
   if (fields == null) 
     return null;
   for(_ fs = fields->v; fs != null; fs = fs->tl) {
@@ -529,14 +557,14 @@ struct Structfield * lookup_field(opt_t<list_t<structfield_t>> fields, var v) {
   return null;
 }
 
-struct Structfield * lookup_struct_field(structdecl sd, var v) {
+struct Structfield * lookup_struct_field(structdecl_t sd, var_t v) {
   return lookup_field(sd->fields,v);
 }
-struct Structfield * lookup_union_field(uniondecl_t ud, var v) {
+struct Structfield * lookup_union_field(uniondecl_t ud, var_t v) {
   return lookup_field(ud->fields,v);
 }
 
-$(tqual,typ) * lookup_tuple_field(list_t<$(tqual,typ)@> ts, int i) {
+$(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@> ts, int i) {
   for(; i != 0; --i) {
     if(ts == null)
       return null;
@@ -549,16 +577,16 @@ $(tqual,typ) * lookup_tuple_field(list_t<$(tqual,typ)@> ts, int i) {
 
 string attribute2string(attribute_t a) {
   switch (a) {
-  case Regparm_att(i): return xprintf("regparm(%d)",i);
+  case &Regparm_att(i): return xprintf("regparm(%d)",i);
   case Stdcall_att: return "stdcall";
   case Cdecl_att: return "cdecl";
   case Noreturn_att: return "noreturn";
   case Const_att: return "const";
-  case Aligned_att(i): 
+  case &Aligned_att(i): 
     if (i == -1) return "aligned";
     else return xprintf("aligned(%d)",i);
   case Packed_att: return "packed";
-  case Section_att(s): return xprintf("section(\"%s\")",s);
+  case &Section_att(s): return xprintf("section(\"%s\")",s);
   case Nocommon_att: return "nocommon";
   case Shared_att: return "shared";
   case Unused_att: return "unused";

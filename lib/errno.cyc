@@ -7,7 +7,7 @@ namespace Errno {
 
   char ?sys_err(int i) {
     if (i < 0 || i > Errno::_sys_nerr)
-      throw InvalidArg("sys_err: integer argument out of range");
+      throw new InvalidArg("sys_err: integer argument out of range");
     return Cstring_to_string(Errno::_sys_errlist[i]);
   }
 }

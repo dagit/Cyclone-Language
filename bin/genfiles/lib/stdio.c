@@ -108,12 +108,15 @@ m));} int Cyc_Stdio_putw( int i, struct Cyc_Stdio___sFILE* f){ return putw( i, f
 char Cyc_Stdio_FileOpenError_tag[ 14u]="FileOpenError"; char Cyc_Stdio_FileCloseError_tag[
 15u]="FileCloseError"; struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open( struct
 _tagged_string fname, struct _tagged_string mode){ struct Cyc_Stdio___sFILE* f=
-Cyc_Stdio_fopen( fname, mode); if( f == 0){( void) _throw(({ struct Cyc_Stdio_FileOpenError_struct*
-_temp1=( struct Cyc_Stdio_FileOpenError_struct*) GC_malloc( sizeof( struct Cyc_Stdio_FileOpenError_struct));
-_temp1->tag= Cyc_Stdio_FileOpenError_tag; _temp1->f1= fname;( struct
-_xenum_struct*) _temp1;}));} return( struct Cyc_Stdio___sFILE*)({ struct Cyc_Stdio___sFILE*
-_temp2= f; if( _temp2 == 0){ _throw( Null_Exception);} _temp2;});} void Cyc_Stdio_file_close(
-struct Cyc_Stdio___sFILE* f){ if( Cyc_Stdio_fclose(( struct Cyc_Stdio___sFILE*)
-f) != 0){( void) _throw(({ struct Cyc_Stdio_FileCloseError_struct* _temp3=(
-struct Cyc_Stdio_FileCloseError_struct*) GC_malloc_atomic( sizeof( struct Cyc_Stdio_FileCloseError_struct));
-_temp3->tag= Cyc_Stdio_FileCloseError_tag;( struct _xenum_struct*) _temp3;}));}}
+Cyc_Stdio_fopen( fname, mode); if( f == 0){( void) _throw(( struct
+_xtunion_struct*)({ struct Cyc_Stdio_FileOpenError_struct* _temp1=( struct Cyc_Stdio_FileOpenError_struct*)
+GC_malloc( sizeof( struct Cyc_Stdio_FileOpenError_struct)); _temp1[ 0]=({ struct
+Cyc_Stdio_FileOpenError_struct _temp2; _temp2.tag= Cyc_Stdio_FileOpenError_tag;
+_temp2.f1= fname; _temp2;}); _temp1;}));} return( struct Cyc_Stdio___sFILE*)({
+struct Cyc_Stdio___sFILE* _temp3= f; if( _temp3 == 0){ _throw( Null_Exception);}
+_temp3;});} void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE* f){ if( Cyc_Stdio_fclose((
+struct Cyc_Stdio___sFILE*) f) != 0){( void) _throw(( struct _xtunion_struct*)({
+struct Cyc_Stdio_FileCloseError_struct* _temp4=( struct Cyc_Stdio_FileCloseError_struct*)
+GC_malloc( sizeof( struct Cyc_Stdio_FileCloseError_struct)); _temp4[ 0]=({
+struct Cyc_Stdio_FileCloseError_struct _temp5; _temp5.tag= Cyc_Stdio_FileCloseError_tag;
+_temp5;}); _temp4;}));}}

@@ -151,7 +151,7 @@ parse_conversionspecification(string s, int i) {
   return new Opt(new $(flags,width,precision,lenmod,c,i+1));
 }
 
-list_t<typ> get_format_typs(string s,seg_t loc) {
+list_t<type_t> get_format_typs(string s,seg_t loc) {
   // FIX: on error we return null.  This will probably lead to
   // cascading errors (e.g., too many arguments to printf).
   let len = String::strlen(s);
@@ -183,7 +183,7 @@ list_t<typ> get_format_typs(string s,seg_t loc) {
       typs = new List(sint_t,typs); break;
     default: break;
     }
-    typ t;
+    type_t t;
     switch (c) {
     case 'd': fallthru;
     case 'i':
@@ -452,7 +452,7 @@ parse_inputformat(string s, int i) {
   }
   return new Opt(new $(suppress,width,lenmod,c,i+1));
 }
-list_t<typ> get_scanf_typs(string s,seg_t loc) {
+list_t<type_t> get_scanf_typs(string s,seg_t loc) {
   // FIX: on error we return null.  This will probably lead to
   // cascading errors (e.g., too many arguments to scanf).
   let len = String::strlen(s);
@@ -475,7 +475,7 @@ list_t<typ> get_scanf_typs(string s,seg_t loc) {
     default: break;
     }
     if (suppress) continue;
-    typ t;
+    type_t t;
     switch (c) {
     case 'd': fallthru;
     case 'i':

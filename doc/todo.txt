@@ -4,6 +4,9 @@ BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * FIX all of the FIX things.
 
+* seems to be a bug in definite assignment.  On line 490 of 
+  absynpp.cyc, delete the "s = " and the code type-checks...
+
 * are we treating void properly?
 
 * link-checking:  we need to spit out an internal interface for each
@@ -20,6 +23,9 @@ BUG FIXES and UNSOUNDNESSES:
 * there are unsoundnesses w.r.t. the way we type-check the left-hand-sides
   of certain operations (e.g., x++.)  Part of the problem is that we allow
   implicit coercion from an enum to an integral type.  
+
+* we need to do a bounds check on enum assignments.  Also, the pattern
+  matcher assumes that there are no duplicate tags for enums.
 
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
@@ -44,10 +50,10 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 
 * wide characters and strings
 
+* attributes on enums? (e.g., packed)
+
 THINGS NEEDED TO SIMPLIFY PORTING:
 ----------------------------------
-* need to add support for explicit malloc and initialization.
-
 * get rid of null, replace with 0 (requires clever overloading)
 
 * we should start on the porting tool -- use region inference to
@@ -74,13 +80,8 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 
 THINGS NEEDED TO MAKE REGIONS MORE REAL:
 ----------------------------------------
-* Need to modify enum's to support region-allocation.  
-
 * Need to add letregion, syntax for region handles, and a way to
   allocate into a region (as opposed to the heap.)
-
-* Need to add a way to explicitly name the regions corresponding
-  to declaration blocks.
 
 THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 --------------------------------------------------
@@ -106,10 +107,10 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
 
 * We should allow partial instantiations of polymorphic routines.
 
-* ought to be able to treat the arguments to an enum constructor as a tuple
+* ought to be able to treat the arguments to a tunion constructor as a tuple
   in a pattern...
 
-* qualifiers for arguments to enum/xenum constructors?  on tuples?
+* qualifiers for arguments to [x]tunion constructors?  on tuples?
 
 * cut, fill, codegen, splice
 
@@ -131,7 +132,7 @@ THINGS THAT WOULD MAKE THE COMPILER FASTER OR THE CODE BETTER:
 --------------------------------------------------------------
 * Try to avoid using so many lists in the abstract syntax --
   we should use arrays (e.g., for CompoundLit_e, Array_e,
-  Struct_e, Enum_e, Xenum_e, and UnresolvedMem_e, Switch_s, etc.)
+  Struct_e, Tunion_e, Xtunion_e, and UnresolvedMem_e, Switch_s, etc.)
 
 * We need to re-do the pattern match compilation -- we should take
   advantage of the decision tree built during type-checking.
@@ -158,6 +159,7 @@ MISCELLANEOUS
 
 * translation to C is busted with -noexpandtypedefs because we hoist
 tuples to the top (before typedef declarations)
+
 
 
 

@@ -329,12 +329,12 @@ bool equals(gset_t<`a,`r1,`e> s1, gset_t<`a,`r2,`e> s2) {
   return compare(s1,s2) == 0;
 }
     
-xenum exn {Absent};
+xtunion exn {Absent};
 
 /* Return an elt (in this case -- the first one in the set).
  * If the set is empty, throw Absent.
  */
 `a choose(gset_t<`a,`r,`e> s) {
-  if (s->nodes == null) throw Absent;
+  if (s->nodes == null) throw new Absent;
   return(s->nodes->hd);
 }

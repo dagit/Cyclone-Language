@@ -5,11 +5,11 @@ using Stdio;
 
 int c = (int)' ';
 
-xenum exn {ParseError};
+xtunion exn {ParseError};
 
 void yyerror(string s) {
   printf("error: %s\n",s);
-  throw ParseError;
+  throw new ParseError;
 }
 
 int yylex() {
@@ -22,7 +22,7 @@ int yylex() {
       i = i*10 + (c - ((int)'0'));
       c = fgetc(stdin);
     }
-    yylval = Integer(i);
+    yylval = new Integer(i);
     return INT;
   } else {
     int old_c = c;
