@@ -82,6 +82,8 @@ void output_tables(FILE @oc, Compact::lex_tables_t tbl) {
 	   // Read next input char 
 "	   c = (int) (lbuf->lex_buffer[lbuf->lex_curr_pos++]);\n"
 "	   if (c==EOF) c=256;\n"
+           // Deal with non-ascii characters
+"          else if (c < 0) c = 256 + c;\n"
 "	 }\n"
 	 // Determine next state 
 "	 if (lex_check[base+c]==state)\n"

@@ -474,21 +474,22 @@ return(- state)- 1;else{
 c=256;}}else{
 # 65
 c=(int)*((char*)_check_fat_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_curr_pos ++));
-if(c==-1)c=256;}
-# 68
+if(c==-1)c=256;else{
+if(c < 0)c=256 + c;}}
+# 69
 if(*((const int*)_check_known_subscript_notnull(Cyc_Lineno_lex_check,273U,sizeof(int),base + c))==state)
 state=Cyc_Lineno_lex_trans[base + c];else{
-# 71
+# 72
 state=Cyc_Lineno_lex_default[state];}
 if(state < 0){
 lbuf->lex_curr_pos=lbuf->lex_last_pos;
 if(lbuf->lex_last_action==-1)
 _throw((void*)({struct Cyc_Lexing_Error_exn_struct*_Tmp0=_cycalloc(sizeof(struct Cyc_Lexing_Error_exn_struct));_Tmp0->tag=Cyc_Lexing_Error,_Tmp0->f1=_tag_fat("empty token",sizeof(char),12U);_Tmp0;}));else{
-# 77
+# 78
 return lbuf->lex_last_action;}}else{
-# 80
+# 81
 if(c==256)lbuf->lex_eof_reached=0;}}}
-# 84
+# 85
 enum Cyc_Lineno_token_val Cyc_Lineno_token_rec(struct Cyc_Lexing_lexbuf*lexbuf,int lexstate){
 lexstate=Cyc_Lineno_lex_engine(lexstate,lexbuf);
 switch((int)lexstate){case 0:
