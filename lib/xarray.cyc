@@ -151,3 +151,17 @@ xarray_t<`b> map_c(`b f(`c,`a), `c env, xarray_t<`a> xarr) {
 void reuse(xarray_t<`a> xarr) {
   xarr->num_elmts = 0;
 }
+
+void delete(xarray_t<`a> xarr, int num) {
+  if (num > length(xarr))
+    throw new Invalid_argument("number deleted is greater than length of xarray");
+  xarr->num_elmts -= num;
+}
+
+void remove(xarray_t<`a> xarr, int i) {
+  if (i < 0 || i > xarr->num_elmts-1)
+    throw new Invalid_argument("xarray index out of bounds");
+  for(int j = i; j < xarr->num_elmts-2; j++)
+    xarr->elmts[j] = xarr->elmts[j+1];
+  xarr->num_elmts--;
+}

@@ -13,8 +13,6 @@ CONFIGURATION BUGS:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
-* There's a bug in subtyping or coercions.  $(int,int) can be cast to int.
-
 * For zero-terminated arrays, we do not require an initializer even
 though we should.  Also, we allow zero-terminated arrays of size 0
 though there are parts of the system that rely upon them having at

@@ -210,7 +210,7 @@ static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
   unsigned int _czs_sz = (orig_sz); \
   int _czs_i = (orig_i); \
   unsigned int _czs_temp; \
-  if ((_czs_x) == NULL) _throw_null(); \
+  if ((_czs_x) == 0) _throw_null(); \
   if (_czs_i < 0) _throw_arraybounds(); \
   for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
     if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
@@ -223,7 +223,7 @@ static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
   _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
   unsigned int _gres_offset = (orig_offset); \
   unsigned int _gres = 0; \
-  if (_gres_x != NULL) { \
+  if (_gres_x != 0) { \
      _gres = _gres_offset; \
      _gres_x += _gres_offset - 1; \
      while (*_gres_x != 0) { _gres_x++; _gres++; } \

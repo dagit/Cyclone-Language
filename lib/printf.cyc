@@ -273,7 +273,8 @@ int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env,
 	int width;		/* width from format (%8d), or 0 */
 	int prec;		/* precision from format (%.3d), or -1 */
 	char sign;		/* sign prefix (' ', '+', '-', or \0) */
-        char sign_string[2];    /* used to get around zero-terminator stuff */
+        /* used to get around zero-terminator stuff */
+        char sign_string[2] = {0,0}; 
 	int softsign = 0;	/* temporary negative sign for floats */
 	double _double;		/* double precision arguments %[eEfgG] */
 	int fpprec;		/* `extra' floating precision in [eEfgG] */
@@ -286,7 +287,7 @@ int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env,
 	   quite grok this spaghetti code ... */
 	int size = 0;		/* size of converted field or string */
         /* space for %c, %[diouxX], %[eEfgG] */
-	char buf[BUF+1]; // = {for i < BUF : '\0'};
+	char buf[BUF+1] = {for i < BUF : '\0'};
 	char ox[2] = {'\0','\0'}; /* space for 0x hex-prefix */
         base_t base;            /* base for [diouxX] conversion */
 	/*
@@ -682,7 +683,7 @@ error:
 static char ?`r1 exponent(char ?`r1 p, int exp, int fmtch)
 {
 	register char ? _ t;
-	char expbuf[MAXEXP+1]; // = {for i < MAXEXP : '0'};
+	char expbuf[MAXEXP+1] = {for i < MAXEXP : '0'};
 
 	*p++ = (char)fmtch;
 	if (exp < 0) {
