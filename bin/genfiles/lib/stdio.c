@@ -20,40 +20,45 @@ struct _tagged_arr); extern int Cyc_Stdio_rename( struct _tagged_arr, struct
 _tagged_arr); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_tmpfile(); extern
 struct _tagged_arr Cyc_Stdio_tmpnam( struct _tagged_arr); extern int Cyc_Stdio_fclose(
 struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE*);
-extern struct Cyc_Stdio___sFILE* Cyc_Stdio_freopen( struct _tagged_arr, struct
-_tagged_arr, struct Cyc_Stdio___sFILE*); extern void Cyc_Stdio_setbuf( struct
-Cyc_Stdio___sFILE*, struct _tagged_arr); extern int Cyc_Stdio_setvbuf( struct
-Cyc_Stdio___sFILE*, struct _tagged_arr, int, int); extern int Cyc_Stdio_fgetc(
-struct Cyc_Stdio___sFILE*); extern struct _tagged_arr Cyc_Stdio_fgets( struct
-_tagged_arr, int n, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fputc( int,
-struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fputs( struct _tagged_arr,
-struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_getc( struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_putc( int, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_puts(
-struct _tagged_arr); extern int Cyc_Stdio_ungetc( int, struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_fread( struct _tagged_arr, int, int, struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_fwrite( struct _tagged_arr, int, int, struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_fgetpos( struct Cyc_Stdio___sFILE*, int*); extern int Cyc_Stdio_fseek(
-struct Cyc_Stdio___sFILE*, int, int); extern int Cyc_Stdio_fsetpos( struct Cyc_Stdio___sFILE*,
-int*); extern int Cyc_Stdio_ftell( struct Cyc_Stdio___sFILE*); extern void Cyc_Stdio_rewind(
-struct Cyc_Stdio___sFILE*); extern void Cyc_Stdio_clearerr( struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_feof( struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_ferror(
-struct Cyc_Stdio___sFILE*); extern void Cyc_Stdio_perror( struct _tagged_arr);
-extern struct Cyc_Stdio___sFILE* Cyc_Stdio_fopen( struct _tagged_arr _name,
-struct _tagged_arr _type); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_fdopen(
-int, struct _tagged_arr); extern int Cyc_Stdio_fileno( struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_getw( struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_putw(
-int, struct Cyc_Stdio___sFILE*); extern void Cyc_Stdio_setbuffer( struct Cyc_Stdio___sFILE*,
-struct _tagged_arr, int); extern void Cyc_Stdio_setlinebuf( struct Cyc_Stdio___sFILE*);
-extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
-18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open( struct
-_tagged_arr fname, struct _tagged_arr mode); extern void Cyc_Stdio_file_close(
-struct Cyc_Stdio___sFILE*); static const int Cyc_Stdio_String_pa= 0; struct Cyc_Stdio_String_pa_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_Int_pa= 1; struct
-Cyc_Stdio_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Stdio_Double_pa=
-2; struct Cyc_Stdio_Double_pa_struct{ int tag; double f1; } ; static const int
-Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{ int tag; short*
-f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
+extern struct Cyc_Stdio___sFILE* Cyc_Stdio_fopen( struct _tagged_arr __filename,
+struct _tagged_arr __modes); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_freopen(
+struct _tagged_arr, struct _tagged_arr, struct Cyc_Stdio___sFILE*); extern void
+Cyc_Stdio_setbuf( struct Cyc_Stdio___sFILE* __stream, struct _tagged_arr __buf);
+extern int Cyc_Stdio_setvbuf( struct Cyc_Stdio___sFILE* __stream, struct
+_tagged_arr __buf, int __modes, int __n); extern int Cyc_Stdio_fgetc( struct Cyc_Stdio___sFILE*
+__stream); extern int Cyc_Stdio_getc( struct Cyc_Stdio___sFILE* __stream);
+extern struct _tagged_arr Cyc_Stdio_fgets( struct _tagged_arr __s, int __n,
+struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_fputc( int __c, struct
+Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_putc( int __c, struct Cyc_Stdio___sFILE*
+__stream); extern int Cyc_Stdio_fputs( struct _tagged_arr __s, struct Cyc_Stdio___sFILE*
+__stream); extern int Cyc_Stdio_puts( struct _tagged_arr __s); extern int Cyc_Stdio_ungetc(
+int __c, struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_fread( struct
+_tagged_arr __ptr, int __size, int __n, struct Cyc_Stdio___sFILE* __stream);
+extern int Cyc_Stdio_fwrite( struct _tagged_arr __ptr, int __size, int __n,
+struct Cyc_Stdio___sFILE* __s); extern int Cyc_Stdio_fseek( struct Cyc_Stdio___sFILE*
+__stream, int __off, int __whence); extern int Cyc_Stdio_ftell( struct Cyc_Stdio___sFILE*
+__stream); extern void Cyc_Stdio_rewind( struct Cyc_Stdio___sFILE* __stream);
+extern int Cyc_Stdio_fgetpos( struct Cyc_Stdio___sFILE* __stream, int* __pos);
+extern int Cyc_Stdio_fsetpos( struct Cyc_Stdio___sFILE* __stream, int* __pos);
+extern void Cyc_Stdio_clearerr( struct Cyc_Stdio___sFILE* __stream); extern int
+Cyc_Stdio_feof( struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_ferror(
+struct Cyc_Stdio___sFILE* __stream); extern void Cyc_Stdio_perror( struct
+_tagged_arr __s); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_fdopen( int __fd,
+struct _tagged_arr __modes); extern int Cyc_Stdio_fileno( struct Cyc_Stdio___sFILE*
+__stream); extern int Cyc_Stdio_getw( struct Cyc_Stdio___sFILE* __stream);
+extern int Cyc_Stdio_putw( int __w, struct Cyc_Stdio___sFILE* __stream); extern
+void Cyc_Stdio_setbuffer( struct Cyc_Stdio___sFILE* __stream, struct _tagged_arr
+__buf, int __size); extern void Cyc_Stdio_setlinebuf( struct Cyc_Stdio___sFILE*
+__stream); extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern
+unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern struct Cyc_Stdio___sFILE*
+Cyc_Stdio_file_open( struct _tagged_arr fname, struct _tagged_arr mode); extern
+void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE*); static const int Cyc_Stdio_String_pa=
+0; struct Cyc_Stdio_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Stdio_Int_pa= 1; struct Cyc_Stdio_Int_pa_struct{ int tag;
+unsigned int f1; } ; static const int Cyc_Stdio_Double_pa= 2; struct Cyc_Stdio_Double_pa_struct{
+int tag; double f1; } ; static const int Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{
+int tag; short* f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
 int tag; unsigned int* f1; } ; static const int Cyc_Stdio_ShortPtr_sa= 0; struct
 Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_Stdio_UShortPtr_sa=
 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static

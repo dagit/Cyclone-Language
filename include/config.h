@@ -3,7 +3,6 @@
 #define _CYCLONE_CONFIG_H_
 /* Add definitions here that are suitable for your platform */
 
-#define __RAND_MAX 0x7fffffff
 typedef int __int32_t;
 typedef unsigned int __uint32_t;
 

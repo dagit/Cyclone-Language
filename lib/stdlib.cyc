@@ -1,36 +1,34 @@
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2001 Greg Morrisett, AT&T
+
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
 #include <core.h>
 #include <stdlib.h>
 
 namespace Cstdlib {
   extern "C" {
-    double _EXFUN(atof,(const Cstring _nptr));
-#ifndef __STRICT_ANSI__
-/*
-    float _EXFUN(atoff,(const Cstring _nptr));
-*/
-#endif
-    int   _EXFUN(atoi,(const Cstring _nptr));
-    long  _EXFUN(atol,(const Cstring _nptr));
-    Cstring _EXFUN(getenv,(const Cstring __string));
-    //Cstring _EXFUN(_getenv_r,(struct _reent @, const Cstring __string));
-    Cstring _EXFUN(_findenv,(const Cstring, int *));
-    //Cstring _EXFUN(_findenv_r,(struct _reent *, const Cstring, int *));
-    int _EXFUN(putenv,(const Cstring __string));
-    //int	_EXFUN(_putenv_r,(struct _reent @, const Cstring __string));
-/* Commented out because it's not available in IRIX
-    int	_EXFUN(setenv,(const Cstring __string, const Cstring __value, int __overwrite));
-    int	_EXFUN(_setenv_r,(struct _reent @, const Cstring __string, const Cstring __value, int __overwrite));
-*/
-    double _EXFUN(strtod,(Cstring, Cstring *`r));
-    long _EXFUN(strtol,(Cstring, Cstring *`r, int base));
-    unsigned long _EXFUN(strtoul,(Cstring, Cstring *`r, int base));
-#ifdef __CYGWIN__
-/* Commented out because it's not available in IRIX
-    void _EXFUN(unsetenv,(const Cstring __string));
-    void _EXFUN(_unsetenv_r,(struct _reent @, const Cstring __string));
-*/
-#endif
-
+    double __cdecl atof(const Cstring);
+    int __cdecl atoi(const Cstring);
+    long __cdecl atol(const Cstring);
+    Cstring __cdecl getenv(const Cstring);
+    int __cdecl putenv(const Cstring);
+    double __cdecl strtod(Cstring, Cstring *`r);
+    long __cdecl strtol(Cstring, Cstring *`r, int);
+    unsigned long __cdecl strtoul(Cstring, Cstring *`r, int);
 #define s2c(x) (string_to_Cstring(x))
   }
 }
@@ -40,13 +38,6 @@ namespace Stdlib {
   double atof(const char ?`r _nptr) {
     return Cstdlib::atof(s2c(_nptr));
   }
-#ifndef __STRICT_ANSI__
-/*
-  float atoff(string _nptr) {
-    return Cstdlib::atoff(s2c(_nptr));
-  }
-*/
-#endif
   int atoi(const char ?`r _nptr) {
     return Cstdlib::atoi(s2c(_nptr));
   }
@@ -56,39 +47,13 @@ namespace Stdlib {
   mstring_t getenv(string_t name) {
     return Cstring_to_string(Cstdlib::getenv(s2c(name)));
   }
-  /*
-  string _getenv_r(struct _reent @r, string name) {
-    return Cstring_to_string(Cstdlib::_getenv_r(r,s2c(name)));
-  }
-  string _findenv(string n, int *i) {
-    return Cstring_to_string(Cstdlib::_findenv(s2c(n),i));
-  }
-  string _findenv_r(struct _reent @r, string n, int *i) {
-    return Cstring_to_string(Cstdlib::_findenv_r(r,s2c(n),i));
-  }
-  */
   int putenv(string_t s) {
     return Cstdlib::putenv(s2c(s));
   }
-  /*
-  int _putenv_r(struct _reent @r, string s) {
-    return Cstdlib::_putenv_r(r,s2c(s));
-  }
-   */
-/* Commented out because it's not available in IRIX
-  int setenv(string_t s, string_t v, int overwrite) {
-    return Cstdlib::setenv(s2c(s),s2c(v),overwrite);
-  }
-*/
-  /*
-  int _setenv_r(struct _reent @r, string s, string v, int overwrite) {
-    return Cstdlib::_setenv_r(r,s2c(s),s2c(v),overwrite);
-  }
-  */
   static void check_valid_cstring(const char ?`r s) {
     if (s == NULL) throw new InvalidArg("strtox NULL pointer");
     bool found_zero = false;
-    for (int i = s.size - 1; i >= 0; i--) 
+    for (int i = s.size - 1; i >= 0; i--)
       if (s[i] == '\0') { found_zero = true; break; }
     if (!found_zero) throw new InvalidArg("strtox: not a C string");
   }
@@ -99,9 +64,9 @@ namespace Stdlib {
     check_valid_cstring(nptr);
     // FIX:  TOTAL HACK ALERT
     Cstring c = underlying_Cstring(nptr); // so far so good
-    Cstring e = (endptr == NULL) ? NULL : c; 
-    double d = Cstdlib::strtod(c, &e); 
-    if (endptr != NULL) { 
+    Cstring e = (endptr == NULL) ? NULL : c;
+    double d = Cstdlib::strtod(c, &e);
+    if (endptr != NULL) {
       // need to adjust the endptr -- the best we can do is calculate
       // the diff between e and c.  And our pointer arithmetic doesn't
       // support subtraction on * types.  So I'm casting to unsigned int.
@@ -117,9 +82,9 @@ namespace Stdlib {
     check_valid_cstring(n);
     // FIX:  TOTAL HACK ALERT
     Cstring c = underlying_Cstring(n); // so far so good
-    Cstring e = (endptr == NULL) ? NULL : c; 
-    long r = Cstdlib::strtol(c, &e, base); 
-    if (endptr != NULL) { 
+    Cstring e = (endptr == NULL) ? NULL : c;
+    long r = Cstdlib::strtol(c, &e, base);
+    if (endptr != NULL) {
       // need to adjust the end -- the best we can do is calculate
       // the diff between e and c.  And our pointer arithmetic doesn't
       // support subtraction on * types.  So I'm casting to unsigned int.
@@ -135,9 +100,9 @@ namespace Stdlib {
     check_valid_cstring(n);
     // FIX:  TOTAL HACK ALERT
     Cstring c = underlying_Cstring(n); // so far so good
-    Cstring e = (endptr == NULL) ? NULL : c; 
-    unsigned long r = Cstdlib::strtoul(c, &e, base); 
-    if (endptr != NULL) { 
+    Cstring e = (endptr == NULL) ? NULL : c;
+    unsigned long r = Cstdlib::strtoul(c, &e, base);
+    if (endptr != NULL) {
       // need to adjust the end -- the best we can do is calculate
       // the diff between e and c.  And our pointer arithmetic doesn't
       // support subtraction on * types.  So I'm casting to unsigned int.
@@ -147,14 +112,4 @@ namespace Stdlib {
     return r;
   }
 
-#ifdef __CYGWIN__
-/* Commented out because it's not available in IRIX
-  void unsetenv(string_t s) {
-    Cstdlib::unsetenv(s2c(s));
-  }
-  void _unsetenv_r(struct _reent @r, string s) {
-    Cstdlib::_unsetenv_r(r,s2c(s));
-  }
-*/
-#endif
 }

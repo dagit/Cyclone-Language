@@ -128,7 +128,6 @@ CYCLONE_H:=arg.h\
 	sys/mman.h\
 	sys/reent.h\
 	sys/resource.h\
-	sys/signal.h\
 	sys/stat.h\
 	sys/types.h\
 	sys/wait.h\

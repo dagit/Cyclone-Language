@@ -42,8 +42,8 @@ errmsg, struct _tagged_arr args); struct Cyc_Stdio___sFILE; extern struct Cyc_St
 Cyc_Stdio_stdout; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stderr; extern int
 Cyc_Stdio_remove( struct _tagged_arr); extern int Cyc_Stdio_fclose( struct Cyc_Stdio___sFILE*);
 extern int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE*); extern struct Cyc_Stdio___sFILE*
-Cyc_Stdio_fopen( struct _tagged_arr _name, struct _tagged_arr _type); extern
-unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
+Cyc_Stdio_fopen( struct _tagged_arr __filename, struct _tagged_arr __modes);
+extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
 18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
 _tagged_arr f1; } ; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open( struct
 _tagged_arr fname, struct _tagged_arr mode); extern void Cyc_Stdio_file_close(
@@ -66,30 +66,30 @@ struct Cyc_Stdio_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static
 const int Cyc_Stdio_DoublePtr_sa= 5; struct Cyc_Stdio_DoublePtr_sa_struct{ int
 tag; double* f1; } ; static const int Cyc_Stdio_FloatPtr_sa= 6; struct Cyc_Stdio_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_Stdlib__Div{ int quot; int rem; } ; struct
-Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int __mb_cur_max; extern int abs(
-int)  __attribute__(( cdecl )) ; extern int atexit( void(* __func)())
+Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int abs( int __x)
+ __attribute__(( cdecl )) ; extern int atexit( void(* __func)())
  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Div div( int __numer, int
 __denom)  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Ldiv ldiv( int
-__numer, int __denom)  __attribute__(( cdecl )) ; extern int rand()
- __attribute__(( cdecl )) ; extern void srand( unsigned int __seed)
- __attribute__(( cdecl )) ; extern int rand_r( unsigned int* __seed)
- __attribute__(( cdecl )) ; extern int random()  __attribute__(( cdecl )) ;
-extern int srandom( unsigned int __seed)  __attribute__(( cdecl )) ; extern int
-grantpt( int)  __attribute__(( cdecl )) ; extern int unlockpt( int)
- __attribute__(( cdecl )) ; extern struct _tagged_arr Cyc_Stdlib_getenv( struct
-_tagged_arr); extern int Cyc_String_strlen( struct _tagged_arr s); extern int
-Cyc_String_strcmp( struct _tagged_arr s1, struct _tagged_arr s2); extern struct
-_tagged_arr Cyc_String_strconcat( struct _tagged_arr, struct _tagged_arr);
-extern struct _tagged_arr Cyc_String_strconcat_l( struct Cyc_List_List*); extern
-struct _tagged_arr Cyc_String_str_sepstr( struct Cyc_List_List*, struct
-_tagged_arr); extern struct _tagged_arr Cyc_String_substring( struct _tagged_arr,
-int ofs, int n); extern struct _tagged_arr Cyc_String_strchr( struct _tagged_arr
-s, unsigned char c); struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[
-12u]; extern unsigned char Cyc_Dict_Absent[ 11u]; extern struct _tagged_arr Cyc_Filename_concat(
-struct _tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Filename_chop_extension(
-struct _tagged_arr); extern int Cyc_Filename_check_suffix( struct _tagged_arr,
-struct _tagged_arr); struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file;
-struct _tagged_arr line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[
+__numer, int __denom)  __attribute__(( cdecl )) ; extern int random()
+ __attribute__(( cdecl )) ; extern void srandom( unsigned int __seed)
+ __attribute__(( cdecl )) ; extern int rand()  __attribute__(( cdecl )) ; extern
+void srand( unsigned int __seed)  __attribute__(( cdecl )) ; extern int rand_r(
+unsigned int* __seed)  __attribute__(( cdecl )) ; extern int grantpt( int __fd)
+ __attribute__(( cdecl )) ; extern int unlockpt( int __fd)  __attribute__((
+cdecl )) ; extern struct _tagged_arr Cyc_Stdlib_getenv( struct _tagged_arr);
+extern int Cyc_String_strlen( struct _tagged_arr s); extern int Cyc_String_strcmp(
+struct _tagged_arr s1, struct _tagged_arr s2); extern struct _tagged_arr Cyc_String_strconcat(
+struct _tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_String_strconcat_l(
+struct Cyc_List_List*); extern struct _tagged_arr Cyc_String_str_sepstr( struct
+Cyc_List_List*, struct _tagged_arr); extern struct _tagged_arr Cyc_String_substring(
+struct _tagged_arr, int ofs, int n); extern struct _tagged_arr Cyc_String_strchr(
+struct _tagged_arr s, unsigned char c); struct Cyc_Dict_Dict; extern
+unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
+extern struct _tagged_arr Cyc_Filename_concat( struct _tagged_arr, struct
+_tagged_arr); extern struct _tagged_arr Cyc_Filename_chop_extension( struct
+_tagged_arr); extern int Cyc_Filename_check_suffix( struct _tagged_arr, struct
+_tagged_arr); struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file; struct
+_tagged_arr line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[
 9u]; extern void Cyc_Position_reset_position( struct _tagged_arr); struct Cyc_Position_Segment;
 static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
 static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct

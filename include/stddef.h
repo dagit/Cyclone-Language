@@ -25,6 +25,7 @@ typedef long size_t;
 #endif
 
 /* This file is missing:
+   NULL (because we handle this specially in Cyclone)
    offsetof (because we handle this specially in Cyclone)
    ptrdiff_t
    wchar_t */

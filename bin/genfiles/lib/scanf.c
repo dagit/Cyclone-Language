@@ -28,30 +28,29 @@ extern int tolower( int)  __attribute__(( cdecl )) ; extern int toupper( int)
 extern int toascii( int)  __attribute__(( cdecl )) ; extern int _tolower( int)
  __attribute__(( cdecl )) ; extern int _toupper( int)  __attribute__(( cdecl )) ;
 struct Cyc_Stdlib__Div{ int quot; int rem; } ; struct Cyc_Stdlib__Ldiv{ int quot;
-int rem; } ; extern int __mb_cur_max; extern int abs( int)  __attribute__((
-cdecl )) ; extern int atexit( void(* __func)())  __attribute__(( cdecl )) ;
-extern struct Cyc_Stdlib__Div div( int __numer, int __denom)  __attribute__((
-cdecl )) ; extern struct Cyc_Stdlib__Ldiv ldiv( int __numer, int __denom)
+int rem; } ; extern int abs( int __x)  __attribute__(( cdecl )) ; extern int
+atexit( void(* __func)())  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Div
+div( int __numer, int __denom)  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Ldiv
+ldiv( int __numer, int __denom)  __attribute__(( cdecl )) ; extern int random()
+ __attribute__(( cdecl )) ; extern void srandom( unsigned int __seed)
  __attribute__(( cdecl )) ; extern int rand()  __attribute__(( cdecl )) ; extern
 void srand( unsigned int __seed)  __attribute__(( cdecl )) ; extern int rand_r(
-unsigned int* __seed)  __attribute__(( cdecl )) ; extern int random()
- __attribute__(( cdecl )) ; extern int srandom( unsigned int __seed)
- __attribute__(( cdecl )) ; extern int grantpt( int)  __attribute__(( cdecl )) ;
-extern int unlockpt( int)  __attribute__(( cdecl )) ; extern double Cyc_Stdlib_atof(
-struct _tagged_arr); extern int Cyc_Stdlib_strtol( struct _tagged_arr n, struct
-_tagged_arr* end, int base); extern unsigned int Cyc_Stdlib_strtoul( struct
-_tagged_arr n, struct _tagged_arr* end, int base); struct Cyc_Stdio___sFILE;
-extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stdin; extern int Cyc_Stdio_fgetc(
-struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_getc( struct Cyc_Stdio___sFILE*);
-extern int Cyc_Stdio_ungetc( int, struct Cyc_Stdio___sFILE*); extern
-unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
-18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; static const int Cyc_Stdio_String_pa= 0; struct Cyc_Stdio_String_pa_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_Int_pa= 1; struct
-Cyc_Stdio_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Stdio_Double_pa=
-2; struct Cyc_Stdio_Double_pa_struct{ int tag; double f1; } ; static const int
-Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{ int tag; short*
-f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
+unsigned int* __seed)  __attribute__(( cdecl )) ; extern int grantpt( int __fd)
+ __attribute__(( cdecl )) ; extern int unlockpt( int __fd)  __attribute__((
+cdecl )) ; extern double Cyc_Stdlib_atof( struct _tagged_arr); extern int Cyc_Stdlib_strtol(
+struct _tagged_arr n, struct _tagged_arr* end, int base); extern unsigned int
+Cyc_Stdlib_strtoul( struct _tagged_arr n, struct _tagged_arr* end, int base);
+struct Cyc_Stdio___sFILE; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stdin;
+extern int Cyc_Stdio_fgetc( struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_getc(
+struct Cyc_Stdio___sFILE* __stream); extern int Cyc_Stdio_ungetc( int __c,
+struct Cyc_Stdio___sFILE* __stream); extern unsigned char Cyc_Stdio_FileCloseError[
+19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Stdio_String_pa=
+0; struct Cyc_Stdio_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Stdio_Int_pa= 1; struct Cyc_Stdio_Int_pa_struct{ int tag;
+unsigned int f1; } ; static const int Cyc_Stdio_Double_pa= 2; struct Cyc_Stdio_Double_pa_struct{
+int tag; double f1; } ; static const int Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{
+int tag; short* f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
 int tag; unsigned int* f1; } ; static const int Cyc_Stdio_ShortPtr_sa= 0; struct
 Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_Stdio_UShortPtr_sa=
 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static

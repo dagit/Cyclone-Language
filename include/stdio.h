@@ -1,126 +1,195 @@
-//
-// Copyright (c) 1990 The Regents of the University of California.
-// All rights reserved.
-//
-// Redistribution and use in source and binary forms are permitted
-// provided that the above copyright notice and this paragraph are
-// duplicated in all such forms and that any documentation,
-// advertising materials, and other materials related to such
-// distribution and use acknowledge that the software was developed
-// by the University of California, Berkeley.  The name of the
-// University may not be used to endorse or promote products derived
-// from this software without specific prior written permission.
-// THIS SOFTWARE IS PROVIDED ``AS IS'' AND WITHOUT ANY EXPRESS OR
-// IMPLIED WARRANTIES, INCLUDING, WITHOUT LIMITATION, THE IMPLIED
-// WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE.
-//
-//	@(#)stdio.h	5.3 (Berkeley) 3/15/86
-//
+/* This file is part of the Cyclone Library.
+   Copyright (C) 2001 Greg Morrisett, AT&T
+
+   This library is free software; you can redistribute it and/or it
+   under the terms of the GNU Lesser General Public License as
+   published by the Free Software Foundation; either version 2.1 of
+   the License, or (at your option) any later version.
+
+   This library is distributed in the hope that it will be useful, but
+   WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+   Lesser General Public License for more details.
+
+   You should have received a copy of the GNU Lesser General Public
+   License along with this library; see the file COPYING.LIB.  If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+   330, Boston, MA 02111-1307 USA. */
+
+/* Some definitions taken from the GNU C Library, released under LGPL:
+   Copyright (C) 1991-1999, 2000 Free Software Foundation, Inc. */
+
+/*
+ *	ISO C99 Standard: 7.19 Input/output	<stdio.h>
+ */
+
 #ifndef _STDIO_H_
 #define _STDIO_H_
 #include <core.h>
 namespace Stdio {
 using Core;
+
+/* The name __sFILE is derived from Cygwin but we have our own
+   implementation in runtime_cyc.c */
 extern struct __sFILE;  
 typedef struct __sFILE FILE;
+
+/* Standard streams.  */
 extern FILE @stdout;
 extern FILE @stdin;
 extern FILE @stderr;
-typedef long fpos_t;
-#define	__SLBF	0x0001		// line buffered 
-#define	__SNBF	0x0002		// unbuffered 
-#define	__SRD	0x0004		// OK to read 
-#define	__SWR	0x0008		// OK to write 
-	// RD and WR are never simultaneously asserted 
-#define	__SRW	0x0010		// open for reading & writing 
-#define	__SEOF	0x0020		// found EOF 
-#define	__SERR	0x0040		// found error 
-#define	__SMBF	0x0080		// _buf is from malloc 
-#define	__SAPP	0x0100		// fdopen()ed in append mode - so must  write to end 
-#define	__SSTR	0x0200		// this is an sprintf/snprintf string 
-#define	__SOPT	0x0400		// do fseek() optimisation 
-#define	__SNPT	0x0800		// do not do fseek() optimisation 
-#define	__SOFF	0x1000		// set iff _offset is in fact correct 
-#define	__SMOD	0x2000		// true => fgetline modified _p text 
-#define __SCLE        0x4000          // convert line endings CR/LF <-> NL 
 
-#define	_IOFBF	0		// setvbuf should set fully buffered 
-#define	_IOLBF	1		// setvbuf should set line buffered 
-#define	_IONBF	2		// setvbuf should set unbuffered 
+/* The type of the second argument to `fgetpos' and `fsetpos'.  */
+typedef long fpos_t;  //FIX: __off_t in linux
 
+/* The possibilities for the third argument to `setvbuf'.  */
+#define	_IOFBF 0  /* Full buffering.  */
+#define	_IOLBF 1  /* Line buffering.  */
+#define	_IONBF 2  /* No buffering.  */
+
+/* Default buffer size.  */
 #define	BUFSIZ	1024
+
+/* End of file character.
+   Some things throughout the library rely on this being -1.  */
 #define	EOF	(-1)
 
-#define	FOPEN_MAX	20	// must be <= OPEN_MAX <sys/syslimits.h> 
-#define	FILENAME_MAX	1024	// must be <= PATH_MAX <sys/syslimits.h> 
-#define	L_tmpnam	1024	// XXX must be == PATH_MAX 
-
-#ifndef SEEK_SET
-#define	SEEK_SET	0	// set file offset to offset 
+/* CAREFUL: the constants TMP_MAX FOPEN_MAX FILENAME_MAX
+   L_tmpnam L_cuserid L_ctermid
+   are platform-dependent, and some can lead to buffer overflows
+   if incorrect */
+#ifdef __CYGWIN__
+/* Cygwin */
+#define TMP_MAX 26
+#define FOPEN_MAX 20
+#define FILENAME_MAX 1024
+#define L_tmpnam FILENAME_MAX
+#define L_cuserid 9
+#define L_ctermid 16
+#else
+/* Linux */
+#define TMP_MAX 238328
+#define FOPEN_MAX 16
+#define FILENAME_MAX 4095
+#define L_tmpnam 20
+#define L_cuserid 9
+#define L_ctermid 9
 #endif
-#ifndef SEEK_CUR
-#define	SEEK_CUR	1	// set file offset to current plus offset 
-#endif
-#ifndef SEEK_END
-#define	SEEK_END	2	// set file offset to EOF plus offset 
-#endif
 
-#define	TMP_MAX		26
 
-//
-// Functions defined in ANSI C standard.
-//
-extern int	remove(const char ?`r);
-extern int	rename(const char ?`r1, const char ?`r2);
-extern FILE *	tmpfile();
-extern char ?`H	tmpnam(char ?`H);
-extern int	fclose(FILE @`r);
-extern int	fflush(FILE *`r);
-extern FILE *	freopen(const char ?`r1, const char ?`r2, FILE @`r3);
-extern void	setbuf(FILE @`r1, char ?`r2);
-extern int	setvbuf(FILE @`r1, char ?`r2, int, size_t);
-extern int	fgetc(FILE @`r);
-extern char ?`r1 fgets(char ?`r1, int n, FILE @`r2);
-extern int	fputc(int, FILE @`r);
-extern int	fputs(const char ?`r1, FILE @`r2);
-extern int	getc(FILE @`r);
-//extern int	getchar();
+/* The possibilities for the third argument to `fseek'.
+   These values should not be changed.  */
+#define	SEEK_SET	0	/* Seek from beginning of file.  */
+#define	SEEK_CUR	1	/* Seek from current position.  */
+#define	SEEK_END	2	/* Seek from end of file.  */
+
+/* Remove file FILENAME.  */
+extern int remove (const char ?);
+/* Rename file OLD to NEW.  */
+extern int rename (const char ?, const char ?);
+
+/* Create a temporary file and open it read/write.  */
+extern FILE *tmpfile ();
+/* Generate a temporary filename.  */
+extern char ?`H tmpnam (char ?`H);
+
+/* Close STREAM.  */
+extern int fclose (FILE @);
+/* Flush STREAM, or all streams if STREAM is NULL.  */
+extern int fflush (FILE *);
+
+/* Open a file and create a new stream for it.  */
+extern FILE *fopen (const char ?__filename, const char ?__modes);
+/* Open a file, replacing an existing stream with it. */
+extern FILE *freopen (const char ?, const char ?, FILE @);
+
+/* If BUF is NULL, make STREAM unbuffered.
+   Else make it use buffer BUF, of size BUFSIZ.  */
+extern void setbuf (FILE @ __stream, char ? __buf);
+/* Make STREAM use buffering mode MODE.
+   If BUF is not NULL, use N bytes of it for buffering;
+   else allocate an internal buffer N bytes long.  */
+extern int setvbuf (FILE @ __stream, char ? __buf,
+		    int __modes, size_t __n);
+
+/* Read a character from STREAM.  */
+extern int fgetc (FILE @__stream);
+extern int getc (FILE @__stream);
+
+/* Read a character from stdin.  */
+  //FIX: not much use doing this because getc is not a macro
+#define	getchar() getc(stdin)
+
+/* Get a newline-terminated string from stdin, removing the newline.
+   DO NOT USE THIS FUNCTION!!  There is no limit on how much it will read.  */
 // extern string     gets(string); // unsafe!
-extern int	putc(int, FILE @`r);
-  //extern int	putchar(int);
-extern int	puts(const char ?`r);
-extern int	ungetc(int, FILE @`r);
-extern size_t	fread(char ?`r1, size_t, size_t, FILE @`r2);
-extern size_t	fwrite(const char ?`r1, size_t, size_t, FILE @`r2);
-extern int	fgetpos(FILE @`r1, fpos_t @`r2);
-extern int	fseek(FILE @`r, long, int);
-extern int	fsetpos(FILE @`r1, fpos_t @`r2);
-extern long	ftell(FILE @`r);
-extern void	rewind(FILE @`r);
-extern void	clearerr(FILE @`r);
-extern int	feof(FILE @`r);
-extern int	ferror(FILE @`r);
-extern void     perror(const char ?`r);
-extern FILE *	fopen(const char ?`r1 _name , const char ?`r2 _type);
 
-//
-// Routines in POSIX 1003.1.
-//
+/* Get a newline-terminated string of finite length from STREAM.  */
+extern char ?`r fgets (char ?`r __s, int __n, FILE @ __stream);
 
-extern FILE *	fdopen(int, const char ?`r);
-extern int	fileno(FILE @`r);
-extern int	getw(FILE @`r);
-  //extern int	pclose(FILE @);
-  //extern FILE *   popen(string, string);
-extern int	putw(int, FILE @`r);
-extern void     setbuffer(FILE @`r1, char ?`r2, int);
-extern void	setlinebuf(FILE @`r);
+/* Write a character to STREAM.  */
+extern int fputc (int __c, FILE @__stream);
+extern int putc (int __c, FILE @__stream);
 
-#define	getchar()	getc(stdin)
-#define	putchar(x)	putc(x, stdout)
+/* Write a character to stdout.  */
+  //FIX: not much use doing this because putc is not a macro, no speedup
+#define	putchar(__c) putc(__c, stdout)
 
-#define	L_cuserid	9		// posix says it goes in stdio.h :( 
-#define L_ctermid       16
+/* Write a string to STREAM.  */
+extern int fputs (const char ? __s, FILE @ __stream);
+/* Write a string, followed by a newline, to stdout.  */
+extern int puts (const char ? __s);
+
+/* Push a character back onto the input buffer of STREAM.  */
+extern int ungetc (int __c, FILE @ __stream);
+
+/* Read chunks of generic data from STREAM.  */
+extern size_t fread (char ? __ptr, size_t __size,
+		     size_t __n, FILE @ __stream);
+/* Write chunks of generic data to STREAM.  */
+extern size_t fwrite (const char ? __ptr, size_t __size,
+		      size_t __n, FILE @ __s);
+
+/* Seek to a certain position on STREAM.  */
+extern int fseek (FILE @__stream, long __off, int __whence);
+/* Return the current position of STREAM.  */
+extern long ftell (FILE @__stream);
+/* Rewind to the beginning of STREAM.  */
+extern void rewind (FILE @__stream);
+
+/* Get STREAM's position.  */
+extern int fgetpos (FILE @__stream, fpos_t @ __pos);
+/* Set STREAM's position.  */
+extern int fsetpos (FILE @__stream, fpos_t @ __pos);
+
+/* Clear the error and EOF indicators for STREAM.  */
+extern void clearerr (FILE @__stream);
+/* Return the EOF indicator for STREAM.  */
+extern int feof (FILE @__stream);
+/* Return the error indicator for STREAM.  */
+extern int ferror (FILE @__stream);
+
+/* Print a message describing the meaning of the value of errno.  */
+extern void perror (const char ?__s);
+
+/* Create a new stream that refers to an existing system file descriptor.  */
+extern FILE *fdopen (int __fd, const char ?__modes);
+
+/* Return the system file descriptor for STREAM.  */
+extern int fileno (FILE @__stream);
+
+/* Get a word (int) from STREAM.  */
+extern int getw (FILE @__stream);
+
+/* Write a word (int) to STREAM.  */
+extern int putw (int __w, FILE @__stream);
+
+  //FIX: setbuffer and setlinebuf only if __USE_BSD
+/* If BUF is NULL, make STREAM unbuffered.
+   Else make it use SIZE bytes of BUF for buffering.  */
+extern void setbuffer (FILE @__stream, char ?__buf, size_t __size);
+/* Make STREAM line-buffered.  */
+extern void setlinebuf (FILE @__stream);
 
 // 
 // Routines added for Cyclone
@@ -226,7 +295,6 @@ extern int vsscanf(const char ?`r src, const char ?`r1 fmt,
   __attribute__((format(scanf,2,0)))
   ;
 
-
-
 }
-#endif // defined _STDIO_H_
+
+#endif /* stdio.h  */
