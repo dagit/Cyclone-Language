@@ -33,7 +33,7 @@ nested tag in the input.  The other is careful not to use more than
 8Mb of stack space.  By using auxiliary work-stacks and other
 techniques, it is still able to do the optimizations, but it is
 clumsier, slower, and we'd rather not use it.  (We had trouble getting
-a consisting and useful answer from getrlimit on the Linux machines we
+a consistent and useful answer from getrlimit on the Linux machines we
 had available.  If 8Mb is too large, we need to change a constant in
 our code.)
 
