@@ -1,0 +1,220 @@
+# @configure_input@
+VERSION=@PACKAGE_VERSION@
+build=@build@
+target=@target@
+CC=@CC@
+CFLAGS=@CFLAGS@
+TARGET_CC=@TARGET_CC@
+TARGET_CFLAGS=@TARGET_CFLAGS@
+CYCDIR=@abs_srcdir@
+prefix=@prefix@
+exec_prefix=@exec_prefix@
+INC_INSTALL=@includedir@/cyclone
+BIN_INSTALL=@bindir@
+LIB_INSTALL=@libdir@/cyclone
+@SET_MAKE@
+RANLIB=@RANLIB@
+TARGET_RANLIB=@TARGET_RANLIB@
+TARGET_AR=@TARGET_AR@
+EXE=@EXEEXT@
+O=@OBJEXT@
+LDFLAGS=@LDFLAGS@
+SIZEOF_WCHAR_T=@ac_cv_sizeof_wchar_t@
+WCHAR_T_UNSIGNED=@WCHAR_T_UNSIGNED@
+
+SHELL=/bin/sh
+A=a
+# What we do when using VC++
+ifdef MS
+  O=obj
+  A=lib
+endif
+
+# needed for booting
+CYCLONE_BOOT_LIBS:=arg\
+        assert\
+        buffer\
+        core\
+        dict\
+        filename\
+        fn\
+        hashtable\
+	iter\
+        lexing\
+        lineno\
+        list\
+        position\
+        pp\
+	printf\
+	scanf\
+        set\
+        slowdict\
+        string\
+        xarray
+
+# other bits of the standard library
+CYCLONE_LIBS:=array\
+        bitvec\
+	execinfo\
+        getopt\
+        getopt1\
+        queue\
+        rope\
+        splay\
+	tmp
+
+CYCLONE_H:=arg.h\
+	array.h\
+	assert.h\
+	binding.h\
+	bitvec.h\
+	buffer.h\
+	core.h\
+	crypt.h\
+	dict.h\
+	execinfo.h\
+	filename.h\
+	fn.h\
+	gc_ifc.h\
+	getopt.h\
+	hashtable.h\
+	iter.h\
+	lexing.h\
+	lineno.h\
+	list.h\
+	position.h\
+	pp.h\
+	queue.h\
+	rope.h\
+	set.h\
+	slowdict.h\
+	splay.h\
+	string.h\
+	strings.h\
+	sys/cioctl.h\
+	sys/ioctl.h\
+	xarray.h\
+	warn.h
+
+CYCLONE_SRCS:=absyn\
+	 warn\
+         parse_tab\
+         parse_errors\
+         lex\
+         absynpp\
+	 absyndump\
+	 rgnorder\
+         tcenv\
+         tcutil\
+         relations\
+         tcstmt\
+         tcpat\
+         tcexp\
+	 formatstr\
+         evexp\
+         tc\
+         binding\
+         pratt\
+         jump_analysis\
+         cf_flowinfo\
+         new_control_flow\
+         toc\
+	 remove_aggregates\
+         toseqc\
+         tovc\
+         interface\
+	 tcdecl\
+         port\
+         specsfile\
+	 cyclone
+
+CYCDOC_SRCS:=cycdoc\
+	warn\
+        parse_errors\
+	lex\
+	parse_tab\
+	absyn\
+	tcutil\
+	rgnorder\
+        relations\
+	tcenv\
+	tcexp\
+        binding\
+	tcstmt\
+	tcpat\
+        tc\
+	tcdecl\
+        pratt\
+        jump_analysis\
+	new_control_flow\
+	cf_flowinfo\
+	formatstr\
+	evexp\
+	absynpp
+
+BUILDLIB_SRCS:=buildlib\
+        specsfile\
+	warn\
+        parse_errors\
+	lex\
+	parse_tab\
+	tcutil\
+	absynpp\
+        relations\
+	tc\
+	tcdecl\
+	tcexp\
+        binding\
+	tcstmt\
+	formatstr\
+	evexp\
+	rgnorder\
+	tcenv\
+	tcpat\
+        pratt\
+        jump_analysis\
+	new_control_flow\
+	cf_flowinfo\
+        toc\
+	absyn
+
+NOOPT_SRCS:=parse_tab parse_tab_a parse_tab_pg
+
+# Add XML library .h files to CYCLONE_H
+ifndef NO_XML_LIB
+CYCLONE_H := $(CYCLONE_H) xml/xml.h xml/xmldump.h xml/xmlparse.h
+endif
+
+# Files for the runtime system
+RUNTIME:=runtime_cyc \
+	runtime_stack \
+	runtime_exception \
+	runtime_zeroterm \
+	runtime_memory
+
+CYCLIB:=libcyc.$(A)
+CYCBOOTLIB:=libcycboot.$(A)
+CYCCOMP:=cyclone$(EXE)
+
+C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS))
+C_BOOT_LIBS:=$(addsuffix .c, $(CYCLONE_BOOT_LIBS))
+C_LIBS:=$(addsuffix .c, $(CYCLONE_LIBS))
+O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS))
+O_BOOT_LIBS:=$(addsuffix .$(O), $(CYCLONE_BOOT_LIBS))
+O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
+A_SRCS:=$(addsuffix _a.$(O), $(CYCLONE_SRCS))
+A_BOOT_LIBS:=$(addsuffix _a.$(O), $(CYCLONE_BOOT_LIBS))
+A_LIBS:=$(addsuffix _a.$(O), $(CYCLONE_LIBS))
+PG_SRCS:=$(addsuffix _pg.$(O), $(CYCLONE_SRCS))
+PG_BOOT_LIBS:=$(addsuffix _pg.$(O), $(CYCLONE_BOOT_LIBS))
+PG_LIBS:=$(addsuffix _pg.$(O), $(CYCLONE_LIBS))
+NOCHECK_BOOT_LIBS:=$(addsuffix _nocheck.$(O), $(CYCLONE_BOOT_LIBS))
+NOCHECK_LIBS:=$(addsuffix _nocheck.$(O), $(CYCLONE_LIBS))
+C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
+O_RUNTIME:=$(addsuffix .$(O), $(RUNTIME))
+A_RUNTIME:=$(addsuffix _a.$(O), $(RUNTIME))
+PG_RUNTIME:=$(addsuffix _pg.$(O), $(RUNTIME))
+O_NOOPT_SRCS:=$(addsuffix .$(O),$(NOOPT_SRCS))
+OPTFLAG:=-O
+
+UPDATE_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS) cycdoc buildlib)
