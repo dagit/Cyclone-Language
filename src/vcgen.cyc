@@ -975,7 +975,8 @@ static $(list_t<$(var_opt_t,tqual_t,type_t)@> args, list_t<vardecl_t> argvds, ex
   return $(NULL,NULL,NULL,NULL,NULL);
 }
 
-static void check_requires(env_t env, list_t<term_t> inputs,
+static void check_requires(Position::seg_t loc,
+                           env_t env, list_t<term_t> inputs,
                            list_t<vardecl_t> argvds,
                            assn_t a, exp_opt_t reqopt) {
   if (reqopt != NULL) {
@@ -989,7 +990,7 @@ static void check_requires(env_t env, list_t<term_t> inputs,
     // FIX? varargs.
     let $(at,_) = vcgen_test(env,(exp_t)reqopt,&true_assn);
     if (!implies(&a,&at))
-      Warn::err(req->loc, "cannot prove @requires %s from %s",
+      Warn::err(loc, "cannot prove @requires %s from %s",
                 assn2string(reduce(at)), assn2string(reduce(a)));
   }
 }
@@ -1119,18 +1120,18 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::SeqExp_e(e1,e2):
     let $(_,a) = vcgen_rexp(env,e1,ain);
     return vcgen_rexp(env,e2,a);
-  case &Absyn::FnCall_e(e,es,...):
+  case &Absyn::FnCall_e(e1,es,...):
     let $(ts,a) = vcgen_rexps_always(env,es,ain);
-    let $(_,a2) = vcgen_rexp(env,e,a);
+    let $(_,a2) = vcgen_rexp(env,e1,a);
     // check @requires clause on function
-    let $(args,argvds,reqopt,ensopt,ret_value) = get_requires_and_ensures(e->topt);
-    check_requires(env,ts,argvds,a2,reqopt);
+    let $(args,argvds,reqopt,ensopt,ret_value) = get_requires_and_ensures(e1->topt);
+    check_requires(e->loc,env,ts,argvds,a2,reqopt);
     // kill every variable that points into memory -- could refine
     // this to only those reachable from globals or the parameters.
     a2 = kill(a2);
     update_try_assn(env,a2);
     // noreturn functions don't return...
-    if (Atts::is_noreturn_fn_type((type_t)e->topt)) a2 = &false_assn;
+    if (Atts::is_noreturn_fn_type((type_t)e1->topt)) a2 = &false_assn;
     if (ensopt == NULL) 
       return $(NULL,a2);
     exp_t ensures = (exp_t)ensopt;

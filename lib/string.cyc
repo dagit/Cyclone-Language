@@ -34,16 +34,23 @@ using List;
 extern "C" Cstring strerror(int errnum);
 
 ///////////////////////// LENGTH
-size_t strlen(buffer_t s) /*@ensures(return_value <= numelts(s))*/
+size_t strlen(buffer_t s) @ensures(return_value <= numelts(s))
 {
   size_t i;
   unsigned int sz = numelts(s);
-  for (i = 0; /*@assert__(i <= numelts(s)) && */ i < sz; ++i) 
+  for (i = 0; @assert__(i <= numelts(s)) && i < sz; ++i) 
     if (s[i] == '\000')
       return i;
   return i;
 }
 
+static inline unsigned int umin(unsigned int i, unsigned int j) 
+  @ensures(return_value <= i && return_value <= j) {
+  if (i < j)
+    return i;
+  else
+    return j;
+}
 
 ///////////////////////// COMPARISONS
 // Compare two strings lexicographically.
@@ -54,9 +61,9 @@ int strcmp(buffer_t s1, buffer_t s2) {
   int i = 0;
   unsigned sz1 = numelts(s1);
   unsigned sz2 = numelts(s2);
-  unsigned minsz = (sz1 < sz2) ? sz1 : sz2;
-  assert(minsz <= numelts(s1) && minsz <= numelts(s2));
-  for(; i < minsz; ++i) {
+  unsigned minsz = umin(sz1,sz2);
+  @assert__(minsz <= numelts(s1) && minsz <= numelts(s2));
+  for(; @assert__(minsz <= sz1 && minsz <= sz2 && i <= minsz) && i < minsz; ++i) {
     char c1 = s1[i];
     char c2 = s2[i];
     if (c1 == '\000')
@@ -67,6 +74,7 @@ int strcmp(buffer_t s1, buffer_t s2) {
   }
   if (sz1 == sz2) return 0;
   if (sz1 < sz2)  return (s2[i] == '\000') ? 0 : -1;
+  @assert__(i <= minsz && minsz < sz1);
   return (s1[i] == '\000') ? 0 : 1;
 }
 
@@ -75,14 +83,15 @@ int strptrcmp(stringptr_t s1, stringptr_t s2) {
 }
 
 static inline int ncmp(buffer_t s1, size_t len1, buffer_t s2, size_t len2, 
-                       size_t n) 
+                       size_t n) //@requires(len1 <= numelts(s1) && len2 <= numelts(s2))
 {
   if (n <= 0) return 0;
 
-  size_t min_len = (len1 > len2) ? len2 : len1;
-  size_t bound = (min_len > n) ? n : min_len;
+  size_t min_len = umin(len1,len2);
+  //@assert__(min_len <= numelts(s1) && min_len <= numelts(s2));
+  size_t bound = umin(min_len,n);
 
-  assert(bound <= numelts(s1) && bound <= numelts(s2));
+  //@assert__(bound <= numelts(s1) && bound <= numelts(s2));
 
   for (int i=0; i < bound; i++) {
     int retc;
@@ -99,6 +108,7 @@ static inline int ncmp(buffer_t s1, size_t len1, buffer_t s2, size_t len2,
 int strncmp(buffer_t s1, buffer_t s2, size_t n) {
   size_t len1 = strlen(s1);
   size_t len2 = strlen(s2);
+  @assert__(len1 <= numelts(s1) && len2 <= numelts(s2));
   return ncmp(s1,len1,s2,len2,n);
 }
 

@@ -504,27 +504,27 @@ extern int Cyc_Flags_warn_all_null_deref;
 extern int Cyc_Flags_noexpand_r;
 # 71
 extern int Cyc_Flags_allpaths;
-# 77
+# 80
 extern int Cyc_Flags_tovc_r;
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
-# 82
+# 85
 extern enum Cyc_Flags_C_Compilers Cyc_Flags_c_compiler;
-# 92 "flags.h"
+# 95 "flags.h"
 enum Cyc_Flags_Cyclone_Passes{Cyc_Flags_Cpp =0U,Cyc_Flags_Parsing =1U,Cyc_Flags_Binding =2U,Cyc_Flags_CurrentRegion =3U,Cyc_Flags_TypeChecking =4U,Cyc_Flags_Jumps =5U,Cyc_Flags_FlowAnalysis =6U,Cyc_Flags_VCGen =7U,Cyc_Flags_CheckInsertion =8U,Cyc_Flags_Toc =9U,Cyc_Flags_AggregateRemoval =10U,Cyc_Flags_LabelRemoval =11U,Cyc_Flags_TempRename =12U,Cyc_Flags_EvalOrder =13U,Cyc_Flags_CCompiler =14U,Cyc_Flags_AllPasses =15U};
-# 110
+# 113
 extern enum Cyc_Flags_Cyclone_Passes Cyc_Flags_stop_after_pass;
-# 112
+# 115
 void Cyc_Flags_set_cpponly (void);
 void Cyc_Flags_set_parseonly (void);
 void Cyc_Flags_set_crgnonly (void);
 void Cyc_Flags_set_tconly (void);
 void Cyc_Flags_set_cfonly (void);
 void Cyc_Flags_set_toconly (void);
-# 123
+# 126
 extern int Cyc_Flags_compile_for_boot;
-# 127
-extern int Cyc_Flags_print_parser_state_and_token;
 # 130
+extern int Cyc_Flags_print_parser_state_and_token;
+# 133
 void Cyc_Flags_set_all_warnings (void);
 # 29 "specsfile.h"
 struct _fat_ptr Cyc_Specsfile_target_arch;

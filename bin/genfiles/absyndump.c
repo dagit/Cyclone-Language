@@ -408,9 +408,9 @@ void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn
 void*Cyc_Warn_impos2(struct _fat_ptr);
 # 78 "kinds.h"
 void*Cyc_Kinds_compress_kb(void*);
-# 78 "flags.h"
+# 81 "flags.h"
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
-# 82
+# 85
 extern enum Cyc_Flags_C_Compilers Cyc_Flags_c_compiler;struct _tuple15{struct _fat_ptr f1;unsigned f2;};
 # 28 "absyndump.cyc"
 extern struct _tuple15 Cyc_Lex_xlate_pos(unsigned);

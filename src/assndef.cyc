@@ -21,6 +21,7 @@
    assertions as well as utilities on them (such as comparison, debugging
    printing etc.). */
 
+#include "flags.h"
 #include "assndef.h"
 #include "pratt_prover.h"
 #include <sexp.h>
@@ -28,7 +29,6 @@ namespace AssnDef;
 using List;
 using Hashtable;
 ///////////////////// Terms /////////////////////
-
 
 datatype Term {
   Uint(unsigned int);
@@ -44,7 +44,12 @@ string_t term2string(term_t t) {
   switch (t) {
   case &Uint(i): res = aprintf("0x%x", i); break;
   case &Const(e): res = Absynpp::exp2string(e); break;
-  case &Var(vd): res = Absynpp::qvar2string(vd->name); break;
+  case &Var(vd): 
+    if (Flags::debug_assn) 
+      res = aprintf("%s_%x",Absynpp::qvar2string(vd->name),(unsigned int)vd); 
+    else 
+      res = Absynpp::qvar2string(vd->name);
+    break;
   case &LogicVar(NULL,i,_): res = aprintf("_X%d",i); break;
   case &LogicVar(vd,i,_): 
     res = aprintf("_%s%d",Absynpp::qvar2string(vd->name),i); break;

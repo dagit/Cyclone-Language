@@ -405,9 +405,9 @@ struct _fat_ptr Cyc_Kinds_kind2string(struct Cyc_Absyn_Kind*);
 void*Cyc_Kinds_compress_kb(void*);
 # 40 "warn.h"
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);
-# 78 "flags.h"
+# 81 "flags.h"
 enum Cyc_Flags_C_Compilers{Cyc_Flags_Gcc_c =0U,Cyc_Flags_Vc_c =1U};
-# 82
+# 85
 extern enum Cyc_Flags_C_Compilers Cyc_Flags_c_compiler;
 # 39 "pp.h"
 extern int Cyc_PP_tex_output;struct Cyc_PP_Doc;

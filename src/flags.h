@@ -70,6 +70,9 @@ extern bool noexpand_r;
   // The default is false.
 extern bool allpaths;
 
+  // Used to print out more verbose information in assertions.
+extern bool debug_assn;
+
   // true for producing output compatible with MSVC and not using
   // gcc extensions (outdated; surely does NOT work); corresponds
   // mostly to inserting the compiler pass defined in tovc.cyc.
