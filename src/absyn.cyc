@@ -68,6 +68,9 @@ int tvar_cmp(tvar_t tv1, tvar_t tv2) {
   else return 1;
 }
 
+tunion Nmspace.Rel_n rel_ns_null_value = Rel_n(null);
+tunion Nmspace       rel_ns_null       = &rel_ns_null_value;
+
 static int new_type_counter = 0;
 
 type_t new_evar(opt_t<kind_t> k, opt_t<list_t<tvar_t>> env) {
@@ -307,10 +310,10 @@ opt_t<type_t> void_star_typ_opt() {
 //          the structdecl field.  Beware using them anywhere else!
 // (Probably we should require setting the third field even in Toc.)
 type_t strct(var_t name) {
-  return new StructType(new {$((nmspace_t)(new Rel_n(null)),name)},null,null);
+  return new StructType(new $(rel_ns_null, name),null,null);
 }
 type_t union_typ(var_t name) {
-  return new UnionType(new {$((nmspace_t)(new Rel_n(null)),name)},null,null);
+  return new UnionType(new $(rel_ns_null, name),null,null);
 }
 type_t strctq(qvar_t name) {
   return new StructType(name,null,null);

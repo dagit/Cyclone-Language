@@ -110,7 +110,7 @@ struct Genv {
   Dict::dict_t<var_t,enumdecl_t@>   enumdecls;
   Dict::dict_t<var_t,typedefdecl_t> typedefs; // no indirection b/c no redeclaration
   Dict::dict_t<var_t,$(resolved_t,bool)@> ordinaries; // bool for tree-shaking
-  list_t<list_t<var_t>>             availables; // abs. names of "using" namespaces
+  list_t<list_t<var_t>> availables; // abs. names of "using" namespaces
 };
 
 // Used to tell what an ordinary identifer refers to
@@ -168,7 +168,7 @@ abstract struct Fenv {
   struct SharedFenv @      shared;
   list_t<tvar_t>           type_vars; //type variables that can occur free
   rgn_po_t                 region_order; // partial order on region variables 
-  Dict::dict_t<var_t,binding_t> locals;//binding one of Param_b, Local_b, or Pat_b
+  Dict::dict_t<var_t,binding_t> locals;//binding one of Param_b, Local_b, Pat_b
   stmt_t                   encloser;  // nearest stmt with a binder or a try
   ctrl_env_t               ctrl_env;
   type_t                   capability; 
@@ -180,15 +180,18 @@ abstract struct Fenv {
 tenv_t tc_init() {
   // Initialize globals
   empty_var_set = new Opt(Set::empty(String::zstrptrcmp));
-
-  // Set up initial environment so that xtunion exn is defined
+  // Set up initial environment so that xtunion exn, etc. is defined
   let ge     = empty_genv();
   let top_ns = null;
-  ge->tuniondecls = Dict::insert(ge->tuniondecls, (*exn_name)[1], &exn_tud);
-  ge->ordinaries = Dict::insert(ge->ordinaries, (*null_pointer_exn_name)[1],
-				new $(new TunionRes(exn_tud, null_pointer_exn_tuf), true));
-  ge->ordinaries = Dict::insert(ge->ordinaries, (*match_exn_name)[1],
-				new $(new TunionRes(exn_tud, match_exn_tuf), true));
+  ge->tuniondecls = 
+    Dict::insert(ge->tuniondecls, (*exn_name)[1], 
+		 &exn_tud);
+  ge->ordinaries = 
+    Dict::insert(ge->ordinaries, (*null_pointer_exn_name)[1],
+		 new $(new TunionRes(exn_tud, null_pointer_exn_tuf), true));
+  ge->ordinaries = 
+    Dict::insert(ge->ordinaries, (*match_exn_name)[1],
+		 new $(new TunionRes(exn_tud, match_exn_tuf), true));
   let ae = Dict::insert(Dict::empty(varlist_cmp), top_ns, ge);
   return new Tenv(top_ns,ae,null);
 }
@@ -222,12 +225,11 @@ static void check_repeat(tenv_t te, seg_t loc, `a lookup(genv_t,var_t),
 
 static `a scoped_lookup(tenv_t te,seg_t loc,`a lookup(genv_t,var_t),var_t v){
   list_t<var_t> cns = te->ns; // current namespace
-  `a result; // def assignment too dumb
   while (true) {
     genv_t ge = Dict::lookup(te->ae,cns);
     // Check current namespace
     try {
-      result = lookup(ge,v);
+      `a result = lookup(ge,v);
       check_repeat(te, loc, lookup, v, ge->availables);
       return result;
     } catch { case Dict::Absent: break; }
@@ -235,7 +237,7 @@ static `a scoped_lookup(tenv_t te,seg_t loc,`a lookup(genv_t,var_t),var_t v){
     for (let nss = ge->availables; nss != null; nss = nss->tl) {
       genv_t ge2 = Dict::lookup(te->ae,nss->hd);
       try {
-	result = lookup(ge2,v);
+	`a result = lookup(ge2,v);
 	check_repeat(te, loc, lookup, v, nss->tl);
 	return result;
       } catch { case Dict::Absent: break; }

@@ -173,9 +173,9 @@ namespace Absyn {
   typedef struct Structfield @structfield_t;
 
   EXTERN_ABSYN tunion Nmspace {
-    Loc_n,                  // Local name
-    Rel_n(list_t<var_t>),     // Relative name
-    Abs_n(list_t<var_t>)      // Absolute name
+    Loc_n,                // Local name
+    Rel_n(list_t<var_t>), // Relative name
+    Abs_n(list_t<var_t>)  // Absolute name
   };
   EXTERN_ABSYN tunion Scope { Static, Abstract, Public, Extern, ExternC };
   EXTERN_ABSYN struct Tqual { 
@@ -184,8 +184,7 @@ namespace Absyn {
   EXTERN_ABSYN tunion Size_of { B1, B2, B4, B8 };
 
   EXTERN_ABSYN tunion Kind { 
-    // BoxKind <= MemKind <= AnyKind <= UnresolvedKind
-    // EffKind <== UnresolvedKind, RgnKind <= UnresolvedKind
+    // BoxKind <= MemKind <= AnyKind
     AnyKind,      // kind of all types, including abstract structs
     MemKind,      // same as AnyType but excludes abstract structs
     BoxKind,      // same as MemKind but excludes types whose 
@@ -649,6 +648,10 @@ namespace Absyn {
   extern int qvar_cmp(qvar_t, qvar_t);
   extern int varlist_cmp(list_t<var_t>, list_t<var_t>);
   extern int tvar_cmp(tvar_t, tvar_t); // WARNING: ignores the kinds
+
+  ///////////////////////// Namespaces ////////////////////////////
+  extern tunion Nmspace.Rel_n rel_ns_null_value; // for sharing
+  extern tunion Nmspace       rel_ns_null; // for sharing
 
   ///////////////////////// Qualifiers ////////////////////////////
   extern tqual_t const_tqual();

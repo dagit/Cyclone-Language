@@ -102,9 +102,6 @@ xtunion exn {Match_error};
 /////////////////////////// Pre-Allocated Stuff /////////////////////////////
 // Don't use any of these things if they might get mutated!!!
 
-static tunion Nmspace.Rel_n rel_ns_value = Rel_n(null);
-static tunion Nmspace rel_ns = &rel_ns_value;
-
 // some pre-allocated boxed strings -- use foo_sp for char ?* w/ contents "foo"
 #define MAKE_STRING(str)\
   static string_t    str##_string = #str; \
@@ -121,7 +118,7 @@ MAKE_STRING(_RegionHandle);
 // FIX: Next step is to make the exp_t, not just the qvar_t
 #define MAKE_VAR(str)\
   static string_t                  str##_str = #str;\
-  static $(nmspace_t, stringptr_t) str##_pr  = $((nmspace_t)&rel_ns_value,\
+  static $(nmspace_t, stringptr_t) str##_pr  = $((nmspace_t)&rel_ns_null_value,\
 						  &str##_str);\
   static qvar_t                    str##_qv  = &str##_pr;\
   static tunion Raw_exp.Var_e      str##_re  = Var_e(&str##_pr,Unresolved_b);\
@@ -235,7 +232,7 @@ static var_t add_tuple_type(glist_t<$(tqual_t,type_t)@,`r> tqs0) {
   for (int i=1; ts2 != null; ts2 = ts2->tl, i++)
     fs = new List(new Structfield(fieldname(i),mt_tq,ts2->hd,null,null),fs);
   fs = List::imp_rev(fs);
-  let sd = new Structdecl{.sc = Public, .name = new Opt(new $(rel_ns,x)),
+  let sd = new Structdecl{.sc = Public, .name = new Opt(new $(rel_ns_null,x)),
                        .tvs = null, .fields = new Opt(fs), .attributes = null};
   result_decls = new List(new_decl(new Struct_d(sd),DL),result_decls);
   tuple_types  = new List(new $(x,ts),tuple_types);
@@ -3004,7 +3001,7 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       let c_name = vd->name;
       // strip any namespace from an extern C declaration
       if (vd->sc == ExternC) 
-	c_name = new $(rel_ns,(*c_name)[1]);
+	c_name = new $(rel_ns_null,(*c_name)[1]);
       if (vd->initializer != null)
 	exp_to_c(nv, (exp_t)vd->initializer);
       nv = add_varmap(nv,vd->name,varb_exp(c_name,new Global_b(vd),DL));
@@ -3017,7 +3014,7 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       let c_name = fd->name;
       // strip any namespace from an extern C declaration
       if (fd->sc == ExternC)
-	c_name = new $(rel_ns,(*c_name)[1]);
+	c_name = new $(rel_ns_null,(*c_name)[1]);
       nv = add_varmap(nv,fd->name,var_exp(c_name,DL));
       fd->name = c_name;
       fndecl_to_c(nv, fd);

@@ -75,9 +75,8 @@ static int comment_depth = 0;
 // These needn't be set by lex_init -- they're set while finding a token.
 static $(sign_t,int)        token_int_pair = $(Signed,0);
 static string_t             bogus_string   = "*bogus*";
-static tunion Nmspace.Abs_n absn_null      = Abs_n(null);
-static $(nmspace_t,var_t)   token_id_pair  = $((nmspace_t)(&absn_null),
-					       &bogus_string);
+static $(nmspace_t,var_t)   token_id_pair = $((nmspace_t)&rel_ns_null_value,
+					      &bogus_string);
 
 static char           token_char   = '\000';
 static string_t       token_string = "";
@@ -166,10 +165,9 @@ static $(string_t,short) rw_array[] = {
 ///////////////////////// Trie manipulation ///////////////////////
 static int trie_char(int c) {
   // get the legal chars into a narrow range starting at 0
-  c -= 48;
-  if(c >= 47) c -= 11;
-  else if(c > 16) c -= 7;
-  return c;
+  if(c >= 95) return c - 59;
+  else if(c > 64) return c - 55;
+  return c - 48;
 }
 
 static trie_t trie_lookup(trie_t t, string_t buff, int offset, int len) {
@@ -260,48 +258,23 @@ static int int_of_char(char c) {
  
 // FIX: We should really have 8-bytes to store a long literal!!!
 //      That is, we and the previous version totally ignore the L!!!
-$(sign_t, int)@ intconst(Lexbuf<`a> lbuf, int start, int base) {
+static $(sign_t, int)@ intconst(Lexbuf<`a> lbuf, int start, int end, int base) {
   unsigned int n    = 0;
-  int          end  = lbuf->lex_curr_pos;
+  int          end2 = lbuf->lex_curr_pos - end;
   mstring_t    buff = lbuf->lex_buffer;
   int          i    = start + lbuf->lex_start_pos;
-  for(int i = start + lbuf->lex_start_pos; i < end; ++i) {
+  for(int i = start + lbuf->lex_start_pos; i < end2; ++i) {
     char c = buff[i];
     switch (c) {
         // incorrect to return as soon as we see 'u' 'U' if l isn't ignored
     case 'u': fallthru;
-    case 'U': return new $((sign_t)Unsigned,(signed int)n); 
+    case 'U': return new $(Unsigned,(signed int)n); 
     case 'l': break;
     case 'L': break;
     default: n = n*base + (unsigned int)int_of_char(c); break;
     }
   }
-  return new $((sign_t)Signed, (signed int)n);
-}
-
-// *********************** CHARACTER CONSTANTS ***********************
-
-static char char_for_octal_code(Lexbuf<`a> lb, int start, int howmany) {
-  int c = 0;
-  for (int i = 0; i<howmany; i++)
-    c = (8 * c) + lexeme_char(lb,start+i) - 48;
-  return (char)c;
-}
-
-static char char_for_hex_code(string_t s, int start) {
-  int c = 0; 
-  int len = String::strlen(s);
-  for (int i = 0; start+i<len; i++) {
-    char x = s[start+i];
-    if ('0'<=x && x<='9') 
-      c = (16 * c) + ((int)x)-((int)'0');
-    else if ('A'<=x && x<='F') 
-      c = (16 * c) + ((int)x)-((int)'A');
-    else if ('a'<=x && x<='f') 
-      c = (16 * c) + ((int)x)-((int)'a');
-    else break;
-  }
-  return (char)c;
+  return new $(Signed, (signed int)n);
 }
 
 // ************************* STRING CONSTANTS *************************
@@ -320,7 +293,7 @@ void store_string_char(char c) {
   string_buffer[string_pos] = c;
   ++string_pos;
 }
-mstring_t get_stored_string () {
+mstring_t get_stored_string() {
   mstring_t str = String::substring(string_buffer,0,string_pos);
   string_pos = 0;
   return str;
@@ -337,15 +310,15 @@ typedef struct Ldecls @ldecls_t;
 
 static struct Lvis {  // the King lives!
   // records the namespaces whose declarations are visible in a scope
-  list_t<var_t>       current_namespace;
+  list_t<var_t>         current_namespace;
   list_t<list_t<var_t>> imported_namespaces;
 };
-typedef struct Lvis @lvis;
+typedef struct Lvis @lvis_t;
 
 static struct Lstate {
   // lstack is the current nested scope structure,
   // decls is the global declaration mapping
-  List_t<lvis>                     lstack; 
+  List_t<lvis_t>                     lstack; 
   Dict::dict_t<list_t<var_t>,ldecls_t> decls;
 };
 typedef struct Lstate @lstate_t;
@@ -364,13 +337,12 @@ static void typedef_init() {
   lstate = new Opt(new Lstate{.lstack=init_lstack,.decls=init_decls});
 }
 
-static list_t<var_t> get_absolute_namespace(struct List<var_t,`H> @ns) {
+static list_t<var_t> get_absolute_namespace(List_t<var_t> ns) {
   // ns is a relative namespace, we return the absolute namespace
-  // Invariant: ns != null -- in the type!
   var_t n = ns->hd;
   // For each enclosing scope...
-  for (list_t<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
-    lvis lv = ls->hd; // ... see what namespaces are visible
+  for (list_t<lvis_t> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
+    lvis_t lv = ls->hd; // ... see what namespaces are visible
     // ... and look in each such visible namespace
     list_t<list_t<var_t>> x = new List(lv->current_namespace,
                                        lv->imported_namespaces);
@@ -383,18 +355,16 @@ static list_t<var_t> get_absolute_namespace(struct List<var_t,`H> @ns) {
     }
   }
   yyerror(xprintf("undeclared namespace %s",String::str_sepstr(ns,"::")));
-  return null; // FIX: can we return something better here? Do we have
-               // to give up and raise an exception?
+  return null; 
 }
 
 static void recompute_typedefs() {
   // Drop the old trie on the floor.
   typedefs_trie = new Trie(Zero,false);
   
-  // For each enclosing scope, get the visible namespaces and add all
-  // of their typedefs
-  for (list_t<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
-    lvis lv = ls->hd; 
+ //For each enclosing scope, get the visible namespaces and add all the typedefs
+  for (list_t<lvis_t> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
+    lvis_t lv = ls->hd; 
     list_t<list_t<var_t>> x = new List(lv->current_namespace, 
                                        lv->imported_namespaces);
     for (; x != null; x = x->tl) {
@@ -470,7 +440,7 @@ void enter_namespace(var_t s) {
 }
 void leave_namespace() {
   // we never leave the outermost namespace, so the cast is okay
-  lstate->v->lstack = (List_t<lvis>)lstate->v->lstack->tl;
+  lstate->v->lstack = (List_t<lvis_t>)lstate->v->lstack->tl;
   recompute_typedefs();
 }
 void enter_using(qvar_t q) {
@@ -527,7 +497,7 @@ static short process_id(Lexbuf<`a> lbuf) {
 
   // maybe it's a typedef
   if (is_typedef(null,s)) {
-    token_qvar = new $((nmspace_t)(new Rel_n(null)),s);
+    token_qvar = new $(rel_ns_null, s);
     return QUAL_TYPEDEF_NAME;
   }
 
@@ -537,9 +507,9 @@ static short process_id(Lexbuf<`a> lbuf) {
 }
 
 static short process_qual_id(Lexbuf<`a> lbuf) {
-  int    i   = lbuf->lex_start_pos;
-  int    end = lbuf->lex_curr_pos;
-  mstring_t s = lbuf->lex_buffer;
+  int       i   = lbuf->lex_start_pos;
+  int       end = lbuf->lex_curr_pos;
+  mstring_t s   = lbuf->lex_buffer;
 
   list_t<var_t> rev_vs = null;
 
@@ -556,9 +526,9 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
   }
   if (rev_vs == null)
     throw new Impossible("bad namespace");
-  var_t          v = rev_vs->hd;
+  var_t         v  = rev_vs->hd;
   list_t<var_t> vs = List::imp_rev(rev_vs->tl);
-  token_qvar = new $((nmspace_t)(new Rel_n(vs)),v);
+  token_qvar = new $(new Rel_n(vs),v);
   if (is_typedef(vs,v))
     return QUAL_TYPEDEF_NAME;
   else 
@@ -601,7 +571,7 @@ rule token = parse
   ['A'-'Z''a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
 { return process_id(lexbuf); }
 | ['_']['A'-'Z''a'-'z''0'-'9''_']+
-{ return process_id (lexbuf); }
+{ return process_id(lexbuf); }
 /* Qualified identifiers and type names (e.g., Foo::bar) */
 | (['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*':'':')+
   ['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*
@@ -612,19 +582,19 @@ rule token = parse
       return TYPE_VAR; }
 /* Integer constants */
 | '0'['x''X']['0'-'9''a'-'f''A'-'F']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
-      { token_int = intconst(lexbuf,2,16);
+      { token_int = intconst(lexbuf,2,0,16);
         return INTEGER_CONSTANT; }
 | '0'['0'-'7']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
-      { token_int = intconst(lexbuf,0,8);
+      { token_int = intconst(lexbuf,0,0,8);
         return INTEGER_CONSTANT; }
 | '0'['0'-'9']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
       /* This is really an error case according to OSI C --
          the leading 0 indicates this should be in octal. */
       /* FIX: print a warning message? */
-      { token_int = intconst(lexbuf,0,10);
+      { token_int = intconst(lexbuf,0,0,10);
         return INTEGER_CONSTANT; }
 | ['1'-'9']['0'-'9']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
-      { token_int = intconst(lexbuf,0,10);
+      { token_int = intconst(lexbuf,0,0,10);
         return INTEGER_CONSTANT; }
 /* Floating-point constants */
 | ['0'-'9']+['e''E']['+''-']?['0'-'9']+['f''F''l''L']?
@@ -689,21 +659,13 @@ rule token = parse
 | "'\\\"'"  { token_char = '"';  return CHARACTER_CONSTANT; }
 | "'\\?'"   { token_char = '?';  return CHARACTER_CONSTANT; }
 /* octal character escapes */
-| "'\\" ['0'-'7']['0'-'7']['0'-'7'] "'"
-            { token_char = char_for_octal_code(lexbuf,2,3);
-              return CHARACTER_CONSTANT;
-            }
-| "'\\" ['0'-'7']['0'-'7'] "'"
-            { token_char = char_for_octal_code(lexbuf,2,2);
-              return CHARACTER_CONSTANT;
-            }
-| "'\\" ['0'-'7'] "'"
-            { token_char = char_for_octal_code(lexbuf,2,1);
+| "'\\" ['0'-'7']['0'-'7']?['0'-'7']? "'"
+            { token_char = (char)(*intconst(lexbuf,2,1,8))[1];
               return CHARACTER_CONSTANT;
             }
 /* hex character escapes */
 | "'\\x" ['0'-'9''A'-'Z''a'-'z']+ "'"
-            { token_char = char_for_hex_code(lexeme(lexbuf),3);
+            { token_char = (char)(*intconst(lexbuf,3,1,16))[1];
               return CHARACTER_CONSTANT;
             }
 | "'" [^ '\\' '\'' '\n'] "'"
@@ -733,21 +695,13 @@ and strng = parse
   | "\\\""          { store_string_char('"');  return strng(lexbuf); }
   | "\\?"           { store_string_char('?');  return strng(lexbuf); }
   /* octal character escapes */
-  | "\\" ['0'-'7']['0'-'7']['0'-'7']
-                    { store_string_char(char_for_octal_code(lexbuf,1,3));
+  | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
+                    { store_string_char((char)(*intconst(lexbuf,1,0,8))[1]);
                       return strng(lexbuf);
                     }
-  | "\\" ['0'-'7']['0'-'7']
-                    { store_string_char(char_for_octal_code(lexbuf,1,2));
-                      return strng(lexbuf);
-                    }
-  | "\\" ['0'-'7']
-                    { store_string_char(char_for_octal_code(lexbuf,1,1));
-                      return strng(lexbuf);
-                    }
-  /* hex character escapes */
-  | "\\x" ['0'-'9''A'-'Z''a'-'z']+
-                    { store_string_char(char_for_hex_code(lexeme(lexbuf),2));
+  /* hex character escapes FIX? any length okay? */
+  | "\\x" ['0'-'9''A'-'F''a'-'f']+
+                    { store_string_char((char)(*intconst(lexbuf,2,0,16))[1]);
                       return strng(lexbuf);
                     }
   | [^ '"''\\''\n']   /* NOT double quote, backslash, or newline */

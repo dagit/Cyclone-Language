@@ -938,7 +938,7 @@ using Parse;
 %token TYPE_VAR QUAL_IDENTIFIER QUAL_TYPEDEF_NAME
 // Cyc: added __attribute__ keyword
 %token ATTRIBUTE
-// the union type for all productions -- for now a placeholder
+// the union type for all productions
 %union {
   Okay_tok;
   Bool_tok(bool);
@@ -1167,7 +1167,7 @@ declaration:
     { let vds = null;
       for (let ids = $2; ids != null; ids = ids->tl) {
         let id = ids->hd;
-        let qv = new $((nmspace_t)(new Rel_n(null)), id);
+        let qv = new $(rel_ns_null, id);
         let vd = new_vardecl(qv,wildtyp(null),null);
         vds = new List(vd,vds);
       }
@@ -1546,8 +1546,7 @@ struct_declarator:
     {
       // HACK: give the field an empty name -- see elsewhere in the
       // compiler where we use this invariant
-      $$=^$(new $((new Declarator(new $((nmspace_t)(new Rel_n(null)),new ((string_t)"")),
-                                  null)),
+      $$=^$(new $((new Declarator(new $(rel_ns_null, new ""), null)),
                   new Opt($2)));
     }
 | declarator ':' constant_expression
@@ -2627,7 +2626,7 @@ constant:
 ;
 
 qual_opt_identifier:
-  IDENTIFIER      { $$=^$(new $((nmspace_t)(new Rel_n(null)),new $1)); }
+  IDENTIFIER      { $$=^$(new $(rel_ns_null, new $1)); }
 | QUAL_IDENTIFIER { $$=$!1; }
 ;
 
