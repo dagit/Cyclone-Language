@@ -185,6 +185,8 @@ extern float atoff(string);
 extern int atoi(string);
 extern long atol(string);
 extern string getenv(string);
+/*
 extern string _getenv_r(struct _reent @,string);
+*/
 }
 #endif /* _STDLIB_H_ */

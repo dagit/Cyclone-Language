@@ -45,6 +45,7 @@ namespace Stdlib {
   string getenv(string name) {
     return Cstring_to_string(Cstdlib::getenv(s2c(name)));
   }
+  /*
   string _getenv_r(struct _reent @r, string name) {
     return Cstring_to_string(Cstdlib::_getenv_r(r,s2c(name)));
   }
@@ -54,24 +55,31 @@ namespace Stdlib {
   string _findenv_r(struct _reent @r, string n, int *i) {
     return Cstring_to_string(Cstdlib::_findenv_r(r,s2c(n),i));
   }
+  */
   int putenv(string s) {
     return Cstdlib::putenv(s2c(s));
   }
+  /*
   int _putenv_r(struct _reent @r, string s) {
     return Cstdlib::_putenv_r(r,s2c(s));
   }
+   */
   int setenv(string s, string v, int overwrite) {
     return Cstdlib::setenv(s2c(s),s2c(v),overwrite);
   }
+  /*
   int _setenv_r(struct _reent @r, string s, string v, int overwrite) {
     return Cstdlib::_setenv_r(r,s2c(s),s2c(v),overwrite);
   }
+  */
 #ifdef __CYGWIN__
   void unsetenv(string s) {
     Cstdlib::unsetenv(s2c(s));
   }
+  /*
   void _unsetenv_r(struct _reent @r, string s) {
     Cstdlib::_unsetenv_r(r,s2c(s));
   }
+  */
 #endif
 }

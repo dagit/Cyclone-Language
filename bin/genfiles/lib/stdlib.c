@@ -90,19 +90,18 @@ grantpt( int)  __attribute__(( cdecl )) ; extern int unlockpt( int)
 extern float Cyc_Stdlib_atoff( struct _tagged_string); extern int Cyc_Stdlib_atoi(
 struct _tagged_string); extern int Cyc_Stdlib_atol( struct _tagged_string);
 extern struct _tagged_string Cyc_Stdlib_getenv( struct _tagged_string); extern
-struct _tagged_string Cyc_Stdlib__getenv_r( struct Cyc__reent*, struct
-_tagged_string); extern double atof( unsigned char* _nptr)  __attribute__((
-cdecl )) ; extern float atoff( unsigned char* _nptr)  __attribute__(( cdecl )) ;
-extern int atoi( unsigned char* _nptr)  __attribute__(( cdecl )) ; extern int
-atol( unsigned char* _nptr)  __attribute__(( cdecl )) ; extern unsigned char*
-getenv( unsigned char* __string)  __attribute__(( cdecl )) ; extern
-unsigned char* _getenv_r( struct Cyc__reent*, unsigned char* __string)
- __attribute__(( cdecl )) ; extern unsigned char* _findenv( unsigned char*, int*)
- __attribute__(( cdecl )) ; extern unsigned char* _findenv_r( struct Cyc__reent*,
-unsigned char*, int*)  __attribute__(( cdecl )) ; extern int putenv(
-unsigned char* __string)  __attribute__(( cdecl )) ; extern int _putenv_r(
-struct Cyc__reent*, unsigned char* __string)  __attribute__(( cdecl )) ; extern
-int setenv( unsigned char* __string, unsigned char* __value, int __overwrite)
+double atof( unsigned char* _nptr)  __attribute__(( cdecl )) ; extern float
+atoff( unsigned char* _nptr)  __attribute__(( cdecl )) ; extern int atoi(
+unsigned char* _nptr)  __attribute__(( cdecl )) ; extern int atol( unsigned char*
+_nptr)  __attribute__(( cdecl )) ; extern unsigned char* getenv( unsigned char*
+__string)  __attribute__(( cdecl )) ; extern unsigned char* _getenv_r( struct
+Cyc__reent*, unsigned char* __string)  __attribute__(( cdecl )) ; extern
+unsigned char* _findenv( unsigned char*, int*)  __attribute__(( cdecl )) ;
+extern unsigned char* _findenv_r( struct Cyc__reent*, unsigned char*, int*)
+ __attribute__(( cdecl )) ; extern int putenv( unsigned char* __string)
+ __attribute__(( cdecl )) ; extern int _putenv_r( struct Cyc__reent*,
+unsigned char* __string)  __attribute__(( cdecl )) ; extern int setenv(
+unsigned char* __string, unsigned char* __value, int __overwrite)
  __attribute__(( cdecl )) ; extern int _setenv_r( struct Cyc__reent*,
 unsigned char* __string, unsigned char* __value, int __overwrite)
  __attribute__(( cdecl )) ; extern void unsetenv( unsigned char* __string)
@@ -114,20 +113,8 @@ _nptr));} int Cyc_Stdlib_atoi( struct _tagged_string _nptr){ return atoi(
 string_to_Cstring( _nptr));} int Cyc_Stdlib_atol( struct _tagged_string _nptr){
 return atol( string_to_Cstring( _nptr));} struct _tagged_string Cyc_Stdlib_getenv(
 struct _tagged_string name){ return Cstring_to_string( getenv( string_to_Cstring(
-name)));} struct _tagged_string Cyc_Stdlib__getenv_r( struct Cyc__reent* r,
-struct _tagged_string name){ return Cstring_to_string( _getenv_r( r,
-string_to_Cstring( name)));} struct _tagged_string Cyc_Stdlib__findenv( struct
-_tagged_string n, int* i){ return Cstring_to_string( _findenv( string_to_Cstring(
-n), i));} struct _tagged_string Cyc_Stdlib__findenv_r( struct Cyc__reent* r,
-struct _tagged_string n, int* i){ return Cstring_to_string( _findenv_r(( struct
-Cyc__reent*) r, string_to_Cstring( n), i));} int Cyc_Stdlib_putenv( struct
-_tagged_string s){ return putenv( string_to_Cstring( s));} int Cyc_Stdlib__putenv_r(
-struct Cyc__reent* r, struct _tagged_string s){ return _putenv_r( r,
+name)));} int Cyc_Stdlib_putenv( struct _tagged_string s){ return putenv(
 string_to_Cstring( s));} int Cyc_Stdlib_setenv( struct _tagged_string s, struct
 _tagged_string v, int overwrite){ return setenv( string_to_Cstring( s),
-string_to_Cstring( v), overwrite);} int Cyc_Stdlib__setenv_r( struct Cyc__reent*
-r, struct _tagged_string s, struct _tagged_string v, int overwrite){ return
-_setenv_r( r, string_to_Cstring( s), string_to_Cstring( v), overwrite);} void
-Cyc_Stdlib_unsetenv( struct _tagged_string s){ unsetenv( string_to_Cstring( s));}
-void Cyc_Stdlib__unsetenv_r( struct Cyc__reent* r, struct _tagged_string s){
-_unsetenv_r( r, string_to_Cstring( s));}
+string_to_Cstring( v), overwrite);} void Cyc_Stdlib_unsetenv( struct
+_tagged_string s){ unsetenv( string_to_Cstring( s));}
