@@ -72,44 +72,44 @@ static $(list_t<designator_t>,exp_t)@ make_struct_arg(exp_t e) {
   return new $(NULL,e);
 }
 // Resolve whether this is a function call or datatype, xdatatype, or struct
-// constructor -- let normal type-checking do the rest of the work.
-// NOTE: We assume q is a relative qvar.
-static void resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es){
+// constructor.  Return false if an error occurs to prevent cascading errors.
+static bool resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es){
   switch (e1->r) {
   case &Var_e(q,*b):
     try {
       TEMP_RGN(te, r) {
         switch (lookup_ordinary(r,te,e1->loc,q,true)) {
         case &VarRes(&Unresolved_b):
-          // error will be caught later
-          return;
+          terr(e1->loc,"undeclared identifier %s",qvar2string(q));
+          return false;
         case &VarRes(bnd):
           *b = bnd;
-          return;
+          return true;
         case &DatatypeRes(tud,tuf):
-          if (tuf->typs == NULL)
+          if (tuf->typs == NULL) {
             // Don't allow "foo()", require "foo"
             terr(e->loc,"%s is a constant, not a function",
                  qvar2string(tuf->name));
+            return false;
+          }
           e->r = new Datatype_e(es,tud,tuf);
-          return;
+          return true;
         case &AggrRes(ad):
           let des = List::map(make_struct_arg,es);
           e->r = new Aggregate_e(ad->name,NULL,des,ad);
-          return;
+          return true;
         case &AnonEnumRes(_,_):
         case &EnumRes(_,_):
           terr(e->loc,"%s is an enum constructor, not a function",qvar2string(q));
-          return;
+          return false;
         }
       }
     } catch { case &Dict::Absent:
-      // print out error message later when type-checking the fn call
-      // terr(e1->loc, "unbound identifier %s",qvar2string(q));
-      return;
+      terr(e1->loc, "undeclared identifier %s",qvar2string(q));
+      return false;
     }
   default:
-    return;
+    return true;
   }
 }
 
@@ -249,10 +249,12 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
         break;
       case &TagType(t1):
 	let t2 = new ValueofType(uint_exp(i,0));
+        /*
 	if(!unify(t1,t2)) {
 	  terr(loc, "expecting %s but found %s",typ2string(t1),typ2string(t2));
 	  explain_failure();
 	}
+        */
 	t = new TagType(t2);
 	break;
       default: // topt isn't int; presumably an error to be caught elsewhere
@@ -341,7 +343,7 @@ static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, qvar_t q,
       TEMP_RGN(te,r) {
         switch (lookup_ordinary(r,te,e->loc,q,true)) {
         case &VarRes(&Unresolved_b): 
-          return expr_err(te,loc,NULL,"undeclared identifier: %s",qvar2string(q));
+          return expr_err(te,loc,NULL,"undeclared identifier %s",qvar2string(q));
         case &VarRes(bnd): 
           *b = bnd; 
           return tcVar(te,loc,topt,e,q,b);
@@ -360,7 +362,7 @@ static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, qvar_t q,
       }
     } catch {
     case &Dict::Absent:
-      return expr_err(te,loc,NULL,"undeclared identifier: %s",qvar2string(q));
+      return expr_err(te,loc,NULL,"undeclared identifier %s",qvar2string(q));
     }
   case &Global_b(vd):
     *q = *vd->name;
@@ -2642,9 +2644,13 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &FnCall_e(e1,es,*vci,*resolved) && (!*resolved):
     // resolve e1 as a function or struct, or datatype constructor and
     // then re-type-check the expression
-    resolve_unknown_fn(te,e,e1,es);
-    *resolved = true;
-    tcExpNoInst(te,topt,e);
+    if (resolve_unknown_fn(te,e,e1,es)) {
+      *resolved = true;
+      tcExpNoInst(te,topt,e);
+    } else {
+      if (topt != NULL) e->topt = *topt;
+      else e->topt = wildtyp(lookup_opt_type_vars(te));
+    }
     return;
 
   case &UnresolvedMem_e(nopt,des):

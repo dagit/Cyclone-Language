@@ -2366,7 +2366,8 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2, bool @alias_coercion) {
       return true;
     } else if ((c = castable(te,e->loc,t1,t2)) != Unknown_coercion) {
       //fprintf(stderr,"found them to be castable\n");
-      unchecked_cast(te,e,t2,c);
+      // if C supports the conversion, then we don't need the cast.
+      if (c != No_coercion) unchecked_cast(te,e,t2,c);
       // we warn for null-checks in the flow analysis now
       if (c != NonNull_to_Null)
 	warn(e->loc,"implicit cast from %s to %s",
@@ -2696,7 +2697,7 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   // we can cast t1 to an int if t1 is a boxed type.
   case &IntType(_,Int_sz):
   case &IntType(_,Long_sz):
-    if (typ_kind(t1)->kind == BoxKind) return No_coercion;
+    if (typ_kind(t1)->kind == BoxKind) return Other_coercion;
     break;
   default: break;
   }
@@ -2777,7 +2778,7 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       return
         // FIX: we need to take any qualifiers into account on typedefs
         (okay && unify(t1a,t2a) && (!tq1a.real_const || tq2a.real_const)) ?
-        Other_coercion : Unknown_coercion;
+        No_coercion : Unknown_coercion;
     default: return Unknown_coercion;
     }
     return Unknown_coercion;
@@ -2788,13 +2789,13 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     case &EnumType(_,ed2):
       if(ed1->fields != NULL && ed2->fields != NULL
 	 && length(ed1->fields->v) >= length(ed2->fields->v))
-	return No_coercion;
+	return Other_coercion;
       break;
     default: break;
     }
     fallthru;
   case &IntType(_,_):
-  case &FloatType(_): return coerceable(t2) ? No_coercion : Unknown_coercion;
+  case &FloatType(_): return coerceable(t2) ? Other_coercion : Unknown_coercion;
     // region_t<`r1> <= region_t<`r2> when `r1 outlives `r2
   case &RgnHandleType(r1):
     switch(t2) {
@@ -3900,11 +3901,15 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         *eptr = e = uint_exp(1,0);
       }
     }
-    Tcexp::tcExp(te,NULL,(exp_t)e);
-    if (!is_const_exp(te,(exp_t)e))
-      terr(loc,"array bounds expression is not constant");
+    TEMP_RGN(te, temp) {
+      let te2 = allow_valueof(temp,te);
+      Tcexp::tcExp(te2,NULL,(exp_t)e);
+    }
     if (!coerce_uint_typ(te,(exp_t)e))
       terr(loc,"array bounds expression is not an unsigned int");
+    cvtenv = i_check_valid_type_level_exp(e,te,cvtenv);
+    if (!is_const_exp(te,(exp_t)e))
+      terr(loc,"array bounds expression is not constant");
     let $(sz,known) = Evexp::eval_const_uint_exp((exp_t)e);
     // FIX: if we have an unknown size then it might not be zero-terminated!
     if (is_zero_terminated && known && sz < 1)
