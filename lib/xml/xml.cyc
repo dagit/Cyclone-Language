@@ -96,17 +96,18 @@ attvalue_t getAttribute(list_t<attribute_t> atrs, name nm)
     match the names in [n], returned in the order the names appear in
     [n].  If a name is missing, a NULL is inserted instead.  Order
     does not matter.  **/
-list_t<attvalue_t *>
-getAttributes(list_t<attribute_t> atrs,list_t<name @> names)
+list_t<attvalue_t *,`r>
+getAttributes(region_t<`r> r,
+	      list_t<attribute_t> atrs,list_t<name @> names)
 {
-  list_t<attvalue_t *`H,`H> res = NULL;
+  list_t<attvalue_t *`H,`r> res = NULL;
   while (names != NULL) {
     try {
       let v = getAttribute(atrs,*(names->hd));
-      res = new List(new v,res);
+      res = rnew (r) List(new v,res);
     } catch {
     default:
-      res = new List(NULL, res);
+      res = rnew (r) List(NULL, res);
       break;
     }
     names = names->tl;
@@ -119,15 +120,16 @@ getAttributes(list_t<attribute_t> atrs,list_t<name @> names)
    match the names in [n].  The lists must match up exactly
    (i.e. order matters).  If order shouldn't matter, you can sort both
    lists first.  */
-list_t<attvalue_t>
-matchAttributes(list_t<attribute_t> atrs,list_t<name @> names) 
+list_t<attvalue_t,`r>
+matchAttributes(region_t<`r> r,
+		list_t<attribute_t> atrs,list_t<name @> names) 
 {
-  list_t<attvalue_t,`H> res = NULL;
+  list_t<attvalue_t,`r> res = NULL;
   while (names != NULL) {
     if (atrs != NULL) {
       let &$(nm,val) = atrs->hd;
       if (!strcmp(nm,*(names->hd))) {
-	res = new List(val,res);
+	res = rnew (r) List(val,res);
       }
       else
 	throw new procXMLdocFailed

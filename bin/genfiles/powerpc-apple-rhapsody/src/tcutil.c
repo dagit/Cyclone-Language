@@ -2254,47 +2254,47 @@ _tmp283)->f1;_LL21D: {struct _dyneither_ptr*_tmp315=_tmp282->name;struct
 _dyneither_ptr*_tmp316=_tmp284->name;int _tmp317=_tmp282->identity;int _tmp318=
 _tmp284->identity;void*_tmp319=Cyc_Tcutil_tvar_kind(_tmp282);void*_tmp31A=Cyc_Tcutil_tvar_kind(
 _tmp284);if(_tmp318 == _tmp317  && Cyc_strptrcmp(_tmp315,_tmp316)== 0){if(_tmp319
-!= _tmp31A){const char*_tmpCF5;void*_tmpCF4[3];struct Cyc_String_pa_struct _tmpCF3;
-struct Cyc_String_pa_struct _tmpCF2;struct Cyc_String_pa_struct _tmpCF1;(_tmpCF1.tag=
-0,((_tmpCF1.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_kind2string(
-_tmp31A)),((_tmpCF2.tag=0,((_tmpCF2.f1=(struct _dyneither_ptr)((struct
-_dyneither_ptr)Cyc_Absynpp_kind2string(_tmp319)),((_tmpCF3.tag=0,((_tmpCF3.f1=(
-struct _dyneither_ptr)((struct _dyneither_ptr)*_tmp315),((_tmpCF4[0]=& _tmpCF3,((
-_tmpCF4[1]=& _tmpCF2,((_tmpCF4[2]=& _tmpCF1,((int(*)(struct _dyneither_ptr fmt,
-struct _dyneither_ptr ap))Cyc_Tcutil_impos)(((_tmpCF5="same type variable %s has kinds %s and %s",
-_tag_dyneither(_tmpCF5,sizeof(char),42))),_tag_dyneither(_tmpCF4,sizeof(void*),3)))))))))))))))))));}
-return;}{const char*_tmpCF6;Cyc_Tcutil_failure_reason=((_tmpCF6="(variable types are not the same)",
-_tag_dyneither(_tmpCF6,sizeof(char),34)));}goto _LL217;}_LL21E: _tmp285=_tmp27D.f1;
-if(_tmp285 <= (void*)4)goto _LL220;if(*((int*)_tmp285)!= 10)goto _LL220;_tmp286=((
-struct Cyc_Absyn_AggrType_struct*)_tmp285)->f1;_tmp287=_tmp286.aggr_info;_tmp288=
-_tmp286.targs;_tmp289=_tmp27D.f2;if(_tmp289 <= (void*)4)goto _LL220;if(*((int*)
-_tmp289)!= 10)goto _LL220;_tmp28A=((struct Cyc_Absyn_AggrType_struct*)_tmp289)->f1;
-_tmp28B=_tmp28A.aggr_info;_tmp28C=_tmp28A.targs;_LL21F: {void*_tmp322;struct
-_tuple2*_tmp323;struct _tuple12 _tmp321=Cyc_Absyn_aggr_kinded_name(_tmp28B);
-_tmp322=_tmp321.f1;_tmp323=_tmp321.f2;{void*_tmp325;struct _tuple2*_tmp326;struct
-_tuple12 _tmp324=Cyc_Absyn_aggr_kinded_name(_tmp287);_tmp325=_tmp324.f1;_tmp326=
-_tmp324.f2;if(_tmp322 != _tmp325){{const char*_tmpCF7;Cyc_Tcutil_failure_reason=((
-_tmpCF7="(struct and union type)",_tag_dyneither(_tmpCF7,sizeof(char),24)));}
-goto _LL217;}if(Cyc_Absyn_qvar_cmp(_tmp323,_tmp326)!= 0){{const char*_tmpCF8;Cyc_Tcutil_failure_reason=((
-_tmpCF8="(different type name)",_tag_dyneither(_tmpCF8,sizeof(char),22)));}goto
-_LL217;}Cyc_Tcutil_unify_list(_tmp28C,_tmp288);return;}}_LL220: _tmp28D=_tmp27D.f1;
-if(_tmp28D <= (void*)4)goto _LL222;if(*((int*)_tmp28D)!= 12)goto _LL222;_tmp28E=((
-struct Cyc_Absyn_EnumType_struct*)_tmp28D)->f1;_tmp28F=_tmp27D.f2;if(_tmp28F <= (
-void*)4)goto _LL222;if(*((int*)_tmp28F)!= 12)goto _LL222;_tmp290=((struct Cyc_Absyn_EnumType_struct*)
-_tmp28F)->f1;_LL221: if(Cyc_Absyn_qvar_cmp(_tmp28E,_tmp290)== 0)return;{const char*
-_tmpCF9;Cyc_Tcutil_failure_reason=((_tmpCF9="(different enum types)",
-_tag_dyneither(_tmpCF9,sizeof(char),23)));}goto _LL217;_LL222: _tmp291=_tmp27D.f1;
-if(_tmp291 <= (void*)4)goto _LL224;if(*((int*)_tmp291)!= 13)goto _LL224;_tmp292=((
-struct Cyc_Absyn_AnonEnumType_struct*)_tmp291)->f1;_tmp293=_tmp27D.f2;if(_tmp293
-<= (void*)4)goto _LL224;if(*((int*)_tmp293)!= 13)goto _LL224;_tmp294=((struct Cyc_Absyn_AnonEnumType_struct*)
-_tmp293)->f1;_LL223: {int bad=0;for(0;_tmp292 != 0  && _tmp294 != 0;(_tmp292=_tmp292->tl,
-_tmp294=_tmp294->tl)){struct Cyc_Absyn_Enumfield*_tmp32A=(struct Cyc_Absyn_Enumfield*)
-_tmp292->hd;struct Cyc_Absyn_Enumfield*_tmp32B=(struct Cyc_Absyn_Enumfield*)
-_tmp294->hd;if(Cyc_Absyn_qvar_cmp(_tmp32A->name,_tmp32B->name)!= 0){{const char*
-_tmpCFA;Cyc_Tcutil_failure_reason=((_tmpCFA="(different names for enum fields)",
-_tag_dyneither(_tmpCFA,sizeof(char),34)));}bad=1;break;}if(_tmp32A->tag == 
-_tmp32B->tag)continue;if(_tmp32A->tag == 0  || _tmp32B->tag == 0){{const char*
-_tmpCFB;Cyc_Tcutil_failure_reason=((_tmpCFB="(different tag values for enum fields)",
+!= _tmp31A){{const char*_tmpCF5;void*_tmpCF4[3];struct Cyc_String_pa_struct _tmpCF3;
+struct Cyc_String_pa_struct _tmpCF2;struct Cyc_String_pa_struct _tmpCF1;Cyc_Tcutil_failure_reason=(
+struct _dyneither_ptr)((_tmpCF1.tag=0,((_tmpCF1.f1=(struct _dyneither_ptr)((struct
+_dyneither_ptr)Cyc_Absynpp_kind2string(_tmp31A)),((_tmpCF2.tag=0,((_tmpCF2.f1=(
+struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Absynpp_kind2string(_tmp319)),((
+_tmpCF3.tag=0,((_tmpCF3.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*_tmp315),((
+_tmpCF4[0]=& _tmpCF3,((_tmpCF4[1]=& _tmpCF2,((_tmpCF4[2]=& _tmpCF1,Cyc_aprintf(((
+_tmpCF5="same type variable %s has kinds %s and %s",_tag_dyneither(_tmpCF5,
+sizeof(char),42))),_tag_dyneither(_tmpCF4,sizeof(void*),3))))))))))))))))))));}(
+int)_throw((void*)Cyc_Tcutil_Unify);}return;}{const char*_tmpCF6;Cyc_Tcutil_failure_reason=((
+_tmpCF6="(variable types are not the same)",_tag_dyneither(_tmpCF6,sizeof(char),
+34)));}goto _LL217;}_LL21E: _tmp285=_tmp27D.f1;if(_tmp285 <= (void*)4)goto _LL220;
+if(*((int*)_tmp285)!= 10)goto _LL220;_tmp286=((struct Cyc_Absyn_AggrType_struct*)
+_tmp285)->f1;_tmp287=_tmp286.aggr_info;_tmp288=_tmp286.targs;_tmp289=_tmp27D.f2;
+if(_tmp289 <= (void*)4)goto _LL220;if(*((int*)_tmp289)!= 10)goto _LL220;_tmp28A=((
+struct Cyc_Absyn_AggrType_struct*)_tmp289)->f1;_tmp28B=_tmp28A.aggr_info;_tmp28C=
+_tmp28A.targs;_LL21F: {void*_tmp322;struct _tuple2*_tmp323;struct _tuple12 _tmp321=
+Cyc_Absyn_aggr_kinded_name(_tmp28B);_tmp322=_tmp321.f1;_tmp323=_tmp321.f2;{void*
+_tmp325;struct _tuple2*_tmp326;struct _tuple12 _tmp324=Cyc_Absyn_aggr_kinded_name(
+_tmp287);_tmp325=_tmp324.f1;_tmp326=_tmp324.f2;if(_tmp322 != _tmp325){{const char*
+_tmpCF7;Cyc_Tcutil_failure_reason=((_tmpCF7="(struct and union type)",
+_tag_dyneither(_tmpCF7,sizeof(char),24)));}goto _LL217;}if(Cyc_Absyn_qvar_cmp(
+_tmp323,_tmp326)!= 0){{const char*_tmpCF8;Cyc_Tcutil_failure_reason=((_tmpCF8="(different type name)",
+_tag_dyneither(_tmpCF8,sizeof(char),22)));}goto _LL217;}Cyc_Tcutil_unify_list(
+_tmp28C,_tmp288);return;}}_LL220: _tmp28D=_tmp27D.f1;if(_tmp28D <= (void*)4)goto
+_LL222;if(*((int*)_tmp28D)!= 12)goto _LL222;_tmp28E=((struct Cyc_Absyn_EnumType_struct*)
+_tmp28D)->f1;_tmp28F=_tmp27D.f2;if(_tmp28F <= (void*)4)goto _LL222;if(*((int*)
+_tmp28F)!= 12)goto _LL222;_tmp290=((struct Cyc_Absyn_EnumType_struct*)_tmp28F)->f1;
+_LL221: if(Cyc_Absyn_qvar_cmp(_tmp28E,_tmp290)== 0)return;{const char*_tmpCF9;Cyc_Tcutil_failure_reason=((
+_tmpCF9="(different enum types)",_tag_dyneither(_tmpCF9,sizeof(char),23)));}goto
+_LL217;_LL222: _tmp291=_tmp27D.f1;if(_tmp291 <= (void*)4)goto _LL224;if(*((int*)
+_tmp291)!= 13)goto _LL224;_tmp292=((struct Cyc_Absyn_AnonEnumType_struct*)_tmp291)->f1;
+_tmp293=_tmp27D.f2;if(_tmp293 <= (void*)4)goto _LL224;if(*((int*)_tmp293)!= 13)
+goto _LL224;_tmp294=((struct Cyc_Absyn_AnonEnumType_struct*)_tmp293)->f1;_LL223: {
+int bad=0;for(0;_tmp292 != 0  && _tmp294 != 0;(_tmp292=_tmp292->tl,_tmp294=_tmp294->tl)){
+struct Cyc_Absyn_Enumfield*_tmp32A=(struct Cyc_Absyn_Enumfield*)_tmp292->hd;struct
+Cyc_Absyn_Enumfield*_tmp32B=(struct Cyc_Absyn_Enumfield*)_tmp294->hd;if(Cyc_Absyn_qvar_cmp(
+_tmp32A->name,_tmp32B->name)!= 0){{const char*_tmpCFA;Cyc_Tcutil_failure_reason=((
+_tmpCFA="(different names for enum fields)",_tag_dyneither(_tmpCFA,sizeof(char),
+34)));}bad=1;break;}if(_tmp32A->tag == _tmp32B->tag)continue;if(_tmp32A->tag == 0
+ || _tmp32B->tag == 0){{const char*_tmpCFB;Cyc_Tcutil_failure_reason=((_tmpCFB="(different tag values for enum fields)",
 _tag_dyneither(_tmpCFB,sizeof(char),39)));}bad=1;break;}if(!Cyc_Evexp_same_const_exp((
 struct Cyc_Absyn_Exp*)_check_null(_tmp32A->tag),(struct Cyc_Absyn_Exp*)_check_null(
 _tmp32B->tag))){{const char*_tmpCFC;Cyc_Tcutil_failure_reason=((_tmpCFC="(different tag values for enum fields)",

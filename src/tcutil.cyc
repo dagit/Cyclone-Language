@@ -1106,9 +1106,12 @@ void unify_it(type_t t1, type_t t2) {
     // FIX: shouldn't need the strptrcmp any more...
     if (id1 == id2 && strptrcmp(x2,x1) == 0) {
       // sanity check
-      if (k2 != k1)
-        impos("same type variable %s has kinds %s and %s",
-              *x2,kind2string(k2),kind2string(k1));
+      if (k2 != k1) {
+        failure_reason = 
+	  aprintf("same type variable %s has kinds %s and %s",
+		  *x2,kind2string(k2),kind2string(k1));
+	throw Unify;
+      }
       return;
     } 
     failure_reason = "(variable types are not the same)";

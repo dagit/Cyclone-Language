@@ -3188,17 +3188,26 @@ DynCast:
     else
       swap_fn = _swap_word_e;
 
-    // turn each expression into a declaration + initializer
-    // followed by a call to the swap primtive
-//     type_t vtyp = at_typ(e1_old_typ,HeapRgn /* XXX */,
-// 			 empty_tqual(NULL),false_conref);
-//     qvar_t v1 = temp_var();
-//     qvar_t v2 = temp_var();
-//     exp_t fe = fncall_exp(swap_fn,list(var_exp(v1,e1->loc),
-// 				       var_exp(v2,e2->loc)),e->loc);
+    // some sanity checks for now
+    // MWH: here was my version of this stuff; Greg's looks simpler
+//     if (!is_lvalue(e1))
+//       toc_impos("Swap_e: %s is not an l-value\n",Absynpp::exp2string(e1));
+//     if (!is_lvalue(e2))
+//       toc_impos("Swap_e: %s is not an l-value\n",Absynpp::exp2string(e2));
 
     // take the address of each operand; the runtime system primitive
     // will dereference and swap the given lhs's.
+//     let e1a = address_exp(e1,DL);
+//     e1a->loc = e1->loc;
+//     e1a->topt = new Opt(at_typ(e1->topt->v,HeapRgn,
+// 			       empty_tqual(NULL),false_conref));
+//     let e2a = address_exp(e2,DL);
+//     e2a->loc = e2->loc;
+//     e2a->topt = new Opt(at_typ(e2->topt->v,HeapRgn,
+// 			       empty_tqual(NULL),false_conref));
+//     exp_to_c(nv,e1a);
+//     exp_to_c(nv,e2a);
+//     e->r = fncall_exp_r(swap_fn,list(e1a,e2a));
     exp_to_c(nv,e1);
     exp_to_c(nv,e2);
 

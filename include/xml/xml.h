@@ -87,19 +87,19 @@ extern attvalue_t matchAttribute(attribute_t atr, name nm);
       attribute [atr] if it has name [nm]; throws [procXMLdocFailed]
       if not. **/
 
-extern list_t<attvalue_t *>
-getAttributes(list_t<attribute_t> atrs,list_t<name @> names);
-  /** [getAttributes(a,n)] returns the attribute values from [a] that
+extern list_t<attvalue_t *,`r>
+getAttributes(region_t<`r> r,list_t<attribute_t> atrs,list_t<name @> names);
+  /** [getAttributes(r,a,n)] returns the attribute values from [a] that
       match the names in [n], returned in the order the names appear in
       [n].  If a name is missing, a NULL is inserted instead.  Order
-      does not matter.  **/
+      does not matter.  The result list is allocated in region [r]. **/
 
-extern list_t<attvalue_t>
-matchAttributes(list_t<attribute_t> atrs,list_t<name @> names);
+extern list_t<attvalue_t,`r>
+matchAttributes(region_t<`r> r,list_t<attribute_t> atrs,list_t<name @> names);
   /** [matchAttributes(a,n)] returns the attribute values from [a] that
       match the names in [n].  The lists must match up exactly
       (i.e. order matters).  If order shouldn't matter, you can sort
-      both lists first.  **/
+      both lists first.  The result list is allocated in region [r]. **/
 
 extern $(list_t<content_t>,list_t<attribute_t>)
 getElemData(content_t doc, string_t tagname);

@@ -53,10 +53,26 @@ struct RgnPO<`r::R> {
   tvar_t youngest_unresettable; // fact: there always is one
 };
 
+/* Can assign a (col) to a (row):
+       R  UR TR
+   R   x  x  x
+   UR     x
+   TR        x
+
+   Therefore, we allow outlives constraints that have the form:
+     x can outlive an R
+     UR can outlive a UR
+     TR can outlive a TR
+   Or said another way
+     UR can outlive R,UR
+     R  can outlive R
+     TR can outlive TR,R
+*/
+
 // makes sure that for all regions r in [eff], kind(r) <= kind([rgn]);
 // also allows regions(`a) to outlive only regions having R kind
 static bool valid_constraint(type_t eff, type_t rgn) {
-  let rkind = typ_kind(rgn);
+  let rgnkind = typ_kind(rgn);
   switch (compress(eff)) {
   case &JoinEff(es):
     for (; es != NULL; es = es->tl) 
@@ -67,12 +83,15 @@ static bool valid_constraint(type_t eff, type_t rgn) {
   case &VarType(_): return true;
   case &RgnsEff(t): 
     // Only allow regions(`a) to outlive R kinded vars
-//     fprintf(stderr,"checking regions(`a) > %s\n",Absynpp::typ2string(rgn));
-    if (rkind == RgnKind) return true; else return false;
+    //   FIX: this will change when we properly deal with uniqueness and
+    //   polymorphism
+    if (rgnkind == RgnKind) return true; else return false;
   case &AccessEff(r): 
 //     fprintf(stderr,"checking %s > %s; are the kinds reversed?\n",
 // 	    Absynpp::typ2string(rgn), Absynpp::typ2string(r));
-    return kind_leq(typ_kind(r),rkind);
+    let rkind = typ_kind(r);
+    return (rgnkind == RgnKind) || (rkind == rgnkind);
+//     return kind_leq(typ_kind(r),rgnkind);
   default:
     impos("bad effect |%s| passed to add_outlives_constraint",
 	  Absynpp::typ2string(eff));
@@ -163,16 +182,11 @@ rgn_po_t<`r> initial_fn_po(region_t<`r> r,
       break;
     default: break;
     }
-  // need to filter any TR or UR kind variables from effect, since
-  // they are not <= the fst_rgn, which has R kind;
-  // assumes that fst_rgn has R kind
+  // make sure we don't have any bogus constraints
   if (!valid_constraint(effect,new VarType(fst_rgn))) {
 //     fprintf(stderr,"filtering effect\n");
-    // JGM:  I'm *not* filtering the TR vars -- they can't be freed
-    // so they must outlive the region of the function, no?
-
-    //    effect = filter_effect(effect,TopRgnKind);
-    effect = filter_effect(effect,UniqueRgnKind);
+    terr(loc,"Invalid region ordering constraint; kind mismatch");
+    return rnew(r) RgnPO(d,empty_effect,empty_effect,fst_rgn);
   }
 //   fprintf(stderr,"  Relating %s <= effect %s\n",
 // 	  Absynpp::typ2string(new VarType(fst_rgn)),
@@ -263,12 +277,12 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
     case UniqueRgn: return true;
     case HeapRgn:
       // The heap outlives all regions except the unique region
-      //   and regions with UR kind
+      //   and regions with UR and TR kind
       switch (compress(rgn)) {
       case UniqueRgn: return false;
       case &VarType(tv):
-	if (tvar_kind(tv) == UniqueRgnKind) return false;
-	fallthru;
+	if (tvar_kind(tv) == RgnKind) return true;
+	else return false;
       default:
 	return true;
       }
