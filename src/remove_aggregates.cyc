@@ -38,6 +38,7 @@
 #include "warn.h"
 #include "absynpp.h"
 #include "toc.h" // for temp_var and Dest
+#include "tcutil.h" // for is_array
 #include "remove_aggregates.h"
 using Core;
 using List;
@@ -100,6 +101,20 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
   bool did_assign = false; // changed in comprehension, array and aggr cases
 
   switch(e->r) {
+  case &Const_e(Cnst{.String_c = s}):
+    // FIX! need to deal with Wstring's too!
+    if (env.ctxt == AggrField && Tcutil::is_array((type_t)e->topt)) {
+      list_t<$(list_t<designator_t>,exp_t)@> dles = NULL;
+      let n = numelts(s);
+      for (unsigned i = 0; i < n; i++) {
+        let c = char_exp(s[i],0);
+        c->topt = char_typ;
+        dles = new List{new $(NULL,c), dles};
+      }
+      dles = List::imp_rev(dles);
+      e->r = new Array_e(dles);
+      return remove_aggrs_exp(env, e);
+    } else break;
   case &Const_e(_):
   case &Sizeoftyp_e(_):  
   case &Offsetof_e(_,_): 
