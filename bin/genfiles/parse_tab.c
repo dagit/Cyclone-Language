@@ -1643,8 +1643,8 @@ struct _tuple12*_tmp92D;struct Cyc_List_List*_tmp92C;return(_tmp92C=_region_mall
 r,sizeof(*_tmp92C)),((_tmp92C->hd=((_tmp92D=_region_malloc(r,sizeof(*_tmp92D)),((
 _tmp92D->f1=_tmp130,((_tmp92D->f2=_tmp132,((_tmp92D->f3=_tmp133,((_tmp92D->f4=
 _tmp134,((_tmp92D->f5=_tmp135,_tmp92D)))))))))))),((_tmp92C->tl=Cyc_Parse_apply_tmss(
-r,_tmp132,Cyc_Tcutil_copy_type(t),ds->tl,shared_atts),_tmp92C)))));}};}static
-struct _tuple10 Cyc_Parse_apply_tms(struct Cyc_Absyn_Tqual tq,void*t,struct Cyc_List_List*
+r,tq,Cyc_Tcutil_copy_type(t),ds->tl,shared_atts),_tmp92C)))));}};}static struct
+_tuple10 Cyc_Parse_apply_tms(struct Cyc_Absyn_Tqual tq,void*t,struct Cyc_List_List*
 atts,struct Cyc_List_List*tms){if(tms == 0){struct _tuple10 _tmp92E;return(_tmp92E.f1=
 tq,((_tmp92E.f2=t,((_tmp92E.f3=0,((_tmp92E.f4=atts,_tmp92E)))))));}{void*_tmp13B=(
 void*)tms->hd;union Cyc_Absyn_Constraint*_tmp13D;struct Cyc_Position_Segment*

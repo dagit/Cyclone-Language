@@ -633,13 +633,13 @@ static list_t<$(qvar_t,tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)@`r,`r>
   if (ds==NULL) return NULL;
   let d = ds->hd;
   let q = d->id;
-  let $(tq,new_typ,tvs,atts) = apply_tms(tq,t,shared_atts,d->tms);
+  let $(tq2,new_typ,tvs,atts) = apply_tms(tq,t,shared_atts,d->tms);
   // NB: we copy the type here to avoid sharing definitions
   // but we avoid the copy when ds->tl is NULL
   if (ds->tl == NULL) 
-    return rnew(r) List(rnew(r) $(q,tq,new_typ,tvs,atts),NULL);
+    return rnew(r) List(rnew(r) $(q,tq2,new_typ,tvs,atts),NULL);
   else
-    return rnew(r) List(rnew(r) $(q,tq,new_typ,tvs,atts),
+    return rnew(r) List(rnew(r) $(q,tq2,new_typ,tvs,atts),
                     apply_tmss(r,tq,Tcutil::copy_type(t),ds->tl,shared_atts));
 }
 
