@@ -5,15 +5,6 @@
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
-///////////////////// Basic types
-typedef int Int;
-typedef int Long;
-typedef int Short;
-typedef int Float;
-typedef struct _boxed_double_struct { double v; } *Double;
-typedef struct _boxed_long_long_struct { long long v; } *_LongLong;
-typedef int Char;
-
 ///////////////////// Strings
 struct _tagged_string { char *curr; char *base; char *last_plus_one; };
 extern struct _tagged_string xprintf(char *fmt, ...);
