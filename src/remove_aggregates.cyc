@@ -155,8 +155,9 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
       remove_aggrs_exp(Env(AggrField,field_dest),field_exp);
     }
     // note: we must preserve left-to-right since we're linearizing here
-    if(dles==NULL)
+    if(dles==NULL) {
       Warn::impos("zero-field aggregate");
+    }
     exp_t init_e = (*dles->hd)[1];
     for(dles=dles->tl; dles!=NULL; dles=dles->tl)
       init_e = seq_exp(init_e,(*dles->hd)[1],DL);

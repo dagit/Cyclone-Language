@@ -1272,10 +1272,10 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     else
       return $(outflow,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
 
-  case &Malloc_e(MallocInfo{iscalloc,eopt,topt,exp,isfat,_}):
+  case &Malloc_e(MallocInfo{mknd,eopt,topt,exp,isfat,_}):
     absRval_t place_val;
     if(isfat) place_val = fenv->notzeroall;
-    else if(iscalloc) place_val = typ_to_absrval(fenv,*topt,false,fenv->zero);
+    else if(mknd==Calloc) place_val = typ_to_absrval(fenv,*topt,false,fenv->zero);
     else place_val = typ_to_absrval(fenv,*topt,false,fenv->unknown_none);
     flow_t    outflow;
     if(eopt!=NULL) {

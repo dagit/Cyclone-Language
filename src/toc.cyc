@@ -242,6 +242,7 @@ MAKE_VAR(_cycalloc_atomic);
 MAKE_VAR(_cyccalloc_atomic);
 MAKE_VAR(_region_malloc);
 MAKE_VAR(_region_calloc);
+MAKE_VAR(_region_vmalloc);
 MAKE_VAR(_fast_region_malloc);
 MAKE_VAR(_check_times);
 MAKE_VAR(_new_region);
@@ -960,6 +961,10 @@ static exp_t calloc_exp(type_t elt_type, exp_t s, exp_t n) {
 // region malloc something
 static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
   return fncall_exp_dl(_region_malloc_e,rgn,s);
+}
+// region vmalloc something
+static exp_t rvmalloc_exp(exp_t rgn, exp_t s) {
+  return fncall_exp_dl(_region_vmalloc_e,rgn,s);
 }
 // region malloc (inlined) something
 static exp_t rmalloc_inline_exp(exp_t rgn, exp_t s) {
@@ -2640,7 +2645,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Enum_e(...):
   case &AnonEnum_e(...): break;
 
-  case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,num_elts,is_fat,inline_call}):
+  case &Malloc_e(MallocInfo{mknd,rgnopt,topt,num_elts,is_fat,inline_call}):
     type_t t_c = typ_to_c(*topt);
     exp_to_c(nv,num_elts);
     qvar_opt_t x = NULL;
@@ -2650,7 +2655,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       x = temp_var();
       num_elts2 = var_exp(x,DL);
     }
-    if (is_calloc) {
+    if (mknd == Calloc) {
       if (rgnopt != NULL && !Flags::no_regions) {
 	exp_to_c(nv,rgnopt);
 	pexp = fncall_exp_dl(_region_calloc_e,
@@ -2660,13 +2665,13 @@ static void exp_to_c(env_t nv, exp_t e) {
     } else {
       if (rgnopt != NULL && !Flags::no_regions) {
 	exp_to_c(nv,rgnopt);
-	let fn_e = inline_call ? rmalloc_inline_exp : rmalloc_exp;
+	let fn_e = (mknd == Vmalloc ? rvmalloc_exp : inline_call ? rmalloc_inline_exp : rmalloc_exp);
 	pexp = fn_e(rgnopt, num_elts2);
       } else
 	pexp = malloc_exp(*topt, num_elts2);
     }
     if (is_fat) {
-      exp_t  elt_sz = is_calloc ? sizeoftype_exp(t_c,DL) : uint_exp(1,DL);
+      exp_t  elt_sz = (mknd==Calloc ? sizeoftype_exp(t_c,DL) : uint_exp(1,DL));
       exp_t  rexp   = fncall_exp_dl(_tag_fat_e,pexp,elt_sz,num_elts2);
       stmt_t s      = declare_stmt((qvar_t)x, uint_type, num_elts,
 				   exp_stmt(rexp,DL),DL);

@@ -28,10 +28,16 @@
 
 #include <linux/kernel.h>
 #include <linux/mm.h>
+
+#include <linux/highmem.h>	/* several arch define VMALLOC_END via PKMAP_BASE */
+#include <asm/pgtable.h>
+
 #include <linux/string.h>
 
 extern void *kmalloc(size_t, int);
+extern void * __vmalloc (unsigned long size, int gfp_mask, pgprot_t prot);
 extern void kfree(const void *);
+extern void vfree(const void *);
 
 #define calloc cyc_kcalloc
 #define realloc cyc_krealloc
@@ -40,6 +46,9 @@ extern void kfree(const void *);
 static void* cyc_kcalloc(size_t s, int mult);
 void* cyc_krealloc(void *ptr, size_t oldsize, size_t newsize);
 #endif
+
+void* cyc_vmalloc(size_t s);
+void cyc_vfree(void *ptr);
 
 /****************************************************************************/
 /* Stuff that's shared amongst all the different ways to implement malloc() */
@@ -211,6 +220,34 @@ void* cyc_krealloc(void *ptr, size_t oldsize, size_t newsize) {
   kfree(ptr);
   total_bytes_allocd = total_bytes_allocd + newsize - oldsize;
   malloc_sizeb(p, newsize);
+}
+
+void *cyc_vmalloc(size_t s) {
+  unsigned long adr=0;
+  void *mem = __vmalloc(s, GFP_KERNEL | __GFP_HIGHMEM, PAGE_KERNEL);
+  if (mem) 
+    {
+      memset(mem, 0, s); /* Clear the ram out, no junk to the user */
+    }
+  return mem;
+}
+
+void cyc_vfree(void *mem) {
+  unsigned long adr;
+  if (mem) 
+    {
+      vfree(mem);
+    }
+}
+
+#else 
+
+void *cyc_vmalloc(size_t s) {
+  return GC_malloc(s);
+}
+
+void cyc_vfree(void *ptr) {
+  GC_free(ptr);
 }
 
 #endif

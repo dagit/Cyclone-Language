@@ -929,7 +929,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       scan_type(t1,dep);
       scan_exp(e1,dep);
       return;
-    case &Malloc_e(MallocInfo{iscalloc,ropt,topt,e,_,_}):
+    case &Malloc_e(MallocInfo{mknd,ropt,topt,e,_,_}):
       if (ropt != NULL) scan_exp((exp_t)ropt,dep);
       if (topt != NULL) scan_type(*topt,dep);
       scan_exp(e,dep);

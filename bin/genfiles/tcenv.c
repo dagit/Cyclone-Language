@@ -1,6 +1,6 @@
 #include <setjmp.h>
 /* This is a C header file to be used by the output of the Cyclone to
-   C translator.  The corresponding definitions are in file lib/runtime_*.c */
+   C translator  The corresponding definitions are in file lib/runtime_*.c */
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
@@ -39,6 +39,9 @@ struct _pool;
 struct _RegionHandle {
   struct _RuntimeStack s;
   struct _RegionPage *curr;
+#if(defined(__linux__) && defined(__KERNEL__))
+  struct _RegionPage *vpage;
+#endif 
   char               *offset;
   char               *last_plus_one;
   struct _DynRegionHandle *sub_regions;
@@ -63,6 +66,10 @@ struct Cyc_Core_DynamicRegion {
 struct _RegionHandle _new_region(const char*);
 void* _region_malloc(struct _RegionHandle*, unsigned);
 void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
+void* _region_vmalloc(struct _RegionHandle*, unsigned);
+void   _free_region(struct _RegionHandle*);
+struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
+void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
@@ -277,11 +284,23 @@ void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned)
 //Not a macro since initialization order matters. Defined in runtime_zeroterm.c.
 struct _fat_ptr _fat_ptr_decrease_size(struct _fat_ptr,unsigned sz,unsigned numelts);
 
+#ifdef CYC_GC_PTHREAD_REDIRECTS
+# define pthread_create GC_pthread_create
+# define pthread_sigmask GC_pthread_sigmask
+# define pthread_join GC_pthread_join
+# define pthread_detach GC_pthread_detach
+# define dlopen GC_dlopen
+#endif
 /* Allocation */
 void* GC_malloc(int);
 void* GC_malloc_atomic(int);
 void* GC_calloc(unsigned,unsigned);
 void* GC_calloc_atomic(unsigned,unsigned);
+
+#if(defined(__linux__) && defined(__KERNEL__))
+void *cyc_vmalloc(unsigned);
+void cyc_vfree(void *);
+#endif
 // bound the allocation size to be < MAX_ALLOC_SIZE. See macros below for usage.
 #define MAX_MALLOC_SIZE (1 << 28)
 void* _bounded_GC_malloc(int,const char*,int);
@@ -366,30 +385,30 @@ extern struct Cyc_List_List*Cyc_List_append(struct Cyc_List_List*,struct Cyc_Lis
 extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
 # 50 "string.h"
 extern int Cyc_strptrcmp(struct _fat_ptr*,struct _fat_ptr*);struct _union_Nmspace_Rel_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Abs_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_C_n{int tag;struct Cyc_List_List*val;};struct _union_Nmspace_Loc_n{int tag;int val;};union Cyc_Absyn_Nmspace{struct _union_Nmspace_Rel_n Rel_n;struct _union_Nmspace_Abs_n Abs_n;struct _union_Nmspace_C_n C_n;struct _union_Nmspace_Loc_n Loc_n;};struct _tuple0{union Cyc_Absyn_Nmspace f1;struct _fat_ptr*f2;};
-# 149 "absyn.h"
+# 150 "absyn.h"
 enum Cyc_Absyn_Scope{Cyc_Absyn_Static =0U,Cyc_Absyn_Abstract =1U,Cyc_Absyn_Public =2U,Cyc_Absyn_Extern =3U,Cyc_Absyn_ExternC =4U,Cyc_Absyn_Register =5U};struct Cyc_Absyn_Tqual{int print_const: 1;int q_volatile: 1;int q_restrict: 1;int real_const: 1;unsigned loc;};
-# 172
+# 173
 enum Cyc_Absyn_AggrKind{Cyc_Absyn_StructA =0U,Cyc_Absyn_UnionA =1U};
-# 175
+# 176
 enum Cyc_Absyn_AliasQual{Cyc_Absyn_Aliasable =0U,Cyc_Absyn_Unique =1U,Cyc_Absyn_Top =2U};
-# 180
+# 181
 enum Cyc_Absyn_KindQual{Cyc_Absyn_AnyKind =0U,Cyc_Absyn_MemKind =1U,Cyc_Absyn_BoxKind =2U,Cyc_Absyn_RgnKind =3U,Cyc_Absyn_EffKind =4U,Cyc_Absyn_IntKind =5U,Cyc_Absyn_BoolKind =6U,Cyc_Absyn_PtrBndKind =7U};struct Cyc_Absyn_Kind{enum Cyc_Absyn_KindQual kind;enum Cyc_Absyn_AliasQual aliasqual;};struct Cyc_Absyn_Eq_kb_Absyn_KindBound_struct{int tag;struct Cyc_Absyn_Kind*f1;};struct Cyc_Absyn_Tvar{struct _fat_ptr*name;int identity;void*kind;};struct Cyc_Absyn_VarargInfo{struct _fat_ptr*name;struct Cyc_Absyn_Tqual tq;void*type;int inject;};struct Cyc_Absyn_FnInfo{struct Cyc_List_List*tvars;void*effect;struct Cyc_Absyn_Tqual ret_tqual;void*ret_type;struct Cyc_List_List*args;int c_varargs;struct Cyc_Absyn_VarargInfo*cyc_varargs;struct Cyc_List_List*rgn_po;struct Cyc_List_List*attributes;struct Cyc_Absyn_Exp*requires_clause;struct Cyc_List_List*requires_relns;struct Cyc_Absyn_Exp*ensures_clause;struct Cyc_List_List*ensures_relns;struct Cyc_Absyn_Vardecl*return_value;};struct Cyc_Absyn_VarType_Absyn_Type_struct{int tag;struct Cyc_Absyn_Tvar*f1;};struct Cyc_Absyn_Exp{void*topt;void*r;unsigned loc;void*annot;};struct Cyc_Absyn_Stmt{void*r;unsigned loc;void*annot;};struct Cyc_Absyn_Pat{void*r;void*topt;unsigned loc;};struct Cyc_Absyn_Switch_clause{struct Cyc_Absyn_Pat*pattern;struct Cyc_Core_Opt*pat_vars;struct Cyc_Absyn_Exp*where_clause;struct Cyc_Absyn_Stmt*body;unsigned loc;};struct Cyc_Absyn_Vardecl{enum Cyc_Absyn_Scope sc;struct _tuple0*name;unsigned varloc;struct Cyc_Absyn_Tqual tq;void*type;struct Cyc_Absyn_Exp*initializer;void*rgn;struct Cyc_List_List*attributes;int escapes;int is_proto;};struct Cyc_Absyn_Fndecl{enum Cyc_Absyn_Scope sc;int is_inline;struct _tuple0*name;struct Cyc_Absyn_Stmt*body;struct Cyc_Absyn_FnInfo i;void*cached_type;struct Cyc_Core_Opt*param_vardecls;struct Cyc_Absyn_Vardecl*fn_vardecl;enum Cyc_Absyn_Scope orig_scope;};struct Cyc_Absyn_AggrdeclImpl{struct Cyc_List_List*exist_vars;struct Cyc_List_List*rgn_po;struct Cyc_List_List*fields;int tagged;};struct Cyc_Absyn_Aggrdecl{enum Cyc_Absyn_AggrKind kind;enum Cyc_Absyn_Scope sc;struct _tuple0*name;struct Cyc_List_List*tvs;struct Cyc_Absyn_AggrdeclImpl*impl;struct Cyc_List_List*attributes;int expected_mem_kind;};struct Cyc_Absyn_Datatypedecl{enum Cyc_Absyn_Scope sc;struct _tuple0*name;struct Cyc_List_List*tvs;struct Cyc_Core_Opt*fields;int is_extensible;};struct Cyc_Absyn_Enumdecl{enum Cyc_Absyn_Scope sc;struct _tuple0*name;struct Cyc_Core_Opt*fields;};struct Cyc_Absyn_Typedefdecl{struct _tuple0*name;struct Cyc_Absyn_Tqual tq;struct Cyc_List_List*tvs;struct Cyc_Core_Opt*kind;void*defn;struct Cyc_List_List*atts;int extern_c;};extern char Cyc_Absyn_EmptyAnnot[11U];
-# 843 "absyn.h"
+# 850 "absyn.h"
 int Cyc_Absyn_qvar_cmp(struct _tuple0*,struct _tuple0*);
-# 863
+# 870
 void*Cyc_Absyn_compress(void*);
-# 888
+# 895
 extern void*Cyc_Absyn_heap_rgn_type;extern void*Cyc_Absyn_unique_rgn_type;extern void*Cyc_Absyn_refcnt_rgn_type;
-# 890
+# 897
 extern void*Cyc_Absyn_empty_effect;
-# 892
+# 899
 extern void*Cyc_Absyn_false_type;
-# 894
+# 901
 extern void*Cyc_Absyn_access_eff(void*);extern void*Cyc_Absyn_join_eff(struct Cyc_List_List*);
-# 909
+# 916
 extern struct _tuple0*Cyc_Absyn_exn_name;
 struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_exn_tud (void);
-# 937
+# 944
 void*Cyc_Absyn_fatptr_type(void*,void*,struct Cyc_Absyn_Tqual,void*,void*);struct Cyc_RgnOrder_RgnPO;
 # 33 "rgnorder.h"
 struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(struct Cyc_List_List*,struct Cyc_List_List*,void*,struct Cyc_Absyn_Tvar*,unsigned);

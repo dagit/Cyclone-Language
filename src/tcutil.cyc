@@ -472,11 +472,11 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   case &Enum_e(ed,ef): new_e = e; break;
   case &AnonEnum_e(t,ef):
     new_e = new_exp(new AnonEnum_e(copy_type(t),ef),e->loc); break;
-  case &Malloc_e(MallocInfo(ic,r,t,n,res,inlc)):
+  case &Malloc_e(MallocInfo(mk,r,t,n,res,inlc)):
     exp_t     e2 = copy_exp(e);
     exp_opt_t r1 = r; if (r != NULL) r1 = DC(pt,r);
     type_t *  t1 = t; if (t != NULL) t1 = new copy_type(*t);
-    e2->r = new Malloc_e(MallocInfo(ic,r1,t1,n,res,inlc));
+    e2->r = new Malloc_e(MallocInfo(mk,r1,t1,n,res,inlc));
     new_e = e2;
     break;
   case &Swap_e(e1,e2): new_e = swap_exp(DC(pt,e1),DC(pt,e2),e->loc); break;

@@ -1266,10 +1266,10 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     break;
   case &Enum_e(_,ef):     fallthru(ef);
   case &AnonEnum_e(_,ef): s = qvar2doc(ef->name); break;
-  case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,e,_,inline_call}):
+  case &Malloc_e(MallocInfo{mknd,rgnopt,topt,e,_,inline_call}):
     // Note: This is for Cyclone's malloc, not the mallocs introduced during
     //       translation to C, which are function calls.
-    if (is_calloc) {
+    if (mknd == Calloc) {
       // topt should not be NULL for calloc's
       exp_t st = sizeoftype_exp(*topt,0);
       if (rgnopt == NULL)
@@ -1291,7 +1291,10 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
         if (inline_call) 
           s = cat(text("rmalloc_inline("),exp2doc((exp_t)rgnopt),text(","),
                   exp2doc(new_e),text(")"));
-        else
+        else if(mknd == Vmalloc) 
+          s = cat(text("rvmalloc("),exp2doc((exp_t)rgnopt),text(","),
+                  exp2doc(new_e),text(")"));
+	else
           s = cat(text("rmalloc("),exp2doc((exp_t)rgnopt),text(","),
                   exp2doc(new_e),text(")"));
       }

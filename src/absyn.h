@@ -141,6 +141,7 @@ namespace Absyn {
   typedef list_t<attribute_t> attributes_t;
   typedef struct Aggrfield @aggrfield_t;
   typedef datatype OffsetofField @offsetof_field_t;
+  typedef enum MallocKind malloc_kind_t;
   typedef struct MallocInfo malloc_info_t;
   typedef enum Coercion coercion_t;
   typedef struct PtrLoc *ptrloc_t;
@@ -500,6 +501,12 @@ namespace Absyn {
     FieldName(var_t);
   };
 
+  EXTERN_ABSYN enum MallocKind { 
+    Malloc,
+    Calloc,
+    Vmalloc
+  };
+
   // information for malloc:
   //  it's important to note that when is_calloc is false (i.e., we have
   //  a malloc or rmalloc) then we can be in one of two states depending
@@ -508,7 +515,7 @@ namespace Absyn {
   //  be the entire argument to malloc.  After type-checking, the malloc
   //  argument is sizeof(*elt_type)*num_elts.
   EXTERN_ABSYN struct MallocInfo {
-    bool       is_calloc; // determines whether this is a malloc or calloc
+    malloc_kind_t mknd;     // determines whether this is a malloc or calloc or vmalloc
     exp_opt_t  rgn;      // for rmalloc and rcalloc only
     type_t    *elt_type; // when [r]malloc, set by type-checker.  when 
                          // [r]calloc, set by parser

@@ -1315,7 +1315,6 @@ int main(int argc, string_t<`H> ?`H argv) {
                                   add_subdir(Specsfile::cyclone_exec_path,
                                              Specsfile::target_arch)), " -L"));
   add_ccarg(strconcat("-L",Specsfile::def_lib_path));
-
   ccargs = rev(ccargs);
   let ccargs_string = str_sepstr(List::map(sh_escape_stringptr,ccargs), " ");
   libargs = rev(libargs);
@@ -1371,10 +1370,12 @@ int main(int argc, string_t<`H> ?`H argv) {
 
     let gc = (nogc_r ? find_in_arch_path(nogc_filename): find_in_arch_path(gc_filename));
     let runtime = find_in_arch_path(runtime_filename);
-
     // FIX: temporarily removed from interface check below
     stdlib = NULL;     //stdlib = list(new libcyc_flag);
-    stdlib_string = aprintf(" %s %s %s ", libcyc_flag, runtime, gc);
+    if(nogc_r)
+      stdlib_string = aprintf(" %s %s %s ", libcyc_flag, runtime, gc);
+    else
+      stdlib_string = aprintf(" %s %s %s -DCYC_GC_PTHREAD_REDIRECTS ", libcyc_flag, runtime, gc);
   }
 
   if (ic_r) try {

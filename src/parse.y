@@ -1002,7 +1002,7 @@ using Parse;
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH EXPORT OVERRIDE HIDE
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
-%token MALLOC RMALLOC RMALLOC_INLINE CALLOC RCALLOC SWAP
+%token MALLOC RMALLOC RVMALLOC RMALLOC_INLINE CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS 
 %token PORTON PORTOFF PRAGMA TEMPESTON TEMPESTOFF
 // %token ALIAS
@@ -2653,24 +2653,27 @@ unary_expression:
    { let t = type_name_to_type($3,SLOC(@3));
      $$=^$(offsetof_exp(t,List::imp_rev($5),LOC(@1,@6))); 
    }
-/* Cyc: malloc, rmalloc, numelts, swap, etc. */
+/* Cyc: malloc, rmalloc, rvmalloc, numelts, swap, etc. */
 | MALLOC '(' assignment_expression ')'
-   { $$=^$(new_exp(new Malloc_e(MallocInfo{false,NULL,NULL,$3,false,false}),
+   { $$=^$(new_exp(new Malloc_e(MallocInfo{Malloc,NULL,NULL,$3,false,false}),
                    LOC(@1,@4))); }
 | RMALLOC '(' assignment_expression ',' assignment_expression ')'
-   { $$=^$(new_exp(new Malloc_e(MallocInfo{false,$3,NULL,$5,false,false}),
+   { $$=^$(new_exp(new Malloc_e(MallocInfo{Malloc,$3,NULL,$5,false,false}),
+                   LOC(@1,@6))); }
+| RVMALLOC '(' assignment_expression ',' assignment_expression ')'
+   { $$=^$(new_exp(new Malloc_e(MallocInfo{Vmalloc,$3,NULL,$5,false,false}),
                    LOC(@1,@6))); }
 | RMALLOC_INLINE '(' assignment_expression ',' assignment_expression ')'
-   { $$=^$(new_exp(new Malloc_e(MallocInfo{false,$3,NULL,$5,false,true}),
+   { $$=^$(new_exp(new Malloc_e(MallocInfo{Malloc,$3,NULL,$5,false,true}),
                    LOC(@1,@6))); }
 | CALLOC '(' assignment_expression ',' SIZEOF '(' type_name ')' ')'
    { let t = type_name_to_type($7,SLOC(@7));
-     $$=^$(new_exp(new Malloc_e(MallocInfo{true,NULL,new(t),$3,false,false}),
+     $$=^$(new_exp(new Malloc_e(MallocInfo{Calloc,NULL,new(t),$3,false,false}),
                    LOC(@1,@9))); }
 | RCALLOC '(' assignment_expression ',' assignment_expression ',' 
               SIZEOF '(' type_name ')' ')'
    { let t = type_name_to_type($9,SLOC(@9));
-     $$=^$(new_exp(new Malloc_e(MallocInfo{true,$3,new(t),$5,false,false}),
+     $$=^$(new_exp(new Malloc_e(MallocInfo{Calloc,$3,new(t),$5,false,false}),
                    LOC(@1,@11))); }
 | NUMELTS '(' assignment_expression ')'
    { $$=^$(primop_exp(Numelts, list($3), LOC(@1,@4))); }

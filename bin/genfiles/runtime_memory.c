@@ -39,6 +39,7 @@ struct _RegionPage {
 };
 #endif
 
+// defined in cyc_include.h when profiling turned on
 #ifdef CYC_REGION_PROFILE
 static FILE *alloc_log = NULL;
 extern unsigned int GC_gc_no;
@@ -467,6 +468,23 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
   }
 }
 
+#if (defined(__linux__) && defined(__KERNEL__))
+void * _region_vmalloc(struct _RegionHandle *r, unsigned int s) {
+  unsigned tot_bytes = s + sizeof(struct _RegionPage); 
+  void *allocd_page = cyc_vmalloc(tot_bytes);//rounds to n*4096 ... careful!
+  if(!allocd_page)
+    _throw_badalloc();
+  struct _RegionPage *new_vpage = (struct _RegionPage *)allocd_page;
+  new_vpage->next = r->vpage;
+  r->vpage = new_vpage;
+  return (allocd_page+sizeof(struct _RegionPage));
+} 
+#else
+void * _region_vmalloc(struct _RegionHandle *r, unsigned int s) {
+  return _region_malloc(r, s);
+}
+#endif
+
 // allocate s bytes within region r
 void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t) 
 {
@@ -589,6 +607,16 @@ void _free_region(struct _RegionHandle *r) {
     GC_free(pl);
     pl = next;}
   }
+  /* free vmalloc'd pages, if linux kernel */
+#if (defined(__linux__) && defined(__KERNEL__))
+  p = r->vpage;
+  while(p) {
+    struct _RegionPage *n = p->next;
+    cyc_vfree(p);
+    p=n;
+  }
+  r->vpage = 0;
+#endif
   r->curr = 0;
   r->offset = 0;
   r->last_plus_one = 0;

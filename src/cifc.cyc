@@ -41,6 +41,34 @@ namespace Cifc;
 static int glob_tvar_id=0;
 bool opt_inst_tvar = false;
 
+static bool is_concrete(decl_t d) {
+  switch(d->r) {
+  case &Fn_d(...):
+    return true;
+  case &Typedef_d(td):
+    return true;
+  case &Aggr_d(ad):
+    return ad->impl != NULL;
+  case &Enum_d(ed):
+    return ed->fields != NULL;
+  default:
+    return false;
+  }
+}
+
+// returns the decl from the list having the given name, prefers concrete decls
+static struct Decl *lookup_concrete_decl(list_t<decl_t> decls, stringptr_t<`H> name) {
+  //  return lookup_decl(decls, name);
+  let indecls = decls;
+  for (; decls != NULL; decls = decls->tl) {
+    let dname = decl_name(decls->hd);
+    if (dname && !strptrcmp(dname,name) && is_concrete(decls->hd))
+      return decls->hd;
+  }
+  return lookup_decl(indecls, name);
+}
+
+
 void set_inst_tvar(){
   opt_inst_tvar=true;
 }
@@ -548,7 +576,7 @@ static type_t instantiate_tvar(seg_t loc, tvar_t tv) {
 //te: the type environment
 //tv_ovrs: the user overrides that introduced new tvars
 //t: a type that may use a type that was overriden
-//enclosing_decl: the context in which t appears; if a tvar is added the enclosing decl needs to be updated
+//enclosing_decl: the context in which t appears; if a tvar is added the enclosing decl needs to be updated; recursive case only
 //instantiate: a flag that controls whether a tvar is introduced, or if the free var is instantiated to void*
 //returns: first elt is the added tvars, snd is the removed tvars if any; null implies no-action taken
 static $(list_t<tvar_t>, list_t<tvar_t>)* update_tvars(tenv_t te, list_t<decl_t> tv_ovrs, 
@@ -705,6 +733,131 @@ static int decl_name_cmp(decl_t a, decl_t b) {
   return 1;
 }
 
+
+static void deconstruct_type(type_t t) {
+  fprintf(stderr, "Type is %s\n", Absynpp::typ2string(t));
+  switch(t) { 
+  case &AppType(tc, ts): 
+    fprintf(stderr, "Got AppType ... <\n");
+    //with constructor %s and args <\n", tycon2string(tc));
+    while(ts) {
+      deconstruct_type(ts->hd);
+      ts = ts->tl;
+    }
+    fprintf(stderr, ">\n");
+    break;
+  case &Evar(...):
+    fprintf(stderr, "Got Evar\n"); break;
+  case &VarType(tv):
+    fprintf(stderr, "Got VarType -- kindbnd is %s\n", Absynpp::kindbound2string(tv->kind)); break;
+  case &PointerType(*pi):
+    fprintf(stderr, "Got PointerType\n"); 
+    deconstruct_type(pi->elt_type);
+    break;
+  case &ArrayType(...):
+    fprintf(stderr, "Got ArrayType\n"); break;
+  case &FnType(*fi):
+    fprintf(stderr, "Got FnType\n"); 
+    let tvit = fi->tvars;
+    while(tvit) {
+      fprintf(stderr, "tvar(%s), ",Absynpp::tvar2string(tvit->hd)); 
+      tvit=tvit->tl;
+    }
+    let argit = fi->args;
+    while(argit) {
+      let &$(_,_,t) = argit->hd;
+      fprintf(stderr, "Arg::");
+      deconstruct_type(t);
+      argit=argit->tl;
+    }
+    break;
+  case &TupleType(...):
+    fprintf(stderr, "Got TupleType\n"); break;
+  case &AnonAggrType(...):
+    fprintf(stderr, "Got AnonAggrType\n"); break;
+  case &TypedefType(n,ts,d,topt):
+    fprintf(stderr, "Got TypedefType\n"); 
+    while(ts) {
+      fprintf(stderr, "Types(i) = %s\n", Absynpp::typ2string(ts->hd)); 
+      ts = ts->tl;
+    }
+    if(topt) {
+      fprintf(stderr, "topt = %s\n", Absynpp::typ2string(topt)); 
+    }
+    break;
+  case &ValueofType(...):
+    fprintf(stderr, "Got ValueofType\n"); break;
+  case &TypeDeclType(...):
+    fprintf(stderr, "Got TypeDeclType\n"); break;
+  case &TypeofType(...):
+    fprintf(stderr, "Got TypeofType\n"); break;
+  }
+}
+
+static $(list_t<tvar_t>, list_t<tvar_t>)* add_tvars_to_type(tenv_t te, 
+							    decl_t encloser, 
+							    type_t t, 
+							    list_t<decl_t> tv_ovrs) {
+  switch(t) {
+  case &AppType(tc, ts): 
+    return update_tvars(te, tv_ovrs, t, encloser, false);
+  case &PointerType(*pi):
+    return add_tvars_to_type(te, encloser, pi->elt_type, tv_ovrs);
+  case &ArrayType(...):
+    break;
+  case &FnType(*fi):
+    list_t<tvar_t> old_tvars = List::copy(fi->tvars);
+    let changed = update_fninfo_usage(encloser->loc, te, tv_ovrs, fi, encloser);
+    if(changed)
+      return  new $(fi->tvars, old_tvars);
+    break;
+  case &AnonAggrType(...):
+    break;
+  case &TypedefType(n,ts,d,topt):
+    /*  fprintf(stderr, "Got TypedefType\n"); 
+	while(ts) {
+	fprintf(stderr, "Types(i) = %s\n", Absynpp::typ2string(ts->hd)); 
+	ts = ts->tl;
+	}
+	if(topt) {
+	fprintf(stderr, "topt = %s\n", Absynpp::typ2string(topt)); 
+	}
+    */
+    break;
+  case &TypeDeclType(...):
+    break;
+  default: //other cases are not possible in extern C decls
+    return NULL;
+  }
+  return NULL;
+}
+
+static bool update_typedef_decl(tenv_t te, decl_t encloser, list_t<decl_t, `H> tv_ovrs) 
+{
+  let opt_inst_tvar_sav =  opt_inst_tvar;
+  opt_inst_tvar = false;
+  bool changed = false;
+  switch(encloser->r) { 
+  case &Typedef_d(td_decl):
+    let new_old_tvars = add_tvars_to_type(te, encloser, td_decl->defn, tv_ovrs);
+    if(new_old_tvars) {
+      let &$(nt, ot) = new_old_tvars;
+      while(ot) {
+	td_decl->tvs = List::delete_cmp(Absyn::tvar_cmp, td_decl->tvs, ot->hd);
+	ot = ot->tl;
+      }
+      td_decl->tvs = List::append(td_decl->tvs, nt);
+      changed =true;
+    }
+    break;
+  default:
+    impos("expect only a typedef_d");
+  }
+  opt_inst_tvar = opt_inst_tvar_sav;
+  return changed;
+}
+
+
 //if a type struct foo {..} --override--> struct foo<`a>{...}
 //then usages of struct foo require the additional tvar inserted 
 // for instance void func(struct foo *a) ----> void func<`ovr_1>(struct foo<`ovr_1> *a)
@@ -828,6 +981,15 @@ static list_t<decl_t, `H> update_usages(seg_t loc, tenv_t te, list_t<decl_t,`H> 
 	//	  dsm = remove_cur(dsm, ds, prev);
 	break;
       case &Typedef_d(td):
+	/*	fprintf(stderr, "Got typedef decl ");
+		let tvit = td->tvs;
+		while(tvit) {
+		fprintf(stderr, "tvar(%s), ", Absynpp::tvar2string(tvit->hd));
+		tvit=tvit->tl;
+		}
+		fprintf(stderr, "\n");
+		deconstruct_type(td->defn);*/
+	changed = update_typedef_decl(te, d, tv_ovrs);
 	break;
       default: //ds are extern C include decls ... the other cases are impos or cannot contain tvars
 	break;
@@ -938,7 +1100,7 @@ void user_overrides(seg_t loc, tenv_t te, list_t<decl_t, `H> *ds, list_t<decl_t>
     let un = decl_name(ud);
     if (!un) warn(ud->loc,"Overriding decl without a name\n");
     else {
-      let d = lookup_decl(*ds,un);
+      let d = lookup_concrete_decl(*ds,un);
       if (!d)  warn(ud->loc,"%s is overridden but not defined",*un);
       else {    
 	overriden_decls = new List(d, overriden_decls);

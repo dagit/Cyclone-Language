@@ -1910,7 +1910,7 @@ static type_t mallocRgn(type_t rgn) {
 }
 
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
-                       type_t *@t, exp_t @e, bool @is_calloc, bool @is_fat) {
+                       type_t *@t, exp_t @e, malloc_kind_t @mknd, bool @is_fat) {
   // by default, we allocate heap pointers unless the topt tells us
   //   to do otherwise (see below)
   type_t rgn = heap_rgn_type;
@@ -1951,7 +1951,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
   type_t elt_type; // the element type of the resulting pointer
   exp_t num_elts;  // the number of elements of the resulting pointer
   bool one_elt;
-  if (*is_calloc) {
+  if (*mknd == Calloc) {
     if (*t == NULL) 
       Warn::impos2("calloc with empty type");
     elt_type = **t;
@@ -1987,7 +1987,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
 	    Warn::err2(loc,"malloc cannot be used with type ",t2,
 		       "\n\t(type needs initialization)");
           else
-            *is_calloc = true;
+            *mknd = Calloc;
         }
         elt_type = t2;
         *t = new elt_type;
@@ -2048,9 +2048,9 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
 	ptr_maker = star_type;
       // for zero-terminated arrays, rewrite malloc to calloc to ensure
       // we're actually zero-terminated.
-      if (force_type2bool(false,zt) && !(*is_calloc)) {
+      if (force_type2bool(false,zt) && !(*mknd == Calloc)) {
         Warn::warn2(loc,"converting malloc to calloc to ensure zero-termination");
-        *is_calloc = true;
+        *mknd = Calloc;
       }
       // here, we're seeing if what's expected is T@{e}.  If so, we
       // check to see if e is the same as upper_exp or its type.
@@ -2496,8 +2496,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &Datatype_e(es,tud,tuf): t = tcDatatype(te,loc,topt,e,es,tud,tuf); break;
   case &Enum_e(ed,ef):          t = enum_type(ed->name,ed); break;
   case &AnonEnum_e(t2,ef):      t = t2; break;
-  case &Malloc_e(MallocInfo{*is_calloc,*ropt,*t2,*e2,*isfat,_}):
-    t = tcMalloc(te,loc,topt,ropt,t2,e2,is_calloc,isfat); break;
+  case &Malloc_e(MallocInfo{*mknd,*ropt,*t2,*e2,*isfat,_}):
+    t = tcMalloc(te,loc,topt,ropt,t2,e2,mknd,isfat); break;
   case &Swap_e(e1,e2):   t = tcSwap(te,loc,topt,e1,e2); break;
   case &Tagcheck_e(e,f): t = tcTagcheck(te,loc,topt,e,f); break;
   case &Extension_e(e1): t = tcExp(te,topt,e1); break;

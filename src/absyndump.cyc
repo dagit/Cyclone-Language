@@ -779,18 +779,19 @@ static void dumpexp_prec(int inprec, exp_t e) {
     if (es != NULL) group(dumpexp,es,"(",")",",");
     break;
 
-  case &Malloc_e(MallocInfo{is_calloc,ropt,topt,e,_,inline_call}):
+  case &Malloc_e(MallocInfo{mknd,ropt,topt,e,_,inline_call}):
     dumploc(e->loc);
-    if (is_calloc) {
+    if (mknd == Calloc) {
       if (ropt != NULL) {
         dump("rcalloc("); dumpexp(ropt); dump(",");
       } else {
         dump("calloc(");
       }
       dumpexp(e); dump(","); dumpexp(sizeoftype_exp(*topt,0)); dump(")");
-    } else {
+    } 
+    else {
       if (ropt != NULL) {
-	dump((inline_call ? "rmalloc_inline(" : "rmalloc(")); 
+	dump((mknd == Vmalloc ? "rvmalloc(" : inline_call ? "rmalloc_inline(" : "rmalloc(")); 
         dumpexp(ropt); dump(",");
       } else {
         dump("malloc(");
