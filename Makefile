@@ -66,7 +66,7 @@ $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include: $(CYC_LIB_PATH) \
   $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz
 	-mkdir $@
 	tar -z -xf bin/genfiles/$(ARCH).headers.tgz -C $@
-	$(CYCDIR)/bin/buildlib -d bin/cyc-lib/$(ARCH)/include -finish $(CYCDIR)/bin/cyc-lib/libc.cys
+	bin/buildlib -d bin/lib/cyc-lib/$(ARCH)/include -finish bin/cyc-lib/libc.cys
 	find $@ -name '*.i[BC]' -exec rm \{\} \;
 
 $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz:
