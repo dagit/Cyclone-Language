@@ -16,7 +16,15 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
+#ifdef __ARMEL__
+/* There's no stdint.h on arm-elf for Gameboy */
+typedef char      int8_t;
+typedef short     int16_t;
+typedef int       int32_t;
+typedef long long int64_t;
+#else
 #include <stdint.h>
+#endif
 #include "runtime_internal.h"
 
 /* Add i to zero-terminated pointer x.  Checks for x being null and
