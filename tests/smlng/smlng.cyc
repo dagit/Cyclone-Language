@@ -12,10 +12,20 @@
 #include "flat.h"
 using Core;
 using Stdio;
+using List;
 using Buffer;
 using Parser;
 using String;
 using TagElim;
+
+// we conservatively guess that we get only 8M of stack (set in main)
+// we'd use getrlimit, but we're not developing under Linux. :-(
+unsigned int stack_limit = 0; 
+bool check_stack() {
+  unsigned int x=0; 
+  int current_stack_address = (unsigned int)&x; 
+  return stack_limit - current_stack_address > 10000;
+}
 
 bool is_change = true;
 bool longer_seq = false;
@@ -214,26 +224,46 @@ static List::list_t<doc_t> filter_Mt(List::list_t<doc_t> ds){
   return ds;
 }
 
+// for deep-nesting and no stack overflow
+static list_t<doc_t> down_workstack = null;
+
 //getting rid of Mt branches
-doc_t remove_Mt(doc_t d){
+doc_t remove_Mt_rec(doc_t d){
+  if(!check_stack()) {
+    down_workstack = new List(d,down_workstack);
+    return d;
+  }
   switch(d){
   case &Seq(ds):
     let oldds = ds;
     for(; ds!=null; ds=ds->tl)
-      ds->hd = remove_Mt(ds->hd);
+      ds->hd = remove_Mt_rec(ds->hd);
     ds = filter_Mt(oldds);
     if (ds==null) return Mt;
     if (ds->tl==null) return ds->hd;//size 1
     return new Seq(ds);
   case &Text(_): return d;
-  case &Spc(_): return d;
+  case &Spc(_):  return d;
   case &Tagged(tag,*d2):
-    let d3 = remove_Mt(*d2);
+    let d3 = remove_Mt_rec(*d2);
     if (d3 == Mt) return Mt;
-    else return new Tagged(tag,d3);
+    return new Tagged(tag,d3);
   case Mt: return Mt;
   }
 }
+
+doc_t remove_Mt(doc_t d) {
+  doc_t ans = remove_Mt_rec(d);
+  while(down_workstack != null) {
+    fprintf(stderr,"!");
+    doc_t next = down_workstack->hd;
+    down_workstack = down_workstack->tl;
+    remove_Mt_rec(next);
+  }
+  return ans;
+}
+
+// These are for testing w/o having the write stack check!
 
 // gets rid of redundant tags in a top-down fashion
 doc_t down_opt(context_t ctxt, doc_t d) {
@@ -243,7 +273,7 @@ doc_t down_opt(context_t ctxt, doc_t d) {
       ds->hd = down_opt(ctxt,ds->hd);
     return d;
   case &Text(_): return d;
-  case &Spc(_): return d;
+  case &Spc(_):  return d;
   case &Tagged(tag,*d2):
     switch (tag) {
     case B_tag:
@@ -416,6 +446,9 @@ int main(int argc, char ??argv) {
   string_t tlimit = "182";
   FILE @f = stdin;
 
+  int x = 0;
+  stack_limit = ((unsigned int)&x) - (1 << 23);
+
   if (argc <= 1) {
     tlimit = Stdlib::getenv("TLIMIT");
     if (tlimit == null) {
@@ -442,7 +475,7 @@ int main(int argc, char ??argv) {
   //  fprintf(stderr,"\ndumping..."); fflush(stderr);
   //  dump(b,d);
   //  fprintf(stderr,"\nfinished!\n"); fflush(stderr);
-  //  printf("\nDONE PARSING\n");
+  fprintf(stderr,"\nDONE PARSING\n");
   d = remove_Mt(d);
 
   try {
@@ -463,20 +496,22 @@ int main(int argc, char ??argv) {
       d = down_opt(init_context,d);
       ++round_num;
     }
+
     if(round_num > 1 && check_time() > 8) {
       fprintf(stderr,"%d\nup_shuffle...", check_time()); fflush(stderr);
       d = TagElim::up_shuffle(d)[0];
+
       fprintf(stderr,"%d\nunder_elim...", check_time()); fflush(stderr);
       d = TagElim::under_elim(d)[0];
             // down_opt must precede up_opt 
       fprintf(stderr,"%d\ndown_opt...", check_time()); fflush(stderr);
+
       d = remove_Mt(d);
       d = down_opt(init_context,d);
       is_change = true;
       round_num = 0;
     }
   }
-
   // notice we wait until cheaper things have run
   // don't put any optimizations after this -- it tries to hog the time
   // BTW, it's expensive to keep flattening and unflattening the sequences,
@@ -486,7 +521,7 @@ int main(int argc, char ??argv) {
     fprintf(stderr," %d\ndynamic_regions %d ...", 
 	    check_time(), window_size); 
     fflush(stderr);
-    // toggle the shift -- dont' bother
+    // toggle the shift -- don't bother
     //shift_window = !shift_window;
 
     // FIX: pass window size and shift_window

@@ -66,5 +66,9 @@ extern struct Context {
 typedef struct Context context_t;
 context_t init_context;
 extern bool is_white(char c);
+
+extern bool check_stack();
+
+
 #endif _SMLNG_H_
 

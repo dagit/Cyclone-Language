@@ -50,8 +50,23 @@ union Synth {
 
 synth_t init;
 
+// shared worklist -- better be empty when a pass is done!
+// Never used except to avoid stack overflow.  Will miss optimizations
+// right "on the edge", but it is *extremely* unlikely that we won't get
+// it in another pass.
+static list_t<doc_t> work_list = null;
+
 // currently destructive (of doc), but could easily be made functional
-$(doc_t, synth_t) up_opt(doc_t doc) {
+$(doc_t, synth_t) up_opt_rec(doc_t doc) {
+  if(!check_stack()) {
+    work_list = new List(doc,work_list);
+    synth_t synth;
+    synth.i = 0;
+    synth.s.sizes  = ~0;
+    synth.s.colors = ~0;
+    return $(doc,synth);
+  }
+    
   switch(doc) {
   case &Seq(*dsp): 
     let ds = *dsp;
@@ -62,12 +77,13 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
       synth.s.mt_doc = 1;
       return $(Mt,synth);
     }
-    if(ds->tl == null)
-      return up_opt(ds->hd);
+    if(ds->tl == null) {
+      return up_opt_rec(ds->hd);
+    }
     list_t<doc_t> prev     = ds; // won't get used b/c of prev_synth
     list_t<doc_t> prevprev = ds; // won't get used b/c of prev_synth
     while(ds != null) {
-      let $(newd, inner_synth) = up_opt(ds->hd);
+      let $(newd, inner_synth) = up_opt_rec(ds->hd);
       ds->hd = newd; // destructive here
       if(inner_synth.s.mt_doc) {
 	prev->tl = ds->tl;
@@ -151,7 +167,7 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
     return $(doc,synth);
   case &Tagged(tag,*dp):
     let d = *dp;
-    let $(d2, synth) = up_opt(d);
+    let $(d2, synth) = up_opt_rec(d);
     if(synth.s.mt_doc)
       return $(d,synth);
     *dp = d2; // destructive
@@ -211,6 +227,18 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
     synth.i = ~0;
     return $(Mt,synth);
   }
+}
+
+$(doc_t, synth_t) up_opt(doc_t doc) {
+  
+  let ans = up_opt_rec(doc);
+  while(work_list != null) {
+    fprintf(stderr,"?");
+    doc_t next = work_list->hd;
+    work_list = work_list->tl;
+    up_opt_rec(next);
+  }
+  return ans;
 }
 
 $(list_t<doc_t>,list_t<doc_t>*) flatten_top_seq(doc_t d) {
