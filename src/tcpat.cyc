@@ -96,7 +96,7 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
     t = TupleType(List::imp_rev(ts));
     break;
 
-  case Struct_p(sd, *topt_ref,tvs,dps): 
+  case Struct_p(sd,*topt_ref,tvs,dps): 
     if (tvs != null)
       return impos("tcPat: struct<...> not implemented");
     // type check the argument patterns
@@ -106,16 +106,16 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
       v_result  = List::append(v_result,  sub_vs);
     }
     // build up the instantiated pattern type
-    _ all_inst = List::map(make_inst_var,sd->tvs);
-    _ all_typs = List::map(snd,all_inst); 
+    let all_inst = List::map(make_inst_var,sd->tvs);
+    let all_typs = List::map(snd,all_inst); 
     *topt_ref = &Opt(all_typs); // side effect
-    t = StructType(sd->name->v,all_typs,(structdecl@)(&$(sd)));
+    t = StructType(sd->name->v,all_typs,(structdecl@)(new{sd}));
     // unify with the struct type
     list_t<$($(field_name,tqual,typ)@,pat)@> fields = 
       resolve_struct_designators(p->loc,dps,sd);
     for(; fields != null; fields = fields->tl) {
       let &$(&$(n,tq,fieldtyp),p_arg) = fields->hd;
-      _ inst_fieldtyp = substitute(all_inst,fieldtyp);
+      let inst_fieldtyp = substitute(all_inst,fieldtyp);
       if (!unify(p_arg->topt->v,inst_fieldtyp))
 	terr(p->loc,
 	     xprintf("field %s of struct pattern expects type %s != %s",
@@ -129,7 +129,7 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
     typ heap = HeapRgn;
     tenv_t te2 = add_type_vars(p->loc,te,tvs);
     tv_result = List::append(tv_result, tvs);
-    _ all_inst = List::map(make_inst_var,ed->tvs);
+    let all_inst = List::map(make_inst_var,ed->tvs);
     _ all_typs = List::map(snd,all_inst); 
     t = EnumType(ed->name->v,all_typs,(enumdecl@)(&$(ed)));
     list_t<$(tqual,typ)@> tqts = ef->typs;

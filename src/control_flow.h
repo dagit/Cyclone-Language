@@ -11,6 +11,9 @@ namespace ControlFlow {
 
   // top-level entry for this pass
   extern void cf_check(List::list_t<Absyn::decl>);
+
+  // needed for NewControlFlow for the moment
+  extern Absyn::stmt get_encloser(Absyn::stmt enclosee);
 }
 
 #endif

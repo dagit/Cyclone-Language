@@ -1936,13 +1936,14 @@ $(bool,typ) addressof_props(tenv te, exp e) {
 
   case Subscript_e(e1,e2):
     // here we need to figure out whether we've got a boxed thing
-    // or not because [] is overloaded for all array kinds, tuples, and
-    // tuple pointers.
+    // or not because [] is overloaded for all array kinds, and tuples
     // FIX: eventually a tagged array's elements may live in a region, for now, 
     // they always in the heap
     typ t = compress(e1->topt->v);
     switch (t) {
     case ArrayType(_,tq,_): 
+      // Actually, this should be impossible since we've surely
+      // promoted e1 to a pointer.
       // NOTE: Unlike C, we cannot allow any e1 -- it must be an lvalue.
       // (C doesn't need to know the region and we do!)
       return $(tq->q_const, addressof_props(te,e1)[1]);
@@ -1952,16 +1953,9 @@ $(bool,typ) addressof_props(tenv te, exp e) {
       if(finfo != null)
 	return $((*finfo)[0]->q_const, addressof_props(te,e1)[1]);
       return bogus_ans;
-    case PointerType(PtrInfo{t2,r,_,_,b}): 
-      // boxed tuple case -- so the region is in the pointer type.
-      switch(compress(t2)) {
-      case TupleType(ts):
-	let finfo = lookup_tuple_field(ts,Evexp::eval_const_uint_exp(e2));
-	if(finfo != null)
-	  return $((*finfo)[0]->q_const, r);
-	fallthru;
-      default: return bogus_ans;
-      }
+
+    case PointerType(PtrInfo{t2,r,_,tq,b}): 
+      return $(tq->q_const,r);
     default: return bogus_ans;
     }
   default: 

@@ -328,7 +328,8 @@ namespace Absyn {
   EXTERN_DEFINITION struct Stmt {
     raw_stmt_t   r;
     seg_t        loc;
-    list_t<stmt> non_local_preds; // set by type-checking
+    list_t<stmt> non_local_preds; // set by type-checking, should go in the
+                                  // appropriate CFStmtAnnot, not here!
     stmt_annot_t annot;
   };
 

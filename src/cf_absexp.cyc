@@ -19,21 +19,31 @@
 // addressable ::= x | malloc_op(exp) | noaddress.f
 // noaddress ::= addressable | *noaddress
 
+// Another invariant is that "top-level" absops cannot have struct or tuple
+// types.  Instead, the constructors expand out any uses are assignments
+// to the leaves.  That is, top-level absops must be "leaves" in the
+// aggregate sense.  It is up to the translation to pass us the right type
+// to make this happen.
+
 #include "core.h"
 #include "list.h"
 #include "dict.h"
+#include "tcutil.h"
 #include "absyn.h"
+#include "cf_flowinfo.h"
 #include "new_control_flow.h"
 #include "cf_absexp.h"
 using Absyn;
+using List;
+using CfFlowInfo;
 using NewControlFlow;
-namespace CFabsexp;
+namespace CfAbsexp;
 
 xenum exn {BadAbsexp};
 
-typedef List::list_t<`a>    list_t<`a>;
 typedef vardecl             vardecl_t;
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
+typedef Position::seg_t     seg_t;
 
 enum Absexpgroup { OrderedG; UnorderedG; OneofG };
 
@@ -131,35 +141,41 @@ absop_t mkDerefOp(absop_t ao) {
   ok_deref_arg(ao);
   return DerefOp(ao);
 }
+
 absexp_t mkBottomAE() {
   return BottomAE;
 }
 absexp_t mkSkipAE() { 
- return SkipAE;
-}
-absexp_t mkUseAE(absop_t ao) {
-  return UseAE(ao);
-}
-absexp_t mkAssignAE(absop_t l, absop_t r) {
-  // Note: The special cases are just optimizations.
-  switch($(l,r)) {
-  case $(UnknownOp,UnknownOp): return SkipAE;
-  case $(UnknownOp,_):         return UseAE(r);
-  default: ok_lvalue(l); return AssignAE(l,r);
-  }
+  return SkipAE;
 }
 absexp_t mkMallocAE(exp e) {
-  return MallocAE(e, mallocpt_int(e));
+  return MallocAE(e,mallocpt_int(e));
 }
 absexp_t mkStmtAE(stmt s) {
   return StmtAE(s);
 }
+absexp_t mkUseAE(absop_t ao) {
+  switch(ao) {
+  case UnknownOp: return SkipAE;
+  default:        return UseAE(ao);
+  }
+}
+absexp_t mkAssignAE(absop_t l, absop_t r) {
+  switch($(l,r)) {
+  case $(UnknownOp,UnknownOp): return SkipAE;
+  case $(UnknownOp,_):         return mkUseAE(r);
+  default: 
+    ok_lvalue(l);       
+    return AssignAE(l,r);
+  }
+}
+
 // Note: All the cases are just unnecessary optimizations -- speeds up analysis
 // Note: Here are more optimizations we could add:
-//       * When creating Unordered, can remove repeats (including from
-//           nested Unordered)
-//       * When creating Ordered, can remove adjacent repeats (and swap
-//           adjacent UseAE to get more adjacent repeats)
+// * When creating Unordered, can remove repeats (including from
+//     nested Unordered)
+// * When creating Ordered, can remove adjacent repeats (and swap
+//     adjacent UseAE to get more adjacent repeats)
 absexp_t mkGroupAE(absexpgroup_t g, absexp_t ae1, absexp_t ae2) { 
  switch ($(g,ae1,ae2)) {
   case $(_,_,SkipAE) && g != OneofG: return ae1;
@@ -180,8 +196,11 @@ absexp_t mkGroupAE(absexpgroup_t g, absexp_t ae1, absexp_t ae2) {
   }
 }
 absexp_t mkGroupAE_l(absexpgroup_t g, list_t<absexp_t> ael) {
-  // Note: Maybe should optimize here too?
-  // Note: Doesn't copy the list, maybe it should
+  // Note: Maybe should optimize more here?
+  if(ael == null) // g really shouldn't be OneofG in this case??
+    return SkipAE;
+  if(ael->tl == null)
+    return ael->hd;
   return GroupAE(g, ael);
 }
 
@@ -189,37 +208,62 @@ bool isUnknownOp(absop_t ao) {
   return ao == UnknownOp;
 }
 
-////////////////////////////// Debugging //////////////////////////////////
-// recurses rather than assume smaller ops and exps are okay
-static void check_absop(absop_t ao) {
-  switch(ao) {
-  case UnknownOp:       return;
-  case AddressOp(ao2):  check_absop(ao2); ok_address_arg(ao2); return;
-  case DerefOp(ao2):    check_absop(ao2); ok_deref_arg(ao2);   return;
-  case MemberOp(ao2,_): check_absop(ao2); ok_member_arg(ao2);  return;
-  case LocalOp(_):      return;
-  case MallocOp(_,_):   return;
-  }
+/////////////////////////// Abstract Evaluation ///////////////////////////
+// Note: should have versions that takes state_dict b/c of recursive calls??
+// Note: eval_absop_l never returns ThisInit or Uninit???????
+// DO ME!!!!!!
+init_state_t eval_absop_l(seg_t loc, absop_t ao, flow_info_t flow) {
+  return Uninit;
 }
-void check_absexp(absexp_t ae) {
+init_state_t eval_absop_r(seg_t loc, absop_t ao, flow_info_t flow) {
+  return Uninit;
+}
+// DO ME!!!!!!
+flow_info_t eval_absexp(seg_t loc, absexp_t ae, flow_info_t in_flow) {
   switch(ae) {
-  case BottomAE:      return;
-  case SkipAE:        return;
-  case MallocAE(_,_): return;
-  case StmtAE(s):     return;
-  case GroupAE(_,l):  
-    for(; l != null; l = l->tl) 
-      check_absexp(l->hd); 
-    return;
-  case UseAE(ao):     check_absop(ao); return;
-  case AssignAE(aol,aor):
-    check_absop(aol);
-    check_absop(aor);
-    ok_lvalue(aol);
-    return;
+  case UseAE(ao): 
+    let state = eval_absop_r(loc,ao,in_flow);
+    // must check for all init (detecting cycles -- do it in CfFlowInfo)
+    // must "nuke downstream"
+    return in_flow;
+  case AssignAE(aol,aor): 
+    // DO ME: if aol is not MustPointTo(p), must "nuke downstream"
+    throw Core::Impossible("");
+  case MallocAE(e,_):     
+    // DO ME: need to do nuke anything that points to part of MallocPt(e)
+    //   That's what the backward-pointer dictionary is for!
+    // Then have to make all the fields Uninit.
+    throw Core::Impossible("");
+
+    // The rest of the cases are done but untested.
+  case BottomAE:  return BottomFL;
+  case SkipAE:    return in_flow;
+
+  case StmtAE(s): return cf_analyze_stmt(s,in_flow);
+
+  case GroupAE(OrderedG,ael):
+    for(; ael != null; ael = ael->tl)
+      in_flow = eval_absexp(loc,ael->hd,in_flow);
+    return in_flow;
+
+  case GroupAE(OneofG,ael):
+    let out_flow = BottomFL; 
+    for(; ael != null; ael = ael->tl)
+      out_flow = join_flow(out_flow, eval_absexp(loc, ael->hd, in_flow));
+    return out_flow;
+
+  case GroupAE(UnorderedG,ael): // local iteration until we reach a fixpoint
+    _ out_flow;
+    do {
+      out_flow = in_flow;
+      for(; ael != null; ael = ael->tl)
+	out_flow = join_flow(out_flow, eval_absexp(loc, ael->hd, out_flow));
+    } while(out_flow != in_flow);
+    return out_flow;
   }
 }
-// a quick and dirty printer
+
+///////////////////////// Printing and Debugging //////////////////////////////
 string absop2string(absop_t ao) {
   switch(ao) {
   case UnknownOp:      return "Unknown";
@@ -260,4 +304,33 @@ string absexp2string(absexp_t ae, int depth) {
   case BottomAE:  ans = xprintf("%sbottom",  ans); break;
   }
   return ans;
+}
+// recurses rather than assume smaller ops and exps are okay
+static void check_absop(absop_t ao) {
+  switch(ao) {
+  case UnknownOp:       return;
+  case AddressOp(ao2):  check_absop(ao2); ok_address_arg(ao2); return;
+  case DerefOp(ao2):    check_absop(ao2); ok_deref_arg(ao2);   return;
+  case MemberOp(ao2,_): check_absop(ao2); ok_member_arg(ao2);  return;
+  case LocalOp(_):      return;
+  case MallocOp(_,_):   return;
+  }
+}
+void check_absexp(absexp_t ae) {
+  switch(ae) {
+  case BottomAE:      return;
+  case SkipAE:        return;
+  case MallocAE(_,_): return;
+  case StmtAE(s):     return;
+  case GroupAE(_,l):  
+    for(; l != null; l = l->tl) 
+      check_absexp(l->hd); 
+    return;
+  case UseAE(ao):     check_absop(ao); return;
+  case AssignAE(aol,aor):
+    check_absop(aol);
+    check_absop(aor);
+    ok_lvalue(aol);
+    return;
+  }
 }

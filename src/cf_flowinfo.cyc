@@ -1,0 +1,135 @@
+#define CF_FLOWINFO_CYC
+
+#include "core.h"
+#include "list.h"
+#include "string.h"
+#include "absyn.h"
+#include "cf_flowinfo.h"
+using Absyn;
+using List;
+
+namespace CfFlowInfo;
+
+// Note that everything is persistent in the functional data structure sense.
+// Note we're careful to avoid allocation when replacing something with itself
+//      (pointer equality is our friend)
+
+int local_root_cmp(local_root_t r1, local_root_t r2) {
+  if(r1 == r2)
+    return 0;
+  switch ($(r1,r2)) {
+  case $(VarRoot(_), MallocPt(_)): return 1;
+  case $(MallocPt(_),VarRoot(_)):  return -1;
+  case $(VarRoot(x), VarRoot(y)):  return Core::ptrcmp(x,y);
+  case $(MallocPt(x),MallocPt(y)): return Core::ptrcmp(x,y);
+  }
+}
+int field_cmp(field_t f1, field_t f2) {
+  if(f1 == f2)
+    return 0;
+  switch($(f1,f2)) {
+  case $(StructF(_), TupleF(_)):  return 1;
+  case $(TupleF(_),  StructF(_)): return -1;
+  case $(StructF(x), StructF(y)): return Core::ptrcmp(x,y);
+  case $(TupleF(x),  TupleF(y)):  return x-y;
+  }
+}
+int place_cmp(place_t p1, place_t p2) {
+  if(p1 == p2)
+    return 0;
+  int i = local_root_cmp(p1->root,p2->root);
+  if(i != 0)
+    return i;
+  let fs1 = p1->fields;
+  let fs2 = p2->fields;
+  for(; fs1 != null && fs2 != null; fs1 = fs1->tl, fs2 = fs2->tl) {
+    if(fs1 == fs2)
+      return 0;
+    i = field_cmp(fs1->hd, fs2->hd);
+    if(i != 0)
+      return i;
+  }
+  if(fs1 == null)
+    return 1;
+  return -1;
+}
+
+path_info_t lookup_place(path_info_dict_t d, place_t place) {
+  let &Place(root,fields) = place;
+  let ans = Dict::lookup(d,root);
+  for(; fields != null; fields = fields->tl)
+    switch($(ans,fields->hd)) {
+    case $(TuplePI(d2), TupleF(i)):  ans = Dict::lookup(d2,i); break;
+    case $(StructPI(d2),StructF(n)): ans = Dict::lookup(d2,n); break;
+    default: throw Core::Impossible("bad lookup_place");
+    }
+  return ans;
+}
+
+// Also make a lookup_absop (or maybe put that in cf_absexp)
+
+// Note: We don't have to worry about instantiating polymorphic struct fields
+//       b/c they can't be instantiated with aggregates.
+//   (If we ever have memory kinds, then we either need to figure out field's
+//    instantiated types or not allow partial initialization of such fields.)
+// Note: We could memoize answers here, but it doesn't seem important.
+// Note: may revisit the decision to separate tuple and struct dicts, but
+//       probably can write iterators that are polymorphic over the key type.
+path_info_t typ_to_pathinfo_uninit(typ t) {
+  switch(t) {
+  case TupleType(tqts):
+    let d = Dict::empty(Core::intcmp);
+    for(int i=0; tqts != null; tqts = tqts->tl, ++i) {
+      let &$(_,t2) = tqts->hd;
+      d = Dict::insert(d, i, typ_to_pathinfo_uninit(t2));
+    }
+    return TuplePI(d);
+  case StructType(_,_, & &Structdecl(_,_,_,&Core::Opt(fs))):
+    let d = Dict::empty(String::zstrptrcmp);
+    for(; fs != null; fs = fs->tl) {
+      let &$(n,_,t2) = fs->hd;
+      d = Dict::insert(d, n, typ_to_pathinfo_uninit(t2));
+    }
+    return StructPI(d);
+  default: 
+    return LeafPI(Uninit);
+  }
+}
+
+// Return the best init state you can out of Uninit, ThisInit, AllInit
+// Note: must detect cycles in the MustPointTo graph or we won't terminate.
+//   (Note it suffices to track the MustPoinTo's b/c only they create cycles.)
+// Note: The list would be a cool think to stack-allocate, but we want
+//       each element in a different region (works with subregioning).
+//       Then again, the length of the list is the length of must-aliases
+//       which is surely not very deep.
+init_state_t escaping_initstate(path_info_dict_t d, path_info_t path, 
+				list_t<place_t> seen) {
+  switch(path) {
+  case LeafPI(MustPointTo(place)):
+    if(List::mem(place_cmp,seen,place))
+      return AllInit;
+    return escaping_initstate(d, lookup_place(d,place), new{List(place,seen)});
+  case LeafPI(s): return s;
+  case TuplePI(d2):  
+    throw Core::Impossible(""); // DO ME!!!
+  case StructPI(d2):
+    throw Core::Impossible(""); // DO ME!!!
+    // can this be ThisInit or not???
+  }
+}
+
+flow_info_t join_flow(flow_info_t f1, flow_info_t f2) { 
+  if(f1 == f2)
+    return f1;
+  path_info_dict_t d1, d2;
+  // need the other dicts too (better than recomputing them??)
+  switch(f1) {
+  case BottomFL: return f2;
+  default:  throw Core::Impossible("");
+  }
+  switch(f2) {
+  case BottomFL: return f1;
+  default:  throw Core::Impossible("");
+  }
+}

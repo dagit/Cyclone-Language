@@ -2516,6 +2516,17 @@ See also `c++-font-lock-extra-types'.")
        (1 font-lock-variable-name-face t t)))
     
     '("\\<case\\|goto\\>" . font-lock-keyword-face)
+      ; color the pattern like a constant, except identifiers starting
+      ; with lower-case are variables.
+    '("\\(\\\<let\\\>\\)\\(\\([^=\n]\\)+\\)=" 
+      (1 'font-lock-type-face) 
+      (2 'font-lock-constant-face)
+      ("[^A-Za-z0-9_.']\\([a-z][A-Za-z0-9_]*\\)"  
+       (cond (t (goto-char (match-end 1)) (match-end 2)))
+       nil
+       (1 font-lock-variable-name-face t t)))
+   '("\\\<let\\\>" . 'font-lock-type-face)
+
 ;    '("\\<\\(case\\|goto\\)\\>\\(\\([^:]\\|::\\)+\\)"
 ;;    '("\\<\\(case\\|goto\\)\\>[ \t]*\\(-?\\sw+\\)?"
 ;      (1 font-lock-keyword-face) (2 font-lock-variable-name-face nil t))

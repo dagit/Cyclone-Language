@@ -23,14 +23,11 @@
 namespace Lex {
 extern void lex_init();
 }
-
 using Core;
 using Stdio;
 using List;
 using Arg;
 using String;
-
-#define PRINT_STAGE(s) { if (*v) fprintf(stderr,s); else if (!*q) fprintf(stderr,"."); fflush(stderr); }
 
 static bool pp_r       = false;
 static bool up_r       = false;
@@ -41,7 +38,6 @@ static bool toc_r      = false;
 static bool v_r        = false;
 static bool q_r        = false;
 static bool add_cyc_namespace_r = true;
-
 bool @ pp       = &pp_r;
 bool @ up       = &up_r;
 bool @ noexpand = &noexpand_r;
@@ -53,13 +49,11 @@ bool @ q        = &q_r;
 bool @ add_cyc_namespace = &add_cyc_namespace_r;
 
 static string *out_file_name_opt = null;
-
-static void set_check_null() {
-  Toc::check_for_null = true;
-}
-
 static void set_out_file_name(string s) {
   out_file_name_opt = (string *)(&$(s));
+}
+static void set_check_null() {
+  Toc::check_for_null = true;
 }
 static list_t<stringptr> includes = null;
 static void add_include(string s) {
@@ -72,195 +66,163 @@ static void add_define(string s) {
 
 bool compile_failure = false; // for exit code (helps Makefile)
 
+FILE * try_file_open(string filename, string mode, string msg_part) {
+  try return file_open(filename,mode);
+  catch {
+  default:
+    compile_failure = true;
+    fprintf(stderr, "\nError: couldn't open %s %s\n", msg_part, filename);
+    fflush(stderr);
+    return null;
+  }
+}
+
+list_t<Absyn::decl> do_stage(string stage_name,
+			     list_t<Absyn::decl> f(`a, list_t<Absyn::decl>), 
+			     `a env, list_t<Absyn::decl> tds, 
+			     string preprocfile) {
+  string exn_string     = "";
+  string explain_string = "";
+  bool other_exn = false;
+  xenum exn ex = Core::Impossible(""); // definite assignment doesn't track data
+  let ans = null;
+
+  try ans = f(env,tds);
+  catch {
+  case Core::Impossible(s): 
+    exn_string = "Exception Core::Impossible"; 
+    explain_string = s; 
+    break;
+  case Dict::Absent:  
+    exn_string = "Exception Dict::Absent"; 
+    break;
+  case x: 
+    ex = x; 
+    other_exn = true; 
+    exn_string = "Uncaught exception"; 
+    break;
+  }
+  if(Position::error_p())
+    compile_failure = true;
+  if(strcmp(exn_string,"") != 0) {
+    compile_failure = true;
+    fprintf(stderr,"\n%s thrown during %s: %s", 
+	    exn_string, stage_name, explain_string);
+  }
+  if(compile_failure) {
+    fprintf(stderr,"\nCOMPILATION FAILED!\n");
+    fflush(stderr);
+    Stdio::remove(preprocfile);
+    if(other_exn)
+      throw ex;
+    return ans;
+  }
+  if(*v)
+    fprintf(stderr,"%s completed.\n",stage_name);
+  else if(!*q)
+    fprintf(stderr,".");
+  fflush(stderr);
+  return ans;
+}
+list_t<Absyn::decl> do_parse(FILE @ f, list_t<Absyn::decl> ignore) {
+  Lex::lex_init(); // must forget typedefs, may as well flush symbols too
+  return Parse::parse_file(f);
+}
+list_t<Absyn::decl> do_typecheck(Tcenv::tenv te, list_t<Absyn::decl> tds) {
+  Absynpp::expand_typedefs = ! *noexpand;
+  Tc::tc(te,add_cyc_namespace_r,tds);
+  if(!*noshake)
+    tds = Tc::treeshake(te,tds);
+  return tds;
+}
+list_t<Absyn::decl> do_cfcheck(bool ignore, list_t<Absyn::decl> tds) {
+  ControlFlow::cf_check(tds);
+  //  NewControlFlow::cf_check(tds);
+  return tds;
+}
+list_t<Absyn::decl> do_translate(bool ignore, list_t<Absyn::decl> tds) {
+  return Toc::toc(tds);
+}
+list_t<Absyn::decl> do_print(FILE @ out_file, list_t<Absyn::decl> tds) {
+  Absynpp::expand_typedefs = ! *noexpand;
+  if (*toc) {
+    fprintf(out_file, "#include \"cyc_include.h\"\n\n");
+    Absynpp::qvar_to_Cids = true;
+  }
+  if(*pp)
+    Absynpp::decllist2file(tds,out_file);
+  else if(*up)
+    Absyndump::dumpdecllist2file(tds,out_file);
+  fflush(out_file);
+  return tds;
+}
+
 void compile_file(string filename) {
 
-  Lex::lex_init(); // must forget typedefs, may as well flush symbols too
-
-  string basename = Filename::chop_extension(filename);
+  string basename    = Filename::chop_extension(filename);
+  string preprocfile = strconcat(basename, ".i");
 
   if (!*q||*v) fprintf(stderr,"Compiling file: %s", basename);
   if (*v) fprintf(stderr,"\n");
 
-  // establish filenames
-  string preprocfile = strconcat(basename,  ".i");
-
   // Run the preprocessor, by building and running a command-line
   // Pass -I and -D things onto pre-processor
   string inc_string = 
-    String::str_sepstr(&List(new {""},rev(includes))," -I");
+    String::str_sepstr(&List(new{""},rev(includes))," -I");
   string def_string = 
-    String::str_sepstr(&List(new {""},rev(defines)), " -D");
+    String::str_sepstr(&List(new{""},rev(defines)), " -D");
   // check that the input file exists
-  try {
-    FILE @f0 = file_open(filename, "r");
-    fclose(f0);
-  } catch {
-  default: 
-    fprintf(stderr, "\nError:  can't find input file %s", filename);
-    compile_failure = true;
+  FILE * f0 = try_file_open(filename, "r", "input file");
+  if(compile_failure)
     return;
-  }
+  fclose((FILE @)f0);
+  // actually make the command call
   string cmd = xprintf("gcc -x c -E -U__GNUC__ %s %s %s > %s",
                        inc_string, def_string, filename, preprocfile);
   if (*v) fprintf(stderr,"%s\n",cmd);
   if (system(string_to_Cstring(cmd)) != 0) {
-    fprintf(stderr,"\nError: pre-processing failed!\n");
     compile_failure = true;
+    fprintf(stderr,"\nError: pre-processing failed!\n");
     return;
   }
 
-  // reset front-end -- necessary for good error messages!
-  Position::reset_position(preprocfile);
+  Position::reset_position(preprocfile); // necessary for good error messages!
 
   // Actually process the file
-  FILE @f;
-  try f = file_open(preprocfile, "r");
-  catch {
-  default:
-    fprintf(stderr, "\nError: couldn't open %s\n", preprocfile);
-    compile_failure = true;
+  FILE * in_file  = try_file_open(preprocfile,"r","file");
+  FILE * out_file = stdout; // possibly changed below
+  if(compile_failure)
     return;
-  }
-
-  // parse
   list_t<Absyn::decl> tds = null;
-  try {
-    tds = Parse::parse_file(f);
-  } catch {
-  default:
-    compile_failure = true; break;
+  if(!compile_failure) {
+    tds = do_stage("parsing", do_parse, (FILE@)in_file, tds,
+		   preprocfile);
+    file_close((FILE@)in_file); // won't happen if exception is thrown
   }
-  file_close(f);
-  if (compile_failure || Position::error_p()) {
-    compile_failure=true;
-    Stdio::remove(preprocfile);
-    return;
-  }
-  PRINT_STAGE("Parsing completed\n");
-  fflush(stderr);
-  // typecheck
-  if (tds != null && *tc) try {
-    Absynpp::expand_typedefs = ! *noexpand;
-    Tcenv::tenv te = Tcenv::tc_init();
-    Tc::tc(te, add_cyc_namespace_r, tds);
-    if(! *noshake)
-      tds = Tc::treeshake(te,tds);
-    PRINT_STAGE("Type checking completed.\n");
-    if (Position::error_p()) {
-      compile_failure=true;
-      Stdio::remove(preprocfile);
-      return;
-    }
-    ControlFlow::cf_check(tds);
-    //    NewControlFlow::abstract_decls(tds);
-    PRINT_STAGE("Control-flow checking completed.\n");
-    if (Position::error_p()) {
-      compile_failure = true;
-      Stdio::remove(preprocfile);
-      return;
-    }
-  } catch {
-  case Impossible(s):
-    fprintf(stderr,"\nImpossible during type-checking: %s\n", s); 
-    fflush(stderr);
-    compile_failure=true;
-    Stdio::remove(preprocfile);
-    return;
-  case x:
-    fprintf(stderr,"\nUncaught exception during type-checking\n"); 
-    fflush(stderr);
-    compile_failure=true;
-    Stdio::remove(preprocfile);
-    throw(x);
-  }
-  // translate to C
-  try {
-    if (*toc && !compile_failure) {
-      tds = Toc::toc(tds); 
-      PRINT_STAGE("Translation to C completed\n");
-    }
-  } catch {
-  case Impossible(s):
-    fprintf(stderr,"\nImpossible during translation: %s\n", s); fflush(stderr);
-    compile_failure=true;
-    Stdio::remove(preprocfile);
-    return;
-  default:
-    fprintf(stderr,"\nUncaught exception during translation\n"); 
-    fflush(stderr);
-    compile_failure=true;
-    Stdio::remove(preprocfile);
-    return;
-  }
-  // print
-  FILE @out_file;
-  try {
-    if (out_file_name_opt == null)
-      out_file = stdout;
-    else 
-      out_file = file_open(*out_file_name_opt, "w");
-  } catch {
-  case FileOpenError(_): 
-    fprintf(stderr,"\nCould not open output file: %s\n",*out_file_name_opt);
-    fflush(stderr);
-    Stdio::remove(preprocfile);
-    compile_failure=true;
-    return;
-  }
-  if (tds != null && !compile_failure && (*pp || *up)) {
-    Absynpp::expand_typedefs = ! *noexpand;
-    if (*toc) {
-      fprintf(out_file, "#include \"cyc_include.h\"\n\n");
-      Absynpp::qvar_to_Cids = true;
-    }
-    if(*pp)
-      Absynpp::decllist2file(tds,out_file);
-    else if(*up)
-      Absyndump::dumpdecllist2file(tds,out_file);
-    fflush(out_file);
-    PRINT_STAGE("Printing completed\n");
-  }
-  if (Position::error_p()) {
-    fprintf(stderr,"COMPILATION FAILED!\n");
-    fflush(stderr);
-    Stdio::remove(preprocfile);
-    compile_failure=true;
-  } else {
-    if (!(*v || *q)) fprintf(stderr,"\n"); // for "...." progress indicator
+  if(!compile_failure && tds != null && *tc)
+    tds = do_stage("type checking", do_typecheck, Tcenv::tc_init(), tds,
+		   preprocfile);
+  if(!compile_failure && *tc)
+    tds = do_stage("control-flow checking", do_cfcheck, true, tds,
+		   preprocfile);
+  if(!compile_failure && *toc)
+    tds = do_stage("translation to C", do_translate, true, tds,
+		   preprocfile);
+  if(!compile_failure && out_file_name_opt != null)
+    out_file = try_file_open(*out_file_name_opt, "w", "output file");
+  if(!compile_failure && tds != null && (*pp || *up))
+    tds = do_stage("printing", do_print, (FILE @)out_file, tds,
+		   preprocfile);
+  if (out_file != null && out_file != stdout) 
+    file_close((FILE @)out_file); // won't happen if exception is thrown
+  fprintf(stderr,"\n"); 
+  if(!compile_failure)
     Tcutil::flush_warnings();
-  }
-  // I believe this duplicate file_close is the cause of the segfault -- Jeff
-  // FIX: However, trying to close a file twice should not cause a segfault
-  // file_close(f);
   Stdio::remove(preprocfile);
-  if (out_file_name_opt != null) file_close(out_file);
   return;
 }
 
 int main() {
-  list_t<$(string,spec_t,string)@> options = 
-    &List{new {$("-nocyc",Clear_spec(add_cyc_namespace),
-                 "does not add implicit namespace Cyc")},
-    &List{new {$("-q",Set_spec(q),"compile quietly")},
-    &List{new {$("-v",Set_spec(v), 
-                 "print compilation stages verbosely")},
-    &List{new {$("-check_null",Unit_spec(set_check_null), 
-                 "turn on null-checking in generated C code")},
-    &List{new {$("-D",String_spec(add_define), 
-                 "pass definition to pre-processor")},
-    &List{new {$("-I",String_spec(add_include), "include directory")}, 
-    &List{new {$("-toc",Set_spec(toc), "translate to C")},
-    &List{new {$("-tc",Set_spec(tc), "type check")},
-    &List{new {$("-noremoveunused",Set_spec(noshake),
-                 "don't remove externed variables that aren't used")},
-    &List{new {$("-noexpandtypedefs",Set_spec(noexpand),
-                 "don't expand typedefs in pretty printing")},
-    &List{new {$("-up",Set_spec(up), "ugly print")},
-    &List{new {$("-pp",Set_spec(pp), "pretty print")},
-    &List{new {$("-o",String_spec(set_out_file_name),
-                 "Output file name")}, null}}}}}}}}}}}}};
-
-  /*
   $(string,spec_t,string) specs[13] = 
     {$("-nocyc",Clear_spec(add_cyc_namespace),
        "does not add implicit namespace Cyc"),
@@ -302,10 +264,8 @@ int main() {
   let l12 = List(&specs[11],&l11);
   let l13 = List(&specs[12],&l12);
   let options = &l13;
-*/
 		 
   Arg::parse(options, compile_file, "Options:");
 
   return compile_failure ? 1 : 0;
 }
-

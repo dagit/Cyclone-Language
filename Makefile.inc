@@ -41,8 +41,9 @@ CYCLONE_SRCS:=absyn\
          tc\
 	 control_flow\
          toc\
-         new_control_flow\
+         cf_flowinfo\
          cf_absexp\
+         new_control_flow\
          cyclone
 
 # Makefiles assume this is only one file, but they could be changed.

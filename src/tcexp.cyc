@@ -1061,7 +1061,7 @@ static typ tcStruct(tenv_t te, seg_t loc, typ *`r topt,
   // calculate the instantiation and final type
   let inst    = List::map(make_inst_var,sd->tvs);
   let typs    = List::map(snd,inst);
-  let res_typ = StructType(*tn,typs,(structdecl@)(&$(sd)));
+  let res_typ = StructType(*tn,typs,new{sd});
   // this will instantiate the struct if we have type information in topt
   if (topt != null) unify(res_typ,*topt);
   *otyps = &Opt(typs);

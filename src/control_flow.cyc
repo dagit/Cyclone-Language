@@ -206,6 +206,9 @@ static cf_stmt_annot_t @ get_stmt_annot(stmt s) {
   default: throw Impossible("ControlFlow -- wrong stmt annotation");
   }
 }
+stmt get_encloser(stmt enclosee) {
+  return get_stmt_annot(enclosee)->encloser;
+}
 
 struct CFExpSyn {
   flow_info_t when_true;

@@ -3,10 +3,13 @@
 
 #include "list.h"
 #include "absyn.h"
+#include "position.h"
+#include "cf_flowinfo.h"
 #include "new_control_flow.h"
 
-namespace CFabsexp {
+namespace CfAbsexp {
 using Absyn;
+using CfFlowInfo;
 using NewControlFlow;
 
 extern xenum exn {BadAbsexp};

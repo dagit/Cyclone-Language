@@ -19,7 +19,8 @@ namespace Absyn;
 // second 
 static int zstrlist_cmp(list_t<stringptr> ss1,list_t<stringptr> ss2) {
   while(true) {
-    if (ss1 == null) return (ss2 == null) ? 0 : -1;
+    if (ss1 == ss2)  return 0;
+    if (ss1 == null) return -1;
     if (ss2 == null) return 1;
     int i = zstrptrcmp(ss1->hd,ss2->hd);
     if (i != 0) return i;
