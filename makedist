@@ -7,7 +7,7 @@
 # TODO:
 # 1) automatically generate a version # to include in the compiler
 # 2) tag the CVS repository with this version #
-# 3) tar the files into the directory cyclone-$version
+# 3) tar the files into the directory $PWD-$version
 #
 # usage: makedist [version_num]
 
@@ -66,18 +66,18 @@ function grepexpr {
 
 # figure out files to exclude
 #
-if [ "`basename $PWD`" != "cyclone" ]; then
-  echo "Assumes that we are working the cyclone directory, exiting"
-  exit 1
-fi
 grepstr=`grepexpr`
+DIR=`basename $PWD`
+OLDDIR="$DIR"
 cd ..
-find cyclone -print | egrep -e $grepstr > $TMP
+mv $DIR $DIR-$version
+DIR="$DIR-$version"
+find $DIR -print | egrep -e $grepstr > $TMP
 
 # tar 'em up
 #
-filename=cyclone-$version
-tar -cvf ${filename}.tar -X $TMP cyclone
+filename=$DIR
+tar -cvf ${filename}.tar -X $TMP $DIR
 if [ $? != 0 ]; then
   echo Failed to tar the files into ${filename}.tar
   exit 1
@@ -88,14 +88,18 @@ if [ $? != 0 ]; then
   \rm -f ${filename}.tar
   exit 1
 fi
-mv $filename.tar.gz cyclone
+mv $filename.tar.gz $DIR
 if [ -f "$TMP" ]; then
   \rm -f $TMP
 fi
 
+# restore the directory name
+#
+mv $DIR $OLDDIR
+
 # output the version #
 #
-cd cyclone
+cd $OLDDIR
 echo $version > .version
 
 # tag CVS, if desired

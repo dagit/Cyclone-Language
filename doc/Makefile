@@ -25,6 +25,12 @@ main-screen.html: gen-libdoc.tex
 	hevea main-screen
 	hevea main-screen
 
+main-screen.ps: gen-libdoc.tex
+	latex '\nonstopmode\input' main-screen
+	makeindex main-screen
+	latex '\nonstopmode\input' main-screen
+	latex '\nonstopmode\input' main-screen
+
 main-screen.pdf: gen-libdoc.tex
 	pdflatex '\nonstopmode\input' main-screen
 	makeindex main-screen
