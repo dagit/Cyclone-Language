@@ -1,0 +1,779 @@
+\section{Cyclone for C Programmers}
+
+We begin with a quick overview of Cyclone, suitable for those who
+already know how to program in C\@.  We will explain some of the ways
+that Cyclone differs from C, and some of the reasons why; you should
+come away with enough knowledge to start writing, compiling, and
+running your own Cyclone programs.  We assume that the Cyclone
+compiler is already installed on your system (see
+Appendix~\ref{sec:install} or the Cyclone web site if you need to
+install the compiler).
+
+\subsection{Getting Started}
+
+Here's a Cyclone program that prints the words ``\texttt{hello,
+  world}.''
+\begin{verbatim}
+  #include <stdio.h>
+  using Stdio;
+
+  int main(int argc, char ??argv) {
+    printf("hello, world\n");
+    return 0;
+  }
+\end{verbatim}  
+
+It looks very much like a C program: it uses \texttt{\#include} to
+tell the preprocessor to import some standard definitions, it defines
+a distinguished function \texttt{main} that serves as the entry point
+of the program, and it uses the familiar \texttt{printf} function to
+handle the printing.  To compile the program, put it into a file
+\texttt{hello.cyc}, and run the command
+\begin{verbatim}
+  cyclone hello.cyc -o hello
+\end{verbatim}
+This tells the Cyclone compiler (\texttt{cyclone}) to compile the file
+\texttt{hello.cyc}; the \texttt{-o} flag tells the compiler to leave
+the executable output in the file \texttt{hello} (or, in Windows,
+\texttt{hello.exe}).  If all goes well you can execute the program by
+typing
+\begin{verbatim}
+  hello
+\end{verbatim}
+and it will print
+\begin{verbatim}
+  hello, world
+\end{verbatim}
+
+It's interesting to compare our program with a version written in C:
+\begin{verbatim}
+  #include <stdio.h>
+
+  int main() {
+    printf("hello, world\n");
+  }
+\end{verbatim}
+A C compiler will happily compile and run the C version.  However,
+it's not valid Cyclone code: it will be rejected by the Cyclone
+compiler, for several reasons.
+
+First, the C version omits a \texttt{return} statement.  Cyclone
+requires a \emph{definite return}: any function with a return type
+other than \texttt{void} must explicitly return a value of the correct
+type.  Definite return is important for both safety and security.  The
+caller of the function expects to receive a value of the return type;
+if the function does not execute a \texttt{return} statement, the
+caller will receive some random value instead, and this could easily
+lead to a crash.  We don't expect that problem here (since the return
+type is \texttt{int}), but there is another problem: the random value
+returned is probably drawn from the space occupied by local variables
+of the function.  The caller can exploit this to inspect the internal
+variables of the function, leading to a security breach.
+
+A second reason that Cyclone rejects the C version is that it doesn't
+declare any arguments for \texttt{main}, although by convention
+\texttt{main} will be invoked with an \texttt{argc} and \texttt{argv}
+(containing the command-line arguments).  Even though the arguments
+are not used in our program, Cyclone requires \texttt{main} to declare
+them, because, in general, if the caller and the function do not agree
+on the number and type of arguments to pass, it can lead to a crash.
+
+As you can see, Cyclone restricts programmers in places to ensure
+safety.  Next, we will see that Cyclone also gives programmers some
+new features that encourage safety.
+
+\subsection{Namespaces}
+Cyclone extends C with C++-style namespaces.  For example, the code
+\begin{verbatim}
+  namespace Foo { 
+    int x = 0; 
+    int f() { return x; } 
+  }
+\end{verbatim}
+declares an integer named \texttt{Foo::x} and a function named
+\texttt{Foo::f}.  Names using the ``\texttt{::}'' notation are called
+\emph{qualified} names.  Within the namespace, you don't need to use
+the qualified name.  For instance, \texttt{Foo::f} refers to
+\texttt{Foo::x} as simply \texttt{x}.  Outside of the namespace, you
+have to use the qualified name, unless you open up the namespace with
+a \texttt{using} declaration.  For example, after the above code we
+can write
+\begin{alltt}
+  using Foo;
+  int g() {\lb} return f(); {\rb} \textit{/* f refers to Foo::f */}
+\end{alltt}
+
+Cyclone's standard libraries are all wrapped in namespaces.  For
+example, \texttt{<stdio.h>} defines the \texttt{Stdio} namespace.
+This is why our \texttt{hello} program had a \texttt{using Stdio}
+declaration: it allowed us to refer to \texttt{Stdio::printf} as
+simply \texttt{printf}.
+
+Namespaces allow two programmers to choose names without worrying that
+they will clash with each other.  For example, if you like you can
+define your own version of the \texttt{printf} function, and use your
+\texttt{printf} and \texttt{Stdio::printf} in the same program.  When
+namespaces are used properly, they isolate one programmer's internal
+variables from another's, enhancing safety.
+
+\subsection{Pointers and Exceptions}
+
+The second argument to \texttt{main} (\texttt{argv}) is declared as a
+checked pointer to an array of strings (written ``\texttt{string ?}''.)
+The ``\texttt{?}'' type constructor is similar to ``\texttt{*}'' in C in
+that it supports subscripting, dereferencing, pointer arithmetic, etc.
+However, all dereferences are checked to ensure that the current
+pointer value is in range. The representation of a ``\texttt{?}''
+pointer is different from the representation of a normal pointer, as
+extra information is needed to support the bounds check.
+
+Just as in C, \texttt{main} is called by the Cyclone runtime system and
+passed \texttt{argc} (a count of the number of command-line arguments to
+the program) and \texttt{argv} (the name of the program and the
+command-line arguments.)  Once invoked, this version of \texttt{main}
+checks to see if \texttt{argc} is less than or equal to 1.  If so, a
+failure is signalled by throwing the \texttt{Failure} exception (with an
+argument string reading \texttt{"missing name!"}).  Otherwise, the
+program prints to standard output \texttt{"Hello <name>"} where
+\texttt{<name>} is the first argument to the program.
+
+This will produce an executable program \texttt{hello.exe}.  Typing
+``\texttt{hello}'' under Win32 (``\texttt{hello.exe}'' resp. under Unix)
+will yield ``\texttt{Uncaught exception Core_Failure}''.  Typing
+``\texttt{hello Fred}'' will yield \texttt{"Hello, Fred"}.
+
+\subsection{Features Added}
+
+Cyclone adds a number of features to C, ranging from convenient
+expression forms, to advanced typing constructs.  For instance,
+Cyclone includes many of the GCC and C99 extensions that make writing
+code a bit easier.  Variables need not be declared at the top of a
+block, a declaration can appear within a for-statement, expressions
+can have statements nested inside them, etc.  Cyclone also adds
+support for ML or Haskell-style algebraic datatypes (also known as
+tagged unions) and pattern matching.  Datatypes can seriously lift the
+level of abstraction for code, and pattern matching can be an
+effective tool for ensuring that all cases in a tricky test are
+covered.
+
+In addition, Cyclone adds advanced typing support in the form of (a)
+parametric polymorphism, (b) structural subtyping, (c) some
+unification-based, local-type inference.  These features are necessary
+to type-check or port a number of (potentially) unsafe C idioms,
+usually involving ``\texttt{void*}'' or the like.  Similarly, datatypes
+can be used to code around many of the uses for C's \texttt{union} types
+-- another potential source of unsoundness.  Cyclone also adds new
+support for checked pointer arithmetic and ensures that all pointer
+accesses are to valid objects.  Again, these features are aimed at
+making it easy to port C code to Cyclone.
+
+In what follows, we give a brief overview of these added features.  
+
+\subsection{GCC and C99 Additions}
+
+GCC and the
+\href{http://web.onetelnet.ch/~twolf/tw/c/c9x_changes.html}{ISO C99
+  standard} have some useful new features that we have adopted for
+Cyclone. Some of the ones that we current support:
+\begin{itemize}
+\item Statement expressions: There is a new expression form,
+  \texttt{(\lb} \textit{statement} \textit{expression} \texttt{\rb)}.
+  The statement is executed first, then the expression, and the value
+  of the entire expression is the value of the expression
+\item Struct expressions:  If you've declared
+  \verb|struct point{int x; int y;};| then you can write
+  \verb|point{.x=expression, .y=expression}| to allocate and
+  initialize a struct point
+\item \texttt{//} comments as in Java or C++
+\item Trailing comma allowed in \texttt{enum} declarations.  Also, you
+  can use semi-colons instead of commas.
+\item Declarations can appear in any statement position.  It is not
+  necessary to wrap braces around the declaration of a local variable.
+\item For-statements can include a declaration. For instance:
+  \verb|for (int x=0; x < n; x++) { ... }|
+\end{itemize}
+
+We expect to follow the C99 standard fairly closely.  
+
+
+\subsection{Tuples}
+Tuples are like lightweight structs.  They need not be declared in
+advance, and have member or field names that are implicitly 0, 1, 2,
+3, etc.  For example, the following code declares \texttt{x} to be a
+3-tuple of an integer, a character, and a boolean, initialized with
+the values 42, \texttt{'z'}, and \texttt{true} respectively.  It then
+checks to see whether the third component in the tuple is \texttt{true}
+(it is) and if so, increments the first component in the tuple.
+\begin{verbatim}
+  $(int,char,bool) x = $(42,'z',true)
+
+  if (x[2]) 
+    x[0]++;
+\end{verbatim}
+
+The above code would be roughly equivalent to writing:
+\begin{verbatim}
+  struct {int f0; char f1; bool f2;} x = {42,'z',true};
+  if (x.f2)
+    x.f1++;
+\end{verbatim}
+
+Thus, tuple types are written \texttt{\$(type1,...,typen)}, tuple
+constructor expressions are written \texttt{\$(exp1,...,expn)}, and
+extracting the ith component of a tuple is written using subscript
+notation \texttt{exp[i-1]}.  Note that, consistent with the rest of C,
+the members start with 0, not 1.
+
+Unlike structs, tuple types are treated equivalent as long as they are
+structurally equivalent.  As in C, struct types are equivalent only if
+they have the same tag or name.  (Note that in C, all struct
+declarations have a tag, even if the compiler has to gensym one.)
+
+
+\subsection{Pointers}
+There are three different pointer types in Cyclone, written
+``\texttt{t*},'' ``\texttt{t@},'' and ``\texttt{t?}.''  Actually, pointers
+are quite a bit more complicated than this, but these are the pointer
+types that you'll most likely use the most.
+
+A value of type \texttt{t*} is a possibly \texttt{null} pointer to a
+value of type \texttt{t}.  When these values are dereferenced, a
+\texttt{null} check is performed and an exception is raised if the
+value is actually \texttt{null}. To ensure statically that a pointer
+cannot be \texttt{null}, you can use the type \texttt{t@} instead.
+Dereferencing a \texttt{@} pointer requires no run-time overhead and
+will not raise an exception.  Pointer arithmetic and subscripting
+(except for 0) are not supported for values of type \texttt{t*} or
+\texttt{t@} (but see below).  Both kinds of pointers are represented
+the same way as C pointers.
+
+In general, one can write ``\verb|t*{e}|'' to describe a pointer to an
+array of \texttt{t} values with \texttt{e} elements, where \texttt{e} is a
+constant expression.  For instance, the following code is permissible:
+\begin{verbatim}
+  int x[5] = {0,1,2,3,4};
+  int *{5}p = x;
+\end{verbatim}
+
+Here, we've said that \texttt{p} is a (possibly \texttt{null}) pointer to
+an array of five integers. When a pointer has type \verb|t*{e}|, then
+it is permissible to use subscripts in the range 0 to \texttt{e}-1 to
+access the elements of \texttt{p}.  Note that \texttt{t*} is short hand
+for \verb|t*{1}| (and similarly \texttt{t@} is short hand for
+\verb|t@{1}|).
+
+A value of type \texttt{t?} is a checked pointer to a (possibly empty)
+array of values of type \texttt{t}.  Unlike \texttt{*} or \texttt{@}
+pointers, checked pointers support arbitrary pointer arithmetic
+(following the rules of C), arbitrary integer subscripts, etc.
+However, each access is checked to ensure that the pointer is within
+the bounds of the original underlying array.
+
+Values of type \verb|t*{e}| or \verb|t@{e}| or \texttt{t[e]} can be cast
+to type \texttt{t?} to support pointer arithmetic.  Furthermore, values
+of type \texttt{t?} can be cast to type \verb|t*{e}| or \verb|t@{e}|,
+but this requires a run-time check to ensure that the corresponding
+array slice is in bounds.
+
+Obviously, checked pointers require more information than \texttt{*} or
+\texttt{@} pointers, so that we can determine whether the access is in
+bounds.  Consequently, checked pointers are larger than normal
+pointers.  (The current implementation uses three words for each
+checked pointer.)  However, one rarely needs checked pointers unless
+you're performing lots of pointer arithmetic. In subsequent releases,
+we hope to support checked but untagged representations for these
+pointers using technology from dependent type theory.
+
+Finally, we should note that in fact all pointers in Cyclone point
+into a region. By default, if you don't mention a region, then the
+pointer points into the disgtinguished heap region (written `H).
+Pointers to stack-allocated objects live in regions that are private
+to the enclosing scope. More on this later\ldots
+
+\subsection{Exceptions}
+Cyclone provides exceptions, \texttt{throw}, and \texttt{try}/\texttt{catch}
+statements similar to Java.  (We'll probably add support for finally
+clauses at some point.)  This is one way to avoid the error-prone and
+type-unsafe approach in C of returning a value (e.g., -1) to indicate
+an error.  (An alternative way is to return a possibly-\texttt{null}
+pointer, or an appropritate \texttt{tunion} value.)  Exception values
+are a special case of extensible tagged unions (\texttt{xtunions})
+described below.  The following example shows how to declare a couple
+of exceptions, how to throw an exception, and how to catch an
+exception:
+\begin{verbatim}
+  xtunion exn { NotFound(string); }  // NotFound takes a string as an argument
+  xtunion exn { Foo; }               // Foo takes no arguments
+  void bar() {
+    if (coin_toss()) 
+      throw new Foo;
+    else if (!lookup("friday"))
+      throw new NotFound("friday isn't here");
+  }
+  void foo() {
+    try {
+      bar();
+    } catch {
+    case &NotFound(s):  fprintf(stderr, "not found: %s\n",s); break;
+    case &Foo: fprintf(stderr, "foo raised!\n"); break;
+    }
+    printf("no exception raised.\n");
+  }
+\end{verbatim}
+
+\subsection{Creating Arrays}
+There are about four ways to create arrays in Cyclone. One can always
+declare an array and provide an initializer as in C\@. For instance:
+\begin{verbatim}
+  int foo[8] = {1,2,3,4,5,6,7,8};
+  char s[4] = "bar";
+\end{verbatim}
+are both examples from C for creating arrays.  Note that Cyclone
+follows C's conventions here, so that if you declare arrays as above
+within a function, then the lifetime of the array coincides with the
+activation record of the enclosing scope.  In other words, such arrays
+will be stack allocated.
+
+To create heap-allocated arrays (or strings) within a Cyclone
+function, you should either use ``\texttt{new}'' operator with either an
+array initializer or an array comprehension. The following code
+demonstrates this:
+\begin{verbatim}
+  // foo is a pointer to a heap-allocated array
+  int *{8}foo = new {1,2,3,4,5,6,7,8};
+
+  // s is a checked pointer to a heap-allocated string
+  char ?s = new "bar";
+
+  // a non-null pointer to the first 100 even numbers
+  int @{100}evens = new {for i < 100 : 2*i};
+\end{verbatim}
+
+\subsection{Subtyping}
+Cyclone supports ``extension on the right'' and ``covariant depth on
+\texttt{const}'' subtyping for pointers.  This simply means that you
+can cast a value \texttt{x} from having a type ``pointer to a struct
+with 10 fields,'' to ``pointer to a struct having only the first 5
+fields.''  For example, if we have the following definitions:
+\begin{verbatim}
+  typedef struct Point {float x,y;} *point;
+
+  typedef struct CPoint {float x,y; int color;} *cpoint;
+
+  float xcoord(point p) {
+    return p->x;
+  }
+\end{verbatim}
+then you can call \texttt{xcoord} with either a \texttt{point} or
+\texttt{cpoint} object.  You can also cast a pointer to a tuple having 3
+fields (e.g., \texttt{\$(int,bool,double)*}) to a pointer to a tuple
+having only 2 fields (e.g., \texttt{\$(int,bool)*}).  In other words, you
+can forget about the ``tail'' of the object.  This allows a degree of
+polymorphism that is useful when porting C code.  In addition, you can
+do ``deep'' casts on pointer fields that are \texttt{const}.  (It is
+unsafe to allow deep casts on non-const fields.)  Also, you can cast
+a field from being non-const to being const.  You can also cast a
+constant-sized array to an equivalent pointer to a struct or tuple.
+In short, Cyclone attempts to allow you to cast one type to another as
+long as it is safe.  Note, however, that these casts must be explicit.
+
+We expect to add more support for subtyping in the future (e.g.,
+subtyping on function pointers, bounded subtyping, etc.)
+
+
+\subsection{Tagged Unions}
+
+Cyclone's tagged unions (\texttt{tunion}) are based on the algebraic
+datatypes that first appeared in functional languages such as Hope,
+Miranda, ML, and Haskell.  They provide a safe way for building data
+structures that contain possibly many different types and can be used
+to build algebraic or inductively defined structures, such as lists,
+trees, graphs, etc.  For instance, the following tunion declarations
+give a way to construct abstract syntax trees for a simple calculator
+language:
+\begin{verbatim}
+  tunion operator { Plus, Times, Minus, Divide }
+  tunion absyn {
+    Integer(int);
+    Term(tunion absyn, tunion operator, tunion absyn);
+  }
+  tunion absyn e1 = new Term(new Integer(3),Plus,new Integer(4));
+  tunion absyn e2 = new Term(e1,Times,new Integer(5));
+\end{verbatim}
+
+The operator definition is like an enum---it just defines symbolic
+constants for \texttt{Plus}, \texttt{Times}, \texttt{Minus}, and
+\texttt{Divide}.  The \texttt{absyn} definition defines an inductive
+tree-like data type for abstract syntax.  The \texttt{Integer}
+constructor takes an \texttt{int} argument and returns an \texttt{absyn}
+value.  The \texttt{Term} constructor takes an abstract syntax tree, an
+operator, and an abstract syntax tree and returns a new abstract
+syntax tree.  So, for example, \texttt{e1} is a tree representing the
+term ``3 + 4'' while \texttt{e2} is a tree representing the term ``(3 +
+4) * 5.''
+
+Internally, \texttt{tunion} constructors are either represented as an
+integer value (as with \texttt{Plus}, \texttt{Times}, \texttt{Minus}, and
+\texttt{Divide}) or a pointer to an object containing a tag and the
+arguments to the constructor.  The object is always allocated on the
+heap.  To traverse the tree, we use pattern matching, again in the
+style of functional languages such as ML or Haskell.
+
+In the future, we plan to make the representation of tunions explicit
+and to allow programmers to control tag placement and do explicit
+tests on the tag to refine the type of an object in a more
+traditional, data-flow fashion.  We will probably keep the tunion
+construct as is for convenience.
+
+\subsection{Pattern Matching}
+Pattern matching in Cyclone generalizes the switch construct of C
+allowing you to not only test integral values, but also to test
+structured values such as the abstract syntax trees above.  For
+example, the following function takes in an abstract syntax tree and
+prints the tree to stdout:
+\begin{verbatim}
+  void print_absyn(tunion absyn tree) {
+     switch (tree) {
+     case &Integer(i)       : printf("%d",i); break;
+     case &Term(t1,Plus,t2) : printf("("; print_absyn(t1); 
+                              printf("+"); 
+                              print_absyn(t2); printf(")"); break;
+     case &Term(t1,Times,t2): printf("("; print_absyn(t1); 
+                              printf("*"); 
+                              print_absyn(t2); printf(")"); break;
+     case &Term(t1,Minus,t2): printf("("; print_absyn(t1); 
+                              printf("-");
+                              print_absyn(t2); printf(")"); break;
+     case &Term(t1,Divide,t2):printf("("; print_absyn(t1); 
+                              printf("/");
+                              print_absyn(t2); printf(")"); break;
+  }
+\end{verbatim}
+
+Note that patterns introduce and initialize new variables local to a
+given case.  For instance, in the \texttt{Integer} case above, the
+pattern variable \texttt{i} is introduced and is initialized to whatever
+value is carried by the Integer constructor.  Thus, \texttt{i} is
+available for use on the right-hand-side of the case.  You can pattern
+match on just about any kind of value, and destructure it.  For
+instance, you can pattern match on tuples, structs, pointers to
+tuples/structs, etc.  See the grammar for the syntax of the various
+pattern forms.
+
+The type-checker for Cyclone is much more picky about \texttt{switch}
+statements than C\@.  In particular, it will check that all of the
+patterns you have are exhaustive (or else there's a \texttt{default:}
+clause) and that none of the patterns overlap.  This is useful for
+evolving code.  For instance, if we added a new operator (say
+\texttt{Mod}), then the compiler would complain that the \texttt{switch}
+in \texttt{print_absyn} doesn't cover all possible cases (namely the
+case where we have a term involving the \texttt{Mod} operator.)
+
+In addition, the Cyclone type-checker makes sure that you don't
+accidentally fall-through from one case to another.  In particular, if
+you don't put in explicit breaks, returns, throws, etc., then the
+compiler will reject the code.  You can still fall through to the next
+case, but you have to do it with an explicit ``\texttt{fallthru}''
+statement.  If the case pattern doesn't bind any new variables, then
+you just write ``\texttt{fallthru;}'' as the last thing in the case.  If
+you want to fall through to a case that defines new variables, then
+you need to give values for those variables.  For instance, in the
+following code:
+\begin{verbatim}
+  void foo(tunion absyn tree) {
+     switch (tree) {
+     case &Integer(i)       : printf("%d ",i); break;
+     case &Term(t1,Plus,t2) : printf("It's a plus \n");
+                              fallthru(t2,Plus,t1);
+     case &Term(t1,op,t2)   : foo(t1); foo(t2); break;
+  }
+\end{verbatim}
+if we pass it a tree \texttt{Term(Integer(3),Plus,Integer(4))} then we
+will see ``It's a plus 4 3,'' but if we pass it
+\texttt{Term(Integer(3),Times,Integer(4))} we will see ``3 4.''
+
+
+\subsection{Let Declarations}
+Sometimes, it's painful to declare a variable because you have to
+write down its type.  Cyclone includes some limited support for type
+inference using let declarations.  In particular, you can write:
+\begin{verbatim}
+  int foo(int x) {
+    let y = x+3;
+    let z = 3.14159;
+    return (int)(y*z);
+  }
+\end{verbatim}
+
+Here, we declared two variables y and z using ``\texttt{let}.''  When
+you use \texttt{let}, you don't have to write down the type of the
+variable.  Rather, the compiler infers the type from the expression
+that initializes the variable.  More generally, you can write
+``\texttt{let pattern = exp;}'' to destructure a value into a bunch of
+variables.  For instance, if you pass a tuple to a function, then you
+can extract the components as follows:
+\begin{verbatim}
+  int sum($(int,int,int) args) {
+    let $(x,y,z) = args;
+    return (x+y+z);
+  }
+\end{verbatim}
+
+\subsection{Extensible Tagged Unions}
+Extensible tunions (\texttt{xtunion}s) are just like \texttt{tunion}s
+except that you can add new constructors anytime you want.  Thus,
+\texttt{tunion}s are ``closed world'' datatypes, whereas \texttt{xtunion}s
+are ``open world'' datatypes.  Both are useful.  For instance, with a
+close world representation of abstract syntax trees, when we write a
+function such as \texttt{print_absyn}, we can be sure that we've covered
+all of the cases.  However, if we want an extensible setting, where
+programmers are adding new kinds of nodes all the time, then it's
+useful to use \texttt{xtunion}s.  Right now, we really only use
+\texttt{xtunion}s in the parser (for various semantic values) and for
+exceptions.  We might add better subtyping support for them so that
+you can extend them depth-wise as well as width-wise.
+
+
+\subsection{Polymorphic Functions}
+As mentioned above, Cyclone supports a limited amount of subtyping
+polymorphism.  It also supports a fairly powerful form of parametric
+polymorphism.  Those of you coming from ML or Haskell will find this
+familiar.  Those of you coming from C++ will also find it somewhat
+familiar.  The basic idea is that you can write one function that
+abstracts the types of some of the values it manipulates.  For
+instance, consider the following two functions:
+\begin{verbatim}
+  $(string,int) swap1($(int,string) x) {
+     return $(x[1], x[0]);
+  }
+  $(int,int) swap2($(int,int) x) {
+     return $(x[1], x[0]);
+  }
+\end{verbatim}
+
+The two functions are quite similar: They both take in a pair (i.e., a
+2-tuple) and return a pair with the components swapped.  At the
+machine-level, the code for these two functions will be exactly the
+same, assuming that \texttt{int}s and \texttt{string}s (\texttt{char *}) are
+represented the same way.  So it seems silly to write the code twice.
+Normally, a C programmer would replace the definition with simply:
+\begin{verbatim}
+  $(void *,void *) swap1($(void *,void *) x) {
+     return $(x[1], x[0]);
+  }
+\end{verbatim}
+(assuming you added tuples to C).  But of course, this isn't type-safe
+because once I cast the values to \texttt{void *}, then I can't be sure
+what type I'm getting out.  In Cyclone, you can instead write
+something like this:
+\begin{verbatim}
+  $(`b,`a) swap<`a,`b>($(`a,`b) x) {
+     return $(x[1],x[0]);
+  }
+\end{verbatim}
+The code is the same, but it abstracts what the types are.  The extra
+parameters \texttt{<`a,`b>} are type variables that can be instantiated
+with any word-sized, general-purpose register type.  So, for instance,
+you can call swap on pairs of integers, pairs of pointers, pairs of an
+integer and a pointer, etc.:
+\begin{verbatim}
+  let $(x,y) = swap($("hello",3));  // x is 3, y is hello
+  let $(w,z) = swap($(4,3));        // w is 3, z is 4
+\end{verbatim}
+
+Note that when calling a polymorphic function, you need not tell it
+what types you're using to instantiate the type variables.  Rather,
+Cyclone figures this out through unification.
+
+C++ supports similar functionality with templates.  However, C++ and
+Cyclone differ considerably in their implementation strategies.
+First, Cyclone only produces one copy of the code, whereas a C++
+template is specialized and duplicated at each type that it is used.
+This approach requires that you include definitions of templates in
+interfaces and thus defeats separate compilation.  However, the
+approach used by Cyclone does have its drawbacks: in particular, the
+only types that can instantiate type variables are those that can be
+treated uniformly.  This ensures that we can use the same code for
+different types.  The general rule is that values of the types that
+instantiate a type variable must fit into a machine word and must be
+passed in general-purpose (as opposed to floating-point) registers.
+Examples of such types include \texttt{int}, pointers, \texttt{tunion},
+and \texttt{xtunion} types.  Other types, including \texttt{char},
+\texttt{short}, \texttt{long long}, \texttt{float}, \texttt{double},
+\texttt{struct}, and \texttt{tuple} types violate this rule and thus
+values of these types cannot be passed to a function like swap in
+place of the type variables. In practice, this means that you tend to
+manipulate a lot of pointers in Cyclone code.
+
+The combination of parametric polymorphism and sub-typing means that
+you can cover a lot of C idioms where \texttt{void*} or unsafe casts
+were used without sacrificing type-safety.  We use polymorphism a lot
+when coding in Cyclone.  For instance, the standard library includes
+many container abstractions (lists, sets, queues, etc.) that are all
+polymorphic in the element type.  This allows us to re-use a lot of
+code.  In addition, unlike C++, those libraries can be compiled once
+and need not be specialized.  On the downside, this style of
+polymorphism does not allow you to do any type-specific things (e.g.,
+overloading or ad-hoc polymorphism.)  Someday, we may add support for
+this, but in the short run, we're happy not to have it.
+
+
+\subsection{Polymorphic Data Structures}
+Just as function definitions can be parameterized by types, so can
+\texttt{struct} definitions, \texttt{tunion} definitions, and even
+\texttt{typedef}s.  For instance, the following \texttt{struct} definition
+is used in the standard library for lists:
+\begin{verbatim}
+  struct List<`a> {`a hd; struct List<`a> *tl; };
+  typedef struct List<`a> *list_t<`a>;
+\end{verbatim}
+
+Here, we've declared a \texttt{struct List} parameterized by a type
+\texttt{`a}.  The \texttt{hd} field contains an element of type \texttt{`a}
+and the \texttt{tl} field contains a (possibly \texttt{null}) pointer to a
+\texttt{struct List} with elements of type \texttt{`a}.  We then define
+\texttt{list_t<`a>} as an abbreviation for \texttt{struct List<`a>*}.  So,
+for instance, we can declare both integer and string lists like this:
+\begin{verbatim}
+  list_t<int> ilist = new List{1,new List{2,null}};
+  list_t<string> slist = new List{.hd = "foo",
+                                  .tl = new List{"bar",null}};
+\end{verbatim}
+
+Note that we use ``\texttt{new}'' as in C++ to allocate a new
+\texttt{struct List} on the heap and return a pointer to the resulting
+(initialized) \texttt{List} object.  Note also that the field designator
+(``\texttt{.hd}'', ``\texttt{.tl}'') are optional.
+
+Once you have polymorphic data structures, you can write lots of
+useful polymorphic code and use it over and over again.  For instance,
+the standard list library (see lib/list.h) includes functions for
+mapping over a list, looking up items in a list, concatenating two
+lists, copying lists, sorting lists, etc.
+
+\subsection{Abstract and Existential Types}
+Suppose you want to declare an abstract type for implementing stacks.
+In Cyclone, the way this is accomplished is by declaring a struct that
+encapsulates the implementation type, and by adding the
+``\texttt{abstract}'' qualifier to the struct definition.  For instance,
+if we write:
+\begin{verbatim}
+  abstract struct Queue<`a> { list_t<`a> front, rear; };
+\end{verbatim}
+then this declares a polymorphic \texttt{Queue} implementation that is
+abstract.  The definition of the struct is available within the unit
+that declares the Queue, but will not be made available to the outside
+world.  (This will be enforced by a link-time type-checker which we
+are currently putting together.)  Typically, the provider of the
+\texttt{Queue} abstraction would write in an interface file:
+\begin{verbatim}
+  extern struct Queue<`a>;
+\end{verbatim}
+The abstract keyword in the implementation ensures that the definition
+does not leak to a client.  One can also declare \texttt{tunion}s to be
+abstract, though I find it more useful to always use a \texttt{struct}
+to encapsulate the tunion, and make the \texttt{tunion} static, and the
+struct \texttt{abstract}.  That way, clients are always given an
+abstract struct to manipulate.
+
+\texttt{Typedef}s cannot be made abstract.  As in C, typedefs are type
+abbreviations and are expanded at compile time.  If we chose to make
+them (potentially) abstract, then we'd have to enforce a ``boxedness''
+restriction, similar to the restrictions on type variables.  To
+simplify the language, we chose to make structs abstract.
+
+It's also possible to code up ``first-class'' abstract data types
+using \texttt{tunion}s or \texttt{xtunion}s.  Individual [x]tunion
+constructors can be parameterized by additional type variables that
+are local to the type-constructor.  (From a type-theoretic point of
+view, these are existentially-quantified variables.)  I won't bother
+to say a lot more about these here, except that the approach used is
+quite similar to the treatment of existential types in Haskell.  In
+particular, pattern matching one of these constructors requires you to
+introduce explicit type variables into which the actual types are
+``unpacked.''  These variables are treated abstractly in the body of a
+case.  However, when creating one of the values, it is not necessary
+to explicitly ``pack'' the types to be abstracted.  Rather, the types
+are discovered through unification.  For an example of the use of
+existential types, see the \texttt{fn.h} and \texttt{fn.cyc} files in the
+standard library which implement first-class closures.
+
+
+\subsection{Restrictions}
+\begin{itemize}
+\item Cyclone requires every function to declare a return type (the
+  implicit int for the return type of a function is removed).
+\item Cyclone requires the format argument of the \texttt{printf},
+  \texttt{fprintf}, and \texttt{sprintf} functions to be a string
+  constant.  This is so that we can statically protect against format
+  string attacks.  (We should support dynamic checks too!)
+\item Cyclone does not allow user-defined vararg functions. (We should
+  support this too.)
+\item Cyclone does not permit some of the casts that are allowed in C\@.
+  Incorrect casts in C can lead to crashes.  In general, you should be
+  able to cast something from one type to another as long as the
+  underlying representations are compatible.
+\item Cyclone does not support pointer arithmetic on \texttt{*} or
+  \texttt{@} pointers.  Pointer arithmetic is not unsafe in itself, but
+  it can lead to unsafe code when the resulting pointer is assigned or
+  dereferenced.  You can cast the \texttt{*} or \texttt{@} value to a
+  \texttt{?} value and then do the pointer arithmetic instead.
+\item Cyclone inserts a NULL check when a \texttt{*} pointer is
+  dereferenced and it cannot determine statically that the pointer is
+  not NULL\@.  This prevents segmentation faults.
+\item Cyclone requires any function that is supposed to return a
+  non-\texttt{void} value to execute a return statement (or throw an
+  exception) on every possible execution path. This is needed to
+  ensure that the value returned from the function has the right type,
+  and is not just a random value left in a register or on the stack.
+\item Unions in Cyclone can only hold ``bits.''  In particular, they
+  can hold combinations of chars, ints, shorts, longs, floats,
+  doubles, structs of bits, or tuples of bits. Pointer types are not
+  supported.  This avoids the situation where an arbitrary bit pattern
+  is cast to a pointer and then dereferenced. If you want to use
+  multiple types, then use tagged unions (\texttt{tunion}s.)
+\item Cyclone only supports a limited form of \texttt{malloc} which is
+  baked in. Tuples, tunions, and structs can all be allocated via
+  \texttt{malloc} but this requires writing explicitly:
+  \texttt{malloc(sizeof(t))} where t is the type of the value that you
+  are allocating.
+\item Cyclone performs a static analysis to ensure that every variable
+  and every \texttt{struct} field is initialized before it is used. This
+  prevents a random stack value from being used improperly. The
+  analysis is somewhat conservative so you may need to initialize
+  things earlier than you would do in C\@. For instance, currently,
+  Cyclone does not support initializing a struct in a procedure
+  separate from the one that does the allocation.
+\item Cyclone does not permit \texttt{goto}s from one scope into
+  another. C warns against this practice, as it can cause crashes;
+  Cyclone rules it out entirely.
+\item Cyclone places some limitations on the form of \texttt{switch}
+  statements that rule out crashes like those caused by unrestricted
+  \texttt{goto}.  Furthermore, Cyclone prevents you from accidentally
+  falling through from one case to another. To fall through, you must
+  explicitly use the \texttt{fallthru} keyword.  Otherwise, you must
+  explicitly \texttt{break}, \texttt{goto}, \texttt{continue},
+  \texttt{return}, or \texttt{throw} an exception.
+\item In the near future, Cyclone will place some restrictions on
+  linking for safety reasons. In particular, if you import a variable
+  or function with one type, then it must be exported by another file
+  with that type. In addition, access to C code will be restricted
+  based on a notion of security roles.
+\item Cyclone has some new keywords (\texttt{let}, \texttt{abstract},
+  etc.) that can no longer be used as identifiers.
+\item Cyclone prevents you from using pointers to stack-allocated
+  objects as freely as in C to avoid security holes. The reason is
+  that each declaration block is placed in a conceptual ``region'' and
+  the type system tracks the region into which a pointer points.
+\item Cyclone currently does not support nested type declarations
+  within a function. All \texttt{struct}, \texttt{union}, \texttt{enum},
+  \texttt{tunion}, \texttt{xtunion}, and \texttt{typedef} definitions must
+  be at the top-level.
+\item Cyclone does not allow you to explicitly free a heap-allocated
+  object. Instead, you can either use the region mechanism or rely
+  upon the conservative garbage collector to reclaim the space.
+\end{itemize}
+
+% Local Variables:
+% TeX-master: "main"
+% End:

@@ -1,0 +1,283 @@
+\section{Definite Assignment}
+ 
+It is unsafe to allow memory to be used as a value of a particular
+type just because the memory has been allocated at that type.  In
+other words, you cannot use memory that has not been properly
+initialized.  Most safe languages enforce this invariant by making
+allocation and initialization a single operation.  This solution is
+undesirable in Cyclone for at least two reasons:
+\begin{itemize}
+\item Many idioms require declaring variables in a wider scope than is
+  convenient for initializing the variable.
+\item C code, which we wish to port to Cyclone, is full of separated
+  allocation and initialization, including all heap-allocated storage
+  (i.e., \texttt{malloc}).
+\end{itemize}
+
+Inspired by Java's rules for separate declaration and initialization
+of local variables, Cyclone has a well-defined, sound system for
+checking that memory is written before it is used.  The rules are more
+complicated than in Java because we support pointers to uninitialized
+memory, as is necessary for \texttt{malloc}.
+
+Here we begin with idioms that the analysis does and does not permit.
+With a basic sense of the idea, we expect programmers can generally
+not worry about the exact rules of the analysis.  However, when the
+compiler rejects code because memory may be uninitialized, the
+programmer needs to know how to re-write the code in order to pass the
+analysis.  For this reason, we also give a more complete description
+of the rules.
+
+We begin with examples not involving pointers.  If you are familiar
+with Java's definite assignment, you can skip this part, but note that
+\texttt{struct} and tuple fields are tracked separately.  So you can use
+an initialized field before another field of the same object is
+initialized.  (Java does not allow separate allocation and
+initialization of object fields.  Rather, it inserts null or 0 for
+you.)
+
+The following code is accepted:
+\begin{verbatim}
+  extern int maybe();
+  int f() {
+    int x, y, z;
+    if(maybe())
+      x = 3;
+    else
+      x = 4;
+    while(1) {
+      y = x;
+      break;
+    }
+    if(z = maybe() && q = maybe())
+      return q;
+    else
+      return z;
+  }
+\end{verbatim}
+
+In short, the analysis checks that every control-flow path between a
+variable's declaration and use includes an assignment to the variable.
+More generally, the analysis works on memory locations, not just
+variables.  The analysis knows that loop bodies and conditional
+branches are only executed if the value of certain expressions are 0
+or not 0.
+
+The following code is safe, but is not accepted:
+\begin{verbatim}
+  int f() {
+    int x = 1;
+    int y;
+    if(x) 
+      y = 2;
+    if(x)
+     return y;
+   return 0;
+  }
+\end{verbatim}
+
+The problem is that the analysis does not know that the second
+\texttt{if}-guard is true only if the first one is.  General support for
+such ``data correlation'' would require reasoning about two different
+expressions at different times evaluating to the same value.
+
+Unlike Java, Cyclone supports pointers to uninitialized memory.  The
+following code is accepted:
+\begin{verbatim}
+  extern int maybe();
+  int f() {
+    int x;
+    int z;
+    int *_ y;
+    if(maybe()) {
+      x = 3;
+      y = &x;
+    } else {
+      y = &z;
+      z = 3;
+    }
+    return *y;
+  }
+\end{verbatim}
+
+The analysis does not know which branch of the if will be taken, so
+after the conditional it knows that either ``\texttt{x} is initialized
+and \texttt{y} points to \texttt{x}'' or ``\texttt{z} is initialized and
+\texttt{y} points to \texttt{z}.''  It merges this information to
+``\texttt{y} points to somewhere initialized,'' so the function returns
+an initialized value, as required.  (It is safe to return
+uninitialized ints, but we reject such programs anyway.)
+
+However, this code is rejected even though it is safe:
+\begin{verbatim}
+  extern int maybe();
+  int f() {
+    int x;
+    int z;
+    int *_ y;
+    if(maybe()) {
+      y = &x;
+    } else {
+      y = &z;
+    }
+    x = 3;
+    z = 3;
+    return *y;
+  }
+\end{verbatim}
+
+The problem is that the analysis loses too much information after the
+conditional, remembering only that ``\texttt{y} points somewhere that
+may be uninitialized.''  After such a loss of information, only an
+assignment to \texttt{*y} would be enough to convince the analysis that
+\texttt{*y} is initialized.
+
+A compelling use of pointers to uninitialized memory is porting C code
+that uses \texttt{malloc}, such as the following (the cast is not
+necessary in Cyclone):
+\begin{verbatim}
+  struct IntPair { int x; int y; };
+  struct IntPair * same(int z) {
+     struct IntPair * ans = 
+          (struct IntPair *)malloc(sizeof(struct IntPair));
+    ans->x = ans->y = z;
+    return ans;
+  }
+\end{verbatim}
+
+In the near future, we will support another compelling use.  By adding
+an ``initializes'' qualifier for function parameters, you will be able
+to pass a pointer to uninitialized memory to a function that
+initializes it.  We need the qualifier to ensure both that the
+function actually does initialization and that the function does not
+read through its parameter before initialization.  Here is an example:
+\begin{verbatim}
+  void initInt(initializes int @ ip);
+  int f() {
+    int x;
+    return *initInt(&x);
+  }
+\end{verbatim}
+
+Certain expression forms require their arguments to be fully
+initialized (that is, everything reachable from the expression must be
+initialized) even though the memory is not all immediately used.
+These forms are casts, the expression in ``\texttt{let p = e},'' the
+argument to \texttt{switch}, and any access of a \texttt{union} field.  We
+plan to relax these restrictions in the future.
+
+You should now know enough to program effectively in Cyclone without
+immediately initializing all memory.  For those wanting a more
+complete view of the language definition (i.e., what the analysis does
+and does not accept), we now go into the details.  Note that the
+analysis is sound and well-specified---there is never a reason that
+the compiler rejects your program for unexplainable reasons.
+
+For each local variable and for each program point that allocates
+memory, the analysis tracks information about each field.  We call
+each such field a place. For example, in this code:
+\begin{verbatim}
+  struct B { int x; $(int,int) y;}; 
+  void f() {
+    struct B b;
+    struct B @ bp = malloc(sizeof(B));
+    ...
+  }
+\end{verbatim}
+the places are \texttt{b.x}, \texttt{b.y[0]}, \texttt{b.y[1]}, \texttt{bp},
+\texttt{<1>.x}, \texttt{<1>.y[0]}, and \texttt{<1>.y[1]} where we use
+\texttt{<1>} to stand for the \texttt{malloc} expression (a program point
+that does allocation).  An initialization state can be ``\emph{must
+  point to P}'' where P is a path.  For example, after the second
+declaration above, we have ``\texttt{bp} must point to \texttt{<1>}.''  An
+ensuing assignment of the form ``\texttt{bp->x = 3}'' would therefore
+change the initialization state of \texttt{<1>.x}.  If there is not a
+unique path to which a place definitely points, then we keep track of
+the place's \emph{initialization level} and \emph{escapedness}.  A
+place is escaped if we do not know exactly all of the places that must
+point to it.  For example, both of the following fragments would cause
+all the places starting with \texttt{<1>} to be escaped afterwards
+(assuming \texttt{bp} must point to \texttt{<1>}):
+\begin{verbatim}
+  struct B @ bp2;                some_fun(bp);                      
+   if(maybe()) 
+      bp2 = bp;
+\end{verbatim}
+
+Note that if ``p must point to P,'' then p is implicitly unescaped
+because we cannot know that p points to P if we don't know all the
+pointers to p.  The initialization level is one of None, This, or All.
+None means the place may be uninitialized.  This means the place is an
+initialized pointer, but everything it points to may be uninitialized.
+All means p and everying reachable from p (following as many pointers
+as you want) is initialized.
+
+Note that our choice of tracking ``must point to'' instead of ``must
+alias'' forces us to reject some safe programs, such as this one:
+\begin{verbatim}
+  int f() {
+    int x, int y;
+    int @_ p1, @_ p2;
+    if(maybe())
+     p1 = &x;
+    else
+     p1 = &y;
+    p2 = p1;
+    *p2 = 7;
+    return *p1;
+  }
+\end{verbatim}
+
+Even though \texttt{p1} and \texttt{p2} have not escaped, our analysis
+says that they each point to an unknown place without saying that they
+point to the \emph{same} unknown place.
+
+For safety reasons, once a place is escaped, any assignment to it must
+be a value that is fully initialized, meaning everything reachable
+from the value is initialized. This phenomenon is why the first
+function below is accepted but not the second (the \texttt{list_t} and
+\texttt{glist_t} typedefs are defined in the \texttt{List} library):
+\begin{verbatim}
+  list_t<`a> copy(glist_t<`a,`r> x) {
+    list_t<`a> result, prev;
+
+    if (x == null) return null;
+    result = malloc(sizeof(_));
+    result->hd = x->hd;
+    result->tl = null;
+    prev = result;
+    for (x=x->tl; x != null; x=x->tl) {
+      list_t<`a> next = malloc(sizeof(_));
+      next->hd = x->hd;
+      next->tl = null;
+      prev->tl = next;
+      prev = prev->tl;
+    }
+    return result;
+  } 
+
+  list_t<`a> copy(glist_t<`a,`r> x) {
+    list_t<`a> result, prev;
+
+    if (x == null) return null;
+    result = malloc(sizeof(_));
+    result->hd = x->hd;
+    result->tl = null;
+    prev = result;
+    for (x=x->tl; x != null; x=x->tl) {
+      prev->tl = malloc(sizeof(_));
+      prev->tl->hd = x->hd;
+      prev->tl->tl = null;
+    }
+    return result;
+  } 
+\end{verbatim}
+
+In the for body, we do not know where prev must point (on the first
+loop iteration it points to the first malloc site, but on ensuing
+iterations it points to the second).  Hence \texttt{prev->tl} may be
+assigned only fully initialized objects.
+
+% Local Variables:
+% TeX-master: "main"
+% End:

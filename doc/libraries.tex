@@ -1,0 +1,2525 @@
+\section{Libraries}
+%HEVEA \newcommand{\parbox}[3][x]{#3}
+\newcommand{\code}[1]{\texttt{#1}}
+\newcommand{\var}[1]{\texttt{#1}}
+\newcommand{\defunlabel}[1]{%
+  \parbox[b]{\labelwidth}{\makebox[0pt][l]{#1}\\}}
+\newenvironment{defun}[2]{%
+  \begin{list}{}{}%
+    \renewcommand{\makelabel}{\defunlabel}%
+    \index{#1@\texttt{#1}}%
+  \item[\textbf{\texttt{#1}}\texttt{#2}]}{\end{list}}
+%%% \newenvironment{defun}[2]{\noindent\index{#1@\texttt{#1}}
+%%%   \textbf{\texttt{#1}}\texttt{#2}\begin{quote}}{\end{quote}}
+\newcommand{\tindex}[1]{}
+\newcommand{\exindex}[1]{}
+
+\subsection{Array}
+
+Namespace \code{Array} implements some sorting routines on arrays.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <array.h>
+using Array;
+\end{verbatim}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+void qsort(int comp(`a,`a), `a ?x, int ofs, int len);
+void msort(int comp(`a,`a), `a ?x, int ofs, int len);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{qsort}{(comp,x,ofs,len)}
+  Does an in-place sort of a segment of array \var{x}, starting at the
+  element with index \var{ofs}, and continuing for \var{len} elements.
+  The function \var{comp} should return an integer less than, equal
+  to, or greater than 0 if its first argument is less than, equal to,
+  or greater than its second argument, respectively.  \code{qsort}
+  throws \code{Core::InvalidArg("Array::qsort")} if \var{len} is
+  negative or \var{ofs} and \var{len} specify a segment outside the
+  bounds of \var{x}.
+\end{defun}
+
+\begin{defun}{msort}{(comp,x,ofs,len)}
+  Does an in-place sort of a segment of array \var{x}, starting at the
+  element with index \var{ofs}, and continuing for \var{len} elements.
+  The function \var{comp} should return an integer less than, equal
+  to, or greater than 0 if its first argument is less than, equal to,
+  or greater than its second argument, respectively.  \code{msort}
+  throws \code{Core::InvalidArg("Array::msort")} if \var{len} is
+  negative or \var{ofs} and \var{len} specify a segment outside the
+  bounds of \var{x}.
+\end{defun}
+
+\subsection{Bitvec}
+
+Namespace \code{Bitvec} implements bit vectors, which can be used to
+represent sets with a fixed number of elements.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <bitvec.h>
+using Bitvec;
+\end{verbatim}
+
+\subsubsection*{Types}
+\begin{verbatim}
+typedef int BITVEC[?];
+\end{verbatim}
+
+\subsubsection*{Creating bit vectors}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+BITVEC new_empty(int);
+BITVEC new_full(int);
+BITVEC new_copy(BITVEC);
+BITVEC from_list<`a,`b>(Dict::Dict<`a,`b> d, int f(`b),int sz, List::list<`a>);
+List::list<int> to_sorted_list(BITVEC bvec, int sz);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{new_empty}{(n)}
+Returns a bit vector containing \var{n} bits, all set to 0.
+\end{defun}
+
+\begin{defun}{new_full}{(n)}
+Returns a bit vector containing \var{n} bits, all set to 1.
+\end{defun}
+
+\begin{defun}{new_copy}{(v)}
+Returns a copy of bit vector \var{v}.
+\end{defun}
+
+\subsubsection*{Accessing and updating bits}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+bool get(BITVEC, int);
+void set(BITVEC, int);
+void clear(BITVEC, int);
+bool get_and_set(BITVEC, int);
+void clear_all(BITVEC);
+void set_all(BITVEC);
+bool all_set(BITVEC bvec, int sz);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{get}{(v,n)}
+Returns the \var{n}th bit of vector \var{v}.
+\end{defun}
+
+\begin{defun}{set}{(v,n)}
+Sets the \var{n}th bit of vector \var{v} to 1.
+\end{defun}
+
+\begin{defun}{clear}{(v,n)}
+Sets the \var{n}th bit of vector \var{v} to 0.
+\end{defun}
+
+\begin{defun}{get_and_set}{(v,n)}
+Sets the \var{n}th bit of vector \var{v} to 1, and returns the value
+that the \var{n}th bit had before it was set to 1.
+\end{defun}
+
+\begin{defun}{set_all}{(v)}
+Sets every bit of \var{v} to 1.
+\end{defun}
+
+\begin{defun}{clear_all}{(v)}
+Sets every bit of \var{v} to 0.
+\end{defun}
+
+\begin{defun}{all_set}{(v,n)}
+Does ?????  FIX
+\end{defun}
+
+\subsubsection*{Combining and comparing bit vectors}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+void union_two(BITVEC dest, BITVEC src1, BITVEC src2);
+void intersect_two(BITVEC dest, BITVEC src1, BITVEC src2);
+void diff_two(BITVEC dest, BITVEC src1, BITVEC src2);
+bool compare_two(BITVEC src1, BITVEC src2);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{union_two}{(dest,src1,src2)}
+Updates \var{dest} with the bitwise-or of \var{src1} and \var{src2}.
+There is no error if \var{dest} is shorter than \var{src1} or
+\var{src2} (extra bits are ignored).  If \var{src1} or \var{src2}
+is shorter than \var{dest}, \code{Null_Exception} is thrown;
+\var{dest} may be partially updated.
+\end{defun}
+
+\begin{defun}{intersect_two}{(dest,src1,src2)}
+Updates \var{dest} with the bitwise-and of \var{src1} and \var{src2}.
+Its error conditions are the same as \code{union_two}.
+\end{defun}
+
+\begin{defun}{diff_two}{(dest,src1,src2)}
+Updates \var{dest} with the bitwise-difference of \var{src1} and
+\var{src2}.  Its error conditions are the same as \code{union_two}.
+\end{defun}
+
+\begin{defun}{compare_two}{(src1,src2)}
+Returns 1 if every bit of
+\var{src1} is the same as the corresponding bit of \var{src2}, and 0
+otherwise.  If \var{src2} is longer than \var{src1}, its extra bits are
+ignored.  If \var{src2} is shorter than \var{src1},
+\code{Null_Exception} is thrown.
+\end{defun}
+
+\subsubsection*{Printing bit vectors}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+void print_bvec(BITVEC bvec);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{print_bvec}{(v)}
+FIX: PUT SOMETHING HERE
+\end{defun}
+
+\subsection{Buffer}
+
+Namespace \code{Buffer} implements extensible buffers of characters.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <buffer.h>
+using Buffer;
+\end{verbatim}
+
+\subsubsection*{Types}
+\begin{verbatim}
+struct t;
+typedef struct t @T;
+\end{verbatim}
+
+The type \code{struct t} is the abstract type of buffers.  Most
+functions manipulate the type \code{T}, a non-null pointer to a buffer.
+
+\subsubsection*{Functions}
+\begin{verbatim}
+T create(uint n);
+string contents(T);
+Core::size_t length(T);
+void clear(T);
+void reset(T);
+void add_char(T,char);
+void add_substring(T,string,int offset,int len);
+void add_string(T,string);
+void add_buffer(T buf_dest, T buf_source);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{create}{(n)}
+Returns an empty buffer with internal storage of size \var{n}.  If
+\var{n} is negative, no exception is thrown; a buffer with a small
+amount of internal storage is returned instead.
+\end{defun}
+
+\begin{defun}{contents}{(b)}
+Returns the contents of buffer \var{b} as a string.
+\end{defun}
+
+\begin{defun}{length}{(b)}
+Returns the current length of buffer \var{b}.
+\end{defun}
+
+\begin{defun}{clear}{(b)}
+Sets the length of \var{b} to 0, without modifying its internal storage.
+\end{defun}
+
+\begin{defun}{reset}{(b)}
+Restores \var{b} to its initial internal storage.
+\end{defun}
+
+\begin{defun}{add_char}{(b,c)}
+Adds the character \var{c} to the end of buffer \var{b}.
+\end{defun}
+
+\begin{defun}{add_substring}{(b,s,offset,len)}
+Adds the substring of \var{s} starting at element \var{offset} and
+continuing for \var{len} characters to the end of buffer \var{b}.  If
+\var{offset} and \var{len} do not specify a valid substring of \var{s},
+then the function throws \code{InvalidArg("Buffer::add_substring")}.
+Note, the substring specified by \var{offset} and \var{len} may contain
+null (0) characters; in any case, the entire substring is appended to
+\var{b}, not just the substring up to the first null character.
+\end{defun}
+
+\begin{defun}{add_string}{(b,s)}
+Adds the string \var{s} to the end of buffer \var{b}.
+\end{defun}
+
+\begin{defun}{add_buffer}{(buf_dest,buf_source)}
+Adds the contents of buffer \var{buf_source} to the end of buffer
+\var{buf_dest}.
+\end{defun}
+
+\subsection{Ctype}
+
+Namespace \code{Ctype} implements the character library of C\@.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <ctype.h>
+using Ctype;
+\end{verbatim}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+int isalnum(int c));
+int isalpha(int c));
+int iscntrl(int c));
+int isdigit(int c));
+int isgraph(int c));
+int islower(int c));
+int isprint(int c));
+int ispunct(int c));
+int isspace(int c));
+int isupper(int c));
+int isxdigit(int c));
+int tolower(int c));
+int toupper(int c));
+int isascii(int c));
+int toascii(int c));
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{isalnum}{(c)}
+Returns 1 if \code{isalpha(c)} or \code{isnum(c)} returns 1,
+and returns 0 otherwise.
+\end{defun}
+
+\begin{defun}{isalpha}{(c)}
+Returns 1 if \code{islower(c)} or \code{isupper(c)} returns 1,
+and returns 0 otherwise.
+\end{defun}
+
+\begin{defun}{iscntrl}{(c)}
+Returns 1 if \var{c} is a control character,
+and returns 0 otherwise.
+\end{defun}
+
+\begin{defun}{isdigit}{(c)}
+Returns 1 if \var{c} is a decimal digit (\code{'0'}--\code{'9'}), and
+returns 0 otherwise.
+\end{defun}
+
+\begin{defun}{isgraph}{(c)}
+Returns 1 if \var{c} is a non-space printing character, and returns 0
+otherwise.
+\end{defun}
+
+\begin{defun}{islower}{(c)}
+Returns 1 if \var{c} is a lowercase letter (\code{'a'}--\code{'z'}),
+and returns 0 otherwise.
+\end{defun}
+
+\begin{defun}{isprint}{(c)}
+Returns 1 if \var{c} is a printing character (including space), and
+returns 0 otherwise.
+\end{defun}
+
+\begin{defun}{ispunct}{(c)}
+Returns 1 if \var{c} is a non-whitespace, non-digit, non-alpha
+printing character, and returns 0 otherwise.
+\end{defun}
+
+\begin{defun}{isspace}{(c)}
+Returns 1 if \var{c} is a whitespace character (\code{' '},
+\verb|'\f'|, \verb|'\n'|, \verb|'\r'|, \verb|'\t'|, or \verb|'\v'|),
+and returns 0 otherwise.
+\end{defun}
+
+\begin{defun}{isupper}{(\var{c})}
+Returns 1 if \var{c} is an uppercase letter
+(\code{'A'}--\code{'Z'}), and returns 0 otherwise.
+\end{defun}
+
+\begin{defun}{isxdigit}{(c)}
+Returns 1 if \var{c} is a hexidecimal digit (\code{'0'}--\code{'9'} or
+\code{'A'}--\code{'F'} or \code{'a'}--\code{'f'}), and returns 0
+otherwise.
+\end{defun}
+
+\begin{defun}{tolower}{(c)}
+If \var{c} is an uppercase letter (\code{'A'}--\code{'Z'}), then
+\code{tolower(\var{c})} returns its lowercase (\code{'a'}--\code{'z'})
+equivalent; otherwise it returns \var{c}.
+\end{defun}
+
+\begin{defun}{toupper}{(c)}
+If \var{c} is a lowercase letter (\code{'a'}--\code{'z'}), then
+\code{toupper(\var{c})} returns its uppercase
+(\code{'A'}--\code{'Z'}) equivalent; otherwise it returns \var{c}.
+\end{defun}
+
+\subsection{Core}
+
+The \code{Core} namespace contains fundamental types and functions.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <core.h>
+using Core;
+\end{verbatim}
+
+\subsubsection*{Booleans}
+\subsubsection*{Types}
+\begin{verbatim}
+typedef int bool;
+\end{verbatim}
+
+\subsubsection*{Values}
+\begin{verbatim}
+#define false (0)
+#define true (1)
+\end{verbatim}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+bool true_f<`a>(`a);
+bool false_f<`a>(`a);
+\end{verbatim}
+
+\subsubsection*{Exceptions}
+\begin{verbatim}
+xenum exn { FileOpenError(string) };
+xenum exn { FileCloseError };
+\end{verbatim}
+
+\subsubsection*{Values}
+\begin{verbatim}
+FILE @cyc_stdout;
+FILE @cyc_stdin;
+FILE @cyc_stderr;
+#define EOF ((char)(-1))
+\end{verbatim}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+int   f_string_read(FILE *,string,int,int);
+int   f_string_write(FILE *,string,int,int);
+int   f_seek(FILE *,int);
+int   fflush(FILE *);
+int   fgetc(FILE *);
+FILE @file_open(string fname, string mode);
+void  file_close(FILE @);
+int   file_delete(string);
+int   file_length(string);
+\end{verbatim}
+
+\subsubsection*{Opt}
+\subsubsection*{Types}
+\begin{verbatim}
+struct Opt<`a> { `a v; };
+typedef struct Opt<`a> *Opt_t<`a>;
+\end{verbatim}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+Opt_t<`b> opt_map<`a,`b>(`b f(`a), Opt_t<`a> x);
+\end{verbatim}
+
+\subsubsection*{Core exceptions}
+\exindex{InvalidArg}
+\exindex{Failure}
+\exindex{Impossible}
+\exindex{Not_found}
+\exindex{Unreadchable}
+\begin{verbatim}
+xenum exn { InvalidArg(string) };
+xenum exn { Failure(string) };
+xenum exn { Impossible(string) };
+xenum exn { Not_found };
+xenum exn { Unreachable(string) };
+\end{verbatim}
+
+\subsubsection*{Boxing and unboxing}
+\subsubsection*{Functions}
+\begin{verbatim}
+Char      box_char(char);
+char      unbox_char(Char);
+Short     box_short(short);
+short     unbox_short(Short);
+Long Long box_long_long(long long);
+long long unbox_long_long(Long Long);
+Float     box_float(float);
+float     unbox_float(Float);
+Double    box_double(double);
+double    unbox_double(Double);
+\end{verbatim}
+
+\subsubsection*{Miscellaneous types}
+\begin{verbatim}
+typedef unsigned int uint;
+typedef unsigned int size_t;
+\end{verbatim}
+
+\subsubsection*{Miscellaneous string stuff}
+\subsubsection*{Types}
+\begin{verbatim}
+typedef char Cstring[];
+typedef char string[?];
+\end{verbatim}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+Cstring string_to_Cstring(string);
+string  new_string(int);
+int     int_of_string(string);
+string  string_of_int(int);
+string  string_of_uint(unsigned int);
+string  string_of_char(char);
+\end{verbatim}
+
+\subsubsection*{System interface}
+\subsubsection*{Functions}
+\begin{verbatim}
+int    system(Cstring);
+string get_env(string);
+string std_args()[?];
+\end{verbatim}
+
+\subsubsection*{Miscellaneous functions}
+\begin{verbatim}
+`a   fst<`a,`b>($(`a,`b)@);
+`b   snd<`a,`b>($(`a,`b)@);
+`c   third<`a,`b,`c>($(`a,`b,`c)@);
+`a   identity<`a>(`a);
+int  intcmp(int,int);
+int  charcmp(char,char);
+bool is_space(char);
+\end{verbatim}
+
+\subsection{Dict}
+
+Namespace \code{Dict} defines \emph{dictionaries}, which map keys to
+values.  The dictionaries are implemented functionally: adding a mapping
+to an existing dictionary produces a new dictionary, without affecting
+the existing dictionary.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <dict.h>
+using Dict;
+\end{verbatim}
+
+\subsubsection*{Types}
+\tindex{Dict}
+\tindex{struct dict}
+\begin{verbatim}
+struct dict<`a,`b>;
+typedef struct dict<`a,`b> @Dict<`a,`b>;
+\end{verbatim}
+
+\subsubsection*{Exceptions}
+\exindex{Absent}
+\exindex{Present}
+\begin{verbatim}
+xenum exn {Absent};
+xenum exn {Present};
+\end{verbatim}
+
+The exception \code{Absent} is thrown when a key is expected in a
+dictionary, but is not present.  Conversely, \code{Present} is
+typically thrown when a key is not expected, but is present.
+
+
+\subsubsection*{Creating dictionaries}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+Dict<`a,`b> empty<`a,`b>(int comp(`a,`a));
+Dict<`a,`b> singleton<`a,`b>(int comp(`a,`a),`a key,`b data);
+\end{verbatim}
+
+\subsubsection*{Use}
+\begin{defun}{empty}{(comp)}
+Creates a new dictionary.  The function \var{comp} takes two keys as
+arguments, and it should return an integer less than, equal to, or
+greater than 0 according to whether its first argument is less than,
+equal to, or greater than the second, respectively.
+\end{defun}
+
+\begin{defun}{singleton}{(comp,key,data)}
+Creates a new dictionary with a single entry, mapping \var{key} to
+\var{data}.  The function \var{comp} should be a comparison function for
+keys, as described for \code{empty} above.
+\end{defun}
+
+\subsubsection*{Accessing and updating dictionaries}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+bool            is_empty<`a,`b>(Dict<`a,`b> d);
+bool            member<`a,`b>(Dict<`a,`b> d,`a key);
+`b              lookup<`a,`b>(Dict<`a,`b> d,`a key);
+Core::Opt_t<`b> lookup_opt<`a,`b>(Dict<`a,`b> d,`a key);
+Dict<`a,`b>     insert<`a,`b>(Dict<`a,`b> d,`a key,`b data);
+Dict<`a,`b>     insert_new<`a,`b>(Dict<`a,`b> d,`a key,`b data);
+Dict<`a,`b>     inserts<`a,`b>(Dict<`a,`b> d,list<$(`a,`b)@> kds);
+Dict<`a,`b>     delete<`a,`b>(Dict<`a,`b> d,`a key);
+Dict<`a,`b>     delete_present<`a,`b>(Dict<`a,`b> d,`a key);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{is_empty}{(d)}
+Returns 1 if \var{d} is an empty dictionary, and returns 0 if \var{d} is
+not empty.
+\end{defun}
+
+\begin{defun}{member}{(d,key)}
+Returns 1 if \var{key} is present in dictionary \var{d}, and returns 0
+if \var{key} is not present.
+\end{defun}
+
+\begin{defun}{lookup}{(d,key)}
+Looks up the value associated with \var{key} in dictionary \var{d}, and
+returns it.  If \var{key} has no value in \var{d}, then \code{Absent} is
+thrown.
+\end{defun}
+
+\begin{defun}{lookup_opt}{(d,key)}
+Looks up the value associated with \var{key} in dictionary \var{d}, and
+returns a pointer to it.  If \var{key} has no value in \var{d}, then
+\code{NULL} is returned.
+\end{defun}
+
+\begin{defun}{insert}{(d,key,data)}
+Adds a mapping from \var{key} to \var{data} in dictionary \var{d},
+overwriting any previous value for \var{key}.
+\end{defun}
+
+\begin{defun}{insert_new}{(d,key,data)}
+Behaves like \code{insert}, except that \code{Present} is thrown if
+\var{key} already has a value in \var{d}.
+\end{defun}
+
+\begin{defun}{inserts}{(d,kds)}
+Is used to add a list of mappings to dictionary \var{d}; \var{kds}
+should be a list of (\var{key},\var{data}) pairs.
+\end{defun}
+
+\subsubsection*{Operating on dictionaries}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+void        app<`a,`b,`c>(`c f(`a,`b),Dict<`a,`b> d);
+void        app_c<`a,`b,`c,`d>(`c f(`d,`a,`b),`d env,Dict<`a,`b> d);
+void        iter<`a,`b>(void f(`a,`b),Dict<`a,`b> d);
+void        iter_c<`a,`b,`c>(void f(`c,`a,`b),`c env,Dict<`a,`b> d);
+Dict<`a,`c> map<`a,`b,`c>(`c f(`b),Dict<`a,`b> d);
+Dict<`a,`c> map_c<`a,`b,`c,`d>(`c f(`d,`b),`d env,Dict<`a,`b> d);
+`c          fold<`a,`b,`c>(`c f(`a,`b,`c),Dict<`a,`b> d,`c accum);
+`c          fold_c<`a,`b,`c,`d>(`c f(`d,`a,`b,`c),`d env,
+                                Dict<`a,`b> dict,`c accum);
+$(`a,`b)@   choose<`a,`b>(Dict<`a,`b> d);
+list<$(`a,`b)@> to_list<`a,`b>(Dict<`a,`b> d);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{app}{(f,d)}
+Applies the function \var{f} to every (\var{key},\var{data}) pair in
+\var{d}.  The return value of \var{f} is ignored.
+\end{defun}
+
+\begin{defun}{app_c}{(f,env,d)}
+Applies the function \var{f} to \var{env} and every
+(\var{key},\var{data}) pair in \var{d}.  The argument \var{env} is
+intended to hold auxilliary data for \var{f}.  The return value of
+\var{f} is ignored.
+\end{defun}
+
+\begin{defun}{iter}{(f,d)}
+Acts just like \code{app}, except that \var{f} can return void.
+(\code{app} cannot be used on functions that return void because of
+restrictions in the Cyclone type system.)
+\end{defun}
+
+\begin{defun}{iter_c}{(f,env,d)}
+Acts like \code{app_c} except that \var{f} can return void.
+\end{defun}
+
+\begin{defun}{map}{(f,d)}
+Creates a new dictionary with a pair (\var{key},\var{f}(\var{data})) for
+each pair (\var{key},\var{data}) in \var{d}.
+\end{defun}
+
+\begin{defun}{map_c}{(f,env,d)}
+Does the same but applies \var{f} to \var{env} as well as \var{data}.
+\end{defun}
+
+
+\begin{defun}{fold}{(f,d,accum)}
+Returns the value accumulated by applying \var{f} to the keys and data
+in \var{d}.  For example, if \var{d} has keys \var{k1} through \var{kn}
+and associated values \var{data1} through \var{datan}, then \code{fold}
+returns
+
+\begin{verbatim}
+f(k1,data1,f(k2,data2, ... f(kn,datan,accum) ... ))
+\end{verbatim}
+
+\noindent The order in which the keys and data are passed to \var{f} is
+not specified.
+\end{defun}
+
+\begin{defun}{fold_c}{(f,env,d,accum)}
+Computes
+
+\begin{verbatim}
+f(env,k1,data1, ... f(env,kn,datan,accum) ... )
+\end{verbatim}
+\end{defun}
+
+\begin{defun}{choose}{(d)}
+Returns a (\var{key},\var{data}) pair from \var{d}---exactly which pair
+is unspecified.  If \var{d} is empty, then \code{Absent} is thrown.
+\end{defun}
+
+\begin{defun}{to_list}{(d)}
+Returns a list of the (\var{key},\var{data}) pairs of \var{d}.
+\end{defun}
+
+\subsection{Filename}
+
+The \code{Filename} namespace contains functions for operating on
+strings representing file names.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <filename.h>
+using Filename;
+\end{verbatim}
+
+\subsubsection*{Functions}
+\begin{alltt}
+string \textbf{concat}(string, string);
+string \textbf{chop_extension}(string);
+string \textbf{dirname}(string);
+string \textbf{basename}(string);
+bool   \textbf{check_suffix}(string, string);
+string \textbf{gnuify}(string);
+\end{alltt}
+
+\subsection{Fn}
+
+Namespace \code{Fn} supports \emph{closures}, which allow a function to
+be packaged up with some hidden data.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <fn.h>
+using Fn;
+\end{verbatim}
+
+\subsubsection*{Types}
+\begin{verbatim}
+enum Function<`arg,`res> {
+  Fun<`env>(`res (@)(`env,`arg), `env)
+};
+typedef enum Function<`arg,`res> fn<`arg,`res>;
+\end{verbatim}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+fn<`arg,`res>    make_fn<`arg,`res,`env>(`res f(`env,`arg), `env x);
+fn<`arg,`res>    fp2fn<`arg,`res>(`res f(`arg));
+`res             apply<`arg,`res>(fn<`arg,`res> f, `arg x);
+fn<`a,`c>        compose<`a,`b,`c>(fn<`a,`b> g, fn<`b,`c> f);
+fn<`a,fn<`b,`c>> curry<`a,`b,`c>(fn<$(`a,`b)@,`c> f);
+fn<$(`a,`b)@,`c> uncurry<`a,`b,`c>(fn<`a,fn<`b,`c>> f);
+List::list<`b>   map_fn<`a,`b>(fn<`a,`b> f,List::list<`a> x);
+\end{verbatim}
+
+\subsubsection*{Use}
+\begin{defun}{make_fn}{(f,e)}
+Creates and returns a new closure for function pointer \var{f} and environment
+\var{e}.
+\end{defun}
+
+\begin{defun}{fp2fn}{(f)}
+Creates and returns a new closure for a function pointer that does not
+require an environment.
+\end{defun}
+
+\begin{defun}{apply}{(f,x)}
+Applies closure \var{f} to argument \var{x} and returns the result.  The
+function pointer of \var{f} is applied to the environment of \var{f} and
+the argument \var{x}.
+\end{defun}
+
+\begin{defun}{compose}{(g,f)}
+Returns a new closure that composes the closures \var{f} and \var{g}:
+\code{apply(compose(\var{g},\var{f}),\var{x})} should be the same as
+\code{apply(\var{g},apply(\var{f},\var{x}))}.
+\end{defun}
+
+\begin{defun}{curry}{(f)}
+\var{f} should be a closure that takes a pointer to a pair as an
+argument.  \code{curry(\var{f})} returns a new closure that takes the
+two components of a pair in two steps (applies) before passing them to
+\var{f}.  That is, \code{apply(\var{f},\&\$(\var{x},\var{y}))} should be
+the same as \code{apply(apply(curry(\var{f}),\var{x}),\var{y})}.
+\end{defun}
+
+\begin{defun}{uncurry}{(f)}
+\code{uncurry} is the opposite of \code{curry}.  It takes a closure that
+takes two arguments in sequence and returns a closure that takes the
+arguments as a pair.  \code{apply(uncurry(\var{f}),\&\$(\var{x},\var{y}))}
+should be the same as \code{apply(apply(\var{f},\var{x}),\var{y})}.
+\end{defun}
+
+\begin{defun}{map_fn}{(f,x)}
+Applies the closure \var{f} to each element of list \var{x} in turn,
+left to right, and returns a list built from the results.
+\end{defun}
+
+\subsection{Hashtable}
+
+Namespace \code{Hashtable} implements hash tables.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <hashtable.h>
+using Hashtable;
+\end{verbatim}
+
+\subsubsection*{Types}
+\tindex{struct table}
+\tindex{Table}
+\begin{alltt}
+\textbf{struct Table}<`a,`b,`e1::E,`e2::E>;
+typedef struct Table<`a,`b,`e1,`e2> @\textbf{table_t}<`a,`b,`e1,`e2>;
+\end{alltt}
+
+\subsubsection*{Functions}
+
+\begin{alltt}
+table_t<`a,`b,`e1,`e2> \textbf{create}(int sz,
+                              int comp(`a,`a;`e1),
+                              int hash(`a;`e2));
+void                   \textbf{insert}(table_t<`a,`b,`e1,`e2> t, `a key, `b val);
+`b                     \textbf{lookup}(table_t<`a,`b,`e1,`e2> t, `a key);
+void                   \textbf{resize}(table_t<`a,`b,`e1,`e2> t);
+void                   \textbf{remove}(table_t<`a,`b,`e1,`e2> t, `a key);
+int                    \textbf{hash_string}(string_t s);
+int                    \textbf{hash_stringptr}(stringptr_t s);
+void                   \textbf{iter}(void f(`a,`b), table_t<`a,`b,`e1,`e2> t);
+void                   \textbf{print_table_map}(table_t<`a,`b,`e1,`e2> t,
+                                       void prn_key(`a), 
+                                       void prn_val(`b));
+\end{alltt}
+
+\subsubsection*{Use}
+
+\begin{defun}{create}{(sz,comp,hash)}
+Builds a new, empty hash table with initial size \var{sz}.  \var{comp}
+should be a comparison function that returns an integer less than, equal
+to, or greater than 0 according to whether its first argument is less
+than, equal to, or greater than its second argument.  \code{hash} should
+be a hash function on the keys of the hash table.  \code{comp} and
+\code{hash} should satisfy the following property: if
+\code{comp(\var{x},\var{y})} is 0, then \code{hash(\var{x}) ==
+hash(\var{y})}.
+\end{defun}
+
+\begin{defun}{insert}{(t,key,val)}
+Binds \var{key} to \var{val} in hash table \var{t}.
+\end{defun}
+
+\begin{defun}{lookup}{(t,key)}
+Looks up the value associated with \var{key} in hash table \var{t}.  If
+\var{key} does not appear in \var{t}, \code{Not_found} is thrown.
+\end{defun}
+
+
+\begin{defun}{resize}{(t)}
+Increases the internal storage available to hash table \var{t}.
+\code{resize} is called automatically by functions like insert when the
+buckets of a hash table get large, however, it can also be called by the
+programmer explicitly.
+\end{defun}
+
+\begin{defun}{remove}{(t,key)}
+Removes the most recent binding of \var{key} from \var{t}.  The
+next-most-recent binding of \var{key} (if any) is restored.  If
+\var{key} is not bound in \var{t}, \code{remove} returns silently
+without changing \var{t}.
+\end{defun}
+
+
+\begin{defun}{hash_string}{(s)}
+Returns a hash of a string \var{s}.  It is provided as a convenience for
+making hash tables mapping strings to values.
+\end{defun}
+
+\begin{defun}{iter}{(f,t)}
+Applies the function \var{f} to every (\var{key},\var{value}) pair in
+the hash table \var{t}.
+\end{defun}
+
+\begin{defun}{print_table_map}{(t,prn_key,prn_val)}
+Used for debugging.  It prints out the internal structure of \var{t}.
+\var{prn_key} must be a function that prints keys, and \var{prn_val}
+must be a function that prints values.
+\end{defun}
+
+\subsection{Id}
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <id.h>
+using Id;
+\end{verbatim}
+
+\subsection{Lexing}
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <lexing.h>
+using Lexing;
+\end{verbatim}
+
+\subsection{Lineno}
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <lineno.h>
+using Lineno;
+\end{verbatim}
+
+\subsection{List}
+
+Namespace \code{List} defines polymorphic lists and standard operations
+over them.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <list.h>
+using List;
+\end{verbatim}
+
+\subsubsection*{Types}
+\tindex{struct List}
+\tindex{glist_t}
+\tindex{list_t}
+\tindex{List_t}
+\begin{verbatim}
+struct List<`a,`r::R>{`a hd; struct List<`a,`r> *`r tl;};
+typedef struct List<`a,`r> *`r glist_t<`a,`r>;
+typedef struct List<`a,`H> *list_t<`a>;
+typedef struct List<`a,`H> @List_t<`a>;
+\end{verbatim}
+
+A list is built out of ``cons cells,'' which are structures with a
+head ('hd') field and a tail ('tl') field.  (The term ``cons'' comes
+from Lisp.)  The head of a cons cell holds the first element of the
+list, and the tail points to the remainder of the list.  Most
+functions use the typedef \code{list}, which is a possibly-null
+pointer to a cons cell.  \code{null} serves as the empty list.
+
+\subsubsection*{Exceptions}
+\exindex{List_empty}
+\exindex{List_mismatch}
+\exindex{Nth}
+\begin{verbatim}
+xenum exn { List_empty };
+xenum exn { List_mismatch };
+xenum exn { Nth };
+\end{verbatim}
+
+The \code{List_empty} exception is typically thrown by a function that
+expects a non-empty list, but is passed null instead.  The
+\code{List_mismatch} exception is typically thrown by a function that
+expects two lists of the same length, but receives lists of different
+lengths instead.  The \code{Nth} exception is thrown when
+\code{list_nth} doesn't have enough elements in the list.
+
+\subsubsection*{Basic list operations}
+\subsubsection*{Functions}
+\begin{verbatim}
+int             length(glist_t<`a,`r> x);
+`a              hd(glist_t<`a,`r> x);
+glist_t<`a,`r>  tl(glist_t<`a,`r> x);
+list_t<`a>      copy(glist_t<`a,`r> src);
+glist_t<`a,`r2> rcopy(region_t<`r2>, glist_t<`a,`r> src);
+`a              nth(glist_t<`a,`r> x,int i);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{length}{(x)}
+Returns the length of the list \var{x}.
+\end{defun}
+
+\begin{defun}{hd}{(x)}
+Returns the first element of list \var{x}, or throws \code{List_empty}
+if \var{x} is empty.
+\end{defun}
+
+\begin{defun}{tl}{(x)}
+Returns the tail of \var{x}, or throws \code{List_empty} if \var{x} is
+empty.  Note, \code{hd(\var{x})} is not quite equivalent to
+\code{\var{x}->hd}, because the latter will throw \code{Null_Exception}
+if \var{x} is empty.
+\end{defun}
+
+\begin{defun}{copy}{(src)}
+Returns a fresh copy of the list \var{src} (all of the cons cells are
+duplicated).
+\end{defun}
+
+\begin{defun}{nth}{(x,n)}
+Returns the \var{n}th element of list \var{x}.  The elements of \var{x}
+are numbered starting with 0.  If \var{n} does not correspond to an
+element of \var{x}, the exception \code{Nth} is thrown.
+\end{defun}
+
+\subsubsection*{Iteration and mapping}
+\subsubsection*{Functions}
+\begin{verbatim}
+list_t<`b>      map(`b f(`a),glist_t<`a,`r> x);
+glist_t<`b,`r2> rmap(region_t<`r2>,`b f(`a),glist_t<`a,`r> x);
+list_t<`b>      map_c(`b f(`c,`a),`c env,glist_t<`a,`r> x);
+glist_t<`b,`r2> rmap_c(region_t<`r2>,`b f(`c,`a),`c env,
+                       glist_t<`a,`r> x);
+list_t<`c>      map2(`c f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y);
+glist_t<`c,`r3> rmap2(region_t<`r3>,`c f(`a,`b),
+                      glist_t<`a,`r1> x,glist_t<`b,`r2> y);
+
+void app(`b f(`a),glist_t<`a,`r> x);
+void app_c(`c f(`a,`b),`a,glist_t<`b,`r> x);
+void app2(`c f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y);
+void app2_c(`d f(`a,`b,`c),`a env,
+             glist_t<`b,`r1> x,glist_t<`c,`r2> y);
+
+void iter(void f(`a),glist_t<`a,`r> x);
+void iter_c(void f(`b,`a),`b env,glist_t<`a,`r> x);
+void iter2(void f(`a,`b),glist_t<`a,`r1> x,glist_t<`b,`r2> y);
+void iter2_c(void f(`a,`b,`c),`a env,
+             glist_t<`b,`r1> x,glist_t<`c,`r2> y);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{map}{(f,x)}
+Applies the function \var{f} to each element of list \var{x}, and
+returns a new list of the results.
+\end{defun}
+
+\begin{defun}{map_c}{(f,env,x)}
+A version of map where \var{f} takes an environment.
+\end{defun}
+
+\begin{defun}{map2}{(f,x,y)}
+Applies \var{f} to the pairs consisting of an element from list \var{x}
+and its corresponding element from list \var{y}.  The results are
+returned in a new list.  If \var{x} and \var{y} don't have the same
+length, it throws \code{List_mismatch}.  Note, \var{f} may be applied
+some number of times before \code{List_mismatch} is thrown.
+\end{defun}
+
+\begin{defun}{app}{(f,x)}
+Applies \var{f} to each element of list \var{x}.  The results of the
+function application are not saved.
+\end{defun}
+
+\begin{defun}{app_c}{(f,env,x)}
+A version of app, except that \var{env} is passed as an additional
+argument to \var{f}, along with each element of \var{x}.
+\end{defun}
+
+\begin{defun}{app2}{(f,x,y)}
+Applies f to one element of x and one element of y in turn, from left to
+right in the lists x and y.  If the lists \var{x} and \var{y} are not
+the same length, \code{List_mismatch} is thrown.
+\end{defun}
+
+\begin{defun}{app2_c}{(f,env,x,y)}
+Applies f to env, and to one element of x and one element of y in turn,
+from left to right in the lists x and y.  If the lists \var{x} and
+\var{y} are not the same length, \code{List_mismatch} is thrown.
+\end{defun}
+
+\begin{defun}{iter}{(f,x)}
+Like \code{app(\var{f},\var{x})} except that \var{f} returns void.
+\end{defun}
+
+\begin{defun}{iter_c}{(f,env,x)}
+Like \code{app_c(\var{f},\var{env},\var{x})} except that \var{f} returns
+void.
+\end{defun}
+
+\begin{defun}{iter2}{(f,x,y)}
+Like \code{app2(\var{f},\var{x},\var{y})} except that \var{f} returns
+void.
+\end{defun}
+
+\begin{defun}{iter2_c}{(f,env,x,y)}
+Like \code{app2_c(\var{f},\var{env},\var{x},\var{y})} except that \var{f}
+returns void.
+\end{defun}
+
+
+\subsubsection*{Fold}
+\subsubsection*{Functions}
+\begin{verbatim}
+`a fold_left(`a f(`a,`b),`a accum,glist_t<`b,`r> x);
+`a fold_left_c(`a f(`c,`a,`b),`c,`a accum,glist_t<`b,`r> x);
+
+`b fold_right(`b f(`a,`b),glist_t<`a,`r> x,`b accum);
+`b fold_right_c(`b f(`c,`a,`b),`c,glist_t<`a,`r> x,`b accum);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{fold_left}{(f,accum,x)}
+Returns the value accumulated by applying \var{f} to the elements of
+\var{x}.  For example, if \var{x} has elements \var{v1} through
+\var{vn}, then \code{fold_left} returns
+
+\begin{verbatim}
+f(f( ... f(accum,v1) ... , vn-1), vn)
+\end{verbatim}
+
+\noindent Notice that the function is first applied to the left-most (first)
+element of the list.
+\end{defun}
+
+\begin{defun}{fold_left_c}{(f,env,accum,x)}
+The same as \code{fold_left} except that \var{f} takes a closure.
+\end{defun}
+
+\begin{defun}{fold_right}{(f,x,accum)}
+Like \code{fold_left} except that it applies \var{f} to the elements
+in \var{x} from right to left, rather than left to right:
+
+\begin{verbatim}
+f(v1,f(v2, ... f(vn,accum) ... ))
+\end{verbatim}
+\end{defun}
+
+\begin{defun}{fold_right_c}{(f,env,x,accum)}
+The same as \code{fold_right} except that \var{f} is given a closure
+argument.
+\end{defun}
+
+
+\subsubsection*{Reversing lists}
+\subsubsection*{Functions}
+\begin{verbatim}
+list_t<`a>      revappend(glist_t<`a,`r> x,list_t<`a> y);
+glist_t<`a,`r2> rrevappend(region_t<`r2>,glist_t<`a,`r> x,
+                           glist_t<`a,`r2> y);
+list_t<`a>      rev(glist_t<`a,`r> x);
+glist_t<`a,`r2> rrev(region_t<`r2>,glist_t<`a,`r> x);
+glist_t<`a,`r>  imp_rev(glist_t<`a,`r> x);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{revappend}{(x,y)}
+Returns the list whose elements are the reverse of the elements of
+\var{x}, followed by the elements of \var{y}.
+\end{defun}
+
+\begin{defun}{rev}{(x)}
+Returns a new list whose elements are the elements of \var{x} in reverse
+order.
+\end{defun}
+
+\begin{defun}{imp_rev}{(x)}
+An imperative version of \code{rev}; instead of allocating a new
+list, the elements of \var{x} are reversed in place.
+\end{defun}
+
+\subsubsection*{Appending lists}
+\subsubsection*{Functions}
+\begin{verbatim}
+list_t<`a>      append(glist_t<`a,`r> x,list_t<`a> y);
+glist_t<`a,`r2> rappend(region_t<`r2>,
+                        glist_t<`a,`r> x,glist_t<`a,`r2> y);
+
+glist_t<`a,`r>  imp_append(glist_t<`a,`r> x,glist_t<`a,`r> y);
+
+list_t<`a>      flatten(glist_t<glist_t<`a,`r1>,`r2> x);
+glist_t<`a,`r3> rflatten(region_t<`r3>,
+                         glist_t<glist_t<`a,`r1>,`r2> x);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{append}{(x,y)}
+Returns a list whose elements are the elements of \var{x} and \var{y}.
+The cons cells making up the returned list may be shared with \var{x} or
+\var{y}.
+\end{defun}
+
+\begin{defun}{imp_append}{(x,y)}
+An imperative version that modifies \var{x} so that \var{y} is
+appended to it.
+\end{defun}
+
+\begin{defun}{flatten}{(x)}
+\var{x} should be a list of lists.  \code{flatten} returns a list whose
+elements are the elements of each element of \var{x}, from left to
+right.  The returned list may share some cons cells with elements of
+\var{x}.
+\end{defun}
+
+\subsubsection*{Sorting lists}
+\subsubsection*{Functions}
+\begin{verbatim}
+list_t<`a>      merge_sort(int less_eq(`a,`a), glist_t<`a,`r> x);
+glist_t<`a,`r2> rmerge_sort(region_t<`r2>, int less_eq(`a,`a), 
+glist_t<`a,`r>  rimp_merge_sort(int less_eq(`a,`a), glist_t<`a,`r> x);
+list_t<`a>      merge(int less_eq(`a,`a),list_t<`a> a,list_t<`a> b);
+glist_t<`a,`r3> rmerge(region_t<`r3>, int less_eq(`a,`a),
+                       glist_t<`a,`r1> a,glist_t<`a,`r2> b);
+glist_t<`a,`r>  imp_merge(int less_eq(`a,`a),
+                          glist_t<`a,`r> a,glist_t<`a,`r> b);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{merge_srt}{(less_eq,x)}
+Returns a list the elements of \var{x} in sorted order, according to the
+ordering function \var{less_eq}.  \var{less_eq} should return an integer
+less than, equal to, or greater than 0 according to whether its first
+argument is less than, equal to, or greater than its second argument.
+\code{merge_sort} uses an auxiliary function,
+\code{merge(\var{less_eq},\var{a},\var{b})}, to merge two lists
+according an ordering function.
+\end{defun}
+
+\subsubsection*{Predicates}
+\subsubsection*{Functions}
+\begin{verbatim}
+bool forall(bool pred(`a),glist_t<`a,`r> x);
+bool forall_c(bool pred(`a,`b),`a env,glist_t<`b,`r> x);
+bool exists(bool pred(`a),glist_t<`a,`r> x);
+bool exists_c(bool pred(`a,`b),`a env,glist_t<`b,`r> x);
+bool memq(glist_t<`a,`r> l,`a x);
+bool mem(int compare(`a,`a), glist_t<`a,`r> l, `a x);
+
+Core::opt_t<`c> check_unique(int compare(`c,`c),glist_t<`c,`r> x);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{forall}{(pred,x)}
+Returns true if the function \var{pred} returns true when applied to
+every element of \var{x}, and returns false otherwise.
+\end{defun}
+
+\begin{defun}{forall_c}{(pred,env,x)}
+A version of forall that takes a closure for the function \var{pred}.
+\end{defun}
+
+\begin{defun}{exists}{(pred,x)}
+Returns true if \var{pred} returns true on any element of the list
+\var{x}.
+\end{defun}
+
+\begin{defun}{memq}{(l,x)}
+Returns 1 if \var{l} is an element of list \var{x} (according to
+\code{==}), and returns 0 otherwise.
+\end{defun}
+
+\begin{defun}{mem}{(compare,l,x)}
+A version of memq that uses a provided comparison function.
+\end{defun}
+
+\begin{defun}{check_unique}{(compare,x)}
+Checks that a list of elements is unique; it assumes that the elements
+of \var{x} are sorted according to the comparison function
+\var{compare}.  It returns an element that is duplicated if one exists,
+otherwise it returns null.
+\end{defun}
+
+\subsubsection*{Lists and tuples}
+\subsubsection*{Functions}
+\begin{verbatim}
+list_t<$(`a,`b)@>         zip(glist_t<`a,`r1> x,glist_t<`b,`r2> y);
+glist_t<$(`a,`b)@`r4,`r3> rzip(region_t<`r3> r3, region_t<`r4> r4,
+                               glist_t<`a,`r1> x, glist_t<`b,`r2> y);
+
+$(list_t<`a>,list_t<`b>)            split(glist_t<$(`a,`b)@`r1,`r2> x);
+$(list_t<`a>,list_t<`b>,list_t<`c>) split3(glist_t<$(`a,`b,`c)@`r1,`r2> x);
+
+$(glist_t<`a,`r3>,glist_t<`b,`r4>) 
+rsplit(region_t<`r3> r3, region_t<`r4> r4,
+           glist_t<$(`a,`b)@`r1,`r2> x);
+
+$(glist_t<`a,`r3>,glist_t<`b,`r4>,glist_t<`c,`r5>) 
+rsplit3(region_t<`r3> r3, region_t<`r4> r4, region_t<`r5> r5,
+        glist_t<$(`a,`b,`c)@`r1,`r2> x);
+\end{verbatim}
+  
+\subsubsection*{Use}
+
+\begin{defun}{zip}{(x,y)}
+\var{x} should be a list with elements \var{x1} through \var{xn}, and
+\var{y} should be a list with elements \var{y1} through \var{yn}.
+\code{zip} returns a list with elements \code{\&\$(\var{x1},\var{y1})}
+through \code{\&\$(\var{xn},\var{yn})}.  If \var{x} and \var{y} have
+different lengths, then \code{zip(\var{x},\var{y})} will throw
+\code{List_mismatch}.
+\end{defun}
+
+\begin{defun}{split}{(x)}
+Performs the opposite of \code{zip}; the list \var{x} is a list of
+pairs, and \code{split} returns a pair of lists.
+\end{defun}
+
+\begin{defun}{split3}{(x)}
+A version of split that takes a list of triples and returns a triple
+of lists.
+\end{defun}
+
+  
+\subsubsection*{Association lists}
+\subsubsection*{Functions}
+\begin{verbatim}
+`b   assoc(glist_t<$(`a,`b)@`r1,`r2> l,`a x);
+`b   assoc_cmp(int compare(`a,`a), glist_t<$(`a,`b)@`r1,`r2> l,`a x);
+bool mem_assoc(glist_t<$(`a,`b)@`r1,`r2> l,`a x);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{assoc}{(l,x)}
+\var{l} is a list of (key,value) pairs, and \var{x} is a key.
+\code{assoc} returns the value associated with \var{x} in \var{l}, or
+throws \code{Core::Not_found} if no such value exists.  It uses
+\code{==} to compare \var{x} to the keys in \var{l}.
+\end{defun}
+
+\begin{defun}{assoc_cmp}{(compare,l,x)}
+A variant of assoc that uses the supplied \var{compare} function instead
+of \code{==}.
+\end{defun}
+
+\begin{defun}{mem_assoc}{(l,x)}
+\var{l} is a list of (key,value) pairs, and \var{x} is a key.
+\code{mem_assoc} returns true if there is a value associated with
+\var{x} in \var{l}.
+\end{defun}
+
+
+\subsubsection*{Lists and arrays}
+\subsubsection*{Functions}
+\begin{verbatim}
+`a ?            to_array(glist_t<`a,`r> x);
+`a ?`r2         rto_array(region_t<`r2> r2, glist_t<`a,`r> x);
+list_t<`a>      from_array(`a ?`r arr);
+glist_t<`a,`r2> rfrom_array(region_t<`r2> r2, `a ?`r arr);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{to_array}{(x)}
+Makes a new array with elements drawn from list \var{x}.
+\end{defun}
+
+\begin{defun}{from_array}{(arr)}
+Makes a new list with elements drawn from array \var{arr}.
+\end{defun}
+
+\subsubsection*{Tabulation}
+\subsubsection*{Functions}
+\begin{verbatim}
+list_t<`a>     tabulate(int n, `a f(int));
+list_t<`a>     tabulate_c(int n, `a f(`b,int), `b env);
+glist_t<`a,`r> rtabulate(region_t<`r> r, int n, `a f(int));
+glist_t<`a,`r> rtabulate_c(region_t<`r> r,int n,`a f(`b,int),`b env);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{tabulate}{(n,f)}
+Does ??? FIX
+\end{defun}
+
+\begin{defun}{tabulate_c}{(n,f,env)}
+Does ??? FIX
+\end{defun}
+
+\subsubsection*{Miscellaneous}
+\subsubsection*{Functions}
+\begin{alltt}
+int  \textbf{list_cmp}(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2);
+bool \textbf{list_prefix}(int cmp(`a,`a), glist_t<`a,`r1> l1, glist_t<`a,`r1> l2);
+
+list_t<`a>      \textbf{filter_c}(bool f(`b,`a), `b env, glist_t<`a,`r> l);
+glist_t<`a,`r2> \textbf{rfilter_c}(region_t<`r2> r2, bool f(`b,`a), 
+                          `b env, glist_t<`a,`r> l);
+  
+list_t<`a>      \textbf{filter}(bool f(`a), glist_t<`a,`r> l);
+glist_t<`a,`r2> \textbf{rfilter}(region_t<`r2> r2,bool f(`a),glist_t<`a,`r> l);
+\end{alltt}
+
+\subsubsection*{Use}
+
+???
+
+\subsection{Printf}
+
+Cyclone provides safe versions of \code{printf} and \code{fprintf} as
+built-in primitives.  It also provides a built-in function,
+\code{xprintf}, that allocates a string, prints to it, and returns it.
+Cyclone protects against format string attacks by requiring the format
+string argument of the \code{printf} functions to be a string constant,
+and by doing more rigorous checks than the C version of \code{printf}.
+
+\subsubsection*{Functions}
+\begin{verbatim}
+int    printf(string s, ...);
+int    fprintf(FILE @f, string s, ...);
+string xprintf(string s, ...);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{printf}{(s,...)}
+Prints to the standard output according to the format string \var{s} and
+the remaining arguments.  It returns the number of characters printed,
+or a negative value if an output error or encoding error occurred.
+\end{defun}
+
+\begin{defun}{fprintf}{(f,s,...)}
+Prints to the stream pointed to by \var{f} according to the format
+string \var{s} and the remaining arguments.  It returns the number of
+characters printed, or a negative value if an output error or encoding
+error occurred.
+\end{defun}
+
+\begin{defun}{xprintf}{(s,...)}
+Allocates and returns a string whose contents are given by printing
+according to the format string \var{s} and the remaining arguments.
+FIX: is an error possible?  What do we do then?
+\end{defun}
+
+\subsubsection*{Format strings}
+
+Cyclone requires the format string arguments of \code{printf},
+\code{fprintf}, and \code{xprintf} to be string constants, and it checks
+the remaining arguments for consistency at compile time.
+
+The format string consists of ordinary (non-\code{\%}) characters, which
+are copied to the output, and \emph{conversion specifications}, which
+are sequences of characters introduced by \code{\%}.  Each conversion
+specification `converts' zero or more arguments to the output, as
+described below.
+
+A conversion specification has the following parts, described, in order,
+by regular expressions:
+\begin{itemize}
+\item Zero or more \emph{flags}:
+[\code{-} \code{+} \emph{space} \code{\#} \code{0}]*
+\item An optional minimal \emph{width}:
+(\code{*} | [\code{0}-\code{9}]+)?
+\item An optional \emph{precision}:
+(\code{.} (\code{*} | [\code{0}-\code{9}]+)? )?
+\item An optional \emph{length modifier}:
+(\code{l} | \code{h} | \code{hh} )
+\item A \emph{conversion specifier}:
+[\code{d} \code{i} \code{o} \code{u} \code{x} \code{X} \code{f} \code{F} \code{e} \code{E} \code{g} \code{G} \code{a} \code{A} \code{c} \code{s} \code{n} \code{\%}]
+\end{itemize}
+
+The flag \code{-} causes left justification; right justification is the
+default.  The flag \code{+} is valid for numeric conversions only; it
+forces a \code{+} sign to be printed for positive arguments.  The flag
+\emph{space} (the space character) is valid for numeric conversions only;
+it causes an extra space to be printed in front of positive arguments.
+It is ignored if the \code{+} flag is also given.
+The flag \code{\#} is valid for \code{o}, \code{x}, \code{X}, \code{a},
+\code{A}, \code{e}, \code{E}, \code{f}, \code{F}, \code{g}, \code{G}
+only; it causes an ``alternative form'' to be printed.  For \code{o} it
+forces a leading zero to be printed; for \code{x} and \code{X}, a
+leading \code{0x} or \code{0X} is added to non-zero conversions; for the
+other conversions, a decimal point is always printed.
+
+The width of a conversion specification gives a minimum width for the
+result of the conversion; if the conversion naturally gives a shorter
+result, it is padded by spaces to the minimum width.  If the width has
+the form \code{*}, the minimum width is given by an integer argument.
+
+A precision is valid for numeric conversions only.  It gives the minimum
+number of digits to appear for the \code{d}, \code{i}, \code{o},
+\code{u}, \code{x}, and \code{X} conversions, the number of digits to
+appear after the decimal point in the \code{a}, \code{A}, \code{e},
+\code{E}, \code{f}, and \code{F} conversions, and the maximum number of
+significant digits for the \code{g} and \code{G} conversions.  If the
+precision has the form \code{.} \code{*}, it is given by an integer
+argument.
+
+The optional length modifier and conversion specifier give the type of
+the corresponding argument, as shown in the table below.  If no type
+appears, then the combination of conversion specifier and length
+modifier is not allowed.
+
+\begin{tt}
+\begin{tabular}{r|llll}
+  & none         & l             & h              & hh\\\hline
+d & int          & long          & short          & char \\
+i & int          & long          & short          & char \\
+o & unsigned int & unsigned long & unsigned short & unsigned char \\
+u & unsigned int & unsigned long & unsigned short & unsigned char \\
+x & unsigned int & unsigned long & unsigned short & unsigned char \\
+X & unsigned int & unsigned long & unsigned short & unsigned char \\
+f & double \\
+F & double \\
+e & double \\
+E & double \\
+g & double \\
+G & double \\
+a & double \\
+A & double \\
+c & int \\
+s & string \\
+n & int @        & unsigned long @ & short @      & char @ \\
+\% & \textrm{(no arg)}
+\end{tabular}
+\end{tt}
+
+No flags, width, precision, or length modifiers are allowed for the
+\code{s} and \code{\%} conversions.
+
+The \code{d} and \code{i} specifiers print their arguments as signed
+decimal integers.
+
+The \code{o} specifier prints its argument as an unsigned octal number.
+
+The \code{u} specifier prints its argument as an unsigned decimal number.
+
+The \code{x} and \code{X} specifiers print their arguments as unsigned
+hexidecimal integers.
+
+The \code{f} and \code{F} specifiers print their arguments in the form
+[-]ddd.ddd (no exponents).
+
+The \code{e} and \code{E} specifiers print their arguments using exponents.
+
+The \code{g} and \code{G} specifiers print their arguments using either
+the \code{f}/\code{F}
+style or the \code{e}/\code{E} style, depending on the precision and the
+argument.
+
+The \code{a} and \code{A} specifiers print their arguments as
+hexidecimal floating point numbers.
+
+The \code{c} specifier prints its argument as an unsigned character.
+
+The \code{s} specifier prints its argument as a zero terminated string.
+
+The \code{n} specifier does not print its argument; instead, the number
+of characters written up to the \code{n} specifier is stored where the
+argument points.
+
+The \code{\%} specifier prints a \code{\%} character.
+
+
+\subsection{Position}
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <position.h>
+using Position;
+\end{verbatim}
+
+\subsection{PP}
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <pp.h>
+using PP;
+\end{verbatim}
+
+\subsection{Queue}
+
+Namespace \code{Queue} defines generic, imperative, first-in-first-out
+queues.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <queue.h>
+using Queue;
+\end{verbatim}
+
+\subsubsection*{Types}
+\tindex{struct queue}
+\tindex{Queue}
+\begin{verbatim}
+struct queue<`a>;
+typedef struct queue<`a> @Queue<`a>;
+\end{verbatim}
+
+\subsubsection*{Exceptions}
+\exindex{Empty}
+\begin{verbatim}
+xenum exn { Empty };
+\end{verbatim}
+
+\code{Empty} is thrown by operations that expect a non-empty queue, but
+receive an empty queue.
+
+\subsubsection*{Basic operations on queues}
+\subsubsection*{Functions}
+\begin{verbatim}
+Queue<`a> create<`a>();
+void      add<`a>(Queue<`a>,`a x);
+`a        take<`a>(Queue<`a>);
+`a        peek<`a>(Queue<`a>);
+bool      is_empty<`a>(Queue<`a>);
+void      clear<`a>(Queue<`a>);
+int       length<`a>(Queue<`a>);  
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{create}{()}
+Creates a new, empty queue.
+\end{defun}
+
+\begin{defun}{add}{(q,x)}
+Adds \var{x} to the end of queue \var{q}, by side effect.
+\end{defun}
+
+\begin{defun}{take}{(q)}
+Removes an element from the front of queue \var{q} by side effect, and
+returns the element.  If \var{q} is empty, \code{Empty} is thrown.
+\code{peek(\var{q})} returns the element at the front of queue \var{q};
+if \var{q} is empty, \code{Empty} is thrown.
+\end{defun}
+
+\begin{defun}{is_empty}{(q)}
+Returns \code{true} if \var{q} is an empty queue.
+\end{defun}
+
+\begin{defun}{clear}{(q)}
+Removes all elements from \var{q} by side effect.
+\end{defun}
+
+\begin{defun}{length}{(q)}
+Returns the number of elements in queue \var{q}.
+\end{defun}
+
+\subsubsection*{Iterating over queues}
+\subsubsection*{Functions}
+\begin{verbatim}
+void iter<`a>(void f(`a), Queue<`a>);
+void app<`a,`b>(`b f(`a), Queue<`a>);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{iter}{(f,q)}
+Applies the function \var{f} to the elements of queue \var{q}, in order
+from front to back.  \var{f} is a function that returns void.
+\end{defun}
+
+\begin{defun}{app}{(f,q)}
+Applies the function \var{f} to the elements of queue \var{q}, in order
+from front to back.  \var{f} is a function that returns a boxed type.
+\end{defun}
+
+\subsection{Ref}
+
+Namespace \code{Ref} defines generic reference cells.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <ref.h>
+using Ref;
+\end{verbatim}
+
+\subsubsection*{Types}
+\tindex{struct Reference}
+\tindex{ref}
+\begin{verbatim}
+struct Reference<`a> {`a v;};
+typedef struct Reference<`a> @ref<`a>;
+\end{verbatim}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+ref<`a> new_ref<`a>(`a);
+`a get<`a>(ref<`a>);
+void set<`a>(ref<`a>,`a);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{new_ref}{(x)}
+Returns a new reference cell holding \var{x}.
+\end{defun}
+
+\begin{defun}{get}{(r)}
+Returns the value held in reference cell \var{r}.
+\end{defun}
+
+\begin{defun}{set}{(r,x)}
+Updates the value held in cell \var{r} with \var{x}.
+\end{defun}
+
+\subsection{Rope}
+
+Namespace \code{Rope} defines a representation of character strings that
+can be concatenated in constant time.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <rope.h>
+using Rope;
+\end{verbatim}
+
+\subsubsection*{Types}
+\tindex{struct Rope_node}
+\tindex{rope}
+\begin{verbatim}
+struct Rope_node;
+typedef struct Rope_node @rope;
+\end{verbatim}
+
+
+\subsubsection*{Basic operations on ropes}
+\subsubsection*{Functions}
+\begin{verbatim}
+uint length(rope);
+int cmp(rope,rope);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{length}{(r)}
+Returns the number of characters in the string represented by rope
+\var{r}.
+\end{defun}
+
+\begin{defun}{cmp}{(r1,r2)}
+Returns an integer less than, equal to, or greater than 0, according to
+whether the string represented by \var{r1} is lexicographically less
+than, equal to, or greater than the string represented by \var{r2}.
+\end{defun}
+
+\subsubsection*{Converting between ropes and strings}
+\subsubsection*{Functions}
+\begin{verbatim}
+rope from_string(string);
+string to_string(rope);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{from_string}{(s)}
+Allocates and returns a new rope containing string \var{s}.
+\end{defun}
+
+\begin{defun}{to_string}{(r)}
+Converts rope \var{r} to a string and returns it.
+\end{defun}
+
+\subsubsection*{Concatenation}
+\subsubsection*{Functions}
+\begin{verbatim}
+rope concat(rope,rope);
+rope concata(rope[?]);
+rope concatl(List::list<rope>);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{concat}{(r1,r2)}
+Returns a rope containing the concatenation of \var{r1} and \var{r2}.
+\end{defun}
+
+\begin{defun}{concata}{(arr)}
+Returns a rope containing the concatenation of the ropes in array
+\var{arr}, from left to right.
+\end{defun}
+
+\begin{defun}{concatl}{(l)}
+Returns a rope containing the concatenation of the ropes in list
+\var{l}, from left to right.
+\end{defun}
+
+\subsection{Scanf}
+
+Cyclone provides safe versions of \code{scanf} and \code{fscanf} as
+built-in primitives.  \code{sscanf} is not yet supported.
+
+\subsubsection*{Functions}
+\begin{verbatim}
+int    scanf(string s,...);
+int    fscanf(FILE @ f, string s,...);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{scanf}{(s,...)}
+Reads from the standard input according to the format string \var{s}.
+Results are stored in the remaining arguments.
+\code{scanf} returns the number of arguments successfully read.
+If an error occurs before any arguments are converted, \code{EOF} is
+returned.
+\end{defun}
+
+\begin{defun}{fprintf}{(f,s,...)}
+Reads from the stream \var{f} according to the format string \var{s}.
+Results are stored in the remaining arguments.
+\code{fscanf} returns the number of arguments successfully read.
+If an error occurs before any arguments are converted, \code{EOF} is
+returned.
+\end{defun}
+
+\subsubsection*{Format strings}
+
+Cyclone requires the format string arguments of \code{scanf} and
+\code{fscanf} to be string constants, and it checks the remaining
+arguments for consistency at compile time.
+
+The format string consists of white space characters (which match any
+(possible empty) sequence of white space characters), ordinary
+(non-\code{\%}) characters (which match themselves), and \emph{conversion
+specifications}, which are sequences of characters introduced by
+\code{\%}.  Each conversion specification `converts' a sequence of
+characters from the input stream, placing the result into storage
+pointed to by the corresponding argument of \code{scanf} or
+\code{fscanf}.
+
+A conversion specification has the following parts, described, in order,
+by regular expressions:
+\begin{itemize}
+\item An optional assignment suppression character, \code{*}
+\item An optional maximal \emph{width}:
+([\code{0}-\code{9}]+)?
+\item An optional \emph{length modifier}:
+(\code{l} | \code{h} | \code{hh} )
+\item A \emph{conversion specifier}:
+[\code{d} \code{i} \code{o} \code{u} \code{x} \code{X} \code{f} \code{F} \code{e} \code{E} \code{g} \code{G} \code{a} \code{A} \code{n} \code{\%}]
+\end{itemize}
+
+If the assignment suppression character \code{*} is given, the
+characters corresponding to the conversion specifier are read, but no
+argument is assigned, and no argument is required for that specifier.
+
+The optional length modifier and conversion specifier give the type of
+the corresponding argument, as shown in the table below.  If no type
+appears, then the combination of conversion specifier and length
+modifier is not allowed.
+
+\begin{tt}
+\begin{tabular}{r|llll}
+  & none           & l               & h                &  hh\\\hline
+d & int @          & long @          & short @          & char @ \\
+i & int @          & long @          & short @          & char @ \\
+o & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
+u & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
+x & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
+X & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
+f & float @        & double @ \\
+F & float @        & double @ \\
+e & float @        & double @ \\
+E & float @        & double @ \\
+g & float @        & double @ \\
+G & float @        & double @ \\
+a & float @        & double @ \\
+A & float @        & double @ \\
+n & int @          & unsigned long @ & short @          & char @ \\
+\% & \texttt{(no arg)}
+\end{tabular}
+\end{tt}
+
+The \code{d} and \code{i} specifiers match optionally signed decimal
+integers.
+
+The \code{o} specifier matches an optionally signed octal integer.
+
+The \code{u} specifier matches an optionally signed decimal integer.
+
+The \code{x} and \code{X} specifiers match optionally signed hexidecimal
+integers.
+
+The \code{f}, \code{F}, \code{e}, \code{E}, \code{g}, \code{G},
+\code{a}, and \code{A} specifiers match floating point numbers.
+
+The \code{n} specifier does not match any input; instead, the number of
+characters read by the call of \code{fscanf} or \code{scanf} up to the
+\code{n} specifier is stored where the argument points.
+
+The \code{\%} specifier matches a \code{\%} character.  No assignment
+suppression, width, or length modifiers are allowed for the \code{\%}
+conversion.
+
+\subsection{Set}
+
+Namespace \code{Set} defines polymorphic, functional, finite sets of
+elements with a total order.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <set.h>
+using Set;
+\end{verbatim}
+
+\subsubsection*{Types}
+\tindex{struct set}
+\tindex{Set}
+\begin{verbatim}
+struct set<`a>;
+typedef struct set<`a> @Set<`a>;
+\end{verbatim}
+
+\subsubsection*{Exceptions}
+\exindex{Absent}
+\begin{verbatim}
+xenum exn {Absent};
+\end{verbatim}
+
+\subsubsection*{Creating sets}
+
+\subsubsection*{Functions}
+\begin{verbatim}
+Set<`a> empty<`a>(int comp(`a,`a));
+Set<`a> singleton<`a>(int comp(`a,`a),`a x);
+Set<`a> from_list<`a>(int comp(`a,`a),list<`a> x);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+Each set creation function requires an comparison function \var{comp}
+which should return an integer less than, equal to, or greater than 0,
+according to whether its first argument is less than, equal to, or
+greater than its second argument.
+
+\begin{defun}{empty}{(comp)}
+Allocates and returns a new empty set.
+\end{defun}
+
+\begin{defun}{singleton}{(comp,x)}
+Allocates and returns a new set containing the single element \var{x}.
+\end{defun}
+
+\begin{defun}{from_list}{(comp,l)}
+Allocates and returns a new set with the same elements as the list
+\var{l}.
+\end{defun}
+
+\subsubsection*{Basic set operations}
+\subsubsection*{Functions}
+\begin{verbatim}
+Set<`a> insert<`a>(Set<`a> s,`a elt);
+Set<`a> delete<`a>(Set<`a> s,`a elt);
+Set<`a> union_two<`a>(Set<`a> s1,Set<`a> s2);
+Set<`a> intersect<`a>(Set<`a> s1,Set<`a> s2);
+Set<`a> diff<`a>(Set<`a> s1,Set<`a> s2);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{insert}{(s,elt)}
+Returns a set containing the elements of \var{s} plus the element
+\var{elt}.  The set \var{s} is not affected.
+\end{defun}
+
+\begin{defun}{delete}{(s,elt)}
+Returns a set containing all the elements of \var{s}, except for
+\var{elt}.  If \var{s} does not contain \var{elt}, a set with the same
+elements as \var{s} is returned.
+\end{defun}
+
+\begin{defun}{union_two}{(s1,s2)}
+Returns a set whose elements are the union of the elements of \var{s1}
+and \var{s2}.  The name \code{union_two} is used because \code{union} is
+a keyword in Cyclone.
+\end{defun}
+
+\begin{defun}{difference}{(s1,s2)}
+Returns a set whose elements are the elements of \var{s1}, except for
+those elements that also in set \var{s2}.
+\end{defun}
+
+\begin{defun}{intersection}{(s1,s2)}
+Returns the intersection of \var{s1} and \var{s2}.
+\end{defun}
+
+\subsubsection*{Predicates on sets}
+\subsubsection*{Functions}
+\begin{verbatim}
+int  cardinality<`a>(Set<`a> s);
+bool is_empty<`a>(Set<`a> s);
+bool member<`a>(Set<`a> s,`a elt);
+bool subset<`a>(Set<`a> s1,Set<`a> s2);
+int  compare<`a>(Set<`a> s1,Set<`a> s2);
+bool equals <`a>(Set<`a> s1,Set<`a> s2);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{cardinality}{(s)}
+Returns the number of elements in set \var{s}.
+\end{defun}
+
+\begin{defun}{is_empty}{(s)}
+Returns true if the set \var{s} is empty, else it returns false.
+\end{defun}
+
+\begin{defun}{member}{(s,elt)}
+Returns true if \var{elt} is an element of \var{s}.
+\end{defun}
+
+\begin{defun}{subset}{(s1,s2)}
+Returns true if every element of \var{s1} is an element of \var{s2}.
+\end{defun}
+
+\begin{defun}{compare}{(s1,s2)}
+The function \code{compare} defines a total ordering on sets;
+\code{compare(\var{s1},\var{s2})} returns an integer less than, equal
+to, or greater than 0, according to whether its first argument is less
+than, equal to, or greater than its second argument.
+\end{defun}
+
+\begin{defun}{equals}{(s1,s2)}
+Returns true if \var{s1} is a subset of \var{s2} and \var{s2} is a
+subset of \var{s1}.
+\end{defun}
+
+\subsubsection*{Iterating over sets}
+\subsubsection*{Functions}
+\begin{verbatim}
+void app<`a,`b>(`b f(`a),Set<`a> s);
+void iter<`a>(void f(`a),Set<`a> s);
+void iter_c<`a,`c>(void f(`c,`a),`c env,Set<`a> s);
+
+`b   fold<`a,`b>(`b f(`a,`b),Set<`a> s,`b accum);
+`b   fold_c<`a,`b,`c>(`b f(`c,`a,`b),`c env,Set<`a> s,`b accum);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{app}{(f,s)}
+Applies function \var{f} to each element of set \var{s}, in some
+unspecified order.  \var{f} is a function returning a boxed value.
+\end{defun}
+
+\begin{defun}{iter}{(f,s)}
+Applies function \var{f} to each element of set \var{s}, in some
+unspecified order.  \var{f} is a function returning void.
+\end{defun}
+
+\begin{defun}{iter_c}{(f,env,s)}
+A version of \code{iter} where \var{f} takes a closure, \var{env}.
+\end{defun}
+
+\begin{defun}{fold}{(f,s,accum)}
+If the set \var{s} has elements \var{s1} through \var{sn}, then
+\code{fold(\var{f},\var{s},\var{accum})} returns
+\begin{verbatim}
+f(s1,f(s2, ... f(sn,accum) ... ))
+\end{verbatim}
+\end{defun}
+
+\begin{defun}{fold_c}{(f,env,s,accum)}
+A version of \var{fold} where \var{f} takes a closure \var{env}.
+\end{defun}
+
+\subsubsection*{Extracting elements of sets}
+\subsubsection*{Functions}
+\begin{verbatim}
+`a choose<`a>(Set<`a> s);
+list<`a> elements<`a>(Set<`a> s);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{choose}{(s)}
+Returns an unspecified element of set \var{s}.
+\end{defun}
+
+\begin{defun}{elements}{(s)}
+Returns all of the elements of set \var{s} in some unspecified order.
+\end{defun}
+
+\subsection{Splay}
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <splay.h>
+using Splay;
+\end{verbatim}
+
+\subsection{String}
+
+Namespace \code{String} implements a string library similar to the one
+provided by C\@.  In Cyclone, a string is a \code{char[?]}.  Most
+functions in String consider a zero (null) character as an end of string
+marker, so we may have \code{strlen(\var{s}) < size(\var{s})} for a
+string \var{s}.  Functions that do not follow this convention have names
+starting with 'z'.  Many functions accept a string and an offset; these
+functions may have names ending in 'o'.  Functions whose arguments have
+range errors throw the \code{Core::InvalidArg} exception.
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <string.h>
+using String;
+\end{verbatim}
+
+
+\subsubsection*{String length}
+\subsubsection*{Functions}
+\begin{verbatim}
+size_t strlen(string s);
+size_t strleno(string s, int ofs);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{strlen}{(s)}
+Returns the length of the string \var{s}.  It considers a null
+character to mark the end of the string.
+\end{defun}
+
+\begin{defun}{strleno}{(s,ofs)}
+Returns the length of the string starting from offset \var{ofs}.  If
+\var{ofs} is out of range, \code{strleno} throws
+\code{Core::InvalidArg("String::strleno")}.
+\end{defun}
+
+\subsubsection*{Comparing strings}
+\subsubsection*{Functions}
+\begin{verbatim}
+int strcmp(string s1, string s2);
+int strcmpo(string s1, int ofs1, string s2, int ofs2);
+int strncmp(string s1, int ofs1, string s2, int ofs2, size_t len);
+int strncasecmp(string s1, int ofs1, string s2, int ofs2, size_t len);
+int zstrcmp(string,string);
+int zstrncmp(string s1,string s2,size_t n);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+All of these functions return an integer less than, equal to, or greater
+than 0 if their first argument is less than, equal to, or greater than
+their second argument, respectively.  The ordering used is the standard,
+lexicographic ordering.
+
+\begin{defun}{strcmp}{(s1,s2)}
+Compares \var{s1} to \var{s2}.
+\end{defun}
+
+\begin{defun}{strcmpo}{(s1,ofs1,s2,ofs2)}
+Compares \var{s1} starting at offset \var{ofs1} to \var{s2} starting at
+\var{ofs2}.  If \var{ofs1} or \var{ofs2} is out of range, \code{strcmpo}
+throws \code{Core::InvalidArg("String::strcmpo")}.
+\end{defun}
+
+\begin{defun}{strncmp}{(s1,ofs1,s2,ofs2,len)}
+Compares at most \var{len} characters of \var{s1} starting at offset
+\var{ofs1} to \var{s2} starting at \var{ofs2}.  If \var{ofs1} or
+\var{ofs2} is out of range, \code{strncmp} throws
+\code{Core::InvalidArg("String::strncmp")}.  If \var{len} is negative,
+\code{strncmp} returns 0.
+\end{defun}
+
+\begin{defun}{strncasecmp}{(s1,ofs1,s2,ofs2,len)}
+A case-insensitive version of \code{strncmp}.
+\end{defun}
+
+\begin{defun}{zstrcmp}{(s1,s2)}
+Compares \var{s1} to \var{s2}, and it assumes that null (zero)
+characters in \var{s1} and \var{s2} are not end-of-string markers.
+\end{defun}
+
+\begin{defun}{zstrcmp}{(s1,s2,n)}
+Compares at most \var{n} characters of \var{s1} to \var{s2}, assuming
+that null characters do not mark the end of strings.  If \var{n} is less
+than 0, \code{zstrcmp(\var{s1},\var{s2},\var{n})} returns 0.
+\end{defun}
+
+\subsubsection*{Concatenating strings}
+\subsubsection*{Functions}
+\begin{verbatim}
+string strcat(string dest,string src);
+string strcato(string dest,string src,int srcOfs);
+string strconcat(string,string);
+string strconcat_l(list<string>);
+string str_sepstr(list<string>,string);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{strcat}{(dest,src)}
+Concatenates \var{src} onto \var{dest} and returns \var{dest}.  If
+\var{dest} is not large enough, \code{strcat} throws
+\code{Core::InvalidArg("String::strcat")}.
+\end{defun}
+
+\begin{defun}{strcato}{(dest,src,srcOfs)}
+Concatenates \var{src} staring at \var{srcOfs} onto \var{dest} and
+returns \var{dest}.  If \var{dest} is not large enough, \code{strcat}
+throws \code{Core::InvalidArg("String::strcato")}.
+\end{defun}
+
+\begin{defun}{strconcat}{(s1,s2)}
+Allocates and returns a new string whose contents are the concatenation
+of \var{s1} and \var{s2}.
+\end{defun}
+
+\begin{defun}{strconcat_l}{(l)}
+Allocates and returns a new string whose contents are the concatenation
+of the strings in the list \var{l}, from left to right.
+\end{defun}
+
+\begin{defun}{str_sepstr}{(l,s)}
+Allocates and returns a new string whose contents are the concatenation
+of the strings in the list \var{l}, with \var{s} used as a separator
+between each two adjacent elements in \var{l}.
+\end{defun}
+
+\subsubsection*{Copying strings and substrings}
+\subsubsection*{Functions}
+\begin{verbatim}
+string strcpy(string dest,string src); 
+string strncpy(string,int,string,int,size_t);
+string zstrncpy(string,int,string,int,size_t);
+string expand(string s, size_t sz);
+string realloc_str(string str, size_t sz);
+string strdup(string src);
+string substring(string,int ofs, size_t n);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{strcpy}{(dest,src)}
+Copies \var{src} into \var{dest} and returns \var{dest}.  If \var{dest}
+is not big enough to hold \var{src}, \code{strcpy} throws
+\code{Core::InvalidArg("String::strncpy")}.
+\end{defun}
+
+\begin{defun}{strncpy}{(dest,destOfs,src,srcOfs,len)}
+Copies at most \var{len} characters of \var{src} starting at offset
+\var{srcOfs} into \var{dest} starting at \var{destOfs}, and returns
+\var{dest}.  If \var{dest} is not big enough to hold \var{src}, or
+\var{srcOfs} or \var{destOfs} are out of bounds, \code{strcpy} throws
+\code{Core::InvalidArg("String::strncpy")}.
+\end{defun}
+
+\begin{defun}{zstrncpy}{(dest,destOfs,src,srcOfs,len)}
+A variant of \code{strncpy} that does not consider null characters to
+terminate strings.
+\end{defun}
+
+\begin{defun}{expand}{(s,n)}
+Allocates and returns a new string that has size \var{n} or
+\code{strlen(\var{s})}, whichever is greater.  The returned string has
+the same contents as \var{s} (considering null characters as string
+terminators).
+\end{defun}
+
+\begin{defun}{realloc_str}{(s,n)}
+Like expand except that the returned string is usually a bit bigger than
+\var{n} and \code{strlen(\var{s})}.
+\end{defun}
+
+\begin{defun}{strdup}{(s)}
+Allocates and returns a new string with the same contents as \var{s}
+(assuming that null characters terminate strings).
+\end{defun}
+
+\begin{defun}{substring}{(s,ofs,len)}
+Allocates and returns a new string whose contents are \var{len}
+characters of \var{s} starting at offset \var{ofs}.  If \var{ofs} or
+\var{len} are out of bounds then substrings throws
+\code{Core::InvalidArg("String::substring")}.
+\end{defun}
+
+\subsubsection*{Transforming strings}
+\subsubsection*{Functions}
+\begin{verbatim}
+string replace_suffix(string,string,string);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{replace_suffix}{(s,before,after)}
+Allocates and returns a string whose characters are the characters of
+\var{s}, with its suffix before replaced by the string after.  If before
+is not a suffix of \var{s}, then \code{replace_suffix} throws
+\code{Core::InvalidArg("String::replace_suffix")}.
+\end{defun}
+
+\subsubsection*{Searching in strings}
+\subsubsection*{Functions}
+\begin{verbatim}
+int strchr(string s, int ofs, char c);
+int strrchr(string s, int ofs, char c);
+int strpbrk(string s, int ofs, string accept);
+int strspn(string s, int ofs, string accept);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{strchr}{(s,ofs,c)}
+Returns the lowest index \code{\var{i} >= \var{ofs}} such that
+\code{\var{s}[\var{i}] == \var{c}}.  If \var{ofs} is out of range strchr
+throws \code{Core::InvalidArg("String::strchr")}.  If \var{c} does not
+appear in \var{s} starting at \var{ofs}, \code{strchr} returns -1.
+\end{defun}
+
+\begin{defun}{strrchr}{(s,ofs,c)}
+Returns the greatest index \code{\var{i} >= \var{ofs}} such that
+\code{\var{s}[\var{i}] == \var{c}}.  If \var{ofs} is out of range,
+\code{strrchr} throws \code{Core::InvalidArg("String::strrchr")}.  If
+\var{c} does not appear in \var{s} starting at \var{ofs}, \code{strrchr}
+returns -1.
+\end{defun}
+
+\begin{defun}{strpbrk}{(s,ofs,accept)}
+Returns the lowest index \code{\var{i} >= \var{ofs}} such that
+\code{\var{s}[\var{i}] == \var{c}}, where \var{c} is any character of
+accept.  If \var{ofs} is out of range, strpbrk throws
+\code{Core::InvalidArg("String::strpbrk")}.  If no character of accept
+appears in \var{s} starting at \var{ofs}, \code{strpbrk} returns -1.
+\end{defun}
+
+\begin{defun}{strspn}{(s,ofs,accept)}
+Returns the lowest index \code{\var{i} >= \var{ofs}} such that
+\code{\var{s}[\var{i}] == \var{c}}, where \var{c} is any character not
+in the string \var{accept}.  If \var{ofs} is out of range, \code{strspn}
+throws \code{Core::InvalidArg("String::strpbrk")}.  If no character of
+\var{accept} appears in \var{s} starting at \var{ofs}, \code{strspn}
+returns the length of \var{s} after \var{ofs}.
+\end{defun}
+
+
+\subsubsection*{String conversions}
+\subsubsection*{Functions}
+\begin{verbatim}
+list<Char> explode(string s);
+string implode(list<Char> c);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{explode}{(s)}
+Returns a list of the characters in string \var{s}.
+\end{defun}
+
+\begin{defun}{implode}{(l)}
+Allocates and returns a string whose contents are the characters in list
+\var{l}, from left to right.
+\end{defun}
+
+\subsection{Xarray}
+
+Namespace \code{Xarray} defines arrays that can grow: they can be
+extended by new elements.  (Currently, an xarray cannot shrink.)
+
+\subsubsection*{Header}
+\begin{verbatim}
+#include <xarray.h>
+using Xarray;
+\end{verbatim}
+
+\subsubsection*{Types}
+\tindex{struct xarray}
+\tindex{Xarray}
+\begin{verbatim}
+struct xarray<`a> {
+  `a elmts[?];
+  int num_elmts;
+};
+typedef struct xarray<`a> @Xarray<`a>;
+\end{verbatim}
+
+\subsubsection*{Creating xarrays}
+\subsubsection*{Functions}
+\begin{verbatim}
+Xarray<`a> create<`a>(int, `a);
+Xarray<`a> create_empty<`a>();
+Xarray<`a> singleton<`a>(int, `a);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{create_empty}{()}
+Returns a new xarray containing no elements.
+\end{defun}
+
+\begin{defun}{create}{(n,x)}
+Returns a new xarray containing no elements.  The xarray has enough
+initial internal storage to hold up to \var{n} elements without
+resizing; \var{x} is used internally in allocating this array.
+\end{defun}
+
+\begin{defun}{singleton}{(n,x)}
+Returns a new xarray with a single element, \var{x}.  The xarray has
+enough initial internal storage to hold up to \var{n} elements without
+resizing.
+\end{defun}
+
+\subsubsection*{Accessing and updating xarrays}
+\subsubsection*{Functions}
+\begin{verbatim}
+`a         get<`a>(Xarray<`a>, int);
+void       set<`a>(Xarray<`a>, int, `a);
+void       add<`a>(Xarray<`a>, `a);
+int        add_ind<`a>(Xarray<`a>, `a);
+Xarray<`a> append<`a>(Xarray<`a>, Xarray<`a>);
+void       imp_append<`a>(Xarray<`a>, Xarray<`a>);
+void       delete<`a>(Xarray<`a> xarr, int num);
+void       remove<`a>(Xarray<`a> xarr, int i);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{get}{(a,n)}
+Returns the \var{n}th element of array \var{a}.  If \var{a} does not
+have an \var{n}th element, get throws InvalidArg("Xarray::get: bad
+index").
+\end{defun}
+
+\begin{defun}{set}{(a,n,x)}
+Updates the \var{n}th element of \var{a} to be \var{x}.  If \var{a} does
+not have an \var{n}th element, set throws InvalidArg("Xarray::set: bad
+index").
+\end{defun}
+
+\begin{defun}{add}{(a,x)}
+Extends the array \var{a} by adding \var{x} as a new last element.
+\end{defun}
+
+\begin{defun}{add_ind}{(a,x)}
+Extends the array \var{a} by adding \var{x} as a new last element.  It
+returns the index of the new element.
+\end{defun}
+
+\begin{defun}{append}{(a1,a2)}
+Returns a new xarray whose elements are the elements of \var{a1}
+followed by the elements of \var{a2}.
+\end{defun}
+
+\begin{defun}{imp_append}{(a1,a2)}
+An imperative version of append.  It extends array \var{a1} by the
+elements of \var{a2}.
+\end{defun}
+
+\begin{defun}{delete}{(a,n)}
+Deletes the last \var{n} elements of array \var{a}.  FIX: IT'S IN THE .H
+FILE BUT NOT DEFINED IN THE .CYC FILE!  It should throw some exception
+if \var{a} has less than \var{n} elements.
+\end{defun}
+
+
+\begin{defun}{remove}{(a,n)}
+Deletes the \var{n}th element of array \var{a}; all higher elements move
+down one position.  FIX: IT'S IN THE .H FILE BUT NOT DEFINED IN THE .CYC
+FILE!  It should throw some exception if \var{a} has less than \var{n}
+elements.
+\end{defun}
+
+\subsubsection*{Conversions on xarrays}
+\subsubsection*{Functions}
+\begin{verbatim}
+`a         to_array<`a>(Xarray<`a>) [?];
+Xarray<`a> from_array<`a>(`a arr[?]);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{to_array}{(a)}
+Returns a new (non-extensible) array with the same elements as the
+xarray \var{a}.
+\end{defun}
+
+\begin{defun}{from_array}{(b)}
+Returns a new xarray with the same elements as the array \var{b}.
+\end{defun}
+
+\subsubsection*{Iteration on xarrays}
+\subsubsection*{Functions}
+\begin{verbatim}
+void app<`a,`b>(`b f(`a), Xarray<`a>);
+void app_c<`a,`b,`c>(`b f(`c,`a), `c, Xarray<`a>);
+void iter<`a>(void f(`a), Xarray<`a>);
+void iter_c<`a,`b>(void f(`b,`a), `b, Xarray<`a>);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{app}{(f,a)}
+Applies the function \var{f} to every element of \var{a}, in order from
+low to high index.  The results of the applications are discarded.
+\end{defun}
+
+\begin{defun}{app_c}{(f,env,a)}
+A version of app where the function \var{f} takes a closure.
+\end{defun}
+
+\begin{defun}{iter}{(f,a)}
+A version of app where the function \var{f} returns void.
+\end{defun}
+
+\begin{defun}{iter_c}{(f,env,a)}
+A version of iter where the function \var{f} takes a closure.
+\end{defun}
+
+\subsubsection*{Mapping over xarrays}
+\subsubsection*{Functions}
+\begin{verbatim}
+Xarray<`b> map<`a,`b>(`b f(`a), Xarray<`a>);
+Xarray<`b> map_c<`a,`b,`c>(`b f(`c,`a), `c, Xarray<`a>);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{map}{(f,a)}
+Returns an xarray with elements \var{f}(\var{x1})..\var{f}(xn), where
+\var{x1}..\var{xn} are the elements of xarray \var{a}.
+\end{defun}
+
+\begin{defun}{map_c}{(f,env,a)}
+A version of map where the function \var{f} takes a closure argument.
+\end{defun}
+
+\subsubsection*{Miscellaneous operations on xarrays}
+\subsubsection*{Functions}
+\begin{verbatim}
+int length<`a>(Xarray<`a>);
+void reuse<`a>(Xarray<`a> xarr);
+\end{verbatim}
+
+\subsubsection*{Use}
+
+\begin{defun}{length}{(a)}
+Returns the number of elements in the xarray \var{a}.
+\end{defun}
+
+\begin{defun}{reuse}{(a)}
+Sets the number of elements in xarray \var{a} to 0.
+\end{defun}
+
+% Local Variables:
+% TeX-master: "main"
+% End:

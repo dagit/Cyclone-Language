@@ -1,0 +1,73 @@
+\section{Installing Cyclone}
+\label{sec:install}
+Cyclone currently only runs on 32-bit machines, and has only been
+tested on Win32 (Cygnus) and Linux (Red Hat 6.2) platforms.  Other
+platforms might or might not work.  Right now, there are a few 32-bit
+dependencies in the compiler, so the system will probably not work on
+a 64-bit machine without some changes.
+
+To install and use Cyclone, you'll need to use the Gnu utilities,
+including GCC (the Gnu C compiler) and Gnu-Make.  For Win32, you
+should first install the latest version of the
+\href{http://cygwin.com/}{Cygwin} utilities to do the build, and make
+sure that the Cygwin \texttt{bin} directory is on your path. We use
+some features of GCC extensively, so Cyclone definitely will not build
+with another C compiler.
+
+The file cyclone.zip (or cyclone.tar.gz) contains all of the files
+that you need to build and install the system.  Unzip the files into a
+directory; if you are installing Cyclone on a Windows system, we
+suggest you choose \texttt{c:/cyclone}.  Once you've created the
+directory, enter it and type ``\texttt{make}.''  This will create
+executables for the Cyclone compiler (\texttt{cyclone} in Unix
+systems, or \texttt{cyclone.exe} in Windows systems) and some
+utilities in the \texttt{bin} subdirectory.
+
+To use the Cyclone compiler, you should add the \texttt{bin}
+subdirectory to your \texttt{PATH}.  In addition, if you have not
+installed Cyclone in \texttt{c:/cyclone}, you must set the environment
+variable \texttt{CYCLONE_INCLUDE_PATH} to
+\textit{cycdir}\texttt{/include}, and the variable
+\texttt{CYCLONE_EXEC_PREFIX} to \textit{cycdir}\texttt{/bin/cyc-lib},
+where \textit{cycdir} is the directory where you installed Cyclone.
+
+\subsection*{Bootstrapping}
+
+If you're interested in working on the compiler itself, you'll want to
+know more about how the sources are organized.  The Cyclone directory
+has the following subdirectories:
+\begin{center}
+\begin{tabular}{ll}
+\texttt{bin/}        & executables\\
+~~\texttt{genfiles/} & generated C files for making the executables\\
+\texttt{doc/}        & documentation\\
+\texttt{include/}    & .h files for the libraries\\
+\texttt{lib/}        & Cyclone source code for the libraries\\
+\texttt{src/}        & Cyclone source code for the compiler\\
+\texttt{tests/}      & some test code written in Cyclone\\
+\texttt{tools/}      & source code of the lexer and parser generators
+\end{tabular}
+\end{center}
+
+The Cyclone compiler is written in Cyclone, but since you won't have a
+Cyclone compiler to start with, we have a directory,
+\texttt{bin/genfiles}, that contains C files generated from our
+Cyclone source files.  During the installation, these are compiled by
+GCC to produce the executables in \texttt{bin}.  Once this is done,
+the resulting Cyclone compiler can be used to compile the compiler
+written in Cyclone.
+
+To do this, simply type ``\texttt{make cyclone_src}.''  This will use
+the Cyclone compiler to compile all of the files in the \texttt{lib}
+and \texttt{src} directories (it will not overwrite the binaries in
+the \texttt{bin/} directory).
+
+If you want to make a change to the compiler and then start using the
+change, you can type ``\texttt{make update}'' which will update the
+\texttt{genfiles/} with any different C files that you generated.
+Then you can type ``\texttt{make cyclone}'' to bootstrap with the new
+code.
+
+% Local Variables:
+% TeX-master: "main"
+% End:

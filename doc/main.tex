@@ -1,0 +1,98 @@
+\documentclass[12pt]{article}
+
+\newif\ifpdf
+\ifx\pdfoutput\undefined
+  \pdffalse               % we are not running PDFLaTeX
+\else
+  \pdfoutput=1            % we are running PDFLaTeX
+  \pdftrue
+\fi
+
+% Print for screen or paper
+\newif\ifscreen
+\screentrue
+%\screenfalse
+
+\usepackage{alltt}
+
+%\usepackage{index}
+\usepackage{makeidx}
+\makeindex
+\usepackage{color}
+\definecolor{lightgray}{gray}{.85}
+\definecolor{bluegray}{rgb}{.25,.25,.65}
+\usepackage{palatino}
+\usepackage[colorlinks=true,linkcolor=bluegray,anchorcolor=bluegray,
+citecolor=bluegray,filecolor=bluegray,menucolor=bluegray,pagecolor=bluegray,
+urlcolor=bluegray]{hyperref}
+
+\ifscreen
+\pagecolor{lightgray}
+%\pagestyle{plain}
+\setlength\paperheight{6in}
+\setlength\paperwidth{8in}
+\setlength\oddsidemargin{-.5in}
+\setlength\textwidth{7in}
+\setlength\topmargin{-1in}
+\setlength\textheight{5in}
+\ifpdf
+\pdfpageheight=6in
+\pdfpagewidth=8in
+\pdfcatalog{/PageMode/FullScreen}
+\fi %pdf
+\fi %screen
+
+\usepackage{underscore}
+
+%% tt versions of backslash, left brace, right brace
+\newcommand{\bs}{\texttt{\char`\\}}
+\newcommand{\lb}{\texttt{\char`\{}}
+\newcommand{\rb}{\texttt{\char`\}}}
+
+\begin{document}
+\thispagestyle{empty}
+\textcolor{bluegray}{
+%HEVEA \begin{rawhtml}<h1 align="center">Cyclone</h1>\end{rawhtml}
+%HEVEA \begin{rawhtml}<h1 align="center">A safe programming language</h1>\end{rawhtml}
+%HEVEA \begin{latexonly}
+\begin{center}
+  \bfseries\fontsize{.7in}{.8in}\selectfont
+  {\fontsize{1.5in}{1.6in}\selectfont Cyclone}\\[1ex]
+  A safe\\
+  programming\\
+  language
+\end{center}
+%HEVEA \end{latexonly}
+}
+\newpage
+\tableofcontents
+\newpage
+
+\input{intro}
+\input{tutorial}
+\input{pointers}
+\input{taggedunions}
+\input{patterns}
+\input{typeinference.tex}
+\section{Polymorphism}
+\hypertarget{polymorphism}{}
+
+Use \texttt{`a} instead of \texttt{void *}.
+
+\input{regions}
+\input{namespaces}
+
+\appendix
+
+\input{libraries}
+\input{grammar}
+\input{installing}
+
+\section{Tools}
+\input{compiler}
+\subsection{The lexer generator}
+\subsection{The parser generator}
+
+\printindex
+
+\end{document}

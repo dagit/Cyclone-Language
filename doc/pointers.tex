@@ -1,0 +1,336 @@
+\section{Pointers}
+\label{sec:pointers}
+
+As in C, Cyclone pointers are just addresses.  Operations on pointers,
+such as \texttt{*x}, \texttt{x->f}, and \texttt{x[e]}, behave the same
+as in C, with the exception that run-time checks sometimes precede
+memory accesses.  (Exactly when and where these checks occur is
+described below.)  However, Cyclone prevents memory errors such as
+dereferencing dangling pointers, so it may reject legal C operations
+on pointers.
+
+In order to enforce memory safety, Cyclone pointer types contain more
+information than their C counterparts.  In addition to the type of the
+object pointed to, pointer types indicate:
+
+\begin{itemize}
+\item \hyperlink{pointer_null}{Whether a value of the type may be
+    \texttt{null}}
+\item \hyperlink{pointer_bound}{The number of objects pointed to}
+\item \hyperlink{pointer_region}{The region into which the pointer
+    points}
+\end{itemize}
+
+For example, the type \verb|int *{7}`H| is for possibly-null
+pointers to seven \texttt{int} objects in the heap.  The syntax and
+semantics of all this additional pointer information is now explained.
+Then we introduce a new type for \hyperlink{pointer_unknown}{arrays of
+  unknown size}.  Pointer arithmetic is allowed only on this last
+collection of types.  Throughout, we mention planned improvements.  We
+end with a \hyperlink{pointer_summary}{summary}.
+
+\subsection*{\hypertarget{pointer_null}{Whether a value of the type may be
+    \texttt{null}}}
+
+Cyclone's type system distinguishes between pointers that may be
+\texttt{null} and those that may not.
+
+\paragraph{Syntax and Semantics} The syntax is straightforward:
+The \texttt{*} character is for pointers that may be \texttt{null} (as in
+C), and the \texttt{@} character is for pointers that may not be
+\texttt{null}.  So ``\texttt{int * x = null;}'' is accepted, but
+``\texttt{int @ x = null;}'' is not.
+
+
+\paragraph{Subtyping}
+For any type \texttt{t}, the type \texttt{t@} is a subtype of \texttt{t*}.
+The type of \texttt{malloc(sizeof(t))} is \texttt{t@}, as is \texttt{new e}
+where \texttt{e} has type \texttt{t}.  Hence in the declaration,
+``\texttt{int *x = malloc(sizeof(int))}'', there is an implicit legal
+cast from \texttt{t@} to \texttt{t*}.  Note that even when \texttt{t1} is a
+subtype of \texttt{t2}, the type \texttt{t1*} is not necessarily a subtype
+of \texttt{t2*}, nor is \texttt{t1@} necessarily a subtype of \texttt{t2@}.
+For example, \texttt{int@@} is not a subtype of \texttt{int*@}.  This
+illegal code shows why:
+
+\begin{verbatim}
+  void f(int @@ x) {
+    int *@ y = x; // would be legal were int *@ a subtype of int @@
+    *y = null;    // legal because *y has type int *
+    **x;          // seg faults even though the type of *x is int @
+  }
+\end{verbatim}
+
+You can explicitly cast a value of type \texttt{t*} to
+\texttt{t@}.  Doing so will perform a run-time check.  The
+cast can be omitted, but the compiler emits a warning and performs the
+run-time check.  Because the current implementation does not
+consider tests to change a \texttt{t*} to \texttt{t@}, such casts are
+sometimes necessary to avoid spurious warnings, such as in this code:
+
+\begin{verbatim}
+  extern void f(int @);
+
+  void g(int * x) {
+    if (x != null)
+       f((int @)x);
+  }
+\end{verbatim}
+
+\paragraph{Implementation}
+A run-time null check is a simple comparison.  If it fails (i.e., the
+value is \texttt{null}), the exception \texttt{Null_Exception} is thrown.
+A check is inserted whenever a \texttt{t*} is (explicitly or implicitly)
+cast to a \texttt{t@}.  Casting \texttt{t@} to \texttt{t*} has no run-time
+effect.
+
+Safety demands that if \texttt{x} may be \texttt{null}, then \texttt{*e},
+\texttt{e.f}, \texttt{e->f}, and \texttt{e[e2]} are translated such that we
+first check that \texttt{e} is not \texttt{null}.  \texttt{e} is only
+evaluated once.  The only way to guarantee there is no check at
+run-time is to use \texttt{@} instead of \texttt{*}.  For example, the
+function on the left performs one check whereas the one on the right
+performs three (both throw \texttt{Null_Exception} if passed
+\texttt{null}):
+
+\begin{verbatim}
+  int sum3(int *{3} x) {           int sum3(int *{3} x) {
+    int @{3} y = x;                  return x[0]+x[1]+x[2];
+    return y[0]+y[1]+y[2];         }
+  }
+\end{verbatim}
+
+
+Note that \texttt{\&e->f} and \texttt{\&e[e2]} check (if necessary) that
+\texttt{e} is not \texttt{null} even though these constructs do not read
+through \texttt{e}.
+
+\paragraph{Future}
+
+\begin{itemize}
+\item We may allow an implicit cast from 0 to a pointer type, as in
+  C\@.  Currently 0 must have a numeric type, even though \texttt{null}
+  is implemented as address 0.  This change would make porting easier.
+\item We may use dataflow information to avoid spurious warning about
+  implicit casts from \texttt{t*} to \texttt{t@} and to avoid
+  inserting unnecessary checks.  However, the analysis is
+  non-trivial (due to the address-of operator, unstructured control
+  flow, and undefined evaluation order), and the C compiler may be
+  able to eliminate unnecessary checks for us.
+\item For debugging purposes, we may have \texttt{Null_Exception}
+  carry source-position information.
+\end{itemize}
+
+\subsection*{\hypertarget{pointer_bound}{The number of objects pointed to}}
+
+\paragraph{Syntax and Semantics}
+The type \verb|t@{37}| (similarly \verb|t*{37}|) describes pointers to
+37 \texttt{t} values.  In other words, if \texttt{x} has type
+\verb|t@{37}|, then \texttt{x[e]} is safe so long as \texttt{e} is between
+0 and 36, inclusive.  If the \verb|{n}| is omitted, it is implicitly
+\verb|{1}|.  Currently, the number must be a compile-time
+constant---see below for arrays of unknown size.
+
+We are taking pains not to say \verb|t@{37}| describes an array of 37
+\texttt{t} values because C (and therefore Cyclone) distinguishes arrays
+and pointers in certain contexts.  For example, a local declaration
+``\verb|t@{37}| \texttt{x;}'' allocates space on the stack for a pointer
+(which must hold a pointer to 37 \texttt{t} values in the help) whereas
+``\texttt{t x[37];}'' allocates space on the stack for 37 \texttt{t}
+values.
+
+
+\paragraph{Subtyping}
+Pointers to more objects are subtypes of pointers to fewer objects (of
+the same type).  An explicit cast is not necessary.  Put another way,
+we could say \verb|t@{37}| describes pointers to at least 37 \texttt{t}
+values.
+
+
+\paragraph{Implementation}
+The length information is not present at run-time, except implicitly
+in run-time checks.  That is, if \texttt{e} has type \verb|t @{37}|, the
+compiler translates \texttt{e[e2]} to check that \texttt{e2} is less than
+37.  \texttt{e2} is evaluated only once.  If \texttt{e2} is a constant
+expression, there is no run-time check.  If \texttt{e2} is a constant
+expression not less than 37, it is a compile-time error.
+
+\paragraph{Future}
+In the future, the bounds information on a pointer will not have to be
+a compile-time constant.  For example, you will be able to write
+
+\begin{verbatim}
+  void f(int n) {}
+    int *{n} arr = new {for i < n : 37};
+    ...
+  }
+\end{verbatim}
+
+This addition is non-trivial because, in terms of the above example,
+the variable n may be mutated later in the function.  In general,
+we are developing a general system where the sizes of pointer bounds
+may be expressed in terms of expressions, yet the compiler can always
+insert the correct bounds check or verify that the check is
+unnecessary.
+
+Currently, pointer arithmetic is only allowed on types of the form
+\texttt{t?}.  Soon we will allow adding a compile-time constant \texttt{c}
+to \verb|t@{n}| (for example), with the type of the result being
+\verb|t@{n-c}|.  It will be a compile-time error if \texttt{c > n}.
+
+\subsection*{\hypertarget{pointer_region}{The region into which the
+    pointer points}}
+
+\paragraph{Syntax and Semantics} The type \texttt{t@`r}
+describes pointers into region \texttt{r}.  All regions start with the
+\texttt{`} character so that they are not confused with identifiers.  If
+the region is omitted, it is \texttt{`H}, which is the name for the heap
+region.  (The heap region conceptually lives forever; in practice, it
+is garbage-collected.)  As a result, you cannot say \texttt{int *x = \&y}
+if \texttt{y} is a local variable because \texttt{y} is not in the heap
+region.
+
+Every block (i.e., local scope) is a region.  If you label a block
+with \texttt{L:}, then the region's name is \texttt{`L}.  Similarly, the
+parameters to a function \texttt{f} are in a region named \texttt{`f}.
+Thanks to type inference, you can point into regions without explicit
+names.  For example, you can say \texttt{int *_x = \&y} if \texttt{y} is a
+local variable in an unlabeled block.  Conceptually, the compiler
+creates a label for the block and fills in the corresponding region
+name for you.  (The output need not actually have a label.)
+
+Because every pointer has a type and every pointer type has a region,
+a pointer cannot be mutated so that it points into a different region
+than it did before the assignment.  Hence you will need to re-write C
+code if the same variable holds heap pointers and stack pointers (or
+pointers into different local blocks) at different points.  Also,
+there is currently know way for a global variable to hold a stack
+pointer.
+
+
+Functions are implicitly polymorphic over the regions of their
+arguments.  For example, \texttt{void f(int *`r);} is a prototype that
+can be passed a pointer into any \emph{accessible} region.  That is,
+it can be passed a stack pointer or a heap pointer, so long as it is
+not passed a dangling pointer.  The exact meaning of regions and
+effects in function prototypes is defined elsewhere.  We just note
+that our example function \texttt{f} could not possibly assign its
+argument to a global, whereas \texttt{void g(int *);} could.  On the
+other hand, \texttt{g} cannot be passed a stack pointer.
+
+
+\paragraph{Subtyping} Currently, if \texttt{`r1} does not
+equal \texttt{`r2}, then \texttt{t *`r1} and \texttt{t*`r2} are neither a
+subtype of the other.  A sound system could allow \texttt{t *`r1} to be
+a subtype of \texttt{t*`r2} so long as \texttt{`r1} is known to
+\emph{outlive} \texttt{`r2}.
+
+
+\paragraph{Implementation} A pointer's region is not stored with the
+pointer at run-time.  So there is no way to ask for the region into
+which a pointer points.  For stack regions there is no region object
+at run-time \emph{per se}, just the stack space for the objects.  As
+is normal with region-based systems, Cyclone does not prevent dangling
+pointers.  Rather, it prevents \emph{dereferencing} dangling points.
+
+
+\paragraph{Future} We may provide more subtyping with respect to
+regions.  Other additions have more to do with regions than pointers,
+so they are described elsewhere.
+
+\subsection*{\hypertarget{pointer_unknown}{Pointers to an Unknown
+    Number of Objects---The \texttt{t ?} Types}}
+
+So far, we have not provided a way to point to a number of objects
+when the number is not known at compile-time.
+
+
+\paragraph{Syntax and Semantics} The type \texttt{t ?} describes such pointers
+to objects of type \texttt{t}.  Such types may be assigned \texttt{null}.
+They may have a region annotation, which as with other pointer types,
+is the region into which the pointer points and the default is
+\texttt{`H}, the heap.  Clearly, explicit bounds information makes no
+sense for these types.  If \texttt{e} has type \texttt{t ?}, then
+\texttt{e.size} has type \texttt{int} and is the number of objects pointed
+to by type \texttt{t}.  (Actually, \texttt{e.size} is allowed for any
+pointer type, but for other pointers it is evaluated at compile-time.)
+The meaning of operations on \texttt{t ?} objects is best explained in
+terms of the implementation.
+
+\paragraph{Implementation} Unlike with types like \verb|t*{37}|,
+the implementation stores bounds information with objects of type
+\texttt{t ?}.  Currently, a \texttt{t ?} object occupies three machine
+words.  Conceptually, the object maintains the starting address of the
+collection of objects pointed to, the length of the collection, and
+the current value of the pointer used for accessing memory.  Pointer
+arithmetic may cause the access pointer to be out-of-bounds; no error
+occurs at this point.  On the other hand, a subscript operation
+\texttt{e1[e2]} where \texttt{e1} has type \texttt{t?} checks that the
+access-pointer of \texttt{e1} plus \texttt{e2} is within bounds of
+\texttt{e1}.  Both \texttt{e1} and \texttt{e2} are evaluated once.  If the
+bound is violated the exception \texttt{Array_Bounds} is thrown.
+
+When an object of type \texttt{t?} is assigned to, it gets the bounds
+information from the ``right-hand side'' of the assignment.  So
+\texttt{x=y} copies all of \texttt{y}'s fields to the fields of \texttt{x}.
+Similarly \texttt{x = y + 17}, copies \texttt{y}'s fields and then adds 17
+to \texttt{x}'s access pointer.  Finally, \texttt{x++} just increments
+\texttt{x}'s access pointer.  As in C, pointer arithmetic is limited to
+addition of constants and subtraction.  The result of pointer
+subtraction has type \texttt{unsigned int}, so there is no bounds
+information.
+
+Even though, \texttt{t ?} types are implemented as multi-word values,
+comparison operations (e.g., \texttt{==}) are defined on them---the
+comparison is performed on the access pointers.
+
+Conversions to/from \texttt{t?`r} types from/to \verb|t*{n}`r| and
+\verb|t@{n}`r| types exist.  Converting to a \texttt{t?} type just uses
+the \texttt{t*} or \texttt{t@}'s static type information to initialize the
+bounds information.  The cast may be implicit; no warning is given.
+Converting to a \texttt{t*} or \texttt{t@} type incurs a run-time check
+that the access pointer has a value such that the target type's bounds
+information is sound.  If so, the access pointer is returned, else the
+exception \texttt{Array_Bounds} is thrown.  Implicit casts of this form
+cause the compiler to give a warning.
+
+
+\paragraph{Future} We may add a ``cannot be null'' version of these types
+for sake of completeness.  More significantly, we intend to allow
+user-defined types to have certain fields describe the bounds
+information for other fields, rather than relying on types built into
+the language.
+
+\subsection*{\hypertarget{pointer_summary}{Summary and Discussion}}
+A pointer type has one of the following forms, where \texttt{t} is a
+type and \texttt{n} is a constant unsigned expression:
+
+\begin{itemize}
+\item \verb|t *{n}`r|, a possibly \texttt{null} pointer to \texttt{n}
+  elements of type \texttt{t} in region \texttt{`r}
+\item \verb|t @{n}`r|, a non-\texttt{null} pointer to \texttt{n} elements
+  of type \texttt{t} in region \texttt{`r}
+\item \texttt{t ?`r}, a pointer to an unknown number of elements of type
+  \texttt{t} in region \texttt{`r}.  Implemented as a multi-word object.
+\end{itemize}
+If \verb|{n}| is omitted, it is \verb|{1}|.  If the region is omitted,
+it is `H, the heap.
+
+The easiest way to port code is to replace uses of \texttt{t *} with
+\texttt{t ?}.  Of course, this technique will fail if the code makes
+assumptions about the size of pointers or if the pointers may point
+into the stack.  For functions that only read through their
+parameters, it is always possibly to make them region-polymorphic,
+i.e., replace each \texttt{t*} parameter with \texttt{t*`r} (or with the
+above suggestions \texttt{t?`r}), using a different region name for each
+pointer parameter.
+
+Of course, using \texttt{t?} delays errors until run-time and is less
+efficient.  Using \texttt{t@} is the most efficient and
+guarantees that \texttt{Null_Exception} will not be thrown.
+
+Currently, code performing pointer arithmetic must use \texttt{t?}.
+
+% Local Variables:
+% TeX-master: "main"
+% End:

@@ -1,0 +1,96 @@
+\section{Namespaces}
+
+As in C++, namespaces are used to avoid name clashes in code.  For
+example:
+\begin{verbatim}
+  namespace Foo { 
+    int x = 0; 
+    int f() { return x; }  
+  }
+\end{verbatim}
+declares an integer named \texttt{Foo::x} and a function named
+\texttt{Foo::f}.  Note that within the namespace, you don't need to use
+the qualified name.  For instance, \texttt{Foo::f} refers to
+\texttt{Foo::x} as simply \texttt{x}.  We could also simply write
+``\texttt{namespace Foo;}'' (note the trailing semi-colon) and leave out
+the enclosing braces.  Every declaration (variables, functions, types,
+typedefs) following this namespace declaration would be placed in the
+Foo namespace.
+
+As noted before, you can refer to elements of a namespace using the
+``\texttt{::}'' notation.  Alternatively, you can open up a namespace
+with a ``\texttt{using}'' declaration.  For example, we could follow the
+above code with:
+\begin{verbatim}
+  namespace Bar {  
+    using Foo { 
+      int g() { return f(); } 
+    } 
+    int h() { return Foo::f(); } 
+  }
+\end{verbatim}
+
+Here, we opened the \texttt{Foo} namespace within the definition of
+\texttt{Bar::g}.  One can also write ``\texttt{using Foo;}'' to open a
+namespace for the remaining definitions in the current block.
+
+Namespaces can nest as in C++.  
+
+Currently, namespaces are only supported at the top-level and you
+can't declare a qualified variable directly.  Rather, you have to
+write a namespace declaration to encapsulate it.  For example, you
+cannot write ``\texttt{int Foo::x = 3;}.''
+
+The following subtle issues and \textbf{implementation bugs} may leave
+you scratching your head:
+\begin{itemize}
+\item The current implementation translates qualified Cyclone
+  variables to C identifiers very naively: each \texttt{::} is
+  translated to \texttt{_} (underscore).  This translation is wrong
+  because it can introduce clashes that are not clashes in Cyclone,
+  such as in the following:
+\begin{verbatim}
+  namespace Foo { int x = 7; }
+  int Foo_x = 9;
+\end{verbatim}
+  
+  So avoid prefixing your identifiers with namespaces in your program.
+  We intend to fix this bug in a future release.
+  
+\item Because \texttt{\#include} is defined as textual substitution, the
+  following are usually very bad ideas: Having ``\texttt{namespace Foo;}''
+  or ``\texttt{using Foo;}'' at the top level of a header file.
+  After all, you will be changing the identifiers produced or the
+  identifiers available in every file that includes the header file.
+  Having \texttt{\#include} directives within the scope of namespace
+  declarations.  After all, you are changing the names of the
+  identifiers in the header file by (further) qualifying them.
+  Unfortunately, the current system uses the C pre-processor before
+  looking at the code, so it cannot warn you of these probable errors.
+  
+  In short, you are advised to not use the ``semicolon syntax'' in
+  header files and you are advised to put all \texttt{\#include}
+  directives at the top of files, before any namespace or using
+  declarations.
+  
+\item The translation of identifiers declared \texttt{extern "C"} is
+  different.  Given
+\begin{verbatim}
+  namespace Foo { extern "C" int x; }
+\end{verbatim}
+  the Cyclone code refers to the global variable as \texttt{Foo::x}, but
+  the translation to C will convert all uses to just \texttt{x}.  The
+  following code will therefore get compiled incorrectly (\texttt{f}
+  will return 4):
+\begin{verbatim}
+  namespace Foo { extern "C" int x; }
+  int f() {
+    int x = 2;
+    return x + Foo::x;
+  }
+\end{verbatim}
+\end{itemize}
+
+% Local Variables:
+% TeX-master: "main"
+% End:

@@ -1,0 +1,94 @@
+\subsection{The compiler}
+\subsubsection*{General options}
+The Cyclone compiler has the following command-line options:
+\begin{description}
+\item[-help] Print a short description of the command-line options.
+\item[-v] Print information about the stages of the compiler and the
+  commands it invokes to the standard error.
+\item[-o \textit{file}] Set the output file name to \textit{file}.
+\item[-D\textit{name}]
+  Define a macro named \textit{name} for preprocessing.
+\item[-D\textit{name}=\textit{defn}]
+  Give macro \textit{name} the definition \textit{defn} in preprocessing.
+\item[-B\textit{dir}]
+  Add \textit{dir} to the list of directories to search for special
+  compiler files.
+\item[-I\textit{dir}]
+  Add \textit{dir} to the list of directories to search for include files.
+\item[-L\textit{dir}]
+  Add \textit{dir} to the list of directories to search for libraries.
+\item[-l\textit{lib}]
+  Link library \textit{lib} into the final executable.
+\item[-c]
+  Produce an object (\texttt{.o}) file instead of an executable; do
+  not link.
+\item[-s]
+  Remove all symbol table and relocation information from the executable.
+\item[-O]
+  Optimize.
+\item[-O2]
+  A higher level of optimization.
+\item[-O3]
+  Even more optimization.
+\item[-p]
+  Compile for profiling with the \texttt{prof} tool.
+\item[-pg]
+  Compile for profiling with the \texttt{gprof} tool.
+\item[-S]
+  Stop after producing assembly code.
+\item[-M]
+  Produce dependencies for inclusion in a makefile.
+\item[-MG]
+  When producing dependencies assume missing files are generated.
+  Must be used with \texttt{-M}.
+\item[-MT \textit{file}]
+  Make \textit{file} be the target of any dependencies generated using
+  the \texttt{-M} flag.
+\item[-E]
+  Stop after preprocessing.
+\end{description}
+
+\subsubsection*{Developer options}
+
+In addition, the compiler has some options that are primarily of use
+to developers:
+\begin{description}
+\item[-g]
+  Compile for debugging.  This is currently only useful for compiler
+  developers, as the debugging information reflects the C code that
+  the Cyclone code is compiled to, and not the Cyclone code itself.
+\item[-parseonly] 
+  Stop after parsing.
+\item[-tc]
+  Stop after type checking.
+\item[-toc]
+  Stop after translation to C\@.
+\item[-ic]
+  Activate the link-checker.
+\item[-pp]
+  Pretty print.
+\item[-up]
+  Ugly print.
+\item[-tovc]
+  Avoid gcc extensions in the C output.
+\item[-save-temps]
+  Don't delete temporary files.
+\item[-save-c]
+  Don't delete temporary C files.
+\item[-nocyc]
+  Don't add the implicit namespace Cyc to variable names in the C output.
+\item[-noremoveunused] 
+  Don't remove externed variables that aren't used.
+\item[-noexpandtypedefs] 
+  Don't expand typedefs in pretty printing.
+\item[-printalltvars] 
+  Print all type variables (even implicit default effects).
+\item[-printallkinds] 
+  Always print kinds of type variables.
+\item[-printfullevars] 
+  Print full information for evars (type debugging).
+\end{description}
+
+% Local Variables:
+% TeX-master: "main"
+% End:

@@ -1,0 +1,390 @@
+\section{Tagged Unions}
+\hypertarget{tagged_unions}{}
+
+In addition to \texttt{struct}, \texttt{enum}, and \texttt{union}, Cyclone
+has \texttt{tunion} (for ``tagged union'') and \texttt{xtunion} (for
+``extensible tagged union'') as ways to construct new aggregate types.
+Like a \texttt{union} type, each \texttt{tunion} and \texttt{xtunion} has a
+number of \textit{variants} (or members).  Unlike with \texttt{union},
+an object of a \texttt{tunion} or \texttt{xtunion} type is exactly one
+variant, we can detect (or discriminate) that variant at run-time, and
+the language prevents using an object as though it had a different
+variant.
+
+The difference between \texttt{tunion} and \texttt{xtunion} is that
+\texttt{tunion} is closed---a definition lists all possible variants.
+It is like the algebraic datatypes in ML\@. With \texttt{xtunion},
+separately compiled files can add variants, so no code can be sure
+that it knows all the variants.  There is a rough analogy with not
+knowing all the subclasses of a class in an object-oriented language.
+
+For sake of specificity, we first explain how to
+\hyperlink{tunion_sec}{create and use tunion} types.  We then
+\hyperlink{xtunion_sec}{explain xtunion} by way of contrast with
+\texttt{tunion}.  Because the only way to read parts of \texttt{tunion}
+and \texttt{xtunion} types is pattern-matching, it is hard to understand
+\texttt{tunion} without pattern-matching, but for sake of motivation and
+completeness, some of the examples in the explanation of
+pattern-matching use \texttt{tunion}!  To resolve this circular
+dependency, we will informally explain pattern-matching as we use it
+here and we stick to its simplest uses.
+
+\subsection{tunion}\hypertarget{tunion_sec}{}
+
+\paragraph{Basic Type Declarations and Subtyping}
+\textit{[Warning: For expository purposes, this section contains a
+  white lie that is exposed in the later section called ``regions for
+  tunion''.]}
+
+A \texttt{tunion} type declaration lists all of its variants.  At its
+simplest, it looks just like an \texttt{enum} declaration.  For example,
+we could say:
+
+\begin{verbatim}
+  tunion Color { Red, Green, Blue };
+\end{verbatim}
+
+As with \texttt{enum}, the declaration creates a type (called
+\texttt{tunion Color}) and three constants \texttt{Red}, \texttt{Green}, and
+\texttt{Blue}.  Unlike \texttt{enum}, these constants do not have type
+\texttt{tunion Color}.  Instead, each variant has its \textit{own type},
+namely \texttt{tunion Color.Red}, \texttt{tunion Color.Green}, and
+\texttt{tunion Color.Blue}.  Fortunately these are all subtypes of
+\texttt{tunion Color} and no explicit cast is necessary.  So you can
+write, as expected:
+
+\begin{verbatim}
+  tunion Color c = Red;
+\end{verbatim}
+
+In this simple example, we are splitting hairs, but we will soon find
+all these distinctions useful.  Unlike \texttt{enum}, \texttt{tunion}
+variants may carry any fixed number of values, as in this example:
+
+\begin{verbatim}
+  tunion Shape {
+    Point,
+    Circle(float),
+    Ellipse(float,float),
+    Polygon(int,float),
+  };
+\end{verbatim}
+
+A \texttt{Point} has no accompanying information, a \texttt{Circle} has a
+radius, an \texttt{Ellipse} has two axis lengths, and a (regular)
+\texttt{Polygon} has a number of sides and a radius.  (The value fields
+do not have names, so it is often better style to have a variant carry
+one value of a struct type, which of course has named members.)  This
+example creates five types: \texttt{tunion Shape},
+\texttt{tunion Shape.Point}, \texttt{tunion Shape.Circle},
+\texttt{tunion Shape.Ellipse}, and \texttt{tunion Shape.Polygon}.  Like in
+our previous example, \texttt{tunion Shape.Point} is a subtype of
+\texttt{tunion Shape} and \texttt{Point} is a constant of
+type \texttt{tunion Shape.Point}.
+
+Variants that carry one or more values are treated differently.
+\texttt{Circle} becomes a \textit{constructor}; given a float it produces an
+object of type \texttt{tunion Shape.Circle}, for example \texttt{Circle(3.0)}.
+Similarly, \texttt{Ellipse(0,0)} has type \texttt{tunion Shape.Ellipse}
+(thanks to implicit casts from \texttt{int} to \texttt{float} for 0) and
+\texttt{Polygon(7,4.0)} has type \texttt{tunion Shape.Polygon}.  The
+arguments to a constructor can be arbitrary expressions of the correct
+type, for example, \texttt{Ellipse(rand(), sqrt(rand()))}.
+
+The second difference is that value-carrying variant types (e.g.,
+\texttt{tunion Shape.Circle}) are not subtypes or the \texttt{tunion} type
+(e.g., \texttt{tunion Shape}).  Rather \textit{non-null pointers} to the
+value-carrying variant types are (e.g., \texttt{tunion Shape.Circle @}
+is a subtype of \texttt{tunion Shape}).  So the following are correct
+initializations that use implicit subtyping:
+
+\begin{verbatim}
+  tunion Shape s1 = Point;
+  tunion Shape s2 = new Circle(3.0);
+\end{verbatim}
+
+\texttt{tunion} types are particularly useful for building recursive
+structures.  For example, a small language of arithmetic expressions
+might look like this:
+\begin{verbatim}
+  enum Unops { Negate, Invert};
+  enum Binops { Add, Subtract, Multiply, Divide };
+  tunion Exp {
+    Int(int),
+    Float(float),
+    Unop(enum Unops, tunion Exp),
+    Binop(enum Binops, tunion Exp, tunion Exp)
+  };
+\end{verbatim}
+
+A function returning an expression representing the multiplication of
+its parameter by two could like this:
+\begin{verbatim}
+  tunion Exp double_exp(tunion Exp e) {
+    return new Binop(Multiply, new Int(2));
+  }
+\end{verbatim}
+
+\paragraph{Accessing tunion Variants} Given a value of a \texttt{tunion}
+type, such as \texttt{tunion Shape}, we do not know which variant it is.
+
+For non-value variants, we can use a standard comparison.  Continuing
+the example from above, ``\texttt{s1 == Point}'' would be true whereas
+``\texttt{s2 == Point}'' would be false.
+
+Analogous comparisons would not work for value-carrying variants
+because these variants are pointers.  Rather than provide predicates
+(perhaps of the form \texttt{isCircle(s1)}), Cyclone requires
+pattern-matching.  For example, here is how you could define
+\texttt{isCircle}:
+\begin{verbatim}
+  bool isCircle(tunion Shape s) {
+    switch(s) {
+    case &Circle(r):
+      return true;
+    default: return false;
+    }
+  }
+\end{verbatim}
+
+When a \texttt{switch} statement's argument has a \texttt{tunion} type,
+the cases describe variants.  One variant of \texttt{tunion Shape} is a
+pointer to a \texttt{Circle}, which carries one value.  The
+corresponding pattern has \texttt{\&} for the pointer, \texttt{Circle} for
+the constructor name, and one identifier for each value carried by
+\texttt{Circle}.  The identifiers are binding occurrences (declarations,
+if you will), and the initial values are the values of the fields of
+the \texttt{Circle} at which \texttt{s} points.  The scope is the extent
+of the case clause.  Pattern-matching works for non-value variants
+too, but there is no \texttt{\&} because they are not pointers.
+
+Here is another example:
+
+\textit{[The reader is asked to indulge compiler-writers who have
+  forgotten basic geometry.]}
+\begin{verbatim}
+  extern area_of_ellipse(float,float);
+  extern area_of_poly(int,float);
+  float area(tunion Shape s) {
+    int ans;
+    switch(s) {
+    case Point:
+      ans = 0;
+      break;
+    case &Circle(r):
+      ans = 3.14*r*r;
+      break;
+    case &Ellipse(r1,r2):
+      ans = area_of_ellipse(r1,r2);
+      break;
+    case &Polygon(sides,r):
+      ans = area_of_poly(sides,r);
+      break;
+    }
+    return ans;
+  }
+\end{verbatim}
+
+The cases are compared in order against \texttt{s}.  The following are
+compile-time errors:
+\begin{itemize}
+\item It is possible that a member of the \texttt{tunion} type matches
+  none of the cases.  Note that default matches everything.
+\item A case is useless because it could only match if one of the
+  earlier cases match.  For example, a default case at the end of the
+  \texttt{switch} in area would be an error.
+\end{itemize}
+
+We emphasize that Cyclone has much richer pattern-matching support
+than we have used here.
+
+\paragraph{Implementation}
+Non-value variants are translated to distinct small integers.  Because
+they are small, they cannot be confused with pointers to
+value-carrying variants.  Value-carrying variants have a distinct
+integer tag field followed by fields for the values carried.  Hence
+all values of a tunion type occupy one word, either with a small
+number or with a pointer.
+
+\paragraph{Regions for tunion} We have seen that non-null pointers to
+value-carrying variants are subtypes of the \texttt{tunion} type.  For
+example, \texttt{tunion Shape.Circle @} is a subtype of
+\texttt{tunion Shape}.  Because \texttt{tunion Shape.Circle @} is a
+pointer into the heap (it is shorthand for
+\texttt{tunion Shape.Circle @`H}),
+it would seem that all values of type \texttt{tunion Shape} are either
+non-value variants or pointers into the heap.  In fact, this is true,
+but only because \texttt{tunion Shape} is itself shorthand for
+\texttt{tunion `H Shape}.
+
+In other words, \texttt{tunion} types are region-polymorphic over the region
+into which the value-carrying variants point.  An explicit region
+annotation goes after \texttt{tunion}, just like an explicit region annotation
+goes after \texttt{*} or \texttt{@}.  Here is an example using a stack
+region:
+\begin{verbatim}
+  tunion Shape.Circle c = Circle(3.0);
+  tunion _ Shape s = &c;
+\end{verbatim}
+
+The \texttt{_} is necessary because we did not give an explicit name to
+the stack region.
+
+We can now correct the white lie from the ``basic type declarations and
+subtyping'' section.  A declaration \verb|tunion Foo {...}| creates a
+type constructor which given a region creates a type.  For any region
+\texttt{`r}, \texttt{tunion `r Foo} is a subtype of
+\texttt{tunion Foo.Bar @`r} if \texttt{tunion Foo.Bar} carries values.  If
+\texttt{tunion Foo.Bar} does not carry values, then it is a subtype of
+\texttt{tunion `r Foo} for all \texttt{`r}.
+
+\paragraph{Polymorphism and tunion} A \texttt{tunion} declaration may be
+polymorphic over types and regions just like a \texttt{struct}
+definition (see the section on
+\hyperlink{polymorphism}{polymorphism}).  For example, here is a
+declaration for binary trees where the leaves can hold some
+\texttt{BoxKind} \texttt{`a}:
+\begin{verbatim}
+  tunion <`a> Tree {
+    Leaf(`a);
+    Node(tunion Tree<`a>, tunion Tree<`a>);
+  };
+\end{verbatim}
+
+In the above example, the root may be in any region, but all children
+will be in the heap.  This version allows the children to be in any
+region, but they must all be in the same region.  (The root can still
+be in a different region.)
+
+\begin{verbatim}
+  tunion <`a,`r::R> Tree {
+    Leaf(`a);
+    Node(tunion `r Tree<`a,`r>, tunion `r Tree<`a,`r>);
+  };
+\end{verbatim}
+
+\paragraph{Existential Types} \textit{[This feature is independent of
+  the rest of tunion's features and can be safely ignored when first
+  learning Cyclone.]}
+
+In addition to polymorphic \texttt{tunion} types, it is also possible to
+parameterize individual variants by additional type variables.  (From
+a type-theoretic point of view, these are existentially-quantified
+variables.)  Here is a useless example:
+
+\begin{verbatim}
+  tunion T { Foo<`a>(`a, `a, int), Bar<`a,`b>(`a, `b), Baz(int) };
+\end{verbatim}
+
+The constructors for variants with existential types are used the same
+way, for example \texttt{Foo("hi","mom",3)}, \texttt{Foo(8,9,3)}, and
+\texttt{Bar("hello",17)} are all well-typed.  The compiler checks that
+the type variables are used consistently---in our example, the first
+two arguments to \texttt{Foo} must have the same type.  There is no need
+(and currently no way) to explicitly specify the types being used.
+
+Once a value of an existential variant is created, there is no way to
+determine the types at which it was used.  For example,
+\texttt{Foo("hi","mom",3)} and \texttt{Foo(8,9,3)} both have type, ``there
+exists an `a such that the type is \texttt{Foo<`a>}''.  When
+pattern-matching an existential variant, you must give an explicit
+name to the type variables; the name can be different from the name in
+the type definition.  Continuing our useless example, we can write:
+\begin{verbatim}
+  void f(tunion T t) {
+    switch(t) {
+    case Foo<`a>(x,y,z): return;
+    case Bar<`b,`c>(x,y): return;
+    case Baz(x): return;
+    }
+  }
+\end{verbatim}
+
+The scope of the type variables is the body of the case clause.  So in
+the first clause we could create a local variable of type \texttt{`a}
+and assign \texttt{x} or \texttt{y} to it.  Our example is fairly
+``useless'' because there is no way for code to use the values of
+existentially quantified types.  In other words, given
+\texttt{Foo("hi","mom",3)}, no code will ever be able to use the strings
+\texttt{"hi"} or \texttt{"mom"}.  Useful examples invariably use function
+pointers.  For a realistic library, see fn.cyc in the distribution.
+Here is a smaller (and sillier) example; see the section on region and
+effects for an explanation of why the \texttt{`e} stuff is necessary.
+\begin{verbatim}
+  int f1(int x, int y) { return x+y; }
+  int f2(string x, int y) {printf("%s",x); return y; }
+  tunion T<`e::E> { Foo<`a>(`a, int f(`a, int; `e)); };
+  void g(bool b) {
+    tunion T<{}> t;
+    if(b)
+      t = Foo(37,f1);
+    else
+      t = Foo("hi",f2);
+    switch(t) {
+    case Foo<`a>(arg,fun):
+      `a x = arg;
+      int (*f)(`a,int;{}) = fun;
+      f(arg,19);
+      break;
+    }
+  }
+\end{verbatim}
+
+The case clause could have just been \texttt{fun(arg)}---the compiler
+would figure out all the types for us.  Similarly, all of the explicit
+types above are for sake of explanation; in practice, we tend to rely
+heavily on type inference when using these advanced typing constructs.
+
+\paragraph{Future}
+\begin{itemize}
+\item Currently, given a value of a variant type (e.g.,
+  \texttt{tunion Shape.Circle}), the only way to access the fields is
+  with pattern-matching even though the variant is known.  We may
+  provide a tuple-like syntax in the future.
+\item If a \texttt{tunion} has only one value-carrying variant, it does
+  not need a tag field in its implementation.  We have not yet
+  implemented this straightforward optimization.
+\end{itemize}
+
+\subsection{xtunion}\hypertarget{xtunion_sec}{}
+
+We now explain how an \texttt{xtunion} type differs from a \texttt{tunion}
+type.  The main difference is that later declarations may continue to
+add variants.  Extensible datatypes are useful for allowing clients to
+extend data structures in unforeseen ways.  For example:
+\begin{verbatim}
+  xtunion Food;
+  xtunion Food { Banana; Grape; Pizza(list_t<xtunion Food>) };
+  xtunion Food { Candy; Broccoli };
+\end{verbatim}
+
+After these declarations, \texttt{Pizza(new List(Broccoli, null))} is a
+well-typed expression.
+
+If multiple declarations include the same variants, the variants must
+have the same declaration (the number of values, types for the values,
+and the same existential type variables).
+
+Because different files may add different variants and Cyclone
+compiles files separately, no code can know (for sure) all the
+variants of an \texttt{xtunion}. Hence all pattern-matches against a
+value of an \texttt{xtunion} type must end with a case that matches
+everything, typically \texttt{default}.
+
+There is one built-in \texttt{xtunion} type: \texttt{xtunion exn} is the
+type of exceptions.  Therefore, you declare new \texttt{xtunion exn}
+types like this:
+
+\begin{verbatim}
+  xtunion exn {BadFilename(string)};
+\end{verbatim}
+
+The implementation of \texttt{xtunion} types if very similar to that of
+\texttt{tunion} types, but non-value variants cannot be represented as
+small integers because of separate compilation.  Instead, these
+variants are represented as pointers to unique locations in static
+data.  Creating a non-value variant still does not cause allocation.
+
+% Local Variables:
+% TeX-master: "main"
+% End:

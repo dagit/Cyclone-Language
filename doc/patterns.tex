@@ -1,0 +1,477 @@
+\section{Pattern Matching}
+
+Pattern matching provides a concise, convenient way to bind parts of
+large objects to new local variables.  Two Cyclone constructs use
+pattern matching, let declarations and switch statements.  Although
+the latter are more common, we first explain patterns with
+\hyperlink{let_decls}{let declarations} because they have fewer
+complications.  Then we describe all the \hyperlink{pat_forms}{pattern
+  forms}.  Then we describe \hyperlink{switch_stmt}{switch
+  statements}.
+
+You must use patterns to access values carried by
+\hyperlink{tagged_unions}{tagged unions}, including exceptions.  In
+other situations, patterns make code more readable and less verbose.
+
+\subsection{Let Declarations}\hypertarget{let_decls}{}
+
+In Cyclone, you can write
+\begin{verbatim}
+  let x = e;
+\end{verbatim}
+as a local declaration.  The meaning is the same as \texttt{t x = e;}
+where \texttt{t} is the type of \texttt{e}.  In other words, \texttt{x} is
+bound to the new variable.  Unlike with variable declarations, a let
+declaration must have an initializer (the \texttt{e}). Patterns are much
+more powerful because they can bind several variables to different
+parts of an aggregate object.  Here is an example:
+\begin{verbatim}
+  struct Pair {  int x; int y; };
+  void f(struct Pair pr) {
+    let Pair(fst,snd) = pr;
+    ...
+  }
+\end{verbatim}
+
+The pattern has the same structure as a \texttt{struct Pair} with parts
+being variables.  Hence the pattern is a match for \texttt{pr} and the
+variables are initialized with the appropriate parts of \texttt{pr}.  Hence
+``\texttt{let Pair(fst,snd) = pr}'' is equivalent to
+``\texttt{int fst =pr.x; int snd = pr.y}''.  A let-declaration's
+initializer is evaluated only once.
+
+Patterns may be as structured as the expressions against which they
+match.  For example, given type
+\begin{verbatim}
+  struct Quad { struct Pair p1; struct Pair p2; };
+\end{verbatim}
+patterns for matching against an expression of type struct Quad could
+be any of the following (and many more because of constants and
+wildcards---see below):
+
+\begin{itemize}
+\item \texttt{Quad(Pair(a,b),Pair(c,d))}
+\item \texttt{Quad(p1, Pair(c,d))}
+\item \texttt{Quad(Pair(a,b), p2)}
+\item \texttt{Quad(p1,p2)}
+\item \texttt{q}
+\end{itemize}
+
+In general, a let-declaration has the form ``let p = e;'' where p is a
+pattern and \texttt{e} is an expression.  In our example, the match
+always succeeds, but in general patterns can have compile-time errors
+or run-time errors.
+
+At compile-time, the type-checker ensures that the pattern makes sense
+for the expression.  For example, it rejects ``let Pair(fst,snd) = 0''
+because 0 has type int but the pattern only makes sense for type
+\texttt{struct Pair}.
+
+Certain patterns are type-correct, but they may not match run-time
+values.  For example, constants can appear in patterns, so ``let
+Pair(17,snd) = pr;'' would match only when \texttt{pr.x} is 17.
+Otherwise the exception \texttt{Match_Exception} is thrown.  Patterns
+that may fail are rarely useful and poor style in let-declarations;
+the compiler emits a warning when you use them.  In switch statements,
+possibly-failing patterns are the norm---as we explain below, the
+whole point is that one of the cases' patterns should match.
+
+\subsection{Pattern Forms}\hypertarget{pat_forms}{}
+
+So far, we have seen three pattern forms, variables patterns, struct
+patterns, and constant patterns.  We now describe all the pattern
+forms.  For each form, you need to know:
+
+\begin{itemize}
+\item The syntax
+\item The types of expressions it can match against (to avoid a
+  compile-time error)
+\item The expressions the pattern matches against (other expressions
+  cause a match failure)
+\item The bindings the pattern introduces, if any.
+\end{itemize}
+There is one compile-time rule that is the same for all forms: All
+variables (and type variables) in a pattern must be distinct.  For
+example, ``let Pair(fst,fst) = pr;'' is not allowed.
+
+You may want to read the descriptions for variable and struct patterns
+first because we have already explained their use informally.
+
+\begin{itemize}
+\item \textbf{Variable patterns}
+  \begin{itemize}
+  \item Syntax: an identifer
+  \item Types for match: all types
+  \item Expressions matched: all expressions
+  \item Bindings introduced: the identifier is bound to the expression
+    being matched
+  \end{itemize}
+\item \hypertarget{wild_pat}{\textbf{Wildcard patterns}}
+  \begin{itemize}
+  \item Syntax: \texttt{_} (underscore, note this use is completely
+    independent of \texttt{_} for \hyperlink{type_inference_sec}{type
+      inference})
+  \item Type for match: all types
+  \item Expressions matched: all expressions
+  \item Bindings introduced: none.  Hence it is like a
+      variable pattern that uses a fresh identifier.  Using \texttt{_}
+      is better style because it indicates the value matched is not
+      used.  Notice that ``\texttt{let _ = e;}'' is equivalent to
+      \texttt{e}.
+  \end{itemize}
+  
+\item \textbf{Reference patterns}
+  \begin{itemize}
+  \item Syntax: \texttt{*x} (i.e., the * character followed by an
+    identifier)
+  \item Types for match: all types
+  \item Expressions matched: all expressions.  Note: Currently,
+    reference patterns may only appear inside of other patterns so
+    that the compiler can determine the region for the pointer type
+    assigned to \texttt{x}.
+  \item Bindings introduced: \texttt{x} is bound to \emph{the address of}
+    the expression being matched.  Hence if matched against a value
+    of type \texttt{t} in region \texttt{r}, the type of \texttt{x} is
+    \texttt{t@r}. 
+  \end{itemize}
+  
+\item \textbf{Numeric constant patterns}
+  \begin{itemize}
+  \item Syntax: An \texttt{int}, \texttt{char}, or \texttt{float} constant
+  \item Types for match: numeric types
+  \item Expressions matched: numeric values such that \texttt{==}
+    applied to the value and the pattern yields true.  (Standard C
+    numeric promotions apply.  Note that comparing floating point
+    values for equality is usually a bad idea.)
+  \item Bindings introduced: none
+  \end{itemize}
+  
+\item \textbf{\texttt{null} constant patterns}
+  \begin{itemize}
+  \item Syntax: \texttt{null}
+  \item Types for match: nullable pointer types, including \texttt{?} types
+  \item Expressions matched: \texttt{null}
+  \item Bindings introduced: none
+  \end{itemize}
+  
+\item \textbf{enum patterns}
+  \begin{itemize}
+  \item Syntax: an enum constant
+  \item Types for match: the enum type containing the constant
+  \item Expressions matched: the constant
+  \item Bindings introduced: none
+  \end{itemize}
+  
+\item \textbf{Tuple patterns}
+  \begin{itemize}
+  \item Syntax: \texttt{\$(p1,...,pn)} where p1,...,pn are patterns
+  \item Types for match: tuple types where pi matches the type of the
+    tuple's ith field \texttt{i} between 1 and \texttt{n}.
+  \item Expressions matched: tuples where the ith field matches \texttt{pi} for
+    \texttt{i} between 1 and \texttt{n}.
+  \item Bindings introduced: bindings introduced by \texttt{p1}, \ldots,
+    \texttt{pn}.
+  \end{itemize}
+  
+\item \textbf{Struct patterns}
+  \begin{itemize}
+  \item Syntax: There are two forms:
+    \begin{itemize}
+    \item \texttt{X(p1,...,pn)} where \texttt{X} is the name of a struct
+      with \texttt{n} fields and p1,...,pn are patterns.  This syntax is
+      shorthand for \verb|X{.f1 = p1, ..., .fn = pn}| where fi is the
+      ith field in X\@.
+    \item \verb|X{.f1 = p1, ..., .fn = pn}| where the fields of X
+      are f1, ..., fn but not necessarily in that order
+    \end{itemize}
+      
+  \item Types for match: \texttt{struct X} (or instantiations when
+    \texttt{struct X} is polymorphic) such that pi matches the type of
+    fi for \texttt{i} between 1 and \texttt{n}.
+  \item Expressions matched: structs where the value in fi matches pi
+    for \texttt{i} between 1 and \texttt{n}.
+  \item Bindings introduced: bindings introduced by p1,...,pn
+  \end{itemize}
+  
+\item \textbf{Pointer patterns}
+  \begin{itemize}
+  \item Syntax: \texttt{\&p} where p is a pattern
+  \item Types for match: pointer types, including \texttt{?} types.
+    Also \texttt{tunion Foo} (or instantiations of it) when the pattern
+    is \texttt{\&Bar(p1,...,pn)} and \texttt{Bar} is a value-carrying
+    variant of \texttt{tunion Foo} and pi matches the type of the ith
+    value carried by Bar.
+  \item Expressions matched: non-null pointers where the value pointed
+    to matches p.  Note this explanation includes the case where the
+    expression has type tunion Foo and the pattern is
+    \texttt{\&Bar(p1,...,pn)} and the current variant of the expression is
+    ``pointer to \texttt{Bar}''.
+  \item Bindings introduced: bindings introduced by p
+  \end{itemize}
+  
+\item \textbf{tunion and xtunion patterns}
+  \begin{itemize}
+  \item Syntax: \texttt{X} if X is a variant that carries no values.
+    Else \texttt{X(p1,...,pn)} where X is the name of a variant (that
+    has no existential type parameters) and p1, ..., pn are patterns.
+    If X has existential type parameters, the syntax is
+    \texttt{X<`t1,...,`tm>(p1,...,pn)} for distinct \texttt{`t1}, \ldots,
+    \texttt{`tm}.
+  \item Types for match: If \texttt{X} is non-value-carrying variant of
+    \texttt{tunion Foo}, then types \texttt{tunion Foo} and \texttt{tunion Foo.x}
+    (or instantiations of them).  If \texttt{X} carries values, then
+    \texttt{tunion Foo.X} (or instantiations of it) where the pi matches
+    the type of ith field.  The number of existential type variables in the
+    pattern must be the number of existential type variables for
+    tunion \texttt{Foo.X}.
+  \item Expressions matched: If \texttt{X} is non-value-carrying, then
+    \texttt{X}.  If \texttt{X} is value-carrying, then values created from
+    the constructor \texttt{X} such that pi matches the ith field.
+  \item Bindings introduced: bindings introduced by p1,...,pn
+  \end{itemize}
+\end{itemize}
+
+\subsection{Switch Statements}\hypertarget{switch_stmt}{}
+
+In Cyclone, you can switch on a value of any type and the case
+``labels'' (the part between case and the colon) are patterns.  The
+switch expression is evaluated and then matched against each pattern
+in turn.  The first matching case statement is executed.  Except for
+some restrictions, Cyclone's switch statement is therefore a powerful
+extension of C's switch statement.
+
+\paragraph{Restrictions}
+\begin{itemize}
+\item \emph{You cannot implicitly ``fall-through'' to the next case}.
+  Instead, you must use the \texttt{fallthru;} statement, which has
+  the effect of transferring control to the beginning of the next
+  case.  Even the last case may not implicitly ``fall-through.''
+  \texttt{fallthru} is discussed more below.
+\item The cases in a switch \emph{must be exhaustive}; it is a
+  compile-time error if the compiler determines that it could be that
+  no case matches.  The rules for what the compiler determines are
+  described below.
+\item A \emph{case cannot be unreachable}.  It is a compile-time error
+  if the compiler determines that a later case may be subsumed by an
+  earlier one.  The rules for what the compiler determines are
+  described below.  (C almost has this restriction because case labels
+  cannot be repeated, but Cyclone is more restrictive.  For example, C
+  allows cases after a default case.)
+\item The body of a switch statement must be a \emph{sequence of case
+    statements} and case statements can appear only in such a
+  sequence. So idioms like Duff's device
+  (such as ``\texttt{switch(i\%4) while(i-- >=0) \{ case 3: ... \}}'')
+  are not supported.
+\item A constant case label must be a constant, \emph{not a constant
+    expression}.  That is, case 3+4: is allowed in C, but not in
+  Cyclone.
+\end{itemize}
+
+\paragraph{An Extension of C}
+
+Except for the above restrictions, we can see Cyclone's switch is an
+extension of C's switch.  For example, consider this code (which has
+the same meaning in C and Cyclone):
+
+\begin{verbatim}
+  int f(int i) {
+    switch(i) {
+    case 0:  return 17;
+    case 1:  return 17;
+    default: return i;
+    }
+  }
+\end{verbatim}
+
+In Cyclone terms, the code tries to match against the constant 0.  If
+it does not match (i is not 0), it tries to match against the pattern
+1.  Everything matches against default; in fact, default is just
+alternate notation for ``\texttt{case _}'', i.e., a case with a
+\hyperlink{wild_pat}{wildcard pattern}.  For performance reasons,
+switch statements that are legal C switch statements are translated to
+C switch statements.  Other switch statements are translated to,
+``a mess of tests and gotos''.
+
+We now discuss some of the restrictions in terms of the above example.
+Because there is no ``implicit fallthrough'', the body of case 0
+cannot be empty.  However, we can replace the ``return 17;'' with
+``fallthru;'' a special Cyclone statement that immediately transfers
+control to the next case.  fallthru does not have to appear at the end
+of a case body, so it acts more like a goto than a fallthrough.  As in
+our example, any case that matches all values of the type switched
+upon (e.g., \texttt{default:}, \texttt{case _:}, \texttt{case x:}) must
+appear last, otherwise later cases would be unreachable.  (Note that
+other types may have even more such patterns.  For example Pair(x,y)
+matches all values of type struct Pair {int x; int y};)
+
+\paragraph{Much More Powerful}
+
+Because Cyclone case labels are patterns, a switch statement can match
+against any expression and bind parts of the expression to variables.
+Also, \textbf{fallthru can (in fact, must) bind values} to the next
+case's pattern variables.  This silly example demonstrates all of
+these features:
+
+\begin{verbatim}
+  extern int f(int);}
+  int g(int x, int y) {
+    // return f(x)*f(y), but try to avoid using multiplication
+    switch($(f(x),f(y))) {
+    case $(0,_): fallthru;
+    case $(_,0): return 0;
+    case $(1,b): fallthru(b+1-1);
+    case $(a,1): return a;
+    case $(a,b): return a*b;
+    }
+  }
+\end{verbatim}
+
+The only part of this example using a still-unexplained feature is
+``fallthru(b)'', but we explain the full example anyway.  The switch
+expression has type \texttt{\$(int,int)}, so all of the cases must
+have patterns that match this type.  Legal case forms for this type
+not used in the example include ``\texttt{case \$(_,id)}:'',
+``\texttt{case \$(id,_):}'',
+``\texttt{case id:}'',
+``\texttt{case _:}'',
+and
+``default:''.
+
+The code does the following:
+
+\begin{itemize}
+\item It evaluates the pair \texttt{\$(f(x), f(y))} and stores the
+  result on the stack.
+\item If f(x) returned 0, the first case matches, control jumps to the second
+  case, and 0 is returned. 
+\item Else if f(y) returned 0, the second case matches and 0 is returned.  
+\item Else if f(x) returned 1, the third case matches, b is assigned the value
+  f(y) returned, control jumps to the fourth case after assigning b+1-1 to a,
+  and a (i.e., b + 1 - 1, i.e., b, i.e., f(y)) is returned.
+\item Else if f(y) returned 1, the fourth case matches, a is assigned the value
+  f(x) returned, and a is returned.
+\item Else the last case matches, a is assigned the value f(x) returned, b is
+  assigned the value f(y) returned, and a*b is returned.
+\end{itemize}
+
+Note that the switch expression is evaluated only once.
+Implementation-wise, the result is stored in a compiler-generated
+local variable and the value of this variable is used for the ensuring
+pattern matches.
+
+The general form of fallthrus is as follows: If the next case has no
+bindings (i.e., identifiers in its pattern), then you must write
+\texttt{fallthru;}.  If the next case has n bindings, then you must
+write \texttt{fallthru(e1,...,en)} where each ei is an expression with
+the appropriate type for the ith binding in the next case's pattern,
+reading from left to right.  (By appropriate type, we mean the type of
+the expression that would be bound to the ith binding were the next
+case to match.)  The effect is to evaluate e1 through en, bind them to
+the identifiers, and then goto the body of the next case.
+\texttt{fallthru} is not allowed in the last case of a switch, not
+even if there is an enclosing switch.
+
+We repeat that fallthru may appear anywhere in a case body, but it is
+usually used at the end, where its name makes the most sense.  ML
+programmers may notice that fallthru with bindings is strictly more
+expressive than or-patterns, but more verbose.
+
+\paragraph{Case Guards}
+
+We have withheld the full form of Cyclone case labels.  In addition to
+case p: where p is a pattern, you may write \texttt{case p \&\& e:} where
+p is a pattern and e is an expression of type int.  (And since
+\texttt{e1 \&\& e2} is an expression, you can write
+\texttt{case p \&\& e1 \&\& e2:} and so on.)  Let's call e the case's
+\textit{guard}.
+
+
+The case matches if p matches the expression in the switch and e
+evaluates to a non-zero value.  e is evaluated only if p matches and
+only after the bindings caused by the match have been properly
+initialized.  Here is a silly example:
+
+\begin{verbatim}
+extern int f(int);
+int g(int a, int b) {
+  switch ($(a,b-1)) {
+  case $(0,y) &amp;&amp; y > 1: return 1;
+  case $(3,y) &amp;&amp; f(x+y) == 7 : return 2;
+  case $(4,72): return 3;
+  default: return 3;
+  }
+}
+\end{verbatim}
+
+
+The function g returns 1 if a is 0 and b is greater than 2.  Else if x
+is 3, it calls the function f (which of course may do arbitrary
+things) with the sum of a and b.  If the result is 7, then 2 is
+returned.  In all other cases (x is not 3 or the call to f does not
+return 7), 3 is returned.
+
+
+Case guards make constant patterns unnecessary (we can replace case 3:
+with \texttt{case x \&\& x==3:}, for example), but constant patterns are
+better style and easier to use.
+
+
+Where clauses are not interpreted by the compiler when doing
+exhaustiveness and overlap checks, as explained below.
+
+
+\paragraph{Exhaustiveness and Useless-Case Checking}
+
+As mentioned before, it is a compile-time error for the type of the
+switch expression to have values that none of the case patterns match
+or for a pattern not to match any values that earlier patterns do not
+already match.  Rather than explain the precise rules, we currently
+rely on your intuition.  But there are two rules to guide your
+intuition:
+
+\begin{itemize}
+\item In terms of exhaustiveness checking, the compiler acts as if any
+  case guard might evaluate to false.
+\item In terms of exhaustiveness checking, numeric constants cannot
+  make patterns exhaustive.  Even if you list out all 256 characters,
+  the compiler will act as though there is another possibility you
+  have not checked.
+\end{itemize}
+
+We emphasize that checking does not just involve the ``top-level'' of
+patterns.  For example, the compiler rejects the switch below because
+the third case is redundant:
+
+\begin{verbatim}
+  enum Color { Red, Green };
+  void f(enum Color c1, enum Color c2) {
+    switch ($(c1,c2)) {
+    case $(Red,x): return;
+    case $(x,Green): return;
+    case $(Red,Green): return;
+    default: return;
+    }
+  }
+\end{verbatim}
+
+\paragraph{Rules for No Implicit Fall-Through}
+As mentioned several times now, Cyclone differs from C in that a case
+body may not implicitly fall-through to the next case.  It is a
+compile-time error if such a fall-through might occur.  Because the
+compiler cannot determine exactly if an implicit fall-through could
+occur, it uses a precise set of rules, which we only sketch here.  The
+exact same rules are used to ensure that a function (with return type
+other than void) does not ``fall off the bottom.''  The rules
+are very similar to the rules for ensuring that Java methods do not
+``fall off the bottom.''
+
+The general intuition is that there must be a break, continue, goto,
+return, or throw along all control-flow paths.  The value of
+expressions is not considered except for numeric constants and logical
+combinations (using \texttt{\&\&}, \texttt{||}, and \texttt{?} \texttt{:}) of
+such constants.  The statement try s catch \ldots{} is checked as
+though an exception might be thrown at any point while s executes.
+
+% Local Variables:
+% TeX-master: "main"
+% End:

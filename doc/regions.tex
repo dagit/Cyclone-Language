@@ -1,0 +1,543 @@
+\section{Memory Management Via Regions}
+
+%Contents: Introduction, Allocation, Common Uses, Type-Checking Regions
+
+\subsection{Introduction}
+
+Cyclone prevents memory-management errors, such as following dangling
+pointers, without requiring that all pointers point into the heap,
+which is garbage-collected.  Here we explain Cyclone's
+memory-management scheme and related type annotations.  The system is
+based on an explicit ``region and effect'' system; you should not need
+to have seen regions and effects before to understand our explanation.
+
+A region contains a collection of objects and every object is
+contained in exactly one region.  When a region is deallocated, all
+the objects in the region are deallocated.  In this sense, regions are
+like ``arenas'' (also called ``zones''), a fairly common
+memory-management idiom.  Cyclone has three flavors of regions:
+\begin{itemize}
+\item The heap is a special region.  There is only one heap.  The heap
+  is never deallocated.  New objects can be added to the heap at any
+  time.  Its contents are garbage-collected.
+
+\item Local declarations give rise to objects allocated into stack
+  regions.  When a block of declarations is executed, a new stack
+  region is allocated with enough space for the declarations.  No more
+  objects can be allocated into a stack region.  The region is
+  deallocated when the block containing the declarations finishes
+  executing.  Similarly, when a function is called, its actual
+  parameters are placed in the same stack region as the objects for
+  the declarations at the beginning of the function's body.  This
+  behavior is exactly like in C; we are just calling this stack space
+  a region!
+  
+\item The construct ``\texttt{region r s}'' creates a growable region,
+  where \texttt{r} is an identifier and \texttt{s} is a statement.
+  (Typically \texttt{s} is a compound statement, so it looks like
+  \verb|region r { ... }|.)  A handle for the growable region is bound
+  to \texttt{r}.  The lifetime of \texttt{r} and the lifetime of the
+  region for which it is a handle is the execution of \texttt{s}.  In
+  \texttt{s}, we can add objects to the region, as explained below.
+\end{itemize}
+
+A non-heap object lives until its region is deallocated.  There is no
+way to free an object earlier.  Heap objects may be garbage-collected
+once they are unreachable (cannot be reached by traversing pointers)
+from the program's variables.  Objects in live non-heap regions always
+appear reachable to the garbage collector (so everything reachable
+from them appears reachable as well).
+
+Cyclone prohibits \emph{following} dangling pointers.  This
+restriction is part of the type system: It is a compile-time error if
+a dangling pointer (a pointer into a deallocated region) might be
+followed.  There are no run-time checks of the form, ``is this
+pointing into a live region?''  As explained below, each pointer type
+has a region and objects of the type may only point into that region.
+The type ``\texttt{t *}'' is for pointers into the heap; see below for
+how to declare pointers into other regions.
+
+\subsection{Allocation}
+There are three constructs for allocating a new object in the heap:
+\begin{itemize}
+\item \texttt{new e}, where \texttt{new} is a keyword an \texttt{e} is an
+  expression, allocates space for an object of \texttt{e}'s type and
+  initializes the object with \texttt{e}.  It is roughly equivalent to
+  ``\texttt{t temp = malloc(sizeof(t)); *temp = e;}''.  For example,
+  \texttt{new 17} creates a pointer to an object containing 17, and,
+  given ``\verb|struct Pair{int x; int y;};|'', \texttt{new Pair(7,9)}
+  and \verb|new Pair{.y = 9, .x = 7}| both return pointers to pairs
+  with the fields initialized in the obvious manner.  (As in all of
+  Cyclone, struct designators must be preceded by the name of the struct.)
+
+\item \verb|new {...}|, where \texttt{new} is a keyword and \verb|{...}|
+  is an array initializer, allocates space for an array of the
+  appropriate size and initializes the array's elements according to
+  the initializer.
+  
+  For example, \verb|new {3,4,5}| allocates space for three
+  \texttt{int}s and returns a pointer to the space.  More interestingly,
+\begin{verbatim}
+  new {for i < e1 : e2 }
+\end{verbatim}
+  evaluates \texttt{e1} (which must have type \texttt{unsigned int}) and
+  allocates space for an array of that many objects of \texttt{e2}'s
+  type.  \texttt{e2} may mention \texttt{i}.  \texttt{e2} is first evaluated
+  with \texttt{i==0} and the result is put at index 0 of the array, then
+  \texttt{e2} is evaluated with \texttt{i==1} and the result is put at
+  index 1 of the array, and so on.
+  
+  Note: Currently, this construct (and the growable-region version) is
+  the only way to create an object whose size depends on run-time
+  information.
+  
+  For example, this function returns an array containing the first \texttt{n}
+  positive even numbers:
+\begin{verbatim}
+  int ? n_evens(int n) {
+    return new {for next < n :  2*(next+1)};
+  }
+\end{verbatim}
+  \texttt{e1} is evaluated exactly once.  \texttt{e2} is evaluated
+  \texttt{e1} times.  Note that \texttt{e1} may be 0.  Warning: \texttt{e1}
+  is implictly converted to an \texttt{unsigned int}, so negative values
+  may crash Cyclone!  After all, \verb|new {for i < -1 : 0}|, after
+  conversion, asks for an object of roughly 4 billion 0s, exhausting
+  the 32-bit address space.
+  
+\item \texttt{malloc(sizeof(t))} where \texttt{malloc} and \texttt{sizeof}
+  are keywords and \texttt{t} is a type.  Notice that \texttt{malloc} in
+  Cyclone is much more restricted than in C (where it is a library
+  function consuming an \texttt{int} and returning a \texttt{char *}).  In
+  Cyclone, the argument currently must have the form \texttt{sizeof(t)},
+  i.e., you cannot say 8, even if 8 is the size of \texttt{t}.  That is
+  why \texttt{malloc} cannot be used to create an array whose length
+  depends on run-time information.  On the plus side, the type of
+  \texttt{malloc(sizeof(t))} is \texttt{t @} (which is a subtype of
+  \texttt{t*}), so there is no need to cast the result.
+\end{itemize}
+
+For a growable region, there are three constructs analogous for those
+that implicitly use the heap: \texttt{rnew(r) e}, \texttt{rnew(r) {...}},
+and \texttt{rmalloc(r,sizeof(t))} all allocate into the region for which
+\texttt{r} is a handle, where \texttt{rnew} and \texttt{rmalloc} are
+keywords.  The Cyclone library has a global variable
+\texttt{Core::heap_region} which contains a handle for the heap region.
+As such, you can view \texttt{new e} as syntactic sugar for
+\texttt{rnew(heap_region,e)}, and similarly for the other constructs.
+
+The only way to allocate an object into a stack region is via a local
+declaration.  Cyclone does not currently support \texttt{salloc}; use a
+growable region instead.
+
+\subsection{Common Uses}
+Although the type system associated with regions is complicated, there
+are a small number of common uses, and you can use them without
+understanding the general framework.  We present these cases
+separately for two reaons.  First, it makes it easier to write and
+port code without investing undue intellectual effort.  Second, the
+full explanation may be easier to understand if you have already used
+the common idioms.
+
+Remember that a pointer always points into the same region and this
+region is indicated by the pointer's type. \texttt{t *} refers to pointers in
+the heap, so you cannot do the following:
+\begin{verbatim}
+  int x = 7;
+  int * y = &x;
+\end{verbatim}
+
+Here is how to make stack pointers:
+
+\begin{verbatim}
+  int x = 7;
+  int *_ y = &x;
+\end{verbatim}
+
+The \texttt{_} (underscore) tells the type-checker to infer the region
+information for \texttt{y}.  In this case, it is the block in which
+\texttt{x} is declared, i.e., it corresponds to a stack region.  You
+could add \texttt{_} to all your local pointer types, but it is
+unnecessary when the pointer points into the heap.
+
+Because pointers have only one region attached, the following will not
+type-check and there is no type that can make it type-check:
+\begin{verbatim}
+  int x = 7;
+  int *_ y = &x;
+  y = new 42; // y is not a heap pointer
+\end{verbatim}
+
+If a function parameter has type \texttt{t*}, then you cannot pass a
+pointer into the stack or a growable region for that parameter.  (To
+do so would make it easy for the function to create dangling pointers
+that could later be followed.)  But many functions can take, for
+example, stack pointers, because they only read through the pointers
+or pass them to other functions that can take stack pointers.  Here is
+how to make functions that can accept stack pointers: For each
+parameter that can safely be a stack pointer, put \texttt{`r} after the
+\texttt{*} (or \texttt{@}) where \texttt{`r} is an identifier starting with
+a back-quote that is different from all the other backquote-starting
+identifiers in the function's type.  For example:
+\begin{verbatim}
+  void f(int *`r1 x1, int *`r2 x2, int * x3);
+\end{verbatim}
+allows the first two arguments to point into any region at all while
+the third argument must point into the heap.  Note that if we replace
+\texttt{`r2} with \texttt{`r1}, then \texttt{x1} and \texttt{x2} can still
+point into any region, but they must point into the same region.
+
+You can pass a region handle to a function (so the function can
+allocate into a caller-provided region).  The type of a handle is
+\texttt{region_t<`r>} where \texttt{`r} is the region information
+associated with pointers into the region.  For example, this code
+allocates a pair of ints into \texttt{r}:
+\begin{verbatim}
+  $(int,int)*`r f(region_t<`r> r, int x, int y) { 
+
+     return rnew(r) $(7,9); 
+
+  }
+\end{verbatim}
+
+Notice that we used the same \texttt{`r} for the handle and the return
+type.  We could have also passed the object back through a pointer
+parameter like this:
+\begin{verbatim}
+  void f2(region_t<`r> r,int x,int y,$(int,int)*`r *`r2 p){ 
+    *p = rnew(r) $(7,9); 
+  }
+\end{verbatim}
+
+Notice that we have been careful to indicate that the region where
+\texttt{*p} lives (corresponding to \texttt{`r2}) may be different from
+the region for which \texttt{r} is the handle (corresponding to
+\texttt{`r}).  Here is an example use of \texttt{f2}:
+\begin{verbatim}
+  region r { 
+    $(int,int) *_ x = null; 
+    f2(r,3,4,&x);
+ }
+\end{verbatim}
+
+\texttt{typedef}, \texttt{struct}, \texttt{tunion}, and \texttt{xtunion}
+declarations can all be parameterized by regions.  For example, here
+is part of the list library.  Note that the ``\texttt{::R}'' is
+necessary and that \texttt{`H} describes the heap region.
+\begin{verbatim}
+  struct List<`a,`r::R>{`a hd; struct List<`a,`r> *`r tl;};
+  typedef struct List<`a,`r> *`r glist_t<`a,`r>;
+  typedef struct List<`a,`H> *list_t<`a>;
+
+  // return a fresh copy of the list in r2
+  glist_t<`a,`r2> rcopy(region_t<`r2> r2, glist_t<`a,`r1> x) {
+    glist_t<`a,`r2> result, prev;
+
+    if (x == null) return null;
+    result = rnew(r2) List{.hd=x->hd,.tl=null};
+    prev = result;
+    for (x=x->tl; x != null; x=x->tl) {
+      prev->tl = rnew(r2) List(x->hd,null);
+      prev = prev->tl;
+    }
+    return result;
+  } 
+  list_t<`a> copy(glist_t<`a,`r> x) {
+    return rcopy(heap_region, x);
+  }
+\end{verbatim}
+
+Putting function pointers in struct fields currently requires an
+arcane type definition.  We recommend following the recipe implied by
+this example:
+\begin{verbatim}
+  struct X<`e1::E, `e2::E, `ra::R, `rb::R> {
+    int f1(int x, int y; `e1); 
+    int f2(int *`r1 x, int *`r2 y; `e2 + {`ra,`rb});
+  };
+
+  typedef struct X<{},{},`ra,`b> x_t<`ra::R, `rb::R>;
+\end{verbatim}
+
+The example is simpler if \texttt{f2} does not accept stack pointers,
+but the effect variables (\texttt{`e1} and \texttt{`e2}) are still
+necessary.  You will probably never encounter a situation where
+\texttt{x_t}'s instantiation of \texttt{`e1} and \texttt{`e2} to \verb|{}|
+causes a program not to type-check, but the gory details are discussed
+below.
+
+\subsection{Type-Checking Regions}
+
+Due to recursive functions, there can be any number of live regions at
+run-time.  The compiler ensures that only pointers into live regions
+are dereferenced via the following general strategy:
+
+\begin{itemize}
+\item Use compile-time \emph{region-names}.  Syntactically these are
+  just type variables, but they are used differently.
+\item Decorate each pointer type and handle type with one region-name. 
+\item Decorate each program point with a (finite) set of region-names.
+  We call the set the point's \emph{capability}.
+\item To dereference a pointer (via \texttt{*}, \texttt{->}, or
+  subscript), the pointer's type's region-name must be in the program
+  point's capability.  Similarly, to use a handle for allocation, the
+  handle type's region-name must be in the capability.
+\item Enforce a type system such that the following is impossible: A
+  program point P's capability contains a region-name \texttt{`r} that
+  decorates a pointer (or handle) expression \texttt{e} that, at
+  run-time, points into a region that has been deallocated and the
+  operation at P dereferences \texttt{e}.
+\end{itemize}
+
+The above strategy is probably too vague to make sense at this point,
+but it may help to refer back to it as we explain specific aspects of
+the type system.
+
+Note that in the rest of the documentation (and in common parlance) we
+abuse the word ``region'' to refer both to region-names and to
+run-time collections of objects.  Similarly, we confuse a block of
+declarations, its region-name, and the run-time space allocated for
+the block.  (With loops and recursive functions, ``the space
+allocated'' for the block is really any number of distinct regions.)
+But in the rest of this section, we painstakingly distinguish
+region-names, regions, etc.
+
+\subsubsection{Region Names}
+
+Given a function, we associate a distinct region-name with each
+program point that creates a region, as follows:
+
+\begin{itemize}
+\item If a block (blocks create stack regions) has label L, then the
+  region-name for the block is \texttt{`L}.
+\item If a block has no label, the compiler makes up a unique
+  region-name for the block.
+\item In region \texttt{r <`foo> s}, the region-name for the construct
+  is \texttt{`foo}.
+\item In region \texttt{r s}, the region-name for the construct is
+  \texttt{`r}.
+\end{itemize}
+
+The region name for the heap is \texttt{`H}.  Region-names associated
+with program points within a function should be distinct from each
+other, distinct from any region-names appearing in the function's
+prototype, and should not be \texttt{`H}.  (So you cannot use \texttt{H}
+as a label name.)  Because the function's return type cannot mention a
+region-name for a block or region-construct in the function, it is
+impossible to return a pointer to deallocated storage.
+
+In region \texttt{r <`r> s} and region \texttt{r s}, the type of \texttt{r}
+is \texttt{region_t<`r>}.  In other words, the handle is decorated with
+the region-name for the construct.  Pointer types' region-names are
+explicit, although you generally use \texttt{_} and rely on inference to
+put in the correct one for you.
+
+\subsubsection{Capabilities}
+
+In the absence of explicit effects (see below), the capability for a
+program point includes exactly:
+\begin{itemize}
+\item \texttt{`H}
+\item The region-names appearing in the function's prototype 
+\item The region-names for the blocks and ``\texttt{region r s}''
+  statements that contain the program point
+\end{itemize}
+
+For each dereference or allocation operation, we simply check that the
+region-name for the type of the object is in the capability.  It is
+rare for the check to fail because failing code has to do one of the
+following:
+\begin{itemize}
+\item Have a pointer that outlives the stack or growable region into
+  which it points.  Here is a silly example:
+\begin{verbatim}
+  int *_ x; // region-name filled in with an inner block's name
+  if(true) {
+      int y = 7;
+      x = &y;
+  }
+  *x; 
+\end{verbatim}
+
+\item Have existential type variables of region kind.  Doing so is
+  useless because the check will always fail (so don't worry if you
+  don't know what an existential type variable of region kind is).
+\end{itemize}
+
+\subsubsection{Assignment}
+
+A pointer type's region-name is part of the type.  Currently, there is
+no ``subregioning,'' so you cannot assign between types with different
+region-names.  For handlers, if \texttt{`r} is a region-name, there is
+at most one value of type \texttt{region_t<`r>} (there are 0 if
+\texttt{`r} is a block's name), so there is little use in creating
+variables of type \texttt{region_t<`r>}.
+
+\subsubsection{Type Declarations}
+
+A \texttt{struct}, \texttt{typedef}, \texttt{tunion}, or \texttt{xtunion}
+declaration may be parameterized by any number of region-names.  The
+region names are placed in the list of type parameters.  They must be
+followed by ``\texttt{::R}'', except for \texttt{typedef} declarations
+(where the region-name appears in the underlying type).  As with other
+type parameters, these must be instantiated when the type constructor
+is used.  For example, given
+\begin{verbatim}
+  struct List<`a,`r::R>{`a hd; struct List<`a,`r> *`r tl;};
+\end{verbatim}
+the type \texttt{struct List<int,`H>} is for a list of ints in the heap.
+Notice that all of the ``cons cells'' of the \texttt{List} will be in
+the same region (the type of the \texttt{tl} field uses the same
+region-name \texttt{`r} that is used to instantiate the recursive
+instance of \texttt{struct List<`a,`r>}).  However, we could instantiate
+\texttt{`a} with a pointer type that has a different region-name.
+
+Currently, you cannot use type inference to instantiate region-names.
+For example, if \texttt{lst} has type \texttt{struct List<int,`H>}, you
+can write any of the following:
+\begin{verbatim}
+  struct List<int,`H> lst2 = lst;
+  struct List<_,`H> lst2 = lst;
+  _ lst2 = lst;
+\end{verbatim}
+but you cannot write either of
+\begin{verbatim}
+  struct List<int,_> lst2 = lst;
+  struct List<_,_> lst2 = list;
+\end{verbatim}
+
+\texttt{tunion} and \texttt{xtunion} declarations must also be
+instantiated with an additional region-name.  If an object of type
+\texttt{tunion `r Foo} turns out to be a value-carrying variant, then
+the object is treated (capability-wise) as a pointer with region-name
+\texttt{`r}.  If the region-name is omitted from a use of a
+\texttt{tunion} declaration, it is implicitly \texttt{`H}.
+
+\subsubsection{Function Calls}
+
+If a function parameter or result has type \texttt{int *`r} or
+\texttt{region_t<`r>}, the function is polymorphic over the region-name
+\texttt{`r}.  That is, the caller can instantiate \texttt{`r} with any
+region \emph{in the caller's current capability}. This instantiation
+is usually implicit, so the caller just calls the function and the
+compiler uses the types of the actual arguments to infer the
+instantiation of the region-names (just like it infers the
+instantiation of type variables).
+
+The callee is checked knowing nothing about \texttt{`r} except that it
+is in its capability.  For example, it will be impossible to assign a
+parameter of type \texttt{int*`r} to a global variable.  Why?  Because
+the global would have to have a type that allowed it to point into any
+region.  There is no such type because we could never safely follow
+such a pointer (since it could point into a deallocated region).
+
+\subsubsection{Explicit and Default Effects}
+
+If you are not using function pointers, you now know everything you
+need to know about Cyclone regions and memory management.  If you are
+using function pointers, you still should not have a problem provided
+you follow this draconian measure:
+\begin{quote}
+  Do not write down function types except in function prototypes
+  (i.e., as parameter or return types).  In particular do not write
+  down function types for \texttt{struct} members, \texttt{typedef}
+  definitions, or local variables.  For local variables, you can use
+  type inference (i.e., write \texttt{_} instead of the function type).
+\end{quote}
+
+In practice, this restriction is often palatable.  The common use of
+function pointers is as parameters, and it usually suffices for the
+caller to use just a function name as the argument.
+
+If you must write down a function type, then you have to understand
+that we have been lying about the form of function types and
+prototypes.  A function type actually has an explicit effect, written
+at the end of the parameter list, following a semi-colon.  For
+example, \texttt{int f(int,int *`r)}; is really shorthand for:
+
+\begin{verbatim}
+  int f(int,int; `e+{`r});
+\end{verbatim}
+
+An effect is part of a function's type; it has nothing to do with
+run-time values.  In particular, the \texttt{+} above has nothing to do
+with addition.  An effect contains region-names and effect-names.
+Capabilities really include effect-names and region-names.  A program
+point's capability includes its function's type's effect and the
+region-names for the enclosing blocks and region constructs.
+Effect-names are discussed more below.
+
+The full syntax for effects is:
+
+\begin{itemize}
+\item \verb|{}|, for the empty capability 
+\item \verb|{`r1,...,`rn}| for the capability of region-names
+  \texttt{`r1},\ldots, \texttt{`rn} 
+\item \texttt{`e} for the capability of effect-name \texttt{`e} 
+\item \texttt{E1 + E2} for the union of the effects of \texttt{E1} and
+  \texttt{E2}.  The union contains all the region-names and effect-names
+  of \texttt{E1} and \texttt{E2}. 
+\end{itemize}
+
+\subsubsection{Default Effects}
+
+When you do not put an explicit effect on a function type, the
+compiler puts one in for you as follows: It is
+\verb|`e+`e1+...+`em+{`r1,...,`rn}| where \texttt{`e} is fresh,
+\texttt{`r1}, \ldots, \texttt{`rn} are the region-names appearing in the
+parameter and return types, and \texttt{`e1}, \ldots, \texttt{`em} are the
+effect-names appearing the parameter and return types.  The
+\texttt{`e1}, \ldots, \texttt{`em} include effect-names added for you.
+For example,
+\begin{verbatim}
+  int f(void g(), 
+        int *`r x, 
+        void h(region_t<`r> rgn));
+\end{verbatim}
+is shorthand for:
+\begin{verbatim}
+  int f(void g(;`e1), 
+        int *`r x, 
+        void h(region_t<`r> rgn; `e2+{`r})
+        ; `e3+`e1+`e2+{`r});
+\end{verbatim}
+
+In fact, we are still leaving the binding of the region-names and
+effect-names implicit.  By default, they are bound at the outermost
+level of the function type:
+\begin{verbatim}
+  int f<`r::R,`e1::E,`e2::E,`e3::E>
+       (void g(;`e1), 
+        int *`r x, 
+        void h(region_t<`r> rgn; `e2+{`r})
+        ; `e3+`e1+`e2+{`r});
+\end{verbatim}
+
+The compiler can only infer default effects for top-level function
+types (i.e., function prototypes) and function types inside other
+function types.  This is why you cannot write down a function-pointer
+type, a function-type \texttt{struct} member, a function-type
+\texttt{typedef} definition, etc., without an explicit effect.
+
+\subsubsection{Meaning of Effect-Names}
+
+As described above, when functions and type declarations are
+parameterized by region-names, uses instantiate the region-names with
+region-names.  (For example, in \texttt{struct List<int,`H>}, \texttt{`H}
+instantiates \texttt{`r}.)  An effect-name is similarly instantiated,
+but with a capability.  The same restrictions on type inference apply.
+
+We can now understand how to declare and use structs with
+function-pointer members.  The example above puts explicit effects on
+the functions, binds the effect-names in the struct declaration, and
+instantiates the effect-names (to the empty capability) when using the
+struct declaration.
+
+Why do functions need effect-names in their capabilities?  The short
+answer is that having different effect names for each function type
+ensures the implicit instantiation of region-names and effects will
+succeed for all function calls where it should succeed.
+
+% Local Variables:
+% TeX-master: "main"
+% End:

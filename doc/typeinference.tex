@@ -1,0 +1,149 @@
+\section{Type Inference}
+\hypertarget{type_inference_sec}{}
+
+Cyclone allows many explicit types to be elided.  In short, you write
+\texttt{_} (underscore) where a type should be and the compiler tries to
+figure out the type for you.  Type inference can make C-like Cyclone
+code easier to write and more readable.  For example,
+\begin{verbatim}
+  _ x = malloc(sizeof(sometype_t));
+\end{verbatim}
+is a fine substitute for
+\begin{verbatim}
+  sometype_t @ x = malloc(sizeof(sometype_t));
+\end{verbatim}
+Of course, explicit types can make code more readable, so it is often
+better style not to use inference.
+
+Inference is even more useful because of Cyclone's advanced typing
+constructs.  For example, it is much easier to write down \texttt{_}
+than a type for a function pointer.  Also, you can use it to omit
+explicit regions, such as in the following:
+\begin{verbatim}
+  void f() {
+    int x = 3;
+    int *_ y = &x;
+  }
+\end{verbatim}
+(If the \texttt{_} is omitted, the code is ill-typed because
+\texttt{int *} describes heap pointers.)
+
+We now give a rough idea of when you can elide types and how types get
+inferred.  In practice, you tend to develop a sense of which idioms
+succeed, and, if there's a strange compiler-error message about a
+variable's type, you give more explicit information about the
+variable's type.
+
+\paragraph{Syntax}
+As far as the parser is
+concerned, \texttt{_} is a legal type specifier.  However, the type-checker
+will immediately reject \texttt{_} in these places (or at least it
+should):
+
+\begin{itemize}
+\item As part of a top-level variable or function's type.
+\item As part of a \texttt{struct}, \texttt{tunion}, \texttt{xtunion}, or
+  \texttt{typedef} declaration.
+\item As a part of an explicit type instantiation (e.g., \texttt{Foo<_,_>}) where
+  it is instantiating a region-name or effect-name.
+\end{itemize}
+
+Note that \texttt{_} can be used for part of a type.  A silly example is
+\texttt{\$(_,int) = \$(3,4)}; a more useful example is an explicit cast to
+a non-nullable pointer (to avoid a compiler warning).  For example:
+\begin{verbatim}
+  void f(some_big_type * x,
+  some_big_type @ y) {
+  if(x != null) {
+    y = (_ @) x;
+  }
+\end{verbatim}
+
+\paragraph{Semantics}
+Except for the subtleties discussed below, using \texttt{_} should not change the
+meaning of programs.  However, it may cause a program not to type-check
+because the compiler no longer has the type information it needs at some point
+in the program.  For example, the compiler rejects \texttt{x->f} if it does not
+know the type of \texttt{x} because the different struct types can have
+members named \texttt{f}. 
+
+The compiler infers the types of expressions based on uses.  For
+example, consider:
+\begin{verbatim}
+  _ x = null;
+  x = g();
+  x->f;
+\end{verbatim}
+This code will type-check provided the return type of \texttt{g} is a
+pointer to a struct with a field named \texttt{f}.  If the two
+statements were in the other order, the code would not type-check. 
+Also, if \texttt{g} returned an \texttt{int}, the code would not
+type-check, even without the \texttt{x->f} expression, because the
+\texttt{_ x = null} constrains \texttt{x} to have a pointer type.
+
+However, the above discussion assumes that sequences of statements are
+type-checked in order.  This is true, but \emph{in general the
+  type-checker's order is unspecified}.
+
+\paragraph{Subtleties}
+In general, inference has subtle interactions with implicit casts
+(such as from \texttt{t@} to \texttt{t*}) and constants that have multiple
+types (such as numeric constants).
+
+The following is a desirable property: If a program is modified by
+replacing some explicit types with \texttt{_} and the program still
+type-checks, then its meaning is the same.  \emph{This property does
+  not hold!}  Here are two examples:
+
+\paragraph{Numeric Types} This program prints -24 1000:
+\begin{verbatim}
+  int f() {
+  char c = 1000;
+  return c;
+  }
+  int g() {
+  _ c = 1000; // compiler infers int
+  return c;
+  }
+  int main() {
+  printf("%d %d", f(), g());
+  return 0;
+  }
+\end{verbatim}
+
+\paragraph{Order Matters}
+Here is an example where the function's meaning depends on the order
+the type-checker examines the function:
+\begin{verbatim}
+  void h1(int @ c, int maybe) {
+    _ a;
+    if(maybe)
+      a = c;
+    else
+      a = null;
+  }
+\end{verbatim}
+At first, the type of \texttt{a} is completely unconstrained.  If we
+next consider \texttt{a = c}, we will give \texttt{a} the type of
+\texttt{c}, namely \texttt{int @}, an int pointer that cannot be
+\texttt{null}.  Clearly that makes the assignment \texttt{a = null}
+problematic, but Cyclone allows assignment from nullable pointers to
+non-nullable pointers; it gives a compile-time warning and inserts a
+run-time check that the value is not \texttt{null}.  Here the check will
+fail and an exception will be raised.  That is, \texttt{h1(p,0)} is
+guaranteed to raise an exception.
+
+But what if the type-checker examines \texttt{a = null} first?  Then the
+type-checker will constrain \texttt{a}'s type to be a nullable pointer
+to an unconstrained type.  Then the assignment \texttt{a = c} will
+constrain that type to be \texttt{int}, so the type of \texttt{a} is
+\texttt{int *}.  An assignment from \texttt{int @} to \texttt{int *} is
+safe, so there is no warning.  Moreover, the assignment \texttt{a = null} is
+not a run-time error.
+
+\emph{The order of type-checking is left unspecified.  In the future,
+  we intend to move to a system that is order-independent.}
+
+% Local Variables:
+% TeX-master: "main"
+% End:
