@@ -122,7 +122,6 @@ CYCLONE_H:=arg.h\
 	precore.h\
 	signal.h\
 	stddef.h\
-	sys/features.h\
 	sys/mman.h\
 	sys/resource.h\
 	sys/stat.h\
