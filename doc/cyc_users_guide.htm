@@ -244,18 +244,192 @@ that point to are the same type.&nbsp; You can also cast a * pointer to a @
 pointer, but this induces a run-time check.&nbsp; If the pointer is null, then
 the (NullPointer???) exception is raised.</p>
 <h4>Exceptions:</h4>
-<p>Cyclone provides exceptions, throw, and try/catch statements similar to
+<p>Cyclone provides exceptions, <font face="courier new">throw</font>, and<font face="courier new">
+try</font>/<font face="courier new">catch</font> statements similar to
 Java.&nbsp; This avoids the error-prone and type-unsafe approach in C of
-returning a value (e.g., -1).&nbsp; Exception values are a special case of
+returning a value (e.g., -1) to indicate an error.&nbsp; Exception values are a special case of
 extensible datatype enums (xenums) described below.&nbsp; The following example
 shows how to declare a couple of exceptions, how to throw an exception, and how
 to catch an exception:</p>
+<pre>  <b>xenum </b>exn { NotFound(string); }  <i><font color="#FF0000">// NotFound takes a string as an argument</font></i>
+  <b>xenum </b>exn { Foo; }              <i><font color="#FF0000"> // Foo takes no arguments</font></i></pre>
+<pre>  <b>void</b> foo() {
+    <b>try</b> {
+      bar();
+    } <b>catch</b> {
+    <b>case</b> NotFound(s):  <b>fprintf</b>(cyc_stderr, &quot;<font color="#0000FF">not found: %s\n</font>&quot;,s); <b>break</b>;
+    <b>case</b> Foo: <b>fprintf</b>(cyc_stderr, &quot;<font color="#0000FF">foo raised!\n</font>&quot;); <b>break</b>;
+    }
+    <b>printf</b>(&quot;no exception raised.\n&quot;);
+  }</pre>
 <h4>Variable Sized Arrays:</h4>
+<p>C purposefully confuses arrays and pointers.&nbsp; Cyclone does not, in large
+part for type-safety reasons.&nbsp; All array accesses are guaranteed to be in
+bounds.&nbsp; To support arrays of variable size, Cyclone provides the
+&quot;[?]&quot; array type.&nbsp; For example, string is defined using the
+following typedef:</p>
+<pre>  <b>typedef </b>string char[?];</pre>
+<p>For representation purposes, an char[?] array is represented as a pointer to
+a struct of the form {const unsigned int size; char[size] *elts;} but of course,
+you can't really write this in C.&nbsp; The point is that there is an extra
+level of indirection in order to support dynamically tracking the size of the
+array.&nbsp; This allows the compiler to insert array bounds checks as
+needed.&nbsp;&nbsp;</p>
+<p>Cyclone also has normal C arrays (e.g., char[]) and constant-sized arrays
+(e.g., char[3+4] == char[7]), but these are all treated differently.&nbsp; In
+particular, you can't perform subscript or update on a char[] array within
+Cyclone.&nbsp; You may, however, pass the array off to a C function (which had
+better make sure that the accesses are in bounds.)&nbsp; An array char[7]
+doesn't need the size information as it is apparent statically.&nbsp; You can
+cast [?] arrays to [] arrays with no overhead (this just extracts the underlying
+array) and this is useful for calling a C function that was written expecting
+the untagged array.&nbsp; You can also cast a [?] array to a [7] array, but this
+incurs a check that the size of the [?] array is actually 7.&nbsp; You can cast
+a [7] array to a [?] array -- this simply adds the size and a level of
+indirection.&nbsp; Finally, you can cast a [7] array to a [] array, again so
+that you can call C code.</p>
+<p>To allocate and initialize an array, you can use the array comprehension
+notation.&nbsp; The following code demonstrates this:</p>
+<pre>  int evens[?] = <b>new</b> {<b>for</b> i &lt; n : 2*i};</pre>
+<p>The above declares evens to be an int[?] array and initializes it to an array
+of size n, where element i has value 2*i in the array.&nbsp; If the upper bound
+is a constant expression, then the type of the array will be [c] where c is a
+constant.&nbsp; Otherwise, it will be a [?] array.&nbsp; Of course, you can cast
+the constant-sized array to a variable-sized array.</p>
+<p>Note that all arrays in Cyclone are heap allocated (not stack
+allocated).&nbsp;&nbsp;</p>
+<p>In the future, we hope to add support for DML-style dependent types so that
+arrays need not carry size information and so that bounds checks can be
+statically verified.&nbsp; In addition, we hope to add support for regions or
+linear types so that arrays can be stack allocated (or managed manually in some
+other fashion.)</p>
 <h4>Subtyping:</h4>
+<p>Cyclone supports &quot;extension on the right&quot; and &quot;covariant depth
+on const&quot; subtyping for pointers.&nbsp; This simply means that you can cast
+a value x from having a pointer to a struct with 10 fields, to a struct having
+only the first 5 fields.&nbsp; Or, you can cast a pointer to a tuple having 3
+fields to a tuple having only 2 fields.&nbsp; In other words, you can forget
+about the &quot;tail&quot; of the object.&nbsp; This allows a degree of
+polymorphism that is useful when porting C code.&nbsp; In addition, you can do
+&quot;deep&quot; casts on pointer fields that are const.&nbsp; (It is unsound to
+allow deep casts on non-const fields.)&nbsp; Also, you can cast a field from
+being non-const to being const.&nbsp; You can also cast a constant-sized array
+to an equivalent pointer to a struct or tuple.&nbsp; In short, Cyclone attempts
+to allow you to cast one type to another as long as it is safe.&nbsp; Note,
+however, that these casts must be explicit.</p>
+<p>We expect to add more support for subtyping in the future (e.g., subtyping on
+function pointers, bounded subtyping, etc.)</p>
 <h4>Datatype Enums:</h4>
+<p>Enums in Cyclone are more like datatypes in ML.&nbsp; In particular, they can
+be used to build algebraic or inductively defined structures, such a lists,
+trees, graphs, etc.&nbsp; For instance, the following enum declarations give a
+way to construct abstract syntax trees for a simple calculator language:</p>
+<pre>  <b>enum </b>operator { Plus, Times, Minus, Divide }</pre>
+<pre>  <b>enum </b>absyn {
+    Integer(int);
+    Term(<b>enum</b> absyn, <b>enum</b> operator, <b>enum</b> absyn);
+  }</pre>
+<pre>  <b>enum </b>absyn e1 = Term(Integer(3),Plus,Integer(4));
+  <b>enum </b>absyn e2 = Term(e1,Times,Integer(5));</pre>
+<p>The operator definition is like a normal Enum -- it just defines symbolic
+constants for Plus, Times, Minus, and Divide.&nbsp; The absyn definition defines
+an inductive tree-like data type for abstract syntax.&nbsp; The Integer
+constructor takes an int argument and returns an absyn value.&nbsp; The Term
+constructor takes an abstract syntax tree, an operator, and an abstract syntax
+tree and returns a new abstract syntax tree.&nbsp; So, for example, e1 is a tree
+representing the term &quot;3 + 4&quot; while e2 is a tree representing the term
+&quot;(3 + 4) * 5&quot;.&nbsp;&nbsp;</p>
+<p>Internally, enum constructors are either represented as an integer value (as
+with Plus, Times, Minus, and Divide) or a pointer to an object containing a <i>tag</i>
+and the arguments to the constructor.&nbsp; The object is always allocated on
+the heap.&nbsp; To traverse the tree, we use pattern matching, again in the
+style of functional languages such as ML or Haskell.</p>
 <h4>Pattern Matching:</h4>
+<p>Pattern matching in Cyclone generalizes the switch construct of C allowing
+you to not only test integral values, but also to test structured values such as
+the abstract syntax trees above.&nbsp; For example, the following function takes
+in an abstract syntax tree and prints the tree to stdout:</p>
+<pre>  <b>void</b> print_absyn(<b>enum</b> absyn tree) {
+     <b>switch</b> (tree) {
+     <b>case</b> Integer(i)       : <b>printf</b>(&quot;<font color="#0000FF">%d</font>&quot;,i); <b>break</b>;
+     <b>case</b> Term(t1,Plus,t2) : <b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
+                             <b>printf</b>(&quot;<font color="#0000FF">+</font>&quot;); 
+                             print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
+     <b>case</b> Term(t1,Times,t2): <b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
+                             <b>printf</b>(&quot;*&quot;); 
+                             print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
+     <b>case</b> Term(t1,Minus,t2): <b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
+                             <b>printf</b>(&quot;-&quot;);
+                             print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
+     <b>case</b> Term(t1,Divide,t2):<b>printf</b>(&quot;<font color="#0000FF">(</font>&quot;; print_absyn(t1); 
+                             <b>printf</b>(&quot;/&quot;);
+                             print_absyn(t2); <b>printf</b>(&quot;<font color="#0000FF">)</font>&quot;); <b>break</b>;
+  }</pre>
+<p>Note that patterns introduce and initialize new variables local to a given
+case.&nbsp; For instance, in the Integer case above, the pattern variable i is
+introduced and is initialized to whatever value is carried by the Integer
+constructor.&nbsp; Thus, i is available for use on the right-hand-side of the
+case.&nbsp; You can pattern match on just about any kind of value, and
+destructure it.&nbsp; For instance, you can pattern match on tuples, structs,
+pointers to tuples/structs, etc.&nbsp; See the grammar for the syntax of the
+various pattern forms.</p>
+<p>The type-checker for Cyclone is much more picky about switch statements than
+C.&nbsp; In particular, it will check that all of the patterns you have are
+exhaustive (or else there's a default: clause) and that none of the patterns
+overlap.&nbsp; This is useful for evolving code.&nbsp; For instance, if we added
+a new operator (say Mod), then the compiler would complain that the switch in
+print_absyn doesn't cover all possible cases (namely the case where we have a
+term involving the Mod operator.)&nbsp;&nbsp;</p>
+<p>In addition, the Cyclone type-checker makes sure that you don't accidentally
+fall-through from one case to another.&nbsp; In particular, if you don't put in
+explicit breaks, returns, throws, etc., then the compiler will reject the
+code.&nbsp; You can still fall through to the next case, but you have to do it
+with an explicit &quot;fallthru&quot; statement.&nbsp; If the case pattern
+doesn't bind any new variables, then you just write &quot;fallthru;&quot; as the
+last thing in the case.&nbsp; If you want to fallthru to a case that defines new
+variables, then you need to give values for those variables.&nbsp; For instance,
+in the following code:</p>
+<pre>
+  <b>void</b> foo(<b>enum</b> absyn tree) {
+     <b>switch</b> (tree) {
+     <b>case</b> Integer(i)       : printf(&quot;<font color="#0000FF">%d </font>&quot;,i); <b>break</b>;
+     <b>case</b> Term(t1,Plus,t2) : printf(&quot;<font color="#0000FF">It's a plus \n</font>&quot;); <b>fallthru</b>(t2,Plus,t1);
+     <b>case</b> Term(t1,op,t2)   : foo(t1); foo(t2); <b>break</b>;
+  }</pre>
+<p>if we pass it a tree Term(Integer(3),Plus,Integer(4)) then we will see
+&quot;It's a plus 4 3 &quot;, but if we pass it
+Term(Integer(3),Times,Integer(4)) we will see &quot;3 4 &quot;.</p>
 <h4>Let Declarations:</h4>
+<p>Sometimes, it's painful to declare a variable because you have to write down
+its type.&nbsp; Cyclone includes some limited support for type inference using
+let declarations.&nbsp; In particular, you can write:</p>
+<pre>  int foo(int x) {
+    <b>let</b> y = x+3;
+    <b>let</b> z = 3.14159;
+    <b>return</b> (int)(y*z);
+  }</pre>
+<p>&nbsp;Here, we declared two variables y and z using &quot;let&quot;.&nbsp;
+When you use let, you don't have to write down the type of the variable.&nbsp;
+Rather, the compiler infers the type from the expression that initializes the
+variable.&nbsp; More generally, you can write &quot;let <i>pattern </i>= <i>exp</i>;&quot;
+to destructure a value into a bunch of variables.&nbsp; For instance, if you
+pass a tuple to a function, then you can extract the components as follows:</p>
+<pre>  int sum($(int,int,int) args) {
+    <b>let</b> (x,y,z) = args;
+    <b>return</b> (x+y+z);
+  }</pre>
 <h4>Extensible Enums (xenums):</h4>
+<p>Extensible enums (xenums) are just like enums except that you can add new
+constructors anytime you want.&nbsp; Thus, enums are &quot;closed world&quot;
+datatypes, whereas xenums are &quot;open world&quot; datatypes.&nbsp; Both are
+useful.&nbsp; For instance, with a close world representation of abstract syntax
+trees, when we write a function such as print_absyn, we can be sure that we've
+covered all of the cases.&nbsp; However, if we want an extensible setting, where
+programmers are adding new kinds of nodes all the time, then it's useful to use
+xenums.&nbsp; Right now, we really only use xenums in the parser (for various
+semantic values) and for exceptions.&nbsp; We might add better subtyping support
+for them so that you can extend them depth-wise as well as
+width-wise.&nbsp;&nbsp;</p>
 <h4>Polymorphic Functions:</h4>
 <h4>Polymorphic Data Structures:</h4>
 <h4>Abstract Types:</h4>
