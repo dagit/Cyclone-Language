@@ -121,6 +121,7 @@ diff: cyclone_src
 	diff bin/genfiles/$(ARCH)/lib/precore_c.h lib/precore_c.h
 	diff bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h
 	diff bin/genfiles/$(ARCH)/lib/nogc.c lib/nogc.c
+	diff bin/genfiles/$(ARCH)/src/cycdoc.c src/cycdoc.c
 
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
@@ -132,6 +133,7 @@ cmp:
 	@cmp -s bin/genfiles/$(ARCH)/lib/precore_c.h lib/precore_c.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/precore_c.h CHANGED
 	@cmp -s bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX cyc-lib/include/cyc_include.h CHANGED
 	@cmp -s bin/genfiles/$(ARCH)/lib/nogc.c lib/nogc.c || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX lib/nogc.c CHANGED
+	@cmp -s bin/genfiles/$(ARCH)/src/cycdoc.c src/cycdoc.c || echo XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX src/cycdoc.c CHANGED
 
 # This target updates what is in bin/genfiles and include.
 # It would be "dangerous" to invoke this target if we did not have 
@@ -163,6 +165,7 @@ update:
 	@cmp -s $(LIBDIR)/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME) || (echo UPDATING $(LIBDIR)/$(C_RUNTIME); cp $(LIBDIR)/$(C_RUNTIME) $(ARCHDIR)/lib/$(C_RUNTIME))
 	@cmp -s $(LIBDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h || (echo UPDATING $(LIBDIR)/precore_c.h; cp $(LIBDIR)/precore_c.h $(ARCHDIR)/lib/precore_c.h)
 ifndef TARGET
+	@cmp -s $(SRCDIR)/cycdoc.c $(ARCHDIR)/src/cycdoc.c || (echo UPDATING $(SRCDIR)/cycdoc.c; cp $(SRCDIR)/cycdoc.c $(ARCHDIR)/src/cycdoc.c)
 	@for i in $(CYCLONE_H); do (cmp -s lib/$$i include/$$i || (echo UPDATING lib/$$i; cp lib/$$i include/$$i)) done
 	@(cd lib; for i in arch/*.h; do (cmp -s $$i ../include/$$i || (echo UPDATING lib/$$i; cp $$i ../include/$$i)) done)
 	@cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h || (echo UPDATING cyc-lib/include/cyc_include.h; cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)
@@ -256,6 +259,7 @@ clean_nogc:
 	$(MAKE) clean -C tests
 	$(MAKE) clean -C doc
 	$(RM) bin/cyclone bin/cyclone.exe 
+	$(RM) bin/cycdoc bin/cycdoc.exe 
 	$(RM) bin/cycbison bin/cycbison.exe 
 	$(RM) bin/cyclex bin/cyclex.exe
 	$(RM) bin/aprof bin/aprof.exe

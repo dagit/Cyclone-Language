@@ -1,3 +1,5 @@
+CYCDOC=../bin/cycdoc
+
 all: screen html
 
 html: main-screen.html
@@ -52,7 +54,7 @@ gen-libdoc.tex: \
   ../include/set.h \
   ../include/slowdict.h \
   ../include/xarray.h
-	../src/cycdoc -cyclone ../bin/cyclone -I../include -B../bin/cyc-lib $^ > gen-libdoc.tex
+	$(CYCDOC) -cyclone ../bin/cyclone -I../include -B../bin/cyc-lib $^ > gen-libdoc.tex
 
 clean:
 	$(RM) *.aux *.dvi *.hind *.haux *.idx *.ilg *.ind *.ing *.log

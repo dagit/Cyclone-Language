@@ -52,10 +52,7 @@ else
 	$(CYCC) $(G_FLAG) $(PG_FLAG) $(LC_FLAG) -B$(CYC_LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
 endif
 
-cycdoc$(EXE): cycdoc.$(O) lex.$(O) parse_tab.$(O) absyn.$(O) \
- tcutil.$(O) tcenv.$(O) tcexp.$(O) tcstmt.$(O) tcpat.$(O) \
- new_control_flow.$(O) cf_absexp.$(O) cf_flowinfo.$(O) \
- formatstr.$(O) evexp.$(O) absynpp.$(O)
+cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
 	$(CYCC) -v -B$(CYC_LIB_PATH) -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
 
 cycdoc.cyc: cycdoc.cyl

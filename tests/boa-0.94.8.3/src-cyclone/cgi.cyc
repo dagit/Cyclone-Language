@@ -21,7 +21,7 @@
  *
  */
 
-/* $Id: cgi.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $ */
+/* $Id: cgi.cyc,v 1.3 2001-10-03 16:57:42 tjim Exp $ */
 
 #include "boa.h"
 #include <unistd.h>
@@ -363,7 +363,8 @@ int init_cgi(request @ req)
             dup2(cgi_log_fd, STDERR_FILENO);
 
         if (req->is_cgi) {
-            char ?aargv[CGI_ARGC_MAX + 1];
+          //            char ?aargv[CGI_ARGC_MAX + 1];
+            char ?`H ?`H aargv = new {for i < CGI_ARGC_MAX + 1 : NULL};
             create_argv(req, aargv);
             execve(req->pathname, aargv, req->cgi_env);
         } else {

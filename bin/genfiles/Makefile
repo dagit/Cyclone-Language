@@ -1,20 +1,22 @@
 include ../../Makefile.inc
 
-# I don't why these need to be repeated here, but they do
+# I don't know why these need to be repeated here, but they do
 CYC_LIB_PATH=$(CYCDIR)/bin/cyc-lib
 CYC_BIN_PATH=$(CYCDIR)/bin
 
-#CFLAGS=-include $(CYC_LIB_PATH)/include/cyc_include.h
-
 # general targets
 
-install: $(ARCH) $(addprefix $(CYC_LIB_PATH)/, $(CYCLIB) nogc.a) $(CYC_BIN_PATH)/cyclone$(EXE)
-	if [ -f "$(ARCH).patch" ]; then $(RM) -rf $(ARCH); fi
+install: $(ARCH) $(addprefix $(CYC_LIB_PATH)/, $(CYCLIB) nogc.a)\
+  $(CYC_BIN_PATH)/cyclone$(EXE)\
+  $(CYC_BIN_PATH)/cycdoc$(EXE)
+	if [ -f "$(ARCH).patch" ]; then $(RM) -r $(ARCH); fi
 $(CYC_LIB_PATH)/$(CYCLIB): $(ARCH)/lib/$(CYCLIB)
 	cp $< $@
 $(CYC_LIB_PATH)/nogc.a: $(ARCH)/lib/nogc.a
 	cp $< $@
 $(CYC_BIN_PATH)/cyclone$(EXE): $(ARCH)/src/cyclone$(EXE)
+	cp $< $@
+$(CYC_BIN_PATH)/cycdoc$(EXE): $(ARCH)/src/cycdoc$(EXE)
 	cp $< $@
 
 install_a: $(ARCH)/lib/libcyc_a.a
@@ -24,22 +26,29 @@ install_a: $(ARCH)/lib/libcyc_a.a
 
 $(ARCH):
 	./extract_patch $(PATCH_ARCH) $(ARCH)
+
 $(ARCH)/lib/$(CYCLIB): $(addprefix $(ARCH)/lib/, $(O_LIBS) $(RUNTIME).o)
-	-rm -f $@
+	-$(RM) $@
 	ar rc $@ $^
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
+
 $(ARCH)/lib/libcyc_a.a: $(addprefix $(ARCH)/lib/, $(A_LIBS) a_$(RUNTIME).o)
-	-rm -f $@
+	-$(RM) $@
 	ar rc $@ $^
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
+
 $(ARCH)/lib/nogc.a: $(ARCH)/lib/nogc.o
-	-rm -f $@
+	-$(RM) $@
 	ar rc $@ $^
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
+
 $(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.o) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
+	$(CC) -o $@ $^ $(LDFLAGS)
+
+$(ARCH)/src/cycdoc$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(CYCDOC_SRCS))) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(ARCH)/src/install_path.c: ../../Makefile.inc
@@ -50,8 +59,8 @@ $(ARCH)/src/install_path.c: ../../Makefile.inc
 	  echo "char *Ccomp = \"$(CC)\";") > $@
 
 clean_arch:
-	rm -f $(addprefix $(ARCH)/lib/, $(CYCLIB) libcyc_a.a nogc.a $(O_LIBS) $(A_LIBS) nogc.o $(RUNTIME).o a_$(RUNTIME).o)
-	rm -f $(addprefix $(ARCH)/src/, $(O_SRCS) cyclone$(EXE) install_path.*)
+	$(RM) $(addprefix $(ARCH)/lib/, $(CYCLIB) libcyc_a.a nogc.a $(O_LIBS) $(A_LIBS) nogc.o $(RUNTIME).o a_$(RUNTIME).o)
+	$(RM) $(addprefix $(ARCH)/src/, $(O_SRCS) cyclone$(EXE) install_path.*)
 
 clean:
 	for arch in $(ALL_ARCHS); do \
