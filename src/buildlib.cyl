@@ -144,7 +144,8 @@ typedef $(string_t<`H>,string_t<`H>) @ifdefined_t;
 typedef $(stringptr_t<`H,`H>,stringptr_t<`H>) @userdef_t;
 
 typedef $(string_t,list_t<stringptr_t>,list_t<userdef_t>,list_t<stringptr_t>,
-          list_t<ifdefined_t>,list_t<ifdefined_t>,list_t<ifdefined_t>) *spec_t;
+          list_t<ifdefined_t>,list_t<ifdefined_t>,list_t<ifdefined_t>,
+          list_t<stringptr_t>) *spec_t;
 extern spec_t spec(Lexbuf<`a>);
 extern int commands(Lexbuf<`a>);
 extern int snarfsymbols(Lexbuf<`a>);
@@ -780,17 +781,20 @@ and spec "spec_t" = parse
   current_cstubs = NULL;
   current_cycstubs = NULL;
   current_hstubs = NULL;
+  current_cpp = NULL;
   while (commands(lexbuf)) /* skip */;
   current_hstubs = imp_rev(current_hstubs);
   current_cstubs = imp_rev(current_cstubs);
   current_cycstubs = imp_rev(current_cycstubs);
+  current_cpp = imp_rev(current_cpp);
   return new $(current_headerfile,
                current_symbols,
 	       current_user_defs,
                current_omit_symbols,
                current_hstubs,
                current_cstubs,
-               current_cycstubs);
+               current_cycstubs,
+               current_cpp);
 }
 | ws+
 { return spec(lexbuf); }
@@ -1559,7 +1563,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                    list_t<stringptr_t<`H,`H>,`H> omit_symbols,
                    list_t<ifdefined_t,`H> hstubs,
                    list_t<ifdefined_t,`H> cstubs,
-                   list_t<ifdefined_t,`H> cycstubs) {
+                   list_t<ifdefined_t,`H> cycstubs,
+                   list_t<stringptr_t<`H,`H>,`H> cpp_insert) {
     FILE *maybe;
     FILE @in_file;
     FILE @out_file;
@@ -1609,10 +1614,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     /* Create the file of macros and the file of declarations */
     if (mode != FINISH) {
-      current_cpp = imp_rev(current_cpp);
       if (mode == GATHERSCRIPT) {
         prscript("cat >%s <<XXX\n",cppinfile);
-        for (let l = current_cpp; l != NULL; l = l->tl)
+        for (let l = cpp_insert; l != NULL; l = l->tl)
           prscript("%s",*(l->hd));
         prscript("#include <%s>\n",filename);
         prscript("XXX\n");
@@ -1629,7 +1633,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 	if (verbose)
           fprintf(stderr,"Creating %s\n",cppinfile);
         out_file = (FILE@)maybe;
-        for (let l = current_cpp; l != NULL; l = l->tl) {
+        for (let l = cpp_insert; l != NULL; l = l->tl) {
           fputs((const char @)(*(l->hd)),out_file);
         }
         fprintf(out_file,"#include <%s>\n",filename);
@@ -2034,9 +2038,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     let entry;
     while ( (entry = spec(l)) != NULL) {
       let &$(headerfile,start_symbols,user_defs,omit_symbols,
-             hstubs,cstubs,cycstubs) = (_ @)entry;
+             hstubs,cstubs,cycstubs,cpp_insert) = (_ @)entry;
       if (process_file((const char @)headerfile,start_symbols,user_defs,omit_symbols, 
-                       hstubs,cstubs,cycstubs))
+                       hstubs,cstubs,cycstubs,cpp_insert))
         return 1; /* fatal error in process_file */
     }
     fclose(in_file);
@@ -2062,7 +2066,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
     if (process_file("setjmp.h", list(new "jmp_buf"), NULL, NULL,
                      list(new $("setjmp", "extern int setjmp(jmp_buf);\n")),
-                     NULL, NULL))
+                     NULL, NULL, NULL))
       return 1; /* fatal error */
     if (chdir((char @)cwd)) {
       fprintf(stderr,"Error: could not change directory to %s\n", cwd);

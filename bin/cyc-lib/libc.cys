@@ -916,6 +916,11 @@ glob.h:
 ;
 
 grp.h:
+cpp {
+  #ifdef __APPLE__
+  #include <sys/types.h> // defines gid_t
+  #endif
+}
 include {
 gid_t
 group {

@@ -2316,12 +2316,18 @@ if [ "$target_vendor" = "sun" ]; then
   TARGET_LDFLAGS="-lnsl -lsocket -lresolv"
 fi
 if [ "$target" = "arm-unknown-elf" ]; then
-  # because the cross gcc is called arm-elf, not arm-unknown-elf
+  # because the cross gcc is called arm-elf-gcc, not arm-unknown-elf-gcc-3.2
   target="arm-elf"
   TARGET_CC="arm-elf-gcc"
   TARGET_CFLAGS="-elf2flt"
   TARGET_AR="arm-elf-ar"
   TARGET_RANLIB="arm-elf-ranlib"
+fi
+if [ "$target" = "arm-agb-elf" ]; then
+  # because the cross gcc is called arm-agb-elf-gcc, not arm-agb-elf-gcc-3.2
+  TARGET_CC="arm-agb-elf-gcc"
+  TARGET_AR="arm-agb-elf-ar"
+  TARGET_RANLIB="arm-agb-elf-ranlib"
 fi
 
 
