@@ -1,0 +1,50 @@
+// Derived from:
+
+/*
+ * http://www.bagley.org/~doug/shootout/
+ *
+ * this program is modified from:
+ *   http://cm.bell-labs.com/cm/cs/who/bwk/interps/pap.html
+ * Timing Trials, or, the Trials of Timing: Experiments with Scripting
+ * and User-Interface Languages</a> by Brian W. Kernighan and
+ * Christopher J. Van Wyk.
+ *
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+using Stdio; using Stdlib; using Unistd;
+
+//ANNOYING: must name enum
+enum x {
+    OUT,			/* outside a word */
+    IN				/* inside a word */
+};
+
+
+char buf[4096];
+
+int
+main() {
+    int i, c, nl, nw, nc, state, nread;
+
+    state = OUT;
+    nl = nw = nc = 0;
+    while ((nread = read(0, buf, sizeof(buf))) > 0) {
+	nc += nread;
+	for (i=0; i<nread; i++) {
+	    c = buf[i];
+	    if (c == '\n')
+		++nl;
+	    if (c == ' ' || c == '\n' || c == '\t')
+		state = OUT;
+	    else if (state == OUT) {
+		state = IN;
+		++nw;
+	    }
+	}
+    }
+    printf("%d %d %d\n", nl, nw, nc);
+    return(0);
+}

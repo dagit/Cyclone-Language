@@ -1,0 +1,18 @@
+This is a Cyclone implementation of the benchmarks from the Great
+Programming Language Shootout,
+
+   http://www.bagley.org/~doug/shootout/
+
+The benchmarks have simply been translated from the C versions and are
+not optimized in any way.
+
+The C versions are included; do
+
+  make bench
+
+to compile and run the benchmarks in both languages for comparison.
+
+If you want to see how optimized versions run try, e.g.,
+
+  make clean
+  make bench CFLAGS=-O2 CYCFLAGS=-O2

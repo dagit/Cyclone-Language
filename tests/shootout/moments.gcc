@@ -1,0 +1,74 @@
+/* -*- mode: c -*-
+ * $Id: moments.gcc,v 1.1 2001-07-30 20:20:33 tjim Exp $
+ * http://www.bagley.org/~doug/shootout/
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+#include <math.h>
+
+#define MAXLINELEN 128
+
+int
+compare_doubles (const double *a, const double *b) {
+    return (int) (*a - *b);
+}
+
+
+int
+main() {
+    char line[MAXLINELEN];
+    int i, n = 0, mid = 0;
+    double sum = 0.0;
+    double mean = 0.0;
+    double average_deviation = 0.0;
+    double standard_deviation = 0.0;
+    double variance = 0.0;
+    double skew = 0.0;
+    double kurtosis = 0.0;
+    double median = 0.0;
+    double deviation = 0.0;
+    int array_size = 4096;
+
+    double *nums = (double *)malloc(array_size * sizeof(double));
+
+    while (fgets(line, MAXLINELEN, stdin)) {
+	sum += (nums[n++] = atof(line));
+	if (n == array_size) {
+	    array_size *= 2;
+	    nums = (double *)realloc(nums, array_size * sizeof(double));
+	}
+    }
+    mean = sum/n;
+    for (i=0; i<n; i++) {
+	deviation = nums[i] - mean;
+	average_deviation += fabs(deviation);
+	variance += pow(deviation,2);
+	skew += pow(deviation,3);
+	kurtosis += pow(deviation,4);
+    }
+    average_deviation /= n;
+    variance /= (n - 1);
+    standard_deviation = sqrt(variance);
+    if (variance) {
+	skew /= (n * variance * standard_deviation);
+	kurtosis = (kurtosis/(n * variance * variance)) - 3.0;
+    }
+
+    qsort(nums, n, sizeof (double),
+	  (int (*)(const void *, const void *))compare_doubles);
+    mid = (n/2);
+    median = n % 2 ? nums[mid] : (nums[mid] + nums[mid-1])/2;
+
+    free(nums);
+
+    printf("n:                  %d\n", n);
+    printf("median:             %f\n", median);
+    printf("mean:               %f\n", mean);
+    printf("average_deviation:  %f\n", average_deviation);
+    printf("standard_deviation: %f\n", standard_deviation);
+    printf("variance:           %f\n", variance);
+    printf("skew:               %f\n", skew);
+    printf("kurtosis:           %f\n", kurtosis);
+    return(0);
+}

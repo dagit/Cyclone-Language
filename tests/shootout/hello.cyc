@@ -1,0 +1,14 @@
+// Derived from:
+
+/*
+ * http://www.bagley.org/~doug/shootout/
+ */
+
+#include <stdio.h>
+using Stdio;
+
+int main() {
+    fputs("hello world\n", stdout);
+    return(0);
+}
+

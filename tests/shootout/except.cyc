@@ -1,0 +1,52 @@
+// Derived from:
+
+/*
+ * http://www.bagley.org/~doug/shootout/
+ */
+
+#include <stdio.h>
+#include <stdlib.h>
+using Stdio;
+using Stdlib;
+
+int HI = 0, LO = 0;
+
+xtunion exn { Hi_exception(int); };
+xtunion exn { Lo_exception(int); };
+
+void blowup (int n) {
+    if (n & 1) {
+        throw new Lo_exception(1);
+    } else {
+	throw new Hi_exception(1);
+    }
+}
+
+void lo_function (volatile int n) {
+    try blowup(n);
+    catch {
+    case &Lo_exception(_): LO++; break;
+    }
+}
+
+void hi_function (volatile int n) {
+    try lo_function(n);
+    catch {
+    case &Hi_exception(_): HI++; break;
+    }
+}
+
+void some_function (int n) {
+    hi_function(n);
+}
+
+int
+main(int argc, char ??argv) {
+    int volatile N = ((argc == 2) ? atoi(argv[1]) : 1);
+
+    while (N) {
+	some_function(N--);
+    }
+    printf("Exceptions: HI=%d / LO=%d\n", HI, LO);
+    return(0);
+}
