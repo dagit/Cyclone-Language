@@ -443,13 +443,13 @@ char* getenv(const char*);
 int system(const char*);struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 170 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 265 "core.h"
+# 277 "core.h"
 void Cyc_Core_rethrow(void*);
-# 269
+# 281
 const char*Cyc_Core_get_exn_name(void*);
-# 271
+# 283
 const char*Cyc_Core_get_exn_filename();
-# 278
+# 290
 int Cyc_Core_get_exn_lineno();struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 54 "list.h"
 struct Cyc_List_List*Cyc_List_list(struct _dyneither_ptr);

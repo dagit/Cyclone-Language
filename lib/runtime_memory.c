@@ -489,26 +489,28 @@ struct Cyc_Core_NewDynamicRegion {
   struct Cyc_Core_DynamicRegion *key;
 };
 
-// XXX need to include in profiling stuff ...
 // Create a new dynamic region and return a unique pointer for the key.
-struct Cyc_Core_NewDynamicRegion Cyc_Core_new_ukey() {
+struct Cyc_Core_NewDynamicRegion Cyc_Core__new_ukey(const char *file,
+						    const char *func,
+						    int lineno) {
   struct Cyc_Core_NewDynamicRegion res;
   res.key = GC_malloc(sizeof(struct Cyc_Core_DynamicRegion));
   if (!res.key)
     _throw_badalloc();
+#ifdef CYC_REGION_PROFILE
+  res.key->h = _profile_new_region("dynamic_unique",file,func,lineno);
+#else
   res.key->h = _new_region("dynamic_unique");
+#endif
   return res;
-}
-// Destroy a dynamic region, given the unique key to it.
-void Cyc_Core_free_ukey(struct Cyc_Core_DynamicRegion *k) {
-  _free_region(&k->h);
-  GC_free(k);
 }
 
 // XXX change to use refcount routines above
 // Create a new dynamic region and return a reference-counted pointer 
 // for the key.
-struct Cyc_Core_NewDynamicRegion Cyc_Core_new_rckey() {
+struct Cyc_Core_NewDynamicRegion Cyc_Core__new_rckey(const char *file,
+						     const char *func,
+						     int lineno) {
   struct Cyc_Core_NewDynamicRegion res;
   int *krc = GC_malloc(sizeof(int)+sizeof(struct Cyc_Core_DynamicRegion));
   //fprintf(stderr,"creating rckey.  Initial address is %x\n",krc);fflush(stderr);
@@ -517,9 +519,24 @@ struct Cyc_Core_NewDynamicRegion Cyc_Core_new_rckey() {
   *krc = 1;
   res.key = (struct Cyc_Core_DynamicRegion *)(krc + 1);
   //fprintf(stderr,"results key address is %x\n",res.key);fflush(stderr);
+#ifdef CYC_REGION_PROFILE
+  res.key->h = _profile_new_region("dynamic_refcnt",file,func,lineno);
+#else
   res.key->h = _new_region("dynamic_refcnt");
+#endif
   return res;
 }
+
+// Destroy a dynamic region, given the unique key to it.
+void Cyc_Core_free_ukey(struct Cyc_Core_DynamicRegion *k) {
+#ifdef CYC_REGION_PROFILE
+  _profile_free_region(&k->h,NULL,NULL,0);
+#else
+  _free_region(&k->h);
+#endif
+  GC_free(k);
+}
+
 // Drop a reference for a dynamic region, possibly freeing it.
 void Cyc_Core_free_rckey(struct Cyc_Core_DynamicRegion *k) {
   //fprintf(stderr,"freeing rckey %x\n",k);
@@ -533,7 +550,11 @@ void Cyc_Core_free_rckey(struct Cyc_Core_DynamicRegion *k) {
   *p = c;
   if (c == 0) {
     //fprintf(stderr,"count at zero, freeing region\n");
+#ifdef CYC_REGION_PROFILE
+    _profile_free_region(&k->h,NULL,NULL,0);
+#else
     _free_region(&k->h);
+#endif
     //fprintf(stderr,"freeing ref-counted pointer\n");
     GC_free(p);
   }

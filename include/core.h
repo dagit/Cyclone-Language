@@ -190,7 +190,7 @@ extern int refptr_count(`a::TA *`RC ptr) __attribute__((noconsume(1)));
 extern `a ?`RC alias_refptr(`a::TA ?`RC ptr;{}) __attribute__((noconsume(1)));
   /** [alias_refptr(p)] returns an alias to [p], and increments the
       reference count by 1.  [p] is not consumed.  */
-extern void drop_refptr(`a::TA *`RC ptr) __attribute__((noliveunique(1)));
+extern void drop_refptr(`a::TA *`RC ptr;{}) __attribute__((noliveunique(1)));
   /** [drop_refptr(p)] decrements the reference count on [p] by 1.  If
       the reference count goes to 0, it frees p.  This will not
       recursively decrement reference counts to embedded pointers,
@@ -230,13 +230,25 @@ struct NewDynamicRegion<`r2> {
       region and must be opened, guaranteeing that the type-level
       name is unique. */
 
-extern struct NewDynamicRegion<`U> new_ukey();
+extern struct NewDynamicRegion<`U> _new_ukey(const char *file,
+					     const char *func,
+					     int lineno);
   /** [new_ukey()] creates a fresh dynamic region [`r] and returns
       a unique key for that region. */
 
-extern struct NewDynamicRegion<`RC> new_rckey();
+extern struct NewDynamicRegion<`RC> _new_rckey(const char *file,
+					       const char *func,
+					       int lineno);
   /** [new_rckey()] creates a fresh dynamic region [`r] and returns
       a reference-counted key for that region. */
+
+#ifndef CYC_REGION_PROFILE
+#define new_ukey() _new_ukey("internal-error","internal-error",0)
+#define new_rckey() _new_rckey("internal-error","internal-error",0)
+#else
+#define new_ukey() _new_ukey(__FILE__,"",__LINE__)
+#define new_rckey() _new_rckey(__FILE__,"",__LINE__)
+#endif
 
 extern void free_ukey(uregion_key_t<`r> k; {});
   /** [free_ukey(k)] takes a unique key for the region [`r] and

@@ -421,10 +421,10 @@ extern struct _RegionHandle*Cyc_Core_unique_region;
 # 177
 void Cyc_Core_ufree(void*ptr);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
 # 233
-struct Cyc_Core_NewDynamicRegion Cyc_Core_new_ukey();
-# 241
+struct Cyc_Core_NewDynamicRegion Cyc_Core__new_ukey(const char*file,const char*func,int lineno);
+# 253 "core.h"
 void Cyc_Core_free_ukey(struct Cyc_Core_DynamicRegion*k);
-# 251
+# 263
 void*Cyc_Core_open_region(struct Cyc_Core_DynamicRegion*key,void*arg,void*(*body)(struct _RegionHandle*h,void*arg));extern char Cyc_Lexing_Error[6U];struct Cyc_Lexing_Error_exn_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct _dyneither_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{int(*read_fun)(struct _dyneither_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{struct _dyneither_ptr lex_base;struct _dyneither_ptr lex_backtrk;struct _dyneither_ptr lex_default;struct _dyneither_ptr lex_trans;struct _dyneither_ptr lex_check;};
 # 84 "lexing.h"
 struct _dyneither_ptr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*);
@@ -798,7 +798,7 @@ struct Cyc_Lex_DynTrie*tdefs=0;
 ({struct Cyc_Lex_DynTrie*_tmpA6=tdefs;struct Cyc_Lex_DynTrie*_tmpA7=Cyc_Lex_typedefs_trie;tdefs=_tmpA7;Cyc_Lex_typedefs_trie=_tmpA6;});{
 struct Cyc_Lex_DynTrie _tmpA8=*((struct Cyc_Lex_DynTrie*)_check_null(tdefs));struct Cyc_Lex_DynTrie _tmpA9=_tmpA8;struct Cyc_Core_DynamicRegion*_tmpB6;struct Cyc_Lex_Trie*_tmpB5;_LL1: _tmpB6=_tmpA9.dyn;_tmpB5=_tmpA9.t;_LL2:;
 Cyc_Core_free_ukey(_tmpB6);{
-struct Cyc_Core_NewDynamicRegion _tmpAA=Cyc_Core_new_ukey();struct Cyc_Core_NewDynamicRegion _tmpAB=_tmpAA;struct Cyc_Core_DynamicRegion*_tmpB4;_LL4: _tmpB4=_tmpAB.key;_LL5:;{
+struct Cyc_Core_NewDynamicRegion _tmpAA=Cyc_Core__new_ukey("internal-error","internal-error",0);struct Cyc_Core_NewDynamicRegion _tmpAB=_tmpAA;struct Cyc_Core_DynamicRegion*_tmpB4;_LL4: _tmpB4=_tmpAB.key;_LL5:;{
 struct Cyc_Lex_Trie*t2=((struct Cyc_Lex_Trie*(*)(struct Cyc_Core_DynamicRegion*key,int arg,struct Cyc_Lex_Trie*(*body)(struct _RegionHandle*h,int arg)))Cyc_Core_open_region)(_tmpB4,0,Cyc_Lex_empty_trie);
 ({struct Cyc_Lex_DynTrie _tmp189=({struct Cyc_Lex_DynTrie _tmp14E;_tmp14E.dyn=_tmpB4,_tmp14E.t=t2;_tmp14E;});*tdefs=_tmp189;});
 ({struct Cyc_Lex_DynTrie*_tmpAC=Cyc_Lex_typedefs_trie;struct Cyc_Lex_DynTrie*_tmpAD=tdefs;Cyc_Lex_typedefs_trie=_tmpAD;tdefs=_tmpAC;});{
@@ -1583,12 +1583,12 @@ struct Cyc_Lex_DynTrie _tmp12F=*((struct Cyc_Lex_DynTrie*)_check_null(tdefs));st
 Cyc_Core_free_ukey(_tmp131);
 ((void(*)(struct Cyc_Lex_DynTrie*ptr))Cyc_Core_ufree)(tdefs);};}{
 # 1179
-struct Cyc_Core_NewDynamicRegion _tmp132=Cyc_Core_new_ukey();struct Cyc_Core_NewDynamicRegion _tmp133=_tmp132;struct Cyc_Core_DynamicRegion*_tmp13E;_LL7: _tmp13E=_tmp133.key;_LL8:;{
+struct Cyc_Core_NewDynamicRegion _tmp132=Cyc_Core__new_ukey("internal-error","internal-error",0);struct Cyc_Core_NewDynamicRegion _tmp133=_tmp132;struct Cyc_Core_DynamicRegion*_tmp13E;_LL7: _tmp13E=_tmp133.key;_LL8:;{
 struct Cyc_Lex_Trie*_tmp134=((struct Cyc_Lex_Trie*(*)(struct Cyc_Core_DynamicRegion*key,int arg,struct Cyc_Lex_Trie*(*body)(struct _RegionHandle*h,int arg)))Cyc_Core_open_region)(_tmp13E,0,Cyc_Lex_empty_trie);
 struct Cyc_Xarray_Xarray*_tmp135=((struct Cyc_Xarray_Xarray*(*)(struct Cyc_Core_DynamicRegion*key,int arg,struct Cyc_Xarray_Xarray*(*body)(struct _RegionHandle*h,int arg)))Cyc_Core_open_region)(_tmp13E,0,Cyc_Lex_empty_xarray);
 ({struct Cyc_Lex_DynTrieSymbols*_tmp1F5=({struct Cyc_Lex_DynTrieSymbols*_tmp136=_region_malloc(Cyc_Core_unique_region,sizeof(*_tmp136));_tmp136->dyn=_tmp13E,_tmp136->t=_tmp134,_tmp136->symbols=_tmp135;_tmp136;});Cyc_Lex_ids_trie=_tmp1F5;});{
 # 1184
-struct Cyc_Core_NewDynamicRegion _tmp137=Cyc_Core_new_ukey();struct Cyc_Core_NewDynamicRegion _tmp138=_tmp137;struct Cyc_Core_DynamicRegion*_tmp13D;_LLA: _tmp13D=_tmp138.key;_LLB:;{
+struct Cyc_Core_NewDynamicRegion _tmp137=Cyc_Core__new_ukey("internal-error","internal-error",0);struct Cyc_Core_NewDynamicRegion _tmp138=_tmp137;struct Cyc_Core_DynamicRegion*_tmp13D;_LLA: _tmp13D=_tmp138.key;_LLB:;{
 struct Cyc_Lex_Trie*t=((struct Cyc_Lex_Trie*(*)(struct Cyc_Core_DynamicRegion*key,int arg,struct Cyc_Lex_Trie*(*body)(struct _RegionHandle*h,int arg)))Cyc_Core_open_region)(_tmp13D,0,Cyc_Lex_empty_trie);
 ({struct Cyc_Lex_DynTrie*_tmp1F6=({struct Cyc_Lex_DynTrie*_tmp139=_region_malloc(Cyc_Core_unique_region,sizeof(*_tmp139));_tmp139->dyn=_tmp13D,_tmp139->t=t;_tmp139;});Cyc_Lex_typedefs_trie=_tmp1F6;});
 ({int _tmp1F7=Cyc_Lex_num_keywords(include_cyclone_keywords);Cyc_Lex_num_kws=_tmp1F7;});

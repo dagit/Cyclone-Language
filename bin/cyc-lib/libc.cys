@@ -932,7 +932,7 @@ glob.h:
 
 grp.h:
 cpp {
-  #ifdef __APPLE__
+  #if defined(__APPLE__) || defined(__linux__)
   #include <sys/types.h> // defines gid_t
   #endif
 }

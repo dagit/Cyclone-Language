@@ -418,7 +418,7 @@ struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned int);e
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 170
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 305 "core.h"
+# 317 "core.h"
 struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 61 "list.h"
 int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};

@@ -418,9 +418,9 @@ extern struct _RegionHandle*Cyc_Core_unique_region;
 void Cyc_Core_ufree(void*ptr);
 # 190
 struct _dyneither_ptr Cyc_Core_alias_refptr(struct _dyneither_ptr ptr);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 237
-struct Cyc_Core_NewDynamicRegion Cyc_Core_new_rckey();
-# 245
+# 239
+struct Cyc_Core_NewDynamicRegion Cyc_Core__new_rckey(const char*file,const char*func,int lineno);
+# 257 "core.h"
 void Cyc_Core_free_rckey(struct Cyc_Core_DynamicRegion*k);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 54 "list.h"
 struct Cyc_List_List*Cyc_List_list(struct _dyneither_ptr);
@@ -4467,7 +4467,7 @@ goto _LL0;case 13U: _LL13: _LL14:
 return nv;}
 # 4724
 static void Cyc_Toc_init(){
-struct Cyc_Core_NewDynamicRegion _tmp763=Cyc_Core_new_rckey();struct Cyc_Core_NewDynamicRegion _tmp764=_tmp763;struct Cyc_Core_DynamicRegion*_tmp769;_LL1: _tmp769=_tmp764.key;_LL2:;{
+struct Cyc_Core_NewDynamicRegion _tmp763=Cyc_Core__new_rckey("internal-error","internal-error",0);struct Cyc_Core_NewDynamicRegion _tmp764=_tmp763;struct Cyc_Core_DynamicRegion*_tmp769;_LL1: _tmp769=_tmp764.key;_LL2:;{
 struct Cyc_Toc_TocState*ts;
 {struct _RegionHandle*h=& _tmp769->h;
 ({struct Cyc_Toc_TocState*_tmpBA0=Cyc_Toc_empty_toc_state(h);ts=_tmpBA0;});;}

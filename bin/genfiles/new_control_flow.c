@@ -420,7 +420,7 @@ int Cyc_Core_ptrcmp(void*,void*);extern char Cyc_Core_Invalid_argument[17U];stru
 extern struct _RegionHandle*Cyc_Core_heap_region;
 # 170
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 265 "core.h"
+# 277 "core.h"
 void Cyc_Core_rethrow(void*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 54 "list.h"
 struct Cyc_List_List*Cyc_List_list(struct _dyneither_ptr);
