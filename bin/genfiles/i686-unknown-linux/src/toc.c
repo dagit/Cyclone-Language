@@ -1628,11 +1628,10 @@ _tmp1E4,fs,f,f_env);goto _LL184;_LL189: if(_tmp1E1 <= (void*)1?1:*((int*)_tmp1E1
 1)goto _LL18B;_tmp1E5=((struct Cyc_Absyn_Seq_s_struct*)_tmp1E1)->f2;_LL18A: Cyc_Toc_lvalue_assign_stmt(
 _tmp1E5,fs,f,f_env);goto _LL184;_LL18B:;_LL18C:({struct Cyc_Std_String_pa_struct
 _tmp1E7;_tmp1E7.tag=0;_tmp1E7.f1=(struct _tagged_arr)Cyc_Absynpp_stmt2string(s);{
-void*_tmp1E6[1]={& _tmp1E7};((int(*)(struct _tagged_arr fmt,struct _tagged_arr ap))
-Cyc_Toc_toc_impos)(_tag_arr("lvalue_assign_stmt: %s",sizeof(char),23),_tag_arr(
-_tmp1E6,sizeof(void*),1));}});_LL184:;}static struct Cyc_List_List*Cyc_Toc_rmap_2c(
-struct _RegionHandle*r2,void*(*f)(void*,void*),void*env,struct Cyc_List_List*x){
-struct Cyc_List_List*result;struct Cyc_List_List*prev;if(x == 0)return 0;result=({
+void*_tmp1E6[1]={& _tmp1E7};Cyc_Toc_toc_impos(_tag_arr("lvalue_assign_stmt: %s",
+sizeof(char),23),_tag_arr(_tmp1E6,sizeof(void*),1));}});_LL184:;}static struct Cyc_List_List*
+Cyc_Toc_rmap_2c(struct _RegionHandle*r2,void*(*f)(void*,void*),void*env,struct Cyc_List_List*
+x){struct Cyc_List_List*result;struct Cyc_List_List*prev;if(x == 0)return 0;result=({
 struct Cyc_List_List*_tmp1E8=_region_malloc(r2,sizeof(*_tmp1E8));_tmp1E8->hd=(
 void*)f((void*)x->hd,env);_tmp1E8->tl=0;_tmp1E8;});prev=result;for(x=x->tl;x != 0;
 x=x->tl){((struct Cyc_List_List*)_check_null(prev))->tl=({struct Cyc_List_List*

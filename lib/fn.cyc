@@ -95,6 +95,7 @@ static `c lambda(fn_t<`a,fn_t<`b,`c,`bd>,`bd> f,
 // uncurry a closure
 fn_t<$(`a,`b)@,`c,`bd> uncurry(fn_t<`a,fn_t<`b,`c,`bd>,`bd> f
              : regions(`a) > `bd, regions(`b) > `bd, regions(`c) > `bd) {
+
   return make_fn(lambda,f);
 }
 

@@ -1251,8 +1251,7 @@ _LL11B;_tmp1B7=_tmp1B1.tl;_LL11A: return Cyc_Tcpat_and_match(r,Cyc_Tcpat_norm_co
 r,ctx),_tmp1B7,right_hand_side,rules);_LL11B: if(_tmp1B0 == 0)goto _LL116;_tmp1B8=*
 _tmp1B0;_tmp1B9=(struct _tuple10*)_tmp1B8.hd;_tmp1BA=*_tmp1B9;_tmp1BB=_tmp1BA.f1;
 _tmp1BC=_tmp1BA.f2;_tmp1BD=_tmp1BA.f3;_tmp1BE=_tmp1B8.tl;_LL11C: if((_tmp1BB == 0?
-1: _tmp1BC == 0)?1: _tmp1BD == 0)({void*_tmp1C1[0]={};((int(*)(struct _tagged_arr fmt,
-struct _tagged_arr ap))Cyc_Tcutil_impos)(_tag_arr("tcpat:and_match: malformed work frame",
+1: _tmp1BC == 0)?1: _tmp1BD == 0)({void*_tmp1C1[0]={};Cyc_Tcutil_impos(_tag_arr("tcpat:and_match: malformed work frame",
 sizeof(char),38),_tag_arr(_tmp1C1,sizeof(void*),0));});{struct Cyc_List_List
 _tmp1C3;void*_tmp1C4;struct Cyc_List_List*_tmp1C5;struct Cyc_List_List*_tmp1C2=(
 struct Cyc_List_List*)_check_null(_tmp1BB);_tmp1C3=*_tmp1C2;_tmp1C4=(void*)
