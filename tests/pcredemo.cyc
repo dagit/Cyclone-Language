@@ -51,9 +51,9 @@ namespace Pcre {
   int pcre_exec(const pcre @code, const pcre_extra *extra, 
                 const char ?subject, int length, int startoffset,
                 int options, int ?ovector, int ovecsize) {
-    assert(length >= 0 && subject.size >= length);
+    assert(length >= 0 && numelts(subject) >= length);
     assert(startoffset >= 0 && startoffset < length);
-    assert(ovecsize >= 0 && ovector.size >= ovecsize);
+    assert(ovecsize >= 0 && numelts(ovector) >= ovecsize);
     return UnsafePcre::pcre_exec(code, extra, subject, length, startoffset,
                                  options, ovector, ovecsize);
   }

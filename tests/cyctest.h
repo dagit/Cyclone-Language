@@ -41,7 +41,7 @@ namespace CycTest {
   static struct Framework *defaultFramework = NULL;
   bool quiet = false;
 
-  datatype exn { GeneralFailure(string_t, string_t) };
+  datatype exn { GeneralFailure(string_t, string_t, unsigned int, string_t) };
 
   suite_t create_suite(string_t<`H> name, test_runner begin, test_runner end) {
     return new TestSuite { name, begin, end, Queue::create() };
@@ -75,14 +75,15 @@ namespace CycTest {
 	    defaultFramework->testCount++;
 	    aTest->runner();
 	  } catch {
-	  case &GeneralFailure(cond, msg):
-	    if (!quiet)
-	      printf("\n\tFAILED %s(%s): %s\n", aTest->name, cond, msg);
+	  case &GeneralFailure(cond, file, line, msg):
+	    if (msg[0] != '\0')
+	      printf("\n\tFAILED %s:%d %s(%s): %s\n", file, line, aTest->name, cond, msg);
+	    else
+	      printf("\n\tFAILED %s:%d %s(%s)\n", file, line, aTest->name, cond);
 	    defaultFramework->testFailureCount++;
 	    continue;
 	  default:
-	    if (!quiet)
-	      printf("\n\tFAILED %s: Unknown exception\n", aTest->name);
+	    printf("\n\tFAILED %s: Unknown exception\n", aTest->name);
 	    defaultFramework->testErrorCount++;
 	    continue;
 	  }
@@ -93,14 +94,16 @@ namespace CycTest {
 	}
 	aSuite->end();
       } catch {
-      case &GeneralFailure(cond, msg):
-	if (!quiet)
-	  printf("\n\tSUITE FAILURE %s(%s): %s\n", aSuite->name, cond, msg);
+      case &GeneralFailure(cond, file, line, msg):
+	if (msg[0] != '\0')
+	  printf("\n\tSUITE FAILURE %s:%d %s(%s): %s\n", 
+		 file, line, aSuite->name, cond, msg);
+	else
+	  printf("\n\tSUITE FAILURE %s:%d %s(%s)\n", file, line, aSuite->name, cond);
 	defaultFramework->suiteFailureCount++;
 	continue;
       default:
-	if (!quiet)
-	  printf("\n\tSUITE ERROR %s: Unknown exception\n", aSuite->name);
+	printf("\n\tSUITE ERROR %s: Unknown exception\n", aSuite->name);
 	defaultFramework->suiteErrorCount++;
 	continue;
       }
@@ -159,14 +162,57 @@ namespace CycTest {
 #define CT_SUITE_REGISTER(N) Suite ##N::init()
 
 
-#define CT_FAILM(M) throw new CycTest::GeneralFailure("FAIL",M)
-#define CT_ASSERTM(C,M) if(!(C)) { throw new CycTest::GeneralFailure("" #C, M); } else { if (!CycTest::quiet) printf("."); }
-#define CT_EQM(A,B,M) if((A) != (B)) { throw new CycTest::GeneralFailure("EQUAL(" #A "," #B ")", M); } else { if (!CycTest::quiet) printf("."); }
-#define CT_NEQM(A,B,M) if((A) == (B)) { throw new CycTest::GeneralFailure("NOT EQUAL(" #A "," #B ")", M); } else { if (!CycTest::quiet) printf("."); }
+#define CT_FAILM(M) throw new CycTest::GeneralFailure("FAIL",__FILE__,__LINE__,M)
+#define CT_ASSERTM(C,M) if(!(C)) { throw new CycTest::GeneralFailure("" #C, __FILE__,__LINE__,M); } else { if (!CycTest::quiet) printf("."); }
+#define CT_EQM(A,B,M) if((A) != (B)) { throw new CycTest::GeneralFailure("EQUAL(" #A "," #B ")", __FILE__,__LINE__,M); } else { if (!CycTest::quiet) printf("."); }
+#define CT_NEQM(A,B,M) if((A) == (B)) { throw new CycTest::GeneralFailure("NOT EQUAL(" #A "," #B ")", __FILE__,__LINE__,M); } else { if (!CycTest::quiet) printf("."); }
 #define CT_OK() if (!CycTest::quiet) printf(".")
 
-#define CT_FAIL() throw new CycTest::GeneralFailure("FAIL","no message")
-#define CT_ASSERT(C) if(!(C)) { throw new CycTest::GeneralFailure("" #C, "no message"); } else { if (!CycTest::quiet) printf("."); }
-#define CT_EQM(A,B) if((A) != (B)) { throw new CycTest::GeneralFailure("EQUAL(" #A "," #B ")", "no message"); } else { if (!CycTest::quiet) printf("."); }
-#define CT_NEQM(A,B) if((A) == (B)) { throw new CycTest::GeneralFailure("NOT EQUAL(" #A "," #B ")", "no message"); } else { if (!CycTest::quiet) printf("."); }
+#define CT_FAIL() throw new CycTest::GeneralFailure("FAIL",__FILE__,__LINE__,"")
+#define CT_ASSERT(C) if(!(C)) { throw new CycTest::GeneralFailure("" #C, __FILE__,__LINE__,""); } else { if (!CycTest::quiet) printf("."); }
+#define CT_EQM(A,B) if((A) != (B)) { throw new CycTest::GeneralFailure("EQUAL(" #A "," #B ")", __FILE__,__LINE__,""); } else { if (!CycTest::quiet) printf("."); }
+#define CT_NEQM(A,B) if((A) == (B)) { throw new CycTest::GeneralFailure("NOT EQUAL(" #A "," #B ")", __FILE__,__LINE__,""); } else { if (!CycTest::quiet) printf("."); }
 #define CT_OKM(M) printf("\nOK: " #M "\n")
+
+#define CT_MAIN_BEGIN(print_level)			\
+void USAGE(const char ?name) __attribute__((noreturn))				\
+{ 										\
+  fprintf(stderr,"usage : %s [-q|-v]\n", name); 				\
+  fprintf(stderr,"  -q     Quiet output (return code 0 indicates success)\n");	\
+  fprintf(stderr,"  -v     Include statistics after the tests\n");		\
+  exit(1); 									\
+}										\
+										\
+int main(int argc, string_t<`H> ?`H argv) {					\
+							\
+  string_t<`H> ?`H arg;					\
+  int print_level = 1;					\
+							\
+  arg = argv + 1;					\
+  while (*arg != NULL) {				\
+    if ((*arg)[0] == '-') {				\
+      switch((*arg)[1]) {				\
+        case 'q':					\
+	  print_level = 0;				\
+	  break;					\
+							\
+        case 'v':					\
+	  print_level = 2;				\
+	  break;					\
+							\
+        case '?':					\
+          USAGE(argv[0]);				\
+          						\
+        default:					\
+          fprintf(stderr,"Unknown option %s\n",*arg);	\
+          USAGE(argv[0]);				\
+     }							\
+     arg++;						\
+   }							\
+   else							\
+     break;						\
+  }
+
+#define CT_MAIN_END(level)				\
+  return CycTest::run(level);				\
+}

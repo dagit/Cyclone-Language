@@ -4,6 +4,13 @@
 #include <string.h>
 #include "streambuff.h"
 
+#include "cyctest.h"
+
+CT_SUITE_BEGIN(Streambuff)
+
+void begin() { }
+void end() { }
+
 static bool matchPrio(unsigned int prio, streambuff_opt_t<`U> stb)
   __attribute__((noconsume(2))) {
 
@@ -33,38 +40,38 @@ void bufqueue_test() {
   }
 
   let stb = (streambuff_t)Queue::take_match(Core::heap_region,q,matchPrio,8);
-  assert(stb_size(stb) == 80);
-  assert(Queue::length(q) == 9);
+  CT_ASSERT(stb_size(stb) == 80);
+  CT_ASSERT(Queue::length(q) == 9);
   stb_free_unique(stb);
 
-  assert(Queue::take_match(Core::heap_region,q,matchPrio,8) == NULL); 
-  assert(Queue::length(q) == 9);
+  CT_ASSERT(Queue::take_match(Core::heap_region,q,matchPrio,8) == NULL); 
+  CT_ASSERT(Queue::length(q) == 9);
 
   stb = (streambuff_t)Queue::ptr_take(q);
-  assert(Queue::length(q) == 8);
-  assert(stb_size(stb) == 0);
+  CT_ASSERT(Queue::length(q) == 8);
+  CT_ASSERT(stb_size(stb) == 0);
   stb_free_unique(stb);
 
   while (!Queue::is_empty(q)) {
     stb = (streambuff_t)Queue::ptr_take(q);
     stb_free_unique(stb);
   }
-  assert(Queue::length(q) == 0);
+  CT_ASSERT(Queue::length(q) == 0);
 }
 
 void copy_test() {
   let stb = alloc_stb(Core::unique_region, Packet, "eth0", 1, "hello");
   let stb2 = stb_copy(Core::unique_region,1,stb); // "ello"
-  assert(stb_size(stb) == 6); // includes null terminator
-  assert(stb_size(stb) -1 == stb_size(stb2));
-  assert(stb_noaliases(stb));
-  assert(stb_noaliases(stb2));
+  CT_ASSERT(stb_size(stb) == 6); // includes null terminator
+  CT_ASSERT(stb_size(stb) -1 == stb_size(stb2));
+  CT_ASSERT(stb_noaliases(stb));
+  CT_ASSERT(stb_noaliases(stb2));
   unsigned int stb_addr, stb3_addr;
   { let alias <`r> streambuff_t<`r> x = stb; stb_addr = (unsigned int)x; }
   let stb3 = stb_rest(3,stb); // "lo"
   { let alias <`r> streambuff_t<`r> x = stb3; stb3_addr = (unsigned int)x; }
-  assert(stb_addr == stb3_addr);
-  assert(stb_size(stb3) == 3);
+  CT_ASSERT(stb_addr == stb3_addr);
+  CT_ASSERT(stb_size(stb3) == 3);
   stb_free_unique(stb3);
   stb_free_unique(stb2);
 }
@@ -72,18 +79,18 @@ void copy_test() {
 void clone_test() {
   let stb = alloc_stb(Core::unique_region, Packet, "eth0", 1, "hello");
   let stb2 = stb_clone(Core::unique_region,stb);
-  assert(stb_size(stb) == stb_size(stb2));
-  assert(!stb_cmp(stb,stb2));
-  assert(!stb_noaliases(stb));
-  assert(!stb_noaliases(stb2));
+  CT_ASSERT(stb_size(stb) == stb_size(stb2));
+  CT_ASSERT(!stb_cmp(stb,stb2));
+  CT_ASSERT(!stb_noaliases(stb));
+  CT_ASSERT(!stb_noaliases(stb2));
   let stb3 = stb_clone(Core::unique_region,stb);
   unsigned int stb_addr, stb4_addr;
   { let alias <`r> streambuff_t<`r> x = stb; stb_addr = (unsigned int)x; }
   let stb4 = stb_rest(3,stb);
   { let alias <`r> streambuff_t<`r> x = stb4; stb4_addr = (unsigned int)x; }
-  assert(stb_size(stb4) == 3);
-  assert(stb_size(stb3) == stb_size(stb2));
-  assert(!stb_cmp(stb3,stb2));
+  CT_ASSERT(stb_size(stb4) == 3);
+  CT_ASSERT(stb_size(stb3) == stb_size(stb2));
+  CT_ASSERT(!stb_cmp(stb3,stb2));
   stb_free_unique(stb3);
   stb_free_unique(stb2);
   stb_free_unique(stb4);
@@ -94,24 +101,27 @@ void prepend_test() {
   char ? @nozeroterm `RC rbuf = rmalloc (Core::refcnt_region,6);
   rbuf[0] = rbuf[1] = rbuf[2] = rbuf[3] = rbuf[4] =rbuf[5] = 'a';
   streambuff_t stb2 = stb_prepend(Core::unique_region,stb,rbuf);
-  assert(stb_size(stb) == stb_size(stb2) - 6);
-  assert(stb_cmp(stb,stb2) > 0);
-  assert(!stb_noaliases(stb));
-  assert(!stb_noaliases(stb2));
+  CT_ASSERT(stb_size(stb) == stb_size(stb2) - 6);
+  CT_ASSERT(stb_cmp(stb,stb2) > 0);
+  CT_ASSERT(!stb_noaliases(stb));
+  CT_ASSERT(!stb_noaliases(stb2));
   let stb3 = stb_rest(4,stb2);
-  assert(stb_size(stb) + 2 == stb_size(stb3));
-  assert(stb_cmp(stb,stb3) > 0);
+  CT_ASSERT(stb_size(stb) + 2 == stb_size(stb3));
+  CT_ASSERT(stb_cmp(stb,stb3) > 0);
   let stb4 = stb_rest(2,stb3);
-  assert(stb_size(stb) == stb_size(stb4));
-  assert(!stb_cmp(stb,stb4));
+  CT_ASSERT(stb_size(stb) == stb_size(stb4));
+  CT_ASSERT(!stb_cmp(stb,stb4));
   stb_free_unique(stb4);
   stb_free_unique(stb);
 }
 
-int main(int argc, char ??argv) {
-  bufqueue_test();
-  copy_test();
-  clone_test();
-  prepend_test();
-  return 0;
-}
+CT_SUITE_INIT
+CT_ADD_TEST(bufqueue_test)
+CT_ADD_TEST(copy_test)
+CT_ADD_TEST(clone_test)
+CT_ADD_TEST(prepend_test)
+CT_SUITE_END
+
+CT_MAIN_BEGIN(print_level)
+CT_SUITE_REGISTER(Streambuff);
+CT_MAIN_END(print_level)

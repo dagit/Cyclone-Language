@@ -34,43 +34,7 @@
 
 /* Running them */
 
-void USAGE(const char ?name) __attribute__((noreturn))
-{ 
-  fprintf(stderr,"usage : %s [-q|-v]\n", name); 
-  fprintf(stderr,"  -q     Quiet output (return code 0 indicates success)\n");
-  fprintf(stderr,"  -v     Include statistics after the tests\n");
-  exit(1); 
-}
-
-int main(int argc, string_t<`H> ?`H argv) {
-
-  string_t<`H> ?`H arg;
-  int print_level = 1;
-
-  arg = argv + 1;
-  while (*arg != NULL) {
-    if ((*arg)[0] == '-') {
-      switch((*arg)[1]) {
-        case 'q':
-	  print_level = 0;
-	  break;
-
-        case 'v':
-	  print_level = 2;
-	  break;
-
-        case '?':
-          USAGE(argv[0]);
-          
-        default:
-          fprintf(stderr,"Unknown option %s\n",*arg);
-          USAGE(argv[0]);
-     }
-     arg++;
-   }
-   else
-     break;
-  }
+CT_MAIN_BEGIN(print_level)
 
   CT_SUITE_REGISTER(Exception);
   CT_SUITE_REGISTER(Array);
@@ -103,6 +67,5 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   if (print_level > 0)
     printf("*************** CYCLONE TEST SUITE ***************\n\n");
-    
-  return CycTest::run(print_level);
-}
+
+CT_MAIN_END(print_level)

@@ -53,14 +53,14 @@ all: $(EXES) failtest
 	./zeroterm
 	./structarray
 	./flatlist
-	./md5 abcdefg
+	./md5 -q
 	./require
 	./test_getopt -abc123
-	./streambufftest
+	./streambufftest -q
 	./unique_patterns
 	./dynregion
 	./scheme
-	./refcnt_test
+	./refcnt_test -q
 
 # tests things that should be type errors
 failtest:
@@ -131,7 +131,7 @@ streambufftest$(EXE): streambufftest.o streambuff.o
 
 clean:
 	$(RM) $(addsuffix .[oc], hello bytes cyctest foo histogram test_getopt typeref test_regions unique_test zeroterm structarray flatlist md5 require streambufftest streambuff refcnt_test)
-	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo
+	$(RM) foo_tab.* unsafe_cast.o pcredemo.o pcredemo.c pcredemo md5driver.o
 	$(RM) $(EXES) fail1.tmp
 	$(RM) *~ *.exe *.output *.stackdump
 #	$(MAKE) clean -C benchmarks

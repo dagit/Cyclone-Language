@@ -93,7 +93,6 @@ CT_SUITE_INIT
 CT_ADD_TEST(refcnt_test)
 CT_SUITE_END
 
-int main(int argc, char ??argv) {
-  CT_SUITE_REGISTER(Refcnt);
-  return CycTest::run(1);
-}
+CT_MAIN_BEGIN(print_level)
+CT_SUITE_REGISTER(Refcnt);
+CT_MAIN_END(print_level)
