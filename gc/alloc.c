@@ -812,6 +812,9 @@ word bytes;
     if ((ptr_t)p + bytes >= (ptr_t)GC_greatest_plausible_heap_addr) {
         GC_greatest_plausible_heap_addr = (GC_PTR)((ptr_t)p + bytes);
     }
+    /* TJIM: added for Cyclone allocation profiling */
+    extern void CYCALLOCPROFILE_GC_add_to_heap(struct hblk *,word);
+    CYCALLOCPROFILE_GC_add_to_heap(p,bytes);
 }
 
 # if !defined(NO_DEBUGGING)

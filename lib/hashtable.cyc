@@ -91,24 +91,21 @@ bool try_lookup(table_t<`a,`b> t, `a key, `b@ data) {
 }
 
 void remove(table_t<`a,`b> t, `a key) {
-  // remove only most recent binding.  Silently return if none.
+  // remove the most recent binding; silently return if none.
   // does a destructive list update since this data structure is not functional
-  // UNTESTED!
-  list_t<$(`a,`b)@> ?tab      = t->tab;
-  int         (@cmp)(`a,`a)   = t->cmp;
-  int              bucket   = (*t->hash)(key) % numelts(tab);
-  list_t<$(`a,`b)@> l         = tab[bucket];
-  if(l == NULL)
-    return;
-  if((*cmp)(key,l->hd[0][0])==0) {
+  let tab = t->tab;
+  let cmp = t->cmp;
+  int bucket = (*t->hash)(key) % numelts(tab);
+  let l = tab[bucket];
+  if (l == NULL) return;
+  if (cmp(key,l->hd[0][0]) == 0) {
     tab[bucket] = l->tl;
     return;
   }
-  list_t<$(`a,`b)@> prev = l;
-  l = l->tl;
-  for(; l->tl!=NULL; prev = l, l=l->tl)
-    if((*cmp)(key,l->hd[0][0])==0) {
-      prev->tl = l->tl;
+  for (let next = l->tl; l->tl != NULL; l = l->tl, next = next->tl)
+    // invariant: l != NULL != l->tl == next, l->hd should not be removed
+    if (cmp(key,next->hd[0][0]) == 0) {
+      l->tl = next->tl;
       return;
     }
 }
