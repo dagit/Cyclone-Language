@@ -2580,8 +2580,6 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
   case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); 
   case &CompoundLit_e(_,_):   unimp("compoundlit");
-  case &Codegen_e(fd):        unimp("codegen");
-  case &Fill_e(_):            unimp("fill");
   }
 }
 
@@ -3206,10 +3204,6 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       exp_to_c(nv,e);
       s->r = exp_stmt(fncall_exp(_reset_region_e,new List(e,NULL),DL),DL)->r;
       return;
-    case &SwitchC_s(_,_): toc_impos("switchC_s");
-    case &Cut_s(_):       unimp("cut");
-    case &Splice_s(_):    unimp("splice");
-    case &ForArray_s(_):  unimp("forarray");
     }
   }
 }
@@ -3218,7 +3212,8 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 //              Translation of Declarations                  //
 ///////////////////////////////////////////////////////////////
 // function declaration translation -- straightforward
-static void fndecl_to_c(env_t nv, fndecl_t f) {
+static void stmttypes_to_c(stmt_t s);
+static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   //fprintf(stderr,"translating %s\n",qvar2string(f->name));
   f->tvs      = NULL;
   f->effect   = NULL;
@@ -3228,6 +3223,12 @@ static void fndecl_to_c(env_t nv, fndecl_t f) {
     (*args->hd)[2] = typ_to_c((*args->hd)[2]);
     let x = new $((nmspace_t)Loc_n,(*args->hd)[0]);
     nv = add_varmap(nv,x,var_exp(x,DL));
+  }
+  // for C code, we need to go through and convert all of the types 
+  // from Cyclone types to C, but otherwise leave the code alone.
+  if (cinclude) {
+    stmttypes_to_c(f->body);
+    return;
   }
   if (f->cyc_varargs && f->cyc_varargs->name != NULL) {
     let VarargInfo{n,tq,t,i} = *f->cyc_varargs;
@@ -3515,11 +3516,137 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, type_t t, exp_t e, stmt_t s) {
   return s;
 }
 
+// These next few functions clean up the types in C code, getting
+// rid of stuff inserted by the parser (e.g., region evars). 
+
+static void exptypes_to_c(exp_t e) {
+  switch (e->r) {
+  case &Deref_e(e):          fallthru(e);
+  case &AggrMember_e(e,_):   fallthru(e);
+  case &AggrArrow_e(e,_):    fallthru(e);
+  case &Address_e(e):        fallthru(e);
+  case &Throw_e(e):          fallthru(e);
+  case &NoInstantiate_e(e):  fallthru(e);
+  case &Sizeofexp_e(e):      fallthru(e);
+  case &Increment_e(e1,_):   exptypes_to_c(e1); break;
+  case &Primop_e(_,es):      List::iter(exptypes_to_c,es); break;
+  case &And_e(e1,e2):        fallthru(e1,e2);
+  case &Or_e(e1,e2):         fallthru(e1,e2);
+  case &SeqExp_e(e1,e2):     fallthru(e1,e2);
+  case &Subscript_e(e1,e2):  fallthru(e1,e2);
+  case &AssignOp_e(e1,_,e2): exptypes_to_c(e1); exptypes_to_c(e2); break;
+  case &Conditional_e(e1,e2,e3): 
+    exptypes_to_c(e1); exptypes_to_c(e2); exptypes_to_c(e3); break;
+  case &FnCall_e(e,es,_):    fallthru(e,es);
+  case &UnknownCall_e(e,es):
+    exptypes_to_c(e); List::iter(exptypes_to_c,es); break;
+  case &Cast_e(*t,e,_,_): *t = typ_to_c(*t); exptypes_to_c(e); break;
+  case &CompoundLit_e(&$(_,_,*t),dles): 
+    *t = typ_to_c(*t);
+    fallthru(dles);
+  case &UnresolvedMem_e(_,dles): fallthru(dles);
+  case &Array_e(dles):
+    for (; dles != NULL; dles = dles->tl) {
+      let $(_,e) = *dles->hd;
+      exptypes_to_c(e);
+    }
+    break;
+  case &Offsetof_e(*t,_): fallthru(t);
+  case &Sizeoftyp_e(*t):  *t = typ_to_c(*t); break;
+  case &StmtExp_e(s): stmttypes_to_c(s); break;
+  case &Malloc_e(*m):
+    if (m->elt_type != NULL)
+      m->elt_type = new (typ_to_c(*m->elt_type));
+    exptypes_to_c(m->num_elts);
+    break;
+  case &Const_e(_):       fallthru;
+  case &Var_e(_,_):       fallthru;
+  case &UnknownId_e(_):   fallthru;
+  case &Enum_e(_,_,_):    fallthru;
+  case &AnonEnum_e(_,_,_):break;
+
+  case &AnonStruct_e(_, _): fallthru;
+  case &Tunion_e(_,_,_):    fallthru;
+  case &Struct_e(_,_,_,_):  fallthru;
+  case &Comprehension_e(_,_,_,_): fallthru;
+  case &Tuple_e(_):         fallthru;
+  case &Instantiate_e(_,_): fallthru;
+  case &New_e(_,_):         fallthru;
+  case &Gentyp_e(_,_):      
+    Tcutil::terr(e->loc,"Cyclone expression within C code");
+    break;
+  }
+}
+
+static void decltypes_to_c(decl_t d) {
+  switch (d->r) {
+  case &Var_d(vd): 
+    vd->type = typ_to_c(vd->type);
+    if (vd->initializer != NULL) exptypes_to_c((exp_t)vd->initializer);
+    break;
+  case &Fn_d(fd):
+    fd->ret_type = typ_to_c(fd->ret_type);
+    for (let args=fd->args; args != NULL; args = args->tl) {
+      (*args->hd)[2] = typ_to_c((*args->hd)[2]);
+    }
+    break;
+  case &Aggr_d(ad): aggrdecl_to_c(ad); break;
+  case &Enum_d(ed): 
+    if (ed->fields != NULL) 
+      for (let fs = ed->fields->v; fs != NULL; fs = fs->tl) {
+        let f = fs->hd;
+        if (f->tag != NULL) exptypes_to_c((exp_t)f->tag);
+      }
+    break;
+  case &Typedef_d(td): td->defn = new Opt(typ_to_c_array(td->defn->v)); break;
+  case &Let_d(_,_,_):
+  case &Letv_d(_):
+  case &Tunion_d(_):
+  case &Namespace_d(_,_):
+  case &Using_d(_,_):
+  case &ExternC_d(_):
+  case &ExternCinclude_d(_,_): 
+    Tcutil::terr(d->loc,"Cyclone declaration within C code");
+    break;
+  }
+}
+
+static void stmttypes_to_c(stmt_t s) {
+  switch (s->r) {
+  case &Exp_s(e): exptypes_to_c(e); break;
+  case &Seq_s(s1,s2): stmttypes_to_c(s1); stmttypes_to_c(s2); break;
+  case &Return_s(eopt): if (eopt != NULL) exptypes_to_c((exp_t)eopt); break;
+  case &IfThenElse_s(e,s1,s2):
+    exptypes_to_c(e); stmttypes_to_c(s1); stmttypes_to_c(s2); break;
+  case &While_s($(e,_),s): 
+    exptypes_to_c(e); stmttypes_to_c(s); break;
+  case &For_s(e1,$(e2,_),$(e3,_),s):
+    exptypes_to_c(e1); exptypes_to_c(e2); exptypes_to_c(e3); 
+    stmttypes_to_c(s); break;
+  case &Switch_s(e,scs): 
+    exptypes_to_c(e); 
+    for (; scs != NULL; scs=scs->tl) stmttypes_to_c(scs->hd->body);
+    break;
+  case &Decl_s(d,s): decltypes_to_c(d); stmttypes_to_c(s); break;
+  case &Do_s(s,$(e,_)): stmttypes_to_c(s); exptypes_to_c(e); break;
+  case Skip_s: 
+  case &Break_s(_):
+  case &Continue_s(_):
+  case &Goto_s(_,_): break;
+  case &Fallthru_s(_,_):
+  case &Label_s(_,_):
+  case &TryCatch_s(_,_):
+  case &Region_s(_,_,_,_):
+  case &ResetRegion_s(_): Tcutil::terr(s->loc,"Cyclone statement in C code");
+    break;
+  }
+}
+
 // Translate the given declarations, producing a new list of declarations
 // and a new translation environment.  All source-level variables should
 // be entered in the varmap of the env.  Note that top-level variable
 // declarations are treated differently.
-static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
+static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top, bool cinclude) {
   for (; ds != NULL; ds = ds->tl) {
     if (!nv->toplevel)
       impos("decls_to_c: not at toplevel!");
@@ -3530,8 +3657,12 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       // strip any namespace from an extern C declaration
       if (vd->sc == ExternC) 
 	c_name = new $(rel_ns_null,(*c_name)[1]);
-      if (vd->initializer != NULL)
-	exp_to_c(nv, (exp_t)vd->initializer);
+      if (vd->initializer != NULL) {
+        if (cinclude)
+          exptypes_to_c((exp_t)vd->initializer);
+        else 
+          exp_to_c(nv, (exp_t)vd->initializer);
+      }
       nv = add_varmap(nv,vd->name,varb_exp(c_name,new Global_b(vd),DL));
       vd->name = c_name;
       vd->sc   = scope_to_c(vd->sc);
@@ -3541,11 +3672,13 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
     case &Fn_d(fd):
       let c_name = fd->name;
       // strip any namespace from an extern C declaration
-      if (fd->sc == ExternC)
+      if (fd->sc == ExternC) {
 	c_name = new $(rel_ns_null,(*c_name)[1]);
+        fd->sc = Public; // function declarations can't be extern
+      }
       nv = add_varmap(nv,fd->name,var_exp(c_name,DL));
       fd->name = c_name;
-      fndecl_to_c(nv, fd);
+      fndecl_to_c(nv, fd, cinclude);
       result_decls = new List(d,result_decls);
       break;
     case &Let_d(_,_,_): 
@@ -3580,7 +3713,8 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       break;
     case &Namespace_d(_,ds2): fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
-    case &ExternC_d(ds2): nv = decls_to_c(nv,ds2,top); break;
+    case &ExternC_d(ds2): nv = decls_to_c(nv,ds2,top,cinclude); break;
+    case &ExternCinclude_d(ds2,_): nv = decls_to_c(nv,ds2,top,true); break;
     }
   }
   return nv;
@@ -3604,7 +3738,7 @@ static void init() {
 // a list of C declarations.
 list_t<decl_t> toc(list_t<decl_t> ds) {
   init();
-  decls_to_c(empty_env(),ds,true);
+  decls_to_c(empty_env(),ds,true,false);
 #ifdef BCE_DEBUG
   fprintf(stderr,"***eliminated %d out of %d bounds checks\n",
           bounds_checks_eliminated, total_bounds_checks);

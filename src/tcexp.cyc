@@ -1823,15 +1823,6 @@ static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
     }
 }
 
- // codegen(fd)
-static type_t tcCodegen(tenv_t te, seg_t loc, type_t * topt, fndecl_t fd) {
-  return expr_err(te,loc,topt,"tcCodegen");
-}
- // fill(e)
-static type_t tcFill(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
-  return expr_err(te,loc,topt,"tcFill");
-}
-
 // new e
 static type_t tcNew(tenv_t te, seg_t loc, type_t * topt, 
                     exp_opt_t rgn_handle, exp_t e, exp_t e1) {
@@ -2152,10 +2143,6 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcArray(te,loc,elt_topt,zero_term,des); break;
   case &StmtExp_e(s):
     t = tcStmtExp(te,loc,topt,s); break;
-  case &Codegen_e(fd):
-    t = tcCodegen(te,loc,topt,fd); break;
-  case &Fill_e(e1):
-    t = tcFill(te,loc,topt,e1); break;
   case &Comprehension_e(vd,e1,e2,*iszeroterm):
     t = tcComprehension(te,loc,topt,vd,e1,e2,iszeroterm); break;
   case &Struct_e(*tn,*ts,args,*sd_opt):

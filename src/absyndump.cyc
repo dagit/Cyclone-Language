@@ -742,15 +742,6 @@ void dumpexp_prec(int inprec, exp_t e) {
     break;
 
   case &StmtExp_e(s): dump_nospace("({"); dumpstmt(s); dump_nospace("})"); break;
-
-  case &Codegen_e(fd):
-    dump("codegen(");
-    dumpdecl(new Decl(new Fn_d(fd),e->loc));
-    dump(")");
-    break;
-
-  case &Fill_e(e1): dump("fill("); dumpexp(e1); dump(")"); break;
-
   }
   if(inprec >= myprec)
     dump_char(')');
@@ -825,12 +816,6 @@ void dumpstmt(stmt_t s) {
     dumploc(s->loc); dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
     dump_nospace("){"); dumpstmt(s1); dump_char('}');
     break;
-  case &ForArray_s(ForArrayInfo{ds,$(e1,_),$(e2,_),s1}):
-    dumploc(s->loc); dump("forarray("); 
-    for (; ds != NULL; ds = ds->tl) dumpvardecl(ds->hd,s->loc);
-    dumpexp(e1); dump_semi();
-    dumpexp(e2); dump_nospace("){"); dumpstmt(s1); dump_char('}');
-    break;
   case &Switch_s(e,ss):
     dumploc(s->loc); dump("switch("); dumpexp(e); dump_nospace("){");
     dumpswitchclauses(ss);
@@ -855,20 +840,6 @@ void dumpstmt(stmt_t s) {
     dump_nospace("}while("); dumpexp(e); dump_nospace(");");
     break;
 
-  case &SwitchC_s(e,ss): 
-    dumploc(s->loc); dump("switch \"C\"("); dumpexp(e); dump_nospace("){");
-    for(; ss != NULL; ss = ss->tl) {
-      let &SwitchC_clause(e,s,_) = ss->hd;
-      if(e == NULL)
-	dump("default:");
-      else {
-	dump("case"); dumpexp((exp_t)e); dump_char(':');
-      }
-      dumpstmt(s);
-    }
-    dump_char('}');
-    break;
-
   case &Fallthru_s(NULL,_): dump("fallthru;");     break;
   case &Fallthru_s(es,_):
     dump("fallthru("); dumpexps_prec(20,es); dump_nospace(");"); break;
@@ -889,8 +860,6 @@ void dumpstmt(stmt_t s) {
     dumploc(s->loc); dump("reset_region("); dumpexp(e); dump(");");
     break;
 
-  case &Cut_s(s1):    dump("cut");    dumpstmt(s1); break;
-  case &Splice_s(s1): dump("splice"); dumpstmt(s1); break;
   }
 }
 
@@ -1160,6 +1129,21 @@ void dumpdecl(decl_t d) {
     for(; tdl != NULL; tdl = tdl->tl)
       dumpdecl(tdl->hd);
     dump_char('}');
+    break;
+  case &ExternCinclude_d(tdl,exs):
+    dump("extern \"C include\" {");
+    for(; tdl != NULL; tdl = tdl->tl)
+      dumpdecl(tdl->hd);
+    dump_char('}');
+    if (exs != NULL) {
+      dump(" export {");
+      for (; exs != NULL; exs = exs->tl) {
+        let $(_,v,_) = *exs->hd;
+        dumpqvar(v);
+        if (exs->tl != NULL) dump_char(',');
+      }
+      dump("}");
+    }
     break;
   }
 }

@@ -39,7 +39,6 @@ using Tcutil;
 // forward references
 extern doc_t dp2doc($(list_t<designator_t>,pat_t)@ dp);
 extern doc_t switchclauses2doc(list_t<switch_clause_t> cs);
-extern doc_t switchCclauses2doc(list_t<switchC_clause_t> cs);
 extern doc_t typ2doc(type_t);
 extern doc_t aggrfields2doc(list_t<aggrfield_t> fields);
 extern doc_t scope2doc(scope_t);
@@ -1005,8 +1004,6 @@ int exp_prec(exp_t e) {
   case &Malloc_e(_):            
   case &UnresolvedMem_e(_,_):   return 140; // ???
   case &StmtExp_e(_):           return 10000;
-  case &Codegen_e(_):           
-  case &Fill_e(_):              return 140;
   }
 }
 
@@ -1197,16 +1194,6 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
             nest(2,stmt2doc(s2)),
             blank_doc(),rb(),text(")"));
     break;
-  case &Codegen_e(fd):
-    s = cat(text("codegen("),
-            nest(2,decl2doc(new Decl(new Fn_d(fd),e->loc))),
-            text(")"));
-    break;
-  case &Fill_e(e1):
-    s = cat(text("fill("),
-            nest(2,exp2doc(e1)),
-            text(")"));
-    break;
   }
   if(inprec >= myprec)
     s = cat(text("("), s, text(")"));
@@ -1394,18 +1381,6 @@ doc_t stmt2doc(stmt_t st) {
             line_doc(),
             rb());
     break;
-  case &ForArray_s(ForArrayInfo{d,$(e1,_),$(e2,_),s1}):
-    s = cat(text("forarray("),
-            ppseql(vardecl2doc, " ", d),
-            exp2doc(e1),
-            text("; "),
-            exp2doc(e2),
-            text(") "),
-            lb(),
-            nest(2,cat(line_doc(),stmt2doc(s1))),
-            line_doc(),
-            rb());
-    break;
   case &Switch_s(e,ss):
     s = cat(text("switch ("),
             exp2doc(e),
@@ -1416,16 +1391,6 @@ doc_t stmt2doc(stmt_t st) {
             line_doc(),
             rb());
     break;
-  case &SwitchC_s(e,ss):
-    s = cat(text("switch \"C\" ("),
-	    exp2doc(e),
-	    text(") "),
-            lb(),
-	    line_doc(),
-	    switchCclauses2doc(ss),
-	    line_doc(),
-	    rb());
-    break;
   case &Fallthru_s(NULL,_): s = text("fallthru;"); break;
   case &Fallthru_s(es,_):
     s = cat(text("fallthru("), exps2doc_prec(20,es), text(");")); break;
@@ -1433,14 +1398,6 @@ doc_t stmt2doc(stmt_t st) {
     s = cat(decl2doc(d),
             line_doc(),
             stmt2doc(s1));
-    break;
-  case &Cut_s(s1):
-    s = cat(text("cut "),
-            nest(2,stmt2doc(s1)));
-    break;
-  case &Splice_s(s1):
-    s = cat(text("splice "),
-            nest(2,stmt2doc(s1)));
     break;
   case &Label_s(x,s1):
     if (decls_first && is_declaration(s1)) {
@@ -1575,22 +1532,6 @@ doc_t switchclauses2doc(list_t<switch_clause_t> cs) {
   return ppseql(switchclause2doc,"",cs);
 }
 
-doc_t switchCclause2doc(switchC_clause_t c) {
-  let &SwitchC_clause(e,s,_) = c;
-  if(e == NULL)
-    return cat(text("default: "),
-	       nest(2,cat(line_doc(),stmt2doc(c->body))));
-  else 
-    return cat(text("case "),
-	       exp2doc((exp_t)e),
-	       text(": "),
-	       nest(2,cat(line_doc(),stmt2doc(s))));
-}
-
-doc_t switchCclauses2doc(list_t<switchC_clause_t> cs) {
-  return ppseql(switchCclause2doc,"",cs);
-}
-
 doc_t enumfield2doc(enumfield_t f) {
   if (f->tag == NULL)
     return qvar2doc(f->name);
@@ -1634,6 +1575,11 @@ doc_t vardecl2doc(vardecl_t vd) {
           : cat(text(" = "),exp2doc((exp_t)initializer)),
           text(";"));
   return s;
+}
+
+doc_t export2doc($(Position::seg_t,qvar_t,bool)@ x) {
+  let $(_,v,_) = *x;
+  return qvar2doc(v);
 }
 
 doc_t decl2doc(decl_t d) {
@@ -1787,7 +1733,7 @@ doc_t decl2doc(decl_t d) {
               rb(),
               text(" */"));
     break;
-  case &ExternC_d(tdl):
+  case &ExternC_d(tdl): 
     if (print_externC_stmts)
       s = cat(text("extern \"C\" "),
               lb(),
@@ -1797,6 +1743,32 @@ doc_t decl2doc(decl_t d) {
               rb());
     else
       s = cat(text("/* extern \"C\" "),
+              lb(),
+              text(" */"),
+              line_doc(),
+              ppseql(decl2doc,"",tdl),
+              line_doc(),
+              text("/* "),
+              rb(),
+              text(" */"));
+    break;
+  case &ExternCinclude_d(tdl,exs): 
+    if (print_externC_stmts) {
+      doc_t exs_doc; 
+      if (exs != NULL)
+        exs_doc = cat(rb(),text(" export "),lb(),
+                      line_doc(),ppseql(export2doc,",",exs),
+                      line_doc(),rb());
+      else 
+        exs_doc = rb();
+      s = cat(text("extern \"C include\" "),
+              lb(),
+              line_doc(),
+              ppseql(decl2doc,"",tdl),
+              line_doc(),
+              exs_doc);
+    } else
+      s = cat(text("/* extern \"C include\" "),
               lb(),
               text(" */"),
               line_doc(),

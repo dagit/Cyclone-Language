@@ -63,11 +63,15 @@ static void merge_scope_err(scope_t s0, scope_t s1, string_t t, string_t v,
 }
 
 $(scope_t, bool) merge_scope(scope_t s0, scope_t s1, string_t t, string_t v,
-			     seg_t loc, string_t * msg) {
+			     seg_t loc, string_t * msg, bool externCmerge) {
   switch ($(s0,s1)) {
-    // ExternC is only compatible with ExternC
+    // ExternC is compatible with ExternC 
   case $(ExternC, ExternC): break;
-  case $(ExternC, _ ):
+    // ExternC is compatible with Extern if externCmerge is true 
+  case $(ExternC, Extern): fallthru;
+  case $(Extern, ExternC): if (externCmerge) break;
+    fallthru;
+  case $(ExternC, _): fallthru;
   case $(_, ExternC): merge_scope_err(s0,s1,t,v,loc,msg); return $(s1, false);
     // Extern is compatible with everything else
   case $(_, Extern) : s1 = s0; break;
@@ -146,7 +150,8 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
   if (! check_tvs(d0->tvs, d1->tvs, "type", v, loc, msg)) return NULL;
 
   // check scopes
-  let $(new_scope, res_scope) = merge_scope(d0->sc,d1->sc,"type",v,loc,msg);
+  let $(new_scope, res_scope) = 
+    merge_scope(d0->sc,d1->sc,"type",v,loc,msg,true);
   if (! res_scope) res = false;
 
   // check attributes
@@ -258,7 +263,7 @@ merge_tunionfield(tunionfield_t f0, tunionfield_t f1,
 
   // check scope (for xtunions)
   let $(new_scope, res) = 
-    merge_scope(f0->sc, f1->sc, aprintf("in %s %s, field",t,v), name, loc, msg);
+    merge_scope(f0->sc, f1->sc, aprintf("in %s %s, field",t,v), name, loc, msg, false);
 
   // must have same number of types
   let typs0 = f0->typs;
@@ -408,7 +413,7 @@ struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1,
   if (! check_tvs(d0->tvs, d1->tvs, t, v, loc, msg)) return NULL;
 
   // check scopes
-  let $(new_scope, res_scope) = merge_scope(d0->sc, d1->sc, t, v, loc, msg);
+  let $(new_scope, res_scope) = merge_scope(d0->sc, d1->sc, t, v, loc, msg, false);
   if (! res_scope) res = false;
 
   tuniondecl_t d2; // future result
@@ -481,7 +486,7 @@ struct Enumdecl * merge_enumdecl(enumdecl_t d0, enumdecl_t d1,
   let res = true;
 
   // check scopes
-  let $(new_scope, res_scope) = merge_scope(d0->sc,d1->sc,"enum",v,loc,msg);
+  let $(new_scope, res_scope) = merge_scope(d0->sc,d1->sc,"enum",v,loc,msg,true);
   if (! res_scope) res = false;
 
   enumdecl_t d2; //futur result
@@ -529,7 +534,7 @@ check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
   let res = true;
 
   // check scope
-  let $(new_scope, res_scope) = merge_scope(sc0, sc1, t, v, loc, msg);
+  let $(new_scope, res_scope) = merge_scope(sc0, sc1, t, v, loc, msg, false);
   if (! res_scope) res = false;
 
   // check type

@@ -167,24 +167,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     tcExp(te,NULL,e3); // ??? what does a break/continue in e3 mean ???
     return;
 
-  case &ForArray_s(ForArrayInfo{decls, $(e2,guard_s), $(e3,cont_s), s}):
-    impos("ForArray_s");
-    return;
-    /*
-    decorate_stmt(te,guard_s);
-    decorate_stmt(te,cont_s);
-    let $(te,used_ptrs) = check_forarray_decls(te,s0->loc,decls);
-    tcTest(te,e2,"forarray loop");
-    let cmp_ops = check_forarray_test(te,loc,decls,used_ptrs,e2);
-    te = set_in_loop(te,cont_s);
-    tcStmt(te,s,true);
-    // hack -- we make the declared pointer variables mutable here
-    // so that e3 can update it.
-    for (_ d = decls; d != NULL; d = d->tl) 
-      d->tq.q_const = false;
-    tcExp(te,NULL,e3); // ??? what does a break/continue in e3 mean ???
-    check_forarray_delta(te,loc,decls,cmp_ops,e3);
-    */
   case &Do_s(s,$(e,cont_s)):
     decorate_stmt(te,cont_s);
     tcStmt(set_in_loop(te,cont_s),s,true);
@@ -265,29 +247,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	te = set_fallthru(te, new_tvs, pat_res.patvars, scs->hd);
     }
     check_switch_exhaustive(s0->loc,scs0);
-    return;
-
-  case &SwitchC_s(e,scsC):
-    // translate to switch after evaluating the case expressions (which must
-    // be constant)
-    // FIX: not right for e an enum type b/c we produce int patterns
-    // FIX?: bother to support sizeof/offsetof in cases
-    let scs = NULL;
-    for(; scsC !=NULL; scsC = scsC->tl) {
-      let &SwitchC_clause(e1,body1,loc1) = scsC->hd;
-      _ pat;
-      if(e1 != NULL) {
-	tcExp(te,NULL,(exp_t)e1);
-	let $(i,known) = Evexp::eval_const_uint_exp((exp_t)e1);
-	if(!known)
-	  terr(e1->loc, "Cyclone cases do not support sizeof or offsetof");
-	pat = new_pat(new Int_p(Signed,i), e1->loc);
-      } else
-	pat = new_pat(Wild_p, loc1);
-      scs = new List(new Switch_clause(pat, NULL, NULL, body1, loc1), scs);
-    }
-    s0->r = switch_stmt(e, imp_rev(scs), NULL)->r;
-    tcStmt(te, s0, new_block);
     return;
 
   case &TryCatch_s(s,scs0):
@@ -468,6 +427,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     case &Enum_d(_):          unimp_msg_part = "enum";   break;
     case &Typedef_d(_):       unimp_msg_part = "typedef";   break;
     case &ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;
+    case &ExternCinclude_d(_,_):unimp_msg_part = "extern \"C include\""; break;
     }
     throw impos("tcStmt: nested %s declarations unimplemented",unimp_msg_part);
 
@@ -499,7 +459,5 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // check that `r is resetable
     check_rgn_resetable(te,s0->loc,rgn_type);
     return;
-  case &Cut_s(s):    throw impos("tcStmt: cut is not implemented");    // FIX
-  case &Splice_s(s): throw impos("tcStmt: splice is not implemented"); // FIX
   }
 }

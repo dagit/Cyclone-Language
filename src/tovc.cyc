@@ -563,7 +563,8 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
       break;
     case &Namespace_d(_,ds2): fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
-    case &ExternC_d(ds2):
+    case &ExternC_d(ds2):     fallthru(ds2);
+    case &ExternCinclude_d(ds2,_):
       throw new Impossible("nested translation unit after translation to C");
     }
   }

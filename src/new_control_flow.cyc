@@ -842,8 +842,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
   case &UnknownCall_e(_,_):    
   case &UnresolvedMem_e(_,_):  
   case &CompoundLit_e(_,_):    
-  case &Codegen_e(_):          
-  case &Fill_e(_): throw new Core::Impossible("anal_Rexp, unexpected exp form");
+    throw new Core::Impossible("anal_Rexp, unexpected exp form");
   }
 }
 
@@ -1512,6 +1511,7 @@ void cf_check(list_t<decl_t> ds) {
     case &ExternC_d(ds2):     fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
     case &Namespace_d(_,ds2): cf_check(ds2); break;
+    case &ExternCinclude_d(_,_): break;
     default: break;
     }
 }

@@ -552,8 +552,6 @@ stmt_t declare_stmt(qvar_t x, type_t t, exp_opt_t init, stmt_t s, seg_t loc) {
   decl_t d = new_decl(new Var_d(new_vardecl(x,t,init)),loc);
   return new_stmt(new Decl_s(d,s),loc);
 }
-stmt_t cut_stmt   (stmt_t s, seg_t loc) { return new_stmt(new Cut_s(s),   loc);}
-stmt_t splice_stmt(stmt_t s, seg_t loc) { return new_stmt(new Splice_s(s),loc);}
 stmt_t label_stmt(var_t v, stmt_t s, seg_t loc) {
   return new_stmt(new Label_s(v,s), loc);
 }
@@ -568,12 +566,6 @@ stmt_t goto_stmt(var_t lab, seg_t loc) {
 }
 stmt_t assign_stmt(exp_t e1, exp_t e2, seg_t loc) {
   return exp_stmt(assign_exp(e1,e2,loc),loc);
-}
-stmt_t forarray_stmt(list_t<vardecl_t,`H> d, exp_t e1, exp_t e2,
-		     stmt_t s, seg_t loc) {
-  return new_stmt(new ForArray_s(ForArrayInfo{d,$(e1,skip_stmt(e1->loc)),
-                                                $(e2,skip_stmt(e2->loc)),s}),
-                  loc);
 }
 /////////////////////////// Patterns //////////////////////////////
 pat_t new_pat(raw_pat_t p, seg_t s) { return new Pat(p,NULL,s); }

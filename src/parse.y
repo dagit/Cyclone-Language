@@ -23,11 +23,13 @@ is adapted from the proposed C9X standard, but the productions are
 arranged as in Kernighan and Ritchie's "The C Programming
 Language (ANSI C)", Second Edition, pages 234-239.
 
+The grammar has 13 total shift-reduce conflicts.  
+
 The grammar has 1 shift-reduce conflict due to the "dangling else"
 problem, which (the Cyclone port of) Bison properly resolves.
 
-There are 10 additional shift-reduce conflicts due to ambiguities in
-attribute parsing -- see the comments at function_definition.
+There are 12 additional shift-reduce conflicts due to ambiguities in
+attribute parsing.  
 */
 
 %{
@@ -830,9 +832,8 @@ using Parse;
 %token STRUCT UNION CASE DEFAULT INLINE SIZEOF OFFSETOF
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM
 // Cyc:  CYCLONE additional keywords
-%token NULL_kw LET THROW TRY CATCH
-%token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION FORARRAY
-%token FILL CODEGEN CUT SPLICE
+%token NULL_kw LET THROW TRY CATCH EXPORT
+%token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION 
 %token MALLOC RMALLOC CALLOC RCALLOC
 %token REGION_T SIZEOF_T TAG_T REGION RNEW REGIONS RESET_REGION
 %token GEN NOZEROTERM_kw ZEROTERM_kw
@@ -869,7 +870,6 @@ using Parse;
   QualId_tok(qvar_t);
   Stmt_tok(stmt_t);
   SwitchClauseList_tok(list_t<switch_clause_t>);
-  SwitchCClauseList_tok(list_t<switchC_clause_t>);
   Pattern_tok(pat_t);
   PatternList_tok(list_t<pat_t>);
   FnDecl_tok(fndecl_t);
@@ -905,7 +905,7 @@ using Parse;
   EnumfieldList_tok(list_t<enumfield_t>);
   Scope_tok(scope_t);
   TypeOpt_tok(opt_t<type_t>);
-  Rgnorder_tok(list_t<$(type_t,type_t)@>)
+  Rgnorder_tok(list_t<$(type_t,type_t)@>);
 }
 /* types for productions */
 %type <$(sign_t,int)@> INTEGER_CONSTANT TYPE_INTEGER
@@ -934,7 +934,6 @@ using Parse;
 %type <stmt_t> expression_statement selection_statement iteration_statement
 %type <stmt_t> jump_statement
 %type <list_t<switch_clause_t>> switch_clauses
-%type <list_t<switchC_clause_t>> switchC_clauses
 %type <pat_t> pattern exp_pattern conditional_pattern logical_or_pattern
 %type <pat_t> logical_and_pattern inclusive_or_pattern exclusive_or_pattern
 %type <pat_t> and_pattern equality_pattern relational_pattern shift_pattern
@@ -983,6 +982,7 @@ using Parse;
 %type <opt_t<type_t>> optional_effect
 %type <list_t<$(type_t,type_t)@>> optional_rgn_order rgn_order
 %type <conref_t<bool>> zeroterm_qual_opt
+%type <list_t<$(Position::seg_t,qvar_t,bool)@>> export_list export_list_values
 /* start production */
 %start prog
 %%
@@ -1039,11 +1039,33 @@ translation_unit:
       $$=^$(new List(new Decl(new Namespace_d(new nspace,x),LOC(@1,@4)),y)); 
     }
 | EXTERN STRING '{' translation_unit '}' translation_unit
-    { if (strcmp($2,"C") != 0)
-        err("only extern \"C\" { ... } is allowed",LOC(@1,@2));
-      $$=^$(new List(new Decl(new ExternC_d($4),LOC(@1,@5)),$6));
+    { if (strcmp($2,"C") == 0) {
+        $$=^$(new List(new Decl(new ExternC_d($4),LOC(@1,@4)),$6));
+      } else {
+        if (strcmp($2,"C include") != 0) {
+          err("expecting \"C\" or \"C include\"",LOC(@1,@2));
+        }
+        $$=^$(new List(new Decl(new ExternCinclude_d($4,NULL),LOC(@1,@5)),$6));
+      }
+    }
+| EXTERN STRING '{' translation_unit '}' export_list translation_unit
+    { if (strcmp($2,"C include") != 0) 
+        err("expecting \"C include\"",LOC(@1,@2));
+       list_t<$(seg_t,qvar_t,bool)@> exs = $6;
+      $$=^$(new List(new Decl(new ExternCinclude_d($4,exs),LOC(@1,@6)),$7));
     }
 | /* empty */ { $$=^$(NULL); }
+;
+
+export_list: 
+  EXPORT '{' export_list_values '}' { $$= $!3; }
+| EXPORT '{' '}' { $$=^$(NULL); }
+;    
+
+export_list_values:
+  struct_union_name ';' { $$=^$(new List(new $(LOC(@1,@1),$1,false),NULL)); }
+| struct_union_name ',' export_list_values
+  { $$=^$(new List(new $(LOC(@1,@1),$1,false),$3));}
 ;
 
 external_declaration:
@@ -1977,9 +1999,6 @@ statement:
 /* Cyc: reset_region(e) statement */
 | RESET_REGION '(' expression ')' ';'
   { $$=^$(new_stmt(new ResetRegion_s($3),LOC(@1,@5))); }
-/* Cyc: cut and splice */
-| CUT statement         { $$=^$(new_stmt(new Cut_s($2),LOC(@1,@2))); }
-| SPLICE statement      { $$=^$(new_stmt(new Splice_s($2),LOC(@1,@2))); }
 ;
 
 /* Cyc: Unlike C, we do not treat case and default statements as labeled */
@@ -2024,11 +2043,6 @@ selection_statement:
     { $$=^$(switch_stmt($3,$6,LOC(@1,@7))); }
 | SWITCH error
     { $$=^$(skip_stmt(LOC(@1,@2))); }
-| SWITCH STRING  '(' expression ')' '{' switchC_clauses '}'
-  { if(strcmp($2,"C") != 0)
-     err("only switch \"C\" { ... } is allowed",LOC(@1,@8));
-  $$=^$(new_stmt(new SwitchC_s($4,$7),LOC(@1,@8)));
-  }
 | TRY statement CATCH '{' switch_clauses '}'
     { $$=^$(trycatch_stmt($2,$5,LOC(@1,@6))); }
 | TRY error
@@ -2061,32 +2075,6 @@ switch_clauses:
                                        LOC(@1,@6)),$6)); }
 | CASE pattern AND_OP expression ':' block_item_list switch_clauses
     { $$=^$(new List(new Switch_clause($2,NULL,$4,$6,LOC(@1,@7)),$7)); }
-| CASE error ':' block_item_list
-   { $$=^$(NULL); }
-;
-
-/* we leave the exps unevaluated so enum tags can be used, but we go ahead
- * and add implicit fallthrus.  These are the two differences between these
- * cases and the standard Cyclone ones.  We leave constant-only, no repeats,
- * and exhaustive (here default is mandatory) to the type-checker.
- */
-switchC_clauses:
-  /* empty */
-    { $$=^$(NULL); }
-| DEFAULT ':' block_item_list
-  { $$=^$(new List(new SwitchC_clause(NULL,seq_stmt($3,break_stmt(NULL),NULL),
-				      LOC(@1,@3)), 
-		   NULL)); }
-| CASE expression ':' switchC_clauses
-  { $$=^$(new List(new SwitchC_clause($2,fallthru_stmt(NULL,NULL),
-				      LOC(@1,@4)), 
-		   $4)); }
-| CASE expression ':' block_item_list switchC_clauses
-   { $$=^$(new List(new SwitchC_clause($2,seq_stmt($4,
-						   fallthru_stmt(NULL,NULL),
-						   NULL),
-				       LOC(@1,@5)),
-		    $5)); }
 | CASE error ':' block_item_list
    { $$=^$(NULL); }
 ;
@@ -2150,10 +2138,6 @@ iteration_statement:
     }
 | FOR error
     { $$=^$(skip_stmt(LOC(@1,@2))); }
-| FORARRAY '(' declaration ';' expression ';' expression ')' statement
-    { let vardecls = map(decl2vardecl,$3);
-      $$=^$(forarray_stmt(vardecls,$5,$7,$9,LOC(@1,@9))); 
-    }
 ;
 
 jump_statement:
@@ -2566,11 +2550,6 @@ postfix_expression:
     { $$=^$(new_exp(new CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@6))); }
 | '(' type_name ')' '{' initializer_list ',' '}'
     { $$=^$(new_exp(new CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@7))); }
-/* Cyc: added fill and codegen */
-| FILL '(' expression ')'
-    { $$=^$(new_exp(new Fill_e($3),LOC(@1,@4))); }
-| CODEGEN '(' function_definition ')'
-    { $$=^$(new_exp(new Codegen_e($3),LOC(@1,@4))); }
 ;
 
 primary_expression:

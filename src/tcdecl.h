@@ -57,9 +57,11 @@ extern void merr(seg_t loc, string_t<`r2> * msg1, string_t fmt,
   // _ we assume the declarations have already been type-checked
 
   // t and v describe the type and the name of the object involved
+  // we allow externC and extern on aggregate or enum definitions
 extern $(scope_t, bool) merge_scope(scope_t s0, scope_t s1,  
 				    string_t t, string_t v,
-				    seg_t loc, string_t * msg);
+				    seg_t loc, string_t * msg,
+                                    bool allow_externC_extern_merge);
 
 extern struct Aggrdecl  * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
 					 seg_t loc, string_t * msg);

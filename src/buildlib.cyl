@@ -899,12 +899,6 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &AnonEnum_e(_,_,_):
       fprintf(stderr,"Error: unexpected AnonEnum_e\n");
       exit(1); return;
-    case &Codegen_e(_):
-      fprintf(stderr,"Error: unexpected Codegen_e\n");
-      exit(1); return;
-    case &Fill_e(_):
-      fprintf(stderr,"Error: unexpected Fill_e\n");
-      exit(1); return;
     }
   }
 
@@ -1074,6 +1068,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       exit(1); return NULL;
     case &ExternC_d(_):
       fprintf(stderr,"Error: unexpected extern \"C\" declaration\n");
+      exit(1); return NULL;
+    case &ExternCinclude_d(_,_):
+      fprintf(stderr,"Error: unexpected extern \"C include\" declaration\n");
       exit(1); return NULL;
     }
 
@@ -1390,6 +1387,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case &Namespace_d(_,_):
       case &Using_d(_,_):
       case &ExternC_d(_):
+      case &ExternCinclude_d(_,_):
         name = NULL;
         break;
       }
@@ -1448,6 +1446,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case &Namespace_d(_,_):
       case &Using_d(_,_):
       case &ExternC_d(_):
+      case &ExternCinclude_d(_,_):
         name = NULL;
         break;
       }

@@ -124,7 +124,6 @@ namespace Absyn {
   typedef struct Pat @pat_t;
   typedef tunion Binding binding_t;
   typedef struct Switch_clause @switch_clause_t;
-  typedef struct SwitchC_clause @switchC_clause_t;
   typedef struct Fndecl @fndecl_t;
   typedef struct Aggrdecl @aggrdecl_t;
   typedef struct Tunionfield @tunionfield_t;
@@ -142,7 +141,6 @@ namespace Absyn {
   typedef struct Aggrfield @aggrfield_t;
   typedef tunion OffsetofField offsetof_field_t;
   typedef struct MallocInfo malloc_info_t;
-  typedef struct ForArrayInfo forarray_info_t;
   typedef tunion Coercion coercion_t;
 
   // scopes for declarations 
@@ -524,8 +522,6 @@ namespace Absyn {
     UnresolvedMem_e(opt_t<typedef_name_t>,
                     list_t<$(list_t<designator_t>,exp_t)@>);
     StmtExp_e(stmt_t); // ({s;e})
-    Codegen_e(fndecl_t); // code generation stuff -- not used
-    Fill_e(exp_t);       // code generation stuff -- not used
   };
   // expression with auxiliary information
   EXTERN_ABSYN struct Exp {
@@ -533,13 +529,6 @@ namespace Absyn {
     raw_exp_t     r;     // the real expression
     seg_t         loc;   // the location in the source code
     absyn_annot_t annot; // used during analysis
-  };
-
-  EXTERN_ABSYN struct ForArrayInfo {
-    list_t<vardecl_t> defns;
-    $(exp_t,stmt_t)   condition; // as with For_s, the statements on the 
-    $(exp_t,stmt_t)   delta;     //   condition & delta are hacks to support
-    stmt_t            body;      //   control-flow analysis.
   };
 
   // The $(exp,stmt) in loops are just a hack for holding the
@@ -556,19 +545,14 @@ namespace Absyn {
     Continue_s(stmt_opt_t); // stmt is dest, set by type-checking
     Goto_s(var_t,stmt_opt_t); // stmt is dest, set by type-checking
     For_s(exp_t,$(exp_t,stmt_t),$(exp_t,stmt_t),stmt_t); 
-    Switch_s(exp_t,list_t<switch_clause_t>);  // cyclone switch 
-    SwitchC_s(exp_t,list_t<switchC_clause_t>); // C switch
+    Switch_s(exp_t,list_t<switch_clause_t>);  // switch statement
     // next case set by type-checking
     Fallthru_s(list_t<exp_t>,switch_clause_t *);
     Decl_s(decl_t,stmt_t); // declarations
-    Cut_s(stmt_t);    // code generation stuff -- not used
-    Splice_s(stmt_t); // code generation stuff -- not used
     Label_s(var_t,stmt_t); // L:s
     Do_s(stmt_t,$(exp_t,stmt_t));
     TryCatch_s(stmt_t,list_t<switch_clause_t>);
     Region_s(tvar_t, vardecl_t, bool, stmt_t); // region<`r> h {s}
-    // the bool above is true when the region is resetable
-    ForArray_s(forarray_info_t);
     ResetRegion_s(exp_t); // reset_region(e)
   };
   // statements with auxiliary info
@@ -615,13 +599,6 @@ namespace Absyn {
     exp_opt_t                where_clause; // case p && e: -- the e part
     stmt_t                   body;     // corresponding statement
     seg_t                    loc;      // location in source code
-  };
-
-  // C switch clauses
-  EXTERN_ABSYN struct SwitchC_clause {
-    exp_opt_t cnst_exp; // KLUDGE: null => default (parser ensures it's last)
-    stmt_t    body;
-    seg_t     loc;
   };
 
   // only local and pat cases need to worry about shadowing
@@ -751,6 +728,10 @@ namespace Absyn {
     Namespace_d(var_t,list_t<decl_t>); // namespace Foo { ... }
     Using_d(qvar_t,list_t<decl_t>);  // using Foo { ... }
     ExternC_d(list_t<decl_t>); // extern "C" { ... }
+    ExternCinclude_d(list_t<decl_t>,list_t<$(seg_t,qvar_t,bool)@>); 
+    // extern "C include" { <decls> } export { <vars> }
+    // the bool in the vars is used to warn when an export doesn't appear
+    // in the declarations.
   };
 
   // declarations w/ auxiliary info
@@ -947,7 +928,6 @@ namespace Absyn {
   extern stmt_t goto_stmt(var_t lab, seg_t loc);
   extern stmt_t assign_stmt(exp_t e1, exp_t e2, seg_t loc);
   extern stmt_t trycatch_stmt(stmt_t,list_t<switch_clause_t,`H>,seg_t);
-  extern stmt_t forarray_stmt(list_t<vardecl_t,`H>,exp_t,exp_t,stmt_t,seg_t);
 
   /////////////////////////// Patterns //////////////////////////////
   extern pat_t new_pat(raw_pat_t p, seg_t s);
