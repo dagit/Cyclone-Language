@@ -1,0 +1,537 @@
+#line 1 "cyc_bison.simple"
+/* This is a (simple) skeleton parser engine for Cyclone, adapted from
+ * GNU bison's bison.simple parser engine.  The copyright information for
+ * GNU bison is below.
+ */
+/* Skeleton output parser for bison,
+   Copyright (C) 1984, 1989, 1990 Free Software Foundation, Inc.
+
+   This program is free software; you can redistribute it and/or modify
+   it under the terms of the GNU General Public License as published by
+   the Free Software Foundation; either version 2, or (at your option)
+   any later version.
+
+   This program is distributed in the hope that it will be useful,
+   but WITHOUT ANY WARRANTY; without even the implied warranty of
+   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with this program; if not, write to the Free Software
+   Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.  */
+
+/* As a special exception, when this file is copied by Bison into a
+   Bison output file, you may use that output file without restriction.
+   This special exception was added by the Free Software Foundation
+   in version 1.24 of Bison.  */
+
+/* This is the parser code that is written into each bison parser
+  when the %semantic_parser declaration is not specified in the grammar.
+  It was written by Richard Stallman by simplifying the hairy parser
+  used when %semantic_parser is specified.  */
+
+/* Note: there must be only one dollar sign in this file.
+   It is replaced by the list of actions, each action
+   as one case of the switch.  */
+
+/* JGM: I've cut out the stuff that allows for re-entrant parsers because
+ * we need to do things slightly differently.  For example, yylex() should
+ * return a tuple of the token code, the yylval, and the yylloc instead of
+ * mutating global variables...
+ */
+
+/* Dan: Do not define YYERROR_VERBOSE -- it has not been ported */
+
+xenum exn {Yyimpossible};     // used in various weird cases
+xenum exn {Yystack_overflow}; // thrown if the parsing stack overflows
+
+#define yyerrok		(yyerrstatus = 0)
+#define yyclearin	(yychar = YYEMPTY)
+#define YYEMPTY		-2
+#define YYEOF		0
+#define YYACCEPT	return(0)
+#define YYABORT 	return(1)
+#define YYERROR		throw(Yyerror) 
+#define YYFAIL		throw(Yyerror)
+#define YYRECOVERING()  (!!yyerrstatus)
+#define YYBACKUP(token, value) \
+do								\
+  if (yychar == YYEMPTY && yylen == 1)				\
+    { yychar = (token), yylval = (value);			\
+      yychar1 = YYTRANSLATE (yychar);				\
+      YYPOPSTACK;						\
+      goto yybackup;						\
+    }								\
+  else								\
+    { yyerror ("syntax error: cannot back up"); YYERROR; }	\
+while (0)
+
+#define YYTERROR	1
+#define YYERRCODE	256
+
+
+extern void yyerror(string);
+// no support for YYLEX_PARAM 
+extern int yylex();
+
+xenum YYSTYPE { YYINITIALSVAL };
+
+static int	yychar = '\000';       /*  the lookahead symbol		*/
+xenum YYSTYPE	yylval = YYINITIALSVAL;/*  the semantic value of the	*/
+ 				       /*  lookahead symbol		*/
+
+
+static int yynerrs = 0;		/*  number of parse errors so far       */
+
+#if YYDEBUG
+ bool yydebug = true;	/*  nonzero means print parse trace	*/
+/* Since this is uninitialized, it does not stop multiple parsers
+   from coexisting.  */
+#endif
+
+/*  YYINITDEPTH indicates the initial size of the parser's stacks	*/
+
+#ifndef	YYINITDEPTH
+#define YYINITDEPTH 200
+#endif
+
+/*  YYMAXDEPTH is the maximum size the stacks can grow to
+    (effective only if the built-in stack extension method is used).  */
+
+#if YYMAXDEPTH == 0
+#undef YYMAXDEPTH
+#endif
+
+#ifndef YYMAXDEPTH
+#define YYMAXDEPTH 10000
+#endif
+
+/* The user can define YYPARSE_PARAM as a set of arguments to be passed
+   into yyparse.  Grammar actions can access the variables.
+ */
+#ifndef YYPARSE_PARAM_ARG
+#define YYPARSE_PARAM_ARG 
+#endif
+int yyparse(YYPARSE_PARAM_ARG)
+{
+  int yystate;
+  int yyn=0;
+  int yyerrstatus;//  number of tokens to shift before error messages enabled 
+  int yychar1 = 0;//  lookahead token as an internal (translated) token number 
+
+  int yyssp_offset;
+  /*  the state stack     */
+  short yyss[?] = new {for i < YYINITDEPTH : 0};
+  /*  the semantic value stack */
+  int yyvsp_offset;
+  xenum YYSTYPE yyvs[?] = new {for i < YYINITDEPTH : yylval}; 
+
+#ifdef YYLSP_NEEDED
+  /*  the location stack */
+  int yylsp_offset;
+  YYLTYPE yyls[?] = new {for i < YYINITDEPTH: yynewloc()};
+#define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--, yylsp_offset--)
+#else
+#define YYPOPSTACK   (yyvsp_offset--, yyssp_offset--)
+#endif
+
+  int yystacksize = YYINITDEPTH;
+
+#ifdef YYPURE
+  int yychar;
+  xenum YYSTYPE yylval;
+  int yynerrs;
+#ifdef YYLSP_NEEDED
+  YYLTYPE yylloc;
+#endif
+#endif
+
+  xenum YYSTYPE yyval = yylval;	/*  the variable used to return		*/
+				/*  semantic values from the action	*/
+				/*  routines				*/
+
+  int yylen;
+
+#if YYDEBUG != 0
+  if (yydebug) 
+    fprintf(cyc_stderr,"Starting parse\n");
+#endif
+
+  yystate = 0;
+  yyerrstatus = 0;
+  yynerrs = 0;
+  yychar = YYEMPTY;		/* Cause a token to be read.  */
+
+  /* Initialize stack pointers.
+     Waste one element of value and location stack
+     so that they stay on the same level as the state stack.
+     The wasted elements are never initialized.  */
+
+  yyssp_offset = -1;
+  yyvsp_offset = 0;
+#ifdef YYLSP_NEEDED
+  yylsp_offset = 0;
+#endif
+
+/* Push a new state, which is found in  yystate  .  */
+/* In all cases, when you get here, the value and location stacks
+   have just been pushed. so pushing a state here evens the stacks.  */
+yynewstate:
+
+  yyss[++yyssp_offset] = (short)yystate;
+
+  if (yyssp_offset >= (yystacksize-1)) { 
+    // grow the stacks
+    if (yystacksize >= YYMAXDEPTH) {
+      yyerror("parser stack overflow");
+      throw Yystack_overflow;
+    }
+    yystacksize *= 2;
+    if (yystacksize > YYMAXDEPTH)
+      yystacksize = YYMAXDEPTH;
+    short yyss1[?] = new {for i < yystacksize : 0};
+    xenum YYSTYPE yyvs1[?] = new {for i < yystacksize : yylval};
+#ifdef YYLSP_NEEDED
+    YYLTYPE yyls1[?] = new {for i < yystacksize : yynewloc()};
+#endif
+    for (int i=0; i <= yyssp_offset; i++) {
+      yyss1[i] = yyss[i];
+      yyvs1[i] = yyvs[i];
+#ifdef YYLSP_NEEDED
+      yyls1[i] = yyls[i];
+#endif
+    }
+    yyss = yyss1;
+    yyvs = yyvs1;
+#ifdef YYLSP_NEEDED
+    yyls = yyls1;
+#endif
+  }
+    
+#if YYDEBUG != 0
+  if (yydebug) {
+    fprintf(cyc_stderr,"Entering state %d\n",yystate);
+  }
+#endif
+
+  goto yybackup;
+
+yybackup:
+
+  //#ifdef YYLSP_NEEDED
+  //  yylloc = yycopyloc(yylloc);
+  //#endif
+
+/* Do appropriate processing given the current state.  */
+/* Read a lookahead token if we need one and don't already have one.  */
+/* yyresume: */
+
+  /* First try to decide what to do without reference to lookahead token.  */
+
+  yyn = yypact[yystate];
+  if (yyn == YYFLAG) goto yydefault;
+
+  /* Not known => get a lookahead token if don't already have one.  */
+
+  /* yychar is either YYEMPTY or YYEOF
+     or a valid token in external form.  */
+  if (yychar == YYEMPTY)
+    {
+#if YYDEBUG != 0
+      if (yydebug)
+	fprintf(cyc_stderr,"Reading a token: ");
+#endif
+      yychar = yylex();
+    }
+
+  /* Convert token to internal form (in yychar1) for indexing tables with */
+  if (yychar <= 0)		/* This means end of input. */
+    {
+      yychar1 = 0;
+      yychar = YYEOF;		/* Don't call YYLEX any more */
+#if YYDEBUG != 0
+      if (yydebug)
+	fprintf(cyc_stderr,"Now at end of input.\n");
+#endif
+    }
+  else
+    {
+      yychar1 = YYTRANSLATE(yychar);
+
+#if YYDEBUG != 0
+      if (yydebug)
+	{
+	  fprintf(cyc_stderr,"Next token is %d (%s",yychar,yytname[yychar1]);
+	  /* Give the individual parser a way to print the precise meaning
+	     of a token, for further debugging info.  */
+
+#ifdef YYPRINT
+	  YYPRINT (yychar, yylval);
+#endif
+	  fprintf(cyc_stderr,")\n");
+	}
+#endif
+    }
+
+  yyn += yychar1;
+  if (yyn < 0 || yyn > YYLAST || yycheck[yyn] != yychar1) goto yydefault;
+
+  yyn = yytable[yyn];
+  /* yyn is what to do for this token type in this state.
+     Negative => reduce, -yyn is rule number.
+     Positive => shift, yyn is new state.
+       New state is final state => don't bother to shift,
+       just return success.
+     0, or most negative number => error.  */
+  if (yyn < 0)
+    {
+      if (yyn == YYFLAG) goto yyerrlab;
+      yyn = -yyn;
+      goto yyreduce;
+    }
+  else if (yyn == 0) goto yyerrlab;
+
+  if (yyn == YYFINAL)
+    YYACCEPT;
+
+  /* Shift the lookahead token.  */
+
+#if YYDEBUG != 0
+  if (yydebug)
+    fprintf(cyc_stderr,"Shifting token %d (%s), ",yychar,yytname[yychar1]);
+#endif
+
+  /* Discard the token being shifted unless it is eof.  */
+  if (yychar != YYEOF)
+    yychar = YYEMPTY;
+
+  yyvs[++yyvsp_offset] = yylval;
+#ifdef YYLSP_NEEDED
+  yyls[++yylsp_offset] = yylloc;
+  
+#endif
+
+  /* count tokens shifted since error; after three, turn off error status.  */
+  if (yyerrstatus != 0) yyerrstatus--;
+
+  yystate = yyn;
+  goto yynewstate;
+
+/* Do the default action for the current state.  */
+yydefault:
+
+  yyn = yydefact[yystate];
+  if (yyn == 0) goto yyerrlab;
+  // fallthru to yyreduce
+
+/* Do a reduction.  yyn is the number of a rule to reduce with.  */
+yyreduce:
+
+  yylen = yyr2[yyn];
+  if (yylen > 0)
+    yyval = yyvs[yyvsp_offset+1-yylen]; /* implement default value of the action */
+
+#if YYDEBUG != 0
+  if (yydebug)
+    {
+      int i;
+
+      fprintf(cyc_stderr,"Reducing via rule %d (line %d), ",yyn,yyrline[yyn]);
+      /* Print the symbols being reduced, and their result.  */
+      for (i = yyprhs[yyn]; yyrhs[i] > 0; i++)
+	fprintf(cyc_stderr,"%s ",yytname[yyrhs[i]]);
+      fprintf(cyc_stderr," -> %s\n",yytname[yyr1[yyn]]);
+    }
+#endif
+
+$    /* the action file gets copied in place of this dollarsign */
+  default: throw Yyimpossible;
+  }
+
+#line 371 "cyc_bison.simple"
+  yyvsp_offset -= yylen;
+  yyssp_offset -= yylen;
+#ifdef YYLSP_NEEDED
+  yylsp_offset -= yylen;
+#endif
+
+#if YYDEBUG != 0
+  if (yydebug)
+    {
+      int ssp1 = -1;
+      fprintf(cyc_stderr,"state stack now");
+      while (ssp1 != yyssp_offset)
+	fprintf(cyc_stderr," %d",yyss[++ssp1]);
+      fprintf(cyc_stderr,"\n");
+    }
+#endif
+
+  yyvs[++yyvsp_offset] = yyval;
+
+#ifdef YYLSP_NEEDED
+  yylsp_offset++;
+  if (yylen == 0)
+    {
+      yyls[yylsp_offset]->first_line   = yylloc->first_line;
+      yyls[yylsp_offset]->first_column = yylloc->first_column;
+      yyls[yylsp_offset]->last_line    = yyls[yylsp_offset-1]->last_line; 
+      yyls[yylsp_offset]->last_column  = yyls[yylsp_offset-1]->last_column;  
+      yyls[yylsp_offset]->text = "";
+    }
+  else
+    {
+     yyls[yylsp_offset]->last_line   =yyls[yylsp_offset+yylen-1]->last_line;  
+     yyls[yylsp_offset]->last_column =yyls[yylsp_offset+yylen-1]->last_column; 
+    }
+#endif
+
+  /* Now "shift" the result of the reduction.
+     Determine what state that goes to,
+     based on the state we popped back to
+     and the rule number reduced by.  */
+
+  yyn = yyr1[yyn];
+
+  yystate = yypgoto[yyn - YYNTBASE] + yyss[yyssp_offset];
+  if (yystate >= 0 && yystate <= YYLAST && yycheck[yystate] == yyss[yyssp_offset])
+    yystate = yytable[yystate];
+  else
+    yystate = yydefgoto[yyn - YYNTBASE];
+
+  goto yynewstate;
+
+yyerrlab:   /* here on detecting error */
+
+  if (yyerrstatus == 0)
+    /* If not already recovering from an error, report this error.  */
+    {
+      ++yynerrs;
+
+#ifdef YYERROR_VERBOSE
+      yyn = yypact[yystate];
+
+      if (yyn > YYFLAG && yyn < YYLAST)
+	{
+	  int sze = 0;
+	  string msg;
+	  int x, count;
+
+	  count = 0;
+	  /* Start X at -yyn if nec to avoid negative indexes in yycheck.  */
+	  for (x = (yyn < 0 ? -yyn : 0);
+	       x < (sizeof(yytname) / sizeof(char *)); x++)
+	    if (yycheck[x + yyn] == x)
+	      sze += strlen(yytname[x]) + 15, count++;
+	  msg = new {for i < sze + 15 : '\000'};
+	  strcpy(msg, "parse error");
+
+	  if (count < 5)
+	    {
+	      count = 0;
+	      for (x = (yyn < 0 ? -yyn : 0);
+		   x < (size(yytname) / sizeof(char *)); x++)
+		if (yycheck[x + yyn] == x)
+		  { /* JGM: NB -- casts are needed here.  Sigh. */
+		    strcat(msg, count == 0 ? (string)(", expecting `") : 
+			   (string)(" or `"));
+		    strcat(msg, yytname[x]);
+		    strcat(msg, "'");
+		    count++;
+		  }
+	    }
+	  yyerror(msg);
+	}
+      else
+#endif /* YYERROR_VERBOSE */
+	yyerror("parse error");
+    }
+  goto yyerrlab1;
+
+yyerrlab1:   /* here on error raised explicitly by an action */
+
+  if (yyerrstatus == 3)
+    {
+      /* if just tried and failed to reuse lookahead token after an error, discard it.  */
+
+      /* return failure if at end of input */
+      if (yychar == YYEOF)
+	YYABORT;
+
+#if YYDEBUG != 0
+      if (yydebug) 
+	fprintf(cyc_stderr,"Discarding token %d (%s).\n",
+		yychar,yytname[yychar1]);
+#endif
+
+      yychar = YYEMPTY;
+    }
+
+  /* Else will try to reuse lookahead token
+     after shifting the error token.  */
+
+  yyerrstatus = 3;		/* Each real token shifted decrements this */
+
+  goto yyerrhandle;
+
+yyerrdefault:  /* current state does not do anything special for the error token. */
+
+#if 0
+  /* This is wrong; only states that explicitly want error tokens
+     should shift them.  */
+  yyn = yydefact[yystate];  /* If its default is to accept any token, ok.  Otherwise pop it.*/
+  if (yyn) goto yydefault;
+#endif
+  // fallthru to yyerrpop
+
+yyerrpop:   /* pop the current state because it cannot handle the error token */
+
+  if (yyssp_offset == 0) YYABORT;
+  yyvsp_offset--;
+  yystate = yyss[--yyssp_offset];
+#ifdef YYLSP_NEEDED
+  yylsp_offset--;
+#endif
+
+#if YYDEBUG != 0
+  if (yydebug)
+    {
+      short ssp1_offset = -1;
+      fprintf(cyc_stderr,"Error: state stack now");
+      while (ssp1_offset != yyssp_offset)
+	fprintf(cyc_stderr," %d",yyss[++ssp1_offset]);
+      fprintf(cyc_stderr,"\n");
+    }
+#endif
+  // falthru to yyerrhandle
+
+yyerrhandle:
+  yyn = yypact[yystate];
+  if (yyn == YYFLAG) goto yyerrdefault;
+
+  yyn += YYTERROR;
+  if (yyn < 0 || yyn > YYLAST || yycheck[yyn] != YYTERROR) goto yyerrdefault;
+
+  yyn = yytable[yyn];
+  if (yyn < 0)
+    {
+      if (yyn == YYFLAG) goto yyerrpop;
+      yyn = -yyn;
+      goto yyreduce;
+    }
+  else if (yyn == 0) goto yyerrpop;
+
+  if (yyn == YYFINAL)
+    YYACCEPT;
+
+#if YYDEBUG != 0
+  if (yydebug)
+    fprintf(cyc_stderr,"Shifting error token, ");
+#endif
+
+  yyvs[++yyvsp_offset] = yylval;
+#ifdef YYLSP_NEEDED
+  yyls[++yylsp_offset] = yylloc;
+#endif
+
+  goto yynewstate;
+}

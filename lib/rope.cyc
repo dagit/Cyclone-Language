@@ -1,0 +1,65 @@
+#include "rope.h"
+#include "string.h"
+
+namespace Rope;
+using Core;
+
+static enum R {
+  String_rope(string),
+  Array_rope(rope[?])
+};
+abstract struct Rope_node {
+  enum R v;
+};
+
+rope from_string(string s) {
+  return &Rope_node{String_rope(s)};
+}
+rope concat(rope r1,rope r2) {
+  return &Rope_node{Array_rope(new {r1,r2})};
+}
+rope concata(rope rs[?]) {
+  return &Rope_node(Array_rope(rs));
+}
+rope concatl(List::list<rope> l) {
+  return &Rope_node(Array_rope(new {for i < List::length(l) : 
+                                    ({rope r = l->hd; l = l->tl; r;})}));
+}
+
+uint length(rope r) {
+  switch (r->v) {
+  case String_rope(ss): return String::strlen(ss);
+  case Array_rope(rs):
+    uint total = 0, sz = size(rs);
+    for (uint i = 0; i < sz; i++)
+      total += length(rs[i]);
+    return total;
+  }
+}
+
+static uint flatten_it(string s, uint i, rope r) {
+  switch (r->v) {
+  case String_rope(ss):
+    let len = String::strlen(ss);
+    String::strncpy(s,i,ss,0,len);
+    return i+len;
+  case Array_rope(rs):
+    let len = size(rs);
+    for (int j = 0; j < len; j++)
+      i = flatten_it(s,i,rs[j]);
+    return i;
+  }
+}
+
+string to_string(rope r) {
+  string s = new_string(length(r));
+  flatten_it(s,0,r);
+  // memoize the flattening
+  r->v = String_rope(s);
+  return s;
+}
+
+int cmp(rope r1, rope r2) {
+  return String::strcmp(to_string(r1), to_string(r2));
+}
+

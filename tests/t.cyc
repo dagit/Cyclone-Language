@@ -1,0 +1,192 @@
+int x1 = 3;
+//int x2 = true; // int != bool
+int x3 = 4+3;
+char x4 = 'x';
+//char x5 = "x"; // char != char[1]
+int f1() {return 2;}
+//int f2() {return;} // returns void not int
+//int f3() {0;} // should return int but doesn't return
+int x6;
+char x7;
+float x8;
+//int @x9; // int@ != int*
+int *x10;
+float *x11 = null;
+int f4(int x) { return x; }
+int f5(int x,int y) { return x+y; }
+//int f6(int x,float y) { return x+y; } // returns float not int
+int f7(int x,float y) { return (int)(x+y); } // should the cast be implicit?
+//int f8() { int x; return x; } // x might not be initialized
+int f9() { int x=13; return x; }
+//int f10() { return y; } // unbound identifier y
+//int f11() { int x=13; int *x=null; return x; } // returns wrong type
+int f12(int x) { if (x < 23) return x; else return 0; }
+//int f13(int x) { if (x < 23) return x; } // might not return int
+void f14(int x) {
+  while (x < 23) {
+    break;
+    if (x == 12) continue;
+    x++;
+  }
+}
+//void f15(int x) { break; } // break appears outside loop
+//void f16(int x) { continue; } // continue appears outside loop
+//int @f17() { int x=9; return &x; } // Note, requires heap allocation
+//int *f18() { int x=9; return &x; } // warning, implicit cast from int@ to int*
+enum e1 { E1,E2 };
+enum e1 x12 = E2; // Note E2 is a constant expression
+enum e1 f19() { return E1; }
+enum e2 { E3(int), E4, E5(int,int) };
+enum e2 f20() {
+  if (true) return E5(6,7); else if (true) return E4; else return E3(-1);
+}
+
+struct s1 { int xx; char yy; };
+int f21() { struct s1 x = s1{.yy='M',.xx=4}; return 0; }
+struct s1 f22() { return s1{.yy='M',.xx=4}; }
+struct s1 f23() { return s1(4,'M'); }
+//struct s1 f24() { return s1('M'); } // missing field y
+//struct s1 f25() { return s1('M',4); } // works, but integer conversion warn
+//struct s1 f26() { return s1{.xx='M',.yy=4}; } // works, but conversion warn
+$(int,bool) f27() { return $(1,true); }
+int f28($(bool,int) x) { return x[1]; }
+//int f29($(bool,int) x) { return x[2]; } // bad index
+$(int,bool) f30($(bool,int) x) { return $(x[1],x[0]); }
+int f31(int x) { x += 2; return x; }
+//int f32(int x) { int y; y += 2; return x; } // y not initialized
+int f34() {
+  int x;
+  return ( true ? (x=0) : 2 );
+}
+
+//int f35() {  // FIX: analysis thinks y,z might not be initialized at return 
+//  int y,z;
+//  if (( true ? (y=0) : (z=0) ) == 0)
+//    return y;
+//  else return z;
+//}
+//char x13[2] = "z"; // FIX: declared char[2] not char[1]--terminating zero!
+//char x14[?] = "z"; // FIX: declared char[?] not char[1]--auto convert needed?
+//char x15[?]; // FIX: requires initializer -- default needed 
+//char x16[2]; // FIX: requires initializer -- default needed
+//int x17; int x17; // FIX: should detect duplicate bindings
+int f36() {let $(x,y) = $(1,2); return x+y;}
+//int f37() {let $(x,y,z) = $(1,2); return x+y+z;} // pat&def types don't match
+int f38() {let $($(x,y),z) = $($(1,2),3); return x+y+z;}
+int f39() {let $($(x,2),z) = $($(1,2),3); return x+z;}
+//int f40() {let $(true,y) = $(1,2); return y;} // pat&def types don't match
+int f40(int x) {switch (x) {case 1: return 1; default: return 2;}}
+//int f41(bool x) {switch (x) {case true: return 1;}}
+int f42(enum e1 x) {switch (x) {case E1: return 1; case E2: return 2;}}
+//void f42(enum e2 x) {
+//  switch (x) {case E3(y): y+1; case E4: 2; case E5(y,4): y+4;}
+//}
+//void f43(enum e2 x) {
+//  switch (x) {case E5(w,y,z): 1;} // too many args for E5
+//}
+//void f44(enum e2 x) {
+//  switch (x) {case E5(y): 1;} // too few args for E5
+//}
+//void f45(enum e2 x) {switch (x) {case E3: 1;}} // too few args for E3
+int f46($(int,int) *x) {
+  switch (x) {
+  case null: return 1;
+  case &$(y,z): return y+z;
+  }
+}
+//int f47($(int,bool) *x) { // expecting arith, found bool
+//  switch (x) {case &$(y,z): return y+z;}
+//}
+//int f48(int @x) {switch (x) { case &y: return y;}} // FIX: @ not *
+
+typedef int foo;
+foo tdef0 = 3;
+foo tdef1(foo x) {
+  foo n = x;
+  if (n <= 0) 
+    return 1;
+  else 
+    return n * tdef1(n-1);
+}
+
+typedef $(int,int)@ pair;
+pair tdef2(int i) {
+  return &$(i,i);
+}
+
+typedef $(`a,`b)@ ppair<`a,`b>;
+ppair<int,int> tdef3(foo i) {
+  return &$(i,i);
+}
+
+//ppair<int,char> tdef3(foo i) {  // type char is not a boxed type
+//  return &$(i,'c');
+//}
+
+int f49(struct s1 x) {
+  switch (x) {
+  case s1(0,'a'): return 1;
+  case s1(3,'b'): return 2;
+    //  case s1(x,y): return x; 
+    //  case s1(x,y): return (int)y; // redundant
+    // case s1{.xx=0,.yy='a'}: return 6; //redundant
+    // case s1{.yy='a',.xx=0}: return 7; // redundant
+    // case s1{.yy=y,.xx=x}: return x; 
+  case s1{.yy='b',x}: return x;
+  case s1{x,y}: return x;
+// case s1(x,x): return 4; // x defined twice
+// case s1(0,'a',3): return 1; // extra arg
+// case s1(0): return 1; // missing field yy
+// case s1(true,'a'): return 1; // field xx expects int
+// case s1('a',0): return 1; // FIX: maybe this should be allowed??
+// case s1{.xx='a',.yy=0}: return 7;
+  }
+}
+int f50(float x) {return ({ let y = 3; x; y; });}
+//int f51(struct s1 x) {return ({ let y = 3; y; x; });} // bad return typ
+int f52(bool y,float z) { return (y ? f52(false,z) : f50(z)); }
+
+namespace Foo { int x1 = 4; }
+int f53() { return Foo::x1; }
+namespace Foo { int x2 = 9; }
+int f54() { return Foo::x1+Foo::x2; }
+namespace Foo { int x18 = 18; }
+bool x18 = true;
+namespace Foo { void ff() { x18 < 0; } } // Here x18 should refer to Foo::x18
+namespace Bar {
+  void f1() { if (Foo::x1==Foo::x2) return; }
+}
+namespace Bar {
+  namespace Baz { bool x1 = true; }
+  void f2() { if (Baz::x1) return; }
+}
+int f55() { if (Bar::Baz::x1) return Foo::x2; else return 1; }
+namespace Bar {
+  namespace Foo { bool x1 = true; }
+  void f3() { if (Foo::x1) return; } // Foo refers to Bar::Foo, not other Foo
+}
+namespace Bar {
+  using Foo;
+  void f4() { if (x1) return; }
+}
+extern int x1; // OK to have two declarations if one is extern
+extern bool x19;
+void f56() { x19; }
+bool x19;
+/*
+xenum blah; // new xenum
+xenum blah { Blab, Bloob(int) }; // extend it with new constructors
+xenum blah x20 = Blab;
+void f57(xenum blah y) { xenum blah x = Blab; y; }
+
+namespace GOGOG {
+struct cons{int hd; struct cons *tl;};
+typedef struct cons *list;
+}
+using GOGOG;
+void f58(list z) { z = z->tl; }
+
+//struct YOYOYYYY {
+//  struct YOYOYYYY badfield;
+//};
+*/

@@ -1,0 +1,837 @@
+#include "list.h"
+#include "set.h"
+#include "hashtable.h"
+#include "string.h"
+#include "buffer.h"
+#include "queue.h"
+#include "rope.h"
+#include "dict.h"
+#include "character.h"
+#include "xarray.h"
+#include "bitvec.h"
+#include "ref.h"
+#include "filename.h"
+#include "fn.h"
+#include "pp.h"
+#include "array.h"
+#include "id.h"
+#include "arg.h"
+
+using List;
+using Set;
+using Dict;
+using Hashtable;
+using Character;
+using Xarray;
+using Bitvec;
+using Ref;
+using Fn;
+
+void test_begin(string t) {
+  int x = 12-size(t);
+  if (x<0) x=0;
+  string padding = new { for i < x : ' ' };
+  printf("%s%s: ",padding,t);
+}
+void test_end() {
+  printf("\n");
+}
+void ok() {
+  printf(".");
+}
+bool no_errors = true;
+void fail() {
+  no_errors = false;
+  printf("\n!!!!!!!!!!!!!!!!!!!!! FAILED !!!!!!!!!!!!!!!!!!!!!\n");
+}
+void okfail(bool b) {
+  if (b) ok(); else fail();
+}
+
+int list_cmp<`a>(int cmp(`a,`a),list<`a> x,list<`a> y) {
+  if (x == null)
+    if (y == null) return 0;
+    else return -1;
+  if (y == null) return 1;
+  int c = cmp(x->hd,y->hd);
+  if (c != 0) return c;
+  return list_cmp(cmp,x->tl,y->tl);
+}
+
+void pr_string(string s) {
+  printf("%s; ",s);
+}
+
+void pr_int(int i) {
+  printf("%d;",i);
+}
+
+void pr_list(list<int> x) {
+  printf("[");
+  List::iter(pr_int,x);
+  printf("]\n");
+}
+
+int int_cmp(int a, int b) {
+  if (a == b) return 0;
+  if (a < b) return -1;
+  return 1;
+}
+
+int my_add(int i, int j) {
+  return i+j;
+}
+
+void return_from_try_test() {
+  try
+    return;
+  catch {
+  default:
+    printf("Wrong handler!\n");
+    return;
+  }
+}
+
+void break_in_try_test() {
+  printf("Testing break in try: ");
+  try {
+    for (int i = 5; i>0; i--) {
+      try {
+        if (i == 3) break;
+      }
+      catch {
+      default:
+        printf("INCORRECT HANDLER, break in try\n");
+        break;
+      }
+    }
+    throw List::List_mismatch;
+  }
+  catch {
+  default:
+    printf("break in try found\n");
+    break;
+  }
+}
+
+void continue_in_try_test() {
+  printf("Testing continue in try: ");
+  try {
+    for (int i = 5; i>0; i--) {
+      try continue;
+      catch {
+      default:
+        printf("INCORRECT HANDLER, continue in try\n");
+        break;
+      }
+    }
+    throw List::List_mismatch;
+  }
+  catch {
+  default:
+    printf("continue in try found\n");
+    break;
+  }
+}
+
+void list_test() {
+  test_begin("List");
+  // x = list from 1 to 10, backwards
+  list<int> x = null;
+  for (int i=1; i<11; i++) x = &cons(i,x);
+  // xrev = list from 1 to 10, forwards
+  list<int> xrev = null;
+  for (int i=1; i<11; i++) xrev = &cons(11-i,xrev);
+  okfail(0==list_cmp(int_cmp,List::rev(x),xrev));
+
+  // xrev2 = [1;1;2;2; ...;10;10]
+  list<int> xrev2 = null;
+  for (int i=1; i<11; i++) xrev2 = &cons(11-i,&cons(11-i,xrev2));
+  // test mergesort and append
+  okfail(0==list_cmp(int_cmp,xrev2,
+                     List::merge_sort(int_cmp,
+                                      List::append(x,x))));
+
+  // increment x in place
+  for (list<int> y = x; y != null; y=y->tl)
+    y->hd = y->hd + 1;
+  // xplus = list from 2 to 11, backwards
+  list<int> xplus = null;
+  for (int i=1; i<11; i++) xplus = &cons(i+1,xplus);
+  okfail(0==list_cmp(int_cmp,x,xplus));
+
+  // FIX:  casts are required for typechecking.  Should string constants
+  // have type char[?] or char[sz] ??
+  let slist = &cons((string)"hello",&cons((string)"world",null));
+  let rlist = List::rev(slist);
+  okfail(0==list_cmp(String::strcmp,slist,List::rev(rlist)));
+
+  list<int> xx = null;
+  list<int> yy = null;
+  // xx = list from 1 to 10, backwards
+  for (int i=1; i<11; i++) xx = &cons(i,xx);
+  // yy = list of 10 11's
+  for (int i=1; i<11; i++) yy = &cons(11,yy);
+  try {
+    okfail(0==list_cmp(int_cmp,yy,
+                       List::map2(my_add,xx,List::rev(xx))));
+  }
+  catch {
+  case List_mismatch:
+    fail();
+    break;
+  }
+  try {
+    List::map2(my_add,xx,List::append(xx,xx));
+    fail();
+  }
+  catch {
+  case List_mismatch:
+    ok();
+    break;
+  }
+  test_end();
+}
+
+void array_test() {
+  test_begin("Array");
+  uint x[?] = new { for i < 6 : 2*i }; // Note, not int x[?]
+  for (int i=0; i<6; i++)
+    okfail(x[i]==2*i);
+  for (int i=0; i<6; i+=2) {
+    let temp = x[i];
+    x[i] = x[i+1];
+    x[i+1] = temp;
+  }
+  for (int i=0; i<6; i+=2) {
+    okfail(x[i] == 2*(i+1));
+    okfail(x[i+1] == 2*i);
+  }
+  int z1[?] = new { for i < 10 : (int)(10-i) }; // 10 to 1
+  int z2[?] = new { for i < 10 : (int)(i+1) };  // 1 to 10
+  Array::qsort(int_cmp,z1,0,10);
+  for (int i=0; i<10; i++) {
+    okfail(z1[i]==z2[i]);
+  }
+  test_end();
+}
+
+void tuple_test() {
+  test_begin("Tuple");
+  let x = $(1,2);
+  let $(y,z) = x;
+  okfail(y==1);
+  okfail(z==2);
+  x[0]=-3;
+  x[1]=9;
+  let $(y2,z2) = x;
+  okfail(y2==-3);
+  okfail(z2==9);
+  test_end();
+}
+
+void pattern_match_test() {
+  test_begin("Patterns");
+  // char patterns
+  switch ((char)('a'+2)) { // Note, cast is needed to typecheck
+  case 'b': fail(); break;
+  case 'c': ok(); break;
+  case 'd': fail(); break;
+  default: fail(); break;
+  }
+  // tuple patterns
+  switch ($(1,2,3)) {
+  case $(1,3,2): fail(); break;
+  case $(1,2,3): ok(); break;
+  case $(2,1,3): fail(); break;
+  default: fail(); break;
+  }
+  // nested tuple patterns
+  switch ($($(1,2),3)) {
+  case $($(1,3),2): fail(); break;
+  case $($(1,2),3): ok(); break;
+  case $($(2,1),3): fail(); break;
+  default: fail(); break;
+  }
+  // & patterns
+  switch ($(&$(1,2),3)) {
+  case $(&$(1,3),2): fail(); break;
+  case $(&$(1,2),3): ok(); break;
+  case $(&$(2,1),3): fail(); break;
+  default: fail(); break;
+  }
+  // where patterns
+  switch ($(1,2,3)) {
+  case $(1,x,3) where x<2: fail(); break;
+  case $(1,x,3) where x==2: ok(); break;
+  case $(1,x,3) where x>2: fail(); break;
+  default: fail(); break;
+  }
+  test_end();;
+}
+
+void set_test() {
+  // UNTESTED:
+  // singleton
+  // compare
+  // fold
+  // fold_c
+  // app
+  // iter
+  // iter_c
+  // choose
+
+  test_begin("Set");
+  Set<int> x = Set::empty(int_cmp);
+  okfail(Set::is_empty(x));
+  x = Set::insert(x,9);
+  let x2 = x;
+  x = Set::insert(x,11);
+  x = Set::insert(x,2);
+  x = Set::insert(x,-2);
+  okfail(Set::member(x,9));
+  okfail(!Set::member(Set::delete(x,9),9));
+  okfail(Set::member(x,-2));
+  okfail(Set::member(Set::delete(x,9),-2));
+  okfail(!Set::member(x,4));
+  okfail(list_cmp(int_cmp,Set::elements(x),
+                  &cons(-2,&cons(2,&cons(9,&cons(11,null))))) == 0);
+  okfail(Set::subset(x2,x));
+  okfail(!Set::subset(x,x2));
+  okfail(Set::subset(x,x));
+  okfail(!Set::equals(x,x2));
+  okfail(Set::equals(x,x));
+  okfail(Set::member(Set::intersect(x2,x),9));
+  okfail(!Set::member(Set::intersect(x2,x),2));
+  okfail(Set::member(Set::diff(x,x2),11));
+  okfail(!Set::member(Set::diff(x,x2),9));
+  let x3 = Set::from_list(int_cmp,
+                          &cons(11,&cons(99,null)));
+  okfail(!Set::subset(x3,x));
+  okfail(!Set::subset(x,x3));
+  okfail(Set::cardinality(Set::union_two(x,x3))==5);
+  okfail(Set::member(Set::union_two(x,x3),9));
+  okfail(Set::member(Set::union_two(x,x3),99));
+  okfail(Set::member(Set::union_two(x,x3),11));
+  okfail(!Set::is_empty(x));
+
+  Set<string> s = Set::empty(String::strcmp);
+  s = Set::insert(s,"hello");
+  s = Set::insert(s,"world");
+  s = Set::insert(s,"sphinx");
+  s = Set::insert(s,"quartz");
+  okfail(list_cmp(String::strcmp,Set::elements(s),
+                  &cons((string)"hello",
+                        &cons((string)"quartz",
+                              &cons((string)"sphinx",
+                                    &cons((string)"world",null))))) == 0);
+  test_end();;
+}
+
+void pr_binding(int i, int j) {
+  printf("%d -> %d; ",i,j);
+}
+
+void dict_test() {
+  test_begin("Dict");
+  Dict<int,int> x = Dict::empty(int_cmp);
+  x = Dict::insert(x,34,68);
+  x = Dict::insert(x,1,2);
+  x = Dict::insert(x,5,10);
+  x = Dict::insert(x,-2,-4);
+  okfail(Dict::lookup(x,1)==2);
+  okfail(Dict::lookup(x,5)==10);
+  okfail(Dict::lookup(x,34)==68);
+  okfail(Dict::lookup(x,-2)==-4);
+  test_end();;
+}
+
+int hash_int(int i) { return i; }
+void hashtable_test() {
+  test_begin("Hashtable");
+  Table<int,int> x = Hashtable::create(17,int_cmp,hash_int);
+  Hashtable::insert(x,1,2);
+  Hashtable::insert(x,-4,445);
+  Hashtable::insert(x,300,2828);
+  okfail(Hashtable::lookup(x,1)==2);
+  okfail(Hashtable::lookup(x,-4)==445);
+  okfail(Hashtable::lookup(x,300)==2828);
+
+  Table<string,string> x2 = Hashtable::create(17,String::strcmp,hash_string);
+  Hashtable::insert(x2,"foo","bar");
+  Hashtable::insert(x2,"baz","rogue");
+  okfail(String::strcmp(Hashtable::lookup(x2,"foo"),"bar")==0);
+  okfail(String::strcmp(Hashtable::lookup(x2,"baz"),"rogue")==0);
+
+  test_end();;
+}
+
+void string_test() {
+  // UNTESTED:
+  // strpbrk
+  // strspn
+  // expand
+  // realloc_str
+
+  test_begin("String");
+
+  okfail(String::strcmp("hello","world") < 0);
+  okfail(String::strcmp("hello","hello") == 0);
+  okfail(String::strcmp("world","hello") > 0);
+
+  okfail(String::strcmp(String::substring("hello",2,2),"ll")==0);
+  okfail(String::strcmp(String::replace_suffix("hello.world","world","bar"),
+                        "hello.bar")==0);
+  // FIX:  polymorphism requires the cast char[sz]->char[?]
+  okfail(String::strcmp(String::strconcat_l(&cons((string)"hello ",
+                                                  &cons((string)"world",null))),
+                        "hello world")==0);
+  okfail(String::strcmp(String::str_sepstr(&cons((string)"hello",
+                                                 &cons((string)"world",null)),
+                                           "**"),
+                        "hello**world")==0);
+  // FIX:  polymorphism requires the cast char->Char
+  okfail(String::strcmp(String::implode(&cons((Char)'a',
+                                              &cons((Char)'b',
+                                                    &cons((Char)'c',null)))),
+                        "abc")==0);
+  switch ((char)String::explode("abc")->tl->hd) {
+  case 'a': fail(); break;
+  case 'b': ok(); break;
+  case 'c': fail(); break;
+  default: fail(); break;
+  }
+
+  let s1 = "hello";
+  okfail(String::strlen(s1)==5);
+  okfail(String::strleno(s1,2)==3);
+  s1[3]='\000'; // Note, this writes over a string constant.
+  okfail(String::strlen(s1)==3);
+  okfail(String::strleno(s1,2)==1);
+  okfail(String::strleno(s1,3)==0);
+  okfail(String::strleno(s1,4)==1);
+  let s2 = new { for i < 20 : '\000' };
+  okfail(String::strlen(s2)==0);
+  String::strcat(s2,s1);
+  okfail(String::strcmp(s2,s1)==0);
+  okfail(String::strcmp(s2,"hel")==0);
+  String::strcat(s2,s1);
+  okfail(String::strcmpo(s2,0,"helhel",0)==0);
+  okfail(String::strcmpo(s2,2,"helhel",2)==0);
+  okfail(String::strcmpo(s2,2,"xxlhel",2)==0);
+  String::strcato(s2,s1,4);
+  okfail(String::strcmp(s2,"helhelo")==0);
+  String::strcpy(s2,"foobar");
+  okfail(String::strcmp(s2,"foobar")==0);
+  String::strncpy(s2,1,"foobar",2,3);
+  okfail(String::strcmp(s2,"fobaar")==0);
+  okfail(String::strcmpo(s2,0,"xxxfobaar",3)==0);
+  okfail(String::strchr(s2,1,'a')==3);
+  okfail(String::strchr(s2,2,'z')==-1);
+  okfail(String::strrchr(s2,1,'a')==4);
+  okfail(String::strrchr(s2,2,'o')==-1);
+  okfail(String::strncmp(s2,1,"xxxobaax",3,4)==0);
+  okfail(String::strncmp(s2,1,"xxxobaax",3,5)!=0);
+  okfail(String::strncasecmp(s2,1,"xxxObAax",3,4)==0);
+  let s3 = String::strdup(s2);
+  okfail(String::strcmp(s3,s2)==0);
+
+  test_end();;
+}
+
+void buffer_test() {
+  test_begin("Buffer");
+  Buffer::T b = Buffer::create(5);
+  Buffer::add_char(b,'a');
+  okfail(String::strcmp(Buffer::contents(b),"a")==0);
+  Buffer::add_string(b,"bc");
+  okfail(String::strcmp(Buffer::contents(b),"abc")==0);
+  Buffer::add_string(b,"defg");
+  okfail(String::strcmp(Buffer::contents(b),"abcdefg")==0);
+  Buffer::add_substring(b,"efghijkl",3,4);
+  okfail(String::strcmp(Buffer::contents(b),"abcdefghijk")==0);
+  okfail(Buffer::length(b)==11);
+  test_end();;
+}
+
+void queue_test() {
+  test_begin("Queue");
+  Queue::Queue<string> q = Queue::create();
+  okfail(Queue::is_empty(q));
+  Queue::add(q,"a");
+  okfail(!Queue::is_empty(q));
+  Queue::add(q,"b");
+  okfail(String::strcmp(Queue::peek(q),"a") == 0);
+  okfail(String::strcmp(Queue::take(q),"a") == 0);
+  okfail(Queue::length(q) == 1);
+  test_end();;
+}
+
+void rope_test() {
+  test_begin("Rope");
+  Rope::rope r = Rope::from_string("hello world*");
+  let r2 = Rope::concat(r,r);
+  let r3 = Rope::concatl(&cons(Rope::from_string("xx"),
+                               &cons(Rope::from_string("yy"),null)));
+  okfail(Rope::length(r) == String::strlen("hello world*"));
+  okfail(Rope::length(r2) == 2*String::strlen("hello world*"));
+  okfail(Rope::cmp(r,r2) != 0);
+  okfail(Rope::cmp(r3,r3) == 0);
+  okfail(String::strcmp(Rope::to_string(r),"hello world*")==0);
+  okfail(String::strcmp(Rope::to_string(r2),"hello world*hello world*")==0);
+  okfail(String::strcmp(Rope::to_string(r3),"xxyy")==0);
+  test_end();;
+}
+
+void character_test() {
+  test_begin("Character");
+  okfail(isupper('A'));
+  okfail(!isupper('a'));
+  okfail(!isupper('9'));
+  okfail(!isupper('\000'));
+  okfail(!islower('A'));
+  okfail(islower('a'));
+  okfail(!islower('9'));
+  okfail(!islower('\000'));
+  okfail(!isdigit('A'));
+  okfail(!isdigit('a'));
+  okfail(isdigit('9'));
+  okfail(!isdigit('\000'));
+  okfail(isxdigit('A'));
+  okfail(isxdigit('a'));
+  okfail(!isxdigit('h'));
+  okfail(isxdigit('9'));
+  okfail(!isxdigit('\000'));
+  okfail(isspace(' '));
+  okfail(!isspace('9'));
+  okfail(!isspace('\000'));
+  okfail(isalpha('A'));
+  okfail(isalpha('a'));
+  okfail(isalpha('h'));
+  okfail(!isalpha('9'));
+  okfail(!isalpha('\000'));
+  okfail(isprint(' '));
+  okfail(isprint('A'));
+  okfail(isprint('a'));
+  okfail(isprint('h'));
+  okfail(isprint('9'));
+  okfail(!isprint('\000'));
+  okfail(!isgraph(' '));
+  okfail(isgraph('A'));
+  okfail(isgraph('a'));
+  okfail(isgraph('h'));
+  okfail(isgraph('9'));
+  okfail(!isgraph('\000'));
+  okfail(toupper('c')=='C');
+  okfail(toupper('C')=='C');
+  okfail(toupper('9')=='9');
+  okfail(tolower('c')=='c');
+  okfail(tolower('C')=='c');
+  okfail(tolower('9')=='9');
+  test_end();;
+}
+
+void xarray_test() {
+  test_begin("Xarray");
+  let xa = Xarray::create(3,(Char)'a');
+  Xarray::add(xa,'a');
+  Xarray::add(xa,'b');
+  Xarray::add(xa,'c');
+  okfail(Xarray::get(xa,0)=='a');
+  okfail(Xarray::get(xa,1)=='b');
+  okfail(Xarray::get(xa,2)=='c');
+  try { Xarray::get(xa,3); fail(); } catch { case Core::InvalidArg(x): ok(); break; }
+  Xarray::set(xa,1,'B');
+  okfail(Xarray::get(xa,1)=='B');
+  Xarray::add(xa,'d');
+  okfail(Xarray::get(xa,3)=='d');
+  try { Xarray::get(xa,4); fail(); } catch { case Core::InvalidArg(x): ok(); break; }
+  test_end();;
+}
+
+void bitvec_test() {
+  test_begin("Bitvec");
+  BITVEC b1 = Bitvec::new_empty(24);  // a 24-bit vector
+  Bitvec::set(b1,3);                  // set fourth and fifth bits
+  Bitvec::set(b1,4);
+  okfail(Bitvec::get(b1,3));
+  okfail(Bitvec::get(b1,4));
+  okfail(!Bitvec::get(b1,2));
+  let l1 = Bitvec::to_sorted_list(b1,24);
+  okfail(0==list_cmp(int_cmp,l1,
+                     &cons(3,&cons(4,null))));
+  BITVEC b2 = Bitvec::new_full(24);
+  BITVEC b3 = Bitvec::new_empty(24);
+  Bitvec::intersect_two(b3,b1,b2);
+  okfail(Bitvec::compare_two(b3,b1));
+  Bitvec::union_two(b3,b1,b2);
+  okfail(Bitvec::compare_two(b3,b2));
+  BITVEC b4 = Bitvec::new_empty(24);
+  Bitvec::diff_two(b3,b2,b1);
+  Bitvec::intersect_two(b3,b3,b1);
+  okfail(Bitvec::compare_two(b3,b4));
+  Bitvec::clear(b1,3);
+  Bitvec::clear(b1,4);
+  okfail(Bitvec::compare_two(b1,b4));
+  test_end();
+}
+
+void ref_test() {
+  test_begin("Ref");
+  ref<int> x = new_ref(4);
+  okfail(Ref::get(x)==4);
+  okfail(Ref::get(x)!=5);
+  Ref::set(x,2);
+  okfail(Ref::get(x)==2);
+  okfail(Ref::get(x)!=4);
+
+  ref<string> y = new_ref((string)"hello"); // FIX: cast required!
+  okfail(0==String::strcmp(Ref::get(y),"hello"));
+  okfail(0!=String::strcmp(Ref::get(y),"world"));
+  Ref::set(y,"world");
+  okfail(0!=String::strcmp(Ref::get(y),"hello"));
+  okfail(0==String::strcmp(Ref::get(y),"world"));
+  test_end();
+}
+
+void filename_test() {
+  // UNTESTED:
+  // gnuify
+  // NOT WORKING:
+  // current_dir_name  -- because can't have string global, bad initializer
+
+  test_begin("Filename");
+  string cwd = ".";
+  okfail(0==String::strcmp(Filename::concat(cwd,"foo"),
+                           "./foo"));
+  okfail(0==String::strcmp(Filename::chop_extension("foo.bar"),
+                           "foo"));
+  okfail(0==String::strcmp(Filename::dirname("/foo/bar"),
+                           "/foo"));
+  okfail(0==String::strcmp(Filename::basename("/foo/bar"),
+                           "bar"));
+  okfail(Filename::check_suffix("/foo/bar","bar"));
+  okfail(!Filename::check_suffix("/foo/bar","foo"));
+  test_end();
+}
+
+void float_test() {
+  test_begin("Float");
+  // FIX: parser is having trouble with floating point constants
+  float x;
+  float y;
+  x = (float)2;
+  y = (float)4;
+  okfail(y==x*x);
+  okfail(y==x+x);
+  okfail(y!=3*x);
+  okfail(y!=y+x);
+  okfail(x==y-x);
+  okfail(x==y/x);
+  test_end();
+}
+
+static int addn(int env, int arg) {
+  return arg + env;
+}
+
+static int addpair($(int,int)@ x) {
+  return x[0] + x[1];
+}
+
+void fn_test() {
+  test_begin("Fn");
+  fn<int,int> inc = make_fn(addn,1);
+  fn<int,int> dec = make_fn(addn,-1);
+  fn<int,int> blah = compose(inc,dec);
+  fn<$(int,int)@,int> addp = fp2fn(addpair);
+  fn<int,fn<int,int>> addc = curry(addp);
+  fn<$(int,int)@,int> addu = uncurry(addc);
+  okfail(apply(inc,0) == 1);
+  okfail(apply(dec,0) == -1);
+  okfail(apply(blah,0) == 0);
+  okfail(apply(addp,&$(1,2)) == 3);
+  okfail(apply(apply(addc,1),2) == 3);
+  okfail(apply(addu,&$(1,2)) == 3);
+  list<int> xs = null;
+  for (int i = 0; i < 10; i ++)
+    xs = &cons(i,xs);
+  xs = map_fn(apply(addc,2),xs);
+  bool okay = true;
+  for (int i = 11; xs != null; xs = xs->tl, i--) {
+    if (xs->hd != i) okay = false;
+  }
+  okfail(okay);
+  test_end();
+}
+
+//////////////////////////// Pretty-printer test
+using PP {
+enum term {
+  Var(string),
+  App(enum term,enum term),
+  Lam(string,enum term)
+};
+bool is_lam(enum term t) {
+  switch (t) {
+  case Lam(x,t1): return true;
+  default: return false;
+  }
+}
+Doc pp_term(enum term t) {
+  switch (t) {
+  case Var(x):
+    return text(x);
+  case App(t1,t2):
+    if (is_lam(t1))
+      return
+        concat(text("("),
+               concat(pp_term(t1),
+                      concat(text(")"),
+                             concat(text("("),
+                                    concat(pp_term(t2),
+                                           text(")"))))));
+      else return
+             concat(pp_term(t1),
+                    concat(text("("),
+                           concat(pp_term(t2),
+                                  text(")"))));
+  case Lam(x,t1):
+    return
+      concat(text("\\"),
+             concat(text(x),
+                    concat(text("."),
+                           pp_term(t1))));
+  }
+}
+void pp_test() {
+  test_begin("PP");
+  let x = Var("x");
+  let y = Var("y");
+  let z = Var("z");
+  let t1 = Lam("x",App(x,x));
+  let t2 = App(t1,t1);
+  okfail(0==String::strcmp("\\x.x(x)",string_of_doc(pp_term(t1),72)));
+  okfail(0==String::strcmp("(\\x.x(x))(\\x.x(x))",
+                           string_of_doc(pp_term(t2),72)));
+  test_end();
+}
+}
+
+void id_test() {
+  // Untested:
+  // id_prn
+  // id_unique
+  test_begin("Id");
+  let i1 = Id::id_new("abc");
+  let i2 = Id::id_new("abc");
+  let i3 = Id::id_renew(i2);
+  okfail(0 != Id::id_compare(i1,i2));
+  okfail(0 != Id::id_compare(i1,i3));
+  okfail(0 != Id::id_compare(i3,i2));
+  okfail(0 == String::strcmp(Id::id_to_source(i1),Id::id_to_source(i2)));
+  okfail(0 == String::strcmp(Id::id_to_source(i1),Id::id_to_source(i3)));
+  okfail(0 == String::strcmp(Id::id_to_source(i3),Id::id_to_source(i2)));
+  okfail(0 != String::strcmp(Id::id_to_string(i1),Id::id_to_string(i2)));
+  okfail(0 != String::strcmp(Id::id_to_string(i1),Id::id_to_string(i3)));
+  okfail(0 != String::strcmp(Id::id_to_string(i3),Id::id_to_string(i2)));
+  let i4 = Id::id_make("foo",3);
+  let i5 = Id::id_make("foo",3);
+  okfail(0 == Id::id_compare(i4,i5));
+  test_end();
+}
+
+using Arg {
+static int u_foo_foo = 0;
+void u_foo() {
+  u_foo_foo++;
+}
+static int i_foo_foo = 0;
+void i_foo(int i) {
+  i_foo_foo = i;
+}
+void r_foo(string s) {
+  printf("Got %s\n",s);
+}
+void a_foo(string s) {
+  printf("Anon %s\n",s);
+}
+void arg_test() {
+  // NOTE, TO TEST IT GIVE IT SOME ARGS!
+  test_begin("Arg");
+
+  let args = Core::std_args();
+  if (size(args)<=0) fail();
+  else if (size(args)==1) ok();
+  else {
+    // FIX: all this explicit casting to string is real annoying
+    let u = &$((string)"-u",Unit_spec(u_foo),(string)"unit");
+    let s_foo = Ref::new_ref((Bool)false); // FIX: annoying cast
+    let s = &$((string)"-s",Set_spec(s_foo),(string)"set");
+    let c_foo = Ref::new_ref((Bool)true);  // FIX: annoying cast
+    let c = &$((string)"-c",Clear_spec(c_foo),(string)"clear");
+    let i = &$((string)"-i",Int_spec(i_foo),(string)"int");
+    let r = &$((string)"-r",Rest_spec(r_foo),(string)"rest");
+    parse(&cons(u,&cons(s,&cons(c,&cons(i,&cons(r,null))))),
+          a_foo,
+          "Usage:");
+    printf("u_foo_foo=%d, "
+           "s_foo=%s, "
+           "c_foo=%s, "
+           "i_foo=%d\n",
+           u_foo_foo,
+           (Ref::get(s_foo))?(string)"true":(string)"false",
+           (Ref::get(c_foo))?(string)"true":(string)"false",
+           i_foo_foo);
+  }
+
+  test_end();
+}
+}
+
+void cyc_main() {
+  printf("*************** CYCLONE TEST SUITE ***************\n\n");
+
+  printf("EXCEPTIONS:\n");
+  try {
+    printf("Testing return in try: ");
+    return_from_try_test();
+    throw List_mismatch;
+  }
+  catch {
+  case List_mismatch:
+    printf("return in try found\n");
+    break;
+  }
+  break_in_try_test();
+  continue_in_try_test();
+
+  printf("\nLIBRARIES:\n");
+
+  list_test();
+  array_test();
+  tuple_test();
+  pattern_match_test();
+  set_test();
+  dict_test();
+  hashtable_test();
+  string_test();
+  buffer_test();
+  queue_test();
+  rope_test();
+  character_test();
+  xarray_test();
+  bitvec_test();
+  ref_test();
+  filename_test();
+  float_test();
+  fn_test();
+  pp_test();
+  id_test();
+  arg_test();
+
+  if (no_errors)
+    printf("\nDONE: there were no errors\n");
+  else
+    printf("\n!! ERRORS FOUND !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+}

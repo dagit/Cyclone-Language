@@ -1,0 +1,34 @@
+#include "core.h"
+#include "foo_tab.h"
+
+int c = (int)' ';
+
+xenum exn {ParseError};
+
+void yyerror(string s) {
+  printf("error: %s\n",s);
+  throw ParseError;
+}
+
+int yylex() {
+  if (c == EOF) return -1;
+  while (c == ' ' || c == '\n' || c == '\t') c = fgetc(cyc_stdin);
+  if (c >= (int)'0' && c <= (int)'9') {
+    int i = c - ((int)'0');
+    c = fgetc(cyc_stdin);
+    while (c >= (int)'0' && c <= (int)'9') {
+      i = i*10 + (c - ((int)'0'));
+      c = fgetc(cyc_stdin);
+    }
+    yylval = Integer(i);
+    return INT;
+  } else {
+    int old_c = c;
+    c = fgetc(cyc_stdin);
+    return old_c;
+  }
+}
+
+void cyc_main() {
+  yyparse();
+}

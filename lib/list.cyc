@@ -1,0 +1,549 @@
+////////////////////////////////////////////////////////////////////////////
+// Cyclone library, file list.pop                                         //
+// Copyright Greg Morrisett                                               //
+// January 2000, all rights reserved                                      //
+//                                                                        //
+////////////////////////////////////////////////////////////////////////////
+// list.cyc: defines generic lists and various operations over them,
+//           following the conventions of the Ocaml list library as much
+//           as possible.  Also, a reasonable attempt to make things as
+//           space efficient as possible, while remaining "functional".
+//
+
+#include "list.h"
+
+namespace List;
+
+// Return the length of a list. 
+int length<`a>(list<`a> x) {
+  int i = 0;
+
+  while (x != null) {
+    ++i;
+    x = x->tl;
+  }
+  return i;
+}
+
+// thrown when some function expects a non-empty list 
+// Note that there's no need to declare a type with the exception.
+// If we wanted List_empty to carry an int value, we would write:
+// exception int List_empty;
+xenum exn {List_empty};
+
+// return the first element in a list, if any, throw List_empty otherwise. 
+`a hd<`a>(list<`a> x) {
+  if (x == null) throw List_empty;
+  return x->hd;
+}
+
+// return the tail of a list, if any, throw List_empty otherwise. 
+list<`a> tl<`a>(list<`a> x) {
+  if (x == null) throw List_empty;
+  return x->tl;
+}
+
+// return a fresh copy of the list (same as map of the identity) 
+list<`a> copy<`a>(list<`a> x) {
+  list<`a> result, prev;
+
+  if (x == null) return null;
+  result = &cons{.hd=x->hd,.tl=null};
+  prev = result;
+  for (x=x->tl; x != null; x=x->tl) {
+    prev->tl = &cons(x->hd,null);
+    prev = prev->tl;
+  }
+  return result;
+}  
+
+// Apply a function to each element in a list, returning a new list. 
+list<`b> map<`a,`b>(`b f(`a),list<`a> x) {
+  list<`b> result,prev;
+
+  if (x == null) return null;
+  result = &cons(f(x->hd),null);
+  prev = result;
+  for (x=x->tl; x != null; x=x->tl) {
+    list<`b> temp = &cons(f(x->hd),null);
+    prev->tl = temp;
+    prev = temp;
+  }
+  return(result);
+}
+
+// Apply a function to each element in a list, returning a new list. 
+list<`b> map_c<`a,`b,`c>(`b f(`c,`a),`c env,list<`a> x) {
+  list<`b> result, prev;
+
+  if (x == null) return null;
+  result = &cons(f(env,x->hd),null);
+  prev = result;
+  for (x=x->tl; x != null; x=x->tl) {
+    prev->tl = &cons(f(env,x->hd),null);
+    prev = prev->tl;
+  }
+  return(result);
+}
+
+// thrown when two lists don't have the same size 
+xenum exn {List_mismatch};
+
+// Given two lists of the same length and a function, apply the function
+// to each pair of elements (in order) and collect the results in a new list.
+// Throws List_mismatch if the sizes of the lists aren't the same.
+list<`c> map2<`a,`b,`c>(`c f(`a,`b),list<`a> x,list<`b> y) {
+  list<`c> result, prev;
+
+  if (x == null && y == null) return null;
+  if (x == null || y == null) throw List_mismatch;
+
+  result = &cons(f(x->hd,y->hd),null);
+  prev = result;
+
+  x = x->tl;
+  y = y->tl;
+
+  while (x != null && y != null) {
+    prev->tl = &cons(f(x->hd,y->hd),null);
+    prev = prev->tl;
+    x = x->tl;
+    y = y->tl;
+  }
+  if (x != null || y != null) throw List_mismatch;
+  return(result);
+}
+
+// Apply some function to each element of the list, but don't bother to
+// save the result.  Similar to Ocaml's List.iter but doesn't require
+// void type for the result of the function.
+void app<`a,`b>(`b f(`a),list<`a> x) {
+  while (x != null) {
+    f(x->hd);
+    x = x->tl;
+  }
+}
+
+void app_c<`a,`b,`c>(`c f(`a,`b),`a env,list<`b> x) {
+  while (x != null) {
+    f(env,x->hd);
+    x = x->tl;
+  }
+}
+
+// same as app but with void functions -- unlike Popcorn, the iter
+// functions are no longer needed because we treat "void" as a boxed
+// type.  
+void iter<`a>(void f(`a),list<`a> x) {
+  while (x != null) {
+    f(x->hd);
+    x = x->tl;
+  }
+}
+// same as app_c but with void functions
+void iter_c<`a,`b>(void f(`b,`a),`b env,list<`a> x) {
+  while (x != null) {
+    f(env,x->hd);
+    x = x->tl;
+  }
+}
+
+// Same as app, but generalized to a pair of lists.  Throws List_mismatch
+// if the lengths of the list aren't the same.  
+void app2<`a,`b,`c>(`c f(`a,`b),list<`a> x,list<`b> y) {
+  while (x != null && y != null) {
+    f(x->hd,y->hd);
+    x = x->tl;
+    y = y->tl;
+  }
+  if (x != null || y != null) throw List_mismatch;
+}
+
+void app2_c<`a,`b,`c,`d>(`d f(`a,`b,`c),`a env,list<`b> x,list<`c> y) {
+  while (x != null && y != null) {
+    f(env,x->hd,y->hd);
+    x = x->tl;
+    y = y->tl;
+  }
+  if (x != null || y != null) throw List_mismatch;
+}
+
+// Same as iter, but generalized to a pair of lists.  Throws List_mismatch
+// if the lengths of the list aren't the same.  
+void iter2<`a,`b>(void f(`a,`b),list<`a> x,list<`b> y) {
+  while (x != null && y != null) {
+    f(x->hd,y->hd);
+    x = x->tl;
+    y = y->tl;
+  }
+  if (x != null || y != null) throw List_mismatch;
+}
+void iter2_c<`a,`b,`c>(void f(`a,`b,`c),`a env,list<`b> x,list<`c> y) {
+  while (x != null && y != null) {
+    f(env,x->hd,y->hd);
+    x = x->tl;
+    y = y->tl;
+  }
+  if (x != null || y != null) throw List_mismatch;
+}
+
+// Given a list [x1,x2,...,xn-1,xn], a function f, and an accumulator a,
+// return f(f(...(f(x2,f(x1,a))),xn-1),xn).  Notice that the function is
+// first applied to the left-most element of the list.
+`a fold_left<`a,`b>(`a f(`a,`b),`a accum,list<`b> x) {
+  while (x != null) {
+    accum = f(accum,x->hd);
+    x = x->tl;
+  }
+  return(accum);
+}
+
+`a fold_left_c<`a,`b,`c>(`a f(`c,`a,`b),`c env,`a accum,list<`b> x) {
+  while (x != null) {
+    accum = f(env,accum,x->hd);
+    x = x->tl;
+  }
+  return(accum);
+}
+
+// Given a list [x1,x2,....,xn-1,xn], a function f, and an accumulator a,
+// return f(x1,f(x2,...,f(xn-1,f(xn,a))...)).  Notice that the function is
+// first applied to the right-most element of the list. 
+`b fold_right<`a,`b>(`b f(`a,`b),list<`a> x,`b accum) {
+  if (x == null) return accum;
+  else return(f(x->hd,fold_right(f,x->tl,accum)));
+}
+`b fold_right_c<`a,`b,`c>(`b f(`c,`a,`b),`c env,list<`a> x,`b accum) {
+  if (x == null) return accum;
+  else return(f(env,x->hd,fold_right_c(f,env,x->tl,accum)));
+}
+
+// Given [x1,...,xn] and [y1,...,ym], return [xn,...,x1,y1,...,ym].
+// That is, the first list reversed and appended to the second list.
+list<`a> revappend<`a>(list<`a> x,list<`a> y) {
+  while (x != null) {
+    y = &cons(x->hd,y);
+    x = x->tl;
+  }
+  return(y);
+}
+
+// Return the reverse of a list. 
+list<`a> rev<`a>(list<`a> x) {
+  return(revappend(x,null));
+}
+
+// Imperatively reverse a list 
+list<`a> imp_rev<`a>(list<`a> x) {
+  if (x == null) return x;
+  else {
+    list<`a> first = x;
+    list<`a> second = x->tl;
+    x->tl = null;
+    while (second != null) {
+      list<`a> temp = second->tl;
+      second->tl = first;
+      first = second;
+      second = temp;
+    } 
+    return first;
+  }
+}
+      
+// Return two appended lists -- creates sharing.
+list<`a> append<`a>(list<`a> x,list<`a> y) {
+  list<`a> result, prev;  // we'd really like local declarations for these.
+
+  if (x == null) return y;
+  if (y == null) return x;
+  result = &cons(x->hd,null);
+  prev = result;
+  for (x=x->tl; x != null; x=x->tl) {
+    prev->tl = &cons(x->hd,null);
+    prev = prev->tl;
+  }
+  prev->tl = y;
+  return(result);
+}
+
+// Modify x so that y is appended to it -- if x is empty, return y else
+// return the modified list x.
+list<`a> imp_append<`a>(list<`a> x,list<`a> y) {
+  list<`a> z;
+
+  if (x == null) return y;
+  if (y == null) return x;
+  for(z = x; z->tl != null; z = z->tl) 
+    // skip
+    ;
+  z->tl = y;
+  return x;
+}
+
+//FIX: >> problem
+// Flatten a list of lists into a new list 
+list<`a> flatten<`a>(list<list<`a>> x) {
+  return fold_right(append,x,null);
+}
+
+// Given a partial order less_eq on 'a elements and a list, return
+// the list sorted by less_eq.  Uses a merge sort.  The less_eq
+// function should return 0 if the elements are equal, i < 0 if
+// the first is less than the second, and i > 0 otherwise.
+list<`a> merge_sort<`a>(int less_eq(`a,`a), list<`a> x)
+{
+  list<`a> a = null;
+  list<`a> b = null;
+  
+  if ((x == null) || (x->tl == null))
+    return(x);
+
+  // split into two lists
+  while (x != null) {
+    a = &cons(x->hd,a);
+    x = x->tl;
+    if (x != null) {
+      b = &cons(x->hd,b);
+      x = x->tl;
+    }
+  }
+  a = merge_sort(less_eq,a);
+  b = merge_sort(less_eq,b);
+  return(merge(less_eq,a,b));
+}
+
+list<`a> merge<`a>(int less_eq(`a,`a),list<`a> a,list<`a> b) {
+  list<`a> c,d;
+
+  // Dan bug fix: now works on empty lists by special-casing it first:
+  if (a==null) return b;
+  if (b==null) return a;
+  
+  // merge the two lists:
+  //   d = beginning of the merged list
+  //   c = current cons cell
+ 
+  if (less_eq(a->hd,b->hd) <= 0) {
+    c = a; d = a; a = a->tl; 
+  } else {
+    c = b; d = b; b = b->tl;
+  }
+  // walk through a and b
+  while ((a != null) && (b != null)) {
+    // add a to the list else add b
+    if (less_eq(a->hd, b->hd) <= 0) {
+      c->tl = a;
+      c = a;
+      a = a->tl;
+    } else {
+      c->tl = b;
+      c = b;
+      b = b->tl;
+    }
+  }
+  // splice in the rest of the other list
+  if (a == null)
+    c->tl = b;
+  else
+    c->tl = a;
+  return(d);
+}
+
+// thrown when nth doesn't have enough elements in the list. 
+xenum exn {Nth};
+
+// Given [x0,x1,...,xn], return the ith element of the list (0 <= i <= n).
+// Throw Nth if the list doesn't have enough elements.  Notice that the
+// indexing is zero-based.
+`a nth<`a>(list<`a> x,int i) {
+
+  while (i > 0 && x != null) {
+    --i;
+    x = x->tl;
+  }
+  if (i < 0 || x == null) throw Nth;
+  return(x->hd);
+}
+
+// Given a predicate on 'a values, determine whether every element in a list
+// satisfies the predicate.
+bool forall<`a>(bool pred(`a),list<`a> x) {
+  while (x != null && pred(x->hd)) x=x->tl; // modified by Dan
+  return(x == null);
+}
+bool forall_c<`a,`b>(bool pred(`a,`b),`a env,list<`b> x) {
+  while (x != null && pred(env,x->hd)) x=x->tl; 
+  return(x == null);
+}
+
+// Given a predicate on 'a values, determine whether there exists an element
+// in the list that satisfies the predicate.
+bool exists<`a>(bool pred(`a),list<`a> x) {
+  while (x != null && (!pred(x->hd))) x=x->tl; // modified by Dan
+  return(x != null);
+}
+
+// Given [x1,...,xn] and [y1,...,yn], return [(x1,y1),...,(xn,yn)].  
+// Throws List_mismatch if the lengths are not the same.
+list<$(`a,`b)@> zip<`a,`b>(list<`a> x,list<`b> y) {
+  list<$(`a,`b)@> result, prev;
+  
+  if (x == null && y == null) return null;
+  if (x == null || y == null) throw List_mismatch;
+
+  result = &cons(&$(x->hd,y->hd),null);
+  prev = result;
+
+  x = x->tl;
+  y = y->tl;
+
+  while (x != null && y != null) {
+    prev->tl = &cons(&$(x->hd,y->hd),null);
+    prev = prev->tl;
+    x = x->tl;
+    y = y->tl;
+  }
+  if (x != null || y != null) throw List_mismatch;
+  return(result);
+}
+
+// Given [(x1,y1),...,(xn,yn)], return ([x1,...,xn],[y1,...,yn]) 
+$(list<`a>,list<`b>)@ split<`a,`b>(list<$(`a,`b)@> x) {
+  list<`a> result1, prev1;
+  list<`b> result2, prev2;
+  
+  if (x == null) return &$(null,null);
+
+  prev1 = result1 = &cons(x->hd[0],null);
+  prev2 = result2 = &cons(x->hd[1],null);
+
+  for (x=x->tl; x != null; x=x->tl) {
+    prev1->tl = &cons(x->hd[0],null);
+    prev2->tl = &cons(x->hd[1],null);
+    prev1 = prev1->tl;
+    prev2 = prev2->tl;
+  }
+  return(&$(result1,result2));
+}
+
+// Given [(x1,y1),...,(xn,yn)], return ([x1,...,xn],[y1,...,yn]) 
+$(list<`a>,list<`b>,list<`c>)@ split3<`a,`b,`c>(list<$(`a,`b,`c)@> x) {
+  list<`a> result1,prev1;
+  list<`b> result2,prev2;
+  list<`c> result3,prev3;
+  
+  if (x == null) return &$(null,null,null);
+
+  prev1 = result1 = &cons(x->hd[0],null);
+  prev2 = result2 = &cons(x->hd[1],null);
+  prev3 = result3 = &cons(x->hd[2],null);
+
+  for (x=x->tl; x != null; x=x->tl) {
+    prev1->tl = &cons(x->hd[0],null);
+    prev2->tl = &cons(x->hd[1],null);
+    prev3->tl = &cons(x->hd[2],null);
+    prev1 = prev1->tl;
+    prev2 = prev2->tl;
+    prev3 = prev3->tl;
+  }
+  return(&$(result1,result2,result3));
+}
+
+
+// Given a list [x1,...,xn] and x, determine if x is in the list.  Uses
+// physical equality for comparison.
+bool memq<`a>(list<`a> l, `a x) {
+  while (l != null) {
+    if (l->hd == x) return(true);
+    l = l->tl;
+  }
+  return(false);
+}
+
+bool mem<`a>(int compare(`a,`a), list<`a> l, `a x) {
+  while (l != null) {
+    if (compare(l->hd,x)==0) return true;
+    l = l->tl;
+  }
+  return false;
+}
+
+// now defined in Core
+// exn Not_found;
+
+// Given an association list [(k1,d1),...,(kn,dn)] and a key x,
+// return the first di such that ki = x.  Uses physical equality.
+// Throws Not_found if no such ki exists.
+`b assoc<`a,`b>(list<$(`a,`b)@> l,`a x) {
+  while (l != null) {
+    if (l->hd[0] == x) return(l->hd[1]);
+    l = l->tl;
+  }
+  throw Core::Not_found;
+}
+
+`b assoc_cmp<`a,`b>(int compare(`a,`a),list<$(`a,`b)@> l,`a x) {
+  while (l != null) {
+    if (compare(x,l->hd[0]) == 0) return(l->hd[1]);
+    l = l->tl;
+  }
+  throw Core::Not_found;
+}
+
+// Given an association list [(k1,d1),...,(kn,dn)] and a key x,
+// returns true iff there exists a ki = x.
+bool mem_assoc<`a,`b>(list<$(`a,`b)@> l,`a x) {
+  while (l != null) {
+    if (l->hd[0] == x) return(true);
+    l = l->tl;
+  }
+  return(false);
+}
+
+// checks that a list of elements is unique -- assumes they're sorted
+// returns an element that is duplicated if one exists, otherwise returns
+// null.
+Core::Opt_t<`a> check_unique<`a>(int compare(`a,`a),list<`a> x) {
+  while (x != null) {
+    if (x->tl != null) 
+      if (compare(x->hd,x->tl->hd) == 0) return &Core::Opt(x->hd);
+    x = x->tl;
+  }
+  return null;
+}
+
+// makes a new array with index i being the ith element of the list
+`a to_array<`a>(list<`a> x)[?] {
+  int s;
+  `a arr[?];
+
+  s = length(x);
+  arr = new {for i < s : x->hd};
+  for(int i = 0; i < s; ++i, x = x->tl)
+    arr[i] = x->hd;
+  return arr;
+}
+
+// makes a new list with ith element arr[i]
+list<`a> from_array<`a>(`a arr[?]) {
+  list<`a> ans = null;
+  for(unsigned int i = sizeof(arr)-1; i >= 0; --i)
+    ans = &cons(arr[i],ans);
+  return ans;
+}
+
+list<`a> tabulate<`a>(int n, `a f(int)) {
+  list<`a> res = null;
+  for (int i = 0; i < n; ++i) {
+    res = &cons(f(i),res);
+  }
+  return imp_rev(res);
+}
+
+list<`a> tabulate_c<`a,`b>(int n, `a f(`b,int), `b env) {
+  list<`a> res = null;
+  for (int i = 0; i < n; ++i) {
+    res = &cons(f(env,i),res);
+  }
+  return imp_rev(res);
+}

@@ -1,0 +1,658 @@
+{
+#include "core.h"
+#include "list.h"
+#include "lexing.h"
+#include "set.h"
+#include "string.h"
+#include "hashtable.h"
+#include "parse.h"
+#include "position.h"
+#include "dict.h"
+
+using Core;
+using List;
+using Lexing;
+using Parse;
+using Absyn;
+using String;
+using Position;
+
+void yyerror(string s) { 
+  post_error
+    (mk_err_parse
+     (segment_of_abs(yylloc->first_line,yylloc->last_line), s));
+} 
+
+namespace Lex {
+
+/************************** RESERVED WORDS **************************/
+
+static Opt_t<Hashtable::Table<string,Short>> rw = null;
+  // Fix: having to cast is a pain
+static $(string,short) rw_array[64] = {
+  $((string)"Bool", (short)BOXED_BOOL),
+  $((string)"Char", (short)BOXED_CHAR),
+  $((string)"Double", (short)BOXED_DOUBLE),
+  $((string)"Float", (short)BOXED_FLOAT),
+  $((string)"Int", (short)BOXED_INT),
+  $((string)"Long", (short)BOXED_LONG),
+  $((string)"Short", (short)BOXED_SHORT),
+  $((string)"abstract", (short)ABSTRACT),
+  $((string)"auto", (short)AUTO),
+  $((string)"bool", (short)BOOL),
+  $((string)"break", (short)BREAK),
+  $((string)"case", (short)CASE),
+  $((string)"catch", (short)CATCH),
+  $((string)"char", (short)CHAR),
+  $((string)"codegen", (short)CODEGEN),
+  $((string)"const", (short)CONST),
+  $((string)"continue", (short)CONTINUE),
+  $((string)"cut", (short)CUT),
+  $((string)"default", (short)DEFAULT),
+  $((string)"do", (short)DO),
+  $((string)"double", (short)DOUBLE),
+  $((string)"else", (short)ELSE),
+  $((string)"enum", (short)ENUM),
+  $((string)"extern", (short)EXTERN),
+  $((string)"fallthru", (short)FALLTHRU),
+  $((string)"false", (short)FALSE),
+  $((string)"fill", (short)FILL),
+  $((string)"float", (short)FLOAT),
+  $((string)"for", (short)FOR),
+  $((string)"fprintf", (short)FPRINTF),
+  $((string)"goto", (short)GOTO),
+  $((string)"if", (short)IF),
+  $((string)"inline", (short)INLINE),
+  $((string)"int", (short)INT),
+  $((string)"let", (short)LET),
+  $((string)"long", (short)LONG),
+  $((string)"namespace", (short)NAMESPACE),
+  $((string)"new", (short)NEW),
+  $((string)"null", (short)NULL),
+  $((string)"printf", (short)PRINTF),
+  $((string)"register", (short)REGISTER),
+  $((string)"restrict", (short)RESTRICT),
+  $((string)"return", (short)RETURN),
+  $((string)"short", (short)SHORT),
+  $((string)"signed", (short)SIGNED),
+  $((string)"size", (short)SIZE),
+  $((string)"sizeof", (short)SIZEOF),
+  $((string)"splice", (short)SPLICE),
+  $((string)"static", (short)STATIC),
+  $((string)"struct", (short)STRUCT),
+  $((string)"switch", (short)SWITCH),
+  $((string)"throw", (short)THROW),
+  $((string)"true", (short)TRUE),
+  $((string)"try", (short)TRY),
+  $((string)"typedef", (short)TYPEDEF),
+  $((string)"union", (short)UNION),
+  $((string)"unsigned", (short)UNSIGNED),
+  $((string)"using", (short)USING),
+  $((string)"void", (short)VOID),
+  $((string)"volatile", (short)VOLATILE),
+  $((string)"where", (short)WHERE),
+  $((string)"while", (short)WHILE),
+  $((string)"xenum", (short)XENUM),
+  $((string)"xprintf", (short)XPRINTF)
+};
+
+extern void typedef_init();
+
+void lex_init() {
+  /* build reserved word dictionary */
+  Hashtable::Table<string,Short> t = 
+     Hashtable::create(101, strcmp, Hashtable::hash_string);
+  rw = &Opt(t);
+  for (int i=0; i < size(rw_array); ++i) 
+    Hashtable::insert(t, rw_array[i][0], (Short)rw_array[i][1]);
+
+  typedef_init();
+}
+
+$(sign,int) token_int_pair = $(Signed,0);
+$(sign,int)@ token_int = &token_int_pair;
+char        token_char = '\000';
+string      token_string = "";
+$(list<var>,var) token_id_pair = $(null,(string)"*bogus*");
+qvar        token_qvar = &token_id_pair;
+
+static void err<`a>(string msg,Lexbuf<`a> lb) {
+  segment s = segment_of_abs(lexeme_start(lb),lexeme_end(lb));
+  post_error(mk_err_lex (s,msg));
+}
+int runaway_start = 0;
+static void runaway_err<`a>(string msg,Lexbuf<`a> lb) {
+  segment s = segment_of_abs(runaway_start,lexeme_start(lb));
+  post_error(mk_err_lex (s,msg));
+}
+
+static int comment_depth = 0;
+
+/************************ INTEGER CONSTANTS ************************/
+
+/* String to integer conversions.  Core::int_of_string does not handle
+   all of the cases we want: it does not handle a trailing 'u', 'U',
+   'l', or 'L'; and in particular, it does not treat '0'['0'-'7'] as
+   an octal number.  */
+/* Helper function that tells where the digits in the int constant
+   end */
+int get_finish(string s) {
+  int len = String::strlen(s);
+  if (len-2>=0) {
+    char c = s[len-2];
+    if (c=='u'||c=='U'||c=='l'||c=='L') return len-2;
+  }
+  if (len-1>=0) {
+    char c = s[len-1];
+    if (c=='u'||c=='U'||c=='l'||c=='L') return len-1;
+  }
+  return len;
+}
+/* Helper function that tells whether the int constant is signed
+   or unsigned */
+static sign get_sign(string s) {
+  int len = String::strlen(s);
+  if (len-2>0 && (s[len-2]=='u' || s[len-2]=='U')) return Unsigned;
+  if (len-1>0 && (s[len-1]=='u' || s[len-1]=='U')) return Unsigned;
+  return Signed;
+}
+/* Helper function, copied from core.pop (where it is hidden) */
+static int int_of_char(char c) {
+  if ('0'<=c && c<='9')      return ((int)c)-((int)'0');
+  else if ('a'<=c && c<='f') return 10+((int)c)-((int)'a');
+  else if ('A'<=c && c<='F') return 10+((int)c)-((int)'A');
+  else throw InvalidArg("string to integer conversion");
+}
+/* The arithmetic in this function will be signed */
+static signed int intconst_signed(string s, int start, signed int base) {
+  signed int n = 0;
+  int finish = get_finish(s);
+  for(int i=start; i<finish; i++)
+    n = n*base+int_of_char(s[i]); // Signed arithmetic!!
+  return n;
+}
+/* The arithmetic in this function will be unsigned */
+static unsigned int intconst_unsigned(string s, int start, unsigned int base) {
+  unsigned int n = 0;
+  int finish = get_finish(s);
+  for(int i=start; i<finish; i++)
+    n = n*base+(unsigned int)int_of_char(s[i]); // Unsigned arithmetic!!
+  return n;
+}
+/* The main conversion function */
+$(sign, int)@ intconst(string s, int start, int base) {
+  sign u = get_sign(s);
+  switch (u) {
+  case Signed:
+    /* Here the int part will be signed */
+    return &$(u,intconst_signed(s,start,base));
+  case Unsigned:
+    /* Here the int part will be converted to signed, but
+       the sign part will show that it should be converted
+       back to unsigned. */
+    return &$(u,(signed int)intconst_unsigned(s,start,base));
+  }
+}
+
+/*********************** CHARACTER CONSTANTS ***********************/
+
+static char char_for_octal_code<`a>(Lexbuf<`a> lb, int start, int howmany) {
+  int c = 0;
+  for (int i = 0; i<howmany; i++)
+    c = (8 * c) + lexeme_char(lb,start+i) - 48;
+  return (char)c;
+}
+
+static char char_for_hex_code(string s, int start) {
+  int c = 0; 
+  int len = String::strlen(s);
+  for (int i = 0; start+i<len; i++) {
+    char x = s[start+i];
+    if ('0'<=x && x<='9') 
+      c = (16 * c) + ((int)x)-((int)'0');
+    else if ('A'<=x && x<='F') 
+      c = (16 * c) + ((int)x)-((int)'A');
+    else if ('a'<=x && x<='f') 
+      c = (16 * c) + ((int)x)-((int)'a');
+    else break;
+  }
+  return (char)c;
+}
+
+/************************* STRING CONSTANTS *************************/
+
+string string_buffer = "xxxxxxxxxx";
+int    string_pos    = 0;
+void store_string_char(char c) {
+  int sz = size(string_buffer);
+  if (string_pos >= sz) {
+    int newsz = sz;
+    while (string_pos >= newsz) newsz = newsz * 2;
+    string str = new {for i < newsz : (i < sz) ? string_buffer[i] : '\000'};
+    string_buffer = str;
+  }	
+  string_buffer[string_pos] = c;
+  ++string_pos;
+}
+string get_stored_string () {
+  string str = String::substring(string_buffer,0,string_pos);
+  string_pos = 0;
+  return str;
+} 
+
+/******************* NAMESPACE, USING, AND TYPEDEF  *******************/
+
+static struct Ldecls {
+  // records typedefs and namespaces declared in a scope
+  Set::Set<var> typedefs;
+  Set::Set<var> namespaces;
+};
+typedef struct Ldecls @ldecls;
+
+static struct Lvis {  // the King lives!
+  // records the namespaces whose declarations are visible in a scope
+  list<var>       current_namespace;
+  list<list<var>> imported_namespaces;
+};
+typedef struct Lvis @lvis;
+
+static struct Lstate {
+  // lstack is the current nested scope structure,
+  // decls is the global declaration mapping
+  List<lvis>                   lstack; // invariant: never null -- in the type!
+  Dict::Dict<list<var>,ldecls> decls;
+};
+typedef struct Lstate @lstate_t;
+
+static Opt_t<lstate_t> lstate = null;
+
+static void typedef_init() {
+  let init_lvis = &Lvis{.current_namespace=null,
+			.imported_namespaces=null};
+  let init_lstack = &cons(init_lvis, null);
+  let init_decls = Dict::insert(Dict::empty(varlist_cmp),
+				null,
+				&Ldecls{.typedefs=Set::empty(strcmp),
+					.namespaces=Set::empty(strcmp)});
+  lstate = &Opt(&Lstate{.lstack=init_lstack,
+                        .decls=init_decls});
+}
+
+static void lex_sanitycheck() {
+  if (lstate == null /* JGM: can't happen now: || lstate->v->lstack == null*/)
+    throw Impossible("Lex: bad lexical state");
+}
+
+static list<var> get_absolute_namespace(List<var> ns) {
+  // ns is a relative namespace, we return the absolute namespace
+  // Invariant: ns != null -- in the type!
+  var n = ns->hd;
+  // For each enclosing scope...
+  for (list<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
+    lvis lv = ls->hd; // ... see what namespaces are visible
+    // ... and look in each such visible namespace
+    for (list<list<var>> x = 
+	   &cons(lv->current_namespace,lv->imported_namespaces);
+         x != null; x = x->tl) {
+      ldecls ld = Dict::lookup(lstate->v->decls,x->hd);
+      // ... for namespace n
+      if (Set::member(ld->namespaces,n))
+        // OK, we know ns refers to x.hd+ns
+        return List::append(x->hd,ns);
+    }
+  }
+  yyerror(xprintf("undeclared namespace %s",String::str_sepstr(ns,"::")));
+  return null; // FIX: can we return something better here? Do we have
+               // to give up and raise an exception?
+}
+static bool is_typedef_in_namespace(List<var> ns, var v) {
+  list<var> ans = get_absolute_namespace(ns);
+  try {
+    ldecls ld = Dict::lookup(lstate->v->decls,ans);
+    return Set::member(ld->typedefs,v);
+  } catch {
+  case Dict::Absent:
+    return false;
+  }
+}
+static bool is_typedef(qvar q) {
+  lex_sanitycheck();
+  if (q[0] != null) {
+    return is_typedef_in_namespace(q[0],q[1]);
+  }
+  // For each enclosing scope...
+  for (list<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
+    lvis lv = ls->hd; // ... see what namespaces are visible
+    // ... and look in each such visible namespace
+    for (list<list<var>> x = &cons(lv->current_namespace,
+				   lv->imported_namespaces);
+         x != null; x = x->tl) {
+      ldecls ld = Dict::lookup(lstate->v->decls,x->hd);
+      // ... for typedef q[1]
+      if (Set::member(ld->typedefs,q[1])) return true;
+    }
+  }
+  return false;
+}
+void enter_namespace(var s) {
+  lex_sanitycheck();
+  list<var> ns = lstate->v->lstack->hd->current_namespace;
+  list<var> new_ns = List::append(ns,&cons(s,null));
+  // Push the new namespace on the stack
+  lstate->v->lstack =
+    &cons(&Lvis{.current_namespace = new_ns,.imported_namespaces = null},
+          lstate->v->lstack);
+  // If this is the first time the new namespace has been encountered,
+  // make sure it is bound in the old namespace, and add an empty
+  // environment for the new namespace
+  ldecls ld = Dict::lookup(lstate->v->decls,ns);
+  if (!Set::member(ld->namespaces,s)) {
+    lstate->v->decls = Dict::insert(lstate->v->decls,
+				    ns,
+				    &Ldecls{.typedefs = ld->typedefs,
+					    .namespaces = 
+					    Set::insert(ld->namespaces,
+							s)});
+    lstate->v->decls = Dict::insert(lstate->v->decls,
+				    new_ns,
+				    &Ldecls{.typedefs = Set::empty(strcmp),
+					    .namespaces = Set::empty(strcmp)});
+
+  }
+}
+void leave_namespace() {
+  lex_sanitycheck();
+  lstate->v->lstack = lstate->v->lstack->tl;
+}
+void enter_using(qvar q) {
+  lex_sanitycheck();
+
+  let ns = (List<string>)List::append(q[0],&cons(q[1],null));
+  let ans = get_absolute_namespace(ns);
+  let imported = lstate->v->lstack->hd->imported_namespaces;
+
+  lstate->v->lstack->hd->imported_namespaces = &cons(ans,imported);
+}
+void leave_using() {
+  lex_sanitycheck();
+
+  let imported = lstate->v->lstack->hd->imported_namespaces;
+
+  lstate->v->lstack->hd->imported_namespaces = imported->tl;
+}
+void register_typedef(qvar q) {
+  // FIX: we assume that q is not in fact qualified
+  lex_sanitycheck();
+
+  let current = lstate->v->lstack->hd->current_namespace;
+  let ds = lstate->v->decls;
+  let ld = Dict::lookup(ds,current);
+  let new_ld = &Ldecls{.typedefs = Set::insert(ld->typedefs,q[1]),
+                     .namespaces = ld->namespaces};
+  lstate->v->decls = Dict::insert(ds,current,new_ld);
+}
+
+// can try interning strings once our hashtable resizes
+static short process_id(string s) {
+  try
+    return (short)(Hashtable::lookup(rw->v, s));
+  catch {
+  case Not_found: 
+    if (is_typedef(&$(null,s))) {
+      token_qvar = &$(null,s);
+      return (short)QUAL_TYPEDEF_NAME;
+    } else {
+      token_string = s;
+      return (short)IDENTIFIER;
+    }
+  }
+}
+
+static short process_qual_id(string s) {
+  int i = 0;
+  int len = String::strlen(s);
+  list<var> rev_vs = null;
+
+  while (i<len) {
+    int start = i;
+    for (; i < len && s[i] != ':'; i++) /* skip */ ;
+    if (start == i) // no progress -- first char is ':'
+      throw Impossible("bad namespace");
+    int vlen = i - start;
+    if (vlen == 0) {
+      fprintf(cyc_stderr,"Impossible vlen!");
+    }
+    var v = new_string(vlen);
+    strncpy(v,0,s,start,vlen);
+    rev_vs = &cons(v,rev_vs);
+    i += 2;
+  }
+  if (rev_vs == null)
+    throw Impossible("bad namespace");
+  var v = rev_vs->hd;
+  list<var> vs = List::rev(rev_vs->tl);
+  token_qvar = &$(vs,v);
+  if (is_typedef(token_qvar))
+    return (short)QUAL_TYPEDEF_NAME;
+  else 
+    return (short)QUAL_IDENTIFIER;
+}
+
+// Forward declarations of lexing functions 
+extern int token<`a>(Lexbuf<`a>);
+extern int strng<`a>(Lexbuf<`a>);
+extern int comment<`a>(Lexbuf<`a>);
+} // namespace Lex
+
+/* for parser -- must not be prefixed */
+int yylex() { 
+ int ans = Lex::token(lbuf->v);
+ yylloc->first_line = lexeme_start (lbuf->v);
+ yylloc->last_line  = lexeme_end   (lbuf->v);
+ switch (ans) {
+ case IDENTIFIER        : yylval = String_tok(Lex::token_string); break;
+ case QUAL_IDENTIFIER   : yylval = QualId_tok(Lex::token_qvar); break;
+ case QUAL_TYPEDEF_NAME : yylval = QualId_tok(Lex::token_qvar); break;
+ case TYPE_VAR          : yylval = String_tok(Lex::token_string); break;
+ case INTEGER_CONSTANT  : yylval = Int_tok(Lex::token_int); break;
+ case CHARACTER_CONSTANT: yylval = Char_tok(Lex::token_char); break;
+ case FLOATING_CONSTANT : yylval = Float_tok(Lex::token_string); break;
+ case STRING            : yylval = String_tok(Lex::token_string); break;
+ default: break;
+ }
+ return ans;
+} 
+
+namespace Lex;
+//*************************** LEXING RULES ***************************/
+}
+
+let newline = ('\n' | '\r' | "\r\n")
+
+rule token = parse
+/* Identifiers, type names, and keywords */
+  ['A'-'Z''a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
+      { return process_id (lexeme(lexbuf)); }
+| ['_']['A'-'Z''a'-'z''0'-'9''_']+
+      { return process_id (lexeme(lexbuf)); }
+/* Qualified identifiers and type names (e.g., Foo::bar) */
+| (['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*':'':')+
+  ['A'-'Z''a'-'z''_']['A'-'Z''a'-'z''0'-'9''_']*
+      { return process_qual_id(lexeme(lexbuf)); }
+/* Type variables */
+| '`'['A'-'Z''a'-'z''0'-'9''_']+
+      { token_string = lexeme(lexbuf); return TYPE_VAR; }
+/* Integer constants */
+| '0'['x''X']['0'-'9''a'-'f''A'-'F']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+      { token_int = intconst(lexeme(lexbuf),2,16);
+        return INTEGER_CONSTANT; }
+| '0'['0'-'7']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+      { token_int = intconst(lexeme(lexbuf),0,8);
+        return INTEGER_CONSTANT; }
+| '0'['0'-'9']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+      /* This is really an error case according to OSI C --
+         the leading 0 indicates this should be in octal. */
+      /* TODO: print a warning message? */
+      { token_int = intconst(lexeme(lexbuf),0,10);
+        return INTEGER_CONSTANT; }
+| ['1'-'9']['0'-'9']*((['u''U']['l''L']?)|(['l''L']['u''U']?))?
+      { token_int = intconst(lexeme(lexbuf),0,10);
+        return INTEGER_CONSTANT; }
+/* Floating-point constants */
+| ['0'-'9']+['e''E']['+''-']?['0'-'9']+['f''F''l''L']?
+      { token_string = lexeme(lexbuf);
+        return FLOATING_CONSTANT; }
+| ((['0'-'9']+'.')|(['0'-'9']+'.'['0'-'9']+)|('.'['0'-'9']+))
+  (['e''E']['+''-']?['0'-'9']+)?['f''F''l''L']?
+      { token_string = lexeme(lexbuf);
+        return FLOATING_CONSTANT; }
+/* Operators */
+| "==" { return  EQ_OP; }
+| "!=" { return  NE_OP; }
+| "<=" { return  LE_OP; }
+| ">=" { return  GE_OP; }
+| "++" { return  INC_OP; }
+| "--" { return  DEC_OP; }
+| "+=" { return  ADD_ASSIGN; }
+| "-=" { return  SUB_ASSIGN; }
+| "*=" { return  MUL_ASSIGN; }
+| "/=" { return  DIV_ASSIGN; }
+| "%="   { return  MOD_ASSIGN; }
+| "|="   { return  OR_ASSIGN; }
+| "^="   { return  XOR_ASSIGN; }
+| "&="   { return  AND_ASSIGN; }
+| "<<="  { return  LEFT_ASSIGN; }
+| ">>="  { return  RIGHT_ASSIGN; } 
+| "&&" { return  AND_OP; }
+| "||" { return  OR_OP; }  
+| "<<" { return  LEFT_OP; }
+/* JGM: see shift_expr and relational_expr -- we now parse >> as two
+ * separate > tokens.  */
+| ">>" { return  RIGHT_OP; }
+| "<>" { return  LEFT_RIGHT; }
+| "->" { return PTR_OP; }
+| "..." { return ELLIPSIS; }
+| newline                         { return  token(lexbuf); }
+/* comments */
+| "#"[^ '\n' '\r']*(newline)      { return  token(lexbuf); }
+| [' ' '\009' '\011' '\012']+     { return  token(lexbuf); }
+| "//"[^'\n' '\r']* newline       { return  token(lexbuf); }
+| "/*"  { comment_depth = 1; 
+	  runaway_start = lexeme_start(lexbuf); 
+	  comment(lexbuf); 
+	  return token(lexbuf); }
+/* string constants */
+| "\""
+  { string_pos = 0; 
+    runaway_start = lexeme_start(lexbuf);
+    strng(lexbuf);
+    token_string = get_stored_string();
+    return STRING; }
+/* character constants */
+| "'\\n'"   { token_char = '\n'; return CHARACTER_CONSTANT; }
+| "'\\t'"   { token_char = '\t'; return CHARACTER_CONSTANT; }
+| "'\\b'"   { token_char = '\b'; return CHARACTER_CONSTANT; }
+| "'\\r'"   { token_char = '\r'; return CHARACTER_CONSTANT; }
+| "'\\f'"   { token_char = '\f'; return CHARACTER_CONSTANT; }
+| "'\\v'"   { token_char = '\v'; return CHARACTER_CONSTANT; }
+| "'\\\\'"  { token_char = '\\'; return CHARACTER_CONSTANT; }
+/* single quote ('), decimal character code 39 - gcc doesn't like '\'' */
+| "'\\''"   { token_char = (char)39; return CHARACTER_CONSTANT; }
+| "'\\\"'"
+            { token_char = (char)34; return CHARACTER_CONSTANT; }
+/*| "'\\\034'"*/
+/*            { token_char = '\034'; return CHARACTER_CONSTANT; } */
+| "'\\a'"   { token_char = '\a'; return CHARACTER_CONSTANT; }
+| "'\\?'"   { token_char = '?'; return CHARACTER_CONSTANT; }
+/* octal character escapes */
+| "'\\" ['0'-'7']['0'-'7']['0'-'7'] "'"
+            { token_char = char_for_octal_code(lexbuf,2,3);
+              return CHARACTER_CONSTANT;
+            }
+| "'\\" ['0'-'7']['0'-'7'] "'"
+            { token_char = char_for_octal_code(lexbuf,2,2);
+              return CHARACTER_CONSTANT;
+            }
+| "'\\" ['0'-'7'] "'"
+            { token_char = char_for_octal_code(lexbuf,2,1);
+              return CHARACTER_CONSTANT;
+            }
+/* hex character escapes */
+| "'\\x" ['0'-'9''A'-'Z''a'-'z']+ "'"
+            { token_char = char_for_hex_code(lexeme(lexbuf),3);
+              return CHARACTER_CONSTANT;
+            }
+| "'" [^ '\\' '\'' '\n'] "'"
+    { token_char = lexeme_char(lexbuf,1);
+      return CHARACTER_CONSTANT;
+    }
+/* End of file */
+| eof { return -1; }
+/* Default case */
+| _   { return (int)(lexeme_char(lexbuf,0)); }
+
+and strng = parse
+    "\"" [' ''\n''\r''\t']* "\""
+  /* concatenate adjacent strings */
+                    { return strng(lexbuf); }
+  | "\""            { return 0; /* return value ignored */ }
+  | "\\" newline    { return strng(lexbuf); }
+  | "\\n"           { store_string_char('\n');   return strng(lexbuf); }
+  | "\\t"           { store_string_char('\t');   return strng(lexbuf); }
+  | "\\b"           { store_string_char('\b');   return strng(lexbuf); }
+  | "\\r"           { store_string_char('\r');   return strng(lexbuf); }
+  | "\\f"           { store_string_char('\f');   return strng(lexbuf); }
+  | "\\v"           { store_string_char('\v');   return strng(lexbuf); }
+  | "\\\\"          { store_string_char('\\');   return strng(lexbuf); }
+  | "\\'"           { store_string_char('\'');   return strng(lexbuf); }
+  | "\\\""          { store_string_char('"');    return strng(lexbuf); }
+  | "\\a"           { store_string_char('\a');   return strng(lexbuf); }
+  | "\\?"           { store_string_char('?');    return strng(lexbuf); }
+  /* octal character escapes */
+  | "\\" ['0'-'7']['0'-'7']['0'-'7']
+                    { store_string_char(char_for_octal_code(lexbuf,1,3));
+                      return strng(lexbuf);
+                    }
+  | "\\" ['0'-'7']['0'-'7']
+                    { store_string_char(char_for_octal_code(lexbuf,1,2));
+                      return strng(lexbuf);
+                    }
+  | "\\" ['0'-'7']
+                    { store_string_char(char_for_octal_code(lexbuf,1,1));
+                      return strng(lexbuf);
+                    }
+  /* hex character escapes */
+  | "\\x" ['0'-'9''A'-'Z''a'-'z']+
+                    { store_string_char(char_for_hex_code(lexeme(lexbuf),2));
+                      return strng(lexbuf);
+                    }
+  /* THESE ARE ALL DECIMAL CODES */
+  | [^ '"''\\''\n']   /* NOT double quote, backslash, or newline */
+                    { /* for efficiency, should have a while loop here */
+                      store_string_char (lexeme_char(lexbuf,0));
+		      return strng(lexbuf); }
+  | newline         { runaway_err("string ends in newline",lexbuf);
+                      return 0; /* return value ignored */
+                    }
+  | eof             { runaway_err("unterminated string",lexbuf);
+                      return 0; /* return value ignored */
+                    }
+  | _               { err("bad character following backslash in string",lexbuf);
+		      return strng(lexbuf); }
+and comment = parse
+   "/*"             { ++comment_depth; return comment(lexbuf); }
+ | "*/"             { --comment_depth; 
+		      if (comment_depth > 0) 
+			return comment(lexbuf);
+		      return 0; /* return value ignored */
+		    }
+ | newline          { return comment(lexbuf); }
+ | eof              { runaway_err("unterminated comment",lexbuf);
+                      return 0; /* return value ignored */ 
+                    }
+ | _                { return comment(lexbuf); }
+
+{
+
+
+}

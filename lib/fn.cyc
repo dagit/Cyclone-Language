@@ -1,0 +1,74 @@
+////////////////////////////////////////////////////////////////////////////
+// Cylone library, file fn.cyc                                            //
+// Copyright Greg Morrisett, Trevor Jim                                   //
+// September 2000, all rights reserved                                    //
+//                                                                        //
+// Defines "closures" and operations on them                              //
+////////////////////////////////////////////////////////////////////////////
+#include "fn.h"
+
+namespace Fn;
+
+enum Function<`arg,`res> {
+  Fun<`env>(`res (@)(`env,`arg), `env)
+};
+
+// make a closure out of a function pointer and environment
+fn<`arg,`res> make_fn<`arg,`res,`env>(`res f(`env,`arg), `env x) {
+  return Fun(f,x);
+}
+
+static `res fp_apply<`arg,`res>(`res f(`arg), `arg x) {
+  return f(x);
+}
+
+// convert a function pointer to a closure
+fn<`arg,`res> fp2fn<`arg,`res>(`res f(`arg)) {
+  return make_fn(fp_apply, f);
+}
+
+// apply closure f to argument x
+`res apply<`arg,`res>(fn<`arg,`res> f, `arg x) {
+  switch (f) {
+  case Fun<`env>(code,env):
+    return code(env,x);
+  }
+}
+
+static `c fn_compose<`a,`b,`c>($(fn<`b,`c>, fn<`a,`b>)@ f_and_g,`a arg) {
+  let f = f_and_g[0];
+  let g = f_and_g[1];
+  return apply(f,apply(g,arg));
+}
+
+// compose closures
+fn<`a,`c> compose<`a,`b,`c>(fn<`a,`b> g, fn<`b,`c> f) {
+  return make_fn(fn_compose,&$(f,g));
+}
+
+// These next two functions are used for curring
+static `c inner<`a,`b,`c>($(fn<$(`a,`b)@,`c>,`a)@ env, `b second) {
+  return apply(env[0],&$(env[1],second));
+}
+static fn<`b,`c> outer<`a,`b,`c>(fn<$(`a,`b)@,`c> f,`a first) {
+  return make_fn(inner, &$(f,first));
+}
+
+// curry a closure that takes a pair
+fn<`a,fn<`b,`c>> curry<`a,`b,`c>(fn<$(`a,`b)@,`c> f) {
+  return make_fn(outer,f);
+}
+
+static `c lambda<`a,`b,`c>(fn<`a,fn<`b,`c>> f,$(`a,`b)@ arg) {
+  return apply(apply(f,arg[0]),arg[1]);
+}
+
+// uncurry a closure
+fn<$(`a,`b)@,`c> uncurry<`a,`b,`c>(fn<`a,fn<`b,`c>> f) {
+  return make_fn(lambda,f);
+}
+
+// map a closure across a list
+List::list<`b> map_fn<`a,`b>(fn<`a,`b> f,List::list<`a> x) {
+  return List::map_c(apply,f,x);
+}

@@ -1,0 +1,150 @@
+
+// Port of the splay tree implementation (c) Morrisett, Glew, Walker, Crary
+// Port by Dan, June 1999
+
+// Actually, I (Dan) changed the old implementation to have a
+// second function for lookup which doesn't splay.  The idea is that 
+// while you lose the theoretical bounds, you win by not allocating repeatedly
+// on small things.  (And I'm not sure the theoretical bounds hold when
+// you have sharing between trees anyway.) We should consider adding this
+// and using it for (some, probably small) dictionaries.
+
+// Note that b/c these are functional things, we have to allocate a lot
+// (such as in rotate_left and rotate_right)
+
+#include "core.h"
+#include "list.h"
+#include "splay.h"
+
+using Core;
+using List;
+
+namespace Splay;
+
+enum tree<`a,`b> {
+  Leaf,
+  Node(struct noderef<`a,`b> @)
+};
+
+static enum direction {
+  LEFT, RIGHT
+};
+
+static void rotate_left<`a,`b>(struct noderef<`a,`b> @nr) {
+  let n = nr->v;
+  switch (n->left) {
+  case Node(nr2):
+    let n2 = nr2->v;
+    let t = Node(&noderef(&node(n->key, n->data, n2->right, n->right)));
+    nr->v = &node(n2->key, n2->data, n2->left, t);
+    break;
+  default:
+    throw InvalidArg("Splay::rotate_left");
+  }
+}
+
+static void rotate_right<`a,`b>(struct noderef<`a,`b> @nr) {
+  let n = nr->v;
+  switch (n->right) {
+  case Node(nr2):
+    let n2 = nr2->v;
+    let t = Node(&noderef(&node(n->key, n->data, n->left, n2->left)));
+    nr->v = &node(n2->key, n2->data, t, n2->right);
+    break;
+  default:
+    throw InvalidArg("Splay::rotate_right");
+  }
+}
+
+// THIS VERSION TRIPS OVER A GCC BUG
+//
+// static void rotate_left<`a,`b>(struct noderef<`a,`b> @nr) {
+//   let n = nr->v;
+//   switch (n->left) {
+//   case Node(nr2):
+//     let n2 = nr2->v;
+//     nr->v = &node(n2->key, n2->data, n2->left,
+//                   Node(&noderef(&node(n->key, n->data,
+//                                       n2->right, n->right))));
+//     break;
+//   default:
+//     throw InvalidArg("Splay::rotate_left");
+//   }
+// }
+//
+// static void rotate_right<`a,`b>(struct noderef<`a,`b> @nr) {
+//   let n = nr->v;
+//   switch (n->right) {
+//   case Node(nr2):
+//     let n2 = nr2->v;
+//     nr->v = &node(n2->key, n2->data,
+//                   Node(&noderef(&node(n->key, n->data,
+//                                       n->left, n2->left))),
+//                   n2->right);
+//     break;
+//   default:
+//     throw InvalidArg("Splay::rotate_right");
+//   }
+// }
+
+
+static void lift<`a,`b>(list<$(enum direction,struct noderef<`a,`b> @)@> dnl) {
+  while (dnl != null) {
+    if (dnl->tl == null) {
+      switch (dnl->hd) {
+      case &$(LEFT,nr):
+        rotate_left(nr); break;
+      case &$(RIGHT,nr):
+        rotate_right(nr); break;
+      }
+      return;
+    }
+    let &$(parent_dir,parent) = dnl->hd;
+    let &$(grandparent_dir,grandparent) = dnl->tl->hd;
+    dnl = dnl->tl->tl;
+    switch (parent_dir) {
+    case LEFT:
+      switch (grandparent_dir) {
+      case LEFT:  rotate_left(grandparent); rotate_left (grandparent); break;
+      case RIGHT: rotate_left(parent); rotate_right(grandparent); break;
+      }
+      break;
+    case RIGHT:
+      switch (grandparent_dir) {
+      case LEFT:  rotate_right(parent); rotate_left (grandparent); break;
+      case RIGHT: rotate_right(grandparent); rotate_right(grandparent); break;
+      }
+      break;
+    }
+  }
+}
+
+// maybe want a splay_c too, but dict doesn't need it and that's the immediate
+// concern
+bool splay<`a,`b>(int reln(`a,`a), `a reln_first_arg, enum tree<`a,`b> tree) {
+  let path = null;
+  while(true) {
+    switch (tree) {
+    case Node(nr):
+      let n = nr->v;
+      let comp = reln(reln_first_arg, n->key);
+      if (comp == 0) {
+	lift(path);
+	return true;
+      } else if (comp < 0) {
+	path = &cons(&$(LEFT, nr), path);
+	tree = n->left;
+      } else {
+	path = &cons(&$(RIGHT, nr), path);
+	tree = n->right;
+      }
+      break;
+    case Leaf:
+      if (path != null) {
+        lift(path->tl); // b/c of Dict::delete for example
+      }
+      return false;
+    }
+  }
+  throw Impossible("Splay::splay");
+}

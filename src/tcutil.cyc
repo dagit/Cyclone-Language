@@ -1,0 +1,1443 @@
+/* Utility functions for type checking */
+
+#include "absyn.h"
+#include "absynpp.h"
+#include "set.h"
+#include "position.h"
+#include "tcenv.h"
+#include "string.h"
+#include "evexp.h"
+#include "tcutil.h"
+
+namespace Tcutil;
+
+using Core;
+using List;
+using Absyn;
+using Absynpp;
+using Set;
+using Tcenv;
+using Evexp;
+
+xenum exn {TypeErr};
+
+void terr(segment loc, string s) {
+  Position::post_error(Position::mk_err_elab(loc,s));
+}
+
+`a impos<`a>(string msg) {
+  fprintf(cyc_stderr,"Error: %s\n",msg);
+  fflush(cyc_stderr);
+  throw TypeErr;
+}
+
+void warn(segment sg, string msg) {
+  fprintf(cyc_stderr,"%s: Warning: %s\n",Position::string_of_segment(sg),msg);
+  fflush(cyc_stderr);
+}
+
+// used to make empty statements more explicit
+#define SKIP ;
+
+// compress out any evars or typedefs
+typ compress(typ t) {
+  switch (t) {
+  case Evar(_,*t2opt_ref,_): // TRICKY
+    if (*t2opt_ref == null) return t;
+    else {
+      typ t2 = compress((*t2opt_ref)->v);
+      *t2opt_ref = &Opt(t2);
+      return t2;
+    }
+  case TypedefType(_,_,*topt_ref):
+    if (*topt_ref == null) return t;
+    else {
+      typ t2 = compress((*topt_ref)->v);
+      *topt_ref = &Opt(t2);
+      return t2;
+    }
+  default:
+    return t;
+  }
+}
+
+/* return the "least" kind of a type, where Box <= Reg <= Mem */
+static kind typ_kind(typ t) {
+  switch (compress(t)) {
+  case VoidType: return mem_k;
+  case Evar(k,topt,_): return k;
+  case VarType(_): return box_k;
+  case EnumType(_,_): return box_k;
+  case XenumType(_): return box_k;
+  case PointerType(_,_,_): return box_k;
+  case IntType(_,sz,bx):
+    return (sz == B4 || bx == Boxed) ? box_k :
+      reg_k;
+  case BoolType(bx):
+    return (bx == Boxed) ? box_k : reg_k;
+  case FloatType(bx):
+    return (bx == Boxed) ? box_k : reg_k;
+  case DoubleType(bx):
+    return (bx == Boxed) ? box_k : reg_k;
+  case ArrayType(_,_,ak): 
+    return (ak == TaggedArray) ? box_k : mem_k;
+  case FnType(_,_,_,_): return mem_k;
+  case TupleType(_): return mem_k;
+  case StructType(_,_): return mem_k;
+  case TypedefType(_,_,topt): 
+    return impos(xprintf("typ_kind: typedef found: %s", typ2string(t)));
+  case UnionType: return impos("union type");
+  }
+}
+
+/* return true iff k1 <= k2, where Box <= Reg <= Mem */
+static bool kind_leq(kind k1, kind k2) {
+  switch (k2) {
+  case MemKind: return true;
+  case RegKind: return (k1 == reg_k || k1 == box_k);
+  case BoxKind: return (k1 == box_k);
+  }
+}
+
+xenum exn {Unify};
+
+/* unify types t1 and t2, returning true iff the unification succeeds */
+bool unify(typ t1, typ t2) {
+  try {
+    unify_it(t1,t2);
+    return true;
+  } catch {
+  case Unify: return false;
+  }
+}
+
+/* see if evar occurs within t */
+extern void occurslist(typ evar, list<typ> ts); // mutually recursive fns
+static void occurs(typ evar, typ t) {
+  switch (compress(t)) {
+  case Evar(_,r,_):
+    if (t == evar) throw Unify;
+    else if (r != null) occurs(evar,r->v);
+    break;
+  case EnumType(_,ts): occurslist(evar,ts); break;
+  case PointerType(t2,_,_): occurs(evar,t2); break;
+  case ArrayType(t2,_,_): occurs(evar,t2); break;
+  case FnType(tvs,rt,args,varargs): // FIX: OK to ignore binding of type vars?
+    occurs(evar,rt);
+    for(; args != null; args = args->tl)
+      occurs(evar,args->hd[2]);
+    break;
+  case TupleType(args):
+    for(; args != null; args = args->tl)
+      occurs(evar,args->hd[1]);
+    break;
+  case StructType(_,ts): occurslist(evar,ts); break;
+  case TypedefType(_,ts,topt): occurslist(evar,ts); break;
+  default:
+    break;
+  }
+}
+static void occurslist(typ evar, list<typ> ts) {
+  for (; ts != null; ts = ts->tl)
+    occurs(evar,ts->hd);
+}
+
+/* unify two lists of types */
+static void unify_list(list<typ> t1, list<typ> t2) {
+  try
+    List::iter2(unify_it,t1,t2);
+  catch {
+  case List_mismatch: throw Unify;
+  }
+}
+
+/* unify two type qualifiers -- throws Unify unless they are the same */
+static void unify_tqual(tqual tq1, tqual tq2) {
+  if ((tq1->q_const != tq2->q_const) ||
+      (tq1->q_volatile != tq2->q_volatile) ||
+      (tq1->q_restrict != tq2->q_restrict))
+    throw Unify;
+}
+
+bool equal_tqual(tqual tq1, tqual tq2) {
+  return ((tq1->q_const == tq2->q_const) && (tq1->q_volatile == tq2->q_volatile) &&
+	  (tq1->q_restrict == tq2->q_restrict));
+}
+
+/* compress a conref */
+conref<`a> compress_conref<`a>(conref<`a> x) {
+  switch (x->v) {
+  case No_constr: return x;
+  case Eq_constr(_): return x;
+  case Forward_constr(y):
+    let z = compress_conref(y);
+    x->v = z->v;
+    return z;
+  }
+}
+
+`a conref_val<`a>(conref<`a> x) {
+  switch (compress_conref(x)->v) {
+  case Eq_constr(v): return v;
+  default: return impos("conref_val");
+  }
+}
+
+
+/* unify two constraint refs */
+static void unify_it_conrefs<`a>(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
+  x = compress_conref(x);
+  y = compress_conref(y);
+  if (x == y) return;
+  switch (x->v) {
+  case No_constr: x->v = Forward_constr(y); break;
+  case Forward_constr(_):
+    throw impos("unify_conref: forward after compress");
+  case Eq_constr(xv):
+    switch (y->v) {
+    case No_constr: y->v = x->v; break;
+    case Forward_constr(_):
+      throw impos("unify_confref: forward after compress(2)");
+    case Eq_constr(yv):
+      if (cmp(xv,yv) != 0) throw Unify;
+      break;
+    }
+    break;
+  }
+}
+
+static bool unify_conrefs<`a>(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
+  try {
+    unify_it_conrefs(cmp,x,y);
+    return true;
+  } catch {
+  case Unify: return false;
+  }
+}
+
+static int cmp_bool(Bool x,Bool y) {
+  if (x == y) return 0;
+  if (x == false) return -1;
+  return 1;
+}
+
+/* the real work of unification */
+void unify_it(typ t1, typ t2) {
+  t1 = compress(t1);
+  t2 = compress(t2);
+  if (t1 == t2) return;
+  switch (t1) {
+  case Evar(kind1,*ref1_ref,_):
+    // this really shouldn't happen since we compressed t1
+    if (*ref1_ref != null) {
+      unify_it((*ref1_ref)->v,t2);
+      return;
+    }
+    // check that the evar doesn't occur in t2
+    occurs(t1,t2);
+    let kind2 = typ_kind(t2);
+    // we can constrain the Evar to be equal to t2 only when the kind of the
+    // evar is greater than or equal to the kind of t2 or t2 is an evar that
+    // we can constrain to be equal to t1.
+    if (kind_leq(kind2,kind1)) {
+      *ref1_ref = &Opt(t2);
+      return;
+    } else {
+      switch (t2) {
+      case Evar(_,*ref2_ref,_):
+	*ref2_ref = &Opt(t1);
+	return;
+      default: throw Unify;
+      }
+    }
+  default: // t1 is not an evar
+    // in what follows, we throw Unify unless we explicitly return, hence
+    // all of the defaults just skip.
+    switch (t2) {
+    case Evar(_,_,_): // t2 is an evar, t1 is not, swap and try again
+      unify_it(t2,t1);
+      return;
+    case VoidType:
+      switch (t1) { case VoidType: return; default: break; }
+      break;
+    case VarType(x):
+      switch (t1) {
+      case VarType(y):
+        if (String::strcmp(x,y) == 0) return;
+        break;
+      default: break;
+      }
+      break;
+    case EnumType(nopt2,ts2):
+      switch (t1) {
+      case EnumType(nopt1,ts1):
+	if ((nopt1 != null && nopt2 != null
+             && qvar_cmp(nopt1->v,nopt2->v) == 0) ||
+	    (nopt1 == null && nopt2 == null)) {
+	  unify_list(ts1,ts2);
+	  return;
+	}
+        break;
+      default: break;
+      }
+      break;
+    case XenumType(n2):
+      switch (t1) {
+      case XenumType(n1):
+        if (qvar_cmp(n1,n2) == 0) return;
+        break;
+      default:
+        break;
+      }
+      break;
+    case PointerType(t2a,null2a,tqual2a):
+      switch (t1) {
+      case PointerType(t1a,null1a,tqual1a):
+	unify_it(t1a,t2a);
+	unify_tqual(tqual1a,tqual2a);
+	unify_it_conrefs(cmp_bool,null1a,null2a);
+	return;
+      default:
+        break;
+      }
+      break;
+    case IntType(sn2,sz2,bx2):
+      switch (t1) {
+      case IntType(sn1,sz1,bx1):
+	if ((sn1 == sn2) && (sz1 == sz2) && (bx1 == bx2)) return;
+        break;
+      default: break;
+      }
+      break;
+    case BoolType(bx2):
+      switch (t1) {
+      case BoolType(bx1):
+        if (bx1 == bx2) return;
+          break;
+      default: break;
+      }
+      break;
+    case FloatType(bx2):
+      switch (t1) {
+      case FloatType(bx1):
+        if (bx1 == bx2) return;
+        break;
+      default: break;
+      }
+      break;
+    case DoubleType(bx2):
+      switch (t1) {
+      case DoubleType(bx1):
+        if (bx1 == bx2) return;
+        break;
+      default: break;
+      }
+      break;
+    case ArrayType(t2a,tq2a,ak2a):
+      switch (t1) {
+      case ArrayType(t1a,tq1a,ak1a):
+	unify_it(t1a,t2a);
+	unify_tqual(tq1a,tq2a);
+	switch (ak1a) {
+	case UntaggedArray:
+	  switch (ak2a) { case UntaggedArray: return; default: break; }
+          break;
+	case TaggedArray:
+	  switch (ak2a) { case TaggedArray: return; default: break; }
+          break;
+	case FixedArray(e1):
+	  switch (ak2a) {
+	  case FixedArray(e2):
+            if (eval_const_uint_exp(e1) == eval_const_uint_exp(e2)) return;
+            break;
+	  default: break;
+	  }
+          break;
+	}
+        break;
+      default: break;
+      }
+      break;
+    case FnType(tvs2,rt2,args2,vararg2):
+      switch (t1) {
+      case FnType(tvs1,rt1,args1,vararg1):
+	list<$(var,typ)@> inst = null;
+        while (tvs1 != null) {
+	  if (tvs2 == null) throw Unify;
+	  inst = &cons(&$(tvs2->hd,VarType(tvs1->hd)),inst);
+	  tvs1 = tvs1->tl;
+	  tvs2 = tvs2->tl;
+	}
+	if (tvs2 != null) throw Unify;
+        if (inst != null) {
+          unify_it(FnType(null,rt1,args1,vararg1),
+                   substitute(inst,FnType(null,rt2,args2,vararg2)));
+          return;
+        } else {
+          unify_it(rt1,rt2);
+          for (; args1 != null && args2 != null;
+               args1 = args1->tl, args2 = args2->tl) {
+            unify_tqual(args1->hd[1],args2->hd[1]);
+            unify_it(args1->hd[2],args2->hd[2]);
+          }
+          if ((args1 != null) || (args2 != null)) throw Unify;
+          if (vararg1 == vararg2) return;
+        }
+        break;
+      default: break;
+      }
+      break;
+    case TupleType(ts2):
+      switch (t1) {
+      case TupleType(ts1):
+	for (; ts1 != null && ts2 != null; ts1 = ts1->tl, ts2 = ts2->tl) {
+	  unify_tqual(ts1->hd[0],ts2->hd[0]);
+	  unify_it(ts1->hd[1],ts2->hd[1]);
+	}
+	if ((ts1 != null) || (ts2 != null)) throw Unify;
+	return;
+      default: break;
+      }
+      break;
+    case StructType(nopt2,ts2):
+      switch (t1) {
+      case StructType(nopt1,ts1):
+	if (((nopt1 == null) && (nopt2 == null)) ||
+	    qvar_cmp(nopt1->v,nopt2->v) == 0) {
+	  unify_list(ts1,ts2);
+          return;
+	}
+        break;
+      default: break;
+      }
+      break;
+    case TypedefType(_,_,_):
+      throw impos(xprintf("unify_it: typedef found: %s",typ2string(t2)));
+    case UnionType:
+      throw impos("union type");
+    }
+    throw Unify;
+  }
+}
+
+static void unbox_exp(tenv te, exp e) {
+  typ t = compress(e->topt->v);
+  switch (t) {
+  case IntType(sn,sz,bx):
+    if (bx == Boxed)
+      unchecked_cast(te,e,IntType(sn,sz,Unboxed));
+    break;
+  case BoolType(bx):
+    if (bx == Boxed)
+      unchecked_cast(te,e,bool_t);
+    break;
+  case FloatType(bx):
+    if (bx == Boxed)
+      unchecked_cast(te,e,float_t);
+    break;
+  case DoubleType(bx):
+    if (bx == Boxed)
+      unchecked_cast(te,e,double_t);
+    break;
+  default: break;
+  }
+}
+
+bool is_arithmetic_type(typ t) {
+  switch (compress(t)) {
+  case IntType(_,_,_): return true;
+  case FloatType(_): return true;
+  case DoubleType(_): return true;
+  default: return false;
+  }
+}
+
+static bool is_double(typ t) {
+  switch (t) {
+  case DoubleType(_): return true;
+  default: return false;
+  }
+}
+
+/* we're about to convert a value of type t1 to type t2 -- return true
+   if we will potentially loose precision */
+bool will_lose_precision(typ t1, typ t2) {
+  t1 = compress(t1);
+  t2 = compress(t2);
+  switch (t1) {
+  case DoubleType(_): return (!is_double(t2));
+  case FloatType(_):
+    switch (t2) {
+    case DoubleType(_): return false;
+    case FloatType(_): return false;
+    default: return true;
+    }
+  case IntType(sn1,sz1,_):
+    switch (t2) {
+    case DoubleType(_): return false;
+    case FloatType(_): return (sz1 == B8);
+    case IntType(sn2,sz2,_):
+      switch (sz1) {
+      case B1: return false;
+      case B2: return (sz2 == B1);
+      case B4: return (sz2 == B1 || sz2 == B2);
+      case B8: return (sz2 != B8);
+      }
+    default:
+      throw impos("will_lose_precision");
+    }
+  default:
+    throw impos("will_lose_precision");
+  }
+}
+
+bool is_boxed_type(typ t) {
+  switch (compress(t)) {
+  case IntType(_,_,bx): return (bx == Boxed);
+  case FloatType(bx): return (bx == Boxed);
+  case DoubleType(bx): return (bx == Boxed);
+  case BoolType(bx): return (bx == Boxed);
+  default: return false;
+  }
+}
+
+typ make_unboxed_type(typ t) {
+  switch (compress(t)) {
+  case IntType(sn,sz,bx):
+    return (bx == Unboxed) ? t : IntType(sn,sz,Unboxed);
+  case FloatType(_): return Float_t;
+  case DoubleType(_): return Double_t;
+  case BoolType(_): return Bool_t;
+  default: return t;
+  }
+}
+
+static bool is_boxed_double(typ t) {
+  switch (t) {
+  case DoubleType(b): return (b == Boxed);
+  default: return false;
+  }
+}
+
+static bool is_boxed_uint8(typ t) {
+  switch (t) {
+  case IntType(sn,sz,bx):
+    return (sn == Unsigned && sz == B8 && bx == Boxed);
+  default: return false;
+  }
+}
+
+static bool is_boxed_sint8(typ t) {
+  switch (t) {
+  case IntType(sn,sz,bx):
+    return (sn == Signed && sz == B8 && bx == Boxed);
+  default: return false;
+  }
+}
+
+static bool is_float(typ t) {
+  switch (t) {
+  case FloatType(_): return true;
+  default: return false;
+  }
+}
+
+static bool is_uint(size_of s, typ t) {
+  switch (t) {
+  case IntType(sn,sz,_): return (sn == Unsigned && sz == s);
+  default: return false;
+  }
+}
+
+static bool is_sint(size_of s, typ t) {
+  switch (t) {
+  case IntType(sn,sz,_): return (sn == Signed && sz == s);
+  default: return false;
+  }
+}
+
+/* coerce the list e so that each element has type t -- used in arrays and
+   conditionals */
+bool coerce_list(tenv te, typ t, list<exp> es) {
+  // find the biggest arithmetic type (if any) for the list and determine
+  // if all of the elements are boxed.
+  Opt_t<typ> max_arith_type = null;
+  bool all_boxed = true;
+  for (list<exp> el = es; el != null; el = el->tl) {
+    typ t1 = compress(el->hd->topt->v);
+    if (is_arithmetic_type(t1)) {
+      if (max_arith_type == null || will_lose_precision(t1,max_arith_type->v))
+	max_arith_type = &Opt(t1);
+    }
+    if (!is_boxed_type(t1)) all_boxed = false;
+  }
+  // if even one of the expressions is unboxed, then we unbox all of them
+  if (!all_boxed && max_arith_type != null)
+    max_arith_type = &Opt(make_unboxed_type(max_arith_type->v));
+  // unify the max arithmetic type with the result type t
+  if (max_arith_type != null)
+    if (!unify(t,max_arith_type->v))
+      return false;
+  // now coerce each expression to the type t as if by assignment
+  for (list<exp> el = es; el != null; el = el->tl) {
+    if (!coerce_assign(te,el->hd,t)) {
+      exp_err(el->hd->loc,xprintf("type mismatch: expecting %s but found %s",
+	      typ2string(t),typ2string(el->hd->topt->v)));
+      return false;
+    }
+  }
+  return true;
+}
+
+/* coerce e to have type bool -- used in conditionals */
+bool coerce_bool_t(tenv te, exp e) {
+  if (unify(e->topt->v,bool_t)) return true; // e : bool_t
+  if (unify(e->topt->v,Bool_t)) { // e : Bool_t
+    unchecked_cast(te,e,bool_t);      // unbox e
+    return true;
+  }
+  return false;
+}
+
+bool is_integral_type(typ t) {
+  switch (compress(t)) {
+  case IntType(_,_,_): return true;
+  default: return false;
+  }
+}
+
+/* coerce e to have type unsigned int -- used in subscript */
+bool coerce_uint_t(tenv te, exp e) {
+  if (unify(e->topt->v,uint_t)) return true;
+  // try unboxing e
+  if (typ_kind(e->topt->v) == box_k) {
+    unbox_exp(te,e);
+    if (unify(e->topt->v,uint_t)) return true;
+  }
+  // try arithmetic conversions -- we only allow integral values
+  if (is_integral_type(e->topt->v)) {
+    if (will_lose_precision(e->topt->v,uint_t))
+      warn(e->loc,"integral size mismatch; conversion supplied");
+    unchecked_cast(te,e,uint_t);
+    return true;
+  }
+  return false;
+}
+
+/* Can t1 be (implicitly) cast to t2? Assumes types are well-formed */
+bool silent_castable(tenv te, segment loc, typ t1, typ t2) {
+  t1 = compress(t1);
+  t2 = compress(t2);
+  switch (t1) {
+  case PointerType(t_a,null_a,q_a):
+    // can cast t@ to t* but not vice versa.  can cast a non-const pointer
+    // to a const pointer.  can cast a t pointer to a t[],t[1].
+    switch (t2) {
+    case PointerType(t_b,null_b,q_b):
+      bool okay = true;
+      if (!unify_conrefs(cmp_bool,null_a,null_b)) {
+	switch (compress_conref(null_a)->v) {
+	case Eq_constr(b):
+	  okay = !b; break;
+	default: throw impos("silent_castable: conref not eq");
+	}
+      }
+      return (okay && unify(t_a,t_b) && (!q_a->q_const || q_b->q_const));
+    default:
+      return false;
+    }
+    break;
+  case ArrayType(t1a,tq1a,ak1a):
+    switch (t2) {
+    case ArrayType(t2a,tq2a,ak2a):
+      bool okay = true;
+      switch (ak1a) {
+      case UntaggedArray:
+	okay = (ak2a == UntaggedArray); break;
+      case TaggedArray:
+	okay = (ak2a == TaggedArray || ak2a == UntaggedArray); break;
+      case FixedArray(e1):
+	switch (ak2a) {
+	case FixedArray(e2): 
+	  okay = (eval_const_uint_exp(e1) == eval_const_uint_exp(e2));
+          break;
+	default: okay = true; break;
+	}
+        break;
+      }
+      return (okay && unify(t1a,t2a) && (!tq1a->q_const || tq2a->q_const));
+    default: return false;
+    }
+    break;
+  default: return unify(t1,t2);
+  }
+}
+
+/* coerce e to have type t -- used in function call */
+bool coerce_arg(tenv te, exp e, typ t2) {
+  typ t1 = compress(e->topt->v);
+  // see if types immediately match
+  if (unify(t1,t2)) return true;
+  // try unboxing e
+  if (typ_kind(t1) == box_k && typ_kind(t2) == reg_k) {
+    unbox_exp(te,e);
+    if (unify(t1,t2)) return true;
+  }
+  // try arithmetic conversions
+  if (is_arithmetic_type(t1) && is_arithmetic_type(t2)) {
+    // issue a warning if we lose precision
+    if (will_lose_precision(t1,t2))
+      warn(e->loc,"integral size mismatch; conversion supplied");
+    unchecked_cast(te,e,t2);
+    return true;
+  } else if (silent_castable(te,e->loc,t1,t2)) {
+    unchecked_cast(te,e,t2);
+    return true;
+  } else if (castable(te,e->loc,t1,t2)) {
+    unchecked_cast(te,e,t2);
+    warn(e->loc,xprintf("implicit cast from %s to %s",typ2string(t1),
+		       typ2string(t2)));
+    return true;
+  } else return false;
+}
+
+/* coerce e to have type t -- used in assignment operations.  Neither
+   gcc nor VC++ issue warnings for losing precision here, but I think
+   it may be appropriate. */
+bool coerce_assign(tenv te, exp e, typ t) {
+  return coerce_arg(te,e,t);
+}
+
+static bool any_promote(tenv te, exp e) {
+  typ old_t = compress(e->topt->v);
+  typ t;
+  switch (old_t) {
+  case IntType(sn,sz,b):
+    switch (sz) {
+    case B1:  t = sint_t; break; // convert to unboxed, signed int
+    case B2:  t = sint_t; break; // convert to unboxed, signed int
+    case B4: // make unboxed
+      t = (sn == Unsigned) ? uint_t : sint_t; break;
+    case B8: // make unboxed
+      t = (sn == Unsigned) ? ulong_t : slong_t; break;
+    }
+    break;
+  case BoolType(b): unchecked_cast(te,e,bool_t); return false; // make unboxed
+  case FloatType(b): t = float_t; break;   // make unboxed
+  case DoubleType(b): t = double_t; break; // make unboxed
+  default: return false;
+  }
+  unchecked_cast(te,e,t);
+  return true;
+}
+
+/* Convert e so that it has type t, possibly by casting t.  This is
+   used in routines like function call or assignment where we may have
+   to promote an integral type, may have to unbox, etc.  -- THIS IS
+   NOT RIGHT. */
+bool coerce_use(tenv te, exp e, typ t2) {
+  typ t1 = compress(e->topt->v);
+  kind k1 = typ_kind(t1);
+  kind k2 = typ_kind(t2);
+  if (k1 == box_k && k2 == reg_k) {
+    unbox_exp(te,e);
+  }
+  if (unify(t1,t2)) return true;
+  // unification failed, try unboxing e
+  any_promote(te,e);
+  if (unify(e->topt->v,t2)) return true;
+  else if (silent_castable(te,e->loc,t1,t2)) {
+    unchecked_cast(te,e,t2);
+    return true;
+  } else if (castable(te,e->loc,t1,t2)) {
+    unchecked_cast(te,e,t2);
+    warn(e->loc,xprintf("implicit cast from %s to %s",typ2string(t1),
+		       typ2string(t2)));
+    return true;
+  } else return false;
+}
+
+bool coerceable(typ t) {
+  switch (compress(t)) {
+  case IntType(_,_,_): return true;
+  case FloatType(_): return true;
+  case DoubleType(_): return true;
+  default:
+    return false;
+  }
+}
+
+// Flatten a type into a list of type qualifiers and types for
+// use in subtype comparison.
+// FIX:  we should recursively flatten tuple and struct types here,
+// but doing so is tricky because we have to get the padding and
+// alignment right.  This seems to be particularly weird on the
+// x86 -- I need to find precise documentation on it before we 
+// do this.
+static $(tqual,typ)@ flatten_typ_f(list<$(var,typ)@> inst,
+                                   $(field_name,tqual,typ)@ x) {
+  return &$(x[1],substitute(inst,x[2]));
+}
+static list<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
+  t1 = compress(t1);
+  switch (t1) {
+  case VoidType: return null;
+  case TupleType(tqs): 
+    // FIX: recursively flatten here
+    return tqs;
+  case StructType(tdnopt,ts):
+    let n = tdnopt->v;
+    let sd = lookup_structdecl(te,&Position::dummy_seg,n);
+    let inst = List::zip(sd->tvs,ts);
+    if (sd->fields == null) return &cons(&$(empty_tqual(),t1),null);
+    // FIX: recursively flatten here
+    return List::map_c(flatten_typ_f,inst,sd->fields->v);
+  default: return &cons(&$(empty_tqual(),t1),null);
+  }
+}
+
+// FIX: the plan is, once we have a context that lets us assume t1 <= t2
+// for recursive types, then to do deep subtyping.  
+extern bool ptrsubtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2);
+static bool subtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2) {
+  if (unify(t1,t2)) return true;
+  for (let a = assume; a != null; a = a->tl) {
+    if (unify(t1,a->hd[0]) && unify(t2,a->hd[1])) return true;
+  }
+  t1 = compress(t1);
+  t2 = compress(t2);
+  switch (t1) {
+  case PointerType(t_a,null_a,q_a):
+    switch (t2) {
+    case PointerType(t_b,null_b,q_b):
+      // if t1 is const then t2 must be const
+      if (q_a->q_const && !q_b->q_const) return false;
+      // if t1 is * then t2 must be *
+      if (!unify_conrefs(cmp_bool,null_a,null_b) && 
+	  conref_val(null_a) && !conref_val(null_b)) return false;
+      return ptrsubtype(te, &cons(&$(t1,t2),assume), t_a, t_b);
+    default: return false;
+    }
+  default: return false;
+  }
+}
+
+// is t1* <= t2*?
+//   we flatten t1 and t2 into structurally equivalent tuple types 
+//   (and thus ignore field names, associativity of nested tuples and
+//   structs, etc.) and then check that t1 is a width extension of t2 
+//   and for each field, either (a) both t1 and t2 have qualifier "const"
+//   and the t1 field is a subtype of the t2 field, or (b) t1 = t2.
+static bool ptrsubtype(tenv te, list<$(typ,typ)@> assume, typ t1, typ t2) {
+  list<$(tqual,typ)@> tqs1 = flatten_typ(te,t1);
+  list<$(tqual,typ)@> tqs2 = flatten_typ(te,t2);
+  for (; tqs2 != null; tqs2 = tqs2->tl, tqs1 = tqs1->tl) {
+    if (tqs1 == null) return false;
+    tqual tq1 = tqs1->hd[0];
+    tqual tq2 = tqs2->hd[0];
+    typ t1a = tqs1->hd[1];
+    typ t2a = tqs2->hd[1];
+    if (tq2->q_const && subtype(te,assume,t1a,t2a)) continue;
+    else if (unify(t1a,t2a)) continue;
+    else return false;
+  }
+  return true;
+}
+
+/* Can t1 be cast to t2?  Assumes that the types are well-formed. */
+bool castable(tenv te, segment loc, typ t1, typ t2) {
+  t1 = compress(t1);
+  t2 = compress(t2);
+  switch (t1) {
+  case EnumType(name_opt,ts):
+    // can cast an enum to an int -- extracts the tag
+    let ed = lookup_enumdecl(te,loc,name_opt->v);
+    return (coerceable(t2));
+  case PointerType(t_a,null_a,q_a):
+    // can cast t* to t@ and vice versa.  can cast a non-cost pointer
+    // to a const pointer.  can cast a t pointer to a t[],t[1], or t[?]
+    switch (t2) {
+    case PointerType(t_b,null_b,q_b):
+      let assump = &cons(&$(t1,t2),null);
+      return (ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const));
+    case ArrayType(t_b,q_b,ak):
+      let assump = &cons(&$(t1,t2),null);
+      if (!(ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const)))
+	return false;
+      switch (ak) {
+      case FixedArray(e):
+	return (eval_const_uint_exp(e) == 1);
+      default: return true;
+      }
+    default:
+      return false;
+    }
+  case ArrayType(t1a,tq1a,ak1a):
+    switch (t2) {
+    case ArrayType(t2a,tq2a,ak2a):
+      bool okay;
+      switch (ak1a) {
+      case FixedArray(e1):
+	switch (ak2a) {
+	case FixedArray(e2): 
+	  okay = (eval_const_uint_exp(e1) == eval_const_uint_exp(e2));
+          break;
+	default: okay = true; break;
+	}
+        break;
+      default: okay = true; break;
+      }
+      return (okay && unify(t1a,t2a) && (!tq1a->q_const || tq2a->q_const));
+    default: return false;
+    }
+    break;
+  // can cast a numeric type or bool to any numeric type
+  case IntType(_,_,_)   : return coerceable(t2);
+  case BoolType(_)  : 
+    if (coerceable(t2)) return true;
+    switch (t2) {
+    case BoolType(_): return true;
+    default: return false;
+    }
+  case FloatType(_) : return coerceable(t2);
+  case DoubleType(_): return coerceable(t2);
+  default: return unify(t1,t2);
+  }
+}
+
+/* Replace e by a cast of e to t.  The caller must ensure that the
+   cast is safe. */
+void unchecked_cast(tenv te, exp e, typ t) {
+  if (!unify(e->topt->v,t)) {
+    exp inner = &Exp{.topt = e->topt, .r = e->r, .loc = e->loc};
+    e->r = Cast_e(t,inner);
+    e->topt = &Opt(t);
+  }
+}
+
+/* for comparison operators, we do not unbox Double and Long Long, but
+   rather do a pointer comparison.  However, we issue a warning. */
+bool comparison_promote(tenv te, exp e) {
+  typ old_t = compress(e->topt->v);
+  typ t;
+  switch (old_t) {
+  case IntType(sn,sz,b):
+    switch (sz) {
+    case B1:  t = sint_t; break; // convert to unboxed, signed int
+    case B2:  t = sint_t; break; // convert to unboxed, signed int
+    case B4: // make unboxed
+      t = (sn == Unsigned) ? uint_t : sint_t;
+      break;
+    case B8:
+      if (b == Boxed) {
+	warn(e->loc,"pointer comparison of Long Long");
+	return false;
+      } else return true;
+    }
+    break;
+  case BoolType(b):
+    unchecked_cast(te,e,bool_t);
+    return false; // make unboxed
+  case FloatType(b):
+    t = float_t; // make unboxed
+    break;
+  case DoubleType(b):
+    if (b == Boxed) {
+      warn(e->loc,"pointer comparison of Double");
+      return false;
+    } else return true;
+  default:
+    return false;
+  }
+  unchecked_cast(te,e,t);
+  return true;
+}
+
+/* check that the expression has an arithmetic type and, if it's boxed
+   or a size that is smaller than an int, then promote it up to int.
+   Note that unsigned char or unsigned short will be promoted to
+   signed int.  Otherwise, the sign is preserved. */
+bool arithmetic_promote(tenv te, exp e) {
+  typ old_t = compress(e->topt->v);
+  typ t;
+  switch (old_t) {
+  case IntType(sn,sz,b):
+    switch (sz) {
+    case B1:  t = sint_t; break; // convert to unboxed, signed int
+    case B2:  t = sint_t; break; // convert to unboxed, signed int
+    case B4: // make unboxed
+      t = (sn == Unsigned) ? uint_t : sint_t;
+      break;
+    case B8: // make unboxed
+      t = (sn == Unsigned) ? ulong_t : slong_t;
+      break;
+    }
+    break;
+  case FloatType(b):  t = float_t; break; // make unboxed
+  case DoubleType(b): t = double_t; break; // make unboxed
+  case EnumType(_,_):   t = sint_t; break;   // convert to unboxed, signed int
+  case Evar(_,_,_):
+    t = sint_t;
+    if (!unify(old_t,t))
+      if (!unify(old_t,sInt_t))
+	return false;
+    break;
+  default:
+    return false;
+  }
+  unchecked_cast(te,e,t);
+  return true;
+}
+
+
+/* Make sure that e has integral type; if it's boxed or a size that is
+   smaller than an int, then promote it up to int.  Note that unsigned
+   char or unsigned short will be promoted to signed int.  Otherwise,
+   the sign is preserved.  */
+bool integral_promote(tenv te, exp e) {
+  typ old_t = compress(e->topt->v);
+  typ t;
+  switch (old_t) {
+  case IntType(sn,sz,b):
+    switch (sz) {
+    case B1:  t = sint_t; break; // convert to unboxed, signed int
+    case B2:  t = sint_t; break; // convert to unboxed, signed int
+    case B4: // make unboxed
+      t = (sn == Unsigned) ? uint_t : sint_t;
+      break;
+    case B8: // make unboxed
+      t = (sn == Unsigned) ? ulong_t : slong_t;
+      break;
+    }
+    break;
+  case EnumType(_,_):
+    t = sint_t;
+    break; // convert to unboxed, signed int
+  case Evar(_,_,_):
+    t = sint_t;
+    if (!unify(old_t,t))
+      if (!unify(old_t,sInt_t))
+	return false;
+    break;
+  default:
+    return false;
+  }
+  unchecked_cast(te,e,t);
+  return true;
+}
+typ max_arithmetic_type(typ t1, typ t2) {
+  if (is_double(t1) || is_double(t2))
+    return DoubleType(Unboxed);
+  else if (is_float(t1) || is_float(t2))
+    return FloatType(Unboxed);
+  else if (is_uint(B8,t1) || is_uint(B8,t2))
+    return IntType(Unsigned,B8,Unboxed);
+  else if (is_sint(B8,t1) || is_sint(B8,t2))
+    return IntType(Signed,B8,Unboxed);
+  else if (is_uint(B4,t1) || is_uint(B4,t2))
+    return IntType(Unsigned,B4,Unboxed);
+  else
+    return IntType(Signed,B4,Unboxed);
+}
+
+void check_fndecl_valid_type(segment loc,tenv te,fndecl fd) {
+  check_unique_tvars(loc,fd->tvs);
+  check_valid_type(loc,te,fd->tvs,fd->ret_type);
+  for (let x = fd->args; x != null; x = x->tl)
+    check_valid_type(loc,te,fd->tvs,x->hd[2]);
+}
+
+static $(Opt_t<var>,tqual,typ)@ fndecl2typ_f($(var,tqual,typ)@ x) {
+  return &$((Opt_t<var>)&Opt(x[0]), x[1], x[2]);
+}
+typ fndecl2typ(fndecl fd) {
+  return FnType(fd->tvs,
+                fd->ret_type,
+                List::map(fndecl2typ_f,
+                          fd->args),
+                fd->varargs);
+}
+
+static $($(Opt_t<var>,tqual)@,typ)@ substitute_f1($(Opt_t<var>,tqual,typ)@ y) {
+  return &$(&$(y[0],y[1]),y[2]);
+}
+static $(Opt_t<var>,tqual,typ)@ substitute_f2($($(Opt_t<var>,tqual)@,typ)@ w) {
+  return &$(w[0][0],w[0][1],w[1]);
+}
+extern list<typ> substs(list<$(var,typ)@> inst, list<typ> ts);
+typ substitute(list<$(var,typ)@> inst, typ t) {
+  switch (compress(t)) {
+  case VarType(v):
+    try
+      return List::assoc_cmp(String::strcmp,inst,v);
+    catch {
+    case Not_found: return t;
+    }
+  case StructType(no,ts):
+    return StructType(no,substs(inst,ts));
+  case EnumType(no,ts):
+    return EnumType(no,substs(inst,ts));
+  case PointerType(t1,nullable,tq):
+    return PointerType(substitute(inst,t1),nullable,tq);
+  case TypedefType(n,ts,topt):
+    // NB: topt is null be cause we compressed
+    return TypedefType(n,substs(inst,ts),topt);
+  case ArrayType(t1,tq,eopt):
+    return ArrayType(substitute(inst,t1),tq,eopt);
+  case FnType(vs,rtyp,args,varargs):
+    for (let p = vs; p != null; p = p->tl)
+      inst = &cons(&$(p->hd,VarType(p->hd)),inst);
+    let p = List::split(List::map(substitute_f1, args));
+    let ts = p[1];
+    let ts2 = substs(inst,ts);
+    let args2 = List::map(substitute_f2, List::zip(p[0],ts2));
+    return FnType(vs,substitute(inst,rtyp), args2, varargs);
+  case TupleType(tqts):
+    let p = List::split(tqts);
+    let tqs = p[0];
+    let ts = p[1];
+    let ts2 = substs(inst,ts);
+    let tqts2 = List::zip(tqs,ts2);
+    return TupleType(tqts2);
+  case Evar(_,r,_):
+    if (r != null) return(substitute(inst,r->v));
+    else return t;
+  case VoidType: return t;
+  case XenumType(_): return t;
+  case IntType(_,_,_): return t;
+  case FloatType(_): return t;
+  case DoubleType(_): return t;
+  case BoolType(_): return t;
+  case UnionType: return t;
+  }
+}
+static list<typ> substs(list<$(var,typ)@> inst, list<typ> ts) {
+  return List::map_c(substitute,inst,ts);
+}
+
+exp default_initializer(tenv te, typ t, segment loc) {
+  exp e = &Exp(null,Const_e(Null_c),loc);
+
+  switch (compress(t)) {
+  case PointerType(_,_,_):
+    break;
+  case IntType(sg,sz,bx):
+    if (bx == Boxed)
+      terr(loc,
+           xprintf("declaration of %s without initializer",
+                   typ2string(t)));
+    else if (sz == B1)
+      e->r = Const_e(Char_c(Signed,'\000'));
+    else {
+      e->r = Const_e(Int_c(sg,0));
+      if (sz != B4)
+        e = &Exp(null,Cast_e(t,e),loc);
+    }
+    break;
+  case BoolType(bx):
+    if (bx == Boxed)
+      terr(loc,
+           xprintf("declaration of %s without initializer",
+                   typ2string(t)));
+    else e->r = Const_e(Bool_c(false));
+    break;
+  case FloatType(bx):
+    if (bx == Boxed)
+      terr(loc,
+           xprintf("declaration of %s without initializer",
+                   typ2string(t)));
+    else e->r = Const_e(Float_c("0->0"));
+    break;
+  case DoubleType(bx):
+    e->r =
+      Cast_e(t,&Exp(null, Const_e(Float_c("0->0")), loc));
+    break;
+/*
+  case ArrayType*(t,eopt):
+    if (eopt == null)
+      e->r = ConstArray_e(null,&Opt(t));
+    else {
+      e->r =
+	FnCall_e(&Exp(null,Var("new_array"),loc),null,
+	&cons(eopt->v,&cons(default_initializer(te,t,loc),null)));
+    }
+
+  case StringType:  e->r = Const_e(String_c(""));
+  case CharType:    e->r = Const_e(Char_c('\000'));
+  case TupleType(ts):
+    e->r = NewTuple_e(List::map_c(def_init,&$(te,loc),ts));
+  case NamedType(p):
+    let n  = p[0];
+    let ts = p[1];
+    // check for an opened type name
+    if (!(Dict::member(te->structs,n)
+	  || Dict::member(te->unions,n)
+	  || Dict::member(te->abstracts,n))) {
+      try {
+	n = Dict::lookup(te->open_typs,n);
+	p[0] = n;
+      } catch {
+      case Dict::Absent: terr2(loc,"unbound type name ",n);
+      }
+    }
+    // if it's possibly null, we'e done otherwise...
+    if (possibly_null(te,n)) return e;
+    let sdopt = Dict::lookup_opt(te->structs,n);
+    let udopt;
+    if (sdopt != null) {
+      // n is a struct -- return a struct of the default expressions for
+      // each of the field types->
+      let sd = sdopt->v[0];
+      let inst = List::zip(sd->tvs,ts);
+      let es =
+	List::map_c(fun *(<field_name>Opt,exp)
+		     f(*(*(tenv,segment),list<$(var,typ)@>) env,
+		       *(field_name,capability,typ)               field){
+		       return &$(null,def_init(env[0],subst(env[1],field[2])));
+		    },
+                   &$(&$(te,loc),inst),
+		   sd->fields);
+      e->r = NewStruct_e(n,&Opt(ts),es);
+    } else if ((udopt = Dict::lookup_opt(te->unions,n)) != null) {
+      // n is a union -- return the first field (and an expression of the
+      // argument type if any->)
+      let ud = udopt->v[0];
+      if (ud->fields == null) {
+	terr(loc,"Union has no fields!");
+      } else {
+	// get first field
+	let field = ud->fields->hd[0];
+	// get its type
+	typ t = ud->fields->hd[1];
+	// if it's void then the field doesn't carry a value
+	if (t == VoidType)
+	  e->r = NewUnion_e(n,&Opt(ts),field,null);
+	else {
+	  // otherwise construct a default value for that type
+	  let inst = List::zip(ud->tvs,ts);
+	  let e2 = &Opt(default_initializer(te,subst(inst,t),loc));
+	  e->r = NewUnion_e(n,&Opt(ts),field,e2);
+	}
+      }
+    } else
+      terr(loc,"Abstract types require initializers->");
+  case FnType(_): terr(loc,"function pointer declarations require initializer");
+  case ExnType:   terr(loc,"exception declarations require initializer");
+*/
+
+  default:
+    terr(loc,
+         xprintf("declaration of type %s requires initializer",
+                 typ2string(t)));
+    break;
+  }
+  return e;
+}
+
+$(var,typ)@ make_inst_var(var v) {
+  return &$(v, new_evar(BoxKind));
+}
+
+/* Check that the type is valid assuming that the free type variables
+   are drawn from the given list.  As a side-effect, expand any
+   typedefs, and change relative type names to absolute type names. */
+void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
+  switch (compress(t)) {
+  case VoidType: break; // skip
+  case Evar(k,topt,i): break; // skip
+  case VarType(tv):
+    if (!List::mem(String::strcmp,bound_vars,tv)) 
+      terr(loc,xprintf("unbound type variable %s",tv));
+    break;
+  case EnumType(tdnopt,targs):
+    if (tdnopt == null) {
+      terr(loc,"missing enum name");
+      return;
+    }
+    let tdn = tdnopt->v;
+    enumdecl ed;
+    try
+      ed = lookup_enumdecl(te,loc,tdn);
+    catch {
+    case Dict::Absent: 
+      terr(loc,xprintf("unbound type enum %s",qvar2string(tdn)));
+      return;
+    }
+    // Make relative name absolute
+    if (ed->name != null) // sanity check
+      tdn[0] = ed->name->v[0];
+    int lvs = List::length(ed->tvs);
+    int largs = List::length(targs);
+    if (lvs != largs)
+      terr(loc,xprintf("enum %s expects %d type arguments, not %d",
+		       qvar2string(tdn),lvs,largs));
+    // check that each of the type arguments is well-formed and a box type
+    for (; targs != null; targs = targs->tl) {
+      typ t1 = targs->hd;
+      check_valid_type(loc,te,bound_vars,t1);
+      if (typ_kind(t1) != box_k) 
+	terr(loc,xprintf("type %s is not a boxed type",typ2string(t1)));
+    }
+    break;
+  case XenumType(tdn):
+    try {
+      let xed = lookup_xenumdecl(te,loc,tdn);
+      if(xed == null) {
+	terr(loc,xprintf("unbound xenum %s",qvar2string(tdn)));
+	break;
+      }
+      // Make relative name absolute
+      tdn[0] = xed->v->name[0];
+    } catch {
+    case Dict::Absent:
+      terr(loc,xprintf("unbound xenum %s",qvar2string(tdn)));
+      break;
+    }
+    break;
+  case PointerType(t1,nullable,tq):
+    // FIX: check that tqual is valid?
+    check_valid_type(loc,te,bound_vars,t1);
+    break;
+  case IntType(_,_,_): break; // skip
+  case BoolType(_): break; // skip
+  case FloatType(_): break; // skip
+  case DoubleType(_): break; // skip
+  case ArrayType(t1,tq,ak):
+    // FIX: check that tqual is valid?
+    check_valid_type(loc,te,bound_vars,t1);
+    switch (ak) {
+    case UntaggedArray: break; // skip
+    case TaggedArray  : break; // skip
+    case FixedArray(e):
+      // FIX: should memoize the size so that we don't have to worry about
+      // evaluating it during unification
+      eval_const_uint_exp(e); // check that e is of constant size
+      break;
+    }
+    break;
+  case FnType(btvs,tr,args,vararg):
+    check_unique_tvars(loc,btvs);
+    list<tvar> new_bound_vars = List::append(btvs,bound_vars);
+    check_valid_type(loc,te,new_bound_vars,tr);
+    for (; args != null; args = args->tl) {
+      // FIX: should check that variables are unique that tquals are
+      // okay
+      check_valid_type(loc,te,new_bound_vars,args->hd[2]);
+    }
+    break;
+  case TupleType(tq_ts):
+    // FIX: check the tquals
+    for (; tq_ts != null; tq_ts = tq_ts->tl) {
+      check_valid_type(loc,te,bound_vars,tq_ts->hd[1]);
+    }
+    break;
+  case StructType(tdnopt,targs):
+    if (tdnopt == null) 
+      terr(loc,"missing struct name");
+    else {
+      let tdn = tdnopt->v;
+      try {
+	structdecl sd = lookup_structdecl(te,loc,tdn);
+        // Make relative name absolute
+        if (sd->name != null) // sanity check
+          tdn[0] = sd->name->v[0];
+	int lvs = List::length(sd->tvs);
+	int largs = List::length(targs);
+	if (lvs != largs) 
+	  terr(loc,
+               xprintf("struct %s expects %d type arguments but was given %d",
+                       qvar2string(tdn),lvs,largs));
+	// check that each of the type arguments is well-formed and a box type
+	for (; targs != null; targs = targs->tl) {
+	  typ t1 = targs->hd;
+	  check_valid_type(loc,te,bound_vars,t1);
+	  if (typ_kind(t1) != box_k)
+	    terr(loc,xprintf("type %s is not a boxed type",typ2string(t1)));
+	}
+      } catch {
+      case Dict::Absent:
+	terr(loc,xprintf("unbound type struct %s",qvar2string(tdn)));
+        break;
+      }
+    }
+    break;
+  case TypedefType(tdn,targs,*topt_ref):
+    // NB: since we called compress *topt_ref == null
+    try {
+      typedefdecl td = lookup_typedefdecl(te,loc,tdn);
+      tdn[0] = td->name[0]; // Make relative name absolute
+      for (list<typ> ts = targs; ts != null; ts = ts->tl) {
+	check_valid_type(loc,te,bound_vars,ts->hd);
+	if (typ_kind(ts->hd) != box_k)
+	  terr(loc,xprintf("type %s is not a boxed type",typ2string(ts->hd)));
+      }
+      list<$(var,typ)@> inst = List::zip(td->tvs,targs);
+      typ new_t = substitute(inst,td->defn);
+      // TJ: I think we don't need this.  Presumably the typedefdecl
+      // has been validated before entry into the environment; if
+      // that's so and the type arguments are valid and boxed, the
+      // result of the substitution should be valid as well.  Note, if
+      // we DO need this we have to change something, because the type
+      // names in the typedefdecl are absolute, but check_valid_type
+      // assumes they are relative and changes them to absolute.
+      //
+      // check_valid_type(loc,te,bound_vars,new_t);
+      *topt_ref = &Opt(new_t);
+    } catch {
+    case Dict::Absent:
+      terr(loc,xprintf("unbound typedef name %s",qvar2string(tdn)));
+      break;
+    case List::List_mismatch:
+      terr(loc,xprintf("typedef %s expects a different number of arguments",
+		       qvar2string(tdn)));
+      break;
+    }
+    break;
+  case UnionType:
+    terr(loc,"union type unsupported");
+    break;
+  } // end switch
+}
+
+Set<var> repeated_vars(list<var> vs) {
+  Set<var> seen = Set::empty(String::strcmp);
+  Set<var> repeated = Set::empty(String::strcmp);
+  for (; vs != null; vs = vs->tl) {
+    if (Set::member(seen,vs->hd))
+      repeated = Set::insert(repeated,vs->hd);      
+    else seen = Set::insert(seen,vs->hd);
+  }
+  return repeated;
+}
+
+void check_unique_tvars(segment loc, list<tvar> tvs) {
+  try {
+    tvar x = Set::choose(repeated_vars(tvs));
+    terr(loc,xprintf("duplicate type variable %s",x));
+  } catch {
+  case Set::Absent: break; // skip
+  }
+}
+
+/* remove the field name f from a list of fields -- return the field
+   and the mutated list. */
+xenum exn {MissingField};
+$($(field_name,tqual,typ)@,list<$(field_name,tqual,typ)@>)@
+remove_field(field_name f, list<$(field_name,tqual,typ)@> fs) {
+  if (fs == null) throw MissingField;
+  if (String::strcmp(f,fs->hd[0]) == 0)
+    return (&$(fs->hd,fs->tl));
+  let orig = fs;
+  let prev = fs;
+  fs = fs->tl;
+  while (fs != null) {
+    if (String::strcmp(f,fs->hd[0]) == 0) {
+      prev->tl = fs->tl;
+      return(&$(fs->hd,orig));
+    } else {
+      prev = fs;
+      fs = fs->tl;
+    }
+  }
+  throw MissingField;
+}

@@ -1,0 +1,12 @@
+#include "ref.h"
+
+namespace Ref;
+
+ref<`a> new_ref<`a>(`a x) {
+  return &Reference{.v = x};
+}
+
+`a get<`a>(ref<`a> r) { return r->v; }
+
+void set<`a>(ref<`a> r,`a x) { r->v = x; }
+

@@ -1,0 +1,103 @@
+
+{ 
+  /* Ported by Dan from the ocaml implementation */
+#include "core.h"
+#include "lexing.h"
+#include "string.h"
+#include "lineno.h"
+
+namespace Lineno;
+
+#define NEWLINE 1
+#define LINEDEF 2
+#define END     3
+
+}
+
+let newline = ('\010' | '\013' | "\013\010")
+  
+rule token = parse 
+  "#" [^ '\010' '\013']* newline { return LINEDEF; }
+| [^ '\010' '\013']* newline     { return NEWLINE; }
+| [^ '\010' '\013']* eof         { return END;     }
+
+{
+
+using Core;
+using Lexing;
+using String;
+
+struct pos {
+  string logical_file;
+  string line;
+  int    line_no;
+  int    col;
+};
+
+static Opt_t<$(string,int)@> parse_linedef(string line) {
+  try {
+    int i = 0;
+    while (i < size(line) && (line[i] < '0' || line[i] > '9')) ++i;
+    int j = i;
+    while (j < size(line) && line[j] >= '0' && line[j] <= '9') ++j;
+    if (i == size(line)) return null; /* if there's no number*/
+    int number = int_of_string(substring(line,i,j-i));
+    while (j < size(line) && line[j] != '"') ++j;
+    int k = ++j;
+    while (k < size(line) && line[k] != '"') ++k;
+    if (j == size(line) || k == size(line)) return null; /* if there's no name*/
+    string fname = substring(line,j,k-j);
+
+    return &Opt(&$(fname,number));
+  } catch {
+  default:
+    return null;
+  }      
+}
+
+Pos pos_of_abs(string filename, int abs) {
+  if (abs < 0) return &pos(filename, "", -1, 0);
+
+  FILE @f = file_open(filename,"r");
+  try {
+    Lexbuf<Function_lexbuf_state<FILE@>> lbuf = from_file(f);
+    string source_file = filename;
+    int line = 1;
+
+    // these initializations unnecessary after def. assignment better about
+    // loops
+    string this_line="";
+    int eol=0, next=0;
+    while (true) {
+      next = token(lbuf);
+      eol  = lexeme_end(lbuf);
+      this_line = lexeme(lbuf);
+      if (eol > abs) break;
+      
+      switch (next) {
+      case END:     throw Failure("Lineno: Invalid file position");
+      case NEWLINE: ++line; break;
+      case LINEDEF: 
+	Opt_t<$(string,int)@> fno = parse_linedef(this_line);
+	if (fno == null) {
+	  ++line;
+	  fprintf(cyc_stderr, "Unknown directive: %s\n", this_line);
+	} else {
+	  source_file = fno->v[0]; 
+	  line        = fno->v[1];
+	}
+        break;
+      default: throw Failure("Lineno: Impossible");
+      }
+    }
+    file_close(f);
+    return &pos(source_file, this_line, line, size(this_line)-(eol-abs));
+  } catch {
+  case y:
+    file_close(f); throw (y);
+  }
+  // FIX: this is unreachable, but the compiler doesn't know that.
+  return &pos(filename, "", -1, 0);
+}
+
+}

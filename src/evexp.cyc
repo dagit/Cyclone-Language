@@ -1,0 +1,484 @@
+/* Routines for evaluating expressions that should be "constant". */
+
+#include "core.h"
+#include "list.h"
+#include "position.h"
+#include "absyn.h"
+#include "absynpp.h"
+#include "tcutil.h"
+#include "evexp.h"
+
+namespace Evexp;
+
+using Core;
+using Absyn;
+using List;
+using Position;
+using Absynpp;
+
+void exp_err(segment sg,string msg) {
+  printf("%s: Exp_err: %s\n",
+         Position::string_of_segment(sg),
+         msg);
+  return;
+}
+
+// forward references
+extern cnst promote_const(cnst cn);
+extern cnst eval_const_exp(exp e);
+extern cnst eval_const_unprimop(primop p,exp e);
+extern cnst eval_const_binprimop(primop p,exp e1,exp e2);
+extern cnst eval_sizeof(typ t);
+
+unsigned int eval_const_uint_exp(exp e) {
+  switch (promote_const(eval_const_exp(e))) {
+  case Int_c(_,i): return ((unsigned int)i);
+  default: 
+    exp_err(e->loc,"expecting unsigned int");
+    return 0;
+  }
+}
+
+bool eval_const_bool_exp(exp e) {
+  switch (eval_const_exp(e)) {
+  case Bool_c(b): return b;
+  default:
+    exp_err(e->loc,"expecting bool");
+    return false;
+  }
+}
+
+/* The main routine -- side-effects the expression e, overwriting its
+   r field with the resulting constant (only if there's no
+   error) */
+cnst eval_const_exp(exp e) {
+  cnst cn;
+  switch (e->r) {
+  case Const_e(c):
+    cn = c;
+    break;
+  case Conditional_e(e1,e2,e3):
+    cn = ((eval_const_bool_exp(e1)) ? (eval_const_exp(e2)) : 
+	  (eval_const_exp(e3)));
+    break;
+  case Primop_e(p,es):
+    if (es == null) {
+      exp_err(e->loc,"bad static expression (no args to primop)");
+      return (Int_c(Signed,0));
+    }
+    if (es->tl == null) 
+      cn = eval_const_unprimop(p,es->hd);
+    else if (es->tl->tl != null) {
+      exp_err(e->loc,"bad static expression (too many args to primop)");
+      return (Int_c(Signed,0));
+    } else 
+      cn = eval_const_binprimop(p,es->hd,es->tl->hd);
+    break;
+  case Sizeof_e(t):
+    cn = eval_sizeof(t);
+    break;
+  case Cast_e(t,e2):
+    // FIX: this needs to be generalized
+    cn = eval_const_exp(e2);
+    switch (t) {
+    case IntType(sn,sz,bx):
+      if (bx == Boxed) {
+        exp_err(e->loc,xprintf("eval_const: cannot cast to %s",typ2string(t)));
+        return (Int_c(Signed,0));
+      }
+      switch (cn) {
+      case Int_c(sn2,x):
+        cn = Int_c(sn,x);
+        break;
+      default:
+        exp_err(e->loc,xprintf("eval_const: cannot cast to %s",typ2string(t)));
+        return (Int_c(Signed,0));
+      }
+      break;
+    default:
+      exp_err(e->loc,xprintf("eval_const: cannot cast to %s",typ2string(t)));
+      return (Int_c(Signed,0));
+    }
+    break;
+  default: 
+    exp_err(e->loc,"bad static expression");
+    return (Int_c(Signed,0));
+  }
+  e->r = Const_e(cn);
+  return cn;
+}
+
+
+// FIX: (see below)
+static unsigned int szof(typ t) {
+  switch (Tcutil::compress(t)) {
+  case VoidType: return 0;
+  case VarType(_): return 4;
+  case Evar(k,_,_): 
+    if (k == BoxKind) return 4; else return Tcutil::impos("szof evar");
+  case EnumType(_,_): return 4;
+  case XenumType(_): return 4;
+  case PointerType(_,_,_): return 4;
+  case IntType(_,sz,bx):
+    if (bx == Boxed) return 4;
+    else 
+      switch (sz) {
+      case B1: return 1;
+      case B2: return 2;
+      case B4: return 4;
+      case B8: return 8;
+      }
+  case BoolType(bx): return (bx == Boxed) ? 4 : 1;
+  case FloatType(_): return 4;
+  case DoubleType(bx): return (bx == Boxed) ? 4 : 8;
+  case ArrayType(t2,_,ak):
+    switch (ak) {
+    case TaggedArray: return 4;
+    case FixedArray(e): 
+      // FIX: might need to insert padding to ensure alignment
+      return szof(t2) * eval_const_uint_exp(e);
+    case UntaggedArray: return Tcutil::impos("szof []");
+    }
+  case FnType(_,_,_,_): return 4;
+  case TupleType(tqs):
+    // FIX: we need to insert padding to ensure alignment
+    unsigned int s = 0;
+    for (; tqs != null; tqs = tqs->tl) {
+      s += szof(tqs->hd[1]);
+    }
+    return s;
+  case StructType(tdnopt,ts):
+    // FIX: we need the environment to calculate
+    // FIX: we need to insert padding to ensure alignment
+    return Tcutil::impos("szof on structtype");
+  case TypedefType(_,_,_): return Tcutil::impos("szof typedeftype");
+  case UnionType: return Tcutil::impos("szof uniontype");
+  }
+}
+
+cnst eval_sizeof(typ t) {
+  return Int_c(Unsigned,(int)szof(t));
+}
+
+cnst promote_const(cnst cn) {
+  switch (cn) {
+  case Char_c(sn,c): 
+    cn = Int_c(sn,(int)c);
+    break;
+  case Short_c(sn,s):
+    cn = Int_c(sn,(int)s);
+    break;
+  default: break; // skip
+  }
+  return cn;
+}
+
+bool is_arith_const(cnst cn) {
+  switch (cn) {
+  case Char_c(_,_): return true;
+  case Int_c(_,_): return true;
+  case Float_c(_): return true;
+  default: return false;
+  }
+}
+
+cnst eval_const_unprimop(primop p,exp e) {
+  cnst cn = promote_const(eval_const_exp(e));
+  switch (p) {
+  case Plus: 
+    if (is_arith_const(cn)) return cn;
+    else { 
+      exp_err(e->loc,"expecting arithmetic constant");
+      return cn;
+    }
+  case Minus:
+    switch (cn) {
+    case Int_c(s,i): return Int_c(Signed,-i);
+    default: exp_err(e->loc,"expecting arithmetic constant");
+      break;
+    }
+    break;
+  case Not:
+    switch (cn) {
+    case Bool_c(b): return Bool_c(!b);
+    default: exp_err(e->loc,"expecting boolean constant");
+      break;
+    }
+    break;
+  case Bitnot:
+    switch (cn) {
+    case Int_c(s,i): return Int_c(Unsigned,~i);
+    default: exp_err(e->loc,"expecting arithmetic constant");
+      break;
+    }
+    break;
+  default: exp_err(e->loc,"bad constant expression");
+    break;
+  }
+  return cn;
+}
+
+cnst eval_const_binprimop(primop p,exp e1,exp e2) {
+  let cn1 = promote_const(eval_const_exp(e1));
+  let cn2 = promote_const(eval_const_exp(e2));
+  switch (p) {
+  case Plus:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	if (s1 == Unsigned || s2 == Unsigned) 
+	  return Int_c(Unsigned,
+          (int)(((unsigned int)i1) + ((unsigned int)i2)));
+	else 
+	  return Int_c(Signed,i1 + i2);
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Times:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	if (s1 == Unsigned || s2 == Unsigned) 
+	  return Int_c(Unsigned,
+	  (int)(((unsigned int)i1) * ((unsigned int)i2)));
+	else 
+	  return Int_c(Signed,i1 * i2);
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Minus:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	if (s1 == Unsigned || s2 == Unsigned) 
+	  return Int_c(Unsigned,
+	  (int)(((unsigned int)i1) - ((unsigned int)i2)));
+	else 
+	  return Int_c(Signed,i1 - i2);
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Div:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	if (i2 == 0) {
+	  exp_err(e2->loc,"division by zero in constant expression");
+	  return cn1;
+	}
+	if (s1 == Unsigned || s2 == Unsigned) 
+	  return Int_c(Unsigned,
+	  (int)(((unsigned int)i1) / ((unsigned int)i2)));
+	else 
+	  return Int_c(Signed,i1 / i2);
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Mod:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	if (s1 == Unsigned || s2 == Unsigned) 
+	  return Int_c(Unsigned,
+	  (int)(((unsigned int)i1) % ((unsigned int)i2)));
+	else 
+	  return Int_c(Signed,i1 % i2);
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Eq:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	if (s1 == Unsigned || s2 == Unsigned) 
+	  return Bool_c(((unsigned int)i1) == ((unsigned int)i2));
+	else 
+	  return Bool_c(i1 == i2);
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Neq:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	if (s1 == Unsigned || s2 == Unsigned) 
+	  return Bool_c(((unsigned int)i1) != ((unsigned int)i2));
+	else 
+	  return Bool_c(i1 != i2);
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Gt:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	if (s1 == Unsigned || s2 == Unsigned) 
+	  return Bool_c(((unsigned int)i1) > ((unsigned int)i2));
+	else 
+	  return Bool_c(i1 > i2);
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Lt:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	if (s1 == Unsigned || s2 == Unsigned) 
+	  return Bool_c(((unsigned int)i1) < ((unsigned int)i2));
+	else 
+	  return Bool_c(i1 > i2);
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Gte:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	if (s1 == Unsigned || s2 == Unsigned) 
+	  return Bool_c(((unsigned int)i1) >= ((unsigned int)i2));
+	else 
+	  return Bool_c(i1 >= i2);
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Lte:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	if (s1 == Unsigned || s2 == Unsigned) 
+	  return Bool_c(((unsigned int)i1) <= ((unsigned int)i2));
+	else 
+	  return Bool_c(i1 <= i2);
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Bitand:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	return 
+	  Int_c(Unsigned,
+          (int)(((unsigned int)i1)&((unsigned int)i2)));
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Bitor:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	return Int_c(Unsigned,
+        (int)(((unsigned int)i1) | ((unsigned int)i2)));
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Bitxor:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	return Int_c(Unsigned,
+                     (int)(((unsigned int)i1) ^ ((unsigned int)i2)));
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Bitlshift:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	return Int_c(Unsigned,
+	(int)(((unsigned int)i1) << ((unsigned int)i2)));
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Bitlrshift:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+	return Int_c(Unsigned,
+	(int)(((unsigned int)i1) >> ((unsigned int)i2)));
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  case Bitarshift:
+    switch (cn1) {
+    case Int_c(s1,i1):
+      switch (cn2) {
+      case Int_c(s2,i2):
+        exp_err(e1->loc,">>> NOT IMPLEMENTED YET");
+        return cn1;
+        //	return Int_c(Unsigned,
+        //	(int)(((unsigned int)i1) >>> ((unsigned int)i2)));
+      default: break; // skip
+      }
+      break;
+    default: break; // skip
+    }
+    break;
+  default: break; // skip 
+  }
+  exp_err(e1->loc,"bad constant expression");
+  return cn1;
+}

@@ -1,0 +1,91 @@
+////////////////////////////////////////////////////////////////////////////
+// Popcorn library, file queue.pop                                        //
+// Copyright Greg Morrisett, Dan Grossman                                 //
+// January 1999, all rights reserved                                      //
+//                                                                        //
+////////////////////////////////////////////////////////////////////////////
+
+// queue.h:  defines generic imperative queues and various operations
+//           following the conventions of the Ocaml queue library as much
+//           as possible.
+#include "list.h"
+#include "queue.h"
+
+namespace Queue;
+
+using List;
+
+struct queue<`a> { list<`a> front; list<`a> rear; };
+
+// true when the queue is empty
+bool is_empty<`a>(Queue<`a> q)  {
+   return(q->front == null);
+}
+
+// raised by take and peek
+xenum exn { Empty };
+
+// create a new queue
+Queue<`a> create<`a>() {
+  return &queue(null,null);
+}
+
+// insert an element into the rear of the queue (side effect)
+void add<`a>(Queue<`a> q,`a x) {
+  list<`a> cell = &cons(x,null);
+
+  if (q->front == null) {
+    q->front = cell;
+    q->rear = cell;
+  } else {
+    q->rear->tl = cell;
+    q->rear = cell;
+  }
+}
+
+// get and remove an element from the front of the queue (side effect)
+`a take<`a>(Queue<`a> q) {
+  if (q->front == null)
+    throw Empty; // FIX: toc problems if we try to return this.
+  //    return (throw Empty);
+  else {
+    let x = q->front->hd;
+    q->front = q->front->tl;
+    if (q->front == null) {  // necessary to ensure last cell is
+      q->rear = null;        // garbage collected
+    }
+    return x;
+  }
+}
+
+// return the first element in the queue without removing it
+`a peek<`a>(Queue<`a> q) {
+  if (q->front == null)
+    throw Empty; // FIX: toc problems if we try to return this.
+  else {
+    return(q->front->hd);
+  }
+}
+
+// clear out the entire queue (side effect)
+void clear<`a>(Queue<`a> q) {
+  q->front = null;
+  q->rear = null;
+}
+
+// return the number of elements in the queue
+int length<`a>(Queue<`a> q) {
+  return(List::length(q->front));
+}
+
+// apply f to each element in the queue from the front to the back
+void iter<`a>(void f(`a), Queue<`a> q) {
+  for (list<`a> x = q->front; x != null; x = x->tl) {
+    f(x->hd);
+  }
+}
+void app<`a,`b>(`b f(`a), Queue<`a> q) {
+  for (list<`a> x = q->front; x != null; x = x->tl) {
+    f(x->hd);
+  }
+}

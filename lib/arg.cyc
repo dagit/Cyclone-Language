@@ -1,0 +1,147 @@
+
+// doesn't call exit b/c tal.tali doesn't give it a Popcorn type
+// instead raises exception which is perhaps better anyway.
+
+// Dan blatantly stole this from these guys:
+/***********************************************************************)
+(*                                                                     *)
+(*                           Objective Caml                            *)
+(*                                                                     *)
+(*            Xavier Leroy, projet Cristal, INRIA Rocquencourt         *)
+(*                                                                     *)
+(*  Copyright 1996 Institut National de Recherche en Informatique et   *)
+(*  Automatique.  Distributed only by permission.                      *)
+(*                                                                     *)
+(***********************************************************************/
+#include "arg.h"
+#include "string.h"
+namespace Arg;
+using Core;
+using List;
+
+xenum exn {Error, Bad(string)};
+
+// FIX: when we get & working just use bool@, not ref<Bool>
+enum Spec {
+  Unit_spec(void (@f)()),         // Call the function with unit argument
+  Set_spec(Ref::ref<Bool>),       // Set the reference to true
+  Clear_spec(Ref::ref<Bool>),     // Set the reference to false
+  String_spec(void (@f)(string)), // Call the function with a string argument
+  Int_spec(void (@f)(int)),       // Call the function with an int argument
+  Rest_spec(void (@f)(string))    // Stop interpreting keywords and call the
+                                  // function with each remaining argument
+};
+
+static enum error {
+  Unknown(string),
+  Missing(string),
+  Message(string),
+  Wrong(string,string,string)  // option, actual, expected
+};
+
+static spec lookup (list<$(string,spec,string)@> l, string x) {
+  while (l != null) {
+    if (String::strcmp(x,l->hd[0]) == 0)
+      return l->hd[1];
+    l = l->tl;
+  }
+  throw Not_found;
+}
+
+void usage(list<$(string,spec,string)@> speclist, string errmsg) {
+  fprintf(cyc_stderr, "%s\n", errmsg);
+  while (speclist != null) {
+    fprintf(cyc_stderr, " %s %s\n", speclist->hd[0], speclist->hd[2]);
+    speclist = speclist->tl;
+  }
+}
+
+static int current = 0;
+static string args[?] = {};
+
+static void stop(int prog_pos, enum error e,
+		 list<$(string,spec,string)@> speclist, string errmsg) {
+  string progname = prog_pos < size(args) ? args[prog_pos] : "(?)";
+  switch (e) {
+  case Unknown(s):
+     if (String::strcmp(s,"-help")!=0)
+       fprintf(cyc_stderr, "%s: unknown option `%s'.\n", progname, s);
+     break;
+  case Missing(s):
+     fprintf(cyc_stderr, "%s: option `%s' needs an argument.\n", progname, s);
+     break;
+  case Wrong(flag,cmd,t):
+     fprintf(cyc_stderr, "%s: wrong argument `%s'; option `%s' expects %s.\n",
+             progname, cmd, flag, t);
+     break;
+  case Message(s):
+     fprintf(cyc_stderr, "%s: %s.\n", progname, s);
+     break;
+  }
+  usage(speclist, errmsg);
+  throw Error; // should exit here
+}
+
+void parse(list<$(string,spec,string)@> speclist, void anonfun(string),
+	   string errmsg) {
+  args = std_args();
+
+  int initpos = current;
+  int l       = size(args);
+  ++current;
+  while (current < l) {
+    string s = args[current];
+    if (size(s) >= 1 && s[0] == '-') {
+      spec action;
+      try
+	action = lookup(speclist, s);
+      catch {
+      case Not_found:
+	stop(initpos, Unknown(s), speclist, errmsg);
+	return;
+      }
+      try
+	switch (action) {
+	case Unit_spec(f)  : f(); break;
+	case Set_spec(r)   : Ref::set(r,true); break;
+	case Clear_spec(r) : Ref::set(r,false); break;
+	case String_spec(f):
+	  if (current+1 < l) {
+	    f(args[current+1]);
+	    ++current;
+	  } else
+	    stop(initpos, Missing(s), speclist, errmsg);
+	  break;
+	case Int_spec(f):
+	  string arg = args[current+1];
+	  int n;
+	  try n = int_of_string(arg);
+	  catch {
+	  case InvalidArg(x):
+	    stop(initpos,Wrong(s,arg,"an integer"),speclist,errmsg);
+	    return;
+	  }
+	  f(n);
+	  ++current;
+	  break;
+	case Rest_spec(f):
+	  while (current < l-1) {
+	    f(args[current+1]);
+	    ++current;
+	  }
+	  break;
+	}
+      catch {
+      case Bad(s2): stop(initpos, Message(s2), speclist, errmsg); break;
+      }
+      ++current;
+    }
+    else {
+      try anonfun(s);
+      catch {
+      case Bad(s2): stop(initpos, Message(s2), speclist, errmsg); break;
+      }
+      ++current;
+    }
+  }
+}

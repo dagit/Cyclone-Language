@@ -1,0 +1,141 @@
+Things to keep in mind when porting Popcorn code to Cyclone
+
+
+* Type operands follow type constructors:
+
+    list<int>
+
+* Type variables are preceded by backquote:
+
+    `a fst<`a,`b>(`a x, `b y);
+
+* Tuples are created with $ instead of ^:
+
+    $(int,int) x = $(1,2);
+
+* Tuples are accessed by array notation.  CAREFUL: Popcorn's x.1
+  should be translated to Cyclone's x[0] !!
+
+    $(int,int) x = $(1,2);
+    int y = x[0];          // y is 1
+    int z = x[1];          // z is 2, not 1 !!
+
+* Popcorn's ^ is not the new operator in Cyclone.  An explicit "new"
+  is usually not needed:
+
+    struct foo { int x; int y };  // decl. type "struct foo", constructor "foo"
+
+    struct foo x = foo(3,4);      // builds a new struct foo
+
+* Cyclone's struct declarations do not introduce a new type name.
+
+    struct foo { int x; };  // declares type struct foo, NOT type foo
+    struct foo y = { 4 };   // OK -- struct foo is now a type
+    foo z = { 3 };          // NOT OK -- foo is not a type name
+
+  Use typedef to introduce new type names:
+
+    typedef struct foo Foo; // Now, either struct foo or Foo is a type
+    Foo w = { 4 };          // OK
+
+  Careful, though, because typedef uses up a name:
+
+    struct foo { int x; };
+    let y = foo(3);          // OK
+    typedef struct foo foo;  // CLOBBERS constructor name "foo"
+    let z = foo(4);          // NOT OK
+
+  After the typedef, foo is a type name, and can't be applied as a
+  function.
+
+* Cyclone's structs and tuples are unboxed.
+  A Popcorn (struct foo) is a Cyclone (struct foo @).
+  A Popcorn *(int,int) is a Cyclone $(int,int)@.
+
+* Cyclone's struct declarations must be followed by a semi-colon:
+
+    struct foo { int x; };  // Final semicolon is REQUIRED
+
+* Popcorn's union is subsumed by Cyclone's enum:
+
+    enum foo { Bar, Baz(int,int) };  // declares enum with two constructors
+
+    enum foo x = Bar;                // build nullary enum value
+    enum foo y = Baz(4,5);           // build enum value with associated values
+
+  Note, the declaration for enum foo DOES NOT declare type name foo.
+  Use typedef to do that.
+
+* Declare an exception in Cyclone by extending the xenum exn:
+
+    xenum exn { MyNewExn(string) };  // declare exception
+
+    throw MyNewExn("barf");          // build exception and throw it
+
+* Popcorn's _ corresponds to Cyclone's let, but let can't appear
+  everywhere that Popcorn's _ can appear:
+
+    let w = 3;            // OK
+    void f(let x)         // NOT OK
+    let z;                // NOT OK
+
+* Patterns can be used with let:
+
+    let $(y,z) = x;       // equivalent to int y = x[0]; int z = x[1];
+
+* Cyclone uses "namespace" and "using" instead of Popcorn's "prefix"
+  and "open".  In Cyclone, it isn't necessary to follow
+  "namespace Foo" with "using Foo".
+
+* Cyclone .h files are meant to be included in the corresponding .cyc
+  files.  The declarations in the .h file should typically be externs;
+  by including the .h file in the .cyc file, we check that the extern
+  declarations are consistent with the actual definitions.
+
+* Cyclone does not implement nested functions yet.
+
+* Cyclone uses "throw" instead of Popcorn's "raise".
+
+* Cyclone maintains a distinction between functions and pointers to
+  functions.  It also automatically converts functions to pointers and
+  vice versa in many places, so you don't often have to deal with this.
+  One place it is likely to show up is in structs.  You are not
+  allowed to have a struct field of function type, you must have a
+  pointer instead:
+
+    struct foo { int f(int); }    // NOT OK
+    struct bar { int (@g)(int); } // OK
+    struct bar x;
+    int id(int x) = {return x;}
+    x.g = id;                     // OK, id is converted to &id
+
+* In Cyclone switch statements and exception handlers, break or
+  fallthru is required between cases, unless the compiler can figure
+  out that fallthru is not possible.
+
+  This means that break has its C meaning in switches (in Popcorn, a
+  break in a switch will break to a while).  WATCH OUT FOR THIS!
+  E.G.,
+
+    while (true) {
+      switch (x) {
+      case true: break;
+      case false: x = true; continue;
+      }
+    }
+
+  is an infinite loop in Cyclone but not Popcorn.
+
+* String and character constants are different.  In particular, in
+  Cyclone, the escape \ddd is given in octal, not decimal as in
+  Popcorn.
+
+* In Cyclone a string constant "foo" is a char[4]; the final element
+  of the array is a null character.  This means that size(foo)==4 !!
+  So in converting Popcorn to Cyclone, watch this carefully or you may
+  get off-by-one errors.  In Cyclone String::strlen(foo)==3, this
+  function pays attention to null characters.
+
+* In Cyclone most string functions pay attention to null characters,
+  in particular, String::strncpy.  Use String::zstrncpy if you want
+  the Popcorn behavior.

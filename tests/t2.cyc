@@ -1,0 +1,79 @@
+
+int f40(int x) {switch (x) {case 1: return 1; default: return 2;}}
+
+// should give redundant case and inexhaustive
+// int f41(int x) {switch (x) {case 1: return 1; case 1: return 2;}}
+
+// should give inexhaustive 
+// int f42(int x) {switch (x) {case 1: return 1; case 2: return 2;}}
+
+void f43($(bool,bool,bool) x) {
+  
+  switch (x) {
+  case $(true,true,true): 1; break;
+  case $(true,true,false): 2; break;
+  case $(true,false,true): 3; break;
+  case $(true,false,false): 4; break;
+  case $(false,true,true): 5; break;
+  case $(false,true,false): 6; break;
+  case $(false,false,true): 7; break;
+  case $(false,false,false): 8; break;
+  }
+}
+
+int f44(char x) {switch (x) {case 'a': return 1; default: return 2;}}
+//bug in parser -- doesn't like the 3.14
+//int f45(float x) {switch (x) {case 3.14: return 1; default: return 2;}}
+
+typedef enum Color {Red, Orange, Yellow, Green, Indigo, Violet} color;
+
+int compare_color(color x,color y) {
+  switch ($(x,y)) {
+  case $(Red,Red): return 0;
+  case $(Red,_)  : return -1;
+  case $(Orange,Red): return 1;
+  case $(Orange,Orange): return 0;
+  case $(Orange,_): return -1;
+  case $(Yellow,Red): return 1;
+  case $(Yellow,Orange): return 1;
+  case $(Yellow,Yellow): return 0;
+  case $(Yellow,_): return -1;
+  case $(Green,Red): return 1;
+  case $(Green,Orange): return 1;
+  case $(Green,Yellow): return 1;
+  case $(Green,Green): return 0;
+  case $(Green,_): return -1;
+  case $(Indigo,Red): return 1;
+  case $(Indigo,Orange): return 1;
+  case $(Indigo,Yellow): return 1;
+  case $(Indigo, Green): return 1;
+  case $(Indigo, Indigo): return 0;
+  case $(Indigo, _): return -1;
+  case $(Violet, Violet): return 0;
+  case $(Violet, _): return 1;
+  }
+}
+
+struct Point {int x,y; color z;};
+typedef struct Point *point_opt, @point;
+
+int f45(point p) {
+  switch (p) {
+  case &Point{.x=x,.y=y,.z=Yellow}: return 1;
+  case &Point{.x=x,.y=y,.z=z} where (x <= y): return 2; 
+  case &Point{.x=x,.y=y,.z=z}: return 3;
+    // default: return 4;
+  }
+}
+
+int f46(point_opt p) {
+  switch (p) {
+  case &Point{.x=x,.y=y,.z=Yellow}: return 1;
+  case &Point{.x=x,.y=y,.z=z} where (x <= y): return 2;
+  case &Point{.x=x,.y=y,.z=z}: return 3;
+  case null: return 4;
+    // default: return 4;
+  }
+}
+
+

@@ -1,0 +1,42 @@
+// Demonstrates some subtyping
+
+typedef struct cons<`a> {
+  struct cons<`a> *tl;  
+  `a hd; 
+} *list<`a>;
+
+
+typedef struct cons2<`a> {
+  struct cons2<`a> * const tl;
+} *list2<`a>;
+
+typedef struct cons3<`a> {
+  struct cons3<`a> * const tl;  
+  `a hd; 
+} *list3<`a>;
+
+
+list3<int> foo1(list<int> x) {
+  return (list3<int>)x;
+}
+
+list2<`a> foo2<`a>(list<`a> x) {
+  list3<`a> y = (list3<`a>)x;
+  return (list2<`a>)y;
+}
+
+`a fst<`a>($(`a)* x) {
+  return x[0];
+}
+
+`b snd<`a,`b>($(`a,`b)* y) {
+  return y[1];
+}
+
+list<`a> tail<`a>(list<`a> x) {
+  return fst(x); // should warn about implicit cast
+}
+
+`a head<`a>(list<`a> x) {
+  return snd(x); // should warn about implicit cast
+}

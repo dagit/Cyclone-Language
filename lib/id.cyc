@@ -1,0 +1,64 @@
+
+////////////////////////////////////////////////////////////////////////////
+// Popcorn library, file id->pop                                           //
+// Copyright Greg Morrisett, Dan Grossman                                 //
+// January 1999, all rights reserved                                      //
+//                                                                        //
+////////////////////////////////////////////////////////////////////////////
+
+// This implementation suffers two shortcomings:
+// 1. It does no string sharing -- crucial for talc efficiency in the ocaml
+//    implementation.
+// 2. It does copy incoming strings, allowing for later mutation via external
+//    code.  Could probably live without this one
+
+#include "core.h"
+#include "string.h"
+#include "list.h"
+#include "id.h"
+
+using Core;
+using String;
+using List;
+
+namespace Id;
+
+abstract struct id {
+  string s;
+  int i;
+};
+
+Id id_make(string s,int i) {  return &id(s,i); }
+
+static int counter = 0;
+
+Id id_new(string s) {
+  ++counter;
+  return id_make(s,counter);
+}
+
+Id id_renew(Id i) {
+  ++counter;
+  return id_make(i->s,counter);
+}
+
+Id id_of_string(string s) { return id_make(s,-1); }
+Id id_unique   (string s) { return id_new(s); }
+
+string id_to_string(Id x) {
+  if (x->i == -1)
+    return String::strdup(x->s);
+  return strconcat_l(&cons(x->s,
+                           &cons((string)"$", // FIX: get rid of cast
+                                 &cons(string_of_int(x->i),null))));
+}
+void id_prn(FILE @f, Id x) { fprintf(f, "%s", id_to_string(x)); }
+
+string id_to_source(Id x) { return(x->s); }
+
+int id_compare(Id x1,Id x2) {
+  if (x1->i == x2->i)
+    return(String::strcmp(x1->s,x2->s));
+  else if (x1->i < x2->i) return(-1);
+  else return(1);
+}

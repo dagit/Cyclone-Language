@@ -1,0 +1,132 @@
+
+// Bit vectors -- particularly designed for data flow analysis.
+// Note that we're not overly defensive about different bit vectors being
+// the same size and things -- we rely on the client to enforce her own
+// abstractions.
+
+// Unfortunately, without typedef, we either add a level of indirection
+// or expose the implementation type.  (We can't even use #define because
+// of the grammar for returning arrays.)  For now, we'll expose the type.
+
+// If we ever really care about middle-end speed, maybe this should be in
+// the same module as the middle end so as to promote inlining.
+#include "bitvec.h"
+
+namespace Bitvec {
+// POS_TO_WORD is division by 32
+// POS_TO_BIT is mod by 32
+#define POS_TO_WORD(pos) (pos >> 5)
+#define POS_TO_BIT(pos)  (pos & 0x1F)
+#define INTSZ 32
+
+bool get(BITVEC bvec, int pos) {
+  int word   = POS_TO_WORD(pos);
+  int offset = POS_TO_BIT(pos);
+  return ((bvec[word] >> offset) & 1) == 1;
+}  
+void set(BITVEC bvec, int pos) {
+  int word   = POS_TO_WORD(pos);
+  int offset = POS_TO_BIT(pos);
+  bvec[word] = bvec[word] | (1 << offset);
+}
+void clear(BITVEC bvec, int pos) {
+  int word   = POS_TO_WORD(pos);
+  int offset = POS_TO_BIT(pos);
+  bvec[word] = bvec[word] & ~(1 << offset);
+}
+bool get_and_set(BITVEC bvec, int pos) {
+  int  word   = POS_TO_WORD(pos);
+  int  offset = POS_TO_BIT(pos);
+  int  slot   = bvec[word];
+  bool ans    = ((slot >> offset) & 1) == 1;
+  if(!ans)
+    bvec[word] = slot | (1 << offset);
+  return ans;
+}
+void union_two(BITVEC dest, BITVEC src1, BITVEC src2) {
+  int len = sizeof(dest);
+  for(int i=0; i<len; ++i)
+    dest[i] = src1[i] | src2[i];
+}
+void intersect_two(BITVEC dest, BITVEC src1, BITVEC src2) {
+  int len = sizeof(dest);
+  for(int i=0; i<len; ++i)
+    dest[i] = (src1[i] & src2[i]);
+} 
+void diff_two(BITVEC dest, BITVEC src1, BITVEC src2) {
+ int len = sizeof(dest);
+ for(int i=0; i<len; ++i)
+    dest[i] = src1[i] & ~src2[i];
+} 
+bool compare_two(BITVEC src1, BITVEC src2) {
+  int len = sizeof(src1);
+  for (int i=0; i<len; ++i)
+    if (src1[i] != src2[i])
+      return false;
+  return true;
+}
+
+// makes one more entry then necessary when sz ia multiple of INTSZ
+BITVEC new_empty(int sz) {
+  BITVEC ans = new {for i < (sz / INTSZ)+1 : 0};
+  return ans;
+}
+BITVEC new_full(int sz) {
+  BITVEC ans = new {for i < (sz / INTSZ)+1 : 0xFFFFFFFF};
+  return ans;
+}
+BITVEC new_copy(BITVEC old) {
+  BITVEC copy = new_empty(sizeof(old));
+  union_two(copy,copy,old);
+  return copy;
+}
+BITVEC from_list<`a,`b>(Dict::Dict<`a,`b> d, int f(`b), 
+			int sz, List::list<`a> l) {
+  BITVEC ans = new {for i < (sz % INTSZ)+1 : 0};
+  for(; l!=null;l=l->tl)
+    set(ans, f(Dict::lookup(d,l->hd)));
+  return ans;
+}
+List::list<int> to_sorted_list(BITVEC bvec,int sz) {
+  List::list<int> ans = null;
+  for(int pos=sz-1; pos >= 0; ) {
+    int word = POS_TO_WORD(pos);
+    int bits = bvec[word];
+    for(int offset = POS_TO_BIT(pos); offset >= 0; --offset, --pos)
+      if (((bits >> offset) & 1) == 1)
+	ans = &List::cons(pos,ans); 
+  }
+  return ans;
+}  
+  
+void clear_all(BITVEC bvec) {
+  int len = sizeof(bvec);
+  for (int i=0; i < len; ++i)
+    bvec[i] = 0;
+}
+void set_all(BITVEC bvec) {
+  int len = sizeof(bvec);
+  for (int i=0; i < len; ++i)
+    bvec[i] = 0xFFFFFFFF;
+}
+
+bool all_set(BITVEC bvec, int sz) {
+  int words = POS_TO_WORD(sz);
+
+  for(int i=0; i < words; i++) {
+    if (bvec[i] != 0xFFFFFFFF) return false;
+  }
+  for(int i=words*INTSZ; i < sz; i++) {
+    if (!get(bvec,i)) return false;
+  }
+  return true;
+}
+    
+
+// for debugging
+void print_bvec(BITVEC bvec) {
+  for (int i=0; i<INTSZ*(sizeof(bvec)); ++i)
+    printf("%d",get(bvec,i)?1:0);
+  printf("\n");
+}
+}

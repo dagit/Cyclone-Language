@@ -1,0 +1,65 @@
+#include "core.h"
+int x = 0;
+int y = 1 + 1;
+int @z = &y;
+
+typedef struct Point{int x,y;} *point;
+
+struct Point p = {1,2};
+point pp = &p;
+
+$(int,int) q = $(1,2);
+$(int,int)* qq = &q;
+
+char foo[4] = "foo";
+// Fix: gcc doesn't like the cast to char* that put on the "bar"
+// char bar[] = "bar";
+
+char blahb[?] = {'a','b','c'};
+char blahc[?] = "abc";
+
+int arr[10] = {0,1,2,3,4,5,6,7,8,9};
+
+// Fix:  floating-point and double constants
+Char c1 = 'a';
+Char c2 = (Char)3;
+char c3 = 'b';
+char c4 = (char)3;
+Short s1 = (Short)3;
+short s2 = (short)3;
+Int i1 = 3;
+int i2 = 3;
+double d1 = 3;
+Double d2 = 3;
+long long l1 = 3;
+Long Long l2 = 3;
+
+void blah() {
+  char baz[?] = foo;
+  printf("%s\n",baz);
+}
+
+void (@bbb)() = blah;
+void (*ccc)() = null;
+
+typedef enum Day {Sun, Mon, Tue, Wed, Thu, Fri, Sat} day;
+
+day ddd = Mon;
+
+typedef enum Exp {Intexp(int), Plusexp(enum Exp,enum Exp),
+                  Varexp(string)} exp;
+
+exp eee = Intexp(3);
+// FIX: the type-checker doesn't like the eee's -- for good reason.
+// makes me wonder whether value-carrying constructors should really
+// be boxed...
+// exp fff = Plusexp(eee,eee);
+exp ggg = Plusexp(Intexp(1),Intexp(2));
+exp hhh = Varexp("howdy");
+
+xenum foo_t;
+xenum foo_t { Barbie, Ken(int,string) };
+
+xenum foo_t barbie = Barbie;
+xenum foo_t ken = Ken(3,"hello");
+

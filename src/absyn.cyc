@@ -1,0 +1,470 @@
+// we define ABSYN_CYC to avoid re-declaring the abstract syntax -- see
+// absyn.h
+#define ABSYN_CYC 
+#include "absyn.h"
+#include "string.h"
+
+using Core;
+using List;
+using String;
+using Position;
+namespace Absyn;
+
+// return a negative, zero, or positive int according to whether the
+// first string list is less than, equal to, or greater than the
+// second 
+static int strlist_cmp(list<string> ss1,list<string> ss2) 
+{
+  if (ss1 == null) return (ss2 == null) ? 0 : -1;
+  if (ss2 == null) return 1;
+  int i = strcmp(ss1->hd,ss2->hd);
+  if (i != 0) return i;
+  else return strlist_cmp(ss1->tl,ss2->tl);
+}
+int varlist_cmp(list<var> vs1, list<var> vs2) {
+  return strlist_cmp(vs1,vs2);
+}
+int qvar_cmp(qvar q1, qvar q2) {
+  int i = strlist_cmp(q1[0],q2[0]);
+  if (i != 0) return i;
+  else return strcmp(q1[1],q2[1]);
+}
+
+static int new_type_counter = 0;
+
+typ new_evar(kind k) {
+  return Evar(k,null,new_type_counter++);
+}
+typ wildtyp() {
+  return new_evar(MemKind);
+}
+
+tqual combine_tqual(tqual x,tqual y) {
+  return &Tqual(x->q_const || y->q_const,
+		x->q_volatile || y->q_volatile,
+		x->q_restrict || y->q_restrict);
+}
+
+tqual empty_tqual() { return &Tqual(false,false,false); }
+
+bool is_format_prim(primop p) {
+  bool ans;
+  switch (p) {
+  case Printf: ans = true; break;
+  case Fprintf: ans = true; break;
+  case Xprintf: ans = true; break;
+  default: return false;
+  }
+  return ans;
+}
+
+// Various constructors
+
+//////////////////////////// Kinds ///////////////////////////////
+kind box_k = BoxKind;
+kind reg_k = RegKind;
+kind mem_k = MemKind;
+
+//////////////////////////// Constraints /////////////////////////
+conref<`a> new_conref<`a>(`a x) {
+  return &Conref{.v = Eq_constr(x)};
+}
+conref<`a> empty_conref<`a>() {
+  constraint<`a> c = No_constr;
+  return &Conref{.v = c};
+}
+
+
+//////////////////////////// Types ///////////////////////////////
+// unboxed, unsigned types
+typ uchar_t = IntType(Unsigned,B1,Unboxed);
+typ ushort_t = IntType(Unsigned,B2,Unboxed);
+typ uint_t = IntType(Unsigned,B4,Unboxed);
+typ ulong_t = IntType(Unsigned,B8,Unboxed);
+// unboxed, signed types
+typ schar_t = IntType(Signed,B1,Unboxed);
+typ sshort_t = IntType(Signed,B2,Unboxed);
+typ sint_t = IntType(Signed,B4,Unboxed);
+typ slong_t = IntType(Signed,B8,Unboxed);
+// unboxed float, double, bool
+typ float_t = FloatType(Unboxed);
+typ double_t = DoubleType(Unboxed);
+typ bool_t = BoolType(Unboxed);
+// boxed, unsigned types
+typ uChar_t = IntType(Unsigned,B1,Boxed);
+typ uShort_t = IntType(Unsigned,B2,Boxed);
+typ uInt_t = IntType(Unsigned,B4,Boxed);
+typ uLong_t = IntType(Unsigned,B8,Boxed);
+// boxed, signed types
+typ sChar_t = IntType(Signed,B1,Boxed);
+typ sShort_t = IntType(Signed,B2,Boxed);
+typ sInt_t = IntType(Signed,B4,Boxed);
+typ sLong_t = IntType(Signed,B8,Boxed);
+// boxed float, double, bool
+typ Float_t = FloatType(Boxed);
+typ Double_t = DoubleType(Boxed);
+typ Bool_t = BoolType(Boxed);
+// exceptions
+static $(list<var>,var) exn_pair = $(null,(string)"exn");
+typ exn_t = XenumType(&exn_pair);
+// void
+typ void_t = VoidType;
+// string
+static Opt_t<typ> string_t_opt = null;
+typ string_t() {
+  if (string_t_opt == null) {
+    typ t = ArrayType(uchar_t,empty_tqual(),TaggedArray);
+    string_t_opt = &Opt(t);
+    return t;
+  } else
+    return string_t_opt->v;
+}
+// FILE
+static Opt_t<typ> file_t_opt = null;
+typ file_t() {
+  if (file_t_opt == null) {
+    typedef_name file_t_name = &$(null,(string)"__sFILE");
+    typ file_struct_t = StructType(&Opt(file_t_name),null);
+    file_t_opt = &Opt(PointerType(file_struct_t,
+				  new_conref((Bool)false),
+				  empty_tqual()));
+  }
+  return file_t_opt->v;
+}
+// pointers
+typ nullableptr_t(typ t, tqual tq) {
+  return PointerType(t,new_conref((Bool)true),tq);
+}
+static Opt_t<typ> void_star_t_opt = null;
+typ void_star_t() {
+  if (void_star_t_opt == null) {
+    void_star_t_opt = &Opt(nullableptr_t(void_t, empty_tqual()));
+  }
+  return void_star_t_opt->v;
+}
+typ pureptr_t(typ t, tqual tq) {
+  return PointerType(t,new_conref((Bool)false),tq);
+}
+
+// structs
+typ strct(var name) {
+  return StructType(&Opt(&$(null,name)),null);
+}
+
+///////////////////////// Expressions //////////////////////////////
+exp new_exp(raw_exp r, segment loc) {
+  return &Exp{.topt=null, .r=r, .loc=loc};
+}
+exp const_exp(cnst c, segment loc) { return new_exp(Const_e(c), loc); }
+exp null_exp(segment loc) { return new_exp(Const_e(Null_c), loc); }
+exp bool_exp(bool b, segment loc) { return const_exp(Bool_c(b), loc); }
+exp true_exp(segment loc) { return bool_exp(true, loc); }
+exp false_exp(segment loc) { return bool_exp(false, loc); }
+exp int_exp(sign s,int i,segment seg) { 
+  return const_exp(Int_c(s,i),seg);
+}
+exp signed_int_exp(int i,segment loc) { 
+  return int_exp(Signed,i,loc);
+}
+exp uint_exp(unsigned int i,segment loc) { 
+  return int_exp(Unsigned,i,loc);
+}
+exp char_exp(char c,segment loc) {
+  return const_exp(Char_c(Unsigned,c),loc);
+}
+exp float_exp(string f,segment loc) {
+  return const_exp(Float_c(f),loc);
+}
+exp string_exp(string s,segment loc) {
+  return const_exp(String_c(s),loc);
+}
+exp var_exp(qvar q, segment loc) { return new_exp(Var_e(q), loc); }
+exp unknownid_exp(qvar q, segment loc) { 
+  return new_exp(UnknownId_e(q), loc); 
+}
+exp primop_exp(primop p, list<exp> es, segment loc) {
+  return new_exp(Primop_e(p,es),loc);
+}
+exp prim1_exp(primop p, exp e, segment loc) {
+  return primop_exp(p, &cons(e,null), loc);
+}
+exp prim2_exp(primop p, exp e1, exp e2, segment loc) {
+  return primop_exp(p, &cons(e1,&cons(e2,null)), loc);
+}
+exp times_exp(exp e1, exp e2, segment loc) {
+  return prim2_exp(Times, e1, e2, loc);
+}
+exp eq_exp(exp e1, exp e2, segment loc) {
+  return prim2_exp(Eq, e1, e2, loc);
+}
+exp neq_exp(exp e1, exp e2, segment loc) {
+  return prim2_exp(Neq, e1, e2, loc);
+}
+exp gt_exp(exp e1, exp e2, segment loc) {
+  return prim2_exp(Gt, e1, e2, loc);
+}
+exp lt_exp(exp e1, exp e2, segment loc) {
+  return prim2_exp(Lt, e1, e2, loc);
+}
+exp gte_exp(exp e1, exp e2, segment loc) {
+  return prim2_exp(Gte, e1, e2, loc);
+}
+exp lte_exp(exp e1, exp e2, segment loc) {
+  return prim2_exp(Lte, e1, e2, loc);
+}
+exp assignop_exp(exp e1, Opt_t<primop> popt, exp e2, segment loc) {
+  return new_exp(AssignOp_e(e1,popt,e2),loc);
+}
+exp assign_exp(exp e1, exp e2, segment loc) {
+  return assignop_exp(e1,null,e2,loc);
+}
+exp post_inc_exp(exp e, segment loc) {
+  return new_exp(Increment_e(e,PostInc),loc);
+}
+exp pre_inc_exp(exp e, segment loc) {
+  return new_exp(Increment_e(e,PreInc),loc);
+}
+exp pre_dec_exp(exp e, segment loc) {
+  return new_exp(Increment_e(e,PreDec),loc);
+}
+exp post_dec_exp(exp e, segment loc) {
+  return new_exp(Increment_e(e,PostDec),loc);
+}
+exp conditional_exp(exp e1,exp e2,exp e3,segment loc) {
+  return new_exp(Conditional_e(e1,e2,e3), loc);
+}
+exp and_exp(exp e1, exp e2, segment loc) {
+  return conditional_exp(e1,e2,false_exp(loc), loc);
+}
+exp or_exp(exp e1, exp e2, segment loc) {
+  return conditional_exp(e1,true_exp(loc),e2, loc);
+}
+exp seq_exp(exp e1, exp e2, segment loc) {
+  return new_exp(SeqExp_e(e1,e2), loc);
+}
+exp unknowncall_exp(exp e, list<exp> es, segment loc) {
+  return new_exp(UnknownCall_e(e,es), loc);
+}
+exp fncall_exp(exp e, list<exp> es, segment loc) {
+  return new_exp(FnCall_e(e,es), loc);
+}
+exp throw_exp(exp e, segment loc) {
+  return new_exp(Throw_e(e), loc);
+}
+exp noinstantiate_exp(exp e, segment loc) {
+  return new_exp(NoInstantiate_e(e), loc);
+}
+exp instantiate_exp(exp e, Opt_t<list<typ>> ts, segment loc) {
+  return new_exp(Instantiate_e(e,ts), loc);
+}
+exp cast_exp(typ t, exp e, segment loc) { 
+  return new_exp(Cast_e(t,e), loc);
+}
+exp address_exp(exp e, segment loc) { return new_exp(Address_e(e), loc); }
+exp sizeof_exp(typ t, segment loc) { return new_exp(Sizeof_e(t), loc); }
+exp deref_exp(exp e, segment loc) { return new_exp(Deref_e(e), loc); }
+exp structmember_exp(exp e, field_name n, segment loc) {
+  return new_exp(StructMember_e(e,n), loc); 
+}
+exp structarrow_exp(exp e, field_name n, segment loc) {
+  return new_exp(StructArrow_e(e,n), loc); 
+}
+exp arrow_exp(exp e, field_name n, segment loc) {
+  return deref_exp(structmember_exp(e, n, loc), loc);
+}
+exp subscript_exp(exp e1, exp e2, segment loc) {
+  return new_exp(Subscript_e(e1,e2), loc); 
+}
+exp tuple_exp(list<exp> es, segment loc) {
+  return new_exp(Tuple_e(es), loc); 
+}
+exp stmt_exp(stmt s,segment loc) { return new_exp(StmtExp_e(s), loc); }
+exp null_pointer_exn_exp(segment loc) { 
+  return var_exp(&$(null,(string)"Null_Exception"), loc); 
+}
+exp array_exp(list<exp> es, segment loc) {
+  let dles = null;
+  for (; es != null; es = es->tl) {
+    dles = &cons(&$(null,es->hd),dles);
+  }
+  dles = List::imp_rev(dles);
+  return new_exp(Array_e(dles),loc);
+}
+exp unresolvedmem_exp(Opt_t<typedef_name> n,
+                      list<$(list<designator>,exp)@> dles,segment loc) {
+  return new_exp(UnresolvedMem_e(n,dles),loc);
+}
+///////////////////////// Statements ///////////////////////////////
+stmt new_stmt(raw_stmt s, segment loc) { return &Stmt{.r=s, .loc=loc}; }
+stmt skip_stmt(segment loc) { return new_stmt(Skip_s, loc); }
+stmt exp_stmt(exp e,segment loc) { return new_stmt(Exp_s(e),loc); }
+stmt seq_stmt(stmt s1, stmt s2, segment loc) { 
+  switch (s1->r) {
+  case Skip_s: return s2;
+  default: 
+    return new_stmt(Seq_s(s1,s2), loc); 
+  }
+}
+stmt seq_stmts(list<stmt> ss, segment loc) {
+  if (ss == null) return skip_stmt(loc);
+  else return seq_stmt(ss->hd,seq_stmts(ss->tl,loc),loc);
+}
+stmt return_stmt(Opt_t<exp> e,segment loc) { 
+  return new_stmt(Return_s(e),loc); 
+}
+stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,segment loc) {
+  return new_stmt(IfThenElse_s(e,s1,s2),loc);
+}
+stmt while_stmt(exp e,stmt s,segment loc) { 
+  return new_stmt(While_s(e,s), loc); 
+}
+stmt break_stmt(segment loc) { return new_stmt(Break_s, loc); }
+stmt continue_stmt(segment loc) { return new_stmt(Continue_s, loc); }
+stmt for_stmt(exp e1,exp e2,exp e3,stmt s, segment loc) {
+  return new_stmt(For_s(e1,e2,e3,s), loc);
+}
+stmt switch_stmt(exp e, list<switch_clause> scs, segment loc) {
+  return new_stmt(Switch_s(e,scs), loc);
+}
+stmt fallthru_stmt(segment loc) { return new_stmt(Fallthru_s, loc); }
+stmt decl_stmt(decl d, stmt s, segment loc) {
+  return new_stmt(Decl_s(d,s), loc);
+}
+stmt declare_stmt(qvar x, typ t, Opt_t<exp> init, stmt s, segment loc) {
+  decl d = new_decl(Var_d(new_vardecl(x,t,init)),loc);
+  return new_stmt(Decl_s(d,s),loc);
+}
+stmt cut_stmt(stmt s, segment loc) { return new_stmt(Cut_s(s), loc); }
+stmt splice_stmt(stmt s, segment loc) { return new_stmt(Splice_s(s), loc);}
+stmt label_stmt(var v, stmt s, segment loc) {
+  return new_stmt(Label_s(v,s), loc);
+}
+stmt do_stmt(stmt s, exp e, segment loc) {
+  return new_stmt(Do_s(s,e), loc);
+}
+stmt trycatch_stmt(stmt s, list<switch_clause> scs, segment loc) {
+  return new_stmt(TryCatch_s(s,scs), loc);
+}
+stmt goto_stmt(var lab, segment loc) {
+  return new_stmt(Goto_s(lab), loc);
+}
+stmt assign_stmt(exp e1, exp e2, segment loc) {
+  return exp_stmt(assign_exp(e1,e2,loc),loc);
+}
+/////////////////////////// Patterns //////////////////////////////
+pat new_pat(raw_pat p, segment s) { return &Pat(p,null,s); }
+
+
+////////////////////////// Declarations ///////////////////////////
+decl new_decl(raw_decl r, segment loc) { return &Decl{.r=r, .loc=loc}; }
+decl let_decl(pat p, Opt_t<typ> t_opt, exp e, segment loc) {
+  return new_decl(Let_d(p,t_opt,e),loc);
+}
+vardecl new_vardecl(qvar x, typ t, Opt_t<exp> init) {
+  return &Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
+		  .type=t, .initializer=init};
+}
+vardecl static_vardecl(qvar x, typ t, Opt_t<exp> init) {
+  return &Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
+                     .type=t, .initializer=init};
+}
+decl struct_decl(scope s,Opt_t<typedef_name> n,list<var> ts,
+		 Opt_t<list<$(field_name,tqual,typ)@>> fs,segment loc) {
+  return new_decl(Struct_d(&Structdecl {.sc = s,.name = n,
+					.tvs = ts,.fields = fs}),loc);
+}
+decl enum_decl(scope s,Opt_t<typedef_name> n,list<var> ts,
+	       Opt_t<list<enumfield>> fs,segment loc) {
+  return new_decl(Enum_d(&Enumdecl {.sc = s, .name = n,
+				    .tvs = ts, .fields = fs}),loc);
+}
+decl xenum_decl(scope s,typedef_name n,list<enumfield> fs,segment loc) {
+ return new_decl(Xenum_d(&Xenumdecl{.sc = s, .name = n,
+                                    .fields = fs}),loc);
+}
+
+// We treat function types in argument or return position as an
+// abbreviation for a non-nullable pointer to a function, that is,
+//   int f(void g())(float)
+// is the same as
+//   int (@f(void (@g)()))(float)
+// We do this by constructing every function type using function_t,
+// rather than mucking with the typechecker/unifier/etc.
+static $(Opt_t<var>,tqual,typ)@ expand_arg($(Opt_t<var>,tqual,typ)@ a) {
+  return &$(a[0],a[1],pointer_expand(a[2]));
+}
+
+typ function_t(list<tvar> tvs, typ t, list<$(Opt_t<var>,tqual,typ)@> args,
+               bool varargs) {
+  return FnType(tvs, pointer_expand(t),List::map(expand_arg,args),varargs);
+}
+typ pointer_expand(typ t) {
+  //  switch (compress(t)) {
+  switch (t) {
+  case FnType(_,_,_,_):
+    return pureptr_t(t,empty_tqual());
+// Disabled for now because it is incompatible with C
+//  case ArrayType*(_,_,ak): 
+//    return
+//      (ak == TaggedArray) ? t : pureptr_t(t,empty_tqual());
+//  case TypedefType*(n,_,_): 
+//    return impos(sprintf("pointer_expand: typedef %s", qvar2string(n)));
+  default:
+    return t;
+  }
+}
+//// Inverse of pointer_expand, used in pretty-printer
+//typ pointer_abbrev(typ t) { 
+//  switch (compress(t)) {
+//  case PointerType*(t2,b,tq): // FIX:  what about tq?
+//    switch (compress_conref(b).v) {
+//    case Eq(b):
+//      if (b) return t; // pointer is *
+//      // otherwise, @
+//      switch (t2) {
+//      case FnType(_):
+//        // t (@)(argtyps) -->  t (argtyps)
+//        return t2;
+//// Disabled for now because it is incompatible with C
+////      case ArrayType*(_,_,ak):
+////        // t (@)[]   --> t[]
+////        // t (@)[sz] --> t[sz]
+////        // t (@)[?]  --> t (@)[?]
+////        return (ak == TaggedArray) ? t : t2;
+//      case TypedefType*(n,_,_): 
+//        return impos(sprintf("pointer_abbrev: typedef %s", qvar2string(n)));
+//      default: return t;
+//      }
+//    default: return t;
+//    }
+//  default: return t;
+//  }
+//}
+
+
+// According to Harbison and Steele these are the lvalues of C:
+//
+//    exp      where
+//    ---------------------------
+//    name     name is a variable
+//    e[k]
+//    (e)      e is an lvalue
+//    e.name   e is an lvalue
+//    e->name
+//    *e
+//
+// (We may have more in Cyclone...)
+//
+bool is_lvalue(exp e) {
+  switch (e->r) {
+  case Var_e(_): return true;
+  case Subscript_e(e1,e2): return true;
+  case StructMember_e(e1,f): return is_lvalue(e1);
+  case StructArrow_e(e1,f): return true;
+  case Deref_e(e1): return true;
+    //  case Instantiate*(e1,_): return is_lvalue(e1);
+    //  case NoInstantiate(e1): return is_lvalue(e1);
+  default: return false;
+  }
+}
+

@@ -1,0 +1,195 @@
+/* Main file */
+
+#include "arg.h"
+#include "core.h"
+#include "list.h"
+#include "string.h"
+#include "dict.h"
+#include "filename.h"
+#include "id.h"
+#include "parse.h"
+#include "position.h"
+#include "absyn.h"
+#include "absynpp.h"
+#include "tcutil.h"
+#include "tcenv.h"
+#include "tc.h"
+#include "toc.h"
+
+namespace Lex {
+extern void lex_init();
+}
+
+using Core;
+using List;
+using Arg;
+using Ref;
+using String;
+
+struct Reference<Bool> pp_r = Reference((Bool)false);
+struct Reference<Bool> noexpand_r = Reference((Bool)false);
+struct Reference<Bool> tc_r = Reference((Bool)false);
+struct Reference<Bool> gcc_r = Reference((Bool)false);
+struct Reference<Bool> vc_r = Reference((Bool)false);
+struct Reference<Bool> toc_r = Reference((Bool)false);
+
+ref<Bool> pp = &pp_r;
+ref<Bool> noexpand = &noexpand_r;
+ref<Bool> tc = &tc_r;
+ref<Bool> gcc = &gcc_r;
+ref<Bool> vc = &vc_r;
+ref<Bool> toc = &toc_r;
+
+void set_check_null() {
+  Toc::check_for_null = true;
+}
+
+list<string> includes = null;
+void add_include(string s) {
+  includes = &cons(s,includes);
+}
+
+bool compile_failure = false; // for exit code (helps Makefile)
+
+void compile_file(string filename) {
+
+  string basename = Filename::chop_extension(filename);
+
+  fprintf(cyc_stderr,"Compiling file: %s\n", basename);
+
+  // establish filenames
+  string preprocfile = strconcat(basename,  ".i");
+
+   // Run the preprocessor
+  string cmd = ""; // The command to run
+
+  // Figure out the gcc version of the command
+  list<string> incs = null;
+  for (list<string> is = includes; is != null; is=is->tl) {
+    incs = &cons(is->hd,&cons((string)" -I",incs));
+  }
+  incs = List::imp_rev(incs);
+  string gcc_inc_string = String::strconcat_l(incs);
+
+  string gcc_def_string = "";
+  string gcc_cmd =
+    String::strconcat_l(&cons((string)"gcc -x c -E -U__GNUC__ ",
+	     	        &cons(gcc_inc_string,
+			&cons((string)" ",
+			&cons(gcc_def_string,
+			&cons((string)" ",
+			&cons(filename,
+			&cons((string)" > ",
+			&cons(preprocfile, null)))))))));
+  // Figure out the Visual C version of the command
+  string vc_inc_string = "";
+  string vc_def_string = "";
+  string vc_cmd =
+    String::strconcat_l(&cons((string)"cl /nologo ",
+			&cons(vc_inc_string,
+			&cons((string)" ",
+			&cons(vc_def_string,
+			&cons((string)" /P /TC ",
+			&cons(filename, null)))))));
+
+  // Set up the system-dependent default
+#ifdef SYS_UNIX
+  cmd = gcc_cmd;
+#else
+  cmd = vc_cmd;
+#endif
+
+  // Command-line args can be used to override the default
+  if (gcc->v) cmd = gcc_cmd;
+  else if (vc->v) cmd = vc_cmd;
+
+  fprintf(cyc_stderr,"%s\n",cmd);
+  system(string_to_Cstring(cmd));
+
+  // reset front-end -- necessary for good error messages!
+  Position::reset_position(preprocfile);
+
+  // Actually process the file
+  FILE @f;
+  try
+    f = file_open(preprocfile, "r");
+  catch {
+  default:
+    fprintf(cyc_stderr, "couldn't open %s\n", preprocfile);
+    compile_failure=true;
+    return;
+  }
+
+  // parse
+  list<Absyn::decl> tds = null;
+  // try {
+    tds = Parse::parse_file(f);
+    fprintf(cyc_stderr,"Parsing completed\n");
+    fflush(cyc_stderr);
+    // } handle x {
+    // fprintf(cyc_stderr,"PARSING FAILED!\n");
+    // fflush(cyc_stderr);
+    // compile_failure=true;
+    // }
+  if (tds != null && tc->v) try {
+    if (noexpand->v) Absynpp::expand_typedefs = false;
+    else Absynpp::expand_typedefs = true;
+    Tc::tc(Tcenv::tc_init(),tds);
+    fprintf(cyc_stderr,"Type checking completed\n");
+    fflush(cyc_stderr);
+  } catch {
+  case Tcutil::TypeErr:
+    fprintf(cyc_stderr,"Type error!\n");
+    fflush(cyc_stderr);
+    compile_failure=true;
+    break;
+  case Dict::Absent:
+    fprintf(cyc_stderr,"Dict::Absent occurred during type checking!\n");
+    fflush(cyc_stderr);
+    compile_failure=true;
+    break;
+    //default:
+    //    fprintf(cyc_stderr,"Error during type checking!\n");
+    //    fflush(cyc_stderr);
+    //    compile_failure=true;
+  }
+  if (toc->v) {
+    tds = Toc::toc(tds); // translate to C
+  }
+  if (tds != null && pp->v) {
+    if (noexpand->v) Absynpp::expand_typedefs = false;
+    else Absynpp::expand_typedefs = true;
+    if (toc->v) printf("#include \"cyc_include.h\"\n\n");
+    Absynpp::decllist2file(tds,cyc_stdout);
+    fflush(cyc_stdout);
+  }
+  if (Position::error_p()) {
+    fprintf(cyc_stderr,"COMPILATION FAILED!\n");
+    fflush(cyc_stderr);
+    compile_failure=true;
+  }
+  file_close(f);
+  file_delete(preprocfile);
+  return;
+}
+
+int cyc_main() {
+
+  list<$(string,Arg::spec,string)@> options =
+    &cons(&$((string)"-pp",Set_spec(pp), (string)"pretty print"),
+    &cons(&$((string)"-noexpandtypedefs",Set_spec(noexpand),
+             (string)"don't expand typedefs in pretty printing"),
+    &cons(&$((string)"-tc",Set_spec(tc), (string)"type check"),
+    &cons(&$((string)"-gcc",Set_spec(gcc), (string)"use gcc as preprocessor"),
+    &cons(&$((string)"-vc",Set_spec(vc), (string)"use Visual C++ as preprocessor"),
+    &cons(&$((string)"-toc",Set_spec(toc), (string)"translate to C"),
+    &cons(&$((string)"-I",String_spec(add_include), (string)"include directory"),
+    &cons(&$((string)"-check_null",Unit_spec(set_check_null), (string)"turn on null-checking in generated C code"),
+    null))))))));
+
+  Lex::lex_init();
+  Arg::parse(options, compile_file, "Options:");
+
+  return compile_failure ? 1 : 0;
+}
+

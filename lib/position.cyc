@@ -1,0 +1,147 @@
+#include "position.h"
+#include "string.h"
+namespace Position;
+using Core;
+using List;
+using String;
+
+xenum exn {Exit};
+
+/////////// Location tracking///////////
+static string source = ""; // initialized by set_ctxt
+struct Segment { int start; int end; };
+struct Segment dummy_seg = Segment{.start=0,.end=0};
+
+segment segment_of_abs(int start, int end) { return &Segment(start,end); }
+segment segment_join(segment s1, segment s2) { 
+  return &Segment(s1->start,s2->end); 
+}
+
+string string_of_loc(int loc) {
+  Lineno::Pos pos = Lineno::pos_of_abs(source,loc);
+  return xprintf("%s (%d:%d)",pos->logical_file,pos->line_no,pos->col);
+}
+
+string string_of_segment(segment s) {
+  Lineno::Pos pos_s = Lineno::pos_of_abs(source,s->start);
+  Lineno::Pos pos_e = Lineno::pos_of_abs(source,s->end);
+  if (strcmp(pos_s->logical_file,pos_e->logical_file)==0)
+    return xprintf("%s(%d:%d-%d:%d)",pos_s->logical_file,
+		   pos_s->line_no,pos_s->col,pos_e->line_no,pos_e->col);
+  else
+    return xprintf("%s(%d:%d)-%s(%d:%d)",pos_s->logical_file,
+		   pos_s->line_no,pos_s->col,
+		   pos_e->logical_file,pos_e->line_no,pos_e->col);
+}
+
+///////////// Errors ////////////
+
+enum Error_kind { Lex, Parse, Elab };
+struct Error {
+  string     source;
+  segment    seg;
+  error_kind kind;
+  string     desc;
+};
+error mk_err_lex(segment l, string desc) {
+  return &Error(source, l, Lex, desc);
+}
+error mk_err_parse(segment l, string desc) {
+  return &Error(source, l, Parse, desc);
+}
+error mk_err_elab(segment l, string desc) {
+  return &Error(source, l, Elab, desc);
+}
+
+/////////// Error Reporting ///////////
+
+// If there are errors getting stuff from the source file then raise Nocontext
+// and just don't print the source context
+
+xenum exn {Nocontext};
+
+static string trunc(int n, string s) {
+  int len = strlen(s);
+  if (len < n) 
+    return s;
+  int len_one = (n-3)/2;
+  int len_two = n-3-len_one;
+  string ans = new_string(n);
+  strncpy(ans, 0,         s,     0,           len_one);
+  strncpy(ans, len_one,   "...", 0,           3);
+  strncpy(ans, len_one+3, s,     len-len_two, len_two);
+  return ans;
+}
+
+static int line_length = 76;
+
+// Produce a one line string that shows the peice of the source file containing
+// the error; return also the column numbers the error starts and finishes at.
+static $(string,int,int)@ get_context(segment seg) {
+  Lineno::Pos pos_s, pos_e;
+  try {
+    pos_s = Lineno::pos_of_abs(source,seg->start);
+    pos_e = Lineno::pos_of_abs(source,seg->end);
+  } catch {
+  default: throw Nocontext;
+  }
+  
+  string sline = pos_s->line;     string eline = pos_e->line;
+  int    sl    = pos_s->line_no;  int    el    = pos_e->line_no;
+  int    sc    = pos_s->col;      int    ec    = pos_e->col;
+  
+  if (sl == el) {
+    // Case 1: error is all on one line, 
+    // give 1/3 of line to before, error, and after
+    int n = line_length / 3;
+    string sec_one   = trunc(n, substring(sline, 0,  sc            ));
+    string sec_two   = trunc(n, substring(sline, sc, ec-sc         ));
+    string sec_three = trunc(n, substring(sline, sc, strlen(sline)-ec));
+    return &$(xprintf("%s%s%s",sec_one,sec_two,sec_three),(int)strlen(sec_one),
+	      (int)(strlen(sec_one)+strlen(sec_two)));
+  }
+  else {
+    // Case 2: error on multiple lines,
+    // give 1/4 to start, start line rror, end line error, and end
+    int n = (line_length-3)/4;
+    string sec_one   = trunc(n, substring(sline, 0,  sc            ));
+    string sec_two   = trunc(n, substring(sline, sc, strlen(sline)-sc));
+    string sec_three = trunc(n, substring(eline, 0,  ec            ));
+    string sec_four  = trunc(n, substring(eline, ec, strlen(eline)-ec));
+    return &$(xprintf("%s%s.\\.%s%s",sec_one,sec_two,sec_three,sec_four),
+	      (int)strlen(sec_one),
+	      (int)(strlen(sec_one)+strlen(sec_two)+3+strlen(sec_three)));
+  }
+}
+
+static bool error_b = false;
+bool error_p() { return error_b; }
+
+xenum exn {Error(error)};
+
+bool print_context = false;
+
+void post_error(error e) {
+  error_b = true;
+  // why are we not using the source stored in e????
+  fprintf(cyc_stderr, "%s: %s\n", string_of_segment(e->seg), e->desc);
+  if (print_context) {
+    try {
+      $(string,int,int)@ x = get_context(e->seg);
+      string marker_str = new {for i < x[2]+1 : '\000'};
+      int i = -1;
+      while (++i < x[1]) marker_str[i] = ' ';
+      while (++i < x[2]) marker_str[i] = '^';
+      fprintf(cyc_stderr, "  %s\n  %s\n", x[0], marker_str);
+    } catch {
+    case Nocontext: break; 
+    }
+  }
+  fflush(cyc_stderr);
+}
+
+//////////// Overall Control ///////////
+void reset_position(string s) { source = s; error_b = false; }
+void set_position_file(string s) { source = s; error_b = false; }
+string get_position_file() { return source; }
+

@@ -1,0 +1,79 @@
+#include "filename.h"
+#include "string.h"
+#define DIR_SEPARATOR '/'
+#define DIR_SEPARATOR_STR ((string)"/")
+
+namespace Filename;
+using Core;
+using String;
+using List;
+
+// FIX: this produces a bad initializer.
+// Anyway, why is this useful?  getcwd() would be better.
+//string current_dir_name = ".";
+
+string concat(string s1, string s2) {
+  return String::strconcat_l(&cons(s1,&cons(DIR_SEPARATOR_STR,
+                                            &cons(s2,null))));
+}
+
+string chop_extension(string filename) {
+  int i = size(filename) - 1;
+  while (i >= 0 && filename[i] != '.')
+    --i;
+  if (i < 0)
+    throw InvalidArg("chop_extension");
+  return String::substring(filename, 0, i);
+}
+
+// FIX: I've always thought the type of this was wrong.
+// It should return an option.  Root dirs have no dirname.
+string dirname(string filename) {
+  int i = size(filename) - 1;
+  while (i >= 0 && filename[i] != DIR_SEPARATOR)
+    --i;
+  if (i < 0) return "";
+  return String::substring(filename, 0, i);
+}
+
+// FIX: similarly, this should return an option.
+string basename(string filename) {
+  int i = size(filename) - 1;
+  while (i >= 0 && filename[i] != DIR_SEPARATOR)
+    --i;
+  return String::substring(filename, i+1, size(filename)-(i+1));
+}
+
+bool check_suffix(string filename, string suffix) {
+  int i = size(filename)-1;
+  int j = size(suffix)-1;
+  while (i >= 0 && j >= 0)
+    if (filename[i--] != suffix[j--]) return false;
+  if (j >= 0) return false;
+  else return true;
+}
+
+string gnuify(string filename) {
+  bool has_drive_name = size(filename)>1 && filename[1]==':';
+  int i,j;
+  string ans;
+  int ans_sz;
+  if (has_drive_name) {
+    ans_sz = size(filename)+1;
+    ans = new {for k < ans_sz : '\000'};
+    ans[0] = ans[1] = '/';
+    ans[2] = filename[0];
+    i = 3;
+    j = 2;
+  } else {
+    ans_sz = size(filename);
+    ans = new {for k < ans_sz : '\000'};
+    i = 0;
+    j = 0;
+  }
+  while (i < ans_sz) {
+    char c = filename[j++];
+    ans[i++] = (c == '\\') ? '/' : c;
+  }
+  return ans;
+}

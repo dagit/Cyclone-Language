@@ -1,0 +1,130 @@
+
+// a simple chaining, polymorphic hash table with restore
+// of course this is not functional
+
+// MWH 12/13/99 -- added support for resizing the table.  Based it
+//   on the OCaml 2.02 Hashtbl implementation
+
+#include "list.h"
+#include "core.h"
+#include "hashtable.h"
+#include "string.h"
+
+namespace Hashtable;
+using List;
+
+/*abstract*/
+struct table<`a,`b> {
+  int          (@cmp)(`a,`a);
+  int          (@hash)(`a);
+  int	       max_len; // maximum length of bucket list before resize
+  list<$(`a,`b)@> tab[?];
+};
+
+Table<`a,`b> create<`a,`b>(int sz, int (@cmp)(`a,`a), int (@hash)(`a)) {
+  list<$(`a,`b)@> mt = null;
+  return &table(cmp, hash, 3, new {for i<sz :mt});
+}
+
+void insert<`a,`b>(Table<`a,`b> t, `a key, `b val) {
+  list<$(`a,`b)@> tab[?] = t->tab;
+  int bucket = (*t->hash)(key) % size(tab);
+  tab[bucket] = &cons(&$(key,val),tab[bucket]);
+  if (length (tab[bucket]) > t->max_len) resize(t);
+}
+
+`b lookup<`a,`b>(Table<`a,`b> t, `a key) {
+  // throws Not_found
+  list<$(`a,`b)@> tab[?]    = t->tab;
+  list<$(`a,`b)@> l     = tab[(*t->hash)(key) % size(tab)];
+  return assoc_cmp(t->cmp, l, key);
+}
+
+void remove<`a,`b>(Table<`a,`b> t, `a key) {
+  // remove only most recent binding.  Silently return if none.
+  // does a destructive list update since this data structure is not functional
+  // UNTESTED!
+  list<$(`a,`b)@> tab[?]    = t->tab;
+  int         (@cmp)(`a,`a) = t->cmp;
+  int              bucket   = (*t->hash)(key) % size(tab);
+  list<$(`a,`b)@> l         = tab[bucket];
+  if(l == null)
+    return;
+  if((*cmp)(key,l->hd[0])==0) {
+    tab[bucket] = l->tl;
+    return;
+  }
+  list<$(`a,`b)@> prev = l;
+  l = l->tl;
+  for(; l->tl!=null; prev = l, l=l->tl)
+    if((*cmp)(key,l->hd[0])==0) {
+      prev->tl = l->tl;
+      return;
+    }
+}
+
+int hash_string(string s) {
+  // could be made faster by explicit loop unrolling
+  int ans   = 0;
+  int sz    = size(s);
+  int shift = 0;
+  for (int i=0; i < sz; ++i) {
+    ans = ans ^ (s[i] << shift);
+    shift += 8;
+    if(shift == 32)
+      shift = 0;
+  }
+  return ans;
+}
+
+/* For resizing */
+void insert_bucket<`a,`b>(list<$(`a,`b)@> tab[?], int (@hash)(`a),
+                          list<$(`a,`b)@> elems) {
+  if (elems == null) return;
+  insert_bucket(tab,hash,elems->tl); // preserve the original order
+  `a key = elems->hd[0];
+  `b val = elems->hd[1];
+  int nidx = (*hash)(key) % size(tab);
+  tab[nidx] = &cons(&$(key,val),tab[nidx]);
+}
+
+void resize<`a,`b>(Table<`a,`b> t) {
+  list<$(`a,`b)@> odata[?] = t->tab;
+  int osize = size(odata);
+  int nsize = 2 * osize + 1;
+  list<$(`a,`b)@> mt = null;
+  list<$(`a,`b)@> ndata[?] = new {for i < nsize : mt};
+  for (int i = 0; i<osize; i++) {
+    insert_bucket(ndata,t->hash,odata[i]);
+  }
+  t->tab = ndata;
+  t->max_len = 2 * t->max_len;
+}
+
+/* Iterating over a hashtable */
+void iter<`a,`b>(void f(`a,`b), Table<`a,`b> t) {
+  list<$(`a,`b)@> odata[?] = t->tab;
+  int osize = size(odata);
+  for (int i = 0; i<osize; i++) {
+    for(list<$(`a,`b)@> iter = odata[i]; iter != null; iter = iter->tl) {
+      f(iter->hd[0],iter->hd[1]);
+    }
+  }  
+}
+
+/* debugging */
+void print_table_map<`a,`b>(Table<`a,`b> t, void prn_key(`a), void prn_val(`b)) {
+  list<$(`a,`b)@> odata[?] = t->tab;
+  int osize = size(odata);
+  for (int i = 0; i<osize; i++) {
+    printf("%d: ",i);
+    for(list<$(`a,`b)@> iter = odata[i]; iter != null; iter = iter->tl) {
+      printf("(");
+      prn_key(iter->hd[0]);
+      printf(",");
+      prn_val(iter->hd[1]);
+      printf(") ");
+    }
+    printf("\n");
+  }
+}  
