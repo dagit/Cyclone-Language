@@ -19,14 +19,14 @@ the combination of low-level features (bitfields, unions), mutability
 Cyclone no matter what the problem was, so it's hard to say.
 
 Our submission is rather paranoid.  The purpose of the shell script is
-to detect if our real program errs, and if so, to return the input.
-The script runs our optimizer and then checks the output with a
-validator.  This validator was extremely useful during devlopment.  So
-long as the script and the validator are bug free, there really should
-be no way for us to be eliminated.  
+to detect if our real program errs, and if so, to return the original
+input.  The script runs our optimizer and then checks the output with
+a validator.  This validator was extremely useful during development.
+So long as the script and the validator are bug free, there really
+should be no way for us to be eliminated.
 
 We were also concerned about stack overflow (if the 5MB of input
-consist of completely nested tags), so we are actually gving you TWO
+consists of completely nested tags), so we are actually gving you TWO
 SUBMISSIONS.  One assumes there is sufficient room to make a recursive
 function call (with a reasonable size activation record) for each
 nested tag in the input.  The other is careful not to make more than a
@@ -38,14 +38,14 @@ Linux machines we had available.)
 
 Our optimizations are fairly straightforward.  We eliminate whitespace
 during parsing.  We then alternate between a bottom-up optimizer and a
-top-down optimizer until a fixed point is reached.  top-down optimizer
-eliminates tags that are redundant because of the surrounding context
-(eg. <U> under 3 or other <U>'s, <EM> inside <S>.)  The bottom-up
-optimizer removes tags that are redundant because there is no text
-that is affected (eg. <4><5>x</5</4>).  The bottom-up optimizer also
-takes two adjacent tags (eg. <4>a</4><4>b</4>) and wraps them
-(eg. <4><4>a</4><4>b</4>).  The next top-down pass will eliminate the
-inner tags for a net win.
+top-down optimizer until a fixed point is reached.  The top-down
+optimizer eliminates tags that are redundant because of the
+surrounding context (e.g., <U> under 3 or other <U>'s, <EM> inside
+<S>.)  The bottom-up optimizer removes tags that are redundant because
+there is no text that is affected (e.g., <4><5>x</5></4>).  The
+bottom-up optimizer also takes two adjacent tags (e.g.,
+<4>a</4><4>b</4>) and wraps them (e.g., <4><4>a</4><4>b</4>).  The
+next top-down pass will eliminate the inner tags for a net win.
 
 The next pass tries to move the beginning and end of sequences outside
 of number and color tags.  Example:
@@ -74,7 +74,7 @@ intervals larger than our current "window size".
 Of course, there are many things we did not have time to implement.
 Here are two examples that come to mind:
 (1) Using <PL> to optimize.  
-Eg. <B><I><S>a</S></I></B>x<B><I><S>a</S></I></B>
+E.g., <B><I><S>a</S></I></B>x<B><I><S>a</S></I></B>
   ===>
     <B><I><S>a<PL>x</PL>a</S></I></B>
 (2) Being more aggressive about using the dynamic-programming code.
