@@ -26,6 +26,7 @@
 #include <fn.h>
 #include <assert.h>
 #include <hashtable.h>
+#include <set.h>
 #include <xarray.h>
 #include "aprof_event.h"
 
@@ -977,13 +978,17 @@ int generate_svg2(string_t<`H> file) {
 
 /* Distribution of lifetimes */
 
-/* Table for remembering the time of an allocation at an address */
+/* Map address to time that address was allocated */
 static struct Hashtable::Table<unsigned int,clock_t> *
   starttimes_table = NULL;
 
-/* Table for remembering how many objects had a given lifetime */
+/* Map lifetime to number of objects with that lifetime */
 static struct Hashtable::Table<unsigned int,unsigned int> *
   lifetimes_table = NULL;
+
+/* Map region to addresses allocated in that region */
+static struct Hashtable::Table<const char ?@,Set::set_t<unsigned int>> *
+  regionaddresses_table = NULL;
 
 static void
 init_globals3() {
@@ -991,6 +996,8 @@ init_globals3() {
     Hashtable::create(101,uint_cmp,uint_hash);
   lifetimes_table =
     Hashtable::create(101,uint_cmp,uint_hash);
+  regionaddresses_table =
+    Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr);
 }
 
 static void increment_lifetime(unsigned int lifetime) {
@@ -1037,7 +1044,21 @@ static bool proc_event3(aprof_event_t event) {
       Hashtable::insert((_@)starttimes_table, addr, time);
     }
     else {
-      // TODO
+      let rname_p = new rname;
+      try {
+        let aset = Hashtable::lookup((_@)regionaddresses_table, rname_p);
+        Hashtable::remove((_@)regionaddresses_table, rname_p);
+        Hashtable::insert((_@)regionaddresses_table, rname_p,
+                          Set::insert(aset,addr));
+        Hashtable::insert((_@)starttimes_table,addr,time);
+      }
+      catch {
+      case &Not_found:
+        fprintf(stderr,
+                "error: allocation into an unknown region %s\n",
+                rname);
+        break;
+      }
     }
     break;
 
@@ -1057,8 +1078,38 @@ static bool proc_event3(aprof_event_t event) {
     }
     break;
 
-  case &CreateE(CreateEvent(_,_,_,_)):
-  case &FreeE(FreeEvent(_,_,_)):
+  case &CreateE(CreateEvent(_,_,rname,_)):
+    Hashtable::insert((_@)regionaddresses_table, new rname,
+                      Set::empty(uint_cmp));
+    break;
+
+  case &FreeE(FreeEvent(time,rname,_)):
+    assert(strcmp("unique",rname));
+    assert(strcmp("heap",rname));
+    assert(strcmp("refcnt",rname));
+
+    let rname_p = new rname;
+    try {
+      let aset = Hashtable::lookup((_@)regionaddresses_table, rname_p);
+      Hashtable::remove((_@)regionaddresses_table, rname_p);
+      let i = Set::make_iter(Core::heap_region,aset);
+      unsigned int addr = 0;
+      while (Iter::next(i,&addr)) {
+        let start_time = Hashtable::lookup((_@)starttimes_table, addr);
+        Hashtable::remove((_@)starttimes_table, addr);
+        unsigned int lifetime = (unsigned int)(time - start_time);
+        increment_lifetime(lifetime);
+      }
+    }
+    catch {
+    case &Not_found:
+      fprintf(stderr,
+              "error: free of an unknown region %s\n",
+              rname);
+      break;
+    }
+    break;
+
   case &ResizeE(ResizeEvent(_,_,_,_)):
   case &GcE(GcEvent(_,_,_)):
   case &GcAddToHeapE(GcAddToHeapEvent(_,_,_,_)):
@@ -1099,14 +1150,14 @@ int generate_svg3(string_t<`H> file) {
   //  lifetimes = List::rimp_merge_sort(lifetime_cmp,lifetimes);
 
   unsigned int ?cumulative_arr = calloc(max_lifetime+1,sizeof(unsigned int));
-  unsigned int ?lifetime_arr = calloc(max_lifetime+1,sizeof(unsigned int));
+  unsigned int ?lifetimes_arr = calloc(max_lifetime+1,sizeof(unsigned int));
   for (let l = lifetimes; l != NULL; l = l->tl) {
     let &$(lifetime,lcount) = l->hd;
-    lifetime_arr[lifetime] = lcount;
+    lifetimes_arr[lifetime] = lcount;
   }
   unsigned int cumulative_lifetime = 0;
   for (let i = 0; i < max_lifetime+1; i++) {
-    cumulative_lifetime += lifetime_arr[i];
+    cumulative_lifetime += lifetimes_arr[i];
     cumulative_arr[i] = cumulative_lifetime;
   }
 
@@ -1135,20 +1186,22 @@ int generate_svg3(string_t<`H> file) {
   if (max_lcount != 0)
     yscale = (double)HEIGHT/(double)max_lcount;
 
-  printf("<!-- graph -->");
+  printf("<!-- graph -->\n");
   printf("<g transform='translate(0,%d) scale(%.12f,-%.12f)'>\n",
          (int)HEIGHT,
          xscale, yscale);
+  //  printf("<g y='0' width='1' opacity='0.4'>\n");
   for (let i = 0; i<max_lifetime+1; i++) {
     // TJIM: don't print cumulative graph for now
     //    printf("<rect fill='green' x='%d' y='0' width='1' height='%d' />\n",
     //           i,cumulative_arr[i]);
-    printf("<rect opacity='0.4' x='%d' y='0' width='1' height='%d' />\n",
-           i,lifetime_arr[i]);
+    printf("<rect y='0' width='1' opacity='0.4' x='%d' height='%d'/>\n",
+           i,lifetimes_arr[i]);
   }
+  //  printf("</g>\n");
   printf("</g>\n");
 
-  printf("<!-- x and y axes -->");
+  printf("<!-- x and y axes -->\n");
   printf("<path d='M-5,0 0,0 0,%f %f,%f %f,%f' fill='none'"
          " stroke='black'/>\n",
          HEIGHT, WIDTH, HEIGHT, WIDTH, HEIGHT+5);
@@ -1157,7 +1210,7 @@ int generate_svg3(string_t<`H> file) {
   printf("<text x='%f' y='%f' text-anchor='middle'>%d clocks</text>\n",
          WIDTH, HEIGHT+18, max_lifetime);
 
-  printf("<!-- title -->");
+  printf("<!-- title -->\n");
   printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
          WIDTH/2, HEIGHT+30, title);
   printf("</svg>\n");

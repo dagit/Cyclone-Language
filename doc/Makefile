@@ -75,6 +75,7 @@ gen-libdoc.tex: \
   ../include/filename.h \
   ../include/fn.h \
   ../include/hashtable.h \
+  ../include/iter.h \
   ../include/list.h \
   ../include/pp.h \
   ../include/queue.h \

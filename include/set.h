@@ -121,7 +121,7 @@ extern `b fold_c(`b f(`c,`a,`b),`c env,set_t<`a> s,`b accum);
 
 extern void app(`b f(`a),set_t<`a> s);
   /** [app(f,s)] applies [f] to each element of [s], in no particular
-      order; the result of the application is discared.  Notice that
+      order; the result of the application is discarded.  Notice that
       [f] cannot return [void]; use [iter] instead of [app] for
       that. */
 extern void iter(void f(`a),set_t<`a> s);
@@ -141,8 +141,8 @@ extern `a choose(set_t<`a> s);
 extern Iter::iter_t<`a,`bd> make_iter(region_t<`r1> rgn, set_t<`a,`r2> s
 				     : regions(`a) > `bd,
                                        {`r1,`r2} > `bd);
-  /** [make_iter(s)] returns an iterator over the set [s]; a constant of space
-      is allocated in [rgn] */
+  /** [make_iter(s)] returns an iterator over the set [s]; a constant
+      amount of space is allocated in [rgn]. */
 
 }
 

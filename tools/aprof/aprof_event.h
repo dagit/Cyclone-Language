@@ -129,6 +129,9 @@ namespace Aprof {
   // allocation information.
   extern int generate_summary(string_t<`H> file);
 
+  // Clock granularity
+  extern unsigned int clockunits;
+
   // Statistics
   extern clock_t max_time;
 

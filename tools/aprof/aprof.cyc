@@ -49,6 +49,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   bool do_svg = false;
   bool do_svg2 = false;
   bool do_svg3 = false;
+  unsigned int clockunits_override = 0;
   string_t<`H> file;
 
   int argn = 1;
@@ -84,6 +85,9 @@ int main(int argc, string_t<`H> ?`H argv) {
     else if ( strcmp( argv[argn], "-a" ) == 0 ) {
       all_dynregions = true;
     }
+    else if ( strcmp( argv[argn], "-c" ) == 0 && argn+1 < argc ) {
+      clockunits_override = atoi(argv[++argn]);
+    }
     else
       usage(argv[0]);
     ++argn;
@@ -95,6 +99,15 @@ int main(int argc, string_t<`H> ?`H argv) {
       usage(argv[0]);
   else
     file = "amon.out";
+
+#ifdef __linux__
+  clockunits = 10000;
+#endif
+#ifdef __APPLE__
+  clockunits = 1;
+#endif
+  if (clockunits_override)
+    clockunits = clockunits_override;
 
   int ret;
   if (do_graph)

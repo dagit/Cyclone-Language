@@ -37,6 +37,8 @@ namespace Aprof;
 using Core;
 using Aprof;
 
+unsigned int clockunits = 1;
+
 ///////////////////////////// STATISTICS /////////////////////////////
 
 clock_t max_time = 0;
@@ -102,6 +104,16 @@ static int snarfline(FILE @f) {
 }
 
 static bool getint(FILE @f, int @result) {
+  if (!gettoken(f)) return false;
+  try {
+    *result = atoi(buf);
+  } catch {
+  default: fprintf(stderr,"bad integer %s\n",buf); return false;
+  }  
+  return true;
+}
+
+static bool getuint(FILE @f, unsigned int @result) {
   if (!gettoken(f)) return false;
   try {
     *result = atoi(buf);
@@ -177,6 +189,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
 
     // get the time
     clock_t t = atoi(buf);
+    t = t/clockunits; // e.g., instead of counting by 10000 count by 1
     if (max_time < t) max_time = t;
 
     // get the location
@@ -295,7 +308,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
 	fprintf(stderr,"failed to get address for %s\n",s);
 	return -1;
       }
-      if (!getint(f,amt)) {
+      if (!getuint(f,amt)) {
 	fprintf(stderr,"failed to get alloc amount for %s\n",s);
 	return -1;
       }
