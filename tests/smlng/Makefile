@@ -17,7 +17,8 @@ CYCBISON=../../bin/cycbison$(EXE)
 OUT_PREFIX=
 
 LC_FLAG=
-CYC_FLAGS= $(LC_FLAG) -save-c -pp -I../../lib -B../../lib -O2
+#CYC_FLAGS= $(LC_FLAG) -save-c -pp -I../../lib -B../../lib -O2
+CYC_FLAGS= $(LC_FLAG) -save-c -pp -I../../lib -B../../lib -g
 
 LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 

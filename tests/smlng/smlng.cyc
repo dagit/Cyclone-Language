@@ -209,7 +209,7 @@ int main(int argc, char ??argv) {
   fprintf(stderr,"%d\ncopying docs...",check_time()); fflush(stderr);
   doc_t d = copy_doc(orig);
   is_change = true;
-  while(is_change) {
+  while(is_change && check_time() > 2) {
     is_change = false;
     fprintf(stderr,"%d\nup_opt...", check_time()); fflush(stderr);
     let $(d2, _) = TagElim::up_opt(b,d);
