@@ -134,7 +134,9 @@ static void add_cyclone_lib_path(string_t s) {
 // so that we can force libcyc.a to appear first.
 static list_t<stringptr_t> libargs = NULL;
 static void add_libarg(string_t<`H> s) {
-  libargs = new List(new s,libargs);
+  if (strcmp(s,"-lm") == 0)
+    libargs = new List(new s,libargs);
+  else add_ccarg(s);
 }
 
 static void set_save_temps() {
@@ -997,8 +999,8 @@ int main(int argc, string_t<`H> ?`H argv) {
 	    comp,
             (output_file==NULL?((string_t)""):aprintf(" -o %s",sh_escape_string(*output_file))),
             ccargs_string,
-            libargs_string,
-	    stdlib_string);
+	    stdlib_string,
+            libargs_string);
   if (v_r) fprintf(stderr,"%s\n",cccmd);
   if (system(string_to_Cstring(cccmd)) != 0) {
     fprintf(stderr,"Error: C compiler failed\n");
