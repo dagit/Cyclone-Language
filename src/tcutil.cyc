@@ -108,6 +108,12 @@ bool is_arithmetic_type(type_t t) {
 bool is_strict_arithmetic_type(type_t t) {
   return is_any_int_type(t) || is_any_float_type(t);
 }
+bool is_tag_type(type_t t) {
+  switch (compress(t)) {
+  case &AppType(&TagCon,_): return true;
+  default: return false;
+  }
+}
 bool is_function_type(type_t t) {
   switch (compress(t)) {
   case &FnType(_): return true;
@@ -1692,7 +1698,7 @@ bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2,
   if (unify(t1,t2)) 
     return true;
   // try arithmetic conversions
-  if (is_arithmetic_type(t2) && is_arithmetic_type(t1)) {
+  if (is_arithmetic_type(t2) && is_arithmetic_type(t1) && !is_tag_type(t1)) {
     // issue a warning if we lose precision
     if (will_lose_precision(t1,t2))
       Warn::warn2(e->loc,"integral size mismatch; ",

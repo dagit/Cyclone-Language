@@ -371,19 +371,19 @@ struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_unordered(struct Cyc_RgnOrder_RgnPO*,
 int Cyc_RgnOrder_rgn_outlives_rgn(struct Cyc_RgnOrder_RgnPO*,void*,void*);
 int Cyc_RgnOrder_eff_outlives_eff(struct Cyc_RgnOrder_RgnPO*,void*,void*);
 int Cyc_RgnOrder_satisfies_constraints(struct Cyc_RgnOrder_RgnPO*,struct Cyc_List_List*,void*,int);
-# 95 "tcutil.h"
+# 96 "tcutil.h"
 struct Cyc_Absyn_Kind*Cyc_Tcutil_type_kind(void*);
-# 137
+# 138
 int Cyc_Tcutil_subset_effect(int,void*,void*);
-# 141
+# 142
 int Cyc_Tcutil_region_in_effect(int,void*,void*);
-# 156
+# 157
 void Cyc_Tcutil_check_unique_tvars(unsigned,struct Cyc_List_List*);
-# 197
+# 198
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
-# 199
+# 200
 int Cyc_Tcutil_new_tvar_id (void);
-# 201
+# 202
 void Cyc_Tcutil_add_tvar_identity(struct Cyc_Absyn_Tvar*);
 void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Typ_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Kind_Warn_Warg_struct{int tag;struct Cyc_Absyn_Kind*f1;};
 # 67 "warn.h"

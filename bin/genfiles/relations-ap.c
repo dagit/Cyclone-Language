@@ -377,15 +377,15 @@ int Cyc_Relations_exp2relnop(struct Cyc_Absyn_Exp*,union Cyc_Relations_RelnOp*);
 int Cyc_Unify_unify(void*,void*);
 # 35 "tcutil.h"
 int Cyc_Tcutil_is_integral_type(void*);
-# 66
+# 67
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 78
+# 79
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 197
+# 198
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
-# 207
+# 208
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 218
+# 219
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*);
 # 33 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ik;

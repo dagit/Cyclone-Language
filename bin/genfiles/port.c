@@ -401,13 +401,13 @@ struct _fat_ptr Cyc_Absynpp_typ2string(void*);
 struct _fat_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*);
 # 70
 struct _fat_ptr Cyc_Absynpp_qvar2string(struct _tuple0*);
-# 66 "tcutil.h"
+# 67 "tcutil.h"
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 78
+# 79
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 232
+# 233
 int Cyc_Tcutil_force_type2bool(int,void*);
-# 235
+# 236
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);
 # 40 "warn.h"
 void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};extern char Cyc_Dict_Absent[7U];struct Cyc_Dict_Absent_exn_struct{char*tag;};

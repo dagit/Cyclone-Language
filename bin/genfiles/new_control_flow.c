@@ -438,29 +438,29 @@ int Cyc_Tcutil_is_void_type(void*);
 # 33
 int Cyc_Tcutil_is_any_int_type(void*);
 int Cyc_Tcutil_is_any_float_type(void*);
-# 46
+# 47
 int Cyc_Tcutil_is_zeroterm_pointer_type(void*);
-# 48
+# 49
 int Cyc_Tcutil_is_bound_one(void*);
-# 58
+# 59
 void*Cyc_Tcutil_pointer_elt_type(void*);
-# 69
+# 70
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_type_bound(void*);
-# 128
+# 129
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 134
+# 135
 struct Cyc_Absyn_Exp*Cyc_Tcutil_rsubsexp(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_Absyn_Exp*);
-# 143
+# 144
 void*Cyc_Tcutil_fndecl2type(struct Cyc_Absyn_Fndecl*);
-# 170
+# 171
 int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*,void**,int*,void**);
-# 177
+# 178
 int Cyc_Tcutil_is_noalias_pointer(void*,int);
-# 187
+# 188
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*);
-# 218
+# 219
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*);
-# 221
+# 222
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*);
 # 52 "attributes.h"
 int Cyc_Atts_is_noreturn_fn_type(void*);struct _tuple14{unsigned f1;int f2;};

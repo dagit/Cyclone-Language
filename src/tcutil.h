@@ -34,6 +34,7 @@ bool is_any_int_type(type_t);    // char, short, int, etc.
 bool is_any_float_type(type_t);  // any size or sign
 bool is_integral_type(type_t);   // any_int or tag_t or enum
 bool is_arithmetic_type(type_t); // integral or any_float
+bool is_tag_type(type_t);        // true iff tag_t<...>
 bool is_signed_type(type_t);     // signed
 bool is_function_type(type_t);   // function type
 bool is_typedef_type(type_t);   // function type

@@ -412,51 +412,51 @@ enum Cyc_Relations_Relation{Cyc_Relations_Req =0U,Cyc_Relations_Rneq =1U,Cyc_Rel
 struct Cyc_List_List*Cyc_Relations_exp2relns(struct _RegionHandle*,struct Cyc_Absyn_Exp*);
 # 32 "tcutil.h"
 int Cyc_Tcutil_is_char_type(void*);
-# 38
+# 39
 int Cyc_Tcutil_is_function_type(void*);
-# 41
+# 42
 int Cyc_Tcutil_is_array_type(void*);
-# 58
+# 59
 void*Cyc_Tcutil_pointer_elt_type(void*);
-# 66
+# 67
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 78
+# 79
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 81
+# 82
 int Cyc_Tcutil_is_integral(struct Cyc_Absyn_Exp*);
-# 88
+# 89
 void*Cyc_Tcutil_copy_type(void*);
-# 95
+# 96
 struct Cyc_Absyn_Kind*Cyc_Tcutil_type_kind(void*);
-# 97
+# 98
 int Cyc_Tcutil_coerce_uint_type(struct Cyc_Absyn_Exp*);
-# 125
+# 126
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
-# 143
+# 144
 void*Cyc_Tcutil_fndecl2type(struct Cyc_Absyn_Fndecl*);
-# 153
+# 154
 void Cyc_Tcutil_check_bitfield(unsigned,void*,struct Cyc_Absyn_Exp*,struct _fat_ptr*);
-# 155
+# 156
 void Cyc_Tcutil_check_unique_vars(struct Cyc_List_List*,unsigned,struct _fat_ptr);
 void Cyc_Tcutil_check_unique_tvars(unsigned,struct Cyc_List_List*);
-# 197
+# 198
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
-# 199
+# 200
 int Cyc_Tcutil_new_tvar_id (void);
-# 207
+# 208
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 211
+# 212
 int Cyc_Tcutil_extract_const_from_typedef(unsigned,int,void*);
-# 214
+# 215
 void Cyc_Tcutil_check_no_qual(unsigned,void*);
-# 225
+# 226
 void*Cyc_Tcutil_promote_array(void*,void*,void*,int);
-# 232
+# 233
 int Cyc_Tcutil_force_type2bool(int,void*);
-# 240
+# 241
 int Cyc_Tcutil_admits_zero(void*);
 void Cyc_Tcutil_replace_rops(struct Cyc_List_List*,struct Cyc_Relations_Reln*);
-# 243
+# 244
 int Cyc_Tcutil_fast_tvar_cmp(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*);
 # 28 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_rk;

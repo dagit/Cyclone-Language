@@ -387,11 +387,11 @@ void*Cyc_Warn_impos(struct _fat_ptr,struct _fat_ptr);struct _tuple12{unsigned f1
 extern struct _tuple12 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*);
 # 35 "tcutil.h"
 int Cyc_Tcutil_is_integral_type(void*);
-# 58
+# 59
 void*Cyc_Tcutil_pointer_elt_type(void*);
-# 207
+# 208
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 221
+# 222
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*);
 # 49 "string.h"
 extern int Cyc_strcmp(struct _fat_ptr,struct _fat_ptr);struct Cyc_AssnDef_Var_AssnDef_Term_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};

@@ -494,95 +494,96 @@ void Cyc_Unify_explain_failure (void);
 int Cyc_Unify_unify(void*,void*);struct Cyc_RgnOrder_RgnPO;
 # 36 "tcutil.h"
 int Cyc_Tcutil_is_arithmetic_type(void*);
-# 40
+int Cyc_Tcutil_is_tag_type(void*);
+# 41
 int Cyc_Tcutil_is_pointer_type(void*);
 int Cyc_Tcutil_is_array_type(void*);
 int Cyc_Tcutil_is_boxed(void*);
-# 50
+# 51
 int Cyc_Tcutil_is_fat_pointer_type(void*);
-# 53
+# 54
 int Cyc_Tcutil_is_bits_only_type(void*);
-# 58
+# 59
 void*Cyc_Tcutil_pointer_elt_type(void*);
-# 60
+# 61
 void*Cyc_Tcutil_pointer_region(void*);
-# 63
+# 64
 int Cyc_Tcutil_rgn_of_pointer(void*,void**);
-# 66
+# 67
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 71
+# 72
 int Cyc_Tcutil_is_fat_pointer_type_elt(void*,void**);
-# 73
+# 74
 int Cyc_Tcutil_is_zero_pointer_type_elt(void*,void**);
-# 78
+# 79
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 81
+# 82
 int Cyc_Tcutil_is_integral(struct Cyc_Absyn_Exp*);
 int Cyc_Tcutil_is_numeric(struct Cyc_Absyn_Exp*);
 int Cyc_Tcutil_is_zero(struct Cyc_Absyn_Exp*);
-# 88
+# 89
 void*Cyc_Tcutil_copy_type(void*);
-# 91
+# 92
 struct Cyc_Absyn_Exp*Cyc_Tcutil_deep_copy_exp(int,struct Cyc_Absyn_Exp*);
-# 95
+# 96
 struct Cyc_Absyn_Kind*Cyc_Tcutil_type_kind(void*);
 void Cyc_Tcutil_unchecked_cast(struct Cyc_Absyn_Exp*,void*,enum Cyc_Absyn_Coercion);
 int Cyc_Tcutil_coerce_uint_type(struct Cyc_Absyn_Exp*);
 int Cyc_Tcutil_coerce_sint_type(struct Cyc_Absyn_Exp*);
 int Cyc_Tcutil_coerce_to_bool(struct Cyc_Absyn_Exp*);
-# 101
+# 102
 int Cyc_Tcutil_coerce_arg(struct Cyc_RgnOrder_RgnPO*,struct Cyc_Absyn_Exp*,void*,int*);
 int Cyc_Tcutil_coerce_assign(struct Cyc_RgnOrder_RgnPO*,struct Cyc_Absyn_Exp*,void*);
 int Cyc_Tcutil_coerce_list(struct Cyc_RgnOrder_RgnPO*,void*,struct Cyc_List_List*);
-# 105
+# 106
 int Cyc_Tcutil_silent_castable(struct Cyc_RgnOrder_RgnPO*,unsigned,void*,void*);
-# 107
+# 108
 enum Cyc_Absyn_Coercion Cyc_Tcutil_castable(struct Cyc_RgnOrder_RgnPO*,unsigned,void*,void*);
-# 112
+# 113
 int Cyc_Tcutil_check_aqual_bounds(void*,void*);
-# 114
+# 115
 int Cyc_Tcutil_zero_to_null(void*,struct Cyc_Absyn_Exp*);struct _tuple12{struct Cyc_Absyn_Decl*f1;struct Cyc_Absyn_Exp*f2;};
-# 117
+# 118
 struct _tuple12 Cyc_Tcutil_insert_alias(struct Cyc_Absyn_Exp*,void*);
-# 119
+# 120
 void*Cyc_Tcutil_max_arithmetic_type(void*,void*);
-# 125
+# 126
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
-# 129
+# 130
 struct Cyc_List_List*Cyc_Tcutil_rsubst_rgnpo(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*);
-# 143
+# 144
 void*Cyc_Tcutil_fndecl2type(struct Cyc_Absyn_Fndecl*);struct _tuple13{struct Cyc_List_List*f1;struct _RegionHandle*f2;};struct _tuple14{struct Cyc_Absyn_Tvar*f1;void*f2;};
-# 148
+# 149
 struct _tuple14*Cyc_Tcutil_r_make_inst_var(struct _tuple13*,struct Cyc_Absyn_Tvar*);
-# 159
+# 160
 void Cyc_Tcutil_check_nonzero_bound(unsigned,void*);
-# 161
+# 162
 void Cyc_Tcutil_check_bound(unsigned,unsigned,void*,int);
-# 163
+# 164
 struct Cyc_List_List*Cyc_Tcutil_resolve_aggregate_designators(struct _RegionHandle*,unsigned,struct Cyc_List_List*,enum Cyc_Absyn_AggrKind,struct Cyc_List_List*);
-# 174
+# 175
 int Cyc_Tcutil_is_noalias_region(void*,int);
-# 177
+# 178
 int Cyc_Tcutil_is_noalias_pointer(void*,int);
-# 182
+# 183
 int Cyc_Tcutil_is_noalias_path(struct Cyc_Absyn_Exp*);
-# 187
+# 188
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*);struct _tuple15{int f1;void*f2;};
-# 191
+# 192
 struct _tuple15 Cyc_Tcutil_addressof_props(struct Cyc_Absyn_Exp*);
-# 207
+# 208
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 214
+# 215
 void Cyc_Tcutil_check_no_qual(unsigned,void*);
-# 225
+# 226
 void*Cyc_Tcutil_promote_array(void*,void*,void*,int);
-# 228
+# 229
 int Cyc_Tcutil_zeroable_type(void*);
-# 232
+# 233
 int Cyc_Tcutil_force_type2bool(int,void*);
-# 235
+# 236
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);
-# 237
+# 238
 void*Cyc_Tcutil_any_bounds(struct Cyc_List_List*);
 # 29 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ak;
@@ -1298,9 +1299,9 @@ return t1;}{
 # 797
 struct Cyc_Absyn_Exp*e1copy=Cyc_Absyn_copy_exp(e1);
 void*t_result=Cyc_Tcexp_tcBinPrimop(te,loc,0,(enum Cyc_Absyn_Primop)po->v,e1copy,e2);
-if((!Cyc_Unify_unify(t_result,t1)&& Cyc_Tcutil_is_arithmetic_type(t_result))&& Cyc_Tcutil_is_arithmetic_type(t1))
+if(((!Cyc_Unify_unify(t_result,t1)&& Cyc_Tcutil_is_arithmetic_type(t_result))&& Cyc_Tcutil_is_arithmetic_type(t1))&& !Cyc_Tcutil_is_tag_type(t1))
 return t1;
-if(!(Cyc_Unify_unify(t_result,t1)|| Cyc_Tcutil_is_arithmetic_type(t_result)&& Cyc_Tcutil_is_arithmetic_type(t1))){
+if(!(Cyc_Unify_unify(t_result,t1)||(Cyc_Tcutil_is_arithmetic_type(t_result)&& Cyc_Tcutil_is_arithmetic_type(t1))&& !Cyc_Tcutil_is_tag_type(t1))){
 void*result=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp0=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp1;_Tmp1.tag=0,_Tmp1.f1=
 _tag_fat("Cannot use this operator in an assignment when ",sizeof(char),48U);_Tmp1;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp1=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp2;_Tmp2.tag=0,_Tmp2.f1=
 _tag_fat("the arguments have types ",sizeof(char),26U);_Tmp2;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp2=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp3;_Tmp3.tag=2,_Tmp3.f1=(void*)t1;_Tmp3;});struct Cyc_Warn_String_Warn_Warg_struct _Tmp3=({struct Cyc_Warn_String_Warn_Warg_struct _Tmp4;_Tmp4.tag=0,_Tmp4.f1=_tag_fat(" and ",sizeof(char),6U);_Tmp4;});struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp4=({struct Cyc_Warn_Typ_Warn_Warg_struct _Tmp5;_Tmp5.tag=2,_Tmp5.f1=(void*)t2;_Tmp5;});void*_Tmp5[5];_Tmp5[0]=& _Tmp0,_Tmp5[1]=& _Tmp1,_Tmp5[2]=& _Tmp2,_Tmp5[3]=& _Tmp3,_Tmp5[4]=& _Tmp4;Cyc_Tcexp_expr_err(te,loc,topt,_tag_fat(_Tmp5,sizeof(void*),5));});

@@ -733,15 +733,15 @@ namespace Cstr {
     void * @nozeroterm `r memset(void * @nozeroterm `r, int c, size_t n);
     void bcopy (const `a::A*src, `a *dest, size_t n);
     void bzero(`a::A*s, size_t n);
-    __cyclone_buf<`i> GC_realloc_hint(char * @nozeroterm`H,
+    __cyclone_buf<`j> GC_realloc_hint(char * @nozeroterm`H,
 				      __cyclone_internal_singleton<`i> oldsz,
-				      __cyclone_internal_singleton<`i> newsz);
+				      __cyclone_internal_singleton<`j> newsz);
   }
 }
 
 char ? @nozeroterm realloc(char ? @nozeroterm`H s, size_t n) {
   let oldsz<`i> = numelts(s);
-  let l<`i> = n;
+  let l<`j> = n;
   let res = Cstr::GC_realloc_hint((char * @nozeroterm)s, oldsz, l);
   return Core::mkfat(res, sizeof(char), l);
 }

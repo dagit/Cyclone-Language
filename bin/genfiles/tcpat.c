@@ -469,44 +469,44 @@ void*Cyc_Warn_impos2(struct _fat_ptr);
 int Cyc_Unify_unify(void*,void*);struct Cyc_RgnOrder_RgnPO;
 # 36 "tcutil.h"
 int Cyc_Tcutil_is_arithmetic_type(void*);
-# 40
+# 41
 int Cyc_Tcutil_is_pointer_type(void*);
 int Cyc_Tcutil_is_array_type(void*);
-# 47
+# 48
 int Cyc_Tcutil_is_nullable_pointer_type(void*,int);
-# 91
+# 92
 struct Cyc_Absyn_Exp*Cyc_Tcutil_deep_copy_exp(int,struct Cyc_Absyn_Exp*);
-# 95
+# 96
 struct Cyc_Absyn_Kind*Cyc_Tcutil_type_kind(void*);
-# 102
+# 103
 int Cyc_Tcutil_coerce_assign(struct Cyc_RgnOrder_RgnPO*,struct Cyc_Absyn_Exp*,void*);
-# 109
+# 110
 int Cyc_Tcutil_subtype(struct Cyc_RgnOrder_RgnPO*,struct Cyc_List_List*,void*,void*);
-# 125
+# 126
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
-# 128
+# 129
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);struct _tuple13{struct Cyc_List_List*f1;struct _RegionHandle*f2;};struct _tuple14{struct Cyc_Absyn_Tvar*f1;void*f2;};
-# 148
+# 149
 struct _tuple14*Cyc_Tcutil_r_make_inst_var(struct _tuple13*,struct Cyc_Absyn_Tvar*);
-# 155
+# 156
 void Cyc_Tcutil_check_unique_vars(struct Cyc_List_List*,unsigned,struct _fat_ptr);
-# 163
+# 164
 struct Cyc_List_List*Cyc_Tcutil_resolve_aggregate_designators(struct _RegionHandle*,unsigned,struct Cyc_List_List*,enum Cyc_Absyn_AggrKind,struct Cyc_List_List*);
-# 174
+# 175
 int Cyc_Tcutil_is_noalias_region(void*,int);
-# 182
+# 183
 int Cyc_Tcutil_is_noalias_path(struct Cyc_Absyn_Exp*);
-# 187
+# 188
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*);
-# 197
+# 198
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
-# 207
+# 208
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 225
+# 226
 void*Cyc_Tcutil_promote_array(void*,void*,void*,int);
-# 232
+# 233
 int Cyc_Tcutil_force_type2bool(int,void*);
-# 235
+# 236
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);
 # 29 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ak;

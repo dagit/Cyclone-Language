@@ -399,9 +399,9 @@ void Cyc_Warn_err2(unsigned,struct _fat_ptr);
 void Cyc_Warn_warn2(unsigned,struct _fat_ptr);
 # 34 "tctyp.h"
 void Cyc_Tctyp_check_valid_toplevel_type(unsigned,struct Cyc_Tcenv_Tenv*,void*);
-# 38 "tcutil.h"
+# 39 "tcutil.h"
 int Cyc_Tcutil_is_function_type(void*);
-# 88
+# 89
 void*Cyc_Tcutil_copy_type(void*);
 # 82 "attributes.h"
 struct Cyc_List_List*Cyc_Atts_merge_attributes(struct Cyc_List_List*,struct Cyc_List_List*);

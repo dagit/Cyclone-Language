@@ -591,15 +591,15 @@ void*Cyc_Kinds_kind_to_bound(struct Cyc_Absyn_Kind*);
 struct Cyc_Absyn_Kind*Cyc_Kinds_id_to_kind(struct _fat_ptr,unsigned);
 # 82
 void*Cyc_Kinds_compress_kb(void*);
-# 41 "tcutil.h"
+# 42 "tcutil.h"
 int Cyc_Tcutil_is_array_type(void*);
-# 88
+# 89
 void*Cyc_Tcutil_copy_type(void*);
-# 197
+# 198
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
-# 225
+# 226
 void*Cyc_Tcutil_promote_array(void*,void*,void*,int);
-# 235
+# 236
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);
 # 29 "attributes.h"
 extern struct Cyc_Absyn_Const_att_Absyn_Attribute_struct Cyc_Atts_Const_att_val;

@@ -356,14 +356,14 @@ void*Cyc_Absyn_compress(void*);
 extern void*Cyc_Absyn_var_type(struct Cyc_Absyn_Tvar*);
 # 29 "currgn.h"
 struct _fat_ptr Cyc_CurRgn_curr_rgn_name;
-# 38 "tcutil.h"
+# 39 "tcutil.h"
 int Cyc_Tcutil_is_function_type(void*);
-# 88
+# 89
 void*Cyc_Tcutil_copy_type(void*);
-# 125
+# 126
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
 void*Cyc_Tcutil_substitute_nofun(struct Cyc_List_List*,void*);
-# 199
+# 200
 int Cyc_Tcutil_new_tvar_id (void);
 # 28 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_rk;

@@ -362,11 +362,11 @@ enum Cyc_Absyn_Format_Type{Cyc_Absyn_Printf_ft =0U,Cyc_Absyn_Scanf_ft =1U};struc
 void*Cyc_Absyn_compress(void*);
 # 46 "evexp.h"
 extern int Cyc_Evexp_exp_cmp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*);
-# 48 "tcutil.h"
+# 49 "tcutil.h"
 int Cyc_Tcutil_is_bound_one(void*);
-# 177
+# 178
 int Cyc_Tcutil_is_noalias_pointer(void*,int);
-# 232
+# 233
 int Cyc_Tcutil_force_type2bool(int,void*);
 # 35 "warn.h"
 void Cyc_Warn_err(unsigned,struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Attribute_Warn_Warg_struct{int tag;void*f1;};struct Cyc_Warn_Vardecl_Warn_Warg_struct{int tag;struct Cyc_Absyn_Vardecl*f1;};

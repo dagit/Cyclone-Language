@@ -391,15 +391,15 @@ int Cyc_Relations_relns_approx(struct Cyc_List_List*,struct Cyc_List_List*);
 struct Cyc_List_List*Cyc_Relations_join_relns(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_List_List*);
 # 118
 void Cyc_Relations_print_relns(struct Cyc___cycFILE*,struct Cyc_List_List*);
-# 53 "tcutil.h"
+# 54 "tcutil.h"
 int Cyc_Tcutil_is_bits_only_type(void*);
-# 128
+# 129
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 134
+# 135
 struct Cyc_Absyn_Exp*Cyc_Tcutil_rsubsexp(struct _RegionHandle*,struct Cyc_List_List*,struct Cyc_Absyn_Exp*);
-# 177
+# 178
 int Cyc_Tcutil_is_noalias_pointer(void*,int);
-# 232
+# 233
 int Cyc_Tcutil_force_type2bool(int,void*);
 # 30 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_bk;

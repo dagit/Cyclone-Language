@@ -373,7 +373,7 @@ int Cyc_Absyn_equal_tqual(struct Cyc_Absyn_Tqual,struct Cyc_Absyn_Tqual);
 void Cyc_Unify_explain_failure (void);
 int Cyc_Unify_unify_kindbound(void*,void*);
 int Cyc_Unify_unify(void*,void*);
-# 125 "tcutil.h"
+# 126 "tcutil.h"
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
 # 83 "kinds.h"
 struct Cyc_Absyn_Kind*Cyc_Kinds_force_kb(void*);

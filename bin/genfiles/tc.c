@@ -403,33 +403,33 @@ int Cyc_Unify_unify(void*,void*);
 struct Cyc_List_List*Cyc_Relations_exp2relns(struct _RegionHandle*,struct Cyc_Absyn_Exp*);
 # 129
 int Cyc_Relations_consistent_relations(struct Cyc_List_List*);struct Cyc_RgnOrder_RgnPO;
-# 38 "tcutil.h"
+# 39 "tcutil.h"
 int Cyc_Tcutil_is_function_type(void*);
-# 41
+# 42
 int Cyc_Tcutil_is_array_type(void*);
-# 53
+# 54
 int Cyc_Tcutil_is_bits_only_type(void*);
-# 81
+# 82
 int Cyc_Tcutil_is_integral(struct Cyc_Absyn_Exp*);
-# 102
+# 103
 int Cyc_Tcutil_coerce_assign(struct Cyc_RgnOrder_RgnPO*,struct Cyc_Absyn_Exp*,void*);
-# 143
+# 144
 void*Cyc_Tcutil_fndecl2type(struct Cyc_Absyn_Fndecl*);
-# 153
+# 154
 void Cyc_Tcutil_check_bitfield(unsigned,void*,struct Cyc_Absyn_Exp*,struct _fat_ptr*);
-# 156
+# 157
 void Cyc_Tcutil_check_unique_tvars(unsigned,struct Cyc_List_List*);
-# 187
+# 188
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*);
-# 202
+# 203
 void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
-# 207
+# 208
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 211
+# 212
 int Cyc_Tcutil_extract_const_from_typedef(unsigned,int,void*);
-# 228
+# 229
 int Cyc_Tcutil_zeroable_type(void*);
-# 235
+# 236
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);
 # 28 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_rk;

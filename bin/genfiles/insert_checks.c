@@ -364,19 +364,19 @@ struct Cyc_List_List*Cyc_Relations_add_relation(struct _RegionHandle*,union Cyc_
 int Cyc_Relations_consistent_relations(struct Cyc_List_List*);
 # 41 "cf_flowinfo.h"
 int Cyc_CfFlowInfo_anal_error;extern char Cyc_CfFlowInfo_IsZero[7U];struct Cyc_CfFlowInfo_IsZero_Absyn_AbsynAnnot_struct{char*tag;};extern char Cyc_CfFlowInfo_NotZero[8U];struct Cyc_CfFlowInfo_NotZero_Absyn_AbsynAnnot_struct{char*tag;struct Cyc_List_List*f1;};extern char Cyc_CfFlowInfo_UnknownZ[9U];struct Cyc_CfFlowInfo_UnknownZ_Absyn_AbsynAnnot_struct{char*tag;struct Cyc_List_List*f1;};
-# 46 "tcutil.h"
+# 47 "tcutil.h"
 int Cyc_Tcutil_is_zeroterm_pointer_type(void*);
-# 66
+# 67
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 69
+# 70
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_type_bound(void*);
-# 78
+# 79
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 207
+# 208
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 218
+# 219
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*);
-# 232
+# 233
 int Cyc_Tcutil_force_type2bool(int,void*);struct _tuple12{unsigned f1;int f2;};
 # 28 "evexp.h"
 extern struct _tuple12 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*);

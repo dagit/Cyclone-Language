@@ -378,9 +378,9 @@ int Cyc_Unify_unify(void*,void*);
 extern struct Cyc_Absyn_Kind Cyc_Kinds_bk;
 # 77
 struct Cyc_Absyn_Kind*Cyc_Kinds_tvar_kind(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Kind*);
-# 95 "tcutil.h"
+# 96 "tcutil.h"
 struct Cyc_Absyn_Kind*Cyc_Tcutil_type_kind(void*);
-# 194
+# 195
 void*Cyc_Tcutil_normalize_effect(void*);
 # 62 "absynpp.h"
 struct _fat_ptr Cyc_Absynpp_typ2string(void*);struct Cyc_RgnOrder_RgnPO{struct Cyc_Dict_Dict d;void*these_outlive_heap;void*these_outlive_unique;struct Cyc_Absyn_Tvar*youngest;void*opened_regions;};

@@ -581,47 +581,47 @@ int Cyc_Tcutil_is_void_type(void*);
 int Cyc_Tcutil_is_char_type(void*);
 # 36
 int Cyc_Tcutil_is_arithmetic_type(void*);
-# 40
+# 41
 int Cyc_Tcutil_is_pointer_type(void*);
 int Cyc_Tcutil_is_array_type(void*);
 int Cyc_Tcutil_is_boxed(void*);
-# 45
+# 46
 int Cyc_Tcutil_is_fat_ptr(void*);
 int Cyc_Tcutil_is_zeroterm_pointer_type(void*);
-# 50
+# 51
 int Cyc_Tcutil_is_fat_pointer_type(void*);
-# 58
+# 59
 void*Cyc_Tcutil_pointer_elt_type(void*);
-# 66
+# 67
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 71
+# 72
 int Cyc_Tcutil_is_fat_pointer_type_elt(void*,void**);
-# 73
+# 74
 int Cyc_Tcutil_is_zero_pointer_type_elt(void*,void**);
-# 78
+# 79
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*,void*);
-# 83
+# 84
 int Cyc_Tcutil_is_zero(struct Cyc_Absyn_Exp*);
-# 91
+# 92
 struct Cyc_Absyn_Exp*Cyc_Tcutil_deep_copy_exp(int,struct Cyc_Absyn_Exp*);
-# 95
+# 96
 struct Cyc_Absyn_Kind*Cyc_Tcutil_type_kind(void*);
-# 122
+# 123
 int Cyc_Tcutil_typecmp(void*,void*);
 int Cyc_Tcutil_aggrfield_cmp(struct Cyc_Absyn_Aggrfield*,struct Cyc_Absyn_Aggrfield*);
-# 125
+# 126
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
-# 128
+# 129
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 163
+# 164
 struct Cyc_List_List*Cyc_Tcutil_resolve_aggregate_designators(struct _RegionHandle*,unsigned,struct Cyc_List_List*,enum Cyc_Absyn_AggrKind,struct Cyc_List_List*);
-# 170
+# 171
 int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*,void**,int*,void**);
-# 174
+# 175
 int Cyc_Tcutil_is_noalias_region(void*,int);
-# 221
+# 222
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*);
-# 232
+# 233
 int Cyc_Tcutil_force_type2bool(int,void*);
 # 29 "kinds.h"
 extern struct Cyc_Absyn_Kind Cyc_Kinds_ak;

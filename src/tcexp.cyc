@@ -796,9 +796,9 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   } 
   let e1copy   = copy_exp(e1);
   let t_result = tcBinPrimop(te,loc,NULL,po->v,e1copy,e2);
-  if (!Unify::unify(t_result, t1) && is_arithmetic_type(t_result) && is_arithmetic_type(t1))
+  if (!Unify::unify(t_result, t1) && is_arithmetic_type(t_result) && is_arithmetic_type(t1) && !is_tag_type(t1))
     return t1;
-  if (!(Unify::unify(t_result,t1) || is_arithmetic_type(t_result) && is_arithmetic_type(t1))) {
+  if (!(Unify::unify(t_result,t1) || is_arithmetic_type(t_result) && is_arithmetic_type(t1) && !is_tag_type(t1))) {
     let result =
       expr_err(te,loc,topt,"Cannot use this operator in an assignment when ",
 	       "the arguments have types ",t1," and ",t2);

@@ -382,19 +382,19 @@ struct _fat_ptr Cyc_Absynpp_tvar2string(struct Cyc_Absyn_Tvar*);
 extern int Cyc_Evexp_same_uint_const_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*);
 # 131 "relations-ap.h"
 int Cyc_Relations_check_logical_implication(struct Cyc_List_List*,struct Cyc_List_List*);
-# 95 "tcutil.h"
+# 96 "tcutil.h"
 struct Cyc_Absyn_Kind*Cyc_Tcutil_type_kind(void*);
-# 111
+# 112
 int Cyc_Tcutil_alias_qual_subtype(void*,void*);
-# 128
+# 129
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 137
+# 138
 int Cyc_Tcutil_subset_effect(int,void*,void*);
-# 194
+# 195
 void*Cyc_Tcutil_normalize_effect(void*);
-# 243
+# 244
 int Cyc_Tcutil_fast_tvar_cmp(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*);
-# 247
+# 248
 int Cyc_Tcutil_same_rgn_po(struct Cyc_List_List*,struct Cyc_List_List*);
 int Cyc_Tcutil_tycon_cmp(void*,void*);
 # 30 "kinds.h"
