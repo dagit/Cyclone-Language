@@ -1088,11 +1088,16 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
   case &Enum_e(...): return $(inflow, fenv->unknown_all);
 
   case &Var_e(&Global_b(_)): // globals are init and may be aggregates
-    return $(inflow, typ_to_absrval(fenv,(type_t)e->topt, false,fenv->unknown_all));
+    return $(inflow, typ_to_absrval(fenv,(type_t)e->topt, 
+				    false,fenv->unknown_all));
     // Note: if Esc we return that even though it isn't an absRval.  That's
     //       okay b/c assign_place_inner does the right thing
+  case &Var_e(&Local_b(vd)): 
+    if(vd->sc == Static)
+      return $(inflow, typ_to_absrval(fenv,(type_t)e->topt, 
+				      false,fenv->unknown_all));
+    fallthru(vd);
   case &Var_e(&Param_b(vd)): fallthru(vd);
-  case &Var_e(&Local_b(vd)): fallthru(vd);
   case &Var_e(&Pat_b(vd)):
     DEBUG_PRINT("in Rexp:Var_e for |%s|\n",Absynpp::exp2string(e));
     datatype Root.VarRoot vdroot = VarRoot(vd);
@@ -1832,8 +1837,11 @@ static $(flow_t,absLval_t) anal_Lexp_rec(analenv_t env, flow_t inflow,
   case &NoInstantiate_e(e1): fallthru(e1);
   case &Instantiate_e(e1,_): return anal_Lexp_rec(env,inflow,expand_unique,passthrough_consumes,e1,path);
 
+  case &Var_e(&Local_b(vd)): 
+    if(vd->sc == Static)
+      return $(inflow,UnknownL());
+    fallthru(vd);
   case &Var_e(&Param_b(vd)): fallthru(vd);
-  case &Var_e(&Local_b(vd)): fallthru(vd);
   case &Var_e(&Pat_b(vd)):
     return $(inflow, PlaceL(new Place(new VarRoot(vd), path)));
 
@@ -2866,6 +2874,9 @@ static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
     //       because they won't escape to unordered siblings???
 
   case &Var_d(vd):
+    // Static is like a global -- ignore initializer and treat as escaped
+    if(vd->sc == Static)
+      return inflow;
     DEBUG_PRINT("analyzing declaration %s, Flow = {\n",qvar2string(vd->name));
     DEBUG_PRINT_F(print_flow,inflow);
     DEBUG_PRINT("}\n");
@@ -2874,8 +2885,8 @@ static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
     let e = vd->initializer;
     if(e==NULL)
       return inflow;
-    let $(f,r) = anal_Rexp(env,true,inflow,(exp_t)e);
-    return do_initialize_var(fenv,env,f,vd,(exp_t)e,r,decl->loc);
+    let $(f,r) = anal_Rexp(env,true,inflow,e);
+    return do_initialize_var(fenv,env,f,vd,e,r,decl->loc);
 
   case &Letv_d(vds):
     return add_vars(fenv,inflow,vds,fenv->unknown_none,decl->loc,false);

@@ -545,7 +545,7 @@ static struct Cyc_Absyn_Exp*Cyc_InsertChecks_shared_zero_exp(){
 static struct Cyc_Absyn_Exp*ans=0;
 if(!((unsigned int)ans))
 ans=Cyc_Absyn_uint_exp(0U,0U);
-return ans;}struct Cyc_InsertChecks_Env{int in_sizeof: 1;int at_toplevel: 1;};
+return(struct Cyc_Absyn_Exp*)_check_null(ans);}struct Cyc_InsertChecks_Env{int in_sizeof: 1;int at_toplevel: 1;};
 # 84
 static struct Cyc_InsertChecks_Env Cyc_InsertChecks_toplevel_env(){return({struct Cyc_InsertChecks_Env _tmpA1;_tmpA1.in_sizeof=0,_tmpA1.at_toplevel=1;_tmpA1;});}
 static struct Cyc_InsertChecks_Env Cyc_InsertChecks_fn_body_env(){return({struct Cyc_InsertChecks_Env _tmpA2;_tmpA2.in_sizeof=0,_tmpA2.at_toplevel=0;_tmpA2;});}

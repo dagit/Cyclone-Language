@@ -212,18 +212,17 @@ MAKE_STRING(_RegionHandle);
   static exp_t               str##_e   = &str##_ev
 
 
-static exp_opt_t _get_exn_thrown_e = NULL;
-
 exp_t get_exn_thrown_expression() {
+  static exp_opt_t _get_exn_thrown_e = NULL;
   //  $(nmspace_t, var_t)
   if(_get_exn_thrown_e)
-    return _get_exn_thrown_e;
+    return (exp_t)_get_exn_thrown_e;
   qvar_t qv = new $(Nmspace{.Abs_n=list(new "Core")}, new "get_exn_thrown");
   binding_t bnd = new Unresolved_b(qv); 
   exp_t fnname = new Exp(NULL, new Var_e(bnd), 0, &EmptyAnnot_val);
   raw_exp_t fncall_re = new FnCall_e(fnname,NULL,NULL,false);
   _get_exn_thrown_e = new Exp(NULL,fncall_re,0,&EmptyAnnot_val);
-  return _get_exn_thrown_e;
+  return (exp_t)_get_exn_thrown_e;
 }
 
 MAKE_VAR(_throw);
@@ -301,19 +300,19 @@ type_t void_star_type() {
   if (void_star_t_opt == NULL)
     void_star_t_opt = star_type(void_type,heap_rgn_type,
 				empty_tqual(0),false_type);
-  return void_star_t_opt;
+  return (type_t)void_star_t_opt;
 }
 static type_t dyneither_ptr_type() {
   static type_opt_t dpt = NULL;
   if (dpt == NULL)
     dpt = aggr_type(UnknownAggr(StructA,&_dyneither_ptr_pr,NULL),NULL);
-  return dpt;
+  return (type_t)dpt;
 }
 static type_t rgn_type() {
   static type_opt_t r = NULL;
   if (r == NULL)
     r = cstar_type(strct(_RegionHandle_sp),mt_tq);
-  return r;
+  return (type_t)r;
 }
 
 static stmt_t skip_stmt_dl() {

@@ -347,30 +347,30 @@ datatypedecl_t exn_tud() {
 		      tufs);
     tud_opt = new Datatypedecl(Extern, exn_name, NULL, new Opt(tufs), true);
   }
-  return tud_opt;
+  return (datatypedecl_t)tud_opt;
 }
 
 type_t exn_type() {
-  static type_opt_t exn_type_val = NULL;
-  static type_opt_t eopt         = NULL;
-  if (exn_type_val == NULL) {
-    eopt = datatype_type(DatatypeInfo{.KnownDatatype = new exn_tud()},NULL);
-    exn_type_val = at_type(eopt, heap_rgn_type, empty_tqual(0), false_type);
+  static type_opt_t exn_typ = NULL;
+  static type_opt_t eopt    = NULL;
+  if (exn_typ == NULL) {
+    eopt    = datatype_type(DatatypeInfo{.KnownDatatype = new exn_tud()},NULL);
+    exn_typ = at_type((type_t)eopt,heap_rgn_type,empty_tqual(0),false_type);
   }
-  return exn_type_val;
+  return (type_t)exn_typ;
 }
 
 qvar_t datatype_print_arg_qvar() {
   static qvar_opt_t q = NULL;
   if(q==NULL)
     q = new $(Abs_n(NULL,false), new "PrintArg");
-  return q;
+  return (qvar_t)q;
 }
 qvar_t datatype_scanf_arg_qvar() {
   static qvar_opt_t q = NULL;
   if(q==NULL)
     q = new $(Abs_n(NULL,false), new "ScanfArg");
-  return q;
+  return (qvar_t)q;
 }
 
 // unique region qvar.  We need this so that code generation properly
@@ -382,7 +382,7 @@ qvar_t uniquergn_qvar() {
   static qvar_opt_t q = NULL;
   if(q==NULL)
     q = new $(Abs_n(new List(new "Core",NULL), false), new "unique_region");
-  return q;
+  return (qvar_t)q;
 }
 exp_t uniquergn_exp() {
   static exp_opt_t e = NULL;
@@ -393,7 +393,7 @@ exp_t uniquergn_exp() {
 						   0, empty_tqual(0), t, 
 						   NULL, NULL, NULL, false)))};
   }
-  return e;
+  return (exp_t)e;
 }
 
 // pointers

@@ -73,7 +73,7 @@ static exp_t shared_zero_exp() {
   static exp_opt_t ans = NULL;
   if(!ans) 
     ans = uint_exp(0,0);
-  return ans;
+  return (exp_t)ans;
 }
 
 static struct Env {
