@@ -128,10 +128,10 @@ void f21(int x) {
   let &_ = x;
 }
 
-void f22(int x) {
-  // expecting dynregion_t<`ER130,`ER131> but found int
-  region r = open(x);
-}
+//void f22(int x) {
+  // open(-) is no longer supported
+  //region r = open(x);
+//}
 
 void f23(int*`r2 x,region_t<`r> r) {
   // type mismatch: int *`r2 != int *`r

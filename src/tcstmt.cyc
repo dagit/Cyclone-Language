@@ -108,34 +108,6 @@ static list_t<`b,`r> cmap_c(region_t<`r> r,`b f(`c,`a), `c env, clist_t<`a> x)
   else return rnew(r) List(f(env,x->hd),cmap_c(r,f,env,x->tl));
 }
 
-// we're aliasing an expression of type old_type, temporarily
-// assigning it the type new_type where some occurrences of
-// unique regions are replaced with tv.
-static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type, 
-                                 tvar_t tv, type_t new_type, 
-                                 exp_t initializer) {
-  list_t<$(type_t,type_t)@> assump = new List{new $(&UniqueRgn_val,new VarType(tv)), NULL};
-  if (subtype(tenv, assump, old_type, new_type)) {
-    // next, check that the types are pointer types
-
-    // MWH: removed this check because it was causing the the type of
-    // the rhs of the alias to no longer be unique, foiling the flow
-    // analysis.  However, without this cast we might not properly
-    // insert computational coercions, such as converting from ? to *.
-    // Seems like we need to have unchecked_cast take a parameter
-    // that includes whether or not to leave the region variables alone.
-    // 
-//     unchecked_cast(tenv,initializer,new_type,Other_coercion);
-    switch $(compress(new_type),compress(new_type)) {
-    case $(&PointerType(pold), &PointerType(pnew)): break;
-    default: terr(loc,"alias requires pointer type"); break;
-    }
-  } else {
-    terr(loc,"cannot alias value of type %s to type %s",
-         typ2string(old_type), typ2string(new_type));
-  }
-}
-
 // add a region equality between r1 and r2 for the duration of checking
 // this statement
 static void tcStmtRefine(tenv_t te, stmt_t s0,
@@ -627,7 +599,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         tcStmt(set_encloser(decl_rgn,te2,s0),s,false);
         return;
 
-      case &Region_d(tv,vd,resetable,open_opt):
+      case &Region_d(tv,vd,resetable):
         // Same KLUDGE as with TryCatch_s -- we need a next statement that is
         // not outside of the handler.
         s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
@@ -637,29 +609,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         let curr_bl = Tcenv::curr_rgn(te);
         *rgn_ptr = curr_bl; // side effect
         type_t rgn_typ;
-        if (open_opt != NULL) {
-          Tcutil::warn(s0->loc, "dynamic regions using open are deprecated -- use keys instead");
-          exp_t open_exp = (exp_t)open_opt;
-          let tenv_tvs = lookup_type_vars(te);
-          rgn_typ = new_evar(&rko,new Opt(tenv_tvs));
-          type_t rgn2_typ = new_evar(&rko,new Opt(tenv_tvs));
-          type_t expected = new DynRgnType(rgn_typ,rgn2_typ);
-          *t = new RgnHandleType(rgn_typ);
-          if (!unify(tcExp(te,&expected,open_exp), expected)) {
-            terr(open_exp->loc,"expecting %s but found %s",
-                 typ2string(expected),
-                 typ2string((type_t)open_exp->topt));
-            throw new Tcutil::AbortTypeCheckingFunction;
-          }
-          // check that we have access to rgn2
-          check_rgn_accessible(te,open_exp->loc,rgn2_typ);
-          // FIX: should signal an error if rgn1 is accessible...
-          te2 = add_region(decl_rgn, te2, rgn_typ, false, true);
-        } else {
-          rgn_typ = new VarType(tv);
-          te2 = add_type_vars(decl_rgn,s0->loc,te2,new List(tv,NULL));
-          te2 = add_region(decl_rgn, te2, rgn_typ, resetable, true);
-        }
+        rgn_typ = new VarType(tv);
+        te2 = add_type_vars(decl_rgn,s0->loc,te2,new List(tv,NULL));
+        te2 = add_region(decl_rgn, te2, rgn_typ, resetable, true);
         check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,*t);
         if (!unify(*t,new RgnHandleType(rgn_typ)))
           impos("region stmt: type of region handle is wrong!");
@@ -670,50 +622,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         }
         tcStmt(set_encloser(decl_rgn,add_local_var(decl_rgn,s->loc,te2,vd),s0),s,false);
         return;
-
-        // alias <`r> T x = e;
-	// MWH: made obsolete by alias patterns
-//       case &Alias_d(tv,vd):
-//         TEMP_RGN(te, r) {
-//           // establish tv as a reasonable region variable
-//           //       te2 = Tcenv::new_block(r,s0->loc,te2); // ??
-//           tenv_t te2 = add_type_vars(r,s0->loc,te,rlist(r,tv));
-//           te2 = add_region(r, te2, new VarType(tv), false, true);
-//           check_type(s0->loc,te2,lookup_type_vars(te2),&tmk,true,vd->type);
-//           let e = vd->initializer;
-//           if (e == NULL) {
-//             terr(s0->loc,"alias declaration requires initializer");
-//             return;
-//           }
-//           if (vd->sc != Public) 
-//             terr(d->loc,"bad scope for alias declaration");
-//           vd->rgn = Tcenv::curr_rgn(te);
-//           switch ((*vd->name)[0]) {
-//           case {.Loc_n = _}: break;
-//           case {.Rel_n = NULL}: (*vd->name)[0] = Loc_n; break;
-//           default: terr(d->loc, "cannot declare a qualified local variable");
-//             (*vd->name)[0] = Loc_n; break;
-//           }
-//           vd->tq.real_const = extract_const_from_typedef(s0->loc,
-//                                                          vd->tq.print_const,
-//                                                          vd->type);
-//           te2 = add_local_var(r,s0->loc, te2, vd);
-//           te2 = set_encloser(r,te2,s); // for substatements inside of s
-//           // FIX? could take vd->type and munge it to get a topt...
-//           // NOTE: we type-check e in the old environment (without the tvar)
-//           // which means that we better pick a fresh variable for the vd
-//           // to ensure that there's no circularity in the definition!
-//           tcExpInitializer(te,NULL,e);
-
-//           // need to check the compatibility of the expression's
-//           // type with the variable's
-//           check_alias_coercion(te2,d->loc,(type_t)e->topt,tv,vd->type,e);
-
-//           // check the body
-//           tcStmt(te2,s,false);
-//         }
-//         NewControlFlow::set_encloser(s0,get_encloser(te));
-//         return;
 
       case &Fn_d(fd): 
         // FIX: much of this code is the same as in Tc::tcFndecl

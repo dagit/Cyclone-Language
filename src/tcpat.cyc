@@ -689,6 +689,26 @@ tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt,
   return ans;
 }
 
+// we're trying to make exp_t look like it has the same shape as
+// new_type, which should be a pointer.  But this may involve
+// a coercion (e.g., null-check or make fat).  
+static bool try_alias_coerce(tenv_t tenv, type_t old_type, type_t new_type, 
+                             exp_t initializer, 
+                             list_t<$(type_t,type_t)@`H,`H> assump) {
+  switch $(compress(old_type),compress(new_type)) {
+  case $(&PointerType(pold), &PointerType(pnew)):
+    let ptry = new PointerType(PtrInfo{pold.elt_typ, pnew.elt_tq, 
+                                       PtrAtts{pold.ptr_atts.rgn, 
+                                               pnew.ptr_atts.nullable, 
+                                               pnew.ptr_atts.bounds, 
+                                               pnew.ptr_atts.zero_term, 
+                                               pold.ptr_atts.ptrloc}});
+    return (subtype(tenv, assump, ptry, new_type) && 
+            coerce_assign(tenv, initializer, ptry));
+  default: return false;
+  }
+}
+
 // we're aliasing an expression of type old_type, temporarily
 // assigning it the type new_type where some occurrences of
 // unique regions are replaced with tv.
@@ -696,7 +716,13 @@ static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type,
                                  tvar_t tv, type_t new_type, 
                                  exp_t initializer) {
   list_t<$(type_t,type_t)@> assump = new List{new $(&UniqueRgn_val,new VarType(tv)), NULL};
-  if (subtype(tenv, assump, old_type, new_type)) {
+  if (subtype(tenv, assump, old_type, new_type) 
+      //JGM: the following line would be valid if we could somehow
+      //get the coercion applied to the right expression instead of
+      //this access expression that is passed in for initializer.
+      //Oh well...
+//      || try_alias_coerce(tenv, old_type, new_type, initializer, assump)
+      ) {
     // next, check that the types are pointer types
 
     // MWH: removed this check because it was causing the the type of
@@ -707,7 +733,7 @@ static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type,
     // that includes whether or not to leave the region variables alone.
     // 
 //     unchecked_cast(tenv,initializer,new_type,Other_coercion);
-    switch $(compress(new_type),compress(new_type)) {
+    switch $(compress(old_type),compress(new_type)) {
     case $(&PointerType(pold), &PointerType(pnew)): break;
     default: terr(loc,"alias requires pointer type"); break;
     }

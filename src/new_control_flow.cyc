@@ -2798,12 +2798,7 @@ static flow_t<`r> anal_decl(analenv_t<`r> env, flow_t<`r> inflow, decl_t decl) {
     // to unknown-init-level.
     return add_vars(fenv,inflow,rnew(env->r) List(vd,NULL),fenv->unknown_all,decl->loc,false);
 
-  case &Region_d(tv,vd,resetable,exp_opt):
-    if (exp_opt != NULL) {
-      let e = (exp_t)exp_opt;
-      let $(f,r) = anal_Rexp(env,true,inflow,e);
-      inflow = use_Rval(env,e->loc,f,r);
-    }
+  case &Region_d(tv,vd,resetable):
     let vds = List(vd,NULL);
     return add_vars(fenv, inflow,&vds,fenv->unknown_all,decl->loc,false);
 

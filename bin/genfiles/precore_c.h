@@ -770,6 +770,3 @@ typedef struct _dyneither_ptr mbuffer_t;
 typedef int bool;
 extern void exit(int);
 extern void * abort();
-struct Core_NewRegion{
-  struct _DynRegionHandle * dynregion;
-};

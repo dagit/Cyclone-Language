@@ -42,16 +42,6 @@ extern void exit(int);
 // First, definitions for things declared in cyc_include.h
 //////////////////////////////////////////////////////////
 
-/* Dynamic regions:  When ref_count > 0, the region is opened.  When
- * handle is NULL, the region has been freed. */
-struct _DynRegionHandle {
-  int ref_count;
-  struct _RegionHandle *handle;
-  /* link to other dynamic regions occuring within the same region --
-   * used so we can free sub-regions when an outer region is freed. */
-  struct _DynRegionHandle *next;
-};
-
 // FIX: makes alignment and pointer-size assumptions
 // FIX: what about -nocyc???
 char Cyc_Null_Exception[] = "Cyc_Null_Exception";
@@ -66,12 +56,6 @@ struct _xtunion_struct * Cyc_Match_Exception_val = &Cyc_Match_Exception_struct;
 char Cyc_Bad_alloc[] = "Cyc_Bad_alloc";
 struct _xtunion_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc };
 struct _xtunion_struct * Cyc_Bad_alloc_val = &Cyc_Bad_alloc_struct;
-char Cyc_Core_Free_Region[] = "Cyc_Core_Free_Region";
-struct _xtunion_struct Cyc_Core_Free_Region_struct = { Cyc_Core_Free_Region };
-struct _xtunion_struct * Cyc_Core_Free_Region_val = &Cyc_Core_Free_Region_struct;
-char Cyc_Core_Open_Region[] = "Cyc_Core_Open_Region";
-struct _xtunion_struct Cyc_Core_Open_Region_struct = { Cyc_Core_Open_Region };
-struct _xtunion_struct * Cyc_Core_Open_Region_val = &Cyc_Core_Open_Region_struct;
 
 #ifdef CYC_REGION_PROFILE
 static FILE *alloc_log = NULL;
@@ -126,13 +110,6 @@ void _push_region(struct _RegionHandle * r) {
   _current_handler  = (struct _RuntimeStack *)r;
 }
 
-void _push_dynregion(struct _DynRegionFrame *d) {
-  //fprintf(stderr,"pushing dynregion %x\n",(unsigned int)d);  
-  d->s.tag = 2;
-  d->s.next = _current_handler;
-  _current_handler = (struct _RuntimeStack *)d;
-}
-
 // set _current_handler to its n+1'th tail
 // Invariant: result is non-null
 void _npop_handler(int n) {
@@ -156,15 +133,7 @@ void _npop_handler(int n) {
 #endif
       //} else {
       //fprintf(stderr,"popping handler %x\n",(unsigned int)_current_handler);
-    } else if (_current_handler->tag == 2) {
-      // fprintf(stderr,"popping dynregion %x\n",(unsigned int)_current_handler);
-      struct _DynRegionFrame *f = (struct _DynRegionFrame *)_current_handler;
-      f->x->ref_count--;
-      if (f->x->ref_count < 0) {
-        fprintf(stderr,"internal error: _npop_handler made dynamic region reference count negative");
-        exit(1);
-      }
-    }
+    } 
     _current_handler = _current_handler->next;
   }
 }
@@ -179,13 +148,6 @@ void _pop_handler() {
 void _pop_region() {
   if (_current_handler == NULL || _current_handler->tag != 1) {
     fprintf(stderr,"internal error: _pop_region");
-    exit(1);
-  }
-  _npop_handler(0);
-}
-void _pop_dynregion() {
-  if (_current_handler == NULL || _current_handler->tag != 2) {
-    fprintf(stderr,"internal error: _pop_dynregion");
     exit(1);
   }
   _npop_handler(0);
@@ -211,8 +173,6 @@ int _throw_fn(void* e, const char *filename, unsigned lineno) {// FIX: use struc
   while (_current_handler->tag != 0) {
     if (_current_handler->tag == 1)
       _pop_region();
-    else if (_current_handler->tag == 2) 
-      _pop_dynregion();
   }
   my_handler = (struct _handler_cons *)_current_handler;
   _pop_handler();
@@ -318,50 +278,8 @@ Cstring string_to_Cstring(struct _dyneither_ptr s) {
     if (*str == '\0') return contents;
   }
   _throw_null();
-  /*
-  // slow path -- have to copy the string to ensure it's null terminated
-  str = (char *)GC_malloc_atomic(sz+1);
-  if (str == NULL) 
-    _throw_badalloc();
-
-  for(i=0; i < sz; i++) str[i]=contents[i];
-  str[sz]='\0';
-  return str;
-  */
 }
 
-// Copy a null-terminated list of Cstrings to a tagged,
-// null-terminated list of strings.  (The return type is misleading.)
-// can put back in after bootstrapping
-/*
-struct _tagged_arr ntCsl_to_ntsl(Cstring *ntCsl) {
-  int i, numstrs = 0;
-  struct _tagged_arr result;
-  Cstring *ptr;
-
-  for (ptr = ntCsl; *ptr;  ptr++,numstrs++); // not safe!
-  result.base = (char *)_cycalloc_atomic(numstrs+1);
-  if (result.base == NULL) 
-    _throw_badalloc();
-
-  result.curr = result.base;
-  result.last_plus_one = (char*)(((string_t*)result.base) + numstrs+1);
-  for (i = 0; i <= numstrs; i++)
-    ((string_t*)result.base)[i] = Cstring_to_string(ntCsl[i]);
-  return result;
-}
-*/
-// Convert a "@pointer to a null-terminated list of pointers" to a
-// "?pointer to a null-terminated list of pointers".  We don't list
-// this function in core.h because "pointers to what" might change.
-/*
-struct _tagged_arr pntlp_toCyc(void **in) {
-  struct _tagged_arr result;
-  result.curr = result.base = result.last_plus_one = (char*)in;
-  while (*(result.last_plus_one++));
-  return result;
-}
-*/
 // Returns the size of an array from the current pointer back to
 // its starting point.  If the curr pointer = start pointer, or 
 // the curr pointer is out of bounds, then this is 0.
@@ -373,19 +291,6 @@ unsigned int arr_prevsize(struct _dyneither_ptr arr,size_t elt_sz) {
      _get_arr_size_curr >= arr.last_plus_one) ? 0 :
     ((_get_arr_size_curr - _get_arr_size_base) / (elt_sz));
 }
-/*
-// FIX:  this isn't really needed since you can cast char[?] to char[]
-Cstring underlying_Cstring(struct _tagged_arr s) {
-  char *str=s.curr;
-
-  if (s.curr == NULL) return NULL;
-
-  // FIX:  should throw exception?  
-  if (s.curr < s.base || s.curr >= s.last_plus_one)
-    _throw_fn(Cyc_Null_Exception);
-  return str;
-}
-*/
 ///////////////////////////////////////////////
 // Regions
 
@@ -428,9 +333,10 @@ void Cyc_Core_ufree(struct _dyneither_ptr ptr) {
 	      region_get_total_bytes(Cyc_Core_unique_region),
               (unsigned int)ptr.base);
     }
-#endif
-    // FIX: shouldn't this be inside the ifdef?
+    // FIX:  JGM -- I moved this before the endif -- it was after,
+    // but I'm pretty sure we don't need this unless we're profiling.
     GC_register_finalizer_no_order(ptr.base,NULL,NULL,NULL,NULL);
+#endif
     GC_free(ptr.base);
     ptr.base = ptr.curr = ptr.last_plus_one = NULL; // not really necessary...
   }
@@ -777,76 +683,6 @@ void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t)
   }
 }
 
-/* Open a dynamic region -- throws an exception when the handle
- * is NULL or the region is already opened.
- */
-struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f, 
-                                      struct _DynRegionHandle *h) {
-  struct _RegionHandle *res = h->handle;
-  if (res == NULL)
-    _throw_fn(Cyc_Core_Open_Region_val,__FILE__,__LINE__);
-  h->ref_count++;
-  f->x = h;
-  _push_dynregion(f);
-  return res;
-}
-
-/* Frees a dynamic region -- throws an exception when the region
- * has already been freed or is open.
- */
-void Cyc_Core_free_dynregion(struct _DynRegionHandle* x) {
-  if (x->ref_count != 0 || x->handle == NULL) 
-    _throw_fn(Cyc_Core_Free_Region_val,__FILE__,__LINE__);
-#ifdef CYC_REGION_PROFILE
-  _profile_free_region(x->handle,NULL,NULL,0);
-#else
-  _free_region(x->handle);
-#endif
-  x->handle = NULL;
-}
-
-/* Same as above, but returns 0 when it fails, 1 when it succeeds */
-int Cyc_Core_try_free_dynregion(struct _DynRegionHandle *x) {
-  if (x->ref_count != 0 || x->handle == NULL) 
-    return 0;
-#ifdef CYC_REGION_PROFILE
-  _profile_free_region(x->handle,NULL,NULL,0);
-#else
-  _free_region(x->handle);
-#endif
-  x->handle = NULL;
-  return 1;
-}
-
-/* Allocate a new dynamic region in region r */
-struct Core_NewRegion Cyc_Core__rnew_dynregion(struct _RegionHandle *r,
-					       char *file, int lineno) {
-  struct Core_NewRegion resrgn;
-  struct _DynRegionHandle *res = 
-    _region_malloc(r, sizeof(struct _DynRegionHandle));
-  struct _RegionHandle *d = 
-    _region_malloc(r, sizeof(struct _RegionHandle));
-  res->handle = d;
-  res->ref_count = 0;
-  /* link this dynregion into r's list of sub-regions so we can 
-   * free the dynregion when r is freed -- note that the Heap and
-   * Unique regions end up generating free-floating sub-regions
-   * that are reclaimed by the collector... */
-  if (r != Cyc_Core_heap_region &&
-      r != Cyc_Core_unique_region &&
-      r != Cyc_Core_refcnt_region) {
-    res->next = r->sub_regions;
-    r->sub_regions = res;
-  }
-#ifdef CYC_REGION_PROFILE
-  *d = _profile_new_region("dyn",file,"@",lineno);
-#else
-  *d = _new_region(NULL);
-#endif
-  resrgn.dynregion = res;
-  return resrgn;
-}
-
 // allocate a new page and return a region handle for a new region.
 struct _RegionHandle _new_region(const char *rgn_name) {
   struct _RegionHandle r;
@@ -870,7 +706,6 @@ struct _RegionHandle _new_region(const char *rgn_name) {
   r.curr = 0;
   r.offset = 0;
   r.last_plus_one = 0;
-  r.sub_regions = NULL;
   //r.offset = ((char *)p) + sizeof(struct _RegionPage);
   //r.last_plus_one = r.offset + default_region_page_size;
   return r;
@@ -882,12 +717,6 @@ void _free_region(struct _RegionHandle *r) {
   struct _DynRegionHandle *d;
   struct _RegionPage *p;
 
-  /* free sub regions */
-  d = r->sub_regions;
-  while (d != NULL) {
-    Cyc_Core_try_free_dynregion(d);
-    d = d->next;
-  }
   /* free pages */
   p = r->curr;
   while (p != NULL) {
@@ -925,8 +754,8 @@ void _reset_region(struct _RegionHandle *r) {
 }
 
 
-// New interface for dynamic regions
-// Note that struct Cyc_Core_DynamicRegion is defined in cyc_include.h
+// Dynamic Regions
+// Note that struct Cyc_Core_DynamicRegion is defined in cyc_include.h.
 
 // We use this struct when returning a newly created dynamic region.
 // The wrapper is needed because the Cyclone interface uses an existential.

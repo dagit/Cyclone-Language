@@ -24,7 +24,6 @@ fail1.cyc:123: x was declared with type int * but initialized with type int.
   int * and int are not compatible. 
 fail1.cyc:128: pattern type `EM133 *`ETR132 does not match definition type int
   `EM133 *`ETR132 and int are not compatible. 
-fail1.cyc:133: expecting dynregion_t<`ER134,`ER135> but found int
 fail1.cyc:138: type mismatch: int *`r2 != int *`r
   `r and `r2 are not compatible. (variable types are not the same)
 fail1.cyc:160: bad storage class for inner function

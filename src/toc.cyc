@@ -4402,23 +4402,15 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           stmt_to_c(nv,s1);
         }
         break;
-      case &Region_d(tv, vd, resetable, open_exp_opt):
+      case &Region_d(tv, vd, resetable):
         let body = s1;
         // NOTE:  _npop_handler has to deal with regions as well as exceptions
-        // When open_exp_opt is NULL:
         // { struct _RegionHandle rh = _new_region();
         //   struct _RegionHandle *x = &rh;
         //   _push_region(x);
         //   body;
         //   _pop_region(x);
         // }
-        // When open_exp_opt is not NULL:
-        // { struct _DynRegionFrame f;
-        //   struct _RegionHandle *x = _open_dynregion(&f,open_exp_opt);
-        //   body;
-        //   _pop_dynregion();
-        // }
-        // Note that _open_dynregion implicitly pushes the dynregion.
         type_t rh_struct_typ     = strct(_RegionHandle_sp);
         type_t rh_struct_ptr_typ = cstar_typ(rh_struct_typ,mt_tq);
         qvar_t rh_var = temp_var();
@@ -4432,7 +4424,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         if (no_regions) {
           s->r = declare_stmt(x_var, rh_struct_ptr_typ,
                               uint_exp(0,DL), body, DL)->r;
-        } else if (open_exp_opt == NULL) {
+        } else { 
           s->r =
             declare_stmt(rh_var,rh_struct_typ,
                          fncall_exp(_new_region_e,
@@ -4443,36 +4435,8 @@ static void stmt_to_c(env_t nv, stmt_t s) {
             seq_stmt(body,
                      exp_stmt(fncall_exp(_pop_region_e,  list(x_exp), DL),DL),
                      DL),DL),DL),DL)->r;
-        } else {
-          exp_to_c(nv, (exp_t)open_exp_opt);
-          s->r =
-            declare_stmt(rh_var, strct(_DynRegionFrame_sp), NULL,
-	    declare_stmt(x_var, rh_struct_ptr_typ,
-                         fncall_exp(_open_dynregion_e,
-                                    list(address_exp(rh_exp,DL),
-                                         (exp_t)open_exp_opt),
-                                    DL),
-            seq_stmt(body,
-                     exp_stmt(fncall_exp(_pop_dynregion_e,
-                                         list(x_exp), DL),DL),
-                     DL),DL),DL)->r;
-        }
+        } 
         return;
-	// MWH: made obsolete by alias patterns
-//       case &Alias_d(tv,vd):
-//         // Handle this like a variable declaration
-//         qvar_t old_name = vd->name;
-//         qvar_t new_name = temp_var();
-//         vd->name = new_name;
-//         s->r = new Decl_s(new Decl(new Var_d(vd),DL),s1);
-//         TOC_RGN(nv, temp) {
-//           let nv2 =
-//             add_varmap(temp,nv,old_name,
-//                        varb_exp(new_name,new Local_b(vd),DL));
-//           local_decl_to_c(nv2, nv, vd, s1);
-//         }
-//         return;
-
       default: impos("bad nested declaration within function");
       }
       return;

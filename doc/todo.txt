@@ -7,6 +7,25 @@ CONFIGURATION BUGS:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
+* We allow a thin pointer to an abstract struct to be coerced to
+  a fat pointer, even though we can't generate good C code for this.
+
+  struct Abstract;
+  void foo(`a::A ?);
+  void bar(struct Abstract @x) {
+    foo(x);
+  }
+
+  The problem is that to do the coercion, we need the sizeof the
+  abstract struct.
+
+  Right now, I'm abusing this bug in toc.cyc with the reference
+  counted dynamic region in toc_state.  If we fix this bug, then
+  we should probably 
+   (a) add a function:  
+         sizeof_t<struct DynamicRegion<`r::TR>> sizeof_dynregion();
+   (b) use Core::mkfat to do the coercion.
+
 * Bug in nested tagged unions:  f.y.z = 3  where both y and z are
   tagged members.
 

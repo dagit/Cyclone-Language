@@ -71,16 +71,6 @@ extern "C" `a abort() __attribute__((noreturn));
 
 /*** The rest of the declarations are in namespace Core. */
 
-namespace Core {
-struct NewRegion<`r2::R> {
-  <`r1::R>
-  dynregion_t<`r1,`r2> dynregion;
-};
-  /** The [NewRegion] struct is used to return a new dynamic region.  The
-      region is allocated as a sub-region of [r2]. */
-  // Note that this is here because it is used by the runtime
-}
-
 #ifndef _CYC_GENERATE_PRECORE_C_
 #include <cycboot.h>
 
@@ -249,47 +239,10 @@ extern `result open_region(region_key_t<`r,`r2::TR> key,
       the region [`r] which the [k] provides access to.  The handle
       and value [arg] are passed to the function pointer [body]
       and the result is returned.  Note that [k] can be either a
-      [ukey_t] or an [rckey_t].  The caller does not need to have
-      static access to region [`r] when calling [open_region] but
+      [uregion_key_t] or an [rcregion_key_t].  The caller does not need 
+      to have static access to region [`r] when calling [open_region] but
       that capability is allowed within [body].  In essence, the
       key [k] provides dynamic evidence that [`r] is still live. */
-
-/* ------------------------------------------------------------------ */
-/* The following functions that manipulate dynregion's are deprecated */
-/* ------------------------------------------------------------------ */
-extern struct NewRegion<`r2> _rnew_dynregion(region_t<`r2>,
-					     const char @ file,
-					     int lineno);
-  /** A call to [rnew_dynregion(r2)] returns a new dynamic region allocated
-      within [r2]. */
-extern struct NewRegion _new_dynregion(const char @ file,
-				       int lineno);
-  /** A call to [new_dynregion()] returns a new dynamic region allocated
-      in the heap. */
-#ifndef CYC_REGION_PROFILE
-#define rnew_dynregion(r) _rnew_dynregion(r,"internal-error",0)
-#define new_dynregion() _new_dynregion("internal-error",0)
-#else
-#define rnew_dynregion(r) _rnew_dynregion(r,__FILE__,__LINE__)
-#define new_dynregion() _new_dynregion(__FILE__,__LINE__)
-#endif
-extern datatype exn  { extern Open_Region };
-  /** The [Open_Region] exception is thrown when one attempts to open 
-      a dynamic region that is either already open or has been freed. */
-extern datatype exn  { extern Free_Region };
-  /** The [Free_Region] exception is thrown when one attempts to free
-      a dynamic region that is either open or has already been freed. */
-extern void free_dynregion(dynregion_t<`r1,`r2>);
-  /** A call to [free_dynregion(d)] attempts to free the storage associated
-      with the dynamic region handle d.  If d has been opened or d has already
-      been freed, then the exception [Free_Region] is thrown. */
-extern bool try_free_dynregion(dynregion_t<`r1,`r2>);
-  /** A call to [try_free_dynregion(d)] attempts to free the storage associated
-      with the dynamic region handle d.  If d has been opened or d has already
-      been freed, then it returns 0, and otherwise returns 1 upon success. */
-/* ----------------------------------------------------------------- */
-/* The previous functions that manipulate dynregion's are deprecated */
-/* ----------------------------------------------------------------- */
 
   extern `a?`r mkfat(`a @{valueof(`n)}`r::TR arr, Core::sizeof_t<`a> s, tag_t<`n> n);
   /** mkfat can be used to convert a thin pointer (@) of elements of type `a

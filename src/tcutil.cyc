@@ -2459,7 +2459,7 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2, bool @alias_coercion) {
     } else if (zero_to_null(te,t2,e)) {
       return true;
     } else if ((c = castable(te,e->loc,t1,t2)) != Unknown_coercion) {
-      //fprintf(stderr,"found them to be castable\n");
+      //fprintf(stderr,"found them to be castable: %s\n",coercion2string(c));
       // if C supports the conversion, then we don't need the cast.
       if (c != No_coercion) unchecked_cast(te,e,t2,c);
       if (c != NonNull_to_Null)
@@ -2638,7 +2638,8 @@ bool subtype(tenv_t te,
     // need to check that the bounds match up
     if (!unify_conrefs(unify_it_bounds,b_a,b_b)) {
       switch ($(conref_val(b_a),conref_val(b_b))) {
-      case $(&Upper_b(_), &DynEither_b): break;
+      case $(&DynEither_b, &DynEither_b): break;
+        //case $(&Upper_b(_), &DynEither_b): break;
       case $(&Upper_b(e1), &Upper_b(e2)):
 	if(!Evexp::lte_const_exp(e2,e1))
 	  return false;

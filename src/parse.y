@@ -1341,43 +1341,23 @@ declaration:
     tvar_t tv = new Tvar(new four,-1,Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t  = new VarType(tv);
     vardecl_t vd = new_vardecl(new $(Loc_n,new $6),new RgnHandleType(t),NULL);
-    $$ = ^$(new List(region_decl(tv,vd,$1,NULL,LOC(@1,@7)),NULL));
+    $$ = ^$(new List(region_decl(tv,vd,$1,LOC(@1,@7)),NULL));
   }
-/* region h;   and  region h = open(e); */
-| resetable_qual_opt REGION IDENTIFIER open_exp_opt ';'
+/* region h; */
+| resetable_qual_opt REGION IDENTIFIER ';'
   { let one = $1;
     let three = $3;
-    let four = $4;
     if (zstrcmp(three,"H") == 0)
       err("bad occurrence of heap region `H",SLOC(@3));
     if (zstrcmp(three,"U") == 0)
       err("bad occurrence of unique region `U",SLOC(@3));
-    if (one && (four != NULL))
-      err("open regions cannot be @resetable",LOC(@1,@5));
     tvar_t tv = new Tvar(new (string_t)aprintf("`%s",three), -1,
 			 Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t = new VarType(tv);
     vardecl_t vd = new_vardecl(new $(Loc_n,new three),new RgnHandleType(t),NULL);
 
-    $$ = ^$(new List(region_decl(tv,vd,one,four,LOC(@1,@5)),NULL));
+    $$ = ^$(new List(region_decl(tv,vd,one,LOC(@1,@5)),NULL));
   }
-/* Cyc: alias <r>t v = e; */
-/* | ALIAS '<' TYPE_VAR '>' declaration 
-  { tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Tcutil::rk));
-    list_t<decl_t> ds = $5;
-    if (ds == NULL || ds->tl != NULL) 
-      parse_abort(SLOC(@1),"too many declarations in alias");
-    decl_t d = ds->hd;
-    switch (d->r) {
-    case &Var_d(vd): 
-      $$ = ^$(new List(alias_decl(tv,vd,LOC(@1,@8)),NULL));
-      break;
-    default:
-      err("expecting variable declaration",SLOC(@5));
-      $$ = ^$(NULL);
-    }
-  }
-*/
 ;
 
 resetable_qual_opt:
@@ -2199,6 +2179,7 @@ atomic_effect:
 ;
 
 /* CYC:  new */
+/*
 region_set:
   type_var
   { set_vartyp_kind($1,&Tcutil::trk,true);
@@ -2208,6 +2189,13 @@ region_set:
   { set_vartyp_kind($1,&Tcutil::trk,true);
     $$=^$(new List(new AccessEff($1),$3)); 
   }
+;
+*/
+region_set:
+  type_name
+{ $$ = ^$(new List(new AccessEff(type_name_to_type($1,SLOC(@1))),NULL)); }
+| type_name ',' region_set
+{ $$ = ^$(new List(new AccessEff(type_name_to_type($1,SLOC(@1))),$3)); }
 ;
 
 /* NB: returns list in reverse order */

@@ -1077,9 +1077,6 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
     case &Region_d(...):
       terr(loc,"top level region declarations are not implemented");
       break;
-//     case &Alias_d(...):
-//       terr(loc,"top level alias declarations are not implemented");
-//       break;
     case &Var_d(vd):
       if (in_externC && okay_externC(d->loc,vd->sc,in_externCinclude))
 	vd->sc = ExternC;

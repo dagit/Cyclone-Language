@@ -1321,22 +1321,12 @@ void dumpdecl(decl_t d) {
     dumpids(vds);
     dump_semi();
     break;
-  case &Region_d(tv,vd,resetable,eopt):
+  case &Region_d(tv,vd,resetable):
     dump("region"); 
     dump("<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
     if (resetable) dump("@resetable");
-    if (eopt != NULL) {
-      dump(" = open(");
-      dumpexp((exp_t)eopt);
-      dump(")");
-    }
     dump_semi();
     break;
-//   case &Alias_d(tv,vd):
-//     dump("alias"); 
-//     dump("<"); dumptvar(tv); dump(">" );
-//     dumpvardecl(vd,d->loc,true);
-//     break;
 
   case &Typedef_d(td):
     // JGM: commenting out because abstract typdefs don't get printed

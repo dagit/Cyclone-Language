@@ -778,7 +778,7 @@ typedef struct _dyneither_ptr Cyc_buffer_t;
 # 56
 typedef struct _dyneither_ptr Cyc_mbuffer_t;
 # 59
-typedef int Cyc_bool;struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
+typedef int Cyc_bool;
 # 26 "cycboot.h"
 typedef unsigned long Cyc_size_t;
 # 33
@@ -789,60 +789,54 @@ typedef struct Cyc___cycFILE Cyc_FILE;struct Cyc_String_pa_PrintArg_struct{int t
 typedef void*Cyc_parg_t;struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};
 # 127
 typedef void*Cyc_sarg_t;extern char Cyc_FileCloseError[15];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
-# 89 "core.h"
+# 79 "core.h"
 typedef unsigned int Cyc_Core_sizeof_t;struct Cyc_Core_Opt{void*v;};
-# 93
+# 83
 typedef struct Cyc_Core_Opt*Cyc_Core_opt_t;
-# 103 "core.h"
+# 93 "core.h"
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*x);
-# 107
+# 97
 struct _dyneither_ptr Cyc_Core_new_string(unsigned int);
-# 111
+# 101
 struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*,unsigned int);
-# 115
+# 105
 int Cyc_Core_true_f(void*);
-# 118
+# 108
 int Cyc_Core_false_f(void*);struct _tuple0{void*f1;void*f2;};
-# 120
+# 110
 void*Cyc_Core_fst(struct _tuple0*);
-# 123
+# 113
 void*Cyc_Core_snd(struct _tuple0*);struct _tuple1{void*f1;void*f2;void*f3;};
-# 126
+# 116
 void*Cyc_Core_third(struct _tuple1*);
-# 129
+# 119
 void*Cyc_Core_identity(void*);
-# 131
+# 121
 int Cyc_Core_intcmp(int,int);
-# 136
+# 126
 int Cyc_Core_charcmp(char,char);
-# 138
+# 128
 int Cyc_Core_ptrcmp(void*,void*);
-# 140
+# 130
 int Cyc_Core_nptrcmp(void*,void*);extern char Cyc_Core_Invalid_argument[17];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cyc_Core_Not_found_exn_struct{char*tag;};
-# 158
+# 148
 extern struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val;extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
-# 160
-extern struct _RegionHandle*Cyc_Core_heap_region;
-# 162
+# 152
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;
-# 197
+# 187
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_region_key_t;
-# 203
+# 193
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_uregion_key_t;
-# 208
+# 198
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_rcregion_key_t;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
-# 260 "core.h"
-struct Cyc_Core_NewRegion Cyc_Core__rnew_dynregion(struct _RegionHandle*,const char*file,int lineno);
-# 265
-struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(const char*file,int lineno);extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_exn_struct{char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_exn_struct{char*tag;};
-# 327 "core.h"
+# 280 "core.h"
 inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,unsigned int sz){
-# 332
+# 285
 if(bd >> 20  || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
 if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
-# 339
+# 292
 return 0;
 return dyn.curr;};}char Cyc_Core_Invalid_argument[17]="Invalid_argument";char Cyc_Core_SysError[9]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8]="Failure";char Cyc_Core_Impossible[11]="Impossible";char Cyc_Core_Not_found[10]="Not_found";
 # 31 "core.cyc"
@@ -859,31 +853,28 @@ char*_tmp8;unsigned int _tmp7;return(_tmp7=i,((_tmp8=_cyccalloc_atomic(sizeof(ch
 struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned int i){
 char*_tmpA;unsigned int _tmp9;return(_tmp9=i,((_tmpA=_region_calloc(r,sizeof(char),_tmp9),_tag_dyneither(_tmpA,sizeof(char),_tmp9))));}
 # 48
-struct Cyc_Core_NewRegion Cyc_Core__new_dynregion(const char*file,int lineno){
-return Cyc_Core__rnew_dynregion(Cyc_Core_heap_region,file,lineno);}
-# 52
 int Cyc_Core_true_f(void*x){return 1;}
 int Cyc_Core_false_f(void*x){return 0;}
-# 55
+# 51
 int Cyc_Core_intcmp(int a,int b){return a - b;}
 int Cyc_Core_charcmp(char a,char b){return(int)a - (int)b;}
 int Cyc_Core_nptrcmp(void*a,void*b){
 if(a == b)return 0;
 if(a > b)return 1;
 return - 1;}
-# 62
+# 58
 int Cyc_Core_ptrcmp(void*a,void*b){
 if(a == b)return 0;
 if(a > b)return 1;
 return - 1;}
-# 68
+# 64
 void*Cyc_Core_fst(struct _tuple0*pair){return(*pair).f1;}
 void*Cyc_Core_snd(struct _tuple0*pair){return(*pair).f2;}
 void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}
-# 72
+# 68
 void*Cyc_Core_identity(void*x){
 return x;}
-# 79
+# 75
 struct _dyneither_ptr Cyc_Core_mkfat(unsigned char*arr,unsigned int s,unsigned int n){
 struct _dyneither_ptr res;
 res.curr=arr;

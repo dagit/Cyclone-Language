@@ -1812,21 +1812,15 @@ doc_t decl2doc(decl_t d) {
   case &Var_d(vd):
     s = vardecl2doc(vd);
     break;
-  case &Region_d(tv,vd,resetable,open_exp_opt):
+  case &Region_d(tv,vd,resetable):
     s = cat(text("region"),
             text("<"),
             tvar2doc(tv),
             text(">" ),
             qvar2doc(vd->name),
             (resetable ? text(" @resetable") : nil_doc()),
-            ((open_exp_opt != NULL) ?
-             cat(text(" = open("), exp2doc((exp_t)open_exp_opt), text(")")) :
-             nil_doc()),text(";"));
+            text(";"));
     break;
-//   case &Alias_d(tv,vd):
-//     s = cat(text("alias"),text(" <"),tvar2doc(tv),text("> "),
-//             vardecl2doc(vd),text(";"));
-//     break;
   case &Datatype_d(dd):
     s = cat(datatypedecl2doc(dd),text(";"));
     break;
