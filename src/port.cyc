@@ -1478,15 +1478,11 @@ static ctype_t gen_exp(bool takeaddress,cenv_t env, exp_t e) {
     let ts = map_c(gen_exp_false,env,es);
     let vs = map(new_var,ts);
     unifies(t1,ptr_ct(fn_ct(v,vs),var(),var(),var(),nozterm_ct()));
-    for (; ts != NULL; ts = ts->tl, vs = vs->tl) {
+    for (; ts != NULL; ts = ts->tl, vs = vs->tl)
       leq(ts->hd,vs->hd);
-    }
     return v;
-  case &Assert_e(...): impos("@assert");
-  case &Throw_e(...): impos("throw");
   case &Extension_e(e1): return gen_exp(false,env,e1);
   case &NoInstantiate_e(e1): return gen_exp(false,env,e1);
-  case &Instantiate_e(_,_): impos("instantiate");
   case &Cast_e(t,e1,_,_):
     let t1 = type_to_ctype(env,t);
     let t2 = gen_exp(false,env,e1);
@@ -1520,6 +1516,9 @@ static ctype_t gen_exp(bool takeaddress,cenv_t env, exp_t e) {
     leq(gen_exp(false,env,e1),arith_ct());
     let t = (topt) ? type_to_ctype(env,*topt) : var();
     return ptr_ct(t,var(),fat_ct(),heap_ct(),var());
+  case &Assert_e(...): impos("@assert");
+  case &Throw_e(...): impos("throw");
+  case &Instantiate_e(_,_): impos("instantiate");
   case &Pragma_e(_): impos("Pragma_e");
   case &Swap_e(e1,e2): impos("Swap_e");
   case &New_e(...): impos("New_e");
@@ -1570,12 +1569,9 @@ static void gen_stmt(cenv_t env, stmt_t s) {
     return;
   case &Switch_s(e,scs,_):
     leq(gen_exp(false,env,e),arith_ct());
-    for (; scs; scs = scs->tl) {
-      // ignore the patterns...
+    for (; scs; scs = scs->tl) // ignore the patterns...
       gen_stmt(env,scs->hd->body);
-    }
     return;
-  case &Fallthru_s(_,_): impos("fallthru");
   case &Decl_s(d,s): 
     env = gen_localdecl(env,d,false); gen_stmt(env,s); return;
   case &Label_s(_,s): gen_stmt(env,s); return;
@@ -1583,6 +1579,7 @@ static void gen_stmt(cenv_t env, stmt_t s) {
     gen_stmt(env,s);
     leq(gen_exp(false,env,e),arith_ct());
     return;
+  case &Fallthru_s(_,_): impos("fallthru");
   case &TryCatch_s(...): impos("try/catch");
   }
 }
@@ -2008,5 +2005,3 @@ void port(list_t<decl_t> ds) {
     printf("%s: insert `%s' for `%s'\n",sloc,s1,s2);
   }
 }
-
-

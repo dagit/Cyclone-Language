@@ -219,42 +219,28 @@ static free_tvars_t fast_add_free_tvar_bool(free_tvars_t tvs, tvar_t tv,bool b){
   return new List(new $(tv,b),tvs);
 }
 
-// This is called *after* type-checking the expression to see that
+// i_check_type_level_exp is called *after* type-checking the exp to see that
 // it's of type int, under the assumption that every valueof(T) in e is
 // well-formed and T is of kind Int.  We must now make sure that these
 // assumptions hold and extract the free type variables occurring within T.
-static cvtenv_t i_check_type_level_exp(exp_t e, cvtenv_t env) {
-  env.loc = e->loc;
-  switch (e->r) {
-  case &Const_e(_):
-  case &Enum_e(...):
-  case &AnonEnum_e(...):
-  case &Pragma_e(...):
-  case &Var_e(...): break;
-  case &Primop_e(_,es):
-    for (; es != NULL; es = es->tl)
-      env = i_check_type_level_exp(es->hd,env);
-    break;
-  case &Conditional_e(e1,e2,e3):
-    env = i_check_type_level_exp(e1,env);
-    fallthru(e2,e3);
-  case &And_e(e1,e2): fallthru(e1,e2);
-  case &Or_e(e1,e2):  fallthru(e1,e2);
-  case &SeqExp_e(e1,e2):
-    env = i_check_type_level_exp(e1,env);
-    env = i_check_type_level_exp(e2,env);
-    break;
-  case &Cast_e(t,e1,_,_):
-    env = i_check_type_level_exp(e1,env);
-    env = i_check_type(env,&Kinds::tak,t,true,false);
-    break;
+static bool check_type_visit_f1(cvtenv_t @ env, exp_t e) {
+  // note: there are other types in the abstract-syntax, but only in expression
+  //       forms that should not appear inside types
+  env->loc = e->loc;
+  switch(e->r) {
+  case &Cast_e(t,...):   *env=i_check_type(*env,&Kinds::tak,t,true,false);break;
   case &Offsetof_e(t,_): fallthru(t);
-  case &Sizeoftype_e(t): env=i_check_type(env,&Kinds::tak,t,true,false); break;
-  case &Valueof_e(t):    env=i_check_type(env,&Kinds::ik,t,true,false);  break;
-  case &Sizeofexp_e(e):  fallthru(e);
-  case &Extension_e(e):  env = i_check_type_level_exp(e,env); break;
-  default: impos2("bad expression in Tctyp::i_check_type_level_exp");
+  case &Sizeoftype_e(t): *env=i_check_type(*env,&Kinds::tak,t,true,false);break;
+  case &Valueof_e(t):    *env=i_check_type(*env,&Kinds::ik,t,true,false); break;
+  default: break;
   }
+  return true;
+}
+static bool check_type_visit_f2(cvtenv_t @ env, stmt_t s) {
+  Warn::impos_loc(s->loc,"statement inside expression inside type");
+}
+static cvtenv_t i_check_type_level_exp(exp_t e, cvtenv_t env) {
+  visit_exp(check_type_visit_f1,check_type_visit_f2,&env,e);
   return env;
 }
 

@@ -52,13 +52,12 @@ type_t curr_rgn_type (void) {
 }
 
 void subst_inst(list_t<$(tvar_t,type_t)@> inst, tvar_t tv, type_t t) {
-  while (inst != NULL) {
+  for(; inst != NULL; inst->tl) {
     let &$(*tvi,*ti) = inst->hd;
     if (tvar_cmp(*tvi,tv) == 0) {
       *ti = t;
       return;
     }
-    inst = inst->tl;
   }
 }
 
@@ -85,9 +84,9 @@ static $(var_opt_t,tqual_t,type_t)@ argtype($(var_opt_t,tqual_t,type_t)@`H arg) 
       let tvars2 = *tvars;
       *tvars = new List((tvar_t)curr_tvar,tvars2);
       return new $(vopt,tq,t2);
-    default: throw new Core::Impossible("internal compiler error: not a function type");
+    default: Warn::impos("internal compiler error: not a function type");
     }
-  default: throw new Core::Impossible("internal compiler error: not a pointer type");
+  default: Warn::impos("internal compiler error: not a pointer type");
   }
 }
 
@@ -124,7 +123,6 @@ type_t instantiate(type_t fntype, type_t currgn) {
 bool is_not_curr_rgn(tvar_t v) {
   return tvar_cmp(v,(tvar_t)curr_tvar) != 0;
 }
-
 // Used as an argument to exists for type variable lists 
 bool is_curr_rgn(tvar_t v) {
   return tvar_cmp(v,(tvar_t)curr_tvar) == 0;
@@ -136,13 +134,12 @@ struct rgnsubenv {
   bool toplevel;
 };
 
-static void rgnsubstmt(struct rgnsubenv env, stmt_t s);
-static void rgnsubexp(struct rgnsubenv env, exp_t e);
-static void rgnsubexpopt(struct rgnsubenv env, exp_opt_t e);
-static void rgnsubds(struct rgnsubenv env,
-		     list_t<$(list_t<designator_t>,exp_t)@> ds);
-static void rgnsubdtdecl(Position::seg_t loc,struct rgnsubenv env,datatypedecl_t tud);
-static void rgnsubaggrdecl(Position::seg_t loc,struct rgnsubenv env,aggrdecl_t ad);
+static void rgnsubstmt(struct rgnsubenv, stmt_t);
+static void rgnsubexp(struct rgnsubenv, exp_t);
+static void rgnsubexpopt(struct rgnsubenv, exp_opt_t);
+static void rgnsubds(struct rgnsubenv, list_t<$(list_t<designator_t>,exp_t)@>);
+static void rgnsubdtdecl(Position::seg_t,struct rgnsubenv,datatypedecl_t);
+static void rgnsubaggrdecl(Position::seg_t,struct rgnsubenv,aggrdecl_t);
 
 // Checks that the given tvar is not `C.
 static void check_tvar(Position::seg_t loc, tvar_t tv) {
@@ -236,8 +233,7 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
   case &And_e(e1,e2):                  fallthru(e1,e2);
   case &Or_e(e1,e2):                   fallthru(e1,e2);
   case &Subscript_e(e1,e2):            fallthru(e1,e2);
-  case &SeqExp_e(e1,e2):
-    rgnsubexp(env,e1); rgnsubexp(env,e2); break;
+  case &SeqExp_e(e1,e2): rgnsubexp(env,e1); rgnsubexp(env,e2); break;
 
   case &Datatype_e(es,dtd,dtfd): fallthru(es);
     // FIX: deal with datatype defs?
@@ -346,16 +342,6 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
     if (!env.toplevel)
       e->topt = Tcutil::substitute_nofun(env.inst,(type_t)e->topt);
   }
-//   } catch {
-//   case ex:
-//     switch (ex) {
-//     case &Core::Impossible(s):
-//       Warn::err(e->loc,"Impossible(%s) in rgnsubexp\n",s);
-//       break;
-//     default: break;
-//     }
-//     Core::rethrow(ex);
-//   }
 }
 
 static void rgnsubexpopt(struct rgnsubenv env, exp_opt_t e) {
@@ -401,16 +387,13 @@ static void rgnsubpat(struct rgnsubenv env, pat_t p) {
     check_tvar(p->loc,tv);
     return;
 
-  case &Pointer_p(p1):
-    rgnsubpat(env,p1);
-    return;
+  case &Pointer_p(p1): rgnsubpat(env,p1); return;
 
   case &Aggr_p(_,tvs,ds,_):
     for (;tvs != NULL; tvs=tvs->tl)
       check_tvar(p->loc,tvs->hd);
-    for (;ds != NULL; ds = ds->tl) {
+    for (;ds != NULL; ds = ds->tl)
       rgnsubpat(env,(*ds->hd)[1]);
-    }
     return;
     
     //FIX: deal with datatype fields?
@@ -429,9 +412,7 @@ static void rgnsubpat(struct rgnsubenv env, pat_t p) {
   case &AnonEnum_p(...):
   case &UnknownId_p(...): return;
 
-  case &Exp_p(e):
-    rgnsubexp(env,e);
-    return;
+  case &Exp_p(e): rgnsubexp(env,e); return;
   }
 }
 
@@ -466,7 +447,7 @@ static void rgnsubdtdecl(Position::seg_t loc,struct rgnsubenv env,datatypedecl_t
   }
 }
 
-static void rgnsubdecls(struct rgnsubenv env, list_t<decl_t> ds);
+static void rgnsubdecls(struct rgnsubenv, list_t<decl_t>);
 static void rgnsubdecl(struct rgnsubenv env, decl_t d) {
   switch (d->r) {
   case &Var_d(vd):
@@ -533,18 +514,8 @@ static void rgnsubdecl(struct rgnsubenv env, decl_t d) {
     }
     return;
   case &Region_d(...):
-    throw new Core::Failure("internal compiler error: region or pool at toplevel");
+    Warn::impos("internal compiler error: region or pool at toplevel");
   }
-//   } catch {
-//   case ex:
-//     switch (ex) {
-//     case &Core::Impossible(st):
-//       Warn::err(d->loc,"Impossible(%s) in rgnsubdecl\n",st);
-//       break;
-//     default: break;
-//     }
-//     Core::rethrow(ex);
-//   }
 }
 
 static void rgnsubstmt(struct rgnsubenv env, stmt_t s) {
@@ -607,7 +578,7 @@ static void rgnsubstmt(struct rgnsubenv env, stmt_t s) {
       check_tvar(d->loc,tv);
       rgnsubexpopt(env,open_exp_opt);
       // Here's the interesting case.  We switch the current region to
-      // be the tvar declared here, and then recurse.
+      // be the tvar declared here, and then recur.
       // FIX: support dynamic regions
       if (open_exp_opt == NULL) {
 	subst_inst(env.inst,(tvar_t)curr_tvar,var_type(tv));
@@ -623,22 +594,11 @@ static void rgnsubstmt(struct rgnsubenv env, stmt_t s) {
       return;
     }
   }
-//   } catch {
-//   case ex:
-//     switch (ex) {
-//     case &Core::Impossible(st):
-//       Warn::err(s->loc,"Impossible(%s) in rgnsubstmt\n",st);
-//       break;
-//     default: break;
-//     }
-//     Core::rethrow(ex);
-//   }
 }
 
 static void rgnsubdecls(struct rgnsubenv env, list_t<decl_t> ds) {
-  for (; ds != NULL; ds=ds->tl) {
+  for (; ds != NULL; ds=ds->tl)
     rgnsubdecl(env,ds->hd);
-  }
 }
 
 void adjust_all(list_t<Absyn::decl_t,`H> tds) {

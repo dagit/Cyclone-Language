@@ -1049,15 +1049,6 @@ last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l :{`r2} > `r) {
   return rnew(r) Env{rnew(r) break_l, c,NULL,t,lhs,r};
 }
 
-// must have no pattern vars and type is int, char, or datatype of a type
-// with no value constructors. (If it weren't for allowing fallthru
-// anywhere, we wouldn't need the next_l.)
-static env_t<`r>
-switch_as_switch_env(region_t<`r> r, env_t<`r2> e, var_t next_l : {`r2} > `r) {
-  let &Env{b,c,f,t,lhs,_} = e;
-  return rnew(r) Env{NULL,c, rnew(r) FallthruInfo{next_l,NULL}, t,lhs,r};
-}
-
 #ifdef COARSE_REGIONS
 #define TOC_RGN(env,r) let &Env{.rgn = r, ...} = (env);
 #else

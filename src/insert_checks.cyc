@@ -269,7 +269,6 @@ static bool need_bounds_check_vcgen(env_t nv, exp_t a){
 }
 
 static void do_exp(env_t nv, exp_t e) {
-
   switch(e->r) {
   case &Asm_e(...):  //can do better -- check input expressions initialized
   case &Const_e(...):

@@ -275,15 +275,13 @@ string_t char_escape(char c) {
       let t = new_string(2);
       t[0] = c;
       return t;
-    } else {
-      let t = new_string(5);
-      int j = 0;
-      t[j++] = '\\';
-      t[j++] = (char)('0'+(((unsigned char)c>>6)&3));
-      t[j++] = (char)('0'+((c>>3)&7));
-      t[j++] = (char)('0'+(c&7));
-      return t;
-    }
+    } 
+    let t = new_string(5);
+    t[0] = '\\';
+    t[1] = (char)('0'+(((unsigned char)c>>6)&3));
+    t[2] = (char)('0'+((c>>3)&7));
+    t[3] = (char)('0'+(c&7));
+    return t;
   }
 }
 
@@ -1472,9 +1470,8 @@ doc_t stmt2doc(stmt_t st, bool stmtexp, list_t<qvar_t,`H> varsinblock) {
   case &Fallthru_s(es,_):
     return cat(text("fallthru("), exps2doc_prec(20,es), text(");"));
   case &Decl_s(d,s1):
-    doc_t s;
     let $(newblock, newvarsinblock) = shadows(d,varsinblock);
-    s = cat(decl2doc(d),line_doc(),stmt2doc(s1,stmtexp,newvarsinblock));
+    doc_t s = cat(decl2doc(d),line_doc(),stmt2doc(s1,stmtexp,newvarsinblock));
     if (newblock) s = block(stmtexp,s);
     return s;
   case &Label_s(x,s1):
