@@ -157,6 +157,8 @@ namespace Absyn {
     bool q_const :1; bool q_volatile :1; bool q_restrict :1; 
   };
 
+  // FIX:  we should make this char, short, int, etc.  -- something
+  // that's machine independent.
   // byte sizes -- 1, 2, 4, or 8 bytes
   EXTERN_ABSYN tunion Size_of { B1, B2, B4, B8 };
 
@@ -283,7 +285,7 @@ namespace Absyn {
     PointerType(ptr_info_t); // t*, t?, t@, etc.  BoxKind when not Unknown_b
     IntType(sign_t,size_of_t); // char, short, int.  MemKind unless B4
     FloatType;  // MemKind
-    DoubleType; // MemKind
+    DoubleType(bool); // MemKind.  when bool is true, long double
     ArrayType(type_t/* element typ*/,tqual_t,exp_opt_t/* size */); // MemKind
     FnType(fn_info_t); // MemKind
     TupleType(list_t<$(tqual_t,type_t)@>); // MemKind
@@ -726,7 +728,7 @@ namespace Absyn {
   // signed types
   extern type_t schar_t, sshort_t, sint_t, slong_t, slonglong_t;
   // float, double
-  extern type_t float_t, double_t;
+  extern type_t float_t, double_t(bool);
   // empty effect
   extern type_t empty_effect;
   // exception name and type

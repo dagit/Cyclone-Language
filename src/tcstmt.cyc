@@ -127,10 +127,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
              typ2string(e->topt->v), typ2string(t));
         explain_failure();
       }
+      /*
       switch (compress(t)) {
       case VoidType: terr(s0->loc,"function returns void expression"); break;
       default: break;
       }
+      */
     }
     return;
 

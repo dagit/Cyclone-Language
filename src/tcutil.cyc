@@ -226,8 +226,9 @@ type_t copy_type(type_t t) {
     let bs2 = copy_conref(bs);
     return new PointerType(PtrInfo{elt2,rgn2,nbl2,tq2,bs2});
   case &IntType(sn,sz): return new IntType(sn,sz);
-  case FloatType: 
-  case DoubleType: return t;
+  case FloatType: return t;
+  case &DoubleType(b): 
+    return new DoubleType(b);
   case &ArrayType(et,tq,eopt): 
     // FIX: should really copy eopt
     return new ArrayType(copy_type(et),tq,eopt);
@@ -304,7 +305,7 @@ kind_t typ_kind(type_t t) {
   case VoidType:          return MemKind;
   case &IntType(_,sz):    return (sz==(size_of_t)B4) ? BoxKind : MemKind;
   case FloatType:         
-  case DoubleType:        
+  case &DoubleType(_):        
   case &FnType(_):        return MemKind;
   case &RgnHandleType(_): return BoxKind; 
   case HeapRgn:           return RgnKind;
@@ -555,7 +556,7 @@ static type_t rgns_of(type_t t) {
   switch (compress(t)) {
   case VoidType: 
   case FloatType: 
-  case DoubleType: 
+  case &DoubleType(_): 
   case &EnumType(_,_):
   case &AnonEnumType(_):
   case &IntType(_,_): return empty_effect;
@@ -1177,8 +1178,9 @@ void unify_it(type_t t1, type_t t2) {
     break;
 
   case $(FloatType,  FloatType):  return;
-  case $(DoubleType, DoubleType): return;
-
+  case $(&DoubleType(b2), &DoubleType(b1)): 
+    if (b2 == b1) return;
+    break;
   case $(&ArrayType(t2a,tq2a,e1), &ArrayType(t1a,tq1a,e2)):
     unify_tqual(tq1a,tq2a);
     unify_it(t1a,t2a);
@@ -1490,7 +1492,7 @@ int type_case_number(type_t t) {
   case &PointerType(_): return 5;
   case &IntType(_,_): return 6;
   case FloatType: return 7;
-  case DoubleType: return 8;
+  case &DoubleType(_): return 8;
   case &ArrayType(_,_,_): return 9;
   case &FnType(_): return 10;
   case &TupleType(_): return 11;
@@ -1606,7 +1608,12 @@ int typecmp(type_t t1, type_t t2) {
     return 0;
 
   case $(FloatType,  FloatType):  return 0;
-  case $(DoubleType, DoubleType): return 0;
+  case $(&DoubleType(b1), &DoubleType(b2)): 
+    if (b1 == b2) 
+      return 0;
+    else if (b1)
+      return -1;
+    else return 1;
 
   case $(&ArrayType(t2a,tq2a,e1), &ArrayType(t1a,tq1a,e2)):
     let tqc = tqual_cmp(tq1a,tq2a);
@@ -1657,7 +1664,7 @@ bool is_arithmetic_type(type_t t) {
   switch (compress(t)) {
   case &IntType(_,_): 
   case FloatType:     
-  case DoubleType:    
+  case &DoubleType(_):    
   case &EnumType(_,_): return true;
   case &AnonEnumType(_): return true;
   default: return false;
@@ -1670,8 +1677,10 @@ bool will_lose_precision(type_t t1, type_t t2) {
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
-  case $(DoubleType,     FloatType):       
-  case $(DoubleType,     &IntType(_,_)):   
+  case $(&DoubleType(b1), &DoubleType(b2)):
+    return (!b2 && b1);
+  case $(&DoubleType(_),     FloatType):       
+  case $(&DoubleType(_),     &IntType(_,_)):   
   case $(FloatType,      &IntType(_,_)):  return true;
   case $(&IntType(_,B8), &IntType(_,B8)): return false;
   case $(&IntType(_,B8), _): // see prev case
@@ -1934,7 +1943,7 @@ bool coerceable(type_t t) {
   switch (compress(t)) {
   case &IntType(_,_): 
   case FloatType:     
-  case DoubleType: return true;
+  case &DoubleType(_): return true;
   default: return false;
   }
 }
@@ -2126,7 +2135,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     fallthru;
   case &IntType(_,_): 
   case FloatType :  
-  case DoubleType: return coerceable(t2) || t2 == VoidType;
+  case &DoubleType(_): return coerceable(t2) || t2 == VoidType;
   case VoidType:   return t2 == VoidType;
   default: return false;
   }
@@ -2156,7 +2165,7 @@ bool is_numeric(exp_t e) {
     return true;
   switch (compress(e->topt->v)) {
   case FloatType:  
-  case DoubleType: return true;
+  case &DoubleType(_): return true;
   default:         return false;
   }
 }
@@ -2170,8 +2179,11 @@ bool is_function_type(type_t t) {
 
 type_t max_arithmetic_type(type_t t1, type_t t2) {
   switch ($(t1,t2)) {
-  case $(DoubleType,_): 
-  case $(_,DoubleType): return DoubleType;
+  case $(&DoubleType(b1),&DoubleType(b2)): 
+    if (b1) return t1; 
+    else return t2;
+  case $(&DoubleType(_),_): return t1;
+  case $(_,&DoubleType(_)): return t2;
   case $(FloatType,_):  
   case $(_,FloatType):  return FloatType;
   case $(&IntType(Unsigned,B8),_): 
@@ -2403,7 +2415,7 @@ type_t rsubstitute(region_t<`r> rgn,
   case VoidType:       return t;
   case &IntType(_,_):  return t;
   case FloatType:      return t;
-  case DoubleType:     return t;
+  case &DoubleType(_):  return t;
   case HeapRgn:        return t;
   case &RgnsEff(t2):
     let new_t2 = rsubstitute(rgn,inst,t2);
@@ -2451,7 +2463,7 @@ exp_t default_initializer(tenv_t te, type_t t, seg_t loc) {
   case FloatType:
     e->r = new Const_e(new Float_c("0.0"));
     break;
-  case DoubleType:
+  case &DoubleType(_):
     e->r = new Cast_e(t,new_exp(new Const_e(new Float_c("0.0")), loc));
     break;
   default:
@@ -2839,7 +2851,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     break;
   case &IntType(_,_): break; 
   case FloatType:    break; 
-  case DoubleType:   break; 
+  case &DoubleType(_): break; 
   case &ArrayType(t1,tq,e):
     // FIX: check that tqual is valid?
     // we don't allow abstract mem types as the elt type of an array type
@@ -3728,7 +3740,7 @@ bool bits_only(type_t t) {
   case VoidType: 
   case &IntType(_,_): 
   case FloatType: 
-  case DoubleType: return true;
+  case &DoubleType(_): return true;
   case &EnumType(_,_): return false; //could be true but for pattern exhaustion!
   case &AnonEnumType(_): return false; //could be true but for pattern exhaustion!
   case &ArrayType(t,_,_): return bits_only(t);
@@ -3841,7 +3853,7 @@ bool supports_default(type_t t) {
   case VoidType: 
   case &IntType(_,_): 
   case FloatType: 
-  case DoubleType: return true;
+  case &DoubleType(_): return true;
 
   case &PointerType(PtrInfo{_,_,nullable,_,bounds}):
     switch (compress_conref(bounds)->v) {

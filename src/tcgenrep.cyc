@@ -803,7 +803,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
 		       unknownid_exp(typerep_name(&float_str),loc),
 		       NULL,NULL);
     break;
-  case DoubleType:
+  case &DoubleType(b):
     dict = update_info(dict,
 		       type,
 		       NULL,

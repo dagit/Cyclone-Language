@@ -313,29 +313,30 @@ int tag; struct Cyc_Absyn_TunionFieldInfo f1; } ; static const int Cyc_Absyn_Poi
 4; struct Cyc_Absyn_PointerType_struct{ int tag; struct Cyc_Absyn_PtrInfo f1; }
 ; static const int Cyc_Absyn_IntType= 5; struct Cyc_Absyn_IntType_struct{ int
 tag; void* f1; void* f2; } ; static const int Cyc_Absyn_FloatType= 1; static
-const int Cyc_Absyn_DoubleType= 2; static const int Cyc_Absyn_ArrayType= 6;
-struct Cyc_Absyn_ArrayType_struct{ int tag; void* f1; struct Cyc_Absyn_Tqual f2;
-struct Cyc_Absyn_Exp* f3; } ; static const int Cyc_Absyn_FnType= 7; struct Cyc_Absyn_FnType_struct{
-int tag; struct Cyc_Absyn_FnInfo f1; } ; static const int Cyc_Absyn_TupleType= 8;
-struct Cyc_Absyn_TupleType_struct{ int tag; struct Cyc_List_List* f1; } ; static
-const int Cyc_Absyn_StructType= 9; struct Cyc_Absyn_StructType_struct{ int tag;
+const int Cyc_Absyn_DoubleType= 6; struct Cyc_Absyn_DoubleType_struct{ int tag;
+int f1; } ; static const int Cyc_Absyn_ArrayType= 7; struct Cyc_Absyn_ArrayType_struct{
+int tag; void* f1; struct Cyc_Absyn_Tqual f2; struct Cyc_Absyn_Exp* f3; } ;
+static const int Cyc_Absyn_FnType= 8; struct Cyc_Absyn_FnType_struct{ int tag;
+struct Cyc_Absyn_FnInfo f1; } ; static const int Cyc_Absyn_TupleType= 9; struct
+Cyc_Absyn_TupleType_struct{ int tag; struct Cyc_List_List* f1; } ; static const
+int Cyc_Absyn_StructType= 10; struct Cyc_Absyn_StructType_struct{ int tag;
 struct _tuple0* f1; struct Cyc_List_List* f2; struct Cyc_Absyn_Structdecl** f3;
-} ; static const int Cyc_Absyn_UnionType= 10; struct Cyc_Absyn_UnionType_struct{
+} ; static const int Cyc_Absyn_UnionType= 11; struct Cyc_Absyn_UnionType_struct{
 int tag; struct _tuple0* f1; struct Cyc_List_List* f2; struct Cyc_Absyn_Uniondecl**
-f3; } ; static const int Cyc_Absyn_EnumType= 11; struct Cyc_Absyn_EnumType_struct{
+f3; } ; static const int Cyc_Absyn_EnumType= 12; struct Cyc_Absyn_EnumType_struct{
 int tag; struct _tuple0* f1; struct Cyc_Absyn_Enumdecl* f2; } ; static const int
-Cyc_Absyn_AnonStructType= 12; struct Cyc_Absyn_AnonStructType_struct{ int tag;
-struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_AnonUnionType= 13;
+Cyc_Absyn_AnonStructType= 13; struct Cyc_Absyn_AnonStructType_struct{ int tag;
+struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_AnonUnionType= 14;
 struct Cyc_Absyn_AnonUnionType_struct{ int tag; struct Cyc_List_List* f1; } ;
-static const int Cyc_Absyn_AnonEnumType= 14; struct Cyc_Absyn_AnonEnumType_struct{
+static const int Cyc_Absyn_AnonEnumType= 15; struct Cyc_Absyn_AnonEnumType_struct{
 int tag; struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_RgnHandleType=
-15; struct Cyc_Absyn_RgnHandleType_struct{ int tag; void* f1; } ; static const
-int Cyc_Absyn_TypedefType= 16; struct Cyc_Absyn_TypedefType_struct{ int tag;
+16; struct Cyc_Absyn_RgnHandleType_struct{ int tag; void* f1; } ; static const
+int Cyc_Absyn_TypedefType= 17; struct Cyc_Absyn_TypedefType_struct{ int tag;
 struct _tuple0* f1; struct Cyc_List_List* f2; struct Cyc_Core_Opt* f3; } ;
-static const int Cyc_Absyn_HeapRgn= 3; static const int Cyc_Absyn_AccessEff= 17;
+static const int Cyc_Absyn_HeapRgn= 2; static const int Cyc_Absyn_AccessEff= 18;
 struct Cyc_Absyn_AccessEff_struct{ int tag; void* f1; } ; static const int Cyc_Absyn_JoinEff=
-18; struct Cyc_Absyn_JoinEff_struct{ int tag; struct Cyc_List_List* f1; } ;
-static const int Cyc_Absyn_RgnsEff= 19; struct Cyc_Absyn_RgnsEff_struct{ int tag;
+19; struct Cyc_Absyn_JoinEff_struct{ int tag; struct Cyc_List_List* f1; } ;
+static const int Cyc_Absyn_RgnsEff= 20; struct Cyc_Absyn_RgnsEff_struct{ int tag;
 void* f1; } ; static const int Cyc_Absyn_NoTypes= 0; struct Cyc_Absyn_NoTypes_struct{
 int tag; struct Cyc_List_List* f1; struct Cyc_Position_Segment* f2; } ; static
 const int Cyc_Absyn_WithTypes= 1; struct Cyc_Absyn_WithTypes_struct{ int tag;
@@ -694,7 +695,7 @@ _temp53,(*(( struct Cyc_Absyn_Vardecl*)( env.boundvars)->hd)->name).f2) ==  0){
 return;}} for( 0; env.all_locals !=  0; env.all_locals=( env.all_locals)->tl){
 struct Cyc_Absyn_Vardecl* _temp101=( struct Cyc_Absyn_Vardecl*)( env.all_locals)->hd;
 if( Cyc_Std_zstrptrcmp( _temp53,(* _temp101->name).f2) ==  0){{ void* _temp102=(
-void*) _temp101->type; _LL104: if(( unsigned int) _temp102 >  4u?*(( int*)
+void*) _temp101->type; _LL104: if(( unsigned int) _temp102 >  3u?*(( int*)
 _temp102) ==  Cyc_Absyn_ArrayType: 0){ goto _LL105;} else{ goto _LL106;} _LL106:
 goto _LL107; _LL105: goto _LL103; _LL107:( void*)( e->r=( void*)(( void*)( Cyc_Absyn_deref_exp(
 Cyc_Absyn_var_exp( _temp101->name, 0), 0))->r)); goto _LL103; _LL103:;}* env.freevars=((
@@ -817,7 +818,7 @@ params= 0; struct Cyc_List_List* args= 0; struct Cyc_List_List* free_vars=((
 struct Cyc_List_List*(*)( struct Cyc_Set_Set* s)) Cyc_Set_elements)( freevars);
 for( 0; free_vars !=  0; free_vars= free_vars->tl){ struct Cyc_Absyn_Vardecl* vd=(
 struct Cyc_Absyn_Vardecl*) free_vars->hd; void* _temp206=( void*) vd->type; void*
-_temp212; _LL208: if(( unsigned int) _temp206 >  4u?*(( int*) _temp206) ==  Cyc_Absyn_ArrayType:
+_temp212; _LL208: if(( unsigned int) _temp206 >  3u?*(( int*) _temp206) ==  Cyc_Absyn_ArrayType:
 0){ _LL213: _temp212=( void*)(( struct Cyc_Absyn_ArrayType_struct*) _temp206)->f1;
 goto _LL209;} else{ goto _LL210;} _LL210: goto _LL211; _LL209: params=({ struct
 Cyc_List_List* _temp214=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
@@ -1131,7 +1132,7 @@ void* _temp557=( void*) _temp555->r; struct Cyc_Absyn_Vardecl* _temp563; _LL559:
 if(*(( int*) _temp557) ==  Cyc_Absyn_Var_d){ _LL564: _temp563=(( struct Cyc_Absyn_Var_d_struct*)
 _temp557)->f1; goto _LL560;} else{ goto _LL561;} _LL561: goto _LL562; _LL560:{
 void* _temp565= Cyc_Tcutil_compress(( void*) _temp563->type); _LL567: if((
-unsigned int) _temp565 >  4u?*(( int*) _temp565) ==  Cyc_Absyn_ArrayType: 0){
+unsigned int) _temp565 >  3u?*(( int*) _temp565) ==  Cyc_Absyn_ArrayType: 0){
 goto _LL568;} else{ goto _LL569;} _LL569: goto _LL570; _LL568: if( _temp563->initializer
 !=  0){ void* _temp571=( void*)(( struct Cyc_Absyn_Exp*) _check_null( _temp563->initializer))->r;
 struct Cyc_List_List* _temp577; _LL573: if(*(( int*) _temp571) ==  Cyc_Absyn_UnresolvedMem_e){

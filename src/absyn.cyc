@@ -174,7 +174,9 @@ type_t slong_t  = &slong_tt;
 type_t slonglong_t = &slonglong_tt;
 // float, double
 type_t float_t  = FloatType;
-type_t double_t = DoubleType;
+type_t double_t(bool b) {
+  return new DoubleType(b);
+}
 // exceptions
 static tunion Nmspace.Abs_n abs_null = Abs_n(NULL);
 static string_t exn_str = "exn";

@@ -439,7 +439,7 @@ static string_t msg3 =
 static string_t msg4 = 
   "sign specifier may appear only once within a type specifier";
 // Given a type-specifier list, determines the type and any declared
-// structs, unions, or [x]tunions.  Most of this is just collapsing
+// structs, unions, enums, or [x]tunions.  Most of this is just collapsing
 // combinations of [un]signed, short, long, int, char, etc.  We're
 // probably more permissive than is strictly legal here.  For
 // instance, one can write "unsigned const int" instead of "const
@@ -454,7 +454,7 @@ static $(type_t,opt_t<decl_t>)
   bool      seen_sign = false;
   bool      seen_size = false;
   type_t    t         = VoidType;
-  size_of_t sz        = B4;
+  size_of_t sz        = B4; 
   sign_t    sgn       = Signed;
 
   seg_t last_loc = loc;
@@ -557,6 +557,10 @@ static $(type_t,opt_t<decl_t>)
       case &IntType(sgn2,_):
 	t = new IntType(sgn2,sz);
 	break;
+      case &DoubleType(_):
+        // hack -- if we've seen "long" then sz will be B8
+        t = new DoubleType(true);
+        break;
       default: err("size qualifier on non-integral type",last_loc); break;
       }
   }
@@ -1292,7 +1296,7 @@ type_specifier:
 | INT       { $$=^$(type_spec(sint_t,LOC(@1,@1))); }
 | LONG      { $$=^$(new Long_spec(LOC(@1,@1))); }
 | FLOAT     { $$=^$(type_spec(float_t,LOC(@1,@1))); }
-| DOUBLE    { $$=^$(type_spec(double_t,LOC(@1,@1))); }
+| DOUBLE    { $$=^$(type_spec(double_t(false),LOC(@1,@1))); }
 | SIGNED    { $$=^$(new Signed_spec(LOC(@1,@1))); }
 | UNSIGNED  { $$=^$(new Unsigned_spec(LOC(@1,@1))); }
 | enum_specifier { $$=$!1; }

@@ -410,7 +410,10 @@ void dumpntyp(type_t t) {
   case &IntType(Unsigned,B8) && to_VC: dump_alpha("unsigned __int64");return;
   case &IntType(Unsigned, B8): dump_alpha("unsigned long long");    return;
   case FloatType:  dump_alpha("float");  return;
-  case DoubleType: dump_alpha("double"); return;
+  case &DoubleType(b): 
+    if (b) dump_alpha("long double"); 
+    else dump_alpha("double");
+    return;
   case &TupleType(ts): dump_symbol("\\$"); dumpargs(ts); return;
   case &StructType(NULL,ts,_):   dump_alpha("struct"); dumptps(ts); return;
   case &StructType(n,  ts,_):

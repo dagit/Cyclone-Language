@@ -687,6 +687,9 @@ static type_t tcSeqExp(tenv_t te,seg_t loc,type_t *`r topt,exp_t e1,exp_t e2) {
   return e2->topt->v;
 }
 
+static tunion Type.DoubleType dbl = DoubleType(false);
+static type_t dbl_t = &dbl;
+
 // try to find a field that e can be injected into
 static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
                                        region_t<`r> r,
@@ -696,7 +699,7 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
   type_t t1 = e->topt->v;
   // must promote float to double, and char/short to int
   switch (compress(t1)) {
-  case FloatType: unchecked_cast(te,e,DoubleType); t1 = DoubleType; break;
+  case FloatType: unchecked_cast(te,e,dbl_t); t1 = dbl_t; break;
   case &IntType(_,B1): 
   case &IntType(_,B2): unchecked_cast(te,e,sint_t); t1 = sint_t; break;
   default: break;

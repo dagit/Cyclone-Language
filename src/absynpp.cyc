@@ -628,7 +628,12 @@ doc_t ntyp2doc(type_t t) {
     s = text(aprintf("%s%s",sns,ts));
     break;
   case FloatType:  s = text("float");  break;
-  case DoubleType: s = text("double"); break;
+  case &DoubleType(b): 
+    if (b) 
+      s = text("long double"); 
+    else 
+      s = text("double");
+    break;
   case &TupleType(ts):
     s = cat(text("$"),args2doc(ts));
     break;

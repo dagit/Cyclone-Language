@@ -268,7 +268,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
         terr(loc,"length modifiers are not allowed with %%%c",c);
         return NULL;
       }
-      typs = new List(double_t,typs);
+      typs = new List(double_t(false),typs);
       break;
     case 'c':
       for (_ f = flags; f != NULL; f = f->tl)
@@ -536,7 +536,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
         // Note, %f means float in scanf, double in printf!!
         t = at_typ(float_t,new_evar(&rk,tvs),empty_tqual()); break;
       case &List(x,NULL) && x=='l':
-        t = at_typ(double_t,new_evar(&rk,tvs),empty_tqual()); break;
+        t = at_typ(double_t(false),new_evar(&rk,tvs),empty_tqual()); break;
       // We don't support L
       default:
         terr(loc,"length modifier '%s' is not allowed with %%%c",

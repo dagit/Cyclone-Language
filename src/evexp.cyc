@@ -96,7 +96,7 @@ bool okay_szofarg(type_t t) {
     }
   case &IntType(_,_): return true;
   case FloatType:     return true;
-  case DoubleType:    return true;
+  case &DoubleType(_):    return true;
   case &ArrayType(t2,_,e): // assume e constant checked elsewhere
     return (e != NULL); 
   case &FnType(_): return false;

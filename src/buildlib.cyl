@@ -942,7 +942,7 @@ and block_comment = parse
     case VoidType:
     case &IntType(_,_):
     case FloatType:
-    case DoubleType:
+    case &DoubleType(_):
       return;
 
     case &PointerType(x):

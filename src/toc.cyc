@@ -319,7 +319,7 @@ static type_t typ_to_c(type_t t) {
     }
   case &IntType(_,_): return t;
   case FloatType:     return t;
-  case DoubleType:    return t;
+  case &DoubleType(_):return t;
   case &ArrayType(t2,tq,e): return new ArrayType(typ_to_c_array(t2),tq,e);
   case &FnType(FnInfo{_,_,t2,args,c_vararg,cyc_vararg,_,atts}):
     // just drop the type arguments & effect and translate the nested types
@@ -398,7 +398,7 @@ static bool atomic_typ(type_t t) {
   case &EnumType(_,_): return true;
   case &AnonEnumType(_): return true;
   case FloatType:      return true;
-  case DoubleType:     return true;
+  case &DoubleType(_): return true;
   case &FnType(_):     return true;
   case &ArrayType(t,_,_): return atomic_typ(t);
     // FIX: really should compute in terms of the instantiation
