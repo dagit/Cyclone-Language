@@ -414,7 +414,7 @@ static void recompute_typedefs() {
   // Drop the old trie on the floor.
   let DynTrie{dyn,t} = *typedefs_trie;
   Core::free_dynregion(dyn);
-  let NewRegion{<`d2> dyn2} = Core::new_dynregion();
+  let NewRegion{<`d2> dyn2} = new_dynregion();
   region d2 = open(dyn2); {
     typedefs_trie = new DynTrie{dyn2, rnew(d2) Trie(Zero(),false)};
   }
@@ -1018,7 +1018,7 @@ void lex_init(bool include_cyclone_keywords) {
     Core::free_dynregion(dyn);
   }
   // Now allocate dynamic regions for the tries
-  let NewRegion{id_dyn} = Core::new_dynregion();
+  let NewRegion{id_dyn} = new_dynregion();
   region id_rgn = open(id_dyn); {
     Xarray::xarray_t<stringptr_t> symbols = 
       Xarray::rcreate(id_rgn,101,new ((string_t)""));
@@ -1027,7 +1027,7 @@ void lex_init(bool include_cyclone_keywords) {
     ids_trie = new DynTrieSymbols{id_dyn, rnew(id_rgn) Trie(Zero(),false),
                                   symbols};
   }
-  let NewRegion{typedefs_dyn} = Core::new_dynregion();
+  let NewRegion{typedefs_dyn} = new_dynregion();
   region typedefs_rgn = open(typedefs_dyn); {
     typedefs_trie = new DynTrie{typedefs_dyn, 
                                 rnew(typedefs_rgn) Trie(Zero(),false)};

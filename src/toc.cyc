@@ -4699,7 +4699,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
 
 // initialize all globals
 static void init() {
-  let NewRegion{dyn} = Core::new_dynregion();
+  let NewRegion{dyn} = new_dynregion();
   region d = open(dyn); {
     toc_state = 
       new TocState{ .dyn = dyn,
