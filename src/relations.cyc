@@ -396,6 +396,9 @@ static reln_op_t reduce_relnop(reln_op_t rop) {
   case {.RNumelts = v}:
     switch (Tcutil::compress(v->type)) {
     case &Absyn::PointerType(Absyn::PtrInfo{_,_,Absyn::PtrAtts{.bounds = b,...}}):
+      // major subtlety!  the vardecl's type might have been translated
+      // to C in which case the bound is not accurate...
+      if (b == Absyn::bounds_one_conref) break;
       switch (Absyn::conref_def((Absyn::bounds_t)&Absyn::DynEither_b_val,b)) {
       case &Absyn::Upper_b(e):
         reln_op_t rop2 = rop;
@@ -416,14 +419,14 @@ static reln_op_t reduce_relnop(reln_op_t rop) {
 // the resulting relations are consistent.  
 static bool consist_relations(Pratt::graph_t *G, relns_t rlns) {
   for (; G && rlns != NULL; rlns = rlns->tl) {
+    let reln = rlns->hd;
+    reln->rop1 = reduce_relnop(reln->rop1);
+    reln->rop2 = reduce_relnop(reln->rop2);
 #ifdef RELATIONS_DEBUG
     fprintf(stderr,"adding %s to graph ",reln2string(rlns->hd));
     Pratt::print_graph(G);
     fprintf(stderr,"\n");
 #endif
-    let reln = rlns->hd;
-    reln->rop1 = reduce_relnop(reln->rop1);
-    reln->rop2 = reduce_relnop(reln->rop2);
     switch (reln) {
     case &Reln({.RConst = i},reln,{.RConst = j}):
       switch (reln) {

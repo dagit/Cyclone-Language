@@ -2467,7 +2467,7 @@ return 1;}{
 # 2016
 struct Cyc___cycFILE*_tmp3C2=_tmp3BD;
 # 2020
-struct _dyneither_ptr buf=({char*_tmp3E0=({unsigned int _tmp3DF=(unsigned int)1024 + 1U;char*_tmp3DE=_cycalloc_atomic(_check_times(_tmp3DF,sizeof(char)));({{unsigned int _tmp4D7=(unsigned int)1024;unsigned int i;for(i=0;i < _tmp4D7;++ i){_tmp3DE[i]='\000';}_tmp3DE[_tmp4D7]=0;}0;});_tmp3DE;});_tag_dyneither(_tmp3E0,sizeof(char),_get_zero_arr_size_char((void*)_tmp3E0,(unsigned int)1024 + 1U));});
+struct _dyneither_ptr buf=({char*_tmp3E0=({unsigned int _tmp3DF=(unsigned int)1024 + 1U;char*_tmp3DE=_cycalloc_atomic(_check_times(_tmp3DF,sizeof(char)));({{unsigned int _tmp4D7=1024U;unsigned int i;for(i=0;i < _tmp4D7;++ i){_tmp3DE[i]='\000';}_tmp3DE[_tmp4D7]=0;}0;});_tmp3DE;});_tag_dyneither(_tmp3E0,sizeof(char),1025U);});
 struct _dyneither_ptr _tmp3C3=Cyc_getcwd(buf,_get_dyneither_size(buf,sizeof(char)));
 if(Cyc_mode != Cyc_GATHERSCRIPT){
 if( chdir(dir)){
@@ -2502,7 +2502,7 @@ return 0;};};};}
 # 2058
 int Cyc_process_setjmp(const char*dir){
 # 2061
-struct _dyneither_ptr buf=({char*_tmp3F2=({unsigned int _tmp3F1=(unsigned int)1024 + 1U;char*_tmp3F0=_cycalloc_atomic(_check_times(_tmp3F1,sizeof(char)));({{unsigned int _tmp4DA=(unsigned int)1024;unsigned int i;for(i=0;i < _tmp4DA;++ i){_tmp3F0[i]='\000';}_tmp3F0[_tmp4DA]=0;}0;});_tmp3F0;});_tag_dyneither(_tmp3F2,sizeof(char),_get_zero_arr_size_char((void*)_tmp3F2,(unsigned int)1024 + 1U));});
+struct _dyneither_ptr buf=({char*_tmp3F2=({unsigned int _tmp3F1=(unsigned int)1024 + 1U;char*_tmp3F0=_cycalloc_atomic(_check_times(_tmp3F1,sizeof(char)));({{unsigned int _tmp4DA=1024U;unsigned int i;for(i=0;i < _tmp4DA;++ i){_tmp3F0[i]='\000';}_tmp3F0[_tmp4DA]=0;}0;});_tmp3F0;});_tag_dyneither(_tmp3F2,sizeof(char),1025U);});
 struct _dyneither_ptr _tmp3E1=Cyc_getcwd(buf,_get_dyneither_size(buf,sizeof(char)));
 if( chdir(dir)){
 ({struct Cyc_String_pa_PrintArg_struct _tmp3E4=({struct Cyc_String_pa_PrintArg_struct _tmp4D8;_tmp4D8.tag=0U,({struct _dyneither_ptr _tmp722=(struct _dyneither_ptr)({const char*_tmp3E5=dir;_tag_dyneither(_tmp3E5,sizeof(char),_get_zero_arr_size_char((void*)_tmp3E5,1U));});_tmp4D8.f1=_tmp722;});_tmp4D8;});void*_tmp3E2[1U];_tmp3E2[0]=& _tmp3E4;({struct Cyc___cycFILE*_tmp724=Cyc_stderr;struct _dyneither_ptr _tmp723=({const char*_tmp3E3="Error: can't change directory to %s\n";_tag_dyneither(_tmp3E3,sizeof(char),37U);});Cyc_fprintf(_tmp724,_tmp723,_tag_dyneither(_tmp3E2,sizeof(void*),1U));});});

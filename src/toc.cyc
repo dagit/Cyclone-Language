@@ -1360,13 +1360,21 @@ static bool check_bounds(type_t a_typ, Relations::relns_t<`H> relns,
     x = &bogus_vardecl;
     x->type = a_typ;
   }
+  // We need to temporarily swap in the original type of the
+  // expression so that we have size information correct for
+  // the relations machinery.  
   let xtype = a_typ;
+  let oldtype = x->type;
+  x->type = xtype;
   Relations::reln_op_t rop_a = Relations::RNumelts(x);
 
+  //fprintf(stderr,"vardecl %s has type %s\n",Absynpp::qvar2string(x->name),
+  //        Absynpp::typ2string(x->type));
   // if x's type is T*{e}, T@{e}, or T[e] then we want to 
   // add a constraint of the form e <= numelts(x)
   exp_opt_t bound = Tcutil::get_type_bound(xtype);
   if (bound != NULL) {
+    //fprintf(stderr,"bound is %s\n",exp2string((exp_t)bound));
     Relations::reln_op_t rop_bound = Relations::RConst(0); // bogus value
     if (Relations::exp2relnop(bound,&rop_bound))
       relns = Relations::add_relation(heap_region,rop_bound,
@@ -1382,7 +1390,9 @@ static bool check_bounds(type_t a_typ, Relations::relns_t<`H> relns,
     Relations::print_relns(stderr,rlns);
     fprintf(stderr,"\n");
 #endif
-    if (!Relations::consistent_relations(rlns)) return true;
+    let consistent = Relations::consistent_relations(rlns); 
+    x->type = oldtype;
+    if (!consistent) return true;
   }
 
 inner_loop:
@@ -1396,11 +1406,14 @@ inner_loop:
       // add numelts(x) < z and check to see if it's inconsistent
       let rlns = Relations::add_relation(heap_region,rop_a,
                                          Relations::Rlt,rop_z,relns);
-      return !Relations::consistent_relations(rlns);
+      let consist = Relations::consistent_relations(rlns);
+      x->type = oldtype;
+      return !consist;
     }
     break;
   default: break;
   }
+  x->type = oldtype;
   return false;
 }
 
@@ -1626,6 +1639,48 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
                                  type_t ptr_type,
                                  bool is_dyneither,
                                  type_t elt_type) {
+  /* Sadly, this sleazy trick doesn't work.  The reason is that
+     we need to fail only when writing to the last element of
+     the array a non-zero value.  The code here faults whenever
+     you overwrite a non-zero value.
+
+  // we pull a very sleazy trick here and translate e1 as if it
+  // were a right-hand-side instead of lhs.  Then we get rid of
+  // the resulting deref if necessary in order to get a pointer
+  // that we can then dereference (to check for zero) and 
+  // ultimately update.
+  if (!is_dyneither) {
+    exp_to_c(nv,e1);
+    exp_to_c(nv,e2);
+    exp_t lhs;
+    switch (e1->r) {
+    case &Deref_e(e): lhs = e; break;
+    case &Subscript_e(a,b): lhs = add_exp(a,b,0); break;
+    default: 
+      impos("zero_ptr_assign_to_c: e1 = %s",Absynpp::exp2string(e1));
+    }
+    let c_elt_type = typ_to_c(elt_type);
+    let c_ptr_type = cstar_typ(c_elt_type, mt_tq);
+    let lhs_var = temp_var();
+    let rhs_var = temp_var();
+    let temp = temp_var();
+    exp_t rhs_exp = e2;
+    stmt_t fail = exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL);
+    exp_t result = assign_exp(deref_exp(var_exp(lhs_var,DL),DL),
+                              var_exp(rhs_var,DL),DL);
+    exp_t test1 = eq_exp(var_exp(temp,DL),int_exp(None,0,DL),DL);
+    exp_t test2 = neq_exp(var_exp(rhs_var,DL),int_exp(None,0,DL),DL);
+    exp_t test_exp = and_exp(test1,test2,DL);
+    if (popt != NULL) rhs_exp = prim2_exp(popt->v,var_exp(temp,DL),rhs_exp,DL);
+    let s = declare_stmt(lhs_var,cstar_typ(c_elt_type, mt_tq),lhs,
+            declare_stmt(temp,c_elt_type,deref_exp(var_exp(lhs_var,DL),DL),
+            declare_stmt(rhs_var,c_elt_type,rhs_exp,
+            seq_stmt(ifthenelse_stmt(test_exp,fail,skip_stmt(DL),DL),
+                     exp_stmt(result,DL),DL),DL),DL),DL);
+    e->r = stmt_exp(s,DL)->r;
+    return;
+  }
+  */
   // To simplify the translation, we always use a fat pointer and generate:
   //  ({ fat_ptr_type x = ((fat_ptr_type)ea) + eb;
   //     elt_type y = *x; // check here that x is not null and in bounds
@@ -2356,6 +2411,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       case $(&Upper_b(e2), &DynEither_b):
         if (!Evexp::c_can_eval(e2))
           terr(e->loc,"cannot perform coercion since numelts cannot be determined statically.");
+        let $(i,valid) = Evexp::eval_const_uint_exp(e2);
         // sanity checking
         if (coercion == Null_to_NonNull)
             impos("conversion mis-classified as null-check: %s",exp2string(e));
@@ -2385,10 +2441,20 @@ static void exp_to_c(env_t nv, exp_t e) {
               arg3 = e2; break;
             case &Const_e({.Wstring_c = _}):
               arg3 = e2; break;
+            case &Var_e(&Global_b(vd)): fallthru(vd);
+            case &Var_e(&Local_b(vd)):
+              if (!Tcutil::is_array(vd->type)) fallthru;
+              arg3 = e2;
+              break;
             default:
-              arg3 = fncall_exp(getFunctionRemovePointer(
-                                 &_get_zero_arr_size_functionSet,e1),
-                                list(cast_it(void_star_typ(),x_exp),e2),DL);
+              // if what we're casting has a known size > 1 then
+              // we use it instead of calculating the size at run-time
+              if (valid && i != 1) 
+                arg3 = e2;
+              else 
+                arg3 = fncall_exp(getFunctionRemovePointer(
+                                                           &_get_zero_arr_size_functionSet,e1),
+                                  list(cast_it(void_star_typ(),x_exp),e2),DL);
               break;
             }
             if (!zt2 && !p2.elt_tq.real_const) {
@@ -2747,6 +2813,7 @@ DynCast:
         bool possibly_null = conref_def(false,bcr) && need_nullchk;
 	type_t ta1 = typ_to_c(ta);
 	type_t ta2 = cstar_typ(ta1, tq);
+        let $(i,valid) = Evexp::eval_const_uint_exp(esz);
         if (in_bnds && !possibly_null)
 	  bounds_checks_eliminated++;
         else if (in_bnds && possibly_null) {
@@ -2755,8 +2822,9 @@ DynCast:
             warn(e->loc, "inserted null check due to dereference");
           e1->r = cast_it_r(ta2,fncall_exp(_check_null_e,
                                            list(copy_exp(e1)),DL));
-        // check if zero terminated
-        } else if (conref_def(false,zt)) {
+        // for zero-terminated pointers with a bound of 1, we calculate
+        // the bound dynamically.
+        } else if (valid && i == 1 && conref_def(false,zt)) {
           // *((ta2)_zero_arr_plus(e1, esz, e2)
           if (!Evexp::c_can_eval(esz))
             terr(e->loc,"cannot determine subscript is in bounds");

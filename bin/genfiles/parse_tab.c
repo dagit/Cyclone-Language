@@ -2315,10 +2315,10 @@ int yyssp_offset;
 struct _dyneither_ptr yyss=({unsigned int _tmp6AC=200U;short*_tmp6AD=_region_calloc(yyregion,sizeof(short),_tmp6AC);_tag_dyneither(_tmp6AD,sizeof(short),_tmp6AC);});
 # 158
 int yyvsp_offset;
-struct _dyneither_ptr yyvs=_tag_dyneither(({unsigned int _tmp6AB=(unsigned int)200;union Cyc_YYSTYPE*_tmp6AA=({struct _RegionHandle*_tmp82A=yyregion;_region_malloc(_tmp82A,_check_times(_tmp6AB,sizeof(union Cyc_YYSTYPE)));});({{unsigned int _tmp759=(unsigned int)200;unsigned int i;for(i=0;i < _tmp759;++ i){_tmp6AA[i]=yylval;}}0;});_tmp6AA;}),sizeof(union Cyc_YYSTYPE),(unsigned int)200);
+struct _dyneither_ptr yyvs=_tag_dyneither(({unsigned int _tmp6AB=(unsigned int)200;union Cyc_YYSTYPE*_tmp6AA=({struct _RegionHandle*_tmp82A=yyregion;_region_malloc(_tmp82A,_check_times(_tmp6AB,sizeof(union Cyc_YYSTYPE)));});({{unsigned int _tmp759=200U;unsigned int i;for(i=0;i < _tmp759;++ i){_tmp6AA[i]=yylval;}}0;});_tmp6AA;}),sizeof(union Cyc_YYSTYPE),200U);
 # 163
 int yylsp_offset;
-struct _dyneither_ptr yyls=_tag_dyneither(({unsigned int _tmp6A9=(unsigned int)200;struct Cyc_Yyltype*_tmp6A8=({struct _RegionHandle*_tmp82B=yyregion;_region_malloc(_tmp82B,_check_times(_tmp6A9,sizeof(struct Cyc_Yyltype)));});({{unsigned int _tmp758=(unsigned int)200;unsigned int i;for(i=0;i < _tmp758;++ i){({struct Cyc_Yyltype _tmp82C=Cyc_yynewloc();_tmp6A8[i]=_tmp82C;});}}0;});_tmp6A8;}),sizeof(struct Cyc_Yyltype),(unsigned int)200);
+struct _dyneither_ptr yyls=_tag_dyneither(({unsigned int _tmp6A9=(unsigned int)200;struct Cyc_Yyltype*_tmp6A8=({struct _RegionHandle*_tmp82B=yyregion;_region_malloc(_tmp82B,_check_times(_tmp6A9,sizeof(struct Cyc_Yyltype)));});({{unsigned int _tmp758=200U;unsigned int i;for(i=0;i < _tmp758;++ i){({struct Cyc_Yyltype _tmp82C=Cyc_yynewloc();_tmp6A8[i]=_tmp82C;});}}0;});_tmp6A8;}),sizeof(struct Cyc_Yyltype),200U);
 # 170
 int yystacksize=200;
 # 172

@@ -458,8 +458,11 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
     case &Upper_b(ub):
       // if we have a zero-terminated array, warn that this could
       // be expensive, since coercing to a fat pointer involves a loop.
-      if (conref_def(false,zt))
-        warn(e1->loc, "pointer arithmetic on thin, zero-terminated pointer may be expensive.");
+      if (conref_def(false,zt)) {
+        let $(i,known) = Evexp::eval_const_uint_exp(ub);
+        if (known && i == 1)
+          warn(e1->loc, "pointer arithmetic on thin, zero-terminated pointer may be expensive.");
+      }
       // we have to allow pointer arithmetic that might go out of bounds
       // here.  Consider:
       //   int buf[10] = {...};
@@ -1615,14 +1618,17 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
     // for zero-terminated, thin pointers we warn when doing subscripting
     // to remind the user that this is an expensive operation.
     if (conref_def(false,zt)) {
-      bool emit_warning = true;
+      bool emit_warning = false;
       switch (conref_def((bounds_t)&DynEither_b_val,b)) {
       case &Upper_b(e3):
+        let $(i,known_i) = Evexp::eval_const_uint_exp(e3);
+        if (known_i && i == 1) emit_warning = true;
 	if (is_const_exp(e2)) {
-	  let $(i,known) = Evexp::eval_const_uint_exp(e2);
-	  if (known) {
+	  let $(j,known_j) = Evexp::eval_const_uint_exp(e2);
+	  if (known_j) {
 	    let $(j,knownj) = Evexp::eval_const_uint_exp(e3);
-	    if (knownj && j > i) emit_warning = false;
+	    if (known_i && j > i && i != 1) 
+              terr(loc,"subscript will fail at run-time");
 	  }
 	}
 	break;
