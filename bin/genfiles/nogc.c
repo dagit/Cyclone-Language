@@ -22,19 +22,30 @@
 #undef GC_malloc
 #undef GC_malloc_atomic
 #undef GC_free
+#undef GC_size
 #endif
+
+/* A hack to implement GC_size: remember the last allocation size and
+   just return it.  Obviously it won't work unless GC_size is called
+   immediately after allocation. */
+static size_t last_alloc_size = 0;
+size_t GC_size(void *x) {
+  return last_alloc_size;
+}
 
 void GC_free(void *x) {
   free(x);
 }
 
 void *GC_malloc(int x) {
+  last_alloc_size = x;
   // FIX:  I'm calling calloc to ensure the memory is zero'd.  This
   // is because I had to define GC_calloc in runtime_cyc.c
   return (void*)calloc(sizeof(char),x);
 }
 
 void *GC_malloc_atomic(int x) {
+  last_alloc_size = x;
   // FIX:  I'm calling calloc to ensure the memory is zero'd.  This
   // is because I had to define GC_calloc in runtime_cyc.c
   return (void*)calloc(sizeof(char),x);
@@ -75,4 +86,15 @@ void GC_default_warn_proc(char *msg, GC_word arg) {
 }
 GC_warn_proc GC_set_warn_proc(GC_warn_proc p) {
   return GC_default_warn_proc;
+}
+
+typedef void * GC_PTR;
+typedef void (*GC_finalization_proc)
+  	GC_PROTO((GC_PTR obj, GC_PTR client_data));
+#define GC_API extern
+
+GC_API void
+GC_register_finalizer_no_order (GC_PTR obj, GC_finalization_proc fn, GC_PTR cd,
+                                GC_finalization_proc *ofn, GC_PTR *ocd) {
+  // empty
 }

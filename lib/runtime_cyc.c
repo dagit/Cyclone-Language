@@ -131,7 +131,7 @@ void _push_dynregion(struct _DynRegionFrame *d) {
   _current_handler = (struct _RuntimeStack *)d;
 }
 
-// set _current_handler to it's n+1'th tail
+// set _current_handler to its n+1'th tail
 // Invariant: result is non-null
 void _npop_handler(int n) {
   if (n<0) {
@@ -148,7 +148,7 @@ void _npop_handler(int n) {
       //fprintf(stderr,"popping region %x\n",(unsigned int)_current_handler);
 #ifdef CYC_REGION_PROFILE
       _profile_free_region((struct _RegionHandle *)_current_handler,
-			   "bogus","bogus",0);
+			   NULL,NULL,0);
 #else
       _free_region((struct _RegionHandle *)_current_handler);
 #endif
@@ -398,7 +398,7 @@ void Cyc_Core_ufree(struct _dyneither_ptr ptr) {
     unique_freed_bytes += sz;
     // output special "alloc" event here, where we have a negative size
     if (alloc_log != NULL) {
-      fprintf(alloc_log,"bogus:bogus:0\tunique\talloc\t-%d\t%d\t%d\t%d\t%x\n",
+      fprintf(alloc_log,"@\tunique\talloc\t-%d\t%d\t%d\t%d\t%x\n",
 	      sz,
 	      region_get_heap_size(Cyc_Core_unique_region), 
 	      region_get_free_bytes(Cyc_Core_unique_region),
@@ -460,7 +460,7 @@ void Cyc_Core_drop_refptr(struct _dyneither_ptr ptr) {
       unsigned int sz = GC_size(ptr.base - sizeof(int));
       refcnt_freed_bytes += sz;
       if (alloc_log != NULL) {
-	fprintf(alloc_log,"bogus:bogus:0\trefcnt\talloc\t-%d\t%d\t%d\t%d\t%x\n",
+	fprintf(alloc_log,"@\trefcnt\talloc\t-%d\t%d\t%d\t%d\t%x\n",
 		sz,
 		region_get_heap_size(Cyc_Core_refcnt_region), 
 		region_get_free_bytes(Cyc_Core_refcnt_region),
@@ -612,7 +612,7 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
   p->total_bytes = GC_size(p);
   p->free_bytes = next_size;
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"bogus:0\t%s\tresize\t%d\t%d\t%d\t%d\n",
+    fprintf(alloc_log,"@\t%s\tresize\t%d\t%d\t%d\t%d\n",
 	    r->name,
 	    GC_size(p),
 	    GC_get_heap_size(), GC_get_free_bytes(), GC_get_total_bytes());
@@ -634,7 +634,7 @@ static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
   p->total_bytes = GC_size(p);
   p->free_bytes = page_size;
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"bogus:0\t%s\tresize\t%d\t%d\t%d\t%d\n",
+    fprintf(alloc_log,"@\t%s\tresize\t%d\t%d\t%d\t%d\n",
 	    r->name,
 	    GC_size(p),
 	    GC_get_heap_size(), GC_get_free_bytes(), GC_get_total_bytes());
@@ -782,7 +782,7 @@ void Cyc_Core_free_dynregion(struct _DynRegionHandle* x) {
   if (x->ref_count != 0 || x->handle == NULL) 
     throw(Cyc_Core_Free_Region_val);
 #ifdef CYC_REGION_PROFILE
-  _profile_free_region(x->handle,"bogus","bogus",0);
+  _profile_free_region(x->handle,NULL,NULL,0);
 #else
   _free_region(x->handle);
 #endif
@@ -794,7 +794,7 @@ int Cyc_Core_try_free_dynregion(struct _DynRegionHandle *x) {
   if (x->ref_count != 0 || x->handle == NULL) 
     return 0;
 #ifdef CYC_REGION_PROFILE
-  _profile_free_region(x->handle,"bogus","bogus",0);
+  _profile_free_region(x->handle,NULL,NULL,0);
 #else
   _free_region(x->handle);
 #endif
@@ -823,7 +823,7 @@ struct Core_NewRegion Cyc_Core__rnew_dynregion(struct _RegionHandle *r,
     r->sub_regions = res;
   }
 #ifdef CYC_REGION_PROFILE
-  *d = _profile_new_region("dyn",file,"bogus",lineno);
+  *d = _profile_new_region("dyn",file,"@",lineno);
 #else
   *d = _new_region(NULL);
 #endif
@@ -881,7 +881,7 @@ void _free_region(struct _RegionHandle *r) {
     GC_free(p);
     rgn_freed_bytes += sz;
     if (alloc_log != NULL) {
-      fprintf(alloc_log,"bogus:0\t%s\tresize\t-%d\t%d\t%d\t%d\n",
+      fprintf(alloc_log,"@\t%s\tresize\t-%d\t%d\t%d\t%d\n",
 	      r->name, sz,
 	      GC_get_heap_size(), GC_get_free_bytes(), GC_get_total_bytes());
     }
@@ -899,7 +899,7 @@ void _free_region(struct _RegionHandle *r) {
 //   (assumes r is not heap or unique region)
 void _reset_region(struct _RegionHandle *r) {
 #ifdef CYC_REGION_PROFILE  
-  _profile_free_region(r,"bogus","bogus",0);
+  _profile_free_region(r,NULL,NULL,0);
   *r = _new_region(r->name);
 #else
   _free_region(r);
@@ -1010,12 +1010,19 @@ void _profile_free_region(struct _RegionHandle *r, const char *file, const char 
   // should never be heap, unique, or refcnt ...
   _free_region(r);
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"%s:%s:%d\t%s\tfree\t%d\t%d\t%d\n",
-            file,func,lineno,
-	    (r == Cyc_Core_heap_region ? "heap" :
-	     (r == Cyc_Core_unique_region ? "unique" :
-	      (r == Cyc_Core_refcnt_region ? "refcnt" : r->name))),
-	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
+    if (file == NULL)
+      fprintf(alloc_log,"@\t%s\tfree\t%d\t%d\t%d\n",
+              (r == Cyc_Core_heap_region ? "heap" :
+               (r == Cyc_Core_unique_region ? "unique" :
+                (r == Cyc_Core_refcnt_region ? "refcnt" : r->name))),
+              GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
+    else
+      fprintf(alloc_log,"%s:%s:%d\t%s\tfree\t%d\t%d\t%d\n",
+              file,func,lineno,
+              (r == Cyc_Core_heap_region ? "heap" :
+               (r == Cyc_Core_unique_region ? "unique" :
+                (r == Cyc_Core_refcnt_region ? "refcnt" : r->name))),
+              GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
   }
 }
 
@@ -1025,12 +1032,12 @@ static void
 reclaim_finalizer(GC_PTR obj, GC_PTR client_data) {
   if (alloc_log != NULL)
     fprintf(alloc_log,
-            "bogus:bogus:0: @unknown@ reclaim \t%x\n",
+            "@ @ reclaim \t%x\n",
             (unsigned int)obj);
 }
 
 static void
-unique_finalizer(GC_PTR addr) {
+set_finalizer(GC_PTR addr) {
   GC_register_finalizer_no_order(addr,reclaim_finalizer,NULL,NULL,NULL);
 }
 
@@ -1040,11 +1047,13 @@ void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
   addr = _region_malloc(r,s);
   _profile_check_gc();
   if (alloc_log != NULL) {
-    if (r == Cyc_Core_heap_region)
+    if (r == Cyc_Core_heap_region) {
       s = GC_size(addr);
+      set_finalizer((GC_PTR)addr);
+    }
     if (r == Cyc_Core_unique_region) {
       s = GC_size(addr);
-      unique_finalizer((GC_PTR)addr);
+      set_finalizer((GC_PTR)addr);
     }
     else if (r == Cyc_Core_refcnt_region)
       s = GC_size(addr-1); // back up to before the refcnt
