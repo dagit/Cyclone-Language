@@ -10,7 +10,7 @@
 (*                                                                     *)
 (***********************************************************************)
 
-(* $Id: main.ml,v 1.1 2000-10-31 15:57:12 danieljg Exp $ *)
+(* $Id: main.ml,v 1.2 2000-11-06 16:41:31 danieljg Exp $ *)
 
 (* The lexer generator. Command-line parsing. *)
 
@@ -21,7 +21,7 @@ open Output
 let main () =
   let arglen = Array.length Sys.argv in
   if arglen < 2 || arglen > 3 then begin
-    prerr_endline "Usage: ocamllex <input file> [<output file>]";
+    prerr_endline "Usage: cycocamllex <input file> [<output file>]";
     exit 2
   end;
   let source_name = Sys.argv.(1) in

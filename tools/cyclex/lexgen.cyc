@@ -1,0 +1,274 @@
+
+#include "core.h"
+#include "list.h"
+#include "dict.h"
+#include "set.h"
+
+#include "syntax.h"
+
+#define LEXGEN_CYC
+#include "lexgen.h"
+
+using Core;
+using List;
+using Dict;
+using Set;
+using Syntax;
+
+namespace Lexgen;
+
+// Deep abstract for regular expressions
+static enum Regexp {
+  Empty;
+  Chars(int);
+  Action(int);
+  Seq(enum Regexp, enum Regexp);
+  Alt(enum Regexp, enum Regexp);
+  Star(enum Regexp);
+};
+typedef enum Regexp regexp_t;
+
+static struct Lexer_entry {
+  string                   name;
+  regexp_t                 regexp;
+  list<$(int,location_t)@> actions;
+};
+typedef struct Lexer_entry @ lexer_entry_t;
+
+// From shallow to deep syntax
+static list<list<int>>          chars         = null;
+static int                      chars_count   = 0;
+static list<$(int,location_t)@> actions       = null;
+static int                      actions_count = 0;
+
+static regexp_t encode_regexp(regular_expression_t r) {
+  switch (r) {
+  case Epsilon:            return Empty;
+  case Characters(cl):     chars = &cons(cl,chars); return Chars(chars_count++);
+  case Sequence(r1,r2):    return Seq(encode_regexp(r1), encode_regexp(r2));
+  case Alternative(r1,r2): return Alt(encode_regexp(r1), encode_regexp(r2));
+  case Repetition(r1):     return Star(encode_regexp(r1));
+  }
+}
+
+static regexp_t encode_casedef(list<acase_t> casedef) {
+  regexp_t ans = Empty;
+  for(; casedef != null; casedef = casedef->tl) {
+    let &$(expr,act) = casedef->hd;
+    actions = &cons(&$(actions_count, act), actions);
+    ans = Alt(ans, Seq(encode_regexp(expr), Action(actions_count)));
+    ++actions_count;
+  }
+  return ans;
+}
+
+static 
+$(list<int>[?], list<lexer_entry_t>)@ encode_lexdef(lexer_definition_t def) {
+  chars       = null;
+  chars_count = 0;
+  list<lexer_entry_t> entry_list_rev = null;
+  for(let entries = def->entrypoints; entries!=null; entries=entries->tl) {
+    let &$(entry_name, casedef) = entries->hd;
+    actions       = null;
+    actions_count = 0;
+    let re = encode_casedef(casedef); // mutates actions
+    entry_list_rev = &cons(&Lexer_entry(entry_name, re, rev(actions)),
+			   entry_list_rev);
+  }
+  list<int> chr[?] = to_array(rev(chars));
+  chars   = null;
+  actions = null;
+  return &$(chr, imp_rev(entry_list_rev));
+}
+
+// generate an NFA from a regular expression (dragon book, chapter 3)
+
+static enum transition { OnChars(int); ToAction(int); };
+typedef enum transition transition_t;
+
+static int transition_cmp(transition_t t1, transition_t t2) {
+  switch ($(t1,t2)) {
+  case $(OnChars(_),   ToAction(_)):  return 1;
+  case $(ToAction(_),  OnChars(_)):   return -1;
+  case $(OnChars(i1),  OnChars(i2)):  return i1-i2;
+  case $(ToAction(i1), ToAction(i2)): return i1-i2;  
+  }
+}
+
+static bool nullable(regexp_t r) {
+  switch (r) {
+  case Empty:      return true;
+  case Chars(_):   return false;
+  case Action(_):  return false;
+  case Seq(r1,r2): return nullable(r1) && nullable(r2);
+  case Alt(r1,r2): return nullable(r1) || nullable(r2);
+  case Star(_):    return true;
+  }
+}
+
+static Set<transition_t> firstpos(regexp_t r) {
+  switch (r) {
+  case Empty:       return Set::empty(transition_cmp);
+  case Chars(pos):  return Set::insert(Set::empty(transition_cmp),OnChars(pos));
+  case Action(act): return Set::insert(Set::empty(transition_cmp),ToAction(act));
+  case Seq(r1,r2):  if(nullable(r1)) 
+                      return union_two(firstpos(r1),firstpos(r2));
+                    else
+		      return firstpos(r1);
+  case Alt(r1,r2):  return union_two(firstpos(r1),firstpos(r2));
+  case Star(r1):    return firstpos(r1);
+  }
+}
+
+static Set<transition_t> lastpos(regexp_t r) {
+  switch (r) {
+  case Empty:       return Set::empty(transition_cmp);
+  case Chars(pos):  return Set::insert(Set::empty(transition_cmp),OnChars(pos));
+  case Action(act): return Set::insert(Set::empty(transition_cmp),ToAction(act));
+  case Seq(r1,r2):  if(nullable(r2)) 
+                      return union_two(lastpos(r1),lastpos(r2));
+                    else
+		      return lastpos(r2);
+  case Alt(r1,r2):  return union_two(lastpos(r1),lastpos(r2));
+  case Star(r1):    return lastpos(r1);
+  }
+}
+
+static 
+void fill_pos($(Set<transition_t> [?], Set<transition_t>)@env, transition_t t) {
+  let &$(v, first) = env;
+  switch (t) {
+  case OnChars(pos): v[pos] = union_two(v[pos], first); break;
+  case ToAction(_):  break;
+  }
+}
+
+static void fill_it(regexp_t r, Set<transition_t> v[?]) {
+  switch (r) {
+  case Seq(r1,r2): 
+    fill_it(r1,v);
+    fill_it(r2,v);
+    Set::iter_c(fill_pos, &$(v,firstpos(r2)), lastpos(r1));
+    break;
+  case Alt(r1,r2):
+    fill_it(r1,v);
+    fill_it(r2,v);
+    break;
+  case Star(r1):
+    fill_it(r1,v);
+    Set::iter_c(fill_pos, &$(v,firstpos(r1)), lastpos(r1));
+    break;
+  default:
+    break;
+  }
+}
+
+static Set<transition_t> followpos(int sz, list<lexer_entry_t> entry_list) [?] {
+  Set<transition_t> v[?] = new {for i < sz : Set::empty(transition_cmp)};
+  for(; entry_list != null; entry_list = entry_list->tl) 
+    fill_it(entry_list->hd->regexp, v);
+  return v;
+}
+
+// Ocaml uses MAX_INT, but this should be large enough
+#define NO_ACTION (1 << 29)
+
+static $(int,list<int>)@ split_trans(transition_t      trans, 
+				     $(int,list<int>)@ act_pos_set) {
+  let &$(act, pos_set) = act_pos_set;
+  switch (trans) {
+  case OnChars(pos):   list<int> l = &cons(pos,pos_set); return &$(act, l);
+  case ToAction(act1): return (act1 < act) ? &$(act1,pos_set) : act_pos_set;
+  }
+}
+
+static $(int, list<int>)@ split_trans_set(Set<transition_t> trans_set) {
+  return Set::fold(split_trans, trans_set, &$(NO_ACTION,null));
+}
+
+// The Ocaml I'm porting from isn't functional (re-entrant) here either:
+// (It doesn't look too hard to pass the state around functionally.)
+static Opt_t<Dict<Set<transition_t>, int>> state_map      = null;
+static list<$(Set<transition_t>,int)@>     todo           = null;
+static int                                 next_state_num = 0;
+
+static void reset_state_mem() {
+  state_map      = &Opt(Dict::empty(Set::compare));
+  todo           = null;
+  next_state_num = 0;
+}
+
+static int get_state(Set<transition_t> st) {
+  try return Dict::lookup(state_map->v, st);
+  catch {
+  case Dict::Absent:
+    state_map->v = Dict::insert(state_map->v, st, next_state_num);
+    todo         = &cons(&$(st, next_state_num), todo);
+    return next_state_num++; // post-increment!
+  }
+}
+
+static automata_move_t goto_state(Set<transition_t> st) {
+  if(Set::is_empty(st))
+    return Backtrack;
+  else
+    return Goto(get_state(st));
+}
+
+static automata_move_t transition_from(list<int>         chars[?], 
+	     			       Set<transition_t> follow[?], 
+				       list<int>         pos_set)   [?] {
+  Set<transition_t> tr[?]    = new {for i < 257 : Set::empty(transition_cmp)};
+  automata_move_t   shift[?] = new {for i < 257 : Backtrack};
+  for(; pos_set != null; pos_set = pos_set->tl) {
+    int pos = pos_set->hd;
+    for(list<int> cs_pos = chars[pos]; cs_pos != null; cs_pos = cs_pos->tl) {
+      int c = cs_pos->hd;
+      tr[c] = Set::union_two(tr[c], follow[pos]);
+    }
+  }
+  for(int i=0; i <= 256; ++i)
+    shift[i] = goto_state(tr[i]);
+  return shift;
+}
+
+static automata_t translate_state(list<int>         chars[?], 
+				  Set<transition_t> follow[?], 
+				  Set<transition_t> state) {
+  switch (split_trans_set(state)) {
+  case &$(n,null): return Perform(n);
+  case &$(n,ps):   return Shift((n == NO_ACTION ? No_remember : Remember(n)),
+				transition_from(chars, follow, ps));
+  }
+}
+
+$(list<automata_entry_t>,automata_t[?])@ 
+make_dfa(Syntax::lexer_definition_t lexdef) {
+  let &$(chars, entry_list) = encode_lexdef(lexdef);
+  Set<transition_t> follow[?] = followpos(size(chars), entry_list);
+  reset_state_mem();
+  list<automata_entry_t> initial_states = null;
+  for(; entry_list != null; entry_list = entry_list->tl) {
+    let le = entry_list->hd;
+    initial_states = &cons(&Automata_entry{le->name,
+			 		   get_state(firstpos(le->regexp)),
+				 	   le->actions
+                                          },
+			   initial_states);
+  }
+  initial_states = List::imp_rev(initial_states);
+  list <$(automata_t,int)@> states = null;
+  while(todo != null) {
+    let &$(st,i) = todo->hd;
+    todo = todo->tl;
+    states = &cons(&$(translate_state(chars, follow, st), i), states);
+  }
+  states = List::imp_rev(states);
+  let actions = new {for i < next_state_num : Perform(0)};
+  for(; states != null; states = states->tl) {
+    let &$(act,i) = states->hd;
+    actions[i] = act;
+  }
+  reset_state_mem();
+  return &$(initial_states, actions);
+}

@@ -1,0 +1,48 @@
+#ifndef LEXGEN_H
+#define LEXGEN_H
+
+#include "core.h"
+#include "list.h"
+#include "syntax.h"
+
+#ifdef LEXGEN_CYC
+#define EXTERN_DEFINITION
+#else
+#define EXTERN_DEFINITION extern
+#endif
+
+using Core {
+using List {
+namespace Lexgen {
+
+// Representation of automata
+EXTERN_DEFINITION enum Automata_trans {
+  No_remember;
+  Remember(int);
+};
+typedef enum Automata_trans automata_trans_t;
+
+EXTERN_DEFINITION enum Automata_move {
+  Backtrack;
+  Goto(int);
+};
+typedef enum Automata_move automata_move_t;
+
+EXTERN_DEFINITION enum Automata { 
+  Perform(int); 
+  Shift(automata_trans_t, automata_move_t[?]);
+};
+typedef enum Automata automata_t;
+
+EXTERN_DEFINITION struct Automata_entry {
+  string                           name;
+  int                              initial_state;
+  list<$(int,Syntax::location_t)@> actions;
+};
+typedef struct Automata_entry @ automata_entry_t;
+
+extern 
+$(list<automata_entry_t>,automata_t[?])@ make_dfa(Syntax::lexer_definition_t);
+
+}}}
+#endif

@@ -1,0 +1,50 @@
+
+#include "core.h"
+#include "filename.h"
+#include "string.h"
+
+#include "syntax.h"
+#include "parser.h"
+#include "lexgen.h"
+#include "compact.h"
+#include "output.h"
+
+using Core;
+
+int cyc_main() {
+  string argv[?] = std_args();
+  int    arglen  = size(argv);
+  if(arglen < 2 || arglen > 3) {
+    fprintf(cyc_stderr, "Usage: cycocamllex <input file> [<output file>]");
+    return 1;
+  }
+  string source_name = argv[1];
+  string dest_name;
+  if(arglen==3)
+    dest_name = argv[2];
+  else if (Filename::check_suffix(source_name,(string)".cyl"))
+    dest_name = String::strconcat(Filename::chop_extension(source_name),
+				  (string)".cyc");
+  else
+    dest_name = String::strconcat(source_name, (string)".cyc");
+
+  FILE @ ic;
+  FILE @ oc; 
+  try {
+    ic = file_open(source_name, "rb"); // very important for fseek!
+    oc = file_open(dest_name,   "w");
+  } catch {
+  default: 
+    fprintf(cyc_stderr, "trouble opening files");
+    // FIX: remove dest file
+    return 1;
+  }
+  // FIX: catch errors!!!
+  Syntax::lexer_definition_t def = Parser::parse_file(ic);
+  let &$(entries, transitions) = Lexgen::make_dfa(def);
+  let tables = Compact::compact_tables(transitions);
+  Output::output_lexdef(source_name, ic, oc,
+			def->header, tables, entries, def->trailer);
+  
+  return 0;
+}

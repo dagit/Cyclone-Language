@@ -24,7 +24,7 @@ include Makefile.inc
 CYCC=../bin/$(CYCCOMP) # The .. is b/c this variable is used in lib and src
 OUT_PREFIX=
 
-all: cyclone tools
+all: bin/gc.a cyclone tools 
 
 install: all
 
@@ -34,8 +34,15 @@ cyclone:
 
 tools:
 	$(MAKE) install -C tools/cycbison
-	$(MAKE) install -C tools/cycocamllex
+	$(MAKE) install -C tools/cyclex
 .PHONY: tools
+
+bin/gc.a:
+ifdef WINDIR
+	ln bin/gc.windows $@
+else
+	ln bin/gc.libc5 $@
+endif
 
 # These targets build off the Cyclone source files, 
 # but do not replace anything in bin
@@ -76,7 +83,7 @@ clean_src_prefix:
 
 clean:
 	$(MAKE) clean -C tools/cycbison
-	$(MAKE) clean -C tools/cycocamllex
+	$(MAKE) clean -C tools/cyclex
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib
 	$(MAKE) clean -C bin/genfiles
@@ -85,5 +92,6 @@ clean:
 	rm -f bin/$(CYCLIB)
 	rm -f bin/$(RUNTIME).o
 	rm -f bin/cycbison.exe 
-	rm -f bin/cycocamllex.exe
+	rm -f bin/cyclex.exe
+	rm -f bin/gc.a
 	rm -f *~ doc/*~

@@ -10,7 +10,7 @@
 (*                                                                     *)
 (***********************************************************************)
 
-(* $Id: output.ml,v 1.1 2000-10-31 15:57:12 danieljg Exp $ *)
+(* $Id: output.ml,v 1.2 2000-11-06 16:41:31 danieljg Exp $ *)
 
 (* Output the DFA tables and its entry points *)
 
@@ -118,7 +118,6 @@ let output_lexdef sourcefile ic oc header tables entry_points trailer =
     (2 * (Array.length tables.tbl_base + Array.length tables.tbl_backtrk +
           Array.length tables.tbl_default + Array.length tables.tbl_trans +
           Array.length tables.tbl_check));
-  flush stdout;
   if Array.length tables.tbl_trans > 0x8000 then raise Table_overflow;
   copy_chunk sourcefile ic oc header;
   output_string oc "using Lexing {\n\n";

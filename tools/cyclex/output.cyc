@@ -1,0 +1,99 @@
+
+#include "core.h"
+#include "output.h"
+
+namespace Output;
+
+static string copy_buffer = ""; // initialized in output_lexdef
+
+/*void copy_chars(FILE @ ic, FILE @ oc, int start, int stop) {
+  int n = stop - start;
+  while(n > 0) {
+    int m = f_string_read(ic, copy_buffer, 0, (n < 1024 ? n : 1024));
+    f_string_write(oc, copy_buffer, 0, m);
+    n -= m;
+  }
+  }*/
+void copy_chars(FILE @ ic, FILE @oc, int start, int stop) {
+  for(int i = start; i < stop; ++i) {
+    char c = (char)fgetc(ic);
+    if(c != '\r')
+      fprintf(oc, "%c", c);
+  }
+}
+
+void copy_chunk(string sourcename, FILE @ ic, FILE @ oc, Syntax::location_t loc){
+  if(loc->start_pos < loc->end_pos) {
+    fprintf(oc, "#line %d \"%s\"\n", loc->start_line, sourcename);
+    for(int i=1; i <= loc->start_col; ++i)
+      fprintf(oc, "%c", ' ');
+    f_seek(ic, loc->start_pos);
+    copy_chars(ic, oc, loc->start_pos, loc->end_pos);
+  }
+}
+
+void output_array(FILE @ oc, int v[?]) { // Doesn't work for really short arrays?
+  fprintf(oc, "{");
+  for(int i=0; i < size(v)-1; ++i)
+    fprintf(oc, "%d,", v[i]);
+  fprintf(oc, "%d}", v[size(v)-1]);
+}
+
+void output_tables(FILE @oc, Compact::lex_tables_t tbl) {
+  fprintf(oc, "struct lex_tables *lt = null;\n");
+  fprintf(oc, "int lbase[?] = ");       output_array(oc, tbl->base);
+  fprintf(oc, ";\nint lbacktrk[?] = "); output_array(oc, tbl->backtrk);
+  fprintf(oc, ";\nint ldefault[?] = "); output_array(oc, tbl->defaultX);
+  fprintf(oc, ";\nint ltrans[?] = ");   output_array(oc, tbl->trans);
+  fprintf(oc, ";\nint lcheck[?] = ");   output_array(oc, tbl->check);
+  fprintf(oc, ";\n");
+}
+
+void output_entry(string sourcename, FILE @ ic, FILE @ oc, 
+		  Lexgen::automata_entry_t e) {
+  fprintf(oc, "int %s_rec<`a>(Lexbuf<`a> lexbuf, int lexstate) {\n", e->name);
+  // save new state, then switch on it , so default case can use it.
+  // (int switch can't get the value being switched on??)
+  fprintf(oc, "  if (lt == null) lt = &lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);\n");
+  fprintf(oc, "  lexstate = lex_engine((LexTables)lt,lexstate,lexbuf);\n");
+  fprintf(oc, "  switch (lexstate) {\n");
+  for(let actions=e->actions; actions!=null; actions=actions->tl) {
+    let &$(num,loc) = actions->hd;
+    fprintf(oc, "\ncase %d: \n", num);
+    copy_chunk(sourcename, ic, oc, loc);
+  }
+  fprintf(oc,
+    " default: lexbuf->refill_buff(lexbuf); return %s_rec(lexbuf,lexstate);\n",
+	  e->name);
+  fprintf(oc, "  }\n throw Error(\"some action didn't return!\");\n}\n");
+  fprintf(oc, "int %s<`a>(Lexbuf<`a> lexbuf) { return %s_rec(lexbuf,%d); }\n",
+          e->name, e->name, e->initial_state);
+}
+
+xenum exn { Table_overflow };
+
+void output_lexdef(string sourcename, 
+		   FILE @ ic, 
+		   FILE @ oc,
+		   Syntax::location_t    header,
+		   Compact::lex_tables_t tables,
+		   List::list<Lexgen::automata_entry_t> entry_points,
+		   Syntax::location_t    trailer) {
+  copy_buffer = new_string(1024);
+  fprintf(cyc_stderr, "%d states, %d transitions, table size %d bytes\n",
+	  size(tables->base),
+	  size(tables->trans),
+	  2 * (size(tables->base) + size(tables->backtrk)
+	       + size(tables->defaultX) + size(tables->trans)
+	       + size(tables->check)));
+  if(size(tables->trans) > 0x8000)
+    throw Table_overflow;
+  copy_chunk(sourcename, ic, oc, header);
+  fprintf(oc, "using Lexing {\n\n");
+  output_tables(oc, tables);
+  for(; entry_points != null; entry_points = entry_points->tl)
+    output_entry(sourcename, ic, oc, entry_points->hd);
+  fprintf(oc, "\n}\n");
+  copy_chunk(sourcename, ic, oc, trailer);
+}
+

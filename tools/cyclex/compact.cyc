@@ -1,0 +1,140 @@
+
+#include "core.h"
+#include "list.h"
+#include "ref.h"
+#include "hashtable.h"
+
+#include "lexgen.h"
+#include "compact.h"
+
+using Core;
+using List;
+using Lexgen;
+
+namespace Compact;
+
+struct Lex_tables {
+  int base[?];     // perform/shift
+  int backtrk[?];  // No_remember / Remember
+  int defaultX[?]; // Default transition
+  int trans[?];    // Transitions (compacted)
+  int check[?];    // Check (compacted)
+};
+
+// Determine the integer occurring most frequently in an array
+static int most_frequent_elt(int v[?]) {
+  Hashtable::Table<int,Ref::ref<int>> frequencies = 
+     Hashtable::create(17, intcmp, identity);
+  int max_freq  = 0;
+  int most_freq = 0;
+  for(int i=0; i < size(v); ++i) {
+    int      e = v[i];
+    Ref::ref<int> r;
+    try r = Hashtable::lookup(frequencies, e);
+    catch {
+    case Not_found: 
+      r = Ref::new_ref(0); 
+      Hashtable::insert(frequencies, e, r);
+      break;
+    }
+    int f = Ref::get(r) + 1;
+    Ref::set(r, f);
+    if(f > max_freq) {
+      max_freq  = f;
+      most_freq = e;
+    }
+  }
+  return most_freq;
+}
+
+// Transform an array into a list of (position, non-default element)
+
+static list<$(int,int)@> non_default_elements(int def, int v[?]) {
+  list<$(int,int)@> ans = null;
+  for(int i=size(v)-1; i >= 0; --i) {
+    int e = v[i];
+    if(e != def)
+      ans = &cons(&$(i,e), ans);
+  }
+  return ans;
+}
+
+// Compact the transition and check arrays (initialized in compact_tables)??
+static int trans[?] = {};
+static int check[?] = {};
+static int last_used = 0;
+
+static void grow_transitions() {
+  int old_trans[?] = trans;
+  int old_check[?] = check;
+  int n = size(old_trans);
+  trans = new {for i < 2*n : i < last_used ? old_trans[i] : 0};
+  check = new {for i < 2*n : i < last_used ? old_check[i] : -1};
+}
+
+extern  int pack_from(list<$(int,int)@> nondef, int b);
+
+static int try_pack(list<$(int,int)@> nondef, list<$(int,int)@> rem, int b) {
+  switch (rem) {
+  case null: return b;
+  case &cons{.hd= &$(pos,v), .tl= rem2}:
+    if(check[b+pos] == -1)
+      return try_pack(nondef, rem2, b);
+    else
+      return pack_from(nondef,b+1);
+  }
+}
+
+static int pack_from(list<$(int,int)@> nondef, int b) {
+  while(b+257 > size(trans))
+    grow_transitions();
+  return try_pack(nondef, nondef, b);
+}
+
+static $(int,int)@ pack_moves(int state_num, automata_move_t moves[?]) {
+  int moves_v[?] = new {for i < 257 : 
+		       ({int x; 
+		       switch(moves[i]) { 
+		       case Backtrack: x = -1; break;
+		       case Goto(n):   x = n;  break;
+		       }
+		       x;
+		       })};
+  int               def    = most_frequent_elt(moves_v);
+  list<$(int,int)@> nondef = non_default_elements(def, moves_v);
+  int               base   = pack_from(nondef,0);
+
+  for(; nondef != null; nondef = nondef->tl) {
+    let &$(pos,v) = nondef->hd;
+    trans[base+pos] = v;
+    check[base+pos] = state_num;
+  }
+  if(base + 257 > last_used)
+    last_used = base + 257;
+  return &$(base, def);
+}
+
+lex_tables_t compact_tables(Lexgen::automata_t state_v[?]) {
+  trans = new {for i < 1024 : 0};
+  check = new {for i < 1024 : -1};
+  int n = size(state_v);
+  int base[?]     = new {for i < n : 0};
+  int backtrk[?]  = new {for i < n : -1};
+  int defaultX[?] = new {for i < n : 0};
+  for(int i = 0; i < n; ++i)
+    switch (state_v[i]) {
+    case Perform(m): base[i] = -(m+1); break;
+    case Shift(trans,move):
+      switch (trans) {
+      case No_remember: break;
+      case Remember(m): backtrk[i] = m; break;
+      }
+      let &$(b,d) = pack_moves(i,move);
+      base[i]     = b;
+      defaultX[i] = d;
+      break;
+    }
+  return &Lex_tables(base, backtrk, defaultX, 
+		     new {for i < last_used : trans[i]},
+		     new {for i < last_used : check[i]});
+}

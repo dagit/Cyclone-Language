@@ -43,7 +43,7 @@ install: all
 
 clean::
 	rm -f cycocamllex.exe
-	rm -f *.cmx *.cmi *.obj *~
+	rm -f *.cmx *.cma *.cmi *.cmo *.obj *~ *.stackdump *.output
 
 parser.ml parser.mli: parser.mly
 	$(CAMLYACC) $(YACCFLAGS) parser.mly
@@ -63,6 +63,9 @@ beforedepend:: lexer.ml
 
 .SUFFIXES:
 .SUFFIXES: .ml .cmx .mli .cmi
+
+.ml.cmo:
+	$(CAMLC) -c $(COMPFLAGS) $<
 
 .ml.cmx:
 	$(CAMLC) -c $(COMPFLAGS) $<

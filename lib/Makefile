@@ -5,7 +5,7 @@ include ../Makefile.inc
 # an absolute path)
 CYCC=../bin/$(CYCCOMP)
 
-CYCLEX=../bin/cycocamllex.exe
+CYCLEX=../bin/cyclex.exe
 
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
