@@ -239,7 +239,7 @@ namespace Absyn {
 
   // used to distinguish ? pointers from *{c} or @{c} pointers
   EXTERN_ABSYN datatype Bounds {
-    DynEither_b;    // t?+-
+    DynEither_b;    // t?
     Upper_b(exp_t); // t*{x:x>=0 && x < e} and t@{x:x>=0 && x < e}
   };
   extern_datacon(Bounds,DynEither_b);

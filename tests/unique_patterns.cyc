@@ -130,60 +130,32 @@ void func3b(struct s3<`U> @`U s) {
 //   Core::ufree(s->s.ps); // fails
 }
 
-// void func3ca(struct s3<`U> *`U s) {
-//   int z;
-//   switch (s) {
-//   case &s3{.s=s2{.ps=ps,...},.x=x}:
-//     z = *ps->p + *x;
-// //     Core::ufree(ps); // causes failure below
-//     switch (ps) {
-//     case &s1{.p=p,...}: break;
-//     default: break;
-//     }
-//     goto lab;
-//   default:
-//     z = 0;
-//   }
-//  lab:
-//   { switch (s) {
-//     case &s3{.s=s2{.ps=ps,...},...}:
-//       switch (ps) {
-//       case &s1{.p=p,...}:
-//         z += *p;
-//         goto lab2;
-//       default: break;
-//       }
-//       break;
-//   default: break;
-//   }
-//   lab2:
-// //     Core::ufree(s->s.ps); // fail
-//     goto lab3;
-//   }
-//   lab3:
-//   Core::ufree(s->s.ps->p);
-//   Core::ufree(s->s.ps);
-//   Core::ufree(s->s.x);
-//   Core::ufree(s);
-// }
-
 void func3c(struct s3<`U> *`U s) {
   int z;
   switch (s) {
   case &s3{.s=s2{.ps=ps,...},.x=x}:
-    z = *ps->p + *x; 
+    z = *ps->p + *x;
 //     Core::ufree(ps); // causes failure below
-    let &s1{.p=p,...} = ps;
+    switch (ps) {
+    case &s1{.p=p,...}: break;
+    default: break;
+    }
     goto lab;
   default:
     z = 0;
   }
  lab:
-  { let &s3{.s=s2{.ps=ps,...},...} = s;
-    { let &s1{.p=p,...} = ps;
-      z += *p;
-      goto lab2;
-    }
+  { switch (s) {
+    case &s3{.s=s2{.ps=ps,...},...}:
+      switch (ps) {
+      case &s1{.p=p,...}:
+        z += *p;
+        goto lab2;
+      default: break;
+      }
+      break;
+  default: break;
+  }
   lab2:
 //     Core::ufree(s->s.ps); // fail
     goto lab3;
@@ -194,6 +166,34 @@ void func3c(struct s3<`U> *`U s) {
   Core::ufree(s->s.x);
   Core::ufree(s);
 }
+
+// void func3c(struct s3<`U> *`U s) {
+//   int z;
+//   switch (s) {
+//   case &s3{.s=s2{.ps=ps,...},.x=x}:
+//     z = *ps->p + *x; 
+// //     Core::ufree(ps); // causes failure below
+//     let &s1{.p=p,...} = ps;
+//     goto lab;
+//   default:
+//     z = 0;
+//   }
+//  lab:
+//   { let &s3{.s=s2{.ps=ps,...},...} = s;
+//     { let &s1{.p=p,...} = ps;
+//       z += *p;
+//       goto lab2;
+//     }
+//   lab2:
+// //     Core::ufree(s->s.ps); // fail
+//     goto lab3;
+//   }
+//   lab3:
+//   Core::ufree(s->s.ps->p);
+//   Core::ufree(s->s.ps);
+//   Core::ufree(s->s.x);
+//   Core::ufree(s);
+// }
 
 // noconsume(x) parameters
 void func4a(struct s3<`U> @`U s) __attribute__((noconsume(1))) {

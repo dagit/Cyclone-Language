@@ -2914,6 +2914,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             e->r = cast_it_r(*t,fncall_exp(_check_null_e,
                                            new List(e1,NULL),DL));
           } else {
+	    // no check needed -- see if we can drop the cast all together
             if (unify(old_t2_c,new_typ_c))
               e->r = e1->r;
           }
@@ -3383,7 +3384,7 @@ DynCast:
       total_bounds_checks++;
       switch (conref_def(bounds_one,b)) {
       case &Upper_b(esz):
-        bool possibly_null = conref_def(false,bcr) && need_null_check;
+        bool possibly_null = conref_def(false,bcr) && need_nullchk;
 	type_t ta1 = typ_to_c(ta);
 	type_t ta2 = cstar_typ(ta1, tq);
         if (in_bnds && !possibly_null)

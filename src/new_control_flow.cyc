@@ -427,6 +427,7 @@ static $(flow_t<`r>,list_t<absRval_t<`r>,`rgn>)
   flow_t outflow;
   list_t<absRval_t,`rgn> rvals;
   // expand out any unique paths in the flow before iterating
+  DEBUG_PRINT("anal_unordered begin\n");
   inflow = expand_unique_places(env,inflow,es);
   do { // unnecessarily recomputes rvals each time
     this_all_changed = env->fenv->mt_place_set;
@@ -461,6 +462,7 @@ static $(flow_t<`r>,list_t<absRval_t<`r>,`rgn>)
     env->all_changed = rnew(env->r) union_place_set(*outer_all_changed,
                                                     this_all_changed, false);
   update_tryflow(env,outflow);
+  DEBUG_PRINT("anal_unordered completed\n");
   return $(outflow,imp_rev(rvals));
 }
 
@@ -622,7 +624,13 @@ static $(flow_t<`r>,absRval_t<`r>)
           }
 	  break;
 	case &AddressOf(p):
+	  // could be possibly null if this place was introduced by
+	  // dereferencing a unique pointer.
+	  bool possibly_null = false;
           switch (e->annot) {
+	  case &UnknownZ(relns2):
+	    possibly_null = true;
+	    fallthru(relns2);
           case &NotZero(relns2):
             if (!same_relns(relns,relns2)) fallthru;
             break;
@@ -630,10 +638,16 @@ static $(flow_t<`r>,absRval_t<`r>)
             // if e isn't a subscript, we don't need th relns
             switch (e->r) {
             case &Subscript_e(_,_):
-              e->annot = new NotZero(copy_relns(Core::heap_region,relns));
+	      if (possibly_null)
+		e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
+	      else
+		e->annot = new NotZero(copy_relns(Core::heap_region,relns));
               break;
             default:
-              e->annot = &mt_notzero_v;
+	      if (possibly_null)
+		e->annot = &mt_unknownz_v;
+	      else
+		e->annot = &mt_notzero_v;
               break;
             }
             break;
@@ -737,6 +751,7 @@ static flow_t<`r> restore_noconsume_arg(analenv_t<`r> env,
     DEBUG_PRINT_F(print_flow,inflow);
     fd=assign_place(env->fenv,loc,fd,env->all_changed,p,new_rval);
     inflow = ReachableFL(fd,relns);
+    update_tryflow(env, inflow);
     DEBUG_PRINT("}\n and outflow is {\n");
     DEBUG_PRINT_F(print_flow,inflow);
     DEBUG_PRINT("}\n");
@@ -761,7 +776,6 @@ static $(flow_t<`r>,absRval_t<`r>)
 
   switch(outflow) {
   case {.BottomFL = _}:
-    DEBUG_PRINT("leaving AssignOp_e\n");
     return $(BottomFL(),rval);
   case {.ReachableFL = $(indict,relns)}:
     switch(lval) {
@@ -782,12 +796,10 @@ static $(flow_t<`r>,absRval_t<`r>)
          break;
         }
       }
-      DEBUG_PRINT("in AssignOp_e; calling update_tryflow\n");
+      DEBUG_PRINT("do_assign; calling update_tryflow\n");
       update_tryflow(env, outflow);
-      DEBUG_PRINT("leaving AssignOp_e\n");
       return $(outflow, rval);
     case {.UnknownL = _}:
-      DEBUG_PRINT("leaving AssignOp_e\n");
       return $(use_Rval(env,rexp->loc,outflow,rval), rval);
     }
   }
@@ -804,14 +816,14 @@ static flow_t<`r> do_initialize_var(flow_env_t<`r> fenv,
   switch(f) {
   case {.BottomFL = _}: return BottomFL();
   case {.ReachableFL = $(outdict,relns)}:
+    DEBUG_PRINT("initializing pattern var %s:%s to %s\n",
+		qvar2string(vd->name),typ2string(vd->type),exp2string(rexp));
     outdict = assign_place(fenv,loc,outdict,env->all_changed,
 			   rnew(env->r) Place(rnew(env->r) VarRoot(vd),NULL),
 			   rval);
     relns = reln_assign_var(env->r,relns,vd,rexp);
     let outflow = ReachableFL(outdict,relns);
     update_tryflow(env,outflow);
-    DEBUG_PRINT("initializing pattern var %s:%s to %s\n",
-		qvar2string(vd->name),typ2string(vd->type),exp2string(rexp));
     //fprintf(stderr,"outflow for decl %s:",Absynpp::qvar2string(vd->name));
     //print_relns(relns); fprintf(stderr,"\n");
     return outflow;
@@ -878,7 +890,6 @@ static flow_t<`r> initialize_pat_vars(flow_env_t<`r> fenv,
 	    new_rval = rnew (fenv->r) NamedLocation(*vd, new_rval);
 	    fd = assign_place(fenv,exp_loc,fd,env->all_changed,p,new_rval);
 	    f = ReachableFL(fd,relns);
-	    update_tryflow(env,f);
 	    break;
 
 	  default:
@@ -894,9 +905,6 @@ static flow_t<`r> initialize_pat_vars(flow_env_t<`r> fenv,
 	    // case, we just won't be able to unconsume it.
 	  }
 	}
-
-	// MWH: is this necessary?  Was in the old Alias_d code.
-// 	f = use_Rval(env,exp_loc,ReachableFL(fd,relns),rval);
 	inflow = do_initialize_var(fenv,env,f,*vd,ve,rval,pat_loc);
 	break;
 
@@ -1000,6 +1008,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       else {
 	let new_rval = make_unique_consumed(fenv,(type_t)e->topt,e,env->iteration_num,old_rval);
 	let outdict = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
+	// FIX: do I need to update the tryflow here?
 	DEBUG_PRINT("place is ");
 	DEBUG_PRINT_F(print_place,p);
 	DEBUG_PRINT(", old_rval is ");
@@ -1069,6 +1078,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       f = ReachableFL(assign_place(fenv,e1->loc,outdict,
                                    env->all_changed,p,fenv->unknown_all),
                       relns);
+      // FIX: do I need to update the tryflow here?
       break;
     default: break;
     }
@@ -1093,6 +1103,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	outdict = assign_place(fenv,l->loc,outdict,
 			       env->all_changed,p,fenv->unknown_all);
 	f = ReachableFL(outdict,relns);
+	// FIX: do I need to update the tryflow here?
         DEBUG_PRINT("assignOp: new flow=\n");
         DEBUG_PRINT_F(print_flow,f);
 	break;
@@ -1201,12 +1212,11 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	      case &AddressOf(p):
 		switch(Tcutil::compress((type_t)es->hd->topt)) {
 		case &PointerType(PtrInfo(t,_,_)):
-		  // XXX: should I propagate NamedLocation here?  Seems
-		  //   pointless since I'm escaping it anyway
 		  ans_d = assign_place(fenv, es->hd->loc, ans_d,
 				       env->all_changed,
 				       p, typ_to_absrval(fenv,t,false,
 							 fenv->esc_all));
+		  // FIX: update the tryflow here?
 		  break;
 		default: Tcutil::impos("anal_Rexp:bad type for initialized arg");
 		}
@@ -1231,6 +1241,9 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
           DEBUG_PRINT("}\n");
         }
 	else {
+	  // FIX: for noconsume args, use_Rval will unnecessarily restrict
+	  //   what can be live in the exception handler.  Should avoid
+	  //   update_tryflow there for these cases.
 	  outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
 	  if (List::memq(noconsume_params,i) && 
 	      Tcutil::is_noalias_pointer((type_t)es->hd->topt,false))
@@ -1316,6 +1329,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       relns = reln_kill_exp(fenv->r,relns,e2);
       // create new flow
       outflow = ReachableFL(outdict,relns);
+      update_tryflow(env,outflow);
       break;
     default: break;
     }
@@ -1657,7 +1671,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 // dereferenced, we here set the annotations needed for null-check
 // elimination, etc., and return an appropriate lvalue; either a place
 // if it is known or else UnknownL.  If [passthrough_consumes] is true
-// we skip any consumed attributes so as to find the underlying lexp.
+// we skip any consumed attributes so as to find the underlying lexp.  If [expanded_place] is true, then we cannot assume an AddrOf location is not null.
 static $(flow_t<`r>,absLval_t<`r>)
   anal_derefL(analenv_t<`r> env,
 	      flow_t<`r> inflow,
@@ -1665,6 +1679,7 @@ static $(flow_t<`r>,absLval_t<`r>)
 	      flow_t<`r> f,
 	      absRval_t<`r> r,
 	      bool passthrough_consumes,
+	      bool expanded_place,
               list_t<int,`r> flds) {
   let fenv = env->fenv;
   switch(Tcutil::compress((type_t)e->topt)) {
@@ -1682,7 +1697,24 @@ static $(flow_t<`r>,absLval_t<`r>)
 	case &NotZeroThis:
           e->annot = new NotZero(copy_relns(Core::heap_region,relns)); break;
 	case &AddressOf(&Place(root,flds2)):
-	  e->annot = new NotZero(copy_relns(Core::heap_region,relns));
+	  // if this place was expanded out, we can't be sure it's non-zero
+	  if (expanded_place) {
+	    DEBUG_PRINT("--requiring null check on expanded place for %s\n",
+			exp2string(e));
+	    e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
+	  }
+	  else {
+	    switch (e->annot) {
+	      // See if this was annotated as an expanded place before.
+	      // If so, we leave it that way.
+	    case &UnknownZ(_):
+	      e->annot = new UnknownZ(copy_relns(Core::heap_region,relns));
+	      break;
+	    default:
+	      e->annot = new NotZero(copy_relns(Core::heap_region,relns));
+	      break;
+	    }
+	  }
 	  return $(f, PlaceL(rnew(fenv->r) Place(root, rappend(fenv->r,flds2,flds))));
 	case &Zero:
 	  e->annot = &IsZero_val;
@@ -1751,19 +1783,23 @@ static $(flow_t<`r>,absLval_t<`r>)
   case &Deref_e(e1):
     DEBUG_PRINT("anal_Lexp: found deref |%s|\n",exp2string(e));
     if (expand_unique && Tcutil::is_noalias_pointer((type_t)e1->topt,true)) {
-      DEBUG_PRINT("acquring Lexp for %s\n",exp2string(e1));
+      DEBUG_PRINT("acquiring Lexp for %s\n",exp2string(e1));
       let $(f,lval) =
 	anal_Lexp(env,inflow,
 		  Tcutil::is_noalias_pointer((type_t)e1->topt,true),
 		  passthrough_consumes,e1);
       switch $(f,lval) {
       case $({.ReachableFL = $(fd,r)},{.PlaceL = p}):
-        let $(rval,names) = unname_rval(env->fenv->r,lookup_place(fd,p));
+	let old_rval = lookup_place(fd,p);
+        let $(rval,names) = unname_rval(env->fenv->r,old_rval);
 	switch (rval) {
 	case &NamedLocation(n,r):
 	  throw new Core::Impossible("bad named location in anal_Lexp:deref");
         case &Consumed(_,_,&AddressOf(...)): fallthru;
-        case &AddressOf(...): return anal_derefL(env,f,e1,f,rval,passthrough_consumes,flds);
+        case &AddressOf(...): 
+	  // We don't have to indicate this is an expanded location
+	  // because we would have inserted the check on a prior path.
+	  return anal_derefL(env,f,e1,f,old_rval,passthrough_consumes,false,flds);
         default:
 	  DEBUG_PRINT("expanding unique %s found place ",exp2string(e1));
 	  DEBUG_PRINT_F(print_place,p);
@@ -1782,16 +1818,20 @@ static $(flow_t<`r>,absLval_t<`r>)
           fd = Dict::insert(fd,new_root,new_rval);
           fd = assign_place(fenv,e->loc,fd,env->all_changed,p,res);
           let outflow = ReachableFL(fd,r);
+	  // FIX: update try flow here?
           DEBUG_PRINT("after expansion, flow is ");
           DEBUG_PRINT_F(print_flow,outflow);
           DEBUG_PRINT("\n");
-          return anal_derefL(env,outflow,e1,outflow,res,passthrough_consumes,flds);
+	  // Because we expanded this out, we can't rely on it to be not
+	  // null, so we indicate as much to anal_derefL
+          return anal_derefL(env,outflow,e1,outflow,res,passthrough_consumes,
+			     true,flds);
         }
       default: break;
       }
     }
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
-    return anal_derefL(env,inflow,e1,f,r,passthrough_consumes,flds);
+    return anal_derefL(env,inflow,e1,f,r,passthrough_consumes,false,flds);
   case &Subscript_e(e1,e2):
     // assumes that tuple-projection implies e2 is pure and is evaluable
     switch(Tcutil::compress((type_t)e1->topt)) {
@@ -1813,7 +1853,7 @@ static $(flow_t<`r>,absLval_t<`r>)
           break;
         default: break;
         }
-        let $(f3,r) = anal_derefL(env,inflow,e1,f,rvals->hd,passthrough_consumes,flds);
+        let $(f3,r) = anal_derefL(env,inflow,e1,f,rvals->hd,passthrough_consumes,false,flds);
         switch (f3) {
         case {.BottomFL = _}: return $(f3,r);
         default: return $(f2,r);
@@ -1849,6 +1889,7 @@ anal_Lexp(analenv_t<`r> env, flow_t<`r> inflow, bool expand_unique,
 // [inflow], if necessary, and return the final flow as a result.
 static flow_t<`r> expand_unique_places(analenv_t<`r> env, flow_t<`r> inflow, 
 				       list_t<exp_t> es) {
+  DEBUG_PRINT("BEGIN expanding unique places\n");
   for (_ x = es; x != NULL; x = x->tl) {
     if (is_local_var_rooted_path(x->hd,true) &&
 	Tcutil::is_noalias_pointer_or_aggr(env->r,(type_t)x->hd->topt)) {
@@ -1856,6 +1897,7 @@ static flow_t<`r> expand_unique_places(analenv_t<`r> env, flow_t<`r> inflow,
       inflow = f;
     }
   }
+  DEBUG_PRINT("DONE expanding unique places\n");
   return inflow;
 }
 
@@ -2273,6 +2315,7 @@ static flow_t<`r> unconsume_params(analenv_t<`r> env,
       Tcutil::impos("unconsume_params: flow became Bottom!");
     }
   }
+  update_tryflow(env,flow);
   return flow;
 }
 

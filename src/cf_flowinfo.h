@@ -105,7 +105,8 @@ EXTERN_CFFLOW datatype AbsRVal<`r::R> {
                // what it points to
   UnknownR(initlevel_t); // don't know what the value is
   Esc(initlevel_t); // as an rval means same thing as UnknownR!!
-  AddressOf(place_t<`r,`r>); // I am a pointer to this place (implies not zero)
+  AddressOf(place_t<`r,`r>); // I am a pointer to this place; implies not zero
+                             // when not introduced by deref of unique pointer
   // if you're a tagged union, struct, or tuple, you should always
   // evaluate to an Aggregate in the abstract interpretation (datatype?)
   Aggregate(union_rinfo_t, aggrdict_t<`r>);
