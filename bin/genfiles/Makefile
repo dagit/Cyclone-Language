@@ -20,6 +20,11 @@ copy: ../cyc-lib/$(CYCLIB) ../cyclone$(EXE) ../cyc-lib/nogc.a
 ../cyc-lib/nogc.a: lib/nogc.a
 	cp lib/nogc.a ../cyc-lib
 
+install_a:
+	$(MAKE) -C lib libcyc_a.a nogc_a.a
+	cp lib/libcyc_a.a ../cyc-lib
+	cp lib/nogc_a.a ../cyc-lib
+
 clean:
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib

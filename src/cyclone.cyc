@@ -62,7 +62,8 @@ static bool tovc_r     = false;
 static bool v_r        = false;
 static bool save_temps_r = false;
 static bool save_c_r   = false;
-static bool nogc_r   = false;
+static bool nogc_r     = false;
+static bool pa_r       = false;
 static bool add_cyc_namespace_r = true;
 static bool print_full_evars_r = false;
 static bool print_all_tvars_r = false;
@@ -103,9 +104,9 @@ static void add_ccarg2(string_t flag,string_t arg) {
 
 // Ideally we would simply pass library args as ccargs, preserving
 // their order with the other ccargs.  But if, e.g., -lm precedes
-// cyclib.a, then we get a "multiple definitions of main" error, via
+// libcyc.a, then we get a "multiple definitions of main" error, via
 // libmain.c.  So, we separate out the library args from the ccargs
-// so that we can force cyclib.a to appear first.
+// so that we can force libcyc.a to appear first.
 static list_t<stringptr_t> libargs = null;
 static void add_libarg(string_t s) {
   libargs = new List(new s,libargs);
@@ -138,7 +139,8 @@ static void set_nocyc() {
   add_ccarg("-DNO_CYC_PREFIX");
 }
 
-static void set_mprof() {
+static void set_pa() {
+  pa_r = true;
   add_ccarg("-DCYC_REGION_PROFILE");
 }
 
@@ -649,12 +651,14 @@ int main(int argc, string_t ? argv) {
                "    Compile for prof"),
          new $("-pg",new Flag_spec(add_ccarg),
                "   Compile for gprof"),
+         new $("-pa",new Unit_spec(set_pa),
+               "   Compile for aprof"),
          new $("-S",new Unit_spec(set_stop_after_asmfile),
                "    Stop after producing assembly code"),
          new $("-M",new Unit_spec(set_produce_dependencies),
                "    Produce dependencies"),
          new $("-MG",new Flag_spec(add_cpparg),
-               "    When producing dependencies assume missing files are generated"),
+               "   When producing dependencies assume missing files are generated"),
          new $("-MT",new String_spec(set_dependencies_target),
                "   Give target for dependencies"),
          new $("-E",new Set_spec(&stop_after_cpp_r),
@@ -684,8 +688,6 @@ int main(int argc, string_t ? argv) {
                "Don't add implicit namespace Cyc"),
          new $("-nogc",new Set_spec(&nogc_r),
                " Don't link in the garbage collector"),
-         new $("-mprof",new Unit_spec(set_mprof),
-               "Compile for memory profiling"),
          new $("-noremoveunused",new Set_spec(&noshake_r),
                "\n"
                "        Don't remove externed variables that aren't used"),
@@ -700,7 +702,7 @@ int main(int argc, string_t ? argv) {
                "        Always print kinds of type variables"),
          new $("-printfullevars", new Set_spec(&print_full_evars_r),
                "\n"
-               "       Print full information for evars (type debugging)")
+               "        Print full information for evars (type debugging)")
          );
 
   Arg::parse(options, add_other, "Options:", argv);
@@ -717,7 +719,7 @@ int main(int argc, string_t ? argv) {
   if (ccargs == null) return 0;
 
   // Run the C compiler
-  // First, find the files cyclib.a, gc.a, cyc_include.h
+  // First, find the files libcyc.a, gc.a, cyc_include.h
   string_t cyclone_exec_prefix = Stdlib::getenv("CYCLONE_EXEC_PREFIX");
   if (cyclone_exec_prefix != null)
     cyclone_exec_prefix_path = new List(new cyclone_exec_prefix,
@@ -745,13 +747,16 @@ int main(int argc, string_t ? argv) {
     stdlib_string = (string_t)"";
   } else {
 
-    let cyclib = do_find(cyclone_exec_prefix_path,"cyclib.a");
+    string_t libcyc_filename = pa_r ? "libcyc_a.a" : "libcyc.a";
+    string_t nogc_filename = pa_r ? "nogc_a.a" : "nogc.a";
+
+    let libcyc = do_find(cyclone_exec_prefix_path,libcyc_filename);
     let gc = (nogc_r ?
-              do_find(cyclone_exec_prefix_path,"nogc.a"):
+              do_find(cyclone_exec_prefix_path,nogc_filename):
               do_find(cyclone_exec_prefix_path,"gc.a"));
 
-    stdlib = list(new cyclib /*, new gc*/);
-    stdlib_string = xprintf(" %s %s", cyclib, gc);
+    stdlib = list(new libcyc /*, new gc*/);
+    stdlib_string = xprintf(" %s %s", libcyc, gc);
   }
 
   if (ic_r) try {

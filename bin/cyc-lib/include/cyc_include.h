@@ -174,12 +174,12 @@ struct _tagged_arr _tagged_arr_inplace_plus_post(struct _tagged_arr * arr_ptr,
 extern void * GC_malloc(int);
 extern void * GC_malloc_atomic(int);
 #ifdef CYC_REGION_PROFILE
-extern void * GC_profile_malloc(int,char *file,int lineno);
-extern void * GC_profile_malloc_atomic(int,char *file,int lineno);
+extern void * _profile_GC_malloc(int,char *file,int lineno);
+extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
-#define GC_malloc(n) GC_profile_malloc(n,__FUNCTION__,__LINE__)
-#define GC_malloc_atomic(n) GC_profile_malloc_atomic(n,__FUNCTION__,__LINE__)
+#define GC_malloc(n) _profile_GC_malloc(n,__FUNCTION__,__LINE__)
+#define GC_malloc_atomic(n) _profile_GC_malloc_atomic(n,__FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FUNCTION__,__LINE__)
 #endif
 

@@ -50,6 +50,11 @@ cyclone_src: lib_src
 lib_src:
 	$(MAKE) -C lib CYCC=$(CYCC) OUT_PREFIX=$(OUT_PREFIX)
 
+# Allocation profiler and its special version of the Cyclone library
+aprof:
+	$(MAKE) install_a -C bin/genfiles
+	$(MAKE) install -C tools/aprof
+
 # This target compares the C files in bin/genfiles to those in src
 # Lack of difference means running the update would have no real effect.
 diff: cyclone_src
@@ -102,22 +107,21 @@ clean_src_prefix:
 clean_nogc:
 	$(MAKE) clean -C tools/cycbison
 	$(MAKE) clean -C tools/cyclex
+	$(MAKE) clean -C tools/aprof
 #	$(MAKE) clean -C tools/cycocamllex
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib
 	$(MAKE) clean -C bin/genfiles
 	$(MAKE) clean -C tests
-#	$(MAKE) clean -C gc
-#	rm -f gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
-	rm -f bin/cyclone bin/cyclone.exe 
-	rm -f bin/$(CYCLIB)
-	rm -f bin/$(RUNTIME).o
-	rm -f bin/cycbison bin/cycbison.exe 
-	rm -f bin/cyclex bin/cyclex.exe
-	rm -f *~ doc/*~
+	$(RM) bin/cyclone bin/cyclone.exe 
+	$(RM) bin/cyc-lib/$(CYCLIB)
+	$(RM) bin/cycbison bin/cycbison.exe 
+	$(RM) bin/cyclex bin/cyclex.exe
+	$(RM) bin/aprof bin/aprof.exe
+	$(RM) bin/cyc-lib/libcyc_a.a bin/cyc-lib/nogc_a.a
+	$(RM) *~ doc/*~ amon.out
 
 clean: clean_nogc
 	$(MAKE) clean -C gc
-	rm -f gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
-	rm -f bin/cyc-lib/gc.a bin/gc_pg.a bin/cyc-lib/nogc.a
-
+	$(RM) gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
+	$(RM) bin/cyc-lib/gc.a bin/gc_pg.a bin/cyc-lib/nogc.a

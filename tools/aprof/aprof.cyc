@@ -1,0 +1,183 @@
+/* Allocation profiler
+   Copyright (C) 2001 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <core.h>
+#include <string.h>
+#include <hashtable.h>
+#include <stdio.h>
+#include <array.h>
+
+using Core;
+using Stdio;
+using String;
+using Hashtable;
+
+
+char buf[80];
+
+int count = 0;
+int total_bytes = 0;
+int total_calls = 0;
+// int region_count = 0;
+// int free_count = 0;
+// int region_bytes = 0;
+// int region_allocs = 0;
+// int heap_bytes = 0;
+// int heap_allocs = 0;
+// int heapatomic_bytes = 0;
+// int heapatomic_allocs = 0;
+
+void inccount(stringptr_t pos, $(int,int) @totals) {
+  total_bytes += (*totals)[0];
+  total_calls += (*totals)[1];
+  count++;
+}
+
+$(stringptr_t,int,int)@ ?results = null;
+
+int index = 0;
+void add(stringptr_t pos, $(int,int) @totals) {
+  results[index++] = new $(pos,(*totals)[0],(*totals)[1]);
+}
+
+int cmp($(stringptr_t,int,int) @x,$(stringptr_t,int,int) @y) {
+  let left =  (*x)[1];
+  let right = (*y)[1];
+  if (left>right) return -1;
+  if (left<right) return 1;
+  return 0;
+}
+
+void print_results() {
+//   printf("region_count:\t %8d\n",region_count);
+//   printf("free_count:\t %8d\n",free_count);
+//   printf("region_bytes:\t %8d\n",region_bytes);
+//   printf("region_allocs:\t %8d\n",region_allocs);
+//   printf("heap_bytes:\t %8d\n",heap_bytes);
+//   printf("heap_allocs:\t %8d\n",heap_allocs);
+//   printf("heapatomic_bytes:\t %8d\n",heapatomic_bytes);
+//   printf("heapatomic_allocs:\t %8d\n",heapatomic_allocs);
+//   printf("\n");
+
+  printf("   Bytes     %%    Calls     %%\n");
+  printf("-----------------------------\n");
+  for (int i = 0; i < count; i++) {
+    let &$(pos,byte_count,call_count) = results[i];
+    printf("%8d  %4.1f %8d  %4.1f  %s\n",
+           byte_count, 100.0 * byte_count / (double) total_bytes,
+           call_count, 100.0 * call_count / (double) total_calls,
+           *pos);
+  }
+}
+
+bool eof = false;
+
+void skip_whitespace(FILE @f) {
+  int c = getc(f);
+  while (c == ' ' || c == '\t' || c == '\n') 
+    c = getc(f);
+  ungetc(c,f);
+}
+  
+
+bool gettoken(FILE @f) {
+  int i = 0;
+  int c;
+  skip_whitespace(f);
+  c = getc(f);
+  if (c == EOF) return false;
+  while (c != EOF && c != ' ' && c != '\t' && c != '\n') {
+    buf[i++] = (char)c;
+    c = getc(f);
+  }
+  buf[i] = '\0';
+  ungetc(c,f);
+  return true;
+}  
+
+void snarfline(FILE @f) {
+  int c = getc(f);
+  while (c != '\n' && c != EOF) c = getc(f);
+  ungetc(c,f);
+}
+
+int main(int argc, string_t ?argv) {
+  FILE @f;
+  if (argc < 2) {
+    f = (FILE @)fopen("amon.out","r");
+  } else {
+    f = (FILE @)fopen(argv[1],"r");
+  }
+  table_t<stringptr_t,$(int,int)@,{},{}> table =
+      create(101, strptrcmp, hash_stringptr);
+
+  // get the program point
+  while (gettoken(f)) {
+    if (strcmp(buf,"----") == 0) break;
+    string_t @s = new ((string_t)String::strdup(buf));
+    // get the allocation amount
+    if (!gettoken(f)) {
+      fprintf(stderr,"missing allocation amount for %s\n",*s); return -1;
+    }
+    int count;
+    try {
+      count = to_int(buf,null);
+    } catch {
+    default: fprintf(stderr,"bad integer %s\n",buf); return -1;
+    }
+    // skip the rest of the info on the line
+    try {
+      snarfline(f);
+    } catch {
+    default: fprintf(stderr,"snarfline failed\n"); break;
+    }
+    try {
+      let &$(*byte_count,*call_count) = lookup(table, s);
+      *byte_count = *byte_count + count;
+      *call_count = *call_count + 1;
+    } catch {
+    case Not_found:
+      insert(table, s, new $(count,1)); break;
+    }
+  }
+//   snarfline(f); gettoken(f);
+//   region_count = to_int(buf,null);
+//   snarfline(f); gettoken(f);
+//   free_count = to_int(buf,null);
+//   snarfline(f); gettoken(f);
+//   region_bytes = to_int(buf,null);
+//   snarfline(f); gettoken(f);
+//   region_allocs = to_int(buf,null);
+//   snarfline(f); gettoken(f);
+//   heap_bytes = to_int(buf,null);
+//   snarfline(f); gettoken(f);
+//   heap_allocs = to_int(buf,null);
+//   snarfline(f); gettoken(f);
+//   heapatomic_bytes = to_int(buf,null);
+//   snarfline(f); gettoken(f);
+//   heapatomic_allocs = to_int(buf,null);
+
+  iter(inccount, table);
+  results = new {for i < count : new $(new "",0,0)};
+  iter(add, table);
+  Array::qsort(cmp,results,0,results.size);
+  print_results();
+
+  return 0;
+}

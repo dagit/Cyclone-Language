@@ -455,7 +455,7 @@ int main(int argc, char **argv) {
   struct _handler_cons top_handler;
   int status = 0;
 #ifdef CYC_REGION_PROFILE
-  alloc_log = fopen("alloc_profile.txt","w");
+  alloc_log = fopen("amon.out","w");
 #endif
   if (setjmp(top_handler.handler)) status = 1;
   _push_handler(&top_handler);
@@ -587,7 +587,7 @@ void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
   return _region_malloc(r,s);
 }
 
-void * GC_profile_malloc(int n, char *file, int lineno) {
+void * _profile_GC_malloc(int n, char *file, int lineno) {
   heap_total_bytes += n;
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
@@ -597,7 +597,7 @@ void * GC_profile_malloc(int n, char *file, int lineno) {
   return GC_malloc(n);
 }
 
-void * GC_profile_malloc_atomic(int n, char *file, int lineno) {
+void * _profile_GC_malloc_atomic(int n, char *file, int lineno) {
   heap_total_bytes += n;
   heap_total_atomic_bytes +=n;
   if (alloc_log != NULL) {

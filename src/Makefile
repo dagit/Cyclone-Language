@@ -18,9 +18,10 @@ CYCBISON := $(CYCDIR)/bin/cycbison$(EXE)
 OUT_PREFIX=
 
 ifdef PROFILE_REGIONS
-MPROF_FLAG := -mprof
+APROF_FLAG := -pa
+LDFLAGS = -pa
 else
-MPROF_FLAG := 
+APROF_FLAG := 
 endif
 
 ifdef MS
@@ -31,8 +32,8 @@ endif
 
 LC_FLAG =
 
-CYC_FLAGS := -I$(CYCDIR)/lib -B$(CYCDIR)/lib -save-c $(LC_FLAG) $(TOC_FLAG) $(MPROF_FLAG)
-#CYC_FLAGS := -I$(CYCDIR)/lib -B$(CYCDIR)/lib -pg -save-c $(LC_FLAG) $(TOC_FLAG) $(MPROF_FLAG)
+CYC_FLAGS := -I$(CYCDIR)/lib -B$(CYCDIR)/lib -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
+#CYC_FLAGS := -I$(CYCDIR)/lib -B$(CYCDIR)/lib -pg -save-c $(LC_FLAG) $(TOC_FLAG) $(APROF_FLAG)
 
 LIBR:=$(CYCDIR)/lib/$(OUT_PREFIX)$(CYCLIB)
 
@@ -84,7 +85,7 @@ clean_prefix:
 clean:
 	rm -f $(addprefix *, $(C_SRCS) $(O_SRCS) $(CYCCOMP))
 	rm -f $(addprefix *, lex.cyc parse_tab.cyc parse_tab.h)
-	rm -f *~ *.output *.stackdump *.d
+	rm -f *~ *.output *.stackdump *.d amon.out
 
 # Produce dependencies
 # We don't use $(CYCC) here because this would create a circular

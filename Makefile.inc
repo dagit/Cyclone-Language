@@ -149,7 +149,7 @@ CYCLONE_SRCS:=absyn\
 # Makefiles assume this is only one file, but they could be changed.
 RUNTIME:=runtime_cyc
 
-CYCLIB:=cyclib.$(A)
+CYCLIB:=libcyc.$(A)
 CYCCOMP:=cyclone$(EXE)
 
 C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS))

@@ -13,14 +13,14 @@ CYCLEX:=$(CYCDIR)/bin/cyclex$(EXE)
 OUT_PREFIX:=
 
 ifdef PROFILE_REGIONS
-C_MPROF_FLAG := -DCYC_REGION_PROFILE
-CYC_MPROF_FLAG := -mprof
+C_APROF_FLAG := -DCYC_REGION_PROFILE
+CYC_APROF_FLAG := -pa
 else
-C_MPROF_FLAG := 
-CYC_MPROF_FLAG := 
+C_APROF_FLAG := 
+CYC_APROF_FLAG := 
 endif
 
-CFLAGS:=-fwritable-strings -I$(CYCDIR) $(C_MPROF_FLAG)
+CFLAGS:=-fwritable-strings -I$(CYCDIR) $(C_APROF_FLAG)
 
 CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
 
@@ -32,8 +32,8 @@ endif
 
 LC_FLAG =
 
-CYC_FLAGS := -I. -B. -save-c $(LC_FLAG) $(CYC_MPROF_FLAG) $(TOC_FLAG)
-#CYC_FLAGS := -I. -B. -pg -save-c $(LC_FLAG) $(CYC_MPROF_FLAG) $(TOC_FLAG)
+CYC_FLAGS := -I. -B. -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG)
+#CYC_FLAGS := -I. -B. -pg -save-c $(LC_FLAG) $(CYC_APROF_FLAG) $(TOC_FLAG)
 
 all: $(OUT_PREFIX)$(CYCLIB) nogc.a xml/libxml.a
 
@@ -94,7 +94,7 @@ clean:
 	rm -f $(addprefix *, $(C_LIBS) $(O_LIBS) $(RUNTIME).o $(CYCLIB))
 	rm -f $(addprefix *, precore_c.h lineno.cyc)
 	rm -f nogc.o nogc.a
-	rm -f *~ *.output *.stackdump *.d
+	rm -f *~ *.output *.stackdump *.d amon.out
 	$(MAKE) clean -C xml
 
 # Produce dependencies
