@@ -69,7 +69,7 @@ struct CFStmtAnnot {
   // flow_t flow;     // flow to merge in when we check again
 };
 typedef struct CFStmtAnnot cf_stmt_annot_t;
-datatype AbsynAnnot @extensible { static CFAnnot(cf_stmt_annot_t); };
+@extensible datatype AbsynAnnot { static CFAnnot(cf_stmt_annot_t); };
 
 // to be used by the type-checking pass to get things set up for us
 // must be called on EVERY stmt in the abstract syntax (even the dummy ones)
@@ -460,8 +460,8 @@ static flow_t<`r> if_tagcmp(analenv_t<`r> env, flow_t<`r> flow, exp_t e1,
   }
 }
 
-static datatype @extensible AbsynAnnot.NotZero mt_notzero_v = NotZero(NULL);
-static datatype @extensible AbsynAnnot.UnknownZ mt_unknownz_v = UnknownZ(NULL);
+static datatype AbsynAnnot.NotZero mt_notzero_v = NotZero(NULL);
+static datatype AbsynAnnot.UnknownZ mt_unknownz_v = UnknownZ(NULL);
 
 // Note: correct for e1 an array b/c r won't be AddressOf??
 // FIX: Important place to memoize type_to_absrval calls (b/c StructArrow
@@ -789,9 +789,9 @@ static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
     }
   case &AggrType(AggrInfo(UnknownAggr(_,_),_)):
     Tcutil::impos("got unknown aggr in noalias_ptrs_rec");
-  case &TunionType(_):
-    // For tunions, we consider the entire tunion to be a place,
-    // rather than considering the individual fields.  Tunions
+  case &DatatypeType(_):
+    // For datatypes, we consider the entire datatype to be a place,
+    // rather than considering the individual fields.  Datatypes
     // are consumed when they are switch'ed and when they
     // copied (as is normal).
     ANAL_RGN(env,temp) {
@@ -800,11 +800,11 @@ static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
       else
         return NULL;
     }
-  case &TunionFieldType(TunionFieldInfo(tinfo,inst_ts)):
+  case &DatatypeFieldType(DatatypeFieldInfo(tinfo,inst_ts)):
     switch (tinfo) {
-    case UnknownTunionfield(_):
-      Tcutil::impos("got unknown tunion field in noalias_ptrs_rec");
-    case KnownTunionfield(td,fld):
+    case UnknownDatatypefield(_):
+      Tcutil::impos("got unknown datatype field in noalias_ptrs_rec");
+    case KnownDatatypefield(td,fld):
       let ts = NULL;
       ANAL_RGN(env,rgn) {
 	let inst = List::rzip(rgn,rgn,td->tvs,inst_ts);
@@ -896,7 +896,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   case &Const_e(Int_c(_,_)): 
   case &Var_e(_,&Funname_b(_)):    return $(inflow, NotZeroAll);
 
-  case &Tunion_e(NULL,_,_): // FIX: distinguish zero/non-zero
+  case &Datatype_e(NULL,_,_): // FIX: distinguish zero/non-zero
   case &Const_e(_): 
   case &Sizeofexp_e(_): // note: the exp is NOT evaluated
   case &Sizeoftyp_e(_):  
@@ -1240,7 +1240,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     // we can drop these here because this has to be a unique path
     f = drop_unique_rvals(e->loc, f);
     f = may_consume_exp(env,f,e);
-    // FIX: what to do about tunions and unique sub-elements?
+    // FIX: what to do about datatypes and unique sub-elements?
     if(is_union_type(e1->topt->v))
       return $(f,typ_to_absrval(fenv,e->topt->v,fenv->unknown_all)); 
     switch (r) {
@@ -1352,7 +1352,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       }
     }
 
-  case &Tunion_e(es,tud,_): // NULL case handled above
+  case &Datatype_e(es,tud,_): // NULL case handled above
     if (tud->is_flat) {
       // FIX: for now, I'm just requiring everything to be initialized here
       // because otherwise, I'm getting join errors.

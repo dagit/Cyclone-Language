@@ -775,7 +775,7 @@ parse_type_decl ()
   if(deconstructor) {
     if(!nolinesflag)
       fprintf((FILE @)fattrs, "\n#line %d \"%s\"", lineno, infile);
-    fprintf((FILE @)fattrs, "\n static datatype @extensible exn.Core::Failure yyfail_%s = Core::Failure(\"%s\");\n",deconstructor,name);
+    fprintf((FILE @)fattrs, "\n static @extensible datatype exn.Core::Failure yyfail_%s = Core::Failure(\"%s\");\n",deconstructor,name);
     // JGM: the new type system does not allow evars in function types so I am
     // going back to a macro like we used to have.  The right solution is to
     // modify bison so that we get rid of the union definition and gensym

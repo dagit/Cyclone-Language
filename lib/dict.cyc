@@ -23,7 +23,7 @@
 
 namespace Dict;
 
-datatype exn @extensible {Absent,Present};
+datatype exn {Absent,Present};
 
 static datatype Color { R, B };
 

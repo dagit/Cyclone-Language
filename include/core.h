@@ -135,23 +135,23 @@ extern int ptrcmp(`a::A @ `r, `a::A @ `r);
   /** [ptrcmp] is a comparison function on pointers. */
 extern int nptrcmp(`a::A * `r, `a::A * `r);
   /** [nptrcmp] is a comparison function on nullable pointers. */
-extern datatype exn @extensible { extern Invalid_argument(string_t) };
+extern datatype exn  { extern Invalid_argument(string_t) };
   /** [Invalid_argument] is an exception thrown by library functions
       when one of their arguments is inappropriate.  */
-extern datatype exn @extensible { extern Failure(string_t) };
+extern datatype exn  { extern Failure(string_t) };
   /** [Failure] is an exception that's thrown by library functions
       when they encounter an unexpected error. */
-extern datatype exn @extensible { extern Impossible(string_t) };
+extern datatype exn  { extern Impossible(string_t) };
   /** The [Impossible] exception is thrown when a supposedly
       impossible situation occurs (whether in a library or in your own
       code).  For example, you might thrw [Impossible] if an assertion
       fails.  */
-extern datatype exn @extensible { extern Not_found };
+extern datatype exn  { extern Not_found };
   /** The [Not_found] exception is thrown by search functions to
       indicate failure.  For example, a function that looks up an
       entry in a table can throw [Not_found] if the entry is not
       found. */
-extern datatype exn @extensible { extern Unreachable(string_t) };
+extern datatype exn  { extern Unreachable(string_t) };
 extern region_t<`H> heap_region;
   /** [heap_region] is the region handle of the heap. */
 extern region_t<`U> unique_region;
@@ -171,10 +171,10 @@ extern struct NewRegion<`r2> rnew_dynregion(region_t<`r2>);
 extern struct NewRegion new_dynregion();
   /** The [Open_Region] exception is thrown when one attempts to open 
       a dynamic region that is either already open or has been freed. */
-extern datatype exn @extensible { extern Open_Region };
+extern datatype exn  { extern Open_Region };
   /** The [Free_Region] exception is thrown when one attempts to free
       a dynamic region that is either open or has already been freed. */
-extern datatype exn @extensible { extern Free_Region };
+extern datatype exn  { extern Free_Region };
   /** A call to [free_dynregion(d)] attempts to free the storage associated
       with the dynamic region handle d.  If d has been opened or d has already
       been freed, then the exception [Free_Region] is thrown. */

@@ -7,7 +7,7 @@
 using Core;
 using List;
 
-datatype @extensible exn { Eof };
+datatype exn { Eof };
 
 void read_filename(char ?buf) {
   int i = 0;

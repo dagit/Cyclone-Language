@@ -74,7 +74,7 @@ extern void imp_map_c(`a f(`b,`a),`b env,`a ? x);
   /** [imp_map_c] is a version of [imp_map] where the function
       argument requires a closure as its first argument. */
 
-extern datatype exn @extensible {extern Array_mismatch};
+extern datatype exn {extern Array_mismatch};
   /** [Array_mismatch] is thrown when two arrays don't have the same
       length. */
 

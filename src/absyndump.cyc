@@ -420,11 +420,12 @@ void dumpntyp(type_t t) {
     if (k == NULL) dump("?"); else dumpkind(k->v); 
     dump(aprintf("(%d)",i)); return;
   case &Evar(k,&Opt(t),i,_): dumpntyp(t); return; // shouldn't happen!
-  case &TunionType(TunionInfo(tu_info,ts,ropt)):
+  case &DatatypeType(DatatypeInfo(tu_info,ts,ropt)):
     switch(tu_info) {
-    case UnknownTunion(UnknownTunionInfo(n,is_x,_)): fallthru(n,is_x);
-    case KnownTunion(& &Tuniondecl(_,n,_,_,is_x,_)):
-      if(is_x) dump("xtunion "); else dump("datatype ");
+    case UnknownDatatype(UnknownDatatypeInfo(n,is_x,_)): fallthru(n,is_x);
+    case KnownDatatype(& &Datatypedecl(_,n,_,_,is_x,_)):
+      if(is_x) dump("@extensible "); 
+      dump("datatype ");
       type_t r = (ropt) ? ropt->v : HeapRgn;
       switch (Tcutil::compress(r)) {
       case HeapRgn: break;
@@ -435,13 +436,14 @@ void dumpntyp(type_t t) {
       break;
     }
     break;
-  case &TunionFieldType(TunionFieldInfo(tuf_info,ts)):
+  case &DatatypeFieldType(DatatypeFieldInfo(tuf_info,ts)):
     switch(tuf_info) {
-    case UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
+    case UnknownDatatypefield(UnknownDatatypeFieldInfo(tname,fname,is_x)):
       fallthru(tname,is_x,fname);
-    case KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x,_),
-                          &Tunionfield(fname,_,_,_)):
-      if(is_x) dump("xtunion "); else dump("datatype ");
+    case KnownDatatypefield(&Datatypedecl(_,tname,_,_,is_x,_),
+                            &Datatypefield(fname,_,_,_)):
+      if(is_x) dump("@extensible ");
+      dump("datatype ");                            
       dumpqvar(tname);
       dump(".");
       dumpqvar(fname);
@@ -734,7 +736,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     group(dumpde,des,"{","}",",");
     break;
 
-  case &Tunion_e(es,_,tuf):
+  case &Datatype_e(es,_,tuf):
     dumpqvar(tuf->name);
     if (es != NULL) group(dumpexp,es,"(",")",",");
     break;
@@ -935,7 +937,7 @@ void dumppat(pat_t p) {
     egroup(dumptvar,exists,"[","]",",");
     group(dumpdp,dps,"",term,",");
     break;
-  case &Tunion_p(_,tuf,ps,dots):
+  case &Datatype_p(_,tuf,ps,dots):
     string_t term = dots ? ", ...)" : ")";
     dumpqvar(tuf->name); 
     if (ps != NULL) group(dumppat,ps,"(",term,",");
@@ -946,13 +948,13 @@ void dumppat(pat_t p) {
   }
 }
 
-void dumptunionfield(tunionfield_t ef) { 
+void dumpdatatypefield(datatypefield_t ef) { 
   dumpqvar(ef->name);
   if(ef->typs != NULL)
     dumpargs(ef->typs);
 }
-void dumptunionfields(list_t<tunionfield_t> fields) {
-  dump_sep(dumptunionfield,fields,",");
+void dumpdatatypefields(list_t<datatypefield_t> fields) {
+  dump_sep(dumpdatatypefield,fields,",");
 }
 void dumpenumfield(enumfield_t ef) {
   dumpqvar(ef->name);
@@ -1126,19 +1128,19 @@ void dumpdecl(decl_t d) {
       dump(";");
     }
     break;
-  case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion,is_flat)):
+  case &Datatype_d(&Datatypedecl(sc,name,tvs,fields,is_x,is_flat)):
     dumpscope(sc);
     dump("datatype");
     if (is_flat)
       dump_nospace(" __attribute__((flat))");
     dumpqvar(name);
     dumptvars(tvs);
-    if (is_xtunion) dump("@extensible");
+    if (is_x) dump("@extensible");
     if(fields == NULL)
       dump_semi();
     else  {
       dump_char('{');
-      dumptunionfields(fields->v);
+      dumpdatatypefields(fields->v);
       dump_nospace("};");
     }
     break;

@@ -60,7 +60,7 @@ extern doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
                          bool c_varargs,vararg_info_t *cyc_varargs,
                          opt_t<type_t> effopt, 
                          list_t<$(type_t,type_t)@> rgn_po);
-extern doc_t tunionfields2doc(list_t<tunionfield_t> fields);
+extern doc_t datatypefields2doc(list_t<datatypefield_t> fields);
 extern doc_t enumfields2doc(list_t<enumfield_t> fs);
 extern doc_t vardecl2doc(vardecl_t vd);
 // Flag controlling whether typedefs are expanded during printing
@@ -713,29 +713,30 @@ doc_t ntyp2doc(type_t t) {
       // we cannot print its kind after the underscore for _::E doesn't parse
     }
     break;
-  case &TunionType(TunionInfo(tu_info,ts,ropt)):
+  case &DatatypeType(DatatypeInfo(tu_info,ts,ropt)):
     switch(tu_info) {
-    case UnknownTunion(UnknownTunionInfo(n,is_x,_)): 
+    case UnknownDatatype(UnknownDatatypeInfo(n,is_x,_)): 
       fallthru(n,is_x);
-    case KnownTunion(&&Tuniondecl(_,n,_,_,is_x,_)):
-      let kw = text(is_x ? "xtunion " : "datatype ");
+    case KnownDatatype(&&Datatypedecl(_,n,_,_,is_x,_)):
+      let kw = text("datatype ");
+      let ext = is_x ? text("@extensible ") : nil_doc();
       type_t r = (ropt) ? ropt->v : HeapRgn;
       switch (compress(r)) {
       case HeapRgn:
-        s = cat(kw,qvar2doc(n),tps2doc(ts)); break;
+        s = cat(ext,kw,qvar2doc(n),tps2doc(ts)); break;
       default:
-	s = cat(kw,typ2doc(r),text(" "),qvar2doc(n),tps2doc(ts)); break;
+	s = cat(ext,kw,typ2doc(r),text(" "),qvar2doc(n),tps2doc(ts)); break;
       }
       break;
     }
     break;
-  case &TunionFieldType(TunionFieldInfo(tuf_info,ts)):
+  case &DatatypeFieldType(DatatypeFieldInfo(tuf_info,ts)):
     switch(tuf_info) {
-    case UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
+    case UnknownDatatypefield(UnknownDatatypeFieldInfo(tname,fname,is_x)):
       fallthru(tname,is_x,fname);
-    case KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x,_),
-                          &Tunionfield(fname,_,_,_)):
-      let kw = text(is_x ? "xtunion " : "datatype ");
+    case KnownDatatypefield(&Datatypedecl(_,tname,_,_,is_x,_),
+                          &Datatypefield(fname,_,_,_)):
+      let kw = text(is_x ? "@extensible datatype " : "datatype ");
       s = cat(kw, qvar2doc(tname),text("."),qvar2doc(fname));
       break;
     }
@@ -1010,7 +1011,7 @@ int exp_prec(exp_t e) {
   case &Comprehension_e(_,_,_,_): 
   case &Struct_e(_,_,_,_):      
   case &AnonStruct_e(_,_):      
-  case &Tunion_e(_,_,_):    
+  case &Datatype_e(_,_,_):    
   case &Enum_e(_,_,_):          
   case &AnonEnum_e(_,_,_):      
   case &Malloc_e(_):            
@@ -1159,9 +1160,9 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &AnonStruct_e(_,des):
     s = group_braces(",",List::map(de2doc,des));
     break;
-  case &Tunion_e(es,_,tuf):
+  case &Datatype_e(es,_,tuf):
     if (es == NULL)
-      // special case: a nullary tunion constant is printed "foo" not "foo()"
+      // special case: a nullary datatype constant is printed "foo" not "foo()"
       s = qvar2doc(tuf->name);
     else
       s = cat(qvar2doc(tuf->name),
@@ -1507,8 +1508,8 @@ doc_t pat2doc(pat_t p) {
     break;
   case &Enum_p(_,ef): fallthru(ef);
   case &AnonEnum_p(_,ef):     s = qvar2doc(ef->name);  break;
-  case &Tunion_p(_,tuf,NULL,_): s = qvar2doc(tuf->name); break;
-  case &Tunion_p(_,tuf,ps,dots):
+  case &Datatype_p(_,tuf,NULL,_): s = qvar2doc(tuf->name); break;
+  case &Datatype_p(_,tuf,ps,dots):
     string_t term = dots ? ", ...)" : ")";
     s = cat(qvar2doc(tuf->name), egroup("(",term,",",List::map(pat2doc,ps)));
     break;
@@ -1684,24 +1685,24 @@ doc_t decl2doc(decl_t d) {
     s = cat(text("alias"),text(" <"),textptr(get_name(tv)),text("> "),
             qvar2doc(vd->name),text(" = "),exp2doc(e),text(";"));
     break;
-  case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion,is_flat)):
+  case &Datatype_d(&Datatypedecl(sc,name,tvs,fields,is_x,is_flat)):
     if (fields==NULL)
       s = cat(scope2doc(sc),
+              (is_x ? text("@extensible") : blank_doc()),
               text("datatype "),
               (is_flat ? text("__attribute__((flat)) ") : blank_doc()),
-              (is_xtunion ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
+              (is_x ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
               ktvars2doc(tvs),
-              (is_xtunion ? text("@extensible") : blank_doc()),
               text(";"));
     else
       s = cat(scope2doc(sc),
-              text("datatype "),
-              (is_xtunion ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
-              ktvars2doc(tvs),
-              (is_xtunion ? text("xtunion ") : blank_doc()),
+              (is_x ? text("@extensible ") : blank_doc()),
               (is_flat ? text("__attribute__((flat)) ") : blank_doc()),
+              text("datatype "),
+              (is_x ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
+              ktvars2doc(tvs),
               blank_doc(),lb(),
-              nest(2, cat(line_doc(),tunionfields2doc(fields->v))),
+              nest(2, cat(line_doc(),datatypefields2doc(fields->v))),
               line_doc(),
               rb(),
               text(";"));
@@ -2047,13 +2048,13 @@ doc_t aggrfields2doc(list_t<aggrfield_t> fields) {
   return ppseql(aggrfield2doc,"",fields);
 }
 
-doc_t tunionfield2doc(tunionfield_t f) {
+doc_t datatypefield2doc(datatypefield_t f) {
   return cat(scope2doc(f->sc), typedef_name2doc(f->name),
              (f->typs==NULL)?nil_doc():args2doc(f->typs));
 }
 
-doc_t tunionfields2doc(list_t<tunionfield_t> fields) {
-  return ppseql(tunionfield2doc,",",fields);
+doc_t datatypefields2doc(list_t<datatypefield_t> fields) {
+  return ppseql(datatypefield2doc,",",fields);
 }
 
 #ifndef PP_WIDTH

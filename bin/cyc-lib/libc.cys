@@ -458,7 +458,7 @@ cycstub opendir {
   namespace Cdirent {
     extern "C" __cDIR *opendir(const char @);
   }
-  static datatype @extensible exn.Failure __opendir_failure =
+  static datatype exn.Failure __opendir_failure =
     Failure("opendir called with NULL string");
   DIR *opendir(const char @ f) {
     let cd = Cdirent::opendir(f);
@@ -672,7 +672,7 @@ cycstub {
     extern "C" int open_without_mode(const char *,int);
     extern "C" int open_with_mode(const char *,int,mode_t);
   }
-  static datatype @extensible exn.Failure __fcntl_failure =
+  static datatype exn.Failure __fcntl_failure =
     Failure("fcntl: too many args");
   int fcntl(int fd, int cmd, ... inject fcntlarg_t argv) {
     if (numelts(argv) == 0) return Cfcntl::fcntl(fd, cmd);
@@ -1981,9 +1981,9 @@ cycstub poll {
   namespace Cpoll {
     extern "C" int poll(struct pollfd @{0}, nfds_t b, int c);
   }
-  static datatype @extensible exn.Failure __poll_failure_1 =
+  static datatype exn.Failure __poll_failure_1 =
     Failure("poll called with NULL");
-  static datatype @extensible exn.Failure __poll_failure_2 =
+  static datatype exn.Failure __poll_failure_2 =
     Failure("poll called with out-of-bounds pointer");
   int poll(struct pollfd?a, nfds_t b, int c) {
     if (!a) throw &__poll_failure_1;
@@ -2263,7 +2263,7 @@ cycstub signal {
     extern "C" sigarg_t signal_SIG_IGN(int);
     extern "C" sigarg_t signal(int, void (@`H)(int));
   }
-  static datatype @extensible exn.Failure __signal_failure =
+  static datatype exn.Failure __signal_failure =
     Failure("signal called with the wrong number of arguments");
   sigarg_t signal(int a, ... inject sigarg_t b) {
     if (numelts(b) != 1)
@@ -2587,9 +2587,9 @@ cycstub fgets {
   namespace Cstdio {
     extern "C" char * @nozeroterm`r fgets(char * @nozeroterm`r, int, __cFILE @);
   }
-  static datatype @extensible exn.Failure __fgets_failure_1 =
+  static datatype exn.Failure __fgets_failure_1 =
     Failure("fgets called with NULL string");
-  static datatype @extensible exn.Failure __fgets_failure_2 =
+  static datatype exn.Failure __fgets_failure_2 =
     Failure("fgets: buffer insufficient");
   char ? @nozeroterm`r fgets(char ? @nozeroterm`r s, int n, FILE @f) {
     if (!s) throw &__fgets_failure_1;
@@ -2679,7 +2679,7 @@ cycstub fread {
   namespace Cstdio {
     extern "C" size_t fread(char * @nozeroterm, size_t, size_t, __cFILE @);
   }
-  static datatype @extensible exn.Failure __fread_failure =
+  static datatype exn.Failure __fread_failure =
     Failure("fread: buffer insufficient");
   size_t fread(char ? @nozeroterm ptr, size_t size, size_t nmemb, FILE @f) {
     if (size * nmemb > numelts(ptr)) throw &__fread_failure;
@@ -2824,9 +2824,9 @@ cycstub fwrite {
   namespace Cstdio {
     extern "C" size_t fwrite(const char @ @nozeroterm, size_t, size_t, __cFILE @);
   }
-  static datatype @extensible exn.Failure __fwrite_failure_1 =
+  static datatype exn.Failure __fwrite_failure_1 =
     Failure("fwrite called with NULL string");
-  static datatype @extensible exn.Failure __fwrite_failure_2 =
+  static datatype exn.Failure __fwrite_failure_2 =
     Failure("fwrite: buffer insufficient");
   size_t fwrite(const char ? @nozeroterm`r ptr, size_t size, size_t nmemb, FILE @f) {
     if (!ptr) { throw &__fwrite_failure_1; } 
@@ -3008,9 +3008,9 @@ cycstub setvbuf {
   namespace Cstdio {
     extern "C" int setvbuf(__cFILE @, char * @nozeroterm`H, int, size_t);
   }
-  static datatype @extensible exn.Failure __setvbuf_failure_1 =
+  static datatype exn.Failure __setvbuf_failure_1 =
     Failure("setvbuf: buffer is NULL");
-  static datatype @extensible exn.Failure __setvbuf_failure_2 =
+  static datatype exn.Failure __setvbuf_failure_2 =
     Failure("setvbuf: buffer insufficient");
   int setvbuf(FILE @f, char ? @nozeroterm`H buf, int type, size_t size) {
     if (!buf) throw &__setvbuf_failure_1;
@@ -3178,7 +3178,7 @@ hstub {
   // them elsewhere.
 
   // FIX: Not sure if these should use NULL-terminated strings or not
-  extern datatype @extensible exn {
+  extern datatype exn {
     extern FileOpenError(const char ?);
     extern FileCloseError;
   };
@@ -3235,7 +3235,7 @@ cstub {
   }
 }
 cycstub {
-  datatype exn @extensible { 
+  datatype exn { 
     FileOpenError(const char ?); 
     FileCloseError;
   };
@@ -3416,9 +3416,9 @@ cycstub {
     extern "C" void qsort(`a::A @, size_t, size_t,
                           int (@)(const `a @, const `a @));
   }
-  static datatype @extensible exn.Failure __qsort_failure_1 =
+  static datatype exn.Failure __qsort_failure_1 =
     Failure("qsort called with NULL");
-  static datatype @extensible exn.Failure __qsort_failure_2 =
+  static datatype exn.Failure __qsort_failure_2 =
     Failure("qsort called with insufficient array size");
   void qsort(`a::A ? tab, size_t nmemb, tag_t<valueof_t(sizeof(`a))> szmemb, 
              int (@compar)(const `a @, const `a @)) {
@@ -3577,7 +3577,7 @@ cycstub mmap {
                   int flags, int fd, off_t offset);
     extern "C" int munmap(const char * @nozeroterm start, size_t length);
   }
-  static datatype @extensible exn.Failure __mmap_failure =
+  static datatype exn.Failure __mmap_failure =
     Failure("mmap called with illegal start/prot/flags");
   const char ? @nozeroterm mmap(char ? @nozeroterm ignored,
 			      size_t length, int prot, 
@@ -3923,10 +3923,10 @@ hstub accept {
   extern int accept(int fd, ... inject SA);
 }
 hstub {
-  datatype exn @extensible { extern SocketError };
+  datatype exn { extern SocketError };
 }
 cycstub {
-  datatype exn @extensible { SocketError };
+  datatype exn { SocketError };
 }
 cstub {
   #include <sys/socket.h>
@@ -4744,7 +4744,7 @@ cycstub strftime {
     extern "C" size_t strftime(char *, size_t, const char *,
                                const struct tm @);
   }
-  static datatype @extensible exn.Failure __strftime_failure =
+  static datatype exn.Failure __strftime_failure =
     Failure("fgets: buffer insufficient");
   size_t strftime(char ?s, size_t maxsize, const char ?fmt,
                   const struct tm @t) {
@@ -5162,7 +5162,7 @@ hstub execlp {
   extern int execlp(const char @, const char @`r, ... const char *`r);
 }
 cycstub execlp {
-  static datatype @extensible exn.Failure __execlp_failure =
+  static datatype exn.Failure __execlp_failure =
     Failure("execlp arg list not NULL-terminated");
   int execlp(const char @ path, const char @`r arg0, ... const char *`r argv) {
     if (argv[numelts(argv) - 1] != NULL) throw &__execlp_failure;
@@ -5196,7 +5196,7 @@ cycstub execve {
 //    namespace Cunistd {
 //      extern "C" int execve(char * path, char @ *argv, char @ *envp);
 //    }
-//    static datatype @extensible exn.Failure __execve_failure =
+//    static datatype exn.Failure __execve_failure =
 //      Failure("execve: arg list must be NULL-terminated");
 //    int execve(const char ? filename, char ? const ?argv, char ? const ?envp) {
 //      if (argv[numelts(argv) - 1] != NULL)
@@ -5250,7 +5250,7 @@ cycstub getcwd {
   namespace Cunistd {
     extern "C" char *`r getcwd(char *`r buf, size_t size);
   }
-  static datatype @extensible exn.Failure __getcwd_failure =
+  static datatype exn.Failure __getcwd_failure =
     Failure("getcwd: invalid buf argument");
   char ?`r getcwd(char ?`r buf, size_t size) {
     if (numelts(buf) < size) throw &__getcwd_failure;
@@ -5281,9 +5281,9 @@ cycstub gethostname {
   namespace Cunistd {
     extern "C" int gethostname(char @ @nozeroterm,size_t);
   }
-  static datatype @extensible exn.Failure __gethostname_failure_1 =
+  static datatype exn.Failure __gethostname_failure_1 =
     Failure("gethostname: called with NULL buf");
-  static datatype @extensible exn.Failure __gethostname_failure_2 =
+  static datatype exn.Failure __gethostname_failure_2 =
     Failure("gethostname: called with count > numelts(buf)");
   int gethostname(char ? @nozeroterm buf, size_t count) {
     if (!buf) throw &__gethostname_failure_1;
@@ -5375,7 +5375,7 @@ cycstub read {
   namespace Cunistd {
     extern "C" ssize_t read(int fd, char * @nozeroterm buf, size_t count);
   }
-  static datatype @extensible exn.Failure __read_failure =
+  static datatype exn.Failure __read_failure =
     Failure("read: called with count > numelts(buf)");
   ssize_t read(int fd, char ? @nozeroterm buf, size_t count) {
     if (count > numelts(buf)) throw &__read_failure;
@@ -5468,7 +5468,7 @@ cycstub write {
   namespace Cunistd {
     extern "C" ssize_t write(int fd, const char @ @nozeroterm buf, size_t count);
   }
-  static datatype @extensible exn.Failure __write_failure =
+  static datatype exn.Failure __write_failure =
     Failure("write: called with count > numelts(buf)");
   ssize_t write(int fd, const char ? @nozeroterm buf, size_t count) {
     if (count > numelts(buf)) throw &__write_failure;

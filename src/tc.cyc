@@ -197,8 +197,8 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
     case &AggrRes(_): 
       warn(loc,"variable declaration shadows previous struct declaration");
       break;
-    case &TunionRes(_,_): 
-      warn(loc,"variable declaration shadows previous [x]tunion constructor");
+    case &DatatypeRes(_,_): 
+      warn(loc,"variable declaration shadows previous datatype constructor");
       break;
     case &AnonEnumRes(_,_): 
     case &EnumRes(_,_): 
@@ -274,8 +274,8 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
     case &AggrRes(_):
       warn(loc,"function declaration shadows previous type declaration");
       break;
-    case &TunionRes(_,_): 
-      warn(loc,"function declaration shadows previous [x]tunion constructor");
+    case &DatatypeRes(_,_): 
+      warn(loc,"function declaration shadows previous datatype constructor");
       break;
     case &AnonEnumRes(_,_):
     case &EnumRes(_,_): 
@@ -575,25 +575,25 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
 				  new $(new AggrRes(ad), true));
 }
 
-static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge, 
+static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge, 
                                             seg_t loc,
 					    string_t obj, 
-                                            bool is_xtunion,
+                                            bool is_extensible,
 					    qvar_t name,
-					    list_t<tunionfield_t,`H> fields,
+					    list_t<datatypefield_t,`H> fields,
 					    list_t<tvar_t,`H> tvs,
-					    tuniondecl_t tudres) {
+					    datatypedecl_t tudres) {
   // check variants, rejecting ill-formed types and repeated tyvars
   for(let fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
 
     for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
       check_type(f->loc, te, tvs, MemKind, false, (*typs->hd)[1]);
-      // make sure no no-alias fields in non-flat tunion
+      // make sure no no-alias fields in non-flat datatype
       TEMP_RGN(te, temp) {
         if (!tudres->is_flat && is_noalias_pointer_or_aggr(temp,(*typs->hd)[1]))
           terr(f->loc, 
-               "noalias pointers in non-flat tunions are not allowed (%s)",
+               "noalias pointers in non-flat datatypes are not allowed (%s)",
                qvar2string(f->name)); //FIX ?      
       }
       (*typs->hd)[0].real_const = 
@@ -603,32 +603,32 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
 
     switch((*f->name)[0]) {
     case Rel_n(NULL): 
-      if(is_xtunion)
+      if(is_extensible)
 	(*f->name)[0] = Abs_n(te->ns);
       else
 	(*f->name)[0] = (*name)[0];
       break;
     case Rel_n(_): 
-      terr(f->loc, "qualified tunionfield declarations are not allowed (%s)",
+      terr(f->loc, "qualified datatypefield declarations are not allowed (%s)",
 	   qvar2string(f->name)); //FIX ?
       break;
     case Abs_n(_): break;
-    case Loc_n: impos("tcTunionFields: Loc_n");
+    case Loc_n: impos("tcDatatypeFields: Loc_n");
     }
   }
 
-  list_t<tunionfield_t,`H> fields2;  
-  if(is_xtunion) {
-    // for xtunions sort the fields (trying to merge the duplicates)
+  list_t<datatypefield_t,`H> fields2;  
+  if(is_extensible) {
+    // for xdatatypes sort the fields (trying to merge the duplicates)
     let res = true;
-    let fs = Tcdecl::sort_xtunion_fields(fields, &res, (*name)[1], loc, tc_msg);
+    let fs = Tcdecl::sort_xdatatype_fields(fields, &res, (*name)[1], loc, tc_msg);
     if (res)
       fields2 = fs;
     else
       fields2 = NULL; // should it be fs anyway ?
   } else {
     region uprev_rgn; 
-    // for tunions, check there's no duplicate field
+    // for datatypes, check there's no duplicate field
     list_t<var_t, `uprev_rgn> prev_fields = NULL;
     for (_ fs = fields; fs != NULL; fs = fs-> tl) {
       let f = fs->hd;
@@ -646,20 +646,20 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
   }
   
   // finally add the variants
-  // (for xtunion, only the new fields; this is important because tudres
+  // (for xdatatype, only the new fields; this is important because tudres
   // may not define the old ones or the tvars may not be the same)
   for(let fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
     ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
-                                  new $(new TunionRes(tudres,f), true));
+                                  new $(new DatatypeRes(tudres,f), true));
   }
 
   return fields2;
 }
 
-void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
+void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
   var_t v = (*tud->name)[1];
-  string_t obj = tud->is_xtunion ? "xtunion" : "tunion";
+  string_t obj = tud->is_extensible ? "@extensible datatype" : "datatype";
 #ifdef DEBUG
   fprintf(stderr,"type-checking %sdecl %s\n",obj,*v);
   fflush(stderr);
@@ -694,35 +694,40 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   // give the bound type variables identities
   add_tvar_identities(tvs);
 
-  // determine [x]tunion type's qualified name
+  // determine datatype type's qualified name
   // set ge_decl to the namespace where the declaration 'lives'
-  // (for xtunions it may be different from ge)
+  // (for @extensible datatype it may be different from ge)
   region temp; {
-    tuniondecl_t@*`temp tud_opt;
-    if(tud->is_xtunion) {
-      try tud_opt = lookup_xtuniondecl(temp,te,loc,tud->name);
-      catch {
-      case Dict::Absent:
-        terr(loc,"qualified xtunion declaration %s is not an existing xtunion",
-             qvar2string(tud->name));
-        return;
-      }
+    datatypedecl_t@*`temp tud_opt;
+    // JGM: we first look up the datatype as if it's @extensible.  If we
+    // don't find an extensible definition for it, and this definition 
+    // does not say it's extensible, then we treat it as a normal datatype.
+    // This has a good and bad effect:  the good effect is that you can
+    // naturally extend an existing extensible datatype (e.g., exn) without
+    // having to write @extensible all the time.  The bad news is that
+    // you can't shadow an extensible datatype that is reachable in the
+    // current namespace.  But oh well...
+    try {
+      tud_opt = lookup_xdatatypedecl(temp,te,loc,tud->name);
+      if (tud_opt == NULL && !tud->is_extensible) throw Dict::Absent;
       if (tud_opt != NULL) {
         tud->name = (*(*tud_opt))->name;
       } else {
         (*tud->name)[0] = Abs_n(te->ns); 
       }
-    } else {
+    } catch {
+    case Dict::Absent:
       switch ((*tud->name)[0]) {
       case Rel_n(NULL): (*tud->name)[0] = Abs_n(te->ns); break;
       case Abs_n(_): fallthru;
       default:
-        terr(loc,"qualified tunion declarations are not implemented (%s)",
+        terr(loc,"qualified (non-extensible) datatype declarations are not implemented (%s)",
              qvar2string(tud->name)); // FIX
         return;
       }
-      let tdopt = Dict::lookup_opt(ge->tuniondecls, v);
+      let tdopt = Dict::lookup_opt(ge->datatypedecls, v);
       tud_opt = tdopt ? rnew(temp)(*tdopt) : NULL;
+      break;
     }
     
     // check the fields and update the environment
@@ -730,37 +735,42 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
     switch ($(tud->fields, tud_opt)) {
     case $(NULL, NULL):
       // insert tud in the environment
-      ge->tuniondecls = Dict::insert(ge->tuniondecls, v, new tud);
+      ge->datatypedecls = Dict::insert(ge->datatypedecls, v, new tud);
       break;
     case $(&Opt(*fs), NULL):
       // for the sake of recursive fields, make name abstract in body
-      let tudp = new (new Tuniondecl(Extern,tud->name,tvs,NULL,tud->is_xtunion,
-                                     tud->is_flat));
-      ge->tuniondecls = Dict::insert(ge->tuniondecls, v, tudp);
+      let tudp = new (new Datatypedecl(Extern,tud->name,tvs,NULL,
+                                       tud->is_extensible,tud->is_flat));
+      ge->datatypedecls = Dict::insert(ge->datatypedecls, v, tudp);
    
-      // check the fields (and sort them if this is a xtunion)
-      *fs = tcTunionFields(te,ge,loc,obj,tud->is_xtunion,tud->name,*fs,tvs,tud);
+      // check the fields (and sort them if this is a @extensible datatype)
+      *fs = tcDatatypeFields(te,ge,loc,obj,tud->is_extensible,tud->name,*fs,tvs,tud);
 
       *tudp = tud; //insert tud in the environment
       break;
     case $(&Opt(*fs), &tudp):
       let tud0 = *tudp;
+      // a previous declaration said this was extensible -- so change the
+      // current declaration to pretend like it's extensible.
+      if (!tud->is_extensible && tud0 && tud0->is_extensible)
+        tud->is_extensible = true;
       // for the sake of recursive fields, make name abstract in body
-      *tudp = new Tuniondecl(Extern, tud->name, tvs, NULL, tud->is_xtunion,
-                             tud->is_flat);
+      *tudp = new Datatypedecl(Extern, tud->name, tvs, NULL, 
+                               tud->is_extensible, tud->is_flat);
       
-      // check the fields (and sort them if this is a xtunion)
-      *fs = tcTunionFields(te,ge,loc,obj,tud->is_xtunion,tud->name,*fs,tvs,tud);
+      // check the fields (and sort them if this is a @extensible datatype)
+      *fs = tcDatatypeFields(te,ge,loc,obj,tud->is_extensible,
+                             tud->name,*fs,tvs,tud);
 
       *tudp = tud0; // restore previous declaration and go update the environment
       fallthru(tudp);
     case $(NULL, &tudp):
       // try to merge the declarations
-      let tud2 = Tcdecl::merge_tuniondecl(*tudp, tud, loc, tc_msg);
+      let tud2 = Tcdecl::merge_datatypedecl(*tudp, tud, loc, tc_msg);
       if (tud2 == NULL)
         return; // error in redeclaration
       else {
-        *tudp = (tuniondecl_t) tud2; // make the update
+        *tudp = (datatypedecl_t) tud2; // make the update
         break;
       }
     } 
@@ -954,10 +964,10 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
 	ad->sc = ExternC;
       tcAggrdecl(te,ge,loc,ad);
       break;
-    case &Tunion_d(tud):
+    case &Datatype_d(tud):
       if (in_externC && okay_externC(d->loc,tud->sc))
 	tud->sc = ExternC;
-      tcTuniondecl(te,ge,loc,tud);
+      tcDatatypedecl(te,ge,loc,tud);
       break;
     case &Enum_d(ed):
       if (in_externC && okay_externC(d->loc,ed->sc))

@@ -33,7 +33,7 @@ using List;
 //   <filename>:(<lineno>:<char>-<lineno>:<char>):<message>
 bool use_gcc_style_location = true;
 
-datatype exn @extensible {Exit};
+datatype exn {Exit};
 
 /////////// Location tracking///////////
 static string_t source = ""; // initialized by overall control
@@ -133,7 +133,7 @@ error_t mk_err_elab(seg_t l, string_t<`H> desc) {
 // If there are errors getting stuff from the source file then raise Nocontext
 // and just don't print the source context
 
-datatype exn @extensible {Nocontext};
+datatype exn {Nocontext};
 
 static mstring_t trunc(int n, mstring_t<`H> s) {
   int len = strlen(s);
@@ -194,7 +194,7 @@ static $(mstring_t,int,int)@ get_context(seg_t seg) {
 static bool error_b = false;
 bool error_p() { return error_b; }
 
-datatype exn @extensible {Error(error_t)};
+datatype exn {Error(error_t)};
 
 bool print_context = false;
 

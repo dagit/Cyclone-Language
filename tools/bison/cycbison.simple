@@ -42,8 +42,8 @@
 
 /* Dan: Do not define YYERROR_VERBOSE -- it has not been ported */
 
-datatype exn @extensible {Yyimpossible};     // used in various weird cases
-datatype exn @extensible {Yystack_overflow}; // thrown if the parsing stack overflows
+datatype exn {Yyimpossible};     // used in various weird cases
+datatype exn {Yystack_overflow}; // thrown if the parsing stack overflows
 
 #define yyerrok		(yyerrstatus = 0)
 #define yyclearin	(yychar = YYEMPTY)

@@ -262,7 +262,7 @@ rule token "$(int,comment_t)*" = parse
         break;
       case &Aggr_d(_):
       case &Var_d(_):
-      case &Tunion_d(_):
+      case &Datatype_d(_):
       case &Enum_d(_):
       case &Typedef_d(_):
       case &Fn_d(_):

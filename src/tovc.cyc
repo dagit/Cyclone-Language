@@ -624,7 +624,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
     case &Region_d(...):
     case &Alias_d(...):
     case &Aggr_d(_):
-    case &Tunion_d(_):
+    case &Datatype_d(_):
     case &Enum_d(_):        
     case &Typedef_d(_):
       new_ds = new List(next_d, new_ds);

@@ -41,7 +41,7 @@ namespace Interface {
 
   // a new interface which describes what is automatically provided and needed when
   // building an executable file, so far :
-  //   xtunion exn;
+  //   @extensible datatype exn;
   //   extern int main(int, char ??);
   // the test whether a bunch of files whose interfaces are li = [i1..in] is linkable
   // to an executable file can be written :

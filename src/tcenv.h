@@ -43,7 +43,7 @@ typedef struct CList<`a,`r> *`r const clist_t<`a,`r>;
 extern datatype Resolved {
   VarRes(binding_t); // includes unresolved variant
   AggrRes(aggrdecl_t);
-  TunionRes(tuniondecl_t,tunionfield_t);
+  DatatypeRes(datatypedecl_t,datatypefield_t);
   EnumRes(enumdecl_t,enumfield_t);
   AnonEnumRes(type_t,enumfield_t);
 };
@@ -57,7 +57,7 @@ extern struct Genv<`g::R> {
   region_t<`g> grgn;
   set_t<var_t,`g>                   namespaces;
   Dict::dict_t<var_t,aggrdecl_t@,`g> aggrdecls;
-  Dict::dict_t<var_t,tuniondecl_t@,`g> tuniondecls;
+  Dict::dict_t<var_t,datatypedecl_t@,`g> datatypedecls;
   Dict::dict_t<var_t,enumdecl_t@,`g>   enumdecls;
   // no indirection b/c no redeclaration
   Dict::dict_t<var_t,typedefdecl_t,`g> typedefs; 
@@ -117,8 +117,8 @@ extern tenv_t<`r> enter_ns(region_t<`r>,tenv_t, var_t);
 extern list_t<var_t> resolve_namespace(tenv_t,seg_t,var_t,list_t<var_t,`H>);
 extern resolved_t<`r>    lookup_ordinary(region_t<`r>,tenv_t,seg_t,qvar_t);
 extern aggrdecl_t@       lookup_aggrdecl(tenv_t,seg_t,qvar_t);
-extern tuniondecl_t@     lookup_tuniondecl(tenv_t,seg_t,qvar_t);
-extern tuniondecl_t@*`r  lookup_xtuniondecl(region_t<`r>,tenv_t,seg_t,qvar_t);
+extern datatypedecl_t@     lookup_datatypedecl(tenv_t,seg_t,qvar_t);
+extern datatypedecl_t@*`r  lookup_xdatatypedecl(region_t<`r>,tenv_t,seg_t,qvar_t);
 extern enumdecl_t@       lookup_enumdecl(tenv_t,seg_t,qvar_t);
 extern typedefdecl_t     lookup_typedefdecl(tenv_t,seg_t,qvar_t);
 

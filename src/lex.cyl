@@ -550,7 +550,7 @@ static short process_id(Lexbuf<`a> lbuf) {
                    "deprecated tunion, use datatype"); break;
     case XTUNION: 
       Tcutil::warn(segment_of_abs(yylloc.first_line,yylloc.last_line),
-                   "deprecated xtunion, use datatype ... @extensible"); break;
+                   "deprecated xtunion, use @extensible datatype"); break;
     default: break;
     }
     return (short)kw_nums[symbol_num-1]; 

@@ -59,8 +59,8 @@ static void resolve_pat(tenv_t te, pat_t p) {
           p->r = Wild_p;
           terr(p->loc,"struct tag used without arguments in pattern");
           return;
-        case &TunionRes(tud,tuf): 
-          p->r = new Tunion_p(tud,tuf,NULL,false); return;
+        case &DatatypeRes(tud,tuf): 
+          p->r = new Datatype_p(tud,tuf,NULL,false); return;
         case &EnumRes(ed,ef):     p->r = new Enum_p(ed,ef); return;
         case &AnonEnumRes(t,ef):  p->r = new AnonEnum_p(t,ef); return;
         case &VarRes(_): break; // shadows an outer definition, but that's fine
@@ -93,7 +93,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
           p->r = new Aggr_p(AggrInfo(KnownAggr(new ad),NULL),
                             NULL,imp_rev(new_ps),dots);
           return;
-        case &TunionRes(tud,tuf): p->r = new Tunion_p(tud,tuf,ps,dots); return;
+        case &DatatypeRes(tud,tuf): p->r = new Datatype_p(tud,tuf,ps,dots); return;
         case &EnumRes(_,_):
         case &AnonEnumRes(_,_):
           terr(p->loc,"enum tag used with arguments in pattern");
@@ -276,7 +276,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     break;
 
   case &Pointer_p(p2):
-    // FIX: In the TunionField for p2 case, we should really pass-through
+    // FIX: In the DatatypeField for p2 case, we should really pass-through
     // the type instantiation information in topt!!!
 
     type_t inner_typ  = VoidType;
@@ -294,13 +294,13 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     // check_pat_regions after unifying against the type they're destructuring.
     type_t ptr_rgn = new_evar(&trk,lookup_opt_type_vars(te));
     res = combine_results(res,tcPatRec(te,p2,inner_topt,&ptr_rgn));
-    // if p2's type is a tunion field type, then we cast
-    // the type of p = &p2 to the appropriate tunion type, unless
+    // if p2's type is a datatype field type, then we cast
+    // the type of p = &p2 to the appropriate datatype type, unless
     // topt suggests we do otherwise.
     if(inner_topt == NULL) 
       switch (compress(p2->topt->v)) {
-      case &TunionFieldType(TunionFieldInfo{KnownTunionfield(tud,tuf),targs}) && !tud->is_flat:
-	t = new TunionType(TunionInfo{KnownTunion(new tud),targs,new Opt(ptr_rgn)});
+      case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),targs}) && !tud->is_flat:
+	t = new DatatypeType(DatatypeInfo{KnownDatatype(new tud),targs,new Opt(ptr_rgn)});
 	break;
       default:
 	t = new PointerType(PtrInfo(p2->topt->v, empty_tqual(NULL),
@@ -474,9 +474,9 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     }
     break;
 
-  case &Tunion_p(tud,tuf,*ps_p,dots): 
+  case &Datatype_p(tud,tuf,*ps_p,dots): 
     let ps = *ps_p;
-    // don't allow reference patterns in flat tunions -- these are like
+    // don't allow reference patterns in flat datatypes -- these are like
     // existentials (see Dan's ESOP paper.)
     if (tud->is_flat) rgn_opt = NULL;
     TEMP_RGN(te, rgn) {
@@ -486,22 +486,22 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       let env      = $(tenv_tvs,rgn);
       let inst     = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
       let all_typs = List::map(snd,inst);
-      // unless topt says otherwise, guess we want Tunion when there are no args or we have a flat tunion
+      // unless topt says otherwise, guess we want Datatype when there are no args or we have a flat datatype
       if(tqts == NULL || tud->is_flat) {
         opt_t<type_t> ropt = NULL;
         if (!tud->is_flat) 
           ropt = new Opt(new_evar(&rk,new Opt(tenv_tvs)));
-	t = new TunionType(TunionInfo{KnownTunion(new tud),all_typs,ropt});
+	t = new DatatypeType(DatatypeInfo{KnownDatatype(new tud),all_typs,ropt});
       } else
-	t = new TunionFieldType(TunionFieldInfo{KnownTunionfield(tud,tuf),
+	t = new DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),
 						all_typs});
       if(topt != NULL && (tqts == NULL || tud->is_flat))
 	switch(compress(*topt)) {
-	case &TunionFieldType(_): 
-	  t = new TunionFieldType(TunionFieldInfo{KnownTunionfield(tud,tuf),
+	case &DatatypeFieldType(_): 
+	  t = new DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),
 						  all_typs});
 	  break;
-	case &TunionType(TunionInfo{_,targs,_}):
+	case &DatatypeType(DatatypeInfo{_,targs,_}):
 	  // these unifies could make topt cause an error
 	  let a = all_typs;
 	  for (; a != NULL && targs != NULL; a=a->tl,targs=targs->tl)
@@ -520,7 +520,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
           *ps_p = List::imp_append(ps,wild_ps);
           ps = *ps_p;
         } else if (lps == ltqts)
-          warn(p->loc,"unnecessary ... in tunion field %s",
+          warn(p->loc,"unnecessary ... in datatype field %s",
                qvar2string(tud->name));
       }
       for(; ps != NULL && tqts != NULL; ps = ps->tl, tqts = tqts->tl) {
@@ -538,10 +538,10 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
                typ2string(p2->topt->v));
       }
       if (ps != NULL)
-	terr(p->loc,"too many arguments for tunion constructor %s",
+	terr(p->loc,"too many arguments for datatype constructor %s",
              qvar2string(tuf->name));
       if (tqts != NULL)
-	terr(p->loc,"too few arguments for tunion constructor %s",
+	terr(p->loc,"too few arguments for datatype constructor %s",
 	     qvar2string(tuf->name));
     }
     break;
@@ -586,21 +586,21 @@ void check_pat_regions(tenv_t te, pat_t p) {
     }
     switch (p->topt->v) {
     case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_,_))): fallthru(rt);
-    case &TunionType(TunionInfo{_,_,&Opt(rt)}):
+    case &DatatypeType(DatatypeInfo{_,_,&Opt(rt)}):
       check_rgn_accessible(te,p->loc,rt);
       return;
     default: impos("check_pat_regions: bad pointer type");
     }
-  case &Tunion_p(_,_,ps,_): 
+  case &Datatype_p(_,_,ps,_): 
     for(; ps != NULL; ps = ps->tl) check_pat_regions(te,ps->hd);
     switch (p->topt->v) {
-    case &TunionType(TunionInfo{_,_,NULL}):
+    case &DatatypeType(DatatypeInfo{_,_,NULL}):
       return;
-    case &TunionType(TunionInfo{_,_,&Opt(rt)}):
+    case &DatatypeType(DatatypeInfo{_,_,&Opt(rt)}):
       check_rgn_accessible(te,p->loc,rt);
       return;
-    case &TunionFieldType(_): return;
-    default: impos("check_pat_regions: bad tunion type");
+    case &DatatypeFieldType(_): return;
+    default: impos("check_pat_regions: bad datatype type");
     }
   case &Aggr_p(_,_,dps,_): 
     for(; dps != NULL; dps = dps->tl)
@@ -649,7 +649,7 @@ void check_pat_regions(tenv_t te, pat_t p) {
 // span is the total number of constructors for the given type.
 // Constant patterns (e.g., 1, true, 3[0]4) have 0 arity.  The span
 // for bool is 2, for char is 256, and for integers, floats, and
-// Xtunions is infinite (i.e., NULL).
+// Xdatatypes is infinite (i.e., NULL).
 static __flat__ datatype Name_value { Name_v(string_t); Int_v(int); };
 typedef datatype Name_value name_value_t;
 static struct Con_s<`r::R> {
@@ -780,40 +780,40 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
       else 
 	s = ptr_pat(r,ss,p);
       break;
-    case &TunionType(TunionInfo{_,_,&Opt(_)}):
+    case &DatatypeType(DatatypeInfo{_,_,&Opt(_)}):
       switch(pp->r) {
-      case &Tunion_p(tud,tuf,ps,_):
+      case &Datatype_p(tud,tuf,ps,_):
 	int*`r span;
-	if(tud->is_xtunion)
+	if(tud->is_extensible)
 	  span = NULL;
 	else
 	  span = rnew(r) (List::length(tud->fields->v));
 	s = con_pat(r,*((*tuf->name)[1]),span,
                     List::rmap_c(r,compile_pat,r,ps),p); 
 	break;
-      default: impos("non-[x]tunion pattern has tunion type");
+      default: impos("non-datatype pattern has datatype type");
       }
       break;
     default: impos("pointer pattern does not have pointer type");
     }
     break;
 
-  case &Tunion_p(tud,tuf,ps,_):
+  case &Datatype_p(tud,tuf,ps,_):
     int*`r span;
     switch(compress(p->topt->v)) {
-    case &TunionType(_):     
-      if(tud->is_xtunion)
+    case &DatatypeType(_):     
+      if(tud->is_extensible)
 	span = NULL;
       else
 	span = rnew(r) (List::length(tud->fields->v)); 
       break;
-    case &TunionFieldType(_): span = &one_opt; break;
-    default: span = impos("void tunion pattern has bad type"); break;
+    case &DatatypeFieldType(_): span = &one_opt; break;
+    default: span = impos("void datatype pattern has bad type"); break;
     }
     s = con_pat(r,*((*tuf->name)[1]),span, List::rmap_c(r,compile_pat,r,ps),p);
     break;
     
-    // case &Tunion_p(_,_,ps,_): fallthru(ps); // ps != NULL
+    // case &Datatype_p(_,_,ps,_): fallthru(ps); // ps != NULL
   case &Tuple_p(ps,_): 
     s = tuple_pat(r,List::rmap_c(r,compile_pat,r,ps),p); break;
 
@@ -1149,7 +1149,7 @@ $(simple_pat_t<`r>, $(bool,seg_t)@`r)@`r get_match($(region_t<`r>,int @)@ env,
 }
 
 // Turn a descriptor into an example for reporting an inexhaustive match
-datatype @extensible exn { Desc2string };
+datatype exn { Desc2string };
 static string_t descs2string(region_t<`r> r, list_t<term_desc_t<`r>,`r>);
 static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
   switch (d) {
@@ -1166,13 +1166,13 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
     case &TagInt_p(tv,vd): return aprintf("%s<`%s>",qvar2string(vd->name),
                                           *tv->name);
     case &Tuple_p(_,_): return aprintf("$(%s)",descs2string(r,ds));
-    case &Pointer_p(&Pat{&Tunion_p(_,tuf,_,_),_,_}): 
+    case &Pointer_p(&Pat{&Datatype_p(_,tuf,_,_),_,_}): 
       return aprintf("&%s(%s)",qvar2string(tuf->name),descs2string(r,ds));
     case &Pointer_p(_):
       return aprintf("&%s",descs2string(r,ds));
     case &Aggr_p(AggrInfo(KnownAggr(&ad),_),_,_,_): 
       return aprintf("%s{%s}",qvar2string(ad->name),descs2string(r,ds));
-    case &Tunion_p(_, tuf, _, _): 
+    case &Datatype_p(_, tuf, _, _): 
       return aprintf("%s",qvar2string(tuf->name));
     case Null_p: return "NULL";
     case &Int_p(_,i): return aprintf("%d",i);
@@ -1215,8 +1215,8 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
           return "NULL";
       }
       return "&_";
-    case &TunionType(TunionInfo{KnownTunion(&tud),_,_}):
-      if (tud->is_xtunion) throw Desc2string;
+    case &DatatypeType(DatatypeInfo{KnownDatatype(&tud),_,_}):
+      if (tud->is_extensible) throw Desc2string;
       let fields = tud->fields->v;
       int span = List::length(fields);
       for (; fields; fields = fields->tl) {

@@ -489,7 +489,7 @@ list_t<Absyn::decl_t>
   string_t exn_string     = "";
   string_t explain_string = "";
   bool other_exn = false;
-  datatype @extensible exn ex = new Core::Impossible(""); // definite assignment doesn't track data
+  datatype exn ex = new Core::Impossible(""); // definite assignment doesn't track data
   let ans = NULL;
 
   try ans = f(env,tds);

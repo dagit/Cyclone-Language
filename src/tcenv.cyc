@@ -24,12 +24,12 @@
    2) structure tags (after "struct")
    3) union tags (after "union")
    4) structure or union members (after "." or "->")
-   5) tunion tags (after "tunion")
+   5) datatype tags (after "datatype")
    7) labels (after "goto", before ":")
    8) typedef names (in types)
    9) ordinary identifiers (the catch-all case)
 
-   The ordinary identifiers include structure tags and tunion
+   The ordinary identifiers include structure tags and datatype
    constructors.
 
    The environment data structures below follow from this directly.
@@ -84,7 +84,7 @@ using Absynpp;
 using RgnOrder;
 namespace Tcenv;
 
-datatype exn @extensible {Env_error};
+datatype exn {Env_error};
 
 `a env_err(string_t msg) __attribute__((noreturn)) {
   fprintf(stderr,"Internal error in tcenv: %s\n",msg);
@@ -111,7 +111,7 @@ struct Genv<`g::R> {
   region_t<`g> grgn;   // region for allocating globals
   set_t<var_t,`g>                   namespaces;
   Dict::dict_t<var_t,aggrdecl_t@,`g> aggrdecls;
-  Dict::dict_t<var_t,tuniondecl_t@,`g> tuniondecls;
+  Dict::dict_t<var_t,datatypedecl_t@,`g> datatypedecls;
   Dict::dict_t<var_t,enumdecl_t@,`g>   enumdecls;
   // no indirection b/c no redeclaration
   Dict::dict_t<var_t,typedefdecl_t,`g> typedefs; 
@@ -120,7 +120,7 @@ struct Genv<`g::R> {
   // abs. names of "using" namespaces 
   list_t<list_t<var_t>,`g> availables; 
 };
-// Region notes:  the @ pointers for aggrdecl_t, tuniondecl_t,
+// Region notes:  the @ pointers for aggrdecl_t, datatypedecl_t,
 // and enumdecl_t show up in the abstract syntax, so we make them
 // heap pointers.  The list_t<var_t> in availables is heap-allocated
 // because we look them up in the ae environment of the tenv.
@@ -129,7 +129,7 @@ struct Genv<`g::R> {
 datatype Resolved {
   VarRes(binding_t); // includes unresolved variant
   AggrRes(aggrdecl_t);
-  TunionRes(tuniondecl_t,tunionfield_t);
+  DatatypeRes(datatypedecl_t,datatypefield_t);
   EnumRes(enumdecl_t,enumfield_t);
   AnonEnumRes(type_t,enumfield_t);
 };
@@ -208,7 +208,7 @@ abstract struct Fenv<`r::R> {
 
 
 //////////////////////// Lookup a local binding /////////////////////////////
-datatype exn @extensible { NoBinding; };
+datatype exn { NoBinding; };
 
 // lookup a binding, throwing NoBinding on failure.
 binding_t lookup_binding(bindings_t bs, var_t v) {
@@ -224,7 +224,7 @@ genv_t<`r> empty_genv(region_t<`r> r) {
   return rnew(r) Genv{.grgn        = r,
                       .namespaces  = Set::rempty(r,strptrcmp),
                       .aggrdecls   = Dict::rempty(r,strptrcmp),
-                      .tuniondecls = Dict::rempty(r,strptrcmp),
+                      .datatypedecls = Dict::rempty(r,strptrcmp),
                       .enumdecls   = Dict::rempty(r,strptrcmp),
 		      .typedefs    = Dict::rempty(r,strptrcmp),
                       .ordinaries  = Dict::rempty(r,strptrcmp),
@@ -236,11 +236,11 @@ tenv_t<`r,`r> tc_init(region_t<`r> r) {
   empty_var_set = new Opt(Set::empty(strptrcmp));
   // Set up initial environment so that datatype exn, etc. is defined
   let ge     = empty_genv(r);
-  ge->tuniondecls = Dict::insert(ge->tuniondecls, (*exn_name)[1], new exn_tud);
+  ge->datatypedecls = Dict::insert(ge->datatypedecls, (*exn_name)[1], new exn_tud);
   for (let tufs = exn_tud->fields->v; tufs != NULL; tufs = tufs->tl)
     ge->ordinaries = Dict::insert(ge->ordinaries, (*tufs->hd->name)[1],
                                   rnew(r) 
-                                  $(new TunionRes(exn_tud,tufs->hd),true));
+                                  $(new DatatypeRes(exn_tud,tufs->hd),true));
   
   Dict::dict_t<list_t<var_t,`H>,genv_t<`r>,`r> ae = 
     Dict::insert(Dict::rempty(r,varlist_cmp), NULL, ge);
@@ -394,56 +394,56 @@ aggrdecl_t @ lookup_aggrdecl(tenv_t te,seg_t loc,qvar_t q) {
   }
 }
 
-static tuniondecl_t @ lookup_tuniondecl_f(genv_t ge,var_t v) {
-  let tds = ge->tuniondecls;
+static datatypedecl_t @ lookup_datatypedecl_f(genv_t ge,var_t v) {
+  let tds = ge->datatypedecls;
   return Dict::lookup(tds,v);
 }
-tuniondecl_t @ lookup_tuniondecl(tenv_t te,seg_t loc,qvar_t q) {
+datatypedecl_t @ lookup_datatypedecl(tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n: fallthru;
   case Rel_n(NULL):
-    return scoped_lookup(te, loc, lookup_tuniondecl_f, v);
+    return scoped_lookup(te, loc, lookup_datatypedecl_f, v);
   case Rel_n(&List(x,y)):
-    let tds = lookup_namespace(te,loc,x,y)->tuniondecls;
+    let tds = lookup_namespace(te,loc,x,y)->datatypedecls;
     return Dict::lookup(tds,v);
   case Abs_n(y):
-    let tds = Dict::lookup(te->ae,y)->tuniondecls;
+    let tds = Dict::lookup(te->ae,y)->datatypedecls;
     return Dict::lookup(tds,v);
   }
 }
 
-static tuniondecl_t @ lookup_xtuniondecl_f(genv_t ge,var_t v) {
-  return Dict::lookup(ge->tuniondecls,v);
+static datatypedecl_t @ lookup_xdatatypedecl_f(genv_t ge,var_t v) {
+  return Dict::lookup(ge->datatypedecls,v);
 }
 
-// DAN: some functionality from tcXTuniondecl has moved to here.
-tuniondecl_t@*`r lookup_xtuniondecl(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
+// DAN: some functionality from tcXDatatypedecl has moved to here.
+datatypedecl_t@*`r lookup_xdatatypedecl(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Rel_n(NULL):
-    // unqualified name, okay to fail -- that just means we have a new xtunion
-    try return rnew(r) scoped_lookup(te, loc, lookup_xtuniondecl_f, v);
+    // unqualified name, okay to fail -- that just means we have a new xdatatype
+    try return rnew(r) scoped_lookup(te, loc, lookup_xdatatypedecl_f, v);
     catch { case Dict::Absent: return NULL; }
   case Loc_n: // impossible case
-    terr(loc,"lookup_xtuniondecl: impossible");
+    terr(loc,"lookup_xdatatypedecl: impossible");
     return NULL;
   case Rel_n(&List(x,y)):
     // qualified name, it's an error if the namespace is bad or the
-    // xtunion doesn't already exist.  In either case, we'll raise
+    // xdatatype doesn't already exist.  In either case, we'll raise
     // Dict::Absent, so we give a more descriptive message for the
     // former.
     genv_t ge;
     try ge = lookup_namespace(te,loc,x,y);
     catch {
     case Dict::Absent:
-      Tcutil::terr(loc,"bad qualified name for xtunion");
+      Tcutil::terr(loc,"bad qualified name for @extensible datatype");
       throw Dict::Absent;
     }
-    let tds = ge->tuniondecls;
+    let tds = ge->datatypedecls;
     return rnew(r) Dict::lookup(tds,v);
   case Abs_n(y):
-    let tds = Dict::lookup(te->ae,y)->tuniondecls;
+    let tds = Dict::lookup(te->ae,y)->datatypedecls;
     return rnew(r) Dict::lookup(tds,v);
   }
 }

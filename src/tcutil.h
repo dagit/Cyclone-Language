@@ -144,7 +144,7 @@ extern void check_contains_assign(exp_t);
 // This also performs the following side-effects which most of the 
 // rest of the compiler rightfully assumes have occurred:
 // * expand typedefs
-// * set pointers to declarations for StructType, TunionType
+// * set pointers to declarations for StructType, DatatypeType
 // * change relative type names to absolute type names
 // * set the kind field of type variables: we use the expected kind
 //   initially, but if later constraints force a more constrained kind,
@@ -257,7 +257,7 @@ extern void rewrite_temp_tvar(tvar_t);
 // are the lists of attributes the same?  doesn't require the same order
 extern bool same_atts(attributes_t, attributes_t);
 
-// returns true iff t contains only "bits" and no pointers or tunions. 
+// returns true iff t contains only "bits" and no pointers or datatypes. 
 // This is used to restrict the members of unions to ensure safety.
 extern bool bits_only(type_t t);
 

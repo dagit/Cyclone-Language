@@ -262,9 +262,9 @@ qvar_t exn_name   = &exn_name_v;
   static string_t            str##_str   = #str;\
   static $(nmspace_t, var_t) str##_pr    = $(Abs_n(NULL), &str##_str);\
   qvar_t                     str##_name  = &str##_pr;\
-  static struct Tunionfield  str##_tuf_v = Tunionfield(&str##_pr,\
+  static struct Datatypefield  str##_tuf_v = Datatypefield(&str##_pr,\
 				 		       NULL,NULL,Extern);\
-  tunionfield_t              str##_tuf   = &str##_tuf_v
+  datatypefield_t              str##_tuf   = &str##_tuf_v
 
 MAKE_BUILTIN_EXN(Null_Exception);
 MAKE_BUILTIN_EXN(Array_bounds);
@@ -272,31 +272,31 @@ MAKE_BUILTIN_EXN(Match_Exception);
 MAKE_BUILTIN_EXN(Bad_alloc);
 #undef MAKE_BUILTIN_EXN
 
-static struct List<tunionfield_t> exn_l0 = List(&Null_Exception_tuf_v, NULL);
-static struct List<tunionfield_t> exn_l1 = List(&Array_bounds_tuf_v,   &exn_l0);
-static struct List<tunionfield_t> exn_l2 = List(&Match_Exception_tuf_v,&exn_l1);
-static struct List<tunionfield_t> exn_l3 = List(&Bad_alloc_tuf_v,      &exn_l2);
+static struct List<datatypefield_t> exn_l0 = List(&Null_Exception_tuf_v, NULL);
+static struct List<datatypefield_t> exn_l1 = List(&Array_bounds_tuf_v,   &exn_l0);
+static struct List<datatypefield_t> exn_l2 = List(&Match_Exception_tuf_v,&exn_l1);
+static struct List<datatypefield_t> exn_l3 = List(&Bad_alloc_tuf_v,      &exn_l2);
 
-static struct Opt<list_t<tunionfield_t>> exn_ol = Opt(&exn_l3);
-static struct Tuniondecl exn_tud_v = Tuniondecl(Extern, &exn_name_v, NULL,
-						&exn_ol, true, false);
-tuniondecl_t exn_tud = &exn_tud_v;
+static struct Opt<list_t<datatypefield_t>> exn_ol = Opt(&exn_l3);
+static struct Datatypedecl exn_tud_v = Datatypedecl(Extern, &exn_name_v, NULL,
+                                                    &exn_ol, true, false);
+datatypedecl_t exn_tud = &exn_tud_v;
 
-  //static datatype TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud);
+  //static datatype DatatypeInfoU.KnownDatatype exn_tinfou = KnownDatatype(&exn_tud);
 static struct Opt<type_t> heap_opt = Opt(HeapRgn);
-static datatype Type.TunionType exn_typ_tt =
-                  TunionType(TunionInfo(KnownTunion(&exn_tud),NULL,&heap_opt));
+static datatype Type.DatatypeType exn_typ_tt =
+                  DatatypeType(DatatypeInfo(KnownDatatype(&exn_tud),NULL,&heap_opt));
 type_t exn_typ = &exn_typ_tt;
 
 // datatype PrintArg and datatype ScanfArg qvars
 static string_t printarg_str = "PrintArg";
 static string_t scanfarg_str = "ScanfArg";
-static $(nmspace_t,var_t) tunion_print_arg_qvar_p = 
+static $(nmspace_t,var_t) datatype_print_arg_qvar_p = 
   $(Abs_n(NULL), &printarg_str);
-static $(nmspace_t,var_t) tunion_scanf_arg_qvar_p = 
+static $(nmspace_t,var_t) datatype_scanf_arg_qvar_p = 
   $(Abs_n(NULL), &scanfarg_str);
-qvar_t tunion_print_arg_qvar = &tunion_print_arg_qvar_p;
-qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
+qvar_t datatype_print_arg_qvar = &datatype_print_arg_qvar_p;
+qvar_t datatype_scanf_arg_qvar = &datatype_scanf_arg_qvar_p;
 
 // string
 static type_t* string_t_opt = NULL;
@@ -684,10 +684,11 @@ decl_t union_decl(scope_t s,typedef_name_t n,
 		  attributes_t atts, seg_t loc) {
   return aggr_decl(UnionA,s,n,ts,i,atts,loc);
 }
-decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
-		   opt_t<list_t<tunionfield_t,`H>,`H> fs, 
-                   bool is_xtunion, bool is_flat, seg_t loc){
-  return new_decl(new Tunion_d(new Tuniondecl(s,n,ts,fs,is_xtunion,is_flat)),
+decl_t datatype_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
+		   opt_t<list_t<datatypefield_t,`H>,`H> fs, 
+                   bool is_extensible, bool is_flat, seg_t loc){
+  return new_decl(new Datatype_d(new Datatypedecl(s,n,ts,fs,is_extensible,
+                                                  is_flat)),
                   loc);
 }
 
@@ -868,8 +869,8 @@ bool is_union_type(type_t t) {
 }
 bool is_aggr_type(type_t t) {
   switch(Tcutil::compress(t)) {
-  case &TunionType(_):
-  case &TunionFieldType(_):
+  case &DatatypeType(_):
+  case &DatatypeFieldType(_):
   case &TupleType(_):
   case &AggrType(_):
   case &AnonAggrType(_,_): return true;

@@ -118,7 +118,7 @@ extern void iter_c(void f(`c,`a),`c env,set_t<`a> s);
   /** [iter_c] is a version of [iter] where the function argument [f]
       requires a closure. */
 
-extern datatype exn @extensible {extern Absent};
+extern datatype exn {extern Absent};
   /** [Absent] is an exception thrown by the [choose] function. */
 
 extern `a choose(set_t<`a> s);

@@ -88,10 +88,10 @@ struct TocState {
   list_t<$(type_t,list_t<type_t,`d>)@`d,`d> @`d tuple_types;
   // aggregates seen so far, their declaration, and C type
   Dict::dict_t<qvar_t,$(aggrdecl_t,type_t)@`d,`d> @`d aggrs_so_far;
-  // tunions seen so far
-  Set::set_t<qvar_t,`d> @`d                    tunions_so_far;
-  // xtunions seen so far -- bool is false if seen but not initialized (extern)
-  Dict::dict_t<qvar_t,bool,`d> @`d             xtunions_so_far;
+  // datatypes seen so far
+  Set::set_t<qvar_t,`d> @`d                    datatypes_so_far;
+  // xdatatypes seen so far -- bool is false if seen but not initialized (extern)
+  Dict::dict_t<qvar_t,bool,`d> @`d             xdatatypes_so_far;
   // generated identifiers from other identifiers (e.g., Foo_struct)
   Dict::dict_t<$(qvar_t,string_t)@`d,qvar_t,`d>@`d qvar_tags;
   // generated labels -- get re-used across functions
@@ -125,8 +125,8 @@ static int temp_var_counter = 0;
 static int fresh_label_counter = 0;
 
 // errors and reporting
-datatype exn @extensible {Toc_Unimplemented};
-datatype exn @extensible {Toc_Impossible};
+datatype exn {Toc_Unimplemented};
+datatype exn {Toc_Impossible};
 static `a unimp(string_t fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,1,2), noreturn))
 {
@@ -143,7 +143,7 @@ static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap)
   fflush(stderr);
   throw Toc_Impossible;
 }
-datatype exn @extensible {Match_error};
+datatype exn {Match_error};
 
 /////////////////////////// Pre-Allocated Stuff /////////////////////////////
 // Don't use any of these things if they might get mutated!!!
@@ -429,7 +429,7 @@ static bool is_nullable(type_t t) {
 }
 
 // FIX: Share the results to save compile-time space and time.
-//      Alternately, put struct names for tunion variants in the environment.
+//      Alternately, put struct names for datatype variants in the environment.
 static qvar_t collapse_qvar_tag(qvar_t x,string_t<`H> tag) {
   let TocState{.dyn = dyn, .qvar_tags = qvs, ...} = *toc_state;
   static string_t bogus_string = "*bogus*";
@@ -506,10 +506,10 @@ static var_t fresh_label() {
   }
 }
 
-// These two functions should never be used for xtunions. Should memoize?
+// These two functions should never be used for xdatatypes. Should memoize?
 // Note the former used to use static const int variables, but couldn't
 // at top-level.
-static exp_t tunion_tag(tuniondecl_t td, qvar_t name, bool carries_value) {
+static exp_t datatype_tag(datatypedecl_t td, qvar_t name, bool carries_value) {
   int ans = 0;
   let fs  = td->fields->v;
   while(qvar_cmp(name,fs->hd->name)!=0) {
@@ -521,7 +521,7 @@ static exp_t tunion_tag(tuniondecl_t td, qvar_t name, bool carries_value) {
   }
   return uint_exp(ans,DL);    
 }
-static int num_void_tags(tuniondecl_t td) {
+static int num_void_tags(datatypedecl_t td) {
   int ans = 0;
   for(let fs = td->fields->v; fs != NULL; fs = fs->tl)
     if(fs->hd->typs == NULL)
@@ -610,24 +610,24 @@ static type_t typ_to_c(type_t t) {
   case &VarType(tv): 
     if (tvar_kind(tv) == AnyKind) return VoidType;
     else return void_star_typ(); // map `a to void *
-  case &TunionType(TunionInfo{KnownTunion(&tud),_,_}): 
+  case &DatatypeType(DatatypeInfo{KnownDatatype(&tud),_,_}): 
     if (tud->is_flat)
       return unionq_typ(collapse_qvar_tag(tud->name,"_union"));
     else return void_star_typ();
-  case &TunionType(_): toc_impos("unresolved TunionType");
-  case &TunionFieldType(TunionFieldInfo{KnownTunionfield(tud,tuf),_}):
-    // for flat tunion fields, it's the same as the tunion type.
-    // for tunion fields that carry no arguments, it's an unsigned int
-    // for xtunion fields that carry no argument, it's a char *.
+  case &DatatypeType(_): toc_impos("unresolved DatatypeType");
+  case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),_}):
+    // for flat datatype fields, it's the same as the datatype type.
+    // for datatype fields that carry no arguments, it's an unsigned int
+    // for xdatatype fields that carry no argument, it's a char *.
     // for fields that carry arguments, it's a struct _Field_struct;
     if (tud->is_flat) 
       return unionq_typ(collapse_qvar_tag(tud->name,"_union"));
     if (tuf->typs == NULL) 
-      if(tud->is_xtunion) 
+      if(tud->is_extensible) 
         return char_star_typ();
       else return uint_typ;
     else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
-  case &TunionFieldType(_): toc_impos("unresolved TunionFieldType");
+  case &DatatypeFieldType(_): toc_impos("unresolved DatatypeFieldType");
   case &PointerType(PtrInfo(t2,tq,PtrAtts(_,_,bnds,_,_))):
     // t2? maps to struct dyneither_ptr.
     // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
@@ -752,7 +752,7 @@ static bool atomic_typ(type_t t) {
     for (; fs != NULL; fs = fs->tl)
       if (!atomic_typ(fs->hd->type)) return false;
     return true;
-  case &TunionFieldType(TunionFieldInfo{KnownTunionfield(tud,tuf),_}):
+  case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),_}):
     fallthru(tuf->typs);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
@@ -760,7 +760,7 @@ static bool atomic_typ(type_t t) {
     return true;
     // FIX: can do better if all variants are fieldless (but then they could
     //      have used an enum)
-  case &TunionType(_):    
+  case &DatatypeType(_):    
   case &PointerType(_):   
   case &RgnHandleType(_): return false;
   default: toc_impos("atomic_typ:  bad type %s",typ2string(t));
@@ -992,7 +992,7 @@ last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l :
   return rnew(r) Env{rnew(r) break_l, c, NULL, Dict::rshare(r,v), t, r};
 }
 
-// must have no pattern vars and type is int, char, or tunion of a type
+// must have no pattern vars and type is int, char, or datatype of a type
 // with no value constructors. (If it weren't for allowing fallthru
 // anywhere, we wouldn't need the next_l.)
 static env_t<`r> 
@@ -2070,10 +2070,10 @@ static void exp_to_c(env_t nv, exp_t e) {
      
       // make the declarations and prepend them
       if(vai->inject) {
-	tuniondecl_t tud;
+	datatypedecl_t tud;
 	switch(compress(vai->type)) {
-	case &TunionType(TunionInfo(KnownTunion(&x),_,_)): tud = x; break;
-	default: toc_impos("toc: unknown tunion in vararg with inject");
+	case &DatatypeType(DatatypeInfo(KnownDatatype(&x),_,_)): tud = x; break;
+	default: toc_impos("toc: unknown datatype in vararg with inject");
 	}
 	qvar_t ? vs = rnew(r) {for i < num_varargs : temp_var()};
 	
@@ -2091,7 +2091,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             type_t arg_type = arg->topt->v;
             qvar_t var      = vs[i];
             exp_t  varexp   = var_exp(var,DL);
-            let &Tunionfield{qv,tqts,_,_} = injectors->hd;
+            let &Datatypefield{qv,tqts,_,_} = injectors->hd;
             type_t field_typ = typ_to_c((*tqts->hd)[1]);
             exp_to_c(nv,arg);
             if (is_void_star(field_typ))
@@ -2105,7 +2105,7 @@ static void exp_to_c(env_t nv, exp_t e) {
                                      arg,DL),
                          s,DL);
             s = seq_stmt(assign_stmt(aggrmember_exp(varexp,tag_sp,DL),
-                                     tunion_tag(tud,qv,true),DL),
+                                     datatype_tag(tud,qv,true),DL),
                          s,DL);
             s = declare_stmt(var,strctq(collapse_qvar_tag(qv,"_struct")), NULL,
                              s,DL);
@@ -2170,7 +2170,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	 k != RgnKind && k != UniqueRgnKind && k != TopRgnKind) {
 	switch(compress(ts->hd)) {
 	case &VarType(_):    
-	case &TunionType(_): continue;
+	case &DatatypeType(_): continue;
 	default: 
 	  e->r = array_to_ptr_cast(typ_to_c(e->topt->v),e1,DL)->r;
 	  break;
@@ -2547,7 +2547,7 @@ DynCast:
     case &TupleType(_):
       e->r = new Offsetof_e(typ_to_c_array(t),new StructField(fieldname(n+1)));
       break;
-    case &TunionFieldType(_):
+    case &DatatypeFieldType(_):
       if(n == 0)
 	e->r = new Offsetof_e(typ_to_c_array(t),new StructField(tag_sp));
       else
@@ -2840,27 +2840,27 @@ DynCast:
     }
     break;
   
-  case &Tunion_e(NULL,tud,tuf) && !tud->is_flat:
+  case &Datatype_e(NULL,tud,tuf) && !tud->is_flat:
     qvar_t qv = tuf->name;
     // non-value-carrying constructor
-    exp_t tag_exp = tud->is_xtunion ? var_exp(qv,DL) : tunion_tag(tud,qv,false);
+    exp_t tag_exp = tud->is_extensible ? var_exp(qv,DL) : datatype_tag(tud,qv,false);
     e->r = tag_exp->r;
     break;
-  case &Tunion_e(es,tud,tuf):
-    type_t tunion_ctype;
+  case &Datatype_e(es,tud,tuf):
+    type_t datatype_ctype;
     exp_t tag_exp;
     let x = temp_var();
     let xexp = var_exp(x,DL);
     exp_t member_exp;
     if (tud->is_flat) {
-      tunion_ctype = unionq_typ(collapse_qvar_tag(tud->name,"_union"));
-      tag_exp = tunion_tag(tud,tuf->name,true);
+      datatype_ctype = unionq_typ(collapse_qvar_tag(tud->name,"_union"));
+      tag_exp = datatype_tag(tud,tuf->name,true);
       let &$(_,v) = tuf->name;
       member_exp = aggrmember_exp(xexp,v,DL);
     } else {
-      tunion_ctype = strctq(collapse_qvar_tag(tuf->name,"_struct"));
-      tag_exp = (tud->is_xtunion) ? var_exp(tuf->name,DL) : 
-        tunion_tag(tud,tuf->name,true);
+      datatype_ctype = strctq(collapse_qvar_tag(tuf->name,"_struct"));
+      tag_exp = (tud->is_extensible) ? var_exp(tuf->name,DL) : 
+        datatype_tag(tud,tuf->name,true);
       member_exp = xexp;
     }
     let tqts = tuf->typs;
@@ -2903,7 +2903,7 @@ DynCast:
       }
       let final_stmt = exp_stmt(xexp,DL);
       let s2         = seq_stmts(imp_rev(new List(final_stmt,rev_assign)),DL);
-      e->r = stmt_exp_r(declare_stmt(x,tunion_ctype,NULL,s2,DL));
+      e->r = stmt_exp_r(declare_stmt(x,datatype_ctype,NULL,s2,DL));
     }
     break;
 
@@ -3087,26 +3087,26 @@ xlate_pat(env_t<`rgn> nv,
     s = if_neq_stmt(r,new_exp(new AnonEnum_e(ef->name,t2,ef),NULL),fail_stmt); 
     break;
 
-  case &Tunion_p(tud,tuf,NULL,_) && !tud->is_flat:
+  case &Datatype_p(tud,tuf,NULL,_) && !tud->is_flat:
     // when ps == NULL:  if (r == tag) goto succ_lab else goto fail_lab;
-    // Note: This should be correct for tunion and xtunion!
+    // Note: This should be correct for datatype and xdatatype!
     exp_t cmp_exp;
-    if(tud->is_xtunion)
+    if(tud->is_extensible)
       cmp_exp = var_exp(tuf->name,DL);
     else {
-      cmp_exp = tunion_tag(tud,tuf->name,false);
+      cmp_exp = datatype_tag(tud,tuf->name,false);
       r = cast_it(sint_typ,r);
     }
     s = if_neq_stmt(r, cmp_exp, fail_stmt);
     break;
 
-  case &Pointer_p(&Pat{&Tunion_p(tud,tuf,ps,_),_,_}) && ps != NULL && !tud->is_flat:
+  case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}) && ps != NULL && !tud->is_flat:
     // when ps is p1,...,pn:
     //   if ((unsigned int)r > max_tag && ((t)r)->tag == qv_tag)
     //      <similar to tuple and struct patterns>
     //   else goto fail_lab
-    // (no max tag check on xtunions)
-    // FIX: When type is TunionField, can avoid all checks
+    // (no max tag check on xdatatypes)
+    // FIX: When type is DatatypeField, can avoid all checks
     // It's unfortunate that we have to always check that r > max_tag.
     // If we had the decision tree information, we could avoid doing so.
     s = skip_stmt_dl();
@@ -3135,7 +3135,7 @@ xlate_pat(env_t<`rgn> nv,
       s = seq_stmt(s, seq_stmt(s1,s3,DL), DL);
     }
     exp_t test_exp;
-    if(tud->is_xtunion) {
+    if(tud->is_extensible) {
       exp_t e2 = cast_it(cstar_typ(void_star_typ(),mt_tq), r);
       exp_t e1 = deref_exp(e2,DL);
       exp_t e  = var_exp(tuf->name,DL);
@@ -3145,7 +3145,7 @@ xlate_pat(env_t<`rgn> nv,
     } else {
       exp_t e3 = cast_it(cstar_typ(sint_typ,mt_tq), r);
       exp_t e1 = deref_exp(e3,DL);
-      exp_t e  = tunion_tag(tud,tuf->name,true);
+      exp_t e  = datatype_tag(tud,tuf->name,true);
       s = seq_stmt(ifthenelse_stmt(neq_exp(e1,e,DL),fail_stmt,skip_stmt_dl(),
                                    DL), s, DL);
       if (tag_fail_stmt != NULL) {
@@ -3160,13 +3160,13 @@ xlate_pat(env_t<`rgn> nv,
     }
     break;
 
-  case &Tunion_p(tud,tuf,ps,_) && tud->is_flat: 
+  case &Datatype_p(tud,tuf,ps,_) && tud->is_flat: 
     // check that the tag matches and then check the sub-patterns.
     let &$(_,field_name) = tuf->name;
     r = aggrmember_exp(r,field_name,DL);
     path = aggrmember_exp(path,field_name,DL);
     s = ifthenelse_stmt(neq_exp(aggrmember_exp(path,tag_sp,DL),
-                                tunion_tag(tud,tuf->name,true),DL),
+                                datatype_tag(tud,tuf->name,true),DL),
                         fail_stmt,skip_stmt_dl(),DL);
     int cnt = 1;
     for(; ps != NULL; ps = ps->tl, ++cnt) {
@@ -3187,7 +3187,7 @@ xlate_pat(env_t<`rgn> nv,
       s = seq_stmt(s,seq_stmt(s3,s2,DL),DL);
     }
     break;
-  case &Tunion_p(_,_,ps,_): fallthru(ps); // okay for xtunion too
+  case &Datatype_p(_,_,ps,_): fallthru(ps); // okay for xdatatype too
   case &Tuple_p(ps,_):
     // given the pattern $(p1,p2,...,pn)
     //    v1 = r->f1; if (matches(v1,p1)) goto L1 else goto fail_lab;
@@ -3281,7 +3281,7 @@ xlate_pat(env_t<`rgn> nv,
 // For performance, we try to leave switches as switches.  We do this when
 // all of the following hold:
 // * We are switching on a char or int type.
-//   (Could also do tunion without value contructors, but we didn't pass in
+//   (Could also do datatype without value contructors, but we didn't pass in
 //    access to the type definitions!)
 // * No switch_clause has any variables. (reject switch(3) { case x: ... }
 // The hitch is we could still have something like
@@ -3312,9 +3312,9 @@ static $(var_t,var_t,switch_clause_t)@`r gen_label(region_t<`r> r,
   return rnew(r) $(fresh_label(),fresh_label(),sc);
 }
 
-static bool is_mixed_tunion(type_t t) {
+static bool is_mixed_datatype(type_t t) {
   switch (compress(t)) {
-  case &TunionType(TunionInfo{KnownTunion(&tud),...}) && !tud->is_flat:
+  case &DatatypeType(DatatypeInfo{KnownDatatype(&tud),...}) && !tud->is_flat:
     bool seen_novalue = false;
     bool seen_value = false;
     for (let fs = tud->fields->v; fs; fs = fs->tl) {
@@ -3333,7 +3333,7 @@ static bool is_mixed_tunion(type_t t) {
 static bool no_tag_test(pat_t p) {
   switch (p->r) {
   case &Var_p(_,p): return no_tag_test(p);
-  case &Pointer_p(&Pat{&Tunion_p(tud,tuf,ps,_),_,_}) && ps != NULL && !tud->is_flat:
+  case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}) && ps != NULL && !tud->is_flat:
     return false;
   default: return true;
   }
@@ -3383,8 +3383,8 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
     list_t<stmt_t/*,`rgn*/>                test_stmts = NULL;
     list_t<env_t/*,`rgn*/>                 nvs        = NULL;
     list_t<$(qvar_t,type_t)@/*`rgn,`rgn*/> decls      = NULL;
-    bool is_tunion = is_mixed_tunion(t);
-    bool needs_tag_test = is_tunion;
+    bool is_datatype = is_mixed_datatype(t);
+    bool needs_tag_test = is_datatype;
     // generate the tests for each case, continuing to the case's
     // label on success and to the next test on false.
     // do tests first so as to get vars for fallthrus
@@ -3412,7 +3412,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
                                               tag_fail_stmt,
 					      goto_stmt(fail_lab,DL),
                                               decls);
-      if (is_tunion && no_tag_test(sc->pattern))
+      if (is_datatype && no_tag_test(sc->pattern))
         needs_tag_test = true;
       if(sc->where_clause!=NULL) {
 	let e = (exp_t)sc->where_clause;
@@ -3895,9 +3895,9 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
   }
 }
 
-// tunion declarations -- tricky
+// datatype declarations -- tricky
 // Non-flat case:
-// For "tunion foo {Bar,Blah,Baz(t1,t2,t3),Baf(t4,t5)}" we generate
+// For "datatype foo {Bar,Blah,Baz(t1,t2,t3),Baf(t4,t5)}" we generate
 //   typedef void *foo;
 //   struct Baz_struct {
 //     int tag;  // always == 0
@@ -3910,18 +3910,18 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
 //     t4 f1;
 //     t5 f2;
 //   };
-// for xtunion, we pull a really slimy trick: By using char arrays instead
+// for xdatatype, we pull a really slimy trick: By using char arrays instead
 // of ints, the uses get promoted to addresses just like we want.
-// When the tunion is "extern" then we don't generate initializers
+// When the datatype is "extern" then we don't generate initializers
 // for the tags (that should be done elsewhere.)
 //
 // NB: we allow any number of repeated declarations but we can only
 //     declare and initialize global variables once.  So we keep track
 //     of what we've seen so far.  And we make the globals static so that
 //     extern and what not is only a link-checker thing.  Unfortunately,
-//     the static trick doesn't work for xtunion, which uses the addresses.
+//     the static trick doesn't work for xdatatype, which uses the addresses.
 // 
-// For flat tunions, "tunion Foo {Bar, Blah, Baz(t1,t2,t3),Baf(t4,t5)}"
+// For flat datatypes, "datatype Foo {Bar, Blah, Baz(t1,t2,t3),Baf(t4,t5)}"
 // we generate:
 //    struct Bar { int tag; };
 //    struct Blah { int tag; };
@@ -3933,22 +3933,22 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
 //      struct Baz  Baz;
 //      struct Baf  Baf;
 //    };
-static void tuniondecl_to_c(tuniondecl_t tud) {
-  let TocState{.dyn = dyn, .tunions_so_far = tunions_so_far, ...} = *toc_state;
+static void datatypedecl_to_c(datatypedecl_t tud) {
+  let TocState{.dyn = dyn, .datatypes_so_far = datatypes_so_far, ...} = *toc_state;
   region d = open(dyn); {
     let n = tud->name;
-    if(tud->fields == NULL || Set::member(*tunions_so_far, n))
+    if(tud->fields == NULL || Set::member(*datatypes_so_far, n))
       return;
-    *tunions_so_far = Set::rinsert(d,*tunions_so_far, n);
+    *datatypes_so_far = Set::rinsert(d,*datatypes_so_far, n);
   }
-  // list of anonymous struct fields used for flattened tunions
+  // list of anonymous struct fields used for flattened datatypes
   list_t<aggrfield_t> flat_structs = NULL;
   
   for (let fields = tud->fields->v; fields != NULL; fields = fields->tl) {
-    tunionfield_t f = fields->hd;
+    datatypefield_t f = fields->hd;
     if (f->typs != NULL || tud->is_flat) {
       // compute the fields for the struct, adding in a tag field if this
-      // isn't a flat tunion
+      // isn't a flat datatype
       let fs = NULL;
       int i  = 1;
       for (let ts = f->typs; ts != NULL; ts = ts->tl, i++) {
@@ -3987,15 +3987,15 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
   }
 }
 
-// xtunion declarations -- similar to tunion declarations
-// For a declaration extending an existing xtunion, e.g.,
-//   "xtunion foo {Bar,Baz(t1,t2)}"
+// @extensible datatype declarations -- similar to datatype declarations
+// For a declaration extending an existing xdatatype, e.g.,
+//   "@extensible datatype foo {Bar,Baz(t1,t2)}"
 // we generate
 //   char Bar[4] = "\0\0\0\0Bar";
 //   struct Bar_struct { char *tag; };
 //   char Baz[4] = "\0\0\0\0Baz";
 //   struct Baz_struct { char *tag; t1 f1; t2 f2; };
-// When the xtunion is extern, then we don't do initializers for the tags.
+// When the xdatatype is extern, then we don't do initializers for the tags.
 // The 0s are a crazy trick for letting void variants not have to be boxed
 // (value variants can still follow the pointer and then their check fails)
 //
@@ -4006,19 +4006,19 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
 //   t;})
 //true if already seen & initialized, false if seen but non initialized (extern)
 
-static void xtuniondecl_to_c(tuniondecl_t xd) {
+static void xdatatypedecl_to_c(datatypedecl_t xd) {
   if(xd->fields == NULL)
     return;
-  let TocState{.dyn = dyn, .xtunions_so_far = xtunions_so_far, ...} = *toc_state;
+  let TocState{.dyn = dyn, .xdatatypes_so_far = xdatatypes_so_far, ...} = *toc_state;
   region d = open(dyn); {
     let n = xd->name;
     for (let fs = xd->fields->v; fs != NULL; fs = fs->tl) {
-      tunionfield_t f  = fs->hd;
+      datatypefield_t f  = fs->hd;
       stringptr_t fn = (*f->name)[1];
       let sz_exp  = uint_exp(numelts(*fn)+4,DL);
       let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,NULL);
       // FIX: making bad alignment and pointer-size assumptions!
-      switch (Dict::lookup_opt(*xtunions_so_far,f->name)) {
+      switch (Dict::lookup_opt(*xdatatypes_so_far,f->name)) {
       case NULL:
         exp_opt_t initopt = NULL;
         if (f->sc != Extern) {
@@ -4031,8 +4031,8 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
         let tag_decl = new_vardecl(f->name, tag_typ, initopt);
         tag_decl->sc = f->sc;
         result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-        *xtunions_so_far = 
-          Dict::insert(*xtunions_so_far, f->name, f->sc != Extern);
+        *xdatatypes_so_far = 
+          Dict::insert(*xdatatypes_so_far, f->name, f->sc != Extern);
         if(f->typs != NULL) {
           list_t<aggrfield_t> fields = NULL;
           int i = 1;
@@ -4067,7 +4067,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
           let tag_decl = new_vardecl(f->name, tag_typ, initopt);
           tag_decl->sc = f->sc;
           result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);
-          *xtunions_so_far = Dict::insert(*xtunions_so_far, f->name, true);
+          *xdatatypes_so_far = Dict::insert(*xdatatypes_so_far, f->name, true);
         }
         break;
       default: break;
@@ -4212,7 +4212,7 @@ static void exptypes_to_c(exp_t e) {
   case &AnonEnum_e(_,_,_):break;
 
   case &AnonStruct_e(_, _): fallthru;
-  case &Tunion_e(_,_,_):    fallthru;
+  case &Datatype_e(_,_,_):    fallthru;
   case &Struct_e(_,_,_,_):  fallthru;
   case &Comprehension_e(_,_,_,_): fallthru;
   case &Tuple_e(_):         fallthru;
@@ -4248,7 +4248,7 @@ static void decltypes_to_c(decl_t d) {
   case &Typedef_d(td): td->defn = new Opt(typ_to_c_array(td->defn->v)); break;
   case &Let_d(_,_,_):
   case &Letv_d(_):
-  case &Tunion_d(_):
+  case &Datatype_d(_):
   case &Namespace_d(_,_):
   case &Using_d(_,_):
   case &ExternC_d(_):
@@ -4343,11 +4343,11 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       aggrdecl_to_c(sd);
       result_decls = new List(d,result_decls);
       break;
-    case &Tunion_d(tud):
-      if(tud->is_xtunion)
-	xtuniondecl_to_c(tud);
+    case &Datatype_d(tud):
+      if(tud->is_extensible)
+	xdatatypedecl_to_c(tud);
       else
-	tuniondecl_to_c(tud);
+	datatypedecl_to_c(tud);
       break;
     case &Enum_d(ed):
       enumdecl_to_c(nv,ed);
@@ -4386,8 +4386,8 @@ static void init() {
       new TocState{ .dyn = dyn,
                     .tuple_types = rnew(d) NULL,
                     .aggrs_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
-                    .tunions_so_far = rnew(d) Set::rempty(d,qvar_cmp),
-                    .xtunions_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
+                    .datatypes_so_far = rnew(d) Set::rempty(d,qvar_cmp),
+                    .xdatatypes_so_far = rnew(d) Dict::rempty(d,qvar_cmp),
                     .qvar_tags = rnew(d) Dict::rempty(d,qvar_tag_cmp),
                     .temp_labels = Xarray::rcreate_empty(d)
       };

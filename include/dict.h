@@ -54,9 +54,9 @@ typedef struct Dict<`a,`b,`r> dict_t<`a,`b,`r>;
     keys of type [`a] to values of type [`b]; the dictionary
     datatypes live in region [`r]. */
 
-extern datatype exn @extensible {extern Present};
+extern datatype exn {extern Present};
 /** [Present] is thrown when a key is present but not expected. */
-extern datatype exn @extensible {extern Absent};
+extern datatype exn {extern Absent};
 /** [Absent] is thrown when a key is absent but should be present. */
 
 extern dict_t<`a,`b> empty(int (@`H cmp)(`a,`a));

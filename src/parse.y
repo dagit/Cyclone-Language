@@ -46,8 +46,8 @@ typedef names to be redeclared as identifiers.
 #define YYERROR_VERBOSE
 
 #if YYDEBUG==1
-extern xtunion YYSTYPE;
-extern void yyprint(int i, xtunion YYSTYPE v);
+extern @extensible datatype YYSTYPE;
+extern void yyprint(int i, datatype YYSTYPE v);
 #endif
 
 #include <core.h>
@@ -241,7 +241,7 @@ static tvar_t copy_tvar(tvar_t t) {
 // convert a list of types to a list of typevars -- the parser can't
 // tell lists of types apart from lists of typevars easily so we parse
 // them as types and then convert them back to typevars.  See
-// productions "struct_or_union_specifier" and "tunion_specifier";
+// productions "struct_or_union_specifier" and "datatype_specifier";
 static tvar_t typ2tvar(seg_t loc, type_t t) {
   switch (t) {
   case &VarType(pr): return pr;
@@ -407,7 +407,7 @@ static string_t msg3 =
 static string_t msg4 = 
   "sign specifier may appear only once within a type specifier";
 // Given a type-specifier list, determines the type and any declared
-// structs, unions, enums, or [x]tunions.  Most of this is just collapsing
+// structs, unions, enums, or datatypes.  Most of this is just collapsing
 // combinations of [un]signed, short, long, int, char, etc.  We're
 // probably more permissive than is strictly legal here.  For
 // instance, one can write "unsigned const int" instead of "const
@@ -489,10 +489,10 @@ static $(type_t,opt_t<decl_t>)
           t = new AggrType(AggrInfo(UnknownAggr(ad->kind,ad->name),args));
           if (ad->impl!=NULL) declopt = new Opt(d);
 	  break;
-        case &Tunion_d(tud):
+        case &Datatype_d(tud):
           let args = List::map(tvar2typ,List::map(copy_tvar,tud->tvs));
           opt_t<type_t> ropt = tud->is_flat ? NULL : new Opt(HeapRgn);
-          t = new TunionType(TunionInfo(KnownTunion(new tud),args,ropt));
+          t = new DatatypeType(DatatypeInfo(KnownDatatype(new tud),args,ropt));
 	  if(tud->fields != NULL) declopt = new Opt(d);
 	  break;
         case &Enum_d(ed):
@@ -727,7 +727,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
   let ts_info = collapse_type_specifiers(tss,loc);
   if (declarators == NULL) {
     // here we have a type declaration -- either a struct, union,
-    // tunion, or xtunion as in: "struct Foo { ... };"
+    // or datatype as in: "struct Foo { ... };"
     let $(t,declopt) = ts_info;
     if (declopt != NULL) {
       decl_t d = declopt->v;
@@ -737,9 +737,9 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
         if (atts != NULL) err("bad attributes on enum",loc); 
 	break;
       case &Aggr_d(ad): ad->sc = s; ad->attributes = atts; break;
-      case &Tunion_d(tud):
+      case &Datatype_d(tud):
         tud->sc = s;
-        if (atts != NULL) err("bad attributes on tunion",loc); 
+        if (atts != NULL) err("bad attributes on datatype",loc); 
 	break;
       default: err("bad declaration",loc); return NULL;
       }
@@ -751,13 +751,13 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 	let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL);
 	if (atts != NULL) err("bad attributes on type declaration",loc);
 	return new List(new_decl(new Aggr_d(ad),loc),NULL);
-      case &TunionType(TunionInfo(KnownTunion(tudp),_,_)):
-	if(atts != NULL) err("bad attributes on tunion", loc);
-	return new List(new_decl(new Tunion_d(*tudp),loc),NULL);
-      case &TunionType(TunionInfo(UnknownTunion(UnknownTunionInfo(n,isx,is_flat)),ts,_)):
+      case &DatatypeType(DatatypeInfo(KnownDatatype(tudp),_,_)):
+	if(atts != NULL) err("bad attributes on datatype", loc);
+	return new List(new_decl(new Datatype_d(*tudp),loc),NULL);
+      case &DatatypeType(DatatypeInfo(UnknownDatatype(UnknownDatatypeInfo(n,isx,is_flat)),ts,_)):
         let ts2 = List::map_c(typ2tvar,loc,ts);
-        let tud = tunion_decl(s, n, ts2, NULL, isx, is_flat, loc);
-        if (atts != NULL) err("bad attributes on tunion",loc);
+        let tud = datatype_decl(s, n, ts2, NULL, isx, is_flat, loc);
+        if (atts != NULL) err("bad attributes on datatype",loc);
         return new List(tud,NULL);
       case &EnumType(n,_):
         let ed = new Enumdecl{s,n,NULL};
@@ -777,7 +777,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
     type_t t = ts_info[0];
     let fields = apply_tmss(mkrgn,tq,t,declarators,atts);
     if (istypedef) {
-      // we can have a nested struct, union, tunion, or xtunion
+      // we can have a nested struct, union, or datatype
       // declaration within the typedef as in:
       // typedef struct Foo {...} t;
       if (!exps_empty)
@@ -788,11 +788,11 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
         switch (d->r) {
         case &Aggr_d(ad):
           ad->sc = s; ad->attributes = atts; atts = NULL; break;
-        case &Tunion_d(tud): tud->sc = s; break;
+        case &Datatype_d(tud): tud->sc = s; break;
         case &Enum_d(ed):    ed->sc  = s; break;
         default:
-          err("declaration within typedef is not a struct, union, tunion, "
-              "or xtunion",loc);
+          err("declaration within typedef is not a struct, union, or datatype",
+              loc);
 	  break;
         }
         decls = new List(d,decls);
@@ -950,7 +950,7 @@ using Parse;
 %type <list_t<$(declarator_t,exp_opt_t)@>> init_declarator_list init_declarator_list0
 %type <storage_class_t> storage_class_specifier
 %type <type_specifier_t> type_specifier type_specifier_notypedef enum_specifier
-%type <type_specifier_t> struct_or_union_specifier tunion_specifier
+%type <type_specifier_t> struct_or_union_specifier datatype_specifier
 %type <aggr_kind_t> struct_or_union
 %type <tqual_t> type_qualifier tqual_list
 %type <list_t<aggrfield_t>> struct_declaration_list struct_declaration
@@ -960,10 +960,10 @@ using Parse;
 %type <$(declarator_t,exp_opt_t)@> struct_declarator
 %type <list_t<$(declarator_t,exp_opt_t)@>> struct_declarator_list struct_declarator_list0
 %type <abstractdeclarator_t> abstract_declarator direct_abstract_declarator
-%type <bool> tunion_or_xtunion optional_inject flat_opt resetable_qual_opt tagged_qual_opt extensible_opt
-%type <scope_t> tunionfield_scope
-%type <tunionfield_t> tunionfield
-%type <list_t<tunionfield_t>> tunionfield_list
+%type <bool> optional_inject resetable_qual_opt 
+%type <scope_t> datatypefield_scope
+%type <datatypefield_t> datatypefield
+%type <list_t<datatypefield_t>> datatypefield_list
 %type <$(tqual_t,list_t<type_specifier_t>,attributes_t)@> specifier_qualifier_list notypedef_specifier_qualifier_list
 %type <list_t<var_t>> identifier_list identifier_list0
 %type <$(opt_t<var_t>,tqual_t,type_t)@> parameter_declaration type_name
@@ -983,6 +983,7 @@ using Parse;
 %type <list_t<$(type_t,type_t)@>> optional_rgn_order rgn_order
 %type <conref_t<bool>> zeroterm_qual_opt
 %type <list_t<$(Position::seg_t,qvar_t,bool)@>> export_list export_list_values
+%type <$(bool,bool)> qual_datatype
 /* start production */
 %start prog
 %%
@@ -1143,33 +1144,30 @@ declaration:
     }
 /* Cyc: region declaration */
 /* region <`r> h;  and region <`r> h @resetable; */
-| REGION '<' TYPE_VAR '>' IDENTIFIER resetable_qual_opt ';'
-  { if (zstrcmp($3,"`H") == 0 || zstrcmp($3,"`U") == 0)
-      err(aprintf("bad occurrence of heap region %s",$3),LOC(@3,@3));
-    tvar_t tv = new Tvar(new $3,-1,Tcutil::kind_to_bound(RgnKind));
+| resetable_qual_opt REGION '<' TYPE_VAR '>' IDENTIFIER ';'
+  { if (zstrcmp($4,"`H") == 0)
+      err(aprintf("bad occurrence of heap region"),LOC(@4,@4));
+    if (zstrcmp($4,"`U") == 0)
+      err(aprintf("bad occurrence of unique region"),LOC(@4,@4));
+    tvar_t tv = new Tvar(new $4,-1,Tcutil::kind_to_bound(RgnKind));
     type_t t  = new VarType(tv);
-    vardecl_t vd = new_vardecl(new $(Loc_n,new $5),new RgnHandleType(t),NULL);
-    $$ = ^$(new List(region_decl(tv,vd,$6,NULL,LOC(@1,@7)),NULL));
+    vardecl_t vd = new_vardecl(new $(Loc_n,new $6),new RgnHandleType(t),NULL);
+    $$ = ^$(new List(region_decl(tv,vd,$1,NULL,LOC(@1,@7)),NULL));
   }
 /* region h;   and  region h = open(e); */
-| REGION IDENTIFIER open_exp_opt ';'
-  { if (zstrcmp($2,"H") == 0)
-      err("bad occurrence of heap region `H",LOC(@2,@2));
-    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$2), -1,
+| resetable_qual_opt REGION IDENTIFIER open_exp_opt ';'
+  { if (zstrcmp($3,"H") == 0)
+      err("bad occurrence of heap region `H",LOC(@3,@3));
+    if (zstrcmp($3,"U") == 0)
+      err("bad occurrence of unique region `U",LOC(@3,@3));
+    if ($1 && ($4 != NULL))
+      err("open regions cannot be @resetable",LOC(@1,@5));
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$3), -1,
 			 Tcutil::kind_to_bound(RgnKind));
     type_t t = new VarType(tv);
-    vardecl_t vd = new_vardecl(new $(Loc_n,new $2),new RgnHandleType(t),NULL);
-    $$ = ^$(new List(region_decl(tv,vd,false,$3,LOC(@1,@4)),NULL));
-  }
-/* region h @resetable; */
-| REGION IDENTIFIER RESETABLE_QUAL ';'
-  { if (zstrcmp($2,"H") == 0)
-      err("bad occurrence of heap region `H",LOC(@2,@2));
-    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$2), -1,
-			 Tcutil::kind_to_bound(RgnKind));
-    type_t t = new VarType(tv);
-    vardecl_t vd = new_vardecl(new $(Loc_n,new $2),new RgnHandleType(t),NULL);
-    $$ = ^$(new List(region_decl(tv,vd,true,NULL,LOC(@1,@4)),NULL));
+    vardecl_t vd = new_vardecl(new $(Loc_n,new $3),new RgnHandleType(t),NULL);
+
+    $$ = ^$(new List(region_decl(tv,vd,$1,$4,LOC(@1,@5)),NULL));
   }
 /* Cyc: alias <r>t v = e; */
 | ALIAS '<' TYPE_VAR '>' IDENTIFIER '=' expression ';'
@@ -1400,8 +1398,8 @@ type_specifier_notypedef:
 | UNSIGNED  { $$=^$(new Unsigned_spec(LOC(@1,@1))); }
 | enum_specifier { $$=$!1; }
 | struct_or_union_specifier { $$=$!1; }
-/* Cyc: added [x]tunions */
-| tunion_specifier { $$=$!1; }
+/* Cyc: added datatypes */
+| datatype_specifier { $$=$!1; }
 /* Cyc: added type variables and optional type parameters to typedef'd names */
 | type_var { $$=^$(type_spec($1, LOC(@1,@1))); }
 /* Cyc: everything below here is an addition */
@@ -1466,27 +1464,32 @@ enum_declaration_list:
 struct_or_union_specifier:
   struct_or_union '{' struct_declaration_list '}'
   { $$=^$(type_spec(new AnonAggrType($1,$3),LOC(@1,@4))); }
-/* Cyc:  type_params_opt are added */
-| struct_or_union struct_union_name type_params_opt tagged_qual_opt '{' 
+/* Cyc:  TAGGED_QUAL, type_params_opt are added */
+| TAGGED_QUAL struct_or_union struct_union_name type_params_opt '{' 
+    type_params_opt optional_rgn_order 
+  struct_declaration_list '}'
+    { 
+      let ts = List::map_c(typ2tvar,LOC(@4,@4),$4);
+      let exist_ts = List::map_c(typ2tvar,LOC(@6,@6),$6);
+      $$=^$(new Decl_spec(aggr_decl($2, Public, $3, ts,
+				    aggrdecl_impl(exist_ts,$7,$8,true), NULL,
+				    LOC(@1,@9))));
+    }
+| struct_or_union struct_union_name type_params_opt '{' 
     type_params_opt optional_rgn_order 
   struct_declaration_list '}'
     { 
       let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      let exist_ts = List::map_c(typ2tvar,LOC(@6,@6),$6);
+      let exist_ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
       $$=^$(new Decl_spec(aggr_decl($1, Public, $2, ts,
-				    aggrdecl_impl(exist_ts,$7,$8,$4), NULL,
-				    LOC(@1,@9))));
+				    aggrdecl_impl(exist_ts,$6,$7,false), NULL,
+				    LOC(@1,@8))));
     }
 /* Cyc:  type_params_opt are added */
 | struct_or_union struct_union_name type_params_opt 
     { $$=^$(type_spec(new AggrType(AggrInfo(UnknownAggr($1,$2),$3)),
 		      LOC(@1,@3)));
     }
-;
-
-tagged_qual_opt:
-  /* empty */ { $$=^$(false); }
-| TAGGED_QUAL { $$=^$(true); }
 ;
 
 type_params_opt:
@@ -1540,7 +1543,7 @@ struct_declaration:
       /* when we collapse the specifier_qualifier_list and
        * struct_declarator_list, we get a list of (1) optional id,
        * (2) type, and (3) in addition any nested struct, union,
-       * or [x]tunion declarations.  For now, we warn about the nested
+       * or datatype declarations.  For now, we warn about the nested
        * declarations.  We must check that each id is actually present
        * and then convert this to a list of struct fields: (1) id,
        * (2) tqual, (3) type. */
@@ -1617,58 +1620,49 @@ struct_declarator:
 ;
 
 // FIX: hack to have rgn_opt in 1st and 3rd cases
-tunion_specifier:
-  flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier type_params_opt extensible_opt '{' tunionfield_list '}'
-    { bool extensible = $2 || $6;
-      let ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
-      $$ = ^$(new Decl_spec(tunion_decl(Public, $4,ts,new Opt($8), 
-                                        extensible,$1,LOC(@1,@9))));
+datatype_specifier:
+  qual_datatype opt_rgn_opt qual_opt_identifier type_params_opt '{' datatypefield_list '}'
+    { let $(is_flat,is_extensible) = $1;
+      let ts = List::map_c(typ2tvar,LOC(@4,@4),$4);
+      $$ = ^$(new Decl_spec(datatype_decl(Public, $3,ts,new Opt($6), 
+                                          is_extensible,is_flat,LOC(@1,@7))));
     }
-| flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier type_params_opt extensible_opt
-    { bool extensible = $2 || $6;
-      $$=^$(type_spec(new TunionType(TunionInfo(UnknownTunion(UnknownTunionInfo($4,extensible,$1)), $5, $3)), LOC(@1,@6)));
+| qual_datatype opt_rgn_opt qual_opt_identifier type_params_opt 
+    { let $(is_flat,is_extensible) = $1;
+      $$=^$(type_spec(new DatatypeType(DatatypeInfo(UnknownDatatype(UnknownDatatypeInfo($3,is_extensible,is_flat)), $4, $2)), LOC(@1,@4)));
     }
-| flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier '.' qual_opt_identifier type_params_opt extensible_opt
-    { bool extensible = $2 || $8;
-      $$=^$(type_spec(new TunionFieldType(TunionFieldInfo(
-		  UnknownTunionfield(UnknownTunionFieldInfo($4,$6,extensible)),$7)),
-		      LOC(@1,@8)));
+| qual_datatype opt_rgn_opt qual_opt_identifier '.' qual_opt_identifier type_params_opt 
+   {  let $(is_flat,is_extensible) = $1;
+      $$=^$(type_spec(new DatatypeFieldType(DatatypeFieldInfo(
+		  UnknownDatatypefield(UnknownDatatypeFieldInfo($3,$5,is_extensible)),$6)),
+		      LOC(@1,@6)));
     }
 ;
 
-flat_opt:
-  FLAT_kw { $$=^$(true); }
-| /*empty*/ { $$=^$(false); }
-
-tunion_or_xtunion:
-  DATATYPE extensible_opt { $$=$!2; }
-| TUNION    { $$=^$(false); }
-| XTUNION   { $$=^$(true);  }
+qual_datatype:
+  DATATYPE { $$ = ^$($(false,false)); }
+| FLAT_kw DATATYPE { $$ = ^$($(true,false)); }
+| EXTENSIBLE_QUAL DATATYPE { $$ = ^$($(false,true)); }
 ;
 
-extensible_opt:
-  /* empty */ { $$=^$(false); }
-| EXTENSIBLE_QUAL { $$=^$(true); }
+datatypefield_list:
+  datatypefield                      { $$=^$(new List($1,NULL)); }
+| datatypefield ';'                  { $$=^$(new List($1,NULL)); }
+| datatypefield ',' datatypefield_list { $$=^$(new List($1,$3)); }
+| datatypefield ';' datatypefield_list { $$=^$(new List($1,$3)); }
 ;
 
-tunionfield_list:
-  tunionfield                      { $$=^$(new List($1,NULL)); }
-| tunionfield ';'                  { $$=^$(new List($1,NULL)); }
-| tunionfield ',' tunionfield_list { $$=^$(new List($1,$3)); }
-| tunionfield ';' tunionfield_list { $$=^$(new List($1,$3)); }
-;
-
-tunionfield_scope:
+datatypefield_scope:
          { $$=^$(Public);}
 | EXTERN { $$=^$(Extern);}
 | STATIC { $$=^$(Static);}
 
-tunionfield:
-  tunionfield_scope qual_opt_identifier
-    { $$=^$(new Tunionfield($2,NULL,LOC(@1,@2),$1)); }
-| tunionfield_scope qual_opt_identifier '(' parameter_list ')'
+datatypefield:
+  datatypefield_scope qual_opt_identifier
+    { $$=^$(new Datatypefield($2,NULL,LOC(@1,@2),$1)); }
+| datatypefield_scope qual_opt_identifier '(' parameter_list ')'
     { let typs = List::map_c(get_tqual_typ,LOC(@4,@4),List::imp_rev($4));
-      $$=^$(new Tunionfield($2,typs,LOC(@1,@5),$1)); }
+      $$=^$(new Datatypefield($2,typs,LOC(@1,@5),$1)); }
 ;
 
 declarator:
@@ -2754,7 +2748,7 @@ postfix_expression:
 
 primary_expression:
   qual_opt_identifier
-    /* Could be an identifier, a struct tag, or an [x]tunion constructor */
+    /* Could be an identifier, a struct tag, or an datatype constructor */
     { $$=^$(new_exp(new UnknownId_e($1),LOC(@1,@1))); }
 | constant
     { $$= $!1; }

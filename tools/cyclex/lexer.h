@@ -14,7 +14,7 @@ using Lexing {
 using Parser {
 namespace Lexer {
 
-extern datatype @extensible exn { extern Lexical_error(string_t,int,int); };
+extern datatype exn { extern Lexical_error(string_t,int,int); };
 
 extern int lexmain(Lexing::Lexbuf<`a>);
 extern int line_num;

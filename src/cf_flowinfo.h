@@ -104,7 +104,7 @@ typedef struct TagCmp @`r tag_cmp_t<`r>;
 
   // as with AbsRVal below, HasTagCmps forgets zero-ness which technically
   // is bad but shouldn't matter in practice.
-datatype Absyn::AbsynAnnot @extensible { 
+@extensible datatype Absyn::AbsynAnnot { 
   EXTERN_CFFLOW IsZero;
   EXTERN_CFFLOW NotZero(relns_t<`H>);
   EXTERN_CFFLOW UnknownZ(relns_t<`H>);
@@ -137,7 +137,7 @@ EXTERN_CFFLOW datatype AbsRVal<`r::R> {
   // Can always add zero-ness as another field.
   TagCmps(List::list_t<tag_cmp_t<`r>,`r>);
   Aggregate(aggrdict_t<`r>); // if you're a struct or tuple, you should always
-  // evaluate to an Aggregate in the abstract interpretation (tunion?)
+  // evaluate to an Aggregate in the abstract interpretation (datatype?)
 };
 
 typedef Dict::dict_t<`a,Position::seg_t,`r> dict_set_t<`a,`r>;

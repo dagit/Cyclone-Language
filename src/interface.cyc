@@ -43,16 +43,16 @@ namespace Interface {
 
 /* ------ definition of an interface ------- */
 
-typedef Tcdecl::xtunionfielddecl_t xtunionfielddecl_t;
+typedef Tcdecl::xdatatypefielddecl_t xdatatypefielddecl_t;
 
 // clone of Genv, but with only what we need
 struct Ienv {
   Dict::dict_t<var_t,aggrdecl_t>    aggrdecls;
-  Dict::dict_t<var_t,tuniondecl_t>  tuniondecls;
+  Dict::dict_t<var_t,datatypedecl_t>  datatypedecls;
   Dict::dict_t<var_t,enumdecl_t>    enumdecls;
   Dict::dict_t<var_t,typedefdecl_t> typedefdecls;
   Dict::dict_t<var_t,vardecl_t>     vardecls;
-  Dict::dict_t<var_t,xtunionfielddecl_t> xtunionfielddecls;
+  Dict::dict_t<var_t,xdatatypefielddecl_t> xdatatypefielddecls;
 };
 
 typedef struct Ienv @ienv_t;
@@ -66,11 +66,11 @@ struct I {
 static ienv_t new_ienv() {
   return new Ienv {
     .aggrdecls    = Dict::empty(strptrcmp),
-    .tuniondecls  = Dict::empty(strptrcmp),
+    .datatypedecls  = Dict::empty(strptrcmp),
     .enumdecls    = Dict::empty(strptrcmp),
     .typedefdecls = Dict::empty(strptrcmp),
     .vardecls     = Dict::empty(strptrcmp),
-    .xtunionfielddecls = Dict::empty(strptrcmp)
+    .xdatatypefielddecls = Dict::empty(strptrcmp)
   };
 }
 
@@ -97,16 +97,16 @@ i_t empty() {
 // + requirement for a function main
 i_t final() {
   let i = empty();
-  // add definition of xtunion exn
+  // add definition of @extensible datatype exn
   let ie1 = new_ienv();
   let exn_d = new *exn_tud;
   exn_d->sc = Public;
-  ie1->tuniondecls = Dict::insert(ie1->tuniondecls, (*exn_name)[1], exn_d);
+  ie1->datatypedecls = Dict::insert(ie1->datatypedecls, (*exn_name)[1], exn_d);
   for(let tufs = exn_tud->fields->v; tufs != NULL; tufs = tufs->tl) {
     let exn_f = new *tufs->hd;
     exn_f->sc = Public;
-    let exn_fd = new Tcdecl::Xtunionfielddecl(exn_d, exn_f);
-    ie1->xtunionfielddecls = Dict::insert(ie1->xtunionfielddecls,
+    let exn_fd = new Tcdecl::Xdatatypefielddecl(exn_d, exn_f);
+    ie1->xdatatypefielddecls = Dict::insert(ie1->xdatatypefielddecls,
 					  (*tufs->hd->name)[1], exn_fd);
   }    
   i->exports = Dict::insert(i->exports, NULL, ie1);
@@ -140,8 +140,9 @@ i_t final() {
  * _ possible scopes in imports are : Extern and ExternC
  * _ no var is initialized, there are no functions either (only prototypes)
  * _ all the qvars match the namespace they are in
- * _ a same object cannot be both in exports and in imports (except xtunions)
- * _ fields of xtunions are sorted by name
+ * _ a same object cannot be both in exports and in imports 
+ *   (except @extensible datatype)
+ * _ fields of @extensible datatypes are sorted by name
  *
  * ***********************************************/
 
@@ -184,7 +185,7 @@ static void abstract_err(string_t obj1,qvar_t name1,string_t obj2,qvar_t name2){
 /* --- to keep a track of already checked structures --- */
 struct Seen {
   Dict::dict_t<qvar_t, bool> aggrs;
-  Dict::dict_t<qvar_t, bool> tunions;
+  Dict::dict_t<qvar_t, bool> datatypes;
 };
 
 typedef struct Seen @ seen_t;
@@ -229,18 +230,18 @@ static type_t get_type2($(opt_t<string_t @>, struct Tqual, type_t) @ x) {
   return (*x)[2];
 }
 
-static bool check_public_tuniondecl(aenv_t ae, seen_t seen, tuniondecl_t d) {
-  try return Dict::lookup(seen->tunions, d->name);
+static bool check_public_datatypedecl(aenv_t ae, seen_t seen, datatypedecl_t d) {
+  try return Dict::lookup(seen->datatypes, d->name);
   catch { case Dict::Absent: break; }
   let res = true;
-  seen->tunions = Dict::insert(seen->tunions, d->name, res); // necessary for recursive datas
+  seen->datatypes = Dict::insert(seen->datatypes, d->name, res); // necessary for recursive datas
   if (d->fields != NULL)
     for(let fs = d->fields->v; fs != NULL; fs=fs->tl)
-      if (!check_public_type_list(ae, seen, "[x]tunion", d->name,
+      if (!check_public_type_list(ae, seen, "datatype", d->name,
 				  get_type1, fs->hd->typs)) 
 	res = false;
 
-  seen->tunions = Dict::insert(seen->tunions, d->name, res); // save result
+  seen->datatypes = Dict::insert(seen->datatypes, d->name, res); // save result
   return res;
 }
 
@@ -312,41 +313,41 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
     }
     return true /*check_public_enum(ae, seen, ed)*/;
 
-  case &TunionType(TunionInfo(KnownTunion(&tud0),targs,_)):
+  case &DatatypeType(DatatypeInfo(KnownDatatype(&tud0),targs,_)):
     let &$(tns, v) = tud0->name;
     let ns = get_abs_ns(tns);
-    tuniondecl_t tud;
+    datatypedecl_t tud;
     try {
       let ge = Dict::lookup(ae, ns);
-      tud = *Dict::lookup(ge->tuniondecls, v);
+      tud = *Dict::lookup(ge->datatypedecls, v);
     } catch { case Dict::Absent: 
-      invalid_arg(aprintf("check_public_type (can't find [x]tunion %s)",
+      invalid_arg(aprintf("check_public_type (can't find datatype %s)",
 			  qvar2string(tud0->name)));
     }
     if (tud->sc == Static) {
-      static_err(obj, name, "[x]tunion", tud->name);
+      static_err(obj, name, "datatype", tud->name);
       return false;
     }
     return check_public_type_list(ae, seen, obj, name, identity, targs)
-      && check_public_tuniondecl(ae, seen, tud);
+      && check_public_datatypedecl(ae, seen, tud);
 
-  case &TunionFieldType(TunionFieldInfo{KnownTunionfield(tud0,tuf0), targs}):
+  case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud0,tuf0), targs}):
     let &$(tns, v) = tud0->name;
     let ns = get_abs_ns(tns);
-    tuniondecl_t tud;
+    datatypedecl_t tud;
     try {
       let ge = Dict::lookup(ae, ns);
-      tud = *Dict::lookup(ge->tuniondecls, v);
+      tud = *Dict::lookup(ge->datatypedecls, v);
     } catch {
     case Dict::Absent:
-      invalid_arg(aprintf("check_public_type (can't find [x]tunion %s and search its fields)",
+      invalid_arg(aprintf("check_public_type (can't find datatype %s and search its fields)",
 			  qvar2string(tud0->name)));
     }
     if (tud->fields == NULL) 
-      invalid_arg(aprintf("check_public_type ([x]tunion %s has no fields)",
+      invalid_arg(aprintf("check_public_type (datatype %s has no fields)",
 			  qvar2string(tud->name)));
 
-    struct Tunionfield * tuf1 = NULL;
+    struct Datatypefield * tuf1 = NULL;
     for (let fs = tud->fields->v; fs != NULL; fs = fs->tl)
       if (strptrcmp((*tuf0->name)[1], (*fs->hd->name)[1]) == 0) {
 	  tuf1 = fs->hd;
@@ -354,16 +355,16 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
 	}
   
     if (tuf1 == NULL) 
-      invalid_arg(aprintf("check_public_type (can't find [x]tunionfield %s)",
+      invalid_arg(aprintf("check_public_type (can't find datatypefield %s)",
 			  qvar2string(tuf0->name)));
-    tunionfield_t tuf = (tunionfield_t) tuf1;
+    datatypefield_t tuf = (datatypefield_t) tuf1;
 
     if (tud->sc == Static) {
-      static_err(obj, name, "[x]tunion", tud->name);
+      static_err(obj, name, "datatype", tud->name);
       return false;
     }
     if (tud->sc == Abstract) {
-      abstract_err(obj, name, "[x]tunion", tud->name);
+      abstract_err(obj, name, "datatype", tud->name);
       return false;
     }
     if (tuf->sc == Static) {
@@ -372,7 +373,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       return false;
     }
     return check_public_type_list(ae, seen, obj, name, identity, targs)
-      && check_public_tuniondecl(ae, seen, tud);
+      && check_public_datatypedecl(ae, seen, tud);
 
   default: return true;
   }
@@ -460,7 +461,7 @@ static void extract_enumdecl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,
 }
 
 static void
-extract_xtunionfielddecl(i_t i, tuniondecl_t d, tunionfield_t f) {
+extract_xdatatypefielddecl(i_t i, datatypedecl_t d, datatypefield_t f) {
   let ns = NULL;
   switch ((*(f->name))[0]) {
   case Rel_n(l): fallthru(l);
@@ -472,7 +473,7 @@ extract_xtunionfielddecl(i_t i, tuniondecl_t d, tunionfield_t f) {
   case Static: return;
   case Extern: dict = & i->imports; break;
   case Public: dict = & i->exports; break;
-  default: invalid_arg("add_xtunionfielddecl");
+  default: invalid_arg("add_xdatatypefielddecl");
   }
 
   ienv_t env;
@@ -484,66 +485,66 @@ extract_xtunionfielddecl(i_t i, tuniondecl_t d, tunionfield_t f) {
     *dict = Dict::insert(*dict, ns, env);
     break;
   }
-  env->xtunionfielddecls =
-    Dict::insert(env->xtunionfielddecls, (*(f->name))[1] , new Tcdecl::Xtunionfielddecl(d, f));
+  env->xdatatypefielddecls =
+    Dict::insert(env->xdatatypefielddecls, (*(f->name))[1] , new Tcdecl::Xdatatypefielddecl(d, f));
 }
 
-static void extract_tuniondecl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env, 
-			       var_t x, tuniondecl_t@ dp) {
+static void extract_datatypedecl($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env, 
+			       var_t x, datatypedecl_t@ dp) {
   let &$(imp, exp, check_complete_defs, ae, seen, i) = env;
   let d = *dp;
 
   switch(d->sc) {
   case Static:
-    if (!d->is_xtunion && check_complete_defs && d->fields == NULL) {
-      fields_err("static", "tunion", d->name);
+    if (!d->is_extensible && check_complete_defs && d->fields == NULL) {
+      fields_err("static", "datatype", d->name);
     }
     break;
   case Abstract:
     if (d->fields == NULL) {
-      if (!d->is_xtunion && check_complete_defs) {
-	fields_err("abstract", "tunion", d->name);
+      if (!d->is_extensible && check_complete_defs) {
+	fields_err("abstract", "datatype", d->name);
       }
     } else {
       d = new *d;
       d->fields = NULL;
     }
-    if (check_public_tuniondecl(ae, seen, d))
-      exp->tuniondecls = Dict::insert(exp->tuniondecls, x, d);
+    if (check_public_datatypedecl(ae, seen, d))
+      exp->datatypedecls = Dict::insert(exp->datatypedecls, x, d);
     break;
   case Public:
     d = new *d;
-    if (!d->is_xtunion && d->fields == NULL) {
-      fields_err("public", "tunion", d->name);
+    if (!d->is_extensible && d->fields == NULL) {
+      fields_err("public", "datatype", d->name);
       d->sc = Abstract;
     }
-    if (check_public_tuniondecl(ae, seen, d)) {
-      if (d->is_xtunion && d->fields != NULL) {
+    if (check_public_datatypedecl(ae, seen, d)) {
+      if (d->is_extensible && d->fields != NULL) {
 	let fields = d->fields->v;
 	d->fields = NULL;
 	for (let f = fields; f != NULL; f = f->tl) {
-	  extract_xtunionfielddecl(i, d, f->hd);
+	  extract_xdatatypefielddecl(i, d, f->hd);
 	}
       }
-      exp->tuniondecls = Dict::insert(exp->tuniondecls, x, d);
+      exp->datatypedecls = Dict::insert(exp->datatypedecls, x, d);
     }
     break;
-  case ExternC: invalid_arg("extract_tuniondecl");
+  case ExternC: invalid_arg("extract_datatypedecl");
   case Extern:
-    if (check_public_tuniondecl(ae, seen, d)) {
-      if (d->is_xtunion && d->fields != NULL) {
+    if (check_public_datatypedecl(ae, seen, d)) {
+      if (d->is_extensible && d->fields != NULL) {
 	d = new *d;
 	let fields = d->fields->v;
 	d->fields = NULL;
 	for (let f = fields; f != NULL; f = f->tl) {
-	  extract_xtunionfielddecl(i, d, f->hd);
+	  extract_xdatatypefielddecl(i, d, f->hd);
 	}
       }
-      imp->tuniondecls = Dict::insert(imp->tuniondecls, x, d);
+      imp->datatypedecls = Dict::insert(imp->datatypedecls, x, d);
     }
     break;
   case Register: 
-    invalid_arg("add_tuniondecl");
+    invalid_arg("add_datatypedecl");
     break;
   }
 }
@@ -619,7 +620,7 @@ static void extract_f($(i_t, bool, aenv_t, seen_t) @ env_f,
 	      ae, seen,
 	      i);
   Dict::iter_c(extract_aggrdecl,   &env,  ge->aggrdecls);
-  Dict::iter_c(extract_tuniondecl, &env,  ge->tuniondecls);
+  Dict::iter_c(extract_datatypedecl, &env,  ge->datatypedecls);
   Dict::iter_c(extract_enumdecl,   &env,  ge->enumdecls);
   Dict::iter_c(extract_typedef,    &env,  ge->typedefs);
   Dict::iter_c(extract_ordinarie,  &env,  ge->ordinaries);
@@ -687,7 +688,7 @@ static bool incl_##OBJ##decl(OBJ##decl_t d0, OBJ##decl_t d1, string_t<`H> *`H ms
 
 INCL_DECL(aggr, "type", ->name)
 
-INCL_DECL(tunion, "tunion", ->name)
+INCL_DECL(datatype, "datatype", ->name)
 
 INCL_DECL(enum, "enum", ->name)
 
@@ -695,7 +696,7 @@ INCL_DECL(var, "variable", ->name)
 
 INCL_DECL(typedef, "typedef", ->name)
 
-INCL_DECL(xtunionfield, "xtunionfield", ->field->name)
+INCL_DECL(xdatatypefield, "xdatatypefield", ->field->name)
 
 #define INCL_DICT(OBJ, NAMEOBJ)\
   incl_dict(ie1->OBJ##decls, ie2->OBJ##decls, incl_##OBJ##decl, NAMEOBJ, msg)
@@ -711,14 +712,14 @@ compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
 
 static bool incl_ienv(ienv_t ie1, ienv_t ie2, string_t<`H> *`H msg) {
   let r1 = INCL_DICT(aggr, "type");
-  let r2 = INCL_DICT(tunion, "tunion");
+  let r2 = INCL_DICT(datatype, "datatype");
   let r3 = INCL_DICT(enum, "enum");
   /* special case for typedefs */
   let r4 = (compat_merge_dict(ie1->typedefdecls, ie2->typedefdecls,
 			      Dict::empty(strptrcmp), Tcdecl::merge_typedefdecl,
 			      "typedef", msg) != NULL);
   let r5 = INCL_DICT(var, "variable");
-  let r6 = INCL_DICT(xtunionfield, "xtunionfield");
+  let r6 = INCL_DICT(xdatatypefield, "xdatatypefield");
   return (r1 && r2 && r3 && r4 && r5 && r6);
 }
 
@@ -838,11 +839,11 @@ compat_merge_dict(Dict::dict_t<var_t, `a @`H,`H> dic1,
 
 struct Ienv * compat_merge_ienv(ienv_t ie1, ienv_t ie2, ienv_t iexcl, string_t<`H> *`H msg) {
   let r1 = COMPAT_MERGE_DICT(aggr, "type");
-  let r2 = COMPAT_MERGE_DICT(tunion, "tunion");
+  let r2 = COMPAT_MERGE_DICT(datatype, "datatype");
   let r3 = COMPAT_MERGE_DICT(enum, "enum");
   let r4 = COMPAT_MERGE_DICT(typedef, "typedef");
   let r5 = COMPAT_MERGE_DICT(var, "variable");
-  let r6 = COMPAT_MERGE_DICT(xtunionfield, "xtunionfield");
+  let r6 = COMPAT_MERGE_DICT(xdatatypefield, "xdatatypefield");
   if (!r1 || !r2 || !r3 || !r4 || !r5 || !r6 )
     return NULL;
   return new Ienv(*r1, *r2, *r3, *r4, *r5, *r6);
@@ -924,15 +925,15 @@ struct Ienv * disj_merge_ienv(ienv_t ie1, ienv_t ie2, string_t<`H> *`H msg) {
   let r1 = compat_merge_dict(ie1->aggrdecls, ie2->aggrdecls, 
 			     Dict::empty(strptrcmp),
 			     Tcdecl::merge_aggrdecl, "type", msg);
-  let r2 = disj_merge_dict(ie1->tuniondecls,ie2->tuniondecls,"[x]tunion",msg);
+  let r2 = disj_merge_dict(ie1->datatypedecls,ie2->datatypedecls,"datatype",msg);
   let r3 = disj_merge_dict(ie1->enumdecls, ie2->enumdecls, "enum", msg);
   /* special case for typedefs */
   let r4 = compat_merge_dict(ie1->typedefdecls, ie2->typedefdecls, 
 			     Dict::empty(strptrcmp),
 			     Tcdecl::merge_typedefdecl, "typedef", msg);
   let r5 = disj_merge_dict(ie1->vardecls, ie2->vardecls, "variable", msg);
-  let r6 = disj_merge_dict(ie1->xtunionfielddecls, ie2->xtunionfielddecls,
-			   "xtunionfield", msg);
+  let r6 = disj_merge_dict(ie1->xdatatypefielddecls, ie2->xdatatypefielddecls,
+			   "xdatatypefield", msg);
 
   if (!r1 || !r2 || !r3 || !r4 || !r5 || !r6)
     return NULL;
@@ -1054,31 +1055,31 @@ static list_t<decl_t> add_aggrdecl_header(var_t x, aggrdecl_t d,
   return new List(new_decl(new Aggr_d(d), NULL),tds);
 }
 
-static list_t<decl_t> add_tuniondecl(var_t x, tuniondecl_t d, list_t<decl_t,`H> tds) {
-  return new List(new_decl(new Tunion_d(d), NULL),tds);
+static list_t<decl_t> add_datatypedecl(var_t x, datatypedecl_t d, list_t<decl_t,`H> tds) {
+  return new List(new_decl(new Datatype_d(d), NULL),tds);
 }
 
 static string_t us = "_";
 static stringptr_t us_p = &us;
 
-static $(tqual_t,type_t)@ rewrite_tunionfield_type($(tqual_t,type_t)@`H x) {
+static $(tqual_t,type_t)@ rewrite_datatypefield_type($(tqual_t,type_t)@`H x) {
   return new $(empty_tqual(NULL),
 	       new VarType(new Tvar(us_p, -1, kind_to_bound(BoxKind))));
 }
 
-static tunionfield_t rewrite_tunionfield(tunionfield_t f) {
+static datatypefield_t rewrite_datatypefield(datatypefield_t f) {
   f = new *f;
-  f->typs = map(rewrite_tunionfield_type, f->typs);
+  f->typs = map(rewrite_datatypefield_type, f->typs);
   return f;
 }
 
-static list_t<decl_t> add_tuniondecl_header(var_t x, tuniondecl_t d, 
+static list_t<decl_t> add_datatypedecl_header(var_t x, datatypedecl_t d, 
 					    list_t<decl_t,`H> tds) {
   d = new *d;
   //d->fields = NULL;
-  if (d->fields != NULL) d->fields = new Opt(map(rewrite_tunionfield, d->fields->v));
+  if (d->fields != NULL) d->fields = new Opt(map(rewrite_datatypefield, d->fields->v));
   if (d->sc != ExternC) d->sc = Extern;
-  return new List(new_decl(new Tunion_d(d), NULL),tds);
+  return new List(new_decl(new Datatype_d(d), NULL),tds);
 }
 
 static list_t<decl_t> add_enumdecl(var_t x,enumdecl_t d,list_t<decl_t,`H> tds) {
@@ -1102,30 +1103,30 @@ static list_t<decl_t> add_vardecl(var_t x, vardecl_t d, list_t<decl_t,`H> tds) {
   return new List(new_decl(new Var_d(d), NULL),tds);
 }
 
-static list_t<decl_t> add_xtunionfielddecl(var_t x, xtunionfielddecl_t d, 
+static list_t<decl_t> add_xdatatypefielddecl(var_t x, xdatatypefielddecl_t d, 
 					   list_t<decl_t,`H> tds) {
-  let &Tcdecl::Xtunionfielddecl(b,f)=d;
+  let &Tcdecl::Xdatatypefielddecl(b,f)=d;
   b = new *b;
   b->fields = new Opt(new List(f,NULL));
   b->sc = Extern;
-  return new List(new_decl(new Tunion_d(b), NULL),tds);
+  return new List(new_decl(new Datatype_d(b), NULL),tds);
 }
 
-static list_t<decl_t> add_xtunionfielddecl_header(var_t x, xtunionfielddecl_t d,
+static list_t<decl_t> add_xdatatypefielddecl_header(var_t x, xdatatypefielddecl_t d,
 						  list_t<decl_t,`H> tds) {
-  let &Tcdecl::Xtunionfielddecl(b,f)=d;
+  let &Tcdecl::Xdatatypefielddecl(b,f)=d;
   b = new *b;
-  f = rewrite_tunionfield(f);
+  f = rewrite_datatypefield(f);
   f->sc = Extern;
   b->fields = new Opt(new List(f,NULL));
   b->sc = Extern;
-  return new List(new_decl(new Tunion_d(b), NULL),tds);
+  return new List(new_decl(new Datatype_d(b), NULL),tds);
 }
 
 static void print_ns_headers(FILE @ f, list_t<var_t,`H> ns, ienv_t ie) {
   let tds = NULL;
   tds = Dict::fold(add_aggrdecl_header,   ie->aggrdecls,   tds);
-  tds = Dict::fold(add_tuniondecl_header, ie->tuniondecls, tds);
+  tds = Dict::fold(add_datatypedecl_header, ie->datatypedecls, tds);
   tds = Dict::fold(add_enumdecl_header,   ie->enumdecls,   tds);
 
   if (tds != NULL) {
@@ -1135,9 +1136,9 @@ static void print_ns_headers(FILE @ f, list_t<var_t,`H> ns, ienv_t ie) {
   }
 }
 
-static void print_ns_xtunionfielddecl_headers(FILE @ f, list_t<var_t,`H> ns,
+static void print_ns_xdatatypefielddecl_headers(FILE @ f, list_t<var_t,`H> ns,
 					      ienv_t ie) {
-  let tds = Dict::fold(add_xtunionfielddecl_header,ie->xtunionfielddecls,NULL);
+  let tds = Dict::fold(add_xdatatypefielddecl_header,ie->xdatatypefielddecls,NULL);
   if (tds != NULL) {
     tds = imp_rev(tds);
     tds = add_namespace(tds, ns);
@@ -1157,10 +1158,10 @@ static void print_ns_typedefs(FILE @ f, list_t<var_t,`H> ns, ienv_t ie) {
 static void print_ns_decls(FILE @ f, list_t<var_t,`H> ns, ienv_t ie) {
   let tds = NULL;
   tds = Dict::fold(add_aggrdecl,   ie->aggrdecls,   tds);
-  tds = Dict::fold(add_tuniondecl, ie->tuniondecls, tds);
+  tds = Dict::fold(add_datatypedecl, ie->datatypedecls, tds);
   tds = Dict::fold(add_enumdecl,   ie->enumdecls,   tds);
   tds = Dict::fold(add_vardecl,    ie->vardecls,    tds);
-  tds = Dict::fold(add_xtunionfielddecl, ie->xtunionfielddecls, tds);
+  tds = Dict::fold(add_xdatatypefielddecl, ie->xdatatypefielddecls, tds);
 
   if (tds != NULL) {
     tds = imp_rev(tds);
@@ -1180,13 +1181,13 @@ void print(i_t i, FILE @ f) {
   fprintf(f, "\n/****** provided (headers) ******/\n");
   Dict::iter_c(print_ns_headers, f, i->exports);
 
-  // we handle xtunionfields separately because they can be in a different
-  // namespace from their corresponding xtuniondecls
-  fprintf(f,   "\n/****** needed (headers of xtunionfielddecls) ******/\n");
-  Dict::iter_c(print_ns_xtunionfielddecl_headers, f, i->imports);
+  // we handle xdatatypefields separately because they can be in a different
+  // namespace from their corresponding xdatatypedecls
+  fprintf(f,   "\n/****** needed (headers of xdatatypefielddecls) ******/\n");
+  Dict::iter_c(print_ns_xdatatypefielddecl_headers, f, i->imports);
 
-  fprintf(f, "\n/****** provided (headers of xtunionfielddecls) ******/\n");
-  Dict::iter_c(print_ns_xtunionfielddecl_headers, f, i->exports);
+  fprintf(f, "\n/****** provided (headers of xdatatypefielddecls) ******/\n");
+  Dict::iter_c(print_ns_xdatatypefielddecl_headers, f, i->exports);
 
   //typedefs are always public...
   fprintf(f, "\n/****** provided (typedefs) ******/\n");
@@ -1218,15 +1219,15 @@ i_t parse(FILE @ f) {
 using Marshal;
 using Typerep;
 
-//  static tunion Typerep::Typestruct i_t_rep = gen(i_t);
+//  static datatype Typerep::Typestruct i_t_rep = gen(i_t);
 
 extern datatype Typestruct.Struct struct_Absyn_Aggrdecl_rep;
 static datatype Typestruct.ThinPtr aggrdecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Aggrdecl_rep);
 datatype Typestruct aggrdecl_rep = (datatype Typestruct)&aggrdecl_p;
 
-extern datatype Typestruct.Struct struct_Absyn_Tuniondecl_rep;
-static datatype Typestruct.ThinPtr tuniondecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Tuniondecl_rep);
-datatype Typestruct tuniondecl_rep = (datatype Typestruct)&tuniondecl_p;
+extern datatype Typestruct.Struct struct_Absyn_Datatypedecl_rep;
+static datatype Typestruct.ThinPtr datatypedecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Datatypedecl_rep);
+datatype Typestruct datatypedecl_rep = (datatype Typestruct)&datatypedecl_p;
 
 extern datatype Typestruct.Struct struct_Absyn_Enumdecl_rep;
 static datatype Typestruct.ThinPtr enumdecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Enumdecl_rep);
@@ -1240,9 +1241,9 @@ extern datatype Typestruct.Struct struct_Absyn_Vardecl_rep;
 static datatype Typestruct.ThinPtr vardecl_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Vardecl_rep);
 datatype Typestruct vardecl_rep = (datatype Typestruct)&vardecl_p;
 
-extern datatype Typestruct.Struct struct_Absyn_Tunionfield_rep;
-static datatype Typestruct.ThinPtr tunionfield_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Tunionfield_rep);
-datatype Typestruct tunionfield_rep = (datatype Typestruct)&tunionfield_p;
+extern datatype Typestruct.Struct struct_Absyn_Datatypefield_rep;
+static datatype Typestruct.ThinPtr datatypefield_p = ThinPtr(1,(datatype Typestruct)&struct_Absyn_Datatypefield_rep);
+datatype Typestruct datatypefield_rep = (datatype Typestruct)&datatypefield_p;
 
 namespace Interface {
 
@@ -1252,20 +1253,20 @@ static addr_index_t write_##X(addr_index_t env, FILE @fp, X decl) {	\
 }
 
 MARSHALTYP(aggrdecl_t,aggrdecl_rep)
-MARSHALTYP(tuniondecl_t,tuniondecl_rep)
+MARSHALTYP(datatypedecl_t,datatypedecl_rep)
 MARSHALTYP(enumdecl_t,enumdecl_rep)
 MARSHALTYP(typedefdecl_t,typedefdecl_rep)
 MARSHALTYP(vardecl_t,vardecl_rep)
-MARSHALTYP(tunionfield_t,tunionfield_rep)
+MARSHALTYP(datatypefield_t,datatypefield_rep)
   /* XXX need one for var_t's and for list_t<var_t>'s */
 
-/* construct xtunionfielddecl marshaller by hand from its components since
+/* construct xdatatypefielddecl marshaller by hand from its components since
    we can't do it automatically (due to parts of the rep structure being
    generated already by absyn.h) */
-static addr_index_t write_xtunionfielddecl_t(addr_index_t env, FILE @fp,
-					     xtunionfielddecl_t decl) {
-  env = write_tuniondecl_t(env,fp,decl->base);
-  env = write_tunionfield_t(env,fp,decl->field);
+static addr_index_t write_xdatatypefielddecl_t(addr_index_t env, FILE @fp,
+					     xdatatypefielddecl_t decl) {
+  env = write_datatypedecl_t(env,fp,decl->base);
+  env = write_datatypefield_t(env,fp,decl->field);
   return env;
 }
 

@@ -28,7 +28,7 @@
 namespace SlowDict;
 using   Splay;
 
-datatype exn @extensible {Absent,Present};
+datatype exn {Absent,Present};
 
 abstract struct Dict<`a,`b> {
   int       (@reln)(`a,`a);

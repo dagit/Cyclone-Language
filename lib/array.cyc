@@ -244,7 +244,7 @@ void imp_map_c(`a f(`b,`a),`b env,`a ?`r x) {
 }
 
 // thrown when two arrays don't have the same size 
-datatype exn @extensible {Array_mismatch};
+datatype exn {Array_mismatch};
 
 // Given two arrays of the same length and a function, apply the function
 // to each pair of elements (in order) and collect the results in a new array.

@@ -348,7 +348,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
           : (*pat_res.tvars_and_bounds_opt)[0];
         if (!unify(p->topt->v,exn_typ))
-          terr(scs->hd->loc, "expected xtunion exn but found %s",
+          terr(scs->hd->loc, "expected datatype exn but found %s",
                typ2string(p->topt->v));
         else
           check_pat_regions(te,p);
@@ -618,7 +618,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       case &Namespace_d(n,tds): unimp_msg_part = "namespace"; break;
       case &Using_d(q,tds):     unimp_msg_part = "using";     break; //FIX: allow
       case &Aggr_d(_):          unimp_msg_part = "type";      break;
-      case &Tunion_d(_):        unimp_msg_part = "[x]tunion"; break;
+      case &Datatype_d(_):        unimp_msg_part = "datatype"; break;
       case &Enum_d(_):          unimp_msg_part = "enum";   break;
       case &Typedef_d(_):       unimp_msg_part = "typedef";   break;
       case &ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;

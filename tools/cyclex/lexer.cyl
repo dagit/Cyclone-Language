@@ -43,7 +43,7 @@ void yyerror(string_t<`H> s) {
 
 namespace Lexer {
 
-datatype exn @extensible { Lexical_error(string_t,int,int); };
+datatype exn { Lexical_error(string_t,int,int); };
 
 static string_t          token_string = "";
 static int                     token_char   = (int)'D';

@@ -27,7 +27,7 @@ namespace Position {
   using Core;
   using List;
   using Lineno;
-  extern datatype exn @extensible {extern Exit};
+  extern datatype exn {extern Exit};
 
   extern void   reset_position(string_t<`H>);
   extern void   set_position_file(string_t<`H>);
@@ -59,7 +59,7 @@ namespace Position {
 
 
   //////// Error Reporting ///////////
-  extern datatype exn @extensible {extern Nocontext};
+  extern datatype exn {extern Nocontext};
   extern bool use_gcc_style_location;
   extern bool print_context;
   extern int num_errors;

@@ -69,8 +69,8 @@ static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, string_t msg,
 
 //////////////////// Resolving References the Parser Cannot /////////////////
 
-// The qualified identifier q could be a variable, a tunion
-// constructor, or an xtunion constructor.  We resolve q and overwrite
+// The qualified identifier q could be a variable, a datatype
+// constructor, or an xdatatype constructor.  We resolve q and overwrite
 // the expression e with the appropriate r.
 // We must always overwrite e to prevent the compiler from diverging.
 static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
@@ -80,7 +80,7 @@ static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
       case &VarRes(b):          e->r = new Var_e(q,b); break;
       case &EnumRes(ed,ef):     e->r = new Enum_e(q,ed,ef); break;
       case &AnonEnumRes(t,ef):  e->r = new AnonEnum_e(q,t,ef); break;
-      case &TunionRes(tud,tuf): e->r = new Tunion_e(NULL,tud,tuf); break;
+      case &DatatypeRes(tud,tuf): e->r = new Datatype_e(NULL,tud,tuf); break;
       case &AggrRes(_):
         terr(e->loc,"bad occurrence of type name %s",qvar2string(q));
         e->r = new Var_e(q,Unresolved_b);
@@ -99,7 +99,7 @@ static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
 static $(list_t<designator_t>,exp_t)@ make_struct_arg(exp_t e) {
   return new $(NULL,e);
 }
-// Resolve whether this is a function call or tunion, xtunion, or struct
+// Resolve whether this is a function call or datatype, xdatatype, or struct
 // constructor -- let normal type-checking do the rest of the work.
 // NOTE: We assume q is a relative qvar.
 static void resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es) {
@@ -111,12 +111,12 @@ static void resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es) {
         case &VarRes(b):        
           e->r = new FnCall_e(e1,es,NULL); 
           return;
-        case &TunionRes(tud,tuf):
+        case &DatatypeRes(tud,tuf):
           if (tuf->typs == NULL)
             // Don't allow "foo()", require "foo"
             terr(e->loc,"%s is a constant, not a function",
                  qvar2string(tuf->name));
-          e->r = new Tunion_e(es,tud,tuf); 
+          e->r = new Datatype_e(es,tud,tuf); 
           return;
         case &AggrRes(ad):
           let des = List::map(make_struct_arg,es);
@@ -816,14 +816,14 @@ static type_t tcSeqExp(tenv_t te,seg_t loc,type_t * topt,exp_t e1,exp_t e2) {
 }
 
 // try to find a field that e can be injected into
-static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
+static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
                                        region_t<`r> r,
                                        list_t<$(tvar_t,type_t)@`r,`r> inst, 
-                                       list_t<tunionfield_t> fs) {
+                                       list_t<datatypefield_t> fs) {
   static datatype Type.DoubleType dbl = DoubleType(false);
   static type_t dbl_typ = &dbl;
 
-  list_t<tunionfield_t> fields;
+  list_t<datatypefield_t> fields;
   type_t t1 = e->topt->v;
   // must promote float to double, and char/short to int
   switch (compress(t1)) {
@@ -834,7 +834,7 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
   }
   // try to find an exact match first
   for (fields = fs; fields != NULL; fields = fields->tl) {
-    let Tunionfield{n,typs,loc,sc} = *fields->hd;
+    let Datatypefield{n,typs,loc,sc} = *fields->hd;
     // should have exactly one argument
     if (typs == NULL || typs->tl != NULL) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
@@ -844,7 +844,7 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
   }
   // now try to find a match supported by silent conversions
   for (fields = fs; fields != NULL; fields = fields->tl) {
-    let Tunionfield{n,typs,loc,sc} = *fields->hd;
+    let Datatypefield{n,typs,loc,sc} = *fields->hd;
     // should have exactly one argument 
     if (typs == NULL || typs->tl != NULL) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
@@ -969,13 +969,13 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
               }
             } else {
               // this is trickier, we have to match up the type of the
-              // actual argument with a constructor from the [x]tunion.
+              // actual argument with a constructor from the datatype.
               switch (compress(vt)) {
-              case &TunionType(TunionInfo{KnownTunion(&td),targs,tur}):
+              case &DatatypeType(DatatypeInfo{KnownDatatype(&td),targs,tur}):
                 // unfortunately, td may not be the "latest" declaration of
-                // an xtunion, so we re-look it up in the environment.
-                let td = *lookup_tuniondecl(te,loc,td->name);
-                list_t<tunionfield_t> fields = NULL;
+                // an xdatatype, so we re-look it up in the environment.
+                let td = *lookup_datatypedecl(te,loc,td->name);
+                list_t<datatypefield_t> fields = NULL;
                 if (td->fields == NULL) 
                   terr(loc,"can't inject into %s",typ2string(vt));
                 else fields = td->fields->v;
@@ -997,7 +997,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                     if (f != NULL)
                       vci->injectors = 
                         List::append(vci->injectors,
-                                     new List{(tunionfield_t)f,NULL});
+                                     new List{(datatypefield_t)f,NULL});
                   }
                 }
                 break;
@@ -1024,7 +1024,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 static type_t tcThrow(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   tcExp(te,&exn_typ,e); 
   if (!coerce_arg(te,e,exn_typ))
-    terr(loc,"expected xtunion exn but found %s",typ2string(e->topt->v));
+    terr(loc,"expected datatype exn but found %s",typ2string(e->topt->v));
   return wildtyp(lookup_opt_type_vars(te));
 }
 
@@ -1168,7 +1168,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
     tq.print_const = true;
     tq.real_const = true;
   }
-  // FIX: use topt to determine if we should return a tunion type
+  // FIX: use topt to determine if we should return a datatype type
   type_t t = at_typ(e->topt->v, rgn, tq, false_conref);
   return t;
 }
@@ -1247,9 +1247,9 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 		     List::length(l),n);
       bad_type = false;
       break;
-    case &TunionFieldType(TunionFieldInfo(KnownTunionfield(_,tuf),_)):
+    case &DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(_,tuf),_)):
       if(List::length(tuf->typs) < n)
-	Tcutil::terr(loc,"tunionfield has too few components: %d < %d",
+	Tcutil::terr(loc,"datatype field has too few components: %d < %d",
 		     List::length(tuf->typs),n);
       bad_type = false;
       break;
@@ -1311,7 +1311,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
       let inst = List::rzip(rgn,rgn,ad->tvs,ts);
       t2 = rsubstitute(rgn,inst,finfo->type);
       // prevent someone from reading a non-bits-only union member
-      if (ad->kind == UnionA && !in_notreadctxt(te) && !bits_only(t2))
+      if (ad->kind == UnionA && !ad->impl->tagged && !in_notreadctxt(te) && !bits_only(t2))
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
     }
     return t2;
@@ -1731,29 +1731,29 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
   return ts;
 }
 
-// f(es)   where f is a tunion and is tuf->name
-static type_t tcTunion(tenv_t te, seg_t loc, type_t * topt, exp_t e,
-		       list_t<exp_t> es, tuniondecl_t tud, tunionfield_t tuf) {
+// f(es)   where f is a datatype and is tuf->name
+static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
+		       list_t<exp_t> es, datatypedecl_t tud, datatypefield_t tuf) {
   TEMP_RGN(te, rgn) {
   let env      = $(lookup_type_vars(te),rgn);
   let inst     = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
   let all_typs = List::map(snd,inst);
   type_t res =
-    new TunionFieldType(TunionFieldInfo{KnownTunionfield(tud,tuf),
+    new DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud,tuf),
 					all_typs});
   // this instantiates the type variables if we have top-down type info
   if (topt != NULL) {
     switch (compress(*topt)) {
-    case &TunionFieldType(_): unify(*topt,res); break;
-    case &TunionType(TunionInfo{_,targs,r}):
+    case &DatatypeFieldType(_): unify(*topt,res); break;
+    case &DatatypeType(DatatypeInfo{_,targs,r}):
       for (_ a = all_typs; a != NULL && targs != NULL; a=a->tl,targs=targs->tl)
         unify(a->hd,targs->hd);
-      // top-down, we're looking for a Tunion, not a Tunion field.
+      // top-down, we're looking for a Datatype, not a Datatype field.
       // we can cast up here if there are no arguments to the constructor
-      // or the tunion is flat.
+      // or the datatype is flat.
       if (tud->is_flat || (tuf->typs == NULL && es == NULL)) {
         e->topt = new Opt(res);
-        res = new TunionType(TunionInfo{KnownTunion(new tud),all_typs,r});
+        res = new DatatypeType(DatatypeInfo{KnownDatatype(new tud),all_typs,r});
         unchecked_cast(te, e, res, No_coercion);
         // return res;
       }
@@ -1767,7 +1767,7 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t * topt, exp_t e,
     type_t t = rsubstitute(rgn,inst,(*ts->hd)[1]);
     tcExpInitializer(te, &t, e);
     if (!coerce_arg(te,e,t)) {
-      terr(e->loc,"tunion constructor %s expects argument of type %s "
+      terr(e->loc,"datatype constructor %s expects argument of type %s "
            "but this argument has type %s",
            qvar2string(tuf->name),typ2string(t),
            (e->topt == NULL) ? (string_t)"?" : typ2string(e->topt->v));
@@ -1776,10 +1776,10 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   }
   if (es != NULL)
     return expr_err(te,es->hd->loc,topt,
-                    "too many arguments for tunion constructor %s",
+                    "too many arguments for datatype constructor %s",
                     qvar2string(tuf->name));
   if (ts != NULL)
-    return expr_err(te,loc,topt,"too few arguments for tunion constructor %s",
+    return expr_err(te,loc,topt,"too few arguments for datatype constructor %s",
                     qvar2string(tuf->name));
   return res;
   }
@@ -1790,8 +1790,8 @@ static bool zeroable_type(type_t t) {
   case VoidType: return true;
   case &Evar(_,_,_,_):
   case &VarType(_): 
-  case &TunionType(_):
-  case &TunionFieldType(_): return false;
+  case &DatatypeType(_):
+  case &DatatypeFieldType(_): return false;
   case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
     return (conref_def(true,n));
   case &IntType(_,_):
@@ -1947,7 +1947,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   }
   *e = num_elts;
   *is_fat = !one_elt;
-  // Don't yet support existential types (to do it, add to TunionFieldInfo
+  // Don't yet support existential types (to do it, add to DatatypeFieldInfo
   // and here generate fresh evars).
   switch(elt_type) {
   case &AggrType(AggrInfo(KnownAggr(&ad),_)):
@@ -2191,10 +2191,10 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       switch (compress(*topt)) {
       case &PointerType(PtrInfo(*elttype,tq,_)):
         topt2 = elttype; break;
-      case &TunionType(_):
+      case &DatatypeType(_):
         // Note, we're lying here in the sense that we should pass down
-        // a TunionFieldType -- but we don't know which field...
-        // FIX: not sure this is right for flat tunions
+        // a DatatypeFieldType -- but we don't know which field...
+        // FIX: not sure this is right for flat datatypes
         // FIX: avoid allocation here!
         topt2 = new (*topt);
         break;
@@ -2339,7 +2339,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     tcExpNoInst(te,topt,e);
     return;
   case &UnknownCall_e(e1,es):
-    // resolve e1 as a function or struct, tunion, or xtunion constructor and
+    // resolve e1 as a function or struct, or datatype constructor and
     // then re-type-check the expression
     resolve_unknown_fn(te,e,e1,es);
     tcExpNoInst(te,topt,e);
@@ -2425,8 +2425,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcStruct(te,loc,topt,tn,ts,args,sd_opt); break;
   case &AnonStruct_e(ts,args):
     t = tcAnonStruct(te,loc,ts,args); break;
-  case &Tunion_e(es,tud,tuf):
-    t = tcTunion(te,loc,topt,e,es,tud,tuf); break;
+  case &Datatype_e(es,tud,tuf):
+    t = tcDatatype(te,loc,topt,e,es,tud,tuf); break;
   case &Enum_e(*q,ed,ef):
     *q = ef->name;
     t = new EnumType(ed->name,ed); break;

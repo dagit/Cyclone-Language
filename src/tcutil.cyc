@@ -42,7 +42,7 @@ using Cyclone;
 
 namespace Tcutil;
 
-datatype exn @extensible {Unify};
+datatype exn {Unify};
 
 extern void unify_it(type_t t1, type_t t2);
 
@@ -230,11 +230,11 @@ type_t copy_type(type_t t) {
   case VoidType:
   case &Evar(_,_,_,_): return t;
   case &VarType(tv): return new VarType(copy_tvar(tv));
-  case &TunionType(TunionInfo{tui,targs,rgn_opt}):
+  case &DatatypeType(DatatypeInfo{tui,targs,rgn_opt}):
     let ropt = rgn_opt ? new Opt(copy_type(rgn_opt->v)) : NULL;
-    return new TunionType(TunionInfo{tui,copy_types(targs),ropt});
-  case &TunionFieldType(TunionFieldInfo{fi,targs}):
-    return new TunionFieldType(TunionFieldInfo{fi,copy_types(targs)});
+    return new DatatypeType(DatatypeInfo{tui,copy_types(targs),ropt});
+  case &DatatypeFieldType(DatatypeFieldInfo{fi,targs}):
+    return new DatatypeFieldType(DatatypeFieldInfo{fi,copy_types(targs)});
   case &PointerType(PtrInfo(elt,tq,PtrAtts(rgn,nbl,bs,zt,loc))):
     let elt2 = copy_type(elt);
     let rgn2 = copy_type(rgn);
@@ -354,17 +354,17 @@ kind_t typ_kind(type_t t) {
   case &RgnHandleType(_): return BoxKind; 
   case UniqueRgn:	  return UniqueRgnKind;
   case HeapRgn:           return RgnKind;
-  case &TunionType(TunionInfo{UnknownTunion(uti),...}):
-    // flat tunions always have MemKind -- they're like structs.
+  case &DatatypeType(DatatypeInfo{UnknownDatatype(uti),...}):
+    // flat datatypes always have MemKind -- they're like structs.
     if (uti.is_flat) return MemKind; else return BoxKind;
-  case &TunionType(TunionInfo{KnownTunion(&tud),...}):
+  case &DatatypeType(DatatypeInfo{KnownDatatype(&tud),...}):
     if (tud->is_flat) return MemKind; else return BoxKind;
-  case &TunionFieldType(TunionFieldInfo(KnownTunionfield(tud,tuf),_)):
+  case &DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(tud,tuf),_)):
     if (tud->is_flat) return MemKind;
     else if(tuf->typs == NULL) return BoxKind;
     else return MemKind;
-  case &TunionFieldType(TunionFieldInfo(UnknownTunionfield(_),_)):
-    impos("typ_kind: Unresolved TunionFieldType");
+  case &DatatypeFieldType(DatatypeFieldInfo(UnknownDatatypefield(_),_)):
+    impos("typ_kind: Unresolved DatatypeFieldType");
     // for structs, unions, or enums without definitions, we must be 
     // conservative and treat them as having AnyKind
   case &EnumType(_,NULL):     
@@ -465,10 +465,10 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     for(; args != NULL; args = args->tl)
       occurs(evar,r,env,(*args->hd)[1]);
     break;
-  case &TunionType(TunionInfo{_,ts,rgopt}):
+  case &DatatypeType(DatatypeInfo{_,ts,rgopt}):
     if (rgopt) occurs(evar,r,env,rgopt->v); occurslist(evar,r,env,ts); break;
   case &TypedefType(_,ts,_,_): fallthru(ts);
-  case &TunionFieldType(TunionFieldInfo{_,ts}): fallthru(ts);
+  case &DatatypeFieldType(DatatypeFieldInfo{_,ts}): fallthru(ts);
   case &AggrType(AggrInfo(_,ts)): occurslist(evar,r,env,ts); break;
   case &AnonAggrType(_,fs):
     for (; fs != NULL; fs = fs->tl)
@@ -678,7 +678,7 @@ static type_t rgns_of(type_t t) {
     // Note: for dynregion_t<t1,t2>, we only include t2 as part of the
     // effect, since t1 is checked dynamically.
     return new AccessEff(t2);
-  case &TunionType(TunionInfo{_,targs,rgopt}):
+  case &DatatypeType(DatatypeInfo{_,targs,rgopt}):
     list_t<type_t> ts = map(rgns_of,targs);
     if (rgopt) ts = new List(new AccessEff(rgopt->v), ts);
     return normalize_effect(new JoinEff(ts));
@@ -692,7 +692,7 @@ static type_t rgns_of(type_t t) {
     for (; tqts != NULL; tqts = tqts->tl)
       ts = new List((*tqts->hd)[1],ts);
     fallthru(ts);
-  case &TunionFieldType(TunionFieldInfo{_,ts}): fallthru(ts);
+  case &DatatypeFieldType(DatatypeFieldInfo{_,ts}): fallthru(ts);
   case &AggrType(AggrInfo(_,ts)): 
     return normalize_effect(new JoinEff(map(rgns_of,ts)));
   case &AnonAggrType(_,fs): 
@@ -1159,27 +1159,27 @@ void unify_it(type_t t1, type_t t2) {
     failure_reason = "(different number of fields for enums)";
     break;
 
-  case $(&TunionType(TunionInfo(KnownTunion(&tud2),ts2,r2)),
-	 &TunionType(TunionInfo(KnownTunion(&tud1),ts1,r1))):
+  case $(&DatatypeType(DatatypeInfo(KnownDatatype(&tud2),ts2,r2)),
+	 &DatatypeType(DatatypeInfo(KnownDatatype(&tud1),ts1,r1))):
     if(tud2 == tud1 || qvar_cmp(tud2->name,tud1->name) == 0) {
       if (r1 != NULL && r2 != NULL)
         unify_it(r1->v,r2->v);
-      else if (r1 != NULL || r2 != NULL) goto Tunion_fail;
+      else if (r1 != NULL || r2 != NULL) goto Datatype_fail;
       unify_list(ts1,ts2);
       return;
     }
-  Tunion_fail:
-    failure_reason = "(different tunion types)";
+  Datatype_fail:
+    failure_reason = "(different datatype types)";
     break;
 
-  case $(&TunionFieldType(TunionFieldInfo(KnownTunionfield(tud2,tuf2),ts2)),
-	 &TunionFieldType(TunionFieldInfo(KnownTunionfield(tud1,tuf1),ts1))):
+  case $(&DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(tud2,tuf2),ts2)),
+	 &DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(tud1,tuf1),ts1))):
     if((tud2 == tud1 || qvar_cmp(tud2->name,tud1->name)==0)
        && (tuf2 == tuf1 || qvar_cmp(tuf2->name, tuf1->name)==0)) {
       unify_list(ts1,ts2);
       return;
     }
-    failure_reason = "(different tunion field types)";
+    failure_reason = "(different datatype field types)";
     break;
 
   case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_))),
@@ -1461,8 +1461,8 @@ static int type_case_number(type_t t) {
   case VoidType: return 0;
   case &Evar(_,_,_,_): return 1;
   case &VarType(_): return 2;
-  case &TunionType(_): return 3;
-  case &TunionFieldType(_): return 4;
+  case &DatatypeType(_): return 3;
+  case &DatatypeFieldType(_): return 4;
   case &PointerType(_): return 5;
   case &IntType(_,_): return 6;
   case FloatType: return 7;
@@ -1520,8 +1520,8 @@ int typecmp(type_t t1, type_t t2) {
   case $(&AnonEnumType(efs1), &AnonEnumType(efs2)):
     return list_cmp(enumfield_cmp,efs1,efs2);
     
-  case $(&TunionType(TunionInfo(KnownTunion(&tud2),ts2,r2)),
-	 &TunionType(TunionInfo(KnownTunion(&tud1),ts1,r1))):
+  case $(&DatatypeType(DatatypeInfo(KnownDatatype(&tud2),ts2,r2)),
+	 &DatatypeType(DatatypeInfo(KnownDatatype(&tud1),ts1,r1))):
     if(tud1 == tud2) return 0;
     let qc = qvar_cmp(tud1->name,tud2->name);
     if(qc != 0) return qc;
@@ -1532,8 +1532,8 @@ int typecmp(type_t t1, type_t t2) {
     else return 1;
     return list_cmp(typecmp,ts1,ts2);
 
-  case $(&TunionFieldType(TunionFieldInfo(KnownTunionfield(tud2,tuf2),ts2)),
-	 &TunionFieldType(TunionFieldInfo(KnownTunionfield(tud1,tuf1),ts1))):
+  case $(&DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(tud2,tuf2),ts2)),
+	 &DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(tud1,tuf1),ts1))):
     if(tud1 == tud2) return 0;
     let qc1 =  qvar_cmp(tud2->name,tud1->name);
     if(qc1 != 0) return qc1;
@@ -1799,10 +1799,10 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
                         pinfo_b.elt_tq.real_const));
     return okay;
 
-    // allow casting tunion `r1 T<t1,...,tn> to tunion `r2 T<t1,...,tn>
+    // allow casting datatype `r1 T<t1,...,tn> to datatype `r2 T<t1,...,tn>
     // when `r1 outlives `r2
-  case $(&TunionType(TunionInfo{KnownTunion(&tud1),ts1,&Opt(r1)}),
-         &TunionType(TunionInfo{KnownTunion(&tud2),ts2,&Opt(r2)})):
+  case $(&DatatypeType(DatatypeInfo{KnownDatatype(&tud1),ts1,&Opt(r1)}),
+         &DatatypeType(DatatypeInfo{KnownDatatype(&tud2),ts2,&Opt(r2)})):
     if (tud1 != tud2 || !region_outlives(te,r1,r2)) return false;
     for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
       if (!unify(ts1->hd,ts2->hd)) return false;
@@ -1818,10 +1818,10 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     // FIX: we need to take qualifiers into account on typedefs
     return (okay && unify(t1a,t2a) && (!tq1a.real_const || tq2a.real_const));
 
-  // can cast a TunionFieldType to a TunionType if the field doesn't 
-  // carry values or the TunionType is flat.
-  case $(&TunionFieldType(TunionFieldInfo{KnownTunionfield(tud1,tuf),ts1}),
-         &TunionType(TunionInfo(KnownTunion(&tud2),ts2,_))):
+  // can cast a DatatypeFieldType to a DatatypeType if the field doesn't 
+  // carry values or the DatatypeType is flat.
+  case $(&DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud1,tuf),ts1}),
+         &DatatypeType(DatatypeInfo(KnownDatatype(&tud2),ts2,_))):
        if ((tud1 == tud2 || qvar_cmp(tud1->name,tud2->name) == 0) 
 	   && (tuf->typs == NULL || tud1->is_flat)) {
 	 for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
@@ -1832,14 +1832,14 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
        }
        return false;
 
-  // can cast a "tunion T.f<ts> @`r1" to a "tunion `r2 T<ts>" when 
+  // can cast a "datatype T.f<ts> @`r1" to a "datatype `r2 T<ts>" when 
   //   field f carries values and r1==r2 or r1 outlives r2 and T is
   //   not flat.
   case $(&PointerType(PtrInfo(t_a,q_a,PtrAtts(rt_a,null_a,b_a,zt1,_))),
-	 &TunionType(TunionInfo{KnownTunion(&tud2),ts2,r2}))&&!tud2->is_flat:
+	 &DatatypeType(DatatypeInfo{KnownDatatype(&tud2),ts2,r2}))&&!tud2->is_flat:
 	   //n2,ts2,r2,_})):
     switch (compress(t_a)) {
-    case &TunionFieldType(TunionFieldInfo{KnownTunionfield(tud1,tuf1),ts1}):
+    case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(tud1,tuf1),ts1}):
       //n1,ts1,f1,_,tufd}):
       // regions must unify or rt_a must outlive r2
       if (!unify(rt_a,r2->v) && !region_outlives(te,rt_a,r2->v))
@@ -1852,7 +1852,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
         return false;
       // don't allow zero-terminated pointer
       if (!unify_conrefs(intcmp,zt1,false_conref)) return false;
-      // field must carry values and tunion names must align
+      // field must carry values and datatype names must align
       if (qvar_cmp(tud2->name,tud1->name)==0 && tuf1->typs != NULL) {
         // check type arguments
         bool okay = true;
@@ -2159,8 +2159,8 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
 
     // allow datatype `r1 T<t1,...,tn> <= datatype `r2 T<t1,...,tn> when
     // `r1 outlives `r2.
-  case $(&TunionType(TunionInfo{KnownTunion(&tud1),ts1,&Opt(r1)}),
-         &TunionType(TunionInfo{KnownTunion(&tud2),ts2,&Opt(r2)})):
+  case $(&DatatypeType(DatatypeInfo{KnownDatatype(&tud1),ts1,&Opt(r1)}),
+         &DatatypeType(DatatypeInfo{KnownDatatype(&tud2),ts2,&Opt(r2)})):
     if (tud1 != tud2 || !region_outlives(te,r1,r2)) return false;
     for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
       if (!unify(ts1->hd,ts2->hd)) return false;
@@ -2638,7 +2638,7 @@ type_t rsubstitute(region_t<`r> rgn,
   case &AggrType(AggrInfo(info,ts)):   
     let new_ts = substs(rgn,inst,ts);
     return new_ts == ts ? t : new AggrType(AggrInfo(info,new_ts));
-  case &TunionType(TunionInfo{info,ts,ropt}):     
+  case &DatatypeType(DatatypeInfo{info,ts,ropt}):     
     let new_ts = substs(rgn,inst,ts);
     opt_t<type_t> new_r;
     if (ropt) {
@@ -2647,11 +2647,11 @@ type_t rsubstitute(region_t<`r> rgn,
     } else 
       new_r = ropt;
     return (new_ts == ts && new_r == ropt) ? t : 
-      new TunionType(TunionInfo{info,new_ts,new_r});
-  case &TunionFieldType(TunionFieldInfo{info,ts}):
+      new DatatypeType(DatatypeInfo{info,new_ts,new_r});
+  case &DatatypeFieldType(DatatypeFieldInfo{info,ts}):
     let new_ts = substs(rgn,inst,ts);
     return (new_ts == ts) ? t : 
-      new TunionFieldType(TunionFieldInfo{info,new_ts});
+      new DatatypeFieldType(DatatypeFieldInfo{info,new_ts});
   case &TypedefType(n,ts,td,topt): 
     let new_ts = substs(rgn,inst,ts);
     return new_ts == ts ? t : new TypedefType(n,new_ts,td,topt);
@@ -3011,7 +3011,7 @@ bool extract_const_from_typedef(seg_t loc, bool declared_const, type_t t) {
 
 // Checks that a type is well-formed and lives in kind expected_kind.  
 // Takes as input a location (for error reporting), a type environment 
-// (for looking up struct, enum, tunion, etc. decls), a check-valid-type
+// (for looking up struct, enum, datatype, etc. decls), a check-valid-type
 // environment (explained below), an expected kind, and the type itself t.
 // It returns a check-valid-type-env as a result.
 //
@@ -3030,7 +3030,7 @@ bool extract_const_from_typedef(seg_t loc, bool declared_const, type_t t) {
 // rest of the compiler rightly assumes have occurred:
 // * expand typedefs
 // * set pointers (or Known* variants) to declarations for 
-//   StructType, UnionType, TunionType, TunionFieldType
+//   StructType, UnionType, DatatypeType, DatatypeFieldType
 // * change relative type names to absolute type names
 // * set the kind field of type variables: we use the expected kind
 //   initially, but if later constraints force a more constrained kind,
@@ -3133,44 +3133,46 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // Make relative name absolute
     *n = (ed->name)[0];
     break;
-  case &TunionType(TunionInfo(*info,*targsp,*rgn_opt)):
+  case &DatatypeType(DatatypeInfo(*info,*targsp,*rgn_opt)):
     let targs = *targsp;
     switch(*info) {
-    case UnknownTunion(UnknownTunionInfo(n,is_x,is_flat)):
-      tuniondecl_t@ tudp;
-      try tudp = lookup_tuniondecl(te,loc,n);// FIX: lookup_xtuniondecl needed?
+    case UnknownDatatype(UnknownDatatypeInfo(n,is_x,is_flat)):
+      datatypedecl_t@ tudp;
+      try tudp = lookup_datatypedecl(te,loc,n);// FIX: lookup_xdatatypedecl needed?
       catch { case Dict::Absent:
         // declare the datatype for the user
         let ge = Dict::lookup(te->ae,te->ns);
-        let tud = new Tuniondecl{Extern, n, NULL, NULL, is_x, is_flat};
-        Tc::tcTuniondecl(te, ge, loc, tud);
-        tudp = lookup_tuniondecl(te,loc,n);
+        let tud = new Datatypedecl{Extern, n, NULL, NULL, is_x, is_flat};
+        Tc::tcDatatypedecl(te, ge, loc, tud);
+        tudp = lookup_datatypedecl(te,loc,n);
         // give an error here if targs is non-empty
         if (targs != NULL) {
-          terr(loc,"declare parameterized %s %s before using",
-               (is_x ? (buffer_t)"xtunion" : "tunion"), qvar2string(n));
+          terr(loc,"declare parameterized datatype %s before using",
+               qvar2string(n));
           return cvtenv;
         }        
         break;
-        // terr(loc,"unbound type [x]tunion %s",qvar2string(n));
+        // terr(loc,"unbound type datatype %s",qvar2string(n));
         // return cvtenv;
       }
-      if((*tudp)->is_xtunion != is_x)
-	terr(loc,"[x]tunion is different from type declaration %s",
-			 qvar2string(n));
-      *info = KnownTunion(tudp);
+      // JGM: I'm allowing someone to just write "datatype Foo" even
+      // when the datatype is extensible.
+      if(is_x && !(*tudp)->is_extensible)
+	terr(loc,"datatype %s was not declared @extensible",
+             qvar2string(n));
+      *info = KnownDatatype(tudp);
       fallthru(*tudp);
-    case KnownTunion(&tud):
-      // if this is a flat tunion, there shouldn't be a region variable
+    case KnownDatatype(&tud):
+      // if this is a flat datatype, there shouldn't be a region variable
       if (tud->is_flat && *rgn_opt)
-        terr(loc,"flat tunion has region %s",typ2string((*rgn_opt)->v));
-      // if this isn't a flat tunion, then insert a region variable
+        terr(loc,"flat datatype has region %s",typ2string((*rgn_opt)->v));
+      // if this isn't a flat datatype, then insert a region variable
       if (!tud->is_flat && !*rgn_opt) 
         *rgn_opt = new Opt(new_evar(&rk,NULL));
       // check the region is well-formed
       if (*rgn_opt) {
         let rgn = (*rgn_opt)->v;
-	//   MWH: don't allow tunions to be in the unique region for now
+	//   MWH: don't allow datatypes to be in the unique region for now
         cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,rgn,true);
       }
       // check the type arguments are well-formed
@@ -3181,7 +3183,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1,true);
       }
       if (targs != NULL)
-	terr(loc,"too many type arguments for tunion %s",
+	terr(loc,"too many type arguments for datatype %s",
              qvar2string(tud->name));
       if (tvs != NULL) {
         // fill in missing parameters
@@ -3198,40 +3200,40 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     }
     break;
 
-  case &TunionFieldType(TunionFieldInfo{*info,targs}):
+  case &DatatypeFieldType(DatatypeFieldInfo{*info,targs}):
     switch(*info) {
-    case UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
-      tuniondecl_t  tud;
-      tunionfield_t tuf;
-      try *lookup_tuniondecl(te,loc,tname);//FIX lookup_xtuniondecl needed?
+    case UnknownDatatypefield(UnknownDatatypeFieldInfo(tname,fname,is_x)):
+      datatypedecl_t  tud;
+      datatypefield_t tuf;
+      try *lookup_datatypedecl(te,loc,tname);//FIX lookup_xdatatypedecl needed?
       catch { case Dict::Absent:
-        terr(loc,"unbound type tunion %s",qvar2string(tname));
+        terr(loc,"unbound datatype %s",qvar2string(tname));
       return cvtenv;
       }
       try {
         TEMP_RGN(te, r) {
 	  switch(lookup_ordinary(r,te,loc,fname)) {
-          case &TunionRes(tud2,tuf2):
+          case &DatatypeRes(tud2,tuf2):
             tuf = tuf2;
             tud = tud2;
-            if(tud->is_xtunion != is_x)
-              terr(loc,"[x]tunion is different from type declaration %s",
+            if(is_x && !tud->is_extensible)
+              terr(loc,"datatype %s was not declared @extensible",
                    qvar2string(tname));
             break;
-          default: terr(loc,"unbound field %s in type tunion %s",
+          default: terr(loc,"unbound field %s in type datatype %s",
                         qvar2string(fname), qvar2string(tname));
             return cvtenv;
           }
       }
       } catch {
       case Dict::Absent:
-        terr(loc,"unbound field %s in type tunion %s",
+        terr(loc,"unbound field %s in type datatype %s",
              qvar2string(fname), qvar2string(tname));
         return cvtenv;
       }  
-      *info = KnownTunionfield(tud,tuf);
+      *info = KnownDatatypefield(tud,tuf);
       fallthru(tud,tuf);
-    case KnownTunionfield(tud,tuf):
+    case KnownDatatypefield(tud,tuf):
       // check the type arguments are well-formed
       list_t<tvar_t> tvs = tud->tvs;
       for (; targs != NULL && tvs != NULL; targs = targs->tl, tvs = tvs->tl) {
@@ -3240,10 +3242,10 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1,true);
       }
       if (targs != NULL)
-	terr(loc,"too many type arguments for tunion %s.%s",
+	terr(loc,"too many type arguments for datatype %s.%s",
              qvar2string(tud->name),qvar2string(tuf->name));
       if (tvs != NULL) 
-	terr(loc,"too few type arguments for tunion %s.%s",
+	terr(loc,"too few type arguments for datatype %s.%s",
              qvar2string(tud->name),qvar2string(tuf->name));
       break;
     }
@@ -3458,15 +3460,15 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         let VarargInfo{_,_,vt,vi} = *cyc_vararg;
         new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,vt,true);
         cyc_vararg->tq.real_const = extract_const_from_typedef(loc,cyc_vararg->tq.print_const,vt);
-        // if inject, then check the type is an appropriate [x]tunion
-        // FIX: does this work with flat tunions???
+        // if inject, then check the type is an appropriate datatype
+        // FIX: does this work with flat datatypes???
         if (vi)
           switch (compress(vt)) {
-          case &TunionType(TunionInfo{KnownTunion(tud),_,_}): 
+          case &DatatypeType(DatatypeInfo{KnownDatatype(tud),_,_}): 
             if ((*tud)->is_flat)
-              terr(loc,"cant inject into a flat tunion");
+              terr(loc,"cant inject into a flat datatype");
             break;
-          default: terr(loc,"can't inject a non-[x]tunion type"); break;
+          default: terr(loc,"can't inject a non-datatype type"); break;
           }
       }
       
@@ -3493,15 +3495,15 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           default: terr(loc,"format descriptor is not a char ? type"); break;
           }
           if (fmt_arg_start != 0) {
-            // check the type of the varargs is either tunion PrintArg or 
-            // tunion ScanfArg according to ft.
+            // check the type of the varargs is either datatype PrintArg or 
+            // datatype ScanfArg according to ft.
             // FIX: shouldn't we just do this once when the declaration is made?
             bool problem;
             switch ($(ft,compress(cyc_vararg->type))) {
-            case $(Printf_ft, &TunionType(TunionInfo(KnownTunion(&tud),_,_))):
-              problem = (qvar_cmp(tud->name,tunion_print_arg_qvar) != 0); break;
-            case $(Scanf_ft,  &TunionType(TunionInfo(KnownTunion(&tud),_,_))):  
-              problem = (qvar_cmp(tud->name,tunion_scanf_arg_qvar) != 0); break;
+            case $(Printf_ft, &DatatypeType(DatatypeInfo(KnownDatatype(&tud),_,_))):
+              problem = (qvar_cmp(tud->name,datatype_print_arg_qvar) != 0); break;
+            case $(Scanf_ft,  &DatatypeType(DatatypeInfo(KnownDatatype(&tud),_,_))):  
+              problem = (qvar_cmp(tud->name,datatype_scanf_arg_qvar) != 0); break;
             default: 
               problem = true; break;
             }  
@@ -4247,11 +4249,11 @@ bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
     return false;
   case &AggrType(AggrInfo(UnknownAggr(_,_),_)):
     impos("got unknown aggr in is_noalias_aggr");
-  case &TunionType(TunionInfo(tinfo,ts,r)):
+  case &DatatypeType(DatatypeInfo(tinfo,ts,r)):
     switch (tinfo) {
-    case UnknownTunion(UnknownTunionInfo(nm,isxt,isfl)):
-      impos("got unknown tunion in is_noalias_aggr");
-    case KnownTunion(&&Tuniondecl(_,_,tvs,flds,_,flat)):
+    case UnknownDatatype(UnknownDatatypeInfo(nm,isxt,isfl)):
+      impos("got unknown datatype in is_noalias_aggr");
+    case KnownDatatype(&&Datatypedecl(_,_,tvs,flds,_,flat)):
       // is non-aliased iff
       // * it's flat and has a field with a unique pointer
       // * it's not flat and lives in a no-alias region
@@ -4262,7 +4264,7 @@ bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
       }
       else {
 	if (flds == NULL)
-	  impos("got tunion with no fields");
+	  impos("got datatype with no fields");
 	else {
           let inst = List::rzip(rgn,rgn,tvs,ts);
           let fs = flds->v; // assume not-NULL
@@ -4279,11 +4281,11 @@ bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
 	}
       }
     }
-  case &TunionFieldType(TunionFieldInfo(tinfo,ts)):
+  case &DatatypeFieldType(DatatypeFieldInfo(tinfo,ts)):
     switch (tinfo) {
-    case UnknownTunionfield(_):
-      impos("got unknown tunion field in is_noalias_aggr");
-    case KnownTunionfield(td,fld):
+    case UnknownDatatypefield(_):
+      impos("got unknown datatype field in is_noalias_aggr");
+    case KnownDatatypefield(td,fld):
       let inst = List::rzip(rgn,rgn,td->tvs,ts);
       let typs = fld->typs;
       while (typs != NULL) {
@@ -4380,7 +4382,7 @@ static bool is_noalias_path_aux(region_t<`r> r, exp_t e,bool ignore_leaf) {
       }
     default: Tcutil::impos("is_noalias_path_aux: subscript on non-pointer/tuple");
     }
-  case &Tunion_e(_,_,_):
+  case &Datatype_e(_,_,_):
   case &Tuple_e(_):  
   case &Struct_e(_,_,_,_):
   case &AnonStruct_e(_,_):
@@ -4554,7 +4556,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
 // a string constant or Array_e expression occurring as follows:
 //    t x[c] = e
 //    {.... e ... }  where the {...} is an Array_e
-//    Foo(.... e ....)  where Foo is a struct or [x]tunion with a 
+//    Foo(.... e ....)  where Foo is a struct or datatype with a 
 //     corresponding field that has type t 
 type_t array_to_ptr(tenv_t te, type_t e_typ, exp_t e) {
   switch (compress(e_typ)) {
@@ -4689,7 +4691,7 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
 
   case &Primop_e(p,es): fallthru(es);
   case &Tuple_e(es):    fallthru(es);
-  case &Tunion_e(es,_,_):
+  case &Datatype_e(es,_,_):
     for (; es != NULL; es = es->tl)
       if (!cnst_exp(te,false,es->hd))
         return false;

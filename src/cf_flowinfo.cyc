@@ -290,7 +290,7 @@ static absRval_t<`r> i_typ_to_absrval(flow_env_t<`r> fenv,
     return fenv->unknown_all;
 
   switch(Tcutil::compress(t)) {
-  case &TunionFieldType(TunionFieldInfo(KnownTunionfield(_,tuf),_)):
+  case &DatatypeFieldType(DatatypeFieldInfo(KnownDatatypefield(_,tuf),_)):
     if(tuf->typs == NULL)
       return leafval;
     fallthru(tuf->typs);
@@ -1434,15 +1434,15 @@ bool contains_region(killrgn_t rgn, type_t t) {
     // might not actually get used or may only get used in a handle or
     // in a function.  But it beats substituting and descending.
     //
-    // Note also that we don't descend into the definitions of [x]tunions,
+    // Note also that we don't descend into the definitions of datatypes,
     // structs, typedefs, etc. because they must be closed w.r.t. all regions
     // except the heap.  
-  case &TunionType(TunionInfo{_,targs,r}):
+  case &DatatypeType(DatatypeInfo{_,targs,r}):
     if (r && contains_region(rgn,r->v)) return true;
     fallthru(targs);
   case &TypedefType(_,targs,_,_):    fallthru(targs);
   case &AggrType(AggrInfo{_,targs}): fallthru(targs);
-  case &TunionFieldType(TunionFieldInfo{_,targs}): fallthru(targs);
+  case &DatatypeFieldType(DatatypeFieldInfo{_,targs}): fallthru(targs);
   case &JoinEff(targs): 
     return List::exists_c(contains_region,rgn,targs);
   case &PointerType(PtrInfo{t2,_,PtrAtts(r,_,_,_,_)}):
@@ -1714,12 +1714,12 @@ bool is_unique_pointer(type_t t) {
   case &Evar(_,_,_,_): return false; // because of compress above
     // for parameterized types, we really need to substitute and descend
     // to figure out whether the outermost pointer is unique.
-  case &TunionType(TunionInfo{_,targs,r}): 
+  case &DatatypeType(DatatypeInfo{_,targs,r}): 
     if (contains_region(rgn,r)) return true;
     fallthru(targs);
   case &TypedefType(_,targs,_,_):    fallthru(targs);
   case &AggrType(AggrInfo{_,targs}): fallthru(targs);
-  case &TunionFieldType(TunionFieldInfo{_,targs}): fallthru(targs);
+  case &DatatypeFieldType(DatatypeFieldInfo{_,targs}): fallthru(targs);
   case &JoinEff(targs): 
     return List::exists_c(contains_region,rgn,targs);
   case &PointerType(PtrInfo{t2,_,PtrAtts(r,_,_,_,_)}):

@@ -896,8 +896,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &AnonStruct_e(_,_):
       fprintf(stderr,"Error: unexpected AnonStruct_e\n");
       exit(1); return;
-    case &Tunion_e(_,_,_):
-      fprintf(stderr,"Error: unexpected Tunion_e\n");
+    case &Datatype_e(_,_,_):
+      fprintf(stderr,"Error: unexpected Datatype_e\n");
       exit(1); return;
     case &Enum_e(_,_,_):
       fprintf(stderr,"Error: unexpected Enum_e\n");
@@ -960,11 +960,11 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &VarType(_):
       fprintf(stderr,"Error: unexpected VarType\n");
       exit(1); return;
-    case &TunionType(_):
-      fprintf(stderr,"Error: unexpected TunionType\n");
+    case &DatatypeType(_):
+      fprintf(stderr,"Error: unexpected DatatypeType\n");
       exit(1); return;
-    case &TunionFieldType(_):
-      fprintf(stderr,"Error: unexpected TunionFieldType\n");
+    case &DatatypeFieldType(_):
+      fprintf(stderr,"Error: unexpected DatatypeFieldType\n");
       exit(1); return;
     case &TupleType(_):
       fprintf(stderr,"Error: unexpected TupleType\n");
@@ -1074,8 +1074,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Let_d(_,_,_):
       fprintf(stderr,"Error: unexpected let declaration\n");
       exit(1); return NULL;
-    case &Tunion_d(_):
-      fprintf(stderr,"Error: unexpected tunion declaration\n");
+    case &Datatype_d(_):
+      fprintf(stderr,"Error: unexpected datatype declaration\n");
       exit(1); return NULL;
     case &Letv_d(_):
       fprintf(stderr,"Error: unexpected let declaration\n");
@@ -1198,7 +1198,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   }
 
   /* Exception for handling error cases of process_file */
-  datatype exn @extensible { NO_SUPPORT(string_t) };
+  datatype exn { NO_SUPPORT(string_t) };
 
   /* Returns 1 on a fatal error (can't create files, etc.) or 0 otherwise. */
   int process_file(const char @ filename,
@@ -1403,7 +1403,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case Porton_d:
       case Portoff_d:
       case &Let_d(_,_,_):
-      case &Tunion_d(_):
+      case &Datatype_d(_):
       case &Letv_d(_):
       case &Namespace_d(_,_):
       case &Using_d(_,_):
@@ -1469,7 +1469,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case Porton_d:
       case Portoff_d:
       case &Let_d(_,_,_):
-      case &Tunion_d(_):
+      case &Datatype_d(_):
       case &Letv_d(_):
       case &Namespace_d(_,_):
       case &Using_d(_,_):

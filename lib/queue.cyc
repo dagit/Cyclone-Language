@@ -40,7 +40,7 @@ bool is_empty(queue_t q)  {
 }
 
 // raised by take and peek
-datatype exn @extensible { Empty };
+datatype exn { Empty };
 
 // create a new queue
 queue_t create() {

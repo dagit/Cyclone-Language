@@ -21,14 +21,14 @@
 // The rest is all Cyclone
 namespace Core;
 
-datatype exn @extensible { Invalid_argument(string_t) };
-datatype exn @extensible { SysError(int) };
+datatype exn { Invalid_argument(string_t) };
+datatype exn { SysError(int) };
 
 /////////////////////////////Generally Useful Things//////////////
-datatype exn @extensible { Failure(string_t) };
-datatype exn @extensible { Impossible(string_t) };
-datatype exn @extensible { Not_found };
-datatype exn @extensible { Unreachable(string_t) };
+datatype exn { Failure(string_t) };
+datatype exn { Impossible(string_t) };
+datatype exn { Not_found };
+datatype exn { Unreachable(string_t) };
 struct Opt<`a> { `a v; };
 opt_t<`b,`H> opt_map(`b f(`a), opt_t<`a> o) {
   if (o==NULL)

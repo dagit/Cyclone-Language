@@ -44,7 +44,7 @@ namespace Lexing;
 #define BUFFER_SIZE 8192
 #define AUX_SIZE    4096
 
-datatype exn @extensible { Error(string_t) };
+datatype exn { Error(string_t) };
 
 struct lexbuf<`a> { // use `a for state that refill_buff might need 
 

@@ -40,7 +40,7 @@ namespace Arg;
 using Core;
 using List;
 
-extern datatype exn @extensible {Error, Bad(string_t)};
+extern datatype exn {Error, Bad(string_t)};
 
 datatype Flag {Prefix(string_t), Exact(string_t)};
 

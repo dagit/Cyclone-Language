@@ -37,7 +37,7 @@
 #include <core.h>
 
 namespace Arg {
-extern datatype exn @extensible {extern Error, extern Bad(string_t)};
+extern datatype exn {extern Error, extern Bad(string_t)};
 
 extern datatype Spec {
   Unit_spec(void (@f)()),        // Call f with unit argument

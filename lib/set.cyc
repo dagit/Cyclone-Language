@@ -341,7 +341,7 @@ bool equals(set_t<`a> s1, set_t<`a> s2) {
   return setcmp(s1,s2) == 0;
 }
     
-datatype @extensible exn {Absent};
+datatype exn {Absent};
 
 /* Return an elt (in this case -- the first one in the set).
  * If the set is empty, throw Absent.

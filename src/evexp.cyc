@@ -378,8 +378,8 @@ bool okay_szofarg(type_t t) {
     }
   case &Evar(&Opt{BoxKind},_,_,_): return true; // Possible?
   case &Evar(_,_,_,_): return false;
-  case &TunionType(_): return true;
-  case &TunionFieldType(TunionFieldInfo{KnownTunionfield(_,tuf),_}):
+  case &DatatypeType(_): return true;
+  case &DatatypeFieldType(DatatypeFieldInfo{KnownDatatypefield(_,tuf),_}):
     fallthru(tuf->typs);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
@@ -387,7 +387,7 @@ bool okay_szofarg(type_t t) {
 	return false;
     return true;
 
-  case &TunionFieldType(_): return false;
+  case &DatatypeFieldType(_): return false;
 
     // okay? (used to require constrained bound)
   case &PointerType(_): return true;

@@ -31,14 +31,14 @@ namespace Tcdecl {
   //  using String;
   using Position;
 
-  extern datatype exn @extensible {extern Incompatible};
+  extern datatype exn {extern Incompatible};
 
   // used by Interface
-  struct Xtunionfielddecl {
-    tuniondecl_t base; //no fields here
-    tunionfield_t field;
+  struct Xdatatypefielddecl {
+    datatypedecl_t base; //no fields here
+    datatypefield_t field;
   };
-  typedef struct Xtunionfielddecl @ xtunionfielddecl_t;
+  typedef struct Xdatatypefielddecl @ xdatatypefielddecl_t;
 
   // if msg0 == null, don't print any message; just throw exception Incompatible
   // otherwise call terr(loc, msg) where msg is *msg0 + " " + msg1
@@ -66,7 +66,7 @@ extern $(scope_t, bool) merge_scope(scope_t s0, scope_t s1,
 extern struct Aggrdecl  * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
 					 seg_t loc, string_t * msg);
 
-extern struct Tuniondecl  * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1,
+extern struct Datatypedecl  * merge_datatypedecl(datatypedecl_t d0, datatypedecl_t d1,
 					     seg_t loc, string_t * msg);
 extern struct Enumdecl    * merge_enumdecl(enumdecl_t d0, enumdecl_t d1, 
 					   seg_t loc, string_t * msg);
@@ -79,14 +79,14 @@ extern struct Typedefdecl * merge_typedefdecl(typedefdecl_t d0,
 extern binding_t            merge_binding    (binding_t d0, binding_t d1,
 					      seg_t loc, string_t * msg);
   
-extern struct Xtunionfielddecl * 
-  merge_xtunionfielddecl (xtunionfielddecl_t d0, xtunionfielddecl_t d1, 
+extern struct Xdatatypefielddecl * 
+  merge_xdatatypefielddecl (xdatatypefielddecl_t d0, xdatatypefielddecl_t d1, 
                           seg_t loc, string_t * msg);
 
   // sort the list of fields, trying to merge the duplicate
   // *res is set to false if something's wrong
-extern List::list_t<tunionfield_t> 
-sort_xtunion_fields(List::list_t<tunionfield_t,`H> f, bool @ res,
+extern List::list_t<datatypefield_t> 
+sort_xdatatype_fields(List::list_t<datatypefield_t,`H> f, bool @ res,
 		    var_t v, seg_t loc, string_t * msg);
 }
 

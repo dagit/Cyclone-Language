@@ -87,7 +87,7 @@ namespace List {
   /** [rmap_c] is a version of [rmap] where the function argument
       requires a closure as its first argument. */
 
-  extern datatype exn @extensible {extern List_mismatch};
+  extern datatype exn {extern List_mismatch};
   /** [List_mismatch] is thrown when two lists don't have the same
       length. */
 
@@ -223,7 +223,7 @@ namespace List {
                                  list_t<`a,`r> a,list_t<`a,`r> b);
   /** [imp_merge] is an imperative version of [merge]. */
 
-  extern datatype exn @extensible {extern Nth};
+  extern datatype exn {extern Nth};
   /** [Nth] is thrown when [nth] doesn't have enough elements in the
        list.  */
 

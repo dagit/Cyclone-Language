@@ -39,7 +39,7 @@
 //  B1. None of the following are used:
 //        UnknownId_e, UnknownCall_e, UnresolvedMem_e
 //      They have all been replaced by
-//        Var_e, FnCall_e, Struct_e, Tunion_e, 
+//        Var_e, FnCall_e, Struct_e, Datatype_e, 
 //      In Var_e, Unresolved_b is not used.
 //  B2. All qvars are either Loc_n or Abs_n.  Any Rel_n has been
 //      replaced by Loc_n or Abs_n.
@@ -106,8 +106,8 @@ namespace Absyn {
   typedef struct PtrInfo ptr_info_t;
   typedef struct VarargInfo vararg_info_t;
   typedef struct FnInfo fn_info_t;
-  typedef struct TunionInfo tunion_info_t;
-  typedef struct TunionFieldInfo tunion_field_info_t;
+  typedef struct DatatypeInfo datatype_info_t;
+  typedef struct DatatypeFieldInfo datatype_field_info_t;
   typedef struct AggrInfo aggr_info_t;
   typedef struct ArrayInfo array_info_t;
   typedef datatype Type type_t, rgntype_t;
@@ -125,8 +125,8 @@ namespace Absyn {
   typedef struct Switch_clause @switch_clause_t;
   typedef struct Fndecl @fndecl_t;
   typedef struct Aggrdecl @aggrdecl_t;
-  typedef struct Tunionfield @tunionfield_t;
-  typedef struct Tuniondecl @tuniondecl_t;
+  typedef struct Datatypefield @datatypefield_t;
+  typedef struct Datatypedecl @datatypedecl_t;
   typedef struct Typedefdecl @typedefdecl_t;
   typedef struct Enumfield @enumfield_t;
   typedef struct Enumdecl @enumdecl_t;
@@ -134,7 +134,7 @@ namespace Absyn {
   typedef datatype Raw_decl raw_decl_t;
   typedef struct Decl @decl_t;
   typedef datatype Designator designator_t;
-  typedef datatype @extensible AbsynAnnot absyn_annot_t;
+  typedef @extensible datatype AbsynAnnot absyn_annot_t;
   typedef datatype Attribute attribute_t;
   typedef list_t<attribute_t> attributes_t;
   typedef struct Aggrfield @aggrfield_t;
@@ -271,34 +271,34 @@ namespace Absyn {
     attributes_t                             attributes; 
   };
 
-  // information for [x]tunion's
-  EXTERN_ABSYN struct UnknownTunionInfo {
-    qvar_t name;       // name of the [x]tunion
-    bool   is_xtunion; // true -> xtunion, false -> tunion
-    bool   is_flat;       // only used when we have an abstract tunion decl
+  // information for datatypes
+  EXTERN_ABSYN struct UnknownDatatypeInfo {
+    qvar_t name;          // name of the datatype
+    bool   is_extensible; // true -> @extensible
+    bool   is_flat;       // only used when we have an abstract datatype decl
   };
-  EXTERN_ABSYN __flat__ datatype TunionInfoU {
-    UnknownTunion(struct UnknownTunionInfo); // don't know definition yet
-    KnownTunion(tuniondecl_t@);              // known definition
+  EXTERN_ABSYN __flat__ datatype DatatypeInfoU {
+    UnknownDatatype(struct UnknownDatatypeInfo); // don't know definition yet
+    KnownDatatype(datatypedecl_t@);              // known definition
   };
-  EXTERN_ABSYN struct TunionInfo {
-    datatype TunionInfoU tunion_info; // we either know the definition or not
+  EXTERN_ABSYN struct DatatypeInfo {
+    datatype DatatypeInfoU datatype_info; // we either know the definition or not
     list_t<type_t>     targs;       // actual type parameters
-    opt_t<rgntype_t>   rgn;         // region into which tunion points -- 
-                     // only present for indirect tunions (i.e., not flat)
+    opt_t<rgntype_t>   rgn;         // region into which datatype points -- 
+                     // only present for indirect datatypes (i.e., not flat)
   };
-  // information for [x]tunion Foo.Bar
-  EXTERN_ABSYN struct UnknownTunionFieldInfo {
-    qvar_t tunion_name;   // name of the [x]tunion 
-    qvar_t field_name;    // name of the tunion field
-    bool   is_xtunion;    // true -> xtunion, false -> tunion
+  // information for datatype Foo.Bar
+  EXTERN_ABSYN struct UnknownDatatypeFieldInfo {
+    qvar_t datatype_name;   // name of the datatype
+    qvar_t field_name;      // name of the datatype field
+    bool   is_extensible;   // true -> @extensible
   };
-  EXTERN_ABSYN __flat__ datatype TunionFieldInfoU {
-    UnknownTunionfield(struct UnknownTunionFieldInfo);
-    KnownTunionfield(tuniondecl_t, tunionfield_t);
+  EXTERN_ABSYN __flat__ datatype DatatypeFieldInfoU {
+    UnknownDatatypefield(struct UnknownDatatypeFieldInfo);
+    KnownDatatypefield(datatypedecl_t, datatypefield_t);
   };
-  EXTERN_ABSYN struct TunionFieldInfo {
-    datatype TunionFieldInfoU field_info;
+  EXTERN_ABSYN struct DatatypeFieldInfo {
+    datatype DatatypeFieldInfoU field_info;
     list_t<type_t>          targs;
   };
 
@@ -336,8 +336,8 @@ namespace Absyn {
     // occur in the type to which the evar is constrained.  
     Evar(opt_t<kind_t>,opt_t<type_t>,int,opt_t<list_t<tvar_t>>); 
     VarType(tvar_t); // type variables, kind induced by tvar
-    TunionType(tunion_info_t); // [x]tunion Foo
-    TunionFieldType(tunion_field_info_t); // [x]tunion Foo.Bar
+    DatatypeType(datatype_info_t); // datatype Foo
+    DatatypeFieldType(datatype_field_info_t); // datatype Foo.Bar
     PointerType(ptr_info_t); // t*, t?, t@, etc.  BoxKind when not Unknown_b
     IntType(sign_t,size_of_t); // char, short, int.  MemKind unless B4
     FloatType;  // MemKind
@@ -445,7 +445,7 @@ namespace Absyn {
   // information about a call to a vararg function
   EXTERN_ABSYN struct VarargCallInfo {
     int                   num_varargs;
-    list_t<tunionfield_t> injectors;
+    list_t<datatypefield_t> injectors;
     vararg_info_t        @vai;
   };
 
@@ -530,7 +530,7 @@ namespace Absyn {
     // {.x1=e1,....,.xn=en}
     AnonStruct_e(type_t, list_t<$(list_t<designator_t>,exp_t)@>);
     // Foo(e1,...,en)
-    Tunion_e(list_t<exp_t>,tuniondecl_t,tunionfield_t);
+    Datatype_e(list_t<exp_t>,datatypedecl_t,datatypefield_t);
     Enum_e(qvar_t,struct Enumdecl *,struct Enumfield *);
     AnonEnum_e(qvar_t,type_t,struct Enumfield *);
     // malloc(e1), rmalloc(e1,e2), calloc(e1,e2), rcalloc(e1,e2,e3).  
@@ -597,7 +597,7 @@ namespace Absyn {
     Pointer_p(pat_t); // &p
     Aggr_p(aggr_info_t,list_t<tvar_t>,list_t<$(list_t<designator_t>,pat_t)@>,
            bool dot_dot_dot);
-    Tunion_p(tuniondecl_t, tunionfield_t, list_t<pat_t>, bool dot_dot_dot);
+    Datatype_p(datatypedecl_t, datatypefield_t, list_t<pat_t>, bool dot_dot_dot);
     Null_p; // NULL
     Int_p(sign_t,int); // 3
     Char_p(char);      // 'a'
@@ -636,7 +636,7 @@ namespace Absyn {
 
   // Variable declarations.
   // re-factor this so different kinds of vardecls only have what they
-  // need.  Makes this a struct with an tunion componenent (Global, Pattern,
+  // need.  Makes this a struct with an datatype componenent (Global, Pattern,
   // Param, Local)
   EXTERN_ABSYN struct Vardecl {
     scope_t            sc;          // static, extern, etc.
@@ -692,7 +692,7 @@ namespace Absyn {
     bool                      tagged; // only applicable for unions
   };
 
-  //for structs and tunions we should memoize the string to field-number mapping
+  //for structs and datatypes we should memoize the string to field-number mapping
   EXTERN_ABSYN struct Aggrdecl {
     aggr_kind_t           kind;
     scope_t               sc;  // abstract possible here
@@ -702,19 +702,19 @@ namespace Absyn {
     attributes_t          attributes; 
   };
 
-  EXTERN_ABSYN struct Tunionfield {
+  EXTERN_ABSYN struct Datatypefield {
     qvar_t                     name; 
     list_t<$(tqual_t,type_t)@> typs;
     seg_t                      loc;
-    scope_t                    sc; // relevant only for xtunions
+    scope_t                    sc; // relevant only for extensible datatypes
   };
 
-  EXTERN_ABSYN struct Tuniondecl { 
+  EXTERN_ABSYN struct Datatypedecl { 
     scope_t                      sc;
     typedef_name_t               name;
     list_t<tvar_t>               tvs;
-    opt_t<list_t<tunionfield_t>> fields;
-    bool                         is_xtunion;
+    opt_t<list_t<datatypefield_t>> fields;
+    bool                         is_extensible;
     bool                         is_flat;
   };
 
@@ -754,7 +754,7 @@ namespace Absyn {
     Alias_d(exp_t, tvar_t, vardecl_t);  // open for unique pointer
     // alias <`r>x = e;
     Aggr_d(aggrdecl_t);    // [struct|union] Foo { ... }
-    Tunion_d(tuniondecl_t);    // [x]tunion Bar { ... }
+    Datatype_d(datatypedecl_t);    // datatype Bar { ... }
     Enum_d(enumdecl_t);        // enum Baz { ... }
     Typedef_d(typedefdecl_t);  // typedef t n
     Namespace_d(var_t,list_t<decl_t>); // namespace Foo { ... }
@@ -779,7 +779,7 @@ namespace Absyn {
     FieldName(var_t);
   };
 
-  EXTERN_ABSYN datatype AbsynAnnot @extensible { EXTERN_ABSYN EmptyAnnot; };
+  EXTERN_ABSYN @extensible datatype AbsynAnnot { EXTERN_ABSYN EmptyAnnot; };
 
   ///////////////////////////////////////////////////////////////////
   // Operations and Constructors for Abstract Syntax
@@ -828,15 +828,15 @@ namespace Absyn {
   extern type_t empty_effect;
   // exception name and type
   extern qvar_t exn_name;
-  extern tuniondecl_t exn_tud;
+  extern datatypedecl_t exn_tud;
   extern qvar_t null_pointer_exn_name;
   extern qvar_t match_exn_name;
-  extern tunionfield_t null_pointer_exn_tuf;
-  extern tunionfield_t match_exn_tuf;
+  extern datatypefield_t null_pointer_exn_tuf;
+  extern datatypefield_t match_exn_tuf;
   extern type_t exn_typ;
-  // tunion PrintArg and tunion ScanfArg types
-  extern qvar_t tunion_print_arg_qvar;
-  extern qvar_t tunion_scanf_arg_qvar;
+  // datatype PrintArg and datatype ScanfArg types
+  extern qvar_t datatype_print_arg_qvar;
+  extern qvar_t datatype_scanf_arg_qvar;
   // string (char ?)
   extern type_t string_typ(type_t rgn);
   extern type_t const_string_typ(type_t rgn);
@@ -988,10 +988,11 @@ namespace Absyn {
   extern decl_t union_decl(scope_t s,typedef_name_t n,
 			   list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
 			   attributes_t atts, seg_t loc);
-  extern decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
-                            opt_t<list_t<tunionfield_t,`H>,`H> fs, 
-                            bool is_xtunion, bool is_flat,
-			    seg_t loc);
+  extern decl_t datatype_decl(scope_t s, typedef_name_t n, 
+                              list_t<tvar_t,`H> ts,
+                              opt_t<list_t<datatypefield_t,`H>,`H> fs, 
+                              bool is_extensible, bool is_flat,
+                              seg_t loc);
 
   extern type_t function_typ(list_t<tvar_t,`H> tvs,opt_t<type_t,`H> eff_typ,
                              type_t ret_typ, 

@@ -18,7 +18,7 @@ using Syntax;
 
 namespace Lexer {
   extern int lexmain(Lexing::Lexbuf<`a>);
-  extern datatype exn @extensible { extern Lexical_error(string_t,int,int) };
+  extern datatype exn { extern Lexical_error(string_t,int,int) };
   extern int line_num;
   extern int line_start_pos;
 }
@@ -27,7 +27,7 @@ namespace Parser {
 
 opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = NULL;
 
-datatype exn @extensible {Parser_error(string_t)};
+datatype exn {Parser_error(string_t)};
 typedef struct Hashtable::Table<stringptr_t,regular_expression_t> htbl;
   // must be initialized!
 htbl * named_regexps = NULL;

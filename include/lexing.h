@@ -38,7 +38,7 @@
 namespace Lexing {
 using Core;
 
-extern datatype exn @extensible { extern Error(string_t) };
+extern datatype exn { extern Error(string_t) };
 
 extern struct lexbuf<`a::B>{ /* use 'a for state that refill_buff might need */
  

@@ -456,7 +456,7 @@ static bool occurs(ctype_t v, ctype_t t) {
 //////////////////////////////////////////////////////////////////
 // Unification of ctypes
 // thrown when unification fails
-datatype exn @extensible { Unify_ct };
+datatype exn { Unify_ct };
 // prototypes for functions defined later
 static bool leq(ctype_t t1, ctype_t t2);
 static void unify_cts(list_t<ctype_t> t1, list_t<ctype_t> t2);
@@ -1482,7 +1482,7 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
   case &Comprehension_e(_,_,_,_): impos("Comprehension_e");
   case &Struct_e(_,_,_,_): impos("Struct_e");
   case &AnonStruct_e(_,_): impos("AnonStruct_e");
-  case &Tunion_e(_,_,_): impos("Tunion_e");
+  case &Datatype_e(_,_,_): impos("Datatype_e");
   case &UnresolvedMem_e(_,_): impos("UnresolvedMem_e");
   case &StmtExp_e(s): impos("StmtExp_e");
   case &Valueof_e(_): impos("Valueof_e");
