@@ -716,7 +716,7 @@ namespace Cstr {
 
 char ?NOZEROTERM realloc(char ?NOZEROTERM`H s, size_t n) {
   let res = Cstr::GC_realloc((char *NOZEROTERM)s, n);
-  return wrap_Cstring_as_string(res, n);
+  return wrap_Cbuffer_as_buffer(res, n);
 }
 
 `a::A?`r _memcpy(`a?`r d, const `a? s, size_t n, sizeof_t<`a> sz) {

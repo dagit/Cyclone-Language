@@ -314,7 +314,7 @@ tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Fai
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};extern
-struct _RegionHandle*Cyc_Core_heap_region;struct _tagged_arr wrap_Cstring_as_string(
+struct _RegionHandle*Cyc_Core_heap_region;struct _tagged_arr wrap_Cbuffer_as_buffer(
 char*,unsigned int);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(
 struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[
 8];int toupper(int);char*strerror(int errnum);unsigned int Cyc_strlen(struct
@@ -724,7 +724,7 @@ void*memset(void*,int c,unsigned int n);void bcopy(const void*src,void*dest,
 unsigned int n);void bzero(void*s,unsigned int n);char*GC_realloc(char*,
 unsigned int n);struct _tagged_arr Cyc_realloc(struct _tagged_arr s,unsigned int n){
 char*_tmp66=GC_realloc((char*)_check_null(_untag_arr(s,sizeof(char),1)),n);
-return wrap_Cstring_as_string(_tmp66,n);}struct _tagged_arr Cyc__memcpy(struct
+return wrap_Cbuffer_as_buffer(_tmp66,n);}struct _tagged_arr Cyc__memcpy(struct
 _tagged_arr d,struct _tagged_arr s,unsigned int n,unsigned int sz){if(((d.curr == (
 _tag_arr(0,0,0)).curr?1: _get_arr_size(d,sizeof(void))< n)?1: s.curr == ((struct
 _tagged_arr)_tag_arr(0,0,0)).curr)?1: _get_arr_size(s,sizeof(void))< n)(int)

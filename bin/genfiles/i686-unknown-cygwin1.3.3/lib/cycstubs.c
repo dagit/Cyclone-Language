@@ -312,7 +312,7 @@ char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Cor
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct
-_tagged_arr wrap_Cstring_as_string(char*,unsigned int);struct Cyc_in_addr{
+_tagged_arr wrap_Cbuffer_as_buffer(char*,unsigned int);struct Cyc_in_addr{
 unsigned int s_addr;};struct Cyc_dirent{int d_version;int __d_reserved[2];int d_fd;
 unsigned int d_ino;char d_name[256];};struct Cyc___cycDIR;int Cyc_closedir(struct Cyc___cycDIR*);
 struct Cyc___cycDIR*Cyc_opendir(const char*);struct Cyc_dirent*Cyc_readdir(struct
@@ -530,25 +530,27 @@ unsigned int szmemb,int(*compar)(const void*,const void*)){if(!((unsigned int)ta
 int)_throw((void*)& Cyc___qsort_failure_1);if(_get_arr_size(tab,sizeof(void))< 
 nmemb)(int)_throw((void*)& Cyc___qsort_failure_2);qsort((void*)_untag_arr(tab,
 sizeof(void),1),nmemb,(unsigned int)szmemb,compar);}struct _tagged_arr Cyc_mmap(
-unsigned int length,int prot,int flags,int fd,int offset);int Cyc_munmap(struct
-_tagged_arr start,unsigned int length);char*mmap(char*start,unsigned int length,int
-prot,int flags,int fd,int offset);int munmap(const char*start,unsigned int length);
-static char _tmp3C[36]="mmap called with illegal prot/flags";static struct Cyc_Core_Failure_struct
-Cyc___mmap_failure={Cyc_Core_Failure,{_tmp3C,_tmp3C,_tmp3C + 36}};struct
-_tagged_arr Cyc_mmap(unsigned int length,int prot,int flags,int fd,int offset){if(prot
-== 1?flags == 2?1: flags == 1: 0)return(struct _tagged_arr)wrap_Cstring_as_string(
-mmap(0,length,prot,flags,fd,offset),length);else{(int)_throw((void*)& Cyc___mmap_failure);}}
-int Cyc_munmap(struct _tagged_arr start,unsigned int length){return munmap((const char*)
-_check_null(_untag_arr(start,sizeof(char),1)),length);}struct Cyc_timeval{int
-tv_sec;int tv_usec;};struct Cyc_rlimit{unsigned int rlim_cur;unsigned int rlim_max;}
-;struct Cyc_rusage{struct Cyc_timeval ru_utime;struct Cyc_timeval ru_stime;int
-ru_maxrss;int ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt;int
-ru_nswap;int ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;
-int ru_nvcsw;int ru_nivcsw;};struct Cyc_timespec{int tv_sec;int tv_nsec;};struct Cyc__types_fd_set{
-int fds_bits[(64 + (sizeof(int)* 8 - 1))/ (sizeof(int)* 8)];};int select(int,struct
-Cyc__types_fd_set*,struct Cyc__types_fd_set*,struct Cyc__types_fd_set*,struct Cyc_timeval*);
-void Cyc_FD_CLR(int,struct Cyc__types_fd_set*);int Cyc_FD_ISSET(int,struct Cyc__types_fd_set*);
-void Cyc_FD_SET(int,struct Cyc__types_fd_set*);void Cyc_FD_ZERO(struct Cyc__types_fd_set*);
+struct _tagged_arr,unsigned int length,int prot,int flags,int fd,int offset);int Cyc_munmap(
+struct _tagged_arr start,unsigned int length);char*__stub_mmap(char*start,
+unsigned int length,int prot,int flags,int fd,int offset);int munmap(const char*start,
+unsigned int length);static char _tmp3C[42]="mmap called with illegal start/prot/flags";
+static struct Cyc_Core_Failure_struct Cyc___mmap_failure={Cyc_Core_Failure,{_tmp3C,
+_tmp3C,_tmp3C + 42}};struct _tagged_arr Cyc_mmap(struct _tagged_arr ignored,
+unsigned int length,int prot,int flags,int fd,int offset){if((ignored.curr == (
+_tag_arr(0,0,0)).curr?prot == 1: 0)?flags == 2?1: flags == 1: 0)return(struct
+_tagged_arr)wrap_Cbuffer_as_buffer(__stub_mmap(0,length,prot,flags,fd,offset),
+length);else{(int)_throw((void*)& Cyc___mmap_failure);}}int Cyc_munmap(struct
+_tagged_arr start,unsigned int length){return munmap((const char*)_check_null(
+_untag_arr(start,sizeof(char),1)),length);}struct Cyc_timeval{int tv_sec;int
+tv_usec;};struct Cyc_rlimit{unsigned int rlim_cur;unsigned int rlim_max;};struct Cyc_rusage{
+struct Cyc_timeval ru_utime;struct Cyc_timeval ru_stime;int ru_maxrss;int ru_ixrss;int
+ru_idrss;int ru_isrss;int ru_minflt;int ru_majflt;int ru_nswap;int ru_inblock;int
+ru_oublock;int ru_msgsnd;int ru_msgrcv;int ru_nsignals;int ru_nvcsw;int ru_nivcsw;};
+struct Cyc_timespec{int tv_sec;int tv_nsec;};struct Cyc__types_fd_set{int fds_bits[(
+64 + (sizeof(int)* 8 - 1))/ (sizeof(int)* 8)];};int select(int,struct Cyc__types_fd_set*,
+struct Cyc__types_fd_set*,struct Cyc__types_fd_set*,struct Cyc_timeval*);void Cyc_FD_CLR(
+int,struct Cyc__types_fd_set*);int Cyc_FD_ISSET(int,struct Cyc__types_fd_set*);void
+Cyc_FD_SET(int,struct Cyc__types_fd_set*);void Cyc_FD_ZERO(struct Cyc__types_fd_set*);
 void __stub_FD_CLR(int,struct Cyc__types_fd_set*);int __stub_FD_ISSET(int,struct Cyc__types_fd_set*);
 void __stub_FD_SET(int,struct Cyc__types_fd_set*);void __stub_FD_ZERO(struct Cyc__types_fd_set*);
 void Cyc_FD_CLR(int a,struct Cyc__types_fd_set*b){return __stub_FD_CLR(a,b);}int Cyc_FD_ISSET(

@@ -3471,7 +3471,6 @@ sys/mman.h:
 include {
 size_t
 off_t
-MAP_FAILED
 PROT_READ
 MAP_SHARED
 MAP_PRIVATE
@@ -3480,28 +3479,36 @@ hstub {
   // We leave out many of the functions/flags, and just allow
   // mapping in read-only, shared files and unmapping them.
 
+  // So that we can properly return a char ? pointer, we define
+  // MAP_FAILED as NULL
+  #define MAP_FAILED NULL
+
   // The traditional first arg to mmap should be 0 anyway, so don't
   // even bother to pass it to us.
-  extern const char ?NOZEROTERM mmap(size_t length, int prot, int flags, 
-		       int fd, off_t offset);
+  extern const char ?NOZEROTERM mmap(char ?NOZEROTERM, size_t length, 
+                                     int prot, int flags, 
+		                     int fd, off_t offset);
 
   extern int munmap(const char ?NOZEROTERM start, size_t length);
 }
 cycstub mmap {
   namespace Cmman {
+    // refers to our Cyclone stub that deals with MMAP_FAILED
     extern "C" char *NOZEROTERM
-      mmap(char *NOZEROTERM start, size_t length, int prot,
-           int flags, int fd, off_t offset);
+      __stub_mmap(char *NOZEROTERM start, size_t length, int prot,
+                  int flags, int fd, off_t offset);
     extern "C" int munmap(const char *NOZEROTERM start, size_t length);
   }
   static xtunion exn.Failure __mmap_failure =
-    Failure("mmap called with illegal prot/flags");
-  const char ?NOZEROTERM mmap(size_t length, int prot, 
-		int flags, int fd, off_t offset) {
-    if (prot == PROT_READ &&
+    Failure("mmap called with illegal start/prot/flags");
+  const char ?NOZEROTERM mmap(char ?NOZEROTERM ignored,
+			      size_t length, int prot, 
+		              int flags, int fd, off_t offset) {
+    if (ignored == NULL &&
+        prot == PROT_READ &&
         (flags == MAP_PRIVATE || flags == MAP_SHARED))
-      return wrap_Cstring_as_string
-        (Cmman::mmap(NULL, length, prot, flags, fd, offset),
+      return wrap_Cbuffer_as_buffer
+        (Cmman::__stub_mmap(NULL, length, prot, flags, fd, offset),
          length);
     else
       throw &__mmap_failure;
@@ -3511,6 +3518,20 @@ cycstub mmap {
   int munmap(const char ?NOZEROTERM start, size_t length) {
     // We definitely do NOT want to copy the "string"
     return Cmman::munmap((const char *NOZEROTERM)start, length);
+  }
+}
+cstub mmap {
+  #include <sys/types.h>
+  #include <sys/mman.h>
+  #ifndef MMAP_FAILED
+  #define MMAP_FAILED NULL
+  #endif
+  char *__stub_mmap(char *start, size_t length, int prot,
+                    int flags, int fd, off_t offset) {
+    char *retval;
+    retval = mmap(start,length,prot,flags,fd,offset);
+    if (retval == MMAP_FAILED) return NULL;
+    else return retval;
   }
 }
 ;

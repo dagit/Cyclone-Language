@@ -118,6 +118,19 @@
     return fwrite(new_curr, 1, max_count, fd);
   }
 
+  #include <sys/types.h>
+  #include <sys/mman.h>
+  #ifndef MMAP_FAILED
+  #define MMAP_FAILED NULL
+  #endif
+  char *__stub_mmap(char *start, size_t length, int prot,
+                    int flags, int fd, off_t offset) {
+    char *retval;
+    retval = mmap(start,length,prot,flags,fd,offset);
+    if (retval == MMAP_FAILED) return NULL;
+    else return retval;
+  }
+
   #include <sys/select.h>
   void __stub_FD_CLR(int a, fd_set *b) {
     FD_CLR(a,b);

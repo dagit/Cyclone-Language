@@ -312,7 +312,7 @@ char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Cor
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct
-_tagged_arr wrap_Cstring_as_string(char*,unsigned int);struct Cyc_in_addr{
+_tagged_arr wrap_Cbuffer_as_buffer(char*,unsigned int);struct Cyc_in_addr{
 unsigned int s_addr;};struct Cyc_dirent{unsigned int d_ino;int d_off;unsigned short
 d_reclen;unsigned char d_type;char d_name[256];};struct Cyc___cycDIR;int Cyc_closedir(
 struct Cyc___cycDIR*);struct Cyc___cycDIR*Cyc_opendir(const char*);struct Cyc_dirent*
@@ -584,16 +584,18 @@ nmemb)(int)_throw((void*)& Cyc___qsort_failure_2);qsort((void*)_untag_arr(tab,
 sizeof(void),1),nmemb,(unsigned int)szmemb,compar);}struct Cyc_ipc_perm{int __key;
 unsigned int uid;unsigned int gid;unsigned int cuid;unsigned int cgid;unsigned short
 mode;unsigned short __pad1;unsigned short __seq;unsigned short __pad2;unsigned int
-__unused1;unsigned int __unused2;};struct _tagged_arr Cyc_mmap(unsigned int length,
-int prot,int flags,int fd,int offset);int Cyc_munmap(struct _tagged_arr start,
-unsigned int length);char*mmap(char*start,unsigned int length,int prot,int flags,int
-fd,int offset);int munmap(const char*start,unsigned int length);static char _tmp43[36]="mmap called with illegal prot/flags";
-static struct Cyc_Core_Failure_struct Cyc___mmap_failure={Cyc_Core_Failure,{_tmp43,
-_tmp43,_tmp43 + 36}};struct _tagged_arr Cyc_mmap(unsigned int length,int prot,int
-flags,int fd,int offset){if(prot == 1?flags == 2?1: flags == 1: 0)return(struct
-_tagged_arr)wrap_Cstring_as_string(mmap(0,length,prot,flags,fd,offset),length);
-else{(int)_throw((void*)& Cyc___mmap_failure);}}int Cyc_munmap(struct _tagged_arr
-start,unsigned int length){return munmap((const char*)_check_null(_untag_arr(start,
+__unused1;unsigned int __unused2;};struct _tagged_arr Cyc_mmap(struct _tagged_arr,
+unsigned int length,int prot,int flags,int fd,int offset);int Cyc_munmap(struct
+_tagged_arr start,unsigned int length);char*__stub_mmap(char*start,unsigned int
+length,int prot,int flags,int fd,int offset);int munmap(const char*start,unsigned int
+length);static char _tmp43[42]="mmap called with illegal start/prot/flags";static
+struct Cyc_Core_Failure_struct Cyc___mmap_failure={Cyc_Core_Failure,{_tmp43,_tmp43,
+_tmp43 + 42}};struct _tagged_arr Cyc_mmap(struct _tagged_arr ignored,unsigned int
+length,int prot,int flags,int fd,int offset){if((ignored.curr == (_tag_arr(0,0,0)).curr?
+prot == 1: 0)?flags == 2?1: flags == 1: 0)return(struct _tagged_arr)
+wrap_Cbuffer_as_buffer(__stub_mmap(0,length,prot,flags,fd,offset),length);else{(
+int)_throw((void*)& Cyc___mmap_failure);}}int Cyc_munmap(struct _tagged_arr start,
+unsigned int length){return munmap((const char*)_check_null(_untag_arr(start,
 sizeof(char),1)),length);}struct Cyc_timeval{int tv_sec;int tv_usec;};struct Cyc_rlimit{
 unsigned int rlim_cur;unsigned int rlim_max;};enum Cyc___rusage_who{Cyc_RUSAGE_SELF
  = 0,Cyc_RUSAGE_CHILDREN  = -1,Cyc_RUSAGE_BOTH  = -2};struct Cyc_rusage{struct Cyc_timeval
