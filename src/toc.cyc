@@ -176,12 +176,7 @@ static type_t aggrdecl_type_body<`r2,`d,`r>(region_t<`d> d,
                                    $(qvar_t q,type_t (@`H)(qvar_t))@`r2)@`r env) {
   let $(s, &$(q, type_maker)) = *env;
   $(aggrdecl_t,type_t)@`d*`d v = Dict::lookup_opt(*s->aggrs_so_far,q);
-  if (v == NULL) {
-    return type_maker(q);
-  } else {
-    let &$(_,t) = *v;
-    return t;
-  }
+  return v==NULL ? type_maker(q) : (**v)[1];
 }
 
 static type_t aggrdecl_type(qvar_t q, type_t (@`H type_maker)(qvar_t)) {
@@ -203,8 +198,6 @@ MAKE_STRING(val);
 MAKE_STRING(_handler_cons);
 MAKE_STRING(handler);
 MAKE_STRING(_RegionHandle);
-MAKE_STRING(_DynRegionHandle);
-MAKE_STRING(_DynRegionFrame);
 
 /* Some pre-allocated qvars -- use foo_e for exp that is var "foo".
    NB we must record all of these so that tovc knows about them;
@@ -286,17 +279,27 @@ MAKE_VAR(_fast_region_malloc);
 #undef MAKE_STRING
 #undef MAKE_VAR
 
-type_t dyneither_ptr_type() {
-  static type_opt_t dpt = NULL;
-  let t = dpt;
-  if (t == NULL) {
-    t = aggr_type(UnknownAggr(StructA,&_dyneither_ptr_pr,NULL),NULL);
-    dpt = t;
-  }
-  return (type_t)t;
-}
-
 static tqual_t mt_tq = Tqual(false,false,false,false,0);
+
+type_t void_star_type() {
+  static type_opt_t void_star_t_opt = NULL;
+  if (void_star_t_opt == NULL)
+    void_star_t_opt = star_type(void_type,heap_rgn_type,
+				empty_tqual(0),false_type);
+  return void_star_t_opt;
+}
+static type_t dyneither_ptr_type() {
+  static type_opt_t dpt = NULL;
+  if (dpt == NULL)
+    dpt = aggr_type(UnknownAggr(StructA,&_dyneither_ptr_pr,NULL),NULL);
+  return dpt;
+}
+static type_t rgn_type() {
+  static type_opt_t r = NULL;
+  if (r == NULL)
+    r = cstar_type(strct(_RegionHandle_sp),mt_tq);
+  return r;
+}
 
 static stmt_t skip_stmt_dl() {
   return skip_stmt(DL);
@@ -306,14 +309,17 @@ static $(list_t<designator_t>,exp_t)@ make_field(var_t name,exp_t e) {
   return new $(new List(new FieldName(name),NULL), e);
 }
 
-// These constructors are useful when we want to just update the
-// raw part of an expression or statement.
-static exp_t cast_it(type_t t, exp_t e) {
+static exp_t fncall_exp_dl(exp_t f, ... exp_t args) {
+  return fncall_exp(f,List::from_array(args),DL);
+}
+static exp_t cast_it(type_t t, exp_t e) { // DJG: sound for numeric casts?
   switch (e->r) {
   case &Cast_e(_,e,_,No_coercion): return cast_it(t,e);
   default: return cast_exp(t,e,false,No_coercion,DL);
   }
 }
+// These constructors are useful when we want to just update the
+// raw part of an expression or statement.
 static raw_exp_t cast_it_r(type_t t, exp_t e) {
   return new Cast_e(t,e,false,No_coercion);
 }
@@ -329,11 +335,8 @@ static raw_exp_t stmt_exp_r(stmt_t s) {
 static raw_exp_t sizeoftype_exp_r(type_t t) {
   return new Sizeoftype_e(t);
 }
-static raw_exp_t fncall_exp_r(exp_t e, list_t<exp_t,`H> es) {
-  return new FnCall_e(e,es,NULL,true);
-}
-static raw_stmt_t exp_stmt_r(exp_t e) {
-  return new Exp_s(e);
+static raw_exp_t fncall_exp_r(exp_t e, ... exp_t es) {
+  return new FnCall_e(e,List::from_array(es),NULL,true);
 }
 static raw_stmt_t seq_stmt_r(stmt_t s1, stmt_t s2) {
   return new Seq_s(s1,s2);
@@ -343,9 +346,6 @@ static raw_exp_t conditional_exp_r(exp_t e1, exp_t e2, exp_t e3) {
 }
 static raw_exp_t aggrmember_exp_r(exp_t e, field_name_t n) {
   return new AggrMember_e(e,n,false,false);
-}
-static raw_exp_t aggrarrow_exp_r(exp_t e, field_name_t n) {
-  return new AggrArrow_e(e,n,false,false);
 }
 static raw_exp_t unresolvedmem_exp_r(opt_t<typedef_name_t,`H> tdopt,
                                      list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> ds)
@@ -692,6 +692,10 @@ static type_t add_struct_type(qvar_t struct_name,
 qvar_t temp_var() {
   return new $(Loc_n,new (string_t)aprintf("_tmp%X",temp_var_counter++));
 }
+$(qvar_t,exp_t) temp_var_and_exp() {
+  qvar_t v = temp_var();
+  return $(v,var_exp(v,DL));
+}
 
 // generate a fresh label
 // FIX: need to guarantee these can't conflict
@@ -705,7 +709,6 @@ static var_t fresh_label_body<`d,`r>(region_t<`d> d, $(struct TocState<`d>@`d,in
     toc_impos("fresh_label: add_ind returned bad index...");
   return res;
 }
-
 static var_t fresh_label() {
   return use_toc_state(0, fresh_label_body<>);
 }
@@ -771,24 +774,6 @@ static void enumfields_to_c(list_t<enumfield_t> fs) {
   return;
 }
 
-static type_t char_star_type() {
-  static type_t* cs = NULL;
-  if (cs == NULL)
-    cs = new star_type(char_type,heap_rgn_type,mt_tq,false_type);
-  return *cs;
-}
-static type_t rgn_type() {
-  static type_t* r = NULL;
-  if (r == NULL)
-    r = new cstar_type(strct(_RegionHandle_sp),mt_tq);
-  return *r;
-}
-static type_t dyn_rgn_type() {
-  static type_t* r = NULL;
-  if (r == NULL)
-    r = new cstar_type(strct(_DynRegionHandle_sp),mt_tq);
-  return *r;
-}
 static bool is_boxed_tvar(type_t t) {
   switch (compress(t)) {
   case &VarType(tv): return kind_leq(type_kind(t),&tbk);
@@ -800,6 +785,18 @@ static bool is_abstract_type(type_t t) {
   case &Kind{.kind = AnyKind, ...}: return true;
   default: return false;
   }
+}
+static bool is_void_star(type_t t) {
+  switch (compress(t)) {
+  case &PointerType(PtrInfo{t2,_,_}): return is_void_type(t2);
+  default: return false;
+  }
+}
+static bool is_void_star_or_boxed_tvar(type_t t) {
+  return is_void_star(t) || is_boxed_tvar(t);
+}
+static bool is_pointer_or_boxed_tvar(type_t t) {
+  return is_pointer_type(t) || is_boxed_tvar(t);
 }
 
 type_t typ_to_c(type_t t) {
@@ -1014,21 +1011,6 @@ static bool atomic_type(type_t t) {
   }
 }
 
-static bool is_void_star(type_t t) {
-  switch (compress(t)) {
-  case &PointerType(PtrInfo{t2,_,_}): return is_void_type(t2);
-  default: return false;
-  }
-}
-
-static bool is_void_star_or_boxed_tvar(type_t t) {
-  return is_void_star(t) || is_boxed_tvar(t);
-}
-
-static bool is_pointer_or_boxed_tvar(type_t t) {
-  return is_pointer_type(t) || is_boxed_tvar(t);
-}
-
 // returns true when field f of the struct/union t has type void*.
 static bool is_poly_field(type_t t, field_name_t f) {
   switch (compress(t)) {
@@ -1064,45 +1046,31 @@ static bool is_poly_project(exp_t e) {
   }
 }
 
-// possible pointer malloc
-static exp_t malloc_ptr(exp_t s) {
-  return fncall_exp(_cycalloc_e, new List(s,NULL),DL);
-}
-// no pointers possible malloc
-static exp_t malloc_atomic(exp_t s) {
-  return fncall_exp(_cycalloc_atomic_e, new List(s,NULL),DL);
-}
 // malloc something -- choose malloc routine according to the (Cyclone) type
 static exp_t malloc_exp(type_t t,exp_t s) {
-  return atomic_type(t) ? malloc_atomic(s) : malloc_ptr(s);
+  exp_t fn_e = atomic_type(t) ? _cycalloc_atomic_e : _cycalloc_e;
+  return fncall_exp_dl(fn_e,s);
+}
+// calloc something -- choose calloc routine according to the (Cyclone) type
+static exp_t calloc_exp(type_t elt_type, exp_t s, exp_t n) {
+  exp_t fn_e = atomic_type(elt_type) ? _cyccalloc_atomic_e : _cyccalloc_e;
+  return fncall_exp_dl(fn_e,s,n);
 }
 // region malloc something
 static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
-  return fncall_exp(_region_malloc_e, list(rgn,s), DL);
+  return fncall_exp_dl(_region_malloc_e,rgn,s);
 }
 // region malloc (inlined) something
 static exp_t rmalloc_inline_exp(exp_t rgn, exp_t s) {
-  return fncall_exp(_fast_region_malloc_e, list(rgn,s), DL);
-}
-// calloc something
-static exp_t calloc_exp(type_t elt_type, exp_t s, exp_t n) {
-  exp_t allocator = atomic_type(elt_type) ? _cyccalloc_atomic_e : _cyccalloc_e;
-  return fncall_exp(allocator, list(s,n), DL);
+  return fncall_exp_dl(_fast_region_malloc_e,rgn,s);
 }
 // rcalloc something
 static exp_t rcalloc_exp(exp_t rgn, exp_t s, exp_t n) {
-  return fncall_exp(_region_calloc_e, list(rgn,s,n), DL);
-}
-// throw an exception -- this is turned into a function call
-static exp_t newthrow_exp(exp_t e) {
-  return fncall_exp(_throw_e, new List(e,NULL), DL);
-}
-static exp_t newrethrow_exp(exp_t e) {
-  return fncall_exp(_rethrow_e, new List(e,NULL), DL);
+  return fncall_exp_dl(_region_calloc_e,rgn,s,n);
 }
 // throw a match exception
 static stmt_t throw_match_stmt() {
-  return exp_stmt(fncall_exp(_throw_match_e,list(),DL),DL);
+  return exp_stmt(fncall_exp_dl(_throw_match_e),DL);
 }
 
 // t*{sz} -> t? at top-level
@@ -1282,8 +1250,7 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
       if(!get_bounds_exp(bounds_one(),b))
 	fallthru; // FIX: add a way to just null-check a fat-pointer
       // ((t *)_check_null(e))
-      ptr->r = cast_it_r(new_typ,
-			 fncall_exp(_check_null_e, list(new_exp(ptr->r,0)),DL));
+      ptr->r=cast_it_r(new_typ,fncall_exp_dl(_check_null_e,new_exp(ptr->r,0)));
       ans = false;
       break;
     case &InsertChecks::NullAndFatBound: fallthru; // null check comes for free
@@ -1292,10 +1259,10 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
       type_t ta1 = typ_to_c(ta);
       exp_t  ind = index ? index : uint_exp(0,DL);
       ptr->r = cast_it_r(cstar_type(ta1,tq),
-			fncall_exp(_check_dyneither_subscript_e,
-				   list(new_exp(ptr->r,DL),
-					sizeoftype_exp(ta1,DL),
-					ind),DL));
+			fncall_exp_dl(_check_dyneither_subscript_e,
+				      new_exp(ptr->r,DL),
+				      sizeoftype_exp(ta1,DL),
+				      ind));
       ans = true;
       break;
     case &InsertChecks::NullAndThinBound(bd): 
@@ -1311,9 +1278,8 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
       if(!valid || i != 1 || !is_zeroterm_pointer_type((type_t)ptr->topt)) {
 	// ((ta1*)_fn_e(e1, esz, sizeof(ta1), ind)
 	ptr->r = cast_it_r(cstar_type(ta1,tq), 
-			   fncall_exp(fn_e, list(new_exp(ptr->r,DL),
-						 bd,sizeoftype_exp(ta1,DL),
-						 ind),DL));
+			   fncall_exp_dl(fn_e, new_exp(ptr->r,DL),
+					 bd, sizeoftype_exp(ta1,DL), ind));
 	ans = true;
       } else {
 	// special case: null-check suffices when ind is zero
@@ -1321,16 +1287,14 @@ static bool ptr_use_to_c(env_t nv, exp_t ptr, absyn_annot_t annot,
 	  if(fn_e == _check_known_subscript_null_e)
 	    // ((t *)_check_null(e))
 	    ptr->r = cast_it_r(new_typ,
-			       fncall_exp(_check_null_e, 
-					  list(new_exp(ptr->r,0)),DL));
+			       fncall_exp_dl(_check_null_e, new_exp(ptr->r,0)));
 	  ans = false;
 	} else {
 	  // get the right run-time function (always does a null-check)
 	  // *((ta2)_zero_arr_plus(e1, esz, e2)
           fn_e = getFunctionRemovePointer(&_zero_arr_plus_functionSet,ptr);
           ptr->r = cast_it_r(cstar_type(ta1,tq), 
-			     fncall_exp(fn_e, list(new_exp(ptr->r,0),
-						   bd,ind),DL));
+			     fncall_exp_dl(fn_e,new_exp(ptr->r,0),bd,ind));
 	  ans = true;
 	}
       }
@@ -1417,9 +1381,9 @@ static exp_opt_t get_varsizeexp(exp_t e) {
 	//      version had them
 	// FIX: as was try before, we execute the bound twice, and once
 	//      in a position where the flow analysis does not expect
-	return add_exp(fncall_exp(_check_times_e,
-				  list((exp_t)array_length_exp(e2),
-				       sizeoftype_exp(elt_type,DL)),DL),
+	return add_exp(fncall_exp_dl(_check_times_e,
+				     (exp_t)array_length_exp(e2),
+				     sizeoftype_exp(elt_type,DL)),
 		       signed_int_exp(PAD_BYTES,DL),DL);
       default: return NULL;
       }
@@ -1523,34 +1487,6 @@ static void push_address_stmt(stmt_t s) {
   }
 }
 
-// given a type t that admits "zero", return an expression representing
-// zero for that type.  For pointers, this is NULL.  For integral types,
-// this is the appropriate integral 0.
-static exp_t generate_zero(type_t t) {
-  exp_t res;
-  switch (compress(t)) {
-  case &PointerType(_) : res = null_exp(DL); break;
-  case &AppType(c,_): 
-    switch (c) {
-    case &IntCon(sn,Char_sz):  res = const_exp(Char_c(sn,0),DL);  break;
-    case &IntCon(sn,Short_sz): res = const_exp(Short_c(sn,0),DL); break;
-    case &EnumCon(_,_):       fallthru;
-    case &AnonEnumCon(_):     fallthru(Unsigned);
-    case &IntCon(sn,Int_sz):  fallthru(sn);
-    case &IntCon(sn,Long_sz):     res = const_exp(Int_c(sn,0),DL);      break;
-    case &IntCon(sn,LongLong_sz): res = const_exp(LongLong_c(sn,0),DL); break;
-    case &FloatCon(0): res = const_exp(Float_c("0.0F",0),DL); break;
-    case &FloatCon(1): res = const_exp(Float_c("0.0",1),DL); break;
-    case &FloatCon(i): res = const_exp(Float_c("0.0L",i),DL); break;
-    default: toc_impos("found non-zero type %s in generate_zero",typ2string(t));
-    }
-    break;
-  default: toc_impos("found non-zero type %s in generate_zero",typ2string(t));
-  }
-  res->topt = t;
-  return res;
-}
-
 // We're translating e which is of the form e_1 op= e_2 where e_1
 // involves a zero-terminated pointer and is of the form *ea or
 // ea[eb].  We need to prevent overwriting the last zero in the array.  
@@ -1587,8 +1523,8 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
       ea->annot = &InsertChecks::NoCheck_val;
     }
     exp_to_c(nv,ea); exp_to_c(nv,eb);
-    xinit = fncall_exp(_dyneither_ptr_plus_e,
-                       list(ea,sizeoftype_exp(typ_to_c(elt_type),DL),eb),DL);
+    xinit = fncall_exp_dl(_dyneither_ptr_plus_e,
+			  ea,sizeoftype_exp(typ_to_c(elt_type),DL),eb);
     break;
   default: toc_impos("found bad lhs for zero-terminated pointer assignment");
   }
@@ -1620,14 +1556,16 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
     // build y == zero and translate -- here, we need to know what
     // the element type is to generate the right zero.
     let y2_exp = varb_exp(y_bnd,DL); y2_exp->topt = deref_x->topt;
-    let zero1_exp = generate_zero(elt_type);
+    let zero1_exp = signed_int_exp(0,DL);
     let comp1_exp = prim2_exp(Eq,y2_exp,zero1_exp,DL);
+    zero1_exp->topt = sint_type;
     comp1_exp->topt = sint_type;
     exp_to_c(nv,comp1_exp);
     // build z != zero and translate
     let z_exp = varb_exp(z_bnd,DL); z_exp->topt = deref_x->topt;
-    let zero2_exp = generate_zero(elt_type);
+    let zero2_exp = signed_int_exp(0,DL);
     let comp2_exp = prim2_exp(Neq,z_exp,zero2_exp,DL);
+    zero2_exp->topt = sint_type;
     comp2_exp->topt = sint_type;
     exp_to_c(nv,comp2_exp);
     // build numelts(x) == 1 directly (no translation)
@@ -1639,7 +1577,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
                       oneexp,DL);
     // start assembling the statement
     let comp_exp = and_exp(xsize,and_exp(comp1_exp,comp2_exp,DL),DL);
-    let thr_stmt = exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL);
+    let thr_stmt = exp_stmt(fncall_exp_dl(_throw_arraybounds_e),DL);
     let xcurr = member_exp(varb_exp(x_bnd,DL),curr_sp,DL);
     xcurr = cast_it(c_ptr_type,xcurr);
     let deref_xcurr = deref_exp(xcurr,DL);
@@ -1674,8 +1612,7 @@ static raw_exp_t check_tagged_union(exp_t e1,type_t e1_c_type,
   default: impos(aprintf("expecting union but found %s in check_tagged_union",
                          typ2string(aggrtype)));
   }
-  let temp = temp_var();
-  let temp_exp = var_exp(temp,DL);
+  let $(temp,temp_exp) = temp_var_and_exp();
   let f_tag = signed_int_exp(get_member_offset(ad,f),DL);
   if (in_lhs) {
     let temp_f_tag = aggrarrow_exp(temp_exp,tag_sp,DL);
@@ -1749,8 +1686,7 @@ static raw_exp_t tagged_union_assignop(exp_t e1, type_t e1_cyc_type,
                                        opt_t<primop_t,`H> popt,
                                        exp_t e2, type_t e2_cyc_type,
                                        int tag_num, type_t member_type) {
-  let temp = temp_var();
-  exp_t temp_exp = var_exp(temp,DL);
+  let $(temp,temp_exp) = temp_var_and_exp();
   exp_t temp_val = aggrarrow_exp(temp_exp,val_sp,DL);
   exp_t temp_tag = aggrarrow_exp(temp_exp,tag_sp,DL);
   exp_t f_tag = signed_int_exp(tag_num,DL);
@@ -1793,7 +1729,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       if(is_toplevel(nv))
 	e->r = make_toplevel_dyn_arr(old_typ, zero, zero)->r;
       else
-	e->r = fncall_exp_r(_tag_dyneither_e, list(zero,zero,zero));
+	e->r = fncall_exp_r(_tag_dyneither_e,zero,zero,zero);
     } else {
       e->r = (raw_exp_t)(&zero_exp);
     }
@@ -1810,18 +1746,12 @@ static void exp_to_c(env_t nv, exp_t e) {
     case Numelts:
       exp_t arg = es->hd;
       switch (compress((type_t)arg->topt)) {
-      case &ArrayType(ArrayInfo{_,_,e2,_,_}):
-        // FIX: copy the expression e2 here.
-	// DJG: type-checker now checks e2 is a C constant??
-        e->r = e2->r;  
-	break;
       case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,nbl,bound,zt,_))):
         let eopt = get_bounds_exp(bounds_one(),bound);
         if (eopt == NULL) {
           // retrieve (last_plus_one - curr) via runtime call
 	  e->r = fncall_exp_r(_get_dyneither_size_e,
-                              list(es->hd,
-                                   sizeoftype_exp(typ_to_c(elt_type),DL)));
+			      es->hd,sizeoftype_exp(typ_to_c(elt_type),DL));
         } else {
           let e2 = eopt;
           // when zero-terminated, we have to call "strlen"
@@ -1829,7 +1759,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             exp_t function_e =
 	      getFunctionRemovePointer(&_get_zero_arr_size_functionSet,
 				       es->hd);
-            e->r = fncall_exp_r(function_e,list(es->hd,e2));
+            e->r = fncall_exp_r(function_e,es->hd,e2);
           } else if (force_type2bool(false,nbl)) {
             if (!Evexp::c_can_eval(e2))
               terr(e->loc,"can't calculate numelts");
@@ -1840,7 +1770,7 @@ static void exp_to_c(env_t nv, exp_t e) {
           }
 	}
 	break;
-      default: toc_impos("numelts primop applied to non-array %s",
+      default: toc_impos("numelts primop applied to non-pointer %s",
 			 typ2string((type_t)arg->topt));
       }
       break;
@@ -1857,9 +1787,9 @@ static void exp_to_c(env_t nv, exp_t e) {
 	exp_t e2 = es->tl->hd;
         if (eopt == NULL)
           e->r = fncall_exp_r(_dyneither_ptr_plus_e,
-                              list(e1,sizeoftype_exp(typ_to_c(elt_type),DL),e2));
+			     e1,sizeoftype_exp(typ_to_c(elt_type),DL),e2);
         else if (force_type2bool(false,zt))
-            e->r = fncall_exp(getFunctionRemovePointer(&_zero_arr_plus_functionSet,e1),list(e1,eopt,e2),DL)->r;
+	  e->r = fncall_exp_r(getFunctionRemovePointer(&_zero_arr_plus_functionSet,e1),e1,eopt,e2);
         break;
       default: break;
       }
@@ -1880,8 +1810,8 @@ static void exp_to_c(env_t nv, exp_t e) {
 			     sizeoftype_exp(typ_to_c(elt_type),DL),DL)->r;
 	} else
 	  e->r = fncall_exp_r(_dyneither_ptr_plus_e,
-                              list(e1,sizeoftype_exp(typ_to_c(elt_type),DL),
-                                   prim1_exp(Minus,e2,DL)));
+			      e1,sizeoftype_exp(typ_to_c(elt_type),DL),
+			      prim1_exp(Minus,e2,DL));
       }
       break;
     case Eq:
@@ -1955,9 +1885,9 @@ static void exp_to_c(env_t nv, exp_t e) {
         _dyneither_ptr_inplace_plus_post_e : _dyneither_ptr_inplace_plus_e;
       if (incr == PreDec || incr == PostDec)
         change = -1;
-      e->r = fncall_exp_r(fn_e, list(push_address_exp(e2),
-                                     sizeoftype_exp(typ_to_c(elt_typ),DL),
-                                     signed_int_exp(change,DL)));
+      e->r = fncall_exp_r(fn_e, push_address_exp(e2),
+			  sizeoftype_exp(typ_to_c(elt_typ),DL),
+			  signed_int_exp(change,DL));
     } else if (is_zero_pointer_type_elt(old_typ,&elt_typ)) {
       // we treat ++x specially -- this becomes
       //   if (x != 0 && *x != 0) ++x; else _throw_arraybounds()
@@ -1976,15 +1906,14 @@ static void exp_to_c(env_t nv, exp_t e) {
                                     int_exp(None,0,DL),DL),testexp,DL);
         let s = ifthenelse_stmt(testexp,
                   exp_stmt(pre_inc_exp(deref_exp(var_exp(x,DL),DL),DL),DL),
-                  exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL),DL);
+                  exp_stmt(fncall_exp_dl(_throw_arraybounds_e),DL),DL);
         s = seq_stmt(s,exp_stmt(deref_exp(var_exp(x,DL),DL),DL),DL);
         e->r = stmt_exp(declare_stmt(x,t,xexp,s,DL),DL)->r;
       } else {
         // e.g, x++ becomes _zero_arr_inplace_plus_post(x,1) (does null check)
         let fnSet = &_zero_arr_inplace_plus_post_functionSet;
         exp_t fn_e = getFunctionRemovePointer(fnSet, e2);
-        e->r = fncall_exp_r(fn_e, list(push_address_exp(e2),
-                                       signed_int_exp(1,DL)));
+        e->r = fncall_exp_r(fn_e, push_address_exp(e2), signed_int_exp(1,DL));
       }
     } else if(elt_typ == void_type && !is_lvalue(e2)) {
       lvalue_assign(e2,NULL,incr_lvalue,incr);
@@ -2051,16 +1980,16 @@ static void exp_to_c(env_t nv, exp_t e) {
         done = true;
         // FIX: Is e1 definitely still an lvalue? Probably not!!
         let fn_e = _dyneither_ptr_inplace_plus_e;
-        e->r = fncall_exp_r(fn_e,list(push_address_exp(e1),
-                                      sizeoftype_exp(typ_to_c(elt_typ),DL),
-                                      change));
+        e->r = fncall_exp_r(fn_e,push_address_exp(e1),
+			    sizeoftype_exp(typ_to_c(elt_typ),DL),
+			    change);
       } else if (is_zero_pointer_type_elt(old_typ,&elt_typ)) {
         // We're doing x += e where x is a zero-terminated pointer.
         // Make sure we don't run off the end.
         switch (popt->v) {
         case Plus:
           done = true;
-          e->r = fncall_exp_r(getFunctionRemovePointer(&_zero_arr_inplace_plus_functionSet,e1),list(e1,e2));
+          e->r = fncall_exp_r(getFunctionRemovePointer(&_zero_arr_inplace_plus_functionSet,e1),e1,e2);
           break;
         default: toc_impos("bad zero-terminated pointer arithmetic");
         }
@@ -2098,8 +2027,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     if(do_null_check(e))
       //*((t *)_check_null(e)) (cast necessary b/c void* not a function type)
       e1->r = cast_it_r(typ_to_c(e1_typ),
-			fncall_exp(_check_null_e,
-				   new List(copy_exp(e1),NULL),DL));
+			fncall_exp_dl(_check_null_e,copy_exp(e1)));
     List::iter_c(exp_to_c,nv,es);
     break;
   case &FnCall_e(e1,es,&VarargCallInfo{num_varargs,injectors,vai},_):
@@ -2112,8 +2040,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     //    t argv[num_varargs] = {es[n-num_varargs+1], ..., es[n]};
     // e1(es[0], ..., es[n-num_varargs], tag_dyneither(argv, sizeof(t), num_varargs));
     TOC_RGN(nv,r) {
-      qvar_t argv = temp_var();
-      exp_t argvexp = var_exp(argv,DL);
+      let $(argv,argvexp) = temp_var_and_exp();
       exp_t  num_varargs_exp = uint_exp(num_varargs,DL);
       type_t cva_type = typ_to_c(vai->type);
       type_t arr_type = array_type(cva_type,mt_tq,num_varargs_exp,false_type,
@@ -2128,10 +2055,10 @@ static void exp_to_c(env_t nv, exp_t e) {
 	exp_to_c(nv,es->hd);
 	new_args = new List(es->hd, new_args);
       }
-      new_args = new List(fncall_exp(_tag_dyneither_e,
-				     list(argvexp,
-					  sizeoftype_exp(cva_type,DL),
-					  num_varargs_exp), DL),
+      new_args = new List(fncall_exp_dl(_tag_dyneither_e,
+					argvexp,
+					sizeoftype_exp(cva_type,DL),
+					num_varargs_exp),
 			  new_args);
       new_args = imp_rev(new_args);
       // make the function call
@@ -2141,8 +2068,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       if(do_null_check(e))
 	// ((t *)_check_null(e1))
 	e1->r = cast_it_r(typ_to_c(e1_typ),
-			  fncall_exp(_check_null_e,
-				     new List(copy_exp(e1),NULL),DL));
+			  fncall_exp_dl(_check_null_e,copy_exp(e1)));
       stmt_t s = exp_stmt(fncall_exp(e1,new_args,DL),DL);
 
       // make the declarations and prepend them
@@ -2211,8 +2137,8 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Throw_e(e1,b):
     // throw e -> (t)(throw(e)), the latter being a function call to throw
     exp_to_c(nv,e1);
-    let nt = b ? newrethrow_exp(e1) : newthrow_exp(e1);
-    e->r = array_to_ptr_cast(typ_to_c(old_typ),nt,DL)->r;
+    exp_t fn_e = b ? _rethrow_e : _throw_e;
+    e->r = array_to_ptr_cast(typ_to_c(old_typ),fncall_exp_dl(fn_e,e1),DL)->r;
     break;
   case &NoInstantiate_e(e1): exp_to_c(nv,e1); break;
   case &Instantiate_e(e1,ts):
@@ -2258,8 +2184,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	// neither fat -- bound guaranteed in type-checker, so just check NULL
 	did_inserted_checks = true;
 	if(do_null_check(e))
-	  e->r = cast_it_r(*t,fncall_exp(_check_null_e,
-					 new List(e1,NULL),DL));
+	  e->r = cast_it_r(*t,fncall_exp_dl(_check_null_e,e1));
 	else if (unify(old_t2_c,new_typ_c))
 	  e->r = e1->r;
         // FIX: the type-checker doesn't currently allow the case
@@ -2284,8 +2209,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             //   ({ t *x = e1;
             //      _dynxxx_ptr_arr(x, sizeof(t), _get_zero_arr_size(x,n));
             //   })
-            let x = temp_var();
-            let x_exp = var_exp(x,DL);
+	    let $(x,x_exp) = temp_var_and_exp();
             exp_t arg3;
             // if what we're casting is a string constant or an array
             // variable, we can avoid computing the "size" at run-time.
@@ -2304,8 +2228,8 @@ static void exp_to_c(env_t nv, exp_t e) {
               if (valid && i != 1) 
                 arg3 = e2;
               else 
-                arg3 = fncall_exp(getFunctionRemovePointer(&_get_zero_arr_size_functionSet,e1),
-                                  list(cast_it(void_star_type(),x_exp),e2),DL);
+                arg3 = fncall_exp_dl(getFunctionRemovePointer(&_get_zero_arr_size_functionSet,e1),
+				     cast_it(void_star_type(),x_exp),e2);
               break;
             }
             if (!zt2 && !p2.elt_tq.real_const) {
@@ -2314,16 +2238,16 @@ static void exp_to_c(env_t nv, exp_t e) {
               arg3 = prim2_exp(Minus,arg3,uint_exp(1,DL),DL);
             }
             let arg2 = sizeoftype_exp(typ_to_c(p2.elt_type),DL);
-            let tg_exp = fncall_exp(_tag_dyneither_e,list(x_exp,arg2,arg3),DL);
+            let tg_exp = fncall_exp_dl(_tag_dyneither_e,x_exp,arg2,arg3);
             let s = exp_stmt(tg_exp,DL);
             s = declare_stmt(x,typ_to_c(old_t2),e1,s,DL);
             e->r = stmt_exp_r(s);
           } else
             // build the t ? struct
-            e->r = fncall_exp_r(_tag_dyneither_e,
-                                list(e1,
-                                     sizeoftype_exp(typ_to_c(p2.elt_type),DL),
-                                     e2));
+            e->r = fncall_exp_r(_tag_dyneither_e, 
+				e1,
+				sizeoftype_exp(typ_to_c(p2.elt_type),DL),
+				e2);
         }
 	break;
       case $(NULL, &_): //InsertChecks ensures not-at-toplevel and b2 is known
@@ -2342,14 +2266,13 @@ static void exp_to_c(env_t nv, exp_t e) {
 	// cast from t ? to t* or t@ -- run-time check:
 	// for t*: (t *)_untag_arr(e1, sizeof(t), new_e2)
 	// for t@: (t *)_check_null(_untag_arr(e1, sizeof(t), new_e2))
-	let ptr_exp = fncall_exp(_untag_dyneither_ptr_e,
-				 list(e1,
-                                      sizeoftype_exp(typ_to_c(p1.elt_type),DL),
-				      new_e2), DL);
+	let ptr_exp = fncall_exp_dl(_untag_dyneither_ptr_e,
+				    e1,
+				    sizeoftype_exp(typ_to_c(p1.elt_type),DL),
+				    new_e2);
 	did_inserted_checks = true;
 	if(do_null_check(e)) // DJG: redundant unless bound is 0?
-	  ptr_exp->r = fncall_exp_r(_check_null_e,
-                                    new List(copy_exp(ptr_exp), NULL));
+	  ptr_exp->r = fncall_exp_r(_check_null_e, copy_exp(ptr_exp));
 	e->r = cast_it_r(*t, ptr_exp);
 	break;
       // If p1 is zero-terminated and p2 is not, then p2 had better
@@ -2359,8 +2282,8 @@ static void exp_to_c(env_t nv, exp_t e) {
           if (is_toplevel(nv)) // FIX: move to InsertChecks
             unimp("can't coerce a ZEROTERM to a non-const NOZEROTERM pointer at toplevel");
           e->r = fncall_exp_r(_dyneither_ptr_decrease_size_e,
-                              list(e1,sizeoftype_exp(typ_to_c(p1.elt_type),DL),
-                                   uint_exp(1,DL)));
+                              e1,sizeoftype_exp(typ_to_c(p1.elt_type),DL),
+			      uint_exp(1,DL));
         }
 	break;
       }
@@ -2404,8 +2327,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     exp_to_c(nv,e1);
     // determine elt_typ after translating e1 due to the struct hack
     type_t elt_typ = typ_to_c((type_t)e1->topt); 
-    let x = temp_var();
-    let xexp = var_exp(x,DL);
+    let $(x,xexp) = temp_var_and_exp();
     exp_t lhs;
     switch(compress(elt_typ)) {
     case &ArrayType(ArrayInfo(t2,...)): 
@@ -2420,9 +2342,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     let lenvar = array_len ? (qvar_opt_t)temp_var() : NULL;
     let lenexp = array_len ? (exp_opt_t)var_exp((qvar_t)lenvar,DL) : NULL;
     exp_t      mexp;
-    if(array_len)
-      mexp = fncall_exp(_check_times_e,
-			list((exp_t)lenexp,sizeoftype_exp(elt_typ,DL)),DL);
+    if(lenexp)
+      mexp = fncall_exp_dl(_check_times_e,lenexp,sizeoftype_exp(elt_typ,DL));
     else
       mexp = sizeofexp_exp(deref_exp(xexp,DL),DL);
     // deal with the struct hack (executing the bound twice and suffering
@@ -2440,10 +2361,10 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     exp_t answer;
     if(is_dyneither_ptr(old_typ))
-      answer = fncall_exp(_tag_dyneither_e,
-			  list(copy_exp(xexp),
-			       sizeoftype_exp(elt_typ,DL),
-			       (lenexp ? lenexp : uint_exp(1,DL))),DL);
+      answer = fncall_exp_dl(_tag_dyneither_e, 
+			     copy_exp(xexp),
+			     sizeoftype_exp(elt_typ,DL),
+			     (lenexp ? lenexp : uint_exp(1,DL)));
     else
       answer = copy_exp(xexp);
     e->annot = new Dest(xexp); // RemoveAggrs puts in the assignments
@@ -2492,7 +2413,6 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  }
 	  break;
 	default: toc_impos("impossible type for offsetof tuple index");
-	  break;
 	}
 	break;
       }
@@ -2852,7 +2772,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       if (rgnopt != NULL && !no_regions) {
 	exp_t rgn = rgnopt;
 	exp_to_c(nv,rgn);
-	pexp = rcalloc_exp(rgn, sizeoftype_exp(t_c,DL), num_elts2);
+	pexp = fncall_exp_dl(_region_calloc_e, 
+			     rgn, sizeoftype_exp(t_c,DL), num_elts2);
       } else
 	pexp = calloc_exp(*topt,sizeoftype_exp(t_c,DL), num_elts2);
     } else {
@@ -2868,7 +2789,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     if (is_fat) {
       exp_t elt_sz = is_calloc ? sizeoftype_exp(t_c,DL) : uint_exp(1,DL);
-      exp_t rexp = fncall_exp(_tag_dyneither_e,list(pexp,elt_sz,num_elts2),DL);
+      exp_t rexp = fncall_exp_dl(_tag_dyneither_e,pexp,elt_sz,num_elts2);
       stmt_t s = declare_stmt((qvar_t)x, uint_type, num_elts, 
 			      exp_stmt(rexp,DL),DL);
       e->r = stmt_exp_r(s);
@@ -2891,7 +2812,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     // create the Cyclone expression for the swap.  Need to deep copy the
     // expressions since the translation to C is by side-effect, and the rhs
     // and lhs of tagged unions are translated differently.
-    let loc = e->loc;
+    let loc = e->loc;  
     let v1 = temp_var();
     let v1e = var_exp(v1,loc); v1e->topt = e1_old_typ;
     let v2 = temp_var();
@@ -2925,7 +2846,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
 
   case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem");
-  case &CompoundLit_e(_,_):   unimp("compoundlit");
+  case &CompoundLit_e(_,_):   toc_impos("compoundlit");
   case &Valueof_e(_):         toc_impos("valueof(-)");
   case &Asm_e(...):           toc_impos("__asm__");
   }
@@ -3326,7 +3247,7 @@ static stmt_t compile_decision_tree(region_t<`rgn> rgn,
         // add an extra .tag for tagged unions
         p = member_exp(member_exp(p,f,DL),tag_sp,DL); break;
         // where shouldn't really happen here.
-      case &WhereTest(_): break;
+      case &WhereTest(_):
       case &OtherTest: break;
       }
       res = new_stmt(new Switch_s(p,new_lscs,NULL),DL);
@@ -3406,14 +3327,13 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   let t = (type_t)e->topt;
   exp_to_c(nv,e);
 
-  qvar_t v     = temp_var();
-  exp_t  path  = var_exp(v,DL);
-  var_t  end_l = fresh_label();
+  let $(v,path) = temp_var_and_exp();
+  var_t end_l = fresh_label();
   TOC_RGN(nv,rgn) {
     let nv = share_env(rgn,nv);
     // for each clause, generate a test label and an entry label, and flag indicating
     // whether we've already emitted code for the rhs of the clause.
-    list_t<$(bool,var_t,var_t,switch_clause_t)@/*`rgn,`rgn*/> lscs =
+    list_t<$(bool,var_t,var_t,switch_clause_t)@> lscs =
       List::rmap_c(rgn,gen_labels,rgn,scs);
     // compile the decision tree -- generates a list of declarations and
     // a list of case bodies with associated labels and environments, as
@@ -3432,7 +3352,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
       // find the environment for this rhs.
       env_t<`rgn>* envp = find_case_env(mybodies,s);
       // skip over any case that is never called (i.e., has no envp), as it
-      // must be dead code (not reachable in the decision tree.)
+      // must be dead code (not reachable in the decision tree).
       if (envp == NULL) continue; 
       let env = *envp;
       // find the environment for the fallthru case if it's there.
@@ -3487,8 +3407,7 @@ static void local_decl_to_c(env_t nv,vardecl_t vd,stmt_t s);
 static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude);
 
 stmt_t make_npop_handler(int n) {
-  return exp_stmt(fncall_exp(_npop_handler_e,
-			     new List(uint_exp(n-1,DL),NULL), DL), DL);
+  return exp_stmt(fncall_exp_dl(_npop_handler_e,uint_exp(n-1,DL)),DL);
 }
 void do_npop_before(int n, stmt_t s) { // mutates s as necessary!
   if(n > 0)
@@ -3624,9 +3543,8 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         // NOTE:  _npop_handler has to deal with regions as well as exceptions
         type_t rh_struct_typ     = strct(_RegionHandle_sp);
         type_t rh_struct_ptr_typ = cstar_type(rh_struct_typ,mt_tq);
-        qvar_t rh_var = temp_var();
+	let $(rh_var,rh_exp) = temp_var_and_exp();
         qvar_t x_var  = vd->name;
-        exp_t  rh_exp = var_exp(rh_var,DL);
         exp_t  x_exp  = var_exp(x_var, DL);
 
 	stmt_to_c(nv,body);
@@ -3639,22 +3557,20 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           exp_t arg = address_exp(aggrarrow_exp(open_exp_opt,new "h",DL),DL);
           s->r = declare_stmt(x_var,rh_struct_ptr_typ,arg,body,DL)->r;
         } else {
-	  // { struct _RegionHandle rh = _new_region();
-	  //   struct _RegionHandle *x = &rh;
-	  //   _push_region(x);
-	  //   body;
-	  //   _pop_region(x);
-	  // }
+	  // struct _RegionHandle rh = _new_region();
+	  // struct _RegionHandle *x = &rh;
+	  // _push_region(x);
+	  // body;
+	  // _pop_region(x);
           s->r =
             declare_stmt(rh_var,rh_struct_typ,
-                         fncall_exp(_new_region_e,
-                                    new List(string_exp(qvar2string(x_var),DL),
-                                             NULL),DL),
+                         fncall_exp_dl(_new_region_e,
+				       string_exp(qvar2string(x_var),DL)),
             declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
-    	    seq_stmt(exp_stmt(fncall_exp(_push_region_e, list(x_exp), DL),DL),
-            seq_stmt(body,
-                     exp_stmt(fncall_exp(_pop_region_e,  list(x_exp), DL),DL),
-                     DL),DL),DL),DL)->r;
+    	    seq_stmt(exp_stmt(fncall_exp_dl(_push_region_e, x_exp),DL),
+            seq_stmt(body, 
+		     exp_stmt(fncall_exp_dl(_pop_region_e,x_exp), 
+			      DL),DL),DL),DL),DL)->r;
         } 
         return;
       default: impos("bad nested declaration within function");
@@ -3680,12 +3596,9 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       //   switch (e) scs
       // }
       // [Auxillary functions are defined in runtime_cyc.c]
-      qvar_t h_var = temp_var();
-      qvar_t e_var = temp_var();
-      qvar_t was_thrown_var = temp_var();
-      exp_t  h_exp = var_exp(h_var,DL);
-      exp_t  e_exp = var_exp(e_var,DL);
-      exp_t  was_thrown_exp = var_exp(was_thrown_var,DL);
+      let $(h_var,h_exp) = temp_var_and_exp();
+      let $(e_var,e_exp) = temp_var_and_exp();
+      let $(was_thrown_var,was_thrown_exp) = temp_var_and_exp();      
       type_t h_typ = strct(_handler_cons_sp);
       type_t e_typ = typ_to_c(exn_type());
       type_t was_thrown_typ = typ_to_c(sint_type);
@@ -3695,22 +3608,17 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         // translate the body
         stmt_to_c(nv,body);
         let tryandpop_stmt = seq_stmt(body,
-                                      exp_stmt(fncall_exp(_pop_handler_e,
-                                                          NULL,
-                                                          DL), DL),DL);
+				      exp_stmt(fncall_exp_dl(_pop_handler_e),
+					       DL),DL);
         let handler_stmt = new_stmt(new Switch_s(e_exp,scs,dec_tree), DL);
         // translate the switches
         stmt_to_c(nv,handler_stmt);
 
         // wrap with the conditional, declarations, and setjmp
         let setjmp_call = // setjmp(h.handler)
-          fncall_exp(setjmp_e,
-                     new List(member_exp(h_exp,handler_sp,DL), NULL),
-                     DL);
+          fncall_exp_dl(setjmp_e, member_exp(h_exp,handler_sp,DL));
         let pushhandler_call = // _pushhandler(h);
-          exp_stmt(fncall_exp(_push_handler_e,
-                              new List(address_exp(h_exp,DL), NULL),
-                              DL),DL);
+          exp_stmt(fncall_exp_dl(_push_handler_e,address_exp(h_exp,DL)),DL);
         let zero_exp = int_exp(Signed,0,DL);
         let one_exp = int_exp(Signed,1,DL);
         s->r =
@@ -3787,7 +3695,6 @@ static scope_t scope_to_c(scope_t s) {
 //   ...
 //   struct _union_Foo_mn { int tag; Tn val; };
 //   union Foo { struct _union_Foo_m1 m1; ... struct _union_Foo_mn mn; };
-
 static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d, 
                               $(struct TocState<`d>@`d,aggrdecl_t@`r2)@`r env) {
   let $(s, &ad) = *env;
@@ -4400,7 +4307,6 @@ static void init() {
     &_check_known_subscript_null_str,
     &_check_known_subscript_notnull_str,
     &_check_dyneither_subscript_str,
-    &_dyneither_ptr_str,
     &_tag_dyneither_str,
     &_untag_dyneither_ptr_str,
     &_get_dyneither_size_str,

@@ -796,7 +796,7 @@ while(Cyc_Lex_string_pos >= newsz){newsz=newsz * 2;}{
 struct _dyneither_ptr str=({unsigned int _tmpA1=(unsigned int)newsz + 1U;char*_tmpA0=_cycalloc_atomic(_check_times(_tmpA1,sizeof(char)));({{unsigned int _tmp14C=(unsigned int)newsz;unsigned int i;for(i=0;i < _tmp14C;++ i){i < sz?_tmpA0[i]=*((char*)_check_dyneither_subscript(Cyc_Lex_string_buffer,sizeof(char),(int)i)):(_tmpA0[i]='\000');}_tmpA0[_tmp14C]=0;}0;});_tag_dyneither(_tmpA0,sizeof(char),_tmpA1);});
 Cyc_Lex_string_buffer=str;};}
 # 432
-({struct _dyneither_ptr _tmpA2=_dyneither_ptr_plus(Cyc_Lex_string_buffer,sizeof(char),Cyc_Lex_string_pos);char _tmpA3=*((char*)_check_dyneither_subscript(_tmpA2,sizeof(char),0U));char _tmpA4=c;if(_get_dyneither_size(_tmpA2,sizeof(char))== 1U  && (_tmpA3 == '\000'  && _tmpA4 != '\000'))_throw_arraybounds();*((char*)_tmpA2.curr)=_tmpA4;});
+({struct _dyneither_ptr _tmpA2=_dyneither_ptr_plus(Cyc_Lex_string_buffer,sizeof(char),Cyc_Lex_string_pos);char _tmpA3=*((char*)_check_dyneither_subscript(_tmpA2,sizeof(char),0U));char _tmpA4=c;if(_get_dyneither_size(_tmpA2,sizeof(char))== 1U  && (_tmpA3 == 0  && _tmpA4 != 0))_throw_arraybounds();*((char*)_tmpA2.curr)=_tmpA4;});
 ++ Cyc_Lex_string_pos;}
 # 435
 void Cyc_Lex_store_string(struct _dyneither_ptr s){

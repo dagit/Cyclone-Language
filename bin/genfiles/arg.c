@@ -513,7 +513,7 @@ if(margin < 0)margin=0;{
 # 135
 struct _dyneither_ptr indentstr=({unsigned int _tmp11=(unsigned int)(indent + 2)+ 1U;char*_tmp10=_cycalloc_atomic(_check_times(_tmp11,sizeof(char)));({{unsigned int _tmp59=(unsigned int)(indent + 2);unsigned int i;for(i=0;i < _tmp59;++ i){_tmp10[i]='\000';}_tmp10[_tmp59]=0;}0;});_tag_dyneither(_tmp10,sizeof(char),_tmp11);});
 {unsigned int i=0U;for(0;i < indent + 1;++ i){
-({struct _dyneither_ptr _tmp6=_dyneither_ptr_plus(indentstr,sizeof(char),(int)i);char _tmp7=*((char*)_check_dyneither_subscript(_tmp6,sizeof(char),0U));char _tmp8=i == 0?'\n':' ';if(_get_dyneither_size(_tmp6,sizeof(char))== 1U  && (_tmp7 == '\000'  && _tmp8 != '\000'))_throw_arraybounds();*((char*)_tmp6.curr)=_tmp8;});}}{
+({struct _dyneither_ptr _tmp6=_dyneither_ptr_plus(indentstr,sizeof(char),(int)i);char _tmp7=*((char*)_check_dyneither_subscript(_tmp6,sizeof(char),0U));char _tmp8=i == 0?'\n':' ';if(_get_dyneither_size(_tmp6,sizeof(char))== 1U  && (_tmp7 == 0  && _tmp8 != 0))_throw_arraybounds();*((char*)_tmp6.curr)=_tmp8;});}}{
 unsigned long _tmp9=Cyc_strlen((struct _dyneither_ptr)item);
 struct _dyneither_ptr itemsep;
 if(Cyc_strlen((struct _dyneither_ptr)desc)> 0){
@@ -521,7 +521,7 @@ if(_tmp9 + 1 > indent)
 itemsep=indentstr;else{
 # 144
 struct _dyneither_ptr temp=({unsigned int _tmpE=((indent - _tmp9)+ 1)+ 1U;char*_tmpD=_cycalloc_atomic(_check_times(_tmpE,sizeof(char)));({{unsigned int _tmp58=(indent - _tmp9)+ 1;unsigned int i;for(i=0;i < _tmp58;++ i){_tmpD[i]='\000';}_tmpD[_tmp58]=0;}0;});_tag_dyneither(_tmpD,sizeof(char),_tmpE);});
-{unsigned int i=0U;for(0;i < indent - _tmp9;++ i){({struct _dyneither_ptr _tmpA=_dyneither_ptr_plus(temp,sizeof(char),(int)i);char _tmpB=*((char*)_check_dyneither_subscript(_tmpA,sizeof(char),0U));char _tmpC=' ';if(_get_dyneither_size(_tmpA,sizeof(char))== 1U  && (_tmpB == '\000'  && _tmpC != '\000'))_throw_arraybounds();*((char*)_tmpA.curr)=_tmpC;});}}
+{unsigned int i=0U;for(0;i < indent - _tmp9;++ i){({struct _dyneither_ptr _tmpA=_dyneither_ptr_plus(temp,sizeof(char),(int)i);char _tmpB=*((char*)_check_dyneither_subscript(_tmpA,sizeof(char),0U));char _tmpC=' ';if(_get_dyneither_size(_tmpA,sizeof(char))== 1U  && (_tmpB == 0  && _tmpC != 0))_throw_arraybounds();*((char*)_tmpA.curr)=_tmpC;});}}
 itemsep=temp;}}else{
 # 149
 return;}

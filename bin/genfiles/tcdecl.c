@@ -482,7 +482,7 @@ int Cyc_Absyn_qvar_cmp(struct _tuple0*,struct _tuple0*);
 struct Cyc_Absyn_Tqual Cyc_Absyn_empty_tqual(unsigned int);
 # 913
 struct Cyc_Absyn_Kind*Cyc_Absyn_force_kb(void*kb);
-# 1164
+# 1162
 struct _dyneither_ptr Cyc_Absyn_attribute2string(void*);extern char Cyc_Tcdecl_Incompatible[13U];struct Cyc_Tcdecl_Incompatible_exn_struct{char*tag;};struct Cyc_Tcdecl_Xdatatypefielddecl{struct Cyc_Absyn_Datatypedecl*base;struct Cyc_Absyn_Datatypefield*field;};
 # 38 "tcdecl.h"
 void Cyc_Tcdecl_merr(unsigned int loc,struct _dyneither_ptr*msg1,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);struct _tuple10{enum Cyc_Absyn_Scope f1;int f2;};

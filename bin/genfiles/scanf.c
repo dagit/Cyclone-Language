@@ -846,7 +846,7 @@ goto _LL54;default: _LL89: _LL8A:
 break;
 ok:
 # 640
-({struct _dyneither_ptr _tmp23=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp24=*((char*)_check_dyneither_subscript(_tmp23,sizeof(char),0U));char _tmp25=(char)c;if(_get_dyneither_size(_tmp23,sizeof(char))== 1U  && (_tmp24 == '\000'  && _tmp25 != '\000'))_throw_arraybounds();*((char*)_tmp23.curr)=_tmp25;});
+({struct _dyneither_ptr _tmp23=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp24=*((char*)_check_dyneither_subscript(_tmp23,sizeof(char),0U));char _tmp25=(char)c;if(_get_dyneither_size(_tmp23,sizeof(char))== 1U  && (_tmp24 == 0  && _tmp25 != 0))_throw_arraybounds();*((char*)_tmp23.curr)=_tmp25;});
 _IO_getc(fp);
 if(_IO_peekc(fp)== - 1){
 ++ seen_eof;
@@ -867,7 +867,7 @@ _IO_ungetc(c,fp);}
 if((flags & 8)== 0){
 unsigned long res;
 # 668
-({struct _dyneither_ptr _tmp26=p;char _tmp27=*((char*)_check_dyneither_subscript(_tmp26,sizeof(char),0U));char _tmp28='\000';if(_get_dyneither_size(_tmp26,sizeof(char))== 1U  && (_tmp27 == '\000'  && _tmp28 != '\000'))_throw_arraybounds();*((char*)_tmp26.curr)=_tmp28;});
+({struct _dyneither_ptr _tmp26=p;char _tmp27=*((char*)_check_dyneither_subscript(_tmp26,sizeof(char),0U));char _tmp28='\000';if(_get_dyneither_size(_tmp26,sizeof(char))== 1U  && (_tmp27 == 0  && _tmp28 != 0))_throw_arraybounds();*((char*)_tmp26.curr)=_tmp28;});
 if(use_strtoul)
 ({unsigned long _tmp50= strtoul(buf,0,base);res=_tmp50;});else{
 # 672
@@ -925,7 +925,7 @@ goto _LL8B;default: _LLAA: _LLAB:
 # 730
 break;
 fok:
-({struct _dyneither_ptr _tmp2C=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp2D=*((char*)_check_dyneither_subscript(_tmp2C,sizeof(char),0U));char _tmp2E=(char)c;if(_get_dyneither_size(_tmp2C,sizeof(char))== 1U  && (_tmp2D == '\000'  && _tmp2E != '\000'))_throw_arraybounds();*((char*)_tmp2C.curr)=_tmp2E;});
+({struct _dyneither_ptr _tmp2C=_dyneither_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp2D=*((char*)_check_dyneither_subscript(_tmp2C,sizeof(char),0U));char _tmp2E=(char)c;if(_get_dyneither_size(_tmp2C,sizeof(char))== 1U  && (_tmp2D == 0  && _tmp2E != 0))_throw_arraybounds();*((char*)_tmp2C.curr)=_tmp2E;});
 _IO_getc(fp);
 if(_IO_peekc(fp)== - 1){
 ++ seen_eof;
@@ -951,7 +951,7 @@ _IO_ungetc(c,fp);}
 # 763
 if((flags & 8)== 0){
 double res;
-({struct _dyneither_ptr _tmp2F=p;char _tmp30=*((char*)_check_dyneither_subscript(_tmp2F,sizeof(char),0U));char _tmp31='\000';if(_get_dyneither_size(_tmp2F,sizeof(char))== 1U  && (_tmp30 == '\000'  && _tmp31 != '\000'))_throw_arraybounds();*((char*)_tmp2F.curr)=_tmp31;});
+({struct _dyneither_ptr _tmp2F=p;char _tmp30=*((char*)_check_dyneither_subscript(_tmp2F,sizeof(char),0U));char _tmp31='\000';if(_get_dyneither_size(_tmp2F,sizeof(char))== 1U  && (_tmp30 == 0  && _tmp31 != 0))_throw_arraybounds();*((char*)_tmp2F.curr)=_tmp31;});
 ({double _tmp5A= atof((const char*)buf);res=_tmp5A;});
 if(flags & 1)
 ({double _tmp5B=res;*Cyc_va_arg_double_ptr(*((void**)_check_dyneither_subscript(ap,sizeof(void*),0U)))=_tmp5B;});else{

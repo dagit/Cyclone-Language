@@ -496,7 +496,7 @@ return;}
 void Cyc_Buffer_add_char(struct Cyc_Buffer_t*b,char c){
 int pos=(int)b->position;
 if(pos >= b->length)Cyc_Buffer_resize(b,1U);
-({struct _dyneither_ptr _tmp1=_dyneither_ptr_plus(b->buffer,sizeof(char),pos);char _tmp2=*((char*)_check_dyneither_subscript(_tmp1,sizeof(char),0U));char _tmp3=c;if(_get_dyneither_size(_tmp1,sizeof(char))== 1U  && (_tmp2 == '\000'  && _tmp3 != '\000'))_throw_arraybounds();*((char*)_tmp1.curr)=_tmp3;});
+({struct _dyneither_ptr _tmp1=_dyneither_ptr_plus(b->buffer,sizeof(char),pos);char _tmp2=*((char*)_check_dyneither_subscript(_tmp1,sizeof(char),0U));char _tmp3=c;if(_get_dyneither_size(_tmp1,sizeof(char))== 1U  && (_tmp2 == 0  && _tmp3 != 0))_throw_arraybounds();*((char*)_tmp1.curr)=_tmp3;});
 b->position=(unsigned int)(pos + 1);
 return;}
 # 100

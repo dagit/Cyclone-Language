@@ -430,7 +430,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 
 # 1 "xp.cyc"
- static char Cyc_rcsid[49U]="$Id: xp.c,v 1.10 2004-07-29 04:29:34 djg Exp $";
+ static char Cyc_rcsid[49U]="$Id: xp.c,v 1.11 2004-07-30 22:08:58 djg Exp $";
 # 4 "ctype.h"
 int isalnum(int);
 # 22
@@ -729,17 +729,17 @@ base >= 2  && base <= 36?0:({struct _dyneither_ptr _tmp4C=({const char*_tmp11="b
 do{
 int r=Cyc_XP_quotient(n,x,x,base);
 i < size?0:({struct _dyneither_ptr _tmp4D=({const char*_tmp13="i < size";_tag_dyneither(_tmp13,sizeof(char),9U);});((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(_tmp4D,({const char*_tmp14="xp.cyc";_tag_dyneither(_tmp14,sizeof(char),7U);}),275U);});
-({struct _dyneither_ptr _tmp15=_dyneither_ptr_plus(str,sizeof(char),i ++);char _tmp16=*((char*)_check_dyneither_subscript(_tmp15,sizeof(char),0U));char _tmp17=*((const char*)_check_dyneither_subscript(Cyc_digits,sizeof(char),r));if(_get_dyneither_size(_tmp15,sizeof(char))== 1U  && (_tmp16 == '\000'  && _tmp17 != '\000'))_throw_arraybounds();*((char*)_tmp15.curr)=_tmp17;});
+({struct _dyneither_ptr _tmp15=_dyneither_ptr_plus(str,sizeof(char),i ++);char _tmp16=*((char*)_check_dyneither_subscript(_tmp15,sizeof(char),0U));char _tmp17=*((const char*)_check_dyneither_subscript(Cyc_digits,sizeof(char),r));if(_get_dyneither_size(_tmp15,sizeof(char))== 1U  && (_tmp16 == 0  && _tmp17 != 0))_throw_arraybounds();*((char*)_tmp15.curr)=_tmp17;});
 while(n > 1  && *((unsigned char*)_check_dyneither_subscript(x,sizeof(unsigned char),n - 1))== 0){
 -- n;}}while(
 n > 1  || *((unsigned char*)_check_dyneither_subscript(x,sizeof(unsigned char),0))!= 0);
 i < size?0:({struct _dyneither_ptr _tmp4E=({const char*_tmp18="i < size";_tag_dyneither(_tmp18,sizeof(char),9U);});((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(_tmp4E,({const char*_tmp19="xp.cyc";_tag_dyneither(_tmp19,sizeof(char),7U);}),280U);});
-({struct _dyneither_ptr _tmp1A=_dyneither_ptr_plus(str,sizeof(char),i);char _tmp1B=*((char*)_check_dyneither_subscript(_tmp1A,sizeof(char),0U));char _tmp1C='\000';if(_get_dyneither_size(_tmp1A,sizeof(char))== 1U  && (_tmp1B == '\000'  && _tmp1C != '\000'))_throw_arraybounds();*((char*)_tmp1A.curr)=_tmp1C;});
+({struct _dyneither_ptr _tmp1A=_dyneither_ptr_plus(str,sizeof(char),i);char _tmp1B=*((char*)_check_dyneither_subscript(_tmp1A,sizeof(char),0U));char _tmp1C='\000';if(_get_dyneither_size(_tmp1A,sizeof(char))== 1U  && (_tmp1B == 0  && _tmp1C != 0))_throw_arraybounds();*((char*)_tmp1A.curr)=_tmp1C;});
 {
 int j;
 for(j=0;j < -- i;++ j){
 char c=*((char*)_check_dyneither_subscript(str,sizeof(char),j));
-({struct _dyneither_ptr _tmp1D=_dyneither_ptr_plus(str,sizeof(char),j);char _tmp1E=*((char*)_check_dyneither_subscript(_tmp1D,sizeof(char),0U));char _tmp1F=*((char*)_check_dyneither_subscript(str,sizeof(char),i));if(_get_dyneither_size(_tmp1D,sizeof(char))== 1U  && (_tmp1E == '\000'  && _tmp1F != '\000'))_throw_arraybounds();*((char*)_tmp1D.curr)=_tmp1F;});
-({struct _dyneither_ptr _tmp20=_dyneither_ptr_plus(str,sizeof(char),i);char _tmp21=*((char*)_check_dyneither_subscript(_tmp20,sizeof(char),0U));char _tmp22=c;if(_get_dyneither_size(_tmp20,sizeof(char))== 1U  && (_tmp21 == '\000'  && _tmp22 != '\000'))_throw_arraybounds();*((char*)_tmp20.curr)=_tmp22;});}}
+({struct _dyneither_ptr _tmp1D=_dyneither_ptr_plus(str,sizeof(char),j);char _tmp1E=*((char*)_check_dyneither_subscript(_tmp1D,sizeof(char),0U));char _tmp1F=*((char*)_check_dyneither_subscript(str,sizeof(char),i));if(_get_dyneither_size(_tmp1D,sizeof(char))== 1U  && (_tmp1E == 0  && _tmp1F != 0))_throw_arraybounds();*((char*)_tmp1D.curr)=_tmp1F;});
+({struct _dyneither_ptr _tmp20=_dyneither_ptr_plus(str,sizeof(char),i);char _tmp21=*((char*)_check_dyneither_subscript(_tmp20,sizeof(char),0U));char _tmp22=c;if(_get_dyneither_size(_tmp20,sizeof(char))== 1U  && (_tmp21 == 0  && _tmp22 != 0))_throw_arraybounds();*((char*)_tmp20.curr)=_tmp22;});}}
 # 290
 return str;}

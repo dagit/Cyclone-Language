@@ -501,7 +501,7 @@ void*Cyc_Absyn_string_type(void*rgn);
 extern void*Cyc_Absyn_fat_bound_type;
 # 988
 void*Cyc_Absyn_fatptr_type(void*t,void*rgn,struct Cyc_Absyn_Tqual tq,void*zeroterm);
-# 1178
+# 1176
 struct _tuple0*Cyc_Absyn_binding2qvar(void*);struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 62 "absynpp.h"
 struct _dyneither_ptr Cyc_Absynpp_typ2string(void*);

@@ -574,34 +574,34 @@ void*Cyc_Absyn_bounds_one();
 void*Cyc_Absyn_pointer_type(struct Cyc_Absyn_PtrInfo);
 # 977
 void*Cyc_Absyn_atb_type(void*t,void*rgn,struct Cyc_Absyn_Tqual tq,void*b,void*zero_term);
-# 1001
+# 999
 void*Cyc_Absyn_datatype_type(union Cyc_Absyn_DatatypeInfo,struct Cyc_List_List*args);
-# 1003
+# 1001
 void*Cyc_Absyn_aggr_type(union Cyc_Absyn_AggrInfo,struct Cyc_List_List*args);
-# 1006
+# 1004
 struct Cyc_Absyn_Exp*Cyc_Absyn_new_exp(void*,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_New_exp(struct Cyc_Absyn_Exp*rgn_handle,struct Cyc_Absyn_Exp*,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_copy_exp(struct Cyc_Absyn_Exp*);
 struct Cyc_Absyn_Exp*Cyc_Absyn_const_exp(union Cyc_Absyn_Cnst,unsigned int);
-# 1016
+# 1014
 struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned int,unsigned int);
-# 1023
+# 1021
 struct Cyc_Absyn_Exp*Cyc_Absyn_varb_exp(void*,unsigned int);
-# 1025
+# 1023
 struct Cyc_Absyn_Exp*Cyc_Absyn_pragma_exp(struct _dyneither_ptr s,unsigned int loc);
 struct Cyc_Absyn_Exp*Cyc_Absyn_primop_exp(enum Cyc_Absyn_Primop,struct Cyc_List_List*es,unsigned int);
-# 1029
+# 1027
 struct Cyc_Absyn_Exp*Cyc_Absyn_swap_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,unsigned int);
-# 1039
+# 1037
 struct Cyc_Absyn_Exp*Cyc_Absyn_assignop_exp(struct Cyc_Absyn_Exp*,struct Cyc_Core_Opt*,struct Cyc_Absyn_Exp*,unsigned int);
-# 1041
+# 1039
 struct Cyc_Absyn_Exp*Cyc_Absyn_increment_exp(struct Cyc_Absyn_Exp*,enum Cyc_Absyn_Incrementor,unsigned int);
-# 1046
+# 1044
 struct Cyc_Absyn_Exp*Cyc_Absyn_conditional_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_and_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_or_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_seq_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,unsigned int);
-# 1052
+# 1050
 struct Cyc_Absyn_Exp*Cyc_Absyn_throw_exp(struct Cyc_Absyn_Exp*,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_rethrow_exp(struct Cyc_Absyn_Exp*,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_noinstantiate_exp(struct Cyc_Absyn_Exp*,unsigned int);
@@ -612,27 +612,27 @@ struct Cyc_Absyn_Exp*Cyc_Absyn_sizeoftype_exp(void*t,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_sizeofexp_exp(struct Cyc_Absyn_Exp*e,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_offsetof_exp(void*,struct Cyc_List_List*,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_deref_exp(struct Cyc_Absyn_Exp*,unsigned int);
-# 1064
+# 1062
 struct Cyc_Absyn_Exp*Cyc_Absyn_subscript_exp(struct Cyc_Absyn_Exp*,struct Cyc_Absyn_Exp*,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_tuple_exp(struct Cyc_List_List*,unsigned int);
-# 1070
+# 1068
 struct Cyc_Absyn_Exp*Cyc_Absyn_valueof_exp(void*,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_asm_exp(int volatile_kw,struct _dyneither_ptr body,unsigned int);
 struct Cyc_Absyn_Exp*Cyc_Absyn_extension_exp(struct Cyc_Absyn_Exp*,unsigned int);
-# 1111
+# 1109
 struct Cyc_Absyn_Decl*Cyc_Absyn_alias_decl(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Vardecl*,struct Cyc_Absyn_Exp*,unsigned int);
 struct Cyc_Absyn_Vardecl*Cyc_Absyn_new_vardecl(unsigned int varloc,struct _tuple2*x,void*t,struct Cyc_Absyn_Exp*init);
-# 1158
+# 1156
 struct Cyc_Absyn_Aggrfield*Cyc_Absyn_lookup_field(struct Cyc_List_List*,struct _dyneither_ptr*);
-# 1160
+# 1158
 struct Cyc_Absyn_Aggrfield*Cyc_Absyn_lookup_decl_field(struct Cyc_Absyn_Aggrdecl*,struct _dyneither_ptr*);struct _tuple12{struct Cyc_Absyn_Tqual f1;void*f2;};
-# 1162
+# 1160
 struct _tuple12*Cyc_Absyn_lookup_tuple_field(struct Cyc_List_List*,int);
-# 1164
+# 1162
 struct _dyneither_ptr Cyc_Absyn_attribute2string(void*);
-# 1166
+# 1164
 int Cyc_Absyn_fntype_att(void*);
-# 1172
+# 1170
 struct Cyc_Absyn_Aggrdecl*Cyc_Absyn_get_known_aggrdecl(union Cyc_Absyn_AggrInfo);struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 53 "absynpp.h"
 void Cyc_Absynpp_set_params(struct Cyc_Absynpp_Params*fs);
@@ -3567,7 +3567,7 @@ void Cyc_Tcutil_rewrite_temp_tvar(struct Cyc_Absyn_Tvar*t){
 ({struct Cyc_String_pa_PrintArg_struct _tmp513=({struct Cyc_String_pa_PrintArg_struct _tmp9DB;_tmp9DB.tag=0U,_tmp9DB.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*t->name);_tmp9DB;});void*_tmp511[1U];_tmp511[0]=& _tmp513;({struct _dyneither_ptr _tmpBEA=({const char*_tmp512="%s";_tag_dyneither(_tmp512,sizeof(char),3U);});Cyc_printf(_tmpBEA,_tag_dyneither(_tmp511,sizeof(void*),1U));});});
 if(!Cyc_Tcutil_is_temp_tvar(t))return;{
 struct _dyneither_ptr _tmp514=({struct _dyneither_ptr _tmpBEB=({const char*_tmp51A="`";_tag_dyneither(_tmp51A,sizeof(char),2U);});Cyc_strconcat(_tmpBEB,(struct _dyneither_ptr)*t->name);});
-({struct _dyneither_ptr _tmp515=_dyneither_ptr_plus(_tmp514,sizeof(char),1);char _tmp516=*((char*)_check_dyneither_subscript(_tmp515,sizeof(char),0U));char _tmp517='t';if(_get_dyneither_size(_tmp515,sizeof(char))== 1U  && (_tmp516 == '\000'  && _tmp517 != '\000'))_throw_arraybounds();*((char*)_tmp515.curr)=_tmp517;});
+({struct _dyneither_ptr _tmp515=_dyneither_ptr_plus(_tmp514,sizeof(char),1);char _tmp516=*((char*)_check_dyneither_subscript(_tmp515,sizeof(char),0U));char _tmp517='t';if(_get_dyneither_size(_tmp515,sizeof(char))== 1U  && (_tmp516 == 0  && _tmp517 != 0))_throw_arraybounds();*((char*)_tmp515.curr)=_tmp517;});
 ({struct _dyneither_ptr*_tmpBEC=({unsigned int _tmp519=1;struct _dyneither_ptr*_tmp518=_cycalloc(_check_times(_tmp519,sizeof(struct _dyneither_ptr)));_tmp518[0]=(struct _dyneither_ptr)_tmp514;_tmp518;});t->name=_tmpBEC;});};}
 # 3174
 static struct _tuple10*Cyc_Tcutil_fndecl2type_f(struct _tuple10*x){

@@ -737,8 +737,8 @@ int _tmp24=0;
 for(0;_tmp23 < _tmp18;++ _tmp23){
 char _tmp25=*((const char*)_check_dyneither_subscript(s,sizeof(char),_tmp23));
 if(_tmp25 == '\''  || Cyc_is_other_special(_tmp25))
-({struct _dyneither_ptr _tmp26=_dyneither_ptr_plus(s2,sizeof(char),_tmp24 ++);char _tmp27=*((char*)_check_dyneither_subscript(_tmp26,sizeof(char),0U));char _tmp28='\\';if(_get_dyneither_size(_tmp26,sizeof(char))== 1U  && (_tmp27 == '\000'  && _tmp28 != '\000'))_throw_arraybounds();*((char*)_tmp26.curr)=_tmp28;});
-({struct _dyneither_ptr _tmp29=_dyneither_ptr_plus(s2,sizeof(char),_tmp24 ++);char _tmp2A=*((char*)_check_dyneither_subscript(_tmp29,sizeof(char),0U));char _tmp2B=_tmp25;if(_get_dyneither_size(_tmp29,sizeof(char))== 1U  && (_tmp2A == '\000'  && _tmp2B != '\000'))_throw_arraybounds();*((char*)_tmp29.curr)=_tmp2B;});}
+({struct _dyneither_ptr _tmp26=_dyneither_ptr_plus(s2,sizeof(char),_tmp24 ++);char _tmp27=*((char*)_check_dyneither_subscript(_tmp26,sizeof(char),0U));char _tmp28='\\';if(_get_dyneither_size(_tmp26,sizeof(char))== 1U  && (_tmp27 == 0  && _tmp28 != 0))_throw_arraybounds();*((char*)_tmp26.curr)=_tmp28;});
+({struct _dyneither_ptr _tmp29=_dyneither_ptr_plus(s2,sizeof(char),_tmp24 ++);char _tmp2A=*((char*)_check_dyneither_subscript(_tmp29,sizeof(char),0U));char _tmp2B=_tmp25;if(_get_dyneither_size(_tmp29,sizeof(char))== 1U  && (_tmp2A == 0  && _tmp2B != 0))_throw_arraybounds();*((char*)_tmp29.curr)=_tmp2B;});}
 # 212
 return(struct _dyneither_ptr)s2;};}
 # 214

@@ -986,8 +986,6 @@ namespace Absyn {
   extern type_t cstar_type(type_t t, tqual_t tq); 
   // t?`r
   extern type_t fatptr_type(type_t t, type_t rgn, tqual_t tq, booltype_t zeroterm);
-  // void*
-  extern type_t void_star_type();
   // structs
   extern type_t strct(var_t  name);
   extern type_t strctq(qvar_t name);

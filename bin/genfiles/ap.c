@@ -430,7 +430,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 
 # 1 "ap.cyc"
- static char Cyc_rcsid[52U]="$Id: ap.c,v 1.10 2004-07-29 04:29:26 djg Exp $";
+ static char Cyc_rcsid[52U]="$Id: ap.c,v 1.11 2004-07-30 22:07:50 djg Exp $";
 # 22 "ctype.h"
 int isspace(int);struct _tuple0{int quot;int rem;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 300 "cycboot.h"
@@ -862,7 +862,7 @@ if(x->sign == - 1)
 ({struct _dyneither_ptr _tmpCF=({unsigned int _tmp46=x->ndigits * sizeof(unsigned char);_tag_dyneither(_cycalloc_atomic(_tmp46),1U,_tmp46);});q=_tmpCF;});
 ((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned int,unsigned int))Cyc__memcpy)(q,(struct _dyneither_ptr)x->digits,x->ndigits / sizeof(*((unsigned char*)(x->digits).curr))+ (x->ndigits % sizeof(*((unsigned char*)(x->digits).curr))== 0?0: 1),sizeof(*((unsigned char*)(x->digits).curr)));
 if(x->sign == - 1){
-({struct _dyneither_ptr _tmp47=_dyneither_ptr_plus(str,sizeof(char),0);char _tmp48=*((char*)_check_dyneither_subscript(_tmp47,sizeof(char),0U));char _tmp49='-';if(_get_dyneither_size(_tmp47,sizeof(char))== 1U  && (_tmp48 == '\000'  && _tmp49 != '\000'))_throw_arraybounds();*((char*)_tmp47.curr)=_tmp49;});
+({struct _dyneither_ptr _tmp47=_dyneither_ptr_plus(str,sizeof(char),0);char _tmp48=*((char*)_check_dyneither_subscript(_tmp47,sizeof(char),0U));char _tmp49='-';if(_get_dyneither_size(_tmp47,sizeof(char))== 1U  && (_tmp48 == 0  && _tmp49 != 0))_throw_arraybounds();*((char*)_tmp47.curr)=_tmp49;});
 ({struct _dyneither_ptr _tmpD3=_dyneither_ptr_plus(str,sizeof(char),1);int _tmpD2=size - 1;int _tmpD1=base;int _tmpD0=x->ndigits;Cyc_XP_tostr(_tmpD3,_tmpD2,_tmpD1,_tmpD0,q);});}else{
 # 390
 Cyc_XP_tostr(str,size,base,x->ndigits,q);}
