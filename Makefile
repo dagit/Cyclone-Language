@@ -171,7 +171,10 @@ cmp:
               || echo $(XS) lib/nogc.c CHANGED
 	@test ! -e lib/cyc_include.h\
 	      || cmp -s bin/cyc-lib/cyc_include.h lib/cyc_include.h\
-              || echo $(XS) cyc-lib/cyc_include.h CHANGED
+              || echo $(XS) bin/cyc-lib/cyc_include.h CHANGED
+	@test ! -e lib/libc.cys\
+	      || cmp -s bin/cyc-lib/libc.cys lib/libc.cys\
+              || echo $(XS) bin/cyc-lib/libc.cys CHANGED
 
 # This target updates what is in bin/genfiles and include.
 # It would be "dangerous" to invoke this target if we did not have 
@@ -219,6 +222,10 @@ ifeq ($(UPDATEARCH),$(ARCH))
                || cmp -s lib/cyc_include.h bin/cyc-lib/cyc_include.h\
                || (echo UPDATING cyc-lib/cyc_include.h;\
                  cp lib/cyc_include.h bin/cyc-lib/cyc_include.h)
+	@test ! -e lib/libc.cys\
+               || cmp -s lib/libc.cys bin/cyc-lib/libc.cys\
+               || (echo UPDATING cyc-lib/libc.cys;\
+                 cp lib/libc.cys bin/cyc-lib/libc.cys)
 endif
 	@if [ "$(UPDATEARCH)" = "$(PATCH_ARCH)" ]; then\
 	  for arch in $(ALL_ARCHS); do\

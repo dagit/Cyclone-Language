@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c i386-unknown-bsdi3.1/lib/cycstubs.c
 *** i686-unknown-linux/lib/cycstubs.c	Fri Feb  8 15:19:24 2002
---- i386-unknown-bsdi3.1/lib/cycstubs.c	Mon Feb 11 11:14:32 2002
+--- i386-unknown-bsdi3.1/lib/cycstubs.c	Mon Feb 11 11:50:56 2002
 ***************
 *** 285,319 ****
   unsigned int),0)));else{return open_without_mode(string_to_Cstring(s),i);}}struct
@@ -109,7 +109,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c i386-unknown-bsdi3.1
   filename),buf);}int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode){
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1/lib/execinfo.c
 *** i686-unknown-linux/lib/execinfo.c	Fri Feb  8 15:19:24 2002
---- i386-unknown-bsdi3.1/lib/execinfo.c	Mon Feb 11 11:14:33 2002
+--- i386-unknown-bsdi3.1/lib/execinfo.c	Mon Feb 11 11:50:56 2002
 ***************
 *** 256,334 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
@@ -218,7 +218,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-bsdi3.1
 ! sizeof(char),42);_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/lib/getopt.c
 *** i686-unknown-linux/lib/getopt.c	Fri Feb  8 15:19:24 2002
---- i386-unknown-bsdi3.1/lib/getopt.c	Mon Feb 11 11:14:33 2002
+--- i386-unknown-bsdi3.1/lib/getopt.c	Mon Feb 11 11:50:56 2002
 ***************
 *** 271,284 ****
   quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};struct _tagged_arr Cyc_Std_getenv(
@@ -249,7 +249,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-bsdi3.1/l
   unsigned int,unsigned int);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-bsdi3.1/src/buildlib.c
 *** i686-unknown-linux/src/buildlib.c	Fri Feb  8 15:19:25 2002
---- i386-unknown-bsdi3.1/src/buildlib.c	Mon Feb 11 11:14:33 2002
+--- i386-unknown-bsdi3.1/src/buildlib.c	Mon Feb 11 11:50:56 2002
 ***************
 *** 583,608 ****
   struct Cyc_Std__Div{int quot;int rem;};struct Cyc_Std__Ldiv{int quot;int rem;};int Cyc_Std_system(
