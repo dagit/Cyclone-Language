@@ -3317,7 +3317,6 @@ hstub {
   //  extern "C" size_t mbstowcs(wchar_t *restrict, const char *restrict, size_t);
   //  extern "C" int mbtowc(wchar_t *restrict, const char *restrict, size_t);
   //  extern "C" char *mktemp(char *); // (LEGACY)
-  //  extern "C" int mkstemp(char *);
   //  extern "C" int posix_memalign(void **, size_t, size_t);
   //  extern "C" int posix_openpt(int);
   //  extern "C" char *ptsname(int);
@@ -3418,6 +3417,11 @@ hstub lldiv {
 }
 hstub lrand48 {
   extern "C" long lrand48(void);
+}
+hstub mkstemp {
+  // must be at least 6 chars long, with the last 6 ending in XXXXXX.
+  // The C code checks this, so we can use a more liberal Cyclone type.
+  extern "C" int mkstemp(char @);
 }
 hstub mrand48 {
   extern "C" long mrand48(void);
