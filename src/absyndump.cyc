@@ -405,19 +405,8 @@ void dumpatts(attributes_t atts) {
   }
 }
 
-bool next_is_pointer(list_t<type_modifier_t> tms) {
-  if (tms==NULL) return false;
-  switch (tms->hd) {
-  case &Pointer_mod(_,_): return true;
-  default: return false;
-  }
-}
-
 static void dumprgn(type_t t) {
-  switch (Tcutil::compress(t)) {
-  case &HeapRgn: dump("`H"); break;
-  default: dumpntyp(t); break;
-  }
+  dumpntyp(t);
 }
 
 static $(list_t<type_t>, list_t<type_t>) effects_split(type_t t) {

@@ -1660,7 +1660,6 @@ struct Cyc_Absyn_Vardecl*vd=({struct Cyc_Absyn_Vardecl*_tmpF8=_cycalloc(sizeof(*
 void*_tmp1FE=t;void*_tmp1FD=_tmpF0;struct Cyc_Absyn_Tqual _tmp1FC=Cyc_Absyn_empty_tqual(0);Cyc_Absyn_at_typ(_tmp1FE,_tmp1FD,_tmp1FC,Cyc_Absyn_false_conref);});_tmpF8->type=_tmp1FF;});_tmpF8->initializer=0;_tmpF8->rgn=_tmpF0;_tmpF8->attributes=0;_tmpF8->escapes=0;_tmpF8;});
 # 569
 _tmp10C->fn_vardecl=vd;{
-# 571
 struct Cyc_Tcenv_Fenv*old_fenv=(struct Cyc_Tcenv_Fenv*)_check_null(_tmp7C->le);
 ({struct Cyc_Tcenv_Fenv*_tmp200=Cyc_Tcenv_nested_fenv(_tmp132->loc,old_fenv,_tmp10C);_tmp7C->le=_tmp200;});
 Cyc_Tcstmt_tcStmt(_tmp7C,_tmp10C->body,0);
@@ -1676,9 +1675,9 @@ return;};};};}case 9: _LL47: _tmp10E=((struct Cyc_Absyn_Namespace_d_Absyn_Raw_de
 ({struct _dyneither_ptr _tmp205=({const char*_tmpFD="enum";_tag_dyneither(_tmpFD,sizeof(char),5);});unimp_msg_part=_tmp205;});goto _LL3C;case 8: _LL51: _LL52:
 ({struct _dyneither_ptr _tmp206=({const char*_tmpFE="typedef";_tag_dyneither(_tmpFE,sizeof(char),8);});unimp_msg_part=_tmp206;});goto _LL3C;case 11: _LL53: _LL54:
 ({struct _dyneither_ptr _tmp207=({const char*_tmpFF="extern \"C\"";_tag_dyneither(_tmpFF,sizeof(char),11);});unimp_msg_part=_tmp207;});goto _LL3C;case 12: _LL55: _LL56:
-# 587
+# 586
 ({struct _dyneither_ptr _tmp208=({const char*_tmp100="extern \"C include\"";_tag_dyneither(_tmp100,sizeof(char),19);});unimp_msg_part=_tmp208;});goto _LL3C;case 13: _LL57: _LL58:
 ({struct _dyneither_ptr _tmp209=({const char*_tmp101="__cyclone_port_on__";_tag_dyneither(_tmp101,sizeof(char),20);});unimp_msg_part=_tmp209;});goto _LL3C;default: _LL59: _LL5A:
 ({struct _dyneither_ptr _tmp20A=({const char*_tmp102="__cyclone_port_off__";_tag_dyneither(_tmp102,sizeof(char),21);});unimp_msg_part=_tmp20A;});goto _LL3C;}_LL3C:;}
-# 591
+# 590
 (int)_throw(({struct Cyc_String_pa_PrintArg_struct _tmp113;_tmp113.tag=0;_tmp113.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)unimp_msg_part);({void*_tmp111[1]={& _tmp113};({struct _dyneither_ptr _tmp20B=({const char*_tmp112="tcStmt: nested %s declarations unimplemented";_tag_dyneither(_tmp112,sizeof(char),45);});((void*(*)(struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Tcutil_impos)(_tmp20B,_tag_dyneither(_tmp111,sizeof(void*),1));});});}));}}_LLA:;}

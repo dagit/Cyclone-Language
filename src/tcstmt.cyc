@@ -567,7 +567,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
                                            false_conref),
                                     NULL, curr_bl, NULL, false};
         fd->fn_vardecl = vd;
-	//        te = add_local_var(decl_rgn,d->loc,te,vd);
         fenv_t old_fenv = (fenv_t)te->le;
         te->le = nested_fenv(d->loc,old_fenv,fd);
         tcStmt(te,fd->body,false);

@@ -2504,8 +2504,7 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2, bool @alias_coercion) {
     return true;
   } else {
     // check if we can do an alias coercion; if so, make sure it otherwise
-    // typechecks before performing the coercion (for better error
-    // reporting).
+    // typechecks before performing the coercion (for better error reporting).
     if (can_insert_alias(e,t1,t2,e->loc)) {
       if (warn_alias_coerce)
 	warn(e->loc,"implicit alias coercion for %s:%s to %s",
