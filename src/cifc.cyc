@@ -24,6 +24,7 @@
 #include "warn.h"
 #include "tctyp.h"
 #include "tcutil.h"
+#include "attributes.h"
 #include <string.h>
 
 using Absyn;
@@ -167,14 +168,6 @@ static bool c_types_ok(seg_t loc, tenv_t te, type_t ctyp, type_t cyctyp) {
       Absynpp::typ2string(u_typ)); */
 }
 
-// Merge two attribute lists into a freshly-allocated list.  
-static attributes_t merge_attributes(attributes_t a1, attributes_t a2) {
-  attributes_t x = NULL;
-  for (_ a = a1; a != NULL; a = a->tl)
-    if (!List::exists_c(equal_att,a->hd,a2)) x = new List(a->hd,x);
-  return List::append(x,List::copy(a2));
-}
-
 // Merges a C declaration with a representation-compatible Cyclone
 // one.  If successful, [c_decl] is side-effected to be changed
 // appropriately.  Otherwise it is left alone.
@@ -191,7 +184,7 @@ void merge_sys_user_decl(seg_t loc, tenv_t te, bool is_buildlib,
     else {
       // Copy the user type, qualifier, and attributes to the C version.
       if (ud->attributes != NULL)
-	cd->attributes = merge_attributes(cd->attributes,ud->attributes);
+	cd->attributes = Atts::merge_attributes(cd->attributes,ud->attributes);
       cd->type = ud->type;
       cd->tq = ud->tq;
     }
@@ -219,7 +212,7 @@ void merge_sys_user_decl(seg_t loc, tenv_t te, bool is_buildlib,
 	let old_tvars = fi.tvars;
 	Tctyp::check_valid_toplevel_type(loc, te, ud->type);
 	if (cd->i.attributes != NULL)
-	  fi.attributes = merge_attributes(fi.attributes,cd->i.attributes);
+	  fi.attributes = Atts::merge_attributes(fi.attributes,cd->i.attributes);
 	cd->i = fi;
 	break;
       default: err2(0,"oops!\n");
@@ -273,8 +266,8 @@ void merge_sys_user_decl(seg_t loc, tenv_t te, bool is_buildlib,
 				 "field %s",Absynpp::typ2string(ufield->type)));
 	    }
 	    if (ufield->attributes != NULL)
-	      cfield->attributes = merge_attributes(cfield->attributes,
-						    ufield->attributes);
+	      cfield->attributes = Atts::merge_attributes(cfield->attributes,
+							  ufield->attributes);
 	    // Copy the user type, qualifier, and requires clause to the C version.
 	    cfield->type = ufield->type;
 	    cfield->tq = ufield->tq;
@@ -331,7 +324,7 @@ void merge_sys_user_decl(seg_t loc, tenv_t te, bool is_buildlib,
       cd->defn = ud->defn;
       cd->tq = ud->tq;
       if (ud->atts != NULL)
-	cd->atts = merge_attributes(cd->atts,ud->atts);
+	cd->atts = Atts::merge_attributes(cd->atts,ud->atts);
       // FIX: do anything with the kind?
     }
     break;

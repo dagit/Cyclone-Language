@@ -1140,12 +1140,6 @@ namespace Absyn {
   struct Decl *lookup_decl(list_t<decl_t> decls, stringptr_t<`H> name);
   // get the name of decl; return NULL if has no name
   string_t<`H> *decl_name(decl_t decl);
-  // returns true when a is an attribute for function types
-  bool fntype_att(attribute_t);
-  // returns true when a1 is equal to a2
-  bool equal_att(attribute_t, attribute_t);
-  // like strcmp but for attributes
-  int attribute_cmp(attribute_t,attribute_t);
   // int to field-name caching used by control-flow and toc
   field_name_t fieldname(int);
   // get the name and aggr_kind of an aggregate type

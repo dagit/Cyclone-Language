@@ -23,23 +23,21 @@
 #include "tcenv.h"
 
 namespace Tc {
-
-using List;
 using Absyn;
 using Tcenv;
 
 extern bool aggressive_warn;
 
-extern void tc(tenv_t te, bool var_default_init, list_t<decl_t,`H> ds);
+void tc(tenv_t te, bool var_default_init, List::list_t<decl_t,`H> ds);
 
   // if called, must be after tc is called
   // removes extern variables that are never referred to
-extern list_t<decl_t> treeshake(tenv_t te, list_t<decl_t>);
+List::list_t<decl_t> treeshake(tenv_t te, List::list_t<decl_t>);
 
 // internal functions needed by tcutil
-extern void tcAggrdecl(tenv_t, seg_t, aggrdecl_t);
-extern void tcDatatypedecl(tenv_t, seg_t, datatypedecl_t);
-extern void tcEnumdecl(tenv_t, seg_t, enumdecl_t);
+void tcAggrdecl(tenv_t, seg_t, aggrdecl_t);
+void tcDatatypedecl(tenv_t, seg_t, datatypedecl_t);
+void tcEnumdecl(tenv_t, seg_t, enumdecl_t);
 
 }
 #endif

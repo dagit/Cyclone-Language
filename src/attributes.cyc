@@ -1,0 +1,310 @@
+/* Functions concerning attributes
+   Copyright (C) 2004 Dan Grossman, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+#include <string.h>
+#include "evexp.h"
+#include "tcutil.h"
+#include "warn.h"
+#include "attributes.h"
+using List;
+using Absyn;
+namespace Atts;
+
+// returns true when a function type or pointer to a function includes
+// the noreturn attribute.
+bool is_noreturn_fn_type(type_t t) {
+  switch (Tcutil::compress(t)) {
+  case &PointerType(PtrInfo(elt,_,_)): return is_noreturn_fn_type(elt);
+  case &FnType(FnInfo{.attributes = atts,...}):
+    for (; atts != NULL; atts = atts->tl)
+      switch (atts->hd) {
+      case &Noreturn_att: return true;
+      default: continue;
+      }
+    return false;
+  default: return false;
+  }
+}
+
+bool same_atts(attributes_t a1, attributes_t a2) {
+  for (_ a = a1; a != NULL; a = a->tl)
+    if (!List::exists_c(equal_att,a->hd,a2)) 
+      return false;
+  for (_ a = a2; a != NULL; a = a->tl)
+    if (!List::exists_c(equal_att,a->hd,a1)) 
+      return false;
+  return true;
+}
+
+static bool is_regparm0_att(attribute_t a){
+  switch(a) {
+  case &Regparm_att(0): return true;
+  default: return false;
+  }
+}
+
+bool equiv_fn_atts(attributes_t a1, attributes_t a2) {
+  for (_ a = a1; a != NULL; a = a->tl)
+    if (!List::exists_c(equal_att,a->hd,a2) && !is_regparm0_att(a->hd))
+      return false;
+  for (_ a = a2; a != NULL; a = a->tl)
+    if (!List::exists_c(equal_att,a->hd,a1)&& !is_regparm0_att(a->hd)) 
+      return false;
+  return true; 
+}
+
+// Transfer any function type attributes from the given list to the
+// function type.
+attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
+  switch (Tcutil::compress(t)) {
+  case &FnType(FnInfo{.attributes = *fnatts,...}):
+    let res_atts = NULL;
+    for (; atts != NULL; atts = atts->tl)
+      if (!fntype_att(atts->hd)) 
+	res_atts = new List(atts->hd,res_atts);
+      else if (!List::mem(attribute_cmp,*fnatts,atts->hd))
+	*fnatts = new List(atts->hd,*fnatts);
+    return res_atts;
+  default: Warn::impos2("transfer_fn_type_atts");
+  }
+}
+
+static bool fnTypeAttsRangeOK(seg_t loc,int i,int nargs,attribute_t att) {
+  if(i < 1 || i > nargs) {
+    Warn::err2(loc,att," has an out-of-range index");
+    return false;
+  }
+  return true;
+}
+static void fnTypeAttsOverlap(seg_t loc, int i, 
+			      $(list_t<int>,string_t) lst1,
+			      $(list_t<int>,string_t) lst2) {
+  if(List::memq(lst2[0],i))
+    Warn::err(loc, "incompatible %s() and %s() attributes on parameter %d",
+	      lst1[1], lst2[1], i);
+}
+void fnTypeAttsOK(seg_t loc, type_t t) {
+  $(list_t<int>,string_t) init_params          = $(NULL,"initializes");
+  $(list_t<int>,string_t) nolive_unique_params = $(NULL,"noliveunique");
+  $(list_t<int>,string_t) consume_params       = $(NULL,"consume");
+  switch (Tcutil::compress(t)) {
+  case &FnType(FnInfo{.attributes=atts,.args=args,...}):
+    int nargs = List::length(args);
+    for ( ; atts != NULL; atts = atts->tl) {
+      switch(atts->hd) {
+      case &Initializes_att(i):
+	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) 
+	  break;
+	fnTypeAttsOverlap(loc,i,init_params,nolive_unique_params);
+	fnTypeAttsOverlap(loc,i,init_params,consume_params);
+	string_t s = "initializes attribute allowed only on";
+	switch(Tcutil::compress((*List::nth(args,i-1))[2])) {
+	case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bd,zt,_))):
+	  if(Tcutil::force_type2bool(false,nullable))
+	    Warn::err2(loc,s," non-null pointers");
+	  if(!Tcutil::is_bound_one(bd))
+	    Warn::err2(loc,s," pointers of size 1");
+	  if(Tcutil::force_type2bool(false,zt))
+	    Warn::err2(loc,s," pointers to non-zero-terminated arrays");
+	  break;
+	default:
+	  Warn::err2(loc,s," pointers");
+	}
+	init_params[0] = new List(i,init_params[0]); 
+	break;
+      case &Noliveunique_att(i):
+	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
+	fnTypeAttsOverlap(loc,i,nolive_unique_params,init_params);
+	// NB. noliveunique and consume can overlap
+	let &$(_,_,t) = List::nth(args,i-1);
+	if (!Tcutil::is_noalias_pointer(t,false))
+	  Warn::err2(loc,"noliveunique allowed only on unique pointers");
+	nolive_unique_params[0] = new List(i,nolive_unique_params[0]);
+	break;
+      case &Consume_att(i):
+	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
+	fnTypeAttsOverlap(loc,i,consume_params,init_params);
+	// NB. noliveunique and consume can overlap
+	let &$(_,_,t) = List::nth(args,i-1);
+	if (!Tcutil::is_noalias_pointer(t,false))
+	  Warn::err2(loc,"consume allowed only on unique pointers");
+	consume_params[0] = new List(i,consume_params[0]); 
+	break;
+      default: break;
+      }
+    }
+    break;
+  default: Warn::impos2("fnTypeAttsOK: not a function type");
+  }
+}
+
+// Returns true when attribute list a1 can be safely cast to a2
+bool sub_attributes(attributes_t a1, attributes_t a2) {
+  for (attributes_t t = a1; t != NULL; t = t->tl)
+    switch (t->hd) {
+    case &Pure_att: // can safely omit these in a2
+    case &Noreturn_att:
+    case &Initializes_att(_): continue;
+    default: if (!List::exists_c(equal_att, t->hd, a2)) return false;
+    }
+  for (; a2 != NULL; a2 = a2->tl)
+    if (!List::exists_c(equal_att, a2->hd, a1)) 
+      return false;
+  return true;
+}
+
+static int attribute_case_number(attribute_t att) {
+  switch(att) {
+  case &Regparm_att(_): return 0;
+  case &Stdcall_att: return 1;
+  case &Cdecl_att: return 2;
+  case &Fastcall_att: return 3;
+  case &Noreturn_att: return 4;
+  case &Const_att: return 5;
+  case &Aligned_att(_): return 6;
+  case &Packed_att: return 7;
+  case &Section_att(_): return 8;
+  case &Nocommon_att: return 9;
+  case &Shared_att: return 10;
+  case &Unused_att: return 11;
+  case &Weak_att: return 12;
+  case &Dllimport_att: return 13;
+  case &Dllexport_att: return 14;
+  case &No_instrument_function_att: return 15;
+  case &Constructor_att: return 16;
+  case &Destructor_att: return 17;
+  case &No_check_memory_usage_att: return 18;
+  case &Format_att(...): return 19;
+  case &Initializes_att(_): return 20;
+  case &Noliveunique_att(_): return 21;
+  case &Consume_att(...): return 22;
+  case &Pure_att: return 23;
+  case &Mode_att(...): return 24;
+  case &Alias_att(...): return 25;
+  case &Always_inline_att: return 26;
+  }
+}
+int attribute_cmp(attribute_t att1, attribute_t att2) {
+  switch($(att1,att2)) {
+  case $(&Regparm_att(i1),&Regparm_att(i2)): fallthru(i1,i2);
+  case $(&Initializes_att(i1), &Initializes_att(i2)): 
+    return Core::intcmp(i1,i2);
+  case $(&Aligned_att(e1),&Aligned_att(e2)): 
+    if (e1 == e2) return 0;
+    if (e1 == NULL) return -1;
+    if (e2 == NULL) return 1;
+    return Evexp::exp_cmp(e1,e2);
+  case $(&Section_att(s1),&Section_att(s2)): return strcmp(s1,s2);
+  case $(&Format_att(ft1,i1,j1),&Format_att(ft2,i2,j2)):
+    let ftc = Core::intcmp((unsigned int)ft1, (unsigned int)ft2);
+    if(ftc != 0) return ftc;
+    let ic = Core::intcmp(i1,i2);
+    if(ic != 0) return ic;
+    return Core::intcmp(j1,j2);
+    // FIX: missing lots of cases!!!
+  default: return Core::intcmp(attribute_case_number(att1), 
+			       attribute_case_number(att2));
+  }
+}
+bool equal_att(attribute_t a1, attribute_t a2) {
+  return attribute_cmp(a1,a2)==0;
+}
+
+// returns true when a is an attribute for function types
+bool fntype_att(attribute_t a) {
+  switch (a) {
+  case &Regparm_att(i):    
+  case &Fastcall_att:       
+  case &Stdcall_att:        
+  case &Cdecl_att:          
+  case &Noreturn_att:       
+  case &Pure_att:
+  case &Always_inline_att:
+  case &Format_att(...):
+  case &Const_att:
+  case &Noliveunique_att(_):
+  case &Initializes_att(_):
+  case &Consume_att(_): return true;
+  default: return false;
+  }
+}
+
+void check_fndecl_atts(seg_t loc,attributes_t atts,bool is_defn) {
+  for(; atts != NULL; atts = atts->tl)
+    switch(atts->hd) {
+    case &Aligned_att(_):
+    case &Packed_att:
+      Warn::err2(loc,"bad attribute ",atts->hd," in function declaration");
+      return;
+    default:
+      if(!is_defn && fntype_att(atts->hd))
+	Warn::impos2("function-type att in function variable declaration");
+    }
+}
+// check_variable_atts not for functio prototypes (see above)
+void check_variable_atts(seg_t loc, vardecl_t vd, attributes_t atts) {
+  for (; atts != NULL; atts = atts->tl)
+    switch (atts->hd) {
+    case &Aligned_att(_):
+      // GCC doesn't allow variables to be packed
+      // case Packed_att:     continue;
+    case &Section_att(_):
+    case &Nocommon_att:   
+    case &Shared_att:     
+    case &Unused_att:     
+    case &Weak_att:       
+    case &Dllimport_att:  
+    case &Dllexport_att: continue;
+    default: Warn::err2(loc,"bad attribute ",atts->hd," for variable ",vd);
+    }
+}
+
+void check_field_atts(seg_t loc, stringptr_t<`H> fn, attributes_t atts) {
+  for (; atts != NULL; atts = atts->tl)
+    switch (atts->hd) {
+    case &Packed_att: 
+    case &Aligned_att(_): continue;
+    default: Warn::err2(loc,"bad attribute ",atts->hd," on ",*fn);
+    }
+}
+
+// Merge two attribute lists into a freshly-allocated list.  
+attributes_t merge_attributes(attributes_t a1, attributes_t a2) {
+  attributes_t x = NULL;
+  for (_ a = a1; a != NULL; a = a->tl)
+    if (!List::exists_c(equal_att,a->hd,a2)) 
+      x = new List(a->hd,x);
+  return List::append(x,List::copy(a2));
+}
+
+attributes_t atts2c(attributes_t atts) {
+  // FIX:  problem with higher-order functions?  Again C's rules are strange.
+  // FIX:  dropping noreturn and const attributes b/c C is complaining.
+  let ans = NULL;
+  for (; atts != NULL; atts = atts->tl)
+    switch (atts->hd) {
+    case &Noreturn_att:
+    case &Const_att:
+    case &Format_att(...): continue;
+    case &Consume_att(_): continue; // correct: a Cyclone addition
+    case &Noliveunique_att(_): continue; // correct: a Cyclone addition
+    case &Initializes_att(_): continue; // correct: a Cyclone addition
+    default: ans = new List(atts->hd,ans); break;
+    }
+  return imp_rev(ans);
+}

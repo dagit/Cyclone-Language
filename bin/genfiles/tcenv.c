@@ -429,31 +429,31 @@ enum Cyc_Relations_Relation{Cyc_Relations_Req =0U,Cyc_Relations_Rneq =1U,Cyc_Rel
 # 30 "tcutil.h"
 void*Cyc_Tcutil_impos(struct _fat_ptr,struct _fat_ptr);
 void Cyc_Tcutil_terr(unsigned,struct _fat_ptr,struct _fat_ptr);
-# 101
+# 99
 int Cyc_Tcutil_kind_leq(struct Cyc_Absyn_Kind*,struct Cyc_Absyn_Kind*);
-# 106
+# 104
 struct Cyc_Absyn_Kind*Cyc_Tcutil_tvar_kind(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Kind*def);
 struct Cyc_Absyn_Kind*Cyc_Tcutil_type_kind(void*);
 void*Cyc_Tcutil_compress(void*);
-# 136
+# 134
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
-# 138
+# 136
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 175
+# 173
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);struct _tuple11{struct Cyc_Absyn_Tvar*f1;void*f2;};
-# 177
+# 175
 struct _tuple11 Cyc_Tcutil_swap_kind(void*,void*);
-# 198
+# 196
 int Cyc_Tcutil_subset_effect(int may_constrain_evars,void*e1,void*e2);
-# 202
+# 200
 int Cyc_Tcutil_region_in_effect(int constrain,void*r,void*e);
-# 217
+# 215
 void Cyc_Tcutil_check_unique_tvars(unsigned,struct Cyc_List_List*);
-# 258
+# 256
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
-# 260
+# 258
 int Cyc_Tcutil_new_tvar_id (void);
-# 262
+# 260
 void Cyc_Tcutil_add_tvar_identity(struct Cyc_Absyn_Tvar*);
 void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[8U];struct Cyc_Dict_Present_exn_struct{char*tag;};extern char Cyc_Dict_Absent[7U];struct Cyc_Dict_Absent_exn_struct{char*tag;};
 # 62 "dict.h"

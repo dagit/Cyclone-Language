@@ -21,6 +21,7 @@
 #include "warn.h"
 #include "unify.h"
 #include "tcutil.h"
+#include "attributes.h"
 #include "tctyp.h"
 #include "tcexp.h"
 #include "tcstmt.h"
@@ -31,11 +32,9 @@
 #include "tc.h"
 #include "cifc.h"
 #include "toc.h"
-
 using Core;
 using List;
 using Absyn;
-using Absynpp;
 using Tctyp;
 using Tcutil;
 using Tcenv;
@@ -51,83 +50,14 @@ bool aggressive_warn = false;
 static bool export_member(qvar_t x, list_t<$(seg_t,qvar_t,bool)@> exports) {
   for (; exports != NULL; exports = exports->tl) {
     let p = exports->hd;
-    if (qvar_cmp(x,(*p)[1]) == 0) {
-      // set the flag associated with the export to record that the
-      // declaration is present and return true
-      (*p)[2] = true;
-      return true;
-    }
+    if (!qvar_cmp(x,(*p)[1]) == 0) 
+      continue;
+    // set the flag associated with the export to record that the
+    // declaration is present and return true
+    (*p)[2] = true;
+    return true;
   }
   return false;
-}
-
-static bool fnTypeAttsRangeOK(seg_t loc,int i,int nargs,attribute_t att) {
-  if(i < 1 || i > nargs) {
-    Warn::err2(loc,att," has an out-of-range index");
-    return false;
-  }
-  return true;
-}
-static void fnTypeAttsOverlap(seg_t loc, int i, 
-			      $(list_t<int>,string_t) lst1,
-			      $(list_t<int>,string_t) lst2) {
-  if(List::memq(lst2[0],i))
-    Warn::err(loc, "incompatible %s() and %s() attributes on parameter %d",
-	      lst1[1], lst2[1], i);
-}
-static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
-  $(list_t<int>,string_t) init_params          = $(NULL,"initializes");
-  $(list_t<int>,string_t) nolive_unique_params = $(NULL,"noliveunique");
-  $(list_t<int>,string_t) consume_params       = $(NULL,"consume");
-  switch (compress(t)) {
-  case &FnType(FnInfo{.attributes=atts,.args=args,...}):
-    int nargs = List::length(args);
-    for ( ; atts != NULL; atts = atts->tl) {
-      switch(atts->hd) {
-      case &Initializes_att(i):
-	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) 
-	  break;
-	fnTypeAttsOverlap(loc,i,init_params,nolive_unique_params);
-	fnTypeAttsOverlap(loc,i,init_params,consume_params);
-	string_t s = "initializes attribute allowed only on";
-	switch(Tcutil::compress((*List::nth(args,i-1))[2])) {
-	case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bd,zt,_))):
-	  if(force_type2bool(false,nullable))
-	    Warn::err2(loc,s," non-null pointers");
-	  if(!is_bound_one(bd))
-	    Warn::err2(loc,s," pointers of size 1");
-	  if(force_type2bool(false,zt))
-	    Warn::err2(loc,s," pointers to non-zero-terminated arrays");
-	  break;
-	default:
-	  Warn::err2(loc,s," pointers");
-	}
-	init_params[0] = new List(i,init_params[0]); 
-	break;
-      case &Noliveunique_att(i):
-	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
-	fnTypeAttsOverlap(loc,i,nolive_unique_params,init_params);
-	// NB. noliveunique and consume can overlap
-	let &$(_,_,t) = List::nth(args,i-1);
-	if (!is_noalias_pointer(t,false))
-	  Warn::err2(loc,"noliveunique allowed only on unique pointers");
-	nolive_unique_params[0] = new List(i,nolive_unique_params[0]);
-	break;
-      case &Consume_att(i):
-	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
-	fnTypeAttsOverlap(loc,i,consume_params,init_params);
-	// NB. noliveunique and consume can overlap
-	let &$(_,_,t) = List::nth(args,i-1);
-	if (!is_noalias_pointer(t,false))
-	  Warn::err2(loc,"consume allowed only on unique pointers");
-	consume_params[0] = new List(i,consume_params[0]); 
-	break;
-      default: break;
-      }
-    }
-    break;
-  default: Warn::impos2("fnTypeAttsOK: not a function type");
-  }
 }
 
 static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init, 
@@ -135,7 +65,7 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
   let &Vardecl(sc,q,_,_,t,initializer,_,atts,_,*is_proto) = vd;
 #ifdef DEBUG
   fprintf(stderr,"type-checking vardecl_t %s, type %s\n",*((*q)[1]), 
-          typ2string(vd->type)); fflush(stderr);
+          Absynpp::typ2string(vd->type)); fflush(stderr);
 #endif
 
   // if it's an array or string, fill in the size on the type
@@ -143,16 +73,12 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
   case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && initializer != NULL:
     switch (initializer->r) {
     case &Const_e({.String_c = s}):
-      t = vd->type = array_type(telt,tq,uint_exp(numelts(s),0),zt,ztl);
-      break;
+      t = vd->type = array_type(telt,tq,uint_exp(numelts(s),0),zt,ztl); break;
     case &Const_e({.Wstring_c = s}): /* FIX: need correct size, not 1 */
-      t = vd->type = array_type(telt,tq,uint_exp(1,0),zt,ztl);
-      break;
+      t = vd->type = array_type(telt,tq,uint_exp(1,0),zt,ztl); break;
     case &Comprehension_e(_,e,_,_): fallthru(e);
-    case &ComprehensionNoinit_e(e,_,_):
-      // FIX: need to copy e here!
-      t = vd->type = array_type(telt,tq,e,zt,ztl);
-      break;
+    case &ComprehensionNoinit_e(e,_,_): // FIX: need to copy e here!
+      t = vd->type = array_type(telt,tq,e,zt,ztl); break;
     case &UnresolvedMem_e(_,es): fallthru(es);
     case &Array_e(es):
       t = vd->type = array_type(telt,tq,uint_exp(List::length(es),0),zt,ztl);
@@ -172,8 +98,8 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
   // move any function type attributes into the function's type
   if (is_function_type(t)) {
     *is_proto = false; //by default this is extern -- if we say a decl later, we flip this flag
-    atts = transfer_fn_type_atts(t,atts);
-    fnTypeAttsOK(te, t, loc);
+    atts = Atts::transfer_fn_type_atts(t,atts);
+    Atts::fnTypeAttsOK(loc, t);
   }
   // if extern, make sure it has no initializer
   if (sc == Extern || sc == ExternC) {
@@ -183,77 +109,37 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
     // we skip over function types -- these are function prototypes.
     // otherwise, we compute default initializer, if necessary
     // first check that the attributes are okay
-    for (; atts != NULL; atts = atts->tl)
-      switch (atts->hd) {
-      case &Aligned_att(_):
-        // GCC doesn't allow variables to be packed
-        // case Packed_att:     continue;
-      case &Section_att(_):
-      case &Nocommon_att:   
-      case &Shared_att:     
-      case &Unused_att:     
-      case &Weak_att:       
-      case &Dllimport_att:  
-      case &Dllexport_att: continue;
-      default:
-        Warn::err2(loc,"bad attribute ",atts->hd," for variable ",vd);
-        break;
-      }
-
+    Atts::check_variable_atts(loc,vd,atts);
     if(initializer == NULL || in_cinclude) {
       if (check_var_init && !in_cinclude && !zeroable_type(t))
         Warn::err2(loc,"initializer required for variable ",vd," of type ",t);
     } else {
-      let e = (exp_t)initializer;
       // type-check the initializer
       // have to look out for an Env_error when the expression
       // is not a valid-toplevel one.
       try {
-        let t2 = Tcexp::tcExpInitializer(te,&t,e);
-        if (!coerce_assign(curr_rgnpo(te),e,t)) {
-          let s0 = qvar2string(vd->name);
+        let t2 = Tcexp::tcExpInitializer(te,&t,initializer);
+        if (!coerce_assign(curr_rgnpo(te),initializer,t)) {
+          let s0 = Absynpp::qvar2string(vd->name);
           let s1 = " declared with type ";
-          let s2 = typ2string(t);
+          let s2 = Absynpp::typ2string(t);
           let s3 = " but initialized with type ";
-          let s4 = typ2string(t2);
+          let s4 = Absynpp::typ2string(t2);
           if (strlen(s0)+strlen(s1)+strlen(s2)+strlen(s3)+strlen(s4) > 70)
-            terr(loc,"%s%s\n\t%s\n%s\n\t%s",s0,s1,s2,s3,s4);
+            Warn::err(loc,"%s%s\n\t%s\n%s\n\t%s",s0,s1,s2,s3,s4);
           else 
-            terr(loc,"%s%s%s%s%s",s0,s1,s2,s3,s4);
+            Warn::err(loc,"%s%s%s%s%s",s0,s1,s2,s3,s4);
           Unify::explain_failure();
         }
         // reject non-constant initializers
-        if (!Tcutil::is_const_exp(e))
-          terr(loc,"initializer is not a constant expression");
-      } catch {
-      case &Tcenv::Env_error: 
-        terr(loc,"initializer is not a constant expression");
-        break;
+        if (!Tcutil::is_const_exp(initializer))
+          Warn::err2(loc,"initializer is not a constant expression");
+      } catch { case &Tcenv::Env_error: 
+        Warn::err2(loc,"initializer is not a constant expression"); break;
       }
     }
-  } else {
-    // it is a function type -- check that the attributes are okay
-    for (; atts != NULL; atts = atts->tl)
-      switch (atts->hd) {
-      // these attributes should be in the function's type
-      case &Regparm_att(_):
-      case &Stdcall_att:   
-      case &Cdecl_att:     
-      case &Fastcall_att: 
-      case &Noreturn_att: 
-      case &Format_att(...):
-      case &Initializes_att(_):
-      case &Pure_att:
-      case &Always_inline_att:
-      case &Const_att: impos("tcVardecl: fn type atts in function var decl");
-      // C doesn't allow these attributes on functions
-      case &Aligned_att(_):
-      case &Packed_att:
-        Warn::err2(loc,"bad attribute ",atts->hd," in function declaration");
-        break;
-      default: continue;
-      }
-  }
+  } else // it is a function type
+    Atts::check_fndecl_atts(loc,atts,false);
 
   // update the environment
   try {
@@ -278,12 +164,10 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
 static bool is_main(qvar_t n) {
   let &$(nms,v) = n;
   switch (nms) {
-  case {.Abs_n = NULL}:
-    return (strcmp(*v,"main") == 0);
+  case {.Abs_n = NULL}: return (strcmp(*v,"main") == 0);
   default: return false;
   }
 }
-
 
 static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
                      list_t<$(seg_t,qvar_t,bool)@>* exports) {
@@ -292,17 +176,10 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   fprintf(stderr,"type-checking fndecl %s\n",*((*q)[1])); fflush(stderr);
 #endif
   if(fd->sc == ExternC && !te->in_extern_c_include)
-    terr(loc,"extern \"C\" functions cannot be implemented in Cyclone");
+    Warn::err2(loc,"extern \"C\" functions cannot be implemented in Cyclone");
 
   // check that packed and aligned don't show up in the attributes
-  for (_ atts = fd->i.attributes; atts != NULL; atts = atts->tl)
-    switch (atts->hd) {
-    case &Packed_att:
-    case &Aligned_att(_): 
-      Warn::err2(loc,"bad attribute ",atts->hd," for function");
-      break;
-    default: break;
-    }
+  Atts::check_fndecl_atts(loc,fd->i.attributes,true);
 
   // reject ill-formed type
   if(te->in_extern_c_inc_repeat)
@@ -310,8 +187,8 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   check_fndecl_valid_type(loc,te,fd);
   type_t t = fndecl2type(fd);
   // move any function type attributes into the function's type
-  fd->i.attributes = transfer_fn_type_atts(t,fd->i.attributes);
-  fnTypeAttsOK(te, t, loc);
+  fd->i.attributes = Atts::transfer_fn_type_atts(t,fd->i.attributes);
+  Atts::fnTypeAttsOK(loc, t);
 
   // due to recursion, add function to environment before checking body
   try {
@@ -319,22 +196,16 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
     let b0 = (*ans)[0];
     let b1 = new Funname_b(fd);
     let b = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
-    if (b != NULL) { // NULL implies error in merging (error reported already)
+    if (b != NULL) // NULL implies error in merging (error reported already)
       // make the update if the function is exported
-      if (exports == NULL || export_member(q,*exports)) {
-	if (!(b == b0 && (*ans)[1])) { // no need to reinsert the entry
+      if (exports == NULL || export_member(q,*exports))
+	if (!(b == b0 && (*ans)[1])) // no need to reinsert the entry
 	  te->ae->ordinaries = Dict::insert(te->ae->ordinaries, 
 					    q, new $(b, (*ans)[1]));
-	}
-      }
-    }
-  } catch { 
-  case &Dict::Absent:
-    if (exports == NULL || export_member(fd->name,*exports)) {
-      let b = new Funname_b(fd);
+  } catch { case &Dict::Absent:
+    if (exports == NULL || export_member(fd->name,*exports))
       te->ae->ordinaries = Dict::insert(te->ae->ordinaries, q,
-                                    new $(new Funname_b(fd), false));
-    }
+					new $(new Funname_b(fd), false));
     break;
   }
 
@@ -362,33 +233,30 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   if (is_main(q)) {
     // result type should be int
     switch (compress(fd->i.ret_type)) {
-    case &AppType(&VoidCon,_): warn(loc,"main declared with return type void"); break;
-    case &AppType(&IntCon(_,Int_sz),_): break;
+    case &AppType(&VoidCon,_): 
+      Warn::warn2(loc,"main declared with return type void"); break;
+    case &AppType(&IntCon(_,Int_sz),_):
     case &AppType(&IntCon(_,Long_sz),_): break;
-    default: 
-      terr(loc,"main declared with return type %s instead of int or void",
-	   typ2string(fd->i.ret_type)); 
-      break;
+    default: Warn::err2(loc,"main declared with return type ",fd->i.ret_type,
+			" instead of int or void");
     }
     if (fd->i.c_varargs || fd->i.cyc_varargs != NULL)
-      terr(loc,"main declared with varargs");
+      Warn::err2(loc,"main declared with varargs");
     let args = fd->i.args;
     if (args != NULL) {
       let &$(_,_,t1) = args->hd;
       switch (compress(t1)) {
-      case &AppType(&IntCon(_,Int_sz),_): break;
+      case &AppType(&IntCon(_,Int_sz),_):
       case &AppType(&IntCon(_,Long_sz),_): break;
-      default:
-        terr(loc,"main declared with first argument of type %s instead of int",
-             typ2string(t1));
-        break;
+      default: Warn::err2(loc,"main declared with first argument of type ",t1,
+			  " instead of int");
       }
       args = args->tl;
       if (args != NULL) {
         let &$(_,_,t2) = args->hd;
         args = args->tl;
         if (args != NULL)
-          terr(loc,"main declared with too many arguments");
+          Warn::err2(loc,"main declared with too many arguments");
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->i.tvars);
         if (!Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
                                      new_evar(new Opt(&rk),tvs),
@@ -404,8 +272,8 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
                                                                tvs)),
                                      new_evar(new Opt(&rk),tvs),
                                      const_tqual(0),any_bool(tvs->v)))) {
-          terr(loc,"second argument of main has type %s instead of char??",
-               typ2string(t2));
+          Warn::err2(loc,"second argument of main has type ",t2,
+		     " instead of char??");
         }
       }
     }
@@ -415,12 +283,11 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
 static void tcTypedefdecl(tenv_t te, seg_t loc, typedefdecl_t td) {
   qvar_t q = td->name;
 #ifdef DEBUG
-  fprintf(stderr,"type-checking typedefdecl %s",*((*q)[1]));
-  fflush(stderr);
+  fprintf(stderr,"type-checking typedefdecl %s",*((*q)[1])); fflush(stderr);
 #endif
   // check for redeclaration (never allowed, apparently)
   if (Dict::member(te->ae->typedefs,q)) {
-    terr(loc,"redeclaration of typedef %s",*((*q)[1]));
+    Warn::err2(loc,"redeclaration of typedef ",q);
     return;
   }
   // reject ill-formed type
@@ -437,8 +304,7 @@ static void tcTypedefdecl(tenv_t te, seg_t loc, typedefdecl_t td) {
     switch (compress_kb(tvs->hd->kind)) {
     case &Unknown_kb(*f): 
       if (td->defn != NULL)
-        warn(loc,"type variable %s is not used in typedef definition",
-             *tvs->hd->name);
+        Warn::warn2(loc,"type variable ",tvs->hd, " is not used in typedef");
       *f = new Opt(kind_to_bound(&tbk)); break;
     case &Less_kb(*f,k):
       // treat region kinds specially; unconstrained region kinds
@@ -450,7 +316,6 @@ static void tcTypedefdecl(tenv_t te, seg_t loc, typedefdecl_t td) {
       break;
     default: continue;
     }
-  
   // add to environment
   te->ae->typedefs = Dict::insert(te->ae->typedefs,q,td);
 }
@@ -477,7 +342,7 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
     let &Aggrfield(fn,tq,t,width,atts,requires_clause) = fs->hd;
       
     if (List::mem(strptrcmp,prev_fields,fn))
-      terr(loc, "duplicate member %s", *fn);
+      Warn::err2(loc, "duplicate member ", *fn);
     // add the field to previous fields only if it's not an empty name
     // (empty names arise for bitfield padding.)
     if (strcmp(*fn,"") != 0)
@@ -499,40 +364,34 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
     // FIX : check for consistent tquals
     if (requires_clause) {
       if (str_or_union != UnionA)
-	terr(loc,"@requires clauses are only allowed on union members");
+	Warn::err2(loc,"@requires clauses are allowed only on union members");
       let te2 = allow_valueof(te);
       Tcexp::tcExp(te2,NULL,requires_clause);
       if (!is_integral(requires_clause))
-	terr(requires_clause->loc,
-	     "@requires clause has type %s instead of integral type",
-	     typ2string((type_t)requires_clause->topt));
+	Warn::err2(requires_clause->loc,
+		   "@requires clause has type ",(type_t)requires_clause->topt,
+		   " instead of integral type");
       else {
 	check_type(requires_clause->loc,te,tvs,&ik,false,false,new ValueofType(requires_clause));
         // convert the requires expression to a CNF formula
 	let relns = Relations::exp2relns(uprev_rgn,requires_clause);
 
-	//fprintf(stderr,"relations for %s: ",*fn);
-	//Relations::print_relns(stderr,relns);
-	//fprintf(stderr,"\n");
-
 	// warn if the relations aren't consistent
 	if (!Relations::consistent_relations(relns))
-	  terr(requires_clause->loc,"@requires clause may be unsatisfiable");
+	  Warn::err2(requires_clause->loc,"@requires clause may be unsatisfiable");
 
 	// run through all of the previous formulae and see if
 	// this one is consistent with those.  If so, there may
 	// be an overlap and we must reject.
-	for (let p = prev_relations; p != NULL; p = p->tl) {
+	for (let p = prev_relations; p != NULL; p = p->tl)
 	  if (Relations::consistent_relations(rappend(uprev_rgn,relns,p->hd)))
-	    terr(requires_clause->loc,
-		 "@requires clause may overlap with previous clauses");
-	}
+	    Warn::err2(requires_clause->loc,
+		       "@requires clause may overlap with previous clauses");
 	prev_relations = rnew(uprev_rgn) List(relns,prev_relations);
       }
-    } else /* no requires clause */ {
+    } else /* no requires clause */
       if (prev_relations != NULL)
-	terr(loc,"if one field has a @requires clause, they all must");
-    }
+	Warn::err2(loc,"if one field has a @requires clause, they all must");
   }
 }
 
@@ -554,29 +413,49 @@ static void rule_out_memkind(seg_t loc, qvar_t n, list_t<tvar_t> tvs,
     case &Less_kb(*f,k): 
       *f = new Opt(kind_to_bound(k)); continue;
     case &Eq_kb(&Kind(MemKind,a)):
-      terr(loc,"type %s attempts to abstract type variable %s of kind %s", 
-           *((*n)[1]), *tvs2->hd->name, kind2string(new Kind(MemKind,a)));
+      Warn::err2(loc,"type ",n," attempts to abstract type variable ",
+		 tvs2->hd," of kind ",new Kind(MemKind,a)); 
       continue;
     default: continue;
     }
   }
 }
+static void rule_out_mem_and_unique(seg_t loc, qvar_t q, list_t<tvar_t> tvs) {
+  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
+    switch (compress_kb(tvs2->hd->kind)) {
+    case &Unknown_kb(*f): fallthru(f);
+//     case &Less_kb(*f,&Kind(BoxKind,Top)): fallthru(f);
+    case &Less_kb(*f,&Kind(MemKind,Top)): fallthru(f);
+    case &Less_kb(*f,&Kind(MemKind,Aliasable)): 
+      *f = new Opt(kind_to_bound(&bk)); break;
+    case &Less_kb(*f,&Kind(AnyKind,Top)): fallthru(f);
+    case &Less_kb(*f,&Kind(AnyKind,Aliasable)): 
+      *f = new Opt(kind_to_bound(&ak)); break;
+    case &Less_kb(*f,&Kind(RgnKind,Top)):
+      *f = new Opt(kind_to_bound(&rk)); break;
+    case &Eq_kb(&Kind(RgnKind,Top)):
+      Warn::err2(loc,"type ",q," attempts to abstract type variable ",
+		 tvs2->hd," of kind TR"); break;
+    case &Less_kb(*f,&Kind(k,Unique)): fallthru(k);
+    case &Eq_kb(&Kind(k,Unique)):
+      Warn::err2(loc,"type ",q," attempts to abstract type variable ",
+		 tvs2->hd," of kind ",new Kind(k,Unique)); break;
+    case &Eq_kb(&Kind(MemKind,a)):
+      Warn::err2(loc,"type ",q," attempts to abstract type variable ",
+		 tvs2->hd," of kind ",new Kind(MemKind,a)); break;
+    default: break;
+    }
+  }
+}
+
 
 void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
   let q = ad->name;
 #ifdef DEBUG
-  fprintf(stderr,"type-checking type decl %s\n",*((*q)[1]));
-  fflush(stderr);
+  fprintf(stderr,"type-checking type decl %s\n",*((*q)[1])); fflush(stderr);
 #endif
   // allow only packed and aligned attributes
-  for (_ atts = ad->attributes; atts != NULL; atts = atts->tl)
-    switch (atts->hd) {
-    case &Packed_att: 
-    case &Aligned_att(_): continue;
-    default: 
-      Warn::err2(loc,"bad attribute ",atts->hd," in ",q," definition");
-      break;
-    }
+  Atts::check_field_atts(loc,(*q)[1],ad->attributes);
   
   let tvs = ad->tvs;
 
@@ -608,7 +487,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     // disallow MemKinds and set unconstrained kinds to BoxKind
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
-      terr(loc,"@tagged qualifier is only allowed on union declarations");
+      Warn::err2(loc,"@tagged is allowed only on union declarations");
     tcAggrImpl(te, loc, ad->kind, append(tvs,exist_vars), rgn_po, fs);
 
     rule_out_memkind(loc, q, tvs, false);
@@ -622,15 +501,14 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
       for (_ f = fs; f != NULL; f = f->tl)
 	if (aggressive_warn &&
             !is_bits_only_type(f->hd->type) && f->hd->requires_clause == NULL)
-	  warn(loc,"member %s of union %s has type %s which is not `bits-only' so it can only be written and not read",
-	       *f->hd->name,*((*q)[1]), typ2string(f->hd->type));
-
+	  Warn::warn2(loc,"member ",*f->hd->name," of union ",q," has type ",
+		      f->hd->type," so it can only be written and not read");
     *adp = ad; //insert ad in the environment
     break;
   case $(&AggrdeclImpl(exist_vars,rgn_po,fs,tagged), &adp):
     // FIX: check rgn_po!!! (just need to be closed (and no > `a ??))
     if(ad->kind != (*adp)->kind)
-      terr(loc,"cannot reuse struct names for unions and vice-versa");
+      Warn::err2(loc,"cannot reuse struct names for unions and vice-versa");
 
     let ad0 = *adp;
     // for the sake of recursive fields, make name abstract in body
@@ -644,7 +522,7 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     add_tvar_identities(exist_vars);
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
-      terr(loc,"@tagged qualifier is only allowed on union declarations");
+      Warn::err2(loc,"@tagged is allowed only on union declarations");
     tcAggrImpl(te, loc, ad->kind, append(tvs,exist_vars), rgn_po, fs);
 
     *adp = ad0;// restore the previous declaration and go update the environment
@@ -654,52 +532,17 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     let ad2 = Tcdecl::merge_aggrdecl(*adp, ad, loc, tc_msg);
     if (ad2 == NULL)
       return; // error in redeclaration
-    else {
-      rule_out_memkind(loc, q, tvs, false);
-      // we constrain existential variables to be Aliasable if
-      //   they have not yet been fixed
-      if (ad->impl != NULL) 
-	rule_out_memkind(loc, q, ad->impl->exist_vars, true);
-    
-      *adp = (aggrdecl_t)ad2; // make the update
-      ad = ad2; // update ad so we add the right constructor below
-      break;
-    }
-  }
-}
-
-static void rule_out_mem_and_unique(seg_t loc, qvar_t q, list_t<tvar_t> tvs) {
-  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
-    switch (compress_kb(tvs2->hd->kind)) {
-    case &Unknown_kb(*f): fallthru(f);
-//     case &Less_kb(*f,&Kind(BoxKind,Top)): fallthru(f);
-    case &Less_kb(*f,&Kind(MemKind,Top)): fallthru(f);
-    case &Less_kb(*f,&Kind(MemKind,Aliasable)): 
-      *f = new Opt(kind_to_bound(&bk)); break;
-    case &Less_kb(*f,&Kind(AnyKind,Top)): fallthru(f);
-    case &Less_kb(*f,&Kind(AnyKind,Aliasable)): 
-      *f = new Opt(kind_to_bound(&ak)); break;
-    case &Less_kb(*f,&Kind(RgnKind,Top)):
-      *f = new Opt(kind_to_bound(&rk)); break;
-    case &Eq_kb(&Kind(RgnKind,Top)):
-      terr(loc,"type %s attempts to abstract type "
-           "variable %s of kind TR",*((*q)[1]),*tvs2->hd->name); break;
-    case &Less_kb(*f,&Kind(k,Unique)): fallthru(k);
-    case &Eq_kb(&Kind(k,Unique)):
-      terr(loc,"type %s attempts to abstract type "
-	   "variable %s of kind %s",
-	   *((*q)[1]),*tvs2->hd->name,kind2string(new Kind(k,Unique))); break;
-    case &Eq_kb(&Kind(MemKind,a)):
-      terr(loc,"type %s attempts to abstract type "
-           "variable %s of kind %s",*((*q)[1]),*tvs2->hd->name,
-	   kind2string(new Kind(MemKind,a))); break;
-    default: break;
-    }
+    rule_out_memkind(loc, q, tvs, false);
+    // we constrain existential variables to be Aliasable if
+    //   they have not yet been fixed
+    if (ad->impl != NULL) 
+      rule_out_memkind(loc, q, ad->impl->exist_vars, true);
+    *adp = ad2; // make the update
   }
 }
 
 static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, seg_t loc,
-					    string_t obj, 
+					    string_t<`H> obj, 
                                             bool is_extensible,
 					    qvar_t name,
 					    list_t<datatypefield_t,`H> fields,
@@ -712,51 +555,43 @@ static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, seg_t loc,
       check_type(f->loc, te, tvs, &tmk, false, false, (*typs->hd)[1]);
       // make sure no no-alias fields in datatype
       if (is_noalias_pointer_or_aggr((*typs->hd)[1]))
-	terr(f->loc, 
-	     "noalias pointers in datatypes are not allowed (%s)",
-	     qvar2string(f->name)); //FIX ?      
+	Warn::err2(f->loc, "noalias pointers in datatypes are not allowed: ",
+		   f->name); // FIX ?
       (*typs->hd)[0].real_const = 
         extract_const_from_typedef(f->loc,(*typs->hd)[0].print_const,
                                    (*typs->hd)[1]);
     }
   }
 
-  list_t<datatypefield_t,`H> fields2;  
   if(is_extensible) {
     // for xdatatypes sort the fields (trying to merge the duplicates)
     let res = true;
     let fs = Tcdecl::sort_xdatatype_fields(fields, &res, (*name)[1], loc, tc_msg);
-    if (res)
-      fields2 = fs;
+    return res ? fs : NULL; // should be fs always??
+  } 
+  region uprev_rgn; 
+  // for datatypes, check there's no duplicate field
+  list_t<var_t, `uprev_rgn> prev_fields = NULL;
+  for (_ fs = fields; fs != NULL; fs = fs-> tl) {
+    let f = fs->hd;
+    if (List::mem(strptrcmp, prev_fields, (*f->name)[1]))
+      Warn::err2(f->loc,"duplicate field ",f->name," in ", obj);
     else
-      fields2 = NULL; // should it be fs anyway ?
-  } else {
-    region uprev_rgn; 
-    // for datatypes, check there's no duplicate field
-    list_t<var_t, `uprev_rgn> prev_fields = NULL;
-    for (_ fs = fields; fs != NULL; fs = fs-> tl) {
-      let f = fs->hd;
-      if (List::mem(strptrcmp, prev_fields, (*f->name)[1]))
-	terr(f->loc,"duplicate field name %s in %s", *((*f->name)[1]), obj);
-      else
-	prev_fields = rnew(uprev_rgn) List((*f->name)[1], prev_fields);
-      // erase the scope of the field (which has no meaning)
-      if (f->sc != Public) {
-	warn(loc, "ignoring scope of field %s", *((*f->name)[1]));
-	f->sc = Public;
-      }
+      prev_fields = rnew(uprev_rgn) List((*f->name)[1], prev_fields);
+    // erase the scope of the field (which has no meaning)
+    if (f->sc != Public) {
+      Warn::warn2(loc, "ignoring scope of field ", f->name);
+      f->sc = Public;
     }
-    fields2 = fields;
   }
-  return fields2;
+  return fields;
 }
 
 void tcDatatypedecl(tenv_t te, seg_t loc, datatypedecl_t tud) {
   qvar_t q = tud->name;
   string_t obj = tud->is_extensible ? "@extensible datatype" : "datatype";
 #ifdef DEBUG
-  fprintf(stderr,"type-checking %sdecl %s\n",obj,*((*q)[1]));
-  fflush(stderr);
+  fprintf(stderr,"type-checking %sdecl %s\n",obj,*((*q)[1])); fflush(stderr);
 #endif
   list_t<tvar_t> tvs = tud->tvs;
   // disallow MemKinds and set unconstrained kinds to BoxKind
@@ -780,13 +615,11 @@ void tcDatatypedecl(tenv_t te, seg_t loc, datatypedecl_t tud) {
   try {
     tud_opt = lookup_xdatatypedecl(heap_region,te,loc,tud->name);
     if (tud_opt == NULL && !tud->is_extensible) throw new Dict::Absent;
-    if (tud_opt != NULL) {
+    if (tud_opt != NULL)
       tud->name = (*(*tud_opt))->name;
-    } else {
+    else
       (*tud->name)[0] = Abs_n(te->ns, false); 
-    }
-  } catch {
-  case &Dict::Absent:
+  } catch { case &Dict::Absent:
     let tdopt = Dict::lookup_opt(te->ae->datatypedecls, q);
     tud_opt = tdopt ? new (*tdopt) : NULL;
     break;
@@ -832,54 +665,49 @@ void tcDatatypedecl(tenv_t te, seg_t loc, datatypedecl_t tud) {
     // try to merge the declarations
     let tud2 = Tcdecl::merge_datatypedecl(*tudp, tud, loc, tc_msg);
     rule_out_mem_and_unique(loc,q,tvs);
-    if (tud2 == NULL)
-      return; // error in redeclaration
-    else {
-      *tudp = (datatypedecl_t) tud2; // make the update
-      break;
-    }
+    if (tud2 != NULL) // else error in redeclaration
+      *tudp = tud2; // make the update
+    break;
   } 
 }
 
 void tcEnumdecl(tenv_t te, seg_t loc, enumdecl_t ed) {
   qvar_t q = ed->name;
 #ifdef DEBUG
-  fprintf(stderr,"type-checking enumdecl %s",*((*q)[1]));
-  fflush(stderr);
+  fprintf(stderr,"type-checking enumdecl %s",*((*q)[1])); fflush(stderr);
 #endif
   // check the fields.
-  if (ed->fields != NULL) { region uprev_rgn; {
+  if (ed->fields != NULL) { 
+    region uprev_rgn;
     list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
     unsigned int tag_count = 0;
     for (_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
       // check for duplicate fields
       if (List::mem(strptrcmp,prev_fields,(*f->name)[1]))
-	terr(f->loc,"duplicate enum constructor %s",*((*f->name)[1]));
+	Warn::err2(f->loc,"duplicate enum constructor ",f->name);
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1],prev_fields);
       // check for shadowing of global variables
       if (Dict::lookup_opt(te->ae->ordinaries,f->name) != NULL)
-	terr(f->loc,"enum field name %s shadows global name",*((*f->name)[1]));
-
-      if (f->tag == NULL) {
-	f->tag = uint_exp(tag_count, f->loc);
-	++tag_count;
-      }
+	Warn::err2(f->loc,"enum field name ",f->name," shadows global name");
+      if (f->tag == NULL)
+	f->tag = uint_exp(tag_count++, f->loc);
       // allow non-const exprs for now; will be caught below
       else if (Tcutil::is_const_exp((exp_t)f->tag)) {
 	let $(t1,known) = Evexp::eval_const_uint_exp((exp_t)f->tag);
-	if(known) tag_count = t1+1;
+	if(known) 
+	  tag_count = t1+1;
       }
     }
-  }}
+  }
 
   // update the environment
   try {
     let edp = Dict::lookup(te->ae->enumdecls, q);
     let ed2 = Tcdecl::merge_enumdecl(*edp, ed, loc, tc_msg);
     if (ed2 == NULL) return;
-    *edp = (enumdecl_t) ed2; // if there's no error, make the update
+    *edp = ed2; // if there's no error, make the update
   } catch { case &Dict::Absent:
     let edp = new ed;
     te->ae->enumdecls = Dict::insert(te->ae->enumdecls, q, edp);
@@ -892,8 +720,8 @@ void tcEnumdecl(tenv_t te, seg_t loc, enumdecl_t ed) {
       let f = fs->hd;
       Tcexp::tcExp(te,NULL,(exp_t)f->tag); // substitute if poss
       if (!Tcutil::is_const_exp((exp_t)f->tag))
-	terr(loc,"enum %s, field %s: expression is not constant",
-             *((*q)[1]),*(*f->name)[1]);
+	Warn::err2(loc,"enum ",q,", field ",f->name,
+		   ": expression is not constant");
     }
 }
 
@@ -901,10 +729,10 @@ static bool okay_externC(seg_t loc, scope_t sc, bool in_include, bool in_inc_rep
   switch (sc) {
   case Static:
     if(!in_include)
-      warn(loc,"static declaration within extern \"C\"");
+      Warn::warn2(loc,"static declaration within extern \"C\"");
     return false;
   case Abstract:
-    warn(loc,"abstract declaration within extern \"C\"");
+    Warn::warn2(loc,"abstract declaration within extern \"C\"");
     return false;
   case Public:
   case Register: 
@@ -912,27 +740,22 @@ static bool okay_externC(seg_t loc, scope_t sc, bool in_include, bool in_inc_rep
   case ExternC:
   default: 
     if(!in_inc_rep)
-      warn(loc,"nested extern \"C\" declaration");
+      Warn::warn2(loc,"nested extern \"C\" declaration");
     return true;
   }
 }
 
 static void set_scopes(list_t<decl_t> ovrs, scope_t sc) {
-  while(ovrs) {
-    let d = ovrs->hd;
-    switch(d->r) {
+  for(; ovrs != NULL; ovrs=ovrs->tl)
+    switch(ovrs->hd->r) {
     case &Var_d(vd): vd->sc = sc; break;
     case &Fn_d(fd): fd->sc = sc; break;
     case &Aggr_d(ad): ad->sc = sc; break;
     case &Datatype_d(tud): tud->sc = sc; break;
     case &Enum_d(ed): ed->sc = sc; break;
-    default: //no scope attr.
-      break;
+    default: break; //no scope attr.
     }
-    ovrs = ovrs->tl;
-  }
 }
-
 
 // Typecheck a list, ds, of declarations in environment te.
 // As a side effect, all declarations and variable references are made
@@ -949,9 +772,9 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
     switch (d->r) {
     case &Let_d(...): 
     case &Letv_d(_): // FIX -- error will be in Binding pass
-      terr(loc,"top level let-declarations are not implemented"); break;
+      Warn::err2(loc,"top level let-declarations are not implemented"); break;
     case &Region_d(...):
-      terr(loc,"top level region declarations are not implemented"); break;
+      Warn::err2(loc,"top level region declarations are not implemented");break;
     case &Var_d(vd):
       if (in_externC && okay_externC(d->loc,vd->sc,te->in_extern_c_include,te->in_extern_c_inc_repeat))
         vd->sc = ExternC;
@@ -986,7 +809,7 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
         ed->sc = ExternC;
       tcEnumdecl(te,loc,ed);
       break;
-    case &Porton_d: warn(d->loc,"spurious __cyclone_port_on__"); break;
+    case &Porton_d: Warn::warn2(d->loc,"spurious __cyclone_port_on__"); break;
     case &Portoff_d: break;
     case &Tempeston_d:  te = enter_tempest(te); break;
     case &Tempestoff_d: te = clear_tempest(te); break;
@@ -1026,8 +849,7 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
       for (; exports2 != NULL; exports2 = exports2->tl) {
 	let exp = exports2->hd;
 	if (!(*exp)[2])
-	  warn((*exp)[0],"%s is exported but not defined",
-	       qvar2string((*exp)[1]));
+	  Warn::warn2((*exp)[0],(*exp)[1]," is exported but not defined");
       }
       break;
     }
@@ -1035,7 +857,7 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
 }
 
 void tc(tenv_t te, bool check_var_init, list_t<decl_t,`H> ds) {
-  set_params(&tc_params_r);
+  Absynpp::set_params(&Absynpp::tc_params_r);
   let cg = Callgraph::compute_callgraph(ds);
   //fprintf(stderr,"Callgraph:\n");
   //Callgraph::print_callgraph(stderr, cg);
@@ -1060,7 +882,7 @@ static struct TreeshakeEnv<`g::R> {
 };  
 typedef struct TreeshakeEnv<`g> @`r2 treeshake_env_t<`r2,`g>;
 
-static bool vardecl_needed(treeshake_env_t env, decl_t d);
+static bool vardecl_needed(treeshake_env_t, decl_t);
 
 static list_t<decl_t> treeshake_f(treeshake_env_t env, list_t<decl_t> ds) {
   return List::filter_c(vardecl_needed, env, ds);

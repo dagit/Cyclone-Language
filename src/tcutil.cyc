@@ -24,6 +24,7 @@
 #include "unify.h"
 #include "relations-ap.h"
 #include "tcutil.h"
+#include "attributes.h"
 using Core;
 using List;
 using Absyn;
@@ -274,22 +275,6 @@ bool is_bits_only_type(type_t t) {
       if (!is_bits_only_type(fs->hd->type)) 
 	return false;
     return true;
-  default: return false;
-  }
-}
-
-// returns true when a function type or pointer to a function includes
-// the noreturn attribute.
-bool is_noreturn_fn_type(type_t t) {
-  switch (compress(t)) {
-  case &PointerType(PtrInfo(elt,_,_)): return is_noreturn_fn_type(elt);
-  case &FnType(FnInfo{.attributes = atts,...}):
-    for (; atts != NULL; atts = atts->tl)
-      switch (atts->hd) {
-      case &Noreturn_att: return true;
-      default: continue;
-      }
-    return false;
   default: return false;
   }
 }
@@ -637,8 +622,8 @@ static kind_t field_kind(type_t field_type,
 kind_t type_kind(type_t t) {
   // FIX: we're assuming sizeof(int) = sizeof(long) = sizeof(void *) here
   switch (compress(t)) {
-  case &Evar(k,_,_,_):    return k->v;
-  case &VarType(tv):      return tvar_kind(tv,&bk);
+  case &Evar(k,...):    return k->v;
+  case &VarType(tv):    return tvar_kind(tv,&bk);
   case &AppType(c,ts):
     switch (c) {
     case &VoidCon:      return &mk;
@@ -728,29 +713,6 @@ kind_t type_kind(type_t t) {
 
 bool kind_eq(kind_t k1, kind_t k2) {
   return k1 == k2 || (k1->kind == k2->kind && k1->aliasqual == k2->aliasqual);
-}
-
-bool same_atts(attributes_t a1, attributes_t a2) {
-  for (_ a = a1; a != NULL; a = a->tl)
-    if (!List::exists_c(equal_att,a->hd,a2)) return false;
-  for (_ a = a2; a != NULL; a = a->tl)
-    if (!List::exists_c(equal_att,a->hd,a1)) return false;
-  return true;
-}
-
-bool is_regparm0_att(attribute_t a){
-  switch(a) {
-  case &Regparm_att(0): return true;
-  default: return false;
-  }
-}
-
-bool equiv_fn_atts(attributes_t a1, attributes_t a2) {
-  for (_ a = a1; a != NULL; a = a->tl)
-    if (!List::exists_c(equal_att,a->hd,a2) && !is_regparm0_att(a->hd))return false;
-  for (_ a = a2; a != NULL; a = a->tl)
-    if (!List::exists_c(equal_att,a->hd,a1)&& !is_regparm0_att(a->hd)) return false;
-  return true; 
 }
 
 // forward declarations
@@ -1264,7 +1226,7 @@ int aggrfield_cmp(aggrfield_t f1, aggrfield_t f2) {
   if(tqc != 0) return tqc;
   let tc = typecmp(f1->type, f2->type);
   if(tc != 0) return tc;
-  let ac = list_cmp(attribute_cmp,f1->attributes, f2->attributes);
+  let ac = list_cmp(Atts::attribute_cmp,f1->attributes, f2->attributes);
   if(ac != 0) return ac;
   ac = star_cmp(Evexp::uint_exp_cmp,f1->width, f2->width);
   if(ac != 0) return ac;
@@ -2003,21 +1965,6 @@ flatten_type(region_t<`r> r, bool flatten, type_t t1) {
   return rnew(r) List(rnew(r) $(empty_tqual(0),t1),NULL);
 }
 
-// Returns true when attribute list a1 can be safely cast to a2
-static bool sub_attributes(attributes_t a1, attributes_t a2) {
-  for (attributes_t t = a1; t != NULL; t = t->tl)
-    switch (t->hd) {
-    case &Pure_att: // can safely omit these in a2
-    case &Noreturn_att:
-    case &Initializes_att(_): continue;
-    default: if (!List::exists_c(equal_att, t->hd, a2)) return false;
-    }
-  for (; a2 != NULL; a2 = a2->tl)
-    if (!List::exists_c(equal_att, a2->hd, a1)) 
-      return false;
-  return true;
-}
-
 static bool isomorphic(type_t t1, type_t t2) {
   switch ($(compress(t1),compress(t2))) {
   case $(&AppType(&IntCon(_,b1),_), &AppType(&IntCon(_, b2),_)):
@@ -2137,7 +2084,7 @@ bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
     // deal with region partial order
     if (!sub_rgnpo(f1.rgn_po,f2.rgn_po)) return false;
     // deal with attributes that can be dropped
-    if (!sub_attributes(f1.attributes,f2.attributes)) return false;
+    if (!Atts::sub_attributes(f1.attributes,f2.attributes)) return false;
     // deal with requires clause
     if (!Relations::check_logical_implication(f2.requires_relns,
 					      f1.requires_relns)) 
@@ -2324,7 +2271,7 @@ type_t fndecl2type(fndecl_t fd) {
     // of the attributes and update the function declaration appropriately.
     let fn_type_atts = NULL;
     for (_ atts = fd->i.attributes; atts != NULL; atts = atts->tl)
-      if (fntype_att(atts->hd))
+      if (Atts::fntype_att(atts->hd))
         fn_type_atts = new List(atts->hd,fn_type_atts);
     let type_info = fd->i;
     type_info.attributes = fn_type_atts;
@@ -3240,22 +3187,6 @@ void check_no_qual(seg_t loc, type_t t) {
       Warn::warn2(loc,"qualifier within typedef type ",t," is ignored");
     return;
   default: return;
-  }
-}
-
-// Transfer any function type attributes from the given list to the
-// function type.
-attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
-  switch (compress(t)) {
-  case &FnType(FnInfo{.attributes = *fnatts,...}):
-    let res_atts = NULL;
-    for (; atts != NULL; atts = atts->tl)
-      if (!fntype_att(atts->hd)) 
-	res_atts = new List(atts->hd,res_atts);
-      else if (!List::mem(attribute_cmp,*fnatts,atts->hd))
-	*fnatts = new List(atts->hd,*fnatts);
-    return res_atts;
-  default: Warn::impos2("transfer_fn_type_atts");
   }
 }
 

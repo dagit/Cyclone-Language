@@ -417,17 +417,17 @@ enum Cyc_CfFlowInfo_InitLevel{Cyc_CfFlowInfo_NoneIL =0U,Cyc_CfFlowInfo_AllIL =1U
 void Cyc_Tcutil_warn(unsigned,struct _fat_ptr,struct _fat_ptr);
 # 51
 int Cyc_Tcutil_is_zeroterm_pointer_type(void*);
-# 73
+# 71
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*def,void*b);
-# 76
+# 74
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_type_bound(void*);
-# 85
+# 83
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*def,void*b);
-# 108
+# 106
 void*Cyc_Tcutil_compress(void*);
-# 290
+# 277
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*);
-# 304
+# 291
 int Cyc_Tcutil_force_type2bool(int desired,void*);
 # 32 "evexp.h"
 extern int Cyc_Evexp_c_can_eval(struct Cyc_Absyn_Exp*e);

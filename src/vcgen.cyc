@@ -84,6 +84,7 @@
 #include "vcgen.h"
 #include "absynpp.h"
 #include "tcutil.h"
+#include "attributes.h"
 #include "evexp.h"
 #include <hashtable.h>
 #include <dict.h>
@@ -1888,7 +1889,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     a2 = kill(a2);
     update_try_assn(env,a2);
     // noreturn functions don't return...
-    if (Tcutil::is_noreturn_fn_type((type_t)e->topt)) a2 = &false_assn;
+    if (Atts::is_noreturn_fn_type((type_t)e->topt)) a2 = &false_assn;
     if (ensopt == NULL) 
       return $(NULL,a2);
     exp_t ensures = (exp_t)ensopt;

@@ -395,7 +395,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
     if (force_type2bool(false,zt)) {
       let $(i,known) = Evexp::eval_const_uint_exp(eopt);
       if (known && i == 1)
-        warn(e1->loc, "pointer arithmetic on thin, zero-terminated pointer may be expensive.");
+        Warn::warn2(e1->loc, "pointer arithmetic on thin, zero-terminated pointer may be expensive.");
     }
     // we have to allow pointer arithmetic that might go out of bounds
     // here.  Consider:
@@ -430,7 +430,7 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
 	err_and_explain(e1->loc,"pointer arithmetic on values of different ",
 			"types(",t1," != ",t2,")");
       // t2 is thin, coerce t1 to thin and return int
-      warn(e1->loc,"coercing fat pointer to thin pointer to support subtraction");
+      Warn::warn2(e1->loc,"coercing fat pointer to thin pointer for subtraction");
       unchecked_cast(e1, star_type(t1_elt,pointer_region(t1),
 				   empty_tqual(0), false_type), 
                      Other_coercion);
@@ -449,20 +449,20 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
     if (is_pointer_type(t2) && Unify::unify(pointer_elt_type(t1),
 					    pointer_elt_type(t2))) {
       if (is_fat_pointer_type(t2)) { 
-        warn(e1->loc,"coercing fat pointer to thin pointer to support subtraction");
+        Warn::warn2(e1->loc,"coercing fat pointer to thin pointer for subtraction");
         unchecked_cast(e2, star_type(pointer_elt_type(t2),
 				     pointer_region(t2),
 				     empty_tqual(0), false_type), 
                        Other_coercion);
       }
-      warn(e1->loc,"thin pointer subtraction!");
+      Warn::warn2(e1->loc,"thin pointer subtraction!");
       return sint_type;
     }
-    warn(e1->loc,"coercing thin pointer to integer to support subtraction");
+    Warn::warn2(e1->loc,"coercing thin pointer to integer for subtraction");
     unchecked_cast(e1, sint_type, Other_coercion);
   }
   if (is_pointer_type(t2)) {
-    warn(e1->loc,"coercing pointer to integer to support subtraction");
+    Warn::warn2(e1->loc,"coercing pointer to integer for subtraction");
     unchecked_cast(e2, sint_type, Other_coercion);
   }
                              
@@ -566,7 +566,7 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t * topt,
 }
 
 static bool check_writable_aggr(seg_t loc, type_t t) {
-  let t = compress(t);
+  t = compress(t);
   switch (t) {
   case &AppType(&AggrCon({.KnownAggr = &ad}),_):
     if (ad->impl == NULL) {
@@ -634,7 +634,7 @@ static void check_writable(tenv_t te, exp_t e) {
     case &TupleType(ts):
       let $(i,known) = Evexp::eval_const_uint_exp(e2);
       if(!known) {
-	Warn::err2(e->loc, "tuple projection cannot use sizeof or offsetof");
+	Warn::err2(e->loc,"tuple projection cannot use sizeof or offsetof");
 	return;
       }
       try {
@@ -935,24 +935,25 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 				Formatstr::get_scanf_types);
 	      break;
 	    }
-	  } catch {case &Nth: terr(loc,"bad format arguments"); break;}
+	  } catch {case &Nth: Warn::err2(loc,"bad format arguments"); break;}
 	  break;
 	default: break;
 	}
       }
-      if (args_info != NULL) terr(loc,"too few arguments for function");
+      if (args_info != NULL) 
+	Warn::err2(loc,"too few arguments for function");
       // if we have left-over arguments, then check for varargs
       else if (es != NULL || c_vararg || cyc_vararg != NULL) {
 	if(c_vararg)
 	  for(; es != NULL; es = es->tl)
 	    tcExp(te, NULL, es->hd);
 	else if(cyc_vararg == NULL)
-	  terr(loc, "too many arguments for function");
+	  Warn::err2(loc, "too many arguments for function");
 	else {
 	  let VarargInfo{_,_,vt,inject} = *cyc_vararg;
 	  let vci = new VarargCallInfo {.num_varargs = 0,
 					.injectors = NULL,
-					.vai = (vararg_info_t @)cyc_vararg};
+					.vai = cyc_vararg};
 	  *vararg_call_info = vci;
 
 	  if (!inject) {
@@ -1000,7 +1001,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 		let f = tcInjection(te,e1,pointer_elt_type(vt),inst,fields);
 		if (f != NULL)
 		  vci->injectors =
-		    append(vci->injectors, new List{(datatypefield_t)f,NULL});
+		    append(vci->injectors, new List{f,NULL});
 	      }
 	      break;
 	    default: Warn::err2(loc,"bad inject vararg type"); break;
@@ -1285,8 +1286,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 	break;
       case &TupleType(l):
 	if(List::length(l) <= n)
-	  terr(loc,"tuple has too few components: %d <= %d",
-	       List::length(l),n);
+	  Warn::err2(loc,"tuple has too few components: ",length(l)," <= ",n);
 	else
 	  t = (*List::nth(l,n))[1];
 	bad_type = false;
@@ -1475,8 +1475,8 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
 		      "tuple projection cannot use sizeof or offsetof");
     try return (*List::nth(ts,i))[1];
     catch { case &Nth:
-	      return expr_err(te,loc,NULL,"index is ",i," but tuple has only ",
-			      List::length(ts), " fields");
+      return expr_err(te,loc,NULL,"index is ",i," but tuple has only ",
+		      List::length(ts), " fields");
     }
   default: return expr_err(te,loc,topt,"subscript applied to ",t1);
   }
@@ -1633,7 +1633,7 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     if (!is_const_exp(bound))
       Warn::err2(bound->loc,"bound is not constant");
     if (!is_const_exp(body))
-      Warn::err2(bound->loc,"body is not constant");
+      Warn::err2(body->loc,"body is not constant");
   }
   if (ztopt != NULL && force_type2bool(false,*ztopt)) {
     //for zero-terminated arrays, the result is 1 larger due to the implicit 0
@@ -1766,7 +1766,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     ex_ts      = ex_ts->tl;
   }
   if(user_ex_ts != NULL)
-    terr(loc, "too many explicit witness types");
+    Warn::err2(loc, "too many explicit witness types");
 
   *ts = exist_typs;
 
@@ -2060,7 +2060,7 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
   type_t t2 = (type_t)e2->topt;
   // Check to see that the type is not an array type
   switch (compress(t1)) {
-  case &ArrayType(_): terr(loc,"cannot assign to an array"); break;
+  case &ArrayType(_): Warn::err2(loc,"cannot assign to an array"); break;
   default: break;
   }
   // check to see that the type is word-sized or a pointer
@@ -2106,9 +2106,7 @@ static type_t tcTagcheck(tenv_t te, seg_t loc, type_t * topt, exp_t e, field_nam
     if (ad->kind == UnionA && ad->impl != NULL && ad->impl->tagged) 
       break;
     fallthru;
-  default:
-    Warn::err2(loc,"expecting @tagged union but found ",t);
-    break;
+  default: Warn::err2(loc,"expecting @tagged union but found ",t); break;
   }
   return uint_type;
 }
@@ -2126,7 +2124,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
   // by default, we allocate heap pointers; this is for making inference
   // simpler.  If you want a unique pointer, do rnew (Core::unique_region)
   type_t rgn = heap_rgn_type;
-  let te = clear_abstract_val_ok(set_new_status(InNew,te));
+  te = clear_abstract_val_ok(set_new_status(InNew,te));
   if (*rgn_handle != NULL) {
     // check that the region handle is still valid
     //JGMFIX: should just unify here

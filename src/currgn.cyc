@@ -21,7 +21,6 @@
 #include "currgn.h"
 #include "tcutil.h"
 #include "warn.h"
-#include "absynpp.h"
 
 using Absyn;
 using Tcutil;

@@ -19,6 +19,7 @@
 #include <string.h>
 #include "unify.h"
 #include "tcutil.h"
+#include "attributes.h"
 #include "evexp.h"
 #include "tcexp.h"
 #include "tc.h"
@@ -358,15 +359,6 @@ static cvtenv_t check_type_inst(cvtenv_t env, types_t @ targsp,
   }
   *targsp = imp_append(*targsp,imp_rev(hidden_ts));
   return env;
-}
-
-static void check_field_atts(seg_t loc, stringptr_t<`H> fn, attributes_t atts) {
-  for (; atts != NULL; atts = atts->tl)
-    switch (atts->hd) {
-    case &Packed_att: 
-    case &Aligned_att(_): continue;
-    default: err2(loc,"bad attribute ",atts->hd," on member ",*fn);
-    }
 }
 
 // check that a @requires/@ensures clause is well-formed and satisfiable
@@ -720,6 +712,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 
     // attributes: check that the attributes are function type attributes
     // and that at most one of {stdcall, cdecl, fastcall} is there.
+    // FIX: move to Atts
     int num_formats = 0;
     int is_cdecl    = 0;
     int is_stdcall  = 0;
@@ -739,7 +732,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	fmt_arg_start = j;
         break;
       default: 
-	if (!fntype_att(atts->hd))
+	if (!Atts::fntype_att(atts->hd))
 	  err2(loc,"bad function type attribute ",atts->hd);
       }
     if((is_stdcall + is_cdecl + is_fastcall) > 1)
@@ -996,7 +989,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       env = i_check_type(env,&tmk,t,true,false);
       tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t);
       check_bitfield(loc,t,width,fn);
-      check_field_atts(loc,fn,atts);
+      Atts::check_field_atts(loc,fn,atts);
       if (requires_clause != NULL) {
 	// FIX: check that this requires clause does not overlap with others?
 	if(k!=UnionA)

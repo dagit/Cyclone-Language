@@ -20,6 +20,7 @@
 #include <string.h>
 #include "unify.h"
 #include "tcutil.h"
+#include "attributes.h"
 #include "absynpp.h"
 #include "tcdecl.h"
 using Core;
@@ -130,7 +131,7 @@ static bool check_tvs(list_t<tvar_t> tvs0, list_t<tvar_t> tvs1,
 
 static bool check_atts(attributes_t atts0, attributes_t atts1,
 		       string_t t, string_t v, seg_t loc,string_t* msg) {
-  if (!same_atts(atts0, atts1)) {
+  if (!Atts::same_atts(atts0, atts1)) {
     merr(loc, msg, "%s %s has different attributes", t, v);
     return false;
   } 
@@ -193,7 +194,7 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
 	     v,*fn0,*fn1);
 	return NULL; // we don't need further messages
       }
-      if (!same_atts(atts0,atts1)) {
+      if (!Atts::same_atts(atts0,atts1)) {
 	merr(loc, msg, "%s %s : attribute mismatch on field %s","type",v,*fn0);
 	res = false;
       }
@@ -580,7 +581,7 @@ check_var_or_fn_decl(scope_t sc0, type_t t0, tqual_t tq0, attributes_t atts0,
   }
   
   // check attribute
-  if (! same_atts(atts0, atts1)) {
+  if (! Atts::same_atts(atts0, atts1)) {
     merr(loc, msg, "%s %s has different attributes", t, v);
     fprintf(stderr,"\tprevious attributes: ");
     for (; atts0 != NULL; atts0 = atts0->tl)

@@ -27,6 +27,7 @@
 // only read bits out, safety is not compromised.
 
 #include "tcutil.h"
+#include "attributes.h"
 #include "evexp.h"
 #include "relations-ap.h"
 #include "new_control_flow.h"
@@ -1267,7 +1268,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     check_fn_requires(env, outflow, orig_es, requires, e->loc);
     // FIX: add in the @ensures information...
     // if the called function doesn't return, we get BottomFL out
-    if (Tcutil::is_noreturn_fn_type((type_t)e1->topt))
+    if (Atts::is_noreturn_fn_type((type_t)e1->topt))
       return $(BottomFL(),typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
     else
       return $(outflow,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
@@ -3000,7 +3001,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
 
   inflow = ReachableFL(d,relns);
 
-  bool      noreturn = Tcutil::is_noreturn_fn_type(Tcutil::fndecl2type(fd));
+  bool      noreturn = Atts::is_noreturn_fn_type(Tcutil::fndecl2type(fd));
   Hashtable::table_t<stmt_t,flow_t@> flow_table =
     Hashtable::create(33, Core::ptrcmp, hash_ptr);
   analenv_t env = 

@@ -41,6 +41,7 @@
 #include "warn.h"
 #include "unify.h"
 #include "tcutil.h"
+#include "attributes.h"
 #include "evexp.h"
 #include "insert_checks.h"
 #include "toc.h"
@@ -811,22 +812,10 @@ type_t typ_to_c(type_t t) {
   case &AppType(&FloatCon(_),_): return t;
   case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}):
     return array_type(typ_to_c(t2),tq,e,false_type,ztl);
-  case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,atts,_,_,_,_,_}):
+  case &FnType(FnInfo{_,_,tq2,t2,args,c_vararg,cyc_vararg,_,atts,...}):
     // just drop the type arguments & effect and translate the nested types
     // also, drop any format descriptors
-    // FIX:  problem with higher-order functions?  Again C's rules are strange.
-    // FIX:  dropping noreturn and const attributes b/c C is complaining.
-    let new_atts = NULL;
-    for (; atts != NULL; atts = atts->tl)
-      switch (atts->hd) {
-      case &Noreturn_att:
-      case &Const_att:
-      case &Format_att(_,_,_): continue;
-      case &Consume_att(_): continue; // correct: a Cyclone addition
-      case &Noliveunique_att(_): continue; // correct: a Cyclone addition
-      case &Initializes_att(_): continue; // correct: a Cyclone addition
-      default: new_atts = new List(atts->hd,new_atts); break;
-      }
+    let new_atts = Atts::atts2c(atts);
     let new_args = List::map(arg_to_c,args);
     if (cyc_vararg != NULL) {
       // region for array type irrelevant

@@ -57,6 +57,7 @@ extern void yyprint(int i, union YYSTYPE<`yy> v);
 #include <string.h>
 #include "warn.h"
 #include "tcutil.h"
+#include "attributes.h"
 #include "currgn.h"
 #include "absynpp.h"
 using Core;
@@ -651,9 +652,7 @@ static type_specifier_t combine_specifiers(seg_t loc,
 // Given a type-specifier, determines the type.  This just really
 // needs to look for conflicts (e.g., "signed unsigned") and collapse
 // the specifier down to a type.
-static type_t
-  collapse_type_specifiers(type_specifier_t ts, seg_t loc) {
-
+static type_t collapse_type_specifiers(type_specifier_t ts, seg_t loc) {
   bool      seen_type = ts.Valid_type_spec;
   bool      seen_sign = ts.Signed_spec || ts.Unsigned_spec;
   bool      seen_size = ts.Short_spec || ts.Long_spec || ts.Long_Long_spec;
@@ -736,7 +735,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
       // function type attributes seen thus far get put in the function type
       attributes_t fn_atts = NULL, new_atts = NULL;
       for (_ as = atts; as != NULL; as = as->tl) {
-	if (fntype_att(as->hd))
+	if (Atts::fntype_att(as->hd))
 	  fn_atts = new List(as->hd,fn_atts);
 	else
 	  new_atts = new List(as->hd,new_atts);
@@ -748,8 +747,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 	  typvars = ts;
 	  tms=tms->tl; // skip TypeParams on call of apply_tms below
 	  break;
-	default:
-	  break;
+	default: break;
 	}
       }
       // special case where the parameters are void, e.g., int f(void)
@@ -847,9 +845,7 @@ static decl_t v_typ_to_typedef(seg_t loc, $(seg_t,qvar_t,tqual_t,type_t,list_t<t
 static stmt_t flatten_decl(decl_t d,stmt_t s) {
   return new_stmt(new Decl_s(d,s),d->loc);
 }
-
-// given a list of local declarations and a statement, produce a big
-// decl statement.
+//given a list of local declarations & a statement, produce a big decl statement
 static stmt_t flatten_declarations(list_t<decl_t> ds, stmt_t s){
   return List::fold_right(flatten_decl,ds,s);
 }
@@ -878,7 +874,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
    case ExternC_sc:  s = ExternC;  break;
    case Static_sc:   s = Static;   break;
    case Auto_sc:     s = Public;   break;
-   case Register_sc: if(no_register) s = Public; else s = Register;   break;
+   case Register_sc: s = no_register ? Public : Register;   break;
    case Abstract_sc: 
    default: s = Abstract; break;
    }
@@ -1591,36 +1587,32 @@ attribute:
       $$ = ^$(&Cdecl_att_val);
     }
   }
-| CONST { $$=^$(&Const_att_val); }
+| CONST { $$=^$(&Const_att_val); } // because const a keyword!
 | IDENTIFIER '(' assignment_expression ')'
   { let s = $1;
     let e = $3;
     attribute_t a;
-    if (zstrcmp(s,"aligned") == 0 || zstrcmp(s,"__aligned__") == 0) {
+    if (zstrcmp(s,"aligned") == 0 || zstrcmp(s,"__aligned__") == 0)
       a = new Aligned_att(e);
-    } else if (zstrcmp(s,"section") == 0 || zstrcmp(s,"__section__") == 0) {
-      string_t str = exp2string(SLOC(@3),e);
-      a = new Section_att(str);
-    } else if (zstrcmp(s,"__mode__") == 0) {
-      string_t str = exp2string(SLOC(@3),e);
-      a = new Mode_att(str);
-    } else if (zstrcmp(s,"alias") == 0) {
-      string_t str = exp2string(SLOC(@3),e);
-      a = new Alias_att(str);
-    }
+    else if (zstrcmp(s,"section") == 0 || zstrcmp(s,"__section__") == 0)
+      a = new Section_att(exp2string(SLOC(@3),e));
+    else if (zstrcmp(s,"__mode__") == 0)
+      a = new Mode_att(exp2string(SLOC(@3),e));
+    else if (zstrcmp(s,"alias") == 0)
+      a = new Alias_att(exp2string(SLOC(@3),e));
     else {
       int n = exp2int(SLOC(@3),e);
       if (zstrcmp(s,"regparm") == 0 || zstrcmp(s,"__regparm__") == 0) {
         if (n < 0 || n > 3) 
           Warn::err(SLOC(@3),"regparm requires value between 0 and 3");
         a = new Regparm_att(n);
-      } else if(zstrcmp(s,"initializes")==0 || zstrcmp(s,"__initializes__")==0) {
+      } else if(zstrcmp(s,"initializes")==0 || zstrcmp(s,"__initializes__")==0) 
         a = new Initializes_att(n);
-      } else if(zstrcmp(s,"noliveunique")==0 || zstrcmp(s,"__noliveunique__")==0){
+      else if(zstrcmp(s,"noliveunique")==0 || zstrcmp(s,"__noliveunique__")==0)
         a = new Noliveunique_att(n);
-      } else if(zstrcmp(s,"consume")==0 || zstrcmp(s,"__consume__")==0) {
+      else if(zstrcmp(s,"consume")==0 || zstrcmp(s,"__consume__")==0) 
         a = new Consume_att(n);
-      } else {
+      else {
         Warn::err(SLOC(@1),"unrecognized attribute");
         a = &Cdecl_att_val;
       }
@@ -2118,37 +2110,21 @@ pointer_qual:
   { $$ = ^$(rnew(yyr) Numelts_ptrqual($3)); }
 | REGION_QUAL '(' any_type_name ')'
   { $$ = ^$(rnew(yyr) Region_ptrqual($3)); }
-| THIN_QUAL
-  { $$ = ^$(rnew(yyr) Thin_ptrqual); }
-| FAT_QUAL
-  { $$ = ^$(rnew(yyr) Fat_ptrqual); }
-| ZEROTERM_QUAL
-  { $$ = ^$(rnew(yyr) Zeroterm_ptrqual); }
-| NOZEROTERM_QUAL
-  { $$ = ^$(rnew(yyr) Nozeroterm_ptrqual); }
-| NOTNULL_QUAL
-  { $$ = ^$(rnew(yyr) Notnull_ptrqual); }
-| NULLABLE_QUAL
-  { $$ = ^$(rnew(yyr) Nullable_ptrqual); }
+| THIN_QUAL       { $$ = ^$(rnew(yyr) Thin_ptrqual); }
+| FAT_QUAL        { $$ = ^$(rnew(yyr) Fat_ptrqual); }
+| ZEROTERM_QUAL   { $$ = ^$(rnew(yyr) Zeroterm_ptrqual); }
+| NOZEROTERM_QUAL { $$ = ^$(rnew(yyr) Nozeroterm_ptrqual); }
+| NOTNULL_QUAL    { $$ = ^$(rnew(yyr) Notnull_ptrqual); }
+| NULLABLE_QUAL   { $$ = ^$(rnew(yyr) Nullable_ptrqual); }
 ;
 
 pointer_null_and_bound:
   '*' pointer_bound 
-   { // avoid putting location info on here when not porting C code
-     seg_t loc = SLOC(@1);
-     if (!parsing_tempest)
-       $$=^$(new $(loc,true_type, $2)); 
-     else 
-       $$=^$(new $(loc,true_type, fat_bound_type)); 
+   { // avoid putting location info on here when not porting C code??
+     $$=^$(new $(SLOC(@1),true_type,(parsing_tempest ? fat_bound_type : $2))); 
    }
-| '@' pointer_bound 
-  {  seg_t loc = SLOC(@1);
-     $$=^$(new $(loc, false_type, $2)); 
-  }
-| '?' 
-  { seg_t loc = SLOC(@1);
-    $$=^$(new $(loc, true_type,  fat_bound_type));  
-  }
+| '@' pointer_bound { $$=^$(new $(SLOC(@1), false_type, $2)); }
+| '?'               { $$=^$(new $(SLOC(@1), true_type,  fat_bound_type)); }
 
 pointer_bound:
 /* empty */ { $$=^$(bounds_one()); }
@@ -2212,15 +2188,13 @@ rgn_order:
     // $$ = ^$(new List(new $(join_eff($1),id2type(id,new Less_kb(NULL,TopRgnKind))), NULL));
     // then we get a core-dump.  I think it must be the gcc bug...
     let kb = new Less_kb(NULL,&Tcutil::trk);
-    let id = $3;
-    let t = id2type(id,kb);
+    let t = id2type($3,kb);
     $$ = ^$(new List(new $(join_eff($1),t), NULL));
   }
 | atomic_effect '>' TYPE_VAR ',' rgn_order 
   { 
     let kb = new Less_kb(NULL,&Tcutil::trk);
-    let id = $3;
-    let t = id2type(id,kb);
+    let t = id2type($3,kb);
     $$ = ^$(new List(new $(join_eff($1),t),$5)); 
   }
 ;
@@ -2230,7 +2204,7 @@ optional_inject:
   {$$ = ^$(false);}
 | IDENTIFIER
      { if (zstrcmp($1,"inject") != 0) 
-         Warn::err(SLOC(@1),"missing type in function declaration");
+         Warn::err2(SLOC(@1),"missing type in function declaration");
        $$ = ^$(true);
      }
 ;
@@ -2288,12 +2262,12 @@ parameter_declaration:
       let t = speclist2typ(tspecs, SLOC(@1));
       let $(tq2,t2,tvs,atts2) = apply_tms(tq,t,atts,tms);
       if (tvs != NULL)
-        Warn::err(SLOC(@2),"parameter with bad type params");
+        Warn::err2(SLOC(@2),"parameter with bad type params");
       if(is_qvar_qualified(qv))
-        Warn::err(SLOC(@1),"parameter cannot be qualified with a namespace");
+        Warn::err2(SLOC(@1),"parameter cannot be qualified with a namespace");
       var_opt_t idopt = (*qv)[1];
       if (atts2 != NULL)
-        Warn::warn(LOC(@1,@2),"extra attributes on parameter, ignoring");
+        Warn::warn2(LOC(@1,@2),"extra attributes on parameter, ignoring");
       $$=^$(new $(idopt,tq2,t2));
     }
 | specifier_qualifier_list
@@ -2301,7 +2275,7 @@ parameter_declaration:
       if (tq.loc == 0) tq.loc = SLOC(@1);
       let t = speclist2typ(tspecs, SLOC(@1));
       if (atts != NULL)
-        Warn::warn(SLOC(@1),"bad attributes on parameter, ignoring");
+        Warn::warn2(SLOC(@1),"bad attributes on parameter, ignoring");
       $$=^$(new $(NULL,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
@@ -2311,10 +2285,10 @@ parameter_declaration:
       let tms = $2.tms;
       let $(tq2,t2,tvs,atts2) = apply_tms(tq,t,atts,tms);
       if (tvs != NULL) // Ex: int (@)<`a>
-        Warn::warn(LOC(@1,@2),
+        Warn::warn2(LOC(@1,@2),
                      "bad type parameters on formal argument, ignoring");
       if (atts2 != NULL)
-        Warn::warn(LOC(@1,@2),"bad attributes on parameter, ignoring");
+        Warn::warn2(LOC(@1,@2),"bad attributes on parameter, ignoring");
       $$=^$(new $(NULL,tq2,t2));
     }
 ;
@@ -2552,8 +2526,7 @@ switch_clauses:
   /* empty */
     { $$=^$(NULL); }
 | DEFAULT ':' block_item_list switch_clauses
-    { // JGM: some linux code has defaults coming before other
-      // cases.
+    { // JGM: some linux code has defaults coming before other cases.
       $$=^$(new List(new Switch_clause(new_pat(&Wild_p_val,SLOC(@1)),NULL,
                                        NULL,$3,LOC(@1,@3)),
 		     $4));}
@@ -2607,31 +2580,22 @@ iteration_statement:
     { $$=^$(for_stmt($3,$5,$7,
 		     $9,LOC(@1,@9))); }
 | FOR '(' declaration ';' ')' statement
-    { let decls = $3;
-      let s = for_stmt(false_exp(DUMMYLOC),true_exp(DUMMYLOC),false_exp(DUMMYLOC),
+    { let s = for_stmt(false_exp(DUMMYLOC),true_exp(DUMMYLOC),false_exp(DUMMYLOC),
 		     $6,LOC(@1,@6));
-      $$=^$(flatten_declarations(decls,s));
+      $$=^$(flatten_declarations($3,s));
     }
 | FOR '(' declaration expression ';' ')' statement
-    { let decls = $3;
-      let s     = for_stmt(false_exp(DUMMYLOC),$4,false_exp(DUMMYLOC),
-                           $7,LOC(@1,@7));
-      $$=^$(flatten_declarations(decls,s));
+    { let s = for_stmt(false_exp(DUMMYLOC),$4,false_exp(DUMMYLOC),$7,LOC(@1,@7));
+      $$=^$(flatten_declarations($3,s));
     }
 | FOR '(' declaration ';' expression ')' statement
-    { let decls = $3;
-      let s     = for_stmt(false_exp(DUMMYLOC),true_exp(DUMMYLOC),$5,
-                           $7,LOC(@1,@7));
-      $$=^$(flatten_declarations(decls,s));
+    { let s = for_stmt(false_exp(DUMMYLOC),true_exp(DUMMYLOC),$5,$7,LOC(@1,@7));
+      $$=^$(flatten_declarations($3,s));
     }
 | FOR '(' declaration expression ';' expression ')' statement
-    { let decls = $3;
-      let s     = for_stmt(false_exp(DUMMYLOC),$4,$6,
-                           $8,LOC(@1,@8));
-      $$=^$(flatten_declarations(decls,s));
+    {let s = for_stmt(false_exp(DUMMYLOC),$4,$6, $8,LOC(@1,@8));
+      $$=^$(flatten_declarations($3,s));
     }
-//| FOR error
-//    { $$=^$(skip_stmt(LOC(@1,@2))); }
 ;
 
 jump_statement:
@@ -2784,7 +2748,6 @@ pattern:
     case &Const_e({.Null_c = _}):
       $$=^$(new_pat(&Null_p_val,e->loc)); break;
     case &Const_e({.String_c = _}): 
-      Warn::err(SLOC(@1),"strings cannot occur within patterns"); break;
     case &Const_e({.Wstring_c = _}): 
       Warn::err(SLOC(@1),"strings cannot occur within patterns"); break;
     case &Const_e({.LongLong_c = _}): 
@@ -2810,7 +2773,7 @@ pattern:
       tvar_t tv = new Tvar(new $3,-1,new Eq_kb(&Tcutil::rk));
       vardecl_t vd = new_vardecl(SLOC(@1),new $(Loc_n, new $6),
 				 type_name_to_type($5,SLOC(@5)),NULL);
-      $$ = ^$(new_pat(new AliasVar_p(tv,vd),location));
+      $$ = ^$(new_pat(new AliasVar_p(tv,vd),LOC(@1,@6)));
     }
 | TYPEDEF_NAME '<' TYPE_VAR '>' type_name IDENTIFIER
     { if (strcmp($1,"alias") != 0) 
@@ -3306,7 +3269,7 @@ string_t token2string(int token) {
   int z = YYTRANSLATE(token);
   if ((unsigned)z < numelts(yytname))
     return yytname[z];
-  else return NULL;
+  return NULL;
 }
 
 namespace Parse{

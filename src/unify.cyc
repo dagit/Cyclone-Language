@@ -23,6 +23,7 @@
 #include "evexp.h"
 #include "relations-ap.h"
 #include "tcutil.h"
+#include "attributes.h"
 #include "unify.h"
 using Core;
 using List;
@@ -464,7 +465,7 @@ static void unify_it(type_t t1, type_t t2) {
     if(bad_effect)
       fail_because(aprintf("(function effects (%s,%s) do not match)", eff1 ? Absynpp::typ2string(eff1) : (string_t)"-",  
 			   eff2 ? Absynpp::typ2string(eff2) : (string_t)"-"));
-    if (!equiv_fn_atts(atts2,atts1))
+    if (!Atts::equiv_fn_atts(atts2,atts1))
       fail_because("(function types have different attributes)");
     if (!same_rgn_po(rpo2,rpo1))
       fail_because("(function types have different region lifetime orderings)");
@@ -497,7 +498,7 @@ static void unify_it(type_t t1, type_t t2) {
       unify_it(f1->type, f2->type);
       unify_tqual(f1->tq, f1->type, f2->tq, f2->type);
       ts_failure = $(t1,t2);
-      if (!same_atts(f1->attributes,f2->attributes))
+      if (!Atts::same_atts(f1->attributes,f2->attributes))
         fail_because("(different attributes on member)");
       if(!unify_const_exp_opt(f1->width,f2->width))
         fail_because("(different bitfield widths on member)");

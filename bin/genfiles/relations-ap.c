@@ -439,21 +439,21 @@ int Cyc_Relations_consistent_relations(struct Cyc_List_List*rlns);
 int Cyc_Unify_unify(void*,void*);struct Cyc_RgnOrder_RgnPO;
 # 40 "tcutil.h"
 int Cyc_Tcutil_is_integral_type(void*);
-# 73
+# 71
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*def,void*b);
-# 85
+# 83
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*def,void*b);
-# 108
+# 106
 void*Cyc_Tcutil_compress(void*);
-# 141
+# 139
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ik;
-# 175
+# 173
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 258
+# 256
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
-# 275
+# 266
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 290
+# 277
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*);
 # 8 "ap.h"
 extern struct Cyc_AP_T*Cyc_AP_one;
