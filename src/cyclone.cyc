@@ -1272,6 +1272,10 @@ int main(int argc, string_t<`H> ?`H argv) {
   if (ccargs == NULL) return 0;
 
   // Run the C compiler
+  if (Specsfile::target_arch && Specsfile::cyclone_exec_path)
+    add_ccarg(str_sepstr(new List(new "",
+                                  add_subdir(Specsfile::cyclone_exec_path,
+                                             Specsfile::target_arch)), " -L"));
   add_ccarg(strconcat("-L",Specsfile::def_lib_path));
 
   ccargs = rev(ccargs);
