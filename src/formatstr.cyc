@@ -193,7 +193,8 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
     switch (lenmod) {
     case &List(x,null) && (x == 'j' || x == 'z' || x == 't'):
       // These length modifiers are OK in C99 but we don't support them yet
-      terr(loc,aprintf("length modifier '%c' is not supported",x));
+      // FIX: is this true now?
+      terr(loc,"length modifier '%c' is not supported",x);
       return null;
     default: break;
     }
@@ -213,7 +214,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
     case 'i':
       for (_ f = flags; f != null; f = f->tl)
         if (f->hd == '#') {
-          terr(loc,aprintf("flag '#' is not valid with %%%c",c));
+          terr(loc,"flag '#' is not valid with %%%c",c);
           return null;
         }
       switch (lenmod) {
@@ -224,9 +225,8 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
         && (x=='h' && y=='h'):       t = schar_t; break;
       // We don't support ll
       default:
-        terr(loc,
-             aprintf("length modifier '%s' is not allowed with %%%c",
-                     String::implode(lenmod), c));
+        terr(loc,"length modifier '%s' is not allowed with %%%c",
+             String::implode(lenmod), c);
         return null;
       }
       typs = new List(t,typs);
@@ -249,9 +249,8 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
         && (x=='h' && y=='h'):       t = uchar_t; break;
       // We don't support ll
       default:
-        terr(loc,
-             aprintf("length modifier '%s' is not allowed with %%%c",
-                     String::implode(lenmod), c));
+        terr(loc,"length modifier '%s' is not allowed with %%%c",
+             String::implode(lenmod), c);
         return null;
       }
       typs = new List(t,typs);
@@ -267,7 +266,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
       // We don't allow any length modifiers for floating point numbers;
       // in particular, we don't allow L (long double)
       if (lenmod != null) {
-        terr(loc,aprintf("length modifiers are not allowed with %%%c",c));
+        terr(loc,"length modifiers are not allowed with %%%c",c);
         return null;
       }
       typs = new List(double_t,typs);
@@ -275,19 +274,19 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
     case 'c':
       for (_ f = flags; f != null; f = f->tl)
         if (f->hd == '#' || f->hd == '0') {
-          terr(loc,aprintf("flag '%c' not allowed with %%c",f->hd));
+          terr(loc,"flag '%c' not allowed with %%c",f->hd);
           return null;
         }
       // We don't allow any length modifiers for characters;
       // in particular, we don't allow l (wint_t)
       if (lenmod != null) {
-        terr(loc,aprintf("length modifier '%s' not allowed with %%c",
-                         String::implode(lenmod)));
+        terr(loc,"length modifier '%s' not allowed with %%c",
+             String::implode(lenmod));
         return null;
       }
       if (precision != null) {
-        terr(loc,aprintf("precision '%s' not allowed with %%c",
-                         String::implode(precision)));
+        terr(loc,"precision '%s' not allowed with %%c",
+             String::implode(precision));
         return null;
       }
       typs = new List(sint_t,typs);
@@ -296,23 +295,21 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
 // FIX: temporarily we don't allow any variations on %s.  To do that
 // we'd have to modify toc.cyc
       if (flags != null) {
-        terr(loc,aprintf("flags '%s' not allowed with %%s",
-                         String::implode(flags)));
+        terr(loc,"flags '%s' not allowed with %%s",String::implode(flags));
         return null;
       }
       if (width != null) {
-        terr(loc,aprintf("width '%s' not allowed with %%s",
-                         String::implode(width)));
+        terr(loc,"width '%s' not allowed with %%s",String::implode(width));
         return null;
       }
       if (precision != null) {
-        terr(loc,aprintf("precision '%s' not allowed with %%s",
-                         String::implode(precision)));
+        terr(loc,"precision '%s' not allowed with %%s",
+             String::implode(precision));
         return null;
       }
       if (lenmod != null) {
-        terr(loc,aprintf("length modifier '%s' not allowed with %%s",
-                         String::implode(lenmod)));
+        terr(loc,"length modifier '%s' not allowed with %%s",
+                         String::implode(lenmod));
         return null;
       }
 //       // Only flag '-' is allowed for %s
@@ -336,12 +333,12 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
     case 'n':
       for (_ f = flags; f != null; f = f->tl)
         if (f->hd == '#' || f->hd == '0') {
-          terr(loc,aprintf("flag '%c' not allowed with %%n",f->hd));
+          terr(loc,"flag '%c' not allowed with %%n",f->hd);
           return null;
         }
       if (precision != null) {
-        terr(loc,aprintf("precision '%s' not allowed with %%n",
-                         String::implode(precision)));
+        terr(loc,"precision '%s' not allowed with %%n",
+             String::implode(precision));
         return null;
       }
       let tenv_tvs = new Opt(lookup_type_vars(te));
@@ -356,31 +353,31 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
           t = at_typ(schar_t,new_evar(&rk,tenv_tvs),empty_tqual()); break;
       // We don't support ll
       default:
-        terr(loc,aprintf("length modifier '%s' not allowed with %%n",
-                         String::implode(lenmod)));
+        terr(loc,"length modifier '%s' not allowed with %%n",
+             String::implode(lenmod));
         return null;
       }
       typs = new List(t,typs);
       break;
     case '%':
       if (flags != null) {
-        terr(loc,aprintf("flags '%s' not allowed with %%%%",
-                         String::implode(flags)));
+        terr(loc,"flags '%s' not allowed with %%%%",
+             String::implode(flags));
         return null;
       }
       if (width != null) {
-        terr(loc,aprintf("width '%s' not allowed with %%%%",
-                         String::implode(width)));
+        terr(loc,"width '%s' not allowed with %%%%",
+             String::implode(width));
         return null;
       }
       if (precision != null) {
-        terr(loc,aprintf("precision '%s' not allowed with %%%%",
-                         String::implode(precision)));
+        terr(loc,"precision '%s' not allowed with %%%%",
+             String::implode(precision));
         return null;
       }
       if (lenmod != null) {
-        terr(loc,aprintf("length modifier '%s' not allowed with %%%%",
-                         String::implode(lenmod)));
+        terr(loc,"length modifier '%s' not allowed with %%%%",
+             String::implode(lenmod));
         return null;
       }
       break;
@@ -495,7 +492,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
     switch (lenmod) {
     case &List(x,null) && (x == 'j' || x == 'z' || x == 't'):
       // These length modifiers are OK in C99 but we don't support them yet
-      terr(loc,aprintf("length modifier '%c' is not supported",x));
+      terr(loc,"length modifier '%c' is not supported",x);
       return null;
     default: break;
     }
@@ -516,9 +513,8 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
         t = at_typ(schar_t,new_evar(&rk,tvs),empty_tqual()); break;
       // We don't support ll
       default:
-        terr(loc,
-             aprintf("length modifier '%s' is not allowed with %%%c",
-                     String::implode(lenmod), c));
+        terr(loc,"length modifier '%s' is not allowed with %%%c",
+              String::implode(lenmod), c);
         return null;
       }
       typs = new List(t,typs);
@@ -541,9 +537,8 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
           t = at_typ(uchar_t,new_evar(&rk,tvs),empty_tqual()); break;
       // We don't support ll
       default:
-        terr(loc,
-             aprintf("length modifier '%s' is not allowed with %%%c",
-                     String::implode(lenmod), c));
+        terr(loc,"length modifier '%s' is not allowed with %%%c",
+              String::implode(lenmod), c);
         return null;
       }
       typs = new List(t,typs);
@@ -565,9 +560,8 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
         t = at_typ(double_t,new_evar(&rk,tvs),empty_tqual()); break;
       // We don't support L
       default:
-        terr(loc,
-             aprintf("length modifier '%s' is not allowed with %%%c",
-                     String::implode(lenmod), c));
+        terr(loc,"length modifier '%s' is not allowed with %%%c",
+              String::implode(lenmod), c);
         return null;
       }
       typs = new List(t,typs);
@@ -597,8 +591,8 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
 	t = at_typ(schar_t,new_evar(&rk,tvs),empty_tqual()); break;
       // We don't support ll
       default:
-        terr(loc,aprintf("length modifier '%s' not allowed with %%n",
-                         String::implode(lenmod)));
+        terr(loc,"length modifier '%s' not allowed with %%n",
+              String::implode(lenmod));
         return null;
       }
       typs = new List(t,typs);
@@ -609,13 +603,13 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
         return null;
       }
       if (width != null) {
-        terr(loc,aprintf("width '%s' not allowed with %%%%",
-                         String::implode(width)));
+        terr(loc,"width '%s' not allowed with %%%%",
+              String::implode(width));
         return null;
       }
       if (lenmod != null) {
-        terr(loc,aprintf("length modifier '%s' not allowed with %%%%",
-                         String::implode(lenmod)));
+        terr(loc,"length modifier '%s' not allowed with %%%%",
+              String::implode(lenmod));
         return null;
       }
       break;

@@ -126,24 +126,23 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
       case Dllimport_att:  continue;
       case Dllexport_att:  continue;
       default:
-        terr(loc,aprintf("bad attribute %s for variable %s",
-                         attribute2string(atts->hd), qvar2string(vd->name)));
+        terr(loc,"bad attribute %s for variable %s",
+             attribute2string(atts->hd), qvar2string(vd->name));
         break;
       }
     }
 
     if(vd->initializer == null) {
       if (check_var_init && !supports_default(t))
-        terr(loc,aprintf("initializer required for variable %s of type %s",
-                         qvar2string(vd->name), typ2string(t)));
+        terr(loc,"initializer required for variable %s of type %s",
+             qvar2string(vd->name), typ2string(t));
     } else {
       let e = (exp_t)vd->initializer;
       // type-check the initializer
       let t2 = Tcexp::tcExpInitializer(te,&t,e);
       if (!coerce_assign(te,e,t))
-        terr(loc,
-             aprintf("%s is declared with type %s but initialized with type %s",
-                     qvar2string(vd->name), typ2string(t), typ2string(t2)));
+        terr(loc,"%s is declared with type %s but initialized with type %s",
+             qvar2string(vd->name), typ2string(t), typ2string(t2));
       // reject non-constant initializers
       if (!Tcutil::is_const_exp(te,e))
         terr(loc,"initializer is not a constant expression");
@@ -165,8 +164,8 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc, vardecl_t vd, bool check_
       // C doesn't allow these attributes on functions
       case &Aligned_att(_): fallthru;
       case Packed_att:
-        terr(loc,aprintf("bad attribute %s in function declaration",
-                         attribute2string(atts->hd)));
+        terr(loc,"bad attribute %s in function declaration",
+             attribute2string(atts->hd));
         break;
       default: continue;
       }
@@ -234,8 +233,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
     switch (atts->hd) {
     case Packed_att: fallthru;
     case &Aligned_att(_): 
-      terr(loc,aprintf("bad attribute %s for function",
-                       attribute2string(atts->hd)));
+      terr(loc,"bad attribute %s for function",attribute2string(atts->hd));
       break;
     default: break;
     }
@@ -300,7 +298,7 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   }
   // check for redeclaration (never allowed, apparently)
   if (Dict::member(ge->typedefs,v)) {
-    terr(loc,aprintf("redeclaration of typedef %s",*v));
+    terr(loc,"redeclaration of typedef %s",*v);
     return;
   }
   // expand to qualified name
@@ -326,7 +324,7 @@ static void tcStructFields(tenv_t te, genv_t ge, seg_t loc,
       let &Structfield(fn,tq,t,width,atts) = fs->hd;
       
       if (List::mem(String::zstrptrcmp,prev_fields,fn))
-	terr(loc, aprintf("duplicate field %s in %s", *fn, obj));
+	terr(loc, "duplicate field %s in %s", *fn, obj);
       // add the field to previous fields only if it's not an empty name
       // (empty names arise for bitfield padding.)
       if (String::strcmp(*fn,"") != 0)
@@ -338,7 +336,7 @@ static void tcStructFields(tenv_t te, genv_t ge, seg_t loc,
       if (width != null) {
 	unsigned int w = 0;
 	if (!Tcutil::is_const_exp(te,width->v))
-	  terr(loc,aprintf("bitfield %s does not have constant width",*fn));
+	  terr(loc,"bitfield %s does not have constant width",*fn);
 	else w = Evexp::eval_const_uint_exp(width->v);
 	switch (compress(t)) {
 	case &IntType(_,b): 
@@ -358,8 +356,8 @@ static void tcStructFields(tenv_t te, genv_t ge, seg_t loc,
 	  }
 	  break;
 	default: 
-	  terr(loc,aprintf("bitfield %s must have integral type but "
-			   "has type %s",*fn,typ2string(t)));
+	  terr(loc,"bitfield %s must have integral type but has type %s",
+               *fn,typ2string(t));
 	  break;
 	}
       }
@@ -377,7 +375,7 @@ static void tcStructOrUniondecl(tenv_t te, genv_t ge, string_t obj, seg_t loc, s
 #endif
   // reject anonymous top-level
   if (sd->name == null) {
-    terr(loc, aprintf("anonymous %ss are not allowed at top level", obj));
+    terr(loc, "anonymous %ss are not allowed at top level", obj);
     return;
   }
 
@@ -386,8 +384,8 @@ static void tcStructOrUniondecl(tenv_t te, genv_t ge, string_t obj, seg_t loc, s
     switch (atts->hd) {
     case Packed_att: continue;
     case &Aligned_att(_): continue;
-    default: terr(loc,aprintf("bad attribute %s in %s %s definition",
-                              attribute2string(atts->hd), obj, *v));
+    default: terr(loc,"bad attribute %s in %s %s definition",
+                  attribute2string(atts->hd), obj, *v);
     break;
     }
   }
@@ -399,9 +397,8 @@ static void tcStructOrUniondecl(tenv_t te, genv_t ge, string_t obj, seg_t loc, s
     case No_constr:
       c->v = new Eq_constr((kind_t)BoxKind); continue;
     case &Eq_constr(MemKind):
-      terr(loc,aprintf("%s %s attempts to abstract type "
-                       "variable %s of kind M", obj, *v,
-                       *tvs->hd->name)); continue;
+      terr(loc,"%s %s attempts to abstract type variable %s of kind M", 
+           obj, *v, *tvs->hd->name); continue;
     default: continue;
     }
   }
@@ -501,9 +498,9 @@ static void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
     // must check that fields are bits-only
     for (_ f = fs; f != null; f = f->tl) {
       if (!bits_only(f->hd->type))
-        terr(loc,aprintf("field %s of union %s has type %s which "
-                         "is not `bits-only'",*f->hd->name,*v,
-                         typ2string(f->hd->type)));
+        terr(loc,"field %s of union %s has type %s which "
+             "is not `bits-only'",*f->hd->name,*v,
+             typ2string(f->hd->type));
     }
 
     *udp = ud; //insert ud in the environment
@@ -549,8 +546,8 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
       switch (c->v) {
       case No_constr: c->v = new Eq_constr((kind_t)BoxKind); break;
       case &Eq_constr(MemKind): 
-        terr(f->loc,aprintf("field %s abstracts type variable of "
-			    "kind M", *(*f->name)[1])); break;
+        terr(f->loc,"field %s abstracts type variable of kind M", 
+             *(*f->name)[1]); break;
       default: break;
       }
     }
@@ -596,12 +593,12 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
     for (_ fs = fields; fs != null; fs = fs-> tl) {
       let f = fs->hd;
       if (List::mem(String::zstrptrcmp, prev_fields, (*f->name)[1]))
-	terr(f->loc,aprintf("duplicate field name %s in %s", *((*f->name)[1]), obj));
+	terr(f->loc,"duplicate field name %s in %s", *((*f->name)[1]), obj);
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1], prev_fields);
       // erase the scope of the field (which has no meaning)
       if (f->sc != Public) {
-	warn(loc, aprintf("ignoring scope of field %s", *((*f->name)[1])));
+	warn(loc, "ignoring scope of field %s", *((*f->name)[1]));
 	f->sc = Public;
       }
     }
@@ -640,8 +637,8 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
     switch (c->v) {
     case No_constr: c->v = new Eq_constr((kind_t)BoxKind); break;
     case &Eq_constr(MemKind): 
-      terr(loc,aprintf("%s %s attempts to abstract type "
-                       "variable %s of kind M",obj,*v,*tvs2->hd->name)); break;
+      terr(loc,"%s %s attempts to abstract type "
+           "variable %s of kind M",obj,*v,*tvs2->hd->name); break;
     default: break;
     }
   }
@@ -658,9 +655,8 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
     try tud_opt = lookup_xtuniondecl(te,loc,tud->name);
     catch {
     case Dict::Absent:
-      terr(loc,
-	   aprintf("qualified xtunion declaration %s is not an existing xtunion",
-		   qvar2string(tud->name)));
+      terr(loc,"qualified xtunion declaration %s is not an existing xtunion",
+           qvar2string(tud->name));
       return;
     }
     if (tud_opt != null) {
@@ -744,15 +740,15 @@ static void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
       let f = fs->hd;
       
       if (List::mem(String::zstrptrcmp,prev_fields,(*f->name)[1]))
-	terr(f->loc,aprintf("duplicate field name %s",*((*f->name)[1])));
+	terr(f->loc,"duplicate field name %s",*((*f->name)[1]));
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1],prev_fields);
       
       if (f->tag == null)
 	f->tag = uint_exp(tag_count, f->loc);
       else if (!Tcutil::is_const_exp(te,(exp_t)f->tag))
-	terr(loc,aprintf("enum %s, field %s: expression is not constant",
-			 *v,*(*f->name)[1]));
+	terr(loc,"enum %s, field %s: expression is not constant",
+             *v,*(*f->name)[1]);
       
       unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag);
       tag_count = t1+1;

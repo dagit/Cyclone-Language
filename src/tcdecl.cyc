@@ -47,7 +47,7 @@ void merr(seg_t loc, string_t * `r msg1, string_t msg2) {
   if (msg1 == null) {
     throw Incompatible;
   } else {
-    terr(loc, aprintf("%s %s", *msg1, msg2));
+    terr(loc, "%s %s", *msg1, msg2);
   }
 }
 

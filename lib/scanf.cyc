@@ -255,16 +255,8 @@ literal:
 			flags |= SHORT;
 			goto again;
 
-		case '0': fallthru;
-                case '1': fallthru;
-                case '2': fallthru;
-                case '3': fallthru;
-                case '4': fallthru;
-		case '5': fallthru;
-                case '6': fallthru;
-                case '7': fallthru;
-                case '8': fallthru;
-                case '9':
+		case '0': case '1': case '2': case '3': case '4': 
+		case '5': case '6': case '7': case '8': case '9':
 			if (flags & ~(SUPPRESS | WIDTH)) goto control_failure;
 			flags |= WIDTH;
 			width = width * 10 + c - '0';
@@ -307,19 +299,14 @@ literal:
 			base = 10;
 			break;
 
-		case 'X': fallthru;
-		case 'x':
+		case 'X': case 'x':
 			flags |= PFXOK;	/* enable 0x prefixing */
 			c = CT_INT;
 			use_strtoul = true;
 			base = 16;
 			break;
 
-		case 'E': fallthru;
-                case 'F': fallthru;
-		case 'e': fallthru;
-                case 'f': fallthru;
-                case 'g':
+		case 'E': case 'F': case 'e': case 'f': case 'g':
 			c = CT_FLOAT;
 			break;
 
@@ -574,20 +561,14 @@ literal:
 					goto ok;
 
 				/* 1 through 7 always legal */
-				case '1': fallthru;
-                                case '2': fallthru;
-                                case '3': fallthru;
-				case '4': fallthru;
-                                case '5': fallthru;
-                                case '6': fallthru;
-                                case '7':
+				case '1': case '2': case '3': case '4': 
+                                case '5': case '6': case '7':
 					base = basefix[base];
 					flags &= ~(SIGNOK | PFXOK | NDIGITS);
 					goto ok;
 
 				/* digits 8 and 9 ok iff decimal or hex */
-				case '8': fallthru; 
-                                case '9':
+				case '8': case '9':
 					base = basefix[base];
 					if (base <= 8)
 						break;	/* not legal here */
@@ -595,18 +576,9 @@ literal:
 					goto ok;
 
 				/* letters ok iff hex */
-				case 'A': fallthru;
-                                case 'B': fallthru;
-                                case 'C': fallthru;
-				case 'D': fallthru;
-                                case 'E': fallthru;
-                                case 'F': fallthru;
-				case 'a': fallthru;
-                                case 'b': fallthru;
-                                case 'c': fallthru;
-				case 'd': fallthru;
-                                case 'e': fallthru;
-                                case 'f':
+				case 'A': case 'B': case 'C': case 'D': 
+                                case 'E': case 'F': case 'a': case 'b': 
+                                case 'c': case 'd': case 'e': case 'f':
 					/* no need to fix base here */
 					if (base <= 10)
 						break;	/* not legal here */
@@ -614,8 +586,7 @@ literal:
 					goto ok;
 
 				/* sign ok only as first character */
-				case '+': fallthru;
-                                case '-':
+				case '+': case '-':
 					if (flags & SIGNOK) {
 						flags &= ~SIGNOK;
 						goto ok;
@@ -623,8 +594,7 @@ literal:
 					break;
 
 				/* x ok iff flag still set & 2nd char */
-				case 'x': fallthru;
-                                case 'X':
+				case 'x': case 'X':
 					if (flags & PFXOK && p == buf + 1) {
 						base = 16;	/* if %i */
 						flags &= ~PFXOK;
@@ -705,21 +675,13 @@ literal:
 				 */
 				switch (c) {
 
-				case '0': fallthru;
-                                case '1': fallthru;
-                                case '2': fallthru;
-                                case '3': fallthru;
-				case '4': fallthru;
-                                case '5': fallthru;
-                                case '6': fallthru;
-                                case '7': fallthru;
-				case '8': fallthru;
-                                case '9':
+				case '0': case '1': case '2': case '3': 
+				case '4': case '5': case '6': case '7': 
+				case '8': case '9':
 					flags &= ~(SIGNOK | NDIGITS);
 					goto fok;
 
-				case '+': fallthru;
-                                case '-':
+				case '+': case '-':
 					if (flags & SIGNOK) {
 						flags &= ~SIGNOK;
 						goto fok;
@@ -731,8 +693,7 @@ literal:
 						goto fok;
 					}
 					break;
-				case 'e': fallthru;
-                                case 'E':
+				case 'e': case 'E':
 					/* no exponent without some digits */
 					if ((flags&(NDIGITS|EXPOK)) == EXPOK) {
 						flags =

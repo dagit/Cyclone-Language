@@ -45,11 +45,6 @@ function declarations are only allowed at top-level.
   hash and sign the code and interface so that we can detect tampering
   with the code or interface at link-time.
 
-* Are we treating static variables (within a function) correctly?  NO:
-  We need to give them heap region and type-check/translate the
-  initializers as though they're at top-level.  Basically, these
-  should be globals in every sense except scope.
-
 * we're too restrictive about typedef names -- C allows typedef names
   to be shadowed by identifiers (or other typedefs).  Our lexer
   doesn't have quite the right infrastructure for this.
@@ -108,8 +103,6 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 
 * long long, short, float, and double constants (including 12s, 3l, etc.)
 
-* write printf, scanf, etc. using our new vararg facility.
-
 * add some way to forward varargs -- easiest would be to cast a vararg
   function to one with an explicit array.
 
@@ -127,10 +120,6 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 
 * add memcpy and memset somehow.
 
-* if in a procedure, we have a t*`r1, we should be able to coerce
-  this to a t*`r2 as long as we know that `r1 lives as long as `r2.
-  Within a procedure, we have enough info to tell this...
-
 THINGS NEEDED TO SIMPLIFY PORTING:
 ----------------------------------
 * we should start on the porting tool -- use region inference to
@@ -140,9 +129,6 @@ THINGS NEEDED TO SIMPLIFY PORTING:
   causes core dump for negative x.  (Not surprising -- x is treated as
   unsigned so that's a really big number and likely, malloc is returning
   null which we're not checking for when we allocate...)
-
-* better formatting support in printf & friends (i.e., deal with full
-  %-specifiers)  
 
 * multi-level initializers, e.g., {{0,1},{2,3}}
 
@@ -221,14 +207,7 @@ MISCELLANEOUS
 
 * We should get the documentation in shape.
 
-* Maybe we should port bison to cyclone.
-
 * need to start putting user's guide together.
-
-* new { for i < x : ' ' }
-  causes core dump for negative x.  (Not surprising -- x is treated as
-  unsigned so that's a really big number and likely, malloc is returning
-  null which we're not checking for when we allocate...)
 
 * better implementation of unresolved mem
 

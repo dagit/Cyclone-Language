@@ -367,15 +367,8 @@ reswitch:	use_cp2 = false;
 			if (!(flags & LADJUST))
 			    flags |= ZEROPAD; /* '-' disables '0' */
 			goto rflag;
-                case '1': fallthru;
-                case '2': fallthru;
-                case '3': fallthru;
-                case '4': fallthru;
-		case '5': fallthru;
-                case '6': fallthru;
-                case '7': fallthru;
-                case '8': fallthru;
-                case '9':
+                case '1': case '2': case '3': case '4': 
+		case '5': case '6': case '7': case '8': case '9':
 			n = 0;
 			do {
 				n = 10 * n + to_digit(ch);
@@ -401,8 +394,7 @@ reswitch:	use_cp2 = false;
 		case 'D':
 			flags |= LONGINT;
 			fallthru;
-		case 'd': fallthru;
-		case 'i':
+		case 'd': case 'i':
                         _ulong = SARG(); ap++;
 			if ((long)_ulong < 0) {
 				_ulong = -_ulong;
@@ -410,12 +402,8 @@ reswitch:	use_cp2 = false;
 			}
 			base = DEC;
 			goto number;
-		case 'e': fallthru;
-		case 'E': fallthru;
-		case 'f': fallthru;
-		case 'F': fallthru;
-		case 'g': fallthru;
-		case 'G':
+		case 'e': case 'E': case 'f': case 'F': 
+		case 'g': case 'G':
                          _double = va_arg_double(ap); ap++;
 			/*
 			 * don't do unrealistic precision; just pad it with
@@ -503,8 +491,7 @@ reswitch:	use_cp2 = false;
                         _ulong = UARG(); ap++;
 			base = DEC;
 			goto nosign;
-		case 'X': fallthru;
-		case 'x':
+		case 'X': case 'x':
                         _ulong = UARG(); ap++;
 			base = HEX;
 			/* leading 0x/X only if non-zero */
@@ -760,8 +747,7 @@ int __cvt_double(double number, int prec, int flags, int @`r1 signp,
 		*p-- = (char)to_char((int)((tmp + .01) * 10));
 	}
 	switch (fmtch) {
-	case 'f': fallthru;
-	case 'F':
+	case 'f': case 'F':
 		/* reverse integer into beginning of buffer */
 		if (expcnt)
 			for (; ++p < endp; *t++ = *p);
@@ -786,8 +772,7 @@ int __cvt_double(double number, int prec, int flags, int @`r1 signp,
 		}
 		for (; prec--; *t++ = '0');
 		break;
-	case 'e': fallthru;
-	case 'E':
+	case 'e': case 'E':
 eformat:	if (expcnt) {
 			*t++ = *++p;
 			if (prec || flags&ALT)
@@ -848,8 +833,7 @@ eformat:	if (expcnt) {
 		}
 		t = exponent(t, expcnt, fmtch);
 		break;
-	case 'g': fallthru;
-	case 'G':
+	case 'g': case 'G':
 		/* a precision of 0 is treated as a precision of 1. */
 		if (!prec)
 			++prec;

@@ -87,13 +87,19 @@ static int fresh_label_counter = 0;
 // errors and reporting
 xtunion exn {Toc_Unimplemented};
 xtunion exn {Toc_Impossible};
-static `a unimp(string_t s) {
-  fprintf(stderr,"%s\n",s);
+static `a unimp(string_t fmt, ...`r1 inject parg_t<`r2> ap) 
+  __attribute__((format(printf,1,2)))
+{
+  vfprintf(stderr,fmt,ap);
+  fprintf(stderr,"\n");
   fflush(stderr);
   throw Toc_Unimplemented;
 }
-static `a toc_impos(string_t s) {
-  fprintf(stderr,"%s\n",s);
+static `a toc_impos(string_t fmt, ...`r1 inject parg_t<`r2> ap) 
+  __attribute__((format(printf,1,2)))
+{
+  vfprintf(stderr,fmt,ap);
+  fprintf(stderr,"\n");
   fflush(stderr);
   throw Toc_Impossible;
 }
@@ -426,7 +432,7 @@ static bool atomic_typ(type_t t) {
   case &PointerType(_):   return false;
   case &RgnHandleType(_): return false;
   default:
-    toc_impos(aprintf("atomic_typ:  bad type %s",typ2string(t)));
+    toc_impos("atomic_typ:  bad type %s",typ2string(t));
     return false;
   }
 }
@@ -452,12 +458,12 @@ static bool is_poly_field(type_t t, field_name_t f) {
   case &AnonStructType(fs):
     let field = lookup_field(fs,f);
     if (field == null) 
-      toc_impos(aprintf("is_poly_field: bad field %s",*field->name));
+      toc_impos("is_poly_field: bad field %s",*field->name);
     return is_void_star(field->type);
   // unions currently permit only bits, so no polytypes
   case &AnonUnionType(_): return false;
   case &UnionType(_,_,_): return false;
-  default: throw toc_impos(aprintf("is_poly_field: bad type %s",typ2string(t)));
+  default: throw toc_impos("is_poly_field: bad type %s",typ2string(t));
   }
 }
 
@@ -471,8 +477,7 @@ static bool is_poly_project(exp_t e) {
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t,_,_,_,_}): return is_poly_field(t,f);
     default: 
-      toc_impos(aprintf("is_poly_project:  bad type %s",
-			typ2string(e1->topt->v)));
+      toc_impos("is_poly_project:  bad type %s",typ2string(e1->topt->v));
       return false;
     }
   default: return false;
@@ -592,7 +597,7 @@ static env_t clear_toplevel(env_t e) {
 static env_t add_varmap(env_t e, qvar_t x, exp_t y) {
   switch ((*x)[0]) {
   case &Rel_n(_):
-    throw toc_impos(aprintf("Toc::add_varmap on Rel_n: %s\n", qvar2string(x)));
+    throw toc_impos("Toc::add_varmap on Rel_n: %s\n", qvar2string(x));
   default: break;
   }
   env_t ans = copy_env(e);
@@ -958,8 +963,7 @@ static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
     // Sanity check: the translation of lvalues may change,
     // so we may need to adjust how we find the inner lvalue.
     if (!is_lvalue(e1))
-      toc_impos(aprintf("lvalue_assign: could not find lvalue in `%s'",
-			exp2string(e1)));
+      toc_impos("lvalue_assign: could not find lvalue in `%s'",exp2string(e1));
     // make a copy so we don't create a loop
     exp_t e1_copy = copy_exp(e1);
     // add the path back on to the expression
@@ -976,7 +980,7 @@ static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
     // we assume free vars of e2 are not captured by d
   case &Decl_s(d,s2): lvalue_assign_stmt(s2,fs,f,f_env); break;
   case &Seq_s(_,s2):  lvalue_assign_stmt(s2,fs,f,f_env); break;
-  default: toc_impos(aprintf("lvalue_assign_stmt: %s",stmt2string(s))); break;
+  default: toc_impos("lvalue_assign_stmt: %s",stmt2string(s)); break;
   }
 }
 
@@ -1013,7 +1017,7 @@ static struct PtrInfo get_ptr_type(type_t t) {
 static void exp_to_c(env_t nv, exp_t e) {
   let r = e->r;
   if(e->topt == null) {
-    toc_impos(aprintf("exp_to_c: no type for %s",exp2string(e)));
+    toc_impos("exp_to_c: no type for %s",exp2string(e));
     return;
   }
   type_t old_typ = e->topt->v;
@@ -1036,7 +1040,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Var_e(qv,b): 
     try e->r = Dict::lookup(nv->varmap,qv)->r;
     catch { case Dict::Absent:
-       toc_impos(aprintf("Can't find %s in exp_to_c, Var\n", qvar2string(qv)));
+       toc_impos("Can't find %s in exp_to_c, Var\n", qvar2string(qv));
        return;
     }
     break;
@@ -1064,8 +1068,8 @@ static void exp_to_c(env_t nv, exp_t e) {
 	}
 	break;
       default: 
-	toc_impos(aprintf("size primop applied to non-array %s (%s)",
-			  typ2string(typs->hd),typ2string(arg->topt->v))); 
+	toc_impos("size primop applied to non-array %s (%s)",
+                  typ2string(typs->hd),typ2string(arg->topt->v)); 
 	return;
       }
       break;
@@ -1379,14 +1383,14 @@ static void exp_to_c(env_t nv, exp_t e) {
     switch (e1->r) {
     case &Struct_e(tdn,_,es,_):
       if (nv->toplevel)
-	unimp(aprintf("%s: & on non-identifiers at the top-level",
-                      Position::string_of_segment(e1->loc)));
+	unimp("%s: & on non-identifiers at the top-level",
+              Position::string_of_segment(e1->loc));
       e->r = init_struct(nv, e1->topt->v, true, null, es, tdn)->r;
       break;
     case &Tuple_e(es):
       if (nv->toplevel)
-	unimp(aprintf("%s: & on non-identifiers at the top-level",
-                      Position::string_of_segment(e1->loc)));
+	unimp("%s: & on non-identifiers at the top-level",
+              Position::string_of_segment(e1->loc));
       e->r = init_tuple(nv, true, null, es)->r;
       break;
     default: // it's actually an address-of.
@@ -1401,8 +1405,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &New_e(rgnopt,e1):
     if (nv->toplevel)
-      unimp(aprintf("%s: new at top-level", 
-                    Position::string_of_segment(e1->loc)));
+      unimp("%s: new at top-level", Position::string_of_segment(e1->loc));
     switch (e1->r) {
     case &Array_e(dles0):
       // FIX: MAY BE SUSCEPTIBLE TO GCC BUG!
@@ -1746,7 +1749,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     switch (compress(st)) {
     case &AnonStructType(afs): fs = afs; break;
     default: 
-      fs = toc_impos(aprintf("anon struct has type %s",typ2string(st))); 
+      fs = toc_impos("anon struct has type %s",typ2string(st)); 
       break;
     }
     region rgn {

@@ -217,7 +217,7 @@ static void check_repeat(tenv_t te, seg_t loc, `a lookup(genv_t,var_t),
     genv_t ge2 = Dict::lookup(te->ae,nss->hd);
     try {
       lookup(ge2,v);
-      Tcutil::terr(loc,aprintf("%s is ambiguous",*v));
+      Tcutil::terr(loc,"%s is ambiguous",*v);
     } catch { case Dict::Absent: break; }
   }
   return;
@@ -291,7 +291,7 @@ list_t<var_t> resolve_namespace(tenv_t te, seg_t loc,
     // Seems inconsistent.
     if (possible_results != null) {
       if (possible_results->tl != null)
-        Tcutil::terr(loc,aprintf("%s is ambiguous",*(n)));
+        Tcutil::terr(loc,"%s is ambiguous",*(n));
       return possible_results->hd;
     }
     if (cns == null)
@@ -537,9 +537,9 @@ static rgn_po_t initial_region_po(seg_t loc, list_t<tvar_t> tvs,
       // r2 has r1 as an ancestor.  Make sure that r1 and r2 aren't the
       // same region, and that r1 doesn't have r2 as an ancestor.
       if (tvar_cmp(r1,r2) == 0 || check_region_outlives(result,r2,r1))
-        terr(loc,aprintf("bad region lifetime assertion (circularity):%s < %s",
-                         typ2string(new VarType(r1)), 
-                         typ2string(new VarType(r2))));
+        terr(loc,"bad region lifetime assertion (circularity):%s < %s",
+             typ2string(new VarType(r1)), 
+             typ2string(new VarType(r2)));
       else {
         // go find r1's po entry and add it to r2's po entry
         let r1 = find_region_in_po(result,r1);
@@ -548,8 +548,8 @@ static rgn_po_t initial_region_po(seg_t loc, list_t<tvar_t> tvs,
       }
       break;
     case $(t1,t2):
-      terr(loc,aprintf("bad region lifetime assertion:: %s < %s",
-                       typ2string(t1), typ2string(t2)));
+      terr(loc,"bad region lifetime assertion:: %s < %s",
+           typ2string(t1), typ2string(t2));
       break;
     }
   }
@@ -641,7 +641,7 @@ resolved_t lookup_ordinary(tenv_t te,seg_t loc,qvar_t q) {
     try return lookup_ordinary_global(te,loc,q);    
     catch {
     case Dict::Absent: 
-      terr(loc,aprintf("unbound identifier: %s", Absynpp::qvar2string(q)));
+      terr(loc,"unbound identifier: %s", Absynpp::qvar2string(q));
       return new VarRes(Unresolved_b);
     }
   }
@@ -784,7 +784,7 @@ tenv_t add_label(tenv_t te, var_t v, stmt_t s) {
       }
   }
   if(Dict::member(fe->shared->seen_labels, v))
-    Tcutil::terr(s->loc, aprintf("Repeated label: %s", *v));
+    Tcutil::terr(s->loc, "Repeated label: %s", *v);
   fe->shared->seen_labels = Dict::insert(fe->shared->seen_labels, v, s);
   return te;
 }
@@ -851,8 +851,8 @@ void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
     if (region_in_effect(false, rgn, capability) ||
         region_in_effect(true, rgn, capability)) return;
   }
-  terr(loc, aprintf("Expression accesses unavailable region %s",
-                    typ2string(rgn)));
+  terr(loc, "Expression accesses unavailable region %s", typ2string(rgn));
+                    
 }
 
 // check that region rt_a outlives region rt_b using the partial order in
@@ -882,8 +882,8 @@ void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
   // for function calls, we drive the slack in the function's effect to 
   // the empty effect
   if (!subset_effect(true, eff, capability))
-    terr(loc, aprintf("Capability %s does not cover function's effect %s",
-                      typ2string(capability), typ2string(eff)));
+    terr(loc, "Capability %s does not cover function's effect %s",
+         typ2string(capability), typ2string(eff));
 }
 
 // Check that a function call's region partial order is compatible
@@ -893,8 +893,8 @@ void check_rgn_partial_order(tenv_t te, seg_t loc,
   for (; po != null; po = po->tl) {
     let &$(r1,r2) = po->hd;
     if (!region_outlives(te, r1, r2))
-      terr(loc, aprintf("function requires that region %s outlive %s",
-                        typ2string(r1),typ2string(r2)));
+      terr(loc, "function requires that region %s outlive %s",
+           typ2string(r1),typ2string(r2));
   }
 }
 

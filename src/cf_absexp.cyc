@@ -518,14 +518,14 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
       switch (ao) {
       case &LocalOp(vd): 
 	if(Tcutil::bits_only(vd->type)) {
-	  Tcutil::warn(loc, aprintf("pointer-free %s may not be fully "
-				    "initialized", *(*vd->name)[1]));
+	  Tcutil::warn(loc, "pointer-free %s may not be fully initialized", 
+                       *(*vd->name)[1]);
 	  break;
 	}
 	fallthru;
       default:
-	Tcutil::terr(loc, aprintf("%s must be fully initialized "
-				  "to be used here", absop2string(ao)));
+	Tcutil::terr(loc, "%s must be fully initialized to be used here", 
+                     absop2string(ao));
 	return BottomFL; // attempt to avoid cascaded messages
       }
 

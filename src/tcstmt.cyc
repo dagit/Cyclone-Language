@@ -117,15 +117,15 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       switch (compress(t)) {
       case VoidType: break;
       default:
-	terr(s0->loc,aprintf("must return a value of type %s",typ2string(t)));
+	terr(s0->loc,"must return a value of type %s",typ2string(t));
         break;
       }
     } else {
       exp_t e = (exp_t)eopt;
       tcExp(te,&t,e);
       if (!coerce_use(te,e,t))
-	terr(s0->loc, aprintf("returns value of type %s but requires %s",
-			      typ2string(e->topt->v), typ2string(t)));
+	terr(s0->loc, "returns value of type %s but requires %s",
+             typ2string(e->topt->v), typ2string(t));
       switch (compress(t)) {
       case VoidType: terr(s0->loc,"function returns void expression"); break;
       default: break;
@@ -180,9 +180,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     for(; ts != null && es != null; ts = ts->tl, es = es->tl) {
       tcExp(te,null,es->hd);
       if(!coerce_arg(te,es->hd,ts->hd))
-	terr(s0->loc, aprintf("fallthru argument has type %s "
-			      "but pattern variable has type %s",
-			      typ2string(es->hd->topt->v), typ2string(ts->hd)));
+	terr(s0->loc, "fallthru argument has type %s "
+             "but pattern variable has type %s",
+             typ2string(es->hd->topt->v), typ2string(ts->hd));
     }
     if (es != null)
       terr(s0->loc, "too many arguments to explicit fallthru");
@@ -214,9 +214,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       // FIX: can pass region if e is an lvalue
       let $(new_tvs,vds) = tcPat(te,p,&t,null);
       if (!unify(p->topt->v,t))
-	terr(scs->hd->loc,
-	     aprintf("switch on type %s, but case expects type %s",
-		     typ2string(t), typ2string(p->topt->v)));
+	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
+             typ2string(t), typ2string(p->topt->v));
       else
 	check_pat_regions(te,p);
       scs->hd->pat_vars = new Opt(vds);
@@ -265,8 +264,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let p       = scs->hd->pattern;
       let $(new_tvs,x) = tcPat(te,p,&exn_typ,null);
       if (!unify(p->topt->v,exn_typ))
-        terr(scs->hd->loc, aprintf("expected xtunion exn but found %s",
-				   typ2string(p->topt->v)));
+        terr(scs->hd->loc, "expected xtunion exn but found %s",
+             typ2string(p->topt->v));
       else
 	check_pat_regions(te,p);
       scs->hd->pat_vars = new Opt(x);
@@ -341,10 +340,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       if (initializer != null) {
         tcExpInitializer(te2,&t,(exp_t)initializer);
         if (!coerce_assign(te2,(exp_t)initializer,t))
-	  terr(d->loc,
-	       aprintf("%s declared with type %s, initialized with type %s",
-		       *x, typ2string(t),
-		       typ2string(initializer->topt->v)));
+	  terr(d->loc, "%s declared with type %s, initialized with type %s",
+               *x, typ2string(t), typ2string(initializer->topt->v));
       }
       tcStmt(set_encloser(te2,s0),s,false);
       return;
@@ -359,8 +356,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       if (topt != null && !unify(p->topt->v,topt->v))
         terr(d->loc,"type of pattern does not match declared type");
       if (!unify(p->topt->v,e->topt->v))
-	terr(d->loc,aprintf("pattern type %s does not match definition type %s",
-			    typ2string(p->topt->v),typ2string(e->topt->v)));
+	terr(d->loc,"pattern type %s does not match definition type %s",
+             typ2string(p->topt->v),typ2string(e->topt->v));
       else
 	check_pat_regions(te,p);
       *exhaust = check_let_pat_exhaustive(p->loc,p); // side effect
@@ -400,8 +397,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     case &Typedef_d(_):       unimp_msg_part = "typedef";   break;
     case &ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;
     }
-    throw impos(aprintf("tcStmt: nested %s declarations unimplemented",
-			unimp_msg_part));
+    throw impos("tcStmt: nested %s declarations unimplemented",unimp_msg_part);
 
   case &Region_s(tv,vd,s):
     // Same KLUDGE as with TryCatch_s -- we need a next statement that is
