@@ -411,7 +411,7 @@ int len=(int)({struct _fat_ptr _tmp15=buf;struct _fat_ptr _tmp16;_tmp16=_tmp15;(
 ({struct _fat_ptr _tmp11=buf;struct _fat_ptr _tmp12=b->buffer;buf=_tmp12;b->buffer=_tmp11;});
 if(({char*_tmp3A=(char*)buf.curr;_tmp3A != (char*)(_tag_fat(0,0,0)).curr;})){
 ({struct _fat_ptr _tmp13=buf;struct _fat_ptr _tmp14=b->buffer;buf=_tmp14;b->buffer=_tmp13;});
-((void(*)(char*))Cyc_Core_ufree)((char*)_untag_fat_ptr(buf,sizeof(char),1U + 1U));
+({(void(*)(char*))Cyc_Core_ufree;})((char*)_untag_fat_ptr(buf,sizeof(char),1U + 1U));
 return 0;}
 # 84
 b->position=0U;
@@ -431,7 +431,7 @@ struct _fat_ptr _tmp17=_tag_fat(0,0,0);struct _fat_ptr buf=_tmp17;
 ({struct _fat_ptr _tmp18=b->initial_buffer;struct _fat_ptr _tmp19=buf;b->initial_buffer=_tmp19;buf=_tmp18;});
 b->length=_get_fat_size(buf,sizeof(char))- 1U;
 ({struct _fat_ptr _tmp1A=b->buffer;struct _fat_ptr _tmp1B=buf;b->buffer=_tmp1B;buf=_tmp1A;});
-((void(*)(char*))Cyc_Core_ufree)((char*)_untag_fat_ptr(buf,sizeof(char),1U + 1U));}
+({(void(*)(char*))Cyc_Core_ufree;})((char*)_untag_fat_ptr(buf,sizeof(char),1U + 1U));}
 # 106
 return;}
 # 109
@@ -450,7 +450,7 @@ struct _fat_ptr _tmp1D=new_buffer;struct _fat_ptr _tmp1E;_tmp1E=_tmp1D;{struct _
 if(({char*_tmp3E=(char*)(b->initial_buffer).curr;_tmp3E == (char*)(_tag_fat(0,0,0)).curr;}))
 ({struct _fat_ptr _tmp1F=b->initial_buffer;struct _fat_ptr _tmp20=b->buffer;b->initial_buffer=_tmp20;b->buffer=_tmp1F;});
 ({struct _fat_ptr _tmp21=b->buffer;struct _fat_ptr _tmp22=new_buffer;b->buffer=_tmp22;new_buffer=_tmp21;});
-((void(*)(char*))Cyc_Core_ufree)((char*)_untag_fat_ptr(new_buffer,sizeof(char),1U + 1U));
+({(void(*)(char*))Cyc_Core_ufree;})((char*)_untag_fat_ptr(new_buffer,sizeof(char),1U + 1U));
 b->length=new_len;
 return;}
 # 129

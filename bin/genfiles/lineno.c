@@ -486,7 +486,7 @@ int Cyc_Lineno_place_cmp(struct _tuple1*place1,struct _tuple1*place2){
 return Cyc_Core_intcmp((*place1).f1,(*place2).f1);}
 # 89
 void Cyc_Lineno_poss_of_abss(struct _fat_ptr filename,struct Cyc_List_List*places){
-places=((struct Cyc_List_List*(*)(int(*)(struct _tuple1*,struct _tuple1*),struct Cyc_List_List*))Cyc_List_merge_sort)(Cyc_Lineno_place_cmp,places);{
+places=({(struct Cyc_List_List*(*)(int(*)(struct _tuple1*,struct _tuple1*),struct Cyc_List_List*))Cyc_List_merge_sort;})(Cyc_Lineno_place_cmp,places);{
 struct Cyc___cycFILE*f=({struct _fat_ptr _tmp24=filename;Cyc_file_open(_tmp24,({const char*_tmp19="r";_tag_fat(_tmp19,sizeof(char),2U);}));});
 {struct _handler_cons _tmp11;_push_handler(& _tmp11);{int _tmp13=0;if(setjmp(_tmp11.handler))_tmp13=1;if(!_tmp13){
 {struct Cyc_Lexing_lexbuf*lbuf=Cyc_Lexing_from_file(f);
@@ -498,10 +498,10 @@ enum Cyc_Lineno_token_val next;
 # 100
 while(places != 0){
 while(1){
-next=((enum Cyc_Lineno_token_val(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lineno_token)(lbuf);
-eol=((int(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme_end)(lbuf);
+next=({(enum Cyc_Lineno_token_val(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lineno_token;})(lbuf);
+eol=({(int(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme_end;})(lbuf);
 # 105
-this_line=((struct _fat_ptr(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme)(lbuf);
+this_line=({(struct _fat_ptr(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme;})(lbuf);
 # 107
 if((int)next == 2 || eol > (*((struct _tuple1*)places->hd)).f1)
 break;

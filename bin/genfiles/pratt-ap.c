@@ -473,7 +473,7 @@ for(1;ds != 0;ds=ds->tl){
 struct Cyc_Pratt_Edge*_tmp19=(struct Cyc_Pratt_Edge*)ds->hd;struct Cyc_Pratt_Edge*e=_tmp19;
 res=({struct Cyc_List_List*_tmp1B=_cycalloc(sizeof(*_tmp1B));({struct Cyc_Pratt_Edge*_tmp52=({struct Cyc_Pratt_Edge*_tmp1A=_cycalloc(sizeof(*_tmp1A));_tmp1A->x=e->x,_tmp1A->y=e->y,_tmp1A->value=e->value;_tmp1A;});_tmp1B->hd=_tmp52;}),_tmp1B->tl=res;_tmp1B;});}
 # 161
-return((struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev)(res);}
+return({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(res);}
 # 164
 struct Cyc_Pratt_Graph*Cyc_Pratt_copy_graph(struct Cyc_Pratt_Graph*G){
 struct Cyc_Pratt_Graph*_tmp1C=G;void*_tmp1E;void*_tmp1D;_tmp1D=_tmp1C->nodes;_tmp1E=_tmp1C->edges;{struct Cyc_List_List*nodes=_tmp1D;struct Cyc_List_List*edges=_tmp1E;

@@ -419,14 +419,14 @@ void*_tmp6=statement->r;void*_stmttmp1=_tmp6;void*_tmp7=_stmttmp1;void*_tmpB;voi
 # 63
  goto _LL0;case 1: _tmp8=((struct Cyc_Absyn_Exp_s_Absyn_Raw_stmt_struct*)_tmp7)->f1;{struct Cyc_Absyn_Exp*e1=_tmp8;
 # 66
-((void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement)(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
+({(void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement;})(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
 goto _LL0;}case 2: _tmp8=((struct Cyc_Absyn_Seq_s_Absyn_Raw_stmt_struct*)_tmp7)->f1;_tmp9=((struct Cyc_Absyn_Seq_s_Absyn_Raw_stmt_struct*)_tmp7)->f2;{struct Cyc_Absyn_Stmt*s1=_tmp8;struct Cyc_Absyn_Stmt*s2=_tmp9;
 # 70
 Cyc_RemoveLabels_build_labelbin(lb,s1);
 Cyc_RemoveLabels_build_labelbin(lb,s2);
 goto _LL0;}case 4: _tmp8=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_tmp7)->f1;_tmp9=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_tmp7)->f2;_tmpA=((struct Cyc_Absyn_IfThenElse_s_Absyn_Raw_stmt_struct*)_tmp7)->f3;{struct Cyc_Absyn_Exp*e1=_tmp8;struct Cyc_Absyn_Stmt*s1=_tmp9;struct Cyc_Absyn_Stmt*s2=_tmpA;
 # 75
-((void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement)(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
+({(void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement;})(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
 Cyc_RemoveLabels_build_labelbin(lb,s1);
 Cyc_RemoveLabels_build_labelbin(lb,s2);
 goto _LL0;}case 8: _tmp8=((struct Cyc_Absyn_Goto_s_Absyn_Raw_stmt_struct*)_tmp7)->f1;{struct _fat_ptr*vt=_tmp8;
@@ -440,20 +440,20 @@ if(lb->label_stmts == 0)({struct Cyc_List_List*_tmp1A=({struct Cyc_List_List*_tm
 Cyc_RemoveLabels_build_labelbin(lb,s1);
 goto _LL0;}case 9: _tmp8=((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_tmp7)->f1;_tmp9=(((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_tmp7)->f2).f1;_tmpA=(((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_tmp7)->f3).f1;_tmpB=((struct Cyc_Absyn_For_s_Absyn_Raw_stmt_struct*)_tmp7)->f4;{struct Cyc_Absyn_Exp*e1=_tmp8;struct Cyc_Absyn_Exp*e2=_tmp9;struct Cyc_Absyn_Exp*e3=_tmpA;struct Cyc_Absyn_Stmt*s1=_tmpB;
 # 92
-((void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement)(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
-((void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement)(e2,lb,Cyc_RemoveLabels_build_labelbin,1);
-((void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement)(e3,lb,Cyc_RemoveLabels_build_labelbin,1);
+({(void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement;})(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
+({(void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement;})(e2,lb,Cyc_RemoveLabels_build_labelbin,1);
+({(void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement;})(e3,lb,Cyc_RemoveLabels_build_labelbin,1);
 Cyc_RemoveLabels_build_labelbin(lb,s1);
 goto _LL0;}case 5: _tmp8=(((struct Cyc_Absyn_While_s_Absyn_Raw_stmt_struct*)_tmp7)->f1).f1;_tmp9=((struct Cyc_Absyn_While_s_Absyn_Raw_stmt_struct*)_tmp7)->f2;{struct Cyc_Absyn_Exp*e1=_tmp8;struct Cyc_Absyn_Stmt*s1=_tmp9;
 # 99
-((void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement)(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
+({(void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement;})(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
 Cyc_RemoveLabels_build_labelbin(lb,s1);
 goto _LL0;}case 12: _tmp8=((struct Cyc_Absyn_Decl_s_Absyn_Raw_stmt_struct*)_tmp7)->f1;_tmp9=((struct Cyc_Absyn_Decl_s_Absyn_Raw_stmt_struct*)_tmp7)->f2;{struct Cyc_Absyn_Decl*d=_tmp8;struct Cyc_Absyn_Stmt*s1=_tmp9;
 # 104
 {void*_tmp10=d->r;void*_stmttmp2=_tmp10;void*_tmp11=_stmttmp2;void*_tmp12;switch(*((int*)_tmp11)){case 0: _tmp12=((struct Cyc_Absyn_Var_d_Absyn_Raw_decl_struct*)_tmp11)->f1;{struct Cyc_Absyn_Vardecl*vdt=_tmp12;
 # 106
 if((unsigned)vdt->initializer)
-((void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement)((struct Cyc_Absyn_Exp*)_check_null(vdt->initializer),lb,Cyc_RemoveLabels_build_labelbin,1);
+({(void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement;})((struct Cyc_Absyn_Exp*)_check_null(vdt->initializer),lb,Cyc_RemoveLabels_build_labelbin,1);
 goto _LL21;}case 2:
  goto _LL27;case 3: _LL27:
  goto _LL29;case 4: _LL29:
@@ -469,7 +469,7 @@ Cyc_RemoveLabels_build_labelbin(lb,s1);
 goto _LL0;}case 14: _tmp8=((struct Cyc_Absyn_Do_s_Absyn_Raw_stmt_struct*)_tmp7)->f1;_tmp9=(((struct Cyc_Absyn_Do_s_Absyn_Raw_stmt_struct*)_tmp7)->f2).f1;{struct Cyc_Absyn_Stmt*s1=_tmp8;struct Cyc_Absyn_Exp*e1=_tmp9;
 # 123
 Cyc_RemoveLabels_build_labelbin(lb,s1);
-((void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement)(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
+({(void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement;})(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
 goto _LL0;}case 15: _tmp8=((struct Cyc_Absyn_TryCatch_s_Absyn_Raw_stmt_struct*)_tmp7)->f1;_tmp9=((struct Cyc_Absyn_TryCatch_s_Absyn_Raw_stmt_struct*)_tmp7)->f2;{struct Cyc_Absyn_Stmt*s1=_tmp8;struct Cyc_List_List*scl=_tmp9;
 # 128
 Cyc_RemoveLabels_build_labelbin(lb,s1);
@@ -477,7 +477,7 @@ for(1;scl != 0;scl=scl->tl){
 Cyc_RemoveLabels_build_labelbin(lb,((struct Cyc_Absyn_Switch_clause*)scl->hd)->body);}
 goto _LL0;}default: _tmp8=((struct Cyc_Absyn_Switch_s_Absyn_Raw_stmt_struct*)_tmp7)->f1;_tmp9=((struct Cyc_Absyn_Switch_s_Absyn_Raw_stmt_struct*)_tmp7)->f2;{struct Cyc_Absyn_Exp*e1=_tmp8;struct Cyc_List_List*scl=_tmp9;
 # 134
-((void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement)(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
+({(void(*)(struct Cyc_Absyn_Exp*,struct Cyc_RemoveLabels_LabelBin*,void(*)(struct Cyc_RemoveLabels_LabelBin*,struct Cyc_Absyn_Stmt*),int))Cyc_Absyn_do_nested_statement;})(e1,lb,Cyc_RemoveLabels_build_labelbin,1);
 for(1;scl != 0;scl=scl->tl){
 Cyc_RemoveLabels_build_labelbin(lb,((struct Cyc_Absyn_Switch_clause*)scl->hd)->body);}
 goto _LL0;}}_LL0:;}

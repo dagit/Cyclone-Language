@@ -432,13 +432,13 @@ static int Cyc_Lexing_read_from_file(struct _fat_ptr aux,int n,struct Cyc___cycF
 return Cyc_file_string_read(f,aux,0,n);}
 # 123
 struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc___cycFILE*f){
-return((struct Cyc_Lexing_lexbuf*(*)(int(*)(struct _fat_ptr,int,struct Cyc___cycFILE*),struct Cyc___cycFILE*))Cyc_Lexing_from_function)(Cyc_Lexing_read_from_file,f);}
+return({(struct Cyc_Lexing_lexbuf*(*)(int(*)(struct _fat_ptr,int,struct Cyc___cycFILE*),struct Cyc___cycFILE*))Cyc_Lexing_from_function;})(Cyc_Lexing_read_from_file,f);}
 # 127
 static void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*lbuf){
 lbuf->lex_eof_reached=1;}
 # 131
 struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _fat_ptr s){
-return({struct Cyc_Lexing_lexbuf*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->refill_buff=(void(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_set_eof,_tmp2->refill_state=(void*)0,({
+return({struct Cyc_Lexing_lexbuf*_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2->refill_buff=({(void(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_set_eof;}),_tmp2->refill_state=(void*)0,({
 # 134
 struct _fat_ptr _tmpF=Cyc_strdup((struct _fat_ptr)s);_tmp2->lex_buffer=_tmpF;}),_tmp2->lex_buffer_len=(int)
 _get_fat_size(s,sizeof(char)),_tmp2->lex_abs_pos=0,_tmp2->lex_start_pos=0,_tmp2->lex_curr_pos=0,_tmp2->lex_last_pos=0,_tmp2->lex_last_action=0,_tmp2->lex_eof_reached=1;_tmp2;});}

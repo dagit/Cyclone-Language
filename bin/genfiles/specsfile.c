@@ -561,15 +561,15 @@ if(j < 4096)
 l=({struct Cyc_List_List*_tmp22=_cycalloc(sizeof(*_tmp22));({struct _fat_ptr*_tmp7C=({struct _fat_ptr*_tmp21=_cycalloc(sizeof(*_tmp21));({struct _fat_ptr _tmp7B=(struct _fat_ptr)Cyc_strdup(_tag_fat(buf,sizeof(char),4096U));*_tmp21=_tmp7B;});_tmp21;});_tmp22->hd=_tmp7C;}),_tmp22->tl=l;_tmp22;});}
 # 192
 DONE:
- l=((struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev)(l);
+ l=({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(l);
 l=({struct Cyc_List_List*_tmp25=_cycalloc(sizeof(*_tmp25));({struct _fat_ptr*_tmp7E=({struct _fat_ptr*_tmp24=_cycalloc(sizeof(*_tmp24));({struct _fat_ptr _tmp7D=({const char*_tmp23="";_tag_fat(_tmp23,sizeof(char),1U);});*_tmp24=_tmp7D;});_tmp24;});_tmp25->hd=_tmp7E;}),_tmp25->tl=l;_tmp25;});{
-struct _fat_ptr _tmp26=((struct _fat_ptr(*)(struct Cyc_List_List*))Cyc_List_to_array)(l);struct _fat_ptr ptrarray=_tmp26;
+struct _fat_ptr _tmp26=({(struct _fat_ptr(*)(struct Cyc_List_List*))Cyc_List_to_array;})(l);struct _fat_ptr ptrarray=_tmp26;
 struct _fat_ptr _tmp27=({unsigned _tmp29=_get_fat_size(ptrarray,sizeof(struct _fat_ptr*));struct _fat_ptr*_tmp28=_cycalloc(_check_times(_tmp29,sizeof(struct _fat_ptr)));({{unsigned _tmp5E=_get_fat_size(ptrarray,sizeof(struct _fat_ptr*));unsigned k;for(k=0;k < _tmp5E;++ k){_tmp28[k]=*((struct _fat_ptr**)ptrarray.curr)[(int)k];}}0;});_tag_fat(_tmp28,sizeof(struct _fat_ptr),_tmp29);});struct _fat_ptr result=_tmp27;
 return result;}}}
 # 200
 struct _fat_ptr Cyc_Specsfile_get_spec(struct Cyc_List_List*specs,struct _fat_ptr spec_name){
 struct _handler_cons _tmp2A;_push_handler(& _tmp2A);{int _tmp2C=0;if(setjmp(_tmp2A.handler))_tmp2C=1;if(!_tmp2C){
-{struct _fat_ptr _tmp2D=*((struct _fat_ptr*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*,struct _fat_ptr*))Cyc_List_assoc_cmp)(Cyc_strptrcmp,specs,& spec_name);_npop_handler(0);return _tmp2D;};_pop_handler();}else{void*_tmp2B=(void*)Cyc_Core_get_exn_thrown();void*_tmp2E=_tmp2B;void*_tmp2F;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp2E)->tag == Cyc_Core_Not_found)
+{struct _fat_ptr _tmp2D=*({(struct _fat_ptr*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*,struct _fat_ptr*))Cyc_List_assoc_cmp;})(Cyc_strptrcmp,specs,& spec_name);_npop_handler(0);return _tmp2D;};_pop_handler();}else{void*_tmp2B=(void*)Cyc_Core_get_exn_thrown();void*_tmp2E=_tmp2B;void*_tmp2F;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp2E)->tag == Cyc_Core_Not_found)
 # 205
 return _tag_fat(0,0,0);else{_tmp2F=_tmp2E;{void*exn=_tmp2F;(int)_rethrow(exn);}};}}}
 # 209
@@ -583,7 +583,7 @@ for(1;dirs != 0;dirs=dirs->tl){
 l=({struct Cyc_List_List*_tmp31=_cycalloc(sizeof(*_tmp31));_tmp31->hd=(struct _fat_ptr*)dirs->hd,_tmp31->tl=l;_tmp31;});
 l=({struct Cyc_List_List*_tmp33=_cycalloc(sizeof(*_tmp33));({struct _fat_ptr*_tmp80=({struct _fat_ptr*_tmp32=_cycalloc(sizeof(*_tmp32));({struct _fat_ptr _tmp7F=(struct _fat_ptr)Cyc_Filename_concat(*((struct _fat_ptr*)dirs->hd),subdir);*_tmp32=_tmp7F;});_tmp32;});_tmp33->hd=_tmp80;}),_tmp33->tl=l;_tmp33;});}
 # 221
-l=((struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev)(l);
+l=({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(l);
 return l;}
 # 236 "specsfile.cyc"
 struct _fat_ptr Cyc_Specsfile_parse_b(struct Cyc_List_List*specs,void(*anonfun)(struct _fat_ptr),int(*anonflagfun)(struct _fat_ptr),struct _fat_ptr errmsg,struct _fat_ptr argv){
@@ -624,7 +624,7 @@ if(Cyc_strlen((struct _fat_ptr)Cyc_Specsfile_def_lib_path)> 0U)
 Cyc_Specsfile_cyclone_exec_path=({struct Cyc_List_List*_tmp40=_cycalloc(sizeof(*_tmp40));
 ({struct _fat_ptr*_tmp8E=({struct _fat_ptr*_tmp3F=_cycalloc(sizeof(*_tmp3F));({struct _fat_ptr _tmp8D=(struct _fat_ptr)({struct _fat_ptr _tmp8C=Cyc_Specsfile_def_lib_path;Cyc_Filename_concat(_tmp8C,({const char*_tmp3E="cyc-lib";_tag_fat(_tmp3E,sizeof(char),8U);}));});*_tmp3F=_tmp8D;});_tmp3F;});_tmp40->hd=_tmp8E;}),_tmp40->tl=Cyc_Specsfile_cyclone_exec_path;_tmp40;});
 # 295
-Cyc_Specsfile_cyclone_exec_path=((struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev)(Cyc_Specsfile_cyclone_exec_path);
+Cyc_Specsfile_cyclone_exec_path=({(struct Cyc_List_List*(*)(struct Cyc_List_List*))Cyc_List_imp_rev;})(Cyc_Specsfile_cyclone_exec_path);
 Cyc_Specsfile_cyclone_arch_path=Cyc_Specsfile_also_subdir(Cyc_Specsfile_cyclone_exec_path,Cyc_Specsfile_target_arch);
 return otherargs;}}}
 # 301

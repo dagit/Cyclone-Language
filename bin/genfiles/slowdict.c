@@ -606,4 +606,4 @@ struct Cyc_List_List*Cyc_SlowDict_to_list_f(void*k,void*v,struct Cyc_List_List*a
 return({struct Cyc_List_List*_tmp5A=_cycalloc(sizeof(*_tmp5A));({struct _tuple0*_tmp83=({struct _tuple0*_tmp59=_cycalloc(sizeof(*_tmp59));_tmp59->f1=k,_tmp59->f2=v;_tmp59;});_tmp5A->hd=_tmp83;}),_tmp5A->tl=accum;_tmp5A;});}
 # 296
 struct Cyc_List_List*Cyc_SlowDict_to_list(struct Cyc_SlowDict_Dict*d){
-return((struct Cyc_List_List*(*)(struct Cyc_List_List*(*)(void*,void*,struct Cyc_List_List*),struct Cyc_SlowDict_Dict*,struct Cyc_List_List*))Cyc_SlowDict_fold)(Cyc_SlowDict_to_list_f,d,0);}
+return({(struct Cyc_List_List*(*)(struct Cyc_List_List*(*)(void*,void*,struct Cyc_List_List*),struct Cyc_SlowDict_Dict*,struct Cyc_List_List*))Cyc_SlowDict_fold;})(Cyc_SlowDict_to_list_f,d,0);}

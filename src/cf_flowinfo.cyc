@@ -194,7 +194,7 @@ static struct Aggrfield@`t
 // this is the same as aggrfields_to_aggrdict, except that it
 // performs a type substitution -- this is necessary to deal
 // with abstract type parameters that are instantiated with
-// structs or other aggregates.  
+// structs or other aggregates.
 static aggrdict_t substitute_aggrfields_to_aggrdict(flow_env_t fenv,
 						    list_t<tvar_t> tvs,
 						    list_t<type_t> targs,
@@ -202,7 +202,7 @@ static aggrdict_t substitute_aggrfields_to_aggrdict(flow_env_t fenv,
 						    bool no_init_bits_only,
 						    absRval_t leafval){
   region temp;
-  // zip up tvs and targs, but filter out any type parameters that aren't 
+  // zip up tvs and targs, but filter out any type parameters that aren't
   // types (e.g., regions) so as to avoid having to substitute.  Note that
   // we do have to deal with integer kinded types due to arrays.
   list_t<$(tvar_t,type_t)@`temp,`temp> inst = NULL;
@@ -271,7 +271,7 @@ static absRval_t i_typ_to_absrval(flow_env_t fenv,
       return (allow_zeroterm && !no_init_bits_only && Tcutil::is_bits_only_type(et)) ? fenv->unknown_all : leafval;
     break;
   case &AppType(&TagCon,&List{t,_}): return leafval;
-  case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_,_}}): 
+  case &PointerType(PtrInfo{_,_,PtrAtts{_,nbl,_,_,_,_}}):
     if (!Tcutil::force_type2bool(false,nbl))
       switch(leafval) {
       case &UnknownR(AllIL): return fenv->notzeroall;
@@ -371,7 +371,7 @@ absRval_t make_unique_consumed(flow_env_t fenv, type_t t, exp_t consumer, int it
         d2[i] = make_unique_consumed(fenv,t2,consumer,iteration,d[i],local_alias);
     }
     return new Aggregate(b,d2);
-  default: 
+  default:
     if (Tcutil::is_noalias_pointer(t,false))
       return new Consumed(consumer,iteration,r,local_alias);
     return r;
@@ -457,7 +457,7 @@ static aggrdict_t aggr_dict_insert(aggrdict_t d, int n, absRval_t rval) {
 // fields [fs], functionally updating entries in the aggregate
 // dictionary [d] as it unwinds, avoiding changes if pointer equality
 // is maintained.
-static absRval_t insert_place_outer(path_t path, 
+static absRval_t insert_place_outer(path_t path,
 				    absRval_t old_val, absRval_t new_val) {
   if(path==NULL)
     return insert_place_inner(new_val,old_val);
@@ -526,7 +526,7 @@ static initlevel_t initlevel_rec(struct InitlevelEnv @ env,
   if(acc == NoneIL) return NoneIL;
   switch(r) {
   case &NamedLocation(_,r): return initlevel_rec(env,r,acc);
-  case &Aggregate(UnionRInfo{.is_union = iu, .fieldnum = f }, d) && iu: 
+  case &Aggregate(UnionRInfo{.is_union = iu, .fieldnum = f }, d) && iu:
     // union case
     // if one of the members is AllIL then we're okay; if we know the
     // field, then it better be the known field that's initialized
@@ -564,8 +564,8 @@ static initlevel_t initlevel_rec(struct InitlevelEnv @ env,
   return this_ans;
 }
 initlevel_t initlevel(flow_env_t env, flowdict_t d, absRval_t r) {
-  let env = InitlevelEnv(d,NULL);
-  return initlevel_rec(&env,r,AllIL);
+  let env2 = InitlevelEnv(d,NULL);
+  return initlevel_rec(&env2,r,AllIL);
 }
 
 absRval_t lookup_place(flowdict_t d, place_t place) {
@@ -722,7 +722,7 @@ static absRval_t assign_place_outer(struct AssignEnv @ env,
   case $(&List(&Star,tl),&UniquePtr(r)):
     let new_r = assign_place_outer(env,tl,path_prefix+1,r,newval);
     if (new_r == r) return oldval;
-    else return new UniquePtr(new_r);    
+    else return new UniquePtr(new_r);
   case $(&List(&Dot(fnum),tl),&Aggregate(UnionRInfo(is_union,fldnum),d)):
     let new_child = assign_place_outer(env,tl,path_prefix+1,
 				       d[fnum],newval);
@@ -804,7 +804,7 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2);//fo
 //The case aggregate values is the only special one since we need to examine
 //the fields of the aggregate and join them individually.
 //For this, fall back on the join_absRval which now has a special case for
-//joining aggregates in a tryflow. 
+//joining aggregates in a tryflow.
 static absRval_t join_absRval_tryflow(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
   if(r1 == r2) return r1;
   switch($(contains_local_consumed(r1),contains_local_consumed(r2))) {
@@ -813,7 +813,7 @@ static absRval_t join_absRval_tryflow(joinenv_t env,`a a,absRval_t r1,absRval_t 
   default:
     return join_absRval(env, a, r1, r2);
   }
-}	   
+}
 
 // note: There is another reasonable policy for losing an alias to AllInit:
 //   (when destination unescaped!)
@@ -891,7 +891,7 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
     aggrdict_t new_d =
       new {for i < numelts(d1) : (env->is_try_flow ? join_absRval_tryflow(env,0,d1[i],d2[i]) :
 				  join_absRval(env,a,d1[i],d2[i])) };
-    
+
     // try to preserve sharing by returning one of the original arrays
     // if there was no change
     bool change = false;
@@ -937,7 +937,7 @@ static absRval_t join_absRval(joinenv_t env,`a a,absRval_t r1,absRval_t r2) {
 
 //in the case of tryflows, values that are consumed within the scope of
 //the try-block due to a local alias (let alias<`r>) are to be treated as
-//unconsumed in the catch block. In particular, we want the join of (x and Consumed(...,local)) 
+//unconsumed in the catch block. In particular, we want the join of (x and Consumed(...,local))
 //to be x, where x != Consumed(...,local)
 flow_t join_tryflow(flow_env_t fenv, flow_t newflow, flow_t oldflow){
   // if(f1 == f2) return f1;
@@ -1013,7 +1013,7 @@ static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2) {
   case $(&UniquePtr(r1), &UniquePtr(r2)): return absRval_lessthan_approx(ignore,r1,r2);
   case $(&UniquePtr(_),_):
   case $(_,&UniquePtr(_)): return false;
-  case $(&Aggregate(UnionRInfo{is_union1,fld1},d1), 
+  case $(&Aggregate(UnionRInfo{is_union1,fld1},d1),
          &Aggregate(UnionRInfo{is_union2,fld2},d2)):
     if (is_union1 && fld1 != fld2) return false;
     if (d1 == d2) return true;
@@ -1024,7 +1024,7 @@ static bool absRval_lessthan_approx(`a ignore, absRval_t r1, absRval_t r2) {
   case $(_, &NotZeroAll): return false;
   case $(&Esc(_),&Esc(_)): break;
   case $(&Esc(_),_): return false;
-  default: 
+  default:
     DEBUG_PRINT("lessthan_approx: r1 = ");
     DEBUG_PRINT_F(print_absrval,r1);
     DEBUG_PRINT(", r2 = ");

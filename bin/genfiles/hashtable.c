@@ -396,7 +396,7 @@ void Cyc_Hashtable_insert(struct Cyc_Hashtable_Table*t,void*key,void*val){
 struct _fat_ptr tab=t->tab;
 int bucket=(int)({unsigned _tmp2C=(unsigned)((t->hash))(key);_tmp2C % _get_fat_size(tab,sizeof(struct Cyc_List_List*));});
 ({struct Cyc_List_List*_tmp2E=({struct Cyc_List_List*_tmp3=_region_malloc(t->r,sizeof(*_tmp3));({struct _tuple0*_tmp2D=({struct _tuple0*_tmp2=_region_malloc(t->r,sizeof(*_tmp2));_tmp2->f1=key,_tmp2->f2=val;_tmp2;});_tmp3->hd=_tmp2D;}),_tmp3->tl=((struct Cyc_List_List**)tab.curr)[bucket];_tmp3;});((struct Cyc_List_List**)tab.curr)[bucket]=_tmp2E;});
-if(({int _tmp2F=((int(*)(struct Cyc_List_List*))Cyc_List_length)(((struct Cyc_List_List**)tab.curr)[bucket]);_tmp2F > t->max_len;}))
+if(({int _tmp2F=({(int(*)(struct Cyc_List_List*))Cyc_List_length;})(((struct Cyc_List_List**)tab.curr)[bucket]);_tmp2F > t->max_len;}))
 Cyc_Hashtable_resize(t);}
 # 55
 void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,void*key){
