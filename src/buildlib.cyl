@@ -1478,6 +1478,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     if (!maybe) throw new NO_SUPPORT(aprintf("can't open macrosfile %s",
                                              macrosfile));
 
+    if (verbose) fprintf(stderr,"Getting macros...");
     in_file = (FILE@)maybe;
     let l = Lexing::from_file(in_file);
     let entry;
@@ -1488,17 +1489,20 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       //      Set::iter(pr,uses);
     }
     fclose(in_file);
+    if (verbose) fprintf(stderr,"done.\n");
 
     /* Get the type declarations out of the file */
     maybe = fopen(declsfile,"r");
     if (!maybe) throw new NO_SUPPORT(aprintf("can't open declsfile %s",
                                              declsfile));
 
+    if (verbose) fprintf(stderr,"Extracting declarations...");
     in_file = (FILE@)maybe;
     l = Lexing::from_file(in_file);
     slurp_out = fopen(filtereddeclsfile,"w");
     if (!slurp_out) return 1;
     while (slurp(l)) /* skip */;
+    if (verbose) fprintf(stderr,"done.\n");
     // Now include (renamed) user-defined declarations
     let x = user_defs;
     while (x != NULL) {
@@ -1514,12 +1518,14 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     maybe = fopen(filtereddeclsfile,"r");
     if (!maybe) return 1;
+    if (verbose) fprintf(stderr,"Parsing declarations...");
     in_file = (FILE@)maybe;
     Position::reset_position(filtereddeclsfile);
     Lex::lex_init(false);// must forget typedefs, may as well flush symbols too
     let decls = Parse::parse_file(in_file);
     Lex::lex_init(false); // garbage collect those big tries
     fclose(in_file);
+    if (verbose) fprintf(stderr,"done.\n");
     //JGM:remove(filtereddeclsfile);
 
     for (let d = decls; d != NULL; d = d->tl)

@@ -1932,6 +1932,10 @@ hstub herror {
 netinet/in.h:
 cpp {
   #include <sys/types.h>
+  #ifdef __APPLE__
+  // for uint32_t and uint16_t on OS X
+  #include <stdint.h>
+  #endif
 }
 include {
 in_port_t
@@ -3752,6 +3756,9 @@ hstub ftok {
 ;
 
 sys/mman.h:
+cpp {
+  #include <sys/types.h>  // For size_t on OS X
+}
 include {
 size_t
 off_t
@@ -3891,6 +3898,9 @@ hstub setrlimit {
 
 // Semaphores -- not supported yet
 sys/sem.h:
+cpp {
+  #include <sys/types.h>  // For ushort on OS X
+}
 ;
 
 sys/select.h:
@@ -4039,6 +4049,9 @@ sys/shm.h:
 ;
 
 sys/socket.h:
+cpp {
+  #include <sys/types.h>  // For u_char on OS X
+}
 include {
 sockaddr
 socklen_t
@@ -4689,6 +4702,9 @@ hstub {
 
 // Defines a struct containing a void *, not supported.
 sys/uio.h:
+cpp {
+  #include <sys/types.h>  // For size_t and ssize_t on OS X
+}
 ;
 
 sys/un.h:
@@ -5013,6 +5029,12 @@ trace.h:
 // User context
 // Defines a pointer-containing struct, not supported yet
 ucontext.h:
+cpp {
+  #include <sys/types.h>  // For fd_set on OS X
+  #include <sys/time.h>   // For struct timeval on OS X
+  #include <unistd.h> // For select on OS X
+  #include <sys/select.h>  // For sigset_t on OS X
+}
 ;
 
 // Defines a vararg function, needs a stub to be written
