@@ -41,6 +41,7 @@ tools:
 	$(MAKE) -C tools/bison  install 
 	$(MAKE) -C tools/cyclex install 
 	$(MAKE) -C tools/flex   install 
+	$(MAKE) -C tools/rewrite install
 aprof:
 	$(MAKE) -C bin/genfiles install_a 
 	$(MAKE) -C tools/aprof  install 
@@ -96,7 +97,7 @@ inc_install inc_uninstall:
 endif
 ifdef BIN_INSTALL
 bin_install:
-	$(SHELL) config/cyc_install bin/cyclone$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) bin/cycflex$(EXE) $(BIN_INSTALL)
+	$(SHELL) config/cyc_install bin/cyclone$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) bin/cycflex$(EXE) bin/rewrite$(EXE) $(BIN_INSTALL)
 bin_uninstall:
 	$(SHELL) config/cyc_install -u $(BIN_INSTALL)
 else
@@ -327,13 +328,14 @@ clean_nogc: clean_test clean_build
 	$(MAKE) -C tools/bison  clean
 	$(MAKE) -C tools/cyclex clean
 	$(MAKE) -C tools/flex   clean
+	$(MAKE) -C tools/rewrite clean
 	$(MAKE) -C tools/aprof  clean
 	$(MAKE) -C bin/genfiles clean
 	$(MAKE) -C tests        clean
 #	$(MAKE) -C doc          clean
 	$(MAKE) -C lib/xml      clean
 	$(RM) -r bin/lib
-	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cycdoc buildlib cycbison cyclex cycflex aprof))
+	$(RM) $(addprefix bin/, $(addsuffix $(EXE), cyclone cycdoc buildlib cycbison cyclex cycflex aprof rewrite))
 	$(RM) *~ amon.out
 
 clean: clean_nogc
