@@ -47,6 +47,12 @@ extern void radd(region_t<`r>, queue_t<`a,`r>,`a x);
   /** [radd(r,q,x)] is like [add(q,x)] except that the queue lives in
       the region with handle [r]. */
 
+extern void push(queue_t<`a,`H> q, `a x);
+  /** [push(q,x)] adds [x] to the front of [q] (by side effect). */
+extern void rpush(region_t<`r> r, queue_t<`a,`r> q,`a x);
+  /** [rpush(r,q,x)] is like [push(q,x)] except that the queue lives in
+      the region with handle [r]. */
+
 extern xtunion exn { extern Empty };
   /** [Empty] is an exception raised by [take] and [peek]. */
 extern `a take(queue_t<`a>);

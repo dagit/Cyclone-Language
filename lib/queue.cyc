@@ -65,6 +65,18 @@ void add(queue_t<`a,`H> q, `a x) {
   radd(Core::heap_region,q,x);
 }
 
+// insert an element into the front of the queue (side effect)
+void rpush(region_t<`r> r, queue_t<`a,`r> q,`a x) {
+  q->front = rnew(r) List(x,q->front);
+  if (q->rear == NULL)
+    q->rear = q->front;
+  q->len++;
+}
+
+void push(queue_t<`a,`H> q, `a x) {
+  rpush(Core::heap_region,q,x);
+}
+
 // get and remove an element from the front of the queue (side effect)
 `a take(queue_t<`a> q) {
   if (q->front == NULL)
