@@ -86,6 +86,7 @@ extern absLval_t<`r> UnknownL();
 
 EXTERN_CFFLOW datatype AbsRVal<`r::R>;
 typedef datatype AbsRVal<`r> @`r absRval_t<`r>;
+typedef datatype AbsRVal<`r> *`r absRval_opt_t<`r>;
 typedef Dict::dict_t<root_t<`r>,absRval_t<`r>,`r> flowdict_t<`r>;
 typedef absRval_t<`r> ?`r aggrdict_t<`r>;
 EXTERN_CFFLOW struct UnionRInfo {

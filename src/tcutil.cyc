@@ -3166,7 +3166,8 @@ list_t<aggrfield_t> subst_aggrfields(region_t<`r> r,
   let new_f = subst_aggrfield(r,inst,f);
   let new_t = subst_aggrfields(r,inst,t);
   if (new_f == f && new_t == t) return fs;
-  return new List(f,fs);
+  // return new List(f,fs);
+  return new List(new_f,new_t);
 }
 
 list_t<$(type_t,type_t)@> rsubst_rgnpo(region_t<`r> rgn,
