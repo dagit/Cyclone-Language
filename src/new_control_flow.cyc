@@ -483,9 +483,14 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     let $(f1,r1) = anal_Rexp(env,inflow,e1);
     let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
     switch(Tcutil::compress(e1->topt->v)) {
-    case &AnonUnionType(_):
-    case &UnionType(_,_,_): return $(f2,r2); // just drop the field
-    default: break;
+    case &PointerType(PtrInfo(t2,_,_,_,_)):
+      switch(Tcutil::compress(t2)) {
+      case &AnonUnionType(_):
+      case &UnionType(_,_,_): return $(f2,r2); // just drop the field
+      default: break;
+      }
+      break;
+    default: throw new Core::Impossible("anal_Rexp: StructArrow ptr");
     }
     switch(r2) {
     case &Aggregate(rdict): return $(f2,Dict::lookup(rdict,field));
