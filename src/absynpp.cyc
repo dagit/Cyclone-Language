@@ -1985,6 +1985,12 @@ doc_t decl2doc(decl_t d) {
   case &Portoff_d:
     s = cat(text("__cyclone_port_off__;"), lb());
     break;
+  case &Tempeston_d:
+    s = cat(text("__tempest_on__;"), lb());
+    break;
+  case &Tempestoff_d:
+    s = cat(text("__tempest_off__;"), lb());
+    break;
 
   }
   return s;

@@ -35,16 +35,15 @@ void read_filename(FILE@ input, char ?buf) {
 
 void read_num(FILE@ input, int @j) {
   char buffer[11]@zeroterm = {for i < 10 : 0};
-  char ?buf = (char ?)buffer;
   int i = 0;
   int c = fgetc(input);
   while (c >= '0' && c <= '9') {
-    buf[i] = (char)c;
+    buffer[i] = (char)c;
     i++;
     c = fgetc(input);
   }
   if (c == EOF) throw &Eof_val;
-  *j = atoi(buf);
+  *j = atoi(buffer);
 }
 
 void read_line(FILE @f) {

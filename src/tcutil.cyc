@@ -4182,7 +4182,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 	(kind_leq(expected_kind,(*k)->v) && !kind_leq((*k)->v,expected_kind)))
       *k = kind_to_opt(expected_kind);
     if (cvtenv.fn_result && cvtenv.generalize_evars &&
-	expected_kind->kind == RgnKind) {
+	expected_kind->kind == RgnKind && !te->tempest_generalize) {
       if (expected_kind->aliasqual == Unique)
 	*ref = unique_rgn_type;
       else // generalize Top RgnKind evars to be the heap in return values
@@ -4391,12 +4391,12 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // vars (and evars) of the function type in case we have to abstract them.
     let new_cvtenv =
       CVTEnv{heap_region,cvtenv.kind_env,NULL,NULL,cvtenv.generalize_evars,true};
-
-      // results and arguments of functions cannot be abstract mem types
-      // FIX?: should check that variables are unique and that tquals are ok
       new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&tmk,tr,true,true);
       rtq->real_const = extract_const_from_typedef(loc,rtq->print_const,tr);
       new_cvtenv.fn_result = false;
+
+      // results and arguments of functions cannot be abstract mem types
+      // FIX?: should check that variables are unique and that tquals are ok
       for (_ a = args; a != NULL; a = a->tl) {
         let trip = a->hd;
         let t = (*trip)[2];
@@ -4495,7 +4495,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       // to make it possible to enter the parameters as variables that can
       // be mentioned in the @requires clause.  
       let fenv = bogus_fenv(tr, args);
-      let ftenv = new Tenv{te->ns, te->ae, fenv, true, te->in_extern_c_include};
+      let ftenv = new Tenv{te->ns, te->ae, fenv, true, te->in_extern_c_include, te->in_tempest,te->tempest_generalize};
       let $(nenv,req_rs) = check_clause(loc,ftenv,new_cvtenv,"@requires",req);
       new_cvtenv = nenv;
       *req_relns = req_rs;
@@ -4832,8 +4832,9 @@ void check_free_evars(list_t<type_t> free_evars, type_t in_t, seg_t loc) {
 // list of the bound type variables and have the right kinds.
 void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
   bool generalize_evars = is_function_type(t);
+  if (te->in_tempest && !te->tempest_generalize) generalize_evars = false;
   let te_vars = lookup_type_vars(te);
-  kind_t expected_kind = generalize_evars ? &tak : &tmk;
+  kind_t expected_kind = is_function_type(t) ? &tak : &tmk;
   let cvt = check_valid_type(loc, te,
 			     CVTEnv{heap_region, te_vars, NULL, NULL,
 				    generalize_evars,false},
@@ -4892,7 +4893,8 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
     }
     if (free_tvars != NULL)
       terr(loc,"unbound type variable %s",*free_tvars->hd->name);
-    check_free_evars(free_evars,t,loc);
+    if (!is_function_type(t) || !te->in_tempest)
+      check_free_evars(free_evars,t,loc);
   }
 }
 

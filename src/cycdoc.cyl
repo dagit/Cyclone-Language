@@ -268,6 +268,8 @@ rule token "$(int,comment_t)*" = parse
       case &Letv_d(_):
       case &Porton_d:
       case &Portoff_d:
+      case &Tempeston_d:
+      case &Tempestoff_d:
       case &Region_d(...):
 //       case &Alias_d(...):
         result = new List(decls->hd,result);

@@ -213,10 +213,10 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
           else 
             terr(loc,"%s%s%s%s%s",s0,s1,s2,s3,s4);
           explain_failure();
-          // reject non-constant initializers
-          if (!Tcutil::is_const_exp(e))
-            terr(loc,"initializer is not a constant expression");
         }
+        // reject non-constant initializers
+        if (!Tcutil::is_const_exp(e))
+          terr(loc,"initializer is not a constant expression");
       } catch {
       case &Tcenv::Env_error: 
         terr(loc,"initializer is not a constant expression");
@@ -333,13 +333,19 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
   let fenv = new_fenv(loc,fd);
-  let te = new Tenv{te->ns, te->ae, fenv, false, false};
+  let te = new Tenv{te->ns, te->ae, fenv, false, false, te->in_tempest, te->tempest_generalize};
   // check the body, then get rid of local environment
   Tcstmt::tcStmt(te,fd->body,false);
   // we delayed checking some capabilities and constraints so that inference
   // works a bit better, and now it's time to check them:
   check_delayed_effects(te);
   check_delayed_constraints(te);
+  // for tempest code, we now have to generalize the type.
+  if (te->in_tempest) {
+    te->tempest_generalize = true;
+    check_fndecl_valid_type(loc,te,fd);
+    te->tempest_generalize = false;
+  }
   // look for main and check that it has a good type
   if (is_main(q)) {
     // result type should be int
@@ -958,6 +964,12 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
       warn(d->loc,"spurious __cyclone_port_on__");
       break;
     case &Portoff_d:
+      break;
+    case &Tempeston_d:
+      te = enter_tempest(te);
+      break;
+    case &Tempestoff_d:
+      te = clear_tempest(te);
       break;
     case &Namespace_d(v,ds2):
       // Do the nested declarations then restore the namespace

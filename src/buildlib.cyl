@@ -209,6 +209,8 @@ static void rename_decl(decl_t d) {
   case &ExternCinclude_d(...):
   case &Porton_d:
   case &Portoff_d:
+  case &Tempeston_d:
+  case &Tempestoff_d:
     fprintf(stderr,"Error in .cys file: bad user-defined type definition\n");
     exit(1);
   }
@@ -236,6 +238,8 @@ static decl_t named_decl(list_t<decl_t> decls, stringptr_t<`H> decl_name) {
     case &Fn_d(_):
     case &Porton_d:
     case &Portoff_d:
+    case &Tempeston_d:
+    case &Tempestoff_d:
     case &Let_d(...):
     case &Datatype_d(_):
     case &Letv_d(_):
@@ -1336,6 +1340,12 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Portoff_d:
       fprintf(stderr,"Error: unexpected __cyclone_port_off__");
       exit(1);
+    case &Tempeston_d:
+      fprintf(stderr,"Error: unexpected __tempest_on__");
+      exit(1);
+    case &Tempestoff_d:
+      fprintf(stderr,"Error: unexpected __tempest_off__");
+      exit(1);
     case &Let_d(...):
       fprintf(stderr,"Error: unexpected let declaration\n");
       exit(1);
@@ -1747,6 +1757,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         break;
       case &Porton_d:
       case &Portoff_d:
+      case &Tempeston_d:
+      case &Tempestoff_d:
       case &Let_d(...):
       case &Datatype_d(_):
       case &Letv_d(_):
@@ -1821,6 +1833,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case &Region_d(...): 
       case &Porton_d:
       case &Portoff_d:
+      case &Tempeston_d:
+      case &Tempestoff_d:
       case &Let_d(...):
       case &Datatype_d(_):
       case &Letv_d(_):

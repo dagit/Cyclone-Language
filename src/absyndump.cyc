@@ -1408,6 +1408,12 @@ void dumpdecl(decl_t d) {
   case &Portoff_d:
     dump(" __cyclone_port_off__; ");
     break;
+  case &Tempeston_d:
+    dump(" __tempest_on__; ");
+    break;
+  case &Tempestoff_d:
+    dump(" __tempest_off__; ");
+    break;
   }
 }
 

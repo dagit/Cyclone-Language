@@ -1090,9 +1090,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	      // and instead get away with subtyping since it's more
 	      // flexible.  So, we're going to constraint the region
 	      // of the pointer to the datatype to be the current block's region
-	      if (!unify(pointer_region(vt),curr_rgn(te)))
-		terr(loc,"can't unify pointer region for %s to curr_rgn %s",
-		     typ2string(vt), typ2string(curr_rgn(te)));
+              unify(pointer_region(vt),curr_rgn(te));
 
 	      let inst = List::zip(td->tvs,targs);
 	      for (; es != NULL; es = es->tl) {
@@ -2083,21 +2081,25 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   return res;
 }
 
-static void check_malloc_type(bool allow_zero, seg_t loc,
+// returns true when okay, false otherwise
+static bool check_malloc_type(bool allow_zero, seg_t loc,
                               type_t * topt, type_t t) {
-  if (is_bits_only_type(t) || (allow_zero && zeroable_type(t))) return;
+  if (is_bits_only_type(t) || (allow_zero && zeroable_type(t))) return true;
   // try unifying t with the topt info to get better results
   if (topt != NULL) {
     switch (compress(*topt)) {
     case &PointerType(PtrInfo(elt_typ,_,_)):
       unify(elt_typ,t);
-      if (is_bits_only_type(t) || (allow_zero && zeroable_type(t))) return;
+      if (is_bits_only_type(t) || (allow_zero && zeroable_type(t))) return true;
       break;
     default: break;
     }
   }
+  return false;
+  /*
   terr(loc,"%s cannot be used with type %s\n\t(type needs initialization)",
        allow_zero ? ((string_t)"calloc") : (string_t)"malloc", typ2string(t));
+  */
 }
 
 static type_t mallocRgn(type_t rgn) {
@@ -2157,7 +2159,8 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     elt_type = **t;
     check_type(loc,te,lookup_type_vars(te),&tmk,true,false,elt_type);
     check_no_qual(loc,elt_type);
-    check_malloc_type(true,loc,topt,elt_type);
+    if (!check_malloc_type(true,loc,topt,elt_type))
+      terr(loc,"calloc cannot be used with type %s\n\t(type needs initialization)", typ2string(elt_type));
     num_elts = *e;
     one_elt = false;
   } else {
@@ -2174,14 +2177,32 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     case &Primop_e(Times,&List(e1,&List(e2,NULL))):
       switch ($(e1->r, e2->r)) {
       case $(&Sizeoftype_e(t1),_):
-        check_malloc_type(false,loc,topt,t1);
+        // check the element type to see if its bits only
+        if (!check_malloc_type(false,loc,topt,t1)) {
+          // if it's not bits only but admits zero as a value, we can change
+          // the malloc to a calloc.  otherwise, we're out of luck.
+          if (!check_malloc_type(true,loc,topt,t1)) {
+            terr(loc,"malloc cannot be used with type %s\n\t(type needs initialization)", typ2string(t1));
+          } else {
+            *is_calloc = true;
+          }
+        }
         elt_type = t1;
         *t = new elt_type;
         num_elts = e2;
         one_elt = false;
         break;
       case $(_,&Sizeoftype_e(t2)):
-        check_malloc_type(false,loc,topt,t2);
+        // check the element type to see if its bits only
+        if (!check_malloc_type(false,loc,topt,t2)) {
+          // if it's not bits only but admits zero as a value, we can change
+          // the malloc to a calloc.  otherwise, we're out of luck.
+          if (!check_malloc_type(true,loc,topt,t2)) {
+            terr(loc,"malloc cannot be used with type %s\n\t(type needs initialization)", typ2string(t2));
+          } else {
+            *is_calloc = true;
+          }
+        }
         elt_type = t2;
         *t = new elt_type;
         num_elts = e1;
@@ -2756,8 +2777,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = enum_type(ed->name,ed); break;
   case &AnonEnum_e(t2,ef):
     t = t2; break;
-  case &Malloc_e(MallocInfo{*is_calloc,*ropt,*t2,*e,*isfat,_}):
-    t = tcMalloc(te,loc,topt,ropt,t2,e,is_calloc,isfat); break;
+  case &Malloc_e(MallocInfo{*is_calloc,*ropt,*t2,*e2,*isfat,_}):
+    t = tcMalloc(te,loc,topt,ropt,t2,e2,is_calloc,isfat); break;
   case &Swap_e(e1,e2):
     t = tcSwap(te,loc,topt,e1,e2); break;
   case &Tagcheck_e(e,f):

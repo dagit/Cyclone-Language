@@ -631,6 +631,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	unimp_msg_part = "extern \"C include\""; break;
       case &Porton_d:          unimp_msg_part = "__cyclone_port_on__";  break;
       case &Portoff_d:         unimp_msg_part = "__cyclone_port_off__"; break;
+      case &Tempeston_d:       unimp_msg_part = "__tempest_on__";  break;
+      case &Tempestoff_d:      unimp_msg_part = "__tempest_off__"; break;
       }
     throw impos("tcStmt: nested %s declarations unimplemented",unimp_msg_part);
 

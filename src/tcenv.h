@@ -58,6 +58,8 @@ extern struct Tenv {
   struct Fenv * le; // local environment
   bool allow_valueof : 1;   // controls whether we allow valueof(T) in an expr
   bool in_extern_c_include : 1;
+  bool in_tempest : 1;
+  bool tempest_generalize : 1; // used when generalizing types for tempest
 };
 typedef struct Tenv@ tenv_t; 
 
@@ -80,6 +82,9 @@ extern typedefdecl_t     lookup_typedefdecl(tenv_t,seg_t,qvar_t);
 
 extern tenv_t allow_valueof(tenv_t);
 extern tenv_t enter_extern_c_include(tenv_t);
+extern tenv_t enter_tempest(tenv_t);
+extern tenv_t clear_tempest(tenv_t);
+extern bool in_tempest(tenv_t);
 
 enum NewStatus { NoneNew, InNew, InNewAggr };  
 extern tenv_t set_new_status(enum NewStatus, tenv_t);

@@ -870,12 +870,16 @@ namespace Absyn {
     ExternCinclude_d(list_t<decl_t>,list_t<$(seg_t,qvar_t,bool)@>); 
     Porton_d;
     Portoff_d;
+    Tempeston_d;
+    Tempestoff_d;
     // extern "C include" { <decls> } export { <vars> }
     // the bool in the vars is used to warn when an export doesn't appear
     // in the declarations.
   };
   extern_datacon(Raw_decl,Porton_d);
   extern_datacon(Raw_decl,Portoff_d);
+  extern_datacon(Raw_decl,Tempeston_d);
+  extern_datacon(Raw_decl,Tempestoff_d);
 
   // declarations w/ auxiliary info
   EXTERN_ABSYN struct Decl {

@@ -650,7 +650,10 @@ static list_t<decl_t, `H> filterstatics(list_t<decl_t, `H> accum, decl_t d) {
     case &ExternC_d(...):
     case &ExternCinclude_d(...):
     case &Porton_d:
-    case &Portoff_d: return accum;
+    case &Portoff_d: 
+    case &Tempeston_d:
+    case &Tempestoff_d:
+      return accum;
   }
   return new List(new *d, accum);
 }

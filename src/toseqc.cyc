@@ -520,6 +520,8 @@ list_t<decl_t> toseqc(list_t<decl_t,`H> ds) {
     case &ExternCinclude_d(ds2,_):
     case &Porton_d:
     case &Portoff_d: 
+    case &Tempeston_d:
+    case &Tempestoff_d:
       Warn::impos("nested translation unit after translation to C");
     }
   }

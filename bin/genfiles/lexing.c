@@ -449,7 +449,7 @@ static char Cyc_Lexing_aux_buffer_v[1U]={'\000'};
 static struct _dyneither_ptr Cyc_Lexing_aux_buffer={(void*)((char*)Cyc_Lexing_aux_buffer_v),(void*)((char*)Cyc_Lexing_aux_buffer_v),(void*)((char*)Cyc_Lexing_aux_buffer_v + 1U)};
 # 80
 void Cyc_Lexing_lex_refill(struct Cyc_Lexing_lexbuf*lexbuf){
-if(_get_dyneither_size(Cyc_Lexing_aux_buffer,sizeof(char))== 1)({struct _dyneither_ptr _tmp6=Cyc_Core_new_string((unsigned int)(4096 + 1));Cyc_Lexing_aux_buffer=_tmp6;});{
+if(_get_dyneither_size(Cyc_Lexing_aux_buffer,sizeof(char))== 1)Cyc_Lexing_aux_buffer=Cyc_Core_new_string((unsigned int)(4096 + 1));{
 int read=
 (((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun)(Cyc_Lexing_aux_buffer,(int)(
 _get_dyneither_size(Cyc_Lexing_aux_buffer,sizeof(char))- 1),((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun_state);
@@ -460,7 +460,7 @@ int oldlen=lexbuf->lex_buffer_len;
 int newlen=oldlen * 2;
 # 91
 struct _dyneither_ptr newbuf=Cyc_Core_new_string((unsigned int)(newlen + 1));
-({struct _dyneither_ptr _tmp9=({struct _dyneither_ptr _tmp7=_dyneither_ptr_decrease_size(newbuf,sizeof(char),1U);_dyneither_ptr_plus(_tmp7,sizeof(char),oldlen);});struct _dyneither_ptr _tmp8=(struct _dyneither_ptr)lexbuf->lex_buffer;Cyc_zstrncpy(_tmp9,_tmp8,(unsigned long)oldlen);});
+({struct _dyneither_ptr _tmp8=({struct _dyneither_ptr _tmp6=_dyneither_ptr_decrease_size(newbuf,sizeof(char),1U);_dyneither_ptr_plus(_tmp6,sizeof(char),oldlen);});struct _dyneither_ptr _tmp7=(struct _dyneither_ptr)lexbuf->lex_buffer;Cyc_zstrncpy(_tmp8,_tmp7,(unsigned long)oldlen);});
 lexbuf->lex_buffer=newbuf;
 lexbuf->lex_buffer_len=newlen;
 lexbuf->lex_abs_pos=lexbuf->lex_abs_pos - oldlen;
@@ -468,12 +468,12 @@ lexbuf->lex_curr_pos=lexbuf->lex_curr_pos + oldlen;
 lexbuf->lex_start_pos=lexbuf->lex_start_pos + oldlen;
 lexbuf->lex_last_pos=lexbuf->lex_last_pos + oldlen;}
 # 100
-({struct _dyneither_ptr _tmpB=_dyneither_ptr_decrease_size(lexbuf->lex_buffer,sizeof(char),1U);struct _dyneither_ptr _tmpA=(struct _dyneither_ptr)
+({struct _dyneither_ptr _tmpA=_dyneither_ptr_decrease_size(lexbuf->lex_buffer,sizeof(char),1U);struct _dyneither_ptr _tmp9=(struct _dyneither_ptr)
 _dyneither_ptr_plus(lexbuf->lex_buffer,sizeof(char),n);
 # 100
-Cyc_zstrncpy(_tmpB,_tmpA,(unsigned long)(lexbuf->lex_buffer_len - n));});
+Cyc_zstrncpy(_tmpA,_tmp9,(unsigned long)(lexbuf->lex_buffer_len - n));});
 # 103
-({struct _dyneither_ptr _tmpD=_dyneither_ptr_decrease_size(_dyneither_ptr_plus(lexbuf->lex_buffer,sizeof(char),lexbuf->lex_buffer_len - n),sizeof(char),1U);struct _dyneither_ptr _tmpC=(struct _dyneither_ptr)Cyc_Lexing_aux_buffer;Cyc_zstrncpy(_tmpD,_tmpC,(unsigned long)n);});
+({struct _dyneither_ptr _tmpC=_dyneither_ptr_decrease_size(_dyneither_ptr_plus(lexbuf->lex_buffer,sizeof(char),lexbuf->lex_buffer_len - n),sizeof(char),1U);struct _dyneither_ptr _tmpB=(struct _dyneither_ptr)Cyc_Lexing_aux_buffer;Cyc_zstrncpy(_tmpC,_tmpB,(unsigned long)n);});
 # 105
 lexbuf->lex_abs_pos=lexbuf->lex_abs_pos + n;
 lexbuf->lex_curr_pos=lexbuf->lex_curr_pos - n;
@@ -483,8 +483,8 @@ lexbuf->lex_last_pos=lexbuf->lex_last_pos - n;};}
 struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*read_fun)(struct _dyneither_ptr,int,void*),void*read_fun_state){
 # 114
 return({struct Cyc_Lexing_lexbuf*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->refill_buff=Cyc_Lexing_lex_refill,({
-struct Cyc_Lexing_function_lexbuf_state*_tmpF=({struct Cyc_Lexing_function_lexbuf_state*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->read_fun=read_fun,_tmp0->read_fun_state=read_fun_state;_tmp0;});_tmp1->refill_state=_tmpF;}),({
-struct _dyneither_ptr _tmpE=Cyc_Core_new_string((unsigned int)(8192 + 1));_tmp1->lex_buffer=_tmpE;}),_tmp1->lex_buffer_len=8192,_tmp1->lex_abs_pos=- 8192,_tmp1->lex_start_pos=8192,_tmp1->lex_curr_pos=8192,_tmp1->lex_last_pos=8192,_tmp1->lex_last_action=0,_tmp1->lex_eof_reached=0;_tmp1;});}
+struct Cyc_Lexing_function_lexbuf_state*_tmpE=({struct Cyc_Lexing_function_lexbuf_state*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->read_fun=read_fun,_tmp0->read_fun_state=read_fun_state;_tmp0;});_tmp1->refill_state=_tmpE;}),({
+struct _dyneither_ptr _tmpD=Cyc_Core_new_string((unsigned int)(8192 + 1));_tmp1->lex_buffer=_tmpD;}),_tmp1->lex_buffer_len=8192,_tmp1->lex_abs_pos=- 8192,_tmp1->lex_start_pos=8192,_tmp1->lex_curr_pos=8192,_tmp1->lex_last_pos=8192,_tmp1->lex_last_action=0,_tmp1->lex_eof_reached=0;_tmp1;});}
 # 123
 int Cyc_Lexing_read_from_file(struct _dyneither_ptr aux,int n,struct Cyc___cycFILE*f){
 # 125
@@ -500,13 +500,13 @@ struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _dyneither_ptr s){
 return({struct Cyc_Lexing_lexbuf*_tmp2=_cycalloc(sizeof(*_tmp2));
 _tmp2->refill_buff=Cyc_Lexing_set_eof,_tmp2->refill_state=(void*)0,({
 # 141
-struct _dyneither_ptr _tmp10=Cyc_strdup((struct _dyneither_ptr)s);_tmp2->lex_buffer=_tmp10;}),_tmp2->lex_buffer_len=(int)
+struct _dyneither_ptr _tmpF=Cyc_strdup((struct _dyneither_ptr)s);_tmp2->lex_buffer=_tmpF;}),_tmp2->lex_buffer_len=(int)
 _get_dyneither_size(s,sizeof(char)),_tmp2->lex_abs_pos=0,_tmp2->lex_start_pos=0,_tmp2->lex_curr_pos=0,_tmp2->lex_last_pos=0,_tmp2->lex_last_action=0,_tmp2->lex_eof_reached=1;_tmp2;});}
 # 147
 struct _dyneither_ptr Cyc_Lexing_rlexeme(struct _RegionHandle*r,struct Cyc_Lexing_lexbuf*lbuf){
 int len=lbuf->lex_curr_pos - lbuf->lex_start_pos;
 struct _dyneither_ptr s=Cyc_Core_rnew_string(r,(unsigned int)(len + 1));
-({struct _dyneither_ptr _tmp12=_dyneither_ptr_decrease_size(s,sizeof(char),1U);struct _dyneither_ptr _tmp11=(struct _dyneither_ptr)_dyneither_ptr_plus(lbuf->lex_buffer,sizeof(char),lbuf->lex_start_pos);Cyc_zstrncpy(_tmp12,_tmp11,(unsigned long)len);});
+({struct _dyneither_ptr _tmp11=_dyneither_ptr_decrease_size(s,sizeof(char),1U);struct _dyneither_ptr _tmp10=(struct _dyneither_ptr)_dyneither_ptr_plus(lbuf->lex_buffer,sizeof(char),lbuf->lex_start_pos);Cyc_zstrncpy(_tmp11,_tmp10,(unsigned long)len);});
 ({struct _dyneither_ptr _tmp3=_dyneither_ptr_plus(s,sizeof(char),len);char _tmp4=*((char*)_check_dyneither_subscript(_tmp3,sizeof(char),0U));char _tmp5='\000';if(_get_dyneither_size(_tmp3,sizeof(char))== 1U  && (_tmp4 == 0  && _tmp5 != 0))_throw_arraybounds();*((char*)_tmp3.curr)=_tmp5;});
 # 157
 return s;}

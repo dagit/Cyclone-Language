@@ -62,6 +62,8 @@ struct Tenv {
   struct Fenv *  le; // local environment
   bool allow_valueof : 1;     // controls whether we allow valueof(T) in an expr
   bool in_extern_c_include : 1;
+  bool in_tempest : 1;
+  bool tempest_generalize : 1;
 };
 
 // Global environments -- what's declared in a global scope
@@ -115,7 +117,7 @@ tenv_t tc_init() {
 		    .typedefs      = Dict::empty(qvar_cmp),
 		    .ordinaries    = Dict::empty(qvar_cmp)};
   ae->datatypedecls = Dict::insert(ae->datatypedecls, exn_name, new exn_tud);
-  return new Tenv(NULL,ae,NULL,false,false);
+  return new Tenv(NULL,ae,NULL,false,false,false,false);
 }
 binding_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q,bool is_use) {
   let ans = Dict::lookup(te->ae->ordinaries, q);
@@ -301,7 +303,21 @@ tenv_t enter_extern_c_include(tenv_t te) {
   ans->in_extern_c_include = true;
   return ans;
 }  
-
+tenv_t enter_tempest(tenv_t te) {
+  let fe = (te->le==NULL) ? NULL : new *te->le;
+  let ans = new *te;
+  ans->in_tempest = true;
+  return ans;
+}
+tenv_t clear_tempest(tenv_t te) {
+  let fe = (te->le==NULL) ? NULL : new *te->le;
+  let ans = new *te;
+  ans->in_tempest = false;
+  return ans;
+}
+bool in_tempest(tenv_t te) {
+  return te->in_tempest;
+}
 tenv_t add_region(tenv_t te, type_t rgn, bool opened) {
   let ans = new *get_fenv(te,"add_region");
   let region_order = ans->region_order;

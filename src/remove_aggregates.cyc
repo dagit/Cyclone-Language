@@ -402,7 +402,10 @@ list_t<decl_t> remove_aggrs(list_t<decl_t,`H> ds) {
     case &ExternC_d(ds2):     fallthru(ds2);
     case &ExternCinclude_d(ds2,_):
     case &Porton_d:
-    case &Portoff_d: Warn::impos("nested translation unit after xlation to C");
+    case &Portoff_d: 
+    case &Tempeston_d:
+    case &Tempestoff_d:
+      Warn::impos("nested translation unit after xlation to C");
     }
   return ds;
 }

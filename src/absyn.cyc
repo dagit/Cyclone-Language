@@ -1172,6 +1172,8 @@ bool type2bool(bool def, type_t t) {
 
 datacon(Raw_decl,Porton_d);
 datacon(Raw_decl,Portoff_d);
+datacon(Raw_decl,Tempeston_d);
+datacon(Raw_decl,Tempestoff_d);
 
 bool porting_c_code = false;
 bool no_regions = false;

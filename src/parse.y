@@ -88,6 +88,10 @@ namespace Lex {
 #define DUMMYLOC 0
 
 namespace Parse {
+  // Flag that's turned on when processing tempest code instead of cyclone.
+  // We interpreter "*" as a fat pointer there and intend for regions to
+  // default to the heap (along with some other trickery).
+  bool parsing_tempest = false;
 
   // flattened lists
   struct FlatList<`a::A,`r::R> { struct FlatList<`a,`r> *`r tl; `a hd; };
@@ -1070,7 +1074,7 @@ using Parse;
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
 %token MALLOC RMALLOC RMALLOC_INLINE CALLOC RCALLOC SWAP
 %token REGION_T TAG_T REGION RNEW REGIONS 
-%token PORTON PORTOFF PRAGMA DYNREGION_T
+%token PORTON PORTOFF PRAGMA TEMPESTON TEMPESTOFF
 // %token ALIAS
 %token NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL
@@ -1253,7 +1257,21 @@ translation_unit:
   { $$=^$(new List(new Decl(&Porton_d_val,SLOC(@1)),$3)); }
 | PORTOFF ';' translation_unit
   { $$=^$(new List(new Decl(&Portoff_d_val,SLOC(@1)),$3)); }
+| tempest_on_action ';' translation_unit
+  { $$=^$(new List(new Decl(&Tempeston_d_val,SLOC(@1)),$3)); }
+| tempest_off_action ';' translation_unit
+  { $$=^$(new List(new Decl(&Tempestoff_d_val,SLOC(@1)),$3)); }
 | /* empty */ { $$=^$(NULL); }
+;
+
+tempest_on_action:
+  TEMPESTON
+{ parsing_tempest = true; }
+;
+
+tempest_off_action:
+  TEMPESTOFF
+{ parsing_tempest = false; }
 ;
 
 extern_c_action:
@@ -2090,7 +2108,10 @@ pointer_null_and_bound:
   '*' pointer_bound 
    { // avoid putting location info on here when not porting C code
      seg_t loc = SLOC(@1);
-     $$=^$(new $(loc,true_type, $2)); 
+     if (!parsing_tempest)
+       $$=^$(new $(loc,true_type, $2)); 
+     else 
+       $$=^$(new $(loc,true_type, fat_bound_type)); 
    }
 | '@' pointer_bound 
   {  seg_t loc = SLOC(@1);

@@ -1170,7 +1170,10 @@ void resolve_decl(env_t env, decl_t d) {
     break;
 
   case &Porton_d: // let Tc warn for now
-  case &Portoff_d: break;
+  case &Portoff_d: 
+  case &Tempeston_d:
+  case &Tempestoff_d:
+    break;
   }
 }
 

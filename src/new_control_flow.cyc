@@ -1611,7 +1611,8 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
     let $(outflow,rvals) = anal_Rexps(env,inflow,es,true,true);
     for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
       outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
-    return $(outflow,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
+    // the default is notzeroall since the pointer will not be null.
+    return $(outflow,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->notzeroall));
 
   case &Comprehension_e(vd,e1,e2,zt):
 
@@ -1668,7 +1669,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
 	    break;
 	  f1 = newflow;
 	}
-	return $(f1,fenv->unknown_all);
+	return $(f1,fenv->notzeroall);
       }
     }
 

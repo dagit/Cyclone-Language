@@ -737,6 +737,8 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
     case &ExternCinclude_d(ds2,_):
     case &Porton_d:
     case &Portoff_d:
+    case &Tempeston_d:
+    case &Tempestoff_d:
       throw new Impossible("nested translation unit after translation to C");
     }
   }

@@ -4144,7 +4144,10 @@ static void decltypes_to_c(decl_t d) {
   case &Region_d(...): // DJG: impossible because of parser, no?
     Warn::impos_loc(d->loc,"Cyclone declaration within C code"); break;
   case &Porton_d:
-  case &Portoff_d: break;
+  case &Portoff_d: 
+  case &Tempeston_d:
+  case &Tempestoff_d:
+    break;
   }
 }
 
@@ -4275,7 +4278,10 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
 	result_decls = new List(d,result_decls);
       break;
     case &Porton_d:
-    case &Portoff_d: break;
+    case &Portoff_d: 
+    case &Tempeston_d:
+    case &Tempestoff_d:
+      break;
     case &Namespace_d(_,ds2): fallthru(ds2);
     case &Using_d(_,ds2):     fallthru(ds2);
     case &ExternC_d(ds2): nv = decls_to_c(r,nv,ds2,top,cinclude); break;
