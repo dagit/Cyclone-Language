@@ -31,6 +31,7 @@ using Lexing {
 namespace Parse {
   extern list_t<decl_t> parse_file(FILE @f);
   extern bool no_register;
+  extern datatype exn {extern Exit};
 }
   struct FlatList<`a::A,`r> { struct FlatList<`a,`r> *`r tl; `a hd; };
   typedef struct FlatList<`a,`r> *`r flat_list_t<`a,`r>;

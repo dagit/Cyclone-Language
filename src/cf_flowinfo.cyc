@@ -35,10 +35,9 @@ namespace CfFlowInfo;
 
 bool anal_error = false; // set to true before checking each top-level decl
 void aerr(Position::seg_t loc, string_t fmt, ... inject parg_t ap)
-  __attribute__((format(printf,2,3)))
-{
-  anal_error = true;
-  Position::post_error(Position::mk_err_elab(loc,vrprintf(Core::heap_region,fmt,ap)));
+  __attribute__((format(printf,2,3))) {
+ anal_error = true;
+ Position::post_error(Position::mk_err(loc,vrprintf(Core::heap_region,fmt,ap)));
 }
 
 #define ANAL_COARSE_REGIONS

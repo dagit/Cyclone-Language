@@ -1374,8 +1374,8 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
   case &Sizeoftyp_e(_):
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_):
-  case &Enum_e(_,_,_):
-  case &AnonEnum_e(_,_,_):
+  case &Enum_e(...):
+  case &AnonEnum_e(...):
   case &Const_e({.Float_c = _}):  return arith_ct();
   case &Const_e({.Int_c = $(_,0)}): return zero_ct();
   case &Const_e({.Int_c = $(_,_)}): return arith_ct();

@@ -17,7 +17,6 @@
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
 
-
 /* An identifier can have at most one binding in each of the following:
 
    1) namespaces (after "namespace" or "using")
@@ -39,26 +38,6 @@
    structs can have members with the same names) so their bindings
    don't belong in our environments.
 */
-
-/* During type checking we keep two parallel environments.  One is
-   accessed by absolute name, the other by local name.  We need these
-   two environments because what is defined in a namespace is
-   different from what is available in the namespace.  E.g.,
-
-      extern int z;
-      namespace Foo {
-        int x;
-        namespace Bar {
-          int y = x;
-        }
-      }
-
-   Here x is available in the inner namespace Bar but not defined
-   there.  The absolute namespace will have entries for ::z, ::Foo::x,
-   ::Foo::Bar, and ::Foo::Bar::y.  The relative namespace just after
-   the definition of y will have entries for x, y, and z.
-*/
-
 #include <core.h>
 #include <cycboot.h>
 #include <list.h>
@@ -73,7 +52,6 @@
 #include "tcutil.h"
 #include "tcenv.h"
 #include "rgnorder.h"
-
 using Core;
 using List;
 using Set;
@@ -94,7 +72,6 @@ datacon(exn,Env_error);
   //fflush(stderr);
   throw &Env_error_val;
 }
-
 
 /////////////////////////// Type Definitions /////////////////////////////////
 
@@ -335,7 +312,7 @@ static resolved_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q,bool is_us
 list_t<var_t> resolve_namespace(tenv_t te, seg_t loc,
                                 var_t n, list_t<var_t,`H> ns) {
   let cns = te->ns; // current namespace
-  TEMP_RGN(te,temp) {
+  { TEMP_RGN(te,temp) 
     let possible_results = NULL;
     while (true) {
       let ge = Dict::lookup(te->ae,cns);
@@ -415,7 +392,6 @@ static datatypedecl_t @ lookup_xdatatypedecl_f(genv_t ge,var_t v,bool ignore) {
   return Dict::lookup(ge->datatypedecls,v);
 }
 
-// DAN: some functionality from tcXDatatypedecl has moved to here.
 datatypedecl_t@*`r lookup_xdatatypedecl(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
   let &$(nsl,v) = q;
   switch (nsl) {
@@ -1069,39 +1045,22 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
   let rgn_po = initial_fn_po(r, fd->tvs,fd->rgn_po,
                              (type_t)fd->effect,rgn0,loc);
   type_t param_rgn = new VarType(rgn0);
-  let vds = NULL;
-  for(let args = fd->args; args != NULL; args = args->tl) {
-    let vd = new{Vardecl{.sc = Public,
-			 .name = new $((nmspace_t)Loc_n,(*args->hd)[0]),
-			 .tq = (*args->hd)[1],
-			 .type = (*args->hd)[2],
-			 .initializer = NULL,
-                         .rgn = param_rgn,
-                         .attributes = NULL, .escapes = false}};
-    vds = new{List(vd, vds)};
-    let b = new Param_b(vd);
-    let var = (*args->hd)[0];
-    locals = rnew(r) Bindings{var, b, locals};
+  for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
+    let vd = vds->hd;
+    vd->rgn = param_rgn;
+    locals = rnew(r) Bindings{(*vd->name)[1], new Param_b(vd), locals};
   }
   if (fd->cyc_varargs != NULL) {
-    let VarargInfo{nopt,tq,t,i} = *fd->cyc_varargs;
-    if (nopt != NULL) {
-      let typ = dyneither_typ(t, param_rgn, tq, false_conref);
-      let vd = new{Vardecl{.sc = Public,
-                           .name = new $((nmspace_t)Loc_n,(var_t)nopt),
-                           .tq = empty_tqual(0),
-                           .type = typ,
-                           .initializer = NULL,
-                           .rgn = param_rgn,
-                           .attributes = NULL, .escapes = false}};
-      vds = new List(vd,vds);
-      let b = new Param_b(vd);
-      let var = (var_t)nopt;
-      locals = rnew(r) Bindings{var, b, locals};
+    let VarargInfo(n,tq,t,i) = *fd->cyc_varargs;
+    // name-resolution did not set param_rgn for the cyc_varargs array
+    for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
+      let vd = vds->hd;
+      if(strptrcmp((*vd->name)[1], (var_t)n)==0) {
+	vd->type = dyneither_typ(t, param_rgn, tq, false_conref);
+	break;
+      }
     }
-    else terr(loc,"missing name for varargs");
   }
-  fd->param_vardecls = new{Opt(imp_rev(vds))};
   return rnew(r)
     Fenv{.shared = rnew(r) SharedFenv{
                      .frgn = r,
@@ -1185,39 +1144,22 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
   let tvs = new List(rgn0,List::append(fd->tvs,type_vars));
   Tcutil::check_unique_tvars(loc,tvs);
   type_t param_rgn = new VarType(rgn0);
-  let vds = NULL;
-  for(let args = fd->args; args != NULL; args = args->tl) {
-    let vd = new{Vardecl{.sc = Public,
-			 .name = new $((nmspace_t)Loc_n,(*args->hd)[0]),
-			 .tq = (*args->hd)[1],
-			 .type = (*args->hd)[2],
-			 .initializer = NULL,
-                         .rgn = param_rgn,
-                         .attributes = NULL, .escapes = false}};
-    vds = new{List(vd, vds)};
-    let b = new Param_b(vd);
-    let var = (*args->hd)[0];
-    locals = rnew(r) Bindings{var, b, locals};
+  for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
+    let vd = vds->hd;
+    vd->rgn = param_rgn;
+    locals = rnew(r) Bindings{(*vd->name)[1], new Param_b(vd), locals};
   }
   if (fd->cyc_varargs != NULL) {
-    let VarargInfo{nopt,tq,t,i} = *fd->cyc_varargs;
-    if (nopt != NULL) {
-      let typ = dyneither_typ(t, param_rgn, tq, false_conref);
-      let vd = new{Vardecl{.sc = Public,
-                           .name = new $((nmspace_t)Loc_n,(var_t)nopt),
-                           .tq = empty_tqual(0),
-                           .type = typ,
-                           .initializer = NULL,
-                           .rgn = param_rgn,
-                           .attributes = NULL, .escapes = false}};
-      vds = new List(vd,vds);
-      let var = (var_t)nopt;
-      let b = new Param_b(vd);
-      locals = rnew(r) Bindings{var, b, locals};
+    let VarargInfo(n,tq,t,i) = *fd->cyc_varargs;
+    // name-resolution did not set param_rgn for the cyc_varargs array
+    for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) {
+      let vd = vds->hd;
+      if(strptrcmp((*vd->name)[1], (var_t)n)==0) {
+	vd->type = dyneither_typ(t, param_rgn, tq, false_conref);
+	break;
+      }
     }
-    else terr(loc,"missing name for varargs");
   }
-  fd->param_vardecls = new{Opt(imp_rev(vds))};
   return rnew(r)
     Fenv{.shared = rnew(r) SharedFenv{
                      .frgn = r,

@@ -1483,10 +1483,8 @@ static exp_t make_struct(env_t nv, exp_t x, type_t struct_typ, stmt_t s,
   }
   if (do_declare) {
     switch (x->r) {
-    case &Var_e(b):
-      return stmt_exp(declare_stmt(binding2qvar(b),t,eo,s,DL),DL);
-    default:
-      toc_impos("bogus x to make_struct");
+    case &Var_e(b): return stmt_exp(declare_stmt(binding2qvar(b),t,eo,s,DL),DL);
+    default: toc_impos("bogus x to make_struct");
     }
   }
   else {
@@ -3720,8 +3718,8 @@ DynCast:
     }
     break;
 
-  case &Enum_e(_,_,_):
-  case &AnonEnum_e(_,_,_): break;
+  case &Enum_e(...):
+  case &AnonEnum_e(...): break;
 
   case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,num_elts,is_fat,inline_call}):
     type_t t_c = typ_to_c(*topt);
@@ -3952,9 +3950,9 @@ static exp_t compile_pat_test(exp_t v, Tcpat::pat_test_t t) {
   case &Tcpat::EqNull: return eq_exp(v, signed_int_exp(0,DL),DL);
   case &Tcpat::NeqNull: return neq_exp(v, signed_int_exp(0,DL),DL);
   case &Tcpat::EqEnum(ed, ef): 
-    return eq_exp(v, new_exp(new Enum_e(ef->name, ed, ef),DL), DL);
+    return eq_exp(v, new_exp(new Enum_e(ed, ef),DL), DL);
   case &Tcpat::EqAnonEnum(t, ef): 
-    return eq_exp(v, new_exp(new AnonEnum_e(ef->name, t, ef),DL), DL);
+    return eq_exp(v, new_exp(new AnonEnum_e(t, ef),DL), DL);
   case &Tcpat::EqFloat(s,i): return eq_exp(v, float_exp(s,i,DL), DL);
   case &Tcpat::EqConst(i): return eq_exp(v, uint_exp(i,DL), DL);
   case &Tcpat::EqDatatypeTag(i,tud,tuf):
@@ -4040,9 +4038,9 @@ static pat_t compile_pat_test_as_case(Tcpat::pat_test_t p) {
   exp_t e;
   switch (p) {
   case &Tcpat::EqEnum(ed,ef): 
-    e = new_exp(new Enum_e(ef->name, ed, ef), DL); break;
+    e = new_exp(new Enum_e(ed, ef), DL); break;
   case &Tcpat::EqAnonEnum(t, ef):
-    e = new_exp(new AnonEnum_e(ef->name, t, ef), DL); break;
+    e = new_exp(new AnonEnum_e(t, ef), DL); break;
   case &Tcpat::EqConst(i): fallthru(i);
   case &Tcpat::EqDatatypeTag(i,_,_): fallthru(i);
   case &Tcpat::EqTaggedUnion(_,i):
@@ -4978,7 +4976,6 @@ static void xdatatypedecl_to_c(datatypedecl_t xd) {
   use_toc_state(xd, xdatatypedecl_to_c_body<>);
 }
 
-
 static void enumdecl_to_c(enumdecl_t ed) {
   ed->sc = Public; // gcc warns if we have Extern or Static on an enum
   if(ed->fields != NULL)
@@ -5114,8 +5111,8 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
 static void exptypes_to_c(exp_t e) {
   switch (e->r) {
   case &Deref_e(e):          fallthru(e);
-  case &AggrMember_e(e,...):   fallthru(e);
-  case &AggrArrow_e(e,...):    fallthru(e);
+  case &AggrMember_e(e,...): fallthru(e);
+  case &AggrArrow_e(e,...):  fallthru(e);
   case &Address_e(e):        fallthru(e);
   case &Throw_e(e,_):        fallthru(e);
   case &NoInstantiate_e(e):  fallthru(e);
@@ -5153,9 +5150,9 @@ static void exptypes_to_c(exp_t e) {
     break;
   case &Const_e(_):     
   case &Var_e(_):       
-  case &Enum_e(_,_,_):  
+  case &Enum_e(...):  
   case &Asm_e(...):     
-  case &AnonEnum_e(_,_,_): break;
+  case &AnonEnum_e(...): break;
 
   case &AnonStruct_e(_, _): fallthru;
   case &Datatype_e(_,_,_):    fallthru;
@@ -5392,7 +5389,7 @@ list_t<decl_t> toc(table_t<fndecl_t,table_t<stmt_t,int>> pop_tables,
 		   list_t<decl_t> ds) {
   gpop_tables = new pop_tables;
   init();
-  region start; {
+  { region start;
     decls_to_c(start,empty_env(start),ds,true,false);
   }
 #ifdef BCE_DEBUG

@@ -861,8 +861,8 @@ void dumpexp_prec(int inprec, exp_t e) {
     if (es != NULL) group(dumpexp,es,"(",")",",");
     break;
 
-  case &Enum_e(n,_,_): dumpqvar(n); break;
-  case &AnonEnum_e(q,_,_): dumpqvar(q); break;
+  case &Enum_e(_,ef): dumpqvar(ef->name); break;
+  case &AnonEnum_e(_,ef): dumpqvar(ef->name); break;
 
   case &Malloc_e(MallocInfo{is_calloc,ropt,topt,e,_,inline_call}):
     dumploc(e->loc);

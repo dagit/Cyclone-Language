@@ -19,6 +19,7 @@
 #include <core.h>
 #include <list.h>
 #include <string.h>
+#include <lineno.h>
 #include <cycboot.h>
 #include <position.h>
 
@@ -31,8 +32,6 @@ using List;
 // and otherwise uses format
 //   <filename>:(<lineno>:<char>-<lineno>:<char>):<message>
 bool use_gcc_style_location = true;
-
-datatype exn {Exit};
 
 /////////// Location tracking///////////
 static string_t source = ""; // initialized by overall control
@@ -92,34 +91,16 @@ list_t<mstringptr_t> strings_of_segments(list_t<seg_t> segs) {
 }
 
 ///////////// Errors ////////////
-
-datatype Error_kind { Lex, Parse, Elab };
-datatype Error_kind.Lex Lex_val = Lex;
-datatype Error_kind.Parse Parse_val = Parse;
-datatype Error_kind.Elab Elab_val = Elab;
 struct Error {
   string_t     source;
   seg_t        seg;
-  error_kind_t kind;
   string_t     desc;
 };
-error_t mk_err_lex(seg_t l, string_t<`H> desc) {
-  return new Error(source, l, &Lex_val, desc);
-}
-error_t mk_err_parse(seg_t l, string_t<`H> desc) {
-  return new Error(source, l, &Parse_val, desc);
-}
-error_t mk_err_elab(seg_t l, string_t<`H> desc) {
-  return new Error(source, l, &Elab_val, desc);
+error_t mk_err(seg_t l, string_t<`H> desc) {
+  return new Error(source, l, desc);
 }
 
 /////////// Error Reporting ///////////
-
-// If there are errors getting stuff from the source file then raise Nocontext
-// and just don't print the source context
-
-datatype exn {Nocontext};
-datatype exn.Nocontext Nocontext_val = Nocontext;
 
 static mstring_t trunc(int n, mstring_t<`H> s) {
   int len = strlen(s);
@@ -139,8 +120,6 @@ static int line_length = 76;
 
 static bool error_b = false;
 bool error_p() { return error_b; }
-
-datatype exn {Error(error_t)};
 
 bool print_context = false;
 
@@ -183,8 +162,3 @@ string_t get_line_directive(seg_t s) {
   
 }
 
-/*
-using Typerep;
-
-datatype Typestruct @ segment_rep = __gen(struct Position::Segment);
-*/

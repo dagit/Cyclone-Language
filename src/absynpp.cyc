@@ -1246,11 +1246,11 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
       s = cat(qvar2doc(tuf->name),
               egroup("(",")",",",List::map(exp2doc,es)));
     break;
-  case &Enum_e(n,_,_):
-    s = qvar2doc(n);
+  case &Enum_e(_,ef):
+    s = qvar2doc(ef->name);
     break;
-  case &AnonEnum_e(q,_,_):
-    s = qvar2doc(q);
+  case &AnonEnum_e(_,ef):
+    s = qvar2doc(ef->name);
     break;
   case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,e,_,inline_call}):
     // Note: This is for Cyclone's malloc, not the mallocs introduced during

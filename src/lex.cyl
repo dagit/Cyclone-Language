@@ -123,11 +123,11 @@ static int paren_depth = 0; // used for __asm__ parsing
 
 static void err(string_t<`H> msg,Lexbuf<`a> lb) {
   seg_t s = lexeme_start(lb);
-  post_error(mk_err_lex(s,msg));
+  post_error(mk_err(s,msg));
 }
 static void runaway_err(string_t<`H> msg,Lexbuf<`a> lb) {
   seg_t s = runaway_start;
-  post_error(mk_err_lex(s,msg));
+  post_error(mk_err(s,msg));
 }
 static char cnst2char(cnst_t cnst,Lexbuf<`a> lb) {
   switch (cnst) {
@@ -680,6 +680,8 @@ static short process_id(Lexbuf<`a> lbuf) {
 }
 
 static short process_qual_id(Lexbuf<`a> lbuf) {
+  if(in_extern_c)
+    err("qualified identifiers not allowed in C code",lbuf);
   int       i   = lbuf->lex_start_pos;
   int       end = lbuf->lex_curr_pos;
   mstring_t s   = lbuf->lex_buffer;

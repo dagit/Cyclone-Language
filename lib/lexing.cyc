@@ -45,7 +45,6 @@ namespace Lexing;
 #define AUX_SIZE    4096
 
 datatype exn { Error(string_t) };
-
 struct lexbuf<`a::B> { // use `a for state that refill_buff might need 
 
   void   (@refill_buff)(struct lexbuf<`a> @);

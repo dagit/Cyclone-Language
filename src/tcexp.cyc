@@ -67,53 +67,6 @@ static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, string_t msg,
 #endif
 
 //////////////////// Resolving References the Parser Cannot /////////////////
-
-static $(list_t<designator_t>,exp_t)@ make_struct_arg(exp_t e) {
-  return new $(NULL,e);
-}
-// Resolve whether this is a function call or datatype, xdatatype, or struct
-// constructor.  Return false if an error occurs to prevent cascading errors.
-static bool resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es){
-  switch (e1->r) {
-  case &Var_e(*b):
-    let q = binding2qvar(*b);
-    try {
-      TEMP_RGN(te, r) {
-        switch (lookup_ordinary(r,te,e1->loc,q,true)) {
-        case &VarRes(&Unresolved_b(_)):
-          terr(e1->loc,"undeclared identifier %s",qvar2string(q));
-          return false;
-        case &VarRes(bnd):
-          *b = bnd;
-          return true;
-        case &DatatypeRes(tud,tuf):
-          if (tuf->typs == NULL) {
-            // Don't allow "foo()", require "foo"
-            terr(e->loc,"%s is a constant, not a function",
-                 qvar2string(tuf->name));
-            return false;
-          }
-          e->r = new Datatype_e(es,tud,tuf);
-          return true;
-        case &AggrRes(ad):
-          let des = List::map(make_struct_arg,es);
-          e->r = new Aggregate_e(ad->name,NULL,des,ad);
-          return true;
-        case &AnonEnumRes(_,_):
-        case &EnumRes(_,_):
-          terr(e->loc,"%s is an enum constructor, not a function",qvar2string(q));
-          return false;
-        }
-      }
-    } catch { case &Dict::Absent:
-      terr(e1->loc, "undeclared identifier %s",qvar2string(q));
-      return false;
-    }
-  default:
-    return true;
-  }
-}
-
 static
 void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t * topt, exp_t e,
 			    list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> des){
@@ -343,40 +296,25 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
 
 // variables
 static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, binding_t *b){
-  // this may actually be a variable, enum constructor, datatype constructor
-  // (of no arguments).  Resolve and then continue as appropriate.
   switch(*b) {
-  case &Unresolved_b(q):
-    try {
-      TEMP_RGN(te,r) {
-        switch (lookup_ordinary(r,te,e->loc,q,true)) {
-        case &VarRes(&Unresolved_b(_)): 
-          return expr_err(te,loc,NULL,"undeclared identifier %s",qvar2string(q));
-        case &VarRes(bnd): 
-          *b = bnd; 
-          return tcVar(te,loc,topt,e,b);
-        case &EnumRes(ed,ef):     
-          e->r = new Enum_e(ef->name,ed,ef); 
-          return new EnumType(ed->name,ed);
-        case &AnonEnumRes(t,ef):  
-          e->r = new AnonEnum_e(ef->name,t,ef); 
-          return t;
-        case &DatatypeRes(tud,tuf): 
-          e->r = new Datatype_e(NULL,tud,tuf); 
-          return tcDatatype(te,loc,topt,e,NULL,tud,tuf);
-        case &AggrRes(_):
-          return expr_err(te,loc,NULL,"bad occurrence of type name %s",qvar2string(q));
-        }
-      }
-    } catch {
-    case &Dict::Absent:
-      return expr_err(te,loc,NULL,"undeclared identifier %s",qvar2string(q));
-    }
-  case &Global_b(vd):  return vd->type;
-  case &Funname_b(fd): return fndecl2typ(fd);
+  case &Unresolved_b(q): 
+    throw new Impossible("unresolved binding in tcVar");
+  case &Global_b(vd):  
+  // FIX DJG: temporary measure to make tree-shaking sound
+  //      (now that we have binding, tree-shaking should be redone)
+    lookup_ordinary(heap_region,te,loc,vd->name,true);
+    return vd->type;
+  case &Funname_b(fd): 
+    // FIX DJG: temporary measure to make tree-shaking sound
+    //      (now that we have binding, tree-shaking should be redone)
+    lookup_ordinary(heap_region,te,loc,fd->name,true);
+    return fndecl2typ(fd);
   case &Pat_b(vd):     fallthru(vd);
   case &Local_b(vd):   fallthru(vd);
   case &Param_b(vd):
+    // FIX DJG: temporary measure to make tree-shaking sound
+    //      (now that we have binding, tree-shaking should be redone)
+    lookup_ordinary(heap_region,te,loc,vd->name,true);
     if (te->allow_valueof) {
       switch (compress(vd->type)) {
       case &TagType(i):
@@ -487,7 +425,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t * topt,
   }
 }
 
-// Note: promoter must return false for any non-arithmetic type.
+// Note: checker must return false for any non-arithmetic type.
 static type_t tcArithBinop(tenv_t te, exp_t e1, exp_t e2,
 			   bool checker(exp_t)) {
   // JGMFIX: lousy error messages...
@@ -926,7 +864,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   //   a function.  Since e2 cannot have a function type (any function
   //   types are promoted to function pointers) the types won't match.
   // As per K&R, don't promote any array types to pointer types in the lhs
-  TEMP_RGN(te, r) {
+  { TEMP_RGN(te, r)
     tcExpNoPromote(enter_lhs(r,enter_notreadctxt(r,te)),NULL,e1);
   }
   type_t t1 = (type_t)e1->topt;
@@ -946,7 +884,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
     return expr_err(te,loc,topt,"assignment to non-lvalue");
   check_writable(te, e1);
   if (po == NULL) {
-    TEMP_RGN (te, temp) {
+    { TEMP_RGN (te, temp)
       if (is_noalias_pointer_or_aggr(temp,t2) && !is_noalias_path(temp,e2))
         terr(e2->loc,UNIQUE_ERR_MSG);
     }
@@ -976,7 +914,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
 
 // e1,e2
 static type_t tcSeqExp(tenv_t te,seg_t loc,type_t * topt,exp_t e1,exp_t e2) {
-  TEMP_RGN(te,r) {
+  { TEMP_RGN(te,r)
     tcExp(clear_abstract_val_ok(r,te),NULL,e1);
     tcExp(clear_abstract_val_ok(r,te),topt,e2);
   }
@@ -1035,7 +973,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
   // region block -- we just do it always here.
   let es = args;
   let arg_cnt = 0;
-  TEMP_RGN(te_orig, ter) {
+  { TEMP_RGN(te_orig, ter)
     let te = new_block(ter,loc,te_orig); // needed for regions of params
     let te = clear_abstract_val_ok(ter,te);
     tcExp(te,NULL,e);
@@ -2046,7 +1984,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     terr(loc,"can't construct abstract %s",(ad->kind == StructA) ? "struct" : "union");
     return wildtyp(lookup_opt_type_vars(te));
   }
-  TEMP_RGN(te, rgn) {
+  { TEMP_RGN(te, rgn)
     // Note that setting the new status here will allow flat array
     // initializations (as done with comprehensions) for all struct
     // fields rather than just the last one; however this will be
@@ -2458,7 +2396,7 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
 bool in_stmt_exp = false;
 
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
-  TEMP_RGN(te, r) {
+  { TEMP_RGN(te, r)
     bool old_stmt_exp_state = in_stmt_exp;
     Tcstmt::tcStmt(clear_abstract_val_ok(r,te),s,true);
     in_stmt_exp = old_stmt_exp_state;
@@ -2485,7 +2423,7 @@ static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
 
 static type_t tcTagcheck(tenv_t te, seg_t loc, type_t * topt, exp_t e, field_name_t f) {
   type_t t;
-  TEMP_RGN(te,r) {
+  { TEMP_RGN(te,r)
     t = compress(tcExp(enter_abstract_val_ok(r,te),NULL,e));
   }
   switch (t) {
@@ -2505,7 +2443,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
   // by default, we allocate heap pointers; this is for making inference
   // simpler.  If you want a unique pointer, do rnew (Core::unique_region)
   type_t rgn = &HeapRgn_val;
-  TEMP_RGN(te, r) {
+  { TEMP_RGN(te, r)
     let te = clear_abstract_val_ok(r,set_new_status(r,InNew,te));
     if (*rgn_handle != NULL) {
       // check that the region handle is still valid
@@ -2658,7 +2596,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   type_t t = tcExpNoPromote(te, topt, e);
   // expression initializers are copied, and therefore consumed,
   // so check for uniqueness
-  TEMP_RGN(te, temp) {
+  { TEMP_RGN(te, temp)
     if (is_noalias_pointer_or_aggr(temp,t) && !is_noalias_path(temp,e)) {
       //fprintf(stderr,"topt=%s, e->topt->v=%s, e=%s\n",
       //        topt == NULL ? "NULL" : Absynpp::typ2string(*topt),
@@ -2808,16 +2746,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     return;
 
   case &FnCall_e(e1,es,*vci,*resolved) && (!*resolved):
-    // resolve e1 as a function or struct, or datatype constructor and
-    // then re-type-check the expression
-    if (resolve_unknown_fn(te,e,e1,es)) {
-      *resolved = true;
-      tcExpNoInst(te,topt,e);
-    } else {
-      if (topt != NULL) e->topt = *topt;
-      else e->topt = wildtyp(lookup_opt_type_vars(te));
-    }
-    return;
+    throw new Impossible("unresolved function in tcExpNoInst");
 
   case &UnresolvedMem_e(nopt,des):
     // resolve as an array or struct and then re-type-check the expression
@@ -2925,11 +2854,9 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcAnonStruct(te,loc,ts,args); break;
   case &Datatype_e(es,tud,tuf):
     t = tcDatatype(te,loc,topt,e,es,tud,tuf); break;
-  case &Enum_e(*q,ed,ef):
-    *q = ef->name;
+  case &Enum_e(ed,ef):
     t = new EnumType(ed->name,ed); break;
-  case &AnonEnum_e(*v,t2,ef):
-    *v = ef->name;
+  case &AnonEnum_e(t2,ef):
     t = t2; break;
   case &Malloc_e(MallocInfo{*is_calloc,*ropt,*t2,*e,*isfat,_}):
     t = tcMalloc(te,loc,topt,ropt,t2,e,is_calloc,isfat); break;

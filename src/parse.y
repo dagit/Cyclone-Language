@@ -114,6 +114,8 @@ namespace Parse {
   // if true, parse register storage class as public
 bool no_register = false;
 
+datatype exn {Exit};
+
 ////////////////////// Type definitions needed only during parsing ///////////
 struct Type_specifier {
   bool Signed_spec      : 1;
@@ -194,7 +196,7 @@ static list_t<decl_t> parse_result = NULL;
 
 //////////////////// Error functions ///////////////////////
 static void err(string_t<`H> msg, seg_t sg) {
-  post_error(mk_err_parse(sg,msg));
+  post_error(mk_err(sg,msg));
 }
 static `a parse_abort(seg_t sg, string_t fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,2,3), noreturn)) {
@@ -2360,7 +2362,8 @@ array_initializer:
       $$=^$(new_exp(new Comprehension_e(vd, $5, $7, false),LOC(@1,@8)));
     }
 | '{' FOR IDENTIFIER '<' expression ':' type_name '}'
-    { let t = type_name_to_type($7,SLOC(@7));
+{ // DJG: notice the parser drops the IDENTIFIER on the floor.
+      let t = type_name_to_type($7,SLOC(@7));
       $$=^$(new_exp(new ComprehensionNoinit_e($5, t, false),LOC(@1,@8)));
     }
 ;

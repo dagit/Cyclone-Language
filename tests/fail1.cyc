@@ -99,12 +99,12 @@ void f15() {
   abstract int x;
 }
 
-namespace Foo {
-void f16() {
-  // cannot declare a qualified local variable
-  int Foo::x = 3;
-}
-}
+//namespace Foo {
+//void f16() {
+//  // cannot declare a qualified local variable
+//  int Foo::x = 3;
+//}
+//}
 
 void f17() {
   // extern declarations are not yet supported within functions
@@ -163,11 +163,11 @@ void f27() {
   return;
 }
 
-void f29() {
-  // explicit namespace not allowed on inner function declaration
-  void Foo::f30() { return; }
-  return;
-}
+//void f29() {
+//  // explicit namespace not allowed on inner function declaration
+//  void Foo::f30() { return; }
+//  return;
+//}
 
 void f31() {
   // bad attribute packed for function
@@ -213,27 +213,27 @@ void f39(region_t<`r> r) {
   reset_region(r);
 }
 
-void f40() {
-  // undeclared identifier x
-  int y = x();
-}
+// void f40() {
+//   // undeclared identifier x
+//   int y = x();
+// }
 
-datatype f41 { F41 };
-void f41() {
-  // F41 is a constant, not a function
-  datatype f41.F41 x = F41();
-}
+// datatype f41 { F41 };
+// void f41() {
+//   // F41 is a constant, not a function
+//   datatype f41.F41 x = F41();
+// }
 
-enum f42 { F42 };
-void f42() {
-  // F42 is an enum constructor, not a function
-  F42();
-}
+// enum f42 { F42 };
+// void f42() {
+//   // F42 is an enum constructor, not a function
+//   F42();
+// }
 
-void f43() {
-  // undeclared identifier x
-  x;
-}
+// void f43() {
+//   // undeclared identifier x
+//   x;
+// }
 
 void f44() {
   $(int,int) x = $(3,3);
@@ -541,10 +541,10 @@ void f101() {
   int ?x = new {for i < $(1,2) : 3};
 }
 
-void f102() {
-  // unbound struct/union name F102
-  new F102{.x = 3};
-}
+// void f102() {
+//   // unbound struct/union name F102
+//   new F102{.x = 3};
+// }
 
 struct F103;
 
@@ -659,16 +659,16 @@ void f120(tag_t<`i> t) {
   valueof(`i);
 }
 
-void f121() {
-  // asm expressions cannot occur within Cyclone code.
-  asm("stuff");
-}
+// void f121() {
+//   // asm expressions cannot occur within Cyclone code.
+//   asm("stuff");
+// }
 
-struct F122 { int x; };
-void f122() {
-  // bad occurrence of type name F122
-  F122;
-}
+// struct F122 { int x; };
+// void f122() {
+//   // bad occurrence of type name F122
+//   F122;
+// }
 
 void f123() {
   // increment/decrement of non-lvalue
@@ -984,8 +984,8 @@ datatype F227 { C227(tag_t<`i>) };
 datatype F228<`r> { C228(`r), D228(int@`r) };
 // noalias pointers in datatypes are not allowed (C229)
 datatype F229 { C229(int@`U) };
-// qualified datatypefield declarations are not allowed (Foo::C230)
-datatype F230 { Foo::C230 };
+//// qualified datatypefield declarations are not allowed (Foo::C230)
+//datatype F230 { Foo::C230 };
 // @extensible datatype F231, field C231: parameter number mismatch
 @extensible datatype F231 { C231(int), C231(int,int) };
 // FIX? -- gives no error

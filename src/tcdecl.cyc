@@ -53,8 +53,7 @@ void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r> ap
     fmt2 = strconcat("%s ", fmt);
   parg_t<`r> ? ap2 = new {for i < numelts(ap)+1 : 
 		     i==0 ? ((parg_t<`r>)(new String_pa((string_t<`r>)(*msg1)))) : ap[i-1]};
-  Position::post_error(Position::mk_err_elab(loc,
-					     vrprintf(heap_region,fmt2,ap2)));
+  Position::post_error(Position::mk_err(loc,vrprintf(heap_region,fmt2,ap2)));
 }
 
 ///////// functions for merging /////////
@@ -515,7 +514,7 @@ struct Enumdecl * merge_enumdecl(enumdecl_t d0, enumdecl_t d1,
   let $(new_scope, res_scope) = merge_scope(d0->sc,d1->sc,"enum",v,loc,msg,true);
   if (! res_scope) res = false;
 
-  enumdecl_t d2; //futur result
+  enumdecl_t d2; //future result
 
   // check fields
   switch ($(d0->fields, d1->fields)) {

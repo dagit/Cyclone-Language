@@ -41,7 +41,7 @@ using Core;
 extern datatype exn { extern Error(string_t) };
 
 extern struct lexbuf<`a::B>{ /* use 'a for state that refill_buff might need */
- 
+
   void   (@refill_buff)(struct lexbuf<`a> @);
   `a     refill_state;
 

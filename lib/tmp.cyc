@@ -5,7 +5,7 @@ using Core;
 
 namespace Cstdio {
 extern "C" {
-struct Cstdio::__abstractFILE *tmpfile();
+struct __abstractFILE *tmpfile();
 Cstring	tmpnam(Cstring);
 }}
 

@@ -36,7 +36,7 @@ void yyerror(string_t<`H> s, int state, int token) {
     } else if (msg_table[i].state == state)
       s = msg_table[i].msg;
   }
-  post_error(mk_err_parse(yylloc.first_line,s));
+  post_error(mk_err(yylloc.first_line,s));
 } 
 
 

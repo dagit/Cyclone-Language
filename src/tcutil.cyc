@@ -114,9 +114,8 @@ void explain_failure() {
 }
 
 void terr(seg_t loc, string_t fmt, ... inject parg_t ap)
-  __attribute__((format(printf,2,3)))
-{
-  Position::post_error(Position::mk_err_elab(loc,vrprintf(heap_region,fmt,ap)));
+  __attribute__((format(printf,2,3))) {
+  Position::post_error(Position::mk_err(loc,vrprintf(heap_region,fmt,ap)));
 }
 
 `a impos(string_t fmt, ... inject parg_t ap)
@@ -450,9 +449,9 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   case &Datatype_e(es,dtd,dtf):
     new_e = new_exp(new Datatype_e(map_c(DC,pt,es),dtd,dtf),e->loc);
     break;
-  case &Enum_e(qv,ed,ef): new_e = e; break;
-  case &AnonEnum_e(qv,t,ef):
-    new_e = new_exp(new AnonEnum_e(qv,copy_type(t),ef),e->loc);
+  case &Enum_e(ed,ef): new_e = e; break;
+  case &AnonEnum_e(t,ef):
+    new_e = new_exp(new AnonEnum_e(copy_type(t),ef),e->loc);
     break;
   case &Malloc_e(MallocInfo(ic,r,t,n,res,inlc)):
     let e2 = copy_exp(e);
@@ -3276,8 +3275,8 @@ static exp_t copye(exp_t old, raw_exp_t r) {
 exp_t rsubsexp(region_t<`r> r, list_t<$(tvar_t,type_t)@`r,`r> inst, exp_t e) {
   switch (e->r) {
   case &Const_e(_):
-  case &Enum_e(_,_,_):
-  case &AnonEnum_e(_,_,_):
+  case &Enum_e(...):
+  case &AnonEnum_e(...):
   case &Var_e(...): return e;
 
   case &Primop_e(p,es):
@@ -4775,8 +4774,8 @@ static cvtenv_t<`r>
 i_check_valid_type_level_exp(exp_t e, tenv_t te, cvtenv_t<`r> cvtenv) {
   switch (e->r) {
   case &Const_e(_):
-  case &Enum_e(_,_,_):
-  case &AnonEnum_e(_,_,_):
+  case &Enum_e(...):
+  case &AnonEnum_e(...):
   case &Var_e(...): break;
   case &Primop_e(_,es):
     for (; es != NULL; es = es->tl)
@@ -5591,8 +5590,8 @@ static bool cnst_exp(bool var_okay, exp_t e) {
   case &Sizeoftyp_e(_):
   case &Sizeofexp_e(_):
   case &Offsetof_e(_,_):
-  case &Enum_e(_,_,_):
-  case &AnonEnum_e(_,_,_): return true;
+  case &Enum_e(...):
+  case &AnonEnum_e(...): return true;
   case &Var_e(b):
     // NB: top-level function names and arrays are "constant"
     // Ignore unbound variables b/c should be reported elsewhere

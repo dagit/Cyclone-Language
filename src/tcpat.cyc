@@ -51,61 +51,11 @@ namespace Tcpat;
 
 static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
   switch(p->r) {
-  case &UnknownId_p(q):
-    try {
-      TEMP_RGN(te, r) {
-        switch (lookup_ordinary(r,te,p->loc,q,false)) {
-        case &AggrRes(_):
-          p->r = &Wild_p_val;
-          terr(p->loc,"struct tag used without arguments in pattern");
-          return;
-        case &DatatypeRes(tud,tuf): 
-          p->r = new Datatype_p(tud,tuf,NULL,false); return;
-        case &EnumRes(ed,ef):     
-          p->r = new Enum_p(ed,ef); 
-          return;
-        case &AnonEnumRes(t,ef):  
-          p->r = new AnonEnum_p(t,ef); 
-          return;
-        case &VarRes(_): break; // shadows an outer definition, but that's fine
-        }
-      } 
-    } catch { case &Dict::Absent: break; } // a new variable
-    // Unqualified variable is a declaration, qualified is an error
-    switch ((*q)[0]) {
-    case {.Loc_n = _}: 
-    case {.Rel_n = NULL}:
-      (*q)[0] = Loc_n;        
-      p->r = new Var_p(new_vardecl(q,&VoidType_val,NULL),// type set later
-                       new_pat(&Wild_p_val,0)); 
-      return;
-    default: terr(p->loc,"qualified variable in pattern"); return;
-    }
-  case &UnknownCall_p(q,ps,dots):
-    try {
-      TEMP_RGN(te, r) {
-        switch (lookup_ordinary(r,te,p->loc,q,false)) {
-        case &AggrRes(ad):
-          let new_ps = NULL;
-          for(; ps != NULL; ps = ps->tl)
-            new_ps = new List(new $(NULL,ps->hd), new_ps);
-          p->r = new Aggr_p(new AggrInfo(KnownAggr(new ad),NULL),
-                            NULL,imp_rev(new_ps),dots);
-          return;
-        case &DatatypeRes(tud,tuf): p->r = new Datatype_p(tud,tuf,ps,dots); return;
-        case &EnumRes(_,_):
-        case &AnonEnumRes(_,_):
-          terr(p->loc,"enum tag used with arguments in pattern");
-          p->r = &Wild_p_val;
-          return;
-        case &VarRes(_): break;
-      }
-    }} catch {case &Dict::Absent: break;}
-    terr(p->loc, "%s is not a constructor in pattern",qvar2string(q));
-    p->r = &Wild_p_val;
-    return;
 
-  case &Aggr_p(NULL, exist_ts, dps, dots):
+  case &Aggr_p(NULL, exist_ts, dps, dots): 
+    // DJG: this case will remain because binding does not have topt
+    //      I think it's primarily used for tagged unions (not datatypes)
+    //      Would people mind if we got rid of it?
     if (topt == NULL) 
       terr(p->loc, "cannot determine pattern type");
     type_t t = compress(*topt);
@@ -121,36 +71,27 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
     }
     return;
     
-  case &Aggr_p(&AggrInfo({.UnknownAggr= $(k,n,_)},targs), *exist_ts, dps, dots):
-    try { 
-      let adp = lookup_aggrdecl(te,p->loc,n);
-      let ad = *adp;
-      if(ad->impl==NULL) {
-	terr(p->loc, "can't destructure an abstract %s",
-             (ad->kind == StructA) ? "struct" : "union");
-        p->r = &Wild_p_val;
-	return;
-      }
-      int more_exists = length(ad->impl->exist_vars) - length(*exist_ts);
-      if(more_exists < 0) {
-	terr(p->loc, "too many existentially bound type variables in pattern");
-        let ts = exist_ts;
-        for (int n = length(ad->impl->exist_vars); n != 0; n--)
-          ts = &(*ts)->tl;
-        *ts = NULL;
-      } else if (more_exists > 0) {
-        // add missing type variables for user here
-        let new_ts = NULL;
-        for (; more_exists != 0; more_exists--) 
-          new_ts = new List(new_tvar(new Unknown_kb(NULL)),new_ts);
-        *exist_ts = List::imp_append(*exist_ts,new_ts);
-      }
-      p->r = new Aggr_p(new AggrInfo(KnownAggr(adp), targs), *exist_ts, dps,
-                        dots);
-    } catch { case &Dict::Absent: 
-      terr(p->loc, "Non-aggregate name has designator patterns"); 
+  case &Aggr_p(&AggrInfo({.KnownAggr= adp},targs), *exist_ts, dps, dots):
+    let ad = *adp;
+    if(ad->impl==NULL) {
+      terr(p->loc, "can't destructure an abstract %s",
+	   (ad->kind == StructA) ? "struct" : "union");
       p->r = &Wild_p_val;
-      break;
+      return;
+    }
+    int more_exists = length(ad->impl->exist_vars) - length(*exist_ts);
+    if(more_exists < 0) {
+      terr(p->loc, "too many existentially bound type variables in pattern");
+      let ts = exist_ts;
+      for (int n = length(ad->impl->exist_vars); n != 0; n--)
+	ts = &(*ts)->tl;
+      *ts = NULL;
+    } else if (more_exists > 0) {
+      // add missing type variables for user here
+      let new_ts = NULL;
+      for (; more_exists != 0; more_exists--) 
+	new_ts = new List(new_tvar(new Unknown_kb(NULL)),new_ts);
+      *exist_ts = List::imp_append(*exist_ts,new_ts);
     }
     return;
   case &Exp_p(e):
@@ -162,6 +103,11 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
     let $(i,known) = Evexp::eval_const_uint_exp(e);
     p->r = new Int_p(None,i);
     return;
+
+  case &UnknownId_p(...):   throw new Impossible("resolve_pat UnknownId_p");
+  case &UnknownCall_p(...): throw new Impossible("resolve_pat UnknownCall_p");
+  case &Aggr_p(...):        throw new Impossible("resolve_pat unknownAggr");
+
   default: return;
   }
 }

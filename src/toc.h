@@ -39,5 +39,7 @@ extern list_t<decl_t> toc(table_t<fndecl_t,table_t<stmt_t,int>> pop_tables,
 extern qvar_t temp_var();
 extern stringptr_t ?globals;
 
+extern bool warn_bounds_checks;
+extern bool warn_all_null_deref;
 }
 #endif

@@ -108,6 +108,7 @@ CYCLONE_SRCS:=absyn\
 	 formatstr\
          evexp\
          tc\
+         binding\
          pratt\
          jump_analysis\
          cf_flowinfo\
@@ -129,6 +130,7 @@ CYCDOC_SRCS:=cycdoc\
         relations\
 	tcenv\
 	tcexp\
+        binding\
 	tcstmt\
 	tcpat\
         tc\
@@ -151,6 +153,7 @@ BUILDLIB_SRCS:=buildlib\
 	tc\
 	tcdecl\
 	tcexp\
+        binding\
 	tcstmt\
 	formatstr\
 	evexp\

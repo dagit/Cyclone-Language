@@ -253,8 +253,8 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
       default: terr(e->loc,"cannot cast to %s",typ2string(t)); break;
       }
     break;
-  case &AnonEnum_e(_,_,ef): fallthru(ef);
-  case &Enum_e(_,_,ef): ans = eval_const_exp((exp_t)ef->tag); break;
+  case &AnonEnum_e(_,ef): fallthru(ef);
+  case &Enum_e(_,ef): ans = eval_const_exp((exp_t)ef->tag); break;
   default:
     terr(e->loc,"bad static expression %s", exp2string(e));
     return $(Int_c(Signed,0), true);

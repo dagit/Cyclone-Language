@@ -21,13 +21,9 @@
 // operations for tracking positions (locations) within source code
 #include <core.h>
 #include <list.h>
-#include <lineno.h>
 
 namespace Position {
   using Core;
-  using List;
-  using Lineno;
-  extern datatype exn {extern Exit};
 
   extern void   reset_position(string_t<`H>);
   extern void   set_position_file(string_t<`H>);
@@ -39,25 +35,14 @@ namespace Position {
   extern bool   segment_equals(seg_t,seg_t);
   extern mstring_t string_of_loc(unsigned int);
   extern mstring_t string_of_segment(seg_t);
-  extern list_t<mstringptr_t> strings_of_segments(list_t<seg_t,`r>);
+  extern List::list_t<mstringptr_t> strings_of_segments(List::list_t<seg_t,`r>);
 
   //////// Errors ////////////////////
-  extern datatype Error_kind { Lex, Parse, Elab };
-  typedef datatype Error_kind @ error_kind_t;
-  extern struct Error {
-    string_t     source;
-    seg_t        seg;
-    error_kind_t kind;
-    string_t     desc;
-  };
+  struct Error;
   typedef struct Error @error_t;
-  extern error_t mk_err_lex(seg_t,string_t<`H>);
-  extern error_t mk_err_parse(seg_t,string_t<`H>);
-  extern error_t mk_err_elab(seg_t,string_t<`H>);
-
+  extern error_t mk_err(seg_t,string_t<`H>);
 
   //////// Error Reporting ///////////
-  extern datatype exn {extern Nocontext};
   extern bool use_gcc_style_location;
   extern int num_errors;
   extern int max_errors;

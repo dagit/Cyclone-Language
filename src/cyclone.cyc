@@ -29,6 +29,7 @@
 #include "absyn.h"
 #include "absynpp.h"
 #include "absyndump.h"
+#include "binding.h"
 #include "tcutil.h"
 #include "tcenv.h"
 #include "tc.h"
@@ -50,11 +51,6 @@ namespace Lex {
   extern void pos_init();
   extern void lex_init(bool use_cyclone_keywords);
 }
-namespace Toc {
-  bool warn_bounds_checks;
-  bool warn_all_null_deref;
-}
-
 
 using Cyclone;
 using Core;
@@ -113,14 +109,12 @@ void set_c_compiler(string_t<`H> s){
   // else invalid compiler -- warn? throw exception? 
 }
 
-
 void set_port_c_code() {
   Absyn::porting_c_code = true;
   Position::max_errors = 65535; // allow a lot of errors
   save_c_r = true; // save temp files
   parseonly_r = true; // stop after parsing
 }
-
 
 static string_t *output_file = NULL;
 static void set_output_file(string_t<`H> s) {
@@ -314,7 +308,7 @@ static void set_all_warnings() {
   Tc::aggressive_warn = true;
 }
 
-/* This only works enough to support cycdoc so far */
+// This only works enough to support cycdoc so far
 enum inputtype {
   DEFAULTINPUT,
   CYCLONEFILE
@@ -326,9 +320,8 @@ static void set_inputtype(string_t s) {
     intype = CYCLONEFILE;
   else if (strcmp(s,"none") == 0)
     intype = DEFAULTINPUT;
-  else {
+  else
     fprintf(stderr,"Input type '%s' not supported\n",s);
-  }
 }
 
 string_t make_base_filename(string_t<`r> s, string_t<`r>* output_file) {
@@ -405,8 +398,8 @@ static void remove_file(string_t<`H> s) {
   else remove((const char @)s);
 }
 
-/**********************************************************************/
-/* Reading a specs file */
+//**********************************************************************
+// Reading a specs file
 
 #define MAXSTRNAME 256
 #define MAXSTRVALUE 4096
@@ -554,7 +547,7 @@ string_t<`H> ?`H split_specs(const char ?cmdline) {
   return result;
 }
 
-/**********************************************************************/
+////********************************************************************
 
 bool compile_failure = false; // for exit code (helps Makefile)
 
@@ -571,22 +564,23 @@ FILE *try_file_open(string_t filename, string_t mode, string_t msg_part) {
 
 extern "C" void CYCALLOCPROFILE_mark(const char *s);
 
-`b do_stage(string_t stage_name, `b f(`a, list_t<Absyn::decl_t,`H>),
-           `a env, list_t<Absyn::decl_t,`H> tds) {
-  string_t explain_string = "";
-  let ans;
-
+`b do_stage(string_t stage_name, list_t<Absyn::decl_t,`H> tds,
+	    `b f(`a, list_t<Absyn::decl_t,`H>), `a env, 
+	    void on_fail(`c), `c failenv) {
   CYCALLOCPROFILE_mark(stage_name);
 
+  let ans;
   try ans = f(env,tds);
   catch {
   case x:
     fprintf(stderr,"COMPILER STAGE %s\n",stage_name);
+    on_fail(failenv);
     Core::rethrow(x);
   }
   if (Position::error_p())
     compile_failure = true;
   if (compile_failure) {
+    on_fail(failenv);
     fprintf(stderr,"\nCOMPILATION FAILED!\n");
     fflush(stderr);
     return ans;
@@ -599,18 +593,27 @@ extern "C" void CYCALLOCPROFILE_mark(const char *s);
   return ans;
 }
 
+static void ignore(`a x) {}
+static void remove_fileptr(mstringptr_t<`H> s) { remove_file(*s); }
+
 list_t<Absyn::decl_t> do_parse(FILE @ f, list_t<Absyn::decl_t> ignore) {
   Lex::lex_init(true); // must forget typedefs, may as well flush symbols too
   Lex::pos_init();
   list_t<Absyn::decl_t> ans = NULL;
   try {
     ans = Parse::parse_file(f);
+    file_close(f);
   } catch {
-  case &Position::Exit: compile_failure = true; break;
-  case e: rethrow(e);
+  case &Parse::Exit: file_close(f); compile_failure = true; break;
+  case e: file_close(f); rethrow(e);
   }
   Lex::lex_init(true); // garbage collect those big tries
   return ans;
+}
+
+bool do_binding(bool ignore, list_t<Absyn::decl_t,`H> tds) {
+  Binding::resolve_all(tds);
+  return true;
 }
 
 list_t<Absyn::decl_t> do_typecheck($(region_t<`tc>,Tcenv::tenv_t<`tc>) @tcenv,
@@ -635,7 +638,8 @@ list_t<Absyn::decl_t> do_cfcheck(JumpAnalysis::jump_anal_res_t tables,
 
 // do_interface [te] [if] [ifo] [decls] where [if] is the interface (cyci)
 // file, and [ifo] is the cycio file for the output
-list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H) @ params, list_t<Absyn::decl_t,`H> tds) {
+list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H)@ params,
+				   list_t<Absyn::decl_t,`H> tds) {
   let &$(te, fi, fo) = params;
   let i1 = Interface::extract(te -> ae);
   if (fi == NULL) {
@@ -648,6 +652,12 @@ list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H) @ params
       Interface::save(i0, fo);
   }
   return tds;
+}
+void interface_fail($(Tcenv::tenv_t, FILE *`H, FILE @`H)@ params) {
+  let &$(_, fi, fo) = params;
+  if(fi != NULL)
+    file_close(fi);
+  file_close(fo);
 }
 
 list_t<Absyn::decl_t> 
@@ -701,9 +711,19 @@ int copy_internal_file(string_t file, FILE @out_file) {
   return 0;
 }
 
+// We must remember what .c files are produced so that we can remove them
+// after we're done.
+static list_t<mstringptr_t> cfiles = NULL;
+static void remove_cfiles() {
+  if (!save_c_r)
+    for (; cfiles != NULL; cfiles = cfiles->tl)
+      remove_file(*(cfiles->hd));
+}
 
-list_t<Absyn::decl_t> do_print(FILE @`H out_file, list_t<Absyn::decl_t,`H> tds) {
-  let params_r = tc_r ? Absynpp::cyc_params_r : Absynpp::c_params_r;
+list_t<Absyn::decl_t> do_print($(FILE@`H,mstring_t<`H>) @env,
+			       list_t<Absyn::decl_t,`H> tds) {
+  let &$(out_file,cfile) = env;
+    let params_r = tc_r ? Absynpp::cyc_params_r : Absynpp::c_params_r;
   params_r.expand_typedefs = ! noexpand_r;
   params_r.to_VC = tovc_r;
   params_r.add_cyc_prefix = add_cyc_namespace_r;
@@ -733,16 +753,14 @@ list_t<Absyn::decl_t> do_print(FILE @`H out_file, list_t<Absyn::decl_t,`H> tds) 
     Absyndump::dumpdecllist2file(tds,out_file);
   }
   fflush(out_file);
+  file_close(out_file);
+  cfiles = new List(new cfile,cfiles);
   return tds;
 }
-
-// We must remember what .c files are produced so that we can remove them
-// after we're done.
-static list_t<stringptr_t> cfiles = NULL;
-static void remove_cfiles() {
-  if (!save_c_r)
-    for (; cfiles != NULL; cfiles = cfiles->tl)
-      remove_file(*(cfiles->hd));
+void print_fail($(FILE@`H,mstring_t<`H>) @env) {
+  let &$(out_file,cfile) = env;
+  file_close(out_file);
+  cfiles = new List(new strdup(cfile),cfiles);
 }
 
 // Take as input a string, return the list of substrings separated by colons
@@ -902,11 +920,12 @@ static stringptr_t sh_escape_stringptr(stringptr_t<`H,`H> sp) {
 static void process_file(string_t<`H> filename) {
 
   let basename = make_base_filename(filename, output_file);
-  let preprocfile   = strconcat(basename, ".cyp");
+  let preprocfile = strconcat(basename, ".cyp");
   let interfacefile = (specified_interface != NULL) ? 
                         specified_interface : strconcat(basename, ".cyci");
   let interfaceobjfile = strconcat(basename, ".cycio");
-  let cfile         = strconcat(basename, ".c");
+  let cfile = strconcat(basename, ".c");
+  let preprocfileptr = new preprocfile;
 
   if (v_r) fprintf(stderr,"Compiling %s\n", filename);
 
@@ -994,57 +1013,47 @@ static void process_file(string_t<`H> filename) {
   list_t<Absyn::decl_t> tds = NULL;
 
   // Parsing
-  try
-    tds = do_stage("parsing", do_parse, (FILE@)in_file, tds);
-  catch {
-  case x:
-    file_close((FILE@)in_file);
-    remove_file(preprocfile); // Can't flush warnings after removal
-    Core::rethrow(x);
-  }
-  file_close(in_file);
-  if (compile_failure) {
-    remove_file(preprocfile); // Can't flush warnings after removal
-    return;
-  } 
+  tds = do_stage("parsing", tds, do_parse, (FILE@)in_file,
+		 remove_fileptr, preprocfileptr);
+  if(compile_failure) return;
 
   if (Absyn::porting_c_code) {
     Port::port(tds);
     return;
   }
 
+  // Binding resolution (result will change later)
+  do_stage("binding", tds, do_binding, true, remove_fileptr, preprocfileptr);
+  if(compile_failure) return;
+
   let jump_tables;
   { region tc_rgn; 
     let te = Tcenv::tc_init(tc_rgn); // Must declare BEFORE the goto 
     if (parseonly_r) goto PRINTC;
 
-    // Type checking and control-flow checking
+    // Type checking
     let tc_env = $(tc_rgn, te);
-    tds = do_stage("type checking", do_typecheck, &tc_env, tds);
+    tds = do_stage("type checking", tds, do_typecheck, &tc_env,
+		   remove_fileptr, preprocfileptr);
+    if(compile_failure) return;
 
-    if (compile_failure) {
-      remove_file(preprocfile); // Can't flush warnings after removal
-      return;
-    } 
-
-    jump_tables = do_stage("jump checking",do_jumpanalysis,true,tds);
-    if (compile_failure) {
-      remove_file(preprocfile); // Can't flush warnings after removal
-      return;
-    } 
+    // Jump analysis
+    jump_tables = do_stage("jump checking", tds, do_jumpanalysis, true,
+			   remove_fileptr, preprocfileptr);
+    if(compile_failure) return;
     
+    // Control-flow checking
     if (tc_r) goto PRINTC;
-    tds = do_stage("control-flow checking", do_cfcheck, jump_tables, tds);
-    if (compile_failure) {
-      remove_file(preprocfile); // Can't flush warnings after removal
-      return;
-    } 
+    tds = do_stage("control-flow checking", tds, do_cfcheck, jump_tables,
+		   remove_fileptr, preprocfileptr);
+    if (compile_failure) return;
     
     // Generate interface file
     if (generate_interface_r) {
-      FILE *inter_file = try_file_open((const char @)interfacefile, "w","interface file");
+      FILE *inter_file = try_file_open((const char @)interfacefile,"w","interface file");
       if (inter_file == NULL) {
-        compile_failure = true; return;
+        compile_failure = true; 
+	return;
       }
       Absyndump::set_params(&Absynpp::cyci_params_r);
       Absyndump::dump_interface(tds, inter_file);
@@ -1062,36 +1071,26 @@ static void process_file(string_t<`H> filename) {
       }
       Position::reset_position(interfacefile);
       let int_env = $(te, inter_file, (FILE@)inter_objfile);
-      tds = do_stage("interface checking", do_interface, &int_env, tds);
-      if (inter_file != NULL) 
-        file_close(inter_file);
-      file_close(inter_objfile);
+      tds = do_stage("interface checking", tds, do_interface, &int_env,
+		     interface_fail, &int_env);
     }
   }
   if (cf_r) goto PRINTC;
 
   // Translation to C
-  tds = do_stage("translation to C",do_translate, jump_tables->pop_tables, tds);
-  if (compile_failure) {
-    remove_file(preprocfile); // Can't flush warnings after removal
-    return;
-  } 
-
-  if (!compile_failure)
-    Tcutil::flush_warnings();
-  remove_file(preprocfile);
+  tds = do_stage("translation to C", tds, do_translate, jump_tables->pop_tables,
+		 remove_fileptr, preprocfileptr);
   if (compile_failure) return;
+
+  // removal of gcc extensions (tovc is an antiquated name)
   if (tovc_r || elim_se_r)
-    // FIX: the tovc functions should be renamed, some things
-    // (lifting out statement expressions) are useful even if
-    // we aren't using VC
-    tds = do_stage("post-pass to VC", do_tovc, true, tds);
+    tds = do_stage("post-pass to VC", tds, do_tovc, true, ignore, true);
   if (compile_failure) return;
 
+  Tcutil::flush_warnings(); // cannot do after preprocfile is removed
+  remove_file(preprocfile);
 
-  // jcheney: we should make a (empty) .c file even if the .cyc file produced no decls
-  /*PRINTC:
-    if (tds != NULL) */
+  // jcheney: we make a (empty) .c file even if the .cyc file produced no decls
  PRINTC: {
   FILE *out_file;
   if (parseonly_r || tc_r || cf_r)
@@ -1106,18 +1105,10 @@ static void process_file(string_t<`H> filename) {
   
   if (compile_failure || !out_file) return;
   
-  try
-    if (!noprint_r)
-      tds = do_stage("printing", do_print, out_file, tds);
-  catch {
-  case x:
-    compile_failure = true;
-    file_close(out_file);
-    cfiles = new List(new ((string_t)cfile),cfiles);
-    Core::rethrow(x);
+  if (!noprint_r) {
+    let env = new $((FILE@)out_file,cfile);
+    tds = do_stage("printing", tds, do_print, env, print_fail, env);
   }
-  file_close(out_file);
-  cfiles = new List(new ((string_t)cfile),cfiles); 
   }
 }
 
@@ -1568,7 +1559,6 @@ int main(int argc, string_t<`H> ?`H argv) {
     stdlib = NULL;
     stdlib_string = (string_t)"";
   } else {
-
     // FIX: -g should get different versions of the libraries?
     string_t libcyc_flag;
     string_t nogc_filename;

@@ -45,13 +45,10 @@
 //      Abs_n is used for some globals (Null_Exception, etc).
 //      Loc_n is used for some locals (comprehension and pattern variables).
 // Here are some invariants after type checking:
-//  B1. UnresolvedMem_e and Unresolved_b are not used.
 //  B2. All qvars are either Loc_n, Abs_n or C_n.  Any Rel_n has been
 //      replaced by Loc_n, Abs_n or C_n.
-//  B3. All "dest fields" and non_local_preds fields in stmt objects
-//      are correct.
-//  B4. Every expression has a non-null and correct type field.
-//  B5. None of the "unresolved" variants are used.  (There may be 
+//  B3. Every expression has a non-null and correct type field.
+//  B4. None of the "unresolved" variants are used.  (There may be 
 //      underconstrained Evars for types.)
 //  B6. The pat_vars field of switch_clause is non-null and correct.
 // Note that translation to C willfully violates B3 and B4, but that's okay.
@@ -609,8 +606,8 @@ namespace Absyn {
     Throw_e(exp_t,bool preserve_lineinfo); // throw.  
     NoInstantiate_e(exp_t); // e@<>
     Instantiate_e(exp_t,list_t<type_t>); // instantiation of polymorphic defn
-    // (t)e.  bool indicates whether user inserted cast
-    Cast_e(type_t,exp_t,bool,coercion_t); 
+    // (t)e.  
+    Cast_e(type_t,exp_t,bool,coercion_t);//true bool indicates user made cast
     Address_e(exp_t); // &e
     New_e(exp_opt_t, exp_t); // first expression is region -- null is heap
     Sizeoftyp_e(type_t); // sizeof(t)
@@ -634,18 +631,18 @@ namespace Absyn {
     // {for i < e1 : e2} -- the bool tells us whether it's zero-terminated
     Comprehension_e(vardecl_t,exp_t,exp_t,bool); // much of vardecl is known
     // {for i < e1 : t} -- used for variable-sized flat arrays
-    ComprehensionNoinit_e(exp_t,type_t,bool); // much of vardecl is known
+    ComprehensionNoinit_e(exp_t,type_t,bool); 
     // Foo{.x1=e1,...,.xn=en} (with optional witness types)
     Aggregate_e(typedef_name_t,
-                list_t<type_t>, // witness types, maybe fewer before type-checking
+                list_t<type_t>,//witness types, maybe fewer before type-checking
                 list_t<$(list_t<designator_t>,exp_t)@>, 
                 struct Aggrdecl *);
     // {.x1=e1,....,.xn=en}
     AnonStruct_e(type_t, list_t<$(list_t<designator_t>,exp_t)@>);
     // Foo(e1,...,en)
     Datatype_e(list_t<exp_t>,datatypedecl_t,datatypefield_t);
-    Enum_e(qvar_t,struct Enumdecl *,struct Enumfield *);
-    AnonEnum_e(qvar_t,type_t,struct Enumfield *);
+    Enum_e(enumdecl_t,enumfield_t);
+    AnonEnum_e(type_t,enumfield_t);
     // malloc(e1), rmalloc(e1,e2), calloc(e1,e2), rcalloc(e1,e2,e3).  
     Malloc_e(malloc_info_t);
     Swap_e(exp_t,exp_t); // swap(e1,e2)
@@ -659,7 +656,7 @@ namespace Absyn {
     // that we can move between the type and expression levels
     // (e.g., valueof_t<valueof(`i)*42 + 36>).
     Asm_e(bool volatile_kw,string_t); // uninterpreted asm statement -- used
-    // within extern "C include" -- the sttring is all of the gunk that goes
+    // within extern "C include" -- the string is all of the gunk that goes
     // between the parens.
   };
   // expression with auxiliary information
@@ -722,8 +719,8 @@ namespace Absyn {
     Float_p(string_t,int); // 3.1415; int 0=>float, 1=>double, _=>long double
     Enum_p(enumdecl_t,enumfield_t);
     AnonEnum_p(type_t,enumfield_t);
-    UnknownId_p(qvar_t); // resolved by tcpat
-    UnknownCall_p(qvar_t,list_t<pat_t>, bool dot_dot_dot); // resolved by tcpat
+    UnknownId_p(qvar_t); // resolved by binding
+    UnknownCall_p(qvar_t,list_t<pat_t>, bool dot_dot_dot); //resolved by binding
     Exp_p(exp_t);        // evaluated and resolved by tcpat
   };
   extern_datacon(Raw_pat,Wild_p);
@@ -858,7 +855,7 @@ namespace Absyn {
   EXTERN_ABSYN struct Enumdecl {
     scope_t                    sc;
     typedef_name_t             name;
-    opt_t<list_t<enumfield_t>> fields;
+    opt_t<list_t<enumfield_t>> fields; // NULL when abstract
   };
 
   EXTERN_ABSYN struct Typedefdecl {
@@ -868,7 +865,7 @@ namespace Absyn {
     opt_t<kind_t>  kind;
     type_opt_t     defn;
     attributes_t   atts;
-    bool           extern_c;
+    bool           extern_c; // DJG: not sure what true means
   };
 
   // raw declarations

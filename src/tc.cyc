@@ -1073,7 +1073,7 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
 
     switch (d->r) {
     case &Let_d(...): 
-    case &Letv_d(_): // FIX
+    case &Letv_d(_): // FIX -- error will be in Binding pass
       terr(loc,"top level let-declarations are not implemented");
       break;
     case &Region_d(...):

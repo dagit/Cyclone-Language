@@ -909,10 +909,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Datatype_e(_,_,_):
       fprintf(stderr,"Error: unexpected Datatype_e\n");
       exit(1); return;
-    case &Enum_e(_,_,_):
+    case &Enum_e(...):
       fprintf(stderr,"Error: unexpected Enum_e\n");
       exit(1); return;
-    case &AnonEnum_e(_,_,_):
+    case &AnonEnum_e(...):
       fprintf(stderr,"Error: unexpected AnonEnum_e\n");
       exit(1); return;
     }

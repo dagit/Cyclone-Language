@@ -266,18 +266,15 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // the flow analysis
     let e = *exp;
     if (!is_var_exp(e)) {
-      let v = stmt_temp_var();
+      let vd = new_vardecl(stmt_temp_var(), new_evar(NULL,NULL), NULL);
       let s1 = new_stmt(s0->r,s0->loc);
-      let d = let_decl(new_pat(new Var_p(new_vardecl(v,
-						     new_evar(NULL,NULL),
-						     NULL),
-					 new_pat(&Wild_p_val,e->loc)),
+      let d = let_decl(new_pat(new Var_p(vd, new_pat(&Wild_p_val,e->loc)),
 			       e->loc),
 		       e, s0->loc);
       let s2 = decl_stmt(d,s1,s0->loc);
 //       let s2 = declare_stmt(v,new_evar(NULL,NULL),e,s1,s0->loc);
       s0->r = s2->r;
-      *exp = var_exp(v,e->loc);
+      *exp = varb_exp(new Local_b(vd),e->loc);
       tcStmt(te,s0,new_block);
       return;
     }
@@ -321,23 +318,22 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &TryCatch_s(s,*scs0,*dtp):
-    // DJG: KLUDGE necessary?
     // This is a KLUDGE so that we have a next statement that is not
     // outside of the handler, eg. for try while(b) break; catch ...
     // We have to do this b/c the translation to C uses the destinations
     // to pop handlers.  We cannot call seq_stmt b/c it optimizes skips away.
     s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
 		    s->loc)->r;
-
     { TEMP_RGN(te,r) 
       tcStmt(te,s,true);
     }
 
     // add a default case that re-throws the exception
     qvar_t def_v = new $(Loc_n,new "exn");
-    let def_pat = new_pat(new Var_p(new_vardecl(def_v,&VoidType_val,0),
-                                    new_pat(&Wild_p_val,0)),0);
-    let def_stmt = exp_stmt(new_exp(new Throw_e(var_exp(def_v,0),true),0),0);
+    let vd = new_vardecl(def_v,&VoidType_val,0);
+    let def_pat = new_pat(new Var_p(vd, new_pat(&Wild_p_val,0)),0);
+    let def_stmt = 
+      exp_stmt(new_exp(new Throw_e(varb_exp(new Local_b(vd),0),true),0),0);
     let def_clause = new Switch_clause{def_pat, NULL, NULL, def_stmt, 0};
     *scs0 = List::append(*scs0,list(def_clause));
     
@@ -498,18 +494,15 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	case &UnknownId_p(...): break;
 	default:
 	  if (!is_var_exp(e)) {
-	    let v = stmt_temp_var();
+	    let vd = new_vardecl(stmt_temp_var(), new_evar(NULL,NULL), NULL);
 	    let s1 = new_stmt(s0->r,s0->loc);
-	    let d = let_decl(new_pat(new Var_p(new_vardecl(v,
-							   new_evar(NULL,NULL),
-							   NULL),
-					       new_pat(&Wild_p_val,e->loc)),
+	    let d = let_decl(new_pat(new Var_p(vd, new_pat(&Wild_p_val,e->loc)),
 				     e->loc),
 			     e, s0->loc);
 	    let s2 = decl_stmt(d,s1,s0->loc);
 // 	    let s2 = declare_stmt(v,new_evar(NULL,NULL),e,s1,s0->loc);
 	    s0->r = s2->r;
-	    *exp = var_exp(v,e->loc);
+	    *exp = varb_exp(new Local_b(vd),e->loc);
 	    tcStmt(te,s0,new_block);
 	    return;
 	  }
