@@ -2238,7 +2238,7 @@ cstub sigset {
   Cyc_sigarg_t sigset_SIG_IGN(int a) {
     return sig_wrap(sigset(a,SIG_IGN));
   }
-#ifdef _SIG_HOLD_def_
+#ifdef SIG_HOLD
   Cyc_sigarg_t sigset_SIG_HOLD(int a) {
     return sig_wrap(sigset(a,SIG_HOLD));
   }
@@ -2284,7 +2284,7 @@ cstub signal {
   Cyc_sigarg_t signal_SIG_ERR(int a) {
     return sig_wrap(signal(a,SIG_ERR));
   }
-  #ifdef _SIG_HOLD_def_
+  #ifdef SIG_HOLD
   Cyc_sigarg_t signal_SIG_HOLD(int a) {
     return sig_wrap(signal(a,SIG_HOLD));
   }
@@ -3715,7 +3715,7 @@ hstub {
   #endif
 }
 hstub {
-  /* FIX: OS X and *BSD define a struct fd_set and then a typedef
+  /* FIX: OS X and *BSD and Solaris define a struct fd_set and then a typedef
      with the same name.  Our current scheme for omitting repeated
      declarations does not use separate namespaces for structs and
      typedefs, so the typedef is omitted by mistake.  This ugly hack
@@ -3729,6 +3729,9 @@ hstub {
   typedef struct fd_set fd_set;
   #endif
   #ifdef __FreeBSD__
+  typedef struct fd_set fd_set;
+  #endif
+  #ifdef __sparc__
   typedef struct fd_set fd_set;
   #endif
   #endif

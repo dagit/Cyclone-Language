@@ -89,7 +89,7 @@
   Cyc_sigarg_t signal_SIG_ERR(int a) {
     return sig_wrap(signal(a,SIG_ERR));
   }
-  #ifdef _SIG_HOLD_def_
+  #ifdef SIG_HOLD
   Cyc_sigarg_t signal_SIG_HOLD(int a) {
     return sig_wrap(signal(a,SIG_HOLD));
   }
