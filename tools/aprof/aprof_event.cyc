@@ -71,10 +71,14 @@ static struct RegionStats region_stats;
 
 static bool eof = false;
 
+static int lineno = 1;
+
 static void skip_whitespace(FILE @f) {
   int c = getc(f);
-  while (c == ' ' || c == '\t' || c == '\n') 
+  while (c == ' ' || c == '\t' || c == '\n') {
+    if (c == '\n') lineno++;
     c = getc(f);
+  }
   ungetc(c,f);
 }  
 
@@ -224,21 +228,21 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
 
     // get the location
     if (!gettoken(f)) {
-      fprintf(stderr,"missing location at time %d\n",t);
+      fprintf(stderr,"missing location at time %d on line %d\n",t,lineno);
       return -1;
     }
     let s = (string_t)strdup(buf);
 
     // get the region name
     if (!gettoken(f)) {
-      fprintf(stderr,"missing region name for %s\n",s);
+      fprintf(stderr,"missing region name for %s on line %d\n",s,lineno);
       return -1;
     }
     let rname = (string_t)strdup(buf);
 
     // get the event
     if (!gettoken(f)) {
-      fprintf(stderr,"missing allocation action for %s\n",s); 
+      fprintf(stderr,"missing allocation action for %s on line %d\n",s,lineno); 
       return -1;
     }
 
@@ -249,7 +253,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       // set up the event
       let &CreateE(CreateEvent(*time,*loc,*rgn,*stats)) = &__create_event;
       if (!get_region_stats(f, stats)) {
-	fprintf(stderr,"failed to get region stats for %s\n",s);
+	fprintf(stderr,"failed to get region stats for %s on line %d\n",s,lineno);
 	return -1;
       }
       *time = t;
@@ -258,7 +262,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       num_create_events++;
       // invoke the handler
       if (!Fn::apply(callback,&__create_event)) {
-	fprintf(stderr,"callback failed for create event at %s\n",s);
+	fprintf(stderr,"callback failed for create event at %s on line %d\n",s,lineno);
 	return -1;
       }
     }
@@ -270,7 +274,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       // set up the event
       let &FreeE(FreeEvent(*time,*rgn,*stats)) = &__free_event;
       if (!get_region_stats(f, stats)) {
-	fprintf(stderr,"failed to get region stats for %s\n",s);
+	fprintf(stderr,"failed to get region stats for %s on line %d\n",s,lineno);
 	return -1;
       }
       *time = t;
@@ -278,7 +282,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       num_free_events++;
       // invoke the handler
       if (!Fn::apply(callback,&__free_event)) {
-	fprintf(stderr,"callback failed for free event at %s\n",s);
+	fprintf(stderr,"callback failed for free event at %s on line %d\n",s,lineno);
 	return -1;
       }
     }
@@ -305,11 +309,11 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       // set up the event
       let &ResizeE(ResizeEvent(*time,*rgn,*amt,*stats)) = &__resize_event;
       if (!getint(f,amt)) {
-	fprintf(stderr,"failed to get shrink amount for %s\n",s);
+	fprintf(stderr,"failed to get shrink amount for %s on line %d\n",s,lineno);
 	return -1;
       }
       if (!get_region_stats(f, stats)) {
-	fprintf(stderr,"failed to get region stats for %s\n",s);
+	fprintf(stderr,"failed to get region stats for %s on line %d\n",s,lineno);
 	return -1;
       }
       *time = t;
@@ -317,7 +321,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       num_resize_events++;
       // invoke the handler
       if (!Fn::apply(callback,&__resize_event)) {
-	fprintf(stderr,"callback failed for resize event at %s\n",s);
+	fprintf(stderr,"callback failed for resize event at %s on line %d\n",s,lineno);
 	return -1;
       }
     }
@@ -329,7 +333,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       // set up the event
       let &GcE(GcEvent(*time,*amt,*stats)) = &__gc_event;
       if (!get_region_stats(f, stats)) {
-	fprintf(stderr,"failed to get region stats for %s\n",s);
+	fprintf(stderr,"failed to get region stats for %s on line %d\n",s,lineno);
 	return -1;
       }
       *time = t;
@@ -337,7 +341,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       num_gc_events++;
       // invoke the handler
       if (!Fn::apply(callback,&__gc_event)) {
-	fprintf(stderr,"callback failed for gc event at %s\n",s);
+	fprintf(stderr,"callback failed for gc event at %s on line %d\n",s,lineno);
 	return -1;
       }
     }
@@ -350,22 +354,22 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       let &GcAddToHeapE(GcAddToHeapEvent(*time,*addr,*amt,*stats)) =
         &__gcaddtoheap_event;
       if (!gethex(f, addr)) {
-	fprintf(stderr,"failed to get address for %s\n",s);
+	fprintf(stderr,"failed to get address for %s on line %d\n",s,lineno);
 	return -1;
       }
       if (!getuint(f,amt)) {
-	fprintf(stderr,"failed to get alloc amount for %s\n",s);
+	fprintf(stderr,"failed to get alloc amount for %s on line %d\n",s,lineno);
 	return -1;
       }
       if (!get_region_stats(f, stats)) {
-	fprintf(stderr,"failed to get region stats for %s\n",s);
+	fprintf(stderr,"failed to get region stats for %s on line %d\n",s,lineno);
 	return -1;
       }
       *time = t;
       num_gc_add_to_heap++;
       // invoke the handler
       if (!Fn::apply(callback,&__gcaddtoheap_event)) {
-	fprintf(stderr,"callback failed for gcaddtoheap event at %s\n",s);
+	fprintf(stderr,"callback failed for gcaddtoheap event at %s on line %d\n",s,lineno);
 	return -1;
       }
     }
@@ -377,7 +381,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       // set up the event
       let &ReclaimE(ReclaimEvent(*time,*addr)) = &__reclaim_event;
       if (!gethex(f,addr)) {
-	fprintf(stderr,"failed to get address for %s\n",s);
+	fprintf(stderr,"failed to get address for %s on line %d\n",s,lineno);
 	return -1;
       }
       *time = t;
@@ -390,7 +394,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       }
       // invoke the handler
       if (!Fn::apply(callback,&__reclaim_event)) {
-	fprintf(stderr,"callback failed for reclaim event at %s\n",s);
+	fprintf(stderr,"callback failed for reclaim event at %s on line %d\n",s,lineno);
 	return -1;
       }
     }
@@ -403,15 +407,15 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       let &AllocE(AllocEvent(*time,*loc,*rgn,*amt,*stats,*addr)) =
         &__alloc_event;
       if (!getint(f,amt)) {
-	fprintf(stderr,"failed to get alloc amount for %s\n",s);
+	fprintf(stderr,"failed to get alloc amount for %s on line %d\n",s,lineno);
 	return -1;
       }
       if (!get_region_stats(f, stats)) {
-	fprintf(stderr,"failed to get region stats for %s\n",s);
+	fprintf(stderr,"failed to get region stats for %s on line %d\n",s,lineno);
 	return -1;
       }
       if (!gethex(f, addr)) {
-	fprintf(stderr,"failed to get address for %s\n",s);
+	fprintf(stderr,"failed to get address for %s on line %d\n",s,lineno);
 	return -1;
       }
       *time = t;
@@ -441,13 +445,13 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
       }
       // invoke the handler
       if (!Fn::apply(callback,&__alloc_event)) {
-	fprintf(stderr,"callback failed for alloc event at %s\n",s);
+	fprintf(stderr,"callback failed for alloc event at %s on line %d\n",s,lineno);
 	return -1;
       }
     }
 
     else {
-      fprintf(stderr,"Got unknown event %s\n",buf);
+      fprintf(stderr,"Got unknown event at line %d\n",lineno);
       return -1;
     }
     snarfline(f);

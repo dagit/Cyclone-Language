@@ -54,7 +54,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
   case &UnknownId_p(q):
     try {
       TEMP_RGN(te, r) {
-        switch (lookup_ordinary(r,te,p->loc,q)) {
+        switch (lookup_ordinary(r,te,p->loc,q,false)) {
         case &AggrRes(_):
           p->r = &Wild_p_val;
           terr(p->loc,"struct tag used without arguments in pattern");
@@ -80,7 +80,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
   case &UnknownCall_p(q,ps,dots):
     try {
       TEMP_RGN(te, r) {
-        switch (lookup_ordinary(r,te,p->loc,q)) {
+        switch (lookup_ordinary(r,te,p->loc,q,false)) {
         case &AggrRes(ad):
           let new_ps = NULL;
           for(; ps != NULL; ps = ps->tl)

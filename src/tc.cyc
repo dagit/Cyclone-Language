@@ -69,18 +69,13 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
           typ2string(vd->type)); fflush(stderr);
 #endif
 
-  // reject explicitly qualified name FIX: prevents re-type-checking
   switch (ns) {
-  case {.Rel_n = NULL}: 
-  case {.C_n = NULL}:
-  case {.Abs_n = NULL}: break; // allowed for top-level constants
-  default:
-    terr(loc,"qualified variable declarations are not implemented (%s)",
-	 qvar2string(vd->name)); // FIX
-    return;
+  case {.Rel_n = _}: 
+    // expand to qualified name
+    (*vd->name)[0] = Abs_n(te->ns, (vd->sc == ExternC) || in_cinclude);
+    break;
+  default: break;
   }
-  // expand to qualified name
-  (*vd->name)[0] = Abs_n(te->ns, (vd->sc == ExternC) || in_cinclude);
 
   // if it's an array or string, fill in the size on the type
   switch (compress(t)) {
@@ -195,7 +190,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
       if (b == &Unresolved_b_val) return; // error in merging
       // make the update if the variable is exported
       if (exports == NULL || export_member(vd->name,*exports)) 
-        if (!(b == b0 && (*ans)[1])) 
+        if (b != b0 || (*ans)[1]) 
           // no need to reinsert the entry 
           ge->ordinaries = Dict::insert(ge->ordinaries, v,
                                         new $(new VarRes(b), true));
@@ -231,22 +226,19 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
                      list_t<$(seg_t,qvar_t,bool)@>* exports) {
   var_t   v  = (*fd->name)[1];
 #ifdef DEBUG
-  fprintf(stderr,"type-checking fndecl %s",*v); fflush(stderr);
+  fprintf(stderr,"type-checking fndecl %s\n",*v); fflush(stderr);
 #endif
   if(fd->sc == ExternC && !in_cinclude)
     terr(loc,"extern \"C\" functions cannot be implemented in Cyclone");
 
-  // reject explicitly qualified name
   switch ((*fd->name)[0]) {
-  case {.Rel_n = NULL}: break;
-  case {.C_n = NULL}: impos("tc: C_n in tcFndecl");
-  case {.Abs_n = y}: impos("tc: Abs_n in tcFndecl");
-  default: terr(loc,"qualified function declarations are not implemented (%s)",
-		qvar2string(fd->name)); // FIX
-    return;
+  case {.Rel_n = NULL}: 
+    // expand to qualified name
+    (*fd->name)[0] = Abs_n(te->ns, (fd->sc == ExternC) || in_cinclude);
+    break;
+  default: 
+    break;
   }
-  // expand to qualified name
-  (*fd->name)[0] = Abs_n(te->ns, (fd->sc == ExternC) || in_cinclude);
   // reject ill-formed type
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
@@ -375,22 +367,18 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   fprintf(stderr,"type-checking typedefdecl %s",*v);
   fflush(stderr);
 #endif
-  // reject explicitly qualified name
   switch ((*td->name)[0]) {
-  case {.Rel_n = NULL}: 
-  case {.C_n = NULL}: 
-  case {.Abs_n = NULL}: break; // allowed for top-level constants
-  default:
-    terr(loc,"qualified typedef declarations are not implemented (%s)",qvar2string(td->name)); // FIX
-    return;
+  case {.Rel_n = _}: 
+    // expand to qualified name
+    (*td->name)[0] = Abs_n(te->ns, false);
+    break;
+  default: break;
   }
   // check for redeclaration (never allowed, apparently)
   if (Dict::member(ge->typedefs,v)) {
     terr(loc,"redeclaration of typedef %s",*v);
     return;
   }
-  // expand to qualified name
-  (*td->name)[0] = Abs_n(te->ns, false);
   // reject ill-formed type
   check_unique_tvars(loc,td->tvs);
   add_tvar_identities(td->tvs);
@@ -512,18 +500,14 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
   
   let tvs = ad->tvs;
 
-  // reject explicitly qualified name
   switch ((*ad->name)[0]) {
   case {.Rel_n = NULL}: 
-  case {.C_n = NULL}:
-  case {.Abs_n = NULL}: break; // allowed for top-level constants
-  default: 
-    terr(loc,"qualified struct declarations are not implemented (%s)",
-	 qvar2string(ad->name)); // FIX
-    return;
+    // expand to qualified name
+    (*ad->name)[0] = Abs_n(te->ns, (ad->sc == ExternC));
+    break;
+  default:
+    break;
   }
-  // expand to qualified name
-  (*ad->name)[0] = Abs_n(te->ns, (ad->sc == ExternC));
 
   // reject ill-formed type
   check_unique_tvars(loc, ad->tvs);
@@ -766,11 +750,7 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
     case &Dict::Absent:
       switch ((*tud->name)[0]) {
       case {.Rel_n = NULL}: (*tud->name)[0] = Abs_n(te->ns,false); break;
-      case {.Abs_n = _}: fallthru;
-      default:
-        terr(loc,"qualified (non-extensible) datatype declarations are not implemented (%s)",
-             qvar2string(tud->name)); // FIX
-        return;
+      default: break;
       }
       let tdopt = Dict::lookup_opt(ge->datatypedecls, v);
       tud_opt = tdopt ? rnew(temp)(*tdopt) : NULL;
@@ -836,14 +816,11 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
   // reject explicitly qualified name
   switch ((*ed->name)[0]) {
   case {.Rel_n = NULL}: 
-  case {.Abs_n = NULL}: break; // allowed for top-level constants
-  default:
-    terr(loc,"qualified enum declarations are not implemented (%s)",
-	 qvar2string(ed->name)); // FIX
-    return;
+    // expand to qualified name
+    (*ed->name)[0] = Abs_n(te->ns, (ed->sc == ExternC));
+    break;
+  default: break;
   }
-  // expand to qualified name
-  (*ed->name)[0] = Abs_n(te->ns, (ed->sc == ExternC));
 
   // check the fields.
   if (ed->fields != NULL) { region uprev_rgn; {
@@ -926,15 +903,11 @@ static void resolve_export_namespace(tenv_t te, $(seg_t,qvar_t,bool)@ exp) {
   let &$(ns,v) = q;
   switch (ns) {
   case {.Rel_n = NULL}:
-  case {.C_n = NULL}:   break;
-  case {.Abs_n = NULL}: break;
-  default:
-    terr(loc,"qualified export variables are not implemented (%s)",
-         qvar2string(q));
-    return;
+    // expand to qualified name
+    (*q)[0] = Abs_n(te->ns, true); 
+    break;
+  default: break;
   }
-  // expand to qualified name
-  (*q)[0] = Abs_n(te->ns, true);
 }
 
 // Typecheck a list, ds, of declarations in environment te.
@@ -1088,10 +1061,13 @@ static list_t<decl_t> treeshake_f(treeshake_env_t env, list_t<decl_t> ds) {
 static bool vardecl_needed(treeshake_env_t env, decl_t d) {
   switch(d->r) {
   case &Var_d(vd):
+    //fprintf(stderr,"looking at var %s: ",qvar2string(vd->name));
     // get rid of externs that are never referenced
     if(env->in_cinclude || (vd->sc != Extern && vd->sc != ExternC) ||
-       !qvar_cmp(vd->name,uniquergn_qvar))
+       !qvar_cmp(vd->name,uniquergn_qvar)) {
+      //fprintf(stderr,"needed--!extern or in_cinclude or unique_rgn\n");
       return true;
+    }
     let &$(nsl,name) = vd->name;
     list_t<var_t> ns;
     switch (nsl) {
@@ -1103,8 +1079,11 @@ static bool vardecl_needed(treeshake_env_t env, decl_t d) {
     let nsenv = Dict::lookup(env->nsdict,ns);
     let ge = (*nsenv)[0];
     let needed = (*Dict::lookup(ge->ordinaries,name))[1];
-    if (! needed) // we'll remove it later from ge->ordinaries
+    if (! needed) {// we'll remove it later from ge->ordinaries
       (*nsenv)[1] = Set::rinsert(env->rgn, (*nsenv)[1], name); 
+      //fprintf(stderr,"not needed\n");
+    } //else 
+      //fprintf(stderr,"needed.\n");
     return needed;
   case &ExternC_d(*ds2p): fallthru(ds2p);
   case &Using_d(_,*ds2p): fallthru(ds2p);

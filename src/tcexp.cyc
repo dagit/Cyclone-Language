@@ -79,7 +79,7 @@ static void resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es){
   case &Var_e(q,*b):
     try {
       TEMP_RGN(te, r) {
-        switch (lookup_ordinary(r,te,e1->loc,q)) {
+        switch (lookup_ordinary(r,te,e1->loc,q,true)) {
         case &VarRes(&Unresolved_b):
           // error will be caught later
           return;
@@ -339,7 +339,7 @@ static type_t tcVar(tenv_t te, seg_t loc, type_t * topt, exp_t e, qvar_t q,
   case &Unresolved_b:
     try {
       TEMP_RGN(te,r) {
-        switch (lookup_ordinary(r,te,e->loc,q)) {
+        switch (lookup_ordinary(r,te,e->loc,q,true)) {
         case &VarRes(&Unresolved_b): 
           return expr_err(te,loc,NULL,"undeclared identifier: %s",qvar2string(q));
         case &VarRes(bnd): 

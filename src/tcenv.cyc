@@ -283,7 +283,7 @@ static bool same_namespace(list_t<var_t,`H> n1, list_t<var_t,`H> n2) {
 // FIX: We should eagerly detect repeats by having one big dict
 // that we recompute on namespace and using boundaries
 static void check_repeat(tenv_t<`r> te, seg_t loc,
-                         `a lookup(genv_t<`r>,var_t),
+                         `a lookup(genv_t<`r>,var_t,bool),
 			 var_t v,
 			 list_t<var_t,`H> cns,
 			 list_t<list_t<var_t,`H>,`g> nss) {
@@ -291,20 +291,20 @@ static void check_repeat(tenv_t<`r> te, seg_t loc,
     if (!same_namespace(cns,nss->hd)) {
       genv_t ge2 = Dict::lookup(te->ae,nss->hd);
       try {
-	lookup(ge2,v);
+	lookup(ge2,v,false);
 	Tcutil::terr(loc,"%s is ambiguous",*v);
       } catch { case &Dict::Absent: break; }
     }
   return;
 }
 
-static `a scoped_lookup(tenv_t<`g,`r> te,seg_t loc,`a lookup(genv_t<`g>,var_t),var_t v){
+static `a scoped_lookup(tenv_t<`g,`r> te,seg_t loc,`a lookup(genv_t<`g>,var_t,bool),var_t v, bool is_use){
   list_t<var_t> cns = te->ns; // current namespace
   while (true) {
     genv_t ge = Dict::lookup(te->ae,cns);
     // Check current namespace
     try {
-      `a result = lookup(ge,v);
+      `a result = lookup(ge,v,is_use);
       check_repeat(te, loc, lookup, v, cns, ge->availables);
       return result;
     } catch { case &Dict::Absent: break; }
@@ -312,7 +312,7 @@ static `a scoped_lookup(tenv_t<`g,`r> te,seg_t loc,`a lookup(genv_t<`g>,var_t),v
     for (let nss = ge->availables; nss != NULL; nss = nss->tl) {
       genv_t ge2 = Dict::lookup(te->ae,nss->hd);
       try {
-	`a result = lookup(ge2,v);
+	`a result = lookup(ge2,v,is_use);
 	check_repeat(te, loc, lookup, v, nss->hd, nss->tl);
 	return result;
       } catch { case &Dict::Absent: break; }
@@ -324,24 +324,25 @@ static `a scoped_lookup(tenv_t<`g,`r> te,seg_t loc,`a lookup(genv_t<`g>,var_t),v
   }
 }
 
-static resolved_t lookup_ordinary_global_f(genv_t ge,var_t v) {
+static resolved_t lookup_ordinary_global_f(genv_t ge,var_t v,bool is_use) {
   let ord = ge->ordinaries;
   $(resolved_t,bool)@ ans = Dict::lookup(ord,v);
-  (*ans)[1] = true;
+  if (is_use)
+    (*ans)[1] = true;
   return (*ans)[0];
 }
-static resolved_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q) {
+static resolved_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q,bool is_use) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case {.Loc_n = _}: fallthru;
   case {.Rel_n = NULL}:
-    return scoped_lookup(te, loc, lookup_ordinary_global_f, v);
+    return scoped_lookup(te, loc, lookup_ordinary_global_f, v, is_use);
   case {.Rel_n = &List(x,y)}:
     let ge = lookup_namespace(te,loc,x,y);
-    return lookup_ordinary_global_f(ge,v);
+    return lookup_ordinary_global_f(ge,v,is_use);
   case {.C_n = y}: fallthru(y);
   case {.Abs_n = y}:
-    return lookup_ordinary_global_f(Dict::lookup(te->ae,y),v);
+    return lookup_ordinary_global_f(Dict::lookup(te->ae,y),v,is_use);
   }
 }
 
@@ -385,7 +386,7 @@ list_t<var_t> resolve_namespace(tenv_t te, seg_t loc,
 // The absolute versions aren't being used right now, but it's
 // important to think about whether they are correct in certain contexts.
 
-static aggrdecl_t @ lookup_aggrdecl_f(genv_t ge,var_t v) {
+static aggrdecl_t @ lookup_aggrdecl_f(genv_t ge,var_t v,bool ignore) {
   let ag = ge->aggrdecls;
   return Dict::lookup(ag,v);
 }
@@ -394,7 +395,7 @@ aggrdecl_t @ lookup_aggrdecl(tenv_t te,seg_t loc,qvar_t q) {
   switch (nsl) {
   case {.Loc_n = _}: fallthru;
   case {.Rel_n = NULL}:
-    return scoped_lookup(te, loc, lookup_aggrdecl_f, v);
+    return scoped_lookup(te, loc, lookup_aggrdecl_f, v, false);
   case {.C_n = y}: fallthru(y);
   case {.Abs_n = y}:
     let ads = Dict::lookup(te->ae,y)->aggrdecls;
@@ -405,7 +406,7 @@ aggrdecl_t @ lookup_aggrdecl(tenv_t te,seg_t loc,qvar_t q) {
   }
 }
 
-static datatypedecl_t @ lookup_datatypedecl_f(genv_t ge,var_t v) {
+static datatypedecl_t @ lookup_datatypedecl_f(genv_t ge,var_t v,bool ignore) {
   let tds = ge->datatypedecls;
   return Dict::lookup(tds,v);
 }
@@ -414,7 +415,7 @@ datatypedecl_t @ lookup_datatypedecl(tenv_t te,seg_t loc,qvar_t q) {
   switch (nsl) {
   case {.Loc_n = _}: fallthru;
   case {.Rel_n = NULL}:
-    return scoped_lookup(te, loc, lookup_datatypedecl_f, v);
+    return scoped_lookup(te, loc, lookup_datatypedecl_f, v, false);
   case {.Rel_n = &List(x,y)}:
     let tds = lookup_namespace(te,loc,x,y)->datatypedecls;
     return Dict::lookup(tds,v);
@@ -425,7 +426,7 @@ datatypedecl_t @ lookup_datatypedecl(tenv_t te,seg_t loc,qvar_t q) {
   }
 }
 
-static datatypedecl_t @ lookup_xdatatypedecl_f(genv_t ge,var_t v) {
+static datatypedecl_t @ lookup_xdatatypedecl_f(genv_t ge,var_t v,bool ignore) {
   return Dict::lookup(ge->datatypedecls,v);
 }
 
@@ -435,7 +436,7 @@ datatypedecl_t@*`r lookup_xdatatypedecl(region_t<`r> r, tenv_t te,seg_t loc,qvar
   switch (nsl) {
   case {.Rel_n = NULL}:
     // unqualified name, okay to fail -- that just means we have a new xdatatype
-    try return rnew(r) scoped_lookup(te, loc, lookup_xdatatypedecl_f, v);
+    try return rnew(r) scoped_lookup(te, loc, lookup_xdatatypedecl_f, v,false);
     catch { case &Dict::Absent: return NULL; }
   case {.Loc_n = _}: // impossible case
     terr(loc,"lookup_xdatatypedecl: impossible");
@@ -461,7 +462,7 @@ datatypedecl_t@*`r lookup_xdatatypedecl(region_t<`r> r, tenv_t te,seg_t loc,qvar
   }
 }
 
-static enumdecl_t @lookup_enumdecl_f(genv_t ge, var_t v) {
+static enumdecl_t @lookup_enumdecl_f(genv_t ge, var_t v,bool ignore) {
   let eds = ge->enumdecls;
   return Dict::lookup(eds,v);
 }
@@ -470,7 +471,7 @@ enumdecl_t @lookup_enumdecl(tenv_t te, seg_t loc, qvar_t q) {
   switch (nsl) {
   case {.Loc_n = _}:
   case {.Rel_n = NULL}:
-    return scoped_lookup(te, loc, lookup_enumdecl_f, v);
+    return scoped_lookup(te, loc, lookup_enumdecl_f, v, false);
   case {.Rel_n = &List(x,y)}:
     let eds = lookup_namespace(te,loc,x,y)->enumdecls;
     return Dict::lookup(eds,v);
@@ -481,7 +482,7 @@ enumdecl_t @lookup_enumdecl(tenv_t te, seg_t loc, qvar_t q) {
   }
 }
 
-static typedefdecl_t lookup_typedefdecl_f(genv_t ge,var_t v) {
+static typedefdecl_t lookup_typedefdecl_f(genv_t ge,var_t v,bool ignore) {
   let tds = ge->typedefs;
   return Dict::lookup(tds,v);
 }
@@ -490,7 +491,7 @@ typedefdecl_t lookup_typedefdecl(tenv_t te, seg_t loc, qvar_t q) {
   switch (nsl) {
   case {.Loc_n = _}:
   case {.Rel_n = NULL}:
-    return scoped_lookup(te, loc, lookup_typedefdecl_f, v);
+    return scoped_lookup(te, loc, lookup_typedefdecl_f, v, false);
   case {.Rel_n = &List(x,y)}:
     let tds = lookup_namespace(te,loc,x,y)->typedefs;
     return Dict::lookup(tds,v);
@@ -688,7 +689,7 @@ tenv_t<`g,`r> add_pat_var(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
   return put_fenv(r,te,fe);
 }
 
-resolved_t<`r> lookup_ordinary(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
+resolved_t<`r> lookup_ordinary(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q,bool is_use) {
   let le = te->le;
   let &$(nsl,v) = q;
   switch (nsl) {
@@ -700,9 +701,9 @@ resolved_t<`r> lookup_ordinary(region_t<`r> r, tenv_t te,seg_t loc,qvar_t q) {
     // NB a local overrides any global, without an ambiguity warning
     try {
       return rnew(r) VarRes(lookup_binding(locals,v));
-    } catch {case &NoBinding: return lookup_ordinary_global(te,loc,q);}
+    } catch {case &NoBinding: return lookup_ordinary_global(te,loc,q,is_use);}
   default:
-    try return lookup_ordinary_global(te,loc,q);
+    try return lookup_ordinary_global(te,loc,q,is_use);
     catch {case &Dict::Absent:
       // Print out the error message elsewhere.
       // terr(loc,"unbound identifier: %s", Absynpp::qvar2string(q));

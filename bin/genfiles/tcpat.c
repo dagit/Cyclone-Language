@@ -708,6 +708,11 @@ extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
                                     const char *file,
                                     const char *func,
                                     int lineno);
+extern void* _profile_region_calloc(struct _RegionHandle *, unsigned,
+                                    unsigned,
+                                    const char *file,
+                                    const char *func,
+                                    int lineno);
 extern struct _RegionHandle _profile_new_region(const char *rgn_name,
 						const char *file,
 						const char *func,
@@ -720,6 +725,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _new_region(n) _profile_new_region(n,__FILE__,__FUNCTION__,__LINE__)
 #define _free_region(r) _profile_free_region(r,__FILE__,__FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__,__FUNCTION__,__LINE__)
+#define _region_calloc(rh,n,t) _profile_region_calloc(rh,n,t,__FILE__,__FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__,__FUNCTION__,__LINE__)
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__,__FUNCTION__,__LINE__)
@@ -1108,17 +1114,17 @@ typedef struct Cyc_Tcenv_Fenv*Cyc_Tcenv_fenv_t;struct Cyc_Tcenv_NotLoop_j_Tcenv_
 typedef void*Cyc_Tcenv_jumpee_t;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Dict_Dict ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof;};
 # 96
 typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
-# 122 "tcenv.h"
-void*Cyc_Tcenv_lookup_ordinary(struct _RegionHandle*,struct Cyc_Tcenv_Tenv*,unsigned int,struct _tuple1*);
-# 123
+# 123 "tcenv.h"
+void*Cyc_Tcenv_lookup_ordinary(struct _RegionHandle*,struct Cyc_Tcenv_Tenv*,unsigned int,struct _tuple1*,int is_use);
+# 124
 struct Cyc_Absyn_Aggrdecl**Cyc_Tcenv_lookup_aggrdecl(struct Cyc_Tcenv_Tenv*,unsigned int,struct _tuple1*);
-# 136
-struct Cyc_List_List*Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);
 # 137
-struct Cyc_Core_Opt*Cyc_Tcenv_lookup_opt_type_vars(struct Cyc_Tcenv_Tenv*te);
+struct Cyc_List_List*Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);
 # 138
+struct Cyc_Core_Opt*Cyc_Tcenv_lookup_opt_type_vars(struct Cyc_Tcenv_Tenv*te);
+# 139
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_add_type_vars(struct _RegionHandle*,unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*);
-# 195
+# 196
 void Cyc_Tcenv_check_rgn_accessible(struct Cyc_Tcenv_Tenv*,unsigned int,void*rgn);
 # 38 "tcutil.h"
 void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
@@ -1193,7 +1199,7 @@ void*_tmp0=p->r;struct _tuple1*_tmp2;struct _tuple1*_tmp4;struct Cyc_List_List*_
 # 56
 {struct _RegionHandle _tmp1D=_new_region("r");struct _RegionHandle*r=& _tmp1D;_push_region(r);
 # 57
-{void*_tmp1E=Cyc_Tcenv_lookup_ordinary(r,te,p->loc,_tmp2);struct Cyc_Absyn_Datatypedecl*_tmp21;struct Cyc_Absyn_Datatypefield*_tmp22;struct Cyc_Absyn_Enumdecl*_tmp24;struct Cyc_Absyn_Enumfield*_tmp25;void*_tmp27;struct Cyc_Absyn_Enumfield*_tmp28;_LLE: {struct Cyc_Tcenv_AggrRes_Tcenv_Resolved_struct*_tmp1F=(struct Cyc_Tcenv_AggrRes_Tcenv_Resolved_struct*)_tmp1E;if(_tmp1F->tag != 1)goto _LL10;}_LLF:
+{void*_tmp1E=Cyc_Tcenv_lookup_ordinary(r,te,p->loc,_tmp2,0);struct Cyc_Absyn_Datatypedecl*_tmp21;struct Cyc_Absyn_Datatypefield*_tmp22;struct Cyc_Absyn_Enumdecl*_tmp24;struct Cyc_Absyn_Enumfield*_tmp25;void*_tmp27;struct Cyc_Absyn_Enumfield*_tmp28;_LLE: {struct Cyc_Tcenv_AggrRes_Tcenv_Resolved_struct*_tmp1F=(struct Cyc_Tcenv_AggrRes_Tcenv_Resolved_struct*)_tmp1E;if(_tmp1F->tag != 1)goto _LL10;}_LLF:
 # 59
  p->r=(void*)& Cyc_Absyn_Wild_p_val;
 # 60
@@ -1233,7 +1239,7 @@ return;_LL22:;_LL23:
 # 82
 {struct _RegionHandle _tmp3F=_new_region("r");struct _RegionHandle*r=& _tmp3F;_push_region(r);
 # 83
-{void*_tmp40=Cyc_Tcenv_lookup_ordinary(r,te,p->loc,_tmp4);struct Cyc_Absyn_Aggrdecl*_tmp42;struct Cyc_Absyn_Datatypedecl*_tmp44;struct Cyc_Absyn_Datatypefield*_tmp45;_LL25: {struct Cyc_Tcenv_AggrRes_Tcenv_Resolved_struct*_tmp41=(struct Cyc_Tcenv_AggrRes_Tcenv_Resolved_struct*)_tmp40;if(_tmp41->tag != 1)goto _LL27;else{_tmp42=_tmp41->f1;}}_LL26: {
+{void*_tmp40=Cyc_Tcenv_lookup_ordinary(r,te,p->loc,_tmp4,0);struct Cyc_Absyn_Aggrdecl*_tmp42;struct Cyc_Absyn_Datatypedecl*_tmp44;struct Cyc_Absyn_Datatypefield*_tmp45;_LL25: {struct Cyc_Tcenv_AggrRes_Tcenv_Resolved_struct*_tmp41=(struct Cyc_Tcenv_AggrRes_Tcenv_Resolved_struct*)_tmp40;if(_tmp41->tag != 1)goto _LL27;else{_tmp42=_tmp41->f1;}}_LL26: {
 # 85
 struct Cyc_List_List*_tmp49=0;
 # 86

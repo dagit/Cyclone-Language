@@ -38,7 +38,7 @@ namespace Lex {
   extern void lex_init();
 }
 
-namespace Interface {
+namespace Interface;
 
 /* ------ definition of an interface ------- */
 
@@ -1228,4 +1228,4 @@ i_t load(FILE @ f) {
   return parse(f);
 }
 
-}
+

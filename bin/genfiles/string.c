@@ -708,6 +708,11 @@ extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
                                     const char *file,
                                     const char *func,
                                     int lineno);
+extern void* _profile_region_calloc(struct _RegionHandle *, unsigned,
+                                    unsigned,
+                                    const char *file,
+                                    const char *func,
+                                    int lineno);
 extern struct _RegionHandle _profile_new_region(const char *rgn_name,
 						const char *file,
 						const char *func,
@@ -720,6 +725,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _new_region(n) _profile_new_region(n,__FILE__,__FUNCTION__,__LINE__)
 #define _free_region(r) _profile_free_region(r,__FILE__,__FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__,__FUNCTION__,__LINE__)
+#define _region_calloc(rh,n,t) _profile_region_calloc(rh,n,t,__FILE__,__FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__,__FUNCTION__,__LINE__)
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__,__FUNCTION__,__LINE__)
@@ -808,9 +814,7 @@ typedef struct Cyc_List_List*Cyc_List_list_t;
 typedef struct Cyc_List_List*Cyc_List_List_t;
 # 61
 int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_exn_struct{char*tag;};
-# 35 "string.h"
-char*strerror(int errnum);
-# 38
+# 38 "string.h"
 unsigned long Cyc_strlen(struct _dyneither_ptr s);
 # 49 "string.h"
 int Cyc_strcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2);
@@ -920,9 +924,7 @@ int Cyc_strcasecmp(struct _dyneither_ptr,struct _dyneither_ptr);
 int Cyc_strncasecmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long len);
 # 29 "assert.h"
 void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line);
-# 36 "string.cyc"
-char*strerror(int errnum);
-# 39
+# 39 "string.cyc"
 unsigned long Cyc_strlen(struct _dyneither_ptr s){
 # 40
 unsigned long i;

@@ -443,9 +443,11 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     }
     catch {
     case &Not_found:
+      /* JGM: this seems to happen for heap-allocated objects...
       fprintf(stderr,
 	      "error: reclaim event %x without (remembered) allocation\n",
               addr);
+      */
       //return false;
       break;
     }

@@ -85,6 +85,7 @@ static bool print_all_tvars_r = false;
 static bool print_all_kinds_r = false;
 static bool print_all_effects_r = false;
 static bool nocyc_setjmp_r = false;
+static bool generate_interface_r = false;
 
 // Arguments to pass to the C compiler
 static list_t<stringptr_t> ccargs = NULL;
@@ -653,7 +654,7 @@ int copy_internal_file(string_t file, FILE @out_file) {
 }
 
 
-list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
+list_t<Absyn::decl_t> do_print(FILE @`H out_file, list_t<Absyn::decl_t,`H> tds) {
   let params_r = tc_r ? Absynpp::cyc_params_r : Absynpp::c_params_r;
   params_r.expand_typedefs = ! noexpand_r;
   params_r.to_VC = tovc_r;
@@ -981,6 +982,18 @@ static void process_file(string_t<`H> filename) {
       return;
     } 
     
+    // Generate interface file
+    if (generate_interface_r) {
+      FILE *inter_file = try_file_open((char @)interfacefile, "w","interface file");
+      if (inter_file == NULL) {
+        compile_failure = true; return;
+      }
+      Absyndump::set_params(&Absynpp::cyci_params_r);
+      Absyndump::dump_interface(tds, inter_file);
+      fclose(inter_file);
+      Absynpp::set_params(&Absynpp::tc_params_r);
+    }
+
     // Interface checking
     if (ic_r) {
       FILE *inter_file = fopen((char @)interfacefile, "r");
@@ -1337,21 +1350,24 @@ int main(int argc, string_t<`H> ?`H argv) {
          rnew(r)$("-noregions", false, "",
                rnew(r)Set_spec(&Absyn::no_regions),
                "Generate code that doesn't use regions"),
-         rnew(r) $("-iprefix",true,"<prefix>", 
+         rnew(r) $("-iprefix",false,"<prefix>", 
                    rnew(r)String_spec(add_iprefix),
                    "Specify <prefix> as the prefix for subsequent -iwithprefix options"),
-         rnew(r) $("-iwithprefix",true,"<dir>",
+         rnew(r) $("-iwithprefix",false,"<dir>",
                    rnew(r)String_spec(add_iwithprefix),
                    "Add <prefix>/<dir> to the second include path."),
-         rnew(r) $("-iwithprefixbefore",true,"<dir>",
+         rnew(r) $("-iwithprefixbefore",false,"<dir>",
                     rnew(r)String_spec(add_iwithprefixbefore),
                    "Add <prefix>/<dir> to the main include path."),
-         rnew(r) $("-isystem",true,"<dir>",
+         rnew(r) $("-isystem",false,"<dir>",
                     rnew(r)String_spec(add_isystem),
                    "Add <dir> to the beginning of the second include path and treat it as a\nsystem directory."),
-         rnew(r) $("-idirafter",true,"<dir>",
+         rnew(r) $("-idirafter",false,"<dir>",
                    rnew(r)String_spec(add_idirafter),
-                   "Add the directory to the second include path.")
+                   "Add the directory to the second include path."),
+         rnew(r) $("--geninterface",false,"",
+                   rnew(r)Set_spec(&generate_interface_r),
+                   "Generate interface files")
          );
 
   string_t optstring = "Options:";

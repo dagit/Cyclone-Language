@@ -3621,7 +3621,11 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
         unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
         tag_count = t1+1;
-        (*f->name)[0] = Abs_n(te->ns,false); // Not clear if this can't be C_n
+        switch ((*f->name)[0]) {
+        case {.Rel_n = _}:
+          (*f->name)[0] = Abs_n(te->ns,false); break;
+        default: break;
+        }
         ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
                                       new $(new AnonEnumRes(t,f), true));
       }
@@ -3725,7 +3729,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       }
       try {
         TEMP_RGN(te, r) {
-	  switch(lookup_ordinary(r,te,loc,fname)) {
+	  switch(lookup_ordinary(r,te,loc,fname,false)) {
           case &DatatypeRes(tud2,tuf2):
             tuf = tuf2;
             tud = tud2;

@@ -4741,7 +4741,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       let c_name = fd->name;
       // strip any namespace from an extern C declaration
       if (fd->sc == ExternC) {
-	c_name = new $(Rel_n(NULL),(*c_name)[1]);
+	c_name = new $(Abs_n(NULL,true),(*c_name)[1]);
         fd->sc = Public; // function declarations can't be extern
       }
       nv = add_varmap(r,nv,fd->name,var_exp(c_name,DL));

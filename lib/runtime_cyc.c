@@ -1089,6 +1089,38 @@ void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
   return addr;
 }
 
+void * _profile_region_calloc(struct _RegionHandle *r, unsigned int t1,
+                              unsigned int t2,
+                              const char *file, const char *func, int lineno) {
+  void *addr;
+  unsigned s = t1 * t2;
+  addr = _region_calloc(r,t1,t2);
+  _profile_check_gc();
+  if (alloc_log != NULL) {
+    if (r == Cyc_Core_heap_region) {
+      s = GC_size(addr);
+      set_finalizer((GC_PTR)addr);
+    }
+    if (r == Cyc_Core_unique_region) {
+      s = GC_size(addr);
+      set_finalizer((GC_PTR)addr);
+    }
+    else if (r == Cyc_Core_refcnt_region)
+      s = GC_size(addr-1); // back up to before the refcnt
+    fprintf(alloc_log,"%u %s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
+            clock(),
+            file,func,lineno,
+	    (r == Cyc_Core_heap_region ? "heap" :
+	     (r == Cyc_Core_unique_region ? "unique" :
+	      (r == Cyc_Core_refcnt_region ? "refcnt" : r->name))), s,
+	    region_get_heap_size(r), 
+	    region_get_free_bytes(r),
+	    region_get_total_bytes(r),
+            (unsigned int)addr);
+  }
+  return addr;
+}
+
 void * _profile_GC_malloc(int n, const char *file, const char *func, int lineno) {
   void * result;
   result =  GC_malloc(n);

@@ -119,7 +119,8 @@ extern fenv_t<`r> nested_fenv(seg_t,fenv_t<`r> old_fenv, fndecl_t new_fn);
 extern tenv_t<`r> enter_ns(region_t<`r>,tenv_t, var_t);
 
 extern list_t<var_t> resolve_namespace(tenv_t,seg_t,var_t,list_t<var_t,`H>);
-extern resolved_t<`r>    lookup_ordinary(region_t<`r>,tenv_t,seg_t,qvar_t);
+// when is_use is true, we are looking up a free occurrence of the variable
+extern resolved_t<`r>    lookup_ordinary(region_t<`r>,tenv_t,seg_t,qvar_t,bool is_use);
 extern aggrdecl_t@       lookup_aggrdecl(tenv_t,seg_t,qvar_t);
 extern datatypedecl_t@     lookup_datatypedecl(tenv_t,seg_t,qvar_t);
 extern datatypedecl_t@*`r  lookup_xdatatypedecl(region_t<`r>,tenv_t,seg_t,qvar_t);

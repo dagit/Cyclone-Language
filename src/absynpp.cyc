@@ -187,13 +187,13 @@ struct Params cyci_params_r =
   Params{
     .expand_typedefs = true,
     .qvar_to_Cids = false,
-    .add_cyc_prefix = false,
+    .add_cyc_prefix = true,
     .to_VC = false,
     .decls_first = false,
     .rewrite_temp_tvars = true,
     .print_all_tvars = false,
     .print_all_kinds = false,
-    .print_all_effects = true,
+    .print_all_effects = false,
     .print_using_stmts = true,
     .print_externC_stmts = true,
     .print_full_evars = false,
@@ -425,12 +425,17 @@ doc_t tps2doc(list_t<type_t> ts) {
   return egroup("<",">",",",List::map(typ2doc,ts));
 }
 
+doc_t tvar2doc(tvar_t tv) {
+  let n = *tv->name;
+  return text(n);
+}
+
 doc_t ktvar2doc(tvar_t tv) {
   switch (compress_kb(tv->kind)) {
   case &Unknown_kb(_):
-  case &Eq_kb(&Kind(BoxKind,Aliasable)): return textptr(tv->name);
+  case &Eq_kb(&Kind(BoxKind,Aliasable)): return tvar2doc(tv);
   case &Less_kb(_,k):   fallthru(k);
-  case &Eq_kb(k):       return cat(textptr(tv->name), text("::"), kind2doc(k));
+  case &Eq_kb(k):       return cat(tvar2doc(tv), text("::"), kind2doc(k));
   }
 }
 

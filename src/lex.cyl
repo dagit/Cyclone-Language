@@ -604,7 +604,17 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
   if (v == NULL)
     throw new Impossible("bad namespace");
   list_t<var_t> vs = List::imp_rev(rev_vs);
-  token_qvar = new $(Rel_n(vs),(var_t)v);
+  // special cases:  when we have Cyc::Foo::bar or C::Foo::bar then
+  // we have absolute namespaces.
+  if (vs != NULL && strcmp(*vs->hd,"Cyc") == 0) {
+    vs = vs->tl;
+    token_qvar = new $(Abs_n(vs,false),(var_t)v);
+  }
+  else if (vs != NULL && strcmp(*vs->hd,"C") == 0) {
+    vs = vs->tl;
+    token_qvar = new $(Abs_n(vs,true),(var_t)v);
+  } else 
+    token_qvar = new $(Rel_n(vs),(var_t)v);
   if (is_typedef(vs,(var_t)v))
     return QUAL_TYPEDEF_NAME;
   return QUAL_IDENTIFIER;

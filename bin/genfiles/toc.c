@@ -708,6 +708,11 @@ extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
                                     const char *file,
                                     const char *func,
                                     int lineno);
+extern void* _profile_region_calloc(struct _RegionHandle *, unsigned,
+                                    unsigned,
+                                    const char *file,
+                                    const char *func,
+                                    int lineno);
 extern struct _RegionHandle _profile_new_region(const char *rgn_name,
 						const char *file,
 						const char *func,
@@ -720,6 +725,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _new_region(n) _profile_new_region(n,__FILE__,__FUNCTION__,__LINE__)
 #define _free_region(r) _profile_free_region(r,__FILE__,__FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__,__FUNCTION__,__LINE__)
+#define _region_calloc(rh,n,t) _profile_region_calloc(rh,n,t,__FILE__,__FUNCTION__,__LINE__)
 #  endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__,__FUNCTION__,__LINE__)
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__,__FUNCTION__,__LINE__)
@@ -6937,7 +6943,7 @@ struct _tuple0*_tmpA4F=_tmpA33->name;
 # 4743
 if(_tmpA33->sc == Cyc_Absyn_ExternC){
 # 4744
-{struct _tuple0*_tmpE2A;_tmpA4F=((_tmpE2A=_cycalloc(sizeof(*_tmpE2A)),((_tmpE2A->f1=Cyc_Absyn_Rel_n(0),((_tmpE2A->f2=(*_tmpA4F).f2,_tmpE2A))))));}
+{struct _tuple0*_tmpE2A;_tmpA4F=((_tmpE2A=_cycalloc(sizeof(*_tmpE2A)),((_tmpE2A->f1=Cyc_Absyn_Abs_n(0,1),((_tmpE2A->f2=(*_tmpA4F).f2,_tmpE2A))))));}
 # 4745
 _tmpA33->sc=Cyc_Absyn_Public;}
 # 4747
