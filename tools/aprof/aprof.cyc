@@ -33,6 +33,8 @@ static void usage(string_t<`H> argv0) __attribute__((noreturn)) {
   exit(1);
 }
 
+int do_gnuplot = 0;
+
 int main(int argc, string_t<`H> ?`H argv) {
   bool do_graph = false;
   string_t<`H> file;
@@ -43,6 +45,10 @@ int main(int argc, string_t<`H> ?`H argv) {
       usage(argv[0]);
     else if ( strcmp( argv[argn], "-g" ) == 0 ) {
       do_graph = true;
+    }
+    else if ( strcmp( argv[argn], "-gp" ) == 0 ) {
+      do_graph = true;
+      do_gnuplot = true;
     }
     else if ( strcmp( argv[argn], "-q" ) == 0 ) {
       verbose = false;

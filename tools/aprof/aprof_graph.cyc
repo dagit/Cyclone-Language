@@ -91,6 +91,98 @@ struct ProcEnv {
 
 /////////////////////////////// GRAPH OUTPUT
 
+// We either output in jgraph syntax or gnuplot syntax
+extern int do_gnuplot; // defined in aprof.cyc
+/* Build a growable buffer in the unique region. */
+static char ?@nozeroterm `U buf_buf = NULL;
+static int buf_pos = 0;
+static int buf_len = 0;
+static void buf_append(const char ?s) {
+  let howmuch = strlen(s);
+  if (buf_pos+howmuch > buf_len) {
+    let newlen = (buf_len? buf_len*2: 17);
+    while (newlen <= buf_pos+howmuch) newlen *= 2;
+    char ?@nozeroterm `U newbuf = malloc(newlen * sizeof(char));
+    for (int i = 0; i<buf_pos; i++)
+      newbuf[i] = buf_buf[i];
+    buf_len = newlen;
+    buf_buf :=: newbuf;
+    if (newbuf) ufree(newbuf);
+  }
+  for (int i = 0; i < howmuch; i++,s++,buf_pos++) {
+    buf_buf[buf_pos] = *s;
+  }
+}
+static void buf_print_contents() {
+  if (buf_pos) printf("%.*s",buf_pos,buf_buf);
+}
+static void output_xy(int x, int y) {
+  region r;
+  if (do_gnuplot) buf_append(rprintf(r,"%d, %d\n",x,y));
+  else printf("%d %d ",x,y);
+}
+static void output_header(int xmax, int ymax) {
+  if (do_gnuplot) {
+    printf("set title \"Allocation Profile\"\n"
+           "set xlabel \"allocation event #\"\n"
+           "set xrange [1:%d]\n"
+           "set ylabel \"bytes allocated/freed\"\n"
+           "set yrange [1:%d]\n",
+           xmax,
+           ymax);
+  }
+  else {
+    printf("newgraph\n  xaxis min 1 max %d label : allocation event #\n",
+           xmax);
+    printf("  yaxis min 1 max %d label : bytes allocated/freed\n\n",
+           ymax);
+  }
+}
+
+static list_t<char ?@> gnuplot_curves = NULL;
+static void output_points_header(const char ? name) {
+  if (do_gnuplot) {
+    gnuplot_curves =
+      new List(new aprintf("'-' title \"%s\" with points",name),
+               gnuplot_curves);
+  }
+  else {
+    printf("newcurve\n  label : %s\n  marktype circle\n linetype none\n",
+	   name);
+    printf("  pts ");
+  }
+}
+static void output_lines_header(const char ?name, const char ?curvekind) {
+  if (do_gnuplot) {
+    gnuplot_curves =
+      new List(new aprintf("'-' title \"%s\" with lines",name),
+               gnuplot_curves);
+  }
+  else {
+    printf("newcurve\n  label : %s\n  marktype none\n linetype %s\n",
+	   name, curvekind);
+    printf("  pts ");
+  }
+}
+static void output_curve_end() {
+  if (do_gnuplot)
+    buf_append("e\n");
+  else
+    printf("\n\n");
+}
+static void output_cleanup() {
+  if (do_gnuplot) {
+    printf("plot \\\n");
+    gnuplot_curves = imp_rev(gnuplot_curves);
+    for (let l = gnuplot_curves; l != NULL; l = l->tl) {
+      printf("%s",*(l->hd));
+      if (l->tl) printf(", \\");
+      printf("\n");
+    }
+    buf_print_contents();
+  }
+}
+
 // given a point and the current heap size, outputs a point and
 // updates the heap size.  Note that the points are out of order, so
 // we're processing them backwards.
@@ -103,7 +195,7 @@ static void output_point($(unsigned int ?, unsigned int) @env,
   //   we're processing in reverse order)
   if (*last_cnt == 0) {
     (*heap_size)[x] += amt;
-    printf("%d %d ",x,(*heap_size)[x]);
+    output_xy(x,(*heap_size)[x]);
   }
   else {
     if (*last_cnt <= x) {
@@ -121,8 +213,8 @@ static void output_point($(unsigned int ?, unsigned int) @env,
       // the prior x.
       if ((*heap_size)[i] != last_output_amt) {
 	if (last_output_cnt != (i+1))
-	  printf("%d %d ",i+1,(*heap_size)[i+1]);
-	printf("%d %d ",i,(*heap_size)[i]);
+	  output_xy(i+1,(*heap_size)[i+1]);
+	output_xy(i,(*heap_size)[i]);
 	last_output_cnt = i;
 	last_output_amt = (*heap_size)[i];
       }
@@ -134,7 +226,7 @@ static void output_point($(unsigned int ?, unsigned int) @env,
 static void output_point_no_stack($(unsigned int, unsigned int) @point) {
   let x = (*point)[0];
   let y = (*point)[1];
-  printf("%d %d ",x,y);
+  output_xy(x,y);
 }
 
 // output a line representing the live data for a particular region.
@@ -149,19 +241,16 @@ static void output_line(string_t name,
       "dotdotdash", "dotdotdashdash" };
   if (points == NULL) return;
   if (num < 0)
-    printf("newcurve\n  label : %s\n  marktype circle\n linetype none\n",
-	   name);
+    output_points_header(name);
   else 
-    printf("newcurve\n  label : %s\n  marktype none\n linetype %s\n",
-	   name, linetypes[num % 7]);
-  printf("  pts ");
+    output_lines_header(name,linetypes[num % 7]);
   if (no_stack)
     iter(output_point_no_stack,points);
   else {
     let env = new $(heap_size,(unsigned int)0);
     iter_c(output_point,env,points);
   }
-  printf("\n\n");
+  output_curve_end();
 }
 
 // go through all of the points in the line and determine if they
@@ -455,10 +544,8 @@ int generate_graph(string_t<`H> file) {
   unsigned int ?heap_size = calloc(env->cnt+1,sizeof(unsigned int));
 
   // header
-  printf("newgraph\n  xaxis min 1 max %d label : allocation event #\n",
-	 env->cnt+1);
-  printf("  yaxis min 1 max %d label : bytes allocated/freed\n\n",
-	 env->total_heap_size + (int)(env->total_heap_size * 0.05));
+  output_header(env->cnt+1,
+                env->total_heap_size + (int)(env->total_heap_size * 0.05));
 
   // gc
   output_line(aprintf("GC (%d total)",length(env->gc_points)),
@@ -485,5 +572,6 @@ int generate_graph(string_t<`H> file) {
     let dynenv = new $(2,heap_size,env->mem_total);
     iter_c(output_dynregion_line,dynenv,env->dyn_live);
   }
+  output_cleanup();
   return 0;
 }
