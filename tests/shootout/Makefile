@@ -17,19 +17,21 @@ EXEFILES = $(addsuffix $(EXE), $(BENCHMARKS))
 GCCEXEFILES = $(addprefix gcc-, $(EXEFILES))
 NOCHECKEXEFILES = $(addprefix nocheck-, $(EXEFILES))
 NOBOUNDSEXEFILES = $(addprefix nobounds-, $(EXEFILES))
+HIST=hist$(EXE)
 
 all: $(EXEFILES) $(GCCEXEFILES) $(NOCHECKEXEFILES) $(NOBOUNDSEXEFILES)
 
-TIME=/usr/bin/time
-
-bench: all
-	@(./runtests)
+bench: all $(HIST)
+	@(./runtests 3 | ./hist)
 
 clean:
 	$(RM) $(NOCHECKEXEFILES)
 	$(RM) $(NOBOUNDSEXEFILES)
 	$(RM) $(EXEFILES)
 	$(RM) $(GCCEXEFILES)
+
+$(HIST): hist.c
+	gcc $(CFLAGS) -o $@ -x c $^
 
 gcc-%$(EXE): %.gcc
 	gcc $(CFLAGS) -o $@ -x c $^
