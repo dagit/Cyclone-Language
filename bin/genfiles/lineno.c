@@ -447,15 +447,15 @@ if(c == 256)lbuf->lex_eof_reached=0;}}}
 # 84
 enum Cyc_Lineno_token_val Cyc_Lineno_token_rec(struct Cyc_Lexing_lexbuf*lexbuf,int lexstate){
 lexstate=Cyc_Lineno_lex_engine(lexstate,lexbuf);
-{int _tmp2=lexstate;switch(_tmp2){case 0: _LL1: _LL2:
+{int _tmp2=lexstate;switch(_tmp2){case 0:
 # 49 "lineno.cyl"
- return Cyc_Lineno_LINEDEF;case 1: _LL3: _LL4:
+ return Cyc_Lineno_LINEDEF;case 1:
 # 50 "lineno.cyl"
- return Cyc_Lineno_NEWLINE;case 2: _LL5: _LL6:
+ return Cyc_Lineno_NEWLINE;case 2:
 # 51 "lineno.cyl"
- return Cyc_Lineno_END;default: _LL7: _LL8:
+ return Cyc_Lineno_END;default:
 ((lexbuf->refill_buff))(lexbuf);
-return Cyc_Lineno_token_rec(lexbuf,lexstate);}_LL0:;}
+return Cyc_Lineno_token_rec(lexbuf,lexstate);};}
 # 55
 (int)_throw((void*)({struct Cyc_Lexing_Error_exn_struct*_tmp4=_cycalloc(sizeof(*_tmp4));_tmp4->tag=Cyc_Lexing_Error,({struct _fat_ptr _tmp21=({const char*_tmp3="some action didn't return!";_tag_fat(_tmp3,sizeof(char),27U);});_tmp4->f1=_tmp21;});_tmp4;}));}
 # 57
@@ -478,9 +478,9 @@ if((unsigned)j == _get_fat_size(line,sizeof(char))||(unsigned)k == _get_fat_size
 struct _fat_ptr fname=Cyc_substring((struct _fat_ptr)line,j,(unsigned long)(k - j));
 struct _tuple0*_tmpF=({struct _tuple0*_tmpE=_cycalloc(sizeof(*_tmpE));_tmpE->f1=fname,_tmpE->f2=number;_tmpE;});_npop_handler(0);return _tmpF;}}}}}
 # 67
-;_pop_handler();}else{void*_tmp6=(void*)Cyc_Core_get_exn_thrown();void*_tmp10=_tmp6;_LL1: _LL2:
+;_pop_handler();}else{void*_tmp6=(void*)Cyc_Core_get_exn_thrown();void*_tmp10=_tmp6;
 # 81
- return 0;_LL0:;}}}struct _tuple1{int f1;struct Cyc_Lineno_Pos*f2;};
+return 0;;}}}struct _tuple1{int f1;struct Cyc_Lineno_Pos*f2;};
 # 84
 int Cyc_Lineno_place_cmp(struct _tuple1*place1,struct _tuple1*place2){
 return Cyc_Core_intcmp((*place1).f1,(*place2).f1);}
@@ -526,9 +526,9 @@ places=places->tl;}
 # 132
 ++ line;}}
 # 93
-;_pop_handler();}else{void*_tmp12=(void*)Cyc_Core_get_exn_thrown();void*_tmp17=_tmp12;void*_tmp18;_LL1: _tmp18=_tmp17;_LL2: {void*y=_tmp18;
+;_pop_handler();}else{void*_tmp12=(void*)Cyc_Core_get_exn_thrown();void*_tmp17=_tmp12;void*_tmp18;_tmp18=_tmp17;{void*y=_tmp18;
 # 134
-Cyc_file_close(f);(int)_throw(y);}_LL0:;}}}
+Cyc_file_close(f);(int)_throw(y);};}}}
 Cyc_file_close(f);
 return;}}
 # 139

@@ -394,59 +394,59 @@ int Cyc_vsprintf(struct _fat_ptr,struct _fat_ptr,struct _fat_ptr);extern char Cy
 extern struct _fat_ptr Cyc_strdup(struct _fat_ptr);
 # 87 "printf.cyc"
 static struct _fat_ptr Cyc_parg2string(void*x){
-void*_tmp0=x;switch(*((int*)_tmp0)){case 0: _LL1: _LL2:
- return({const char*_tmp1="string";_tag_fat(_tmp1,sizeof(char),7U);});case 1: _LL3: _LL4:
- return({const char*_tmp2="int";_tag_fat(_tmp2,sizeof(char),4U);});case 2: _LL5: _LL6:
+void*_tmp0=x;switch(*((int*)_tmp0)){case 0:
+ return({const char*_tmp1="string";_tag_fat(_tmp1,sizeof(char),7U);});case 1:
+ return({const char*_tmp2="int";_tag_fat(_tmp2,sizeof(char),4U);});case 2:
 # 92
- return({const char*_tmp3="double";_tag_fat(_tmp3,sizeof(char),7U);});case 3: _LL7: _LL8:
- return({const char*_tmp4="long double";_tag_fat(_tmp4,sizeof(char),12U);});case 4: _LL9: _LLA:
- return({const char*_tmp5="short *";_tag_fat(_tmp5,sizeof(char),8U);});default: _LLB: _LLC:
- return({const char*_tmp6="unsigned long *";_tag_fat(_tmp6,sizeof(char),16U);});}_LL0:;}
+ return({const char*_tmp3="double";_tag_fat(_tmp3,sizeof(char),7U);});case 3:
+ return({const char*_tmp4="long double";_tag_fat(_tmp4,sizeof(char),12U);});case 4:
+ return({const char*_tmp5="short *";_tag_fat(_tmp5,sizeof(char),8U);});default:
+ return({const char*_tmp6="unsigned long *";_tag_fat(_tmp6,sizeof(char),16U);});};}
 # 99
 static void*Cyc_badarg(struct _fat_ptr s){
 return(void*)_throw((void*)({struct Cyc_Core_Invalid_argument_exn_struct*_tmp7=_cycalloc(sizeof(*_tmp7));_tmp7->tag=Cyc_Core_Invalid_argument,_tmp7->f1=s;_tmp7;}));}
 # 104
 static int Cyc_va_arg_int(struct _fat_ptr ap){
-void*_tmp8=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp0=_tmp8;void*_tmp9=_stmttmp0;unsigned long _tmpA;if(*((int*)_tmp9)== 1){_LL1: _tmpA=((struct Cyc_Int_pa_PrintArg_struct*)_tmp9)->f1;_LL2: {unsigned long i=_tmpA;
-return(int)i;}}else{_LL3: _LL4:
- return((int(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmpB="printf expected int";_tag_fat(_tmpB,sizeof(char),20U);}));}_LL0:;}
+void*_tmp8=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp0=_tmp8;void*_tmp9=_stmttmp0;unsigned long _tmpA;if(*((int*)_tmp9)== 1){_tmpA=((struct Cyc_Int_pa_PrintArg_struct*)_tmp9)->f1;{unsigned long i=_tmpA;
+return(int)i;}}else{
+return((int(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmpB="printf expected int";_tag_fat(_tmpB,sizeof(char),20U);}));};}
 # 111
 static long Cyc_va_arg_long(struct _fat_ptr ap){
-void*_tmpC=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp1=_tmpC;void*_tmpD=_stmttmp1;unsigned long _tmpE;if(*((int*)_tmpD)== 1){_LL1: _tmpE=((struct Cyc_Int_pa_PrintArg_struct*)_tmpD)->f1;_LL2: {unsigned long i=_tmpE;
-return(long)i;}}else{_LL3: _LL4:
- return((long(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmpF="printf expected int";_tag_fat(_tmpF,sizeof(char),20U);}));}_LL0:;}
+void*_tmpC=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp1=_tmpC;void*_tmpD=_stmttmp1;unsigned long _tmpE;if(*((int*)_tmpD)== 1){_tmpE=((struct Cyc_Int_pa_PrintArg_struct*)_tmpD)->f1;{unsigned long i=_tmpE;
+return(long)i;}}else{
+return((long(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmpF="printf expected int";_tag_fat(_tmpF,sizeof(char),20U);}));};}
 # 118
 static unsigned long Cyc_va_arg_ulong(struct _fat_ptr ap){
-void*_tmp10=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp2=_tmp10;void*_tmp11=_stmttmp2;unsigned long _tmp12;if(*((int*)_tmp11)== 1){_LL1: _tmp12=((struct Cyc_Int_pa_PrintArg_struct*)_tmp11)->f1;_LL2: {unsigned long i=_tmp12;
-return i;}}else{_LL3: _LL4:
- return((unsigned long(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp13="printf expected int";_tag_fat(_tmp13,sizeof(char),20U);}));}_LL0:;}
+void*_tmp10=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp2=_tmp10;void*_tmp11=_stmttmp2;unsigned long _tmp12;if(*((int*)_tmp11)== 1){_tmp12=((struct Cyc_Int_pa_PrintArg_struct*)_tmp11)->f1;{unsigned long i=_tmp12;
+return i;}}else{
+return((unsigned long(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp13="printf expected int";_tag_fat(_tmp13,sizeof(char),20U);}));};}
 # 125
 static unsigned long Cyc_va_arg_uint(struct _fat_ptr ap){
-void*_tmp14=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp3=_tmp14;void*_tmp15=_stmttmp3;unsigned long _tmp16;if(*((int*)_tmp15)== 1){_LL1: _tmp16=((struct Cyc_Int_pa_PrintArg_struct*)_tmp15)->f1;_LL2: {unsigned long i=_tmp16;
-return i;}}else{_LL3: _LL4:
- return((unsigned long(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp17="printf expected int";_tag_fat(_tmp17,sizeof(char),20U);}));}_LL0:;}
+void*_tmp14=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp3=_tmp14;void*_tmp15=_stmttmp3;unsigned long _tmp16;if(*((int*)_tmp15)== 1){_tmp16=((struct Cyc_Int_pa_PrintArg_struct*)_tmp15)->f1;{unsigned long i=_tmp16;
+return i;}}else{
+return((unsigned long(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp17="printf expected int";_tag_fat(_tmp17,sizeof(char),20U);}));};}
 # 133
 static double Cyc_va_arg_double(struct _fat_ptr ap){
-void*_tmp18=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp4=_tmp18;void*_tmp19=_stmttmp4;long double _tmp1A;double _tmp1B;switch(*((int*)_tmp19)){case 2: _LL1: _tmp1B=((struct Cyc_Double_pa_PrintArg_struct*)_tmp19)->f1;_LL2: {double d=_tmp1B;
-return d;}case 3: _LL3: _tmp1A=((struct Cyc_LongDouble_pa_PrintArg_struct*)_tmp19)->f1;_LL4: {long double ld=_tmp1A;
-return(double)ld;}default: _LL5: _LL6:
+void*_tmp18=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp4=_tmp18;void*_tmp19=_stmttmp4;long double _tmp1A;double _tmp1B;switch(*((int*)_tmp19)){case 2: _tmp1B=((struct Cyc_Double_pa_PrintArg_struct*)_tmp19)->f1;{double d=_tmp1B;
+return d;}case 3: _tmp1A=((struct Cyc_LongDouble_pa_PrintArg_struct*)_tmp19)->f1;{long double ld=_tmp1A;
+return(double)ld;}default:
 # 138
-(int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)((struct _fat_ptr)({struct Cyc_String_pa_PrintArg_struct _tmp1E=({struct Cyc_String_pa_PrintArg_struct _tmpC1;_tmpC1.tag=0,({struct _fat_ptr _tmpC5=(struct _fat_ptr)((struct _fat_ptr)Cyc_parg2string(*((void**)_check_fat_subscript(ap,sizeof(void*),0U))));_tmpC1.f1=_tmpC5;});_tmpC1;});void*_tmp1C[1];_tmp1C[0]=& _tmp1E;({struct _fat_ptr _tmpC6=({const char*_tmp1D="printf expected double but found %s";_tag_fat(_tmp1D,sizeof(char),36U);});Cyc_aprintf(_tmpC6,_tag_fat(_tmp1C,sizeof(void*),1));});})));}_LL0:;}
+(int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)((struct _fat_ptr)({struct Cyc_String_pa_PrintArg_struct _tmp1E=({struct Cyc_String_pa_PrintArg_struct _tmpC1;_tmpC1.tag=0,({struct _fat_ptr _tmpC5=(struct _fat_ptr)((struct _fat_ptr)Cyc_parg2string(*((void**)_check_fat_subscript(ap,sizeof(void*),0U))));_tmpC1.f1=_tmpC5;});_tmpC1;});void*_tmp1C[1];_tmp1C[0]=& _tmp1E;({struct _fat_ptr _tmpC6=({const char*_tmp1D="printf expected double but found %s";_tag_fat(_tmp1D,sizeof(char),36U);});Cyc_aprintf(_tmpC6,_tag_fat(_tmp1C,sizeof(void*),1));});})));};}
 # 144
 static short*Cyc_va_arg_short_ptr(struct _fat_ptr ap){
-void*_tmp1F=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp5=_tmp1F;void*_tmp20=_stmttmp5;short*_tmp21;if(*((int*)_tmp20)== 4){_LL1: _tmp21=((struct Cyc_ShortPtr_pa_PrintArg_struct*)_tmp20)->f1;_LL2: {short*p=_tmp21;
-return p;}}else{_LL3: _LL4:
-(int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp22="printf expected short pointer";_tag_fat(_tmp22,sizeof(char),30U);})));}_LL0:;}
+void*_tmp1F=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp5=_tmp1F;void*_tmp20=_stmttmp5;short*_tmp21;if(*((int*)_tmp20)== 4){_tmp21=((struct Cyc_ShortPtr_pa_PrintArg_struct*)_tmp20)->f1;{short*p=_tmp21;
+return p;}}else{
+(int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp22="printf expected short pointer";_tag_fat(_tmp22,sizeof(char),30U);})));};}
 # 152
 static unsigned long*Cyc_va_arg_int_ptr(struct _fat_ptr ap){
-void*_tmp23=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp6=_tmp23;void*_tmp24=_stmttmp6;unsigned long*_tmp25;if(*((int*)_tmp24)== 5){_LL1: _tmp25=((struct Cyc_IntPtr_pa_PrintArg_struct*)_tmp24)->f1;_LL2: {unsigned long*p=_tmp25;
-return p;}}else{_LL3: _LL4:
-(int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp26="printf expected int pointer";_tag_fat(_tmp26,sizeof(char),28U);})));}_LL0:;}
+void*_tmp23=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp6=_tmp23;void*_tmp24=_stmttmp6;unsigned long*_tmp25;if(*((int*)_tmp24)== 5){_tmp25=((struct Cyc_IntPtr_pa_PrintArg_struct*)_tmp24)->f1;{unsigned long*p=_tmp25;
+return p;}}else{
+(int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp26="printf expected int pointer";_tag_fat(_tmp26,sizeof(char),28U);})));};}
 # 160
 static const struct _fat_ptr Cyc_va_arg_string(struct _fat_ptr ap){
-void*_tmp27=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp7=_tmp27;void*_tmp28=_stmttmp7;struct _fat_ptr _tmp29;if(*((int*)_tmp28)== 0){_LL1: _tmp29=((struct Cyc_String_pa_PrintArg_struct*)_tmp28)->f1;_LL2: {struct _fat_ptr s=_tmp29;
-return s;}}else{_LL3: _LL4:
-(int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp2A="printf expected string";_tag_fat(_tmp2A,sizeof(char),23U);})));}_LL0:;}
+void*_tmp27=*((void**)_check_fat_subscript(ap,sizeof(void*),0U));void*_stmttmp7=_tmp27;void*_tmp28=_stmttmp7;struct _fat_ptr _tmp29;if(*((int*)_tmp28)== 0){_tmp29=((struct Cyc_String_pa_PrintArg_struct*)_tmp28)->f1;{struct _fat_ptr s=_tmp29;
+return s;}}else{
+(int)_throw(((void*(*)(struct _fat_ptr))Cyc_badarg)(({const char*_tmp2A="printf expected string";_tag_fat(_tmp2A,sizeof(char),23U);})));};}
 # 177 "printf.cyc"
 int Cyc___cvt_double(double,int,int,int*,int,struct _fat_ptr,struct _fat_ptr);
 # 206 "printf.cyc"
@@ -567,27 +567,27 @@ sign='\000';
 # 372
 rflag: ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));
 reswitch: which_cp=0;
-{int _tmp2B=ch;switch(_tmp2B){case 32: _LL1: _LL2:
+{int _tmp2B=ch;switch(_tmp2B){case 32:
 # 381
  if(!((int)sign))
 sign=' ';
-goto rflag;case 35: _LL3: _LL4:
+goto rflag;case 35:
 # 385
  flags |=8;
-goto rflag;case 42: _LL5: _LL6:
+goto rflag;case 42:
 # 394
  width=Cyc_va_arg_int(ap);_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 if(width >= 0)
 goto rflag;
 width=- width;
-goto _LL8;case 45: _LL7: _LL8:
+goto _LL8;case 45: _LL8:
 # 400
  flags |=16;
 flags &=~ 32;
-goto rflag;case 43: _LL9: _LLA:
+goto rflag;case 43:
 # 404
  sign='+';
-goto rflag;case 46: _LLB: _LLC:
+goto rflag;case 46:
 # 407
  if((ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U)))== (int)'*'){
 n=Cyc_va_arg_int(ap);_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
@@ -600,48 +600,48 @@ n=10 * n + (ch - (int)'0');
 ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}
 # 417
 prec=n < 0?- 1: n;
-goto reswitch;case 48: _LLD: _LLE:
+goto reswitch;case 48:
 # 425
  if(!(flags & 16))
 flags |=32;
-goto rflag;case 49: _LLF: _LL10:
- goto _LL12;case 50: _LL11: _LL12: goto _LL14;case 51: _LL13: _LL14: goto _LL16;case 52: _LL15: _LL16: goto _LL18;case 53: _LL17: _LL18:
- goto _LL1A;case 54: _LL19: _LL1A: goto _LL1C;case 55: _LL1B: _LL1C: goto _LL1E;case 56: _LL1D: _LL1E: goto _LL20;case 57: _LL1F: _LL20:
+goto rflag;case 49:
+ goto _LL12;case 50: _LL12: goto _LL14;case 51: _LL14: goto _LL16;case 52: _LL16: goto _LL18;case 53: _LL18:
+ goto _LL1A;case 54: _LL1A: goto _LL1C;case 55: _LL1C: goto _LL1E;case 56: _LL1E: goto _LL20;case 57: _LL20:
  n=0;
 do{
 n=10 * n + (ch - (int)'0');
 ch=(int)*((const char*)_check_fat_subscript(_fat_ptr_inplace_plus_post(& fmt,sizeof(char),1),sizeof(char),0U));}while((unsigned)(ch - (int)'0')<= (unsigned)9);
 # 435
 width=n;
-goto reswitch;case 76: _LL21: _LL22:
+goto reswitch;case 76:
 # 438
  flags |=2;
-goto rflag;case 104: _LL23: _LL24:
+goto rflag;case 104:
 # 441
  flags |=4;
-goto rflag;case 108: _LL25: _LL26:
+goto rflag;case 108:
 # 444
  flags |=1;
-goto rflag;case 99: _LL27: _LL28:
+goto rflag;case 99:
 # 447
  cp=({char*_tmp2C=buf;_tag_fat(_tmp2C,sizeof(char),349U);});
 ({struct _fat_ptr _tmp2D=cp;char _tmp2E=*((char*)_check_fat_subscript(_tmp2D,sizeof(char),0U));char _tmp2F=(char)Cyc_va_arg_int(ap);if(_get_fat_size(_tmp2D,sizeof(char))== 1U &&(_tmp2E == 0 && _tmp2F != 0))_throw_arraybounds();*((char*)_tmp2D.curr)=_tmp2F;});_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 size=1;
 sign='\000';
-goto _LL0;case 68: _LL29: _LL2A:
+goto _LL0;case 68:
 # 453
  flags |=1;
-goto _LL2C;case 100: _LL2B: _LL2C:
- goto _LL2E;case 105: _LL2D: _LL2E:
+goto _LL2C;case 100: _LL2C:
+ goto _LL2E;case 105: _LL2E:
  _ulong=(unsigned long)(flags & 1?Cyc_va_arg_long(ap):(flags & 4?(long)((short)Cyc_va_arg_int(ap)): Cyc_va_arg_int(ap)));_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 if((long)_ulong < 0){
 _ulong=- _ulong;
 sign='-';}
 # 461
 base=1U;
-goto number;case 101: _LL2F: _LL30:
- goto _LL32;case 69: _LL31: _LL32: goto _LL34;case 102: _LL33: _LL34: goto _LL36;case 70: _LL35: _LL36: goto _LL38;case 103: _LL37: _LL38:
- goto _LL3A;case 71: _LL39: _LL3A:
+goto number;case 101:
+ goto _LL32;case 69: _LL32: goto _LL34;case 102: _LL34: goto _LL36;case 70: _LL36: goto _LL38;case 103: _LL38:
+ goto _LL3A;case 71: _LL3A:
  _double=Cyc_va_arg_double(ap);_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 # 470
 if(prec > 39){
@@ -660,7 +660,7 @@ if(softsign)
 sign='-';
 if((int)*((char*)_check_fat_subscript(cp,sizeof(char),0U))== (int)'\000')
 _fat_ptr_inplace_plus(& cp,sizeof(char),1);
-goto _LL0;case 110: _LL3B: _LL3C:
+goto _LL0;case 110:
 # 493
  if(flags & 1)
 ({unsigned long _tmpCD=(unsigned long)ret;*Cyc_va_arg_int_ptr(ap)=_tmpCD;});else{
@@ -669,20 +669,20 @@ if(flags & 4)
 # 498
 ({unsigned long _tmpCF=(unsigned long)ret;*Cyc_va_arg_int_ptr(ap)=_tmpCF;});}}
 _fat_ptr_inplace_plus(& ap,sizeof(void*),1);
-continue;case 79: _LL3D: _LL3E:
+continue;case 79:
 # 502
  flags |=1;
-goto _LL40;case 111: _LL3F: _LL40:
+goto _LL40;case 111: _LL40:
 # 505
  _ulong=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)): Cyc_va_arg_uint(ap));_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 base=0U;
-goto nosign;case 112: _LL41: _LL42:
+goto nosign;case 112:
 # 517 "printf.cyc"
  _ulong=(unsigned long)Cyc_va_arg_long(ap);_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 base=2U;
 flags |=64;
 ch=(int)'x';
-goto nosign;case 115: _LL43: _LL44: {
+goto nosign;case 115:  {
 # 523
 struct _fat_ptr b=Cyc_va_arg_string(ap);_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 which_cp=3;cp3=b;
@@ -697,15 +697,15 @@ size=prec;}}else{
 # 534
 size=(int)Cyc_my_strlen(cp3);}
 sign='\000';
-goto _LL0;}case 85: _LL45: _LL46:
+goto _LL0;}case 85:
 # 538
  flags |=1;
-goto _LL48;case 117: _LL47: _LL48:
+goto _LL48;case 117: _LL48:
 # 541
  _ulong=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)): Cyc_va_arg_uint(ap));_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 base=1U;
-goto nosign;case 88: _LL49: _LL4A:
- goto _LL4C;case 120: _LL4B: _LL4C:
+goto nosign;case 88:
+ goto _LL4C;case 120: _LL4C:
  _ulong=flags & 1?Cyc_va_arg_ulong(ap):(flags & 4?(unsigned long)((unsigned short)Cyc_va_arg_int(ap)): Cyc_va_arg_uint(ap));_fat_ptr_inplace_plus(& ap,sizeof(void*),1);
 base=2U;
 # 548
@@ -721,7 +721,7 @@ cp=_fat_ptr_plus(({char*_tmp35=buf;_tag_fat(_tmp35,sizeof(char),349U);}),sizeof(
 if(_ulong != (unsigned long)0 || prec != 0){
 struct _fat_ptr xdigs;
 # 574
-enum Cyc_BASE _tmp36=base;switch(_tmp36){case Cyc_OCT: _LL50: _LL51:
+enum Cyc_BASE _tmp36=base;switch(_tmp36){case Cyc_OCT:
 # 576
  do{
 ({struct _fat_ptr _tmp37=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp38=*((char*)_check_fat_subscript(_tmp37,sizeof(char),0U));char _tmp39=(char)((_ulong & (unsigned long)7)+ (unsigned long)'0');if(_get_fat_size(_tmp37,sizeof(char))== 1U &&(_tmp38 == 0 && _tmp39 != 0))_throw_arraybounds();*((char*)_tmp37.curr)=_tmp39;});
@@ -729,14 +729,14 @@ _ulong >>=3U;}while((int)_ulong);
 # 581
 if(flags & 8 &&(int)*((char*)_check_fat_subscript(cp,sizeof(char),0U))!= (int)'0')
 ({struct _fat_ptr _tmp3A=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp3B=*((char*)_check_fat_subscript(_tmp3A,sizeof(char),0U));char _tmp3C='0';if(_get_fat_size(_tmp3A,sizeof(char))== 1U &&(_tmp3B == 0 && _tmp3C != 0))_throw_arraybounds();*((char*)_tmp3A.curr)=_tmp3C;});
-goto _LL4F;case Cyc_DEC: _LL52: _LL53:
+goto _LL4F;case Cyc_DEC:
 # 587
  while(_ulong >= (unsigned long)10){
 ({struct _fat_ptr _tmp3D=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp3E=*((char*)_check_fat_subscript(_tmp3D,sizeof(char),0U));char _tmp3F=(char)(_ulong % (unsigned long)10 + (unsigned long)'0');if(_get_fat_size(_tmp3D,sizeof(char))== 1U &&(_tmp3E == 0 && _tmp3F != 0))_throw_arraybounds();*((char*)_tmp3D.curr)=_tmp3F;});
 _ulong /=10U;}
 # 591
 ({struct _fat_ptr _tmp40=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp41=*((char*)_check_fat_subscript(_tmp40,sizeof(char),0U));char _tmp42=(char)(_ulong + (unsigned long)'0');if(_get_fat_size(_tmp40,sizeof(char))== 1U &&(_tmp41 == 0 && _tmp42 != 0))_throw_arraybounds();*((char*)_tmp40.curr)=_tmp42;});
-goto _LL4F;case Cyc_HEX: _LL54: _LL55:
+goto _LL4F;case Cyc_HEX:
 # 595
  if(ch == (int)'X')
 xdigs=({const char*_tmp43="0123456789ABCDEF";_tag_fat(_tmp43,sizeof(char),17U);});else{
@@ -746,14 +746,14 @@ do{
 ({struct _fat_ptr _tmp45=_fat_ptr_inplace_plus(& cp,sizeof(char),-1);char _tmp46=*((char*)_check_fat_subscript(_tmp45,sizeof(char),0U));char _tmp47=*((const char*)_check_fat_subscript(xdigs,sizeof(char),(int)(_ulong & (unsigned long)15)));if(_get_fat_size(_tmp45,sizeof(char))== 1U &&(_tmp46 == 0 && _tmp47 != 0))_throw_arraybounds();*((char*)_tmp45.curr)=_tmp47;});
 _ulong >>=4U;}while((int)_ulong);
 # 603
-goto _LL4F;default: _LL56: _LL57:
+goto _LL4F;default:
 # 605
  cp=(struct _fat_ptr)Cyc_strdup(({const char*_tmp48="bug in vform: bad base";_tag_fat(_tmp48,sizeof(char),23U);}));
 goto skipsize;}_LL4F:;}
 # 609
 size=({unsigned char*_tmpD1=(_fat_ptr_plus(({char*_tmp49=buf;_tag_fat(_tmp49,sizeof(char),349U);}),sizeof(char),(308 + 39)+ 1)).curr;_tmpD1 - cp.curr;})/ sizeof(char);
 skipsize:
- goto _LL0;default: _LL4D: _LL4E:
+ goto _LL0;default:
 # 613
  if(ch == (int)'\000')
 goto done;
@@ -892,8 +892,8 @@ for(p=_fat_ptr_plus(endp,sizeof(char),- 1);(char*)p.curr >= (char*)startp.curr &
 tmp=modf(integer / (double)10,& integer);
 ({struct _fat_ptr _tmp78=_fat_ptr_inplace_plus_post(& p,sizeof(char),-1);char _tmp79=*((char*)_check_fat_subscript(_tmp78,sizeof(char),0U));char _tmp7A=(char)((int)((tmp + .01)* (double)10)+ (int)'0');if(_get_fat_size(_tmp78,sizeof(char))== 1U &&(_tmp79 == 0 && _tmp7A != 0))_throw_arraybounds();*((char*)_tmp78.curr)=_tmp7A;});}
 # 800
-{int _tmp7B=fmtch;switch(_tmp7B){case 102: _LL1: _LL2:
- goto _LL4;case 70: _LL3: _LL4:
+{int _tmp7B=fmtch;switch(_tmp7B){case 102:
+ goto _LL4;case 70: _LL4:
 # 803
  if(expcnt)
 for(1;({char*_tmpDF=(char*)(_fat_ptr_inplace_plus(& p,sizeof(char),1)).curr;_tmpDF < (char*)endp.curr;});({struct _fat_ptr _tmp7C=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp7D=*((char*)_check_fat_subscript(_tmp7C,sizeof(char),0U));char _tmp7E=*((char*)_check_fat_subscript(p,sizeof(char),0U));if(_get_fat_size(_tmp7C,sizeof(char))== 1U &&(_tmp7D == 0 && _tmp7E != 0))_throw_arraybounds();*((char*)_tmp7C.curr)=_tmp7E;})){;}else{
@@ -916,8 +916,8 @@ _fat_ptr_plus(t,sizeof(char),- 1);
 Cyc_sround(_tmpE2,0,_tmpE1,_tmpE0,'\000',signp);});}
 # 824
 for(1;prec --;({struct _fat_ptr _tmp88=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp89=*((char*)_check_fat_subscript(_tmp88,sizeof(char),0U));char _tmp8A='0';if(_get_fat_size(_tmp88,sizeof(char))== 1U &&(_tmp89 == 0 && _tmp8A != 0))_throw_arraybounds();*((char*)_tmp88.curr)=_tmp8A;})){;}
-goto _LL0;case 101: _LL5: _LL6:
- goto _LL8;case 69: _LL7: _LL8:
+goto _LL0;case 101:
+ goto _LL8;case 69: _LL8:
  eformat: if(expcnt){
 ({struct _fat_ptr _tmp8B=_fat_ptr_inplace_plus_post(& t,sizeof(char),1);char _tmp8C=*((char*)_check_fat_subscript(_tmp8B,sizeof(char),0U));char _tmp8D=*((char*)_check_fat_subscript(_fat_ptr_inplace_plus(& p,sizeof(char),1),sizeof(char),0U));if(_get_fat_size(_tmp8B,sizeof(char))== 1U &&(_tmp8C == 0 && _tmp8D != 0))_throw_arraybounds();*((char*)_tmp8B.curr)=_tmp8D;});
 if(prec || flags & 8)
@@ -971,8 +971,8 @@ _fat_ptr_inplace_plus(& t,sizeof(char),-1);
 _fat_ptr_inplace_plus(& t,sizeof(char),1);}
 # 885
 t=Cyc_exponent(t,expcnt,fmtch);
-goto _LL0;case 103: _LL9: _LLA:
- goto _LLC;case 71: _LLB: _LLC:
+goto _LL0;case 103:
+ goto _LLC;case 71: _LLC:
 # 889
  if(!prec)
 ++ prec;
@@ -1019,7 +1019,7 @@ while((char*)t.curr > (char*)startp.curr &&(int)*((char*)_check_fat_subscript(_f
 if((int)*((char*)_check_fat_subscript(t,sizeof(char),0U))!= (int)'.')
 _fat_ptr_inplace_plus(& t,sizeof(char),1);}}
 # 954
-goto _LL0;default: _LLD: _LLE:
+goto _LL0;default:
 (int)_throw((void*)({struct Cyc_Core_Impossible_exn_struct*_tmpB9=_cycalloc(sizeof(*_tmpB9));_tmpB9->tag=Cyc_Core_Impossible,({struct _fat_ptr _tmpEF=({const char*_tmpB8="__cvt_double";_tag_fat(_tmpB8,sizeof(char),13U);});_tmpB9->f1=_tmpEF;});_tmpB9;}));}_LL0:;}
 # 957
 return(t.curr - startp.curr)/ sizeof(char);}
@@ -1047,7 +1047,7 @@ ans=Cyc_vprintf(fmt,ap);
 return ans;}struct _tuple0{struct _fat_ptr*f1;unsigned long*f2;};
 # 992
 static int Cyc_putc_string(int c,struct _tuple0*sptr_n){
-struct _tuple0*_tmpBA=sptr_n;unsigned long*_tmpBC;struct _fat_ptr*_tmpBB;_LL1: _tmpBB=_tmpBA->f1;_tmpBC=_tmpBA->f2;_LL2: {struct _fat_ptr*sptr=_tmpBB;unsigned long*nptr=_tmpBC;
+struct _tuple0*_tmpBA=sptr_n;unsigned long*_tmpBC;struct _fat_ptr*_tmpBB;_tmpBB=_tmpBA->f1;_tmpBC=_tmpBA->f2;{struct _fat_ptr*sptr=_tmpBB;unsigned long*nptr=_tmpBC;
 struct _fat_ptr s=*sptr;
 unsigned long n=*nptr;
 if(n == (unsigned long)0)return - 1;

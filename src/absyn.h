@@ -1134,7 +1134,9 @@ namespace Absyn {
   // call Warn::impos if list is not length 1 or holds an ArrayElement
   var_t designatorlist_to_fieldname(list_t<designator_t>);
 
-  }
+  // for recurring through exps to process statement-exps
+  void do_nested_statement(exp_t, `a, void (@f)(`a, stmt_t), bool do_szeof);
+}
 
 #endif
 

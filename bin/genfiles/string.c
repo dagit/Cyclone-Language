@@ -670,7 +670,7 @@ struct _fat_ptr temp;
 len=Cyc_strlen(src);
 temp=Cyc_Core_rnew_string(r,len + (unsigned long)1);
 {struct _fat_ptr _tmp35=_fat_ptr_decrease_size(temp,sizeof(char),1U);struct _fat_ptr temp2=_tmp35;
-struct _fat_ptr _tmp36=temp2;struct _fat_ptr _tmp37;_LL1: _tmp37=_tmp36;_LL2: {struct _fat_ptr dst=_tmp37;
+struct _fat_ptr _tmp36=temp2;struct _fat_ptr _tmp37;_tmp37=_tmp36;{struct _fat_ptr dst=_tmp37;
 Cyc_strncpy(dst,src,len);}}
 # 341
 return temp;}
@@ -686,7 +686,7 @@ slen=_get_fat_size(s,sizeof(char));
 sz=sz > slen?sz: slen;
 temp=({unsigned _tmp38=sz;_tag_fat(_region_calloc(r,sizeof(char),_tmp38),sizeof(char),_tmp38);});
 # 356
-{struct _fat_ptr _tmp39=temp;struct _fat_ptr _tmp3A;_LL1: _tmp3A=_tmp39;_LL2: {struct _fat_ptr dst=_tmp3A;
+{struct _fat_ptr _tmp39=temp;struct _fat_ptr _tmp3A;_tmp3A=_tmp39;{struct _fat_ptr dst=_tmp3A;
 Cyc_strncpy((struct _fat_ptr)dst,(struct _fat_ptr)s,slen);}}
 # 360
 return temp;}
@@ -699,7 +699,7 @@ slen=Cyc_strlen(s);
 sz=sz > slen?sz: slen;
 temp=Cyc_Core_rnew_string(r,sz);
 # 371
-{struct _fat_ptr _tmp3B=temp;struct _fat_ptr _tmp3C;_LL1: _tmp3C=_tmp3B;_LL2: {struct _fat_ptr dst=_tmp3C;
+{struct _fat_ptr _tmp3B=temp;struct _fat_ptr _tmp3C;_tmp3C=_tmp3B;{struct _fat_ptr dst=_tmp3C;
 Cyc_strncpy((struct _fat_ptr)dst,s,slen);}}
 # 375
 if(slen != _get_fat_size(s,sizeof(char)))
@@ -721,7 +721,7 @@ res=Cyc_Core_rnew_string(r,maxsizeP);
 # 394
 if(sz > maxsizeP){
 maxsizeP=maxsizeP * (unsigned long)2 > (sz * (unsigned long)5)/ (unsigned long)4?maxsizeP * (unsigned long)2:(sz * (unsigned long)5)/ (unsigned long)4;{
-struct _fat_ptr _tmp44=str;struct _fat_ptr _tmp45;_LL1: _tmp45=_tmp44;_LL2: {struct _fat_ptr dst=_tmp45;
+struct _fat_ptr _tmp44=str;struct _fat_ptr _tmp45;_tmp45=_tmp44;{struct _fat_ptr dst=_tmp45;
 res=Cyc_rexpand(r,(struct _fat_ptr)dst,maxsizeP);}}}}
 # 401
 return res;}
@@ -983,8 +983,8 @@ extern void bzero(void*,unsigned long);
 extern char*GC_realloc_hint(char*,unsigned,unsigned);
 # 730
 struct _fat_ptr Cyc_realloc(struct _fat_ptr s,unsigned long n){
-unsigned _tmp65=_get_fat_size(s,sizeof(char));unsigned _stmttmp0=_tmp65;unsigned _tmp66=_stmttmp0;unsigned _tmp67;_LL1: _tmp67=_tmp66;_LL2: {unsigned oldsz=_tmp67;
-unsigned long _tmp68=n;unsigned _tmp69;_LL4: _tmp69=_tmp68;_LL5: {unsigned l=_tmp69;
+unsigned _tmp65=_get_fat_size(s,sizeof(char));unsigned _stmttmp0=_tmp65;unsigned _tmp66=_stmttmp0;unsigned _tmp67;_tmp67=_tmp66;{unsigned oldsz=_tmp67;
+unsigned long _tmp68=n;unsigned _tmp69;_tmp69=_tmp68;{unsigned l=_tmp69;
 char*_tmp6A=GC_realloc_hint((char*)_untag_fat_ptr(s,sizeof(char),1U),oldsz,l);char*res=_tmp6A;
 return((struct _fat_ptr(*)(char*,unsigned,unsigned))Cyc_Core_mkfat)((char*)_check_null(res),sizeof(char),l);}}}
 # 737

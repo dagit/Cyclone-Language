@@ -387,11 +387,11 @@ struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*)){
 return((struct Cyc_Fn_Function*(*)(void*(*)(void*(*)(void*),void*),void*(*)(void*)))Cyc_Fn_make_fn)(Cyc_Fn_fp_apply,f);}
 # 47
 void*Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x){
-struct Cyc_Fn_Function*_tmp1=f;void*_tmp3;void*(*_tmp2)(void*,void*);_LL1: _tmp2=_tmp1->f;_tmp3=(void*)_tmp1->env;_LL2: {void*(*code)(void*,void*)=_tmp2;void*env=_tmp3;
+struct Cyc_Fn_Function*_tmp1=f;void*_tmp3;void*(*_tmp2)(void*,void*);_tmp2=_tmp1->f;_tmp3=(void*)_tmp1->env;{void*(*code)(void*,void*)=_tmp2;void*env=_tmp3;
 return code(env,x);}}struct _tuple0{struct Cyc_Fn_Function*f1;struct Cyc_Fn_Function*f2;};
 # 52
 static void*Cyc_Fn_fn_compose(struct _tuple0*f_and_g,void*arg){
-struct _tuple0*_tmp4=f_and_g;struct Cyc_Fn_Function*_tmp6;struct Cyc_Fn_Function*_tmp5;_LL1: _tmp5=_tmp4->f1;_tmp6=_tmp4->f2;_LL2: {struct Cyc_Fn_Function*f=_tmp5;struct Cyc_Fn_Function*g=_tmp6;
+struct _tuple0*_tmp4=f_and_g;struct Cyc_Fn_Function*_tmp6;struct Cyc_Fn_Function*_tmp5;_tmp5=_tmp4->f1;_tmp6=_tmp4->f2;{struct Cyc_Fn_Function*f=_tmp5;struct Cyc_Fn_Function*g=_tmp6;
 return({struct Cyc_Fn_Function*_tmpB=f;Cyc_Fn_apply(_tmpB,Cyc_Fn_apply(g,arg));});}}
 # 58
 struct Cyc_Fn_Function*Cyc_Fn_compose(struct Cyc_Fn_Function*g,struct Cyc_Fn_Function*f){

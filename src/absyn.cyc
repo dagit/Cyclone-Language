@@ -1066,6 +1066,88 @@ bool no_side_effects_exp(exp_t e) {
   }
 }
 
+void do_nested_statement(exp_t e, `a env, void (@f)(`a, stmt_t), bool szeof) {
+  switch(e->r) {
+  case &StmtExp_e(s): return f(env, s);
+
+  case &Const_e(...):
+  case &Var_e(...): // binding_t is a vardecl_t we have already looked at
+  case &Pragma_e(...):  // won't have
+  case &Enum_e(...):
+  case &AnonEnum_e(...):        
+  case &Valueof_e(...):
+  case &Asm_e(...):
+  case &Offsetof_e(...):    
+  case &Sizeoftype_e(...):
+    break;
+
+  case &Extension_e(e1): fallthru(e1);  
+  case &Assert_e(e1): fallthru(e1);
+  case &Increment_e(e1,_): fallthru(e1);
+  case &Throw_e(e1,_): fallthru(e1);
+  case &NoInstantiate_e(e1): fallthru(e1);
+  case &Instantiate_e(e1,_): fallthru(e1);
+  case &Cast_e(_,e1,_,_): fallthru(e1);
+  case &Address_e(e1): fallthru(e1);
+  case &Deref_e(e1): fallthru(e1);
+  case &AggrMember_e(e1,...): fallthru(e1);
+  case &ComprehensionNoinit_e(e1,_,_): fallthru(e1);
+  case &Tagcheck_e(e1, _): fallthru(e1);
+  case &AggrArrow_e(e1,...):
+    do_nested_statement(e1, env, f, szeof);
+    break;
+    
+  case &Sizeofexp_e(e): 
+    if(szeof) do_nested_statement(e, env, f, szeof); 
+    break;
+
+  case &AssignOp_e(e1,_,e2): fallthru(e1,e2);
+  case &And_e(e1,e2): fallthru(e1,e2);
+  case &Or_e(e1,e2): fallthru(e1,e2);
+  case &SeqExp_e(e1,e2): fallthru(e1,e2);
+  case &Subscript_e(e1,e2): fallthru(e1,e2);
+  case &Swap_e(e1,e2): fallthru(e1,e2);
+  case &Comprehension_e(_,e1,e2,_): // ignore vardecl_t because "i" can not be set with a complex expression
+    do_nested_statement(e1, env, f, szeof);
+    do_nested_statement(e2, env, f, szeof);
+    break;
+
+  case &Conditional_e(e1,e2,e3):
+    do_nested_statement(e1, env, f, szeof);
+    do_nested_statement(e2, env, f, szeof);
+    do_nested_statement(e3, env, f, szeof);
+    break;
+
+  case &FnCall_e(e1,lexp,...):
+    for(; lexp != NULL; lexp = lexp->tl)
+      do_nested_statement(lexp->hd, env, f, szeof);
+    do_nested_statement(e1, env, f, szeof);
+    break;
+    
+  case &Array_e(ldt): fallthru(ldt);
+  case &CompoundLit_e(_, ldt): fallthru(ldt);
+  case &UnresolvedMem_e(_, ldt): fallthru(ldt);
+  case &Aggregate_e(_,_,ldt,_): fallthru(ldt);
+  case &AnonStruct_e(_, ldt):
+    for(; ldt != NULL; ldt = ldt->tl)
+      do_nested_statement((*ldt->hd)[1], env, f, szeof);
+    break;
+
+  case &Tuple_e(lexp): fallthru(lexp);
+  case &Primop_e(_,lexp): fallthru(lexp);
+  case &Datatype_e(lexp,_,_):
+    for(; lexp!=NULL; lexp=lexp->tl)
+      do_nested_statement(lexp->hd, env, f, szeof);
+    break;
+
+  case &Malloc_e(MallocInfo{.rgn=e1o,.num_elts=e2,...}): fallthru(e1o,e2);
+  case &New_e(e1, e2): // first expression is region -- null is heap
+    if(e1!=NULL) do_nested_statement(e1, env, f, szeof);
+    do_nested_statement(e2, env, f, szeof);
+    break;
+  }
+}
+
 datacon(Raw_decl,Porton_d);
 datacon(Raw_decl,Portoff_d);
 datacon(Raw_decl,Tempeston_d);

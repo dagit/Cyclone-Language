@@ -100,68 +100,11 @@ static void anal_exps(senv_t env, list_t<exp_t> es) {
   for(; es!=NULL; es=es->tl)
     anal_exp(env,es->hd);
 }
+static void anal_stmt_exp(senv_t@ env, stmt_t s) {
+  anal_stmt(add_encloser(s,*env),s); 
+}
 static void anal_exp(senv_t env, exp_t e) { // only care about nested StmtExp_e
-  switch (e->r) {
-  case &StmtExp_e(s): anal_stmt(add_encloser(s,env),s); break;
-
-  case &Asm_e(...): 
-  case &Const_e(...):
-  case &Sizeoftype_e(_):
-  case &Sizeofexp_e(_):  // ignore the expression!
-  case &Offsetof_e(...):
-  case &Valueof_e(_):
-  case &Enum_e(...):
-  case &AnonEnum_e(...):
-  case &Pragma_e(_):
-  case &Var_e(...):  break;
-
-  case &Datatype_e(es,_,_): fallthru(es);
-  case &Tuple_e(es):        fallthru(es);
-  case &Primop_e(_,es): anal_exps(env,es); break;
-
-  case &FnCall_e(e1,es,_,_): anal_exp(env,e1); anal_exps(env,es); break;
-
-  case &ComprehensionNoinit_e(e1,_,_): fallthru(e1);
-  case &Extension_e(e1):       fallthru(e1);
-  case &Tagcheck_e(e1,_):      fallthru(e1);
-  case &Address_e(e1):         fallthru(e1);
-  case &Deref_e(e1):           fallthru(e1);
-  case &AggrMember_e(e1,...):  fallthru(e1);
-  case &AggrArrow_e(e1,...):   fallthru(e1);
-  case &Cast_e(_,e1,_,_):      fallthru(e1);
-  case &NoInstantiate_e(e1):   fallthru(e1);
-  case &Instantiate_e(e1,...): fallthru(e1);
-  case &Throw_e(e1,...):       fallthru(e1);
-  case &Assert_e(e1):          fallthru(e1);
-  case &Increment_e(e1,...):   anal_exp(env,e1); break;
-
-  case &Conditional_e(e1,e2,e3): 
-    anal_exp(env,e1); anal_exp(env,e2); anal_exp(env,e3); break;
-
-  case &Comprehension_e(_,e1,e2,_): fallthru(e1,e2);
-  case &AssignOp_e(e1,_,e2): fallthru(e1,e2);
-  case &Swap_e(e1,e2):      fallthru(e1,e2);
-  case &Subscript_e(e1,e2): fallthru(e1,e2);
-  case &And_e(e1,e2):       fallthru(e1,e2);
-  case &Or_e(e1,e2):        fallthru(e1,e2);
-  case &SeqExp_e(e1,e2):    anal_exp(env,e1); anal_exp(env,e2); break;
-
-  case &Malloc_e(MallocInfo{.rgn=e1o,.num_elts=e2,...}): fallthru(e1o,e2);
-  case &New_e(e1o,e2):
-    if(e1o!=NULL) anal_exp(env,e1o);
-    anal_exp(env,e2);
-    break;
-
-  case &AnonStruct_e(_,dles):    fallthru(dles);
-  case &Aggregate_e(_,_,dles,_): fallthru(dles);
-  case &CompoundLit_e(_,dles):   fallthru(dles);
-  case &Array_e(dles):
-    for(; dles!=NULL; dles=dles->tl)
-      anal_exp(env,(*dles->hd)[1]);
-    break;
-
-  case &UnresolvedMem_e(...): Warn::impos("jump_anaysis found UnresolvedMem_e");
-  }
+  do_nested_statement(e,&env,anal_stmt_exp,false);
 }
 static void anal_scs(senv_t env, list_t<switch_clause_t> scs) {
   // encloser and pat_var_depth changes only if it has pattern-vars, which the

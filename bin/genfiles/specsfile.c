@@ -569,9 +569,9 @@ return result;}}}
 # 200
 struct _fat_ptr Cyc_Specsfile_get_spec(struct Cyc_List_List*specs,struct _fat_ptr spec_name){
 struct _handler_cons _tmp2A;_push_handler(& _tmp2A);{int _tmp2C=0;if(setjmp(_tmp2A.handler))_tmp2C=1;if(!_tmp2C){
-{struct _fat_ptr _tmp2D=*((struct _fat_ptr*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*,struct _fat_ptr*))Cyc_List_assoc_cmp)(Cyc_strptrcmp,specs,& spec_name);_npop_handler(0);return _tmp2D;};_pop_handler();}else{void*_tmp2B=(void*)Cyc_Core_get_exn_thrown();void*_tmp2E=_tmp2B;void*_tmp2F;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp2E)->tag == Cyc_Core_Not_found){_LL1: _LL2:
+{struct _fat_ptr _tmp2D=*((struct _fat_ptr*(*)(int(*)(struct _fat_ptr*,struct _fat_ptr*),struct Cyc_List_List*,struct _fat_ptr*))Cyc_List_assoc_cmp)(Cyc_strptrcmp,specs,& spec_name);_npop_handler(0);return _tmp2D;};_pop_handler();}else{void*_tmp2B=(void*)Cyc_Core_get_exn_thrown();void*_tmp2E=_tmp2B;void*_tmp2F;if(((struct Cyc_Core_Not_found_exn_struct*)_tmp2E)->tag == Cyc_Core_Not_found)
 # 205
- return _tag_fat(0,0,0);}else{_LL3: _tmp2F=_tmp2E;_LL4: {void*exn=_tmp2F;(int)_rethrow(exn);}}_LL0:;}}}
+return _tag_fat(0,0,0);else{_tmp2F=_tmp2E;{void*exn=_tmp2F;(int)_rethrow(exn);}};}}}
 # 209
 struct Cyc_List_List*Cyc_Specsfile_cyclone_arch_path=0;
 struct _fat_ptr Cyc_Specsfile_def_lib_path={(void*)0,(void*)0,(void*)(0 + 0)};
@@ -630,7 +630,7 @@ return otherargs;}}}
 # 301
 static int Cyc_Specsfile_file_exists(struct _fat_ptr file){
 struct Cyc___cycFILE*f=0;
-{struct _handler_cons _tmp48;_push_handler(& _tmp48);{int _tmp4A=0;if(setjmp(_tmp48.handler))_tmp4A=1;if(!_tmp4A){f=({struct _fat_ptr _tmp8F=file;Cyc_file_open(_tmp8F,({const char*_tmp4B="r";_tag_fat(_tmp4B,sizeof(char),2U);}));});;_pop_handler();}else{void*_tmp49=(void*)Cyc_Core_get_exn_thrown();void*_tmp4C=_tmp49;_LL1: _LL2: goto _LL0;_LL0:;}}}
+{struct _handler_cons _tmp48;_push_handler(& _tmp48);{int _tmp4A=0;if(setjmp(_tmp48.handler))_tmp4A=1;if(!_tmp4A){f=({struct _fat_ptr _tmp8F=file;Cyc_file_open(_tmp8F,({const char*_tmp4B="r";_tag_fat(_tmp4B,sizeof(char),2U);}));});;_pop_handler();}else{void*_tmp49=(void*)Cyc_Core_get_exn_thrown();void*_tmp4C=_tmp49;goto _LL0;_LL0:;}}}
 if(f == 0)return 0;else{
 Cyc_fclose(f);return 1;}}
 # 310
