@@ -117,9 +117,6 @@ static list_t<stringptr_t> ccargs = NULL;
 static void add_ccarg(string_t<`H> s) {
   ccargs = new List(new s,ccargs);
 }
-static void add_ccarg2(string_t<`H> flag,string_t<`H> arg) {
-  ccargs = new List(new arg, new List(new flag,ccargs));
-}
 
 static list_t<stringptr_t> cyclone_lib_path = NULL;
 static void add_cyclone_lib_path(string_t s) {
@@ -923,7 +920,7 @@ int main(int argc, string_t<`H> ?`H argv) {
     cyclone_lib_path = new List(new def_lib_path, cyclone_lib_path);
   /* Look for other cyclone libraries during linking */
   if (cyclone_lib_path != NULL)
-    add_ccarg2((string_t)"-L",*cyclone_lib_path->hd);
+    add_ccarg(strconcat("-L",*cyclone_lib_path->hd));
   cyclone_lib_path = List::imp_rev(cyclone_lib_path);
   /* The absolute file name is kept in a global variable */
   cyc_include = do_find(cyclone_lib_path,"include/cyc_include.h");

@@ -378,6 +378,10 @@ struct sa_xtunion *Csockaddr_to_sockaddr(struct sockaddr *addr, int len) {
 #include <sys/socket.h>
 #include <netinet/in.h>
 
+#ifdef __APPLE__
+typedef int socklen_t;
+#endif
+
 int accept_in(int a, const struct sockaddr_in *b, socklen_t *c) {
   return accept(a,(struct sockaddr *)b,c);
 }
