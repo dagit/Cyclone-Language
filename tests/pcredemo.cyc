@@ -23,7 +23,11 @@
 /* Put the unsafe C interface in a separate namespace. */
 namespace UnsafePcre {
 extern "C include" {  /* tell Cyclone that <pcre.h> is C code */
+#if defined(__CYGWIN__)
 #include <pcre.h>     /* include the pcre C interface */
+#else
+#include "/usr/include/pcre/pcre.h"
+#endif
 } export {
   pcre_compile, pcre_exec; /* export these functions */
 }}
