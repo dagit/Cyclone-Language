@@ -155,12 +155,8 @@ void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   my_handler = (struct _handler_cons *)_current_handler;
   _pop_handler();
   _exn_thrown = e;
-  // FIX: temporarily disabled.  Since runtime_cyc.o is now separate
-  // from libcyc.a, this gives a circular dependency for the linker.
-  /*
   if (my_handler->handler == top_handler.handler)
     Cyc_Execinfo_bt();
-  */
   longjmp(my_handler->handler,1);
 }
 

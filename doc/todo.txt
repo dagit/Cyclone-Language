@@ -6,8 +6,6 @@ CONFIGURATION BUGS:
   not remove the bin/genfiles directory after it's been extracted
   and built.  This currently screws up make install.
 
-* cygwin has problems when you have c:/ in the path of Makefile.inc
-  instead of /cygdrive/c/.
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
@@ -121,6 +119,10 @@ function declarations are only allowed at top-level.
 * src/Makefile produces $(OUTPUT_PREFIX)parse_tab.h, but parse.h is
   hardcoded to #include "parse_tab.h", so everything breaks when you
   use a prefix.
+
+* cyclone -Dfoo=bar baz.c
+  does not pass the macro definition to the .c file; macro definitions
+  are only passed to .cyc files.
 
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------

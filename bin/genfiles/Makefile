@@ -73,13 +73,13 @@ $(ARCH)/lib/nogc_a.a: $(ARCH)/lib/a_nogc.$(O)
 $(ARCH)/lib/$(RUNTIME)_a.$(O): $(ARCH)/lib/a_$(RUNTIME).$(O)
 	cp $< $@
 
-$(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.$(O)) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a $(CYC_LIB_PATH)/$(RUNTIME).$(O)
+$(ARCH)/src/cyclone$(EXE): $(addprefix $(ARCH)/src/, $(O_SRCS) install_path.$(O)) $(CYC_LIB_PATH)/$(RUNTIME).$(O) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(ARCH)/src/cycdoc$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(CYCDOC_SRCS))) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a $(CYC_LIB_PATH)/$(RUNTIME).$(O)
+$(ARCH)/src/cycdoc$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(CYCDOC_SRCS))) $(CYC_LIB_PATH)/$(RUNTIME).$(O) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
-$(ARCH)/src/buildlib$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a $(CYC_LIB_PATH)/$(RUNTIME).$(O)
+$(ARCH)/src/buildlib$(EXE): $(addprefix $(ARCH)/src/, $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)) $(CYC_LIB_PATH)/$(RUNTIME).$(O) $(CYC_LIB_PATH)/$(CYCLIB) $(CYC_LIB_PATH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
 
 $(ARCH)/src/install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
