@@ -56,12 +56,12 @@ typ wildtyp() {
 }
 
 tqual combine_tqual(tqual x,tqual y) { 
-  return &Tqual(x->q_const    || y->q_const,
-		x->q_volatile || y->q_volatile,
-		x->q_restrict || y->q_restrict);
+  return new Tqual(x->q_const    || y->q_const,
+                   x->q_volatile || y->q_volatile,
+                   x->q_restrict || y->q_restrict);
 }
 
-tqual empty_tqual() { return &Tqual(false,false,false); }
+tqual empty_tqual() { return new Tqual(false,false,false); }
 
 bool is_format_prim(primop p) {
   switch (p) {
@@ -77,10 +77,10 @@ bool is_format_prim(primop p) {
 
 //////////////////////////// Constraints /////////////////////////
 conref<`a> new_conref(`a x) {
-  return &Conref{.v = Eq_constr(x)};
+  return new Conref{.v = Eq_constr(x)};
 }
 conref<`a> empty_conref() {
-  return &Conref{.v = No_constr};
+  return new Conref{.v = No_constr};
 }
 // just to avoid some unnecessary allocation:
 struct Conref<bool> true_conref_v  = Conref(Eq_constr(true));
@@ -134,7 +134,7 @@ static opt_t<typ> string_t_opt = null;
 typ string_typ(typ rgn) {
   if (string_t_opt == null) {
     typ t = starb_typ(uchar_t,rgn,empty_tqual(),Unknown_b);
-    string_t_opt = &Opt(t);
+    string_t_opt = new Opt(t);
   }
   return string_t_opt->v;
 }
@@ -183,10 +183,11 @@ typ file_typ() {
   if (file_t_opt == null) {
     // struct Cyc::Stdio::__sFILE *
     typedef_name_t file_t_name = 
-      new {$(Abs_n((list_t<var>)&List(cyc,&List(st,null))), sf)};
-    structdecl sd = &Structdecl(Abstract,&Opt(file_t_name),null, null,null);
+      new $(Abs_n((list_t<var>)(new List(cyc,new List(st,null)))), sf);
+    structdecl sd = new Structdecl(Abstract,new Opt(file_t_name),null,
+                                   null,null);
     typ file_struct_typ = StructType(file_t_name, null, new {sd});
-    file_t_opt = &Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
+    file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
   }
   return file_t_opt->v;
 }
@@ -194,7 +195,7 @@ typ file_typ() {
 static opt_t<typ> void_star_t_opt = null;
 typ void_star_typ() {
   if (void_star_t_opt == null)
-    void_star_t_opt = &Opt(star_typ(VoidType, HeapRgn, empty_tqual()));
+    void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual()));
   return void_star_t_opt->v;
 }
 
@@ -217,13 +218,13 @@ typ unionq_typ(qvar name) {
 
 ///////////////////////// Expressions //////////////////////////////
 exp new_exp(raw_exp_t r, seg_t loc) {
-  return &Exp{.topt=null, .r=r, .loc=loc};
+  return new Exp{.topt=null, .r=r, .loc=loc};
 }
 exp New_exp(exp e, seg_t loc) {
   return new_exp(New_e(e), loc);
 }
 exp copy_exp(exp e) {
-  return &Exp{.topt=e->topt, .r=e->r, .loc=e->loc};
+  return new Exp{.topt=e->topt, .r=e->r, .loc=e->loc};
 }
 exp const_exp(cnst_t c, seg_t loc) { return new_exp(Const_e(c), loc); }
 exp null_exp(seg_t loc) { return new_exp(Const_e(Null_c), loc); }
@@ -254,10 +255,10 @@ exp primop_exp(primop p, list_t<exp> es, seg_t loc) {
   return new_exp(Primop_e(p,es),loc);
 }
 exp prim1_exp(primop p, exp e, seg_t loc) {
-  return primop_exp(p, &List(e,null), loc);
+  return primop_exp(p, new List(e,null), loc);
 }
 exp prim2_exp(primop p, exp e1, exp e2, seg_t loc) {
-  return primop_exp(p, &List(e1,&List(e2,null)), loc);
+  return primop_exp(p, new List(e1,new List(e2,null)), loc);
 }
 exp add_exp(exp e1,exp e2,seg_t loc){return prim2_exp(Plus, e1, e2, loc);}
 exp subtract_exp(exp e1,exp e2,seg_t loc) {
@@ -336,12 +337,12 @@ exp stmt_exp(stmt s,seg_t loc) { return new_exp(StmtExp_e(s), loc); }
 static string ne_str = "Null_Exception";
 static stringptr ne = &ne_str;
 exp null_pointer_exn_exp(seg_t loc) { 
-  return var_exp(&$(Abs_n(null),ne), loc); 
+  return var_exp(new $(Abs_n(null),ne), loc); 
 }
 exp array_exp(list_t<exp> es, seg_t loc) {
   let dles = null;
   for (; es != null; es = es->tl)
-    dles = &List(&$(null,es->hd),dles);
+    dles = new List(new $(null,es->hd),dles);
   dles = List::imp_rev(dles);
   return new_exp(Array_e(dles),loc);
 }
@@ -351,8 +352,8 @@ exp unresolvedmem_exp(opt_t<typedef_name_t> n,
 }
 ///////////////////////// Statements ///////////////////////////////
 stmt new_stmt(raw_stmt_t s, seg_t loc) { 
-  return &Stmt{.r=s, .loc=loc, .non_local_preds=null, .try_depth = 0,
-	       .annot=EmptyAnnot }; }
+  return new Stmt{.r=s, .loc=loc, .non_local_preds=null, .try_depth = 0,
+                     .annot=EmptyAnnot }; }
 stmt skip_stmt(seg_t loc) { return new_stmt(Skip_s, loc); }
 stmt exp_stmt(exp e,seg_t loc) { return new_stmt(Exp_s(e),loc); }
 stmt seq_stmts(list_t<stmt> ss, seg_t loc) {
@@ -412,41 +413,42 @@ stmt assign_stmt(exp e1, exp e2, seg_t loc) {
   return exp_stmt(assign_exp(e1,e2,loc),loc);
 }
 /////////////////////////// Patterns //////////////////////////////
-pat new_pat(raw_pat_t p, seg_t s) { return &Pat(p,null,s); }
+pat new_pat(raw_pat_t p, seg_t s) { return new Pat(p,null,s); }
 
 ////////////////////////// Declarations ///////////////////////////
-decl new_decl(raw_decl r, seg_t loc) { return &Decl{.r=r, .loc=loc}; }
+decl new_decl(raw_decl r, seg_t loc) { return new Decl{.r=r, .loc=loc}; }
 decl let_decl(pat p, opt_t<typ> t_opt, exp e, seg_t loc) {
   return new_decl(Let_d(p,null,t_opt,e,false),loc);
 }
 vardecl new_vardecl(qvar x, typ t, exp_opt init) {
-  return &Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
-		  .type=t, .initializer=init, .shadow=0, .region=null, 
-                  .attributes=null};
+  return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
+                        .type=t, .initializer=init, .shadow=0, .region=null, 
+                        .attributes=null};
 }
 vardecl static_vardecl(qvar x, typ t, exp_opt init) {
-  return &Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
-	          .type=t, .initializer=init, .shadow=0, .region=null,
-                  .attributes=null};
+  return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
+                        .type=t, .initializer=init, .shadow=0, .region=null,
+                        .attributes=null};
 }
 decl struct_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
 		 opt_t<list_t<structfield_t>> fs, attributes_t atts,
                  seg_t loc) {
-  return new_decl(Struct_d(&Structdecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
-                                        .attributes = atts}),loc);
+  return new_decl(Struct_d(new Structdecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
+                                              .attributes = atts}),loc);
 }
 decl union_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
                 opt_t<list_t<structfield_t>> fs, attributes_t atts,
                 seg_t loc) {
-  return new_decl(Union_d(&Uniondecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
-                                         .attributes = atts}),loc);
+  return new_decl(Union_d(new Uniondecl {.sc=s,.name=n,.tvs=ts,.fields=fs,
+                                            .attributes = atts}),loc);
 }
 decl enum_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
 	       opt_t<list_t<enumfield>> fs,seg_t loc) {
-  return new_decl(Enum_d(&Enumdecl{.sc=s, .name=n, .tvs=ts, .fields=fs}),loc);
+  return new_decl(Enum_d(new Enumdecl{.sc=s, .name=n, 
+                                         .tvs=ts, .fields=fs}),loc);
 }
 decl xenum_decl(scope s,typedef_name_t n,list_t<enumfield> fs,seg_t loc) {
- return new_decl(Xenum_d(&Xenumdecl{.sc=s, .name=n, .fields=fs}),loc);
+ return new_decl(Xenum_d(new Xenumdecl{.sc=s, .name=n, .fields=fs}),loc);
 }
 
 // We treat function types in argument or return position as an
@@ -457,7 +459,7 @@ decl xenum_decl(scope s,typedef_name_t n,list_t<enumfield> fs,seg_t loc) {
 // We do this by constructing every function type using function_typ,
 // rather than mucking with the typechecker/unifier/etc.
 static $(opt_t<var>,tqual,typ)@ expand_arg($(opt_t<var>,tqual,typ)@ a) {
-  return &$((*a)[0],(*a)[1],pointer_expand((*a)[2]));
+  return new $((*a)[0],(*a)[1],pointer_expand((*a)[2]));
 }
 
 typ function_typ(list_t<tvar> tvs, opt_t<typ> eff_typ, typ ret_typ, 

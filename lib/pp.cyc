@@ -40,7 +40,7 @@ alist_t<`a> append(alist_t<`a> a1, alist_t<`a> a2) {
 list_t<`a> list_of_alist_f(alist_t<`a> y,list_t<`a> l) {
   switch (y) {
   case Empty:         return l;
-  case Single(z):     return &List(z,l);
+  case Single(z):     return new List(z,l);
   case Append(a1,a2): return list_of_alist_f(a1,list_of_alist_f(a2,l));
   }
 }
@@ -95,29 +95,29 @@ static void dump_out(FILE @f, alist_t<stringptr> al) {
 
 // Dump a doc to a file descriptor
 void file_of_doc(doc_t d,int w,FILE @f) {
-  out_t o = apply(d->f,&Ppstate(0,0,1,w,w));
+  out_t o = apply(d->f,new Ppstate(0,0,1,w,w));
   dump_out(f,o->ppout);
 }
 
 // Convert a doc_t to a string.  Takes a doc_t and a width as arguments.
 string string_of_doc(doc_t d, int w) {
-  out_t o = apply(d->f,&Ppstate(0,0,1,w,w));
+  out_t o = apply(d->f,new Ppstate(0,0,1,w,w));
   return String::str_sepstr(list_of_alist(o->ppout),"");
 }
 
 // Convert a doc_t to a string and hyperlinks.
 // Takes a doc_t and a width as arguments.
 $(string,list_t<$(int,int,int,string)@>) @string_and_links(doc_t d, int w) {
-  out_t o = apply(d->f,&Ppstate(0,0,1,w,w));
-  return &$(String::str_sepstr(list_of_alist(o->ppout),""),
-            list_of_alist(o->links));
+  out_t o = apply(d->f,new Ppstate(0,0,1,w,w));
+  return new $(String::str_sepstr(list_of_alist(o->ppout),""),
+               list_of_alist(o->links));
 }
 
 static opt_t<table_t<int,stringptr,{},{}>> bhashtbl = null;
 
 string nlblanks(int i) {  // a newline followed by i blanks
   if (bhashtbl == null)
-    bhashtbl = &Opt(Hashtable::create(61,intcmp,identity));
+    bhashtbl = new Opt(Hashtable::create(61,intcmp,identity));
   if (i<0) throw Failure("nlblanks");
   try
     return *(Hashtable::lookup(bhashtbl->v,i));
@@ -144,25 +144,25 @@ int infinity = 9999999;
 
 static out_t text_doc_f($(int,string) @clo,ppstate_t st) {
   let &$(slen,s) = clo;
-  return &Out(st->cc+slen,
-              st->cl,
-              Single(new {s}),
-              Empty);
+  return new Out(st->cc+slen,
+                 st->cl,
+                 Single(new {s}),
+                 Empty);
 }
 static doc_t text_doc(string s) {
   int slen = String::strlen(s);
   return
-    &Doc(slen,
-         infinity,
-         make_fn
-         (text_doc_f,
-          &$(slen,s)));
+    new Doc(slen,
+            infinity,
+            make_fn
+            (text_doc_f,
+             new $(slen,s)));
 }
 doc_t text(string s) {
   table_t<stringptr,doc_t,{},{}> t;
   if (str_hashtbl == null) {
     t = Hashtable::create(101,zstrptrcmp,hash_stringptr);
-    str_hashtbl = &Opt(t);
+    str_hashtbl = new Opt(t);
   } else {
     t = str_hashtbl->v;
   }
@@ -184,61 +184,60 @@ opt_t<doc_t> line_doc_opt  = null;
 // This is made a function because non-constant initializers not allowed
 doc_t nil_doc() {
   if (nil_doc_opt == null) 
-    nil_doc_opt = &Opt(text(""));
+    nil_doc_opt = new Opt(text(""));
   return nil_doc_opt->v;
 }
 
 // This is made a function because non-constant initializers not allowed
 doc_t blank_doc() {
   if (blank_doc_opt == null) 
-    blank_doc_opt = &Opt(text(""));
+    blank_doc_opt = new Opt(text(""));
   return blank_doc_opt->v;
 }
 
 static out_t hyperlink_f($(int,string,string) @clo, ppstate_t st) {
   let &$(slen,shrt,full) = clo;
-  return &Out(st->cc+slen,
+  return new Out(st->cc+slen,
               st->cl,
               Single(new {shrt}),
-              Single(&$(st->cl,st->cc,slen,full)));
+              Single(new $(st->cl,st->cc,slen,full)));
 }
 doc_t hyperlink(string shrt, string full) {
   int slen = String::strlen(shrt);
-  return &Doc(slen,
-	      infinity,
-	      make_fn (hyperlink_f, &$(slen,shrt,full)));
+  return new Doc(slen,
+                 infinity,
+                 make_fn (hyperlink_f, new $(slen,shrt,full)));
 }
 
 // This is made a function because non-constant initializers not allowed
 static out_t line_f(ppstate_t st) {
-  return &Out(st->ci,
-              st->cl+1,
-              Single(new {nlblanks(st->ci)}),
-              Empty);
+  return new Out(st->ci,
+                 st->cl+1,
+                 Single(new {nlblanks(st->ci)}),
+                 Empty);
 }
 doc_t line_doc() {
   if (line_doc_opt == null) 
-    line_doc_opt = &Opt(&Doc(0,0,fp2fn(line_f)));
+    line_doc_opt = new Opt(new Doc(0,0,fp2fn(line_f)));
   return line_doc_opt->v;
 }
 
 static out_t nest_f($(int,doc_t) @clo, ppstate_t st) {
   let &$(k,d) = clo;
   ppstate_t st2 = 
-    &Ppstate(st->ci + k,
-             st->cc,
-             st->cl,
-             st->pw,
-             st->epw);
+    new Ppstate(st->ci + k,
+                st->cc,
+                st->cl,
+                st->pw,
+                st->epw);
   return apply(d->f,st2);
 }
 doc_t nest(int k, doc_t d) {
-  return &Doc
-    (d->mwo,
-     d->mw,
-     make_fn
-     (nest_f,
-      &$(k,d)));
+  return new Doc(d->mwo,
+                 d->mw,
+                 make_fn
+                 (nest_f,
+                  new $(k,d)));
 }
 
 int min(int x, int y) {
@@ -254,20 +253,20 @@ int max(int x, int y) {
 static out_t concat_f($(doc_t,doc_t) @clo, ppstate_t st) {
   let &$(d1,d2) = clo;
   int epw2 = max(st->pw-d2->mw, st->epw-d1->mwo);
-  ppstate_t st2 = &Ppstate(st->ci,st->cc,st->cl,st->pw,epw2);
+  ppstate_t st2 = new Ppstate(st->ci,st->cc,st->cl,st->pw,epw2);
   out_t     o1  = apply(d1->f,st2);
-  ppstate_t st3 = &Ppstate(st->ci,o1->newcc,o1->newcl,st->pw,epw2);
+  ppstate_t st3 = new Ppstate(st->ci,o1->newcc,o1->newcl,st->pw,epw2);
   out_t     o2  = apply(d2->f,st3);
-  out_t     o3  = &Out(o2->newcc,
-		     o2->newcl,
-		     append(o1->ppout, o2->ppout),
-		     append(o1->links, o2->links));
+  out_t     o3  = new Out(o2->newcc,
+                          o2->newcl,
+                          append(o1->ppout, o2->ppout),
+                          append(o1->links, o2->links));
   return o3;
 }
 doc_t concat(doc_t d1, doc_t d2) {
-  return &Doc(min(d1->mw, d1->mwo+d2->mwo),
+  return new Doc(min(d1->mw, d1->mwo+d2->mwo),
               min(d1->mw, d1->mwo+d2->mw),
-              make_fn(concat_f, &$(d1,d2)));
+              make_fn(concat_f, new $(d1,d2)));
 }    
 
 // good places in here for passing address of locals (eg. st)
@@ -277,8 +276,8 @@ static out_t long_concats_f(list_t<doc_t> ds0, ppstate_t st) {
   for (let ds = ds0; ds != null; ds = ds->tl) {
     doc_t d = ds->hd;
     out_t o = apply(d->f,st);
-    st = &Ppstate(st->ci,o->newcc,o->newcl,st->pw,st->epw-d->mwo);
-    os = &List(o,os);
+    st = new Ppstate(st->ci,o->newcc,o->newcl,st->pw,st->epw-d->mwo);
+    os = new List(o,os);
   }
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
@@ -288,7 +287,7 @@ static out_t long_concats_f(list_t<doc_t> ds0, ppstate_t st) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);
   }
-  return &Out(newcc,newcl,s,links);
+  return new Out(newcc,newcl,s,links);
 }
 static doc_t long_concats(list_t<doc_t> doclist) {
 #ifdef DEBUG
@@ -306,7 +305,7 @@ static doc_t long_concats(list_t<doc_t> doclist) {
     mw  = mw2;
     mwo = mwo2;
   }
-  return &Doc(mw,mwo,make_fn(long_concats_f,orig));
+  return new Doc(mw,mwo,make_fn(long_concats_f,orig));
 }
 
 doc_t concats(list_t<doc_t> doclist) {
@@ -324,8 +323,8 @@ static out_t concats_arr_f(doc_t ?@docs_ptr, ppstate_t st) {
   for (int i=0; i < sz; ++i) {
     doc_t d = docs[i];
     out_t o = apply(d->f,st);
-    st = &Ppstate(st->ci,o->newcc,o->newcl,st->pw,st->epw-d->mwo);
-    os = &List(o,os);
+    st = new Ppstate(st->ci,o->newcc,o->newcl,st->pw,st->epw-d->mwo);
+    os = new List(o,os);
   }
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
@@ -335,7 +334,7 @@ static out_t concats_arr_f(doc_t ?@docs_ptr, ppstate_t st) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);
   }
-  return &Out(newcc,newcl,s,links);
+  return new Out(newcc,newcl,s,links);
 }
 
 doc_t concats_arr(doc_t ?docs) {
@@ -351,7 +350,7 @@ doc_t concats_arr(doc_t ?docs) {
     mw  = mw2;
     mwo = mwo2;
   }
-  return &Doc(mw,mwo,make_fn(concats_arr_f,new {docs}));
+  return new Doc(mw,mwo,make_fn(concats_arr_f,new {docs}));
 }
 
 static out_t doc_union_f($(doc_t,doc_t) @clo, ppstate_t st) {
@@ -362,9 +361,9 @@ static out_t doc_union_f($(doc_t,doc_t) @clo, ppstate_t st) {
   else return apply(d2->f,st);
 }
 doc_t doc_union(doc_t d, doc_t d2) {
-  return &Doc(min(d->mwo, d2->mwo),
-	      min(d->mw, d2->mw),
-	      make_fn (doc_union_f, &$(d,d2)));
+  return new Doc(min(d->mwo, d2->mwo),
+                 min(d->mw, d2->mw),
+                 make_fn (doc_union_f, new $(d,d2)));
 }
 
 // This is made a function because non-constant initializers not allowed
@@ -373,14 +372,14 @@ doc_t oline_doc() {
 }
 
 static out_t tab_f(doc_t d, ppstate_t st) {
-  ppstate_t st2 = &Ppstate(st->cc,st->cc,st->cl,st->pw,st->epw);
+  ppstate_t st2 = new Ppstate(st->cc,st->cc,st->cl,st->pw,st->epw);
   return apply(d->f,st2);
 }
 doc_t tab(doc_t d) {
   doc_t d2 =
-    &Doc(d->mwo,
-         d->mw,
-         make_fn (tab_f, d));
+    new Doc(d->mwo,
+            d->mw,
+            make_fn (tab_f, d));
   return d2;
 }
 
@@ -389,10 +388,12 @@ doc_t tab(doc_t d) {
 static doc_t ppseq_f(doc_t pp(`a), string sep, list_t<`a> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return pp(l->hd);
-  else return concats(&List(pp(l->hd),
-                            &List(text(sep),
-                                  &List(oline_doc(),
-                                        &List(ppseq_f(pp,sep,l->tl),null)))));
+  else return concats(new List(pp(l->hd),
+                               new List(text(sep),
+                                        new List(oline_doc(),
+                                                 new List(ppseq_f(pp,
+                                                                  sep,l->tl),
+                                                          null)))));
 }
 doc_t ppseq(doc_t pp(`a), string sep, list_t<`a> l0) {
   return tab(ppseq_f(pp,sep,l0));
@@ -407,15 +408,15 @@ doc_t seq_f(string sep, list_t<doc_t> l) {
     let x = l;
     while (x->tl != null) {
       let temp = x->tl;
-      x->tl = &List(sep2,&List(oline,temp));
+      x->tl = new List(sep2,new List(oline,temp));
       x = temp;
     }
     return concats(l);
     // This causes stack overflow on big sequences
-    //return concats(&List(l->hd,
-    //                        &List(text(sep),
-    //                              &List(oline_doc(),
-    //                                    &List(f(sep,l->tl),null)))));
+    //return concats(new List(l->hd,
+    //                        new List(text(sep),
+    //                              new List(oline_doc(),
+    //                                    new List(f(sep,l->tl),null)))));
   }
 }
 doc_t seq(string sep, list_t<doc_t> l0) {
@@ -426,10 +427,10 @@ doc_t seq(string sep, list_t<doc_t> l0) {
 doc_t ppseql_f(doc_t pp(`a), string sep, list_t<`a> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return pp(l->hd);
-  else return concats(&List(pp(l->hd),
-                            &List(text(sep),
-                                  &List(line_doc(),
-                                        &List(ppseql_f(pp,sep,l->tl),null)))));
+  else return concats(new List(pp(l->hd),
+                            new List(text(sep),
+                                  new List(line_doc(),
+                                        new List(ppseql_f(pp,sep,l->tl),null)))));
 }
 doc_t ppseql(doc_t pp(`a), string sep, list_t<`a> l0) {
   return tab(ppseql_f(pp,sep,l0));
@@ -438,10 +439,10 @@ doc_t ppseql(doc_t pp(`a), string sep, list_t<`a> l0) {
 static doc_t seql_f(string sep, list_t<doc_t> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return l->hd;
-  else return concats(&List(l->hd,
-                            &List(text(sep),
-                                  &List(line_doc(),
-                                        &List(seql_f(sep,l->tl),null)))));
+  else return concats(new List(l->hd,
+                            new List(text(sep),
+                                  new List(line_doc(),
+                                        new List(seql_f(sep,l->tl),null)))));
 }
 doc_t seql(string sep, list_t<doc_t> l0) {
   return tab(seql_f(sep,l0));

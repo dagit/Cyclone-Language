@@ -56,7 +56,7 @@ void output_entry(string sourcename, FILE @ ic, FILE @ oc,
   fprintf(oc, "int %s_rec(Lexbuf<`a> lexbuf, int lexstate) {\n", e->name);
   // save new state, then switch on it , so default case can use it.
   // (int switch can't get the value being switched on??)
-  fprintf(oc, "  if (lt == null) lt = &lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);\n");
+  fprintf(oc, "  if (lt == null) lt = new lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);\n");
   fprintf(oc, "  lexstate = lex_engine((LexTables)lt,lexstate,lexbuf);\n");
   fprintf(oc, "  switch (lexstate) {\n");
   for(let actions=e->actions; actions!=null; actions=actions->tl) {

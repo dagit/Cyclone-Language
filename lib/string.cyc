@@ -194,13 +194,13 @@ string strconcat_l(glist_t<stringptr,`r> strs) {
   size_t len;                           // temp
   size_t total_len  = 0;                // sum of lengths of the strings
   list_t<size_t> lens = 
-    &List((size_t)0,                    // save length of each string
-          null);                        // (with junk 0 on front)
+    new List((size_t)0,                    // save length of each string
+             null);                        // (with junk 0 on front)
   list_t<size_t> end = lens;            // last cons cell in 'lens'
   for(_ p = strs; p!=null; p = p->tl) {
     len = strlen(*(p->hd));
     total_len += len;
-    end->tl = &List(len,null);
+    end->tl = new List(len,null);
     end = end->tl;
   } 
   lens = lens->tl;                      // remove junk/temporary 0
@@ -223,7 +223,7 @@ string str_sepstr(glist_t<stringptr,`r> strs, string separator) {
   if (strs == null)    return "";
   if (strs->tl == null) return strdup(*(strs->hd));
   glist_t<stringptr,`r> p = strs;
-  list_t<size_t> lens = &List((size_t)0,null);  // see comments in strconcat_l
+  list_t<size_t> lens = new List((size_t)0,null);// see comments in strconcat_l
   list_t<size_t> end = lens;
   size_t len        = 0;   // initialized to avoid warning
   size_t total_len  = 0;
@@ -231,7 +231,7 @@ string str_sepstr(glist_t<stringptr,`r> strs, string separator) {
   for(;p!=null;p=p->tl) {
     len = strlen(*(p->hd));
     total_len += len;
-    end->tl = &List(len,null);
+    end->tl = new List(len,null);
     end = end->tl;
     ++list_len;
   }
@@ -468,7 +468,7 @@ size_t strspn(string s, string accept) {
 list_t<int> explode(string s) {
   list_t<int> result = null;
   for (int i = strlen(s) - 1; i >= 0; i--)
-    result = &List((int)s[i],result);
+    result = new List((int)s[i],result);
   return result;
 }
 

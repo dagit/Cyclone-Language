@@ -86,7 +86,7 @@ bool print_externC_stmts = false;
 static list_t<var> curr_namespace = null;
 
 static void curr_namespace_add(var v) {
-  curr_namespace = &List(v, curr_namespace);
+  curr_namespace = new List(v, curr_namespace);
 }
 
 static void curr_namespace_drop() {
@@ -196,9 +196,9 @@ static stringptr const_sp = &const_string;
 doc_t tqual2doc(tqual tq) {
   list_t<stringptr> l = null;
 
-  if (tq->q_restrict) l = &List(restrict_sp,l);
-  if (tq->q_volatile) l = &List(volatile_sp,l);
-  if (tq->q_const)    l = &List(const_sp,l);
+  if (tq->q_restrict) l = new List(restrict_sp,l);
+  if (tq->q_volatile) l = new List(volatile_sp,l);
+  if (tq->q_const)    l = new List(const_sp,l);
   return egroup(""," "," ",List::map(textptr,l));
 }
 
@@ -363,13 +363,13 @@ static void effects2docs(list_t<doc_t> @ `r regions,
 			 typ t)
 {
   switch (compress(t)) {
-  case AccessEff(r): *regions = &List(rgn2doc(r), *regions); break;
+  case AccessEff(r): *regions = new List(rgn2doc(r), *regions); break;
   case JoinEff(ts):
     for (; ts != null; ts = ts->tl) {
       effects2docs(regions, effects, ts->hd);
     }
     break;
-  default: *effects = &List(ntyp2doc(t),*effects); break;
+  default: *effects = new List(ntyp2doc(t),*effects); break;
   }
 }
 
@@ -382,7 +382,7 @@ doc_t eff2doc(typ t) {
     return group("","","+",effects);
   } else {
     let doc1 = group("{","}",",",regions);
-    return group("","","+",List::imp_append(effects,&List(doc1,null)));
+    return group("","","+",List::imp_append(effects,new List(doc1,null)));
   }
 }
 
@@ -503,7 +503,7 @@ doc_t vo2doc(opt_t<var> vo) {
 }
 
 doc_t funarg2doc($(opt_t<var>,tqual,typ)@ t) {
-  opt_t<doc_t> dopt = ((*t)[0]==null)?null:&Opt(text(*((*t)[0]->v)));
+  opt_t<doc_t> dopt = ((*t)[0]==null)?null:(new Opt(text(*((*t)[0]->v))));
   return tqtd2doc((*t)[1],(*t)[2],dopt);
 }
 
@@ -513,26 +513,26 @@ doc_t funargs2doc(list_t<$(opt_t<var>,tqual,typ)@> args,bool varargs,
     if (varargs) // Varargs
       return(group("(",")",",",
                    List::append(List::map(funarg2doc,args),
-                                &List(text("..."),null))));
+                                new List(text("..."),null))));
     else      // Not varargs
       return(group("(",")",",",List::map(funarg2doc,args)));
   } else {
     if (varargs)
       return(group("(",")",";",
-                   &List(group("","",",",
-                               List::append(List::map(funarg2doc,args),
-                                            &List(text("..."),null))),
-                         &List(eff2doc(effopt->v),null))));
+                   new List(group("","",",",
+                                  List::append(List::map(funarg2doc,args),
+                                               new List(text("..."),null))),
+                            new List(eff2doc(effopt->v),null))));
     else 
       return(group("(",")",";",
-                   &List(group("","",",",
-                               List::map(funarg2doc,args)),
-                         &List(eff2doc(effopt->v),null))));
+                   new List(group("","",",",
+                                  List::map(funarg2doc,args)),
+                            new List(eff2doc(effopt->v),null))));
   }
 }
 
 $(opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg) {
-  return &$(/*(opt_t<var>)*/&Opt((*arg)[0]), // FIX: can we get rid of the cast? => YES
+  return new $(/*(opt_t<var>)*/new Opt((*arg)[0]), // FIX: can we get rid of the cast? => YES
             (*arg)[1],(*arg)[2]);
 }
 
@@ -549,7 +549,7 @@ doc_t qvar2doc(qvar q) {
   }
   if (qvar_to_Cids) {
     return text(String::str_sepstr(List::append(prefix,
-						&List((*q)[1],null)),"_"));
+						new List((*q)[1],null)),"_"));
   } else {
     // don't print the prefix it aims at the current namespaces
     if (list_prefix(String::strptrcmp, prefix, curr_namespace))
@@ -830,7 +830,7 @@ doc_t exp2doc_prec(int inprec, exp e) {
     break;
   case Codegen_e(fd):
     s = cat3(text("codegen("),
-             nest(2,decl2doc(&Decl(Fn_d(fd),e->loc))),
+             nest(2,decl2doc(new Decl(Fn_d(fd),e->loc))),
              text(")"));
     break;
   case Fill_e(e1):
@@ -1107,10 +1107,10 @@ doc_t stmt2doc(stmt st) {
 		 text("}"),
 		 line_doc());
       else
-	s = ppseql(stmt2doc,"",&List(s1,&List(s2,null)));
+	s = ppseql(stmt2doc,"",new List(s1,new List(s2,null)));
     }
     else
-      s = ppseql(stmt2doc,"",&List(s1,&List(s2,null)));
+      s = ppseql(stmt2doc,"",new List(s1,new List(s2,null)));
     break;
   case Return_s(eopt):
     if (eopt == null)
@@ -1324,8 +1324,8 @@ doc_t decl2doc(decl d) {
                           fd->varargs, null});
     s = cat7(text(fd->is_inline? "inline " : ""),
              scope2doc(fd->sc),
-             tqtd2doc(&Tqual(false,false,false),t,
-                      &Opt(cat2(atts2doc(fd->attributes),typedef_name2doc(fd->name)))),
+             tqtd2doc(new Tqual(false,false,false),t,
+                      new Opt(cat2(atts2doc(fd->attributes),typedef_name2doc(fd->name)))),
              text(" {"),
              nest(2,cat2(line_doc(),stmt2doc(fd->body))),
              line_doc(),
@@ -1378,7 +1378,7 @@ doc_t decl2doc(decl d) {
     if(shadow_depth > 0)
       sn = cat2(sn, text(xprintf("%d",shadow_depth)));
     s = cat5(scope2doc(sc),
-             tqtd2doc(tq,type,&Opt(sn)),
+             tqtd2doc(tq,type,new Opt(sn)),
              atts2doc(atts),
              (initializer == null)
 	       ? text("")
@@ -1423,9 +1423,9 @@ doc_t decl2doc(decl d) {
     break;
   case Typedef_d(td):
     s = cat3(text("typedef "),
-             tqtd2doc(&Tqual(false,false,false),
+             tqtd2doc(new Tqual(false,false,false),
                       td->defn,
-                      &Opt(cat2(typedef_name2doc(td->name),tvars2doc(td->tvs)))),
+                      new Opt(cat2(typedef_name2doc(td->name),tvars2doc(td->tvs)))),
              text(";"));
     
     break;
@@ -1508,7 +1508,7 @@ $(tqual,typ,list_t<type_modifier>) to_tms(tqual tq,typ t) {
       tm = Carray_mod;
     else
       tm = ConstArray_mod((exp)e);
-    return $(tq3, t3, (list_t<type_modifier>)&List(tm,tml3));
+    return $(tq3, t3, (list_t<type_modifier>)(new List(tm,tml3)));
 
   case PointerType(PtrInfo{.elt_typ = t2, .rgn_typ = rgntyp,
 			   .nullable = nullable, .tq = tq2, .bounds = b}):
@@ -1527,7 +1527,7 @@ $(tqual,typ,list_t<type_modifier>) to_tms(tqual tq,typ t) {
       // ps = impos("bad pointer type in Absynpp::to_tms"); break;
     }
     type_modifier tm = Pointer_mod(ps,rgntyp,tq);
-    return $(tq3, t3, (list_t<type_modifier>)&List(tm,tml3));
+    return $(tq3, t3, (list_t<type_modifier>)(new List(tm,tml3)));
 
   case FnType(FnInfo{typvars,effopt,t2,args,varargs,fn_atts}):
     if (! print_all_tvars) {
@@ -1555,10 +1555,10 @@ $(tqual,typ,list_t<type_modifier>) to_tms(tqual tq,typ t) {
     let $(tq3,t3,tml3) = to_tms(empty_tqual(),t2);
     list_t<type_modifier> tms = tml3;
     if (fn_atts != null) 
-      tms = &List(Attributes_mod(null,fn_atts),tms);
-    tms = &List(Function_mod(WithTypes(args,varargs,effopt)),tms);
+      tms = new List(Attributes_mod(null,fn_atts),tms);
+    tms = new List(Function_mod(WithTypes(args,varargs,effopt)),tms);
     if (typvars != null)
-      tms = &List(TypeParams_mod(typvars,null,true),tms);
+      tms = new List(TypeParams_mod(typvars,null,true),tms);
     return $(tq3,t3,tms);
 
   case Evar(k,topt,i):
@@ -1592,11 +1592,11 @@ doc_t tqtd2doc(tqual tq, typ t, opt_t<doc_t> dopt) {
 
 doc_t structfield2doc(structfield_t f) {
   if (f->width != null) 
-    return cat5(tqtd2doc(f->tq, f->type, &Opt(textptr(f->name))),
+    return cat5(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
                 text(":"), exp2doc(f->width->v),
                 atts2doc(f->attributes), text(";"));
   else 
-    return cat3(tqtd2doc(f->tq, f->type, &Opt(textptr(f->name))),
+    return cat3(tqtd2doc(f->tq, f->type, new Opt(textptr(f->name))),
                 atts2doc(f->attributes), text(";"));
 }
 

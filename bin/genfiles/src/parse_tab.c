@@ -5541,7 +5541,7 @@ struct _tuple1)); _temp3301->f1=({ struct Cyc_Absyn_Rel_n_struct* _temp3305=(
 struct Cyc_Absyn_Rel_n_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Rel_n_struct));
 _temp3305->tag= Cyc_Absyn_Rel_n_tag; _temp3305->f1= 0;( void*) _temp3305;});
 _temp3301->f2=({ struct _tagged_string* _temp3302=( struct _tagged_string*)
-GC_malloc( sizeof( struct _tagged_string) * 1); _temp3302[ 0]=( struct
+GC_malloc( sizeof( struct _tagged_string)); _temp3302[ 0]=( struct
 _tagged_string)({ char* _temp3303=( char*)""; struct _tagged_string _temp3304;
 _temp3304.curr= _temp3303; _temp3304.base= _temp3303; _temp3304.last_plus_one=
 _temp3303 + 1; _temp3304;}); _temp3302;}); _temp3301;}); _temp3300->tms= 0;
@@ -7014,25 +7014,25 @@ _temp4448=( struct Cyc_Absyn_Function_mod_struct*) GC_malloc( sizeof( struct Cyc
 _temp4448->tag= Cyc_Absyn_Function_mod_tag; _temp4448->f1=( void*)({ struct Cyc_Absyn_WithTypes_struct*
 _temp4449=( struct Cyc_Absyn_WithTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_WithTypes_struct));
 _temp4449->tag= Cyc_Absyn_WithTypes_tag; _temp4449->f1= 0; _temp4449->f2= 0;
-_temp4449->f3=( struct Cyc_Core_Opt*) eff;( void*) _temp4449;});( void*)
-_temp4448;}); _temp4444->tl=( Cyc_yyget_AbstractDeclarator_tok(({ struct
-_tagged_ptr2 _temp4445= yyvs; struct _xenum_struct** _temp4447= _temp4445.curr +(
-yyvsp_offset - 4); if( _temp4447 < _temp4445.base? 1: _temp4447 >= _temp4445.last_plus_one){
-_throw( Null_Exception);}* _temp4447;})))->tms; _temp4444;}); _temp4443;});(
-struct _xenum_struct*) _temp4442;}); break;} case 198: _LL4436: { struct
-_tuple16 _temp4456; struct Cyc_Core_Opt* _temp4457; int _temp4459; struct Cyc_List_List*
-_temp4461; struct _tuple16* _temp4454= Cyc_yyget_ParamDeclListBool_tok(({ struct
-_tagged_ptr2 _temp4451= yyvs; struct _xenum_struct** _temp4453= _temp4451.curr +(
-yyvsp_offset - 1); if( _temp4453 < _temp4451.base? 1: _temp4453 >= _temp4451.last_plus_one){
-_throw( Null_Exception);}* _temp4453;})); _temp4456=* _temp4454; _LL4462:
-_temp4461= _temp4456.f1; goto _LL4460; _LL4460: _temp4459= _temp4456.f2; goto
-_LL4458; _LL4458: _temp4457= _temp4456.f3; goto _LL4455; _LL4455: yyval=({
-struct Cyc_AbstractDeclarator_tok_struct* _temp4463=( struct Cyc_AbstractDeclarator_tok_struct*)
-GC_malloc( sizeof( struct Cyc_AbstractDeclarator_tok_struct)); _temp4463->tag=
-Cyc_AbstractDeclarator_tok_tag; _temp4463->f1=({ struct Cyc_Parse_Abstractdeclarator*
-_temp4464=( struct Cyc_Parse_Abstractdeclarator*) GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator));
-_temp4464->tms=({ struct Cyc_List_List* _temp4465=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp4465->hd=( void*)({ struct Cyc_Absyn_Function_mod_struct*
+_temp4449->f3= eff;( void*) _temp4449;});( void*) _temp4448;}); _temp4444->tl=(
+Cyc_yyget_AbstractDeclarator_tok(({ struct _tagged_ptr2 _temp4445= yyvs; struct
+_xenum_struct** _temp4447= _temp4445.curr +( yyvsp_offset - 4); if( _temp4447 <
+_temp4445.base? 1: _temp4447 >= _temp4445.last_plus_one){ _throw( Null_Exception);}*
+_temp4447;})))->tms; _temp4444;}); _temp4443;});( struct _xenum_struct*)
+_temp4442;}); break;} case 198: _LL4436: { struct _tuple16 _temp4456; struct Cyc_Core_Opt*
+_temp4457; int _temp4459; struct Cyc_List_List* _temp4461; struct _tuple16*
+_temp4454= Cyc_yyget_ParamDeclListBool_tok(({ struct _tagged_ptr2 _temp4451=
+yyvs; struct _xenum_struct** _temp4453= _temp4451.curr +( yyvsp_offset - 1); if(
+_temp4453 < _temp4451.base? 1: _temp4453 >= _temp4451.last_plus_one){ _throw(
+Null_Exception);}* _temp4453;})); _temp4456=* _temp4454; _LL4462: _temp4461=
+_temp4456.f1; goto _LL4460; _LL4460: _temp4459= _temp4456.f2; goto _LL4458;
+_LL4458: _temp4457= _temp4456.f3; goto _LL4455; _LL4455: yyval=({ struct Cyc_AbstractDeclarator_tok_struct*
+_temp4463=( struct Cyc_AbstractDeclarator_tok_struct*) GC_malloc( sizeof( struct
+Cyc_AbstractDeclarator_tok_struct)); _temp4463->tag= Cyc_AbstractDeclarator_tok_tag;
+_temp4463->f1=({ struct Cyc_Parse_Abstractdeclarator* _temp4464=( struct Cyc_Parse_Abstractdeclarator*)
+GC_malloc( sizeof( struct Cyc_Parse_Abstractdeclarator)); _temp4464->tms=({
+struct Cyc_List_List* _temp4465=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp4465->hd=( void*)({ struct Cyc_Absyn_Function_mod_struct*
 _temp4469=( struct Cyc_Absyn_Function_mod_struct*) GC_malloc( sizeof( struct Cyc_Absyn_Function_mod_struct));
 _temp4469->tag= Cyc_Absyn_Function_mod_tag; _temp4469->f1=( void*)({ struct Cyc_Absyn_WithTypes_struct*
 _temp4470=( struct Cyc_Absyn_WithTypes_struct*) GC_malloc( sizeof( struct Cyc_Absyn_WithTypes_struct));

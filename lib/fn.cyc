@@ -53,18 +53,18 @@ static
 fn<`a,`c,`e1+`e2> compose<`a,`b,`c,`e1,`e2,`e3>(fn<`a,`b,`e1> g, 
                                                 fn<`b,`c,`e2> f;
                                                 `e1+`e2+`e3) {
-  return make_fn(fn_compose@<`a,`b,`c,`e2,`e1>,&$(f,g));
+  return make_fn(fn_compose@<`a,`b,`c,`e2,`e1>,new $(f,g));
 }
 
 
 // These next two functions are used for curring
 static `c inner($(fn<$(`a,`b)@,`c,`e1>,`a)@ env, `b second;`e1) {
-  return apply((*env)[0],&$((*env)[1],second));
+  return apply((*env)[0],new $((*env)[1],second));
 }
 
 static fn<`b,`c,`e1> outer(fn<$(`a,`b)@,`c,`e1> f,`a first; 
                                              `e1+`e2) {
-  return make_fn(inner, &$(f,first));
+  return make_fn(inner, new $(f,first));
 }
 
 // curry a closure that takes a pair

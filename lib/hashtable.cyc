@@ -24,13 +24,13 @@ struct Table<`a,`b,`e1::E,`e2::E> {
 table_t<`a,`b,`e1,`e2> create(int sz, int (@cmp)(`a,`a;`e1), 
                             int (@hash)(`a;`e2)) {
   list_t<$(`a,`b)@> mt = null;
-  return &Table(cmp, hash, 3, new {for i<sz :mt});
+  return new Table(cmp, hash, 3, new {for i<sz :mt});
 }
 
 void insert(table_t<`a,`b,`e1,`e2> t, `a key, `b val) {
   list_t<$(`a,`b)@> ?tab   = t->tab;
   int             bucket = (*t->hash)(key) % tab.size;
-  tab[bucket] = &List(&$(key,val),tab[bucket]);
+  tab[bucket] = new List(new $(key,val),tab[bucket]);
   if (length(tab[bucket]) > t->max_len) 
     resize(t);
 }
@@ -91,7 +91,7 @@ void insert_bucket(list_t<$(`a,`b)@> ?tab, int (@hash)(`a),
   `a  key  = elems->hd[0][0];
   `b  val  = elems->hd[0][1];
   int nidx = (*hash)(key) % tab.size;
-  tab[nidx] = &List(&$(key,val),tab[nidx]);
+  tab[nidx] = new List(new $(key,val),tab[nidx]);
 }
 
 void resize(table_t<`a,`b,`e1,`e2> t) {

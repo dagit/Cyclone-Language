@@ -426,7 +426,7 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
 	}
       return ans;
     default:
-      return use_exp_unordered(env, &List(e1,null), null);
+      return use_exp_unordered(env, new List(e1,null), null);
     }
   case Address_e(e1):
     //This might really be a malloc-and-initialize

@@ -218,7 +218,7 @@ static $(list_t<typ>, list_t<typ>) effects_split(typ t) {
   list_t<typ> effects = null;
 
   switch (Tcutil::compress(t)) {
-  case AccessEff(r): regions = &List(r,regions); break;
+  case AccessEff(r): regions = new List(r,regions); break;
   case JoinEff(ts):
     for (; ts != null; ts = ts->tl) {
       let $(rs,es) = effects_split(ts->hd);
@@ -226,7 +226,7 @@ static $(list_t<typ>, list_t<typ>) effects_split(typ t) {
       effects = List::imp_append(es,effects);
     }
     break;
-  default: effects = &List(t,effects); break;
+  default: effects = new List(t,effects); break;
   }
   return $(regions, effects);
 }
@@ -498,7 +498,7 @@ void dumpexp_prec(int inprec, exp e) {
 
   case Codegen_e(fd):
     dump("codegen(");
-    dumpdecl(&Decl(Fn_d(fd),e->loc));
+    dumpdecl(new Decl(Fn_d(fd),e->loc));
     dump(")");
     break;
 

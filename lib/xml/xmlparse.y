@@ -108,30 +108,30 @@ element:
                     }
 
 sTag:
-  opn attributes cls { $$ = ^$(&$($1,$2)); }
+  opn attributes cls { $$ = ^$(new $($1,$2)); }
 
 opn:
   OPEN { setContext(InTag); $$ = $!1; }
 
 attributes:
   /* empty */          { $$ = ^$(null); }
-| attribute attributes { $$ = ^$(&List($1,$2)); }
+| attribute attributes { $$ = ^$(new List($1,$2)); }
 
 attribute:
-  NAME EQ ATTVALUE1 { $$ = ^$(&$($1,Attvalue1($3))); }
-| NAME EQ ATTVALUE2 { $$ = ^$(&$($1,Attvalue2($3))); }
+  NAME EQ ATTVALUE1 { $$ = ^$(new $($1,Attvalue1($3))); }
+| NAME EQ ATTVALUE2 { $$ = ^$(new $($1,Attvalue2($3))); }
 
 cls:
   CLOSE { setContext(Normal); }
 
 content:
   /* empty */       { $$ = ^$(null); }
-| element content   { $$ = ^$(&List(Element($1),$2)); }
-| CHARDATA content  { $$ = ^$(&List(Chardata($1),$2)); }
-| REFERENCE content { $$ = ^$(&List(Reference($1),$2)); }
-| CDSECT content    { $$ = ^$(&List(Cdsect($1),$2)); }
-| PI content        { $$ = ^$(&List(Pi($1),$2)); }
-| COMMENT content   { $$ = ^$(&List(Comment($1),$2)); }
+| element content   { $$ = ^$(new List(Element($1),$2)); }
+| CHARDATA content  { $$ = ^$(new List(Chardata($1),$2)); }
+| REFERENCE content { $$ = ^$(new List(Reference($1),$2)); }
+| CDSECT content    { $$ = ^$(new List(Cdsect($1),$2)); }
+| PI content        { $$ = ^$(new List(Pi($1),$2)); }
+| COMMENT content   { $$ = ^$(new List(Comment($1),$2)); }
 
 eTag:
   opnslash cls { $$ = $!1; }
@@ -140,7 +140,7 @@ opnslash:
   OPENSLASH { setContext(InTag); $$ = $!1; }
 
 emptyElemTag:
-  opn attributes slashcls { $$ = ^$(&$($1,$2)); }
+  opn attributes slashcls { $$ = ^$(new $($1,$2)); }
 
 slashcls:
   SLASHCLOSE { setContext(Normal); }
@@ -150,7 +150,7 @@ slashcls:
 namespace XmlParse{
   list_t<content_t> parse_file(Stdio::FILE @f) {
     parse_result = null;
-    lbuf = &Core::Opt(from_file(f));
+    lbuf = new Core::Opt(from_file(f));
     XmlScan::init();
     yyparse();
     return parse_result;

@@ -22,14 +22,14 @@ void set(xarray_t<`a> xarr, int i, `a a) {
 
 xarray_t<`a> create_empty() {
   `a ?x = new { };
-  return &Xarray{.elmts=x,.num_elmts=0};
+  return new Xarray{.elmts=x,.num_elmts=0};
 }
 
  // create an xarray with zero elements, but space for len elements
 xarray_t<`a> create(int len, `a a) {
   if (len < 0)
     throw InvalidArg("xarrays must have a non-negative size buffer");
-  return &Xarray{.elmts=new {for i < len : a}, .num_elmts=0};
+  return new Xarray{.elmts=new {for i < len : a}, .num_elmts=0};
 }
 
 xarray_t<`a> singleton(int len, `a a) {
@@ -68,8 +68,8 @@ int add_ind(xarray_t<`a> xarr, `a a) {
 xarray_t<`a> from_array(`a ?arr) {
   if (arr.size == 0)
     return create_empty();
-  xarray_t<`a> ans = &Xarray{.elmts=new {for i<arr.size : arr[i]},
-                             .num_elmts=arr.size};
+  xarray_t<`a> ans = new Xarray{.elmts=new {for i<arr.size : arr[i]},
+                                   .num_elmts=arr.size};
   return ans;
 }
 
@@ -79,8 +79,8 @@ xarray_t<`a> append(xarray_t<`a> xarr1, xarray_t<`a> xarr2) {
   if(newsz == 0)
     return create_empty();
   `a init = (xarr1->elmts).size == 0 ? xarr2->elmts[0] : xarr1->elmts[0];
-  xarray_t<`a> ans = &Xarray{.elmts=new {for i < newsz : init},
-			     .num_elmts=0};
+  xarray_t<`a> ans = new Xarray{.elmts=new {for i < newsz : init},
+                                   .num_elmts=0};
   for(int i=0; i < xarr1->num_elmts; ++i)
     add(ans, xarr1->elmts[i]);
   for(int i=0; i < xarr2->num_elmts; ++i)
@@ -112,8 +112,8 @@ xarray_t<`b> map(`b f(`a), xarray_t<`a> xarr) {
   if(xarr->num_elmts==0) return create_empty();
 
   xarray_t<`b> ans =
-    &Xarray{.elmts=new {for i< (xarr->elmts).size : f(xarr->elmts[0])},
-            .num_elmts=xarr->num_elmts};
+    new Xarray{.elmts=new {for i< (xarr->elmts).size : f(xarr->elmts[0])},
+                  .num_elmts=xarr->num_elmts};
   for(int i=1; i<xarr->num_elmts; ++i)
     ans->elmts[i] = f(xarr->elmts[i]);
   return ans;
@@ -123,8 +123,8 @@ xarray_t<`b> map_c(`b f(`c,`a), `c env, xarray_t<`a> xarr) {
   if(xarr->num_elmts==0) return create_empty();
 
   xarray_t<`b> ans =
-    &Xarray{.elmts=new {for i < (xarr->elmts).size : f(env,xarr->elmts[0])},
-            .num_elmts=xarr->num_elmts};
+    new Xarray{.elmts=new {for i < (xarr->elmts).size : f(env,xarr->elmts[0])},
+                  .num_elmts=xarr->num_elmts};
   for(int i=1; i<xarr->num_elmts; ++i)
     ans->elmts[i] = f(env, xarr->elmts[i]);
   return ans;

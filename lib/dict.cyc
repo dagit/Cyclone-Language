@@ -24,10 +24,10 @@ abstract struct Dict<`a,`b,`e::E> {
 };
 
 hdict_t<`a,`b,`e> empty(int comp(`a,`a;`e)) {
-  return &Dict(comp,null);
+  return new Dict(comp,null);
 }
 hdict_t<`a,`b,`e> singleton(int comp(`a,`a;`e),`a key,`b data) {
-  return &Dict(comp,&T(B,null,null,$(key,data)));
+  return new Dict(comp,new T(B,null,null,$(key,data)));
 }
 
 bool is_empty(hdict_t<`a,`b,`e> d) {
@@ -63,7 +63,7 @@ Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d, `a key) {
     let i = rel(key,t->key_val[0]);
     if(i < 0) t = t->left;
     else if (i > 0) t = t->right;
-    else return &Core::Opt(t->key_val[1]);
+    else return new Core::Opt(t->key_val[1]);
   }
   return null;
 }
@@ -85,29 +85,29 @@ bool lookup_bool(hdict_t<`a,`b,`d> d, `a key, `b @`r ans_place) {
 static tree<`a,`b> 
 balance($(enum Color, tree<`a,`b>, tree<`a,`b>, $(`a,`b)) quad) {
   switch(quad) {
-  case $(B,&T(R,&T(R,a,b,x),c,y),d,z): return &T(R,&T(B,a,b,x),&T(B,c,d,z),y);
-  case $(B,&T(R,a,&T(R,b,c,y),x),d,z): return &T(R,&T(B,a,b,x),&T(B,c,d,z),y);
-  case $(B,a,&T(R,&T(R,b,c,y),d,z),x): return &T(R,&T(B,a,b,x),&T(B,c,d,z),y);
-  case $(B,a,&T(R,b,&T(R,c,d,z),y),x): return &T(R,&T(B,a,b,x),&T(B,c,d,z),y);
-  case $(a,b,c,d): return &T(a,b,c,d);
+  case $(B,&T(R,&T(R,a,b,x),c,y),d,z): return new T(R,new T(B,a,b,x),new T(B,c,d,z),y);
+  case $(B,&T(R,a,&T(R,b,c,y),x),d,z): return new T(R,new T(B,a,b,x),new T(B,c,d,z),y);
+  case $(B,a,&T(R,&T(R,b,c,y),d,z),x): return new T(R,new T(B,a,b,x),new T(B,c,d,z),y);
+  case $(B,a,&T(R,b,&T(R,c,d,z),y),x): return new T(R,new T(B,a,b,x),new T(B,c,d,z),y);
+  case $(a,b,c,d): return new T(a,b,c,d);
   }
 }
 static tree<`a,`b>
 ins(int rel(`a,`a), $(`a,`b) key_val, tree<`a,`b> t) {
   switch (t) {
-  case null: return &T(R,null,null,key_val);
+  case null: return new T(R,null,null,key_val);
   case &T(color, a, b, y):
     let i = rel(key_val[0], y[0]);
     if(i < 0)       return balance($(color, ins(rel,key_val,a), b, y));
     else if (i > 0) return balance($(color, a, ins(rel,key_val,b), y));
-    else            return &T(color,a,b,key_val);
+    else            return new T(color,a,b,key_val);
   }
 }
 
 hdict_t<`a,`b,`e> insert(hdict_t<`a,`b,`e> d,`a key,`b data) {
   let ans = ins(d->rel, $(key,data), d->t);
   ans->color = B;
-  return &Dict(d->rel, ans);
+  return new Dict(d->rel, ans);
 }
 
 // notice we descend twice -- we can live
@@ -215,13 +215,13 @@ static tree<`a,`c> map_tree(`c f(`b), struct T<`a,`b>@ t) {
   let &T(c,left,right,$(key,val)) = t;
   let new_left  = left  == null ? null : map_tree(f,(struct T<`a,`b>@)left);
   let new_right = right == null ? null : map_tree(f,(struct T<`a,`b>@)right);
-  return &T(c,new_left,new_right,$(key,f(val)));
+  return new T(c,new_left,new_right,$(key,f(val)));
 } 
 
 hdict_t<`a,`c,`e> map(`c f(`b),hdict_t<`a,`b,`e> d) {
   if(d->t == null)
-    return &Dict(d->rel,null);
-  return &Dict(d->rel,map_tree(f,(struct T<`a,`b>@)(d->t)));
+    return new Dict(d->rel,null);
+  return new Dict(d->rel,map_tree(f,(struct T<`a,`b>@)(d->t)));
 }
 
 // Note: walk is post-order
@@ -229,19 +229,19 @@ static tree<`a,`c> map_tree_c(`c f(`d,`b), `d env, struct T<`a,`b>@ t) {
   let &T(c,left,right,$(key,val)) = t;
   let new_left = left ==null ? null : map_tree_c(f,env,(struct T<`a,`b>@)left);
   let new_right= right==null ? null : map_tree_c(f,env,(struct T<`a,`b>@)right);
-  return &T(c,new_left,new_right,$(key,f(env,val)));
+  return new T(c,new_left,new_right,$(key,f(env,val)));
 } 
 
 hdict_t<`a,`c,`e> map_c(`c f(`d,`b),`d env,hdict_t<`a,`b,`e> d) {
   if(d->t == null)
-    return &Dict(d->rel,null);
-  return &Dict(d->rel,map_tree_c(f,env,(struct T<`a,`b>@)(d->t)));
+    return new Dict(d->rel,null);
+  return new Dict(d->rel,map_tree_c(f,env,(struct T<`a,`b>@)(d->t)));
 }
 
 $(`a,`b)@ choose(hdict_t<`a,`b,`e> d) {
   if(d->t == null)
     throw Absent;
-  return &$(d->t->key_val[0], d->t->key_val[1]);
+  return new $(d->t->key_val[0], d->t->key_val[1]);
 }
 
 static bool forall_tree_c(bool f(`c,`a,`b),`c env,struct T<`a,`b>@ t){
@@ -361,7 +361,7 @@ hdict_t<`a,`b,`e> intersect_c(`b (@f)(`c,`b,`b), `c env,
 
 static List::list_t<$(`a,`b)@> 
   to_list_f(`a k, `b v, List::list_t<$(`a,`b)@> accum){
-  return &List::List(&$(k,v),accum);
+  return new List::List(new $(k,v),accum);
 }
 List::list_t<$(`a,`b)@> to_list(hdict_t<`a,`b,`e> d) {
   return fold(to_list_f, d, null);

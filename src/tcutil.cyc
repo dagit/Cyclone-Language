@@ -51,9 +51,9 @@ static list_t<stringptr> warning_msgs = null;
 // we batch warnings because we have to parse the file to determine
 // line and column information.
 void warn(seg_t sg, string msg) {
-  warning_segs = &List(sg, warning_segs);
+  warning_segs = new List(sg, warning_segs);
   // FIX:  cast to stringptr is necessary here...
-  warning_msgs = &List((stringptr)(new {msg}),warning_msgs);
+  warning_msgs = new List((stringptr)(new {msg}),warning_msgs);
 }
 void flush_warnings() {
   if(warning_segs == null)
@@ -83,7 +83,7 @@ typ compress(typ t) {
     typ t2 = compress((*t2opt_ref)->v);
     // only modify if something changed to avoid allocation
     if (t2 != (*t2opt_ref)->v)
-      *t2opt_ref = &Opt(t2);
+      *t2opt_ref = new Opt(t2);
     return t2;
   case TypedefType(_,_,null): 
     return t;
@@ -91,7 +91,7 @@ typ compress(typ t) {
     typ t2 = compress((*topt_ref)->v);
     // only modify if something changed to avoid allocation
     if (t2 != (*topt_ref)->v)
-      *topt_ref = &Opt(t2);
+      *topt_ref = new Opt(t2);
     return t2;
   default:
     return t;
@@ -310,7 +310,7 @@ static void normalize_effect(typ e) {
       case JoinEff(nested_effs): 
         effects = List::revappend(nested_effs,effects);
         break;
-      case e: effects = &List(e,effects); break;
+      case e: effects = new List(e,effects); break;
       }
     }
     *es = List::imp_rev(effects);
@@ -327,12 +327,12 @@ static $(typ, list_t<typ>)* get_effect_evar(typ t) {
   switch (compress(t)) {
   case JoinEff(&List{.hd=ef1,.tl=ef2}):
     switch (compress(ef1)) {
-    case Evar(_,_,_): return &$(ef1,ef2);
+    case Evar(_,_,_): return new $(ef1,ef2);
     default: return null;
     }
   case Evar(*k,*p,_): 
     if (*k != EffKind) impos("effect evar has wrong kind");
-    return &$(t,null);
+    return new $(t,null);
   default: return null;
   }
 }
@@ -363,8 +363,8 @@ bool region_in_effect(bool constrain, typ r, typ e) {
     // we found a non-canonical evar -- we can grow it to include r
     // but this may cause problems later on with other constraints.
     let ev = new_evar(EffKind);
-    let new_typ = JoinEff(&List{ev,&List{AccessEff(r),null}});
-    *p = &Opt(new_typ);
+    let new_typ = JoinEff(new List{ev,new List{AccessEff(r),null}});
+    *p = new Opt(new_typ);
     return true;
   default: return false;
   }
@@ -385,8 +385,8 @@ static bool variable_in_effect(bool constrain, tvar v, typ e) {
     // we found a non-canonical evar -- we can grow it to include v
     // but this may cause problems later on with other constraints.
     let ev = new_evar(EffKind);
-    let new_typ = JoinEff(&List{ev,&List{VarType(v),null}});
-    *p = &Opt(new_typ);
+    let new_typ = JoinEff(new List{ev,new List{VarType(v),null}});
+    *p = new Opt(new_typ);
     return true;
   default: return false;
   }
@@ -420,7 +420,7 @@ bool subset_effect(bool set_to_empty, typ e1, typ e2) {
   switch (get_effect_evar(e2)) {
   case &$(ev1,rest): 
     let ev = new_evar(EffKind);
-    let new_typ = JoinEff(&List{ev,&List{e1,null}});
+    let new_typ = JoinEff(new List{ev,new List{e1,null}});
     return unify(ev1, new_typ);
   default: break;
   }
@@ -450,9 +450,9 @@ bool subset_effect(bool set_to_empty, typ e1, typ e2) {
       // a function call when the instatiation and call occur simultaneously. 
       // For other situations, it's not clear what is the right thing to do.
       if (set_to_empty)
-        *p = &Opt(JoinEff(null));
+        *p = new Opt(JoinEff(null));
       else 
-        *p = &Opt(e2);
+        *p = new Opt(e2);
 
     return true;
   default: 
@@ -497,7 +497,7 @@ static bool unify_effect(typ e1, typ e2) {
   case $(&$(ev1,rest1), &$(ev2,rest2)):
     // The fast path:  both effects are of the form JoinEff(ev::rest)
     let ev = new_evar(EffKind);
-    let new_typ = JoinEff(&List{ev,List::append(rest1,rest2)});
+    let new_typ = JoinEff(new List{ev,List::append(rest1,rest2)});
     // the calls to unify here do the occurs check and also set the evars
     // to point to the new "union" effect
     return unify(ev1, new_typ) && unify(ev2, new_typ);
@@ -522,13 +522,13 @@ void unify_it(typ t1, typ t2) {
     // evar is greater than or equal to the kind of t2 or t2 is an evar that
     // we can constrain to be equal to t1.
     if (kind_leq(kind2,kind1)) {
-      *ref1_ref = &Opt(t2);
+      *ref1_ref = new Opt(t2);
       return;
     } else {
       switch (t2) {
       case Evar(_,*ref2_ref,_): 
         if (kind_leq(kind1,kind2)) {
-          *ref2_ref = &Opt(t1); return;
+          *ref2_ref = new Opt(t1); return;
         }
         break;
         // this is a special hack to deal with the fact that a boxed evar
@@ -540,7 +540,7 @@ void unify_it(typ t1, typ t2) {
         case No_constr:
           // set the pointer to be a * or @ to an array of size 1
           c->v = Eq_constr(Upper_b(signed_int_exp(1,null)));
-          *ref1_ref = &Opt(t2);
+          *ref1_ref = new Opt(t2);
           return;
         default: break;
         }
@@ -650,7 +650,7 @@ void unify_it(typ t1, typ t2) {
     list_t<$(tvar,typ)@> inst = null;
     while (tvs1 != null) {
       if (tvs2 == null) break;
-      inst = &List(&$(tvs2->hd,VarType(tvs1->hd)),inst);
+      inst = new List(new $(tvs2->hd,VarType(tvs1->hd)),inst);
       tvs1 = tvs1->tl;
       tvs2 = tvs2->tl;
     }
@@ -737,7 +737,7 @@ bool coerce_list(tenv te, typ t, glist_t<exp,`r> es) {
     typ t1 = compress(el->hd->topt->v);
     if (is_arithmetic_type(t1)) 
       if (max_arith_type == null || will_lose_precision(t1,max_arith_type->v))
-	max_arith_type = &Opt(t1);
+	max_arith_type = new Opt(t1);
   }
   // unify the max arithmetic type with the result type t
   if (max_arith_type != null)
@@ -944,7 +944,7 @@ bool coerceable(typ t) {
 // x86 -- I need to find precise documentation on it before we do this.
 static $(tqual,typ)@ flatten_typ_f(list_t<$(tvar,typ)@> inst,
                                    structfield_t x) {
-  return &$(x->tq,substitute(inst,x->type));
+  return new $(x->tq,substitute(inst,x->type));
 }
 static list_t<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
   t1 = compress(t1);
@@ -952,14 +952,15 @@ static list_t<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
   case VoidType:       return null;
   case TupleType(tqs): return tqs; // FIX: recursively flatten here
   case StructType(tdnopt,ts,sdp):
-    if (sdp == null || tdnopt == null) return &List(&$(empty_tqual(),t1),null);
+    if (sdp == null || tdnopt == null) 
+      return new List(new $(empty_tqual(),t1),null);
     let sd   = *sdp;
     let n    = *tdnopt;
     let inst = List::zip(sd->tvs,ts);
-    if (sd->fields == null) return &List(&$(empty_tqual(),t1),null);
+    if (sd->fields == null) return new List(new $(empty_tqual(),t1),null);
     // FIX: recursively flatten here
     return List::map_c(flatten_typ_f,inst,sd->fields->v);
-  default: return &List(&$(empty_tqual(),t1),null);
+  default: return new List(new $(empty_tqual(),t1),null);
   }
 }
 
@@ -1002,7 +1003,7 @@ static bool subtype(tenv te, list_t<$(typ,typ)@> assume, typ t1, typ t2) {
       default: return false;
       }
     }
-    return ptrsubtype(te, &List(&$(t1,t2),assume), t_a, t_b);
+    return ptrsubtype(te, new List(new $(t1,t2),assume), t_a, t_b);
   default: return false;
   }
 }
@@ -1059,7 +1060,7 @@ bool castable(tenv te, seg_t loc, typ t1, typ t2) {
     // can cast a pointer in the heap to a pointer to some other region
     switch (t2) {
     case PointerType(PtrInfo{t_b,rt_b,null_b,q_b,b_b}):
-      _ assump = &List(&$(t1,t2),null);
+      _ assump = new List(new $(t1,t2),null);
       _ ptrsub =
 	ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const);
       bool bounds_ok = unify_conrefs(boundscmp,b_a,b_b);
@@ -1102,7 +1103,7 @@ void unchecked_cast(tenv te, exp e, typ t) {
   if (!unify(e->topt->v,t)) {
     _ inner = copy_exp(e);
     e->r    = Cast_e(t,inner);
-    e->topt = &Opt(t);
+    e->topt = new Opt(t);
   }
 }
 
@@ -1246,7 +1247,7 @@ static bool constrain_kinds(conref<kind_t> c1, conref<kind_t> c2) {
 static list_t<tvar> add_free_tvar(seg_t loc, list_t<tvar> tvs, tvar tv)
 {
   if (tvs == null) { 
-    return &List{tv,null};
+    return new List{tv,null};
   } else {
     for (_ tvs2 = tvs; tvs2 != null; tvs2 = tvs2->tl) {
       if (String::zstrptrcmp(tvs2->hd->name, tv->name) == 0) {
@@ -1258,7 +1259,7 @@ static list_t<tvar> add_free_tvar(seg_t loc, list_t<tvar> tvs, tvar tv)
                            ckind2string(k1), ckind2string(k2)));
         return tvs;
       } else if (tvs2->tl == null) {
-        tvs2->tl = &List(tv,null);
+        tvs2->tl = new List(tv,null);
         return tvs;
       }
     }
@@ -1276,7 +1277,7 @@ static list_t<tvar> remove_bound_tvars(list_t<tvar> tvs, list_t<tvar> btvs) {
         break;
       }
     }
-    if (!present) r = &List(tvs->hd,r);
+    if (!present) r = new List(tvs->hd,r);
   }
   r = List::imp_rev(r);
   return r;
@@ -1285,7 +1286,7 @@ static list_t<tvar> remove_bound_tvars(list_t<tvar> tvs, list_t<tvar> btvs) {
 static int tvar_counter = 0;
 tvar new_tvar(kind_t k) {
   string s = xprintf("#%d",tvar_counter++);
-  return &Tvar(new{s},new_conref(k));
+  return new Tvar(new{s},new_conref(k));
 }
 
 bool is_temp_tvar(tvar t) {
@@ -1301,7 +1302,7 @@ void rewrite_temp_tvar(tvar t) { // change t->name from "#xxx" to "`txxx"
 }
 
 static $(opt_t<var>,tqual,typ)@ fndecl2typ_f($(var,tqual,typ)@ x) {
-  return &$((opt_t<var>)&Opt((*x)[0]), (*x)[1], (*x)[2]);
+  return new $((opt_t<var>)(new Opt((*x)[0])), (*x)[1], (*x)[2]);
 }
 
 // returns true when a is an attribute for function types
@@ -1326,7 +1327,7 @@ typ fndecl2typ(fndecl fd) {
     let fn_type_atts = null;
     for (_ atts = fd->attributes; atts != null; atts = atts->tl) {
       if (fntype_att(atts->hd)) {
-        fn_type_atts = &List(atts->hd,fn_type_atts); 
+        fn_type_atts = new List(atts->hd,fn_type_atts); 
       } 
     }
     return FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
@@ -1356,16 +1357,16 @@ void check_fndecl_valid_type(seg_t loc,tenv te,fndecl fd) {
   check_unique_vars(map(fst3,fd->args), loc, 
 		    "function declaration has repeated parameter");
   // cache the type on the declaration so we don't have to recompute it
-  fd->cached_typ = &Opt(t);
+  fd->cached_typ = new Opt(t);
 }
 
 static $($(opt_t<var>,tqual)@,typ)@ substitute_f1($(opt_t<var>,tqual,typ)@ y) {
-  return &$(&$((*y)[0],(*y)[1]),(*y)[2]);
+  return new $(new $((*y)[0],(*y)[1]),(*y)[2]);
 }
 static $(opt_t<var>,tqual,typ)@ substitute_f2($($(opt_t<var>,tqual)@,typ)@ w) {
   let $(p,t) = *w;
   let $(vopt,tq) = *p;
-  return &$(vopt,tq,t);
+  return new $(vopt,tq,t);
 }
 // More ways to avoid allocation during substitution:
 //   * optimize the FnType case
@@ -1400,7 +1401,7 @@ typ substitute(list_t<$(tvar,typ)@> inst, typ t) {
     return PointerType(PtrInfo(new_t1,new_r,n,tq,b));
   case FnType(FnInfo{vs,eff,rtyp,args,varargs,atts}):
     for (let p = vs; p != null; p = p->tl)
-      inst = &List(&$(p->hd,VarType(p->hd)),inst);
+      inst = new List(new $(p->hd,VarType(p->hd)),inst);
     let $(qs,ts) = List::split(List::map(substitute_f1, args));
     let ts2      = substs(inst,ts);
     let args2    = List::map(substitute_f2, List::zip(qs,ts2));
@@ -1486,7 +1487,7 @@ exp default_initializer(tenv te, typ t, seg_t loc) {
 // Generate an appropriate evar for an instantiation of a type var
 $(tvar,typ)@ make_inst_var(tvar tv) {
   kind_t k = conref_val(tv->kind);
-  return &$(tv, new_evar(k));
+  return new $(tv, new_evar(k));
 }
 
 
@@ -1641,19 +1642,19 @@ list_t<tvar> check_valid_type(seg_t loc, tenv te, list_t<tvar> free_vars,
     } else {
       // add in an effect variable and calculate the default effect
       tvar e = new_tvar(EffKind); // guaranteed unique
-      new_free_vars = &List(e,new_free_vars);
+      new_free_vars = new List(e,new_free_vars);
       list_t<typ> effect = null;
       // add in any free region or effect variables to the effect.
       for (_ tvs = new_free_vars; tvs != null; tvs = tvs->tl) {
         switch (compress_conref(tvs->hd->kind)->v) {
         case Eq_constr(RgnKind):
-          effect = &List(AccessEff(VarType(tvs->hd)),effect); break;
+          effect = new List(AccessEff(VarType(tvs->hd)),effect); break;
         case Eq_constr(EffKind):
-          effect = &List(VarType(tvs->hd),effect); break;
+          effect = new List(VarType(tvs->hd),effect); break;
         default: break;
         }
       }
-      *eff = &Opt(JoinEff(List::imp_rev(effect)));
+      *eff = new Opt(JoinEff(List::imp_rev(effect)));
     }
     // Add in the bound type variables -- this will cause their kinds
     // to be constrained to the kinds of the free occurrences.  Warn
@@ -1760,7 +1761,7 @@ list_t<tvar> check_valid_type(seg_t loc, tenv te, list_t<tvar> free_vars,
     for (; ts != null && tvs != null; ts = ts->tl, tvs = tvs->tl) {
       kind_t k = conref_val(tvs->hd->kind);
       free_vars = check_valid_type(loc,te,free_vars,k,ts->hd);
-      inst = &List(&$(tvs->hd,ts->hd),inst);
+      inst = new List(new $(tvs->hd,ts->hd),inst);
     }
     if (tvs != null || ts != null) {
       terr(loc,xprintf("typedef %s expects a different number of arguments",
@@ -1768,7 +1769,7 @@ list_t<tvar> check_valid_type(seg_t loc, tenv te, list_t<tvar> free_vars,
       return free_vars;
     }
     typ new_typ = substitute(inst,td->defn);
-    *toptp = &Opt(new_typ);
+    *toptp = new Opt(new_typ);
     break;
   case HeapRgn:
     break;
@@ -1906,7 +1907,7 @@ resolve_struct_designators(seg_t loc,
   list_t<$(structfield_t,bool)@> fields = null;
   for(_ sd_fields = sd->fields->v; sd_fields != null; sd_fields = sd_fields->tl) {
     if (String::strcmp(*sd_fields->hd->name,"") != 0)
-      fields = &List(&$(sd_fields->hd,false), fields);
+      fields = new List(new $(sd_fields->hd,false), fields);
   }
   fields = imp_rev(fields);
 
@@ -1920,8 +1921,8 @@ resolve_struct_designators(seg_t loc,
       for(; fields2 != null; fields2 = fields2->tl)
 	if(!(*fields2->hd)[1]) {
 	  (*fields2->hd)[1] = true;
-	  (*des->hd)[0] = &List(FieldName((*fields2->hd)[0]->name), null);
-	  ans = &List(&$((*fields2->hd)[0],a), ans);
+	  (*des->hd)[0] = new List(FieldName((*fields2->hd)[0]->name), null);
+	  ans = new List(new $((*fields2->hd)[0],a), ans);
 	  break;
 	}
       if(fields2 == null)
@@ -1944,7 +1945,7 @@ resolve_struct_designators(seg_t loc,
 		   xprintf("field %s has already been used as an argument", 
 			   *v));
 	    (*fields2->hd)[1] = true;
-	    ans = &List(&$((*fields2->hd)[0],a), ans);
+	    ans = new List(new $((*fields2->hd)[0],a), ans);
 	    break;
 	  }
 	if(fields2 == null)

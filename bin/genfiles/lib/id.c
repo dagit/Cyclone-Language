@@ -51,9 +51,9 @@ _tagged_string* _temp8=( struct _tagged_string*) GC_malloc( sizeof( struct
 _tagged_string) * 1); _temp8[ 0]= x->s; _temp8;}); _temp1->tl=({ struct Cyc_List_List*
 _temp2=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
 _temp2->hd=( void*)({ struct _tagged_string* _temp5=( struct _tagged_string*)
-GC_malloc( sizeof( struct _tagged_string) * 1); _temp5[ 0]=( struct
-_tagged_string)({ char* _temp6=( char*)"$"; struct _tagged_string _temp7; _temp7.curr=
-_temp6; _temp7.base= _temp6; _temp7.last_plus_one= _temp6 + 2; _temp7;}); _temp5;});
+GC_malloc( sizeof( struct _tagged_string)); _temp5[ 0]=( struct _tagged_string)({
+char* _temp6=( char*)"$"; struct _tagged_string _temp7; _temp7.curr= _temp6;
+_temp7.base= _temp6; _temp7.last_plus_one= _temp6 + 2; _temp7;}); _temp5;});
 _temp2->tl=({ struct Cyc_List_List* _temp3=( struct Cyc_List_List*) GC_malloc(
 sizeof( struct Cyc_List_List)); _temp3->hd=( void*)({ struct _tagged_string*
 _temp4=( struct _tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1);

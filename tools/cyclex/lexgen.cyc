@@ -44,7 +44,8 @@ static int                      actions_count = 0;
 static regexp_t encode_regexp(regular_expression_t r) {
   switch (r) {
   case Epsilon:            return Empty;
-  case Characters(cl):     chars = &List(cl,chars); return Chars(chars_count++);
+  case Characters(cl): 
+    chars = new List(cl,chars); return Chars(chars_count++);
   case Sequence(r1,r2):    return Seq(encode_regexp(r1), encode_regexp(r2));
   case Alternative(r1,r2): return Alt(encode_regexp(r1), encode_regexp(r2));
   case Repetition(r1):     return Star(encode_regexp(r1));
@@ -55,7 +56,7 @@ static regexp_t encode_casedef(list_t<acase_t> casedef) {
   regexp_t ans = Empty;
   for(; casedef != null; casedef = casedef->tl) {
     let &$(expr,act) = casedef->hd;
-    actions = &List(&$(actions_count, act), actions);
+    actions = new List(new $(actions_count, act), actions);
     ans = Alt(ans, Seq(encode_regexp(expr), Action(actions_count)));
     ++actions_count;
   }
@@ -72,13 +73,13 @@ $(list_t<int>?, list_t<lexer_entry_t>)@ encode_lexdef(lexer_definition_t def) {
     actions       = null;
     actions_count = 0;
     let re = encode_casedef(casedef); // mutates actions
-    entry_list_rev = &List(&Lexer_entry(entry_name, re, rev(actions)),
+    entry_list_rev = new List(new Lexer_entry(entry_name, re, rev(actions)),
 			   entry_list_rev);
   }
   list_t<int> ?chr = to_array(rev(chars));
   chars   = null;
   actions = null;
-  return &$(chr, imp_rev(entry_list_rev));
+  return new $(chr, imp_rev(entry_list_rev));
 }
 
 // generate an NFA from a regular expression (dragon book, chapter 3)
@@ -148,7 +149,7 @@ static void fill_it(regexp_t r, set_t<transition_t> ?v) {
   case Seq(r1,r2): 
     fill_it(r1,v);
     fill_it(r2,v);
-    Set::iter_c(fill_pos, &$(v,firstpos(r2)), lastpos(r1));
+    Set::iter_c(fill_pos, new $(v,firstpos(r2)), lastpos(r1));
     break;
   case Alt(r1,r2):
     fill_it(r1,v);
@@ -156,7 +157,7 @@ static void fill_it(regexp_t r, set_t<transition_t> ?v) {
     break;
   case Star(r1):
     fill_it(r1,v);
-    Set::iter_c(fill_pos, &$(v,firstpos(r1)), lastpos(r1));
+    Set::iter_c(fill_pos, new $(v,firstpos(r1)), lastpos(r1));
     break;
   default:
     break;
@@ -177,13 +178,15 @@ static $(int,list_t<int>)@ split_trans(transition_t      trans,
 				     $(int,list_t<int>)@ act_pos_set) {
   let &$(act, pos_set) = act_pos_set;
   switch (trans) {
-  case OnChars(pos):   list_t<int> l = &List(pos,pos_set); return &$(act, l);
-  case ToAction(act1): return (act1 < act) ? &$(act1,pos_set) : act_pos_set;
+  case OnChars(pos):   
+    list_t<int> l = new List(pos,pos_set); return new $(act, l);
+  case ToAction(act1): 
+    return (act1 < act) ? (new $(act1,pos_set)) : act_pos_set;
   }
 }
 
 static $(int, list_t<int>)@ split_trans_set(set_t<transition_t> trans_set) {
-  return Set::fold(split_trans, trans_set, &$(NO_ACTION,null));
+  return Set::fold(split_trans, trans_set, new $(NO_ACTION,null));
 }
 
 // The Ocaml I'm porting from isn't functional (re-entrant) here either:
@@ -193,7 +196,7 @@ static list_t<$(set_t<transition_t>,int)@>     todo           = null;
 static int                                 next_state_num = 0;
 
 static void reset_state_mem() {
-  state_map      = &Opt(Dict::empty(Set::compare));
+  state_map      = new Opt(Dict::empty(Set::compare));
   todo           = null;
   next_state_num = 0;
 }
@@ -203,7 +206,7 @@ static int get_state(set_t<transition_t> st) {
   catch {
   case Dict::Absent:
     state_map->v = Dict::insert(state_map->v, st, next_state_num);
-    todo         = &List(&$(st, next_state_num), todo);
+    todo         = new List(new $(st, next_state_num), todo);
     return next_state_num++; // post-increment!
   }
 }
@@ -250,7 +253,7 @@ make_dfa(Syntax::lexer_definition_t lexdef) {
   list_t<automata_entry_t> initial_states = null;
   for(; entry_list != null; entry_list = entry_list->tl) {
     let le = entry_list->hd;
-    initial_states = &List(&Automata_entry{le->name,
+    initial_states = new List(new Automata_entry{le->name,
 			 		   get_state(firstpos(le->regexp)),
 				 	   le->actions
                                           },
@@ -261,7 +264,7 @@ make_dfa(Syntax::lexer_definition_t lexdef) {
   while(todo != null) {
     let &$(st,i) = todo->hd;
     todo = todo->tl;
-    states = &List(&$(translate_state(chars, follow, st), i), states);
+    states = new List(new $(translate_state(chars, follow, st), i), states);
   }
   states = List::imp_rev(states);
   let actions = new {for i < next_state_num : Perform(0)};
@@ -270,5 +273,5 @@ make_dfa(Syntax::lexer_definition_t lexdef) {
     actions[i] = act;
   }
   reset_state_mem();
-  return &$(initial_states, actions);
+  return new $(initial_states, actions);
 }

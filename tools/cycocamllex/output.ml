@@ -10,7 +10,7 @@
 (*                                                                     *)
 (***********************************************************************)
 
-(* $Id: output.ml,v 1.4 2001-03-15 23:37:55 jgm Exp $ *)
+(* $Id: output.ml,v 1.5 2001-04-20 23:36:44 jgm Exp $ *)
 
 (* Output the DFA tables and its entry points *)
 
@@ -91,7 +91,7 @@ let output_entry sourcefile ic oc e =
   fprintf oc "int %s_rec(Lexbuf<`a> lexbuf, int lexstate) {\n" e.auto_name;
   (* save new state, then switch on it, so default case can use it.
      (int switch can't get the value being switched on) *)
-  fprintf oc "  if (lt == null) lt = &lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);\n";
+  fprintf oc "  if (lt == null) lt = new lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);\n";
   fprintf oc "  lexstate = lex_engine((LexTables)lt,lexstate,lexbuf);\n";
   fprintf oc "  switch (lexstate) {\n";
   List.iter

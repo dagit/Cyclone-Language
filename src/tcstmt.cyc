@@ -39,7 +39,7 @@ static void pattern_synth(seg_t loc, tenv_t te, list_t<tvar> tvs,
   tenv te2 = add_type_vars(loc,te,tvs);
   if(new_block)
     te2 = Tcenv::new_block(te2);
-  let ropt = &Opt(Tcenv::curr_rgn(te2));
+  let ropt = new Opt(Tcenv::curr_rgn(te2));
   for(let vs2 = vs; vs2 != null; vs2 = vs2->tl) {
     te2 = add_pat_var(loc, te2, vs2->hd);
     vs2->hd->region = ropt;
@@ -194,7 +194,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
 				  typ2string(t), typ2string(p->topt->v)));
       else
 	check_pat_regions(te,p);
-      scs->hd->pat_vars = &Opt(x);
+      scs->hd->pat_vars = new Opt(x);
       // type-checking the body will type-check any explicit fallthrus.
       pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body,
 		    scs->hd->where_clause, true);
@@ -225,7 +225,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
 				   typ2string(p->topt->v)));
       else
 	check_pat_regions(te,p);
-      scs->hd->pat_vars = &Opt(x);
+      scs->hd->pat_vars = new Opt(x);
       // type-checking the body will type-check any explicit fallthrus
       pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body,
 		    scs->hd->where_clause, true);
@@ -244,7 +244,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
     case Var_d(vd):
       let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*rgn_ptr,atts) = vd;
       let curr_bl = Tcenv::curr_rgn(te);
-      *rgn_ptr = &Opt(curr_bl); // side effect
+      *rgn_ptr = new Opt(curr_bl); // side effect
       switch (nsl) {
       case Loc_n: break;
       case Rel_n(null):
@@ -290,7 +290,7 @@ void tcStmt(tenv_t te, stmt s0, bool new_block) {
       tcExpInitializer(te,null,e);
       *topt_ref = e->topt; // side effect
       let &$(new_tvs,x) = tcPat(te,p,null);//FIX: can pass region if e an lvalue
-      *vds = &Opt(x);
+      *vds = new Opt(x);
       // FIX: if let-declarations were of the form "let pat = e in S" then
       // we could allow any type variables within e to be used within S.
       if (new_tvs != null)

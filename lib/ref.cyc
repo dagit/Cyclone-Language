@@ -3,7 +3,7 @@
 namespace Ref;
 
 ref_t<`a> new_ref(`a x) {
-  return &Ref{.v = x};
+  return new Ref{.v = x};
 }
 
 `a get(ref_t<`a> r) { return r->v; }

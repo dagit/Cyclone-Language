@@ -21,10 +21,10 @@ abstract struct Dict<`a,`b,`e::E> {
 // should be the commented out one, but unification is buggy
 hdict_t<`a,`b,`e1> empty(int comp(`a,`a;`e1)) {
   enum tree<`a,`b> t = Leaf;
-  return &Dict(comp, t);
+  return new Dict(comp, t);
 }
 //hdict_t<`a,`b,`e> empty(int comp(`a,`a)) {
-//  return &Dict(comp, Leaf);
+//  return new Dict(comp, Leaf);
 //}
 
 bool is_empty(hdict_t<`a,`b,`e> d) {
@@ -57,9 +57,11 @@ hdict_t<`a,`b,`e> insert(hdict_t<`a,`b,`e> d, `a key, `b data) {
       let n = nr->v;
       if (d->reln(key,n->key) < 0) {
 	newleft  = n->left;
-	newright = Node(&noderef(&node(n->key, n->data, Leaf, n->right)));
+	newright = Node(new noderef(new 
+                                    node(n->key, n->data, Leaf, n->right)));
       } else {
-	newleft  = Node(&noderef(&node(n->key, n->data, n->left, Leaf)));
+	newleft  = Node(new noderef(new 
+                                    node(n->key, n->data, n->left, Leaf)));
 	newright = n->right;
       }
       break;
@@ -67,7 +69,8 @@ hdict_t<`a,`b,`e> insert(hdict_t<`a,`b,`e> d, `a key, `b data) {
       break; // newleft and newright are already Leaf
     }
   }
-  return &Dict(d->reln, Node(&noderef(&node(key,data,newleft,newright))));
+  return new Dict(d->reln, Node(new 
+                                noderef(new node(key,data,newleft,newright))));
 }
 
 hdict_t<`a,`b,`e> insert_new(hdict_t<`a,`b,`e> d, `a key, `b data) {
@@ -85,7 +88,7 @@ hdict_t<`a,`b,`e> inserts(hdict_t<`a,`b,`e> d,
 }
 
 hdict_t<`a,`b,`e> singleton(int comp(`a,`a;`e),`a key,`b data) {
-  return &Dict(comp, Node(&noderef(&node(key, data, Leaf, Leaf))));
+  return new Dict(comp, Node(new noderef(new node(key, data, Leaf, Leaf))));
 }
 
 `b lookup(hdict_t<`a,`b,`e> d,`a key) {
@@ -100,7 +103,7 @@ hdict_t<`a,`b,`e> singleton(int comp(`a,`a;`e),`a key,`b data) {
 Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d,`a key) {
   if (splay(d->reln, key, d->tree))
     switch (d->tree) {
-    case Node(nr): return &Core::Opt(nr->v->data);
+    case Node(nr): return new Core::Opt(nr->v->data);
     case Leaf:     throw Core::Impossible("Dict::lookup");
   }
   return null;
@@ -115,16 +118,16 @@ hdict_t<`a,`b,`e> delete(hdict_t<`a,`b,`e> d,`a key) {
     case Node(nr):
       struct node<`a,`b> @n = nr->v;
       switch (n->left) {
-      case Leaf:    return &Dict(d->reln, n->right);
+      case Leaf:    return new Dict(d->reln, n->right);
       case Node(noderef_left): 
 	switch (n->right) {
-	case Leaf:    return &Dict(d->reln, n->left);
+	case Leaf:    return new Dict(d->reln, n->left);
 	case Node(node_ref_right): 
 	  splay(get_largest, key, n->left);
 	  struct node<`a,`b> @newtop = noderef_left->v; // splay changes this
-	  return &Dict(d->reln,
-		       Node(&noderef(&node(newtop->key, newtop->data,
-                                          newtop->left, n->right))));
+	  return new Dict(d->reln,
+		       Node(new noderef(new node(newtop->key, newtop->data,
+                                                 newtop->left, n->right))));
 	}
       }
   }
@@ -232,14 +235,14 @@ static enum tree<`a,`c> map_tree(`c f(`b), enum tree<`a,`b> t) {
   case Leaf: return Leaf;
   case Node(nr):
     let n = nr->v;
-    return Node(&noderef(&node(n->key,
-                               f(n->data), 
-                               map_tree(f, n->left), 
-                               map_tree(f, n->right))));
+    return Node(new noderef(new node(n->key,
+                                     f(n->data), 
+                                     map_tree(f, n->left), 
+                                     map_tree(f, n->right))));
   }
 }
 hdict_t<`a,`c,`e> map(`c f(`b), hdict_t<`a,`b,`e> d) {
-  return &Dict(d->reln, map_tree(f, d->tree));
+  return new Dict(d->reln, map_tree(f, d->tree));
 }
 
 static enum tree<`a,`c> map_tree_c(`c f(`d,`b), `d env, enum tree<`a,`b> t) {
@@ -247,24 +250,24 @@ static enum tree<`a,`c> map_tree_c(`c f(`d,`b), `d env, enum tree<`a,`b> t) {
   case Leaf: return Leaf;
   case Node(nr):
     struct node<`a,`b> @n = nr->v;
-    return Node(&noderef(&node(n->key, f(env, n->data), 
-                               map_tree_c(f, env, n->left), 
-                               map_tree_c(f, env, n->right))));
+    return Node(new noderef(new node(n->key, f(env, n->data), 
+                                     map_tree_c(f, env, n->left), 
+                                     map_tree_c(f, env, n->right))));
   }
 }
 hdict_t<`a,`c,`e> map_c(`c f(`d,`b), `d env, hdict_t<`a,`b,`e> d) {
-  return &Dict(d->reln, map_tree_c(f, env, d->tree));
+  return new Dict(d->reln, map_tree_c(f, env, d->tree));
 }
 
 $(`a,`b)@ choose(hdict_t<`a,`b,`e> d) {
   switch (d->tree) {
   case Leaf:     throw Absent;
-  case Node(nr): return &$(nr->v->key, nr->v->data);
+  case Node(nr): return new $(nr->v->key, nr->v->data);
   }
 }
 
 List::list_t<$(`a,`b)@> to_list_f(`a k, `b v, List::list_t<$(`a,`b)@> accum) {
-  return &List::List(&$(k,v),accum);
+  return new List::List(new $(k,v),accum);
 }
 
 List::list_t<$(`a,`b)@> to_list(hdict_t<`a,`b,`e> d) {

@@ -170,7 +170,7 @@ rule lexmain = parse
      int s1 = line_start_pos;
      brace_depth = 1;
      int n2 = handle_lexical_error(action,lexbuf);
-     token_action = &Syntax::Location(n1,n2,l1,n1-s1);
+     token_action = new Syntax::Location(n1,n2,l1,n1-s1);
      return TACTION;
    }
 | '=' { return TEQUAL; }

@@ -30,7 +30,7 @@ abstract struct id {
   int i;
 };
 
-Id id_make(string s,int i) {  return &id(s,i); }
+Id id_make(string s,int i) {  return new id(s,i); }
 
 static int counter = 0;
 
@@ -50,9 +50,10 @@ Id id_unique   (string s) { return id_new(s); }
 string id_to_string(Id x) {
   if (x->i == -1)
     return String::strdup(x->s);
-  return strconcat_l(&List(new {x->s},
-                           &List(new {(string)"$"}, // FIX: get rid of cast
-                                 &List(new {string_of_int(x->i)},null))));
+  return strconcat_l(new List(new {x->s},
+                              new List(new "$", 
+                                       new List(new {string_of_int(x->i)},
+                                                null))));
 }
 void id_prn(FILE @f, Id x) { fprintf(f, "%s", id_to_string(x)); }
 

@@ -38,7 +38,7 @@ parse_conversionspecification(string s, int i) {
     case '-': fallthru;
     case ' ': fallthru;
     case '#': fallthru;
-    case '0': flags = &List((int)c,flags); continue;
+    case '0': flags = new List((int)c,flags); continue;
     default: break;
     }
     break;
@@ -50,12 +50,12 @@ parse_conversionspecification(string s, int i) {
   let width = null;
   c = s[i]; // redundant
   if (c=='*') {
-    width = &List((int)c,width);
+    width = new List((int)c,width);
     i++;
   } else {
     for (; i<len; i++) {
       c = s[i];
-      if (Character::isdigit(c)) width = &List((int)c,width);
+      if (Character::isdigit(c)) width = new List((int)c,width);
       else break;
     }
   }
@@ -66,17 +66,17 @@ parse_conversionspecification(string s, int i) {
   let precision = null;
   c = s[i]; // not redundant
   if (c == '.') {
-    precision = &List((int)c,precision);
+    precision = new List((int)c,precision);
     i++;
     if (i>=len) return null;
     c = s[i];    
     if (c == '*') {
-      precision = &List((int)c,precision);
+      precision = new List((int)c,precision);
       i++;
     } else {
       for (; i<len; i++) {
         c = s[i];
-        if (Character::isdigit(c)) precision = &List((int)c,precision);
+        if (Character::isdigit(c)) precision = new List((int)c,precision);
         else break;
       }
     }
@@ -90,24 +90,24 @@ parse_conversionspecification(string s, int i) {
   c = s[i]; // not redundant
   switch (c) {
   case 'h':
-    lenmod = &List((int)c,lenmod);
+    lenmod = new List((int)c,lenmod);
     i++;
     if (i>=len) return null;
     c = s[i];
-    if (c == 'h') { lenmod = &List((int)c,lenmod); i++; }
+    if (c == 'h') { lenmod = new List((int)c,lenmod); i++; }
     break;
   case 'l':
-    lenmod = &List((int)c,lenmod);
+    lenmod = new List((int)c,lenmod);
     i++;
     if (i>=len) return null;
     c = s[i];
-    if (c == 'l') { lenmod = &List((int)c,lenmod); i++; }
+    if (c == 'l') { lenmod = new List((int)c,lenmod); i++; }
     break;
   case 'j': fallthru; 
   case 'z': fallthru; 
   case 't': fallthru; 
   case 'L':
-    lenmod = &List((int)c,lenmod);
+    lenmod = new List((int)c,lenmod);
     i++;
     break;
   default: break;
@@ -148,7 +148,7 @@ parse_conversionspecification(string s, int i) {
   //          String::implode(width),
   //          String::implode(precision),
   //          String::implode(lenmod));
-  return &Opt(&$(flags,width,precision,lenmod,c,i+1));
+  return new Opt(new $(flags,width,precision,lenmod,c,i+1));
 }
 
 list_t<typ> get_format_typs(string s,seg_t loc) {
@@ -175,12 +175,12 @@ list_t<typ> get_format_typs(string s,seg_t loc) {
     }
     switch (width) {
     case &List(x,null) && x=='*':
-      typs = &List(sint_t,typs); break;
+      typs = new List(sint_t,typs); break;
     default: break;
     }
     switch (precision) {
     case &List(x,&List(y,null)) && x=='.' && y=='*':
-      typs = &List(sint_t,typs); break;
+      typs = new List(sint_t,typs); break;
     default: break;
     }
     typ t;
@@ -205,7 +205,7 @@ list_t<typ> get_format_typs(string s,seg_t loc) {
                      String::implode(lenmod), c));
         return null;
       }
-      typs = &List(t,typs);
+      typs = new List(t,typs);
       break;
     case 'u':
       for (_ f = flags; f != null; f = f->tl)
@@ -230,7 +230,7 @@ list_t<typ> get_format_typs(string s,seg_t loc) {
                      String::implode(lenmod), c));
         return null;
       }
-      typs = &List(t,typs);
+      typs = new List(t,typs);
       break;
     case 'f': fallthru;
     case 'F': fallthru;
@@ -246,7 +246,7 @@ list_t<typ> get_format_typs(string s,seg_t loc) {
         terr(loc,xprintf("length modifiers are not allowed with %%%c",c));
         return null;
       }
-      typs = &List(double_t,typs);
+      typs = new List(double_t,typs);
       break;
     case 'c':
       for (_ f = flags; f != null; f = f->tl)
@@ -266,7 +266,7 @@ list_t<typ> get_format_typs(string s,seg_t loc) {
                          String::implode(precision)));
         return null;
       }
-      typs = &List(sint_t,typs);
+      typs = new List(sint_t,typs);
       break;
     case 's':
 // FIX: temporarily we don't allow any variations on %s.  To do that
@@ -303,7 +303,7 @@ list_t<typ> get_format_typs(string s,seg_t loc) {
 //         terr(loc,"length modifiers not allowed with %%s");
 //         return null;
 //       }
-      typs = &List(string_typ(new_evar(RgnKind)),typs);
+      typs = new List(string_typ(new_evar(RgnKind)),typs);
       break;
     case 'p':
       // We don't support pointer printing
@@ -335,7 +335,7 @@ list_t<typ> get_format_typs(string s,seg_t loc) {
                          String::implode(lenmod)));
         return null;
       }
-      typs = &List(t,typs);
+      typs = new List(t,typs);
       break;
     case '%':
       if (flags != null) {
@@ -389,7 +389,7 @@ parse_inputformat(string s, int i) {
   let width = null;
   for (; i<len; i++) {
     c = s[i];
-    if (Character::isdigit(c)) width = &List((int)c,width);
+    if (Character::isdigit(c)) width = new List((int)c,width);
     else break;
   }
   if (i>=len) return null;
@@ -401,24 +401,24 @@ parse_inputformat(string s, int i) {
   c = s[i]; // not redundant
   switch (c) {
   case 'h':
-    lenmod = &List((int)c,lenmod);
+    lenmod = new List((int)c,lenmod);
     i++;
     if (i>=len) return null;
     c = s[i];
-    if (c == 'h') { lenmod = &List((int)c,lenmod); i++; }
+    if (c == 'h') { lenmod = new List((int)c,lenmod); i++; }
     break;
   case 'l':
-    lenmod = &List((int)c,lenmod);
+    lenmod = new List((int)c,lenmod);
     i++;
     if (i>=len) return null;
     c = s[i];
-    if (c == 'l') { lenmod = &List((int)c,lenmod); i++; }
+    if (c == 'l') { lenmod = new List((int)c,lenmod); i++; }
     break;
   case 'j': fallthru; 
   case 'z': fallthru; 
   case 't': fallthru; 
   case 'L':
-    lenmod = &List((int)c,lenmod);
+    lenmod = new List((int)c,lenmod);
     i++;
     break;
   default: break;
@@ -450,7 +450,7 @@ parse_inputformat(string s, int i) {
   case '%': break;
   default: return null;
   }
-  return &Opt(&$(suppress,width,lenmod,c,i+1));
+  return new Opt(new $(suppress,width,lenmod,c,i+1));
 }
 list_t<typ> get_scanf_typs(string s,seg_t loc) {
   // FIX: on error we return null.  This will probably lead to
@@ -495,7 +495,7 @@ list_t<typ> get_scanf_typs(string s,seg_t loc) {
                      String::implode(lenmod), c));
         return null;
       }
-      typs = &List(t,typs);
+      typs = new List(t,typs);
       break;
     case 'u':
       fallthru;
@@ -519,7 +519,7 @@ list_t<typ> get_scanf_typs(string s,seg_t loc) {
                      String::implode(lenmod), c));
         return null;
       }
-      typs = &List(t,typs);
+      typs = new List(t,typs);
       break;
     case 'f': fallthru;
     case 'F': fallthru;
@@ -542,7 +542,7 @@ list_t<typ> get_scanf_typs(string s,seg_t loc) {
                      String::implode(lenmod), c));
         return null;
       }
-      typs = &List(t,typs);
+      typs = new List(t,typs);
       break;
     case 'c':
       terr(loc,"%%c is not supported");
@@ -572,7 +572,7 @@ list_t<typ> get_scanf_typs(string s,seg_t loc) {
                          String::implode(lenmod)));
         return null;
       }
-      typs = &List(t,typs);
+      typs = new List(t,typs);
       break;
     case '%':
       if (suppress) {

@@ -147,7 +147,7 @@ static int str_index(string buff, int offset, int len) {
         let temp = (trie_child_v_t)(new { for i < 75 : null });
         let temp2 = new {temp};
 	t->children = (trie_child_t)temp2;
-	(*(t->children))[ch] = &Trie(null,-1);
+	(*(t->children))[ch] = new Trie(null,-1);
 	t = (*(t->children))[ch];
 	++i;
 	ch = ((int)buff[i]) - 48; // see width of trie above
@@ -161,7 +161,7 @@ static int str_index(string buff, int offset, int len) {
     }
     // walk down one level
     if((*(t->children))[ch] == null)
-      (*(t->children))[ch] = &Trie(null,-1);
+      (*(t->children))[ch] = new Trie(null,-1);
     t = (*(t->children))[ch];
     ++i;
   }
@@ -191,8 +191,8 @@ static void insert_typedef(stringptr sptr) {
     int ch = ((int)s[i]) - 48;
     if(t->children == null) {
       while(i < len) {
-	t->children = (trie_child_t) &$((new { for i < 75 : null }));
-	(*(t->children))[ch] = &Trie(null,0);
+	t->children = (trie_child_t) (new $((new { for i < 75 : null })));
+	(*(t->children))[ch] = new Trie(null,0);
 	t = (*(t->children))[ch];
 	++i;
 	ch = ((int)s[i]) - 48; // see width of trie above
@@ -202,7 +202,7 @@ static void insert_typedef(stringptr sptr) {
     }
     // walk down one level
     if((*(t->children))[ch] == null)
-      (*(t->children))[ch] = &Trie(null,false);
+      (*(t->children))[ch] = new Trie(null,false);
     t = (*(t->children))[ch];
   }
   t->shared_str = true;
@@ -323,15 +323,15 @@ typedef struct Lstate @lstate_t;
 static opt_t<lstate_t> lstate = null;
 
 static void typedef_init() {
-  let init_lvis   = &Lvis{.current_namespace=null,
-                          .imported_namespaces=null};
-  let init_lstack = &List(init_lvis, null);
+  let init_lvis   = new Lvis{.current_namespace=null,
+                             .imported_namespaces=null};
+  let init_lstack = new List(init_lvis, null);
   let init_decls  = Dict::insert(Dict::empty(varlist_cmp),
                                  null,
-                                 &Ldecls{.typedefs=Set::empty(zstrptrcmp),
-                                         .namespaces=Set::empty(zstrptrcmp)});
-  lstate = &Opt(&Lstate{.lstack=init_lstack,
-                        .decls=init_decls});
+                                 new 
+                                 Ldecls{.typedefs=Set::empty(zstrptrcmp),
+                                        .namespaces=Set::empty(zstrptrcmp)});
+  lstate = new Opt(new Lstate{.lstack=init_lstack,.decls=init_decls});
 }
 
 static list_t<var> get_absolute_namespace(struct List<var,`H> @ns) {
@@ -342,7 +342,8 @@ static list_t<var> get_absolute_namespace(struct List<var,`H> @ns) {
   for (list_t<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
     lvis lv = ls->hd; // ... see what namespaces are visible
     // ... and look in each such visible namespace
-    list_t<list_t<var>> x = &List(lv->current_namespace,lv->imported_namespaces);
+    list_t<list_t<var>> x = new List(lv->current_namespace,
+                                     lv->imported_namespaces);
     for (; x != null; x = x->tl) {
       ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
       // ... for namespace n
@@ -358,13 +359,14 @@ static list_t<var> get_absolute_namespace(struct List<var,`H> @ns) {
 
 static void recompute_typedefs() {
   // Drop the old trie on the floor.
-  typedefs_trie = &Trie(null,false);
+  typedefs_trie = new Trie(null,false);
   
   // For each enclosing scope, get the visible namespaces and add all
   // of their typedefs
   for (list_t<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
     lvis lv = ls->hd; 
-    list_t<list_t<var>> x = &List(lv->current_namespace, lv->imported_namespaces);
+    list_t<list_t<var>> x = new List(lv->current_namespace, 
+                                     lv->imported_namespaces);
     for (; x != null; x = x->tl) {
       ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
       Set::iter(insert_typedef,ld->typedefs);
@@ -402,11 +404,11 @@ static bool is_typedef(List::list_t<var> ns, var v) {
 
 void enter_namespace(var s) {
   list_t<var> ns = lstate->v->lstack->hd->current_namespace;
-  list_t<var> new_ns = List::append(ns,&List(s,null));
+  list_t<var> new_ns = List::append(ns,new List(s,null));
   // Push the new namespace on the stack
   lstate->v->lstack =
-    &List(&Lvis{.current_namespace = new_ns,.imported_namespaces = null},
-          lstate->v->lstack);
+    new List(new Lvis{.current_namespace = new_ns,.imported_namespaces = null},
+             lstate->v->lstack);
   // If this is the first time the new namespace has been encountered,
   // make sure it is bound in the old namespace, and add an empty
   // environment for the new namespace
@@ -414,13 +416,16 @@ void enter_namespace(var s) {
   if (!Set::member(ld->namespaces,s)) {
     lstate->v->decls = Dict::insert(lstate->v->decls,
 				    ns,
-				    &Ldecls{.typedefs = ld->typedefs,
-					    .namespaces = 
-					    Set::insert(ld->namespaces, s)});
+				    new Ldecls{.typedefs = ld->typedefs,
+                                               .namespaces = 
+                                               Set::insert(ld->namespaces, 
+                                                           s)});
     lstate->v->decls = Dict::insert(lstate->v->decls,
 				    new_ns,
-				    &Ldecls{.typedefs= Set::empty(zstrptrcmp),
-					    .namespaces= Set::empty(zstrptrcmp)
+				    new Ldecls{.typedefs= 
+                                               Set::empty(zstrptrcmp),
+                                               .namespaces= 
+                                               Set::empty(zstrptrcmp)
 				    });
 
   }
@@ -435,18 +440,18 @@ void enter_using(qvar q) {
   _ ns;
   switch ((*q)[0]) {
   case Loc_n:
-    ns = (List_t<stringptr>)&List((*q)[1],null);
+    ns = (List_t<stringptr>)(new List((*q)[1],null));
     break;
   case Rel_n(y): fallthru(y);
   case Abs_n(y):
-    ns = (List_t<stringptr>)List::append(y,&List((*q)[1],null));
+    ns = (List_t<stringptr>)List::append(y,new List((*q)[1],null));
     break;
   }
 
   let ans      = get_absolute_namespace(ns);
   let imported = lstate->v->lstack->hd->imported_namespaces;
 
-  lstate->v->lstack->hd->imported_namespaces = &List(ans,imported);
+  lstate->v->lstack->hd->imported_namespaces = new List(ans,imported);
   
   // some more typedefs may be visible
   recompute_typedefs();
@@ -464,8 +469,8 @@ void register_typedef(qvar q) {
   let current = lstate->v->lstack->hd->current_namespace;
   let ds      = lstate->v->decls;
   let ld      = Dict::lookup(ds,current);
-  let new_ld  = &Ldecls{.typedefs   = Set::insert(ld->typedefs,(*q)[1]),
-                        .namespaces = ld->namespaces};
+  let new_ld  = new Ldecls{.typedefs   = Set::insert(ld->typedefs,(*q)[1]),
+                           .namespaces = ld->namespaces};
   lstate->v->decls = Dict::insert(ds,current,new_ld);
 
   // FIX: We're really assuming it's unqualified here -- else need to
@@ -484,7 +489,7 @@ static short process_id(Lexbuf<`a> lbuf) {
 
   // maybe it's a typedef
   if (is_typedef(null,s)) {
-    token_qvar = &$(Rel_n(null),s);
+    token_qvar = new $(Rel_n(null),s);
     return QUAL_TYPEDEF_NAME;
   }
 
@@ -508,14 +513,14 @@ static short process_qual_id(Lexbuf<`a> lbuf) {
       throw Impossible("bad namespace");
     int vlen = i - start;
     var v    = get_symbol(str_index(s, start, vlen));
-    rev_vs = &List(v,rev_vs);
+    rev_vs = new List(v,rev_vs);
     i += 2;
   }
   if (rev_vs == null)
     throw Impossible("bad namespace");
   var       v  = rev_vs->hd;
   list_t<var> vs = List::imp_rev(rev_vs->tl);
-  token_qvar = &$(Rel_n(vs),v);
+  token_qvar = new $(Rel_n(vs),v);
   if (is_typedef(vs,v))
     return QUAL_TYPEDEF_NAME;
   else 

@@ -33,7 +33,7 @@ using Stdio;
 // qualifiers (e.g., const).
 /////////////////////////////////////////////////////////////////////////
 static $(list_t<designator>,pat)@ null_designator(pat p) {
-  return &$(null,p);
+  return new $(null,p);
 }
 static var get_name(vardecl vd) {
   return (*vd->name)[1];
@@ -59,7 +59,7 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
     vd->type   = t;
     vd->tq     = empty_tqual();
     vd->shadow = 0; // FIX?!?!?
-    v_result = &List(vd,v_result);
+    v_result = new List(vd,v_result);
     break;
   case Reference_p(vd):
     t = new_evar(MemKind);
@@ -71,7 +71,7 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
 				     empty_tqual(),empty_conref()});
     vd->tq     = empty_tqual();
     vd->shadow = 0; // FIX?!?!?
-    v_result = &List(vd,v_result);
+    v_result = new List(vd,v_result);
     break;
 
   case Pointer_p(p2):
@@ -91,7 +91,7 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
       let &$(sub_tvs,sub_vs) = tcPat(te,ps->hd,region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
-      ts = &List(&$(empty_tqual(),ps->hd->topt->v),ts);
+      ts = new List(new $(empty_tqual(),ps->hd->topt->v),ts);
     }
     t = TupleType(List::imp_rev(ts));
     break;
@@ -108,7 +108,7 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
     // build up the instantiated pattern type
     let all_inst = List::map(make_inst_var,sd->tvs);
     let all_typs = List::map(snd,all_inst); 
-    *topt_ref = &Opt(all_typs); // side effect
+    *topt_ref = new Opt(all_typs); // side effect
     t = StructType(sd->name->v,all_typs,(structdecl@)(new{sd}));
     // unify with the struct type
     list_t<$(structfield_t,pat)@> fields = 
@@ -131,7 +131,7 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
     tv_result = List::append(tv_result, tvs);
     let all_inst = List::map(make_inst_var,ed->tvs);
     _ all_typs = List::map(snd,all_inst); 
-    t = EnumType(ed->name->v,all_typs,(enumdecl@)(&$(ed)));
+    t = EnumType(ed->name->v,all_typs,(enumdecl@)(new $(ed)));
     list_t<$(tqual,typ)@> tqts = ef->typs;
     for(; ps != null && tqts != null; ps = ps->tl, tqts = tqts->tl) {
       _ p2 = ps->hd;
@@ -156,7 +156,7 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
     typ heap = HeapRgn;
     tenv_t te2 = add_type_vars(p->loc,te,tvs);
     tv_result = List::append(tv_result, tvs);
-    t = XenumType(xed->name,(xenumdecl@)(&$(xed)));
+    t = XenumType(xed->name,new xed);
     list_t<$(tqual,typ)@> tqts = ef->typs;
     for(; ps != null && tqts != null; ps = ps->tl, tqts = tqts->tl) {
       _ p2 = ps->hd;
@@ -276,10 +276,10 @@ $(list_t<tvar>, list_t<vardecl>)@ tcPat(tenv_t te,pat p, typ *`p region_opt) {
     }      
     break;
   }
-  p->topt = &Opt(t);
+  p->topt = new Opt(t);
   check_unique_vars(List::map(get_name, v_result), p->loc,
 		    "pattern contains a repeated variable");
-  return &$(tv_result,v_result);
+  return new $(tv_result,v_result);
 }
 
 void check_pat_regions(tenv_t te, pat p) {
@@ -383,11 +383,15 @@ static con_t null_con     = &null_con0;
 static con_t null_ptr_con = &null_ptr_con0;
 static con_t ptr_con      = &ptr_con0;
 
-static con_t int_con(int i)       { return &Con_s(Int_v(i),      0, null); }
-static con_t char_con(char c)     { return &Con_s(Int_v((int)c), 0, &Opt(256));}
-static con_t float_con(string f)  { return &Con_s(Name_v(f),  0, null); }
-static con_t double_con(string d) { return &Con_s(Name_v(d),  0, null); }
-static con_t tuple_con(int i)     { return &Con_s(tuple_name, i, one_opt_ptr); }
+static con_t int_con(int i)       { return new Con_s(Int_v(i),      0, null); }
+static con_t char_con(char c) { 
+  return new Con_s(Int_v((int)c), 0,new Opt(256));
+}
+static con_t float_con(string f)  { return new Con_s(Name_v(f),  0, null); }
+static con_t double_con(string d) { return new Con_s(Name_v(d),  0, null); }
+static con_t tuple_con(int i)     { 
+  return new Con_s(tuple_name, i, one_opt_ptr); 
+}
 
 // build various simple patterns
 static simple_pat_t null_pat()           { return Con(null_con,      null); }
@@ -397,17 +401,17 @@ static simple_pat_t float_pat(string f)  { return Con(float_con(f),  null); }
 static simple_pat_t double_pat(string d) { return Con(double_con(d), null); }
 
 static simple_pat_t null_ptr_pat(simple_pat_t p) {
-  return Con(null_ptr_con,&List(p,null));
+  return Con(null_ptr_con,new List(p,null));
 }
 static simple_pat_t ptr_pat(simple_pat_t p) { 
-  return Con(ptr_con,&List(p,null)); 
+  return Con(ptr_con,new List(p,null)); 
 }
 static simple_pat_t tuple_pat(list_t<simple_pat_t> ss) {
   return Con(tuple_con(List::length(ss)),ss);
 }
 static 
 simple_pat_t con_pat(string con_name,opt_t<int> span,list_t<simple_pat_t> ps) {
-  con_t c = &Con_s(Name_v(con_name), List::length(ps), span);
+  con_t c = new Con_s(Name_v(con_name), List::length(ps), span);
   return Con(c,ps);
 }
 
@@ -463,7 +467,7 @@ static simple_pat_t compile_pat(pat p) {
 	switch (dl) {
 	case &List{.hd=FieldName(f), .tl=null}: 
 	  if(String::zstrptrcmp(f,fields->hd->name) == 0) {
-	    ps = &List(compile_pat(p),ps);
+	    ps = new List(compile_pat(p),ps);
 	    found = true;
 	  }
 	  break;
@@ -477,7 +481,7 @@ static simple_pat_t compile_pat(pat p) {
     break;
   case Enum_p(_,_,_,ps,ed,ef):
     int span = List::length(ed->fields->v);
-    s = con_pat(*((*ef->name)[1]),&Opt(span),List::map(compile_pat,ps)); 
+    s = con_pat(*((*ef->name)[1]),new Opt(span),List::map(compile_pat,ps)); 
     break;
   case Xenum_p(_,_,ps,xd,ef):
     s = con_pat(*((*ef->name)[1]),null,List::map(compile_pat,ps)); 
@@ -579,7 +583,7 @@ static context_t augment(context_t ctxt, term_desc_t dsc) {
   switch (ctxt) {
   case null: return null; // ???
   case &List{.hd=&$(c,args), .tl=rest}:
-    return &List(&$(c,(list_t<term_desc_t>)&List(dsc, args)),rest);
+    return new List(new $(c,(list_t<term_desc_t>)(new List(dsc, args))),rest);
   }
 }
 
@@ -606,7 +610,7 @@ static term_desc_t build_desc(context_t ctxt, term_desc_t dsc, work_stack work)
   case $(null,_):    return impos("build_desc: ctxt and work don't match");
   case $(_,   null): return impos("build_desc: ctxt and work don't match");
   case $(&List{.hd=&$(c,args), .tl=rest}, &List{.hd=&$(_,_,dargs), .tl=work2}):
-    let td = Pos(c, List::append(List::rev(args), &List(dsc,dargs)));
+    let td = Pos(c, List::append(List::rev(args), new List(dsc,dargs)));
     return build_desc(rest, td, work2);
   } 
 }
@@ -646,8 +650,8 @@ static decision_t<`rhs> and_match(context_t ctx, work_stack work,
     let &List(pat1,patr) = (_@)(pats);
     let &List(obj1,objr) = (_@)(objs);
     let &List(dsc1,dscr) = (_@)(dscs);
-    let wf = &$(patr, objr, dscr);
-    return match(pat1,obj1,dsc1,ctx,&List(wf,workr),right_hand_side,rules);
+    let wf = new $(patr, objr, dscr);
+    return match(pat1,obj1,dsc1,ctx,new List(wf,workr),right_hand_side,rules);
   } 
 }
 
@@ -661,7 +665,7 @@ static list_t<term_desc_t> getdargs(con_t pcon, term_desc_t dsc) {
     term_desc_t any = Neg(empty_con_set());
     let res = null;
     for (int i = 0; i < pcon->arity; ++i)
-      res = &List(any,res);
+      res = new List(any,res);
     return res;
   case Pos(_, dargs): return dargs;
   }
@@ -687,16 +691,16 @@ match(simple_pat_t p, access_t obj, term_desc_t dsc,
   case Con(pcon, pargs):
     switch (static_match(pcon, dsc)) {
     case Yes:
-      let ctx2       = &List(&$(pcon,null), ctx);
-      let work_frame = &$(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
-      let work2      = &List(work_frame, work);
+      let ctx2       = new List(new $(pcon,null), ctx);
+      let work_frame = new $(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
+      let work2      = new List(work_frame, work);
       return and_match(ctx2, work2, right_hand_side, rules);
     case No:
       return or_match(build_desc(ctx, dsc, work), rules);
     case Maybe:
-      let ctx2       = &List(&$(pcon,null), ctx);
-      let work_frame = &$(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
-      let work2      = &List(work_frame, work);
+      let ctx2       = new List(new $(pcon,null), ctx);
+      let work_frame = new $(pargs, getoargs(pcon, obj), getdargs(pcon, dsc));
+      let work2      = new List(work_frame, work);
       let s          = and_match(ctx2, work2, right_hand_side, rules);
       let f          = or_match(build_desc(ctx, add_neg(dsc,pcon), work), rules);
       return IfEq(obj, pcon, s, f);
@@ -730,14 +734,14 @@ void check_exhaust_overlap(decision_t<`rhs> d,
 static 
 $(simple_pat_t, $(bool,seg_t)@)@ get_match(int @ r, switch_clause swc) {
   simple_pat_t sp0 = compile_pat(swc->pattern);
-  $(bool,seg_t)@ rhs = &$(false,swc->pattern->loc);
+  $(bool,seg_t)@ rhs = new $(false,swc->pattern->loc);
   simple_pat_t sp;
   if (swc->where_clause != null) {
-    sp = tuple_pat(&List(sp0,&List(int_pat(*r),null)));
+    sp = tuple_pat(new List(sp0,new List(int_pat(*r),null)));
     *r = (*r) + 1;
   } else
-    sp = tuple_pat(&List(sp0,&List(Any,null)));
-  return &$(sp, rhs);
+    sp = tuple_pat(new List(sp0,new List(Any,null)));
+  return new $(sp, rhs);
 }
 static void not_exhaust_err(seg_t loc) {
   terr(loc,"patterns may not be exhaustive");
@@ -750,7 +754,7 @@ void check_switch_exhaustive(seg_t loc, list_t<switch_clause> swcs) {
   // We represent patterns without where clauses as (simple_pat,_).
   // This way, if we have the same pattern repeated, we get exhuastiveness
   // right as long as one of the copies does not have a where-clause.
-  let match_rules = List::map_c(get_match,(int @)&$(0),swcs);
+  let match_rules = List::map_c(get_match,new 0,swcs);
   let dec_tree    = match_compile(match_rules);
   check_exhaust_overlap(dec_tree, not_exhaust_err, loc, rule_occurs, 0);
   for (; match_rules != null; match_rules = match_rules->tl) {
@@ -772,9 +776,9 @@ static void dummy_fn(int i,int j) {
   return;
 }
 bool check_let_pat_exhaustive(seg_t loc,pat p) {
-  let match_rules = &List(&$(compile_pat(p),0),null);
+  let match_rules = new List(new $(compile_pat(p),0),null);
   let dec_tree    = match_compile(match_rules);
-  let exhaust_env = &$(loc,true);
+  let exhaust_env = new $(loc,true);
   check_exhaust_overlap(dec_tree, not_exhaust_warn, exhaust_env, dummy_fn, 0);
   return (*exhaust_env)[1];
 }
@@ -784,8 +788,8 @@ bool check_let_pat_exhaustive(seg_t loc,pat p) {
 // to check for exhaustiveness.
 static $(simple_pat_t, $(bool,seg_t)@)@ get_match2(switch_clause swc) {
   simple_pat_t sp0 = compile_pat(swc->pattern);
-  $(bool,seg_t)@ rhs = &$(false,swc->pattern->loc);
-  return &$(sp0, rhs);
+  $(bool,seg_t)@ rhs = new $(false,swc->pattern->loc);
+  return new $(sp0, rhs);
 }
 static void not_exhaust_err2(seg_t loc) {
   ; // skip

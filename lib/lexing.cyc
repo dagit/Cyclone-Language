@@ -87,13 +87,13 @@ void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
 Lexbuf<Function_lexbuf_state<`b>>
 from_function(int read_fun(string,int,`b;{}),
                   `b read_fun_state) {
-  return &lexbuf(lex_refill, // @ <`b>,
-                 &function_lexbuf_state(read_fun, read_fun_state),
-		 new_string(BUFFER_SIZE),
-                 BUFFER_SIZE, -BUFFER_SIZE,
-		 BUFFER_SIZE, BUFFER_SIZE, BUFFER_SIZE,
-                 0,
-                 false);
+  return new lexbuf(lex_refill, // @ <`b>,
+                    new function_lexbuf_state(read_fun, read_fun_state),
+                    new_string(BUFFER_SIZE),
+                    BUFFER_SIZE, -BUFFER_SIZE,
+                    BUFFER_SIZE, BUFFER_SIZE, BUFFER_SIZE,
+                    0,
+                    false);
 }
 
 int read_from_file(string aux, int n, FILE @f) {
@@ -112,12 +112,13 @@ static void set_eof(Lexbuf<bool> lbuf) {
 }
 
 Lexbuf<bool> from_string(string s) {
-  return &lexbuf(set_eof,
-                 false,     //ignored but can't instantiate with void
-                 String::strdup(s), // copy to keep lexer shielded from updates
-                 s.size,
-                 0,0,0,0,0,
-                 true);
+  return 
+    new lexbuf(set_eof,
+               false,     //ignored but can't instantiate with void
+               String::strdup(s), // copy to keep lexer shielded from updates
+               s.size,
+               0,0,0,0,0,
+               true);
 }
 
 string lexeme(Lexbuf<`a> lbuf) {

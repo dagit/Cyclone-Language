@@ -59,7 +59,7 @@ static void resolve_unknown_id(tenv te, exp e, qvar q) {
 }
 
 static $(list_t<designator>,exp)@ make_struct_arg(exp e) {
-  return &$(null,e);
+  return new $(null,e);
 }
 // Resolve whether this is a function call or enum, xenum, or struct
 // constructor -- let normal type-checking do the rest of the work.
@@ -191,7 +191,7 @@ static typ tcConst(tenv te, seg_t loc, typ *`r topt, cnst_t c, exp e) {
     int len  = s.size; // includes the trailing 0 character
     let r    = Const_e(Int_c(Unsigned,len));
     exp elen = new_exp(r,loc);
-    elen->topt = &Opt(uint_t);
+    elen->topt = new Opt(uint_t);
     // The default is to treat a string as if it's statically heap allocated
     // and return a pointer to that string.  However, if the string is used
     // as an initializer, then we should return an array type.
@@ -202,7 +202,7 @@ static typ tcConst(tenv te, seg_t loc, typ *`r topt, cnst_t c, exp e) {
         return ArrayType(uchar_t, tq, elen);
       case PointerType(PtrInfo(telt,trgn,nullable,tq,b)):
         if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
-          e->topt = &Opt(t);
+          e->topt = new Opt(t);
           unchecked_cast(te, e, *topt);
           t = *topt;
         }
@@ -514,8 +514,8 @@ static typ tcConditional(tenv te, seg_t loc, typ *`r topt,
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
   typ t = new_evar(MemKind);
-  let l1 = &List(e3,null);
-  let l2 = &List(e2,l1);
+  let l1 = new List(e3,null);
+  let l2 = new List(e2,l1);
   if (!coerce_list(te,t,l2))
     terr(loc,xprintf("conditional clause types do not match: %s != %s",
 			    typ2string(e2->topt->v),typ2string(e3->topt->v)));
@@ -638,7 +638,7 @@ static typ tcInstantiate(tenv te, seg_t loc, typ *`r topt,
       for (; ts != null; ts = ts->tl, tvars = tvars->tl) {
 	kind_t k = conref_val(tvars->hd->kind);
 	check_type(loc,te,lookup_type_vars(te),k,ts->hd);
-	instantiation = &List(&$(tvars->hd,ts->hd),instantiation);
+	instantiation = new List(new $(tvars->hd,ts->hd),instantiation);
       }
       typ new_fn_typ = 
         substitute(instantiation,
@@ -693,6 +693,7 @@ static typ tcAddress(tenv te, seg_t loc, typ *`r topt, exp e) {
   switch (e->r) {
   case Struct_e(_,_,_,_): fallthru;
   case Tuple_e(_):
+    warn(loc,"& used to allocate");
     // Avoid casts when we're passed down a nullable type
     let ptr_maker = at_typ;
     if(topt != null)
@@ -768,10 +769,10 @@ static typ tcStructMember(tenv te, seg_t loc, typ *`r topt,
     let t2   = substitute(inst,finfo->type);
     return t2;
   case ArrayType(_,_,_) && (String::zstrcmp(*f,"size") == 0):
-    outer_e->r = Primop_e(Size,&List(e,null));
+    outer_e->r = Primop_e(Size,new List(e,null));
     return uint_t;
   case PointerType(_) && (String::zstrcmp(*f,"size") == 0):
-    outer_e->r = Primop_e(Size,&List(e,null));
+    outer_e->r = Primop_e(Size,new List(e,null));
     return uint_t;
   default:
     if (String::zstrcmp(*f,"size") == 0)
@@ -871,7 +872,7 @@ static typ tcTuple(tenv te, seg_t loc, typ *`r topt, list_t<exp> es) {
       for(; es != null; es = es->tl, ts = ts->tl) {
 	let topt2 = (*ts->hd)[1];
 	tcExpInitializer(te,&topt2,es->hd);
-	fields = &List(new{$((*ts->hd)[0], es->hd->topt->v)}, fields);
+	fields = new List(new{$((*ts->hd)[0], es->hd->topt->v)}, fields);
       }
       done = true;
       break;
@@ -881,7 +882,7 @@ static typ tcTuple(tenv te, seg_t loc, typ *`r topt, list_t<exp> es) {
   if(!done)
     for(; es != null; es = es->tl) {
       tcExpInitializer(te,null,es->hd);
-      fields = &List(new{$(empty_tqual(), es->hd->topt->v)}, fields);
+      fields = new List(new{$(empty_tqual(), es->hd->topt->v)}, fields);
     }
   return TupleType(List::imp_rev(fields));
 }
@@ -905,7 +906,7 @@ static typ tcArray(tenv te,seg_t loc,typ *`r elt_topt,
   typ res      = new_evar(MemKind);
   let sz_rexp  = Const_e(Int_c(Unsigned,List::length(es)));
   exp sz_exp   = new_exp(sz_rexp,loc);
-  sz_exp->topt = &Opt(uint_t);
+  sz_exp->topt = new Opt(uint_t);
   typ res_t2 = ArrayType(res, empty_tqual(), sz_exp);
 
   for (_ es2 = es; es2 != null; es2 = es2->tl) {
@@ -1019,7 +1020,7 @@ static typ tcStruct(tenv_t te, seg_t loc, typ *`r topt,
   let res_typ = StructType(*tn,typs,new{sd});
   // this will instantiate the struct if we have type information in topt
   if (topt != null) unify(res_typ,*topt);
-  *otyps = &Opt(typs);
+  *otyps = new Opt(typs);
   // make sure each argument has the right type
   list_t<$(structfield_t,exp)@> fields =
     resolve_struct_designators(loc,args,sd);
@@ -1048,8 +1049,8 @@ static typ tcEnum(tenv te, seg_t loc, typ *`r topt,
   let all_typs   = List::map(snd,all_inst);
   let exist_typs = List::map(snd,exist_inst);
   let inst       = List::append(all_inst,exist_inst);
-  *all_ref   = &Opt(all_typs);
-  *exist_ref = &Opt(exist_typs);
+  *all_ref   = new Opt(all_typs);
+  *exist_ref = new Opt(exist_typs);
   typ res = EnumType(ed->name->v,all_typs, new{ed});
   // this instantiates the type variables if we have top-down type info
   if (topt != null) unify(*topt,res);
@@ -1087,7 +1088,7 @@ static typ tcXenum(tenv te, seg_t loc, typ *`r topt,
   let exist_typs = List::map(snd,exist_inst);
   let res        = XenumType(xd->name, new{xd});
   let ts         = ef->typs;
-  *exist_ref = &Opt(exist_typs);
+  *exist_ref = new Opt(exist_typs);
   while (es != null && ts != null) {
     exp e = es->hd;
     typ t = substitute(exist_inst,(*ts->hd)[1]);
@@ -1189,7 +1190,7 @@ static typ tcNew(tenv te, seg_t loc, typ *`r topt, exp e, exp e1) {
                                         new_conref(b)});
       if (topt != null) {
         if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
-          e->topt = &Opt(res_typ);
+          e->topt = new Opt(res_typ);
           unchecked_cast(te, e, *topt);
           res_typ = *topt;
         }
@@ -1222,7 +1223,7 @@ static typ tcNew(tenv te, seg_t loc, typ *`r topt, exp e, exp e1) {
         // can cast res_typ to topt, and insert the cast so that the code
         // generator knows what to do.
         if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
-          e->topt = &Opt(res_typ);
+          e->topt = new Opt(res_typ);
           unchecked_cast(te, e, *topt);
           res_typ = *topt;
         }
@@ -1257,7 +1258,7 @@ static typ tcNew(tenv te, seg_t loc, typ *`r topt, exp e, exp e1) {
                                       new_conref(Upper_b(uint_exp(1,null)))});
     if (topt != null) {
       if (!unify(*topt,res_typ) && silent_castable(te,loc,res_typ,*topt)) {
-        e->topt = &Opt(res_typ);
+        e->topt = new Opt(res_typ);
         unchecked_cast(te,e,*topt);
         res_typ = *topt;
       }
@@ -1338,7 +1339,7 @@ static typ tcExpNoPromote(tenv te, typ *`r topt, exp e) {
 	  typ new_typ = PointerType(PtrInfo{ftyp,rt,x,tq,b});
 	  exp inner   = copy_exp(e);
 	  e->r        = Instantiate_e(inner,ts);
-	  e->topt     = &Opt(new_typ);
+	  e->topt     = new Opt(new_typ);
 	}
 	break;
       default: break;
@@ -1452,5 +1453,5 @@ static void tcExpNoInst(tenv te, typ *`r topt, exp e) {
   case Malloc_e(*ma_ptr):
     t = tcMalloc(te,loc,topt,ma_ptr); break;
   }
-  e->topt = &Opt(t);
+  e->topt = new Opt(t);
 }

@@ -36,16 +36,16 @@ ofs, unsigned int n); struct _tagged_string Cyc_Filename_concat( struct
 _tagged_string s1, struct _tagged_string s2){ return Cyc_String_strconcat_l(({
 struct Cyc_List_List* _temp0=( struct Cyc_List_List*) GC_malloc( sizeof( struct
 Cyc_List_List)); _temp0->hd=( void*)({ struct _tagged_string* _temp7=( struct
-_tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1); _temp7[ 0]= s1;
+_tagged_string*) GC_malloc( sizeof( struct _tagged_string)); _temp7[ 0]= s1;
 _temp7;}); _temp0->tl=({ struct Cyc_List_List* _temp1=( struct Cyc_List_List*)
 GC_malloc( sizeof( struct Cyc_List_List)); _temp1->hd=( void*)({ struct
 _tagged_string* _temp4=( struct _tagged_string*) GC_malloc( sizeof( struct
-_tagged_string) * 1); _temp4[ 0]=( struct _tagged_string)({ char* _temp5=( char*)"/";
+_tagged_string)); _temp4[ 0]=( struct _tagged_string)({ char* _temp5=( char*)"/";
 struct _tagged_string _temp6; _temp6.curr= _temp5; _temp6.base= _temp5; _temp6.last_plus_one=
 _temp5 + 2; _temp6;}); _temp4;}); _temp1->tl=({ struct Cyc_List_List* _temp2=(
 struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2->hd=(
 void*)({ struct _tagged_string* _temp3=( struct _tagged_string*) GC_malloc(
-sizeof( struct _tagged_string) * 1); _temp3[ 0]= s2; _temp3;}); _temp2->tl= 0;
+sizeof( struct _tagged_string)); _temp3[ 0]= s2; _temp3;}); _temp2->tl= 0;
 _temp2;}); _temp1;}); _temp0;}));} struct _tagged_string Cyc_Filename_chop_extension(
 struct _tagged_string filename){ int i=( int)(({ struct _tagged_string _temp8=
 filename;( unsigned int)( _temp8.last_plus_one - _temp8.curr);}) -( unsigned int)

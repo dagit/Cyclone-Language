@@ -50,7 +50,7 @@ static opt_t<$(string,int)@> parse_linedef(string line) {
     if (j == line.size || k == line.size) return null; // if there's no name
     string fname = substring(line,j,k-j);
 
-    return &Opt(&$(fname,number));
+    return new Opt(new $(fname,number));
   } catch {
   default:
     return null;
@@ -112,8 +112,8 @@ void poss_of_abss(string filename, List::list_t<$(int,pos_t)@> places) {
 }
 
 pos_t pos_of_abs(string filename, int abs) {
-  pos_t ans = &Pos("","",0,0);
-  poss_of_abss(filename, &List::List(&$(abs,ans),null));
+  pos_t ans = new Pos("","",0,0);
+  poss_of_abss(filename, new List::List(new $(abs,ans),null));
   return ans;
 }
 

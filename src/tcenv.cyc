@@ -155,7 +155,7 @@ struct Fenv {
 
 tenv tc_init() {
   // Initialize globals
-  empty_var_set = &Opt(Set::empty(String::zstrptrcmp));
+  empty_var_set = new Opt(Set::empty(String::zstrptrcmp));
 
   // Set up initial environment so that xenum exn is defined
   // Note: Absyn::exn_xed must be fresh for each file b/c fields gets mutated!!
@@ -166,7 +166,7 @@ tenv tc_init() {
   exn_typ = XenumType(exn_name, &exn_xed);
   ge->xenumdecls = Dict::insert(ge->xenumdecls, (*exn_name)[1], &exn_xed);
   let ae = Dict::insert(Dict::empty(varlist_cmp), top_ns, ge);
-  return &Tenv(top_ns,ae,null);
+  return new Tenv(top_ns,ae,null);
 }
 
 // Lookup a namespace relative to the current namespace
@@ -253,13 +253,13 @@ list_t<var> resolve_namespace(tenv_t te, seg_t loc,
     for (let nss = ge->availables; nss != null; nss = nss->tl) {
       genv_t ge2 = Dict::lookup(te->ae,nss->hd);
       if (Set::member(ge2->namespaces, n))
-        possible_results = &List(List::append(cns,&List(n,ns)),
-                                 possible_results);
+        possible_results = new List(List::append(cns,new List(n,ns)),
+                                    possible_results);
     }
     // Check current namespace
     if (Set::member(ge->namespaces, n))
-      possible_results = &List(List::append(cns,&List(n,ns)),
-                               possible_results);
+      possible_results = new List(List::append(cns,new List(n,ns)),
+                                  possible_results);
     // Is this right? We check for ambiguity between the current namespace
     // and used namespaces in the current scope, but not outer namespaces.
     // Seems inconsistent.
@@ -348,7 +348,7 @@ opt_t<xenumdecl@> lookup_xenumdecl(tenv te,seg_t loc,qvar q) {
   switch (nsl) {
   case Rel_n(null):
     // unqualified name, okay to fail -- that just means we have a new xenum
-    try return &Opt(scoped_lookup(te, loc, lookup_xenumdecl_f, v));
+    try return new Opt(scoped_lookup(te, loc, lookup_xenumdecl_f, v));
     catch { case Dict::Absent: return null; }
   case Loc_n: // impossible case
     terr(loc,"lookup_xenumdecl: impossible");
@@ -365,10 +365,10 @@ opt_t<xenumdecl@> lookup_xenumdecl(tenv te,seg_t loc,qvar q) {
       Tcutil::terr(loc,"bad qualified name for xenum");
       throw Dict::Absent;
     }
-    return &Opt(Dict::lookup(ge->xenumdecls,v));
+    return new Opt(Dict::lookup(ge->xenumdecls,v));
   case Abs_n(y):
     genv_t ge = Dict::lookup(te->ae,y);
-    return &Opt(Dict::lookup(ge->xenumdecls,v));
+    return new Opt(Dict::lookup(ge->xenumdecls,v));
   }
 }
 //// FIX: We probably need some of the lenience of lookup_xenumdecl here too.
@@ -396,14 +396,15 @@ typedefdecl lookup_typedefdecl(tenv te, seg_t loc, qvar q) {
 }
 
 genv_t empty_genv() {
-  return &Genv{.namespaces  = empty_var_set->v,
-               .structdecls = Dict::empty(String::zstrptrcmp),
-               .uniondecls  = Dict::empty(String::zstrptrcmp),
-               .enumdecls   = Dict::empty(String::zstrptrcmp),
-               .xenumdecls  = Dict::empty(String::zstrptrcmp),
-               .typedefs    = Dict::empty(String::zstrptrcmp),
-               .ordinaries  = Dict::empty(String::zstrptrcmp),
-               .availables  = null};
+  return new 
+    Genv{.namespaces  = empty_var_set->v,
+            .structdecls = Dict::empty(String::zstrptrcmp),
+            .uniondecls  = Dict::empty(String::zstrptrcmp),
+            .enumdecls   = Dict::empty(String::zstrptrcmp),
+            .xenumdecls  = Dict::empty(String::zstrptrcmp),
+            .typedefs    = Dict::empty(String::zstrptrcmp),
+            .ordinaries  = Dict::empty(String::zstrptrcmp),
+            .availables  = null};
 }
 
 ////////////////////////////// Frames Manipulation //////////////////////////
@@ -444,20 +445,20 @@ fenv_t get_fenv(tenv te) {
 
 tenv put_fenv(tenv te, fenv_t fe) {
   if (te->le == null) throw Env_error;
-  return &Tenv(te->ns, te->ae, &Opt(put_visible(te->le->v,fe)));
+  return new Tenv(te->ns, te->ae, new Opt(put_visible(te->le->v,fe)));
 }
 
 //////////////////// Function Environment Manipulation //////////////////////
 
 static fenv_t copy_fenv_old_ctrl(fenv_t f) {
-  return &Fenv(f->shared, f->type_vars, f->locals, f->encloser, f->ctrl_env,
-	       f->capability, f->curr_rgn);
+  return new Fenv(f->shared, f->type_vars, f->locals, f->encloser, f->ctrl_env,
+                  f->capability, f->curr_rgn);
 }
 static fenv_t copy_fenv_new_ctrl(fenv_t f) {
   // WARNING: fallthru_clause shared with old
   ctrl_env_t c = f->ctrl_env;
-  return &Fenv(f->shared, f->type_vars, f->locals, f->encloser,
-	       &CtrlEnv(c->continue_stmt, c->break_stmt, c->fallthru_clause,
+  return new Fenv(f->shared, f->type_vars, f->locals, f->encloser,
+                  new CtrlEnv(c->continue_stmt, c->break_stmt, c->fallthru_clause,
 			c->next_stmt, c->try_depth),
 	       f->capability, f->curr_rgn);
 }
@@ -538,7 +539,7 @@ void process_continue(tenv te, stmt s, stmt_opt @sopt) {
   if (te->le == null) env_err("Tcenv: unexpected process_continue");
   switch (get_fenv(te)->ctrl_env->continue_stmt) {
   case Stmt_j(s2):
-    s2->non_local_preds = &List(s,s2->non_local_preds);
+    s2->non_local_preds = new List(s,s2->non_local_preds);
     *sopt = s2;
     return;
   case NotLoop_j: terr(s->loc, "continue not in a loop");     return;
@@ -551,7 +552,7 @@ void process_break(tenv te, stmt s, stmt_opt @sopt) {
   fenv_t fe = get_fenv(te);
   switch (fe->ctrl_env->break_stmt) {
   case Stmt_j(s2):
-    s2->non_local_preds = &List(s,s2->non_local_preds);
+    s2->non_local_preds = new List(s,s2->non_local_preds);
     *sopt = s2;
     return;
   case NotLoop_j:
@@ -578,10 +579,10 @@ void process_goto(tenv te, stmt s, var l, stmt_opt @sopt) {
     let needed = fe->shared->needed_labels;
     let slopt  = SlowDict::lookup_opt(needed, l);
     if(slopt == null)
-      slopt = &Opt(null);
-    fe->shared->needed_labels = SlowDict::insert(needed,l,&List(s,slopt->v));
+      slopt = new Opt(null);
+    fe->shared->needed_labels = SlowDict::insert(needed,l,new List(s,slopt->v));
   } else {
-    sopt2->v->non_local_preds = &List(s, sopt2->v->non_local_preds);
+    sopt2->v->non_local_preds = new List(s, sopt2->v->non_local_preds);
     *sopt = sopt2->v;
   }
 }
@@ -592,7 +593,7 @@ process_fallthru(tenv te,stmt s, switch_clause *@ clauseopt){
   let ans = fe->ctrl_env->fallthru_clause;
   if(ans != null) {
     (*ans)[0]->body->non_local_preds = 
-      &List(s, (*ans)[0]->body->non_local_preds);
+      new List(s, (*ans)[0]->body->non_local_preds);
     *clauseopt = new{(*ans)[0]};
   }
   return ans;
@@ -603,10 +604,10 @@ tenv set_fallthru(tenv te, $(list_t<tvar>,list_t<vardecl>) * pat_typ,
   if(te->le == null) env_err("Tcenv: unexpected set_fallthru");
   let ft_typ = null;
   for(let vds = (*pat_typ)[1]; vds!=null; vds=vds->tl)
-    ft_typ = &List(vds->hd->type,ft_typ);
+    ft_typ = new List(vds->hd->type,ft_typ);
   ft_typ = List::imp_rev(ft_typ);
   fenv_t fe = copy_fenv_new_ctrl(get_fenv(te));
-  fe->ctrl_env->fallthru_clause = &$(clause,(*pat_typ)[0],ft_typ);
+  fe->ctrl_env->fallthru_clause = new $(clause,(*pat_typ)[0],ft_typ);
   return put_fenv(te,fe);
 }
 // fallthru is illegal in the last case
@@ -700,9 +701,9 @@ tenv new_block(tenv te) {
   tvar block_rgn = new_tvar(RgnKind);
   typ block_typ = VarType(block_rgn);
   // NOTE:  no need to check uniqueness since the variable is gensymed
-  fe->type_vars = &List(block_rgn, fe->type_vars);
-  fe->capability = JoinEff(&List(AccessEff(block_typ), 
-                                 &List(fe->capability,null)));
+  fe->type_vars = new List(block_rgn, fe->type_vars);
+  fe->capability = JoinEff(new List(AccessEff(block_typ), 
+                                    new List(fe->capability,null)));
   fe->curr_rgn = block_typ;
   return put_fenv(te,fe);
 }
@@ -762,18 +763,19 @@ fenv_t new_fenv(fndecl fd) {
     locals = Dict::insert(locals, (*args->hd)[0], Param_b(vd));
   }
   fd->param_vardecls = new{Opt(vds)};
-  return &Fenv{.shared      = 
-                  &SharedFenv{.return_typ = fd->ret_type,
-			      .seen_labels = Dict::empty(String::zstrptrcmp),
-			      .needed_labels = 
-			        SlowDict::empty(String::zstrptrcmp)
-		             },
- 	       .type_vars   = &List(rgn0,fd->tvs), // assumed unique
-	       .locals      = locals,  // assumed unique
-	       .encloser    = fd->body, // careful -- self loop at top!!!
-	       .ctrl_env    = &CtrlEnv(NotLoop_j, NotLoop_j, null, FnEnd_j, 0),
-               .capability  = JoinEff(&List(AccessEff(param_rgn),
-                                            &List(fd->effect->v,null))),
-               .curr_rgn    = param_rgn
-              };
+  return new 
+    Fenv{.shared = new SharedFenv{
+                     .return_typ = fd->ret_type,
+                     .seen_labels = Dict::empty(String::zstrptrcmp),
+                     .needed_labels = 
+                       SlowDict::empty(String::zstrptrcmp)
+                   },
+         .type_vars   = new List(rgn0,fd->tvs), // assumed unique
+         .locals      = locals,  // assumed unique
+         .encloser    = fd->body, // careful -- self loop at top!!!
+         .ctrl_env    = new CtrlEnv(NotLoop_j, NotLoop_j, null, FnEnd_j, 0),
+         .capability  = JoinEff(new List(AccessEff(param_rgn),
+                                         new List(fd->effect->v,null))),
+         .curr_rgn    = param_rgn
+       };
 }

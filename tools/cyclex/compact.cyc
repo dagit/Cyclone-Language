@@ -54,7 +54,7 @@ static list_t<$(int,int)@> non_default_elements(int def, int ?v) {
   for(int i=v.size-1; i >= 0; --i) {
     int e = v[i];
     if(e != def)
-      ans = &List(&$(i,e), ans);
+      ans = new List(new $(i,e), ans);
   }
   return ans;
 }
@@ -111,7 +111,7 @@ static $(int,int)@ pack_moves(int state_num, automata_move_t ?moves) {
   }
   if(base + 257 > last_used)
     last_used = base + 257;
-  return &$(base, def);
+  return new $(base, def);
 }
 
 lex_tables_t compact_tables(Lexgen::automata_t ?state_v) {
@@ -134,7 +134,7 @@ lex_tables_t compact_tables(Lexgen::automata_t ?state_v) {
       defaultX[i] = d;
       break;
     }
-  return &Lex_tables(base, backtrk, defaultX, 
-		     new {for i < last_used : trans[i]},
-		     new {for i < last_used : check[i]});
+  return new Lex_tables(base, backtrk, defaultX, 
+                        new {for i < last_used : trans[i]},
+                        new {for i < last_used : check[i]});
 }

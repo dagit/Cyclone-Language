@@ -13,17 +13,17 @@ abstract struct Rope_node {
 };
 
 rope_t from_string(string s) {
-  return &Rope_node{String_rope(s)};
+  return new Rope_node{String_rope(s)};
 }
 rope_t concat(rope_t r1,rope_t r2) {
-  return &Rope_node{Array_rope(new {r1,r2})};
+  return new Rope_node{Array_rope(new {r1,r2})};
 }
 rope_t concata(rope_t ?rs) {
-  return &Rope_node(Array_rope(rs));
+  return new Rope_node(Array_rope(rs));
 }
 rope_t concatl(List::list_t<rope_t> l) {
-  return &Rope_node(Array_rope(new {for i < List::length(l) : 
-                                    ({rope_t r = l->hd; l = l->tl; r;})}));
+  return new Rope_node(Array_rope(new {for i < List::length(l) : 
+    ({rope_t r = l->hd; l = l->tl; r;})}));
 }
 
 uint length(rope_t r) {

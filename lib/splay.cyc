@@ -35,8 +35,8 @@ static void rotate_left(struct noderef<`a,`b> @nr) {
   switch (n->left) {
   case Node(nr2):
     let n2 = nr2->v;
-    let t = Node(&noderef(&node(n->key, n->data, n2->right, n->right)));
-    nr->v = &node(n2->key, n2->data, n2->left, t);
+    let t = Node(new noderef(new node(n->key, n->data, n2->right, n->right)));
+    nr->v = new node(n2->key, n2->data, n2->left, t);
     break;
   default:
     throw InvalidArg("Splay::rotate_left");
@@ -48,8 +48,8 @@ static void rotate_right(struct noderef<`a,`b> @nr) {
   switch (n->right) {
   case Node(nr2):
     let n2 = nr2->v;
-    let t = Node(&noderef(&node(n->key, n->data, n->left, n2->left)));
-    nr->v = &node(n2->key, n2->data, t, n2->right);
+    let t = Node(new noderef(new node(n->key, n->data, n->left, n2->left)));
+    nr->v = new node(n2->key, n2->data, t, n2->right);
     break;
   default:
     throw InvalidArg("Splay::rotate_right");
@@ -63,8 +63,8 @@ static void rotate_right(struct noderef<`a,`b> @nr) {
 //   switch (n->left) {
 //   case Node(nr2):
 //     let n2 = nr2->v;
-//     nr->v = &node(n2->key, n2->data, n2->left,
-//                   Node(&noderef(&node(n->key, n->data,
+//     nr->v = new node(n2->key, n2->data, n2->left,
+//                   Node(new noderef(new node(n->key, n->data,
 //                                       n2->right, n->right))));
 //     break;
 //   default:
@@ -77,8 +77,8 @@ static void rotate_right(struct noderef<`a,`b> @nr) {
 //   switch (n->right) {
 //   case Node(nr2):
 //     let n2 = nr2->v;
-//     nr->v = &node(n2->key, n2->data,
-//                   Node(&noderef(&node(n->key, n->data,
+//     nr->v = new node(n2->key, n2->data,
+//                   Node(new noderef(new node(n->key, n->data,
 //                                       n->left, n2->left))),
 //                   n2->right);
 //     break;
@@ -129,10 +129,10 @@ bool splay(int reln(`a,`a), `a reln_first_arg, enum tree<`a,`b> tree) {
 	lift(path);
 	return true;
       } else if (comp < 0) {
-	path = &List(&$(LEFT, nr), path);
+	path = new List(new $(LEFT, nr), path);
 	tree = n->left;
       } else {
-	path = &List(&$(RIGHT, nr), path);
+	path = new List(new $(RIGHT, nr), path);
 	tree = n->right;
       }
       break;

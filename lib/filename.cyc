@@ -13,9 +13,9 @@ using List;
 //string current_dir_name = ".";
 
 string concat(string s1, string s2) {
-  return String::strconcat_l(&List(new {s1},
-				   &List(new {(string)DIR_SEPARATOR_STR},
-					 &List(new {s2},null))));
+  return String::strconcat_l(new List(new s1,
+                                      new List(new DIR_SEPARATOR_STR,
+                                               new List(new s2,null))));
 }
 
 string chop_extension(string filename) {

@@ -59,7 +59,7 @@ xenum exn { Unreachable(string) };
 opt_t<`b> opt_map(`b f(`a), opt_t<`a> o) {
   if (o==null)
     return null;
-  return &Opt(f(o->v));
+  return new Opt(f(o->v));
 }
 
 string new_string(int i) {

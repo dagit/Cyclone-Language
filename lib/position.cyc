@@ -55,19 +55,20 @@ list_t<stringptr> strings_of_segments(glist_t<seg_t,`r> segs) {
   for(let segs2 = segs; segs2 != null; segs2 = segs2->tl) {
     if(segs2->hd == null)
       continue;
-    places = &List(&$(segs2->hd->end,   new_pos()),
-	     &List(&$(segs2->hd->start, new_pos()),
-		   places));
+    places = new List(new $(segs2->hd->end,   new_pos()),
+                      new List(new $(segs2->hd->start, new_pos()),
+                               places));
   }
   Lineno::poss_of_abss(source, places); // mutates places
   list_t<stringptr> ans = null;
   places = List::imp_rev(places);
   for(; segs != null; segs = segs->tl) 
     if(segs->hd == null)
-      ans = &List(new {xprintf("%s(unknown)", source)}, ans);
+      ans = new List(new {xprintf("%s(unknown)", source)}, ans);
     else {
-      ans = &List(new {string_of_pos_pr((*places->hd)[1],(*places->tl->hd)[1])},
-		  ans);
+      ans = new List(new {string_of_pos_pr((*places->hd)[1],
+                                           (*places->tl->hd)[1])},
+                     ans);
       places = places->tl->tl;
     }
   return ans;
@@ -83,13 +84,13 @@ struct Error {
   string       desc;
 };
 error_t mk_err_lex(seg_t l, string desc) {
-  return &Error(source, l, Lex, desc);
+  return new Error(source, l, Lex, desc);
 }
 error_t mk_err_parse(seg_t l, string desc) {
-  return &Error(source, l, Parse, desc);
+  return new Error(source, l, Parse, desc);
 }
 error_t mk_err_elab(seg_t l, string desc) {
-  return &Error(source, l, Elab, desc);
+  return new Error(source, l, Elab, desc);
 }
 
 /////////// Error Reporting ///////////
@@ -136,9 +137,9 @@ static $(string,int,int)@ get_context(seg_t seg) {
     string sec_one   = trunc(n, substring(sline, 0,  sc            ));
     string sec_two   = trunc(n, substring(sline, sc, ec-sc         ));
     string sec_three = trunc(n, substring(sline, sc, strlen(sline)-ec));
-    return &$(xprintf("%s%s%s",sec_one,sec_two,sec_three),
-	      (int)strlen(sec_one),
-	      (int)(strlen(sec_one)+strlen(sec_two)));
+    return new $(xprintf("%s%s%s",sec_one,sec_two,sec_three),
+                 (int)strlen(sec_one),
+                 (int)(strlen(sec_one)+strlen(sec_two)));
   }
   else {
     // Case 2: error on multiple lines,
@@ -148,9 +149,9 @@ static $(string,int,int)@ get_context(seg_t seg) {
     string sec_two   = trunc(n, substring(sline, sc, strlen(sline)-sc));
     string sec_three = trunc(n, substring(eline, 0,  ec            ));
     string sec_four  = trunc(n, substring(eline, ec, strlen(eline)-ec));
-    return &$(xprintf("%s%s.\\.%s%s",sec_one,sec_two,sec_three,sec_four),
-	      (int)strlen(sec_one),
-	      (int)(strlen(sec_one)+strlen(sec_two)+3+strlen(sec_three)));
+    return new $(xprintf("%s%s.\\.%s%s",sec_one,sec_two,sec_three,sec_four),
+                 (int)strlen(sec_one),
+                 (int)(strlen(sec_one)+strlen(sec_two)+3+strlen(sec_three)));
   }
 }
 

@@ -1849,31 +1849,31 @@ goto _LL1408; _LL1406: { struct Cyc_List_List* assump=({ struct Cyc_List_List*
 _temp1421=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
 _temp1421->hd=( void*)({ struct _tuple7* _temp1422=( struct _tuple7*) GC_malloc(
 sizeof( struct _tuple7)); _temp1422->f1= t1; _temp1422->f2= t2; _temp1422;});
-_temp1421->tl= 0; _temp1421;}); int ptrsub= Cyc_Tcutil_ptrsubtype( te,( struct
-Cyc_List_List*) assump, _temp1391, _temp1419)? ! _temp1385->q_const? 1:
-_temp1413->q_const: 0; int bounds_ok=(( int(*)( int(* cmp)( void*, void*),
-struct Cyc_Absyn_Conref* x, struct Cyc_Absyn_Conref* y)) Cyc_Tcutil_unify_conrefs)(
-Cyc_Tcutil_boundscmp, _temp1383, _temp1411); if( ! bounds_ok){ struct _tuple7
-_temp1424=({ struct _tuple7 _temp1423; _temp1423.f1=(( void*(*)( struct Cyc_Absyn_Conref*
-x)) Cyc_Absyn_conref_val)( _temp1383); _temp1423.f2=(( void*(*)( struct Cyc_Absyn_Conref*
-x)) Cyc_Absyn_conref_val)( _temp1411); _temp1423;}); void* _temp1430; struct Cyc_Absyn_Exp*
-_temp1432; void* _temp1434; struct Cyc_Absyn_Exp* _temp1436; _LL1426: _LL1435:
-_temp1434= _temp1424.f1; if(( unsigned int) _temp1434 > 1u?(( struct
-_enum_struct*) _temp1434)->tag == Cyc_Absyn_Upper_b_tag: 0){ _LL1437: _temp1436=(
-struct Cyc_Absyn_Exp*)(( struct Cyc_Absyn_Upper_b_struct*) _temp1434)->f1; goto
-_LL1431;} else{ goto _LL1428;} _LL1431: _temp1430= _temp1424.f2; if((
-unsigned int) _temp1430 > 1u?(( struct _enum_struct*) _temp1430)->tag == Cyc_Absyn_Upper_b_tag:
-0){ _LL1433: _temp1432=( struct Cyc_Absyn_Exp*)(( struct Cyc_Absyn_Upper_b_struct*)
-_temp1430)->f1; goto _LL1427;} else{ goto _LL1428;} _LL1428: goto _LL1429;
-_LL1427: if( Cyc_Evexp_eval_const_uint_exp( _temp1436) >= Cyc_Evexp_eval_const_uint_exp(
-_temp1432)){ bounds_ok= 1;} goto _LL1425; _LL1429: bounds_ok= 1; goto _LL1425;
-_LL1425:;} return( bounds_ok? ptrsub: 0)? _temp1389 == Cyc_Absyn_HeapRgn? 1: Cyc_Tcutil_unify(
-_temp1389, _temp1417): 0;} _LL1408: return 0; _LL1404:;} _LL1366: { void*
-_temp1438= t2; struct Cyc_Absyn_Exp* _temp1444; struct Cyc_Absyn_Tqual*
-_temp1446; void* _temp1448; _LL1440: if(( unsigned int) _temp1438 > 4u?(( struct
-_enum_struct*) _temp1438)->tag == Cyc_Absyn_ArrayType_tag: 0){ _LL1449:
-_temp1448=( void*)(( struct Cyc_Absyn_ArrayType_struct*) _temp1438)->f1; goto
-_LL1447; _LL1447: _temp1446=( struct Cyc_Absyn_Tqual*)(( struct Cyc_Absyn_ArrayType_struct*)
+_temp1421->tl= 0; _temp1421;}); int ptrsub= Cyc_Tcutil_ptrsubtype( te, assump,
+_temp1391, _temp1419)? ! _temp1385->q_const? 1: _temp1413->q_const: 0; int
+bounds_ok=(( int(*)( int(* cmp)( void*, void*), struct Cyc_Absyn_Conref* x,
+struct Cyc_Absyn_Conref* y)) Cyc_Tcutil_unify_conrefs)( Cyc_Tcutil_boundscmp,
+_temp1383, _temp1411); if( ! bounds_ok){ struct _tuple7 _temp1424=({ struct
+_tuple7 _temp1423; _temp1423.f1=(( void*(*)( struct Cyc_Absyn_Conref* x)) Cyc_Absyn_conref_val)(
+_temp1383); _temp1423.f2=(( void*(*)( struct Cyc_Absyn_Conref* x)) Cyc_Absyn_conref_val)(
+_temp1411); _temp1423;}); void* _temp1430; struct Cyc_Absyn_Exp* _temp1432; void*
+_temp1434; struct Cyc_Absyn_Exp* _temp1436; _LL1426: _LL1435: _temp1434=
+_temp1424.f1; if(( unsigned int) _temp1434 > 1u?(( struct _enum_struct*)
+_temp1434)->tag == Cyc_Absyn_Upper_b_tag: 0){ _LL1437: _temp1436=( struct Cyc_Absyn_Exp*)((
+struct Cyc_Absyn_Upper_b_struct*) _temp1434)->f1; goto _LL1431;} else{ goto
+_LL1428;} _LL1431: _temp1430= _temp1424.f2; if(( unsigned int) _temp1430 > 1u?((
+struct _enum_struct*) _temp1430)->tag == Cyc_Absyn_Upper_b_tag: 0){ _LL1433:
+_temp1432=( struct Cyc_Absyn_Exp*)(( struct Cyc_Absyn_Upper_b_struct*) _temp1430)->f1;
+goto _LL1427;} else{ goto _LL1428;} _LL1428: goto _LL1429; _LL1427: if( Cyc_Evexp_eval_const_uint_exp(
+_temp1436) >= Cyc_Evexp_eval_const_uint_exp( _temp1432)){ bounds_ok= 1;} goto
+_LL1425; _LL1429: bounds_ok= 1; goto _LL1425; _LL1425:;} return( bounds_ok?
+ptrsub: 0)? _temp1389 == Cyc_Absyn_HeapRgn? 1: Cyc_Tcutil_unify( _temp1389,
+_temp1417): 0;} _LL1408: return 0; _LL1404:;} _LL1366: { void* _temp1438= t2;
+struct Cyc_Absyn_Exp* _temp1444; struct Cyc_Absyn_Tqual* _temp1446; void*
+_temp1448; _LL1440: if(( unsigned int) _temp1438 > 4u?(( struct _enum_struct*)
+_temp1438)->tag == Cyc_Absyn_ArrayType_tag: 0){ _LL1449: _temp1448=( void*)((
+struct Cyc_Absyn_ArrayType_struct*) _temp1438)->f1; goto _LL1447; _LL1447:
+_temp1446=( struct Cyc_Absyn_Tqual*)(( struct Cyc_Absyn_ArrayType_struct*)
 _temp1438)->f2; goto _LL1445; _LL1445: _temp1444=( struct Cyc_Absyn_Exp*)((
 struct Cyc_Absyn_ArrayType_struct*) _temp1438)->f3; goto _LL1441;} else{ goto
 _LL1442;} _LL1442: goto _LL1443; _LL1441: { int okay; okay=( _temp1393 != 0?

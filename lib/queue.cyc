@@ -27,12 +27,12 @@ xenum exn { Empty };
 
 // create a new queue
 queue_t<`a> create() {
-  return &Queue(null,null);
+  return new Queue(null,null);
 }
 
 // insert an element into the rear of the queue (side effect)
 void add(queue_t<`a> q,`a x) {
-  list_t<`a> cell = &List(x,null);
+  list_t<`a> cell = new List(x,null);
 
   if (q->front == null) {
     q->front = cell;

@@ -29,7 +29,7 @@ abstract struct t
 T create (uint n) {
   if (n < 1) n=1;
   string s = new_string(n);
-  return &t(s, 0, n, s);
+  return new t(s, 0, n, s);
 }
 
 string contents(T b) {

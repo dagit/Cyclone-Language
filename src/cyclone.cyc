@@ -49,18 +49,18 @@ bool @ add_cyc_namespace = &add_cyc_namespace_r;
 
 static string *out_file_name_opt = null;
 static void set_out_file_name(string s) {
-  out_file_name_opt = (string *)(&$(s));
+  out_file_name_opt = (string *)(new s);
 }
 static void set_check_null() {
   Toc::check_for_null = true;
 }
 static list_t<stringptr> includes = null;
 static void add_include(string s) {
-  includes = &List((stringptr)(new {s}),includes);
+  includes = new List(new s,includes);
 }
 static list_t<stringptr> defines = null;
 static void add_define(string s) {
-  defines = &List((stringptr)(new {s}),defines);
+  defines = new List(new s,defines);
 }
 
 bool compile_failure = false; // for exit code (helps Makefile)
@@ -170,10 +170,10 @@ void compile_file(string filename) {
 
   // Run the preprocessor, by building and running a command-line
   // Pass -I and -D things onto pre-processor
-  string inc_string = String::str_sepstr(&List(new{(string)""},
-                                               rev(includes))," -I");
-  string def_string = String::str_sepstr(&List(new{(string)""},
-                                               rev(defines)), " -D");
+  string inc_string = String::str_sepstr(new List(new "",
+                                                  rev(includes))," -I");
+  string def_string = String::str_sepstr(new List(new "",
+                                                  rev(defines)), " -D");
   // check that the input file exists
   FILE * f0 = try_file_open(filename, "r", "input file");
   if(compile_failure)
