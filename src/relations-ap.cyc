@@ -1,0 +1,624 @@
+/* Tracking relations among variables.
+   Copyright (C) 2003 Greg Morrisett
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+#include "relations.h"
+#include "tcutil.h"
+#include "pratt-ap.h"
+#include "absynpp.h"
+#include "evexp.h"
+#include <string.h>
+#include <ap.h>
+
+//#define RELATIONS_DEBUG
+
+using List;
+namespace Relations;
+
+reln_op_t RConst(unsigned int i) {
+  return RelnOp{.RConst = i};
+}
+reln_op_t RVar(Absyn::vardecl_t v) {
+  return RelnOp{.RVar = v};
+}
+reln_op_t RNumelts(Absyn::vardecl_t v) {
+  return RelnOp{.RNumelts = v};
+}
+reln_op_t RType(Absyn::type_t t) {
+  return RelnOp{.RType = Tcutil::compress(t)};
+}
+reln_op_t RParam(unsigned int i) {
+  return RelnOp{.RParam = i};
+}
+reln_op_t RParamNumelts(unsigned int i) {
+  return RelnOp{.RParamNumelts = i};
+}
+reln_op_t RReturn() {
+  return RelnOp{.RReturn = 0};
+}
+
+static bool same_relop(reln_op_t r1,reln_op_t r2) {
+  switch ($(r1,r2)) {
+  case $({.RConst = c1},   {.RConst = c2})   : return c1 == c2;
+  case $({.RVar = x1},     {.RVar = x2}): return x1 == x2;
+  case $({.RNumelts = x1}, {.RNumelts = x2}) : return x1 == x2;
+  case $({.RType = t1},    {.RType = t2}) : return Tcutil::unify(t1,t2);
+  case $({.RParam = i},    {.RParam = j}): return i == j;
+  case $({.RParamNumelts = i}, {.RParamNumelts = j}): return i == j;
+  case $({.RReturn = _},   {.RReturn = _}): return true;
+  default: return false;
+  }
+}
+
+relns_t<`r> add_relation(region_t<`r> rgn, reln_op_t rop1, relation_t relation,
+                         reln_op_t rop2, relns_t<`r> relns) {
+  // add the relation to the list unless it's already there -- could
+  // avoid anything that's implied (e.g., n1 == n2 implies n1 <= n2)
+  for (let rs = relns; rs != NULL; rs = rs->tl) {
+    let r = rs->hd;
+    if (same_relop(r->rop1,rop1) && r->relation == relation && 
+        same_relop(r->rop2,rop2)) return relns;
+  }
+  return rnew(rgn) List(rnew(rgn) Reln(rop1,relation,rop2),relns);
+}
+
+relns_t<`r> duplicate_relation(region_t<`r> rgn,
+			       Absyn::exp_t e_old, Absyn::exp_t e_new,
+			       relns_t<`r> relns) {
+  Relations::reln_op_t rop_old = Relations::RConst(0); // dummy value
+  Relations::reln_op_t rop_new = Relations::RConst(0); // dummy value
+  if (!exp2relnop(e_old,&rop_old)) return relns;
+  if (!exp2relnop(e_new,&rop_new)) {
+    Tcutil::warn(e_new->loc,"Could not construct relation");
+    return relns;
+  }
+  for (let rs = relns; rs != NULL; rs = rs->tl) {
+    let r = rs->hd;
+    let rop1 = r->rop1;
+    let rop2 = r->rop2;
+    bool addIt = false;
+    if (same_relop(rop1,rop_old)) {
+      addIt = true;
+      rop1 = rop_new;
+    }
+    if (same_relop(rop2,rop_old)) {
+      addIt = true;
+      rop2 = rop_new;
+    }
+    if (addIt)
+      relns = rnew(rgn) List(rnew (rgn) Reln(rop1,r->relation,rop2),relns);
+  }
+  return relns;
+}
+
+bool relns_approx(relns_t<`r> r2s, relns_t<`r> r1s) {
+  if (r1s == r2s) return true;
+  //fprintf(stderr,"approx on ["); print_relns(stderr,r1s);
+  //fprintf(stderr,"] and ["); print_relns(stderr,r2s); fprintf(stderr,"]");
+  for (; r1s != NULL; r1s = r1s->tl) {
+    let r1 = r1s->hd;
+    bool found = false;
+    for (let r2s = r2s; r2s != NULL; r2s = r2s->tl) {
+      let r2 = r2s->hd;
+      if (r1 == r2 || (same_relop(r1->rop1,r2->rop1) && 
+                       r1->relation == r2->relation &&
+                       same_relop(r1->rop2,r2->rop2))) {
+        found = true;
+        break;
+      }
+    }
+    if (!found)
+      return false;
+  }
+  return true;
+}
+
+relns_t<`r> join_relns(region_t<`r> r, relns_t<`r> r1s, relns_t<`r> r2s){
+  if (r1s == r2s) return r1s;
+  list_t<reln_t> res = NULL;
+  bool diff = false;
+  for (let r1s = r1s; r1s != NULL; r1s = r1s->tl) {
+    let r1 = r1s->hd;
+    bool found = false;
+    for (let r2s = r2s; r2s != NULL; r2s = r2s->tl) {
+      let r2 = r2s->hd;
+      if (r1 == r2 || (same_relop(r1->rop1,r2->rop1) && 
+                       r1->relation == r2->relation &&
+                       same_relop(r1->rop2,r2->rop2))) {
+        res = rnew(r) List(r1,res);
+        found = true;
+        break;
+      }
+    }
+    if (!found) diff = true;
+  }
+  if (!diff) res = r1s;
+  return res;
+}
+
+static bool rop_contains_var(reln_op_t r, Absyn::vardecl_t v) {
+  switch (r) {
+  case {.RVar = v2}:      return v == v2;
+  case {.RNumelts = v2}:  return v == v2;
+  case {.RType = _}:
+  case {.RParam = _}:
+  case {.RParamNumelts = _}:
+  case {.RReturn = _}:
+  case {.RConst = _}:     return false;
+  }
+}
+
+relns_t<`r> reln_kill_var(region_t<`r> rgn, relns_t<`r> rs, Absyn::vardecl_t v) {
+  relns_t p;
+  bool found = false;
+  for (p = rs; !found && p != NULL; p = p->tl) {
+    let r = p->hd;
+    if (rop_contains_var(r->rop1,v) || rop_contains_var(r->rop2,v)) {
+      found = true;
+      break;
+    }
+  }
+  if (!found) return rs;
+
+  let new_rs = NULL;
+  for (p = rs; p != NULL; p = p->tl) {
+    let r = p->hd;
+    if (rop_contains_var(r->rop1,v) || rop_contains_var(r->rop2,v)) continue;
+    new_rs = rnew(rgn) List(r,new_rs);
+  }
+  return new_rs;
+}
+
+// Convert an expression to a relation operand -- puts the result in p
+// and returns true if successful, returns false otherwise.  Can we 
+// add other constants (e.g., NULL, characters, shorts, etc.?)
+bool exp2relnop(Absyn::exp_t e, reln_op_t @p) {
+  // if the expression has a singleton type, then that's what we track
+  // FIX: some constants were showing up here without types!
+ RETRY:
+  if (e->topt != NULL) {
+    switch (Tcutil::compress((Absyn::type_t)e->topt)) {
+    case &Absyn::AppType(&Absyn::TagCon,&List{t,_}):
+      *p = RType(t); return true;
+      break;
+    case &Absyn::ValueofType(type_exp): 
+      e = type_exp; 
+      break;
+    default: break;
+    }
+  }
+  switch (e->r) {
+  case &Absyn::Cast_e(_,e,...): return exp2relnop(e,p);
+  case &Absyn::Var_e(b):
+    let v = Tcutil::nonesc_vardecl(b);
+    if (v != NULL) {
+      *p = RVar(v);
+      return true;
+    }
+    break;
+  case &Absyn::Const_e({.Int_c = $(_,i)}):
+    *p = RConst(i);
+    return true;
+  case &Absyn::Primop_e(Absyn::Numelts,&List(&Absyn::Exp{.r=&Absyn::Var_e(b),...},_)):
+    let v = Tcutil::nonesc_vardecl(b);
+    if (v != NULL) {
+      *p = RNumelts(v);
+      return true;
+    }
+    break;
+  case &Absyn::Valueof_e(t):
+    switch (Tcutil::compress(t)) {
+    case &Absyn::ValueofType(type_exp):
+      e = type_exp;
+      goto RETRY;
+    default:
+      *p = RType(t);
+      return true;
+    }
+    break;
+  default: break;
+  }
+  // try to reduce the expression to a constant
+  if (Tcutil::is_const_exp(e)) {
+    let $(t1,known) = Evexp::eval_const_uint_exp(e);
+    if (known) {
+      *p = RConst(t1);
+      return true;
+    }
+  }
+  return false;
+}
+
+relns_t<`r> reln_kill_exp(region_t<`r> rgn, relns_t<`r> r, Absyn::exp_t e) {
+  switch (e->r) {
+  case &Absyn::Var_e(b):
+    let v = Tcutil::nonesc_vardecl(b);
+    if (v != NULL)
+      return reln_kill_var(rgn, r, v);
+    else return r;
+  default: return r;
+  }
+}
+
+reln_t<`r2> copy_reln(region_t<`r2> r2, reln_t r) {
+  return rnew(r2)(*r);
+}
+
+relns_t<`r2> copy_relns(region_t<`r2> r2, relns_t<`r> relns) {
+  return List::rmap_c(r2,copy_reln,r2,relns);
+}
+
+bool same_relns(relns_t r1, relns_t r2) {
+  for (; r1 != NULL && r2 != NULL; r1 = r1->tl, r2 = r2->tl) {
+    let x1 = r1->hd;
+    let x2 = r2->hd;
+    if (!same_relop(x1->rop1,x2->rop1)  || 
+        x1->relation != x2->relation || 
+        !same_relop(x1->rop2,x2->rop2)) return false;
+  }
+  if (r1 != NULL || r2 != NULL) return false;
+  else return true;
+}
+
+relns_t<`r> reln_assign_var(region_t<`r> rgn, relns_t<`r> r, Absyn::vardecl_t v, Absyn::exp_t e) {
+  //fprintf(stderr,"assigning %s to %s: \n", Absynpp::qvar2string(v->name),
+  //        Absynpp::exp2string(e));
+  // the relations only track non-escaping variables
+  if (v->escapes) return r;
+  // even if v isn't an integral type, it might be an array in which case
+  // we need to kill it.
+  r = reln_kill_var(rgn, r, v);
+  // if e is malloc(n*sizeof(t)) or a calloc(n,sizeof(t))
+  // then we can add n <= numelts(v).  Note that we can't easily
+  // do this for comprehensions (i.e., rnew(e1) {for i < n : e2})
+  // because e1 or e2 could modify n.
+  switch (e->r) {
+  case &Absyn::Malloc_e(Absyn::MallocInfo{_,_,_,e2,true,_}):
+    {
+      malloc_loop:
+      switch (e2->r) {
+      case &Absyn::Cast_e(_,e3,_,_): e2 = e3; goto malloc_loop;
+      case &Absyn::Var_e(b): 
+        let vd = Tcutil::nonesc_vardecl(b);
+        if (vd != NULL) 
+          return add_relation(rgn,RVar(vd),Req,RNumelts(v),r);
+        else return r;
+      default: return r;
+      }
+    }
+  default: break;
+  }
+  // otherwise ignore any situations where we have a non-integral type
+  if (!Tcutil::is_integral_type(v->type)) return r;
+  // try to convert to a relnop
+  reln_op_t eop = RConst(0); // bogus value;
+  if (exp2relnop(e,&eop)) {
+    return add_relation(rgn,RVar(v),Req,eop,r);
+  }
+  return r;
+}
+
+relns_t<`r> reln_assign_exp(region_t<`r> rgn, relns_t<`r> r, Absyn::exp_t e1, Absyn::exp_t e2) {
+  switch (e1->r) {
+  case &Absyn::Var_e(b):
+    let v = Tcutil::nonesc_vardecl(b);
+    if (v != NULL) 
+      return reln_assign_var(rgn, r, v, e2);
+    else return r;
+  default: return r;
+  }
+}
+
+// only works on non-constants
+static Pratt::node_t rop2node(reln_op_t r) {
+  switch (r) {
+  case {.RVar = x}: return Pratt::NVar(x);
+  case {.RNumelts = x}: return Pratt::NNumelts(x);
+  case {.RType = x}: return Pratt::NType(x);
+  case {.RParam = i}: return Pratt::NParam(i);
+  case {.RParamNumelts = i}: return Pratt::NParamNumelts(i);
+  case {.RReturn = _}: return Pratt::NReturn();
+  default: Tcutil::impos("rop2node");
+  }
+}
+
+string_t relation2string(relation_t r) {
+  switch (r) {
+  case Req: return "==";
+  case Rneq: return "!=";
+  case Rlt: return "<";
+  case Rlte: return "<=";
+  }
+}
+
+string_t rop2string(reln_op_t r) {
+  switch (r) {
+  case {.RConst = c}: return aprintf("%d",c); 
+  case {.RVar = vd}: return aprintf("%s",Absynpp::qvar2string(vd->name));
+  case {.RType = t}: return Absynpp::typ2string(t);
+  case {.RNumelts = vd}:  return aprintf("numelts(%s)",Absynpp::qvar2string(vd->name));
+  case {.RParam = i}: return aprintf("param(%d)",i);
+  case {.RParamNumelts = i}: return aprintf("numelts(param(%d))",i);
+  case {.RReturn = _}: return aprintf("return_value");
+  }
+}
+
+string_t reln2string(reln_t r) {
+  return aprintf("%s %s %s",rop2string(r->rop1),relation2string(r->relation),
+                 rop2string(r->rop2));
+}
+
+string_t relns2string(relns_t rs) {
+  if (rs == NULL) return "true";
+  list_t<stringptr_t> ss = NULL;
+  for (; rs != NULL; rs = rs->tl) {
+    ss = new List{new reln2string(rs->hd),ss};
+    if (rs->tl != NULL) ss = new List{new " && ",ss};
+  }
+  return strconcat_l(ss);
+}
+
+void print_relns(FILE@f, relns_t r) {
+  for (; r != NULL; r = r->tl) {
+    fprintf(f,"%s",reln2string(r->hd));
+    if (r->tl != NULL) fprintf(f,",");
+  }
+}
+
+static reln_op_t reduce_relnop(reln_op_t rop) {
+  switch (rop) {
+  case {.RType = t}:
+    switch (Tcutil::compress(t)) {
+    case &Absyn::ValueofType(e):
+      reln_op_t rop2 = rop;
+      if (exp2relnop(e,&rop2)) return rop2;
+      break;
+    default: break;
+    }
+    break;
+  case {.RNumelts = v}:
+    switch (Tcutil::compress(v->type)) {
+    case &Absyn::PointerType(Absyn::PtrInfo{_,_,Absyn::PtrAtts{.bounds = b,...}}):
+      // major subtlety!  the vardecl's type might have been translated
+      // to C in which case the bound is not accurate...
+      if (b == Absyn::bounds_one()) break;
+      let eopt = Tcutil::get_bounds_exp(Absyn::fat_bound_type,b);
+      if (eopt != NULL) {
+        let e = (Absyn::exp_t)eopt;
+        reln_op_t rop2 = rop;
+        if (exp2relnop(e,&rop2)) return rop2;
+      }
+      break;
+    default: break;
+    }
+    break;
+  default: break;
+  }
+  return rop;
+}
+
+// add all of the relations to the graph G and return true iff 
+// the resulting relations are consistent.  
+static bool consist_relations(Pratt::graph_t *G, relns_t rlns) {
+  for (; G && rlns != NULL; rlns = rlns->tl) {
+    let reln = rlns->hd;
+    reln->rop1 = reduce_relnop(reln->rop1);
+    reln->rop2 = reduce_relnop(reln->rop2);
+#ifdef RELATIONS_DEBUG
+    fprintf(stderr,"adding %s to graph ",reln2string(rlns->hd));
+    Pratt::print_graph(G);
+    fprintf(stderr,"\n");
+#endif
+    switch (reln) {
+    case &Reln({.RConst = i},reln,{.RConst = j}):
+      switch (reln) {
+      case Req: if (i != j) return false; break;
+      case Rneq: if (i == j) return false; break;
+      case Rlt: if ((unsigned)i >= (unsigned)j) return false; break;
+      case Rlte: if ((unsigned)i > (unsigned)j) return false; break;
+      }
+      break;
+    // r1 != r2 is a pain -- we have to check whether r1 < r2 is 
+    // consistent with everything else and whether r1 > r2 is consistent
+    // with everything else.  So, there's potentially a big exponential
+    // blow up here...
+    case &Reln(rop,Rneq,{.RConst = i}): fallthru(i,rop);
+    case &Reln({.RConst = i},Rneq,rop): 
+      let n = rop2node(rop);
+      Pratt::graph_t* G2 = Pratt::copy_graph(G);
+      G2 = Pratt::add_edge(G2, n, Pratt::zero_node, AP_sub(AP_fromint(i), AP_one));
+      G = Pratt::add_edge(G, Pratt::zero_node, n, AP_neg(AP_add(AP_fromint(i), AP_one))); 
+#ifdef RELATIONS_DEBUG
+      fprintf(stderr,"after adding, Graph G is ");
+      Pratt::print_graph(G); fprintf(stderr,"\n");
+      fprintf(stderr,"after adding, Graph G2 is ");
+      Pratt::print_graph(G2); fprintf(stderr,"\n");
+#endif
+      if (G != NULL && G2 != NULL) 
+        return (consist_relations(G,rlns->tl) || 
+                consist_relations(G2,rlns->tl));
+      else if (G == NULL) 
+        G = G2;
+      break;
+    case &Reln(rop1,Rneq,rop2):
+      let n1 = rop2node(rop1);
+      let n2 = rop2node(rop2);
+      Pratt::graph_t* G2 = Pratt::copy_graph(G);
+      G2 = Pratt::add_edge(G2, n1, n2, AP_neg(AP_one));
+      G = Pratt::add_edge(G, n2, n1, AP_neg(AP_one));
+      if (G != NULL && G2 != NULL) 
+        return (consist_relations(G,rlns->tl) || 
+                consist_relations(G2,rlns->tl));
+      else if (G == NULL) 
+        G = G2;
+      break;
+    case &Reln{rop,reln,{.RConst = i}}:
+      // x < i:  add  x - zero <= i-1
+      // x <= i: add  x - zero <= i
+      let n = rop2node(rop);
+      if (reln == Rlt) i = i - 1;
+      G = Pratt::add_edge(G, n, Pratt::zero_node, AP_fromint(i)); 
+      // x == i: also add zero - x <= -i
+      if (G && (reln == Req))
+        G = Pratt::add_edge(G, Pratt::zero_node, n, AP_neg(AP_fromint(i))); 
+      break;
+    case &Reln{{.RConst = i},reln,rop}:
+      // i < x:  zero - x <= -i-1
+      // i <= x: zero - x <= -i
+#ifdef RELATIONS_DEBUG
+      fprintf(stderr,"Rcons reln rop:  i = %d\n",i);
+#endif
+      let n = rop2node(rop);
+      if (reln == Rlt) i = i + 1;
+      G = Pratt::add_edge(G, Pratt::zero_node, n, AP_neg(AP_fromint(i))); 
+
+      // x == i: also add x - zero <= i
+      if (G && (reln == Req)) {
+#ifdef RELATIONS_DEBUG
+        fprintf(stderr,"Rcons reln rop:  G1 = ");
+        Pratt::print_graph(G); fprintf(stderr,"\n");
+#endif
+        G = Pratt::add_edge(G, n, Pratt::zero_node, AP_fromint(i)); 
+#ifdef RELATIONS_DEBUG
+        fprintf(stderr,"Rcons reln rop:  G2 = ");
+        Pratt::print_graph(G); 
+        fprintf(stderr,"\n");
+#endif
+      }
+      break;
+    case &Reln(rop1,reln,rop2):
+      // rop1 and rop2 must be either vars or numelts
+      let n1 = rop2node(rop1);
+      let n2 = rop2node(rop2);
+      int i = (reln == Rlt) ? -1 : 0;
+      // x < y: add x - y <= -1
+      // x <= y: add x - y <= 0
+      G = Pratt::add_edge(G, n1, n2, AP_fromint(i)); 
+      // x == y: also add y - x <= 0
+      if (G && (reln == Req))
+        G = Pratt::add_edge(G, n2, n1, AP_fromint(i));
+      break;
+    }
+  }
+  if (G != NULL) return true; else return false;
+}
+
+// returns true if the relations are consistent -- typical use
+// is to check a relation you want to be true (e.g., i < numelts(x))
+// under the current set of relations R.  To do so, you add the
+// negation numelts(x) <= i and check to see if the resulting system
+// is inconsistent.  If not, then you know that the desired relation holds.
+bool consistent_relations(relns_t rlns) {
+#ifdef RELATIONS_DEBUG
+  fprintf(stderr,"checking consistency of: ");
+  print_relns(stderr,rlns);
+  fprintf(stderr,"\n");
+#endif
+  Pratt::graph_t *G = Pratt::empty_graph();
+  return consist_relations(G,rlns);
+}
+
+
+// map relational primop to one of our limited forms of relations
+// (gets rid of > and >= in favor of < and <= to keep things simple.)
+// assumes primop is one of ==,!=,<,<=,>,>=
+$(Absyn::exp_t,relation_t,Absyn::exp_t) primop2relation(Absyn::exp_t e1,Absyn::primop_t p,Absyn::exp_t e2) 
+{
+  switch (p) {
+  case Absyn::Eq: return $(e1,Req,e2);
+  case Absyn::Neq: return $(e1,Rneq,e2);
+  case Absyn::Lt: return $(e1,Rlt,e2);
+  case Absyn::Lte: return $(e1,Rlte,e2);
+  case Absyn::Gt: return $(e2,Rlt,e1);
+  case Absyn::Gte: return $(e2,Rlte,e1);
+  default: throw new Core::Impossible("primop2relation");
+  }
+}
+
+// used to negate a relation (note -- must flip operands too)
+relation_t flip_relation(relation_t r) {
+  switch (r) {
+  case Req: return Rneq;
+  case Rneq: return Req;
+  case Rlt: return Rlte;
+  case Rlte: return Rlt;
+  }
+}
+
+reln_t<`r> negate(region_t<`r> r, reln_t rln) {
+  return rnew(r) Reln{rln->rop2,flip_relation(rln->relation),rln->rop1};
+}
+
+// tries to convert an expression e to a conjunction of relations
+// Right now, e must be of the form:
+// P ::= <constant-expression> | P && P | (int)P | (unsigned)P | Rop R Rop |
+//       !(Rop R Rop)
+// R ::= == | != | <= | < | >= | >
+// Rop -- see exp2relnop above.
+using Absyn {
+relns_t<`r> exp2relns(region_t<`r> r, Absyn::exp_t e) {
+  // FIX: should be using add_relation throughout...
+  switch (e->r) {
+  case &Cast_e(t,e,...):
+    // if t is an unsigned int or int we don't care
+    switch(Tcutil::compress(t)) {
+    case &AppType(&IntCon(_,Int_sz),_): return exp2relns(r,e);
+    default: break;
+    }
+    break;
+  case &And_e(e1,e2): return rappend(r,exp2relns(r,e1),exp2relns(r,e2));
+  case &Primop_e(Not,&List{&Exp{.r = &Primop_e(p,&List(e1,&List(e2,NULL))),...},NULL}):
+    switch (p) {
+    case Eq: case Neq: case Lt: case Lte: case Gt: case Gte:
+      let $(e1,rln,e2) = primop2relation(e1,p,e2);
+      reln_op_t rop1 = RConst(0); // dummy value
+      reln_op_t rop2 = RConst(0); // dummy value
+      if (exp2relnop(e1,&rop1) && exp2relnop(e2,&rop2)) 
+        return rnew(r) List(rnew(r) Reln(rop2,flip_relation(rln),rop1),NULL);
+      break;
+    default: break;
+    }
+    break;
+  case &Primop_e(p,&List(e1,&List(e2,NULL))):
+    switch (p) {
+    case Eq: case Neq: case Lt: case Lte: case Gt: case Gte:
+      let $(e1,rln,e2) = primop2relation(e1,p,e2);
+      reln_op_t rop1 = RConst(0); // dummy value
+      reln_op_t rop2 = RConst(0); // dummy value
+      if (exp2relnop(e1,&rop1) && exp2relnop(e2,&rop2)) 
+        return rnew(r) List(rnew(r) Reln(rop1,rln,rop2),NULL);
+      break;
+    default: break;
+    }
+    break;
+  default: break;
+  }
+  // see if it's a constant
+  if (Tcutil::is_const_exp(e)) {
+    let $(i,known) = Evexp::eval_const_uint_exp(e);
+    if (known) {
+      if (i) return NULL; // empty list represents always true predicate
+      // any inconsistent fact represents false
+      else return rnew(r) List(rnew(r) Reln(RConst(0),Rlt,RConst(0)),NULL);
+    }
+    Tcutil::terr(e->loc,"unable to convert `%s' to static relation",
+                 Absynpp::exp2string(e));
+  }
+  // return an inconsistent relation
+  return rnew(r) List(rnew(r) Reln(RConst(0),Rlt,RConst(0)),NULL);
+}
+}
