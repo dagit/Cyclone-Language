@@ -226,7 +226,7 @@ char ?`r rstrconcat_l(region_t<`r> r,glist_t<const char ?`r1@`r2,`r3>strs)
     while (strs != null) {
       let next    = *(strs->hd);
       len            = lens->hd;
-      strncpy(ans,i,next,0,len);
+      strncpy(ans+i,next,len);
       i += len;
       strs = strs->tl;
       lens = lens->tl;
@@ -267,14 +267,14 @@ char ?`r rstr_sepstr(region_t<`r> r,glist_t<const char ?`r1@`r2,`r3> strs, const
     while (strs->tl != null) {
       let next    = *(strs->hd);
       len            = lens->hd;
-      strncpy(ans,i,next,0,len);
+      strncpy(ans+i,next,len);
       i += len;
-      strncpy(ans,i,separator,0,seplen);
+      strncpy(ans+i,separator,seplen);
       i += seplen;
       strs = strs->tl;
       lens = lens->tl;
     }
-    strncpy(ans,i,*(strs->hd),0,lens->hd);
+    strncpy(ans+i,*(strs->hd),lens->hd);
     return ans;
   }
 }
@@ -286,25 +286,21 @@ mstring_t str_sepstr(glist_t<const char ?`r1@`r2,`r> strs, const char ?`r3 separ
 // Destructively copy at most n characters from src into dest, starting
 // at the given offsets
 // (C version does not take offsets)
-char ?`r strncpy(char ?`r dest, int destOfs, const char ?`r1 src, int srcOfs, size_t n) {
+char ?`r strncpy(char ?`r dest, const char ?`r1 src, size_t n) {
   // Range checking
   let destSz = dest.size;
   let srcSz = src.size;
-  if (destOfs < 0)
-    throw new InvalidArg("String::strncpy");
-  if (srcOfs < 0 || (n > 0 && srcOfs >= srcSz))
-    throw new InvalidArg("String::strncpy");
   if (n <= 0) return dest;
-  if (destOfs + n > destSz || srcOfs + n > srcSz)
+  if (n > destSz || n > srcSz)
     throw new InvalidArg("String::strncpy");
   int i;
   for (i=0; i<n; i++) {
-    let srcChar = src[srcOfs+i];
+    let srcChar = src[i];
     if (srcChar == '\000') break;
-    dest[destOfs+i] = srcChar;
+    dest[i] = srcChar;
   }
   for (; i<n; i++)
-    dest[destOfs+i] = '\000';
+    dest[i] = '\000';
 
   return dest;
 
@@ -328,26 +324,22 @@ char ?`r strncpy(char ?`r dest, int destOfs, const char ?`r1 src, int srcOfs, si
 }
 
 // Strncpy that does not pay attention to zero chars
-char ?`r zstrncpy(char ?`r dest, int destOfs, const char ?`r1 src, int srcOfs, size_t n) {
+char ?`r zstrncpy(char ?`r dest, const char ?`r1 src, size_t n) {
   // Range checking
   let destSz = dest.size;
   let srcSz  = src.size;
-  if (destOfs < 0)
-    throw new InvalidArg("String::zstrncpy");
-  if (srcOfs < 0 || (n > 0 && srcOfs >= srcSz))
-    throw new InvalidArg("String::zstrncpy");
   if (n <= 0) return dest;
-  if (destOfs + n > destSz || srcOfs + n > srcSz)
+  if (n > destSz || n > srcSz)
     throw new InvalidArg("String::zstrncpy");
   int i;
   for (i=0; i<n; i++) 
-    dest[destOfs+i] = src[srcOfs+i];
+    dest[i] = src[i];
   return dest;
 }
 // Non-allocating string copy: first arg is returned
 char ?`r strcpy(char ?`r dest, const char ?`r1 src) {
   size_t len = strlen(src);
-  strncpy(dest,0,src,0,len);
+  strncpy(dest,src,len);
   if (len != dest.size)
     dest[len] = '\000';
   return dest;
@@ -362,7 +354,7 @@ char ?`r rstrdup(region_t<`r> r, const char ?`r1 src) {
 
   len = strlen(src);
   temp = rnew_string(r,len);
-  strncpy(temp,0,src,0,len);
+  strncpy(temp,src,len);
   return temp;
 }
 
@@ -378,7 +370,7 @@ char ?`r rexpand(region_t<`r> r,const char ?`r1 s, size_t sz) {
   sz = (sz>slen)?sz:slen;
   temp = rnew_string(r,sz);
 
-  strncpy(temp,0,s,0,slen);
+  strncpy(temp,s,slen);
 
   if (slen != s.size)
     temp[slen] = '\000';
@@ -443,8 +435,8 @@ char ?`r rreplace_suffix (region_t<`r> r,const char ?`r1 src, const char ?`r2 cu
     if (src[m-i] != curr_suffix[n-i])
       throw new InvalidArg(err);
   char ?`r ans = rnew_string(r,m-n+new_suffix.size);
-  strncpy(ans,0,src,0,m-n);
-  strncpy(ans,m-n,new_suffix,0,new_suffix.size);
+  strncpy(ans,src,m-n);
+  strncpy(ans+m-n,new_suffix,new_suffix.size);
   return ans;
 }
 

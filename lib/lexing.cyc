@@ -66,7 +66,7 @@ void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
     int    newlen = oldlen*2;
 
     mstring_t newbuf = new_string(newlen+1);
-    String::zstrncpy(newbuf, oldlen, lexbuf->lex_buffer, 0, oldlen);
+    String::zstrncpy(newbuf+oldlen, lexbuf->lex_buffer, oldlen);
     lexbuf->lex_buffer     = newbuf;
     lexbuf->lex_buffer_len = newlen;
     lexbuf->lex_abs_pos    = lexbuf->lex_abs_pos   - oldlen;
@@ -74,11 +74,11 @@ void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
     lexbuf->lex_start_pos  = lexbuf->lex_start_pos + oldlen;
     lexbuf->lex_last_pos   = lexbuf->lex_last_pos  + oldlen;
   }
-  String::zstrncpy(lexbuf->lex_buffer, 0,
-                   lexbuf->lex_buffer, n,
+  String::zstrncpy(lexbuf->lex_buffer,
+                   lexbuf->lex_buffer + n,
                    lexbuf->lex_buffer_len-n);
-  String::zstrncpy(lexbuf->lex_buffer, lexbuf->lex_buffer_len-n,
-                   aux_buffer, 0,  n);
+  String::zstrncpy(lexbuf->lex_buffer + lexbuf->lex_buffer_len-n,
+                   aux_buffer, n);
   lexbuf->lex_abs_pos    = lexbuf->lex_abs_pos   + n;
   lexbuf->lex_curr_pos   = lexbuf->lex_curr_pos  - n;
   lexbuf->lex_start_pos  = lexbuf->lex_start_pos - n;
@@ -125,7 +125,7 @@ Lexbuf<bool> from_string(mstring_t s) {
 mstring_t lexeme(Lexbuf<`a> lbuf) {
    int    len = lbuf->lex_curr_pos - lbuf->lex_start_pos;
    mstring_t s   = new_string(len+1);
-   String::zstrncpy(s, 0, lbuf->lex_buffer, lbuf->lex_start_pos, len);
+   String::zstrncpy(s, lbuf->lex_buffer + lbuf->lex_start_pos, len);
    s[len] = '\000';
 //     if (len == 0) {
 //       fprintf(cyc_stderr,"Lexing::lexeme: 0 length!!\n");

@@ -39,11 +39,11 @@ struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lex_engine( struct Cyc_Lexing_
 int, struct Cyc_Lexing_lexbuf*); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
 tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
 18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_String_zstrncpy(
-struct _tagged_arr, int, struct _tagged_arr, int, int); extern struct
-_tagged_arr Cyc_String_strdup( struct _tagged_arr src); unsigned char Cyc_Lexing_Error[
-10u]="\000\000\000\000Error"; struct Cyc_Lexing_lexbuf; struct Cyc_Lexing_function_lexbuf_state;
-struct Cyc_Lexing_lex_tables; static unsigned char Cyc_Lexing_aux_buffer_v[ 1u]={'\000'};
-static struct _tagged_arr Cyc_Lexing_aux_buffer={( void*)(( unsigned char*) Cyc_Lexing_aux_buffer_v),(
+struct _tagged_arr, struct _tagged_arr, int); extern struct _tagged_arr Cyc_String_strdup(
+struct _tagged_arr src); unsigned char Cyc_Lexing_Error[ 10u]="\000\000\000\000Error";
+struct Cyc_Lexing_lexbuf; struct Cyc_Lexing_function_lexbuf_state; struct Cyc_Lexing_lex_tables;
+static unsigned char Cyc_Lexing_aux_buffer_v[ 1u]={'\000'}; static struct
+_tagged_arr Cyc_Lexing_aux_buffer={( void*)(( unsigned char*) Cyc_Lexing_aux_buffer_v),(
 void*)(( unsigned char*) Cyc_Lexing_aux_buffer_v),( void*)(( unsigned char*) Cyc_Lexing_aux_buffer_v)
 + 1u}; void Cyc_Lexing_lex_refill( struct Cyc_Lexing_lexbuf* lexbuf){ if(
 _get_arr_size( Cyc_Lexing_aux_buffer, sizeof( unsigned char)) == 1){ Cyc_Lexing_aux_buffer=
@@ -53,21 +53,24 @@ Cyc_Lexing_aux_buffer, sizeof( unsigned char)),( void*)(( struct Cyc_Lexing_func
 lexbuf->refill_state)->read_fun_state); int n= read > 0? read:(( lexbuf->lex_eof_reached=
 1, 0)); if( lexbuf->lex_start_pos < n){ int oldlen= lexbuf->lex_buffer_len; int
 newlen= oldlen * 2; struct _tagged_arr newbuf= Cyc_Core_new_string( newlen + 1);
-Cyc_String_zstrncpy( newbuf, oldlen,( struct _tagged_arr) lexbuf->lex_buffer, 0,
-oldlen); lexbuf->lex_buffer= newbuf; lexbuf->lex_buffer_len= newlen; lexbuf->lex_abs_pos=
-lexbuf->lex_abs_pos - oldlen; lexbuf->lex_curr_pos= lexbuf->lex_curr_pos +
-oldlen; lexbuf->lex_start_pos= lexbuf->lex_start_pos + oldlen; lexbuf->lex_last_pos=
-lexbuf->lex_last_pos + oldlen;} Cyc_String_zstrncpy( lexbuf->lex_buffer, 0,(
-struct _tagged_arr) lexbuf->lex_buffer, n, lexbuf->lex_buffer_len - n); Cyc_String_zstrncpy(
-lexbuf->lex_buffer, lexbuf->lex_buffer_len - n,( struct _tagged_arr) Cyc_Lexing_aux_buffer,
-0, n); lexbuf->lex_abs_pos= lexbuf->lex_abs_pos + n; lexbuf->lex_curr_pos=
-lexbuf->lex_curr_pos - n; lexbuf->lex_start_pos= lexbuf->lex_start_pos - n;
-lexbuf->lex_last_pos= lexbuf->lex_last_pos - n;}} struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_function(
-int(* read_fun)( struct _tagged_arr, int, void*), void* read_fun_state){ return({
-struct Cyc_Lexing_lexbuf* _temp0=( struct Cyc_Lexing_lexbuf*) GC_malloc( sizeof(
-struct Cyc_Lexing_lexbuf)); _temp0->refill_buff=( void(*)( struct Cyc_Lexing_lexbuf*
-lexbuf)) Cyc_Lexing_lex_refill; _temp0->refill_state=( void*)({ struct Cyc_Lexing_function_lexbuf_state*
-_temp1=( struct Cyc_Lexing_function_lexbuf_state*) GC_malloc( sizeof( struct Cyc_Lexing_function_lexbuf_state));
+Cyc_String_zstrncpy( _tagged_arr_plus( newbuf, sizeof( unsigned char), oldlen),(
+struct _tagged_arr) lexbuf->lex_buffer, oldlen); lexbuf->lex_buffer= newbuf;
+lexbuf->lex_buffer_len= newlen; lexbuf->lex_abs_pos= lexbuf->lex_abs_pos -
+oldlen; lexbuf->lex_curr_pos= lexbuf->lex_curr_pos + oldlen; lexbuf->lex_start_pos=
+lexbuf->lex_start_pos + oldlen; lexbuf->lex_last_pos= lexbuf->lex_last_pos +
+oldlen;} Cyc_String_zstrncpy( lexbuf->lex_buffer,( struct _tagged_arr)
+_tagged_arr_plus( lexbuf->lex_buffer, sizeof( unsigned char), n), lexbuf->lex_buffer_len
+- n); Cyc_String_zstrncpy( _tagged_arr_plus( _tagged_arr_plus( lexbuf->lex_buffer,
+sizeof( unsigned char), lexbuf->lex_buffer_len), sizeof( unsigned char), - n),(
+struct _tagged_arr) Cyc_Lexing_aux_buffer, n); lexbuf->lex_abs_pos= lexbuf->lex_abs_pos
++ n; lexbuf->lex_curr_pos= lexbuf->lex_curr_pos - n; lexbuf->lex_start_pos=
+lexbuf->lex_start_pos - n; lexbuf->lex_last_pos= lexbuf->lex_last_pos - n;}}
+struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_function( int(* read_fun)( struct
+_tagged_arr, int, void*), void* read_fun_state){ return({ struct Cyc_Lexing_lexbuf*
+_temp0=( struct Cyc_Lexing_lexbuf*) GC_malloc( sizeof( struct Cyc_Lexing_lexbuf));
+_temp0->refill_buff=( void(*)( struct Cyc_Lexing_lexbuf* lexbuf)) Cyc_Lexing_lex_refill;
+_temp0->refill_state=( void*)({ struct Cyc_Lexing_function_lexbuf_state* _temp1=(
+struct Cyc_Lexing_function_lexbuf_state*) GC_malloc( sizeof( struct Cyc_Lexing_function_lexbuf_state));
 _temp1->read_fun= read_fun; _temp1->read_fun_state=( void*) read_fun_state;
 _temp1;}); _temp0->lex_buffer= Cyc_Core_new_string( 8192); _temp0->lex_buffer_len=
 8192; _temp0->lex_abs_pos= - 8192; _temp0->lex_start_pos= 8192; _temp0->lex_curr_pos=
@@ -87,14 +90,14 @@ unsigned char)); _temp2->lex_abs_pos= 0; _temp2->lex_start_pos= 0; _temp2->lex_c
 0; _temp2->lex_last_pos= 0; _temp2->lex_last_action= 0; _temp2->lex_eof_reached=
 1; _temp2;});} struct _tagged_arr Cyc_Lexing_lexeme( struct Cyc_Lexing_lexbuf*
 lbuf){ int len= lbuf->lex_curr_pos - lbuf->lex_start_pos; struct _tagged_arr s=
-Cyc_Core_new_string( len + 1); Cyc_String_zstrncpy( s, 0,( struct _tagged_arr)
-lbuf->lex_buffer, lbuf->lex_start_pos, len);*(( unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char), len))='\000'; return s;}
-unsigned char Cyc_Lexing_lexeme_char( struct Cyc_Lexing_lexbuf* lbuf, int i){
-return*(( unsigned char*) _check_unknown_subscript( lbuf->lex_buffer, sizeof(
-unsigned char), lbuf->lex_start_pos + i));} int Cyc_Lexing_lexeme_start( struct
-Cyc_Lexing_lexbuf* lbuf){ return lbuf->lex_abs_pos + lbuf->lex_start_pos;} int
-Cyc_Lexing_lexeme_end( struct Cyc_Lexing_lexbuf* lbuf){ return lbuf->lex_abs_pos
+Cyc_Core_new_string( len + 1); Cyc_String_zstrncpy( s,( struct _tagged_arr)
+_tagged_arr_plus( lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_start_pos),
+len);*(( unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char),
+len))='\000'; return s;} unsigned char Cyc_Lexing_lexeme_char( struct Cyc_Lexing_lexbuf*
+lbuf, int i){ return*(( unsigned char*) _check_unknown_subscript( lbuf->lex_buffer,
+sizeof( unsigned char), lbuf->lex_start_pos + i));} int Cyc_Lexing_lexeme_start(
+struct Cyc_Lexing_lexbuf* lbuf){ return lbuf->lex_abs_pos + lbuf->lex_start_pos;}
+int Cyc_Lexing_lexeme_end( struct Cyc_Lexing_lexbuf* lbuf){ return lbuf->lex_abs_pos
 + lbuf->lex_curr_pos;} int Cyc_Lexing_lex_engine( struct Cyc_Lexing_lex_tables*
 tbl, int start_state, struct Cyc_Lexing_lexbuf* lbuf){ int state; int base; int
 backtrk; int c; state= start_state; if( state >= 0){ lbuf->lex_last_pos=( lbuf->lex_start_pos=

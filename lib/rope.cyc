@@ -41,7 +41,7 @@ static uint flatten_it(mstring_t s, uint i, rope_t r) {
   switch (r->v) {
   case &String_rope(ss):
     let len = String::strlen(ss);
-    String::strncpy(s,i,ss,0,len);
+    String::strncpy(s+i,ss,len);
     return i+len;
   case &Array_rope(rs):
     let len = rs.size;

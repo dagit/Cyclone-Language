@@ -185,7 +185,7 @@ static int str_index(string_t buff, int offset, int len) {
         else if (ch > 16) ch -= 7;
       }
       let newstr = new_string(len+1);
-      String::zstrncpy(newstr,0,buff,offset,len);
+      String::zstrncpy(newstr,buff+offset,len);
       int ans = Xarray::add_ind((Xarray::xarray_t<stringptr_t>)symbols, 
 				new ((string_t)newstr));
       t->shared_str = ans;
@@ -200,7 +200,7 @@ static int str_index(string_t buff, int offset, int len) {
   // build string if necessary and return
   if(t->shared_str == -1) {
     let newstr = new_string(len+1);
-    String::zstrncpy(newstr,0,buff,offset,len);
+    String::zstrncpy(newstr,buff+offset,len);
     int ans = Xarray::add_ind((Xarray::xarray_t<stringptr_t>)symbols, 
 			      new ((string_t)newstr));
     t->shared_str = ans;

@@ -55,8 +55,8 @@ extern char ?`r rstr_sepstr(region_t<`r>,glist_t<const char ?`r1@`r2,`r3>,const 
 ///////////////////////// COPYING
 // Non-allocating
 extern char ?`r1 strcpy(char ?`r1 dest,const char ?`r2 src); 
-extern char ?`r1 strncpy(char ?`r1,int,const char ?`r2,int,size_t);
-extern char ?`r1 zstrncpy(char ?`r1,int,const char ?`r2,int,size_t);
+extern char ?`r1 strncpy(char ?`r1,const char ?`r2,size_t);
+extern char ?`r1 zstrncpy(char ?`r1,const char ?`r2,size_t);
 // Allocating
 extern char ? expand(const char ?`r1 s, size_t sz); /* like realloc */
 extern char ?`r rexpand(region_t<`r>,const char ?`r1 s, size_t sz);

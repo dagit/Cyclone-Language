@@ -2201,8 +2201,8 @@ between each two adjacent elements in \var{l}.
 \subsubsection*{Functions}
 \begin{verbatim}
 string strcpy(string dest,string src); 
-string strncpy(string,int,string,int,size_t);
-string zstrncpy(string,int,string,int,size_t);
+string strncpy(string,string,size_t);
+string zstrncpy(string,string,size_t);
 string expand(string s, size_t sz);
 string realloc_str(string str, size_t sz);
 string strdup(string src);
@@ -2217,15 +2217,14 @@ is not big enough to hold \var{src}, \code{strcpy} throws
 \code{Core::InvalidArg("String::strncpy")}.
 \end{defun}
 
-\begin{defun}{strncpy}{(dest,destOfs,src,srcOfs,len)}
-Copies at most \var{len} characters of \var{src} starting at offset
-\var{srcOfs} into \var{dest} starting at \var{destOfs}, and returns
-\var{dest}.  If \var{dest} is not big enough to hold \var{src}, or
-\var{srcOfs} or \var{destOfs} are out of bounds, \code{strcpy} throws
+\begin{defun}{strncpy}{(dest,src,len)}
+Copies at most \var{len} characters of \var{src} into \var{dest} and
+returns \var{dest}.  If \var{dest} is not big enough to hold
+\var{src}, \code{strcpy} throws
 \code{Core::InvalidArg("String::strncpy")}.
 \end{defun}
 
-\begin{defun}{zstrncpy}{(dest,destOfs,src,srcOfs,len)}
+\begin{defun}{zstrncpy}{(dest,src,len)}
 A variant of \code{strncpy} that does not consider null characters to
 terminate strings.
 \end{defun}

@@ -491,7 +491,7 @@ void string_test() {
   okfail(String::strcmp(s2,"helhelo")==0);
   String::strcpy(s2,"foobar");
   okfail(String::strcmp(s2,"foobar")==0);
-  String::strncpy(s2,1,"foobar",2,3);
+  String::strncpy(s2+1,"foobar"+2,3);
   okfail(String::strcmp(s2,"fobaar")==0);
   okfail(String::strcmp(s2,"xxxfobaar"+3)==0);
   okfail(String::strcmp(String::strchr((mstring_t)s2+1,'a'),"aar")==0);
