@@ -576,7 +576,7 @@ extern void Cyc_Interface_save( struct Cyc_Interface_I*, struct Cyc_Stdio___sFIL
 extern struct Cyc_Interface_I* Cyc_Interface_load( struct Cyc_Stdio___sFILE*);
 extern void Cyc_Lex_lex_init(); static int Cyc_pp_r= 0; static int Cyc_noexpand_r=
 0; static int Cyc_noshake_r= 0; static int Cyc_stop_after_cpp_r= 0; static int
-Cyc_parseonly_r= 0; static int Cyc_tc_r= 0; static int Cyc_lc_r= 0; static int
+Cyc_parseonly_r= 0; static int Cyc_tc_r= 0; static int Cyc_ic_r= 0; static int
 Cyc_toc_r= 0; static int Cyc_stop_after_objectfile_r= 0; static int Cyc_stop_after_asmfile_r=
 0; static int Cyc_tovc_r= 0; static int Cyc_v_r= 0; static int Cyc_save_temps_r=
 0; static int Cyc_save_c_r= 0; static int Cyc_add_cyc_namespace_r= 1; static int
@@ -908,7 +908,7 @@ unsigned char*)"control-flow checking"; struct _tagged_string _temp220; _temp220
 _temp219; _temp220.base= _temp219; _temp220.last_plus_one= _temp219 + 22;
 _temp220;}), Cyc_do_cfcheck, 1, tds); if( ! Cyc_compile_failure){ Cyc_Tcutil_flush_warnings();}
 Cyc_remove_file(( struct _tagged_string) _temp152); if( Cyc_compile_failure){
-return;} if( Cyc_lc_r){ struct Cyc_Stdio___sFILE* inter_file= Cyc_Stdio_fopen((
+return;} if( Cyc_ic_r){ struct Cyc_Stdio___sFILE* inter_file= Cyc_Stdio_fopen((
 struct _tagged_string) _temp156,({ unsigned char* _temp228=( unsigned char*)"r";
 struct _tagged_string _temp229; _temp229.curr= _temp228; _temp229.base= _temp228;
 _temp229.last_plus_one= _temp228 + 2; _temp229;})); struct Cyc_Stdio___sFILE*
@@ -1226,12 +1226,12 @@ _temp528;}); _temp525->f3=({ unsigned char* _temp526=( unsigned char*)"  Stop af
 struct _tagged_string _temp527; _temp527.curr= _temp526; _temp527.base= _temp526;
 _temp527.last_plus_one= _temp526 + 30; _temp527;}); _temp525;}); struct _tuple11*
 _temp429=({ struct _tuple11* _temp518=( struct _tuple11*) GC_malloc( sizeof(
-struct _tuple11)); _temp518->f1=({ unsigned char* _temp523=( unsigned char*)"-lc";
+struct _tuple11)); _temp518->f1=({ unsigned char* _temp523=( unsigned char*)"-ic";
 struct _tagged_string _temp524; _temp524.curr= _temp523; _temp524.base= _temp523;
 _temp524.last_plus_one= _temp523 + 4; _temp524;}); _temp518->f2=( void*)({
 struct Cyc_Arg_Set_spec_struct* _temp521=( struct Cyc_Arg_Set_spec_struct*)
 GC_malloc( sizeof( struct Cyc_Arg_Set_spec_struct)); _temp521[ 0]=({ struct Cyc_Arg_Set_spec_struct
-_temp522; _temp522.tag= Cyc_Arg_Set_spec; _temp522.f1=& Cyc_lc_r; _temp522;});
+_temp522; _temp522.tag= Cyc_Arg_Set_spec; _temp522.f1=& Cyc_ic_r; _temp522;});
 _temp521;}); _temp518->f3=({ unsigned char* _temp519=( unsigned char*)"   Activate the link-checker";
 struct _tagged_string _temp520; _temp520.curr= _temp519; _temp520.base= _temp519;
 _temp520.last_plus_one= _temp519 + 29; _temp520;}); _temp518;}); struct _tuple11*
@@ -1429,7 +1429,7 @@ _temp343[ 1u]={ _temp345}; struct _tagged_ptr3 _temp344={ _temp343, _temp343,
 _temp343 + 1u}; _temp342( _temp344);}); stdlib_string=( struct _tagged_string)({
 struct _tagged_string _temp347= _temp336; struct _tagged_string _temp348=
 _temp340; xprintf(" %.*s %.*s", _temp347.last_plus_one - _temp347.curr, _temp347.curr,
-_temp348.last_plus_one - _temp348.curr, _temp348.curr);});}} if( Cyc_lc_r){
+_temp348.last_plus_one - _temp348.curr, _temp348.curr);});}} if( Cyc_ic_r){
 struct _handler_cons _temp349; _push_handler(& _temp349);{ int _temp351= 0; if(
 setjmp( _temp349.handler)){ _temp351= 1;} if( ! _temp351){ Cyc_ccargs=(( struct
 Cyc_List_List*(*)( int(* f)( struct _tagged_string*), struct Cyc_List_List* l))

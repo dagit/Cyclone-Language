@@ -37,7 +37,7 @@ static bool noshake_r  = false;
 static bool stop_after_cpp_r = false;
 static bool parseonly_r = false;
 static bool tc_r       = false;
-static bool lc_r       = false;
+static bool ic_r       = false;
 static bool toc_r      = false;
 static bool stop_after_objectfile_r = false;
 static bool stop_after_asmfile_r = false;
@@ -415,7 +415,7 @@ void process_file(string_t filename) {
   if (compile_failure) return;
 
   // Interface checking
-  if (lc_r) {
+  if (ic_r) {
     FILE *inter_file = fopen(interfacefile, "r");
     FILE *inter_objfile = try_file_open(interfaceobjfile, "w", "interface object file");
     if (inter_objfile == null) {
@@ -544,7 +544,7 @@ int main(int argc, string_t ? argv) {
                   "   Stop after type checking"),
          new $("-toc",new Set_spec(&toc_r),
                    "  Stop after translation to C"),
-         new $("-lc",new Set_spec(&lc_r),
+         new $("-ic",new Set_spec(&ic_r),
                   "   Activate the link-checker"),
          new $("-pp",new Set_spec(&pp_r),
                   "   Pretty print"),
@@ -624,7 +624,7 @@ int main(int argc, string_t ? argv) {
     stdlib_string = xprintf(" %s %s", cyclib, gc);
   }
 
-  if (lc_r) try {
+  if (ic_r) try {
     ccargs = filter(is_cfile, ccargs);
     libargs = filter(is_cfile, libargs);
     let lf = append(stdlib, append(ccargs, libargs));
