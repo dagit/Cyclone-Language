@@ -627,41 +627,34 @@ static $(flow_t<`r>,absRval_t<`r>)
   }
 }
 
+
 // we've performed e1[e2] -- if this is of the form x[i], then add
-// i < x.size to the relations.
+// i < numelts(x) to the relations.
 static relns_t<`r> add_subscript_reln(region_t<`r> rgn,
                                       relns_t<`r> relns, exp_t e1, exp_t e2) {
+
+  reln_op_t n2 = RConst(0); // dummy value
+  bool e2_valid_op = exp2relnop(e2,&n2);
+
   switch (e1->r) {
-  case &Var_e(_,&Pat_b(x)):   fallthru(x);
-  case &Var_e(_,&Local_b(x)): fallthru(x);
-  case &Var_e(_,&Param_b(x)): fallthru(x);
-  case &Var_e(_,&Global_b(x)):
-    if (!x->escapes)
-      switch (e2->r) {
-      case &Var_e(_,&Pat_b(i)):   fallthru(i);
-      case &Var_e(_,&Local_b(i)): fallthru(i);
-      case &Var_e(_,&Param_b(i)): fallthru(i);
-      case &Var_e(_,&Global_b(i)):
-        if (!i->escapes) {
-          // we have x[i] -- add i < x.size to relns if not already present.
-          bool found = false;
-          for (let rs = relns; rs != NULL; rs = rs->tl) {
-            let r = rs->hd;
-            if (r->vd == i)
-              switch (r->rop) {
-              case {.LessNumelts = v} && v == x: return relns;
-              default: continue;
-              }
-          }
-          if (!found)
-            return rnew(rgn) List(rnew(rgn) Reln(i,LessNumelts(x)),relns);
-        }
-        return relns;
-      default: return relns;
-      }
-    else return relns;
-  default: return relns;
+  case &Var_e(_,b1):
+    let x = nonesc_vardecl(b1);
+    if (x != NULL) {
+      reln_op_t n1 = RNumelts(x);
+      if (e2_valid_op)
+        relns = add_relation(rgn, n2, Rlt, n1, relns);
+    }
+    break;
+  default: break;
   }
+  // if e1 has type T*{n},T@{n}, or T[n], then add e2 < n to the relations.
+  exp_opt_t bound = Tcutil::get_type_bound((type_t)e1->topt);
+  if (bound != NULL) {
+    reln_op_t rbound = RConst(0); // dummy value
+    if (exp2relnop(bound,&rbound))
+      relns = add_relation(rgn, n2, Rlt, rbound, relns);
+  }
+  return relns;
 }
 
 // assigns [rexp] to [lexp], which have abstract values [rval] and
@@ -796,6 +789,8 @@ anal_stmt_exp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, stmt_t s) {
     }
   }
 }
+
+
 
 
 // Note: must deal with try-flow in all "base" cases!!!
@@ -1407,31 +1402,10 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 
       // add vd < e1 when e1 is something useful
       relns_t new_relns = relns;
-    comp_loop:
-      switch(e1->r) {
-      case &Cast_e(_,e2,_,_): e1 = e2; goto comp_loop;
-      case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
-      case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
-      case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
-      case &Var_e(_,&Param_b(v2)) && !v2->escapes:
-        new_relns = rnew(env->r) List(rnew(env->r) Reln(vd,LessVar(v2,v2->type)),relns);
-        break;
-      case &Const_e({.Int_c = $(_,i)}):
-        new_relns = rnew(env->r) List(rnew(env->r) Reln(vd,LessConst(i)),relns);
-        break;
-      case &Primop_e(Size,&List(e3,_)):
-        switch (e3->r) {
-        case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
-        case &Var_e(_,&Local_b(v2)) && !v2->escapes: fallthru(v2);
-        case &Var_e(_,&Pat_b(v2)) && !v2->escapes: fallthru(v2);
-        case &Var_e(_,&Param_b(v2)) && !v2->escapes:
-          // size is always unsigned
-          new_relns = rnew(env->r) List(rnew(env->r) Reln(vd,LessNumelts(v2)),relns);
-          break;
-        default: break;
-        }
-        break;
-      default: break;
+      reln_op_t n1 = RVar(vd);
+      reln_op_t n2 = RConst(0); // dummy value
+      if (exp2relnop(e1,&n2)) {
+        new_relns = add_relation(env->r,n1,Rlt,n2,relns);
       }
       if (relns != new_relns)
         f1 = ReachableFL(d1,new_relns);
@@ -1676,6 +1650,141 @@ anal_Lexp(analenv_t<`r> env, flow_t<`r> inflow, bool expand_unique, exp_t e) {
   return $(f,r);
 }
 
+// map relational primop to one of our limited forms of relations
+// (gets rid of > and >= in favor of < and <= to keep things simple.)
+static $(exp_t,relation_t,exp_t) primop2relation(exp_t e1,primop_t p,exp_t e2) 
+{
+  switch (p) {
+  case Eq: return $(e1,Req,e2);
+  case Neq: return $(e1,Rneq,e2);
+  case Lt: return $(e1,Rlt,e2);
+  case Lte: return $(e1,Rlte,e2);
+  case Gt: return $(e2,Rlt,e1);
+  case Gte: return $(e2,Rlte,e1);
+  default: throw new Core::Impossible("primop2relation");
+  }
+}
+
+// used to negate a relation (note -- must flip operands too)
+static relation_t flip_relation(relation_t r) {
+  switch (r) {
+  case Req: return Rneq;
+  case Rneq: return Req;
+  case Rlt: return Rlte;
+  case Rlte: return Rlt;
+  }
+}
+
+// this function does the hard work of refining the flow info
+// based on a conditional test that involves primitive oeprations
+// such as comparisons.  
+static $(flow_t<`r>,flow_t<`r>) 
+anal_primop_test(analenv_t<`r> env, flow_t<`r> inflow, 
+                 primop_t p, list_t<exp_t> es) {
+  let fenv = env->fenv;
+  DEBUG_PRINT("anal_primop_test %s, inflow is ",exp2string(e));
+  DEBUG_PRINT_F(print_flow,inflow);
+  absRval_t r1,r2;
+  flow_t f;
+  ANAL_RGN(env, temp) {
+    let $(fl,rvals) = anal_unordered_Rexps(temp,env,inflow,es,false,false);
+    r1 = rvals->hd;
+    r2 = rvals->tl->hd;
+    f = fl;
+  }
+  DEBUG_PRINT("anal_primop_test %s, after rexps, flow is ",exp2string(e));
+  DEBUG_PRINT_F(print_flow,f);
+  switch(f) {
+  case {.BottomFL = _}: return $(f,f);
+  case {.ReachableFL = $(d,relns)}:
+    let e1 = es->hd;
+    let e2 = es->tl->hd;
+    if(initlevel(env->fenv,d,r1)==NoneIL)
+      Tcutil::terr(es->hd->loc,"expression may not be initialized");
+    if(initlevel(env->fenv,d,r2)==NoneIL)
+      Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
+
+    // zero-splitting, only for Eq and Neq with Zero and Unknown, so can
+    // take precedence over any array-bounds splitting
+    if(p==Eq || p==Neq) {
+      vardecl_opt_t r1n = NULL, r2n = NULL;
+      switch (r1) {
+      case &NamedLocation(n,r): r1 = r; r1n = n; break;
+      default: break;
+      }
+      switch (r2) {
+      case &NamedLocation(n,r): r2 = r; r2n = n; break;
+      default: break;
+      }
+	  
+      switch($(r1,r2)) {
+	/* XXX here I would adjust things to use VirtualAddrOf;
+	   do a fall-through on that case for the next two */
+      case $(&UnknownR(il),&Zero): // f is correct for both args b/c unordered
+        let $(f1,f2) = splitzero(env,f,f,e1,il,r1n);
+        switch(p) {
+        case Eq:  return $(f2,f1);
+        case Neq: return $(f1,f2);
+        default: throw new Core::Impossible("anal_test, zero-split");
+        }
+      case $(&Zero,&UnknownR(il)):
+        let $(f1,f2) = splitzero(env,f,f,e2,il,r2n);
+        switch(p) {
+        case Eq:  return $(f2,f1);
+        case Neq: return $(f1,f2);
+        default: throw new Core::Impossible("anal_test, zero-split");
+        }
+      case $(&Zero,&Zero):
+        if (p == Eq) return $(f,BottomFL());
+        else return $(BottomFL(),f);
+      case $(&Zero,&NotZeroAll): fallthru;
+      case $(&Zero,&NotZeroThis): fallthru;
+      case $(&Zero,&AddressOf(_)): fallthru;
+      case $(&NotZeroAll,&Zero): fallthru;
+      case $(&NotZeroThis,&Zero): fallthru;
+      case $(&AddressOf(_),&Zero):
+        if (p == Neq) return $(f,BottomFL());
+        else return $(BottomFL(),f);
+      default: break;
+      }
+    }
+
+    // bounds checking needs unsigned comparisons
+    // this (hoisted) check shouldn't disable any of Greg's stuff because
+    // it always used to either check for unsigned or require numelts(x),
+    // which is unsigned
+    switch($(Tcutil::compress((type_t)e1->topt),Tcutil::compress((type_t)e2->topt))) {
+    case $(&IntType(Unsigned,_),_):
+    case $(_,&IntType(Unsigned,_)):
+    case $(&TagType(_),_):
+    case $(_,&TagType(_)): break;
+    default: return $(f,f);
+    }
+
+    // bypass any non-relational primop
+    switch (p) {
+    case Eq: case Neq: case Gt: case Gte: case Lt: case Lte: break;
+    default: return $(f,f);
+    }
+
+    let r = env->fenv->r;
+    let $(e1,relation,e2) = primop2relation(e1,p,e2);
+    reln_op_t n1 = RConst(0); // dummy values
+    reln_op_t n2 = RConst(0); // dummy values
+    // try to convert expressions to relation operands
+    if (exp2relnop(e1,&n1) && exp2relnop(e2,&n2)) {
+      // if successful, add the relation for the true flow
+      let relns_true = add_relation(r,n1,relation,n2,relns);
+      // add the negation of the relation for the false flow -- note
+      // we flip the relation (== flips with !=, < flips with <=) and 
+      // the arguments.  
+      let relns_false = add_relation(r,n2,flip_relation(relation),n1,relns);
+      return $(ReachableFL(d,relns_true), ReachableFL(d,relns_false));
+    } else 
+      return $(f,f);
+  }
+}
+
 // FIX: ?? there are more primops and the "not-zero" cases to add if we care.
 //      also we can statically determine stupid tests like NotZero == Zero
 static $(flow_t<`r>,flow_t<`r>)
@@ -1703,203 +1812,31 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     let $(f1,f2) = anal_test(env,inflow,e1);
     return $(f2,f1);
   case &Primop_e(p,es):
-    DEBUG_PRINT("anal_test %s, inflow is ",exp2string(e));
-    DEBUG_PRINT_F(print_flow,inflow);
-    absRval_t r1,r2;
-    flow_t f;
-    ANAL_RGN(env, temp) {
-      let $(fl,rvals) = anal_unordered_Rexps(temp,env,inflow,es,false,false);
-      r1 = rvals->hd;
-      r2 = rvals->tl->hd;
-      f = fl;
-    }
-    DEBUG_PRINT("anal_test %s, after rexps, flow is ",exp2string(e));
-    DEBUG_PRINT_F(print_flow,f);
+    return anal_primop_test(env,inflow,p,es);
+  default: 
+    // NB: just the default case of the outermost switch from here on;
+    // should otherwise have returned in switch statement
+    let $(f,r) = anal_Rexp(env,false,inflow,e);
     switch(f) {
     case {.BottomFL = _}: return $(f,f);
-    case {.ReachableFL = $(d,relns)}:
-      let e1 = es->hd;
-      let e2 = es->tl->hd;
-      if(initlevel(env->fenv,d,r1)==NoneIL)
-        Tcutil::terr(es->hd->loc,"expression may not be initialized");
-      if(initlevel(env->fenv,d,r2)==NoneIL)
-        Tcutil::terr(es->tl->hd->loc,"expression may not be initialized");
-
-      // zero-splitting, only for Eq and Neq with Zero and Unknown, so can
-      // take precedence over any array-bounds splitting
-      if(p==Eq || p==Neq) {
-	vardecl_opt_t r1n = NULL, r2n = NULL;
-	switch (r1) {
-	case &NamedLocation(n,r): r1 = r; r1n = n; break;
-	default: break;
-	}
-	switch (r2) {
-	case &NamedLocation(n,r): r2 = r; r2n = n; break;
-	default: break;
-	}
-	  
-        switch($(r1,r2)) {
-	/* XXX here I would adjust things to use VirtualAddrOf;
-	   do a fall-through on that case for the next two */
-        case $(&UnknownR(il),&Zero): // f is correct for both args b/c unordered
-          let $(f1,f2) = splitzero(env,f,f,e1,il,r1n);
-          switch(p) {
-          case Eq:  return $(f2,f1);
-          case Neq: return $(f1,f2);
-          default: throw new Core::Impossible("anal_test, zero-split");
-          }
-        case $(&Zero,&UnknownR(il)):
-          let $(f1,f2) = splitzero(env,f,f,e2,il,r2n);
-          switch(p) {
-          case Eq:  return $(f2,f1);
-          case Neq: return $(f1,f2);
-          default: throw new Core::Impossible("anal_test, zero-split");
-          }
-        case $(&Zero,&Zero):
-          if (p == Eq) return $(f,BottomFL());
-          else return $(BottomFL(),f);
-        case $(&Zero,&NotZeroAll): fallthru;
-        case $(&Zero,&NotZeroThis): fallthru;
-        case $(&Zero,&AddressOf(_)): fallthru;
-        case $(&NotZeroAll,&Zero): fallthru;
-        case $(&NotZeroThis,&Zero): fallthru;
-        case $(&AddressOf(_),&Zero):
-          if (p == Neq) return $(f,BottomFL());
-          else return $(BottomFL(),f);
-        default: break;
-        }
+    case {.ReachableFL = $(d,_)}:
+      vardecl_opt_t locname = NULL;
+      retry: switch(r) {
+      case &NamedLocation(n,r2): r = r2; locname = n; goto retry;
+      case &Zero: return $(BottomFL(),f);
+      case &NotZeroThis:
+      case &NotZeroAll:
+      case &AddressOf(_): return $(f,BottomFL());
+      case &UnknownR(NoneIL):
+      case &Esc(NoneIL):
+      case &Consumed(_,_,_):
+        Tcutil::terr(e->loc,"expression may not be initialized");
+        return $(BottomFL(),BottomFL());
+        /* XXX another place to add VirtAddrOf fallthru */
+      case &UnknownR(il): return splitzero(env,inflow,f,e,il,locname);
+      case &Esc(_):       return $(f,f);
+      case &Aggregate(...): throw new Core::Impossible("anal_test");
       }
-
-      // bounds checking needs unsigned comparisons
-      // this (hoisted) check shouldn't disable any of Greg's stuff because
-      // it always used to either check for unsigned or require x.size,
-      // which is unsigned
-      switch($(Tcutil::compress((type_t)e1->topt),Tcutil::compress((type_t)e2->topt))) {
-      case $(&IntType(Unsigned,_),_):
-      case $(_,&IntType(Unsigned,_)):
-      case $(&TagType(_),_):
-      case $(_,&TagType(_)): break;
-      default: return $(f,f);
-      }
-
-      switch(p) {
-      case Eq:
-      case Neq:
-      case Gt:
-      case Gte: return $(f,f);
-      case Lt:
-        let ft = f;
-        let ff = f;
-
-        switch(ft) {
-        case {.BottomFL = _}: throw new Core::Impossible("anal_test, Lt");
-        case {.ReachableFL = $(d2,_)}: d = d2;
-        }
-
-        // this case tracks most of the inequalities we need for bounds-checking
-        switch (e1->r) {
-          // Note: global arrays are the only thing that don't "escape"
-        case &Var_e(_,&Global_b(v1)) && !v1->escapes: fallthru(v1);
-        case &Var_e(_,&Local_b(v1))  && !v1->escapes: fallthru(v1);
-        case &Var_e(_,&Pat_b(v1))    && !v1->escapes: fallthru(v1);
-        case &Var_e(_,&Param_b(v1))  && !v1->escapes:
-          switch (e2->r) {
-          case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
-          case &Var_e(_,&Local_b(v2))  && !v2->escapes: fallthru(v2);
-          case &Var_e(_,&Pat_b(v2))    && !v2->escapes: fallthru(v2);
-          case &Var_e(_,&Param_b(v2))  && !v2->escapes:
-            // v1 or v2 are unsigned, so this is an unsigned comparison
-            let r = env->fenv->r;
-            let relns_true = rnew(r) List(rnew(r) Reln(v1,LessVar(v2,v2->type)),relns);
-            return $(ReachableFL(d,relns_true), ff);
-          case &Const_e({.Int_c = $(_,i)}): fallthru(i);
-          case &Cast_e(_,&Exp{.r = &Const_e({.Int_c = $(_,i)}),...},...):
-            let r = env->fenv->r;
-            let relns_true = rnew(r) List(rnew(r) Reln(v1,LessConst(i)),relns);
-            return $(ReachableFL(d,relns_true), ff);
-          case &Primop_e(Size,&List(e3,_)):
-            switch (e3->r) {
-            case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
-            case &Var_e(_,&Local_b(v2))  && !v2->escapes: fallthru(v2);
-            case &Var_e(_,&Pat_b(v2))    && !v2->escapes: fallthru(v2);
-            case &Var_e(_,&Param_b(v2))  && !v2->escapes:
-              // size is always unsigned
-              let r = env->fenv->r;
-              let relns_true = rnew(r) List(rnew(r) Reln(v1,LessNumelts(v2)),relns);
-              return $(ReachableFL(d,relns_true), ff);
-            default: return $(ft,ff);
-            }
-          default: return $(ft,ff);
-          }
-        default: return $(ft,ff);
-        }
-
-      case Lte:
-        let ft = f;
-        let ff = f;
-
-        switch(ft) {
-        case {.BottomFL = _}: throw new Core::Impossible("anal_test, Lte");
-        case {.ReachableFL = $(d2,_)}: d = d2;
-        }
-
-        // this case checks for i <= x.size
-        switch (e1->r) {
-          // Note: global arrays are the only thing that don't "escape"
-        case &Var_e(_,&Global_b(v1)) && !v1->escapes: fallthru(v1);
-        case &Var_e(_,&Local_b(v1))  && !v1->escapes: fallthru(v1);
-        case &Var_e(_,&Pat_b(v1))    && !v1->escapes: fallthru(v1);
-        case &Var_e(_,&Param_b(v1))  && !v1->escapes:
-          switch (e2->r) {
-          case &Const_e({.Int_c = $(_,i)}): fallthru(i);
-          case &Cast_e(_,&Exp{.r = &Const_e({.Int_c = $(_,i)}),...},...):
-            let r = env->fenv->r;
-            let relns_true = rnew(r)
-              List(rnew(r) Reln(v1,LessEqConst(i)),relns);
-            return $(ReachableFL(d,relns_true), ff);
-          case &Primop_e(Size,&List(e3,_)):
-            switch (e3->r) {
-            case &Var_e(_,&Global_b(v2)) && !v2->escapes: fallthru(v2);
-            case &Var_e(_,&Local_b(v2))  && !v2->escapes: fallthru(v2);
-            case &Var_e(_,&Pat_b(v2))    && !v2->escapes: fallthru(v2);
-            case &Var_e(_,&Param_b(v2))  && !v2->escapes:
-              // size is always unsigned
-              let fenv = env->fenv;
-              let relns_true = rnew(fenv->r) List(rnew(fenv->r) Reln(v1,LessEqNumelts(v2)),relns);
-              return $(ReachableFL(d,relns_true), ff);
-            default: return $(ft,ff);
-            }
-          default: return $(ft,ff);
-          }
-        default: return $(ft,ff);
-        }
-      default: return $(f,f);
-      }
-    }
-  default: break;
-  }
-  // NB: just the default case of the outermost switch from here on;
-  // should otherwise have returned in switch statement
-  let $(f,r) = anal_Rexp(env,false,inflow,e);
-  switch(f) {
-  case {.BottomFL = _}: return $(f,f);
-  case {.ReachableFL = $(d,_)}:
-    vardecl_opt_t locname = NULL;
-    retry: switch(r) {
-    case &NamedLocation(n,r2): r = r2; locname = n; goto retry;
-    case &Zero: return $(BottomFL(),f);
-    case &NotZeroThis:
-    case &NotZeroAll:
-    case &AddressOf(_): return $(f,BottomFL());
-    case &UnknownR(NoneIL):
-    case &Esc(NoneIL):
-    case &Consumed(_,_,_):
-      Tcutil::terr(e->loc,"expression may not be initialized");
-      return $(BottomFL(),BottomFL());
-    /* XXX another place to add VirtAddrOf fallthru */
-    case &UnknownR(il): return splitzero(env,inflow,f,e,il,locname);
-    case &Esc(_):       return $(f,f);
-    case &Aggregate(...): throw new Core::Impossible("anal_test");
     }
   }
 }

@@ -2180,6 +2180,7 @@ string_t exp2string(exp_t e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
 string_t stmt2string(stmt_t s)   {return string_of_doc(stmt2doc(s,false), PP_WIDTH);}
 string_t typ2string(type_t t)    {return string_of_doc(typ2doc(t),  PP_WIDTH);}
 //string_t qvar2string(qvar_t v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
+string_t tvar2string(tvar_t t) {return string_of_doc(tvar2doc(t), PP_WIDTH);}
 string_t typ2cstring(type_t t) {
   bool old_qvar_to_Cids = qvar_to_Cids;
   bool old_add_cyc_prefix = add_cyc_prefix;

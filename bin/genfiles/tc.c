@@ -1101,8 +1101,6 @@ int Cyc_Tcutil_supports_default(void*);
 int Cyc_Tcutil_extract_const_from_typedef(unsigned int,int declared_const,void*);
 # 337
 struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(void*t,struct Cyc_List_List*atts);
-# 344
-void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 32 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);
 void*Cyc_Tcexp_tcExpInitializer(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);struct Cyc_Tcexp_TestEnv{struct _tuple10*eq;int isTrue;};

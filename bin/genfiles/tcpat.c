@@ -1105,8 +1105,6 @@ int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
 # 315
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 344
-void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 32 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);struct Cyc_Tcexp_TestEnv{struct _tuple0*eq;int isTrue;};
 # 39

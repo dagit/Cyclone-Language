@@ -1051,9 +1051,7 @@ void*Cyc_Tcutil_compress(void*t);
 # 303 "tcutil.h"
 int Cyc_Tcutil_is_temp_tvar(struct Cyc_Absyn_Tvar*);
 # 305
-void Cyc_Tcutil_rewrite_temp_tvar(struct Cyc_Absyn_Tvar*);
-# 344
-void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
+void Cyc_Tcutil_rewrite_temp_tvar(struct Cyc_Absyn_Tvar*);struct Cyc_Absynpp_Params{int expand_typedefs;int qvar_to_Cids;int add_cyc_prefix;int to_VC;int decls_first;int rewrite_temp_tvars;int print_all_tvars;int print_all_kinds;int print_all_effects;int print_using_stmts;int print_externC_stmts;int print_full_evars;int print_zeroterm;int generate_line_directives;int use_curr_namespace;struct Cyc_List_List*curr_namespace;};
 # 54 "absynpp.h"
 extern int Cyc_Absynpp_print_for_cycdoc;
 # 56
@@ -1076,6 +1074,7 @@ struct _dyneither_ptr Cyc_Absynpp_decllist2string(struct Cyc_List_List*tdl);
 struct _dyneither_ptr Cyc_Absynpp_prim2string(enum Cyc_Absyn_Primop p);
 struct _dyneither_ptr Cyc_Absynpp_pat2string(struct Cyc_Absyn_Pat*p);
 struct _dyneither_ptr Cyc_Absynpp_scope2string(enum Cyc_Absyn_Scope sc);
+struct _dyneither_ptr Cyc_Absynpp_tvar2string(struct Cyc_Absyn_Tvar*);
 # 77
 int Cyc_Absynpp_is_anon_aggrtype(void*t);
 extern struct _dyneither_ptr Cyc_Absynpp_cyc_string;
@@ -3353,6 +3352,7 @@ struct _dyneither_ptr Cyc_Absynpp_exp2string(struct Cyc_Absyn_Exp*e){return Cyc_
 struct _dyneither_ptr Cyc_Absynpp_stmt2string(struct Cyc_Absyn_Stmt*s){return Cyc_PP_string_of_doc(Cyc_Absynpp_stmt2doc(s,0),72);}
 struct _dyneither_ptr Cyc_Absynpp_typ2string(void*t){return Cyc_PP_string_of_doc(Cyc_Absynpp_typ2doc(t),72);}
 # 2183
+struct _dyneither_ptr Cyc_Absynpp_tvar2string(struct Cyc_Absyn_Tvar*t){return Cyc_PP_string_of_doc(Cyc_Absynpp_tvar2doc(t),72);}
 struct _dyneither_ptr Cyc_Absynpp_typ2cstring(void*t){
 int old_qvar_to_Cids=Cyc_Absynpp_qvar_to_Cids;
 int old_add_cyc_prefix=Cyc_Absynpp_add_cyc_prefix;
@@ -3362,7 +3362,7 @@ struct _dyneither_ptr s=Cyc_Absynpp_typ2string(t);
 Cyc_Absynpp_qvar_to_Cids=old_qvar_to_Cids;
 Cyc_Absynpp_add_cyc_prefix=old_add_cyc_prefix;
 return s;};}
-# 2193
+# 2194
 struct _dyneither_ptr Cyc_Absynpp_prim2string(enum Cyc_Absyn_Primop p){return Cyc_PP_string_of_doc(Cyc_Absynpp_prim2doc(p),72);}
 struct _dyneither_ptr Cyc_Absynpp_pat2string(struct Cyc_Absyn_Pat*p){return Cyc_PP_string_of_doc(Cyc_Absynpp_pat2doc(p),72);}
 struct _dyneither_ptr Cyc_Absynpp_scope2string(enum Cyc_Absyn_Scope sc){return Cyc_PP_string_of_doc(Cyc_Absynpp_scope2doc(sc),72);}

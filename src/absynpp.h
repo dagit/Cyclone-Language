@@ -72,7 +72,7 @@ extern string_t decllist2string(list_t<decl_t> tdl);
 extern string_t prim2string(primop_t p);
 extern string_t pat2string(pat_t p);
 extern string_t scope2string(scope_t sc);
-
+extern string_t tvar2string(tvar_t);
   // These are only exposed so Absyndump can use them:
   extern bool is_anon_aggrtype(type_t t);
   extern string_t cyc_string;

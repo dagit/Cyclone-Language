@@ -1280,76 +1280,10 @@ static CfFlowInfo::relns_t get_relns(exp_t e) { // e must be pre-translation!
   }
 }
 
-// returns true when i is <= the number of elements in t
-static bool check_const_array(unsigned i, type_t t) {
-  switch (compress(t)) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,zt,_))):
-    switch (conref_def(bounds_one,b)) {
-    case &DynEither_b: return false;
-    case &Upper_b(e):
-      let $(j,known) = Evexp::eval_const_uint_exp(e);
-      return known && i <= j;
-    }
-  case &ArrayType(ArrayInfo{_,_,e,_,_}):
-    if (e == NULL) return false;
-    let $(j,known) = Evexp::eval_const_uint_exp(e);
-    return known && i <= j;
-  default: return false;
-  }
-}
-
-// see if y is <= numelts(v)
-static bool check_leq_size_var(CfFlowInfo::relns_t relns, vardecl_t v,
-                               vardecl_t y) {
-  for (; relns != NULL; relns = relns->tl) {
-    let r = relns->hd;
-    if (r->vd != y) continue;
-    switch (r->rop) {
-    case {.LessNumelts = z} : fallthru(z);
-    case {.LessEqNumelts = z}: if (z == v) return true; else break;
-    default: continue;
-    }
-  }
-  return false;
-}
-
-// see if e is <= numelts(v)
-static bool check_leq_size(CfFlowInfo::relns_t relns, vardecl_t v, exp_t e,
-                           type_t vtype) {
-  switch (e->r) {
-  case &Var_e(_,&Pat_b(y)): fallthru(y);
-  case &Var_e(_,&Local_b(y)): fallthru(y);
-  case &Var_e(_,&Global_b(y)): fallthru(y);
-  case &Var_e(_,&Param_b(y)):
-    if (y->escapes) return false;
-    // see if y <= numelts(v)
-    if (check_leq_size_var(relns,v,y)) return true;
-    break;
-  case &Const_e({.Int_c = $(None,i)}): fallthru(i);
-  case &Const_e({.Int_c = $(Signed,i)}):
-    return ((i >= 0) && check_const_array(i,vtype));
-  case &Const_e({.Int_c = $(Unsigned,i)}):
-    return check_const_array(i,vtype);
-  case &Primop_e(Numelts,&List(e2,_)):
-    // see if e2 is v
-    switch (e2->r) {
-    case &Var_e(_,&Pat_b(y)): fallthru(y);
-    case &Var_e(_,&Local_b(y)): fallthru(y);
-    case &Var_e(_,&Global_b(y)): fallthru(y);
-    case &Var_e(_,&Param_b(y)):
-      return y == v;
-    default: break;
-    }
-    break;
-  default: break;
-  }
-  return false;
-}
-
 // return true if we can prove from relns that i < numelts(a)
 //  FIX: doesn't deal with the case where i is a constant and a's size
 //  can be found.
-static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
+static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t<`H> relns,
                          exp_t a, exp_t i) {
 #ifdef BCE_DEBUG
   fprintf(stderr,"bounds check on %s:%s and %s\n",exp2string(a),
@@ -1359,15 +1293,15 @@ static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
 #endif
   // if a has type T*{x} or T[x], then we can pretend like it's
   // a variable to get the rest of this code to work out.
-  vardecl_t x;
+  CfFlowInfo::reln_op_t rop_i = CfFlowInfo::RConst(0); // dummy value
+  bool valid_rop_i = CfFlowInfo::exp2relnop(i,&rop_i);
 
+  vardecl_t x;
   switch (a->r) {
-  case &Var_e(_,&Pat_b(x1)):    fallthru(x1);
-  case &Var_e(_,&Local_b(x1)):  fallthru(x1);
-  case &Var_e(_,&Global_b(x1)): fallthru(x1);
-  case &Var_e(_,&Param_b(x1)):
-    if (x1->escapes) fallthru;
-    x = x1;
+  case &Var_e(_,b):
+    let x1 = CfFlowInfo::nonesc_vardecl(b);
+    if (x1 == NULL) fallthru;
+    x = (vardecl_t)x1;
     break;
   default:
     // we're going to fake up a vardecl here
@@ -1384,97 +1318,46 @@ static bool check_bounds(type_t a_typ, CfFlowInfo::relns_t relns,
     x->type = a_typ;
   }
   let xtype = a_typ;
+  CfFlowInfo::reln_op_t rop_a = CfFlowInfo::RNumelts(x);
 
-  inner_loop:
-    switch (i->r) {
-    case &Cast_e(t,e2,_,_): i = e2; goto inner_loop;
-    case &Const_e({.Int_c = $(None,i)}): fallthru(i);
-    case &Const_e({.Int_c = $(Signed,i)}):
-      return ((i >= 0) && check_const_array(i+1,xtype));
-    case &Const_e({.Int_c = $(Unsigned,i)}):
-      return check_const_array(i+1,xtype);
-    case &Primop_e(Mod,&List(e1,&List(e2,_))):
-      // we have x[e1 % e2]
-      // if e2 is numelts(x) or z such that z <= numelts(x) then it's okay
-      return check_leq_size(relns, x, e2, xtype);
-    case &Var_e(_,&Pat_b(y)):    fallthru(y);
-    case &Var_e(_,&Local_b(y)):  fallthru(y);
-    case &Var_e(_,&Global_b(y)): fallthru(y);
-    case &Var_e(_,&Param_b(y)):
-      if (y->escapes) return false;
-      // the expression we're checking is x[y].
-      // find something such that y < something
-      for (let rs = relns; rs != NULL; rs = rs->tl) {
-        let r = rs->hd;
-        if (r->vd == y) {
-          switch (r->rop) {
-            // y < numelts(x)
-          case {.LessNumelts = z}: if (x == z) return true; else break;
-          case {.LessVar = $(z,zt)}:
-            // y < z --
-            // first try to find out z : tag_t<t> and x has type t*{e} and
-            // then prove t <= e.  Here's where we need z's original type.
-            // Unfortunately, z->type is the translated type at this point.
+  // if x's type is T*{e}, T@{e}, or T[e] then we want to 
+  // add a constraint of the form e <= numelts(x)
+  exp_opt_t bound = Tcutil::get_type_bound(xtype);
+  if (bound != NULL) {
+    CfFlowInfo::reln_op_t rop_bound = CfFlowInfo::RConst(0); // bogus value
+    if (CfFlowInfo::exp2relnop(bound,&rop_bound))
+      relns = CfFlowInfo::add_relation(heap_region,rop_bound,
+                                       CfFlowInfo::Rlte,rop_a,relns);
+  }
+
+  // check to see if adding numelts(x) <= i to relns is inconsistent
+  if (valid_rop_i) {
+    let rlns = CfFlowInfo::add_relation(heap_region,rop_a,
+                                        CfFlowInfo::Rlte,rop_i,relns);
 #ifdef BCE_DEBUG
-            fprintf(stderr,"found %s < %s:%s and %s's type is %s\n",
-                    qvar2string(y->name),
-                    qvar2string(z->name),
-                    typ2string(zt),
-                    qvar2string(x->name),
-                    typ2string((type_t)a->topt));
+    fprintf(stderr,"checking consistency of: "); CfFlowInfo::print_relns(rlns);
+    fprintf(stderr,"\n");
 #endif
-            switch $(compress(zt), compress((type_t)a->topt)) {
-            case $(&TagType(tagv), &PointerType(PtrInfo{_,_,PtrAtts{.bounds = bnd, ...}})):
-              switch (conref_val(bnd)) {
-              case &Upper_b(tage):
-                let tve = cast_exp(uint_typ,valueof_exp(tagv,0),false,
-                                   No_coercion,0);
-#ifdef BCE_DEBUG
-                fprintf(stderr,"checking to see if %s <= %s\n",
-                        exp2string(tve), exp2string(tage));
-#endif
-                if (Evexp::lte_const_exp(tve, tage))
-                  return true;
-                break;
-              default: break;
-              }
-              break;
-            default: break;
-            }
-            // then try to find z == numelts(x) or z <= numelts(x)
-            for (let rs = relns; rs != NULL; rs = rs->tl) {
-              let r = rs->hd;
-              if (r->vd == z)
-                switch (r->rop) {
-                case {.LessEqNumelts = w}: fallthru(w);
-                case {.LessNumelts = w}:
-                  if (x == w) return true;
-		  break;
-                case {.EqualConst = c}:
-                  return check_const_array(c,xtype);
-                case {.LessEqConst = c} && c > 0:
-                  return check_const_array(c,xtype);
-                case {.LessVar = $(w,_)}:
-                  if (check_leq_size_var(relns, x, w)) return true;
-		  break;
-                default: break;
-                }
-            }
-            break;
-          case {.LessConst = c}:
-            // y < c -- see if c <= numelts(x)
-            return check_const_array(c,xtype);
-          case {.LessEqConst = c}:
-            // y <= c+1 -- see if c+1 <= numelts(x)
-            return check_const_array(c+1,xtype);
-          default: break;
-          }
-        }
-      }
-      break;
-    default: break;
+    if (!CfFlowInfo::consistent_relations(rlns)) return true;
+  }
+
+inner_loop:
+  switch (i->r) {
+  case &Cast_e(t,e2,_,_): i = e2; goto inner_loop;
+  case &Primop_e(Mod,&List(e1,&List(e2,_))):
+    // we have x[e1 % e2]
+    // if e2 is numelts(x) or z such that z <= numelts(x) then it's okay
+    CfFlowInfo::reln_op_t rop_z = CfFlowInfo::RConst(0); // dummy
+    if (CfFlowInfo::exp2relnop(e2,&rop_z)) {
+      // add numelts(x) < z and check to see if it's inconsistent
+      let rlns = CfFlowInfo::add_relation(heap_region,rop_a,
+                                          CfFlowInfo::Rlt,rop_z,relns);
+      return !CfFlowInfo::consistent_relations(rlns);
     }
-    return false;
+    break;
+  default: break;
+  }
+  return false;
 }
 
 static type_t get_c_typ(exp_t e) {

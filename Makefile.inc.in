@@ -106,10 +106,11 @@ CYCLONE_SRCS:=absyn\
 	 formatstr\
          evexp\
          tc\
-         toc\
-         tovc\
+         pratt\
          cf_flowinfo\
          new_control_flow\
+         toc\
+         tovc\
          interface\
 	 tcdecl\
          port\
@@ -127,6 +128,7 @@ CYCDOC_SRCS:=cycdoc\
 	tcpat\
         tc\
 	tcdecl\
+        pratt\
 	new_control_flow\
 	cf_flowinfo\
 	formatstr\
@@ -147,6 +149,7 @@ BUILDLIB_SRCS:=buildlib\
 	rgnorder\
 	tcenv\
 	tcpat\
+        partt\
 	new_control_flow\
 	cf_flowinfo\
 	absyn

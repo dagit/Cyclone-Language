@@ -1040,8 +1040,6 @@ typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_InNewAggr  = 2};
 # 42 "tcutil.h"
 void Cyc_Tcutil_warn(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
-# 344 "tcutil.h"
-void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 43 "lex.cyl"
 void Cyc_yyerror(struct _dyneither_ptr s){
 Cyc_Position_post_error(Cyc_Position_mk_err_parse((unsigned int)Cyc_yylloc.first_line,s));}

@@ -995,9 +995,7 @@ extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
 # 154
 int Cyc_Tcutil_unify(void*,void*);
 # 293 "tcutil.h"
-void*Cyc_Tcutil_normalize_effect(void*e);
-# 344
-void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct Cyc_PP_Ppstate;
+void*Cyc_Tcutil_normalize_effect(void*e);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;
 # 43

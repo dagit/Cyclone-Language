@@ -341,7 +341,9 @@ extern attributes_t transfer_fn_type_atts(type_t t, attributes_t atts);
 extern bool rgn_of_pointer(type_t t, type_t @rgn);
 
 // issue a warning if the type is a typedef with non-empty qualifiers
-void check_no_qual(seg_t loc, type_t t);
+extern void check_no_qual(seg_t loc, type_t t);
 
+// return the bound of an array or pointer type (if present)
+extern exp_opt_t get_type_bound(type_t t);
 }
 #endif

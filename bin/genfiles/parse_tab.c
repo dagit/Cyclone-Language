@@ -1212,9 +1212,7 @@ extern struct Cyc_Core_Opt Cyc_Tcutil_trko;
 struct Cyc_Core_Opt*Cyc_Tcutil_kind_to_opt(struct Cyc_Absyn_Kind*k);
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
 # 296 "tcutil.h"
-struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
-# 344
-void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct Cyc_PP_Ppstate;
+struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;
 # 43
@@ -3487,7 +3485,7 @@ static struct _tuple26 att_map[17]={{{_tmp4DD,_tmp4DD,_tmp4DD + 8},(void*)& Cyc_
 # 1508
 struct _dyneither_ptr _tmp4DB=Cyc_yyget_String_tok(yyyyvsp[0]);
 # 1510
-if((((_get_dyneither_size(_tmp4DB,sizeof(char))> 4  && *((const char*)_check_dyneither_subscript(_tmp4DB,sizeof(char),0))== '_') && *((const char*)_check_dyneither_subscript(_tmp4DB,sizeof(char),1))== '_') && *((const char*)_check_dyneither_subscript(_tmp4DB,sizeof(char),(int)(_get_dyneither_size(_tmp4DB,sizeof(char))- 2)))== '_') && *((const char*)_check_dyneither_subscript(_tmp4DB,sizeof(char),(int)(_get_dyneither_size(_tmp4DB,sizeof(char))- 3)))== '_')
+if((((_get_dyneither_size(_tmp4DB,sizeof(char))> 4  && ((const char*)_tmp4DB.curr)[0]== '_') && ((const char*)_tmp4DB.curr)[1]== '_') && *((const char*)_check_dyneither_subscript(_tmp4DB,sizeof(char),(int)(_get_dyneither_size(_tmp4DB,sizeof(char))- 2)))== '_') && *((const char*)_check_dyneither_subscript(_tmp4DB,sizeof(char),(int)(_get_dyneither_size(_tmp4DB,sizeof(char))- 3)))== '_')
 # 1512
 _tmp4DB=(struct _dyneither_ptr)Cyc_substring((struct _dyneither_ptr)_tmp4DB,2,_get_dyneither_size(_tmp4DB,sizeof(char))- 5);{
 int i=0;

@@ -980,8 +980,6 @@ struct Cyc_List_List*Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);
 void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 120
 extern struct Cyc_Core_Opt Cyc_Tcutil_rko;
-# 344 "tcutil.h"
-void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 34 "formatstr.h"
 struct Cyc_List_List*Cyc_Formatstr_get_format_typs(struct _RegionHandle*,struct Cyc_Tcenv_Tenv*,struct _dyneither_ptr,unsigned int);
 # 37

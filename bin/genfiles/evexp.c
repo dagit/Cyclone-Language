@@ -985,9 +985,7 @@ int Cyc_Tcutil_unify(void*,void*);
 # 156
 int Cyc_Tcutil_typecmp(void*,void*);
 # 159
-void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 344 "tcutil.h"
-void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct _tuple10{unsigned int f1;int f2;};
+void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);struct _tuple10{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple10 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);
 # 32

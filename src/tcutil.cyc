@@ -5441,3 +5441,20 @@ attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
   }
 }
 
+// return the number of elements in an array or pointer type (if present)
+exp_opt_t get_type_bound(type_t t) {
+  exp_opt_t bound = NULL;
+  switch (compress(t)) {
+  case &PointerType(*pi):
+    switch (conref_val(pi->ptr_atts.bounds)) {
+    case &Upper_b(e): bound = e; break;
+    default: break;
+    }
+    break;
+  case &ArrayType(ArrayInfo{.num_elts = e,...}):
+    bound = e;
+    break;
+  default: break;
+  }
+  return bound;
+}

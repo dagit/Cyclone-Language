@@ -1139,9 +1139,7 @@ struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
 int Cyc_Tcutil_new_tvar_id();
 # 300
 void Cyc_Tcutil_add_tvar_identity(struct Cyc_Absyn_Tvar*);
-void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);
-# 344
-void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);char Cyc_Tcenv_Env_error[10]="Env_error";struct Cyc_Tcenv_Env_error_exn_struct{char*tag;};
+void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);char Cyc_Tcenv_Env_error[10]="Env_error";struct Cyc_Tcenv_Env_error_exn_struct{char*tag;};
 # 88 "tcenv.cyc"
 struct Cyc_Tcenv_Env_error_exn_struct Cyc_Tcenv_Env_error_val={Cyc_Tcenv_Env_error};
 # 90
