@@ -74,7 +74,7 @@ list_t<mstringptr_t> strings_of_segments(list_t<seg_t> segs) {
   list_t<mstringptr_t> ans = NULL;
   for (; segs != NULL; segs = segs->tl)
     ans = new List(new string_of_segment(segs->hd),ans);
-  return List::imp_rev(ans);
+  return ans; 
   /* 
   list_t<$(int,Lineno::pos_t)@> places = NULL;
   for(let segs2 = segs; segs2 != NULL; segs2 = segs2->tl) {

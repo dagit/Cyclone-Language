@@ -814,9 +814,7 @@ return dyn.curr;};}struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 39 "list.h"
 typedef struct Cyc_List_List*Cyc_List_list_t;
 # 49 "list.h"
-typedef struct Cyc_List_List*Cyc_List_List_t;extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_exn_struct{char*tag;};
-# 178
-struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[4];struct Cyc_List_Nth_exn_struct{char*tag;};
+typedef struct Cyc_List_List*Cyc_List_List_t;extern char Cyc_List_List_mismatch[14];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4];struct Cyc_List_Nth_exn_struct{char*tag;};
 # 38 "string.h"
 unsigned long Cyc_strlen(struct _dyneither_ptr s);
 # 72 "string.h"
@@ -887,7 +885,7 @@ struct Cyc_List_List*Cyc_Position_strings_of_segments(struct Cyc_List_List*segs)
 struct Cyc_List_List*ans=0;
 for(0;segs != 0;segs=segs->tl){
 struct _dyneither_ptr*_tmp46;struct Cyc_List_List*_tmp45;ans=((_tmp45=_cycalloc(sizeof(*_tmp45)),((_tmp45->hd=((_tmp46=_cycalloc(sizeof(*_tmp46)),((_tmp46[0]=Cyc_Position_string_of_segment((unsigned int)segs->hd),_tmp46)))),((_tmp45->tl=ans,_tmp45))))));}
-return((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(ans);}
+return ans;}
 # 97 "position.cyc"
 struct Cyc_Position_Lex_Position_Error_kind_struct Cyc_Position_Lex_val={0};
 struct Cyc_Position_Parse_Position_Error_kind_struct Cyc_Position_Parse_val={1};
