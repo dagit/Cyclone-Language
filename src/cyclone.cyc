@@ -476,8 +476,8 @@ list_t<Absyn::decl_t> do_cfcheck(JumpAnalysis::jump_anal_res_t tables,
 //   return true;
 // }
 
-bool do_insert_checks(bool ignore, list_t<Absyn::decl_t,`H> tds) {
-  InsertChecks::insert_checks(tds);
+bool do_insert_checks(JumpAnalysis::jump_anal_res_t tables, list_t<Absyn::decl_t,`H> tds) {
+  InsertChecks::insert_checks(tds,tables, vcgen_r);
   return true;
 }
 
@@ -831,7 +831,7 @@ static void process_file(string_t<`H> filename) {
   
   // check-insertion
   if(!compile_failure && Flags::stop_after_pass >= Flags::CheckInsertion)
-    do_stage("check insertion", tds, do_insert_checks, true, true);
+    do_stage("check insertion", tds, do_insert_checks, (_@)jump_tables, true);
     
   // Generate interface file
   if (!compile_failure && generate_interface_r

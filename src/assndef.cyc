@@ -340,7 +340,7 @@ static $(assn_t,bool reduced) copy_assn(datatype Assn@`r a){
 // not already there, then make a shallow copy and enter it (along
 // with info regarding whether or not it's been reduced) into the
 // hash table.
-assn_t hash_cons(datatype Assn@`r a) {
+static assn_t hash_cons(datatype Assn@`r a) {
   Hashtable::table_t h;
   if (hash_cons_table == NULL) {
     h = Hashtable::create(123, assncmp, assnhash);
@@ -488,7 +488,7 @@ assn_t not(assn_t a) {
 // we are under a Kill node.
 
 // TRY: we could try using dictionaries here instead of lists.
-term_t 
+static term_t 
 reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
             list_t<$(vardecl_t,term_t)@`H,`H> *esc_subst) {
   switch (t) {
@@ -534,7 +534,7 @@ reduce_term(term_t t, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst,
   }
 }
 
-assn_t 
+static assn_t 
 reduce_assn(assn_t a, list_t<$(vardecl_t,term_t)@`H,`H> non_esc_subst, 
             list_t<$(vardecl_t,term_t)@`H,`H> *esc_subst) {
  LOOP:
@@ -619,7 +619,7 @@ term_t kill_mem_term(term_t t) {
 // intersect two lists of assertions returning the common
 // assertions, and the remainders of the two lists.  Assumes
 // the assertions are in sorted order.
-void intersect(list_t<assn_t,`H> a1s, list_t<assn_t,`H> a2s, 
+static void intersect(list_t<assn_t,`H> a1s, list_t<assn_t,`H> a2s, 
                       list_t<assn_t,`H>@common,
                       list_t<assn_t,`H>@res1,
                       list_t<assn_t,`H>@res2) {

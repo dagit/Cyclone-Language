@@ -131,11 +131,6 @@ namespace AssnDef{
   bool simple_prove(assn_t ctxt, assn_t a);
 
   term_t kill_mem_term(term_t t);
-  void intersect(list_t<assn_t,`H> a1s, list_t<assn_t,`H> a2s, 
-		 list_t<assn_t,`H>@common,
-		 list_t<assn_t,`H>@res1,
-		 list_t<assn_t,`H>@res2);
-
 
 }
 #endif

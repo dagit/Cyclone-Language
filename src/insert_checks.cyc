@@ -482,7 +482,8 @@ static void do_stmt(env_t nv, stmt_t s) {
   }
 }
 
-void insert_checks(List::list_t<decl_t,`H> tds) {
+void insert_checks(List::list_t<decl_t,`H> tds,
+		   JumpAnalysis::jump_anal_res_t tables, bool do_vcgen) {
   let nv = toplevel_env();
   for(; tds != NULL; tds = tds->tl)
     do_decl(nv,tds->hd);

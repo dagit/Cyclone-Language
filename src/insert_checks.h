@@ -21,6 +21,7 @@
 #define _INSERT_CHECKS_H
 
 #include "absyn.h"
+#include "jump_analysis.h"
 
 namespace InsertChecks {
 @extensible datatype Absyn::AbsynAnnot {
@@ -36,7 +37,8 @@ extern_datacon(Absyn::AbsynAnnot,NullOnly);
 extern_datacon(Absyn::AbsynAnnot,NullAndFatBound);
 extern_datacon(Absyn::AbsynAnnot,FatBound);
 
-void insert_checks(List::list_t<Absyn::decl_t,`H>);
+void insert_checks(List::list_t<Absyn::decl_t,`H>, 
+		   JumpAnalysis::jump_anal_res_t,bool);
 }
 
 #endif
