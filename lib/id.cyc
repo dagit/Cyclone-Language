@@ -12,11 +12,11 @@
 // 2. It does copy incoming strings, allowing for later mutation via external
 //    code.  Could probably live without this one
 
-#include "core.h"
-#include "stdio.h"
-#include "string.h"
-#include "list.h"
-#include "id.h"
+#include <core.h>
+#include <stdio.h>
+#include <string.h>
+#include <list.h>
+#include <id.h>
 
 using Core;
 using String;

@@ -3,8 +3,8 @@
 
 // TO DO:  add region support
 
-#include "core.h"
-#include "list.h"
+#include <core.h>
+#include <list.h>
 
 namespace Splay {
 

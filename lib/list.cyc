@@ -9,8 +9,8 @@
 //           as possible.  Also, a reasonable attempt to make things as
 //           space efficient as possible, while remaining "functional".
 //
-#include "core.h"
-#include "list.h"
+#include <core.h>
+#include <list.h>
 
 namespace List;
 using Core;

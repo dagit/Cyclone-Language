@@ -1,4 +1,4 @@
-#include "core.h"
+#include <core.h>
 
 ////////////////////////////////////////////////////////////////////////////
 // Popcorn library, file core.pop                                         //

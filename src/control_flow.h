@@ -1,7 +1,7 @@
 #ifndef _CONTROL_FLOW_H_
 #define _CONTROL_FLOW_H_
 
-#include "list.h"
+#include <list.h>
 #include "absyn.h"
 
 namespace ControlFlow {

@@ -1,9 +1,9 @@
 #ifndef CFABSEXP_H
 #define CFABSEXP_H
 
-#include "list.h"
+#include <list.h>
 #include "absyn.h"
-#include "position.h"
+#include <position.h>
 #include "cf_flowinfo.h"
 #include "new_control_flow.h"
 

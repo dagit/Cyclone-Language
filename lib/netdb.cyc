@@ -1,0 +1,47 @@
+#include <core.h>
+#include <netdb.h>
+using Core;
+
+namespace Cnetdb {
+  static struct Cservent {
+    Cstring s_name;
+    Cstring @s_aliases;
+    Inet::in_port_t s_port;
+    Cstring s_proto;
+  };
+  static struct Chostent {
+    Cstring h_name;
+    Cstring @h_aliases;
+    int h_addrtype;
+    int h_length; // always 4
+    struct Inet::in_addr *@h_addr_list;
+  };
+  extern "C" {
+    struct Cservent *getservbyname(const Cstring name, const Cstring proto);
+    struct Chostent *gethostbyname(const Cstring name);
+    struct Inet::in_addr *?pntlp_toCyc(struct Inet::in_addr *@);
+  }
+#define s2c(x) (string_to_Cstring(x))
+#define c2s(x) (Cstring_to_string(x))
+}
+
+namespace NetDB;
+
+struct servent *getservbyname(string_t name, string_t proto) {
+  struct Cnetdb::Cservent *src = Cnetdb::getservbyname(s2c(name),s2c(proto));
+  return src ? new servent{.s_name = c2s(src->s_name),
+                           .s_aliases = ntCsl_to_ntsl(src->s_aliases),
+                           .s_port = src->s_port,
+                           .s_proto = c2s(src->s_proto)}
+    : null;
+}
+
+struct hostent *gethostbyname(string_t name) {
+  struct Cnetdb::Chostent *src = Cnetdb::gethostbyname(s2c(name));
+  return src ? new hostent{.h_name = c2s(src->h_name),
+                           .h_aliases = ntCsl_to_ntsl(src->h_aliases),
+                           .h_addrtype = src->h_addrtype,
+                           .h_length = src->h_length,
+                           .h_addr_list = Cnetdb::pntlp_toCyc(src->h_addr_list)}
+    : null;
+}

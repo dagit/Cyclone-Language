@@ -24,11 +24,11 @@
 //   the analysis for sake of comparison -- change the abstraction translation, 
 //   not the flow analysis.
 
-#include "core.h"
-#include "list.h"
-#include "dict.h"
-#include "string.h"
-#include "assert.h"
+#include <core.h>
+#include <list.h>
+#include <dict.h>
+#include <string.h>
+#include <assert.h>
 #include "absyn.h"
 #include "tcutil.h"
 #include "evexp.h"
@@ -39,7 +39,7 @@
 
 // for debugging
 #include "absynpp.h"
-#include "stdio.h"
+#include <stdio.h>
 
 using Core;
 using List;

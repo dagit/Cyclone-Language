@@ -1,6 +1,6 @@
 #ifndef _FILENAME_H_
 #define _FILENAME_H_
-#include "core.h"
+#include <core.h>
 
 namespace Filename {
   //extern string current_dir_name;

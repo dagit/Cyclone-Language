@@ -40,9 +40,9 @@
 #define EXTERN_ABSYN extern
 #endif
 
-#include "core.h"
-#include "list.h"
-#include "position.h"
+#include <core.h>
+#include <list.h>
+#include <position.h>
 
 namespace Absyn {
   using Core;

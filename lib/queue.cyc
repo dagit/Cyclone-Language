@@ -8,8 +8,8 @@
 // queue.h:  defines generic imperative queues and various operations
 //           following the conventions of the Ocaml queue library as much
 //           as possible.
-#include "list.h"
-#include "queue.h"
+#include <list.h>
+#include <queue.h>
 
 namespace Queue;
 

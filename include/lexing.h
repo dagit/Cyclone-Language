@@ -2,8 +2,8 @@
 #ifndef _LEXING_H_
 #define _LEXING_H_
 
-#include "core.h"
-#include "stdio.h"
+#include <core.h>
+#include <stdio.h>
 
 namespace Lexing {
 using Core;

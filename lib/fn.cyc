@@ -5,7 +5,7 @@
 //                                                                        //
 // Defines "closures" and operations on them                              //
 ////////////////////////////////////////////////////////////////////////////
-#include "fn.h"
+#include <fn.h>
 
 namespace Fn;
 

@@ -4,8 +4,8 @@
  * Definitions for common types, variables, and functions.
  */
 #ifndef _STDLIB_H_
-#include "config.h"
-#include "sys/reent.h"
+#include <config.h>
+#include <sys/reent.h>
 
 namespace Stdlib {
 extern "C" {

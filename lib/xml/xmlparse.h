@@ -4,10 +4,10 @@
 #define _XMLPARSE_H
 
 #include "xml.h"
-#include "lexing.h"
-#include "list.h"
-#include "core.h"
-#include "stdio.h"
+#include <lexing.h>
+#include <list.h>
+#include <core.h>
+#include <stdio.h>
 
 namespace XmlParse {
 using Lexing;

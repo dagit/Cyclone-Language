@@ -2,8 +2,8 @@
 extern "C" {
 #define _SIGNAL_H_
 
-#include "config.h"
-#include "sys/signal.h"
+#include <config.h>
+#include <sys/signal.h>
 
 typedef int	sig_atomic_t;		/* Atomic entity type (ANSI) */
 

@@ -11,24 +11,26 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern
-unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_string f1; } ; struct Cyc_List_List{ void* hd;
-struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u];
-extern unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List*
-Cyc_List_imp_rev( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append(
-struct Cyc_List_List* x, struct Cyc_List_List* y); extern unsigned char Cyc_List_Nth[
-8u]; extern unsigned char Cyc_Lexing_Error[ 10u]; struct Cyc_Lexing_Error_struct{
-unsigned char* tag; struct _tagged_string f1; } ; struct Cyc_Lexing_lexbuf{ void(*
-refill_buff)( struct Cyc_Lexing_lexbuf*); void* refill_state; struct
-_tagged_string lex_buffer; int lex_buffer_len; int lex_abs_pos; int
-lex_start_pos; int lex_curr_pos; int lex_last_pos; int lex_last_action; int
-lex_eof_reached; } ; struct Cyc_Lexing_function_lexbuf_state{ int(* read_fun)(
-struct _tagged_string, int, void*); void* read_fun_state; } ; struct
-_tagged_ptr0{ int* curr; int* base; int* last_plus_one; } ; struct Cyc_Lexing_lex_tables{
-struct _tagged_ptr0 lex_base; struct _tagged_ptr0 lex_backtrk; struct
-_tagged_ptr0 lex_default; struct _tagged_ptr0 lex_trans; struct _tagged_ptr0
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_Stdio___sFILE; extern
+unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
+18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_string f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
+} ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x);
+extern struct Cyc_List_List* Cyc_List_append( struct Cyc_List_List* x, struct
+Cyc_List_List* y); extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned char
+Cyc_Lexing_Error[ 10u]; struct Cyc_Lexing_Error_struct{ unsigned char* tag;
+struct _tagged_string f1; } ; struct Cyc_Lexing_lexbuf{ void(* refill_buff)(
+struct Cyc_Lexing_lexbuf*); void* refill_state; struct _tagged_string lex_buffer;
+int lex_buffer_len; int lex_abs_pos; int lex_start_pos; int lex_curr_pos; int
+lex_last_pos; int lex_last_action; int lex_eof_reached; } ; struct Cyc_Lexing_function_lexbuf_state{
+int(* read_fun)( struct _tagged_string, int, void*); void* read_fun_state; } ;
+struct _tagged_ptr1{ int* curr; int* base; int* last_plus_one; } ; struct Cyc_Lexing_lex_tables{
+struct _tagged_ptr1 lex_base; struct _tagged_ptr1 lex_backtrk; struct
+_tagged_ptr1 lex_default; struct _tagged_ptr1 lex_trans; struct _tagged_ptr1
 lex_check; } ; extern struct _tagged_string Cyc_Lexing_lexeme( struct Cyc_Lexing_lexbuf*);
 extern unsigned char Cyc_Lexing_lexeme_char( struct Cyc_Lexing_lexbuf*, int);
 extern int Cyc_Lexing_lexeme_start( struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lexeme_end(
@@ -43,8 +45,8 @@ _tagged_string*, struct _tagged_string*); extern struct _tagged_string Cyc_Strin
 struct Cyc_List_List*, struct _tagged_string); extern struct _tagged_string Cyc_String_zstrncpy(
 struct _tagged_string, int, struct _tagged_string, int, unsigned int); extern
 struct _tagged_string Cyc_String_substring( struct _tagged_string, int ofs,
-unsigned int n); struct _tagged_ptr1{ void** curr; void** base; void**
-last_plus_one; } ; struct Cyc_Xarray_Xarray{ struct _tagged_ptr1 elmts; int
+unsigned int n); struct _tagged_ptr2{ void** curr; void** base; void**
+last_plus_one; } ; struct Cyc_Xarray_Xarray{ struct _tagged_ptr2 elmts; int
 num_elmts; } ; extern void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*, int);
 extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create( int, void*); extern int Cyc_Xarray_add_ind(
 struct Cyc_Xarray_Xarray*, void*); struct Cyc_Lineno_Pos{ struct _tagged_string
@@ -460,7 +462,7 @@ struct Cyc_Dict_Dict* d, void* key); void Cyc_yyerror( struct _tagged_string s){
 Cyc_Position_post_error( Cyc_Position_mk_err_parse( Cyc_Position_segment_of_abs(
 Cyc_yylloc.first_line, Cyc_yylloc.last_line), s));} struct Cyc_Lex_Trie; struct
 Cyc_Lex_Trie{ struct Cyc_Lex_Trie*** children; int shared_str; } ; static int
-Cyc_Lex_num_kws= 0; static struct _tagged_ptr0 Cyc_Lex_kw_nums={ 0, 0, 0};
+Cyc_Lex_num_kws= 0; static struct _tagged_ptr1 Cyc_Lex_kw_nums={ 0, 0, 0};
 static struct Cyc_Xarray_Xarray* Cyc_Lex_symbols= 0; static struct Cyc_Lex_Trie*
 Cyc_Lex_ids_trie= 0; static struct Cyc_Lex_Trie* Cyc_Lex_typedefs_trie= 0;
 static int Cyc_Lex_comment_depth= 0; static struct _tuple6 Cyc_Lex_token_int_pair={(
@@ -844,7 +846,7 @@ struct Cyc_Lex_Ldecls* data)) Cyc_Dict_insert)( _temp296, _temp294, _temp301);
 Cyc_Lex_insert_typedef((* q).f2);}}}} static short Cyc_Lex_process_id( struct
 Cyc_Lexing_lexbuf* lbuf){ int symbol_num=(( int(*)( struct Cyc_Lexing_lexbuf*
 lbuf)) Cyc_Lex_str_index_lbuf)( lbuf); if( symbol_num < Cyc_Lex_num_kws){ return(
-short)*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+short)*(( int*(*)( struct _tagged_ptr1, unsigned int, unsigned int))
 _check_unknown_subscript)( Cyc_Lex_kw_nums, sizeof( int), symbol_num);}{ struct
 _tagged_string* _temp303= Cyc_Lex_get_symbol( symbol_num); goto _LL304; _LL304:
 if( Cyc_Lex_is_typedef( 0, _temp303)){ Cyc_Lex_token_qvar=({ struct _tuple0*
@@ -1139,17 +1141,17 @@ int Cyc_Lex_lcheck[ 1813u]={ - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1, 0, 0,
 - 1, - 1, - 1, - 1, - 1, - 1, - 1, - 1}; int Cyc_Lex_token_rec( struct Cyc_Lexing_lexbuf*
 lexbuf, int lexstate){ if( Cyc_Lex_lt == 0){ Cyc_Lex_lt=({ struct Cyc_Lexing_lex_tables*
 _temp346=( struct Cyc_Lexing_lex_tables*) GC_malloc( sizeof( struct Cyc_Lexing_lex_tables));
-_temp346->lex_base=({ int* _temp355=( int*) Cyc_Lex_lbase; struct _tagged_ptr0
+_temp346->lex_base=({ int* _temp355=( int*) Cyc_Lex_lbase; struct _tagged_ptr1
 _temp356; _temp356.curr= _temp355; _temp356.base= _temp355; _temp356.last_plus_one=
 _temp355 + 151; _temp356;}); _temp346->lex_backtrk=({ int* _temp353=( int*) Cyc_Lex_lbacktrk;
-struct _tagged_ptr0 _temp354; _temp354.curr= _temp353; _temp354.base= _temp353;
+struct _tagged_ptr1 _temp354; _temp354.curr= _temp353; _temp354.base= _temp353;
 _temp354.last_plus_one= _temp353 + 151; _temp354;}); _temp346->lex_default=({
-int* _temp351=( int*) Cyc_Lex_ldefault; struct _tagged_ptr0 _temp352; _temp352.curr=
+int* _temp351=( int*) Cyc_Lex_ldefault; struct _tagged_ptr1 _temp352; _temp352.curr=
 _temp351; _temp352.base= _temp351; _temp352.last_plus_one= _temp351 + 151;
 _temp352;}); _temp346->lex_trans=({ int* _temp349=( int*) Cyc_Lex_ltrans; struct
-_tagged_ptr0 _temp350; _temp350.curr= _temp349; _temp350.base= _temp349;
+_tagged_ptr1 _temp350; _temp350.curr= _temp349; _temp350.base= _temp349;
 _temp350.last_plus_one= _temp349 + 1813; _temp350;}); _temp346->lex_check=({ int*
-_temp347=( int*) Cyc_Lex_lcheck; struct _tagged_ptr0 _temp348; _temp348.curr=
+_temp347=( int*) Cyc_Lex_lcheck; struct _tagged_ptr1 _temp348; _temp348.curr=
 _temp347; _temp348.base= _temp347; _temp348.last_plus_one= _temp347 + 1813;
 _temp348;}); _temp346;});} lexstate=(( int(*)( struct Cyc_Lexing_lex_tables*,
 int, struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lex_engine)(( struct Cyc_Lexing_lex_tables*)
@@ -1222,17 +1224,17 @@ lexbuf, int lexstate)) Cyc_Lex_token_rec)( lexbuf, 0);} int Cyc_Lex_strng_rec(
 struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ if( Cyc_Lex_lt == 0){ Cyc_Lex_lt=({
 struct Cyc_Lexing_lex_tables* _temp420=( struct Cyc_Lexing_lex_tables*)
 GC_malloc( sizeof( struct Cyc_Lexing_lex_tables)); _temp420->lex_base=({ int*
-_temp429=( int*) Cyc_Lex_lbase; struct _tagged_ptr0 _temp430; _temp430.curr=
+_temp429=( int*) Cyc_Lex_lbase; struct _tagged_ptr1 _temp430; _temp430.curr=
 _temp429; _temp430.base= _temp429; _temp430.last_plus_one= _temp429 + 151;
 _temp430;}); _temp420->lex_backtrk=({ int* _temp427=( int*) Cyc_Lex_lbacktrk;
-struct _tagged_ptr0 _temp428; _temp428.curr= _temp427; _temp428.base= _temp427;
+struct _tagged_ptr1 _temp428; _temp428.curr= _temp427; _temp428.base= _temp427;
 _temp428.last_plus_one= _temp427 + 151; _temp428;}); _temp420->lex_default=({
-int* _temp425=( int*) Cyc_Lex_ldefault; struct _tagged_ptr0 _temp426; _temp426.curr=
+int* _temp425=( int*) Cyc_Lex_ldefault; struct _tagged_ptr1 _temp426; _temp426.curr=
 _temp425; _temp426.base= _temp425; _temp426.last_plus_one= _temp425 + 151;
 _temp426;}); _temp420->lex_trans=({ int* _temp423=( int*) Cyc_Lex_ltrans; struct
-_tagged_ptr0 _temp424; _temp424.curr= _temp423; _temp424.base= _temp423;
+_tagged_ptr1 _temp424; _temp424.curr= _temp423; _temp424.base= _temp423;
 _temp424.last_plus_one= _temp423 + 1813; _temp424;}); _temp420->lex_check=({ int*
-_temp421=( int*) Cyc_Lex_lcheck; struct _tagged_ptr0 _temp422; _temp422.curr=
+_temp421=( int*) Cyc_Lex_lcheck; struct _tagged_ptr1 _temp422; _temp422.curr=
 _temp421; _temp422.base= _temp421; _temp422.last_plus_one= _temp421 + 1813;
 _temp422;}); _temp420;});} lexstate=(( int(*)( struct Cyc_Lexing_lex_tables*,
 int, struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lex_engine)(( struct Cyc_Lexing_lex_tables*)
@@ -1294,17 +1296,17 @@ Cyc_Lexing_lexbuf* lexbuf, int lexstate)) Cyc_Lex_strng_rec)( lexbuf, 1);} int
 Cyc_Lex_comment_rec( struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ if( Cyc_Lex_lt
 == 0){ Cyc_Lex_lt=({ struct Cyc_Lexing_lex_tables* _temp465=( struct Cyc_Lexing_lex_tables*)
 GC_malloc( sizeof( struct Cyc_Lexing_lex_tables)); _temp465->lex_base=({ int*
-_temp474=( int*) Cyc_Lex_lbase; struct _tagged_ptr0 _temp475; _temp475.curr=
+_temp474=( int*) Cyc_Lex_lbase; struct _tagged_ptr1 _temp475; _temp475.curr=
 _temp474; _temp475.base= _temp474; _temp475.last_plus_one= _temp474 + 151;
 _temp475;}); _temp465->lex_backtrk=({ int* _temp472=( int*) Cyc_Lex_lbacktrk;
-struct _tagged_ptr0 _temp473; _temp473.curr= _temp472; _temp473.base= _temp472;
+struct _tagged_ptr1 _temp473; _temp473.curr= _temp472; _temp473.base= _temp472;
 _temp473.last_plus_one= _temp472 + 151; _temp473;}); _temp465->lex_default=({
-int* _temp470=( int*) Cyc_Lex_ldefault; struct _tagged_ptr0 _temp471; _temp471.curr=
+int* _temp470=( int*) Cyc_Lex_ldefault; struct _tagged_ptr1 _temp471; _temp471.curr=
 _temp470; _temp471.base= _temp470; _temp471.last_plus_one= _temp470 + 151;
 _temp471;}); _temp465->lex_trans=({ int* _temp468=( int*) Cyc_Lex_ltrans; struct
-_tagged_ptr0 _temp469; _temp469.curr= _temp468; _temp469.base= _temp468;
+_tagged_ptr1 _temp469; _temp469.curr= _temp468; _temp469.base= _temp468;
 _temp469.last_plus_one= _temp468 + 1813; _temp469;}); _temp465->lex_check=({ int*
-_temp466=( int*) Cyc_Lex_lcheck; struct _tagged_ptr0 _temp467; _temp467.curr=
+_temp466=( int*) Cyc_Lex_lcheck; struct _tagged_ptr1 _temp467; _temp467.curr=
 _temp466; _temp467.base= _temp466; _temp467.last_plus_one= _temp466 + 1813;
 _temp467;}); _temp465;});} lexstate=(( int(*)( struct Cyc_Lexing_lex_tables*,
 int, struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lex_engine)(( struct Cyc_Lexing_lex_tables*)
@@ -1343,12 +1345,12 @@ struct _tagged_string _temp496; _temp496.curr= _temp495; _temp496.base= _temp495
 _temp496.last_plus_one= _temp495 + 1; _temp496;}); _temp494;})); Cyc_Lex_num_kws=(
 int) 62u; Cyc_Lex_kw_nums=({ unsigned int _temp497=( unsigned int) Cyc_Lex_num_kws;
 int* _temp498=( int*) GC_malloc_atomic( sizeof( int) * _temp497); struct
-_tagged_ptr0 _temp500={ _temp498, _temp498, _temp498 + _temp497};{ unsigned int
+_tagged_ptr1 _temp500={ _temp498, _temp498, _temp498 + _temp497};{ unsigned int
 _temp499= _temp497; unsigned int i; for( i= 0; i < _temp499; i ++){ _temp498[ i]=
 0;}}; _temp500;});{ int i= 0; for( 0; i < Cyc_Lex_num_kws; ++ i){ struct
 _tagged_string _temp501=( Cyc_Lex_rw_array[ _check_known_subscript_notnull( 62u,
 i)]).f1; goto _LL502; _LL502: Cyc_Lex_str_index( _temp501, 0,( int) Cyc_String_strlen(
-_temp501));*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+_temp501));*(( int*(*)( struct _tagged_ptr1, unsigned int, unsigned int))
 _check_unknown_subscript)( Cyc_Lex_kw_nums, sizeof( int), i)=( int)( Cyc_Lex_rw_array[
 _check_known_subscript_notnull( 62u, i)]).f2;}} Cyc_Lex_typedef_init(); Cyc_Lex_comment_depth=
 0;}

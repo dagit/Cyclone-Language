@@ -1,4 +1,4 @@
-#include "core.h"
+#include <core.h>
 using Core;
 
 extern void f1(region_t<`r> r);

@@ -1,7 +1,7 @@
-#include "core.h"
-#include "string.h"
-#include "hashtable.h"
-#include "stdio.h"
+#include <core.h>
+#include <string.h>
+#include <hashtable.h>
+#include <stdio.h>
 // A little histogram program.
 // Usage:  histogram [filename]
 // The file (or stdin if no file is specified) should be a text file,

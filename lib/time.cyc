@@ -1,5 +1,5 @@
-#include "time.h"
-#include "core.h"
+#include <time.h>
+#include <core.h>
 
 using Core;
 using Time;

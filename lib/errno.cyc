@@ -1,6 +1,6 @@
-#include "config.h"
-#include "core.h"
-#include "errno.h"
+#include <config.h>
+#include <core.h>
+#include <errno.h>
 using Core;
 
 namespace Errno {

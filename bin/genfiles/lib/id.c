@@ -10,9 +10,12 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern struct _tagged_string
 Cyc_Core_string_of_int( int); extern unsigned char* string_to_Cstring( struct
 _tagged_string); extern unsigned char* underlying_Cstring( struct _tagged_string);
-extern struct _tagged_string Cstring_to_string( unsigned char*); extern int
-system( unsigned char*); struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[
-19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+extern struct _tagged_string Cstring_to_string( unsigned char*); struct
+_tagged_ptr0{ struct _tagged_string* curr; struct _tagged_string* base; struct
+_tagged_string* last_plus_one; } ; extern struct _tagged_ptr0 ntCsl_to_ntsl(
+unsigned char**); extern int system( unsigned char*); extern int* __errno();
+struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[ 19u];
+extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
 unsigned char* tag; struct _tagged_string f1; } ; struct Cyc_List_List{ void* hd;
 struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u];
 extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[

@@ -28,8 +28,8 @@
 #endif
 #endif
 
-# include "stddef.h"
-# include "machine/types.h"
+# include <stddef.h>
+# include <machine/types.h>
 
 /* To ensure the stat struct's layout doesn't change when sizeof(int), etc.
    changes, we assume sizeof short and long never change and have all types
@@ -313,5 +313,7 @@ typedef struct {
 #endif /* defined(_POSIX_THREADS) */
 
 #endif  /* defined(__rtems__) */
+
+typedef unsigned int socklen_t;
 
 #endif	/* _SYS_TYPES_H */

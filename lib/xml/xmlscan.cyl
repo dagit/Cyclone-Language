@@ -1,11 +1,11 @@
 {
 /* Trevor Jim, 2001 */
 
-#include "core.h"
-#include "stdio.h"
-#include "list.h"
-#include "lexing.h"
-#include "string.h"
+#include <core.h>
+#include <stdio.h>
+#include <list.h>
+#include <lexing.h>
+#include <string.h>
 
 #include "xml.h"
 #include "xmlparse.h"

@@ -12,9 +12,9 @@
 // Note that b/c these are functional things, we have to allocate a lot
 // (such as in rotate_left and rotate_right)
 
-#include "core.h"
-#include "list.h"
-#include "splay.h"
+#include <core.h>
+#include <list.h>
+#include <splay.h>
 
 using Core;
 using List;

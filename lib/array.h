@@ -1,7 +1,7 @@
 #ifndef _ARRAY_H_
 #define _ARRAY_H_
 
-#include "list.h"
+#include <list.h>
 
 namespace Array {
 

@@ -5,7 +5,7 @@
 #ifdef NDEBUG
 #define assert(test) (0)
 #else
-#include "core.h"
+#include <core.h>
 namespace Assert{
 extern `a AssertFail(string_t msg);
 }

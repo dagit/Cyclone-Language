@@ -1,8 +1,8 @@
 #ifndef _ARG_H_
 #define _ARG_H_
 
-#include "list.h"
-#include "core.h"
+#include <list.h>
+#include <core.h>
 
 namespace Arg {
 extern xtunion exn {extern Error, extern Bad(string_t)};

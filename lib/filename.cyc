@@ -1,5 +1,5 @@
-#include "filename.h"
-#include "string.h"
+#include <filename.h>
+#include <string.h>
 #define DIR_SEPARATOR '/'
 #define DIR_SEPARATOR_STR ("/")
 

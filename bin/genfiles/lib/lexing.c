@@ -11,21 +11,24 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern
-unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern int Cyc_Stdio_file_string_read(
-struct Cyc_Stdio___sFILE* fd, struct _tagged_string dest, int dest_offset, int
-max_count); extern unsigned char Cyc_Lexing_Error[ 10u]; struct Cyc_Lexing_Error_struct{
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_Stdio___sFILE; extern
+unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
+18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_string f1; } ; extern int Cyc_Stdio_file_string_read( struct Cyc_Stdio___sFILE*
+fd, struct _tagged_string dest, int dest_offset, int max_count); extern
+unsigned char Cyc_Lexing_Error[ 10u]; struct Cyc_Lexing_Error_struct{
 unsigned char* tag; struct _tagged_string f1; } ; struct Cyc_Lexing_lexbuf{ void(*
 refill_buff)( struct Cyc_Lexing_lexbuf*); void* refill_state; struct
 _tagged_string lex_buffer; int lex_buffer_len; int lex_abs_pos; int
 lex_start_pos; int lex_curr_pos; int lex_last_pos; int lex_last_action; int
 lex_eof_reached; } ; struct Cyc_Lexing_function_lexbuf_state{ int(* read_fun)(
 struct _tagged_string, int, void*); void* read_fun_state; } ; struct
-_tagged_ptr0{ int* curr; int* base; int* last_plus_one; } ; struct Cyc_Lexing_lex_tables{
-struct _tagged_ptr0 lex_base; struct _tagged_ptr0 lex_backtrk; struct
-_tagged_ptr0 lex_default; struct _tagged_ptr0 lex_trans; struct _tagged_ptr0
+_tagged_ptr1{ int* curr; int* base; int* last_plus_one; } ; struct Cyc_Lexing_lex_tables{
+struct _tagged_ptr1 lex_base; struct _tagged_ptr1 lex_backtrk; struct
+_tagged_ptr1 lex_default; struct _tagged_ptr1 lex_trans; struct _tagged_ptr1
 lex_check; } ; extern struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_function( int(*
 read_fun)( struct _tagged_string, int, void*), void*); extern struct Cyc_Lexing_lexbuf*
 Cyc_Lexing_from_file( struct Cyc_Stdio___sFILE*); extern struct Cyc_Lexing_lexbuf*
@@ -101,20 +104,20 @@ Cyc_Lexing_lexeme_end( struct Cyc_Lexing_lexbuf* lbuf){ return lbuf->lex_abs_pos
 tbl, int start_state, struct Cyc_Lexing_lexbuf* lbuf){ int state; int base; int
 backtrk; int c; state= start_state; if( state >= 0){ lbuf->lex_last_pos=( lbuf->lex_start_pos=
 lbuf->lex_curr_pos); lbuf->lex_last_action= - 1;} else{ state=( - state) - 1;}
-while( 1) { base=*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+while( 1) { base=*(( int*(*)( struct _tagged_ptr1, unsigned int, unsigned int))
 _check_unknown_subscript)( tbl->lex_base, sizeof( int), state); if( base < 0){
-return( - base) - 1;} backtrk=*(( int*(*)( struct _tagged_ptr0, unsigned int,
+return( - base) - 1;} backtrk=*(( int*(*)( struct _tagged_ptr1, unsigned int,
 unsigned int)) _check_unknown_subscript)( tbl->lex_backtrk, sizeof( int), state);
 if( backtrk >= 0){ lbuf->lex_last_pos= lbuf->lex_curr_pos; lbuf->lex_last_action=
 backtrk;} if( lbuf->lex_curr_pos >= lbuf->lex_buffer_len){ if( ! lbuf->lex_eof_reached){
 return( - state) - 1;} else{ c= 256;}} else{ c=( int)*(( unsigned char*(*)(
 struct _tagged_string, unsigned int, unsigned int)) _check_unknown_subscript)(
 lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_curr_pos ++); if( c == - 1){
-c= 256;}} if(*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+c= 256;}} if(*(( int*(*)( struct _tagged_ptr1, unsigned int, unsigned int))
 _check_unknown_subscript)( tbl->lex_check, sizeof( int), base + c) == state){
-state=*(( int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+state=*(( int*(*)( struct _tagged_ptr1, unsigned int, unsigned int))
 _check_unknown_subscript)( tbl->lex_trans, sizeof( int), base + c);} else{ state=*((
-int*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+int*(*)( struct _tagged_ptr1, unsigned int, unsigned int))
 _check_unknown_subscript)( tbl->lex_default, sizeof( int), state);} if( state <
 0){ lbuf->lex_curr_pos= lbuf->lex_last_pos; if( lbuf->lex_last_action == - 1){(
 void) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp8=( struct Cyc_Lexing_Error_struct*)

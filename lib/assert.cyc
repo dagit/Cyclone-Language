@@ -1,6 +1,6 @@
-#include "assert.h"
-#include "core.h"
-#include "stdio.h"
+#include <assert.h>
+#include <core.h>
+#include <stdio.h>
 
 namespace Assert {
   using Stdio;

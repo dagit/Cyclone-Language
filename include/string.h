@@ -1,9 +1,9 @@
 #ifndef _STRING_H_
 #define _STRING_H_
 
-#include "core.h"
-#include "list.h"
-#include "stdio.h" // for size_t
+#include <core.h>
+#include <list.h>
+#include <stdio.h> // for size_t
 
 namespace String {
 using Core;
@@ -17,6 +17,9 @@ using Stdio; // for size_t
 // and an offset; these functions may have names ending in 'o'.
 // Functions whose arguments have range errors throw the
 // Core::InvalidArg exn.
+
+///////////////////////// WRAPPERS
+extern mstring_t strerror(int);
 
 ///////////////////////// LENGTH
 extern size_t strlen(string_t s);
@@ -65,9 +68,9 @@ extern mstring_t substring(string_t,int ofs, size_t n);
 extern mstring_t replace_suffix(string_t,string_t,string_t);
 
 ////////////////////////// SEARCHING
-extern string_t strchr(string_t s, char c);
-extern string_t strrchr(string_t s, char c);
-extern string_t strpbrk(string_t s, string_t accept);
+extern mstring_t strchr(string_t s, char c);
+extern mstring_t strrchr(string_t s, char c);
+extern mstring_t strpbrk(string_t s, string_t accept);
 extern size_t strspn(string_t s, string_t accept);
 
 ////////////////////////// CONVERSIONS

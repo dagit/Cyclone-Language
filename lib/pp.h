@@ -1,9 +1,9 @@
 #ifndef _PP_H_
 #define _PP_H_
 
-#include "core.h"
-#include "stdio.h"
-#include "list.h"
+#include <core.h>
+#include <stdio.h>
+#include <list.h>
 
 namespace PP {
 using Core;

@@ -3,7 +3,7 @@
 %{
 #include "xmlparse.h"
 #include "xmlscan.h"
-#include "string.h"
+#include <string.h>
 
 using Core;
 using List;

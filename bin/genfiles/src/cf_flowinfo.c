@@ -11,9 +11,12 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[
-15u]; extern struct Cyc_List_List* Cyc_List_tl( struct Cyc_List_List* x); extern
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
+Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern
+struct Cyc_List_List* Cyc_List_tl( struct Cyc_List_List* x); extern
 unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
 extern int Cyc_List_mem( int(* compare)( void*, void*), struct Cyc_List_List* l,
 void* x); extern int Cyc_List_list_cmp( int(* cmp)( void*, void*), struct Cyc_List_List*

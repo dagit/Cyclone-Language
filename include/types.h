@@ -28,8 +28,8 @@
 #endif
 #endif
 
-# include "stddef.h"
-# include "machine/types.h"
+# include <stddef.h>
+# include <machine/types.h>
 
 /* To ensure the stat struct's layout doesn't change when sizeof(int), etc.
    changes, we assume sizeof short and long never change and have all types
@@ -214,7 +214,7 @@ typedef _TIMER_T_ timer_t;
 #define __timer_t_defined
 #endif
 
-#include "sys/features.h"
+#include <sys/features.h>
 
 #if defined(_POSIX_THREADS)
 

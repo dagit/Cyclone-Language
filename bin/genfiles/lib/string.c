@@ -11,26 +11,23 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern int Cyc_List_length(
-struct Cyc_List_List* x); extern unsigned char Cyc_List_List_empty[ 15u]; extern
-unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
-extern int isalnum( int __c)  __attribute__(( cdecl )) ; extern int isalpha( int
-__c)  __attribute__(( cdecl )) ; extern int iscntrl( int __c)  __attribute__((
-cdecl )) ; extern int isdigit( int __c)  __attribute__(( cdecl )) ; extern int
-isgraph( int __c)  __attribute__(( cdecl )) ; extern int islower( int __c)
- __attribute__(( cdecl )) ; extern int isprint( int __c)  __attribute__(( cdecl
-)) ; extern int ispunct( int __c)  __attribute__(( cdecl )) ; extern int isspace(
-int __c)  __attribute__(( cdecl )) ; extern int isupper( int __c)
- __attribute__(( cdecl )) ; extern int isxdigit( int __c)  __attribute__(( cdecl
-)) ; extern int tolower( int __c)  __attribute__(( cdecl )) ; extern int toupper(
-int __c)  __attribute__(( cdecl )) ; extern int isascii( int __c)
- __attribute__(( cdecl )) ; extern int toascii( int __c)  __attribute__(( cdecl
-)) ; extern int _tolower( int __c)  __attribute__(( cdecl )) ; extern int
-_toupper( int __c)  __attribute__(( cdecl )) ; struct Cyc_Stdio___sFILE; extern
-unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
-18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_string f1; } ; extern unsigned int Cyc_String_strlen( struct
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
+Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List* x);
+extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern int isalnum( int __c);
+extern int isalpha( int __c); extern int iscntrl( int __c); extern int isdigit(
+int __c); extern int isgraph( int __c); extern int islower( int __c); extern int
+isprint( int __c); extern int ispunct( int __c); extern int isspace( int __c);
+extern int isupper( int __c); extern int isxdigit( int __c); extern int tolower(
+int __c); extern int toupper( int __c); extern int isascii( int __c); extern int
+toascii( int __c); extern int _tolower( int __c); extern int _toupper( int __c);
+struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[ 19u];
+extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern struct _tagged_string
+Cyc_String_strerror( int); extern unsigned int Cyc_String_strlen( struct
 _tagged_string s); extern int Cyc_String_strcmp( struct _tagged_string s1,
 struct _tagged_string s2); extern int Cyc_String_strptrcmp( struct
 _tagged_string* s1, struct _tagged_string* s2); extern int Cyc_String_strncmp(
@@ -107,13 +104,15 @@ extern float j1f( float); extern float jnf( int, float); extern float hypotf(
 float, float); extern float cabsf(); extern float dremf( float, float); extern
 int signgam; struct Cyc_Math___exception{ int type; unsigned char* name; double
 arg1; double arg2; double retval; int err; } ; extern int matherr( struct Cyc_Math___exception*
-e); unsigned int Cyc_String_strlen( struct _tagged_string s){ unsigned int i;
-for( i= 0; i <({ struct _tagged_string _temp0= s;( unsigned int)( _temp0.last_plus_one
-- _temp0.curr);}); i ++){ if(*(( const unsigned char*(*)( struct _tagged_string,
-unsigned int, unsigned int)) _check_unknown_subscript)( s, sizeof( unsigned char),(
-int) i) =='\000'){ return i;}} return i;} static unsigned int Cyc_String_int_strleno(
-struct _tagged_string s, int ofs, struct _tagged_string error){ if( ofs >({
-struct _tagged_string _temp1= s;( unsigned int)( _temp1.last_plus_one - _temp1.curr);})?
+e); extern unsigned char* strerror( int errnum); struct _tagged_string Cyc_String_strerror(
+int errnum){ return Cstring_to_string( strerror( errnum));} unsigned int Cyc_String_strlen(
+struct _tagged_string s){ unsigned int i; for( i= 0; i <({ struct _tagged_string
+_temp0= s;( unsigned int)( _temp0.last_plus_one - _temp0.curr);}); i ++){ if(*((
+const unsigned char*(*)( struct _tagged_string, unsigned int, unsigned int))
+_check_unknown_subscript)( s, sizeof( unsigned char),( int) i) =='\000'){ return
+i;}} return i;} static unsigned int Cyc_String_int_strleno( struct
+_tagged_string s, int ofs, struct _tagged_string error){ if( ofs >({ struct
+_tagged_string _temp1= s;( unsigned int)( _temp1.last_plus_one - _temp1.curr);})?
 1: ofs < 0){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp2=(
 struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp2[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp3; _temp3.tag= Cyc_Core_InvalidArg;

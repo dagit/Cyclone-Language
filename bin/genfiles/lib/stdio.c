@@ -10,18 +10,20 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_Stdio___sFILE; extern int Cyc_Stdio_remove( struct _tagged_string); extern
-int Cyc_Stdio_rename( struct _tagged_string, struct _tagged_string); extern
-struct Cyc_Stdio___sFILE* Cyc_Stdio_tmpfile(); extern int Cyc_Stdio_fclose(
-struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE*);
-extern struct Cyc_Stdio___sFILE* Cyc_Stdio_freopen( struct _tagged_string,
-struct _tagged_string, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fgetc(
-struct Cyc_Stdio___sFILE*); extern struct _tagged_string Cyc_Stdio_fgets( struct
-_tagged_string, int n, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fputc(
-int, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fputs( struct
-_tagged_string, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_getc( struct
-Cyc_Stdio___sFILE*); extern int Cyc_Stdio_putc( int, struct Cyc_Stdio___sFILE*);
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_Stdio___sFILE; extern int Cyc_Stdio_remove(
+struct _tagged_string); extern int Cyc_Stdio_rename( struct _tagged_string,
+struct _tagged_string); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_tmpfile();
+extern int Cyc_Stdio_fclose( struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fflush(
+struct Cyc_Stdio___sFILE*); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_freopen(
+struct _tagged_string, struct _tagged_string, struct Cyc_Stdio___sFILE*); extern
+int Cyc_Stdio_fgetc( struct Cyc_Stdio___sFILE*); extern struct _tagged_string
+Cyc_Stdio_fgets( struct _tagged_string, int n, struct Cyc_Stdio___sFILE*);
+extern int Cyc_Stdio_fputc( int, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fputs(
+struct _tagged_string, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_getc(
+struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_putc( int, struct Cyc_Stdio___sFILE*);
 extern int Cyc_Stdio_puts( struct _tagged_string); extern int Cyc_Stdio_ungetc(
 int, struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fgetpos( struct Cyc_Stdio___sFILE*,
 int*); extern int Cyc_Stdio_fseek( struct Cyc_Stdio___sFILE*, int, int); extern

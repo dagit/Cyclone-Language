@@ -26,11 +26,11 @@
 // to make this happen.
 
 // for debugging
-#include "stdio.h"
+#include <stdio.h>
 
-#include "core.h"
-#include "list.h"
-#include "dict.h"
+#include <core.h>
+#include <list.h>
+#include <dict.h>
 #include "tcutil.h"
 #include "absyn.h"
 #include "cf_flowinfo.h"

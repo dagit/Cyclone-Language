@@ -1,16 +1,16 @@
 // Main file
 
-#include "arg.h"
-#include "core.h"
-#include "stdio.h"
-#include "stdlib.h"
-#include "list.h"
-#include "string.h"
-#include "dict.h"
-#include "filename.h"
-#include "id.h"
+#include <arg.h>
+#include <core.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <list.h>
+#include <string.h>
+#include <dict.h>
+#include <filename.h>
+#include <id.h>
 #include "parse.h"
-#include "position.h"
+#include <position.h>
 #include "absyn.h"
 #include "absynpp.h"
 #include "absyndump.h"
@@ -263,8 +263,8 @@ static list_t<stringptr_t> split_by_char(string_t s, char c) {
       break;
     }
     else {
-      result = new List(new ((string_t)substring(s,0,end-s)),result);
-      len -= (end-s);
+      result = new List(new ((string_t)substring(s,0,(string_t)end-s)),result);
+      len -= ((string_t)end-s);
       s = end+1;
     }
   }
@@ -326,7 +326,7 @@ void process_file(string_t filename) {
   }
   else ofile_string = xprintf(" -o %s", preprocfile);
 
-  let cmd = xprintf("gcc -x c -E -U__GNUC__%s%s%s %s",
+  let cmd = xprintf("gcc -x c -E -U__GNUC__ -nostdinc%s%s%s %s",
                     cppargs_string, stdinc_string, ofile_string, filename);
 
   if (v_r) fprintf(stderr,"%s\n",cmd);

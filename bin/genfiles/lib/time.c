@@ -10,26 +10,22 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_Time_tm{ int tm_sec; int tm_min; int tm_hour; int tm_mday; int tm_mon; int
-tm_year; int tm_wday; int tm_yday; int tm_isdst; } ; extern unsigned int clock()
- __attribute__(( cdecl )) ; extern double difftime( int _time2, int _time1)
- __attribute__(( cdecl )) ; extern int mktime( struct Cyc_Time_tm* _timeptr)
- __attribute__(( cdecl )) ; extern int time( int* _timer)  __attribute__(( cdecl
-)) ; extern struct Cyc_Time_tm* gmtime( const int* _timer)  __attribute__((
-cdecl )) ; extern struct Cyc_Time_tm* localtime( const int* _timer)
- __attribute__(( cdecl )) ; extern struct Cyc_Time_tm* gmtime_r( const int*,
-struct Cyc_Time_tm*)  __attribute__(( cdecl )) ; extern struct Cyc_Time_tm*
-localtime_r( const int*, struct Cyc_Time_tm*)  __attribute__(( cdecl )) ; extern
-int _timezone  __attribute__(( dllimport )) ; extern int _daylight
- __attribute__(( dllimport )) ; extern unsigned char* _tzname[ 2u]
- __attribute__(( dllimport )) ; extern void tzset()  __attribute__(( cdecl )) ;
-extern struct _tagged_string Cyc_Time_asctime( const struct Cyc_Time_tm* _tblock);
-extern struct _tagged_string Cyc_Time_ctime( const int* _time); extern
-unsigned int Cyc_Time_strftime( struct _tagged_string _s, unsigned int _maxsize,
-struct _tagged_string _fmt, const struct Cyc_Time_tm* _t); extern struct
-_tagged_string Cyc_Time_asctime_r( const struct Cyc_Time_tm*, struct
-_tagged_string); extern struct _tagged_string Cyc_Time_ctime_r( const int*,
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_Time_tm{ int tm_sec; int
+tm_min; int tm_hour; int tm_mday; int tm_mon; int tm_year; int tm_wday; int
+tm_yday; int tm_isdst; } ; extern unsigned int clock(); extern double difftime(
+int _time2, int _time1); extern int mktime( struct Cyc_Time_tm* _timeptr);
+extern int time( int* _timer); extern struct Cyc_Time_tm* gmtime( const int*
+_timer); extern struct Cyc_Time_tm* localtime( const int* _timer); extern struct
+Cyc_Time_tm* gmtime_r( const int*, struct Cyc_Time_tm*); extern struct Cyc_Time_tm*
+localtime_r( const int*, struct Cyc_Time_tm*); extern struct _tagged_string Cyc_Time_asctime(
+const struct Cyc_Time_tm* _tblock); extern struct _tagged_string Cyc_Time_ctime(
+const int* _time); extern unsigned int Cyc_Time_strftime( struct _tagged_string
+_s, unsigned int _maxsize, struct _tagged_string _fmt, const struct Cyc_Time_tm*
+_t); extern struct _tagged_string Cyc_Time_asctime_r( const struct Cyc_Time_tm*,
+struct _tagged_string); extern struct _tagged_string Cyc_Time_ctime_r( const int*,
 struct _tagged_string); extern struct _tagged_string Cyc_Time_timezone(); extern
 unsigned char* asctime( const struct Cyc_Time_tm* _tblock); extern unsigned char*
 ctime( const int* _time); extern unsigned int strftime( unsigned char* _s,

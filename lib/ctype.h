@@ -1,6 +1,6 @@
 #ifndef _CTYPE_H_
 #define _CTYPE_H_
-#include "config.h"
+#include <config.h>
 namespace Ctype {
 extern "C" {
 int _EXFUN(isalnum, (int __c));

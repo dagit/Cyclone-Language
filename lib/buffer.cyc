@@ -1,5 +1,5 @@
-#include "buffer.h"
-#include "string.h"
+#include <buffer.h>
+#include <string.h>
 
 namespace Buffer;
 using Core;

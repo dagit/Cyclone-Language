@@ -1,0 +1,29 @@
+#include <core.h>
+#include <sys/socket.h>
+#include <netinet/in.h>
+using Core;
+
+namespace Csocket {
+  using Socket;
+  abstract struct Csockaddr;
+  extern "C" {
+    int connect(int, const struct Csockaddr *addr, socklen_t len);
+    struct Csockaddr *sockaddr_to_Csockaddr(const xtunion sockaddr addr);
+  }
+  $(struct Csockaddr *, socklen_t) sa2Csa(const xtunion sockaddr addr) {
+    struct Csockaddr *ptr = sockaddr_to_Csockaddr(addr);
+    switch (addr) {
+    case &Inet::sockaddr_in(s):
+      return $(ptr, (socklen_t)sizeof(struct Inet::sockaddr_in));
+    default:
+      throw new Failure("Unexpected xtunion sockaddr found");
+    }
+  }
+}
+
+namespace Socket;
+
+int connect(int fd, const xtunion sockaddr addr) {
+  let $(Caddr, Clen) = Csocket::sa2Csa(addr);
+  return Csocket::connect(fd, Caddr, Clen);
+}

@@ -1,9 +1,9 @@
 #ifndef _INTERFACE_H_
 #define _INTERFACE_H_
 
-#include "core.h"
-#include "stdio.h"
-#include "list.h"
+#include <core.h>
+#include <stdio.h>
+#include <list.h>
 #include "absyn.h"
 #include "tcenv.h"
 

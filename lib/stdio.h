@@ -18,7 +18,7 @@
 //
 #ifndef _STDIO_H_
 #define _STDIO_H_
-#include "core.h"
+#include <core.h>
 namespace Stdio {
 using Core;
 extern struct __sFILE;  

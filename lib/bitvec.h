@@ -1,7 +1,7 @@
 #ifndef _BITVEC_H_
 #define _BITVEC_H_
-#include "list.h"
-#include "dict.h"
+#include <list.h>
+#include <dict.h>
 
 namespace Bitvec {
 typedef int ?`r1 gbitvec_t<`r1>;

@@ -2,9 +2,9 @@
 #define _TCDECL_H_
 
 #include "absyn.h"
-#include "string.h"
-#include "position.h"
-#include "list.h"
+#include <string.h>
+#include <position.h>
+#include <list.h>
 
 namespace Tcdecl {
   using Absyn;

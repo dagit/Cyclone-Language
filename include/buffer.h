@@ -1,8 +1,8 @@
 #ifndef _BUFFER_H_
 #define _BUFFER_H_
-#include "core.h"
-#include "stdio.h"
-#include "buffer.h"
+#include <core.h>
+#include <stdio.h>
+#include <buffer.h>
 namespace Buffer {
 // Ported from the standard library of 
 //(***********************************************************************)

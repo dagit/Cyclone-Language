@@ -1,9 +1,9 @@
 #include "tcdecl.h"
 
-#include "core.h"
-#include "list.h"
-#include "dict.h"
-#include "string.h"
+#include <core.h>
+#include <list.h>
+#include <dict.h>
+#include <string.h>
 #include "tcutil.h"
 #include "absynpp.h"
 

@@ -10,9 +10,9 @@
 (*  Automatique.  Distributed only by permission.                      *)
 (*                                                                     *)
 (***********************************************************************/
-#include "stdio.h"
-#include "string.h"
-#include "arg.h"
+#include <stdio.h>
+#include <string.h>
+#include <arg.h>
 namespace Arg;
 using Core;
 using Stdio;

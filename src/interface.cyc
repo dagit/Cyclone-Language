@@ -1,14 +1,14 @@
 #include "interface.h"
 
 #include "absynpp.h"
-#include "dict.h"
+#include <dict.h>
 #include "tc.h"
 #include "parse.h"
-#include "pp.h"
-#include "string.h"
+#include <pp.h>
+#include <string.h>
 #include "tcutil.h"
 #include "tcdecl.h"
-#include "position.h"
+#include <position.h>
 
 using Core;
 using List;

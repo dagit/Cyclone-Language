@@ -1,7 +1,7 @@
-#include "core.h"
-#include "array.h"
+#include <core.h>
+#include <array.h>
 
-#include "list.h"
+#include <list.h>
 using List;
 using Core;
 

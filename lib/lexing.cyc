@@ -5,10 +5,10 @@
 // This is the merged port of lexing.ml and lexing.c with lexing.ml
 // basically coming first 
 
-#include "core.h"
-#include "stdio.h"
-#include "lexing.h"
-#include "string.h"
+#include <core.h>
+#include <stdio.h>
+#include <lexing.h>
+#include <string.h>
 
 using Core;
 using Stdio;

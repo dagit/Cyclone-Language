@@ -6,14 +6,14 @@
  * extended to do hyperlinks for Tk.                                  
  */
 
-#include "core.h"
-#include "stdio.h"
-#include "list.h"
-#include "string.h"
-#include "hashtable.h"
-#include "fn.h"
-#include "pp.h"
-#include "xarray.h"
+#include <core.h>
+#include <stdio.h>
+#include <list.h>
+#include <string.h>
+#include <hashtable.h>
+#include <fn.h>
+#include <pp.h>
+#include <xarray.h>
 
 using Core;
 using Stdio;

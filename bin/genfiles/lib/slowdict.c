@@ -10,15 +10,18 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[
-15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
-Cyc_List_Nth[ 8u]; struct Cyc_Splay_node; struct Cyc_Splay_noderef{ struct Cyc_Splay_node*
-v; } ; static const int Cyc_Splay_Leaf= 0; static const int Cyc_Splay_Node= 0;
-struct Cyc_Splay_Node_struct{ int tag; struct Cyc_Splay_noderef* f1; } ; struct
-Cyc_Splay_node{ void* key; void* data; void* left; void* right; } ; extern int
-Cyc_Splay_splay( int(* f)( void*, void*), void*, void*); struct Cyc_SlowDict_Dict;
-extern unsigned char Cyc_SlowDict_Present[ 12u]; extern unsigned char Cyc_SlowDict_Absent[
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
+Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern
+unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
+struct Cyc_Splay_node; struct Cyc_Splay_noderef{ struct Cyc_Splay_node* v; } ;
+static const int Cyc_Splay_Leaf= 0; static const int Cyc_Splay_Node= 0; struct
+Cyc_Splay_Node_struct{ int tag; struct Cyc_Splay_noderef* f1; } ; struct Cyc_Splay_node{
+void* key; void* data; void* left; void* right; } ; extern int Cyc_Splay_splay(
+int(* f)( void*, void*), void*, void*); struct Cyc_SlowDict_Dict; extern
+unsigned char Cyc_SlowDict_Present[ 12u]; extern unsigned char Cyc_SlowDict_Absent[
 11u]; extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_empty( int(* comp)( void*,
 void*)); extern int Cyc_SlowDict_is_empty( struct Cyc_SlowDict_Dict* d); extern
 int Cyc_SlowDict_member( struct Cyc_SlowDict_Dict* d, void* key); extern struct

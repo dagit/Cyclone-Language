@@ -1,7 +1,7 @@
 #ifndef _LINENO_H_
 #define _LINENO_H_
 
-#include "list.h"
+#include <list.h>
 
 namespace Lineno {
 

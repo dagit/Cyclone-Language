@@ -1,7 +1,7 @@
 #ifndef _ROPE_H_
 #define _ROPE_H_
-#include "core.h"
-#include "list.h"
+#include <core.h>
+#include <list.h>
 
 namespace Rope {
 extern struct Rope_node;

@@ -5,10 +5,10 @@
 // MWH 12/13/99 -- added support for resizing the table.  Based it
 //   on the OCaml 2.02 Hashtbl implementation
 
-#include "list.h"
-#include "core.h"
-#include "hashtable.h"
-#include "string.h"
+#include <list.h>
+#include <core.h>
+#include <hashtable.h>
+#include <string.h>
 
 namespace Hashtable;
 using List;

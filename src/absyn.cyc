@@ -2,7 +2,7 @@
 // absyn.h
 #define ABSYN_CYC 
 #include "absyn.h"
-#include "string.h"
+#include <string.h>
 #include "tcutil.h"
 
 using Core;

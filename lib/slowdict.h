@@ -6,8 +6,8 @@
 // January 1999, all rights reserved                                      //
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
-#include "core.h"
-#include "list.h"
+#include <core.h>
+#include <list.h>
 
 namespace SlowDict {
 using List;

@@ -6,7 +6,7 @@
 
 // Note these arrays never shrink in size.
 
-#include "core.h"
+#include <core.h>
 namespace Xarray {
 
 using Core;

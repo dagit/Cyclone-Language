@@ -22,8 +22,10 @@ _tagged_string Cyc_Core_string_of_uint( unsigned int); extern struct
 _tagged_string Cyc_Core_string_of_char( unsigned char); extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*);
-unsigned char Cyc_Core_InvalidArg[ 15u]="\000\000\000\000InvalidArg";
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); unsigned char Cyc_Core_InvalidArg[ 15u]="\000\000\000\000InvalidArg";
 unsigned char Cyc_Core_SysError[ 13u]="\000\000\000\000SysError"; struct Cyc_Core_SysError_struct{
 unsigned char* tag; int f1; } ; unsigned char Cyc_Core_Failure[ 12u]="\000\000\000\000Failure";
 unsigned char Cyc_Core_Impossible[ 15u]="\000\000\000\000Impossible";

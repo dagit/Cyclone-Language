@@ -1,8 +1,8 @@
 // Routines for evaluating expressions that should be "constant".
 
-#include "core.h"
-#include "list.h"
-#include "position.h"
+#include <core.h>
+#include <list.h>
+#include <position.h>
 #include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"

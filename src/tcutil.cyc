@@ -1,11 +1,11 @@
 // Utility functions for type checking
 
-#include "core.h"
-#include "stdio.h"
+#include <core.h>
+#include <stdio.h>
 #include "absyn.h"
 #include "absynpp.h"
-#include "set.h"
-#include "position.h"
+#include <set.h>
+#include <position.h>
 #include "tcenv.h"
 #include "string.h"
 #include "evexp.h"

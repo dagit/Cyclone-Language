@@ -3,8 +3,8 @@
 #include "xmldump.h"
 #include "xmlscan.h"
 #include "xmlparse.h"
-#include "lexing.h"
-#include "stdio.h"
+#include <lexing.h>
+#include <stdio.h>
 
 using Core;
 

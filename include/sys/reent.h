@@ -5,7 +5,7 @@
    in the namespace allotted to us.  */
 
 #ifndef _SYS_REENT_H_
-#include "time.h"
+#include <time.h>
 using Time;
 extern "C" {
 #define _SYS_REENT_H_

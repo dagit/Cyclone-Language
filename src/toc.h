@@ -1,7 +1,7 @@
 #ifndef _TOC_H_
 #define _TOC_H_
 
-#include "list.h"
+#include <list.h>
 #include "absyn.h"
 
 namespace Toc {

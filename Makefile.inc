@@ -26,6 +26,7 @@ ifndef MS
 endif
 
 CYCLONE_LIBS:=arg\
+         arpa/inet\
          array\
          assert\
          bitvec\
@@ -40,6 +41,8 @@ CYCLONE_LIBS:=arg\
          lexing\
          lineno\
          list\
+         netdb\
+         netinet/in\
          position\
          pp\
          queue\
@@ -51,6 +54,7 @@ CYCLONE_LIBS:=arg\
 	 stdio\
          stdlib\
          string\
+         sys/socket\
          time\
          xarray
 
@@ -67,7 +71,8 @@ CYCLONE_OTHER_H:=config.h\
 	sys/reent.h\
 	sys/signal.h\
 	sys/types.h\
-	types.h
+	types.h\
+	unistd.h
 
 CYCLONE_SRCS:=absyn\
          parse_tab\

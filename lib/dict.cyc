@@ -1,6 +1,6 @@
-#include "core.h"
-#include "list.h"
-#include "dict.h"
+#include <core.h>
+#include <list.h>
+#include <dict.h>
 
 namespace Dict;
 

@@ -2,7 +2,7 @@
 #define _EVEXP_H_
 
 #include "absyn.h"
-#include "position.h"
+#include <position.h>
 
 namespace Evexp {
 

@@ -1,7 +1,7 @@
 #ifndef _TC_H_
 #define _TC_H_
 
-#include "list.h"
+#include <list.h>
 #include "absyn.h"
 #include "tcenv.h"
 

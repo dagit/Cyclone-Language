@@ -7,6 +7,8 @@
 #include <errno.h>
 extern void exit(int);
 
+int *__errno(void) { return &errno; }
+
 //////////////////////////////////////////////////////////
 // First, definitions for things declared in cyc_include.h
 //////////////////////////////////////////////////////////
@@ -148,6 +150,10 @@ struct _tagged_string Cstring_to_string(Cstring s) {
   else {
     int sz = strlen(s);
     str.base = (char *)GC_malloc_atomic(sz);
+    if (str.base == NULL) {
+      fprintf(stderr, "internal error: out of memory in Cstring_to_string\n");
+      exit(1);
+    }
     str.curr = str.base;
     str.last_plus_one = str.base + sz;
 
@@ -177,6 +183,36 @@ Cstring string_to_Cstring(struct _tagged_string s) {
   for(i=0; i < sz; i++) str[i]=contents[i];
   str[sz]='\0';
   return str;
+}
+
+// Copy a null-terminated list of Cstrings to a tagged,
+// null-terminated list of strings.  (The return type is misleading.)
+struct _tagged_string ntCsl_to_ntsl(Cstring *ntCsl) {
+  int i, numstrs = 0;
+  struct _tagged_string result;
+  Cstring *ptr;
+
+  for (ptr = ntCsl; *ptr; numstrs++); // not safe!
+  result.base = (char *)GC_malloc_atomic(numstrs+1);
+  if (result.base == NULL) {
+    fprintf(stderr, "internal error: out of memory in ntCsl_to_ntsl\n");
+    exit(1);
+  }
+  result.curr = result.base;
+  result.last_plus_one = result.base + numstrs+1;
+  for (i = 0; i <= numstrs; i++)
+    ((string_t*)result.base)[i] = Cstring_to_string(ntCsl[i]);
+  return result;
+}
+
+// Convert a "@pointer to a null-terminated list of pointers" to a
+// "?pointer to a null-terminated list of pointers".  We don't list
+// this function in core.h because "pointers to what" might change.
+struct _tagged_string pntlp_toCyc(void **in) {
+  struct _tagged_string result;
+  result.curr = result.base = result.last_plus_one = (char*)in;
+  while (*(result.last_plus_one++));
+  return result;
 }
 
 // FIX:  this isn't really needed since you can cast char[?] to char[]
@@ -234,6 +270,25 @@ int Cyc_Stdio_file_string_write(struct Cyc_Stdio___sFILE *sf,
     exit(255);
   } 
   return fwrite(new_curr, 1, max_count, fd);
+}
+
+///////////////////////////////////////////////
+// Sockets
+
+// This really doesn't belong here; we should change the makefiles so
+// C code can live with the libraries and be linked only as necessary.
+
+// This function takes a const xtunion Socket::sockaddr and returns a
+// pointer to the body of the union.  We'd return the size of the body
+// if we could, but that information isn't available at runtime.
+
+#include <sys/socket.h>
+struct sa_xtunion {
+  unsigned char *tag;
+  struct sockaddr sa;
+};
+struct sockaddr *sockaddr_to_Csockaddr(struct sa_xtunion *xtunionaddr) {
+  return &xtunionaddr->sa;
 }
 
 ///////////////////////////////////////////////

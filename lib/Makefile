@@ -125,6 +125,7 @@ MACHINE_TYPES_H := machine/types.h
 SYS_TYPES_H := sys/types.h $(STDDEF_H) $(MACHINE_TYPES_H)
 SYS_SIGNAL_H := sys/signal.h $(CONFIG_H) sys/features.h $(SYS_TYPES_H)
 SIGNAL_H    := signal.h $(CONFIG_H) $(SYS_SIGNAL_H)
+NETDB_H     := netdb.h $(CORE_H)
 
 
 $(OUT_PREFIX)arg.c: $(ARG_H) $(STRING_H)
@@ -155,3 +156,4 @@ $(OUT_PREFIX)assert.c: $(ASSERT_H) $(CORE_H) $(STDIO_H)
 $(OUT_PREFIX)errno.c: $(CORE_H) $(ERRNO_H) $(CONFIG_H)
 $(OUT_PREFIX)stdlib.c: $(CORE_H) $(STDLIB_H)
 $(OUT_PREFIX)time.c: $(CORE_H) $(TIME_H)
+$(OUT_PREFIX)netdb.c: $(CORE_H) $(NETDB_H)

@@ -13,7 +13,7 @@
 // but clients don't need to know that.  They are defined in
 // cyc_runtime.c
 
-#include "precore.h"
+#include <precore.h>
 
 // The rest is defined in Cyclone, in core.cyc
 namespace Core {
@@ -49,7 +49,9 @@ extern "C" Cstring string_to_Cstring(string_t);
 // when the string is empty
 extern "C" Cstring underlying_Cstring(string_t);
 extern "C" mstring_t Cstring_to_string(Cstring);
+extern "C" mstring_t ?ntCsl_to_ntsl(Cstring @);
 extern "C" int system(Cstring);
+extern "C" int @__errno(void);
 }
 
 #endif

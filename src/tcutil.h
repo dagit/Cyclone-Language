@@ -1,10 +1,10 @@
 #ifndef _TCUTIL_H_
 #define _TCUTIL_H_
 
-#include "list.h"
-#include "set.h"
+#include <list.h>
+#include <set.h>
 #include "absyn.h"
-#include "position.h"
+#include <position.h>
 #include "tcenv.h"
 
 namespace Tcutil {

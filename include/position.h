@@ -1,9 +1,9 @@
 #ifndef _POSITION_H_
 #define _POSITION_H_
 // operations for tracking positions (locations) within source code
-#include "core.h"
-#include "list.h"
-#include "lineno.h"
+#include <core.h>
+#include <list.h>
+#include <lineno.h>
 
 namespace Position {
   using Core;

@@ -2,16 +2,16 @@
 // WARNING: Because we now intern identifiers, you better never mutate them!
 // WARNING: lex_init must be called for each source file!
 
-#include "core.h"
-#include "stdio.h"
-#include "list.h"
-#include "lexing.h"
-#include "set.h"
-#include "string.h"
-#include "xarray.h"
+#include <core.h>
+#include <stdio.h>
+#include <list.h>
+#include <lexing.h>
+#include <set.h>
+#include <string.h>
+#include <xarray.h>
 #include "parse.h"
-#include "position.h"
-#include "dict.h"
+#include <position.h>
+#include <dict.h>
 
 using Core;
 using Stdio;

@@ -26,11 +26,11 @@
 //       Alertnately, we'll do something more conservative for obfuscated
 //       expressions, eg., one that assigns a variable null in the "middle".
 
-#include "core.h"
-#include "list.h"
-#include "set.h"
-#include "dict.h"
-#include "string.h"
+#include <core.h>
+#include <list.h>
+#include <set.h>
+#include <dict.h>
+#include <string.h>
 #include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"

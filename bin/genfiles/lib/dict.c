@@ -10,9 +10,12 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern struct _RegionHandle*
 Cyc_Core_heap_region; extern unsigned char* string_to_Cstring( struct
 _tagged_string); extern unsigned char* underlying_Cstring( struct _tagged_string);
-extern struct _tagged_string Cstring_to_string( unsigned char*); extern int
-system( unsigned char*); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
-tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+extern struct _tagged_string Cstring_to_string( unsigned char*); struct
+_tagged_ptr0{ struct _tagged_string* curr; struct _tagged_string* base; struct
+_tagged_string* last_plus_one; } ; extern struct _tagged_ptr0 ntCsl_to_ntsl(
+unsigned char**); extern int system( unsigned char*); extern int* __errno();
+struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
+unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
 18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern
 unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
 extern struct Cyc_Dict_Dict* Cyc_Dict_empty( int(* comp)( void*, void*)); extern

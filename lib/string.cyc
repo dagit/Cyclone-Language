@@ -1,16 +1,26 @@
 // String library, base on code from Mike Hicks, modified by T. Jim
 
-#include "core.h"
-#include "list.h"
-#include "ctype.h"
-#include "string.h"
-#include "stdio.h" // for size_t
-#include "math.h" //  for pow
+#include <core.h>
+#include <list.h>
+#include <ctype.h>
+#include <string.h>
+#include <stdio.h> // for size_t
+#include <math.h> //  for pow
 
 namespace String;
 using Core;
 using List;
 using Stdio; // for size_t
+
+///////////////////////// WRAPPERS
+namespace C_string {
+  extern "C" {
+    Cstring strerror(int errnum);
+  }
+}
+mstring_t strerror(int errnum) {
+  return Cstring_to_string(C_string::strerror(errnum));
+}
 
 ///////////////////////// LENGTH
 size_t strlen(string_t s) {

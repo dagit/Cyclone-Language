@@ -1,9 +1,9 @@
 #ifndef CF_FLOWINFO_H
 #define CF_FLOWINFO_H
 
-#include "list.h"
-#include "set.h"
-#include "dict.h"
+#include <list.h>
+#include <set.h>
+#include <dict.h>
 #include "absyn.h"
 
 // Note: Okasaki's dictionaries may be the wrong thing here because

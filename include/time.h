@@ -7,8 +7,8 @@
 #ifndef _TIME_H_
 #define _TIME_H_
 
-#include "config.h"
-#include "core.h"
+#include <config.h>
+#include <core.h>
 namespace Time {
 extern "C" {
 
@@ -32,9 +32,9 @@ extern "C" {
 #define CLOCKS_PER_SEC _CLOCKS_PER_SEC_
 #define CLK_TCK CLOCKS_PER_SEC
 #define __need_size_t
-#include "stddef.h"
+#include <stddef.h>
 
-#include "sys/types.h"
+#include <sys/types.h>
 
 struct tm
 {
@@ -79,12 +79,12 @@ void _EXFUN(tzset, (void));
 #endif
 #endif /* __CYGWIN__ */
 
-#include "sys/features.h"
+#include <sys/features.h>
 
 
 #if defined(_POSIX_TIMERS)
 
-#include "signal.h"
+#include <signal.h>
 
 /* Clocks, P1003.1b-1993, p. 263 */
 

@@ -7,8 +7,8 @@
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
 
-#include "core.h"
-#include "stdio.h"
+#include <core.h>
+#include <stdio.h>
 
 namespace Id {
 using Core;

@@ -3,9 +3,9 @@
 // module for non-C code gives you fairly worthless stuff.  (And it hasn't
 // been tested.) 
 
-#include "core.h"
-#include "stdio.h"
-#include "list.h"
+#include <core.h>
+#include <stdio.h>
+#include <list.h>
 #include "absyn.h"
 #include "absynpp.h"
 #include "evexp.h"

@@ -1,8 +1,8 @@
-#include "core.h"
-#include "list.h"
-#include "stdio.h"
-#include "position.h"
-#include "string.h"
+#include <core.h>
+#include <list.h>
+#include <stdio.h>
+#include <position.h>
+#include <string.h>
 namespace Position;
 using Core;
 using List;

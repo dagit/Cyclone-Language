@@ -1,9 +1,9 @@
 
-#include "core.h"
-#include "list.h"
-#include "set.h"
-#include "dict.h"
-#include "string.h"
+#include <core.h>
+#include <list.h>
+#include <set.h>
+#include <dict.h>
+#include <string.h>
 #include "absyn.h"
 #include "tcutil.h"
 

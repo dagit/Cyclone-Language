@@ -1,7 +1,7 @@
 #ifndef _DICT_H_
 #define _DICT_H_
 
-#include "list.h"
+#include <list.h>
 
 // The entire interface is the same as SlowDict, except there is no
 // delete_present.

@@ -11,19 +11,21 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern int Cyc_List_length(
-struct Cyc_List_List* x); extern unsigned char Cyc_List_List_empty[ 15u]; extern
-struct Cyc_List_List* Cyc_List_map( void*(* f)( void*), struct Cyc_List_List* x);
-extern struct Cyc_List_List* Cyc_List_rmap_c( struct _RegionHandle*, void*(* f)(
-void*, void*), void* env, struct Cyc_List_List* x); extern unsigned char Cyc_List_List_mismatch[
-18u]; extern struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x);
-extern struct Cyc_List_List* Cyc_List_append( struct Cyc_List_List* x, struct
-Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_rappend( struct
-_RegionHandle*, struct Cyc_List_List* x, struct Cyc_List_List* y); extern
-unsigned char Cyc_List_Nth[ 8u]; extern void* Cyc_List_nth( struct Cyc_List_List*
-x, int i); extern struct Cyc_List_List* Cyc_List_zip( struct Cyc_List_List* x,
-struct Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_rzip( struct
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
+Cyc_List_List* tl; } ; extern int Cyc_List_length( struct Cyc_List_List* x);
+extern unsigned char Cyc_List_List_empty[ 15u]; extern struct Cyc_List_List* Cyc_List_map(
+void*(* f)( void*), struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_rmap_c(
+struct _RegionHandle*, void*(* f)( void*, void*), void* env, struct Cyc_List_List*
+x); extern unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List*
+Cyc_List_imp_rev( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append(
+struct Cyc_List_List* x, struct Cyc_List_List* y); extern struct Cyc_List_List*
+Cyc_List_rappend( struct _RegionHandle*, struct Cyc_List_List* x, struct Cyc_List_List*
+y); extern unsigned char Cyc_List_Nth[ 8u]; extern void* Cyc_List_nth( struct
+Cyc_List_List* x, int i); extern struct Cyc_List_List* Cyc_List_zip( struct Cyc_List_List*
+x, struct Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_rzip( struct
 _RegionHandle* r3, struct _RegionHandle* r4, struct Cyc_List_List* x, struct Cyc_List_List*
 y); struct Cyc_Lineno_Pos{ struct _tagged_string logical_file; struct
 _tagged_string line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[

@@ -11,30 +11,32 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[
-15u]; extern struct Cyc_List_List* Cyc_List_rcopy( struct _RegionHandle*, struct
-Cyc_List_List* src); extern unsigned char Cyc_List_List_mismatch[ 18u]; extern
-struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x); extern struct
-Cyc_List_List* Cyc_List_append( struct Cyc_List_List* x, struct Cyc_List_List* y);
-extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern
-unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
-extern struct Cyc_Dict_Dict* Cyc_Dict_rempty( struct _RegionHandle*, int(* comp)(
-void*, void*)); extern int Cyc_Dict_member( struct Cyc_Dict_Dict* d, void* key);
-extern struct Cyc_Dict_Dict* Cyc_Dict_insert( struct Cyc_Dict_Dict* d, void* key,
-void* data); extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key);
-extern struct Cyc_Dict_Dict* Cyc_Dict_rdelete_same( struct Cyc_Dict_Dict*, void*);
-struct Cyc_Stdio___sFILE; extern unsigned char Cyc_Stdio_FileCloseError[ 19u];
-extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern int Cyc_String_zstrptrcmp(
-struct _tagged_string*, struct _tagged_string*); struct Cyc_Lineno_Pos{ struct
-_tagged_string logical_file; struct _tagged_string line; int line_no; int col; }
-; extern unsigned char Cyc_Position_Exit[ 9u]; struct Cyc_Position_Segment;
-static const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1;
-static const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct
-_tagged_string source; struct Cyc_Position_Segment* seg; void* kind; struct
-_tagged_string desc; } ; extern unsigned char Cyc_Position_Nocontext[ 14u];
-struct _tuple0{ void* f1; struct _tagged_string* f2; } ; struct Cyc_Absyn_Tvar;
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
+Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern
+struct Cyc_List_List* Cyc_List_rcopy( struct _RegionHandle*, struct Cyc_List_List*
+src); extern unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List*
+Cyc_List_imp_rev( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append(
+struct Cyc_List_List* x, struct Cyc_List_List* y); extern unsigned char Cyc_List_Nth[
+8u]; struct Cyc_Dict_Dict; extern unsigned char Cyc_Dict_Present[ 12u]; extern
+unsigned char Cyc_Dict_Absent[ 11u]; extern struct Cyc_Dict_Dict* Cyc_Dict_rempty(
+struct _RegionHandle*, int(* comp)( void*, void*)); extern int Cyc_Dict_member(
+struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Dict_Dict* Cyc_Dict_insert(
+struct Cyc_Dict_Dict* d, void* key, void* data); extern void* Cyc_Dict_lookup(
+struct Cyc_Dict_Dict* d, void* key); extern struct Cyc_Dict_Dict* Cyc_Dict_rdelete_same(
+struct Cyc_Dict_Dict*, void*); struct Cyc_Stdio___sFILE; extern unsigned char
+Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[ 18u];
+struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct _tagged_string
+f1; } ; extern int Cyc_String_zstrptrcmp( struct _tagged_string*, struct
+_tagged_string*); struct Cyc_Lineno_Pos{ struct _tagged_string logical_file;
+struct _tagged_string line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[
+9u]; struct Cyc_Position_Segment; static const int Cyc_Position_Lex= 0; static
+const int Cyc_Position_Parse= 1; static const int Cyc_Position_Elab= 2; struct
+Cyc_Position_Error{ struct _tagged_string source; struct Cyc_Position_Segment*
+seg; void* kind; struct _tagged_string desc; } ; extern unsigned char Cyc_Position_Nocontext[
+14u]; struct _tuple0{ void* f1; struct _tagged_string* f2; } ; struct Cyc_Absyn_Tvar;
 struct Cyc_Absyn_Tqual; struct Cyc_Absyn_Conref; struct Cyc_Absyn_PtrInfo;
 struct Cyc_Absyn_VarargInfo; struct Cyc_Absyn_FnInfo; struct Cyc_Absyn_TunionInfo;
 struct Cyc_Absyn_TunionFieldInfo; struct Cyc_Absyn_VarargCallInfo; struct Cyc_Absyn_Exp;

@@ -12,23 +12,25 @@ unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
 unsigned char* tag; struct _tagged_string f1; } ; extern int Cyc_Core_int_of_string(
 struct _tagged_string); extern unsigned char* string_to_Cstring( struct
 _tagged_string); extern unsigned char* underlying_Cstring( struct _tagged_string);
-extern struct _tagged_string Cstring_to_string( unsigned char*); extern int
-system( unsigned char*); struct Cyc_Stdio___sFILE; extern struct Cyc_Stdio___sFILE*
-Cyc_Stdio_stderr; extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern
-unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
-unsigned char* tag; struct _tagged_string f1; } ; extern struct Cyc_Stdio___sFILE*
-Cyc_Stdio_file_open( struct _tagged_string fname, struct _tagged_string mode);
-extern void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE*); extern
-unsigned char Cyc_Lexing_Error[ 10u]; struct Cyc_Lexing_Error_struct{
-unsigned char* tag; struct _tagged_string f1; } ; struct Cyc_Lexing_lexbuf{ void(*
-refill_buff)( struct Cyc_Lexing_lexbuf*); void* refill_state; struct
-_tagged_string lex_buffer; int lex_buffer_len; int lex_abs_pos; int
-lex_start_pos; int lex_curr_pos; int lex_last_pos; int lex_last_action; int
-lex_eof_reached; } ; struct Cyc_Lexing_function_lexbuf_state{ int(* read_fun)(
-struct _tagged_string, int, void*); void* read_fun_state; } ; struct
-_tagged_ptr0{ int* curr; int* base; int* last_plus_one; } ; struct Cyc_Lexing_lex_tables{
-struct _tagged_ptr0 lex_base; struct _tagged_ptr0 lex_backtrk; struct
-_tagged_ptr0 lex_default; struct _tagged_ptr0 lex_trans; struct _tagged_ptr0
+extern struct _tagged_string Cstring_to_string( unsigned char*); struct
+_tagged_ptr0{ struct _tagged_string* curr; struct _tagged_string* base; struct
+_tagged_string* last_plus_one; } ; extern struct _tagged_ptr0 ntCsl_to_ntsl(
+unsigned char**); extern int system( unsigned char*); extern int* __errno();
+struct Cyc_Stdio___sFILE; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stderr;
+extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
+18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_string f1; } ; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open(
+struct _tagged_string fname, struct _tagged_string mode); extern void Cyc_Stdio_file_close(
+struct Cyc_Stdio___sFILE*); extern unsigned char Cyc_Lexing_Error[ 10u]; struct
+Cyc_Lexing_Error_struct{ unsigned char* tag; struct _tagged_string f1; } ;
+struct Cyc_Lexing_lexbuf{ void(* refill_buff)( struct Cyc_Lexing_lexbuf*); void*
+refill_state; struct _tagged_string lex_buffer; int lex_buffer_len; int
+lex_abs_pos; int lex_start_pos; int lex_curr_pos; int lex_last_pos; int
+lex_last_action; int lex_eof_reached; } ; struct Cyc_Lexing_function_lexbuf_state{
+int(* read_fun)( struct _tagged_string, int, void*); void* read_fun_state; } ;
+struct _tagged_ptr1{ int* curr; int* base; int* last_plus_one; } ; struct Cyc_Lexing_lex_tables{
+struct _tagged_ptr1 lex_base; struct _tagged_ptr1 lex_backtrk; struct
+_tagged_ptr1 lex_default; struct _tagged_ptr1 lex_trans; struct _tagged_ptr1
 lex_check; } ; extern struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_file( struct Cyc_Stdio___sFILE*);
 extern struct _tagged_string Cyc_Lexing_lexeme( struct Cyc_Lexing_lexbuf*);
 extern int Cyc_Lexing_lexeme_end( struct Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lex_engine(
@@ -75,16 +77,16 @@ int Cyc_Lineno_lbase[ 8u]={ 0, 1, - 2, 2, 5, - 3, - 1, 6}; int Cyc_Lineno_lbackt
 Cyc_Lineno_token_rec( struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ if( Cyc_Lineno_lt
 == 0){ Cyc_Lineno_lt=({ struct Cyc_Lexing_lex_tables* _temp0=( struct Cyc_Lexing_lex_tables*)
 GC_malloc( sizeof( struct Cyc_Lexing_lex_tables)); _temp0->lex_base=({ int*
-_temp9=( int*) Cyc_Lineno_lbase; struct _tagged_ptr0 _temp10; _temp10.curr=
+_temp9=( int*) Cyc_Lineno_lbase; struct _tagged_ptr1 _temp10; _temp10.curr=
 _temp9; _temp10.base= _temp9; _temp10.last_plus_one= _temp9 + 8; _temp10;});
 _temp0->lex_backtrk=({ int* _temp7=( int*) Cyc_Lineno_lbacktrk; struct
-_tagged_ptr0 _temp8; _temp8.curr= _temp7; _temp8.base= _temp7; _temp8.last_plus_one=
+_tagged_ptr1 _temp8; _temp8.curr= _temp7; _temp8.base= _temp7; _temp8.last_plus_one=
 _temp7 + 8; _temp8;}); _temp0->lex_default=({ int* _temp5=( int*) Cyc_Lineno_ldefault;
-struct _tagged_ptr0 _temp6; _temp6.curr= _temp5; _temp6.base= _temp5; _temp6.last_plus_one=
+struct _tagged_ptr1 _temp6; _temp6.curr= _temp5; _temp6.base= _temp5; _temp6.last_plus_one=
 _temp5 + 8; _temp6;}); _temp0->lex_trans=({ int* _temp3=( int*) Cyc_Lineno_ltrans;
-struct _tagged_ptr0 _temp4; _temp4.curr= _temp3; _temp4.base= _temp3; _temp4.last_plus_one=
+struct _tagged_ptr1 _temp4; _temp4.curr= _temp3; _temp4.base= _temp3; _temp4.last_plus_one=
 _temp3 + 263; _temp4;}); _temp0->lex_check=({ int* _temp1=( int*) Cyc_Lineno_lcheck;
-struct _tagged_ptr0 _temp2; _temp2.curr= _temp1; _temp2.base= _temp1; _temp2.last_plus_one=
+struct _tagged_ptr1 _temp2; _temp2.curr= _temp1; _temp2.base= _temp1; _temp2.last_plus_one=
 _temp1 + 263; _temp2;}); _temp0;});} lexstate=(( int(*)( struct Cyc_Lexing_lex_tables*,
 int, struct Cyc_Lexing_lexbuf*)) Cyc_Lexing_lex_engine)(( struct Cyc_Lexing_lex_tables*)
 _check_null( Cyc_Lineno_lt), lexstate, lexbuf); switch( lexstate){ case 0: _LL11:

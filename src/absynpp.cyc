@@ -1,10 +1,10 @@
-#include "core.h"
-#include "stdio.h"
-#include "pp.h"
+#include <core.h>
+#include <stdio.h>
+#include <pp.h>
 #include "absyn.h"
-#include "list.h"
-#include "buffer.h"
-#include "string.h"
+#include <list.h>
+#include <buffer.h>
+#include <string.h>
 #include "evexp.h"
 #include "tcutil.h"
 #include "absynpp.h"

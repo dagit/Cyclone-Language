@@ -6,7 +6,7 @@
 // September 2000, all rights reserved                                    //
 //                                                                        //
 ////////////////////////////////////////////////////////////////////////////
-#include "core.h"
+#include <core.h>
 
 namespace List {
 

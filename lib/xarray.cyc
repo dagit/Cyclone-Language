@@ -1,5 +1,5 @@
-#include "core.h"
-#include "xarray.h"
+#include <core.h>
+#include <xarray.h>
 
 namespace Xarray;
 using Core;

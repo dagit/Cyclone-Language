@@ -10,10 +10,13 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; struct _tagged_ptr0{ void**
-curr; void** base; void** last_plus_one; } ; extern struct Cyc_List_List* Cyc_List_list(
-struct _tagged_ptr0); extern unsigned char Cyc_List_List_empty[ 15u]; extern
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
+Cyc_List_List* tl; } ; struct _tagged_ptr1{ void** curr; void** base; void**
+last_plus_one; } ; extern struct Cyc_List_List* Cyc_List_list( struct
+_tagged_ptr1); extern unsigned char Cyc_List_List_empty[ 15u]; extern
 unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List* Cyc_List_rev(
 struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_imp_rev( struct
 Cyc_List_List* x); extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned char
@@ -29,75 +32,59 @@ struct Cyc_Arg_Set_spec_struct{ int tag; int* f1; } ; static const int Cyc_Arg_C
 5; struct Cyc_Arg_String_spec_struct{ int tag; void(* f1)( struct _tagged_string);
 } ; static const int Cyc_Arg_Int_spec= 6; struct Cyc_Arg_Int_spec_struct{ int
 tag; void(* f1)( int); } ; static const int Cyc_Arg_Rest_spec= 7; struct Cyc_Arg_Rest_spec_struct{
-int tag; void(* f1)( struct _tagged_string); } ; struct _tagged_ptr1{ struct
-_tagged_string* curr; struct _tagged_string* base; struct _tagged_string*
-last_plus_one; } ; extern void Cyc_Arg_parse( struct Cyc_List_List* specs, void(*
-anonfun)( struct _tagged_string), struct _tagged_string errmsg, struct
-_tagged_ptr1 args); struct Cyc_Stdio___sFILE; extern struct Cyc_Stdio___sFILE*
-Cyc_Stdio_stdout; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stderr; extern int
-Cyc_Stdio_remove( struct _tagged_string); extern int Cyc_Stdio_fclose( struct
-Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE*);
-extern unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
-18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_string f1; } ; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open(
-struct _tagged_string fname, struct _tagged_string mode); extern void Cyc_Stdio_file_close(
-struct Cyc_Stdio___sFILE*); struct Cyc_Time_tm{ int tm_sec; int tm_min; int
-tm_hour; int tm_mday; int tm_mon; int tm_year; int tm_wday; int tm_yday; int
-tm_isdst; } ; extern unsigned int clock()  __attribute__(( cdecl )) ; extern
-double difftime( int _time2, int _time1)  __attribute__(( cdecl )) ; extern int
-mktime( struct Cyc_Time_tm* _timeptr)  __attribute__(( cdecl )) ; extern int
-time( int* _timer)  __attribute__(( cdecl )) ; extern struct Cyc_Time_tm* gmtime(
-const int* _timer)  __attribute__(( cdecl )) ; extern struct Cyc_Time_tm*
-localtime( const int* _timer)  __attribute__(( cdecl )) ; extern struct Cyc_Time_tm*
-gmtime_r( const int*, struct Cyc_Time_tm*)  __attribute__(( cdecl )) ; extern
-struct Cyc_Time_tm* localtime_r( const int*, struct Cyc_Time_tm*)
- __attribute__(( cdecl )) ; extern int _timezone  __attribute__(( dllimport )) ;
-extern int _daylight  __attribute__(( dllimport )) ; extern unsigned char*
-_tzname[ 2u]  __attribute__(( dllimport )) ; extern void tzset()
- __attribute__(( cdecl )) ; struct Cyc___sFILE; struct Cyc__reent; struct Cyc__glue{
-struct Cyc__glue* _next; int _niobs; struct Cyc___sFILE* _iobs; } ; struct Cyc__Bigint{
-struct Cyc__Bigint* _next; int _k; int _maxwds; int _sign; int _wds;
-unsigned int _x[ 1u]; } ; struct Cyc__atexit{ struct Cyc__atexit* _next; int
-_ind; void(* _fns[ 32u])(); } ; struct Cyc___sbuf{ unsigned char* _base; int
-_size; } ; struct Cyc___sFILE{ unsigned char* _p; int _r; int _w; short _flags;
-short _file; struct Cyc___sbuf _bf; int _lbfsize; void* _cookie; int(* _read)(
-void* _cookie, unsigned char* _buf, int _n)  __attribute__(( cdecl )) ; int(*
-_write)( void* _cookie, const unsigned char* _buf, int _n)  __attribute__((
-cdecl )) ; int(* _seek)( void* _cookie, int _offset, int _whence)
- __attribute__(( cdecl )) ; int(* _close)( void* _cookie)  __attribute__(( cdecl
-)) ; struct Cyc___sbuf _ub; unsigned char* _up; int _ur; unsigned char _ubuf[ 3u];
-unsigned char _nbuf[ 1u]; struct Cyc___sbuf _lb; int _blksize; int _offset;
-struct Cyc__reent* _data; } ; struct Cyc__reent_u1{ unsigned int _unused_rand;
-int _strtok_last; unsigned char _asctime_buf[ 26u]; struct Cyc_Time_tm
-_localtime_buf; int _gamma_signgam; unsigned long long _rand_next; } ; struct
-Cyc__reent_u2{ unsigned int _nextf[ 30u]; unsigned int _nmalloc[ 30u]; } ; union
-Cyc__reent_union{ struct Cyc__reent_u1 _reent; struct Cyc__reent_u2 _unused; } ;
-struct Cyc__reent{ int _errno; struct Cyc___sFILE* _stdin; struct Cyc___sFILE*
-_stdout; struct Cyc___sFILE* _stderr; int _inc; unsigned char _emergency[ 25u];
-int _current_category; const unsigned char* _current_locale; int __sdidinit;
-void(* __cleanup)( struct Cyc__reent*)  __attribute__(( cdecl )) ; struct Cyc__Bigint*
-_result; int _result_k; struct Cyc__Bigint* _p5s; struct Cyc__Bigint** _freelist;
-int _cvtlen; unsigned char* _cvtbuf; union Cyc__reent_union _new; struct Cyc__atexit*
-_atexit; struct Cyc__atexit _atexit0; void(** _sig_func)( int); struct Cyc__glue
-__sglue; struct Cyc___sFILE __sf[ 3u]; } ; extern struct Cyc__reent* _impure_ptr;
-extern void _reclaim_reent( struct Cyc__reent*); struct Cyc_Stdlib__Div{ int
-quot; int rem; } ; struct Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int
-__mb_cur_max  __attribute__(( dllimport )) ; extern int abs( int)
- __attribute__(( cdecl )) ; extern int atexit( void(* __func)())
- __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Div div( int __numer, int
-__denom)  __attribute__(( cdecl )) ; extern struct Cyc_Stdlib__Ldiv ldiv( int
-__numer, int __denom)  __attribute__(( cdecl )) ; extern int rand()
- __attribute__(( cdecl )) ; extern void srand( unsigned int __seed)
- __attribute__(( cdecl )) ; extern int rand_r( unsigned int* __seed)
- __attribute__(( cdecl )) ; extern int random()  __attribute__(( cdecl )) ;
-extern int srandom( unsigned int __seed)  __attribute__(( cdecl )) ; extern int
-grantpt( int)  __attribute__(( cdecl )) ; extern int unlockpt( int)
- __attribute__(( cdecl )) ; extern struct _tagged_string Cyc_Stdlib_getenv(
-struct _tagged_string); extern unsigned int Cyc_String_strlen( struct
-_tagged_string s); extern int Cyc_String_strcmp( struct _tagged_string s1,
-struct _tagged_string s2); extern struct _tagged_string Cyc_String_strconcat(
-struct _tagged_string, struct _tagged_string); extern struct _tagged_string Cyc_String_str_sepstr(
-struct Cyc_List_List*, struct _tagged_string); extern struct _tagged_string Cyc_String_substring(
+int tag; void(* f1)( struct _tagged_string); } ; extern void Cyc_Arg_parse(
+struct Cyc_List_List* specs, void(* anonfun)( struct _tagged_string), struct
+_tagged_string errmsg, struct _tagged_ptr0 args); struct Cyc_Stdio___sFILE;
+extern struct Cyc_Stdio___sFILE* Cyc_Stdio_stdout; extern struct Cyc_Stdio___sFILE*
+Cyc_Stdio_stderr; extern int Cyc_Stdio_remove( struct _tagged_string); extern
+int Cyc_Stdio_fclose( struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fflush(
+struct Cyc_Stdio___sFILE*); extern unsigned char Cyc_Stdio_FileCloseError[ 19u];
+extern unsigned char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
+unsigned char* tag; struct _tagged_string f1; } ; extern struct Cyc_Stdio___sFILE*
+Cyc_Stdio_file_open( struct _tagged_string fname, struct _tagged_string mode);
+extern void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE*); struct Cyc_Time_tm{
+int tm_sec; int tm_min; int tm_hour; int tm_mday; int tm_mon; int tm_year; int
+tm_wday; int tm_yday; int tm_isdst; } ; extern unsigned int clock(); extern
+double difftime( int _time2, int _time1); extern int mktime( struct Cyc_Time_tm*
+_timeptr); extern int time( int* _timer); extern struct Cyc_Time_tm* gmtime(
+const int* _timer); extern struct Cyc_Time_tm* localtime( const int* _timer);
+extern struct Cyc_Time_tm* gmtime_r( const int*, struct Cyc_Time_tm*); extern
+struct Cyc_Time_tm* localtime_r( const int*, struct Cyc_Time_tm*); struct Cyc___sFILE;
+struct Cyc__reent; struct Cyc__glue{ struct Cyc__glue* _next; int _niobs; struct
+Cyc___sFILE* _iobs; } ; struct Cyc__Bigint{ struct Cyc__Bigint* _next; int _k;
+int _maxwds; int _sign; int _wds; unsigned int _x[ 1u]; } ; struct Cyc__atexit{
+struct Cyc__atexit* _next; int _ind; void(* _fns[ 32u])(); } ; struct Cyc___sbuf{
+unsigned char* _base; int _size; } ; struct Cyc___sFILE{ unsigned char* _p; int
+_r; int _w; short _flags; short _file; struct Cyc___sbuf _bf; int _lbfsize; void*
+_cookie; int(* _read)( void* _cookie, unsigned char* _buf, int _n); int(* _write)(
+void* _cookie, const unsigned char* _buf, int _n); int(* _seek)( void* _cookie,
+int _offset, int _whence); int(* _close)( void* _cookie); struct Cyc___sbuf _ub;
+unsigned char* _up; int _ur; unsigned char _ubuf[ 3u]; unsigned char _nbuf[ 1u];
+struct Cyc___sbuf _lb; int _blksize; int _offset; struct Cyc__reent* _data; } ;
+struct Cyc__reent_u1{ unsigned int _unused_rand; int _strtok_last; unsigned char
+_asctime_buf[ 26u]; struct Cyc_Time_tm _localtime_buf; int _gamma_signgam;
+unsigned long long _rand_next; } ; struct Cyc__reent_u2{ unsigned int _nextf[ 30u];
+unsigned int _nmalloc[ 30u]; } ; union Cyc__reent_union{ struct Cyc__reent_u1
+_reent; struct Cyc__reent_u2 _unused; } ; struct Cyc__reent{ int _errno; struct
+Cyc___sFILE* _stdin; struct Cyc___sFILE* _stdout; struct Cyc___sFILE* _stderr;
+int _inc; unsigned char _emergency[ 25u]; int _current_category; const
+unsigned char* _current_locale; int __sdidinit; void(* __cleanup)( struct Cyc__reent*);
+struct Cyc__Bigint* _result; int _result_k; struct Cyc__Bigint* _p5s; struct Cyc__Bigint**
+_freelist; int _cvtlen; unsigned char* _cvtbuf; union Cyc__reent_union _new;
+struct Cyc__atexit* _atexit; struct Cyc__atexit _atexit0; void(** _sig_func)(
+int); struct Cyc__glue __sglue; struct Cyc___sFILE __sf[ 3u]; } ; extern struct
+Cyc__reent* _impure_ptr; extern void _reclaim_reent( struct Cyc__reent*); struct
+Cyc_Stdlib__Div{ int quot; int rem; } ; struct Cyc_Stdlib__Ldiv{ int quot; int
+rem; } ; extern int __mb_cur_max; extern int abs( int); extern int atexit( void(*
+__func)()); extern struct Cyc_Stdlib__Div div( int __numer, int __denom); extern
+struct Cyc_Stdlib__Ldiv ldiv( int __numer, int __denom); extern int rand();
+extern void srand( unsigned int __seed); extern int rand_r( unsigned int* __seed);
+extern struct _tagged_string Cyc_Stdlib_getenv( struct _tagged_string); extern
+unsigned int Cyc_String_strlen( struct _tagged_string s); extern int Cyc_String_strcmp(
+struct _tagged_string s1, struct _tagged_string s2); extern struct
+_tagged_string Cyc_String_strconcat( struct _tagged_string, struct
+_tagged_string); extern struct _tagged_string Cyc_String_str_sepstr( struct Cyc_List_List*,
+struct _tagged_string); extern struct _tagged_string Cyc_String_substring(
 struct _tagged_string, int ofs, unsigned int n); extern struct _tagged_string
 Cyc_String_strchr( struct _tagged_string s, unsigned char c); struct Cyc_Dict_Dict;
 extern unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[
@@ -723,22 +710,23 @@ unsigned char c){ if( s.curr ==(( struct _tagged_string)({ struct _tagged_string
 _temp95={ 0, 0, 0}; _temp95;})).curr){ return 0;}{ struct Cyc_List_List* _temp96=
 0; goto _LL97; _LL97: { unsigned int _temp98= Cyc_String_strlen( s); goto _LL99;
 _LL99: while( _temp98 > 0) { struct _tagged_string _temp100= Cyc_String_strchr(
-s, c); goto _LL101; _LL101: if( _temp100.curr ==(( struct _tagged_string)({
-struct _tagged_string _temp102={ 0, 0, 0}; _temp102;})).curr){ _temp96=({ struct
-Cyc_List_List* _temp103=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+s, c); goto _LL101; _LL101: if( _temp100.curr ==({ struct _tagged_string
+_temp102={ 0, 0, 0}; _temp102;}).curr){ _temp96=({ struct Cyc_List_List*
+_temp103=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
 _temp103->hd=( void*)({ struct _tagged_string* _temp104=( struct _tagged_string*)
 GC_malloc( sizeof( struct _tagged_string)); _temp104[ 0]= s; _temp104;});
 _temp103->tl= _temp96; _temp103;}); break;} else{ _temp96=({ struct Cyc_List_List*
 _temp105=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
 _temp105->hd=( void*)({ struct _tagged_string* _temp106=( struct _tagged_string*)
 GC_malloc( sizeof( struct _tagged_string)); _temp106[ 0]=( struct _tagged_string)
-Cyc_String_substring( s, 0,( unsigned int)( _temp100.curr - s.curr)); _temp106;});
-_temp105->tl= _temp96; _temp105;}); _temp98 -= _temp100.curr - s.curr; s=({
-struct _tagged_string _temp107= _temp100; _temp107.curr += 1; _temp107;});}}
-return(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
-_temp96);}}} int Cyc_file_exists( struct _tagged_string file){ struct Cyc_Stdio___sFILE*
-f= 0;{ struct _handler_cons _temp108; _push_handler(& _temp108);{ int _temp110=
-0; if( setjmp( _temp108.handler)){ _temp110= 1;} if( ! _temp110){ f=( struct Cyc_Stdio___sFILE*)
+Cyc_String_substring( s, 0,( unsigned int)((( struct _tagged_string) _temp100).curr
+- s.curr)); _temp106;}); _temp105->tl= _temp96; _temp105;}); _temp98 -=(( struct
+_tagged_string) _temp100).curr - s.curr; s=( struct _tagged_string)({ struct
+_tagged_string _temp107= _temp100; _temp107.curr += 1; _temp107;});}} return((
+struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( _temp96);}}}
+int Cyc_file_exists( struct _tagged_string file){ struct Cyc_Stdio___sFILE* f= 0;{
+struct _handler_cons _temp108; _push_handler(& _temp108);{ int _temp110= 0; if(
+setjmp( _temp108.handler)){ _temp110= 1;} if( ! _temp110){ f=( struct Cyc_Stdio___sFILE*)
 Cyc_Stdio_file_open( file,({ unsigned char* _temp111=( unsigned char*)"r";
 struct _tagged_string _temp112; _temp112.curr= _temp111; _temp112.base= _temp111;
 _temp112.last_plus_one= _temp111 + 2; _temp112;}));; _pop_handler();} else{ void*
@@ -822,8 +810,8 @@ _temp129; xprintf(" -o %.*s", _temp168.last_plus_one - _temp168.curr, _temp168.c
 struct _tagged_string _temp173=({ struct _tagged_string _temp169=( struct
 _tagged_string) _temp146; struct _tagged_string _temp170= stdinc_string; struct
 _tagged_string _temp171= ofile_string; struct _tagged_string _temp172= filename;
-xprintf("gcc -x c -E -U__GNUC__%.*s%.*s%.*s %.*s", _temp169.last_plus_one -
-_temp169.curr, _temp169.curr, _temp170.last_plus_one - _temp170.curr, _temp170.curr,
+xprintf("gcc -x c -E -U__GNUC__ -nostdinc%.*s%.*s%.*s %.*s", _temp169.last_plus_one
+- _temp169.curr, _temp169.curr, _temp170.last_plus_one - _temp170.curr, _temp170.curr,
 _temp171.last_plus_one - _temp171.curr, _temp171.curr, _temp172.last_plus_one -
 _temp172.curr, _temp172.curr);}); goto _LL174; _LL174: if( Cyc_v_r){({ struct
 _tagged_string _temp175=( struct _tagged_string) _temp173; fprintf(
@@ -939,7 +927,7 @@ struct _tagged_string)); _temp232[ 0]=( struct _tagged_string) _temp137;
 _temp232;}); _temp231->tl= Cyc_cfiles; _temp231;});}}}}}}}}}}}}} struct _tuple10{
 struct _tagged_string f1; void* f2; struct _tagged_string f3; } ; struct
 _tagged_ptr3{ struct _tuple10** curr; struct _tuple10** base; struct _tuple10**
-last_plus_one; } ; int Cyc_main( int argc, struct _tagged_ptr1 argv){ struct Cyc_List_List*
+last_plus_one; } ; int Cyc_main( int argc, struct _tagged_ptr0 argv){ struct Cyc_List_List*
 options=({ struct Cyc_List_List*(* _temp295)( struct _tagged_ptr3)=( struct Cyc_List_List*(*)(
 struct _tagged_ptr3)) Cyc_List_list; struct _tuple10* _temp298=({ struct
 _tuple10* _temp547=( struct _tuple10*) GC_malloc( sizeof( struct _tuple10));

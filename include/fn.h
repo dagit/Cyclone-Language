@@ -7,7 +7,7 @@
 //                                                                        //
 // Defines "closures" and operations on them                              //
 ////////////////////////////////////////////////////////////////////////////
-#include "list.h"
+#include <list.h>
 
 namespace Fn {
 

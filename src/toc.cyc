@@ -30,13 +30,13 @@
 //       back to the corresponding decls.  The printer doesn't follow these
 //       pointers, else we need to set them.
 
-#include "core.h"
-#include "stdio.h"
-#include "list.h"
-#include "string.h"
-#include "set.h"
-#include "dict.h"
-#include "position.h"
+#include <core.h>
+#include <stdio.h>
+#include <list.h>
+#include <string.h>
+#include <set.h>
+#include <dict.h>
+#include <position.h>
 #include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"

@@ -1,10 +1,10 @@
 #ifndef NEW_CONTROL_FLOW_H
 #define NEW_CONTROL_FLOW_H
 
-#include "list.h"
-#include "set.h"
-#include "dict.h"
-#include "stdio.h"
+#include <list.h>
+#include <set.h>
+#include <dict.h>
+#include <stdio.h>
 #include "absyn.h"
 #include "cf_flowinfo.h"
 

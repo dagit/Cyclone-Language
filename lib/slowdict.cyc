@@ -3,10 +3,10 @@
 // Walker, Crary.
 // Port by Dan, June 1999
 
-#include "core.h"
-#include "list.h"
-#include "splay.h"
-#include "slowdict.h"
+#include <core.h>
+#include <list.h>
+#include <splay.h>
+#include <slowdict.h>
 
 namespace SlowDict;
 using   Splay;

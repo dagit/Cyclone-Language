@@ -1,18 +1,18 @@
 // Type checking for patterns
 
-#include "core.h"
-#include "list.h"
-#include "dict.h"
-#include "set.h"
-#include "string.h"
-#include "position.h"
+#include <core.h>
+#include <list.h>
+#include <dict.h>
+#include <set.h>
+#include <string.h>
+#include <position.h>
 #include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"
 #include "tcenv.h"
 #include "tcexp.h"
 #include "tcpat.h"
-#include "stdio.h"
+#include <stdio.h>
 
 namespace Tcpat;
 

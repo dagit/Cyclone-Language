@@ -1,10 +1,10 @@
 #ifndef _ABSYNPP_H_
 #define _ABSYNPP_H_
 
-#include "core.h"
-#include "stdio.h"
-#include "list.h"
-#include "pp.h"
+#include <core.h>
+#include <stdio.h>
+#include <list.h>
+#include <pp.h>
 #include "absyn.h"
 
 namespace Absynpp {

@@ -9,8 +9,8 @@
 #define EXTERN_DEFINITION extern
 #endif
 
-#include "core.h"
-#include "list.h"
+#include <core.h>
+#include <list.h>
 
 namespace Xml {
 

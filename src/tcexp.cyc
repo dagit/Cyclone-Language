@@ -7,8 +7,8 @@
  */
 
 #include "absyn.h"
-#include "string.h"
-#include "position.h"
+#include <string.h>
+#include <position.h>
 #include "absynpp.h"
 #include "tcenv.h"
 #include "tcutil.h"

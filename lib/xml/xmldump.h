@@ -4,8 +4,8 @@
 #define _XMLDUMP_H
 
 #include "xml.h"
-#include "list.h"
-#include "stdio.h"
+#include <list.h>
+#include <stdio.h>
 
 namespace XmlDump {
 

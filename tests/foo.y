@@ -1,6 +1,6 @@
 %{
-#include "core.h"    // must include both core.h and string.h
-#include "string.h"
+#include <core.h>    // must include both core.h and string.h
+#include <string.h>
 using String;
   //#define YYDEBUG 1  // turn this on to debug the parser engine
 #define YYERROR_VERBOSE 1 // turn this on to get better error messages

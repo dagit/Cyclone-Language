@@ -20,15 +20,15 @@ extern void yyprint(int i, xtunion YYSTYPE v);
 #endif
 
 
-#include "core.h"
-#include "stdio.h"
-#include "lexing.h"
-#include "list.h"
-#include "string.h"
-#include "set.h"
-#include "position.h"
+#include <core.h>
+#include <stdio.h>
+#include <lexing.h>
+#include <list.h>
+#include <string.h>
+#include <set.h>
+#include <position.h>
 #include "absyn.h"
-#include "pp.h"
+#include <pp.h>
 #include "tcutil.h"
 using Core;
 using Stdio;

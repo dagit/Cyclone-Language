@@ -10,17 +10,20 @@ unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char Cyc_Core_
 unsigned char* tag; struct _tagged_string f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_string); extern unsigned char*
 underlying_Cstring( struct _tagged_string); extern struct _tagged_string
-Cstring_to_string( unsigned char*); extern int system( unsigned char*); struct
-Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[
-15u]; extern struct Cyc_List_List* Cyc_List_map_c( void*(* f)( void*, void*),
-void* env, struct Cyc_List_List* x); extern unsigned char Cyc_List_List_mismatch[
-18u]; extern unsigned char Cyc_List_Nth[ 8u]; static const int Cyc_Fn_Fun= 0;
-struct Cyc_Fn_Fun_struct{ int tag; void*(* f1)( void*, void*); void* f2; } ;
-extern void* Cyc_Fn_make_fn( void*(* f)( void*, void*), void* x); extern void*
-Cyc_Fn_fp2fn( void*(* f)( void*)); extern void* Cyc_Fn_apply( void* f, void* x);
-extern void* Cyc_Fn_compose( void* g, void* f); extern void* Cyc_Fn_curry( void*
-f); extern void* Cyc_Fn_uncurry( void* f); extern struct Cyc_List_List* Cyc_Fn_map_fn(
-void* f, struct Cyc_List_List* x); void* Cyc_Fn_make_fn( void*(* f)( void*, void*),
+Cstring_to_string( unsigned char*); struct _tagged_ptr0{ struct _tagged_string*
+curr; struct _tagged_string* base; struct _tagged_string* last_plus_one; } ;
+extern struct _tagged_ptr0 ntCsl_to_ntsl( unsigned char**); extern int system(
+unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
+Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern
+struct Cyc_List_List* Cyc_List_map_c( void*(* f)( void*, void*), void* env,
+struct Cyc_List_List* x); extern unsigned char Cyc_List_List_mismatch[ 18u];
+extern unsigned char Cyc_List_Nth[ 8u]; static const int Cyc_Fn_Fun= 0; struct
+Cyc_Fn_Fun_struct{ int tag; void*(* f1)( void*, void*); void* f2; } ; extern
+void* Cyc_Fn_make_fn( void*(* f)( void*, void*), void* x); extern void* Cyc_Fn_fp2fn(
+void*(* f)( void*)); extern void* Cyc_Fn_apply( void* f, void* x); extern void*
+Cyc_Fn_compose( void* g, void* f); extern void* Cyc_Fn_curry( void* f); extern
+void* Cyc_Fn_uncurry( void* f); extern struct Cyc_List_List* Cyc_Fn_map_fn( void*
+f, struct Cyc_List_List* x); void* Cyc_Fn_make_fn( void*(* f)( void*, void*),
 void* x){ return( void*)({ struct Cyc_Fn_Fun_struct* _temp0=( struct Cyc_Fn_Fun_struct*)
 GC_malloc( sizeof( struct Cyc_Fn_Fun_struct)); _temp0[ 0]=({ struct Cyc_Fn_Fun_struct
 _temp1; _temp1.tag= Cyc_Fn_Fun; _temp1.f1= f; _temp1.f2=( void*) x; _temp1;});
