@@ -325,6 +325,60 @@ static bool atomic_typ(typ t) {
   }
 }
 
+static bool is_void_star(typ t) {
+  switch (compress(t)) {
+  case PointerType(t2,_,_,_):
+    switch (compress(t2)) {
+    case VoidType: return true;
+    default: return false;
+    }
+  default: return false;
+  }
+}
+
+// returns true when field f of the struct t has type void*.
+static bool is_poly_field(typ t, field_name f) {
+  switch (compress(t)) {
+  case StructType(&Opt(tdn),_,&sd):
+    if (sd->fields == null)
+      toc_impos(xprintf("is_poly_field:  struct %s missing fields",
+			qvar2string(tdn)));
+    _ fields = sd->fields->v;
+    for (; fields != null; fields = fields->tl) {
+      if (String::zstrcmp(f,fields->hd[0]) == 0)
+	return is_void_star(fields->hd[2]);
+    }
+    toc_impos(xprintf("is_poly_field:  struct %s has no %s field",
+		      qvar2string(tdn),f));
+    return false;
+  case StructType(&Opt(tdn),_,null):
+    toc_impos(xprintf("is_poly_field:  struct %s missing structdecl",
+		      qvar2string(tdn)));
+    return false;
+  default:
+    toc_impos(xprintf("is_poly_field:  bad type %s",typ2string(t)));
+    return false;
+  }
+}
+
+// returns true when e is projection of a field in a struct that has a 
+// variable type before instantiation.  For instance, the field hd has
+// type `a before instantiation in struct cons.
+static bool is_poly_project(exp e) {
+  switch (e->r) {
+  case StructMember_e(e1,f): return is_poly_field(e1->topt->v,f);
+  case StructArrow_e(e1,f):
+    switch (compress(e1->topt->v)) {
+    case PointerType(t,_,_,_): return is_poly_field(t,f);
+    default: 
+      toc_impos(xprintf("is_poly_project:  bad type %s",
+			typ2string(e1->topt->v)));
+      return false;
+    }
+  default: return false;
+  }
+}
+
 // possible pointer malloc
 static exp malloc_ptr(exp s) {
   return fncall_exp(var_exp(&$(null,(string)"GC_malloc"),DL),&cons(s,null),DL);
@@ -974,7 +1028,8 @@ static exp init_tuple(env nv, bool pointer, list<exp> es) {
   return make_struct(x,strct(n),s,pointer,is_atomic);
 }
 
-static exp init_struct(env nv,bool pointer,list<$(list<designator>,exp)@> dles, 
+static exp init_struct(env nv,typ struct_type,
+		       bool pointer,list<$(list<designator>,exp)@> dles, 
 		       typedef_name_t tdn) {
   _ x    = temp_var();
   _ xexp = var_exp(x,DL);
@@ -996,6 +1051,9 @@ static exp init_struct(env nv,bool pointer,list<$(list<designator>,exp)@> dles,
       for(; ds != null; ds = ds->tl)
 	switch (ds->hd) {
 	case FieldName(f):
+	  // cast to void* if necessary
+	  if (is_poly_field(struct_type,f))
+	    yexp = cast_exp(void_star_typ(),yexp,DL);
 	  s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,f,DL), yexp, DL), DL),
 		       s, DL);
 	  break;
@@ -1007,6 +1065,9 @@ static exp init_struct(env nv,bool pointer,list<$(list<designator>,exp)@> dles,
       switch (ds->hd) {
       case FieldName(f):
 	exp_to_c(nv,e);
+	// cast to void* if necessary
+	if (is_poly_field(struct_type,f))
+	  e = cast_exp(void_star_typ(),e,DL);
 	s = seq_stmt(exp_stmt(assign_exp(lval_f(xexp,f,DL), e, DL), DL),
 		     s, DL);
 	break;
@@ -1125,7 +1186,12 @@ static void exp_to_c(env nv, exp e) {
     break;
   case AssignOp_e(e1,popt,e2):
     // FIX:  works for boxed types?
+    // See if e1 is a polymorphic field (i.e., is an instantiated type
+    // variable) -- if so, coerce e2 to void*.
+    bool e1_poly = is_poly_project(e1);
     exp_to_c(nv,e1); exp_to_c(nv,e2);
+    if (e1_poly) 
+      e2->r = cast_exp(void_star_typ(), new_exp(e2->r, DL), DL)->r;
     // The typechecker guarantees that e1 starts out as an lvalue, but
     // the translation might have to insert casts, null checks,
     // declarations of temps, bound checks, etc.  If so we look into e1,
@@ -1177,7 +1243,7 @@ static void exp_to_c(env nv, exp e) {
       if (nv->toplevel)
 	unimp(xprintf("%s: & on non-identifiers at the top-level",
                       Position::string_of_segment(e1->loc)));
-      e->r = init_struct(nv, true, es, tdn)->r;
+      e->r = init_struct(nv, e1->topt->v, true, es, tdn)->r;
       break;
     case Tuple_e(es):
       if (nv->toplevel)
@@ -1477,16 +1543,27 @@ static void exp_to_c(env nv, exp e) {
     }
     e->r = stmt_exp(s,DL)->r;
     break;
-  case Struct_e(tdn,ots,dles,_):
+  case Struct_e(tdn,ots,dles,sd):
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
     // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
     if(!nv->toplevel)
-      e->r = init_struct(nv,false,dles,tdn)->r;
+      e->r = init_struct(nv,old_typ,false,dles,tdn)->r;
     else {
       // At top-level must use deisignators
       _ n = tdn;
-      for (_ es = dles; es != null; es = es->tl)
-	exp_to_c(nv,es->hd[1]);
+      structdecl sd2 = 
+	(structdecl)((sd == null) ? toc_impos(xprintf("no structdecl %s",qvar2string(tdn))) : sd);
+      _ fields = Tcutil::resolve_struct_designators(e->loc, dles, 
+						    (structdecl)sd2);
+      for (; fields != null; fields = fields->tl) {
+	let &$(&$(_,_,fieldtyp),fieldexp) = fields->hd;
+	exp_to_c(nv,fieldexp);
+	if (is_void_star(fieldtyp))
+	  fieldexp->r = cast_exp(void_star_typ(), 
+				 new_exp(fieldexp->r,DL),DL)->r;
+      }
+      //for (_ es = dles; es != null; es = es->tl)
+      //  exp_to_c(nv,es->hd[1]);
       e->r = cast_exp(strctq(n), unresolvedmem_exp(null,dles,DL),DL)->r;
     }
     break;
@@ -1539,17 +1616,21 @@ static void exp_to_c(env nv, exp e) {
 	// value-carrying constructor
 	// ({ struct qv_tag *x = (struct qv_tag*)malloc(sizeof(struct qv_tag));
 	//    x->tag = i; x->f1 = e1; ...; x->fn = en; (t)x; })
+	_ typs = ef->typs;
 	_ e2 = sizeof_exp(strct_typ,DL);
 	_ atomic = true;
 	_ rev_assign =
 	  &cons(assign_stmt(structarrow_exp(xexp,"tag",DL),
 			    var_exp(collapse_qvar_tag(qv,"_tag"),DL),DL),null);
-	for (int i = 1; es != null; es = es->tl, i++) {
-	  if (!atomic_typ(es->hd->topt->v)) atomic = false;
-	  exp_to_c(nv,es->hd);
+	for (int i = 1; es != null; es = es->tl, i++, typs = typs->tl) {
+	  exp cur_e = es->hd;
+	  typ field_t = typ_to_c(typs->hd[1]);
+	  if (!atomic_typ(cur_e->topt->v)) atomic = false;
+	  exp_to_c(nv,cur_e);
+	  if (is_void_star(field_t))
+	    cur_e = cast_exp(field_t,cur_e,DL);
 	  _ a = assign_stmt(structarrow_exp(xexp,xprintf("f%d",i),DL),
-			      es->hd,
-			      DL);
+			    cur_e,DL);
 	  rev_assign = &cons(a,rev_assign);
 	}
 	_ e1 = cast_exp(pstrct_typ,
@@ -1720,8 +1801,9 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       _ p2  = rps->hd;
       _ v   = temp_var();
       _ t2  = p2->topt->v;
+      _ t2c = typ_to_c(t2);
       _ lab = fresh_label();
-      decls = &cons(&$(v,typ_to_c(t2)),decls);
+      decls = &cons(&$(v,t2c),decls);
       _ result = xlate_pat(nv,t2,var_exp(v,DL),
 			   structarrow_exp(rcast,xprintf("f%d",cnt),DL),
 			   p2,succ_lab,fail_lab,decls);
@@ -1729,7 +1811,9 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       decls = result[1];
       _ s3 = result[2];
       _ s1 = assign_stmt(var_exp(v,DL),
-			 structarrow_exp(rcast,xprintf("f%d",cnt),DL),DL);
+			 cast_exp(t2c,structarrow_exp(rcast,
+						      xprintf("f%d",cnt),DL),
+				  DL),DL);
       _ s2 = seq_stmt(s1,s3,DL);
       ss = &cons(label_stmt(lab,s2,DL),ss);
       succ_lab = lab;
@@ -1847,14 +1931,17 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       }
       _ v   = temp_var();
       _ t2  = p2->topt->v;
+      _ t2c = typ_to_c(t2);
       _ lab = fresh_label();
-      decls = &cons(&$(v,typ_to_c(t2)),decls);
+      decls = &cons(&$(v,t2c),decls);
       _ result = xlate_pat(nv,t2,var_exp(v,DL), structarrow_exp(path,f,DL),p2,
 			   succ_lab,fail_lab,decls);
       nv    = result[0];
       decls = result[1];
       _ s2 = result[2];
-      _ s3 = seq_stmt(assign_stmt(var_exp(v,DL),structmember_exp(r,f,DL),DL),
+      _ s3 = seq_stmt(assign_stmt(var_exp(v,DL), 
+				  cast_exp(t2c,
+					   structmember_exp(r,f,DL),DL),DL),
 		      s2, DL);
       ss = &cons(label_stmt(lab,s3,DL),ss);
       succ_lab = lab;

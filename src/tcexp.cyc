@@ -955,13 +955,14 @@ static synth tcStruct(tenv_t te, seg_t loc, Opt_t<typ> topt,
 		      typedef_name_t @tn,                    
 		      Opt_t<list<typ>> @otyps,             
 		      list<$(list<designator>,exp)@> args, 
-		      struct Structdecl * sd_opt) {
+		      struct Structdecl *@ sd_opt) {
   tcExpList(te,List::map(snd,args));
   structdecl sd;
-  if (sd_opt != null)
-    sd = (structdecl)sd_opt;
+  if (*sd_opt != null)
+    sd = (structdecl)(*sd_opt);
   else {
     sd = *lookup_structdecl(te,loc,*tn);
+    *sd_opt = sd;
     if (sd->name != null)
       *tn = sd->name->v;
   }
@@ -1231,7 +1232,7 @@ static void tcExpNoInst(tenv te, Opt_t<typ> topt, exp e) {
   case Fill_e(e1):              esyn=tcFill(te,loc,topt,e1);              break;
   case Comprehension_e(vd,e1,e2): 
     esyn = tcComprehension(te,loc,topt,vd,e1,e2); break;
-  case Struct_e(*tn,*otyps,args,sd_opt): 
+  case Struct_e(*tn,*otyps,args,*sd_opt): 
     esyn = tcStruct(te,loc,topt,tn,otyps,args,sd_opt); break;
   case Enum_e(*all_ref,*exist_ref,es,ed,ef): 
     esyn = tcEnum(te,loc,topt,all_ref,exist_ref,es,ed,ef); break;
