@@ -386,7 +386,7 @@ Cyc_Std_IPPROTO_PIM  = 103,Cyc_Std_IPPROTO_COMP  = 108,Cyc_Std_IPPROTO_RAW  = 25
 Cyc_Std_IPPROTO_MAX  = 256};struct Cyc_Std_in6_addr{union{unsigned char u6_addr8[16];
 unsigned short u6_addr16[8];unsigned int u6_addr32[4];}in6_u;};struct Cyc_Std_sockaddr_in{
 unsigned short sin_family;unsigned short sin_port;struct Cyc_Std_in_addr sin_addr;
-unsigned char sin_zero[11];};struct Cyc_Std_sockaddr_in6{unsigned short sin6_family;
+unsigned char sin_zero[8];};struct Cyc_Std_sockaddr_in6{unsigned short sin6_family;
 unsigned short sin6_port;unsigned int sin6_flowinfo;struct Cyc_Std_in6_addr
 sin6_addr;unsigned int sin6_scope_id;};struct Cyc_Std_ipv6_mreq{struct Cyc_Std_in6_addr
 ipv6mr_multiaddr;unsigned int ipv6mr_interface;};struct Cyc_Std_pollfd{int fd;short
@@ -663,9 +663,9 @@ ru_stime;int ru_maxrss;int ru_ixrss;int ru_idrss;int ru_isrss;int ru_minflt;int
 ru_majflt;int ru_nswap;int ru_inblock;int ru_oublock;int ru_msgsnd;int ru_msgrcv;int
 ru_nsignals;int ru_nvcsw;int ru_nivcsw;};enum Cyc_Std___priority_which{Cyc_Std_PRIO_PROCESS
  = 0,Cyc_Std_PRIO_PGRP  = 1,Cyc_Std_PRIO_USER  = 2};struct Cyc_Std_timespec{int
-tv_sec;int tv_nsec;};typedef struct{int __fds_bits[4294967168];}Cyc_Std_fd_set;int
-select(int,Cyc_Std_fd_set*,Cyc_Std_fd_set*,Cyc_Std_fd_set*,struct Cyc_Std_timeval*);
-void Cyc_Std_FD_CLR(int,Cyc_Std_fd_set*);int Cyc_Std_FD_ISSET(int,Cyc_Std_fd_set*);
+tv_sec;int tv_nsec;};typedef struct{int __fds_bits[32];}Cyc_Std_fd_set;int select(
+int,Cyc_Std_fd_set*,Cyc_Std_fd_set*,Cyc_Std_fd_set*,struct Cyc_Std_timeval*);void
+Cyc_Std_FD_CLR(int,Cyc_Std_fd_set*);int Cyc_Std_FD_ISSET(int,Cyc_Std_fd_set*);
 void Cyc_Std_FD_SET(int,Cyc_Std_fd_set*);void Cyc_Std_FD_ZERO(Cyc_Std_fd_set*);
 void __stub_FD_CLR(int,Cyc_Std_fd_set*);int __stub_FD_ISSET(int,Cyc_Std_fd_set*);
 void __stub_FD_SET(int,Cyc_Std_fd_set*);void __stub_FD_ZERO(Cyc_Std_fd_set*);void
