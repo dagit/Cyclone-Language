@@ -215,37 +215,62 @@ static bool check_redundant(context_t @`r ctxt, tag_t tag) {
   return false;
 }
 
-doc_t get_docs(context_t ctxt, buf_t b, FILE @f) {
-  doc_t ? result;
-  region r {
-    glist_t<doc_t,`r> docs = null;
-    int c = GETC(f);
-    while (true) {
-      if (c == EOF) break;
-      else if (c == '<') {
-        c = GETC(f);
-        UNGETC(c,f);
-        if (c == '/') {
-          break;
-        } else {
-          let tag = get_tag(f);
-	  let new_ctxt = ctxt;
-	  let redundant = check_redundant(&new_ctxt,tag);
-          let d = get_docs(new_ctxt, b, f);
-          get_endtag(f,tag);
-	  if (!redundant)
-	    d = new Tagged(tag,d);
-          docs = rnew(r) List(d,docs);
-        }
-      } else {
-        UNGETC(c,f);
-        docs = rnew(r) List(get_text(ctxt, b,f),docs);
-      }
+/* returns a list of docs in reverse order. */
+static glist_t<doc_t,`r> local_get_docs(region_t<`r> r, context_t ctxt, buf_t b, FILE @f) {
+  glist_t<doc_t,`r> docs = null, ds = null;
+  int c = GETC(f);
+  while (true) {
+    if (c == EOF) break;
+    else if (c == '<') {
       c = GETC(f);
+      UNGETC(c,f);
+      if (c == '/') {
+	break;
+      } else {
+	let tag = get_tag(f);
+	let new_ctxt = ctxt;
+	let redundant = check_redundant(&new_ctxt,tag);
+        let ds = local_get_docs(r, new_ctxt, b, f);
+	get_endtag(f,tag);
+        doc_t ? result;
+	/* The code below optimizes in two ways:
+	   1) it eliminates redundant tags <x><y><z></z></y></x> etc.
+	   2) it avoids allocating doc_t's, converting to/from arrays, etc.
+	      in favor of concatentating lists */
+	if (!redundant) {
+          if (ds != null) {
+            if (ds->tl == null) /* length == 1 */ {
+  	      doc_t d = new Tagged(tag,ds->hd);
+              docs = rnew(r) List(d,docs);
+            }
+            else /* length > 1 */ {
+	      result = to_array(imp_rev(ds));
+	      docs = rnew(r) List(new Tagged(tag,new Seq(result,result.size)),docs);
+            }
+          }
+          /* else do nothing; had <x></x> */
+        }
+        else { /* eliminated the tags, so just append the lists */
+	  docs = imp_append(ds,docs);
+        }
+      }
+    } else {
+      UNGETC(c,f);
+      docs = rnew(r) List(get_text(ctxt, b,f),docs);
     }
-    result = to_array(imp_rev(docs));
+    c = GETC(f);
   }
-  if (result.size == 1) return *result;
-  else return new Seq(result,result.size);
+  return docs;
 }
   
+doc_t get_docs(context_t ctxt, buf_t b, FILE @f) {
+  doc_t ? res;
+  region r {
+    glist_t<doc_t,`r> docs;
+    docs = local_get_docs(r,ctxt,b,f);
+    res = to_array(imp_rev(docs));
+  }
+  if (res.size == 1) return *res;
+  else return (new Seq(res,res.size));
+}
+
