@@ -1,0 +1,73 @@
+/***********************************************************************
+ ** md5driver.cyc -- sample routines to test (Cyclone Version)        **
+ ** Derived from RSA Data Security, Inc.                              **
+ ** MD5 Message Digest Algorithm.                                     **
+ ** Created: May 10 2003                                              **
+ ** Creator: I-Hsuan Huang <ihhuang@acm.org>                          **
+ ***********************************************************************/
+
+/*
+ ************************************************************************
+ * Copyright (C) 2003 I-Hsuan Huang <ihhuang@acm.org>                   *
+ *                                                                      *
+ * This Program is free software; you can redistribute it and/or modify *
+ * it under the terms of the GNU Gereral Public License as publisded by *
+ * the Free Software Foundation; eigher version 2 of the License, or    *
+ * (at your option) any laterversion.                                   *
+ *                                                                      *
+ * This program is distributed in the hope that it will be useful,      *
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of       *
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the        *
+ * GNU General Public License for more details.                         *
+ *                                                                      *
+ * You should have received a copy of the GNU General Public License    *
+ * along with this program; if not, write to the Free Software          *
+ * Foundation, Inc., 59 Temple Place - Suite 330, Boston,               *
+ * MA 02111-1307, USA.                                                  *
+ ************************************************************************
+ */
+
+#include <stdio.h>
+#include <string.h>
+#include "md5.h" */
+
+/* Prints message digest buffer in mdContext as 32 hexadecimal digits.
+   Order is from low-order byte to high-order byte of digest.
+   Each byte is printed with high-order hexadecimal digit first.
+ */
+static void MDPrint (MD5_CTX *mdContext)
+{
+  int i;
+
+  for (i = 0; i < 16; i++)
+    printf ("%02x", mdContext->digest[i]);
+}
+
+/* Computes the message digest for string inString.
+   Prints out message digest, a space, the string (in quotes) and a
+   carriage return.
+ */
+static void MDString (char ?inString)
+{
+  MD5_CTX mdContext;
+  unsigned int len = strlen (inString);
+
+  MD5Init (&mdContext);
+  MD5Update (&mdContext, (unsigned char ?@nozeroterm)inString, len);
+  MD5Final (&mdContext);
+  MDPrint (&mdContext);
+  printf (" \"%s\"\n\n", inString);
+}
+
+int main (int argc, char *@fat *@fat argv)
+{
+  if(argc==2)
+    MDString (argv[1]);
+  else
+  {
+    printf("Usage: md5 string\n");
+    printf("For Example: md5 abc\n");
+  }
+
+  return 0;
+}
