@@ -257,15 +257,17 @@ f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_stru
 int tag; float* f1; } ; extern int wait( int* status); extern int waitpid( int
 pid, int* status, int options); void(* Cyc_Std_signal( int sig, void(* func)(
 int)))( int); extern int raise( int sig); extern int kill( int, int); struct Cyc_Std_timeval{
-int tv_sec; int tv_usec; } ; struct Cyc_Std_option{ struct _tagged_arr name; int
-has_arg; int* flag; int val; } ; extern unsigned int alarm( unsigned int seconds);
-extern int close( int); extern void _exit( int); extern int getpid(); extern int
-getppid(); extern int fork(); extern int fchdir( int); extern int fchown( int,
-unsigned int, unsigned int); extern int fsync( int); extern int ftruncate( int,
-int); extern int dup( int); extern int dup2( int, int); extern unsigned int
-getuid(); extern int setuid( unsigned int uid); extern unsigned int geteuid();
-extern int seteuid( unsigned int euid); extern unsigned int getgid(); extern int
-setgid( unsigned int gid); extern unsigned int getegid(); extern int setegid(
+int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
+tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
+__z); struct Cyc_Std_option{ struct _tagged_arr name; int has_arg; int* flag;
+int val; } ; extern unsigned int alarm( unsigned int seconds); extern int close(
+int); extern void _exit( int); extern int getpid(); extern int getppid(); extern
+int fork(); extern int fchdir( int); extern int fchown( int, unsigned int,
+unsigned int); extern int fsync( int); extern int ftruncate( int, int); extern
+int dup( int); extern int dup2( int, int); extern unsigned int getuid(); extern
+int setuid( unsigned int uid); extern unsigned int geteuid(); extern int seteuid(
+unsigned int euid); extern unsigned int getgid(); extern int setgid(
+unsigned int gid); extern unsigned int getegid(); extern int setegid(
 unsigned int egid); extern int nice( int); extern int pause(); extern int pipe(
 int* filedes); extern int lseek( int filedes, int offset, int whence); extern
 unsigned int sleep( unsigned int); int Cyc_Std_access( struct _tagged_arr, int);

@@ -815,27 +815,27 @@ _tag_arr( _temp13, sizeof( void*), 1u));}}); exit( 0);} static int Cyc_is_cyclon
 struct _tagged_arr s){ unsigned int _temp15= Cyc_Std_strlen( s); if( _temp15 <= 
 4){ return 0;} else{ return Cyc_Std_strcmp( _tagged_arr_plus( s, sizeof(
 unsigned char),( int)( _temp15 -  4)), _tag_arr(".cyc", sizeof( unsigned char),
-5u)) ==  0;}} static struct Cyc_List_List* Cyc_cyclone_lib_path= 0; static void
-Cyc_add_cyclone_lib_path( struct _tagged_arr s){ unsigned int _temp16= Cyc_Std_strlen(
-s); if( _temp16 <=  2){ return;}{ struct _tagged_arr _temp17=( struct
-_tagged_arr) Cyc_Std_substring( s, 2, _temp16 -  2); Cyc_cyclone_lib_path=({
-struct Cyc_List_List* _temp18=( struct Cyc_List_List*) _cycalloc( sizeof( struct
-Cyc_List_List)); _temp18->hd=( void*)({ struct _tagged_arr* _temp19=( struct
-_tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp19[ 0]= _temp17;
-_temp19;}); _temp18->tl= Cyc_cyclone_lib_path; _temp18;});}} static struct Cyc_List_List*
-Cyc_ccargs= 0; static void Cyc_add_ccarg( struct _tagged_arr s){ Cyc_ccargs=({
-struct Cyc_List_List* _temp20=( struct Cyc_List_List*) _cycalloc( sizeof( struct
-Cyc_List_List)); _temp20->hd=( void*)({ struct _tagged_arr* _temp21=( struct
-_tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp21[ 0]= s; _temp21;});
-_temp20->tl= Cyc_ccargs; _temp20;});} static void Cyc_add_ccarg2( struct
-_tagged_arr flag, struct _tagged_arr arg){ Cyc_ccargs=({ struct Cyc_List_List*
-_temp22=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp22->hd=( void*)({ struct _tagged_arr* _temp25=( struct _tagged_arr*)
-_cycalloc( sizeof( struct _tagged_arr)); _temp25[ 0]= arg; _temp25;}); _temp22->tl=({
-struct Cyc_List_List* _temp23=( struct Cyc_List_List*) _cycalloc( sizeof( struct
-Cyc_List_List)); _temp23->hd=( void*)({ struct _tagged_arr* _temp24=( struct
-_tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp24[ 0]= flag;
-_temp24;}); _temp23->tl= Cyc_ccargs; _temp23;}); _temp22;});} static struct Cyc_List_List*
+5u)) ==  0;}} static struct Cyc_List_List* Cyc_ccargs= 0; static void Cyc_add_ccarg(
+struct _tagged_arr s){ Cyc_ccargs=({ struct Cyc_List_List* _temp16=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp16->hd=( void*)({ struct
+_tagged_arr* _temp17=( struct _tagged_arr*) _cycalloc( sizeof( struct
+_tagged_arr)); _temp17[ 0]= s; _temp17;}); _temp16->tl= Cyc_ccargs; _temp16;});}
+static void Cyc_add_ccarg2( struct _tagged_arr flag, struct _tagged_arr arg){
+Cyc_ccargs=({ struct Cyc_List_List* _temp18=( struct Cyc_List_List*) _cycalloc(
+sizeof( struct Cyc_List_List)); _temp18->hd=( void*)({ struct _tagged_arr*
+_temp21=( struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp21[
+0]= arg; _temp21;}); _temp18->tl=({ struct Cyc_List_List* _temp19=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp19->hd=( void*)({ struct
+_tagged_arr* _temp20=( struct _tagged_arr*) _cycalloc( sizeof( struct
+_tagged_arr)); _temp20[ 0]= flag; _temp20;}); _temp19->tl= Cyc_ccargs; _temp19;});
+_temp18;});} static struct Cyc_List_List* Cyc_cyclone_lib_path= 0; static void
+Cyc_add_cyclone_lib_path( struct _tagged_arr s){ unsigned int _temp22= Cyc_Std_strlen(
+s); if( _temp22 <=  2){ return;}{ struct _tagged_arr _temp23=( struct
+_tagged_arr) Cyc_Std_substring( s, 2, _temp22 -  2); Cyc_cyclone_lib_path=({
+struct Cyc_List_List* _temp24=( struct Cyc_List_List*) _cycalloc( sizeof( struct
+Cyc_List_List)); _temp24->hd=( void*)({ struct _tagged_arr* _temp25=( struct
+_tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp25[ 0]= _temp23;
+_temp25;}); _temp24->tl= Cyc_cyclone_lib_path; _temp24;});}} static struct Cyc_List_List*
 Cyc_libargs= 0; static void Cyc_add_libarg( struct _tagged_arr s){ Cyc_libargs=({
 struct Cyc_List_List* _temp26=( struct Cyc_List_List*) _cycalloc( sizeof( struct
 Cyc_List_List)); _temp26->hd=( void*)({ struct _tagged_arr* _temp27=( struct
@@ -1581,21 +1581,24 @@ if( Cyc_Std_strlen( def_lib_path) >  0){ Cyc_cyclone_lib_path=({ struct Cyc_List
 _temp231=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
 _temp231->hd=( void*)({ struct _tagged_arr* _temp232=( struct _tagged_arr*)
 _cycalloc( sizeof( struct _tagged_arr)); _temp232[ 0]= def_lib_path; _temp232;});
-_temp231->tl= Cyc_cyclone_lib_path; _temp231;});} Cyc_cyclone_lib_path=(( struct
-Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_cyclone_lib_path);
-Cyc_cyc_include= Cyc_do_find( Cyc_cyclone_lib_path, _tag_arr("include/cyc_include.h",
-sizeof( unsigned char), 22u));{ struct Cyc_List_List* _temp233=(( struct Cyc_List_List*(*)(
-struct Cyc_List_List* x)) Cyc_List_rev)( Cyc_cyclone_files); for( 0; _temp233 != 
-0; _temp233=(( struct Cyc_List_List*) _check_null( _temp233))->tl){ Cyc_process_file(*((
-struct _tagged_arr*)(( struct Cyc_List_List*) _check_null( _temp233))->hd)); if(
-Cyc_compile_failure){ return 1;}}} if((( Cyc_stop_after_cpp_r? 1: Cyc_parseonly_r)?
-1: Cyc_tc_r)? 1: Cyc_toc_r){ return 0;} if( Cyc_ccargs ==  0){ return 0;} Cyc_ccargs=((
-struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_rev)( Cyc_ccargs);{
-struct _tagged_arr _temp234= Cyc_Std_str_sepstr((( struct Cyc_List_List*(*)(
-struct _tagged_arr*(* f)( struct _tagged_arr*), struct Cyc_List_List* x)) Cyc_List_map)(
-Cyc_sh_escape_stringptr, Cyc_ccargs), _tag_arr(" ", sizeof( unsigned char), 2u));
-Cyc_libargs=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_rev)(
-Cyc_libargs);{ struct _tagged_arr _temp235= Cyc_Std_str_sepstr(({ struct Cyc_List_List*
+_temp231->tl= Cyc_cyclone_lib_path; _temp231;});} if( Cyc_cyclone_lib_path !=  0){
+Cyc_add_ccarg2( _tag_arr("-L", sizeof( unsigned char), 3u),*(( struct
+_tagged_arr*)(( struct Cyc_List_List*) _check_null( Cyc_cyclone_lib_path))->hd));}
+Cyc_cyclone_lib_path=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)(
+Cyc_cyclone_lib_path); Cyc_cyc_include= Cyc_do_find( Cyc_cyclone_lib_path,
+_tag_arr("include/cyc_include.h", sizeof( unsigned char), 22u));{ struct Cyc_List_List*
+_temp233=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_rev)(
+Cyc_cyclone_files); for( 0; _temp233 !=  0; _temp233=(( struct Cyc_List_List*)
+_check_null( _temp233))->tl){ Cyc_process_file(*(( struct _tagged_arr*)(( struct
+Cyc_List_List*) _check_null( _temp233))->hd)); if( Cyc_compile_failure){ return
+1;}}} if((( Cyc_stop_after_cpp_r? 1: Cyc_parseonly_r)? 1: Cyc_tc_r)? 1: Cyc_toc_r){
+return 0;} if( Cyc_ccargs ==  0){ return 0;} Cyc_ccargs=(( struct Cyc_List_List*(*)(
+struct Cyc_List_List* x)) Cyc_List_rev)( Cyc_ccargs);{ struct _tagged_arr
+_temp234= Cyc_Std_str_sepstr((( struct Cyc_List_List*(*)( struct _tagged_arr*(*
+f)( struct _tagged_arr*), struct Cyc_List_List* x)) Cyc_List_map)( Cyc_sh_escape_stringptr,
+Cyc_ccargs), _tag_arr(" ", sizeof( unsigned char), 2u)); Cyc_libargs=(( struct
+Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_rev)( Cyc_libargs);{
+struct _tagged_arr _temp235= Cyc_Std_str_sepstr(({ struct Cyc_List_List*
 _temp301=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
 _temp301->hd=( void*) _init_tag_arr(( struct _tagged_arr*) _cycalloc( sizeof(
 struct _tagged_arr)),"", sizeof( unsigned char), 1u); _temp301->tl=(( struct Cyc_List_List*(*)(
@@ -1692,9 +1695,9 @@ _tag_arr("Uncaught exception\n", sizeof( unsigned char), 20u), _tag_arr(
 _temp288, sizeof( void*), 0u));}); Cyc_compile_failure= 1; Cyc_remove_cfiles();
 return 1; _LL274:( void) _throw( _temp261); _LL262:;}}}{ struct _tagged_arr
 _temp289=({ struct Cyc_Std_String_pa_struct _temp298; _temp298.tag= Cyc_Std_String_pa;
-_temp298.f1=( struct _tagged_arr) _temp235;{ struct Cyc_Std_String_pa_struct
+_temp298.f1=( struct _tagged_arr) stdlib_string;{ struct Cyc_Std_String_pa_struct
 _temp297; _temp297.tag= Cyc_Std_String_pa; _temp297.f1=( struct _tagged_arr)
-stdlib_string;{ struct Cyc_Std_String_pa_struct _temp296; _temp296.tag= Cyc_Std_String_pa;
+_temp235;{ struct Cyc_Std_String_pa_struct _temp296; _temp296.tag= Cyc_Std_String_pa;
 _temp296.f1=( struct _tagged_arr) _temp234;{ struct Cyc_Std_String_pa_struct
 _temp295; _temp295.tag= Cyc_Std_String_pa; _temp295.f1=( struct _tagged_arr)(
 Cyc_output_file ==  0? _tag_arr("", sizeof( unsigned char), 1u):( struct
