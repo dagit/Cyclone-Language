@@ -74,7 +74,7 @@
 #include "parse.h"
 #include "tcenv.h"
 #include "tc.h"
-
+#include "binding.h"
 #include <cycboot.h>
 
 namespace Lex {
@@ -1585,9 +1585,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       names = new List(name,names);
     }
 
-    /* make the declarations are well-formed */
+    /* make sure the declarations are well-formed */
     try {
       region tc_rgn; {
+	Binding::resolve_all(print_decls);
 	let te = Tcenv::tc_init(tc_rgn);
 	Tc::tc(tc_rgn, te, true, print_decls);
       }
