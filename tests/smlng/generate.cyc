@@ -30,6 +30,9 @@ using Stdio;
 #define TAGk	23
 #define TAGw	24
 
+int color_tags[] = {TAGr, TAGg, TAGb, TAGc, TAGm, TAGy, TAGk, TAGw};
+int size_tags[] = {TAG0, TAG1, TAG2, TAG3, TAG4, TAG5, TAG6, TAG7, TAG8, TAG9};
+
 string_t tag_strings[] = {
   "<B>",
   "<EM>",
@@ -169,28 +172,7 @@ void generate_tag() {
   printable_ok = true;
 }
 
-
-
-
-/**********************************************************************/
-
-int main(int argc, char ??argv) {
-  if (argc > 2) {
-    fprintf(stderr,"Usage: generate [n]\n");
-    exit(1);
-  }
-  /* Get optional length */
-  if (argc > 1)
-    sscanf(argv[1],"%d",&len);
-
-  /* initialize random number generator */
-  let t = new Time::time(null);
-  if (*t<0) {
-    fprintf(stderr,"Error: the time is not available\n");
-    exit(1);
-  }
-  else Stdlib::srand(*t);
-
+void random_generate0() {
   while (len > 8) { // A tag can consume 9 characters
     /* randomly choose: generate a tag, generate a space,
        end a tag, or generate a printable character;
@@ -213,6 +195,161 @@ int main(int argc, char ??argv) {
     else
       generate_space();
   }
+}
+
+#include "contexts.h"
+
+context_t random_context() {
+  let r = random(1<<15);
+  if (CL(r)>=9) r = setCL(r,random(9));   // 8 colors plus initial color
+  if (SZ(r)>=11) r = setSZ(r,random(11)); // 10 sizes plus initial size
+  return (context_t)r;
+}
+
+using List;
+
+typedef List::list_t<$(context_t,int)@> selt_t; // stack element
+
+selt_t delta(context_t before,context_t after,selt_t tag_stack) {
+  
+  /* To get to original color or size, close all tags */
+  if (((CL(before) != CL(after)) && CL(after) == 8) ||
+      ((SZ(before) != SZ(after)) && SZ(after) == 10)) {
+    for (; tag_stack != null; tag_stack = tag_stack->tl) {
+      let &$(ctxt,tag) = tag_stack->hd;
+      printf(end_tag_strings[tag]);
+      before = ctxt;
+    }
+  }
+  /* Take care of color and size changes */
+  if (CL(before) != CL(after)) {
+    /* Assume CL(after) != original color */
+    let tag = color_tags[CL(after)];
+    printf(tag_strings[tag]);
+    tag_stack = new List::List(new $(before,tag),tag_stack);
+    before = setCL(before,CL(after));
+  }
+  if (SZ(before) != SZ(after)) {
+    /* Assume SZ(after) != original size */
+    let tag = size_tag(SZ(after));
+    printf(tag_strings[tag]);
+    tag_stack = new List::List(new $(before,tag),tag_stack);
+    before = setSZ(before,SZ(after));
+  }
+  /* All other changes are made by inserting PL and then open
+     tags as appropriate */
+  if ((UL(before) != UL(after)) ||
+      (isB(before) != isB(after)) ||
+      (isI(before) != isI(after)) ||
+      (isEM(before) != isEM(after)) ||
+      (isS(before) != isS(after)) ||
+      (isTT(before) != isTT(after))) {
+    let tag = TAGPL;
+    printf(tag_strings[tag]);
+    tag_stack = new List::List(new $(before,tag),tag_stack);
+    before = doPL(before);
+  }
+  for (let ul = UL(after)-UL(before); ul > 0; ul--) {
+    /* Assume UL(after)-UL(before) >=0 */
+    let tag = TAGU;
+    printf(tag_strings[tag]);
+    tag_stack = new List::List(new $(before,tag),tag_stack);
+    before = incUL(before);
+  }
+  if (isB(before) != isB(after)) {
+    /* Assume !isB(before) */
+    let tag = TAGB;
+    printf(tag_strings[tag]);
+    tag_stack = new List::List(new $(before,tag),tag_stack);
+    before = setB(before);
+  }
+  if (isI(before) != isI(after)) {
+    /* Assume !isI(before) */
+    let tag = TAGI;
+    printf(tag_strings[tag]);
+    tag_stack = new List::List(new $(before,tag),tag_stack);
+    before = setI(before);
+  }
+  if (isEM(before) != isEM(after)) {
+    /* Assume !isEM(before) and !isS(before) */
+    let tag = TAGEM;
+    printf(tag_strings[tag]);
+    tag_stack = new List::List(new $(before,tag),tag_stack);
+    before = setEM(before);
+  }
+  if (isS(before) != isS(after)) {
+    /* Assume !isS(before) */
+    let tag = TAGS;
+    printf(tag_strings[tag]);
+    tag_stack = new List::List(new $(before,tag),tag_stack);
+    before = setS(before);
+  }
+  if (isTT(before) != isTT(after)) {
+    /* Assume !isTT(before) */
+    let tag = TAGTT;
+    printf(tag_strings[tag]);
+    tag_stack = new List::List(new $(before,tag),tag_stack);
+    before = setTT(before);
+  }
+
+  /* Sanity check */
+  if (before != after)
+    fprintf(stderr,"Error: delta failed\n");
+
+  return tag_stack;
+}
+
+void random_generate1() {
+  context_t outside_ctxt = setCL(setSZ(0x0000,10),8);
+  let ctxts = new { for i<len : random_context() };
+  let tag_stack = null;
+  let ctxt = outside_ctxt;
+  for (int i = 0; i < len; i++) {
+    tag_stack = delta(ctxt,ctxts[i],tag_stack);
+    ctxt = ctxts[i];
+    if (random(2)) printf(" ");
+    else printf("x");
+  }
+  tag_stack = delta(ctxt,outside_ctxt,tag_stack);
+  for (; tag_stack != null; tag_stack = tag_stack->tl) {
+    let &$(ctxt,tag) = tag_stack->hd;
+    printf(end_tag_strings[tag]);
+  }
+}
+
+/**********************************************************************/
+
+int main(int argc, char ??argv) {
+  let algorithm = 0;
+
+  if (argc > 3) {
+    fprintf(stderr,"Usage: %s [-alg] [len]\n",argv[0]);
+    exit(1);
+  }
+
+  /* Get optional length */
+  if (argc > 1 && argv[1].size > 1 && argv[1][0] == '-') {
+    sscanf(argv[1],"-%d",&algorithm);
+    if (argc > 2)
+      sscanf(argv[2],"%d",&len);
+  }
+  else if (argc > 1)
+    sscanf(argv[1],"%d",&len);
+
+  //  fprintf(stderr,"Length is %d and algorithm is %d\n",len,algorithm);
+
+  /* initialize random number generator */
+  let t = new Time::time(null);
+  if (*t<0) {
+    fprintf(stderr,"Error: the time is not available\n");
+    exit(1);
+  }
+  else Stdlib::srand(*t);
+
+  if (algorithm == 0)
+    random_generate0();
+  else
+    random_generate1();
 
   return 0;
 }
