@@ -31,8 +31,8 @@ all: $(EXES) failtest
 failtest:
 	($(CYCC) -c --manyerrors fail1.cyc 2> fail1.tmp) || true
 	diff fail1.tmp fail1.out || true
-#	($(CYCC) -c --manyerrors fail2.cyc 2> fail2.tmp) || true
-#	diff fail2.tmp fail2.out || true
+	($(CYCC) -c --manyerrors fail2.cyc 2> fail2.tmp) || true
+	diff fail2.tmp fail2.out || true
 
 hello$(EXE): hello.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
