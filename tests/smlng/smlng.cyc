@@ -123,7 +123,7 @@ doc_t down_opt(context_t ctxt, doc_t d) {
       // PL clears the U, B, EM, I, S, and TT attributes
       if (ctxt.U == 0 && !ctxt.B && !ctxt.EM && !ctxt.I && !ctxt.S && !ctxt.TT)
         return down_opt(ctxt,*d2);
-      ctxt.U == 0; ctxt.B = false; ctxt.EM = false; ctxt.I = false;
+      ctxt.U = 0; ctxt.B = false; ctxt.EM = false; ctxt.I = false;
       ctxt.S = false; ctxt.TT = false;
       break;
     case S_tag:
@@ -188,11 +188,11 @@ int main(int argc, char ??argv) {
   validate_docs(d,orig); // checks the validator (one direction)
   //  doc_t d2 = new Text(new {for i < 3: 'a'});
   //  validate_docs(d,d2);
-  /*  d = down_opt(Context(0,0,0,0,0,0,DONT_KNOW,DONT_KNOW),
+      d = down_opt(Context(0,0,0,0,0,0,DONT_KNOW,DONT_KNOW),
   	       d);
 	       fprintf(stderr,"down: ");
-  validate_docs(d,orig);
-  let $(d,_) = TagElim::up_opt(d);
+	       validate_docs(d,orig);
+	       /*  let $(d,_) = TagElim::up_opt(d);
   fprintf(stderr,"up: ");
   validate_docs(d,orig);*/
   dump(d);
