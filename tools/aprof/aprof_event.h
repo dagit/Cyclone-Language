@@ -105,6 +105,8 @@ namespace Aprof {
   // or a gnuplot graph (http://www.gnuplot.info/).
   extern int generate_graph(string_t<`H> file);
 
+  extern int generate_newgraph(string_t<`H> file);
+
   // Uses proc_file above to generate a tabular summary of per-region
   // allocation information.
   extern int generate_summary(string_t<`H> file);

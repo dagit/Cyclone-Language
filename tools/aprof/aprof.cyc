@@ -45,6 +45,7 @@ int do_gnuplot = 0;
 
 int main(int argc, string_t<`H> ?`H argv) {
   bool do_graph = false;
+  bool do_newgraph = false;
   string_t<`H> file;
 
   int argn = 1;
@@ -56,6 +57,10 @@ int main(int argc, string_t<`H> ?`H argv) {
     }
     else if ( strcmp( argv[argn], "-gp" ) == 0 ) {
       do_graph = true;
+      do_gnuplot = true;
+    }
+    else if ( strcmp( argv[argn], "-ngp" ) == 0 ) {
+      do_newgraph = true;
       do_gnuplot = true;
     }
     else if ( strcmp( argv[argn], "-q" ) == 0 ) {
@@ -82,6 +87,8 @@ int main(int argc, string_t<`H> ?`H argv) {
   int ret;
   if (do_graph)
     ret = generate_graph(file);
+  else if (do_newgraph)
+    ret = generate_newgraph(file);
   else
     ret = generate_summary(file);
   return ret;

@@ -35,7 +35,7 @@
 // 2) refcnt-avail-bytes
 //    update on refcnt alloc events (+ or - amounts)
 // 3) total-heap-size, total-free-size
-//    update on heap alloc, unique alloc, refcnt alloc, 
+//    update on heap alloc, unique alloc, refcnt alloc,
 //              create, resize, free events
 // 4) table that indexes a dynamic region name to a pair $(tot,free)
 //    initialize to 0 on create
@@ -51,7 +51,7 @@
 //   current allocated data for live dyn regions
 //   refcnt live data
 //   unique live data
-//   heap = 
+//   heap =
 //     total-heap-size - total-free-size - dyn-region size - refcnt live -
 //   unique live
 
@@ -243,7 +243,7 @@ static void output_line(string_t name,
   if (points == NULL) return;
   if (num < 0)
     output_points_header(name);
-  else 
+  else
     output_lines_header(name,linetypes[num % 7]);
   if (no_stack)
     iter(output_point_no_stack,points);
@@ -329,7 +329,7 @@ static void update_heap_stats(struct ProcEnv @env,
   //   refcnt live - unique live
   // If this number comes out negative, then we must make it 0, and
   // remove some data from the reference-counted region.
-  int heap_live = env->total_heap_size - env->total_free_size 
+  int heap_live = env->total_heap_size - env->total_free_size
     - env->total_dynregion_size - env->refcnt_live_bytes
     - env->unique_live_bytes;
 //   printf("HTS=%d HFS=%d DS=%d RS=%d US=%d\n",env->total_heap_size,
@@ -345,13 +345,13 @@ static void update_heap_stats(struct ProcEnv @env,
     env->refcnt_live_bytes = refcnt_live;
   }
   env->heap_live = add_point(env->cnt,heap_live,env->heap_live);
-} 
+}
 
-struct Hashtable::Table<unsigned int,unsigned int> *tab = NULL;
-int uint_cmp(unsigned int i, unsigned int j) {
+static struct Hashtable::Table<unsigned int,unsigned int> *tab = NULL;
+static int uint_cmp(unsigned int i, unsigned int j) {
   return (i<j)?(-1):((i>j)?1:0);
 }
-int uint_hash(unsigned int i) {
+static int uint_hash(unsigned int i) {
   return (int)i;
 }
 static void
@@ -386,7 +386,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
   case &AllocE(AllocEvent(_,rname,count,*rstats,addr)):
     if (!strcmp(rname,"unique")) {
       env->unique_live_bytes += count;
-      env->unique_live = 
+      env->unique_live =
 	add_point(env->cnt,env->unique_live_bytes,env->unique_live);
       update_heap_stats(env,rstats);
       if (count>0)
@@ -440,7 +440,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     try {
       unsigned int count = Hashtable::lookup((Hashtable::table_t)tab,addr);
       env->unique_live_bytes -= count;
-      env->unique_live = 
+      env->unique_live =
 	add_point(env->cnt,env->unique_live_bytes,env->unique_live);
       Hashtable::remove((Hashtable::table_t)tab,addr);
     }
@@ -477,7 +477,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       let l = assoc_cmp(strptrcmp,env->dyn_live,rnameptr);
 //       fprintf(stderr,"adding point at time %d for region %s l=%x\n",
 // 	      env->cnt,rname,(unsigned int)l);
-      *l = add_point(env->cnt,0,*l);      
+      *l = add_point(env->cnt,0,*l);
     } catch {
     case &Not_found:
       fprintf(stderr,
@@ -534,9 +534,9 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
 			      env->gc_points);
     break;
   }
-  
+
   return true;
-} 
+}
 
 namespace Aprof;
 
@@ -593,7 +593,7 @@ int generate_graph(string_t<`H> file) {
     if (env->total_dyn_live != NULL) {
       let &$(cnt,livesize) = env->total_dyn_live->hd;
       if (livesize > heap_size[cnt] * dyn_threshhold)
-	env->total_dyn_live = 
+	env->total_dyn_live =
 	  new List(new $(env->cnt-1,livesize),env->total_dyn_live);
     }
     if (yeah_man(env->total_dyn_live,env->mem_total,dyn_threshhold))
