@@ -291,7 +291,7 @@ void cf_check_switch_clauses(flow_info_t env, list<switch_clause> scs) {
     let &Switch_clause(_,_,where_opt,body,_) = scs->hd;
     let body_env = env;
     if(where_opt!=null) 
-      body_env = expsynth_to_flow(cf_check_exp(env,where_opt->v));
+      body_env = expsynth_to_flow(cf_check_exp(env,(exp)where_opt));
     if(cf_check_stmt_ft(body_env,body))
       terr(body->loc, "switch clause may implicitly fallthru");
   }
@@ -310,9 +310,8 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
   switch(s->r) {
   case Skip_s:            return env;
   case Exp_s(e):          return expsynth_to_flow(cf_check_exp(env,e));
-  case Return_s(&Opt(e)): cf_check_exp(env,e); 
-                          fallthru();
   case Return_s(null):    return empty_flow();
+  case Return_s(e):       cf_check_exp(env,(exp)e); return empty_flow();
   case Seq_s(s1,s2):      return cf_check_stmt(cf_check_stmt(env,s1), s2);
   case IfThenElse_s(e,s1,s2):
     let syn_e = cf_check_exp(env,e);
@@ -337,12 +336,12 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
     update_flow(guard, syn_e3);
     return syn_e2.when_false;
 
-  case Goto_s(_,&Opt(dest)):  
+  case Goto_s(_,dest):  
     // must make sure not into scope 
     // doesn't change, so can just do the first time.
     if(iteration_num == 1) {
       let my_encloser   = get_stmt_annot(s)->encloser;
-      let dest_encloser = get_stmt_annot(dest)->encloser;
+      let dest_encloser = get_stmt_annot((stmt)dest)->encloser;
       while(dest_encloser != my_encloser) {
 	let next_encloser = get_stmt_annot(my_encloser)->encloser;
 	if(next_encloser == my_encloser) { // function body is own encloser
@@ -352,19 +351,21 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
 	my_encloser = next_encloser;
       }
     }
-    fallthru(dest);
-
-  case Break_s(&Opt(dest)):    
-    fallthru(dest);
-  case Continue_s(&Opt(dest)):
-    update_flow(dest, env);
-    return empty_flow();
-  case Fallthru_s(es,&Opt(dest)):
-    update_flow(dest, expsynth_to_flow(cf_check_explist_unordered(env,es)));
+    update_flow((stmt)dest, env);
     return empty_flow();
 
   case Break_s(null): // eg. break dest is function end.
     return empty_flow(); 
+  case Break_s(dest):    
+    fallthru(dest);
+  case Continue_s(dest):
+    update_flow((stmt)dest, env);
+    return empty_flow();
+  case Fallthru_s(es,dest):
+    update_flow((stmt)dest, 
+		expsynth_to_flow(cf_check_explist_unordered(env,es)));
+    return empty_flow();
+
 
   // could someday refine env for branches, but seems rather unuseful
   // in non-pathological cases and/or a lot of work.
@@ -380,18 +381,16 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
   case TryCatch_s(s,scs):
     cf_check_switch_clauses(env,scs);
     return cf_check_stmt(env,s);
-
   case Decl_s(&Decl(Var_d(vd),_),s):
-    if(vd->initializer == null)
+    exp_opt e = vd->initializer;
+    if(e == null)
       return cf_check_stmt(add_unassigned(env,vd), s);
-    fallthru(vd->initializer->v,s);
+    fallthru((exp)e,s);
   case Decl_s(&Decl(Let_d(_,_,e,_),_),s):
     return cf_check_stmt(expsynth_to_flow(cf_check_exp(env,e)), s);
-
   // all the work necessary for non-local control flow is done by the jumpers
   case Label_s(_,s):
     return cf_check_stmt(env,s);
-
   default: throw Impossible("ControlFlow::cf_check_stmt -- bad stmt syntax"
 			    " or unimplemented stmt form");
   }
@@ -422,3 +421,4 @@ void cf_check(list<decl> ds) {
     }
   }
 }
+

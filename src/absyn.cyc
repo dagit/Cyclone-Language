@@ -313,7 +313,7 @@ stmt seq_stmts(list<stmt> ss, segment loc) {
   else if (ss->tl == null) return ss->hd;
   else return seq_stmt(ss->hd,seq_stmts(ss->tl,loc),loc);
 }
-stmt return_stmt(Opt_t<exp> e,segment loc) { 
+stmt return_stmt(exp_opt e,segment loc) { 
   return new_stmt(Return_s(e),loc); 
 }
 stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,segment loc) {
@@ -343,7 +343,7 @@ stmt fallthru_stmt(list<exp> el, segment loc) {
 stmt decl_stmt(decl d, stmt s, segment loc) {
   return new_stmt(Decl_s(d,s), loc);
 }
-stmt declare_stmt(qvar x, typ t, Opt_t<exp> init, stmt s, segment loc) {
+stmt declare_stmt(qvar x, typ t, exp_opt init, stmt s, segment loc) {
   decl d = new_decl(Var_d(new_vardecl(x,t,init)),loc);
   return new_stmt(Decl_s(d,s),loc);
 }
@@ -372,11 +372,11 @@ decl new_decl(raw_decl r, segment loc) { return &Decl{.r=r, .loc=loc}; }
 decl let_decl(pat p, Opt_t<typ> t_opt, exp e, segment loc) {
   return new_decl(Let_d(p,t_opt,e,false),loc);
 }
-vardecl new_vardecl(qvar x, typ t, Opt_t<exp> init) {
+vardecl new_vardecl(qvar x, typ t, exp_opt init) {
   return &Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
 		  .type=t, .initializer=init, .shadow=0, .block=0};
 }
-vardecl static_vardecl(qvar x, typ t, Opt_t<exp> init) {
+vardecl static_vardecl(qvar x, typ t, exp_opt init) {
   return &Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
 	          .type=t, .initializer=init, .shadow=0, .block=0};
 }

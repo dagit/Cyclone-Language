@@ -93,9 +93,9 @@ namespace Absyn {
   typedef enum Primop primop;
   typedef enum Incrementor incrementor_t;
   typedef enum Raw_exp raw_exp_t;
-  typedef struct Exp @exp;
+  typedef struct Exp @exp, *exp_opt;
   typedef enum Raw_stmt raw_stmt_t;
-  typedef struct Stmt @stmt;
+  typedef struct Stmt @stmt, *stmt_opt;
   typedef enum Raw_pat raw_pat_t;
   typedef struct Pat @pat;
   typedef enum Binding binding_t;
@@ -274,15 +274,15 @@ namespace Absyn {
     Skip_s;
     Exp_s(exp);
     Seq_s(stmt,stmt);
-    Return_s(Opt_t<exp>);
+    Return_s(exp_opt);
     IfThenElse_s(exp,stmt,stmt);
     While_s($(exp,stmt),stmt);
-    Break_s(Opt_t<stmt>);    // stmt is dest, set by type-checking
-    Continue_s(Opt_t<stmt>); // stmt is dest, set by type-checking
-    Goto_s(var,Opt_t<stmt>); // stmt is dest, set by type-checking
+    Break_s(stmt_opt);    // stmt is dest, set by type-checking
+    Continue_s(stmt_opt); // stmt is dest, set by type-checking
+    Goto_s(var,stmt_opt); // stmt is dest, set by type-checking
     For_s(exp,$(exp,stmt),$(exp,stmt),stmt); 
     Switch_s(exp,list<switch_clause>); 
-    Fallthru_s(list<exp>,Opt_t<stmt>); // stmt is dest, set by type-checking
+    Fallthru_s(list<exp>,stmt_opt); // stmt is dest, set by type-checking
     Decl_s(decl,stmt);
     Cut_s(stmt);
     Splice_s(stmt);
@@ -326,7 +326,7 @@ namespace Absyn {
   EXTERN_DEFINITION struct Switch_clause {
     pat               pattern;
     Opt_t<list<qvar>> pat_vars; // set by type-checker, used by translation to C
-    Opt_t<exp>        where_clause;
+    exp_opt           where_clause;
     stmt              body;
     segment           loc;
   };
@@ -346,7 +346,7 @@ namespace Absyn {
     qvar       name;
     tqual      tq;
     typ        type;
-    Opt_t<exp> initializer; // ignored for pattern variables
+    exp_opt    initializer; // ignored for pattern variables
     int        shadow; // FIX: NOT USED PROPERLY RIGHT NOW!!!
     int        block;  
   };
@@ -371,7 +371,7 @@ namespace Absyn {
 
   EXTERN_DEFINITION struct Enumfield {
     qvar                name;
-    Opt_t<exp>          tag;
+    exp_opt             tag;
     list<tvar>          tvs;
     list<$(tqual,typ)@> typs;
     segment             loc;
@@ -529,7 +529,7 @@ namespace Absyn {
   extern stmt exp_stmt(exp e,segment loc);
   extern stmt seq_stmt(stmt s1, stmt s2, segment loc);
   extern stmt seq_stmts(list<stmt>, segment loc);
-  extern stmt return_stmt(Opt_t<exp> e,segment loc);
+  extern stmt return_stmt(exp_opt e,segment loc);
   extern stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,segment loc);
   extern stmt while_stmt(exp e,stmt s,segment loc);
   extern stmt break_stmt(segment loc);
@@ -538,7 +538,7 @@ namespace Absyn {
   extern stmt switch_stmt(exp e, list<switch_clause>, segment loc);
   extern stmt fallthru_stmt(list<exp> el, segment loc);
   extern stmt decl_stmt(decl d, stmt s, segment loc); 
-  extern stmt declare_stmt(qvar, typ, Opt_t<exp> init, stmt, segment loc);
+  extern stmt declare_stmt(qvar, typ, exp_opt init, stmt, segment loc);
   extern stmt cut_stmt(stmt s, segment loc);
   extern stmt splice_stmt(stmt s, segment loc);
   extern stmt label_stmt(var v, stmt s, segment loc);
@@ -553,8 +553,8 @@ namespace Absyn {
   ////////////////////////// Declarations ///////////////////////////
   extern decl new_decl(raw_decl r, segment loc);
   extern decl let_decl(pat p, Opt_t<typ> t_opt, exp e, segment loc);
-  extern vardecl new_vardecl(qvar x, typ t, Opt_t<exp> init);
-  extern vardecl static_vardecl(qvar x, typ t, Opt_t<exp> init);
+  extern vardecl new_vardecl(qvar x, typ t, exp_opt init);
+  extern vardecl static_vardecl(qvar x, typ t, exp_opt init);
   extern decl struct_decl(scope s,Opt_t<typedef_name_t> n,list<tvar> ts,
 			  Opt_t<list<$(field_name,tqual,typ)@>> fs,
 			  segment loc);

@@ -448,25 +448,25 @@ resolved_t lookup_ordinary(tenv te,segment loc,qvar q) {
   catch {case Dict::Absent: return lookup_ordinary_global(te,loc,q);}
 }
 
-void process_continue(tenv te, stmt s, Opt_t<stmt> * sopt) {
+void process_continue(tenv te, stmt s, stmt_opt @sopt) {
   if (te->le == null) env_err("Tcenv: unexpected process_continue");
   switch (get_fenv(te)->ctrl_env->continue_stmt) {
   case Stmt_j(s2):
     s2->non_local_preds = &cons(s,s2->non_local_preds);
-    *sopt = &Opt(s2);
+    *sopt = s2;
     return;
   case NotLoop_j: terr(s->loc, "continue not in a loop");     return;
   case CaseEnd_j: env_err("Tcenv: continue dest is CaseEnd"); return;
   case FnEnd_j:   env_err("Tcenv: continue dest is CaseEnd"); return;
   }
 }
-void process_break(tenv te, stmt s, Opt_t<stmt> * sopt) {
+void process_break(tenv te, stmt s, stmt_opt @sopt) {
   if (te->le == null) env_err("Tcenv: unexpected process_break");
   fenv_t fe = get_fenv(te);
   switch (fe->ctrl_env->break_stmt) {
   case Stmt_j(s2):
     s2->non_local_preds = &cons(s,s2->non_local_preds);
-    *sopt = &Opt(s2);
+    *sopt = s2;
     return;
   case NotLoop_j: 
     terr(s->loc, "break not in a loop or switch"); 
@@ -484,7 +484,7 @@ void process_break(tenv te, stmt s, Opt_t<stmt> * sopt) {
     return;
   }
 }
-void process_goto(tenv te, stmt s, var l, Opt_t<stmt> * sopt) {
+void process_goto(tenv te, stmt s, var l, stmt_opt @sopt) {
   if (te->le == null) env_err("Tcenv: unexpected process_goto");
   fenv_t fe    = get_fenv(te);
   _      sopt2 = Dict::lookup_opt(fe->shared->seen_labels, l);
@@ -496,16 +496,16 @@ void process_goto(tenv te, stmt s, var l, Opt_t<stmt> * sopt) {
     fe->shared->needed_labels = SlowDict::insert(needed,l,&cons(s,slopt->v));
   } else {
     sopt2->v->non_local_preds = &cons(s, sopt2->v->non_local_preds);
-    *sopt = sopt2;
+    *sopt = sopt2->v;
   }
 }
-$(stmt,list<tvar>,list<typ>)* process_fallthru(tenv te,stmt s,Opt_t<stmt>*sopt){
+$(stmt,list<tvar>,list<typ>)* process_fallthru(tenv te,stmt s,stmt_opt @sopt){
   if (te->le == null) env_err("Tcenv: unexpected process_fallthru");
   fenv_t fe  = get_fenv(te);
   _      ans = fe->ctrl_env->fallthru_stmt;
   if(ans != null) {
     (*ans)[0]->non_local_preds = &cons(s, (*ans)[0]->non_local_preds);
-    *sopt = &Opt((*ans)[0]);
+    *sopt = (*ans)[0];
   }
   return ans;
 }
@@ -566,7 +566,7 @@ tenv add_label(tenv te, var v, stmt s) {
     s->non_local_preds = sl; 
     for(; sl != null; sl = sl->tl)
       switch (sl->hd->r) {
-      case Goto_s(_,*so): *so = &Opt(s); break;
+      case Goto_s(_,*so): *so = s; break;
       default: env_err("Tcenv: add_label backpatching of non-goto"); break;
       }
   }

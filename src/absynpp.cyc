@@ -910,7 +910,7 @@ Doc stmt2doc(stmt st) {
       s = text("return;");
     else 
       s = cat3(text("return "),
-               (eopt==null)?nil_doc():exp2doc(eopt->v),
+               (eopt==null)?nil_doc():exp2doc((exp)eopt),
                text(";"));
     break;
   case IfThenElse_s(e,s1,s2):
@@ -1096,7 +1096,7 @@ Doc switchclause2doc(switch_clause c) {
       cat6(text("case "),
            pat2doc(c->pattern),
            text(" && "),
-           exp2doc(c->where_clause->v),
+           exp2doc((exp)c->where_clause),
            text(": "),
            nest(2,cat2(line_doc(),stmt2doc(c->body))));
 }
@@ -1147,7 +1147,7 @@ Doc decl2doc(decl d) {
              tqtd2doc(tq,type,&Opt(sn)),
              (initializer == null) 
 	       ? text("")
-	       : cat2(text(" = "),exp2doc(initializer->v)),
+	       : cat2(text(" = "),exp2doc((exp)initializer)),
              text(";"));
     break;
   case Union_d:
@@ -1259,7 +1259,10 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
       ps = NonNullable_ps(e); break;
     case $(_, Eq_constr(Unknown_b)): 
       ps = TaggedArray_ps; break;
-    default: ps = impos("bad pointer type in Absynpp::to_tms"); break;
+    default: 
+      // We need to print out something...
+      ps = TaggedArray_ps; break;
+      // ps = impos("bad pointer type in Absynpp::to_tms"); break;
     }
     type_modifier tm = Pointer_mod(ps,rgntyp,tq);
     return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3)); 
@@ -1312,7 +1315,7 @@ Doc structfields2doc(list<$(field_name,tqual,typ)@> fields) {
 
 Doc enumfield2doc(enumfield f) {
   return cat3(qvar2doc(f->name),
-	      (f->tag==null)?nil_doc():cat2(text("="),exp2doc(f->tag->v)),
+	      (f->tag==null)?nil_doc():cat2(text("="),exp2doc((exp)f->tag)),
 	      (f->typs==null)?nil_doc():args2doc(f->typs));
 }
 

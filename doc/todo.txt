@@ -1,5 +1,12 @@
 Todo now:
 
+* Try to avoid using so many lists in the abstract syntax -- 
+  we should use arrays (e.g., for CompoundLit_e, Array_e, 
+  Struct_e, Enum_e, Xenum_e, and UnresolvedMem_e, Switch_s, etc.)
+
+* allows a cast between a "struct cons<exp>*" and "exp@?" !!!
+  at least it gives a warning...  Actually, this may be right.
+
 * need to add support for explicit malloc and initialization.
 
 * need to add GCC-style attributes for functions, structs, variables, etc.

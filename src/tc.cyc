@@ -71,8 +71,8 @@ static void field_redecl_okay(enumfield f1, enumfield f2,
   if ((f1->tag == null && f2->tag != null) ||
       (f1->tag != null && f2->tag == null) ||
       (f1->tag != null && f2->tag != null &&
-       Evexp::eval_const_uint_exp(f1->tag->v) !=
-       Evexp::eval_const_uint_exp(f2->tag->v))) {
+       Evexp::eval_const_uint_exp((exp)f1->tag) !=
+       Evexp::eval_const_uint_exp((exp)f2->tag))) {
     terr(loc,xprintf("redeclaration of %s %s: tag mismatch for field %s",
 		     t, *v, *((*f1->name)[1])));
   }
@@ -221,9 +221,9 @@ static void tcVardecl(tenv te, genv_t ge, segment loc, vardecl vd) {
     exp e;
     if(vd->initializer == null) {
       e = default_initializer(te,t,loc);
-      vd->initializer = &Opt(e);
+      vd->initializer = e;
     } else {
-      e = vd->initializer->v;
+      e = (exp)vd->initializer;
       // special case for t[] -- fill in the size for the user
       switch (compress(t)) {
       case ArrayType(telt,tq,sz):
@@ -525,7 +525,7 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
       terr(f->loc,xprintf("duplicate field name %s",*((*f->name)[1])));
     prev_fields = &cons((*f->name)[1],prev_fields);
     if (f->tag != null) 
-      Evexp::eval_const_uint_exp(f->tag->v); 
+      Evexp::eval_const_uint_exp((exp)f->tag); 
     list<tvar> alltvs = List::append(tvs,f->tvs);
     check_unique_tvars(loc,alltvs);
     for (list<$(tqual,typ)@> typs = f->typs; typs != null; typs=typs->tl) {

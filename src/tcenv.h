@@ -103,10 +103,10 @@ extern tenv_t clear_fallthru(tenv_t);
 extern tenv_t set_next(tenv_t, jumpee_t);
 
 // The next 4 all assign through their last arg
-extern void process_continue(tenv_t,stmt,Opt_t<stmt>*);
-extern void process_break   (tenv_t,stmt,Opt_t<stmt>*);
-extern void process_goto(tenv_t,stmt,var,Opt_t<stmt>*);
-extern $(stmt,list<tvar>,list<typ>)* process_fallthru(tenv_t,stmt,Opt_t<stmt>*);
+extern void process_continue(tenv_t,stmt,stmt_opt@);
+extern void process_break   (tenv_t,stmt,stmt_opt@);
+extern void process_goto(tenv_t,stmt,var,stmt_opt@);
+extern $(stmt,list<tvar>,list<typ>)* process_fallthru(tenv_t,stmt,stmt_opt@);
 
 extern stmt get_encloser(tenv_t);
 extern tenv_t set_encloser(tenv_t,stmt);

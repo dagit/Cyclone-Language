@@ -594,7 +594,7 @@ static stmt flatten_declarations(list<decl> ds, stmt s){
    produce a list of top-level declarations.  By far, this is the most
    involved function and thus I expect a number of subtle errors. */
 static list<decl> make_declarations(decl_spec_t ds,
-				    list<$(declarator_t,Opt_t<exp>)@> ids,
+				    list<$(declarator_t,exp_opt)@> ids,
 				    segment loc) {
   list<type_specifier_t> tss       = ds->type_specs;
   tqual                  tq        = ds->tq;
@@ -623,7 +623,7 @@ static list<decl> make_declarations(decl_spec_t ds,
   let $(declarators, exprs) = List::split(ids);
   // check to see if there are no initializers -- useful later on
   bool exps_empty = true;
-  for (list<Opt_t<exp>> es = exprs; es != null; es = es->tl)
+  for (list<exp_opt> es = exprs; es != null; es = es->tl)
     if (es->hd != null) {
       exps_empty = false;
       break;
@@ -770,8 +770,8 @@ using Parse;
   FnDecl_tok(fndecl);
   DeclList_tok(list<decl>);
   DeclSpec_tok(decl_spec_t);
-  InitDecl_tok($(declarator_t,Opt_t<exp>)@);
-  InitDeclList_tok(list<$(declarator_t,Opt_t<exp>)@>);
+  InitDecl_tok($(declarator_t,exp_opt)@);
+  InitDeclList_tok(list<$(declarator_t,exp_opt)@>);
   StorageClass_tok(storage_class_t);
   TypeSpecifier_tok(type_specifier_t);
   QualSpecList_tok($(tqual,list<type_specifier_t>)@);
@@ -1151,7 +1151,7 @@ init_declarator:
   declarator
     { $$=^$(&$($1,null)); }
 | declarator '=' initializer
-    { $$=^$(&$($1,(Opt_t<exp>)&Opt($3))); }  // FIX: cast needed!
+    { $$=^$(&$($1,(exp_opt)$3)); } // FIX: cast needed
 ;
 
 struct_declaration:
@@ -1240,7 +1240,7 @@ enumerator:
   qual_opt_identifier
     { $$=^$(&Enumfield($1,null,null,null,LOC(@1,@1))); }
 | qual_opt_identifier '=' constant_expression
-    { $$=^$(&Enumfield($1,&Opt($3),null,null,LOC(@1,@3))); }
+    { $$=^$(&Enumfield($1,$3,null,null,LOC(@1,@3))); }
 /* Cyc: value-carrying enumerators */
 | qual_opt_identifier type_params_opt '(' parameter_list ')'
     { _ typs = List::map_c(get_tqual_typ,LOC(@4,@4),List::imp_rev($4));
@@ -1633,10 +1633,10 @@ switch_clauses:
 | CASE pattern ':' block_item_list switch_clauses
     { $$=^$(&cons(&Switch_clause($2,null,null,$4,LOC(@1,@4)),$5)); }
 | CASE pattern AND_OP expression ':' switch_clauses
-    { $$=^$(&cons(&Switch_clause($2,null,&Opt($4),skip_stmt(LOC(@5,@5)),
+    { $$=^$(&cons(&Switch_clause($2,null,$4,skip_stmt(LOC(@5,@5)),
                                  LOC(@1,@6)),$6)); }
 | CASE pattern AND_OP expression ':' block_item_list switch_clauses
-    { $$=^$(&cons(&Switch_clause($2,null,&Opt($4),$6,LOC(@1,@7)),$7)); }
+    { $$=^$(&cons(&Switch_clause($2,null,$4,$6,LOC(@1,@7)),$7)); }
 ;
 
 iteration_statement:
@@ -1699,7 +1699,7 @@ jump_statement:
 | CONTINUE ';'          { $$=^$(continue_stmt(LOC(@1,@1)));}
 | BREAK ';'             { $$=^$(break_stmt(LOC(@1,@1)));}
 | RETURN ';'            { $$=^$(return_stmt(null,LOC(@1,@1)));}
-| RETURN expression ';' { $$=^$(return_stmt(&Opt($2),LOC(@1,@2)));}
+| RETURN expression ';' { $$=^$(return_stmt($2,LOC(@1,@2)));}
 /* Cyc:  explicit fallthru for switches */
 | FALLTHRU ';'          { $$=^$(fallthru_stmt(null,LOC(@1,@1)));}
 | FALLTHRU '(' ')' ';'  { $$=^$(fallthru_stmt(null,LOC(@1,@1)));}
@@ -2019,9 +2019,8 @@ postfix_expression:
   /* array comprehension */
 | NEW '{' FOR IDENTIFIER '<' expression ':' expression '}'
     { $$=^$(new_exp(Comprehension_e(new_vardecl(&$(null,new {$4}), uint_t,
-						&Opt(uint_exp(0,LOC(@4,@4)))),
-				    $6, $8),
-		    LOC(@1,@9))); }
+						uint_exp(0,LOC(@4,@4))),
+				    $6, $8),LOC(@1,@9))); }
 | NEW STRING
     { $$=^$(string_exp(true,$2,LOC(@1,@2))); }
 /* Cyc: added fill and codegen */

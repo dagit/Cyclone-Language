@@ -420,7 +420,7 @@ void dumpswitchclauses(list<switch_clause> scs) {
       dumppat(c->pattern);
       if(c->where_clause != null) {
 	dump("&&");
-	dumpexp(c->where_clause->v);
+	dumpexp((exp)c->where_clause);
       }
       dump_nospace(":");
     }
@@ -445,8 +445,8 @@ void dumpstmt(stmt s) {
     } else
       dumpstmt(s2);
     break;
-  case Return_s(null):    dump("return;"); break;
-  case Return_s(&Opt(e)): dump("return"); dumpexp(e); dump_semi(); break;
+  case Return_s(null): dump("return;"); break;
+  case Return_s(e): dump("return"); dumpexp((exp)e); dump_semi(); break;
   case IfThenElse_s(e,s1,s2):
     dump("if("); dumpexp(e); dump_nospace("){");
     dumpstmt(s1);
@@ -543,7 +543,7 @@ void dumpenumfield(enumfield ef) {
   dumpqvar(ef->name);
   if(ef->tag != null) {
     dump("=");
-    dumpexp(ef->tag->v);
+    dumpexp((exp)ef->tag);
   }
   if(ef->typs != null)
     dumpargs(ef->typs);
@@ -598,7 +598,7 @@ void dumpdecl(decl d) {
     dumptqtd(tq,type,dumpqvar,name);
     if(initializer != null) {
       dump("=");
-      dumpexp(initializer->v);
+      dumpexp((exp)initializer);
     }
     dump_semi();
     break;

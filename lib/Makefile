@@ -11,7 +11,7 @@ CYCLEX=../bin/cyclex.exe
 OUT_PREFIX=
 
 CFLAGS=-fwritable-strings -I..
-#CFLAGS=-pg -fwritable-strings -I..
+#CFLAGS=-g -pg -fwritable-strings -I..
 #CFLAGS=-O -fwritable-strings -I..
 
 CYC_LIBS=$(addsuffix .cyc, $(CYCLONE_LIBS))
