@@ -537,13 +537,16 @@ splitzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
     case {.UnknownL = _}: return $(outflow,outflow);
     case {.PlaceL = p}: // okay b/c p can't be escaped (it's Unknown)
       absRval_t nzval = il==AllIL ? env->fenv->notzeroall : env->fenv->notzerothis;
-      if (locname != NULL)
+      absRval_t zval = env->fenv->zero;
+      if (locname != NULL) {
 	nzval = rnew (env->fenv->r) NamedLocation(locname,nzval);
+	zval = rnew (env->fenv->r) NamedLocation(locname,zval);
+      }
       return
         $(ReachableFL(assign_place(env->fenv,e->loc,d,env->all_changed,
                                    p,nzval),relns),
           ReachableFL(assign_place(env->fenv,e->loc,d,env->all_changed,p,
-                                   env->fenv->zero),relns));
+                                   zval),relns));
     }
   }
 }
@@ -2106,8 +2109,10 @@ static flow_t<`r> unconsume_params(analenv_t<`r> env,
 	      }
 	      break;
 	    default:
-	      Tcutil::impos("unconsume_params: |%s| not an lval!",
-			    exp2string(unconsume_exps->hd));
+	      // not an lval; this means we had a pattern like
+	      // let x = f(y), which means there's no need to attempt
+	      // to unconsume f(y);
+	      break;
 	    }
 	  }
 	}
