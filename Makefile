@@ -128,13 +128,13 @@ ARCHDIR=bin/genfiles/$(UPDATEARCH)
 DO_LIBSRC=$(MAKE) -r -C $(BUILDDIR) -f $(CYCDIR)/Makefile_libsrc 
 
 cyclone_src:
-	-mkdir $(BUILDDIR)
+	-mkdir -p $(BUILDDIR)
 	$(DO_LIBSRC) all
 lib_src:
-	-mkdir $(BUILDDIR)
+	-mkdir -p $(BUILDDIR)
 	$(DO_LIBSRC) libs
 cfiles:
-	-mkdir $(BUILDDIR)
+	-mkdir -p $(BUILDDIR)
 	$(DO_LIBSRC) cfiles
 
 # Note: Tried doing this stuff with target-specific variables instead

@@ -3,8 +3,9 @@
 CVS
 TAGS
 NOTES
-.inst
+\.inst
 doc$
+build$
 tools/cyclex/qdist
 tools/cycocamllex
 tools/cycbison
