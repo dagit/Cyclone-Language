@@ -437,17 +437,25 @@ ifneq ($(build),$(target))
 build/$(target)/include/cstubs.c: build/$(target)/include/cycstubs.cyc
 endif
 
-# FIX: the cp moves some temp files ??
+# FIX: the rule creates a bunch of header files but the header
+# files aren't targets, so, dependencies are wrong and make can
+# get confused.
 build/$(build)/include/cycstubs.cyc: bin/cyc-lib/libc.cys
 	bin/buildlib -Bbin/lib/cyc-lib -d $(@D) $<
-	cp -r $(@D)/* bin/lib/cyc-lib/$(build)/include
-#	cp $(@D)/*.h bin/lib/cyc-lib/$(build)/include
+#	cp -r $(@D)/* bin/lib/cyc-lib/$(build)/include
+	for i in `(cd build/$(build)/include; find * -type d)`;\
+	  do mkdir -p bin/lib/cyc-lib/$(build)/include/$$i; done
+	for i in `(cd build/$(build)/include; find * -name '*.h')`;\
+	  do cp build/$(build)/include/$$i bin/lib/cyc-lib/$(build)/include/$$i; done
 
 ifneq ($(build),$(target))
 build/$(target)/include/cycstubs.cyc: bin/cyc-lib/libc.cys
 	bin/buildlib $(BTARGET) -Bbin/lib/cyc-lib -d $(@D) $<
-	cp -r $(@D)/* bin/lib/cyc-lib/$(target)/include
-#	cp $(@D)/*.h bin/lib/cyc-lib/$(target)/include
+#	cp -r $(@D)/* bin/lib/cyc-lib/$(target)/include
+	for i in `(cd build/$(target)/include; find * -type d)`;\
+	  do mkdir -p bin/lib/cyc-lib/$(target)/include/$$i; done
+	for i in `(cd build/$(target)/include; find * -name '*.h')`;\
+	  do cp build/$(target)/include/$$i bin/lib/cyc-lib/$(target)/include/$$i; done
 endif
 
 build/$(build)/include/precore_c.h: \
