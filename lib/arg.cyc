@@ -42,7 +42,7 @@ using List;
 using String;
 using Ctype;
 
-xtunion exn {Error, Bad(string_t)};
+extern xtunion exn {Error, Bad(string_t)};
 
 tunion Flag {Prefix(string_t), Exact(string_t)};
 

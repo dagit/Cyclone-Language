@@ -21,7 +21,7 @@
 using Core;
 
 namespace Cgrp {
-  static struct Cgroup {
+  abstract struct Cgroup {
     Cstring gr_name;
     Cstring gr_passwd;
     gid_t gr_gid;

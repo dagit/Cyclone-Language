@@ -448,7 +448,6 @@ static void process_file(string_t<`H> filename) {
 
   // Run the preprocessor, by building and running a command-line
   // Pass -I and -D things onto preprocessor
-  // FIX: let user change how/which preprocessor is invoked
   let cppargs_string =
     String::str_sepstr(new List(new (string_t)"",
                                 List::map(sh_escape_stringptr,rev(cppargs))),

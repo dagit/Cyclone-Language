@@ -21,7 +21,7 @@
 using Core;
 
 namespace Cpwd {
-  static struct Cpasswd {
+  abstract struct Cpasswd {
     Cstring pw_name;
     Cstring pw_passwd;
     uid_t pw_uid;

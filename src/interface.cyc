@@ -938,7 +938,9 @@ opt_t<Dict::dict_t<var_t, `a>> disj_merge_dict(Dict::dict_t<var_t, `a,`H> dic1,
 }
 
 struct Ienv * disj_merge_ienv(ienv_t ie1, ienv_t ie2, string_t<`H> *`H msg) {
-  let r1 = disj_merge_dict(ie1->structdecls, ie2->structdecls, "struct", msg);
+//    let r1 = disj_merge_dict(ie1->structdecls, ie2->structdecls, "struct", msg);
+  let r1 = compat_merge_dict(ie1->structdecls, ie2->structdecls, Dict::empty(zstrptrcmp),
+			     Tcdecl::merge_structdecl, "struct", msg);
   let r2 = disj_merge_dict(ie1->uniondecls, ie2->uniondecls, "union", msg);
   let r3 = disj_merge_dict(ie1->tuniondecls, ie2->tuniondecls, "[x]tunion", msg);
   let r4 = disj_merge_dict(ie1->enumdecls, ie2->enumdecls, "enum", msg);

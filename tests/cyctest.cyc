@@ -993,7 +993,7 @@ using Errno {
   short __attribute__((aligned(4))) att_x = 0;
 
   struct AttFoo {
-    short __attribute__((aligned(4))) x ;
+    short x __attribute__((aligned(4)));
     short y;
   } __attribute__((packed));
 
