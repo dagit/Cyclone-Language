@@ -4,6 +4,31 @@ BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * FIX all of the FIX things.
 
+* Prevent using label H (induces region name `H).  Centralize the
+  check that tyvars aren't `H.
+
+* void f() {
+   void g();
+   g();
+  }
+We complain that g isn't initialized.  We should complain that
+function declarations are only allowed at top-level.
+
+* This won't re-parse and type-check after inference:
+
+  void f() {
+    int *_ p;
+   L: { 
+      int x = 7;
+      p = &x;
+    }
+  }
+
+* Better error message when programmer leaves off effect but
+  can't. For example,
+  void h() {}
+  void (*i)() = h;
+
 * are we treating void properly?
 
 * link-checking:  we need to spit out an internal interface for each
@@ -12,11 +37,11 @@ BUG FIXES and UNSOUNDNESSES:
   hash and sign the code and interface so that we can detect tampering
   with the code or interface at link-time.
 
-* Are we treating static variables (within a fun) correctly?
+* Are we treating static variables (within a function) correctly?
 
-* we're too restrictive about typedef names -- C really treats them as
-  a separate namespace, but our parser depends crucially on the lexer
-  making a distinction between typedef names and other identifiers.
+* we're too restrictive about typedef names -- C allows typedef names
+  to be shadowed by identifiers (or other typedefs).  Our lexer
+  doesn't have quite the right infrastructure for this.
 
 * there are unsoundnesses w.r.t. the way we type-check the left-hand-sides
   of certain operations (e.g., x++.)  Part of the problem is that we allow

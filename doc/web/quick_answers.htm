@@ -123,6 +123,18 @@ are all in region `r.</p>
 <p><b><a name="types_discunion"></a>What do tunion and xtunion mean?</b></p>
 <p>tunion and xtunion are used to create <a href="discriminated_unions.htm">discriminated
 unions</a>.</p>
+<p><b><a name="types_struct_fun"></a>How do I make a struct with
+function-pointer fields?</b></p>
+<p>Follow this arcane format:</p>
+<p style="line-height: 50%"><font face="Courier New">struct S&lt;`e1::E,
+`e2::E&gt; {</font></p>
+<p style="line-height: 50%"><font face="Courier New">&nbsp;&nbsp; void
+f1(int,int; `e1);</font></p>
+<p style="line-height: 50%"><font face="Courier New">&nbsp;&nbsp; int f2(; `e2);</font></p>
+<p style="line-height: 50%"><font face="Courier New">};</font></p>
+<p style="line-height: 50%"><font face="Courier New">typedef S&lt;{},{}&gt; s_t;</font></p>
+<p>More explanation is in the discussion of <a href="regions_and_effects.htm">memory
+management</a>.</p>
 <p><b><a name="types_abstract"></a>What does &quot;abstract&quot; mean?</b></p>
 <p>&quot;abstract&quot; is a storage-class specifier, like
 &quot;static&quot; or &quot;extern&quot;.&nbsp; When attached to a top-level
@@ -136,6 +148,12 @@ be used as identifiers: abstract,&nbsp; catch, codegen, cut, fallthru, fill,
 fprintf, fscanf, let, malloc, namespace, new, null, printf, sscanf, splice,
 throw, try, tunion, using, xprintf, xscanf, xtunion.&nbsp; As in gcc,
 __attribute__ is reserved.</p>
+      <p align="left"><b><a name="add_namespace"></a>What are namespace and using?</b><p>These
+constructs provide a convenient way to help avoid name clashes.&nbsp; namespace
+X prepends X:: to the declarations in its body (rest of file in case of
+namespace X;) and using X makes the identifiers prepended with X:: available
+without having to write the X::.&nbsp; A longer explanation and list of common
+pitfalls is <a href="namespaces.htm">here</a>.</p>
 <p><b><a name="add_fallthru"></a>What does fallthru mean?</b></p>
 <p>In Cyclone, you cannot implicitly fall-through from one switch case to the
 next.&nbsp; You can explicitly fall-through with the statement &quot;fallthru;&quot;.&nbsp;
@@ -222,17 +240,6 @@ have more support for non-local control flow.</p>
       <p align="left"><b><a name="del_union"></a>What types are allowed for union members?</b><p>Currently,
 union members cannot contain pointers.&nbsp; You can have numeric types
 (including bit fields) and structs and tuples of allowable union-member types.</p>
-<p><b><a name="types_struct_fun"></a>How do I make a struct with
-function-pointer fields?</b></p>
-<p>Follow this pattern:</p>
-<p style="line-height: 50%"><font face="Courier New">struct S&lt;`e1::E,
-`e2::E&gt; {</font></p>
-<p style="line-height: 50%"><font face="Courier New">&nbsp;&nbsp; void
-f1(int,int; `e1);</font></p>
-<p style="line-height: 50%"><font face="Courier New">&nbsp;&nbsp; int f2(; `e2);</font></p>
-<p style="line-height: 50%"><font face="Courier New">};</font></p>
-<p>To understand what is going on here requires a pretty full understanding of
-regions and effects.</p>
       <p align="left"><b><a name="io_xprintf"></a>What is xprintf?</b><p align="left">xprintf
 is a primitive taking the same arguments as printf.&nbsp; Instead of writing the
 result to stdout, it returns a heap-allocated string containing what would have
@@ -380,7 +387,7 @@ Information on how to build on various platforms is available elsewhere?</p>
 <p>We are eager to have a wider code base, but we are compiler writers with
 limited resources.&nbsp; Let us know of useful code you write.</p>
 <p><b><a name="meta_speares"></a>What does Cyclone have in common with Britney
-Speares?</b></p>
+Spears?</b></p>
 <p>Nothing that we know of, but the question may help our web-page hit count.</p>
 <p><b><a name="other_imprev"></a>How come List::imp_rev(l1) doesn't change l1 to
 its reverse?</b></p>

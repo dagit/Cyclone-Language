@@ -15,8 +15,8 @@
 </td><td valign="top" width="24"></td><!--msnavigation--><td valign="top">
 <h1 align="center">Memory Management Via Regions</h1>
 <p align="left">Contents: <a href="#intro">Introduction</a>, <a href="#alloc">Allocation</a>,
-<a href="#common">Common Uses</a>, <a href="#types">Types</a></p>
-<p><b><a name="intro"></a>Introduction</b></p>
+<a href="#common">Common Uses</a>, <a href="#types">Type-Checking Regions</a></p>
+<h3><b><a name="intro"></a>Introduction</b></h3>
 <p>Cyclone prevents memory-management errors, such as following dangling
 pointers, without requiring that all pointers point into the heap, which is
 garbage-collected.&nbsp; Here we explain Cyclone's memory-management scheme and
@@ -45,14 +45,14 @@ memory-management idiom.&nbsp; Cyclone has three flavors of regions:</p>
     creates a <b>growable region</b>, where r is an identifier and s is a
     statement.&nbsp; (Typically s is a compound statement, so it looks like <font face="Courier New">region
     r { ... }</font>.)&nbsp; A <i>handle</i> for the growable region is bound to
-    r.&nbsp; Both r and the region's lifetime is the execution of s.&nbsp;
-    Inside of s, we can add objects to the region, as explained below.</li>
+    r.&nbsp; The lifetime of r and the lifetime of the region for which it is a
+    handle is the execution of s.&nbsp; Inside of s, we can add objects to the region, as explained below.</li>
 </ul>
 <p>A non-heap object lives until its region is deallocated.&nbsp; There is no
 way to free an object earlier.&nbsp; Heap objects may be garbage-collected once
 they are unreachable (cannot be reached by traversing pointers) from the
 program's variables.&nbsp; Objects in live non-heap regions always appear
-reachable to the garbage collector (and so everything reachable from them
+reachable to the garbage collector (so everything reachable from them
 appears reachable as well).</p>
 <p>Cyclone allows dangling pointers; it prohibits <i>following</i> dangling
 pointers.&nbsp; This restriction is part of the type system: It is a
@@ -62,7 +62,7 @@ pointing into a live region?&quot;&nbsp; As explained below, each pointer type
 has a region and objects of the type may only point into that region.&nbsp; The
 type &quot;t *&quot; is for pointers into the heap; see below for how to declare
 pointers into other regions.</p>
-<p><b><a name="alloc"></a>Allocation</b></p>
+<h3><b><a name="alloc"></a>Allocation</b></h3>
 <p>There are three constructs for allocating a new object in the heap:</p>
 <ul>
   <li><font face="Courier New"><b>new e</b></font>, where new is a keyword an e
@@ -94,7 +94,7 @@ pointers into other regions.</p>
     <p style="line-height: 0"><font face="Courier New">}</font></p>
     <p>e1 is evaluated exactly once.&nbsp;&nbsp; e2 is evaluated e1 times.&nbsp;
     Note that e1 may be 0.&nbsp; <b>Warning: e1 is implictly converted to an
-    unsigned int</b>, so negative values may crash Cyclone!&nbsp; After all new
+    unsigned int</b>, so negative values may crash Cyclone!&nbsp; After all, new
     {for i &lt; -1 :&nbsp; 0}, after conversion, asks for an object of roughly 4
     billion 0s, exhausting the 32-bit address space.</li>
   <li><font face="Courier New"><b>malloc(sizeof(t))</b></font> where malloc and
@@ -116,10 +116,9 @@ view new e as syntactic sugar for rnew(heap_region,e), and similarly for the
 other constructs.</p>
 <p>The only way to allocate an object into a stack region is via a local
 declaration.&nbsp; Cyclone does not currently support salloc.</p>
-<p><b><a name="common"></a>Common Uses</b></p>
+<h3><b><a name="common"></a>Common Uses</b></h3>
 <p>Although the type system associated with regions is complicated, there are a
-small number of common uses that are easy, even before you understand how they
-fit into the general framework.&nbsp; We present these cases separately for two
+small number of common uses, and you can use them without understanding the general framework.&nbsp; We present these cases separately for two
 reaons.&nbsp; First, it makes it easier to write and port code without investing
 undue intellectual effort.&nbsp; Second, the full explanation may be easier to
 understand if you have already used the common idioms.</p>
@@ -130,10 +129,10 @@ understand if you have already used the common idioms.</p>
     <p style="line-height: 0"><font face="Courier New">int x = 7;</font></p>
     <p style="line-height: 0"><font face="Courier New">int * y = &amp;x;</font></p>
     <p><b>Here is how to make stack pointers:</b></p>
-    <p style="line-height: 0"><font face="Courier New"><b>int x = 7;</b></font></p>
-    <p style="line-height: 0"><font face="Courier New"><b>int *_ y = &amp;x;</b></font></p>
-    <p><b>The _ (underscore) tells the type-checker to infer the region
-    information for y.</b>&nbsp; In this case, it is the&nbsp; block in which x
+    <p style="line-height: 0"><font face="Courier New">int x = 7;</font></p>
+    <p style="line-height: 0"><font face="Courier New">int *_ y = &amp;x;</font></p>
+    <p>The _ (underscore) tells the type-checker to infer the region
+    information for y<b>.</b>&nbsp; In this case, it is the&nbsp; block in which x
     is declared, i.e. it corresponds to a stack region.&nbsp; You could add _ to
     all your local pointer types, but it is unnecessary when the pointer points
     into the heap.</p>
@@ -152,10 +151,10 @@ understand if you have already used the common idioms.</p>
     functions that can take stack pointers.</li>
 </ul>
 <blockquote>
-  <p><b>Here is how to make functions that can accept stack pointers:&nbsp; For
+  <p><b>Here is how to make functions that can accept stack pointers:&nbsp; </b>For
   each parameter that can safely be a stack pointer, put `r after the * (or @)
   where `r is an identifier starting with a back-quote that is different from
-  all the other backquote-starting identifiers in the function's type.</b>&nbsp;
+  all the other backquote-starting identifiers in the function's type.&nbsp;
   For example:</p>
   <p><font face="Courier New">void f(int *`r1 x1, int *`r2 x2, int * x3);</font></p>
   <p>allows the first two arguments to point into any region at all while the
@@ -168,16 +167,16 @@ understand if you have already used the common idioms.</p>
     allocate into a caller-provided region).&nbsp; The type of a handle is <font face="Courier New">region_t&lt;`r&gt;</font>
     where `r is the region information associated with pointers into the
     region.&nbsp; For example, this code allocates a pair of ints into r:
-    <p><font face="Courier New">$(int,int)*`r f(region_t&lt;`r&gt; r, int x, int
+    <p style="line-height: 0"><font face="Courier New">$(int,int)*`r f(region_t&lt;`r&gt; r, int x, int
     y) { </font></p>
-    <p>&nbsp;&nbsp; <font face="Courier New"> </font><font face="Courier New">return
+    <p style="line-height: 0">&nbsp;&nbsp; <font face="Courier New"> </font><font face="Courier New">return
     rnew(r) $(7,9); </font></p>
-    <p><font face="Courier New">}</font></p>
+    <p style="line-height: 0"><font face="Courier New">}</font></p>
     <p>Notice that we used the same `r for the handle and the return type.&nbsp;
     We could have also passed the object back through a pointer parameter like
     this:</p>
     <p style="line-height: 0"><font face="Courier New">void
-    f2(region_t&lt;`r&gt; r, int x, int y, $(int,int)*`r *`r2 p){ </font></p>
+    f2(region_t&lt;`r&gt; r,int x,int y,$(int,int)*`r *`r2 p){ </font></p>
     <p style="line-height: 0"><font face="Courier New">&nbsp; *p = rnew(r)
     $(7,9); </font></p>
     <p style="line-height: 0"><font face="Courier New">}</font></p>
@@ -190,10 +189,167 @@ understand if you have already used the common idioms.</p>
     <p style="line-height: 0"><font face="Courier New">&nbsp; f2(r,3,4,&amp;x);</font></p>
     <p style="line-height: 0"><font face="Courier New">&nbsp;}</font></p>
     <p>&nbsp;</li>
-  <li>typedef, struct, tunion, and xtunion declarations can all be parameterized
-    by regions.</li>
+  <li><b>typedef, struct, tunion, and xtunion declarations can all be parameterized
+    by regions.</b>&nbsp; For example, here is part of the list library.&nbsp;
+    Note that the &quot;::R&quot; is necessary and that `H describes the heap
+    region.
+    <p><font face="Courier New">struct List&lt;`a,`r::R>{`a hd; struct List&lt;`a,`r> *`r tl;};<br>
+  typedef struct List&lt;`a,`r> *`r glist_t&lt;`a,`r>;<br>
+  typedef struct List&lt;`a,`H> *list_t&lt;`a>;</font></p>
+    <p><font face="Courier New">// return a fresh copy of the list in r2<br>
+    glist_t&lt;`a,`r2> rcopy(region_t&lt;`r2> r2, glist_t&lt;`a,`r1> x) {<br>
+    &nbsp; glist_t&lt;`a,`r2> result, prev;<br>
+    <br>
+    &nbsp; if (x == null) return null;<br>
+    &nbsp; result = rnew(r2) List{.hd=x->hd,.tl=null};<br>
+    &nbsp; prev = result;<br>
+    &nbsp; for (x=x->tl; x != null; x=x->tl) {<br>
+    &nbsp;&nbsp;&nbsp; prev-&gt;tl = rnew(r2) List(x->hd,null);<br>
+    &nbsp;&nbsp;&nbsp; prev = prev->tl;<br>
+    &nbsp; }<br>
+    &nbsp; return result;<br>
+    }&nbsp;<br>
+    list_t&lt;`a> copy(glist_t&lt;`a,`r> x) {<br>
+    &nbsp; return rcopy(heap_region, x);<br>
+    }</font><br>
+  </li>
+  <li><b>Putting function pointers in struct fields currently requires an arcane
+    type definition.</b>&nbsp; We recommend following the recipe implied by this
+    example:
+    <p style="line-height: 0"><font face="Courier New">struct X&lt;`e1::E,
+    `e2::E, `ra::R, `rb::R&gt; {</font></p>
+    <p style="line-height: 0"><font face="Courier New">&nbsp; int f1(int x, int
+    y; `e1);&nbsp;</font></p>
+    <p style="line-height: 0"><font face="Courier New">&nbsp; int f2(int *`r1 x,
+    int *`r2 y; `e2 + {`ra,`rb});</font></p>
+    <p style="line-height: 0"><font face="Courier New">};</font></p>
+    <p style="line-height: 0"><font face="Courier New">typedef struct
+    X&lt;{},{},`ra,`b&gt; x_t&lt;`ra::R, `rb::R&gt;;</font></p>
+    <p>The example is simpler if f2 does not accept stack pointers, but the
+    effect variables (`e1 and `e2) are still necessary.&nbsp; You will probably
+    never encounter a situation where x_t's instantiation of `e1 and `e2 to {}
+    causes a program not to type-check, but the gory details are discussed
+    below.&nbsp;</li>
 </ul>
-<p><b><a name="types"></a>Types</b></p>
+<h3><b><a name="types"></a>Type-Checking Regions</b></h3>
+<p>Due to recursive functions, there can be any number of live regions at
+run-time.&nbsp; The compiler ensures that only pointers into live regions are
+dereferenced via the following general strategy:</p>
+<ul>
+  <li>Use compile-time <i>region-names</i>.&nbsp; Syntactically these are just
+    type variables, but they used differently.</li>
+  <li>Decorate each pointer type and handle type with one region-name.</li>
+  <li>Decorate each program point with a (finite) set of region-names.&nbsp; We
+    call the set a program point's <i>capability</i>.</li>
+  <li>To dereference a pointer (via <font face="Courier New">*</font>, <font face="Courier New">-&gt;</font>,
+    or subscript), the pointer's type's region-name must be in the program
+    point's capability.&nbsp; Similarly, to use a handle for allocation, the
+    handle type's&nbsp; region-name must be in the capability.</li>
+  <li>Enforce a type system such that the following is impossible: A program
+    point P's capability contains a region-name `r that decorates a pointer (or
+    handle) expression e that, at run-time, points into a region that has been
+    deallocated and the operation at P dereferences e.</li>
+</ul>
+<p>The above strategy is probably too vague to make sense at this point, but it
+may help to refer back to it as we explain specific aspects of the type system.</p>
+<p>Note that in the rest of the documentation (and in common parlance) we abuse
+the word &quot;region&quot; to refer both to region-names and to the run-time
+collections of objects.&nbsp; Similarly, we confuse a block of declarations, its
+region-name, and the run-time space allocated for the block.&nbsp; (With loops
+and recursive functions, &quot;the space allocated&quot; for the block is really
+any number of distinct regions.)&nbsp; But in the rest of this section, we
+painstakingly distinguish region-names, regions, etc.</p>
+<p><b>Region Names</b></p>
+<p>Given a function, we associate a distinct region-name with each program point
+that creates a region, as follows:</p>
+<ul>
+  <li>If a block (blocks create stack regions) has label L, then the region-name
+    for the block is `L.</li>
+  <li>If a block has no label, the compiler makes up a unique region-name for
+    the block.</li>
+  <li>In region r &lt;`foo&gt; s, the region-name for the construct is `foo.&nbsp;</li>
+  <li>In region r s, the region-name for the construct is `r.</li>
+</ul>
+<p>The region name for the heap is `H.&nbsp; Region-names associated with
+program points within a function should be distinct from each other, distinct
+from any region-names appearing in the function's prototype, and should not be
+`H.&nbsp; (So you cannot use H as a label name.)&nbsp; <i>Because the function's
+return type cannot mention a region-name for for a block or region-construct in
+the function, it is impossible to return a pointer to deallocated storage.</i></p>
+<p>In region r &lt;`r&gt; s and region r s, the type of r is region_t&lt;`r&gt;.&nbsp;
+In other words, the handle is decorated with the region-name for the
+construct.&nbsp; Pointer types' region-names are explicit, although you
+generally&nbsp; use _ and rely on inference to put in the correct one for you.</p>
+<p><b>Capabilities</b></p>
+<p>In the absence of explicit effects (see below), the capability for a program
+point includes exactly:&nbsp;</p>
+<ul>
+  <li>`H</li>
+  <li>The region-names appearing in the function's prototype</li>
+  <li>The region-names for the blocks and &quot;region r s&quot; statements that
+    contain the program point</li>
+</ul>
+<p>For each dereference or allocation operation, we simply check that the
+region-name for the type of the object is in the capability.&nbsp; It is rare
+for the check to fail because failing code has to do one of the following:</p>
+<ul>
+  <li>Have a pointer that outlives the stack or growable region into which it
+    points.&nbsp; Here is a silly example:
+    <p style="line-height: 0"><font face="Courier New">int *_ x; // region-name
+    filled in with an inner block's name</font></p>
+    <p style="line-height: 0"><font face="Courier New">if(true) {</font></p>
+    <p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp; int y
+    = 7;</font></p>
+    <p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp; x =
+    &amp;y;</font></p>
+    <p style="line-height: 0"><font face="Courier New">}</font></p>
+    <p style="line-height: 0"><font face="Courier New">*x;</font></li>
+  <li>Have existential type variables of region kind.&nbsp; Doing so is useless
+    because the check will always fail (so don't worry if you don't know what an
+    existential type variable of region kind is).</li>
+</ul>
+<b>Assignment</b>
+<p>A pointer type's region-name is part of the type.&nbsp; Currently, there is
+no &quot;subregioning&quot;, so you cannot assign between types with different
+region-names.&nbsp; For handlers, if `r is a region-name, there is at most one
+value of type region_t&lt;`r&gt; (there are 0 if `r is a block's name), so there
+is little use in creating variables of type region_t&lt;`r&gt;.</p>
+<p>Type Declarations</p>
+<p>A struct, typedef, tunion, or xtunion declaration may be parameterized by any
+number of region-names.&nbsp; The region names are placed in the list of type
+parameters and must be followed by &quot;::R&quot;, except for typedef
+declarations (where the region-name appears in the underlying type).&nbsp; As
+with other type parameters, these must be instantiated when the type constructor
+is used.&nbsp; For example, given</p>
+<p><font face="Courier New">struct List&lt;`a,`r::R&gt;{`a hd; struct List&lt;`a,`r&gt; *`r
+tl;};<br>
+</font>the type struct List&lt;int,`H&gt; is for a list of ints in the
+heap.&nbsp; Notice that all of the &quot;cons cells&quot; of the List will be in
+the same region (the type of the tl field uses the same region-name `r that is
+used to instantiate the recursive instance of struct List&lt;`a,`r&gt;.&nbsp;
+However, we could instantiate `a with a pointer type that has a different
+region-name.</p>
+<p>tunion and xtunion declarations must also be instantiated with an additional
+region-name.&nbsp; If an object of type tunion `r Foo turns out to be a
+value-carrying variant, then the object is treated (capability-wise) as a
+pointer with region-name `r.&nbsp; If the region-name is omitted from a use of a
+tunion declaration, it is implicitly `H.</p>
+<p><b>Function Calls</b></p>
+<p>We can now explain why function parameters that can be pointers into non-heap
+regions should be given region-names and why these region names are part of the
+(default) capability.</p>
+<p>DO ME!</p>
+<p><b>Explicit and Default Effects</b></p>
+<p>If you are not using function pointers, you now know everything you need to
+know about Cyclone regions and memory management.&nbsp; If you are using
+function pointers and the parameters of these functions point into the heap,
+then just follow the recipe in the previous section for&nbsp; </p>
+<p>ALSO MENTION THAT IF YOU ONLY DECLARE FUNCTION POINTERS AS PARAMS, THEN NO
+PROBLEM.</p>
+<p>WE'VE BEEN LYING! DO ME!</p>
+<p>We can now see why the types of struct member function pointers look so
+strange.</p>
+<p>&nbsp;</p>
 &nbsp;<!--msnavigation--></td></tr><!--msnavigation--></table></body>
 
 </html>
