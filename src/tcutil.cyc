@@ -2292,16 +2292,27 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ) {
   qvar_t v = new $(Loc_n, new ((string_t)aprintf("__aliasvar%d",counter++)));
   vardecl_t vd = new_vardecl(v,e_typ,e);
   exp_t ve = varb_exp(v,new Local_b(vd),e->loc);
-
-  // generate a fresh region variable for it and the cast expression
+  // generate a fresh region variable for it and make the type
+  // of the variable be as close to the instantiated type as we
+  // can.  We achieve this by unifying the expected type, which
+  // should have an evar for the region of the pointer type, with
+  // the new type variable.  
   tvar_t tv = new_tvar(&rgn_kb);
+  //fprintf(stderr,"before unifying, type is %s\n",typ2string(e_typ));
   switch (compress(e_typ)) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(*r,_,_,_,_))):
-    *r = new VarType(tv); break;
+  case &PointerType(PtrInfo{et,tq,PtrAtts{old_r,nb,b,zt,pl}}):
+    switch (compress(old_r)) {
+    case &Evar(_,*topt,_,ts): 
+      let new_r = new VarType(tv);
+      *topt = new_r;
+      break;
+    default: break;
+    }
+    break;
   default: break;
   }
+  //fprintf(stderr,"after unifying, type is %s\n",typ2string(e_typ));
   e->topt = NULL;
-  vd->type = e_typ;
   vd->initializer = e;
 
   // generate the alias decl
@@ -2516,9 +2527,9 @@ static bool isomorphic(type_t t1, type_t t2) {
 
 // FIX: the subtyping environment needs to take into account the
 // qualifiers on the pointers.
-static bool subtype(tenv_t te,
-                    list_t<$(type_t,type_t)@`H,`H> assume,
-		    type_t t1, type_t t2) {
+bool subtype(tenv_t te,
+             list_t<$(type_t,type_t)@`H,`H> assume,
+             type_t t1, type_t t2) {
   if (unify(t1,t2)) return true;
   for (_ a = assume; a != NULL; a = a->tl)
     if (unify(t1,(*a->hd)[0]) && unify(t2,(*a->hd)[1]))
@@ -2543,7 +2554,8 @@ static bool subtype(tenv_t te,
         && !conref_def(false,zt_a) && conref_def(false,zt_b))
       return false;
     // rt_a must outlive rt_b
-    if (!unify(rt_a,rt_b) && !region_outlives(te,rt_a,rt_b))
+    if (!unify(rt_a,rt_b) && !region_outlives(te,rt_a,rt_b) && 
+        !subtype(te, assume, rt_a, rt_b))
       return false;
     // need to check that the bounds match up
     if (!unify_conrefs(unify_it_bounds,b_a,b_b)) {

@@ -76,6 +76,9 @@ extern bool coerceable(type_t); // true if numeric or character
 extern bool silent_castable(tenv_t,seg_t,type_t,type_t);
 // true when expressions of type t1 can be cast to t2 -- call silent first
 extern coercion_t castable(tenv_t,seg_t,type_t,type_t);
+// true when t1 is a subtype of t2 under the given list of subtype assumptions
+extern bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, 
+                    type_t t1, type_t t2);
 
 // used to alias the given expression, assumed to have non-Aliasable type
 extern $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ);

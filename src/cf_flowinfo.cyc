@@ -1546,7 +1546,7 @@ void print_absrval(absRval_t rval) {
     print_absrval(r); fprintf(stderr,"]");
     break;
   case &NamedLocation(n,r):
-    fprintf(stderr,"[NamedLocation(%s,",n);
+    fprintf(stderr,"[NamedLocation(%s,",Absynpp::qvar2string(n->name));
     print_absrval(r); fprintf(stderr,"]");
     break;
   }

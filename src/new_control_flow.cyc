@@ -60,6 +60,7 @@ namespace NewControlFlow;
 
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
 typedef Position::seg_t     seg_t;
+typedef struct Vardecl *`H  vardecl_opt_t;
 
 // flag controlling whether or not to warn when we lose unique pointers
 bool warn_lose_unique = false;
@@ -239,8 +240,7 @@ static flow_t<`r> add_vars(flow_env_t<`r> fenv,
       let root = rnew(fenv->r) VarRoot(vds->hd);
       let rval = typ_to_absrval(fenv,vds->hd->type,false,leafval);
       if (nameit) {
-	string_t<`r> locname = Absynpp::qvar2string(vds->hd->name);
-	rval = rnew (fenv->r) NamedLocation(locname, rval);
+	rval = rnew (fenv->r) NamedLocation(vds->hd, rval);
       }
       DEBUG_PRINT("adding variable %s\n",qvar2string(vds->hd->name));
       d = Dict::insert(d,root,rval);
@@ -460,7 +460,7 @@ anal_use_ints(analenv_t<`r> env, flow_t<`r> inflow,
 // place for it.
 static flow_t<`r>
 notzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
-        exp_t e, initlevel_t il, string_t<`r> locname) {
+        exp_t e, initlevel_t il, vardecl_opt_t locname) {
   DEBUG_PRINT("in notzero for exp |%s|\n",Absynpp::exp2string(e));
   DEBUG_PRINT("inflow=\n");
   DEBUG_PRINT_F(print_flow,inflow);
@@ -493,7 +493,7 @@ notzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
 // is either zero or notzero if the place is unaliased.
 static $(flow_t<`r>,flow_t<`r>)
 splitzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
-          exp_t e, initlevel_t il, string_t<`r> locname) {
+          exp_t e, initlevel_t il, vardecl_opt_t locname) {
   switch(outflow) {
   case {.BottomFL = _}: return $(outflow,outflow);
   case {.ReachableFL = $(d,relns)}:
@@ -529,7 +529,7 @@ static $(flow_t<`r>,absRval_t<`r>)
       return $(f,typ_to_absrval(env->fenv,elttype,false,env->fenv->unknown_all));
     case {.ReachableFL = $(outdict,relns)}:
       // else cannot be known: FIX: determine notzero as appropriate
-      string_t locname = NULL;
+      vardecl_opt_t locname = NULL;
       switch (r) {
       case &NamedLocation(n,r2): locname = n; break;
       default: break;
@@ -1506,7 +1506,7 @@ static $(flow_t<`r>,absLval_t<`r>)
     case {.BottomFL = _}: return $(f,UnknownL());
     case {.ReachableFL = $(outdict,relns)}:
       // else cannot be known: FIX: determine notzero as appropriate
-      string_t locname = NULL;
+      vardecl_opt_t locname = NULL;
       if(Tcutil::is_bound_one(bd))
 	retry: switch(r) {
 	case &NamedLocation(n,r2): r = r2; locname = n; goto retry;
@@ -1576,7 +1576,7 @@ static $(flow_t<`r>,absLval_t<`r>)
       switch $(f,lval) {
       case $({.ReachableFL = $(fd,r)},{.PlaceL = p}):
         let rval = lookup_place(fd,p);
-	string_t locname = NULL;
+	vardecl_opt_t locname = NULL;
         switch (rval) {
         case &AddressOf(...): return anal_derefL(env,f,e1,f,rval,flds);
 	case &NamedLocation(n,r): rval = r; locname = n; fallthru;
@@ -1706,7 +1706,7 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
       // zero-splitting, only for Eq and Neq with Zero and Unknown, so can
       // take precedence over any array-bounds splitting
       if(p==Eq || p==Neq) {
-	string_t r1n = NULL, r2n = NULL;
+	vardecl_opt_t r1n = NULL, r2n = NULL;
 	switch (r1) {
 	case &NamedLocation(n,r): r1 = r; r1n = n; break;
 	default: break;
@@ -1862,7 +1862,7 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   switch(f) {
   case {.BottomFL = _}: return $(f,f);
   case {.ReachableFL = $(d,_)}:
-    string_t locname = NULL;
+    vardecl_opt_t locname = NULL;
     retry: switch(r) {
     case &NamedLocation(n,r2): r = r2; locname = n; goto retry;
     case &Zero: return $(BottomFL(),f);
@@ -2211,6 +2211,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
       }
       */
       let new_rval = make_unique_consumed(fenv,t,e,env->iteration_num,old_rval);
+      new_rval = rnew (fenv->r) NamedLocation(vd, new_rval);
       fd = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
       f = ReachableFL(fd,relns);
       DEBUG_PRINT("flow after consuming is {\n");
@@ -2238,6 +2239,15 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
       // up escaping.
       switch (f) {
       case {.ReachableFL = $(fd,relns)}:
+        // first, check that the named location hasn't been messed with.
+        switch (lookup_place(fd,p)) {
+        case &NamedLocation(l2,_): 
+          if (l2 != vd) fallthru;
+          break;
+        default:
+          Tcutil::terr(s->loc,"aliased location was overwritten");
+          break;
+        }
         fd = assign_place(fenv,s->loc,fd,env->all_changed,p,old_rval_approx);
         outflow = ReachableFL(fd,relns);
         DEBUG_PRINT("flow for alias continuation is {\n");

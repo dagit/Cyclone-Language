@@ -1078,13 +1078,13 @@ typedef struct Cyc_Yyltype Cyc_yyltype;
 void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 65
 void*Cyc_Tcutil_compress(void*t);
-# 91
+# 94
 int Cyc_Tcutil_is_function_type(void*t);
-# 101
+# 104
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 134
+# 137
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 338 "tcutil.h"
+# 341 "tcutil.h"
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);extern char Cyc_Tcdecl_Incompatible[13];struct Cyc_Tcdecl_Incompatible_exn_struct{char*tag;};struct Cyc_Tcdecl_Xdatatypefielddecl{struct Cyc_Absyn_Datatypedecl*base;struct Cyc_Absyn_Datatypefield*field;};
 # 41 "tcdecl.h"
 typedef struct Cyc_Tcdecl_Xdatatypefielddecl*Cyc_Tcdecl_xdatatypefielddecl_t;

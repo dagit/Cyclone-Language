@@ -107,20 +107,19 @@ static list_t<`b,`r> cmap_c(region_t<`r> r,`b f(`c,`a), `c env, clist_t<`a> x)
 // assigning it the type new_type where some occurrences of
 // unique regions are replaced with tv.
 static void check_alias_coercion(tenv_t tenv, seg_t loc, type_t old_type, 
-                                 tvar_t tv, type_t new_type) {
-  region temp;
-  let inst = rnew(temp) List{rnew(temp) $(tv,(type_t)&UniqueRgn_val),NULL};
-  let inst_new_type = rsubstitute(temp,inst,new_type);
-  if (silent_castable(tenv,loc,old_type,inst_new_type)) {
+                                 tvar_t tv, type_t new_type, 
+                                 exp_t initializer) {
+  list_t<$(type_t,type_t)@> assump = new List{new $(&UniqueRgn_val,new VarType(tv)), NULL};
+  if (subtype(tenv, assump, old_type, new_type)) {
+    // next, check that the types are pointer types
+    unchecked_cast(tenv,initializer,new_type,Other_coercion);
     switch $(compress(new_type),compress(new_type)) {
     case $(&PointerType(pold), &PointerType(pnew)): break;
-      //FIX: now we need to check that the deep things work out...
     default: terr(loc,"alias requires pointer type"); break;
     }
   } else {
     terr(loc,"cannot alias value of type %s to type %s\n",
          typ2string(old_type), typ2string(new_type));
-    explain_failure();
   }
 }
 
@@ -624,7 +623,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
           // need to check the compatibility of the expression's
           // type with the variable's
-          check_alias_coercion(te2,d->loc,(type_t)e->topt,tv,vd->type);
+          check_alias_coercion(te2,d->loc,(type_t)e->topt,tv,vd->type,e);
 
           // check the body
           tcStmt(te2,s,false);

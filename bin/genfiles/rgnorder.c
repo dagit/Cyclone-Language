@@ -995,13 +995,13 @@ struct Cyc_Absyn_Kind*Cyc_Tcutil_tvar_kind(struct Cyc_Absyn_Tvar*t,struct Cyc_Ab
 struct Cyc_Absyn_Kind*Cyc_Tcutil_typ_kind(void*t);
 # 65
 void*Cyc_Tcutil_compress(void*t);
-# 101
+# 104
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 150
+# 153
 int Cyc_Tcutil_unify(void*,void*);
-# 287 "tcutil.h"
+# 290 "tcutil.h"
 void*Cyc_Tcutil_normalize_effect(void*e);
-# 338
+# 341
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;

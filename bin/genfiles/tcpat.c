@@ -1081,36 +1081,36 @@ struct Cyc_Absyn_Kind*Cyc_Tcutil_typ_kind(void*t);
 void*Cyc_Tcutil_compress(void*t);
 # 74
 int Cyc_Tcutil_coerceable(void*);
-# 100
+# 103
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ak;
-# 109
+# 112
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tmk;
-# 116
+# 119
 extern struct Cyc_Core_Opt Cyc_Tcutil_rko;
 extern struct Cyc_Core_Opt Cyc_Tcutil_ako;
-# 119
+# 122
 extern struct Cyc_Core_Opt Cyc_Tcutil_mko;
-# 123
+# 126
 extern struct Cyc_Core_Opt Cyc_Tcutil_trko;
-# 150
+# 153
 int Cyc_Tcutil_unify(void*,void*);
-# 155
+# 158
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);struct _tuple11{struct Cyc_List_List*f1;struct _RegionHandle*f2;};struct _tuple12{struct Cyc_Absyn_Tvar*f1;void*f2;};
-# 169
+# 172
 struct _tuple12*Cyc_Tcutil_r_make_inst_var(struct _tuple11*,struct Cyc_Absyn_Tvar*);
-# 217 "tcutil.h"
+# 220 "tcutil.h"
 void Cyc_Tcutil_check_unique_vars(struct Cyc_List_List*vs,unsigned int loc,struct _dyneither_ptr err_msg);
-# 232
+# 235
 struct Cyc_List_List*Cyc_Tcutil_resolve_aggregate_designators(struct _RegionHandle*rgn,unsigned int loc,struct Cyc_List_List*des,enum Cyc_Absyn_AggrKind,struct Cyc_List_List*fields);
-# 260
+# 263
 int Cyc_Tcutil_is_noalias_pointer(void*t);
-# 270
+# 273
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(struct _RegionHandle*,void*t);
-# 290
+# 293
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
-# 309
+# 312
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 338
+# 341
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 32 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);struct Cyc_Tcexp_TestEnv{struct _tuple0*eq;int isTrue;};

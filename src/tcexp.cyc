@@ -1177,12 +1177,21 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
             }
           }
         }
-        // Check that the effect of the function is compatible with the current
-        // capability.  May be delayed.
-        Tcenv::check_effect_accessible(te, loc, (type_t)eff);
-        // Check that the function's partial-order on region lifetimes
-        // is compatible with the current region partial order. May be delayed.
-        Tcenv::check_rgn_partial_order(te, loc, rgn_po);
+        if (*alias_arg_exps == NULL) {
+          // JGM: we can't do these checks when we're going to re-type
+          // something due to insertion of alias's because they're likely
+          // to be delayed and later cause a failure where there should be
+          // none.  Note, however, this depends crucially on the caller
+          // of TcFnCall to check that alias_arg_exps is not NULL and
+          // loop around again.
+          // Check that the effect of the function is compatible with the 
+          // current capability.  May be delayed.
+          Tcenv::check_effect_accessible(te, loc, (type_t)eff);
+          // Check that the function's partial-order on region lifetimes
+          // is compatible with the current region partial order. May be 
+          // delayed.
+          Tcenv::check_rgn_partial_order(te, loc, rgn_po);
+        }
         return res_typ;
       default: return expr_err(te,loc,topt,"expected pointer to function");
       }
@@ -2665,6 +2674,7 @@ static void insert_alias_stmts(tenv_t te, exp_t e, exp_t fn_exp,
     //   and re-typecheck
     e->topt = NULL;
     e->r = fn_exp->r;
+    //fprintf(stderr,"New expression is:\n\t%s\n",exp2string(e));
   }
 }
 

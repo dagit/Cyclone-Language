@@ -1248,15 +1248,15 @@ typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
 void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 65
 void*Cyc_Tcutil_compress(void*t);
-# 99
+# 102
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
-# 101
+# 104
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 126
+# 129
 extern struct Cyc_Core_Opt Cyc_Tcutil_tmko;
-# 134
+# 137
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 338 "tcutil.h"
+# 341 "tcutil.h"
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 25 "cyclone.h"
 extern int Cyc_Cyclone_tovc_r;

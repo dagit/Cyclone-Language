@@ -1038,9 +1038,9 @@ typedef void*Cyc_Tcenv_jumpee_t;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;st
 typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
 # 65 "tcutil.h"
 void*Cyc_Tcutil_compress(void*t);
-# 164
+# 167
 void*Cyc_Tcutil_fndecl2typ(struct Cyc_Absyn_Fndecl*);
-# 338 "tcutil.h"
+# 341 "tcutil.h"
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);
 # 35 "toc.h"
 struct _tuple0*Cyc_Toc_temp_var();

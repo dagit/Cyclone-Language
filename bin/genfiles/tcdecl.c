@@ -1009,19 +1009,19 @@ typedef struct Cyc_Tcenv_Fenv*Cyc_Tcenv_fenv_t;struct Cyc_Tcenv_NotLoop_j_Tcenv_
 typedef void*Cyc_Tcenv_jumpee_t;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Dict_Dict ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof;};
 # 96
 typedef struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tenv_t;
-# 135 "tcutil.h"
+# 138 "tcutil.h"
 int Cyc_Tcutil_unify_kindbound(void*,void*);
-# 148
+# 151
 void Cyc_Tcutil_explain_failure();
-# 150
-int Cyc_Tcutil_unify(void*,void*);
 # 153
+int Cyc_Tcutil_unify(void*,void*);
+# 156
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
-# 230 "tcutil.h"
+# 233 "tcutil.h"
 int Cyc_Tcutil_equal_tqual(struct Cyc_Absyn_Tqual tq1,struct Cyc_Absyn_Tqual tq2);
-# 302
+# 305
 int Cyc_Tcutil_same_atts(struct Cyc_List_List*,struct Cyc_List_List*);
-# 338
+# 341
 void Cyc_Tcutil_check_no_qual(unsigned int loc,void*t);struct Cyc_PP_Ppstate;
 # 41 "pp.h"
 typedef struct Cyc_PP_Ppstate*Cyc_PP_ppstate_t;struct Cyc_PP_Out;

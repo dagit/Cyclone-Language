@@ -165,12 +165,12 @@ void remove(queue_t<`a,`r> q,`a v) {
 
   do {
     x = ptr_take(q);
-    { alias<`f> _*`f y = x;
+    { alias<`f> `a*`f y = x;
       if (f(env,y)) ok = true; 
     }
     rpush(g,saveq,x);
-    if (ok) break;
-  } while (!is_empty(q));
+    if (ok) break; 
+  } while (!is_empty(q)); 
 
   if (ok)
     x = ptr_take(saveq);
