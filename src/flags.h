@@ -29,6 +29,8 @@ extern bool porting_c_code;
   // heap allocates everything)
 extern bool no_regions;
 
+extern bool no_reaps;
+
   // if true, the parser ignores the "register" scope, simply translating
   // it as public (the default)
 extern bool no_register;

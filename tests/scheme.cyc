@@ -44,7 +44,7 @@ extern "C include" {
   // get a new region, it's key, and it's counter
   static struct NewCounterRgn new_ukey_and_counter() {
     struct Cyc_Scheme_NewCounterRgn res;
-    res.cr.key = Cyc_Core__new_ukey("internal error","internal error",0).key;
+    res.cr.key = Cyc_Core__new_ukey(0,"internal error","internal error",0).key;
     res.cr.ctr = 0;
     return res;
   }
@@ -54,7 +54,7 @@ extern "C include" {
   // so forth.  
   static struct CounterRgn<next_rgn<`r>> next_key(rgn_ctr_t<`r> c; {}) {
     struct Cyc_Scheme_CounterRgn cr;
-    cr.key = Cyc_Core__new_ukey("internal error","internal error",0).key;
+    cr.key = Cyc_Core__new_ukey(0,"internal error","internal error",0).key;
     cr.ctr = 0;
     return cr;
   }

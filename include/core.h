@@ -262,25 +262,35 @@ struct NewDynamicRegion<`q::Q> {
       dynamic region [`r].  The struct hides the name of the
       region and must be opened, guaranteeing that the type-level
       name is unique. */
-
- struct NewDynamicRegion<UNIQUE> _new_ukey(const char *file,
-					   const char *func,
-					   int lineno);
+  
+  struct NewDynamicRegion<UNIQUE> _new_ukey(unsigned int dis_reaps,
+					    const char *file,
+					    const char *func,
+					    int lineno);
   /** [new_ukey()] creates a fresh dynamic region [`r] and returns
       a unique key for that region. */
-
-  struct NewDynamicRegion<REFCNT> _new_rckey(const char *file,
+  
+  struct NewDynamicRegion<REFCNT> _new_rckey(unsigned int dis_reaps,
+					     const char *file,
 					     const char *func,
 					     int lineno);
-  /** [new_rckey()] creates a fresh dynamic region [`r] and returns
-      a reference-counted key for that region. */
 
+#ifndef _CYC_INTERNAL_DISABLE_REAPS
 #ifndef CYC_REGION_PROFILE
-#define new_ukey() _new_ukey("internal-error","internal-error",0)
-#define new_rckey() _new_rckey("internal-error","internal-error",0)
+#define new_ukey() _new_ukey(0,"internal-error","internal-error",0)
+#define new_rckey() _new_rckey(0,"internal-error","internal-error",0)
 #else
-#define new_ukey() _new_ukey(__FILE__,"",__LINE__)
-#define new_rckey() _new_rckey(__FILE__,"",__LINE__)
+#define new_ukey() _new_ukey(0,__FILE__,"",__LINE__)
+#define new_rckey() _new_rckey(0,__FILE__,"",__LINE__)
+#endif
+#else 
+#ifndef CYC_REGION_PROFILE
+#define new_ukey() _new_ukey(1,"internal-error","internal-error",0)
+#define new_rckey() _new_rckey(1,"internal-error","internal-error",0)
+#else
+#define new_ukey() _new_ukey(1,__FILE__,"",__LINE__)
+#define new_rckey() _new_rckey(1,__FILE__,"",__LINE__)
+#endif
 #endif
 
   void free_ukey(uregion_key_t<`r> k; {})  __attribute__((consume(1)));

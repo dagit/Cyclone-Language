@@ -3585,20 +3585,24 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           exp_to_c(nv,open_exp_opt);
           exp_t arg = address_exp(aggrarrow_exp(open_exp_opt,new "h",DL),DL);
           s->r = declare_stmt(x_var,rh_struct_ptr_typ,arg,body,DL)->r;
-        } else
+        } else {
 	  // struct _RegionHandle rh = _new_region();
 	  // struct _RegionHandle *x = &rh;
 	  // _push_region(x);
 	  // body;
 	  // _pop_region(x);
+	  let _zero_exp = uint_exp(0,0);
+	  let _one_exp = uint_exp(1,0);
+	  let rgn_flag_exp = Flags::no_reaps ? _one_exp : _zero_exp;
           s->r = declare_stmt(rh_var,rh_struct_typ,
-		   fncall_exp_dl(_new_region_e, string_exp(*(*x_var)[1],DL)),
-                 declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
-		 seq_stmt(exp_stmt(fncall_exp_dl(_push_region_e, x_exp),DL),
-                 seq_stmt(body,
-			  exp_stmt(fncall_exp_dl(_pop_region_e),
-				   DL),DL),DL),DL),DL)->r;
-        return;
+			      fncall_exp_dl(_new_region_e, rgn_flag_exp, string_exp(*(*x_var)[1],DL)),
+			      declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
+					   seq_stmt(exp_stmt(fncall_exp_dl(_push_region_e, x_exp),DL),
+						    seq_stmt(body,
+							     exp_stmt(fncall_exp_dl(_pop_region_e),
+								      DL),DL),DL),DL),DL)->r;
+	}
+	return;
       default: Warn::impos2("bad nested declaration within function");
       }
       return;

@@ -534,7 +534,7 @@ struct bget_region {
   /* Automatic expansion block management functions */
   
   int (*compfcn) _((bget_rgn_key_t reg, bufsize sizereq, int sequence)) ;
-  void *(*acqfcn) _((bget_rgn_key_t reg, bufsize size));
+  void *(*acqfcn) _((void *priv, bufsize size, bufsize *incr));
   void (*relfcn) _((bget_rgn_key_t reg, void *buf));
   
   bufsize exp_incr;	      /* Expansion block size */
@@ -563,7 +563,7 @@ long *numprel = &reg->numprel; \
 long *numdget = &reg->numdget; \
 long *numdrel = &reg->numdrel; \
 int (*compfcn) _((bget_rgn_key_t reg,bufsize sizereq, int sequence)) = reg->compfcn; \
-void *(*acqfcn) _((bget_rgn_key_t reg,bufsize size)) = reg->acqfcn; \
+void *(*acqfcn) _((void *reg,bufsize size,bufsize *incr)) = reg->acqfcn; \
 void (*relfcn) _((bget_rgn_key_t reg,void *buf)) = reg->relfcn; \
 bufsize *exp_incr = &reg->exp_incr; \
 bufsize *pool_len = &reg->pool_len
@@ -590,7 +590,7 @@ long *numprel = &reg->numprel; \
 long *numdget = &reg->numdget; \
 long *numdrel = &reg->numdrel; \
 int (*compfcn) _((bget_rgn_key_t reg,bufsize sizereq, int sequence)) = reg->compfcn; \
-void *(*acqfcn) _((bget_rgn_key_t reg,bufsize size)) = reg->acqfcn; \
+void *(*acqfcn) _((void *reg,bufsize size,bufsize *incr)) = reg->acqfcn; \
 void (*relfcn) _((bget_rgn_key_t reg,void *buf)) = reg->relfcn; \
 bufsize *exp_incr = &reg->exp_incr; \
 bufsize *pool_len = &reg->pool_len
@@ -650,6 +650,11 @@ bufsize *pool_len = &reg->pool_len
    bufsize, defined in a way that the compiler will accept. */
 
 #define ESent	((bufsize) (-(((1L << (sizeof(bufsize) * 8 - 2)) - 1) * 2) - 2))
+
+
+unsigned int bget_get_static_overhead() {
+  return (sizeof(struct bget_region) + sizeof(struct bget_region_key));
+}
 
 /*  BGET  --  Allocate a buffer.  */
 
@@ -739,7 +744,7 @@ void *bget(bget_rgn_key_t regkey, bufsize requested_size)
 
 #ifdef BufStats
 	  *totalloc += size;
-	  *numget++;		  /* Increment number of bget() calls */
+	  (*numget)++;		  /* Increment number of bget() calls */
 #endif
 	  buf = (void *) ((((char *) ba) + sizeof(struct bhead)));
 	  return buf;
@@ -759,7 +764,7 @@ void *bget(bget_rgn_key_t regkey, bufsize requested_size)
 
 #ifdef BufStats
 	  *totalloc += b->bh.bsize;
-	  *numget++;		  /* Increment number of bget() calls */
+	  (*numget)++;		  /* Increment number of bget() calls */
 #endif
 	  /* Negate size to mark buffer allocated. */
 	  b->bh.bsize = -(b->bh.bsize);
@@ -789,47 +794,44 @@ void *bget(bget_rgn_key_t regkey, bufsize requested_size)
   /* No buffer available with requested size free. */
 
   /* Don't give up yet -- look in the reserve supply. */
-
+  
   if (acqfcn != NULL) {
-    if (size > *exp_incr - sizeof(struct bhead)) {
-
-      /* Request	is  too  large	to  fit in a single expansion
-	 block.  Try to satisy it by a direct buffer acquisition. */
-
-      struct bdhead *bdh;
-
-      size += sizeof(struct bdhead) - sizeof(struct bhead);
-      if ((bdh = BDH((*acqfcn)(regkey, (bufsize) size))) != NULL) {
-
-	/*  Mark the buffer special by setting the size field
-	    of its header to zero.  */
-	bdh->bh.bsize = 0;
-	bdh->bh.prevfree = 0;
-	bdh->tsize = size;
-#ifdef BufStats
-	*totalloc += size;
-	*numget++;	      /* Increment number of bget() calls */
-	*numdget++;	      /* Direct bget() call count */
-#endif
-	buf =  (void *) (bdh + 1);
-	return buf;
-      }
-
-    } else {
-
+    /*     if (size > *exp_incr - sizeof(struct bhead)) { */
+/*       bufsize next = *exp_incr *2; */
+/*       *exp_incr = size > (next - sizeof(struct bhead)) ? size: next; */
+/*     } */
+/*       /\* Request	is  too  large	to  fit in a single expansion */
+/* 	 block.  Try to satisy it by a direct buffer acquisition. *\/ */
+/*       struct bdhead *bdh; */
+/*       size += sizeof(struct bdhead) - sizeof(struct bhead); */
+/*       if ((bdh = BDH((*acqfcn)(regkey, (bufsize) size))) != NULL) { */
+/* 	/\*  Mark the buffer special by setting the size field */
+/* 	    of its header to zero.  *\/ */
+/* 	bdh->bh.bsize = 0; */
+/* 	bdh->bh.prevfree = 0; */
+/* 	bdh->tsize = size; */
+/* #ifdef BufStats */
+/* 	*totalloc += size; */
+/* 	(*numget)++;	      /\* Increment number of bget() calls *\/ */
+/* 	(*numdget)++;	      /\* Direct bget() call count *\/ */
+/* #endif */
+/* 	buf =  (void *) (bdh + 1); */
+/* 	return buf; */
+/*       } */
+/*     } */
+    
       /*	Try to obtain a new expansion block */
-
-      void *newpool;
-
-      if ((newpool = (*acqfcn)(regkey,(bufsize)*exp_incr)) != NULL) {
-	bpool(regkey, newpool, *exp_incr);
-	buf =  bget(regkey, requested_size);  /* This can't, I say, can't
-					      get into a loop. */
-	return buf;
-      }
+    size += sizeof(struct bdhead) - sizeof(struct bhead);
+    void *newpool;      
+    if ((newpool = (*acqfcn)(regkey->priv,size,exp_incr)) != NULL) {
+      bpool(regkey, newpool, *exp_incr);
+      buf =  bget(regkey, requested_size);  /* This can't, I say, can't
+					       get into a loop. */
+      return buf;
     }
+    //    }
   }
-
+  
   /*	Still no buffer available */
 
 #endif /* BECtl */
@@ -909,7 +911,7 @@ void brel(bget_rgn_key_t regkey, void *buf)
   UNPACK_REGION(regkey);
   b = BFH(((char *) buf) - sizeof(struct bhead));
 #ifdef BufStats
-  *numrel++;			      /* Increment number of brel() calls */
+  (*numrel)++;			      /* Increment number of brel() calls */
 #endif
   assert(buf != NULL);
 
@@ -922,7 +924,7 @@ void brel(bget_rgn_key_t regkey, void *buf)
 #ifdef BufStats
     *totalloc -= bdh->tsize;
     assert(*totalloc >= 0);
-    *numdrel++;		      /* Number of direct releases */
+    (*numdrel)++;		      /* Number of direct releases */
 #endif /* BufStats */
 #ifdef FreeWipe
     V memset((char *) buf, 0x55,
@@ -1039,8 +1041,8 @@ void brel(bget_rgn_key_t regkey, void *buf)
 
     (*relfcn)(regkey, b);
 #ifdef BufStats
-    *numprel++;		      /* Nr of expansion block releases */
-    *numpblk--;		      /* Total number of blocks */
+    (*numprel)++;		      /* Nr of expansion block releases */
+    (*numpblk)--;		      /* Total number of blocks */
     assert(*numpblk == *numpget - *numprel);
 #endif /* BufStats */
   }
@@ -1053,7 +1055,7 @@ void brel(bget_rgn_key_t regkey, void *buf)
 
 void bectl(bget_rgn_key_t regkey,
 	   int (*compact) _((bget_rgn_key_t regkey,bufsize sizereq, int sequence)),
-	   void *(*acquire) _((bget_rgn_key_t regkey,bufsize size)),
+	   void *(*acquire) _((void *regkey,bufsize size,bufsize *incr)),
 	   void (*release) _((bget_rgn_key_t regkey,void *buf)),
 	   bufsize pool_incr)
 {
@@ -1083,8 +1085,8 @@ void bpool(bget_rgn_key_t regkey,
     *pool_len = -1;
   }
 #ifdef BufStats
-  *numpget++;			      /* Number of block acquisitions */
-  *numpblk++;			      /* Number of blocks total */
+  (*numpget)++;			      /* Number of block acquisitions */
+  (*numpblk)++;			      /* Number of blocks total */
   assert(*numpblk == *numpget - *numprel);
 #endif /* BufStats */
 #endif /* BECtl */
@@ -1336,14 +1338,15 @@ int bpoolv(bget_rgn_key_t regkey,
 }
 #endif /* BufValid */
 
-struct bget_region_list {
-  struct bget_region *hd;
-  struct bget_region_list *next;
-  struct bget_region_list *prev;
-};
+/* struct bget_region_list { */
+/*   struct bget_region *hd; */
+/*   struct bget_region_list *next; */
+/*   struct bget_region_list *prev; */
+/* }; */
 
-typedef struct bget_region_list *bget_region_list_t;
-static struct bget_region region_list = {0,0,0};
+/* typedef struct bget_region_list *bget_region_list_t; */
+/* static struct bget_region region_list = {0,0,0}; */
+
 static int region_counter =0;
 
 #define GRAB_NEXT_ID ++region_counter
@@ -1354,37 +1357,31 @@ static int region_counter =0;
 
 bget_rgn_key_t  bget_init_region(void *buf, bufsize len)
 {
-  bget_rgn_key_t regkey = (bget_rgn_key_t)MALLOC(sizeof(struct bget_region_key) + sizeof(struct bget_region));
+  assert(len > (sizeof(struct bget_region_key) + sizeof(struct bget_region)));
+  bget_rgn_key_t regkey = (bget_rgn_key_t)buf;
+  //(bget_rgn_key_t)MALLOC(sizeof(struct bget_region_key) + sizeof(struct bget_region));
   regkey->reg = ((void*)regkey)+sizeof(struct bget_region_key);
   regkey->priv = 0;
   bget_region_t reg = regkey->reg;
+  buf = (((char*)buf) + (sizeof(struct bget_region_key) + sizeof(struct bget_region)));
   V memset(reg, 0, sizeof(struct bget_region));
   reg->id = GRAB_NEXT_ID;
   reg->freelist.ql.flink = reg->freelist.ql.blink = &reg->freelist;
-  GRAB_LOCK;
-  bget_region_t tmp = region_list.next;
-  region_list.next = reg;
-  reg->next = tmp;
-  if(tmp)
-    tmp->prev = reg;
-  reg->prev = &region_list;
-  REL_LOCK;
-  bpool(regkey, buf, len);
+  bpool(regkey, buf, len-(sizeof(struct bget_region_key) + sizeof(struct bget_region)));
   return regkey;
 }
 
 void  bget_drop_region (bget_rgn_key_t regkey)
 {
   //unlink from the list
-  assert(regkey->reg != &region_list);
-  bget_region_t reg = regkey->reg;
-  reg->prev->next = reg->next;
-  if(reg->next)
-    reg->next->prev = reg->prev;
-  reg->prev = reg->next = 0;
-  
+/*   assert(regkey->reg != &region_list); */
+/*   bget_region_t reg = regkey->reg; */
+/*   reg->prev->next = reg->next; */
+/*   if(reg->next) */
+/*     reg->next->prev = reg->prev; */
+/*   reg->prev = reg->next = 0; */
   //freelist should be explicitly freed by the application
-  FREE(regkey);
+  //  FREE(regkey);
 }
 
 /***********************\
@@ -1393,351 +1390,351 @@ void  bget_drop_region (bget_rgn_key_t regkey)
  *			*
 \***********************/
 
-#ifdef TestProg
+/* #ifdef TestProg */
 
-#define Repeatable  1		      /* Repeatable pseudorandom sequence */
-				      /* If Repeatable is not defined, a
-					 time-seeded pseudorandom sequence
-					 is generated, exercising BGET with
-					 a different pattern of calls on each
-					 run. */
-#define OUR_RAND		      /* Use our own built-in version of
-					 rand() to guarantee the test is
-					 100% repeatable. */
+/* #define Repeatable  1		      /\* Repeatable pseudorandom sequence *\/ */
+/* 				      /\* If Repeatable is not defined, a */
+/* 					 time-seeded pseudorandom sequence */
+/* 					 is generated, exercising BGET with */
+/* 					 a different pattern of calls on each */
+/* 					 run. *\/ */
+/* #define OUR_RAND		      /\* Use our own built-in version of */
+/* 					 rand() to guarantee the test is */
+/* 					 100% repeatable. *\/ */
 
-#ifdef BECtl
-#define PoolSize    300000	      /* Test buffer pool size */
-#else
-#define PoolSize    50000	      /* Test buffer pool size */
-#endif
-#define ExpIncr     32768	      /* Test expansion block size */
-#define CompactTries 10 	      /* Maximum tries at compacting */
+/* #ifdef BECtl */
+/* #define PoolSize    300000	      /\* Test buffer pool size *\/ */
+/* #else */
+/* #define PoolSize    50000	      /\* Test buffer pool size *\/ */
+/* #endif */
+/* #define ExpIncr     32768	      /\* Test expansion block size *\/ */
+/* #define CompactTries 10 	      /\* Maximum tries at compacting *\/ */
 
-#define dumpAlloc   0		      /* Dump allocated buffers ? */
-#define dumpFree    0		      /* Dump free buffers ? */
+/* #define dumpAlloc   0		      /\* Dump allocated buffers ? *\/ */
+/* #define dumpFree    0		      /\* Dump free buffers ? *\/ */
 
-#ifndef Repeatable
-extern long time();
-#endif
+/* #ifndef Repeatable */
+/* extern long time(); */
+/* #endif */
 
-extern char *malloc();
-extern int free _((char *));
+/* extern char *malloc(); */
+/* extern int free _((char *)); */
 
-static char *bchain = NULL;	      /* Our private buffer chain */
-static char *bp = NULL; 	      /* Our initial buffer pool */
+/* static char *bchain = NULL;	      /\* Our private buffer chain *\/ */
+/* static char *bp = NULL; 	      /\* Our initial buffer pool *\/ */
 
-#include <math.h>
+/* #include <math.h> */
 
-#ifdef OUR_RAND
+/* #ifdef OUR_RAND */
 
-static unsigned long int next = 1;
+/* static unsigned long int next = 1; */
 
-/* Return next random integer */
+/* /\* Return next random integer *\/ */
 
-int rand()
-{
-  next = next * 1103515245L + 12345;
-  return (unsigned int) (next / 65536L) % 32768L;
-}
+/* int rand() */
+/* { */
+/*   next = next * 1103515245L + 12345; */
+/*   return (unsigned int) (next / 65536L) % 32768L; */
+/* } */
 
-/* Set seed for random generator */
+/* /\* Set seed for random generator *\/ */
 
-void srand(seed)
-     unsigned int seed;
-{
-  next = seed;
-}
-#endif
+/* void srand(seed) */
+/*      unsigned int seed; */
+/* { */
+/*   next = seed; */
+/* } */
+/* #endif */
 
-/*  STATS  --  Edit statistics returned by bstats() or bstatse().  */
+/* /\*  STATS  --  Edit statistics returned by bstats() or bstatse().  *\/ */
 
-static void stats(bget_rgn_key_t regkey, char *when)
-{
-  bufsize cural, totfree, maxfree;
-  long nget, nfree;
-#ifdef BECtl
-  bufsize pincr;
-  long totblocks, npget, nprel, ndget, ndrel;
-#endif
+/* static void stats(bget_rgn_key_t regkey, char *when) */
+/* { */
+/*   bufsize cural, totfree, maxfree; */
+/*   long nget, nfree; */
+/* #ifdef BECtl */
+/*   bufsize pincr; */
+/*   long totblocks, npget, nprel, ndget, ndrel; */
+/* #endif */
 
-  bstats(regkey, &cural, &totfree, &maxfree, &nget, &nfree);
-  V printf(
-	   "region %d -- %s: %ld gets, %ld releases.  %ld in use, %ld free, largest = %ld\n",
-	   regkey->reg->id, when, nget, nfree, (long) cural, (long) totfree, (long) maxfree);
-#ifdef BECtl
-  bstatse(regkey, &pincr, &totblocks, &npget, &nprel, &ndget, &ndrel);
-  V printf(
-	   "  Blocks: size = %ld, %ld (%ld bytes) in use, %ld gets, %ld frees\n",
-	   (long)pincr, totblocks, pincr * totblocks, npget, nprel);
-  V printf("  %ld direct gets, %ld direct frees\n", ndget, ndrel);
-#endif /* BECtl */
-}
+/*   bstats(regkey, &cural, &totfree, &maxfree, &nget, &nfree); */
+/*   V printf( */
+/* 	   "region %d -- %s: %ld gets, %ld releases.  %ld in use, %ld free, largest = %ld\n", */
+/* 	   regkey->reg->id, when, nget, nfree, (long) cural, (long) totfree, (long) maxfree); */
+/* #ifdef BECtl */
+/*   bstatse(regkey, &pincr, &totblocks, &npget, &nprel, &ndget, &ndrel); */
+/*   V printf( */
+/* 	   "  Blocks: size = %ld, %ld (%ld bytes) in use, %ld gets, %ld frees\n", */
+/* 	   (long)pincr, totblocks, pincr * totblocks, npget, nprel); */
+/*   V printf("  %ld direct gets, %ld direct frees\n", ndget, ndrel); */
+/* #endif /\* BECtl *\/ */
+/* } */
 
-#ifdef BECtl
-static int protect = 0; 	      /* Disable compaction during bgetr() */
+/* #ifdef BECtl */
+/* static int protect = 0; 	      /\* Disable compaction during bgetr() *\/ */
 
-/*  BCOMPACT  --  Compaction call-back function.  */
+/* /\*  BCOMPACT  --  Compaction call-back function.  *\/ */
 
-static int bcompact(bget_rgn_key_t regkey, 
-		    bufsize bsize,
-		    int seq)
-{
-#ifdef CompactTries
-  char *bc = bchain;
-  int i = rand() & 0x3;
+/* static int bcompact(bget_rgn_key_t regkey,  */
+/* 		    bufsize bsize, */
+/* 		    int seq) */
+/* { */
+/* #ifdef CompactTries */
+/*   char *bc = bchain; */
+/*   int i = rand() & 0x3; */
 
-#ifdef COMPACTRACE
-  V printf("Compaction requested.  %ld bytes needed, sequence %d.\n",
-	   (long) bsize, seq);
-#endif
+/* #ifdef COMPACTRACE */
+/*   V printf("Compaction requested.  %ld bytes needed, sequence %d.\n", */
+/* 	   (long) bsize, seq); */
+/* #endif */
 
-  if (protect || (seq > CompactTries)) {
-#ifdef COMPACTRACE
-    V printf("Compaction gave up.\n");
-#endif
-    return 0;
-  }
+/*   if (protect || (seq > CompactTries)) { */
+/* #ifdef COMPACTRACE */
+/*     V printf("Compaction gave up.\n"); */
+/* #endif */
+/*     return 0; */
+/*   } */
 
-  /* Based on a random cast, release a random buffer in the list
-     of allocated buffers. */
+/*   /\* Based on a random cast, release a random buffer in the list */
+/*      of allocated buffers. *\/ */
 
-  while (i > 0 && bc != NULL) {
-    bc = *((char **) bc);
-    i--;
-  }
-  if (bc != NULL) {
-    char *fb;
+/*   while (i > 0 && bc != NULL) { */
+/*     bc = *((char **) bc); */
+/*     i--; */
+/*   } */
+/*   if (bc != NULL) { */
+/*     char *fb; */
 
-    fb = *((char **) bc);
-    if (fb != NULL) {
-      *((char **) bc) = *((char **) fb);
-      brel(regkey, (void *) fb);
-      return 1;
-    }
-  }
+/*     fb = *((char **) bc); */
+/*     if (fb != NULL) { */
+/*       *((char **) bc) = *((char **) fb); */
+/*       brel(regkey, (void *) fb); */
+/*       return 1; */
+/*     } */
+/*   } */
 
-#ifdef COMPACTRACE
-  V printf("Compaction bailed out.\n");
-#endif
-#endif /* CompactTries */
-  return 0;
-}
+/* #ifdef COMPACTRACE */
+/*   V printf("Compaction bailed out.\n"); */
+/* #endif */
+/* #endif /\* CompactTries *\/ */
+/*   return 0; */
+/* } */
 
-/*  BEXPAND  --  Expand pool call-back function.  */
+/* /\*  BEXPAND  --  Expand pool call-back function.  *\/ */
 
-static void *bexpand(bget_rgn_key_t regkey, bufsize size)
-{
-  void *np = NULL;
-  bufsize cural, totfree, maxfree;
-  long nget, nfree;
+/* static void *bexpand(bget_rgn_key_t regkey, bufsize size) */
+/* { */
+/*   void *np = NULL; */
+/*   bufsize cural, totfree, maxfree; */
+/*   long nget, nfree; */
 
-  /* Don't expand beyond the total allocated size given by PoolSize. */
+/*   /\* Don't expand beyond the total allocated size given by PoolSize. *\/ */
 
-  bstats(regkey, &cural, &totfree, &maxfree, &nget, &nfree);
+/*   bstats(regkey, &cural, &totfree, &maxfree, &nget, &nfree); */
 
-  if (cural < PoolSize) {
-    np = (void *) malloc((unsigned) size);
-  }
-#ifdef EXPTRACE
-  V printf("Expand pool by %ld -- %s.\n", (long) size,
-	   np == NULL ? "failed" : "succeeded");
-#endif
-  return np;
-}
+/*   if (cural < PoolSize) { */
+/*     np = (void *) malloc((unsigned) size); */
+/*   } */
+/* #ifdef EXPTRACE */
+/*   V printf("Expand pool by %ld -- %s.\n", (long) size, */
+/* 	   np == NULL ? "failed" : "succeeded"); */
+/* #endif */
+/*   return np; */
+/* } */
 
-/*  BSHRINK  --  Shrink buffer pool call-back function.  */
+/* /\*  BSHRINK  --  Shrink buffer pool call-back function.  *\/ */
 
-static void bshrink(bget_rgn_key_t regkey, void *buf)
-{
-  if (((char *) buf) == bp) {
-#ifdef EXPTRACE
-    V printf("Initial pool released.\n");
-#endif
-    bp = NULL;
-  }
-#ifdef EXPTRACE
-  V printf("Shrink pool.\n");
-#endif
-  free((char *) buf);
-}
+/* static void bshrink(bget_rgn_key_t regkey, void *buf) */
+/* { */
+/*   if (((char *) buf) == bp) { */
+/* #ifdef EXPTRACE */
+/*     V printf("Initial pool released.\n"); */
+/* #endif */
+/*     bp = NULL; */
+/*   } */
+/* #ifdef EXPTRACE */
+/*   V printf("Shrink pool.\n"); */
+/* #endif */
+/*   free((char *) buf); */
+/* } */
 
-#endif /* BECtl */
+/* #endif /\* BECtl *\/ */
 
-/*  Restrict buffer requests to those large enough to contain our pointer and
-    small enough for the CPU architecture.  */
+/* /\*  Restrict buffer requests to those large enough to contain our pointer and */
+/*     small enough for the CPU architecture.  *\/ */
 
-static bufsize blimit(bufsize bs)
-{
-  if (bs < sizeof(char *)) {
-    bs = sizeof(char *);
-  }
+/* static bufsize blimit(bufsize bs) */
+/* { */
+/*   if (bs < sizeof(char *)) { */
+/*     bs = sizeof(char *); */
+/*   } */
 
-  /* This is written out in this ugly fashion because the
-     cool expression in sizeof(int) that auto-configured
-     to any length int befuddled some compilers. */
+/*   /\* This is written out in this ugly fashion because the */
+/*      cool expression in sizeof(int) that auto-configured */
+/*      to any length int befuddled some compilers. *\/ */
 
-  if (sizeof(int) == 2) {
-    if (bs > 32767) {
-      bs = 32767;
-    }
-  } else {
-    if (bs > 200000) {
-      bs = 200000;
-    }
-  }
-  return bs;
-}
+/*   if (sizeof(int) == 2) { */
+/*     if (bs > 32767) { */
+/*       bs = 32767; */
+/*     } */
+/*   } else { */
+/*     if (bs > 200000) { */
+/*       bs = 200000; */
+/*     } */
+/*   } */
+/*   return bs; */
+/* } */
 
-int main()
-{
-  int i;
-  double x;
-  int regc;
-  /* Seed the random number generator.  If Repeatable is defined, we
-     always use the same seed.  Otherwise, we seed from the clock to
-     shake things up from run to run. */
+/* int main() */
+/* { */
+/*   int i; */
+/*   double x; */
+/*   int regc; */
+/*   /\* Seed the random number generator.  If Repeatable is defined, we */
+/*      always use the same seed.  Otherwise, we seed from the clock to */
+/*      shake things up from run to run. *\/ */
 
-#ifdef Repeatable
-  V srand(1234);
-#else
-  V srand((int) time((long *) NULL));
-#endif
+/* #ifdef Repeatable */
+/*   V srand(1234); */
+/* #else */
+/*   V srand((int) time((long *) NULL)); */
+/* #endif */
 
-  /*	Compute x such that pow(x, p) ranges between 1 and 4*ExpIncr as
-	p ranges from 0 to ExpIncr-1, with a concentration in the lower
-	numbers.  */
+/*   /\*	Compute x such that pow(x, p) ranges between 1 and 4*ExpIncr as */
+/* 	p ranges from 0 to ExpIncr-1, with a concentration in the lower */
+/* 	numbers.  *\/ */
 
-  x = 4.0 * ExpIncr;
-  x = log(x);
-  x = exp(log(4.0 * ExpIncr) / (ExpIncr - 1.0));
+/*   x = 4.0 * ExpIncr; */
+/*   x = log(x); */
+/*   x = exp(log(4.0 * ExpIncr) / (ExpIncr - 1.0)); */
   
-  for(regc=0;regc<10;regc++) {
+/*   for(regc=0;regc<10;regc++) { */
 
-#ifdef BECtl
-    bp = malloc(ExpIncr);
-    assert(bp != NULL);
-    bget_rgn_key_t regkey = bget_init_region(bp, (bufsize) ExpIncr);
-    bectl(regkey, bcompact, bexpand, bshrink, (bufsize) ExpIncr);
-    //    bpool((void *) bp, (bufsize) ExpIncr);
-#else
-    bp = malloc(PoolSize);
-    assert(bp != NULL);
-    bget_rgn_key_t regkey = bget_init_region(bp, (bufsize) ExpIncr);
-    //    bpool((void *) bp, (bufsize) PoolSize);
-#endif
+/* #ifdef BECtl */
+/*     bp = malloc(ExpIncr); */
+/*     assert(bp != NULL); */
+/*     bget_rgn_key_t regkey = bget_init_region(bp, (bufsize) ExpIncr); */
+/*     bectl(regkey, bcompact, bexpand, bshrink, (bufsize) ExpIncr); */
+/*     //    bpool((void *) bp, (bufsize) ExpIncr); */
+/* #else */
+/*     bp = malloc(PoolSize); */
+/*     assert(bp != NULL); */
+/*     bget_rgn_key_t regkey = bget_init_region(bp, (bufsize) ExpIncr); */
+/*     //    bpool((void *) bp, (bufsize) PoolSize); */
+/* #endif */
 
-    stats(regkey, "Create pool");
-    V bpoolv(regkey, (void *) bp);
-    bpoold(regkey, (void *) bp, dumpAlloc, dumpFree);
+/*     stats(regkey, "Create pool"); */
+/*     V bpoolv(regkey, (void *) bp); */
+/*     bpoold(regkey, (void *) bp, dumpAlloc, dumpFree); */
 
-    for (i = 0; i < TestProg; i++) {
-      char *cb;
-      bufsize bs = pow(x, (double) (rand() & (ExpIncr - 1)));
+/*     for (i = 0; i < TestProg; i++) { */
+/*       char *cb; */
+/*       bufsize bs = pow(x, (double) (rand() & (ExpIncr - 1))); */
 
-      assert(bs <= (((bufsize) 4) * ExpIncr));
-      bs = blimit(bs);
-      if (rand() & 0x400) {
-	cb = (char *) bgetz(regkey, bs);
-      } else {
-	cb = (char *) bget(regkey, bs);
-      }
-      if (cb == NULL) {
-#ifdef EasyOut
-	break;
-#else
-	char *bc = bchain;
+/*       assert(bs <= (((bufsize) 4) * ExpIncr)); */
+/*       bs = blimit(bs); */
+/*       if (rand() & 0x400) { */
+/* 	cb = (char *) bgetz(regkey, bs); */
+/*       } else { */
+/* 	cb = (char *) bget(regkey, bs); */
+/*       } */
+/*       if (cb == NULL) { */
+/* #ifdef EasyOut */
+/* 	break; */
+/* #else */
+/* 	char *bc = bchain; */
 
-	if (bc != NULL) {
-	  char *fb;
+/* 	if (bc != NULL) { */
+/* 	  char *fb; */
 
-	  fb = *((char **) bc);
-	  if (fb != NULL) {
-	    *((char **) bc) = *((char **) fb);
-	    brel(regkey, (void *) fb);
-	  }
-	  continue;
-	}
-#endif
-      }
-      *((char **) cb) = (char *) bchain;
-      bchain = cb;
+/* 	  fb = *((char **) bc); */
+/* 	  if (fb != NULL) { */
+/* 	    *((char **) bc) = *((char **) fb); */
+/* 	    brel(regkey, (void *) fb); */
+/* 	  } */
+/* 	  continue; */
+/* 	} */
+/* #endif */
+/*       } */
+/*       *((char **) cb) = (char *) bchain; */
+/*       bchain = cb; */
 
-      /* Based on a random cast, release a random buffer in the list
-	 of allocated buffers. */
+/*       /\* Based on a random cast, release a random buffer in the list */
+/* 	 of allocated buffers. *\/ */
 
-      if ((rand() & 0x10) == 0) {
-	char *bc = bchain;
-	int i = rand() & 0x3;
+/*       if ((rand() & 0x10) == 0) { */
+/* 	char *bc = bchain; */
+/* 	int i = rand() & 0x3; */
 
-	while (i > 0 && bc != NULL) {
-	  bc = *((char **) bc);
-	  i--;
-	}
-	if (bc != NULL) {
-	  char *fb;
+/* 	while (i > 0 && bc != NULL) { */
+/* 	  bc = *((char **) bc); */
+/* 	  i--; */
+/* 	} */
+/* 	if (bc != NULL) { */
+/* 	  char *fb; */
 
-	  fb = *((char **) bc);
-	  if (fb != NULL) {
-	    *((char **) bc) = *((char **) fb);
-	    brel(regkey, (void *) fb);
-	  }
-	}
-      }
+/* 	  fb = *((char **) bc); */
+/* 	  if (fb != NULL) { */
+/* 	    *((char **) bc) = *((char **) fb); */
+/* 	    brel(regkey, (void *) fb); */
+/* 	  } */
+/* 	} */
+/*       } */
 
-      /* Based on a random cast, reallocate a random buffer in the list
-	 to a random size */
+/*       /\* Based on a random cast, reallocate a random buffer in the list */
+/* 	 to a random size *\/ */
 
-      if ((rand() & 0x20) == 0) {
-	char *bc = bchain;
-	int i = rand() & 0x3;
+/*       if ((rand() & 0x20) == 0) { */
+/* 	char *bc = bchain; */
+/* 	int i = rand() & 0x3; */
 
-	while (i > 0 && bc != NULL) {
-	  bc = *((char **) bc);
-	  i--;
-	}
-	if (bc != NULL) {
-	  char *fb;
+/* 	while (i > 0 && bc != NULL) { */
+/* 	  bc = *((char **) bc); */
+/* 	  i--; */
+/* 	} */
+/* 	if (bc != NULL) { */
+/* 	  char *fb; */
 
-	  fb = *((char **) bc);
-	  if (fb != NULL) {
-	    char *newb;
+/* 	  fb = *((char **) bc); */
+/* 	  if (fb != NULL) { */
+/* 	    char *newb; */
 
-	    bs = pow(x, (double) (rand() & (ExpIncr - 1)));
-	    bs = blimit(bs);
-#ifdef BECtl
-	    protect = 1;      /* Protect against compaction */
-#endif
-	    newb = (char *) bgetr(regkey, (void *) fb, bs);
-#ifdef BECtl
-	    protect = 0;
-#endif
-	    if (newb != NULL) {
-	      *((char **) bc) = newb;
-	    }
-	  }
-	}
-      }
-    }
-    stats(regkey, "\nAfter allocation");
-    if (bp != NULL) {
-      V bpoolv(regkey, (void *) bp);
-      bpoold(regkey, (void *) bp, dumpAlloc, dumpFree);
-    }
+/* 	    bs = pow(x, (double) (rand() & (ExpIncr - 1))); */
+/* 	    bs = blimit(bs); */
+/* #ifdef BECtl */
+/* 	    protect = 1;      /\* Protect against compaction *\/ */
+/* #endif */
+/* 	    newb = (char *) bgetr(regkey, (void *) fb, bs); */
+/* #ifdef BECtl */
+/* 	    protect = 0; */
+/* #endif */
+/* 	    if (newb != NULL) { */
+/* 	      *((char **) bc) = newb; */
+/* 	    } */
+/* 	  } */
+/* 	} */
+/*       } */
+/*     } */
+/*     stats(regkey, "\nAfter allocation"); */
+/*     if (bp != NULL) { */
+/*       V bpoolv(regkey, (void *) bp); */
+/*       bpoold(regkey, (void *) bp, dumpAlloc, dumpFree); */
+/*     } */
     
-    while (bchain != NULL) {
-      char *buf = bchain;
+/*     while (bchain != NULL) { */
+/*       char *buf = bchain; */
 
-      bchain = *((char **) buf);
-      brel(regkey, (void *) buf);
-    }
-    stats(regkey, "\nAfter release");
-#ifndef BECtl
-    if (bp != NULL) {
-      V bpoolv(regkey, (void *) bp);
-      bpoold(regkey, (void *) bp, dumpAlloc, dumpFree);
-    }
-#endif
-  }
-  return 0;
-}
-#endif
+/*       bchain = *((char **) buf); */
+/*       brel(regkey, (void *) buf); */
+/*     } */
+/*     stats(regkey, "\nAfter release"); */
+/* #ifndef BECtl */
+/*     if (bp != NULL) { */
+/*       V bpoolv(regkey, (void *) bp); */
+/*       bpoold(regkey, (void *) bp, dumpAlloc, dumpFree); */
+/*     } */
+/* #endif */
+/*   } */
+/*   return 0; */
+/* } */
+/* #endif */

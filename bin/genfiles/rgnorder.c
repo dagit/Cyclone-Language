@@ -36,53 +36,26 @@ struct _RegionPage
 #endif
 ; // abstract -- defined in runtime_memory.c
 struct _pool;
+struct bget_region_key;
+struct _RegionAllocFunctions;
 struct _RegionHandle {
   struct _RuntimeStack s;
   struct _RegionPage *curr;
 #if(defined(__linux__) && defined(__KERNEL__))
   struct _RegionPage *vpage;
 #endif 
+  struct _RegionAllocFunctions *fcns;
   char               *offset;
   char               *last_plus_one;
-  struct _DynRegionHandle *sub_regions; //not used
   struct _pool *released_ptrs;
+  struct bget_region_key *key;
 #ifdef CYC_REGION_PROFILE
-  const char         *name;
-#else
+  const char *name;
+#endif
   unsigned used_bytes;
   unsigned wasted_bytes;
-#endif
-};
-struct _DynRegionFrame { //not used
-  struct _RuntimeStack s;
-  struct _DynRegionHandle *x;
 };
 
-/* Reaps */
-struct _ReapPage
-#ifdef CYC_REGION_PROFILE
-{ unsigned direct_flag;
-  unsigned total_bytes;
-  unsigned free_bytes;
-  void *bget_page;
-  struct _ReapPage *next;
-}
-#endif
-; 
-struct bget_region_key;
-struct _ReapHandle {
-  struct _RuntimeStack s;
-  struct _ReapPage *curr;
-#if(defined(__linux__) && defined(__KERNEL__))
-  struct _RegionPage *vpage;
-#endif 
-  struct _pool *released_ptrs;
-  struct bget_region_key *bkey;
-#ifdef CYC_REGION_PROFILE
-  unsigned int id;
-  const char         *name;
-#endif
-};
 
 // A dynamic region is just a region handle.  The wrapper struct is for type
 // abstraction.
@@ -90,30 +63,16 @@ struct Cyc_Core_DynamicRegion {
   struct _RegionHandle h;
 };
 
-struct Cyc_Core_DynamicReap {
-  struct _ReapHandle h;
-};
-
 /* Alias qualifier stuff */
 typedef unsigned char _AliasQualHandle_t;
 
-struct _RegionHandle _new_region(const char*);
+struct _RegionHandle _new_region(unsigned int, const char*);
 void* _region_malloc(struct _RegionHandle*, _AliasQualHandle_t, unsigned);
 void* _region_calloc(struct _RegionHandle*, _AliasQualHandle_t, unsigned t, unsigned n);
 void* _region_vmalloc(struct _RegionHandle*, unsigned);
 void * _aqual_malloc(_AliasQualHandle_t aq, unsigned int s);
 void * _aqual_calloc(_AliasQualHandle_t aq, unsigned int n, unsigned int t);
 void _free_region(struct _RegionHandle*);
-
-struct _ReapHandle _new_reap(const char*);
-void* _reap_malloc(struct _ReapHandle*, _AliasQualHandle_t, unsigned);
-void* _reap_calloc(struct _ReapHandle*, _AliasQualHandle_t, unsigned t, unsigned n);
-void * _reap_aqual_malloc(_AliasQualHandle_t aq, unsigned int s);
-void * _reap_aqual_calloc(_AliasQualHandle_t aq, unsigned int n, unsigned int t);
-void _free_reap(struct _ReapHandle*);
-
-struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);//not used
-void _pop_dynregion(); //not used
 
 /* Exceptions */
 struct _handler_cons {
@@ -126,7 +85,6 @@ void _npop_handler(int);
 void _pop_handler();
 void _pop_region();
 
-void _push_reap(struct _ReapHandle*);
 
 #ifndef _throw
 void* _throw_null_fn(const char*,unsigned);
@@ -319,7 +277,7 @@ static inline unsigned int _check_times(unsigned x, unsigned y) {
   return word_ans;
 }
 
-#define _CYC_MAX_REGION_CONST 2
+#define _CYC_MAX_REGION_CONST 0
 #define _CYC_MIN_ALIGNMENT (sizeof(double))
 
 #ifdef CYC_REGION_PROFILE
@@ -347,47 +305,10 @@ static inline void*_fast_region_malloc(struct _RegionHandle*r, _AliasQualHandle_
   return _region_malloc(r,aq,orig_s); 
 }
 
-//doesn't make sense to fast_reap_malloc
-// static inline void*_fast_reap_malloc(struct _ReapHandle*r, _AliasQualHandle_t aq, unsigned orig_s) {  
-//   if (r > (struct _RegionHandle*)_CYC_MAX_REGION_CONST && r->curr != 0) { 
-// #ifdef CYC_NOALIGN
-//     unsigned s =  orig_s;
-// #else
-//     unsigned s =  (orig_s + _CYC_MIN_ALIGNMENT - 1) & (~(_CYC_MIN_ALIGNMENT -1)); 
-// #endif
-//     char *result; 
-//     result = r->offset; 
-//     if (s <= (r->last_plus_one - result)) {
-//       r->offset = result + s; 
-// #ifdef CYC_REGION_PROFILE
-//     r->curr->free_bytes = r->curr->free_bytes - s;
-//     rgn_total_bytes += s;
-// #endif
-//       return result;
-//     }
-//   } 
-//   return _region_malloc(r,aq,orig_s); 
-// }
-
-//migration to reaps -- Remove this block to revert to regions 
-//... but the rufree etc. will not work
-#ifndef RUNTIME_CYC
-#define _new_region(n) _new_reap(n)
-#define _free_region(r) _free_reap(r)
-#define _region_malloc(rh,aq,n) _reap_malloc(rh,aq,n)
-#define _region_calloc(rh,aq,n,t) _reap_calloc(rh,aq,n,t)
-#define _push_region(rh) _push_reap(rh)
-#define _aqual_malloc(aq,s) _reap_aqual_malloc(aq, s)
-#define _aqual_calloc(aq,s,i) _reap_aqual_calloc(aq, s, i)
-#define _RegionHandle _ReapHandle
-#define Cyc_Core_NewDynamicRegion Cyc_Core_NewDynamicReap
-#define Cyc_Core_DynamicRegion Cyc_Core_DynamicReap
-#define Cyc_Core__new_ukey(f,fn,l) Cyc_Core__reap_new_ukey(f, fn, l)
-#define Cyc_Core__new_rckey(f,fn,l) Cyc_Core__reap_new_rckey(f, fn, l)
-#define Cyc_Core_free_ukey(k) Cyc_Core_reap_free_ukey(k)
-#define Cyc_Core_free_rckey(k) Cyc_Core_reap_free_rckey(k)
-#define Cyc_Core_open_region Cyc_Core_reap_open_region
-#endif 
+//doesn't make sense to fast malloc with reaps
+#ifndef DISABLE_REAPS
+#define _fast_region_malloc _region_malloc
+#endif
 
 #ifdef CYC_REGION_PROFILE
 /* see macros below for usage. defined in runtime_memory.c */
@@ -399,22 +320,22 @@ void* _profile_region_malloc(struct _RegionHandle*,_AliasQualHandle_t,unsigned,c
 void* _profile_region_calloc(struct _RegionHandle*,_AliasQualHandle_t,unsigned,unsigned,const char *,const char*,int);
 void * _profile_aqual_malloc(_AliasQualHandle_t aq, unsigned int s,const char *file, const char *func, int lineno);
 void * _profile_aqual_calloc(_AliasQualHandle_t aq, unsigned int t1,unsigned int t2,const char *file, const char *func, int lineno);
-struct _RegionHandle _profile_new_region(const char*,const char*,const char*,int);
+struct _RegionHandle _profile_new_region(unsigned int i, const char*,const char*,const char*,int);
 void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #ifndef RUNTIME_CYC
-#define _new_region(n) _profile_new_region(n,__FILE__,__FUNCTION__,__LINE__)
+#define _new_region(i,n) _profile_new_region(i,n,__FILE__,__FUNCTION__,__LINE__)
 #define _free_region(r) _profile_free_region(r,__FILE__,__FUNCTION__,__LINE__)
 #define _region_malloc(rh,aq,n) _profile_region_malloc(rh,aq,n,__FILE__,__FUNCTION__,__LINE__)
 #define _region_calloc(rh,aq,n,t) _profile_region_calloc(rh,aq,n,t,__FILE__,__FUNCTION__,__LINE__)
-#define _aqual_malloc(aq,n) _profile_region_malloc(aq,n,__FILE__,__FUNCTION__,__LINE__)
-#define _aqual_calloc(aq,n,t) _profile_region_calloc(aq,n,t,__FILE__,__FUNCTION__,__LINE__)
-#  endif
+#define _aqual_malloc(aq,n) _profile_aqual_malloc(aq,n,__FILE__,__FUNCTION__,__LINE__)
+#define _aqual_calloc(aq,n,t) _profile_aqual_calloc(aq,n,t,__FILE__,__FUNCTION__,__LINE__)
+#endif
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__,__FUNCTION__,__LINE__)
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__,__FUNCTION__,__LINE__)
 #define _cyccalloc(n,s) _profile_GC_calloc(n,s,__FILE__,__FUNCTION__,__LINE__)
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
-#endif
-#endif
+#endif //CYC_REGION_PROFILE
+#endif //_CYC_INCLUDE_H
  struct Cyc___cycFILE;
 # 53 "cycboot.h"
 extern struct Cyc___cycFILE*Cyc_stderr;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};
@@ -606,7 +527,7 @@ goto _LL7;}}else{_LL7:
  return ans;};}}}
 # 267
 static int Cyc_RgnOrder_atomic_effect_outlives(struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn){
-struct _RegionHandle _Tmp0=_new_region("listrgn");struct _RegionHandle*listrgn=& _Tmp0;_push_region(listrgn);
+struct _RegionHandle _Tmp0=_new_region(0U,"listrgn");struct _RegionHandle*listrgn=& _Tmp0;_push_region(listrgn);
 {void*_Tmp1=Cyc_Absyn_compress(eff);void*_Tmp2;if(*((int*)_Tmp1)==0)switch(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp1)->f1)){case 9: if(((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp1)->f2!=0){_Tmp2=(void*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp1)->f2->hd;{void*vt=_Tmp2;
 # 272
 void*_Tmp3=Cyc_Absyn_compress(vt);void*_Tmp4;switch(*((int*)_Tmp3)){case 0: if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp3)->f1)==6){

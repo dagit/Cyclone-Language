@@ -93,10 +93,6 @@ int main(int argc, char **argv) {
   // because we won't have multiple main() threads
   _init_stack();
   _init_exceptions();
-/* #ifdef _HAVE_PTHREAD_ */
-/*   if((status = pthread_once(&key_once, init_keys_once))) */
-/*     do_exit("Failed pthread_once", status); */
-/* #endif */
   // install outermost exception handler
   _set_top_handler();
   // set standard file descriptors
@@ -106,15 +102,16 @@ int main(int argc, char **argv) {
   // convert command-line args to Cyclone strings -- we add an extra
   // NULL to the end of the argv so that people can step through argv
   // until they hit NULL. (Calling calloc with argc+1 takes care of this.)
-  {struct _fat_argv args;
-  int i, result;
-  args.curr = (struct _fat_ptr *)GC_calloc(argc+1,sizeof(struct _fat_ptr));
-  args.base = args.curr;
-  args.last_plus_one = args.curr + argc + 1;
-  for(i = 0; i < argc; ++i)
-    args.curr[i] = Cstring_to_string(argv[i]);
-  result = Cyc_main(argc, args);
-  _fini_regions();
-  return result;
+  {
+    struct _fat_argv args;
+    int i, result;
+    args.curr = (struct _fat_ptr *)GC_calloc(argc+1,sizeof(struct _fat_ptr));
+    args.base = args.curr;
+    args.last_plus_one = args.curr + argc + 1;
+    for(i = 0; i < argc; ++i)
+      args.curr[i] = Cstring_to_string(argv[i]);
+    result = Cyc_main(argc, args);
+    _fini_regions();
+    return result;
   }
 }

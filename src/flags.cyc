@@ -29,6 +29,7 @@ bool tovc_r = false;
 enum C_Compilers c_compiler = Gcc_c;
 bool porting_c_code = false;
 bool no_regions = false;
+bool no_reaps = false;
 bool no_register = false;
 bool noexpand_r = false;
 bool warn_bounds_checks  = false; 

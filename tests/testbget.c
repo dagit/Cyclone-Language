@@ -47,9 +47,9 @@ void Cyc_Core_rufree(struct _ReapHandle *r, void *ptr) {
   brel(r->bkey, ptr);
 }
 
-static void* _acquire_reap_page(bget_rgn_key_t key, bufsize s) {
-  unsigned int next_size = s+sizeof(struct _ReapPage);
-  struct _ReapHandle *r = (struct _ReapHandle *)key->priv;
+static void* _acquire_reap_page(void *vr, bufsize s, bufsize *incr) {
+  struct _ReapHandle *r = (struct _ReapHandle *)vr;
+  unsigned int next_size = (2*s)+sizeof(struct _ReapPage);
   if(r->curr == NULL) //no assert :(
     return 0;
   void *p =malloc(next_size);
@@ -60,6 +60,7 @@ static void* _acquire_reap_page(bget_rgn_key_t key, bufsize s) {
   r->curr = (struct _ReapPage*)p;
   r->curr->bget_page = (p + sizeof(struct _ReapPage));
   r->curr->next = tmp;
+  *incr = 2*s;
   return r->curr->bget_page;
 }
 
@@ -121,7 +122,7 @@ struct _ReapHandle _new_reap(const char *rgn_name) {
 void _free_reap(struct _ReapHandle *r) {
   if(r && r->curr) {
     //notify bget 
-    bget_drop_region(r->bkey);
+    //    bget_drop_region(r->bkey);
     //free pages
     do {
       struct _ReapPage *next = r->curr->next;
