@@ -1,8 +1,4 @@
 # Architecture-specific configuration.
-# 
-# TODO:
-#   better job of finding egrep
-#
 
 ######### figure out the architecture
 PATCH_ARCH=i686-unknown-linux
@@ -42,18 +38,6 @@ case "$OS" in
     WHICH='which'
   ;;
 esac
-
-########## find a suitable version of egrep
-EGREP="egrep"
-if [ "$TYPE" = "sun" ]; then
-  f="/usr/xpg4/bin/egrep"
-  if [ -f "$f" ]; then
-    EGREP=$f
-  else
-    echo "Warning: could not find $f"
-    echo "  files bin/genfiles/${ARCH}* may be incorrect/incomplete"
-  fi
-fi
 
 ########## find a suitable version of cc, along with special flags
 #   if we can't find gcc, use cc (which, if not symlinked to gcc,
@@ -153,7 +137,6 @@ if [ ! -f "${CYCDIR}/bin/genfiles/${ARCH}.cycspecs" ]; then
     echo "error creating ${CYCDIR}/bin/genfiles/${ARCH}.cycspecs"
     cleanup
   fi
-  export EGREP
   export CC
 else
   echo "Supported architecture ${ARCH}"

@@ -3,49 +3,40 @@ OVERVIEW
 Unpack the distribution and move into the resulting directory.  Note,
 if you are using cygwin, you must not unpack the distribution in a
 directory whose path contains a space character, e.g., don't unpack
-under C:\Documents and Settings.
+under C:\Documents and Settings; we suggest C:\cyclone.
 
 To build Cyclone, do
 
-./configure
-make
-make install
+  ./configure
+  make
+  make install
 
 To build the profiling libraries, you should instead do
 
-./configure
-make all gprof aprof
-make install
+  ./configure
+  make all gprof aprof
+  make install
 
 In either case, after these steps, you can optionally do
 
-make clean
+  make clean
 
 to reclaim about 20MB of disk space.  You can reclaim over another
-10MB by deleting the bin subdirectory.  (In fact, none of
-the subdirectories are needed after installation, but the other ones
+10MB by deleting the bin subdirectory.  (In fact, none of the
+subdirectories are needed after installation, but the other ones
 contain Cyclone programs that are useful examples.)
 
-To get off the ground, you need GNU make and bash; if bash is not
-installed, ksh can be used instead. If GNU make is not the default make on 
-your system, if might be installed as "gmake" so just type gmake 
-instead of make if things don't work.  If you have bash or ksh installed 
-somewhere that is not in your PATH, invoke configure with the -sh option, 
-e.g.
+To get off the ground, you need /bin/sh, GNU make, and gcc.  If GNU
+make is not the default make on your system, if might be installed as
+"gmake" so just type gmake instead of make if things don't work.
 
-./configure -sh /usr/local/gnu/bin/bash
+By default, binaries will be stored into /usr/local/bin, libraries
+into /usr/local/lib/cyclone, and include files into
+/usr/include/cyclone.  If you wish to install into different
+directories, specify them using the options -bindir and -libdir and
+-incdir.  For example, you could do
 
-if bash were installed in /usr/local/gnu/bin/bash.  The configure script
-will prompt you to do this if it can't find bash or ksh.
-
-By default, binaries will be stored into /usr/local/bin, libraries into
-/usr/local/lib/cyclone, and include files into /usr/include/cyclone.  If
-your architecture is not supported, you will have the opportunity to port it
-(see below).  If you wish to install into different directories, specify
-them using the options -bindir and -libdir and -incdir.  For example, you
-could do
-
-./configure -bindir /usr/bin -libdir /usr/lib/cyclone
+  ./configure -bindir /usr/bin -libdir /usr/lib/cyclone
 
 to alter the binary directory to /usr/bin and the library directory to
 /usr/lib/cyclone (while leaving the include directory as
@@ -53,111 +44,37 @@ to alter the binary directory to /usr/bin and the library directory to
 
 If you wish to remove cyclone after installing it, simply do
 
-make uninstall
+  make uninstall
 
 and it will remove any files and directories created in your system
 directories as a result of installation.
 
 POTENTIAL PROBLEMS
 
-You won't be able to compile cyclone if are using cygwin and you have
-placed the source in a directory whose name contains a space.  In
-particular, you can't compile under c:\Documents and Settings.
-Move it to another directory.
+(1) You won't be able to compile cyclone if are using cygwin and you
+    have placed the source in a directory whose name contains a space.
+    In particular, you can't compile under c:\Documents and Settings.
+    Move it to another directory.
 
-Note that configure and make install use several utilities, which
-need to be in your path.  In our experience, this is the most common
-source of problems.  In particular:
-(1) you need Gnu-like behavior for egrep.  Set an EGREP environment variable
-to point to an appropriate egrep if necessary.
-(2) Windows systems tend to have a program called find that is
-different than the find we are expecting.  cygwin puts the find we
-want in /usr/bin -- make sure a different find is not earlier in your
-path.
+(2) Note that configure and make install use several utilities, which
+    need to be in your path.  In particular, Windows systems tend to have
+    a program called find that is different than the find we are
+    expecting.  cygwin puts the find we want in /usr/bin -- make sure a
+    different find is not earlier in your path.
+
 (3) Some users have had trouble running configure on a non-root
-partition of a Linux system.  Try installing somewhere on the root
-partition.  
+    partition of a Linux system.  Try installing somewhere on the root
+    partition.
 
-Other architecture-specific problems that we've encountered are
-described in the file config/ARCHINFO.
+(4) We use a program called buildlib to try to automatically construct
+    a Cyclone interface to the POSIX library.  Buildlib might fail if
+    your C library header files use GCC features we aren't expecting.
+    Contact us if this happens.
 
-PORTING TO UNSUPPORTED ARCHITECTURES
+(5) There are bugs in some versions of GCC that can cause a crash when
+    Cyclone builds.  Later versions tend to work better than older
+    versions.
 
-If your architecture is not currently supported, the configure script will
-ask if you'd like to create the files necessary to support it.  For a new
-architecture ARCH, this will result in creating the files config/arch/ARCH,
-config/arch/ARCH.undef, a directory bin/genfiles/ARCH containing additional
-subdirectories, and the file ARCH.h stored in lib/arch and include/arch.
-
-Now type make (from the cyclone directory) to compile the C files in
-bin/genfiles/ARCH.  Since you are trying to port your architecture, these
-files came from an existing architecture, so they may not work.  If not, you
-can either try to modify them by hand, or cross-compile from a supported
-architecture, as explained below.
-
-If they did work, you can now recompile the compiler and update your
-architecture-specific files.  In particular
-
-a) Build Cyclone for the source files by doing
-
-make cyclone_src
-
-This will build the .c files in the lib and src directories.
-
-d) Install the .c files for the new architecture by doing
-
-make update
-
-This will copy all of the relevant files for the new architecture to
-bin/genfiles/ARCH.
-
-e) Recompile the compiler by doing
-
-make
-
-At the completion of make, you should be able to install the compiler
-specialized for your architecture.
-
-CROSS-COMPILING FROM A SUPPORTED ARCHITECTURE
-
-If compiling for the default .c files did not work, you can cross-compile
-from a supported architecture as follows:
-
-a) Assuming you have done ./configure on the architecture you wish to
-support (thus creating the appropriate config/arch/ and bin/genfiles/ files
-as described above), copy the entire cyclone source tree to a supported
-architecture.
-
-b) Configure the source tree on the supported architecture by doing
-./configure again.  This should set up your configuration properly and
-indicate you are on a supported architecture.
-
-c) Build Cyclone for the unsupported architecture by doing
-
-make cyclone_src TARGET=ARCH
-
-(where ARCH is the unsupported architecture).  This will build the .c files
-in a newly created ARCH directory, using the information in the
-architecture-specific file for ARCH.
-
-d) Install the .c files for the new architecture by doing
-
-make update TARGET=ARCH
-
-This will copy all of the relevant files for the new architecture to
-bin/genfiles/ARCH.
-
-f) copy the entire source tree back to the new architecture.  Reconfigure it
-by doing ./configure, and then try building it again by doing make.  If
-cross-compilation worked, it should now build correctly. (Please send us the
-ARCH directory in bin/genfiles, and the ARCH and ARCH.undef file in
-config/arch so we can then incorporate these into our normal distribution
-tree.)
-
----
-
-If things fail to build either with the default .c files or with the
-cross-compiler, it is probably due to library incompatibilities.  These will
-require changes to the Makefile and/or the Cyclone source, so please send us
-e-mail and we can help work these out.
-
+(6) You may have to raise your stack limit.  The way to do this varies
+    by shell; "ulimit", "limit", and "unlimit" are some commands used
+    in some shells.
