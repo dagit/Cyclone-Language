@@ -300,10 +300,12 @@ void* _bounded_GC_malloc_atomic(int,const char*,int);
 void* _bounded_GC_calloc(unsigned,unsigned,const char*,int);
 void* _bounded_GC_calloc_atomic(unsigned,unsigned,const char*,int);
 /* these macros are overridden below ifdef CYC_REGION_PROFILE */
+#ifndef CYC_REGION_PROFILE
 #define _cycalloc(n) _bounded_GC_malloc(n,__FILE__,__LINE__)
 #define _cycalloc_atomic(n) _bounded_GC_malloc_atomic(n,__FILE__,__LINE__)
 #define _cyccalloc(n,s) _bounded_GC_calloc(n,s,__FILE__,__LINE__)
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
+#endif
 
 static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
