@@ -80,3 +80,9 @@ static struct Cyc_Null_Exception_exn_struct exn_val = {Cyc_Null_Exception};
        omitted the 0 it would be created with random permissions. */
     return open(s,flags,0);
   }
+
+/* This stuff needed by ap.cyc only.  We define long_max and long_min
+   as variables to try to keep things reasonably portable. */
+  #include <limits.h>
+  long Cyc_long_max = LONG_MAX;
+  long Cyc_long_min = LONG_MIN;

@@ -1,5 +1,6 @@
+#include <cycboot.h>
 #include <ctype.h>
-#include <limits.h>
+//#include <limits.h>
 //#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
@@ -40,8 +41,8 @@ static T mk(int size) {
 	return z;
 }
 static T set(T z, long int n) {
-	if (n == LONG_MIN)
-		XP_fromint(z->size, z->digits, LONG_MAX + 1UL);
+	if (n == long_min)
+		XP_fromint(z->size, z->digits, long_max + 1UL);
 	else if (n < 0)
 		XP_fromint(z->size, z->digits, -n);
 	else
@@ -329,7 +330,7 @@ T AP_fromint (long int x) {
 long int AP_toint(T x) {
 	unsigned long u;
 	assert(x);
-	u = XP_toint(x->ndigits, x->digits)%(LONG_MAX + 1UL);
+	u = XP_toint(x->ndigits, x->digits)%(long_max + 1UL);
 	if (x->sign == -1)
 		return -(long)u;
 	else

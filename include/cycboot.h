@@ -327,4 +327,7 @@ extern int file_string_write(FILE @, const char ?src, int src_offset,
   extern "C" int chdir(const char @);
   extern char ?`r getcwd(char ?`r buf, size_t size);
 
+/***** <limits.h> -- needed for ap.cyc *****/
+  extern const long long_max, long_min;
+
 #endif
