@@ -42,6 +42,7 @@
 #define get_tlocal Tlocal_Get
 #define put_tlocal Tlocal_Put
 #define DO_THREAD_UNREG 
+
 #elif (defined(__linux__) && defined(__KERNEL__)) //change to CYC_LINUX_KERNEL
 
 #include <linux/kernel.h>
@@ -54,7 +55,9 @@
 
 #define errprintf(arg...) printk("<3>" arg)
 #define errquit(arg...) { printk("<3>" arg); }
+
 #else
+
 #include <setjmp.h> // precore_c.h uses jmp_buf without defining it
 #include <stdio.h>  // for error printing
 #include <limits.h> // for magic numbers
@@ -73,7 +76,7 @@
 #define errprintf(arg...) fprintf(stderr,##arg)
 #define errquit(arg...) { fprintf(stderr,##arg); exit(1); }
 
-#endif //geekos
+#endif
 
 
 #define MAX_ALLOC_SIZE INT_MAX

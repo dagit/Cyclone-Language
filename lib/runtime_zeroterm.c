@@ -58,6 +58,7 @@ void* _zero_arr_plus_other_fn(unsigned t,void* orig_x,unsigned orig_sz,int orig_
     if(t==sizeof(long double))
       DO_PLUS_FN(long double);
     _throw_null_fn("runtime_zeroterm.c",__LINE__);
+    return NULL; // to make gcc -Wall happy
   }
 }
 #endif
@@ -87,6 +88,7 @@ unsigned _get_zero_arr_size_other(unsigned t,const void* orig_x,unsigned orig_of
     if(t==sizeof(long double))
       DO_GET_SIZE(long double);
     _throw_null_fn("runtime_zeroterm.c",__LINE__);
+    return 0; // to make gcc -Wall happy
   }
 }
 

@@ -49,6 +49,7 @@ extern size_t GC_get_free_bytes();
 extern size_t GC_get_total_bytes();
 
 extern void GC_free(void *);
+extern void *GC_realloc(void *,unsigned);
 
 static int region_get_heap_size(struct _RegionHandle *);
 static int region_get_free_bytes(struct _RegionHandle *);
