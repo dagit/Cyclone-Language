@@ -161,6 +161,8 @@ extern region_t<`H> heap_region;
   /** [heap_region] is the region handle of the heap. */
 extern region_t<`U> unique_region;
   /** [unique_region] is the region handle of the unique pointer region. */
+  // FIX: unique_region also defined in absyn.cyc; should really unify
+  //   the two definitions!
 #define unew rnew (Core::unique_region)
 #define umalloc rmalloc (Core::unique_region)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */

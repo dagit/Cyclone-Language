@@ -29,7 +29,7 @@ using Core;
 using Hashtable;
 
 
-char buf[81]@zeroterm;
+char buf[1000]@zeroterm;
 
 List::list_t<$(stringptr_t<`H,`H>,
 	       $(table_t<stringptr_t<`H,`H>,$(int,int)@>,int)@,
@@ -293,6 +293,13 @@ int main(int argc, string_t ?argv) {
     create(101, strptrcmp, hash_stringptr);
   insert(tab,new "heap",true);
   insert(loctab,new "heap",tab);
+
+  /* create tables for the unique region */
+  table = create(101, strptrcmp, hash_stringptr);
+  insert(regiontable, new "unique", table);
+  tab = create(101, strptrcmp, hash_stringptr);
+  insert(tab,new "unique",true);
+  insert(loctab,new "unique",tab);
 
   // get the program point
   while (gettoken(f)) {

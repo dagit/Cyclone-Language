@@ -27,7 +27,8 @@ inst_record_name () {
 # get_files filelist targetdir
 #   prints all of the files in the given list.  If a given file is
 #   a directory, it recurses and prints the files in the directory as well.
-#   Skips files with CVS in their path.
+#   Skips files with CVS in their path.  If the file does not exist,
+#   it is ignored (not printed)
 get_files () {
   for file in $1; do
     # regular file
@@ -37,9 +38,6 @@ get_files () {
     elif [ -d "$file" ]; then
       files=`find $file/* -print -prune | grep -v CVS`
       get_files "$files" "$2/`basename $file`"
-    else
-      echo file $file has unsupported file type!
-      exit 1
     fi
   done
 }

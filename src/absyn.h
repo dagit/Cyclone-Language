@@ -1054,6 +1054,8 @@ namespace Absyn {
   extern exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
                                  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
 				 seg_t);
+  extern qvar_t uniquergn_qvar;
+  extern exp_t uniquergn_exp; // refers to the unique region in Core::
   /////////////////////////// Statements ///////////////////////////////
   extern stmt_t new_stmt(raw_stmt_t s, seg_t loc);
   extern stmt_t skip_stmt(seg_t loc);

@@ -1970,24 +1970,24 @@ static type_t mallocRgn(type_t rgn) {
   }
 }
 
-static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt, 
+static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt, 
                        type_t *@t, exp_t @e, bool @is_calloc,
                        bool @is_fat) {
   // by default, we allocate heap pointers unless the topt tells us
   //   to do otherwise (see below)
   type_t rgn = &HeapRgn_val;
-  if (ropt != NULL) {
+  if (*ropt != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
       new RgnHandleType(new_evar(&trko,lookup_opt_type_vars(te)));
-    type_t handle_type = tcExp(te,&expected_type,(exp_t)ropt);
+    type_t handle_type = tcExp(te,&expected_type,(exp_t)*ropt);
     switch (compress(handle_type)) {
     case &RgnHandleType(r): 
       rgn = r;
       check_rgn_accessible(te,loc,rgn);
       break;
     default:
-      terr(ropt->loc,"expecting region_t type but found %s",
+      terr((*ropt)->loc,"expecting region_t type but found %s",
            typ2string(handle_type));
       break;
     }
@@ -1998,6 +1998,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
     type_t optrgn = &VoidType_val;
     if (rgn_of_pointer(*topt,&optrgn)) {
       rgn = mallocRgn(optrgn);
+      if (rgn != &HeapRgn_val) *ropt = uniquergn_exp;
     }
   }
 
@@ -2209,22 +2210,22 @@ static type_t tcTagcheck(tenv_t te, seg_t loc, type_t * topt, exp_t e, field_nam
 
 // e has the form new e1
 static type_t tcNew(tenv_t te, seg_t loc, type_t * topt, 
-                    exp_opt_t rgn_handle, exp_t e, exp_t e1) {
+                    exp_opt_t @rgn_handle, exp_t e, exp_t e1) {
   // by default, we allocate heap pointers; this is for making inference
   // simpler.  If you want a unique pointer, do rnew (Core::unique_region)
   type_t rgn = &HeapRgn_val; 
-  if (rgn_handle != NULL) {
+  if (*rgn_handle != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
       new RgnHandleType(new_evar(&trko,lookup_opt_type_vars(te)));
-    type_t handle_type = tcExp(te,&expected_type,(exp_t)rgn_handle);
+    type_t handle_type = tcExp(te,&expected_type,(exp_t)*rgn_handle);
     switch (compress(handle_type)) {
     case &RgnHandleType(r): 
       rgn = r;
       check_rgn_accessible(te,loc,rgn);
       break;
     default:
-      terr(rgn_handle->loc,"expecting region_t type but found %s",
+      terr((*rgn_handle)->loc,"expecting region_t type but found %s",
            typ2string(handle_type));
       break;
     }
@@ -2235,6 +2236,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     type_t optrgn = &VoidType_val;
     if (rgn_of_pointer(*topt,&optrgn)) {
       rgn = mallocRgn(optrgn);
+      if (rgn != &HeapRgn_val) *rgn_handle = uniquergn_exp;
     }
   }
 
@@ -2587,7 +2589,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcCast(te,loc,topt,t1,e1,c); break;
   case &Address_e(e1):
     t = tcAddress(te,loc,e,topt,e1); break;
-  case &New_e(rgn_handle,e1):
+  case &New_e(*rgn_handle,e1):
     t = tcNew(te,loc,topt,rgn_handle,e,e1); break;
   case &Sizeofexp_e(e1):
     let t1 = tcExpNoPromote(te, NULL, e1);
@@ -2639,7 +2641,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
   case &AnonEnum_e(*v,t2,ef):
     *v = ef->name;
     t = t2; break;
-  case &Malloc_e(MallocInfo{*is_calloc,ropt,*t2,*e,*isfat}):
+  case &Malloc_e(MallocInfo{*is_calloc,*ropt,*t2,*e,*isfat}):
     t = tcMalloc(te,loc,topt,ropt,t2,e,is_calloc,isfat); break;
   case &Swap_e(e1,e2):
     t = tcSwap(te,loc,topt,e1,e2); break;

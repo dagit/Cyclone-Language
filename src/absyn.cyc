@@ -321,7 +321,6 @@ static struct Datatypedecl exn_tud_v = Datatypedecl(Extern, &exn_name_v, NULL,
 datatypedecl_t exn_tud = &exn_tud_v;
 
   //static datatype DatatypeInfoU.KnownDatatype exn_tinfou = KnownDatatype(&exn_tud);
-static struct Opt<type_t> heap_opt = Opt(&HeapRgn_val);
 static datatype Type.DatatypeType exn_typ_tt =
                   DatatypeType(DatatypeInfo(DatatypeInfoU{.KnownDatatype=&exn_tud},NULL));
 type_t exn_typ() {
@@ -342,6 +341,36 @@ static $(nmspace_t,var_t) datatype_scanf_arg_qvar_p =
   $(Nmspace{.Abs_n = NULL}, &scanfarg_str);
 qvar_t datatype_print_arg_qvar = &datatype_print_arg_qvar_p;
 qvar_t datatype_scanf_arg_qvar = &datatype_scanf_arg_qvar_p;
+
+// unique region qvar.  We need this so that code generation properly
+// attributes an allocation to the unique region.  This way, when
+// doing dynamic region profiling we correctly tally the stuff stored
+// in the unique region
+// FIX: must correspond with def in core.h; should have just one def
+static string_t uniquergn_str = "unique_region";
+static string_t Core_str = "Core";
+static struct List<var_t> uniquergn_nmspace =
+  List((var_t)&Core_str,(list_t<var_t,`H>)NULL);
+static $(nmspace_t,var_t) uniquergn_qvar_p = 
+  $(Nmspace{.Abs_n = &uniquergn_nmspace }, &uniquergn_str);
+qvar_t uniquergn_qvar = &uniquergn_qvar_p;
+
+static datatype Type.RgnHandleType uniquergn_typ = 
+  RgnHandleType(&UniqueRgn_val);
+
+static struct Vardecl uniquergn_var_d =
+  Vardecl(Extern,&uniquergn_qvar_p,Tqual(false,false,false,false,NULL),
+	  &uniquergn_typ, NULL, NULL, NULL, false);
+static datatype Binding.Global_b uniquergn_bind_p = Global_b(&uniquergn_var_d);
+
+static datatype Raw_exp.Var_e uniquergn_exp_r =
+  Var_e(&uniquergn_qvar_p,&uniquergn_bind_p);
+
+static struct Opt<type_t> uniquergn_typ_opt = Opt(&uniquergn_typ);
+static struct Exp uniquergn_exp_p =
+  Exp(&uniquergn_typ_opt, &uniquergn_exp_r, NULL, &EmptyAnnot_val);
+
+exp_t uniquergn_exp = &uniquergn_exp_p;
 
 // string
 static type_t* string_t_opt = NULL;
