@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Sun Dec  2 16:26:04 2001
---- powerpc-apple-rhapsody/lib/execinfo.c	Tue Dec  4 15:10:56 2001
+*** i686-unknown-linux/lib/execinfo.c	Sun Dec  2 16:30:56 2001
+--- powerpc-apple-rhapsody/lib/execinfo.c	Wed Dec  5 13:00:46 2001
 ***************
 *** 265,387 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -171,8 +171,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! sizeof( unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Sun Dec  2 16:26:06 2001
---- powerpc-apple-rhapsody/lib/getopt.c	Tue Dec  4 15:10:56 2001
+*** i686-unknown-linux/lib/getopt.c	Sun Dec  2 16:30:56 2001
+--- powerpc-apple-rhapsody/lib/getopt.c	Wed Dec  5 13:00:46 2001
 ***************
 *** 297,309 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -199,8 +199,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody
   int Cyc_Std__getopt_internal( int __argc, struct _tagged_arr __argv, struct
   _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind, int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c powerpc-apple-rhapsody/lib/in.c
-*** i686-unknown-linux/lib/in.c	Sun Dec  2 16:26:06 2001
---- powerpc-apple-rhapsody/lib/in.c	Tue Dec  4 15:10:56 2001
+*** i686-unknown-linux/lib/in.c	Sun Dec  2 16:30:56 2001
+--- powerpc-apple-rhapsody/lib/in.c	Wed Dec  5 13:00:46 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -229,8 +229,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c powerpc-apple-rhapsody/lib
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c powerpc-apple-rhapsody/lib/inet.c
-*** i686-unknown-linux/lib/inet.c	Sun Dec  2 16:26:04 2001
---- powerpc-apple-rhapsody/lib/inet.c	Tue Dec  4 15:10:56 2001
+*** i686-unknown-linux/lib/inet.c	Sun Dec  2 16:30:56 2001
+--- powerpc-apple-rhapsody/lib/inet.c	Wed Dec  5 13:00:46 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -259,8 +259,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c powerpc-apple-rhapsody/l
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsody/lib/marshal.c
-*** i686-unknown-linux/lib/marshal.c	Tue Dec  4 15:03:14 2001
---- powerpc-apple-rhapsody/lib/marshal.c	Tue Dec  4 15:10:56 2001
+*** i686-unknown-linux/lib/marshal.c	Tue Dec  4 11:48:21 2001
+--- powerpc-apple-rhapsody/lib/marshal.c	Wed Dec  5 13:00:46 2001
 ***************
 *** 540,558 ****
   struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
@@ -303,8 +303,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsod
   _temp183; _temp183.tag= Cyc_Core_Failure; _temp183.f1= _temp178; _temp183;});
   _temp182;})); _LL177:( void) _throw( _temp172); _LL173:;}}} void Cyc_Marshal_cycputchar(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c powerpc-apple-rhapsody/lib/netdb.c
-*** i686-unknown-linux/lib/netdb.c	Sun Dec  2 16:26:06 2001
---- powerpc-apple-rhapsody/lib/netdb.c	Tue Dec  4 15:10:56 2001
+*** i686-unknown-linux/lib/netdb.c	Sun Dec  2 16:30:56 2001
+--- powerpc-apple-rhapsody/lib/netdb.c	Wed Dec  5 13:00:46 2001
 ***************
 *** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -333,8 +333,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c powerpc-apple-rhapsody/
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c powerpc-apple-rhapsody/lib/socket.c
-*** i686-unknown-linux/lib/socket.c	Sun Dec  2 16:26:08 2001
---- powerpc-apple-rhapsody/lib/socket.c	Tue Dec  4 15:10:56 2001
+*** i686-unknown-linux/lib/socket.c	Sun Dec  2 16:30:56 2001
+--- powerpc-apple-rhapsody/lib/socket.c	Wed Dec  5 13:00:46 2001
 ***************
 *** 290,303 ****
   Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -363,8 +363,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c powerpc-apple-rhapsody
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c powerpc-apple-rhapsody/lib/stat.c
-*** i686-unknown-linux/lib/stat.c	Sun Dec  2 16:26:08 2001
---- powerpc-apple-rhapsody/lib/stat.c	Tue Dec  4 15:10:56 2001
+*** i686-unknown-linux/lib/stat.c	Sun Dec  2 16:30:56 2001
+--- powerpc-apple-rhapsody/lib/stat.c	Wed Dec  5 13:00:46 2001
 ***************
 *** 268,279 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
@@ -391,8 +391,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c powerpc-apple-rhapsody/l
   fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c powerpc-apple-rhapsody/lib/time.c
-*** i686-unknown-linux/lib/time.c	Sun Dec  2 16:26:08 2001
---- powerpc-apple-rhapsody/lib/time.c	Tue Dec  4 15:10:56 2001
+*** i686-unknown-linux/lib/time.c	Sun Dec  2 16:30:56 2001
+--- powerpc-apple-rhapsody/lib/time.c	Wed Dec  5 13:00:46 2001
 ***************
 *** 279,298 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -433,8 +433,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c powerpc-apple-rhapsody/l
   const int* timep){ return wrap_Cstring_as_string( ctime( timep), - 1);}
   unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c powerpc-apple-rhapsody/lib/unistd.c
-*** i686-unknown-linux/lib/unistd.c	Sun Dec  2 16:26:08 2001
---- powerpc-apple-rhapsody/lib/unistd.c	Tue Dec  4 15:10:56 2001
+*** i686-unknown-linux/lib/unistd.c	Sun Dec  2 16:30:56 2001
+--- powerpc-apple-rhapsody/lib/unistd.c	Wed Dec  5 13:00:46 2001
 ***************
 *** 269,312 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
@@ -522,8 +522,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c powerpc-apple-rhapsody
   extern int symlink( unsigned char* path1, unsigned char* path2); extern int
   truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapsody/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Mon Dec  3 21:31:52 2001
---- powerpc-apple-rhapsody/src/buildlib.c	Tue Dec  4 15:10:56 2001
+*** i686-unknown-linux/src/buildlib.c	Sun Dec  2 16:30:58 2001
+--- powerpc-apple-rhapsody/src/buildlib.c	Wed Dec  5 13:00:46 2001
 ***************
 *** 355,383 ****
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*

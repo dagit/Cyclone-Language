@@ -205,10 +205,12 @@ static type_specifier_t type_spec(type_t t,seg_t loc) {
 }
 
 // convert any array types to pointer types
-static type_t array2ptr(type_t t) {
+static type_t array2ptr(type_t t, bool argposn) {
   switch (t) {
   case &ArrayType(t1,tq,eopt):
-    return starb_typ(t1,HeapRgn,tq,
+    return starb_typ(t1,
+                     argposn ? new_evar(new Opt(RgnKind), NULL) : HeapRgn,
+                     tq,
                      eopt == NULL ? Unknown_b : new Upper_b((exp_t)eopt));
   default: return t;
   }
@@ -216,7 +218,7 @@ static type_t array2ptr(type_t t) {
 
 // convert an argument's type from arrays to pointers
 static void arg_array2ptr($(opt_t<var_t,`H>,tqual_t,type_t) @x) {
-  (*x)[2] = array2ptr((*x)[2]);
+  (*x)[2] = array2ptr((*x)[2],true);
 }
 
 // given an optional variable, tqual, type, and list of type
@@ -646,7 +648,7 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
 	  args2 = NULL;
 	}
 	// convert result type from array to pointer result
-	t = array2ptr(t);
+	t = array2ptr(t,false);
 	// convert any array arguments to pointer arguments
 	List::iter(arg_array2ptr,args2);
         // Note, we throw away the tqual argument.  An example where

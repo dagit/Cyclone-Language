@@ -547,11 +547,10 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
       break;
       //JGM: need to fix and synch up with lib/scanf.cyc
     case 'c':
-      terr(loc,"%%c is not supported");
-      return NULL;
     case 's':
-      terr(loc,"%%s is not supported");
-      return NULL;
+      let tvs = new Opt(lookup_type_vars(te));
+      typs = new List(string_typ(new_evar(&rk,tvs)),typs);
+      break;
     case '[':
       terr(loc,"%%[ is not supported");
       return NULL;
