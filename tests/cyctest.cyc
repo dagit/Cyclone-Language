@@ -254,7 +254,8 @@ void array_test() {
   okfail(0==array_cmp(int_cmp,z1,z2));
   Array::msort(int_cmp,z3,0,10);
   okfail(0==array_cmp(int_cmp,z3,z2));
-  int ?z4 = Array::map(add2,Array::extract(z2,2,&Core::Opt(4)));
+  int x = 4;
+  int ?z4 = Array::map(add2,Array::extract(z2,2,&x));
   Array::imp_map(add2,z4);
   okfail(0==array_cmp(int_cmp,z4,Array::extract(z2,6,null)));
   $(int,int) ?z5 = new {for i < 10 : $((int)(i),(int)(i)) };

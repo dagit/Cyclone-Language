@@ -498,7 +498,7 @@ void unify_it(typ t1, typ t2) {
   case Evar(kind1,*ref1_ref,_):
     // check that the evar doesn't occur in t2
     occurs(t1,t2);
-    _ kind2 = typ_kind(t2);
+    let kind2 = typ_kind(t2);
     // we can constrain the Evar to be equal to t2 only when the kind of the
     // evar is greater than or equal to the kind of t2 or t2 is an evar that
     // we can constrain to be equal to t1.
@@ -561,7 +561,7 @@ void unify_it(typ t1, typ t2) {
 	 PointerType(PtrInfo{.elt_typ=t1a,.rgn_typ=rgn1,
 			     .nullable=null1a,.tq=tqual1a,.bounds=b1})):
     unify_it(t1a,t2a);
-    unify_it(rgn2,rgn1); // the whole reason regions are "types"
+    unify_it(rgn1,rgn2); // the whole reason regions are "types"
     unify_tqual(tqual1a,tqual2a);
     unify_it_conrefs(boundscmp,b1,b2);
     // There's no need to force the nullable's to be the same when
@@ -889,9 +889,9 @@ static list_t<$(tqual,typ)@> flatten_typ(tenv te,typ t1) {
   case VoidType:       return null;
   case TupleType(tqs): return tqs; // FIX: recursively flatten here
   case StructType(tdnopt,ts,sdp):
-    _ sd   = *sdp;
-    _ n    = *tdnopt;
-    _ inst = List::zip(sd->tvs,ts);
+    let sd   = *sdp;
+    let n    = *tdnopt;
+    let inst = List::zip(sd->tvs,ts);
     if (sd->fields == null) return &List(&$(empty_tqual(),t1),null);
     // FIX: recursively flatten here
     return List::map_c(flatten_typ_f,inst,sd->fields->v);
@@ -981,8 +981,8 @@ bool castable(tenv te, seg_t loc, typ t1, typ t2) {
     // can cast a pointer in the heap to a pointer to some other region
     switch (t2) {
     case PointerType(PtrInfo{t_b,rt_b,null_b,q_b,b_b}):
-      _ assump = &List(&$(t1,t2),null);
-      _ ptrsub =
+      let assump = &List(&$(t1,t2),null);
+      let ptrsub =
 	ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const);
       bool bounds_ok = unify_conrefs(boundscmp,b_a,b_b);
       if (!bounds_ok) {
@@ -1019,7 +1019,7 @@ bool castable(tenv te, seg_t loc, typ t1, typ t2) {
 // Replace e by a cast of e to t.  The caller must ensure that the cast is safe.
 void unchecked_cast(tenv te, exp e, typ t) {
   if (!unify(e->topt->v,t)) {
-    _ inner = copy_exp(e);
+    let inner = copy_exp(e);
     e->r    = Cast_e(t,inner);
     e->topt = &Opt(t);
   }
@@ -1940,6 +1940,8 @@ bool is_tagged_pointer_typ(typ t) {
 //    of RgnKind).
 // FIX: not sure const is sufficient to prevent assigning to a function
 //      designator???
+// FIX: When debugging the compiler, we should print something when
+//      returning bogus_ans!!!
 // Type errors should already have been reported, so we often silently return
 //   a bogus answer to avoid duplicate errors.
 // Note: regions might not be resolved (unification is order-dependent),
@@ -2013,6 +2015,8 @@ $(bool,typ) addressof_props(tenv te, exp e) {
     typ t = compress(e1->topt->v);
     switch (t) {
     case ArrayType(_,tq,_): 
+      // Actually, this should be impossible since we've surely
+      // promoted e1 to a pointer.
       // NOTE: Unlike C, we cannot allow any e1 -- it must be an lvalue.
       // (C doesn't need to know the region and we do!)
       return $(tq->q_const, addressof_props(te,e1)[1]);
@@ -2022,16 +2026,8 @@ $(bool,typ) addressof_props(tenv te, exp e) {
       if(finfo != null)
 	return $((*finfo)[0]->q_const, addressof_props(te,e1)[1]);
       return bogus_ans;
-    case PointerType(PtrInfo{t2,r,_,_,b}): 
-      // boxed tuple case -- so the region is in the pointer type.
-      switch(compress(t2)) {
-      case TupleType(ts):
-	let finfo = lookup_tuple_field(ts,Evexp::eval_const_uint_exp(e2));
-	if(finfo != null)
-	  return $((*finfo)[0]->q_const, r);
-	fallthru;
-      default: return bogus_ans;
-      }
+    case PointerType(PtrInfo{t2,r,_,tq,b}): 
+      return $(tq->q_const,r);
     default: return bogus_ans;
     }
   default: 

@@ -1030,24 +1030,34 @@ static exp init_struct(env nv,typ struct_type,
   return make_struct(x, strctq(tdn), s, pointer, is_atomic);
 }
 
-// forward declaration
+// functions for passing to lvalue_assign (see below)
+static exp assignop_lvalue(exp el, $(opt_t<primop>,exp)@ pr) {
+  return assignop_exp(el,(*pr)[0],(*pr)[1],DL);
+}
+static exp address_lvalue(exp e1, bool ignore) {
+  return address_exp(e1,DL);
+}
+static exp incr_lvalue(exp e1, incrementor_t incr) {
+  return new_exp(Increment_e(e1,incr),DL);
+}
+
 static void lvalue_assign_stmt(stmt s,list_t<field_name> fs,
-			       opt_t<primop> popt,exp e2);
+			       exp f(exp,`a), `a f_env);
 // e1 is the result of translating an lvalue.  fs is the path of struct
 // fields that we're assigning to on e1 (if any).  The translation
-//  may have inserted null checks, etc., but buried within e is an lvalue.
-// These two functions find that lvalue and insert an assignment to it.
-// We assume that variables of e2 will not be captured by any
-// declarations in e1 (they should all be temps).
-static void lvalue_assign(exp e1,list_t<field_name> fs,opt_t<primop> popt,exp e2)
-{
+//  may have inserted null checks, etc., but buried within e1 is an lvalue.
+// We find the underlying lvalue, call it el.
+// We replace el in e1 with f(el,env)
+// We assume that variables in f(el,env) will not be captured by any
+static void lvalue_assign(exp e1, list_t<field_name> fs, 
+			  exp f(exp,`a), `a f_env){
   switch (e1->r) {
-  case StmtExp_e(s): lvalue_assign_stmt(s,fs,popt,e2); break;
-  case Cast_e(t,e):  lvalue_assign(e,fs,popt,e2);      break;
-  case StructMember_e(e,f):
+  case StmtExp_e(s): lvalue_assign_stmt(s,fs,f,f_env); break;
+  case Cast_e(t,e):  lvalue_assign(e,fs,f,f_env);      break;
+  case StructMember_e(e,fld):
     // Hack: strip off the struct member -- the base case adds it back in.
     e1->r = e->r;
-    lvalue_assign(e1,&List(f,fs),popt,e2);
+    lvalue_assign(e1,&List(fld,fs),f,f_env);
     break;
   default:
     // Sanity check: the translation of lvalues may change,
@@ -1060,19 +1070,44 @@ static void lvalue_assign(exp e1,list_t<field_name> fs,opt_t<primop> popt,exp e2
     // add the path back on to the expression
     for (; fs != null; fs = fs->tl)
       e1_copy = structmember_exp(e1_copy,fs->hd,e1_copy->loc);
-    e1->r = assignop_exp(e1_copy,popt,e2,DL)->r;
+    e1->r = f(e1_copy, f_env)->r;
     break;
   }
 }
-static void lvalue_assign_stmt(stmt s,list_t<field_name> fs,
-			       opt_t<primop> popt,exp e2) {
+static void lvalue_assign_stmt(stmt s,list_t<field_name> fs, 
+			       exp f(exp,`a), `a f_env) {
   switch (s->r) {
-  case Exp_s(e1):    lvalue_assign(e1,fs,popt,e2);      break;
+  case Exp_s(e1):    lvalue_assign(e1,fs,f,f_env);      break;
     // we assume free vars of e2 are not captured by d
-  case Decl_s(d,s2): lvalue_assign_stmt(s2,fs,popt,e2); break;
-  case Seq_s(_,s2):  lvalue_assign_stmt(s2,fs,popt,e2); break;
+  case Decl_s(d,s2): lvalue_assign_stmt(s2,fs,f,f_env); break;
+  case Seq_s(_,s2):  lvalue_assign_stmt(s2,fs,f,f_env); break;
   default: toc_impos(xprintf("lvalue_assign_stmt: %s",stmt2string(s))); break;
   }
+}
+
+// arr and ind must already be translated to C. sz must be constant
+// elt_typ must be before translation to C.
+static exp known_size_subscript(exp arr, exp ind, exp esz, 
+				typ elt_typ, tqual tq,
+				bool take_address) {
+  // ({elt_typ *a=arr; uint i=ind; if (i >= sz) throw(ArrayIndex); a[i]})
+  // but if take_address is true, end with &a[i]
+  unsigned int sz = Evexp::eval_const_uint_exp(esz);
+  qvar a = temp_var();
+  qvar i = temp_var();
+  typ ta = cstar_typ(typ_to_c(elt_typ), tq);
+  exp e3 = prim2_exp(Gte, var_exp(i,DL), uint_exp(sz,DL), DL);
+  // FIX:  should throw array out of bounds exception
+  exp  e4 = newthrow_exp(null_pointer_exn_exp(DL));
+  stmt s5 = exp_stmt(e4,DL);
+  stmt s4 = ifthenelse_stmt(e3,s5,skip_stmt(DL),DL);
+  exp  e5 = subscript_exp(var_exp(a,DL),var_exp(i,DL),DL);
+  if(take_address)
+    e5 = address_exp(e5,DL);
+  stmt s6 = exp_stmt(e5,DL);
+  stmt s3 = seq_stmt(s4,s6,DL);
+  stmt s1 = declare_stmt(i,uint_t,ind,s3,DL);
+  return stmt_exp(declare_stmt(a,ta,arr,s1,DL),DL);
 }
 
 static void stmt_to_c(env nv, stmt s); // forward declaration
@@ -1235,12 +1270,16 @@ static void exp_to_c(env nv, exp e) {
     default: break; //skip
     }
     break;
-  case Increment_e(e2,_):
+  case Increment_e(e2,incr):
     typ e2_cyc_typ = e2->topt->v;
     exp_to_c(nv,e2);
     if (is_tagged_pointer_typ(e2_cyc_typ)) {
       // e2.curr++
       e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
+    }
+    if(!is_lvalue(e2)) {
+      lvalue_assign(e2,null,incr_lvalue,incr);
+      e->r = e2->r;
     }
     break;
   case AssignOp_e(e1,popt,e2):
@@ -1268,7 +1307,7 @@ static void exp_to_c(env nv, exp e) {
     // declarations of temps, bound checks, etc.  If so we look into e1,
     // find the lvalue, and put the assignment there.
     if (!is_lvalue(e1)) {
-      lvalue_assign(e1,null,popt,e2);
+      lvalue_assign(e1,null,assignop_lvalue,new{$(popt,e2)});
       e->r = e1->r;
     }
     break;
@@ -1323,7 +1362,13 @@ static void exp_to_c(env nv, exp e) {
       e->r = init_tuple(nv, true, es)->r;
       break;
     default: // it's actually an address-of.
+      // FIX: translation of e1 cannot induce a bounds-check or other
+      //      stmt_exp (i.e. it must remain an lvalue!)
       exp_to_c(nv,e1);
+      if(!is_lvalue(e1)) {
+	lvalue_assign(e1,null,address_lvalue,true);
+	e->r = e1->r;
+      }
       break;
     }
     break;
@@ -1414,40 +1459,13 @@ static void exp_to_c(env nv, exp e) {
       e->r = structmember_exp(e1,new {xprintf("f%d",i)},DL)->r;
       break;
     case ArrayType(ta,tq,esz):
-      // ({t *a=e1; uint i=e2; if (i >= esz) throw(ArrayIndex); a[i]})
-      unsigned int sz = Evexp::eval_const_uint_exp(esz);
-      qvar i = temp_var();
-      qvar a = temp_var();
-      let ta1 = typ_to_c(ta);
-      typ ta2 = cstar_typ(ta1,tq);
-      exp e3 = prim2_exp(Gte, var_exp(i,DL), uint_exp(sz,DL), DL);
-      // FIX:  should throw array out of bounds exception
-      exp e4  = newthrow_exp(null_pointer_exn_exp(DL));
-      stmt s5 = exp_stmt(e4,DL);
-      stmt s4 = ifthenelse_stmt(e3,s5,skip_stmt(DL),DL);
-      stmt s6 = exp_stmt(subscript_exp(var_exp(a,DL),var_exp(i,DL),DL),DL);
-      stmt s3 = seq_stmt(s4,s6,DL);
-      stmt s1 = declare_stmt(i,uint_t,e2,s3,DL);
-      e->r = stmt_exp(declare_stmt(a,ta2,e1,s1,DL),DL)->r;
+      // is this possible (was it not promoted by the type-checker)
+      e->r = known_size_subscript(e1,e2,esz,ta,tq,false)->r;
       break;
     case PointerType(PtrInfo{ta,rgn,bcr,tq,b}):
       switch (conref_val(b)) {
       case Upper_b(esz):
-	// ({t *a=e1; uint i=e2; if (i >= esz) throw(ArrayIndex); a[i]})
-	unsigned int sz = Evexp::eval_const_uint_exp(esz);
-	qvar i = temp_var();
-	qvar a = temp_var();
-	let ta1 = typ_to_c(ta);
-	typ ta2 = cstar_typ(ta1,tq);
-	exp e3 = prim2_exp(Gte, var_exp(i,DL), uint_exp(sz,DL), DL);
-	// FIX:  should throw array out of bounds exception
-	exp e4  = newthrow_exp(null_pointer_exn_exp(DL));
-	stmt s5 = exp_stmt(e4,DL);
-	stmt s4 = ifthenelse_stmt(e3,s5,skip_stmt(DL),DL);
-	stmt s6 = exp_stmt(subscript_exp(var_exp(a,DL),var_exp(i,DL),DL),DL);
-	stmt s3 = seq_stmt(s4,s6,DL);
-	stmt s1 = declare_stmt(i,uint_t,e2,s3,DL);
-	e->r = stmt_exp(declare_stmt(a,ta2,e1,s1,DL),DL)->r;
+	e->r = known_size_subscript(e1,e2,esz,ta,tq,false)->r;
 	break;
       case Unknown_b:
 	// ({tagptr x=e1; 

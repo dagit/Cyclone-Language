@@ -45,9 +45,9 @@ using Tcutil;
 
 namespace ControlFlow;
 
-typedef vardecl           vardecl_t;
-typedef field_name        field_name_t;
-typedef Set::set_t<`a> set_t<`a>;
+typedef vardecl             vardecl_t;
+typedef field_name          field_name_t;
+typedef Set::set_t<`a>      set_t<`a>;
 typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
 
 // The set of variables that may be unassigned.

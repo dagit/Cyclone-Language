@@ -257,7 +257,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
 	      t = vd->type = ArrayType(telt,tq,uint_exp(s.size,null)); break;
 	    case UnresolvedMem_e(_,es): fallthru(es);
 	    case Array_e(_,es):
-	      t = vd->type =ArrayType(telt,tq,uint_exp(List::length(es),null));
+	      t = vd->type = ArrayType(telt,tq,uint_exp(List::length(es),null));
 	      break;
 	    default: break;
 	    }
