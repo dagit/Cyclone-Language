@@ -27,6 +27,10 @@
 #include <array.h>
 #include "aprof_event.h"
 
+/* FIX: amounts for deallocation are INVALID when -nogc is used.
+ * This affects AllocE and ResizeE (see runtime_cyc.c).
+ */
+
 /***** This file is used to process the amon.out file.  It uses callbacks
        to actually process the data in that file.  We have two processors
        at the moment: one that prints tabular allocation data, and the
@@ -311,6 +315,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
     else if (!strcmp(buf,"resize")) {
       // set up the event
       let &ResizeE(ResizeEvent(*time,*rgn,*amt,*stats)) = &__resize_event;
+      /* FIX: amt is invalid if -nogc is used (but sign of amt is valid) */
       if (!getint(f,amt)) {
 	fprintf(stderr,"failed to get shrink amount for %s on line %d\n",s,lineno);
 	return -1;
@@ -426,6 +431,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
           num_alloc_unique++;
         }
         else {
+          /* FIX: amt is invalid if -nogc is used (but sign of amt is valid) */
           bytes_freed_unique -= *amt;
           num_freed_unique++;
         }
@@ -436,6 +442,7 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
           num_alloc_refcnt++;
         }
         else {
+          /* FIX: amt is invalid if -nogc is used (but sign of amt is valid) */
           bytes_freed_refcnt -= *amt;
           num_freed_refcnt++;
         }

@@ -137,7 +137,6 @@ namespace Aprof {
   extern int generate_svg(string_t<`H> file);
   extern int generate_svg2(string_t<`H> file);
   extern int generate_svg3(string_t<`H> file);
-  extern int generate_svg4(string_t<`H> file);
   extern int generate_sizes(string_t<`H> file);
 
   // Uses proc_file above to generate a tabular summary of per-region

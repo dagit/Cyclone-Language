@@ -282,31 +282,55 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
   case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
     mark_gc_over();
     if (!strcmp(rname,"unique")) {
-      if (!omitted("unique"))
-        mark_delta(env->unique_live,time,count);
       update_heap_stats(env,time,rstats);
       if (count>0) {
+        if (!omitted("unique")) mark_delta(env->unique_live,time,count);
         // remember count for addr in case gc reclaims addr
         Hashtable::insert((_@)allocation_at_address_table,
                           addr,new $("unique",(unsigned int)count));
       }
       else {
         // gc did not reclaim, this is ufree, forget addr/count
-        Hashtable::remove((_@)allocation_at_address_table, addr);
+        try {
+          let &$(rname2,count2) =
+            Hashtable::lookup((_@)allocation_at_address_table,addr);
+          Hashtable::remove((_@)allocation_at_address_table,addr);
+          int delta_y = -1*((int)count2);
+          /* NB: if the program was compiled with -nogc, then count will not be
+             valid (because GC_size can't be implemented correctly in -nogc).
+             However, the original count2 should be correct. */
+          count = delta_y; /* assume the second count is wrong */
+        }
+        catch {
+        case &Not_found: break;
+        }
+        if (!omitted("unique")) mark_delta(env->unique_live,time,count);
       }
     }
     else if (!strcmp(rname,"refcnt")) {
-      if (!omitted("refcnt"))
-        mark_delta(env->refcnt_live,time,count);
       update_heap_stats(env,time,rstats);
       if (count>0) {
+        if (!omitted("refcnt")) mark_delta(env->refcnt_live,time,count);
         // remember count for addr in case gc reclaims addr
         Hashtable::insert((_@)allocation_at_address_table,
                           addr,new $("refcnt",(unsigned int)count));
       }
       else {
         // gc did not reclaim, this is free, forget addr/count
-        Hashtable::remove((_@)allocation_at_address_table, addr);
+        try {
+          let &$(rname2,count2) =
+            Hashtable::lookup((_@)allocation_at_address_table,addr);
+          Hashtable::remove((_@)allocation_at_address_table,addr);
+          int delta_y = -1*((int)count2);
+          /* NB: if the program was compiled with -nogc, then count will not be
+             valid (because GC_size can't be implemented correctly in -nogc).
+             However, the original count2 should be correct. */
+          count = delta_y; /* assume the second count is wrong */
+        }
+        catch {
+        case &Not_found: break;
+        }
+        if (!omitted("refcnt")) mark_delta(env->refcnt_live,time,count);
       }
     }
     else if (!strcmp(rname,"heap")) {
@@ -387,6 +411,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     break;
 
   case &ResizeE(ResizeEvent(time,rname,count,*rstats)):
+    /* NB: count size (but not sign) will be invalid if -nogc is used */
     assert(strcmp("unique",rname));
     assert(strcmp("heap",rname));
     assert(strcmp("refcnt",rname));
@@ -883,6 +908,7 @@ static bool proc_event2(aprof_event_t event) {
   case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
     mark_gc_over();
     if (!strcmp(rname,"unique") || !strcmp(rname,"refcnt")) {
+      /* NB: count size (but not sign) will be invalid if -nogc is used */
       if (count>0) {
         // remember count for addr in case gc reclaims addr
         Hashtable::insert((_@)allocations_table,
@@ -892,10 +918,10 @@ static bool proc_event2(aprof_event_t event) {
       else {
         // gc did not reclaim, this is (u)free, forget addr/count
         try {
-          let &$(_,start_time,_) =
+          let &$(_,start_time,count2) =
             Hashtable::lookup((_@)allocations_table, addr);
           Hashtable::remove((_@)allocations_table, addr);
-          add_rect(rname,start_time,addr,time,-count); // count<0
+          add_rect(rname,start_time,addr,time,count2); // count2 because count might not be accurate
         }
         catch {
         case &Not_found: break;
@@ -1010,6 +1036,7 @@ static bool proc_event2(aprof_event_t event) {
     break;
 
   case &ResizeE(ResizeEvent(time,rname,count,*rstats)):
+    /* NB: count size (but not sign) will be invalid if -nogc is used */
     assert(strcmp("unique",rname));
     assert(strcmp("heap",rname));
     assert(strcmp("refcnt",rname));
@@ -1215,6 +1242,7 @@ static bool proc_event3(aprof_event_t event) {
   switch (event) {
   case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
     if (!strcmp(rname,"unique") || !strcmp(rname,"refcnt")) {
+      /* NB: count size (but not sign) will be invalid if -nogc is used */
       if (count>0) {
         // remember time for addr in case gc reclaims addr
         Hashtable::insert((_@)starttimes_table,addr,time);
@@ -1401,121 +1429,6 @@ int generate_svg3(string_t<`H> file) {
   if (use_events) CE = "events";
   printf("<text x='%f' y='%f' text-anchor='middle'>%d %s</text>\n",
          WIDTH, HEIGHT+18, max_lifetime, CE);
-
-  printf("<!-- title -->\n");
-  printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
-         WIDTH/2, HEIGHT+30, title);
-  printf("</svg>\n");
-
-  return 0;
-}
-
-
-/**********************************************************************/
-/*                                                                    */
-/*                   DISTRIBUTION OF OBJECT SIZE                      */
-/*                                                                    */
-/**********************************************************************/
-
-/* Map object size to number of objects with that size */
-static struct Hashtable::Table<unsigned int,unsigned int> *
-  sizes_table = NULL;
-
-static unsigned int max_size = 0;
-static unsigned int max_scount = 0;
-
-static void
-init_globals4() {
-  sizes_table = Hashtable::create(101,uint_cmp,uint_hash);
-}
-
-static void increment_size(unsigned int size) {
-  unsigned int scount = 0;
-  if (Hashtable::try_lookup((_@)sizes_table, size, &scount))
-    Hashtable::remove((_@)sizes_table, size);
-  scount++;
-  Hashtable::insert((_@)sizes_table, size, scount);
-  if (max_size < size) max_size = size;
-  if (max_scount < scount) max_scount = scount;
-}
-
-static bool proc_event4(aprof_event_t event) {
-  switch (event) {
-  case &AllocE(AllocEvent(time,_,rname,count,*rstats,addr)):
-    increment_size(count);
-    break;
-
-  case &ReclaimE(_):
-  case &CreateE(_):
-  case &FreeE(_):
-  case &MarkE(_):
-  case &ResizeE(_):
-  case &GcE(_):
-  case &GcAddToHeapE(_):
-    break;
-  }
-
-  return true;
-}
-
-static unsigned int cumulative_scount = 0;
-
-int generate_svg4(string_t<`H> file) {
-
-  init_globals4();
-
-  fn_t clos = fp2fn(proc_event4);
-  int ret = proc_file(file,clos);
-  if (ret != 0) return ret;
-
-  unsigned int ?sizes_arr = calloc(max_size+1,sizeof(unsigned int));
-  for (let size = 0; size < max_size+1; size++) {
-    unsigned int scount = 0;
-    Hashtable::try_lookup((_@)sizes_table, size, &scount);
-    sizes_arr[size] = scount;
-  }
-
-  /* print the XML header */
-  printf("<?xml version='1.0' encoding='ISO-8859-1'?>\n"
-         "<!DOCTYPE svg PUBLIC '-//W3C//DTD SVG 1.0//EN'\n"
-         " 'http://www.w3.org/TR/2001/REC-SVG-20010904/DTD/svg10.dtd'>\n");
-
-  let title = "Number of objects with a given size";
-  output_comment("Allocation size profile produced by aprof");
-  output_comment(title);
-  output_comment(aprintf("max_size = %u",max_size));
-  comment_stats();
-
-  /* start of svg stuff */
-  printf("<svg xmlns='http://www.w3.org/2000/svg'\n"
-         "     xmlns:xlink='http://www.w3.org/1999/xlink'>\n");
-
-  double xscale = (double)WIDTH/(double)(max_size+1);
-  double yscale = 1.0;
-  if (max_scount != 0)
-    yscale = (double)HEIGHT/(double)max_scount;
-
-  printf("<!-- graph -->\n");
-  printf("<g transform='translate(0,%d) scale(%.12f,-%.12f)'>\n",
-         (int)HEIGHT,
-         xscale, yscale);
-  for (let i = 0; i<max_size+1; i++) {
-    if (sizes_arr[i]) // to prevent lots of zero-height bars
-      printf("<rect fill='red' x='%d' y='0' width='1' height='%d'/>\n",
-             i,sizes_arr[i]);
-  }
-  printf("</g>\n");
-
-  printf("<!-- x and y axes -->\n");
-  printf("<path d='M-5,0 0,0' fill='none'"
-         " stroke='black' stroke-width='0.1'/>\n"
-         "<path d='M 0,%f %f,%f %f,%f' fill='none'"
-         " stroke='black' stroke-width='0.1'/>\n",
-         HEIGHT, WIDTH, HEIGHT, WIDTH, HEIGHT+5);
-  printf("<text x='-10' y='3' text-anchor='end'>%d objects</text>\n",
-         max_scount);
-  printf("<text x='%f' y='%f' text-anchor='middle'>size %d</text>\n",
-         WIDTH, HEIGHT+18, max_size);
 
   printf("<!-- title -->\n");
   printf("<text x='%f' y='%f' text-anchor='middle'>%s</text>\n",
