@@ -17,7 +17,7 @@ export CYCFLAGS
 CYCC:=$(CYCDIR)/bin/$(CYCCOMP)
 CYCLEX:=$(CYCDIR)/bin/cyclex$(EXE)
 CYCBISON:=$(CYCDIR)/bin/cycbison$(EXE)
-INC_PATH:=. $(CYCDIR)/lib $(CYCDIR)/src
+INC_PATH:=. $(CYCDIR)/lib $(CYCDIR)/src $(CYCDIR)/include
 LIB_PATH:=$(CYCDIR)/lib
 LIBR:=$(CYCLIB)
 

@@ -22,7 +22,7 @@
 #define ABSYN_CYC 
 #include "absyn.h"
 #include "absynrep.h"
-#include "positionrep.h"
+#include <positionrep.h>
 #include <string.h>
 #include <stdio.h>
 #include "tcutil.h"

@@ -150,7 +150,7 @@ cmp:
 	@cmp -s $(ARCHDIR)/lib/precore_c.h $(BUILDDIR)/precore_c.h\
 	      || echo $(XS) lib/precore_c.h CHANGED
 	@for i in $(CYCLONE_H);\
-	  do (cmp -s include/$$i lib/$$i\
+	  do (test ! -e lib/$$i || cmp -s include/$$i lib/$$i\
               || echo $(XS) lib/$$i CHANGED) done
 	@cmp -s $(ARCHDIR)/lib/$(C_RUNTIME) lib/$(C_RUNTIME)\
               || echo $(XS) lib/$(C_RUNTIME) CHANGED
@@ -158,7 +158,8 @@ cmp:
               || echo $(XS) lib/cstubs.c CHANGED
 	@cmp -s $(ARCHDIR)/lib/nogc.c lib/nogc.c\
               || echo $(XS) lib/nogc.c CHANGED
-	@cmp -s bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h\
+	@test ! -e lib/include/cyc_include.h\
+	      || cmp -s bin/cyc-lib/include/cyc_include.h lib/include/cyc_include.h\
               || echo $(XS) cyc-lib/include/cyc_include.h CHANGED
 
 # This target updates what is in bin/genfiles and include.
@@ -196,14 +197,15 @@ update: cfiles
                    cp lib/nogc.c $(ARCHDIR)/lib/nogc.c)
 ifeq ($(UPDATEARCH),$(ARCH))
 	@for i in $(CYCLONE_H);\
-           do (cmp -s lib/$$i include/$$i\
+           do (test ! -e lib/$$i || cmp -s lib/$$i include/$$i\
                || (echo UPDATING lib/$$i;\
                    cp lib/$$i include/$$i)) done
 	@(cd lib; for i in arch/*.h;\
 	   do (cmp -s $$i ../include/$$i\
                || (echo UPDATING include/$$i;\
                     cp $$i ../include/$$i)) done)
-	@cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h\
+	@test ! -e lib/include/cyc_include.h\
+               || cmp -s lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h\
                || (echo UPDATING cyc-lib/include/cyc_include.h;\
                  cp lib/include/cyc_include.h bin/cyc-lib/include/cyc_include.h)
 endif
