@@ -112,7 +112,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
   case &Exp_s(e): 
     tcExp(te,NULL,e); 
-    if (!Tcexp::in_stmt_exp)
+    if (!in_stmt_exp(te))
       simplify_unused_result_exp(e);
     return;
 

@@ -118,6 +118,9 @@ extern tenv_t enter_lhs(tenv_t);
 extern tenv_t clear_lhs(tenv_t);
 extern bool in_lhs(tenv_t te);
 
+extern tenv_t enter_stmt_exp(tenv_t);
+extern bool in_stmt_exp(tenv_t);
+
 // assigns through its last arg
 extern $(switch_clause_t,list_t<tvar_t>,list_t<type_t>)const* const
 process_fallthru(tenv_t,stmt_t,switch_clause_t *@);

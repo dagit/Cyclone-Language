@@ -1176,7 +1176,7 @@ i_t parse(FILE @ f) {
   let tds = Parse::parse_file(f);
   Binding::resolve_all(tds);
   let te  = Tcenv::tc_init();
-  Tc::tc(heap_region,te,false,tds);// no "Cyc" prefix, no default initializer 
+  Tc::tc(te,false,tds);// no "Cyc" prefix, no default initializer 
   return gen_extract(te->ae, false, tds); //don't check that definitions are complete
 }
 

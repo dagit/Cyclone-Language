@@ -325,15 +325,13 @@ void check_format_args(tenv_t te, exp_t fmt,
                        opt_t<list_t<exp_t>> opt_args,
 		       int arg_cnt,
 		       list_t<int> @alias_arg_exps,
-                       region_t<`temp> temp,
-		       list_t<type_t,`temp>
-                         type_getter(region_t<`temp>,tenv_t,string_t,seg_t)) {
+		       list_t<type_t> type_getter(tenv_t,string_t,seg_t)) {
   // check the format string and get the types it requires
   list_t<type_t> desc_types;
   switch (fmt->r) {
   case &Const_e({.String_c = s}): fallthru(s);
   case &Cast_e(_,&Exp(_,&Const_e({.String_c = s}),_,_),_,_):
-    desc_types = type_getter(temp,te,s,fmt->loc); break;
+    desc_types = type_getter(te,s,fmt->loc); break;
   default:
     // without a string literal argument, we can't check the args against
     // the format string, but we still have to check they are type-correct.
@@ -905,9 +903,8 @@ static type_t tcSeqExp(tenv_t te,seg_t loc,type_t * topt,exp_t e1,exp_t e2) {
 
 // try to find a field that e can be injected into
 static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
-                                       region_t<`r> r,
-                                       list_t<$(tvar_t,type_t)@`r,`r> inst,
-                                       list_t<datatypefield_t> fs) {
+					 list_t<$(tvar_t,type_t)@`H,`H> inst,
+					 list_t<datatypefield_t> fs) {
   list_t<datatypefield_t> fields;
   type_t t1 = (type_t)e->topt;
   // must promote float to double, and char/short to int
@@ -922,7 +919,7 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
     let Datatypefield{n,typs,loc,sc} = *fields->hd;
     // should have exactly one argument
     if (typs == NULL || typs->tl != NULL) continue;
-    type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
+    type_t t2 = substitute(inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
     if (unify(t1,t2)) {
       return fields->hd;
@@ -933,7 +930,7 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
     let Datatypefield{n,typs,loc,sc} = *fields->hd;
     // should have exactly one argument
     if (typs == NULL || typs->tl != NULL) continue;
-    type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
+    type_t t2 = substitute(inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
     // MWH: ignores potential to insert alias coercions
     bool bogus = false;
@@ -1028,12 +1025,12 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	    case Printf_ft:
 	      check_format_args(te,fmt_arg,fmt_args,
 				arg_start_pos - 1,alias_arg_exps,
-				heap_region,Formatstr::get_format_typs);
+				Formatstr::get_format_typs);
 	      break;
 	    case Scanf_ft:
 	      check_format_args(te,fmt_arg,fmt_args,
 				arg_start_pos - 1,alias_arg_exps,
-				heap_region,Formatstr::get_scanf_typs);
+				Formatstr::get_scanf_typs);
 	      break;
 	    }
 	  } catch {case &Nth: terr(loc,"bad format arguments"); break;}
@@ -1107,8 +1104,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 		      !is_noalias_path(e1))
 		    terr(e1->loc,UNIQUE_ERR_MSG);
 		}
-		let f = tcInjection(te,e1,pointer_elt_type(vt),
-				    heap_region,inst,fields);
+		let f = tcInjection(te,e1,pointer_elt_type(vt),inst,fields);
 		if (f != NULL)
 		  vci->injectors =
 		    List::append(vci->injectors,
@@ -2316,12 +2312,9 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
 }
 
 // ({ s })
-bool in_stmt_exp = false;
 
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
-  bool old_stmt_exp_state = in_stmt_exp;
-  Tcstmt::tcStmt(clear_abstract_val_ok(te),s,true);
-  in_stmt_exp = old_stmt_exp_state;
+  Tcstmt::tcStmt(enter_stmt_exp(clear_abstract_val_ok(te)),s,true);
   // The type is the type of the expression that ends the statment.
   while(true)
     switch (s->r) {

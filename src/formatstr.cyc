@@ -162,7 +162,7 @@ parse_conversionspecification(region_t<`r> r, string_t s, int i) {
   return rnew(r) Opt(rnew(r) $(flags,width,precision,lenmod,c,i+1));
 }
 
-list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc) {
+list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
   // FIX: on error we return NULL.  This will probably lead to
   // cascading errors (e.g., too many arguments to printf).
   let len = strlen(s);
@@ -187,12 +187,12 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
       default: break;
       }
       switch (width) {
-      case &List(x,NULL) && x=='*': typs = rnew(r) List(sint_typ,typs); break;
+      case &List(x,NULL) && x=='*': typs = new List(sint_typ,typs); break;
       default: break;
       }
       switch (precision) {
       case &List(x,&List(y,NULL)) && x=='.' && y=='*':
-        typs = rnew(r) List(sint_typ,typs); break;
+        typs = new List(sint_typ,typs); break;
       default: break;
     }
       type_t t;
@@ -215,7 +215,7 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
                implode(lenmod), c);
           return NULL;
         }
-        typs = rnew(r) List(t,typs);
+        typs = new List(t,typs);
         break;
       case 'u':
         for (_ f = flags; f != NULL; f = f->tl)
@@ -239,7 +239,7 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
                implode(lenmod), c);
           return NULL;
         }
-        typs = rnew(r) List(t,typs);
+        typs = new List(t,typs);
         break;
       case 'f': 
       case 'F': 
@@ -256,9 +256,11 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
         //  return NULL;
         //}
         switch (lenmod) {
-        case NULL:       typs = rnew(r) List(float_typ(1),typs); break;
+        case NULL:
+	  typs = new List(float_typ(1),typs); 
+	  break;
         case &List(x,NULL) && x =='l': 
-          typs = rnew(r) List(float_typ(2),typs); break;
+          typs = new List(float_typ(2),typs); break;
         default:
           terr(loc,"length modifier '%s' is not allowed with %%%c",
                implode(lenmod), c);
@@ -283,7 +285,7 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
                implode(precision));
           return NULL;
         }
-        typs = rnew(r) List(sint_typ,typs);
+        typs = new List(sint_typ,typs);
         break;
       case 's':
         // Only flag '-' is allowed for %s
@@ -304,11 +306,11 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
 				   new_evar(&rko,
                                              new Opt(lookup_type_vars(te))),
                                     const_tqual(0), false_conref);
-        typs = rnew(r) List(ptr,typs);
+        typs = new List(ptr,typs);
         break;
       case 'p':
         // Note:  we require pointers to be cast to integers
-      typs = rnew(r) List(uint_typ,typs);
+      typs = new List(uint_typ,typs);
       break;
       case 'n':
         for (_ f = flags; f != NULL; f = f->tl)
@@ -335,7 +337,7 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
           return NULL;
         }
         t = at_typ(t,new_evar(&rko,tvs),empty_tqual(0),false_conref);
-        typs = rnew(r) List(t,typs);
+        typs = new List(t,typs);
         break;
       case '%':
         if (flags != NULL) {
@@ -449,7 +451,7 @@ parse_inputformat(region_t<`r> r, string_t s, int i) {
   }
   return rnew(r)Opt(rnew(r)$(suppress,width,lenmod,c,i+1));
 }
-list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) {
+list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
   // FIX: on error we return NULL.  This will probably lead to
   // cascading errors (e.g., too many arguments to scanf).
   let len = strlen(s);
@@ -489,7 +491,7 @@ list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) 
         return NULL;
       }
       t = at_typ(t,new_evar(&rko,tvs),empty_tqual(0),false_conref);
-      typs = rnew(r) List(t,typs);
+      typs = new List(t,typs);
       break;
     case 'u':
     case 'o': 
@@ -507,7 +509,7 @@ list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) 
         return NULL;
       }
       t = at_typ(t,new_evar(&rko,tvs),empty_tqual(0),false_conref);
-      typs = rnew(r) List(t,typs);
+      typs = new List(t,typs);
       break;
     case 'f': 
     case 'F': 
@@ -528,21 +530,21 @@ list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) 
         return NULL;
       }
       t = at_typ(t,new_evar(&rko,tvs),empty_tqual(0),false_conref);
-      typs = rnew(r) List(t,typs);
+      typs = new List(t,typs);
       break;
       //JGM: need to fix and synch up with lib/scanf.cyc
     case 'c':
       let tvs = new Opt(lookup_type_vars(te));
-      typs = rnew(r) List(dyneither_typ(char_typ,new_evar(&rko,tvs),
-                                     empty_tqual(0),
-                                     false_conref),typs);
+      typs = new List(dyneither_typ(char_typ,new_evar(&rko,tvs),
+				    empty_tqual(0),
+				    false_conref),typs);
       break;
     case 's':
       let tvs = new Opt(lookup_type_vars(te));
       // we use a mbuffer_t here because this matches more things.
       type_t ptr = dyneither_typ(char_typ, new_evar(&rko,tvs),
 				 empty_tqual(0), false_conref);
-      typs = rnew(r) List(ptr,typs);
+      typs = new List(ptr,typs);
       break;
     case '[':
     case 'p':
@@ -561,7 +563,7 @@ list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) 
         return NULL;
       }
       t = at_typ(t,new_evar(&rko,tvs),empty_tqual(0),false_conref);
-      typs = rnew(r) List(t,typs);
+      typs = new List(t,typs);
       break;
     case '%':
       if (suppress) {

@@ -416,7 +416,7 @@ DONT_PROMOTE:
       if (topt == NULL || typ_kind(*topt) != &ak)
         allow_ref_pat = false;
     }
-    region<`rgn> rgn; {
+    { region rgn;
       // constrain type variables to have at least the kind they were abstracted over
       let var_tvs = NULL;
       list_t<$(type_t,type_t)@> outlives_constraints = NULL;

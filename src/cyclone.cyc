@@ -459,10 +459,9 @@ bool do_binding(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   return true;
 }
 
-list_t<Absyn::decl_t> do_typecheck($(region_t<`H>,Tcenv::tenv_t) @tcenv,
-                                   list_t<Absyn::decl_t,`H> tds){
-  let $(tc_rgn, te) = *tcenv;
-  Tc::tc(tc_rgn, te, true, tds);
+list_t<Absyn::decl_t> do_typecheck(Tcenv::tenv_t te,
+				   list_t<Absyn::decl_t,`H> tds){
+  Tc::tc(te, true, tds);
   if (!noshake_r)
     tds = Tc::treeshake(te,tds);
   return tds;
@@ -831,8 +830,7 @@ static void process_file(string_t<`H> filename) {
     if (parseonly_r) goto PRINTC;
 
     // Type checking
-    let tc_env = $(heap_region, te);
-    tds = do_stage("type checking", tds, do_typecheck, &tc_env,
+    tds = do_stage("type checking", tds, do_typecheck, te,
 		   remove_fileptr, preprocfileptr);
     if(compile_failure) return;
 

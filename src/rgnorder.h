@@ -26,23 +26,23 @@ namespace RgnOrder {
 using Absyn;
 using List;
 
-extern struct RgnPO<`r::R>;
-typedef struct RgnPO<`r> @`r rgn_po_t<`r>;
+extern struct RgnPO;
+typedef struct RgnPO @ rgn_po_t;
 
-rgn_po_t<`r> initial_fn_po(region_t<`r>, list_t<tvar_t> tvs, 
-                           list_t<$(type_t,type_t)@> po,
-                           type_t effect,
-                           tvar_t fst_rgn, Position::seg_t);
+rgn_po_t initial_fn_po(list_t<tvar_t> tvs, 
+		       list_t<$(type_t,type_t)@> po,
+		       type_t effect,
+		       tvar_t fst_rgn, Position::seg_t);
 //  bool sub_constraints(region_t<`r>, list_t<tvar_t> tvs,
 //  		     list_t<$(type_t,type_t)@> po1, 
 //  		     list_t<$(type_t,type_t)@> po2);
-rgn_po_t<`r> add_outlives_constraint(region_t<`r>, rgn_po_t<`r> po, type_t eff, type_t rgn, Position::seg_t loc);
-rgn_po_t<`r> add_youngest(region_t<`r>,rgn_po_t<`r> po,tvar_t rgn,bool opened);
-rgn_po_t<`r> add_unordered(region_t<`r>, rgn_po_t<`r> po, tvar_t rgn);
-bool effect_outlives(rgn_po_t po, type_t eff, type_t rgn);
-bool satisfies_constraints(rgn_po_t po, list_t<$(type_t,type_t)@> constraints,
+rgn_po_t add_outlives_constraint(rgn_po_t, type_t eff, type_t rgn, Position::seg_t);
+rgn_po_t add_youngest(rgn_po_t, tvar_t rgn,bool opened);
+rgn_po_t add_unordered(rgn_po_t, tvar_t rgn);
+bool effect_outlives(rgn_po_t, type_t eff, type_t rgn);
+bool satisfies_constraints(rgn_po_t, list_t<$(type_t,type_t)@> constraints,
 			   type_t default_bound, bool do_pin);
-bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2);
+bool eff_outlives_eff(rgn_po_t, type_t eff1, type_t eff2);
 
 //DEBUGGING
 void print_region_po(rgn_po_t po);

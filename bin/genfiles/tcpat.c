@@ -1094,15 +1094,15 @@ void*Cyc_Set_choose(struct Cyc_Set_Set*s);struct Cyc_RgnOrder_RgnPO;
 # 30 "rgnorder.h"
 typedef struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_rgn_po_t;
 # 32
-struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(struct _RegionHandle*,struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,struct Cyc_Absyn_Tvar*fst_rgn,unsigned int);
+struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_initial_fn_po(struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,struct Cyc_Absyn_Tvar*fst_rgn,unsigned int);
 # 39
-struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_outlives_constraint(struct _RegionHandle*,struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn,unsigned int loc);
-struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_youngest(struct _RegionHandle*,struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*rgn,int opened);
-struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_unordered(struct _RegionHandle*,struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*rgn);
-int Cyc_RgnOrder_effect_outlives(struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn);
-int Cyc_RgnOrder_satisfies_constraints(struct Cyc_RgnOrder_RgnPO*po,struct Cyc_List_List*constraints,void*default_bound,int do_pin);
+struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_outlives_constraint(struct Cyc_RgnOrder_RgnPO*,void*eff,void*rgn,unsigned int);
+struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_youngest(struct Cyc_RgnOrder_RgnPO*,struct Cyc_Absyn_Tvar*rgn,int opened);
+struct Cyc_RgnOrder_RgnPO*Cyc_RgnOrder_add_unordered(struct Cyc_RgnOrder_RgnPO*,struct Cyc_Absyn_Tvar*rgn);
+int Cyc_RgnOrder_effect_outlives(struct Cyc_RgnOrder_RgnPO*,void*eff,void*rgn);
+int Cyc_RgnOrder_satisfies_constraints(struct Cyc_RgnOrder_RgnPO*,struct Cyc_List_List*constraints,void*default_bound,int do_pin);
 # 45
-int Cyc_RgnOrder_eff_outlives_eff(struct Cyc_RgnOrder_RgnPO*po,void*eff1,void*eff2);
+int Cyc_RgnOrder_eff_outlives_eff(struct Cyc_RgnOrder_RgnPO*,void*eff1,void*eff2);
 # 48
 void Cyc_RgnOrder_print_region_po(struct Cyc_RgnOrder_RgnPO*po);extern char Cyc_Tcenv_Env_error[10];struct Cyc_Tcenv_Env_error_exn_struct{char*tag;};struct Cyc_Tcenv_Genv{struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict datatypedecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict ordinaries;};
 # 48 "tcenv.h"
@@ -1117,9 +1117,9 @@ enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0,Cyc_Tcenv_InNew  = 1,Cyc_Tcenv_I
 struct Cyc_List_List*Cyc_Tcenv_lookup_type_vars(struct Cyc_Tcenv_Tenv*);
 struct Cyc_Core_Opt*Cyc_Tcenv_lookup_opt_type_vars(struct Cyc_Tcenv_Tenv*);
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_add_type_vars(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*);
-# 134
+# 137
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_add_region(struct Cyc_Tcenv_Tenv*,void*,int opened);
-# 136
+# 139
 void Cyc_Tcenv_check_rgn_accessible(struct Cyc_Tcenv_Tenv*,unsigned int,void*rgn);
 # 30 "tcutil.h"
 void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
@@ -1550,11 +1550,11 @@ allow_ref_pat=0;
 if(_tmp111 != 0){
 # 416
 if(topt == 0  || ({Cyc_Tcutil_typ_kind(*topt)!= & Cyc_Tcutil_ak;}))
-allow_ref_pat=0;}{
+allow_ref_pat=0;}
 # 419
-struct _RegionHandle _tmpA3=_new_region("rgn");struct _RegionHandle*rgn=& _tmpA3;_push_region(rgn);{
+{struct _RegionHandle _tmpA3=_new_region("rgn");struct _RegionHandle*rgn=& _tmpA3;_push_region(rgn);
 # 421
-struct Cyc_List_List*_tmpA4=0;
+{struct Cyc_List_List*_tmpA4=0;
 struct Cyc_List_List*outlives_constraints=0;
 struct Cyc_List_List*_tmpA5=((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp113->impl))->exist_vars;
 {struct Cyc_List_List*t=_tmp111;for(0;t != 0;t=t->tl){
@@ -1666,10 +1666,10 @@ Cyc_Absynpp_typ2string((void*)_check_null(_tmpE0->topt)));_tmpDF.f1=_tmp49F;});(
 Cyc_Absynpp_typ2string(_tmpD9));_tmpDE.f1=_tmp4A0;});({struct Cyc_String_pa_PrintArg_struct _tmpDD;_tmpDD.tag=0;_tmpDD.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)aggr_str);({struct Cyc_String_pa_PrintArg_struct _tmpDC;_tmpDC.tag=0;_tmpDC.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*_tmpE1->name);({void*_tmpDA[4]={& _tmpDC,& _tmpDD,& _tmpDE,& _tmpDF};({unsigned int _tmp4A2=p->loc;struct _dyneither_ptr _tmp4A1=({const char*_tmpDB="field %s of %s pattern expects type %s != %s";_tag_dyneither(_tmpDB,sizeof(char),45);});Cyc_Tcutil_terr(_tmp4A2,_tmp4A1,_tag_dyneither(_tmpDA,sizeof(void*),4));});});});});});});
 # 529
 if((unsigned int)new_access_exp)new_access_exp->topt=_tmpE0->topt;};}};};}
+# 421
+;_pop_region(rgn);}
 # 532
-_npop_handler(0);goto _LL24;
-# 419
-;_pop_region(rgn);};}}else{_LL49: _LL4A:
+goto _LL24;}}else{_LL49: _LL4A:
 # 586
  goto _LL4C;}}else{_LL47: _LL48:
 # 585

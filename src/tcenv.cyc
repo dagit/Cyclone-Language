@@ -93,6 +93,7 @@ struct FenvFlags {
   bool in_lhs;         // true when we're in a lhs exp
   bool in_new;         // true when we're in a new expression
   bool abstract_ok;    // true when an expression can be abstract
+  bool in_stmt_exp;    // true when in a statement-expression ({ s })
 };
 
 // Local function environments -- local variables are already bound
@@ -260,6 +261,18 @@ bool in_lhs(tenv_t te) {
   if (le == NULL) return false;
   return le->flags.in_lhs;
 }
+tenv_t enter_stmt_exp(tenv_t te) {
+  let le = te->le;
+  if(le == NULL) return put_emptyfenv(te);
+  let ans = new *le;
+  ans->flags.in_stmt_exp = true;
+  return put_fenv(te,ans);
+}
+bool in_stmt_exp(tenv_t te) {
+  let le = te->le;
+  if (le == NULL) return false;
+  return le->flags.in_stmt_exp;
+}
 
 // do not stop setting clauseopt -- JumpAnalysis needs it!
 $(switch_clause_t,list_t<tvar_t>,list_t<type_t>)const* const
@@ -305,7 +318,7 @@ tenv_t add_region(tenv_t te, type_t rgn, bool opened) {
   let region_order = ans->region_order;
   switch (compress(rgn)) {
   case &VarType(x): 
-    region_order = add_youngest(heap_region,region_order, x, opened);
+    region_order = add_youngest(region_order, x, opened);
     break;
   default: break;
   }
@@ -320,8 +333,7 @@ tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
   let block_typ = new VarType(block_rgn);
   ans->type_vars = new List(block_rgn, ans->type_vars);
   check_unique_tvars(loc, ans->type_vars); // DJG: FIX -- very wasteful
-  ans->region_order = add_youngest(heap_region, ans->region_order, 
-				   block_rgn, false);
+  ans->region_order = add_youngest(ans->region_order, block_rgn, false);
   ans->capability = new JoinEff(new List(new AccessEff(block_typ), 
 					 new List(ans->capability,NULL)));
   ans->curr_rgn = block_typ;
@@ -341,8 +353,7 @@ tenv_t new_outlives_constraints(tenv_t te, list_t<$(type_t,type_t)@> cs,
   let ans = new *get_fenv(te,"new_outlives_constraints");
   for(; cs != NULL; cs = cs->tl)
     ans->region_order =
-      add_outlives_constraint(heap_region,
-                              ans->region_order,(*cs->hd)[0],(*cs->hd)[1], loc);
+      add_outlives_constraint(ans->region_order,(*cs->hd)[0],(*cs->hd)[1], loc);
   return put_fenv(te,ans);
 }
 
@@ -494,8 +505,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
 //   fprintf(stderr,"checking fn %s\n",qvar2string(fd->name));
-  let rgn_po = initial_fn_po(heap_region, fd->tvs,fd->rgn_po,
-                             (type_t)fd->effect,rgn0,loc);
+  let rgn_po = initial_fn_po(fd->tvs,fd->rgn_po, (type_t)fd->effect,rgn0,loc);
   type_t param_rgn = new VarType(rgn0);
   for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl) 
     vds->hd->rgn = param_rgn;
@@ -518,14 +528,13 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,
-	 .flags       = FenvFlags{false,false,false,false}
+	 .flags       = FenvFlags{false,false,false,false,false}
        };
 }
 
 fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
   let &Fenv{.region_order = rgn_po,
             .type_vars = type_vars, .shared = shared, ...} = old_fenv;
-  let r = heap_region;
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(), &rgn_kb);
@@ -533,13 +542,13 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
     let &Kind(k,a) = tvar_kind(tvars->hd,&bk);
     if (k == RgnKind)
       if (a == Aliasable)
-	rgn_po = add_unordered(r, rgn_po, tvars->hd);
+	rgn_po = add_unordered(rgn_po, tvars->hd);
       else
 	impos("non-intuitionistic tvar in nested_fenv");
   }
-  rgn_po = add_youngest(r, rgn_po, rgn0, false);
+  rgn_po = add_youngest(rgn_po, rgn0, false);
   for(let po2 = fd->rgn_po; po2 != NULL; po2=po2->tl)
-    rgn_po = add_outlives_constraint(r,rgn_po,(*po2->hd)[0],(*po2->hd)[1],loc);
+    rgn_po = add_outlives_constraint(rgn_po,(*po2->hd)[0],(*po2->hd)[1],loc);
   let tvs = new List(rgn0,List::append(fd->tvs,type_vars));
   check_unique_tvars(loc,tvs);
   type_t param_rgn = new VarType(rgn0);
@@ -564,7 +573,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List((type_t)fd->effect,NULL))),
          .curr_rgn    = param_rgn,
-	 .flags       = FenvFlags{false,false,false,false}
+	 .flags       = FenvFlags{false,false,false,false,false}
        };
 }
 
@@ -572,7 +581,7 @@ fenv_t bogus_fenv(type_t ret_type,
 		  list_t<$(var_opt_t,tqual_t,type_t)@> args) {
   tvar_t rgn0 = new Tvar(new "bogus", new_tvar_id(), &rgn_kb);
   let tvs = new List(rgn0,NULL);
-  let rgn_po = initial_fn_po(heap_region,NULL,NULL,new JoinEff(NULL),rgn0,0);
+  let rgn_po = initial_fn_po(NULL,NULL,new JoinEff(NULL),rgn0,0);
   type_t param_rgn = new VarType(rgn0);
   return new
     Fenv{.shared = new_shared_fenv(ret_type),
@@ -581,6 +590,6 @@ fenv_t bogus_fenv(type_t ret_type,
          .ctrl_env    = NULL,
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),NULL)),
          .curr_rgn    = param_rgn,
-	 .flags       = FenvFlags{false,false,false,false}
+	 .flags       = FenvFlags{false,false,false,false,false}
        };
 }

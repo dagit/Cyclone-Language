@@ -748,8 +748,7 @@ void tcDatatypedecl(tenv_t te, seg_t loc, datatypedecl_t tud) {
   // determine datatype type's qualified name
   // set ge_decl to the namespace where the declaration 'lives'
   // (for @extensible datatype it may be different from ge)
-  region temp; {
-    datatypedecl_t@*`temp tud_opt;
+  datatypedecl_t@* tud_opt;
     // JGM: we first look up the datatype as if it's @extensible.  If we
     // don't find an extensible definition for it, and this definition 
     // does not say it's extensible, then we treat it as a normal datatype.
@@ -759,69 +758,68 @@ void tcDatatypedecl(tenv_t te, seg_t loc, datatypedecl_t tud) {
     // you can't shadow an extensible datatype that is reachable in the
     // current namespace.  But oh well...
     // FIX: necessary now that we have binding pass?
-    try {
-      tud_opt = lookup_xdatatypedecl(temp,te,loc,tud->name);
-      if (tud_opt == NULL && !tud->is_extensible) throw new Dict::Absent;
-      if (tud_opt != NULL) {
-        tud->name = (*(*tud_opt))->name;
-      } else {
-        (*tud->name)[0] = Abs_n(te->ns, false); 
-      }
-    } catch {
-    case &Dict::Absent:
-      let tdopt = Dict::lookup_opt(te->ae->datatypedecls, q);
-      tud_opt = tdopt ? rnew(temp)(*tdopt) : NULL;
+  try {
+    tud_opt = lookup_xdatatypedecl(heap_region,te,loc,tud->name);
+    if (tud_opt == NULL && !tud->is_extensible) throw new Dict::Absent;
+    if (tud_opt != NULL) {
+      tud->name = (*(*tud_opt))->name;
+    } else {
+      (*tud->name)[0] = Abs_n(te->ns, false); 
+    }
+  } catch {
+  case &Dict::Absent:
+    let tdopt = Dict::lookup_opt(te->ae->datatypedecls, q);
+    tud_opt = tdopt ? new (*tdopt) : NULL;
+    break;
+  }
+    
+  // check the fields and update the environment
+  // may not be the first declaration, so must not overwrite the dict entry!
+  switch ($(tud->fields, tud_opt)) {
+  case $(NULL, NULL):
+    // insert tud in the environment
+    rule_out_mem_and_unique(loc,q,tvs);
+    te->ae->datatypedecls = Dict::insert(te->ae->datatypedecls, q, new tud);
+    break;
+  case $(&Opt(*fs), NULL):
+    // for the sake of recursive fields, make name abstract in body
+    let tudp = new (new Datatypedecl(Extern,tud->name,tvs,NULL,
+				     tud->is_extensible));
+    te->ae->datatypedecls = Dict::insert(te->ae->datatypedecls, q, tudp);
+    
+    // check the fields (and sort them if this is a @extensible datatype)
+    *fs = tcDatatypeFields(te,loc,obj,tud->is_extensible,tud->name,*fs,tvs,tud);
+    rule_out_mem_and_unique(loc,q,tvs);
+    *tudp = tud; //insert tud in the environment
+    break;
+  case $(&Opt(*fs), &tudp):
+    let tud0 = *tudp;
+    // a previous declaration said this was extensible -- so change the
+    // current declaration to pretend like it's extensible.
+    if (!tud->is_extensible && tud0 && tud0->is_extensible)
+      tud->is_extensible = true;
+    // for the sake of recursive fields, make name abstract in body
+    *tudp = new Datatypedecl(Extern, tud->name, tvs, NULL, 
+			     tud->is_extensible);
+    
+    // check the fields (and sort them if this is a @extensible datatype)
+    *fs = tcDatatypeFields(te,loc,obj,tud->is_extensible,
+			   tud->name,*fs,tvs,tud);
+
+    *tudp = tud0; // restore previous declaration and go update the environment
+    fallthru(tudp);
+  
+  case $(NULL, &tudp):
+    // try to merge the declarations
+    let tud2 = Tcdecl::merge_datatypedecl(*tudp, tud, loc, tc_msg);
+    rule_out_mem_and_unique(loc,q,tvs);
+    if (tud2 == NULL)
+      return; // error in redeclaration
+    else {
+      *tudp = (datatypedecl_t) tud2; // make the update
       break;
     }
-    
-    // check the fields and update the environment
-    // may not be the first declaration, so must not overwrite the dict entry!
-    switch ($(tud->fields, tud_opt)) {
-    case $(NULL, NULL):
-      // insert tud in the environment
-      rule_out_mem_and_unique(loc,q,tvs);
-      te->ae->datatypedecls = Dict::insert(te->ae->datatypedecls, q, new tud);
-      break;
-    case $(&Opt(*fs), NULL):
-      // for the sake of recursive fields, make name abstract in body
-      let tudp = new (new Datatypedecl(Extern,tud->name,tvs,NULL,
-                                       tud->is_extensible));
-      te->ae->datatypedecls = Dict::insert(te->ae->datatypedecls, q, tudp);
-   
-      // check the fields (and sort them if this is a @extensible datatype)
-      *fs = tcDatatypeFields(te,loc,obj,tud->is_extensible,tud->name,*fs,tvs,tud);
-      rule_out_mem_and_unique(loc,q,tvs);
-      *tudp = tud; //insert tud in the environment
-      break;
-    case $(&Opt(*fs), &tudp):
-      let tud0 = *tudp;
-      // a previous declaration said this was extensible -- so change the
-      // current declaration to pretend like it's extensible.
-      if (!tud->is_extensible && tud0 && tud0->is_extensible)
-        tud->is_extensible = true;
-      // for the sake of recursive fields, make name abstract in body
-      *tudp = new Datatypedecl(Extern, tud->name, tvs, NULL, 
-                               tud->is_extensible);
-      
-      // check the fields (and sort them if this is a @extensible datatype)
-      *fs = tcDatatypeFields(te,loc,obj,tud->is_extensible,
-                             tud->name,*fs,tvs,tud);
-
-
-      *tudp = tud0; // restore previous declaration and go update the environment
-      fallthru(tudp);
-    case $(NULL, &tudp):
-      // try to merge the declarations
-      let tud2 = Tcdecl::merge_datatypedecl(*tudp, tud, loc, tc_msg);
-      rule_out_mem_and_unique(loc,q,tvs);
-      if (tud2 == NULL)
-        return; // error in redeclaration
-      else {
-        *tudp = (datatypedecl_t) tud2; // make the update
-        break;
-      }
-    } 
-  }
+  } 
 }
 
 void tcEnumdecl(tenv_t te, seg_t loc, enumdecl_t ed) {
@@ -906,7 +904,6 @@ static bool okay_externC(seg_t loc, scope_t sc, bool in_include) {
 static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0, 
 		     bool in_externC, 
                      bool check_var_init,
-                     region_t<`g> grgn,
                      list_t<$(seg_t,qvar_t,bool)@`H,`H>* exports) {
 
   list_t<decl_t,`H> last = NULL;
@@ -964,17 +961,17 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
       // Do the nested declarations then restore the namespace
       let ns  = te->ns;
       te->ns = List::append(ns,new List(v,NULL));
-      tc_decls(te,ds2,in_externC,check_var_init,grgn,exports);
+      tc_decls(te,ds2,in_externC,check_var_init,exports);
       te->ns = ns;
       break;
 
     case &Using_d(&$(nsl,v),ds2):
       // DJG: using was handled by the previous pass
-      tc_decls(te,ds2,in_externC,check_var_init,grgn,exports);
+      tc_decls(te,ds2,in_externC,check_var_init,exports);
       break;
 
     case &ExternC_d(ds2):
-      tc_decls(te,ds2,true,check_var_init,grgn,exports);
+      tc_decls(te,ds2,true,check_var_init,exports);
       break;
 
       // FIX: there's a simpler way to do this that does not require remembering
@@ -982,26 +979,23 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
     case &ExternCinclude_d(ds2,exports2):
       list_t<$(seg_t,qvar_t,bool)@> newexs = 
         List::append(exports2,exports ? *exports : NULL);
-      { let temp = heap_region;
-        let te2 = enter_extern_c_include(te);
-        tc_decls(te2,ds2,true,check_var_init,grgn,&newexs);
-        // check that all of the exports were actually present
-        for (; exports2 != NULL; exports2 = exports2->tl) {
-          let exp = exports2->hd;
-          if (!(*exp)[2])
-            warn((*exp)[0],"%s is exported but not defined",
-                 qvar2string((*exp)[1]));
-        }
+      let te2 = enter_extern_c_include(te);
+      tc_decls(te2,ds2,true,check_var_init,&newexs);
+      // check that all of the exports were actually present
+      for (; exports2 != NULL; exports2 = exports2->tl) {
+	let exp = exports2->hd;
+	if (!(*exp)[2])
+	  warn((*exp)[0],"%s is exported but not defined",
+	       qvar2string((*exp)[1]));
       }
       break;
     }
   }
 }
 
-void tc(region_t<`g> g, tenv_t te, bool check_var_init, 
-        list_t<decl_t,`H> ds) {
+void tc(tenv_t te, bool check_var_init, list_t<decl_t,`H> ds) {
   set_params(&tc_params_r);
-  tc_decls(te,ds,false,check_var_init,g,NULL);
+  tc_decls(te,ds,false,check_var_init,NULL);
 }
 
 // for tree-shaking (so we don't include the world)

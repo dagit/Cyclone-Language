@@ -32,11 +32,8 @@ using Absynpp;
 namespace RgnOrder;
 
 // Encodes partial order for region lifetimes
-struct RgnInfo { // FIX: unnecessary indirection now that resetable is gone
-  type_t these_outlive; // EffKind
-};
-struct RgnPO<`r::R> {
-  Dict::dict_t<tvar_t, struct RgnInfo@`r,`r> d;
+struct RgnPO {
+  Dict::dict_t<tvar_t, type_t> d; // type has EffKind, tvar outlives it
   type_t these_outlive_heap; // EffKind
   type_t these_outlive_unique; // EffKind
   tvar_t youngest; // fact: there always is one
@@ -92,11 +89,10 @@ static bool valid_constraint(type_t eff, type_t rgn) {
 // adds constraint: [eff] outlives [rgn]
 // Note: Evars get constrained to HeapRgn!
 // Note: assumes not resettable and all regions of RgnKind
-rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po, 
-                                     type_t eff, type_t rgn,
-				     Position::seg_t loc) {
+rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn,
+				 Position::seg_t loc) {
   eff = normalize_effect(eff);
-  let ans = rnew(r) *po;
+  let ans = new *po;
   // first check that this is a valid constraint
   if (!valid_constraint(eff,rgn)) {
     terr(loc,"Invalid region ordering constraint; kind mismatch");
@@ -107,10 +103,10 @@ rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po,
   case &VarType(tv):
     let d = po->d;
     if(Dict::member(d,tv)) {
-      let old = Dict::lookup(d,tv)->these_outlive;
-      d = Dict::insert(d,tv,rnew(r) RgnInfo(new JoinEff(list(eff,old))));
+      let old = Dict::lookup(d,tv);
+      d = Dict::insert(d,tv,new JoinEff(list(eff,old)));
     } else
-      d = Dict::insert(d,tv,rnew(r) RgnInfo(eff));
+      d = Dict::insert(d,tv,eff);
     ans->d = d;
     return ans;
   case &Evar(...):
@@ -128,50 +124,48 @@ rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po,
   }
 }
 
-rgn_po_t<`r> add_youngest(region_t<`r> r,rgn_po_t<`r> po, tvar_t rgn, bool opened) {
+rgn_po_t add_youngest(rgn_po_t po, tvar_t rgn, bool opened) {
   // sanity check
   if(!opened && Dict::member(po->d,rgn))
     impos("RgnOrder::add_youngest: repeated region");
-  let ans = rnew(r) *po;
+  let ans = new *po;
   let eff = new AccessEff(new VarType(po->youngest));
-  ans->d = Dict::insert(po->d, rgn, rnew(r) RgnInfo(eff));
+  ans->d = Dict::insert(po->d, rgn, eff);
   ans->youngest = rgn;
   return ans;
 }
-rgn_po_t<`r> add_unordered(region_t<`r> r, rgn_po_t<`r> po, tvar_t rgn) {
+rgn_po_t add_unordered(rgn_po_t po, tvar_t rgn) {
   if(Dict::member(po->d,rgn))
     impos("RgnOrder::add_unordered: repeated region");
-  let ans = rnew(r) *po;
-  ans->d = Dict::insert(ans->d, rgn, rnew(r) RgnInfo(empty_effect));
+  let ans = new *po;
+  ans->d = Dict::insert(ans->d, rgn, empty_effect);
   return ans;
 }
 
-rgn_po_t<`r> initial_fn_po(region_t<`r> r,
-                           list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
-                           type_t effect, tvar_t fst_rgn, Position::seg_t loc){
+rgn_po_t initial_fn_po(list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
+		       type_t effect, tvar_t fst_rgn, Position::seg_t loc){
   // put all region tvs in the dict and make fst_rgn outlive all tvs
-  Dict::dict_t<_,struct RgnInfo@`r,`r> d = Dict::rempty(r,tvar_cmp);
+  let d = Dict::empty(tvar_cmp);
   for(let tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
     if (tvar_kind(tvs2->hd,&bk)->kind == RgnKind) {
 //       fprintf(stderr,"  Adding tvar %s to dict\n",
 // 	      Absynpp::typ2string(new VarType(tvs2->hd)));
-      d = Dict::insert(d,tvs2->hd,rnew (r) RgnInfo(empty_effect));
+      d = Dict::insert(d,tvs2->hd,empty_effect);
     }
 
-  // make sure we don't have any bogus constraints
   if (!valid_constraint(effect,new VarType(fst_rgn))) {
 //     fprintf(stderr,"filtering effect\n");
     terr(loc,"Invalid region ordering constraint; kind mismatch");
-    return rnew(r) RgnPO(d,empty_effect,empty_effect,fst_rgn);
+    return new RgnPO(d,empty_effect,empty_effect,fst_rgn);
   }
 //   fprintf(stderr,"  Relating %s <= effect %s\n",
 // 	  Absynpp::typ2string(new VarType(fst_rgn)),
 // 	  Absynpp::typ2string(effect));	  
-  d = Dict::insert(d, fst_rgn, rnew(r) RgnInfo(effect));
+  d = Dict::insert(d, fst_rgn, effect);
   // add in the explicit partial order -- no longer detects cycles
-  let ans = rnew(r) RgnPO(d,empty_effect,empty_effect,fst_rgn);
+  let ans = new RgnPO(d,empty_effect,empty_effect,fst_rgn);
   for(; po != NULL; po = po->tl)
-    ans = add_outlives_constraint(r, ans, (*po->hd)[0], (*po->hd)[1], loc);
+    ans = add_outlives_constraint(ans, (*po->hd)[0], (*po->hd)[1], loc);
 //   print_region_po(ans);
   return ans;
 }
@@ -315,9 +309,9 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
 	// (meaning we already tried them or will try them).
 	if(Dict::member(po->d,next)) {
           //fprintf(stderr,"adding %s outlives: %s\n",tvar2string(next),
-          //        typ2string(Dict::lookup(po->d,next)->these_outlive));
+          //        typ2string(Dict::lookup(po->d,next)));
 
-	  add_to_search(&env,Dict::lookup(po->d,next)->these_outlive);
+	  add_to_search(&env,Dict::lookup(po->d,next));
 	} else 
           // JGM:  just returning false here to avoid a cascading error
           return false;
@@ -351,7 +345,7 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
 	let next = env.todo->hd;
 	env.todo = env.todo->tl;
 	if(Dict::member(po->d,next)) {
-	  let next_eff = Dict::lookup(po->d,next)->these_outlive;
+	  let next_eff = Dict::lookup(po->d,next);
 	  if(contains_rgnseff(tv,next_eff))
 	    return true;
 	  add_to_search(&env,next_eff);
@@ -389,15 +383,15 @@ static void pin_effect(type_t eff, type_t bd) {
     return;
   case &RgnsEff(t):
     switch(compress(t)) {
-    case &Evar(_,_,_,_): unify(t,uint_typ); return;
+    case &Evar(...): unify(t,uint_typ); return;
     default: return;
     }
   case &AccessEff(r):
     switch(compress(r)) {
-    case &Evar(_,_,_,_): unify(r,bd); return;
+    case &Evar(...): unify(r,bd); return;
     default: return;
     }
-  case &Evar(_,_,_,_): unify(eff,empty_effect); return; // going away 
+  case &Evar(...): unify(eff,empty_effect); return; // going away 
   default: return;
   }
 }
@@ -418,7 +412,7 @@ bool satisfies_constraints(rgn_po_t po, list_t<$(type_t,type_t)@> constraints,
   for(let cs=constraints; cs != NULL; cs = cs->tl) {
     let &$(_,bd) = cs->hd;
     switch(compress(bd)) {
-    case &Evar(_,_,_,_): 
+    case &Evar(...): 
       if(do_pin) 
 	unify(bd,default_bound); 
       break;
@@ -473,16 +467,14 @@ bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2) {
 
 // DEBUGGING
 void print_region_po(rgn_po_t po) {
-  region r; { 
-    Iter::iter_t<_,`r> iter = Dict::make_iter(r,po->d);
-    let elem = *Dict::rchoose(r,po->d);
-    fprintf(stderr,"region po:\n");
-    while(Iter::next(iter,&elem))
-      fprintf(stderr,"  %s outlived by %s\n",*(elem[0]->name),
-	      Absynpp::typ2string(elem[1]->these_outlive));
-    fprintf(stderr,"  these outlive heap: %s\n",
-	    Absynpp::typ2string(po->these_outlive_heap));
-    fprintf(stderr,"  these outlive unique: %s\n",
-	    Absynpp::typ2string(po->these_outlive_unique));
-  }
+  Iter::iter_t iter = Dict::make_iter(Core::heap_region,po->d);
+  let elem = *Dict::rchoose(Core::heap_region,po->d);
+  fprintf(stderr,"region po:\n");
+  while(Iter::next(iter,&elem))
+    fprintf(stderr,"  %s outlived by %s\n",*(elem[0]->name),
+	    Absynpp::typ2string(elem[1]));
+  fprintf(stderr,"  these outlive heap: %s\n",
+	  Absynpp::typ2string(po->these_outlive_heap));
+  fprintf(stderr,"  these outlive unique: %s\n",
+	  Absynpp::typ2string(po->these_outlive_unique));
 }
