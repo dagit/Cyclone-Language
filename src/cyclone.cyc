@@ -862,11 +862,7 @@ int main(int argc, string_t<`H> ?`H argv) {
      BSD systems (??) */
   GC_blacklist_warn_clear();
 
-  // set default preprocessor before overwriting with argument processing
-  string_t comp = Cstring_to_string(Ccomp);
-  set_cpp(strconcat(comp," -x c -E -U__GNUC__ -nostdinc"));
-
-  // now parse the arguments
+  // parse the arguments
   region r {
     Arg::speclist_t<`r,`r> options =
     rlist(r,rnew(r)$("-v",false,"",
@@ -1084,6 +1080,13 @@ int main(int argc, string_t<`H> ?`H argv) {
               cyclone_exec_path);
   cyclone_exec_path = List::imp_rev(cyclone_exec_path);
   let cyclone_arch_path = also_subdir(cyclone_exec_path, target_arch);
+
+  string_t comp = Cstring_to_string(Ccomp);
+  if (strcmp(cpp,"") == 0) {
+    // if cpp string is not explicitly set, use the default
+    set_cpp(aprintf("%s -x c -E -specs %s",
+                    comp,do_find(cyclone_arch_path,"cycspecs")));
+  }
 
   /* The absolute file name is kept in a global variable */
   /* don't bother if we won't translate to C or if set explicitly */

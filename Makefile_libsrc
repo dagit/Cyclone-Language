@@ -49,7 +49,9 @@ endif
 
 # cross compilation -- will be changed to use -b shortly
 ifneq ($(UPDATEARCH),$(ARCH))
-override CYCFLAGS += -use-cpp '$(addprefix $(CYCDIR)/config/, cyccpp arch/$(ARCH) arch/$(UPDATEARCH))'
+#override CYCFLAGS += -use-cpp '$(addprefix $(CYCDIR)/config/, cyccpp arch/$(ARCH) arch/$(UPDATEARCH))'
+# TJIM -- WORKING
+override CYCFLAGS += -b $(UPDATEARCH)
 endif
 
 CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
@@ -136,10 +138,13 @@ nogc.a: nogc.o
 cyc_include.h: $(CYCDIR)/bin/lib/cyc-lib/cyc_include.h
 	cp $< $@
 
+cycspecs: $(CYCDIR)/bin/lib/cyc-lib/$(UPDATEARCH)/cycspecs
+	cp $< $@
+
 core.h: $(CYCDIR)/include/core.h
 	cp $< $@
 
-precore_c.h: core.h $(CYCC) cyc_include.h
+precore_c.h: core.h $(CYCC) cyc_include.h cycspecs
 	$(CYCC) $(CYCFLAGS) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc $<
 
 %.cyc: %.cyl $(CYCLEX)
@@ -148,16 +153,16 @@ precore_c.h: core.h $(CYCC) cyc_include.h
 	$(CYCBISON) -d $< -o $@
 %_tab.h: %.y $(CYCBISON)
 	$(CYCBISON) -d $< -o $(patsubst %.h,%.cyc,$@)
-%.c: %.cyc $(CYCC) cyc_include.h
+%.c: %.cyc $(CYCC) cyc_include.h cycspecs
 	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ -stopafter-toc $<
-%.$(O): %.cyc $(CYCC) cyc_include.h
+%.$(O): %.cyc $(CYCC) cyc_include.h cycspecs
 	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ $<
 # For runtime_cyc.c and nogc.c and cstubs.c
-%.$(O): %.c precore_c.h cyc_include.h
+%.$(O): %.c precore_c.h cyc_include.h cycspecs
 	$(CC) $(CFLAGS) -I. -c -o $@ $<
 
 ifdef MS
-%.obj: %.c precore_c.h cyc_include.h
+%.obj: %.c precore_c.h cyc_include.h cycspecs
 	cl /I$(CYCDIR) /Dinline=__inline /c /w /nologo /Fo$@ $^
 endif
 
@@ -165,7 +170,7 @@ endif
 # Note: In most cases, it would be correct to share .d files
 # Note: depends on cstubs.c so header files get built first
 %.d: %.cyc cstubs.c
-	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYCFLAGS) $< > $@
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYCFLAGS) -B$(CYCDIR)/bin/lib/cyc-lib $< > $@
 
 ifndef NODEPS
 -include $(addsuffix .d, $(CYCLONE_LIBS) $(CYCLONE_SRCS) cycdoc buildlib)

@@ -67,7 +67,7 @@ function diff_path {
         DIFF=$f
       else
         echo "Warning: could not find $f"
-        echo "  file include/arch/$1.h may be incorrect/incomplete"
+        echo "  files bin/genfiles/${ARCH}* may be incorrect/incomplete"
       fi
     fi
   fi
@@ -86,7 +86,7 @@ function egrep_path {
       EGREP=$f
     else
       echo "Warning: could not find $f"
-      echo "  file include/arch/$1.h may be incorrect/incomplete"
+      echo "  files bin/genfiles/${ARCH}* may be incorrect/incomplete"
     fi
   fi
   RES=$EGREP
@@ -207,8 +207,7 @@ fi
 
 # function to cleanup if we can't port the arch
 function cleanup {
-  \rm -f ${CYCDIR}/config/arch/${ARCH}*
-  \rm -rf ${CYCDIR}/bin/genfiles/${ARCH}
+  \rm -rf ${CYCDIR}/bin/genfiles/${ARCH}*
   exit 1
 }
 
@@ -219,22 +218,16 @@ CC=$RES
 cd config
 
 # see if we have #defines for this architecture
-if [ ! -f "arch/${ARCH}" ]; then
+if [ ! -f "${CYCDIR}/bin/genfiles/${ARCH}.cycspecs" ]; then
   echo "This architecture ($ARCH) is currently unsupported."
   echo "Set it up (y/n)?"
   read resp
   if [ "$resp" = "y" ]; then
-    echo | ${CC} -E -dM - > arch/$ARCH
+    ${CYCDIR}/config/buildspecs > ${CYCDIR}/bin/genfiles/${ARCH}.cycspecs
     if [ $? != 0 ]; then
-      echo "error creating arch #define file"
+      echo "error creating ${CYCDIR}/bin/genfiles/${ARCH}.cycspecs"
       cleanup
     fi
-    awk '{ printf("#undef %s\n",$2); }' arch/$ARCH > arch/$ARCH.undef
-    if [ $? != 0 ]; then
-      echo "error creating arch #undef file"
-      cleanup
-    fi
-    echo "Creating architecture-specific include file"
     egrep_path ${ARCH}
     EGREP=$RES
     export EGREP
@@ -249,17 +242,11 @@ if [ ! -f "arch/${ARCH}" ]; then
     exit 1
   fi
 else
-  # make sure all of the needed configuration files are here
-  if [ -f "arch/${ARCH}.undef" ]; then
-    echo "Supported architecture ${ARCH}"
-    cd ../bin/genfiles; ./extract_patch ${PATCH_ARCH} ${ARCH}; cd -
-    if [ ! -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
-      echo "Warning: genfiles directory for ${ARCH} not present"
-      get_def_genfiles;
-    fi
-  else
-    echo "Error---missing configuration files for ${ARCH}; rerun configure"
-    cleanup
+  echo "Supported architecture ${ARCH}"
+  cd ../bin/genfiles; ./extract_patch ${PATCH_ARCH} ${ARCH}; cd -
+  if [ ! -d "${CYCDIR}/bin/genfiles/${ARCH}" ]; then
+    echo "Warning: genfiles directory for ${ARCH} not present"
+    get_def_genfiles;
   fi
 fi
 

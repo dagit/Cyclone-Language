@@ -1,0 +1,54 @@
+#!/bin/sh
+
+# buildspecs
+
+# This is a program that builds a gcc specs file that sets up
+# cpp so that it has only the default #defines, and not any other
+# options (such as include directories).  This is used in Cyclone
+# to eliminate not only the include directories, but also for
+# cross-compilation purposes.
+
+# USAGE
+# buildspecs > specsfile
+# gcc -specs specsfile ...
+
+# NOTES
+# The cpp command string is supposed to look like the desired
+# command-line arguments to cpp.  The output of gcc -dM is a sequence
+# of #defines.  We use sed to transform this into a sequence of
+# -Dname=value flags.  We also escape special characters; the special
+# characters of gcc spec files seem to be undocumented, but at least
+# space, tab, and backslashes have to be escaped with backslashes.
+# (This is in case the special characters appear in the macro values,
+# e.g., inside a string.)  We don't have to escape newline because gcc
+# -dM emits each #define on a single line.  The awk script at the end
+# adds some boilerplate that makes the output a specs file, and puts
+# all the -D flags on one line.  NB: there are two literal tabs in the
+# last sed command which must remain literal tabs!!
+
+echo |\
+gcc - -E -dM |\
+sed -e 's/#define /-D/' |\
+sed -e 's/ /=/' |\
+sed -e 's/\\/\\\\/g' |\
+sed -e 's/ /\\ /g' |\
+sed -e 's/	/\\	/g' |\
+awk 'BEGIN { printf "*predefines:\n\n\n*cpp:\n" }\
+           { printf " %s", $0 }\
+       END { print "" }'
+
+# BUGS
+# 
+# We would like the output specs file to completely determine the
+# defined macros, however, cpp apparently looks for certain macros,
+# and if they are defined, it defines some related macros.  For
+# example, if _cdecl is defined it adds __cdecl, similarly for
+# _stdcall.  Since we are taking the output of gcc -dM and passing it
+# back to gcc using a specs file, we define __cdecl ... but then cpp
+# adds the macro ___cdecl, which was never a default macro.  This is
+# probably harmless, so we ignore it for now.
+# 
+# Also, cpp defines the macros __GNUC__ and __GNUC_MINOR__ which give
+# the version number of the compiler, unless they are specified as
+# defaults; since the output of gcc -dM will always specify them, we
+# get the desired effect (they are overridden).

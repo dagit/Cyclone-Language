@@ -60,7 +60,10 @@ nocheck:
 $(CYC_LIB_PATH):
 	mkdir $@
 	mkdir $@/cyc-lib
-	mkdir $@/cyc-lib/$(ARCH)
+	for i in `(cd bin/genfiles; echo *.cycspecs | sed -e 's/.cycspecs//g')`;\
+	  do mkdir $@/cyc-lib/$$i;\
+	     cp bin/genfiles/$$i.cycspecs $@/cyc-lib/$$i/cycspecs;\
+	  done
 	cp $(CYCDIR)/bin/cyc-lib/cyc_include.h $@/cyc-lib
 
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include: $(CYC_LIB_PATH) \
