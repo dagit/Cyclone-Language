@@ -868,9 +868,9 @@ Cyc_Evexp_eval_const_uint_exp(e);
 # 491
 CAST_LOOP: {
 void*_Tmp1=e->r;void*_Tmp2;void*_Tmp3;switch(*((int*)_Tmp1)){case 38: _Tmp3=(void*)((struct Cyc_Absyn_Valueof_e_Absyn_Raw_exp_struct*)_Tmp1)->f1;{void*t2=_Tmp3;
-return Cyc_Absyn_compress(t2);}case 14: _Tmp3=(void*)((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_Tmp1)->f1;_Tmp2=((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_Tmp1)->f2;{void*t=_Tmp3;struct Cyc_Absyn_Exp*e2=_Tmp2;
+return Cyc_Absyn_compress(t2);}case 14: _Tmp3=(void*)((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_Tmp1)->f1;_Tmp2=((struct Cyc_Absyn_Cast_e_Absyn_Raw_exp_struct*)_Tmp1)->f2;{void*t2=_Tmp3;struct Cyc_Absyn_Exp*e2=_Tmp2;
 # 495
-void*_Tmp4=Cyc_Absyn_compress(t);if(*((int*)_Tmp4)==0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp4)->f1)==1){if(((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp4)->f1)->f1==Cyc_Absyn_Unsigned)switch((int)((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp4)->f1)->f2){case Cyc_Absyn_Int_sz:
+void*_Tmp4=Cyc_Absyn_compress(t2);if(*((int*)_Tmp4)==0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp4)->f1)==1){if(((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp4)->f1)->f1==Cyc_Absyn_Unsigned)switch((int)((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_Tmp4)->f1)->f2){case Cyc_Absyn_Int_sz:
  goto _LL20;case Cyc_Absyn_Long_sz: _LL20: {
 # 498
 void*_Tmp5=e2->r;if(*((int*)_Tmp5)==38){

@@ -491,8 +491,8 @@ type_t compress(type_t t) {
   CAST_LOOP:
     switch (e->r) { 
     case &Valueof_e(t2): return compress(t2);
-    case &Cast_e(t,e2,_,_):
-      switch (compress(t)) {
+    case &Cast_e(t2,e2,_,_):
+      switch (compress(t2)) {
       case &AppType(&IntCon(Unsigned,Int_sz),_):
       case &AppType(&IntCon(Unsigned,Long_sz),_):
         switch (e2->r) {
