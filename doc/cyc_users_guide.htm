@@ -23,7 +23,7 @@ Project<br>
 </a>&nbsp;&nbsp;&nbsp; <a href="#Hello World">Hello World<br>
 </a><a href="#Quick Guide to Cyclone">Quick Overview<br>
 </a>&nbsp;&nbsp;&nbsp; <a href="#Features Added">Features added<br>
-</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#GCC and C-9X Additions:&nbsp;">GCC and C-9X
+</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#GCC and C-99 Additions:&nbsp;">GCC and C-99
     features</a><br>
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
     <a href="#Namespaces">Namespaces</a><br>
@@ -59,37 +59,38 @@ Project<br>
     Goals of the Cyclone Project</a>
 </h2>
 <p>
-Cyclone is intended to be a type-safe variant of C.&nbsp; The primary goals
-of Cyclone are to:
+Cyclone is a programming language that has been designed with two
+goals in mind:
 </p>
 <ol>
-  <li><b>Not crash</b> --- ideally, there should be no way to write a
-    Cyclone program that causes a core dump (i.e., segmentation fault or
-    bus error, blue screen of death, etc.)
-    To achieve this, Cyclone uses a combination of static type checking,
-    extended static checking, dynamic checking, and specially prepared 
-    libraries.</li>
+  <li><b>Safety</b> --- ideally, there should be no way to write a
+    Cyclone program that crashes (i.e., has a core dump, segmentation
+    fault or bus error, blue screen of death, and so on).  Safety also
+    rules out things like buffer overflows and format string attacks
+    (which can lead to crashes).  To achieve safety, Cyclone uses a
+    combination of static type checking, extended static checking,
+    dynamic checking, and specially prepared libraries.</li>
 
   <li><b>Support as much of C as possible</b> --- Cyclone should share as much
     with C as possible, including syntax, static semantics, data
     representations, calling conventions, and dynamic semantics.&nbsp; 
     This rule should only be violated when in direct conflict with the 
-    first goal of supporting type safety.</li>
+    first goal of supporting safety.</li>
 </ol>
 
 <p>
-The intended user of Cyclone is someone who is either (a) writing systems
-code, or (b) needs to port C code to a safe environment.&nbsp; Though languages
-such as Java, ML, or Scheme are safe, they do not give the control over data
-representations, calling conventions, etc. that C does.&nbsp; Hence, they are
-often unsuitable for building systems where performance and control
-matter.&nbsp; For instance, no one suggests building a run-time system
-in these languages.  
-Furthermore, today's implementations of 
-these languages make it relatively difficult to
-interface with legacy code written in C, or to incrementally move program units
-from C to the safe setting.&nbsp; The goals of Cyclone are aimed at making it
-easier to build systems software without sacrificing safety or
+The intended user of Cyclone is someone who is either (a) writing
+systems code, or (b) needs to port C code to a safe environment.&nbsp;
+Though languages such as Java, ML, or Scheme are safe, they do not
+give the control over data representations, memory management, calling
+conventions, etc., that C does.&nbsp; Hence, they are often unsuitable
+for building systems where performance and control matter.&nbsp; For
+instance, no one suggests building a run-time system in these
+languages.  Furthermore, today's implementations of these languages
+make it relatively difficult to interface with legacy code written in
+C, or to incrementally move program units from C to the safe
+setting.&nbsp; The goals of Cyclone are aimed at making it easier to
+build systems software without sacrificing safety or
 control.&nbsp;&nbsp;
 </p>
 
@@ -100,7 +101,7 @@ instance, right now, Cyclone supports a fairly rich form of stack allocation
 based on the Tofte-Talpin region type system.  This ensures that you never
 try to access a stack-allocated object outside of the lifetime of the object.
 However, all heap-allocated memory in Cyclone is reclaimed via (conservative)
-garbage collection.&nbsp; This is type safe, but prevents systems programmers
+garbage collection.&nbsp; This is safe, but prevents systems programmers
 from using Cyclone for latency-critical or space-sensitive applications.&nbsp;
 One of the big research goals of Cyclone is to introduce new typing
 abstractions, such as linear types or regions, that support programmer control
@@ -121,18 +122,16 @@ from Cyclone and we view our work as somewhat overlapping, but
 mostly complimentary.  
 </p>
 <p>
-Though we are interested
-in finding and eliminating bugs, we also want to guarantee a certain
-level of safety.  LCLint can't provide such a guarantee, because 
-the underlying language (C) and associated static analyses are
-unsound (i.e., some bugs will not be caught).  The reason for this
-is that without changing C, it is extremely difficult to guarantee
-even memory safety, much less a stronger type safety property,
-without a lot of extra runtime overhead, or a lot of false positives
-in your static analysis.  LCLint is aimed at being a practical tool
-for debugging C code, and as such, makes certain compromises to eliminate
-false positives, but at the expense of soundness.  Thus, LCLint can't
-be used in settings where security is a concern.
+Though we are interested in finding and eliminating bugs, we also want
+to <i>guarantee</i> a certain level of safety.  LCLint can't provide
+such a guarantee, because the underlying language (C) and associated
+static analyses are unsound (i.e., some bugs will not be caught).  The
+reason for this is that without changing C, it is extremely difficult
+to guarantee safety without a lot of extra runtime overhead, or a lot
+of false positives in your static analysis.  LCLint is aimed at being
+a practical tool for debugging C code, and as such, makes compromises
+to eliminate false positives, but at the expense of soundness.  Thus,
+LCLint can't be used in settings where security is a concern.
 </p>
 <p>
 ESC is similar in some ways to LCLint, but is built on top of Java.
@@ -341,16 +340,15 @@ in Stdio available.  The declaration &quot;int main() {
 ... }&quot; declares the &quot;main&quot; function for the Cyclone
 program, which takes no arguments and returns an integer result.&nbsp; 
 
-<p>The first line of the main function
-declares a variable &quot;args&quot; to be a checked pointer to
-an array of strings (written &quot;string ?&quot;.)  
-The &quot;?&quot; type constructor is similar to 
-&quot;*&quot;
-in C in that it supports subscripting, dereferencing, pointer
-arithmetic, etc.  However, all dereferences are checked to ensure
-that the current pointer value is in range.  The representation
-of a &quot;?&quot; pointers is different from normal pointers, as
-extra information is needed to support the bounds check.  
+<p>The first line of the main function declares a variable
+&quot;args&quot; to be a checked pointer to an array of strings
+(written &quot;string ?&quot;.)  The &quot;?&quot; type constructor is
+similar to &quot;*&quot; in C in that it supports subscripting,
+dereferencing, pointer arithmetic, etc.  However, all dereferences are
+checked to ensure that the current pointer value is in range.  The
+representation of a &quot;?&quot; pointer is different from the
+representation of a normal pointer, as extra information is needed to
+support the bounds check.
 
 <p>
 The declaration on the first line also initializes args by calling the
@@ -399,20 +397,21 @@ minimum, you'll need to link against the cyclib.a and gc.a libraries
 in the bin/ directory.&nbsp;&nbsp;</p>
 
 <hr>
-<h2><a name="Quick Guide to Cyclone">Quick Overview of the Language</a></h2>
-<p>C programmers should find it fairly easy to get up to speed in Cyclone.&nbsp;
-In particular, the syntax that we use is lifted directly from ANSI C and
-wherever possible, we try to follow the static and dynamic semantics.&nbsp;
-Nonetheless, there are a number of additions and restrictions that you need to
-know in order to use the language effectively.</p>
-<p>We'll begin by going over the new features that Cyclone adds to C.&nbsp; Then
-we'll go over the common idioms that Cyclone prohibits, and see how these can be
+<h2><a name="Quick Guide to Cyclone">Quick Overview of the
+Language</a></h2> <p>C programmers should find it fairly easy to get
+up to speed in Cyclone.&nbsp; In particular, the syntax and primitive
+types are lifted directly from ISO C, and, wherever possible, we try
+to follow its static and dynamic semantics.&nbsp; Nonetheless, there
+are a number of additions and restrictions that you need to know in
+order to use the language effectively.</p> <p>We'll begin by going
+over the new features that Cyclone adds to C.&nbsp; Then we'll go over
+the common idioms that Cyclone prohibits, and see how these can be
 coded using the new facilities.</p>
 <hr>
 <h2><a name="Features Added">Features Added</a></h2>
 <p>Cyclone adds a number of features to C, ranging from convenient expression
 forms, to advanced typing constructs.&nbsp; For instance, Cyclone includes many
-of the GCC and proposed C-9X extensions that make writing code a bit
+of the GCC and C-99 extensions that make writing code a bit
 easier.&nbsp; Variables need not be declared at the top of a block, a
 declaration can appear within a for-statement, expressions can have statements
 nested inside them, etc.&nbsp; Cyclone also adds support for ML or Haskell-style
@@ -432,18 +431,22 @@ aimed at making it easy to port C code to Cyclone.</p>
 <p>In what follows, we give a brief overview of these added
 features.&nbsp;&nbsp;</p>
 <hr>
-<h4><a name="GCC and C-9X Additions:&nbsp;">GCC and C-9X Additions:&nbsp;</a></h4>
-<p>Cyclone includes a number of features that GCC and the proposed <a href="http://web.onetelnet.ch/~twolf/tw/c/c9x_changes.html">ANSI
-C-9X</a> standard include.&nbsp; A quick summary of the ones that Cyclone
-currently includes are as follows:</p>
+<h4><a name="GCC and C-99 Additions:&nbsp;">GCC and C-99 Additions:&nbsp;</a></h4>
+<p>
+GCC and the <a
+href="http://web.onetelnet.ch/~twolf/tw/c/c9x_changes.html">ISO C-99
+standard</a> have some useful new features that we have adopted for
+Cyclone.  Some of the ones that we current support:</p>
 <ul>
-  <li>Expressions can include statements of the form <code>({<i>stmt;</i>
-    <i>exp</i>})</code></li>
+  <li>Statement expressions: There is a new expression form,
+    <code>({<i>statement</i> <i>expression</i>})</code>.
+    The <i>statement</i> is executed first, then the <i>expression</i>,
+    and the value of the entire expression is the value of
+    <i>expression</i></li>
   <li>Struct expressions:&nbsp; If you've declared <code>struct
-    point{int x; int y;};</code> then you can write <code>point{.x=<i>exp,
-    </i>.y=<i>exp</i>}</code> as a <code>struct point</code>
-    expression.&nbsp;&nbsp;</li>
-  <li>The implicit &quot;int&quot; for the return type of a function is removed</li>
+    point{int x; int y;};</code> then you can write
+    <code>point{.x=<i>expression, </i>.y=<i>expression</i>}</code> 
+    to allocate and initialize a <code>struct point</code></li>
   <li>// comments as in Java or C++</li>
   <li>Trailing comma allowed in enum declarations.&nbsp; Also, you can use
     semi-colons instead of commas.</li>
@@ -452,7 +455,7 @@ currently includes are as follows:</p>
   <li>For-statements can include a declaration. For instance:&nbsp; <code><b>for</b>(int
     x=0; x &lt; n; x++) { ... }</code></li>
 </ul>
-<p>We expect to follow the C-9X standard fairly closely.&nbsp;&nbsp;</p>
+<p>We expect to follow the C-99 standard fairly closely.&nbsp;&nbsp;</p>
 <hr>
 <h4><a name="Namespaces">Namespaces</a>:&nbsp;&nbsp;</h4>
 <p>As in C++, namespaces are used to avoid name clashes in code.&nbsp; For
@@ -916,12 +919,59 @@ For an example of the use of existential types, see the fn.h and fn.cyc files in
 the standard library which implement first-class closures.</p>
 <hr>
 <h2><a name="Restrictions">Restrictions</a></h2>
+<ul>
+  <li>Cyclone requires every function to declare a return type
+    (the implicit <tt>int</tt> for the return type of a function
+    is removed).</li>
+  <li>Cyclone requires the format argument of the printf functions to
+    be a string constant.  This is so that we can statically protect
+    against format string attacks.
+    <i>(We should support dynamic checks too!)</i>
+    </li>
+  <li>Cyclone does not allow user-defined vararg functions.
+    <i>(We should support this too.)</i></li>
+  <li>Cyclone does not permit some of the casts that are allowed in C.
+    Incorrect casts in C can lead to crashes.</li>
+  <li>Cyclone does not support pointer arithmetic on <tt>*</tt> or
+    <tt>@</tt>; pointers.    Pointer arithmetic is not unsafe in
+    itself, but it can lead to unsafe code when the resulting pointer
+    is assigned or dereferenced.</li>
+  <li>Cyclone inserts a NULL check when a <tt>*</tt> pointer
+    is dereferenced and it cannot determine statically that the
+    pointer is not NULL.  This prevents segmentation faults.</li>
+  <li>Cyclone requires any function that is supposed to return a
+    non-<tt>void</tt> value to execute a <tt>return</tt>
+    statement on every possible execution path.  This is needed to
+    ensure that the value returned from the function has the right type,
+    and is not just a random value left in a register or on the stack.</li>
+  <li>Cyclone does not currently support <tt>malloc</tt>.
+  <i>(But this is coming soon!)</i>.  Instead we have a variety of
+    mechanisms for safely allocating, initializing, and reclaiming memory.</li>
+  <li>Cyclone performs a static analysis to ensure that every variable
+    is initialized before it is used.  This prevents a random stack
+    value from being used improperly.</li>
+  <li>Cyclone does not permit <tt>goto</tt>s from one scope into another.
+    C warns against this practice, as it can cause crashes; Cyclone
+    rules it out entirely.</li>
+  <li>Cyclone places some limitations on the form of
+    <tt>switch</tt> statements that rule out crashes like those
+    caused by unrestricted <tt>goto</tt>.</li>
+  <li>Cyclone places some restrictions on <tt>union</tt>s for
+    safety reasons.  <i>(In fact we currently rule them out entirely,
+    but we should support them soon.)</i></li>
+  <li>Cyclone places some restrictions on linking for safety reasons.</li>
+  <li>Cyclone requires that every case in a <tt>switch</tt>
+    explicitly <tt>fallthru</tt> or <tt>break</tt>.</li>
+  <li>Cyclone has some new keywords (<tt>let</tt>,
+    <tt>abstract</tt>, etc.) that can no longer be used as identifiers.</li>
+</ul>
+
 <hr>
 <h2><a name="The Grammar of Cyclone">The Grammar of Cyclone</a></h2>
 
-Cyclone's grammar is derived from the next proposed OSI C standard,
-C9X.  Changes from and additions to the C9X grammar are noted in red.
-The start symbol is <i>translation-unit</i>.
+Cyclone's grammar is derived from the latest ISO C standard, C99.
+Changes from and additions to the C99 grammar are noted in red.  The
+start symbol is <i>translation-unit</i>.
 <p>
 
 <b>Quick links:</b>
@@ -1023,7 +1073,7 @@ namespace <i>identifier</i></font>
 </ul>
 <br>
 <font color=green>
-(The C9X type-specifiers
+(The C99 type-specifiers
 <code>_Complex</code>, and
 <code>_Imaginary</code>
 are not yet supported)
@@ -1165,7 +1215,7 @@ are not yet supported)
   <i>pointer<sub>opt</sub></i> <i>direct-declarator</i><br>
 </ul>
 <br>
-<font color=green>(We do not support C9X <code>[*]</code> direct-declarators.)</font><br>
+<font color=green>(We do not support C99 <code>[*]</code> direct-declarators.)</font><br>
 <i>direct-declarator</i>:<br>
 <ul>
   <i>identifier</i><br>
@@ -1292,7 +1342,7 @@ are not yet supported)
   <i>pointer<sub>opt</sub></i> <i>direct-abstract-declarator</i><br>
 </ul>
 <br>
-<font color=green>(We do not support C9X <code>[*]</code> direct-abstract-declarators.)</font><br>
+<font color=green>(We do not support C99 <code>[*]</code> direct-abstract-declarators.)</font><br>
 <i>direct-abstract-declarator</i>:<br>
 <ul>
   <code>(</code> <i>abstract-declarator</i> <code>)</code><br>
