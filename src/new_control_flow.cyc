@@ -1240,13 +1240,8 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	  case {.BottomFL = _}: break;
 	  case {.ReachableFL = $(fst_d,_)}:
 	    let $(r,_) = unname_rval(fenv->r,rvals->hd);
-	    switch (rvals->hd) {
-	    case &AddressOf(_):
-	    case &UniquePtr(_): break;
-	    default:
-	      if(initlevel(env->fenv,fst_d,rvals->hd)==NoneIL)
-		aerr(es->hd->loc,"expression may not be initialized");
-	    }
+	    if(initlevel(env->fenv,fst_d,rvals->hd)==NoneIL && !is_init_pointer(rvals->hd))
+	      aerr(es->hd->loc,"expression may not be initialized");
 	    switch(outflow) {
 	    case {.BottomFL = _}: break;
 	    case {.ReachableFL = $(d,relns)}:
@@ -2033,10 +2028,10 @@ anal_primop_test(analenv_t<`r> env, flow_t<`r> inflow,
   case {.ReachableFL = $(d,relns)}:
     let e1 = es->hd;
     let e2 = es->tl->hd;
-    if(initlevel(env->fenv,d,r1)==NoneIL)
-      aerr(es->hd->loc,"expression may not be initialized");
-    if(initlevel(env->fenv,d,r2)==NoneIL)
-      aerr(es->tl->hd->loc,"expression may not be initialized");
+    if(initlevel(env->fenv,d,r1)==NoneIL && !is_init_pointer(r1))
+	aerr(es->hd->loc,"expression may not be initialized");
+    if(initlevel(env->fenv,d,r2)==NoneIL && !is_init_pointer(r1))
+	aerr(es->tl->hd->loc,"expression may not be initialized");
 
     let ft = f;
     let ff = f;

@@ -641,6 +641,14 @@ static bool is_rval_unescaped(absRval_t rval) {
 bool is_unescaped(flowdict_t<`r> d, place_t<`r,`r> place) {
   return is_rval_unescaped(lookup_place(d,place));
 }
+bool is_init_pointer(absRval_t rval) {
+  switch (rval) {
+  case &NamedLocation(_,r): return is_init_pointer(r);
+  case &AddressOf(...):
+  case &UniquePtr(...): return true;
+  default: return false;
+  }
+}
 
 // only things pointed to escape
 flowdict_t<`r> escape_deref(flow_env_t<`r> fenv, flowdict_t<`r> d, absRval_t<`r> r) {

@@ -198,6 +198,8 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
         static datatype Raw_exp.Const_e nullc = Const_e(Cnst{.Null_c =0});
         e->r = &nullc;
         if (conref_constr(true,nbl)) return *topt;
+        terr(e->loc,"Used NULL when expecting a non-NULL value of type %s",
+             typ2string(*topt));
         let tenv_tvs = lookup_type_vars(te);
         t = new PointerType(PtrInfo(et,etq,
                                     PtrAtts(rgn,true_conref,bnd,zt,NULL)));
@@ -265,6 +267,8 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
       case &PointerType(PtrInfo(et,etq,PtrAtts(rgn,nbl,bnd,zt,_))):
         // check that t is nullable
         if (conref_constr(true,nbl)) return *topt;
+        terr(e->loc,"Used NULL when expecting a non-NULL value of type %s",
+             typ2string(*topt));
         return new PointerType(PtrInfo{et,etq,PtrAtts{rgn,true_conref,
                                                         bnd,zt,NULL}});
       default: break;

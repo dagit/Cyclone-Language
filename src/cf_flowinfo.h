@@ -168,7 +168,8 @@ extern $(absRval_t<`r>,List::list_t<Absyn::vardecl_t,`rgn>)
 
 extern initlevel_t initlevel(flow_env_t,flowdict_t<`r> d, absRval_t<`r> r);
 extern absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place);
-extern bool        is_unescaped(flowdict_t<`r> d, place_t<`r,`r> place);
+extern bool is_unescaped(flowdict_t<`r> d, place_t<`r,`r> place);
+extern bool is_init_pointer(absRval_t<`r> r);
 extern bool flow_lessthan_approx(flow_t<`r> f1, flow_t<`r> f2);
 
 extern void print_absrval(absRval_t rval);
