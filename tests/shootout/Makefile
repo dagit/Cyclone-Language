@@ -18,10 +18,11 @@ GCCEXEFILES = $(addprefix gcc-, $(EXEFILES))
 NOCHECKEXEFILES = $(addprefix nocheck-, $(EXEFILES))
 # NOBOUNDSEXEFILES = $(addprefix nobounds-, $(EXEFILES))
 HIST=hist$(EXE)
+CATN=catn$(EXE)
 
 all: $(EXEFILES) $(GCCEXEFILES) $(NOCHECKEXEFILES)
 
-bench: all $(HIST)
+bench: all $(HIST) $(CATN)
 	@(./runtests 11 | ./hist)
 
 diff:
