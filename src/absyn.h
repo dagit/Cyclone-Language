@@ -176,7 +176,10 @@ namespace Absyn {
     AnyKind, // kind of all types, including abstract structs
     MemKind, // excludes abstract structs
     BoxKind, // excludes types whose values dont go in general-purpose registers
+    // RgnKind <= TopRgnKind, UniqueRgnKind <= TopRgnKind
     RgnKind, // intuitionistic regions
+    UniqueRgnKind, // the affine region's kind
+    TopRgnKind, // either one
     EffKind, // effects
     IntKind  // constant ints
   };
@@ -359,7 +362,7 @@ namespace Absyn {
     TagType(type_t);         // tag_t<t>.  IntKind -> BoxKind.
     TypeInt(int);            // `i, i a const int.  IntKind
     HeapRgn;                 // The heap region.  RgnKind 
-    UniqueRgn;               // The heap region.  RgnKind 
+    UniqueRgn;               // The unique region.  UniqueRgnKind 
     AccessEff(type_t);       // Uses region r.  RgnKind -> EffKind
     JoinEff(list_t<type_t>); // e1+e2.  EffKind list -> EffKind
     RgnsEff(type_t);         // regions(t).  AnyKind -> EffKind
@@ -535,6 +538,7 @@ namespace Absyn {
     AnonEnum_e(qvar_t,type_t,struct Enumfield *);
     // malloc(e1), rmalloc(e1,e2), calloc(e1,e2), rcalloc(e1,e2,e3).  
     Malloc_e(malloc_info_t);
+    Swap_e(exp_t,exp_t); // swap(e1,e2)
     // will resolve into array, struct, etc.
     UnresolvedMem_e(opt_t<typedef_name_t>,
                     list_t<$(list_t<designator_t>,exp_t)@>);

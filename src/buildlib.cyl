@@ -854,6 +854,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         scan_exp(e1);
       }
       return;
+    case &Swap_e(_,_):
+      fprintf(stderr,"Error: unexpected Swap_e\n");
+      exit(1); return;
     case &StmtExp_e(_):
       fprintf(stderr,"Error: unexpected Stmt_e\n");
       exit(1); return;
@@ -1192,7 +1195,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   xtunion exn { NO_SUPPORT(string_t) };
 
   /* Returns 1 on a fatal error (can't create files, etc.) or 0 otherwise. */
-  int process_file(const char @filename,
+  int process_file(const char @ filename,
                    list_t<stringptr_t<`H,`H>,`H> start_symbols,
                    list_t<stringptr_t<`H,`H>,`H> omit_symbols,
                    list_t<ifdefined_t,`H> hstubs,
@@ -1589,7 +1592,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   }
 
   /* Return 1 on fatal error, else 0 */
-  int process_specfile(const char @ file,const char @dir) {
+  int process_specfile(const char @ file,const char @ dir) {
     let maybe = fopen(file,"r");
     if (!maybe) {
       fprintf(stderr,"Error: could not open %s\n", file);

@@ -188,6 +188,9 @@ MAKE_VAR(_throw_arraybounds);
 // MAKE_VAR(_tagged_ptr_decrease_size);
 MAKE_VAR(_dynforward_ptr_decrease_size);
 MAKE_VAR(_dyneither_ptr_decrease_size);
+MAKE_VAR(_swap_word);
+MAKE_VAR(_swap_dynforward);
+MAKE_VAR(_swap_dyneither);
 
 #undef MAKE_STRING
 #undef MAKE_VAR
@@ -1372,74 +1375,6 @@ static struct PtrInfo get_ptr_type(type_t t) {
   }
 }
 
-// return true if t is a zero-terminated pointer or array type and set the
-// elt_type and ptr_type as appropriate.
-static bool is_zero_ptr_type(type_t t, type_t @ptr_type, 
-                             bool @is_dynforward, bool @is_dyneither, 
-                             type_t @elt_type) {
-  switch (compress(t)) {
-  case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt,_)}):
-    if (conref_def(false,zt)) {
-      *ptr_type = t;
-      *elt_type = elt;
-      switch (conref_def(bounds_one,bnds)) {
-      case DynForward_b: *is_dyneither = false; *is_dynforward = true; break;
-      case DynEither_b: *is_dynforward = false; *is_dyneither = true; break;
-      default: *is_dynforward = *is_dyneither = false; break;
-      }
-      return true;
-    } else return false;
-  case &ArrayType(ArrayInfo{elt,tq,n,zt,_}):
-    if (conref_def(false,zt)) {
-      *elt_type = elt;
-      *is_dynforward = *is_dyneither = false;
-      *ptr_type = 
-	new PointerType(PtrInfo(elt,tq, 
-				PtrAtts(HeapRgn,false_conref,
-					new_conref(new Upper_b((exp_t)n)),
-					zt,NULL)));
-      return true;
-    } else return false;
-  default: return false;
-  }
-}
-
-// is e1 of the form *ea or ea[eb] where ea is a zero-terminated pointer?
-// If so, return true and set ea and eb appropriately (for *ea set eb to 0).
-// Finally, if the pointer is fat, set one of is_dyneither or is_dynforward
-// to true.
-static bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type, 
-                              bool @is_dynforward,
-                              bool @is_dyneither,
-                              type_t @elt_type) {
-  switch (e1->r) {
-  case &Cast_e(_,_,_,_):
-    toc_impos("we have a cast in a lhs:  %s",exp2string(e1));
-  case &Deref_e(e1a): fallthru(e1a);
-  case &Subscript_e(e1a,_):
-    return is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
-                            elt_type);
-  case &AggrArrow_e(e1a,_): fallthru(e1a);
-  case &AggrMember_e(e1a,_):
-    // sanity check
-    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
-                         elt_type))
-      toc_impos("found zero pointer aggregate member assignment: %s",
-                exp2string(e1));
-    return false;
-  case &Instantiate_e(e1a,_): fallthru(e1a);
-  case &NoInstantiate_e(e1a):
-    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
-                         elt_type))
-      toc_impos("found zero pointer instantiate/noinstantiate: %s",
-                exp2string(e1));
-    return false;
-  case &Var_e(_,_): return false;
-  default: 
-    toc_impos("found bad lhs in is_zero_ptr_deref: %s",exp2string(e1));
-  }
-}
-
 // given a type t that admits "zero", return an expression representing
 // zero for that type.  For pointers, this is NULL.  For integral types,
 // this is the appropriate integral 0.
@@ -2005,7 +1940,8 @@ static void exp_to_c(env_t nv, exp_t e) {
     //  it's just an implicit cast to void * (so long as inst type isn't int)
     for(; ts != NULL; ts = ts->tl) {
       kind_t k = typ_kind(ts->hd);
-      if(k != EffKind && k != RgnKind) {
+      if(k != EffKind && 
+	 k != RgnKind && k != UniqueRgnKind && k != TopRgnKind) {
 	switch(compress(ts->hd)) {
 	case &VarType(_):    
 	case &TunionType(_): continue;
@@ -2853,6 +2789,53 @@ DynCast:
         e->r = malloc_exp(*topt, sizeoftyp_exp(t_c,DL))->r;
       }
     }
+    break;
+
+  case &Swap_e(e1,e2):
+    // for pointer values, do
+    //   swap(e1,e2) --> _swap_kw(&e1,&e2)
+    // where _swap_kw is _swap_word for word-sized values, and something
+    // different for the two kinds of fat pointers.  Assumes that we are
+    // not swapping zero-terminated array elements so that we can avoid
+    // adding dynamic checks.
+    bool is_dynforward_ptr = false;
+    bool is_dyneither_ptr = false;
+    type_t e1_old_typ = e1->topt->v;
+    type_t e2_old_typ = e2->topt->v;
+    if (!is_pointer_or_boxed(e1_old_typ,&is_dynforward_ptr,
+			     &is_dyneither_ptr))
+      toc_impos("Swap_e: is_pointer_or_boxed: not a pointer or boxed type");
+
+    // figure out which swap primitive to use
+    exp_t swap_fn;
+    if (is_dynforward_ptr)
+      swap_fn = _swap_dynforward_e;
+    else if (is_dyneither_ptr)
+      swap_fn = _swap_dyneither_e;
+    else
+      swap_fn = _swap_word_e;
+
+    // some sanity checks for now
+    if (!is_lvalue(e1))
+      toc_impos("Swap_e: %s is not an l-value\n",Absynpp::exp2string(e1));
+    if (!is_lvalue(e2))
+      toc_impos("Swap_e: %s is not an l-value\n",Absynpp::exp2string(e2));
+
+    // turn each expression into a declaration + initializer
+    // followed by a call to the swap primtive
+//     type_t vtyp = at_typ(e1_old_typ,HeapRgn /* XXX */,
+// 			 empty_tqual(NULL),false_conref);
+//     qvar_t v1 = temp_var();
+//     qvar_t v2 = temp_var();
+//     exp_t fe = fncall_exp(swap_fn,list(var_exp(v1,e1->loc),
+// 				       var_exp(v2,e2->loc)),e->loc);
+
+    // take the address of each operand; the runtime system primitive
+    // will dereference and swap the given lhs's.
+    exp_to_c(nv,e1);
+    exp_to_c(nv,e2);
+    e->r = fncall_exp_r(swap_fn,list(address_exp(e1,DL),
+				     address_exp(e2,DL)));
     break;
 
   case &StmtExp_e(s): stmt_to_c(nv,s);  break;
@@ -4001,6 +3984,7 @@ static void exptypes_to_c(exp_t e) {
   case &Or_e(e1,e2):         fallthru(e1,e2);
   case &SeqExp_e(e1,e2):     fallthru(e1,e2);
   case &Subscript_e(e1,e2):  fallthru(e1,e2);
+  case &Swap_e(e1,e2):       fallthru(e1,e2);
   case &AssignOp_e(e1,_,e2): exptypes_to_c(e1); exptypes_to_c(e2); break;
   case &Conditional_e(e1,e2,e3): 
     exptypes_to_c(e1); exptypes_to_c(e2); exptypes_to_c(e3); break;

@@ -662,6 +662,26 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
+
+/* the next three routines swap [x] and [y]; not thread safe! */
+static inline void _swap_word(void *x, void *y) {
+  unsigned long *lx = (unsigned long *)x, *ly = (unsigned long *)y, tmp;
+  tmp = *lx;
+  *lx = *ly;
+  *ly = tmp;
+}
+static inline void _swap_dynforward(struct _dynforward_ptr *x, 
+				    struct _dynforward_ptr *y) {
+  struct _dynforward_ptr tmp = *x;
+  *x = *y;
+  *y = tmp;
+}
+static inline void _swap_dyneither(struct _dyneither_ptr *x, 
+				   struct _dyneither_ptr *y) {
+  struct _dyneither_ptr tmp = *x;
+  *x = *y;
+  *y = tmp;
+}
  struct Cyc_Core_Opt{void*v;};struct _dynforward_ptr Cyc_Core_new_string(
 unsigned int);extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
 char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{

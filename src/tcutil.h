@@ -79,9 +79,13 @@ extern bool is_numeric(exp_t);
 extern bool is_function_type(type_t t);
 extern bool is_pointer_type(type_t t);
 extern bool is_zero(exp_t e);
+extern bool is_pointer_or_boxed(type_t t,bool @is_dynforward_ptr,
+				bool @is_dyneither_ptr);
 
 // useful kinds
 extern struct Core::Opt<kind_t> rk;
+extern struct Core::Opt<kind_t> trk;
+extern struct Core::Opt<kind_t> urk;
 extern struct Core::Opt<kind_t> ak;
 extern struct Core::Opt<kind_t> bk;
 extern struct Core::Opt<kind_t> mk;
@@ -150,7 +154,7 @@ extern void check_contains_assign(exp_t);
 // Similar to the above except that (a) there are no bound type variables,
 // (b) for function types, we bind the free type variables, (c) the expected
 // kind defaults to MemKind.
-extern void check_valid_toplevel_type(seg_t,tenv_t,type_t,bool allow_unique);
+extern void check_valid_toplevel_type(seg_t,tenv_t,type_t);
 // Special cased for function declarations
 extern void check_fndecl_valid_type(seg_t,tenv_t,fndecl_t);
 // Same as check_valid_type but ensures that the resulting free variables
@@ -167,7 +171,7 @@ extern void check_unique_vars(list_t<var_t,`r> vs, seg_t loc, string_t err_msg);
 extern void check_unique_tvars(seg_t,list_t<tvar_t>);
 
 // Sees if the unique region `U occurs in the type t
-extern void check_no_unique_region(seg_t loc, tenv_t te, type_t t);
+//  extern void check_no_unique_region(seg_t loc, tenv_t te, type_t t);
 
 // Check that bounds are not zero -- constrain to 1 if necessary
 extern void check_nonzero_bound(seg_t, conref_t<bounds_t>);
@@ -189,6 +193,28 @@ extern bool is_tagged_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest,
                                       bool @is_forward_only);
 // like above but checks to see if the pointer is zero-terminated
 extern bool is_zero_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest);
+
+// like above but also works for arrays and returns dynamic pointer
+//   stats
+extern bool is_zero_ptr_type(type_t t, type_t @ptr_type, 
+			     bool @is_dynforward, bool @is_dyneither, 
+			     type_t @elt_type);
+
+// is e1 of the form *ea or ea[eb] where ea is a zero-terminated pointer?
+// If so, return true and set ea and eb appropriately (for *ea set eb to 0).
+// Finally, if the pointer is fat, set one of is_dyneither or is_dynforward
+// to true.
+extern bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type, 
+			      bool @is_dynforward,
+			      bool @is_dyneither,
+			      type_t @elt_type);
+
+// returns true if this a unique pointer, e.g. *`U, ?`U etc.
+extern bool is_unique_pointer(type_t t);
+
+// returns true if this expression only deferences unique pointers
+#define NO_PATHS
+extern bool is_unique_path(exp_t e);
 
 // if exp is of array type, cast it to an appropriate pointer type --
 // assumes the expression has already been type-checked and that t is

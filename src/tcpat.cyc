@@ -264,6 +264,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     let tenv_tvs = lookup_type_vars(te);
     t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)),
                                 empty_tqual(NULL),
+				// MWH: don't allow switching on
+				//   unique pointers for now
 				PtrAtts(new_evar(&rk,new Opt(tenv_tvs)),
 					true_conref,
 					empty_conref(),empty_conref(),NULL)));
@@ -288,6 +290,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
+    // MWH: don't allow switching on unique pointers for now
     type_t ptr_rgn = new_evar(&rk,new Opt(lookup_type_vars(te)));
     res = combine_results(res,tcPatRec(te,p2,inner_topt,&ptr_rgn));
     // if p2's type is a tunion field type, then we cast
@@ -400,6 +403,9 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 	// if unpacking a region var, must add it to the po
 	if(k2 == RgnKind) {
           outlives_constraints = new List(new $(empty_effect,vartype),outlives_constraints);
+	}
+	else if (k2 == UniqueRgnKind || k2 == TopRgnKind) {
+	  Tcutil::impos("opened existential had unique or top region kind");
 	}
       }
 

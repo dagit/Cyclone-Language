@@ -172,13 +172,14 @@ extern bool flow_lessthan_approx(flow_t f1, flow_t f2);
 extern void print_absrval(absRval_t rval);
 extern void print_initlevel(initlevel_t il);
 extern void print_root(root_t root);
+extern void print_place(place_t p);
 extern void print_place_set(place_set_t p);
 extern void print_place_list(List::list_t<place_t> p);
 extern void print_flowdict(flowdict_t d);
 extern void print_flow(flow_t f);
 
 // debugging
-  // #define DEBUG_FLOW
+// #define DEBUG_FLOW
 #ifdef DEBUG_FLOW
 #define DEBUG_PRINT(arg...) fprintf(stderr,##arg)
 #define DEBUG_PRINT_F(f,arg...) f ## (##arg)

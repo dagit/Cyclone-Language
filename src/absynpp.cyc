@@ -363,6 +363,8 @@ string_t kind2string(kind_t k) {
   case MemKind: return "M";
   case BoxKind: return "B";
   case RgnKind: return "R";
+  case UniqueRgnKind: return "UR";
+  case TopRgnKind: return "TR";
   case EffKind: return "E";
   case IntKind: return "I";
   }
@@ -685,19 +687,19 @@ doc_t ntyp2doc(type_t t) {
       // This is an error case, topt should be NULL in a normalized type
       return(ntyp2doc(topt->v));
     else {
-      switch (k->v) {
-      case RgnKind:
-	s = cat(text("`r"),
-		text(aprintf("%d",i)));
-	  break;
-      default:
+//        switch (k->v) {
+//        case RgnKind:
+//  	s = cat(text("`r"),
+//  		text(aprintf("%d",i)));
+//  	  break;
+//        default:
 	s = cat(text("%"),
 		text("("),
 		text(aprintf("%d",i)),
 		(!print_full_evars || tvs == NULL) ?
 		nil_doc() : tvars2doc(tvs->v),
 		text(")::"),k == NULL ? question() : kind2doc(k->v));
-      }
+//        }
     }
     break;
   case &VarType(tv):
@@ -1011,6 +1013,7 @@ int exp_prec(exp_t e) {
   case &Enum_e(_,_,_):          
   case &AnonEnum_e(_,_,_):      
   case &Malloc_e(_):            
+  case &Swap_e(_,_):            
   case &UnresolvedMem_e(_,_):   return 140; // ???
   case &StmtExp_e(_):           return 10000;
   }
@@ -1193,6 +1196,9 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
         s = cat(text("rmalloc("),exp2doc((exp_t)rgnopt),text(","),
                 exp2doc(new_e),text(")"));
     }
+    break;
+  case &Swap_e(e1,e2):
+    s = cat(text("cycswap("),exp2doc(e1),text(","),exp2doc(e2),text(")"));
     break;
   case &UnresolvedMem_e(n,des):
     // Currently n is always NULL from the parser

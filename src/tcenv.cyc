@@ -947,7 +947,11 @@ bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
     return rt_a==HeapRgn;
   fenv_t fe = le;
   let &Fenv{<`f,`c> .region_order = ro, ...} = fe;
-  return effect_outlives(ro,new AccessEff(rt_a),rt_b);
+  let res = effect_outlives(ro,new AccessEff(rt_a),rt_b);
+//    fprintf(stderr,"region_outlives: %s outlves %s = %s\n",
+//  	  typ2string(rt_a),typ2string(rt_b),res ? "true" : "false");
+//    print_region_po(ro);
+  return res;
 }
 
 // Check that a function call's effect is contained in the current capability.
@@ -1020,7 +1024,9 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
              new Eq_kb(RgnKind));
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
-  let rgn_po = initial_fn_po(r, fd->tvs,fd->rgn_po,fd->effect->v,rgn0);
+  // make sure that region ordering constraints do not include the
+  //   unique region
+  let rgn_po = initial_fn_po(r, fd->tvs,fd->rgn_po,fd->effect->v,rgn0,loc);
   type_t param_rgn = new VarType(rgn0);
   let vds = NULL;
   for(let args = fd->args; args != NULL; args = args->tl) {
@@ -1085,6 +1091,9 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
   for (let tvars = fd->tvs; tvars != NULL; tvars = tvars->tl)
     if (tvar_kind(tvars->hd) == RgnKind)
       rgn_po = add_youngest(r, rgn_po, tvars->hd, false, false);
+    else if (tvar_kind(tvars->hd) == UniqueRgnKind ||
+	     tvar_kind(tvars->hd) == TopRgnKind)
+      Tcutil::impos("non-intuitionistic tvar in nested_fenv");
   rgn_po = add_youngest(r, rgn_po, rgn0, false, false);
   let tvs = new List(rgn0,List::append(fd->tvs,type_vars));
   Tcutil::check_unique_tvars(loc,tvs);

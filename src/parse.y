@@ -253,11 +253,14 @@ static type_t tvar2typ(tvar_t pr) {
 }
 
 // if tvar's kind is unconstrained, set it to k
-static void set_vartyp_kind(type_t t, kind_t k) {
+static void set_vartyp_kind(type_t t, kind_t k, bool leq) {
   switch(Tcutil::compress(t)) {
   case &VarType(&Tvar(_,_,*cptr)): 
     switch(compress_kb(*cptr)) {
-    case &Unknown_kb(_): *cptr = new Eq_kb(k); return;
+    case &Unknown_kb(_): 
+      if (!leq) *cptr = new Eq_kb(k); 
+      else *cptr = new Less_kb(NULL,k);
+      return;
     default: return;
     }
   default: return;
@@ -822,17 +825,19 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 
 // Convert an identifier to a kind
 static kind_t id_to_kind(string_t s, seg_t loc) {
-  if(strlen(s)==1)
+  if(strlen(s)==1 || strlen(s)==2)
     switch (s[0]) {
     case 'A': return AnyKind;
     case 'M': return MemKind;
     case 'B': return BoxKind;
     case 'R': return RgnKind;
+    case 'U': if (s[1] == 'R') return UniqueRgnKind; else break;
+    case 'T': if (s[1] == 'R') return TopRgnKind; else break;
     case 'E': return EffKind;
     case 'I': return IntKind;
     default:  break;
   }
-  err(aprintf("bad kind: %s",s), loc); 
+  err(aprintf("bad kind: %s; strlen=%d",s,strlen(s)), loc); 
   return BoxKind;
 }
 
@@ -870,7 +875,7 @@ using Parse;
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH EXPORT
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION 
-%token MALLOC RMALLOC CALLOC RCALLOC
+%token MALLOC RMALLOC CALLOC RCALLOC SWAP
 %token REGION_T SIZEOF_T TAG_T REGION RNEW REGIONS RESET_REGION
 %token GEN NOZEROTERM_kw ZEROTERM_kw PORTON PORTOFF FLAT_kw DYNREGION_T
 // double and triple-character tokens
@@ -1775,15 +1780,15 @@ zeroterm_qual_opt:
 /* Returns an option */
 opt_rgn_opt:
 /* empty */ { $$ = ^$(NULL); }
-| type_var  { set_vartyp_kind($1,RgnKind); $$ = ^$(new Opt($1)); }
+| type_var  { set_vartyp_kind($1,RgnKind,true); $$ = ^$(new Opt($1)); }
 | '_'       { $$ = ^$(new Opt(new_evar(new Opt(RgnKind),NULL))); }
 ;
 
 /* Always returns a type (possibly an evar) */
 rgn_opt:
-/* empty */ { $$ = ^$(new_evar(new Opt(RgnKind),NULL)); }
-| type_var  { set_vartyp_kind($1,RgnKind); $$ = $!1; }
-| '_'       { $$ = ^$(new_evar(new Opt(RgnKind),NULL)); }
+/* empty */ { $$ = ^$(new_evar(new Opt(TopRgnKind),NULL)); }
+| type_var  { set_vartyp_kind($1,TopRgnKind,true); $$ = $!1; }
+| '_'       { $$ = ^$(new_evar(new Opt(TopRgnKind),NULL)); }
 ;
 
 tqual_list:
@@ -1855,7 +1860,7 @@ atomic_effect:
 | REGIONS '(' any_type_name ')'
   { $$=^$(new List(new RgnsEff($3), NULL)); }
 | type_var
-  { set_vartyp_kind($1,EffKind);
+  { set_vartyp_kind($1,EffKind,false);
     $$ = ^$(new List($1,NULL)); 
   }
 ;
@@ -1863,11 +1868,11 @@ atomic_effect:
 /* CYC:  new */
 region_set:
   type_var
-  { set_vartyp_kind($1,RgnKind);
+  { set_vartyp_kind($1,RgnKind,false);
     $$=^$(new List(new AccessEff($1),NULL)); 
   }
 | type_var ',' region_set
-  { set_vartyp_kind($1,RgnKind);
+  { set_vartyp_kind($1,RgnKind,false);
     $$=^$(new List(new AccessEff($1),$3)); 
   }
 ;
@@ -2696,6 +2701,8 @@ unary_expression:
    { let $(_,_,t) = *($9);
      $$=^$(new_exp(new Malloc_e(MallocInfo{true,$3,new(t),$5,false}),
                    LOC(@1,@11))); }
+| SWAP '(' assignment_expression ',' expression ')'
+   { $$=^$(new_exp(new Swap_e($3,$5), LOC(@1,@6))); }
 ;
 
 unary_operator:

@@ -1180,8 +1180,9 @@ void print_root(root_t root) {
   switch (root) {
   case &VarRoot(vd): 
     fprintf(stderr,"Root(%s): ",Absynpp::qvar2string(vd->name)); break;
-  case &MallocPt(_,_):
-    fprintf(stderr,"MallocPt(_,_)"); break;
+  case &MallocPt(e,t):
+    fprintf(stderr,"MallocPt(%s,%s)",
+	    Absynpp::exp2string(e),Absynpp::typ2string(t)); break;
   case &InitParam(_,_):
     fprintf(stderr,"InitParam(_,_)"); break;
   }

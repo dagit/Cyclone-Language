@@ -286,9 +286,9 @@ type_t copy_type(type_t t) {
 }
 
 // Our lattice looks like this:
-//          AbsType   EffKind  RgnKind
-//             V
-//          MemType
+//          AbsType   EffKind  TopRgnKind
+//             V                V      V
+//          MemType         RgnKind  UniqueRgnKind
 //             V
 //          BoxType
 // Only used during unification -- we can constrain an Evar or VarType
@@ -298,7 +298,16 @@ bool kind_leq(kind_t k1, kind_t k2) {
   switch ($(k1,k2)) {
   case $(BoxKind, MemKind): 
   case $(BoxKind, AnyKind): 
-  case $(MemKind, AnyKind): return true;
+  case $(MemKind, AnyKind):
+  case $(RgnKind, TopRgnKind):
+  case $(UniqueRgnKind, TopRgnKind):return true;
+  default: return false;
+  }
+}
+
+static bool is_region_kind(kind_t k) {
+  switch (k) {
+  case RgnKind: case TopRgnKind: case UniqueRgnKind: return true;
   default: return false;
   }
 }
@@ -317,7 +326,7 @@ kind_t tvar_kind(tvar_t tv) {
 // by this point.
 kind_t typ_kind(type_t t) {
   switch (compress(t)) {
-  case &Evar(k,topt,_,_): return k->v; 
+  case &Evar(k,_,_,_):    return k->v; 
   case &VarType(tv):      return tvar_kind(tv);
   case VoidType:          return MemKind;
     // FIX: we're assuming sizeof(int) = sizeof(long) = sizeof(void *) here
@@ -328,8 +337,7 @@ kind_t typ_kind(type_t t) {
   case &FnType(_):        return MemKind;
   case &DynRgnType(_,_):
   case &RgnHandleType(_): return BoxKind; 
-
-  case UniqueRgn:
+  case UniqueRgn:	  return UniqueRgnKind;
   case HeapRgn:           return RgnKind;
   case &TunionType(TunionInfo{UnknownTunion(uti),...}):
     // flat tunions always have MemKind -- they're like structs.
@@ -644,6 +652,8 @@ static tunion Type.TypeInt tizero = TypeInt(0);
 static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
   type_t t;
   switch (tvar_kind(tv)) {
+  // MWH: what to do with TopRgnKind?
+  case UniqueRgnKind: t = UniqueRgn;      break;
   case RgnKind: t = HeapRgn;      break;
   case EffKind: t = empty_effect; break;
   case IntKind: t = &tizero;      break; 
@@ -668,7 +678,9 @@ static type_t rgns_of(type_t t) {
   case &Evar(_,_,_,_):
   case &VarType(_): 
     switch (typ_kind(t)) {
-    case RgnKind: return new AccessEff(t);
+    case RgnKind:
+    case UniqueRgnKind:
+    case TopRgnKind: return new AccessEff(t);
     case EffKind: return t;
     case IntKind: return empty_effect;
     default: return new RgnsEff(t);
@@ -775,7 +787,7 @@ static type_t dummy_fntype(type_t eff) {
 // effect evars to become constrained.
 bool region_in_effect(bool constrain, type_t r, type_t e) {
   r = compress(r);
-  if (r == HeapRgn) return true;
+  if (r == HeapRgn || r == UniqueRgn) return true;
   switch (compress(e)) {
   case &AccessEff(r2): 
     // note:  might constrain a region variable unnecessarily
@@ -1919,6 +1931,21 @@ bool is_pointer_type(type_t t) {
   }
 }
 
+// return true if t is a pointer type and/or has boxed kind.  Also return
+// dynamic pointer description, if a pointer
+bool is_pointer_or_boxed(type_t t,
+			 bool @is_dynforward_ptr,
+			 bool @is_dyneither_ptr) {
+  switch (compress(t)) {
+  case &PointerType(PtrInfo{_,_,PtrAtts(_,_,b,_,_)}):
+    *is_dynforward_ptr = (conref_def(bounds_one,b) == DynForward_b);
+    *is_dyneither_ptr = (conref_def(bounds_one,b) == DynEither_b);
+    return true;
+  default:
+    return typ_kind(t) == BoxKind;
+  }
+}
+
 bool is_zero(exp_t e) {
   switch (e->r) {
   case &Const_e(Int_c(_,0)): 
@@ -1930,6 +1957,8 @@ bool is_zero(exp_t e) {
   }
 }
 
+struct Opt<kind_t> trk = {TopRgnKind};
+struct Opt<kind_t> urk = {UniqueRgnKind};
 struct Opt<kind_t> rk = {RgnKind};
 struct Opt<kind_t> ak = {AnyKind};
 struct Opt<kind_t> bk = {BoxKind};
@@ -1943,7 +1972,7 @@ bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
     let tenv_tvs = lookup_type_vars(te);
     let t1 = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), 
 				     empty_tqual(NULL),
-				     PtrAtts(new_evar(&rk,new Opt(tenv_tvs)), 
+				     PtrAtts(new_evar(&trk,new Opt(tenv_tvs)), 
 					     true_conref, 
 					     empty_conref(), 
 					     empty_conref(),NULL)));
@@ -2920,15 +2949,17 @@ bool extract_const_from_typedef(seg_t loc, bool declared_const, type_t t) {
 // * add default effects for function types 
 static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv, 
                                    kind_t expected_kind, type_t t, 
-				   bool allow_unique, bool put_in_effect) {
+				   bool put_in_effect) {
   switch (compress(t)) {
   case VoidType: break;
   case &Evar(*k,*ref,_,_): 
-    /* MWH FIX: how to check for unique region here? */
     if (*k == NULL) *k = new Opt(expected_kind); 
-    if (cvtenv.fn_result && cvtenv.generalize_evars && 
-        expected_kind == RgnKind) {
-      *ref = new Opt(HeapRgn);
+    if (cvtenv.fn_result && cvtenv.generalize_evars &&
+	is_region_kind(expected_kind)) {
+      if (expected_kind == UniqueRgnKind)
+	*ref = new Opt(UniqueRgn);
+      else // generalize TopRgnKind evars to be the heap in return values
+	*ref = new Opt(HeapRgn);
     } else if (cvtenv.generalize_evars) {
       let v = new_tvar(new Less_kb(NULL,expected_kind));
       *ref = new Opt(new VarType(v));
@@ -2948,6 +2979,14 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // no need to constrain things here, but want to add it only if
     // it hasn't already been added.
     cvtenv.free_vars = fast_add_free_tvar_bool(cvtenv.free_vars, v, put_in_effect);
+    // if we have some latitude with moving the type var, do it here
+    switch (compress_kb(v->kind)) {
+    case &Less_kb(*f,k): 
+      if (kind_leq(expected_kind,k))
+	*f = new Opt(new Less_kb(NULL,expected_kind));
+      break;
+    default: break;
+    }
     break;
   case &AnonEnumType(fs):
     // Note: this code is duplicated almost exactly in tc.cyc
@@ -3032,15 +3071,15 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       // check the region is well-formed
       if (*rgn_opt) {
         let rgn = (*rgn_opt)->v;
-        cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,rgn,allow_unique,
-                                    true);
+	//   MWH: don't allow tunions to be in the unique region for now
+        cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,rgn,true);
       }
       // check the type arguments are well-formed
       list_t<tvar_t> tvs = tud->tvs;
       for (; targs != NULL && tvs != NULL; targs = targs->tl, tvs = tvs->tl) {
 	type_t t1 = targs->hd;
 	kind_t k1 = tvar_kind(tvs->hd);
-	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1,false,true);
+	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1,true);
       }
       if (targs != NULL)
 	terr(loc,"too many type arguments for tunion %s",
@@ -3052,7 +3091,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
           kind_t k1 = tvar_kind(tvs->hd);
           type_t e = new_evar(NULL,NULL);
           hidden_ts = new List(e,hidden_ts);
-          cvtenv = i_check_valid_type(loc,te,cvtenv,k1,e,false,true);
+          cvtenv = i_check_valid_type(loc,te,cvtenv,k1,e,true);
         }
         *targsp = List::imp_append(*targsp,List::imp_rev(hidden_ts));
       }
@@ -3099,7 +3138,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       for (; targs != NULL && tvs != NULL; targs = targs->tl, tvs = tvs->tl) {
 	type_t t1 = targs->hd;
 	kind_t k1 = tvar_kind(tvs->hd);
-	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1,false,true);
+	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1,true);
       }
       if (targs != NULL)
 	terr(loc,"too many type arguments for tunion %s.%s",
@@ -3114,9 +3153,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // FIX: check that tqual is valid?
     bool is_zero_terminated;
     // note that here, we allow AnyKind types under the pointer
-    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1,false,true);
+    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1,true);
     tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t1);
-    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,rgn_typ,allow_unique,true);
+    cvtenv = i_check_valid_type(loc,te,cvtenv,TopRgnKind,rgn_typ,true);
     switch (compress_conref(zt)->v) {
     case No_constr:
       // if zero_term is unconstrained, then set it to false unless
@@ -3157,16 +3196,14 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         terr(loc,"zero-terminated pointer cannot point to empty sequence");
       break;
     case Eq_constr(&AbsUpper_b(tb)):
-      cvtenv = i_check_valid_type(loc,te,cvtenv,IntKind,tb,false,true); break;
+      cvtenv = i_check_valid_type(loc,te,cvtenv,IntKind,tb,true); break;
     case Forward_constr(_): impos("forward constraint");
     }
     break;
   case &TagType(t1):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,IntKind,t1,allow_unique,true); 
-    break;
+    cvtenv = i_check_valid_type(loc,te,cvtenv,IntKind,t1,true); break;
   case &SizeofType(t1):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1,allow_unique,true); 
-    break;
+    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1,true); break;
   case &IntType(_,_): 
   case FloatType:    
   case &DoubleType(_): break; 
@@ -3174,7 +3211,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // FIX: check that tqual is valid?
     // we don't allow abstract mem types as the elt type of an array type
     let e = *eptr;
-    cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t1,false,true);
+    cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t1,true);
     tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t1);
     bool is_zero_terminated;
     switch (compress_conref(zt)->v) {
@@ -3279,6 +3316,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       case &Eq_kb(MemKind):
 	terr(loc,"function attempts to abstract Mem type variable %s",
 	     *b->hd->name); break;
+      case &Eq_kb(TopRgnKind):
+	terr(loc,"function attempts to abstract TopRegion type variable %s",
+	     *b->hd->name); break;
       default: break;
       }
     }
@@ -3290,12 +3330,12 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 
     // results and arguments of functions cannot be abstract mem types
     // FIX?: should check that variables are unique and that tquals are ok
-    new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,tr,true,true);
+    new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,tr,true);
     new_cvtenv.fn_result = false;
     for (_ a = args; a != NULL; a = a->tl) {
       let trip = a->hd;
       let t = (*trip)[2];
-      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,t,true,true);
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,t,true);
       (*trip)[1].real_const = extract_const_from_typedef(loc,(*trip)[1].print_const,t);
     }
 
@@ -3303,7 +3343,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     if (cyc_vararg != NULL) {
       if (c_vararg) impos("both c_vararg and cyc_vararg"); // sanity
       let VarargInfo{_,_,vt,vi} = *cyc_vararg;
-      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,vt,true,true);
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,vt,true);
       cyc_vararg->tq.real_const = extract_const_from_typedef(loc,cyc_vararg->tq.print_const,vt);
       // if inject, then check the type is an appropriate [x]tunion
       // FIX: does this work with flat tunions???
@@ -3316,6 +3356,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         default: terr(loc,"can't inject a non-[x]tunion type"); break;
         }
     }
+
     // check the format attribute is consistent
     if (seen_format) {
       let num_args = List::length(args);
@@ -3361,12 +3402,13 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     //       actually, allow circularities, but forbid effect variables
     for (_ rpo = rgn_po; rpo != NULL; rpo = rpo->tl) {
       let &$(r1,r2) = rpo->hd;
-      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,EffKind,r1,false,true);
-      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,RgnKind,r2,false,true);
+      // don't allow non-intuitionistic regions in partial orders
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,EffKind,r1,true);
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,RgnKind,r2,true);
     }
     // finally, the effect -- usually inferred
     if (*eff != NULL)
-      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,EffKind,(*eff)->v,false,true);
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,EffKind,(*eff)->v,true);
     else {
       list_t<type_t> effect = NULL;
       // Add in any free region or effect variables to the effect.
@@ -3377,9 +3419,13 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         let $(tv,put_in_eff) = *tvs->hd;
         if (!put_in_eff) continue; // skip variables that shouldn't go in effs
         switch (compress_kb(tv->kind)) {
-        case &Less_kb(*f,RgnKind):
-          *f = new Opt(new Eq_kb(RgnKind)); fallthru;
-        case &Eq_kb(RgnKind):
+	case &Eq_kb(TopRgnKind): impos("TopRgnKind in toplevel effect!\n");
+	  // Coerce TopRgnKind to RgnKind
+        case &Less_kb(*f,TopRgnKind):
+	  fallthru(f,RgnKind); // MWH: is this premature?
+        case &Less_kb(*f,r) && ((r==RgnKind) || (r==UniqueRgnKind)):
+          *f = new Opt(new Eq_kb(r)); fallthru(r);
+        case &Eq_kb(r) && ((r==RgnKind) || (r==UniqueRgnKind)):
           effect = new List(new AccessEff(new VarType(tv)),effect); break;
 	case &Less_kb(_,IntKind):
 	case &Eq_kb(IntKind): break;
@@ -3399,6 +3445,8 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         let $(tv,put_in_eff) = *ts->hd;
         if (!put_in_eff) continue; // skip variables that shouldn't go in effs
         switch (typ_kind(tv)) {
+	case TopRgnKind: // should get constrained below
+	case UniqueRgnKind:
         case RgnKind: effect = new List(new AccessEff(tv), effect); break;
         case EffKind: effect = new List(tv,                effect); break;
 	case IntKind: break;
@@ -3409,7 +3457,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     }
     // Warn if afterwards any kind is still unconstrained and set it to 
     // BoxKind. In addition, drive any MemKind or AnyKind bounded type
-    // variables to BoxKind to ensure that we don't abstract a MemKind variable.
+    // variables to BoxKind to ensure that we don't abstract a MemKind
+    // variable.  Finally, drive TopRgnKind variables to RgnKind so we
+    // don't abstract them either.
     if (*btvs != NULL)
       for(list_t<tvar_t> bs = *btvs; bs != NULL; bs = bs->tl)
         switch (compress_kb(bs->hd->kind)) {
@@ -3419,9 +3469,12 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
           fallthru(f);
         case &Less_kb(*f,MemKind): fallthru(f);
         case &Less_kb(*f,AnyKind): *f = new Opt(new Eq_kb(BoxKind)); break;
+        case &Less_kb(*f,TopRgnKind): *f = new Opt(new Eq_kb(RgnKind)); break;
         case &Less_kb(*f,k):       *f = new Opt(new Eq_kb(k));       break;
         case &Eq_kb(MemKind):
 	  terr(loc,"functions can't abstract M types"); break;
+        case &Eq_kb(TopRgnKind):
+	  terr(loc,"functions can't abstract TR types"); break;
         default: break;
         }
     // remove the bound vars from the kind environment and the list of free vars
@@ -3442,7 +3495,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
   case &TupleType(tq_ts):
     for (; tq_ts != NULL; tq_ts = tq_ts->tl) {
       let p = tq_ts->hd;
-      cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,(*p)[1],false,true);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,(*p)[1],true);
       (*p)[0].real_const = 
         extract_const_from_typedef(loc,(*p)[0].print_const,(*p)[1]);
     }
@@ -3458,7 +3511,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
           terr(loc,"duplicate field %s",*fn);
         if (strcmp(*fn,"") != 0)
           prev_fields = rnew(aprev_rgn) List(fn,prev_fields);
-        cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t,false,true);
+        cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t,true);
         tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t);
 	if(k==UnionA && !bits_only(t))
           // FIX: bad error message when t is a zero-terminated type
@@ -3498,7 +3551,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       list_t<type_t> ts = *targs;
       for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
 	kind_t k = tvar_kind(tvs->hd);
-	cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd,false,true);
+	cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd,true);
       }
       if (ts != NULL)
 	terr(loc,"too many parameters for type %s", qvar2string(ad->name));
@@ -3509,7 +3562,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 	  kind_t k = tvar_kind(tvs->hd);
 	  type_t e = new_evar(NULL,NULL);
 	  hidden_ts = new List(e,hidden_ts);
-	  cvtenv = i_check_valid_type(loc,te,cvtenv,k,e,false,true);
+	  cvtenv = i_check_valid_type(loc,te,cvtenv,k,e,true);
 	}
 	*targs = List::imp_append(*targs,List::imp_rev(hidden_ts));
       }
@@ -3534,7 +3587,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // check type arguments
     for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
       kind_t k = tvar_kind(tvs->hd);
-      cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd,false,true);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,k,ts->hd,true);
       inst = new List(new $(tvs->hd,ts->hd),inst);
     }
     if (ts != NULL)
@@ -3546,7 +3599,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         kind_t k = tvar_kind(tvs->hd);
         type_t e = new_evar(NULL,NULL);
         hidden_ts = new List(e,hidden_ts);
-        cvtenv = i_check_valid_type(loc,te,cvtenv,k,e,false,true);
+        cvtenv = i_check_valid_type(loc,te,cvtenv,k,e,true);
         inst = new List(new $(tvs->hd,e),inst);
       }
       // add the hidden type arguments back in so error messages are decent
@@ -3557,187 +3610,53 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       *toptp = new new_typ;
     }
     break;
-  case UniqueRgn:
-    if (!allow_unique)
-      terr(loc,"`U only allowed in outermost pointers");
-    break;
   case &TypeInt(_):
+  case UniqueRgn:
   case HeapRgn: break;
   case &RgnHandleType(t2):
-    // As far as uniqueness goes, this will only apply to the unique
-    // region handle, so no worries about letting `U appear.
-    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t2,true,true); break;
+    cvtenv = i_check_valid_type(loc,te,cvtenv,TopRgnKind,t2,true); break;
   case &DynRgnType(t2,t3):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t2,false,false); 
-    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t3,false,true); 
+    // don't let dynamic regions point into the unique region (for now?)
+    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t2,false); 
+    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t3,true); 
     break;
   case &AccessEff(t2):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t2,false,true); break;
+    cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t2,true); break;
   case &RgnsEff(t2):
-    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t2,false,true); break;
+    cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t2,true); break;
   case &JoinEff(ts):
     for (; ts != NULL; ts = ts->tl)
-      cvtenv = i_check_valid_type(loc,te,cvtenv,EffKind,ts->hd,false,true);
+      cvtenv = i_check_valid_type(loc,te,cvtenv,EffKind,ts->hd,true);
     break;
   } 
-  if (!kind_leq(typ_kind(t), expected_kind))
+  if (!kind_leq(typ_kind(t), expected_kind)) {
+    switch (t) {
+    case &Evar(k,ref,_,_): 
+      string_t s;
+      switch (k) {
+      case NULL: s = "kind=NULL "; break;
+      case &Opt(k): s = aprintf("kind=%s ",kind2string(k)); break;
+      }
+      switch (ref) {
+      case NULL: s = aprintf("%s ref=NULL",s); break;
+      case &Opt(t): s = aprintf("%s ref=%s",s,typ2string(t)); break;
+      }
+      fprintf(stderr,"evar info: %s\n",s); break;
+    default: break;
+    }
     terr(loc,"type %s has kind %s but as used here needs kind %s",
-         typ2string(t), kind2string(typ_kind(t)), kind2string(expected_kind));
+	 typ2string(t), kind2string(typ_kind(t)), kind2string(expected_kind));
+  }
   return cvtenv;
 }
 
-#ifdef NOTDEF
-/* The next two routines check for the unique region in the given type,
-   returning true iff it is found there.  We assume declarations
-   have already been checked. */
-static bool unique_region_in_list(list_t<type_t> tvs, tenv_t te) {
-  for (; tvs != NULL; tvs = tvs->tl)
-    if (unique_region_in_type(tvs->hd, te))
-      return true;
-  return false;
-}
-
-bool unique_region_in_type(type_t t, tenv_t te) {
-  /* assumes that all declarations have been checked; that is, we
-     assume that no tuniondecl, structdecl, etc. will have occurrences
-     of the unique region, so we don't recurse into the declaration */
-  switch (compress(t)) {
-  case VoidType: break;
-  case &Evar(_,ref,_,_): 
-    if (ref != NULL) return unique_region_in_type(ref->v,te);
-    break;
-  case &VarType(_): break;
-  case &AnonEnumType(_): break;
-  case &EnumType(_,_): break;
-  case &TunionType(TunionInfo(_,targsp,rgn_opt)):
-    /* check tunion's region or that of the actual type parameters */
-    if ((ropt && (compress(ropt->v) == UniqueRgn)) || 
-        unique_region_in_list(targsp,te)) return true;
-    break;
-  case &TunionFieldType(TunionFieldInfo{_,targs}):
-    /* check actual type parameters */
-    if (unique_region_in_list(targs,te)) return true;
-    break;
-  case &PointerType(PtrInfo(t1,_,PtrAtts(rgn_typ,_,_,_))):
-    if (compress(rgn_typ) == UniqueRgn) return true;
-    else return unique_region_in_type(t1,te);
-  case &TagType(t1): return unique_region_in_type(t1,te);
-  case &SizeofType(t1): return unique_region_in_type(t1,te);
-  case &IntType(_,_): 
-  case FloatType:    
-  case &DoubleType(_): break; 
-  case &ArrayType(ArrayInfo{t1,_,_,_}):
-    return unique_region_in_type(t1,te);
-  case &FnType(FnInfo{*btvs,eff,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
-    /* check the return type */
-    if (unique_region_in_type(tr,te))
-      return true;
-    /* check argument types */
-    for (; args != NULL; args = args->tl) {
-      let &$(_,_,t) = args->hd;
-      if (unique_region_in_type(t,te))
-	return true;
-    }
-    /* FIX: check varargs? Check partial order relations? */
-    break;
-  case &TupleType(tq_ts):
-    for (; tq_ts != NULL; tq_ts = tq_ts->tl) {
-      let &$(_,t) = tq_ts->hd;
-      if (unique_region_in_type(t,te))
-	return true;
-    }
-    break;
-  case &AnonAggrType(_,fs):
-    for (; fs != NULL; fs = fs->tl) {
-      let &Aggrfield{_,_,t,_,_} = fs->hd;
-      if (unique_region_in_type(t,te))
-	return true;
-    }   
-    break;
-  case &AggrType(AggrInfo(_,targs)):
-    /* check actual type parameters */
-    return unique_region_in_list(targs,te);
-  case &TypedefType(_,targs,_,_):
-    /* as above, we assume that the decl has already been checked */
-    return unique_region_in_list(targs,te);
-  case &TypeInt(_):
-  case UniqueRgn: 
-    return true;
-  case HeapRgn: break;
-  case &DynRgnType(t2,t3):
-    return unique_region_in_type(t2,te) || unique_region_in_type(t3,te);
-  case &RgnHandleType(t2): fallthru(t2);
-  case &AccessEff(t2): fallthru(t2);
-  case &RgnsEff(t2):
-    return unique_region_in_type(t2,te);
-  case &JoinEff(ts):
-    for (; ts != NULL; ts = ts->tl)
-      if (unique_region_in_type(ts->hd,te))
-	return true;
-    break;
-  } 
-  return false;
-}
-
-/* Returns true if the unique region appears illegally in this type. */
-bool illegal_unique_region(type_t t, tenv_t te) {
-  if (!unique_region_in_type(t,te))
-    return false;
-  
-  switch (compress(t)) {
-  case &TunionType(_):
-  case &TunionFieldType(_):
-  case &ArrayType(_):
-  case &TupleType(_):
-  case &AnonAggrType(_,_):
-  case &AggrType(_):
-  case &TypedefType(_,_,_,_):
-    return true;
-  case &PointerType(PtrInfo(t1,_,PtrAtts(rgn_typ,_,_,_))):
-    switch (t1) {
-    case &TagType(_):
-    case &SizeofType(_):
-    case &IntType(_,_): 
-    case FloatType:    
-    case &DoubleType(_):
-      break; 
-    default:
-      /* allow any nested structure, even pointers, as long as it
-	 doesn't contain unique pointers */
-      if (!unique_region_in_type(t1,te))
-	return false;
-      return true;
-    }
-    return false;
-  case &FnType(FnInfo{*btvs,eff,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
-    /* check the return type */
-    if (illegal_unique_region(tr,te))
-      return true;
-    /* check argument types */
-    for (; args != NULL; args = args->tl) {
-      let &$(_,_,t) = args->hd;
-      if (illegal_unique_region(t,te))
-	return true;
-    }
-    /* FIX: check varargs? Check partial order relations? */
-    return false;
-  case &DynRgnType(r1,r2):
-    return illegal_unique_region(r1,te) || illegal_unique_region(r2,te);
-  default:
-    return false; /* FIX: what about effects? */
-  }
-}
-#endif
-
 static cvtenv_t check_valid_type(seg_t loc, tenv_t te, 
-                                 list_t<tvar_t,`H> kind_env, 
+				 cvtenv_t cvt,
                                  kind_t expected_kind, 
-                                 bool generalize_evars,
-                                 type_t t,
-				 bool allow_unique) {
-  let cvt = 
-    i_check_valid_type(loc,te,CVTEnv{kind_env,NULL,NULL,generalize_evars,false},
-		       expected_kind,t,allow_unique,true);
+                                 type_t t) {
+
+  let kind_env = cvt.kind_env;
+  cvt = i_check_valid_type(loc,te,cvt,expected_kind,t,true);
 
   for (_ vs = cvt.free_vars; vs != NULL; vs = vs->tl) {
     let $(v,_) = *vs->hd;
@@ -3773,12 +3692,13 @@ static cvtenv_t check_valid_type(seg_t loc, tenv_t te,
 // that either the bound type variables are empty (in which case we
 // plug them in) or else the free type variables are contained in the
 // list of the bound type variables and have the right kinds.
-void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t, bool allow_unique) {
+void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
   bool generalize_evars = is_function_type(t);
   let te_vars = lookup_type_vars(te);
-  // do not let `U appear in toplevel types for the moment
-  let cvt = check_valid_type(loc, te, te_vars, MemKind, generalize_evars, t,
-			     allow_unique);
+  let cvt = check_valid_type(loc, te, 
+			     CVTEnv{te_vars, NULL, NULL,
+				    generalize_evars,false},
+			     MemKind, t);
   let free_tvars = List::map(fst,cvt.free_vars);
   let free_evars = List::map(fst,cvt.free_evars);
 
@@ -3797,12 +3717,14 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t, bool allow_unique
   }
 
   // resolve the kinds of type variables.  If there's a kind that must
-  // be less than Mem or Any, make it boxed.  
+  // be less than Mem or Any, make it boxed.  If there's a TopRgnKind
+  // type variable, make it RgnKind
   for (_ x = free_tvars; x != NULL; x = x->tl)
     switch (compress_kb(x->hd->kind)) {
     case &Unknown_kb(*f):      fallthru(f);
     case &Less_kb(*f,MemKind): fallthru(f);
     case &Less_kb(*f,AnyKind): *f = new Opt(new Eq_kb(BoxKind)); break;
+    case &Less_kb(*f,TopRgnKind): *f = new Opt(new Eq_kb(RgnKind)); break;
     case &Less_kb(*f,k):       *f = new Opt(new Eq_kb(k));       break;
     case &Eq_kb(MemKind):
       terr(loc,"type variable %s cannot have kind M",tvar2string(x->hd));
@@ -3830,6 +3752,11 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t, bool allow_unique
       for (; free_evars != NULL; free_evars = free_evars->tl) {
         type_t e = free_evars->hd;
         switch (typ_kind(e)) {
+        case UniqueRgnKind: 
+          if (!unify(e,UniqueRgn))
+	    impos("can't unify evar with unique region!");
+          break;
+        case TopRgnKind: // will use the Heap region if unconstrained
         case RgnKind: 
           if (!unify(e,HeapRgn)) impos("can't unify evar with heap!");
           break;
@@ -3843,16 +3770,13 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t, bool allow_unique
         }
       }
     }
+
+  // make sure this is not a toplevel unique pointer
+  if (is_unique_pointer(t))
+    terr(loc,"unique pointers not permitted at the toplevel");
+//    fprintf(stderr,"Finished checking toplevel type %s\n",typ2string(t));
 }
 
-/* Will signal an error if a unique region variable is found;
-   otherwise will redo some typechecking stuff, but shouldn't
-   matter if things are idempotent. */
-void check_no_unique_region(seg_t loc, tenv_t te, type_t t) {
-  i_check_valid_type(loc,te,CVTEnv{NULL,NULL,NULL,false,false},
-		     MemKind,t,false,true);
-}
-    
 // Check that the function declaration has a valid type:  all
 // we do is build a FnType and then check that it is well-formed
 // which has the side effect of giving us the effect and any
@@ -3860,7 +3784,7 @@ void check_no_unique_region(seg_t loc, tenv_t te, type_t t) {
 void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   type_t t = fndecl2typ(fd);
   // this fills in the missing bound type variables and effects
-  check_valid_toplevel_type(loc,te,t,true);
+  check_valid_toplevel_type(loc,te,t);
   switch (compress(t)) {
   case &FnType(FnInfo{tvs,effect,rt,_,_,_,_,_}):
     fd->tvs = tvs;
@@ -3882,7 +3806,9 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
 void check_type(seg_t loc, tenv_t te, 
                 list_t<tvar_t,`H> bound_tvars, 
                 kind_t expected_kind, bool allow_evars, type_t t) {
-  let cvt = check_valid_type(loc,te,bound_tvars,expected_kind,false,t,true);
+  let cvt = check_valid_type(loc, te, 
+			     CVTEnv{bound_tvars, NULL, NULL, false,false},
+			     expected_kind, t);
   let free_tvars = remove_bound_tvars(map(fst,cvt.free_vars), bound_tvars);
   let free_evars = map(fst,cvt.free_evars);
   for (_ fs = free_tvars; fs != NULL; fs = fs->tl) {
@@ -3893,6 +3819,10 @@ void check_type(seg_t loc, tenv_t te,
     for (; free_evars != NULL; free_evars = free_evars->tl) {
       type_t e = free_evars->hd;
       switch (typ_kind(e)) {
+      case UniqueRgnKind: 
+	if (!unify(e,UniqueRgn)) impos("can't unify evar with unique region!");
+	break;
+      case TopRgnKind: // unify with the heap
       case RgnKind: 
         if (!unify(e,HeapRgn)) impos("can't unify evar with heap!");
           break;
@@ -4049,10 +3979,267 @@ bool is_zero_pointer_typ_elt(type_t t, type_t@ elt_typ_dest) {
   }
 }
 
+// return true if t is a zero-terminated pointer or array type and set the
+// elt_type and ptr_type as appropriate.
+bool is_zero_ptr_type(type_t t, type_t @ptr_type, 
+		      bool @is_dynforward, bool @is_dyneither, 
+		      type_t @elt_type) {
+  switch (compress(t)) {
+  case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt,_)}):
+    if (conref_def(false,zt)) {
+      *ptr_type = t;
+      *elt_type = elt;
+      switch (conref_def(bounds_one,bnds)) {
+      case DynForward_b: *is_dyneither = false; *is_dynforward = true; break;
+      case DynEither_b: *is_dynforward = false; *is_dyneither = true; break;
+      default: *is_dynforward = *is_dyneither = false; break;
+      }
+      return true;
+    } else return false;
+  case &ArrayType(ArrayInfo{elt,tq,n,zt,_}):
+    if (conref_def(false,zt)) {
+      *elt_type = elt;
+      *is_dynforward = *is_dyneither = false;
+      *ptr_type = 
+	new PointerType(PtrInfo(elt,tq, 
+				PtrAtts(HeapRgn,false_conref,
+					new_conref(new Upper_b((exp_t)n)),
+					zt,NULL)));
+      return true;
+    } else return false;
+  default: return false;
+  }
+}
+
+// is e1 of the form *ea or ea[eb] where ea is a zero-terminated pointer?
+// If so, return true and set ea and eb appropriately (for *ea set eb to 0).
+// Finally, if the pointer is fat, set one of is_dyneither or is_dynforward
+// to true.
+bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type, 
+		       bool @is_dynforward,
+		       bool @is_dyneither,
+		       type_t @elt_type) {
+  switch (e1->r) {
+  case &Cast_e(_,_,_,_):
+    impos("we have a cast in a lhs:  %s",exp2string(e1));
+  case &Deref_e(e1a): fallthru(e1a);
+  case &Subscript_e(e1a,_):
+    return is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
+			    elt_type);
+  case &AggrArrow_e(e1a,_): fallthru(e1a);
+  case &AggrMember_e(e1a,_):
+    // sanity check
+    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
+                         elt_type))
+      impos("found zero pointer aggregate member assignment: %s",
+	    exp2string(e1));
+    return false;
+  case &Instantiate_e(e1a,_): fallthru(e1a);
+  case &NoInstantiate_e(e1a):
+    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_dynforward,is_dyneither,
+                         elt_type))
+      impos("found zero pointer instantiate/noinstantiate: %s",
+	    exp2string(e1));
+    return false;
+  case &Var_e(_,_): return false;
+  default: 
+    impos("found bad lhs in is_zero_ptr_deref: %s",exp2string(e1));
+  }
+}
+
 bool is_tagged_pointer_typ(type_t t, bool @is_forward_only) {
   type_t ignore = VoidType;
   return is_tagged_pointer_typ_elt(t, &ignore, is_forward_only);
 }
+
+static bool is_unique_region(type_t r) {
+  switch (compress(r)) {
+  case UniqueRgn: return true;
+  case &VarType(tv): return tvar_kind(tv) == UniqueRgnKind;
+  default: return false;
+  }
+}
+
+bool is_unique_pointer(type_t t) {
+  switch (compress(t)) {
+  case &PointerType(PtrInfo(_,_,PtrAtts(r,_,_,_,_))):
+    return is_unique_region(r);
+  default: return false;
+  }
+}
+
+static bool is_unique_field(type_t t, field_name_t f) {
+  switch (t) {
+  case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
+    let finfo = lookup_decl_field(ad,f);
+    switch (finfo) {
+    case NULL: Tcutil::impos("is_unique_field: missing field");
+    case &Aggrfield(_,_,t,_,_):
+      return is_unique_pointer(t);
+    }
+  default:
+    Tcutil::impos("is_unique_field: invalid type");
+  }
+}
+
+#ifndef NO_PATHS
+// returns true if the path [e] is entirely unique.  I.e. **x is unique
+// if x has type (e.g.) int *`U*`U*`U x but not if it has type (e.g.)
+// int *`U*`H*`U x
+bool is_unique_path(exp_t e) {
+  switch (e->r) {
+  case &Const_e(_):
+  case &Increment_e(_,_):
+  case &And_e(_,_):
+  case &Or_e(_,_):
+  case &Throw_e(_):
+  case &Address_e(_): // address of a `U pointer is not unique
+  case &Sizeoftyp_e(_):
+  case &Sizeofexp_e(_):
+  case &Offsetof_e(_,_):
+  case &Gentyp_e(_,_):
+  case &Tuple_e(_):  
+  case &CompoundLit_e(_,_):
+  case &Comprehension_e(_,_,_,_):
+  case &Struct_e(_,_,_,_):
+  case &AnonStruct_e(_,_):
+  case &Array_e(_):
+  case &Tunion_e(_,_,_): // never allow unique tunions (for now)
+  case &Enum_e(_,_,_):
+  case &AnonEnum_e(_,_,_):
+  case &Swap_e(_,_): // has void type
+  case &Primop_e(_,_): return false;
+
+  case &Malloc_e(_):
+  case &New_e(_,_):
+  case &Var_e(_,_): return is_unique_pointer(e->topt->v);
+  case &Conditional_e(_,e1,_): fallthru(e1);
+  case &SeqExp_e(_,e1): fallthru(e1);
+  case &AssignOp_e(e1,_,_): return is_unique_path(e1);
+  case &FnCall_e(e1,_,_):
+    switch (compress(e1->topt->v)) {
+    case &FnType(FnInfo(_,_,rt,_,_,_,_,_)): return is_unique_pointer(rt);
+    case &PointerType(PtrInfo(t,_,_)):
+      switch (compress(t)) {
+      case &FnType(FnInfo(_,_,rt,_,_,_,_,_)): return is_unique_pointer(rt);
+      default: break;
+      }
+      fallthru;
+    default: Tcutil::impos("Fncall has non function type %s",
+			   typ2string(e1->topt->v));
+    }
+  case &Cast_e(t,e1,_,_): return is_unique_path(e1) && is_unique_pointer(t);
+  case &Deref_e(e1):
+    return is_unique_path(e1) && is_unique_pointer(e->topt->v);
+  case &AggrArrow_e(e1,f):
+    if (is_unique_path(e1)) {
+      switch (compress(e1->topt->v)) {
+      case &PointerType(PtrInfo(t2,_,_)): return is_unique_field(t2,f);
+      default: Tcutil::impos("is_unique_path: -> on non-pointer");
+      }
+    }
+    return false;
+  case &AggrMember_e(e1,f): return is_unique_field(e1->topt->v,f);
+  case &Subscript_e(e1,e2):
+    switch (compress(e1->topt->v)) {
+    case &PointerType(PtrInfo(t,_,_)): return is_unique_pointer(t);
+    case &TupleType(ts): 
+      let $(i,known) = Evexp::eval_const_uint_exp(e2);
+      if(!known) Tcutil::impos("is_unique_path: non-constant subscript");
+      try {
+	let t = (*List::nth(ts,i))[1];
+	return is_unique_pointer(t);
+      } catch { case Nth:
+	return Tcutil::impos("is_unique_path: out-of-bounds subscript");
+      }
+    default: Tcutil::impos("is_unique_path: subscript on non-pointer/tuple");
+    }
+  case &StmtExp_e(s):
+    // keep looking for the final expression of the statement,
+    //   and recurse into that to find the unique path
+    while(true) {
+      switch(s->r) {
+      case &Seq_s(s1,s2): s = s2; break;
+      case &Decl_s(d,s1): s = s1; break;
+      case &Exp_s(e): return is_unique_path(e);
+      default: Tcutil::impos("is_unique_stmt_exp: ill-formed StmtExp");
+      }
+    }
+  default: Tcutil::impos("Called is_unique_path with bogus exp |%s|\n",
+			 exp2string(e));
+  }  
+}
+#else
+// the real version of this is above; this version makes sure that e
+// is *NOT* a path but is a unique pointer.  This forces unique
+// pointers in structures to be swapped.
+bool is_unique_path(exp_t e) {
+  switch (e->r) {
+  case &Const_e(_):
+  case &Increment_e(_,_):
+  case &And_e(_,_):
+  case &Or_e(_,_):
+  case &Throw_e(_):
+  case &Address_e(_): // address of a `U pointer is not unique
+  case &Sizeoftyp_e(_):
+  case &Sizeofexp_e(_):
+  case &Offsetof_e(_,_):
+  case &Gentyp_e(_,_):
+  case &Tuple_e(_):  
+  case &CompoundLit_e(_,_):
+  case &Comprehension_e(_,_,_,_):
+  case &Struct_e(_,_,_,_):
+  case &AnonStruct_e(_,_):
+  case &Array_e(_):
+  case &Tunion_e(_,_,_): // never allow unique tunions (for now)
+  case &Enum_e(_,_,_):
+  case &AnonEnum_e(_,_,_):
+  case &Swap_e(_,_): // has void type
+
+  // These next three are allowed above ... 
+  case &AggrArrow_e(_,_): 
+  case &AggrMember_e(_,_):
+  case &Subscript_e(_,_):
+
+  case &Primop_e(_,_): return false;
+
+  case &Malloc_e(_):
+  case &New_e(_,_):
+  case &Var_e(_,_): return is_unique_pointer(e->topt->v);
+  case &Conditional_e(_,e1,_): fallthru(e1);
+  case &SeqExp_e(_,e1): fallthru(e1);
+  case &AssignOp_e(e1,_,_): return is_unique_path(e1);
+  case &FnCall_e(e1,_,_):
+    switch (compress(e1->topt->v)) {
+    case &FnType(FnInfo(_,_,rt,_,_,_,_,_)): return is_unique_pointer(rt);
+    case &PointerType(PtrInfo(t,_,_)):
+      switch (compress(t)) {
+      case &FnType(FnInfo(_,_,rt,_,_,_,_,_)): return is_unique_pointer(rt);
+      default: break;
+      }
+      fallthru;
+    default: Tcutil::impos("Fncall has non function type %s",
+			   typ2string(e1->topt->v));
+    }
+  case &Cast_e(t,e1,_,_): return is_unique_path(e1) && is_unique_pointer(t);
+  case &Deref_e(e1):
+    return is_unique_path(e1) && is_unique_pointer(e->topt->v);
+  case &StmtExp_e(s):
+    // keep looking for the final expression of the statement,
+    //   and recurse into that to find the unique path
+    while(true) {
+      switch(s->r) {
+      case &Seq_s(s1,s2): s = s2; break;
+      case &Decl_s(d,s1): s = s1; break;
+      case &Exp_s(e): return is_unique_path(e);
+      default: Tcutil::impos("is_unique_stmt_exp: ill-formed StmtExp");
+      }
+    }
+  default: Tcutil::impos("Called is_unique_path with bogus exp |%s|\n",
+			 exp2string(e));
+  }  
+}  
+#endif
 
 // used by address of.  
 // Ensure e is an lvalue or function designator.

@@ -61,6 +61,12 @@ static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, string_t msg,
     return *topt;
 }
 
+#ifdef NO_PATHS
+#define UNIQUE_ERR_MSG "Cannot consume paths; do swap instead"
+#else
+#define UNIQUE_ERR_MSG "Cannot consume non-unique paths; do swap instead"
+#endif
+
 //////////////////// Resolving References the Parser Cannot /////////////////
 
 // The qualified identifier q could be a variable, a tunion
@@ -223,7 +229,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
         let tenv_tvs = lookup_type_vars(te);
         t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), 
 				    empty_tqual(NULL),
-				    PtrAtts(new_evar(&rk,new Opt(tenv_tvs)), 
+				    PtrAtts(new_evar(&trk,new Opt(tenv_tvs)), 
 					    true_conref,
 					    empty_conref(), empty_conref(),
                                             NULL)));
@@ -282,7 +288,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
     // FIX: take advantage of topt
     t = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), 
                                 empty_tqual(NULL),
-				PtrAtts(new_evar(&rk,new Opt(tenv_tvs)), 
+				PtrAtts(new_evar(&trk,new Opt(tenv_tvs)), 
 					true_conref,
 					empty_conref(),empty_conref(),NULL)));
                                        
@@ -320,8 +326,11 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
     // the format string, but we still have to check they are type-correct.
     if (opt_args != NULL) {
       let args = opt_args->v;
-      for (; args != NULL; args = args->tl)
+      for (; args != NULL; args = args->tl) {
         tcExp(te,NULL,args->hd);
+	if (is_unique_pointer(args->hd->topt->v) && !is_unique_path(args->hd))
+	  terr(args->hd->loc, UNIQUE_ERR_MSG);
+      }
     }
     return; 
   }
@@ -338,6 +347,8 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
              typ2string(t), typ2string(e->topt->v));
         explain_failure();
       }
+      if (is_unique_pointer(t) && !is_unique_path(e))
+	terr(args->hd->loc,UNIQUE_ERR_MSG);
     }
     // check arity
     if (desc_types != NULL)
@@ -407,6 +418,8 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt,_))):
     if (!kind_leq(typ_kind(et),MemKind))
       terr(e1->loc,"can't perform arithmetic on abstract pointer type");
+    if (is_unique_pointer(t1))
+      terr(e1->loc,"can't perform arithmetic on unique pointer type");
     if (!coerce_sint_typ(te, e2))
       terr(e2->loc,"expecting int but found %s",typ2string(t2));
     b = compress_conref(b);
@@ -463,6 +476,8 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
         terr(e1->loc,"can't subtract from forward-only ? pointer");
       if (!kind_leq(typ_kind(t1_elt),MemKind))
         terr(e1->loc,"can't perform arithmetic on abstract pointer type");
+      if (is_unique_pointer(t1))
+	terr(e1->loc,"can't perform arithmetic on unique pointer type");
       if (!coerce_sint_typ(te, e2)) {
 	terr(e2->loc,"expecting either %s or int but found %s",
              typ2string(t1),typ2string(t2));
@@ -656,6 +671,8 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
         (is_zero_pointer_typ_elt(t,&telt) && (i == PreInc || i == PostInc))) {
       if (!kind_leq(typ_kind(telt),MemKind))
         terr(e->loc,"can't perform arithmetic on abstract pointer type");
+      if (is_unique_pointer(t))
+        terr(e->loc,"can't perform arithmetic on unique pointer type");
       if (forward_only && (i == PreDec || i == PostDec))
         terr(e->loc,"can't subtract from forward-only ? pointer");
     } else 
@@ -723,6 +740,8 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
     return expr_err(te,loc,topt,"assignment to non-lvalue");
   check_writable(te, e1);
   if (po == NULL) {
+    if (is_unique_pointer(t2) && !is_unique_path(e2))
+      terr(e2->loc,UNIQUE_ERR_MSG);
     if (!coerce_assign(te,e2,t1)) {
       let result = expr_err(te,loc,topt,"type mismatch: %s != %s",
                             typ2string(t1), typ2string(t2));
@@ -838,6 +857,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
             unify(e1->topt->v,t2);
             explain_failure();
           }
+	  if (is_unique_pointer(t2) && !is_unique_path(e1))
+	    terr(e1->loc,UNIQUE_ERR_MSG);
           es = es->tl;
           args_info = args_info->tl;
         }
@@ -899,6 +920,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                        typ2string(vt),typ2string(e1->topt->v));
                   explain_failure();
                 }
+		if (is_unique_pointer(vt) && !is_unique_path(e1))
+		  terr(e1->loc,UNIQUE_ERR_MSG);
               }
             } else {
               // this is trickier, we have to match up the type of the
@@ -920,8 +943,12 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                     vci->num_varargs++;
                     exp_t e1 = es->hd;
                     // must be careful not to type-check twice
-                    if (!args_already_checked)
+                    if (!args_already_checked) {
                       tcExp(te,NULL,e1); 
+		      if (is_unique_pointer(e1->topt->v) && 
+			  !is_unique_path(e1))
+			terr(e1->loc,UNIQUE_ERR_MSG);
+		    }
                     let f = tcInjection(te,e1,vt,rgn,inst,fields);
                     if (f != NULL)
                       vci->injectors = 
@@ -1081,9 +1108,6 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
     break;
   default: break;
   }
-
-  // now make sure we aren't taking the address of a unique pointer
-//    check_no_unique_region(loc,te,e->topt->v);
 
   // we've got an address-of
   let $(is_const,rgn) = addressof_props(te,e);
@@ -1764,7 +1788,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   if (ropt != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
-      new RgnHandleType(new_evar(&rk,new Opt(lookup_type_vars(te))));
+      new RgnHandleType(new_evar(&trk,new Opt(lookup_type_vars(te))));
     type_t handle_type = tcExp(te,&expected_type,(exp_t)ropt);
     switch (compress(handle_type)) {
     case &RgnHandleType(r): 
@@ -1863,6 +1887,50 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   if (!one_elt) ptr_maker = dynforward_typ;
   return ptr_maker(elt_type,rgn,empty_tqual(NULL),zero_term);
 }
+
+// swap(e1,e2)
+static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
+		     exp_t e1, exp_t e2) {
+  // MWH: is tcAssign, we do noPromote for the lhs, in a notreadctxt;
+  //   I'm thinking we don't want to do this
+  tcExp(te,NULL,e1);
+  tcExp(te,&e1->topt->v,e2);
+  type_t t1 = e1->topt->v;
+  type_t t2 = e2->topt->v;
+  // Check to see that the type is not an array type
+  switch (compress(t1)) {
+  case &ArrayType(_): terr(loc,"cannot assign to an array"); break;
+  default: break;
+  }
+  // check to see that the type is word-sized or a pointer
+  bool ign_1 = false;
+  bool ign_2 = false;
+  if (!is_pointer_or_boxed(t1,&ign_1,&ign_2))
+    terr(loc,"Swap not allowed for non-pointer or non-word-sized types.");
+  // Check to see if e1 is an lvalue after typechecking, so that
+  // UnknownIds have been resolved.
+  if (!is_lvalue(e1))
+    return expr_err(te,e1->loc,topt,"swap non-lvalue");
+  if (!is_lvalue(e2))
+    return expr_err(te,e2->loc,topt,"swap non-lvalue");
+  // Make sure we aren't swapping elements of a zero-terminated array
+  type_t t_ign1 = VoidType, t_ign2 = VoidType;
+  bool b_ign1 = false, b_ign2 = false;
+  if (is_zero_ptr_deref(e1,&t_ign1,&b_ign1,&b_ign2,&t_ign2))
+    return expr_err(te,e1->loc,topt,"swap value in zeroterm array");
+  if (is_zero_ptr_deref(e2,&t_ign1,&b_ign1,&b_ign2,&t_ign2))
+    return expr_err(te,e2->loc,topt,"swap value in zeroterm array");
+  // Make sure the elements are writable
+  check_writable(te, e1);
+  check_writable(te, e2);
+  if (!unify(t1,t2)) {
+    let result = expr_err(te,loc,topt,"type mismatch: %s != %s",
+			  typ2string(t1), typ2string(t2));
+    return result;
+  }
+  return VoidType;
+}
+
 // ({ s })
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
   region r {
@@ -1891,7 +1959,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
   if (rgn_handle != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
-      new RgnHandleType(new_evar(&rk,new Opt(lookup_type_vars(te))));
+      new RgnHandleType(new_evar(&trk,new Opt(lookup_type_vars(te))));
     type_t handle_type = tcExp(te,&expected_type,(exp_t)rgn_handle);
     switch (compress(handle_type)) {
     case &RgnHandleType(r): 
@@ -1932,10 +2000,6 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
           res_typ = *topt;
         }
       }
-      // make sure we don't allocate a pointer around a unique
-      // pointer.  Ultimately, "paths" of unique pointers should
-      // be fine, but we're not permitting them for now.
-//        check_no_unique_region(loc, te, res_typ, true);
       return res_typ;
     default: impos("tcNew: comprehension returned non-array type");
     }
@@ -1978,10 +2042,6 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       break;
     default: impos("tcExpNoPromote on Array_e returned non-array type");
     }
-    // make sure we don't allocate a pointer around a unique
-    // pointer.  Ultimately, "paths" of unique pointers should
-    // be fine, but we're not permitting them for now.
-//      check_no_unique_region(loc, te, res_typ, true);
     return res_typ;
   case &Const_e(String_c(s)):
     // here I'm going to guess that the user wants a char *@ instead of
@@ -2023,10 +2083,6 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
         res_typ = *topt;
       }
     }
-    // make sure we don't allocate a pointer around a unique
-    // pointer.  Ultimately, "paths" of unique pointers should
-    // be fine, but we're not permitting them for now.
-//      check_no_unique_region(loc, te, res_typ, true);
     return res_typ;
   }
 }
@@ -2051,6 +2107,10 @@ type_t tcExp(tenv_t te, type_t * topt, exp_t e) {
 // Otherwise, do so.
 type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   type_t t = tcExpNoPromote(te, topt, e);
+  // expression initializers are copied, and therefore consumed,
+  // so check for uniqueness
+  if (is_unique_pointer(t) && !is_unique_path(e))
+    terr(e->loc,UNIQUE_ERR_MSG);
   switch (e->r) {
   case &Array_e(_): 
   case &Comprehension_e(_,_,_,_):
@@ -2236,6 +2296,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = t2; break;
   case &Malloc_e(MallocInfo{*is_calloc,ropt,*t2,*e,*isfat}):
     t = tcMalloc(te,loc,topt,ropt,t2,e,is_calloc,isfat); break;
+  case &Swap_e(e1,e2):
+    t = tcSwap(te,loc,topt,e1,e2); break;
   }
   e->topt = new Opt(t);
 }

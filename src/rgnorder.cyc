@@ -28,6 +28,8 @@
 #include "rgnorder.h"
 #include "tcutil.h"
 #include "tcenv.h"
+#include "absynpp.h"
+
 using List;
 using Absyn;
 using Tcutil;
@@ -44,8 +46,9 @@ struct RgnPO<`r::R> {
   tvar_t youngest_unresettable; // fact: there always is one
 };
 
+// adds constraint: [eff] outlives [rgn]
 // Note: Evars get constrained to HeapRgn!
-// Note: assumes not resettable
+// Note: assumes not resettable and all regions of RgnKind
 rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po, 
                                      type_t eff, type_t rgn) {
   let ans = rnew(r) *po;
@@ -62,7 +65,7 @@ rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po,
   case &Evar(_,_,_,_):
     unify(rgn,HeapRgn);
     fallthru;
-  case HeapRgn: 
+  case HeapRgn:
     ans->these_outlive_heap = new JoinEff(list(eff,po->these_outlive_heap));
     return ans;
   default: impos("RgnOrder::add_outlives_constraint passed a bad region");
@@ -83,13 +86,17 @@ rgn_po_t<`r> add_youngest(region_t<`r> r,rgn_po_t<`r> po, tvar_t rgn, bool reset
 
 rgn_po_t<`r> initial_fn_po(region_t<`r> r,
                            list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
-                           type_t effect, tvar_t fst_rgn) {
+                           type_t effect, tvar_t fst_rgn, Position::seg_t loc){
   // put all region tvs in the dict and make fst_rgn outlive all tvs
   Dict::dict_t<_,struct RgnInfo@`r,`r> d = Dict::rempty(r,tvar_cmp);
   for(let tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
     switch(tvar_kind(tvs2->hd)) {
     case RgnKind: 
-      d = Dict::insert(d,tvs2->hd,rnew(r) RgnInfo(empty_effect,false)); break;
+    case UniqueRgnKind: 
+      d = Dict::insert(d,tvs2->hd,rnew (r) RgnInfo(empty_effect,false)); break;
+    case TopRgnKind: 
+      Tcutil::terr(loc,"initial_fn_po: tvar %s has TopRgnKind",
+		   *tvs2->hd->name); break;
     default: break;
     }
   d = Dict::insert(d, fst_rgn, rnew(r) RgnInfo(effect,false));
@@ -157,7 +164,7 @@ initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
   }
 }
 
-// does po prove that rgn1 (parm [eff]) outlives rgn2 (parm [rgn])
+// does [po] prove that [eff] outlives [rgn]?
 // evar treatment: return false and do not constrain
 static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
   region listrgn { // FIX: make a small initial size
@@ -173,7 +180,7 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       while(env.todo != NULL) {
 	let next = env.todo->hd;
 	env.todo = env.todo->tl;
-	if(tvar_cmp(next,tv)==0)
+	if(tvar_cmp(next,tv)==0) // found it in po
 	  return true;
 	if(Dict::member(po->d,next)) {
 	  add_to_search(&env,Dict::lookup(po->d,next)->these_outlive);
@@ -206,7 +213,7 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
   }
 }
 
-// does po prove that all regions in eff1 outlive rgn2
+// does [po] prove that all regions in [eff] outlive [rgn]?
 // evar treatment: return false and do not constrain
 bool effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
   eff = normalize_effect(eff);
@@ -308,5 +315,20 @@ bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2) {
 	return false;
     return true;
   default: return eff_outlives_atomic_eff(po, eff1, eff2);
+  }
+}
+
+// DEBUGGING
+void print_region_po(rgn_po_t po) {
+  region r { 
+    let iter = Dict::make_iter(r,po->d);
+    let elem = *Dict::rchoose(r,po->d);
+    fprintf(stderr,"region po:\n");
+    while(Iter::next(iter,&elem)) {
+      fprintf(stderr,"  %s outlived by %s\n",*(elem[0]->name),
+	      Absynpp::typ2string(elem[1]->these_outlive));
+    }
+    fprintf(stderr,"  these outlive heap: %s\n",
+	    Absynpp::typ2string(po->these_outlive_heap));
   }
 }

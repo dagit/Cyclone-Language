@@ -150,6 +150,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("sizeof_t", SIZEOF_T, false),
   $("static", STATIC, true),
   $("struct", STRUCT, true),
+  $("cycswap", SWAP, false),
   $("switch", SWITCH, true),
   $("tag_t", TAG_T, false),
   $("throw", THROW, false),

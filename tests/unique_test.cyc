@@ -27,6 +27,8 @@ struct s1 {
   int x; int y;
 };
 
+// just checks basic variable stuff
+
 int *`U h(int b) {
   int *`U x = unew 3;
   int *`U y = unew 4;
@@ -39,9 +41,9 @@ int *`U h(int b) {
   int ok = 1;
   int ?`U a2 = unew { (ok = rand(), (int)z), (ok ? (int)x : (int)y) }; // consumed = { x, y, z }
 
-  a2++; // consumed = { x, y, z }
+//    a2++; // consumed = { x, y, z }
   int yy = ((int)(int *`H)a2) * 1; // consumed = { x, y, z }
-  a2 = a2 + 1; // consumed = { x, y, z }
+//    a2 = a2 + 1; // consumed = { x, y, z }
 
   y = unew 4; // consumed = { x, z }
   try {
@@ -133,6 +135,20 @@ int *`U h(int b) {
 
   y = unew 7;
   return y;
+}
+
+// can be parameterized by either kind of region
+struct Mylist<`a,`r::TR> {
+  `a hd;
+  struct Mylist<`a,`r> *`r tl;
+};
+typedef struct Mylist<`a,`r> *`r mylist_u_t<`a,`r>;
+
+// this checks paths, etc.
+int p(int b) {
+  struct Mylist<int,`U> e = Mylist(1,NULL);
+  e.tl = unew Mylist(3,NULL);
+//    mylist_u_t l = e.tl;
 }
 
 int main() {

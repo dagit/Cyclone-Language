@@ -661,6 +661,8 @@ type_t function_typ(list_t<tvar_t,`H> tvs, opt_t<type_t,`H> eff_typ,
                               .rgn_po = rgn_po,
                               .attributes=atts});
 }
+// MWH: use RgnKind here rather than TopRgnKind for fresh evars;
+//   function pointers can't be unique at the moment
 type_t pointer_expand(type_t t,bool fresh_evar) {
   switch (Tcutil::compress(t)) {
   case &FnType(_): return at_typ(t,

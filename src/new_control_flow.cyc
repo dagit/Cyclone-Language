@@ -555,7 +555,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     // will only be an error in the event the list is actually
     // consumed.
     DEBUG_PRINT("in Rexp:Var_e for |%s|\n",Absynpp::exp2string(e));
-    if (contains_region(UniqueRgn_k,vd->type)) {
+    if (Tcutil::is_unique_pointer(vd->type)) {
       DEBUG_PRINT("  adding to may_consume\n");
       let root  = new VarRoot(vd);
       let place = new Place(root,NULL);
@@ -604,7 +604,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       relns = reln_kill_exp(relns,l);
       outdict = assign_place(l->loc,outdict,env->all_changed,p,unknown_all);
       // add lhs to consume list if it's unique
-      if (contains_region(UniqueRgn_k,l->topt->v)) {
+      if (Tcutil::is_unique_pointer(l->topt->v)) {
 	DEBUG_PRINT("  assign lhs; adding |%s| to may_consume\n",
 		    Absynpp::exp2string(l));
 	cinfo.may_consume = List::merge(place_cmp,new List::List(p,NULL),
@@ -707,7 +707,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	  case &PlaceL(p): 
 	    outdict = assign_place(e->loc,outdict,env->all_changed,p,rval);
 	    // add lhs to consume list if it's unique
-	    if (contains_region(UniqueRgn_k,e1->topt->v)) {
+	    if (Tcutil::is_unique_pointer(e1->topt->v)) {
 	      DEBUG_PRINT("  assign lhs; adding |%s| to may consume\n",
 			  Absynpp::exp2string(e1));
 	      cinfo.may_consume = List::merge(place_cmp,new List::List(p,NULL),
@@ -745,7 +745,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	    return $(outflow, rval);
 	  case UnknownL: 
 	    DEBUG_PRINT("leaving AssignOp_e\n");
-	    if (contains_region(UniqueRgn_k,e1->topt->v))
+	    if (Tcutil::is_unique_pointer(e1->topt->v))
 	      Tcutil::impos("dest of unique assignment is unknown!");
 	    return $(use_Rval(env,e2->loc,outflow,rval), rval);
 	  }
@@ -857,6 +857,55 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     case ReachableFL(d2,relns,c):
       return $(ReachableFL(Dict::insert(d2,root,place_val),relns,c), rval);
     }
+
+  case &Swap_e(e1,e2):
+    _ left_rval;
+    _ right_rval;
+    _ outflow;
+    DEBUG_PRINT("in Swap_e(%s,%s): at start, flow is\n",
+		Absynpp::exp2string(e1),Absynpp::exp2string(e2));
+    DEBUG_PRINT_F(print_flow,inflow);
+    region temp {
+      let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
+					    rlist(temp,e1,e2),false);
+      left_rval = rvals->hd;
+      right_rval = rvals->tl->hd;
+      outflow = f;
+    }
+    // make sure we aren't swapping consumed values
+    readthrough_unique_rvals(e->loc,outflow);
+    // now assign the abstract rvals
+    let $(_,left_lval) = anal_Lexp(env,outflow,e1);
+    let $(_,right_lval) = anal_Lexp(env,outflow,e2);
+    switch (outflow) {
+    case ReachableFL(outdict,relns,cinfo):
+      // note that we don't have to make any changes to cinfo, since
+      // following the swap no `consumed' status will have changed.
+      switch(left_lval) {
+      case &PlaceL(lp):
+	outdict = assign_place(e1->loc,outdict,env->all_changed,
+			       lp,right_rval);
+	break;
+      case UnknownL: break;
+      }
+      switch(right_lval) {
+      case &PlaceL(rp): 
+	outdict = assign_place(e2->loc,outdict,env->all_changed,
+			       rp,left_rval);
+	break;
+      case UnknownL: break;
+      }	
+      // FIX: should swap the relation information
+      relns = reln_kill_exp(relns,e1);
+      relns = reln_kill_exp(relns,e2);
+      // create new flow
+      outflow = ReachableFL(outdict,relns,cinfo);
+      break;
+    default: break;
+    }
+    DEBUG_PRINT("in Swap_e: after swap, flow is\n");
+    DEBUG_PRINT_F(print_flow,outflow);
+    return $(outflow,unknown_all); 
 
   case &New_e(eopt,e2):
     root_t    root      = new MallocPt(e2,e->topt->v);

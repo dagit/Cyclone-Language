@@ -36,8 +36,6 @@ using Tcenv;
 
 namespace Formatstr;
 
-static struct Opt<kind_t> rk = {RgnKind};
-
 // Parse a conversion specification starting at index i in string s.
 // s[i] should be the first character after the leading '%'.
 // If there is an error, return NULL.

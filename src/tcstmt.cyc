@@ -31,6 +31,12 @@
 #include "evexp.h"
 #include <stdio.h>
 
+#ifdef NO_PATHS
+#define UNIQUE_ERR_MSG "Cannot consume paths; do swap instead"
+#else
+#define UNIQUE_ERR_MSG "Cannot consume non-unique paths; do swap instead"
+#endif
+
 using Core;
 using List;
 using Position;
@@ -141,6 +147,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
              typ2string(e->topt->v), typ2string(t));
         explain_failure();
       }
+      if (is_unique_pointer(t) && !is_unique_path(e))
+	terr(e->loc,UNIQUE_ERR_MSG);
     }
     return;
 
@@ -203,6 +211,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
              typ2string(es->hd->topt->v), typ2string(ts->hd));
         explain_failure();
       }
+      if (is_unique_pointer(ts->hd) && !is_unique_path(es->hd))
+	terr(es->hd->loc,UNIQUE_ERR_MSG);
     }
     if (es != NULL)
       terr(s0->loc, "too many arguments to explicit fallthru");
@@ -227,6 +237,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &Switch_s(e,scs0):
     tcExp(te,NULL,e);
     let t = e->topt->v;
+    if (is_unique_pointer(t) && !is_unique_path(e))
+      terr(e->loc,UNIQUE_ERR_MSG);
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,
     // fallthru is not allowed.
@@ -534,7 +546,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     }
     return;
   case &ResetRegion_s(e):
-    // check that e is a region_t<`r> 
+    // check that e is an intuitionistic region_t<`r> 
     type_t rgn_type = new_evar(new Opt(RgnKind),
                                new Opt(lookup_type_vars(te)));
     type_t etype = new RgnHandleType(rgn_type);

@@ -378,10 +378,8 @@ struct _RegionHandle *Cyc_Core_unique_region = NULL;
 // Note that this is not recursive; it assumes that programmer
 // has freed nested pointers (otherwise will be grabbed by the GC).
 void Cyc_Core_ufree(struct _dyneither_ptr ptr) {
-  if (ptr.base == NULL) {
-    fprintf(stderr,"internal error: Cyc_ufree");
-    exit(1);
-  } else {
+  if (ptr.base == NULL) return; // eventually make not-null type
+  else {
     GC_free(ptr.base);
     ptr.base = ptr.curr = ptr.last_plus_one = NULL;
   }

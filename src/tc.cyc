@@ -101,7 +101,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   default: break;
   }
   // reject ill-formed type
-  check_valid_toplevel_type(loc,te,t,false);
+  check_valid_toplevel_type(loc,te,t);
   
   vd->tq.real_const = extract_const_from_typedef(loc,vd->tq.print_const,t);
   // top-level arrays don't escape because they can't be assigned to, so
@@ -418,11 +418,8 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
     for(; rpo != NULL; rpo = rpo->tl) {
       let &$(e,r) = rpo->hd;
       check_type(loc,te,tvs,EffKind,false,e);
-      check_type(loc,te,tvs,RgnKind,false,r);
-      if (r == UniqueRgn)
-	terr(loc,"Currently only allow `U on variables");
-        /** should I also go through the effect variable to forbid `U? **/
-    }
+      check_type(loc,te,tvs,TopRgnKind,false,r); 
+   }
 
     list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
 
@@ -450,7 +447,7 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
 void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
   let v = (*ad->name)[1];
 #ifdef DEBUG
-  fprintf(stderr,"type-checking type decl %s",*v);
+  fprintf(stderr,"type-checking type decl %s\n",*v);
   fflush(stderr);
 #endif
   // allow only packed and aligned attributes
