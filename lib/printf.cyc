@@ -733,9 +733,9 @@ static char ?-`r exponent(char ?-`r p, int exp, int fmtch)
 	return (p);
 }
 
-static char ?-`r round(double fract, int * exp,
-                       char ?- `r start, char ?- `r end,
-                       char ch, int @ signp)
+static char ?-`r sround(double fract, int * exp,
+			char ?- `r start, char ?- `r end,
+			char ch, int @ signp)
 {
 	double tmp = 0.0;
 
@@ -824,7 +824,7 @@ int __cvt_double(double number, int prec, int flags, int @ signp,
 					*t++ = (char)to_char((int)tmp);
 				} while (--prec && fract != 0.0);
 			if (fract != 0.0)
-				startp = round(fract, NULL, startp,
+				startp = sround(fract, NULL, startp,
 				    t - 1, (char)0, signp);
 		}
 		for (; prec--; *t++ = '0');
@@ -844,7 +844,7 @@ eformat:	if (expcnt) {
 			 */
 			if (!prec && ++p < endp) {
 				fract = 0;
-				startp = round((double)0, &expcnt, startp,
+				startp = sround((double)0, &expcnt, startp,
 				    t - 1, *p, signp);
 			}
 			/* adjust expcnt for digit in front of decimal */
@@ -875,7 +875,7 @@ eformat:	if (expcnt) {
 					*t++ = (char)to_char((int)tmp);
 				} while (--prec && fract != 0.0);
 			if (fract != 0.0)
-				startp = round(fract, &expcnt, startp,
+				startp = sround(fract, &expcnt, startp,
 				    t - 1, (char)0, signp);
 		}
 		/* if requires more precision */
@@ -946,7 +946,7 @@ eformat:	if (expcnt) {
 				}
 			}
 			if (fract != 0.0)
-				startp = round(fract, NULL, startp,
+				startp = sround(fract, NULL, startp,
 				    t - 1, (char)0, signp);
 		}
 		/* alternate format, adds 0's for precision, else trim 0's */

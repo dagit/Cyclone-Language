@@ -2632,16 +2632,21 @@ cycstub fileno {
     return Cstdio::fileno(f->file);
   }
 }
+
 hstub flockfile {
+  #ifndef __CYGWIN__
   extern void flockfile(FILE @);
+  #endif
 }
 cycstub flockfile {
+  #ifndef __CYGWIN__
   namespace Cstdio {
     extern "C" void flockfile(__cFILE @);
   }
   void flockfile(FILE @f) {
     return Cstdio::flockfile(f->file);
   }
+  #endif
 }
 hstub fopen {
   extern FILE *fopen(const char @, const char @);
@@ -2788,15 +2793,19 @@ cycstub ftello {
   }
 }
 hstub ftrylockfile {
+  #ifndef __CYGWIN__
   extern int ftrylockfile(FILE @);
+  #endif
 }
 cycstub ftrylockfile {
+  #ifndef __CYGWIN__
   namespace Cstdio {
     extern "C" int ftrylockfile(__cFILE @);
   }
   int ftrylockfile(FILE @f) {
     return Cstdio::ftrylockfile(f->file);
   }
+  #endif
 }
 hstub ftryunlockfile {
   extern int ftryunlockfile(FILE @);
@@ -2810,15 +2819,19 @@ cycstub ftryunlockfile {
   }
 }
 hstub funlockfile {
+  #ifndef __CYGWIN__
   extern void funlockfile(FILE @);
+  #endif
 }
 cycstub funlockfile {
+  #ifndef __CYGWIN__
   namespace Cstdio {
     extern "C" void funlockfile(__cFILE @);
   }
   void funlockfile(FILE @f) {
     return Cstdio::funlockfile(f->file);
   }
+  #endif
 }
 hstub fwrite {
   extern size_t fwrite(const char ?NOZEROTERM, size_t, size_t, FILE @);
@@ -2862,33 +2875,43 @@ cycstub getchar {
   }
 }
 hstub getc_unlocked {
+  #ifndef __CYGWIN__
   extern int getc_unlocked(FILE @);
+  #endif
 }
 cycstub getc_unlocked {
+  #ifndef __CYGWIN__
   namespace Cstdio {
     extern "C" int getc_unlocked(__cFILE @);
   }
   int getc_unlocked(FILE @f) {
     return Cstdio::getc_unlocked(f->file);
   }
+  #endif
 }
 hstub getchar_unlocked {
+#ifndef __CYGWIN__
   extern int getchar_unlocked(void);
+#endif
 }
 cycstub getchar_unlocked {
+  #ifndef __CYGWIN__
   namespace Cstdio {
     extern "C" int __CYCLONE_GETCHAR_UNLOCKED(void);
   }
   int getchar_unlocked(void) {
     return Cstdio::__CYCLONE_GETCHAR_UNLOCKED();
   }
+  #endif
 }
 cstub getchar_unlocked {
+  #ifndef __CYGWIN__
   // In OpenBSD getchar_unlocked is a macro and not a function, so we
   // do this for now.
   int __CYCLONE_GETCHAR_UNLOCKED(void) {
     return getchar_unlocked();
   }
+  #endif
 }
 hstub gets {
   // FIX: we don't support gets because the C version is completely
@@ -2943,15 +2966,19 @@ hstub putchar {
   extern "C" int putchar(int);
 }
 hstub putc_unlocked {
+  #ifndef __CYGWIN__
   extern int putc_unlocked(int, FILE @);
+  #endif
 }
 cycstub putc_unlocked {
+  #ifndef __CYGWIN__
   namespace Cstdio {
     extern "C" int putc_unlocked(int, __cFILE @);
   }
   int putc_unlocked(int x, FILE @f) {
     return Cstdio::putc_unlocked(x,f->file);
   }
+  #endif
 }
 hstub putchar_unlocked {
   extern "C" int putchar_unlocked(int);
