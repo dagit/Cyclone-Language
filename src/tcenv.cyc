@@ -204,7 +204,6 @@ static $(list<var>,`a) * scoped_lookup<`a>(tenv te, segment loc,
     // v is not defined in current namespace, look in next outer
     cns = outer_namespace(cns);
   }
-  throw Unreachable("Tcenv::scoped_lookup");
 }
 
 static resolved_t lookup_ordinary_global_f(genv ge,var v) {
@@ -252,7 +251,6 @@ list<var> resolve_namespace(tenv te, segment loc, list<var> ns) {
     // ns->hd is not defined in current namespace, look in next outer
     cns = outer_namespace(cns);
   }
-  throw Unreachable("Tcenv::resolve_namespace");
 }
 
 static structdecl lookup_structdecl_f(genv ge,var v) {
@@ -333,7 +331,6 @@ genv empty_genv() {
     case Frame(x,_):   return x;
     case Hidden(x,y):  f = y; break;
     }
-  throw Unreachable("Tcenv::get_visible");
 }
 
 frames<`a> put_visible<`a>(frames<`a> f, `a x) {

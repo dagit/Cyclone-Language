@@ -198,5 +198,4 @@ int lex_engine<`a>(LexTables tbl, int start_state, Lexbuf<`a> lbuf) {
        if (c == 256) lbuf->lex_eof_reached = false;
      }
   }
-  throw Unreachable("Lexing::lex_engine");
 }

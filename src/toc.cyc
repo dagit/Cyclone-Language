@@ -296,123 +296,57 @@ typedef enum Conv conv;
 static list<conv> conversion(typ t1, typ t2) {
   t1 = compress(t1);
   t2 = compress(t2);
-  switch (t1) {
-  case IntType(s1,sz1,b1):
-    switch (t2) {
-    case IntType(s2,sz2,b2):
-      // no conversion needed if:
-      // 1. they are the same size and have same box state, or
-      // 2. they're both unboxed, or
-      // 3. none of the sizes are B8
-      if ((sz1 == sz2 && b1 == b2) || 
-	  (b1 == Unboxed && b2 == Unboxed) ||
-	  (sz1 != B8 && sz2 != B8)) return null;
-      else if (b1 == Boxed) {
-	// t1 is boxed, t2 is not
-	if (sz1 == B8)
-	  // t1 is a boxed long long, t2 is an unboxed int of some size
-	  return &cons(UnboxLongLong,null);
-	else 
-	  // t1 is boxed but small, t2 is unboxed -- no conversion needed
-	  return null;
-      } else {
-	// t2 is boxed, t1 is not
-	if (sz2 == B8)
-	  // t1 is some unboxed int, t2 is a boxed long long
-	  return &cons(BoxLongLong,null);
-	else
-	  // t2 is boxed but small, t1 is unboxed -- no conversion needed
-	  return null;
-      }
-    case FloatType(b2):
-      // no conversion needed unless t1 is Long Long or t2 is Float
-      if (b2 == Unboxed && b1 == Boxed && sz1 == B8) 
-	return &cons(UnboxLongLong,null);
-      else if (b2 == Boxed && b1 == Boxed && sz1 == B8) 
-	return &cons(BoxFloat,&cons(UnboxLongLong,null));
-      else if (b2 == Boxed)
-	return &cons(BoxFloat,null);
-      else return null;
-    case DoubleType(b2):
-      // no conversion needed if both are unboxed
-      if (b1 == Unboxed && b2 == Unboxed) return null;
-      else if (b1 == Boxed && sz1 == B8 && b2 == Boxed)
-	// must go from Long Long to Double:  unbox and box
-	return &cons(BoxDouble,&cons(UnboxLongLong,null));
-      else if (b2 == Boxed)
-	// b1 is boxed but small or unboxed, b2 is boxed:  box the result
-	return &cons(BoxDouble,null);
-      else if (b1 == Boxed && sz1 == B8)
-	// b1 is Long Long and b2 is unboxed:  unbox 
-	return &cons(UnboxLongLong,null);
-      else 
-	// b1 is boxed but small, b2 is unboxed:  no conversion needed
-	return null;
-    default: return null;
-    }
-  case FloatType(b1):
-    // if t1 is Float, must unbox (unless t2 is also Float)
-    list<conv> cs = (b1 == Boxed) ? (list<conv>)&cons(UnboxFloat,null) : null;
-    switch (t2) {
-    case IntType(_,sz2,b2):
-      if (b2 == Unboxed || sz2 != B8) 
-	return cs;
-      else // t2 is Long Long, need to box the result
-	return &cons(BoxLongLong,cs);
-    case FloatType(b2):
-      if (b1 == b2) return null;
-      else if (b2 == Boxed) return &cons(BoxFloat,null);
-      else return cs;
-    case DoubleType(b2):
-      if (b2 == Unboxed) return cs;
-      else return &cons(BoxDouble,cs);
-    default: return cs;
-    }
-  case DoubleType(b1):
-    // if t1 is Double, must unbox (unless t2 is also Double)
-    list<conv> cs = 
-       (b1 == Boxed) ? (list<conv>)&cons(UnboxDouble,null) : null;
-    switch (t2) {
-    case IntType(_,sz2,b2):
-      if (sz2 == B8 && b2 == Boxed)
-	// t2 is Long Long, must box
-	return &cons(BoxLongLong,cs);
-      else return cs;
-    case FloatType(b2):
-      if (b2 == Boxed) // t2 is Float, must box
-	return &cons(BoxFloat,cs);
-      else return cs;
-    case DoubleType(b2):
-      if (b1 == b2) return cs;
-      else if (b1 == Boxed) return &cons(UnboxDouble,null);
-      else return &cons(BoxDouble,null);
-    default: return cs;
-    }
-  case PointerType(t1e,bc1,tq1):
-    switch (t2) {
-    case PointerType(t2e,bc2,tq2):
-      if (is_nullable(t1) && !is_nullable(t2))
-	return &cons(NullCheck(t2),null);
-      else return null;
-    default: return null;
-    }
-  case ArrayType(t1e,tq1,ak1):
-    switch (t2) {
-    case ArrayType(t2e,tq2,ak2):
-      switch (&$(ak1,ak2)) {
-      case &$(TaggedArray, FixedArray(e2)): 
-	return &cons(FixTaggedArray(typ_to_c(t2),e2), null);
-      case &$(FixedArray(e1), TaggedArray): 
-	return &cons(TagFixedArray(typ_to_c(t1),e1), null);
-      default: 
-	return null;
-      }
-    default: return null;
-    }
+
+  switch ($(t1,t2)) {
+    // large boxed t1's must be unboxed
+  case $(IntType(_,B8,Boxed), IntType(_,B8,Boxed)): 
+    return null;
+  case $(IntType(_,B8,Boxed), FloatType(Boxed)):
+    return &cons(BoxFloat,&cons(UnboxLongLong,null));
+  case $(IntType(_,B8,Boxed), DoubleType(Boxed)):
+    return &cons(BoxDouble,&cons(UnboxLongLong,null));
+  case $(IntType(_,B8,Boxed), _): 
+    return &cons(UnboxLongLong,null);
+
+  case $(FloatType(Boxed), IntType(_,B8,Boxed)):
+    return &cons(BoxLongLong,&cons(UnboxFloat,null));
+  case $(FloatType(Boxed), FloatType(Boxed)):
+    return null;
+  case $(FloatType(Boxed), DoubleType(Boxed)):
+    return &cons(BoxDouble,&cons(UnboxFloat,null));
+  case $(FloatType(Boxed), _):
+    return &cons(UnboxFloat,null);
+
+  case $(DoubleType(Boxed), IntType(_,B8,Boxed)):
+    return &cons(BoxLongLong,&cons(UnboxDouble,null));
+  case $(DoubleType(Boxed), FloatType(Boxed)):
+    return &cons(BoxFloat,&cons(UnboxDouble,null));
+  case $(DoubleType(Boxed), DoubleType(Boxed)):
+    return null;
+  case $(DoubleType(Boxed), _):
+    return &cons(UnboxDouble,null);
+
+    // If we got this far, t1 is not large and boxed
+  case $(_, IntType(_,B8,Boxed)): return &cons(BoxLongLong,null);
+  case $(_, FloatType(Boxed)):    return &cons(BoxFloat,   null);
+  case $(_, DoubleType(Boxed)):   return &cons(BoxDouble,  null);
+
+    // insert null checks if such a thing is turned on
+  case $(PointerType(_,_,_),PointerType(_,_,_)):
+    if(is_nullable(t1) && !is_nullable(t2))
+      return &cons(NullCheck(t2),null);
+    else
+      return null;
+
+    // convert arrays
+  case $(ArrayType(_,_,TaggedArray),    ArrayType(_,_,FixedArray(e2))):
+    return &cons(FixTaggedArray(typ_to_c(t2),e2), null);
+  case $(ArrayType(_,_,FixedArray(e1)), ArrayType(_,_,TaggedArray)):
+    return &cons(TagFixedArray(typ_to_c(t1),e1), null);
+
   default: return null;
   }
-}
-  
+}    
 
 // malloc something
 static exp malloc_exp(exp s) {

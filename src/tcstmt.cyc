@@ -387,5 +387,4 @@ synth tcStmt(tenv te, stmt s0) {
     return loop_synth(esyn,ssyn);
   }
 
-  throw Unreachable("tcStmt");
 }

@@ -389,7 +389,6 @@ flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
   default: throw Impossible("ControlFlow::cf_check_stmt -- bad stmt syntax"
 			    " or unimplemented stmt form");
   }
-  throw Unreachable("ControlFlow::cf_check_stmt"); // removable later
 }
 
 void cf_check_fun(fndecl fd) {

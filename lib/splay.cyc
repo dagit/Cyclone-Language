@@ -146,5 +146,4 @@ bool splay<`a,`b>(int reln(`a,`a), `a reln_first_arg, enum tree<`a,`b> tree) {
       return false;
     }
   }
-  throw Impossible("Splay::splay");
 }

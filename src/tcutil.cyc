@@ -882,7 +882,6 @@ typ max_arithmetic_type(typ t1, typ t2) {
   case $(_,IntType(Unsigned,B4,_)): return IntType(Unsigned,B4,Unboxed);
   default: return IntType(Signed,B4,Unboxed);
   }
-  throw Core::Unreachable("max_arithmetic_type"); // FIX: def assignment
 }
 
 void check_fndecl_valid_type(segment loc,tenv te,fndecl fd) {
