@@ -57,7 +57,7 @@ void write_buf(FILE @f, buf_t b, unsigned int start) {
     b->seek_pos = 0;
   }
 
-  while (start > DEF_BUFSIZE) {
+  while (start >= DEF_BUFSIZE) {
     start -= DEF_BUFSIZE;
     b->seek_buf = bl = (struct BufList @)bl->next;
     b->seek_pos += DEF_BUFSIZE;
@@ -75,10 +75,20 @@ void write_buf(FILE @f, buf_t b, unsigned int start) {
 
 unsigned int size(buf_t b, unsigned int start) {
   unsigned int sum = 0;
-  struct BufList @bl = b->first;
-  while (start > DEF_BUFSIZE) {
+  struct BufList @bl;
+
+  if (b->seek_pos < start) {
+    bl = b->seek_buf;
+    start -= b->seek_pos;
+  } else {
+    bl = b->first;
+    b->seek_buf = bl;
+    b->seek_pos = 0;
+  }
+  while (start >= DEF_BUFSIZE) {
     start -= DEF_BUFSIZE;
-    bl = (struct BufList @)bl->next;
+    b->seek_buf = bl = (struct BufList @)bl->next;
+    b->seek_pos += DEF_BUFSIZE;
   }
   while (true) {
     char c = bl->data->v[start++];
@@ -92,7 +102,17 @@ unsigned int size(buf_t b, unsigned int start) {
 }
 
 char get_char(buf_t b, unsigned int start) {
-  struct BufList @bl = b->first;
+  struct BufList @bl;
+
+  if (b->seek_pos < start) {
+    bl = b->seek_buf;
+    start -= b->seek_pos;
+  } else {
+    bl = b->first;
+    b->seek_buf = bl;
+    b->seek_pos = 0;
+  }
+
   while (start > DEF_BUFSIZE) {
     start -= DEF_BUFSIZE;
     bl = (struct BufList @)bl->next;
