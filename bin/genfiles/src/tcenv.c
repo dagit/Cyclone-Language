@@ -1,23 +1,17 @@
 #include "cyc_include.h"
 
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
-unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
-unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
-Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
-typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
-Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
-; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
-unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
-Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
-typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
-int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
-unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
-typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
-typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
-struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t;
+typedef unsigned int Cyc_wint_t; typedef unsigned char Cyc_u_char; typedef
+unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int
+Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint;
+typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+unsigned char* Cyc_caddr_t; typedef unsigned short Cyc_ino_t; typedef short Cyc_dev_t;
+typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
+Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
+typedef unsigned int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int
+Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
 Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
 _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
 struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
@@ -485,21 +479,22 @@ r, void* e); extern void Cyc_Tcutil_check_unique_tvars( struct Cyc_Position_Segm
 struct Cyc_List_List*); extern struct Cyc_Absyn_Tvar* Cyc_Tcutil_new_tvar( void*
 k); unsigned char Cyc_Tcenv_Env_error[ 14u]="\000\000\000\000Env_error"; void*
 Cyc_Tcenv_env_err( struct _tagged_string msg){({ struct _tagged_string _temp0=
-msg; fprintf( Cyc_Stdio_stderr,"Error: %.*s\n", _temp0.last_plus_one - _temp0.curr,
-_temp0.curr);}); Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);(
-void) _throw(( void*) Cyc_Tcenv_Env_error);} struct Cyc_Tcenv_Tenv; struct Cyc_Tcenv_Genv;
-struct Cyc_Tcenv_CtrlEnv{ void* continue_stmt; void* break_stmt; struct _tuple3*
-fallthru_clause; void* next_stmt; int try_depth; } ; typedef struct Cyc_Tcenv_CtrlEnv*
-Cyc_Tcenv_ctrl_env_t; struct Cyc_Tcenv_SharedFenv{ void* return_typ; struct Cyc_Dict_Dict*
-seen_labels; struct Cyc_SlowDict_Dict* needed_labels; } ; struct Cyc_Tcenv_Fenv{
-struct Cyc_Tcenv_SharedFenv* shared; struct Cyc_List_List* type_vars; struct Cyc_Dict_Dict*
-locals; struct Cyc_Absyn_Stmt* encloser; struct Cyc_Tcenv_CtrlEnv* ctrl_env;
-void* capability; void* curr_rgn; } ; struct Cyc_Tcenv_Tenv* Cyc_Tcenv_tc_init(){
-Cyc_Tcutil_empty_var_set=({ struct Cyc_Core_Opt* _temp1=( struct Cyc_Core_Opt*)
-GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp1->v=( void*)(( struct Cyc_Set_Set*(*)(
-int(* comp)( struct _tagged_string*, struct _tagged_string*))) Cyc_Set_empty)(
-Cyc_String_zstrptrcmp); _temp1;});{ struct Cyc_Tcenv_Genv* _temp2= Cyc_Tcenv_empty_genv();
-goto _LL3; _LL3: { struct Cyc_List_List* _temp4= 0; goto _LL5; _LL5: _temp2->tuniondecls=((
+msg; fprintf( sfile_to_file( Cyc_Stdio_stderr),"Error: %.*s\n", _temp0.last_plus_one
+- _temp0.curr, _temp0.curr);}); Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*)
+Cyc_Stdio_stderr);( void) _throw(( void*) Cyc_Tcenv_Env_error);} struct Cyc_Tcenv_Tenv;
+struct Cyc_Tcenv_Genv; struct Cyc_Tcenv_CtrlEnv{ void* continue_stmt; void*
+break_stmt; struct _tuple3* fallthru_clause; void* next_stmt; int try_depth; } ;
+typedef struct Cyc_Tcenv_CtrlEnv* Cyc_Tcenv_ctrl_env_t; struct Cyc_Tcenv_SharedFenv{
+void* return_typ; struct Cyc_Dict_Dict* seen_labels; struct Cyc_SlowDict_Dict*
+needed_labels; } ; struct Cyc_Tcenv_Fenv{ struct Cyc_Tcenv_SharedFenv* shared;
+struct Cyc_List_List* type_vars; struct Cyc_Dict_Dict* locals; struct Cyc_Absyn_Stmt*
+encloser; struct Cyc_Tcenv_CtrlEnv* ctrl_env; void* capability; void* curr_rgn;
+} ; struct Cyc_Tcenv_Tenv* Cyc_Tcenv_tc_init(){ Cyc_Tcutil_empty_var_set=({
+struct Cyc_Core_Opt* _temp1=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct
+Cyc_Core_Opt)); _temp1->v=( void*)(( struct Cyc_Set_Set*(*)( int(* comp)( struct
+_tagged_string*, struct _tagged_string*))) Cyc_Set_empty)( Cyc_String_zstrptrcmp);
+_temp1;});{ struct Cyc_Tcenv_Genv* _temp2= Cyc_Tcenv_empty_genv(); goto _LL3;
+_LL3: { struct Cyc_List_List* _temp4= 0; goto _LL5; _LL5: _temp2->tuniondecls=((
 struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict* d, struct _tagged_string* key,
 struct Cyc_Absyn_Tuniondecl** data)) Cyc_Dict_insert)( _temp2->tuniondecls,(*
 Cyc_Absyn_exn_name).f2,& Cyc_Absyn_exn_xed);{ struct Cyc_Dict_Dict* _temp6=((

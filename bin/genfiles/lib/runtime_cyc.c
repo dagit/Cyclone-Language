@@ -178,32 +178,48 @@ Cstring underlying_Cstring(string s) {
   return str;
 }
 
+struct Cyc_Stdio___sFILE {
+  FILE *file; // Mirror any changes in stdio.cyc
+} Cyc_Stdio_stdin_v, Cyc_Stdio_stdout_v, Cyc_Stdio_stderr_v,
+  *Cyc_Stdio_stdin = &Cyc_Stdio_stdin_v,
+  *Cyc_Stdio_stdout = &Cyc_Stdio_stdout_v,
+  *Cyc_Stdio_stderr = &Cyc_Stdio_stderr_v;
+
+FILE *sfile_to_file(struct Cyc_Stdio___sFILE *sf) {
+  if(!sf) {
+    fprintf(stderr,"Attempt to access null file descriptor.\n");
+    exit(255);
+  }
+  if(!sf->file)
+    throw(Null_Exception); // FIX:  should be more descriptive?
+  return sf->file;
+}
 static void check_fd(FILE *fd) {
   if(!fd) {
     fprintf(stderr,"Attempt to access null file descriptor.\n");
     exit(255);
   }
 }
-int Cyc_Stdio_file_string_read(FILE *fd, string dest, int dest_offset, 
-			       int max_count) {
+int Cyc_Stdio_file_string_read(struct Cyc_Stdio___sFILE *sf, string dest,
+                               int dest_offset, int max_count) {
   unsigned char *new_curr = dest.curr + dest_offset;
   size_t sz = dest.last_plus_one - new_curr;
+  FILE *fd = sfile_to_file(sf);
   if (new_curr < dest.base || new_curr >= dest.last_plus_one)
     throw(Null_Exception);
-  check_fd(fd);
   if(dest_offset + max_count > sz) {
     fprintf(stderr,"Attempt to read off end of string.\n");
     exit(255);
   }
   return fread(new_curr, 1, max_count, fd);
 }
-int Cyc_Stdio_file_string_write(FILE *fd, string src, int src_offset, 
-				int max_count) {
+int Cyc_Stdio_file_string_write(struct Cyc_Stdio___sFILE *sf, string src,
+                                int src_offset, int max_count) {
   size_t sz = src.last_plus_one - src.curr;
   unsigned char *new_curr = src.curr + src_offset;
+  FILE *fd = sfile_to_file(sf);
   if (new_curr < src.base || new_curr >= src.last_plus_one)
     throw(Null_Exception);
-  check_fd(fd);
   if(src_offset + max_count > sz) {
     fprintf(stderr,"Attempt to write off end of string.\n");
     exit(255);
@@ -219,10 +235,6 @@ int f_seek(FILE *fd, int offset) {
   }
   return 0;
 }
-
-FILE *Cyc_Stdio_stdin; 
-FILE *Cyc_Stdio_stdout;
-FILE *Cyc_Stdio_stderr;
 
 ///////////////////////////////////////////////
 // Regions
@@ -322,9 +334,9 @@ int main(int argc, char **argv) {
     return 1;
   }
   // set standard file descriptors
-  Cyc_Stdio_stdin  = stdin;
-  Cyc_Stdio_stdout = stdout;
-  Cyc_Stdio_stderr = stderr;
+  Cyc_Stdio_stdin->file = stdin;
+  Cyc_Stdio_stdout->file = stdout;
+  Cyc_Stdio_stderr->file = stderr;
   // convert command-line args to Cyclone strings
   {struct _tagged_argv args;
   int i, result;

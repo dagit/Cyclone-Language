@@ -105,7 +105,7 @@ TCDECL_H       := tcdecl.h $(ABSYN_H)
 
 $(OUT_PREFIX)absyn.c: $(ABSYN_H)
 $(OUT_PREFIX)parse_tab.c: $(ABSYN_H)
-$(OUT_PREFIX)lex.c: 
+$(OUT_PREFIX)lex.c: $(PARSE_H)
 $(OUT_PREFIX)absynpp.c: $(ABSYNPP_H) $(ABSYN_H)
 $(OUT_PREFIX)absyndump.c: $(ABSYNDUMP_H) $(ABSYNPP_H)
 $(OUT_PREFIX)tcenv.c: $(TCENV_H) $(ABSYN_H) $(TCUTIL_H) $(ABSYNPP_H)

@@ -570,6 +570,15 @@ static conv conversion(type_t t1, type_t t2) {
   }
 }
 
+static string _sfile_to_file_string = "sfile_to_file";
+static $(nmspace_t,var_t) _sfile_to_file_var =
+  $((nmspace_t)&abs_ns_value,&_sfile_to_file_string);
+
+// convert a Cyc_Stdio___sFILE to a FILE (aka Cyc_Cstdio___sFILE)
+static exp_t fdconv(exp_t e) {
+  return fncall_exp(var_exp(&_sfile_to_file_var,DL),new List(e,null),DL);
+}
+
 // throw an exception -- this is turned into a function call
 static exp_t newthrow_exp(exp_t e) {
   return fncall_exp(var_exp(_throw_qv,DL),new List(e,null),DL);
@@ -1395,7 +1404,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     case Xprintf: e->r = printf_to_c(p,null,es,typs)->r; break;
     case Fprintf:
       if (es == null) toc_impos("fprintf without arguments");
-      e->r = printf_to_c(p,new Opt(es->hd),es->tl,typs->tl)->r;
+      e->r = printf_to_c(p,new Opt(fdconv(es->hd)),es->tl,typs->tl)->r;
       break;
     case Sscanf:
       // INSECURE -- but useful for debugging.

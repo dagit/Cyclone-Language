@@ -1,23 +1,17 @@
 #include "cyc_include.h"
 
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
-unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
-unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
-Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
-typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
-Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
-; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
-unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
-Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
-typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
-int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
-unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
-typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
-typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
-struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t;
+typedef unsigned int Cyc_wint_t; typedef unsigned char Cyc_u_char; typedef
+unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int
+Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint;
+typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+unsigned char* Cyc_caddr_t; typedef unsigned short Cyc_ino_t; typedef short Cyc_dev_t;
+typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
+Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
+typedef unsigned int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int
+Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
 Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
 _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
 struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
@@ -70,22 +64,23 @@ struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f1) == 0){
 return(*(( struct _tuple0*)(( struct Cyc_List_List*) _check_null( l))->hd)).f2;}
 l=(( struct Cyc_List_List*) _check_null( l))->tl;}( void) _throw(( void*) Cyc_Core_Not_found);}
 void Cyc_Arg_usage( struct Cyc_List_List* speclist, struct _tagged_string errmsg){({
-struct _tagged_string _temp0= errmsg; fprintf( Cyc_Stdio_stderr,"%.*s\n", _temp0.last_plus_one
-- _temp0.curr, _temp0.curr);}); while( speclist != 0) {({ struct _tagged_string
-_temp1=(*(( struct _tuple0*)(( struct Cyc_List_List*) _check_null( speclist))->hd)).f1;
-struct _tagged_string _temp2=(*(( struct _tuple0*)(( struct Cyc_List_List*)
-_check_null( speclist))->hd)).f3; fprintf( Cyc_Stdio_stderr," %.*s %.*s\n",
-_temp1.last_plus_one - _temp1.curr, _temp1.curr, _temp2.last_plus_one - _temp2.curr,
-_temp2.curr);}); speclist=(( struct Cyc_List_List*) _check_null( speclist))->tl;}}
-int Cyc_Arg_current= 0; static struct _tagged_ptr0 Cyc_Arg_args={ 0, 0, 0};
-static void Cyc_Arg_stop( int prog_pos, void* e, struct Cyc_List_List* speclist,
-struct _tagged_string errmsg){ struct _tagged_string progname= prog_pos <({
-struct _tagged_ptr0 _temp38= Cyc_Arg_args;( unsigned int)( _temp38.last_plus_one
-- _temp38.curr);})?*(( struct _tagged_string*(*)( struct _tagged_ptr0,
-unsigned int, unsigned int)) _check_unknown_subscript)( Cyc_Arg_args, sizeof(
-struct _tagged_string), prog_pos):({ unsigned char* _temp39="(?)"; struct
-_tagged_string _temp40; _temp40.curr= _temp39; _temp40.base= _temp39; _temp40.last_plus_one=
-_temp39 + 4; _temp40;});{ void* _temp3= e; struct _tagged_string _temp13; struct
+struct _tagged_string _temp0= errmsg; fprintf( sfile_to_file( Cyc_Stdio_stderr),"%.*s\n",
+_temp0.last_plus_one - _temp0.curr, _temp0.curr);}); while( speclist != 0) {({
+struct _tagged_string _temp1=(*(( struct _tuple0*)(( struct Cyc_List_List*)
+_check_null( speclist))->hd)).f1; struct _tagged_string _temp2=(*(( struct
+_tuple0*)(( struct Cyc_List_List*) _check_null( speclist))->hd)).f3; fprintf(
+sfile_to_file( Cyc_Stdio_stderr)," %.*s %.*s\n", _temp1.last_plus_one - _temp1.curr,
+_temp1.curr, _temp2.last_plus_one - _temp2.curr, _temp2.curr);}); speclist=((
+struct Cyc_List_List*) _check_null( speclist))->tl;}} int Cyc_Arg_current= 0;
+static struct _tagged_ptr0 Cyc_Arg_args={ 0, 0, 0}; static void Cyc_Arg_stop(
+int prog_pos, void* e, struct Cyc_List_List* speclist, struct _tagged_string
+errmsg){ struct _tagged_string progname= prog_pos <({ struct _tagged_ptr0
+_temp38= Cyc_Arg_args;( unsigned int)( _temp38.last_plus_one - _temp38.curr);})?*((
+struct _tagged_string*(*)( struct _tagged_ptr0, unsigned int, unsigned int))
+_check_unknown_subscript)( Cyc_Arg_args, sizeof( struct _tagged_string),
+prog_pos):({ unsigned char* _temp39="(?)"; struct _tagged_string _temp40;
+_temp40.curr= _temp39; _temp40.base= _temp39; _temp40.last_plus_one= _temp39 + 4;
+_temp40;});{ void* _temp3= e; struct _tagged_string _temp13; struct
 _tagged_string _temp15; struct _tagged_string _temp17; struct _tagged_string
 _temp19; struct _tagged_string _temp21; struct _tagged_string _temp23; _LL5: if(*((
 int*) _temp3) == Cyc_Arg_Unknown){ _LL14: _temp13=(( struct Cyc_Arg_Unknown_struct*)
@@ -99,23 +94,25 @@ _LL24: _temp23=(( struct Cyc_Arg_Message_struct*) _temp3)->f1; goto _LL12;}
 else{ goto _LL4;} _LL6: if( Cyc_String_strcmp( _temp13,({ unsigned char* _temp25="-help";
 struct _tagged_string _temp26; _temp26.curr= _temp25; _temp26.base= _temp25;
 _temp26.last_plus_one= _temp25 + 6; _temp26;})) != 0){({ struct _tagged_string
-_temp27= progname; struct _tagged_string _temp28= _temp13; fprintf( Cyc_Stdio_stderr,"%.*s: unknown option `%.*s'.\n",
-_temp27.last_plus_one - _temp27.curr, _temp27.curr, _temp28.last_plus_one -
-_temp28.curr, _temp28.curr);});} goto _LL4; _LL8:({ struct _tagged_string
-_temp29= progname; struct _tagged_string _temp30= _temp15; fprintf( Cyc_Stdio_stderr,"%.*s: option `%.*s' needs an argument.\n",
+_temp27= progname; struct _tagged_string _temp28= _temp13; fprintf(
+sfile_to_file( Cyc_Stdio_stderr),"%.*s: unknown option `%.*s'.\n", _temp27.last_plus_one
+- _temp27.curr, _temp27.curr, _temp28.last_plus_one - _temp28.curr, _temp28.curr);});}
+goto _LL4; _LL8:({ struct _tagged_string _temp29= progname; struct
+_tagged_string _temp30= _temp15; fprintf( sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `%.*s' needs an argument.\n",
 _temp29.last_plus_one - _temp29.curr, _temp29.curr, _temp30.last_plus_one -
 _temp30.curr, _temp30.curr);}); goto _LL4; _LL10:({ struct _tagged_string
 _temp31= progname; struct _tagged_string _temp32= _temp19; struct _tagged_string
-_temp33= _temp21; struct _tagged_string _temp34= _temp17; fprintf( Cyc_Stdio_stderr,"%.*s: wrong argument `%.*s'; option `%.*s' expects %.*s.\n",
+_temp33= _temp21; struct _tagged_string _temp34= _temp17; fprintf( sfile_to_file(
+Cyc_Stdio_stderr),"%.*s: wrong argument `%.*s'; option `%.*s' expects %.*s.\n",
 _temp31.last_plus_one - _temp31.curr, _temp31.curr, _temp32.last_plus_one -
 _temp32.curr, _temp32.curr, _temp33.last_plus_one - _temp33.curr, _temp33.curr,
 _temp34.last_plus_one - _temp34.curr, _temp34.curr);}); goto _LL4; _LL12:({
 struct _tagged_string _temp35= progname; struct _tagged_string _temp36= _temp23;
-fprintf( Cyc_Stdio_stderr,"%.*s: %.*s.\n", _temp35.last_plus_one - _temp35.curr,
-_temp35.curr, _temp36.last_plus_one - _temp36.curr, _temp36.curr);}); goto _LL4;
-_LL4:;} Cyc_Arg_usage( speclist, errmsg); Cyc_Arg_current=( int)({ struct
-_tagged_ptr0 _temp37= Cyc_Arg_args;( unsigned int)( _temp37.last_plus_one -
-_temp37.curr);});} void Cyc_Arg_parse( struct Cyc_List_List* speclist, void(*
+fprintf( sfile_to_file( Cyc_Stdio_stderr),"%.*s: %.*s.\n", _temp35.last_plus_one
+- _temp35.curr, _temp35.curr, _temp36.last_plus_one - _temp36.curr, _temp36.curr);});
+goto _LL4; _LL4:;} Cyc_Arg_usage( speclist, errmsg); Cyc_Arg_current=( int)({
+struct _tagged_ptr0 _temp37= Cyc_Arg_args;( unsigned int)( _temp37.last_plus_one
+- _temp37.curr);});} void Cyc_Arg_parse( struct Cyc_List_List* speclist, void(*
 anonfun)( struct _tagged_string), struct _tagged_string errmsg, struct
 _tagged_ptr0 orig_args){ Cyc_Arg_args= orig_args;{ int initpos= Cyc_Arg_current;
 int l=( int)({ struct _tagged_ptr0 _temp126= Cyc_Arg_args;( unsigned int)(

@@ -113,6 +113,10 @@ this would fix the following two bugs.
 * new "foo" and rnew(h) "foo" don't work properly -- they should allocate
   a copy of the string in the region, no?
 
+* src/Makefile produces $(OUTPUT_PREFIX)parse_tab.h, but parse.h is
+  hardcoded to #include "parse_tab.h", so everything breaks when you
+  use a prefix.
+
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
 * Need to port more C libraries
@@ -146,6 +150,15 @@ MISSING THINGS NEEDED TO PORT REAL CODE:
 * we don't allow casts in "constant" expressions so as to avoid
   the issue that our casts may include computation.  We should
   have a way to check to see if a cast doesn't do any computation.
+
+* stdio.h currently defines EOF as type char, not int, so the real
+  char at that position is shadowed.  Is there any problem with making
+  this change?
+
+* Lots of headers currently define NULL in lots of incompatible ways.
+
+* runtime_cyc.c still defines check_fd and f_seek, which we never use
+  (and are mentioned in the docs exactly once).
 
 THINGS NEEDED TO SIMPLIFY PORTING:
 ----------------------------------
@@ -223,6 +236,9 @@ THINGS THAT WOULD BE NICE OR THAT HAVE SEX APPEAL:
   compile (or run?) time.  That would allow us to abstract over
   Mem types.
 
+* Cyclone ought to say something when called with no arguments, as gcc
+  does.
+
 THINGS THAT WOULD MAKE THE COMPILER FASTER OR THE CODE BETTER:
 --------------------------------------------------------------
 * Try to avoid using so many lists in the abstract syntax --
@@ -255,6 +271,4 @@ MISCELLANEOUS
 * translation to C is busted with -noexpandtypedefs because we hoist
 tuples to the top (before typedef declarations)
 
-
-
-
+* The FAQ in doc/web/ has two instances of "What does new mean?"

@@ -1,23 +1,17 @@
 #include "cyc_include.h"
 
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
-unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
-unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
-Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
-typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
-Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
-; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
-unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
-Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
-typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
-int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
-unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
-typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
-typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
-struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t;
+typedef unsigned int Cyc_wint_t; typedef unsigned char Cyc_u_char; typedef
+unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int
+Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint;
+typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+unsigned char* Cyc_caddr_t; typedef unsigned short Cyc_ino_t; typedef short Cyc_dev_t;
+typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
+Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
+typedef unsigned int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int
+Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
 Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
 _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
 struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
@@ -128,28 +122,29 @@ goto _LL24;} else{ goto _LL25;} _LL25: if(( unsigned int) _temp19 > 1u?*(( int*)
 _temp19) == Cyc_PP_Append: 0){ _LL32: _temp31=( void*)(( struct Cyc_PP_Append_struct*)
 _temp19)->f1; goto _LL30; _LL30: _temp29=( void*)(( struct Cyc_PP_Append_struct*)
 _temp19)->f2; goto _LL26;} else{ goto _LL20;} _LL22: -- last; goto _LL20; _LL24:
--- last;({ struct _tagged_string _temp33=* _temp27; fprintf( f,"%.*s", _temp33.last_plus_one
-- _temp33.curr, _temp33.curr);}); goto _LL20; _LL26:(( void(*)( struct Cyc_Xarray_Xarray*,
-int, void*)) Cyc_Xarray_set)( _temp17, last, _temp29); if( last ==(( int(*)(
-struct Cyc_Xarray_Xarray*)) Cyc_Xarray_length)( _temp17) - 1){(( void(*)( struct
-Cyc_Xarray_Xarray*, void*)) Cyc_Xarray_add)( _temp17, _temp31);} else{(( void(*)(
-struct Cyc_Xarray_Xarray*, int, void*)) Cyc_Xarray_set)( _temp17, last + 1,
-_temp31);} ++ last; goto _LL20; _LL20:;}}} void Cyc_PP_file_of_doc( struct Cyc_PP_Doc*
-d, int w, struct Cyc_Stdio___sFILE* f){ struct Cyc_PP_Out* o=(( struct Cyc_PP_Out*(*)(
-void* f, struct Cyc_PP_Ppstate* x)) Cyc_Fn_apply)(( void*) d->f,({ struct Cyc_PP_Ppstate*
-_temp34=( struct Cyc_PP_Ppstate*) GC_malloc_atomic( sizeof( struct Cyc_PP_Ppstate));
-_temp34->ci= 0; _temp34->cc= 0; _temp34->cl= 1; _temp34->pw= w; _temp34->epw= w;
-_temp34;})); Cyc_PP_dump_out( f,( void*) o->ppout);} struct _tagged_string Cyc_PP_string_of_doc(
-struct Cyc_PP_Doc* d, int w){ struct Cyc_PP_Out* o=(( struct Cyc_PP_Out*(*)(
-void* f, struct Cyc_PP_Ppstate* x)) Cyc_Fn_apply)(( void*) d->f,({ struct Cyc_PP_Ppstate*
-_temp37=( struct Cyc_PP_Ppstate*) GC_malloc_atomic( sizeof( struct Cyc_PP_Ppstate));
-_temp37->ci= 0; _temp37->cc= 0; _temp37->cl= 1; _temp37->pw= w; _temp37->epw= w;
-_temp37;})); return Cyc_String_str_sepstr((( struct Cyc_List_List*(*)( void* x))
-Cyc_PP_list_of_alist)(( void*) o->ppout),({ unsigned char* _temp35=""; struct
-_tagged_string _temp36; _temp36.curr= _temp35; _temp36.base= _temp35; _temp36.last_plus_one=
-_temp35 + 1; _temp36;}));} struct _tuple0* Cyc_PP_string_and_links( struct Cyc_PP_Doc*
+-- last;({ struct _tagged_string _temp33=* _temp27; fprintf( sfile_to_file( f),"%.*s",
+_temp33.last_plus_one - _temp33.curr, _temp33.curr);}); goto _LL20; _LL26:((
+void(*)( struct Cyc_Xarray_Xarray*, int, void*)) Cyc_Xarray_set)( _temp17, last,
+_temp29); if( last ==(( int(*)( struct Cyc_Xarray_Xarray*)) Cyc_Xarray_length)(
+_temp17) - 1){(( void(*)( struct Cyc_Xarray_Xarray*, void*)) Cyc_Xarray_add)(
+_temp17, _temp31);} else{(( void(*)( struct Cyc_Xarray_Xarray*, int, void*)) Cyc_Xarray_set)(
+_temp17, last + 1, _temp31);} ++ last; goto _LL20; _LL20:;}}} void Cyc_PP_file_of_doc(
+struct Cyc_PP_Doc* d, int w, struct Cyc_Stdio___sFILE* f){ struct Cyc_PP_Out* o=((
+struct Cyc_PP_Out*(*)( void* f, struct Cyc_PP_Ppstate* x)) Cyc_Fn_apply)(( void*)
+d->f,({ struct Cyc_PP_Ppstate* _temp34=( struct Cyc_PP_Ppstate*)
+GC_malloc_atomic( sizeof( struct Cyc_PP_Ppstate)); _temp34->ci= 0; _temp34->cc=
+0; _temp34->cl= 1; _temp34->pw= w; _temp34->epw= w; _temp34;})); Cyc_PP_dump_out(
+f,( void*) o->ppout);} struct _tagged_string Cyc_PP_string_of_doc( struct Cyc_PP_Doc*
 d, int w){ struct Cyc_PP_Out* o=(( struct Cyc_PP_Out*(*)( void* f, struct Cyc_PP_Ppstate*
-x)) Cyc_Fn_apply)(( void*) d->f,({ struct Cyc_PP_Ppstate* _temp41=( struct Cyc_PP_Ppstate*)
+x)) Cyc_Fn_apply)(( void*) d->f,({ struct Cyc_PP_Ppstate* _temp37=( struct Cyc_PP_Ppstate*)
+GC_malloc_atomic( sizeof( struct Cyc_PP_Ppstate)); _temp37->ci= 0; _temp37->cc=
+0; _temp37->cl= 1; _temp37->pw= w; _temp37->epw= w; _temp37;})); return Cyc_String_str_sepstr(((
+struct Cyc_List_List*(*)( void* x)) Cyc_PP_list_of_alist)(( void*) o->ppout),({
+unsigned char* _temp35=""; struct _tagged_string _temp36; _temp36.curr= _temp35;
+_temp36.base= _temp35; _temp36.last_plus_one= _temp35 + 1; _temp36;}));} struct
+_tuple0* Cyc_PP_string_and_links( struct Cyc_PP_Doc* d, int w){ struct Cyc_PP_Out*
+o=(( struct Cyc_PP_Out*(*)( void* f, struct Cyc_PP_Ppstate* x)) Cyc_Fn_apply)((
+void*) d->f,({ struct Cyc_PP_Ppstate* _temp41=( struct Cyc_PP_Ppstate*)
 GC_malloc_atomic( sizeof( struct Cyc_PP_Ppstate)); _temp41->ci= 0; _temp41->cc=
 0; _temp41->cl= 1; _temp41->pw= w; _temp41->epw= w; _temp41;})); return({ struct
 _tuple0* _temp38=( struct _tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp38->f1=

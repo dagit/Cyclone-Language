@@ -1,23 +1,17 @@
 #include "cyc_include.h"
 
- typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
-unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef
-unsigned char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
-unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
-Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
-typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
-Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
-; typedef int Cyc_daddr_t; typedef unsigned char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef unsigned char Cyc_int8_t; typedef
-unsigned char Cyc_u_int8_t; typedef short Cyc_int16_t; typedef unsigned short
-Cyc_u_int16_t; typedef int Cyc_int32_t; typedef unsigned int Cyc_u_int32_t;
-typedef long long Cyc_int64_t; typedef unsigned long long Cyc_u_int64_t; typedef
-int Cyc_register_t; typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef
-unsigned short Cyc_uid_t; typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t;
-typedef int Cyc_key_t; typedef int Cyc_ssize_t; typedef unsigned char* Cyc_addr_t;
-typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int Cyc_fd_mask;
-struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t;
+typedef unsigned int Cyc_wint_t; typedef unsigned char Cyc_u_char; typedef
+unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int
+Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint;
+typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+unsigned char* Cyc_caddr_t; typedef unsigned short Cyc_ino_t; typedef short Cyc_dev_t;
+typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
+Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
+typedef unsigned int Cyc_mode_t; typedef unsigned short Cyc_nlink_t; typedef int
+Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ; typedef struct Cyc__types_fd_set
 Cyc__types_fd_set; typedef unsigned char* Cyc_Cstring; typedef struct
 _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
 struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void exit(
@@ -523,42 +517,43 @@ unsigned char Cyc_Tcutil_TypeErr[ 12u]="\000\000\000\000TypeErr"; extern void
 Cyc_Tcutil_unify_it( void* t1, void* t2); void Cyc_Tcutil_terr( struct Cyc_Position_Segment*
 loc, struct _tagged_string s){ Cyc_Position_post_error( Cyc_Position_mk_err_elab(
 loc, s));} void* Cyc_Tcutil_impos( struct _tagged_string msg){({ struct
-_tagged_string _temp0= msg; fprintf( Cyc_Stdio_stderr,"Error: %.*s\n", _temp0.last_plus_one
-- _temp0.curr, _temp0.curr);}); Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*)
-Cyc_Stdio_stderr);( void) _throw(( void*) Cyc_Tcutil_TypeErr);} static struct
-_tagged_string Cyc_Tcutil_tvar2string( struct Cyc_Absyn_Tvar* tv){ return* tv->name;}
-void Cyc_Tcutil_print_tvars( struct Cyc_List_List* tvs){ for( 0; tvs != 0; tvs=((
-struct Cyc_List_List*) _check_null( tvs))->tl){({ struct _tagged_string _temp1=
-Cyc_Tcutil_tvar2string(( struct Cyc_Absyn_Tvar*)(( struct Cyc_List_List*)
-_check_null( tvs))->hd); struct _tagged_string _temp2= Cyc_Absynpp_ckind2string(((
+_tagged_string _temp0= msg; fprintf( sfile_to_file( Cyc_Stdio_stderr),"Error: %.*s\n",
+_temp0.last_plus_one - _temp0.curr, _temp0.curr);}); Cyc_Stdio_fflush(( struct
+Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);( void) _throw(( void*) Cyc_Tcutil_TypeErr);}
+static struct _tagged_string Cyc_Tcutil_tvar2string( struct Cyc_Absyn_Tvar* tv){
+return* tv->name;} void Cyc_Tcutil_print_tvars( struct Cyc_List_List* tvs){ for(
+0; tvs != 0; tvs=(( struct Cyc_List_List*) _check_null( tvs))->tl){({ struct
+_tagged_string _temp1= Cyc_Tcutil_tvar2string(( struct Cyc_Absyn_Tvar*)(( struct
+Cyc_List_List*) _check_null( tvs))->hd); struct _tagged_string _temp2= Cyc_Absynpp_ckind2string(((
 struct Cyc_Absyn_Tvar*)(( struct Cyc_List_List*) _check_null( tvs))->hd)->kind);
-fprintf( Cyc_Stdio_stderr,"%.*s::%.*s ", _temp1.last_plus_one - _temp1.curr,
-_temp1.curr, _temp2.last_plus_one - _temp2.curr, _temp2.curr);});} fprintf( Cyc_Stdio_stderr,"\n");
-Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);} static struct
-Cyc_List_List* Cyc_Tcutil_warning_segs= 0; static struct Cyc_List_List* Cyc_Tcutil_warning_msgs=
-0; void Cyc_Tcutil_warn( struct Cyc_Position_Segment* sg, struct _tagged_string
-msg){ Cyc_Tcutil_warning_segs=({ struct Cyc_List_List* _temp3=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp3->hd=( void*) sg; _temp3->tl=
-Cyc_Tcutil_warning_segs; _temp3;}); Cyc_Tcutil_warning_msgs=({ struct Cyc_List_List*
-_temp4=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp4->hd=( void*)(( struct _tagged_string*)({ struct _tagged_string* _temp5=(
-struct _tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1); _temp5[
-0]= msg; _temp5;})); _temp4->tl= Cyc_Tcutil_warning_msgs; _temp4;});} void Cyc_Tcutil_flush_warnings(){
-if( Cyc_Tcutil_warning_segs == 0){ return;} fprintf( Cyc_Stdio_stderr,"***Warnings***\n");{
+fprintf( sfile_to_file( Cyc_Stdio_stderr),"%.*s::%.*s ", _temp1.last_plus_one -
+_temp1.curr, _temp1.curr, _temp2.last_plus_one - _temp2.curr, _temp2.curr);});}
+fprintf( sfile_to_file( Cyc_Stdio_stderr),"\n"); Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*)
+Cyc_Stdio_stderr);} static struct Cyc_List_List* Cyc_Tcutil_warning_segs= 0;
+static struct Cyc_List_List* Cyc_Tcutil_warning_msgs= 0; void Cyc_Tcutil_warn(
+struct Cyc_Position_Segment* sg, struct _tagged_string msg){ Cyc_Tcutil_warning_segs=({
+struct Cyc_List_List* _temp3=( struct Cyc_List_List*) GC_malloc( sizeof( struct
+Cyc_List_List)); _temp3->hd=( void*) sg; _temp3->tl= Cyc_Tcutil_warning_segs;
+_temp3;}); Cyc_Tcutil_warning_msgs=({ struct Cyc_List_List* _temp4=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp4->hd=( void*)(( struct
+_tagged_string*)({ struct _tagged_string* _temp5=( struct _tagged_string*)
+GC_malloc( sizeof( struct _tagged_string) * 1); _temp5[ 0]= msg; _temp5;}));
+_temp4->tl= Cyc_Tcutil_warning_msgs; _temp4;});} void Cyc_Tcutil_flush_warnings(){
+if( Cyc_Tcutil_warning_segs == 0){ return;} fprintf( sfile_to_file( Cyc_Stdio_stderr),"***Warnings***\n");{
 struct Cyc_List_List* seg_strs= Cyc_Position_strings_of_segments( Cyc_Tcutil_warning_segs);
 Cyc_Tcutil_warning_segs= 0; Cyc_Tcutil_warning_msgs=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( Cyc_Tcutil_warning_msgs); while(
 Cyc_Tcutil_warning_msgs != 0) {({ struct _tagged_string _temp6=*(( struct
 _tagged_string*)(( struct Cyc_List_List*) _check_null( seg_strs))->hd); struct
 _tagged_string _temp7=*(( struct _tagged_string*)(( struct Cyc_List_List*)
-_check_null( Cyc_Tcutil_warning_msgs))->hd); fprintf( Cyc_Stdio_stderr,"%.*s: %.*s\n",
+_check_null( Cyc_Tcutil_warning_msgs))->hd); fprintf( sfile_to_file( Cyc_Stdio_stderr),"%.*s: %.*s\n",
 _temp6.last_plus_one - _temp6.curr, _temp6.curr, _temp7.last_plus_one - _temp7.curr,
 _temp7.curr);}); seg_strs=(( struct Cyc_List_List*) _check_null( seg_strs))->tl;
 Cyc_Tcutil_warning_msgs=(( struct Cyc_List_List*) _check_null( Cyc_Tcutil_warning_msgs))->tl;}
-fprintf( Cyc_Stdio_stderr,"**************\n"); Cyc_Stdio_fflush(( struct Cyc_Stdio___sFILE*)
-Cyc_Stdio_stderr);}} struct Cyc_Core_Opt* Cyc_Tcutil_empty_var_set= 0; void* Cyc_Tcutil_compress(
-void* t){ void* _temp8= t; int _temp20; struct Cyc_Core_Opt* _temp22; void*
-_temp24; int _temp26; struct Cyc_Core_Opt* _temp28; struct Cyc_Core_Opt**
+fprintf( sfile_to_file( Cyc_Stdio_stderr),"**************\n"); Cyc_Stdio_fflush((
+struct Cyc_Stdio___sFILE*) Cyc_Stdio_stderr);}} struct Cyc_Core_Opt* Cyc_Tcutil_empty_var_set=
+0; void* Cyc_Tcutil_compress( void* t){ void* _temp8= t; int _temp20; struct Cyc_Core_Opt*
+_temp22; void* _temp24; int _temp26; struct Cyc_Core_Opt* _temp28; struct Cyc_Core_Opt**
 _temp30; void* _temp31; struct Cyc_Core_Opt* _temp33; struct Cyc_List_List*
 _temp35; struct _tuple1* _temp37; struct Cyc_Core_Opt* _temp39; struct Cyc_Core_Opt**
 _temp41; struct Cyc_List_List* _temp42; struct _tuple1* _temp44; _LL10: if((
