@@ -808,7 +808,7 @@ ret +=width > fieldsz?width: fieldsz;}}
 done:
  return ret;
 error:
- return - 1;}}}}
+ return -1;}}}}
 # 703
 static struct _fat_ptr Cyc_exponent(struct _fat_ptr p,int exp,int fmtch){
 # 705

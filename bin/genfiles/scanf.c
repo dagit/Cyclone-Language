@@ -785,7 +785,7 @@ ok:
 # 640
 ({struct _fat_ptr _tmp1F=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp20=*((char*)_check_fat_subscript(_tmp1F,sizeof(char),0U));char _tmp21=(char)c;if(_get_fat_size(_tmp1F,sizeof(char))== 1U &&(_tmp20 == 0 && _tmp21 != 0))_throw_arraybounds();*((char*)_tmp1F.curr)=_tmp21;});
 _IO_getc(fp);
-if(_IO_peekc(fp)== - 1){
+if(_IO_peekc(fp)== -1){
 ++ seen_eof;
 break;}}
 # 653
@@ -864,7 +864,7 @@ break;
 fok:
 ({struct _fat_ptr _tmp28=_fat_ptr_inplace_plus_post(& p,sizeof(char),1);char _tmp29=*((char*)_check_fat_subscript(_tmp28,sizeof(char),0U));char _tmp2A=(char)c;if(_get_fat_size(_tmp28,sizeof(char))== 1U &&(_tmp29 == 0 && _tmp2A != 0))_throw_arraybounds();*((char*)_tmp28.curr)=_tmp2A;});
 _IO_getc(fp);
-if(_IO_peekc(fp)== - 1){
+if(_IO_peekc(fp)== -1){
 ++ seen_eof;
 break;}}
 # 744

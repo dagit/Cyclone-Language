@@ -76,7 +76,7 @@ namespace AssnDef{
 
   ///////////////////// Assertions /////////////////////
   typedef datatype Assn @assn_t;
-  typedef datatype Assn *assn_t_nullable;
+  typedef datatype Assn *assn_opt_t;
   typedef enum Primreln { Eq, Neq, SLt, SLte, ULt, ULte } prim_reln_t;
 
   datatype Assn {

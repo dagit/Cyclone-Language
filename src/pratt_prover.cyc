@@ -33,7 +33,7 @@ typedef enum DistanceInfo {
 
 typedef struct Dist{
   int length;
-  assn_t_nullable prim; //to record a single edge shortest path's origin
+  assn_opt_t prim; //to record a single edge shortest path's origin
 } dist_t;
 typedef struct Distance {
   struct Distance *next;  // ptr to next entry in sparse matrix
@@ -142,7 +142,7 @@ static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
   return g1;
 }
 
-static bool add_edge(graph_t @, bool, term_t, term_t, int, assn_t_nullable);
+static bool add_edge(graph_t @, bool, term_t, term_t, int, assn_opt_t);
 static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
 
 type_opt_t get_term_type(term_t t) {
@@ -265,7 +265,7 @@ static dist_t* lookup_distance(row_t i, bool is_signed, term_t j) {
 // Inserts the edge as appropriate.  Must look through the Distance
 // list to see if there's already an entry for i and j and update
 // it instead of adding a new Distance node.
-static void insert_distance(row_t i, bool is_signed, term_t j, int dist,assn_t_nullable origin) {
+static void insert_distance(row_t i, bool is_signed, term_t j, int dist,assn_opt_t origin) {
   if (cmp_term(i->source,j) == 0) return; // same term always at distance 0
   let ds = lookup_col(i,j);
   if (ds != NULL) {
@@ -346,7 +346,7 @@ is_unsigned_overflow(unsigned c1, operator_t op,unsigned c2){
 // the edges in the graph, we need to check if any overflow happens
 // while computing shoterst path of all pairs and looking for negative
 // weight cycles.
-static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, assn_t_nullable origin){
+static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, assn_opt_t origin){
   add_node(g,i);
   add_node(g,j);
   dist_t* ij_dist = lookup_distance(lookup_row(g,i),is_signed,j);

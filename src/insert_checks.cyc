@@ -403,9 +403,10 @@ static void do_exp(env_t nv, exp_t e) {
           ++bounds_checks_eliminated;
         let old_bds_ck = need_bounds_check(nv,get_relns(e1),e1,e2);
         if (old_bds_ck != bds_ck) {
-          if (bds_ck)
+          if (bds_ck) {
+            warn(e1->loc,"relations eliminated check here, but not vcgen");
             ++relations_eliminated_check;
-          else 
+          } else 
             ++vcgen_eliminated_check;
         } else {
           if (!bds_ck && !old_bds_ck) ++both_eliminated_check;
@@ -524,9 +525,8 @@ static void do_decl(env_t nv, decl_t d) {
         end.tv_usec += 1000000;
         --end.tv_sec;
       }
-      fprintf(stderr,"vcgen for %s:  %d.%06d secs\n",
-              Absynpp::qvar2string(fd->name),end.tv_sec,end.tv_usec);
-      fflush(stderr);
+      //fprintf(stderr,"vcgen for %s:  %d.%06d secs\n",
+      //        Absynpp::qvar2string(fd->name),end.tv_sec,end.tv_usec);
 #endif
     }
 #ifdef PERFORMANCE_DEBUG
@@ -542,9 +542,8 @@ static void do_decl(env_t nv, decl_t d) {
       end.tv_usec += 1000000;
       --end.tv_sec;
     }
-    fprintf(stderr,"insert checks for %s:  %d.%06d secs\n",
-            Absynpp::qvar2string(fd->name),end.tv_sec,end.tv_usec);
-    fflush(stderr);
+    //fprintf(stderr,"insert checks for %s:  %d.%06d secs\n",
+    //        Absynpp::qvar2string(fd->name),end.tv_sec,end.tv_usec);
 #endif
     break;//forgets if in sizeof
   case &Let_d(_,_,e,_): do_exp(nv,e); break;    

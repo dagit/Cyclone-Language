@@ -512,12 +512,15 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
  LOOP:
   ain = pre_stmt_update(env,s,ain);
   //assn_size(ain);
-  // don't bother analyzing if we can show the assertion is false
-  // (effectively an unreachable state.)
+
+  /* JGM: can't skip -- we might run into a label in which case
+     we're re-setting the assertion to true...
   switch (ain) {
   case &False: return ain;
   default: break;
   }
+  */
+
   switch (s->r) {
   case &Absyn::Skip_s: return ain;
   case &Absyn::Exp_s(e): 
@@ -623,12 +626,14 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     ain = vcgen_local_decl(env,d,ain);
     s = s1;
     goto LOOP;
-  case &Absyn::Label_s(_,s): 
+  case &Absyn::Label_s(_,s1): 
     // by making the assertion True here, we're effectively losing
     // all information when we do a goto.  This is conservative, 
     // and means that I don't have to worry about non-structured
     // control-flow.
-    return vcgen_stmt(env,s,&true_assn);
+    ain = &true_assn;
+    s = s1;
+    goto LOOP;
   case &Absyn::Goto_s(_): return &false_assn; // see above
   case &Absyn::TryCatch_s(s,scs,_):
     // save old try/catch-handler assertion
@@ -918,27 +923,25 @@ static term_opt_t deref_lterm(env_t env, term_opt_t lt, assn_t ain) {
 }
 
 static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
-//   if (Tcutil::is_const_exp(e)) {
-//     // special case for pragmas
-//     switch (e->r) {
-//     case &Absyn::Pragma_e(s):
-//       if (strcmp(s,"print_assn") == 0) {
-//         let seg_str = Position::string_of_segment(e->loc);
-//         fprintf(stderr,"%s: current assn is %s\n",seg_str,assn2string(reduce(ain)));
-//       }
-//       if (strcmp(s,"all_paths") == 0) {
-//         env->shared->widen_paths = false;
-//       }
-//       if (strcmp(s,"one_path") == 0) {
-//         env->shared->widen_paths = true;
-//       }
-//       return $(zero(),ain);
-//     default: return $(cnst(e),ain);
-//     }
-//   }
   if (Tcutil::is_const_exp(e)){
-    let $(cn, known)= Evexp::eval_const_uint_exp(e);
-    if (known) return $(new Uint(cn), ain);
+     // special case for pragmas
+     switch (e->r) {
+     case &Absyn::Pragma_e(s):
+       if (strcmp(s,"print_assn") == 0) {
+         let seg_str = Position::string_of_segment(e->loc);
+         fprintf(stderr,"%s: current assn is %s\n",seg_str,assn2string(reduce(ain)));
+       }
+       if (strcmp(s,"all_paths") == 0) {
+         env->shared->widen_paths = false;
+       }
+       if (strcmp(s,"one_path") == 0) {
+         env->shared->widen_paths = true;
+       }
+       return $(zero(),ain);
+     default:  break;
+     }
+     let $(cn, known)= Evexp::eval_const_uint_exp(e);
+     if (known) return $(new Uint(cn), ain);
   }
   switch (e->r) {
   case &Absyn::Const_e(c): 
@@ -1050,42 +1053,37 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::NoInstantiate_e(e): return vcgen_rexp(env,e,ain);
   case &Absyn::Instantiate_e(e,_):  return vcgen_rexp(env,e,ain);
 
-  case &Absyn::Cast_e(tp,e,_,c): 
+  case &Absyn::Cast_e(tp,e1,_,c): 
     // FIX: really need to put C coercions in terms...
-    let $(topt,a) = vcgen_rexp(env,e,ain);
+    let $(topt,a) = vcgen_rexp(env,e1,ain);
+
+    // we only need to retain the cast on the term if it
+    // changes the size of the value.  In particular, we
+    // can drop a cast from an int to an unsigned int and
+    // vice versa.  We might be able to get away with 
+    // dropping other casts (e.g., char->int) but we'll be
+    // conservative now.
+    switch $(Absyn::compress(tp),Absyn::compress((type_t)e->topt)) {
+      // these two cases allow us to drop a cast of a tag_t to int/long
+      // or unsigned int/unsigned long.
+    case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Int_sz),_),&Absyn::AppType(&Absyn::TagCon,_)):
+      return $(topt,a);
+    case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Long_sz),_),&Absyn::AppType(&Absyn::TagCon,_)):
+      return $(topt,a);
+      // this case lets us drop a cast when they are two integers and the
+      // size is the same.
+    case $(&Absyn::AppType(&Absyn::IntCon(u1,s1),_),&Absyn::AppType(&Absyn::IntCon(u2,s2),_)):
+      //wangyl: a hack to tell compiler that long and int have the same size
+      //FIX: this is machine dependent!
+      s1 = (s1 == Absyn::Long_sz? Absyn::Int_sz:s1);
+      s2 = (s2 == Absyn::Long_sz? Absyn::Int_sz:s2);
+      if (s1 == s2) return $(topt,a);
+      break;
+    default: break;
+    }
     if (c == Absyn::No_coercion) {
       if (topt == NULL) return $(NULL,a);
       term_t t = (term_t)topt;
-      // we only need to retain the cast on the term if it
-      // changes the size of the value.  In particular, we
-      // can drop a cast from an int to an unsigned int and
-      // vice versa.  We might be able to get away with 
-      // dropping other casts (e.g., char->int) but we'll be
-      // conservative now.
-#ifdef VCGEN_DEBUG
-      fprintf(stderr, "\n\n tp = %s\n", Absynpp::typ2string(tp));
-      fprintf(stderr, "type(e) = %s\n", Absynpp::typ2string(e->topt));
-#endif
-      switch $(Absyn::compress(tp),Absyn::compress((type_t)e->topt)) {
-        // these two cases allow us to drop a cast of a tag_t to int/long
-        // or unsigned int/unsigned long.
-      case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Int_sz),_),&Absyn::AppType(&Absyn::TagCon,_)):
-        return $(t,a);
-      case $(&Absyn::AppType(&Absyn::IntCon(_,Absyn::Long_sz),_),&Absyn::AppType(&Absyn::TagCon,_)):
-        return $(t,a);
-      case $(&Absyn::AppType(&Absyn::IntCon(u1,s1),_),&Absyn::AppType(&Absyn::IntCon(u2,s2),_)):
-#ifdef VCGEN_DEBUG
-	fprintf(stderr, "cast: (tp) e where (tp) could be removed if %d == %d\n",
-		s1, s2);
-#endif
-	//wangyl: a hack to tell compiler that long and int have the same size
-	//FIX: this is machine dependent!
-	s1 = (s1 == Absyn::Long_sz? Absyn::Int_sz:s1);
-	s2 = (s2 == Absyn::Long_sz? Absyn::Int_sz:s1);
-        if (s1 == s2) return $(t,a);
-        break;
-      default: break;
-      }
       return $(cast(tp,t),a);
     }
     else {
@@ -1202,18 +1200,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     return $(t,aout);
   case &Absyn::Asm_e(...): return $(NULL,ain);
   case &Absyn::Extension_e(e): return vcgen_rexp(env,e,ain);
-  case &Absyn::Pragma_e(s): 
-    if (strcmp(s,"print_assn") == 0) {
-      let seg_str = Position::string_of_segment(e->loc);
-      fprintf(stderr,"%s: current assn is %s\n",seg_str,assn2string(ain));
-    }
-    if (strcmp(s,"all_paths") == 0) {
-      env->shared->widen_paths = false;
-    }
-    if (strcmp(s,"one_path") == 0) {
-      env->shared->widen_paths = true;
-    }
-    return $(zero(),ain);
+  case &Absyn::Pragma_e(s):  return $(zero(),ain);
   case &Absyn::Assert_e(e1):
     let $(at,_) = vcgen_test(env,e1,&true_assn);
     if (!implies(&ain,&at)) 

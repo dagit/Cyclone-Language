@@ -2396,7 +2396,7 @@ return
 # 2043
 return 0U;};}
 # 2045
-return Cyc_Absyn_Unknown_coercion;}case 0: switch(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp2C2)->f1)){case 15: _tmp2C3=((struct Cyc_Absyn_EnumCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp2C2)->f1)->f2;{struct Cyc_Absyn_Enumdecl*ed1=_tmp2C3;
+return 0U;}case 0: switch(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp2C2)->f1)){case 15: _tmp2C3=((struct Cyc_Absyn_EnumCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp2C2)->f1)->f2;{struct Cyc_Absyn_Enumdecl*ed1=_tmp2C3;
 # 2049
 {void*_tmp2E0=t2;void*_tmp2E1;if(*((int*)_tmp2E0)== 0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp2E0)->f1)== 15){_tmp2E1=((struct Cyc_Absyn_EnumCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp2E0)->f1)->f2;{struct Cyc_Absyn_Enumdecl*ed2=_tmp2E1;
 # 2051
