@@ -55,7 +55,7 @@ typerep_test$(EXE): typerep_test.o
 equiv.o: equiv.c
 	$(CC) -c $< -o $@
 
-rep$(EXE):  rep.o equiv.o
+reptest$(EXE):  reptest.o rep.o equiv.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
 genrep_write$(EXE):  genrep_write.o muttrep.o

@@ -1924,7 +1924,27 @@ static void exp_to_c(env_t nv, exp_t e) {
                                  uint_exp(1,DL)),DL)->r;
         }
 	break;
-      case $(&AbsUpper_b(_),_): toc_impos("toc, cast from AbsUpper_b");
+      case $(&AbsUpper_b(t1),&AbsUpper_b(t2)): 
+	if(n1 && !n2) {
+	  if(nv->toplevel)
+	    unimp("can't do NULL-check conversion at top-level");
+	  // cast from t* to t@ -- run-time check: (t*)_check_null(e)
+	  // flow analysis may not set annotation correctly here!
+          // sanity checking:
+          if (coercion != NonNull_to_Null) 
+            impos("null-check conversion mis-classified: %s",exp2string(e));
+          bool do_null_check = need_null_check(e1);
+          if (do_null_check) {
+            if (!user_inserted) 
+              Tcutil::warn(e->loc,"inserted null check due to implicit "
+                           "cast from * to @ type");
+            e->r = cast_it(*t,fncall_exp(_check_null_e,
+                                         new List(e1,NULL),DL))->r;
+          }
+	}
+	break;
+      case $(&AbsUpper_b(_),_):
+	unimp("%s: toc, cast from AbsUpper_b",Position::string_of_segment(e1->loc));
       case $(_,&AbsUpper_b(_)): break; // type-checker must have said okay
       }
       break;

@@ -526,13 +526,29 @@ static int boundscmp(bounds_t b1, bounds_t b2) {
   case $(Unknown_b,Unknown_b): return 0;
   case $(Unknown_b,_): return -1;
   case $(_,Unknown_b): return 1;
-  case $(&Upper_b(e1),&Upper_b(e2)): return Evexp::const_exp_cmp(e1,e2);
+  case $(&Upper_b(e1),&Upper_b(e2)): 
+    return Evexp::const_exp_cmp(e1,e2);
   case $(&Upper_b(_),&AbsUpper_b(_)): return -1;
   case $(&AbsUpper_b(_),&Upper_b(_)): return 1;
-  case $(&AbsUpper_b(t1),&AbsUpper_b(t2)): 
-    if(unify(t1,t2))
-      return 0;
+  case $(&AbsUpper_b(t1), &AbsUpper_b(t2)): 
     return typecmp(t1,t2);
+  }
+}
+
+static int unify_it_bounds(bounds_t b1, bounds_t b2) {
+  switch ($(b1,b2)) {
+  case $(Unknown_b,Unknown_b): return 0;
+  case $(Unknown_b,_): return -1;
+  case $(_,Unknown_b): return 1;
+  case $(&Upper_b(e1),&Upper_b(e2)): return Evexp::const_exp_cmp(e1,e2);
+  case $(&Upper_b(eb),&AbsUpper_b(tb)): fallthru(tb,eb);
+  case $(&AbsUpper_b(tb),&Upper_b(eb)): 
+    let $(bnd,ci) = Evexp::eval_const_uint_exp(eb);
+    if(!ci) return 1;
+    fallthru(tb,new TypeInt(bnd));
+  case $(&AbsUpper_b(t1), &AbsUpper_b(t2)): 
+    unify_it(t1,t2);
+    return 0;
   }
 }
 
@@ -1141,7 +1157,7 @@ void unify_it(type_t t1, type_t t2) {
     t2_failure = t2;
     unify_it_conrefs(intcmp,zt1,zt2,"(not both zero terminated)");
     unify_tqual(tqual1a,t1a,tqual2a,t2a);
-    unify_it_conrefs(boundscmp,b1,b2,"(different pointer bounds)");
+    unify_it_conrefs(unify_it_bounds,b1,b2,"(different pointer bounds)");
     // Don't force the nullable's to be the same when the bounds are ?.
     switch (compress_conref(b1)->v) {
     case &Eq_constr(Unknown_b): return;
@@ -1679,7 +1695,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       default: impos("silent_castable conref not eq");
       }
     // can coerce *{e} to ? and *{e1} to *{e2} when e2 <= e1
-    if (!unify_conrefs(boundscmp,
+    if (!unify_conrefs(unify_it_bounds,
 		       pinfo_a.ptr_atts.bounds,
 		       pinfo_b.ptr_atts.bounds))
       switch ($(compress_conref(pinfo_a.ptr_atts.bounds)->v, 
@@ -1782,7 +1798,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       // to insert a bounds check?
       if (!unify_conrefs(intcmp,null_a,false_conref)) return false;
       // pointer must point to one element -- note, could allow > 0
-      if (!unify_conrefs(boundscmp,b_a,bounds_one_conref))
+      if (!unify_conrefs(unify_it_bounds,b_a,bounds_one_conref))
         return false;
       // don't allow zero-terminated pointer
       if (!unify_conrefs(intcmp,zt1,false_conref)) return false;
@@ -1996,7 +2012,7 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
     if (!unify(rt_a,rt_b) && !region_outlives(te,rt_a,rt_b))
       return false;
     // need to check that the bounds match up
-    if (!unify_conrefs(boundscmp,b_a,b_b)) {
+    if (!unify_conrefs(unify_it_bounds,b_a,b_b)) {
       switch ($(conref_val(b_a),conref_val(b_b))) {
       case $(&Upper_b(_), Unknown_b): break;
       case $(&Upper_b(e1), &Upper_b(e2)): 
@@ -2134,7 +2150,7 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       let bitcase = ptrsub ? false : (bits_only(t_a) && is_char_type(t_b)
                                       && !conref_def(false,zt_b) 
                                       && (q_b.q_const || !q_a.q_const));
-      bool bounds_ok = unify_conrefs(boundscmp,b_a,b_b);
+      bool bounds_ok = unify_conrefs(unify_it_bounds,b_a,b_b);
       if (!bounds_ok && !bitcase)
 	switch ($(conref_val(b_a),conref_val(b_b))) {
 	  // We allow casts of any form as long as we can't statically
@@ -2143,6 +2159,11 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 	case $(&Upper_b(e_a),&Upper_b(e_b)): 
 	  if(Evexp::lte_const_exp(e_b,e_a))
 	    bounds_ok = true;
+	  break;
+	  // jcheney: allow casts among abstract bounds if the bounds unify
+	  // e.g. `a@{`i} <-> `a*{`i}
+	case $(&AbsUpper_b(t1),&AbsUpper_b(t2)):
+	  bounds_ok = unify(t1,t2);
 	  break;
 	case $(&AbsUpper_b(_),_):
 	case $(_,&AbsUpper_b(_)): bounds_ok = false; break;
