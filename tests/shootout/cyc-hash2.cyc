@@ -5,7 +5,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "simple_hash_cyc.h"
+#include "cyc-simple_hash_cyc.h"
 #include "timer.h"
 
 int main(int argc, char ??argv) {

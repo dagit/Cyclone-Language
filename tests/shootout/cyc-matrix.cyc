@@ -5,7 +5,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include <assert.h>
 #include "timer.h"
 
 #define SIZE 30
@@ -16,31 +15,40 @@ int ??mkmatrix(int rows, int cols) {
     return(m);
 }
 
-void zeromatrix(int rows, int cols, int ??m) {
-    int i, j;
-    assert(rows <= numelts(m));
+xtunion exn {Fail};
+#define assert(e) if (!(e)) throw Fail;
+
+void zeromatrix(int _rows, int _cols, int ??m) {
+    unsigned rows = numelts(m);
+    unsigned int i, j;
+    
     for (i=0; i<rows; i++) {
       int ?v = m[i];
-      assert(cols <= numelts(v));
+      unsigned cols = numelts(v);
       for (j=0; j<cols; j++)
         v[j] = 0;
     }
 }
 
-void freematrix(int rows, int ??m) {
-    while (--rows > -1) { free(m[rows]); }
-    free(m);
+void freematrix(int _rows, int ??m) {
+  unsigned rows = numelts(m);
+  for (unsigned i = 0; i < rows; i++)
+    free(m[i]);
+  free(m);
 }
 
-int ?`r ?`r2 mmult(int rows, int cols, int ??m1, int ??m2, int ?`r ?`r2 m3) {
-    int i, j, k, val;
+int ?`r ?`r2 mmult(int _rows, int _cols, int ??m1, int ??m2, int ?`r ?`r2 m3) {
+    unsigned int i, j, k;
+    int val;
+    unsigned rows = numelts(m1);
+    assert(rows <= numelts(m3));
     for (i=0; i<rows; i++) {
         int ?v = m1[i];
         int ?w = m3[i];
-        assert(cols <= numelts(w));
+        unsigned cols = numelts(w);
+        assert(cols <= numelts(m2) && cols <= numelts(v));
 	for (j=0; j<cols; j++) {
 	    val = 0;
-            assert(cols <= numelts(m2));
 	    for (k=0; k<cols; k++) {
 		val += v[k] * m2[k][j];
 	    }

@@ -13,23 +13,23 @@ xtunion exn { Lo_exception; };
 
 void blowup (int n) {
     if (n & 1) {
-        throw new Lo_exception;
+        throw Lo_exception;
     } else {
-	throw new Hi_exception;
+	throw Hi_exception;
     }
 }
 
 void lo_function (volatile int n) {
     try blowup(n);
     catch {
-    case &Lo_exception: LO++; break;
+    case Lo_exception: LO++; break;
     }
 }
 
 void hi_function (volatile int n) {
     try lo_function(n);
     catch {
-    case &Hi_exception: HI++; break;
+    case Hi_exception: HI++; break;
     }
 }
 

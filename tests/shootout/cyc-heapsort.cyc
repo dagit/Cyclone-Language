@@ -22,16 +22,17 @@ heapsort(int n, double ?ra) {
     int ir = n;
     int l = (n >> 1) + 1;
     double rra;
-    unsigned sz = numelts(ra);
+    double @ra_one = &ra[1];
+    //unsigned sz = numelts(ra);
 
     for (;;) {
 	if (l > 1) {
 	    rra = ra[--l];
 	} else {
 	    rra = ra[ir];
-	    ra[ir] = ra[1];
+	    ra[ir] = *ra_one;
 	    if (--ir == 1) {
-		ra[1] = rra;
+		*ra_one = rra;
 		return;
 	    }
 	}
@@ -39,8 +40,9 @@ heapsort(int n, double ?ra) {
 	j = l << 1;
 	while (j <= ir) {
 	    if (j < ir && ra[j] < ra[j+1]) { ++j; }
-	    if (rra < ra[j]) {
-		ra[i] = ra[j];
+            double temp = ra[j];
+	    if (rra < temp) {
+		ra[i] = temp;
 		j += (i = j);
 	    } else {
 		j = ir + 1;
@@ -53,12 +55,13 @@ heapsort(int n, double ?ra) {
 int
 main(int argc, char ??argv) {
     int N = ((argc == 2) ? atoi(argv[1]) : 1);
+    unsigned M = N+1;
     double ?ary;
-    int i;
+    unsigned int i;
     START_TIME
     /* create an array of N random doubles */
-    ary = (double ?)malloc((N+1) * sizeof(double));
-    for (i=1; i <=N; i++) {
+    ary = (double ?)malloc(M * sizeof(double));
+    for (i=1; i < M; i++) {
         ary[i] = gen_random(1);
     }
 
