@@ -96,9 +96,9 @@ extern dict_t<`a,`b> delete_present(dict_t<`a,`b> d,`a k);
       [Absent] is thrown if [k] has no binding in [d]. */
 
 extern `c fold(`c f(`a,`b,`c),dict_t<`a,`b> d,`c accum);
-/** If [d] has keys [k1], \ldots, [kn] and mapping to values [v1],
-    \ldots, [vn], then [fold(f,d,accum)] returns [f(k1,v1, \cdots
-    f(kn,vn,accum)\cdots)]. */
+/** If [d] has keys [k1] through [kn] mapping to values [v1] through
+    [vn], then [fold(f,d,accum)] returns
+    [f(k1,v1,...f(kn,vn,accum)...)]. */
 extern `c fold_c(`c f(`d,`a,`b,`c),`d env, dict_t<`a,`b> d,`c accum);
 /** [fold_c(f,env,d,accum)] is like [fold(f,d,accum)] except that [f]
     takes closure [env] as its first argument. */

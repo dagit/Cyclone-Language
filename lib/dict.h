@@ -110,9 +110,9 @@ extern bool lookup_bool(dict_t<`a,`b> d, `a k, `b @ans);
     false. */
 
 extern `c fold(`c f(`a,`b,`c),dict_t<`a,`b> d,`c accum);
-/** If [d] has keys [k1], \ldots, [kn] and mapping to values [v1],
-    \ldots, [vn], then [fold(f,d,accum)] returns [f(k1,v1, \cdots
-    f(kn,vn,accum)\cdots)]. */
+/** If [d] has keys [k1] through [kn] mapping to values [v1] through
+    [vn], then [fold(f,d,accum)] returns
+    [f(k1,v1,...f(kn,vn,accum)...)]. */
 extern `c fold_c(`c f(`d,`a,`b,`c),`d env,dict_t<`a,`b> d,`c accum);
 /** [fold_c(f,env,d,accum)] is like [fold(f,d,accum)] except that [f]
     takes closure [env] as its first argument. */
@@ -142,12 +142,11 @@ extern void iter2_c(void (@f)(`c,`b,`b), `c env,
     first argument. */
 extern `c fold2_c(`c (@f)(`d,`a,`b1,`b2,`c), `d env,
 		  dict_t<`a,`b1> d1, dict_t<`a,`b2> d2, `c accum);
-/** If [k1], \ldots, [kn] are the keys of [d1], then
+/** If [k1] through [kn] are the keys of [d1], then
     [fold2_c(f,env,d1,d2,accum)] returns
-    [f(env,k1,lookup(k1,d1),lookup(k1,d2), \cdots\
-    f(env,kn,lookup(kn,d1),lookup(kn,d2),accum)\cdots)]. If
-    there is any key present in [d1] but not [d2], then [Absent] is
-    thrown. */
+    [f(env,k1,lookup(k1,d1),lookup(k1,d2), ...
+    f(env,kn,lookup(kn,d1),lookup(kn,d2),accum)...)]. If there is any
+    key present in [d1] but not [d2], then [Absent] is thrown. */
 
 extern dict_t<`a,`b,`r> rcopy(region_t<`r>, dict_t<`a,`b>);
 /** [rcopy(r,d)] returns a copy of [d], newly allocated in the region

@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c sparc-sun-solaris2.7/lib/execinfo.c
 *** i686-unknown-linux/lib/execinfo.c	Fri Aug 24 14:04:59 2001
---- sparc-sun-solaris2.7/lib/execinfo.c	Fri Sep  7 14:27:50 2001
+--- sparc-sun-solaris2.7/lib/execinfo.c	Fri Sep  7 18:36:08 2001
 ***************
 *** 11,105 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);

@@ -96,9 +96,9 @@ rule token "$(int,comment_t)*" = parse
       printf("%c",c);
       last_dumped = SYMBOL;
     }
-    void dump_pointer(int c) {
-      if (last_dumped == ALPHA) printf(" %c",c);
-      else printf("%c",c);
+    void dump_pointer(string_t s) {
+      if (last_dumped == ALPHA) printf(" %s",s);
+      else printf("%s",s);
       last_dumped = POINTER;
     }
     void dump_boldalpha(string_t x) {
@@ -755,31 +755,34 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
   switch(tms->hd) {
     // FIX?? What about tq2?
   case &Pointer_mod(&Nullable_ps(ue),  HeapRgn,  tq2):
-    dump_pointer('*'); dump_upperbound(ue); dump_alpha("`H");
+    dump_pointer("*"); dump_upperbound(ue); dump_alpha("`H");
     dumptms(tms->tl,f,a); return;
   case &Pointer_mod(&NonNullable_ps(ue), HeapRgn,  tq2):
-    dump_pointer('@'); dump_upperbound(ue); dump_alpha("`H");
+    dump_pointer("@"); dump_upperbound(ue); dump_alpha("`H");
     dumptms(tms->tl,f,a); return;
   case &Pointer_mod(TaggedArray_ps, HeapRgn,  tq2):
-    dump_pointer('?'); dump_alpha("`H");
+    /* We need the braces to protect the ? from the following ` */
+    dump_pointer("{?}"); dump_alpha("`H");
     dumptms(tms->tl,f,a); return;
   case &Pointer_mod(&Nullable_ps(ue),  &VarType(tv), tq2):
-    dump_pointer('*'); dump_upperbound(ue); dump_alphastr(tv->name);
+    dump_pointer("*"); dump_upperbound(ue); dump_alphastr(tv->name);
     dumptms(tms->tl,f,a); return;
   case &Pointer_mod(&NonNullable_ps(ue), &VarType(tv), tq2):
-    dump_pointer('@'); dump_upperbound(ue); dump_alphastr(tv->name);
+    dump_pointer("@"); dump_upperbound(ue); dump_alphastr(tv->name);
     dumptms(tms->tl,f,a); return;
   case &Pointer_mod(TaggedArray_ps, &VarType(tv), tq2):
-    dump_pointer('?'); dump_alphastr(tv->name);
+    /* We need the braces to protect the ? from a following ` */
+    dump_pointer("{?}"); dump_alphastr(tv->name);
     dumptms(tms->tl,f,a); return;
   case &Pointer_mod(&Nullable_ps(ue),  _, tq2):
-    dump_pointer('*'); dump_upperbound(ue);
+    dump_pointer("*"); dump_upperbound(ue);
     dumptms(tms->tl,f,a); return;
   case &Pointer_mod(&NonNullable_ps(ue), _, tq2):
-    dump_pointer('@'); dump_upperbound(ue);
+    dump_pointer("@"); dump_upperbound(ue);
     dumptms(tms->tl,f,a); return;
   case &Pointer_mod(TaggedArray_ps, _, tq2):
-    dump_pointer('?');
+    /* We need the braces to protect the ? from a following ` */
+    dump_pointer("{?}");
     dumptms(tms->tl,f,a); return;
 
   default:

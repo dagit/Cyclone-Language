@@ -87,7 +87,7 @@ extern doc_t nest(int k, doc_t d);
   /** [nest(k,d)] returns a document that will be formatted like
       document [d], but indented by [k] spaces. */
 extern doc_t cat(... doc_t);
-  /** [cat(d1, d2, \ldots, dn)] returns a document consisting of
+  /** [cat(d1, d2, ..., dn)] returns a document consisting of
       document [d1] followed by [d2], and so on up to [dn].  */
 extern doc_t cats(list_t<doc_t,`H> doclist);
   /** [cats(l)] returns a document containing all of the documents in

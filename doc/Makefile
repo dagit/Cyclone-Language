@@ -35,11 +35,22 @@ main-a4.pdf: gen-libdoc.tex
 	pdflatex '\nonstopmode\input' main-a4
 	pdflatex '\nonstopmode\input' main-a4
 
-gen-libdoc.tex: ../include/array.h ../include/buffer.h \
-  ../include/dict.h ../include/filename.h \
-  ../include/hashtable.h ../include/id.h ../include/list.h \
-  ../include/pp.h ../include/queue.h ../include/ref.h ../include/rope.h \
-  ../include/set.h ../include/slowdict.h ../include/xarray.h
+gen-libdoc.tex: \
+  ../include/array.h \
+  ../include/buffer.h \
+  ../include/core.h \
+  ../include/dict.h \
+  ../include/filename.h \
+  ../include/hashtable.h \
+  ../include/id.h \
+  ../include/list.h \
+  ../include/pp.h \
+  ../include/queue.h \
+  ../include/ref.h \
+  ../include/rope.h \
+  ../include/set.h \
+  ../include/slowdict.h \
+  ../include/xarray.h
 	../src/cycdoc -cyclone ../bin/cyclone -I../include $^ > gen-libdoc.tex
 
 clean:

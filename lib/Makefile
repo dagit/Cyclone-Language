@@ -59,10 +59,11 @@ nogc.a: nogc.o
 	ar rc $@ $^
 	ranlib $@
 
-precore_c.h: precore.h $(CYCC)
-	cp precore.h precore.cyc
-	$(CYCC) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ precore.cyc
-	rm -f precore.cyc
+precore_c.h: core.h $(CYCC)
+	$(CYCC) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc core.h
+
+#precore_c.h: precore.h $(CYCC)
+#	$(CYCC) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ -x cyc precore.h
 
 xml/libxml.a: 
 	$(MAKE) -C xml 

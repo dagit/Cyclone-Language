@@ -104,9 +104,9 @@ extern list_t<`a,`r> elements(set_t<`a,`r> s);
       the same region as the set [s]. */
 
 extern `b fold(`b f(`a,`b),set_t<`a> s,`b accum);
-  /** If [s] is a set with elements [x1], [x2], \ldots, [xn], then
+  /** If [s] is a set with elements [x1] through [xn], then
       [fold(f,s,accum)] returns
-      [f(x1,f(x2,f(\ldots,f(xn,accum)\ldots)))]. */
+      [f(x1,f(x2,f(...,f(xn,accum)...)))]. */
 extern `b fold_c(`b f(`c,`a,`b),`c env,set_t<`a> s,`b accum);
   /** [fold_c(f,env,s,accum)] is like [fold], except that the function
       [f] takes an extra (closure) argument, [env]. */
