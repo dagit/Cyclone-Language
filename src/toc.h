@@ -35,14 +35,17 @@ extern list_t<decl_t> toc(table_t<fndecl_t,table_t<stmt_t,int>> pop_tables,
 			  list_t<decl_t> ds);
 
 // translate a Cyclone type to a C type (functionally)
-type_t typ_to_c(type_t t);
-  void finish(); // call this when done with a batch of typ_to_c calls
-
-// this is just for Tovc and tcStmt
+type_t typ_to_c(type_t);
+// this is just for other translation files
 extern qvar_t temp_var();
 extern stringptr_t ?globals;
+// for passing New_e destinations to RemoveAggrs
+@extensible datatype Absyn::AbsynAnnot { 
+  extern Dest(exp_t);
+};
 
 extern bool warn_bounds_checks;
 extern bool warn_all_null_deref;
+void finish(); // call this when done with a batch of typ_to_c calls
 }
 #endif

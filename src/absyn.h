@@ -663,7 +663,7 @@ namespace Absyn {
     type_opt_t    topt;  // type of expression -- filled in by type-checker
     raw_exp_t     r;     // the real expression
     seg_t         loc;   // the location in the source code
-    absyn_annot_t annot; // used during analysis
+    absyn_annot_t annot; // used during analysis and to pass info to removeAggrs
   };
 
   // The $(exp,stmt) in loops are just a hack for holding the
@@ -1160,19 +1160,22 @@ namespace Absyn {
   // turn an attribute into a string
   extern string_t attribute2string(attribute_t);
   // returns true when a is an attribute for function types
-  extern bool fntype_att(attribute_t a);
+  extern bool fntype_att(attribute_t);
   // int to field-name caching used by control-flow and toc
   extern field_name_t fieldname(int);
   // get the name and aggr_kind of an aggregate type
   extern $(aggr_kind_t,qvar_t) aggr_kinded_name(union AggrInfoU);
   // given a checked type, get the decl
-  extern aggrdecl_t get_known_aggrdecl(union AggrInfoU info);
+  extern aggrdecl_t get_known_aggrdecl(union AggrInfoU);
   // ditto except rule out @tagged unions and @require unions
   extern bool is_nontagged_nonrequire_union_type(type_t);
   // a union (anonymous or otherwise) that has requires clauses on the fields
   extern bool is_require_union_type(type_t);
 
   extern qvar_t binding2qvar(binding_t);
+
+  // call Warn::impos if list is not length 1 or holds an ArrayElement
+  extern var_t designatorlist_to_fieldname(list_t<designator_t>);
 
   // used to control whether we're compiling or porting c code
   extern bool porting_c_code;

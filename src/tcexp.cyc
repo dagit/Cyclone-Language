@@ -1248,8 +1248,7 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
 }
 
 // e0 has the form &e, and optional type topt
-static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
-                        type_t * topt, exp_t e) {
+static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0, type_t * topt, exp_t e){
   let topt2 = NULL;
   let tq2 = empty_tqual(0);
   let nullable = false;

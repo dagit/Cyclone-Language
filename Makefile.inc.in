@@ -116,6 +116,7 @@ CYCLONE_SRCS:=absyn\
          cf_flowinfo\
          new_control_flow\
          toc\
+	 remove_aggregates\
          toseqc\
          tovc\
          interface\

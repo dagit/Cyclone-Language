@@ -588,8 +588,11 @@ static env_t<`r> initial_env(region_t<`r> r) {
 // name of the primop to the write offset in the top-level environment.
 static list_t<const char?`H?`H@`r,`r> initial_static_env(region_t<`r> r) {
   // needs to sync up with primops above!
-  let vars = new {for i < numelts(primop_table) : primop_table[i].id};
-  return rnew(r) List(rnew(r) (_ ?)vars,NULL);
+  int bd = numelts(primop_table);
+  let vars = new {for i < bd : primop_table[i].id};
+  return rnew(r) List(rnew(r) vars,NULL);
+  //  let vars = new {for i < numelts(primop_table) : primop_table[i].id};
+  // return rnew(r) List(rnew(r) (_ ?)vars,NULL);
 }
 
 // map a string variable to its debruijn depth and offset, given

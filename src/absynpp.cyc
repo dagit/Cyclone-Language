@@ -2116,9 +2116,10 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
       return to_tms(r,tq,topt);
 
   case &TypedefType(n,ts,td,topt):
-    // we don't want to expand when either the flag is set, it's
-    // an anonymous aggregate, or it's qualified in some way...
-    if (topt == NULL || !expand_typedefs || is_anon_aggrtype((type_t)topt))
+    // we don't want to expand when either the flag is set,
+    // or it's qualified in some way...
+    // DJG: we now expand anonymous aggrs b/c we hoist and name them
+    if (topt == NULL || !expand_typedefs)
       return $(tq,t,NULL);
     else {
       if (tq.real_const)

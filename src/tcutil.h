@@ -147,6 +147,8 @@ extern void explain_failure();
 extern bool unify(type_t, type_t);
   // linear order on types (needed for dictionary indexing)
 extern int typecmp(type_t, type_t);
+extern int aggrfield_cmp(aggrfield_t, aggrfield_t); // used in toc.cyc
+
 extern type_t substitute(list_t<$(tvar_t,type_t)@`H,`H>, type_t);
   // could also have a version with two regions, but doesn't seem useful
 extern type_t rsubstitute(region_t<`r>,list_t<$(tvar_t,type_t)@`r,`r>,type_t);

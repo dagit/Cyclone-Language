@@ -27,6 +27,7 @@
 #include "tcutil.h"
 #include "tc.h"
 #include "toc.h"
+#include "remove_aggregates.h"
 #include "toseqc.h"
 #include "tovc.h"
 #include "new_control_flow.h"
@@ -507,13 +508,16 @@ do_translate(table_t<Absyn::fndecl_t,table_t<Absyn::stmt_t,int>> pops,
 	     list_t<Absyn::decl_t> tds) {
   return Toc::toc(pops,tds);
 }
-list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
-  Tovc::elim_array_initializers = tovc_r;
-  return Tovc::tovc(tds);
+list_t<Absyn::decl_t> do_removeaggrs(bool ignore,list_t<Absyn::decl_t,`H> tds) {
+  return RemoveAggrs::remove_aggrs(tds);
 }
 
 list_t<Absyn::decl_t> do_toseqc(bool ignore, list_t<Absyn::decl_t,`H> tds) {
   return Toseqc::toseqc(tds);
+}
+list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
+  Tovc::elim_array_initializers = tovc_r;
+  return Tovc::tovc(tds);
 }
 
 static string_t cyc_setjmp = NULL;
@@ -877,6 +881,8 @@ static void process_file(string_t<`H> filename) {
   // Translation to C
   tds = do_stage("translation to C",tds, do_translate, jump_tables->pop_tables,
 		 remove_fileptr, preprocfileptr);
+  // Removal of aggregates (necessary for comprehensions and to avoid GCC bug)
+  tds = do_stage("aggregate removal",tds,do_removeaggrs,true,ignore,true);
   if (compile_failure) return;
 
   // Translation to left-to-right evaluation order
@@ -1228,6 +1234,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   let specs_file = find_in_arch_path("cycspecs");
   if (v_r) fprintf(stderr,"Reading from specs file %s\n",specs_file);
   let specs = Specsfile::read_specs(specs_file);
+
   let args_from_specs_file = Specsfile::split_specs(Specsfile::get_spec(specs,"cyclone"));
   if (args_from_specs_file != NULL) {
     Arg::current = 0;

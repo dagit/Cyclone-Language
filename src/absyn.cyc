@@ -20,6 +20,7 @@
 // we define ABSYN_CYC to avoid redeclaring the abstract syntax -- see absyn.h
 #define ABSYN_CYC 
 #include "absyn.h"
+#include "warn.h"
 #include <string.h>
 #include "tcutil.h"
 #include "cyclone.h"
@@ -1089,7 +1090,6 @@ bool is_require_union_type(type_t t) {
   default: return false;
   }
 }
-  
 
 qvar_t binding2qvar(binding_t b) {
   switch (b) {
@@ -1099,6 +1099,15 @@ qvar_t binding2qvar(binding_t b) {
   case &Local_b(vd):      fallthru(vd);
   case &Pat_b(vd):        return vd->name;
   case &Funname_b(fd):    return fd->name;
+  }
+}
+
+var_t designatorlist_to_fieldname(list_t<designator_t> ds) {
+  if(ds==NULL || ds->tl != NULL)
+    Warn::impos("designator list not of length 1");
+  switch(ds->hd) {
+  case &FieldName(f):    return f;
+  case &ArrayElement(_): Warn::impos("array designator in struct");
   }
 }
 

@@ -1782,7 +1782,7 @@ static int tqual_type_cmp($(tqual_t,type_t)@ tqt1, $(tqual_t,type_t)@tqt2) {
   return typecmp(t1,t2);
 }
 
-static int aggrfield_cmp(aggrfield_t f1, aggrfield_t f2) {
+int aggrfield_cmp(aggrfield_t f1, aggrfield_t f2) {
   let zsc = strptrcmp(f1->name,f2->name);
   if(zsc != 0) return zsc;
   let tqc = tqual_cmp(f1->tq, f2->tq);
@@ -1849,7 +1849,7 @@ int typecmp(type_t t1, type_t t2) {
 
   // guaranteed that top cases are the same
   switch ($(t2,t1)) {
-  case $(&Evar(_,_,_,_),&Evar(_,_,_,_)):
+  case $(&Evar(...),&Evar(...)):
     impos("typecmp: can only compare closed types");
 
   case $(&VarType(tv2),&VarType(tv1)):
@@ -1936,10 +1936,10 @@ int typecmp(type_t t1, type_t t2) {
     return list_cmp(tqual_type_cmp,ts1,ts2);
 
   case $(&AnonAggrType(k2,fs2), &AnonAggrType(k1,fs1)):
-    if(k1 != k2)
+    if(k1 != k2) {
       if(k1 == StructA) return -1;
       else return 1;
-    return list_cmp(aggrfield_cmp,fs1,fs2);
+    } return list_cmp(aggrfield_cmp,fs1,fs2);
 
   case $(&RgnHandleType(rt1),&RgnHandleType(rt2)): return typecmp(rt1,rt2);
   case $(&DynRgnType(rt1a,rt1b),&DynRgnType(rt2a,rt2b)):
@@ -2168,6 +2168,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
          &ArrayType(ArrayInfo{t2a,tq2a,e2,zt2,_})):
     bool okay;
     // we could allow e1 >= e2 but I think it's best to give an error
+    // DJG: I think you need e1==e2; these are not pointers here!
     okay = unify_conrefs(intcmp,zt1,zt2) &&
       (e1 != NULL && e2 != NULL && Evexp::same_const_exp((exp_t)e1,(exp_t)e2));
     // FIX: we need to take qualifiers into account on typedefs

@@ -837,13 +837,13 @@ struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found}
 struct Cyc_Core_Opt*Cyc_Core_opt_map(void*(*f)(void*),struct Cyc_Core_Opt*o){
 if(o == 0)
 return 0;
-return({struct Cyc_Core_Opt*_tmp1=_cycalloc(sizeof(*_tmp1));({void*_tmp7=f(o->v);_tmp1->v=_tmp7;});_tmp1;});}
+return({struct Cyc_Core_Opt*_tmp0=_cycalloc(sizeof(*_tmp0));({void*_tmp6=f(o->v);(*_tmp0).v=_tmp6;});_tmp0;});}
 # 40
 struct _dyneither_ptr Cyc_Core_new_string(unsigned int i){
-return({unsigned int _tmp2=i;char*_tmp3=_cyccalloc_atomic(sizeof(char),_tmp2);_tag_dyneither(_tmp3,sizeof(char),_tmp2);});}
+return({unsigned int _tmp1=i;char*_tmp2=_cyccalloc_atomic(sizeof(char),_tmp1);_tag_dyneither(_tmp2,sizeof(char),_tmp1);});}
 # 44
 struct _dyneither_ptr Cyc_Core_rnew_string(struct _RegionHandle*r,unsigned int i){
-return({unsigned int _tmp4=i;char*_tmp5=_region_calloc(r,sizeof(char),_tmp4);_tag_dyneither(_tmp5,sizeof(char),_tmp4);});}
+return({unsigned int _tmp3=i;char*_tmp4=_region_calloc(r,sizeof(char),_tmp3);_tag_dyneither(_tmp4,sizeof(char),_tmp3);});}
 # 48
 int Cyc_Core_true_f(void*x){return 1;}
 int Cyc_Core_false_f(void*x){return 0;}
@@ -869,7 +869,7 @@ return x;}struct _tuple2{void*f1;unsigned int f2;};
 # 72
 inline static struct _tuple2 Cyc_Core_mktuple(void*a,unsigned int b){
 # 75
-return({struct _tuple2 _tmp6;_tmp6.f1=a;_tmp6.f2=b;_tmp6;});}
+return({struct _tuple2 _tmp5;(_tmp5.f1=a,_tmp5.f2=b);_tmp5;});}
 # 81
 struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){
 # 83
