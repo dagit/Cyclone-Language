@@ -122,6 +122,11 @@ static void set_output_file(string_t<`H> s) {
   output_file = new s;
 }
 
+static string_t specified_interface = NULL;
+static void set_specified_interface(string_t<`H> s) {
+  specified_interface = s;
+}
+
 // These strings are install_path.c, which is created by Makefile wizardry.
 // We use Cstrings because we pull the same trick when bootstrapping (and
 // then we don't have a Cyclone compiler yet)
@@ -855,7 +860,8 @@ static void process_file(string_t<`H> filename) {
 
   let basename = make_base_filename(filename, output_file);
   let preprocfile   = strconcat(basename, ".cyp");
-  let interfacefile = strconcat(basename, ".cyci");
+  let interfacefile = (specified_interface != NULL) ? 
+                        specified_interface : strconcat(basename, ".cyci");
   let interfaceobjfile = strconcat(basename, ".cycio");
   let cfile         = strconcat(basename, ".c");
 
@@ -984,7 +990,7 @@ static void process_file(string_t<`H> filename) {
     
     // Generate interface file
     if (generate_interface_r) {
-      FILE *inter_file = try_file_open((char @)interfacefile, "w","interface file");
+      FILE *inter_file = try_file_open((const char @)interfacefile, "w","interface file");
       if (inter_file == NULL) {
         compile_failure = true; return;
       }
@@ -996,7 +1002,7 @@ static void process_file(string_t<`H> filename) {
 
     // Interface checking
     if (ic_r) {
-      FILE *inter_file = fopen((char @)interfacefile, "r");
+      FILE *inter_file = fopen((const char @)interfacefile, "r");
       FILE *inter_objfile = try_file_open(interfaceobjfile, "w", "interface object file");
       if (inter_objfile == NULL) {
         compile_failure = true;
@@ -1367,7 +1373,10 @@ int main(int argc, string_t<`H> ?`H argv) {
                    "Add the directory to the second include path."),
          rnew(r) $("--geninterface",false,"",
                    rnew(r)Set_spec(&generate_interface_r),
-                   "Generate interface files")
+                   "Generate interface files"),
+         rnew(r) $("--interface",false," <file>",
+                   rnew(r)String_spec(set_specified_interface),
+                   "Set the interface file to be <file>.")
          );
 
   string_t optstring = "Options:";

@@ -164,9 +164,9 @@ initialization but this really only works for bits-only objects.
 To heap- or region-allocate and initialize an array that might contain
 pointers, use
 \texttt{new} or \texttt{rnew} in conjunction with array comprehensions.  
-For example, to copy a string \texttt{s}, one might write:
+For example, to copy a vector of integers \texttt{s}, one might write:
 \begin{verbatim}
-  char *@fat t = new {for i < numelts(s) : s[i]};
+  int *@fat t = new {for i < numelts(s) : s[i]};
 \end{verbatim}
 \end{porta}
 

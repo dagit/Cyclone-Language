@@ -1,6 +1,105 @@
-This file explains some of the changes that occurred in between 
-releases.
+Cyclone Release Notes:
 
+This file explains some of the changes that occurred in between releases.
+----------------------------------------------------------------------
+Changes going from Version 0.4 dated 1 January 2003, to Version 0.5:
+
+* Configuration is based on autoconf so should work a bit better.
+
+* Change to use a minimal "boot" library should make it easier to
+  bootstrap on new systems.
+
+* We now emit # <line> <file> directives in the generated C code
+  when you use the ugly printer (by default).  This helps for 
+  debugging the code with GDB or using other tools such gprof.
+
+* We have improved support for allocation profiling and the
+  aprof tool now supports generating gnu-plot and svg graphs.
+
+* We now print out from what file and line number an uncaught
+  exception was thrown.
+
+* You can now have a struct whose last member is abstract.  For
+  instance, you can define:
+
+  struct Sequence<`a> {
+    struct Sequence<`a> * next;
+    `a value;
+  };
+
+  Here, `a can be instantiated with any type, not just a boxed
+  type.  So, for instance, you can have a sequence of doubles,
+  or a sequence of structs or tuples, etc.  This is extremely
+  useful for avoiding the need to box something.  
+
+* Enums can now have dependencies (e.g., enum Foo { X = 1, Y = X }).
+
+* Upgraded to latest version of Boehm's collector.
+
+* The lexer generator now supports taking an additional, user-specified
+  argument.
+
+* The XML library now allows for allocating the result into a region
+  instead of the heap.
+
+* Support for float, double, and long double constants and patterns.
+
+* Support for wide character literals and strings.
+
+* bison uses growable arrays instead of a (large) fixed-size array.
+  Also, you can region-allocate the semantic values now.
+
+* Preliminary support for reference counted pointers -- see 
+  tests/refcnt_test.cyc.  Documentation forthcoming.
+
+* Many fixes to make qualifiers better.  In particular, they are
+  propagated correctly for typedefs and not dropped in so many
+  places.
+
+* Lots of bug fixes -- too many to mention but the bigger ones are:
+  * Major bug fix to the subtyping machinery.  
+  * Bug fix in pattern matching error message.
+  * Fixed bug in using array types as the definition of a typedef.
+  * Various fixes to the documentation (thanks to Mujtaba Ali)
+
+* Register declarations without types are now supported.
+
+* Support for nested type declarations.  You no longer have to
+  declare a struct, datatype, or union before using it unless it
+  has parameters (though we do not get the scope right when it's
+  used within a function.)  
+
+* Better support for unique pointers.  
+
+* We can now parse __asm__ though it's only useful within 
+  extern "C include".  
+
+* We don't emit prototypes for all functions now (laziness in tovc.)
+
+* Lots of compiler hacking to cut heap allocation.
+
+* Got rid of some more warnings in the generated C code.
+
+* We now allow shadowed datatype constructors.  
+
+* bison doesn't do as many array bound checks.
+
+* You can use --geninterface to generate an interface foo.cyci
+  while compiling file foo.cyc.  We will later provide support 
+  for link-checking interfaces to ensure consistency across modules.
+
+* Better tree-shaking for unused declarations.
+
+* Preliminary support for absolute namespace declarations using
+  Cyc:: or C::.  For instance, given:
+
+  #include <core.h>
+  int Cyc::Core::x = 0;
+
+  declares x to be in namespace Core.  To use this, you need to
+  have previously declared the namespace somewhere.  
+
+----------------------------------------------------------------------
 Changes going from Version 0.3 dated 18 April 2002, to Version 0.4:
 
 * Bezillions of bug fixes.  Hopefully, we got yours, but if not,

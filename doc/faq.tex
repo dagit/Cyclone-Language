@@ -103,7 +103,7 @@ tuple, you use array-like notation: you write \texttt{x[0]}, not
 
 \begin{faqa}{faq:non-null}{What does \texttt{int @} mean?}
 In Cyclone \texttt{@} is a pointer that is guaranteed not to be
-\texttt{NULL}.  The Cyclone compiler guarantees through static or
+\texttt{NULL}.  The Cyclone compiler guarantees this through static or
 dynamic checks.  For example,
 \begin{verbatim}
   int *x = NULL;
@@ -112,11 +112,13 @@ is not an error, but
 \begin{verbatim}
   int @x = NULL;
 \end{verbatim}
-is an error
+is an error.  Note that ``\texttt{int @}'' is shorthand for the
+more verbose ``\texttt{int *@notnull}''.  
 \end{faqa}
 
 \begin{faqa}{faq:bounds}{What does \texttt{int *\lb 37\rb} mean?}
-This is the type of pointers to a sequence of at least 37 integers.
+This is the type of (possibly-null) pointers to a sequence of at least 37 integers,
+which can also be written as ``\texttt{int *@numelts(37)}''.
 The extra length information is used by Cyclone to prevent buffer
 overflows.  For example, Cyclone will compile
 \texttt{x[\textup{\textit{expr}}]} into code that will evaluate
