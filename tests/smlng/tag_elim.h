@@ -22,7 +22,7 @@ extern struct SynthS {
 };
 extern union Synth {
   struct SynthS s;
-  unsigned int i;
+  unsigned long long i;
 };
 typedef union Synth synth_t; // not a pointer
 extern $(doc_t, synth_t) up_opt(Buffer::buf_t, doc_t);

@@ -1,9 +1,11 @@
 #include "core.h"
+#include "list.h"
 #include "stdio.h"
 #include "buffer.h"
 #include "smlng.h"
 #include "tag_elim.h"
 using Core;
+using List;
 using Stdio;
 namespace TagElim;
 
@@ -25,12 +27,13 @@ struct SynthS {
   bool sz: 1;
   int sizes: 10; // 0 at bit n means n DOES get used as a size
   int colors: 8; // 0 at bit n means n DOES get used as a color
-  // ONLY 4 BITS OF ROOM LEFT!!!
 };
-// sizoef struct SynthS must stay less than 32 for this trick!
+
+// unfortunately, the return size of up_opt is now 3 words, so it uses the
+// stack.
 union Synth {
   struct SynthS s;
-  unsigned int i;
+  unsigned long long i;
 };
 
 synth_t all_ones;
@@ -39,13 +42,14 @@ synth_t all_ones;
 $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
   all_ones.i = ~0;
   switch(doc) {
-  case &Seq(*dsp,*bdp): 
+  case &Seq(*dsp): 
+    let ds = *dsp;
     synth_t synth = all_ones;
-    if(*bdp == 0)
+    if(ds == null)
       return $(doc,synth);
-    for(int i=0; i < *bdp; ++i) {
-      let $(newd, inner_synth) = up_opt(b, (*dsp)[i]);
-      (*dsp)[i] = newd; // destructive here
+    while(ds != null) {
+      let $(newd, inner_synth) = up_opt(b, ds->hd);
+      ds->hd = newd; // destructive here
       short split_tag = 0;
       bool  do_split  = false;
       // if size is guarded look for a size that appears in synth & inner_synth
@@ -73,15 +77,15 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
 	  ++split_tag;
 	}
       }
-      if(do_split) {
-	// This is crazy -- we're splitting the sequence in place!
-	doc_t ? before_ds = new {for k < 2: newd};
-	before_ds[0] = new Seq(*dsp,i);
-	(*dsp)[i] = new Tagged(split_tag,new Seq(before_ds,2));
-	*dsp += i;
-	*bdp -= i;
-	i = 0;
-      }
+      if(do_split) { // subtle invariant: cannot happen on first loop iteration
+	// IN PLACE sequence splitting
+	let next = ds->tl;
+	ds->tl = null;
+	let d = new Tagged(split_tag, new Seq(*dsp));
+	*dsp = new List(d, next);
+	ds = next;
+      } else
+	ds = ds->tl;
       synth.i = synth.i & inner_synth.i;
     }
     return $(doc,synth);

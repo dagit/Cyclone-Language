@@ -23,4 +23,4 @@ if [ $i -gt $n ]; then
 fi
 done
 
-rm -f $TMP $TMP2
+#rm -f $TMP $TMP2

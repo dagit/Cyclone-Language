@@ -216,8 +216,8 @@ static bool check_redundant(context_t @`r ctxt, tag_t tag) {
 }
 
 /* returns a list of docs in reverse order. */
-static glist_t<doc_t,`r> local_get_docs(region_t<`r> r, context_t ctxt, buf_t b, FILE @f) {
-  glist_t<doc_t,`r> docs = null, ds = null;
+static list_t<doc_t> local_get_docs(context_t ctxt, buf_t b, FILE @f) {
+  list_t<doc_t> docs = null, ds = null;
   int c = GETC(f);
   while (true) {
     if (c == EOF) break;
@@ -230,7 +230,7 @@ static glist_t<doc_t,`r> local_get_docs(region_t<`r> r, context_t ctxt, buf_t b,
 	let tag = get_tag(f);
 	let new_ctxt = ctxt;
 	let redundant = check_redundant(&new_ctxt,tag);
-        let ds = local_get_docs(r, new_ctxt, b, f);
+        let ds = local_get_docs(new_ctxt, b, f);
 	get_endtag(f,tag);
         doc_t ? result;
 	/* The code below optimizes in two ways:
@@ -241,11 +241,10 @@ static glist_t<doc_t,`r> local_get_docs(region_t<`r> r, context_t ctxt, buf_t b,
           if (ds != null) {
             if (ds->tl == null) /* length == 1 */ {
   	      doc_t d = new Tagged(tag,ds->hd);
-              docs = rnew(r) List(d,docs);
+              docs = new List(d,docs);
             }
             else /* length > 1 */ {
-	      result = to_array(imp_rev(ds));
-	      docs = rnew(r) List(new Tagged(tag,new Seq(result,result.size)),docs);
+	      docs = new List(new Tagged(tag,new Seq(imp_rev(ds))), docs);
             }
           }
           /* else do nothing; had <x></x> */
@@ -256,7 +255,7 @@ static glist_t<doc_t,`r> local_get_docs(region_t<`r> r, context_t ctxt, buf_t b,
       }
     } else {
       UNGETC(c,f);
-      docs = rnew(r) List(get_text(ctxt, b,f),docs);
+      docs = new List(get_text(ctxt, b,f),docs);
     }
     c = GETC(f);
   }
@@ -264,13 +263,10 @@ static glist_t<doc_t,`r> local_get_docs(region_t<`r> r, context_t ctxt, buf_t b,
 }
   
 doc_t get_docs(context_t ctxt, buf_t b, FILE @f) {
-  doc_t ? res;
-  region r {
-    glist_t<doc_t,`r> docs;
-    docs = local_get_docs(r,ctxt,b,f);
-    res = to_array(imp_rev(docs));
-  }
-  if (res.size == 1) return *res;
-  else return (new Seq(res,res.size));
+  list_t<doc_t> docs = imp_rev(local_get_docs(ctxt,b,f));
+  if(docs->tl == null)
+    return docs->hd;
+  else 
+    return new Seq(docs);
 }
 

@@ -1,6 +1,7 @@
 #ifndef _SMLNG_H_
 #define _SMLNG_H_
 #include "buffer.h"
+#include "list.h"
 
 extern int is_change;
 
@@ -41,7 +42,7 @@ typedef short tag_t;
 extern tunion Document;
 typedef tunion Document doc_t;
 extern tunion Document {
-  Seq(doc_t ?, int); // bound because we split arrays in place
+  Seq(List::list_t<doc_t>); // bound because we split arrays in place
   Text(unsigned int);
   Tagged(tag_t,doc_t);
 };

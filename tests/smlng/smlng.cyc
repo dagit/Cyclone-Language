@@ -1,4 +1,5 @@
 #include <core.h>
+#include <list.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include "smlng.h"
@@ -26,7 +27,7 @@ string_t end_tags[] = {
 
 extern tunion Document;
 tunion Document {
-  Seq(doc_t ?, int); // int is bound (b/c we split sequences sometimes)
+  Seq(List::list_t<doc_t>); // list must NEVER BE SHARED
   Text(unsigned int);
   Tagged(tag_t,doc_t);
 };
@@ -45,14 +46,14 @@ bool is_white(char c) {
 doc_t copy_doc(doc_t d) {
   switch(d) {
   case &Text(i): return new Text(i);
-  case &Seq(ds,bd): return new Seq(new {for i<bd: copy_doc(ds[i])},bd);
+  case &Seq(ds): return new Seq(List::copy(ds));
   case &Tagged(t,d): return new Tagged(t,d);
   }
 }
 
 void dump(buf_t b, doc_t d) {
   switch (d) {
-  case &Seq(ds,bd): for (int i=0; i<bd; ++i) dump(b,ds[i]); break;
+  case &Seq(ds): for (; ds != null; ds=ds->tl) dump(b,ds->hd); break;
   case &Text(i): Buffer::write_buf(stdout,b,i); break;
   case &Tagged(tag,d):
     fputs(start_tags[tag],stdout); dump(b,d); fputs(end_tags[tag],stdout);
@@ -63,9 +64,9 @@ void dump(buf_t b, doc_t d) {
 int doc_size(buf_t b,doc_t d) {
   int sum = 0;
   switch (d) {
-  case &Seq(ds,bd):
-    for (int i=0; i<bd; ++i)
-      sum += doc_size(b,ds[i]); 
+  case &Seq(ds):
+    for (; ds != null; ds=ds->tl)
+      sum += doc_size(b,ds->hd); 
     break;
   case &Text(i): sum += Buffer::size(b,i); break;
   case &Tagged(tag,d):
@@ -80,9 +81,9 @@ int doc_size(buf_t b,doc_t d) {
 int num_texts(doc_t d) {
   int sum = 0;
   switch (d) {
-  case &Seq(ds,bd):
-    for (int i=0; i<bd; ++i)
-      sum += num_texts(ds[i]); 
+  case &Seq(ds):
+    for (; ds != null; ds=ds->tl)
+      sum += num_texts(ds->hd); 
     break;
   case &Text(s): ++sum; break;
   case &Tagged(tag,d):
@@ -110,9 +111,9 @@ context_t init_context = {
 // gets rid of redundant tags in a top-down fashion
 doc_t down_opt(context_t ctxt, doc_t d) {
   switch (d) {
-  case &Seq(ds,bd):
-    for (int i=0; i<bd; ++i)
-      ds[i] = down_opt(ctxt,ds[i]);
+  case &Seq(ds):
+    for (; ds!=null; ds=ds->tl)
+      ds->hd = down_opt(ctxt,ds->hd);
     return d;
   case &Text(_): return d;
   case &Tagged(tag,*d2):
@@ -203,6 +204,8 @@ int main(int argc, char ??argv) {
     tlimit = argv[1];
   }
   start_timer(tlimit);
+  if(sizeof(TagElim::synth_t) != sizeof(unsigned long long))
+    fprintf(stderr, "TagElim::synth_t has gotten too big!!!");
   buf_t b = init_buf();
   fprintf(stderr,"getting docs..."); fflush(stderr);
   doc_t orig = get_docs(init_context,b,stdin);
