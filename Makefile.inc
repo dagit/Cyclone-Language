@@ -50,7 +50,7 @@ CYCLONE_SRCS:=absyn\
          cyclone
 
 # Makefiles assume this is only one file, but they could be changed.
-RUNTIME:=cyc_runtime
+RUNTIME:=runtime_cyc
 
 CYCLIB:=cyclib.a
 CYCCOMP:=cyclone.exe

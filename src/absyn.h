@@ -206,7 +206,6 @@ namespace Absyn {
     // function type attributes can include regparm(n), stdcall xor cdecl,
     // noreturn, and const.
     attributes_t                            attributes; 
-
   };
 
   EXTERN_DEFINITION struct TunionInfo {
