@@ -1810,6 +1810,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       fprintf(stderr,"Got Not_found\n"); break;
     case &NO_SUPPORT(s):
       fprintf(stderr,"No support because %s\n",s); break;
+    case &Lexing::Error(s):
+      fprintf(stderr,"Got a lexing error %s\n",s); break;
     case x:
       fprintf(stderr,"Got unknown exception\n");
       rethrow(x);
