@@ -621,10 +621,10 @@ int snarf_asm_body(Lexbuf<`a>);
 
 // for parser -- must not be prefixed
 int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf,
-          union YYSTYPE<`yy>@ yylval) { 
+          union YYSTYPE<`yy>@ yylval, YYLTYPE @yyllocptr) { 
  int ans = Lex::token(lbuf);
- yylloc.first_line = lexeme_start(lbuf);
- yylloc.last_line  = lexeme_end(lbuf);
+ yylloc.first_line = yyllocptr->first_line = lexeme_start(lbuf);
+ yylloc.last_line = yyllocptr->last_line  = lexeme_end(lbuf);
  switch (ans) {
  case IDENTIFIER        : 
    *yylval = YYSTYPE{.String_tok = Lex::token_string}; break;

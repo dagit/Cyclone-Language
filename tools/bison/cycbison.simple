@@ -147,10 +147,9 @@ region yyregion; {
   int yychar;
   union YYSTYPE YYSTYPEVARS yylval = {.YYINITIALSVAL = 0};
   int yynerrs;
-//FIX:  right now, our parser expects a global for the location...
-//#ifdef YYLSP_NEEDED
-//  YYLTYPE yylloc;
-//#endif
+#ifdef YYLSP_NEEDED
+  YYLTYPE yylloc;
+#endif
 #endif
 
   int yyssp_offset;

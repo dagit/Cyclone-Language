@@ -76,8 +76,8 @@ namespace Lex {
 }
 
 // State that we thread through the lexer and parser.
-#define YYLEX_PARAM_ARG Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>,union YYSTYPE<`yy> @yylval_ptr
-#define YYLEX_ARG yylex_buf,&yylval
+#define YYLEX_PARAM_ARG Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>,union YYSTYPE<`yy> @yylval_ptr, YYLTYPE @yylloc
+#define YYLEX_ARG yylex_buf,&yylval,&yylloc
 #define YYPARSE_PARAM_ARG region_t<`yy> yyr, Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> yylex_buf
 
 #define LOC(s,e) (s.first_line)
