@@ -211,6 +211,21 @@ MAKE_STRING(_RegionHandle);
   static struct Exp          str##_ev  = Exp{NULL,&str##_re,0,&EmptyAnnot_val};\
   static exp_t               str##_e   = &str##_ev
 
+
+static exp_opt_t _get_exn_thrown_e = NULL;
+
+exp_t get_exn_thrown_expression() {
+  //  $(nmspace_t, var_t)
+  if(_get_exn_thrown_e)
+    return _get_exn_thrown_e;
+  qvar_t qv = new $(Nmspace{.Abs_n=list(new "Core")}, new "get_exn_thrown");
+  binding_t bnd = new Unresolved_b(qv); 
+  exp_t fnname = new Exp(NULL, new Var_e(bnd), 0, &EmptyAnnot_val);
+  raw_exp_t fncall_re = new FnCall_e(fnname,NULL,NULL,false);
+  _get_exn_thrown_e = new Exp(NULL,fncall_re,0,&EmptyAnnot_val);
+  return _get_exn_thrown_e;
+}
+
 MAKE_VAR(_throw);
 MAKE_VAR(setjmp);
 MAKE_VAR(_push_handler);
@@ -3631,8 +3646,8 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           ifthenelse_stmt(prim1_exp(Not, was_thrown_exp,DL),
                           tryandpop_stmt,
                           declare_stmt(e_var,e_typ,
-                                       cast_it(e_typ,_exn_thrown_e),
-                          handler_stmt,DL),DL),DL),DL),DL),DL)->r;
+                                       cast_it(e_typ,get_exn_thrown_expression()), //<--- change _exn_thrown_e to be a call to TLS _exn_thrown
+				       handler_stmt,DL),DL),DL),DL),DL),DL)->r;
       }
       return;
     }

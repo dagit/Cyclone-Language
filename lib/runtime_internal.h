@@ -45,6 +45,9 @@
 #include <setjmp.h> // precore_c.h uses jmp_buf without defining it
 #include <stdio.h>  // for error printing
 #include <limits.h> // for magic numbers
+#ifdef _HAVE_PTHREAD_
+#include <pthread.h>
+#endif
 
 // error printing functions
 #define errprintf(arg...) fprintf(stderr,##arg)

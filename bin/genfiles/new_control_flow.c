@@ -107,8 +107,8 @@ extern void* _rethrow(void* e);
 #define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
-extern struct _xtunion_struct *_exn_thrown;
-
+//extern struct _xtunion_struct *_exn_thrown;
+extern struct _xtunion_struct* Cyc_Core_get_exn_thrown();
 /* Built-in Exceptions */
 struct Cyc_Null_Exception_exn_struct { char *tag; };
 struct Cyc_Array_bounds_exn_struct { char *tag; };
@@ -2762,7 +2762,7 @@ struct _handler_cons _tmp55A;_push_handler(& _tmp55A);{int _tmp55C=0;if(setjmp(_
 {struct Cyc_CfFlowInfo_FlowEnv*fenv=Cyc_CfFlowInfo_new_flow_env();
 ({struct Cyc_JumpAnalysis_Jump_Anal_Result*_tmp7A2=tables;struct Cyc_CfFlowInfo_FlowEnv*_tmp7A1=fenv;union Cyc_CfFlowInfo_FlowInfo _tmp7A0=Cyc_CfFlowInfo_ReachableFL(fenv->mt_flowdict,0);Cyc_NewControlFlow_check_nested_fun(_tmp7A2,_tmp7A1,_tmp7A0,fd);});}
 # 2908
-;_pop_handler();}else{void*_tmp55B=(void*)_exn_thrown;void*_tmp55D=_tmp55B;void*_tmp55F;if(((struct Cyc_Dict_Absent_exn_struct*)_tmp55D)->tag == Cyc_Dict_Absent){_LL1: _LL2:
+;_pop_handler();}else{void*_tmp55B=(void*)Cyc_Core_get_exn_thrown();void*_tmp55D=_tmp55B;void*_tmp55F;if(((struct Cyc_Dict_Absent_exn_struct*)_tmp55D)->tag == Cyc_Dict_Absent){_LL1: _LL2:
 # 2914
  if(Cyc_Position_num_errors > 0)
 goto _LL0;else{

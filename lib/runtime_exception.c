@@ -35,10 +35,16 @@ struct _xtunion_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc };
 struct _xtunion_struct * Cyc_Bad_alloc_val = &Cyc_Bad_alloc_struct;
 
 // The exception that was thrown
-// (Need one per thread)
-struct _xtunion_struct *_exn_thrown = NULL;
+#ifdef _HAVE_PTHREAD_
+extern pthread_key_t _exn_thrown_key;
+extern pthread_key_t _exn_filename_key;
+extern pthread_key_t _exn_lineno_key;
+#else
 static const char *_exn_filename = "?";
 static unsigned _exn_lineno = 0;
+#endif
+
+struct _xtunion_struct *_exn_thrown = NULL;
 
 // create a new handler, put it on the stack, and return it so its
 // jmp_buf can be filled in by the caller
@@ -65,11 +71,27 @@ static int (*uncaught_fun)() = NULL;
 struct _handler_cons top_handler;
 static int in_uncaught_fun = 0; // avoid infinite exception chain
 
+struct _xtunion_struct* Cyc_Core_get_exn_thrown() {
+#ifdef _HAVE_PTHREAD_
+  return (struct _xtunion_struct*)pthread_getspecific(_exn_thrown_key);
+#else
+  return _exn_thrown;
+#endif
+}
+
 const char *Cyc_Core_get_exn_filename() {
+#ifdef _HAVE_PTHREAD_
+  return (const char*)pthread_getspecific(_exn_filename_key);
+#else
   return _exn_filename;
+#endif
 }
 int Cyc_Core_get_exn_lineno() {
+#ifdef _HAVE_PTHREAD_
+  return (int)pthread_getspecific(_exn_lineno_key);
+#else
   return _exn_lineno;
+#endif
 }
 const char *Cyc_Core_get_exn_name(struct _xtunion_struct *x) {
   return x->tag;
@@ -84,9 +106,12 @@ void Cyc_Core_set_uncaught_exn_fun(int f()) {
   if (setjmp(_handler->handler)) status = 1;					\
   if (status) {									\
     char *exn_name;								\
-    exn_name = _exn_thrown->tag;						\
+    struct _xtunion_struct *exn_thrown = Cyc_Core_get_exn_thrown();             \
+    const char *exn_filename = Cyc_Core_get_exn_filename();                     \
+    int exn_lineno = Cyc_Core_get_exn_lineno();                                 \
+    exn_name = exn_thrown->tag;						        \
     errprintf("Uncaught exception %s thrown from around %s:%d\n",exn_name,	\
-	      _exn_filename,_exn_lineno);					\
+	      exn_filename,exn_lineno);					        \
     return exn_name;								\
   }										\
   _push_handler(_handler);							\
@@ -109,9 +134,15 @@ void* _throw_fn(void* e, const char *filename, unsigned lineno) {
   // pop handlers until exception handler found
   my_handler = (struct _handler_cons *)_pop_frame_until(0);
   _npop_frame(0);
-  _exn_thrown = e;
+#ifdef _HAVE_PTHREAD_
+  pthread_setspecific(_exn_thrown_key, e);
+  pthread_setspecific(_exn_filename_key, filename);
+  pthread_setspecific(_exn_lineno_key, lineno);
+#else
+  _exn_thrown = e; 
   _exn_filename = filename;
-  _exn_lineno = lineno;
+  _exn_lineno = lineno; 
+#endif
   if (my_handler->handler == top_handler.handler && !in_uncaught_fun) {
     in_uncaught_fun = 1;
     if(uncaught_fun)
@@ -123,7 +154,7 @@ void* _throw_fn(void* e, const char *filename, unsigned lineno) {
 
 /* re-throw an exception, but keep the filename and lineno info */
 void* _rethrow(void *e) {
-  _throw_fn(e, _exn_filename, _exn_lineno);
+  _throw_fn(e, Cyc_Core_get_exn_filename(), Cyc_Core_get_exn_lineno());
   return NULL; // unreached
 }
 void Cyc_Core_rethrow(void *e) {

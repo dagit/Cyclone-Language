@@ -1386,7 +1386,12 @@ int main(int argc, string_t<`H> ?`H argv) {
 
     // FIX: temporarily removed from interface check below
     stdlib = NULL;     //stdlib = list(new libcyc_flag);
-    stdlib_string = aprintf(" %s %s %s", libcyc_flag, runtime, gc);
+#ifdef _HAVE_PTHREAD_
+    stdlib_string = aprintf(" %s %s %s -lpthread ", libcyc_flag, runtime, gc);
+#else
+    stdlib_string = aprintf(" %s %s %s ", libcyc_flag, runtime, gc);
+#endif
+    
   }
 
   if (ic_r) try {

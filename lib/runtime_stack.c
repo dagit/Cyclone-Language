@@ -20,36 +20,59 @@
 
 #include "runtime_internal.h"
 
-// Need one per thread
+#ifdef _HAVE_PTHREAD_
+extern pthread_key_t _current_frame_key;
+#else
 static struct _RuntimeStack *_current_frame = NULL;
+#endif
+
+struct _RuntimeStack *get_current_frame() {
+#ifdef _HAVE_PTHREAD_
+  return (struct _RuntimeStack *)pthread_getspecific(_current_frame_key); 
+#else
+  return _current_frame;
+#endif
+}
+
+void set_current_frame(struct _RuntimeStack *frame) {
+#ifdef _HAVE_PTHREAD_
+  pthread_setspecific(_current_frame_key, frame);
+#else
+  _current_frame = frame;
+#endif
+}
 
 void _push_frame(struct _RuntimeStack *frame) {
-  frame->next = _current_frame;
-  _current_frame = frame;
+  frame->next = get_current_frame();
+  set_current_frame(frame);
 }
 
 // set _current_frame to its n+1'th tail (i.e. pop n+1 frames)
 // Invariant: result is non-null
 void _npop_frame(unsigned int n) {
   unsigned int i;
+  struct _RuntimeStack *current_frame = get_current_frame();
   for(i = n; i <= n; i--) {
-    if(_current_frame == NULL) {
+    if(current_frame == NULL) {
       errquit("internal error: empty frame stack\n");
     } 
-    if (_current_frame->cleanup != NULL)
-      _current_frame->cleanup(_current_frame);
-    _current_frame = _current_frame->next;
+    if (current_frame->cleanup != NULL)
+      current_frame->cleanup(current_frame);
+    set_current_frame(current_frame->next);
   }
 }
 
 struct _RuntimeStack * _top_frame() {
-  return _current_frame;
+  return get_current_frame();
 }
 
 // set _current_frame to the first frame with the given tag.
 // If no such frame is found, _current_frame is set to NULL.
 struct _RuntimeStack * _pop_frame_until(int tag) {
-  while (_current_frame != NULL && _current_frame->tag != tag)
-    _current_frame = _current_frame->next;
-  return _current_frame;
+  struct _RuntimeStack *current_frame = get_current_frame();
+  while (current_frame != NULL && current_frame->tag != tag) {
+    set_current_frame(current_frame->next);
+    current_frame = get_current_frame();
+  }
+  return current_frame;
 }

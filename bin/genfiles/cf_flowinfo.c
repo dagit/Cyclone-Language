@@ -107,8 +107,8 @@ extern void* _rethrow(void* e);
 #define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
-extern struct _xtunion_struct *_exn_thrown;
-
+//extern struct _xtunion_struct *_exn_thrown;
+extern struct _xtunion_struct* Cyc_Core_get_exn_thrown();
 /* Built-in Exceptions */
 struct Cyc_Null_Exception_exn_struct { char *tag; };
 struct Cyc_Array_bounds_exn_struct { char *tag; };
@@ -955,7 +955,7 @@ while(pile->places != 0){
 struct Cyc_CfFlowInfo_Place*_tmpC9=(struct Cyc_CfFlowInfo_Place*)((struct Cyc_List_List*)_check_null(pile->places))->hd;
 pile->places=((struct Cyc_List_List*)_check_null(pile->places))->tl;{
 void*oldval;void*newval;
-{struct _handler_cons _tmpCA;_push_handler(& _tmpCA);{int _tmpCC=0;if(setjmp(_tmpCA.handler))_tmpCC=1;if(!_tmpCC){oldval=Cyc_CfFlowInfo_lookup_place(d,_tmpC9);;_pop_handler();}else{void*_tmpCB=(void*)_exn_thrown;void*_tmpCD=_tmpCB;void*_tmpCE;if(((struct Cyc_Dict_Absent_exn_struct*)_tmpCD)->tag == Cyc_Dict_Absent){_LL1: _LL2:
+{struct _handler_cons _tmpCA;_push_handler(& _tmpCA);{int _tmpCC=0;if(setjmp(_tmpCA.handler))_tmpCC=1;if(!_tmpCC){oldval=Cyc_CfFlowInfo_lookup_place(d,_tmpC9);;_pop_handler();}else{void*_tmpCB=(void*)Cyc_Core_get_exn_thrown();void*_tmpCD=_tmpCB;void*_tmpCE;if(((struct Cyc_Dict_Absent_exn_struct*)_tmpCD)->tag == Cyc_Dict_Absent){_LL1: _LL2:
  continue;}else{_LL3: _tmpCE=_tmpCD;_LL4:(int)_rethrow(_tmpCE);}_LL0:;}};}
 {enum Cyc_CfFlowInfo_InitLevel _tmpCF=Cyc_CfFlowInfo_initlevel(fenv,d,oldval);enum Cyc_CfFlowInfo_InitLevel _tmpD0=_tmpCF;if(_tmpD0 == Cyc_CfFlowInfo_AllIL){_LL6: _LL7:
  newval=fenv->esc_all;goto _LL5;}else{_LL8: _LL9:

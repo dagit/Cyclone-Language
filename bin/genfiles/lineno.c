@@ -107,8 +107,8 @@ extern void* _rethrow(void* e);
 #define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
-extern struct _xtunion_struct *_exn_thrown;
-
+//extern struct _xtunion_struct *_exn_thrown;
+extern struct _xtunion_struct* Cyc_Core_get_exn_thrown();
 /* Built-in Exceptions */
 struct Cyc_Null_Exception_exn_struct { char *tag; };
 struct Cyc_Array_bounds_exn_struct { char *tag; };
@@ -530,7 +530,7 @@ if((unsigned int)j == _get_dyneither_size(line,sizeof(char)) || (unsigned int)k 
 struct _dyneither_ptr fname=Cyc_substring((struct _dyneither_ptr)line,j,(unsigned long)(k - j));
 struct Cyc_Core_Opt*_tmp10=({struct Cyc_Core_Opt*_tmpF=_cycalloc(sizeof(*_tmpF));({struct _tuple0*_tmp25=({struct _tuple0*_tmpE=_cycalloc(sizeof(*_tmpE));_tmpE->f1=fname,_tmpE->f2=number;_tmpE;});_tmpF->v=_tmp25;});_tmpF;});_npop_handler(0U);return _tmp10;};};};};}
 # 69
-;_pop_handler();}else{void*_tmp6=(void*)_exn_thrown;void*_tmp11=_tmp6;_LL1: _LL2:
+;_pop_handler();}else{void*_tmp6=(void*)Cyc_Core_get_exn_thrown();void*_tmp11=_tmp6;_LL1: _LL2:
 # 85
  return 0;_LL0:;}};}struct _tuple1{int f1;struct Cyc_Lineno_Pos*f2;};
 # 89
@@ -578,7 +578,7 @@ places=places->tl;}
 # 139
 ++ _tmp16;}}
 # 98
-;_pop_handler();}else{void*_tmp13=(void*)_exn_thrown;void*_tmp18=_tmp13;void*_tmp19;_LL1: _tmp19=_tmp18;_LL2:
+;_pop_handler();}else{void*_tmp13=(void*)Cyc_Core_get_exn_thrown();void*_tmp18=_tmp13;void*_tmp19;_LL1: _tmp19=_tmp18;_LL2:
 # 141
  Cyc_file_close(f);(int)_throw(_tmp19);_LL0:;}};}
 Cyc_file_close(f);

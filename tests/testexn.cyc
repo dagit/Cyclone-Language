@@ -1,0 +1,47 @@
+#include <core.h>
+#include <stdio.h>
+
+typedef unsigned long int pthread_t;
+extern "C" int pthread_create(pthread_t *, void*, void *(*_start)(int), int);
+// extern "C" int pthread_yield(void);
+using Core;
+
+datatype exn {OneException};
+datatype exn {OtherException};
+
+datatype exn.OneException fe_val = OneException;
+datatype exn.OtherException se_val = OtherException;
+
+void foo(int i) {
+  if(i%2)
+    throw &fe_val;
+  throw &se_val;
+}
+
+void* runthread(int i) {
+  try {
+    if(i%3 == 0)
+      // pthread_yield();
+    foo(i);
+  }
+  catch {
+  case &OneException:
+    fprintf(stdout, "%d Caught OneException\n", i);
+    fflush(stdout);
+    return NULL;
+  case &OtherException:
+    fprintf(stdout, "%d Caught OtherException\n", i);
+    fflush(stdout);
+    return NULL;
+  }
+  return NULL;
+}
+
+int main(int argc, string_t ?args) {
+  pthread_t t[100];
+  int *arg =new 1;
+  for(int i=0;i<100;i++) {
+    pthread_create(&t[i], NULL, runthread, i);
+  }
+}
+

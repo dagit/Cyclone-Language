@@ -6021,10 +6021,24 @@ else
   RANLIB="$ac_cv_prog_RANLIB"
 fi
 
+# FIX HERE TREVOR
+if test "$with_pthreads" = yes; then
+  echo -n "checking for pthread.h ... "
+  if [ -r /usr/include/pthread.h ]; then
+    echo "yes"
+    ac_cv_pthreads="pthreads"
+  else
+    echo "no"
+    ac_cv_pthreads="no"
+  fi
+else
+  ac_cv_pthreads="no"
+fi
 
+# FIX HERE TOO: uses the results from above
 # configure the garbage collector
 # don't use AC_CONFIG_SUBDIRS(gc) because it can't pass flags
-(cd gc; ./configure --enable-threads=no --enable-shared=no --enable-cplusplus=no)
+(cd gc; ./configure --enable-threads=$ac_cv_pthreads --enable-shared=no --enable-cplusplus=no)
 
           ac_config_files="$ac_config_files Makefile.inc"
 
@@ -6954,6 +6968,12 @@ if test "$no_create" != yes; then
   exec 5>/dev/null
   $SHELL $CONFIG_STATUS $ac_config_status_args || ac_cs_success=false
   exec 5>>config.log
+# FIX HERE TREVOR; should adjust Makefile.inc.in etc.
+  if test "$ac_cv_pthreads" = pthreads; then
+    echo "HAVE_PTHREAD=yes" >> Makefile.inc
+#    echo "LDFLAGS+=-lpthread" >> Makefile.inc
+    echo "CFLAGS+=-D_HAVE_PTHREAD_" >> Makefile.inc
+  fi
   # Use ||, not &&, to avoid exiting from the if with $? = 1, which
   # would make configure fail if this is the last instruction.
   $ac_cs_success || { (exit 1); exit 1; }
