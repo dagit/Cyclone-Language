@@ -64,9 +64,14 @@ CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
 
 all: libs $(CYCCOMP) cycdoc$(EXE) buildlib$(EXE) 
 
-libs: $(CYCBOOTLIB) $(CYCLIB) nogc.a $(RUNTIME).$(O)
+libs: $(CYCBOOTLIB) nogc.a $(RUNTIME).$(O) $(CYCLIB)
 
-cfiles: cstubs.c cycstubs.cyc $(C_SRCS) cycdoc.c buildlib.c $(C_BOOT_LIBS) boot_cycstubs.c $(C_LIBS) precore_c.h
+cfiles: $(C_SRCS) cycdoc.c buildlib.c $(C_BOOT_LIBS) boot_cycstubs.c precore_c.h other_cfiles
+
+# These c files aren't genfiles needed for booting, but, it's
+# a good idea to make them anyway: building them can find problems
+# with buildlib or libc.cys.
+other_cfiles: cyc_setjmp.h cstubs.c cycstubs.cyc $(C_LIBS)
 
 cyc_setjmp.h cstubs.c cycstubs.cyc: libc.cys
 	-mkdir include
@@ -80,12 +85,12 @@ cyc_setjmp.h cstubs.c cycstubs.cyc: libc.cys
 libc.cys:
 	(test -e $(CYCDIR)/lib/libc.cys && cp $(CYCDIR)/lib/libc.cys $@) || cp $(CYCDIR)/bin/cyc-lib/libc.cys $@
 
-$(CYCCOMP): $(O_SRCS) $(LIBR) install_path.$(O)
+$(CYCCOMP): $(O_SRCS) install_path.$(O) $(LIBR)
 ifdef MS
 #FIX: Ignore fewer flags.
 	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/lib/cyc-lib/gc.lib
 else
-	$(CYCC) $(CYCFLAGS) -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(CYCFLAGS) $(O_SRCS) install_path.$(O) $(LDFLAGS)
 endif
 
 # The -L. makes sure that we pick up the libcyc.a of the current
@@ -109,11 +114,11 @@ ifdef NOREGIONS
 OTHER_CYCFLAGS += -noregions
 endif
 
-cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
-	$(CYCC) $(OTHER_CYCFLAGS) -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
+cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS)) $(LIBR)
+	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(OTHER_CYCFLAGS) $(addsuffix .$(O), $(CYCDOC_SRCS)) $(LDFLAGS)
 
-buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)
-	$(CYCC) $(OTHER_CYCFLAGS) -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
+buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O) $(LIBR)
+	$(CYCC) -o $@ -v -compile-for-boot -L. -B. -B$(CYCDIR)/bin/lib/cyc-lib $(OTHER_CYCFLAGS) $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O) $(LDFLAGS)
 
 install_path.c: $(CYCDIR)/Makefile.inc
 	 (echo "char *Carch = \"$(ARCH)\";"; \
@@ -128,7 +133,7 @@ ifdef MS
 else
 	-$(RM) $@
 ifdef LC_FLAG
-	$(CYCC) $(LC_FLAG) -o $@ $^
+	$(CYCC) -o $@ $(LC_FLAG) $^
 else
 	ar rc $@ $^
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
@@ -142,7 +147,7 @@ ifdef MS
 else
 	-$(RM) $@
 ifdef LC_FLAG
-	$(CYCC) $(LC_FLAG) -o $@ $^
+	$(CYCC) -o $@ $(LC_FLAG) $^
 else
 	ar rc $@ $^
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
@@ -165,7 +170,7 @@ core.h: $(CYCDIR)/include/core.h
 	cp $< $@
 
 precore_c.h: core.h $(CYCC) cyc_include.h cycspecs
-	$(CYCC) $(CYCFLAGS) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -o $@ -x cyc $<
+	$(CYCC) -o $@ $(CYCFLAGS) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -nocyc_setjmp -x cyc $<
 
 %.cyc: %.cyl $(CYCLEX)
 	$(CYCLEX) $< $@
@@ -173,13 +178,16 @@ precore_c.h: core.h $(CYCC) cyc_include.h cycspecs
 	$(CYCBISON) -d $< -o $@
 %_tab.h: %.y $(CYCBISON)
 	$(CYCBISON) -d $< -o $(patsubst %.h,%.cyc,$@)
-%.c: %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
-	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ -stopafter-toc $<
-%.$(O): %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
-	$(CYCC) $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -c -o $@ $<
 # For runtime_cyc.c and nogc.c and cstubs.c and boot_cstubs.c
 %.$(O): %.c precore_c.h cyc_include.h cyc_setjmp.h cycspecs
-	$(CC) $(CFLAGS) -I. -c -o $@ $<
+	$(CC) -c -o $@ $(CFLAGS) -I. $<
+
+# These two rules always uses -compile-for-boot, but we really shouldn't
+# use it for library files not in the minimal boot library.
+%.c: %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
+	$(CYCC) -c -o $@ -compile-for-boot $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" -stopafter-toc $<
+%.$(O): %.cyc $(CYCC) cyc_include.h cyc_setjmp.h cycspecs
+	$(CYCC) -c -o $@ -compile-for-boot $(CYCFLAGS) -D__FILE2__=\"$(notdir $<)\" $<
 
 ifdef MS
 %.obj: %.c precore_c.h cyc_include.h cyc_setjmp.h cycspecs

@@ -2258,13 +2258,7 @@ cycstub signal {
     extern "C" sigarg_t signal_SIG_HOLD(int);
 #endif
     extern "C" sigarg_t signal_SIG_IGN(int);
-    /* TREVOR -- look at me */
-#if defined(__CYGWIN32__) || defined(__CYGWIN__)
-    typedef void (*`H _signal_result_t)(int);
-    extern "C" _signal_result_t signal(int, void (@`H)(int));
-#else
-    extern "C" sigarg_t signal(int, void (@`H)(int));
-#endif
+    extern "C" sigarg_t signal_SIG_HANDLER(int, void (@`H)(int));
   }
   static datatype exn.Failure __signal_failure =
     Failure("signal called with the wrong number of arguments");
@@ -2279,13 +2273,7 @@ cycstub signal {
 #endif
     case &__SIG_BUILTIN(SIG_IGN): return Csignal::signal_SIG_IGN(a);
     case &__SIG_HANDLER(f):
-      let res = Csignal::signal(a,f);
-    /* TREVOR -- look at me */
-#if defined(__CYGWIN32__) || defined(__CYGWIN__)
-      return new __SIG_HANDLER(res);
-#else
-      return res;
-#endif
+      return Csignal::signal_SIG_HANDLER(a,f);
     }
   }
 }
@@ -2303,6 +2291,9 @@ cstub signal {
   #endif
   Cyc_sigarg_t signal_SIG_IGN(int a) {
     return sig_wrap(signal(a,SIG_IGN));
+  }
+  Cyc_sigarg_t signal_SIG_HANDLER(int a, void (*f)(int)) {
+    return sig_wrap(signal(a,f));
   }
 }
 hstub {

@@ -1524,7 +1524,7 @@ _tmpA7.print_all_tvars=Cyc_print_all_tvars_r;_tmpA7.print_all_kinds=Cyc_print_al
 _tmpA7.print_all_effects=Cyc_print_all_effects_r;if(Cyc_inline_functions_r)({
 void*_tmpA8=0;Cyc_fprintf(out_file,({const char*_tmpA9="#define _INLINE_FUNCTIONS\n";
 _tag_dyneither(_tmpA9,sizeof(char),27);}),_tag_dyneither(_tmpA8,sizeof(void*),0));});
-if((!Cyc_parseonly_r  && !Cyc_tc_r) && !Cyc_cf_r){if(!Cyc_nocyc_setjmp_r){if(!Cyc_compile_for_boot_r)({
+if((!Cyc_parseonly_r  && !Cyc_tc_r) && !Cyc_cf_r){if(!Cyc_nocyc_setjmp_r){if(Cyc_compile_for_boot_r)({
 void*_tmpAA=0;Cyc_fprintf(out_file,({const char*_tmpAB="#include <setjmp.h>\n";
 _tag_dyneither(_tmpAB,sizeof(char),21);}),_tag_dyneither(_tmpAA,sizeof(void*),0));});
 else{if(Cyc_copy_internal_file(Cyc_cyc_setjmp,out_file))return tds;}}if(Cyc_copy_internal_file(

@@ -246,7 +246,7 @@ $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cstubs.$(O): \
 $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs.$(O): \
   $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/include/cycstubs.cyc \
   bin/cyclone$(EXE)
-	bin/cyclone$(EXE) -Iinclude -Bbin/lib/cyc-lib -c -o $@ $<
+	bin/cyclone$(EXE) -save-c -Iinclude -Bbin/lib/cyc-lib -c -o $@ $<
 
 # Note, we can only build the headers on the current arch
 $(CYCDIR)/bin/genfiles/$(ARCH).headers.tgz:
