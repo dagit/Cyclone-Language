@@ -48,6 +48,7 @@ size_t GC_get_free_bytes() {
 }
 
 #else
+#include <stddef.h> // needed for size_t
 
 static size_t last_alloc_bytes = 0;
 
