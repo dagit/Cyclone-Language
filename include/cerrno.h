@@ -27,14 +27,14 @@ namespace Std {
 extern const char ?sys_err(int);
 extern "C" {
 
-#if defined(__CYGWIN32__) || defined(__CYGWIN__)
-/* cygwin */
-int @ __errno(void);
-#define errno (*Std::__errno())
-#else
+#if defined(__linux__)
 /* x86 linux */
 int @ __errno_location(void);
 #define errno (*Std::__errno_location())
+#else
+/* cygwin, BSD */
+int @ __errno(void);
+#define errno (*Std::__errno())
 #endif
 
 #define	EPERM		 1	/* Operation not permitted */
