@@ -332,7 +332,7 @@ gc/.libs/libgc.a:
 	$(MAKE) -C gc libgc.la CC="$(CC)"
 
 # gc/gc.a:
-# 	$(MAKE) -C gc CC="$(CC)" gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
+#	$(MAKE) -C gc CC="$(CC)" gc.a CFLAGS="$(CFLAGS) -O -I./include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END"
 
 # Store the compiler, libraries, and tools in the user-defined directories.
 # Also, keep a record of what was copied for later uninstall.

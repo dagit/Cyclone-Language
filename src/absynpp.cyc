@@ -1706,7 +1706,7 @@ doc_t datatypedecl2doc(datatypedecl_t dd) {
   let &Datatypedecl(sc,name,tvs,fields,is_x) = dd;
   if (fields==NULL)
     return cat(scope2doc(sc),
-               (is_x ? text("@extensible") : blank_doc()),
+               (is_x ? text("@extensible ") : blank_doc()),
                text("datatype "),
                (is_x ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
                ktvars2doc(tvs));

@@ -849,24 +849,24 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
     unsigned int tag_count = 0;
     for (_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
-      
+      // check for duplicate fields
       if (List::mem(strptrcmp,prev_fields,(*f->name)[1]))
 	terr(f->loc,"duplicate field name %s",*((*f->name)[1]));
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1],prev_fields);
-      
-      if (f->tag == NULL)
+      // check for shadowing of global variables
+      if (Dict::lookup_opt(ge->ordinaries,(*f->name)[1]) != NULL)
+	terr(f->loc,"enum field name %s shadows global name",*((*f->name)[1]));
+
+      if (f->tag == NULL) {
 	f->tag = uint_exp(tag_count, f->loc);
-      else if (!Tcutil::is_const_exp(te,(exp_t)f->tag))
-	terr(loc,"enum %s, field %s: expression is not constant",
-             *v,*(*f->name)[1]);
-      
-      // FIX? I'm just being lazy here, but who wants a sizeof in their tag?
-      let $(t1,known) = Evexp::eval_const_uint_exp((exp_t)f->tag);
-      if(!known)
-	terr(loc,"Cyclone enum tags cannot use sizeof or offsetof or other enum tags");
-      tag_count = t1+1;
-      
+	++tag_count;
+      }
+      // allow non-const exprs for now; will be caught below
+      else if (Tcutil::is_const_exp(te,(exp_t)f->tag)) {
+	let $(t1,known) = Evexp::eval_const_uint_exp((exp_t)f->tag);
+	if(known) tag_count = t1+1;
+      }
       (*f->name)[0] = Abs_n(te->ns, (ed->sc == ExternC));
     }
   }}
@@ -882,12 +882,22 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
     ge->enumdecls = Dict::insert(ge->enumdecls, v, edp);
     break;
   }
-
   if (ed->fields != NULL)
     for (_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
       ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
 				    new $(new EnumRes(ed,f), true));
+    }
+
+  // Now make sure that the fields are constant expressions;
+  // we do this now so that an enum can refer to its own fields
+  if (ed->fields != NULL)
+    for (_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
+      let f = fs->hd;
+      Tcexp::tcExp(te,NULL,(exp_t)f->tag); // substitute if poss
+      if (!Tcutil::is_const_exp(te,(exp_t)f->tag))
+	terr(loc,"enum %s, field %s: expression is not constant",
+             *v,*(*f->name)[1]);
     }
 }
 

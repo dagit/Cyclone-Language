@@ -13,13 +13,20 @@ datatype exn.Eof Eof_val = Eof(0);
 void read_filename(char ?buf) {
   int i = 0;
   int c = fgetc(stdin);
-  while (c != '(' && c != EOF) {
+  while (c != ':' && c != EOF) {
     buf[i] = (char)c;
     i++;
     c = fgetc(stdin);
   }
   buf[i] = 0;
   if (c == EOF) throw &Eof_val;
+  else {
+    c = fgetc(stdin);
+    if (c != '(') {
+      fprintf(stderr,"Ill-formed rewrite\n");
+      exit(1);
+    }
+  }
 }
 
 void read_num(int @j) {
@@ -163,7 +170,7 @@ int main(int argc, const char ?`H? argv) {
   } catch {
   case &Eof(_): break;
   }
-  printf("done parsing rewrites.\n");
+  printf("done parsing rewrites (%d total).\n",List::length(fs));
   for (let xs = fs; xs != NULL; xs = xs->tl) {
     let $(file,rewrites) = *xs->hd;
     let basename = Filename::chop_extension(file);

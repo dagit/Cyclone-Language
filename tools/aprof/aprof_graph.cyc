@@ -585,7 +585,7 @@ int generate_graph(string_t<`H> file) {
   output_line("heap",1,heap_size,false,env->heap_live);
   // dynamic/growable regions
   if (!all_dynregions) {
-    // tie of the end of the points if the regions weren't cleared
+    // tie off the end of the points if the regions weren't cleared
     if (env->total_dyn_live != NULL) {
       let &$(cnt,livesize) = env->total_dyn_live->hd;
       if (livesize > heap_size[cnt] * dyn_threshhold)

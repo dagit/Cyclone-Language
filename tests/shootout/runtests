@@ -80,7 +80,7 @@ do
   INPUTFILE=`getinputfile $file`
   $TEST $N ./gcc-${file} $ARGS $INPUTFILE
   $TEST $N ./${file} $ARGS $INPUTFILE
-  $TEST $N ./nocheck-${file} $ARGS $INPUTFILE
+#  $TEST $N ./nocheck-${file} $ARGS $INPUTFILE
   $TEST $N ./cyc-${file} $ARGS $INPUTFILE
 #  $TEST $N ./nobounds-${file} $ARGS $INPUTFILE
 done

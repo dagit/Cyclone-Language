@@ -3100,8 +3100,8 @@ const char*_tmp9F7;const char*_tmp9F6;struct Cyc_PP_Doc*_tmp9F5[5];return(_tmp9F
 Cyc_Absynpp_ktvars2doc(_tmp4EF),((_tmp9F5[3]=_tmp4F1?Cyc_Absynpp_qvar2bolddoc(
 _tmp4EE): Cyc_Absynpp_typedef_name2bolddoc(_tmp4EE),((_tmp9F5[2]=Cyc_PP_text(((
 _tmp9F6="datatype ",_tag_dyneither(_tmp9F6,sizeof(char),10)))),((_tmp9F5[1]=
-_tmp4F1?Cyc_PP_text(((_tmp9F7="@extensible",_tag_dyneither(_tmp9F7,sizeof(char),
-12)))): Cyc_PP_blank_doc(),((_tmp9F5[0]=Cyc_Absynpp_scope2doc(_tmp4ED),Cyc_PP_cat(
+_tmp4F1?Cyc_PP_text(((_tmp9F7="@extensible ",_tag_dyneither(_tmp9F7,sizeof(char),
+13)))): Cyc_PP_blank_doc(),((_tmp9F5[0]=Cyc_Absynpp_scope2doc(_tmp4ED),Cyc_PP_cat(
 _tag_dyneither(_tmp9F5,sizeof(struct Cyc_PP_Doc*),5)))))))))));}else{const char*
 _tmp9FE;const char*_tmp9FD;struct Cyc_PP_Doc*_tmp9FC[2];struct Cyc_PP_Doc*_tmp9FB[
 10];return(_tmp9FB[9]=Cyc_Absynpp_rb(),((_tmp9FB[8]=Cyc_PP_line_doc(),((_tmp9FB[

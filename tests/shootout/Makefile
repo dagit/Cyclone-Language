@@ -15,7 +15,7 @@ spellcheck strcat
 
 EXEFILES = $(addsuffix $(EXE), $(BENCHMARKS))
 GCCEXEFILES = $(addprefix gcc-, $(EXEFILES))
-NOCHECKEXEFILES = $(addprefix nocheck-, $(EXEFILES))
+# NOCHECKEXEFILES = $(addprefix nocheck-, $(EXEFILES))
 CYCEXEFILES = $(addprefix cyc-, $(EXEFILES))
 # NOBOUNDSEXEFILES = $(addprefix nobounds-, $(EXEFILES))
 DIFFFILES = $(addsuffix .diff, $(BENCHMARKS))

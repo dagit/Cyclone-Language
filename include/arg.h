@@ -56,15 +56,25 @@ typedef datatype Spec @`r spec_t<`r>;
 
 typedef List::list_t<$(string_t,bool,string_t,spec_t<`r1>,string_t)@`r1,`r2>
 speclist_t<`r1,`r2>;
-
+  /** The [speclist] elements are, in order:
+      [flag] the option's flag to match against
+      [isprefix] indicates [flag] matches flags having it as a prefix (i.e. if [flag] is [-x], then it will match [-xo -xi -xop] etc.)
+      [argdesc] a description of the argument to the option (if any)
+      [spec] the argument spec denoted by the flag
+      [desc] a description of the function of the option
+  */      
 extern void usage(speclist_t<`r1,`r2>,string_t);
-
+  /** [usage(s,prog)] prints a usage string for the given speclist,
+      assuming the program is named [prog]. */
 extern int current;
 
 extern void parse(speclist_t<`r1,`r2> specs, 
                   void anonfun(string_t<`H>), 
                   string_t errmsg, string_t<`H> ?`H args);
-
+  /** [parse(s,f,err,args)] parses the arguments, given in the string
+      array [args], using the speclist [s].  Arguments not matching a
+      flag are passed to [f].  If an error should occur, the usage
+      string is printed, prepended with the given [err] string. */
 }
 
 #endif
