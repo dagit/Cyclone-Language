@@ -15,7 +15,7 @@ string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
 struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); extern int* __errno(); void* Cyc_Dirent_opendir( struct
-_tagged_arr name); extern struct Cyc_dirent* readdir( void* dir); extern int
-closedir( void* dir); extern void* opendir( unsigned char* name); void* Cyc_Dirent_opendir(
-struct _tagged_arr name){ return opendir( string_to_Cstring( name));}
+unsigned char*); void* Cyc_Dirent_opendir( struct _tagged_arr name); extern
+struct Cyc_dirent* readdir( void* dir); extern int closedir( void* dir); extern
+void* opendir( unsigned char* name); void* Cyc_Dirent_opendir( struct
+_tagged_arr name){ return opendir( string_to_Cstring( name));}

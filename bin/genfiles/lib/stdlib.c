@@ -15,22 +15,22 @@ string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
 struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); extern int* __errno(); struct Cyc_Stdlib__Div{ int quot; int
-rem; } ; struct Cyc_Stdlib__Ldiv{ int quot; int rem; } ; extern int abs( int __x);
-extern int atexit( void(* __func)()); extern struct Cyc_Stdlib__Div div( int
-__numer, int __denom); extern struct Cyc_Stdlib__Ldiv ldiv( int __numer, int
-__denom); extern int random(); extern void srandom( unsigned int __seed); extern
-int rand(); extern void srand( unsigned int __seed); extern int rand_r(
-unsigned int* __seed); extern int grantpt( int __fd); extern int unlockpt( int
-__fd); extern double Cyc_Stdlib_atof( struct _tagged_arr); extern int Cyc_Stdlib_atoi(
-struct _tagged_arr); extern int Cyc_Stdlib_atol( struct _tagged_arr); extern
-struct _tagged_arr Cyc_Stdlib_getenv( struct _tagged_arr); extern double Cyc_Stdlib_strtod(
-struct _tagged_arr n, struct _tagged_arr* end); extern int Cyc_Stdlib_strtol(
-struct _tagged_arr n, struct _tagged_arr* end, int base); extern unsigned int
-Cyc_Stdlib_strtoul( struct _tagged_arr n, struct _tagged_arr* end, int base);
-extern double atof( unsigned char*); extern int atoi( unsigned char*); extern
-int atol( unsigned char*); extern unsigned char* getenv( unsigned char*); extern
-int putenv( unsigned char*); extern double strtod( unsigned char*, unsigned char**);
+unsigned char*); struct Cyc_Stdlib__Div{ int quot; int rem; } ; struct Cyc_Stdlib__Ldiv{
+int quot; int rem; } ; extern int abs( int __x); extern int atexit( void(*
+__func)()); extern struct Cyc_Stdlib__Div div( int __numer, int __denom); extern
+struct Cyc_Stdlib__Ldiv ldiv( int __numer, int __denom); extern int random();
+extern void srandom( unsigned int __seed); extern int rand(); extern void srand(
+unsigned int __seed); extern int rand_r( unsigned int* __seed); extern int
+grantpt( int __fd); extern int unlockpt( int __fd); extern double Cyc_Stdlib_atof(
+struct _tagged_arr); extern int Cyc_Stdlib_atoi( struct _tagged_arr); extern int
+Cyc_Stdlib_atol( struct _tagged_arr); extern struct _tagged_arr Cyc_Stdlib_getenv(
+struct _tagged_arr); extern double Cyc_Stdlib_strtod( struct _tagged_arr n,
+struct _tagged_arr* end); extern int Cyc_Stdlib_strtol( struct _tagged_arr n,
+struct _tagged_arr* end, int base); extern unsigned int Cyc_Stdlib_strtoul(
+struct _tagged_arr n, struct _tagged_arr* end, int base); extern double atof(
+unsigned char*); extern int atoi( unsigned char*); extern int atol(
+unsigned char*); extern unsigned char* getenv( unsigned char*); extern int
+putenv( unsigned char*); extern double strtod( unsigned char*, unsigned char**);
 extern int strtol( unsigned char*, unsigned char**, int); extern unsigned int
 strtoul( unsigned char*, unsigned char**, int); double Cyc_Stdlib_atof( struct
 _tagged_arr _nptr){ return atof( string_to_Cstring( _nptr));} int Cyc_Stdlib_atoi(

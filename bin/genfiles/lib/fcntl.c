@@ -19,12 +19,12 @@ f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int*
-__errno(); extern int fcntl( int fd, int cmd); extern int fcntl_with_arg( int fd,
-int cmd, int arg); extern int fcntl_with_lock( int fd, int cmd, struct Cyc_Fcntl_flock*
-lock); int Cyc_Fcntl_fcntl( int fd, int cmd, struct _tagged_arr argv){ if(
-_get_arr_size( argv, sizeof( void*)) ==  0){ return fcntl( fd, cmd);} else{ if(
-_get_arr_size( argv, sizeof( void*)) !=  1){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
+ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int
+fcntl( int fd, int cmd); extern int fcntl_with_arg( int fd, int cmd, int arg);
+extern int fcntl_with_lock( int fd, int cmd, struct Cyc_Fcntl_flock* lock); int
+Cyc_Fcntl_fcntl( int fd, int cmd, struct _tagged_arr argv){ if( _get_arr_size(
+argv, sizeof( void*)) ==  0){ return fcntl( fd, cmd);} else{ if( _get_arr_size(
+argv, sizeof( void*)) !=  1){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
 _temp0=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
 _temp1.f1= _tag_arr("fcntl: too many args", sizeof( unsigned char), 21u); _temp1;});

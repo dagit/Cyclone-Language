@@ -15,20 +15,20 @@ extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int*
-__errno(); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
-struct Cyc_List_List* Cyc_List_list( struct _tagged_arr); extern struct Cyc_List_List*
-Cyc_List_rlist( struct _RegionHandle*, struct _tagged_arr); extern int Cyc_List_length(
-struct Cyc_List_List* x); extern unsigned char Cyc_List_List_empty[ 15u]; extern
-void* Cyc_List_hd( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_tl(
-struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_copy( struct Cyc_List_List*
-src); extern struct Cyc_List_List* Cyc_List_rcopy( struct _RegionHandle*, struct
-Cyc_List_List* src); extern struct Cyc_List_List* Cyc_List_map( void*(* f)( void*),
-struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_rmap( struct
-_RegionHandle*, void*(* f)( void*), struct Cyc_List_List* x); extern struct Cyc_List_List*
-Cyc_List_map_c( void*(* f)( void*, void*), void* env, struct Cyc_List_List* x);
-extern struct Cyc_List_List* Cyc_List_rmap_c( struct _RegionHandle*, void*(* f)(
-void*, void*), void* env, struct Cyc_List_List* x); extern unsigned char Cyc_List_List_mismatch[
+ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); struct Cyc_List_List{
+void* hd; struct Cyc_List_List* tl; } ; extern struct Cyc_List_List* Cyc_List_list(
+struct _tagged_arr); extern struct Cyc_List_List* Cyc_List_rlist( struct
+_RegionHandle*, struct _tagged_arr); extern int Cyc_List_length( struct Cyc_List_List*
+x); extern unsigned char Cyc_List_List_empty[ 15u]; extern void* Cyc_List_hd(
+struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_tl( struct Cyc_List_List*
+x); extern struct Cyc_List_List* Cyc_List_copy( struct Cyc_List_List* src);
+extern struct Cyc_List_List* Cyc_List_rcopy( struct _RegionHandle*, struct Cyc_List_List*
+src); extern struct Cyc_List_List* Cyc_List_map( void*(* f)( void*), struct Cyc_List_List*
+x); extern struct Cyc_List_List* Cyc_List_rmap( struct _RegionHandle*, void*(* f)(
+void*), struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_map_c(
+void*(* f)( void*, void*), void* env, struct Cyc_List_List* x); extern struct
+Cyc_List_List* Cyc_List_rmap_c( struct _RegionHandle*, void*(* f)( void*, void*),
+void* env, struct Cyc_List_List* x); extern unsigned char Cyc_List_List_mismatch[
 18u]; extern struct Cyc_List_List* Cyc_List_map2( void*(* f)( void*, void*),
 struct Cyc_List_List* x, struct Cyc_List_List* y); extern struct Cyc_List_List*
 Cyc_List_rmap2( struct _RegionHandle*, void*(* f)( void*, void*), struct Cyc_List_List*

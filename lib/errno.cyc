@@ -1,5 +1,5 @@
 /* This file is part of the Cyclone Library.
-   Copyright (C) 2001 Greg Morrisett
+   Copyright (C) 2001 Greg Morrisett, AT&T
 
    This library is free software; you can redistribute it and/or it
    under the terms of the GNU Lesser General Public License as
@@ -26,7 +26,7 @@ namespace Errno {
   extern "C" Cstring _sys_errlist[__CYCLONE_SYS_NUM_ERR];
 
   const char ?sys_err(int i) {
-    if (i < 0 || i > Errno::_sys_nerr)
+    if (i < 0 || i > __CYCLONE_SYS_NUM_ERR)
       throw new InvalidArg("sys_err: integer argument out of range");
     return Cstring_to_string(Errno::_sys_errlist[i]);
   }

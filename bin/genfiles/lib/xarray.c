@@ -15,9 +15,9 @@ string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
 struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); extern int* __errno(); struct Cyc_Xarray_Xarray{ struct
-_tagged_arr elmts; int num_elmts; } ; extern int Cyc_Xarray_length( struct Cyc_Xarray_Xarray*);
-extern void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*, int); extern void Cyc_Xarray_set(
+unsigned char*); struct Cyc_Xarray_Xarray{ struct _tagged_arr elmts; int
+num_elmts; } ; extern int Cyc_Xarray_length( struct Cyc_Xarray_Xarray*); extern
+void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*, int); extern void Cyc_Xarray_set(
 struct Cyc_Xarray_Xarray*, int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create(
 int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create_empty(); extern
 struct Cyc_Xarray_Xarray* Cyc_Xarray_singleton( int, void*); extern void Cyc_Xarray_add(

@@ -63,7 +63,6 @@ extern "C" mstring_t<`H> Cstring_to_string(Cstring);
 extern "C" mstring_t<`H> wrap_Cstring_as_string(Cstring, size_t);
 extern "C" mstring_t<`H> ?`H ntCsl_to_ntsl(Cstring @);
 extern "C" int system(Cstring);
-extern "C" int @`H __errno(void);
 }
 
 #endif

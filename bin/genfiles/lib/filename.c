@@ -15,15 +15,14 @@ f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
 unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
 _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern int*
-__errno(); extern struct _tagged_arr Cyc_Filename_concat( struct _tagged_arr,
-struct _tagged_arr); extern struct _tagged_arr Cyc_Filename_chop_extension(
-struct _tagged_arr); extern struct _tagged_arr Cyc_Filename_dirname( struct
-_tagged_arr); extern struct _tagged_arr Cyc_Filename_basename( struct
-_tagged_arr); extern int Cyc_Filename_check_suffix( struct _tagged_arr, struct
-_tagged_arr); extern struct _tagged_arr Cyc_Filename_gnuify( struct _tagged_arr);
-struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
-unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+ntCsl_to_ntsl( unsigned char**); extern int system( unsigned char*); extern
+struct _tagged_arr Cyc_Filename_concat( struct _tagged_arr, struct _tagged_arr);
+extern struct _tagged_arr Cyc_Filename_chop_extension( struct _tagged_arr);
+extern struct _tagged_arr Cyc_Filename_dirname( struct _tagged_arr); extern
+struct _tagged_arr Cyc_Filename_basename( struct _tagged_arr); extern int Cyc_Filename_check_suffix(
+struct _tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Filename_gnuify(
+struct _tagged_arr); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; }
+; extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
 18u]; extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Stdio___sFILE; extern
 unsigned char Cyc_Stdio_FileCloseError[ 19u]; extern unsigned char Cyc_Stdio_FileOpenError[
 18u]; struct Cyc_Stdio_FileOpenError_struct{ unsigned char* tag; struct

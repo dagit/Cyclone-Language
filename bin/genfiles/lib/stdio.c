@@ -15,8 +15,8 @@ string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
 struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); extern int* __errno(); struct Cyc_Stdio___sFILE; extern int Cyc_Stdio_remove(
-struct _tagged_arr); extern int Cyc_Stdio_rename( struct _tagged_arr, struct
+unsigned char*); struct Cyc_Stdio___sFILE; extern int Cyc_Stdio_remove( struct
+_tagged_arr); extern int Cyc_Stdio_rename( struct _tagged_arr, struct
 _tagged_arr); extern struct Cyc_Stdio___sFILE* Cyc_Stdio_tmpfile(); extern
 struct _tagged_arr Cyc_Stdio_tmpnam( struct _tagged_arr); extern int Cyc_Stdio_fclose(
 struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE*);

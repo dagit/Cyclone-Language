@@ -16,11 +16,11 @@ string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
 struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); extern int* __errno(); struct Cyc_List_List{ void* hd; struct
-Cyc_List_List* tl; } ; extern struct Cyc_List_List* Cyc_List_list( struct
-_tagged_arr); extern unsigned char Cyc_List_List_empty[ 15u]; extern struct Cyc_List_List*
-Cyc_List_tl( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_map(
-void*(* f)( void*), struct Cyc_List_List* x); extern unsigned char Cyc_List_List_mismatch[
+unsigned char*); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ;
+extern struct Cyc_List_List* Cyc_List_list( struct _tagged_arr); extern
+unsigned char Cyc_List_List_empty[ 15u]; extern struct Cyc_List_List* Cyc_List_tl(
+struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_map( void*(* f)(
+void*), struct Cyc_List_List* x); extern unsigned char Cyc_List_List_mismatch[
 18u]; extern struct Cyc_List_List* Cyc_List_imp_rev( struct Cyc_List_List* x);
 extern unsigned char Cyc_List_Nth[ 8u]; struct Cyc_Dict_Dict; extern
 unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];

@@ -15,36 +15,35 @@ string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, int); extern
 struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
-unsigned char*); extern int* __errno(); struct Cyc_Getopt_option{ struct
-_tagged_arr name; int has_arg; int* flag; int val; } ; extern unsigned int alarm(
-unsigned int seconds); extern int close( int); extern int getpid(); extern int
-getppid(); extern int fork(); extern int fchdir( int); extern int dup( int);
-extern int dup2( int, int); extern unsigned short getuid(); extern int setuid(
-unsigned short uid); extern unsigned short geteuid(); extern int seteuid(
-unsigned short euid); extern unsigned short getgid(); extern int setgid(
-unsigned short gid); extern unsigned short getegid(); extern int setegid(
-unsigned short egid); extern int select( int n, struct Cyc__types_fd_set*
-readfds, struct Cyc__types_fd_set* writefds, struct Cyc__types_fd_set* exceptfds,
-struct Cyc_timeval* timeout); extern int pipe( int* filedes); extern int lseek(
-int filedes, int offset, int whence); int Cyc_Unistd_chdir( struct _tagged_arr);
-struct _tagged_arr Cyc_Unistd_getcwd( struct _tagged_arr buf, int size); int Cyc_Unistd_execl(
-struct _tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv); int
-Cyc_Unistd_execlp( struct _tagged_arr file, struct _tagged_arr arg0, struct
-_tagged_arr argv); int Cyc_Unistd_execve( struct _tagged_arr filename, struct
-_tagged_arr argv, struct _tagged_arr envp); int Cyc_Unistd_read( int fd, struct
-_tagged_arr buf, int count); int Cyc_Unistd_write( int fd, struct _tagged_arr
-buf, int count); int Cyc_Unistd_unlink( struct _tagged_arr pathname); extern int
-chdir( unsigned char*); extern unsigned char* getcwd( unsigned char* buf, int
-size); extern int execv( unsigned char* path, unsigned char** argv); extern int
-execvp( unsigned char* file, unsigned char** argv); extern int execve(
-unsigned char* path, unsigned char** argv, unsigned char** envp); extern int
-read( int fd, unsigned char* buf, int count); extern int write( int fd,
-unsigned char* buf, int count); extern int unlink( unsigned char* pathname); int
-Cyc_Unistd_chdir( struct _tagged_arr path){ return chdir( string_to_Cstring(
-path));} struct _tagged_arr Cyc_Unistd_getcwd( struct _tagged_arr buf, int size){
-if( !(( unsigned int) buf.curr)? 1: _get_arr_size( buf, sizeof( unsigned char))
-<  size){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp0=(
-struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
+unsigned char*); struct Cyc_Getopt_option{ struct _tagged_arr name; int has_arg;
+int* flag; int val; } ; extern unsigned int alarm( unsigned int seconds); extern
+int close( int); extern int getpid(); extern int getppid(); extern int fork();
+extern int fchdir( int); extern int dup( int); extern int dup2( int, int);
+extern unsigned short getuid(); extern int setuid( unsigned short uid); extern
+unsigned short geteuid(); extern int seteuid( unsigned short euid); extern
+unsigned short getgid(); extern int setgid( unsigned short gid); extern
+unsigned short getegid(); extern int setegid( unsigned short egid); extern int
+select( int n, struct Cyc__types_fd_set* readfds, struct Cyc__types_fd_set*
+writefds, struct Cyc__types_fd_set* exceptfds, struct Cyc_timeval* timeout);
+extern int pipe( int* filedes); extern int lseek( int filedes, int offset, int
+whence); int Cyc_Unistd_chdir( struct _tagged_arr); struct _tagged_arr Cyc_Unistd_getcwd(
+struct _tagged_arr buf, int size); int Cyc_Unistd_execl( struct _tagged_arr path,
+struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Unistd_execlp( struct
+_tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Unistd_execve(
+struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp);
+int Cyc_Unistd_read( int fd, struct _tagged_arr buf, int count); int Cyc_Unistd_write(
+int fd, struct _tagged_arr buf, int count); int Cyc_Unistd_unlink( struct
+_tagged_arr pathname); extern int chdir( unsigned char*); extern unsigned char*
+getcwd( unsigned char* buf, int size); extern int execv( unsigned char* path,
+unsigned char** argv); extern int execvp( unsigned char* file, unsigned char**
+argv); extern int execve( unsigned char* path, unsigned char** argv,
+unsigned char** envp); extern int read( int fd, unsigned char* buf, int count);
+extern int write( int fd, unsigned char* buf, int count); extern int unlink(
+unsigned char* pathname); int Cyc_Unistd_chdir( struct _tagged_arr path){ return
+chdir( string_to_Cstring( path));} struct _tagged_arr Cyc_Unistd_getcwd( struct
+_tagged_arr buf, int size){ if( !(( unsigned int) buf.curr)? 1: _get_arr_size(
+buf, sizeof( unsigned char)) <  size){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
+_temp0=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
 _temp1.f1= _tag_arr("getcwd: invalid buf argument", sizeof( unsigned char), 29u);
 _temp1;}); _temp0;}));}{ unsigned char* response= getcwd(( unsigned char*)
