@@ -550,11 +550,11 @@ static void check_writable(tenv_t te, exp_t e) {
   case &Var_e(_,&Param_b(vd)): fallthru(vd);
   case &Var_e(_,&Local_b(vd)): fallthru(vd);
   case &Var_e(_,&Pat_b(vd)):   fallthru(vd);
-  case &Var_e(_,&Global_b(vd)): if (!vd->tq.q_const) return; break;
+  case &Var_e(_,&Global_b(vd)): if (!vd->tq.real_const) return; break;
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{_,tq,_}): fallthru(tq);
-    case &ArrayType(ArrayInfo{_,tq,_,_}): if (!tq.q_const) return; break;
+    case &ArrayType(ArrayInfo{_,tq,_,_}): if (!tq.real_const) return; break;
     case &TupleType(ts):
       let $(i,known) = Evexp::eval_const_uint_exp(e2);
       if(!known) {
@@ -563,7 +563,7 @@ static void check_writable(tenv_t te, exp_t e) {
       }
       try {
         let &$(tq,_) = List::nth(ts,i);
-        if (!tq.q_const) return;
+        if (!tq.real_const) return;
       } catch { case Nth: return; }
       break;
     default: break;
@@ -574,11 +574,11 @@ static void check_writable(tenv_t te, exp_t e) {
     case &AggrType(AggrInfo(&KnownAggr(adp),_)):
       struct Aggrfield *sf = 
         (adp == NULL) ? NULL : lookup_decl_field(*adp, f);
-      if (sf == NULL || !sf->tq.q_const) return;
+      if (sf == NULL || !sf->tq.real_const) return;
       break;
     case &AnonAggrType(_,fs): 
       struct Aggrfield *sf = lookup_field(fs, f);
-      if (sf == NULL || !sf->tq.q_const) return;
+      if (sf == NULL || !sf->tq.real_const) return;
       break;
     default: break;
     }
@@ -590,11 +590,11 @@ static void check_writable(tenv_t te, exp_t e) {
       case &AggrType(AggrInfo(&KnownAggr(adp),_)):
 	struct Aggrfield *sf = 
 	  (adp == NULL) ? NULL : lookup_decl_field(*adp, f);
-	if (sf == NULL || !sf->tq.q_const) return;
+	if (sf == NULL || !sf->tq.real_const) return;
 	break;
       case &AnonAggrType(_,fs): 
 	struct Aggrfield *sf = lookup_field(fs, f);
-	if (sf == NULL || !sf->tq.q_const) return;
+	if (sf == NULL || !sf->tq.real_const) return;
 	break;
       default: break;
       }
@@ -605,7 +605,7 @@ static void check_writable(tenv_t te, exp_t e) {
   case &Deref_e(e1):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{_,tq,_}): fallthru(tq);
-    case &ArrayType(ArrayInfo{_,tq,_,_}): if (!tq.q_const) return; break;
+    case &ArrayType(ArrayInfo{_,tq,_,_}): if (!tq.real_const) return; break;
     default: break;
     }
     break;
@@ -1035,8 +1035,10 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   // we've got an address-of
   let $(is_const,rgn) = addressof_props(te,e);
   tqual_t tq = empty_tqual();
-  if(is_const)
-    tq.q_const = true;
+  if(is_const) {
+    tq.print_const = true;
+    tq.real_const = true;
+  }
   // FIX: use topt to determine if we should return a tunion type
   type_t t = at_typ(e->topt->v, rgn, tq, false_conref);
   return t;
@@ -1405,7 +1407,7 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
 	   typ2string(bound->topt->v));
   }
   // double-check that the index variable x is declared const
-  if (!vd->tq.q_const)
+  if (!vd->tq.real_const)
     impos("comprehension index variable is not declared const!");
   // add x to the environment as an unsigned int only if te->le is not NULL
   if (te->le != NULL) {

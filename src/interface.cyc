@@ -567,7 +567,7 @@ static void extract_ordinarie($(ienv_t,ienv_t,bool,aenv_t,seen_t,i_t) @ env,
       let vd = new Vardecl{
 	.sc = fd->sc,
 	.name = fd->name,
-	.tq = Tqual(false, false, false),
+	.tq = empty_tqual(),
 	.type = (fd->cached_typ)->v,
 	.initializer = NULL,
 	.rgn = NULL,

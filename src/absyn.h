@@ -156,8 +156,14 @@ namespace Absyn {
   };
 
   // type qualifiers -- const, volatile, and restrict
+  //   the print fields are printed but the real fields control the
+  //   attributes with respect to type-checking.  After type-well-formedness,
+  //   it should be that print_const implies real_const
   EXTERN_ABSYN struct Tqual { 
-    bool q_const :1; bool q_volatile :1; bool q_restrict :1; 
+    bool print_const :1; 
+    bool q_volatile :1; 
+    bool q_restrict :1; 
+    bool real_const :1;
   };
 
   // FIX: we should make this char, short, int, etc.  -- something
@@ -224,7 +230,7 @@ namespace Absyn {
   // information about a pointer type
   EXTERN_ABSYN struct PtrInfo {
     type_t     elt_typ;  // type of value to which pointer points
-    tqual_t    elt_tq;   // qualifier **for elements**
+    tqual_t    elt_tq;   // qualifier **for elements** 
     ptr_atts_t ptr_atts;
   };
 
@@ -720,9 +726,11 @@ namespace Absyn {
 
   EXTERN_ABSYN struct Typedefdecl {
     typedef_name_t name;
+    tqual_t        tq;
     list_t<tvar_t> tvs;
     opt_t<kind_t>  kind;
     opt_t<type_t>  defn;
+    attributes_t   atts;
   };
 
   // raw declarations

@@ -171,7 +171,7 @@ static tunion Type.AggrType tagged_arr_typ_v =
                            AggrType(AggrInfo(&tagged_arr_typ_u,NULL));
 static tunion Type tagged_arr_typ = &tagged_arr_typ_v;
 
-static tqual_t mt_tq = Tqual(false,false,false);
+static tqual_t mt_tq = Tqual(false,false,false,false);
 
 static stmt_t skip_stmt_dl() {
   static stmt_t * skip_stmt_opt = NULL;
@@ -1854,7 +1854,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             impos("conversion mis-classified as null-check: %s",exp2string(e));
 	if(nv->toplevel) {
 	  // can't use a function at top-level and don't want macros
-          if (zt1 && !p2.elt_tq.q_const && !zt2) {
+          if (zt1 && !p2.elt_tq.real_const && !zt2) {
             // If p2 is not zero-terminated and not const, then we subtract
             // one from the size so that no one can write the last location.
             e2 = prim2_exp(Minus,e2,uint_exp(1,DL),DL);
@@ -1870,7 +1870,7 @@ static void exp_to_c(env_t nv, exp_t e) {
             let x = temp_var();
             let x_exp = var_exp(x,DL);
             let arg3 = fncall_exp(_get_zero_arr_size_e,list(x_exp,e2),DL);
-            if (!zt2 && !p2.elt_tq.q_const) {
+            if (!zt2 && !p2.elt_tq.real_const) {
               // If p2 is not zero-terminated and not const, then we subtract
               // one from the size so that no one can write the last location.
               arg3 = prim2_exp(Minus,arg3,uint_exp(1,DL),DL);
@@ -1917,7 +1917,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       case $(Unknown_b, Unknown_b):
         // If p1 is zero-terminated and p2 is not, then p2 had better
         // be const or else we have to decrement its size by 1.
-        if (zt1 && !zt2 && !p2.elt_tq.q_const) {
+        if (zt1 && !zt2 && !p2.elt_tq.real_const) {
           if (nv->toplevel)
             unimp("can't coerce a ?ZEROTERM to a non-const ?NOZEROTERM at toplevel");
           e->r = fncall_exp(_tagged_ptr_decrease_size_e,

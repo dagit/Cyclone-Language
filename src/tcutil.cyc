@@ -470,13 +470,18 @@ static void unify_list(list_t<type_t> t1, list_t<type_t> t2) {
 
 // unify two type qualifiers -- throws Unify unless they are the same
 static void unify_tqual(tqual_t tq1, type_t t1, tqual_t tq2, type_t t2) {
-  if ((tq1.q_const != tq2.q_const)    
+  if (tq1.print_const && !tq1.real_const)
+    impos("tq1 real_const not set.");
+  if (tq2.print_const && !tq2.real_const)
+    impos("tq2 real_const not set.");
+
+  if ((tq1.real_const != tq2.real_const)    
       || (tq1.q_volatile != tq2.q_volatile) 
       || (tq1.q_restrict != tq2.q_restrict)) {
     t1_failure = t1;
     t2_failure = t2;
-    tq1_const = tq1.q_const;
-    tq2_const = tq2.q_const;
+    tq1_const = tq1.real_const;
+    tq2_const = tq2.real_const;
     failure_reason = "(qualifiers don't match)";
     throw Unify;
   }
@@ -486,7 +491,7 @@ static void unify_tqual(tqual_t tq1, type_t t1, tqual_t tq2, type_t t2) {
 }
 
 bool equal_tqual(tqual_t tq1, tqual_t tq2) {
-  return ((tq1.q_const == tq2.q_const) 
+  return ((tq1.real_const == tq2.real_const) 
 	  && (tq1.q_volatile == tq2.q_volatile) 
 	  && (tq1.q_restrict == tq2.q_restrict));
 }
@@ -1367,8 +1372,8 @@ int star_cmp<`a::A,`r::R>(int cmp(`a@`r,`a@`r),`a*`r a1, `a*`r a2) {
 }
 
 static int tqual_cmp(tqual_t tq1, tqual_t tq2) {
-  let i1 = tq1.q_const + (tq1.q_volatile << 1) + (tq1.q_restrict << 2);
-  let i2 = tq2.q_const + (tq2.q_volatile << 1) + (tq2.q_restrict << 2);
+  let i1 = tq1.real_const + (tq1.q_volatile << 1) + (tq1.q_restrict << 2);
+  let i2 = tq2.real_const + (tq2.q_volatile << 1) + (tq2.q_restrict << 2);
   return intcmp(i1,i2);
 }
 
@@ -1752,13 +1757,14 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       okay && (unify(pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn) || 
 	       region_outlives(te,pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn));
     // can only move from non-const to const or stay same
-    okay = okay && (!pinfo_a.elt_tq.q_const || pinfo_b.elt_tq.q_const);
+    // FIX:  we need to take qualifiers into account on any typedef's...
+    okay = okay && (!pinfo_a.elt_tq.real_const || pinfo_b.elt_tq.real_const);
     // must preserve zero-termination or second pointer must be const
     okay = okay && (unify_conrefs(intcmp,
 				  pinfo_a.ptr_atts.zero_term,
 				  pinfo_b.ptr_atts.zero_term) 
                     || (conref_def(true,pinfo_a.ptr_atts.zero_term) && 
-                        pinfo_b.elt_tq.q_const));
+                        pinfo_b.elt_tq.real_const));
     return okay;
 
   case $(&ArrayType(ArrayInfo{t1a,tq1a,e1,zt1}),
@@ -1767,7 +1773,8 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     // we could allow e1 >= e2 but I think it's best to give an error
     okay = unify_conrefs(intcmp,zt1,zt2) && 
       (e1 != NULL && e2 != NULL && Evexp::same_const_exp((exp_t)e1,(exp_t)e2));
-    return (okay && unify(t1a,t2a) && (!tq1a.q_const || tq2a.q_const));
+    // FIX: we need to take qualifiers into account on typedefs
+    return (okay && unify(t1a,t2a) && (!tq1a.real_const || tq2a.real_const));
 
   // can cast a TunionFieldType to a TunionType if the field doesn't 
   // carry values.
@@ -1998,7 +2005,8 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
     case $(&PointerType(PtrInfo(t_a, q_a, PtrAtts(rt_a, null_a, b_a, zt_a))),
 	   &PointerType(PtrInfo(t_b, q_b, PtrAtts(rt_b, null_b, b_b, zt_b)))):
     // if t1 is const then t2 must be const
-    if (q_a.q_const && !q_b.q_const) 
+    // FIX: we need to take any qualifiers into account on typedefs
+    if (q_a.real_const && !q_b.real_const) 
       return false;
     // if t1 is * then t2 must be *
     if (!unify_conrefs(intcmp,null_a,null_b) 
@@ -2055,7 +2063,8 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
     for (; args1 != NULL; args1 = args1->tl, args2 = args2->tl) {
       let $(_,tq1,t1) = *args1->hd;
       let $(_,tq2,t2) = *args2->hd;
-      if ((tq2.q_const && !tq1.q_const) || !subtype(te,assume,t2,t1))
+      // FIX: we need to take any qualifiers into account on typedefs
+      if ((tq2.real_const && !tq1.real_const) || !subtype(te,assume,t2,t1))
           return false;
     }
     // deal with varargs
@@ -2063,8 +2072,9 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
     if (f1.cyc_varargs != NULL && f2.cyc_varargs != NULL) {
       let v1 = *f1.cyc_varargs;
       let v2 = *f2.cyc_varargs;
-      if ((v2.tq.q_const && !v1.tq.q_const) || !subtype(te,assume,v2.type,
-                                                        v1.type)) 
+      // FIX: we need to take any qualifiers into account on typedefs
+      if ((v2.tq.real_const && !v1.tq.real_const) || 
+          !subtype(te,assume,v2.type,v1.type)) 
         return false;
     } else if (f1.cyc_varargs != NULL || f2.cyc_varargs != NULL) return false;
     // deal with effect
@@ -2099,7 +2109,8 @@ static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t 
     if (tqs1 == NULL) return false;
     let &$(tq1,t1a) = tqs1->hd;
     let &$(tq2,t2a) = tqs2->hd;
-    if (tq2.q_const && subtype(te,assume,t1a,t2a)) continue;
+      // FIX: we need to take any qualifiers into account on typedefs
+    if (tq2.real_const && subtype(te,assume,t1a,t2a)) continue;
     else if (unify(t1a,t2a)) continue;
     else if (isomorphic(t1a,t2a)) continue;
     else return false;
@@ -2142,14 +2153,16 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     case &PointerType(PtrInfo(t_b,q_b,PtrAtts(rt_b,null_b,b_b,zt_b))):
       coercion_t coercion = Other_coercion;
       let assump = new List(new $(t1,t2),NULL);
+      // FIX: we need to take any qualifiers into account on typedefs
       let ptrsub =
-	ptrsubtype(te,assump,t_a,t_b) && (!q_a.q_const || q_b.q_const);
+	ptrsubtype(te,assump,t_a,t_b) && (!q_a.real_const || q_b.real_const);
       t1_failure = t1;
       t2_failure = t2;
       bool zeroterm_ok = unify_conrefs(intcmp,zt_a,zt_b) || !conref_val(zt_b);
+      // FIX: we need to take any qualifiers into account on typedefs
       let bitcase = ptrsub ? false : (bits_only(t_a) && is_char_type(t_b)
                                       && !conref_def(false,zt_b) 
-                                      && (q_b.q_const || !q_a.q_const));
+                                      && (q_b.real_const || !q_a.real_const));
       bool bounds_ok = unify_conrefs(unify_it_bounds,b_a,b_b);
       if (!bounds_ok && !bitcase)
 	switch ($(conref_val(b_a),conref_val(b_b))) {
@@ -2187,7 +2200,8 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
         (e1 != NULL && e2 != NULL && unify_conrefs(intcmp,zt1,zt2) &&
 	 Evexp::lte_const_exp((exp_t)e2,(exp_t)e1));
       return 
-        (okay && unify(t1a,t2a) && (!tq1a.q_const || tq2a.q_const)) ? 
+        // FIX: we need to take any qualifiers into account on typedefs
+        (okay && unify(t1a,t2a) && (!tq1a.real_const || tq2a.real_const)) ? 
         Other_coercion : Unknown_coercion;
     default: return Unknown_coercion;
     }
@@ -2679,6 +2693,23 @@ static struct CVTEnv {
 };
 typedef struct CVTEnv cvtenv_t;
 
+// If t is a typedef, returns true if the typedef is const, and warns
+// if the flag declared_const is true.  Otherwise returns declared_const.
+bool extract_const_from_typedef(seg_t loc, bool declared_const, type_t t) {
+  switch (t) {
+  case &TypedefType(_,_,td,tdopt):
+    if (td->tq.real_const || td->tq.print_const) {
+      if (declared_const) warn(loc,"extra const");
+      return true;
+    }
+    // not done yet -- the typedef could expand to a typedef
+    if (tdopt)
+      return extract_const_from_typedef(loc,declared_const,*tdopt);
+    else return declared_const;
+  default: return declared_const;
+  }
+}
+
 // Checks that a type is well-formed and lives in kind expected_kind.  
 // Takes as input a location (for error reporting), a type environment 
 // (for looking up struct, enum, tunion, etc. decls), a check-valid-type
@@ -2885,11 +2916,12 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       break;
     }
     break;
-  case &PointerType(PtrInfo(t1,tq,PtrAtts(rgn_typ,nullable,b,zt))):
+  case &PointerType(PtrInfo(t1,*tqp,PtrAtts(rgn_typ,nullable,b,zt))):
     // FIX: check that tqual is valid?
     bool is_zero_terminated;
     // note that here, we allow AnyKind types under the pointer
     cvtenv = i_check_valid_type(loc,te,cvtenv,AnyKind,t1);
+    tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t1);
     cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,rgn_typ);
     switch (compress_conref(zt)->v) {
     case No_constr:
@@ -2941,11 +2973,12 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
   case &IntType(_,_): 
   case FloatType:    
   case &DoubleType(_): break; 
-  case &ArrayType(ArrayInfo{t1,tq,*eptr,zt}):
+  case &ArrayType(ArrayInfo{t1,*tqp,*eptr,zt}):
     // FIX: check that tqual is valid?
     // we don't allow abstract mem types as the elt type of an array type
     let e = *eptr;
     cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t1);
+    tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t1);
     bool is_zero_terminated;
     switch (compress_conref(zt)->v) {
     case No_constr:
@@ -3062,14 +3095,19 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // FIX?: should check that variables are unique and that tquals are ok
     new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,tr);
     new_cvtenv.fn_result = false;
-    for (_ a = args; a != NULL; a = a->tl)
-      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,(*a->hd)[2]);
+    for (_ a = args; a != NULL; a = a->tl) {
+      let trip = a->hd;
+      let t = (*trip)[2];
+      new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,t);
+      (*trip)[1].real_const = extract_const_from_typedef(loc,(*trip)[1].print_const,t);
+    }
 
     // varargs
     if (cyc_vararg != NULL) {
       if (c_vararg) impos("both c_vararg and cyc_vararg"); // sanity
       let VarargInfo{_,_,vt,vi} = *cyc_vararg;
       new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,vt);
+      cyc_vararg->tq.real_const = extract_const_from_typedef(loc,cyc_vararg->tq.print_const,vt);
       // if inject, then check the type is an appropriate [x]tunion
       if (vi)
         switch (compress(vt)) {
@@ -3191,9 +3229,12 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     break;
 
   case &TupleType(tq_ts):
-    // FIX: check the tquals
-    for (; tq_ts != NULL; tq_ts = tq_ts->tl)
-      cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,(*tq_ts->hd)[1]);
+    for (; tq_ts != NULL; tq_ts = tq_ts->tl) {
+      let p = tq_ts->hd;
+      cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,(*p)[1]);
+      (*p)[0].real_const = 
+        extract_const_from_typedef(loc,(*p)[0].print_const,(*p)[1]);
+    }
     break;
 
   case &AnonAggrType(k,fs):
@@ -3201,12 +3242,13 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     region aprev_rgn {
       list_t<field_name_t,`aprev_rgn> prev_fields = NULL;
       for (; fs != NULL; fs = fs->tl) {
-        let &Aggrfield{fn,tq,t,width,atts} = fs->hd;
+        let &Aggrfield{fn,*tqp,t,width,atts} = fs->hd;
         if (List::mem(strptrcmp,prev_fields,fn))
           terr(loc,"duplicate field %s",*fn);
         if (strcmp(*fn,"") != 0)
           prev_fields = rnew(aprev_rgn) List(fn,prev_fields);
         cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t);
+        tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t);
 	if(k==UnionA && !bits_only(t))
           // FIX: bad error message when t is a zero-terminated type
 	  warn(loc,"union member %s is not `bits-only' so it can only be written and not read", *fn);
@@ -3636,19 +3678,19 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       switch (compress(e->topt->v)) {
 	// arrays cannot be modified
       case &ArrayType(_): return $(true, HeapRgn);
-      default: return $(vd->tq.q_const,HeapRgn);
+      default: return $(vd->tq.real_const,HeapRgn);
       }
     case &Local_b(vd):  
       switch (compress(e->topt->v)) {
       case &ArrayType(_): return $(true, vd->rgn->v);
       default: 
         vd->escapes = true;
-        return $(vd->tq.q_const, vd->rgn->v);
+        return $(vd->tq.real_const, vd->rgn->v);
       }
     case &Pat_b(vd):   fallthru(vd);
     case &Param_b(vd): 
       vd->escapes = true;
-      return $(vd->tq.q_const, vd->rgn->v);
+      return $(vd->tq.real_const, vd->rgn->v);
     }
   case &AggrMember_e(e1,f):
     // we have an unboxed thing, so we inherit e2's region
@@ -3657,12 +3699,12 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     case &AnonAggrType(_,fs):
       let finfo = lookup_field(fs,f);
       if(finfo != NULL && finfo->width != NULL)
-	return $(finfo->tq.q_const, addressof_props(te,e1)[1]);
+	return $(finfo->tq.real_const, addressof_props(te,e1)[1]);
       return bogus_ans;
     case &AggrType(AggrInfo(&KnownAggr(&ad),_)):
       let finfo = lookup_decl_field(ad,f);
       if(finfo != NULL && finfo->width != NULL)
-	return $(finfo->tq.q_const, addressof_props(te,e1)[1]);
+	return $(finfo->tq.real_const, addressof_props(te,e1)[1]);
       return bogus_ans;
     default: return bogus_ans;
     }
@@ -3681,7 +3723,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       default: return bogus_ans;
       }
       if(finfo != NULL && finfo->width != NULL)
-	return $(finfo->tq.q_const, r);
+	return $(finfo->tq.real_const, r);
       return bogus_ans;
     default: return bogus_ans;
     }
@@ -3689,7 +3731,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     // we have a boxed thing, so the region is in the pointer-type.
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo(_,tq,PtrAtts(r,_,_,_))): 
-      return $(tq.q_const, r); // FIX: is tq set correctly?
+      return $(tq.real_const, r); // FIX: is tq set correctly?
     default: return bogus_ans;
     }
 
@@ -3705,16 +3747,16 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
 	return bogus_ans;
       let finfo = lookup_tuple_field(ts,i);
       if(finfo != NULL)
-	return $((*finfo)[0].q_const, addressof_props(te,e1)[1]);
+	return $((*finfo)[0].real_const, addressof_props(te,e1)[1]);
       return bogus_ans;
     case &PointerType(PtrInfo(_,tq,PtrAtts(r,_,_,_))): 
-      return $(tq.q_const,r);
+      return $(tq.real_const,r);
     case &ArrayType(ArrayInfo{_,tq,_,_}): 
       // Actually, this should be impossible since we've surely
       // promoted e1 to a pointer.
       // NOTE: Unlike C, we cannot allow any e1 -- it must be an lvalue.
       // (C doesn't need to know the region and we do!)
-      return $(tq.q_const, addressof_props(te,e1)[1]);
+      return $(tq.real_const, addressof_props(te,e1)[1]);
     default: return bogus_ans;
     }
   default: 

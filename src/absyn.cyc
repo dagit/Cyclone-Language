@@ -92,13 +92,14 @@ type_t wildtyp(opt_t<list_t<tvar_t,`H>,`H> tenv) {
 }
 
 tqual_t combine_tqual(tqual_t x,tqual_t y) { 
-  return Tqual(x.q_const    || y.q_const,
+  return Tqual(x.print_const || y.print_const,
 	       x.q_volatile || y.q_volatile,
-	       x.q_restrict || y.q_restrict);
+	       x.q_restrict || y.q_restrict,
+               x.real_const || y.real_const);
 }
 
-tqual_t empty_tqual() { return Tqual(false,false,false); }
-tqual_t const_tqual() { return Tqual(true, false,false); }
+tqual_t empty_tqual() { return Tqual(false,false,false,false); }
+tqual_t const_tqual() { return Tqual(true, false,false,true); }
 
 // a static &Upper_b(&Exp(NULL,&Const_e(&Int_c(Unsigned,1)),NULL))
 static tunion Cnst.Int_c      one_intc  = Int_c(Unsigned,1);

@@ -228,9 +228,9 @@ void dumpqvar(qvar_t v) {
 }
 
 void dumptq(tqual_t tq) {
-  if(tq.q_restrict) dump("restrict");
-  if(tq.q_volatile) dump("volatile");
-  if(tq.q_const)    dump("const");
+  if(tq.q_restrict)  dump("restrict");
+  if(tq.q_volatile)  dump("volatile");
+  if(tq.print_const) dump("const");
 }
 
 void dumpscope(scope_t sc) {
@@ -514,7 +514,7 @@ void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool c_varargs,
 }
 
 void dumptyp(type_t t) {
-  dumptqtd(Tqual(false,false,false),t,ignore,0);
+  dumptqtd(empty_tqual(),t,ignore,0);
 }
 
 void dumpdesignator(designator_t d) {
@@ -1055,7 +1055,7 @@ void dumpdecl(decl_t d) {
                                  List::map(Absynpp::arg_mk_opt,fd->args), 
                                  fd->c_varargs, fd->cyc_varargs,
                                  fd->rgn_po, NULL});
-    dumptqtd(Tqual(false,false,false),t,
+    dumptqtd(empty_tqual(), t,
 	     to_VC ? dump_callconv_fdqvar : dump_atts_qvar,fd);
     dump_char('{');
     dumpstmt(fd->body);
@@ -1127,7 +1127,8 @@ void dumpdecl(decl_t d) {
         t = new_evar(td->kind,NULL);
       else 
         t = td->defn->v;
-      dumptqtd(Tqual(false,false,false),t,dumptypedefname,td);
+      dumptqtd(td->tq,t,dumptypedefname,td);
+      dumpatts(td->atts);
       dump_semi();
     }
     break;

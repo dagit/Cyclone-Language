@@ -26,7 +26,7 @@ Language (ANSI C)", Second Edition, pages 234-239.
 The grammar has 1 shift-reduce conflict due to the "dangling else"
 problem, which (the Cyclone port of) Bison properly resolves.
 
-There are 2 additional shift-reduce conflicts due to ambiguities in
+There are 10 additional shift-reduce conflicts due to ambiguities in
 attribute parsing -- see the comments at function_definition.
 */
 
@@ -610,13 +610,10 @@ type_t speclist2typ(list_t<type_specifier_t> tss, seg_t loc) {
 // the typedef with the lexer.
 // TJ: FIX the tqual should make it into the typedef as well,
 // e.g., typedef const int CI;
-static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t,`H>,list_t<attribute_t>)@ t) {
+static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t,`H>,list_t<attribute_t,`H>)@ t) {
   let &$(x,tq,typ,tvs,atts) = t;
   // tell the lexer that x is a typedef identifier
   Lex::register_typedef(x);
-  if (atts != NULL)
-    Tcutil::warn(loc,aprintf("attribute %s within in typedef",
-			     attribute2string(atts->hd)));
   // if the "type" is an evar, then the typedef is abstract
   opt_t<kind_t> kind;
   opt_t<type_t> type;
@@ -629,7 +626,8 @@ static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t,
   default: kind = NULL; type = new Opt(typ); break;
   }
   return new_decl(new Typedef_d(new Typedefdecl{.name=x, .tvs=tvs, .kind=kind,
-                                                .defn=type}),
+                                                .defn=type, .atts=atts,
+                                                .tq=tq}),
 		  loc);
 }
 
@@ -1332,9 +1330,9 @@ kind:
 ;
 
 type_qualifier:
-  CONST    { $$=^$(Tqual(true,false,false)); }
-| VOLATILE { $$=^$(Tqual(false,true,false)); }
-| RESTRICT { $$=^$(Tqual(false,false,true)); }
+  CONST    { $$=^$(Tqual(true,false,false,true)); }
+| VOLATILE { $$=^$(Tqual(false,true,false,false)); }
+| RESTRICT { $$=^$(Tqual(false,false,true,false)); }
 ;
 
 /* parsing of enum specifiers */
@@ -1542,6 +1540,13 @@ direct_declarator:
     { $$=^$(new Declarator($1,NULL)); }
 | '(' declarator ')'
     { $$=$!2; }
+/* the following rule causes a large number of shift/reduce conflicts
+ * but seems necessary to parse some of the GCC header files. */
+| '(' attributes declarator ')'
+    { let d = $3;
+      d->tms = new List(new Attributes_mod(LOC(@2,@2),$2),d->tms);
+      $$=$!3;
+    }
 | direct_declarator '[' ']' zeroterm_qual_opt
     { $$=^$(new Declarator($1->id,new List(new Carray_mod($4),$1->tms)));}
 | direct_declarator '[' assignment_expression ']' zeroterm_qual_opt
@@ -1771,7 +1776,7 @@ array_initializer:
     { let vd = new_vardecl(new $(Loc_n,new $3), uint_typ,
                            uint_exp(0,LOC(@3,@3)));
       // make the index variable const
-      vd->tq = Tqual{.q_const = true, .q_volatile = false, .q_restrict = true};
+      vd->tq.real_const = true;
       $$=^$(new_exp(new Comprehension_e(vd, $5, $7, false),LOC(@1,@8)));
     }
 ;

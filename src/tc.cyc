@@ -102,6 +102,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   }
   // reject ill-formed type
   check_valid_toplevel_type(loc,te,t);
+  vd->tq.real_const = extract_const_from_typedef(loc,vd->tq.print_const,t);
   // top-level arrays don't escape because they can't be assigned to, so
   // their sizes do not change over time. All other globals escape.
   switch (compress(t)) {
@@ -372,9 +373,12 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   // reject ill-formed type
   check_unique_tvars(loc,td->tvs);
   add_tvar_identities(td->tvs);
-  if (td->defn != NULL)
+  if (td->defn != NULL) {
     check_type(loc,te,td->tvs,AnyKind,false,td->defn->v);
-  else
+    td->tq.real_const = 
+      extract_const_from_typedef(loc,td->tq.print_const,td->defn->v);
+    // FIX: check that attributes are okay for this kind of type
+  } else
     // run through and constrain the kinds of unconstrained tvs to boxkind
     for (_ tvs = td->tvs; tvs != NULL; tvs = tvs->tl)
       switch (compress_kb(tvs->hd->kind)) {
@@ -415,6 +419,7 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
 	prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
 
       check_type(loc,te,tvs,MemKind,false,t);
+      fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
 
       // if width is non-NULL then t must be of integral type
       check_bitfield(loc, te, t, width, fn);
@@ -549,8 +554,12 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
   for(let fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
 
-    for (_ typs = f->typs; typs != NULL; typs=typs->tl)
+    for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
       check_type(f->loc, te, tvs, MemKind, false, (*typs->hd)[1]);
+      (*typs->hd)[0].real_const = 
+        extract_const_from_typedef(f->loc,(*typs->hd)[0].print_const,
+                                   (*typs->hd)[1]);
+    }
 
     switch((*f->name)[0]) {
     case &Rel_n(NULL): 

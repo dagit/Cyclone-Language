@@ -238,6 +238,9 @@ extern bool admits_zero(type_t t);
 
 // does the function type have the "noreturn" attribute?
 extern bool is_noreturn(type_t);
-}
 
+// If t is a typedef, returns true if the typedef is const, and warns
+// if the flag declared_const is true.  Otherwise returns declared_const.
+extern bool extract_const_from_typedef(seg_t, bool declared_const, type_t);
+}
 #endif

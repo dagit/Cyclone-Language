@@ -352,9 +352,9 @@ static stringptr_t const_sp = &const_str;
 doc_t tqual2doc(tqual_t tq) {
   list_t<stringptr_t> l = NULL;
 
-  if (tq.q_restrict) l = new List(restrict_sp,l);
-  if (tq.q_volatile) l = new List(volatile_sp,l);
-  if (tq.q_const)    l = new List(const_sp,l);
+  if (tq.q_restrict)  l = new List(restrict_sp,l);
+  if (tq.q_volatile)  l = new List(volatile_sp,l);
+  if (tq.print_const) l = new List(const_sp,l);
   return egroup(""," "," ",List::map(textptr,l));
 }
 
@@ -1638,7 +1638,7 @@ doc_t decl2doc(decl_t d) {
     doc_t scopedoc  = scope2doc(fd->sc);
     doc_t beforenamedoc = (to_VC ? callconv2doc(fd->attributes) : attsdoc);
     doc_t namedoc   = typedef_name2doc(fd->name);
-    doc_t tqtddoc   = tqtd2doc(Tqual(false,false,false), t,
+    doc_t tqtddoc   = tqtd2doc(empty_tqual(), t,
 			       new Opt(cat(beforenamedoc,namedoc)));
     doc_t bodydoc   = cat(blank_doc(),lb(),
 			  nest(2,cat(line_doc(),stmt2doc(fd->body))),
@@ -1724,10 +1724,12 @@ doc_t decl2doc(decl_t d) {
     else 
       t = new_evar(td->kind,NULL);
     s = cat(text("typedef "),
-            tqtd2doc(Tqual(false,false,false),
+            tqtd2doc(td->tq,
                      t,
                      new Opt(cat(typedef_name2bolddoc(td->name),
                                  tvars2doc(td->tvs)))),
+            // FIX:  not clear where attributes should go...
+            atts2doc(td->atts),
             text(";"));
 
     break;
