@@ -408,6 +408,13 @@ struct Tuniondecl * merge_tuniondecl(tuniondecl_t d0, tuniondecl_t d1,
   } else {
     t = is_x2string(d0->is_xtunion);
   }
+  // check is_flat
+  if (d0->is_flat != d1->is_flat) {
+    if (d0->is_flat)
+      merr(loc, msg, "expected __attribute__((flat))");
+    else 
+      merr(loc, msg, "did not expect __attribute__((flat))");
+  }
   
   // check type variables
   if (! check_tvs(d0->tvs, d1->tvs, t, v, loc, msg)) return NULL;

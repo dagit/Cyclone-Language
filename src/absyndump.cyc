@@ -402,11 +402,12 @@ void dumpntyp(type_t t) {
     if (k == NULL) dump("?"); else dumpkind(k->v); 
     dump(aprintf("(%d)",i)); return;
   case &Evar(k,&Opt(t),i,_): dumpntyp(t); return; // shouldn't happen!
-  case &TunionType(TunionInfo(tu_info,ts,r)):
+  case &TunionType(TunionInfo(tu_info,ts,ropt)):
     switch(tu_info) {
-    case &UnknownTunion(UnknownTunionInfo(n,is_x)): fallthru(n,is_x);
-    case &KnownTunion(& &Tuniondecl(_,n,_,_,is_x)):
+    case &UnknownTunion(UnknownTunionInfo(n,is_x,_)): fallthru(n,is_x);
+    case &KnownTunion(& &Tuniondecl(_,n,_,_,is_x,_)):
       if(is_x) dump("xtunion "); else dump("tunion ");
+      type_t r = (ropt) ? ropt->v : HeapRgn;
       switch (Tcutil::compress(r)) {
       case HeapRgn: break;
       default: dumptyp(r); dump(" "); break;
@@ -420,7 +421,7 @@ void dumpntyp(type_t t) {
     switch(tuf_info) {
     case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
       fallthru(tname,is_x,fname);
-    case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
+    case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x,_),
 			   &Tunionfield(fname,_,_,_)):
       if(is_x) dump("xtunion "); else dump("tunion ");
       dumpqvar(tname);
@@ -1073,9 +1074,11 @@ void dumpdecl(decl_t d) {
       dump(";");
     }
     break;
-  case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion)):
+  case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion,is_flat)):
     dumpscope(sc);
     dump(is_xtunion ? "xtunion" : "tunion");
+    if (is_flat)
+      dump_nospace(" __attribute__((flat))");
     dumpqvar(name);
     dumptvars(tvs);
     if(fields == NULL)

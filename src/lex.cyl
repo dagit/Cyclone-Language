@@ -114,6 +114,7 @@ static $(string_t,short,bool) rw_array[] = {
   $("export", EXPORT, false),
   $("extern", EXTERN, true),
   $("fallthru", FALLTHRU, false),
+  $("__flat__", FLAT_kw, false),
   $("float", FLOAT, true),
   $("for", FOR, true),
   $("__gen", GEN, false),

@@ -106,7 +106,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
     p->r = Wild_p;
     return;
 
-  case &Aggr_p(AggrInfo(&UnknownAggr(k,n),targs), exist_ts, dps, dots):
+  case &Aggr_p(AggrInfo(&UnknownAggr(k,n),targs), *exist_ts, dps, dots):
     try { 
       let adp = lookup_aggrdecl(te,p->loc,n);
       let ad = *adp;
@@ -120,11 +120,21 @@ static void resolve_pat(tenv_t te, pat_t p) {
         p->r = Wild_p;
 	return;
       }
-      int more_exists = length(ad->impl->exist_vars) - length(exist_ts);
-      if(more_exists != 0)
-	terr(p->loc, "wrong number of existentially bound type variables");
-      // FIX: add missing ones for the user here!
-      p->r = new Aggr_p(AggrInfo(new KnownAggr(adp), targs), exist_ts, dps,
+      int more_exists = length(ad->impl->exist_vars) - length(*exist_ts);
+      if(more_exists < 0) {
+	terr(p->loc, "too many existentially bound type variables in pattern");
+        let ts = exist_ts;
+        for (int n = length(ad->impl->exist_vars); n != 0; n--)
+          ts = &(*ts)->tl;
+        *ts = NULL;
+      } else if (more_exists > 0) {
+        // add missing type variables for user here
+        let new_ts = NULL;
+        for (; more_exists != 0; more_exists--) 
+          new_ts = new List(new_tvar(new Unknown_kb(NULL)),new_ts);
+        *exist_ts = List::imp_append(*exist_ts,new_ts);
+      }
+      p->r = new Aggr_p(AggrInfo(new KnownAggr(adp), targs), *exist_ts, dps,
                         dots);
     } catch { case Dict::Absent: 
       terr(p->loc, "Non-struct name has designator patterns"); 
@@ -285,8 +295,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     // topt suggests we do otherwise.
     if(inner_topt == NULL) 
       switch (compress(p2->topt->v)) {
-      case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),targs}):
-	t = new TunionType(TunionInfo{new KnownTunion(new tud),targs,ptr_rgn});
+      case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),targs}) && !tud->is_flat:
+	t = new TunionType(TunionInfo{new KnownTunion(new tud),targs,new Opt(ptr_rgn)});
 	break;
       default:
 	t = new PointerType(PtrInfo(p2->topt->v, empty_tqual(NULL),
@@ -349,6 +359,9 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       t = wildtyp(new Opt(lookup_type_vars(te)));
       break;
     }
+    // don't allow reference patterns for existentials -- see Dan's ESOP paper
+    if (exist_ts != NULL)
+      rgn_opt = NULL;
     region<`rgn> rgn {
       // constrain type variables to have at least the kind they were abstracted over
       let var_tvs = NULL;
@@ -455,6 +468,9 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 
   case &Tunion_p(tud,tuf,*ps_p,dots): 
     let ps = *ps_p;
+    // don't allow reference patterns in flat tunions -- these are like
+    // existentials (see Dan's ESOP paper.)
+    if (tud->is_flat) rgn_opt = NULL;
     region rgn {
       list_t<$(tqual_t,type_t)@> tqts = tuf->typs;
 
@@ -462,15 +478,16 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       let env      = $(tenv_tvs,rgn);
       let inst     = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
       let all_typs = List::map(snd,inst);
-      // unless topt says otherwise, guess we want Tunion when there are no args
-      if(tqts == NULL)
-	t = new TunionType(TunionInfo{new KnownTunion(new tud),
-				      all_typs,
-				      new_evar(&rk,new Opt(tenv_tvs))});
-      else
+      // unless topt says otherwise, guess we want Tunion when there are no args or we have a flat tunion
+      if(tqts == NULL || tud->is_flat) {
+        opt_t<type_t> ropt = NULL;
+        if (!tud->is_flat) 
+          ropt = new Opt(new_evar(&rk,new Opt(tenv_tvs)));
+	t = new TunionType(TunionInfo{new KnownTunion(new tud),all_typs,ropt});
+      } else
 	t = new TunionFieldType(TunionFieldInfo{new KnownTunionfield(tud,tuf),
 						all_typs});
-      if(topt != NULL && tqts == NULL)
+      if(topt != NULL && (tqts == NULL || tud->is_flat))
 	switch(compress(*topt)) {
 	case &TunionFieldType(_): 
 	  t = new TunionFieldType(TunionFieldInfo{new KnownTunionfield(tud,tuf),
@@ -548,7 +565,7 @@ void check_pat_regions(tenv_t te, pat_t p) {
     check_pat_regions(te,p2);
     switch (p->topt->v) {
     case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_,_))): fallthru(rt);
-    case &TunionType(TunionInfo{_,_,rt}):
+    case &TunionType(TunionInfo{_,_,&Opt(rt)}):
       check_rgn_accessible(te,p->loc,rt);
       return;
     default: impos("check_pat_regions: bad pointer type");
@@ -556,7 +573,9 @@ void check_pat_regions(tenv_t te, pat_t p) {
   case &Tunion_p(_,_,ps,_): 
     for(; ps != NULL; ps = ps->tl) check_pat_regions(te,ps->hd);
     switch (p->topt->v) {
-    case &TunionType(TunionInfo{_,_,rt}):
+    case &TunionType(TunionInfo{_,_,NULL}):
+      return;
+    case &TunionType(TunionInfo{_,_,&Opt(rt)}):
       check_rgn_accessible(te,p->loc,rt);
       return;
     case &TunionFieldType(_): return;
@@ -740,7 +759,7 @@ static simple_pat_t compile_pat(pat_t p) {
       else 
 	s = ptr_pat(ss,p);
       break;
-    case &TunionType(_):
+    case &TunionType(TunionInfo{_,_,&Opt(_)}):
       switch(pp->r) {
       case &Tunion_p(tud,tuf,ps,_):
 	opt_t<int> span;
@@ -757,7 +776,7 @@ static simple_pat_t compile_pat(pat_t p) {
     }
     break;
 
-  case &Tunion_p(tud,tuf,NULL,_):
+  case &Tunion_p(tud,tuf,ps,_):
     opt_t<int,`H> span;
     switch(compress(p->topt->v)) {
     case &TunionType(_):     
@@ -769,10 +788,10 @@ static simple_pat_t compile_pat(pat_t p) {
     case &TunionFieldType(_): span = new Opt(1); break;
     default: span = impos("void tunion pattern has bad type"); break;
     }
-    s = con_pat(*((*tuf->name)[1]),span, NULL,p); 
+    s = con_pat(*((*tuf->name)[1]),span, List::map(compile_pat,ps) ,p); 
     break;
     
-  case &Tunion_p(_,_,ps,_): fallthru(ps); // ps != NULL
+    // case &Tunion_p(_,_,ps,_): fallthru(ps); // ps != NULL
   case &Tuple_p(ps,_): s = tuple_pat(List::map(compile_pat,ps),p); break;
 
   case &Aggr_p(AggrInfo(&KnownAggr(&ad),_),_,dlps,_):
@@ -1183,7 +1202,10 @@ static string_t desc2string(term_desc_t d) {
         if (!Set::member(s,new Con_s(new Name_v(n), 0, NULL, orig_pat))) {
           if (List::length(args) == 0)
             return n;
-          else return aprintf("&%s(...)",n);
+          else if (tud->is_flat)
+            return aprintf("%s(...)",n);
+            else 
+              return aprintf("&%s(...)",n);
         }
       }
       throw Desc2string;

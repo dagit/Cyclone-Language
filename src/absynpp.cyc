@@ -714,14 +714,16 @@ doc_t ntyp2doc(type_t t) {
       // we cannot print its kind after the underscore for _::E doesn't parse
     }
     break;
-  case &TunionType(TunionInfo(tu_info,ts,r)):
+  case &TunionType(TunionInfo(tu_info,ts,ropt)):
     switch(tu_info) {
-    case &UnknownTunion(UnknownTunionInfo(n,is_x)): fallthru(n,is_x);
-    case &KnownTunion(&&Tuniondecl(_,n,_,_,is_x)):
+    case &UnknownTunion(UnknownTunionInfo(n,is_x,_)): 
+      fallthru(n,is_x);
+    case &KnownTunion(&&Tuniondecl(_,n,_,_,is_x,_)):
       let kw = text(is_x ? "xtunion " : "tunion ");
+      type_t r = (ropt) ? ropt->v : HeapRgn;
       switch (compress(r)) {
       case HeapRgn:
-	s = cat(kw,qvar2doc(n),tps2doc(ts)); break;
+        s = cat(kw,qvar2doc(n),tps2doc(ts)); break;
       default:
 	s = cat(kw,typ2doc(r),text(" "),qvar2doc(n),tps2doc(ts)); break;
       }
@@ -732,7 +734,7 @@ doc_t ntyp2doc(type_t t) {
     switch(tuf_info) {
     case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
       fallthru(tname,is_x,fname);
-    case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
+    case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x,_),
 			   &Tunionfield(fname,_,_,_)):
 			     let kw = text(is_x ? "xtunion " : "tunion ");
       s = cat(kw, qvar2doc(tname),text("."),qvar2doc(fname));
@@ -1654,10 +1656,11 @@ doc_t decl2doc(decl_t d) {
   case &Var_d(vd):
     s = vardecl2doc(vd);
     break;
-  case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion)):
+  case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion,is_flat)):
     if (fields==NULL)
       s = cat(scope2doc(sc),
               (is_xtunion ? text("xtunion ") : text("tunion ")),
+              (is_flat ? text("__attribute__((flat)) ") : blank_doc()),
               (is_xtunion ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
               ktvars2doc(tvs),
               text(";"));
@@ -1666,6 +1669,7 @@ doc_t decl2doc(decl_t d) {
               (is_xtunion ? text("xtunion ") : text("tunion ")),
               (is_xtunion ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
               ktvars2doc(tvs),
+              (is_flat ? text("__attribute__((flat)) ") : blank_doc()),
               blank_doc(),lb(),
               nest(2, cat(line_doc(),tunionfields2doc(fields->v))),
               line_doc(),

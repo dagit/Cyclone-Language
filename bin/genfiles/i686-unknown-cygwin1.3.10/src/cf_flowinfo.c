@@ -726,11 +726,11 @@ struct Cyc_Core_Opt*name;struct Cyc_Absyn_Tqual tq;void*type;int inject;};struct
 struct Cyc_List_List*tvars;struct Cyc_Core_Opt*effect;void*ret_typ;struct Cyc_List_List*
 args;int c_varargs;struct Cyc_Absyn_VarargInfo*cyc_varargs;struct Cyc_List_List*
 rgn_po;struct Cyc_List_List*attributes;};struct Cyc_Absyn_UnknownTunionInfo{struct
-_tuple1*name;int is_xtunion;};struct Cyc_Absyn_UnknownTunion_struct{int tag;struct
-Cyc_Absyn_UnknownTunionInfo f1;};struct Cyc_Absyn_KnownTunion_struct{int tag;struct
-Cyc_Absyn_Tuniondecl**f1;};struct Cyc_Absyn_TunionInfo{void*tunion_info;struct Cyc_List_List*
-targs;void*rgn;};struct Cyc_Absyn_UnknownTunionFieldInfo{struct _tuple1*
-tunion_name;struct _tuple1*field_name;int is_xtunion;};struct Cyc_Absyn_UnknownTunionfield_struct{
+_tuple1*name;int is_xtunion;int is_flat;};struct Cyc_Absyn_UnknownTunion_struct{int
+tag;struct Cyc_Absyn_UnknownTunionInfo f1;};struct Cyc_Absyn_KnownTunion_struct{int
+tag;struct Cyc_Absyn_Tuniondecl**f1;};struct Cyc_Absyn_TunionInfo{void*tunion_info;
+struct Cyc_List_List*targs;struct Cyc_Core_Opt*rgn;};struct Cyc_Absyn_UnknownTunionFieldInfo{
+struct _tuple1*tunion_name;struct _tuple1*field_name;int is_xtunion;};struct Cyc_Absyn_UnknownTunionfield_struct{
 int tag;struct Cyc_Absyn_UnknownTunionFieldInfo f1;};struct Cyc_Absyn_KnownTunionfield_struct{
 int tag;struct Cyc_Absyn_Tuniondecl*f1;struct Cyc_Absyn_Tunionfield*f2;};struct Cyc_Absyn_TunionFieldInfo{
 void*field_info;struct Cyc_List_List*targs;};struct Cyc_Absyn_UnknownAggr_struct{
@@ -872,7 +872,7 @@ kind;void*sc;struct _tuple1*name;struct Cyc_List_List*tvs;struct Cyc_Absyn_Aggrd
 impl;struct Cyc_List_List*attributes;};struct Cyc_Absyn_Tunionfield{struct _tuple1*
 name;struct Cyc_List_List*typs;struct Cyc_Position_Segment*loc;void*sc;};struct Cyc_Absyn_Tuniondecl{
 void*sc;struct _tuple1*name;struct Cyc_List_List*tvs;struct Cyc_Core_Opt*fields;int
-is_xtunion;};struct Cyc_Absyn_Enumfield{struct _tuple1*name;struct Cyc_Absyn_Exp*
+is_xtunion;int is_flat;};struct Cyc_Absyn_Enumfield{struct _tuple1*name;struct Cyc_Absyn_Exp*
 tag;struct Cyc_Position_Segment*loc;};struct Cyc_Absyn_Enumdecl{void*sc;struct
 _tuple1*name;struct Cyc_Core_Opt*fields;};struct Cyc_Absyn_Typedefdecl{struct
 _tuple1*name;struct Cyc_Absyn_Tqual tq;struct Cyc_List_List*tvs;struct Cyc_Core_Opt*
@@ -903,10 +903,11 @@ struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*r);int Cyc_RgnOrder_effect_ou
 struct Cyc_RgnOrder_RgnPO*po,void*eff,void*rgn);int Cyc_RgnOrder_satisfies_constraints(
 struct Cyc_RgnOrder_RgnPO*po,struct Cyc_List_List*constraints,void*default_bound,
 int do_pin);int Cyc_RgnOrder_eff_outlives_eff(struct Cyc_RgnOrder_RgnPO*po,void*
-eff1,void*eff2);struct Cyc_Tcenv_VarRes_struct{int tag;void*f1;};struct Cyc_Tcenv_AggrRes_struct{
-int tag;struct Cyc_Absyn_Aggrdecl*f1;};struct Cyc_Tcenv_TunionRes_struct{int tag;
-struct Cyc_Absyn_Tuniondecl*f1;struct Cyc_Absyn_Tunionfield*f2;};struct Cyc_Tcenv_EnumRes_struct{
-int tag;struct Cyc_Absyn_Enumdecl*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcenv_AnonEnumRes_struct{
+eff1,void*eff2);struct Cyc_Tcenv_CList{void*hd;struct Cyc_Tcenv_CList*tl;};struct
+Cyc_Tcenv_VarRes_struct{int tag;void*f1;};struct Cyc_Tcenv_AggrRes_struct{int tag;
+struct Cyc_Absyn_Aggrdecl*f1;};struct Cyc_Tcenv_TunionRes_struct{int tag;struct Cyc_Absyn_Tuniondecl*
+f1;struct Cyc_Absyn_Tunionfield*f2;};struct Cyc_Tcenv_EnumRes_struct{int tag;struct
+Cyc_Absyn_Enumdecl*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcenv_AnonEnumRes_struct{
 int tag;void*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcenv_Genv{struct
 _RegionHandle*grgn;struct Cyc_Set_Set*namespaces;struct Cyc_Dict_Dict*aggrdecls;
 struct Cyc_Dict_Dict*tuniondecls;struct Cyc_Dict_Dict*enumdecls;struct Cyc_Dict_Dict*
@@ -2063,8 +2064,8 @@ Cyc_stderr,({const char*_tmp2B2="\n";_tag_dynforward(_tmp2B2,sizeof(char),
 _get_zero_arr_size(_tmp2B2,2));}),_tag_dynforward(_tmp2B1,sizeof(void*),0));});
 goto _LL1B8;_LL1B8:;}int Cyc_CfFlowInfo_contains_region(void*rgn,void*t){void*
 _tmp2B3=Cyc_Tcutil_compress(t);struct Cyc_Absyn_Tvar*_tmp2B4;struct Cyc_Absyn_TunionInfo
-_tmp2B5;struct Cyc_List_List*_tmp2B6;void*_tmp2B7;struct Cyc_List_List*_tmp2B8;
-struct Cyc_Absyn_AggrInfo _tmp2B9;struct Cyc_List_List*_tmp2BA;struct Cyc_Absyn_TunionFieldInfo
+_tmp2B5;struct Cyc_List_List*_tmp2B6;struct Cyc_Core_Opt*_tmp2B7;struct Cyc_List_List*
+_tmp2B8;struct Cyc_Absyn_AggrInfo _tmp2B9;struct Cyc_List_List*_tmp2BA;struct Cyc_Absyn_TunionFieldInfo
 _tmp2BB;struct Cyc_List_List*_tmp2BC;struct Cyc_List_List*_tmp2BD;struct Cyc_Absyn_PtrInfo
 _tmp2BE;void*_tmp2BF;struct Cyc_Absyn_PtrAtts _tmp2C0;void*_tmp2C1;struct Cyc_List_List*
 _tmp2C2;struct Cyc_List_List*_tmp2C3;struct Cyc_Absyn_ArrayInfo _tmp2C4;void*
@@ -2087,9 +2088,9 @@ struct Cyc_Absyn_Tvar*_tmp2CB;_LL1F8: if((int)_tmp2CA != 0)goto _LL1FA;_LL1F9: r
 _tmp2CB=((struct Cyc_CfFlowInfo_Region_k_struct*)_tmp2CA)->f1;_LL1FB: return Cyc_Absyn_tvar_cmp(
 _tmp2B4,_tmp2CB)== 0;_LL1F7:;}_LL1D8: if(_tmp2B3 <= (void*)4)goto _LL1DA;if(*((int*)
 _tmp2B3)!= 2)goto _LL1DA;_tmp2B5=((struct Cyc_Absyn_TunionType_struct*)_tmp2B3)->f1;
-_tmp2B6=_tmp2B5.targs;_tmp2B7=(void*)_tmp2B5.rgn;_LL1D9: if(Cyc_CfFlowInfo_contains_region(
-rgn,_tmp2B7))return 1;_tmp2B8=_tmp2B6;goto _LL1DB;_LL1DA: if(_tmp2B3 <= (void*)4)
-goto _LL1DC;if(*((int*)_tmp2B3)!= 16)goto _LL1DC;_tmp2B8=((struct Cyc_Absyn_TypedefType_struct*)
+_tmp2B6=_tmp2B5.targs;_tmp2B7=_tmp2B5.rgn;_LL1D9: if((unsigned int)_tmp2B7  && Cyc_CfFlowInfo_contains_region(
+rgn,(void*)_tmp2B7->v))return 1;_tmp2B8=_tmp2B6;goto _LL1DB;_LL1DA: if(_tmp2B3 <= (
+void*)4)goto _LL1DC;if(*((int*)_tmp2B3)!= 16)goto _LL1DC;_tmp2B8=((struct Cyc_Absyn_TypedefType_struct*)
 _tmp2B3)->f2;_LL1DB: _tmp2BA=_tmp2B8;goto _LL1DD;_LL1DC: if(_tmp2B3 <= (void*)4)goto
 _LL1DE;if(*((int*)_tmp2B3)!= 10)goto _LL1DE;_tmp2B9=((struct Cyc_Absyn_AggrType_struct*)
 _tmp2B3)->f1;_tmp2BA=_tmp2B9.targs;_LL1DD: _tmp2BC=_tmp2BA;goto _LL1DF;_LL1DE: if(

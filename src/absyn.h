@@ -274,6 +274,7 @@ namespace Absyn {
   EXTERN_ABSYN struct UnknownTunionInfo {
     qvar_t name;       // name of the [x]tunion
     bool   is_xtunion; // true -> xtunion, false -> tunion
+    bool   is_flat;       // only used when we have an abstract union decl
   };
   EXTERN_ABSYN tunion TunionInfoU {
     UnknownTunion(struct UnknownTunionInfo); // don't know definition yet
@@ -282,7 +283,8 @@ namespace Absyn {
   EXTERN_ABSYN struct TunionInfo {
     tunion TunionInfoU tunion_info; // we either know the definition or not
     list_t<type_t>     targs;       // actual type parameters
-    rgntype_t          rgn;         // region into which tunion points
+    opt_t<rgntype_t>   rgn;         // region into which tunion points -- 
+                     // only present for indirect tunions (i.e., not flat)
   };
   // information for [x]tunion Foo.Bar
   EXTERN_ABSYN struct UnknownTunionFieldInfo {
@@ -705,6 +707,7 @@ namespace Absyn {
     list_t<tvar_t>               tvs;
     opt_t<list_t<tunionfield_t>> fields;
     bool                         is_xtunion;
+    bool                         is_flat;
   };
 
   EXTERN_ABSYN struct Enumfield {
@@ -974,7 +977,7 @@ namespace Absyn {
 			   attributes_t atts, seg_t loc);
   extern decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
                             opt_t<list_t<tunionfield_t,`H>,`H> fs, 
-                            bool is_xtunion,
+                            bool is_xtunion, bool is_flat,
 			    seg_t loc);
 
   extern type_t function_typ(list_t<tvar_t,`H> tvs,opt_t<type_t,`H> eff_typ,

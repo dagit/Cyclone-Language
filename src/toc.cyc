@@ -113,6 +113,7 @@ xtunion exn {Match_error};
 
 MAKE_STRING(curr);
 MAKE_STRING(tag);
+MAKE_STRING(val);
 MAKE_STRING(_handler_cons);
 MAKE_STRING(handler);
 MAKE_STRING(_RegionHandle);
@@ -307,7 +308,8 @@ static exp_t tunion_tag(tuniondecl_t td, qvar_t name, bool carries_value) {
   int ans = 0;
   let fs  = td->fields->v;
   while(qvar_cmp(name,fs->hd->name)!=0) {
-    if((carries_value && fs->hd->typs != NULL)
+    if(td->is_flat || 
+       (carries_value && fs->hd->typs != NULL)
        || (!carries_value && fs->hd->typs == NULL))
       ++ans;
     fs = fs->tl;
@@ -361,7 +363,10 @@ static type_t typ_to_c_array(type_t t) {
 }
 
 static aggrfield_t aggrfield_to_c(aggrfield_t f) {
-  return new Aggrfield{.name=f->name, .tq=f->tq, .type = typ_to_c(f->type),
+  // JGM: I'm making the qualifiers non-const here to allow initialization
+  return new Aggrfield{.name=f->name, 
+                          .tq=mt_tq, // .tq=f->tq, 
+                          .type = typ_to_c(f->type),
                        .width=f->width, .attributes=f->attributes};
 }
 
@@ -378,12 +383,18 @@ static type_t typ_to_c(type_t t) {
   case &VarType(tv): 
     if (tvar_kind(tv) == AnyKind) return VoidType;
     else return void_star_typ(); // map `a to void *
-  case &TunionType(TunionInfo{&KnownTunion(_),_,_}): return void_star_typ();
+  case &TunionType(TunionInfo{&KnownTunion(&tud),_,_}): 
+    if (tud->is_flat)
+      return unionq_typ(collapse_qvar_tag(tud->name,"_union"));
+    else return void_star_typ();
   case &TunionType(_): toc_impos("unresolved TunionType");
   case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),_}):
+    // for flat tunion fields, it's the same as the tunion type.
     // for tunion fields that carry no arguments, it's an unsigned int
     // for xtunion fields that carry no argument, it's a char *.
     // for fields that carry arguments, it's a struct _Field_struct;
+    if (tud->is_flat) 
+      return unionq_typ(collapse_qvar_tag(tud->name,"_union"));
     if (tuf->typs == NULL) 
       if(tud->is_xtunion) 
         return star_typ(char_typ,HeapRgn,mt_tq,false_conref);
@@ -1187,12 +1198,13 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
           default:
 	    bool was_ptr_type = is_pointer_type(e->topt->v);
             exp_to_c(nv,e);
+            let ad = lookup_decl_field(ad,f);
             // cast to void* to vaoid gcc warnings (does it more than needed)
 	    if (is_poly_field(struct_type,f) && !was_ptr_type)
 	      e = cast_it(void_star_typ(),e);
 	    // more warning avoidance -- watch out if existentials are common
 	    if(has_exists)
-	      e = cast_it(lookup_decl_field(ad,f)->type,e);
+	      e = cast_it(ad->type,e);
             // FIX: deal with nested arrays and comprehensions
             s = seq_stmt(exp_stmt(assign_exp(lval, e, DL), DL), s, DL);
             break;
@@ -2653,20 +2665,30 @@ DynCast:
     }
     break;
   
-  case &Tunion_e(NULL,tud,tuf):
+  case &Tunion_e(NULL,tud,tuf) && !tud->is_flat:
     qvar_t qv = tuf->name;
     // non-value-carrying constructor
     exp_t tag_exp = tud->is_xtunion ? var_exp(qv,DL) : tunion_tag(tud,qv,false);
     e->r = tag_exp->r;
     break;
   case &Tunion_e(es,tud,tuf):
-    let qv   = tuf->name;
-    let tqts = tuf->typs;
-
+    type_t tunion_ctype;
+    exp_t tag_exp;
     let x = temp_var();
     let xexp = var_exp(x,DL);
-    let strct_typ = strctq(collapse_qvar_tag(qv,"_struct"));
-    exp_t tag_exp = tud->is_xtunion ? var_exp(qv,DL) : tunion_tag(tud,qv,true);
+    exp_t member_exp;
+    if (tud->is_flat) {
+      tunion_ctype = unionq_typ(collapse_qvar_tag(tud->name,"_union"));
+      tag_exp = tunion_tag(tud,tuf->name,true);
+      let &$(_,v) = tuf->name;
+      member_exp = aggrmember_exp(xexp,v,DL);
+    } else {
+      tunion_ctype = strctq(collapse_qvar_tag(tuf->name,"_struct"));
+      tag_exp = (tud->is_xtunion) ? var_exp(tuf->name,DL) : 
+        tunion_tag(tud,tuf->name,true);
+      member_exp = xexp;
+    }
+    let tqts = tuf->typs;
     // we have to do this differently for the toplevel
     if (nv->toplevel) {
       // {i, e1, ... , en};
@@ -2680,14 +2702,19 @@ DynCast:
 	dles = new List(new $(NULL,cur_e),dles);
       }
       dles = new List(new $(NULL,tag_exp),imp_rev(dles));
-      e->r = unresolvedmem_exp(new Opt(collapse_qvar_tag(qv,"_struct")),
-                               dles,DL)->r;
+      e->r = unresolvedmem_exp(NULL,dles,DL)->r;
+      if (tud->is_flat) {
+        e->r = cast_it(strctq(collapse_qvar_tag(tuf->name,"_struct")),
+                       copy_exp(e))->r;
+      }
     } else {
-      // value-carrying constructor
-      // ({ struct qv_tag x; x.tag = i; x.f1 = e1; ...; x.fn = en; x; })
-      // Due to GCC bug we can't just use a struct expression.
+      // value-carrying, non-flat constructor
+      // ({ struct F x; x.tag = i; x.f1 = e1; ...; x.fn = en; x; })
+      // flat constructor
+      // ({ union T x; x.F.tag = i; x.F.f1 = e1; ...; x.F.fn = en; x; })
+      // Due to GCC bug we can't just use a struct expression
       let rev_assign =
-	new List(assign_stmt(aggrmember_exp(xexp,tag_sp,DL), tag_exp, DL),
+	new List(assign_stmt(aggrmember_exp(member_exp,tag_sp,DL),tag_exp, DL),
                  NULL);
       for (int i = 1; es != NULL; es = es->tl, i++, tqts = tqts->tl) {
 	exp_t cur_e = es->hd;
@@ -2695,13 +2722,13 @@ DynCast:
 	exp_to_c(nv,cur_e);
 	if (is_void_star(field_typ))
 	  cur_e = cast_it(field_typ,cur_e);
-	let a = assign_stmt(aggrmember_exp(xexp,fieldname(i), DL),
+	let a = assign_stmt(aggrmember_exp(member_exp,fieldname(i), DL),
 			    cur_e,DL);
 	rev_assign = new List(a,rev_assign);
       }
       let final_stmt = exp_stmt(xexp,DL);
       let s2         = seq_stmts(imp_rev(new List(final_stmt,rev_assign)),DL);
-      e->r = stmt_exp(declare_stmt(x,strct_typ,NULL,s2,DL),DL)->r;
+      e->r = stmt_exp(declare_stmt(x,tunion_ctype,NULL,s2,DL),DL)->r;
     }
     break;
 
@@ -2837,7 +2864,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     s = if_neq_stmt(r,new_exp(new AnonEnum_e(ef->name,t2,ef),NULL),fail_stmt); 
     break;
 
-  case &Tunion_p(tud,tuf,NULL,_):
+  case &Tunion_p(tud,tuf,NULL,_) && !tud->is_flat:
     // when ps == NULL:  if (r == tag) goto succ_lab else goto fail_lab;
     // Note: This should be correct for tunion and xtunion!
     exp_t cmp_exp;
@@ -2850,7 +2877,7 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     s = if_neq_stmt(r, cmp_exp, fail_stmt);
     break;
 
-  case &Pointer_p(&Pat{&Tunion_p(tud,tuf,ps,_),_,_}) && ps != NULL:
+  case &Pointer_p(&Pat{&Tunion_p(tud,tuf,ps,_),_,_}) && ps != NULL && !tud->is_flat:
     // when ps is p1,...,pn:
     //   if ((unsigned int)r > max_tag && ((t)r)->tag == qv_tag)
     //      <similar to tuple and struct patterns>
@@ -2910,6 +2937,33 @@ xlate_pat(env_t nv, region_t<`rgn> rgn, type_t t, exp_t r, exp_t path, pat_t p,
     }
     break;
 
+  case &Tunion_p(tud,tuf,ps,_) && tud->is_flat: 
+    // check that the tag matches and then check the sub-patterns.
+    let &$(_,field_name) = tuf->name;
+    r = aggrmember_exp(r,field_name,DL);
+    path = aggrmember_exp(path,field_name,DL);
+    s = ifthenelse_stmt(neq_exp(aggrmember_exp(path,tag_sp,DL),
+                                tunion_tag(tud,tuf->name,true),DL),
+                        fail_stmt,skip_stmt_dl(),DL);
+    int cnt = 1;
+    for(; ps != NULL; ps = ps->tl, ++cnt) {
+      let p2  = ps->hd;
+      if(p2->r == Wild_p)
+	continue;
+      let v   = temp_var();
+      let t2  = p2->topt->v;
+      decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c(t2)),decls);
+      let result = xlate_pat(nv,rgn,t2,var_exp(v,DL),
+                             aggrmember_exp(path,fieldname(cnt),DL),
+			     p2,&fail_stmt,fail_stmt,decls);
+      nv = result[0];
+      decls = result[1];
+      let s2 = result[2];
+      let s3 = assign_stmt(var_exp(v,DL),
+			   aggrmember_exp(r,fieldname(cnt),DL),DL);
+      s = seq_stmt(s,seq_stmt(s3,s2,DL),DL);
+    }
+    break;
   case &Tunion_p(_,_,ps,_): fallthru(ps); // okay for xtunion too
   case &Tuple_p(ps,_):
     // given the pattern $(p1,p2,...,pn)
@@ -3037,7 +3091,7 @@ static $(var_t,var_t,switch_clause_t)@`r gen_label(region_t<`r> r,
 
 static bool is_mixed_tunion(type_t t) {
   switch (compress(t)) {
-  case &TunionType(TunionInfo{&KnownTunion(&tud),...}):
+  case &TunionType(TunionInfo{&KnownTunion(&tud),...}) && !tud->is_flat:
     bool seen_novalue = false;
     bool seen_value = false;
     for (let fs = tud->fields->v; fs; fs = fs->tl) {
@@ -3056,7 +3110,7 @@ static bool is_mixed_tunion(type_t t) {
 static bool no_tag_test(pat_t p) {
   switch (p->r) {
   case &Var_p(_,p): return no_tag_test(p);
-  case &Pointer_p(&Pat{&Tunion_p(tud,tuf,ps,_),_,_}) && ps != NULL:
+  case &Pointer_p(&Pat{&Tunion_p(tud,tuf,ps,_),_,_}) && ps != NULL && !tud->is_flat:
     return false;
   default: return true;
   }
@@ -3532,25 +3586,30 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
     if (seen_defn_before)
       ad->impl = NULL;
     else
-      for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl)
+      for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl){
+        // JGM: I'm trying to get rid of warnings when we assign "const"
+        // locations...
+        fields->hd->tq = mt_tq;
         fields->hd->type = typ_to_c_array(fields->hd->type);
+      }
   }
 }
 
 // tunion declarations -- tricky
-// for "tunion foo {Bar,Blah,Baz(t1,t2,t3),Baf(t4,t5)}" we generate
+// Non-flat case:
+// For "tunion foo {Bar,Blah,Baz(t1,t2,t3),Baf(t4,t5)}" we generate
 //   typedef void *foo;
 //   struct Baz_struct {
 //     int tag;  // always == 0
 //     t1 f1;
 //     t2 f2;
 //     t3 f3;
-//   }
+//   };
 //   struct Baf_struct {
 //     int tag;  // always == 1
 //     t4 f1;
 //     t5 f2;
-//   }
+//   };
 // for xtunion, we pull a really slimy trick: By using char arrays instead
 // of ints, the uses get promoted to addresses just like we want.
 // When the tunion is "extern" then we don't generate initializers
@@ -3561,6 +3620,19 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
 //     of what we've seen so far.  And we make the globals static so that
 //     extern and what not is only a link-checker thing.  Unfortunately,
 //     the static trick doesn't work for xtunion, which uses the addresses.
+// 
+// For flat tunions, "tunion Foo {Bar, Blah, Baz(t1,t2,t3),Baf(t4,t5)}"
+// we generate:
+//    struct Bar { int tag; };
+//    struct Blah { int tag; };
+//    struct Baz { int tag; t1 f1; t2 f2; t3 f3; };
+//    struct Baf { int tag; t4 f1; t5 f2; };
+//    union Foo {
+//      struct Bar Bar;
+//      struct Blah Blah;
+//      struct Baz  Baz;
+//      struct Baf  Baf;
+//    };
 static opt_t<Set::set_t<qvar_t>> tunions_so_far = NULL;
 static void tuniondecl_to_c(tuniondecl_t tud) {
   if (tunions_so_far == NULL)
@@ -3570,10 +3642,14 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
     return;
   tunions_so_far->v = Set::insert(tunions_so_far->v, n);
 
+  // list of anonymous struct fields used for flattened tunions
+  list_t<aggrfield_t> flat_structs = NULL;
+
   for (let fields = tud->fields->v; fields != NULL; fields = fields->tl) {
     tunionfield_t f = fields->hd;
-    if (f->typs != NULL) {
-      // compute the fields for the struct, adding in a tag field
+    if (f->typs != NULL || tud->is_flat) {
+      // compute the fields for the struct, adding in a tag field if this
+      // isn't a flat tunion
       let fs = NULL;
       int i  = 1;
       for (let ts = f->typs; ts != NULL; ts = ts->tl, i++) {
@@ -3582,16 +3658,33 @@ static void tuniondecl_to_c(tuniondecl_t tud) {
 			      typ_to_c_array((*ts->hd)[1]),NULL,NULL);
 	fs = new List(f,fs);
       }
-      fs = List::imp_rev(fs);
-      fs = new List(new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL),fs);
+      fs = new List(new Aggrfield(tag_sp,mt_tq,sint_typ,NULL,NULL),
+                    List::imp_rev(fs));
       let ad = 
-	new Aggrdecl{.kind = StructA, .sc = Public,
-		     .name = collapse_qvar_tag(f->name,"_struct"),
-		     .tvs = NULL, 
-		     .impl = new AggrdeclImpl(NULL,NULL,fs),
-		     .attributes = NULL};
+        new Aggrdecl{.kind = StructA, .sc = Public,
+                     .name = collapse_qvar_tag(f->name,"_struct"),
+                     .tvs = NULL, 
+                     .impl = new AggrdeclImpl(NULL,NULL,fs),
+                     .attributes = NULL};
       result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
+      if (tud->is_flat) {
+        let field = new Aggrfield((*f->name)[1], mt_tq,
+                                  new AggrType(AggrInfo(new KnownAggr(new ad), NULL)),
+                                  NULL,NULL);
+        flat_structs = new List(field,flat_structs);
+      }
     }
+  }
+  if (tud->is_flat) {
+    // make an anonymous union out of the flat_structs
+    flat_structs = List::imp_rev(flat_structs);
+    let ad = 
+      new Aggrdecl{.kind = UnionA, .sc = Public, 
+                   .name = collapse_qvar_tag(tud->name,"_union"),
+                   .tvs = NULL,
+                   .impl = new AggrdeclImpl(NULL,NULL,flat_structs),
+                   .attributes = NULL};
+    result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
   }
 }
 

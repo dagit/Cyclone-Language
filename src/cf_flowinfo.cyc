@@ -1199,8 +1199,8 @@ bool contains_region(killrgn_t rgn, type_t t) {
     // Note also that we don't descend into the definitions of [x]tunions,
     // structs, typedefs, etc. because they must be closed w.r.t. all regions
     // except the heap.  
-  case &TunionType(TunionInfo{_,targs,r}): 
-    if (contains_region(rgn,r)) return true;
+  case &TunionType(TunionInfo{_,targs,r}):
+    if (r && contains_region(rgn,r->v)) return true;
     fallthru(targs);
   case &TypedefType(_,targs,_,_):    fallthru(targs);
   case &AggrType(AggrInfo{_,targs}): fallthru(targs);

@@ -36,6 +36,9 @@ using Dict;
 using Absyn;
 using Position;
 
+extern struct CList<`a,`r::R> { `a hd; struct CList<`a,`r> *`r const tl; };
+typedef struct CList<`a,`r> *`r const clist_t<`a,`r>;
+
 // Used to tell what an ordinary identifer refers to 
 extern tunion Resolved {
   VarRes(binding_t); // includes unresolved variant
@@ -138,8 +141,10 @@ extern bool in_notreadctxt(tenv_t te);
 extern void process_continue(tenv_t,stmt_t,stmt_opt_t@);
 extern void process_break   (tenv_t,stmt_t,stmt_opt_t@);
 extern void process_goto(tenv_t,stmt_t,var_t,stmt_opt_t@);
-extern $(switch_clause_t,list_t<tvar_t>,list_t<type_t>)*
-  process_fallthru(tenv_t<`g,`r>,stmt_t,switch_clause_t *@);
+
+extern $(switch_clause_t,list_t<tvar_t>,clist_t<type_t,`r>)*`r const
+process_fallthru(tenv_t<`g,`r>,stmt_t,switch_clause_t *@);
+                                     
 
 extern stmt_t get_encloser(tenv_t);
 extern tenv_t<`g,`r> set_encloser(region_t<`r>,tenv_t<`g,`r2>,stmt_t:{`r2}>`r);

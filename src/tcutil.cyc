@@ -227,9 +227,9 @@ type_t copy_type(type_t t) {
   case VoidType:
   case &Evar(_,_,_,_): return t;
   case &VarType(tv): return new VarType(copy_tvar(tv));
-  case &TunionType(TunionInfo{tui,targs,rgn}):
-    return new TunionType(TunionInfo{tui,copy_types(targs),
-                                       copy_type(rgn)});
+  case &TunionType(TunionInfo{tui,targs,rgn_opt}):
+    let ropt = rgn_opt ? new Opt(copy_type(rgn_opt->v)) : NULL;
+    return new TunionType(TunionInfo{tui,copy_types(targs),ropt});
   case &TunionFieldType(TunionFieldInfo{fi,targs}):
     return new TunionFieldType(TunionFieldInfo{fi,copy_types(targs)});
   case &PointerType(PtrInfo(elt,tq,PtrAtts(rgn,nbl,bs,zt,loc))):
@@ -328,9 +328,14 @@ kind_t typ_kind(type_t t) {
   case &RgnHandleType(_): return BoxKind; 
   case UniqueRgn:
   case HeapRgn:           return RgnKind;
-  case &TunionType(_):    return BoxKind;
-  case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
-    if(tuf->typs == NULL) return BoxKind;
+  case &TunionType(TunionInfo{&UnknownTunion(uti),...}):
+    // flat tunions always have MemKind -- they're like structs.
+    if (uti.is_flat) return MemKind; else return BoxKind;
+  case &TunionType(TunionInfo{&KnownTunion(&tud),...}):
+    if (tud->is_flat) return MemKind; else return BoxKind;
+  case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(tud,tuf),_)):
+    if (tud->is_flat) return MemKind;
+    else if(tuf->typs == NULL) return BoxKind;
     else return MemKind;
   case &TunionFieldType(TunionFieldInfo(&UnknownTunionfield(_),_)):
     impos("typ_kind: Unresolved TunionFieldType");
@@ -441,8 +446,8 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     for(; args != NULL; args = args->tl)
       occurs(evar,r,env,(*args->hd)[1]);
     break;
-  case &TunionType(TunionInfo{_,ts,rg}):
-    occurs(evar,r,env,rg); occurslist(evar,r,env,ts); break;
+  case &TunionType(TunionInfo{_,ts,rgopt}):
+    if (rgopt) occurs(evar,r,env,rgopt->v); occurslist(evar,r,env,ts); break;
   case &TypedefType(_,ts,_,_): fallthru(ts);
   case &TunionFieldType(TunionFieldInfo{_,ts}): fallthru(ts);
   case &AggrType(AggrInfo(_,ts)): occurslist(evar,r,env,ts); break;
@@ -664,8 +669,9 @@ static type_t rgns_of(type_t t) {
     default: return new RgnsEff(t);
     }
   case &RgnHandleType(t): return new AccessEff(t);
-  case &TunionType(TunionInfo{_,targs,r}):
-    list_t<type_t> ts = new List(new AccessEff(r), map(rgns_of,targs));
+  case &TunionType(TunionInfo{_,targs,rgopt}):
+    list_t<type_t> ts = map(rgns_of,targs);
+    if (rgopt) ts = new List(new AccessEff(rgopt->v), ts);
     return normalize_effect(new JoinEff(ts));
   case &PointerType(PtrInfo(et,_,PtrAtts(r,_,_,_,_))):
     // ignoring a sizeof(int*`r) in the bounds -- nobody will notice
@@ -1149,10 +1155,13 @@ void unify_it(type_t t1, type_t t2) {
   case $(&TunionType(TunionInfo(&KnownTunion(&tud2),ts2,r2)),
 	 &TunionType(TunionInfo(&KnownTunion(&tud1),ts1,r1))):
     if(tud2 == tud1 || qvar_cmp(tud2->name,tud1->name) == 0) {
-      unify_it(r1,r2);
+      if (r1 != NULL && r2 != NULL)
+        unify_it(r1->v,r2->v);
+      else if (r1 != NULL || r2 != NULL) goto Tunion_fail;
       unify_list(ts1,ts2);
       return;
     }
+  Tunion_fail:
     failure_reason = "(different tunion types)";
     break;
 
@@ -1505,8 +1514,11 @@ int typecmp(type_t t1, type_t t2) {
     if(tud1 == tud2) return 0;
     let qc = qvar_cmp(tud1->name,tud2->name);
     if(qc != 0) return qc;
-    let rc = typecmp(r1,r2);
-    if(rc != 0) return rc;
+    if (r1 && r2) {
+      let rc = typecmp(r1->v,r2->v);
+      if(rc != 0) return rc;
+    } else if (r1) return -1;
+    else return 1;
     return list_cmp(typecmp,ts1,ts2);
 
   case $(&TunionFieldType(TunionFieldInfo(&KnownTunionfield(tud2,tuf2),ts2)),
@@ -1804,8 +1816,8 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
 
     // allow casting tunion `r1 T<t1,...,tn> to tunion `r2 T<t1,...,tn>
     // when `r1 outlives `r2
-  case $(&TunionType(TunionInfo{&KnownTunion(&tud1),ts1,r1}),
-         &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,r2})):
+  case $(&TunionType(TunionInfo{&KnownTunion(&tud1),ts1,&Opt(r1)}),
+         &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,&Opt(r2)})):
     if (tud1 != tud2 || !region_outlives(te,r1,r2)) return false;
     for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
       if (!unify(ts1->hd,ts2->hd)) return false;
@@ -1822,11 +1834,11 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     return (okay && unify(t1a,t2a) && (!tq1a.real_const || tq2a.real_const));
 
   // can cast a TunionFieldType to a TunionType if the field doesn't 
-  // carry values.
+  // carry values or the TunionType is flat.
   case $(&TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud1,tuf),ts1}),
          &TunionType(TunionInfo(&KnownTunion(&tud2),ts2,_))):
        if ((tud1 == tud2 || qvar_cmp(tud1->name,tud2->name) == 0) 
-	   && tuf->typs == NULL) {
+	   && (tuf->typs == NULL || tud1->is_flat)) {
 	 for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
 	   if (!unify(ts1->hd,ts2->hd))
 	     break;
@@ -1836,15 +1848,16 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
        return false;
 
   // can cast a "tunion T.f<ts> @`r1" to a "tunion `r2 T<ts>" when 
-  //   field f carries values and r1==r2 or r1 outlives r2
+  //   field f carries values and r1==r2 or r1 outlives r2 and T is
+  //   not flat.
   case $(&PointerType(PtrInfo(t_a,q_a,PtrAtts(rt_a,null_a,b_a,zt1,_))),
-	 &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,r2})):
+	 &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,r2}))&&!tud2->is_flat:
 	   //n2,ts2,r2,_})):
     switch (compress(t_a)) {
     case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud1,tuf1),ts1}):
       //n1,ts1,f1,_,tufd}):
       // regions must unify or rt_a must outlive r2
-      if (!unify(rt_a,r2) && !region_outlives(te,rt_a,r2))
+      if (!unify(rt_a,r2->v) && !region_outlives(te,rt_a,r2->v))
         return false;
       // pointer must be non-NULL(@) -- note could allow * but would have
       // to insert a bounds check?
@@ -2081,8 +2094,8 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
 
     // allow tunion `r1 T<t1,...,tn> <= tunion `r2 T<t1,...,tn> when
     // `r1 outlives `r2.
-  case $(&TunionType(TunionInfo{&KnownTunion(&tud1),ts1,r1}),
-         &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,r2})):
+  case $(&TunionType(TunionInfo{&KnownTunion(&tud1),ts1,&Opt(r1)}),
+         &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,&Opt(r2)})):
     if (tud1 != tud2 || !region_outlives(te,r1,r2)) return false;
     for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
       if (!unify(ts1->hd,ts2->hd)) return false;
@@ -2478,10 +2491,15 @@ type_t rsubstitute(region_t<`r> rgn,
   case &AggrType(AggrInfo(info,ts)):   
     let new_ts = substs(rgn,inst,ts);
     return new_ts == ts ? t : new AggrType(AggrInfo(info,new_ts));
-  case &TunionType(TunionInfo{info,ts,r}):     
+  case &TunionType(TunionInfo{info,ts,ropt}):     
     let new_ts = substs(rgn,inst,ts);
-    let new_r  = rsubstitute(rgn,inst,r);
-    return (new_ts == ts && new_r == r) ? t : 
+    opt_t<type_t> new_r;
+    if (ropt) {
+      let r = rsubstitute(rgn,inst,ropt->v);
+      if (r == ropt->v) new_r = ropt; else new_r = new Opt(r);
+    } else 
+      new_r = ropt;
+    return (new_ts == ts && new_r == ropt) ? t : 
       new TunionType(TunionInfo{info,new_ts,new_r});
   case &TunionFieldType(TunionFieldInfo{info,ts}):
     let new_ts = substs(rgn,inst,ts);
@@ -2886,16 +2904,16 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // Make relative name absolute
     *n = (ed->name)[0];
     break;
-  case &TunionType(TunionInfo(*info,*targsp,rgn)):
+  case &TunionType(TunionInfo(*info,*targsp,*rgn_opt)):
     let targs = *targsp;
     switch(*info) {
-    case &UnknownTunion(UnknownTunionInfo(n,is_x)):
+    case &UnknownTunion(UnknownTunionInfo(n,is_x,is_flat)):
       tuniondecl_t@ tudp;
       try tudp = lookup_tuniondecl(te,loc,n);// FIX: lookup_xtuniondecl needed?
       catch { case Dict::Absent:
         // declare the tunion for the user
         let ge = Dict::lookup(te->ae,te->ns);
-        let tud = new Tuniondecl{Extern, n, NULL, NULL, is_x};
+        let tud = new Tuniondecl{Extern, n, NULL, NULL, is_x, is_flat};
         Tc::tcTuniondecl(te, ge, loc, tud);
         tudp = lookup_tuniondecl(te,loc,n);
         // give an error here if targs is non-empty
@@ -2914,8 +2932,17 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       *info = new KnownTunion(tudp);
       fallthru(*tudp);
     case &KnownTunion(&tud):
+      // if this is a flat tunion, there shouldn't be a region variable
+      if (tud->is_flat && *rgn_opt)
+        terr(loc,"flat tunion has region %s",typ2string((*rgn_opt)->v));
+      // if this isn't a flat tunion, then insert a region variable
+      if (!tud->is_flat && !*rgn_opt) 
+        *rgn_opt = new Opt(new_evar(new Opt(RgnKind),NULL));
       // check the region is well-formed
-      cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,rgn,allow_unique);
+      if (*rgn_opt) {
+        let rgn = (*rgn_opt)->v;
+        cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,rgn,allow_unique);
+      }
       // check the type arguments are well-formed
       list_t<tvar_t> tvs = tud->tvs;
       for (; targs != NULL && tvs != NULL; targs = targs->tl, tvs = tvs->tl) {
@@ -3185,9 +3212,13 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,MemKind,vt,true);
       cyc_vararg->tq.real_const = extract_const_from_typedef(loc,cyc_vararg->tq.print_const,vt);
       // if inject, then check the type is an appropriate [x]tunion
+      // FIX: does this work with flat tunions???
       if (vi)
         switch (compress(vt)) {
-        case &TunionType(TunionInfo{&KnownTunion(_),_,_}): break;
+        case &TunionType(TunionInfo{&KnownTunion(tud),_,_}): 
+          if ((*tud)->is_flat)
+            terr(loc,"cant inject into a flat tunion");
+          break;
         default: terr(loc,"can't inject a non-[x]tunion type"); break;
         }
     }
@@ -3470,16 +3501,17 @@ bool unique_region_in_type(type_t t, tenv_t te) {
   case &VarType(_): break;
   case &AnonEnumType(_): break;
   case &EnumType(_,_): break;
-  case &TunionType(TunionInfo(_,targsp,rgn)):
+  case &TunionType(TunionInfo(_,targsp,rgn_opt)):
     /* check tunion's region or that of the actual type parameters */
-    if (rgn == UniqueRgn || unique_region_in_list(targsp,te)) return true;
+    if ((ropt && (compress(ropt->v) == UniqueRgn)) || 
+        unique_region_in_list(targsp,te)) return true;
     break;
   case &TunionFieldType(TunionFieldInfo{_,targs}):
     /* check actual type parameters */
     if (unique_region_in_list(targs,te)) return true;
     break;
   case &PointerType(PtrInfo(t1,_,PtrAtts(rgn_typ,_,_,_))):
-    if (rgn_typ == UniqueRgn) return true;
+    if (compress(rgn_typ) == UniqueRgn) return true;
     else return unique_region_in_type(t1,te);
   case &TagType(t1): return unique_region_in_type(t1,te);
   case &SizeofType(t1): return unique_region_in_type(t1,te);

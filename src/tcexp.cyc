@@ -912,7 +912,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                 if (td->fields == NULL) 
                   terr(loc,"can't inject into %s",typ2string(vt));
                 else fields = td->fields->v;
-                if(!unify(tur,curr_rgn(te)))
+                if(!unify(tur->v,curr_rgn(te)))
                   terr(loc,"bad region for injected varargs");
                 region rgn {
                   let inst = List::rzip(rgn,rgn,td->tvs,targs);
@@ -1650,13 +1650,14 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t * topt, exp_t e,
       for (_ a = all_typs; a != NULL && targs != NULL; a=a->tl,targs=targs->tl)
         unify(a->hd,targs->hd);
       // top-down, we're looking for a Tunion, not a Tunion field.
-      // we can cast up here if there are no arguments to the constructor.
-      if (tuf->typs == NULL && es == NULL) {
+      // we can cast up here if there are no arguments to the constructor
+      // or the tunion is flat.
+      if (tud->is_flat || (tuf->typs == NULL && es == NULL)) {
         e->topt = new Opt(res);
         res = new TunionType(TunionInfo{new KnownTunion(new tud),
 					all_typs,r});
         unchecked_cast(te, e, res, No_coercion);
-        return res;
+        // return res;
       }
       break;
     default: break;
@@ -2000,6 +2001,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       case &TunionType(_):
         // Note, we're lying here in the sense that we should pass down
         // a TunionFieldType -- but we don't know which field...
+        // FIX: not sure this is right for flat tunions
         topt2 = new (*topt);
         break;
       default: break;

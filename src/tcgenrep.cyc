@@ -282,9 +282,10 @@ static type_t tunion_typ(qvar_t name) {
   return new TunionType(
 			TunionInfo(
 				   new UnknownTunion(UnknownTunionInfo(name,
-								       false)),
+								       false,
+                                                                       false)),
 				   NULL,
-				   HeapRgn));
+				   new Opt(HeapRgn)));
 }
 static type_t tunionfield_typ(qvar_t name, qvar_t fieldname) {
   return new TunionFieldType(TunionFieldInfo(new UnknownTunionfield(UnknownTunionFieldInfo(name,fieldname,false)),NULL));
@@ -592,7 +593,7 @@ type_t monomorphize_type(type_t type) {
     opt_t<list_t<tunionfield_t>> fields = NULL;
     if(tud->fields != NULL) 
       fields = new Opt{List::map_c(substitute_tunionfield_type,subst,tud->fields->v)};
-    let tud2 = new Tuniondecl{tud->sc,tud->name,NULL,fields,tud->is_xtunion};
+    let tud2 = new Tuniondecl{tud->sc,tud->name,NULL,fields,tud->is_xtunion,tud->is_flat};
     let type2 = new TunionType(TunionInfo{new KnownTunion(new tud2),params,rgn});
     
     let loc = segment_of_abs(0,0);

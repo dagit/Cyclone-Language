@@ -231,12 +231,13 @@ static struct List<tunionfield_t> exn_l3 = List(&Bad_alloc_tuf_v,      &exn_l2);
 
 static struct Opt<list_t<tunionfield_t>> exn_ol = Opt(&exn_l3);
 static struct Tuniondecl exn_tud_v = Tuniondecl(Extern, &exn_name_v, NULL,
-						&exn_ol, true);
+						&exn_ol, true, false);
 tuniondecl_t exn_tud = &exn_tud_v;
 
 static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud);
+static struct Opt<type_t> heap_opt = Opt(HeapRgn);
 static tunion Type.TunionType exn_typ_tt =
-                  TunionType(TunionInfo(&exn_tinfou,NULL,HeapRgn));
+                  TunionType(TunionInfo(&exn_tinfou,NULL,&heap_opt));
 type_t exn_typ = &exn_typ_tt;
 
 // tunion PrintArg and tunion ScanfArg qvars
@@ -632,8 +633,9 @@ decl_t union_decl(scope_t s,typedef_name_t n,
 }
 decl_t tunion_decl(scope_t s, typedef_name_t n, list_t<tvar_t,`H> ts,
 		   opt_t<list_t<tunionfield_t,`H>,`H> fs, 
-                   bool is_xtunion, seg_t loc){
-  return new_decl(new Tunion_d(new Tuniondecl(s,n,ts,fs,is_xtunion)),loc);
+                   bool is_xtunion, bool is_flat, seg_t loc){
+  return new_decl(new Tunion_d(new Tuniondecl(s,n,ts,fs,is_xtunion,is_flat)),
+                  loc);
 }
 
 // We treat function types in argument or return position as an

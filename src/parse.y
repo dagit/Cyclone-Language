@@ -483,7 +483,8 @@ static $(type_t,opt_t<decl_t>)
 	  break;
         case &Tunion_d(tud):
           let args = List::map(tvar2typ,List::map(copy_tvar,tud->tvs));
-          t = new TunionType(TunionInfo(new KnownTunion(new tud),args,HeapRgn));
+          opt_t<type_t> ropt = tud->is_flat ? NULL : new Opt(HeapRgn);
+          t = new TunionType(TunionInfo(new KnownTunion(new tud),args,ropt));
 	  if(tud->fields != NULL) declopt = new Opt(d);
 	  break;
         case &Enum_d(ed):
@@ -734,9 +735,9 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       case &TunionType(TunionInfo(&KnownTunion(tudp),_,_)):
 	if(atts != NULL) err("bad attributes on tunion", loc);
 	return new List(new_decl(new Tunion_d(*tudp),loc),NULL);
-      case &TunionType(TunionInfo(&UnknownTunion(UnknownTunionInfo(n,isx)),ts,_)):
+      case &TunionType(TunionInfo(&UnknownTunion(UnknownTunionInfo(n,isx,is_flat)),ts,_)):
         let ts2 = List::map_c(typ2tvar,loc,ts);
-        let tud = tunion_decl(s, n, ts2, NULL, isx, loc);
+        let tud = tunion_decl(s, n, ts2, NULL, isx, is_flat, loc);
         if (atts != NULL) err("bad attributes on tunion",loc);
         return new List(tud,NULL);
       case &EnumType(n,_):
@@ -854,7 +855,7 @@ using Parse;
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION 
 %token MALLOC RMALLOC CALLOC RCALLOC
 %token REGION_T SIZEOF_T TAG_T REGION RNEW REGIONS RESET_REGION
-%token GEN NOZEROTERM_kw ZEROTERM_kw PORTON PORTOFF
+%token GEN NOZEROTERM_kw ZEROTERM_kw PORTON PORTOFF FLAT_kw
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -980,7 +981,7 @@ using Parse;
 %type <$(declarator_t,exp_opt_t)@> struct_declarator
 %type <list_t<$(declarator_t,exp_opt_t)@>> struct_declarator_list struct_declarator_list0
 %type <abstractdeclarator_t> abstract_declarator direct_abstract_declarator
-%type <bool> tunion_or_xtunion optional_inject
+%type <bool> tunion_or_xtunion optional_inject flat_opt
 %type <scope_t> tunionfield_scope
 %type <tunionfield_t> tunionfield
 %type <list_t<tunionfield_t>> tunionfield_list
@@ -999,7 +1000,7 @@ using Parse;
 %type <attribute_t> attribute
 %type <enumfield_t> enum_field
 %type <list_t<enumfield_t>> enum_declaration_list
-%type <opt_t<type_t>> optional_effect
+%type <opt_t<type_t>> optional_effect opt_rgn_opt
 %type <list_t<$(type_t,type_t)@>> optional_rgn_order rgn_order
 %type <conref_t<bool>> zeroterm_qual_opt
 %type <list_t<$(Position::seg_t,qvar_t,bool)@>> export_list export_list_values
@@ -1585,26 +1586,30 @@ struct_declarator:
 
 // FIX: hack to have rgn_opt in 1st and 3rd cases
 tunion_specifier:
-  tunion_or_xtunion rgn_opt qual_opt_identifier type_params_opt '{' tunionfield_list '}'
-    { let ts = List::map_c(typ2tvar,LOC(@4,@4),$4);
-      $$ = ^$(new Decl_spec(tunion_decl(Public, $3,ts,new Opt($6), $1,
-					LOC(@1,@7))));
+  flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier type_params_opt '{' tunionfield_list '}'
+    { let ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
+      $$ = ^$(new Decl_spec(tunion_decl(Public, $4,ts,new Opt($7), 
+                                        $2,$1,LOC(@1,@8))));
     }
-| tunion_or_xtunion rgn_opt qual_opt_identifier type_params_opt
-    {
-      $$=^$(type_spec(new TunionType(TunionInfo(new
-                                                UnknownTunion(UnknownTunionInfo($3,$1)), $4, $2)), LOC(@1,@4)));
+| flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier type_params_opt
+    { $$=^$(type_spec(new TunionType(TunionInfo(new
+                                                UnknownTunion(UnknownTunionInfo($4,$2,$1)), $5, $3)), LOC(@1,@5)));
     }
-| tunion_or_xtunion rgn_opt qual_opt_identifier '.' qual_opt_identifier type_params_opt
+| flat_opt tunion_or_xtunion opt_rgn_opt qual_opt_identifier '.' qual_opt_identifier type_params_opt
     { $$=^$(type_spec(new TunionFieldType(TunionFieldInfo(new
-		  UnknownTunionfield(UnknownTunionFieldInfo($3,$5,$1)),$6)),
-		      LOC(@1,@6)));
+		  UnknownTunionfield(UnknownTunionFieldInfo($4,$6,$2)),$7)),
+		      LOC(@1,@7)));
     }
 ;
+
+flat_opt:
+  FLAT_kw { $$=^$(true); }
+| /*empty*/ { $$=^$(false); }
 
 tunion_or_xtunion:
   TUNION  { $$=^$(false); }
 | XTUNION { $$=^$(true);  }
+;
 
 tunionfield_list:
   tunionfield                      { $$=^$(new List($1,NULL)); }
@@ -1772,6 +1777,14 @@ zeroterm_qual_opt:
 | NOZEROTERM_kw { $$ = ^$(false_conref);   }
 ;
 
+/* Returns an option */
+opt_rgn_opt:
+/* empty */ { $$ = ^$(NULL); }
+| type_var  { set_vartyp_kind($1,RgnKind); $$ = ^$(new Opt($1)); }
+| '_'       { $$ = ^$(new Opt(new_evar(new Opt(RgnKind),NULL))); }
+;
+
+/* Always returns a type (possibly an evar) */
 rgn_opt:
 /* empty */ { $$ = ^$(new_evar(new Opt(RgnKind),NULL)); }
 | type_var  { set_vartyp_kind($1,RgnKind); $$ = $!1; }

@@ -63,6 +63,11 @@ extern dict_t<`a,`b,`r> rempty(region_t<`r>,int (@`H cmp)(`a,`a));
 /** [rempty(r,cmp)] is like [empty(cmp)] except that the dictionary is
     allocated in the region with handle [r]. */
 
+extern dict_t<`a,`b,`r> rshare(region_t<`r>,dict_t<`a,`b,`r2> : {`r2} > `r);
+/** [rhare(r,d)] creates a virtual copy in region [`r] of the dictionary 
+    [d] that lives in region [`r2].  The internal data structures of the
+    new dictionary share with the old one. */
+
 extern bool is_empty(dict_t d);
 /** [is_empty(d)] returns true if [d] is empty, and returns false otherwise. */
 

@@ -75,6 +75,12 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
     NewControlFlow::set_encloser(s,get_encloser(te));
 }
 
+static list_t<`b,`r> cmap_c(region_t<`r> r,`b f(`c,`a), `c env, clist_t<`a> x)
+{
+  if (x == NULL) return NULL;
+  else return rnew(r) List(f(env,x->hd),cmap_c(r,f,env,x->tl));
+}
+
 // new_block is a kludge because we he abstract syntax doesn't group the
 // local declarations in a block, but the region rules do.  (That is,
 // adjacent declarations are in the same region.  Those at the beginning
@@ -184,10 +190,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       terr(s0->loc,"fallthru not in a non-last case");
       return;
     }
-    let &$(_,tvs,ts) = (_@)(trip_opt);
+    let tvs = (*trip_opt)[1];
+    let ts_orig = (*trip_opt)[2];
     list_t<$(tvar_t,type_t)@> instantiation = 
       List::map_c(make_inst_var,lookup_type_vars(te),tvs);
-    ts = List::map_c(substitute,instantiation,ts);
+    let ts = cmap_c(heap_region,substitute,instantiation,ts_orig);
     for(; ts != NULL && es != NULL; ts = ts->tl, es = es->tl) {
       tcExp(te,NULL,es->hd);
       if(!coerce_arg(te,es->hd,ts->hd)) {

@@ -30,8 +30,8 @@ static tunion Color { R, B };
 // JGM: we need to put the kinds in explicitly here to avoid a warning
 static struct T<`a::B,`b::B,`r::R> {
   tunion Color color;
-  struct T<`a,`b,`r> *`r   left;
-  struct T<`a,`b,`r> *`r   right;
+  struct T<`a,`b,`r> *`r const left;
+  struct T<`a,`b,`r> *`r const right;
   $(`a,`b)     key_val; // flattened, but tuple convenient for patterns
 };
 typedef struct T<`a,`b,`r> *`r tree<`a,`b,`r>;
@@ -55,6 +55,10 @@ dict_t<`a,`b,`r> rsingleton(region_t<`r> r, int (@`H comp)(`a,`a),
 }
 dict_t<`a,`b> singleton(int (@`H comp)(`a,`a), `a key, `b data) {
   return rsingleton(Core::heap_region, comp, key, data);
+}
+
+dict_t<`a,`b,`r> rshare(region_t<`r> r, dict_t<`a,`b,`r2> d : {`r2} > `r) {
+  return rnew(r) Dict{d->rel, r, (tree<`a,`b,`r>)d->t};
 }
 
 bool is_empty(dict_t<`a,`b,`r> d) {

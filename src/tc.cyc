@@ -387,20 +387,22 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   add_tvar_identities(td->tvs);
   if (td->defn != NULL) {
     check_type(loc,te,td->tvs,AnyKind,false,td->defn->v);
-
     td->tq.real_const = 
       extract_const_from_typedef(loc,td->tq.print_const,td->defn->v);
     // FIX: check that attributes are okay for this kind of type
-  } else
-    // run through and constrain the kinds of unconstrained tvs to boxkind
-    for (_ tvs = td->tvs; tvs != NULL; tvs = tvs->tl)
-      switch (compress_kb(tvs->hd->kind)) {
-      case &Unknown_kb(*f): 
-        *f = new Opt(new Eq_kb(BoxKind)); break;
-      case &Less_kb(*f,k):
-        *f = new Opt(new Eq_kb(k)); break;
-      default: continue;
-      }
+  } 
+  // run through and constrain the kinds of unconstrained tvs to boxkind
+  for (_ tvs = td->tvs; tvs != NULL; tvs = tvs->tl)
+    switch (compress_kb(tvs->hd->kind)) {
+    case &Unknown_kb(*f): 
+      if (td->defn != NULL)
+        warn(loc,"type variable %s is not used in typedef definition",
+             *tvs->hd->name);
+      *f = new Opt(new Eq_kb(BoxKind)); break;
+    case &Less_kb(*f,k):
+      *f = new Opt(new Eq_kb(k)); break;
+    default: continue;
+    }
   
   // add to environment
   ge->typedefs = Dict::insert(ge->typedefs,v,td);
@@ -699,7 +701,8 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
       break;
     case $(&Opt(*fs), NULL):
       // for the sake of recursive fields, make name abstract in body
-      let tudp = new (new Tuniondecl(Extern,tud->name,tvs,NULL,tud->is_xtunion));
+      let tudp = new (new Tuniondecl(Extern,tud->name,tvs,NULL,tud->is_xtunion,
+                                     tud->is_flat));
       ge->tuniondecls = Dict::insert(ge->tuniondecls, v, tudp);
    
       // check the fields (and sort them if this is a xtunion)
@@ -710,7 +713,8 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
     case $(&Opt(*fs), &Opt(tudp)):
       let tud0 = *tudp;
       // for the sake of recursive fields, make name abstract in body
-      *tudp = new Tuniondecl(Extern, tud->name, tvs, NULL, tud->is_xtunion);
+      *tudp = new Tuniondecl(Extern, tud->name, tvs, NULL, tud->is_xtunion,
+                             tud->is_flat);
       
       // check the fields (and sort them if this is a xtunion)
       *fs = tcTunionFields(te,ge,loc,obj,tud->is_xtunion,tud->name,*fs,tvs,tud);
