@@ -579,15 +579,28 @@ static exp_t tag_ptr_conv(bool toplevel, type_t t, exp_t sz, exp_t e) {
     return toc_impos("tag_ptr_conv: not a pointer");
   }
   if (toplevel) {
-    // Note that e must be a constant expression that looks like an
-    // array or string...
-    // t *x = e;
+    // Note e must be either (a) a string or else (b) a [possibly cast] 
+    // identifier that is an array.
+    // For case a, we generate
+    // t x[sz] = e;
     // (struct tagged_ptr) {x,x,x+sz};
-    qvar_t x = temp_var();
-    type_t vd_typ = new ArrayType(elt_typ,mt_tq,sz);
-    vardecl_t vd = static_vardecl(x,vd_typ,e);
-    temp_topdecls = new List(new_decl(new Var_d(vd),DL),temp_topdecls);
-    exp_t xexp = var_exp(x,DL);
+    // For case b, we generate
+    // (struct tagged_ptr) {e,e,e+sz};
+    bool is_string = false;
+    switch (e->r) {
+    case &Const_e(&String_c(_)): is_string = true; break;
+    default: break;
+    }
+    exp_t xexp;
+    if (is_string) {
+      qvar_t x = temp_var();
+      type_t vd_typ = new ArrayType(elt_typ,mt_tq,sz);
+      vardecl_t vd = static_vardecl(x,vd_typ,e);
+      temp_topdecls = new List(new_decl(new Var_d(vd),DL),temp_topdecls);
+      xexp = var_exp(x,DL);
+    } else {
+      xexp = e;
+    }
     exp_t xplussz = add_exp(xexp,sz,DL);
     exp_t urm_exp = 
       unresolvedmem_exp(null,new List(new $(null,xexp),
