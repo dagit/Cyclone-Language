@@ -50,6 +50,7 @@ namespace Warn {
     String(string_t);
     Qvar(Absyn::qvar_t);
     Typ(Absyn::type_t);
+    TypOpt(Absyn::type_opt_t);
     Exp(Absyn::exp_t);
     Stmt(Absyn::stmt_t);
     Aggrdecl(Absyn::aggrdecl_t);

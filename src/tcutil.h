@@ -110,7 +110,7 @@ bool coerce_uint_type(exp_t);
 bool coerce_sint_type(exp_t);
 bool coerce_to_bool(exp_t);
 
-bool coerce_arg(RgnOrder::rgn_po_opt_t, exp_t, type_t, bool@ alias_coercion); 
+bool coerce_arg(RgnOrder::rgn_po_opt_t, exp_t, type_t, bool* alias_coercion); 
 bool coerce_assign(RgnOrder::rgn_po_opt_t, exp_t, type_t);
 bool coerce_list(RgnOrder::rgn_po_opt_t, type_t, list_t<exp_t>);
 // true when expressions of type t1 can be implicitly cast to t2

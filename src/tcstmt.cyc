@@ -16,16 +16,13 @@
    along with the Cyclone compiler; see the file COPYING. If not,
    write to the Free Software Foundation, Inc., 59 Temple Place -
    Suite 330, Boston, MA 02111-1307, USA. */
-
 #include "warn.h"
 #include "unify.h"
 #include "tcutil.h"
 #include "tctyp.h"
 #include "tcexp.h"
 #include "tcpat.h"
-#include "new_control_flow.h"
 #include "tcstmt.h"
-#include "evexp.h"
 using Core;
 using List;
 using Absyn;
@@ -106,8 +103,7 @@ static bool noassign_exp(exp_t e) {
   case &ComprehensionNoinit_e(e,...): fallthru(e);
   case &Address_e(e)                : return noassign_exp(e);
 
-  case &Malloc_e(MallocInfo{_,eopt,_,e,...}):
-    fallthru(eopt,e);
+  case &Malloc_e(MallocInfo{_,eopt,_,e,...}): fallthru(eopt,e);
   case &New_e(eopt,e):
     if (!noassign_exp(e)) return false;
     if (eopt != NULL) return noassign_exp(eopt);
@@ -149,17 +145,16 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
       (*vs2->hd)->rgn = ropt;
 
   if(where_opt != NULL) {
-    tcTest(te2,(exp_t)where_opt,"switch clause guard");
-    if (!noassign_exp((exp_t)where_opt))
+    tcTest(te2,where_opt,"switch clause guard");
+    if (!noassign_exp(where_opt))
       terr(where_opt->loc, "cannot show &&-clause in pattern has no effects");
   }
   tcStmt(te2,s,false); // pattern vars are in a different region from body ??
 }
 
-static int stmt_temp_var_counter = 0;
 static qvar_t stmt_temp_var() {
-  let i = stmt_temp_var_counter++;
-  qvar_t res = new $(Loc_n,new (string_t)aprintf("_stmttmp%X",i));
+  static int counter = 0;
+  qvar_t res = new $(Loc_n,new (string_t)aprintf("_stmttmp%X",counter++));
   return res;
 }
 // new_block is a kludge because we he abstract syntax doesn't group the
@@ -196,19 +191,16 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         else
           Warn::err2(s0->loc,"must return a value of type ",t);
       }
-    } else {
-      // don't introduce alias expressions here; would be useless
-      bool bogus = false;
-      exp_t e = eopt;
-      tcExp(te,&t,e);
-      if (!coerce_arg(curr_rgnpo(te),e,t,&bogus)) {
-        Warn::err2(s0->loc, "returns value of type ",(type_t)e->topt,
-	           "but requires ",t);
-        Unify::explain_failure();
-      }
-      if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
-	unique_consume_err(e->loc);
+      return;
+    } 
+    // don't introduce alias expressions here; would be useless
+    tcExp(te,&t,eopt);
+    if (!coerce_arg(curr_rgnpo(te),eopt,t,NULL)) {
+     Warn::err2(s0->loc,"returns value of type ",eopt->topt," but requires ",t);
+     Unify::explain_failure();
     }
+    if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(eopt))
+      unique_consume_err(eopt->loc);
     return;
 
   case &IfThenElse_s(e,s1,s2):
@@ -239,23 +231,28 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &Continue_s:
   case &Goto_s(_):  return;
 
+  case &Label_s(l,s): 
+    // We make new_block false because we explicitly create a new block here
+    // Note: NewControlFlow requires we add the label with s, not s0 !!
+    let tv = new Tvar(new (string_t)aprintf("`%s",*l),
+		      new_tvar_id(), kind_to_bound(&rk));
+    tcStmt(new_named_block(s0->loc,te,tv),s,false);
+    return;
+
   case &Fallthru_s(es,*clauseopt):
     let trip_opt = process_fallthru(te,s0,clauseopt);
     if(trip_opt == NULL) {
-      terr(s0->loc,"fallthru not in a non-last case");
+      Warn::err2(s0->loc,"fallthru not in a non-last case");
       return;
     }
-    let tvs = (*trip_opt)[1];
-    let ts_orig = (*trip_opt)[2];
-    list_t<$(tvar_t,type_t)@> instantiation = 
-      List::map_c(make_inst_var,lookup_type_vars(te),tvs);
+    let $(_,tvs,ts_orig) = *trip_opt;
+    let instantiation = List::map_c(make_inst_var,lookup_type_vars(te),tvs);
     let ts = List::map_c(substitute,instantiation,ts_orig);
     for(; ts != NULL && es != NULL; ts = ts->tl, es = es->tl) {
       // don't introduce alias expression here, would be useless
-      bool bogus = false;
       tcExp(te,NULL,es->hd);
-      if(!coerce_arg(curr_rgnpo(te),es->hd,ts->hd,&bogus)) {
-	Warn::err2(s0->loc, "fallthru argument has type ",(type_t)es->hd->topt,
+      if(!coerce_arg(curr_rgnpo(te),es->hd,ts->hd,NULL)) {
+	Warn::err2(s0->loc, "fallthru argument has type ",es->hd->topt,
 		   "but pattern variable has type ",ts->hd);
         Unify::explain_failure();
       }
@@ -264,19 +261,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	unique_consume_err(es->hd->loc);
     }
     if (es != NULL)
-      terr(s0->loc, "too many arguments in explicit fallthru");
+      Warn::err2(s0->loc, "too many arguments in explicit fallthru");
     if (ts != NULL)
-      terr(s0->loc, "too few arguments in explicit fallthru");
-    return;
-
-  // Note: NewControlFlow requires we add the label with s, not s0 !!
-  case &Label_s(l,s): 
-    // Note that we set new_block to false because we're explicitly creating
-    // a new named block here.
-    tcStmt(Tcenv::new_named_block(s0->loc,te,
-				  new Tvar(new ((string_t)aprintf("`%s",*l)),
-					   new_tvar_id(),
-					   kind_to_bound(&rk))),s,false); 
+      Warn::err2(s0->loc, "too few arguments in explicit fallthru");
     return;
 
   case &Switch_s(*exp,scs0,*dtp):
@@ -329,8 +316,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
       let p = scs->hd->pattern;
       if (!Unify::unify((type_t)p->topt,t)) { // allow silent_castable?
-	Warn::err2(scs->hd->loc, "switch on type ",t," but case expects type ",
-		   (type_t)p->topt);
+	Warn::err2(scs->hd->loc, 
+		   "switch on type ",t," but case expects type ",p->topt);
 	Unify::explain_failure();
       }
       else
@@ -393,7 +380,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let p = scs->hd->pattern;
       if (!Unify::unify((type_t)p->topt,exception_type)) { // allow silent_castable?
 	Warn::err2(scs->hd->loc, "switch on type ",exception_type, 
-		   " but case expects type ",(type_t)p->topt);
+		   " but case expects type ",p->topt);
 	Unify::explain_failure();
       }
       else
@@ -411,17 +398,15 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     let te = new_block ? Tcenv::new_block(s0->loc,te) : te;
     switch (d->r) {
     case &Var_d(vd):
-      let &Vardecl(sc,&$(nsl,x),_,tq,t,initializer,*rgn_ptr,atts,_) = vd;
+      let &Vardecl(sc,_,_,tq,t,initializer,*rgn_ptr,_,_) = vd;
       let curr_bl = Tcenv::curr_rgn(te);
       bool is_local;
       switch (sc) {
       case Static: 
       case Extern: 
-      case ExternC: 
-	vd->escapes = true;
-	is_local = false; break;
-      case Abstract: 
-	terr(d->loc,"bad abstract scope for local variable"); 
+      case ExternC: vd->escapes = true; is_local = false; break;
+      case Abstract:
+	Warn::err2(d->loc,"bad abstract scope for local variable"); 
 	fallthru;
       case Register: 
       case Public: 
@@ -429,7 +414,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       }
       // side effect
       *rgn_ptr = is_local ? curr_bl : heap_rgn_type;
-      // if it's an array or string, fill in the size on the type
       switch (compress(t)) {
       case &FnType(_) && is_local: 
 	// this is really an "extern" function declaration
@@ -437,60 +421,54 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	sc = Extern; 
 	is_local = false;
 	break;
-      case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && vd->initializer != NULL:
+      case &ArrayType(ai):
+	// if it's an array or string, fill in the size on the type
+	if(vd->initializer == NULL || ai.num_elts != NULL)
+	  break;
+	exp_opt_t len;
 	switch (vd->initializer->r) {
-	  case &Const_e({.String_c = s}):
-	  t = vd->type = array_type(telt,tq,uint_exp(numelts(s),0),zt,ztl);
-	  break;
-	  case &Const_e({.Wstring_c = s}): /* FIX: need correct size, not 1 */
-	  t = vd->type = array_type(telt,tq,uint_exp(1,0),zt,ztl);
-	  break;
-	  case &Comprehension_e(_,e,_,_): fallthru(e);
-	  case &ComprehensionNoinit_e(e,_,_):
-	  // FIX: copy e here!  
-	  t = vd->type = array_type(telt,tq,e,zt,ztl); 
-	  break;
-	  case &UnresolvedMem_e(_,es): fallthru(es);
-	  case &Array_e(es):
-	  t = vd->type = array_type(telt,tq,uint_exp(List::length(es),0),zt,ztl);
-	  break;
-	  default: break;
+	case &Const_e({.String_c  = s}):    len = uint_exp(numelts(s),0); break;
+	case &Const_e({.Wstring_c = s}):    len = uint_exp(1,0); break; //FIX!
+	case &Comprehension_e(_,e,_,_):     fallthru(e);
+	case &ComprehensionNoinit_e(e,_,_): len = e; break;//FIX: copy e here!
+	case &UnresolvedMem_e(_,es):        fallthru(es);
+	case &Array_e(es):                  len = uint_exp(length(es),0); break;
+	default: len = NULL; break;
 	}
+	ai.num_elts = len;
+	t = vd->type = new ArrayType(ai);
 	break;
       default: break;
       }
-      
       // type safety demands static variables are closed (like globals)
       // (the error message may be confusing b/c it *looks* like tyvars
       //  are in scope)
       let bound_vars = (!is_local) ? NULL : lookup_type_vars(te);
-      let allow_evars = (!is_local) ? false : true;
+      let allow_evars = is_local;
       check_type(s0->loc,te,bound_vars,&tmk,allow_evars,true,t);
       vd->tq.real_const = extract_const_from_typedef(s0->loc,
 						     vd->tq.print_const,t);
-      let te2 = te;
       if (sc == Extern || sc == ExternC)
 	terr(d->loc,"extern declarations are not yet supported within functions");
       if (initializer != NULL) {
-	tcExpInitializer(te2,&t,(exp_t)initializer);
+	tcExpInitializer(te,&t,initializer);
 	// te is only used by is_const_exp for globals and function names
-	if(!is_local && !is_const_exp((exp_t)initializer))
+	if(!is_local && !is_const_exp(initializer))
 	  terr(d->loc, "initializer for static variable needs to be a constant expression");
-	if (!coerce_assign(curr_rgnpo(te2),(exp_t)initializer,t)) {
-	  Warn::err2(d->loc,*x," was declared with type ",t,
-		     " but initialized with type ",(type_t)initializer->topt);
+	if (!coerce_assign(curr_rgnpo(te),initializer,t)) {
+	  Warn::err2(d->loc,vd," was declared with type ",t,
+		     " but initialized with type ",initializer->topt);
 	  Unify::unify(t,(type_t)initializer->topt);
 	  Unify::explain_failure();
 	}
       }
-      tcStmt(te2,s,false);
+      tcStmt(te,s,false);
       return;
           
     case &Let_d(p,*vds,*exp,*dtp):
       // if e is not a variable expression, add an assignment and 
-      // recurse.  This is needed for interpreting patterns cleanly in
-      // the flow analysis.  Exception: when the pattern is just itself
-      // a variable
+      // recurse.  This is needed for interpreting patterns cleanly in the
+      // flow analysis.  Exception: when the pattern is just itself a variable
       let e = *exp;
       switch (p->r) {
       case &Var_p(...): 
@@ -499,13 +477,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       default:
 	if (!is_var_exp(e)) {
 	  let vd = new_vardecl(0,stmt_temp_var(), new_evar(NULL,NULL), NULL);
-	  let s1 = new_stmt(s0->r,s0->loc);
 	  let d = let_decl(new_pat(new Var_p(vd, new_pat(&Wild_p_val,e->loc)),
 				   e->loc),
 			   e, s0->loc);
-	  let s2 = decl_stmt(d,s1,s0->loc);
-	  // 	    let s2 = declare_stmt(v,new_evar(NULL,NULL),e,s1,s0->loc);
-	  s0->r = s2->r;
+	  s0->r = decl_stmt(d,new_stmt(s0->r,s0->loc),s0->loc)->r;
 	  *exp = varb_exp(new Local_b(vd),e->loc);
 	  tcStmt(te,s0,new_block);
 	  return;
@@ -517,11 +492,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       //XXX: need to check that e is a unique path?
       let pat_res = tcPat(te,p,&pat_type,e);
       *vds = new Opt(pat_res.patvars);
-      if (!Unify::unify((type_t)p->topt,(type_t)e->topt)
-	  && !coerce_assign(curr_rgnpo(te),e,(type_t)p->topt)) {
-	Warn::err2(d->loc,"pattern type ",(type_t)p->topt,
-		   " does not match definition type ",(type_t)e->topt);
-	Unify::unify((type_t)p->topt,(type_t)e->topt);
+      let pt = (type_t)p->topt;
+      let et = (type_t)e->topt;
+      if (!Unify::unify(pt,et) && !coerce_assign(curr_rgnpo(te),e,pt)) {
+	Warn::err2(d->loc,
+		   "pattern type ",pt," does not match definition type ",et);
+	Unify::unify(pt,et);
 	Unify::explain_failure();
       }
       else
@@ -532,14 +508,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       
     case &Letv_d(vds):
       let curr_bl = Tcenv::curr_rgn(te);
-      let te2 = te;
       for (; vds != NULL; vds = vds->tl) {
-	let vd = vds->hd;
-	let &Vardecl(_,&$(nsl,_),_,_,t,_,*rgn_ptr,_,_) = vd;
-	*rgn_ptr = curr_bl; // side effect
-	check_type(s0->loc,te2,lookup_type_vars(te2),&tmk,true,true,t);
+       vds->hd->rgn = curr_bl; // side effect
+       check_type(s0->loc,te,lookup_type_vars(te),&tmk,true,true,vds->hd->type);
       }
-      tcStmt(te2,s,false);
+      tcStmt(te,s,false);
       return;
 
     case &Region_d(tv,vd,open_exp_opt):
@@ -587,9 +560,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
     case &Fn_d(fd): 
       // FIX: much of this code is the same as in Tc::tcFndecl
-      let curr_bl = Tcenv::curr_rgn(te);
       if (fd->sc != Public)
-	terr(d->loc,"bad storage class for inner function");
+	Warn::err2(d->loc,"bad storage class for inner function");
       // check packed and aligned don't show up
       for (_ atts = fd->i.attributes; atts; atts = atts->tl)
 	switch (atts->hd) {
@@ -601,6 +573,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       check_fndecl_valid_type(d->loc,te,fd);
       type_t t = fndecl2type(fd);
       fd->i.attributes = transfer_fn_type_atts(t,fd->i.attributes);
+      let curr_bl = Tcenv::curr_rgn(te);
       vardecl_t vd = new Vardecl {fd->sc, fd->name, 0,const_tqual(0), 
 				  at_type(t,curr_bl,empty_tqual(0), 
 					  false_type),
@@ -621,14 +594,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     case &Enum_d(_):          unimp_msg_part = "enum";         break;
     case &Typedef_d(_):       unimp_msg_part = "typedef";      break;
     case &ExternC_d(...):     unimp_msg_part = "extern \"C\""; break;
-    case &ExternCinclude_d(...):
-      unimp_msg_part = "extern \"C include\""; break;
+    case &ExternCinclude_d(...): unimp_msg_part = "extern \"C include\""; break;
     case &Porton_d:          unimp_msg_part = "__cyclone_port_on__";  break;
     case &Portoff_d:         unimp_msg_part = "__cyclone_port_off__"; break;
     case &Tempeston_d:       unimp_msg_part = "__tempest_on__";  break;
     case &Tempestoff_d:      unimp_msg_part = "__tempest_off__"; break;
     }
-    throw impos("tcStmt: nested %s declarations unimplemented",unimp_msg_part);
-
+    Warn::impos2("tcStmt: nested ",unimp_msg_part," declarations not allowed");
   }
 }

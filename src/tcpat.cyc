@@ -766,7 +766,7 @@ void check_pat_regions(tenv_t te, pat_t p,
 		     "from a non-unique path");
 	else
 	  Warn::err2(p->loc,"pattern for variable ",(*vdopt)->name,
-	     "dereferences an alias-free-pointer from a non-unique path");
+	     " dereferences an alias-free-pointer from a non-unique path");
     }
   }
 }

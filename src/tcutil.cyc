@@ -1911,7 +1911,7 @@ static bool can_insert_alias(exp_t e, type_t e_type,
 
 // coerce e to have type t -- used in function call and explicit fallthru
 bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2, 
-		bool @alias_coercion) {
+		bool *alias_coercion) {
   type_t t1 = compress((type_t)e->topt);
   coercion_t c;
   bool do_alias_coercion = false;
@@ -1922,8 +1922,8 @@ bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2,
   if (is_arithmetic_type(t2) && is_arithmetic_type(t1)) {
     // issue a warning if we lose precision
     if (will_lose_precision(t1,t2))
-      warn(e->loc,"integral size mismatch; %s -> %s conversion supplied",
-	   typ2string(t1), typ2string(t2));
+      Warn::warn2(e->loc,"integral size mismatch; ",
+		  t1," -> ",t2," conversion supplied");
     unchecked_cast(e,t2,No_coercion);
     return true;
   } 
@@ -1933,7 +1933,8 @@ bool coerce_arg(RgnOrder::rgn_po_opt_t po, exp_t e, type_t t2,
     if (warn_alias_coerce)
       warn(e->loc,"implicit alias coercion for %s:%s to %s",
 	   exp2string(e), typ2string(t1), typ2string(t2));
-    *alias_coercion = true;
+    if(alias_coercion != NULL)
+      *alias_coercion = true;
   }
 
   if (silent_castable(po,e->loc,t1,t2)) {
@@ -3214,7 +3215,6 @@ void check_bound(seg_t loc, unsigned int i, ptrbound_t b, bool do_warn) {
 void check_nonzero_bound(seg_t loc, ptrbound_t b) {
   check_bound(loc, 0, b, false);
 }
-
 // FIX: there are other expressions we could allow, such as
 // &(x->y) or &(x[0]) that we do not support here...
 // RENAME

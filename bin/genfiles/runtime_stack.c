@@ -59,8 +59,8 @@ void _push_frame(struct _RuntimeStack *frame) {
 // Invariant: result is non-null
 void _npop_frame(unsigned int n) {
   unsigned int i;
-  struct _RuntimeStack *current_frame = get_current_frame();
   for(i = n; i <= n; i--) {
+    struct _RuntimeStack *current_frame = get_current_frame();
     if(current_frame == NULL) {
       errquit("internal error: empty frame stack\n");
     } 

@@ -112,7 +112,7 @@ void tcTest(tenv_t te, exp_t e, string_t<`H> msg_part) {
   check_contains_assign(e);
   tcExp(te,&sint_type,e);
   if (!coerce_to_bool(e))
-    Warn::err2(e->loc,"test of ",msg_part," has type ",(type_t)e->topt, 
+    Warn::err2(e->loc,"test of ",msg_part," has type ",e->topt, 
 	       " instead of integral or pointer type");
 }
 
@@ -305,7 +305,7 @@ void check_format_args(tenv_t te, exp_t fmt,
       tcExp(te,&t,e);
       if (!coerce_arg(curr_rgnpo(te),e,t,&alias_coercion))
 	err_and_explain(e->loc,"descriptor has type ",t,
-			" but argument has type ",(type_t)e->topt);
+			" but argument has type ",e->topt);
       if (alias_coercion)
 	*alias_arg_exps = new List(arg_cnt,*alias_arg_exps);
       if (is_noalias_pointer_or_aggr(t) 
@@ -371,11 +371,9 @@ static type_t tcArithBinop(tenv_t te, exp_t e1, exp_t e2,
 			   bool checker(exp_t)) {
   // JGMFIX: lousy error messages...
   if (!checker(e1)) 
-    return expr_err(te,e1->loc,NULL,
-		    "type ",(type_t)e1->topt," cannot be used here");
+    return expr_err(te,e1->loc,NULL, "type ",e1->topt," cannot be used here");
   if (!checker(e2)) 
-    return expr_err(te,e2->loc,NULL,
-		    "type ",(type_t)e2->topt," cannot be used here");
+    return expr_err(te,e2->loc,NULL, "type ",e2->topt," cannot be used here");
   return arith_convert(te, e1, e2);
 }
 // Plus needs to support a pointer and an int
@@ -736,7 +734,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
   let l2 = List(e2,&l1);
   if (!coerce_list(curr_rgnpo(te),t,&l2))
     err_and_explain(loc,"conditional clause types do not match: ",
-		    (type_t)e2->topt," != ", (type_t)e3->topt);
+		    e2->topt," != ", e3->topt);
   return t;
 }
 
@@ -977,7 +975,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 	      tcExp(te, &vt, e1);
 	      if (!coerce_arg(curr_rgnpo(te),e1,vt,&alias_coercion))
 		err_and_explain(loc,"vararg requires type ",vt,
-				" but argument has type ", (type_t)e1->topt);
+				" but argument has type ", e1->topt);
 	      if (alias_coercion)
 		*alias_arg_exps = new List(arg_cnt,*alias_arg_exps);
 	      if (is_noalias_pointer_or_aggr(vt) &&
@@ -1052,7 +1050,7 @@ static type_t tcThrow(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   let exception_type = exn_type();
   tcExp(te,&exception_type,e);
   if (!coerce_arg(curr_rgnpo(te),e,exception_type,&bogus))
-    Warn::err2(loc,"expected ",exception_type," but found ",(type_t)e->topt);
+    Warn::err2(loc,"expected ",exception_type," but found ",e->topt);
   if (topt != NULL) 
     return *topt;
   return wildtyp(lookup_opt_type_vars(te));
@@ -1227,15 +1225,13 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
   check_type(loc,te,lookup_type_vars(te),&tmk,true,false,t);
   check_no_qual(loc,t);
   if(!Evexp::okay_szofarg(t))
-    terr(loc, "sizeof applied to type %s, which has unknown size here",
-         typ2string(t));
+    Warn::err2(loc, "sizeof applied to type ",t," which has unknown size here");
   if (topt != NULL)
     switch (compress(*topt)) {
-    case tagtyp as &AppType(&TagCon,&List{tt,_}):
+    case &AppType(&TagCon,&List{tt,_}):
       // see if tt unifies with ValueofType(Sizeof_e(t))
-      let e = sizeoftype_exp(t,0);
-      let tt2 = new ValueofType(e);
-      if (Unify::unify(tt,tt2)) return tagtyp;
+      if (Unify::unify(tt,new ValueofType(sizeoftype_exp(t,0)))) 
+	return compress(*topt);
       break;
     default: break;
     }
@@ -1361,19 +1357,16 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
   case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
     check_rgn_accessible(te,loc,rt);
     check_nonzero_bound(loc, b);
-    if (!kind_leq(type_kind(t2),&tmk) && !abstract_val_ok(te)) {
+    if (!kind_leq(type_kind(t2),&tmk) && !abstract_val_ok(te))
       switch (compress(t2)) {
       case &FnType(...):
         if (Tc::aggressive_warn)
-          warn(loc,"unnecessary dereference for function type");
+          Warn::warn2(loc,"unnecessary dereference for function type");
         return t;
-      default:
-        terr(loc,"can't dereference abstract pointer type");
+      default: Warn::err2(loc,"can't dereference abstract pointer type");
       }
-    }
     return t2;
-  default:
-    return expr_err(te,loc,topt,"expecting *, @, or ? type but found ",t);
+  default: return expr_err(te,loc,topt,"expecting pointer type but found ",t);
   }
 }
 
@@ -1418,7 +1411,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
       return expr_err(te,loc,topt,"cannot read union member ",*f," since it is not `bits-only'");
     return finfo->type;
   default: return expr_err(te,loc,topt,"expecting struct or union, found ",
-			   (type_t)e->topt);
+			   e->topt);
   }
 }
 
@@ -1484,7 +1477,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
   default: break;
   }
   return expr_err(te,loc,topt,"expecting struct or union pointer, found ",
-		  (type_t)e->topt);
+		  e->topt);
 }
 
 // e1[e2]
@@ -1685,8 +1678,7 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     break;
   default:
     if (!coerce_uint_type(bound))
-      terr(bound->loc,"expecting unsigned int, found %s",
-	   typ2string((type_t)bound->topt));
+      Warn::err2(bound->loc,"expecting unsigned int, found ",bound->topt);
   }
   // double-check that the index variable x is declared const
   if (!vd->tq.real_const)
@@ -1758,8 +1750,7 @@ static type_t tcComprehensionNoinit(tenv_t te, seg_t loc, type_t * topt,
     break;
   default:
     if (!coerce_uint_type(bound))
-      terr(bound->loc,"expecting unsigned int, found %s",
-	   typ2string((type_t)bound->topt));
+      Warn::err2(bound->loc,"expecting unsigned int, found ",bound->topt);
   }
   // add x to the environment as an unsigned int only if te->le is not NULL
   let topt2 = NULL;
@@ -1909,7 +1900,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     if (!coerce_arg(curr_rgnpo(te2),field_exp,inst_fieldtyp,&bogus))
       err_and_explain(field_exp->loc,"field ",*(field->name)," of ",ad,
 		      " expects type ",inst_fieldtyp, " != ", 
-		      (type_t)field_exp->topt);
+		      field_exp->topt);
   }
   let rpo_inst = NULL;
   for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
@@ -1938,7 +1929,7 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
       if (!coerce_arg(curr_rgnpo(te),field_exp,field->type,&bogus))
 	err_and_explain(field_exp->loc,"field ",*field->name,
 			" of struct expects type ",field->type," != ",
-			(type_t)field_exp->topt);
+			field_exp->topt);
     }
     break;
   default: impos("tcAnonStruct: wrong type");

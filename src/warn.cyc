@@ -34,6 +34,7 @@ datatype Warg {
   String(string_t);
   Qvar(qvar_t);
   Typ(type_t);
+  TypOpt(type_opt_t);
   Exp(exp_t);
   Stmt(stmt_t);
   Aggrdecl(aggrdecl_t);
@@ -117,6 +118,7 @@ static string_t args2string(warg_t ? args) {
     switch(args[i]) {
     case &String(s2): s = s2; break;
     case &Exp(e):     s = exp2string(e); break;
+    case &TypOpt(t):  if(t) fallthru(t); else s = "<?>"; break;
     case &Typ(t):     s = typ2string(t); break;
     case &Qvar(qv):   s = qvar2string(qv); break;
     case &Stmt(s2):   s = stmt2string(s2); break;

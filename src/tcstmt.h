@@ -23,7 +23,7 @@
 #include "tcenv.h"
 
 namespace Tcstmt {
-extern void tcStmt(Tcenv::tenv_t, Absyn::stmt_t, bool new_block);
+void tcStmt(Tcenv::tenv_t, Absyn::stmt_t, bool new_block);
 }
 
 #endif
