@@ -30,13 +30,13 @@ int tag; unsigned int* f1; } ; extern int Cyc_Stdio_fprintf( struct Cyc_Stdio___
 struct _tagged_arr fmt, struct _tagged_arr); extern int Cyc_Stdio_printf( struct
 _tagged_arr fmt, struct _tagged_arr); extern int Cyc_Stdio_sprintf( struct
 _tagged_arr s, struct _tagged_arr fmt, struct _tagged_arr); extern struct
-_tagged_arr Cyc_Stdio_xprintf( struct _tagged_arr fmt, struct _tagged_arr);
-extern struct _tagged_arr Cyc_Stdio_rxprintf( struct _RegionHandle*, struct
+_tagged_arr Cyc_Stdio_aprintf( struct _tagged_arr fmt, struct _tagged_arr);
+extern struct _tagged_arr Cyc_Stdio_raprintf( struct _RegionHandle*, struct
 _tagged_arr fmt, struct _tagged_arr ap); extern int Cyc_Stdio_vfprintf( struct
 Cyc_Stdio___sFILE*, struct _tagged_arr fmt, struct _tagged_arr ap); extern int
 Cyc_Stdio_vprintf( struct _tagged_arr fmt, struct _tagged_arr); extern int Cyc_Stdio_vsprintf(
 struct _tagged_arr s, struct _tagged_arr fmt, struct _tagged_arr); extern struct
-_tagged_arr Cyc_Stdio_vrxprintf( struct _RegionHandle* r1, struct _tagged_arr
+_tagged_arr Cyc_Stdio_vraprintf( struct _RegionHandle* r1, struct _tagged_arr
 fmt, struct _tagged_arr ap); static const int Cyc_Stdio_ShortPtr_sa= 0; struct
 Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_Stdio_UShortPtr_sa=
 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
@@ -198,7 +198,7 @@ _temp59; _LL55: if(*(( int*) _temp53) == Cyc_Stdio_Double_pa){ _LL60: _temp59=((
 struct Cyc_Stdio_Double_pa_struct*) _temp53)->f1; goto _LL56;} else{ goto _LL57;}
 _LL57: goto _LL58; _LL56: return _temp59; _LL58:( int) _throw( Cyc_Stdio_badarg((
 struct _tagged_arr)({ struct _tagged_arr(* _temp61)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp65= _tag_arr("printf expected double but found %s",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp65= _tag_arr("printf expected double but found %s",
 sizeof( unsigned char), 36u); struct Cyc_Stdio_String_pa_struct _temp66; _temp66.tag=
 Cyc_Stdio_String_pa; _temp66.f1=( struct _tagged_arr) Cyc_Stdio_parg2string(*((
 void**) _check_unknown_subscript( ap, sizeof( void*), 0u)));{ void* _temp64=(
@@ -540,7 +540,7 @@ ap); if( 0 <= ans){*(( unsigned char*) _check_unknown_subscript( s, sizeof(
 unsigned char), ans))='\000';} return ans;} int Cyc_Stdio_sprintf( struct
 _tagged_arr s, struct _tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Stdio_vsprintf(
 s, fmt, ap);} static int Cyc_Stdio_putc_void( int c, int dummy){ return 1;}
-struct _tagged_arr Cyc_Stdio_vrxprintf( struct _RegionHandle* r1, struct
+struct _tagged_arr Cyc_Stdio_vraprintf( struct _RegionHandle* r1, struct
 _tagged_arr fmt, struct _tagged_arr ap){ int size=(( int(*)( int(* ioputc)( int,
 int), int ioputc_env, struct _tagged_arr fmt0, struct _tagged_arr ap)) Cyc_Stdio__IO_vfprintf)(
 Cyc_Stdio_putc_void, 0, fmt, ap) + 1; struct _tagged_arr s=({ unsigned int
@@ -549,7 +549,7 @@ _region_malloc( r1, sizeof( unsigned char) * _temp152); struct _tagged_arr
 _temp155= _tag_arr( _temp153, sizeof( unsigned char),( unsigned int) size);{
 unsigned int _temp154= _temp152; unsigned int i; for( i= 0; i < _temp154; i ++){
 _temp153[ i]='\000';}}; _temp155;}); Cyc_Stdio_vsprintf( s, fmt, ap); return s;}
-struct _tagged_arr Cyc_Stdio_rxprintf( struct _RegionHandle* r1, struct
-_tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Stdio_vrxprintf( r1, fmt, ap);}
-struct _tagged_arr Cyc_Stdio_xprintf( struct _tagged_arr fmt, struct _tagged_arr
-ap){ return Cyc_Stdio_vrxprintf( Cyc_Core_heap_region, fmt, ap);}
+struct _tagged_arr Cyc_Stdio_raprintf( struct _RegionHandle* r1, struct
+_tagged_arr fmt, struct _tagged_arr ap){ return Cyc_Stdio_vraprintf( r1, fmt, ap);}
+struct _tagged_arr Cyc_Stdio_aprintf( struct _tagged_arr fmt, struct _tagged_arr
+ap){ return Cyc_Stdio_vraprintf( Cyc_Core_heap_region, fmt, ap);}

@@ -39,7 +39,7 @@ using Tcutil;
 namespace Evexp;
 
 void exp_err(seg_t loc, string_t msg) {
-  Position::post_error(Position::mk_err_elab(loc, xprintf("Exp_err: %s",msg)));
+  Position::post_error(Position::mk_err_elab(loc, aprintf("Exp_err: %s",msg)));
 }
 
 cnst_t eval_const_exp(exp_t e); // forward reference for mutual recursion
@@ -136,7 +136,7 @@ bool okay_szofarg(type_t t) {
   case &AccessEff(_): return false;
 
   case &TypedefType(_,_,_): 
-    return Tcutil::impos(xprintf("szof typedeftype %s",typ2string(t)));
+    return Tcutil::impos(aprintf("szof typedeftype %s",typ2string(t)));
   }
 }
 
@@ -264,7 +264,7 @@ cnst_t eval_const_exp(exp_t e) {
 	cn = new Int_c(sn,x); 
       break;
     default:
-      exp_err(e->loc,xprintf("eval_const: cannot cast to %s",typ2string(t)));
+      exp_err(e->loc,aprintf("eval_const: cannot cast to %s",typ2string(t)));
       return new Int_c(Signed,0);
     }
     break;

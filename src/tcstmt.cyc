@@ -117,14 +117,14 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       switch (compress(t)) {
       case VoidType: break;
       default:
-	terr(s0->loc,xprintf("must return a value of type %s",typ2string(t)));
+	terr(s0->loc,aprintf("must return a value of type %s",typ2string(t)));
         break;
       }
     } else {
       exp_t e = (exp_t)eopt;
       tcExp(te,&t,e);
       if (!coerce_use(te,e,t))
-	terr(s0->loc, xprintf("returns value of type %s but requires %s",
+	terr(s0->loc, aprintf("returns value of type %s but requires %s",
 			      typ2string(e->topt->v), typ2string(t)));
       switch (compress(t)) {
       case VoidType: terr(s0->loc,"function returns void expression"); break;
@@ -180,7 +180,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     for(; ts != null && es != null; ts = ts->tl, es = es->tl) {
       tcExp(te,null,es->hd);
       if(!coerce_arg(te,es->hd,ts->hd))
-	terr(s0->loc, xprintf("fallthru argument has type %s "
+	terr(s0->loc, aprintf("fallthru argument has type %s "
 			      "but pattern variable has type %s",
 			      typ2string(es->hd->topt->v), typ2string(ts->hd)));
     }
@@ -197,7 +197,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // Note that we set new_block to false because we're explicitly creating
     // a new named block here.
     tcStmt(Tcenv::new_named_block(s0->loc,add_label(te,l,s),
-                                  new Tvar(new ((string_t)xprintf("`%s",*l)),new_tvar_id(),
+                                  new Tvar(new ((string_t)aprintf("`%s",*l)),new_tvar_id(),
                                            new_conref(RgnKind))),s,false); 
     return;
 
@@ -215,7 +215,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let $(new_tvs,vds) = tcPat(te,p,&t,null);
       if (!unify(p->topt->v,t))
 	terr(scs->hd->loc,
-	     xprintf("switch on type %s, but case expects type %s",
+	     aprintf("switch on type %s, but case expects type %s",
 		     typ2string(t), typ2string(p->topt->v)));
       else
 	check_pat_regions(te,p);
@@ -265,7 +265,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let p       = scs->hd->pattern;
       let $(new_tvs,x) = tcPat(te,p,&exn_typ,null);
       if (!unify(p->topt->v,exn_typ))
-        terr(scs->hd->loc, xprintf("expected xtunion exn but found %s",
+        terr(scs->hd->loc, aprintf("expected xtunion exn but found %s",
 				   typ2string(p->topt->v)));
       else
 	check_pat_regions(te,p);
@@ -342,7 +342,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         tcExpInitializer(te2,&t,(exp_t)initializer);
         if (!coerce_assign(te2,(exp_t)initializer,t))
 	  terr(d->loc,
-	       xprintf("%s declared with type %s, initialized with type %s",
+	       aprintf("%s declared with type %s, initialized with type %s",
 		       *x, typ2string(t),
 		       typ2string(initializer->topt->v)));
       }
@@ -359,7 +359,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       if (topt != null && !unify(p->topt->v,topt->v))
         terr(d->loc,"type of pattern does not match declared type");
       if (!unify(p->topt->v,e->topt->v))
-	terr(d->loc,xprintf("pattern type %s does not match definition type %s",
+	terr(d->loc,aprintf("pattern type %s does not match definition type %s",
 			    typ2string(p->topt->v),typ2string(e->topt->v)));
       else
 	check_pat_regions(te,p);
@@ -400,7 +400,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     case &Typedef_d(_):       unimp_msg_part = "typedef";   break;
     case &ExternC_d(_):       unimp_msg_part = "extern \"C\""; break;
     }
-    throw impos(xprintf("tcStmt: nested %s declarations unimplemented",
+    throw impos(aprintf("tcStmt: nested %s declarations unimplemented",
 			unimp_msg_part));
 
   case &Region_s(tv,vd,s):

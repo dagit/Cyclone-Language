@@ -370,7 +370,7 @@ namespace Absyn {
   EXTERN_ABSYN tunion Primop {
     Plus, Times, Minus, Div, Mod, Eq, Neq, Gt, Lt, Gte, Lte, Not,
     Bitnot, Bitand, Bitor, Bitxor, Bitlshift, Bitlrshift, Bitarshift,
-    Size, Printf, Fprintf, Xprintf, Scanf, Fscanf, Sscanf
+    Size, Printf, Fprintf, Aprintf, Scanf, Fscanf, Sscanf
   };
 
   EXTERN_ABSYN tunion Incrementor { PreInc, PostInc, PreDec, PostDec };

@@ -25,7 +25,7 @@ unsigned int f1; } ; static const int Cyc_Stdio_Double_pa= 2; struct Cyc_Stdio_D
 int tag; double f1; } ; static const int Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{
 int tag; short* f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
 int tag; unsigned int* f1; } ; extern int Cyc_Stdio_fprintf( struct Cyc_Stdio___sFILE*,
-struct _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Stdio_xprintf(
+struct _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Stdio_aprintf(
 struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
 0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
 Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
@@ -201,7 +201,7 @@ static const int Cyc_Absyn_Bitor= 14; static const int Cyc_Absyn_Bitxor= 15;
 static const int Cyc_Absyn_Bitlshift= 16; static const int Cyc_Absyn_Bitlrshift=
 17; static const int Cyc_Absyn_Bitarshift= 18; static const int Cyc_Absyn_Size=
 19; static const int Cyc_Absyn_Printf= 20; static const int Cyc_Absyn_Fprintf=
-21; static const int Cyc_Absyn_Xprintf= 22; static const int Cyc_Absyn_Scanf= 23;
+21; static const int Cyc_Absyn_Aprintf= 22; static const int Cyc_Absyn_Scanf= 23;
 static const int Cyc_Absyn_Fscanf= 24; static const int Cyc_Absyn_Sscanf= 25;
 static const int Cyc_Absyn_PreInc= 0; static const int Cyc_Absyn_PostInc= 1;
 static const int Cyc_Absyn_PreDec= 2; static const int Cyc_Absyn_PostDec= 3;
@@ -585,7 +585,7 @@ _tagged_arr _temp19={( void*) _temp18,( void*) _temp18,( void*)( _temp18 + 2u)};
 _temp17( _temp22, _temp23, _temp19);}}}); return;} static void* Cyc_Parse_unimp(
 struct _tagged_arr msg, struct Cyc_Position_Segment* sg){ return Cyc_Parse_abort((
 struct _tagged_arr)({ struct _tagged_arr(* _temp26)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp30= _tag_arr("%s unimplemented",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp30= _tag_arr("%s unimplemented",
 sizeof( unsigned char), 17u); struct Cyc_Stdio_String_pa_struct _temp31; _temp31.tag=
 Cyc_Stdio_String_pa; _temp31.f1=( struct _tagged_arr) msg;{ void* _temp29=( void*)&
 _temp31; void* _temp27[ 1u]={ _temp29}; struct _tagged_arr _temp28={( void*)
@@ -705,7 +705,7 @@ Cyc_String_zstrptrcmp((* _temp135->name).f2,( struct _tagged_arr*)(( struct Cyc_
 _check_null( params))->hd) == 0){ found= 1; break;}} if( ! found){(( int(*)(
 struct _tagged_arr msg, struct Cyc_Position_Segment* sg)) Cyc_Parse_abort)((
 struct _tagged_arr)({ struct _tagged_arr(* _temp151)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp155= _tag_arr("%s is not listed as a parameter",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp155= _tag_arr("%s is not listed as a parameter",
 sizeof( unsigned char), 32u); struct Cyc_Stdio_String_pa_struct _temp156;
 _temp156.tag= Cyc_Stdio_String_pa; _temp156.f1=( struct _tagged_arr)*(* _temp135->name).f2;{
 void* _temp154=( void*)& _temp156; void* _temp152[ 1u]={ _temp154}; struct
@@ -725,7 +725,7 @@ sizeof( unsigned char), 18u); goto _LL110; _LL134: decl_kind= _tag_arr("extern C
 sizeof( unsigned char), 21u); goto _LL110; _LL110:;}(( int(*)( struct
 _tagged_arr msg, struct Cyc_Position_Segment* sg)) Cyc_Parse_abort)(( struct
 _tagged_arr)({ struct _tagged_arr(* _temp157)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp161= _tag_arr("%s appears in parameter type",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp161= _tag_arr("%s appears in parameter type",
 sizeof( unsigned char), 29u); struct Cyc_Stdio_String_pa_struct _temp162;
 _temp162.tag= Cyc_Stdio_String_pa; _temp162.f1=( struct _tagged_arr) decl_kind;{
 void* _temp160=( void*)& _temp162; void* _temp158[ 1u]={ _temp160}; struct
@@ -738,7 +738,7 @@ _temp163= env; _temp165=* _temp163; _LL169: _temp168= _temp165.f1; goto _LL167;
 _LL167: _temp166= _temp165.f2; goto _LL164; _LL164: if( _temp168 == 0){ return((
 struct _tuple2*(*)( struct _tagged_arr msg, struct Cyc_Position_Segment* sg))
 Cyc_Parse_abort)(( struct _tagged_arr)({ struct _tagged_arr(* _temp170)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp174= _tag_arr("missing type for parameter %s", sizeof( unsigned char), 30u);
 struct Cyc_Stdio_String_pa_struct _temp175; _temp175.tag= Cyc_Stdio_String_pa;
 _temp175.f1=( struct _tagged_arr)* x;{ void* _temp173=( void*)& _temp175; void*
@@ -1317,7 +1317,7 @@ sizeof( unsigned char), 70u), loc); goto _LL628; _LL628:;} decls=({ struct Cyc_L
 _temp647=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
 _temp647->hd=( void*) d; _temp647->tl= decls; _temp647;});} if( atts != 0){ Cyc_Parse_err((
 struct _tagged_arr)({ struct _tagged_arr(* _temp648)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp652= _tag_arr("bad attribute %s in typedef",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp652= _tag_arr("bad attribute %s in typedef",
 sizeof( unsigned char), 28u); struct Cyc_Stdio_String_pa_struct _temp653;
 _temp653.tag= Cyc_Stdio_String_pa; _temp653.f1=( struct _tagged_arr) Cyc_Absyn_attribute2string((
 void*)(( struct Cyc_List_List*) _check_null( atts))->hd);{ void* _temp651=( void*)&
@@ -1353,7 +1353,7 @@ _temp671->hd=( void*) _temp670; _temp671->tl= decls; _temp671;});}}}} return((
 struct Cyc_List_List*(*)( struct Cyc_List_List* x)) Cyc_List_imp_rev)( decls);}}}}}}}
 static void* Cyc_Parse_id_to_kind( struct _tagged_arr s, struct Cyc_Position_Segment*
 loc){ if( Cyc_String_strlen( s) != 1){ Cyc_Parse_err(( struct _tagged_arr)({
-struct _tagged_arr(* _temp675)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp675)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp679= _tag_arr("bad kind: %s", sizeof( unsigned char), 13u);
 struct Cyc_Stdio_String_pa_struct _temp680; _temp680.tag= Cyc_Stdio_String_pa;
 _temp680.f1=( struct _tagged_arr) s;{ void* _temp678=( void*)& _temp680; void*
@@ -1365,7 +1365,7 @@ return( void*) Cyc_Absyn_AnyKind; case 'M': _LL682: return( void*) Cyc_Absyn_Mem
 case 'B': _LL683: return( void*) Cyc_Absyn_BoxKind; case 'R': _LL684: return(
 void*) Cyc_Absyn_RgnKind; case 'E': _LL685: return( void*) Cyc_Absyn_EffKind;
 default: _LL686: Cyc_Parse_err(( struct _tagged_arr)({ struct _tagged_arr(*
-_temp688)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp688)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp692= _tag_arr("bad kind: %s", sizeof( unsigned char), 13u);
 struct Cyc_Stdio_String_pa_struct _temp693; _temp693.tag= Cyc_Stdio_String_pa;
 _temp693.f1=( struct _tagged_arr) s;{ void* _temp691=( void*)& _temp693; void*
@@ -1383,7 +1383,7 @@ tms; _temp694;});}} static struct Cyc_Absyn_Decl* Cyc_Parse_v_typ_to_typedef(
 struct Cyc_Position_Segment* loc, struct _tuple7* t){ struct _tuple1* x=(* t).f1;
 Cyc_Lex_register_typedef( x); if((* t).f5 != 0){ Cyc_Parse_err(( struct
 _tagged_arr)({ struct _tagged_arr(* _temp697)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp701= _tag_arr("bad attribute %s within typedef",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp701= _tag_arr("bad attribute %s within typedef",
 sizeof( unsigned char), 32u); struct Cyc_Stdio_String_pa_struct _temp702;
 _temp702.tag= Cyc_Stdio_String_pa; _temp702.f1=( struct _tagged_arr) Cyc_Absyn_attribute2string((
 void*)(( struct Cyc_List_List*) _check_null((* t).f5))->hd);{ void* _temp700=(
@@ -1932,7 +1932,7 @@ unsigned char _temp1305[ 7u]="TUNION"; static unsigned char _temp1306[ 8u]="XTUN
 static unsigned char _temp1307[ 5u]="FILL"; static unsigned char _temp1308[ 8u]="CODEGEN";
 static unsigned char _temp1309[ 4u]="CUT"; static unsigned char _temp1310[ 7u]="SPLICE";
 static unsigned char _temp1311[ 7u]="PRINTF"; static unsigned char _temp1312[ 8u]="FPRINTF";
-static unsigned char _temp1313[ 8u]="XPRINTF"; static unsigned char _temp1314[ 6u]="SCANF";
+static unsigned char _temp1313[ 8u]="APRINTF"; static unsigned char _temp1314[ 6u]="SCANF";
 static unsigned char _temp1315[ 7u]="FSCANF"; static unsigned char _temp1316[ 7u]="SSCANF";
 static unsigned char _temp1317[ 7u]="MALLOC"; static unsigned char _temp1318[ 9u]="REGION_T";
 static unsigned char _temp1319[ 7u]="REGION"; static unsigned char _temp1320[ 5u]="RNEW";
@@ -5300,7 +5300,7 @@ Cyc_Absyn_Tvar* tv=({ struct Cyc_Absyn_Tvar* _temp2659=( struct Cyc_Absyn_Tvar*)
 GC_malloc( sizeof( struct Cyc_Absyn_Tvar)); _temp2659->name=({ struct
 _tagged_arr* _temp2660=( struct _tagged_arr*) GC_malloc( sizeof( struct
 _tagged_arr) * 1); _temp2660[ 0]=( struct _tagged_arr)({ struct _tagged_arr(*
-_temp2661)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp2661)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp2665= _tag_arr("`%s", sizeof( unsigned char), 4u);
 struct Cyc_Stdio_String_pa_struct _temp2666; _temp2666.tag= Cyc_Stdio_String_pa;
 _temp2666.f1=( struct _tagged_arr) Cyc_yyget_String_tok( yyvs[
@@ -6484,7 +6484,7 @@ _temp3176.f1=( void*)(( void*) Cyc_Absyn_Fprintf); _temp3176;}); _temp3175;});
 break; case 370: _LL3174: yyval=( void*)({ struct Cyc_Primop_tok_struct*
 _temp3178=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
 _temp3178[ 0]=({ struct Cyc_Primop_tok_struct _temp3179; _temp3179.tag= Cyc_Primop_tok;
-_temp3179.f1=( void*)(( void*) Cyc_Absyn_Xprintf); _temp3179;}); _temp3178;});
+_temp3179.f1=( void*)(( void*) Cyc_Absyn_Aprintf); _temp3179;}); _temp3178;});
 break; case 371: _LL3177: yyval=( void*)({ struct Cyc_Primop_tok_struct*
 _temp3181=( struct Cyc_Primop_tok_struct*) GC_malloc( sizeof( struct Cyc_Primop_tok_struct));
 _temp3181[ 0]=({ struct Cyc_Primop_tok_struct _temp3182; _temp3182.tag= Cyc_Primop_tok;

@@ -163,7 +163,7 @@ regexp:
 				       new {(string_t)$1}));
 	   catch { 
 	     case Not_found:
-	     yyerror(xprintf("Reference to unbound regexp name `%s'", $1));
+	     yyerror(aprintf("Reference to unbound regexp name `%s'", $1));
 	     break;
 	   }
          }

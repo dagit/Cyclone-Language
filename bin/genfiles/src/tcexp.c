@@ -157,7 +157,7 @@ static const int Cyc_Absyn_Bitor= 14; static const int Cyc_Absyn_Bitxor= 15;
 static const int Cyc_Absyn_Bitlshift= 16; static const int Cyc_Absyn_Bitlrshift=
 17; static const int Cyc_Absyn_Bitarshift= 18; static const int Cyc_Absyn_Size=
 19; static const int Cyc_Absyn_Printf= 20; static const int Cyc_Absyn_Fprintf=
-21; static const int Cyc_Absyn_Xprintf= 22; static const int Cyc_Absyn_Scanf= 23;
+21; static const int Cyc_Absyn_Aprintf= 22; static const int Cyc_Absyn_Scanf= 23;
 static const int Cyc_Absyn_Fscanf= 24; static const int Cyc_Absyn_Sscanf= 25;
 static const int Cyc_Absyn_PreInc= 0; static const int Cyc_Absyn_PostInc= 1;
 static const int Cyc_Absyn_PreDec= 2; static const int Cyc_Absyn_PostDec= 3;
@@ -367,7 +367,7 @@ const int Cyc_Stdio_Int_pa= 1; struct Cyc_Stdio_Int_pa_struct{ int tag;
 unsigned int f1; } ; static const int Cyc_Stdio_Double_pa= 2; struct Cyc_Stdio_Double_pa_struct{
 int tag; double f1; } ; static const int Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{
 int tag; short* f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; extern struct _tagged_arr Cyc_Stdio_xprintf(
+int tag; unsigned int* f1; } ; extern struct _tagged_arr Cyc_Stdio_aprintf(
 struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
 0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
 Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
@@ -520,7 +520,7 @@ _temp28[ 0]=({ struct Cyc_Absyn_Tunion_e_struct _temp29; _temp29.tag= Cyc_Absyn_
 _temp29.f1= 0; _temp29.f2= 0; _temp29.f3= 0; _temp29.f4= _temp22; _temp29.f5=
 _temp20; _temp29;}); _temp28;}))); goto _LL5; _LL13: Cyc_Tcutil_terr( e->loc,(
 struct _tagged_arr)({ struct _tagged_arr(* _temp30)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp34= _tag_arr("bad occurrence of struct name %s",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp34= _tag_arr("bad occurrence of struct name %s",
 sizeof( unsigned char), 33u); struct Cyc_Stdio_String_pa_struct _temp35; _temp35.tag=
 Cyc_Stdio_String_pa; _temp35.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string( q);{
 void* _temp33=( void*)& _temp35; void* _temp31[ 1u]={ _temp33}; struct
@@ -562,7 +562,7 @@ GC_malloc( sizeof( struct Cyc_Absyn_FnCall_e_struct)); _temp77[ 0]=({ struct Cyc
 _temp78; _temp78.tag= Cyc_Absyn_FnCall_e; _temp78.f1= e1; _temp78.f2= es;
 _temp78.f3= 0; _temp78;}); _temp77;}))); _npop_handler( 0u); return; _LL64: if(
 _temp71->typs == 0){ Cyc_Tcutil_terr( e->loc,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp79)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp79)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp83= _tag_arr("%s is a constant, not a function", sizeof(
 unsigned char), 33u); struct Cyc_Stdio_String_pa_struct _temp84; _temp84.tag=
 Cyc_Stdio_String_pa; _temp84.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -588,7 +588,7 @@ _temp90[ 0]=({ struct Cyc_Absyn_Struct_e_struct _temp91; _temp91.tag= Cyc_Absyn_
 _temp91.f1= _temp54; _temp91.f2= 0; _temp91.f3= _temp87; _temp91.f4=( struct Cyc_Absyn_Structdecl*)
 _temp75; _temp91;}); _temp90;})));} _npop_handler( 0u); return;} _LL68: Cyc_Tcutil_terr(
 e->loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp92)( struct _tagged_arr
-fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp96=
+fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp96=
 _tag_arr("%s is an enum constructor, not a function", sizeof( unsigned char), 42u);
 struct Cyc_Stdio_String_pa_struct _temp97; _temp97.tag= Cyc_Stdio_String_pa;
 _temp97.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string( _temp54);{ void*
@@ -598,7 +598,7 @@ _temp96, _temp94);}})); _npop_handler( 0u); return; _LL60:;}; _pop_handler();}
 else{ void* _temp57=( void*) _exn_thrown; void* _temp99= _temp57; _LL101: if(
 _temp99 == Cyc_Dict_Absent){ goto _LL102;} else{ goto _LL103;} _LL103: goto
 _LL104; _LL102: Cyc_Tcutil_terr( e1->loc,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp105)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp105)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp109= _tag_arr("unbound identifier %s", sizeof(
 unsigned char), 22u); struct Cyc_Stdio_String_pa_struct _temp110; _temp110.tag=
 Cyc_Stdio_String_pa; _temp110.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -660,7 +660,7 @@ Cyc_List_List*) _check_null( es))->hd);}} void Cyc_Tcexp_tcTest( struct Cyc_Tcen
 te, struct Cyc_Absyn_Exp* e, struct _tagged_arr msg_part){ Cyc_Tcutil_check_contains_assign(
 e); Cyc_Tcexp_tcExp( te,( void**)& Cyc_Absyn_sint_t, e); if( ! Cyc_Tcutil_coerce_to_bool(
 te, e)){ Cyc_Tcutil_terr( e->loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp145)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp145)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp150= _tag_arr("test of %s has type %s instead of integral or * type",
 sizeof( unsigned char), 53u); struct Cyc_Stdio_String_pa_struct _temp152;
 _temp152.tag= Cyc_Stdio_String_pa; _temp152.f1=( struct _tagged_arr) msg_part;{
@@ -808,7 +808,7 @@ _LL267;} else{ goto _LL268;} _LL268: if(( unsigned int) _temp256 > 1u?*(( int*)
 _temp256) == Cyc_Absyn_Param_b: 0){ _LL279: _temp278=(( struct Cyc_Absyn_Param_b_struct*)
 _temp256)->f1; goto _LL269;} else{ goto _LL257;} _LL259: return Cyc_Tcexp_expr_err(
 te, loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp280)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp284= _tag_arr("unbound identifier %s", sizeof( unsigned char), 22u); struct
 Cyc_Stdio_String_pa_struct _temp285; _temp285.tag= Cyc_Stdio_String_pa; _temp285.f1=(
 struct _tagged_arr) Cyc_Absynpp_qvar2string( q);{ void* _temp283=( void*)&
@@ -837,7 +837,7 @@ _check_null( args))->tl)){ void* t=( void*)(( struct Cyc_List_List*) _check_null
 desc_types))->hd; struct Cyc_Absyn_Exp* e=( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
 _check_null( args))->hd; if( ! Cyc_Tcutil_coerce_arg( te, e, t)){ Cyc_Tcutil_terr(
 e->loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp296)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp301= _tag_arr("descriptor has type %s but argument has type %s", sizeof(
 unsigned char), 48u); struct Cyc_Stdio_String_pa_struct _temp303; _temp303.tag=
 Cyc_Stdio_String_pa; _temp303.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t);{
@@ -861,7 +861,7 @@ goto _LL313;} else{ goto _LL314;} _LL314: if( _temp304 ==( void*) Cyc_Absyn_Size
 goto _LL315;} else{ goto _LL316;} _LL316: goto _LL317; _LL307: goto _LL309;
 _LL309: if( ! Cyc_Tcutil_is_numeric( e)){ Cyc_Tcutil_terr( loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp318)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp322= _tag_arr("expecting arithmetic type but found %s",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp322= _tag_arr("expecting arithmetic type but found %s",
 sizeof( unsigned char), 39u); struct Cyc_Stdio_String_pa_struct _temp323;
 _temp323.tag= Cyc_Stdio_String_pa; _temp323.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 t);{ void* _temp321=( void*)& _temp323; void* _temp319[ 1u]={ _temp321}; struct
@@ -869,7 +869,7 @@ _tagged_arr _temp320={( void*) _temp319,( void*) _temp319,( void*)( _temp319 + 1
 _temp318( _temp322, _temp320);}}));} return( void*)(( struct Cyc_Core_Opt*)
 _check_null( e->topt))->v; _LL311: Cyc_Tcutil_check_contains_assign( e); if( !
 Cyc_Tcutil_coerce_to_bool( te, e)){ Cyc_Tcutil_terr( loc,( struct _tagged_arr)({
-struct _tagged_arr(* _temp324)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp324)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp328= _tag_arr("expecting integral or * type but found %s",
 sizeof( unsigned char), 42u); struct Cyc_Stdio_String_pa_struct _temp329;
 _temp329.tag= Cyc_Stdio_String_pa; _temp329.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -877,7 +877,7 @@ t);{ void* _temp327=( void*)& _temp329; void* _temp325[ 1u]={ _temp327}; struct
 _tagged_arr _temp326={( void*) _temp325,( void*) _temp325,( void*)( _temp325 + 1u)};
 _temp324( _temp328, _temp326);}}));} return Cyc_Absyn_sint_t; _LL313: if( ! Cyc_Tcutil_is_integral(
 e)){ Cyc_Tcutil_terr( loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp330)(
-struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct
+struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct
 _tagged_arr _temp334= _tag_arr("expecting integral type but found %s", sizeof(
 unsigned char), 37u); struct Cyc_Stdio_String_pa_struct _temp335; _temp335.tag=
 Cyc_Stdio_String_pa; _temp335.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t);{
@@ -891,7 +891,7 @@ int*) _temp336) == Cyc_Absyn_PointerType: 0){ _LL345: _temp344=(( struct Cyc_Abs
 _temp336)->f1; goto _LL341;} else{ goto _LL342;} _LL342: goto _LL343; _LL339:
 goto _LL337; _LL341: goto _LL337; _LL343: Cyc_Tcutil_terr( loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp346)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp350= _tag_arr("size requires pointer or array type, not %s",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp350= _tag_arr("size requires pointer or array type, not %s",
 sizeof( unsigned char), 44u); struct Cyc_Stdio_String_pa_struct _temp351;
 _temp351.tag= Cyc_Stdio_String_pa; _temp351.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 t);{ void* _temp349=( void*)& _temp351; void* _temp347[ 1u]={ _temp349}; struct
@@ -902,7 +902,7 @@ unsigned char), 17u)); _LL305:;} static void* Cyc_Tcexp_tcArithBinop( struct Cyc
 te, struct Cyc_Absyn_Exp* e1, struct Cyc_Absyn_Exp* e2, int(* checker)( struct
 Cyc_Absyn_Exp*)){ if( ! checker( e1)){ Cyc_Tcutil_terr( e1->loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp352)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp356= _tag_arr("type %s cannot be used here",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp356= _tag_arr("type %s cannot be used here",
 sizeof( unsigned char), 28u); struct Cyc_Stdio_String_pa_struct _temp357;
 _temp357.tag= Cyc_Stdio_String_pa; _temp357.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
 void*)(( struct Cyc_Core_Opt*) _check_null( e1->topt))->v);{ void* _temp355=(
@@ -912,7 +912,7 @@ _temp354);}})); return Cyc_Absyn_wildtyp(({ struct Cyc_Core_Opt* _temp358=(
 struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp358->v=(
 void*) Cyc_Tcenv_lookup_type_vars( te); _temp358;}));} if( ! checker( e2)){ Cyc_Tcutil_terr(
 e2->loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp359)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp363= _tag_arr("type %s cannot be used here", sizeof( unsigned char), 28u);
 struct Cyc_Stdio_String_pa_struct _temp364; _temp364.tag= Cyc_Stdio_String_pa;
 _temp364.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(( void*)(( struct Cyc_Core_Opt*)
@@ -937,7 +937,7 @@ _temp372.rgn_typ; goto _LL379; _LL379: _temp378= _temp372.nullable; goto _LL377;
 _LL377: _temp376= _temp372.tq; goto _LL375; _LL375: _temp374= _temp372.bounds;
 goto _LL369;} else{ goto _LL370;} _LL370: goto _LL371; _LL369: if( ! Cyc_Tcutil_coerce_sint_typ(
 te, e2)){ Cyc_Tcutil_terr( e2->loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp384)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp384)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp388= _tag_arr("expecting int but found %s", sizeof(
 unsigned char), 27u); struct Cyc_Stdio_String_pa_struct _temp389; _temp389.tag=
 Cyc_Stdio_String_pa; _temp389.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -973,7 +973,7 @@ _check_null( e1->topt))->v; void* t2=( void*)(( struct Cyc_Core_Opt*)
 _check_null( e2->topt))->v; if( Cyc_Tcutil_is_tagged_pointer_typ( t1)){ if( Cyc_Tcutil_is_tagged_pointer_typ(
 t2)){ if( ! Cyc_Tcutil_unify( t1, t2)){ Cyc_Tcutil_terr( e1->loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp410)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp415= _tag_arr("pointer arithmetic on values of different types (%s != %s)",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp415= _tag_arr("pointer arithmetic on values of different types (%s != %s)",
 sizeof( unsigned char), 59u); struct Cyc_Stdio_String_pa_struct _temp417;
 _temp417.tag= Cyc_Stdio_String_pa; _temp417.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
 void*)(( struct Cyc_Core_Opt*) _check_null( e1->topt))->v);{ void* _temp413=(
@@ -984,7 +984,7 @@ _check_null( e2->topt))->v);{ void* _temp414=( void*)& _temp416; void* _temp411[
 _temp411,( void*)( _temp411 + 2u)}; _temp410( _temp415, _temp412);}}}));} return
 Cyc_Absyn_sint_t;} else{ if( ! Cyc_Tcutil_coerce_sint_typ( te, e2)){ Cyc_Tcutil_terr(
 e2->loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp418)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp423= _tag_arr("expecting either %s or int but found %s", sizeof(
 unsigned char), 40u); struct Cyc_Stdio_String_pa_struct _temp425; _temp425.tag=
 Cyc_Stdio_String_pa; _temp425.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1021,7 +1021,7 @@ _temp434)->f1; _LL439: _temp438=( void*) _temp436.elt_typ; goto _LL431;} else{
 goto _LL432;} _LL432: goto _LL433; _LL431: if( Cyc_Tcutil_unify( _temp444,
 _temp438)){ return Cyc_Absyn_sint_t;} goto _LL429; _LL433: goto _LL429; _LL429:;}
 Cyc_Tcutil_terr( loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp446)(
-struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct
+struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct
 _tagged_arr _temp451= _tag_arr("comparison not allowed between %s and %s",
 sizeof( unsigned char), 41u); struct Cyc_Stdio_String_pa_struct _temp453;
 _temp453.tag= Cyc_Stdio_String_pa; _temp453.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1071,7 +1071,7 @@ te, topt,( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( es))->hd
 Cyc_Tcexp_tcExpList( te, es);{ void* t;{ void* _temp495= p; _LL497: if( _temp495
 ==( void*) Cyc_Absyn_Printf){ goto _LL498;} else{ goto _LL499;} _LL499: if(
 _temp495 ==( void*) Cyc_Absyn_Fprintf){ goto _LL500;} else{ goto _LL501;} _LL501:
-if( _temp495 ==( void*) Cyc_Absyn_Xprintf){ goto _LL502;} else{ goto _LL503;}
+if( _temp495 ==( void*) Cyc_Absyn_Aprintf){ goto _LL502;} else{ goto _LL503;}
 _LL503: if( _temp495 ==( void*) Cyc_Absyn_Scanf){ goto _LL504;} else{ goto
 _LL505;} _LL505: if( _temp495 ==( void*) Cyc_Absyn_Fscanf){ goto _LL506;} else{
 goto _LL507;} _LL507: if( _temp495 ==( void*) Cyc_Absyn_Sscanf){ goto _LL508;}
@@ -1085,7 +1085,7 @@ sizeof( unsigned char), 29u));} if( ! Cyc_Tcutil_unify(( void*)(( struct Cyc_Cor
 _check_null((( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( es))->hd)->topt))->v,
 Cyc_Absyn_file_typ())){ Cyc_Tcutil_terr((( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
 _check_null( es))->hd)->loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp511)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp511)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp515= _tag_arr("expecting FILE @ but found %s", sizeof(
 unsigned char), 30u); struct Cyc_Stdio_String_pa_struct _temp516; _temp516.tag=
 Cyc_Stdio_String_pa; _temp516.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
@@ -1097,7 +1097,7 @@ _temp513);}}));} Cyc_Tcexp_check_format_args( te,( struct Cyc_Absyn_Exp*)((
 struct Cyc_List_List*) _check_null((( struct Cyc_List_List*) _check_null( es))->tl))->hd,((
 struct Cyc_List_List*) _check_null((( struct Cyc_List_List*) _check_null( es))->tl))->tl,
 Cyc_Formatstr_get_format_typs); t=( void*) Cyc_Absyn_VoidType; goto _LL496;
-_LL502: if( es == 0){ return Cyc_Tcexp_expr_err( te, loc, _tag_arr("missing format string in xprintf",
+_LL502: if( es == 0){ return Cyc_Tcexp_expr_err( te, loc, _tag_arr("missing format string in aprintf",
 sizeof( unsigned char), 33u));} Cyc_Tcexp_check_format_args( te,( struct Cyc_Absyn_Exp*)((
 struct Cyc_List_List*) _check_null( es))->hd,(( struct Cyc_List_List*)
 _check_null( es))->tl, Cyc_Formatstr_get_format_typs); t= Cyc_Absyn_string_typ(
@@ -1114,7 +1114,7 @@ sizeof( unsigned char), 28u));} if( ! Cyc_Tcutil_unify(( void*)(( struct Cyc_Cor
 _check_null((( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( es))->hd)->topt))->v,
 Cyc_Absyn_file_typ())){ Cyc_Tcutil_terr((( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
 _check_null( es))->hd)->loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp518)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp518)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp522= _tag_arr("expecting FILE @ but found %s", sizeof(
 unsigned char), 30u); struct Cyc_Stdio_String_pa_struct _temp523; _temp523.tag=
 Cyc_Stdio_String_pa; _temp523.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
@@ -1271,7 +1271,7 @@ sizeof( unsigned char), 34u));} Cyc_Tcexp_check_writable( te, e);{ void* t=(
 void*)(( struct Cyc_Core_Opt*) _check_null( e->topt))->v; if( ! Cyc_Tcutil_is_numeric(
 e)? ! Cyc_Tcutil_is_tagged_pointer_typ( t): 0){ Cyc_Tcutil_terr( e->loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp684)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp688= _tag_arr("expecting arithmetic or ? type but found %s",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp688= _tag_arr("expecting arithmetic or ? type but found %s",
 sizeof( unsigned char), 44u); struct Cyc_Stdio_String_pa_struct _temp689;
 _temp689.tag= Cyc_Stdio_String_pa; _temp689.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 t);{ void* _temp687=( void*)& _temp689; void* _temp685[ 1u]={ _temp687}; struct
@@ -1290,7 +1290,7 @@ struct Cyc_List_List* _temp691=({ struct Cyc_List_List* _temp700=( struct Cyc_Li
 GC_malloc( sizeof( struct Cyc_List_List)); _temp700->hd=( void*) e2; _temp700->tl=
 _temp690; _temp700;}); if( ! Cyc_Tcutil_coerce_list( te, t, _temp691)){ Cyc_Tcutil_terr(
 loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp692)( struct _tagged_arr
-fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp697=
+fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp697=
 _tag_arr("conditional clause types do not match: %s != %s", sizeof(
 unsigned char), 48u); struct Cyc_Stdio_String_pa_struct _temp699; _temp699.tag=
 Cyc_Stdio_String_pa; _temp699.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
@@ -1314,7 +1314,7 @@ Cyc_Tcexp_expr_err( te, loc, _tag_arr("assignment to non-lvalue", sizeof(
 unsigned char), 25u));} Cyc_Tcexp_check_writable( te, e1); if( po == 0){ if( !
 Cyc_Tcutil_coerce_assign( te, e2, t1)){ return Cyc_Tcexp_expr_err( te, loc,(
 struct _tagged_arr)({ struct _tagged_arr(* _temp709)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp714= _tag_arr("type mismatch: %s != %s",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp714= _tag_arr("type mismatch: %s != %s",
 sizeof( unsigned char), 24u); struct Cyc_Stdio_String_pa_struct _temp716;
 _temp716.tag= Cyc_Stdio_String_pa; _temp716.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 t1);{ void* _temp712=( void*)& _temp716; struct Cyc_Stdio_String_pa_struct
@@ -1370,7 +1370,7 @@ r, inst,(*(( struct _tuple8*)(( struct Cyc_List_List*) _check_null( _temp751))->
 if( Cyc_Tcutil_coerce_arg( te, e, t2)){ return( struct Cyc_Absyn_Tunionfield*)((
 struct Cyc_Absyn_Tunionfield*)(( struct Cyc_List_List*) _check_null( fields))->hd);}}}
 Cyc_Tcutil_terr( e->loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp757)(
-struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct
+struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct
 _tagged_arr _temp762= _tag_arr("can't find a field in %s to inject a value of type %s",
 sizeof( unsigned char), 54u); struct Cyc_Stdio_String_pa_struct _temp764;
 _temp764.tag= Cyc_Stdio_String_pa; _temp764.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1409,7 +1409,7 @@ struct Cyc_Absyn_Exp* e1=( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
 _check_null( es))->hd; void* t2=(*(( struct _tuple2*)(( struct Cyc_List_List*)
 _check_null( _temp799))->hd)).f3; Cyc_Tcexp_tcExp( te,( void**)& t2, e1); if( !
 Cyc_Tcutil_coerce_arg( te, e1, t2)){ Cyc_Tcutil_terr( loc,( struct _tagged_arr)({
-struct _tagged_arr(* _temp807)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp807)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp812= _tag_arr("actual argument has type %s but formal has type %s",
 sizeof( unsigned char), 51u); struct Cyc_Stdio_String_pa_struct _temp814;
 _temp814.tag= Cyc_Stdio_String_pa; _temp814.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
@@ -1435,7 +1435,7 @@ struct Cyc_Absyn_VarargCallInfo*) GC_malloc( sizeof( struct Cyc_Absyn_VarargCall
 _temp871->num_varargs= 0; _temp871->injectors= 0; _temp871->vai=( struct Cyc_Absyn_VarargInfo*)
 _check_null( _temp795); _temp871;});* vararg_call_info= _temp823; if( ! Cyc_Tcutil_unify(
 Cyc_Tcenv_curr_rgn( te), _temp819)){ Cyc_Tcutil_terr( loc,( struct _tagged_arr)({
-struct _tagged_arr(* _temp824)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp824)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp829= _tag_arr("I have no idea how this could fail, but it did because the region for the varargs (%s) doesn't unify with the expected new_block region (%s).",
 sizeof( unsigned char), 142u); struct Cyc_Stdio_String_pa_struct _temp831;
 _temp831.tag= Cyc_Stdio_String_pa; _temp831.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1450,7 +1450,7 @@ struct Cyc_List_List*) _check_null( es))->hd;(( struct Cyc_Absyn_VarargCallInfo*
 _check_null( _temp823))->num_varargs ++; Cyc_Tcexp_tcExp( te,( void**)& _temp821,
 e1); if( ! Cyc_Tcutil_coerce_arg( te, e1, _temp821)){ Cyc_Tcutil_terr( loc,(
 struct _tagged_arr)({ struct _tagged_arr(* _temp832)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp837= _tag_arr("vararg requires type %s but argument has type %s",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp837= _tag_arr("vararg requires type %s but argument has type %s",
 sizeof( unsigned char), 49u); struct Cyc_Stdio_String_pa_struct _temp839;
 _temp839.tag= Cyc_Stdio_String_pa; _temp839.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 _temp821);{ void* _temp835=( void*)& _temp839; struct Cyc_Stdio_String_pa_struct
@@ -1470,13 +1470,13 @@ _LL849: _temp848=( void*) _temp846.rgn; goto _LL843;} else{ goto _LL844;} _LL844
 goto _LL845; _LL843: { struct Cyc_Absyn_Tuniondecl* _temp856=* Cyc_Tcenv_lookup_tuniondecl(
 te, loc, _temp854->name); if( ! Cyc_Tcutil_unify( _temp848, _temp819)){ Cyc_Tcutil_terr(
 loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp857)( struct _tagged_arr
-fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp860=
+fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp860=
 _tag_arr("bad region for injected varargs", sizeof( unsigned char), 32u); void*
 _temp858[ 0u]={}; struct _tagged_arr _temp859={( void*) _temp858,( void*)
 _temp858,( void*)( _temp858 + 0u)}; _temp857( _temp860, _temp859);}));}{ struct
 Cyc_List_List* fields= 0; if( _temp856->fields == 0){ Cyc_Tcutil_terr( loc,(
 struct _tagged_arr)({ struct _tagged_arr(* _temp861)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp865= _tag_arr("can't inject into %s",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp865= _tag_arr("can't inject into %s",
 sizeof( unsigned char), 21u); struct Cyc_Stdio_String_pa_struct _temp866;
 _temp866.tag= Cyc_Stdio_String_pa; _temp866.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 _temp821);{ void* _temp864=( void*)& _temp866; void* _temp862[ 1u]={ _temp864};
@@ -1508,7 +1508,7 @@ sizeof( unsigned char), 29u)); _LL766:;}} static void* Cyc_Tcexp_tcThrow( struct
 Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Exp*
 e){ Cyc_Tcexp_tcExp( te,( void**)& Cyc_Absyn_exn_typ, e); if( ! Cyc_Tcutil_coerce_use(
 te, e, Cyc_Absyn_exn_typ)){ Cyc_Tcutil_terr( loc,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp872)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp872)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp876= _tag_arr("expected xtunion exn but found %s",
 sizeof( unsigned char), 34u); struct Cyc_Stdio_String_pa_struct _temp877;
 _temp877.tag= Cyc_Stdio_String_pa; _temp877.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
@@ -1571,7 +1571,7 @@ _temp925.tq= _temp889; _temp925.bounds= _temp887; _temp925;}); _temp924;});
 _temp923;}); return new_typ;}} _LL902: goto _LL898; _LL898:;} goto _LL880;
 _LL884: goto _LL880; _LL880:;} return Cyc_Tcexp_expr_err( te, loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp929)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp933= _tag_arr("expecting polymorphic type but found %s",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp933= _tag_arr("expecting polymorphic type but found %s",
 sizeof( unsigned char), 40u); struct Cyc_Stdio_String_pa_struct _temp934;
 _temp934.tag= Cyc_Stdio_String_pa; _temp934.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 t1);{ void* _temp932=( void*)& _temp934; void* _temp930[ 1u]={ _temp932}; struct
@@ -1583,7 +1583,7 @@ t); Cyc_Tcexp_tcExp( te, 0, e);{ void* t2=( void*)(( struct Cyc_Core_Opt*)
 _check_null( e->topt))->v; if( ! Cyc_Tcutil_silent_castable( te, loc, t2, t)? !
 Cyc_Tcutil_castable( te, loc, t2, t): 0){ return Cyc_Tcexp_expr_err( te, loc,(
 struct _tagged_arr)({ struct _tagged_arr(* _temp935)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp940= _tag_arr("cannot cast %s to %s",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp940= _tag_arr("cannot cast %s to %s",
 sizeof( unsigned char), 21u); struct Cyc_Stdio_String_pa_struct _temp942;
 _temp942.tag= Cyc_Stdio_String_pa; _temp942.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 t2);{ void* _temp938=( void*)& _temp942; struct Cyc_Stdio_String_pa_struct
@@ -1624,7 +1624,7 @@ _check_null( e->topt))->v, _temp979, tq); return t;}}}} static void* Cyc_Tcexp_t
 struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void** topt, void*
 t){ Cyc_Tcutil_check_type( loc, te, Cyc_Tcenv_lookup_type_vars( te),( void*) Cyc_Absyn_MemKind,
 t); if( ! Cyc_Evexp_okay_szofarg( t)){ Cyc_Tcutil_terr( loc,( struct _tagged_arr)({
-struct _tagged_arr(* _temp983)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp983)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp987= _tag_arr("sizeof applied to type %s, which has unknown size here",
 sizeof( unsigned char), 55u); struct Cyc_Stdio_String_pa_struct _temp988;
 _temp988.tag= Cyc_Stdio_String_pa; _temp988.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1644,7 +1644,7 @@ sizeof( unsigned char), 33u));} if((*(( struct Cyc_Absyn_Structdecl**)
 _check_null( _temp997)))->fields == 0){ goto _LL990;} goto _LL994; _LL994:
 bad_type= 0; goto _LL990; _LL996: goto _LL990; _LL990:;} if( bad_type){ Cyc_Tcutil_terr(
 loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp999)( struct _tagged_arr
-fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp1003=
+fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp1003=
 _tag_arr("%s is not a known struct type", sizeof( unsigned char), 30u); struct
 Cyc_Stdio_String_pa_struct _temp1004; _temp1004.tag= Cyc_Stdio_String_pa;
 _temp1004.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp1002=(
@@ -1663,7 +1663,7 @@ _temp1011.bounds; goto _LL1008;} else{ goto _LL1009;} _LL1009: goto _LL1010;
 _LL1008: Cyc_Tcenv_check_rgn_accessible( te, loc, _temp1015); Cyc_Tcutil_check_nonzero_bound(
 loc, _temp1013); return _temp1017; _LL1010: return Cyc_Tcexp_expr_err( te, loc,(
 struct _tagged_arr)({ struct _tagged_arr(* _temp1019)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp1023= _tag_arr("expecting * or @ type but found %s",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp1023= _tag_arr("expecting * or @ type but found %s",
 sizeof( unsigned char), 35u); struct Cyc_Stdio_String_pa_struct _temp1024;
 _temp1024.tag= Cyc_Stdio_String_pa; _temp1024.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 t);{ void* _temp1022=( void*)& _temp1024; void* _temp1020[ 1u]={ _temp1022};
@@ -1704,7 +1704,7 @@ _tag_arr("unresolved struct type (COMPILER ERROR)", sizeof( unsigned char), 40u)
 struct Cyc_Absyn_Structfield* _temp1061= Cyc_Absyn_lookup_struct_field(
 _temp1043, f); if( _temp1061 == 0){ return Cyc_Tcexp_expr_err( te, loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp1062)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp1067= _tag_arr("struct %s has no %s field",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp1067= _tag_arr("struct %s has no %s field",
 sizeof( unsigned char), 26u); struct Cyc_Stdio_String_pa_struct _temp1069;
 _temp1069.tag= Cyc_Stdio_String_pa; _temp1069.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string((
 struct _tuple1*) _check_null( _temp1046));{ void* _temp1065=( void*)& _temp1069;
@@ -1721,7 +1721,7 @@ rgn, _temp1071,( void*)(( struct Cyc_Absyn_Structfield*) _check_null( _temp1061)
 _pop_region( rgn);} return t2;}} _LL1030: { struct Cyc_Absyn_Structfield*
 _temp1072= Cyc_Absyn_lookup_field( _temp1048, f); if( _temp1072 == 0){ return
 Cyc_Tcexp_expr_err( te, loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp1073)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp1073)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1077= _tag_arr("struct has no %s field", sizeof(
 unsigned char), 23u); struct Cyc_Stdio_String_pa_struct _temp1078; _temp1078.tag=
 Cyc_Stdio_String_pa; _temp1078.f1=( struct _tagged_arr)* f;{ void* _temp1076=(
@@ -1731,7 +1731,7 @@ _temp1073( _temp1077, _temp1075);}}));} return( void*)(( struct Cyc_Absyn_Struct
 _check_null( _temp1072))->type;} _LL1032: { struct Cyc_Absyn_Structfield*
 _temp1079= Cyc_Absyn_lookup_field( _temp1050, f); if( _temp1079 == 0){ return
 Cyc_Tcexp_expr_err( te, loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp1080)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp1080)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1084= _tag_arr("union has no %s field", sizeof(
 unsigned char), 22u); struct Cyc_Stdio_String_pa_struct _temp1085; _temp1085.tag=
 Cyc_Stdio_String_pa; _temp1085.f1=( struct _tagged_arr)* f;{ void* _temp1083=(
@@ -1743,7 +1743,7 @@ te, loc, _tag_arr("unresolved union type (COMPILER ERROR)", sizeof(
 unsigned char), 39u));}{ struct Cyc_Absyn_Structfield* _temp1086= Cyc_Absyn_lookup_union_field(
 _temp1054, f); if( _temp1086 == 0){ return Cyc_Tcexp_expr_err( te, loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp1087)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp1092= _tag_arr("union %s has no %s field",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp1092= _tag_arr("union %s has no %s field",
 sizeof( unsigned char), 25u); struct Cyc_Stdio_String_pa_struct _temp1094;
 _temp1094.tag= Cyc_Stdio_String_pa; _temp1094.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string((
 struct _tuple1*) _check_null( _temp1057));{ void* _temp1090=( void*)& _temp1094;
@@ -1771,7 +1771,7 @@ _temp1102->hd=( void*) e; _temp1102->tl= 0; _temp1102;}); _temp1101;});
 _temp1100;}))); return Cyc_Absyn_uint_t; _LL1040: if( Cyc_String_zstrcmp(* f,
 _tag_arr("size", sizeof( unsigned char), 5u)) == 0){ return Cyc_Tcexp_expr_err(
 te, loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp1103)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp1107= _tag_arr("expecting struct, union or array, found %s", sizeof(
 unsigned char), 43u); struct Cyc_Stdio_String_pa_struct _temp1108; _temp1108.tag=
 Cyc_Stdio_String_pa; _temp1108.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1779,7 +1779,7 @@ t);{ void* _temp1106=( void*)& _temp1108; void* _temp1104[ 1u]={ _temp1106};
 struct _tagged_arr _temp1105={( void*) _temp1104,( void*) _temp1104,( void*)(
 _temp1104 + 1u)}; _temp1103( _temp1107, _temp1105);}}));} else{ return Cyc_Tcexp_expr_err(
 te, loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp1109)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp1113= _tag_arr("expecting struct or union, found %s", sizeof( unsigned char),
 36u); struct Cyc_Stdio_String_pa_struct _temp1114; _temp1114.tag= Cyc_Stdio_String_pa;
 _temp1114.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp1112=(
@@ -1819,7 +1819,7 @@ _LL1137;} _LL1137: if(( unsigned int) _temp1129 > 4u?*(( int*) _temp1129) == Cyc
 goto _LL1138;} else{ goto _LL1139;} _LL1139: goto _LL1140; _LL1132: { struct Cyc_Absyn_Structfield*
 _temp1159= Cyc_Absyn_lookup_struct_field( _temp1143, f); if( _temp1159 == 0){
 return Cyc_Tcexp_expr_err( te, loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp1160)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp1160)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1165= _tag_arr("struct %s has no %s field", sizeof(
 unsigned char), 26u); struct Cyc_Stdio_String_pa_struct _temp1167; _temp1167.tag=
 Cyc_Stdio_String_pa; _temp1167.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string((
@@ -1838,7 +1838,7 @@ _pop_region( rgn);} Cyc_Tcenv_check_rgn_accessible( te, loc, _temp1125); return
 t3;}} _LL1134: { struct Cyc_Absyn_Structfield* _temp1170= Cyc_Absyn_lookup_union_field(
 _temp1150, f); if( _temp1170 == 0){ return Cyc_Tcexp_expr_err( te, loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp1171)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp1176= _tag_arr("union %s has no %s field",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp1176= _tag_arr("union %s has no %s field",
 sizeof( unsigned char), 25u); struct Cyc_Stdio_String_pa_struct _temp1178;
 _temp1178.tag= Cyc_Stdio_String_pa; _temp1178.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string((
 struct _tuple1*) _check_null( _temp1153));{ void* _temp1174=( void*)& _temp1178;
@@ -1853,7 +1853,7 @@ Cyc_Absyn_Structfield*) _check_null( _temp1170))->type); Cyc_Tcenv_check_rgn_acc
 te, loc, _temp1125); return _temp1180;}} _LL1136: { struct Cyc_Absyn_Structfield*
 _temp1181= Cyc_Absyn_lookup_field( _temp1155, f); if( _temp1181 == 0){ return
 Cyc_Tcexp_expr_err( te, loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp1182)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp1182)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1186= _tag_arr("struct has no %s field", sizeof(
 unsigned char), 23u); struct Cyc_Stdio_String_pa_struct _temp1187; _temp1187.tag=
 Cyc_Stdio_String_pa; _temp1187.f1=( struct _tagged_arr)* f;{ void* _temp1185=(
@@ -1863,7 +1863,7 @@ _temp1182( _temp1186, _temp1184);}}));} return( void*)(( struct Cyc_Absyn_Struct
 _check_null( _temp1181))->type;} _LL1138: { struct Cyc_Absyn_Structfield*
 _temp1188= Cyc_Absyn_lookup_field( _temp1157, f); if( _temp1188 == 0){ return
 Cyc_Tcexp_expr_err( te, loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp1189)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp1189)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1193= _tag_arr("union has no %s field", sizeof(
 unsigned char), 22u); struct Cyc_Stdio_String_pa_struct _temp1194; _temp1194.tag=
 Cyc_Stdio_String_pa; _temp1194.f1=( struct _tagged_arr)* f;{ void* _temp1192=(
@@ -1872,14 +1872,14 @@ _temp1191={( void*) _temp1190,( void*) _temp1190,( void*)( _temp1190 + 1u)};
 _temp1189( _temp1193, _temp1191);}}));} return( void*)(( struct Cyc_Absyn_Structfield*)
 _check_null( _temp1188))->type;} _LL1140: return Cyc_Tcexp_expr_err( te, loc,(
 struct _tagged_arr)({ struct _tagged_arr(* _temp1195)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp1199= _tag_arr("expecting struct pointer, found %s",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp1199= _tag_arr("expecting struct pointer, found %s",
 sizeof( unsigned char), 35u); struct Cyc_Stdio_String_pa_struct _temp1200;
 _temp1200.tag= Cyc_Stdio_String_pa; _temp1200.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 t);{ void* _temp1198=( void*)& _temp1200; void* _temp1196[ 1u]={ _temp1198};
 struct _tagged_arr _temp1197={( void*) _temp1196,( void*) _temp1196,( void*)(
 _temp1196 + 1u)}; _temp1195( _temp1199, _temp1197);}})); _LL1130:;} _LL1120:
 return Cyc_Tcexp_expr_err( te, loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp1201)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp1201)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1205= _tag_arr("expecting struct pointer, found %s",
 sizeof( unsigned char), 35u); struct Cyc_Stdio_String_pa_struct _temp1206;
 _temp1206.tag= Cyc_Stdio_String_pa; _temp1206.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1896,7 +1896,7 @@ void* _temp1208=( void*) _exn_thrown; void* _temp1212= _temp1208; _LL1214: if(
 _temp1212 == Cyc_List_Nth){ goto _LL1215;} else{ goto _LL1216;} _LL1216: goto
 _LL1217; _LL1215: return Cyc_Tcexp_expr_err( te, loc,( struct _tagged_arr)({
 struct _tagged_arr(* _temp1218)( struct _tagged_arr fmt, struct _tagged_arr)=
-Cyc_Stdio_xprintf; struct _tagged_arr _temp1223= _tag_arr("index is %d but tuple has only %d fields",
+Cyc_Stdio_aprintf; struct _tagged_arr _temp1223= _tag_arr("index is %d but tuple has only %d fields",
 sizeof( unsigned char), 41u); struct Cyc_Stdio_Int_pa_struct _temp1225;
 _temp1225.tag= Cyc_Stdio_Int_pa; _temp1225.f1= i;{ void* _temp1221=( void*)&
 _temp1225; struct Cyc_Stdio_Int_pa_struct _temp1224; _temp1224.tag= Cyc_Stdio_Int_pa;
@@ -1911,7 +1911,7 @@ e2);{ void* t1= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*) _check_null
 e1->topt))->v); void* t2= Cyc_Tcutil_compress(( void*)(( struct Cyc_Core_Opt*)
 _check_null( e2->topt))->v); if( ! Cyc_Tcutil_coerce_sint_typ( te, e2)){ return
 Cyc_Tcexp_expr_err( te, e2->loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp1226)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp1226)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1230= _tag_arr("expecting int subscript, found %s",
 sizeof( unsigned char), 34u); struct Cyc_Stdio_String_pa_struct _temp1231;
 _temp1231.tag= Cyc_Stdio_String_pa; _temp1231.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1950,7 +1950,7 @@ Cyc_Tcutil_check_nonzero_bound( loc, _temp1242);} Cyc_Tcenv_check_rgn_accessible
 te, loc, _temp1246); return _temp1248; _LL1237: return Cyc_Tcexp_ithTupleType(
 te, loc, _temp1250, e2); _LL1239: return Cyc_Tcexp_expr_err( te, loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp1271)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp1275= _tag_arr("subscript applied to %s",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp1275= _tag_arr("subscript applied to %s",
 sizeof( unsigned char), 24u); struct Cyc_Stdio_String_pa_struct _temp1276;
 _temp1276.tag= Cyc_Stdio_String_pa; _temp1276.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 t1);{ void* _temp1274=( void*)& _temp1276; void* _temp1272[ 1u]={ _temp1274};
@@ -2021,7 +2021,7 @@ Cyc_Tcexp_tcExpInitializer( te, elt_topt,( struct Cyc_Absyn_Exp*)(( struct Cyc_L
 _check_null( es2))->hd);}} if( ! Cyc_Tcutil_coerce_list( te, res, es)){ Cyc_Tcutil_terr(((
 struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*) _check_null( es))->hd)->loc,(
 struct _tagged_arr)({ struct _tagged_arr(* _temp1294)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp1298= _tag_arr("elements of array do not all have the same type (%s)",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp1298= _tag_arr("elements of array do not all have the same type (%s)",
 sizeof( unsigned char), 53u); struct Cyc_Stdio_String_pa_struct _temp1299;
 _temp1299.tag= Cyc_Stdio_String_pa; _temp1299.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
 res);{ void* _temp1297=( void*)& _temp1299; void* _temp1295[ 1u]={ _temp1297};
@@ -2038,7 +2038,7 @@ _LL1301;} _LL1303: Cyc_Tcutil_terr( loc, _tag_arr("only array index designators 
 sizeof( unsigned char), 43u)); goto _LL1301; _LL1305: Cyc_Tcexp_tcExpInitializer(
 te, 0, _temp1306);{ unsigned int i= Cyc_Evexp_eval_const_uint_exp( _temp1306);
 if( i != offset){ Cyc_Tcutil_terr( _temp1306->loc,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp1308)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp1308)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1313= _tag_arr("expecting index designator %d but found %d",
 sizeof( unsigned char), 43u); struct Cyc_Stdio_Int_pa_struct _temp1315;
 _temp1315.tag= Cyc_Stdio_Int_pa; _temp1315.f1=( unsigned int) offset;{ void*
@@ -2052,7 +2052,7 @@ struct Cyc_Position_Segment* loc, void** topt, struct Cyc_Absyn_Vardecl* vd,
 struct Cyc_Absyn_Exp* bound, struct Cyc_Absyn_Exp* body){ Cyc_Tcexp_tcExp( te, 0,
 bound); if( ! Cyc_Tcutil_coerce_uint_typ( te, bound)){ Cyc_Tcutil_terr( bound->loc,(
 struct _tagged_arr)({ struct _tagged_arr(* _temp1323)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp1327= _tag_arr("expecting unsigned int, found %s",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp1327= _tag_arr("expecting unsigned int, found %s",
 sizeof( unsigned char), 33u); struct Cyc_Stdio_String_pa_struct _temp1328;
 _temp1328.tag= Cyc_Stdio_String_pa; _temp1328.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
 void*)(( struct Cyc_Core_Opt*) _check_null( bound->topt))->v);{ void* _temp1326=(
@@ -2098,7 +2098,7 @@ if( ! _temp1353){ sd=* Cyc_Tcenv_lookup_structdecl( te, loc,* tn);; _pop_handler
 else{ void* _temp1352=( void*) _exn_thrown; void* _temp1355= _temp1352; _LL1357:
 if( _temp1355 == Cyc_Dict_Absent){ goto _LL1358;} else{ goto _LL1359;} _LL1359:
 goto _LL1360; _LL1358: Cyc_Tcutil_terr( loc,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp1361)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp1361)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1365= _tag_arr("unbound struct name %s", sizeof(
 unsigned char), 23u); struct Cyc_Stdio_String_pa_struct _temp1366; _temp1366.tag=
 Cyc_Stdio_String_pa; _temp1366.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(*
@@ -2140,7 +2140,7 @@ goto _LL1378; _LL1378: _temp1377= _temp1376.f2; goto _LL1375; _LL1375: { void*
 _temp1381= Cyc_Tcutil_rsubstitute( rgn, _temp1369,( void*) _temp1379->type); Cyc_Tcexp_tcExpInitializer(
 te,( void**)& _temp1381, _temp1377); if( ! Cyc_Tcutil_coerce_arg( te, _temp1377,
 _temp1381)){ Cyc_Tcutil_terr( _temp1377->loc,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp1382)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp1382)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1389= _tag_arr("field %s of struct %s expects type %s != %s",
 sizeof( unsigned char), 44u); struct Cyc_Stdio_String_pa_struct _temp1393;
 _temp1393.tag= Cyc_Stdio_String_pa; _temp1393.f1=( struct _tagged_arr)*
@@ -2174,7 +2174,7 @@ _temp1410.f2; goto _LL1409; _LL1409: Cyc_Tcexp_tcExpInitializer( te,( void**)((
 void**)(( void*)& _temp1413->type)), _temp1411); if( ! Cyc_Tcutil_coerce_arg( te,
 _temp1411,( void*) _temp1413->type)){ Cyc_Tcutil_terr( _temp1411->loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp1415)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp1421= _tag_arr("field %s of struct expects type %s != %s",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp1421= _tag_arr("field %s of struct expects type %s != %s",
 sizeof( unsigned char), 41u); struct Cyc_Stdio_String_pa_struct _temp1424;
 _temp1424.tag= Cyc_Stdio_String_pa; _temp1424.f1=( struct _tagged_arr)*
 _temp1413->name;{ void* _temp1418=( void*)& _temp1424; struct Cyc_Stdio_String_pa_struct
@@ -2254,7 +2254,7 @@ struct Cyc_List_List*) _check_null( es))->hd; void* t= Cyc_Tcutil_rsubstitute(
 rgn, _temp1431,(*(( struct _tuple8*)(( struct Cyc_List_List*) _check_null( ts))->hd)).f2);
 Cyc_Tcexp_tcExpInitializer( te,( void**)& t, e); if( ! Cyc_Tcutil_coerce_arg( te,
 e, t)){ Cyc_Tcutil_terr( e->loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp1455)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp1455)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1461= _tag_arr("tunion constructor %s expects argument of type %s but this argument has type %s",
 sizeof( unsigned char), 80u); struct Cyc_Stdio_String_pa_struct _temp1464;
 _temp1464.tag= Cyc_Stdio_String_pa; _temp1464.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -2269,7 +2269,7 @@ struct _tagged_arr _temp1457={( void*) _temp1456,( void*) _temp1456,( void*)(
 _temp1456 + 3u)}; _temp1455( _temp1461, _temp1457);}}}}));}} if( es != 0){ void*
 _temp1471= Cyc_Tcexp_expr_err( te,(( struct Cyc_Absyn_Exp*)(( struct Cyc_List_List*)
 _check_null( es))->hd)->loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp1465)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp1465)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp1469= _tag_arr("too many arguments for tunion constructor %s",
 sizeof( unsigned char), 45u); struct Cyc_Stdio_String_pa_struct _temp1470;
 _temp1470.tag= Cyc_Stdio_String_pa; _temp1470.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -2278,7 +2278,7 @@ _temp1468}; struct _tagged_arr _temp1467={( void*) _temp1466,( void*) _temp1466,
 void*)( _temp1466 + 1u)}; _temp1465( _temp1469, _temp1467);}})); _npop_handler(
 0u); return _temp1471;} if( ts != 0){ void* _temp1478= Cyc_Tcexp_expr_err( te,
 loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp1472)( struct _tagged_arr
-fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp1476=
+fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp1476=
 _tag_arr("too few arguments for tunion constructor %s", sizeof( unsigned char),
 44u); struct Cyc_Stdio_String_pa_struct _temp1477; _temp1477.tag= Cyc_Stdio_String_pa;
 _temp1477.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string( tuf->name);{ void*
@@ -2303,7 +2303,7 @@ struct Cyc_Absyn_RgnHandleType_struct*) _temp1486)->f1; goto _LL1489;} else{
 goto _LL1490;} _LL1490: goto _LL1491; _LL1489: rgn= _temp1492; Cyc_Tcenv_check_rgn_accessible(
 te, loc, rgn); goto _LL1487; _LL1491: Cyc_Tcutil_terr((( struct Cyc_Absyn_Exp*)
 _check_null( ropt))->loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp1494)(
-struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct
+struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct
 _tagged_arr _temp1498= _tag_arr("expecting region_t type but found %s", sizeof(
 unsigned char), 37u); struct Cyc_Stdio_String_pa_struct _temp1499; _temp1499.tag=
 Cyc_Stdio_String_pa; _temp1499.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -2371,7 +2371,7 @@ _temp1546)->f1; goto _LL1549;} else{ goto _LL1550;} _LL1550: goto _LL1551;
 _LL1549: rgn= _temp1552; Cyc_Tcenv_check_rgn_accessible( te, loc, rgn); goto
 _LL1547; _LL1551: Cyc_Tcutil_terr((( struct Cyc_Absyn_Exp*) _check_null(
 rgn_handle))->loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp1554)(
-struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct
+struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct
 _tagged_arr _temp1558= _tag_arr("expecting region_t type but found %s", sizeof(
 unsigned char), 37u); struct Cyc_Stdio_String_pa_struct _temp1559; _temp1559.tag=
 Cyc_Stdio_String_pa; _temp1559.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(

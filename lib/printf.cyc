@@ -116,7 +116,7 @@ static double va_arg_double(parg_t<`r>?`r2 ap) {
   switch (*ap) {
   case &Double_pa(d): return d;
     // case &Float_pa(f): return (double)f;
-  default: throw badarg(xprintf("printf expected double but found %s",
+  default: throw badarg(aprintf("printf expected double but found %s",
                                 parg2string(*ap)));
   }
 }
@@ -972,7 +972,7 @@ static int putc_void(int c, int dummy) {
   return 1;
 }
 
-char ?`r1 vrxprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap) {
+char ?`r1 vraprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap) {
   // figure out the size of the resulting string -- add one for 0 terminator
   int size = _IO_vfprintf(putc_void, 0, fmt, ap) + 1;
   char ?`r1 s = rnew(r1) {for i < size : '\0'};
@@ -980,12 +980,12 @@ char ?`r1 vrxprintf(region_t<`r1> r1, const char ?`r2 fmt, parg_t<`r4> ? `r3 ap)
   return s;
 }
 
-char ?`r1 rxprintf(region_t<`r1> r1, const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) {
-  return vrxprintf(r1, fmt, ap);
+char ?`r1 raprintf(region_t<`r1> r1, const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) {
+  return vraprintf(r1, fmt, ap);
 }
 
-char ? xprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) {
-  return vrxprintf(heap_region, fmt, ap);
+char ? aprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap) {
+  return vraprintf(heap_region, fmt, ap);
 }
   
 /*

@@ -25,7 +25,7 @@ unsigned int f1; } ; static const int Cyc_Stdio_Double_pa= 2; struct Cyc_Stdio_D
 int tag; double f1; } ; static const int Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{
 int tag; short* f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
 int tag; unsigned int* f1; } ; extern int Cyc_Stdio_fprintf( struct Cyc_Stdio___sFILE*,
-struct _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Stdio_xprintf(
+struct _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Stdio_aprintf(
 struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
 0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
 Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
@@ -127,7 +127,7 @@ _tagged_arr_inplace_plus(& optstring, sizeof( unsigned char), 1);} else{ if( Cyc
 !=( _tag_arr( 0u, 0u, 0u)).curr){ Cyc_Getopt_ordering= Cyc_Getopt_REQUIRE_ORDER;}
 else{ Cyc_Getopt_ordering= Cyc_Getopt_PERMUTE;}}} if( Cyc_Getopt_posixly_correct.curr
 ==( _tag_arr( 0u, 0u, 0u)).curr){ struct _tagged_arr var; var=({ struct
-_tagged_arr(* _temp0)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp0)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp4= _tag_arr("_%d_GNU_nonoption_argv_flags_", sizeof(
 unsigned char), 30u); struct Cyc_Stdio_Int_pa_struct _temp5; _temp5.tag= Cyc_Stdio_Int_pa;
 _temp5.f1=( unsigned int) 10;{ void* _temp3=( void*)& _temp5; void* _temp1[ 1u]={

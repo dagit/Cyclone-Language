@@ -352,7 +352,7 @@ void dumpntyp(type_t t) {
   case &Evar(k,null,i,_): 
     dump("%"); 
     if (k == null) dump("?"); else dumpkind(k->v); 
-    dump(xprintf("(%d)",i)); return;
+    dump(aprintf("(%d)",i)); return;
   case &Evar(k,&Opt(t),i,_): dumpntyp(t); return; // shouldn't happen!
   case &TunionType(TunionInfo(tu_info,ts,r)):
     switch(tu_info) {
@@ -799,8 +799,8 @@ void dumppat(pat_t p) {
   switch(p->r) {
   case Wild_p: dump_char('_');    break;
   case Null_p: dump("null"); break;
-  case &Int_p(Signed,i):   dump(xprintf("%d",i)); break;
-  case &Int_p(Unsigned,i): dump(xprintf("%u",i)); break;
+  case &Int_p(Signed,i):   dump(aprintf("%d",i)); break;
+  case &Int_p(Unsigned,i): dump(aprintf("%u",i)); break;
   case &Char_p(ch):
     dump("'"); dump_nospace(Absynpp::char_escape(ch)); dump_nospace("'"); break;
   case &Float_p(x):      dump(x);            break;

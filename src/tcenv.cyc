@@ -217,7 +217,7 @@ static void check_repeat(tenv_t te, seg_t loc, `a lookup(genv_t,var_t),
     genv_t ge2 = Dict::lookup(te->ae,nss->hd);
     try {
       lookup(ge2,v);
-      Tcutil::terr(loc,xprintf("%s is ambiguous",*v));
+      Tcutil::terr(loc,aprintf("%s is ambiguous",*v));
     } catch { case Dict::Absent: break; }
   }
   return;
@@ -291,7 +291,7 @@ list_t<var_t> resolve_namespace(tenv_t te, seg_t loc,
     // Seems inconsistent.
     if (possible_results != null) {
       if (possible_results->tl != null)
-        Tcutil::terr(loc,xprintf("%s is ambiguous",*(n)));
+        Tcutil::terr(loc,aprintf("%s is ambiguous",*(n)));
       return possible_results->hd;
     }
     if (cns == null)
@@ -504,7 +504,7 @@ static struct RgnPO @find_region_in_po(rgn_po_t po, tvar_t r) {
   for (; po != null; po = po->tl) {
     if (tvar_cmp(po->hd->tvar,r) == 0) return po->hd;
   }
-  return env_err(xprintf("can't find region variable %s in po",
+  return env_err(aprintf("can't find region variable %s in po",
                          typ2string(new VarType(r))));
 }
 
@@ -537,7 +537,7 @@ static rgn_po_t initial_region_po(seg_t loc, list_t<tvar_t> tvs,
       // r2 has r1 as an ancestor.  Make sure that r1 and r2 aren't the
       // same region, and that r1 doesn't have r2 as an ancestor.
       if (tvar_cmp(r1,r2) == 0 || check_region_outlives(result,r2,r1))
-        terr(loc,xprintf("bad region lifetime assertion (circularity):%s < %s",
+        terr(loc,aprintf("bad region lifetime assertion (circularity):%s < %s",
                          typ2string(new VarType(r1)), 
                          typ2string(new VarType(r2))));
       else {
@@ -548,7 +548,7 @@ static rgn_po_t initial_region_po(seg_t loc, list_t<tvar_t> tvs,
       }
       break;
     case $(t1,t2):
-      terr(loc,xprintf("bad region lifetime assertion:: %s < %s",
+      terr(loc,aprintf("bad region lifetime assertion:: %s < %s",
                        typ2string(t1), typ2string(t2)));
       break;
     }
@@ -641,7 +641,7 @@ resolved_t lookup_ordinary(tenv_t te,seg_t loc,qvar_t q) {
     try return lookup_ordinary_global(te,loc,q);    
     catch {
     case Dict::Absent: 
-      terr(loc,xprintf("unbound identifier: %s", Absynpp::qvar2string(q)));
+      terr(loc,aprintf("unbound identifier: %s", Absynpp::qvar2string(q)));
       return new VarRes(Unresolved_b);
     }
   }
@@ -784,7 +784,7 @@ tenv_t add_label(tenv_t te, var_t v, stmt_t s) {
       }
   }
   if(Dict::member(fe->shared->seen_labels, v))
-    Tcutil::terr(s->loc, xprintf("Repeated label: %s", *v));
+    Tcutil::terr(s->loc, aprintf("Repeated label: %s", *v));
   fe->shared->seen_labels = Dict::insert(fe->shared->seen_labels, v, s);
   return te;
 }
@@ -851,7 +851,7 @@ void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
     if (region_in_effect(false, rgn, capability) ||
         region_in_effect(true, rgn, capability)) return;
   }
-  terr(loc, xprintf("Expression accesses unavailable region %s",
+  terr(loc, aprintf("Expression accesses unavailable region %s",
                     typ2string(rgn)));
 }
 
@@ -882,7 +882,7 @@ void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
   // for function calls, we drive the slack in the function's effect to 
   // the empty effect
   if (!subset_effect(true, eff, capability))
-    terr(loc, xprintf("Capability %s does not cover function's effect %s",
+    terr(loc, aprintf("Capability %s does not cover function's effect %s",
                       typ2string(capability), typ2string(eff)));
 }
 
@@ -893,7 +893,7 @@ void check_rgn_partial_order(tenv_t te, seg_t loc,
   for (; po != null; po = po->tl) {
     let &$(r1,r2) = po->hd;
     if (!region_outlives(te, r1, r2))
-      terr(loc, xprintf("function requires that region %s outlive %s",
+      terr(loc, aprintf("function requires that region %s outlive %s",
                         typ2string(r1),typ2string(r2)));
   }
 }
@@ -901,7 +901,7 @@ void check_rgn_partial_order(tenv_t te, seg_t loc,
 fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   Dict::dict_t<var_t,binding_t> locals = Dict::empty(String::zstrptrcmp);
   tvar_t rgn0 = 
-    new Tvar(new ((string_t)xprintf("`%s",*(*fd->name)[1])),
+    new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(),
              new_conref(RgnKind));
   let tvs = new List(rgn0,fd->tvs);

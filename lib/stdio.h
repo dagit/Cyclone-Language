@@ -162,14 +162,14 @@ extern int fprintf(FILE @,const char ?`r fmt, ...`r1 inject parg_t<`r2>);
 extern int printf(const char ?`r fmt, ...`r1 inject parg_t<`r2>);
 extern int sprintf(char ?`r1 s, const char ?`r2 fmt, ...`r3 inject parg_t<`r4>);
 // Similar to sprintf but allocates a result of the right size
-extern char ? xprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4>);
-extern char ?`r1 rxprintf(region_t<`r1>, const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap);
+extern char ? aprintf(const char ?`r2 fmt, ...`r3 inject parg_t<`r4>);
+extern char ?`r1 raprintf(region_t<`r1>, const char ?`r2 fmt, ...`r3 inject parg_t<`r4> ap);
 
 // Same as above but suitable for calling from a user's vararg function
 extern int vfprintf(FILE @,const char ?`r fmt, parg_t<`r2> ? `r1 ap);
 extern int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1);
 extern int vsprintf(char ?`r1 s, const char ?`r2 fmt, parg_t<`r4> ? `r3);
-extern char ?`r1 vrxprintf(region_t<`r1> r1, const char ?`r2 fmt, 
+extern char ?`r1 vraprintf(region_t<`r1> r1, const char ?`r2 fmt, 
                            parg_t<`r4> ? `r3 ap);
 
 //////////////////////////////////////////////////////////////

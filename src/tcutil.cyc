@@ -283,7 +283,7 @@ kind_t typ_kind(type_t t) {
   case &ArrayType(t,_,_): return MemKind;
   case &TupleType(tqts):  return MemKind;
   case &TypedefType(_,_,topt): 
-    return impos(xprintf("typ_kind: typedef found: %s", typ2string(t)));
+    return impos(aprintf("typ_kind: typedef found: %s", typ2string(t)));
   case &AccessEff(_):     return EffKind;
   case &JoinEff(_):       return EffKind;
   }
@@ -636,7 +636,7 @@ bool subset_effect(bool set_to_empty, type_t e1, type_t e2) {
 
     return true;
   default: 
-    return impos(xprintf("subset_effect: bad effect: %s",typ2string(e1)));
+    return impos(aprintf("subset_effect: bad effect: %s",typ2string(e1)));
   }
 }
 
@@ -794,7 +794,7 @@ void unify_it(type_t t1, type_t t2) {
     if (id1 == id2 && String::zstrptrcmp(x2,x1) == 0) {
       // sanity check
       if (k2 != k1)
-        impos(xprintf("same type variable %s has kinds %s and %s",
+        impos(aprintf("same type variable %s has kinds %s and %s",
                       *x2,kind2string(k2),kind2string(k1)));
       return;
     } 
@@ -1025,7 +1025,7 @@ bool coerce_list(tenv_t te, type_t t, glist_t<exp_t,`r> es) {
   // now coerce each expression to the type t as if by assignment
   for (glist_t<exp_t,`r> el = es; el != null; el = el->tl)
     if (!coerce_assign(te,el->hd,t)) {
-      terr(el->hd->loc,xprintf("type mismatch: expecting %s but found %s",
+      terr(el->hd->loc,aprintf("type mismatch: expecting %s but found %s",
 			       typ2string(t),typ2string(el->hd->topt->v)));
       return false;
     }
@@ -1203,7 +1203,7 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
     return true;
   } else if (castable(te,e->loc,t1,t2)) {
     unchecked_cast(te,e,t2);
-    warn(e->loc,xprintf("implicit cast from %s to %s",typ2string(t1),
+    warn(e->loc,aprintf("implicit cast from %s to %s",typ2string(t1),
 			typ2string(t2)));
     return true;
   } else return false;
@@ -1256,7 +1256,7 @@ bool coerce_use(tenv_t te, exp_t e, type_t t2) {
     return true;
   } else if (castable(te,e->loc,t1,t2)) {
     unchecked_cast(te,e,t2);
-    warn(e->loc,xprintf("implicit cast from %s to %s",typ2string(t1),
+    warn(e->loc,aprintf("implicit cast from %s to %s",typ2string(t1),
 		       typ2string(t2)));
     return true;
   } else 
@@ -1554,7 +1554,7 @@ int *new_tvar_id() {
 static int tvar_counter = 0;
 tvar_t new_tvar(kind_t k) {
   int i = tvar_counter++;
-  string_t s = xprintf("#%d",i);
+  string_t s = aprintf("#%d",i);
   return new Tvar(new{s},null,new_conref(k));
 }
 
@@ -1801,7 +1801,7 @@ exp_t default_initializer(tenv_t te, type_t t, seg_t loc) {
     e->r = new Cast_e(t,new_exp(new Const_e(new Float_c("0.0")), loc));
     break;
   default:
-    terr(loc, xprintf("declaration of type %s requires initializer",
+    terr(loc, aprintf("declaration of type %s requires initializer",
 		      typ2string(t)));
     break;
   }
@@ -1834,13 +1834,13 @@ static list_t<tvar_t> add_free_tvar(seg_t loc, list_t<tvar_t> tvs,
       conref_t<kind_t> k1 = tvs2->hd->kind;
       conref_t<kind_t> k2 = tv->kind;
       if (!constrain_kinds(k1,k2))
-        terr(loc,xprintf("type variable %s is used with inconsistent "
+        terr(loc,aprintf("type variable %s is used with inconsistent "
                          "kinds %s and %s",*tv->name, 
                          ckind2string(k1), ckind2string(k2)));
       if (tv->identity == null)
         tv->identity = tvs2->hd->identity;
       else if (*tv->identity != *tvs2->hd->identity)
-        impos(xprintf("same type variable has different identity!"));
+        impos(aprintf("same type variable has different identity!"));
       return tvs;
     }
   }
@@ -1869,7 +1869,7 @@ static list_t<tvar_t> fast_add_free_tvar(list_t<tvar_t> tvs, tvar_t tv)
 // will shadow other variables
 static list_t<tvar_t> add_bound_tvar(list_t<tvar_t> tvs, tvar_t tv) {
   // sanity
-  if (tv->identity == null) impos(xprintf("bound tvar id for %s is null",
+  if (tv->identity == null) impos(aprintf("bound tvar id for %s is null",
                                           tvar2string(tv)));
   return new List(tv,tvs);
 }
@@ -1973,7 +1973,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         *edp = *ed;
       } catch {
       case Dict::Absent:
-        terr(loc,xprintf("unbound type enum %s",qvar2string(n)));
+        terr(loc,aprintf("unbound type enum %s",qvar2string(n)));
         return cvtenv;
       }
     enumdecl_t ed = (enumdecl_t)*edp;
@@ -1987,11 +1987,11 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       try tud = *lookup_tuniondecl(te,loc,n);// FIX: lookup_xtuniondecl needed?
       catch { 
       case Dict::Absent:
-        terr(loc,xprintf("unbound type [x]tunion %s",qvar2string(n)));
+        terr(loc,aprintf("unbound type [x]tunion %s",qvar2string(n)));
         return cvtenv;
       }
       if(tud->is_xtunion != is_x)
-	terr(loc,xprintf("[x]tunion is different from type declaration %s",
+	terr(loc,aprintf("[x]tunion is different from type declaration %s",
 			 qvar2string(n)));
       *info = new KnownTunion(tud);
       fallthru(tud);
@@ -2006,10 +2006,10 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
       }
       if (targs != null)
-	terr(loc,xprintf("too many type arguments for tunion %s",
+	terr(loc,aprintf("too many type arguments for tunion %s",
 			 qvar2string(tud->name)));
       if (tvs != null) 
-	terr(loc,xprintf("too few type arguments for tunion %s",
+	terr(loc,aprintf("too few type arguments for tunion %s",
 			 qvar2string(tud->name)));
       break;
     }
@@ -2022,7 +2022,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       tunionfield_t tuf;
       try *lookup_tuniondecl(te,loc,tname);//FIX lookup_xtuniondecl needed?
       catch { case Dict::Absent:
-        terr(loc,xprintf("unbound type tunion %s",qvar2string(tname)));
+        terr(loc,aprintf("unbound type tunion %s",qvar2string(tname)));
       return cvtenv;
       }
       try 
@@ -2031,23 +2031,23 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 	  tuf = tuf2;
 	  /* Mathieu: this check is not valid any more
 	  if(tud2 != tud) != 0) {
-	    terr(loc,xprintf("unbound field %s in type tunion %s",
+	    terr(loc,aprintf("unbound field %s in type tunion %s",
                              qvar2string(fname), qvar2string(tname)));
             return cvtenv;
           }
 	  */
 	  tud = tud2;
 	  if(tud->is_xtunion != is_x)
-	    terr(loc,xprintf("[x]tunion is different from type declaration %s",
+	    terr(loc,aprintf("[x]tunion is different from type declaration %s",
 			     qvar2string(tname)));
 	  break;
-	default: terr(loc,xprintf("unbound field %s in type tunion %s",
+	default: terr(loc,aprintf("unbound field %s in type tunion %s",
 				  qvar2string(fname), qvar2string(tname)));
           return cvtenv;
         }
       catch {
       case Dict::Absent:
-        terr(loc,xprintf("unbound field %s in type tunion %s",
+        terr(loc,aprintf("unbound field %s in type tunion %s",
                          qvar2string(fname), qvar2string(tname)));
         return cvtenv;
       }  
@@ -2062,10 +2062,10 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
 	cvtenv = i_check_valid_type(loc,te,cvtenv,k1,t1);
       }
       if (targs != null)
-	terr(loc,xprintf("too many type arguments for tunion %s.%s",
+	terr(loc,aprintf("too many type arguments for tunion %s.%s",
 			 qvar2string(tud->name),qvar2string(tuf->name)));
       if (tvs != null) 
-	terr(loc,xprintf("too few type arguments for tunion %s.%s",
+	terr(loc,aprintf("too few type arguments for tunion %s.%s",
 			 qvar2string(tud->name),qvar2string(tuf->name)));
       break;
     }
@@ -2114,7 +2114,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     bool seen_fastcall = false;
     for (; atts != null; atts = atts->tl) {
       if (!fntype_att(atts->hd))
-	terr(loc,xprintf("bad function type attribute %s",
+	terr(loc,aprintf("bad function type attribute %s",
 			 attribute2string(atts->hd)));
       switch(atts->hd) {
       case Stdcall_att: 
@@ -2127,7 +2127,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       }
     }
     if(num_convs > 1)
-      terr(loc,xprintf("function can't have multiple calling conventions"));
+      terr(loc,aprintf("function can't have multiple calling conventions"));
 
     check_unique_tvars(loc,*btvs);
     // check that the function doesn't try to abstract a MemKind 
@@ -2137,7 +2137,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       cvtenv.kind_env = add_bound_tvar(cvtenv.kind_env,b->hd);
       switch (compress_conref(b->hd->kind)->v) {
       case &Eq_constr(MemKind): 
-        terr(loc,xprintf("function attempts to abstract Mem type variable %s",
+        terr(loc,aprintf("function attempts to abstract Mem type variable %s",
                          *b->hd->name)); break;
       default: break;
       }
@@ -2242,7 +2242,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         let c = compress_conref(bs->hd->kind);
         switch (c->v) {
         case No_constr:
-          warn(loc,xprintf("Type variable %s unconstrained, assuming boxed",
+          warn(loc,aprintf("Type variable %s unconstrained, assuming boxed",
                            *bs->hd->name));
           fallthru;
         case &Eq_constr(MemKind):
@@ -2277,14 +2277,14 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       for (; fs != null; fs = fs->tl) {
         let &Structfield{fn,tq,t,width,atts} = fs->hd;
         if (List::mem(String::zstrptrcmp,prev_fields,fn))
-          terr(loc,xprintf("duplicate field %s in struct",*fn));
+          terr(loc,aprintf("duplicate field %s in struct",*fn));
         if (String::strcmp(*fn,"") != 0)
           prev_fields = rnew(sprev_rgn) List(fn,prev_fields);
         cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t);
         if (width != null) {
           unsigned int w = 0;
           if (!is_const_exp(te,width->v))
-            terr(loc,xprintf("bitfield %s does not have constant width",*fn));
+            terr(loc,aprintf("bitfield %s does not have constant width",*fn));
           else w = Evexp::eval_const_uint_exp(width->v);
           switch (compress(t)) {
           case &IntType(_,b):
@@ -2296,7 +2296,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
             }
             break;
           default:
-            terr(loc,xprintf("bitfield %s must have integral type but has "
+            terr(loc,aprintf("bitfield %s must have integral type but has "
                              "type %s",*fn,typ2string(t)));
             break;
           }
@@ -2305,7 +2305,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
           switch (atts->hd) {
           case Packed_att: continue;
           case &Aligned_att(_): continue;
-          default: terr(loc,xprintf("bad attribute %s on struct member %s",
+          default: terr(loc,aprintf("bad attribute %s on struct member %s",
                                     attribute2string(atts->hd), *fn));
           break;
           }
@@ -2321,17 +2321,17 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       for (; fs != null; fs = fs->tl) {
         let &Structfield{fn,tq,t,width,atts} = fs->hd;
         if (List::mem(String::zstrptrcmp,prev_fields,fn))
-          terr(loc,xprintf("duplicate field %s in struct",*fn));
+          terr(loc,aprintf("duplicate field %s in struct",*fn));
         if (String::strcmp(*fn,"") != 0)
           prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
         cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t);
         if (!bits_only(t)) 
-          terr(loc,xprintf("%s has a type that is possibly incompatible "
+          terr(loc,aprintf("%s has a type that is possibly incompatible "
                            "with other members of union",*fn));
         if (width != null) {
           unsigned int w = 0;
           if (!is_const_exp(te,width->v))
-            terr(loc,xprintf("bitfield %s does not have constant width",*fn));
+            terr(loc,aprintf("bitfield %s does not have constant width",*fn));
           else w = Evexp::eval_const_uint_exp(width->v);
           switch (compress(t)) {
           case &IntType(_,b):
@@ -2343,7 +2343,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
             }
             break;
           default:
-            terr(loc,xprintf("bitfield %s must have integral type but has "
+            terr(loc,aprintf("bitfield %s must have integral type but has "
                              "type %s",*fn,typ2string(t)));
             break;
           }
@@ -2352,7 +2352,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
           switch (atts->hd) {
           case Packed_att: continue;
           case &Aligned_att(_): continue;
-          default: terr(loc,xprintf("bad attribute %s on struct member %s",
+          default: terr(loc,aprintf("bad attribute %s on struct member %s",
                                     attribute2string(atts->hd), *fn));
           break;
           }
@@ -2365,7 +2365,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     if (tdnopt == null) {
       // better be an anonymous struct
       if (*sdp == null) {
-        terr(loc,xprintf("bad anonymous struct")); 
+        terr(loc,aprintf("bad anonymous struct")); 
         return cvtenv;
       }
       structdecl_t sd = **sdp;
@@ -2373,7 +2373,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     if(*sdp == null) {
       try *sdp = lookup_structdecl(te,loc,(qvar_t)tdnopt);
       catch { case Dict::Absent:
-	terr(loc,xprintf("unbound type struct %s",
+	terr(loc,aprintf("unbound type struct %s",
                          qvar2string((qvar_t)tdnopt)));
         return cvtenv;
       }
@@ -2386,7 +2386,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     int lvs   = List::length(tvs);
     int largs = List::length(targs);
     if (lvs != largs) 
-      terr(loc,xprintf("struct %s expects %d type arguments but was given %d",
+      terr(loc,aprintf("struct %s expects %d type arguments but was given %d",
 		       qvar2string((qvar_t)tdnopt),lvs,largs));
     // check that each of the type arguments is well-formed
     for (; targs != null; targs = targs->tl, tvs = tvs->tl) {
@@ -2403,7 +2403,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     if(*udp == null) {
       try *udp = lookup_uniondecl(te,loc,(qvar_t)tdnopt);
       catch { case Dict::Absent:
-	terr(loc,xprintf("unbound type union %s",qvar2string((qvar_t)tdnopt)));
+	terr(loc,aprintf("unbound type union %s",qvar2string((qvar_t)tdnopt)));
         return cvtenv;
       }
     }
@@ -2415,7 +2415,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     int lvs   = List::length(tvs);
     int largs = List::length(targs);
     if (lvs != largs) 
-      terr(loc,xprintf("union %s expects %d type arguments but was given %d",
+      terr(loc,aprintf("union %s expects %d type arguments but was given %d",
 		       qvar2string((qvar_t)tdnopt),lvs,largs));
     // check that each of the type arguments is well-formed
     for (; targs != null; targs = targs->tl, tvs = tvs->tl) {
@@ -2429,7 +2429,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     typedefdecl_t td;
     try td = lookup_typedefdecl(te,loc,tdn);
     catch { case Dict::Absent:
-      terr(loc,xprintf("unbound typedef name %s",qvar2string(tdn)));
+      terr(loc,aprintf("unbound typedef name %s",qvar2string(tdn)));
       return cvtenv;
     }
     // Make relative name absolute (or replace absolute name with itself)
@@ -2443,7 +2443,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       inst = new List(new $(tvs->hd,ts->hd),inst);
     }
     if (tvs != null || ts != null) {
-      terr(loc,xprintf("typedef %s expects a different number of arguments",
+      terr(loc,aprintf("typedef %s expects a different number of arguments",
 		       qvar2string(tdn)));
       return cvtenv;
     }
@@ -2463,7 +2463,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     break;
   } 
   if (!kind_leq(typ_kind(t), expected_kind))
-    terr(loc,xprintf("type %s has kind %s but as used here needs kind %s",
+    terr(loc,aprintf("type %s has kind %s but as used here needs kind %s",
                      typ2string(t), kind2string(typ_kind(t)), 
                      kind2string(expected_kind)));
   return cvtenv;
@@ -2530,13 +2530,13 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
         let s = *free_tvars->hd->name;
         if (s[0] == '?')
           // Try to give the user a clue as to what happened...
-          terr(loc,xprintf("You failed to abstract over the generated type variables. \nRemove the bound type variables or else make the effects of the type explicit\nand then abstract the free type variables properly."));
+          terr(loc,aprintf("You failed to abstract over the generated type variables. \nRemove the bound type variables or else make the effects of the type explicit\nand then abstract the free type variables properly."));
         else
-          terr(loc,xprintf("unbound type variable %s",s));
+          terr(loc,aprintf("unbound type variable %s",s));
       }
       break;
     default: 
-      terr(loc,xprintf("unbound type variable %s",*free_tvars->hd->name));
+      terr(loc,aprintf("unbound type variable %s",*free_tvars->hd->name));
       return;
     }
   }
@@ -2559,7 +2559,7 @@ void check_type(seg_t loc, tenv_t te, list_t<tvar_t> bound_tvars,
   let free_tvars = remove_bound_tvars(free_tvars, bound_tvars);
   for (_ fs = free_tvars; fs != null; fs = fs->tl) {
     let ftvn = fs->hd->name;
-    terr(loc,xprintf("unbound type variable %s in type %s",*ftvn,
+    terr(loc,aprintf("unbound type variable %s in type %s",*ftvn,
                      typ2string(t)));
   }
 }
@@ -2572,7 +2572,7 @@ static void check_unique_unsorted(int (@cmp)(`a,`a), glist_t<`a,`r> vs,
   for(; vs != null; vs = vs->tl)
     for(_ vs2 = vs->tl; vs2 != null; vs2 = vs2->tl)
       if(cmp(vs->hd, vs2->hd)== 0)
-	terr(loc, xprintf("%s: %s",msg,a2string(vs->hd)));
+	terr(loc, aprintf("%s: %s",msg,a2string(vs->hd)));
 }
 
 static string_t strptr2string(string_t @s) {
@@ -2645,14 +2645,14 @@ resolve_struct_designators(region_t<`r> rgn, seg_t loc,
 	  if(String::zstrptrcmp(v,((*fields2->hd)[0])->name) == 0) {
 	    if((*fields2->hd)[1])
 	      terr(loc, 
-		   xprintf("field %s has already been used as an argument", 
+		   aprintf("field %s has already been used as an argument", 
 			   *v));
 	    (*fields2->hd)[1] = true;
 	    ans = rnew(rgn) List(rnew(rgn) $((*fields2->hd)[0],a), ans);
 	    break;
 	  }
 	if(fields2 == null)
-	  terr(loc, xprintf("bad field designator %s", *v));
+	  terr(loc, aprintf("bad field designator %s", *v));
 	break;
       }
   }

@@ -125,7 +125,7 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
 	return;
       }
     }
-    throw new Impossible(xprintf("unbound variable %s found in box_free_vars_exp", *v));
+    throw new Impossible(aprintf("unbound variable %s found in box_free_vars_exp", *v));
   case &Var_e(_,_): return;
 
     // everything else is just recursive descent

@@ -247,17 +247,17 @@ bool isUnknownOp(absop_t ao) {
 string_t absop2string(absop_t ao) {
   switch(ao) {
   case UnknownOp:      return "Unknown";
-  case &AddressOp(ao2): return xprintf("& %s",absop2string(ao2));
+  case &AddressOp(ao2): return aprintf("& %s",absop2string(ao2));
   case &LocalOp(vd):    return *(*vd->name)[1];
   case &MemberOp(ao2,f):
     string_t fs;
     switch(f) {
     case &StructF(field): fs = *field; break;
-    case &TupleF(i):      fs = xprintf("%d",i); break;
+    case &TupleF(i):      fs = aprintf("%d",i); break;
     }
-    return xprintf("%s.%s",absop2string(ao2),fs);
-  case &MallocOp(e,i): return xprintf("<mpt%d>",i); 
-  case &DerefOp(ao2):  return xprintf("(*%s)", absop2string(ao2));
+    return aprintf("%s.%s",absop2string(ao2),fs);
+  case &MallocOp(e,i): return aprintf("<mpt%d>",i); 
+  case &DerefOp(ao2):  return aprintf("(*%s)", absop2string(ao2));
   }
 }
 string_t absexp2string(absexp_t ae, int depth) {
@@ -265,23 +265,23 @@ string_t absexp2string(absexp_t ae, int depth) {
   for(int i=0; i < ans.size; ++i)
     ans[i] = ' ';
   switch(ae) {
-  case SkipAE:        ans = xprintf("%sskip",ans); break;
-  case &UseAE(r):      ans = xprintf("%suse %s",ans,absop2string(r)); break;
-  case &MallocAE(&MallocPt(e),i): ans = xprintf("%smalloc %i",ans,i); break;
-  case &AssignAE(l,r): ans = xprintf("%sassign %s %s",ans,
+  case SkipAE:        ans = aprintf("%sskip",ans); break;
+  case &UseAE(r):      ans = aprintf("%suse %s",ans,absop2string(r)); break;
+  case &MallocAE(&MallocPt(e),i): ans = aprintf("%smalloc %i",ans,i); break;
+  case &AssignAE(l,r): ans = aprintf("%sassign %s %s",ans,
 				    absop2string(l), absop2string(r)); break;
   case &GroupAE(g,l):
     switch(g) {
-    case OrderedG:   ans = xprintf("%sordered",ans);   break;
-    case UnorderedG: ans = xprintf("%sunordered",ans); break;
-    case OneofG:     ans = xprintf("%soneof",ans);     break;
+    case OrderedG:   ans = aprintf("%sordered",ans);   break;
+    case UnorderedG: ans = aprintf("%sunordered",ans); break;
+    case OneofG:     ans = aprintf("%soneof",ans);     break;
     }
     for(; l != null; l = l->tl)
-      ans = xprintf("%s\n%s",ans,absexp2string(l->hd, depth+1));
+      ans = aprintf("%s\n%s",ans,absexp2string(l->hd, depth+1));
     break;
     
-  case &StmtAE(s): ans = xprintf("%s<<stmt>>",ans); break;
-  case BottomAE:  ans = xprintf("%sbottom",  ans); break;
+  case &StmtAE(s): ans = aprintf("%s<<stmt>>",ans); break;
+  case BottomAE:  ans = aprintf("%sbottom",  ans); break;
   default: throw BadAbsexp;
   }
   return ans;
@@ -518,13 +518,13 @@ flow_info_t eval_absexp(analenv_t env, seg_t loc,
       switch (ao) {
       case &LocalOp(vd): 
 	if(Tcutil::bits_only(vd->type)) {
-	  Tcutil::warn(loc, xprintf("pointer-free %s may not be fully "
+	  Tcutil::warn(loc, aprintf("pointer-free %s may not be fully "
 				    "initialized", *(*vd->name)[1]));
 	  break;
 	}
 	fallthru;
       default:
-	Tcutil::terr(loc, xprintf("%s must be fully initialized "
+	Tcutil::terr(loc, aprintf("%s must be fully initialized "
 				  "to be used here", absop2string(ao)));
 	return BottomFL; // attempt to avoid cascaded messages
       }

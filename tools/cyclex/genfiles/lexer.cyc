@@ -285,7 +285,7 @@ case 21:
         return -1; 
 case 22: 
 #line 193 "lexer.cyl"
-      throw new Lexical_error(xprintf("illegal character %s", lexeme(lexbuf)),
+      throw new Lexical_error(aprintf("illegal character %s", lexeme(lexbuf)),
 			      line_num, 
 			      lexeme_start(lexbuf) - line_start_pos);  default: lexbuf->refill_buff(lexbuf); return lexmain_rec(lexbuf,lexstate);
   }

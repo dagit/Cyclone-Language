@@ -308,13 +308,13 @@ static cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
   // Var, StructMember and Subscript need to check for iniialization
   case Var_e(&$(_,v),Local_b(vd)):
     if(is_unassigned(env,vd))
-      terr(e0->loc, xprintf("variable %s may be uninitialized",*v));
+      terr(e0->loc, aprintf("variable %s may be uninitialized",*v));
     return CFExpSyn(env,env);
   case Var_e(_,_):     
     return CFExpSyn(env,env);
   case StructMember_e(&Exp(_,Var_e(&$(_,v),Local_b(vd)),_),field): 
     if(is_unassigned_structfield(env,vd,field))
-      terr(e0->loc, xprintf("field %s of struct %s may be uninitialized",
+      terr(e0->loc, aprintf("field %s of struct %s may be uninitialized",
 			    *field, *v));
     return CFExpSyn(env,env);
   case StructMember_e(e,_):
@@ -326,7 +326,7 @@ static cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
       // I wonder how many times the compiler computes the field number.
       let field = Evexp::eval_const_uint_exp(e2);
       if(is_unassigned_tuplefield(env,vd,field))
-	terr(e0->loc, xprintf("field %u of tuple %s may be uninitialized",
+	terr(e0->loc, aprintf("field %u of tuple %s may be uninitialized",
 	                      field, *v));
       return CFExpSyn(env,env);
     default: return meet_expsynth(cf_check_exp(env,e1), cf_check_exp(env,e2));

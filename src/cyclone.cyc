@@ -450,16 +450,16 @@ static void process_file(string_t filename) {
     let s = String::str_sepstr(new List(new (string_t)"",
                                         List::map(sh_escape_stringptr,x)),
                                " -I");
-    stdinc_string = xprintf("%s%s",s,stdinc_string);
+    stdinc_string = aprintf("%s%s",s,stdinc_string);
   }
   string_t ofile_string;
   if (stop_after_cpp_r) {
     if (output_file != null)
-      ofile_string = xprintf(" > %s", *output_file);
+      ofile_string = aprintf(" > %s", *output_file);
     else // output to standard out
       ofile_string = "";
   }
-  else ofile_string = xprintf(" > %s", sh_escape_string(preprocfile));
+  else ofile_string = aprintf(" > %s", sh_escape_string(preprocfile));
 
   string_t fixup_string;
   if (produce_dependencies)
@@ -475,12 +475,12 @@ static void process_file(string_t filename) {
       // Note, we should probably make sure any special characters in
       // *dependencies_target are escaped, but WE DON'T.
       fixup_string =
-        xprintf(" | sed 's/^.*\\.cyc\\.o:/%s:/'",
+        aprintf(" | sed 's/^.*\\.cyc\\.o:/%s:/'",
                 *dependencies_target);
     }
   else fixup_string = "";
 
-  let cmd = xprintf("gcc -x c -E -U__GNUC__ -nostdinc%s%s %s%s%s",
+  let cmd = aprintf("gcc -x c -E -U__GNUC__ -nostdinc%s%s %s%s%s",
                     cppargs_string, stdinc_string,
                     sh_escape_string(filename),
                     fixup_string, ofile_string);
@@ -756,7 +756,7 @@ int main(int argc, string_t ? argv) {
               do_find(cyclone_exec_prefix_path,"gc.a"));
 
     stdlib = list(new libcyc /*, new gc*/);
-    stdlib_string = xprintf(" %s %s", libcyc, gc);
+    stdlib_string = aprintf(" %s %s", libcyc, gc);
   }
 
   if (ic_r) try {
@@ -776,7 +776,7 @@ int main(int argc, string_t ? argv) {
     }
     if (is_not_executable) {
       if (output_file != null) {
-	let output_file_io = xprintf("%s.cycio", Filename::chop_extension(*output_file));
+	let output_file_io = aprintf("%s.cycio", Filename::chop_extension(*output_file));
 	let f = try_file_open(output_file_io, "w", "interface object file");
 	if (f == null) {
 	  compile_failure = true;
@@ -824,9 +824,9 @@ int main(int argc, string_t ? argv) {
   }
 
   let cccmd =
-    xprintf("gcc -include %s%s %s%s%s",
+    aprintf("gcc -include %s%s %s%s%s",
             cyc_include,
-            (output_file==null?((string_t)""):xprintf(" -o %s",sh_escape_string(*output_file))),
+            (output_file==null?((string_t)""):aprintf(" -o %s",sh_escape_string(*output_file))),
             ccargs_string,
             stdlib_string,
             libargs_string);

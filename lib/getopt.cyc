@@ -345,12 +345,12 @@ static const char ? _getopt_initialize (const char? optstring)
 	 command it runs, specifying which ARGV elements are the results of
 	 file name wildcard expansion and therefore should not be
 	 considered as options.  */
-      /*cyclone uses xprintf instead of sprintf*/
+      /*cyclone uses aprintf instead of sprintf*/
       //char var[100];
       //sprintf (var, "_%d_GNU_nonoption_argv_flags_", getpid ());
       char ? var;
       /* cyclone doesn't have unistd.h yet, use 10 instead of getpid*/
-      var = xprintf("_%d_GNU_nonoption_argv_flags_",10 );
+      var = aprintf("_%d_GNU_nonoption_argv_flags_",10 );
       nonoption_flags = getenv (var);
       if (nonoption_flags == NULL)
 	nonoption_flags_len = 0;

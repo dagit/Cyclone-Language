@@ -172,7 +172,7 @@ static void warn(string_t msg,seg_t sg) {
   return;
 }
 static `a unimp(string_t msg,seg_t sg) {
-  return abort(xprintf("%s unimplemented",msg),sg);
+  return abort(aprintf("%s unimplemented",msg),sg);
 }
 static void unimp2(string_t msg,seg_t sg) {
   fprintf(stderr,"%s: Warning: Cyclone does not yet support %s\n",
@@ -274,7 +274,7 @@ static void only_vardecl(list_t<stringptr_t> params,decl_t x) {
 	break;
       }
     if (!found)
-      abort(xprintf("%s is not listed as a parameter",
+      abort(aprintf("%s is not listed as a parameter",
 		    *((*vd->name)[1])),x->loc);
     return;
   case &Let_d(_,_,_,_,_): decl_kind = "let declaration";        break;
@@ -289,7 +289,7 @@ static void only_vardecl(list_t<stringptr_t> params,decl_t x) {
   case &Using_d(_,_):     decl_kind = "using declaration";      break;
   case &ExternC_d(_):     decl_kind = "extern C declaration";   break;
   }
-  abort(xprintf("%s appears in parameter type", decl_kind), x->loc);
+  abort(aprintf("%s appears in parameter type", decl_kind), x->loc);
   return;
 }
 
@@ -299,7 +299,7 @@ static $(opt_t<var_t>,tqual_t,type_t)@
   get_param_type($(list_t<decl_t>,seg_t)@ env, stringptr_t x) {
   let &$(tdl,loc) = env;
   if (tdl==null)
-    return(abort(xprintf("missing type for parameter %s",*x),loc));
+    return(abort(aprintf("missing type for parameter %s",*x),loc));
   switch (tdl->hd->r) {
   case &Var_d(vd):
     switch ((*vd->name)[0]) {
@@ -839,7 +839,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
         decls = new List(d,decls);
       }
       if (atts != null)
-        err(xprintf("bad attribute %s in typedef",attribute2string(atts->hd)),
+        err(aprintf("bad attribute %s in typedef",attribute2string(atts->hd)),
             loc);
       return decls;
     } else {
@@ -869,7 +869,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 // Convert an identifier to a kind
 static kind_t id_to_kind(string_t s, seg_t loc) {
   if (strlen(s) != 1) {
-    err(xprintf("bad kind: %s",s), loc);
+    err(aprintf("bad kind: %s",s), loc);
     return BoxKind;
   } else {
     switch (s[0]) {
@@ -879,7 +879,7 @@ static kind_t id_to_kind(string_t s, seg_t loc) {
     case 'R': return RgnKind;
     case 'E': return EffKind;
     default:
-      err(xprintf("bad kind: %s",s), loc);
+      err(aprintf("bad kind: %s",s), loc);
       return BoxKind;
     }
   }
@@ -904,7 +904,7 @@ static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t>
   // tell the lexer that x is a typedef identifier
   Lex::register_typedef(x);
   if ((*t)[4] != null)
-    err(xprintf("bad attribute %s within typedef",
+    err(aprintf("bad attribute %s within typedef",
                 attribute2string((*t)[4]->hd)),loc);
   return new_decl(new Typedef_d(new Typedefdecl{.name=x, .tvs=(*t)[3],
                                                    .defn=(*t)[2]}),loc);
@@ -922,7 +922,7 @@ using Parse;
 %token NULL_kw LET THROW TRY CATCH
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION
 %token FILL CODEGEN CUT SPLICE
-%token PRINTF FPRINTF XPRINTF SCANF FSCANF SSCANF MALLOC
+%token PRINTF FPRINTF APRINTF SCANF FSCANF SSCANF MALLOC
 %token REGION_T REGION RNEW RMALLOC
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
@@ -2036,7 +2036,7 @@ statement:
 | REGION IDENTIFIER statement
   { if (zstrcmp($2,"H") == 0)
       err("bad occurrence of heap region `H",LOC(@3,@3));
-    tvar_t tv = new Tvar(new {(string_t)xprintf("`%s",$2)},null,
+    tvar_t tv = new Tvar(new {(string_t)aprintf("`%s",$2)},null,
                          new_conref(RgnKind));
     type_t t = new VarType(tv);
     $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $((nmspace_t)Loc_n, new $2),
@@ -2507,7 +2507,7 @@ unary_expression:
 format_primop:
   PRINTF  { $$=^$(Printf); }
 | FPRINTF { $$=^$(Fprintf); }
-| XPRINTF { $$=^$(Xprintf); }
+| APRINTF { $$=^$(Aprintf); }
 | SCANF   { $$=^$(Scanf); }
 | FSCANF  { $$=^$(Fscanf); }
 | SSCANF  { $$=^$(Sscanf); }

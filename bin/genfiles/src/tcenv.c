@@ -26,7 +26,7 @@ Cyc_Stdio_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Stdi
 Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{ int tag; short*
 f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
 int tag; unsigned int* f1; } ; extern int Cyc_Stdio_fprintf( struct Cyc_Stdio___sFILE*,
-struct _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Stdio_xprintf(
+struct _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Stdio_aprintf(
 struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
 0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
 Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
@@ -186,7 +186,7 @@ static const int Cyc_Absyn_Bitor= 14; static const int Cyc_Absyn_Bitxor= 15;
 static const int Cyc_Absyn_Bitlshift= 16; static const int Cyc_Absyn_Bitlrshift=
 17; static const int Cyc_Absyn_Bitarshift= 18; static const int Cyc_Absyn_Size=
 19; static const int Cyc_Absyn_Printf= 20; static const int Cyc_Absyn_Fprintf=
-21; static const int Cyc_Absyn_Xprintf= 22; static const int Cyc_Absyn_Scanf= 23;
+21; static const int Cyc_Absyn_Aprintf= 22; static const int Cyc_Absyn_Scanf= 23;
 static const int Cyc_Absyn_Fscanf= 24; static const int Cyc_Absyn_Sscanf= 25;
 static const int Cyc_Absyn_PreInc= 0; static const int Cyc_Absyn_PostInc= 1;
 static const int Cyc_Absyn_PreDec= 2; static const int Cyc_Absyn_PostDec= 3;
@@ -526,7 +526,7 @@ struct Cyc_List_List*) _check_null( nss))->hd); struct _handler_cons _temp18;
 _push_handler(& _temp18);{ int _temp20= 0; if( setjmp( _temp18.handler)){
 _temp20= 1;} if( ! _temp20){ lookup( ge2, v); Cyc_Tcutil_terr( loc,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp21)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp25= _tag_arr("%s is ambiguous",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp25= _tag_arr("%s is ambiguous",
 sizeof( unsigned char), 16u); struct Cyc_Stdio_String_pa_struct _temp26; _temp26.tag=
 Cyc_Stdio_String_pa; _temp26.f1=( struct _tagged_arr)* v;{ void* _temp24=( void*)&
 _temp26; void* _temp22[ 1u]={ _temp24}; struct _tagged_arr _temp23={( void*)
@@ -607,7 +607,7 @@ struct Cyc_List_List* _temp93=( struct Cyc_List_List*) GC_malloc( sizeof( struct
 Cyc_List_List)); _temp93->hd=( void*) n; _temp93->tl= ns; _temp93;})); _temp92->tl=
 _temp87; _temp92;});} if( _temp87 != 0){ if((( struct Cyc_List_List*)
 _check_null( _temp87))->tl != 0){ Cyc_Tcutil_terr( loc,( struct _tagged_arr)({
-struct _tagged_arr(* _temp94)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp94)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp98= _tag_arr("%s is ambiguous", sizeof( unsigned char),
 16u); struct Cyc_Stdio_String_pa_struct _temp99; _temp99.tag= Cyc_Stdio_String_pa;
 _temp99.f1=( struct _tagged_arr)* n;{ void* _temp97=( void*)& _temp99; void*
@@ -912,7 +912,7 @@ struct Cyc_Tcenv_RgnPO*)(( struct Cyc_List_List*) _check_null( po))->hd)->tvar,
 r) == 0){ return( struct Cyc_Tcenv_RgnPO*)(( struct Cyc_List_List*) _check_null(
 po))->hd;}} return(( struct Cyc_Tcenv_RgnPO*(*)( struct _tagged_arr msg)) Cyc_Tcenv_env_err)((
 struct _tagged_arr)({ struct _tagged_arr(* _temp369)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp373= _tag_arr("can't find region variable %s in po",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp373= _tag_arr("can't find region variable %s in po",
 sizeof( unsigned char), 36u); struct Cyc_Stdio_String_pa_struct _temp376;
 _temp376.tag= Cyc_Stdio_String_pa; _temp376.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
 void*)({ struct Cyc_Absyn_VarType_struct* _temp374=( struct Cyc_Absyn_VarType_struct*)
@@ -950,7 +950,7 @@ _temp389)->f1; goto _LL384;} else{ goto _LL385;} _LL385: _LL400: _temp399=
 _temp379.f1; goto _LL398; _LL398: _temp397= _temp379.f2; goto _LL386; _LL382:
 goto _LL380; _LL384: if( Cyc_Absyn_tvar_cmp( _temp395, _temp391) == 0? 1: Cyc_Tcenv_check_region_outlives(
 result, _temp391, _temp395)){ Cyc_Tcutil_terr( loc,( struct _tagged_arr)({
-struct _tagged_arr(* _temp401)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp401)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp406= _tag_arr("bad region lifetime assertion (circularity):%s < %s",
 sizeof( unsigned char), 52u); struct Cyc_Stdio_String_pa_struct _temp412;
 _temp412.tag= Cyc_Stdio_String_pa; _temp412.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string((
@@ -971,7 +971,7 @@ result, _temp391); _temp414->ancestors=({ struct Cyc_List_List* _temp415=(
 struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp415->hd=(
 void*) _temp413; _temp415->tl= _temp414->ancestors; _temp415;});} goto _LL380;
 _LL386: Cyc_Tcutil_terr( loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp416)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp416)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp421= _tag_arr("bad region lifetime assertion:: %s < %s",
 sizeof( unsigned char), 40u); struct Cyc_Stdio_String_pa_struct _temp423;
 _temp423.tag= Cyc_Stdio_String_pa; _temp423.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1072,7 +1072,7 @@ te, loc, q); _npop_handler( 0u); return _temp482;}; _pop_handler();} else{ void*
 _temp480=( void*) _exn_thrown; void* _temp484= _temp480; _LL486: if( _temp484 ==
 Cyc_Dict_Absent){ goto _LL487;} else{ goto _LL488;} _LL488: goto _LL489; _LL487:
 Cyc_Tcutil_terr( loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp490)(
-struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct
+struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct
 _tagged_arr _temp494= _tag_arr("unbound identifier: %s", sizeof( unsigned char),
 23u); struct Cyc_Stdio_String_pa_struct _temp495; _temp495.tag= Cyc_Stdio_String_pa;
 _temp495.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string( q);{ void* _temp493=(
@@ -1223,7 +1223,7 @@ _LL550:(( int(*)( struct _tagged_arr msg)) Cyc_Tcenv_env_err)( _tag_arr("Tcenv: 
 sizeof( unsigned char), 42u)); goto _LL546; _LL546:;}}} if((( int(*)( struct Cyc_Dict_Dict*
 d, struct _tagged_arr* key)) Cyc_Dict_member)(( _temp541->shared)->seen_labels,
 v)){ Cyc_Tcutil_terr( s->loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp554)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp554)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp558= _tag_arr("Repeated label: %s", sizeof(
 unsigned char), 19u); struct Cyc_Stdio_String_pa_struct _temp559; _temp559.tag=
 Cyc_Stdio_String_pa; _temp559.f1=( struct _tagged_arr)* v;{ void* _temp557=(
@@ -1295,7 +1295,7 @@ struct Cyc_Tcenv_Tenv* te, struct Cyc_Position_Segment* loc, void* rgn){ if( te-
 != 0){ void* capability=( void*)( Cyc_Tcenv_get_fenv( te))->capability; if( Cyc_Tcutil_region_in_effect(
 0, rgn, capability)? 1: Cyc_Tcutil_region_in_effect( 1, rgn, capability)){
 return;}} Cyc_Tcutil_terr( loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp583)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp583)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp587= _tag_arr("Expression accesses unavailable region %s",
 sizeof( unsigned char), 42u); struct Cyc_Stdio_String_pa_struct _temp588;
 _temp588.tag= Cyc_Stdio_String_pa; _temp588.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1321,7 +1321,7 @@ _temp604[ 0]=({ struct Cyc_Absyn_JoinEff_struct _temp605; _temp605.tag= Cyc_Absy
 _temp605.f1= 0; _temp605;}); _temp604;});} else{ struct Cyc_Tcenv_Fenv* _temp606=
 Cyc_Tcenv_get_fenv( te); capability=( void*) _temp606->capability;} if( ! Cyc_Tcutil_subset_effect(
 1, eff, capability)){ Cyc_Tcutil_terr( loc,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp607)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp607)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp612= _tag_arr("Capability %s does not cover function's effect %s",
 sizeof( unsigned char), 50u); struct Cyc_Stdio_String_pa_struct _temp614;
 _temp614.tag= Cyc_Stdio_String_pa; _temp614.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1337,7 +1337,7 @@ struct _tuple5* _temp615=( struct _tuple5*)(( struct Cyc_List_List*) _check_null
 po))->hd; _temp617=* _temp615; _LL621: _temp620= _temp617.f1; goto _LL619;
 _LL619: _temp618= _temp617.f2; goto _LL616; _LL616: if( ! Cyc_Tcenv_region_outlives(
 te, _temp620, _temp618)){ Cyc_Tcutil_terr( loc,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp622)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp622)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp627= _tag_arr("function requires that region %s outlive %s",
 sizeof( unsigned char), 44u); struct Cyc_Stdio_String_pa_struct _temp629;
 _temp629.tag= Cyc_Stdio_String_pa; _temp629.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(
@@ -1354,7 +1354,7 @@ struct Cyc_Absyn_Tvar* rgn0=({ struct Cyc_Absyn_Tvar* _temp682=( struct Cyc_Absy
 GC_malloc( sizeof( struct Cyc_Absyn_Tvar)); _temp682->name=({ struct _tagged_arr*
 _temp683=( struct _tagged_arr*) GC_malloc( sizeof( struct _tagged_arr));
 _temp683[ 0]=( struct _tagged_arr)({ struct _tagged_arr(* _temp684)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp688= _tag_arr("`%s", sizeof( unsigned char), 4u); struct Cyc_Stdio_String_pa_struct
 _temp689; _temp689.tag= Cyc_Stdio_String_pa; _temp689.f1=( struct _tagged_arr)*(*
 fd->name).f2;{ void* _temp687=( void*)& _temp689; void* _temp685[ 1u]={ _temp687};

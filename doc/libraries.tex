@@ -2017,13 +2017,13 @@ The namespace \texttt{Stdio} provides input and output primitives.
 
 Cyclone provides safe versions of \code{printf} and \code{fprintf} as
 built-in primitives.  It also provides a built-in function,
-\code{xprintf}, that allocates a string, prints to it, and returns it.
+\code{aprintf}, that allocates a string, prints to it, and returns it.
 Cyclone protects against format string attacks by using its type safe
 vararg features; the library verifies the format string and
 corresponding arguments at run time.
 
 The permissible types for the varargs of \texttt{printf},
-\texttt{fprintf}, and \texttt{xprintf} are given by the type
+\texttt{fprintf}, and \texttt{aprintf} are given by the type
 \texttt{parg_t}; if you need to know the details of \texttt{parg_t},
 consult \texttt{stdio.h}.
 
@@ -2045,12 +2045,12 @@ consult \texttt{stdio.h}.
   printed, or a negative value if an output error or encoding error
   occurred.
 \end{defun2}
-\begin{defun2}{char ?}{xprintf(const char {?}`r2 \var{fmt}, ...`r3 inject parg_t<`r4>);}
+\begin{defun2}{char ?}{aprintf(const char {?}`r2 \var{fmt}, ...`r3 inject parg_t<`r4>);}
   Allocates and returns a string whose contents are given by printing
   according to the format string \var{fmt} and the remaining arguments.
   \texttt{FIX: is an error possible?  What do we do then?}
 \end{defun2}
-\begin{defun2}{char {?}`r1}{rxprintf}{(region_t<`r1>, const char {?}`r2 fmt, ...`r3 inject parg_t<`r4> ap);}
+\begin{defun2}{char {?}`r1}{raprintf}{(region_t<`r1>, const char {?}`r2 fmt, ...`r3 inject parg_t<`r4> ap);}
 \end{defun2}
 
 \begin{defun2}{int}{vfprintf}{(FILE @,const char {?}`r fmt, parg_t<`r2> ? `r1 ap);}
@@ -2065,16 +2065,12 @@ consult \texttt{stdio.h}.
   A version of \code{sprintf} suitable for calling from a user's
   vararg function.
 \end{defun2}
-\begin{defun2}{char {?}`r1}{vrxprintf}{(region_t<`r1> r1, const char {?}`r2 fmt, parg_t<`r4> ? `r3 ap);}
-  A version of \code{rxprintf} suitable for calling from a user's
+\begin{defun2}{char {?}`r1}{vraprintf}{(region_t<`r1> r1, const char {?}`r2 fmt, parg_t<`r4> ? `r3 ap);}
+  A version of \code{raprintf} suitable for calling from a user's
   vararg function.
 \end{defun2}
 
 \subsubsection*{Output format strings}
-
-Cyclone requires the format string arguments of \code{printf},
-\code{fprintf}, and \code{xprintf} to be string constants, and it checks
-the remaining arguments for consistency at compile time.
 
 The format string consists of ordinary (non-\code{\%}) characters, which
 are copied to the output, and \emph{conversion specifications}, which
@@ -2231,10 +2227,6 @@ by the type \texttt{sarg_t}; if you need to know the details of
 \end{defun2}
 
 \subsubsection*{Input format strings}
-
-Cyclone requires the format string arguments of \code{scanf} and
-\code{fscanf} to be string constants, and it checks the remaining
-arguments for consistency at compile time.
 
 The format string consists of white space characters (which match any
 (possible empty) sequence of white space characters), ordinary

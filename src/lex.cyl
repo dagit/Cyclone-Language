@@ -348,7 +348,7 @@ static list_t<var_t> get_absolute_namespace(List_t<var_t> ns) {
         return List::append(x->hd,ns);
     }
   }
-  yyerror(xprintf("undeclared namespace %s",String::str_sepstr(ns,"::")));
+  yyerror(aprintf("undeclared namespace %s",String::str_sepstr(ns,"::")));
   return null; 
 }
 

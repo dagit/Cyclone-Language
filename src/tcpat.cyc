@@ -89,12 +89,12 @@ static void resolve_pat(tenv_t te, pat_t p) {
       p->r = new Tunion_p(tud,tuf,tvs,ps);
       return;
     case &EnumRes(_,_):
-      terr(p->loc,xprintf("bad enum constructor %s in pattern",qvar2string(q)));
+      terr(p->loc,aprintf("bad enum constructor %s in pattern",qvar2string(q)));
       return;
     case &VarRes(_):
       break;
     } catch {case Dict::Absent: break;}
-    terr(p->loc, xprintf("%s is not a constructor in pattern",qvar2string(q)));
+    terr(p->loc, aprintf("%s is not a constructor in pattern",qvar2string(q)));
     return;
   case &UnknownFields_p(q,tvs,dps):
     try switch (lookup_ordinary(te,p->loc,q)) {
@@ -103,7 +103,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
       return;
     default: break;
     } catch {case Dict::Absent: break; }
-    terr(p->loc, xprintf("%s is not a struct name, but pattern has designators",
+    terr(p->loc, aprintf("%s is not a struct name, but pattern has designators",
 			 qvar2string(q)));
     return;
   default: return;
@@ -279,7 +279,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 	// we could be constraining so as to catch an error later.
 	if (!unify(pat->topt->v,inst_fieldtyp))
         terr(p->loc,
-             xprintf("field %s of struct pattern expects type %s != %s",
+             aprintf("field %s of struct pattern expects type %s != %s",
                      *field->name, typ2string(inst_fieldtyp), 
                      typ2string(pat->topt->v)));
       }
@@ -298,7 +298,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 	switch (compress_conref(tv->kind)->v) {
 	case &Eq_constr(BoxKind): break;
 	case &Eq_constr(k): 
-	  terr(p->loc,xprintf("tunion member %s abstracts type variable %s of kind %s != B",qvar2string(tud->name),*tv->name,kind2string(k))); 
+	  terr(p->loc,aprintf("tunion member %s abstracts type variable %s of kind %s != B",qvar2string(tud->name),*tv->name,kind2string(k))); 
 	  break;
 	case No_constr: 
 	  tv->kind->v = new Eq_constr(BoxKind); 
@@ -356,16 +356,16 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 	// against the exp we're matching against.  Even if we succeed now,
 	// we could be constraining so as to catch an error later.
 	if (!unify(p2->topt->v,field_typ))
-	  terr(p2->loc, xprintf("%s expects argument type %s, not %s",
+	  terr(p2->loc, aprintf("%s expects argument type %s, not %s",
 				qvar2string(tud->name), 
 				typ2string(field_typ),
 				typ2string(p2->topt->v)));
       }
       if (ps != null)
-	terr(p->loc,xprintf("too many arguments for tunion constructor %s",
+	terr(p->loc,aprintf("too many arguments for tunion constructor %s",
 			    qvar2string(tud->name)));
       if (tqts != null)
-	terr(p->loc,xprintf("too few arguments for tunion constructor %s",
+	terr(p->loc,aprintf("too few arguments for tunion constructor %s",
 			    qvar2string(tud->name)));
     }
     break;

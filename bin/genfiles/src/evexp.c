@@ -34,7 +34,7 @@ const int Cyc_Stdio_Int_pa= 1; struct Cyc_Stdio_Int_pa_struct{ int tag;
 unsigned int f1; } ; static const int Cyc_Stdio_Double_pa= 2; struct Cyc_Stdio_Double_pa_struct{
 int tag; double f1; } ; static const int Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{
 int tag; short* f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; extern struct _tagged_arr Cyc_Stdio_xprintf(
+int tag; unsigned int* f1; } ; extern struct _tagged_arr Cyc_Stdio_aprintf(
 struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
 0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
 Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
@@ -166,7 +166,7 @@ static const int Cyc_Absyn_Bitor= 14; static const int Cyc_Absyn_Bitxor= 15;
 static const int Cyc_Absyn_Bitlshift= 16; static const int Cyc_Absyn_Bitlrshift=
 17; static const int Cyc_Absyn_Bitarshift= 18; static const int Cyc_Absyn_Size=
 19; static const int Cyc_Absyn_Printf= 20; static const int Cyc_Absyn_Fprintf=
-21; static const int Cyc_Absyn_Xprintf= 22; static const int Cyc_Absyn_Scanf= 23;
+21; static const int Cyc_Absyn_Aprintf= 22; static const int Cyc_Absyn_Scanf= 23;
 static const int Cyc_Absyn_Fscanf= 24; static const int Cyc_Absyn_Sscanf= 25;
 static const int Cyc_Absyn_PreInc= 0; static const int Cyc_Absyn_PostInc= 1;
 static const int Cyc_Absyn_PreDec= 2; static const int Cyc_Absyn_PostDec= 3;
@@ -379,7 +379,7 @@ unsigned int Cyc_Evexp_eval_const_uint_exp( struct Cyc_Absyn_Exp* e); extern int
 Cyc_Evexp_okay_szofarg( void* t); void Cyc_Evexp_exp_err( struct Cyc_Position_Segment*
 loc, struct _tagged_arr msg){ Cyc_Position_post_error( Cyc_Position_mk_err_elab(
 loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp0)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp4= _tag_arr("Exp_err: %s",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp4= _tag_arr("Exp_err: %s",
 sizeof( unsigned char), 12u); struct Cyc_Stdio_String_pa_struct _temp5; _temp5.tag=
 Cyc_Stdio_String_pa; _temp5.f1=( struct _tagged_arr) msg;{ void* _temp3=( void*)&
 _temp5; void* _temp1[ 1u]={ _temp3}; struct _tagged_arr _temp2={( void*) _temp1,(
@@ -505,7 +505,7 @@ void*)(( struct Cyc_Absyn_Structfield*)(( struct Cyc_List_List*) _check_null(
 _temp129))->hd)->type)){ return 0;}} return 1; _LL89: return 1; _LL91: return 0;
 _LL93: return 0; _LL95: return 0; _LL97: return(( int(*)( struct _tagged_arr))
 Cyc_Tcutil_impos)(( struct _tagged_arr)({ struct _tagged_arr(* _temp149)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp153= _tag_arr("szof typedeftype %s", sizeof( unsigned char), 20u); struct
 Cyc_Stdio_String_pa_struct _temp154; _temp154.tag= Cyc_Stdio_String_pa; _temp154.f1=(
 struct _tagged_arr) Cyc_Absynpp_typ2string( t);{ void* _temp152=( void*)&
@@ -768,7 +768,7 @@ _temp482=( struct Cyc_Absyn_Int_c_struct*) GC_malloc( sizeof( struct Cyc_Absyn_I
 _temp482[ 0]=({ struct Cyc_Absyn_Int_c_struct _temp483; _temp483.tag= Cyc_Absyn_Int_c;
 _temp483.f1=( void*) _temp480; _temp483.f2= _temp472; _temp483;}); _temp482;});}
 goto _LL437; _LL445: Cyc_Evexp_exp_err( e->loc,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp484)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp484)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp488= _tag_arr("eval_const: cannot cast to %s", sizeof(
 unsigned char), 30u); struct Cyc_Stdio_String_pa_struct _temp489; _temp489.tag=
 Cyc_Stdio_String_pa; _temp489.f1=( struct _tagged_arr) Cyc_Absynpp_typ2string(

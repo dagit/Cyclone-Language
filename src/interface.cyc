@@ -163,19 +163,19 @@ static void err(string_t msg) {
 //better than a function regarding to the control flow
 
 static void fields_err(string_t sc, string_t t, qvar_t n) {
-  err(xprintf("fields of %s %s %s have never been defined",
+  err(aprintf("fields of %s %s %s have never been defined",
 	      sc, t, Absynpp::qvar2string(n)));
 }
 
 static void body_err(string_t sc, qvar_t n) {
-  err(xprintf("the body of %s function %s has never been defined",
+  err(aprintf("the body of %s function %s has never been defined",
 	      sc, Absynpp::qvar2string(n)));
 }
 
 // don't print anything if obj1 == null
 static void static_err(string_t obj1, qvar_t name1, string_t obj2, qvar_t name2) {
   if (obj1 != null) {
-    err(xprintf("declaration of %s %s relies on static %s %s",
+    err(aprintf("declaration of %s %s relies on static %s %s",
 		obj1, Absynpp::qvar2string(name1), obj2, Absynpp::qvar2string(name2)));
   }
 }
@@ -183,7 +183,7 @@ static void static_err(string_t obj1, qvar_t name1, string_t obj2, qvar_t name2)
 // id.
 static void abstract_err(string_t obj1, qvar_t name1, string_t obj2, qvar_t name2) {
   if (obj1 != null) {
-    err(xprintf("declaration of %s %s relies on fields of abstract %s %s",
+    err(aprintf("declaration of %s %s relies on fields of abstract %s %s",
 		obj1, Absynpp::qvar2string(name1), obj2, Absynpp::qvar2string(name2)));
   }
 }
@@ -344,7 +344,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       let ge = Dict::lookup(ae, ns);
       ed = *Dict::lookup(ge->enumdecls, v);
     } catch {
-    case Dict::Absent: invalid_arg(xprintf("check_public_type (can't find enum %s)",
+    case Dict::Absent: invalid_arg(aprintf("check_public_type (can't find enum %s)",
 					   qvar2string(name)));
     }
     if (ed->sc == Static) {
@@ -361,7 +361,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       let ge = Dict::lookup(ae, ns);
       tud = *Dict::lookup(ge->tuniondecls, v);
     } catch {
-    case Dict::Absent: invalid_arg(xprintf("check_public_type (can't find [x]tunion %s)",
+    case Dict::Absent: invalid_arg(aprintf("check_public_type (can't find [x]tunion %s)",
 					   qvar2string(tud0->name)));
     }
     if (tud->sc == Static) {
@@ -380,10 +380,10 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       tud = *Dict::lookup(ge->tuniondecls, v);
     } catch {
     case Dict::Absent:
-      invalid_arg(xprintf("check_public_type (can't find [x]tunion %s and search its fields)",
+      invalid_arg(aprintf("check_public_type (can't find [x]tunion %s and search its fields)",
 			  qvar2string(tud0->name)));
     }
-    if (tud->fields == null) invalid_arg(xprintf("check_public_type ([x]tunion %s has no fields)",
+    if (tud->fields == null) invalid_arg(aprintf("check_public_type ([x]tunion %s has no fields)",
 						 qvar2string(tud->name)));
 
     struct Tunionfield * tuf1 = null;
@@ -393,7 +393,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
 	  break;
 	}
   
-    if (tuf1 == null) invalid_arg(xprintf("check_public_type (can't find [x]tunionfield %s)",
+    if (tuf1 == null) invalid_arg(aprintf("check_public_type (can't find [x]tunionfield %s)",
 					  qvar2string(tuf0->name)));
     tunionfield_t tuf = (tunionfield_t) tuf1;
 
@@ -406,7 +406,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
       return false;
     }
     if (tuf->sc == Static) {
-      static_err(obj, name, xprintf("field %s of", qvar2string(tuf->name)),tud->name);
+      static_err(obj, name, aprintf("field %s of", qvar2string(tuf->name)),tud->name);
       return false;
     }
     return check_public_type_list(ae, seen, obj, name, identity, targs)
@@ -656,7 +656,7 @@ static void incl_dict_f($(bool,
     if (! incl_f(y1, y2, msg)) (*res) = false;
   } catch {
   case Dict::Absent:
-    check_err(msg, xprintf("%s %s is missing", t, *x));
+    check_err(msg, aprintf("%s %s is missing", t, *x));
     *res = false;
     break;
   }
@@ -677,7 +677,7 @@ static bool incl_##OBJ##decl(OBJ##decl_t d0, OBJ##decl_t d1, string_t * msg) { \
   let d = Tcdecl::merge_##OBJ##decl(d0, d1, null, msg); \
   if (d == null) return false; \
   if (d0 != d) { \
-    check_err(msg, xprintf("declaration of " TYPEOBJ " %s discloses too much information", \
+    check_err(msg, aprintf("declaration of " TYPEOBJ " %s discloses too much information", \
 			   qvar2string(d1 NAMEOPT))); \
     return false; \
   } \
@@ -757,11 +757,11 @@ bool is_subinterface(i_t i1, i_t i2, $(string_t, string_t) * `r info) {
     string_t * msg = null;
   
     if (info != null)
-      msg = new ((string_t)xprintf("checking inclusion of %s exports into %s exports,", (*info)[0], (*info)[1]));
+      msg = new ((string_t)aprintf("checking inclusion of %s exports into %s exports,", (*info)[0], (*info)[1]));
     if (!incl_ns(i1->exports, i2->exports, msg)) res = false;
     
     if (info != null)
-      msg = new ((string_t)xprintf("checking inclusion of %s imports into %s imports,", (*info)[1], (*info)[0]));
+      msg = new ((string_t)aprintf("checking inclusion of %s imports into %s imports,", (*info)[1], (*info)[0]));
     if (!incl_ns(i2->imports, i1->imports, msg)) res = false;
     
     return res;
@@ -807,7 +807,7 @@ void compat_merge_dict_f($(bool,
     let yt = merge_f(ye, y, null, msg);
     if (yt != ye) {
       if (yt) // if yt is null, the error came from the merging
-	check_err(msg, xprintf("abstract %s %s is being imported as non-abstract",
+	check_err(msg, aprintf("abstract %s %s is being imported as non-abstract",
 			       t, *x));
       *res = false;
     }
@@ -916,7 +916,7 @@ void disj_merge_dict_f($(bool, Dict::dict_t<var_t, `a>,
 		       var_t x, `a y) {
   let &$(*res, *res_dic, dic1, t, msg) = env;
   if (Dict::member(dic1, x)) {
-    check_err(msg, xprintf("%s %s is exported more than once", t, *x));
+    check_err(msg, aprintf("%s %s is exported more than once", t, *x));
     *res = false;
   } else {
     if (*res) *res_dic = Dict::insert(*res_dic, x, y);
@@ -997,13 +997,13 @@ struct I * merge(i_t i1, i_t i2, $(string_t, string_t) * `r info) {
     string_t * msg = null;
 
     if (info != null)
-      msg = new ((string_t)xprintf("merging exports of %s and %s,", (*info)[0], (*info)[1]));
+      msg = new ((string_t)aprintf("merging exports of %s and %s,", (*info)[0], (*info)[1]));
 
     let exp = disj_merge_ns(i1->exports, i2->exports, msg);
     if (exp == null) return null;
 
     if (info != null)
-      msg = new ((string_t)xprintf("merging imports of %s and %s,", (*info)[0], (*info)[1]));
+      msg = new ((string_t)aprintf("merging imports of %s and %s,", (*info)[0], (*info)[1]));
 
     let imp = compat_merge_ns(i1->imports, i2->imports, exp->v, msg);
     if (imp == null) return null;
@@ -1028,7 +1028,7 @@ struct I * merge_list(list_t<i_t> li, list_t<string_t @> linfo) {
     if (i == null) return null;
     curr_i = (i_t) i;
     if (curr_info != null) {
-      curr_info = (linfo != null ? new ((string_t)xprintf("%s+%s", *curr_info, *linfo->hd)) : null);
+      curr_info = (linfo != null ? new ((string_t)aprintf("%s+%s", *curr_info, *linfo->hd)) : null);
     }
     if (linfo != null) linfo = linfo->tl;
   }
@@ -1049,7 +1049,7 @@ struct I * get_and_merge_list(i_t (@get)(`a), list_t<`a> la, list_t<string_t @> 
     if (i == null) return null;
     curr_i = (i_t) i;
     if (curr_info != null) {
-      curr_info = (linfo != null ? new ((string_t)xprintf("%s+%s", *curr_info, *linfo->hd)) : null);
+      curr_info = (linfo != null ? new ((string_t)aprintf("%s+%s", *curr_info, *linfo->hd)) : null);
     }
     if (linfo != null) linfo = linfo->tl;
   }

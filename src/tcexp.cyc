@@ -68,7 +68,7 @@ static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
   case &EnumRes(ed,ef):     e->r = new Enum_e(q,ed,ef); break;
   case &TunionRes(tud,tuf): e->r = new Tunion_e(null,null,null,tud,tuf); break;
   case &StructRes(_):
-    terr(e->loc,xprintf("bad occurrence of struct name %s",qvar2string(q)));
+    terr(e->loc,aprintf("bad occurrence of struct name %s",qvar2string(q)));
     e->r = new Var_e(q,Unresolved_b);
     break;
   } catch { 
@@ -97,7 +97,7 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t> es) {
       case &TunionRes(tud,tuf):
         if (tuf->typs == null)
           // Don't allow "foo()", require "foo"
-          terr(e->loc,xprintf("%s is a constant, not a function",
+          terr(e->loc,aprintf("%s is a constant, not a function",
                               qvar2string(tuf->name)));
         e->r = new Tunion_e(null,null,es,tud,tuf); 
 	return;
@@ -112,13 +112,13 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t> es) {
 	}
 	return;
       case &EnumRes(_,_):
-        terr(e->loc,xprintf("%s is an enum constructor, not a function",
+        terr(e->loc,aprintf("%s is an enum constructor, not a function",
                             qvar2string(q)));
         return;
       }
     } catch {
     case Dict::Absent:
-      terr(e1->loc, xprintf("unbound identifier %s",qvar2string(q)));
+      terr(e1->loc, aprintf("unbound identifier %s",qvar2string(q)));
       e->r = new FnCall_e(e1,es,null);
       return;
     }
@@ -173,7 +173,7 @@ void tcTest(tenv_t te, exp_t e, string_t msg_part) {
   check_contains_assign(e);
   tcExp(te,&sint_t,e);
   if (!coerce_to_bool(te,e))
-    terr(e->loc,xprintf("test of %s has type %s instead of integral or * type",
+    terr(e->loc,aprintf("test of %s has type %s instead of integral or * type",
 			msg_part, typ2string(e->topt->v)));
 }
 
@@ -264,7 +264,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e){
 static type_t tcVar(tenv_t te, seg_t loc, qvar_t q, binding_t b) {
   switch(b) {
   case Unresolved_b:
-    return expr_err(te,loc,xprintf("unbound identifier %s",qvar2string(q)));
+    return expr_err(te,loc,aprintf("unbound identifier %s",qvar2string(q)));
   case &Global_b(vd):
     q[0] = vd->name[0];
     return vd->type;
@@ -293,7 +293,7 @@ static void check_format_args(tenv_t te, exp_t fmt, list_t<exp_t> args,
     type_t t = desc_types->hd;
     exp_t e = args->hd;
     if (!coerce_arg(te,e,t))
-      terr(e->loc,xprintf("descriptor has type %s but argument has type %s",
+      terr(e->loc,aprintf("descriptor has type %s but argument has type %s",
 			  typ2string(t), typ2string(e->topt->v)));
   }
   // check arity
@@ -308,17 +308,17 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t *`r topt, primop_t p, exp_
   case Plus: fallthru;
   case Minus:
     if (!is_numeric(e))
-      terr(loc,xprintf("expecting arithmetic type but found %s",typ2string(t)));
+      terr(loc,aprintf("expecting arithmetic type but found %s",typ2string(t)));
     return e->topt->v;
   case Not:
     check_contains_assign(e);
     if (!coerce_to_bool(te,e))
-      terr(loc,xprintf("expecting integral or * type but found %s",
+      terr(loc,aprintf("expecting integral or * type but found %s",
 		       typ2string(t)));
     return sint_t;
   case Bitnot:
     if (!is_integral(e))
-      terr(loc,xprintf("expecting integral type but found %s",typ2string(t)));
+      terr(loc,aprintf("expecting integral type but found %s",typ2string(t)));
     return e->topt->v;
   case Size:
     switch (t) {
@@ -327,7 +327,7 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t *`r topt, primop_t p, exp_
     case &PointerType(PtrInfo(_,_,_,_,_)):
       break;
     default:
-      terr(loc,xprintf("size requires pointer or array type, not %s",
+      terr(loc,aprintf("size requires pointer or array type, not %s",
 		       typ2string(t)));
       break;
     }
@@ -341,12 +341,12 @@ static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t *`r topt, primop_t p, exp_
 static type_t tcArithBinop(tenv_t te, exp_t e1, exp_t e2, 
 			   bool checker(exp_t)) {
   if (!checker(e1)) {
-    terr(e1->loc,xprintf("type %s cannot be used here",
+    terr(e1->loc,aprintf("type %s cannot be used here",
 			 typ2string(e1->topt->v)));
     return wildtyp(new Opt(lookup_type_vars(te)));
   }
   if (!checker(e2)) {
-    terr(e2->loc,xprintf("type %s cannot be used here",
+    terr(e2->loc,aprintf("type %s cannot be used here",
 			 typ2string(e2->topt->v)));
     return wildtyp(new Opt(lookup_type_vars(te)));
   }
@@ -361,7 +361,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   switch (t1) {
   case &PointerType(PtrInfo{et,r,n,tq,b}):
     if (!coerce_sint_typ(te, e2))
-      terr(e2->loc,xprintf("expecting int but found %s",typ2string(t2)));
+      terr(e2->loc,aprintf("expecting int but found %s",typ2string(t2)));
     b = compress_conref(b);
     switch (b->v) {
     case &Eq_constr(Unknown_b): return t1;
@@ -390,13 +390,13 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   if (is_tagged_pointer_typ(t1)) {
     if (is_tagged_pointer_typ(t2)) {
       if (!unify(t1, t2))
-	terr(e1->loc,xprintf("pointer arithmetic on values of "
+	terr(e1->loc,aprintf("pointer arithmetic on values of "
 			     "different types (%s != %s)",
 			     typ2string(e1->topt->v),typ2string(e2->topt->v)));
       return sint_t;
     } else {
       if (!coerce_sint_typ(te, e2))
-	terr(e2->loc,xprintf("expecting either %s or int but found %s",
+	terr(e2->loc,aprintf("expecting either %s or int but found %s",
 			     typ2string(t1),typ2string(t2)));
       return t1;
     }
@@ -432,7 +432,7 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     default:
       break;
     }
-    terr(loc,xprintf("comparison not allowed between %s and %s",
+    terr(loc,aprintf("comparison not allowed between %s and %s",
 		     typ2string(t1),typ2string(t2)));
     return wildtyp(new Opt(lookup_type_vars(te)));
   }
@@ -492,14 +492,14 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t *`r topt,
     if (es == null || es->tl == null)
       return expr_err(te,loc,"too few arguments to fprintf");
     if (!unify(es->hd->topt->v, file_typ()))
-      terr(es->hd->loc,xprintf("expecting FILE @ but found %s",
+      terr(es->hd->loc,aprintf("expecting FILE @ but found %s",
 			       typ2string(es->hd->topt->v)));
     check_format_args(te, es->tl->hd, es->tl->tl, Formatstr::get_format_typs);
     t = VoidType;
     break;
-  case Xprintf:
+  case Aprintf:
     if (es == null)
-      return expr_err(te,loc,"missing format string in xprintf");
+      return expr_err(te,loc,"missing format string in aprintf");
     check_format_args(te, es->hd, es->tl, Formatstr::get_format_typs);
     // don't make the result const -- let it be modifiable
     t = string_typ(new_evar(&rk,new Opt(lookup_type_vars(te))));
@@ -514,7 +514,7 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t *`r topt,
     if (es == null || es->tl == null)
       return expr_err(te,loc,"too few arguments to fscanf");
     if (!unify(es->hd->topt->v, file_typ()))
-      terr(es->hd->loc,xprintf("expecting FILE @ but found %s",
+      terr(es->hd->loc,aprintf("expecting FILE @ but found %s",
 			       typ2string(es->hd->topt->v)));
     check_format_args(te, es->tl->hd, es->tl->tl, Formatstr::get_scanf_typs);
     t = sint_t;
@@ -532,7 +532,7 @@ static type_t tcPrimop(tenv_t te, seg_t loc, type_t *`r topt,
       return
         expr_err(te,loc,"missing input string or format string in sscanf");
     if (!coerce_arg(te,es->hd, string_typ()))
-      terr(es->hd->loc,xprintf("expecting string found %s",
+      terr(es->hd->loc,aprintf("expecting string found %s",
 			       typ2string(es->hd->topt->v)));
     check_scanf_args(te, es->tl->hd, es->tl->tl, Formatstr::get_scanf_typs);
     */
@@ -645,7 +645,7 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t *`r topt,
   type_t t = e->topt->v;
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
   if (!is_numeric(e) && !is_tagged_pointer_typ(t)) 
-    terr(e->loc,xprintf("expecting arithmetic or ? type but found %s",
+    terr(e->loc,aprintf("expecting arithmetic or ? type but found %s",
 			typ2string(t)));
   return t;
 }
@@ -660,7 +660,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t *`r topt,
   let l1 = new List(e3,null);
   let l2 = new List(e2,l1);
   if (!coerce_list(te,t,l2))
-    terr(loc,xprintf("conditional clause types do not match: %s != %s",
+    terr(loc,aprintf("conditional clause types do not match: %s != %s",
 		     typ2string(e2->topt->v),typ2string(e3->topt->v)));
   return t;
 }
@@ -687,7 +687,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
   check_writable(te, e1);
   if (po == null) {
     if (!coerce_assign(te,e2,t1))
-      return expr_err(te,loc,xprintf("type mismatch: %s != %s",
+      return expr_err(te,loc,aprintf("type mismatch: %s != %s",
 				     typ2string(t1), typ2string(t2)));
   } else {
     let p        = po->v;
@@ -744,7 +744,7 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
     if (coerce_arg(te,e,t2))
       return fields->hd;
   }
-  terr(e->loc,xprintf("can't find a field in %s to inject a value of type %s",
+  terr(e->loc,aprintf("can't find a field in %s to inject a value of type %s",
                       typ2string(tu), typ2string(t1)));
   return null;
 }
@@ -783,7 +783,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
 	tcExp(te, &t2, e1);
         if (!coerce_arg(te,e1,t2))
           terr(loc,
-               xprintf("actual argument has type %s but formal has type %s",
+               aprintf("actual argument has type %s but formal has type %s",
                        typ2string(e1->topt->v),typ2string(t2)));
         es = es->tl;
         args_info = args_info->tl;
@@ -803,7 +803,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
                                         .vai = (vararg_info_t @)cyc_vararg};
           *vararg_call_info = vci;
           if (!unify(curr_rgn(te),vr))
-            terr(loc,xprintf("I have no idea how this could fail, but it did "
+            terr(loc,aprintf("I have no idea how this could fail, but it did "
                              "because the region for the varargs (%s) doesn't "
                              "unify with the expected new_block region (%s).",
                              typ2string(vr),
@@ -816,7 +816,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
               vci->num_varargs++;
               tcExp(te, &vt, e1);
               if (!coerce_arg(te,e1,vt))
-                terr(loc,xprintf("vararg requires type %s but argument has "
+                terr(loc,aprintf("vararg requires type %s but argument has "
                                  "type %s",typ2string(vt),
                                  typ2string(e1->topt->v)));
             }
@@ -829,10 +829,10 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
               // an xtunion, so we re-look it up in the environment.
               let td = *lookup_tuniondecl(te,loc,td->name);
               if (!unify(tur,vr)) 
-                terr(loc,xprintf("bad region for injected varargs"));
+                terr(loc,aprintf("bad region for injected varargs"));
               list_t<tunionfield_t> fields = null;
               if (td->fields == null) 
-                terr(loc,xprintf("can't inject into %s",typ2string(vt)));
+                terr(loc,aprintf("can't inject into %s",typ2string(vt)));
               else fields = td->fields->v;
               region rgn {
                 let inst = List::rzip(rgn,rgn,td->tvs,targs);
@@ -871,7 +871,7 @@ static type_t tcThrow(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
   tcExp(te,&exn_typ,e); 
   if (!coerce_use(te,e,exn_typ))
     terr(loc,
-         xprintf("expected xtunion exn but found %s",typ2string(e->topt->v)));
+         aprintf("expected xtunion exn but found %s",typ2string(e->topt->v)));
   return wildtyp(new Opt(lookup_type_vars(te)));
 }
 
@@ -905,7 +905,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t *`r topt,
     break;
   default: break;
   }
-  return expr_err(te,loc,xprintf("expecting polymorphic type but found %s",
+  return expr_err(te,loc,aprintf("expecting polymorphic type but found %s",
                                  typ2string(t1)));
 }
 
@@ -915,7 +915,7 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t *`r topt, type_t t, exp_t e) {
   tcExp(te,null,e);
   type_t t2 = e->topt->v;
   if (!silent_castable(te,loc,t2,t) && !castable(te,loc,t2,t))
-    return expr_err(te,loc,xprintf("cannot cast %s to %s",
+    return expr_err(te,loc,aprintf("cannot cast %s to %s",
 				   typ2string(t2), typ2string(t)));
   return t;
 }
@@ -977,7 +977,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
 static type_t tcSizeof(tenv_t te, seg_t loc, type_t *`r topt, type_t t) {
   check_type(loc,te,lookup_type_vars(te),MemKind,t);
   if(!Evexp::okay_szofarg(t))
-    terr(loc, xprintf("sizeof applied to type %s, which has unknown size here",
+    terr(loc, aprintf("sizeof applied to type %s, which has unknown size here",
 		      typ2string(t)));
   return uint_t; // FIX: use topt
 }
@@ -1002,7 +1002,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t *`r topt,
   default: break;
   }
   if(bad_type)
-    terr(loc, xprintf("%s is not a known struct type", typ2string(t)));
+    terr(loc, aprintf("%s is not a known struct type", typ2string(t)));
   return uint_t;
 }
 
@@ -1015,7 +1015,7 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
     check_rgn_accessible(te,loc,rt);
     check_nonzero_bound(loc, b);
     return t2;
-  default: return expr_err(te,loc,xprintf("expecting * or @ type but found %s",
+  default: return expr_err(te,loc,aprintf("expecting * or @ type but found %s",
 					  typ2string(t)));
   }
 }
@@ -1032,7 +1032,7 @@ static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
       return expr_err(te,loc,"unresolved struct type (COMPILER ERROR)");
     let finfo = lookup_struct_field(sd,f);
     if (finfo == null)
-      return expr_err(te,loc,xprintf("struct %s has no %s field",
+      return expr_err(te,loc,aprintf("struct %s has no %s field",
 				     qvar2string((qvar_t)tdnopt), *f));
     _ t2;
     region rgn {
@@ -1043,12 +1043,12 @@ static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
   case &AnonStructType(fs):
     let finfo = lookup_field(fs,f);
     if (finfo == null)
-      return expr_err(te,loc,xprintf("struct has no %s field",*f));
+      return expr_err(te,loc,aprintf("struct has no %s field",*f));
     return finfo->type;
   case &AnonUnionType(fs):
     let finfo = lookup_field(fs,f);
     if (finfo == null)
-      return expr_err(te,loc,xprintf("union has no %s field",*f));
+      return expr_err(te,loc,aprintf("union has no %s field",*f));
     return finfo->type;
     
   case &UnionType(tdnopt,ts,&ud):
@@ -1056,7 +1056,7 @@ static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
       return expr_err(te,loc,"unresolved union type (COMPILER ERROR)");
     let finfo = lookup_union_field(ud,f);
     if (finfo == null)
-      return expr_err(te,loc,xprintf("union %s has no %s field",
+      return expr_err(te,loc,aprintf("union %s has no %s field",
 				     qvar2string((qvar_t)tdnopt), *f));
     let inst = List::zip(ud->tvs,ts);
     let t2   = substitute(inst,finfo->type);
@@ -1069,11 +1069,11 @@ static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
     return uint_t;
   default:
     if (String::zstrcmp(*f,"size") == 0)
-      return expr_err(te,loc,xprintf("expecting struct, union or array, "
+      return expr_err(te,loc,aprintf("expecting struct, union or array, "
                                      "found %s",
 				     typ2string(t)));
     else
-       return expr_err(te,loc,xprintf("expecting struct or union, found %s",
+       return expr_err(te,loc,aprintf("expecting struct or union, found %s",
 				      typ2string(t)));
   }
 }
@@ -1090,7 +1090,7 @@ static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt,
     case &StructType(tdnopt,ts,&sd):
       let finfo = lookup_struct_field(sd,f);
       if (finfo == null)
-	return expr_err(te,loc,xprintf("struct %s has no %s field",
+	return expr_err(te,loc,aprintf("struct %s has no %s field",
 				       qvar2string((qvar_t)tdnopt),*f));
       _ t3;
       region rgn {
@@ -1102,7 +1102,7 @@ static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt,
     case &UnionType(tdnopt,ts,&ud):
       let finfo = lookup_union_field(ud,f);
       if (finfo == null)
-	return expr_err(te,loc,xprintf("union %s has no %s field",
+	return expr_err(te,loc,aprintf("union %s has no %s field",
 				       qvar2string((qvar_t)tdnopt),*f));
       let inst = List::zip(ud->tvs,ts);
       let t3   = substitute(inst,finfo->type);
@@ -1111,19 +1111,19 @@ static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt,
     case &AnonStructType(fs):
       let finfo = lookup_field(fs,f);
       if (finfo == null)
-	return expr_err(te,loc,xprintf("struct has no %s field",*f));
+	return expr_err(te,loc,aprintf("struct has no %s field",*f));
       return finfo->type;
     case &AnonUnionType(fs):
       let finfo = lookup_field(fs,f);
       if (finfo == null)
-	return expr_err(te,loc,xprintf("union has no %s field",*f));
+	return expr_err(te,loc,aprintf("union has no %s field",*f));
       return finfo->type;
     default:
-      return expr_err(te,loc, xprintf("expecting struct pointer, found %s",
+      return expr_err(te,loc, aprintf("expecting struct pointer, found %s",
 				      typ2string(t)));
     }
   default:
-    return expr_err(te,loc,xprintf("expecting struct pointer, found %s",
+    return expr_err(te,loc,aprintf("expecting struct pointer, found %s",
 				   typ2string(t)));
   }
 }
@@ -1135,7 +1135,7 @@ static type_t ithTupleType(tenv_t te, seg_t loc,
   try
     return (*List::nth(ts,i))[1];
   catch { case Nth:
-    return expr_err(te,loc,xprintf("index is %d but tuple has only %d fields",
+    return expr_err(te,loc,aprintf("index is %d but tuple has only %d fields",
 				   i, List::length(ts)));
   }
 }
@@ -1147,7 +1147,7 @@ static type_t tcSubscript(tenv_t te, seg_t loc, type_t *`r topt,
   type_t t1 = compress(e1->topt->v);
   type_t t2 = compress(e2->topt->v);
   if (!coerce_sint_typ(te,e2))
-    return expr_err(te,e2->loc,xprintf("expecting int subscript, found %s",
+    return expr_err(te,e2->loc,aprintf("expecting int subscript, found %s",
 				       typ2string(t2)));
   // the subscript could be on a tuple or a pointer -- any arrays
   // should've been coerced to pointers
@@ -1172,7 +1172,7 @@ static type_t tcSubscript(tenv_t te, seg_t loc, type_t *`r topt,
     return t;
   case &TupleType(ts): return ithTupleType(te,loc,ts,e2);
   default:
-    return expr_err(te,loc,xprintf("subscript applied to %s",typ2string(t1)));
+    return expr_err(te,loc,aprintf("subscript applied to %s",typ2string(t1)));
   }
 }
 
@@ -1233,7 +1233,7 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t *`r elt_topt,
 
   if (!coerce_list(te,res,es))
     terr(es->hd->loc,
-	 xprintf("elements of array do not all have the same type (%s)",
+	 aprintf("elements of array do not all have the same type (%s)",
 		 typ2string(res)));
   // check that any designators make sense
   for(int offset = 0; des != null; offset++, des = des->tl) {
@@ -1249,7 +1249,7 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t *`r elt_topt,
 	tcExpInitializer(te,null,e);
 	unsigned int i = Evexp::eval_const_uint_exp(e);
 	if (i != offset)
-	  terr(e->loc, xprintf("expecting index designator %d but found %d",
+	  terr(e->loc, aprintf("expecting index designator %d but found %d",
 			       offset,i));
 	break;
       }
@@ -1270,7 +1270,7 @@ static type_t tcComprehension(tenv_t te,seg_t loc,type_t *`r topt,
                               vardecl_t vd,exp_t bound,exp_t body) {
   tcExp(te,null,bound);
   if (!coerce_uint_typ(te,bound))
-    terr(bound->loc,xprintf("expecting unsigned int, found %s",
+    terr(bound->loc,aprintf("expecting unsigned int, found %s",
 			    typ2string(bound->topt->v)));
   // double-check that the index variable x is declared const
   if (!vd->tq.q_const)
@@ -1335,7 +1335,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
       sd = *lookup_structdecl(te,loc,*tn);
     catch { 
     case Dict::Absent:
-      terr(loc, xprintf("unbound struct name %s",qvar2string(*tn)));
+      terr(loc, aprintf("unbound struct name %s",qvar2string(*tn)));
       return topt != null ? *topt : VoidType;
     }
     *sd_opt = sd;
@@ -1365,7 +1365,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t *`r topt,
     tcExpInitializer(te, &inst_fieldtyp, field_exp);
     if (!coerce_arg(te,field_exp,inst_fieldtyp))
       terr(field_exp->loc,
-	   xprintf("field %s of struct %s expects type %s != %s",
+	   aprintf("field %s of struct %s expects type %s != %s",
 		   *(field->name),qvar2string(*tn),typ2string(inst_fieldtyp),
 		   typ2string(field_exp->topt->v)));
   }
@@ -1385,7 +1385,7 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
         tcExpInitializer(te, &field->type, field_exp);
         if (!coerce_arg(te,field_exp,field->type))
           terr(field_exp->loc,
-               xprintf("field %s of struct expects type %s != %s",
+               aprintf("field %s of struct expects type %s != %s",
                        *(field->name),typ2string(field->type),
                        typ2string(field_exp->topt->v)));
       }
@@ -1443,19 +1443,19 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
     tcExpInitializer(te, &t, e);
     if (!coerce_arg(te,e,t))
       terr(e->loc,
-           xprintf("tunion constructor %s expects argument of type %s "
+           aprintf("tunion constructor %s expects argument of type %s "
                    "but this argument has type %s",
                    qvar2string(tuf->name),typ2string(t),
                    (e->topt == null) ? (string_t)"?" : typ2string(e->topt->v)));
   }
   if (es != null)
     return expr_err(te,es->hd->loc,
-                    xprintf("too many arguments for tunion constructor %s",
+                    aprintf("too many arguments for tunion constructor %s",
                             qvar2string(tuf->name)));
   if (ts != null)
     return expr_err(te,
                     loc,
-                    xprintf("too few arguments for tunion constructor %s",
+                    aprintf("too few arguments for tunion constructor %s",
                             qvar2string(tuf->name)));
   return res;
   }
@@ -1475,7 +1475,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t *`r topt, exp_opt_t ropt,
       check_rgn_accessible(te,loc,rgn);
       break;
     default:
-      terr(ropt->loc,xprintf("expecting region_t type but found %s",
+      terr(ropt->loc,aprintf("expecting region_t type but found %s",
                              typ2string(handle_type)));
       break;
     }
@@ -1542,7 +1542,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t *`r topt,
       check_rgn_accessible(te,loc,rgn);
       break;
     default:
-      terr(rgn_handle->loc,xprintf("expecting region_t type but found %s",
+      terr(rgn_handle->loc,aprintf("expecting region_t type but found %s",
                                    typ2string(handle_type)));
       break;
     }

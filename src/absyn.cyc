@@ -99,7 +99,7 @@ bool is_format_prim(primop_t p) {
   switch (p) {
   case Printf:  return true;
   case Fprintf: return true;
-  case Xprintf: return true; 
+  case Aprintf: return true; 
   case Scanf:   return true; 
   case Fscanf:  return true; 
   case Sscanf:  return true; 
@@ -677,7 +677,7 @@ $(tqual_t,type_t) * lookup_tuple_field(list_t<$(tqual_t,type_t)@> ts, int i) {
 
 string_t attribute2string(attribute_t a) {
   switch (a) {
-  case &Regparm_att(i): return xprintf("regparm(%d)",i);
+  case &Regparm_att(i): return aprintf("regparm(%d)",i);
   case Stdcall_att: return "stdcall";
   case Cdecl_att: return "cdecl";
   case Fastcall_att: return "fastcall";
@@ -685,9 +685,9 @@ string_t attribute2string(attribute_t a) {
   case Const_att: return "const";
   case &Aligned_att(i): 
     if (i == -1) return "aligned";
-    else return xprintf("aligned(%d)",i);
+    else return aprintf("aligned(%d)",i);
   case Packed_att: return "packed";
-  case &Section_att(s): return xprintf("section(\"%s\")",s);
+  case &Section_att(s): return aprintf("section(\"%s\")",s);
   case Nocommon_att: return "nocommon";
   case Shared_att: return "shared";
   case Unused_att: return "unused";

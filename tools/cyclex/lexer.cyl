@@ -190,7 +190,7 @@ rule lexmain = parse
 | '^' { return TCARET; }
 | '-' { return TDASH; }
 | eof { return -1; }
-| _ { throw new Lexical_error(xprintf("illegal character %s", lexeme(lexbuf)),
+| _ { throw new Lexical_error(aprintf("illegal character %s", lexeme(lexbuf)),
 			      line_num, 
 			      lexeme_start(lexbuf) - line_start_pos); }
 

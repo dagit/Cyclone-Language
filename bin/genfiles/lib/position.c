@@ -31,7 +31,7 @@ Cyc_Stdio_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Stdi
 Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{ int tag; short*
 f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
 int tag; unsigned int* f1; } ; extern int Cyc_Stdio_fprintf( struct Cyc_Stdio___sFILE*,
-struct _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Stdio_xprintf(
+struct _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Stdio_aprintf(
 struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
 0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
 Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
@@ -80,7 +80,7 @@ _temp2->start=(( struct Cyc_Position_Segment*) _check_null( s1))->start; _temp2-
 struct Cyc_Position_Segment*) _check_null( s2))->end; _temp2;});} struct
 _tagged_arr Cyc_Position_string_of_loc( int loc){ struct Cyc_Lineno_Pos* pos=
 Cyc_Lineno_pos_of_abs( Cyc_Position_source, loc); return({ struct _tagged_arr(*
-_temp3)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct
+_temp3)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct
 _tagged_arr _temp9= _tag_arr("%s (%d:%d)", sizeof( unsigned char), 11u); struct
 Cyc_Stdio_String_pa_struct _temp12; _temp12.tag= Cyc_Stdio_String_pa; _temp12.f1=(
 struct _tagged_arr) pos->logical_file;{ void* _temp6=( void*)& _temp12; struct
@@ -92,7 +92,7 @@ struct _tagged_arr _temp5={( void*) _temp4,( void*) _temp4,( void*)( _temp4 + 3u
 _temp3( _temp9, _temp5);}}}});} static struct _tagged_arr Cyc_Position_string_of_pos_pr(
 struct Cyc_Lineno_Pos* pos_s, struct Cyc_Lineno_Pos* pos_e){ if( Cyc_String_strcmp(
 pos_s->logical_file, pos_e->logical_file) == 0){ return({ struct _tagged_arr(*
-_temp13)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct
+_temp13)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct
 _tagged_arr _temp21= _tag_arr("%s(%d:%d-%d:%d)", sizeof( unsigned char), 16u);
 struct Cyc_Stdio_String_pa_struct _temp26; _temp26.tag= Cyc_Stdio_String_pa;
 _temp26.f1=( struct _tagged_arr) pos_s->logical_file;{ void* _temp16=( void*)&
@@ -106,7 +106,7 @@ Cyc_Stdio_Int_pa; _temp22.f1=( unsigned int) pos_e->col;{ void* _temp20=( void*)
 _temp22; void* _temp14[ 5u]={ _temp16, _temp17, _temp18, _temp19, _temp20};
 struct _tagged_arr _temp15={( void*) _temp14,( void*) _temp14,( void*)( _temp14
 + 5u)}; _temp13( _temp21, _temp15);}}}}}});} else{ return({ struct _tagged_arr(*
-_temp27)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct
+_temp27)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct
 _tagged_arr _temp36= _tag_arr("%s(%d:%d)-%s(%d:%d)", sizeof( unsigned char), 20u);
 struct Cyc_Stdio_String_pa_struct _temp42; _temp42.tag= Cyc_Stdio_String_pa;
 _temp42.f1=( struct _tagged_arr) pos_s->logical_file;{ void* _temp30=( void*)&
@@ -123,7 +123,7 @@ _temp37; void* _temp28[ 6u]={ _temp30, _temp31, _temp32, _temp33, _temp34,
 _temp35}; struct _tagged_arr _temp29={( void*) _temp28,( void*) _temp28,( void*)(
 _temp28 + 6u)}; _temp27( _temp36, _temp29);}}}}}}});}} struct _tagged_arr Cyc_Position_string_of_segment(
 struct Cyc_Position_Segment* s){ if( s == 0){ return({ struct _tagged_arr(*
-_temp43)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct
+_temp43)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct
 _tagged_arr _temp47= _tag_arr("%s", sizeof( unsigned char), 3u); struct Cyc_Stdio_String_pa_struct
 _temp48; _temp48.tag= Cyc_Stdio_String_pa; _temp48.f1=( struct _tagged_arr) Cyc_Position_source;{
 void* _temp46=( void*)& _temp48; void* _temp44[ 1u]={ _temp46}; struct
@@ -159,7 +159,7 @@ Cyc_Position_Segment*)(( struct Cyc_List_List*) _check_null( segs))->hd == 0){
 ans=({ struct Cyc_List_List* _temp55=( struct Cyc_List_List*) GC_malloc( sizeof(
 struct Cyc_List_List)); _temp55->hd=( void*)({ struct _tagged_arr* _temp56=(
 struct _tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp56[ 0]=({
-struct _tagged_arr(* _temp57)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp57)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp61= _tag_arr("%s(unknown)", sizeof( unsigned char), 12u);
 struct Cyc_Stdio_String_pa_struct _temp62; _temp62.tag= Cyc_Stdio_String_pa;
 _temp62.f1=( struct _tagged_arr) Cyc_Position_source;{ void* _temp60=( void*)&
@@ -224,7 +224,7 @@ Cyc_Position_trunc( n, Cyc_String_substring(( struct _tagged_arr) _temp85,
 _temp81, Cyc_String_strlen(( struct _tagged_arr) _temp85) - _temp90)); return({
 struct _tuple1* _temp96=( struct _tuple1*) GC_malloc( sizeof( struct _tuple1));
 _temp96->f1=({ struct _tagged_arr(* _temp97)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp103= _tag_arr("%s%s%s",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp103= _tag_arr("%s%s%s",
 sizeof( unsigned char), 7u); struct Cyc_Stdio_String_pa_struct _temp106;
 _temp106.tag= Cyc_Stdio_String_pa; _temp106.f1=( struct _tagged_arr) sec_one;{
 void* _temp100=( void*)& _temp106; struct Cyc_Stdio_String_pa_struct _temp105;
@@ -245,7 +245,7 @@ struct _tagged_arr) _temp94, 0, _temp90)); struct _tagged_arr sec_four= Cyc_Posi
 n, Cyc_String_substring(( struct _tagged_arr) _temp94, _temp90, Cyc_String_strlen((
 struct _tagged_arr) _temp94) - _temp90)); return({ struct _tuple1* _temp107=(
 struct _tuple1*) GC_malloc( sizeof( struct _tuple1)); _temp107->f1=({ struct
-_tagged_arr(* _temp108)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp108)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp115= _tag_arr("%s%s.\\.%s%s", sizeof( unsigned char), 12u);
 struct Cyc_Stdio_String_pa_struct _temp119; _temp119.tag= Cyc_Stdio_String_pa;
 _temp119.f1=( struct _tagged_arr) sec_one;{ void* _temp111=( void*)& _temp119;

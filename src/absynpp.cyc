@@ -562,7 +562,7 @@ doc_t ntyp2doc(type_t t) {
       return(ntyp2doc(topt->v));
     else s = cat(text("%"),
                  text("("),
-                 text(xprintf("%d",i)),
+                 text(aprintf("%d",i)),
                  (!print_full_evars || tvs == null) ?
                  text("") : tvars2doc(tvs->v),
                  text(")::"),k == null ? text("?") : kind2doc(k->v));
@@ -625,7 +625,7 @@ doc_t ntyp2doc(type_t t) {
     case B4: ts = "int";   break;
     case B8: ts = (to_VC ? "__int64" : "long long"); break;
     }
-    s = text(xprintf("%s%s",sns,ts));
+    s = text(aprintf("%s%s",sns,ts));
     break;
   case FloatType:  s = text("float");  break;
   case DoubleType: s = text("double"); break;
@@ -821,7 +821,7 @@ int exp_prec(exp_t e) {
     case Size:           return 140; // foo.size (same as struct member)
     case Printf:         return 130;
     case Fprintf:        return 130;
-    case Xprintf:        return 130;
+    case Aprintf:        return 130;
     case Scanf:          return 130;
     case Fscanf:         return 130;
     case Sscanf:         return 130;
@@ -1065,10 +1065,10 @@ doc_t exps2doc_prec(int inprec, list_t<exp_t> es) {
 // FIX: take care of sign for Char_c and Short_c
 doc_t cnst2doc(cnst_t c) {
   switch (c) {
-  case &Char_c(sg,ch):     return text(xprintf("'%s'",char_escape(ch)));
-  case &Short_c(sg,s):     return text(xprintf("%d",(int)s));
+  case &Char_c(sg,ch):     return text(aprintf("'%s'",char_escape(ch)));
+  case &Short_c(sg,s):     return text(aprintf("%d",(int)s));
   case &Int_c(Signed,i):   return text(string_of_int(i));
-  case &Int_c(Unsigned,i): return text(xprintf("%u",(unsigned)i));
+  case &Int_c(Unsigned,i): return text(aprintf("%u",(unsigned)i));
   case &LongLong_c(sg,i):  return text("<<FIX LONG LONG CONSTANT>>"); // FIX
   case &Float_c(x):  return text(x);
   case Null_c:      return text("null");
@@ -1081,7 +1081,7 @@ doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es) {
   doc_t ps = prim2doc(p);
   if (p == (primop_t)Size) {
     if (es == null || es->tl != null)
-      throw new Failure(xprintf("Absynpp::primapp2doc Size: %s with bad args",
+      throw new Failure(aprintf("Absynpp::primapp2doc Size: %s with bad args",
                                 string_of_doc(ps,72)));
     let d = exp2doc_prec(inprec,es->hd);
     return cat(d,text(".size"));
@@ -1089,17 +1089,17 @@ doc_t primapp2doc(int inprec, primop_t p,list_t<exp_t> es) {
   } else if (!is_format_prim(p)) {
     list_t<doc_t> ds = List::map_c(exp2doc_prec,inprec,es);
     if (ds == null)
-      throw new Failure(xprintf("Absynpp::primapp2doc: %s with no args",
+      throw new Failure(aprintf("Absynpp::primapp2doc: %s with no args",
                                 string_of_doc(ps,72)));
     else if (ds->tl == null)
       return cat(ps,text(" "),ds->hd);
     else if (ds->tl->tl != null)
-      throw new Failure(xprintf("Absynpp::primapp2doc: %s with more than 2 args",
+      throw new Failure(aprintf("Absynpp::primapp2doc: %s with more than 2 args",
                                 string_of_doc(ps,72)));
     else
       return cat(ds->hd,text(" "),ps,text(" "),ds->tl->hd);
   } else {
-    // printf, fprintf, xprintf, scanf, fscanf, sscanf
+    // printf, fprintf, aprintf, scanf, fscanf, sscanf
     return cat(ps, text("("), exps2doc_prec(20,es), text(")"));
   }
 }
@@ -1128,7 +1128,7 @@ string_t prim2str(primop_t p) {
   case Size: return "size";
   case Printf: return "printf";
   case Fprintf: return "fprintf";
-  case Xprintf: return "xprintf";
+  case Aprintf: return "aprintf";
   case Scanf: return "scanf";
   case Fscanf: return "fscanf";
   case Sscanf: return "sscanf";
@@ -1226,7 +1226,7 @@ doc_t stmt2doc(stmt_t st) {
     break;
   case &Break_s(_):    s = text("break;"); break;
   case &Continue_s(_): s = text("continue;"); break;
-  case &Goto_s(x,_):   s = text(xprintf("goto %s;",*x)); break;
+  case &Goto_s(x,_):   s = text(aprintf("goto %s;",*x)); break;
   case &For_s(e1,$(e2,_),$(e3,_),s1):
     s = cat(text("for("),
             exp2doc(e1),
@@ -1326,10 +1326,10 @@ doc_t pat2doc(pat_t p) {
   case Null_p: s = text("null"); break;
   case &Int_p(sg,i):
     if (sg == (sign_t)Signed)
-      s = text(xprintf("%d",i));
-    else s = text(xprintf("%u",i));
+      s = text(aprintf("%d",i));
+    else s = text(aprintf("%u",i));
     break;
-  case &Char_p(ch): s = text(xprintf("'%s'",char_escape(ch))); break;
+  case &Char_p(ch): s = text(aprintf("'%s'",char_escape(ch))); break;
   case &Float_p(x): s = text(x); break;
   case &Var_p(vd):  s = qvar2doc(vd->name); break;
   case &Tuple_p(ts):

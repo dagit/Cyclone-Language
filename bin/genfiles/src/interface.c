@@ -25,7 +25,7 @@ unsigned int f1; } ; static const int Cyc_Stdio_Double_pa= 2; struct Cyc_Stdio_D
 int tag; double f1; } ; static const int Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{
 int tag; short* f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
 int tag; unsigned int* f1; } ; extern int Cyc_Stdio_fprintf( struct Cyc_Stdio___sFILE*,
-struct _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Stdio_xprintf(
+struct _tagged_arr fmt, struct _tagged_arr); extern struct _tagged_arr Cyc_Stdio_aprintf(
 struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
 0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
 Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
@@ -168,7 +168,7 @@ static const int Cyc_Absyn_Bitor= 14; static const int Cyc_Absyn_Bitxor= 15;
 static const int Cyc_Absyn_Bitlshift= 16; static const int Cyc_Absyn_Bitlrshift=
 17; static const int Cyc_Absyn_Bitarshift= 18; static const int Cyc_Absyn_Size=
 19; static const int Cyc_Absyn_Printf= 20; static const int Cyc_Absyn_Fprintf=
-21; static const int Cyc_Absyn_Xprintf= 22; static const int Cyc_Absyn_Scanf= 23;
+21; static const int Cyc_Absyn_Aprintf= 22; static const int Cyc_Absyn_Scanf= 23;
 static const int Cyc_Absyn_Fscanf= 24; static const int Cyc_Absyn_Sscanf= 25;
 static const int Cyc_Absyn_PreInc= 0; static const int Cyc_Absyn_PostInc= 1;
 static const int Cyc_Absyn_PreDec= 2; static const int Cyc_Absyn_PostDec= 3;
@@ -630,7 +630,7 @@ _temp3->exports, 0, _temp10); return _temp3;}}}}}} static void Cyc_Interface_err
 struct _tagged_arr msg){ Cyc_Tcutil_terr( 0, msg);} static void Cyc_Interface_fields_err(
 struct _tagged_arr sc, struct _tagged_arr t, struct _tuple0* n){ Cyc_Interface_err((
 struct _tagged_arr)({ struct _tagged_arr(* _temp24)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp30= _tag_arr("fields of %s %s %s have never been defined",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp30= _tag_arr("fields of %s %s %s have never been defined",
 sizeof( unsigned char), 43u); struct Cyc_Stdio_String_pa_struct _temp33; _temp33.tag=
 Cyc_Stdio_String_pa; _temp33.f1=( struct _tagged_arr) sc;{ void* _temp27=( void*)&
 _temp33; struct Cyc_Stdio_String_pa_struct _temp32; _temp32.tag= Cyc_Stdio_String_pa;
@@ -641,7 +641,7 @@ _temp29}; struct _tagged_arr _temp26={( void*) _temp25,( void*) _temp25,( void*)
 _temp25 + 3u)}; _temp24( _temp30, _temp26);}}}}));} static void Cyc_Interface_body_err(
 struct _tagged_arr sc, struct _tuple0* n){ Cyc_Interface_err(( struct
 _tagged_arr)({ struct _tagged_arr(* _temp34)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp39= _tag_arr("the body of %s function %s has never been defined",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp39= _tag_arr("the body of %s function %s has never been defined",
 sizeof( unsigned char), 50u); struct Cyc_Stdio_String_pa_struct _temp41; _temp41.tag=
 Cyc_Stdio_String_pa; _temp41.f1=( struct _tagged_arr) sc;{ void* _temp37=( void*)&
 _temp41; struct Cyc_Stdio_String_pa_struct _temp40; _temp40.tag= Cyc_Stdio_String_pa;
@@ -652,7 +652,7 @@ _temp39, _temp36);}}}));} static void Cyc_Interface_static_err( struct
 _tagged_arr obj1, struct _tuple0* name1, struct _tagged_arr obj2, struct _tuple0*
 name2){ if( obj1.curr !=(( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){ Cyc_Interface_err((
 struct _tagged_arr)({ struct _tagged_arr(* _temp42)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp49= _tag_arr("declaration of %s %s relies on static %s %s",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp49= _tag_arr("declaration of %s %s relies on static %s %s",
 sizeof( unsigned char), 44u); struct Cyc_Stdio_String_pa_struct _temp53; _temp53.tag=
 Cyc_Stdio_String_pa; _temp53.f1=( struct _tagged_arr) obj1;{ void* _temp45=(
 void*)& _temp53; struct Cyc_Stdio_String_pa_struct _temp52; _temp52.tag= Cyc_Stdio_String_pa;
@@ -667,7 +667,7 @@ _temp42( _temp49, _temp44);}}}}}));}} static void Cyc_Interface_abstract_err(
 struct _tagged_arr obj1, struct _tuple0* name1, struct _tagged_arr obj2, struct
 _tuple0* name2){ if( obj1.curr !=(( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){
 Cyc_Interface_err(( struct _tagged_arr)({ struct _tagged_arr(* _temp54)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp61= _tag_arr("declaration of %s %s relies on fields of abstract %s %s",
 sizeof( unsigned char), 56u); struct Cyc_Stdio_String_pa_struct _temp65; _temp65.tag=
 Cyc_Stdio_String_pa; _temp65.f1=( struct _tagged_arr) obj1;{ void* _temp57=(
@@ -864,7 +864,7 @@ Cyc_Core_InvalidArg_struct* _temp215=( struct Cyc_Core_InvalidArg_struct*)
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp215[ 0]=({ struct
 Cyc_Core_InvalidArg_struct _temp216; _temp216.tag= Cyc_Core_InvalidArg; _temp216.f1=(
 struct _tagged_arr)({ struct _tagged_arr(* _temp217)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp221= _tag_arr("check_public_type (can't find enum %s)",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp221= _tag_arr("check_public_type (can't find enum %s)",
 sizeof( unsigned char), 39u); struct Cyc_Stdio_String_pa_struct _temp222;
 _temp222.tag= Cyc_Stdio_String_pa; _temp222.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
 _temp172);{ void* _temp220=( void*)& _temp222; void* _temp218[ 1u]={ _temp220};
@@ -889,7 +889,7 @@ Cyc_Core_InvalidArg_struct* _temp242=( struct Cyc_Core_InvalidArg_struct*)
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp242[ 0]=({ struct
 Cyc_Core_InvalidArg_struct _temp243; _temp243.tag= Cyc_Core_InvalidArg; _temp243.f1=(
 struct _tagged_arr)({ struct _tagged_arr(* _temp244)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp248= _tag_arr("check_public_type (can't find [x]tunion %s)",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp248= _tag_arr("check_public_type (can't find [x]tunion %s)",
 sizeof( unsigned char), 44u); struct Cyc_Stdio_String_pa_struct _temp249;
 _temp249.tag= Cyc_Stdio_String_pa; _temp249.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
 _temp180->name);{ void* _temp247=( void*)& _temp249; void* _temp245[ 1u]={
@@ -915,7 +915,7 @@ _LL267;} _LL267: goto _LL268; _LL266:( int) _throw(( void*)({ struct Cyc_Core_In
 _temp269=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp269[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp270; _temp270.tag= Cyc_Core_InvalidArg;
 _temp270.f1=( struct _tagged_arr)({ struct _tagged_arr(* _temp271)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp275= _tag_arr("check_public_type (can't find [x]tunion %s and search its fields)",
 sizeof( unsigned char), 66u); struct Cyc_Stdio_String_pa_struct _temp276;
 _temp276.tag= Cyc_Stdio_String_pa; _temp276.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -927,7 +927,7 @@ int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp277=( struct Cyc_
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp277[ 0]=({ struct
 Cyc_Core_InvalidArg_struct _temp278; _temp278.tag= Cyc_Core_InvalidArg; _temp278.f1=(
 struct _tagged_arr)({ struct _tagged_arr(* _temp279)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp283= _tag_arr("check_public_type ([x]tunion %s has no fields)",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp283= _tag_arr("check_public_type ([x]tunion %s has no fields)",
 sizeof( unsigned char), 47u); struct Cyc_Stdio_String_pa_struct _temp284;
 _temp284.tag= Cyc_Stdio_String_pa; _temp284.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
 tud->name);{ void* _temp282=( void*)& _temp284; void* _temp280[ 1u]={ _temp282};
@@ -944,7 +944,7 @@ struct Cyc_Core_InvalidArg_struct* _temp286=( struct Cyc_Core_InvalidArg_struct*
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp286[ 0]=({ struct
 Cyc_Core_InvalidArg_struct _temp287; _temp287.tag= Cyc_Core_InvalidArg; _temp287.f1=(
 struct _tagged_arr)({ struct _tagged_arr(* _temp288)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp292= _tag_arr("check_public_type (can't find [x]tunionfield %s)",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp292= _tag_arr("check_public_type (can't find [x]tunionfield %s)",
 sizeof( unsigned char), 49u); struct Cyc_Stdio_String_pa_struct _temp293;
 _temp293.tag= Cyc_Stdio_String_pa; _temp293.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
 _temp188->name);{ void* _temp291=( void*)& _temp293; void* _temp289[ 1u]={
@@ -957,7 +957,7 @@ return 0;} if(( void*) tud->sc ==( void*) Cyc_Absyn_Abstract){ Cyc_Interface_abs
 obj, name, _tag_arr("[x]tunion", sizeof( unsigned char), 10u), tud->name);
 return 0;} if(( void*) tuf->sc ==( void*) Cyc_Absyn_Static){ Cyc_Interface_static_err(
 obj, name,( struct _tagged_arr)({ struct _tagged_arr(* _temp294)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp298= _tag_arr("field %s of", sizeof( unsigned char), 12u); struct Cyc_Stdio_String_pa_struct
 _temp299; _temp299.tag= Cyc_Stdio_String_pa; _temp299.f1=( struct _tagged_arr)
 Cyc_Absynpp_qvar2string( tuf->name);{ void* _temp297=( void*)& _temp299; void*
@@ -1287,7 +1287,7 @@ _pop_handler();} else{ void* _temp548=( void*) _exn_thrown; void* _temp552=
 _temp548; _LL554: if( _temp552 == Cyc_Dict_Absent){ goto _LL555;} else{ goto
 _LL556;} _LL556: goto _LL557; _LL555: Cyc_Interface_check_err( _temp536,( struct
 _tagged_arr)({ struct _tagged_arr(* _temp558)( struct _tagged_arr fmt, struct
-_tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp563= _tag_arr("%s %s is missing",
+_tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp563= _tag_arr("%s %s is missing",
 sizeof( unsigned char), 17u); struct Cyc_Stdio_String_pa_struct _temp565;
 _temp565.tag= Cyc_Stdio_String_pa; _temp565.f1=( struct _tagged_arr) _temp538;{
 void* _temp561=( void*)& _temp565; struct Cyc_Stdio_String_pa_struct _temp564;
@@ -1307,7 +1307,7 @@ d0, struct Cyc_Absyn_Structdecl* d1, struct _tagged_arr* msg){ struct Cyc_Absyn_
 _temp568= Cyc_Tcdecl_merge_structdecl( d0, d1, 0, msg); if( _temp568 == 0){
 return 0;} if(( struct Cyc_Absyn_Structdecl*) d0 != _temp568){ Cyc_Interface_check_err(
 msg,( struct _tagged_arr)({ struct _tagged_arr(* _temp569)( struct _tagged_arr
-fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp573=
+fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp573=
 _tag_arr("declaration of struct %s discloses too much information", sizeof(
 unsigned char), 56u); struct Cyc_Stdio_String_pa_struct _temp574; _temp574.tag=
 Cyc_Stdio_String_pa; _temp574.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string((
@@ -1319,7 +1319,7 @@ struct Cyc_Absyn_Uniondecl* d0, struct Cyc_Absyn_Uniondecl* d1, struct
 _tagged_arr* msg){ struct Cyc_Absyn_Uniondecl* _temp575= Cyc_Tcdecl_merge_uniondecl(
 d0, d1, 0, msg); if( _temp575 == 0){ return 0;} if(( struct Cyc_Absyn_Uniondecl*)
 d0 != _temp575){ Cyc_Interface_check_err( msg,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp576)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp576)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp580= _tag_arr("declaration of union %s discloses too much information",
 sizeof( unsigned char), 55u); struct Cyc_Stdio_String_pa_struct _temp581;
 _temp581.tag= Cyc_Stdio_String_pa; _temp581.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string((
@@ -1331,7 +1331,7 @@ struct Cyc_Absyn_Tuniondecl* d0, struct Cyc_Absyn_Tuniondecl* d1, struct
 _tagged_arr* msg){ struct Cyc_Absyn_Tuniondecl* _temp582= Cyc_Tcdecl_merge_tuniondecl(
 d0, d1, 0, msg); if( _temp582 == 0){ return 0;} if(( struct Cyc_Absyn_Tuniondecl*)
 d0 != _temp582){ Cyc_Interface_check_err( msg,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp583)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp583)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp587= _tag_arr("declaration of tunion %s discloses too much information",
 sizeof( unsigned char), 56u); struct Cyc_Stdio_String_pa_struct _temp588;
 _temp588.tag= Cyc_Stdio_String_pa; _temp588.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -1343,7 +1343,7 @@ Cyc_Absyn_Enumdecl* d1, struct _tagged_arr* msg){ struct Cyc_Absyn_Enumdecl*
 _temp589= Cyc_Tcdecl_merge_enumdecl( d0, d1, 0, msg); if( _temp589 == 0){ return
 0;} if(( struct Cyc_Absyn_Enumdecl*) d0 != _temp589){ Cyc_Interface_check_err(
 msg,( struct _tagged_arr)({ struct _tagged_arr(* _temp590)( struct _tagged_arr
-fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp594=
+fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp594=
 _tag_arr("declaration of enum %s discloses too much information", sizeof(
 unsigned char), 54u); struct Cyc_Stdio_String_pa_struct _temp595; _temp595.tag=
 Cyc_Stdio_String_pa; _temp595.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -1354,7 +1354,7 @@ static int Cyc_Interface_incl_vardecl( struct Cyc_Absyn_Vardecl* d0, struct Cyc_
 d1, struct _tagged_arr* msg){ struct Cyc_Absyn_Vardecl* _temp596= Cyc_Tcdecl_merge_vardecl(
 d0, d1, 0, msg); if( _temp596 == 0){ return 0;} if(( struct Cyc_Absyn_Vardecl*)
 d0 != _temp596){ Cyc_Interface_check_err( msg,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp597)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp597)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp601= _tag_arr("declaration of variable %s discloses too much information",
 sizeof( unsigned char), 58u); struct Cyc_Stdio_String_pa_struct _temp602;
 _temp602.tag= Cyc_Stdio_String_pa; _temp602.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -1366,7 +1366,7 @@ struct Cyc_Absyn_Typedefdecl* d1, struct _tagged_arr* msg){ struct Cyc_Absyn_Typ
 _temp603= Cyc_Tcdecl_merge_typedefdecl( d0, d1, 0, msg); if( _temp603 == 0){
 return 0;} if(( struct Cyc_Absyn_Typedefdecl*) d0 != _temp603){ Cyc_Interface_check_err(
 msg,( struct _tagged_arr)({ struct _tagged_arr(* _temp604)( struct _tagged_arr
-fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp608=
+fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp608=
 _tag_arr("declaration of typedef %s discloses too much information", sizeof(
 unsigned char), 57u); struct Cyc_Stdio_String_pa_struct _temp609; _temp609.tag=
 Cyc_Stdio_String_pa; _temp609.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -1378,7 +1378,7 @@ d0, struct Cyc_Tcdecl_Xtunionfielddecl* d1, struct _tagged_arr* msg){ struct Cyc
 _temp610= Cyc_Tcdecl_merge_xtunionfielddecl( d0, d1, 0, msg); if( _temp610 == 0){
 return 0;} if(( struct Cyc_Tcdecl_Xtunionfielddecl*) d0 != _temp610){ Cyc_Interface_check_err(
 msg,( struct _tagged_arr)({ struct _tagged_arr(* _temp611)( struct _tagged_arr
-fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp615=
+fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp615=
 _tag_arr("declaration of xtunionfield %s discloses too much information",
 sizeof( unsigned char), 62u); struct Cyc_Stdio_String_pa_struct _temp616;
 _temp616.tag= Cyc_Stdio_String_pa; _temp616.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string((
@@ -1452,7 +1452,7 @@ setjmp( _temp646.handler)){ _temp648= 1;} if( ! _temp648){{ int _temp649= 1;
 struct _tagged_arr* msg= 0; if( info != 0){ msg=({ struct _tagged_arr* _temp650=(
 struct _tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)); _temp650[ 0]=(
 struct _tagged_arr)({ struct _tagged_arr(* _temp651)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp656= _tag_arr("checking inclusion of %s exports into %s exports,",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp656= _tag_arr("checking inclusion of %s exports into %s exports,",
 sizeof( unsigned char), 50u); struct Cyc_Stdio_String_pa_struct _temp658;
 _temp658.tag= Cyc_Stdio_String_pa; _temp658.f1=( struct _tagged_arr)(*(( struct
 _tuple3*) _check_null( info))).f1;{ void* _temp654=( void*)& _temp658; struct
@@ -1464,7 +1464,7 @@ _temp651( _temp656, _temp653);}}}); _temp650;});} if( ! Cyc_Interface_incl_ns(
 i1->exports, i2->exports, msg)){ _temp649= 0;} if( info != 0){ msg=({ struct
 _tagged_arr* _temp659=( struct _tagged_arr*) GC_malloc( sizeof( struct
 _tagged_arr)); _temp659[ 0]=( struct _tagged_arr)({ struct _tagged_arr(*
-_temp660)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp660)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp665= _tag_arr("checking inclusion of %s imports into %s imports,",
 sizeof( unsigned char), 50u); struct Cyc_Stdio_String_pa_struct _temp667;
 _temp667.tag= Cyc_Stdio_String_pa; _temp667.f1=( struct _tagged_arr)(*(( struct
@@ -1507,7 +1507,7 @@ struct Cyc_Dict_Dict* d, struct _tagged_arr* key)) Cyc_Dict_lookup)( _temp685, x
 void** _temp711= _temp683( _temp710, y, 0, _temp679); if( _temp711 !=( void**)
 _temp710){ if(( unsigned int) _temp711){ Cyc_Interface_check_err( _temp679,(
 struct _tagged_arr)({ struct _tagged_arr(* _temp712)( struct _tagged_arr fmt,
-struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp717= _tag_arr("abstract %s %s is being imported as non-abstract",
+struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp717= _tag_arr("abstract %s %s is being imported as non-abstract",
 sizeof( unsigned char), 49u); struct Cyc_Stdio_String_pa_struct _temp719;
 _temp719.tag= Cyc_Stdio_String_pa; _temp719.f1=( struct _tagged_arr) _temp681;{
 void* _temp715=( void*)& _temp719; struct Cyc_Stdio_String_pa_struct _temp718;
@@ -1643,7 +1643,7 @@ _temp778).f2; goto _LL786; _LL786: _temp785= _temp780.f3; goto _LL784; _LL784:
 _temp783= _temp780.f4; goto _LL782; _LL782: _temp781= _temp780.f5; goto _LL779;
 _LL779: if((( int(*)( struct Cyc_Dict_Dict* d, struct _tagged_arr* key)) Cyc_Dict_member)(
 _temp785, x)){ Cyc_Interface_check_err( _temp781,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp793)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp793)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp798= _tag_arr("%s %s is exported more than once",
 sizeof( unsigned char), 33u); struct Cyc_Stdio_String_pa_struct _temp800;
 _temp800.tag= Cyc_Stdio_String_pa; _temp800.f1=( struct _tagged_arr) _temp783;{
@@ -1740,7 +1740,7 @@ struct _handler_cons _temp839; _push_handler(& _temp839);{ int _temp841= 0; if(
 setjmp( _temp839.handler)){ _temp841= 1;} if( ! _temp841){{ struct _tagged_arr*
 msg= 0; if( info != 0){ msg=({ struct _tagged_arr* _temp842=( struct _tagged_arr*)
 GC_malloc( sizeof( struct _tagged_arr)); _temp842[ 0]=( struct _tagged_arr)({
-struct _tagged_arr(* _temp843)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp843)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp848= _tag_arr("merging exports of %s and %s,", sizeof(
 unsigned char), 30u); struct Cyc_Stdio_String_pa_struct _temp850; _temp850.tag=
 Cyc_Stdio_String_pa; _temp850.f1=( struct _tagged_arr)(*(( struct _tuple3*)
@@ -1754,7 +1754,7 @@ i1->exports, i2->exports, msg); if( _temp851 == 0){ struct Cyc_Interface_I*
 _temp852= 0; _npop_handler( 0u); return _temp852;} if( info != 0){ msg=({ struct
 _tagged_arr* _temp853=( struct _tagged_arr*) GC_malloc( sizeof( struct
 _tagged_arr)); _temp853[ 0]=( struct _tagged_arr)({ struct _tagged_arr(*
-_temp854)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp854)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp859= _tag_arr("merging imports of %s and %s,", sizeof(
 unsigned char), 30u); struct Cyc_Stdio_String_pa_struct _temp861; _temp861.tag=
 Cyc_Stdio_String_pa; _temp861.f1=( struct _tagged_arr)(*(( struct _tuple3*)
@@ -1791,7 +1791,7 @@ _check_null( linfo))->hd); _temp883;}): 0); if( _temp873 == 0){ return 0;}
 curr_i=( struct Cyc_Interface_I*) _check_null( _temp873); if( curr_info != 0){
 curr_info= linfo != 0?({ struct _tagged_arr* _temp874=( struct _tagged_arr*)
 GC_malloc( sizeof( struct _tagged_arr)); _temp874[ 0]=( struct _tagged_arr)({
-struct _tagged_arr(* _temp875)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp875)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp880= _tag_arr("%s+%s", sizeof( unsigned char), 6u);
 struct Cyc_Stdio_String_pa_struct _temp882; _temp882.tag= Cyc_Stdio_String_pa;
 _temp882.f1=( struct _tagged_arr)*(( struct _tagged_arr*) _check_null( curr_info));{
@@ -1819,7 +1819,7 @@ _check_null( linfo))->hd); _temp894;}): 0); if( _temp884 == 0){ return 0;}
 curr_i=( struct Cyc_Interface_I*) _check_null( _temp884); if( curr_info != 0){
 curr_info= linfo != 0?({ struct _tagged_arr* _temp885=( struct _tagged_arr*)
 GC_malloc( sizeof( struct _tagged_arr)); _temp885[ 0]=( struct _tagged_arr)({
-struct _tagged_arr(* _temp886)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp886)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp891= _tag_arr("%s+%s", sizeof( unsigned char), 6u);
 struct Cyc_Stdio_String_pa_struct _temp893; _temp893.tag= Cyc_Stdio_String_pa;
 _temp893.f1=( struct _tagged_arr)*(( struct _tagged_arr*) _check_null( curr_info));{

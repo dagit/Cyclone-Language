@@ -46,7 +46,7 @@ const int Cyc_Stdio_Int_pa= 1; struct Cyc_Stdio_Int_pa_struct{ int tag;
 unsigned int f1; } ; static const int Cyc_Stdio_Double_pa= 2; struct Cyc_Stdio_Double_pa_struct{
 int tag; double f1; } ; static const int Cyc_Stdio_ShortPtr_pa= 3; struct Cyc_Stdio_ShortPtr_pa_struct{
 int tag; short* f1; } ; static const int Cyc_Stdio_IntPtr_pa= 4; struct Cyc_Stdio_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; extern struct _tagged_arr Cyc_Stdio_xprintf(
+int tag; unsigned int* f1; } ; extern struct _tagged_arr Cyc_Stdio_aprintf(
 struct _tagged_arr fmt, struct _tagged_arr); static const int Cyc_Stdio_ShortPtr_sa=
 0; struct Cyc_Stdio_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int
 Cyc_Stdio_UShortPtr_sa= 1; struct Cyc_Stdio_UShortPtr_sa_struct{ int tag;
@@ -187,7 +187,7 @@ static const int Cyc_Absyn_Bitor= 14; static const int Cyc_Absyn_Bitxor= 15;
 static const int Cyc_Absyn_Bitlshift= 16; static const int Cyc_Absyn_Bitlrshift=
 17; static const int Cyc_Absyn_Bitarshift= 18; static const int Cyc_Absyn_Size=
 19; static const int Cyc_Absyn_Printf= 20; static const int Cyc_Absyn_Fprintf=
-21; static const int Cyc_Absyn_Xprintf= 22; static const int Cyc_Absyn_Scanf= 23;
+21; static const int Cyc_Absyn_Aprintf= 22; static const int Cyc_Absyn_Scanf= 23;
 static const int Cyc_Absyn_Fscanf= 24; static const int Cyc_Absyn_Sscanf= 25;
 static const int Cyc_Absyn_PreInc= 0; static const int Cyc_Absyn_PostInc= 1;
 static const int Cyc_Absyn_PreDec= 2; static const int Cyc_Absyn_PostDec= 3;
@@ -503,7 +503,7 @@ _temp92[ 0]=({ struct Cyc_Absyn_Tunion_p_struct _temp93; _temp93.tag= Cyc_Absyn_
 _temp93.f1= _temp85; _temp93.f2= _temp83; _temp93.f3= _temp14; _temp93.f4=
 _temp12; _temp93;}); _temp92;}))); _npop_handler( 0u); return; _LL78: Cyc_Tcutil_terr(
 p->loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp94)( struct _tagged_arr
-fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr _temp98=
+fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr _temp98=
 _tag_arr("bad enum constructor %s in pattern", sizeof( unsigned char), 35u);
 struct Cyc_Stdio_String_pa_struct _temp99; _temp99.tag= Cyc_Stdio_String_pa;
 _temp99.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string( _temp16);{ void*
@@ -514,7 +514,7 @@ _pop_handler();} else{ void* _temp69=( void*) _exn_thrown; void* _temp101=
 _temp69; _LL103: if( _temp101 == Cyc_Dict_Absent){ goto _LL104;} else{ goto
 _LL105;} _LL105: goto _LL106; _LL104: goto _LL102; _LL106:( void) _throw(
 _temp101); _LL102:;}}} Cyc_Tcutil_terr( p->loc,( struct _tagged_arr)({ struct
-_tagged_arr(* _temp107)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_tagged_arr(* _temp107)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp111= _tag_arr("%s is not a constructor in pattern",
 sizeof( unsigned char), 35u); struct Cyc_Stdio_String_pa_struct _temp112;
 _temp112.tag= Cyc_Stdio_String_pa; _temp112.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -535,7 +535,7 @@ _LL117; _LL117:;}; _pop_handler();} else{ void* _temp114=( void*) _exn_thrown;
 void* _temp127= _temp114; _LL129: if( _temp127 == Cyc_Dict_Absent){ goto _LL130;}
 else{ goto _LL131;} _LL131: goto _LL132; _LL130: goto _LL128; _LL132:( void)
 _throw( _temp127); _LL128:;}}} Cyc_Tcutil_terr( p->loc,( struct _tagged_arr)({
-struct _tagged_arr(* _temp133)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp133)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp137= _tag_arr("%s is not a struct name, but pattern has designators",
 sizeof( unsigned char), 53u); struct Cyc_Stdio_String_pa_struct _temp138;
 _temp138.tag= Cyc_Stdio_String_pa; _temp138.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -768,7 +768,7 @@ _temp315); v_result=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct
 Cyc_List_List* y)) Cyc_List_append)( v_result, _temp313); if( ! Cyc_Tcutil_unify((
 void*)(( struct Cyc_Core_Opt*) _check_null( _temp306->topt))->v, _temp310)){ Cyc_Tcutil_terr(
 p->loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp317)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp323= _tag_arr("field %s of struct pattern expects type %s != %s", sizeof(
 unsigned char), 49u); struct Cyc_Stdio_String_pa_struct _temp326; _temp326.tag=
 Cyc_Stdio_String_pa; _temp326.f1=( struct _tagged_arr)* _temp308->name;{ void*
@@ -798,7 +798,7 @@ goto _LL335;} else{ goto _LL336;} _LL336: if( _temp330 ==( void*) Cyc_Absyn_No_c
 goto _LL337;} else{ goto _LL338;} _LL338: if(( unsigned int) _temp330 > 1u?*((
 int*) _temp330) == Cyc_Absyn_Forward_constr: 0){ goto _LL339;} else{ goto _LL331;}
 _LL333: goto _LL331; _LL335: Cyc_Tcutil_terr( p->loc,( struct _tagged_arr)({
-struct _tagged_arr(* _temp344)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+struct _tagged_arr(* _temp344)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp350= _tag_arr("tunion member %s abstracts type variable %s of kind %s != B",
 sizeof( unsigned char), 60u); struct Cyc_Stdio_String_pa_struct _temp353;
 _temp353.tag= Cyc_Stdio_String_pa; _temp353.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -895,7 +895,7 @@ tv_result, _temp401); v_result=(( struct Cyc_List_List*(*)( struct Cyc_List_List
 x, struct Cyc_List_List* y)) Cyc_List_append)( v_result, _temp399); if( ! Cyc_Tcutil_unify((
 void*)(( struct Cyc_Core_Opt*) _check_null( _temp395->topt))->v, _temp396)){ Cyc_Tcutil_terr(
 _temp395->loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp403)( struct
-_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct _tagged_arr
+_tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct _tagged_arr
 _temp409= _tag_arr("%s expects argument type %s, not %s", sizeof( unsigned char),
 36u); struct Cyc_Stdio_String_pa_struct _temp412; _temp412.tag= Cyc_Stdio_String_pa;
 _temp412.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string( _temp212->name);{
@@ -908,7 +908,7 @@ void* _temp408=( void*)& _temp410; void* _temp404[ 3u]={ _temp406, _temp407,
 _temp408}; struct _tagged_arr _temp405={( void*) _temp404,( void*) _temp404,(
 void*)( _temp404 + 3u)}; _temp403( _temp409, _temp405);}}}}));}} if( _temp206 !=
 0){ Cyc_Tcutil_terr( p->loc,( struct _tagged_arr)({ struct _tagged_arr(*
-_temp413)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf;
+_temp413)( struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf;
 struct _tagged_arr _temp417= _tag_arr("too many arguments for tunion constructor %s",
 sizeof( unsigned char), 45u); struct Cyc_Stdio_String_pa_struct _temp418;
 _temp418.tag= Cyc_Stdio_String_pa; _temp418.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(
@@ -916,7 +916,7 @@ _temp212->name);{ void* _temp416=( void*)& _temp418; void* _temp414[ 1u]={
 _temp416}; struct _tagged_arr _temp415={( void*) _temp414,( void*) _temp414,(
 void*)( _temp414 + 1u)}; _temp413( _temp417, _temp415);}}));} if( tqts != 0){
 Cyc_Tcutil_terr( p->loc,( struct _tagged_arr)({ struct _tagged_arr(* _temp419)(
-struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_xprintf; struct
+struct _tagged_arr fmt, struct _tagged_arr)= Cyc_Stdio_aprintf; struct
 _tagged_arr _temp423= _tag_arr("too few arguments for tunion constructor %s",
 sizeof( unsigned char), 44u); struct Cyc_Stdio_String_pa_struct _temp424;
 _temp424.tag= Cyc_Stdio_String_pa; _temp424.f1=( struct _tagged_arr) Cyc_Absynpp_qvar2string(

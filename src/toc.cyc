@@ -169,7 +169,7 @@ static stringptr_t fieldname(int i) {
   if (i >= fsz) {
     field_names = 
       new {for j < i+1 : 
-	   (j < fsz) ? field_names[j] : new (string_t)xprintf("f%d",j)};
+	   (j < fsz) ? field_names[j] : new (string_t)aprintf("f%d",j)};
   }
   return field_names[i];
 }
@@ -225,7 +225,7 @@ static var_t add_tuple_type(glist_t<$(tqual_t,type_t)@,`r> tqs0) {
       return x;
   }
   // haven't seen this one before, add a declaration
-  stringptr_t x = new (string_t)xprintf("_tuple%d",tuple_type_counter++);
+  stringptr_t x = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
   list_t<type_t> ts = List::map(snd_tqt,tqs0);
   let fs = null;
   list_t<type_t> ts2 = ts;
@@ -242,13 +242,13 @@ static var_t add_tuple_type(glist_t<$(tqual_t,type_t)@,`r> tqs0) {
 // generate a temporary variable
 // FIX: need to guarantee these can't conflict
 qvar_t temp_var() {
-  return new $(Loc_n,new (string_t)xprintf("_temp%d",temp_var_counter++));
+  return new $(Loc_n,new (string_t)aprintf("_temp%d",temp_var_counter++));
 }
 
 // generate a fresh label
 // FIX: need to guarantee these can't conflict
 static var_t fresh_label() {
-  return new (string_t)xprintf("_LL%d",temp_var_counter++);
+  return new (string_t)aprintf("_LL%d",temp_var_counter++);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -424,7 +424,7 @@ static bool atomic_typ(type_t t) {
   case &PointerType(_):   return false;
   case &RgnHandleType(_): return false;
   default:
-    toc_impos(xprintf("atomic_typ:  bad type %s",typ2string(t)));
+    toc_impos(aprintf("atomic_typ:  bad type %s",typ2string(t)));
     return false;
   }
 }
@@ -450,12 +450,12 @@ static bool is_poly_field(type_t t, field_name_t f) {
   case &AnonStructType(fs):
     let field = lookup_field(fs,f);
     if (field == null) 
-      toc_impos(xprintf("is_poly_field: bad field %s",*field->name));
+      toc_impos(aprintf("is_poly_field: bad field %s",*field->name));
     return is_void_star(field->type);
   // unions currently permit only bits, so no polytypes
   case &AnonUnionType(_): return false;
   case &UnionType(_,_,_): return false;
-  default: throw toc_impos(xprintf("is_poly_field: bad type %s",typ2string(t)));
+  default: throw toc_impos(aprintf("is_poly_field: bad type %s",typ2string(t)));
   }
 }
 
@@ -469,7 +469,7 @@ static bool is_poly_project(exp_t e) {
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{t,_,_,_,_}): return is_poly_field(t,f);
     default: 
-      toc_impos(xprintf("is_poly_project:  bad type %s",
+      toc_impos(aprintf("is_poly_project:  bad type %s",
 			typ2string(e1->topt->v)));
       return false;
     }
@@ -590,7 +590,7 @@ static env_t clear_toplevel(env_t e) {
 static env_t add_varmap(env_t e, qvar_t x, exp_t y) {
   switch ((*x)[0]) {
   case &Rel_n(_):
-    throw toc_impos(xprintf("Toc::add_varmap on Rel_n: %s\n", qvar2string(x)));
+    throw toc_impos(aprintf("Toc::add_varmap on Rel_n: %s\n", qvar2string(x)));
   default: break;
   }
   env_t ans = copy_env(e);
@@ -643,7 +643,7 @@ static env_t switch_as_switch_env(env_t e, var_t next_l) {
 
 // printf_to_c(p,aopt,args,typs)
 // Translate printf functions to C;
-//   p is printf, fprintf, or xprintf
+//   p is printf, fprintf, or aprintf
 //   aopt is &Opt(e) if p is fprintf and e is its first arg
 //   args are the remaining args, already translated
 //   typs are the types of the translated args
@@ -744,7 +744,7 @@ static exp_t printf_to_c(primop_t p, opt_t<exp_t> aopt,
         }
         if (c2 != '%') { // all but %% consume an arg and typ
           if (args == null || typs == null)
-            toc_impos(xprintf("missing arg to %s", Absynpp::prim2string(p)));
+            toc_impos(aprintf("missing arg to %s", Absynpp::prim2string(p)));
           let temp = temp_var();
           rev_temps  = rnew(r) List(rnew(r) $(temp,typs->hd,args->hd),
                                     rev_temps);
@@ -1100,7 +1100,7 @@ static void lvalue_assign(exp_t e1, list_t<field_name_t> fs,
     // Sanity check: the translation of lvalues may change,
     // so we may need to adjust how we find the inner lvalue.
     if (!is_lvalue(e1))
-      toc_impos(xprintf("lvalue_assign: could not find lvalue in `%s'",
+      toc_impos(aprintf("lvalue_assign: could not find lvalue in `%s'",
 			exp2string(e1)));
     // make a copy so we don't create a loop
     exp_t e1_copy = copy_exp(e1);
@@ -1118,7 +1118,7 @@ static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
     // we assume free vars of e2 are not captured by d
   case &Decl_s(d,s2): lvalue_assign_stmt(s2,fs,f,f_env); break;
   case &Seq_s(_,s2):  lvalue_assign_stmt(s2,fs,f,f_env); break;
-  default: toc_impos(xprintf("lvalue_assign_stmt: %s",stmt2string(s))); break;
+  default: toc_impos(aprintf("lvalue_assign_stmt: %s",stmt2string(s))); break;
   }
 }
 
@@ -1155,7 +1155,7 @@ static struct PtrInfo get_ptr_type(type_t t) {
 static void exp_to_c(env_t nv, exp_t e) {
   let r = e->r;
   if(e->topt == null) {
-    toc_impos(xprintf("exp_to_c: no type for %s",exp2string(e)));
+    toc_impos(aprintf("exp_to_c: no type for %s",exp2string(e)));
     return;
   }
   type_t old_typ = e->topt->v;
@@ -1178,7 +1178,7 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Var_e(qv,b): 
     try e->r = Dict::lookup(nv->varmap,qv)->r;
     catch { case Dict::Absent:
-       toc_impos(xprintf("Can't find %s in exp_to_c, Var\n", qvar2string(qv)));
+       toc_impos(aprintf("Can't find %s in exp_to_c, Var\n", qvar2string(qv)));
        return;
     }
     break;
@@ -1206,13 +1206,13 @@ static void exp_to_c(env_t nv, exp_t e) {
 	}
 	break;
       default: 
-	toc_impos(xprintf("size primop applied to non-array %s (%s)",
+	toc_impos(aprintf("size primop applied to non-array %s (%s)",
 			  typ2string(typs->hd),typ2string(arg->topt->v))); 
 	return;
       }
       break;
     case Printf:  e->r = printf_to_c(p,null,es,typs)->r; break;
-    case Xprintf: e->r = printf_to_c(p,null,es,typs)->r; break;
+    case Aprintf: e->r = printf_to_c(p,null,es,typs)->r; break;
     case Fprintf:
       if (es == null) toc_impos("fprintf without arguments");
       e->r = printf_to_c(p,new Opt(fdconv(es->hd)),es->tl,typs->tl)->r;
@@ -1538,13 +1538,13 @@ static void exp_to_c(env_t nv, exp_t e) {
     switch (e1->r) {
     case &Struct_e(tdn,_,es,_):
       if (nv->toplevel)
-	unimp(xprintf("%s: & on non-identifiers at the top-level",
+	unimp(aprintf("%s: & on non-identifiers at the top-level",
                       Position::string_of_segment(e1->loc)));
       e->r = init_struct(nv, e1->topt->v, true, null, es, tdn)->r;
       break;
     case &Tuple_e(es):
       if (nv->toplevel)
-	unimp(xprintf("%s: & on non-identifiers at the top-level",
+	unimp(aprintf("%s: & on non-identifiers at the top-level",
                       Position::string_of_segment(e1->loc)));
       e->r = init_tuple(nv, true, null, es)->r;
       break;
@@ -1560,7 +1560,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &New_e(rgnopt,e1):
     if (nv->toplevel)
-      unimp(xprintf("%s: new at top-level", 
+      unimp(aprintf("%s: new at top-level", 
                     Position::string_of_segment(e1->loc)));
     switch (e1->r) {
     case &Array_e(dles0):
@@ -1905,7 +1905,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     switch (compress(st)) {
     case &AnonStructType(afs): fs = afs; break;
     default: 
-      fs = toc_impos(xprintf("anon struct has type %s",typ2string(st))); 
+      fs = toc_impos(aprintf("anon struct has type %s",typ2string(st))); 
       break;
     }
     region rgn {
@@ -2906,7 +2906,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
     case null:
       exp_opt_t initopt = null;
       if (f->sc != Extern) {
-	initopt = string_exp(xprintf("%c%c%c%c%s",0,0,0,0,*fn),DL);
+	initopt = string_exp(aprintf("%c%c%c%c%s",0,0,0,0,*fn),DL);
       }
       let tag_decl = new_vardecl(f->name, tag_typ, initopt);
       tag_decl->sc = f->sc;
@@ -2917,7 +2917,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
 	list_t<structfield_t> fields = null;
 	int i = 1;
 	for (let tqts = f->typs; tqts != null; tqts = tqts->tl,i++) {
-	  let field_n = new ((string_t)xprintf("f%d",i));
+	  let field_n = new ((string_t)aprintf("f%d",i));
 	  let newf = new Structfield(field_n,(*tqts->hd)[0],
 				     typ_to_c_array((*tqts->hd)[1]),null,null);
 	  fields = new List(newf,fields);
@@ -2938,7 +2938,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
 
     case &Opt(false):
       if (f->sc != Extern) {
-	let initopt = string_exp(xprintf("%c%c%c%c%s",0,0,0,0,*fn),DL);
+	let initopt = string_exp(aprintf("%c%c%c%c%s",0,0,0,0,*fn),DL);
 	let tag_decl = new_vardecl(f->name, tag_typ, initopt);
 	tag_decl->sc = f->sc;
 	result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);

@@ -64,7 +64,7 @@ int foo2(int x, int y) {
 int foo3() {
 
   int x[?] = {1,2,3,4,};
-  char s[?] = xprintf("%s %d %c","hello",3,'a');
+  char s[?] = aprintf("%s %d %c","hello",3,'a');
 
   printf("hello\n");
   printf("%s %d %c","hello",3,'a');

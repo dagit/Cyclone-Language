@@ -182,7 +182,7 @@ and intag = parse
 | "\""  { purge(); return attvalue2(lexbuf); }
 | '>'   { return CLOSE; }   
 | "/>"  { return SLASHCLOSE; }
-| _     { warning(xprintf("illegal character '%s' in tag",get(lexbuf)));
+| _     { warning(aprintf("illegal character '%s' in tag",get(lexbuf)));
           return intag(lexbuf); }
 
 /* Other lexing states inside tags */
