@@ -164,6 +164,19 @@ static term_t one() {
 }
   
 static term_t var(vardecl_t vd) { return new Var(vd); }
+
+static inline bool is_commutative(Absyn::primop_t p) {
+  switch (p) {
+  case Absyn::Plus:
+  case Absyn::Times:
+  case Absyn::Eq:
+  case Absyn::Neq:
+  case Absyn::Bitand:
+  case Absyn::Bitor:
+  case Absyn::Bitxor: return true;
+  default: return false;
+  }
+}
 static term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts) {
   return new Primop(p,ts);
 }
@@ -825,8 +838,9 @@ static bool simple_prove(assn_t ctxt, assn_t a) {
 
 //////////////////// Constraint Solving //////////////////
 // We use a variation of the Pratt algorithm here where we keep
-// track of a distance between terms and find the minimal length path
-// between any two terms.  If we ever get a negative-length cycle,
+// track of a signed distance and an unsigned distance between terms 
+// and find the minimal length signed and unsigned paths between any 
+// two terms.  If we ever get a negative-length cycle,
 // then the constraints are inconsistent.  
 //
 // We represent a conjunction of constraints as a sparse matrix of
@@ -839,11 +853,22 @@ static bool simple_prove(assn_t ctxt, assn_t a) {
 // out of time or memory, we limit the blowup according to the
 // variable max_paths.
 
+// The edges in the graph record both signed and unsigned distance
+// values, but only one of them may be valid, or both of them may
+// be valid.
+typedef enum DistanceInfo { 
+  Unsigned_valid = 1,
+  Signed_valid = 2,
+  Both_valid = 3,
+} distance_info_t;
+
 typedef struct Distance {
   struct Distance *next;  // ptr to next entry in sparse matrix
   term_t t1;
   term_t t2;
-  int    dist;
+  distance_info_t dinfo;  // whether unsigned_dist or signed_dist are valid.
+  int    unsigned_dist;
+  int    signed_dist;
 } *distance_t;
 
 typedef struct Graph {
@@ -858,8 +883,17 @@ static void print_graphs(graph_t* gs) {
   for (; gs != NULL; gs = gs->next) {
     fprintf(stderr,"\t{");
     for (let ds = gs->distance; ds != NULL; ds = ds->next) {
-      fprintf(stderr,"%s - %s <= %d",term2string(ds->t1),term2string(ds->t2),
-              ds->dist);
+      if (ds->dinfo == Both_valid) {
+        fprintf(stderr,"%s - %s U<= %d, %s - %s S<= %d",term2string(ds->t1),
+                term2string(ds->t2),ds->unsigned_dist,term2string(ds->t1),
+                term2string(ds->t2),ds->signed_dist);
+      } else if (ds->dinfo == Signed_valid) {
+        fprintf(stderr,"%s - %s S<= %d",term2string(ds->t1),
+                term2string(ds->t2),ds->signed_dist);
+      } else {
+        fprintf(stderr,"%s - %s U<= %d",term2string(ds->t1),
+                term2string(ds->t2),ds->unsigned_dist);
+      }
       if (ds->next != NULL) fprintf(stderr,",");
     }
     fprintf(stderr,"}\n");
@@ -882,7 +916,9 @@ static graph_t @true_graph() { return new Graph{NULL,NULL,NULL};}
 static distance_t copy_distance(distance_t ds) {
   distance_t res = NULL;
   for (; ds != NULL; ds = ds->next) {
-    res = new Distance{res,ds->t1,ds->t2,ds->dist};
+    let newds = new *ds;
+    newds->next = res;
+    res = newds;
   }
   return res;
 }
@@ -915,42 +951,73 @@ static void add_node(graph_t @g, term_t n) {
 
 // lookup the distance between two nodes in the graph -- returns NULL
 // if the distance is infinite.
-static int* lookup_distance(graph_t @g, term_t i, term_t j) {
+static int* lookup_distance(graph_t @g, bool is_signed, term_t i, term_t j) {
   static int zero = 0;
   if (cmp_term(i,j) == 0) return &zero; // same term always at distance 0
   for (let ds = g->distance; ds != NULL; ds = ds->next) {
-    if (cmp_term(i,ds->t1) == 0 && cmp_term(j,ds->t2) == 0) return &ds->dist;
+    if (cmp_term(i,ds->t1) == 0 && cmp_term(j,ds->t2) == 0) {
+      if (is_signed && (ds->dinfo & Signed_valid))
+        return &ds->signed_dist;
+      else if (!is_signed && (ds->dinfo & Unsigned_valid))
+        return &ds->unsigned_dist;
+      else
+        return NULL;
+    }
   }
   return NULL;
+}
+
+// Assumes the signed or unsigned edge is not already in the graph.
+// Inserts the edge as appropriate.  Must look through the Distance
+// list to see if there's already an entry for i and j and update
+// it instead of adding a new Distance node.
+static void insert_distance(graph_t @g, bool is_signed, term_t i, term_t j, int dist) {
+  if (cmp_term(i,j) == 0) return; // same term always at distance 0
+  for (let ds = g->distance; ds != NULL; ds = ds->next) {
+    if (cmp_term(i,ds->t1) == 0 && cmp_term(j,ds->t2) == 0) {
+      if (is_signed) { 
+        ds->dinfo |= Signed_valid;
+        ds->signed_dist = dist;
+      } else {
+        ds->dinfo |= Unsigned_valid;
+        ds->unsigned_dist = dist;
+      }
+      return;
+    }
+  }
+  g->distance = new Distance{g->distance,i,j,is_signed ? Signed_valid : Unsigned_valid,dist,dist};
 }
 
 // add an edge to a graph and close it off to find shortest paths.
 // returns true if the resulting graph remains consistent and false
 // otherwise.
-static bool add_edge(graph_t @g, term_t i, term_t j, int dist) {
+// FIX: MUST WORRY ABOUT OVERFLOW ISSUES
+static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
   add_node(g,i);
   add_node(g,j);
-  int* ij_dist = lookup_distance(g,i,j);
+  int* ij_dist = lookup_distance(g,is_signed,i,j);
   // if we already have a shorter path, then this constraint is redundant
   if (ij_dist != NULL && *ij_dist < dist) 
     return true;
-  int* ji_dist = lookup_distance(g,j,i);
+  int* ji_dist = lookup_distance(g,is_signed,j,i);
   // if  j -n-> i -dist-> j  and n+dist is negative, we have a contradiction.
+  // FIX -- distance could overflow
   if (ji_dist != NULL && (*ji_dist + dist) < 0)
     return false; 
   // update shortest path for each pair of nodes
   for (let ks = g->nodes; ks != NULL; ks = ks->tl) {
     let k = ks->hd;
-    let ki_dist = lookup_distance(g,k,i);
+    let ki_dist = lookup_distance(g,is_signed,k,i);
     if (ki_dist == NULL) continue;
     for (let ls = g->nodes; ls != NULL; ls = ls->tl) {
       let l = ls->hd;
-      let jl_dist = lookup_distance(g,j,l);
+      let jl_dist = lookup_distance(g,is_signed,j,l);
       if (jl_dist != NULL) {
-        let kl_dist = lookup_distance(g,k,l);
+        let kl_dist = lookup_distance(g,is_signed,k,l);
+        // FIX -- distance could overflow
         let new_dist = *ki_dist + dist + *jl_dist;
         if (kl_dist == NULL) {
-          g->distance = new Distance{g->distance,k,l,new_dist};
+          insert_distance(g,is_signed,k,l,new_dist);
         } else if (*kl_dist > new_dist) {
           *kl_dist = new_dist;
         }
@@ -960,26 +1027,94 @@ static bool add_edge(graph_t @g, term_t i, term_t j, int dist) {
   return true;
 }
 
+static $(unsigned int,bool) eval_term(term_t t) {
+  switch (t) {
+  case &Const(e): return Evexp::eval_const_uint_exp(e);
+  default: return $(0,false);
+  }
+}
+
+// FIX: 32-bit dependency!
+#define MAXINT (0x7fffffff)
+
 // convert a primitive assertion to a constraint and add it to the graph.
 // returns true if the resulting graph remains consistent, false otherwise.
 static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
-  // FIX:  we need to do a lot more here, ranging from taking constants
-  // into account, to dealing with the signed/unsigned issue.
+  // first see if t1 or t2 is a constant as we can put in better
+  // constraints then.
+  let $(c1,okay1) = eval_term(t1);
+  let $(c2,okay2) = eval_term(t2);
+
+  // FIX: NOT SURE IF ANY OF THIS IS RIGHT -- MUST WORRY ABOUT
+  // OVERFLOW ISSUES!
+  if (okay1 && okay2) {
+    // we have c1 p c2 -- reduce to true or false immediately.
+    switch (p) {
+    case ULt: return (c1 < c2);
+    case SLt: return ((int)c1) < ((int)c2);
+    case ULte: return (c1 <= c2);
+    case SLte: return ((int)c1) <= ((int)c2);
+    default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
+    }
+  } else if (okay2) {
+    // we have t1 p c2 -- add constraints of the form t1 - Zero p c2
+    switch (p) {
+    case ULt: 
+      c2 = c2 - 1; 
+      fallthru;
+    case ULte:
+    // must check that c2 can be represented by an int.
+      if (c2 <= (unsigned)MAXINT) {
+        if (!add_edge(g,false,t1,zero(),(int)c2)) return false;
+        // since t1 U<= c2 U<= MAXINT, we know t1 S<= c2 as well!
+        return add_edge(g,true,t1,zero(),(int)c2);
+      }
+      break;
+    case SLt: 
+      c2 = c2 - 1;
+      fallthru;
+    case SLte:
+      if (!add_edge(g,true,t1,zero(),(int)c2)) return false;
+      // if c2 is positive then t1 S<= c2 implies t1 U<= c2
+      if (c2 <= (unsigned)MAXINT)
+        return add_edge(g,false,t1,zero(),(int)c2);
+      else return true;
+    default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
+    }
+  } else if (okay1) {
+    // we have c1 p t2 -- add constraints of the form zero - t2 p -c1
+    // FIX:  NOT CHECKING FOR OVERFLOW ISSUES HERE.
+    switch (p) {
+    case ULt: 
+      c1 = c1 + 1;
+      fallthru;
+    case ULte:
+      int k = -((int)c1);
+      return add_edge(g,false,zero(),t2,k);
+    case SLt: 
+      c1 = c1 + 1;
+      fallthru;
+    case SLte:
+      int k = -((int)c1);
+      return add_edge(g,true,zero(),t2,k);
+    default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
+    }
+  }
+  // nothing special about the terms -- have to add them as standard
+  // sort of constraints.
   switch (p) {
-  case Eq:
-    // add t1 - t2 <= 0 and t2 - t1 <= 0
-    if (!add_edge(g,t1,t2,0)) return false;
-    return add_edge(g,t2,t1,0);
   case ULt:
-    // add t1 - t2 <= -1
-    return add_edge(g,t1,t2,-1);
+    // add t1 - t2 U<= -1
+    return add_edge(g,false,t1,t2,-1);
   case ULte:
-    // add t1 - t2 <= 0
-    return add_edge(g,t1,t2,0);
+    // add t1 - t2 U<= 0
+    return add_edge(g,false,t1,t2,0);
   case SLt:
+    // add t1 - t2 S<= -1
+    return add_edge(g,true,t1,t2,-1);
   case SLte: 
-    // for now, we can't do anything about these
-    return true;
+    // add t1 - t2 S<= 0
+    return add_edge(g,true,t1,t2,0);
   default: Tcutil::impos("Vcgen:found bad primop in add_constraint");
   }
 }
@@ -999,6 +1134,8 @@ unsigned int max_paths_seen = 0;
 // whole thing.  
 static graph_t *cgraph(graph_t *`H gs, assn_t a) {
  LOOP:
+  //fprintf(stderr,"inserting assertion %s into \n",assn2string(a));
+  //print_graphs(gs);
   if (gs == NULL) return gs; // already inconsistent
   switch (a) {
   case &True: break;         // gs and true == gs
@@ -1023,8 +1160,13 @@ static graph_t *cgraph(graph_t *`H gs, assn_t a) {
     gs = graph_append(gs1,gs2);
     break;
   case &Prim(t1,Neq,t2): 
-    // must handle neq specially as t1 < t2 or t2 < t1.
-    a = or(ult(t1,t2),ult(t2,t1));
+    // must handle neq specially as t1 < t2 or t2 < t1 (both signed
+    // and unsigned.)
+    a = and(or(slt(t1,t2),slt(t2,t1)),or(ult(t1,t2),ult(t2,t1)));
+    goto LOOP;
+  case &Prim(t1,Eq,t2):
+    // explode t1 == t2 into t1 <= t2 and t2 <= t1 (both signed and unsigned)
+    a = and(and(and(slte(t1,t2),slte(t2,t1)),ulte(t1,t2)),ulte(t2,t1));
     goto LOOP;
   case &Prim(t1,p,t2):
     // add the primitive relation to each graph, pruning out the
@@ -1911,12 +2053,27 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
 
   case &Absyn::Cast_e(tp,e,_,c): 
     // FIX: really need to put C coercions in terms...
-    let $(t,a) = vcgen_rexp(env,e,ain);
-    if (c == Absyn::No_coercion)
-      return $(t == NULL ? NULL : cast(tp,t),a);
+    let $(topt,a) = vcgen_rexp(env,e,ain);
+    if (c == Absyn::No_coercion) {
+      if (topt == NULL) return $(NULL,a);
+      term_t t = (term_t)topt;
+      // we only need to retain the cast on the term if it
+      // changes the size of the value.  In particular, we
+      // can drop a cast from an int to an unsigned int and
+      // vice versa.  We might be able to get away with 
+      // dropping other casts (e.g., char->int) but we'll be
+      // conservative now.
+      switch $(Tcutil::compress(tp),Tcutil::compress((type_t)e->topt)) {
+      case $(&Absyn::AppType(&Absyn::IntCon(u1,s1),_),&Absyn::AppType(&Absyn::IntCon(u2,s2),_)):
+        if (s1 == s2) return $(t,a);
+        break;
+      default: break;
+      }
+      return $(cast(tp,t),a);
+    }
     else {
       update_try_assn(env,ain); // coercion could fail
-      return $(NULL,a);
+      return $(topt == NULL ? NULL : cast(tp,(term_t)topt),a);
     }
   case &Absyn::New_e(eopt,e):
     if (eopt != NULL)
