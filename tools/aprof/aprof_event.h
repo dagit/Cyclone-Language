@@ -45,10 +45,14 @@ namespace Aprof {
     string_t region_name;
     int amount;
     struct RegionStats region_stats;
+    unsigned int address;
   };
   struct GcEvent {
     unsigned int num;
     struct RegionStats heap_region_stats;
+  };
+  struct ReclaimEvent {
+    unsigned int address;
   };
   struct CreateEvent {
     string_t location;
@@ -66,6 +70,7 @@ namespace Aprof {
   };
   typedef struct AllocEvent alloc_event_t;
   typedef struct GcEvent gc_event_t;
+  typedef struct ReclaimEvent reclaim_event_t;
   typedef struct CreateEvent create_event_t;
   typedef struct ResizeEvent resize_event_t;
   typedef struct FreeEvent free_event_t;
@@ -75,6 +80,7 @@ namespace Aprof {
   EXTERN_APROF datatype AProfEvent {
     AllocE(alloc_event_t);
     GcE(gc_event_t);
+    ReclaimE(reclaim_event_t);
     CreateE(create_event_t);
     ResizeE(resize_event_t);
     FreeE(free_event_t);

@@ -233,7 +233,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     }
     break;
 
-  case &AllocE(AllocEvent(loc,rname,count,_)):
+  case &AllocE(AllocEvent(loc,rname,count,_,_)):
     // ignore freeing of memory for now
     if (count <= 0) break;
     // update the region table with this event
@@ -260,6 +260,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     }
     break;
 
+  case &ReclaimE(_):
   case &FreeE(_):
   case &ResizeE(_):
   case &GcE(_): break;

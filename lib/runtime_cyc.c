@@ -398,13 +398,15 @@ void Cyc_Core_ufree(struct _dyneither_ptr ptr) {
     unique_freed_bytes += sz;
     // output special "alloc" event here, where we have a negative size
     if (alloc_log != NULL) {
-      fprintf(alloc_log,"bogus:bogus:0\tunique\talloc\t-%d\t%d\t%d\t%d\n",
+      fprintf(alloc_log,"bogus:bogus:0\tunique\talloc\t-%d\t%d\t%d\t%d\t%x\n",
 	      sz,
 	      region_get_heap_size(Cyc_Core_unique_region), 
 	      region_get_free_bytes(Cyc_Core_unique_region),
-	      region_get_total_bytes(Cyc_Core_unique_region));
+	      region_get_total_bytes(Cyc_Core_unique_region),
+              (unsigned int)ptr.base);
     }
 #endif
+    GC_register_finalizer_no_order(ptr.base,NULL,NULL,NULL,NULL);
     GC_free(ptr.base);
     ptr.base = ptr.curr = ptr.last_plus_one = NULL; // not really necessary...
   }
@@ -458,11 +460,12 @@ void Cyc_Core_drop_refptr(struct _dyneither_ptr ptr) {
       unsigned int sz = GC_size(ptr.base - sizeof(int));
       refcnt_freed_bytes += sz;
       if (alloc_log != NULL) {
-	fprintf(alloc_log,"bogus:bogus:0\trefcnt\talloc\t-%d\t%d\t%d\t%d\n",
+	fprintf(alloc_log,"bogus:bogus:0\trefcnt\talloc\t-%d\t%d\t%d\t%d\t%x\n",
 		sz,
 		region_get_heap_size(Cyc_Core_refcnt_region), 
 		region_get_free_bytes(Cyc_Core_refcnt_region),
-		region_get_total_bytes(Cyc_Core_refcnt_region));
+		region_get_total_bytes(Cyc_Core_refcnt_region),
+                (unsigned int)ptr.base);
       }
 #endif
       GC_free(ptr.base - sizeof(int));
@@ -1015,24 +1018,44 @@ void _profile_free_region(struct _RegionHandle *r, const char *file, const char 
   }
 }
 
+typedef void * GC_PTR; /* Taken from gc/include/gc.h, must be kept in sync. */
+
+static void
+reclaim_finalizer(GC_PTR obj, GC_PTR client_data) {
+  if (alloc_log != NULL)
+    fprintf(alloc_log,
+            "bogus:bogus:0: @unknown@ reclaim \t%x\n",
+            (unsigned int)obj);
+}
+
+static void
+unique_finalizer(GC_PTR addr) {
+  GC_register_finalizer_no_order(addr,reclaim_finalizer,NULL,NULL,NULL);
+}
+
 void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
                               const char *file, const char *func, int lineno) {
   void *addr;
   addr = _region_malloc(r,s);
   _profile_check_gc();
   if (alloc_log != NULL) {
-    if (r == Cyc_Core_heap_region || r == Cyc_Core_unique_region)
+    if (r == Cyc_Core_heap_region)
       s = GC_size(addr);
+    if (r == Cyc_Core_unique_region) {
+      s = GC_size(addr);
+      unique_finalizer((GC_PTR)addr);
+    }
     else if (r == Cyc_Core_refcnt_region)
       s = GC_size(addr-1); // back up to before the refcnt
-    fprintf(alloc_log,"%s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\n",
+    fprintf(alloc_log,"%s:%s:%d\t%s\talloc\t%d\t%d\t%d\t%d\t%x\n",
             file,func,lineno,
 	    (r == Cyc_Core_heap_region ? "heap" :
 	     (r == Cyc_Core_unique_region ? "unique" :
 	      (r == Cyc_Core_refcnt_region ? "refcnt" : r->name))), s,
 	    region_get_heap_size(r), 
 	    region_get_free_bytes(r),
-	    region_get_total_bytes(r));
+	    region_get_total_bytes(r),
+            (unsigned int)addr);
   }
   return addr;
 }
@@ -1046,9 +1069,10 @@ void * _profile_GC_malloc(int n, const char *file, const char *func, int lineno)
   n = GC_size(result);
   heap_total_bytes += n;
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"%s:%s:%d\theap\talloc\t%d\t%d\t%d\t%d\n",
+    fprintf(alloc_log,"%s:%s:%d\theap\talloc\t%d\t%d\t%d\t%d\t%x\n",
             file,func,lineno,n,
-	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
+	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes(),
+            (unsigned int)result);
   }
   return result;
 }
@@ -1064,9 +1088,10 @@ void * _profile_GC_malloc_atomic(int n, const char *file, const char *func,
   heap_total_bytes += n;
   heap_total_atomic_bytes +=n;
   if (alloc_log != NULL) {
-    fprintf(alloc_log,"%s:%s:%d\theap\talloc\t%d\t%d\t%d\t%d\n",
+    fprintf(alloc_log,"%s:%s:%d\theap\talloc\t%d\t%d\t%d\t%d\t%x\n",
             file,func,lineno,n,
-	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
+	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes(),
+            (unsigned int)result);
   }
   return result;
 }

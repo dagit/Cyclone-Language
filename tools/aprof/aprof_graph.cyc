@@ -25,6 +25,7 @@
 #include <array.h>
 #include <fn.h>
 #include <assert.h>
+#include <hashtable.h>
 #include "aprof_event.h"
 
 // Keep track of following information per event
@@ -322,14 +323,12 @@ static void update_heap_stats(struct ProcEnv @env,
     add_point(env->cnt, env->total_heap_size, env->mem_total);
 
   // Adjust the live size of the heap region.  Assuming that
-  // the refcnt live and unique live are accurate (that this, the
+  // the refcnt live ia accurate (that this, the
   // user didn't drop pointers that were then GC'ed), the heap live =
   //   total-heap-size - total-free-size - dyn-region-size -
   //   refcnt live - unique live
   // If this number comes out negative, then we must make it 0, and
-  // remove some data from the unique and/or reference-counted region.
-  // No really good policy here: I'll pull stuff off unique first
-  // (until 0), and then go for the refcounted region.
+  // remove some data from the reference-counted region.
   int heap_live = env->total_heap_size - env->total_free_size 
     - env->total_dynregion_size - env->refcnt_live_bytes
     - env->unique_live_bytes;
@@ -338,22 +337,27 @@ static void update_heap_stats(struct ProcEnv @env,
 // 	 env->unique_live_bytes);
   if (heap_live < 0) {
 //     printf("heap=%d\n",heap_live);
-    int unique_live = env->unique_live_bytes + heap_live;
-//     printf("unique=%d\n",unique_live);
 //     fflush(stdout);
+    int refcnt_live = env->refcnt_live_bytes + heap_live;
     heap_live = 0;
-    if (unique_live < 0) {
-      int refcnt_live = env->refcnt_live_bytes + unique_live;
-      unique_live = 0;
-      assert(refcnt_live >= 0);
-      env->refcnt_live = add_point(env->cnt,refcnt_live,env->refcnt_live);
-      env->refcnt_live_bytes = refcnt_live;
-    }
-    env->unique_live = add_point(env->cnt,unique_live,env->unique_live);
-    env->unique_live_bytes = unique_live;
+    assert(refcnt_live >= 0);
+    env->refcnt_live = add_point(env->cnt,refcnt_live,env->refcnt_live);
+    env->refcnt_live_bytes = refcnt_live;
   }
   env->heap_live = add_point(env->cnt,heap_live,env->heap_live);
 } 
+
+struct Hashtable::Table<unsigned int,unsigned int> *tab = NULL;
+int uint_cmp(unsigned int i, unsigned int j) {
+  return (i<j)?(-1):((i>j)?1:0);
+}
+int uint_hash(unsigned int i) {
+  return (int)i;
+}
+static void
+init_table() {
+  tab = Hashtable::create(101,uint_cmp,uint_hash);
+}
 
 static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
   // update the event counter
@@ -379,12 +383,18 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     update_heap_stats(env,rstats);
     break;
 
-  case &AllocE(AllocEvent(_,rname,count,*rstats)):
+  case &AllocE(AllocEvent(_,rname,count,*rstats,addr)):
     if (!strcmp(rname,"unique")) {
       env->unique_live_bytes += count;
       env->unique_live = 
 	add_point(env->cnt,env->unique_live_bytes,env->unique_live);
       update_heap_stats(env,rstats);
+      if (count>0)
+        // remember count for addr in case gc reclaims addr
+        Hashtable::insert((Hashtable::table_t)tab,addr,(unsigned int)count);
+      else
+        // gc did not reclaim, this is ufree, forget addr/count
+        Hashtable::remove((Hashtable::table_t)tab,addr);
     }
     else if (!strcmp(rname,"refcnt")) {
       env->refcnt_live_bytes += count;
@@ -422,6 +432,24 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
 		"error: alloc event in uncreated dynamic region %s\n",rname);
 	return false;
       }
+    }
+    break;
+
+  case &ReclaimE(ReclaimEvent(addr)):
+    // this is a unique pointer object that got garbage collected
+    try {
+      unsigned int count = Hashtable::lookup((Hashtable::table_t)tab,addr);
+      env->unique_live_bytes -= count;
+      env->unique_live = 
+	add_point(env->cnt,env->unique_live_bytes,env->unique_live);
+      Hashtable::remove((Hashtable::table_t)tab,addr);
+    }
+    catch {
+    case &Not_found:
+      fprintf(stderr,
+	      "error: reclaim event %x without (remembered) allocation\n",
+              addr);
+      return false;
     }
     break;
 
@@ -528,6 +556,9 @@ int generate_graph(string_t<`H> file) {
 		.refcnt_live = NULL,
 		.total_dyn_live = NULL,
 		.dyn_live = NULL };
+
+  // initialize the hash table
+  init_table();
 
   // process the file
   fn_t clos = make_fn(proc_event,env);

@@ -83,9 +83,15 @@ static bool getint(FILE @f, int @result) {
   try {
     *result = atoi(buf);
   } catch {
-  default: fprintf(stderr,"bad integer %s\n",buf); return -1;
+  default: fprintf(stderr,"bad integer %s\n",buf); return false;
   }  
   return true;
+}
+
+static bool gethex(FILE @f, unsigned int @result) {
+  if (!gettoken(f)) return false;
+  int n = sscanf(buf, "%x",result);
+  return (n == 1);
 }
 
 static bool get_region_stats(FILE @f, struct RegionStats @stats) {
@@ -102,9 +108,11 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
 
   // cached versions of events; callback better not cache them!
   static datatype AProfEvent.AllocE __alloc_event =
-    AllocE(AllocEvent("bogus","bogus",0,RegionStats(0,0,0)));
+    AllocE(AllocEvent("bogus","bogus",0,RegionStats(0,0,0),0));
   static datatype AProfEvent.GcE __gc_event =
     GcE(GcEvent(0,RegionStats(0,0,0)));
+  static datatype AProfEvent.ReclaimE __reclaim_event =
+    ReclaimE(ReclaimEvent(0));
   static datatype AProfEvent.CreateE __create_event =
     CreateE(CreateEvent("bogus","bogus",RegionStats(0,0,0)));
   static datatype AProfEvent.ResizeE __resize_event =
@@ -230,17 +238,38 @@ int proc_file(string_t file, Fn::fn_t<aprof_event_t,bool,`H> callback) {
     }
 
     /********************************/
+    /* GC RECLAIM OBJECT event */
+    /********************************/
+    else if  (!strcmp(buf,"reclaim")) {
+      // set up the event
+      let &ReclaimE(ReclaimEvent(*addr)) = &__reclaim_event;
+      if (!gethex(f,addr)) {
+	fprintf(stderr,"failed to get address for %s\n",s);
+	return -1;
+      }
+      // invoke the handler
+      if (!Fn::apply(callback,&__reclaim_event)) {
+	fprintf(stderr,"callback failed for reclaim event at %s\n",s);
+	return -1;
+      }
+    }
+
+    /********************************/
     /* ALLOCATE INTO A REGION event */
     /********************************/
     else if (!strcmp(buf,"alloc")) {
       // set up the event
-      let &AllocE(AllocEvent(*loc,*rgn,*amt,*stats)) = &__alloc_event;
+      let &AllocE(AllocEvent(*loc,*rgn,*amt,*stats,*addr)) = &__alloc_event;
       if (!getint(f,amt)) {
 	fprintf(stderr,"failed to get alloc amount for %s\n",s);
 	return -1;
       }
       if (!get_region_stats(f, stats)) {
 	fprintf(stderr,"failed to get region stats for %s\n",s);
+	return -1;
+      }
+      if (!gethex(f, addr)) {
+	fprintf(stderr,"failed to get address for %s\n",s);
 	return -1;
       }
       *loc = s;
