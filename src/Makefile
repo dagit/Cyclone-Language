@@ -69,7 +69,8 @@ endif
 	$(RM) install_path.c install_path.$(O)
 
 install_path.c:
-	@(echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
+	@(echo "char *Carch = \"$(ARCH)\";"; \
+	  echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";") > $@
 
 src: $(addprefix $(OUT_PREFIX), $(C_SRCS))

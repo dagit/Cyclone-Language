@@ -76,6 +76,7 @@ static void set_output_file(string_t<`H> s) {
 extern "C" {
   extern Cstring Cdef_inc_path;
   extern Cstring Cdef_lib_path;
+  extern Cstring Carch;
 }
 
 static string_t cpp = "gcc -x c -E -U__GNUC__ -nostdinc";
@@ -501,8 +502,9 @@ static void process_file(string_t<`H> filename) {
     }
   else fixup_string = "";
 
-  let cmd = aprintf("%s%s%s %s%s%s",
-	            cpp, cppargs_string, stdinc_string,
+  string_t arch = Cstring_to_string(Carch);
+  let cmd = aprintf("%s '-D_PLATFORM_INCLUDES_=\"arch/%s.h\"'%s%s %s%s%s",
+	            cpp, arch, cppargs_string, stdinc_string,
                     sh_escape_string(filename),
                     fixup_string, ofile_string);
 
