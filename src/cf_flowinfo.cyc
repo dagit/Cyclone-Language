@@ -333,6 +333,21 @@ absRval_t<`r> typ_to_absrval(flow_env_t<`r> fenv, type_t t, absRval_t<`r> leafva
   return i_typ_to_absrval(fenv, true, t, leafval);
 }
 
+bool is_unique_consumed(exp_t e, int env_iteration, absRval_t<`r> r) {
+  switch (r) {
+  case &Consumed(consumer,iteration,r):
+    return !(consumer==e && iteration==env_iteration);
+  case &Aggregate(_,d):
+    let sz = numelts(d);
+    for (int i=0; i<sz; i++) {
+      if (is_unique_consumed(e,env_iteration,d[i]))
+	return true;
+    }
+    return false;
+  default: return false;
+  }
+}  
+
 absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, type_t t, exp_t consumer, int iteration, absRval_t<`r> r) {
   if (Tcutil::is_noalias_pointer(t)) 
     return rnew(fenv->r) Consumed(consumer,iteration,r);

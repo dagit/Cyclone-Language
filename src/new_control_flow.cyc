@@ -774,7 +774,12 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
         }
         Tcutil::terr(e->loc,"expression attempts to copy unique value that may be copied elsewhere.");
         return $(BottomFL(),fenv->unknown_all);
-      default: break;
+      default:
+	if (is_unique_consumed(e,env->iteration_num,old_rval)) {
+	  Tcutil::terr(e->loc,"expression attempts to copy unique value that may be copied elsewhere.");
+	  return $(BottomFL(),fenv->unknown_all);
+	}
+	break;
       }
       let new_rval = make_unique_consumed(fenv,e->topt->v,e,env->iteration_num,old_rval);
       let outdict = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
