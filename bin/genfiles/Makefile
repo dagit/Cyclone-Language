@@ -8,14 +8,17 @@ CYC_BIN_PATH=$(CYCDIR)/bin
 
 # general targets
 
-install: $(ARCH) install_lib install_comp
+install: $(ARCH) $(addprefix $(CYC_LIB_PATH)/, $(CYCLIB) nogc.a) $(CYC_BIN_PATH)/cyclone$(EXE)
 	if [ -f "$(ARCH).patch" ]; then $(RM) -rf $(ARCH); fi
-install_lib: $(ARCH)/lib/$(CYCLIB) $(ARCH)/lib/nogc.a
-	cp $^ $(CYC_LIB_PATH)
+$(CYC_LIB_PATH)/$(CYCLIB): $(ARCH)/lib/$(CYCLIB)
+	cp $< $@
+$(CYC_LIB_PATH)/nogc.a: $(ARCH)/lib/nogc.a
+	cp $< $@
+$(CYC_BIN_PATH)/cyclone$(EXE): $(ARCH)/src/cyclone$(EXE)
+	cp $< $@
+
 install_a: $(ARCH)/lib/libcyc_a.a
 	cp $^ $(CYC_LIB_PATH)
-install_comp: $(ARCH)/src/cyclone$(EXE)
-	cp $^ $(CYC_BIN_PATH)
 
 # architecture-specific targets
 
