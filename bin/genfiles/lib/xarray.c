@@ -1,7 +1,6 @@
 #include "cyc_include.h"
 
- struct _tagged_ptr0{ void** curr; void** base; void** last_plus_one; } ;
-typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
 unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
 typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
 unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
@@ -31,24 +30,25 @@ extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
 char* tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
 _tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
 struct _tagged_string Cstring_to_string( char*); extern int system( char*);
-struct Cyc_Xarray_Xarray{ struct _tagged_ptr0 elmts; int num_elmts; } ; typedef
-struct Cyc_Xarray_Xarray* Cyc_Xarray_xarray_t; extern int Cyc_Xarray_length(
-struct Cyc_Xarray_Xarray*); extern void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*,
-int); extern void Cyc_Xarray_set( struct Cyc_Xarray_Xarray*, int, void*); extern
-struct Cyc_Xarray_Xarray* Cyc_Xarray_create( int, void*); extern struct Cyc_Xarray_Xarray*
-Cyc_Xarray_create_empty(); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_singleton(
-int, void*); extern void Cyc_Xarray_add( struct Cyc_Xarray_Xarray*, void*);
-extern int Cyc_Xarray_add_ind( struct Cyc_Xarray_Xarray*, void*); extern struct
-_tagged_ptr0 Cyc_Xarray_to_array( struct Cyc_Xarray_Xarray*); extern struct Cyc_Xarray_Xarray*
-Cyc_Xarray_from_array( struct _tagged_ptr0 arr); extern struct Cyc_Xarray_Xarray*
-Cyc_Xarray_append( struct Cyc_Xarray_Xarray*, struct Cyc_Xarray_Xarray*); extern
-void Cyc_Xarray_app( void*(* f)( void*), struct Cyc_Xarray_Xarray*); extern void
-Cyc_Xarray_app_c( void*(* f)( void*, void*), void*, struct Cyc_Xarray_Xarray*);
-extern void Cyc_Xarray_iter( void(* f)( void*), struct Cyc_Xarray_Xarray*);
-extern void Cyc_Xarray_iter_c( void(* f)( void*, void*), void*, struct Cyc_Xarray_Xarray*);
-extern struct Cyc_Xarray_Xarray* Cyc_Xarray_map( void*(* f)( void*), struct Cyc_Xarray_Xarray*);
-extern struct Cyc_Xarray_Xarray* Cyc_Xarray_map_c( void*(* f)( void*, void*),
-void*, struct Cyc_Xarray_Xarray*); extern void Cyc_Xarray_reuse( struct Cyc_Xarray_Xarray*
+struct _tagged_ptr0{ void** curr; void** base; void** last_plus_one; } ; struct
+Cyc_Xarray_Xarray{ struct _tagged_ptr0 elmts; int num_elmts; } ; typedef struct
+Cyc_Xarray_Xarray* Cyc_Xarray_xarray_t; extern int Cyc_Xarray_length( struct Cyc_Xarray_Xarray*);
+extern void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray*, int); extern void Cyc_Xarray_set(
+struct Cyc_Xarray_Xarray*, int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create(
+int, void*); extern struct Cyc_Xarray_Xarray* Cyc_Xarray_create_empty(); extern
+struct Cyc_Xarray_Xarray* Cyc_Xarray_singleton( int, void*); extern void Cyc_Xarray_add(
+struct Cyc_Xarray_Xarray*, void*); extern int Cyc_Xarray_add_ind( struct Cyc_Xarray_Xarray*,
+void*); extern struct _tagged_ptr0 Cyc_Xarray_to_array( struct Cyc_Xarray_Xarray*);
+extern struct Cyc_Xarray_Xarray* Cyc_Xarray_from_array( struct _tagged_ptr0 arr);
+extern struct Cyc_Xarray_Xarray* Cyc_Xarray_append( struct Cyc_Xarray_Xarray*,
+struct Cyc_Xarray_Xarray*); extern void Cyc_Xarray_app( void*(* f)( void*),
+struct Cyc_Xarray_Xarray*); extern void Cyc_Xarray_app_c( void*(* f)( void*,
+void*), void*, struct Cyc_Xarray_Xarray*); extern void Cyc_Xarray_iter( void(* f)(
+void*), struct Cyc_Xarray_Xarray*); extern void Cyc_Xarray_iter_c( void(* f)(
+void*, void*), void*, struct Cyc_Xarray_Xarray*); extern struct Cyc_Xarray_Xarray*
+Cyc_Xarray_map( void*(* f)( void*), struct Cyc_Xarray_Xarray*); extern struct
+Cyc_Xarray_Xarray* Cyc_Xarray_map_c( void*(* f)( void*, void*), void*, struct
+Cyc_Xarray_Xarray*); extern void Cyc_Xarray_reuse( struct Cyc_Xarray_Xarray*
 xarr); int Cyc_Xarray_length( struct Cyc_Xarray_Xarray* xarr){ return xarr->num_elmts;}
 void* Cyc_Xarray_get( struct Cyc_Xarray_Xarray* xarr, int i){ if( i < 0? 1: i >=
 xarr->num_elmts){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct*

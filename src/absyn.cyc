@@ -56,12 +56,13 @@ type_t wildtyp() {
 }
 
 tqual_t combine_tqual(tqual_t x,tqual_t y) { 
-  return new Tqual(x->q_const    || y->q_const,
-                   x->q_volatile || y->q_volatile,
-                   x->q_restrict || y->q_restrict);
+  return Tqual(x.q_const    || y.q_const,
+	       x.q_volatile || y.q_volatile,
+	       x.q_restrict || y.q_restrict);
 }
 
-tqual_t empty_tqual() { return new Tqual(false,false,false); }
+// FIX: fit in an int (with bitfields) rather than doing allocation
+tqual_t empty_tqual() { return Tqual(false,false,false); }
 
 bool is_format_prim(primop_t p) {
   switch (p) {
@@ -155,6 +156,13 @@ type_t string_typ(type_t rgn) {
 }
 // pointers
 
+// a static &Upper_b(&Exp(null,&Const_e(&Int_c(Signed,1)),null))
+static tunion Cnst.Int_c      one_intc  = Int_c(Signed,1);
+static tunion Raw_exp.Const_e one_b_raw = Const_e(&one_intc);
+static struct Exp             one_be    = {null,&one_b_raw,null};
+static tunion Bounds.Upper_b  one_bt    = Upper_b(&one_be);
+static tunion Bounds          one_b     = &one_bt;
+
 type_t starb_typ(type_t t, type_t r, tqual_t tq, bounds_t b) {
   return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r,
                                      .nullable = true_conref, .tq = tq, 
@@ -167,13 +175,13 @@ type_t atb_typ(type_t t, type_t r, tqual_t tq, bounds_t b) {
 	 .bounds = new_conref(b)});
 }
 type_t star_typ(type_t t, type_t r, tqual_t tq) { 
-  return starb_typ(t, r, tq, new Upper_b(signed_int_exp(1,null)));
+  return starb_typ(t, r, tq, one_b);
 }
 type_t cstar_typ(type_t t, tqual_t tq) { 
-  return starb_typ(t, HeapRgn, tq, new Upper_b(signed_int_exp(1,null)));
+  return starb_typ(t, HeapRgn, tq, one_b);
 }
 type_t at_typ(type_t t, type_t r, tqual_t tq) {
-  return atb_typ(t, r, tq, new Upper_b(signed_int_exp(1,null)));
+  return atb_typ(t, r, tq, one_b);
 }
 type_t tagged_typ(type_t t, type_t r, tqual_t tq) {
   return 
@@ -254,7 +262,7 @@ exp_t false_exp(seg_t loc) { return bool_exp(false, loc); }
 exp_t char_exp(char c, seg_t loc) {
   return const_exp(new Char_c(Unsigned,c),loc);
 }
-exp_t float_exp(string f, seg_t loc) {return const_exp(new Float_c(f),loc);}
+exp_t float_exp(string f, seg_t loc) { return const_exp(new Float_c(f),loc);  }
 exp_t string_exp(string s, seg_t loc){ return const_exp(new String_c(s),loc); }
 
 // This should only be used after type checking.
@@ -446,12 +454,12 @@ decl_t let_decl(pat_t p, opt_t<type_t> t_opt, exp_t e, seg_t loc) {
 }
 vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
-                        .type=t, .initializer=init, .shadow=0, .rgn=null, 
+                        .type=t, .initializer=init, .rgn=null, 
                         .attributes=null};
 }
 vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
-                        .type=t, .initializer=init, .shadow=0, .rgn=null,
+                        .type=t, .initializer=init, .rgn=null,
                         .attributes=null};
 }
 decl_t struct_decl(scope_t s,opt_t<typedef_name_t> n,list_t<tvar_t> ts,

@@ -204,9 +204,9 @@ static stringptr const_sp = &const_string;
 doc_t tqual2doc(tqual_t tq) {
   list_t<stringptr> l = null;
 
-  if (tq->q_restrict) l = new List(restrict_sp,l);
-  if (tq->q_volatile) l = new List(volatile_sp,l);
-  if (tq->q_const)    l = new List(const_sp,l);
+  if (tq.q_restrict) l = new List(restrict_sp,l);
+  if (tq.q_volatile) l = new List(volatile_sp,l);
+  if (tq.q_const)    l = new List(const_sp,l);
   return egroup(""," "," ",List::map(textptr,l));
 }
 
@@ -684,18 +684,8 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   int myprec = exp_prec(e);
   doc_t s;
   switch (e->r) {
-  case &Const_e(c): s = cnst2doc(c); break;
-  case &Var_e(x,&Local_b(vd)):
-    s = qvar2doc(x);
-    //    if(vd->shadow > 0)
-    //  s = cat2(s,text(xprintf("%d",vd->shadow)));
-    break;
-  case &Var_e(x,&Pat_b(vd)):
-    s = qvar2doc(x);
-    //if(vd->shadow > 0)
-    //  s = cat2(s,text(xprintf("%d",vd->shadow)));
-    break;
-  case &Var_e(x,_):     s = qvar2doc(x); break;
+  case &Const_e(c):     s = cnst2doc(c); break;
+  case &Var_e(x,_):     fallthru(x);
   case &UnknownId_e(x): s = qvar2doc(x); break;
   case &Primop_e(p,es): s = primapp2doc(myprec,p,es); break;
   case &AssignOp_e(e1,popt,e2):
@@ -1377,7 +1367,7 @@ doc_t decl2doc(decl_t d) {
                                  fd->varargs, null});
     s = cat7(text(fd->is_inline? "inline " : ""),
              scope2doc(fd->sc),
-             tqtd2doc(new Tqual(false,false,false),t,
+             tqtd2doc(Tqual(false,false,false),t,
                       new Opt(cat2(atts2doc(fd->attributes),typedef_name2doc(fd->name)))),
              text(" {"),
              nest(2,cat2(line_doc(),stmt2doc(fd->body))),
@@ -1426,10 +1416,8 @@ doc_t decl2doc(decl_t d) {
                 text(";"));
     }
     break;
-  case &Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_,atts)):
+  case &Var_d(&Vardecl(sc,name,tq,type,initializer,_,atts)):
     doc_t sn = typedef_name2doc(name);
-    //    if(shadow_depth > 0)
-    //  sn = cat2(sn, text(xprintf("%d",shadow_depth)));
     s = cat5(scope2doc(sc),
              tqtd2doc(tq,type,new Opt(sn)),
              atts2doc(atts),
@@ -1485,7 +1473,7 @@ doc_t decl2doc(decl_t d) {
     break;
   case &Typedef_d(td):
     s = cat3(text("typedef "),
-             tqtd2doc(new Tqual(false,false,false),
+             tqtd2doc(Tqual(false,false,false),
                       td->defn,
                       new Opt(cat2(typedef_name2doc(td->name),tvars2doc(td->tvs)))),
              text(";"));

@@ -40,18 +40,17 @@ static type_t any_type(type_t *`r topt) {
     return *topt;
   return new_evar(MemKind);
 }
-// by setting to whatever topt is, unification will succeed.  And since
-// comparison between any two num types succeeds, this is fine (albeit kludgey)
-// FIX? Allow *topt to be an Enum ?
 static type_t num_type(type_t *`r topt, type_t numt) {
+  // by setting to whatever topt is, unification will succeed.  Because
+  // comparison between any two num types succeeds, this is fine (but kludgey)
+  // FIX:? Allow *topt to be an Enum ?
   if(topt != null && coerceable(*topt))
     return *topt;
   return numt;
 }
 static void set_vd(vardecl_t vd, list_t<vardecl_t>@`r v_result_ptr, type_t t){
-  vd->type   = t;
-  vd->tq     = empty_tqual();
-  vd->shadow = 0; // FIX?
+  vd->type = t;
+  vd->tq   = empty_tqual();
   *v_result_ptr = new List(vd,*v_result_ptr);
 }
 $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
@@ -74,8 +73,8 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       case &PointerType(_): t = *topt; goto tcpat_end;
       default: break;
       }
-    t = new PointerType(PtrInfo{new_evar(AnyKind),new_evar(RgnKind),
-				new_conref(true),empty_tqual(),empty_conref()});
+    t = new PointerType(PtrInfo(new_evar(AnyKind),new_evar(RgnKind),
+				new_conref(true),empty_tqual(),empty_conref()));
     break;
 
   case Wild_p:       
@@ -92,13 +91,13 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       break;
     }
     set_vd(vd, &v_result, 
-	   new PointerType(PtrInfo{t,*region_opt,new_conref(false),
-				     empty_tqual(),empty_conref()}));
+	   new PointerType(PtrInfo(t,*region_opt,new_conref(false),
+				     empty_tqual(),empty_conref())));
     break;
 
   case &Pointer_p(p2):
-    type_t inner_typ = VoidType;
-    let inner_topt = null;
+    type_t inner_typ  = VoidType;
+    let    inner_topt = null;
     if(topt != null)
       switch(compress(*topt)) {
       case &PointerType(PtrInfo(elt_typ,_,_,_,_)): 
@@ -266,7 +265,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       let $(sub_tvs,sub_vs) = tcPatRec(te2,p2,null,region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
-      _ field_typ = (*tqts->hd)[1];
+      let field_typ = (*tqts->hd)[1];
       if (!unify(p2->topt->v,field_typ))
         terr(p2->loc,
              xprintf("%s expects argument type %s, not %s",

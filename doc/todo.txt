@@ -4,6 +4,11 @@ BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * FIX all of the FIX things.
 
+* We rely on C to catch incomplete types, such as 
+  struct X {
+    struct X x;
+  };
+
 * Prevent using label H (induces region name `H).  Centralize the
   check that tyvars aren't `H.
 

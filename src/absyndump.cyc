@@ -26,7 +26,7 @@ extern void dumpexp_prec(int,exp_t);
 extern void dumppat(pat_t);
 extern void dumpstmt(stmt_t);
 extern void dumpdecl(decl_t);
-extern void dumptqtd(struct Tqual *, type_t, void f(`a), `a);
+extern void dumptqtd(tqual_t, type_t, void f(`a), `a);
 
 // really want to change this to char[] (need a control character for format
 // prims and the ability to cast to untagged (from Tagged requires Toc hlep,
@@ -135,9 +135,9 @@ void dumpqvar(qvar_t v) {
 }
 
 void dumptq(tqual_t tq) {
-  if(tq->q_restrict) dump("restrict");
-  if(tq->q_volatile) dump("volatile");
-  if(tq->q_const)    dump("const");
+  if(tq.q_restrict) dump("restrict");
+  if(tq.q_volatile) dump("volatile");
+  if(tq.q_const)    dump("const");
 }
 
 void dumpscope(scope_t sc) {
@@ -339,7 +339,7 @@ void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool varargs,
 }
 
 void dumptyp(type_t t) {
-  dumptqtd(null,t,ignore,0);
+  dumptqtd(Tqual(false,false,false),t,ignore,0);
 }
 
 void dumpdesignator(designator_t d) {
@@ -380,7 +380,6 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char('"'); dump_nospace(Absynpp::string_escape(s)); dump_char('"');
     break;
 
-    // FIX: w.r.t. shadowing???
   case &UnknownId_e(x): fallthru(x);
   case &Var_e(x,_):     dumpqvar(x); break;
 
@@ -735,7 +734,7 @@ void dumpdecl(decl_t d) {
     type_t t = new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                                  List::map(Absynpp::arg_mk_opt,fd->args), 
                                  fd->varargs, null});
-    dumptqtd(null,t,dump_atts_qvar,fd);
+    dumptqtd(Tqual(false,false,false),t,dump_atts_qvar,fd);
     dump_char('{');
     dumpstmt(fd->body);
     dump_char('}');
@@ -770,8 +769,7 @@ void dumpdecl(decl_t d) {
       dump(";");
     }
     break;
-  case &Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_,atts)):
-    // FIX: use shadow_depth information
+  case &Var_d(&Vardecl(sc,name,tq,type,initializer,_,atts)):
     dumpscope(sc);
     dumptqtd(tq,type,dumpqvar,name);
     dumpatts(atts);
@@ -823,7 +821,7 @@ void dumpdecl(decl_t d) {
     break;
   case &Typedef_d(td):
     dump("typedef");
-    dumptqtd(null,td->defn,dumptypedefname,td);
+    dumptqtd(Tqual(false,false,false),td->defn,dumptypedefname,td);
     dump_semi();
     break;
   case &Namespace_d(v,tdl):
@@ -911,11 +909,7 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
   }
 }
 
-static struct Tqual empty_tq_v = Tqual{false,false,false};
-static tqual_t empty_tq = &empty_tq_v;
-void dumptqtd(struct Tqual * tq, type_t t, void f(`a), `a a) {
-  if(tq == null)
-    tq = empty_tq;
+void dumptqtd(tqual_t tq, type_t t, void f(`a), `a a) {
   let $(tq,t,tms) = Absynpp::to_tms((tqual_t)tq,t);
   dumptq(tq);
   dumpntyp(t);

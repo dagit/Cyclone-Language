@@ -1,15 +1,14 @@
 #include "cyc_include.h"
 
- struct _tuple0{ void* f1; void* f2; } ; typedef int Cyc_ptrdiff_t; typedef
-unsigned int Cyc_size_t; typedef unsigned short Cyc_wchar_t; typedef
-unsigned int Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short Cyc_u_short;
-typedef unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef
-unsigned short Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int
-Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int
-tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec
-it_value; } ; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
+typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
+unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
+Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
+typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
 typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
 typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
 unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
@@ -68,18 +67,18 @@ d); extern void Cyc_SlowDict_iter_c( void(* f)( void*, void*, void*), void* env,
 struct Cyc_SlowDict_Dict* d); extern struct Cyc_SlowDict_Dict* Cyc_SlowDict_map(
 void*(* f)( void*), struct Cyc_SlowDict_Dict* d); extern struct Cyc_SlowDict_Dict*
 Cyc_SlowDict_map_c( void*(* f)( void*, void*), void* env, struct Cyc_SlowDict_Dict*
-d); extern struct _tuple0* Cyc_SlowDict_choose( struct Cyc_SlowDict_Dict* d);
-extern struct Cyc_List_List* Cyc_SlowDict_to_list( struct Cyc_SlowDict_Dict* d);
-char Cyc_SlowDict_Absent_tag[ 7u]="Absent"; char Cyc_SlowDict_Present_tag[ 8u]="Present";
-struct Cyc_SlowDict_Dict{ int(* reln)( void*, void*); void* tree; } ; struct Cyc_SlowDict_Dict*
-Cyc_SlowDict_empty( int(* comp)( void*, void*)){ void* t=( void*) Cyc_Splay_Leaf;
-return({ struct Cyc_SlowDict_Dict* _temp0=( struct Cyc_SlowDict_Dict*) GC_malloc(
-sizeof( struct Cyc_SlowDict_Dict)); _temp0->reln= comp; _temp0->tree=( void*) t;
-_temp0;});} int Cyc_SlowDict_is_empty( struct Cyc_SlowDict_Dict* d){ void*
-_temp1=( void*) d->tree; struct Cyc_Splay_noderef* _temp7; _LL3: if(( int)
-_temp1 == Cyc_Splay_Leaf){ goto _LL4;} else{ goto _LL5;} _LL5: if(( unsigned int)
-_temp1 > 1u?(( struct _tunion_struct*) _temp1)->tag == Cyc_Splay_Node_tag: 0){
-_LL8: _temp7=( struct Cyc_Splay_noderef*)(( struct Cyc_Splay_Node_struct*)
+d); struct _tuple0{ void* f1; void* f2; } ; extern struct _tuple0* Cyc_SlowDict_choose(
+struct Cyc_SlowDict_Dict* d); extern struct Cyc_List_List* Cyc_SlowDict_to_list(
+struct Cyc_SlowDict_Dict* d); char Cyc_SlowDict_Absent_tag[ 7u]="Absent"; char
+Cyc_SlowDict_Present_tag[ 8u]="Present"; struct Cyc_SlowDict_Dict{ int(* reln)(
+void*, void*); void* tree; } ; struct Cyc_SlowDict_Dict* Cyc_SlowDict_empty( int(*
+comp)( void*, void*)){ void* t=( void*) Cyc_Splay_Leaf; return({ struct Cyc_SlowDict_Dict*
+_temp0=( struct Cyc_SlowDict_Dict*) GC_malloc( sizeof( struct Cyc_SlowDict_Dict));
+_temp0->reln= comp; _temp0->tree=( void*) t; _temp0;});} int Cyc_SlowDict_is_empty(
+struct Cyc_SlowDict_Dict* d){ void* _temp1=( void*) d->tree; struct Cyc_Splay_noderef*
+_temp7; _LL3: if(( int) _temp1 == Cyc_Splay_Leaf){ goto _LL4;} else{ goto _LL5;}
+_LL5: if(( unsigned int) _temp1 > 1u?(( struct _tunion_struct*) _temp1)->tag ==
+Cyc_Splay_Node_tag: 0){ _LL8: _temp7=( struct Cyc_Splay_noderef*)(( struct Cyc_Splay_Node_struct*)
 _temp1)->f1; goto _LL6;} else{ goto _LL2;} _LL4: return 1; _LL6: return 0; _LL2:;}
 int Cyc_SlowDict_member( struct Cyc_SlowDict_Dict* d, void* key){ return(( int(*)(
 int(* f)( void*, void*), void*, void*)) Cyc_Splay_splay)( d->reln, key,( void*)

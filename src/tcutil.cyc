@@ -228,16 +228,16 @@ static void unify_list(list_t<type_t> t1, list_t<type_t> t2) {
 
 // unify two type qualifiers -- throws Unify unless they are the same
 static void unify_tqual(tqual_t tq1, tqual_t tq2) {
-  if ((tq1->q_const != tq2->q_const)    
-      || (tq1->q_volatile != tq2->q_volatile) 
-      || (tq1->q_restrict != tq2->q_restrict))
+  if ((tq1.q_const != tq2.q_const)    
+      || (tq1.q_volatile != tq2.q_volatile) 
+      || (tq1.q_restrict != tq2.q_restrict))
     throw new Unify;
 }
 
 bool equal_tqual(tqual_t tq1, tqual_t tq2) {
-  return ((tq1->q_const == tq2->q_const) 
-	  && (tq1->q_volatile == tq2->q_volatile) 
-	  && (tq1->q_restrict == tq2->q_restrict));
+  return ((tq1.q_const == tq2.q_const) 
+	  && (tq1.q_volatile == tq2.q_volatile) 
+	  && (tq1.q_restrict == tq2.q_restrict));
 }
 
 // unify two constraint refs
@@ -887,7 +887,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     }
     return (okay && unify(pinfo_a.elt_typ,pinfo_b.elt_typ) &&
 	    unify(pinfo_a.rgn_typ,pinfo_b.rgn_typ) &&
-	    (!pinfo_a.tq->q_const || pinfo_b.tq->q_const));
+	    (!pinfo_a.tq.q_const || pinfo_b.tq.q_const));
 
   case $(&ArrayType(t1a,tq1a,e1),&ArrayType(t2a,tq2a,e2)):
     bool okay;
@@ -896,7 +896,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
       (e1 != null && e2 != null &&
        Evexp::eval_const_uint_exp((exp_t)e1) ==
        Evexp::eval_const_uint_exp((exp_t)e2));
-    return (okay && unify(t1a,t2a) && (!tq1a->q_const || tq2a->q_const));
+    return (okay && unify(t1a,t2a) && (!tq1a.q_const || tq2a.q_const));
 
   // can cast a TunionFieldType to a TunionType if the field doesn't 
   // carry values.
@@ -1102,7 +1102,7 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@> assume, type_t t1, type
     case $(&PointerType(PtrInfo{t_a, rt_a, null_a, q_a, b_a}),
 	   &PointerType(PtrInfo{t_b, rt_b, null_b, q_b, b_b})):
     // if t1 is const then t2 must be const
-    if (q_a->q_const && !q_b->q_const) 
+    if (q_a.q_const && !q_b.q_const) 
       return false;
     // if t1 is * then t2 must be *
     if (!unify_conrefs(intcmp,null_a,null_b) 
@@ -1143,7 +1143,7 @@ static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@> assume, type_t t1, t
     if (tqs1 == null) return false;
     let &$(tq1,t1a) = tqs1->hd;
     let &$(tq2,t2a) = tqs2->hd;
-    if (tq2->q_const && subtype(te,assume,t1a,t2a)) continue;
+    if (tq2.q_const && subtype(te,assume,t1a,t2a)) continue;
     else if (unify(t1a,t2a)) continue;
     else return false;
   }
@@ -1183,7 +1183,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     case &PointerType(PtrInfo{t_b,rt_b,null_b,q_b,b_b}):
       let assump = new List(new $(t1,t2),null);
       let ptrsub =
-	ptrsubtype(te,assump,t_a,t_b) && (!q_a->q_const || q_b->q_const);
+	ptrsubtype(te,assump,t_a,t_b) && (!q_a.q_const || q_b.q_const);
       bool bounds_ok = unify_conrefs(boundscmp,b_a,b_b);
       if (!bounds_ok) {
 	switch ($(conref_val(b_a),conref_val(b_b))) {
@@ -1209,7 +1209,7 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
         (e1 != null && e2 != null && 
          Evexp::eval_const_uint_exp((exp_t)e1) >= 
          Evexp::eval_const_uint_exp((exp_t)e2));
-      return (okay && unify(t1a,t2a) && (!tq1a->q_const || tq2a->q_const));
+      return (okay && unify(t1a,t2a) && (!tq1a.q_const || tq2a.q_const));
     default: return false;
     }
     return false;
@@ -1406,7 +1406,11 @@ type_t fndecl2typ(fndecl_t fd) {
   return (fd->cached_typ->v);
 }
 
-static `a fst3($(`a,`b,`c)@ t) { return (*t)[0]; }
+static `a fst_fdarg($(`a,tqual_t,`c)@`r t)    { return (*t)[0]; }
+type_t snd_tqt($(tqual_t,type_t)@`r t) { return (*t)[1]; }
+static $(tqual_t,type_t)@ map2_tq($(tqual_t,type_t)@`r1 pr, type_t t) {
+  return new $((*pr)[0],t);
+}
 // Check that the function declaration has a valid type:  all
 // we do is build a FnType and then check that it is well-formed
 // which has the side effect of giving us the effect and any
@@ -1424,7 +1428,7 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   };
   // check for repeated paramater names (not allowed in C and makes no sense)
   region r {
-    check_unique_vars(rmap(r,fst3,fd->args), loc, 
+    check_unique_vars(rmap(r,fst_fdarg,fd->args), loc, 
 		      "function declaration has repeated parameter");
   }
   // cache the type on the declaration so we don't have to recompute it
@@ -1504,11 +1508,11 @@ type_t rsubstitute(region_t<`r> rgn,
     return 
       new FnType(FnInfo{vs,eff2,rsubstitute(rgn,inst,rtyp),args2,varargs,atts});
   case &TupleType(tqts):
-    let $(tqs,ts) = List::rsplit(rgn,rgn,tqts);
-    let ts2       = substs(rgn,inst,ts);
+    let ts  = List::rmap(rgn,snd_tqt,tqts);
+    let ts2 = substs(rgn,inst,ts);
     if(ts2 == ts)
       return t;
-    let tqts2     = List::zip(tqs,ts2);
+    let tqts2 = List::map2(map2_tq,tqts,ts2);
     return new TupleType(tqts2);
   case &Evar(_,r,_):
     if (r != null) return rsubstitute(rgn,inst,r->v);
@@ -2228,15 +2232,15 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       switch (compress(e->topt->v)) {
 	// arrays cannot be modified
       case &ArrayType(_,_,_): return $(true, HeapRgn);
-      default: return $(vd->tq->q_const,HeapRgn);
+      default: return $(vd->tq.q_const,HeapRgn);
       }
     case &Local_b(vd):  
       switch (compress(e->topt->v)) {
       case &ArrayType(_,_,_): return $(true, vd->rgn->v);
-      default: return $(vd->tq->q_const, vd->rgn->v);
+      default: return $(vd->tq.q_const, vd->rgn->v);
       }
     case &Pat_b(vd):   fallthru(vd);
-    case &Param_b(vd): return $(vd->tq->q_const, vd->rgn->v);
+    case &Param_b(vd): return $(vd->tq.q_const, vd->rgn->v);
     }
   case &StructMember_e(e1,f):
     // we have an unboxed thing, so we inherit e2's region
@@ -2245,12 +2249,12 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     case &StructType(_,_,&sd):
       let finfo = lookup_struct_field(sd,f);
       if(finfo != null && finfo->width != null)
-	return $(finfo->tq->q_const, addressof_props(te,e1)[1]);
+	return $(finfo->tq.q_const, addressof_props(te,e1)[1]);
       return bogus_ans;
     case &UnionType(_,_,&ud):
       let finfo = lookup_union_field(ud,f);
       if (finfo != null)
-        return $(finfo->tq->q_const, addressof_props(te,e1)[1]);
+        return $(finfo->tq.q_const, addressof_props(te,e1)[1]);
       fallthru;
     default: return bogus_ans;
     }
@@ -2263,12 +2267,12 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       case &StructType(_,_,&sd):
 	let finfo = lookup_struct_field(sd,f);
 	if(finfo != null && finfo->width != null)
-	  return $(finfo->tq->q_const, r);
+	  return $(finfo->tq.q_const, r);
 	return bogus_ans;
       case &UnionType(_,_,&ud):
 	let finfo = lookup_union_field(ud,f);
 	if(finfo != null)
-	  return $(finfo->tq->q_const, r);
+	  return $(finfo->tq.q_const, r);
 	return bogus_ans;
       default: return bogus_ans;
       }
@@ -2278,7 +2282,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     // we have a boxed thing, so the region is in the pointer-type.
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{_,r,_,tq,_}): 
-      return $(tq->q_const, r); // FIX: is tq set correctly?
+      return $(tq.q_const, r); // FIX: is tq set correctly?
     default: return bogus_ans;
     }
 
@@ -2294,16 +2298,16 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       // promoted e1 to a pointer.
       // NOTE: Unlike C, we cannot allow any e1 -- it must be an lvalue.
       // (C doesn't need to know the region and we do!)
-      return $(tq->q_const, addressof_props(te,e1)[1]);
+      return $(tq.q_const, addressof_props(te,e1)[1]);
     case &TupleType(ts):
       // We need an lvalue in this unboxed case whereas "C w/ tuples" wouldn't.
       let finfo = lookup_tuple_field(ts,Evexp::eval_const_uint_exp(e2));
       if(finfo != null)
-	return $((*finfo)[0]->q_const, addressof_props(te,e1)[1]);
+	return $((*finfo)[0].q_const, addressof_props(te,e1)[1]);
       return bogus_ans;
 
     case &PointerType(PtrInfo{t2,r,_,tq,b}): 
-      return $(tq->q_const,r);
+      return $(tq.q_const,r);
     default: return bogus_ans;
     }
   default: 

@@ -1328,9 +1328,9 @@ kind:
 ;
 
 type_qualifier:
-  CONST    { $$=^$(new Tqual(true,false,false)); }
-| VOLATILE { $$=^$(new Tqual(false,true,false)); }
-| RESTRICT { $$=^$(new Tqual(false,false,true)); }
+  CONST    { $$=^$(Tqual(true,false,false)); }
+| VOLATILE { $$=^$(Tqual(false,true,false)); }
+| RESTRICT { $$=^$(Tqual(false,false,true)); }
 ;
 
 /* parsing of enum specifiers */
@@ -1811,8 +1811,8 @@ array_initializer:
     { let vd = new_vardecl(new $((nmspace_t)Loc_n,new {$3}), uint_t,
                            uint_exp(0,LOC(@3,@3)));
       // make the index variable const
-      vd->tq = new Tqual{.q_const = true, .q_volatile = false, 
-                         .q_restrict = true};
+      vd->tq = Tqual{.q_const = true, .q_volatile = false, 
+		     .q_restrict = true};
       $$=^$(new_exp(new Comprehension_e(vd, $5, $7),LOC(@1,@8))); 
     }
 

@@ -44,12 +44,9 @@ int ptrcmp(`a::M @ `r a, `a @ `r b) {
   return -1;
 }
 
-`a fst($(`a,`b) @`r pair) { return((*pair)[0]); }
-`b snd($(`a,`b) @`r pair) { return((*pair)[1]); }
-
-`c third($(`a,`b,`c) @`r triple) {
-  return((*triple)[2]);
-}
+`a fst($(`a,`b) @`r pair) { return (*pair)[0]; }
+`b snd($(`a,`b) @`r pair) { return (*pair)[1]; }
+`c third($(`a,`b,`c) @`r triple) { return (*triple)[2];}
 
 `a identity(`a x) {
   return x;

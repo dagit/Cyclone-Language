@@ -1,10 +1,6 @@
 #include "cyc_include.h"
 
- struct _tuple0{ struct Cyc_List_List* f1; struct Cyc_List_List* f2; } ; struct
-_tuple1{ struct Cyc_List_List* f1; struct Cyc_List_List* f2; struct Cyc_List_List*
-f3; } ; struct _tagged_ptr0{ void** curr; void** base; void** last_plus_one; } ;
-struct _tuple2{ void* f1; void* f2; } ; struct _tuple3{ void* f1; void* f2; void*
-f3; } ; typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
 unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
 typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
 unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
@@ -96,19 +92,22 @@ int(* pred)( void*), struct Cyc_List_List* x); extern int Cyc_List_exists_c( int
 pred)( void*, void*), void* env, struct Cyc_List_List* x); extern struct Cyc_List_List*
 Cyc_List_zip( struct Cyc_List_List* x, struct Cyc_List_List* y); extern struct
 Cyc_List_List* Cyc_List_rzip( struct _RegionHandle* r3, struct _RegionHandle* r4,
-struct Cyc_List_List* x, struct Cyc_List_List* y); extern struct _tuple0 Cyc_List_split(
-struct Cyc_List_List* x); extern struct _tuple1 Cyc_List_split3( struct Cyc_List_List*
-x); extern struct _tuple0 Cyc_List_rsplit( struct _RegionHandle* r3, struct
-_RegionHandle* r4, struct Cyc_List_List* x); extern struct _tuple1 Cyc_List_rsplit3(
-struct _RegionHandle* r3, struct _RegionHandle* r4, struct _RegionHandle* r5,
-struct Cyc_List_List* x); extern int Cyc_List_memq( struct Cyc_List_List* l,
-void* x); extern int Cyc_List_mem( int(* compare)( void*, void*), struct Cyc_List_List*
-l, void* x); extern void* Cyc_List_assoc( struct Cyc_List_List* l, void* x);
-extern void* Cyc_List_assoc_cmp( int(* compare)( void*, void*), struct Cyc_List_List*
-l, void* x); extern int Cyc_List_mem_assoc( struct Cyc_List_List* l, void* x);
-extern struct Cyc_Core_Opt* Cyc_List_check_unique( int(* compare)( void*, void*),
-struct Cyc_List_List* x); extern struct _tagged_ptr0 Cyc_List_to_array( struct
-Cyc_List_List* x); extern struct _tagged_ptr0 Cyc_List_rto_array( struct
+struct Cyc_List_List* x, struct Cyc_List_List* y); struct _tuple0{ struct Cyc_List_List*
+f1; struct Cyc_List_List* f2; } ; extern struct _tuple0 Cyc_List_split( struct
+Cyc_List_List* x); struct _tuple1{ struct Cyc_List_List* f1; struct Cyc_List_List*
+f2; struct Cyc_List_List* f3; } ; extern struct _tuple1 Cyc_List_split3( struct
+Cyc_List_List* x); extern struct _tuple0 Cyc_List_rsplit( struct _RegionHandle*
+r3, struct _RegionHandle* r4, struct Cyc_List_List* x); extern struct _tuple1
+Cyc_List_rsplit3( struct _RegionHandle* r3, struct _RegionHandle* r4, struct
+_RegionHandle* r5, struct Cyc_List_List* x); extern int Cyc_List_memq( struct
+Cyc_List_List* l, void* x); extern int Cyc_List_mem( int(* compare)( void*, void*),
+struct Cyc_List_List* l, void* x); extern void* Cyc_List_assoc( struct Cyc_List_List*
+l, void* x); extern void* Cyc_List_assoc_cmp( int(* compare)( void*, void*),
+struct Cyc_List_List* l, void* x); extern int Cyc_List_mem_assoc( struct Cyc_List_List*
+l, void* x); extern struct Cyc_Core_Opt* Cyc_List_check_unique( int(* compare)(
+void*, void*), struct Cyc_List_List* x); struct _tagged_ptr0{ void** curr; void**
+base; void** last_plus_one; } ; extern struct _tagged_ptr0 Cyc_List_to_array(
+struct Cyc_List_List* x); extern struct _tagged_ptr0 Cyc_List_rto_array( struct
 _RegionHandle* r2, struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_from_array(
 struct _tagged_ptr0 arr); extern struct Cyc_List_List* Cyc_List_rfrom_array(
 struct _RegionHandle* r2, struct _tagged_ptr0 arr); extern struct Cyc_List_List*
@@ -479,13 +478,14 @@ return x != 0;} int Cyc_List_exists_c( int(* pred)( void*, void*), void* env,
 struct Cyc_List_List* x){ while( x != 0? ! pred( env,( void*)({ struct Cyc_List_List*
 _temp158= x; if( _temp158 == 0){ _throw( Null_Exception);} _temp158->hd;})): 0) {
 x=({ struct Cyc_List_List* _temp159= x; if( _temp159 == 0){ _throw(
-Null_Exception);} _temp159->tl;});} return x != 0;} struct Cyc_List_List* Cyc_List_rzip(
-struct _RegionHandle* r3, struct _RegionHandle* r4, struct Cyc_List_List* x,
-struct Cyc_List_List* y){ struct Cyc_List_List* result; struct Cyc_List_List*
-prev; if( x == 0? y == 0: 0){ return 0;} if( x == 0? 1: y == 0){( void) _throw((
-struct _xtunion_struct*)({ struct Cyc_List_List_mismatch_struct* _temp160=(
-struct Cyc_List_List_mismatch_struct*) GC_malloc( sizeof( struct Cyc_List_List_mismatch_struct));
-_temp160[ 0]=({ struct Cyc_List_List_mismatch_struct _temp161; _temp161.tag= Cyc_List_List_mismatch_tag;
+Null_Exception);} _temp159->tl;});} return x != 0;} struct _tuple2{ void* f1;
+void* f2; } ; struct Cyc_List_List* Cyc_List_rzip( struct _RegionHandle* r3,
+struct _RegionHandle* r4, struct Cyc_List_List* x, struct Cyc_List_List* y){
+struct Cyc_List_List* result; struct Cyc_List_List* prev; if( x == 0? y == 0: 0){
+return 0;} if( x == 0? 1: y == 0){( void) _throw(( struct _xtunion_struct*)({
+struct Cyc_List_List_mismatch_struct* _temp160=( struct Cyc_List_List_mismatch_struct*)
+GC_malloc( sizeof( struct Cyc_List_List_mismatch_struct)); _temp160[ 0]=({
+struct Cyc_List_List_mismatch_struct _temp161; _temp161.tag= Cyc_List_List_mismatch_tag;
 _temp161;}); _temp160;}));} result=({ struct Cyc_List_List* _temp162=( struct
 Cyc_List_List*) _region_malloc( r3, sizeof( struct Cyc_List_List)); _temp162->hd=(
 void*)({ struct _tuple2* _temp163=( struct _tuple2*) _region_malloc( r4, sizeof(
@@ -552,12 +552,13 @@ struct _tuple0 _temp201; _temp201.f1= result1; _temp201.f2= result2; _temp201;})
 struct _tuple0 Cyc_List_split( struct Cyc_List_List* x){ return(( struct _tuple0(*)(
 struct _RegionHandle* r3, struct _RegionHandle* r4, struct Cyc_List_List* x))
 Cyc_List_rsplit)( Cyc_Core_heap_region, Cyc_Core_heap_region, x);} struct
-_tuple1 Cyc_List_rsplit3( struct _RegionHandle* r3, struct _RegionHandle* r4,
-struct _RegionHandle* r5, struct Cyc_List_List* x){ struct Cyc_List_List*
-result1; struct Cyc_List_List* prev1; struct Cyc_List_List* result2; struct Cyc_List_List*
-prev2; struct Cyc_List_List* result3; struct Cyc_List_List* prev3; if( x == 0){
-return({ struct _tuple1 _temp202; _temp202.f1= 0; _temp202.f2= 0; _temp202.f3= 0;
-_temp202;});} prev1=( result1=({ struct Cyc_List_List* _temp203=( struct Cyc_List_List*)
+_tuple3{ void* f1; void* f2; void* f3; } ; struct _tuple1 Cyc_List_rsplit3(
+struct _RegionHandle* r3, struct _RegionHandle* r4, struct _RegionHandle* r5,
+struct Cyc_List_List* x){ struct Cyc_List_List* result1; struct Cyc_List_List*
+prev1; struct Cyc_List_List* result2; struct Cyc_List_List* prev2; struct Cyc_List_List*
+result3; struct Cyc_List_List* prev3; if( x == 0){ return({ struct _tuple1
+_temp202; _temp202.f1= 0; _temp202.f2= 0; _temp202.f3= 0; _temp202;});} prev1=(
+result1=({ struct Cyc_List_List* _temp203=( struct Cyc_List_List*)
 _region_malloc( r3, sizeof( struct Cyc_List_List)); _temp203->hd=( void*)({
 struct _tuple3* _temp205=( struct _tuple3*)({ struct Cyc_List_List* _temp204= x;
 if( _temp204 == 0){ _throw( Null_Exception);} _temp204->hd;}); unsigned int

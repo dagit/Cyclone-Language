@@ -1,15 +1,14 @@
 #include "cyc_include.h"
 
- struct _tuple0{ void* f1; struct Cyc_Splay_noderef* f2; } ; typedef int Cyc_ptrdiff_t;
-typedef unsigned int Cyc_size_t; typedef unsigned short Cyc_wchar_t; typedef
-unsigned int Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short Cyc_u_short;
-typedef unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef
-unsigned short Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int
-Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int
-tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec
-it_value; } ; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
+typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
+unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
+Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
+typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
 typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
 typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
 unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
@@ -91,14 +90,15 @@ _temp30[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp31; _temp31.tag= Cyc_Core_
 _temp31.f1=( struct _tagged_string)({ char* _temp32=( char*)"Splay::rotate_right";
 struct _tagged_string _temp33; _temp33.curr= _temp32; _temp33.base= _temp32;
 _temp33.last_plus_one= _temp32 + 20; _temp33;}); _temp31;}); _temp30;})); _LL18:;}
-static void Cyc_Splay_lift( struct Cyc_List_List* dnl){ while( dnl != 0) { if(({
-struct Cyc_List_List* _temp34= dnl; if( _temp34 == 0){ _throw( Null_Exception);}
-_temp34->tl;}) == 0){{ struct _tuple0* _temp36=( struct _tuple0*)({ struct Cyc_List_List*
-_temp35= dnl; if( _temp35 == 0){ _throw( Null_Exception);} _temp35->hd;});
-struct _tuple0 _temp42; struct Cyc_Splay_noderef* _temp43; void* _temp45; struct
-_tuple0 _temp47; struct Cyc_Splay_noderef* _temp48; void* _temp50; _LL38:
-_temp42=* _temp36; _LL46: _temp45= _temp42.f1; if(( int) _temp45 == Cyc_Splay_LEFT){
-goto _LL44;} else{ goto _LL40;} _LL44: _temp43= _temp42.f2; goto _LL39; _LL40:
+struct _tuple0{ void* f1; struct Cyc_Splay_noderef* f2; } ; static void Cyc_Splay_lift(
+struct Cyc_List_List* dnl){ while( dnl != 0) { if(({ struct Cyc_List_List*
+_temp34= dnl; if( _temp34 == 0){ _throw( Null_Exception);} _temp34->tl;}) == 0){{
+struct _tuple0* _temp36=( struct _tuple0*)({ struct Cyc_List_List* _temp35= dnl;
+if( _temp35 == 0){ _throw( Null_Exception);} _temp35->hd;}); struct _tuple0
+_temp42; struct Cyc_Splay_noderef* _temp43; void* _temp45; struct _tuple0
+_temp47; struct Cyc_Splay_noderef* _temp48; void* _temp50; _LL38: _temp42=*
+_temp36; _LL46: _temp45= _temp42.f1; if(( int) _temp45 == Cyc_Splay_LEFT){ goto
+_LL44;} else{ goto _LL40;} _LL44: _temp43= _temp42.f2; goto _LL39; _LL40:
 _temp47=* _temp36; _LL51: _temp50= _temp47.f1; if(( int) _temp50 == Cyc_Splay_RIGHT){
 goto _LL49;} else{ goto _LL37;} _LL49: _temp48= _temp47.f2; goto _LL41; _LL39:((
 void(*)( struct Cyc_Splay_noderef* nr)) Cyc_Splay_rotate_left)( _temp43); goto

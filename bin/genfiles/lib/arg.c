@@ -1,17 +1,14 @@
 #include "cyc_include.h"
 
- struct _tagged_ptr0{ struct _tagged_string* curr; struct _tagged_string* base;
-struct _tagged_string* last_plus_one; } ; struct _tuple0{ struct _tagged_string
-f1; void* f2; struct _tagged_string f3; } ; typedef int Cyc_ptrdiff_t; typedef
-unsigned int Cyc_size_t; typedef unsigned short Cyc_wchar_t; typedef
-unsigned int Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short Cyc_u_short;
-typedef unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef
-unsigned short Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int
-Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int
-tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec
-it_value; } ; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
+typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
+unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
+Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
+typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
 typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
 typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
 unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
@@ -56,23 +53,26 @@ int tag; void(* f1)( struct _tagged_string); } ; static const int Cyc_Arg_Int_sp
 int Cyc_Arg_Rest_spec_tag= 5; struct Cyc_Arg_Rest_spec_struct{ int tag; void(*
 f1)( struct _tagged_string); } ; typedef void* Cyc_Arg_gspec_t; typedef void*
 Cyc_Arg_spec_t; extern void Cyc_Arg_usage( struct Cyc_List_List*, struct
-_tagged_string); extern int Cyc_Arg_current; extern void Cyc_Arg_parse( struct
-Cyc_List_List* specs, void(* anonfun)( struct _tagged_string), struct
-_tagged_string errmsg, struct _tagged_ptr0 args); char Cyc_Arg_Error_tag[ 6u]="Error";
-char Cyc_Arg_Bad_tag[ 4u]="Bad"; typedef void* Cyc_Arg_error; static const int
-Cyc_Arg_Unknown_tag= 0; struct Cyc_Arg_Unknown_struct{ int tag; struct
-_tagged_string f1; } ; static const int Cyc_Arg_Missing_tag= 1; struct Cyc_Arg_Missing_struct{
-int tag; struct _tagged_string f1; } ; static const int Cyc_Arg_Message_tag= 2;
-struct Cyc_Arg_Message_struct{ int tag; struct _tagged_string f1; } ; static
-const int Cyc_Arg_Wrong_tag= 3; struct Cyc_Arg_Wrong_struct{ int tag; struct
-_tagged_string f1; struct _tagged_string f2; struct _tagged_string f3; } ;
-static void* Cyc_Arg_lookup( struct Cyc_List_List* l, struct _tagged_string x){
-while( l != 0) { if( Cyc_String_strcmp( x,(*(( struct _tuple0*)({ struct Cyc_List_List*
-_temp0= l; if( _temp0 == 0){ _throw( Null_Exception);} _temp0->hd;}))).f1) == 0){
-return(*(( struct _tuple0*)({ struct Cyc_List_List* _temp1= l; if( _temp1 == 0){
-_throw( Null_Exception);} _temp1->hd;}))).f2;} l=({ struct Cyc_List_List* _temp2=
-l; if( _temp2 == 0){ _throw( Null_Exception);} _temp2->tl;});}( void) _throw((
-struct _xtunion_struct*)({ struct Cyc_Core_Not_found_struct* _temp3=( struct Cyc_Core_Not_found_struct*)
+_tagged_string); extern int Cyc_Arg_current; struct _tagged_ptr0{ struct
+_tagged_string* curr; struct _tagged_string* base; struct _tagged_string*
+last_plus_one; } ; extern void Cyc_Arg_parse( struct Cyc_List_List* specs, void(*
+anonfun)( struct _tagged_string), struct _tagged_string errmsg, struct
+_tagged_ptr0 args); char Cyc_Arg_Error_tag[ 6u]="Error"; char Cyc_Arg_Bad_tag[ 4u]="Bad";
+typedef void* Cyc_Arg_error; static const int Cyc_Arg_Unknown_tag= 0; struct Cyc_Arg_Unknown_struct{
+int tag; struct _tagged_string f1; } ; static const int Cyc_Arg_Missing_tag= 1;
+struct Cyc_Arg_Missing_struct{ int tag; struct _tagged_string f1; } ; static
+const int Cyc_Arg_Message_tag= 2; struct Cyc_Arg_Message_struct{ int tag; struct
+_tagged_string f1; } ; static const int Cyc_Arg_Wrong_tag= 3; struct Cyc_Arg_Wrong_struct{
+int tag; struct _tagged_string f1; struct _tagged_string f2; struct
+_tagged_string f3; } ; struct _tuple0{ struct _tagged_string f1; void* f2;
+struct _tagged_string f3; } ; static void* Cyc_Arg_lookup( struct Cyc_List_List*
+l, struct _tagged_string x){ while( l != 0) { if( Cyc_String_strcmp( x,(*((
+struct _tuple0*)({ struct Cyc_List_List* _temp0= l; if( _temp0 == 0){ _throw(
+Null_Exception);} _temp0->hd;}))).f1) == 0){ return(*(( struct _tuple0*)({
+struct Cyc_List_List* _temp1= l; if( _temp1 == 0){ _throw( Null_Exception);}
+_temp1->hd;}))).f2;} l=({ struct Cyc_List_List* _temp2= l; if( _temp2 == 0){
+_throw( Null_Exception);} _temp2->tl;});}( void) _throw(( struct _xtunion_struct*)({
+struct Cyc_Core_Not_found_struct* _temp3=( struct Cyc_Core_Not_found_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Not_found_struct)); _temp3[ 0]=({ struct Cyc_Core_Not_found_struct
 _temp4; _temp4.tag= Cyc_Core_Not_found_tag; _temp4;}); _temp3;}));} void Cyc_Arg_usage(
 struct Cyc_List_List* speclist, struct _tagged_string errmsg){({ struct

@@ -215,10 +215,9 @@ static void extract_ordinarie($(ienv_t, ienv_t, bool) @ env, var_t x, $(resolved
       let vd = new Vardecl{
 	.sc = fd -> sc,
 	.name = fd -> name,
-	.tq = new Tqual(false, false, false),
+	.tq = Tqual(false, false, false),
 	.type = (fd -> cached_typ) -> v,
 	.initializer = null,
-	.shadow = 0,
 	.rgn = null,
 	.attributes = null
       };

@@ -1,15 +1,14 @@
 #include "cyc_include.h"
 
- struct _tagged_ptr0{ int* curr; int* base; int* last_plus_one; } ; typedef int
-Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef unsigned short Cyc_wchar_t;
-typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short
-Cyc_u_short; typedef unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long;
-typedef unsigned short Cyc_ushort; typedef unsigned int Cyc_uint; typedef
-unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{ int
-tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec it_interval;
-struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t;
-typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
+typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
+unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
+Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
+typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
 typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
 typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
 unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
@@ -41,41 +40,41 @@ struct Cyc_Dict_Dict* Cyc_Dict_hdict_t; typedef struct Cyc_Dict_Dict* Cyc_Dict_d
 extern char Cyc_Dict_Present_tag[ 8u]; struct Cyc_Dict_Present_struct{ char* tag;
 } ; extern char Cyc_Dict_Absent_tag[ 7u]; struct Cyc_Dict_Absent_struct{ char*
 tag; } ; extern void* Cyc_Dict_lookup( struct Cyc_Dict_Dict* d, void* key);
-typedef struct _tagged_ptr0 Cyc_Bitvec_gbitvec_t; typedef struct _tagged_ptr0
-Cyc_Bitvec_bitvec_t; extern int Cyc_Bitvec_get( struct _tagged_ptr0, int);
-extern void Cyc_Bitvec_set( struct _tagged_ptr0, int); extern void Cyc_Bitvec_clear(
-struct _tagged_ptr0, int); extern int Cyc_Bitvec_get_and_set( struct
-_tagged_ptr0, int); extern void Cyc_Bitvec_union_two( struct _tagged_ptr0 dest,
-struct _tagged_ptr0 src1, struct _tagged_ptr0 src2); extern void Cyc_Bitvec_intersect_two(
+struct _tagged_ptr0{ int* curr; int* base; int* last_plus_one; } ; typedef
+struct _tagged_ptr0 Cyc_Bitvec_gbitvec_t; typedef struct _tagged_ptr0 Cyc_Bitvec_bitvec_t;
+extern int Cyc_Bitvec_get( struct _tagged_ptr0, int); extern void Cyc_Bitvec_set(
+struct _tagged_ptr0, int); extern void Cyc_Bitvec_clear( struct _tagged_ptr0,
+int); extern int Cyc_Bitvec_get_and_set( struct _tagged_ptr0, int); extern void
+Cyc_Bitvec_union_two( struct _tagged_ptr0 dest, struct _tagged_ptr0 src1, struct
+_tagged_ptr0 src2); extern void Cyc_Bitvec_intersect_two( struct _tagged_ptr0
+dest, struct _tagged_ptr0 src1, struct _tagged_ptr0 src2); extern void Cyc_Bitvec_diff_two(
 struct _tagged_ptr0 dest, struct _tagged_ptr0 src1, struct _tagged_ptr0 src2);
-extern void Cyc_Bitvec_diff_two( struct _tagged_ptr0 dest, struct _tagged_ptr0
-src1, struct _tagged_ptr0 src2); extern int Cyc_Bitvec_compare_two( struct
-_tagged_ptr0 src1, struct _tagged_ptr0 src2); extern struct _tagged_ptr0 Cyc_Bitvec_new_empty(
-int); extern struct _tagged_ptr0 Cyc_Bitvec_new_full( int); extern struct
-_tagged_ptr0 Cyc_Bitvec_new_copy( struct _tagged_ptr0); extern struct
-_tagged_ptr0 Cyc_Bitvec_from_list( struct Cyc_Dict_Dict* d, int(* f)( void*),
-int sz, struct Cyc_List_List*); extern struct Cyc_List_List* Cyc_Bitvec_to_sorted_list(
-struct _tagged_ptr0 bvec, int sz); extern void Cyc_Bitvec_clear_all( struct
-_tagged_ptr0); extern void Cyc_Bitvec_set_all( struct _tagged_ptr0); extern int
-Cyc_Bitvec_all_set( struct _tagged_ptr0 bvec, int sz); extern void Cyc_Bitvec_print_bvec(
-struct _tagged_ptr0 bvec); int Cyc_Bitvec_get( struct _tagged_ptr0 bvec, int pos){
-int word= pos >> 5; int offset= pos & 31; return(({ struct _tagged_ptr0 _temp0=
-bvec; int* _temp2= _temp0.curr + word; if( _temp0.base == 0? 1:( _temp2 < _temp0.base?
-1: _temp2 >= _temp0.last_plus_one)){ _throw( Null_Exception);}* _temp2;}) >>
-offset & 1) == 1;} void Cyc_Bitvec_set( struct _tagged_ptr0 bvec, int pos){ int
-word= pos >> 5; int offset= pos & 31;({ struct _tagged_ptr0 _temp3= bvec; int*
-_temp5= _temp3.curr + word; if( _temp3.base == 0? 1:( _temp5 < _temp3.base? 1:
-_temp5 >= _temp3.last_plus_one)){ _throw( Null_Exception);}* _temp5=({ struct
-_tagged_ptr0 _temp6= bvec; int* _temp8= _temp6.curr + word; if( _temp6.base == 0?
-1:( _temp8 < _temp6.base? 1: _temp8 >= _temp6.last_plus_one)){ _throw(
-Null_Exception);}* _temp8;}) | 1 << offset;});} void Cyc_Bitvec_clear( struct
-_tagged_ptr0 bvec, int pos){ int word= pos >> 5; int offset= pos & 31;({ struct
-_tagged_ptr0 _temp9= bvec; int* _temp11= _temp9.curr + word; if( _temp9.base ==
-0? 1:( _temp11 < _temp9.base? 1: _temp11 >= _temp9.last_plus_one)){ _throw(
-Null_Exception);}* _temp11=({ struct _tagged_ptr0 _temp12= bvec; int* _temp14=
-_temp12.curr + word; if( _temp12.base == 0? 1:( _temp14 < _temp12.base? 1:
-_temp14 >= _temp12.last_plus_one)){ _throw( Null_Exception);}* _temp14;}) & ~( 1
-<< offset);});} int Cyc_Bitvec_get_and_set( struct _tagged_ptr0 bvec, int pos){
+extern int Cyc_Bitvec_compare_two( struct _tagged_ptr0 src1, struct _tagged_ptr0
+src2); extern struct _tagged_ptr0 Cyc_Bitvec_new_empty( int); extern struct
+_tagged_ptr0 Cyc_Bitvec_new_full( int); extern struct _tagged_ptr0 Cyc_Bitvec_new_copy(
+struct _tagged_ptr0); extern struct _tagged_ptr0 Cyc_Bitvec_from_list( struct
+Cyc_Dict_Dict* d, int(* f)( void*), int sz, struct Cyc_List_List*); extern
+struct Cyc_List_List* Cyc_Bitvec_to_sorted_list( struct _tagged_ptr0 bvec, int
+sz); extern void Cyc_Bitvec_clear_all( struct _tagged_ptr0); extern void Cyc_Bitvec_set_all(
+struct _tagged_ptr0); extern int Cyc_Bitvec_all_set( struct _tagged_ptr0 bvec,
+int sz); extern void Cyc_Bitvec_print_bvec( struct _tagged_ptr0 bvec); int Cyc_Bitvec_get(
+struct _tagged_ptr0 bvec, int pos){ int word= pos >> 5; int offset= pos & 31;
+return(({ struct _tagged_ptr0 _temp0= bvec; int* _temp2= _temp0.curr + word; if(
+_temp0.base == 0? 1:( _temp2 < _temp0.base? 1: _temp2 >= _temp0.last_plus_one)){
+_throw( Null_Exception);}* _temp2;}) >> offset & 1) == 1;} void Cyc_Bitvec_set(
+struct _tagged_ptr0 bvec, int pos){ int word= pos >> 5; int offset= pos & 31;({
+struct _tagged_ptr0 _temp3= bvec; int* _temp5= _temp3.curr + word; if( _temp3.base
+== 0? 1:( _temp5 < _temp3.base? 1: _temp5 >= _temp3.last_plus_one)){ _throw(
+Null_Exception);}* _temp5=({ struct _tagged_ptr0 _temp6= bvec; int* _temp8=
+_temp6.curr + word; if( _temp6.base == 0? 1:( _temp8 < _temp6.base? 1: _temp8 >=
+_temp6.last_plus_one)){ _throw( Null_Exception);}* _temp8;}) | 1 << offset;});}
+void Cyc_Bitvec_clear( struct _tagged_ptr0 bvec, int pos){ int word= pos >> 5;
+int offset= pos & 31;({ struct _tagged_ptr0 _temp9= bvec; int* _temp11= _temp9.curr
++ word; if( _temp9.base == 0? 1:( _temp11 < _temp9.base? 1: _temp11 >= _temp9.last_plus_one)){
+_throw( Null_Exception);}* _temp11=({ struct _tagged_ptr0 _temp12= bvec; int*
+_temp14= _temp12.curr + word; if( _temp12.base == 0? 1:( _temp14 < _temp12.base?
+1: _temp14 >= _temp12.last_plus_one)){ _throw( Null_Exception);}* _temp14;}) & ~(
+1 << offset);});} int Cyc_Bitvec_get_and_set( struct _tagged_ptr0 bvec, int pos){
 int word= pos >> 5; int offset= pos & 31; int slot=({ struct _tagged_ptr0
 _temp18= bvec; int* _temp20= _temp18.curr + word; if( _temp18.base == 0? 1:(
 _temp20 < _temp18.base? 1: _temp20 >= _temp18.last_plus_one)){ _throw(

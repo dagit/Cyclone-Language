@@ -1,18 +1,14 @@
 #include "cyc_include.h"
 
- struct _tagged_ptr0{ void** curr; void** base; void** last_plus_one; } ; struct
-_tuple0{ void* f1; void* f2; } ; struct _tagged_ptr1{ struct _tuple0* curr;
-struct _tuple0* base; struct _tuple0* last_plus_one; } ; struct _tuple1{ struct
-_tagged_ptr0 f1; struct _tagged_ptr0 f2; } ; typedef int Cyc_ptrdiff_t; typedef
-unsigned int Cyc_size_t; typedef unsigned short Cyc_wchar_t; typedef
-unsigned int Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short Cyc_u_short;
-typedef unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef
-unsigned short Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int
-Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int
-tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec
-it_value; } ; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
+typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
+unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
+Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
+typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
 typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
 typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
 unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
@@ -39,7 +35,8 @@ Cyc_List_glist_t; typedef struct Cyc_List_List* Cyc_List_list_t; typedef struct
 Cyc_List_List* Cyc_List_List_t; extern char Cyc_List_List_empty_tag[ 11u];
 struct Cyc_List_List_empty_struct{ char* tag; } ; extern char Cyc_List_List_mismatch_tag[
 14u]; struct Cyc_List_List_mismatch_struct{ char* tag; } ; extern char Cyc_List_Nth_tag[
-4u]; struct Cyc_List_Nth_struct{ char* tag; } ; extern struct _tagged_ptr0 Cyc_List_to_array(
+4u]; struct Cyc_List_Nth_struct{ char* tag; } ; struct _tagged_ptr0{ void** curr;
+void** base; void** last_plus_one; } ; extern struct _tagged_ptr0 Cyc_List_to_array(
 struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_from_array(
 struct _tagged_ptr0 arr); extern void Cyc_Array_qsort( int(* less_eq)( void*,
 void*), struct _tagged_ptr0 x, int ofs, int len); extern void Cyc_Array_msort(
@@ -74,18 +71,21 @@ void Cyc_Array_imp_rev( struct _tagged_ptr0 x); extern int Cyc_Array_forall( int
 pred)( void*), struct _tagged_ptr0 x); extern int Cyc_Array_forall_c( int(* pred)(
 void*, void*), void* env, struct _tagged_ptr0 x); extern int Cyc_Array_exists(
 int(* pred)( void*), struct _tagged_ptr0 x); extern int Cyc_Array_exists_c( int(*
-pred)( void*, void*), void* env, struct _tagged_ptr0 x); extern struct
-_tagged_ptr1 Cyc_Array_zip( struct _tagged_ptr0 x, struct _tagged_ptr0 y);
-extern struct _tuple1 Cyc_Array_split( struct _tagged_ptr1 x); extern int Cyc_Array_memq(
-struct _tagged_ptr0 l, void* x); extern int Cyc_Array_mem( int(* compare)( void*,
-void*), struct _tagged_ptr0 l, void* x); extern struct _tagged_ptr0 Cyc_Array_extract(
-struct _tagged_ptr0 x, int start, int* n_opt); static int Cyc_Array_sp[ 40u]={ 0,
+pred)( void*, void*), void* env, struct _tagged_ptr0 x); struct _tuple0{ void*
+f1; void* f2; } ; struct _tagged_ptr1{ struct _tuple0* curr; struct _tuple0*
+base; struct _tuple0* last_plus_one; } ; extern struct _tagged_ptr1 Cyc_Array_zip(
+struct _tagged_ptr0 x, struct _tagged_ptr0 y); struct _tuple1{ struct
+_tagged_ptr0 f1; struct _tagged_ptr0 f2; } ; extern struct _tuple1 Cyc_Array_split(
+struct _tagged_ptr1 x); extern int Cyc_Array_memq( struct _tagged_ptr0 l, void*
+x); extern int Cyc_Array_mem( int(* compare)( void*, void*), struct _tagged_ptr0
+l, void* x); extern struct _tagged_ptr0 Cyc_Array_extract( struct _tagged_ptr0 x,
+int start, int* n_opt); static int Cyc_Array_sp[ 40u]={ 0, 0, 0, 0, 0, 0, 0, 0,
 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; void Cyc_Array_qsort( int(* less_eq)( void*,
-void*), struct _tagged_ptr0 arr, int base_ofs, int len){ void* temp; int sp_ofs;
-int i; int j; int limit_ofs; if(( base_ofs < 0? 1: base_ofs + len >({ struct
-_tagged_ptr0 _temp0= arr;( unsigned int)( _temp0.last_plus_one - _temp0.curr);}))?
-1: len < 0){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct*
+0, 0, 0, 0, 0}; void Cyc_Array_qsort( int(* less_eq)( void*, void*), struct
+_tagged_ptr0 arr, int base_ofs, int len){ void* temp; int sp_ofs; int i; int j;
+int limit_ofs; if(( base_ofs < 0? 1: base_ofs + len >({ struct _tagged_ptr0
+_temp0= arr;( unsigned int)( _temp0.last_plus_one - _temp0.curr);}))? 1: len < 0){(
+void) _throw(( struct _xtunion_struct*)({ struct Cyc_Core_InvalidArg_struct*
 _temp1=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp1[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp2; _temp2.tag= Cyc_Core_InvalidArg_tag;
 _temp2.f1=( struct _tagged_string)({ char* _temp3=( char*)"Array::qsort"; struct

@@ -1,16 +1,14 @@
 #include "cyc_include.h"
 
- struct _tuple0{ int f1; struct Cyc_Lineno_Pos* f2; } ; struct _tuple1{ struct
-_tagged_string f1; int f2; int f3; } ; typedef int Cyc_ptrdiff_t; typedef
-unsigned int Cyc_size_t; typedef unsigned short Cyc_wchar_t; typedef
-unsigned int Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short Cyc_u_short;
-typedef unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef
-unsigned short Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int
-Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int
-tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec
-it_value; } ; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t; typedef
-unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
-unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
+ typedef int Cyc_ptrdiff_t; typedef unsigned int Cyc_size_t; typedef
+unsigned short Cyc_wchar_t; typedef unsigned int Cyc_wint_t; typedef char Cyc_u_char;
+typedef unsigned short Cyc_u_short; typedef unsigned int Cyc_u_int; typedef
+unsigned int Cyc_u_long; typedef unsigned short Cyc_ushort; typedef unsigned int
+Cyc_uint; typedef unsigned int Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{
+int tv_sec; int tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec
+it_interval; struct Cyc_timespec it_value; } ; typedef int Cyc_daddr_t; typedef
+char* Cyc_caddr_t; typedef unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t;
+typedef unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
 typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
 typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
 unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
@@ -120,10 +118,11 @@ _tagged_string _temp31; _temp31.curr= _temp30; _temp31.base= _temp30; _temp31.la
 _temp30 + 1; _temp31;}); _temp27.line=( struct _tagged_string)({ char* _temp28=(
 char*)""; struct _tagged_string _temp29; _temp29.curr= _temp28; _temp29.base=
 _temp28; _temp29.last_plus_one= _temp28 + 1; _temp29;}); _temp27.line_no= 0;
-_temp27.col= 0; _temp27;}); _temp26;});} struct Cyc_List_List* Cyc_Position_strings_of_segments(
-struct Cyc_List_List* segs){ struct Cyc_List_List* places= 0;{ struct Cyc_List_List*
-segs2= segs; for( 0; segs2 != 0; segs2=({ struct Cyc_List_List* _temp32= segs2;
-if( _temp32 == 0){ _throw( Null_Exception);} _temp32->tl;})){ if(( struct Cyc_Position_Segment*)({
+_temp27.col= 0; _temp27;}); _temp26;});} struct _tuple0{ int f1; struct Cyc_Lineno_Pos*
+f2; } ; struct Cyc_List_List* Cyc_Position_strings_of_segments( struct Cyc_List_List*
+segs){ struct Cyc_List_List* places= 0;{ struct Cyc_List_List* segs2= segs; for(
+0; segs2 != 0; segs2=({ struct Cyc_List_List* _temp32= segs2; if( _temp32 == 0){
+_throw( Null_Exception);} _temp32->tl;})){ if(( struct Cyc_Position_Segment*)({
 struct Cyc_List_List* _temp33= segs2; if( _temp33 == 0){ _throw( Null_Exception);}
 _temp33->hd;}) == 0){ continue;} places=({ struct Cyc_List_List* _temp34=(
 struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp34->hd=(
@@ -184,8 +183,9 @@ char* _temp57=( char*)"..."; struct _tagged_string _temp58; _temp58.curr=
 _temp57; _temp58.base= _temp57; _temp58.last_plus_one= _temp57 + 4; _temp58;}),
 0,( unsigned int) 3); Cyc_String_strncpy( ans, len_one + 3, s, len - len_two,(
 unsigned int) len_two); return ans;}} static int Cyc_Position_line_length= 76;
-static struct _tuple1* Cyc_Position_get_context( struct Cyc_Position_Segment*
-seg){ if( seg == 0){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Position_Nocontext_struct*
+struct _tuple1{ struct _tagged_string f1; int f2; int f3; } ; static struct
+_tuple1* Cyc_Position_get_context( struct Cyc_Position_Segment* seg){ if( seg ==
+0){( void) _throw(( struct _xtunion_struct*)({ struct Cyc_Position_Nocontext_struct*
 _temp59=( struct Cyc_Position_Nocontext_struct*) GC_malloc( sizeof( struct Cyc_Position_Nocontext_struct));
 _temp59[ 0]=({ struct Cyc_Position_Nocontext_struct _temp60; _temp60.tag= Cyc_Position_Nocontext_tag;
 _temp60;}); _temp59;}));}{ struct Cyc_Lineno_Pos* pos_s; struct Cyc_Lineno_Pos*

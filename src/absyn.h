@@ -107,7 +107,7 @@ namespace Absyn {
   extern struct Structfield;
 
   typedef tunion Scope scope_t;
-  typedef struct Tqual @tqual_t;
+  typedef struct Tqual tqual_t; // not a pointer
   typedef tunion Size_of size_of_t;
   typedef tunion Kind kind_t;
   typedef struct Tvar @tvar_t; 
@@ -472,7 +472,6 @@ namespace Absyn {
     tqual_t            tq;
     type_t             type;
     exp_opt_t          initializer; // ignored for non-local variables
-    int                shadow;      // FIX: NOT USED PROPERLY RIGHT NOW!!!
     opt_t<type_t>      rgn;         // filled in by type-checker
     // attributes can include just about anything...but the type-checker
     // must ensure that they are properly accounted for.  For instance,

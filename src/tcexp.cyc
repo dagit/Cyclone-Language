@@ -520,17 +520,17 @@ static void check_writable(tenv_t te, exp_t e) {
   case &Var_e(_,&Local_b(vd)): fallthru(vd);
   case &Var_e(_,&Pat_b(vd)): fallthru(vd);
   case &Var_e(_,&Global_b(vd)):
-    if (!vd->tq->q_const) return;
+    if (!vd->tq.q_const) return;
     break;
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{_,_,_,tq,_}): fallthru(tq);
-    case &ArrayType(_,tq,_): if (!tq->q_const) return; break;
+    case &ArrayType(_,tq,_): if (!tq.q_const) return; break;
     case &TupleType(ts):
       unsigned int i = Evexp::eval_const_uint_exp(e2);
       try {
         let &$(tq,_) = List::nth(ts,i);
-        if (!tq->q_const) return;
+        if (!tq.q_const) return;
       } catch { case &Nth: return;
       }
       break;
@@ -542,7 +542,7 @@ static void check_writable(tenv_t te, exp_t e) {
     case &StructType(_,_,sd):
       struct Structfield *sf = 
         (sd == null) ? null : lookup_struct_field((structdecl_t) *sd, f);
-      if (sf == null || !sf->tq->q_const) return;
+      if (sf == null || !sf->tq.q_const) return;
       break;
     default: break;
     }
@@ -554,7 +554,7 @@ static void check_writable(tenv_t te, exp_t e) {
       case &StructType(_,_,sd):
         struct Structfield *sf = 
           (sd == null) ? null : lookup_struct_field((structdecl_t) *sd,f);
-        if (sf == null || !sf->tq->q_const) return;
+        if (sf == null || !sf->tq.q_const) return;
         break;
       default: break;
       }
@@ -565,7 +565,7 @@ static void check_writable(tenv_t te, exp_t e) {
   case &Deref_e(e1):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{_,_,_,tq,_}): fallthru(tq);
-    case &ArrayType(_,tq,_): if (!tq->q_const) return; break;
+    case &ArrayType(_,tq,_): if (!tq.q_const) return; break;
     default: break;
     }
     break;
@@ -795,7 +795,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
   let $(is_const,rgn) = addressof_props(te,e);
   tqual_t tq = empty_tqual();
   if(is_const)
-    tq->q_const = true;
+    tq.q_const = true;
   type_t t = at_typ(e->topt->v, rgn, tq);
   return t;
 }
@@ -1044,7 +1044,7 @@ static type_t tcComprehension(tenv_t te,seg_t loc,type_t *`r topt,
     terr(bound->loc,xprintf("expecting unsigned int, found %s",
 			    typ2string(bound->topt->v)));
   // double-check that the index variable x is declared const
-  if (!vd->tq->q_const)
+  if (!vd->tq.q_const)
     impos("comprehension index variable is not declared const!");
   // add x to the environment with the type unsigned int only if te->le
   // is not null.

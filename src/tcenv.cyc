@@ -501,9 +501,6 @@ tenv_t add_type_vars(seg_t loc,tenv_t te,list_t<tvar_t> tvs) {
   return put_fenv(te,fe);
 }
 
-// FIX: This can cause clashes with other programmer variables!!!!
-static int shadow_ctr = 1;
-
 tenv_t add_local_var(seg_t loc, tenv_t te, vardecl_t vd) {
   if(te->le == null) env_err("Tcenv: unexpected add_local_var");
   let fe = copy_fenv_old_ctrl(get_fenv(te));
@@ -516,8 +513,6 @@ tenv_t add_local_var(seg_t loc, tenv_t te, vardecl_t vd) {
     throw new Impossible("add_local_var: called with Rel_n");
     break;
   }
-  if(Dict::member(fe->locals,v))
-    vd->shadow = ++shadow_ctr;
   fe->locals = Dict::insert(fe->locals,v,new Local_b(vd));
   return put_fenv(te,fe);
 }
@@ -527,8 +522,6 @@ tenv_t add_pat_var(seg_t loc, tenv_t te, vardecl_t vd) {
   if(te->le == null) env_err("Tcenv: unexpected add_pat_var");
   let fe = copy_fenv_old_ctrl(get_fenv(te));
   let v  = (*vd->name)[1];
-  if(Dict::member(fe->locals,v))
-    vd->shadow = ++shadow_ctr;
   fe->locals = Dict::insert(fe->locals,v,new Pat_b(vd));
   return put_fenv(te,fe);
 }
@@ -786,7 +779,6 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
 			 .tq = (*args->hd)[1],
 			 .type = (*args->hd)[2],
 			 .initializer = null, 
-                         .shadow = 0, 
                          .rgn = new{Opt(param_rgn)}, 
                          .attributes = null}};
     vds = new{List(vd, vds)};
