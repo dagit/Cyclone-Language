@@ -1205,7 +1205,7 @@ void print(i_t i, FILE @ f) {
 i_t parse(FILE @ f) { 
   Lex::lex_init();
   let tds = Parse::parse_file(f);
-  region r {
+  region r; {
     let te  = Tcenv::tc_init(r);
     Tc::tc(r, te, false, tds); // no "Cyc" prefix, no default initializer 
     return gen_extract(te->ae, false); //don't check that definitions are complete

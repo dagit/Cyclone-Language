@@ -75,7 +75,7 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
   let TcPatResult(p,vs) = pat_res;
   let tvs = (p==NULL) ? NULL : (*p)[0];
   let bds = (p==NULL) ? NULL : (*p)[1];
-  region r {
+  TEMP_RGN(te,r) {
     tenv_t te2 = add_type_vars(r,loc,te,tvs);
     te2 = new_outlives_constraints(r,te2,bds,loc);
     if(new_block)
@@ -126,7 +126,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     return;
 
   case &Seq_s(s1,s2):
-    region r {
+    TEMP_RGN(te, r) {
       let te2 = set_next(r, te,new Stmt_j(s2));
       tcStmt(te2,s1,true); // pass new_block in case of weird associativity??
     }
@@ -167,8 +167,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
              typ2string(e->topt->v), typ2string(t));
         explain_failure();
       }
-      if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
-        terr(e->loc,UNIQUE_ERR_MSG);
+      TEMP_RGN(te, temp) {
+        if (is_noalias_pointer_or_aggr(temp,t) && !is_noalias_path(temp,e))
+          terr(e->loc,UNIQUE_ERR_MSG);
+      }
     }
     return;
 
@@ -181,7 +183,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &While_s($(e,cont_s),s):
     decorate_stmt(te,cont_s);
     tcTest(te,e,"while loop");
-    region r {
+    TEMP_RGN(te, r) {
       tcStmt(set_in_loop(r,te,cont_s),s,true);
     }
     return;
@@ -191,7 +193,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     decorate_stmt(te,cont_s);
     tcExp(te,NULL,e1);
     tcTest(te,e2,"for loop");
-    region r {
+    TEMP_RGN(te, r) {
       let te = set_in_loop(r,te,cont_s);
       tcStmt(te,s,true);
       tcExp(te,NULL,e3); // ??? what does a break/continue in e3 mean ???
@@ -201,7 +203,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 
   case &Do_s(s,$(e,cont_s)):
     decorate_stmt(te,cont_s);
-    region r {
+    TEMP_RGN(te,r) {
       tcStmt(set_in_loop(r,te,cont_s),s,true);
     }
     tcTest(te,e,"do loop");
@@ -232,9 +234,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
              typ2string(es->hd->topt->v), typ2string(ts->hd));
         explain_failure();
       }
-      if (is_noalias_pointer_or_aggr(ts->hd) &&
-	  !is_noalias_path(es->hd))
-	terr(es->hd->loc,UNIQUE_ERR_MSG);
+      TEMP_RGN(te, temp) {
+        if (is_noalias_pointer_or_aggr(temp,ts->hd) &&
+            !is_noalias_path(temp,es->hd))
+          terr(es->hd->loc,UNIQUE_ERR_MSG);
+      }
     }
     if (es != NULL)
       terr(s0->loc, "too many arguments to explicit fallthru");
@@ -248,7 +252,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &Label_s(l,s): 
     // Note that we set new_block to false because we're explicitly creating
     // a new named block here.
-    region r {
+    TEMP_RGN(te,r) {
       tcStmt(Tcenv::new_named_block(r,s0->loc,add_label(te,l,s),
                                     new Tvar(new ((string_t)aprintf("`%s",*l)),
                                              new_tvar_id(),
@@ -259,12 +263,12 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
   case &Switch_s(e,scs0):
     tcExp(te,NULL,e);
     let t = e->topt->v;
-    if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
-      terr(e->loc,UNIQUE_ERR_MSG);
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,
     // fallthru is not allowed.
-    region r {
+    TEMP_RGN(te,r) {
+      if (is_noalias_pointer_or_aggr(r,t) && !is_noalias_path(r,e))
+        terr(e->loc,UNIQUE_ERR_MSG);
       let te = set_in_switch(r,te);
       te = clear_fallthru(r,te);
       for (_ scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
@@ -290,7 +294,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           te = set_fallthru(r,te, new_tvs, pat_res.patvars, scs->hd);
       }
     }
-    check_switch_exhaustive(s0->loc,scs0);
+    check_switch_exhaustive(s0->loc,te,scs0);
     return;
 
   case &TryCatch_s(s,scs0):
@@ -302,11 +306,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 		    s->loc)->r;
 
     // must set encloser b/c cannot goto into a handler.
-    region r {
+    TEMP_RGN(te,r) {
       tcStmt(set_encloser(r,enter_try(r,te),s0),s,true);
     }
 
-    region r2 {
+    TEMP_RGN(te,r2) {
       // similar to Switch_s -- check the patterns in reverse order:
       let te = set_in_switch(r2,te);
       te = clear_fallthru(r2,te);
@@ -331,13 +335,13 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           te = set_fallthru(r2, te, new_tvs, pat_res.patvars, scs->hd);
       }
     }
-    check_catch_overlap(s0->loc,scs0);
+    check_catch_overlap(s0->loc,te,scs0);
     return;
 
   case &Decl_s(d,s):
     string_t unimp_msg_part;
-    region decl_rgn {
-      tenv_t<_,`decl_rgn> te2;
+    TEMP_RGN(te, decl_rgn) {
+      tenv_t<_,/*`decl_rgn*/ _> te2;
       if(new_block)
         te2 = Tcenv::new_block(decl_rgn,s0->loc,te);
       else 
@@ -443,7 +447,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         }
         else
           check_pat_regions(te,p);
-        check_let_pat_exhaustive(p->loc,p);
+        check_let_pat_exhaustive(p->loc,te,p);
         pattern_synth(s0->loc, te, pat_res, s, NULL, false);
         return;
 
@@ -469,6 +473,80 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         }
         tcStmt(set_encloser(decl_rgn,te2,s0),s,false);
         return;
+
+      case &Region_d(tv,vd,resetable,open_opt):
+        // Same KLUDGE as with TryCatch_s -- we need a next statement that is
+        // not outside of the handler.
+        s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
+                        s->loc)->r;
+        let te2 = te;
+        let &Vardecl(_,_,_,*t,_,*rgn_ptr,_,_) = vd;
+        let curr_bl = Tcenv::curr_rgn(te);
+        *rgn_ptr = new Opt(curr_bl); // side effect
+        type_t rgn_typ;
+        if (open_opt != NULL) {
+          exp_t open_exp = (exp_t)open_opt;
+          let tenv_tvs = lookup_type_vars(te);
+          rgn_typ = new_evar(&rk,new Opt(tenv_tvs));
+          type_t rgn2_typ = new_evar(&rk,new Opt(tenv_tvs));
+          type_t expected = new DynRgnType(rgn_typ,rgn2_typ);
+          *t = new RgnHandleType(rgn_typ);
+          if (!unify(tcExp(te,&expected,open_exp), expected)) {
+            terr(open_exp->loc,"expecting %s but found %s",
+                 typ2string(expected),
+                 typ2string(open_exp->topt->v));
+          }
+          // check that we have access to rgn2
+          check_rgn_accessible(te,open_exp->loc,rgn2_typ);
+          // FIX: should signal an error if rgn1 is accessible...
+          te2 = add_region(decl_rgn, te2, rgn_typ, false, true);
+        } else {
+          rgn_typ = new VarType(tv);
+          te2 = add_type_vars(decl_rgn,s0->loc,te2,new List(tv,NULL));
+          te2 = add_region(decl_rgn, te2, rgn_typ, resetable, true);
+        }
+        check_type(s0->loc,te,lookup_type_vars(te2),BoxKind,true,*t);
+        if (!unify(*t,new RgnHandleType(rgn_typ)))
+          impos("region stmt: type of region handle is wrong!");
+        // we don't push a handler when regions are turned off so we
+        // only want to enter_try when regions are on.
+        if (!no_regions) {
+          te2 = enter_try(decl_rgn,te2);
+        }
+        tcStmt(set_encloser(decl_rgn,add_local_var(decl_rgn,s->loc,te2,vd),s0),s,false);
+        return;
+
+        // alias <tv> vd = e in s1
+      case &Alias_d(e,tv,vd):
+        TEMP_RGN(te, r) {
+          // establish tv as a reasonable region variable
+          //       te2 = Tcenv::new_block(r,s0->loc,te2); // ??
+          tenv_t te2 = add_type_vars(r,s0->loc,te,rlist(r,tv));
+          te2 = add_region(r, te2, new VarType(tv), false, true);
+          
+          // now check e (could include a cast that uses tv)
+          tcExpInitializer(te2,NULL,e);
+
+          // can only alias pointer types
+          if (!is_pointer_type(e->topt->v)) {
+            terr(e->loc,"%s is not a pointer type",
+                 Absynpp::typ2string(e->topt->v));
+            return;
+          }
+
+          // create the local variable
+          vd->type = copy_type(e->topt->v);
+          check_type(e->loc,te,lookup_type_vars(te2),MemKind,true,vd->type);
+          vd->rgn = new Opt(Tcenv::curr_rgn(te2));
+          te2 = add_local_var(r,s0->loc, te2, vd);
+          te2 = set_encloser(r,te2,s); // for substatements inside of s
+
+          // check the body
+          tcStmt(te2,s,false);
+        }
+        NewControlFlow::set_encloser(s0,get_encloser(te));
+        return;
+
       case &Fn_d(fd): 
         // FIX: much of this code is the same as in Tc::tcFndecl
         let curr_bl = Tcenv::curr_rgn(te);
@@ -524,53 +602,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     }
     throw impos("tcStmt: nested %s declarations unimplemented",unimp_msg_part);
 
-  case &Region_s(tv,vd,resetable,open_opt,s):
-    // Same KLUDGE as with TryCatch_s -- we need a next statement that is
-    // not outside of the handler.
-    s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
-		    s->loc)->r;
-    region r {
-      tenv_t<_,`r> te2;
-      if (new_block)
-        te2 = Tcenv::new_block(r,s0->loc,te);
-      else 
-        te2 = Tcenv::copy_tenv(r,te);
-      let &Vardecl(_,_,_,*t,_,*rgn_ptr,_,_) = vd;
-      let curr_bl = Tcenv::curr_rgn(te2);
-      *rgn_ptr = new Opt(curr_bl); // side effect
-      type_t rgn_typ;
-      if (open_opt != NULL) {
-        exp_t open_exp = (exp_t)open_opt;
-        let tenv_tvs = lookup_type_vars(te);
-        rgn_typ = new_evar(&rk,new Opt(tenv_tvs));
-        type_t rgn2_typ = new_evar(&rk,new Opt(tenv_tvs));
-        type_t expected = new DynRgnType(rgn_typ,rgn2_typ);
-        *t = new RgnHandleType(rgn_typ);
-        if (!unify(tcExp(te,&expected,open_exp), expected)) {
-          terr(open_exp->loc,"expecting %s but found %s",
-               typ2string(expected),
-               typ2string(open_exp->topt->v));
-        }
-        // check that we have access to rgn2
-        check_rgn_accessible(te,open_exp->loc,rgn2_typ);
-        // FIX: should signal an error if rgn1 is accessible...
-        te2 = add_region(r, te2, rgn_typ, false, true);
-      } else {
-        rgn_typ = new VarType(tv);
-        te2 = add_type_vars(r,s0->loc,te2,new List(tv,NULL));
-        te2 = add_region(r, te2, rgn_typ, resetable, true);
-      }
-      check_type(s0->loc,te,lookup_type_vars(te2),BoxKind,true,*t);
-      if (!unify(*t,new RgnHandleType(rgn_typ)))
-        impos("region stmt: type of region handle is wrong!");
-      // we don't push a handler when regions are turned off so we
-      // only want to enter_try when regions are on.
-      if (!no_regions) {
-        te2 = enter_try(r,te2);
-      }
-      tcStmt(set_encloser(r,add_local_var(r,s->loc,te2,vd),s0),s,false);
-    }
-    return;
   case &ResetRegion_s(e):
     // check that e is an intuitionistic region_t<`r> 
     type_t rgn_type = new_evar(&rk,lookup_opt_type_vars(te));
@@ -581,35 +612,5 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     check_rgn_resetable(te,s0->loc,rgn_type);
     return;
 
-  // alias <tv> vd = e in s1
-  case &Alias_s(e,tv,vd,s1):
-    region r {
-      // establish tv as a reasonable region variable
-//       te2 = Tcenv::new_block(r,s0->loc,te2); // ??
-      tenv_t te2 = add_type_vars(r,s0->loc,te,rlist(r,tv));
-      te2 = add_region(r, te2, new VarType(tv), false, true);
-
-      // now check e (could include a cast that uses tv)
-      tcExpInitializer(te2,NULL,e);
-
-      // can only alias pointer types
-      if (!is_pointer_type(e->topt->v)) {
-	terr(e->loc,"%s is not a pointer type",
-	     Absynpp::typ2string(e->topt->v));
-	return;
-      }
-
-      // create the local variable
-      vd->type = copy_type(e->topt->v);
-      check_type(e->loc,te,lookup_type_vars(te2),MemKind,true,vd->type);
-      vd->rgn = new Opt(Tcenv::curr_rgn(te2));
-      te2 = add_local_var(r,s0->loc, te2, vd);
-      te2 = set_encloser(r,te2,s1); // for substatements inside of s
-
-      // check the body
-      tcStmt(te2,s1,false);
-    }
-    NewControlFlow::set_encloser(s0,get_encloser(te));
-    return;
   }
 }

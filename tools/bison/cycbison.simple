@@ -120,7 +120,7 @@ static int yynerrs = 0;		/*  number of parse errors so far       */
 int yyparse(YYPARSE_PARAM_ARG)
 {
   // the arrays are allocated in this region
-region yyregion {
+region yyregion; {
   int yystate;
   int yyn=0;
   int yyerrstatus;//  number of tokens to shift before error messages enabled 

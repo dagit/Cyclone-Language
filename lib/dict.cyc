@@ -422,7 +422,7 @@ dict_t<`a,`b,`r> intersect_c(`b (@f)(`c,`a,`b,`b), `c env,
 				 dict_t<`a,`b,`r> d2) {
   if ((int)d1.t == (int)d2.t || d2.t == NULL) return d2;
   let ans_tree = NULL;
-  region temp {
+  region temp; {
     // resizing array used as queue (array means fewer mallocs)
     Tree_t<`a,`b,`r> ? queue = rnew(temp) {for i < 16 : (Tree_t<`a,`b,`r>)d2.t};
     int ind = 0;

@@ -295,7 +295,7 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   // DAN: Here is where I'm assuming the te can be imperatively screwed with
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
-  region fnrgn {
+  region fnrgn; {
     let fenv = new_fenv(fnrgn,loc,fd);
     let te = rnew(fnrgn) Tenv{te->ns, te->ae, fenv, false};
     // check the body, then get rid of local environment
@@ -413,7 +413,7 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
 		       list_t<aggrfield_t> fields) {
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   // (unless the field name is empty)
-  region uprev_rgn {
+  region uprev_rgn; {
     // FIX?: forbid effect variables (but they're going away)
     for(; rpo != NULL; rpo = rpo->tl) {
       let &$(e,r) = rpo->hd;
@@ -586,10 +586,12 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
     for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
       check_type(f->loc, te, tvs, MemKind, false, (*typs->hd)[1]);
       // make sure no no-alias fields in non-flat tunion
-      if (!tudres->is_flat && is_noalias_pointer_or_aggr((*typs->hd)[1]))
-	terr(f->loc, 
-	     "noalias pointers in non-flat tunions are not allowed (%s)",
-	     qvar2string(f->name)); //FIX ?      
+      TEMP_RGN(te, temp) {
+        if (!tudres->is_flat && is_noalias_pointer_or_aggr(temp,(*typs->hd)[1]))
+          terr(f->loc, 
+               "noalias pointers in non-flat tunions are not allowed (%s)",
+               qvar2string(f->name)); //FIX ?      
+      }
       (*typs->hd)[0].real_const = 
         extract_const_from_typedef(f->loc,(*typs->hd)[0].print_const,
                                    (*typs->hd)[1]);
@@ -620,8 +622,8 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
       fields2 = fs;
     else
       fields2 = NULL; // should it be fs anyway ?
-  } else 
-    region uprev_rgn { 
+  } else {
+    region uprev_rgn; 
     // for tunions, check there's no duplicate field
     list_t<var_t, `uprev_rgn> prev_fields = NULL;
     for (_ fs = fields; fs != NULL; fs = fs-> tl) {
@@ -691,7 +693,7 @@ void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   // determine [x]tunion type's qualified name
   // set ge_decl to the namespace where the declaration 'lives'
   // (for xtunions it may be different from ge)
-  region temp {
+  region temp; {
     tuniondecl_t@*`temp tud_opt;
     if(tud->is_xtunion) {
       try tud_opt = lookup_xtuniondecl(temp,te,loc,tud->name);
@@ -780,7 +782,7 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
   (*ed->name)[0] = Abs_n(te->ns);
 
   // check the fields.
-  if (ed->fields != NULL) region uprev_rgn {
+  if (ed->fields != NULL) { region uprev_rgn; {
     list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
     unsigned int tag_count = 0;
     for (_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
@@ -805,7 +807,7 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
       
       (*f->name)[0] = Abs_n(te->ns);
     }
-  }
+  }}
 
   // update the environment
   try {
@@ -885,6 +887,12 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
     case &Let_d(_,_,_): 
     case &Letv_d(_): // FIX
       terr(loc,"top level let-declarations are not implemented");
+      break;
+    case &Region_d(...):
+      terr(loc,"top level region declarations are not implemented");
+      break;
+    case &Alias_d(...):
+      terr(loc,"top level alias declarations are not implemented");
       break;
     case &Var_d(vd):
       if (in_externC && okay_externC(d->loc,vd->sc))
@@ -1084,7 +1092,7 @@ treeshake_make_env_f(region_t<`r> rgn, genv_t<`g> ge) {
 }
 
 list_t<decl_t> treeshake(tenv_t<`g,_> te, list_t<decl_t> ds) {
-  region rgn {
+  region rgn; {
     let env = TreeshakeEnv(rgn, false,
                            Dict::rmap_c(rgn,treeshake_make_env_f,rgn,te->ae));
     let ds1 = treeshake_f(&env, ds);

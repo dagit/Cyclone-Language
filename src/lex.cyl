@@ -242,7 +242,7 @@ static trie_t<`r> trie_lookup(region_t<`r> r, trie_t<`r> t,
 
 static int str_index(string_t buff, int offset, int len) {
   let DynTrieSymbols{dyn,t,symbols} = *ids_trie;
-  region d = open(dyn) {
+  region d = open(dyn); {
     let t = trie_lookup(d, t, buff, offset, len);
     // build string if necessary and return
     if(t->shared_str == 0) {
@@ -264,7 +264,7 @@ static int str_index_lbuf(Lexbuf<`a> lbuf) {
 static void insert_typedef(stringptr_t sptr) {
   let s = *sptr;
   let DynTrie{<`d> dyn, t} = *typedefs_trie;
-  region d = open(dyn) {
+  region d = open(dyn); {
     let t = trie_lookup(d, t, s, 0, numelts(s)-1);
     t->shared_str = true;
   }
@@ -273,7 +273,7 @@ static void insert_typedef(stringptr_t sptr) {
 
 static stringptr_t get_symbol(int symbol_num) {
   let DynTrieSymbols{dyn,t,symbols} = *ids_trie;
-  region d = open(dyn) {
+  region d = open(dyn); {
     return Xarray::get(symbols, symbol_num);
   }
 }
@@ -401,7 +401,7 @@ static void recompute_typedefs() {
   let DynTrie{dyn,t} = *typedefs_trie;
   Core::free_dynregion(dyn);
   let NewRegion{<`d2> dyn2} = Core::new_dynregion();
-  region d2 = open(dyn2) {
+  region d2 = open(dyn2); {
     typedefs_trie = new DynTrie{dyn2, rnew(d2) Trie(Zero,false)};
   }
   
@@ -435,7 +435,7 @@ static bool is_typedef(List::list_t<var_t,`H> ns, var_t v) {
   let s   = *v;
   int    len = numelts(s) - 1;
   let DynTrie{dyn,t} = *typedefs_trie;
-  region d = open(dyn) {
+  region d = open(dyn); {
     for(int i = 0; i < len; ++i)
     switch (t->children) {
       case Zero: return false;
@@ -788,7 +788,7 @@ void lex_init(bool include_cyclone_keywords) {
   }
   // Now allocate dynamic regions for the tries
   let NewRegion{id_dyn} = Core::new_dynregion();
-  region id_rgn = open(id_dyn) {
+  region id_rgn = open(id_dyn); {
     Xarray::xarray_t<stringptr_t> symbols = 
       Xarray::rcreate(id_rgn,101,new ((string_t)""));
     // don't use first entry b/c 0 means "not a symbol"
@@ -797,7 +797,7 @@ void lex_init(bool include_cyclone_keywords) {
                                   symbols};
   }
   let NewRegion{typedefs_dyn} = Core::new_dynregion();
-  region typedefs_rgn = open(typedefs_dyn) {
+  region typedefs_rgn = open(typedefs_dyn); {
     typedefs_trie = new DynTrie{typedefs_dyn, 
                                 rnew(typedefs_rgn) Trie(Zero,false)};
   }

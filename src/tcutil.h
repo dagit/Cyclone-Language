@@ -212,13 +212,15 @@ extern bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
 extern bool is_noalias_pointer(type_t t);
 
 // returns true if this expression only deferences non-aliasable pointers
-// and if the ultimate result is a noalias pointer or aggregate
+// and if the ultimate result is a noalias pointer or aggregate.  The
+// region is used for allocating temporary stuff.
 #define NO_POINTER_PATHS
-extern bool is_noalias_path(exp_t e);
+extern bool is_noalias_path(region_t<`r>, exp_t e);
 
 // returns true if this expression is an aggregate that contains
 // non-aliasable pointers or is itself a non-aliasable pointer
-extern bool is_noalias_pointer_or_aggr(type_t t);
+// The region is used for allocating temporary stuff
+extern bool is_noalias_pointer_or_aggr(region_t<`temp>, type_t t);
 
 // if exp is of array type, cast it to an appropriate pointer type --
 // assumes the expression has already been type-checked and that t is

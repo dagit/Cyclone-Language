@@ -1059,6 +1059,12 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       if (x->defn)
         scan_type(x->defn->v);
       break;
+    case &Region_d(...):
+      fprintf(stderr,"Error: unexpected region declaration");
+      exit(1); 
+    case &Alias_d(...):
+      fprintf(stderr,"Error: unexpected alias declaration");
+      exit(1); 
     case Porton_d:
       fprintf(stderr,"Error: unexpected __cyclone_port_on__");
       exit(1); return NULL;
@@ -1403,6 +1409,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       case &Using_d(_,_):
       case &ExternC_d(_):
       case &ExternCinclude_d(_,_):
+      case &Region_d(...):
+      case &Alias_d(...):
         name = NULL;
         break;
       }
@@ -1456,6 +1464,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         let &$(_,v) = x->name;
         name = v;
         break;
+      case &Region_d(...):
+      case &Alias_d(...):
       case Porton_d:
       case Portoff_d:
       case &Let_d(_,_,_):
@@ -1474,7 +1484,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
 
     /* make the declarations are well-formed */
-    region tc_rgn {
+    region tc_rgn; {
       let te = Tcenv::tc_init(tc_rgn);
       Tc::tc(tc_rgn, te, true, print_decls);
     }

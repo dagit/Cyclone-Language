@@ -177,7 +177,7 @@ list_t<type_t,`r> get_format_typs(region_t<`r> r, tenv_t te,string_t s,seg_t loc
   let len = strlen(s);
   let typs = NULL;
   int i;
-  region temp {
+  region temp; {
     for (i=0; i<len; i++) {
       if (s[i] != '%') continue;
       let cs = parse_conversionspecification(temp,s,i+1);
@@ -464,7 +464,7 @@ list_t<type_t,`r> get_scanf_typs(region_t<`r> r,tenv_t te,string_t s,seg_t loc) 
   let len = strlen(s);
   let typs = NULL;
   int i;
-  region temp {
+  region temp; {
   for (i=0; i<len; i++) {
     if (s[i] != '%') continue;
     let x = parse_inputformat(temp,s,i+1);

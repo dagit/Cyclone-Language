@@ -928,7 +928,7 @@ static void process_file(string_t<`H> filename) {
     return;
   }
 
-  region tc_rgn {
+  region tc_rgn; {
     let te = Tcenv::tc_init(tc_rgn); // Must declare BEFORE the goto 
     if (parseonly_r) goto PRINTC;
 
@@ -1062,7 +1062,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   string_t comp = Cstring_to_string(Ccomp);
 
   // parse the command-line arguments
-  region r {
+  region r; {
     // partition the arguments into (-B and -b) and others
     let bindices = new {for i<argc: false};
     let numbindices = 0;

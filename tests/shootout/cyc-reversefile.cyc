@@ -17,7 +17,7 @@ char ?strrealloc(char ?buf, unsigned sz) {
 }
 
 int main(int argc, char ??argv) {
-    int nread, len = 0, size = (16 * MAXREAD);
+    int nread, len = 0, size = (8192 * MAXREAD);
     char ? cp, ?offset, ?buf;
     START_TIME
     buf = calloc(size+1,sizeof(char));

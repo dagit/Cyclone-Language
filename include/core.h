@@ -184,6 +184,12 @@ extern void free_dynregion(dynregion_t<`r1,`r2>);
       been freed, then it returns 0, and otherwise returns 1 upon success. */
 extern bool try_free_dynregion(dynregion_t<`r1,`r2>);
 
+  /** mkfat can be used to convert a thin pointer (@) of elements of type `a
+      to a fat pointer (?).  It requires that you pass in the size of the
+      element type, as well as the number of elements. */
+  extern `a?`r mkfat(`a @{valueof(`n)}`r arr, Core::sizeof_t<`a> s, tag_t<`n> n);
+
+
 // copies the string, making sure there's a zero at the end
 extern "C" Cstring<`H> string_to_Cstring(string_t);
 // extracts the underlying char[] from the char[?] -- returns NULL

@@ -762,4 +762,6 @@ a,void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}int Cyc_Core_ptrcmp(v
 void*b){if(a == b)return 0;if(a > b)return 1;return - 1;}void*Cyc_Core_fst(struct
 _tuple0*pair){return(*pair).f1;}void*Cyc_Core_snd(struct _tuple0*pair){return(*
 pair).f2;}void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}void*Cyc_Core_identity(
-void*x){return x;}
+void*x){return x;}struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,
+unsigned int n){struct _dyneither_ptr res;res.curr=arr;res.base=arr;res.last_plus_one=
+arr + s * n;return res;}

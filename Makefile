@@ -144,6 +144,9 @@ endif
 ifdef NOREGIONS
 LIBSRC_FLAGS += NOREGIONS=X
 endif
+ifdef OPTBUILD
+LIBSRC_FLAGS += OPTBUILD=X
+endif
 DO_LIBSRC=$(MAKE) -r -C $(BUILDDIR) -f $(CYCDIR)/Makefile_libsrc 
 
 cyclone_src:

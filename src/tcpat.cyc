@@ -52,8 +52,8 @@ namespace Tcpat;
 static void resolve_pat(tenv_t te, pat_t p) {
   switch(p->r) {
   case &UnknownId_p(q):
-    try 
-      region r {
+    try {
+      TEMP_RGN(te, r) {
         switch (lookup_ordinary(r,te,p->loc,q)) {
         case &AggrRes(_):
           p->r = Wild_p;
@@ -66,7 +66,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
         case &VarRes(_): break; // shadows an outer definition, but that's fine
         }
       } 
-    catch { case Dict::Absent: break; } // a new variable
+    } catch { case Dict::Absent: break; } // a new variable
     // Unqualified variable is a declaration, qualified is an error
     switch ((*q)[0]) {
     case Loc_n: 
@@ -78,8 +78,8 @@ static void resolve_pat(tenv_t te, pat_t p) {
     default: terr(p->loc,"qualified variable in pattern"); return;
     }
   case &UnknownCall_p(q,ps,dots):
-    try 
-      region r {
+    try {
+      TEMP_RGN(te, r) {
         switch (lookup_ordinary(r,te,p->loc,q)) {
         case &AggrRes(ad):
           if(ad->kind == UnionA) {
@@ -101,7 +101,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
           return;
         case &VarRes(_): break;
       }
-    } catch {case Dict::Absent: break;}
+    }} catch {case Dict::Absent: break;}
     terr(p->loc, "%s is not a constructor in pattern",qvar2string(q));
     p->r = Wild_p;
     return;
@@ -240,7 +240,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     // gotta add the tvar in too; the parser set its kind correctly
     // the kind is IntKind, so no partial-order munging, etc.
     // this checks uniqueness of new tvars (kinda kludgy)
-    region r2 {
+    TEMP_RGN(te, r2) {
       add_type_vars(r2,p->loc,te,list(tv));
     }
     if(res.tvars_and_bounds_opt==NULL)
@@ -366,7 +366,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     // don't allow reference patterns for existentials -- see Dan's ESOP paper
     if (exist_ts != NULL)
       rgn_opt = NULL;
-    region<`rgn> rgn {
+    region<`rgn> rgn; {
       // constrain type variables to have at least the kind they were abstracted over
       let var_tvs = NULL;
       list_t<$(type_t,type_t)@> outlives_constraints = NULL;
@@ -413,7 +413,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 
       var_tvs = imp_rev(var_tvs);
 
-      region r2 {
+      TEMP_RGN(te, r2) {
         tenv_t te2 = add_type_vars(r2,p->loc,te,exist_ts);
 
         let tenv_tvs = lookup_type_vars(te2);
@@ -479,7 +479,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     // don't allow reference patterns in flat tunions -- these are like
     // existentials (see Dan's ESOP paper.)
     if (tud->is_flat) rgn_opt = NULL;
-    region rgn {
+    TEMP_RGN(te, rgn) {
       list_t<$(tqual_t,type_t)@> tqts = tuf->typs;
 
       let tenv_tvs = lookup_type_vars(te);
@@ -560,7 +560,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
 tcpat_result_t tcPat(tenv_t te, pat_t  p, type_t @ topt) {
   let ans = tcPatRec(te,p,topt,NULL);
   // caller will check tvar uniqueness when adding to environment
-  region r {
+  TEMP_RGN(te, r) {
     check_unique_vars(List::rmap(r, get_name, ans.patvars), p->loc,
 		      "pattern contains a repeated variable");
   }
@@ -572,15 +572,17 @@ void check_pat_regions(tenv_t te, pat_t p) {
   case &Pointer_p(p2):
     check_pat_regions(te,p2);
     // not allowed to dereference pointer to a unique type
-    if (is_noalias_pointer_or_aggr(p2->topt->v)) {
-      terr(p->loc,"Pattern dereferences to a non-aliased pointer; use swap");
-      return;
-    }
-    // FIX: need to fold alias tracking via patterns into
-    // flow analysis to remove this check
-    if (is_noalias_pointer_or_aggr(p->topt->v)) {
-      terr(p->loc,"Pattern dereferences a non-aliased pointer; use swap");
-      return;
+    TEMP_RGN(te, temp) {
+      if (is_noalias_pointer_or_aggr(temp,p2->topt->v)) {
+        terr(p->loc,"Pattern dereferences to a non-aliased pointer; use swap");
+        return;
+      }
+      // FIX: need to fold alias tracking via patterns into
+      // flow analysis to remove this check
+      if (is_noalias_pointer_or_aggr(temp,p->topt->v)) {
+        terr(p->loc,"Pattern dereferences a non-aliased pointer; use swap");
+        return;
+      }
     }
     switch (p->topt->v) {
     case &PointerType(PtrInfo(_,_,PtrAtts(rt,_,_,_,_))): fallthru(rt);
@@ -1262,12 +1264,12 @@ static void not_exhaust_err(region_t<`r> r, seg_t loc, term_desc_t<`r> desc) {
 static void rule_occurs(int dummy, $(bool,seg_t)@ rhs) {
   (*rhs)[0] = true;
 }
-void check_switch_exhaustive(seg_t loc, list_t<switch_clause_t> swcs) {
+void check_switch_exhaustive(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs) {
   // We represent "pat && e" as (simple_pat,i) where i is a unique integer.
   // We represent patterns without where clauses as (simple_pat,_).
   // This way, if we have the same pattern repeated, we get exhuastiveness
   // right as long as one of the copies does not have a where-clause.
-  region r {
+  TEMP_RGN(te, r) {
   let where_ctr   = 0;
   let env = $(r,&where_ctr);
   let match_rules = List::rmap_c(r,get_match,&env,swcs);
@@ -1301,8 +1303,8 @@ static void not_exhaust_warn(region_t<`r> r, $(seg_t, bool) @ pr, term_desc_t<`r
 static void dummy_fn(int i,int j) {
   return;
 }
-bool check_let_pat_exhaustive(seg_t loc,pat_t p) {
-  region r {
+bool check_let_pat_exhaustive(seg_t loc,tenv_t te,pat_t p) {
+  TEMP_RGN(te,r) {
   let match_rules = rnew(r) List(rnew(r) $(compile_pat(r,p),0),NULL);
   let dec_tree    = match_compile(r, match_rules);
   let exhaust_env = $(loc,true);
@@ -1325,9 +1327,9 @@ static $(simple_pat_t<`r>, $(bool,seg_t)@`r)@`r get_match2(region_t<`r> r,
 static void not_exhaust_err2(region_t<`r> r, seg_t loc, term_desc_t d) {
   // skip
 }
-void check_catch_overlap(seg_t loc, list_t<switch_clause_t> swcs) {
+void check_catch_overlap(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs) {
   // We ignore where clauses here because catch's need not be exhaustive.
-  region r {
+  TEMP_RGN(te, r) {
     let match_rules = List::rmap_c(r,get_match2,r,swcs);
     let dec_tree    = match_compile(r,match_rules);
     let ex_done = false;

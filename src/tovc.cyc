@@ -597,8 +597,18 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
                                   Tcutil::fndecl2typ(fd), NULL, NULL, fd->attributes, false};
       new_ds = new List(new_decl(new Var_d(vd),DL),new_ds);
       // fprintf(Stdio::stderr,"%s",*(*fd->name)[1]); Stdio::fflush(Stdio::stdout);
-      region rgn {
+      // FIX: if the param_vardecls are NULL then it's a good sign that 
+      // this was an extern "C include" function, so I'm just leaving it 
+      // alone...
+      if (fd->param_vardecls == NULL) {
+        new_ds = new List(next_d,new_ds);
+      } else {
+      region rgn; {
 	let gen_ds = rnew(rgn) NULL;
+        if (fd->param_vardecls == NULL) {
+          fprintf(stderr,"No param vardecls for function %s\n",
+                  *(*fd->name)[1]); fflush(stderr);
+        }
 	stmt_to_vc(ToExpEnv(rgn,
 			    rcopy(rgn,fd->param_vardecls->v),
 			    Dict::rempty(rgn,strptrcmp), // ptr eq possible?
@@ -606,11 +616,13 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
 			    gen_ds), 
 		   fd->body);
 	new_ds = append(*gen_ds,new_ds);
-      }
+      }}
       fallthru;
     case &Var_d(_):         
     case &Let_d(_,_,_): 
     case &Letv_d(_):        
+    case &Region_d(...):
+    case &Alias_d(...):
     case &Aggr_d(_):
     case &Tunion_d(_):
     case &Enum_d(_):        

@@ -92,6 +92,21 @@ extern struct Tenv<`g::R,`l::R> {
 typedef struct Tenv<`g,`l> @`l tenv_t<`g,`l>; 
 
 extern `a env_err(string_t msg) __attribute__((noreturn));
+
+extern region_t<`r> get_fnrgn(tenv_t<`g,`r>);
+
+// The COARSE_REGIONS flag, when on, uses many fewer, coarse-grained
+// regions.  Basically, we use one region for each function during
+// each of the type-checking, flow analysis, and translation stages.
+#define COARSE_REGIONS
+
+#ifdef COARSE_REGIONS
+#define TEMP_RGN(te,x) let x = Tcenv::get_fnrgn(te);
+#else
+#define TEMP_RGN(te,x) region x;
+#endif
+
+
 extern tenv_t<`r,`r> tc_init(region_t<`r>);
 extern genv_t<`r> empty_genv(region_t<`r>);
 extern fenv_t<`r> new_fenv(region_t<`r>,seg_t,fndecl_t);

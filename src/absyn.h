@@ -574,12 +574,7 @@ namespace Absyn {
     Label_s(var_t,stmt_t); // L:s
     Do_s(stmt_t,$(exp_t,stmt_t));
     TryCatch_s(stmt_t,list_t<switch_clause_t>);
-    Region_s(tvar_t, vardecl_t, bool, exp_opt_t, stmt_t); 
-    // region<`r> h {s} or resetable region<`r> h {s} or 
-    // region h = open(e) { s }.
-    // When bool is true, resetable.  When exp_opt_t is present, an open.
     ResetRegion_s(exp_t); // reset_region(e)
-    Alias_s(exp_t, tvar_t, vardecl_t, stmt_t); // alias (e) = <t>v { s }
   };
   // statements with auxiliary info
   EXTERN_ABSYN struct Stmt {
@@ -751,6 +746,12 @@ namespace Absyn {
           opt_t<list_t<vardecl_t>>, // set by type-checker, used downstream
           exp_t);
     Letv_d(list_t<vardecl_t>); // multi-let
+    Region_d(tvar_t,vardecl_t,bool,exp_opt_t); // region declaration
+    // region<`r> h;  or  region [resetable] <`r> h;   or
+    // region h = open(e).  When bool is true, resetable.  When exp_opt_t
+    // is present, it's an open.
+    Alias_d(exp_t, tvar_t, vardecl_t);  // open for unique pointer
+    // alias <`r>x = e;
     Aggr_d(aggrdecl_t);    // [struct|union] Foo { ... }
     Tunion_d(tuniondecl_t);    // [x]tunion Bar { ... }
     Enum_d(enumdecl_t);        // enum Baz { ... }
@@ -969,6 +970,8 @@ namespace Absyn {
   extern decl_t new_decl(raw_decl_t r, seg_t loc);
   extern decl_t let_decl(pat_t p, exp_t e, seg_t loc);
   extern decl_t letv_decl(list_t<vardecl_t,`H>, seg_t loc);
+  extern decl_t region_decl(tvar_t,vardecl_t,bool,exp_opt_t,seg_t); 
+  extern decl_t alias_decl(exp_t,tvar_t,vardecl_t,seg_t);
   extern vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init);
   extern vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);
   extern struct AggrdeclImpl @ aggrdecl_impl(list_t<tvar_t,`H> exists,

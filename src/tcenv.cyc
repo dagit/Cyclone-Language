@@ -197,6 +197,7 @@ abstract struct Fenv<`r::R> {
   type_t              capability; 
   type_t              curr_rgn;   // current block's region
   bool                in_notreadctxt; // true when in an exp that might read
+  region_t<`r>        fnrgn;
 };
 // Region notes:  the shared part of the function environment has its
 // own region `f, and the ctrl part of the function environment has its
@@ -204,6 +205,7 @@ abstract struct Fenv<`r::R> {
 // but nested fenvs.  The type_vars are heap-allocated because we put
 // them in abstract syntax (specifically evars).  I haven't messed with
 // the region_order yet, but presumably some of it can be region-allocated.
+
 
 //////////////////////// Lookup a local binding /////////////////////////////
 xtunion exn { NoBinding; };
@@ -337,7 +339,7 @@ static resolved_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q) {
 list_t<var_t> resolve_namespace(tenv_t te, seg_t loc,
                                 var_t n, list_t<var_t,`H> ns) {
   let cns = te->ns; // current namespace
-  region temp {
+  TEMP_RGN(te,temp) {
     let possible_results = NULL;
     while (true) {
       let ge = Dict::lookup(te->ae,cns);
@@ -492,6 +494,19 @@ static fenv_t<`r> get_fenv(tenv_t<`g,`r> te, const char ?err_msg) {
   return (fenv_t)le;
 }
 
+region_t<`r> coerce_heap_region() {
+  return (region_t<`r>)Core::heap_region;
+}
+
+region_t<`r> get_fnrgn(tenv_t<`g,`r> te) {
+  let le = te->le;
+  if (le != NULL) {
+    let &Fenv{<`f,`c> .fnrgn=f,...} = (fenv_t)le;
+    return f;
+  } 
+  return coerce_heap_region();
+}
+
 static tenv_t<`g,`l> put_fenv(region_t<`l> l, tenv_t<`g,`l2> te, fenv_t<`l> fe) {
   if (te->le == NULL) env_err("put_fenv");
   return rnew(l) Tenv(te->ns, te->ae, fe, te->allow_valueof);
@@ -504,23 +519,23 @@ static tenv_t<`g,`l> put_emptyfenv(region_t<`l> l,tenv_t<`g,`l2> te) {
 static fenv_t<`l> copy_fenv_old_ctrl(region_t<`l> l, fenv_t<`l2> f : {`l2}>`l)
 {
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = *f;
+              capability,curr_rgn,in_notreadctxt,frgn} = *f;
   return rnew(l) Fenv{shared,type_vars,region_order,(bindings_t<`l>)locals,
                         encloser,ctrl_env,capability,curr_rgn,
-                        in_notreadctxt};
+                        in_notreadctxt,l};
                         
 }
 static fenv_t<`l> copy_fenv_new_ctrl(region_t<`l> l, fenv_t<`l2> f : {`l2}>`l)
 {
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = *f;
+              capability,curr_rgn,in_notreadctxt,_} = *f;
   // WARNING: fallthru_clause shared with old
   let CtrlEnv{cr,c_stmt,b_stmt,fallthru_clause,n_stmt,try_depth} = *ctrl_env;
   let new_ctrl_env = 
     rnew(l) CtrlEnv{cr,c_stmt,b_stmt,fallthru_clause,n_stmt,try_depth};
   return rnew(l) Fenv{shared,type_vars,region_order,(bindings_t<`l>)locals,
                         encloser,new_ctrl_env,capability,curr_rgn,
-                        in_notreadctxt};
+                        in_notreadctxt,l};
                         
 }
 
@@ -545,14 +560,15 @@ opt_t<list_t<tvar_t>> lookup_opt_type_vars(tenv_t te) {
 tenv_t<`g,`r> add_type_vars(region_t<`r> r, seg_t loc,tenv_t<`g,`r2> te,
                             list_t<tvar_t> tvs : {`r2} > `r) {
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = 
+              capability,curr_rgn,in_notreadctxt,_} = 
     get_fenv(te,"add_type_vars");  
 
   add_tvar_identities(tvs);
   let new_tvs = List::append(tvs,type_vars);
   Tcutil::check_unique_tvars(loc,new_tvs);
   let fe = rnew(r) Fenv(shared,new_tvs,region_order,(bindings_t<`r>)locals,
-                        encloser,ctrl_env,capability,curr_rgn,in_notreadctxt);
+                        encloser,ctrl_env,capability,curr_rgn,in_notreadctxt,
+                        r);
   return put_fenv(r,te,fe);
 }
 
@@ -576,11 +592,12 @@ tenv_t<`g,`r> add_local_var(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te, vardec
     throw new Impossible("add_local_var: called with Rel_n");
   }
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = 
+              capability,curr_rgn,in_notreadctxt,_} = 
     get_fenv(te,"add_local_var");  
   let new_locals = rnew(r) Bindings{v,new Local_b(vd),(bindings_t<`r>)locals}; 
   let fe = rnew(r) Fenv(shared,type_vars,region_order,new_locals,
-                        encloser,ctrl_env,capability,curr_rgn,in_notreadctxt);
+                        encloser,ctrl_env,capability,curr_rgn,in_notreadctxt,
+                        r);
   return put_fenv(r,te,fe);
 }
 
@@ -588,9 +605,9 @@ tenv_t<`g,`r> enter_notreadctxt(region_t<`r> r,tenv_t<`g,`r2> te : {`r2}>`r){
   let le = te->le;
   if(le == NULL) return put_emptyfenv(r,te);
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = *le;
+              capability,curr_rgn,in_notreadctxt,_} = *le;
   let fe = rnew(r) Fenv(shared,type_vars,region_order,(bindings_t<`r>)locals,
-                        encloser,ctrl_env,capability,curr_rgn,true);
+                        encloser,ctrl_env,capability,curr_rgn,true,r);
   return put_fenv(r,te,fe);
 }
 
@@ -598,9 +615,9 @@ tenv_t<`g,`r> clear_notreadctxt(region_t<`r> r,tenv_t<`g,`r2> te : {`r2}>`r) {
   let le = te->le;
   if(le == NULL) return put_emptyfenv(r,te);
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = *le;
+              capability,curr_rgn,in_notreadctxt,_} = *le;
   let fe = rnew(r) Fenv(shared,type_vars,region_order,(bindings_t<`r>)locals,
-                        encloser,ctrl_env,capability,curr_rgn,false);
+                        encloser,ctrl_env,capability,curr_rgn,false,r);
   return put_fenv(r,te,fe);
 }
 
@@ -616,11 +633,11 @@ tenv_t<`g,`r> add_pat_var(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
                           vardecl_t vd : {`r2} > `r) {
   let v  = (*vd->name)[1];
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = 
+              capability,curr_rgn,in_notreadctxt,_} = 
     get_fenv(te,"add_pat_var");  
   let new_locals = rnew(r) Bindings{v,new Pat_b(vd),(bindings_t<`r>)locals}; 
   let fe = rnew(r) Fenv(shared,type_vars,region_order,new_locals,
-                        encloser,ctrl_env,capability,curr_rgn,in_notreadctxt);
+                        encloser,ctrl_env,capability,curr_rgn,in_notreadctxt,r);
   return put_fenv(r,te,fe);
 }
 
@@ -718,7 +735,7 @@ tenv_t<`g,`r> set_fallthru(region_t<`r> r, tenv_t<`g,`r2> te,
                            list_t<vardecl_t> vds, 
                            switch_clause_t clause : {`r2} > `r) {
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} =get_fenv(te,"set_fallthru");
+              capability,curr_rgn,in_notreadctxt,_} =get_fenv(te,"set_fallthru");
   let &CtrlEnv{cr,c_stmt,b_stmt,fc,n_stmt,try_depth} = ctrl_env;
   list_t<type_t,`c> ft_typ = NULL;
   for(; vds!=NULL; vds=vds->tl)
@@ -730,7 +747,7 @@ tenv_t<`g,`r> set_fallthru(region_t<`r> r, tenv_t<`g,`r2> te,
   let new_fe = rnew(r) Fenv{shared,type_vars,region_order,
                             (bindings_t<`r>)locals,
                             encloser,new_ctrl_env,capability,curr_rgn,
-                            in_notreadctxt};
+                            in_notreadctxt,r};
   return put_fenv(r,te,new_fe);
 }
 // fallthru is illegal in the last case
@@ -744,7 +761,7 @@ tenv_t<`g,`r> clear_fallthru(region_t<`r> r, tenv_t<`g,`r2> te : {`r2} > `r) {
 tenv_t<`g,`r> set_in_loop(region_t<`r> r, tenv_t<`g,`r2> te, 
                           stmt_t continue_dest : {`r2} > `r) {
   let &Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-            capability,curr_rgn,in_notreadctxt} = get_fenv(te,"set_in_loop");
+            capability,curr_rgn,in_notreadctxt,_} = get_fenv(te,"set_in_loop");
   ctrl_env_t<`r,`r> new_cenv = 
     rnew(r) CtrlEnv{.ctrl_rgn = r,
                     .continue_stmt = rnew(r) Stmt_j(continue_dest),
@@ -755,7 +772,7 @@ tenv_t<`g,`r> set_in_loop(region_t<`r> r, tenv_t<`g,`r2> te,
                     .try_depth = ctrl_env->try_depth};
   fenv_t<`r> new_fenv = 
     rnew(r) Fenv{shared,type_vars,region_order,(bindings_t<`r>)locals,
-                   encloser,new_cenv,capability,curr_rgn,in_notreadctxt};
+                   encloser,new_cenv,capability,curr_rgn,in_notreadctxt,r};
   return put_fenv(r,te,new_fenv);
 }
 
@@ -783,7 +800,7 @@ tenv_t<`g,`r> set_in_switch(region_t<`r> r, tenv_t<`g,`r2> te : {`r2}>`r) {
 tenv_t<`g,`r> set_next(region_t<`r> r, tenv_t<`g,`r2> te, jumpee_t<`r> j
                        : {`r2} > `r) {
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = *get_fenv(te,"set_next");
+              capability,curr_rgn,in_notreadctxt,_} = *get_fenv(te,"set_next");
   ctrl_env_t<`r,`r> new_cenv = 
     rnew(r) CtrlEnv{.ctrl_rgn = r,
                     .continue_stmt = ctrl_env->continue_stmt,
@@ -794,7 +811,7 @@ tenv_t<`g,`r> set_next(region_t<`r> r, tenv_t<`g,`r2> te, jumpee_t<`r> j
                     .try_depth = ctrl_env->try_depth};
   fenv_t<`r> new_fenv = 
     rnew(r) Fenv{shared,type_vars,region_order,(bindings_t<`r>)locals,
-                   encloser,new_cenv,capability,curr_rgn,in_notreadctxt};
+                   encloser,new_cenv,capability,curr_rgn,in_notreadctxt,r};
   return put_fenv(r,te,new_fenv);
 }
 
@@ -833,19 +850,19 @@ stmt_t get_encloser(tenv_t te) {
 tenv_t<`g,`r2> allow_valueof(region_t<`r2> r2, tenv_t<`g,`r> te : {`r} > `r2) {
   if (te->le == NULL)
     return rnew(r2) Tenv(te->ns, te->ae, NULL, true);
-  let Fenv{<`f,`c> s,t,r,l,e,ce,cp,cr,i} = *te->le;
-  let fe = rnew(r2) Fenv{s,t,r,(bindings_t<`r2>)l,e,ce,cp,cr,i};
+  let Fenv{<`f,`c> s,t,r,l,e,ce,cp,cr,i,_} = *te->le;
+  let fe = rnew(r2) Fenv{s,t,r,(bindings_t<`r2>)l,e,ce,cp,cr,i,r2};
   return rnew(r2) Tenv(te->ns, te->ae, fe, true);
 }
 
 tenv_t<`g,`r> set_encloser(region_t<`r> r, tenv_t<`g,`r2> te, stmt_t s : 
                            {`r2} > `r) {
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = 
+              capability,curr_rgn,in_notreadctxt,_} = 
     *get_fenv(te,"set_encloser");
   let fe = 
     rnew(r) Fenv{shared,type_vars,region_order,(bindings_t<`r>)locals,
-                 s,ctrl_env,capability,curr_rgn,in_notreadctxt};
+                 s,ctrl_env,capability,curr_rgn,in_notreadctxt,r};
   return put_fenv(r,te,fe);
 }
 
@@ -858,21 +875,21 @@ tenv_t<`g,`r> add_region(region_t<`r> r, tenv_t<`g,`r2> te, type_t rgn,
   default: tv = env_err("bad add region"); break;
   }
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = 
+              capability,curr_rgn,in_notreadctxt,_} = 
     *get_fenv(te,"add_region");
   region_order = add_youngest(shared->frgn, region_order, tv, resetable, opened);
   capability = new JoinEff(new List(new AccessEff(rgn),
                                     new List(capability,NULL)));
   let fe = 
     rnew(r) Fenv{shared,type_vars,region_order,(bindings_t<`r>)locals,
-                 encloser,ctrl_env,capability,curr_rgn,in_notreadctxt};
+                 encloser,ctrl_env,capability,curr_rgn,in_notreadctxt,r};
   return put_fenv(r,te,fe);
 }
 
 tenv_t<`g,`r> new_named_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
                               tvar_t block_rgn : {`r2} > `r) {
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = 
+              capability,curr_rgn,in_notreadctxt,_} = 
     *get_fenv(te,"new_named_block");
 
   fenv_t fe = copy_fenv_old_ctrl(r,get_fenv(te,"new_block"));
@@ -884,7 +901,7 @@ tenv_t<`g,`r> new_named_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
   curr_rgn = block_typ;
   let fe = 
     rnew(r) Fenv{shared,type_vars,region_order,(bindings_t<`r>)locals,
-                 encloser,ctrl_env,capability,curr_rgn,in_notreadctxt};
+                 encloser,ctrl_env,capability,curr_rgn,in_notreadctxt,r};
   return put_fenv(r,te,fe);
 }
 
@@ -902,7 +919,7 @@ tenv_t<`g,`r> new_outlives_constraints(region_t<`r> r, tenv_t<`g,`r2> te,
 				       seg_t loc
                                        : {`r2} > `r) {
   let Fenv{<`f,`c> shared,type_vars,region_order,locals,encloser,ctrl_env,
-              capability,curr_rgn,in_notreadctxt} = 
+              capability,curr_rgn,in_notreadctxt,_} = 
     *get_fenv(te,"new_outlives_constraints");
   for(; cs != NULL; cs = cs->tl)
     region_order = 
@@ -911,7 +928,7 @@ tenv_t<`g,`r> new_outlives_constraints(region_t<`r> r, tenv_t<`g,`r2> te,
 			      loc);
   let fe = 
     rnew(r) Fenv{shared,type_vars,region_order,(bindings_t<`r>)locals,
-                 encloser,ctrl_env,capability,curr_rgn,in_notreadctxt};
+                 encloser,ctrl_env,capability,curr_rgn,in_notreadctxt,r};
   return put_fenv(r,te,fe);
 }
 
@@ -1091,13 +1108,14 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List(fd->effect->v,NULL))),
          .curr_rgn    = param_rgn,
-         .in_notreadctxt = false
+         .in_notreadctxt = false, 
+         .fnrgn       = r
        };
 }
 
 fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
   let &Fenv{<`f,`c> .locals = old_locals, .region_order = rgn_po, 
-               .type_vars = type_vars, .shared = shared, ...} = old_fenv;
+               .type_vars = type_vars, .shared = shared, .fnrgn = fr, ...} = old_fenv;
   let r = shared->frgn;
   let locals = (bindings_t<`r>)old_locals;
   tvar_t rgn0 = 
@@ -1161,6 +1179,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
          .capability  = new JoinEff(new List(new AccessEff(param_rgn),
                                              new List(fd->effect->v,NULL))),
          .curr_rgn    = param_rgn,
-         .in_notreadctxt = false
+         .in_notreadctxt = false,
+         .fnrgn       = fr
        };
 }

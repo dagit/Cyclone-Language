@@ -689,7 +689,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 					list_t<$(declarator_t,exp_opt_t)@> ids,
                                         seg_t tqual_loc,
 					seg_t loc) {
- region mkrgn {
+ region mkrgn; {
   let &Declaration_spec(_,tq,tss,_,atts) = ds;
   if (tq.loc == NULL) tq.loc = tqual_loc;
   if (ds->is_inline)
@@ -1139,6 +1139,55 @@ declaration:
       vds = List::imp_rev(vds);
       $$=^$(new List(letv_decl(vds,LOC(@1,@3)),NULL));
     }
+/* Cyc: region declaration */
+/* region <`r> h; */
+| REGION '<' TYPE_VAR '>' IDENTIFIER ';'
+  { if (zstrcmp($3,"`H") == 0 || zstrcmp($3,"`U") == 0)
+      err(aprintf("bad occurrence of heap region %s",$3),LOC(@3,@3));
+    tvar_t tv = new Tvar(new $3,-1,Tcutil::kind_to_bound(RgnKind));
+    type_t t  = new VarType(tv);
+    vardecl_t vd = new_vardecl(new $(Loc_n,new $5),new RgnHandleType(t),NULL);
+    $$ = ^$(new List(region_decl(tv,vd,false,NULL,LOC(@1,@6)),NULL));
+  }
+/* region h;   and  region h = open(e); */
+| REGION IDENTIFIER open_exp_opt ';'
+  { if (zstrcmp($2,"H") == 0)
+      err("bad occurrence of heap region `H",LOC(@2,@2));
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$2), -1,
+			 Tcutil::kind_to_bound(RgnKind));
+    type_t t = new VarType(tv);
+    vardecl_t vd = new_vardecl(new $(Loc_n,new $2),new RgnHandleType(t),NULL);
+    $$ = ^$(new List(region_decl(tv,vd,false,$3,LOC(@1,@4)),NULL));
+  }
+/* region [resetable] <`r> h; */
+| REGION '[' IDENTIFIER ']' '<' TYPE_VAR '>' IDENTIFIER ';'
+  { if (zstrcmp($3,"resetable") != 0)
+      err("expecting [resetable]",LOC(@3,@3));
+    if (zstrcmp($6,"`H") == 0 || zstrcmp($6,"`U"))
+      err(aprintf("bad occurrence of heap region %s",$6),LOC(@6,@6));
+    tvar_t tv = new Tvar(new $6,-1,Tcutil::kind_to_bound(RgnKind));
+    type_t t  = new VarType(tv);
+    vardecl_t vd = new_vardecl(new $(Loc_n,new $8),new RgnHandleType(t),NULL);
+    $$ = ^$(new List(region_decl(tv,vd,true,NULL,LOC(@1,@9)),NULL));
+  }
+/* region [resetable] h; */
+| REGION '[' IDENTIFIER ']' IDENTIFIER ';'
+  { if (zstrcmp($3,"resetable") != 0)
+      err("expecting `resetable'",LOC(@3,@3));
+    if (zstrcmp($5,"H") == 0)
+      err("bad occurrence of heap region `H",LOC(@5,@5));
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$5), -1,
+			 Tcutil::kind_to_bound(RgnKind));
+    type_t t = new VarType(tv);
+    vardecl_t vd = new_vardecl(new $(Loc_n,new $5),new RgnHandleType(t),NULL);
+    $$ = ^$(new List(region_decl(tv,vd,true,NULL,LOC(@1,@6)),NULL));
+  }
+/* Cyc: alias <r>t v = e; */
+| ALIAS '<' TYPE_VAR '>' IDENTIFIER '=' expression ';'
+  { tvar_t tv = new Tvar(new $3,-1,new Eq_kb(RgnKind));
+    vardecl_t vd = new_vardecl(new $(Loc_n, new $5),VoidType,NULL);
+    $$ = ^$(new List(alias_decl($7,tv,vd,LOC(@1,@8)),NULL));
+  }
 ;
 
 declaration_list:
@@ -1496,7 +1545,7 @@ struct_declaration:
        * declarations.  We must check that each id is actually present
        * and then convert this to a list of struct fields: (1) id,
        * (2) tqual, (3) type. */
-      region temp {
+      region temp; {
         let &$(tq,tspecs,atts) = $1;
         if (tq.loc == NULL) tq.loc = LOC(@1,@1);
         let $(decls, widths) = List::rsplit(temp,temp,$2);
@@ -2083,65 +2132,9 @@ statement:
 | selection_statement   { $$=$!1; }
 | iteration_statement   { $$=$!1; }
 | jump_statement        { $$=$!1; }
-/* Cyc: region statements */
-| REGION '<' TYPE_VAR '>' IDENTIFIER statement
-  { if (zstrcmp($3,"`H") == 0 || zstrcmp($3,"`U") == 0)
-      err(aprintf("bad occurrence of heap region %s",$3),LOC(@3,@3));
-    tvar_t tv = new Tvar(new $3,-1,Tcutil::kind_to_bound(RgnKind));
-    type_t t  = new VarType(tv);
-    $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $5),
-                                               new RgnHandleType(t),NULL),
-                                false,NULL,$6),
-                   LOC(@1,@6)));
-  }
-| REGION IDENTIFIER open_exp_opt statement
-  { if (zstrcmp($2,"H") == 0)
-      err("bad occurrence of heap region `H",LOC(@2,@2));
-    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$2), -1,
-			 Tcutil::kind_to_bound(RgnKind));
-    type_t t = new VarType(tv);
-    $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $2),
-                                               new RgnHandleType(t),NULL),
-                                false,$3,$4),
-                   LOC(@1,@3)));
-  }
-| REGION '[' IDENTIFIER ']' '<' TYPE_VAR '>' IDENTIFIER statement
-  { if (zstrcmp($3,"resetable") != 0)
-      err("expecting [resetable]",LOC(@3,@3));
-    if (zstrcmp($6,"`H") == 0 || zstrcmp($6,"`U"))
-      err(aprintf("bad occurrence of heap region %s",$6),LOC(@6,@6));
-    tvar_t tv = new Tvar(new $6,-1,Tcutil::kind_to_bound(RgnKind));
-    type_t t  = new VarType(tv);
-    $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $8),
-                                               new RgnHandleType(t),NULL),
-                                true,NULL,$9),
-                   LOC(@1,@9)));
-  }
-| REGION '[' IDENTIFIER ']' IDENTIFIER statement
-  { if (zstrcmp($3,"resetable") != 0)
-      err("expecting `resetable'",LOC(@3,@3));
-    if (zstrcmp($5,"H") == 0)
-      err("bad occurrence of heap region `H",LOC(@5,@5));
-    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$5), -1,
-			 Tcutil::kind_to_bound(RgnKind));
-    type_t t = new VarType(tv);
-    $$=^$(new_stmt(new Region_s(tv,new_vardecl(new $(Loc_n, new $5),
-                                               new RgnHandleType(t),NULL),
-                                true,NULL,$6),
-                   LOC(@1,@6)));
-  }
-/* Cyc: reset_region(e) statement */
+// Cyc: reset_region(e) statement
 | RESET_REGION '(' expression ')' ';'
   { $$=^$(new_stmt(new ResetRegion_s($3),LOC(@1,@5))); }
-/* Cyc: alias <r>t v = e in s */
-| ALIAS '<' TYPE_VAR '>' IDENTIFIER '=' expression IDENTIFIER statement
-  { if (zstrcmp($8,"in") != 0)
-      err("expecting `in'",LOC(@8,@8));
-    tvar_t tv = new Tvar(new $3,-1,new Eq_kb(RgnKind));
-    $$=^$(new_stmt(new Alias_s($7,tv,
-			       new_vardecl(new $(Loc_n, new $5),
-					   VoidType,NULL),$9),LOC(@1,@9)));
-  }
 ;
 
 open_exp_opt:

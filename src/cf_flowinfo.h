@@ -201,7 +201,7 @@ extern int place_cmp(place_t, place_t);
 extern aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r>, List::list_t<Absyn::aggrfield_t>, absRval_t<`r>);
 extern absRval_t<`r> typ_to_absrval(flow_env_t<`r>, Absyn::type_t t, absRval_t<`r> leafval);
 
-extern initlevel_t initlevel(flowdict_t<`r> d, absRval_t<`r> r);
+extern initlevel_t initlevel(flow_env_t,flowdict_t<`r> d, absRval_t<`r> r);
 extern absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place);
 extern bool        is_unescaped(flowdict_t<`r> d, place_t<`r,`r> place);
 extern bool flow_lessthan_approx(flow_t<`r> f1, flow_t<`r> f2);

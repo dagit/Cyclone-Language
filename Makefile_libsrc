@@ -49,6 +49,9 @@ endif
 ifdef NOREGIONS
 override CYCFLAGS += -noregions
 endif
+ifdef OPTBUILD
+override CYCFLAGS += -O3
+endif
 
 # cross compilation -- will be changed to use -b shortly
 ifneq ($(UPDATEARCH),$(ARCH))

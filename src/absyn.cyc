@@ -643,6 +643,13 @@ decl_t let_decl(pat_t p, exp_t e, seg_t loc) {
 decl_t letv_decl(list_t<vardecl_t,`H> vds, seg_t loc) {
   return new_decl(new Letv_d(vds),loc);
 }
+decl_t region_decl(tvar_t tv,vardecl_t vd,bool resetable,exp_opt_t eo,seg_t loc) {
+  return new_decl(new Region_d(tv,vd,resetable,eo),loc);
+}
+decl_t alias_decl(exp_t e,tvar_t tv,vardecl_t vd,seg_t loc) {
+  return new_decl(new Alias_d(e,tv,vd),loc);
+}
+
 vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
   return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(NULL),
                         .type=t, .initializer=init, .rgn=NULL, 

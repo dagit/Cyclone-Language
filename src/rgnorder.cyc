@@ -246,7 +246,7 @@ initial_env(region_t<`r> listrgn, rgn_po_t po, type_t rgn) {
 // does [po] prove that [eff] outlives [rgn]?
 // evar treatment: return false and do not constrain
 static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
-  region listrgn { // FIX: make a small initial size
+  region listrgn; { // FIX: make a small initial size
   switch(compress(eff)) {
   case &AccessEff(vt):
     // does `vt outlive `rgn ?
@@ -428,7 +428,7 @@ bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2) {
 
 // DEBUGGING
 void print_region_po(rgn_po_t po) {
-  region r { 
+  region r; { 
     let iter = Dict::make_iter(r,po->d);
     let elem = *Dict::rchoose(r,po->d);
     fprintf(stderr,"region po:\n");

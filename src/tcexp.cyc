@@ -74,8 +74,8 @@ static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, string_t msg,
 // the expression e with the appropriate r.
 // We must always overwrite e to prevent the compiler from diverging.
 static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
-  try
-    region r {
+  try {
+    TEMP_RGN(te, r) {
       switch (lookup_ordinary(r,te,e->loc,q)) {
       case &VarRes(b):          e->r = new Var_e(q,b); break;
       case &EnumRes(ed,ef):     e->r = new Enum_e(q,ed,ef); break;
@@ -87,7 +87,7 @@ static void resolve_unknown_id(tenv_t te, exp_t e, qvar_t q) {
         break;
       }
     }
-  catch { 
+  } catch { 
     case Dict::Absent:
       // This is an error, but the message will be printed elsewhere.
       // Here we just put the "I don't know" answer in e->r
@@ -106,7 +106,7 @@ static void resolve_unknown_fn(tenv_t te,exp_t e,exp_t e1,list_t<exp_t,`H> es) {
   switch (e1->r) {
   case &UnknownId_e(q):
     try {
-      region r {
+      TEMP_RGN(te, r) {
         switch (lookup_ordinary(r,te,e1->loc,q)) {
         case &VarRes(b):        
           e->r = new FnCall_e(e1,es,NULL); 
@@ -329,9 +329,11 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
       let args = opt_args->v;
       for (; args != NULL; args = args->tl) {
         tcExp(te,NULL,args->hd);
-	if (is_noalias_pointer_or_aggr(args->hd->topt->v) &&
-	    !is_noalias_path(args->hd))
-	  terr(args->hd->loc, UNIQUE_ERR_MSG);
+        TEMP_RGN(te, temp) {
+          if (is_noalias_pointer_or_aggr(temp,args->hd->topt->v) &&
+              !is_noalias_path(temp,args->hd))
+            terr(args->hd->loc, UNIQUE_ERR_MSG);
+        }
       }
     }
     return; 
@@ -349,8 +351,10 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
              typ2string(t), typ2string(e->topt->v));
         explain_failure();
       }
-      if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e))
-	terr(args->hd->loc,UNIQUE_ERR_MSG);
+      TEMP_RGN(te, temp) {
+        if (is_noalias_pointer_or_aggr(temp,t) && !is_noalias_path(temp,e))
+          terr(args->hd->loc,UNIQUE_ERR_MSG);
+      }
     }
     // check arity
     if (desc_types != NULL)
@@ -467,7 +471,7 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
       if (!kind_leq(typ_kind(t1_elt),MemKind))
         terr(e1->loc,"can't perform arithmetic on abstract pointer type");
       if (is_noalias_pointer(t1))
-	terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
+        terr(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
       if (!coerce_sint_typ(te, e2)) {
 	terr(e2->loc,"expecting either %s or int but found %s",
              typ2string(t1),typ2string(t2));
@@ -711,7 +715,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   //   a function.  Since e2 cannot have a function type (any function
   //   types are promoted to function pointers) the types won't match.
   // As per K&R, don't promote any array types to pointer types in the lhs
-  region r {
+  TEMP_RGN(te, r) {
     tcExpNoPromote(enter_notreadctxt(r,te),NULL,e1);
   }
   tcExp(te,&e1->topt->v,e2);
@@ -731,8 +735,10 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
     return expr_err(te,loc,topt,"assignment to non-lvalue");
   check_writable(te, e1);
   if (po == NULL) {
-    if (is_noalias_pointer_or_aggr(t2) && !is_noalias_path(e2))
-      terr(e2->loc,UNIQUE_ERR_MSG);
+    TEMP_RGN (te, temp) {
+      if (is_noalias_pointer_or_aggr(temp,t2) && !is_noalias_path(temp,e2))
+        terr(e2->loc,UNIQUE_ERR_MSG);
+    }
     if (!coerce_assign(te,e2,t1)) {
       let result = expr_err(te,loc,topt,"type mismatch: %s != %s",
                             typ2string(t1), typ2string(t2));
@@ -814,7 +820,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
   // if e is a vararg function then we need to declare a new local
   // region block -- we just do it always here.
   let es = args;
-  region ter {
+  TEMP_RGN(te_orig, ter) {
     let te = new_block(ter,loc,te_orig); // needed for regions of params
     tcExp(te,NULL,e);
     type_t t = compress(e->topt->v);
@@ -848,7 +854,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
             unify(e1->topt->v,t2);
             explain_failure();
           }
-	  if (is_noalias_pointer_or_aggr(t2) && !is_noalias_path(e1))
+	  if (is_noalias_pointer_or_aggr(ter,t2) && !is_noalias_path(ter,e1))
 	    terr(e1->loc,UNIQUE_ERR_MSG);
           es = es->tl;
           args_info = args_info->tl;
@@ -870,7 +876,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
               else
                 fmt_args = new Opt(nth_tail(args,arg_start_pos - 1));
               args_already_checked = true;
-              region temp {
+              TEMP_RGN(te_orig, temp) {
                 switch (ft) {
                 case Printf_ft:
                   check_format_args(te,fmt_arg,fmt_args,temp,Formatstr::get_format_typs);
@@ -913,7 +919,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                        typ2string(vt),typ2string(e1->topt->v));
                   explain_failure();
                 }
-		if (is_noalias_pointer_or_aggr(vt) && !is_noalias_path(e1))
+		if (is_noalias_pointer_or_aggr(ter,vt) && !is_noalias_path(ter,e1))
 		  terr(e1->loc,UNIQUE_ERR_MSG);
               }
             } else {
@@ -930,7 +936,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                 else fields = td->fields->v;
                 if(!unify(tur->v,curr_rgn(te)))
                   terr(loc,"bad region for injected varargs");
-                region rgn {
+                TEMP_RGN(te, rgn) {
                   let inst = List::rzip(rgn,rgn,td->tvs,targs);
                   for (; es != NULL; es = es->tl) {
                     vci->num_varargs++;
@@ -938,8 +944,8 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
                     // must be careful not to type-check twice
                     if (!args_already_checked) {
                       tcExp(te,NULL,e1); 
-		      if (is_noalias_pointer_or_aggr(e1->topt->v) && 
-			  !is_noalias_path(e1))
+		      if (is_noalias_pointer_or_aggr(rgn,e1->topt->v) && 
+			  !is_noalias_path(rgn,e1))
 			terr(e1->loc,UNIQUE_ERR_MSG);
 		    }
                     let f = tcInjection(te,e1,vt,rgn,inst,fields);
@@ -988,8 +994,8 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
   case &PointerType(PtrInfo(t0,tq,PtrAtts(rt,x,b,zt,_))):
     switch (compress(t0)) {
     case &FnType(FnInfo{tvars,eff,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
-      region temp {
-        list_t<$(tvar_t,type_t)@`temp,`temp> instantiation = NULL;
+      TEMP_RGN(te, temp) {
+        list_t<$(tvar_t,type_t)@> instantiation = NULL;
         // now allows partial instantiation
         for (; ts != NULL && tvars != NULL; ts = ts->tl, tvars = tvars->tl) {
           kind_t k = tvar_kind(tvars->hd);
@@ -1083,13 +1089,13 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   // as required (see p. 200, A7.1 of K&R.)
   // We use clear_notreadctxt because the pointer might escape off
   // and later be read.
-  region r {
+  TEMP_RGN(te, r) {
     tcExpNoInst(clear_notreadctxt(r,te),topt2,e);
+    // can't take the address of a unique path
+    if (is_noalias_path(r,e))
+      terr(e->loc,"Cannot take the address of an alias-free path");
   }
 
-  // can't take the address of a unique path
-  if (is_noalias_path(e))
-    terr(e->loc,"Cannot take the address of an alias-free path");
 
   // first, dispense with the 
   // case where we have &e[i] and e is an array/pointer (i.e., not a tuple).
@@ -1213,7 +1219,7 @@ static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 
  // *e
 static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
-  region r { 
+  TEMP_RGN(te_orig, r) { 
     let te = clear_notreadctxt(r,te_orig);
     tcExp(te,NULL,e);
     type_t t = compress(e->topt->v);
@@ -1246,7 +1252,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
       return expr_err(te,loc,topt,"must use pattern-matching to access fields "
 		      "of existential types");
     _ t2;
-    region rgn {
+    TEMP_RGN(te, rgn) {
       let inst = List::rzip(rgn,rgn,ad->tvs,ts);
       t2 = rsubstitute(rgn,inst,finfo->type);
       // prevent someone from reading a non-bits-only union member
@@ -1280,7 +1286,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
 // e->f
 static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt, 
 			  exp_t e, field_name_t f) {
-  region r {
+  TEMP_RGN(te, r) {
     tcExp(clear_notreadctxt(r,te),NULL,e);
   }
   switch (compress(e->topt->v)) {
@@ -1298,7 +1304,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
                         "must use pattern-matching to access fields "
 			"of existential types");
       _ t3;
-      region rgn {
+      TEMP_RGN(te, rgn) {
 	let inst = List::rzip(rgn,rgn,ad->tvs,ts);
 	t3 = rsubstitute(rgn,inst,finfo->type);
       }
@@ -1338,7 +1344,7 @@ static type_t ithTupleType(tenv_t te, seg_t loc,
  // FIX: look at topt
 static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt, 
 			  exp_t e1, exp_t e2) {
-  region r {
+  TEMP_RGN(te_orig, r) {
     let te = clear_notreadctxt(r,te_orig);
     tcExp(te,NULL,e1);
     tcExp(te,NULL,e2);
@@ -1441,9 +1447,9 @@ static type_t tcCompoundLit(tenv_t te, seg_t loc, type_t * topt,
 static type_t tcArray(tenv_t te,seg_t loc,type_t * elt_topt, bool zero_term,
                    list_t<$(list_t<designator_t>,exp_t)@> des) {
   type_t res_t2;
-  region r {
+  TEMP_RGN(te, r) {
     let           num_es  = List::length(des);
-    list_t<exp_t,`r>  es  = List::rmap(r,snd,des);
+    list_t<exp_t> es  = List::rmap(r,snd,des);
     type_t        res     = new_evar(&mk,lookup_opt_type_vars(te));
     let           sz_rexp = new Const_e(Int_c(Unsigned,num_es));
     exp_t         sz_exp  = new_exp(sz_rexp,loc);
@@ -1507,8 +1513,8 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
   if (!vd->tq.real_const)
     impos("comprehension index variable is not declared const!");
   // add x to the environment as an unsigned int only if te->le is not NULL
-  region r {
-    tenv_t<_,`r> te2 = copy_tenv(r,te);
+  TEMP_RGN(te, r) {
+    tenv_t<_> te2 = copy_tenv(r,te);
     if (te2->le != NULL) {
       te2 = Tcenv::new_block(r,loc,te2);
       te2 = add_local_var(r, loc, te2, vd);
@@ -1590,7 +1596,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
     terr(loc,"can't build abstract struct");
     return wildtyp(lookup_opt_type_vars(te));
   }
-  region rgn {
+  TEMP_RGN(te, rgn) {
   // calculate the instantiation and final type
   let env = $(lookup_type_vars(te),rgn);
   let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,ad->tvs);
@@ -1620,7 +1626,7 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
   // the region bound)
   if (topt != NULL) unify(res_typ,*topt);
   // make sure each argument has the right type
-  list_t<$(aggrfield_t,exp_t)@`rgn,`rgn> fields =
+  list_t<$(aggrfield_t,exp_t)@/*`rgn,`rgn*/> fields =
     resolve_struct_designators(rgn,loc,args,ad->impl->fields);
   for(; fields != NULL; fields = fields->tl) {
     let &$(field,field_exp) = fields->hd;
@@ -1646,12 +1652,12 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
 
 static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts, 
                            list_t<$(list_t<designator_t>,exp_t)@> args) {
-  region rgn {
+  TEMP_RGN(te, rgn) {
     switch (compress(ts)) {
     case &AnonAggrType(k,fs):
       if(k==UnionA)
 	terr(loc,"expecting struct but found union");
-      list_t<$(aggrfield_t,exp_t)@`rgn,`rgn> fields = 
+      list_t<$(aggrfield_t,exp_t)@/*`rgn,`rgn*/> fields = 
         resolve_struct_designators(rgn,loc,args,fs);
       for (; fields != NULL; fields = fields->tl) {
         let &$(field,field_exp) = fields->hd;
@@ -1673,7 +1679,7 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
 // f(es)   where f is a tunion and is tuf->name
 static type_t tcTunion(tenv_t te, seg_t loc, type_t * topt, exp_t e,
 		       list_t<exp_t> es, tuniondecl_t tud, tunionfield_t tuf) {
-  region rgn {
+  TEMP_RGN(te, rgn) {
   let env      = $(lookup_type_vars(te),rgn);
   let inst     = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
   let all_typs = List::map(snd,inst);
@@ -1746,7 +1752,7 @@ static bool zeroable_type(type_t t) {
     let ad = get_known_aggrdecl(info);
     if(ad->impl == NULL || ad->impl->exist_vars != NULL)
       return false;
-    region r {
+    region r; {
       let inst = List::rzip(r,r,ad->tvs,ts);
       for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl) 
         if (!zeroable_type(rsubstitute(r,inst,fs->hd->type))) return false;
@@ -1972,7 +1978,7 @@ static type_t tcSwap(tenv_t te, seg_t loc, type_t * topt,
 bool in_stmt_exp = false;
 
 static type_t tcStmtExp(tenv_t te, seg_t loc, type_t * topt, stmt_t s) {
-  region r {
+  TEMP_RGN(te, r) {
     bool old_stmt_exp_state = in_stmt_exp;
     Tcstmt::tcStmt(set_encloser(r,te,s),s,true);
     in_stmt_exp = old_stmt_exp_state;
@@ -2153,12 +2159,14 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   type_t t = tcExpNoPromote(te, topt, e);
   // expression initializers are copied, and therefore consumed,
   // so check for uniqueness
-  if (is_noalias_pointer_or_aggr(t) && !is_noalias_path(e)) {
-    fprintf(stderr,"topt=%s, e->topt->v=%s, e=%s\n",
-	    topt == NULL ? "NULL" : Absynpp::typ2string(*topt),
-	    Absynpp::typ2string(e->topt->v),
-	    Absynpp::exp2string(e));
-    terr(e->loc,UNIQUE_ERR_MSG);
+  TEMP_RGN(te, temp) {
+    if (is_noalias_pointer_or_aggr(temp,t) && !is_noalias_path(temp,e)) {
+      fprintf(stderr,"topt=%s, e->topt->v=%s, e=%s\n",
+              topt == NULL ? "NULL" : Absynpp::typ2string(*topt),
+              Absynpp::typ2string(e->topt->v),
+              Absynpp::exp2string(e));
+      terr(e->loc,UNIQUE_ERR_MSG);
+    }
   }
   switch (e->r) {
   case &Array_e(_): 
@@ -2204,10 +2212,10 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
     case &PointerType(PtrInfo(t,tq,PtrAtts(rt,x,b,zt,_))):
       switch (compress(t)) {
       case &FnType(FnInfo{tvs,eff,rtyp,args,c_varargs,cyc_varargs,rpo,atts}):
-	if (tvs != NULL)    // then, instantiate if necessary
-	  region rgn {
+	if (tvs != NULL) {    // then, instantiate if necessary
+	  TEMP_RGN(te, rgn) {
            let env = $(lookup_type_vars(te),rgn);
-	   list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = 
+	   list_t<$(tvar_t,type_t)@/*`rgn,`rgn*/> inst = 
 	     List::rmap_c(rgn,r_make_inst_var,&env,tvs);
 	   list_t<type_t> ts = List::map(snd,inst);
 	   type_t ftyp = rsubstitute(rgn, inst,
@@ -2219,6 +2227,7 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
 	   e->r    = new Instantiate_e(inner,ts);
 	   e->topt = new Opt(new_typ);
 	  }
+        }
 	break;
       default: break;
       }

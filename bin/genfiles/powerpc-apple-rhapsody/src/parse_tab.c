@@ -911,14 +911,10 @@ int tag;struct Cyc_List_List*f1;struct Cyc_Absyn_Switch_clause**f2;};struct Cyc_
 int tag;struct Cyc_Absyn_Decl*f1;struct Cyc_Absyn_Stmt*f2;};struct Cyc_Absyn_Label_s_struct{
 int tag;struct _dyneither_ptr*f1;struct Cyc_Absyn_Stmt*f2;};struct Cyc_Absyn_Do_s_struct{
 int tag;struct Cyc_Absyn_Stmt*f1;struct _tuple3 f2;};struct Cyc_Absyn_TryCatch_s_struct{
-int tag;struct Cyc_Absyn_Stmt*f1;struct Cyc_List_List*f2;};struct Cyc_Absyn_Region_s_struct{
-int tag;struct Cyc_Absyn_Tvar*f1;struct Cyc_Absyn_Vardecl*f2;int f3;struct Cyc_Absyn_Exp*
-f4;struct Cyc_Absyn_Stmt*f5;};struct Cyc_Absyn_ResetRegion_s_struct{int tag;struct
-Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_Alias_s_struct{int tag;struct Cyc_Absyn_Exp*f1;
-struct Cyc_Absyn_Tvar*f2;struct Cyc_Absyn_Vardecl*f3;struct Cyc_Absyn_Stmt*f4;};
-struct Cyc_Absyn_Stmt{void*r;struct Cyc_Position_Segment*loc;struct Cyc_List_List*
-non_local_preds;int try_depth;void*annot;};struct Cyc_Absyn_Var_p_struct{int tag;
-struct Cyc_Absyn_Vardecl*f1;struct Cyc_Absyn_Pat*f2;};struct Cyc_Absyn_Reference_p_struct{
+int tag;struct Cyc_Absyn_Stmt*f1;struct Cyc_List_List*f2;};struct Cyc_Absyn_ResetRegion_s_struct{
+int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_Stmt{void*r;struct Cyc_Position_Segment*
+loc;struct Cyc_List_List*non_local_preds;int try_depth;void*annot;};struct Cyc_Absyn_Var_p_struct{
+int tag;struct Cyc_Absyn_Vardecl*f1;struct Cyc_Absyn_Pat*f2;};struct Cyc_Absyn_Reference_p_struct{
 int tag;struct Cyc_Absyn_Vardecl*f1;struct Cyc_Absyn_Pat*f2;};struct Cyc_Absyn_TagInt_p_struct{
 int tag;struct Cyc_Absyn_Tvar*f1;struct Cyc_Absyn_Vardecl*f2;};struct Cyc_Absyn_Tuple_p_struct{
 int tag;struct Cyc_List_List*f1;int f2;};struct Cyc_Absyn_Pointer_p_struct{int tag;
@@ -961,15 +957,17 @@ kind;struct Cyc_Core_Opt*defn;struct Cyc_List_List*atts;};struct Cyc_Absyn_Var_d
 int tag;struct Cyc_Absyn_Vardecl*f1;};struct Cyc_Absyn_Fn_d_struct{int tag;struct Cyc_Absyn_Fndecl*
 f1;};struct Cyc_Absyn_Let_d_struct{int tag;struct Cyc_Absyn_Pat*f1;struct Cyc_Core_Opt*
 f2;struct Cyc_Absyn_Exp*f3;};struct Cyc_Absyn_Letv_d_struct{int tag;struct Cyc_List_List*
-f1;};struct Cyc_Absyn_Aggr_d_struct{int tag;struct Cyc_Absyn_Aggrdecl*f1;};struct
-Cyc_Absyn_Tunion_d_struct{int tag;struct Cyc_Absyn_Tuniondecl*f1;};struct Cyc_Absyn_Enum_d_struct{
-int tag;struct Cyc_Absyn_Enumdecl*f1;};struct Cyc_Absyn_Typedef_d_struct{int tag;
-struct Cyc_Absyn_Typedefdecl*f1;};struct Cyc_Absyn_Namespace_d_struct{int tag;
-struct _dyneither_ptr*f1;struct Cyc_List_List*f2;};struct Cyc_Absyn_Using_d_struct{
-int tag;struct _tuple1*f1;struct Cyc_List_List*f2;};struct Cyc_Absyn_ExternC_d_struct{
-int tag;struct Cyc_List_List*f1;};struct Cyc_Absyn_ExternCinclude_d_struct{int tag;
-struct Cyc_List_List*f1;struct Cyc_List_List*f2;};struct Cyc_Absyn_Decl{void*r;
-struct Cyc_Position_Segment*loc;};struct Cyc_Absyn_ArrayElement_struct{int tag;
+f1;};struct Cyc_Absyn_Region_d_struct{int tag;struct Cyc_Absyn_Tvar*f1;struct Cyc_Absyn_Vardecl*
+f2;int f3;struct Cyc_Absyn_Exp*f4;};struct Cyc_Absyn_Alias_d_struct{int tag;struct
+Cyc_Absyn_Exp*f1;struct Cyc_Absyn_Tvar*f2;struct Cyc_Absyn_Vardecl*f3;};struct Cyc_Absyn_Aggr_d_struct{
+int tag;struct Cyc_Absyn_Aggrdecl*f1;};struct Cyc_Absyn_Tunion_d_struct{int tag;
+struct Cyc_Absyn_Tuniondecl*f1;};struct Cyc_Absyn_Enum_d_struct{int tag;struct Cyc_Absyn_Enumdecl*
+f1;};struct Cyc_Absyn_Typedef_d_struct{int tag;struct Cyc_Absyn_Typedefdecl*f1;};
+struct Cyc_Absyn_Namespace_d_struct{int tag;struct _dyneither_ptr*f1;struct Cyc_List_List*
+f2;};struct Cyc_Absyn_Using_d_struct{int tag;struct _tuple1*f1;struct Cyc_List_List*
+f2;};struct Cyc_Absyn_ExternC_d_struct{int tag;struct Cyc_List_List*f1;};struct Cyc_Absyn_ExternCinclude_d_struct{
+int tag;struct Cyc_List_List*f1;struct Cyc_List_List*f2;};struct Cyc_Absyn_Decl{void*
+r;struct Cyc_Position_Segment*loc;};struct Cyc_Absyn_ArrayElement_struct{int tag;
 struct Cyc_Absyn_Exp*f1;};struct Cyc_Absyn_FieldName_struct{int tag;struct
 _dyneither_ptr*f1;};extern char Cyc_Absyn_EmptyAnnot[15];int Cyc_Absyn_is_qvar_qualified(
 struct _tuple1*);struct Cyc_Absyn_Tqual Cyc_Absyn_combine_tqual(struct Cyc_Absyn_Tqual
@@ -1060,14 +1058,17 @@ void*p,struct Cyc_Position_Segment*s);struct Cyc_Absyn_Pat*Cyc_Absyn_exp_pat(
 struct Cyc_Absyn_Exp*);struct Cyc_Absyn_Decl*Cyc_Absyn_new_decl(void*r,struct Cyc_Position_Segment*
 loc);struct Cyc_Absyn_Decl*Cyc_Absyn_let_decl(struct Cyc_Absyn_Pat*p,struct Cyc_Absyn_Exp*
 e,struct Cyc_Position_Segment*loc);struct Cyc_Absyn_Decl*Cyc_Absyn_letv_decl(
-struct Cyc_List_List*,struct Cyc_Position_Segment*loc);struct Cyc_Absyn_Vardecl*Cyc_Absyn_new_vardecl(
-struct _tuple1*x,void*t,struct Cyc_Absyn_Exp*init);struct Cyc_Absyn_AggrdeclImpl*
-Cyc_Absyn_aggrdecl_impl(struct Cyc_List_List*exists,struct Cyc_List_List*po,struct
-Cyc_List_List*fs);struct Cyc_Absyn_Decl*Cyc_Absyn_aggr_decl(void*k,void*s,struct
-_tuple1*n,struct Cyc_List_List*ts,struct Cyc_Absyn_AggrdeclImpl*i,struct Cyc_List_List*
-atts,struct Cyc_Position_Segment*loc);struct Cyc_Absyn_Decl*Cyc_Absyn_tunion_decl(
-void*s,struct _tuple1*n,struct Cyc_List_List*ts,struct Cyc_Core_Opt*fs,int
-is_xtunion,int is_flat,struct Cyc_Position_Segment*loc);void*Cyc_Absyn_function_typ(
+struct Cyc_List_List*,struct Cyc_Position_Segment*loc);struct Cyc_Absyn_Decl*Cyc_Absyn_region_decl(
+struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Vardecl*,int,struct Cyc_Absyn_Exp*,struct
+Cyc_Position_Segment*);struct Cyc_Absyn_Decl*Cyc_Absyn_alias_decl(struct Cyc_Absyn_Exp*,
+struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Vardecl*,struct Cyc_Position_Segment*);
+struct Cyc_Absyn_Vardecl*Cyc_Absyn_new_vardecl(struct _tuple1*x,void*t,struct Cyc_Absyn_Exp*
+init);struct Cyc_Absyn_AggrdeclImpl*Cyc_Absyn_aggrdecl_impl(struct Cyc_List_List*
+exists,struct Cyc_List_List*po,struct Cyc_List_List*fs);struct Cyc_Absyn_Decl*Cyc_Absyn_aggr_decl(
+void*k,void*s,struct _tuple1*n,struct Cyc_List_List*ts,struct Cyc_Absyn_AggrdeclImpl*
+i,struct Cyc_List_List*atts,struct Cyc_Position_Segment*loc);struct Cyc_Absyn_Decl*
+Cyc_Absyn_tunion_decl(void*s,struct _tuple1*n,struct Cyc_List_List*ts,struct Cyc_Core_Opt*
+fs,int is_xtunion,int is_flat,struct Cyc_Position_Segment*loc);void*Cyc_Absyn_function_typ(
 struct Cyc_List_List*tvs,struct Cyc_Core_Opt*eff_typ,void*ret_typ,struct Cyc_List_List*
 args,int c_varargs,struct Cyc_Absyn_VarargInfo*cyc_varargs,struct Cyc_List_List*
 rgn_po,struct Cyc_List_List*atts);int Cyc_Absyn_fntype_att(void*a);extern int Cyc_Absyn_porting_c_code;
@@ -1136,23 +1137,23 @@ struct Cyc_Position_Segment*sg,struct _dyneither_ptr fmt,struct _dyneither_ptr a
 Cyc_Parse_err((struct _dyneither_ptr)Cyc_vrprintf(Cyc_Core_heap_region,fmt,ap),sg);(
 int)_throw((void*)Cyc_Position_Exit);}static void Cyc_Parse_unimp(struct
 _dyneither_ptr msg,struct Cyc_Position_Segment*sg);static void Cyc_Parse_unimp(
-struct _dyneither_ptr msg,struct Cyc_Position_Segment*sg){{const char*_tmp8F4;void*
-_tmp8F3[2];struct Cyc_String_pa_struct _tmp8F2;struct Cyc_String_pa_struct _tmp8F1;(
-_tmp8F1.tag=0,((_tmp8F1.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)msg),((
-_tmp8F2.tag=0,((_tmp8F2.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Position_string_of_segment(
-sg)),((_tmp8F3[0]=& _tmp8F2,((_tmp8F3[1]=& _tmp8F1,Cyc_fprintf(Cyc_stderr,((
-_tmp8F4="%s: Warning: Cyclone does not yet support %s\n",_tag_dyneither(_tmp8F4,
-sizeof(char),46))),_tag_dyneither(_tmp8F3,sizeof(void*),2)))))))))))));}return;}
+struct _dyneither_ptr msg,struct Cyc_Position_Segment*sg){{const char*_tmp8ED;void*
+_tmp8EC[2];struct Cyc_String_pa_struct _tmp8EB;struct Cyc_String_pa_struct _tmp8EA;(
+_tmp8EA.tag=0,((_tmp8EA.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)msg),((
+_tmp8EB.tag=0,((_tmp8EB.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_Position_string_of_segment(
+sg)),((_tmp8EC[0]=& _tmp8EB,((_tmp8EC[1]=& _tmp8EA,Cyc_fprintf(Cyc_stderr,((
+_tmp8ED="%s: Warning: Cyclone does not yet support %s\n",_tag_dyneither(_tmp8ED,
+sizeof(char),46))),_tag_dyneither(_tmp8EC,sizeof(void*),2)))))))))))));}return;}
 static int Cyc_Parse_enum_counter=0;struct _tuple1*Cyc_Parse_gensym_enum();struct
-_tuple1*Cyc_Parse_gensym_enum(){union Cyc_Absyn_Nmspace_union _tmp903;struct
-_dyneither_ptr*_tmp902;const char*_tmp901;void*_tmp900[1];struct Cyc_Int_pa_struct
-_tmp8FF;struct _tuple1*_tmp8FE;return(_tmp8FE=_cycalloc(sizeof(*_tmp8FE)),((
-_tmp8FE->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp903.Rel_n).tag=1,(((_tmp903.Rel_n).f1=
-0,_tmp903)))),((_tmp8FE->f2=((_tmp902=_cycalloc(sizeof(*_tmp902)),((_tmp902[0]=(
-struct _dyneither_ptr)((_tmp8FF.tag=1,((_tmp8FF.f1=(unsigned long)Cyc_Parse_enum_counter
-++,((_tmp900[0]=& _tmp8FF,Cyc_aprintf(((_tmp901="__anonymous_enum_%d__",
-_tag_dyneither(_tmp901,sizeof(char),22))),_tag_dyneither(_tmp900,sizeof(void*),1)))))))),
-_tmp902)))),_tmp8FE)))));}struct _tuple7{struct _tuple1*f1;struct Cyc_Absyn_Tqual f2;
+_tuple1*Cyc_Parse_gensym_enum(){union Cyc_Absyn_Nmspace_union _tmp8FC;struct
+_dyneither_ptr*_tmp8FB;const char*_tmp8FA;void*_tmp8F9[1];struct Cyc_Int_pa_struct
+_tmp8F8;struct _tuple1*_tmp8F7;return(_tmp8F7=_cycalloc(sizeof(*_tmp8F7)),((
+_tmp8F7->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp8FC.Rel_n).tag=1,(((_tmp8FC.Rel_n).f1=
+0,_tmp8FC)))),((_tmp8F7->f2=((_tmp8FB=_cycalloc(sizeof(*_tmp8FB)),((_tmp8FB[0]=(
+struct _dyneither_ptr)((_tmp8F8.tag=1,((_tmp8F8.f1=(unsigned long)Cyc_Parse_enum_counter
+++,((_tmp8F9[0]=& _tmp8F8,Cyc_aprintf(((_tmp8FA="__anonymous_enum_%d__",
+_tag_dyneither(_tmp8FA,sizeof(char),22))),_tag_dyneither(_tmp8F9,sizeof(void*),1)))))))),
+_tmp8FB)))),_tmp8F7)))));}struct _tuple7{struct _tuple1*f1;struct Cyc_Absyn_Tqual f2;
 void*f3;struct Cyc_List_List*f4;struct Cyc_List_List*f5;};struct _tuple8{struct
 _tuple7*f1;struct Cyc_Absyn_Exp*f2;};static struct Cyc_Absyn_Aggrfield*Cyc_Parse_make_aggr_field(
 struct Cyc_Position_Segment*loc,struct _tuple8*field_info);static struct Cyc_Absyn_Aggrfield*
@@ -1162,79 +1163,79 @@ _tuple1*_tmpE;struct Cyc_Absyn_Tqual _tmpF;void*_tmp10;struct Cyc_List_List*_tmp
 struct Cyc_List_List*_tmp12;struct Cyc_Absyn_Exp*_tmp13;struct _tuple8*_tmpA=
 field_info;_tmpB=*_tmpA;_tmpC=_tmpB.f1;_tmpD=*_tmpC;_tmpE=_tmpD.f1;_tmpF=_tmpD.f2;
 _tmp10=_tmpD.f3;_tmp11=_tmpD.f4;_tmp12=_tmpD.f5;_tmp13=_tmpB.f2;if(_tmp11 != 0){
-const char*_tmp904;Cyc_Parse_err(((_tmp904="bad type params in struct field",
-_tag_dyneither(_tmp904,sizeof(char),32))),loc);}if(Cyc_Absyn_is_qvar_qualified(
-_tmpE)){const char*_tmp905;Cyc_Parse_err(((_tmp905="struct or union field cannot be qualified with a namespace",
-_tag_dyneither(_tmp905,sizeof(char),59))),loc);}{struct Cyc_Absyn_Aggrfield*
-_tmp906;return(_tmp906=_cycalloc(sizeof(*_tmp906)),((_tmp906->name=(*_tmpE).f2,((
-_tmp906->tq=_tmpF,((_tmp906->type=(void*)_tmp10,((_tmp906->width=_tmp13,((
-_tmp906->attributes=_tmp12,_tmp906)))))))))));}}static void*Cyc_Parse_type_spec(
+const char*_tmp8FD;Cyc_Parse_err(((_tmp8FD="bad type params in struct field",
+_tag_dyneither(_tmp8FD,sizeof(char),32))),loc);}if(Cyc_Absyn_is_qvar_qualified(
+_tmpE)){const char*_tmp8FE;Cyc_Parse_err(((_tmp8FE="struct or union field cannot be qualified with a namespace",
+_tag_dyneither(_tmp8FE,sizeof(char),59))),loc);}{struct Cyc_Absyn_Aggrfield*
+_tmp8FF;return(_tmp8FF=_cycalloc(sizeof(*_tmp8FF)),((_tmp8FF->name=(*_tmpE).f2,((
+_tmp8FF->tq=_tmpF,((_tmp8FF->type=(void*)_tmp10,((_tmp8FF->width=_tmp13,((
+_tmp8FF->attributes=_tmp12,_tmp8FF)))))))))));}}static void*Cyc_Parse_type_spec(
 void*t,struct Cyc_Position_Segment*loc);static void*Cyc_Parse_type_spec(void*t,
-struct Cyc_Position_Segment*loc){struct Cyc_Parse_Type_spec_struct _tmp909;struct
-Cyc_Parse_Type_spec_struct*_tmp908;return(void*)((_tmp908=_cycalloc(sizeof(*
-_tmp908)),((_tmp908[0]=((_tmp909.tag=4,((_tmp909.f1=(void*)t,((_tmp909.f2=loc,
-_tmp909)))))),_tmp908))));}static void*Cyc_Parse_array2ptr(void*t,int argposn);
+struct Cyc_Position_Segment*loc){struct Cyc_Parse_Type_spec_struct _tmp902;struct
+Cyc_Parse_Type_spec_struct*_tmp901;return(void*)((_tmp901=_cycalloc(sizeof(*
+_tmp901)),((_tmp901[0]=((_tmp902.tag=4,((_tmp902.f1=(void*)t,((_tmp902.f2=loc,
+_tmp902)))))),_tmp901))));}static void*Cyc_Parse_array2ptr(void*t,int argposn);
 static void*Cyc_Parse_array2ptr(void*t,int argposn){void*_tmp19=t;struct Cyc_Absyn_ArrayInfo
 _tmp1A;void*_tmp1B;struct Cyc_Absyn_Tqual _tmp1C;struct Cyc_Absyn_Exp*_tmp1D;struct
 Cyc_Absyn_Conref*_tmp1E;struct Cyc_Position_Segment*_tmp1F;_LL1: if(_tmp19 <= (void*)
 4)goto _LL3;if(*((int*)_tmp19)!= 7)goto _LL3;_tmp1A=((struct Cyc_Absyn_ArrayType_struct*)
 _tmp19)->f1;_tmp1B=(void*)_tmp1A.elt_type;_tmp1C=_tmp1A.tq;_tmp1D=_tmp1A.num_elts;
 _tmp1E=_tmp1A.zero_term;_tmp1F=_tmp1A.zt_loc;_LL2: {struct Cyc_Absyn_Upper_b_struct
-_tmp90C;struct Cyc_Absyn_Upper_b_struct*_tmp90B;return Cyc_Absyn_starb_typ(_tmp1B,
+_tmp905;struct Cyc_Absyn_Upper_b_struct*_tmp904;return Cyc_Absyn_starb_typ(_tmp1B,
 argposn?Cyc_Absyn_new_evar((struct Cyc_Core_Opt*)& Cyc_Tcutil_rk,0):(void*)2,
-_tmp1C,_tmp1D == 0?(void*)0:(void*)((_tmp90B=_cycalloc(sizeof(*_tmp90B)),((
-_tmp90B[0]=((_tmp90C.tag=0,((_tmp90C.f1=(struct Cyc_Absyn_Exp*)_tmp1D,_tmp90C)))),
-_tmp90B)))),_tmp1E);}_LL3:;_LL4: return t;_LL0:;}static void Cyc_Parse_arg_array2ptr(
+_tmp1C,_tmp1D == 0?(void*)0:(void*)((_tmp904=_cycalloc(sizeof(*_tmp904)),((
+_tmp904[0]=((_tmp905.tag=0,((_tmp905.f1=(struct Cyc_Absyn_Exp*)_tmp1D,_tmp905)))),
+_tmp904)))),_tmp1E);}_LL3:;_LL4: return t;_LL0:;}static void Cyc_Parse_arg_array2ptr(
 struct _tuple2*x);static void Cyc_Parse_arg_array2ptr(struct _tuple2*x){(*x).f3=Cyc_Parse_array2ptr((*
 x).f3,1);}struct _tuple9{struct Cyc_Absyn_Tqual f1;void*f2;};static struct _tuple9*
 Cyc_Parse_get_tqual_typ(struct Cyc_Position_Segment*loc,struct _tuple2*t);static
 struct _tuple9*Cyc_Parse_get_tqual_typ(struct Cyc_Position_Segment*loc,struct
-_tuple2*t){struct _tuple9*_tmp90D;return(_tmp90D=_cycalloc(sizeof(*_tmp90D)),((
-_tmp90D->f1=(*t).f2,((_tmp90D->f2=(*t).f3,_tmp90D)))));}static struct Cyc_Absyn_Vardecl*
+_tuple2*t){struct _tuple9*_tmp906;return(_tmp906=_cycalloc(sizeof(*_tmp906)),((
+_tmp906->f1=(*t).f2,((_tmp906->f2=(*t).f3,_tmp906)))));}static struct Cyc_Absyn_Vardecl*
 Cyc_Parse_decl2vardecl(struct Cyc_Absyn_Decl*d);static struct Cyc_Absyn_Vardecl*Cyc_Parse_decl2vardecl(
 struct Cyc_Absyn_Decl*d){void*_tmp23=(void*)d->r;struct Cyc_Absyn_Vardecl*_tmp24;
 _LL6: if(_tmp23 <= (void*)2)goto _LL8;if(*((int*)_tmp23)!= 0)goto _LL8;_tmp24=((
 struct Cyc_Absyn_Var_d_struct*)_tmp23)->f1;_LL7: return _tmp24;_LL8:;_LL9: {const
-char*_tmp910;void*_tmp90F;(_tmp90F=0,((int(*)(struct Cyc_Position_Segment*sg,
+char*_tmp909;void*_tmp908;(_tmp908=0,((int(*)(struct Cyc_Position_Segment*sg,
 struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(d->loc,((
-_tmp910="bad declaration in `forarray' statement",_tag_dyneither(_tmp910,sizeof(
-char),40))),_tag_dyneither(_tmp90F,sizeof(void*),0)));}_LL5:;}static int Cyc_Parse_is_typeparam(
+_tmp909="bad declaration in `forarray' statement",_tag_dyneither(_tmp909,sizeof(
+char),40))),_tag_dyneither(_tmp908,sizeof(void*),0)));}_LL5:;}static int Cyc_Parse_is_typeparam(
 void*tm);static int Cyc_Parse_is_typeparam(void*tm){void*_tmp27=tm;_LLB: if(*((int*)
 _tmp27)!= 4)goto _LLD;_LLC: return 1;_LLD:;_LLE: return 0;_LLA:;}static void*Cyc_Parse_id2type(
 struct _dyneither_ptr s,void*k);static void*Cyc_Parse_id2type(struct _dyneither_ptr s,
-void*k){const char*_tmp911;if(Cyc_zstrcmp((struct _dyneither_ptr)s,((_tmp911="`H",
-_tag_dyneither(_tmp911,sizeof(char),3))))== 0)return(void*)2;else{const char*
-_tmp912;if(Cyc_zstrcmp((struct _dyneither_ptr)s,((_tmp912="`U",_tag_dyneither(
-_tmp912,sizeof(char),3))))== 0)return(void*)3;else{struct Cyc_Absyn_VarType_struct
-_tmp91C;struct _dyneither_ptr*_tmp91B;struct Cyc_Absyn_Tvar*_tmp91A;struct Cyc_Absyn_VarType_struct*
-_tmp919;return(void*)((_tmp919=_cycalloc(sizeof(*_tmp919)),((_tmp919[0]=((
-_tmp91C.tag=1,((_tmp91C.f1=((_tmp91A=_cycalloc(sizeof(*_tmp91A)),((_tmp91A->name=((
-_tmp91B=_cycalloc(sizeof(*_tmp91B)),((_tmp91B[0]=s,_tmp91B)))),((_tmp91A->identity=
-- 1,((_tmp91A->kind=(void*)k,_tmp91A)))))))),_tmp91C)))),_tmp919))));}}}static
+void*k){const char*_tmp90A;if(Cyc_zstrcmp((struct _dyneither_ptr)s,((_tmp90A="`H",
+_tag_dyneither(_tmp90A,sizeof(char),3))))== 0)return(void*)2;else{const char*
+_tmp90B;if(Cyc_zstrcmp((struct _dyneither_ptr)s,((_tmp90B="`U",_tag_dyneither(
+_tmp90B,sizeof(char),3))))== 0)return(void*)3;else{struct Cyc_Absyn_VarType_struct
+_tmp915;struct _dyneither_ptr*_tmp914;struct Cyc_Absyn_Tvar*_tmp913;struct Cyc_Absyn_VarType_struct*
+_tmp912;return(void*)((_tmp912=_cycalloc(sizeof(*_tmp912)),((_tmp912[0]=((
+_tmp915.tag=1,((_tmp915.f1=((_tmp913=_cycalloc(sizeof(*_tmp913)),((_tmp913->name=((
+_tmp914=_cycalloc(sizeof(*_tmp914)),((_tmp914[0]=s,_tmp914)))),((_tmp913->identity=
+- 1,((_tmp913->kind=(void*)k,_tmp913)))))))),_tmp915)))),_tmp912))));}}}static
 struct Cyc_Absyn_Tvar*Cyc_Parse_copy_tvar(struct Cyc_Absyn_Tvar*t);static struct Cyc_Absyn_Tvar*
 Cyc_Parse_copy_tvar(struct Cyc_Absyn_Tvar*t){void*k;{void*_tmp2E=Cyc_Absyn_compress_kb((
 void*)t->kind);void*_tmp2F;_LL10: if(*((int*)_tmp2E)!= 1)goto _LL12;_LL11:{struct
-Cyc_Absyn_Unknown_kb_struct _tmp91F;struct Cyc_Absyn_Unknown_kb_struct*_tmp91E;k=(
-void*)((_tmp91E=_cycalloc(sizeof(*_tmp91E)),((_tmp91E[0]=((_tmp91F.tag=1,((
-_tmp91F.f1=0,_tmp91F)))),_tmp91E))));}goto _LLF;_LL12: if(*((int*)_tmp2E)!= 2)goto
+Cyc_Absyn_Unknown_kb_struct _tmp918;struct Cyc_Absyn_Unknown_kb_struct*_tmp917;k=(
+void*)((_tmp917=_cycalloc(sizeof(*_tmp917)),((_tmp917[0]=((_tmp918.tag=1,((
+_tmp918.f1=0,_tmp918)))),_tmp917))));}goto _LLF;_LL12: if(*((int*)_tmp2E)!= 2)goto
 _LL14;_tmp2F=(void*)((struct Cyc_Absyn_Less_kb_struct*)_tmp2E)->f2;_LL13:{struct
-Cyc_Absyn_Less_kb_struct _tmp922;struct Cyc_Absyn_Less_kb_struct*_tmp921;k=(void*)((
-_tmp921=_cycalloc(sizeof(*_tmp921)),((_tmp921[0]=((_tmp922.tag=2,((_tmp922.f1=0,((
-_tmp922.f2=(void*)_tmp2F,_tmp922)))))),_tmp921))));}goto _LLF;_LL14:;_LL15: k=
-_tmp2E;goto _LLF;_LLF:;}{struct Cyc_Absyn_Tvar*_tmp923;return(_tmp923=_cycalloc(
-sizeof(*_tmp923)),((_tmp923->name=t->name,((_tmp923->identity=- 1,((_tmp923->kind=(
-void*)k,_tmp923)))))));}}static struct Cyc_Absyn_Tvar*Cyc_Parse_typ2tvar(struct Cyc_Position_Segment*
+Cyc_Absyn_Less_kb_struct _tmp91B;struct Cyc_Absyn_Less_kb_struct*_tmp91A;k=(void*)((
+_tmp91A=_cycalloc(sizeof(*_tmp91A)),((_tmp91A[0]=((_tmp91B.tag=2,((_tmp91B.f1=0,((
+_tmp91B.f2=(void*)_tmp2F,_tmp91B)))))),_tmp91A))));}goto _LLF;_LL14:;_LL15: k=
+_tmp2E;goto _LLF;_LLF:;}{struct Cyc_Absyn_Tvar*_tmp91C;return(_tmp91C=_cycalloc(
+sizeof(*_tmp91C)),((_tmp91C->name=t->name,((_tmp91C->identity=- 1,((_tmp91C->kind=(
+void*)k,_tmp91C)))))));}}static struct Cyc_Absyn_Tvar*Cyc_Parse_typ2tvar(struct Cyc_Position_Segment*
 loc,void*t);static struct Cyc_Absyn_Tvar*Cyc_Parse_typ2tvar(struct Cyc_Position_Segment*
 loc,void*t){void*_tmp35=t;struct Cyc_Absyn_Tvar*_tmp36;_LL17: if(_tmp35 <= (void*)4)
 goto _LL19;if(*((int*)_tmp35)!= 1)goto _LL19;_tmp36=((struct Cyc_Absyn_VarType_struct*)
-_tmp35)->f1;_LL18: return _tmp36;_LL19:;_LL1A: {const char*_tmp926;void*_tmp925;(
-_tmp925=0,((int(*)(struct Cyc_Position_Segment*sg,struct _dyneither_ptr fmt,struct
-_dyneither_ptr ap))Cyc_Parse_abort)(loc,((_tmp926="expecting a list of type variables, not types",
-_tag_dyneither(_tmp926,sizeof(char),46))),_tag_dyneither(_tmp925,sizeof(void*),0)));}
+_tmp35)->f1;_LL18: return _tmp36;_LL19:;_LL1A: {const char*_tmp91F;void*_tmp91E;(
+_tmp91E=0,((int(*)(struct Cyc_Position_Segment*sg,struct _dyneither_ptr fmt,struct
+_dyneither_ptr ap))Cyc_Parse_abort)(loc,((_tmp91F="expecting a list of type variables, not types",
+_tag_dyneither(_tmp91F,sizeof(char),46))),_tag_dyneither(_tmp91E,sizeof(void*),0)));}
 _LL16:;}static void*Cyc_Parse_tvar2typ(struct Cyc_Absyn_Tvar*pr);static void*Cyc_Parse_tvar2typ(
-struct Cyc_Absyn_Tvar*pr){struct Cyc_Absyn_VarType_struct _tmp929;struct Cyc_Absyn_VarType_struct*
-_tmp928;return(void*)((_tmp928=_cycalloc(sizeof(*_tmp928)),((_tmp928[0]=((
-_tmp929.tag=1,((_tmp929.f1=pr,_tmp929)))),_tmp928))));}static void Cyc_Parse_set_vartyp_kind(
+struct Cyc_Absyn_Tvar*pr){struct Cyc_Absyn_VarType_struct _tmp922;struct Cyc_Absyn_VarType_struct*
+_tmp921;return(void*)((_tmp921=_cycalloc(sizeof(*_tmp921)),((_tmp921[0]=((
+_tmp922.tag=1,((_tmp922.f1=pr,_tmp922)))),_tmp921))));}static void Cyc_Parse_set_vartyp_kind(
 void*t,void*k,int leq);static void Cyc_Parse_set_vartyp_kind(void*t,void*k,int leq){
 void*_tmp3B=Cyc_Tcutil_compress(t);struct Cyc_Absyn_Tvar*_tmp3C;struct Cyc_Absyn_Tvar
 _tmp3D;void*_tmp3E;void**_tmp3F;_LL1C: if(_tmp3B <= (void*)4)goto _LL1E;if(*((int*)
@@ -1242,9 +1243,9 @@ _tmp3B)!= 1)goto _LL1E;_tmp3C=((struct Cyc_Absyn_VarType_struct*)_tmp3B)->f1;
 _tmp3D=*_tmp3C;_tmp3E=(void*)_tmp3D.kind;_tmp3F=(void**)&(*((struct Cyc_Absyn_VarType_struct*)
 _tmp3B)->f1).kind;_LL1D: {void*_tmp40=Cyc_Absyn_compress_kb(*_tmp3F);_LL21: if(*((
 int*)_tmp40)!= 1)goto _LL23;_LL22: if(!leq)*_tmp3F=Cyc_Tcutil_kind_to_bound(k);
-else{struct Cyc_Absyn_Less_kb_struct _tmp92C;struct Cyc_Absyn_Less_kb_struct*
-_tmp92B;*_tmp3F=(void*)((_tmp92B=_cycalloc(sizeof(*_tmp92B)),((_tmp92B[0]=((
-_tmp92C.tag=2,((_tmp92C.f1=0,((_tmp92C.f2=(void*)k,_tmp92C)))))),_tmp92B))));}
+else{struct Cyc_Absyn_Less_kb_struct _tmp925;struct Cyc_Absyn_Less_kb_struct*
+_tmp924;*_tmp3F=(void*)((_tmp924=_cycalloc(sizeof(*_tmp924)),((_tmp924[0]=((
+_tmp925.tag=2,((_tmp925.f1=0,((_tmp925.f2=(void*)k,_tmp925)))))),_tmp924))));}
 return;_LL23:;_LL24: return;_LL20:;}_LL1E:;_LL1F: return;_LL1B:;}static struct Cyc_List_List*
 Cyc_Parse_oldstyle2newstyle(struct Cyc_List_List*tms,struct Cyc_List_List*tds,
 struct Cyc_Position_Segment*loc);static struct Cyc_List_List*Cyc_Parse_oldstyle2newstyle(
@@ -1254,62 +1255,62 @@ _LL26: if(*((int*)_tmp43)!= 3)goto _LL28;_tmp44=(void*)((struct Cyc_Absyn_Functi
 _tmp43)->f1;_LL27: if(tms->tl == 0  || Cyc_Parse_is_typeparam((void*)((struct Cyc_List_List*)
 _check_null(tms->tl))->hd) && ((struct Cyc_List_List*)_check_null(tms->tl))->tl == 
 0){void*_tmp45=_tmp44;struct Cyc_List_List*_tmp46;_LL2B: if(*((int*)_tmp45)!= 1)
-goto _LL2D;_LL2C:{const char*_tmp92F;void*_tmp92E;(_tmp92E=0,Cyc_Tcutil_warn(loc,((
-_tmp92F="function declaration with both new- and old-style parameter declarations; ignoring old-style",
-_tag_dyneither(_tmp92F,sizeof(char),93))),_tag_dyneither(_tmp92E,sizeof(void*),0)));}
+goto _LL2D;_LL2C:{const char*_tmp928;void*_tmp927;(_tmp927=0,Cyc_Tcutil_warn(loc,((
+_tmp928="function declaration with both new- and old-style parameter declarations; ignoring old-style",
+_tag_dyneither(_tmp928,sizeof(char),93))),_tag_dyneither(_tmp927,sizeof(void*),0)));}
 return tms;_LL2D: if(*((int*)_tmp45)!= 0)goto _LL2A;_tmp46=((struct Cyc_Absyn_NoTypes_struct*)
 _tmp45)->f1;_LL2E: if(((int(*)(struct Cyc_List_List*x))Cyc_List_length)(_tmp46)!= ((
-int(*)(struct Cyc_List_List*x))Cyc_List_length)(tds)){const char*_tmp932;void*
-_tmp931;(_tmp931=0,((int(*)(struct Cyc_Position_Segment*sg,struct _dyneither_ptr
-fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(loc,((_tmp932="wrong number of parameter declarations in old-style function declaration",
-_tag_dyneither(_tmp932,sizeof(char),73))),_tag_dyneither(_tmp931,sizeof(void*),0)));}{
+int(*)(struct Cyc_List_List*x))Cyc_List_length)(tds)){const char*_tmp92B;void*
+_tmp92A;(_tmp92A=0,((int(*)(struct Cyc_Position_Segment*sg,struct _dyneither_ptr
+fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(loc,((_tmp92B="wrong number of parameter declarations in old-style function declaration",
+_tag_dyneither(_tmp92B,sizeof(char),73))),_tag_dyneither(_tmp92A,sizeof(void*),0)));}{
 struct Cyc_List_List*_tmp4B=0;for(0;_tmp46 != 0;_tmp46=_tmp46->tl){struct Cyc_List_List*
 _tmp4C=tds;for(0;_tmp4C != 0;_tmp4C=_tmp4C->tl){struct Cyc_Absyn_Decl*_tmp4D=(
 struct Cyc_Absyn_Decl*)_tmp4C->hd;void*_tmp4E=(void*)_tmp4D->r;struct Cyc_Absyn_Vardecl*
 _tmp4F;_LL30: if(_tmp4E <= (void*)2)goto _LL32;if(*((int*)_tmp4E)!= 0)goto _LL32;
 _tmp4F=((struct Cyc_Absyn_Var_d_struct*)_tmp4E)->f1;_LL31: if(Cyc_zstrptrcmp((*
 _tmp4F->name).f2,(struct _dyneither_ptr*)_tmp46->hd)!= 0)continue;if(_tmp4F->initializer
-!= 0){const char*_tmp935;void*_tmp934;(_tmp934=0,((int(*)(struct Cyc_Position_Segment*
+!= 0){const char*_tmp92E;void*_tmp92D;(_tmp92D=0,((int(*)(struct Cyc_Position_Segment*
 sg,struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(_tmp4D->loc,((
-_tmp935="initializer found in parameter declaration",_tag_dyneither(_tmp935,
-sizeof(char),43))),_tag_dyneither(_tmp934,sizeof(void*),0)));}if(Cyc_Absyn_is_qvar_qualified(
-_tmp4F->name)){const char*_tmp938;void*_tmp937;(_tmp937=0,((int(*)(struct Cyc_Position_Segment*
+_tmp92E="initializer found in parameter declaration",_tag_dyneither(_tmp92E,
+sizeof(char),43))),_tag_dyneither(_tmp92D,sizeof(void*),0)));}if(Cyc_Absyn_is_qvar_qualified(
+_tmp4F->name)){const char*_tmp931;void*_tmp930;(_tmp930=0,((int(*)(struct Cyc_Position_Segment*
 sg,struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(_tmp4D->loc,((
-_tmp938="namespaces forbidden in parameter declarations",_tag_dyneither(_tmp938,
-sizeof(char),47))),_tag_dyneither(_tmp937,sizeof(void*),0)));}{struct _tuple2*
-_tmp93E;struct Cyc_Core_Opt*_tmp93D;struct Cyc_List_List*_tmp93C;_tmp4B=((_tmp93C=
-_cycalloc(sizeof(*_tmp93C)),((_tmp93C->hd=((_tmp93E=_cycalloc(sizeof(*_tmp93E)),((
-_tmp93E->f1=((_tmp93D=_cycalloc(sizeof(*_tmp93D)),((_tmp93D->v=(*_tmp4F->name).f2,
-_tmp93D)))),((_tmp93E->f2=_tmp4F->tq,((_tmp93E->f3=(void*)_tmp4F->type,_tmp93E)))))))),((
-_tmp93C->tl=_tmp4B,_tmp93C))))));}goto L;_LL32:;_LL33: {const char*_tmp941;void*
-_tmp940;(_tmp940=0,((int(*)(struct Cyc_Position_Segment*sg,struct _dyneither_ptr
-fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(_tmp4D->loc,((_tmp941="nonvariable declaration in parameter type",
-_tag_dyneither(_tmp941,sizeof(char),42))),_tag_dyneither(_tmp940,sizeof(void*),0)));}
-_LL2F:;}L: if(_tmp4C == 0){const char*_tmp945;void*_tmp944[1];struct Cyc_String_pa_struct
-_tmp943;(_tmp943.tag=0,((_tmp943.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*((
-struct _dyneither_ptr*)_tmp46->hd)),((_tmp944[0]=& _tmp943,((int(*)(struct Cyc_Position_Segment*
+_tmp931="namespaces forbidden in parameter declarations",_tag_dyneither(_tmp931,
+sizeof(char),47))),_tag_dyneither(_tmp930,sizeof(void*),0)));}{struct _tuple2*
+_tmp937;struct Cyc_Core_Opt*_tmp936;struct Cyc_List_List*_tmp935;_tmp4B=((_tmp935=
+_cycalloc(sizeof(*_tmp935)),((_tmp935->hd=((_tmp937=_cycalloc(sizeof(*_tmp937)),((
+_tmp937->f1=((_tmp936=_cycalloc(sizeof(*_tmp936)),((_tmp936->v=(*_tmp4F->name).f2,
+_tmp936)))),((_tmp937->f2=_tmp4F->tq,((_tmp937->f3=(void*)_tmp4F->type,_tmp937)))))))),((
+_tmp935->tl=_tmp4B,_tmp935))))));}goto L;_LL32:;_LL33: {const char*_tmp93A;void*
+_tmp939;(_tmp939=0,((int(*)(struct Cyc_Position_Segment*sg,struct _dyneither_ptr
+fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(_tmp4D->loc,((_tmp93A="nonvariable declaration in parameter type",
+_tag_dyneither(_tmp93A,sizeof(char),42))),_tag_dyneither(_tmp939,sizeof(void*),0)));}
+_LL2F:;}L: if(_tmp4C == 0){const char*_tmp93E;void*_tmp93D[1];struct Cyc_String_pa_struct
+_tmp93C;(_tmp93C.tag=0,((_tmp93C.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*((
+struct _dyneither_ptr*)_tmp46->hd)),((_tmp93D[0]=& _tmp93C,((int(*)(struct Cyc_Position_Segment*
 sg,struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(loc,((
-_tmp945="%s is not given a type",_tag_dyneither(_tmp945,sizeof(char),23))),
-_tag_dyneither(_tmp944,sizeof(void*),1)))))));}}{struct Cyc_Absyn_Function_mod_struct*
-_tmp954;struct Cyc_Absyn_WithTypes_struct*_tmp953;struct Cyc_Absyn_WithTypes_struct
-_tmp952;struct Cyc_Absyn_Function_mod_struct _tmp951;struct Cyc_List_List*_tmp950;
-return(_tmp950=_cycalloc(sizeof(*_tmp950)),((_tmp950->hd=(void*)((void*)((
-_tmp954=_cycalloc(sizeof(*_tmp954)),((_tmp954[0]=((_tmp951.tag=3,((_tmp951.f1=(
-void*)((void*)((_tmp953=_cycalloc(sizeof(*_tmp953)),((_tmp953[0]=((_tmp952.tag=1,((
-_tmp952.f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(
-_tmp4B),((_tmp952.f2=0,((_tmp952.f3=0,((_tmp952.f4=0,((_tmp952.f5=0,_tmp952)))))))))))),
-_tmp953))))),_tmp951)))),_tmp954))))),((_tmp950->tl=0,_tmp950)))));}}_LL2A:;}
-goto _LL29;_LL28:;_LL29: {struct Cyc_List_List*_tmp955;return(_tmp955=_cycalloc(
-sizeof(*_tmp955)),((_tmp955->hd=(void*)((void*)tms->hd),((_tmp955->tl=Cyc_Parse_oldstyle2newstyle(
-tms->tl,tds,loc),_tmp955)))));}_LL25:;}}struct _tuple10{struct _dyneither_ptr*f1;
+_tmp93E="%s is not given a type",_tag_dyneither(_tmp93E,sizeof(char),23))),
+_tag_dyneither(_tmp93D,sizeof(void*),1)))))));}}{struct Cyc_Absyn_Function_mod_struct*
+_tmp94D;struct Cyc_Absyn_WithTypes_struct*_tmp94C;struct Cyc_Absyn_WithTypes_struct
+_tmp94B;struct Cyc_Absyn_Function_mod_struct _tmp94A;struct Cyc_List_List*_tmp949;
+return(_tmp949=_cycalloc(sizeof(*_tmp949)),((_tmp949->hd=(void*)((void*)((
+_tmp94D=_cycalloc(sizeof(*_tmp94D)),((_tmp94D[0]=((_tmp94A.tag=3,((_tmp94A.f1=(
+void*)((void*)((_tmp94C=_cycalloc(sizeof(*_tmp94C)),((_tmp94C[0]=((_tmp94B.tag=1,((
+_tmp94B.f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(
+_tmp4B),((_tmp94B.f2=0,((_tmp94B.f3=0,((_tmp94B.f4=0,((_tmp94B.f5=0,_tmp94B)))))))))))),
+_tmp94C))))),_tmp94A)))),_tmp94D))))),((_tmp949->tl=0,_tmp949)))));}}_LL2A:;}
+goto _LL29;_LL28:;_LL29: {struct Cyc_List_List*_tmp94E;return(_tmp94E=_cycalloc(
+sizeof(*_tmp94E)),((_tmp94E->hd=(void*)((void*)tms->hd),((_tmp94E->tl=Cyc_Parse_oldstyle2newstyle(
+tms->tl,tds,loc),_tmp94E)))));}_LL25:;}}struct _tuple10{struct _dyneither_ptr*f1;
 struct Cyc_Absyn_Tqual f2;void*f3;};static struct Cyc_Absyn_Fndecl*Cyc_Parse_make_function(
 struct Cyc_Core_Opt*dso,struct Cyc_Parse_Declarator*d,struct Cyc_List_List*tds,
 struct Cyc_Absyn_Stmt*body,struct Cyc_Position_Segment*loc);static struct Cyc_Absyn_Fndecl*
 Cyc_Parse_make_function(struct Cyc_Core_Opt*dso,struct Cyc_Parse_Declarator*d,
 struct Cyc_List_List*tds,struct Cyc_Absyn_Stmt*body,struct Cyc_Position_Segment*loc){
-if(tds != 0){struct Cyc_Parse_Declarator*_tmp956;d=((_tmp956=_cycalloc(sizeof(*
-_tmp956)),((_tmp956->id=d->id,((_tmp956->tms=Cyc_Parse_oldstyle2newstyle(d->tms,
-tds,loc),_tmp956))))));}{void*sc=(void*)2;struct Cyc_List_List*tss=0;struct Cyc_Absyn_Tqual
+if(tds != 0){struct Cyc_Parse_Declarator*_tmp94F;d=((_tmp94F=_cycalloc(sizeof(*
+_tmp94F)),((_tmp94F->id=d->id,((_tmp94F->tms=Cyc_Parse_oldstyle2newstyle(d->tms,
+tds,loc),_tmp94F))))));}{void*sc=(void*)2;struct Cyc_List_List*tss=0;struct Cyc_Absyn_Tqual
 tq=Cyc_Absyn_empty_tqual(0);int is_inline=0;struct Cyc_List_List*atts=0;if(dso != 0){
 tss=((struct Cyc_Parse_Declaration_spec*)dso->v)->type_specs;tq=((struct Cyc_Parse_Declaration_spec*)
 dso->v)->tq;is_inline=((struct Cyc_Parse_Declaration_spec*)dso->v)->is_inline;
@@ -1317,18 +1318,18 @@ atts=((struct Cyc_Parse_Declaration_spec*)dso->v)->attributes;if(((struct Cyc_Pa
 dso->v)->sc != 0){void*_tmp63=(void*)((struct Cyc_Core_Opt*)_check_null(((struct
 Cyc_Parse_Declaration_spec*)dso->v)->sc))->v;_LL35: if((int)_tmp63 != 1)goto _LL37;
 _LL36: sc=(void*)3;goto _LL34;_LL37: if((int)_tmp63 != 3)goto _LL39;_LL38: sc=(void*)0;
-goto _LL34;_LL39:;_LL3A:{const char*_tmp957;Cyc_Parse_err(((_tmp957="bad storage class on function",
-_tag_dyneither(_tmp957,sizeof(char),30))),loc);}goto _LL34;_LL34:;}}{void*_tmp66;
+goto _LL34;_LL39:;_LL3A:{const char*_tmp950;Cyc_Parse_err(((_tmp950="bad storage class on function",
+_tag_dyneither(_tmp950,sizeof(char),30))),loc);}goto _LL34;_LL34:;}}{void*_tmp66;
 struct Cyc_Core_Opt*_tmp67;struct _tuple5 _tmp65=Cyc_Parse_collapse_type_specifiers(
 tss,loc);_tmp66=_tmp65.f1;_tmp67=_tmp65.f2;{struct Cyc_Absyn_Tqual _tmp69;void*
 _tmp6A;struct Cyc_List_List*_tmp6B;struct Cyc_List_List*_tmp6C;struct _tuple6 _tmp68=
 Cyc_Parse_apply_tms(tq,_tmp66,atts,d->tms);_tmp69=_tmp68.f1;_tmp6A=_tmp68.f2;
-_tmp6B=_tmp68.f3;_tmp6C=_tmp68.f4;if(_tmp67 != 0){const char*_tmp95A;void*_tmp959;(
-_tmp959=0,Cyc_Tcutil_warn(loc,((_tmp95A="nested type declaration within function prototype",
-_tag_dyneither(_tmp95A,sizeof(char),50))),_tag_dyneither(_tmp959,sizeof(void*),0)));}
-if(_tmp6B != 0){const char*_tmp95D;void*_tmp95C;(_tmp95C=0,Cyc_Tcutil_warn(loc,((
-_tmp95D="bad type params, ignoring",_tag_dyneither(_tmp95D,sizeof(char),26))),
-_tag_dyneither(_tmp95C,sizeof(void*),0)));}{void*_tmp71=_tmp6A;struct Cyc_Absyn_FnInfo
+_tmp6B=_tmp68.f3;_tmp6C=_tmp68.f4;if(_tmp67 != 0){const char*_tmp953;void*_tmp952;(
+_tmp952=0,Cyc_Tcutil_warn(loc,((_tmp953="nested type declaration within function prototype",
+_tag_dyneither(_tmp953,sizeof(char),50))),_tag_dyneither(_tmp952,sizeof(void*),0)));}
+if(_tmp6B != 0){const char*_tmp956;void*_tmp955;(_tmp955=0,Cyc_Tcutil_warn(loc,((
+_tmp956="bad type params, ignoring",_tag_dyneither(_tmp956,sizeof(char),26))),
+_tag_dyneither(_tmp955,sizeof(void*),0)));}{void*_tmp71=_tmp6A;struct Cyc_Absyn_FnInfo
 _tmp72;struct Cyc_List_List*_tmp73;struct Cyc_Core_Opt*_tmp74;void*_tmp75;struct
 Cyc_List_List*_tmp76;int _tmp77;struct Cyc_Absyn_VarargInfo*_tmp78;struct Cyc_List_List*
 _tmp79;struct Cyc_List_List*_tmp7A;_LL3C: if(_tmp71 <= (void*)4)goto _LL3E;if(*((int*)
@@ -1339,26 +1340,26 @@ _tmp72.attributes;_LL3D: {struct Cyc_List_List*_tmp7B=0;{struct Cyc_List_List*
 _tmp7C=_tmp76;for(0;_tmp7C != 0;_tmp7C=_tmp7C->tl){struct _tuple2 _tmp7E;struct Cyc_Core_Opt*
 _tmp7F;struct Cyc_Absyn_Tqual _tmp80;void*_tmp81;struct _tuple2*_tmp7D=(struct
 _tuple2*)_tmp7C->hd;_tmp7E=*_tmp7D;_tmp7F=_tmp7E.f1;_tmp80=_tmp7E.f2;_tmp81=
-_tmp7E.f3;if(_tmp7F == 0){{const char*_tmp95E;Cyc_Parse_err(((_tmp95E="missing argument variable in function prototype",
-_tag_dyneither(_tmp95E,sizeof(char),48))),loc);}{struct _tuple10*_tmp961;struct
-Cyc_List_List*_tmp960;_tmp7B=((_tmp960=_cycalloc(sizeof(*_tmp960)),((_tmp960->hd=((
-_tmp961=_cycalloc(sizeof(*_tmp961)),((_tmp961->f1=_init_dyneither_ptr(_cycalloc(
-sizeof(struct _dyneither_ptr)),"?",sizeof(char),2),((_tmp961->f2=_tmp80,((_tmp961->f3=
-_tmp81,_tmp961)))))))),((_tmp960->tl=_tmp7B,_tmp960))))));}}else{struct _tuple10*
-_tmp964;struct Cyc_List_List*_tmp963;_tmp7B=((_tmp963=_cycalloc(sizeof(*_tmp963)),((
-_tmp963->hd=((_tmp964=_cycalloc(sizeof(*_tmp964)),((_tmp964->f1=(struct
-_dyneither_ptr*)_tmp7F->v,((_tmp964->f2=_tmp80,((_tmp964->f3=_tmp81,_tmp964)))))))),((
-_tmp963->tl=_tmp7B,_tmp963))))));}}}{struct Cyc_Absyn_Fndecl*_tmp965;return(
-_tmp965=_cycalloc(sizeof(*_tmp965)),((_tmp965->sc=(void*)sc,((_tmp965->name=d->id,((
-_tmp965->tvs=_tmp73,((_tmp965->is_inline=is_inline,((_tmp965->effect=_tmp74,((
-_tmp965->ret_type=(void*)_tmp75,((_tmp965->args=((struct Cyc_List_List*(*)(struct
-Cyc_List_List*x))Cyc_List_imp_rev)(_tmp7B),((_tmp965->c_varargs=_tmp77,((_tmp965->cyc_varargs=
-_tmp78,((_tmp965->rgn_po=_tmp79,((_tmp965->body=body,((_tmp965->cached_typ=0,((
-_tmp965->param_vardecls=0,((_tmp965->fn_vardecl=0,((_tmp965->attributes=Cyc_List_append(
-_tmp7A,_tmp6C),_tmp965)))))))))))))))))))))))))))))));}}_LL3E:;_LL3F: {const char*
-_tmp968;void*_tmp967;(_tmp967=0,((int(*)(struct Cyc_Position_Segment*sg,struct
-_dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(loc,((_tmp968="declarator is not a function prototype",
-_tag_dyneither(_tmp968,sizeof(char),39))),_tag_dyneither(_tmp967,sizeof(void*),0)));}
+_tmp7E.f3;if(_tmp7F == 0){{const char*_tmp957;Cyc_Parse_err(((_tmp957="missing argument variable in function prototype",
+_tag_dyneither(_tmp957,sizeof(char),48))),loc);}{struct _tuple10*_tmp95A;struct
+Cyc_List_List*_tmp959;_tmp7B=((_tmp959=_cycalloc(sizeof(*_tmp959)),((_tmp959->hd=((
+_tmp95A=_cycalloc(sizeof(*_tmp95A)),((_tmp95A->f1=_init_dyneither_ptr(_cycalloc(
+sizeof(struct _dyneither_ptr)),"?",sizeof(char),2),((_tmp95A->f2=_tmp80,((_tmp95A->f3=
+_tmp81,_tmp95A)))))))),((_tmp959->tl=_tmp7B,_tmp959))))));}}else{struct _tuple10*
+_tmp95D;struct Cyc_List_List*_tmp95C;_tmp7B=((_tmp95C=_cycalloc(sizeof(*_tmp95C)),((
+_tmp95C->hd=((_tmp95D=_cycalloc(sizeof(*_tmp95D)),((_tmp95D->f1=(struct
+_dyneither_ptr*)_tmp7F->v,((_tmp95D->f2=_tmp80,((_tmp95D->f3=_tmp81,_tmp95D)))))))),((
+_tmp95C->tl=_tmp7B,_tmp95C))))));}}}{struct Cyc_Absyn_Fndecl*_tmp95E;return(
+_tmp95E=_cycalloc(sizeof(*_tmp95E)),((_tmp95E->sc=(void*)sc,((_tmp95E->name=d->id,((
+_tmp95E->tvs=_tmp73,((_tmp95E->is_inline=is_inline,((_tmp95E->effect=_tmp74,((
+_tmp95E->ret_type=(void*)_tmp75,((_tmp95E->args=((struct Cyc_List_List*(*)(struct
+Cyc_List_List*x))Cyc_List_imp_rev)(_tmp7B),((_tmp95E->c_varargs=_tmp77,((_tmp95E->cyc_varargs=
+_tmp78,((_tmp95E->rgn_po=_tmp79,((_tmp95E->body=body,((_tmp95E->cached_typ=0,((
+_tmp95E->param_vardecls=0,((_tmp95E->fn_vardecl=0,((_tmp95E->attributes=Cyc_List_append(
+_tmp7A,_tmp6C),_tmp95E)))))))))))))))))))))))))))))));}}_LL3E:;_LL3F: {const char*
+_tmp961;void*_tmp960;(_tmp960=0,((int(*)(struct Cyc_Position_Segment*sg,struct
+_dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(loc,((_tmp961="declarator is not a function prototype",
+_tag_dyneither(_tmp961,sizeof(char),39))),_tag_dyneither(_tmp960,sizeof(void*),0)));}
 _LL3B:;}}}}}static char _tmp8B[52]="at most one type may appear within a type specifier";
 static struct _dyneither_ptr Cyc_Parse_msg1={_tmp8B,_tmp8B,_tmp8B + 52};static char
 _tmp8C[63]="const or volatile may appear only once within a type specifier";
@@ -1379,83 +1380,83 @@ _tmp91=((struct Cyc_Parse_Type_spec_struct*)_tmp8F)->f2;_LL42: if(seen_type)Cyc_
 Cyc_Parse_msg1,_tmp91);last_loc=_tmp91;seen_type=1;t=_tmp90;goto _LL40;_LL43: if(*((
 int*)_tmp8F)!= 0)goto _LL45;_tmp92=((struct Cyc_Parse_Signed_spec_struct*)_tmp8F)->f1;
 _LL44: if(seen_sign)Cyc_Parse_err(Cyc_Parse_msg4,_tmp92);if(seen_type){const char*
-_tmp969;Cyc_Parse_err(((_tmp969="signed qualifier must come before type",
-_tag_dyneither(_tmp969,sizeof(char),39))),_tmp92);}last_loc=_tmp92;seen_sign=1;
+_tmp962;Cyc_Parse_err(((_tmp962="signed qualifier must come before type",
+_tag_dyneither(_tmp962,sizeof(char),39))),_tmp92);}last_loc=_tmp92;seen_sign=1;
 sgn=(void*)0;goto _LL40;_LL45: if(*((int*)_tmp8F)!= 1)goto _LL47;_tmp93=((struct Cyc_Parse_Unsigned_spec_struct*)
 _tmp8F)->f1;_LL46: if(seen_sign)Cyc_Parse_err(Cyc_Parse_msg4,_tmp93);if(seen_type){
-const char*_tmp96A;Cyc_Parse_err(((_tmp96A="signed qualifier must come before type",
-_tag_dyneither(_tmp96A,sizeof(char),39))),_tmp93);}last_loc=_tmp93;seen_sign=1;
+const char*_tmp963;Cyc_Parse_err(((_tmp963="signed qualifier must come before type",
+_tag_dyneither(_tmp963,sizeof(char),39))),_tmp93);}last_loc=_tmp93;seen_sign=1;
 sgn=(void*)1;goto _LL40;_LL47: if(*((int*)_tmp8F)!= 2)goto _LL49;_tmp94=((struct Cyc_Parse_Short_spec_struct*)
-_tmp8F)->f1;_LL48: if(seen_size){const char*_tmp96B;Cyc_Parse_err(((_tmp96B="integral size may appear only once within a type specifier",
-_tag_dyneither(_tmp96B,sizeof(char),59))),_tmp94);}if(seen_type){const char*
-_tmp96C;Cyc_Parse_err(((_tmp96C="short modifier must come before base type",
-_tag_dyneither(_tmp96C,sizeof(char),42))),_tmp94);}last_loc=_tmp94;seen_size=1;
+_tmp8F)->f1;_LL48: if(seen_size){const char*_tmp964;Cyc_Parse_err(((_tmp964="integral size may appear only once within a type specifier",
+_tag_dyneither(_tmp964,sizeof(char),59))),_tmp94);}if(seen_type){const char*
+_tmp965;Cyc_Parse_err(((_tmp965="short modifier must come before base type",
+_tag_dyneither(_tmp965,sizeof(char),42))),_tmp94);}last_loc=_tmp94;seen_size=1;
 sz=(void*)1;goto _LL40;_LL49: if(*((int*)_tmp8F)!= 3)goto _LL4B;_tmp95=((struct Cyc_Parse_Long_spec_struct*)
-_tmp8F)->f1;_LL4A: if(seen_type){const char*_tmp96D;Cyc_Parse_err(((_tmp96D="long modifier must come before base type",
-_tag_dyneither(_tmp96D,sizeof(char),41))),_tmp95);}if(seen_size){void*_tmp9C=sz;
+_tmp8F)->f1;_LL4A: if(seen_type){const char*_tmp966;Cyc_Parse_err(((_tmp966="long modifier must come before base type",
+_tag_dyneither(_tmp966,sizeof(char),41))),_tmp95);}if(seen_size){void*_tmp9C=sz;
 _LL4E: if((int)_tmp9C != 3)goto _LL50;_LL4F: sz=(void*)4;goto _LL4D;_LL50:;_LL51:{
-const char*_tmp96E;Cyc_Parse_err(((_tmp96E="extra long in type specifier",
-_tag_dyneither(_tmp96E,sizeof(char),29))),_tmp95);}goto _LL4D;_LL4D:;}else{sz=(
+const char*_tmp967;Cyc_Parse_err(((_tmp967="extra long in type specifier",
+_tag_dyneither(_tmp967,sizeof(char),29))),_tmp95);}goto _LL4D;_LL4D:;}else{sz=(
 void*)3;}last_loc=_tmp95;seen_size=1;goto _LL40;_LL4B: if(*((int*)_tmp8F)!= 5)goto
 _LL40;_tmp96=((struct Cyc_Parse_Decl_spec_struct*)_tmp8F)->f1;_LL4C: last_loc=
 _tmp96->loc;if(declopt == 0  && !seen_type){seen_type=1;{void*_tmp9E=(void*)_tmp96->r;
 struct Cyc_Absyn_Aggrdecl*_tmp9F;struct Cyc_Absyn_Tuniondecl*_tmpA0;struct Cyc_Absyn_Enumdecl*
-_tmpA1;_LL53: if(_tmp9E <= (void*)2)goto _LL59;if(*((int*)_tmp9E)!= 4)goto _LL55;
+_tmpA1;_LL53: if(_tmp9E <= (void*)2)goto _LL59;if(*((int*)_tmp9E)!= 6)goto _LL55;
 _tmp9F=((struct Cyc_Absyn_Aggr_d_struct*)_tmp9E)->f1;_LL54: {struct Cyc_List_List*
 _tmpA2=((struct Cyc_List_List*(*)(void*(*f)(struct Cyc_Absyn_Tvar*),struct Cyc_List_List*
 x))Cyc_List_map)(Cyc_Parse_tvar2typ,((struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*
 f)(struct Cyc_Absyn_Tvar*),struct Cyc_List_List*x))Cyc_List_map)(Cyc_Parse_copy_tvar,
-_tmp9F->tvs));{struct Cyc_Absyn_AggrType_struct _tmp978;union Cyc_Absyn_AggrInfoU_union
-_tmp977;struct Cyc_Absyn_AggrInfo _tmp976;struct Cyc_Absyn_AggrType_struct*_tmp975;
-t=(void*)((_tmp975=_cycalloc(sizeof(*_tmp975)),((_tmp975[0]=((_tmp978.tag=10,((
-_tmp978.f1=((_tmp976.aggr_info=(union Cyc_Absyn_AggrInfoU_union)(((_tmp977.UnknownAggr).tag=
-0,(((_tmp977.UnknownAggr).f1=(void*)((void*)_tmp9F->kind),(((_tmp977.UnknownAggr).f2=
-_tmp9F->name,_tmp977)))))),((_tmp976.targs=_tmpA2,_tmp976)))),_tmp978)))),
-_tmp975))));}if(_tmp9F->impl != 0){struct Cyc_Core_Opt*_tmp979;declopt=((_tmp979=
-_cycalloc(sizeof(*_tmp979)),((_tmp979->v=_tmp96,_tmp979))));}goto _LL52;}_LL55:
-if(*((int*)_tmp9E)!= 5)goto _LL57;_tmpA0=((struct Cyc_Absyn_Tunion_d_struct*)
+_tmp9F->tvs));{struct Cyc_Absyn_AggrType_struct _tmp971;union Cyc_Absyn_AggrInfoU_union
+_tmp970;struct Cyc_Absyn_AggrInfo _tmp96F;struct Cyc_Absyn_AggrType_struct*_tmp96E;
+t=(void*)((_tmp96E=_cycalloc(sizeof(*_tmp96E)),((_tmp96E[0]=((_tmp971.tag=10,((
+_tmp971.f1=((_tmp96F.aggr_info=(union Cyc_Absyn_AggrInfoU_union)(((_tmp970.UnknownAggr).tag=
+0,(((_tmp970.UnknownAggr).f1=(void*)((void*)_tmp9F->kind),(((_tmp970.UnknownAggr).f2=
+_tmp9F->name,_tmp970)))))),((_tmp96F.targs=_tmpA2,_tmp96F)))),_tmp971)))),
+_tmp96E))));}if(_tmp9F->impl != 0){struct Cyc_Core_Opt*_tmp972;declopt=((_tmp972=
+_cycalloc(sizeof(*_tmp972)),((_tmp972->v=_tmp96,_tmp972))));}goto _LL52;}_LL55:
+if(*((int*)_tmp9E)!= 7)goto _LL57;_tmpA0=((struct Cyc_Absyn_Tunion_d_struct*)
 _tmp9E)->f1;_LL56: {struct Cyc_List_List*_tmpA8=((struct Cyc_List_List*(*)(void*(*
 f)(struct Cyc_Absyn_Tvar*),struct Cyc_List_List*x))Cyc_List_map)(Cyc_Parse_tvar2typ,((
 struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Absyn_Tvar*),struct
 Cyc_List_List*x))Cyc_List_map)(Cyc_Parse_copy_tvar,_tmpA0->tvs));struct Cyc_Core_Opt*
-_tmp97A;struct Cyc_Core_Opt*ropt=_tmpA0->is_flat?0:((_tmp97A=_cycalloc(sizeof(*
-_tmp97A)),((_tmp97A->v=(void*)((void*)2),_tmp97A))));{struct Cyc_Absyn_TunionType_struct
-_tmp989;union Cyc_Absyn_TunionInfoU_union _tmp988;struct Cyc_Absyn_Tuniondecl**
-_tmp987;struct Cyc_Absyn_TunionInfo _tmp986;struct Cyc_Absyn_TunionType_struct*
-_tmp985;t=(void*)((_tmp985=_cycalloc(sizeof(*_tmp985)),((_tmp985[0]=((_tmp989.tag=
-2,((_tmp989.f1=((_tmp986.tunion_info=(union Cyc_Absyn_TunionInfoU_union)(((
-_tmp988.KnownTunion).tag=1,(((_tmp988.KnownTunion).f1=((_tmp987=_cycalloc(
-sizeof(*_tmp987)),((_tmp987[0]=_tmpA0,_tmp987)))),_tmp988)))),((_tmp986.targs=
-_tmpA8,((_tmp986.rgn=ropt,_tmp986)))))),_tmp989)))),_tmp985))));}if(_tmpA0->fields
-!= 0){struct Cyc_Core_Opt*_tmp98A;declopt=((_tmp98A=_cycalloc(sizeof(*_tmp98A)),((
-_tmp98A->v=_tmp96,_tmp98A))));}goto _LL52;}_LL57: if(*((int*)_tmp9E)!= 6)goto _LL59;
+_tmp973;struct Cyc_Core_Opt*ropt=_tmpA0->is_flat?0:((_tmp973=_cycalloc(sizeof(*
+_tmp973)),((_tmp973->v=(void*)((void*)2),_tmp973))));{struct Cyc_Absyn_TunionType_struct
+_tmp982;union Cyc_Absyn_TunionInfoU_union _tmp981;struct Cyc_Absyn_Tuniondecl**
+_tmp980;struct Cyc_Absyn_TunionInfo _tmp97F;struct Cyc_Absyn_TunionType_struct*
+_tmp97E;t=(void*)((_tmp97E=_cycalloc(sizeof(*_tmp97E)),((_tmp97E[0]=((_tmp982.tag=
+2,((_tmp982.f1=((_tmp97F.tunion_info=(union Cyc_Absyn_TunionInfoU_union)(((
+_tmp981.KnownTunion).tag=1,(((_tmp981.KnownTunion).f1=((_tmp980=_cycalloc(
+sizeof(*_tmp980)),((_tmp980[0]=_tmpA0,_tmp980)))),_tmp981)))),((_tmp97F.targs=
+_tmpA8,((_tmp97F.rgn=ropt,_tmp97F)))))),_tmp982)))),_tmp97E))));}if(_tmpA0->fields
+!= 0){struct Cyc_Core_Opt*_tmp983;declopt=((_tmp983=_cycalloc(sizeof(*_tmp983)),((
+_tmp983->v=_tmp96,_tmp983))));}goto _LL52;}_LL57: if(*((int*)_tmp9E)!= 8)goto _LL59;
 _tmpA1=((struct Cyc_Absyn_Enum_d_struct*)_tmp9E)->f1;_LL58:{struct Cyc_Absyn_EnumType_struct
-_tmp98D;struct Cyc_Absyn_EnumType_struct*_tmp98C;t=(void*)((_tmp98C=_cycalloc(
-sizeof(*_tmp98C)),((_tmp98C[0]=((_tmp98D.tag=12,((_tmp98D.f1=_tmpA1->name,((
-_tmp98D.f2=0,_tmp98D)))))),_tmp98C))));}{struct Cyc_Core_Opt*_tmp98E;declopt=((
-_tmp98E=_cycalloc(sizeof(*_tmp98E)),((_tmp98E->v=_tmp96,_tmp98E))));}goto _LL52;
-_LL59:;_LL5A: {const char*_tmp991;void*_tmp990;(_tmp990=0,((int(*)(struct Cyc_Position_Segment*
+_tmp986;struct Cyc_Absyn_EnumType_struct*_tmp985;t=(void*)((_tmp985=_cycalloc(
+sizeof(*_tmp985)),((_tmp985[0]=((_tmp986.tag=12,((_tmp986.f1=_tmpA1->name,((
+_tmp986.f2=0,_tmp986)))))),_tmp985))));}{struct Cyc_Core_Opt*_tmp987;declopt=((
+_tmp987=_cycalloc(sizeof(*_tmp987)),((_tmp987->v=_tmp96,_tmp987))));}goto _LL52;
+_LL59:;_LL5A: {const char*_tmp98A;void*_tmp989;(_tmp989=0,((int(*)(struct Cyc_Position_Segment*
 sg,struct _dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(_tmp96->loc,((
-_tmp991="bad declaration within type specifier",_tag_dyneither(_tmp991,sizeof(
-char),38))),_tag_dyneither(_tmp990,sizeof(void*),0)));}_LL52:;}}else{Cyc_Parse_err(
+_tmp98A="bad declaration within type specifier",_tag_dyneither(_tmp98A,sizeof(
+char),38))),_tag_dyneither(_tmp989,sizeof(void*),0)));}_LL52:;}}else{Cyc_Parse_err(
 Cyc_Parse_msg3,_tmp96->loc);}goto _LL40;_LL40:;}if(!seen_type){if(!seen_sign  && !
-seen_size){const char*_tmp994;void*_tmp993;(_tmp993=0,Cyc_Tcutil_warn(last_loc,((
-_tmp994="missing type within specifier",_tag_dyneither(_tmp994,sizeof(char),30))),
-_tag_dyneither(_tmp993,sizeof(void*),0)));}t=Cyc_Absyn_int_typ(sgn,sz);}else{if(
+seen_size){const char*_tmp98D;void*_tmp98C;(_tmp98C=0,Cyc_Tcutil_warn(last_loc,((
+_tmp98D="missing type within specifier",_tag_dyneither(_tmp98D,sizeof(char),30))),
+_tag_dyneither(_tmp98C,sizeof(void*),0)));}t=Cyc_Absyn_int_typ(sgn,sz);}else{if(
 seen_sign){void*_tmpB7=t;void*_tmpB8;void*_tmpB9;_LL5C: if(_tmpB7 <= (void*)4)goto
 _LL5E;if(*((int*)_tmpB7)!= 5)goto _LL5E;_tmpB8=(void*)((struct Cyc_Absyn_IntType_struct*)
 _tmpB7)->f1;_tmpB9=(void*)((struct Cyc_Absyn_IntType_struct*)_tmpB7)->f2;_LL5D:
 if(_tmpB8 != sgn)t=Cyc_Absyn_int_typ(sgn,_tmpB9);goto _LL5B;_LL5E:;_LL5F:{const
-char*_tmp995;Cyc_Parse_err(((_tmp995="sign specification on non-integral type",
-_tag_dyneither(_tmp995,sizeof(char),40))),last_loc);}goto _LL5B;_LL5B:;}if(
+char*_tmp98E;Cyc_Parse_err(((_tmp98E="sign specification on non-integral type",
+_tag_dyneither(_tmp98E,sizeof(char),40))),last_loc);}goto _LL5B;_LL5B:;}if(
 seen_size){void*_tmpBB=t;void*_tmpBC;void*_tmpBD;_LL61: if(_tmpBB <= (void*)4)goto
 _LL65;if(*((int*)_tmpBB)!= 5)goto _LL63;_tmpBC=(void*)((struct Cyc_Absyn_IntType_struct*)
 _tmpBB)->f1;_tmpBD=(void*)((struct Cyc_Absyn_IntType_struct*)_tmpBB)->f2;_LL62:
 if(_tmpBD != sz)t=Cyc_Absyn_int_typ(_tmpBC,sz);goto _LL60;_LL63: if(*((int*)_tmpBB)
 != 6)goto _LL65;_LL64: t=Cyc_Absyn_double_typ(1);goto _LL60;_LL65:;_LL66:{const char*
-_tmp996;Cyc_Parse_err(((_tmp996="size qualifier on non-integral type",
-_tag_dyneither(_tmp996,sizeof(char),36))),last_loc);}goto _LL60;_LL60:;}}{struct
-_tuple5 _tmp997;return(_tmp997.f1=t,((_tmp997.f2=declopt,_tmp997)));}}static
+_tmp98F;Cyc_Parse_err(((_tmp98F="size qualifier on non-integral type",
+_tag_dyneither(_tmp98F,sizeof(char),36))),last_loc);}goto _LL60;_LL60:;}}{struct
+_tuple5 _tmp990;return(_tmp990.f1=t,((_tmp990.f2=declopt,_tmp990)));}}static
 struct Cyc_List_List*Cyc_Parse_apply_tmss(struct _RegionHandle*r,struct Cyc_Absyn_Tqual
 tq,void*t,struct Cyc_List_List*ds,struct Cyc_List_List*shared_atts);static struct
 Cyc_List_List*Cyc_Parse_apply_tmss(struct _RegionHandle*r,struct Cyc_Absyn_Tqual tq,
@@ -1464,20 +1465,20 @@ struct Cyc_Parse_Declarator*_tmpC0=(struct Cyc_Parse_Declarator*)ds->hd;struct
 _tuple1*_tmpC1=_tmpC0->id;struct Cyc_Absyn_Tqual _tmpC3;void*_tmpC4;struct Cyc_List_List*
 _tmpC5;struct Cyc_List_List*_tmpC6;struct _tuple6 _tmpC2=Cyc_Parse_apply_tms(tq,t,
 shared_atts,_tmpC0->tms);_tmpC3=_tmpC2.f1;_tmpC4=_tmpC2.f2;_tmpC5=_tmpC2.f3;
-_tmpC6=_tmpC2.f4;if(ds->tl == 0){struct _tuple7*_tmp99A;struct Cyc_List_List*
-_tmp999;return(_tmp999=_region_malloc(r,sizeof(*_tmp999)),((_tmp999->hd=((
-_tmp99A=_region_malloc(r,sizeof(*_tmp99A)),((_tmp99A->f1=_tmpC1,((_tmp99A->f2=
-_tmpC3,((_tmp99A->f3=_tmpC4,((_tmp99A->f4=_tmpC5,((_tmp99A->f5=_tmpC6,_tmp99A)))))))))))),((
-_tmp999->tl=0,_tmp999)))));}else{struct _tuple7*_tmp99D;struct Cyc_List_List*
-_tmp99C;return(_tmp99C=_region_malloc(r,sizeof(*_tmp99C)),((_tmp99C->hd=((
-_tmp99D=_region_malloc(r,sizeof(*_tmp99D)),((_tmp99D->f1=_tmpC1,((_tmp99D->f2=
-_tmpC3,((_tmp99D->f3=_tmpC4,((_tmp99D->f4=_tmpC5,((_tmp99D->f5=_tmpC6,_tmp99D)))))))))))),((
-_tmp99C->tl=Cyc_Parse_apply_tmss(r,_tmpC3,Cyc_Tcutil_copy_type(t),ds->tl,
-shared_atts),_tmp99C)))));}}}static struct _tuple6 Cyc_Parse_apply_tms(struct Cyc_Absyn_Tqual
+_tmpC6=_tmpC2.f4;if(ds->tl == 0){struct _tuple7*_tmp993;struct Cyc_List_List*
+_tmp992;return(_tmp992=_region_malloc(r,sizeof(*_tmp992)),((_tmp992->hd=((
+_tmp993=_region_malloc(r,sizeof(*_tmp993)),((_tmp993->f1=_tmpC1,((_tmp993->f2=
+_tmpC3,((_tmp993->f3=_tmpC4,((_tmp993->f4=_tmpC5,((_tmp993->f5=_tmpC6,_tmp993)))))))))))),((
+_tmp992->tl=0,_tmp992)))));}else{struct _tuple7*_tmp996;struct Cyc_List_List*
+_tmp995;return(_tmp995=_region_malloc(r,sizeof(*_tmp995)),((_tmp995->hd=((
+_tmp996=_region_malloc(r,sizeof(*_tmp996)),((_tmp996->f1=_tmpC1,((_tmp996->f2=
+_tmpC3,((_tmp996->f3=_tmpC4,((_tmp996->f4=_tmpC5,((_tmp996->f5=_tmpC6,_tmp996)))))))))))),((
+_tmp995->tl=Cyc_Parse_apply_tmss(r,_tmpC3,Cyc_Tcutil_copy_type(t),ds->tl,
+shared_atts),_tmp995)))));}}}static struct _tuple6 Cyc_Parse_apply_tms(struct Cyc_Absyn_Tqual
 tq,void*t,struct Cyc_List_List*atts,struct Cyc_List_List*tms);static struct _tuple6
 Cyc_Parse_apply_tms(struct Cyc_Absyn_Tqual tq,void*t,struct Cyc_List_List*atts,
-struct Cyc_List_List*tms){if(tms == 0){struct _tuple6 _tmp99E;return(_tmp99E.f1=tq,((
-_tmp99E.f2=t,((_tmp99E.f3=0,((_tmp99E.f4=atts,_tmp99E)))))));}{void*_tmpCC=(void*)
+struct Cyc_List_List*tms){if(tms == 0){struct _tuple6 _tmp997;return(_tmp997.f1=tq,((
+_tmp997.f2=t,((_tmp997.f3=0,((_tmp997.f4=atts,_tmp997)))))));}{void*_tmpCC=(void*)
 tms->hd;struct Cyc_Absyn_Conref*_tmpCD;struct Cyc_Position_Segment*_tmpCE;struct
 Cyc_Absyn_Exp*_tmpCF;struct Cyc_Absyn_Conref*_tmpD0;struct Cyc_Position_Segment*
 _tmpD1;void*_tmpD2;struct Cyc_List_List*_tmpD3;struct Cyc_Position_Segment*_tmpD4;
@@ -1499,10 +1500,10 @@ struct Cyc_Absyn_WithTypes_struct*)_tmpD9)->f3;_tmpDD=((struct Cyc_Absyn_WithTyp
 _tmpD9)->f4;_tmpDE=((struct Cyc_Absyn_WithTypes_struct*)_tmpD9)->f5;_LL76: {
 struct Cyc_List_List*typvars=0;struct Cyc_List_List*fn_atts=0;struct Cyc_List_List*
 new_atts=0;{struct Cyc_List_List*as=atts;for(0;as != 0;as=as->tl){if(Cyc_Absyn_fntype_att((
-void*)as->hd)){struct Cyc_List_List*_tmp99F;fn_atts=((_tmp99F=_cycalloc(sizeof(*
-_tmp99F)),((_tmp99F->hd=(void*)((void*)as->hd),((_tmp99F->tl=fn_atts,_tmp99F))))));}
-else{struct Cyc_List_List*_tmp9A0;new_atts=((_tmp9A0=_cycalloc(sizeof(*_tmp9A0)),((
-_tmp9A0->hd=(void*)((void*)as->hd),((_tmp9A0->tl=new_atts,_tmp9A0))))));}}}if(
+void*)as->hd)){struct Cyc_List_List*_tmp998;fn_atts=((_tmp998=_cycalloc(sizeof(*
+_tmp998)),((_tmp998->hd=(void*)((void*)as->hd),((_tmp998->tl=fn_atts,_tmp998))))));}
+else{struct Cyc_List_List*_tmp999;new_atts=((_tmp999=_cycalloc(sizeof(*_tmp999)),((
+_tmp999->hd=(void*)((void*)as->hd),((_tmp999->tl=new_atts,_tmp999))))));}}}if(
 tms->tl != 0){void*_tmpE2=(void*)((struct Cyc_List_List*)_check_null(tms->tl))->hd;
 struct Cyc_List_List*_tmpE3;_LL7A: if(*((int*)_tmpE2)!= 4)goto _LL7C;_tmpE3=((
 struct Cyc_Absyn_TypeParams_mod_struct*)_tmpE2)->f1;_LL7B: typvars=_tmpE3;tms=tms->tl;
@@ -1513,32 +1514,32 @@ void(*)(void(*f)(struct _tuple2*),struct Cyc_List_List*x))Cyc_List_iter)(Cyc_Par
 _tmpDA);return Cyc_Parse_apply_tms(Cyc_Absyn_empty_tqual(tq.loc),Cyc_Absyn_function_typ(
 typvars,_tmpDD,t,_tmpDA,_tmpDB,_tmpDC,_tmpDE,fn_atts),new_atts,((struct Cyc_List_List*)
 _check_null(tms))->tl);}_LL77: if(*((int*)_tmpD9)!= 0)goto _LL74;_tmpDF=((struct
-Cyc_Absyn_NoTypes_struct*)_tmpD9)->f2;_LL78: {const char*_tmp9A3;void*_tmp9A2;(
-_tmp9A2=0,((int(*)(struct Cyc_Position_Segment*sg,struct _dyneither_ptr fmt,struct
-_dyneither_ptr ap))Cyc_Parse_abort)(_tmpDF,((_tmp9A3="function declaration without parameter types",
-_tag_dyneither(_tmp9A3,sizeof(char),45))),_tag_dyneither(_tmp9A2,sizeof(void*),0)));}
+Cyc_Absyn_NoTypes_struct*)_tmpD9)->f2;_LL78: {const char*_tmp99C;void*_tmp99B;(
+_tmp99B=0,((int(*)(struct Cyc_Position_Segment*sg,struct _dyneither_ptr fmt,struct
+_dyneither_ptr ap))Cyc_Parse_abort)(_tmpDF,((_tmp99C="function declaration without parameter types",
+_tag_dyneither(_tmp99C,sizeof(char),45))),_tag_dyneither(_tmp99B,sizeof(void*),0)));}
 _LL74:;}_LL6E: if(*((int*)_tmpCC)!= 4)goto _LL70;_tmpD3=((struct Cyc_Absyn_TypeParams_mod_struct*)
 _tmpCC)->f1;_tmpD4=((struct Cyc_Absyn_TypeParams_mod_struct*)_tmpCC)->f2;_LL6F:
-if(tms->tl == 0){struct _tuple6 _tmp9A4;return(_tmp9A4.f1=tq,((_tmp9A4.f2=t,((
-_tmp9A4.f3=_tmpD3,((_tmp9A4.f4=atts,_tmp9A4)))))));}{const char*_tmp9A7;void*
-_tmp9A6;(_tmp9A6=0,((int(*)(struct Cyc_Position_Segment*sg,struct _dyneither_ptr
-fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(_tmpD4,((_tmp9A7="type parameters must appear before function arguments in declarator",
-_tag_dyneither(_tmp9A7,sizeof(char),68))),_tag_dyneither(_tmp9A6,sizeof(void*),0)));}
+if(tms->tl == 0){struct _tuple6 _tmp99D;return(_tmp99D.f1=tq,((_tmp99D.f2=t,((
+_tmp99D.f3=_tmpD3,((_tmp99D.f4=atts,_tmp99D)))))));}{const char*_tmp9A0;void*
+_tmp99F;(_tmp99F=0,((int(*)(struct Cyc_Position_Segment*sg,struct _dyneither_ptr
+fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(_tmpD4,((_tmp9A0="type parameters must appear before function arguments in declarator",
+_tag_dyneither(_tmp9A0,sizeof(char),68))),_tag_dyneither(_tmp99F,sizeof(void*),0)));}
 _LL70: if(*((int*)_tmpCC)!= 2)goto _LL72;_tmpD5=((struct Cyc_Absyn_Pointer_mod_struct*)
 _tmpCC)->f1;_tmpD6=((struct Cyc_Absyn_Pointer_mod_struct*)_tmpCC)->f2;_LL71: {
-struct Cyc_Absyn_PointerType_struct _tmp9AD;struct Cyc_Absyn_PtrInfo _tmp9AC;struct
-Cyc_Absyn_PointerType_struct*_tmp9AB;return Cyc_Parse_apply_tms(_tmpD6,(void*)((
-_tmp9AB=_cycalloc(sizeof(*_tmp9AB)),((_tmp9AB[0]=((_tmp9AD.tag=4,((_tmp9AD.f1=((
-_tmp9AC.elt_typ=(void*)t,((_tmp9AC.elt_tq=tq,((_tmp9AC.ptr_atts=_tmpD5,_tmp9AC)))))),
-_tmp9AD)))),_tmp9AB)))),atts,tms->tl);}_LL72: if(*((int*)_tmpCC)!= 5)goto _LL67;
+struct Cyc_Absyn_PointerType_struct _tmp9A6;struct Cyc_Absyn_PtrInfo _tmp9A5;struct
+Cyc_Absyn_PointerType_struct*_tmp9A4;return Cyc_Parse_apply_tms(_tmpD6,(void*)((
+_tmp9A4=_cycalloc(sizeof(*_tmp9A4)),((_tmp9A4[0]=((_tmp9A6.tag=4,((_tmp9A6.f1=((
+_tmp9A5.elt_typ=(void*)t,((_tmp9A5.elt_tq=tq,((_tmp9A5.ptr_atts=_tmpD5,_tmp9A5)))))),
+_tmp9A6)))),_tmp9A4)))),atts,tms->tl);}_LL72: if(*((int*)_tmpCC)!= 5)goto _LL67;
 _tmpD7=((struct Cyc_Absyn_Attributes_mod_struct*)_tmpCC)->f1;_tmpD8=((struct Cyc_Absyn_Attributes_mod_struct*)
 _tmpCC)->f2;_LL73: return Cyc_Parse_apply_tms(tq,t,Cyc_List_append(atts,_tmpD8),
 tms->tl);_LL67:;}}void*Cyc_Parse_speclist2typ(struct Cyc_List_List*tss,struct Cyc_Position_Segment*
 loc);void*Cyc_Parse_speclist2typ(struct Cyc_List_List*tss,struct Cyc_Position_Segment*
 loc){void*_tmpED;struct Cyc_Core_Opt*_tmpEE;struct _tuple5 _tmpEC=Cyc_Parse_collapse_type_specifiers(
-tss,loc);_tmpED=_tmpEC.f1;_tmpEE=_tmpEC.f2;if(_tmpEE != 0){const char*_tmp9B0;void*
-_tmp9AF;(_tmp9AF=0,Cyc_Tcutil_warn(loc,((_tmp9B0="ignoring nested type declaration(s) in specifier list",
-_tag_dyneither(_tmp9B0,sizeof(char),54))),_tag_dyneither(_tmp9AF,sizeof(void*),0)));}
+tss,loc);_tmpED=_tmpEC.f1;_tmpEE=_tmpEC.f2;if(_tmpEE != 0){const char*_tmp9A9;void*
+_tmp9A8;(_tmp9A8=0,Cyc_Tcutil_warn(loc,((_tmp9A9="ignoring nested type declaration(s) in specifier list",
+_tag_dyneither(_tmp9A9,sizeof(char),54))),_tag_dyneither(_tmp9A8,sizeof(void*),0)));}
 return _tmpED;}static struct Cyc_Absyn_Decl*Cyc_Parse_v_typ_to_typedef(struct Cyc_Position_Segment*
 loc,struct _tuple7*t);static struct Cyc_Absyn_Decl*Cyc_Parse_v_typ_to_typedef(
 struct Cyc_Position_Segment*loc,struct _tuple7*t){struct _tuple7 _tmpF2;struct
@@ -1549,19 +1550,19 @@ Cyc_Lex_register_typedef(_tmpF3);{struct Cyc_Core_Opt*kind;struct Cyc_Core_Opt*
 type;{void*_tmpF8=_tmpF5;struct Cyc_Core_Opt*_tmpF9;_LL7F: if(_tmpF8 <= (void*)4)
 goto _LL81;if(*((int*)_tmpF8)!= 0)goto _LL81;_tmpF9=((struct Cyc_Absyn_Evar_struct*)
 _tmpF8)->f1;_LL80: type=0;if(_tmpF9 == 0)kind=(struct Cyc_Core_Opt*)& Cyc_Tcutil_bk;
-else{kind=_tmpF9;}goto _LL7E;_LL81:;_LL82: kind=0;{struct Cyc_Core_Opt*_tmp9B1;type=((
-_tmp9B1=_cycalloc(sizeof(*_tmp9B1)),((_tmp9B1->v=(void*)_tmpF5,_tmp9B1))));}goto
-_LL7E;_LL7E:;}{struct Cyc_Absyn_Typedef_d_struct _tmp9B7;struct Cyc_Absyn_Typedefdecl*
-_tmp9B6;struct Cyc_Absyn_Typedef_d_struct*_tmp9B5;return Cyc_Absyn_new_decl((void*)((
-_tmp9B5=_cycalloc(sizeof(*_tmp9B5)),((_tmp9B5[0]=((_tmp9B7.tag=7,((_tmp9B7.f1=((
-_tmp9B6=_cycalloc(sizeof(*_tmp9B6)),((_tmp9B6->name=_tmpF3,((_tmp9B6->tvs=_tmpF6,((
-_tmp9B6->kind=kind,((_tmp9B6->defn=type,((_tmp9B6->atts=_tmpF7,((_tmp9B6->tq=
-_tmpF4,_tmp9B6)))))))))))))),_tmp9B7)))),_tmp9B5)))),loc);}}}static struct Cyc_Absyn_Stmt*
+else{kind=_tmpF9;}goto _LL7E;_LL81:;_LL82: kind=0;{struct Cyc_Core_Opt*_tmp9AA;type=((
+_tmp9AA=_cycalloc(sizeof(*_tmp9AA)),((_tmp9AA->v=(void*)_tmpF5,_tmp9AA))));}goto
+_LL7E;_LL7E:;}{struct Cyc_Absyn_Typedef_d_struct _tmp9B0;struct Cyc_Absyn_Typedefdecl*
+_tmp9AF;struct Cyc_Absyn_Typedef_d_struct*_tmp9AE;return Cyc_Absyn_new_decl((void*)((
+_tmp9AE=_cycalloc(sizeof(*_tmp9AE)),((_tmp9AE[0]=((_tmp9B0.tag=9,((_tmp9B0.f1=((
+_tmp9AF=_cycalloc(sizeof(*_tmp9AF)),((_tmp9AF->name=_tmpF3,((_tmp9AF->tvs=_tmpF6,((
+_tmp9AF->kind=kind,((_tmp9AF->defn=type,((_tmp9AF->atts=_tmpF7,((_tmp9AF->tq=
+_tmpF4,_tmp9AF)))))))))))))),_tmp9B0)))),_tmp9AE)))),loc);}}}static struct Cyc_Absyn_Stmt*
 Cyc_Parse_flatten_decl(struct Cyc_Absyn_Decl*d,struct Cyc_Absyn_Stmt*s);static
 struct Cyc_Absyn_Stmt*Cyc_Parse_flatten_decl(struct Cyc_Absyn_Decl*d,struct Cyc_Absyn_Stmt*
-s){struct Cyc_Absyn_Decl_s_struct _tmp9BA;struct Cyc_Absyn_Decl_s_struct*_tmp9B9;
-return Cyc_Absyn_new_stmt((void*)((_tmp9B9=_cycalloc(sizeof(*_tmp9B9)),((_tmp9B9[
-0]=((_tmp9BA.tag=11,((_tmp9BA.f1=d,((_tmp9BA.f2=s,_tmp9BA)))))),_tmp9B9)))),d->loc);}
+s){struct Cyc_Absyn_Decl_s_struct _tmp9B3;struct Cyc_Absyn_Decl_s_struct*_tmp9B2;
+return Cyc_Absyn_new_stmt((void*)((_tmp9B2=_cycalloc(sizeof(*_tmp9B2)),((_tmp9B2[
+0]=((_tmp9B3.tag=11,((_tmp9B3.f1=d,((_tmp9B3.f2=s,_tmp9B3)))))),_tmp9B2)))),d->loc);}
 static struct Cyc_Absyn_Stmt*Cyc_Parse_flatten_declarations(struct Cyc_List_List*ds,
 struct Cyc_Absyn_Stmt*s);static struct Cyc_Absyn_Stmt*Cyc_Parse_flatten_declarations(
 struct Cyc_List_List*ds,struct Cyc_Absyn_Stmt*s){return((struct Cyc_Absyn_Stmt*(*)(
@@ -1576,10 +1577,10 @@ _tmp100;_push_region(mkrgn);{struct Cyc_Parse_Declaration_spec _tmp102;struct Cy
 _tmp103;struct Cyc_List_List*_tmp104;struct Cyc_List_List*_tmp105;struct Cyc_Parse_Declaration_spec*
 _tmp101=ds;_tmp102=*_tmp101;_tmp103=_tmp102.tq;_tmp104=_tmp102.type_specs;
 _tmp105=_tmp102.attributes;if(_tmp103.loc == 0)_tmp103.loc=tqual_loc;if(ds->is_inline){
-const char*_tmp9BB;Cyc_Parse_err(((_tmp9BB="inline is allowed only on function definitions",
-_tag_dyneither(_tmp9BB,sizeof(char),47))),loc);}if(_tmp104 == 0){{const char*
-_tmp9BC;Cyc_Parse_err(((_tmp9BC="missing type specifiers in declaration",
-_tag_dyneither(_tmp9BC,sizeof(char),39))),loc);}{struct Cyc_List_List*_tmp108=0;
+const char*_tmp9B4;Cyc_Parse_err(((_tmp9B4="inline is allowed only on function definitions",
+_tag_dyneither(_tmp9B4,sizeof(char),47))),loc);}if(_tmp104 == 0){{const char*
+_tmp9B5;Cyc_Parse_err(((_tmp9B5="missing type specifiers in declaration",
+_tag_dyneither(_tmp9B5,sizeof(char),39))),loc);}{struct Cyc_List_List*_tmp108=0;
 _npop_handler(0);return _tmp108;}}{void*s=(void*)2;int istypedef=0;if(ds->sc != 0){
 void*_tmp109=(void*)((struct Cyc_Core_Opt*)_check_null(ds->sc))->v;_LL84: if((int)
 _tmp109 != 0)goto _LL86;_LL85: istypedef=1;goto _LL83;_LL86: if((int)_tmp109 != 1)goto
@@ -1597,20 +1598,20 @@ _tmp104,loc);if(_tmp10B == 0){void*_tmp10F;struct Cyc_Core_Opt*_tmp110;struct
 _tuple5 _tmp10E=_tmp10D;_tmp10F=_tmp10E.f1;_tmp110=_tmp10E.f2;if(_tmp110 != 0){
 struct Cyc_Absyn_Decl*d=(struct Cyc_Absyn_Decl*)_tmp110->v;{void*_tmp111=(void*)d->r;
 struct Cyc_Absyn_Enumdecl*_tmp112;struct Cyc_Absyn_Aggrdecl*_tmp113;struct Cyc_Absyn_Tuniondecl*
-_tmp114;_LL93: if(_tmp111 <= (void*)2)goto _LL99;if(*((int*)_tmp111)!= 6)goto _LL95;
+_tmp114;_LL93: if(_tmp111 <= (void*)2)goto _LL99;if(*((int*)_tmp111)!= 8)goto _LL95;
 _tmp112=((struct Cyc_Absyn_Enum_d_struct*)_tmp111)->f1;_LL94:(void*)(_tmp112->sc=(
-void*)s);if(_tmp105 != 0){const char*_tmp9BD;Cyc_Parse_err(((_tmp9BD="bad attributes on enum",
-_tag_dyneither(_tmp9BD,sizeof(char),23))),loc);}goto _LL92;_LL95: if(*((int*)
-_tmp111)!= 4)goto _LL97;_tmp113=((struct Cyc_Absyn_Aggr_d_struct*)_tmp111)->f1;
+void*)s);if(_tmp105 != 0){const char*_tmp9B6;Cyc_Parse_err(((_tmp9B6="bad attributes on enum",
+_tag_dyneither(_tmp9B6,sizeof(char),23))),loc);}goto _LL92;_LL95: if(*((int*)
+_tmp111)!= 6)goto _LL97;_tmp113=((struct Cyc_Absyn_Aggr_d_struct*)_tmp111)->f1;
 _LL96:(void*)(_tmp113->sc=(void*)s);_tmp113->attributes=_tmp105;goto _LL92;_LL97:
-if(*((int*)_tmp111)!= 5)goto _LL99;_tmp114=((struct Cyc_Absyn_Tunion_d_struct*)
+if(*((int*)_tmp111)!= 7)goto _LL99;_tmp114=((struct Cyc_Absyn_Tunion_d_struct*)
 _tmp111)->f1;_LL98:(void*)(_tmp114->sc=(void*)s);if(_tmp105 != 0){const char*
-_tmp9BE;Cyc_Parse_err(((_tmp9BE="bad attributes on tunion",_tag_dyneither(
-_tmp9BE,sizeof(char),25))),loc);}goto _LL92;_LL99:;_LL9A:{const char*_tmp9BF;Cyc_Parse_err(((
-_tmp9BF="bad declaration",_tag_dyneither(_tmp9BF,sizeof(char),16))),loc);}{
+_tmp9B7;Cyc_Parse_err(((_tmp9B7="bad attributes on tunion",_tag_dyneither(
+_tmp9B7,sizeof(char),25))),loc);}goto _LL92;_LL99:;_LL9A:{const char*_tmp9B8;Cyc_Parse_err(((
+_tmp9B8="bad declaration",_tag_dyneither(_tmp9B8,sizeof(char),16))),loc);}{
 struct Cyc_List_List*_tmp118=0;_npop_handler(0);return _tmp118;}_LL92:;}{struct Cyc_List_List*
-_tmp9C0;struct Cyc_List_List*_tmp11A=(_tmp9C0=_cycalloc(sizeof(*_tmp9C0)),((
-_tmp9C0->hd=d,((_tmp9C0->tl=0,_tmp9C0)))));_npop_handler(0);return _tmp11A;}}
+_tmp9B9;struct Cyc_List_List*_tmp11A=(_tmp9B9=_cycalloc(sizeof(*_tmp9B9)),((
+_tmp9B9->hd=d,((_tmp9B9->tl=0,_tmp9B9)))));_npop_handler(0);return _tmp11A;}}
 else{void*_tmp11B=_tmp10F;struct Cyc_Absyn_AggrInfo _tmp11C;union Cyc_Absyn_AggrInfoU_union
 _tmp11D;void*_tmp11E;struct _tuple1*_tmp11F;struct Cyc_List_List*_tmp120;struct Cyc_Absyn_TunionInfo
 _tmp121;union Cyc_Absyn_TunionInfoU_union _tmp122;struct Cyc_Absyn_Tuniondecl**
@@ -1624,25 +1625,25 @@ if((((((struct Cyc_Absyn_AggrType_struct*)_tmp11B)->f1).aggr_info).UnknownAggr).
 _tmp120=_tmp11C.targs;_LL9D: {struct Cyc_List_List*_tmp12D=((struct Cyc_List_List*(*)(
 struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Position_Segment*,void*),struct Cyc_Position_Segment*
 env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_typ2tvar,loc,_tmp120);
-struct Cyc_Absyn_Aggrdecl*_tmp9C1;struct Cyc_Absyn_Aggrdecl*_tmp12E=(_tmp9C1=
-_cycalloc(sizeof(*_tmp9C1)),((_tmp9C1->kind=(void*)_tmp11E,((_tmp9C1->sc=(void*)
-s,((_tmp9C1->name=_tmp11F,((_tmp9C1->tvs=_tmp12D,((_tmp9C1->impl=0,((_tmp9C1->attributes=
-0,_tmp9C1)))))))))))));if(_tmp105 != 0){const char*_tmp9C2;Cyc_Parse_err(((_tmp9C2="bad attributes on type declaration",
-_tag_dyneither(_tmp9C2,sizeof(char),35))),loc);}{struct Cyc_Absyn_Aggr_d_struct*
-_tmp9C8;struct Cyc_Absyn_Aggr_d_struct _tmp9C7;struct Cyc_List_List*_tmp9C6;struct
-Cyc_List_List*_tmp133=(_tmp9C6=_cycalloc(sizeof(*_tmp9C6)),((_tmp9C6->hd=Cyc_Absyn_new_decl((
-void*)((_tmp9C8=_cycalloc(sizeof(*_tmp9C8)),((_tmp9C8[0]=((_tmp9C7.tag=4,((
-_tmp9C7.f1=_tmp12E,_tmp9C7)))),_tmp9C8)))),loc),((_tmp9C6->tl=0,_tmp9C6)))));
+struct Cyc_Absyn_Aggrdecl*_tmp9BA;struct Cyc_Absyn_Aggrdecl*_tmp12E=(_tmp9BA=
+_cycalloc(sizeof(*_tmp9BA)),((_tmp9BA->kind=(void*)_tmp11E,((_tmp9BA->sc=(void*)
+s,((_tmp9BA->name=_tmp11F,((_tmp9BA->tvs=_tmp12D,((_tmp9BA->impl=0,((_tmp9BA->attributes=
+0,_tmp9BA)))))))))))));if(_tmp105 != 0){const char*_tmp9BB;Cyc_Parse_err(((_tmp9BB="bad attributes on type declaration",
+_tag_dyneither(_tmp9BB,sizeof(char),35))),loc);}{struct Cyc_Absyn_Aggr_d_struct*
+_tmp9C1;struct Cyc_Absyn_Aggr_d_struct _tmp9C0;struct Cyc_List_List*_tmp9BF;struct
+Cyc_List_List*_tmp133=(_tmp9BF=_cycalloc(sizeof(*_tmp9BF)),((_tmp9BF->hd=Cyc_Absyn_new_decl((
+void*)((_tmp9C1=_cycalloc(sizeof(*_tmp9C1)),((_tmp9C1[0]=((_tmp9C0.tag=6,((
+_tmp9C0.f1=_tmp12E,_tmp9C0)))),_tmp9C1)))),loc),((_tmp9BF->tl=0,_tmp9BF)))));
 _npop_handler(0);return _tmp133;}}_LL9E: if(*((int*)_tmp11B)!= 2)goto _LLA0;_tmp121=((
 struct Cyc_Absyn_TunionType_struct*)_tmp11B)->f1;_tmp122=_tmp121.tunion_info;if((((((
 struct Cyc_Absyn_TunionType_struct*)_tmp11B)->f1).tunion_info).KnownTunion).tag != 
 1)goto _LLA0;_tmp123=(_tmp122.KnownTunion).f1;_LL9F: if(_tmp105 != 0){const char*
-_tmp9C9;Cyc_Parse_err(((_tmp9C9="bad attributes on tunion",_tag_dyneither(
-_tmp9C9,sizeof(char),25))),loc);}{struct Cyc_Absyn_Tunion_d_struct*_tmp9CF;struct
-Cyc_Absyn_Tunion_d_struct _tmp9CE;struct Cyc_List_List*_tmp9CD;struct Cyc_List_List*
-_tmp139=(_tmp9CD=_cycalloc(sizeof(*_tmp9CD)),((_tmp9CD->hd=Cyc_Absyn_new_decl((
-void*)((_tmp9CF=_cycalloc(sizeof(*_tmp9CF)),((_tmp9CF[0]=((_tmp9CE.tag=5,((
-_tmp9CE.f1=*_tmp123,_tmp9CE)))),_tmp9CF)))),loc),((_tmp9CD->tl=0,_tmp9CD)))));
+_tmp9C2;Cyc_Parse_err(((_tmp9C2="bad attributes on tunion",_tag_dyneither(
+_tmp9C2,sizeof(char),25))),loc);}{struct Cyc_Absyn_Tunion_d_struct*_tmp9C8;struct
+Cyc_Absyn_Tunion_d_struct _tmp9C7;struct Cyc_List_List*_tmp9C6;struct Cyc_List_List*
+_tmp139=(_tmp9C6=_cycalloc(sizeof(*_tmp9C6)),((_tmp9C6->hd=Cyc_Absyn_new_decl((
+void*)((_tmp9C8=_cycalloc(sizeof(*_tmp9C8)),((_tmp9C8[0]=((_tmp9C7.tag=7,((
+_tmp9C7.f1=*_tmp123,_tmp9C7)))),_tmp9C8)))),loc),((_tmp9C6->tl=0,_tmp9C6)))));
 _npop_handler(0);return _tmp139;}_LLA0: if(*((int*)_tmp11B)!= 2)goto _LLA2;_tmp124=((
 struct Cyc_Absyn_TunionType_struct*)_tmp11B)->f1;_tmp125=_tmp124.tunion_info;if((((((
 struct Cyc_Absyn_TunionType_struct*)_tmp11B)->f1).tunion_info).UnknownTunion).tag
@@ -1652,77 +1653,77 @@ Cyc_List_List*_tmp13A=((struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*f)(stru
 Cyc_Position_Segment*,void*),struct Cyc_Position_Segment*env,struct Cyc_List_List*
 x))Cyc_List_map_c)(Cyc_Parse_typ2tvar,loc,_tmp12A);struct Cyc_Absyn_Decl*_tmp13B=
 Cyc_Absyn_tunion_decl(s,_tmp127,_tmp13A,0,_tmp128,_tmp129,loc);if(_tmp105 != 0){
-const char*_tmp9D0;Cyc_Parse_err(((_tmp9D0="bad attributes on tunion",
-_tag_dyneither(_tmp9D0,sizeof(char),25))),loc);}{struct Cyc_List_List*_tmp9D1;
-struct Cyc_List_List*_tmp13E=(_tmp9D1=_cycalloc(sizeof(*_tmp9D1)),((_tmp9D1->hd=
-_tmp13B,((_tmp9D1->tl=0,_tmp9D1)))));_npop_handler(0);return _tmp13E;}}_LLA2: if(*((
+const char*_tmp9C9;Cyc_Parse_err(((_tmp9C9="bad attributes on tunion",
+_tag_dyneither(_tmp9C9,sizeof(char),25))),loc);}{struct Cyc_List_List*_tmp9CA;
+struct Cyc_List_List*_tmp13E=(_tmp9CA=_cycalloc(sizeof(*_tmp9CA)),((_tmp9CA->hd=
+_tmp13B,((_tmp9CA->tl=0,_tmp9CA)))));_npop_handler(0);return _tmp13E;}}_LLA2: if(*((
 int*)_tmp11B)!= 12)goto _LLA4;_tmp12B=((struct Cyc_Absyn_EnumType_struct*)_tmp11B)->f1;
-_LLA3: {struct Cyc_Absyn_Enumdecl*_tmp9D2;struct Cyc_Absyn_Enumdecl*_tmp13F=(
-_tmp9D2=_cycalloc(sizeof(*_tmp9D2)),((_tmp9D2->sc=(void*)s,((_tmp9D2->name=
-_tmp12B,((_tmp9D2->fields=0,_tmp9D2)))))));if(_tmp105 != 0){const char*_tmp9D3;Cyc_Parse_err(((
-_tmp9D3="bad attributes on enum",_tag_dyneither(_tmp9D3,sizeof(char),23))),loc);}{
-struct Cyc_Absyn_Decl*_tmp9DD;struct Cyc_Absyn_Enum_d_struct _tmp9DC;struct Cyc_Absyn_Enum_d_struct*
-_tmp9DB;struct Cyc_List_List*_tmp9DA;struct Cyc_List_List*_tmp145=(_tmp9DA=
-_cycalloc(sizeof(*_tmp9DA)),((_tmp9DA->hd=((_tmp9DD=_cycalloc(sizeof(*_tmp9DD)),((
-_tmp9DD->r=(void*)((void*)((_tmp9DB=_cycalloc(sizeof(*_tmp9DB)),((_tmp9DB[0]=((
-_tmp9DC.tag=6,((_tmp9DC.f1=_tmp13F,_tmp9DC)))),_tmp9DB))))),((_tmp9DD->loc=loc,
-_tmp9DD)))))),((_tmp9DA->tl=0,_tmp9DA)))));_npop_handler(0);return _tmp145;}}
+_LLA3: {struct Cyc_Absyn_Enumdecl*_tmp9CB;struct Cyc_Absyn_Enumdecl*_tmp13F=(
+_tmp9CB=_cycalloc(sizeof(*_tmp9CB)),((_tmp9CB->sc=(void*)s,((_tmp9CB->name=
+_tmp12B,((_tmp9CB->fields=0,_tmp9CB)))))));if(_tmp105 != 0){const char*_tmp9CC;Cyc_Parse_err(((
+_tmp9CC="bad attributes on enum",_tag_dyneither(_tmp9CC,sizeof(char),23))),loc);}{
+struct Cyc_Absyn_Decl*_tmp9D6;struct Cyc_Absyn_Enum_d_struct _tmp9D5;struct Cyc_Absyn_Enum_d_struct*
+_tmp9D4;struct Cyc_List_List*_tmp9D3;struct Cyc_List_List*_tmp145=(_tmp9D3=
+_cycalloc(sizeof(*_tmp9D3)),((_tmp9D3->hd=((_tmp9D6=_cycalloc(sizeof(*_tmp9D6)),((
+_tmp9D6->r=(void*)((void*)((_tmp9D4=_cycalloc(sizeof(*_tmp9D4)),((_tmp9D4[0]=((
+_tmp9D5.tag=8,((_tmp9D5.f1=_tmp13F,_tmp9D5)))),_tmp9D4))))),((_tmp9D6->loc=loc,
+_tmp9D6)))))),((_tmp9D3->tl=0,_tmp9D3)))));_npop_handler(0);return _tmp145;}}
 _LLA4: if(*((int*)_tmp11B)!= 13)goto _LLA6;_tmp12C=((struct Cyc_Absyn_AnonEnumType_struct*)
-_tmp11B)->f1;_LLA5: {struct Cyc_Core_Opt*_tmp9E0;struct Cyc_Absyn_Enumdecl*_tmp9DF;
-struct Cyc_Absyn_Enumdecl*_tmp147=(_tmp9DF=_cycalloc(sizeof(*_tmp9DF)),((_tmp9DF->sc=(
-void*)s,((_tmp9DF->name=Cyc_Parse_gensym_enum(),((_tmp9DF->fields=((_tmp9E0=
-_cycalloc(sizeof(*_tmp9E0)),((_tmp9E0->v=_tmp12C,_tmp9E0)))),_tmp9DF)))))));if(
-_tmp105 != 0){const char*_tmp9E1;Cyc_Parse_err(((_tmp9E1="bad attributes on enum",
-_tag_dyneither(_tmp9E1,sizeof(char),23))),loc);}{struct Cyc_Absyn_Decl*_tmp9EB;
-struct Cyc_Absyn_Enum_d_struct _tmp9EA;struct Cyc_Absyn_Enum_d_struct*_tmp9E9;
-struct Cyc_List_List*_tmp9E8;struct Cyc_List_List*_tmp14D=(_tmp9E8=_cycalloc(
-sizeof(*_tmp9E8)),((_tmp9E8->hd=((_tmp9EB=_cycalloc(sizeof(*_tmp9EB)),((_tmp9EB->r=(
-void*)((void*)((_tmp9E9=_cycalloc(sizeof(*_tmp9E9)),((_tmp9E9[0]=((_tmp9EA.tag=6,((
-_tmp9EA.f1=_tmp147,_tmp9EA)))),_tmp9E9))))),((_tmp9EB->loc=loc,_tmp9EB)))))),((
-_tmp9E8->tl=0,_tmp9E8)))));_npop_handler(0);return _tmp14D;}}_LLA6:;_LLA7:{const
-char*_tmp9EC;Cyc_Parse_err(((_tmp9EC="missing declarator",_tag_dyneither(_tmp9EC,
+_tmp11B)->f1;_LLA5: {struct Cyc_Core_Opt*_tmp9D9;struct Cyc_Absyn_Enumdecl*_tmp9D8;
+struct Cyc_Absyn_Enumdecl*_tmp147=(_tmp9D8=_cycalloc(sizeof(*_tmp9D8)),((_tmp9D8->sc=(
+void*)s,((_tmp9D8->name=Cyc_Parse_gensym_enum(),((_tmp9D8->fields=((_tmp9D9=
+_cycalloc(sizeof(*_tmp9D9)),((_tmp9D9->v=_tmp12C,_tmp9D9)))),_tmp9D8)))))));if(
+_tmp105 != 0){const char*_tmp9DA;Cyc_Parse_err(((_tmp9DA="bad attributes on enum",
+_tag_dyneither(_tmp9DA,sizeof(char),23))),loc);}{struct Cyc_Absyn_Decl*_tmp9E4;
+struct Cyc_Absyn_Enum_d_struct _tmp9E3;struct Cyc_Absyn_Enum_d_struct*_tmp9E2;
+struct Cyc_List_List*_tmp9E1;struct Cyc_List_List*_tmp14D=(_tmp9E1=_cycalloc(
+sizeof(*_tmp9E1)),((_tmp9E1->hd=((_tmp9E4=_cycalloc(sizeof(*_tmp9E4)),((_tmp9E4->r=(
+void*)((void*)((_tmp9E2=_cycalloc(sizeof(*_tmp9E2)),((_tmp9E2[0]=((_tmp9E3.tag=8,((
+_tmp9E3.f1=_tmp147,_tmp9E3)))),_tmp9E2))))),((_tmp9E4->loc=loc,_tmp9E4)))))),((
+_tmp9E1->tl=0,_tmp9E1)))));_npop_handler(0);return _tmp14D;}}_LLA6:;_LLA7:{const
+char*_tmp9E5;Cyc_Parse_err(((_tmp9E5="missing declarator",_tag_dyneither(_tmp9E5,
 sizeof(char),19))),loc);}{struct Cyc_List_List*_tmp151=0;_npop_handler(0);return
 _tmp151;}_LL9B:;}}else{void*t=_tmp10D.f1;struct Cyc_List_List*_tmp152=Cyc_Parse_apply_tmss(
-mkrgn,_tmp103,t,_tmp10B,_tmp105);if(istypedef){if(!exps_empty){const char*_tmp9ED;
-Cyc_Parse_err(((_tmp9ED="initializer in typedef declaration",_tag_dyneither(
-_tmp9ED,sizeof(char),35))),loc);}{struct Cyc_List_List*decls=((struct Cyc_List_List*(*)(
+mkrgn,_tmp103,t,_tmp10B,_tmp105);if(istypedef){if(!exps_empty){const char*_tmp9E6;
+Cyc_Parse_err(((_tmp9E6="initializer in typedef declaration",_tag_dyneither(
+_tmp9E6,sizeof(char),35))),loc);}{struct Cyc_List_List*decls=((struct Cyc_List_List*(*)(
 struct Cyc_Absyn_Decl*(*f)(struct Cyc_Position_Segment*,struct _tuple7*),struct Cyc_Position_Segment*
 env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_v_typ_to_typedef,loc,
 _tmp152);if(_tmp10D.f2 != 0){struct Cyc_Absyn_Decl*d=(struct Cyc_Absyn_Decl*)(
 _tmp10D.f2)->v;{void*_tmp154=(void*)d->r;struct Cyc_Absyn_Aggrdecl*_tmp155;struct
 Cyc_Absyn_Tuniondecl*_tmp156;struct Cyc_Absyn_Enumdecl*_tmp157;_LLA9: if(_tmp154 <= (
-void*)2)goto _LLAF;if(*((int*)_tmp154)!= 4)goto _LLAB;_tmp155=((struct Cyc_Absyn_Aggr_d_struct*)
+void*)2)goto _LLAF;if(*((int*)_tmp154)!= 6)goto _LLAB;_tmp155=((struct Cyc_Absyn_Aggr_d_struct*)
 _tmp154)->f1;_LLAA:(void*)(_tmp155->sc=(void*)s);_tmp155->attributes=_tmp105;
-_tmp105=0;goto _LLA8;_LLAB: if(*((int*)_tmp154)!= 5)goto _LLAD;_tmp156=((struct Cyc_Absyn_Tunion_d_struct*)
+_tmp105=0;goto _LLA8;_LLAB: if(*((int*)_tmp154)!= 7)goto _LLAD;_tmp156=((struct Cyc_Absyn_Tunion_d_struct*)
 _tmp154)->f1;_LLAC:(void*)(_tmp156->sc=(void*)s);goto _LLA8;_LLAD: if(*((int*)
-_tmp154)!= 6)goto _LLAF;_tmp157=((struct Cyc_Absyn_Enum_d_struct*)_tmp154)->f1;
-_LLAE:(void*)(_tmp157->sc=(void*)s);goto _LLA8;_LLAF:;_LLB0:{const char*_tmp9EE;
-Cyc_Parse_err(((_tmp9EE="declaration within typedef is not a struct, union, tunion, or xtunion",
-_tag_dyneither(_tmp9EE,sizeof(char),70))),loc);}goto _LLA8;_LLA8:;}{struct Cyc_List_List*
-_tmp9EF;decls=((_tmp9EF=_cycalloc(sizeof(*_tmp9EF)),((_tmp9EF->hd=d,((_tmp9EF->tl=
-decls,_tmp9EF))))));}}{struct Cyc_List_List*_tmp15A=decls;_npop_handler(0);return
-_tmp15A;}}}else{if(_tmp10D.f2 != 0){const char*_tmp9F0;Cyc_Parse_unimp(((_tmp9F0="nested type declaration within declarator",
-_tag_dyneither(_tmp9F0,sizeof(char),42))),loc);}{struct Cyc_List_List*decls=0;{
+_tmp154)!= 8)goto _LLAF;_tmp157=((struct Cyc_Absyn_Enum_d_struct*)_tmp154)->f1;
+_LLAE:(void*)(_tmp157->sc=(void*)s);goto _LLA8;_LLAF:;_LLB0:{const char*_tmp9E7;
+Cyc_Parse_err(((_tmp9E7="declaration within typedef is not a struct, union, tunion, or xtunion",
+_tag_dyneither(_tmp9E7,sizeof(char),70))),loc);}goto _LLA8;_LLA8:;}{struct Cyc_List_List*
+_tmp9E8;decls=((_tmp9E8=_cycalloc(sizeof(*_tmp9E8)),((_tmp9E8->hd=d,((_tmp9E8->tl=
+decls,_tmp9E8))))));}}{struct Cyc_List_List*_tmp15A=decls;_npop_handler(0);return
+_tmp15A;}}}else{if(_tmp10D.f2 != 0){const char*_tmp9E9;Cyc_Parse_unimp(((_tmp9E9="nested type declaration within declarator",
+_tag_dyneither(_tmp9E9,sizeof(char),42))),loc);}{struct Cyc_List_List*decls=0;{
 struct Cyc_List_List*_tmp15C=_tmp152;for(0;_tmp15C != 0;(_tmp15C=_tmp15C->tl,
 _tmp10C=_tmp10C->tl)){struct _tuple7 _tmp15E;struct _tuple1*_tmp15F;struct Cyc_Absyn_Tqual
 _tmp160;void*_tmp161;struct Cyc_List_List*_tmp162;struct Cyc_List_List*_tmp163;
 struct _tuple7*_tmp15D=(struct _tuple7*)_tmp15C->hd;_tmp15E=*_tmp15D;_tmp15F=
 _tmp15E.f1;_tmp160=_tmp15E.f2;_tmp161=_tmp15E.f3;_tmp162=_tmp15E.f4;_tmp163=
-_tmp15E.f5;if(_tmp162 != 0){const char*_tmp9F3;void*_tmp9F2;(_tmp9F2=0,Cyc_Tcutil_warn(
-loc,((_tmp9F3="bad type params, ignoring",_tag_dyneither(_tmp9F3,sizeof(char),26))),
-_tag_dyneither(_tmp9F2,sizeof(void*),0)));}if(_tmp10C == 0){const char*_tmp9F6;
-void*_tmp9F5;(_tmp9F5=0,((int(*)(struct Cyc_Position_Segment*sg,struct
-_dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(loc,((_tmp9F6="unexpected NULL in parse!",
-_tag_dyneither(_tmp9F6,sizeof(char),26))),_tag_dyneither(_tmp9F5,sizeof(void*),0)));}{
+_tmp15E.f5;if(_tmp162 != 0){const char*_tmp9EC;void*_tmp9EB;(_tmp9EB=0,Cyc_Tcutil_warn(
+loc,((_tmp9EC="bad type params, ignoring",_tag_dyneither(_tmp9EC,sizeof(char),26))),
+_tag_dyneither(_tmp9EB,sizeof(void*),0)));}if(_tmp10C == 0){const char*_tmp9EF;
+void*_tmp9EE;(_tmp9EE=0,((int(*)(struct Cyc_Position_Segment*sg,struct
+_dyneither_ptr fmt,struct _dyneither_ptr ap))Cyc_Parse_abort)(loc,((_tmp9EF="unexpected NULL in parse!",
+_tag_dyneither(_tmp9EF,sizeof(char),26))),_tag_dyneither(_tmp9EE,sizeof(void*),0)));}{
 struct Cyc_Absyn_Exp*_tmp168=(struct Cyc_Absyn_Exp*)_tmp10C->hd;struct Cyc_Absyn_Vardecl*
 _tmp169=Cyc_Absyn_new_vardecl(_tmp15F,_tmp161,_tmp168);_tmp169->tq=_tmp160;(void*)(
 _tmp169->sc=(void*)s);_tmp169->attributes=_tmp163;{struct Cyc_Absyn_Var_d_struct*
-_tmp9FC;struct Cyc_Absyn_Var_d_struct _tmp9FB;struct Cyc_Absyn_Decl*_tmp9FA;struct
-Cyc_Absyn_Decl*_tmp16A=(_tmp9FA=_cycalloc(sizeof(*_tmp9FA)),((_tmp9FA->r=(void*)((
-void*)((_tmp9FC=_cycalloc(sizeof(*_tmp9FC)),((_tmp9FC[0]=((_tmp9FB.tag=0,((
-_tmp9FB.f1=_tmp169,_tmp9FB)))),_tmp9FC))))),((_tmp9FA->loc=loc,_tmp9FA)))));
-struct Cyc_List_List*_tmp9FD;decls=((_tmp9FD=_cycalloc(sizeof(*_tmp9FD)),((
-_tmp9FD->hd=_tmp16A,((_tmp9FD->tl=decls,_tmp9FD))))));}}}}{struct Cyc_List_List*
+_tmp9F5;struct Cyc_Absyn_Var_d_struct _tmp9F4;struct Cyc_Absyn_Decl*_tmp9F3;struct
+Cyc_Absyn_Decl*_tmp16A=(_tmp9F3=_cycalloc(sizeof(*_tmp9F3)),((_tmp9F3->r=(void*)((
+void*)((_tmp9F5=_cycalloc(sizeof(*_tmp9F5)),((_tmp9F5[0]=((_tmp9F4.tag=0,((
+_tmp9F4.f1=_tmp169,_tmp9F4)))),_tmp9F5))))),((_tmp9F3->loc=loc,_tmp9F3)))));
+struct Cyc_List_List*_tmp9F6;decls=((_tmp9F6=_cycalloc(sizeof(*_tmp9F6)),((
+_tmp9F6->hd=_tmp16A,((_tmp9F6->tl=decls,_tmp9F6))))));}}}}{struct Cyc_List_List*
 _tmp16F=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(decls);
 _npop_handler(0);return _tmp16F;}}}}}}}}};_pop_region(mkrgn);}static void*Cyc_Parse_id_to_kind(
 struct _dyneither_ptr s,struct Cyc_Position_Segment*loc);static void*Cyc_Parse_id_to_kind(
@@ -1734,12 +1735,12 @@ void*)3;case 'U': _LLB5: if(*((const char*)_check_dyneither_subscript(s,sizeof(c
 1))== 'R')return(void*)4;else{break;}case 'T': _LLB6: if(*((const char*)
 _check_dyneither_subscript(s,sizeof(char),1))== 'R')return(void*)5;else{break;}
 case 'E': _LLB7: return(void*)6;case 'I': _LLB8: return(void*)7;default: _LLB9: break;}{
-const char*_tmpA02;void*_tmpA01[2];struct Cyc_String_pa_struct _tmpA00;struct Cyc_Int_pa_struct
-_tmp9FF;Cyc_Parse_err((struct _dyneither_ptr)((_tmp9FF.tag=1,((_tmp9FF.f1=(
-unsigned long)((int)Cyc_strlen((struct _dyneither_ptr)s)),((_tmpA00.tag=0,((
-_tmpA00.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)s),((_tmpA01[0]=& _tmpA00,((
-_tmpA01[1]=& _tmp9FF,Cyc_aprintf(((_tmpA02="bad kind: %s; strlen=%d",
-_tag_dyneither(_tmpA02,sizeof(char),24))),_tag_dyneither(_tmpA01,sizeof(void*),2)))))))))))))),
+const char*_tmp9FB;void*_tmp9FA[2];struct Cyc_String_pa_struct _tmp9F9;struct Cyc_Int_pa_struct
+_tmp9F8;Cyc_Parse_err((struct _dyneither_ptr)((_tmp9F8.tag=1,((_tmp9F8.f1=(
+unsigned long)((int)Cyc_strlen((struct _dyneither_ptr)s)),((_tmp9F9.tag=0,((
+_tmp9F9.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)s),((_tmp9FA[0]=& _tmp9F9,((
+_tmp9FA[1]=& _tmp9F8,Cyc_aprintf(((_tmp9FB="bad kind: %s; strlen=%d",
+_tag_dyneither(_tmp9FB,sizeof(char),24))),_tag_dyneither(_tmp9FA,sizeof(void*),2)))))))))))))),
 loc);}return(void*)2;}static struct Cyc_Absyn_Exp*Cyc_Parse_pat2exp(struct Cyc_Absyn_Pat*
 p);static struct Cyc_Absyn_Exp*Cyc_Parse_pat2exp(struct Cyc_Absyn_Pat*p){void*
 _tmp174=(void*)p->r;struct _tuple1*_tmp175;struct Cyc_Absyn_Vardecl*_tmp176;struct
@@ -1748,15 +1749,15 @@ _tmp17A;void*_tmp17B;int _tmp17C;char _tmp17D;struct _dyneither_ptr _tmp17E;stru
 _tuple1*_tmp17F;struct Cyc_List_List*_tmp180;int _tmp181;struct Cyc_Absyn_Exp*
 _tmp182;_LLBC: if(_tmp174 <= (void*)2)goto _LLC2;if(*((int*)_tmp174)!= 12)goto _LLBE;
 _tmp175=((struct Cyc_Absyn_UnknownId_p_struct*)_tmp174)->f1;_LLBD: {struct Cyc_Absyn_UnknownId_e_struct
-_tmpA05;struct Cyc_Absyn_UnknownId_e_struct*_tmpA04;return Cyc_Absyn_new_exp((void*)((
-_tmpA04=_cycalloc(sizeof(*_tmpA04)),((_tmpA04[0]=((_tmpA05.tag=2,((_tmpA05.f1=
-_tmp175,_tmpA05)))),_tmpA04)))),p->loc);}_LLBE: if(*((int*)_tmp174)!= 1)goto _LLC0;
+_tmp9FE;struct Cyc_Absyn_UnknownId_e_struct*_tmp9FD;return Cyc_Absyn_new_exp((void*)((
+_tmp9FD=_cycalloc(sizeof(*_tmp9FD)),((_tmp9FD[0]=((_tmp9FE.tag=2,((_tmp9FE.f1=
+_tmp175,_tmp9FE)))),_tmp9FD)))),p->loc);}_LLBE: if(*((int*)_tmp174)!= 1)goto _LLC0;
 _tmp176=((struct Cyc_Absyn_Reference_p_struct*)_tmp174)->f1;_tmp177=((struct Cyc_Absyn_Reference_p_struct*)
 _tmp174)->f2;_tmp178=*_tmp177;_tmp179=(void*)_tmp178.r;if((int)_tmp179 != 0)goto
-_LLC0;_LLBF: {struct Cyc_Absyn_UnknownId_e_struct _tmpA08;struct Cyc_Absyn_UnknownId_e_struct*
-_tmpA07;return Cyc_Absyn_deref_exp(Cyc_Absyn_new_exp((void*)((_tmpA07=_cycalloc(
-sizeof(*_tmpA07)),((_tmpA07[0]=((_tmpA08.tag=2,((_tmpA08.f1=_tmp176->name,
-_tmpA08)))),_tmpA07)))),p->loc),p->loc);}_LLC0: if(*((int*)_tmp174)!= 4)goto _LLC2;
+_LLC0;_LLBF: {struct Cyc_Absyn_UnknownId_e_struct _tmpA01;struct Cyc_Absyn_UnknownId_e_struct*
+_tmpA00;return Cyc_Absyn_deref_exp(Cyc_Absyn_new_exp((void*)((_tmpA00=_cycalloc(
+sizeof(*_tmpA00)),((_tmpA00[0]=((_tmpA01.tag=2,((_tmpA01.f1=_tmp176->name,
+_tmpA01)))),_tmpA00)))),p->loc),p->loc);}_LLC0: if(*((int*)_tmp174)!= 4)goto _LLC2;
 _tmp17A=((struct Cyc_Absyn_Pointer_p_struct*)_tmp174)->f1;_LLC1: return Cyc_Absyn_address_exp(
 Cyc_Parse_pat2exp(_tmp17A),p->loc);_LLC2: if((int)_tmp174 != 1)goto _LLC4;_LLC3:
 return Cyc_Absyn_null_exp(p->loc);_LLC4: if(_tmp174 <= (void*)2)goto _LLCE;if(*((int*)
@@ -1769,14 +1770,14 @@ _tmp174)->f1;_LLC9: return Cyc_Absyn_float_exp(_tmp17E,p->loc);_LLCA: if(*((int*
 _tmp174)!= 13)goto _LLCC;_tmp17F=((struct Cyc_Absyn_UnknownCall_p_struct*)_tmp174)->f1;
 _tmp180=((struct Cyc_Absyn_UnknownCall_p_struct*)_tmp174)->f2;_tmp181=((struct Cyc_Absyn_UnknownCall_p_struct*)
 _tmp174)->f3;if(_tmp181 != 0)goto _LLCC;_LLCB: {struct Cyc_Absyn_UnknownId_e_struct
-_tmpA0B;struct Cyc_Absyn_UnknownId_e_struct*_tmpA0A;struct Cyc_Absyn_Exp*e1=Cyc_Absyn_new_exp((
-void*)((_tmpA0A=_cycalloc(sizeof(*_tmpA0A)),((_tmpA0A[0]=((_tmpA0B.tag=2,((
-_tmpA0B.f1=_tmp17F,_tmpA0B)))),_tmpA0A)))),p->loc);struct Cyc_List_List*es=((
+_tmpA04;struct Cyc_Absyn_UnknownId_e_struct*_tmpA03;struct Cyc_Absyn_Exp*e1=Cyc_Absyn_new_exp((
+void*)((_tmpA03=_cycalloc(sizeof(*_tmpA03)),((_tmpA03[0]=((_tmpA04.tag=2,((
+_tmpA04.f1=_tmp17F,_tmpA04)))),_tmpA03)))),p->loc);struct Cyc_List_List*es=((
 struct Cyc_List_List*(*)(struct Cyc_Absyn_Exp*(*f)(struct Cyc_Absyn_Pat*),struct Cyc_List_List*
 x))Cyc_List_map)(Cyc_Parse_pat2exp,_tmp180);return Cyc_Absyn_unknowncall_exp(e1,
 es,p->loc);}_LLCC: if(*((int*)_tmp174)!= 14)goto _LLCE;_tmp182=((struct Cyc_Absyn_Exp_p_struct*)
-_tmp174)->f1;_LLCD: return _tmp182;_LLCE:;_LLCF:{const char*_tmpA0C;Cyc_Parse_err(((
-_tmpA0C="cannot mix patterns and expressions in case",_tag_dyneither(_tmpA0C,
+_tmp174)->f1;_LLCD: return _tmp182;_LLCE:;_LLCF:{const char*_tmpA05;Cyc_Parse_err(((
+_tmpA05="cannot mix patterns and expressions in case",_tag_dyneither(_tmpA05,
 sizeof(char),44))),p->loc);}return Cyc_Absyn_null_exp(p->loc);_LLBB:;}struct
 _tuple11{void*f1;int f2;};struct Cyc_Int_tok_struct{int tag;struct _tuple11 f1;};
 struct Cyc_Char_tok_struct{int tag;char f1;};struct Cyc_String_tok_struct{int tag;
@@ -2200,13 +2201,13 @@ _tmp268=yy1;struct Cyc_List_List*_tmp269;_LL1E4: if((_tmp268.YY52).tag != 56)got
 _LL1E6;_tmp269=(_tmp268.YY52).f1;_LL1E5: yyzzz=_tmp269;goto _LL1E3;_LL1E6:;_LL1E7:(
 int)_throw((void*)& Cyc_yyfail_YY52);_LL1E3:;}return yyzzz;}struct Cyc_Yyltype{int
 timestamp;int first_line;int first_column;int last_line;int last_column;};struct Cyc_Yyltype
-Cyc_yynewloc();struct Cyc_Yyltype Cyc_yynewloc(){struct Cyc_Yyltype _tmpA0D;return(
-_tmpA0D.timestamp=0,((_tmpA0D.first_line=0,((_tmpA0D.first_column=0,((_tmpA0D.last_line=
-0,((_tmpA0D.last_column=0,_tmpA0D)))))))));}struct Cyc_Yyltype Cyc_yylloc={0,0,0,0,
+Cyc_yynewloc();struct Cyc_Yyltype Cyc_yynewloc(){struct Cyc_Yyltype _tmpA06;return(
+_tmpA06.timestamp=0,((_tmpA06.first_line=0,((_tmpA06.first_column=0,((_tmpA06.last_line=
+0,((_tmpA06.last_column=0,_tmpA06)))))))));}struct Cyc_Yyltype Cyc_yylloc={0,0,0,0,
 0};static short Cyc_yytranslate[362]={0,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-2,2,2,2,2,2,2,2,2,2,2,133,2,2,115,131,128,2,112,113,121,125,110,129,118,130,2,2,
-2,2,2,2,2,2,2,2,117,107,116,111,124,123,122,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
-2,2,2,2,2,2,2,2,119,2,120,127,114,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+2,2,2,2,2,2,2,2,2,2,2,133,2,2,119,131,128,2,116,117,122,125,110,129,121,130,2,2,
+2,2,2,2,2,2,2,2,120,107,112,111,113,124,123,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
+2,2,2,2,2,2,2,2,114,2,115,127,118,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 2,2,2,2,108,126,109,132,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
 2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,2,
@@ -2256,11 +2257,11 @@ _tmp2CE[7]="STRING";static char _tmp2CF[19]="CHARACTER_CONSTANT";static char _tm
 static char _tmp2D3[16]="QUAL_IDENTIFIER";static char _tmp2D4[18]="QUAL_TYPEDEF_NAME";
 static char _tmp2D5[10]="ATTRIBUTE";static char _tmp2D6[4]="';'";static char _tmp2D7[4]="'{'";
 static char _tmp2D8[4]="'}'";static char _tmp2D9[4]="','";static char _tmp2DA[4]="'='";
-static char _tmp2DB[4]="'('";static char _tmp2DC[4]="')'";static char _tmp2DD[4]="'_'";
-static char _tmp2DE[4]="'$'";static char _tmp2DF[4]="'<'";static char _tmp2E0[4]="':'";
-static char _tmp2E1[4]="'.'";static char _tmp2E2[4]="'['";static char _tmp2E3[4]="']'";
-static char _tmp2E4[4]="'*'";static char _tmp2E5[4]="'@'";static char _tmp2E6[4]="'?'";
-static char _tmp2E7[4]="'>'";static char _tmp2E8[4]="'+'";static char _tmp2E9[4]="'|'";
+static char _tmp2DB[4]="'<'";static char _tmp2DC[4]="'>'";static char _tmp2DD[4]="'['";
+static char _tmp2DE[4]="']'";static char _tmp2DF[4]="'('";static char _tmp2E0[4]="')'";
+static char _tmp2E1[4]="'_'";static char _tmp2E2[4]="'$'";static char _tmp2E3[4]="':'";
+static char _tmp2E4[4]="'.'";static char _tmp2E5[4]="'*'";static char _tmp2E6[4]="'@'";
+static char _tmp2E7[4]="'?'";static char _tmp2E8[4]="'+'";static char _tmp2E9[4]="'|'";
 static char _tmp2EA[4]="'^'";static char _tmp2EB[4]="'&'";static char _tmp2EC[4]="'-'";
 static char _tmp2ED[4]="'/'";static char _tmp2EE[4]="'%'";static char _tmp2EF[4]="'~'";
 static char _tmp2F0[4]="'!'";static char _tmp2F1[5]="prog";static char _tmp2F2[17]="translation_unit";
@@ -2442,19 +2443,19 @@ _tmp378 + 26},{_tmp379,_tmp379,_tmp379 + 9},{_tmp37A,_tmp37A,_tmp37A + 20},{_tmp
 _tmp37B,_tmp37B + 17},{_tmp37C,_tmp37C,_tmp37C + 18},{_tmp37D,_tmp37D,_tmp37D + 11},{
 _tmp37E,_tmp37E,_tmp37E + 12}};static short Cyc_yyr1[500]={0,134,135,135,135,135,
 135,135,135,135,135,135,136,136,137,137,138,138,138,139,139,139,139,140,140,141,
-142,143,144,145,145,145,145,146,146,147,147,147,147,147,147,147,147,147,147,148,
-148,148,148,148,148,148,149,149,150,151,151,152,152,152,152,152,152,153,153,154,
-154,154,154,154,154,154,154,154,154,154,154,154,154,154,154,154,154,154,154,154,
-154,155,156,156,156,157,157,157,158,158,159,159,159,160,160,160,161,161,162,162,
-163,163,164,164,165,166,166,167,167,168,169,169,169,169,169,169,170,170,170,170,
-170,170,171,172,172,173,173,173,174,174,174,175,175,176,176,177,177,177,177,178,
-178,178,179,179,180,180,181,181,182,182,182,182,182,182,182,182,182,182,183,183,
-183,183,183,183,183,183,183,183,183,184,184,185,186,186,186,187,187,188,188,188,
-189,189,189,190,190,190,191,191,192,192,192,192,193,193,194,194,195,195,196,196,
-197,197,198,198,199,199,199,199,200,200,201,201,202,202,202,203,204,204,205,205,
-206,206,206,206,207,207,207,207,208,209,209,210,210,211,211,212,212,212,212,212,
-213,213,214,214,214,215,215,215,215,215,215,215,215,215,215,215,216,216,216,216,
-216,216,216,216,216,216,216,216,217,217,218,219,219,220,220,221,221,221,221,221,
+142,143,144,145,145,145,145,145,145,145,145,145,146,146,147,147,147,147,147,147,
+147,147,147,147,148,148,148,148,148,148,148,149,149,150,151,151,152,152,152,152,
+152,152,153,153,154,154,154,154,154,154,154,154,154,154,154,154,154,154,154,154,
+154,154,154,154,154,154,155,156,156,156,157,157,157,158,158,159,159,159,160,160,
+160,161,161,162,162,163,163,164,164,165,166,166,167,167,168,169,169,169,169,169,
+169,170,170,170,170,170,170,171,172,172,173,173,173,174,174,174,175,175,176,176,
+177,177,177,177,178,178,178,179,179,180,180,181,181,182,182,182,182,182,182,182,
+182,182,182,183,183,183,183,183,183,183,183,183,183,183,184,184,185,186,186,186,
+187,187,188,188,188,189,189,189,190,190,190,191,191,192,192,192,192,193,193,194,
+194,195,195,196,196,197,197,198,198,199,199,199,199,200,200,201,201,202,202,202,
+203,204,204,205,205,206,206,206,206,207,207,207,207,208,209,209,210,210,211,211,
+212,212,212,212,212,213,213,214,214,214,215,215,215,215,215,215,215,215,215,215,
+215,216,216,216,216,216,216,216,217,217,218,219,219,220,220,221,221,221,221,221,
 221,222,222,222,222,222,222,223,223,223,223,223,223,224,224,224,224,224,224,224,
 224,224,224,224,224,224,224,225,225,225,225,225,225,225,225,226,227,227,228,228,
 229,229,230,230,231,231,232,232,233,233,233,234,234,234,234,234,235,235,235,236,
@@ -2466,726 +2467,736 @@ _tmp37E,_tmp37E,_tmp37E + 12}};static short Cyc_yyr1[500]={0,134,135,135,135,135
 264,264,264,264,264,264,264,264,264,264,264,264,264,264,264,265,265,265,266,266,
 266,266,266,266,266,266,266,266,267,267,267,267,267,267,267,267,267,268,269,269,
 270,270,270,270,271,271,272,272,273,273,274,274,275,275};static short Cyc_yyr2[500]={
-0,1,2,3,5,3,5,6,7,3,3,0,4,3,2,3,1,1,1,2,3,3,4,3,4,2,1,2,1,2,3,5,3,1,2,1,2,1,2,1,
-2,1,2,1,2,1,1,1,1,2,1,1,0,1,6,1,3,1,1,4,4,4,8,1,2,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,
-4,4,4,6,4,1,4,1,1,1,1,5,2,4,1,3,1,2,3,4,8,3,0,3,1,1,0,1,1,2,1,1,3,1,3,3,1,2,1,2,
-1,2,1,2,1,2,1,2,1,1,3,1,2,3,8,5,7,1,0,1,1,1,2,3,3,0,1,1,2,5,1,2,1,2,1,3,4,4,5,4,
-5,4,4,2,1,1,3,4,4,5,4,5,4,4,2,1,2,5,2,2,1,0,3,0,1,1,0,1,1,0,1,1,0,2,3,5,5,7,1,3,
-0,2,0,2,3,5,0,1,1,3,2,3,4,1,1,3,1,3,2,1,2,1,1,3,1,1,2,3,4,8,1,2,3,4,2,1,2,3,2,1,
-2,1,2,3,4,3,1,3,1,1,2,3,3,4,4,5,4,3,5,4,4,2,1,1,1,1,1,1,6,4,9,6,5,9,0,5,3,1,2,2,
+0,1,2,3,5,3,5,6,7,3,3,0,4,3,2,3,1,1,1,2,3,3,4,3,4,2,1,2,1,2,3,5,3,6,4,9,6,8,1,2,
+1,2,1,2,1,2,1,2,1,2,1,1,1,1,2,1,1,0,1,6,1,3,1,1,4,4,4,8,1,2,1,1,3,1,1,1,1,1,1,1,
+1,1,1,1,1,4,4,4,6,4,1,4,1,1,1,1,5,2,4,1,3,1,2,3,4,8,3,0,3,1,1,0,1,1,2,1,1,3,1,3,
+3,1,2,1,2,1,2,1,2,1,2,1,2,1,1,3,1,2,3,8,5,7,1,0,1,1,1,2,3,3,0,1,1,2,5,1,2,1,2,1,
+3,4,4,5,4,5,4,4,2,1,1,3,4,4,5,4,5,4,4,2,1,2,5,2,2,1,0,3,0,1,1,0,1,1,0,1,1,0,2,3,
+5,5,7,1,3,0,2,0,2,3,5,0,1,1,3,2,3,4,1,1,3,1,3,2,1,2,1,1,3,1,1,2,3,4,8,1,2,3,4,2,
+1,2,3,2,1,2,1,2,3,4,3,1,3,1,1,2,3,3,4,4,5,4,3,5,4,4,2,1,1,1,1,1,1,5,0,5,3,1,2,2,
 3,1,2,1,2,1,2,5,7,7,5,8,6,0,3,4,5,6,7,5,7,6,7,7,8,7,8,8,9,6,7,7,8,3,2,2,2,3,2,4,
 5,1,1,5,1,3,1,3,1,3,1,3,1,3,1,3,3,1,3,3,3,3,1,3,3,1,3,3,1,3,3,3,1,4,1,2,2,4,2,6,
 6,1,1,1,3,1,1,3,4,4,5,2,2,2,4,4,4,1,3,1,1,3,1,2,1,3,1,1,3,1,3,1,3,1,1,1,1,1,1,1,
 1,1,1,1,1,5,2,2,2,5,5,1,1,3,1,3,1,3,1,3,1,3,1,3,3,1,3,3,3,3,1,3,3,1,3,3,1,3,3,3,
 1,4,1,2,2,2,2,2,2,4,2,6,6,5,4,6,9,11,6,4,4,1,1,1,1,4,3,4,3,3,2,2,6,7,1,1,1,3,2,5,
-4,5,5,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1};static short Cyc_yydefact[1011]={0,18,45,
-46,47,48,50,65,68,69,70,71,72,73,74,75,88,89,90,104,105,41,0,0,51,0,0,0,85,0,0,
-137,0,0,490,198,492,491,493,0,0,66,0,181,181,180,1,0,16,0,0,17,0,35,43,37,63,39,
-76,77,0,78,0,138,150,0,175,183,79,154,102,49,48,42,0,92,489,0,490,486,487,488,0,
-363,0,0,0,0,221,0,365,366,25,27,138,138,0,0,138,0,0,0,0,0,0,138,0,178,179,2,0,0,
-0,0,29,0,110,111,113,36,44,38,40,138,494,495,102,139,140,186,138,33,138,0,19,138,
-138,0,163,151,176,185,184,189,138,64,0,49,96,0,94,0,490,372,0,0,0,0,0,0,0,0,0,0,
-0,0,102,0,0,0,0,476,138,0,0,0,0,463,461,462,0,389,391,404,412,414,416,418,420,
-422,425,430,433,436,440,0,442,464,475,474,0,373,371,32,0,0,102,0,0,0,120,116,118,
-239,241,0,0,9,10,0,0,496,497,199,87,0,0,155,67,219,0,216,0,3,0,5,0,30,0,0,138,20,
-0,138,108,0,101,188,0,187,0,0,0,0,0,0,0,0,0,0,0,0,0,0,490,277,279,0,285,281,0,
-283,262,263,264,0,265,266,267,0,34,21,113,206,222,0,0,202,200,0,246,0,183,0,191,
-52,190,0,0,97,93,0,0,367,0,0,138,450,138,406,440,0,407,408,0,0,0,0,0,0,0,0,138,
-138,443,444,138,0,0,0,446,447,445,0,364,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-394,395,396,397,398,399,400,401,402,403,393,0,448,0,470,471,0,0,0,478,0,102,379,
-380,0,377,0,223,0,0,0,138,242,214,0,121,126,122,124,117,119,138,0,248,240,249,
-499,498,0,81,84,138,82,86,58,57,0,55,156,138,218,152,248,220,164,165,138,80,182,
-26,0,28,0,112,114,225,224,22,99,109,0,0,0,128,129,131,0,102,102,0,0,0,0,0,0,138,
-0,314,315,316,0,0,318,0,274,0,0,0,0,0,138,286,282,113,284,280,278,207,138,0,0,
-213,201,208,159,0,0,138,202,161,138,162,157,183,192,53,103,0,98,411,95,91,375,
-376,0,0,0,226,0,0,230,0,0,0,235,0,0,0,0,0,0,138,0,0,0,0,0,477,484,0,483,390,413,
-0,415,417,419,421,423,424,428,429,426,427,431,432,434,435,437,438,439,392,469,
-466,0,468,0,138,0,368,0,374,31,386,0,382,387,0,384,369,0,0,243,127,123,125,0,202,
-0,183,0,250,138,138,0,261,245,0,0,0,0,120,0,102,138,138,0,174,153,217,4,6,0,132,
-115,0,0,202,0,135,0,0,0,293,0,0,0,0,0,313,317,0,0,0,0,0,0,0,0,0,276,138,23,200,
-138,210,0,0,203,0,160,206,194,247,158,192,177,0,7,0,449,0,0,238,0,227,0,231,234,
-236,454,0,0,0,0,0,0,459,460,0,0,0,441,480,0,0,467,465,0,0,378,381,383,370,0,244,
-215,257,0,251,252,183,0,202,0,183,0,83,0,0,0,54,56,0,166,0,202,0,0,183,0,130,133,
-138,102,145,0,0,0,0,0,0,0,0,0,0,0,0,0,293,319,0,0,269,0,0,0,0,24,202,0,211,209,0,
-202,138,193,0,8,0,0,0,237,228,232,0,0,0,0,0,409,410,453,482,0,485,405,479,481,0,
-385,388,256,254,259,0,260,253,183,0,61,59,60,167,170,0,172,173,168,183,0,136,147,
-146,0,0,141,287,293,0,0,0,138,0,0,321,322,324,326,328,330,332,334,337,342,345,
-348,352,354,361,362,0,138,290,299,0,0,0,0,0,0,0,0,0,0,320,0,0,0,0,272,0,196,212,
-204,195,200,13,0,0,452,451,0,233,455,138,0,458,472,0,258,255,0,171,169,100,134,
-148,145,145,0,0,293,138,358,138,0,355,138,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,356,294,0,301,0,0,0,309,0,0,0,0,0,0,292,0,268,271,0,0,0,202,12,14,0,0,0,0,473,
-0,138,144,143,288,289,0,0,0,0,293,295,325,0,327,329,331,333,335,336,340,341,338,
-339,343,344,346,347,349,350,351,0,300,302,303,0,311,310,0,305,0,0,0,275,0,0,205,
-197,15,0,0,138,0,0,291,357,0,353,296,0,138,304,312,306,307,0,0,0,229,456,0,62,
-149,0,0,323,293,297,308,270,273,0,360,359,298,457,0,0,0};static short Cyc_yydefgoto[
-142]={1008,46,643,842,47,48,268,49,424,50,426,51,132,52,53,488,210,410,411,211,
-56,223,212,58,148,149,59,145,60,242,243,115,116,117,244,213,393,436,437,438,61,
-62,129,788,789,790,63,439,64,415,65,66,67,107,143,248,295,640,570,68,571,480,632,
-472,476,477,388,288,231,87,88,504,429,505,506,507,508,214,290,291,572,399,271,
-619,272,273,274,275,276,715,277,278,798,799,800,801,802,803,804,805,806,807,808,
-809,810,811,812,813,377,378,379,560,561,562,279,181,365,182,494,183,184,185,186,
-187,188,189,190,191,192,193,194,195,196,197,523,524,198,199,70,843,224,403};
-static short Cyc_yypact[1011]={2525,- -32768,- -32768,- -32768,- -32768,- 1,- -32768,-
+4,5,5,1,1,3,1,1,1,1,1,1,1,1,1,1,1,1,1,1};static short Cyc_yydefact[1010]={0,18,50,
+51,52,53,55,70,73,74,75,76,77,78,79,80,93,94,95,109,110,46,0,0,56,0,0,0,90,0,0,0,
+142,0,0,0,490,203,492,491,493,0,0,71,0,186,186,185,1,0,16,0,0,17,0,40,48,42,68,
+44,81,82,0,83,0,143,155,0,180,188,84,159,107,54,53,47,0,97,489,0,490,486,487,488,
+0,363,0,0,0,0,226,0,365,366,25,27,143,143,274,0,0,0,0,143,0,0,0,0,0,0,0,143,0,
+183,184,2,0,0,0,0,29,0,115,116,118,41,49,43,45,143,494,495,107,144,145,191,143,
+38,143,0,19,143,0,143,168,156,181,190,189,194,143,69,0,54,101,0,99,0,490,372,0,0,
+0,0,0,0,0,0,0,0,0,0,107,0,0,0,0,476,143,0,0,0,0,463,461,462,0,389,391,404,412,
+414,416,418,420,422,425,430,433,436,440,0,442,464,475,474,0,373,371,32,0,0,107,0,
+0,0,125,121,123,244,246,0,0,0,0,0,0,9,10,0,0,0,496,497,204,92,0,0,160,72,224,0,
+221,0,3,0,5,0,30,0,0,143,20,0,143,113,0,106,193,0,192,0,0,0,0,0,0,0,0,0,0,0,0,
+490,277,279,0,285,281,0,283,267,268,269,0,270,271,272,0,39,21,118,251,0,188,0,
+211,227,0,0,207,205,0,196,57,195,0,0,102,98,0,0,367,0,0,143,450,143,406,440,0,
+407,408,0,0,0,0,0,0,0,0,143,143,443,444,143,0,0,0,446,447,445,0,364,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,394,395,396,397,398,399,400,401,402,403,393,0,448,0,
+470,471,0,0,0,478,0,107,379,380,0,377,0,228,0,0,0,143,247,219,0,126,131,127,129,
+122,124,0,143,253,245,254,499,498,0,86,89,0,34,0,0,143,87,0,91,63,62,0,60,161,
+143,223,157,253,225,169,170,143,85,187,26,0,28,0,117,119,230,229,22,104,114,0,0,
+0,133,134,136,0,107,107,0,0,0,0,0,0,143,0,314,315,316,0,0,318,0,0,0,143,286,282,
+118,284,280,278,143,167,162,188,212,143,0,0,218,206,213,164,0,0,143,207,166,197,
+58,108,0,103,411,100,96,375,376,0,0,0,231,0,0,235,0,0,0,240,0,0,0,0,0,0,143,0,0,
+0,0,0,477,484,0,483,390,413,0,415,417,419,421,423,424,428,429,426,427,431,432,
+434,435,437,438,439,392,469,0,466,0,468,143,0,368,0,374,31,386,0,382,387,0,384,
+369,0,0,248,132,128,130,188,0,0,207,0,255,143,0,143,266,250,0,0,0,0,0,0,0,0,0,
+125,0,107,143,0,143,179,158,222,4,6,0,137,120,0,0,207,0,140,0,0,0,293,0,0,0,0,0,
+313,317,0,0,0,0,276,143,23,252,163,205,143,215,0,0,208,0,165,211,199,197,182,0,7,
+0,449,0,0,0,243,232,0,236,239,241,454,0,0,0,0,0,0,459,460,0,0,0,441,480,0,0,465,
+467,0,0,378,381,383,370,0,249,220,257,188,262,0,256,0,188,0,0,207,0,33,36,0,88,0,
+0,0,0,59,61,0,171,0,188,0,0,207,0,135,138,143,107,150,0,0,0,0,0,0,0,0,0,0,0,0,0,
+293,319,0,0,24,207,0,216,214,0,207,143,198,0,8,0,0,0,242,233,237,0,0,0,0,0,409,
+410,453,482,0,485,405,479,481,0,385,388,259,261,265,258,188,264,0,275,0,0,0,66,
+64,65,172,178,173,188,175,0,177,0,141,152,151,0,0,146,287,293,0,0,0,143,0,0,321,
+322,324,326,328,330,332,334,337,342,345,348,352,354,361,362,0,143,290,299,0,0,0,
+0,0,0,0,0,0,0,320,273,201,217,209,200,205,13,0,0,452,451,0,238,455,143,0,458,472,
+0,260,263,0,37,0,174,176,105,139,153,150,150,0,0,293,143,358,143,0,355,143,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,356,294,0,301,0,0,0,309,0,0,0,0,0,0,292,0,207,
+12,14,0,0,0,0,473,35,0,143,149,148,288,289,0,0,0,0,293,295,325,0,327,329,331,333,
+335,336,340,341,338,339,343,344,346,347,349,350,351,0,300,302,303,0,311,310,0,
+305,0,0,0,210,202,15,0,0,143,0,0,291,357,0,353,296,0,143,304,312,306,307,0,234,
+456,0,67,154,0,0,323,293,297,308,0,360,359,298,457,0,0,0};static short Cyc_yydefgoto[
+142]={1007,48,653,850,49,50,277,51,438,52,440,53,138,54,55,498,216,424,425,217,
+58,234,218,60,154,155,61,151,62,253,254,121,122,123,255,219,402,450,451,452,63,
+64,135,801,802,803,65,453,66,429,67,68,69,113,149,259,304,650,582,70,583,494,644,
+486,490,491,397,301,242,89,90,514,443,515,516,517,518,220,292,293,584,408,280,
+224,281,282,283,284,285,730,286,287,811,812,813,814,815,816,817,818,819,820,821,
+822,823,824,825,826,386,387,388,570,571,572,288,187,374,188,504,189,190,191,192,
+193,194,195,196,197,198,199,200,201,202,203,533,534,204,205,72,851,235,412};
+static short Cyc_yypact[1010]={2515,- -32768,- -32768,- -32768,- -32768,- 49,- -32768,-
 -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,-
--32768,- -32768,- -32768,- -32768,3098,205,1187,- -32768,- 2,32,38,55,112,130,- -32768,
-119,165,- -32768,237,- -32768,- -32768,- -32768,226,208,270,243,249,249,- -32768,-
--32768,2401,- -32768,185,216,- -32768,627,3098,3098,3098,- -32768,3098,- -32768,-
--32768,513,- -32768,353,3169,261,154,415,372,- -32768,- -32768,335,374,275,- -32768,
-- 2,381,- -32768,1350,200,- -32768,- -32768,- -32768,5115,- -32768,274,364,1350,394,
-393,396,- -32768,207,- -32768,- -32768,5474,5474,2401,2401,5474,5115,380,399,168,
-411,380,5809,5115,- -32768,- -32768,- -32768,2401,2648,2401,2648,- -32768,441,448,-
--32768,3026,- -32768,- -32768,- -32768,- -32768,5608,- -32768,- -32768,335,- -32768,-
--32768,73,1755,- -32768,3169,627,- -32768,3236,5474,3882,- -32768,261,- -32768,-
--32768,- -32768,140,5474,- -32768,2648,- -32768,455,467,479,- 2,4,- -32768,1350,204,
-5236,466,5115,1109,483,493,512,518,520,522,335,527,549,5292,5292,- -32768,1312,
-556,5348,5348,5348,- -32768,- -32768,- -32768,24,- -32768,- -32768,78,571,558,548,574,
-616,114,637,258,297,- -32768,899,5348,209,- 19,- -32768,610,714,631,- -32768,- -32768,
-640,5115,335,714,621,144,5541,5876,5541,560,- -32768,- 25,- 25,- -32768,- -32768,- 18,
-333,- -32768,- -32768,- -32768,- -32768,22,653,- -32768,- -32768,555,352,- -32768,661,-
--32768,663,- -32768,674,- -32768,168,3979,3169,- -32768,684,5675,- -32768,903,687,-
--32768,- 2,- -32768,689,266,701,3396,710,712,720,732,4044,3396,169,69,733,755,766,
-- -32768,- -32768,737,1624,1624,627,1624,- -32768,- -32768,- -32768,778,- -32768,-
--32768,- -32768,149,- -32768,- -32768,777,793,- -32768,107,779,774,365,780,769,28,
-372,775,- -32768,792,- -32768,28,795,- 2,- -32768,5115,798,- -32768,784,785,1312,-
--32768,5809,- -32768,- -32768,3494,- -32768,829,5115,5115,5115,5115,5115,5115,806,
-5115,5809,1312,- -32768,- -32768,1886,807,395,5115,- -32768,- -32768,- -32768,5115,-
--32768,5348,5115,5348,5348,5348,5348,5348,5348,5348,5348,5348,5348,5348,5348,
-5348,5348,5348,5348,5348,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,
-- -32768,- -32768,- -32768,- -32768,5115,- -32768,380,- -32768,- -32768,4109,380,5115,-
--32768,803,335,- -32768,- -32768,810,812,1350,- -32768,418,2754,813,5474,- -32768,
-815,820,- -32768,5876,5876,5876,- -32768,- -32768,2789,4174,148,- -32768,289,- -32768,
-- -32768,107,- -32768,- -32768,5474,- -32768,- -32768,- -32768,818,821,823,- -32768,
-2718,- -32768,357,336,- -32768,- -32768,- -32768,5809,- -32768,- -32768,- -32768,2401,-
--32768,2401,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,954,5115,828,
-826,- -32768,841,326,335,- 58,5115,5115,847,852,5115,931,2017,855,- -32768,- -32768,
-- -32768,456,921,- -32768,4271,854,864,870,5115,866,3396,2143,- -32768,- -32768,3026,
-- -32768,- -32768,- -32768,- -32768,5809,858,240,- -32768,- -32768,846,- -32768,107,859,
-5742,774,- -32768,5474,- -32768,- -32768,372,672,- -32768,- -32768,2277,- -32768,-
--32768,- -32768,- -32768,- -32768,- -32768,860,867,877,- -32768,380,5115,- -32768,636,
-3979,278,- -32768,478,869,871,883,884,496,5809,534,863,885,887,5171,- -32768,-
--32768,889,893,- -32768,571,259,558,548,574,616,114,114,637,637,637,637,258,258,
-297,297,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,898,- -32768,123,5474,
-3785,- -32768,754,- -32768,- -32768,- -32768,1350,- -32768,- -32768,888,904,- -32768,97,
-878,- -32768,- -32768,- -32768,- -32768,900,774,905,372,896,289,3303,5474,4336,-
--32768,- -32768,- 25,516,906,22,2905,908,335,3236,5474,4433,- -32768,357,- -32768,-
--32768,- -32768,998,- -32768,- -32768,903,5115,774,- 2,909,541,575,5115,809,588,910,
-4530,4595,596,- -32768,- -32768,915,920,916,933,3396,907,912,597,911,- -32768,3169,
-- -32768,926,5474,- -32768,929,107,- -32768,918,- -32768,228,- -32768,769,- -32768,672,
-- -32768,932,- -32768,2401,935,559,928,- -32768,927,- -32768,3591,- -32768,- -32768,-
--32768,- -32768,5115,1023,5115,5115,1109,939,- -32768,- -32768,935,941,3785,- -32768,
-- -32768,5115,5115,- -32768,- -32768,28,667,- -32768,- -32768,- -32768,- -32768,3264,-
--32768,- -32768,- -32768,942,- -32768,- -32768,372,948,774,28,372,944,- -32768,602,
-949,952,- -32768,- -32768,955,- -32768,956,774,957,28,372,947,- -32768,- -32768,5608,
-335,851,3396,965,961,1011,962,969,3396,5115,4660,613,4725,620,4790,809,- -32768,
-973,970,- -32768,984,39,977,990,- -32768,774,219,- -32768,- -32768,986,774,5809,-
--32768,499,- -32768,979,981,5115,- -32768,- -32768,- -32768,3979,641,978,988,643,-
--32768,829,- -32768,- -32768,751,- -32768,- -32768,- -32768,- -32768,3785,- -32768,-
--32768,- -32768,- -32768,- -32768,983,- -32768,- -32768,372,1001,- -32768,- -32768,-
--32768,- -32768,- -32768,987,- -32768,- -32768,- -32768,372,995,- -32768,- -32768,-
--32768,997,- 2,657,1085,809,1006,5404,1004,2143,5348,1000,- -32768,108,- -32768,
-1036,1002,746,796,128,802,370,401,- -32768,- -32768,- -32768,- -32768,1045,5348,1886,
-- -32768,- -32768,658,3396,675,4855,3396,681,4920,4985,690,1020,- -32768,5115,3396,
-3396,1029,- -32768,1022,- -32768,- -32768,1027,- -32768,926,- -32768,1033,695,- -32768,
-- -32768,290,- -32768,- -32768,5809,1120,- -32768,- -32768,3688,- -32768,- -32768,1038,
-- -32768,- -32768,- -32768,- -32768,1034,85,851,3396,1043,809,1312,- -32768,5809,1040,
-- -32768,1493,5348,5115,5348,5348,5348,5348,5348,5348,5348,5348,5348,5348,5348,
-5348,5348,5348,5348,5348,5348,5115,- -32768,- -32768,1047,- -32768,3396,3396,693,-
--32768,3396,3396,697,3396,707,5050,- -32768,730,- -32768,- -32768,1031,5115,107,774,
-- -32768,- -32768,532,5115,1044,1046,- -32768,1058,5809,- -32768,- -32768,- -32768,-
--32768,1050,1053,1057,5348,809,- -32768,571,302,558,548,548,616,114,114,637,637,
-637,637,258,258,297,297,- -32768,- -32768,- -32768,315,- -32768,- -32768,- -32768,3396,
-- -32768,- -32768,3396,- -32768,3396,3396,734,- -32768,1071,111,- -32768,- -32768,-
--32768,771,1056,5809,1059,740,- -32768,935,567,- -32768,- -32768,5115,1493,- -32768,
-- -32768,- -32768,- -32768,3396,3396,3396,- -32768,- -32768,1060,- -32768,- -32768,1061,
-1062,- -32768,809,- -32768,- -32768,- -32768,- -32768,1063,- -32768,- -32768,- -32768,-
--32768,1170,1178,- -32768};static short Cyc_yypgoto[142]={- -32768,116,- -32768,264,-
--32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- 51,- 105,17,- -32768,-
--32768,0,601,- -32768,68,- 142,1082,30,- -32768,- -32768,- 117,- -32768,18,- -32768,480,
-- -32768,- -32768,- -32768,950,951,199,473,- -32768,- -32768,591,- -32768,- -32768,-
--32768,23,- -32768,- -32768,26,- 179,1126,- 307,159,- -32768,- -32768,1148,58,- -32768,
-- -32768,554,- 118,- 115,- 131,- 219,282,561,566,- 393,- 412,- 104,- 364,- 100,- -32768,-
-203,- 136,- 549,- 310,- -32768,691,- 150,101,- 99,- 125,- 200,318,- -32768,- -32768,-
--32768,- 57,- 261,- -32768,- 518,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,-
+-32768,- -32768,- -32768,- -32768,2903,155,941,- -32768,138,- 16,63,93,136,5,16,-
+-32768,126,170,40,- -32768,221,- -32768,- -32768,- -32768,181,650,246,214,262,262,-
+-32768,- -32768,2390,- -32768,149,363,- -32768,740,2903,2903,2903,- -32768,2903,-
+-32768,- -32768,705,- -32768,531,2831,505,- 8,653,529,- -32768,- -32768,268,278,293,-
+-32768,138,290,- -32768,2382,299,- -32768,- -32768,- -32768,5632,- -32768,303,346,
+2382,342,345,350,- -32768,218,- -32768,- -32768,3291,3291,389,381,411,2390,2390,
+3291,410,5632,271,423,928,409,271,3626,5632,- -32768,- -32768,- -32768,2390,2639,
+2390,2639,- -32768,442,451,- -32768,2761,- -32768,- -32768,- -32768,- -32768,3425,-
+-32768,- -32768,268,- -32768,- -32768,- 23,1617,- -32768,2831,740,- -32768,3291,4218,
+3157,- -32768,505,- -32768,- -32768,- -32768,104,3291,- -32768,2639,- -32768,460,467,
+492,138,- 20,- -32768,2382,111,5797,520,5632,5672,522,549,564,570,589,607,268,624,
+632,5880,5880,- -32768,2005,634,5920,5920,5920,- -32768,- -32768,- -32768,184,-
+-32768,- -32768,- 3,526,496,625,600,547,103,659,296,201,- -32768,902,5920,98,44,-
+-32768,649,853,673,- -32768,- -32768,687,5632,268,853,672,212,3358,3693,3358,712,-
+-32768,- 42,- 42,693,692,702,728,- -32768,- -32768,118,706,244,- -32768,- -32768,-
+-32768,- -32768,36,729,- -32768,- -32768,754,285,- -32768,743,- -32768,752,- -32768,
+766,- -32768,928,4301,2831,- -32768,771,3492,- -32768,555,761,- -32768,138,- -32768,
+797,92,805,3788,806,827,818,820,4387,3788,76,812,813,- -32768,- -32768,823,1486,
+1486,740,1486,- -32768,- -32768,- -32768,825,- -32768,- -32768,- -32768,129,- -32768,-
+-32768,829,811,78,529,828,847,- -32768,66,831,826,161,841,- -32768,839,- -32768,78,
+851,138,- -32768,5632,852,- -32768,849,850,2005,- -32768,3626,- -32768,- -32768,3874,
+- -32768,881,5632,5632,5632,5632,5632,5632,854,5632,3626,2005,- -32768,- -32768,
+1748,856,305,5632,- -32768,- -32768,- -32768,5632,- -32768,5920,5632,5920,5920,5920,
+5920,5920,5920,5920,5920,5920,5920,5920,5920,5920,5920,5920,5920,5920,- -32768,-
+-32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,
+5632,- -32768,271,- -32768,- -32768,5632,4470,271,- -32768,864,268,- -32768,- -32768,
+861,867,2382,- -32768,234,664,863,3291,- -32768,872,874,- -32768,3693,3693,3693,-
+-32768,- -32768,4553,2970,498,- -32768,627,- -32768,- -32768,66,- -32768,- -32768,868,
+- -32768,899,67,3291,- -32768,903,- -32768,- -32768,885,887,892,- -32768,1088,- -32768,
+675,587,- -32768,- -32768,- -32768,3626,- -32768,- -32768,- -32768,2390,- -32768,2390,-
+-32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,1015,5632,900,896,- -32768,
+889,255,268,141,5632,5632,894,904,5632,981,1879,907,- -32768,- -32768,- -32768,300,
+973,- -32768,4636,5632,3788,2131,- -32768,- -32768,2761,- -32768,- -32768,- -32768,
+3291,- -32768,- -32768,529,- -32768,3626,901,337,- -32768,- -32768,891,- -32768,66,912,
+3559,826,- -32768,787,- -32768,- -32768,2265,- -32768,- -32768,- -32768,- -32768,-
+-32768,- -32768,916,908,922,- -32768,5632,271,- -32768,714,4301,189,- -32768,374,910,
+911,914,930,382,3626,385,931,932,938,5757,- -32768,- -32768,936,944,- -32768,526,
+114,496,625,600,547,103,103,659,659,659,659,296,296,201,201,- -32768,- -32768,-
+-32768,- -32768,- -32768,437,- -32768,939,- -32768,3291,4132,- -32768,2257,- -32768,-
+-32768,- -32768,2382,- -32768,- -32768,946,948,- -32768,222,959,- -32768,- -32768,-
+-32768,- -32768,529,950,954,826,957,627,3291,4719,3224,- -32768,- -32768,5632,960,
+969,976,- 42,968,741,964,36,3087,965,268,3291,4802,3157,- -32768,675,- -32768,-
+-32768,- -32768,1030,- -32768,- -32768,555,5632,826,138,975,386,427,5632,737,433,
+971,4885,4968,372,- -32768,- -32768,977,983,967,443,- -32768,2831,- -32768,811,-
+-32768,986,3291,- -32768,979,66,- -32768,997,- -32768,199,- -32768,787,- -32768,1003,
+- -32768,2390,1006,362,982,1000,- -32768,- -32768,3960,- -32768,- -32768,- -32768,-
+-32768,5632,1091,5632,5632,5672,1005,- -32768,- -32768,1006,1009,4132,- -32768,-
+-32768,5632,5632,- -32768,- -32768,78,721,- -32768,- -32768,- -32768,- -32768,1306,-
+-32768,- -32768,- -32768,529,- -32768,1011,- -32768,78,529,1008,1012,826,455,- -32768,
+- -32768,1017,- -32768,5632,456,1019,1023,- -32768,- -32768,1024,- -32768,78,529,1027,
+1026,826,1031,- -32768,- -32768,3425,268,860,3788,1039,1033,3654,1037,1042,3788,
+5632,5051,428,5134,506,5217,737,- -32768,1025,1051,- -32768,826,272,- -32768,-
+-32768,1057,826,3626,- -32768,542,- -32768,1044,1045,5632,- -32768,- -32768,- -32768,
+4301,465,1047,1054,481,- -32768,881,- -32768,- -32768,776,- -32768,- -32768,- -32768,-
+-32768,4132,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,529,- -32768,1049,-
+-32768,1070,599,1071,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,529,- -32768,
+1053,- -32768,1059,- -32768,- -32768,- -32768,1062,138,617,1144,737,1065,6003,1058,
+2131,5920,1056,- -32768,11,- -32768,1095,1055,760,809,176,816,312,254,- -32768,-
+-32768,- -32768,- -32768,1098,5920,1748,- -32768,- -32768,487,3788,516,5300,3788,539,
+5383,5466,704,1074,- -32768,- -32768,- -32768,- -32768,1076,- -32768,986,- -32768,1075,
+710,- -32768,- -32768,163,- -32768,- -32768,3626,1162,- -32768,- -32768,4046,- -32768,-
+-32768,1081,- -32768,1079,- -32768,- -32768,- -32768,- -32768,1080,69,860,3788,1089,
+737,2005,- -32768,3626,1082,- -32768,1264,5920,5632,5920,5920,5920,5920,5920,5920,
+5920,5920,5920,5920,5920,5920,5920,5920,5920,5920,5920,5632,- -32768,- -32768,1090,
+- -32768,3788,3788,544,- -32768,3788,3788,566,3788,579,5549,- -32768,66,826,- -32768,
+- -32768,590,5632,1083,1085,- -32768,- -32768,1105,3626,- -32768,- -32768,- -32768,-
+-32768,1100,1096,1104,5920,737,- -32768,526,165,496,625,625,547,103,103,659,659,
+659,659,296,296,201,201,- -32768,- -32768,- -32768,202,- -32768,- -32768,- -32768,3788,
+- -32768,- -32768,3788,- -32768,3788,3788,601,- -32768,- -32768,- -32768,808,1099,3626,
+1101,612,- -32768,1006,697,- -32768,- -32768,5632,1264,- -32768,- -32768,- -32768,-
+-32768,3788,- -32768,- -32768,1103,- -32768,- -32768,1106,1108,- -32768,737,- -32768,-
+-32768,1109,- -32768,- -32768,- -32768,- -32768,1215,1221,- -32768};static short Cyc_yypgoto[
+142]={- -32768,415,- -32768,306,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,-
+-32768,- 33,- 96,- 11,- -32768,- -32768,0,623,- -32768,85,- 174,1117,13,- -32768,- -32768,
+- 110,- -32768,- 105,- -32768,508,- -32768,- -32768,- -32768,984,978,- 107,473,- -32768,-
+-32768,620,- -32768,- -32768,- -32768,47,- -32768,- -32768,46,- 228,1164,- 344,30,-
+-32768,- -32768,1189,52,- -32768,- -32768,591,- 119,31,- 132,- 238,318,592,595,- 409,-
+455,- 108,- 396,- 120,- -32768,- 232,- 149,- 498,- 355,- -32768,724,- 169,- 45,- 57,- 143,-
+236,123,- -32768,- -32768,- -32768,- 51,- 272,- -32768,- 595,- -32768,- -32768,- -32768,-
 -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,- -32768,-
--32768,- -32768,91,992,- -32768,523,- -32768,- -32768,179,599,- -32768,- 156,- 353,- 126,
-- 320,- 313,- 327,872,- 311,- 323,- 302,- 316,- 301,- 149,604,489,- -32768,- -32768,- 333,-
--32768,146,487,- 55,1143,- 351,20};static short Cyc_yytable[5992]={54,230,309,673,
-287,125,134,465,466,580,468,529,131,240,249,526,546,286,532,533,549,54,327,312,
-528,330,331,332,296,531,57,538,539,313,302,289,428,548,73,408,102,534,535,536,
-537,297,366,54,540,541,414,57,400,54,54,54,593,54,144,400,602,241,630,54,138,519,
-103,131,55,391,119,120,121,558,122,281,373,57,118,269,133,280,597,57,57,57,633,
-57,398,55,786,787,405,57,387,34,54,54,71,401,402,154,37,374,417,400,401,402,627,
-592,54,54,54,54,89,55,758,593,54,409,155,55,55,55,617,55,57,57,226,93,54,55,54,
-592,333,133,832,334,484,138,57,57,57,57,246,493,54,270,57,133,648,647,401,680,94,
-833,498,482,499,282,57,335,57,109,55,55,458,473,153,90,475,95,517,518,419,35,57,
-202,55,55,55,55,492,431,320,459,55,247,460,280,419,873,343,344,- 142,215,216,575,
-55,219,55,336,542,543,544,828,881,882,989,35,679,390,217,218,55,474,575,269,269,
-96,269,333,402,90,383,140,233,234,235,236,345,874,90,333,586,98,404,97,346,406,
-54,392,35,671,883,303,35,706,391,391,391,34,884,386,294,586,470,133,37,333,395,
-180,298,636,282,34,40,396,54,54,57,54,37,712,865,269,456,99,220,493,40,457,367,
-368,369,270,270,475,270,43,44,45,110,111,744,489,467,154,57,57,90,57,34,651,229,
-34,304,- 222,55,37,- 222,485,37,74,39,206,155,490,305,207,40,370,245,112,113,471,
-54,371,372,43,44,45,837,100,229,285,55,55,101,55,749,- 200,35,270,402,- 200,90,493,
-928,629,486,328,682,90,933,105,57,106,587,387,230,419,625,34,475,660,104,39,558,
-333,37,666,397,135,147,840,669,136,444,419,137,445,707,349,382,419,200,350,416,
-652,390,390,390,552,55,39,502,503,611,579,333,576,127,128,440,577,697,918,578,
-389,626,394,333,585,980,591,131,697,351,981,392,392,392,34,54,333,54,352,353,36,
-37,38,982,34,596,141,142,454,434,36,37,38,245,333,493,687,407,748,413,54,387,144,
-672,749,57,396,57,700,686,601,603,201,420,39,999,421,133,54,769,588,699,555,285,
-589,559,481,590,221,688,57,1006,779,146,222,133,328,564,69,701,151,702,54,55,509,
-55,887,733,57,514,888,516,203,328,204,738,333,581,205,521,75,91,225,92,760,836,
-527,475,55,639,839,633,57,889,754,227,556,90,69,333,90,587,890,891,755,69,55,43,
-44,45,69,594,419,595,749,419,638,847,124,237,937,938,550,69,934,397,894,940,941,
-238,55,748,150,936,614,91,299,333,939,732,946,947,448,416,91,280,579,300,455,308,
-942,943,944,945,69,69,637,948,949,333,69,301,654,591,440,229,314,34,69,69,69,69,
-691,36,37,38,315,333,642,841,659,34,932,229,692,693,694,36,37,38,229,69,123,604,
-605,316,54,608,996,612,34,317,684,318,69,319,36,37,38,150,321,622,91,133,54,333,
-675,870,661,871,676,748,333,34,337,710,57,221,743,36,37,38,322,222,229,221,995,
-893,413,329,639,222,229,395,57,396,339,43,44,45,396,229,43,44,45,338,333,125,91,
-711,16,17,18,761,55,91,969,341,342,333,919,90,716,340,722,90,232,333,333,770,914,
-730,55,773,347,348,774,418,929,375,930,822,998,781,333,34,69,785,825,380,734,333,
-37,418,385,114,442,293,381,446,40,950,951,952,767,440,649,650,771,43,44,45,333,
-76,333,848,440,851,69,440,742,307,782,310,310,862,269,412,863,333,559,422,895,
-423,324,325,229,762,763,310,310,310,624,979,425,389,333,150,229,897,719,721,333,
-76,432,901,441,77,906,475,310,333,443,916,333,814,917,957,333,376,450,960,152,79,
-447,80,81,54,333,37,975,962,269,449,992,90,997,82,451,83,84,855,713,714,270,750,
-85,77,753,430,452,333,858,86,965,333,461,57,987,674,464,420,152,79,994,80,81,786,
-787,37,90,852,853,125,567,568,569,82,91,83,84,91,462,54,877,878,85,879,880,885,
-886,990,333,86,463,55,924,925,469,239,270,471,479,478,483,402,487,819,821,39,824,
-418,827,57,418,491,310,245,495,496,497,430,69,335,69,510,511,512,513,515,551,520,
-418,554,553,846,565,563,418,522,566,582,269,525,584,583,598,599,727,229,310,55,
-310,310,310,310,310,310,310,310,310,310,310,310,310,310,310,310,310,600,606,607,
-609,613,615,545,618,620,621,623,522,628,631,634,644,646,180,662,645,69,655,35,
-656,54,354,355,356,357,358,359,360,361,362,363,657,658,574,664,677,663,270,34,
-899,667,668,903,905,36,37,38,908,364,670,57,681,678,434,685,709,683,695,435,698,
-717,723,43,44,45,724,791,725,726,728,729,285,818,731,794,795,735,310,741,91,737,
-665,745,91,328,746,751,76,55,34,756,935,757,766,522,36,37,38,39,768,775,522,772,
-776,434,783,777,778,780,953,418,792,793,43,44,45,817,816,829,831,830,418,834,964,
-418,835,838,708,849,967,844,77,845,34,854,971,850,856,857,36,37,38,859,430,860,
-310,152,79,434,80,81,864,866,37,869,872,875,43,44,45,229,796,310,83,84,892,876,
-907,69,911,85,912,156,157,797,913,896,86,177,900,915,178,179,920,923,76,922,909,
-910,430,927,931,954,966,974,972,973,976,160,161,162,163,164,91,977,978,988,991,
-1009,166,993,1003,1004,1005,1007,690,1010,167,168,970,926,169,170,696,228,784,
-427,704,705,139,108,740,433,968,739,736,653,384,91,765,815,126,310,522,34,79,171,
-80,81,530,0,37,0,955,956,311,0,958,959,172,961,0,173,76,0,0,124,0,174,0,0,0,175,
-0,0,176,177,0,0,178,179,0,0,0,0,0,0,430,0,0,0,0,0,0,752,0,0,0,0,0,0,310,430,0,0,
-759,0,77,0,0,0,310,0,983,861,0,984,0,985,986,0,0,78,79,0,80,81,0,0,37,0,0,0,0,0,
-0,0,82,0,83,84,0,0,1000,1001,1002,85,0,0,0,0,0,0,86,0,0,0,0,7,8,9,10,11,12,13,14,
-15,16,17,18,19,20,0,0,0,156,157,0,0,0,0,0,0,0,0,0,430,22,76,0,158,0,0,0,159,0,0,
-0,0,0,430,160,161,162,163,164,27,28,0,165,0,0,166,0,0,0,0,31,32,0,167,168,33,0,
-169,170,76,0,0,0,0,0,0,0,0,0,868,0,0,310,0,0,124,0,0,0,0,34,79,171,80,81,35,36,
-37,38,39,310,326,0,0,0,172,0,41,267,0,0,0,0,77,174,0,0,0,175,0,0,176,177,0,0,178,
-179,0,152,79,0,80,81,430,0,37,0,0,0,0,0,0,0,82,0,83,84,0,0,0,0,0,85,0,0,0,0,0,
-310,86,310,310,310,310,310,310,310,310,310,310,310,310,310,310,310,310,310,2,3,4,
-72,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,713,714,21,156,157,250,0,251,252,253,
-254,255,256,257,258,22,76,23,158,259,310,0,159,24,260,0,0,0,0,160,161,162,163,
-164,27,28,261,165,0,262,166,0,0,0,0,31,32,263,167,168,33,0,169,170,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,310,0,0,0,0,264,79,171,80,81,35,36,37,38,39,265,130,- 293,0,0,
-172,0,41,267,0,0,0,0,0,174,0,0,0,175,0,0,176,177,0,0,178,179,2,3,4,72,6,7,8,9,10,
-11,12,13,14,15,16,17,18,19,20,0,0,21,156,157,250,0,251,252,253,254,255,256,257,
-258,22,76,23,158,259,0,0,159,24,260,0,0,- 138,- 138,160,161,162,163,164,27,28,261,
-165,0,262,166,0,0,0,0,31,32,263,167,168,33,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,264,79,171,80,81,35,36,37,38,39,265,130,0,0,0,172,0,41,267,0,0,0,0,
-0,174,0,0,0,175,0,0,176,177,0,0,178,179,2,3,4,72,6,7,8,9,10,11,12,13,14,15,16,17,
-18,19,20,0,0,21,156,157,250,0,251,252,253,254,255,256,257,258,22,76,23,158,259,0,
-0,159,24,260,0,0,0,0,160,161,162,163,164,27,28,261,165,0,262,166,0,0,0,0,31,32,
-263,167,168,33,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,264,79,171,80,
-81,35,36,37,38,39,265,130,266,0,0,172,0,41,267,0,0,0,0,0,174,0,0,0,175,0,0,176,
-177,0,0,178,179,2,3,4,72,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,156,157,
-250,0,251,252,253,254,255,256,257,258,22,76,23,158,259,0,0,159,24,260,0,0,0,0,
-160,161,162,163,164,27,28,261,165,0,262,166,0,0,0,0,31,32,263,167,168,33,0,169,
-170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,264,79,171,80,81,35,36,37,38,39,
-265,130,0,0,0,172,0,41,267,0,0,0,0,0,174,0,0,0,175,0,0,176,177,0,0,178,179,2,3,4,
-72,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,156,157,0,0,0,0,0,0,0,0,0,0,
-22,76,23,158,0,0,0,159,24,0,0,0,0,0,160,161,162,163,164,27,28,0,165,0,0,166,0,0,
-0,0,31,32,0,167,168,33,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,79,
-171,80,81,35,36,37,38,39,610,0,0,0,0,172,0,41,267,0,0,0,0,0,174,0,0,0,175,0,0,
-176,177,0,0,178,179,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,0,156,157,0,0,0,0,
-0,0,0,0,0,0,22,76,0,158,0,0,0,159,0,0,0,0,0,0,160,161,162,163,164,27,28,0,165,0,
-0,166,0,0,0,0,31,32,0,167,168,33,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,34,79,171,80,81,35,36,37,38,39,0,0,0,0,0,172,0,41,267,0,0,0,0,0,174,0,0,0,
-175,0,0,176,177,0,0,178,179,- 11,1,0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,
-19,20,0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,22,0,23,0,0,0,641,0,24,0,25,26,- 138,- 138,0,
-0,0,0,0,27,28,0,0,0,0,0,0,0,29,30,31,32,0,0,0,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,34,0,0,0,0,35,36,37,38,39,0,0,- 11,0,0,40,0,41,42,0,0,0,0,0,43,44,
-45,- 11,1,0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,0,0,
-0,0,0,0,0,22,0,23,0,0,0,0,0,24,0,25,26,- 138,- 138,0,0,0,0,0,27,28,0,0,0,0,0,0,0,
-29,30,31,32,0,0,0,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,0,0,0,0,
-35,36,37,38,39,0,0,- 11,0,0,40,0,41,42,0,0,0,0,0,43,44,45,- 11,1,0,2,3,4,5,6,7,8,9,
-10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,22,0,23,0,0,0,0,
-0,24,0,25,26,- 138,- 138,0,0,0,0,0,27,28,0,0,0,0,0,0,0,29,30,31,32,0,0,0,33,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,0,0,0,0,35,36,37,38,39,0,0,0,0,0,40,
-0,41,42,0,0,0,0,0,43,44,45,1,0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
-0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,22,0,23,0,0,0,0,0,24,0,25,26,- 138,- 138,0,0,0,0,0,
-27,28,0,0,0,0,0,0,0,29,30,31,32,0,0,0,33,0,0,0,0,0,7,8,9,10,11,12,13,14,15,16,17,
-18,19,20,0,0,0,0,0,34,0,0,0,0,35,36,37,38,39,22,0,- 11,0,0,40,0,41,42,0,0,0,0,0,
-43,44,45,0,0,27,28,0,0,0,0,0,0,0,0,0,31,32,0,0,0,33,0,76,0,0,0,0,7,8,9,10,11,12,
-13,14,15,16,17,18,19,20,0,283,0,0,34,0,0,0,0,35,36,37,38,39,285,22,0,0,0,413,-
-200,41,42,0,- 200,77,396,0,43,44,45,0,0,0,27,28,0,557,0,0,152,79,0,80,81,31,32,37,
-0,0,33,0,0,0,0,82,0,83,84,0,0,502,503,0,85,0,0,0,0,0,0,86,283,0,0,0,0,0,0,0,35,
-36,0,38,39,285,0,0,0,0,395,- 200,41,42,0,- 200,0,396,0,43,44,45,7,8,9,10,11,12,13,
-14,15,16,17,18,19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,22,0,0,0,0,0,0,0,0,0,0,0,- 138,
-- 138,0,0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,31,32,0,0,0,33,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,34,0,0,0,0,35,36,37,38,39,0,0,0,0,0,434,0,41,42,0,0,0,0,0,
-43,44,45,2,3,4,72,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,0,0,
-0,0,0,0,0,22,0,23,0,0,0,0,0,24,0,0,0,- 138,- 138,0,0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,
-31,32,0,0,0,33,0,0,2,3,4,72,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,
-0,0,0,35,36,0,38,39,0,130,22,0,239,0,0,41,42,0,24,0,0,0,- 138,- 138,0,0,0,0,0,27,
-28,0,0,0,0,0,0,0,0,0,31,32,0,0,0,33,0,2,3,4,72,6,7,8,9,10,11,12,13,14,15,16,17,
-18,19,20,0,0,21,0,0,0,0,0,0,35,36,0,38,39,0,22,0,23,0,0,0,41,42,24,0,0,0,0,0,0,0,
-0,0,0,27,28,0,0,0,0,0,0,0,0,0,31,32,0,0,0,33,0,0,7,8,9,10,11,12,13,14,15,16,17,
-18,19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,35,36,22,38,39,0,130,0,0,0,0,0,41,42,0,0,0,0,
-0,0,0,27,28,0,0,0,0,0,0,0,0,76,31,32,0,0,0,33,0,0,7,8,9,10,11,12,13,14,15,16,17,
-18,19,20,0,0,0,0,0,283,0,0,284,0,0,0,0,35,36,22,38,39,285,0,0,77,0,0,- 200,41,42,
-0,- 200,0,0,0,0,764,27,28,152,79,0,80,81,0,0,37,0,31,32,0,0,0,33,82,0,83,84,0,0,
-502,503,0,85,0,0,0,0,0,0,86,0,0,0,0,283,0,0,0,0,0,0,0,35,36,0,38,39,285,0,0,0,0,
-0,- 200,41,42,0,- 200,156,157,250,0,251,252,253,254,255,256,257,258,0,76,0,158,259,
-0,0,159,0,260,0,0,0,0,160,161,162,163,164,0,0,261,165,0,262,166,0,0,0,0,0,0,263,
-167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,264,79,171,80,81,0,
-0,37,0,0,265,130,0,0,0,172,0,0,173,0,0,0,0,0,174,0,156,157,175,0,0,176,177,500,0,
-178,179,0,0,76,0,158,0,0,0,159,0,0,0,0,0,0,160,161,162,163,164,0,0,0,165,0,0,166,
-0,0,0,0,0,0,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,
-79,171,80,81,0,0,37,0,0,0,311,501,0,0,172,0,0,173,0,0,502,503,0,174,156,157,0,
-175,0,0,176,177,0,0,178,179,0,76,0,158,0,0,0,159,0,0,0,0,0,0,160,161,162,163,164,
-0,0,0,165,0,0,166,0,0,0,0,0,0,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,34,79,171,80,81,0,0,37,0,0,0,311,747,0,0,172,0,0,173,0,0,502,503,0,
-174,156,157,0,175,0,0,176,177,0,0,178,179,0,76,0,158,0,0,0,159,0,0,0,0,0,0,160,
-161,162,163,164,0,0,0,165,0,0,166,0,0,0,0,0,0,0,167,168,0,0,169,170,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,79,171,80,81,0,0,37,0,0,0,311,921,0,0,172,0,0,
-173,0,0,502,503,0,174,156,157,0,175,0,0,176,177,0,0,178,179,0,76,0,158,0,0,0,159,
-0,0,0,0,0,0,160,161,162,163,164,0,0,0,165,0,0,166,0,0,0,0,0,0,0,167,168,0,0,169,
-170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,79,171,80,81,0,0,37,0,0,0,311,0,
-0,0,172,0,0,173,0,0,502,503,0,174,156,157,0,175,0,0,176,177,0,0,178,179,0,76,0,
-158,0,0,0,159,0,0,0,0,0,0,160,161,162,163,164,0,0,0,165,0,0,166,0,0,0,0,0,0,0,
-167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,79,171,80,81,0,
-0,37,0,0,0,0,0,0,0,172,0,0,173,0,0,0,0,292,174,156,157,0,175,0,0,176,177,0,0,178,
-179,0,76,0,158,0,0,0,159,0,0,0,0,0,0,160,161,162,163,164,0,0,0,165,0,0,166,0,0,0,
-0,0,0,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,156,157,0,0,0,0,0,34,79,
-171,80,81,0,76,37,158,0,0,311,159,0,0,172,0,0,173,160,161,162,163,164,174,0,0,
-165,175,0,166,176,177,0,0,178,179,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,156,157,0,0,0,0,0,34,79,171,80,81,0,76,37,158,0,453,0,159,0,0,172,0,0,173,
-160,161,162,163,164,174,0,0,165,175,0,166,176,177,0,0,178,179,0,167,168,0,0,169,
-170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,156,157,0,0,0,0,0,34,79,171,80,81,0,76,37,158,0,
-0,0,159,0,0,172,547,0,173,160,161,162,163,164,174,0,0,165,175,0,166,176,177,0,0,
-178,179,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,79,
-171,80,81,0,0,37,0,0,0,0,0,0,0,172,0,0,173,0,0,0,0,573,174,156,157,0,175,0,0,176,
-177,0,0,178,179,0,76,0,158,0,0,0,159,0,0,0,0,0,0,160,161,162,163,164,0,0,0,165,0,
-0,166,0,0,0,0,0,0,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,156,157,0,0,
-0,0,0,34,79,171,80,81,0,76,37,158,0,0,0,159,0,0,172,616,0,173,160,161,162,163,
-164,174,0,0,165,175,0,166,176,177,0,0,178,179,0,167,168,0,0,169,170,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,79,171,80,81,0,0,37,0,0,0,0,0,0,0,172,0,0,173,0,
-0,0,0,689,174,156,157,0,175,0,0,176,177,0,0,178,179,0,76,0,158,0,0,0,159,0,0,0,0,
-0,0,160,161,162,163,164,0,0,0,165,0,0,166,0,0,0,0,0,0,0,167,168,0,0,169,170,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,79,171,80,81,0,0,37,0,0,0,0,0,0,0,172,0,
-0,173,0,0,0,0,703,174,156,157,0,175,0,0,176,177,0,0,178,179,0,76,0,158,0,0,0,159,
-0,0,0,0,0,0,160,161,162,163,164,0,0,0,165,0,0,166,0,0,0,0,0,0,0,167,168,0,0,169,
-170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,156,157,0,0,0,0,0,34,79,171,80,81,0,76,37,158,0,
-718,0,159,0,0,172,0,0,173,160,161,162,163,164,174,0,0,165,175,0,166,176,177,0,0,
-178,179,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,156,157,0,0,0,0,0,34,
-79,171,80,81,0,76,37,158,0,720,0,159,0,0,172,0,0,173,160,161,162,163,164,174,0,0,
-165,175,0,166,176,177,0,0,178,179,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,156,157,0,0,0,0,0,34,79,171,80,81,0,76,37,158,0,0,0,159,0,0,172,820,0,173,
-160,161,162,163,164,174,0,0,165,175,0,166,176,177,0,0,178,179,0,167,168,0,0,169,
-170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,156,157,0,0,0,0,0,34,79,171,80,81,0,76,37,158,0,
-0,0,159,0,0,172,823,0,173,160,161,162,163,164,174,0,0,165,175,0,166,176,177,0,0,
-178,179,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,156,157,0,0,0,0,0,34,
-79,171,80,81,0,76,37,158,0,826,0,159,0,0,172,0,0,173,160,161,162,163,164,174,0,0,
-165,175,0,166,176,177,0,0,178,179,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,156,157,0,0,0,0,0,34,79,171,80,81,0,76,37,158,0,0,0,159,0,0,172,898,0,173,
-160,161,162,163,164,174,0,0,165,175,0,166,176,177,0,0,178,179,0,167,168,0,0,169,
-170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,156,157,0,0,0,0,0,34,79,171,80,81,0,76,37,158,0,
-0,0,159,0,0,172,902,0,173,160,161,162,163,164,174,0,0,165,175,0,166,176,177,0,0,
-178,179,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,0,0,156,157,0,0,0,0,0,34,
-79,171,80,81,0,76,37,158,0,0,0,159,0,0,172,904,0,173,160,161,162,163,164,174,0,0,
-165,175,0,166,176,177,0,0,178,179,0,167,168,0,0,169,170,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,156,157,0,0,0,0,0,34,79,171,80,81,0,76,37,158,0,0,0,159,0,0,172,963,0,173,
-160,161,162,163,164,174,0,0,165,175,0,166,176,177,0,0,178,179,0,167,168,0,0,169,
-170,0,0,0,0,0,156,157,0,0,0,0,0,0,0,0,0,0,0,76,0,0,34,79,171,80,81,0,0,37,0,0,
-160,161,162,163,164,172,0,0,173,0,0,166,0,0,174,0,0,0,175,167,168,176,177,169,
-170,178,179,0,0,0,0,0,0,0,0,0,0,0,0,156,157,0,0,0,0,0,34,79,171,80,81,0,76,37,0,
-0,0,665,0,0,0,172,0,0,173,160,161,162,163,164,174,0,0,0,175,0,166,176,177,0,0,
-178,179,0,167,168,0,0,169,170,0,0,0,0,0,156,157,0,0,0,0,0,0,0,0,0,0,0,76,0,0,34,
-79,171,80,81,0,0,37,0,0,160,161,162,163,164,306,0,0,173,0,0,166,0,0,174,0,0,0,
-175,167,168,176,177,169,170,178,179,0,0,0,156,157,0,0,0,0,0,0,0,0,0,0,0,76,0,0,
-34,79,171,80,81,0,0,37,0,0,160,161,162,163,164,323,0,0,173,0,0,166,0,0,174,0,0,0,
-175,167,168,176,177,169,170,178,179,0,0,0,156,157,0,0,0,0,0,0,0,0,0,0,0,76,0,0,
-34,79,171,80,81,0,0,37,0,0,160,161,162,163,164,172,0,0,173,0,0,166,0,0,174,0,0,0,
-175,167,168,176,177,169,170,178,179,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,0,
-0,0,34,79,171,80,81,0,0,37,0,0,22,0,0,0,0,867,0,0,173,0,0,0,0,0,174,0,0,0,175,27,
-28,176,177,208,0,178,179,0,0,0,31,32,0,0,0,33,0,0,7,8,9,10,11,12,13,14,15,16,17,
-18,19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,35,36,22,38,39,0,209,0,0,0,0,0,41,42,- 138,-
-138,0,0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,31,32,0,0,0,33,0,0,7,8,9,10,11,12,13,14,15,
-16,17,18,19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,35,36,22,38,39,0,0,0,0,0,0,0,41,42,0,0,
-0,0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,31,32,0,0,0,33,0,0,7,8,9,10,11,12,13,14,15,16,
-17,18,19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,35,36,22,38,39,0,0,- 106,0,0,0,0,41,42,0,0,
-0,0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,31,32,0,0,0,33,0,0,7,8,9,10,11,12,13,14,15,16,
-17,18,19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,35,36,22,38,39,0,0,- 107,0,0,0,0,41,42,0,0,
-0,0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,31,32,0,0,0,33,0,0,7,8,9,10,11,12,13,14,15,16,
-17,18,19,20,0,0,0,0,0,635,0,0,0,0,0,0,0,35,36,22,38,39,0,0,0,0,0,0,0,41,42,0,0,0,
-0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,31,32,0,0,0,33,0,0,7,8,9,10,11,12,13,14,15,16,17,
-18,19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,35,36,22,38,39,0,0,0,0,0,0,0,41,42,- 138,- 138,
-0,0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,31,32,0,0,0,33,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-0,0,0,0,0,0,0,0,0,0,0,0,0,35,0,0,0,39,0,0,0,0,0,0,0,41,42};static short Cyc_yycheck[
-5992]={0,105,158,552,135,60,63,268,269,402,271,338,63,118,129,335,367,135,341,
-342,371,21,172,159,337,174,175,176,143,340,0,347,348,159,151,135,239,370,21,17,
-40,343,344,345,346,144,195,47,349,350,229,21,77,53,54,55,420,57,116,77,118,118,
-474,63,64,326,40,118,0,211,53,54,55,383,57,132,95,47,52,130,63,132,435,53,54,55,
-479,57,213,21,5,6,110,63,209,97,96,97,99,124,125,97,104,122,229,77,124,125,472,
-416,110,111,112,113,23,47,665,481,118,97,116,53,54,55,457,57,96,97,102,97,130,63,
-132,440,110,118,97,113,110,139,110,111,112,113,126,301,146,130,118,132,503,502,
-124,565,116,116,306,288,308,133,130,83,132,47,96,97,97,60,77,23,285,116,322,323,
-229,102,146,86,110,111,112,113,299,240,166,116,118,114,119,240,245,83,78,79,109,
-94,95,397,130,98,132,123,351,352,353,723,78,79,97,102,113,211,96,97,146,108,416,
-268,269,107,271,110,125,77,206,66,110,111,112,113,116,123,86,110,413,116,216,107,
-124,219,240,211,102,120,116,154,102,600,390,391,392,97,124,109,114,434,107,240,
-104,110,112,82,146,482,238,97,112,119,268,269,240,271,104,606,792,326,107,112,99,
-435,112,112,73,74,75,268,269,402,271,121,122,123,107,108,645,295,270,97,268,269,
-154,271,97,506,105,97,102,107,240,104,110,291,104,108,106,108,116,297,114,112,
-112,112,123,107,108,97,326,118,119,121,122,123,113,96,135,107,268,269,112,271,
-650,113,102,326,125,117,200,503,866,109,292,172,571,207,872,112,326,108,413,474,
-464,416,467,97,479,515,96,106,678,110,104,520,213,112,99,739,117,116,112,434,119,
-115,601,125,205,440,112,129,229,111,390,391,392,375,326,106,118,119,449,399,110,
-112,49,50,245,116,585,117,119,210,467,212,110,413,932,415,467,596,121,117,390,
-391,392,97,424,110,426,130,131,103,104,105,117,97,434,63,64,258,112,103,104,105,
-243,110,600,576,113,650,112,449,565,116,551,763,424,119,426,588,576,441,442,97,
-110,106,982,113,449,467,687,112,588,380,107,116,383,110,119,97,577,449,998,700,
-108,103,467,306,385,0,588,108,589,491,424,314,426,125,627,467,319,129,321,107,
-323,110,635,110,405,111,113,22,23,112,25,669,733,336,631,449,488,738,913,491,121,
-659,113,107,380,40,110,383,585,130,131,659,47,467,121,122,123,52,424,596,426,853,
-599,487,749,60,107,876,877,372,65,873,395,816,879,880,110,491,763,74,875,107,77,
-110,110,878,625,885,886,253,413,86,625,575,109,259,112,881,882,883,884,96,97,484,
-887,888,110,102,111,113,592,434,395,112,97,110,111,112,113,581,103,104,105,112,
-110,491,109,113,97,872,413,97,98,99,103,104,105,420,133,108,443,444,112,625,447,
-978,449,97,112,573,112,146,112,103,104,105,151,112,461,154,625,643,110,554,796,
-113,797,558,853,110,97,82,113,625,97,98,103,104,105,112,103,464,97,98,815,112,
-112,639,103,472,112,643,119,127,121,122,123,119,481,121,122,123,126,110,741,200,
-113,17,18,19,672,625,207,914,80,81,110,849,554,113,128,107,558,106,110,110,688,
-840,113,643,110,76,77,113,229,867,108,869,107,982,702,110,97,238,708,107,97,628,
-110,104,245,112,107,248,137,97,251,112,889,890,891,685,585,109,110,689,121,122,
-123,110,38,110,113,596,113,270,599,643,156,703,158,159,107,816,113,110,110,678,
-109,113,109,169,170,576,109,110,174,175,176,463,931,109,585,110,299,588,113,610,
-611,110,38,109,113,108,82,107,913,195,110,112,107,110,713,110,113,110,94,97,113,
-97,98,112,100,101,816,110,104,923,113,872,112,973,678,981,112,107,114,115,772,22,
-23,816,655,121,82,658,239,107,110,783,128,113,110,112,816,113,94,112,110,97,98,
-113,100,101,5,6,104,713,109,110,917,390,391,392,112,380,114,115,383,116,872,127,
-128,121,80,81,76,77,109,110,128,117,816,862,863,109,111,872,97,117,113,113,125,
-120,717,718,106,720,413,722,872,416,109,301,707,109,124,124,311,424,83,426,315,
-316,317,318,112,116,113,434,110,113,745,110,113,440,329,109,112,982,333,110,113,
-107,110,619,739,335,872,337,338,339,340,341,342,343,344,345,346,347,348,349,350,
-351,352,353,117,112,108,30,107,42,365,111,102,97,102,370,112,125,113,113,97,796,
-113,110,491,110,102,110,982,84,85,86,87,88,89,90,91,92,93,110,110,396,109,109,
-113,982,97,822,113,110,825,826,103,104,105,830,111,113,982,113,110,112,120,108,
-113,113,117,113,112,108,121,122,123,107,710,113,97,124,120,107,716,124,25,26,109,
-435,108,554,124,108,116,558,867,120,25,38,982,97,113,874,113,113,457,103,104,105,
-106,113,113,464,120,113,112,120,113,113,113,892,585,108,113,121,122,123,109,117,
-107,97,112,596,107,906,599,97,102,602,112,912,113,82,113,97,113,918,110,98,113,
-103,104,105,109,506,109,503,97,98,112,100,101,28,108,104,112,117,82,121,122,123,
-923,112,520,114,115,82,126,109,643,102,121,111,25,26,125,110,820,128,129,823,109,
-132,133,25,112,38,110,831,832,552,109,113,107,124,98,113,112,109,51,52,53,54,55,
-678,113,110,97,113,0,62,113,113,113,113,113,578,0,70,71,917,864,74,75,584,104,
-707,238,590,599,65,44,639,243,913,635,631,507,207,713,678,713,60,600,606,97,98,
-99,100,101,339,- 1,104,- 1,897,898,108,- 1,901,902,112,904,- 1,115,38,- 1,- 1,741,- 1,
-121,- 1,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,- 1,- 1,- 1,- 1,- 1,650,- 1,- 1,- 1,- 1,-
-1,- 1,657,- 1,- 1,- 1,- 1,- 1,- 1,659,665,- 1,- 1,668,- 1,82,- 1,- 1,- 1,669,- 1,957,789,- 1,
-960,- 1,962,963,- 1,- 1,97,98,- 1,100,101,- 1,- 1,104,- 1,- 1,- 1,- 1,- 1,- 1,- 1,112,- 1,114,
-115,- 1,- 1,987,988,989,121,- 1,- 1,- 1,- 1,- 1,- 1,128,- 1,- 1,- 1,- 1,8,9,10,11,12,13,14,
-15,16,17,18,19,20,21,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,749,37,38,- 1,40,-
-1,- 1,- 1,44,- 1,- 1,- 1,- 1,- 1,763,51,52,53,54,55,56,57,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,67,
-68,- 1,70,71,72,- 1,74,75,38,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,794,- 1,- 1,797,- 1,- 1,917,- 1,
-- 1,- 1,- 1,97,98,99,100,101,102,103,104,105,106,815,108,- 1,- 1,- 1,112,- 1,114,115,- 1,
-- 1,- 1,- 1,82,121,- 1,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,97,98,- 1,100,101,853,
-- 1,104,- 1,- 1,- 1,- 1,- 1,- 1,- 1,112,- 1,114,115,- 1,- 1,- 1,- 1,- 1,121,- 1,- 1,- 1,- 1,- 1,873,
-128,875,876,877,878,879,880,881,882,883,884,885,886,887,888,889,890,891,3,4,5,6,
-7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,22,23,24,25,26,27,- 1,29,30,31,32,33,34,
-35,36,37,38,39,40,41,931,- 1,44,45,46,- 1,- 1,- 1,- 1,51,52,53,54,55,56,57,58,59,- 1,
-61,62,- 1,- 1,- 1,- 1,67,68,69,70,71,72,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,981,- 1,- 1,- 1,- 1,97,98,99,100,101,102,103,104,105,106,107,108,109,- 1,
-- 1,112,- 1,114,115,- 1,- 1,- 1,- 1,- 1,121,- 1,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,3,
-4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,25,26,27,- 1,29,30,31,32,
-33,34,35,36,37,38,39,40,41,- 1,- 1,44,45,46,- 1,- 1,49,50,51,52,53,54,55,56,57,58,59,
-- 1,61,62,- 1,- 1,- 1,- 1,67,68,69,70,71,72,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,102,103,104,105,106,107,108,- 1,- 1,
-- 1,112,- 1,114,115,- 1,- 1,- 1,- 1,- 1,121,- 1,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,3,
-4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,25,26,27,- 1,29,30,31,32,
-33,34,35,36,37,38,39,40,41,- 1,- 1,44,45,46,- 1,- 1,- 1,- 1,51,52,53,54,55,56,57,58,59,
-- 1,61,62,- 1,- 1,- 1,- 1,67,68,69,70,71,72,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,102,103,104,105,106,107,108,109,-
-1,- 1,112,- 1,114,115,- 1,- 1,- 1,- 1,- 1,121,- 1,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,
-3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,25,26,27,- 1,29,30,31,
-32,33,34,35,36,37,38,39,40,41,- 1,- 1,44,45,46,- 1,- 1,- 1,- 1,51,52,53,54,55,56,57,58,
-59,- 1,61,62,- 1,- 1,- 1,- 1,67,68,69,70,71,72,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,102,103,104,105,106,107,108,- 1,
-- 1,- 1,112,- 1,114,115,- 1,- 1,- 1,- 1,- 1,121,- 1,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,
-3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,25,26,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,37,38,39,40,- 1,- 1,- 1,44,45,- 1,- 1,- 1,- 1,- 1,51,52,53,54,55,56,57,- 1,
-59,- 1,- 1,62,- 1,- 1,- 1,- 1,67,68,- 1,70,71,72,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,102,103,104,105,106,107,- 1,- 1,
-- 1,- 1,112,- 1,114,115,- 1,- 1,- 1,- 1,- 1,121,- 1,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,
-8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-1,- 1,37,38,- 1,40,- 1,- 1,- 1,44,- 1,- 1,- 1,- 1,- 1,- 1,51,52,53,54,55,56,57,- 1,59,- 1,- 1,
-62,- 1,- 1,- 1,- 1,67,68,- 1,70,71,72,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,102,103,104,105,106,- 1,- 1,- 1,- 1,- 1,112,
-- 1,114,115,- 1,- 1,- 1,- 1,- 1,121,- 1,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,0,1,- 1,3,
-4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,37,- 1,39,- 1,- 1,- 1,43,- 1,45,- 1,47,48,49,50,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,65,66,67,68,- 1,- 1,- 1,72,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,- 1,- 1,- 1,- 1,102,103,104,105,106,- 1,- 1,109,- 1,- 1,
-112,- 1,114,115,- 1,- 1,- 1,- 1,- 1,121,122,123,0,1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,
-16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,39,- 1,- 1,- 1,
-- 1,- 1,45,- 1,47,48,49,50,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,65,66,67,68,- 1,
-- 1,- 1,72,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-97,- 1,- 1,- 1,- 1,102,103,104,105,106,- 1,- 1,109,- 1,- 1,112,- 1,114,115,- 1,- 1,- 1,- 1,- 1,
-121,122,123,0,1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,39,- 1,- 1,- 1,- 1,- 1,45,- 1,47,48,49,50,- 1,- 1,
-- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,65,66,67,68,- 1,- 1,- 1,72,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,- 1,- 1,- 1,- 1,102,103,104,
-105,106,- 1,- 1,- 1,- 1,- 1,112,- 1,114,115,- 1,- 1,- 1,- 1,- 1,121,122,123,1,- 1,3,4,5,6,7,
-8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-1,- 1,37,- 1,39,- 1,- 1,- 1,- 1,- 1,45,- 1,47,48,49,50,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,65,66,67,68,- 1,- 1,- 1,72,- 1,- 1,- 1,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,
-19,20,21,- 1,- 1,- 1,- 1,- 1,97,- 1,- 1,- 1,- 1,102,103,104,105,106,37,- 1,109,- 1,- 1,112,-
-1,114,115,- 1,- 1,- 1,- 1,- 1,121,122,123,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,
-68,- 1,- 1,- 1,72,- 1,38,- 1,- 1,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,94,-
-1,- 1,97,- 1,- 1,- 1,- 1,102,103,104,105,106,107,37,- 1,- 1,- 1,112,113,114,115,- 1,117,
-82,119,- 1,121,122,123,- 1,- 1,- 1,56,57,- 1,94,- 1,- 1,97,98,- 1,100,101,67,68,104,- 1,-
-1,72,- 1,- 1,- 1,- 1,112,- 1,114,115,- 1,- 1,118,119,- 1,121,- 1,- 1,- 1,- 1,- 1,- 1,128,94,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,102,103,- 1,105,106,107,- 1,- 1,- 1,- 1,112,113,114,115,- 1,117,- 1,
-119,- 1,121,122,123,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,49,50,- 1,- 1,- 1,- 1,- 1,
-56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,- 1,- 1,- 1,- 1,102,103,104,105,106,- 1,
-- 1,- 1,- 1,- 1,112,- 1,114,115,- 1,- 1,- 1,- 1,- 1,121,122,123,3,4,5,6,7,8,9,10,11,12,13,
-14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,39,- 1,
-- 1,- 1,- 1,- 1,45,- 1,- 1,- 1,49,50,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,
-68,- 1,- 1,- 1,72,- 1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,
-- 1,- 1,- 1,- 1,- 1,102,103,- 1,105,106,- 1,108,37,- 1,111,- 1,- 1,114,115,- 1,45,- 1,- 1,- 1,
-49,50,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,3,4,5,
-6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,102,103,-
-1,105,106,- 1,37,- 1,39,- 1,- 1,- 1,114,115,45,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,56,57,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,
-19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,37,105,106,- 1,108,- 1,- 1,
-- 1,- 1,- 1,114,115,- 1,- 1,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,38,67,68,- 1,
-- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,94,- 1,- 1,
-97,- 1,- 1,- 1,- 1,102,103,37,105,106,107,- 1,- 1,82,- 1,- 1,113,114,115,- 1,117,- 1,- 1,- 1,
-- 1,94,56,57,97,98,- 1,100,101,- 1,- 1,104,- 1,67,68,- 1,- 1,- 1,72,112,- 1,114,115,- 1,- 1,
-118,119,- 1,121,- 1,- 1,- 1,- 1,- 1,- 1,128,- 1,- 1,- 1,- 1,94,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,
-- 1,105,106,107,- 1,- 1,- 1,- 1,- 1,113,114,115,- 1,117,25,26,27,- 1,29,30,31,32,33,34,
-35,36,- 1,38,- 1,40,41,- 1,- 1,44,- 1,46,- 1,- 1,- 1,- 1,51,52,53,54,55,- 1,- 1,58,59,- 1,61,
-62,- 1,- 1,- 1,- 1,- 1,- 1,69,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,107,108,- 1,- 1,- 1,112,- 1,
-- 1,115,- 1,- 1,- 1,- 1,- 1,121,- 1,25,26,125,- 1,- 1,128,129,32,- 1,132,133,- 1,- 1,38,- 1,
-40,- 1,- 1,- 1,44,- 1,- 1,- 1,- 1,- 1,- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,108,109,- 1,- 1,112,- 1,- 1,115,- 1,- 1,
-118,119,- 1,121,25,26,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,38,- 1,40,- 1,- 1,- 1,44,
-- 1,- 1,- 1,- 1,- 1,- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,
-- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,
-99,100,101,- 1,- 1,104,- 1,- 1,- 1,108,109,- 1,- 1,112,- 1,- 1,115,- 1,- 1,118,119,- 1,121,
-25,26,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,38,- 1,40,- 1,- 1,- 1,44,- 1,- 1,- 1,- 1,- 1,
-- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,
-- 1,104,- 1,- 1,- 1,108,109,- 1,- 1,112,- 1,- 1,115,- 1,- 1,118,119,- 1,121,25,26,- 1,125,- 1,
-- 1,128,129,- 1,- 1,132,133,- 1,38,- 1,40,- 1,- 1,- 1,44,- 1,- 1,- 1,- 1,- 1,- 1,51,52,53,54,
-55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,
-108,- 1,- 1,- 1,112,- 1,- 1,115,- 1,- 1,118,119,- 1,121,25,26,- 1,125,- 1,- 1,128,129,- 1,- 1,
-132,133,- 1,38,- 1,40,- 1,- 1,- 1,44,- 1,- 1,- 1,- 1,- 1,- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,
-- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,- 1,- 1,- 1,- 1,112,-
-1,- 1,115,- 1,- 1,- 1,- 1,120,121,25,26,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,38,- 1,
-40,- 1,- 1,- 1,44,- 1,- 1,- 1,- 1,- 1,- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,25,26,- 1,- 1,
-- 1,- 1,- 1,97,98,99,100,101,- 1,38,104,40,- 1,- 1,108,44,- 1,- 1,112,- 1,- 1,115,51,52,53,
-54,55,121,- 1,- 1,59,125,- 1,62,128,129,- 1,- 1,132,133,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,38,104,
-40,- 1,107,- 1,44,- 1,- 1,112,- 1,- 1,115,51,52,53,54,55,121,- 1,- 1,59,125,- 1,62,128,
-129,- 1,- 1,132,133,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-25,26,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,38,104,40,- 1,- 1,- 1,44,- 1,- 1,112,113,- 1,
-115,51,52,53,54,55,121,- 1,- 1,59,125,- 1,62,128,129,- 1,- 1,132,133,- 1,70,71,- 1,- 1,
+-32768,- -32768,- -32768,- -32768,- -32768,153,1032,- -32768,556,- -32768,- -32768,340,
+263,- -32768,- 157,- 408,- 139,- 343,- 331,- 328,895,- 332,- 321,- 194,- 317,- 298,127,550,
+518,- -32768,- -32768,- 349,- -32768,105,315,20,1185,- 356,- 32};static short Cyc_yytable[
+6137]={56,536,590,241,240,475,476,318,478,336,75,300,428,59,140,538,321,541,442,
+539,556,56,256,302,299,560,322,257,251,542,543,559,137,642,59,409,240,568,608,
+548,549,612,108,400,125,126,127,311,128,56,73,221,222,422,139,56,56,56,229,56,
+550,551,59,529,683,56,144,329,59,59,59,410,59,252,799,800,407,160,59,37,344,95,
+131,411,645,57,607,290,109,36,639,137,161,306,883,258,39,431,146,608,124,56,56,
+278,657,289,57,392,42,398,607,403,101,139,59,59,56,56,56,56,690,345,632,102,56,
+279,487,139,92,59,59,59,59,423,57,884,56,59,56,382,57,57,57,841,57,144,508,256,
+509,59,57,59,56,503,237,409,105,658,544,545,546,547,527,528,593,59,260,383,37,
+496,585,376,377,378,488,96,91,768,- 147,594,305,352,353,470,92,291,57,57,481,36,
+413,410,471,92,585,409,39,419,502,601,445,57,57,57,57,97,37,721,458,57,875,459,
+379,313,380,354,355,399,289,381,601,57,303,57,342,400,400,400,418,314,401,410,
+159,98,679,36,480,57,103,342,139,208,39,411,278,278,396,278,99,406,100,56,36,150,
+891,892,116,117,648,39,433,482,617,76,59,92,279,279,298,279,430,495,727,342,500,
+342,433,56,56,562,56,934,104,923,661,984,454,939,893,894,59,59,503,59,342,291,
+485,107,240,754,662,343,278,512,499,759,298,339,340,341,513,92,342,312,37,71,-
+205,106,92,- 205,240,395,985,360,279,477,212,240,375,489,111,361,362,568,213,56,
+57,77,93,689,94,566,110,983,342,694,483,411,59,574,616,618,36,848,342,503,670,71,
+38,39,40,421,57,57,71,57,241,240,232,71,112,448,712,595,233,243,899,130,722,240,
+150,635,71,712,900,901,152,462,240,845,1000,156,153,469,93,434,160,411,157,399,
+399,399,435,93,1005,295,- 227,629,589,- 227,342,161,401,401,401,342,71,71,759,206,
+57,358,531,71,186,359,636,600,758,606,626,71,71,71,71,406,637,897,56,37,56,898,
+489,207,137,231,641,602,611,209,433,59,139,59,71,210,700,430,503,232,753,211,782,
+56,115,233,139,71,433,699,118,119,156,718,433,93,59,56,454,737,795,240,342,225,
+342,719,717,552,553,554,59,664,342,398,92,342,342,92,240,669,223,56,671,725,682,
+844,759,743,226,645,847,649,230,444,59,748,227,228,337,396,764,93,770,57,489,57,
+238,855,93,696,765,244,245,246,247,835,638,342,342,236,940,758,565,342,726,569,
+714,342,57,248,731,391,680,342,942,432,945,904,943,944,741,249,57,705,71,342,786,
+307,946,947,308,432,783,787,456,342,309,460,952,953,133,134,856,444,742,589,57,
+520,521,522,523,342,147,148,71,744,634,342,859,954,955,532,289,310,905,535,396,
+606,346,468,938,41,404,838,405,256,342,141,798,142,602,143,347,156,139,997,342,
+350,351,758,454,433,691,907,433,56,317,555,323,36,880,454,240,532,454,38,39,40,
+59,342,771,849,36,56,342,337,911,676,38,39,40,963,649,519,778,324,59,581,524,92,
+526,448,337,92,489,449,342,45,46,47,325,972,791,966,36,537,326,36,924,342,38,39,
+40,38,39,40,968,948,949,950,951,404,78,427,93,327,865,93,935,342,936,342,316,999,
+319,319,919,685,990,557,57,686,434,328,872,333,334,873,349,995,319,319,319,41,
+532,356,357,532,57,586,330,587,432,588,776,432,79,36,331,779,338,319,348,71,39,
+71,41,384,567,728,729,158,81,432,82,83,42,792,39,432,389,131,45,46,47,45,46,47,
+512,444,84,41,85,86,390,513,87,603,394,604,414,605,88,92,232,996,278,619,620,415,
+233,623,36,627,16,17,18,993,38,39,40,916,633,129,342,416,71,921,279,420,922,978,
+240,659,660,444,404,998,405,56,772,773,862,92,45,46,47,36,707,708,709,569,59,417,
+39,867,426,120,804,278,698,36,436,609,831,610,42,38,39,40,319,437,45,46,47,799,
+800,716,404,455,427,279,577,578,579,439,45,46,47,93,446,827,56,93,532,860,861,
+887,888,889,890,78,895,896,319,59,319,319,319,319,319,319,319,319,319,319,319,
+319,319,319,319,319,319,457,57,432,652,991,342,930,931,461,463,444,464,465,432,
+466,472,432,762,701,723,473,479,79,411,881,444,474,250,769,131,484,485,41,493,
+385,492,489,158,81,278,82,83,903,906,39,497,910,501,505,506,507,344,734,736,57,
+71,84,525,85,86,530,279,87,561,564,563,78,573,88,575,576,591,56,363,364,365,366,
+367,368,369,370,371,372,592,932,59,319,596,597,599,93,598,760,614,613,763,615,
+621,624,622,373,628,630,643,640,655,656,665,666,444,79,667,36,956,957,958,646,
+961,962,39,654,964,965,444,967,80,81,668,82,83,93,42,39,785,674,672,673,45,46,47,
+677,678,687,681,84,688,85,86,37,319,87,982,692,130,702,752,88,57,693,832,834,695,
+837,703,840,704,706,319,710,713,724,740,738,986,732,745,987,739,988,989,298,755,
+854,7,8,9,10,11,12,13,14,15,16,17,18,19,20,747,751,36,1001,675,756,761,871,38,39,
+40,41,766,780,444,22,767,36,777,781,784,448,842,38,39,40,788,45,46,47,789,790,
+793,794,27,28,448,805,796,186,806,830,45,46,47,32,33,829,843,846,35,852,853,857,
+858,319,863,864,869,866,868,870,874,876,879,909,882,885,913,915,902,886,296,917,
+920,36,918,925,927,928,37,38,39,40,41,298,929,960,933,937,975,976,404,977,427,-
+205,43,44,- 205,979,45,46,47,980,981,1008,992,337,994,319,1002,1009,711,1003,941,
+1004,1006,239,973,319,797,145,447,441,720,114,971,130,746,749,750,663,959,540,
+775,393,828,132,0,0,0,0,0,0,0,0,970,0,0,0,0,0,0,974,0,0,0,2,3,4,74,6,7,8,9,10,11,
+12,13,14,15,16,17,18,19,20,728,729,21,162,163,261,0,262,263,264,265,266,267,268,
+269,22,78,23,164,270,0,0,165,24,271,0,0,0,0,166,167,168,169,170,27,28,29,171,0,
+272,172,0,0,0,0,32,33,34,173,174,35,0,175,176,0,0,0,0,78,0,0,0,0,0,0,0,0,0,0,0,0,
+878,0,0,319,273,81,177,82,83,37,38,39,40,41,274,136,- 293,0,0,0,0,319,0,178,0,43,
+276,0,0,180,0,79,181,0,0,182,183,0,0,184,185,0,0,774,0,0,158,81,0,82,83,0,0,39,0,
+0,0,0,0,0,0,0,0,512,0,84,0,85,86,0,513,87,0,0,0,0,319,88,319,319,319,319,319,319,
+319,319,319,319,319,319,319,319,319,319,319,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,319,0,2,3,4,74,6,7,8,9,10,11,12,13,14,15,16,17,
+18,19,20,0,0,21,162,163,261,0,262,263,264,265,266,267,268,269,22,78,23,164,270,0,
+0,165,24,271,0,319,- 143,- 143,166,167,168,169,170,27,28,29,171,0,272,172,0,0,0,0,
+32,33,34,173,174,35,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,273,81,
+177,82,83,37,38,39,40,41,274,136,0,0,0,0,0,0,0,178,0,43,276,0,0,180,0,0,181,0,0,
+182,183,0,0,184,185,2,3,4,74,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,162,
+163,261,0,262,263,264,265,266,267,268,269,22,78,23,164,270,0,0,165,24,271,0,0,0,
+0,166,167,168,169,170,27,28,29,171,0,272,172,0,0,0,0,32,33,34,173,174,35,0,175,
+176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,273,81,177,82,83,37,38,39,40,41,
+274,136,275,0,0,0,0,0,0,178,0,43,276,0,0,180,0,0,181,0,0,182,183,0,0,184,185,2,3,
+4,74,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,162,163,261,0,262,263,264,
+265,266,267,268,269,22,78,23,164,270,0,0,165,24,271,0,0,0,0,166,167,168,169,170,
+27,28,29,171,0,272,172,0,0,0,0,32,33,34,173,174,35,0,175,176,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,273,81,177,82,83,37,38,39,40,41,274,136,0,0,0,0,0,0,0,178,
+0,43,276,0,0,180,0,0,181,0,0,182,183,0,0,184,185,2,3,4,74,6,7,8,9,10,11,12,13,14,
+15,16,17,18,19,20,0,0,21,162,163,0,0,0,0,0,0,0,0,0,0,22,78,23,164,0,0,0,165,24,0,
+0,0,0,0,166,167,168,169,170,27,28,29,171,0,0,172,0,0,0,0,32,33,34,173,174,35,0,
+175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,37,38,39,40,41,
+625,0,0,0,0,0,0,0,0,178,0,43,276,0,0,180,0,0,181,0,0,182,183,0,0,184,185,7,8,9,
+10,11,12,13,14,15,16,17,18,19,20,0,0,0,162,163,0,0,0,0,0,0,0,0,0,0,22,78,0,164,0,
+0,0,165,0,0,0,0,0,0,166,167,168,169,170,27,28,0,171,0,0,172,0,0,0,0,32,33,0,173,
+174,35,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,37,38,
+39,40,41,0,335,0,0,0,0,0,0,0,178,0,43,276,0,0,180,0,0,181,0,0,182,183,0,0,184,
+185,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,0,162,163,0,0,0,0,0,0,0,0,0,0,22,
+78,0,164,0,0,0,165,0,0,0,0,0,0,166,167,168,169,170,27,28,0,171,0,0,172,0,0,0,0,
+32,33,0,173,174,35,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,
+82,83,37,38,39,40,41,0,0,0,0,0,0,0,0,0,178,0,43,276,0,0,180,0,0,181,0,0,182,183,
+0,0,184,185,- 11,1,0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,
+0,0,0,78,0,0,0,0,0,0,22,0,23,0,0,0,651,0,24,0,25,26,- 143,- 143,0,0,0,0,0,27,28,29,
+0,0,0,0,0,0,30,31,32,33,34,0,0,35,0,79,0,0,0,0,0,0,0,0,0,0,0,684,0,0,158,81,0,82,
+83,0,0,39,36,0,0,0,0,37,38,39,40,41,0,84,- 11,85,86,0,0,87,0,42,0,43,44,88,0,45,
+46,47,- 11,1,0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,
+78,0,0,0,0,0,0,22,0,23,0,0,0,0,0,24,0,25,26,- 143,- 143,0,0,0,0,0,27,28,29,0,0,0,0,
+0,0,30,31,32,33,34,0,0,35,0,79,0,0,0,0,0,0,0,0,0,0,0,0,0,0,158,81,0,82,83,0,0,39,
+36,0,0,0,0,37,38,39,40,41,0,84,- 11,85,86,0,0,87,0,42,0,43,44,88,0,45,46,47,- 11,1,
+0,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,0,0,0,0,0,0,
+0,22,0,23,0,0,0,0,0,24,0,25,26,- 143,- 143,0,0,0,0,0,27,28,29,0,0,0,0,0,0,30,31,32,
+33,34,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,0,0,0,0,37,38,39,
+40,41,0,0,0,0,0,0,0,0,0,42,0,43,44,0,0,45,46,47,1,0,2,3,4,5,6,7,8,9,10,11,12,13,
+14,15,16,17,18,19,20,0,0,21,0,0,0,0,0,0,0,0,0,0,0,0,22,0,23,0,0,0,0,0,24,0,25,26,
+- 143,- 143,0,0,0,0,0,27,28,29,0,0,0,0,0,0,30,31,32,33,34,0,0,35,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,0,0,0,0,37,38,39,40,41,0,0,- 11,0,0,0,0,0,0,42,0,
+43,44,0,0,45,46,47,2,3,4,74,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,21,0,0,
+0,0,0,0,0,0,0,0,0,0,22,0,23,0,0,0,0,0,24,0,0,0,- 143,- 143,0,0,0,0,0,27,28,29,0,0,
+0,0,0,0,0,0,32,33,34,0,0,35,2,3,4,74,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,
+0,21,0,0,0,0,0,0,0,37,38,0,40,41,22,136,23,0,250,0,0,0,24,0,0,43,44,0,0,0,0,0,0,
+27,28,29,0,0,0,0,0,0,0,0,32,33,34,0,0,35,0,0,2,3,4,74,6,7,8,9,10,11,12,13,14,15,
+16,17,18,19,20,0,0,21,0,0,0,0,0,37,38,0,40,41,0,136,22,0,0,0,0,0,0,0,24,43,44,0,
+- 143,- 143,0,0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,32,33,0,0,0,35,0,0,7,8,9,10,11,12,13,
+14,15,16,17,18,19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,37,38,22,40,41,0,0,0,0,0,0,0,0,0,
+0,0,43,44,0,0,0,27,28,0,0,0,0,0,0,0,0,0,32,33,0,0,0,35,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,296,0,0,0,0,0,0,0,37,38,0,40,41,298,0,0,0,0,0,0,404,0,405,- 205,
+43,44,- 205,0,45,46,47,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,22,0,0,0,0,0,0,0,0,0,0,0,- 143,- 143,0,0,0,0,0,27,28,0,0,0,0,0,0,0,0,0,
+32,33,0,0,0,35,0,0,0,0,0,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,0,0,0,36,0,0,
+0,0,37,38,39,40,41,22,0,0,0,0,0,0,0,0,448,0,43,44,0,0,45,46,47,0,27,28,0,0,0,0,0,
+0,0,0,0,32,33,0,0,0,35,0,0,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,0,0,0,296,
+0,0,297,0,0,0,0,37,38,22,40,41,298,0,0,0,0,0,0,0,0,0,- 205,43,44,- 205,0,0,27,28,0,
+0,0,0,0,0,0,0,0,32,33,0,0,0,35,0,0,7,8,9,10,11,12,13,14,15,16,17,18,19,20,0,0,0,
+0,0,296,0,0,0,0,0,0,0,37,38,22,40,41,298,0,0,0,0,0,0,0,0,0,- 205,43,44,- 205,0,0,
+27,28,0,0,214,0,0,0,0,0,0,32,33,0,0,0,35,0,0,7,8,9,10,11,12,13,14,15,16,17,18,19,
+20,0,0,0,0,0,0,0,0,0,0,0,0,0,37,38,22,40,41,0,215,0,0,0,0,0,0,0,- 143,- 143,43,44,
+0,0,0,27,28,0,0,0,0,0,0,0,0,0,32,33,0,0,0,35,0,0,7,8,9,10,11,12,13,14,15,16,17,
+18,19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,37,38,22,40,41,0,0,0,0,0,0,0,0,0,0,0,43,44,0,
+0,0,27,28,0,0,0,0,0,0,0,0,0,32,33,0,0,0,35,0,0,7,8,9,10,11,12,13,14,15,16,17,18,
+19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,37,38,22,40,41,0,0,- 111,0,0,0,0,0,0,0,0,43,44,0,
+0,0,27,28,0,0,0,0,0,0,0,0,0,32,33,0,0,0,35,0,0,7,8,9,10,11,12,13,14,15,16,17,18,
+19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,37,38,22,40,41,0,0,- 112,0,0,0,0,0,0,0,0,43,44,0,
+0,0,27,28,0,0,0,0,0,0,0,0,0,32,33,0,0,0,35,0,0,7,8,9,10,11,12,13,14,15,16,17,18,
+19,20,0,0,0,0,0,647,0,0,0,0,0,0,0,37,38,22,40,41,0,0,0,0,0,0,0,0,0,0,0,43,44,807,
+808,0,27,28,0,0,0,0,0,0,0,0,78,32,33,0,0,0,35,0,0,7,8,9,10,11,12,13,14,15,16,17,
+18,19,20,0,0,0,0,0,0,0,0,0,0,0,0,0,37,38,22,40,41,0,0,0,79,0,0,0,0,0,- 143,- 143,
+43,44,0,0,0,27,28,158,81,0,82,83,0,0,39,0,32,33,0,0,0,35,0,0,0,0,809,0,85,86,0,0,
+87,0,0,810,0,0,88,183,0,0,184,185,0,0,0,0,0,0,0,37,0,0,0,41,0,0,0,0,0,0,0,0,0,0,
+0,43,44,162,163,261,0,262,263,264,265,266,267,268,269,0,78,0,164,270,0,0,165,0,
+271,0,0,0,0,166,167,168,169,170,0,0,0,171,0,272,172,0,0,0,0,0,0,0,173,174,0,0,
+175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,273,81,177,82,83,0,0,39,0,0,
+274,136,0,0,162,163,0,0,0,178,0,510,179,0,0,180,0,78,181,164,0,182,183,165,0,184,
+185,0,0,0,166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,
+176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,0,320,
+511,0,162,163,0,512,0,178,0,0,179,0,513,180,0,78,181,164,0,182,183,165,0,184,185,
+0,0,0,166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,0,320,757,0,
+162,163,0,512,0,178,0,0,179,0,513,180,0,78,181,164,0,182,183,165,0,184,185,0,0,0,
+166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,0,320,926,0,162,163,
+0,512,0,178,0,0,179,0,513,180,0,78,181,164,0,182,183,165,0,184,185,0,0,0,166,167,
+168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,0,320,0,0,162,163,0,512,0,
+178,0,0,179,0,513,180,0,78,181,164,0,182,183,165,0,184,185,0,0,0,166,167,168,169,
+170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,0,162,163,0,0,0,0,0,294,178,0,0,179,
+0,78,180,164,0,181,0,165,182,183,0,0,184,185,166,167,168,169,170,0,0,0,171,0,0,
+172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+36,81,177,82,83,0,0,39,0,0,0,320,0,0,162,163,0,0,0,178,0,0,179,0,0,180,0,78,181,
+164,0,182,183,165,0,184,185,0,0,0,166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,0,
+0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,
+83,0,0,39,0,0,467,162,163,0,0,0,0,0,0,178,0,0,179,0,78,180,164,0,181,0,165,182,
+183,0,0,184,185,166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,
+175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,0,
+162,163,0,0,0,0,0,0,178,558,0,179,0,78,180,164,0,181,0,165,182,183,0,0,184,185,
+166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,0,162,163,0,0,0,0,0,
+580,178,0,0,179,0,78,180,164,0,181,0,165,182,183,0,0,184,185,166,167,168,169,170,
+0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,0,162,163,0,0,0,0,0,0,178,631,0,179,0,
+78,180,164,0,181,0,165,182,183,0,0,184,185,166,167,168,169,170,0,0,0,171,0,0,172,
+0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,
+81,177,82,83,0,0,39,0,0,0,162,163,0,0,0,0,0,697,178,0,0,179,0,78,180,164,0,181,0,
+165,182,183,0,0,184,185,166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,
+174,0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,
+0,0,0,162,163,0,0,0,0,0,715,178,0,0,179,0,78,180,164,0,181,0,165,182,183,0,0,184,
+185,166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,733,162,163,0,0,
+0,0,0,0,178,0,0,179,0,78,180,164,0,181,0,165,182,183,0,0,184,185,166,167,168,169,
+170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,735,162,163,0,0,0,0,0,0,178,0,0,179,
+0,78,180,164,0,181,0,165,182,183,0,0,184,185,166,167,168,169,170,0,0,0,171,0,0,
+172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+36,81,177,82,83,0,0,39,0,0,0,162,163,0,0,0,0,0,0,178,833,0,179,0,78,180,164,0,
+181,0,165,182,183,0,0,184,185,166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,
+0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,
+0,0,39,0,0,0,162,163,0,0,0,0,0,0,178,836,0,179,0,78,180,164,0,181,0,165,182,183,
+0,0,184,185,166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,
+176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,839,162,
+163,0,0,0,0,0,0,178,0,0,179,0,78,180,164,0,181,0,165,182,183,0,0,184,185,166,167,
+168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,0,162,163,0,0,0,0,0,0,178,
+908,0,179,0,78,180,164,0,181,0,165,182,183,0,0,184,185,166,167,168,169,170,0,0,0,
+171,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+0,0,0,0,36,81,177,82,83,0,0,39,0,0,0,162,163,0,0,0,0,0,0,178,912,0,179,0,78,180,
+164,0,181,0,165,182,183,0,0,184,185,166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,
+0,0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,
+82,83,0,0,39,0,0,0,162,163,0,0,0,0,0,0,178,914,0,179,0,78,180,164,0,181,0,165,
+182,183,0,0,184,185,166,167,168,169,170,0,0,0,171,0,0,172,0,0,0,0,0,0,0,173,174,
+0,0,175,176,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,
+0,162,163,0,0,0,0,0,0,178,969,0,179,0,78,180,164,0,181,0,165,182,183,0,0,184,185,
+166,167,168,169,170,0,0,0,171,0,0,172,0,0,162,163,0,0,0,173,174,0,0,175,176,0,0,
+78,0,0,0,0,0,0,0,0,0,0,0,0,166,167,168,169,170,0,36,81,177,82,83,172,0,39,0,0,0,
+0,0,173,174,0,0,175,176,178,0,0,179,0,0,180,0,0,181,0,0,182,183,0,0,184,185,0,0,
+0,36,81,177,82,83,0,0,39,0,0,0,320,0,162,163,0,0,0,0,178,0,0,179,0,0,180,78,0,
+181,0,0,182,183,0,0,184,185,0,0,166,167,168,169,170,0,0,0,0,0,0,172,0,0,162,163,
+0,0,0,173,174,0,0,175,176,0,0,78,0,0,0,0,0,0,0,0,0,0,0,0,166,167,168,169,170,0,
+36,81,177,82,83,172,0,39,0,0,0,675,0,173,174,0,0,175,176,178,0,0,179,0,0,180,0,0,
+181,0,0,182,183,0,0,184,185,0,0,0,36,81,177,82,83,0,0,39,0,0,0,162,163,0,0,0,0,0,
+0,315,0,0,179,0,78,180,0,0,181,0,0,182,183,0,0,184,185,166,167,168,169,170,0,0,0,
+0,0,0,172,0,0,162,163,0,0,0,173,174,0,0,175,176,0,0,78,0,0,0,0,0,0,0,0,0,0,0,0,
+166,167,168,169,170,0,36,81,177,82,83,172,0,39,0,0,0,0,0,173,174,0,0,175,176,332,
+0,0,179,0,0,180,0,0,181,0,0,182,183,0,0,184,185,0,0,0,36,81,177,82,83,0,0,39,0,0,
+0,162,163,0,0,0,0,0,0,178,0,0,179,0,78,180,0,0,181,0,0,182,183,0,0,184,185,166,
+167,168,169,170,0,0,0,0,0,0,172,0,0,0,0,0,0,0,173,174,0,0,175,176,0,0,0,0,0,0,0,
+0,0,0,0,0,0,0,0,0,0,0,0,0,0,36,81,177,82,83,0,0,39,0,0,0,0,0,0,0,0,0,0,0,877,0,0,
+179,0,0,180,0,0,181,0,0,182,183,0,0,184,185};static short Cyc_yycheck[6137]={0,344,
+411,111,111,277,278,164,280,178,21,143,240,0,65,346,165,349,250,347,376,21,129,
+143,143,381,165,132,124,350,351,380,65,488,21,77,143,392,434,356,357,449,42,217,
+55,56,57,157,59,49,99,96,97,17,65,55,56,57,103,59,358,359,49,335,562,65,66,172,
+55,56,57,113,59,124,5,6,219,97,65,102,83,97,62,125,493,0,430,138,42,97,486,124,
+112,150,83,118,104,240,68,495,54,101,102,136,512,138,21,212,116,216,454,218,107,
+124,101,102,116,117,118,119,575,124,471,107,124,136,60,138,23,116,117,118,119,97,
+49,124,136,124,138,95,55,56,57,738,59,145,315,254,317,136,65,138,152,310,108,77,
+116,513,352,353,354,355,331,332,97,152,135,123,102,301,406,73,74,75,108,112,23,
+675,109,112,149,78,79,107,79,139,101,102,110,97,222,113,116,88,430,77,104,229,
+308,427,251,116,117,118,119,112,102,615,116,124,805,119,114,102,116,112,113,217,
+251,121,448,136,118,138,110,399,400,401,110,118,217,113,79,97,120,97,107,152,112,
+110,251,88,104,125,277,278,215,280,112,219,114,251,97,112,78,79,107,108,496,104,
+240,293,121,108,251,160,277,278,107,280,240,110,621,110,306,110,256,277,278,384,
+280,876,112,120,516,120,256,882,112,113,277,278,449,280,110,249,97,116,405,655,
+111,117,335,114,304,660,107,180,181,182,121,206,110,160,102,0,117,96,213,120,427,
+109,120,122,335,279,108,434,201,298,116,130,131,688,116,335,251,22,23,117,25,107,
+96,938,110,583,294,125,335,394,455,456,97,749,110,512,525,42,103,104,105,117,277,
+278,49,280,474,474,97,54,108,116,600,418,103,112,122,62,616,486,112,477,67,611,
+130,131,108,264,495,117,985,76,99,270,79,110,97,125,108,399,400,401,117,88,999,
+142,107,107,408,110,110,112,399,400,401,110,101,102,773,116,335,125,117,108,84,
+129,477,427,660,429,463,116,117,118,119,405,481,125,438,102,440,129,411,97,477,
+105,109,427,448,107,430,438,463,440,139,110,588,427,615,97,98,111,700,463,49,103,
+477,152,448,588,107,108,157,605,454,160,463,477,448,107,718,588,110,102,110,605,
+605,360,361,362,477,117,110,600,389,110,110,392,605,117,111,501,117,117,561,743,
+861,639,97,918,748,498,102,250,501,647,101,102,178,488,669,206,679,438,493,440,
+117,759,213,586,669,116,117,118,119,107,484,110,110,116,883,773,389,110,117,392,
+603,110,463,107,117,211,115,110,885,240,888,829,886,887,117,110,477,595,249,110,
+110,152,889,890,110,256,117,117,259,110,109,262,895,896,49,50,117,320,635,585,
+501,324,325,326,327,110,63,64,279,640,473,110,117,897,898,338,635,111,117,342,
+575,607,82,269,882,106,114,107,116,722,110,112,723,114,600,116,126,308,635,981,
+110,80,81,861,600,611,580,117,614,635,116,374,116,97,809,611,749,380,614,103,104,
+105,635,110,682,109,97,653,110,315,117,530,103,104,105,117,649,323,696,116,653,
+404,328,564,330,116,332,568,643,120,110,122,123,124,116,919,714,117,97,345,116,
+97,857,110,103,104,105,103,104,105,117,891,892,893,894,114,38,116,389,116,107,
+392,877,110,879,110,162,985,164,165,848,564,117,379,635,568,110,116,107,175,176,
+110,128,117,180,181,182,106,471,76,77,474,653,112,116,114,427,116,692,430,82,97,
+116,697,116,201,127,438,104,440,106,108,94,22,23,97,98,448,100,101,116,715,104,
+454,97,751,122,123,124,122,123,124,114,516,116,106,118,119,97,121,122,112,116,
+114,97,116,128,688,97,98,829,457,458,107,103,461,97,463,17,18,19,976,103,104,105,
+107,472,108,110,113,501,107,829,113,110,929,929,109,110,562,114,984,116,829,109,
+110,780,728,122,123,124,97,97,98,99,688,829,115,104,793,117,107,725,882,587,97,
+109,438,731,440,116,103,104,105,310,109,122,123,124,5,6,604,114,108,116,882,399,
+400,401,109,122,123,124,564,109,728,882,568,621,109,110,127,128,80,81,38,76,77,
+344,882,346,347,348,349,350,351,352,353,354,355,356,357,358,359,360,361,362,116,
+829,600,501,109,110,872,873,116,116,660,97,107,611,107,116,614,667,591,617,120,
+109,82,125,810,675,116,111,678,922,115,97,106,120,94,117,918,97,98,985,100,101,
+828,833,104,117,836,109,109,113,113,83,625,626,882,653,116,116,118,119,117,985,
+122,112,110,117,38,117,128,110,109,116,985,84,85,86,87,88,89,90,91,92,93,97,874,
+985,449,97,116,110,688,117,665,110,107,668,120,116,30,108,111,107,42,125,116,110,
+97,110,110,759,82,110,97,899,900,901,117,907,908,104,117,911,912,773,914,97,98,
+110,100,101,728,116,104,706,109,117,117,122,123,124,117,110,109,117,116,110,118,
+119,102,512,122,937,115,751,107,653,128,985,117,732,733,117,735,107,737,102,111,
+530,117,117,108,117,108,963,116,109,966,107,968,969,107,112,755,8,9,10,11,12,13,
+14,15,16,17,18,19,20,21,113,108,97,990,108,115,25,802,103,104,105,106,117,115,
+861,37,117,97,117,117,113,116,107,103,104,105,117,122,123,124,117,117,115,117,56,
+57,116,108,117,809,117,109,122,123,124,67,68,120,107,102,72,117,117,116,110,615,
+117,97,109,98,117,109,28,108,116,835,120,82,838,839,82,126,94,109,109,97,110,25,
+107,110,102,103,104,105,106,107,116,107,109,117,117,116,114,98,116,117,118,119,
+120,109,122,123,124,117,110,0,117,877,117,669,117,0,599,117,884,117,117,110,922,
+679,722,67,254,249,614,46,918,922,643,647,649,517,902,348,688,213,728,62,- 1,- 1,-
+1,- 1,- 1,- 1,- 1,- 1,916,- 1,- 1,- 1,- 1,- 1,- 1,923,- 1,- 1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,
+15,16,17,18,19,20,21,22,23,24,25,26,27,- 1,29,30,31,32,33,34,35,36,37,38,39,40,41,
+- 1,- 1,44,45,46,- 1,- 1,- 1,- 1,51,52,53,54,55,56,57,58,59,- 1,61,62,- 1,- 1,- 1,- 1,67,68,
+69,70,71,72,- 1,74,75,- 1,- 1,- 1,- 1,38,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,807,- 1,-
+1,810,97,98,99,100,101,102,103,104,105,106,107,108,109,- 1,- 1,- 1,- 1,828,- 1,116,- 1,
+118,119,- 1,- 1,122,- 1,82,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,- 1,94,- 1,- 1,97,98,- 1,
+100,101,- 1,- 1,104,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,114,- 1,116,- 1,118,119,- 1,121,122,- 1,
+- 1,- 1,- 1,883,128,885,886,887,888,889,890,891,892,893,894,895,896,897,898,899,900,
+901,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
+1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,937,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,
+20,21,- 1,- 1,24,25,26,27,- 1,29,30,31,32,33,34,35,36,37,38,39,40,41,- 1,- 1,44,45,46,
+- 1,984,49,50,51,52,53,54,55,56,57,58,59,- 1,61,62,- 1,- 1,- 1,- 1,67,68,69,70,71,72,-
+1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,
+100,101,102,103,104,105,106,107,108,- 1,- 1,- 1,- 1,- 1,- 1,- 1,116,- 1,118,119,- 1,- 1,
+122,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,
+18,19,20,21,- 1,- 1,24,25,26,27,- 1,29,30,31,32,33,34,35,36,37,38,39,40,41,- 1,- 1,44,
+45,46,- 1,- 1,- 1,- 1,51,52,53,54,55,56,57,58,59,- 1,61,62,- 1,- 1,- 1,- 1,67,68,69,70,71,
+72,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,
+99,100,101,102,103,104,105,106,107,108,109,- 1,- 1,- 1,- 1,- 1,- 1,116,- 1,118,119,- 1,-
+1,122,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
+17,18,19,20,21,- 1,- 1,24,25,26,27,- 1,29,30,31,32,33,34,35,36,37,38,39,40,41,- 1,- 1,
+44,45,46,- 1,- 1,- 1,- 1,51,52,53,54,55,56,57,58,59,- 1,61,62,- 1,- 1,- 1,- 1,67,68,69,70,
+71,72,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,
+98,99,100,101,102,103,104,105,106,107,108,- 1,- 1,- 1,- 1,- 1,- 1,- 1,116,- 1,118,119,- 1,
+- 1,122,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,3,4,5,6,7,8,9,10,11,12,13,14,15,16,
+17,18,19,20,21,- 1,- 1,24,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,38,39,40,- 1,- 1,- 1,
+44,45,- 1,- 1,- 1,- 1,- 1,51,52,53,54,55,56,57,58,59,- 1,- 1,62,- 1,- 1,- 1,- 1,67,68,69,70,
+71,72,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,
+98,99,100,101,102,103,104,105,106,107,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,116,- 1,118,119,- 1,
+- 1,122,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,8,9,10,11,12,13,14,15,16,17,18,19,
+20,21,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,38,- 1,40,- 1,- 1,- 1,44,- 1,- 1,
+- 1,- 1,- 1,- 1,51,52,53,54,55,56,57,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,67,68,- 1,70,71,72,- 1,
 74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,
-100,101,- 1,- 1,104,- 1,- 1,- 1,- 1,- 1,- 1,- 1,112,- 1,- 1,115,- 1,- 1,- 1,- 1,120,121,25,26,-
-1,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,38,- 1,40,- 1,- 1,- 1,44,- 1,- 1,- 1,- 1,- 1,- 1,51,
-52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,38,104,
-40,- 1,- 1,- 1,44,- 1,- 1,112,113,- 1,115,51,52,53,54,55,121,- 1,- 1,59,125,- 1,62,128,
-129,- 1,- 1,132,133,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,- 1,- 1,- 1,- 1,112,- 1,- 1,
-115,- 1,- 1,- 1,- 1,120,121,25,26,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,38,- 1,40,- 1,
-- 1,- 1,44,- 1,- 1,- 1,- 1,- 1,- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,- 1,- 1,- 1,- 1,112,- 1,- 1,115,- 1,- 1,- 1,- 1,120,
-121,25,26,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,38,- 1,40,- 1,- 1,- 1,44,- 1,- 1,- 1,- 1,
-- 1,- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,
-- 1,38,104,40,- 1,107,- 1,44,- 1,- 1,112,- 1,- 1,115,51,52,53,54,55,121,- 1,- 1,59,125,- 1,
-62,128,129,- 1,- 1,132,133,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,38,104,40,- 1,107,- 1,44,- 1,- 1,
-112,- 1,- 1,115,51,52,53,54,55,121,- 1,- 1,59,125,- 1,62,128,129,- 1,- 1,132,133,- 1,70,
-71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,97,
-98,99,100,101,- 1,38,104,40,- 1,- 1,- 1,44,- 1,- 1,112,113,- 1,115,51,52,53,54,55,121,-
-1,- 1,59,125,- 1,62,128,129,- 1,- 1,132,133,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,-
-1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,38,104,40,- 1,- 1,
-- 1,44,- 1,- 1,112,113,- 1,115,51,52,53,54,55,121,- 1,- 1,59,125,- 1,62,128,129,- 1,- 1,
-132,133,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,25,26,- 1,
-- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,38,104,40,- 1,107,- 1,44,- 1,- 1,112,- 1,- 1,115,51,52,
-53,54,55,121,- 1,- 1,59,125,- 1,62,128,129,- 1,- 1,132,133,- 1,70,71,- 1,- 1,74,75,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,38,
-104,40,- 1,- 1,- 1,44,- 1,- 1,112,113,- 1,115,51,52,53,54,55,121,- 1,- 1,59,125,- 1,62,
-128,129,- 1,- 1,132,133,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,38,104,40,- 1,- 1,- 1,44,- 1,- 1,112,
-113,- 1,115,51,52,53,54,55,121,- 1,- 1,59,125,- 1,62,128,129,- 1,- 1,132,133,- 1,70,71,
-- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,97,98,
-99,100,101,- 1,38,104,40,- 1,- 1,- 1,44,- 1,- 1,112,113,- 1,115,51,52,53,54,55,121,- 1,-
-1,59,125,- 1,62,128,129,- 1,- 1,132,133,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-1,- 1,- 1,- 1,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,38,104,40,- 1,- 1,- 1,
-44,- 1,- 1,112,113,- 1,115,51,52,53,54,55,121,- 1,- 1,59,125,- 1,62,128,129,- 1,- 1,132,
-133,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-38,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,51,52,53,54,55,112,- 1,- 1,115,- 1,- 1,62,
-- 1,- 1,121,- 1,- 1,- 1,125,70,71,128,129,74,75,132,133,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,38,104,- 1,- 1,- 1,108,- 1,- 1,- 1,112,
-- 1,- 1,115,51,52,53,54,55,121,- 1,- 1,- 1,125,- 1,62,128,129,- 1,- 1,132,133,- 1,70,71,-
-1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,38,- 1,- 1,97,98,
-99,100,101,- 1,- 1,104,- 1,- 1,51,52,53,54,55,112,- 1,- 1,115,- 1,- 1,62,- 1,- 1,121,- 1,- 1,
-- 1,125,70,71,128,129,74,75,132,133,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,38,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,51,52,53,54,55,112,- 1,- 1,115,- 1,- 1,
-62,- 1,- 1,121,- 1,- 1,- 1,125,70,71,128,129,74,75,132,133,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,38,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,51,52,53,54,55,
-112,- 1,- 1,115,- 1,- 1,62,- 1,- 1,121,- 1,- 1,- 1,125,70,71,128,129,74,75,132,133,8,9,10,
-11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,
-37,- 1,- 1,- 1,- 1,112,- 1,- 1,115,- 1,- 1,- 1,- 1,- 1,121,- 1,- 1,- 1,125,56,57,128,129,60,- 1,
-132,133,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,37,105,106,- 1,108,- 1,- 1,- 1,- 1,- 1,
-114,115,49,50,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,
-- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-1,- 1,102,103,37,105,106,- 1,- 1,- 1,- 1,- 1,- 1,- 1,114,115,- 1,- 1,- 1,- 1,- 1,- 1,- 1,56,57,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,14,15,16,17,
-18,19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,37,105,106,- 1,- 1,109,
-- 1,- 1,- 1,- 1,114,115,- 1,- 1,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,
+100,101,102,103,104,105,106,- 1,108,- 1,- 1,- 1,- 1,- 1,- 1,- 1,116,- 1,118,119,- 1,- 1,122,
+- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,
+- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,38,- 1,40,- 1,- 1,- 1,44,- 1,- 1,- 1,- 1,- 1,
+- 1,51,52,53,54,55,56,57,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,67,68,- 1,70,71,72,- 1,74,75,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,102,
+103,104,105,106,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,116,- 1,118,119,- 1,- 1,122,- 1,- 1,125,- 1,
+- 1,128,129,- 1,- 1,132,133,0,1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,
+21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,38,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,39,- 1,- 1,- 1,43,- 1,45,- 1,47,
+48,49,50,- 1,- 1,- 1,- 1,- 1,56,57,58,- 1,- 1,- 1,- 1,- 1,- 1,65,66,67,68,69,- 1,- 1,72,- 1,82,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,94,- 1,- 1,97,98,- 1,100,101,- 1,- 1,104,97,- 1,- 1,- 1,
+- 1,102,103,104,105,106,- 1,116,109,118,119,- 1,- 1,122,- 1,116,- 1,118,119,128,- 1,122,
+123,124,0,1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,
+- 1,- 1,- 1,38,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,39,- 1,- 1,- 1,- 1,- 1,45,- 1,47,48,49,50,- 1,- 1,- 1,
+- 1,- 1,56,57,58,- 1,- 1,- 1,- 1,- 1,- 1,65,66,67,68,69,- 1,- 1,72,- 1,82,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,- 1,100,101,- 1,- 1,104,97,- 1,- 1,- 1,- 1,102,103,104,
+105,106,- 1,116,109,118,119,- 1,- 1,122,- 1,116,- 1,118,119,128,- 1,122,123,124,0,1,- 1,
+3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,37,- 1,39,- 1,- 1,- 1,- 1,- 1,45,- 1,47,48,49,50,- 1,- 1,- 1,- 1,- 1,56,57,58,
+- 1,- 1,- 1,- 1,- 1,- 1,65,66,67,68,69,- 1,- 1,72,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,- 1,- 1,- 1,- 1,102,103,104,105,106,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,116,- 1,118,119,- 1,- 1,122,123,124,1,- 1,3,4,5,6,7,8,9,10,11,12,13,
+14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,39,- 1,
+- 1,- 1,- 1,- 1,45,- 1,47,48,49,50,- 1,- 1,- 1,- 1,- 1,56,57,58,- 1,- 1,- 1,- 1,- 1,- 1,65,66,67,
+68,69,- 1,- 1,72,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,97,- 1,- 1,- 1,- 1,102,103,104,105,106,- 1,- 1,109,- 1,- 1,- 1,- 1,- 1,- 1,116,- 1,118,
+119,- 1,- 1,122,123,124,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,39,- 1,- 1,- 1,- 1,- 1,45,- 1,- 1,- 1,49,50,- 1,
+- 1,- 1,- 1,- 1,56,57,58,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,69,- 1,- 1,72,3,4,5,6,7,8,9,10,
+11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,- 1,105,
+106,37,108,39,- 1,111,- 1,- 1,- 1,45,- 1,- 1,118,119,- 1,- 1,- 1,- 1,- 1,- 1,56,57,58,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,67,68,69,- 1,- 1,72,- 1,- 1,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,
+18,19,20,21,- 1,- 1,24,- 1,- 1,- 1,- 1,- 1,102,103,- 1,105,106,- 1,108,37,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,45,118,119,- 1,49,50,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,
 - 1,- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
-1,- 1,- 1,- 1,- 1,- 1,102,103,37,105,106,- 1,- 1,109,- 1,- 1,- 1,- 1,114,115,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,
-14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,94,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,37,105,
-106,- 1,- 1,- 1,- 1,- 1,- 1,- 1,114,115,- 1,- 1,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
-- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,-
-1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,37,105,106,- 1,- 1,- 1,- 1,- 1,- 1,- 1,114,115,49,
-50,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,- 1,- 1,
-- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,-
-1,- 1,- 1,106,- 1,- 1,- 1,- 1,- 1,- 1,- 1,114,115};char Cyc_Yyimpossible[17]="\000\000\000\000Yyimpossible\000";
-char Cyc_Yystack_overflow[21]="\000\000\000\000Yystack_overflow\000";void Cyc_yyerror(
-struct _dyneither_ptr);int Cyc_yylex(struct Cyc_Lexing_lexbuf*);static int Cyc_yychar=(
-int)'\000';union Cyc_YYSTYPE_union Cyc_yylval=(union Cyc_YYSTYPE_union)((struct Cyc_YYINITIALSVAL_struct){
-57});static int Cyc_yynerrs=0;struct _tuple18{struct Cyc_Position_Segment*f1;struct
-_tuple1*f2;int f3;};struct _tuple19{struct _dyneither_ptr f1;void*f2;};static char
-_tmp420[8]="stdcall";static char _tmp421[6]="cdecl";static char _tmp422[9]="fastcall";
-static char _tmp423[9]="noreturn";static char _tmp424[6]="const";static char _tmp425[8]="aligned";
-static char _tmp426[7]="packed";static char _tmp427[7]="shared";static char _tmp428[7]="unused";
-static char _tmp429[5]="weak";static char _tmp42A[10]="dllimport";static char _tmp42B[
-10]="dllexport";static char _tmp42C[23]="no_instrument_function";static char _tmp42D[
-12]="constructor";static char _tmp42E[11]="destructor";static char _tmp42F[22]="no_check_memory_usage";
-static char _tmp430[5]="pure";struct _tuple20{struct Cyc_List_List*f1;struct Cyc_Absyn_Exp*
-f2;};int Cyc_yyparse(struct Cyc_Lexing_lexbuf*yylex_buf);static void _tmpA12(
-unsigned int*_tmpA11,unsigned int*_tmpA10,short**_tmpA0F){for(*_tmpA11=0;*
-_tmpA11 < *_tmpA10;(*_tmpA11)++){(*_tmpA0F)[*_tmpA11]=(short)0;}}static void
-_tmpA17(unsigned int*_tmpA16,unsigned int*_tmpA15,union Cyc_YYSTYPE_union**
-_tmpA14){for(*_tmpA16=0;*_tmpA16 < *_tmpA15;(*_tmpA16)++){(*_tmpA14)[*_tmpA16]=
-Cyc_yylval;}}static void _tmpA1C(unsigned int*_tmpA1B,unsigned int*_tmpA1A,struct
-Cyc_Yyltype**_tmpA19){for(*_tmpA1B=0;*_tmpA1B < *_tmpA1A;(*_tmpA1B)++){(*_tmpA19)[*
-_tmpA1B]=Cyc_yynewloc();}}static void _tmp1345(unsigned int*_tmp1344,unsigned int*
-_tmp1343,char**_tmp1341){for(*_tmp1344=0;*_tmp1344 < *_tmp1343;(*_tmp1344)++){(*
-_tmp1341)[*_tmp1344]='\000';}}int Cyc_yyparse(struct Cyc_Lexing_lexbuf*yylex_buf){
+1,- 1,- 1,- 1,- 1,- 1,102,103,37,105,106,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,118,119,- 1,
+- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,94,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,- 1,105,
+106,107,- 1,- 1,- 1,- 1,- 1,- 1,114,- 1,116,117,118,119,120,- 1,122,123,124,8,9,10,11,12,
+13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,37,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,49,50,- 1,- 1,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+67,68,- 1,- 1,- 1,72,- 1,- 1,- 1,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,-
+1,- 1,- 1,97,- 1,- 1,- 1,- 1,102,103,104,105,106,37,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,116,- 1,118,
+119,- 1,- 1,122,123,124,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,-
+1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,94,- 1,- 1,97,- 1,- 1,- 1,- 1,
+102,103,37,105,106,107,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,117,118,119,120,- 1,- 1,56,57,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,
+19,20,21,- 1,- 1,- 1,- 1,- 1,94,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,37,105,106,107,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,117,118,119,120,- 1,- 1,56,57,- 1,- 1,60,- 1,- 1,- 1,- 1,- 1,- 1,67,68,-
+1,- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,102,103,37,105,106,- 1,108,- 1,- 1,- 1,- 1,- 1,- 1,- 1,49,50,118,119,- 1,-
+1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,14,
+15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,37,105,106,-
+1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,118,119,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,-
+1,67,68,- 1,- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,37,105,106,- 1,- 1,109,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,118,
+119,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,8,9,10,11,
+12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,37,
+105,106,- 1,- 1,109,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,118,119,- 1,- 1,- 1,56,57,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,-
+1,- 1,- 1,- 1,94,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,103,37,105,106,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,118,119,25,26,- 1,56,57,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,38,67,68,- 1,- 1,- 1,72,- 1,- 1,
+8,9,10,11,12,13,14,15,16,17,18,19,20,21,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+102,103,37,105,106,- 1,- 1,- 1,82,- 1,- 1,- 1,- 1,- 1,49,50,118,119,- 1,- 1,- 1,56,57,97,98,
+- 1,100,101,- 1,- 1,104,- 1,67,68,- 1,- 1,- 1,72,- 1,- 1,- 1,- 1,116,- 1,118,119,- 1,- 1,122,-
+1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,- 1,- 1,- 1,- 1,- 1,- 1,102,- 1,- 1,- 1,106,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,118,119,25,26,27,- 1,29,30,31,32,33,34,35,36,- 1,38,- 1,
+40,41,- 1,- 1,44,- 1,46,- 1,- 1,- 1,- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,61,62,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,107,108,- 1,- 1,25,26,- 1,- 1,- 1,116,- 1,32,
+119,- 1,- 1,122,- 1,38,125,40,- 1,128,129,44,- 1,132,133,- 1,- 1,- 1,51,52,53,54,55,- 1,-
+1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,108,
+109,- 1,25,26,- 1,114,- 1,116,- 1,- 1,119,- 1,121,122,- 1,38,125,40,- 1,128,129,44,- 1,
+132,133,- 1,- 1,- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,
+- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,
+99,100,101,- 1,- 1,104,- 1,- 1,- 1,108,109,- 1,25,26,- 1,114,- 1,116,- 1,- 1,119,- 1,121,
+122,- 1,38,125,40,- 1,128,129,44,- 1,132,133,- 1,- 1,- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,
+- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,108,109,- 1,25,26,
+- 1,114,- 1,116,- 1,- 1,119,- 1,121,122,- 1,38,125,40,- 1,128,129,44,- 1,132,133,- 1,- 1,-
+1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,
+- 1,104,- 1,- 1,- 1,108,- 1,- 1,25,26,- 1,114,- 1,116,- 1,- 1,119,- 1,121,122,- 1,38,125,40,
+- 1,128,129,44,- 1,132,133,- 1,- 1,- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,-
+1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,115,116,- 1,
+- 1,119,- 1,38,122,40,- 1,125,- 1,44,128,129,- 1,- 1,132,133,51,52,53,54,55,- 1,- 1,- 1,
+59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,108,- 1,- 1,
+25,26,- 1,- 1,- 1,116,- 1,- 1,119,- 1,- 1,122,- 1,38,125,40,- 1,128,129,44,- 1,132,133,- 1,
+- 1,- 1,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,
+- 1,- 1,104,- 1,- 1,107,25,26,- 1,- 1,- 1,- 1,- 1,- 1,116,- 1,- 1,119,- 1,38,122,40,- 1,125,- 1,
+44,128,129,- 1,- 1,132,133,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,-
+1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,116,117,- 1,119,- 1,
+38,122,40,- 1,125,- 1,44,128,129,- 1,- 1,132,133,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,
+115,116,- 1,- 1,119,- 1,38,122,40,- 1,125,- 1,44,128,129,- 1,- 1,132,133,51,52,53,54,55,
+- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,25,
+26,- 1,- 1,- 1,- 1,- 1,- 1,116,117,- 1,119,- 1,38,122,40,- 1,125,- 1,44,128,129,- 1,- 1,132,
+133,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,-
+1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,-
+1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,115,116,- 1,- 1,119,- 1,38,122,40,- 1,125,- 1,
+44,128,129,- 1,- 1,132,133,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,-
+1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,115,116,- 1,- 1,119,- 1,
+38,122,40,- 1,125,- 1,44,128,129,- 1,- 1,132,133,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,107,25,26,- 1,- 1,- 1,- 1,- 1,-
+1,116,- 1,- 1,119,- 1,38,122,40,- 1,125,- 1,44,128,129,- 1,- 1,132,133,51,52,53,54,55,-
+1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,107,
+25,26,- 1,- 1,- 1,- 1,- 1,- 1,116,- 1,- 1,119,- 1,38,122,40,- 1,125,- 1,44,128,129,- 1,- 1,
+132,133,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,
+75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,
+101,- 1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,116,117,- 1,119,- 1,38,122,40,- 1,
+125,- 1,44,128,129,- 1,- 1,132,133,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,116,117,- 1,
+119,- 1,38,122,40,- 1,125,- 1,44,128,129,- 1,- 1,132,133,51,52,53,54,55,- 1,- 1,- 1,59,-
+1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,107,25,26,- 1,- 1,-
+1,- 1,- 1,- 1,116,- 1,- 1,119,- 1,38,122,40,- 1,125,- 1,44,128,129,- 1,- 1,132,133,51,52,
+53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,
+- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,116,117,- 1,119,- 1,38,122,40,- 1,125,- 1,44,128,129,-
+1,- 1,132,133,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,-
+1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,
+100,101,- 1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,116,117,- 1,119,- 1,38,122,40,-
+1,125,- 1,44,128,129,- 1,- 1,132,133,51,52,53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,- 1,-
+1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,116,117,
+- 1,119,- 1,38,122,40,- 1,125,- 1,44,128,129,- 1,- 1,132,133,51,52,53,54,55,- 1,- 1,- 1,
+59,- 1,- 1,62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,
+- 1,- 1,- 1,- 1,116,117,- 1,119,- 1,38,122,40,- 1,125,- 1,44,128,129,- 1,- 1,132,133,51,52,
+53,54,55,- 1,- 1,- 1,59,- 1,- 1,62,- 1,- 1,25,26,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,38,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,53,54,55,- 1,97,98,99,100,101,62,- 1,104,- 1,
+- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,116,- 1,- 1,119,- 1,- 1,122,- 1,- 1,125,- 1,- 1,128,129,- 1,
+- 1,132,133,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,108,- 1,25,26,- 1,- 1,- 1,- 1,
+116,- 1,- 1,119,- 1,- 1,122,38,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,- 1,51,52,53,54,
+55,- 1,- 1,- 1,- 1,- 1,- 1,62,- 1,- 1,25,26,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,38,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,51,52,53,54,55,- 1,97,98,99,100,101,62,- 1,104,- 1,- 1,- 1,
+108,- 1,70,71,- 1,- 1,74,75,116,- 1,- 1,119,- 1,- 1,122,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,
+132,133,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,116,
+- 1,- 1,119,- 1,38,122,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,51,52,53,54,55,- 1,- 1,-
+1,- 1,- 1,- 1,62,- 1,- 1,25,26,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,38,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,51,52,53,54,55,- 1,97,98,99,100,101,62,- 1,104,- 1,- 1,- 1,- 1,- 1,70,
+71,- 1,- 1,74,75,116,- 1,- 1,119,- 1,- 1,122,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,- 1,
+- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,25,26,- 1,- 1,- 1,- 1,- 1,- 1,116,- 1,- 1,119,
+- 1,38,122,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133,51,52,53,54,55,- 1,- 1,- 1,- 1,- 1,- 1,
+62,- 1,- 1,- 1,- 1,- 1,- 1,- 1,70,71,- 1,- 1,74,75,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,97,98,99,100,101,- 1,- 1,104,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,- 1,
+- 1,116,- 1,- 1,119,- 1,- 1,122,- 1,- 1,125,- 1,- 1,128,129,- 1,- 1,132,133};char Cyc_Yyimpossible[
+17]="\000\000\000\000Yyimpossible\000";char Cyc_Yystack_overflow[21]="\000\000\000\000Yystack_overflow\000";
+void Cyc_yyerror(struct _dyneither_ptr);int Cyc_yylex(struct Cyc_Lexing_lexbuf*);
+static int Cyc_yychar=(int)'\000';union Cyc_YYSTYPE_union Cyc_yylval=(union Cyc_YYSTYPE_union)((
+struct Cyc_YYINITIALSVAL_struct){57});static int Cyc_yynerrs=0;struct _tuple18{
+struct Cyc_Position_Segment*f1;struct _tuple1*f2;int f3;};struct _tuple19{struct
+_dyneither_ptr f1;void*f2;};static char _tmp46D[8]="stdcall";static char _tmp46E[6]="cdecl";
+static char _tmp46F[9]="fastcall";static char _tmp470[9]="noreturn";static char
+_tmp471[6]="const";static char _tmp472[8]="aligned";static char _tmp473[7]="packed";
+static char _tmp474[7]="shared";static char _tmp475[7]="unused";static char _tmp476[5]="weak";
+static char _tmp477[10]="dllimport";static char _tmp478[10]="dllexport";static char
+_tmp479[23]="no_instrument_function";static char _tmp47A[12]="constructor";static
+char _tmp47B[11]="destructor";static char _tmp47C[22]="no_check_memory_usage";
+static char _tmp47D[5]="pure";struct _tuple20{struct Cyc_List_List*f1;struct Cyc_Absyn_Exp*
+f2;};int Cyc_yyparse(struct Cyc_Lexing_lexbuf*yylex_buf);static void _tmpA0B(
+unsigned int*_tmpA0A,unsigned int*_tmpA09,short**_tmpA08){for(*_tmpA0A=0;*
+_tmpA0A < *_tmpA09;(*_tmpA0A)++){(*_tmpA08)[*_tmpA0A]=(short)0;}}static void
+_tmpA10(unsigned int*_tmpA0F,unsigned int*_tmpA0E,union Cyc_YYSTYPE_union**
+_tmpA0D){for(*_tmpA0F=0;*_tmpA0F < *_tmpA0E;(*_tmpA0F)++){(*_tmpA0D)[*_tmpA0F]=
+Cyc_yylval;}}static void _tmpA15(unsigned int*_tmpA14,unsigned int*_tmpA13,struct
+Cyc_Yyltype**_tmpA12){for(*_tmpA14=0;*_tmpA14 < *_tmpA13;(*_tmpA14)++){(*_tmpA12)[*
+_tmpA14]=Cyc_yynewloc();}}static void _tmp12E8(unsigned int*_tmp12E7,unsigned int*
+_tmp12E6,char**_tmp12E4){for(*_tmp12E7=0;*_tmp12E7 < *_tmp12E6;(*_tmp12E7)++){(*
+_tmp12E4)[*_tmp12E7]='\000';}}int Cyc_yyparse(struct Cyc_Lexing_lexbuf*yylex_buf){
 struct _RegionHandle _tmp380=_new_region("yyregion");struct _RegionHandle*yyregion=&
 _tmp380;_push_region(yyregion);{int yystate;int yyn=0;int yyerrstatus;int yychar1=0;
-int yyssp_offset;unsigned int _tmpA11;unsigned int _tmpA10;short*_tmpA0F;
-unsigned int _tmpA0E;short*yyss=(short*)((_tmpA0E=10000,((_tmpA0F=(short*)
-_region_malloc(yyregion,_check_times(sizeof(short),_tmpA0E)),((((_tmpA10=_tmpA0E,
-_tmpA12(& _tmpA11,& _tmpA10,& _tmpA0F))),_tmpA0F))))));int yyvsp_offset;unsigned int
-_tmpA16;unsigned int _tmpA15;union Cyc_YYSTYPE_union*_tmpA14;unsigned int _tmpA13;
-union Cyc_YYSTYPE_union*yyvs=(union Cyc_YYSTYPE_union*)((_tmpA13=10000,((_tmpA14=(
+int yyssp_offset;unsigned int _tmpA0A;unsigned int _tmpA09;short*_tmpA08;
+unsigned int _tmpA07;short*yyss=(short*)((_tmpA07=10000,((_tmpA08=(short*)
+_region_malloc(yyregion,_check_times(sizeof(short),_tmpA07)),((((_tmpA09=_tmpA07,
+_tmpA0B(& _tmpA0A,& _tmpA09,& _tmpA08))),_tmpA08))))));int yyvsp_offset;unsigned int
+_tmpA0F;unsigned int _tmpA0E;union Cyc_YYSTYPE_union*_tmpA0D;unsigned int _tmpA0C;
+union Cyc_YYSTYPE_union*yyvs=(union Cyc_YYSTYPE_union*)((_tmpA0C=10000,((_tmpA0D=(
 union Cyc_YYSTYPE_union*)_region_malloc(yyregion,_check_times(sizeof(union Cyc_YYSTYPE_union),
-_tmpA13)),((((_tmpA15=_tmpA13,_tmpA17(& _tmpA16,& _tmpA15,& _tmpA14))),_tmpA14))))));
-int yylsp_offset;unsigned int _tmpA1B;unsigned int _tmpA1A;struct Cyc_Yyltype*
-_tmpA19;unsigned int _tmpA18;struct Cyc_Yyltype*yyls=(struct Cyc_Yyltype*)((_tmpA18=
-10000,((_tmpA19=(struct Cyc_Yyltype*)_region_malloc(yyregion,_check_times(sizeof(
-struct Cyc_Yyltype),_tmpA18)),((((_tmpA1A=_tmpA18,_tmpA1C(& _tmpA1B,& _tmpA1A,&
-_tmpA19))),_tmpA19))))));int yystacksize=10000;union Cyc_YYSTYPE_union yyval=Cyc_yylval;
+_tmpA0C)),((((_tmpA0E=_tmpA0C,_tmpA10(& _tmpA0F,& _tmpA0E,& _tmpA0D))),_tmpA0D))))));
+int yylsp_offset;unsigned int _tmpA14;unsigned int _tmpA13;struct Cyc_Yyltype*
+_tmpA12;unsigned int _tmpA11;struct Cyc_Yyltype*yyls=(struct Cyc_Yyltype*)((_tmpA11=
+10000,((_tmpA12=(struct Cyc_Yyltype*)_region_malloc(yyregion,_check_times(sizeof(
+struct Cyc_Yyltype),_tmpA11)),((((_tmpA13=_tmpA11,_tmpA15(& _tmpA14,& _tmpA13,&
+_tmpA12))),_tmpA12))))));int yystacksize=10000;union Cyc_YYSTYPE_union yyval=Cyc_yylval;
 int yylen;yystate=0;yyerrstatus=0;Cyc_yynerrs=0;Cyc_yychar=- 2;yyssp_offset=- 1;
 yyvsp_offset=0;yylsp_offset=0;yynewstate: yyss[_check_known_subscript_notnull(
 10000,++ yyssp_offset)]=(short)yystate;if(yyssp_offset >= yystacksize - 1){if(
-yystacksize >= 10000){{const char*_tmpA1D;Cyc_yyerror(((_tmpA1D="parser stack overflow",
-_tag_dyneither(_tmpA1D,sizeof(char),22))));}(int)_throw((void*)Cyc_Yystack_overflow);}}
-goto yybackup;yybackup: yyn=(int)Cyc_yypact[_check_known_subscript_notnull(1011,
+yystacksize >= 10000){{const char*_tmpA16;Cyc_yyerror(((_tmpA16="parser stack overflow",
+_tag_dyneither(_tmpA16,sizeof(char),22))));}(int)_throw((void*)Cyc_Yystack_overflow);}}
+goto yybackup;yybackup: yyn=(int)Cyc_yypact[_check_known_subscript_notnull(1010,
 yystate)];if(yyn == - 32768)goto yydefault;if(Cyc_yychar == - 2)Cyc_yychar=Cyc_yylex(
 yylex_buf);if(Cyc_yychar <= 0){yychar1=0;Cyc_yychar=0;}else{yychar1=Cyc_yychar > 0
  && Cyc_yychar <= 361?(int)Cyc_yytranslate[_check_known_subscript_notnull(362,Cyc_yychar)]:
-276;}yyn +=yychar1;if((yyn < 0  || yyn > 5991) || Cyc_yycheck[
-_check_known_subscript_notnull(5992,yyn)]!= yychar1)goto yydefault;yyn=(int)Cyc_yytable[
-_check_known_subscript_notnull(5992,yyn)];if(yyn < 0){if(yyn == - 32768)goto
-yyerrlab;yyn=- yyn;goto yyreduce;}else{if(yyn == 0)goto yyerrlab;}if(yyn == 1010){int
+276;}yyn +=yychar1;if((yyn < 0  || yyn > 6136) || Cyc_yycheck[
+_check_known_subscript_notnull(6137,yyn)]!= yychar1)goto yydefault;yyn=(int)Cyc_yytable[
+_check_known_subscript_notnull(6137,yyn)];if(yyn < 0){if(yyn == - 32768)goto
+yyerrlab;yyn=- yyn;goto yyreduce;}else{if(yyn == 0)goto yyerrlab;}if(yyn == 1009){int
 _tmp382=0;_npop_handler(0);return _tmp382;}if(Cyc_yychar != 0)Cyc_yychar=- 2;yyvs[
 _check_known_subscript_notnull(10000,++ yyvsp_offset)]=Cyc_yylval;yyls[
 _check_known_subscript_notnull(10000,++ yylsp_offset)]=Cyc_yylloc;if(yyerrstatus
 != 0)-- yyerrstatus;yystate=yyn;goto yynewstate;yydefault: yyn=(int)Cyc_yydefact[
-_check_known_subscript_notnull(1011,yystate)];if(yyn == 0)goto yyerrlab;yyreduce:
+_check_known_subscript_notnull(1010,yystate)];if(yyn == 0)goto yyerrlab;yyreduce:
 yylen=(int)Cyc_yyr2[_check_known_subscript_notnull(500,yyn)];if(yylen > 0)yyval=
 yyvs[_check_known_subscript_notnull(10000,(yyvsp_offset + 1)- yylen)];switch(yyn){
 case 1: _LL1E8: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];Cyc_Parse_parse_result=
-Cyc_yyget_YY18(yyvs[yyvsp_offset]);break;case 2: _LL1E9: {struct Cyc_List_List*x;
-struct Cyc_List_List*y;{struct _handler_cons _tmp383;_push_handler(& _tmp383);{int
-_tmp385=0;if(setjmp(_tmp383.handler))_tmp385=1;if(!_tmp385){x=Cyc_yyget_YY18(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);;_pop_handler();}
-else{void*_tmp384=(void*)_exn_thrown;void*_tmp387=_tmp384;_LL1EC: if(*((void**)
-_tmp387)!= Cyc_Core_Failure)goto _LL1EE;_LL1ED: x=0;goto _LL1EB;_LL1EE:;_LL1EF:(
-void)_throw(_tmp387);_LL1EB:;}}}{struct _handler_cons _tmp388;_push_handler(&
-_tmp388);{int _tmp38A=0;if(setjmp(_tmp388.handler))_tmp38A=1;if(!_tmp38A){y=Cyc_yyget_YY18(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]);;_pop_handler();}else{
-void*_tmp389=(void*)_exn_thrown;void*_tmp38C=_tmp389;_LL1F1: if(*((void**)_tmp38C)
-!= Cyc_Core_Failure)goto _LL1F3;_LL1F2: y=0;goto _LL1F0;_LL1F3:;_LL1F4:(void)_throw(
-_tmp38C);_LL1F0:;}}}{union Cyc_YYSTYPE_union _tmpA1E;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpA1E.YY18).tag=22,(((_tmpA1E.YY18).f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*
-x,struct Cyc_List_List*y))Cyc_List_imp_append)(x,y),_tmpA1E))));}break;}case 3:
-_LL1EA:{struct Cyc_List_List*_tmpA2D;struct Cyc_Absyn_Using_d_struct*_tmpA2C;
-struct Cyc_Absyn_Using_d_struct _tmpA2B;struct Cyc_Absyn_Decl*_tmpA2A;union Cyc_YYSTYPE_union
-_tmpA29;yyval=(union Cyc_YYSTYPE_union)(((_tmpA29.YY18).tag=22,(((_tmpA29.YY18).f1=((
-_tmpA2D=_cycalloc(sizeof(*_tmpA2D)),((_tmpA2D->hd=((_tmpA2A=_cycalloc(sizeof(*
-_tmpA2A)),((_tmpA2A->r=(void*)((void*)((_tmpA2C=_cycalloc(sizeof(*_tmpA2C)),((
-_tmpA2C[0]=((_tmpA2B.tag=9,((_tmpA2B.f1=Cyc_yyget_QualId_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpA2B.f2=Cyc_yyget_YY18(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpA2B)))))),_tmpA2C))))),((
-_tmpA2A->loc=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]);break;
+case 2: _LL1E9: {struct Cyc_List_List*x;struct Cyc_List_List*y;{struct _handler_cons
+_tmp383;_push_handler(& _tmp383);{int _tmp385=0;if(setjmp(_tmp383.handler))_tmp385=
+1;if(!_tmp385){x=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]);;_pop_handler();}else{void*_tmp384=(void*)_exn_thrown;void*
+_tmp387=_tmp384;_LL1EC: if(*((void**)_tmp387)!= Cyc_Core_Failure)goto _LL1EE;
+_LL1ED: x=0;goto _LL1EB;_LL1EE:;_LL1EF:(void)_throw(_tmp387);_LL1EB:;}}}{struct
+_handler_cons _tmp388;_push_handler(& _tmp388);{int _tmp38A=0;if(setjmp(_tmp388.handler))
+_tmp38A=1;if(!_tmp38A){y=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)]);;_pop_handler();}else{void*_tmp389=(void*)_exn_thrown;void*
+_tmp38C=_tmp389;_LL1F1: if(*((void**)_tmp38C)!= Cyc_Core_Failure)goto _LL1F3;
+_LL1F2: y=0;goto _LL1F0;_LL1F3:;_LL1F4:(void)_throw(_tmp38C);_LL1F0:;}}}{union Cyc_YYSTYPE_union
+_tmpA17;yyval=(union Cyc_YYSTYPE_union)(((_tmpA17.YY18).tag=22,(((_tmpA17.YY18).f1=((
+struct Cyc_List_List*(*)(struct Cyc_List_List*x,struct Cyc_List_List*y))Cyc_List_imp_append)(
+x,y),_tmpA17))));}break;}case 3: _LL1EA:{struct Cyc_List_List*_tmpA26;struct Cyc_Absyn_Using_d_struct*
+_tmpA25;struct Cyc_Absyn_Using_d_struct _tmpA24;struct Cyc_Absyn_Decl*_tmpA23;union
+Cyc_YYSTYPE_union _tmpA22;yyval=(union Cyc_YYSTYPE_union)(((_tmpA22.YY18).tag=22,(((
+_tmpA22.YY18).f1=((_tmpA26=_cycalloc(sizeof(*_tmpA26)),((_tmpA26->hd=((_tmpA23=
+_cycalloc(sizeof(*_tmpA23)),((_tmpA23->r=(void*)((void*)((_tmpA25=_cycalloc(
+sizeof(*_tmpA25)),((_tmpA25[0]=((_tmpA24.tag=11,((_tmpA24.f1=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpA24.f2=Cyc_yyget_YY18(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpA24)))))),_tmpA25))))),((
+_tmpA23->loc=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line),_tmpA2A)))))),((_tmpA2D->tl=0,_tmpA2D)))))),_tmpA29))));}
-Cyc_Lex_leave_using();break;case 4: _LL1F5:{struct Cyc_List_List*_tmpA3C;struct Cyc_Absyn_Using_d_struct*
-_tmpA3B;struct Cyc_Absyn_Using_d_struct _tmpA3A;struct Cyc_Absyn_Decl*_tmpA39;union
-Cyc_YYSTYPE_union _tmpA38;yyval=(union Cyc_YYSTYPE_union)(((_tmpA38.YY18).tag=22,(((
-_tmpA38.YY18).f1=((_tmpA3C=_cycalloc(sizeof(*_tmpA3C)),((_tmpA3C->hd=((_tmpA39=
-_cycalloc(sizeof(*_tmpA39)),((_tmpA39->r=(void*)((void*)((_tmpA3B=_cycalloc(
-sizeof(*_tmpA3B)),((_tmpA3B[0]=((_tmpA3A.tag=9,((_tmpA3A.f1=Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),((_tmpA3A.f2=Cyc_yyget_YY18(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpA3A)))))),
-_tmpA3B))))),((_tmpA39->loc=Cyc_Position_segment_of_abs((yyls[
+yylsp_offset)]).last_line),_tmpA23)))))),((_tmpA26->tl=0,_tmpA26)))))),_tmpA22))));}
+Cyc_Lex_leave_using();break;case 4: _LL1F5:{struct Cyc_List_List*_tmpA35;struct Cyc_Absyn_Using_d_struct*
+_tmpA34;struct Cyc_Absyn_Using_d_struct _tmpA33;struct Cyc_Absyn_Decl*_tmpA32;union
+Cyc_YYSTYPE_union _tmpA31;yyval=(union Cyc_YYSTYPE_union)(((_tmpA31.YY18).tag=22,(((
+_tmpA31.YY18).f1=((_tmpA35=_cycalloc(sizeof(*_tmpA35)),((_tmpA35->hd=((_tmpA32=
+_cycalloc(sizeof(*_tmpA32)),((_tmpA32->r=(void*)((void*)((_tmpA34=_cycalloc(
+sizeof(*_tmpA34)),((_tmpA34[0]=((_tmpA33.tag=11,((_tmpA33.f1=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),((_tmpA33.f2=Cyc_yyget_YY18(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpA33)))))),
+_tmpA34))))),((_tmpA32->loc=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),_tmpA39)))))),((
-_tmpA3C->tl=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmpA3C)))))),_tmpA38))));}break;case 5: _LL1F6:{struct Cyc_List_List*
-_tmpA51;struct Cyc_Absyn_Namespace_d_struct*_tmpA50;struct _dyneither_ptr*_tmpA4F;
-struct Cyc_Absyn_Namespace_d_struct _tmpA4E;struct Cyc_Absyn_Decl*_tmpA4D;union Cyc_YYSTYPE_union
-_tmpA4C;yyval=(union Cyc_YYSTYPE_union)(((_tmpA4C.YY18).tag=22,(((_tmpA4C.YY18).f1=((
-_tmpA51=_cycalloc(sizeof(*_tmpA51)),((_tmpA51->hd=((_tmpA4D=_cycalloc(sizeof(*
-_tmpA4D)),((_tmpA4D->r=(void*)((void*)((_tmpA50=_cycalloc(sizeof(*_tmpA50)),((
-_tmpA50[0]=((_tmpA4E.tag=8,((_tmpA4E.f1=((_tmpA4F=_cycalloc(sizeof(*_tmpA4F)),((
-_tmpA4F[0]=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 2)]),_tmpA4F)))),((_tmpA4E.f2=Cyc_yyget_YY18(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpA4E)))))),_tmpA50))))),((
-_tmpA4D->loc=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),_tmpA32)))))),((
+_tmpA35->tl=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmpA35)))))),_tmpA31))));}break;case 5: _LL1F6:{struct Cyc_List_List*
+_tmpA4A;struct Cyc_Absyn_Namespace_d_struct*_tmpA49;struct _dyneither_ptr*_tmpA48;
+struct Cyc_Absyn_Namespace_d_struct _tmpA47;struct Cyc_Absyn_Decl*_tmpA46;union Cyc_YYSTYPE_union
+_tmpA45;yyval=(union Cyc_YYSTYPE_union)(((_tmpA45.YY18).tag=22,(((_tmpA45.YY18).f1=((
+_tmpA4A=_cycalloc(sizeof(*_tmpA4A)),((_tmpA4A->hd=((_tmpA46=_cycalloc(sizeof(*
+_tmpA46)),((_tmpA46->r=(void*)((void*)((_tmpA49=_cycalloc(sizeof(*_tmpA49)),((
+_tmpA49[0]=((_tmpA47.tag=10,((_tmpA47.f1=((_tmpA48=_cycalloc(sizeof(*_tmpA48)),((
+_tmpA48[0]=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 2)]),_tmpA48)))),((_tmpA47.f2=Cyc_yyget_YY18(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpA47)))))),_tmpA49))))),((
+_tmpA46->loc=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line),_tmpA4D)))))),((_tmpA51->tl=0,_tmpA51)))))),_tmpA4C))));}
+yylsp_offset)]).last_line),_tmpA46)))))),((_tmpA4A->tl=0,_tmpA4A)))))),_tmpA45))));}
 Cyc_Lex_leave_namespace();break;case 6: _LL1F7: {struct _dyneither_ptr nspace;struct
 Cyc_List_List*x;struct Cyc_List_List*y;{struct _handler_cons _tmp39E;_push_handler(&
 _tmp39E);{int _tmp3A0=0;if(setjmp(_tmp39E.handler))_tmp3A0=1;if(!_tmp3A0){nspace=
 Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]);;
 _pop_handler();}else{void*_tmp39F=(void*)_exn_thrown;void*_tmp3A2=_tmp39F;_LL1FA:
-if(*((void**)_tmp3A2)!= Cyc_Core_Failure)goto _LL1FC;_LL1FB:{const char*_tmpA52;
-nspace=((_tmpA52="",_tag_dyneither(_tmpA52,sizeof(char),1)));}goto _LL1F9;_LL1FC:;
+if(*((void**)_tmp3A2)!= Cyc_Core_Failure)goto _LL1FC;_LL1FB:{const char*_tmpA4B;
+nspace=((_tmpA4B="",_tag_dyneither(_tmpA4B,sizeof(char),1)));}goto _LL1F9;_LL1FC:;
 _LL1FD:(void)_throw(_tmp3A2);_LL1F9:;}}}{struct _handler_cons _tmp3A4;
 _push_handler(& _tmp3A4);{int _tmp3A6=0;if(setjmp(_tmp3A4.handler))_tmp3A6=1;if(!
 _tmp3A6){x=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
@@ -3197,122 +3208,146 @@ _tmp3A9;_push_handler(& _tmp3A9);{int _tmp3AB=0;if(setjmp(_tmp3A9.handler))_tmp3
 yyvsp_offset)]);;_pop_handler();}else{void*_tmp3AA=(void*)_exn_thrown;void*
 _tmp3AD=_tmp3AA;_LL204: if(*((void**)_tmp3AD)!= Cyc_Core_Failure)goto _LL206;
 _LL205: y=0;goto _LL203;_LL206:;_LL207:(void)_throw(_tmp3AD);_LL203:;}}}{struct Cyc_List_List*
-_tmpA67;struct Cyc_Absyn_Namespace_d_struct*_tmpA66;struct _dyneither_ptr*_tmpA65;
-struct Cyc_Absyn_Namespace_d_struct _tmpA64;struct Cyc_Absyn_Decl*_tmpA63;union Cyc_YYSTYPE_union
-_tmpA62;yyval=(union Cyc_YYSTYPE_union)(((_tmpA62.YY18).tag=22,(((_tmpA62.YY18).f1=((
-_tmpA67=_cycalloc(sizeof(*_tmpA67)),((_tmpA67->hd=((_tmpA63=_cycalloc(sizeof(*
-_tmpA63)),((_tmpA63->r=(void*)((void*)((_tmpA66=_cycalloc(sizeof(*_tmpA66)),((
-_tmpA66[0]=((_tmpA64.tag=8,((_tmpA64.f1=((_tmpA65=_cycalloc(sizeof(*_tmpA65)),((
-_tmpA65[0]=nspace,_tmpA65)))),((_tmpA64.f2=x,_tmpA64)))))),_tmpA66))))),((
-_tmpA63->loc=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_tmpA60;struct Cyc_Absyn_Namespace_d_struct*_tmpA5F;struct _dyneither_ptr*_tmpA5E;
+struct Cyc_Absyn_Namespace_d_struct _tmpA5D;struct Cyc_Absyn_Decl*_tmpA5C;union Cyc_YYSTYPE_union
+_tmpA5B;yyval=(union Cyc_YYSTYPE_union)(((_tmpA5B.YY18).tag=22,(((_tmpA5B.YY18).f1=((
+_tmpA60=_cycalloc(sizeof(*_tmpA60)),((_tmpA60->hd=((_tmpA5C=_cycalloc(sizeof(*
+_tmpA5C)),((_tmpA5C->r=(void*)((void*)((_tmpA5F=_cycalloc(sizeof(*_tmpA5F)),((
+_tmpA5F[0]=((_tmpA5D.tag=10,((_tmpA5D.f1=((_tmpA5E=_cycalloc(sizeof(*_tmpA5E)),((
+_tmpA5E[0]=nspace,_tmpA5E)))),((_tmpA5D.f2=x,_tmpA5D)))))),_tmpA5F))))),((
+_tmpA5C->loc=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 4)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line),_tmpA63)))))),((_tmpA67->tl=y,_tmpA67)))))),
-_tmpA62))));}break;}case 7: _LL1F8:{const char*_tmpA68;if(Cyc_strcmp((struct
+yylsp_offset - 1)]).last_line),_tmpA5C)))))),((_tmpA60->tl=y,_tmpA60)))))),
+_tmpA5B))));}break;}case 7: _LL1F8:{const char*_tmpA61;if(Cyc_strcmp((struct
 _dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 4)]),((_tmpA68="C",_tag_dyneither(_tmpA68,sizeof(char),2))))== 0){
-struct Cyc_List_List*_tmpA77;struct Cyc_Absyn_ExternC_d_struct*_tmpA76;struct Cyc_Absyn_ExternC_d_struct
-_tmpA75;struct Cyc_Absyn_Decl*_tmpA74;union Cyc_YYSTYPE_union _tmpA73;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpA73.YY18).tag=22,(((_tmpA73.YY18).f1=((_tmpA77=
-_cycalloc(sizeof(*_tmpA77)),((_tmpA77->hd=((_tmpA74=_cycalloc(sizeof(*_tmpA74)),((
-_tmpA74->r=(void*)((void*)((_tmpA76=_cycalloc(sizeof(*_tmpA76)),((_tmpA76[0]=((
-_tmpA75.tag=10,((_tmpA75.f1=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 2)]),_tmpA75)))),_tmpA76))))),((_tmpA74->loc=Cyc_Position_segment_of_abs((
+yyvsp_offset - 4)]),((_tmpA61="C",_tag_dyneither(_tmpA61,sizeof(char),2))))== 0){
+struct Cyc_List_List*_tmpA70;struct Cyc_Absyn_ExternC_d_struct*_tmpA6F;struct Cyc_Absyn_ExternC_d_struct
+_tmpA6E;struct Cyc_Absyn_Decl*_tmpA6D;union Cyc_YYSTYPE_union _tmpA6C;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpA6C.YY18).tag=22,(((_tmpA6C.YY18).f1=((_tmpA70=
+_cycalloc(sizeof(*_tmpA70)),((_tmpA70->hd=((_tmpA6D=_cycalloc(sizeof(*_tmpA6D)),((
+_tmpA6D->r=(void*)((void*)((_tmpA6F=_cycalloc(sizeof(*_tmpA6F)),((_tmpA6F[0]=((
+_tmpA6E.tag=12,((_tmpA6E.f1=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 2)]),_tmpA6E)))),_tmpA6F))))),((_tmpA6D->loc=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line),_tmpA74)))))),((
-_tmpA77->tl=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmpA77)))))),_tmpA73))));}else{{const char*_tmpA78;if(Cyc_strcmp((
+_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line),_tmpA6D)))))),((
+_tmpA70->tl=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmpA70)))))),_tmpA6C))));}else{{const char*_tmpA71;if(Cyc_strcmp((
 struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 4)]),((_tmpA78="C include",_tag_dyneither(_tmpA78,sizeof(
-char),10))))!= 0){const char*_tmpA79;Cyc_Parse_err(((_tmpA79="expecting \"C\" or \"C include\"",
-_tag_dyneither(_tmpA79,sizeof(char),29))),Cyc_Position_segment_of_abs((yyls[
+10000,yyvsp_offset - 4)]),((_tmpA71="C include",_tag_dyneither(_tmpA71,sizeof(
+char),10))))!= 0){const char*_tmpA72;Cyc_Parse_err(((_tmpA72="expecting \"C\" or \"C include\"",
+_tag_dyneither(_tmpA72,sizeof(char),29))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 4)]).last_line));}}{struct Cyc_List_List*
-_tmpA88;struct Cyc_Absyn_ExternCinclude_d_struct*_tmpA87;struct Cyc_Absyn_ExternCinclude_d_struct
-_tmpA86;struct Cyc_Absyn_Decl*_tmpA85;union Cyc_YYSTYPE_union _tmpA84;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpA84.YY18).tag=22,(((_tmpA84.YY18).f1=((_tmpA88=
-_cycalloc(sizeof(*_tmpA88)),((_tmpA88->hd=((_tmpA85=_cycalloc(sizeof(*_tmpA85)),((
-_tmpA85->r=(void*)((void*)((_tmpA87=_cycalloc(sizeof(*_tmpA87)),((_tmpA87[0]=((
-_tmpA86.tag=11,((_tmpA86.f1=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 2)]),((_tmpA86.f2=0,_tmpA86)))))),_tmpA87))))),((_tmpA85->loc=
+_tmpA81;struct Cyc_Absyn_ExternCinclude_d_struct*_tmpA80;struct Cyc_Absyn_ExternCinclude_d_struct
+_tmpA7F;struct Cyc_Absyn_Decl*_tmpA7E;union Cyc_YYSTYPE_union _tmpA7D;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpA7D.YY18).tag=22,(((_tmpA7D.YY18).f1=((_tmpA81=
+_cycalloc(sizeof(*_tmpA81)),((_tmpA81->hd=((_tmpA7E=_cycalloc(sizeof(*_tmpA7E)),((
+_tmpA7E->r=(void*)((void*)((_tmpA80=_cycalloc(sizeof(*_tmpA80)),((_tmpA80[0]=((
+_tmpA7F.tag=13,((_tmpA7F.f1=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 2)]),((_tmpA7F.f2=0,_tmpA7F)))))),_tmpA80))))),((_tmpA7E->loc=
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 5)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line),_tmpA85)))))),((_tmpA88->tl=Cyc_yyget_YY18(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpA88)))))),_tmpA84))));}}}
-break;case 8: _LL208:{const char*_tmpA89;if(Cyc_strcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 5)]),((_tmpA89="C include",
-_tag_dyneither(_tmpA89,sizeof(char),10))))!= 0){const char*_tmpA8A;Cyc_Parse_err(((
-_tmpA8A="expecting \"C include\"",_tag_dyneither(_tmpA8A,sizeof(char),22))),Cyc_Position_segment_of_abs((
+yylsp_offset - 1)]).last_line),_tmpA7E)))))),((_tmpA81->tl=Cyc_yyget_YY18(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpA81)))))),_tmpA7D))));}}}
+break;case 8: _LL208:{const char*_tmpA82;if(Cyc_strcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 5)]),((_tmpA82="C include",
+_tag_dyneither(_tmpA82,sizeof(char),10))))!= 0){const char*_tmpA83;Cyc_Parse_err(((
+_tmpA83="expecting \"C include\"",_tag_dyneither(_tmpA83,sizeof(char),22))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 5)]).last_line));}}{struct Cyc_List_List*
 exs=Cyc_yyget_YY52(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);{
-struct Cyc_List_List*_tmpA99;struct Cyc_Absyn_ExternCinclude_d_struct*_tmpA98;
-struct Cyc_Absyn_ExternCinclude_d_struct _tmpA97;struct Cyc_Absyn_Decl*_tmpA96;
-union Cyc_YYSTYPE_union _tmpA95;yyval=(union Cyc_YYSTYPE_union)(((_tmpA95.YY18).tag=
-22,(((_tmpA95.YY18).f1=((_tmpA99=_cycalloc(sizeof(*_tmpA99)),((_tmpA99->hd=((
-_tmpA96=_cycalloc(sizeof(*_tmpA96)),((_tmpA96->r=(void*)((void*)((_tmpA98=
-_cycalloc(sizeof(*_tmpA98)),((_tmpA98[0]=((_tmpA97.tag=11,((_tmpA97.f1=Cyc_yyget_YY18(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpA97.f2=exs,
-_tmpA97)))))),_tmpA98))))),((_tmpA96->loc=Cyc_Position_segment_of_abs((yyls[
+struct Cyc_List_List*_tmpA92;struct Cyc_Absyn_ExternCinclude_d_struct*_tmpA91;
+struct Cyc_Absyn_ExternCinclude_d_struct _tmpA90;struct Cyc_Absyn_Decl*_tmpA8F;
+union Cyc_YYSTYPE_union _tmpA8E;yyval=(union Cyc_YYSTYPE_union)(((_tmpA8E.YY18).tag=
+22,(((_tmpA8E.YY18).f1=((_tmpA92=_cycalloc(sizeof(*_tmpA92)),((_tmpA92->hd=((
+_tmpA8F=_cycalloc(sizeof(*_tmpA8F)),((_tmpA8F->r=(void*)((void*)((_tmpA91=
+_cycalloc(sizeof(*_tmpA91)),((_tmpA91[0]=((_tmpA90.tag=13,((_tmpA90.f1=Cyc_yyget_YY18(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpA90.f2=exs,
+_tmpA90)))))),_tmpA91))))),((_tmpA8F->loc=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),_tmpA96)))))),((
-_tmpA99->tl=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmpA99)))))),_tmpA95))));}break;}case 9: _LL209:{struct Cyc_List_List*
-_tmpA9F;struct Cyc_Absyn_Decl*_tmpA9E;union Cyc_YYSTYPE_union _tmpA9D;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpA9D.YY18).tag=22,(((_tmpA9D.YY18).f1=((_tmpA9F=
-_cycalloc(sizeof(*_tmpA9F)),((_tmpA9F->hd=((_tmpA9E=_cycalloc(sizeof(*_tmpA9E)),((
-_tmpA9E->r=(void*)((void*)0),((_tmpA9E->loc=Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),_tmpA8F)))))),((
+_tmpA92->tl=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmpA92)))))),_tmpA8E))));}break;}case 9: _LL209:{struct Cyc_List_List*
+_tmpA98;struct Cyc_Absyn_Decl*_tmpA97;union Cyc_YYSTYPE_union _tmpA96;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpA96.YY18).tag=22,(((_tmpA96.YY18).f1=((_tmpA98=
+_cycalloc(sizeof(*_tmpA98)),((_tmpA98->hd=((_tmpA97=_cycalloc(sizeof(*_tmpA97)),((
+_tmpA97->r=(void*)((void*)0),((_tmpA97->loc=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line),_tmpA9E)))))),((
-_tmpA9F->tl=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmpA9F)))))),_tmpA9D))));}break;case 10: _LL20A:{struct Cyc_List_List*
-_tmpAA5;struct Cyc_Absyn_Decl*_tmpAA4;union Cyc_YYSTYPE_union _tmpAA3;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpAA3.YY18).tag=22,(((_tmpAA3.YY18).f1=((_tmpAA5=
-_cycalloc(sizeof(*_tmpAA5)),((_tmpAA5->hd=((_tmpAA4=_cycalloc(sizeof(*_tmpAA4)),((
-_tmpAA4->r=(void*)((void*)1),((_tmpAA4->loc=Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line),_tmpA97)))))),((
+_tmpA98->tl=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmpA98)))))),_tmpA96))));}break;case 10: _LL20A:{struct Cyc_List_List*
+_tmpA9E;struct Cyc_Absyn_Decl*_tmpA9D;union Cyc_YYSTYPE_union _tmpA9C;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpA9C.YY18).tag=22,(((_tmpA9C.YY18).f1=((_tmpA9E=
+_cycalloc(sizeof(*_tmpA9E)),((_tmpA9E->hd=((_tmpA9D=_cycalloc(sizeof(*_tmpA9D)),((
+_tmpA9D->r=(void*)((void*)1),((_tmpA9D->loc=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line),_tmpAA4)))))),((
-_tmpAA5->tl=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmpAA5)))))),_tmpAA3))));}break;case 11: _LL20B:{union Cyc_YYSTYPE_union
-_tmpAA6;yyval=(union Cyc_YYSTYPE_union)(((_tmpAA6.YY18).tag=22,(((_tmpAA6.YY18).f1=
-0,_tmpAA6))));}break;case 12: _LL20C: yyval=yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 1)];break;case 13: _LL20D:{union Cyc_YYSTYPE_union _tmpAA7;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpAA7.YY52).tag=56,(((_tmpAA7.YY52).f1=0,_tmpAA7))));}
-break;case 14: _LL20E:{struct Cyc_List_List*_tmpAAD;struct _tuple18*_tmpAAC;union Cyc_YYSTYPE_union
-_tmpAAB;yyval=(union Cyc_YYSTYPE_union)(((_tmpAAB.YY52).tag=56,(((_tmpAAB.YY52).f1=((
-_tmpAAD=_cycalloc(sizeof(*_tmpAAD)),((_tmpAAD->hd=((_tmpAAC=_cycalloc(sizeof(*
-_tmpAAC)),((_tmpAAC->f1=Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line),_tmpA9D)))))),((
+_tmpA9E->tl=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmpA9E)))))),_tmpA9C))));}break;case 11: _LL20B:{union Cyc_YYSTYPE_union
+_tmpA9F;yyval=(union Cyc_YYSTYPE_union)(((_tmpA9F.YY18).tag=22,(((_tmpA9F.YY18).f1=
+0,_tmpA9F))));}break;case 12: _LL20C: yyval=yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 1)];break;case 13: _LL20D:{union Cyc_YYSTYPE_union _tmpAA0;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpAA0.YY52).tag=56,(((_tmpAA0.YY52).f1=0,_tmpAA0))));}
+break;case 14: _LL20E:{struct Cyc_List_List*_tmpAA6;struct _tuple18*_tmpAA5;union Cyc_YYSTYPE_union
+_tmpAA4;yyval=(union Cyc_YYSTYPE_union)(((_tmpAA4.YY52).tag=56,(((_tmpAA4.YY52).f1=((
+_tmpAA6=_cycalloc(sizeof(*_tmpAA6)),((_tmpAA6->hd=((_tmpAA5=_cycalloc(sizeof(*
+_tmpAA5)),((_tmpAA5->f1=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),((_tmpAAC->f2=
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),((_tmpAA5->f2=
 Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((
-_tmpAAC->f3=0,_tmpAAC)))))))),((_tmpAAD->tl=0,_tmpAAD)))))),_tmpAAB))));}break;
-case 15: _LL20F:{struct Cyc_List_List*_tmpAB3;struct _tuple18*_tmpAB2;union Cyc_YYSTYPE_union
-_tmpAB1;yyval=(union Cyc_YYSTYPE_union)(((_tmpAB1.YY52).tag=56,(((_tmpAB1.YY52).f1=((
-_tmpAB3=_cycalloc(sizeof(*_tmpAB3)),((_tmpAB3->hd=((_tmpAB2=_cycalloc(sizeof(*
-_tmpAB2)),((_tmpAB2->f1=Cyc_Position_segment_of_abs((yyls[
+_tmpAA5->f3=0,_tmpAA5)))))))),((_tmpAA6->tl=0,_tmpAA6)))))),_tmpAA4))));}break;
+case 15: _LL20F:{struct Cyc_List_List*_tmpAAC;struct _tuple18*_tmpAAB;union Cyc_YYSTYPE_union
+_tmpAAA;yyval=(union Cyc_YYSTYPE_union)(((_tmpAAA.YY52).tag=56,(((_tmpAAA.YY52).f1=((
+_tmpAAC=_cycalloc(sizeof(*_tmpAAC)),((_tmpAAC->hd=((_tmpAAB=_cycalloc(sizeof(*
+_tmpAAB)),((_tmpAAB->f1=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line),((_tmpAB2->f2=
+_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line),((_tmpAAB->f2=
 Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((
-_tmpAB2->f3=0,_tmpAB2)))))))),((_tmpAB3->tl=Cyc_yyget_YY52(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpAB3)))))),_tmpAB1))));}
-break;case 16: _LL210:{struct Cyc_List_List*_tmpABD;struct Cyc_Absyn_Fn_d_struct
-_tmpABC;struct Cyc_Absyn_Fn_d_struct*_tmpABB;union Cyc_YYSTYPE_union _tmpABA;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpABA.YY18).tag=22,(((_tmpABA.YY18).f1=((_tmpABD=
-_cycalloc(sizeof(*_tmpABD)),((_tmpABD->hd=Cyc_Absyn_new_decl((void*)((_tmpABB=
-_cycalloc(sizeof(*_tmpABB)),((_tmpABB[0]=((_tmpABC.tag=1,((_tmpABC.f1=Cyc_yyget_YY17(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpABC)))),_tmpABB)))),
+_tmpAAB->f3=0,_tmpAAB)))))))),((_tmpAAC->tl=Cyc_yyget_YY52(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpAAC)))))),_tmpAAA))));}
+break;case 16: _LL210:{struct Cyc_List_List*_tmpAB6;struct Cyc_Absyn_Fn_d_struct
+_tmpAB5;struct Cyc_Absyn_Fn_d_struct*_tmpAB4;union Cyc_YYSTYPE_union _tmpAB3;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpAB3.YY18).tag=22,(((_tmpAB3.YY18).f1=((_tmpAB6=
+_cycalloc(sizeof(*_tmpAB6)),((_tmpAB6->hd=Cyc_Absyn_new_decl((void*)((_tmpAB4=
+_cycalloc(sizeof(*_tmpAB4)),((_tmpAB4[0]=((_tmpAB5.tag=1,((_tmpAB5.f1=Cyc_yyget_YY17(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpAB5)))),_tmpAB4)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),((_tmpABD->tl=0,_tmpABD)))))),_tmpABA))));}break;
+yylsp_offset)]).last_line)),((_tmpAB6->tl=0,_tmpAB6)))))),_tmpAB3))));}break;
 case 17: _LL211: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];
-break;case 18: _LL212:{union Cyc_YYSTYPE_union _tmpABE;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpABE.YY18).tag=22,(((_tmpABE.YY18).f1=0,_tmpABE))));}break;case 19: _LL213:{
-union Cyc_YYSTYPE_union _tmpABF;yyval=(union Cyc_YYSTYPE_union)(((_tmpABF.YY17).tag=
-21,(((_tmpABF.YY17).f1=Cyc_Parse_make_function(0,Cyc_yyget_YY29(yyvs[
+break;case 18: _LL212:{union Cyc_YYSTYPE_union _tmpAB7;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpAB7.YY18).tag=22,(((_tmpAB7.YY18).f1=0,_tmpAB7))));}break;case 19: _LL213:{
+union Cyc_YYSTYPE_union _tmpAB8;yyval=(union Cyc_YYSTYPE_union)(((_tmpAB8.YY17).tag=
+21,(((_tmpAB8.YY17).f1=Cyc_Parse_make_function(0,Cyc_yyget_YY29(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),0,Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpABF))));}
-break;case 20: _LL214:{struct Cyc_Core_Opt*_tmpAC2;union Cyc_YYSTYPE_union _tmpAC1;
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpAB8))));}
+break;case 20: _LL214:{struct Cyc_Core_Opt*_tmpABB;union Cyc_YYSTYPE_union _tmpABA;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpABA.YY17).tag=21,(((_tmpABA.YY17).f1=Cyc_Parse_make_function(((
+_tmpABB=_cycalloc(sizeof(*_tmpABB)),((_tmpABB->v=Cyc_yyget_YY19(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpABB)))),Cyc_yyget_YY29(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),0,Cyc_yyget_YY9(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
+yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpABA))));}
+break;case 21: _LL215:{union Cyc_YYSTYPE_union _tmpABC;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpABC.YY17).tag=21,(((_tmpABC.YY17).f1=Cyc_Parse_make_function(0,Cyc_yyget_YY29(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY18(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY9(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
+yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpABC))));}
+break;case 22: _LL216:{struct Cyc_Core_Opt*_tmpABF;union Cyc_YYSTYPE_union _tmpABE;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpABE.YY17).tag=21,(((_tmpABE.YY17).f1=Cyc_Parse_make_function(((
+_tmpABF=_cycalloc(sizeof(*_tmpABF)),((_tmpABF->v=Cyc_yyget_YY19(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),_tmpABF)))),Cyc_yyget_YY29(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY18(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY9(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
+yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpABE))));}
+break;case 23: _LL217:{struct Cyc_Core_Opt*_tmpAC2;union Cyc_YYSTYPE_union _tmpAC1;
 yyval=(union Cyc_YYSTYPE_union)(((_tmpAC1.YY17).tag=21,(((_tmpAC1.YY17).f1=Cyc_Parse_make_function(((
 _tmpAC2=_cycalloc(sizeof(*_tmpAC2)),((_tmpAC2->v=Cyc_yyget_YY19(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpAC2)))),Cyc_yyget_YY29(
@@ -3320,3272 +3355,3229 @@ yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),0,Cyc_yyget_YY9(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpAC1))));}
-break;case 21: _LL215:{union Cyc_YYSTYPE_union _tmpAC3;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpAC3.YY17).tag=21,(((_tmpAC3.YY17).f1=Cyc_Parse_make_function(0,Cyc_yyget_YY29(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY18(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY9(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
-yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpAC3))));}
-break;case 22: _LL216:{struct Cyc_Core_Opt*_tmpAC6;union Cyc_YYSTYPE_union _tmpAC5;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpAC5.YY17).tag=21,(((_tmpAC5.YY17).f1=Cyc_Parse_make_function(((
-_tmpAC6=_cycalloc(sizeof(*_tmpAC6)),((_tmpAC6->v=Cyc_yyget_YY19(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),_tmpAC6)))),Cyc_yyget_YY29(
+break;case 24: _LL218:{struct Cyc_Core_Opt*_tmpAC5;union Cyc_YYSTYPE_union _tmpAC4;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpAC4.YY17).tag=21,(((_tmpAC4.YY17).f1=Cyc_Parse_make_function(((
+_tmpAC5=_cycalloc(sizeof(*_tmpAC5)),((_tmpAC5->v=Cyc_yyget_YY19(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),_tmpAC5)))),Cyc_yyget_YY29(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY18(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpAC5))));}
-break;case 23: _LL217:{struct Cyc_Core_Opt*_tmpAC9;union Cyc_YYSTYPE_union _tmpAC8;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpAC8.YY17).tag=21,(((_tmpAC8.YY17).f1=Cyc_Parse_make_function(((
-_tmpAC9=_cycalloc(sizeof(*_tmpAC9)),((_tmpAC9->v=Cyc_yyget_YY19(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpAC9)))),Cyc_yyget_YY29(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),0,Cyc_yyget_YY9(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
-yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpAC8))));}
-break;case 24: _LL218:{struct Cyc_Core_Opt*_tmpACC;union Cyc_YYSTYPE_union _tmpACB;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpACB.YY17).tag=21,(((_tmpACB.YY17).f1=Cyc_Parse_make_function(((
-_tmpACC=_cycalloc(sizeof(*_tmpACC)),((_tmpACC->v=Cyc_yyget_YY19(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),_tmpACC)))),Cyc_yyget_YY29(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY18(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY9(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
-yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpACB))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpAC4))));}
 break;case 25: _LL219: Cyc_Lex_enter_using(Cyc_yyget_QualId_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]));yyval=yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)];break;case 26: _LL21A: Cyc_Lex_leave_using();
-break;case 27: _LL21B:{struct _dyneither_ptr*_tmpACD;Cyc_Lex_enter_namespace(((
-_tmpACD=_cycalloc(sizeof(*_tmpACD)),((_tmpACD[0]=Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpACD)))));}yyval=yyvs[
+break;case 27: _LL21B:{struct _dyneither_ptr*_tmpAC6;Cyc_Lex_enter_namespace(((
+_tmpAC6=_cycalloc(sizeof(*_tmpAC6)),((_tmpAC6[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpAC6)))));}yyval=yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)];break;case 28: _LL21C: Cyc_Lex_leave_namespace();
-break;case 29: _LL21D:{union Cyc_YYSTYPE_union _tmpACE;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpACE.YY18).tag=22,(((_tmpACE.YY18).f1=Cyc_Parse_make_declarations(Cyc_yyget_YY19(
+break;case 29: _LL21D:{union Cyc_YYSTYPE_union _tmpAC7;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpAC7.YY18).tag=22,(((_tmpAC7.YY18).f1=Cyc_Parse_make_declarations(Cyc_yyget_YY19(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),0,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmpACE))));}
-break;case 30: _LL21E:{union Cyc_YYSTYPE_union _tmpACF;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpACF.YY18).tag=22,(((_tmpACF.YY18).f1=Cyc_Parse_make_declarations(Cyc_yyget_YY19(
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmpAC7))));}
+break;case 30: _LL21E:{union Cyc_YYSTYPE_union _tmpAC8;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpAC8.YY18).tag=22,(((_tmpAC8.YY18).f1=Cyc_Parse_make_declarations(Cyc_yyget_YY19(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY21(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpACF))));}
-break;case 31: _LL21F:{struct Cyc_List_List*_tmpAD2;union Cyc_YYSTYPE_union _tmpAD1;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpAD1.YY18).tag=22,(((_tmpAD1.YY18).f1=((
-_tmpAD2=_cycalloc(sizeof(*_tmpAD2)),((_tmpAD2->hd=Cyc_Absyn_let_decl(Cyc_yyget_YY11(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpAC8))));}
+break;case 31: _LL21F:{struct Cyc_List_List*_tmpACB;union Cyc_YYSTYPE_union _tmpACA;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpACA.YY18).tag=22,(((_tmpACA.YY18).f1=((
+_tmpACB=_cycalloc(sizeof(*_tmpACB)),((_tmpACB->hd=Cyc_Absyn_let_decl(Cyc_yyget_YY11(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpAD2->tl=0,
-_tmpAD2)))))),_tmpAD1))));}break;case 32: _LL220: {struct Cyc_List_List*_tmp3EA=0;{
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpACB->tl=0,
+_tmpACB)))))),_tmpACA))));}break;case 32: _LL220: {struct Cyc_List_List*_tmp3EA=0;{
 struct Cyc_List_List*_tmp3EB=Cyc_yyget_YY36(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset - 1)]);for(0;_tmp3EB != 0;_tmp3EB=_tmp3EB->tl){struct
 _dyneither_ptr*_tmp3EC=(struct _dyneither_ptr*)_tmp3EB->hd;union Cyc_Absyn_Nmspace_union
-_tmpAD5;struct _tuple1*_tmpAD4;struct _tuple1*qv=(_tmpAD4=_cycalloc(sizeof(*
-_tmpAD4)),((_tmpAD4->f1=(union Cyc_Absyn_Nmspace_union)(((_tmpAD5.Rel_n).tag=1,(((
-_tmpAD5.Rel_n).f1=0,_tmpAD5)))),((_tmpAD4->f2=_tmp3EC,_tmpAD4)))));struct Cyc_Absyn_Vardecl*
+_tmpACE;struct _tuple1*_tmpACD;struct _tuple1*qv=(_tmpACD=_cycalloc(sizeof(*
+_tmpACD)),((_tmpACD->f1=(union Cyc_Absyn_Nmspace_union)(((_tmpACE.Rel_n).tag=1,(((
+_tmpACE.Rel_n).f1=0,_tmpACE)))),((_tmpACD->f2=_tmp3EC,_tmpACD)))));struct Cyc_Absyn_Vardecl*
 _tmp3ED=Cyc_Absyn_new_vardecl(qv,Cyc_Absyn_wildtyp(0),0);struct Cyc_List_List*
-_tmpAD6;_tmp3EA=((_tmpAD6=_cycalloc(sizeof(*_tmpAD6)),((_tmpAD6->hd=_tmp3ED,((
-_tmpAD6->tl=_tmp3EA,_tmpAD6))))));}}_tmp3EA=((struct Cyc_List_List*(*)(struct Cyc_List_List*
-x))Cyc_List_imp_rev)(_tmp3EA);{struct Cyc_List_List*_tmpAD9;union Cyc_YYSTYPE_union
-_tmpAD8;yyval=(union Cyc_YYSTYPE_union)(((_tmpAD8.YY18).tag=22,(((_tmpAD8.YY18).f1=((
-_tmpAD9=_cycalloc(sizeof(*_tmpAD9)),((_tmpAD9->hd=Cyc_Absyn_letv_decl(_tmp3EA,
+_tmpACF;_tmp3EA=((_tmpACF=_cycalloc(sizeof(*_tmpACF)),((_tmpACF->hd=_tmp3ED,((
+_tmpACF->tl=_tmp3EA,_tmpACF))))));}}_tmp3EA=((struct Cyc_List_List*(*)(struct Cyc_List_List*
+x))Cyc_List_imp_rev)(_tmp3EA);{struct Cyc_List_List*_tmpAD2;union Cyc_YYSTYPE_union
+_tmpAD1;yyval=(union Cyc_YYSTYPE_union)(((_tmpAD1.YY18).tag=22,(((_tmpAD1.YY18).f1=((
+_tmpAD2=_cycalloc(sizeof(*_tmpAD2)),((_tmpAD2->hd=Cyc_Absyn_letv_decl(_tmp3EA,
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),((_tmpAD9->tl=0,_tmpAD9)))))),_tmpAD8))));}break;}
-case 33: _LL221: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];
-break;case 34: _LL222:{union Cyc_YYSTYPE_union _tmpADA;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpADA.YY18).tag=22,(((_tmpADA.YY18).f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*
+yylsp_offset)]).last_line)),((_tmpAD2->tl=0,_tmpAD2)))))),_tmpAD1))));}break;}
+case 33: _LL221:{const char*_tmpAD4;const char*_tmpAD3;if(Cyc_zstrcmp((struct
+_dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 3)]),((_tmpAD4="`H",_tag_dyneither(_tmpAD4,sizeof(char),3))))== 0
+ || Cyc_zstrcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpAD3="`U",
+_tag_dyneither(_tmpAD3,sizeof(char),3))))== 0){const char*_tmpAD8;void*_tmpAD7[1];
+struct Cyc_String_pa_struct _tmpAD6;Cyc_Parse_err((struct _dyneither_ptr)((_tmpAD6.tag=
+0,((_tmpAD6.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)])),((_tmpAD7[0]=&
+_tmpAD6,Cyc_aprintf(((_tmpAD8="bad occurrence of heap region %s",_tag_dyneither(
+_tmpAD8,sizeof(char),33))),_tag_dyneither(_tmpAD7,sizeof(void*),1)))))))),Cyc_Position_segment_of_abs((
+yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line));}}{struct
+_dyneither_ptr*_tmpADB;struct Cyc_Absyn_Tvar*_tmpADA;struct Cyc_Absyn_Tvar*tv=(
+_tmpADA=_cycalloc(sizeof(*_tmpADA)),((_tmpADA->name=((_tmpADB=_cycalloc(sizeof(*
+_tmpADB)),((_tmpADB[0]=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 3)]),_tmpADB)))),((_tmpADA->identity=- 1,((_tmpADA->kind=(
+void*)Cyc_Tcutil_kind_to_bound((void*)3),_tmpADA)))))));struct Cyc_Absyn_VarType_struct
+_tmpADE;struct Cyc_Absyn_VarType_struct*_tmpADD;void*t=(void*)((_tmpADD=_cycalloc(
+sizeof(*_tmpADD)),((_tmpADD[0]=((_tmpADE.tag=1,((_tmpADE.f1=tv,_tmpADE)))),
+_tmpADD))));struct Cyc_Absyn_RgnHandleType_struct _tmpAE6;struct Cyc_Absyn_RgnHandleType_struct*
+_tmpAE5;union Cyc_Absyn_Nmspace_union _tmpAE3;struct _dyneither_ptr*_tmpAE2;struct
+_tuple1*_tmpAE1;struct Cyc_Absyn_Vardecl*vd=Cyc_Absyn_new_vardecl(((_tmpAE1=
+_cycalloc(sizeof(*_tmpAE1)),((_tmpAE1->f1=(union Cyc_Absyn_Nmspace_union)(((
+_tmpAE3.Loc_n).tag=0,_tmpAE3)),((_tmpAE1->f2=((_tmpAE2=_cycalloc(sizeof(*_tmpAE2)),((
+_tmpAE2[0]=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]),_tmpAE2)))),_tmpAE1)))))),(void*)((_tmpAE5=_cycalloc(sizeof(*
+_tmpAE5)),((_tmpAE5[0]=((_tmpAE6.tag=14,((_tmpAE6.f1=(void*)t,_tmpAE6)))),
+_tmpAE5)))),0);{struct Cyc_List_List*_tmpAE9;union Cyc_YYSTYPE_union _tmpAE8;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpAE8.YY18).tag=22,(((_tmpAE8.YY18).f1=((_tmpAE9=
+_cycalloc(sizeof(*_tmpAE9)),((_tmpAE9->hd=Cyc_Absyn_region_decl(tv,vd,0,0,Cyc_Position_segment_of_abs((
+yyls[_check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpAE9->tl=0,
+_tmpAE9)))))),_tmpAE8))));}break;}case 34: _LL222:{const char*_tmpAEA;if(Cyc_zstrcmp((
+struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 2)]),((_tmpAEA="H",_tag_dyneither(_tmpAEA,sizeof(char),2))))
+== 0){const char*_tmpAEB;Cyc_Parse_err(((_tmpAEB="bad occurrence of heap region `H",
+_tag_dyneither(_tmpAEB,sizeof(char),33))),Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line));}}{struct
+_dyneither_ptr*_tmpAF8;const char*_tmpAF7;void*_tmpAF6[1];struct Cyc_String_pa_struct
+_tmpAF5;struct Cyc_Absyn_Tvar*_tmpAF4;struct Cyc_Absyn_Tvar*tv=(_tmpAF4=_cycalloc(
+sizeof(*_tmpAF4)),((_tmpAF4->name=((_tmpAF8=_cycalloc(sizeof(*_tmpAF8)),((
+_tmpAF8[0]=(struct _dyneither_ptr)((_tmpAF5.tag=0,((_tmpAF5.f1=(struct
+_dyneither_ptr)((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)])),((_tmpAF6[0]=& _tmpAF5,
+Cyc_aprintf(((_tmpAF7="`%s",_tag_dyneither(_tmpAF7,sizeof(char),4))),
+_tag_dyneither(_tmpAF6,sizeof(void*),1)))))))),_tmpAF8)))),((_tmpAF4->identity=-
+1,((_tmpAF4->kind=(void*)Cyc_Tcutil_kind_to_bound((void*)3),_tmpAF4)))))));
+struct Cyc_Absyn_VarType_struct _tmpAFB;struct Cyc_Absyn_VarType_struct*_tmpAFA;
+void*t=(void*)((_tmpAFA=_cycalloc(sizeof(*_tmpAFA)),((_tmpAFA[0]=((_tmpAFB.tag=1,((
+_tmpAFB.f1=tv,_tmpAFB)))),_tmpAFA))));struct Cyc_Absyn_RgnHandleType_struct
+_tmpB03;struct Cyc_Absyn_RgnHandleType_struct*_tmpB02;union Cyc_Absyn_Nmspace_union
+_tmpB00;struct _dyneither_ptr*_tmpAFF;struct _tuple1*_tmpAFE;struct Cyc_Absyn_Vardecl*
+vd=Cyc_Absyn_new_vardecl(((_tmpAFE=_cycalloc(sizeof(*_tmpAFE)),((_tmpAFE->f1=(
+union Cyc_Absyn_Nmspace_union)(((_tmpB00.Loc_n).tag=0,_tmpB00)),((_tmpAFE->f2=((
+_tmpAFF=_cycalloc(sizeof(*_tmpAFF)),((_tmpAFF[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpAFF)))),_tmpAFE)))))),(
+void*)((_tmpB02=_cycalloc(sizeof(*_tmpB02)),((_tmpB02[0]=((_tmpB03.tag=14,((
+_tmpB03.f1=(void*)t,_tmpB03)))),_tmpB02)))),0);{struct Cyc_List_List*_tmpB06;
+union Cyc_YYSTYPE_union _tmpB05;yyval=(union Cyc_YYSTYPE_union)(((_tmpB05.YY18).tag=
+22,(((_tmpB05.YY18).f1=((_tmpB06=_cycalloc(sizeof(*_tmpB06)),((_tmpB06->hd=Cyc_Absyn_region_decl(
+tv,vd,0,Cyc_yyget_YY4(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),
+Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
+yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
+yylsp_offset)]).last_line)),((_tmpB06->tl=0,_tmpB06)))))),_tmpB05))));}break;}
+case 35: _LL223:{const char*_tmpB07;if(Cyc_zstrcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 6)]),((_tmpB07="resetable",
+_tag_dyneither(_tmpB07,sizeof(char),10))))!= 0){const char*_tmpB08;Cyc_Parse_err(((
+_tmpB08="expecting [resetable]",_tag_dyneither(_tmpB08,sizeof(char),22))),Cyc_Position_segment_of_abs((
+yyls[_check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 6)]).last_line));}}{const char*
+_tmpB0A;const char*_tmpB09;if(Cyc_zstrcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpB0A="`H",
+_tag_dyneither(_tmpB0A,sizeof(char),3))))== 0  || Cyc_zstrcmp((struct
+_dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 3)]),((_tmpB09="`U",_tag_dyneither(_tmpB09,sizeof(char),3))))){
+const char*_tmpB0E;void*_tmpB0D[1];struct Cyc_String_pa_struct _tmpB0C;Cyc_Parse_err((
+struct _dyneither_ptr)((_tmpB0C.tag=0,((_tmpB0C.f1=(struct _dyneither_ptr)((struct
+_dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 3)])),((_tmpB0D[0]=& _tmpB0C,Cyc_aprintf(((_tmpB0E="bad occurrence of heap region %s",
+_tag_dyneither(_tmpB0E,sizeof(char),33))),_tag_dyneither(_tmpB0D,sizeof(void*),1)))))))),
+Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
+yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
+yylsp_offset - 3)]).last_line));}}{struct _dyneither_ptr*_tmpB11;struct Cyc_Absyn_Tvar*
+_tmpB10;struct Cyc_Absyn_Tvar*tv=(_tmpB10=_cycalloc(sizeof(*_tmpB10)),((_tmpB10->name=((
+_tmpB11=_cycalloc(sizeof(*_tmpB11)),((_tmpB11[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),_tmpB11)))),((_tmpB10->identity=
+- 1,((_tmpB10->kind=(void*)Cyc_Tcutil_kind_to_bound((void*)3),_tmpB10)))))));
+struct Cyc_Absyn_VarType_struct _tmpB14;struct Cyc_Absyn_VarType_struct*_tmpB13;
+void*t=(void*)((_tmpB13=_cycalloc(sizeof(*_tmpB13)),((_tmpB13[0]=((_tmpB14.tag=1,((
+_tmpB14.f1=tv,_tmpB14)))),_tmpB13))));struct Cyc_Absyn_RgnHandleType_struct
+_tmpB1C;struct Cyc_Absyn_RgnHandleType_struct*_tmpB1B;union Cyc_Absyn_Nmspace_union
+_tmpB19;struct _dyneither_ptr*_tmpB18;struct _tuple1*_tmpB17;struct Cyc_Absyn_Vardecl*
+vd=Cyc_Absyn_new_vardecl(((_tmpB17=_cycalloc(sizeof(*_tmpB17)),((_tmpB17->f1=(
+union Cyc_Absyn_Nmspace_union)(((_tmpB19.Loc_n).tag=0,_tmpB19)),((_tmpB17->f2=((
+_tmpB18=_cycalloc(sizeof(*_tmpB18)),((_tmpB18[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpB18)))),_tmpB17)))))),(
+void*)((_tmpB1B=_cycalloc(sizeof(*_tmpB1B)),((_tmpB1B[0]=((_tmpB1C.tag=14,((
+_tmpB1C.f1=(void*)t,_tmpB1C)))),_tmpB1B)))),0);{struct Cyc_List_List*_tmpB1F;
+union Cyc_YYSTYPE_union _tmpB1E;yyval=(union Cyc_YYSTYPE_union)(((_tmpB1E.YY18).tag=
+22,(((_tmpB1E.YY18).f1=((_tmpB1F=_cycalloc(sizeof(*_tmpB1F)),((_tmpB1F->hd=Cyc_Absyn_region_decl(
+tv,vd,1,0,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
+yylsp_offset - 8)]).first_line,(yyls[_check_known_subscript_notnull(10000,
+yylsp_offset)]).last_line)),((_tmpB1F->tl=0,_tmpB1F)))))),_tmpB1E))));}break;}
+case 36: _LL224:{const char*_tmpB20;if(Cyc_zstrcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpB20="resetable",
+_tag_dyneither(_tmpB20,sizeof(char),10))))!= 0){const char*_tmpB21;Cyc_Parse_err(((
+_tmpB21="expecting `resetable'",_tag_dyneither(_tmpB21,sizeof(char),22))),Cyc_Position_segment_of_abs((
+yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line));}}{const char*
+_tmpB22;if(Cyc_zstrcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpB22="H",
+_tag_dyneither(_tmpB22,sizeof(char),2))))== 0){const char*_tmpB23;Cyc_Parse_err(((
+_tmpB23="bad occurrence of heap region `H",_tag_dyneither(_tmpB23,sizeof(char),
+33))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
+yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
+yylsp_offset - 1)]).last_line));}}{struct _dyneither_ptr*_tmpB30;const char*_tmpB2F;
+void*_tmpB2E[1];struct Cyc_String_pa_struct _tmpB2D;struct Cyc_Absyn_Tvar*_tmpB2C;
+struct Cyc_Absyn_Tvar*tv=(_tmpB2C=_cycalloc(sizeof(*_tmpB2C)),((_tmpB2C->name=((
+_tmpB30=_cycalloc(sizeof(*_tmpB30)),((_tmpB30[0]=(struct _dyneither_ptr)((_tmpB2D.tag=
+0,((_tmpB2D.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)])),((_tmpB2E[0]=&
+_tmpB2D,Cyc_aprintf(((_tmpB2F="`%s",_tag_dyneither(_tmpB2F,sizeof(char),4))),
+_tag_dyneither(_tmpB2E,sizeof(void*),1)))))))),_tmpB30)))),((_tmpB2C->identity=-
+1,((_tmpB2C->kind=(void*)Cyc_Tcutil_kind_to_bound((void*)3),_tmpB2C)))))));
+struct Cyc_Absyn_VarType_struct _tmpB33;struct Cyc_Absyn_VarType_struct*_tmpB32;
+void*t=(void*)((_tmpB32=_cycalloc(sizeof(*_tmpB32)),((_tmpB32[0]=((_tmpB33.tag=1,((
+_tmpB33.f1=tv,_tmpB33)))),_tmpB32))));struct Cyc_Absyn_RgnHandleType_struct
+_tmpB3B;struct Cyc_Absyn_RgnHandleType_struct*_tmpB3A;union Cyc_Absyn_Nmspace_union
+_tmpB38;struct _dyneither_ptr*_tmpB37;struct _tuple1*_tmpB36;struct Cyc_Absyn_Vardecl*
+vd=Cyc_Absyn_new_vardecl(((_tmpB36=_cycalloc(sizeof(*_tmpB36)),((_tmpB36->f1=(
+union Cyc_Absyn_Nmspace_union)(((_tmpB38.Loc_n).tag=0,_tmpB38)),((_tmpB36->f2=((
+_tmpB37=_cycalloc(sizeof(*_tmpB37)),((_tmpB37[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpB37)))),_tmpB36)))))),(
+void*)((_tmpB3A=_cycalloc(sizeof(*_tmpB3A)),((_tmpB3A[0]=((_tmpB3B.tag=14,((
+_tmpB3B.f1=(void*)t,_tmpB3B)))),_tmpB3A)))),0);{struct Cyc_List_List*_tmpB3E;
+union Cyc_YYSTYPE_union _tmpB3D;yyval=(union Cyc_YYSTYPE_union)(((_tmpB3D.YY18).tag=
+22,(((_tmpB3D.YY18).f1=((_tmpB3E=_cycalloc(sizeof(*_tmpB3E)),((_tmpB3E->hd=Cyc_Absyn_region_decl(
+tv,vd,1,0,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
+yylsp_offset - 5)]).first_line,(yyls[_check_known_subscript_notnull(10000,
+yylsp_offset)]).last_line)),((_tmpB3E->tl=0,_tmpB3E)))))),_tmpB3D))));}break;}
+case 37: _LL225: {struct _dyneither_ptr*_tmpB46;struct Cyc_Absyn_Eq_kb_struct*
+_tmpB45;struct Cyc_Absyn_Eq_kb_struct _tmpB44;struct Cyc_Absyn_Tvar*_tmpB43;struct
+Cyc_Absyn_Tvar*tv=(_tmpB43=_cycalloc(sizeof(*_tmpB43)),((_tmpB43->name=((_tmpB46=
+_cycalloc(sizeof(*_tmpB46)),((_tmpB46[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 5)]),_tmpB46)))),((_tmpB43->identity=
+- 1,((_tmpB43->kind=(void*)((void*)((_tmpB45=_cycalloc(sizeof(*_tmpB45)),((
+_tmpB45[0]=((_tmpB44.tag=0,((_tmpB44.f1=(void*)((void*)3),_tmpB44)))),_tmpB45))))),
+_tmpB43)))))));union Cyc_Absyn_Nmspace_union _tmpB4B;struct _dyneither_ptr*_tmpB4A;
+struct _tuple1*_tmpB49;struct Cyc_Absyn_Vardecl*vd=Cyc_Absyn_new_vardecl(((_tmpB49=
+_cycalloc(sizeof(*_tmpB49)),((_tmpB49->f1=(union Cyc_Absyn_Nmspace_union)(((
+_tmpB4B.Loc_n).tag=0,_tmpB4B)),((_tmpB49->f2=((_tmpB4A=_cycalloc(sizeof(*_tmpB4A)),((
+_tmpB4A[0]=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 3)]),_tmpB4A)))),_tmpB49)))))),(void*)0,0);{struct Cyc_List_List*
+_tmpB4E;union Cyc_YYSTYPE_union _tmpB4D;yyval=(union Cyc_YYSTYPE_union)(((_tmpB4D.YY18).tag=
+22,(((_tmpB4D.YY18).f1=((_tmpB4E=_cycalloc(sizeof(*_tmpB4E)),((_tmpB4E->hd=Cyc_Absyn_alias_decl(
+Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),tv,vd,
+Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
+yylsp_offset - 7)]).first_line,(yyls[_check_known_subscript_notnull(10000,
+yylsp_offset)]).last_line)),((_tmpB4E->tl=0,_tmpB4E)))))),_tmpB4D))));}break;}
+case 38: _LL226: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];
+break;case 39: _LL227:{union Cyc_YYSTYPE_union _tmpB4F;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpB4F.YY18).tag=22,(((_tmpB4F.YY18).f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*
 x,struct Cyc_List_List*y))Cyc_List_imp_append)(Cyc_yyget_YY18(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY18(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpADA))));}break;case 35:
-_LL223:{struct Cyc_Parse_Declaration_spec*_tmpAE0;struct Cyc_Core_Opt*_tmpADF;
-union Cyc_YYSTYPE_union _tmpADE;yyval=(union Cyc_YYSTYPE_union)(((_tmpADE.YY19).tag=
-23,(((_tmpADE.YY19).f1=((_tmpAE0=_cycalloc(sizeof(*_tmpAE0)),((_tmpAE0->sc=((
-_tmpADF=_cycalloc(sizeof(*_tmpADF)),((_tmpADF->v=(void*)Cyc_yyget_YY22(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpADF)))),((_tmpAE0->tq=
+_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpB4F))));}break;case 40:
+_LL228:{struct Cyc_Parse_Declaration_spec*_tmpB55;struct Cyc_Core_Opt*_tmpB54;
+union Cyc_YYSTYPE_union _tmpB53;yyval=(union Cyc_YYSTYPE_union)(((_tmpB53.YY19).tag=
+23,(((_tmpB53.YY19).f1=((_tmpB55=_cycalloc(sizeof(*_tmpB55)),((_tmpB55->sc=((
+_tmpB54=_cycalloc(sizeof(*_tmpB54)),((_tmpB54->v=(void*)Cyc_yyget_YY22(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpB54)))),((_tmpB55->tq=
 Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpAE0->type_specs=
-0,((_tmpAE0->is_inline=0,((_tmpAE0->attributes=0,_tmpAE0)))))))))))),_tmpADE))));}
-break;case 36: _LL224: if((Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]))->sc != 0){const char*_tmpAE3;void*_tmpAE2;(_tmpAE2=0,Cyc_Tcutil_warn(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpB55->type_specs=
+0,((_tmpB55->is_inline=0,((_tmpB55->attributes=0,_tmpB55)))))))))))),_tmpB53))));}
+break;case 41: _LL229: if((Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]))->sc != 0){const char*_tmpB58;void*_tmpB57;(_tmpB57=0,Cyc_Tcutil_warn(
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line),((_tmpAE3="Only one storage class is allowed in a declaration",
-_tag_dyneither(_tmpAE3,sizeof(char),51))),_tag_dyneither(_tmpAE2,sizeof(void*),0)));}{
-struct Cyc_Parse_Declaration_spec*_tmpAE9;struct Cyc_Core_Opt*_tmpAE8;union Cyc_YYSTYPE_union
-_tmpAE7;yyval=(union Cyc_YYSTYPE_union)(((_tmpAE7.YY19).tag=23,(((_tmpAE7.YY19).f1=((
-_tmpAE9=_cycalloc(sizeof(*_tmpAE9)),((_tmpAE9->sc=((_tmpAE8=_cycalloc(sizeof(*
-_tmpAE8)),((_tmpAE8->v=(void*)Cyc_yyget_YY22(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 1)]),_tmpAE8)))),((_tmpAE9->tq=(Cyc_yyget_YY19(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]))->tq,((_tmpAE9->type_specs=(
+yylsp_offset)]).last_line),((_tmpB58="Only one storage class is allowed in a declaration",
+_tag_dyneither(_tmpB58,sizeof(char),51))),_tag_dyneither(_tmpB57,sizeof(void*),0)));}{
+struct Cyc_Parse_Declaration_spec*_tmpB5E;struct Cyc_Core_Opt*_tmpB5D;union Cyc_YYSTYPE_union
+_tmpB5C;yyval=(union Cyc_YYSTYPE_union)(((_tmpB5C.YY19).tag=23,(((_tmpB5C.YY19).f1=((
+_tmpB5E=_cycalloc(sizeof(*_tmpB5E)),((_tmpB5E->sc=((_tmpB5D=_cycalloc(sizeof(*
+_tmpB5D)),((_tmpB5D->v=(void*)Cyc_yyget_YY22(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 1)]),_tmpB5D)))),((_tmpB5E->tq=(Cyc_yyget_YY19(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]))->tq,((_tmpB5E->type_specs=(
 Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->type_specs,((
-_tmpAE9->is_inline=(Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]))->is_inline,((_tmpAE9->attributes=(Cyc_yyget_YY19(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]))->attributes,_tmpAE9)))))))))))),
-_tmpAE7))));}break;case 37: _LL225:{struct Cyc_Parse_Declaration_spec*_tmpAEF;
-struct Cyc_List_List*_tmpAEE;union Cyc_YYSTYPE_union _tmpAED;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpAED.YY19).tag=23,(((_tmpAED.YY19).f1=((_tmpAEF=_cycalloc(sizeof(*_tmpAEF)),((
-_tmpAEF->sc=0,((_tmpAEF->tq=Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((
+_tmpB5E->is_inline=(Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]))->is_inline,((_tmpB5E->attributes=(Cyc_yyget_YY19(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]))->attributes,_tmpB5E)))))))))))),
+_tmpB5C))));}break;case 42: _LL22A:{struct Cyc_Parse_Declaration_spec*_tmpB64;
+struct Cyc_List_List*_tmpB63;union Cyc_YYSTYPE_union _tmpB62;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpB62.YY19).tag=23,(((_tmpB62.YY19).f1=((_tmpB64=_cycalloc(sizeof(*_tmpB64)),((
+_tmpB64->sc=0,((_tmpB64->tq=Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpAEF->type_specs=((
-_tmpAEE=_cycalloc(sizeof(*_tmpAEE)),((_tmpAEE->hd=(void*)Cyc_yyget_YY23(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpAEE->tl=0,_tmpAEE)))))),((
-_tmpAEF->is_inline=0,((_tmpAEF->attributes=0,_tmpAEF)))))))))))),_tmpAED))));}
-break;case 38: _LL226:{struct Cyc_Parse_Declaration_spec*_tmpAF5;struct Cyc_List_List*
-_tmpAF4;union Cyc_YYSTYPE_union _tmpAF3;yyval=(union Cyc_YYSTYPE_union)(((_tmpAF3.YY19).tag=
-23,(((_tmpAF3.YY19).f1=((_tmpAF5=_cycalloc(sizeof(*_tmpAF5)),((_tmpAF5->sc=(Cyc_yyget_YY19(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->sc,((_tmpAF5->tq=(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpB64->type_specs=((
+_tmpB63=_cycalloc(sizeof(*_tmpB63)),((_tmpB63->hd=(void*)Cyc_yyget_YY23(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpB63->tl=0,_tmpB63)))))),((
+_tmpB64->is_inline=0,((_tmpB64->attributes=0,_tmpB64)))))))))))),_tmpB62))));}
+break;case 43: _LL22B:{struct Cyc_Parse_Declaration_spec*_tmpB6A;struct Cyc_List_List*
+_tmpB69;union Cyc_YYSTYPE_union _tmpB68;yyval=(union Cyc_YYSTYPE_union)(((_tmpB68.YY19).tag=
+23,(((_tmpB68.YY19).f1=((_tmpB6A=_cycalloc(sizeof(*_tmpB6A)),((_tmpB6A->sc=(Cyc_yyget_YY19(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->sc,((_tmpB6A->tq=(
 Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tq,((
-_tmpAF5->type_specs=((_tmpAF4=_cycalloc(sizeof(*_tmpAF4)),((_tmpAF4->hd=(void*)
+_tmpB6A->type_specs=((_tmpB69=_cycalloc(sizeof(*_tmpB69)),((_tmpB69->hd=(void*)
 Cyc_yyget_YY23(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((
-_tmpAF4->tl=(Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]))->type_specs,_tmpAF4)))))),((_tmpAF5->is_inline=(Cyc_yyget_YY19(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->is_inline,((_tmpAF5->attributes=(
+_tmpB69->tl=(Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]))->type_specs,_tmpB69)))))),((_tmpB6A->is_inline=(Cyc_yyget_YY19(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->is_inline,((_tmpB6A->attributes=(
 Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->attributes,
-_tmpAF5)))))))))))),_tmpAF3))));}break;case 39: _LL227:{struct Cyc_Parse_Declaration_spec*
-_tmpAF8;union Cyc_YYSTYPE_union _tmpAF7;yyval=(union Cyc_YYSTYPE_union)(((_tmpAF7.YY19).tag=
-23,(((_tmpAF7.YY19).f1=((_tmpAF8=_cycalloc(sizeof(*_tmpAF8)),((_tmpAF8->sc=0,((
-_tmpAF8->tq=Cyc_yyget_YY25(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),((_tmpAF8->type_specs=0,((_tmpAF8->is_inline=0,((_tmpAF8->attributes=
-0,_tmpAF8)))))))))))),_tmpAF7))));}break;case 40: _LL228:{struct Cyc_Parse_Declaration_spec*
-_tmpAFB;union Cyc_YYSTYPE_union _tmpAFA;yyval=(union Cyc_YYSTYPE_union)(((_tmpAFA.YY19).tag=
-23,(((_tmpAFA.YY19).f1=((_tmpAFB=_cycalloc(sizeof(*_tmpAFB)),((_tmpAFB->sc=(Cyc_yyget_YY19(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->sc,((_tmpAFB->tq=Cyc_Absyn_combine_tqual(
+_tmpB6A)))))))))))),_tmpB68))));}break;case 44: _LL22C:{struct Cyc_Parse_Declaration_spec*
+_tmpB6D;union Cyc_YYSTYPE_union _tmpB6C;yyval=(union Cyc_YYSTYPE_union)(((_tmpB6C.YY19).tag=
+23,(((_tmpB6C.YY19).f1=((_tmpB6D=_cycalloc(sizeof(*_tmpB6D)),((_tmpB6D->sc=0,((
+_tmpB6D->tq=Cyc_yyget_YY25(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),((_tmpB6D->type_specs=0,((_tmpB6D->is_inline=0,((_tmpB6D->attributes=
+0,_tmpB6D)))))))))))),_tmpB6C))));}break;case 45: _LL22D:{struct Cyc_Parse_Declaration_spec*
+_tmpB70;union Cyc_YYSTYPE_union _tmpB6F;yyval=(union Cyc_YYSTYPE_union)(((_tmpB6F.YY19).tag=
+23,(((_tmpB6F.YY19).f1=((_tmpB70=_cycalloc(sizeof(*_tmpB70)),((_tmpB70->sc=(Cyc_yyget_YY19(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->sc,((_tmpB70->tq=Cyc_Absyn_combine_tqual(
 Cyc_yyget_YY25(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),(Cyc_yyget_YY19(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tq),((_tmpAFB->type_specs=(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tq),((_tmpB70->type_specs=(
 Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->type_specs,((
-_tmpAFB->is_inline=(Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]))->is_inline,((_tmpAFB->attributes=(Cyc_yyget_YY19(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]))->attributes,_tmpAFB)))))))))))),
-_tmpAFA))));}break;case 41: _LL229:{struct Cyc_Parse_Declaration_spec*_tmpAFE;union
-Cyc_YYSTYPE_union _tmpAFD;yyval=(union Cyc_YYSTYPE_union)(((_tmpAFD.YY19).tag=23,(((
-_tmpAFD.YY19).f1=((_tmpAFE=_cycalloc(sizeof(*_tmpAFE)),((_tmpAFE->sc=0,((_tmpAFE->tq=
+_tmpB70->is_inline=(Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]))->is_inline,((_tmpB70->attributes=(Cyc_yyget_YY19(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]))->attributes,_tmpB70)))))))))))),
+_tmpB6F))));}break;case 46: _LL22E:{struct Cyc_Parse_Declaration_spec*_tmpB73;union
+Cyc_YYSTYPE_union _tmpB72;yyval=(union Cyc_YYSTYPE_union)(((_tmpB72.YY19).tag=23,(((
+_tmpB72.YY19).f1=((_tmpB73=_cycalloc(sizeof(*_tmpB73)),((_tmpB73->sc=0,((_tmpB73->tq=
 Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpAFE->type_specs=
-0,((_tmpAFE->is_inline=1,((_tmpAFE->attributes=0,_tmpAFE)))))))))))),_tmpAFD))));}
-break;case 42: _LL22A:{struct Cyc_Parse_Declaration_spec*_tmpB01;union Cyc_YYSTYPE_union
-_tmpB00;yyval=(union Cyc_YYSTYPE_union)(((_tmpB00.YY19).tag=23,(((_tmpB00.YY19).f1=((
-_tmpB01=_cycalloc(sizeof(*_tmpB01)),((_tmpB01->sc=(Cyc_yyget_YY19(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]))->sc,((_tmpB01->tq=(Cyc_yyget_YY19(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tq,((_tmpB01->type_specs=(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpB73->type_specs=
+0,((_tmpB73->is_inline=1,((_tmpB73->attributes=0,_tmpB73)))))))))))),_tmpB72))));}
+break;case 47: _LL22F:{struct Cyc_Parse_Declaration_spec*_tmpB76;union Cyc_YYSTYPE_union
+_tmpB75;yyval=(union Cyc_YYSTYPE_union)(((_tmpB75.YY19).tag=23,(((_tmpB75.YY19).f1=((
+_tmpB76=_cycalloc(sizeof(*_tmpB76)),((_tmpB76->sc=(Cyc_yyget_YY19(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]))->sc,((_tmpB76->tq=(Cyc_yyget_YY19(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tq,((_tmpB76->type_specs=(
 Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->type_specs,((
-_tmpB01->is_inline=1,((_tmpB01->attributes=(Cyc_yyget_YY19(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]))->attributes,_tmpB01)))))))))))),
-_tmpB00))));}break;case 43: _LL22B:{struct Cyc_Parse_Declaration_spec*_tmpB04;union
-Cyc_YYSTYPE_union _tmpB03;yyval=(union Cyc_YYSTYPE_union)(((_tmpB03.YY19).tag=23,(((
-_tmpB03.YY19).f1=((_tmpB04=_cycalloc(sizeof(*_tmpB04)),((_tmpB04->sc=0,((_tmpB04->tq=
+_tmpB76->is_inline=1,((_tmpB76->attributes=(Cyc_yyget_YY19(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]))->attributes,_tmpB76)))))))))))),
+_tmpB75))));}break;case 48: _LL230:{struct Cyc_Parse_Declaration_spec*_tmpB79;union
+Cyc_YYSTYPE_union _tmpB78;yyval=(union Cyc_YYSTYPE_union)(((_tmpB78.YY19).tag=23,(((
+_tmpB78.YY19).f1=((_tmpB79=_cycalloc(sizeof(*_tmpB79)),((_tmpB79->sc=0,((_tmpB79->tq=
 Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpB04->type_specs=
-0,((_tmpB04->is_inline=0,((_tmpB04->attributes=Cyc_yyget_YY45(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpB04)))))))))))),_tmpB03))));}
-break;case 44: _LL22C:{struct Cyc_Parse_Declaration_spec*_tmpB07;union Cyc_YYSTYPE_union
-_tmpB06;yyval=(union Cyc_YYSTYPE_union)(((_tmpB06.YY19).tag=23,(((_tmpB06.YY19).f1=((
-_tmpB07=_cycalloc(sizeof(*_tmpB07)),((_tmpB07->sc=(Cyc_yyget_YY19(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]))->sc,((_tmpB07->tq=(Cyc_yyget_YY19(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tq,((_tmpB07->type_specs=(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpB79->type_specs=
+0,((_tmpB79->is_inline=0,((_tmpB79->attributes=Cyc_yyget_YY45(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpB79)))))))))))),_tmpB78))));}
+break;case 49: _LL231:{struct Cyc_Parse_Declaration_spec*_tmpB7C;union Cyc_YYSTYPE_union
+_tmpB7B;yyval=(union Cyc_YYSTYPE_union)(((_tmpB7B.YY19).tag=23,(((_tmpB7B.YY19).f1=((
+_tmpB7C=_cycalloc(sizeof(*_tmpB7C)),((_tmpB7C->sc=(Cyc_yyget_YY19(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]))->sc,((_tmpB7C->tq=(Cyc_yyget_YY19(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tq,((_tmpB7C->type_specs=(
 Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->type_specs,((
-_tmpB07->is_inline=(Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]))->is_inline,((_tmpB07->attributes=Cyc_List_imp_append(Cyc_yyget_YY45(
+_tmpB7C->is_inline=(Cyc_yyget_YY19(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]))->is_inline,((_tmpB7C->attributes=Cyc_List_imp_append(Cyc_yyget_YY45(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),(Cyc_yyget_YY19(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->attributes),_tmpB07)))))))))))),
-_tmpB06))));}break;case 45: _LL22D:{union Cyc_YYSTYPE_union _tmpB08;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB08.YY22).tag=26,(((_tmpB08.YY22).f1=(void*)((void*)4),_tmpB08))));}break;
-case 46: _LL22E:{union Cyc_YYSTYPE_union _tmpB09;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB09.YY22).tag=26,(((_tmpB09.YY22).f1=(void*)((void*)5),_tmpB09))));}break;
-case 47: _LL22F:{union Cyc_YYSTYPE_union _tmpB0A;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB0A.YY22).tag=26,(((_tmpB0A.YY22).f1=(void*)((void*)3),_tmpB0A))));}break;
-case 48: _LL230:{union Cyc_YYSTYPE_union _tmpB0B;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB0B.YY22).tag=26,(((_tmpB0B.YY22).f1=(void*)((void*)1),_tmpB0B))));}break;
-case 49: _LL231:{const char*_tmpB0C;if(Cyc_strcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpB0C="C",
-_tag_dyneither(_tmpB0C,sizeof(char),2))))!= 0){const char*_tmpB0D;Cyc_Parse_err(((
-_tmpB0D="only extern or extern \"C\" is allowed",_tag_dyneither(_tmpB0D,sizeof(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->attributes),_tmpB7C)))))))))))),
+_tmpB7B))));}break;case 50: _LL232:{union Cyc_YYSTYPE_union _tmpB7D;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpB7D.YY22).tag=26,(((_tmpB7D.YY22).f1=(void*)((void*)4),_tmpB7D))));}break;
+case 51: _LL233:{union Cyc_YYSTYPE_union _tmpB7E;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpB7E.YY22).tag=26,(((_tmpB7E.YY22).f1=(void*)((void*)5),_tmpB7E))));}break;
+case 52: _LL234:{union Cyc_YYSTYPE_union _tmpB7F;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpB7F.YY22).tag=26,(((_tmpB7F.YY22).f1=(void*)((void*)3),_tmpB7F))));}break;
+case 53: _LL235:{union Cyc_YYSTYPE_union _tmpB80;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpB80.YY22).tag=26,(((_tmpB80.YY22).f1=(void*)((void*)1),_tmpB80))));}break;
+case 54: _LL236:{const char*_tmpB81;if(Cyc_strcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpB81="C",
+_tag_dyneither(_tmpB81,sizeof(char),2))))!= 0){const char*_tmpB82;Cyc_Parse_err(((
+_tmpB82="only extern or extern \"C\" is allowed",_tag_dyneither(_tmpB82,sizeof(
 char),37))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line));}}{union Cyc_YYSTYPE_union _tmpB0E;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB0E.YY22).tag=26,(((_tmpB0E.YY22).f1=(void*)((void*)2),_tmpB0E))));}break;
-case 50: _LL232:{union Cyc_YYSTYPE_union _tmpB0F;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB0F.YY22).tag=26,(((_tmpB0F.YY22).f1=(void*)((void*)0),_tmpB0F))));}break;
-case 51: _LL233:{union Cyc_YYSTYPE_union _tmpB10;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB10.YY22).tag=26,(((_tmpB10.YY22).f1=(void*)((void*)6),_tmpB10))));}break;
-case 52: _LL234:{union Cyc_YYSTYPE_union _tmpB11;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB11.YY45).tag=49,(((_tmpB11.YY45).f1=0,_tmpB11))));}break;case 53: _LL235:
-yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 54:
-_LL236: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)];break;
-case 55: _LL237:{struct Cyc_List_List*_tmpB14;union Cyc_YYSTYPE_union _tmpB13;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpB13.YY45).tag=49,(((_tmpB13.YY45).f1=((_tmpB14=
-_cycalloc(sizeof(*_tmpB14)),((_tmpB14->hd=(void*)Cyc_yyget_YY46(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpB14->tl=0,_tmpB14)))))),
-_tmpB13))));}break;case 56: _LL238:{struct Cyc_List_List*_tmpB17;union Cyc_YYSTYPE_union
-_tmpB16;yyval=(union Cyc_YYSTYPE_union)(((_tmpB16.YY45).tag=49,(((_tmpB16.YY45).f1=((
-_tmpB17=_cycalloc(sizeof(*_tmpB17)),((_tmpB17->hd=(void*)Cyc_yyget_YY46(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpB17->tl=Cyc_yyget_YY45(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpB17)))))),_tmpB16))));}
-break;case 57: _LL239: {static struct Cyc_Absyn_Aligned_att_struct att_aligned={1,- 1};
-static struct _tuple19 att_map[17]={{{_tmp420,_tmp420,_tmp420 + 8},(void*)0},{{
-_tmp421,_tmp421,_tmp421 + 6},(void*)1},{{_tmp422,_tmp422,_tmp422 + 9},(void*)2},{{
-_tmp423,_tmp423,_tmp423 + 9},(void*)3},{{_tmp424,_tmp424,_tmp424 + 6},(void*)4},{{
-_tmp425,_tmp425,_tmp425 + 8},(void*)& att_aligned},{{_tmp426,_tmp426,_tmp426 + 7},(
-void*)5},{{_tmp427,_tmp427,_tmp427 + 7},(void*)7},{{_tmp428,_tmp428,_tmp428 + 7},(
-void*)8},{{_tmp429,_tmp429,_tmp429 + 5},(void*)9},{{_tmp42A,_tmp42A,_tmp42A + 10},(
-void*)10},{{_tmp42B,_tmp42B,_tmp42B + 10},(void*)11},{{_tmp42C,_tmp42C,_tmp42C + 
-23},(void*)12},{{_tmp42D,_tmp42D,_tmp42D + 12},(void*)13},{{_tmp42E,_tmp42E,
-_tmp42E + 11},(void*)14},{{_tmp42F,_tmp42F,_tmp42F + 22},(void*)15},{{_tmp430,
-_tmp430,_tmp430 + 5},(void*)16}};struct _dyneither_ptr _tmp41C=Cyc_yyget_String_tok(
+yylsp_offset)]).last_line));}}{union Cyc_YYSTYPE_union _tmpB83;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpB83.YY22).tag=26,(((_tmpB83.YY22).f1=(void*)((void*)2),_tmpB83))));}break;
+case 55: _LL237:{union Cyc_YYSTYPE_union _tmpB84;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpB84.YY22).tag=26,(((_tmpB84.YY22).f1=(void*)((void*)0),_tmpB84))));}break;
+case 56: _LL238:{union Cyc_YYSTYPE_union _tmpB85;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpB85.YY22).tag=26,(((_tmpB85.YY22).f1=(void*)((void*)6),_tmpB85))));}break;
+case 57: _LL239:{union Cyc_YYSTYPE_union _tmpB86;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpB86.YY45).tag=49,(((_tmpB86.YY45).f1=0,_tmpB86))));}break;case 58: _LL23A:
+yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 59:
+_LL23B: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)];break;
+case 60: _LL23C:{struct Cyc_List_List*_tmpB89;union Cyc_YYSTYPE_union _tmpB88;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpB88.YY45).tag=49,(((_tmpB88.YY45).f1=((_tmpB89=
+_cycalloc(sizeof(*_tmpB89)),((_tmpB89->hd=(void*)Cyc_yyget_YY46(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpB89->tl=0,_tmpB89)))))),
+_tmpB88))));}break;case 61: _LL23D:{struct Cyc_List_List*_tmpB8C;union Cyc_YYSTYPE_union
+_tmpB8B;yyval=(union Cyc_YYSTYPE_union)(((_tmpB8B.YY45).tag=49,(((_tmpB8B.YY45).f1=((
+_tmpB8C=_cycalloc(sizeof(*_tmpB8C)),((_tmpB8C->hd=(void*)Cyc_yyget_YY46(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpB8C->tl=Cyc_yyget_YY45(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpB8C)))))),_tmpB8B))));}
+break;case 62: _LL23E: {static struct Cyc_Absyn_Aligned_att_struct att_aligned={1,- 1};
+static struct _tuple19 att_map[17]={{{_tmp46D,_tmp46D,_tmp46D + 8},(void*)0},{{
+_tmp46E,_tmp46E,_tmp46E + 6},(void*)1},{{_tmp46F,_tmp46F,_tmp46F + 9},(void*)2},{{
+_tmp470,_tmp470,_tmp470 + 9},(void*)3},{{_tmp471,_tmp471,_tmp471 + 6},(void*)4},{{
+_tmp472,_tmp472,_tmp472 + 8},(void*)& att_aligned},{{_tmp473,_tmp473,_tmp473 + 7},(
+void*)5},{{_tmp474,_tmp474,_tmp474 + 7},(void*)7},{{_tmp475,_tmp475,_tmp475 + 7},(
+void*)8},{{_tmp476,_tmp476,_tmp476 + 5},(void*)9},{{_tmp477,_tmp477,_tmp477 + 10},(
+void*)10},{{_tmp478,_tmp478,_tmp478 + 10},(void*)11},{{_tmp479,_tmp479,_tmp479 + 
+23},(void*)12},{{_tmp47A,_tmp47A,_tmp47A + 12},(void*)13},{{_tmp47B,_tmp47B,
+_tmp47B + 11},(void*)14},{{_tmp47C,_tmp47C,_tmp47C + 22},(void*)15},{{_tmp47D,
+_tmp47D,_tmp47D + 5},(void*)16}};struct _dyneither_ptr _tmp469=Cyc_yyget_String_tok(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]);if((((
-_get_dyneither_size(_tmp41C,sizeof(char))> 4  && *((const char*)
-_check_dyneither_subscript(_tmp41C,sizeof(char),0))== '_') && *((const char*)
-_check_dyneither_subscript(_tmp41C,sizeof(char),1))== '_') && *((const char*)
-_check_dyneither_subscript(_tmp41C,sizeof(char),(int)(_get_dyneither_size(
-_tmp41C,sizeof(char))- 2)))== '_') && *((const char*)_check_dyneither_subscript(
-_tmp41C,sizeof(char),(int)(_get_dyneither_size(_tmp41C,sizeof(char))- 3)))== '_')
-_tmp41C=(struct _dyneither_ptr)Cyc_substring((struct _dyneither_ptr)_tmp41C,2,
-_get_dyneither_size(_tmp41C,sizeof(char))- 5);{int i=0;for(0;i < 17;++ i){if(Cyc_strcmp((
-struct _dyneither_ptr)_tmp41C,(struct _dyneither_ptr)(att_map[i]).f1)== 0){{union
-Cyc_YYSTYPE_union _tmpB18;yyval=(union Cyc_YYSTYPE_union)(((_tmpB18.YY46).tag=50,(((
-_tmpB18.YY46).f1=(void*)(att_map[i]).f2,_tmpB18))));}break;}}if(i == 17){{const
-char*_tmpB19;Cyc_Parse_err(((_tmpB19="unrecognized attribute",_tag_dyneither(
-_tmpB19,sizeof(char),23))),Cyc_Position_segment_of_abs((yyls[
+_get_dyneither_size(_tmp469,sizeof(char))> 4  && *((const char*)
+_check_dyneither_subscript(_tmp469,sizeof(char),0))== '_') && *((const char*)
+_check_dyneither_subscript(_tmp469,sizeof(char),1))== '_') && *((const char*)
+_check_dyneither_subscript(_tmp469,sizeof(char),(int)(_get_dyneither_size(
+_tmp469,sizeof(char))- 2)))== '_') && *((const char*)_check_dyneither_subscript(
+_tmp469,sizeof(char),(int)(_get_dyneither_size(_tmp469,sizeof(char))- 3)))== '_')
+_tmp469=(struct _dyneither_ptr)Cyc_substring((struct _dyneither_ptr)_tmp469,2,
+_get_dyneither_size(_tmp469,sizeof(char))- 5);{int i=0;for(0;i < 17;++ i){if(Cyc_strcmp((
+struct _dyneither_ptr)_tmp469,(struct _dyneither_ptr)(att_map[i]).f1)== 0){{union
+Cyc_YYSTYPE_union _tmpB8D;yyval=(union Cyc_YYSTYPE_union)(((_tmpB8D.YY46).tag=50,(((
+_tmpB8D.YY46).f1=(void*)(att_map[i]).f2,_tmpB8D))));}break;}}if(i == 17){{const
+char*_tmpB8E;Cyc_Parse_err(((_tmpB8E="unrecognized attribute",_tag_dyneither(
+_tmpB8E,sizeof(char),23))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line));}{union Cyc_YYSTYPE_union
-_tmpB1A;yyval=(union Cyc_YYSTYPE_union)(((_tmpB1A.YY46).tag=50,(((_tmpB1A.YY46).f1=(
-void*)((void*)1),_tmpB1A))));}}break;}}case 58: _LL23A:{union Cyc_YYSTYPE_union
-_tmpB1B;yyval=(union Cyc_YYSTYPE_union)(((_tmpB1B.YY46).tag=50,(((_tmpB1B.YY46).f1=(
-void*)((void*)4),_tmpB1B))));}break;case 59: _LL23B: {struct _dyneither_ptr _tmp433=
+_tmpB8F;yyval=(union Cyc_YYSTYPE_union)(((_tmpB8F.YY46).tag=50,(((_tmpB8F.YY46).f1=(
+void*)((void*)1),_tmpB8F))));}}break;}}case 63: _LL23F:{union Cyc_YYSTYPE_union
+_tmpB90;yyval=(union Cyc_YYSTYPE_union)(((_tmpB90.YY46).tag=50,(((_tmpB90.YY46).f1=(
+void*)((void*)4),_tmpB90))));}break;case 64: _LL240: {struct _dyneither_ptr _tmp480=
 Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]);
-int _tmp435;struct _tuple11 _tmp434=Cyc_yyget_Int_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp435=_tmp434.f2;{void*
-a;{const char*_tmpB1D;const char*_tmpB1C;if(Cyc_zstrcmp((struct _dyneither_ptr)
-_tmp433,((_tmpB1D="regparm",_tag_dyneither(_tmpB1D,sizeof(char),8))))== 0  || Cyc_zstrcmp((
-struct _dyneither_ptr)_tmp433,((_tmpB1C="__regparm__",_tag_dyneither(_tmpB1C,
-sizeof(char),12))))== 0){if(_tmp435 < 0  || _tmp435 > 3){const char*_tmpB1E;Cyc_Parse_err(((
-_tmpB1E="regparm requires value between 0 and 3",_tag_dyneither(_tmpB1E,sizeof(
+int _tmp482;struct _tuple11 _tmp481=Cyc_yyget_Int_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp482=_tmp481.f2;{void*
+a;{const char*_tmpB92;const char*_tmpB91;if(Cyc_zstrcmp((struct _dyneither_ptr)
+_tmp480,((_tmpB92="regparm",_tag_dyneither(_tmpB92,sizeof(char),8))))== 0  || Cyc_zstrcmp((
+struct _dyneither_ptr)_tmp480,((_tmpB91="__regparm__",_tag_dyneither(_tmpB91,
+sizeof(char),12))))== 0){if(_tmp482 < 0  || _tmp482 > 3){const char*_tmpB93;Cyc_Parse_err(((
+_tmpB93="regparm requires value between 0 and 3",_tag_dyneither(_tmpB93,sizeof(
 char),39))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line));}{struct Cyc_Absyn_Regparm_att_struct _tmpB21;
-struct Cyc_Absyn_Regparm_att_struct*_tmpB20;a=(void*)((_tmpB20=_cycalloc_atomic(
-sizeof(*_tmpB20)),((_tmpB20[0]=((_tmpB21.tag=0,((_tmpB21.f1=_tmp435,_tmpB21)))),
-_tmpB20))));}}else{const char*_tmpB23;const char*_tmpB22;if(Cyc_zstrcmp((struct
-_dyneither_ptr)_tmp433,((_tmpB23="aligned",_tag_dyneither(_tmpB23,sizeof(char),8))))
-== 0  || Cyc_zstrcmp((struct _dyneither_ptr)_tmp433,((_tmpB22="__aligned__",
-_tag_dyneither(_tmpB22,sizeof(char),12))))== 0){if(_tmp435 < 0){const char*_tmpB24;
-Cyc_Parse_err(((_tmpB24="aligned requires positive power of two",_tag_dyneither(
-_tmpB24,sizeof(char),39))),Cyc_Position_segment_of_abs((yyls[
+yylsp_offset - 1)]).last_line));}{struct Cyc_Absyn_Regparm_att_struct _tmpB96;
+struct Cyc_Absyn_Regparm_att_struct*_tmpB95;a=(void*)((_tmpB95=_cycalloc_atomic(
+sizeof(*_tmpB95)),((_tmpB95[0]=((_tmpB96.tag=0,((_tmpB96.f1=_tmp482,_tmpB96)))),
+_tmpB95))));}}else{const char*_tmpB98;const char*_tmpB97;if(Cyc_zstrcmp((struct
+_dyneither_ptr)_tmp480,((_tmpB98="aligned",_tag_dyneither(_tmpB98,sizeof(char),8))))
+== 0  || Cyc_zstrcmp((struct _dyneither_ptr)_tmp480,((_tmpB97="__aligned__",
+_tag_dyneither(_tmpB97,sizeof(char),12))))== 0){if(_tmp482 < 0){const char*_tmpB99;
+Cyc_Parse_err(((_tmpB99="aligned requires positive power of two",_tag_dyneither(
+_tmpB99,sizeof(char),39))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line));}{
-unsigned int j=(unsigned int)_tmp435;for(0;(j & 1)== 0;j=j >> 1){;}j=j >> 1;if(j != 0){
-const char*_tmpB25;Cyc_Parse_err(((_tmpB25="aligned requires positive power of two",
-_tag_dyneither(_tmpB25,sizeof(char),39))),Cyc_Position_segment_of_abs((yyls[
+unsigned int j=(unsigned int)_tmp482;for(0;(j & 1)== 0;j=j >> 1){;}j=j >> 1;if(j != 0){
+const char*_tmpB9A;Cyc_Parse_err(((_tmpB9A="aligned requires positive power of two",
+_tag_dyneither(_tmpB9A,sizeof(char),39))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line));}{struct Cyc_Absyn_Aligned_att_struct
-_tmpB28;struct Cyc_Absyn_Aligned_att_struct*_tmpB27;a=(void*)((_tmpB27=
-_cycalloc_atomic(sizeof(*_tmpB27)),((_tmpB27[0]=((_tmpB28.tag=1,((_tmpB28.f1=
-_tmp435,_tmpB28)))),_tmpB27))));}}}else{const char*_tmpB2A;const char*_tmpB29;if(
-Cyc_zstrcmp((struct _dyneither_ptr)_tmp433,((_tmpB2A="initializes",_tag_dyneither(
-_tmpB2A,sizeof(char),12))))== 0  || Cyc_zstrcmp((struct _dyneither_ptr)_tmp433,((
-_tmpB29="__initializes__",_tag_dyneither(_tmpB29,sizeof(char),16))))== 0){struct
-Cyc_Absyn_Initializes_att_struct _tmpB2D;struct Cyc_Absyn_Initializes_att_struct*
-_tmpB2C;a=(void*)((_tmpB2C=_cycalloc_atomic(sizeof(*_tmpB2C)),((_tmpB2C[0]=((
-_tmpB2D.tag=4,((_tmpB2D.f1=_tmp435,_tmpB2D)))),_tmpB2C))));}else{{const char*
-_tmpB2E;Cyc_Parse_err(((_tmpB2E="unrecognized attribute",_tag_dyneither(_tmpB2E,
+_tmpB9D;struct Cyc_Absyn_Aligned_att_struct*_tmpB9C;a=(void*)((_tmpB9C=
+_cycalloc_atomic(sizeof(*_tmpB9C)),((_tmpB9C[0]=((_tmpB9D.tag=1,((_tmpB9D.f1=
+_tmp482,_tmpB9D)))),_tmpB9C))));}}}else{const char*_tmpB9F;const char*_tmpB9E;if(
+Cyc_zstrcmp((struct _dyneither_ptr)_tmp480,((_tmpB9F="initializes",_tag_dyneither(
+_tmpB9F,sizeof(char),12))))== 0  || Cyc_zstrcmp((struct _dyneither_ptr)_tmp480,((
+_tmpB9E="__initializes__",_tag_dyneither(_tmpB9E,sizeof(char),16))))== 0){struct
+Cyc_Absyn_Initializes_att_struct _tmpBA2;struct Cyc_Absyn_Initializes_att_struct*
+_tmpBA1;a=(void*)((_tmpBA1=_cycalloc_atomic(sizeof(*_tmpBA1)),((_tmpBA1[0]=((
+_tmpBA2.tag=4,((_tmpBA2.f1=_tmp482,_tmpBA2)))),_tmpBA1))));}else{{const char*
+_tmpBA3;Cyc_Parse_err(((_tmpBA3="unrecognized attribute",_tag_dyneither(_tmpBA3,
 sizeof(char),23))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line));}a=(void*)1;}}}}{
-union Cyc_YYSTYPE_union _tmpB2F;yyval=(union Cyc_YYSTYPE_union)(((_tmpB2F.YY46).tag=
-50,(((_tmpB2F.YY46).f1=(void*)a,_tmpB2F))));}break;}}case 60: _LL23C: {struct
-_dyneither_ptr _tmp447=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 3)]);struct _dyneither_ptr _tmp448=Cyc_yyget_String_tok(yyvs[
+union Cyc_YYSTYPE_union _tmpBA4;yyval=(union Cyc_YYSTYPE_union)(((_tmpBA4.YY46).tag=
+50,(((_tmpBA4.YY46).f1=(void*)a,_tmpBA4))));}break;}}case 65: _LL241: {struct
+_dyneither_ptr _tmp494=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 3)]);struct _dyneither_ptr _tmp495=Cyc_yyget_String_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]);void*a;{const char*
-_tmpB31;const char*_tmpB30;if(Cyc_zstrcmp((struct _dyneither_ptr)_tmp447,((_tmpB31="section",
-_tag_dyneither(_tmpB31,sizeof(char),8))))== 0  || Cyc_zstrcmp((struct
-_dyneither_ptr)_tmp447,((_tmpB30="__section__",_tag_dyneither(_tmpB30,sizeof(
-char),12))))== 0){struct Cyc_Absyn_Section_att_struct _tmpB34;struct Cyc_Absyn_Section_att_struct*
-_tmpB33;a=(void*)((_tmpB33=_cycalloc(sizeof(*_tmpB33)),((_tmpB33[0]=((_tmpB34.tag=
-2,((_tmpB34.f1=_tmp448,_tmpB34)))),_tmpB33))));}else{{const char*_tmpB35;Cyc_Parse_err(((
-_tmpB35="unrecognized attribute",_tag_dyneither(_tmpB35,sizeof(char),23))),Cyc_Position_segment_of_abs((
+_tmpBA6;const char*_tmpBA5;if(Cyc_zstrcmp((struct _dyneither_ptr)_tmp494,((_tmpBA6="section",
+_tag_dyneither(_tmpBA6,sizeof(char),8))))== 0  || Cyc_zstrcmp((struct
+_dyneither_ptr)_tmp494,((_tmpBA5="__section__",_tag_dyneither(_tmpBA5,sizeof(
+char),12))))== 0){struct Cyc_Absyn_Section_att_struct _tmpBA9;struct Cyc_Absyn_Section_att_struct*
+_tmpBA8;a=(void*)((_tmpBA8=_cycalloc(sizeof(*_tmpBA8)),((_tmpBA8[0]=((_tmpBA9.tag=
+2,((_tmpBA9.f1=_tmp495,_tmpBA9)))),_tmpBA8))));}else{{const char*_tmpBAA;Cyc_Parse_err(((
+_tmpBAA="unrecognized attribute",_tag_dyneither(_tmpBAA,sizeof(char),23))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line));}a=(void*)1;}}{
-union Cyc_YYSTYPE_union _tmpB36;yyval=(union Cyc_YYSTYPE_union)(((_tmpB36.YY46).tag=
-50,(((_tmpB36.YY46).f1=(void*)a,_tmpB36))));}break;}case 61: _LL23D: {struct
-_dyneither_ptr _tmp44F=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 3)]);struct _dyneither_ptr _tmp450=Cyc_yyget_String_tok(yyvs[
+union Cyc_YYSTYPE_union _tmpBAB;yyval=(union Cyc_YYSTYPE_union)(((_tmpBAB.YY46).tag=
+50,(((_tmpBAB.YY46).f1=(void*)a,_tmpBAB))));}break;}case 66: _LL242: {struct
+_dyneither_ptr _tmp49C=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 3)]);struct _dyneither_ptr _tmp49D=Cyc_yyget_String_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]);void*a;{const char*
-_tmpB37;if(Cyc_zstrcmp((struct _dyneither_ptr)_tmp44F,((_tmpB37="__mode__",
-_tag_dyneither(_tmpB37,sizeof(char),9))))== 0){struct Cyc_Absyn_Mode_att_struct
-_tmpB3A;struct Cyc_Absyn_Mode_att_struct*_tmpB39;a=(void*)((_tmpB39=_cycalloc(
-sizeof(*_tmpB39)),((_tmpB39[0]=((_tmpB3A.tag=5,((_tmpB3A.f1=_tmp450,_tmpB3A)))),
-_tmpB39))));}else{{const char*_tmpB3B;Cyc_Parse_err(((_tmpB3B="unrecognized attribute",
-_tag_dyneither(_tmpB3B,sizeof(char),23))),Cyc_Position_segment_of_abs((yyls[
+_tmpBAC;if(Cyc_zstrcmp((struct _dyneither_ptr)_tmp49C,((_tmpBAC="__mode__",
+_tag_dyneither(_tmpBAC,sizeof(char),9))))== 0){struct Cyc_Absyn_Mode_att_struct
+_tmpBAF;struct Cyc_Absyn_Mode_att_struct*_tmpBAE;a=(void*)((_tmpBAE=_cycalloc(
+sizeof(*_tmpBAE)),((_tmpBAE[0]=((_tmpBAF.tag=5,((_tmpBAF.f1=_tmp49D,_tmpBAF)))),
+_tmpBAE))));}else{{const char*_tmpBB0;Cyc_Parse_err(((_tmpBB0="unrecognized attribute",
+_tag_dyneither(_tmpBB0,sizeof(char),23))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line));}a=(void*)1;}}{
-union Cyc_YYSTYPE_union _tmpB3C;yyval=(union Cyc_YYSTYPE_union)(((_tmpB3C.YY46).tag=
-50,(((_tmpB3C.YY46).f1=(void*)a,_tmpB3C))));}break;}case 62: _LL23E: {struct
-_dyneither_ptr _tmp456=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 7)]);struct _dyneither_ptr _tmp457=Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 5)]);int _tmp459;struct
-_tuple11 _tmp458=Cyc_yyget_Int_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 3)]);_tmp459=_tmp458.f2;{int _tmp45B;struct _tuple11 _tmp45A=Cyc_yyget_Int_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp45B=_tmp45A.f2;{
-void*a=(void*)1;{const char*_tmpB3E;const char*_tmpB3D;if(Cyc_zstrcmp((struct
-_dyneither_ptr)_tmp456,((_tmpB3E="format",_tag_dyneither(_tmpB3E,sizeof(char),7))))
-== 0  || Cyc_zstrcmp((struct _dyneither_ptr)_tmp456,((_tmpB3D="__format__",
-_tag_dyneither(_tmpB3D,sizeof(char),11))))== 0){const char*_tmpB3F;if(Cyc_zstrcmp((
-struct _dyneither_ptr)_tmp457,((_tmpB3F="printf",_tag_dyneither(_tmpB3F,sizeof(
-char),7))))== 0){struct Cyc_Absyn_Format_att_struct _tmpB42;struct Cyc_Absyn_Format_att_struct*
-_tmpB41;a=(void*)((_tmpB41=_cycalloc(sizeof(*_tmpB41)),((_tmpB41[0]=((_tmpB42.tag=
-3,((_tmpB42.f1=(void*)((void*)0),((_tmpB42.f2=_tmp459,((_tmpB42.f3=_tmp45B,
-_tmpB42)))))))),_tmpB41))));}else{const char*_tmpB43;if(Cyc_zstrcmp((struct
-_dyneither_ptr)_tmp457,((_tmpB43="scanf",_tag_dyneither(_tmpB43,sizeof(char),6))))
-== 0){struct Cyc_Absyn_Format_att_struct _tmpB46;struct Cyc_Absyn_Format_att_struct*
-_tmpB45;a=(void*)((_tmpB45=_cycalloc(sizeof(*_tmpB45)),((_tmpB45[0]=((_tmpB46.tag=
-3,((_tmpB46.f1=(void*)((void*)1),((_tmpB46.f2=_tmp459,((_tmpB46.f3=_tmp45B,
-_tmpB46)))))))),_tmpB45))));}else{const char*_tmpB47;Cyc_Parse_err(((_tmpB47="unrecognized format type",
-_tag_dyneither(_tmpB47,sizeof(char),25))),Cyc_Position_segment_of_abs((yyls[
+union Cyc_YYSTYPE_union _tmpBB1;yyval=(union Cyc_YYSTYPE_union)(((_tmpBB1.YY46).tag=
+50,(((_tmpBB1.YY46).f1=(void*)a,_tmpBB1))));}break;}case 67: _LL243: {struct
+_dyneither_ptr _tmp4A3=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 7)]);struct _dyneither_ptr _tmp4A4=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 5)]);int _tmp4A6;struct
+_tuple11 _tmp4A5=Cyc_yyget_Int_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 3)]);_tmp4A6=_tmp4A5.f2;{int _tmp4A8;struct _tuple11 _tmp4A7=Cyc_yyget_Int_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp4A8=_tmp4A7.f2;{
+void*a=(void*)1;{const char*_tmpBB3;const char*_tmpBB2;if(Cyc_zstrcmp((struct
+_dyneither_ptr)_tmp4A3,((_tmpBB3="format",_tag_dyneither(_tmpBB3,sizeof(char),7))))
+== 0  || Cyc_zstrcmp((struct _dyneither_ptr)_tmp4A3,((_tmpBB2="__format__",
+_tag_dyneither(_tmpBB2,sizeof(char),11))))== 0){const char*_tmpBB4;if(Cyc_zstrcmp((
+struct _dyneither_ptr)_tmp4A4,((_tmpBB4="printf",_tag_dyneither(_tmpBB4,sizeof(
+char),7))))== 0){struct Cyc_Absyn_Format_att_struct _tmpBB7;struct Cyc_Absyn_Format_att_struct*
+_tmpBB6;a=(void*)((_tmpBB6=_cycalloc(sizeof(*_tmpBB6)),((_tmpBB6[0]=((_tmpBB7.tag=
+3,((_tmpBB7.f1=(void*)((void*)0),((_tmpBB7.f2=_tmp4A6,((_tmpBB7.f3=_tmp4A8,
+_tmpBB7)))))))),_tmpBB6))));}else{const char*_tmpBB8;if(Cyc_zstrcmp((struct
+_dyneither_ptr)_tmp4A4,((_tmpBB8="scanf",_tag_dyneither(_tmpBB8,sizeof(char),6))))
+== 0){struct Cyc_Absyn_Format_att_struct _tmpBBB;struct Cyc_Absyn_Format_att_struct*
+_tmpBBA;a=(void*)((_tmpBBA=_cycalloc(sizeof(*_tmpBBA)),((_tmpBBA[0]=((_tmpBBB.tag=
+3,((_tmpBBB.f1=(void*)((void*)1),((_tmpBBB.f2=_tmp4A6,((_tmpBBB.f3=_tmp4A8,
+_tmpBBB)))))))),_tmpBBA))));}else{const char*_tmpBBC;Cyc_Parse_err(((_tmpBBC="unrecognized format type",
+_tag_dyneither(_tmpBBC,sizeof(char),25))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 5)]).last_line));}}}else{
-const char*_tmpB48;Cyc_Parse_err(((_tmpB48="unrecognized attribute",
-_tag_dyneither(_tmpB48,sizeof(char),23))),Cyc_Position_segment_of_abs((yyls[
+const char*_tmpBBD;Cyc_Parse_err(((_tmpBBD="unrecognized attribute",
+_tag_dyneither(_tmpBBD,sizeof(char),23))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 7)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line));}}{union Cyc_YYSTYPE_union
-_tmpB49;yyval=(union Cyc_YYSTYPE_union)(((_tmpB49.YY46).tag=50,(((_tmpB49.YY46).f1=(
-void*)a,_tmpB49))));}break;}}}case 63: _LL23F: yyval=yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 64: _LL240:{struct
-Cyc_Absyn_TypedefType_struct*_tmpB4F;struct Cyc_Absyn_TypedefType_struct _tmpB4E;
-union Cyc_YYSTYPE_union _tmpB4D;yyval=(union Cyc_YYSTYPE_union)(((_tmpB4D.YY23).tag=
-27,(((_tmpB4D.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpB4F=_cycalloc(
-sizeof(*_tmpB4F)),((_tmpB4F[0]=((_tmpB4E.tag=16,((_tmpB4E.f1=Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpB4E.f2=Cyc_yyget_YY40(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpB4E.f3=0,((
-_tmpB4E.f4=0,_tmpB4E)))))))))),_tmpB4F)))),Cyc_Position_segment_of_abs((yyls[
+_tmpBBE;yyval=(union Cyc_YYSTYPE_union)(((_tmpBBE.YY46).tag=50,(((_tmpBBE.YY46).f1=(
+void*)a,_tmpBBE))));}break;}}}case 68: _LL244: yyval=yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 69: _LL245:{struct
+Cyc_Absyn_TypedefType_struct*_tmpBC4;struct Cyc_Absyn_TypedefType_struct _tmpBC3;
+union Cyc_YYSTYPE_union _tmpBC2;yyval=(union Cyc_YYSTYPE_union)(((_tmpBC2.YY23).tag=
+27,(((_tmpBC2.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpBC4=_cycalloc(
+sizeof(*_tmpBC4)),((_tmpBC4[0]=((_tmpBC3.tag=16,((_tmpBC3.f1=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpBC3.f2=Cyc_yyget_YY40(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpBC3.f3=0,((
+_tmpBC3.f4=0,_tmpBC3)))))))))),_tmpBC4)))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpB4D))));}
-break;case 65: _LL241:{union Cyc_YYSTYPE_union _tmpB50;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB50.YY23).tag=27,(((_tmpB50.YY23).f1=(void*)Cyc_Parse_type_spec((void*)0,Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpBC2))));}
+break;case 70: _LL246:{union Cyc_YYSTYPE_union _tmpBC5;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpBC5.YY23).tag=27,(((_tmpBC5.YY23).f1=(void*)Cyc_Parse_type_spec((void*)0,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpB50))));}
-break;case 66: _LL242:{union Cyc_YYSTYPE_union _tmpB51;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB51.YY23).tag=27,(((_tmpB51.YY23).f1=(void*)Cyc_Parse_type_spec(Cyc_Absyn_new_evar(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpBC5))));}
+break;case 71: _LL247:{union Cyc_YYSTYPE_union _tmpBC6;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpBC6.YY23).tag=27,(((_tmpBC6.YY23).f1=(void*)Cyc_Parse_type_spec(Cyc_Absyn_new_evar(
 0,0),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpB51))));}break;case 67: _LL243:{union Cyc_YYSTYPE_union
-_tmpB52;yyval=(union Cyc_YYSTYPE_union)(((_tmpB52.YY23).tag=27,(((_tmpB52.YY23).f1=(
+yylsp_offset)]).last_line)),_tmpBC6))));}break;case 72: _LL248:{union Cyc_YYSTYPE_union
+_tmpBC7;yyval=(union Cyc_YYSTYPE_union)(((_tmpBC7.YY23).tag=27,(((_tmpBC7.YY23).f1=(
 void*)Cyc_Parse_type_spec(Cyc_Absyn_new_evar(Cyc_Tcutil_kind_to_opt(Cyc_yyget_YY43(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])),0),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpB52))));}
-break;case 68: _LL244:{union Cyc_YYSTYPE_union _tmpB53;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB53.YY23).tag=27,(((_tmpB53.YY23).f1=(void*)Cyc_Parse_type_spec(Cyc_Absyn_char_typ,
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpBC7))));}
+break;case 73: _LL249:{union Cyc_YYSTYPE_union _tmpBC8;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpBC8.YY23).tag=27,(((_tmpBC8.YY23).f1=(void*)Cyc_Parse_type_spec(Cyc_Absyn_char_typ,
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpB53))));}break;case 69: _LL245:{struct Cyc_Parse_Short_spec_struct*
-_tmpB59;struct Cyc_Parse_Short_spec_struct _tmpB58;union Cyc_YYSTYPE_union _tmpB57;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpB57.YY23).tag=27,(((_tmpB57.YY23).f1=(void*)((
-void*)((_tmpB59=_cycalloc(sizeof(*_tmpB59)),((_tmpB59[0]=((_tmpB58.tag=2,((
-_tmpB58.f1=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+yylsp_offset)]).last_line)),_tmpBC8))));}break;case 74: _LL24A:{struct Cyc_Parse_Short_spec_struct*
+_tmpBCE;struct Cyc_Parse_Short_spec_struct _tmpBCD;union Cyc_YYSTYPE_union _tmpBCC;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpBCC.YY23).tag=27,(((_tmpBCC.YY23).f1=(void*)((
+void*)((_tmpBCE=_cycalloc(sizeof(*_tmpBCE)),((_tmpBCE[0]=((_tmpBCD.tag=2,((
+_tmpBCD.f1=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line),_tmpB58)))),_tmpB59))))),_tmpB57))));}break;case 70:
-_LL246:{union Cyc_YYSTYPE_union _tmpB5A;yyval=(union Cyc_YYSTYPE_union)(((_tmpB5A.YY23).tag=
-27,(((_tmpB5A.YY23).f1=(void*)Cyc_Parse_type_spec(Cyc_Absyn_sint_typ,Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line),_tmpBCD)))),_tmpBCE))))),_tmpBCC))));}break;case 75:
+_LL24B:{union Cyc_YYSTYPE_union _tmpBCF;yyval=(union Cyc_YYSTYPE_union)(((_tmpBCF.YY23).tag=
+27,(((_tmpBCF.YY23).f1=(void*)Cyc_Parse_type_spec(Cyc_Absyn_sint_typ,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpB5A))));}
-break;case 71: _LL247:{struct Cyc_Parse_Long_spec_struct*_tmpB60;struct Cyc_Parse_Long_spec_struct
-_tmpB5F;union Cyc_YYSTYPE_union _tmpB5E;yyval=(union Cyc_YYSTYPE_union)(((_tmpB5E.YY23).tag=
-27,(((_tmpB5E.YY23).f1=(void*)((void*)((_tmpB60=_cycalloc(sizeof(*_tmpB60)),((
-_tmpB60[0]=((_tmpB5F.tag=3,((_tmpB5F.f1=Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpBCF))));}
+break;case 76: _LL24C:{struct Cyc_Parse_Long_spec_struct*_tmpBD5;struct Cyc_Parse_Long_spec_struct
+_tmpBD4;union Cyc_YYSTYPE_union _tmpBD3;yyval=(union Cyc_YYSTYPE_union)(((_tmpBD3.YY23).tag=
+27,(((_tmpBD3.YY23).f1=(void*)((void*)((_tmpBD5=_cycalloc(sizeof(*_tmpBD5)),((
+_tmpBD5[0]=((_tmpBD4.tag=3,((_tmpBD4.f1=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpB5F)))),
-_tmpB60))))),_tmpB5E))));}break;case 72: _LL248:{union Cyc_YYSTYPE_union _tmpB61;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpB61.YY23).tag=27,(((_tmpB61.YY23).f1=(void*)
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpBD4)))),
+_tmpBD5))))),_tmpBD3))));}break;case 77: _LL24D:{union Cyc_YYSTYPE_union _tmpBD6;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpBD6.YY23).tag=27,(((_tmpBD6.YY23).f1=(void*)
 Cyc_Parse_type_spec(Cyc_Absyn_float_typ,Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpB61))));}
-break;case 73: _LL249:{union Cyc_YYSTYPE_union _tmpB62;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB62.YY23).tag=27,(((_tmpB62.YY23).f1=(void*)Cyc_Parse_type_spec(Cyc_Absyn_double_typ(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpBD6))));}
+break;case 78: _LL24E:{union Cyc_YYSTYPE_union _tmpBD7;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpBD7.YY23).tag=27,(((_tmpBD7.YY23).f1=(void*)Cyc_Parse_type_spec(Cyc_Absyn_double_typ(
 0),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpB62))));}break;case 74: _LL24A:{struct Cyc_Parse_Signed_spec_struct*
-_tmpB68;struct Cyc_Parse_Signed_spec_struct _tmpB67;union Cyc_YYSTYPE_union _tmpB66;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpB66.YY23).tag=27,(((_tmpB66.YY23).f1=(void*)((
-void*)((_tmpB68=_cycalloc(sizeof(*_tmpB68)),((_tmpB68[0]=((_tmpB67.tag=0,((
-_tmpB67.f1=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+yylsp_offset)]).last_line)),_tmpBD7))));}break;case 79: _LL24F:{struct Cyc_Parse_Signed_spec_struct*
+_tmpBDD;struct Cyc_Parse_Signed_spec_struct _tmpBDC;union Cyc_YYSTYPE_union _tmpBDB;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpBDB.YY23).tag=27,(((_tmpBDB.YY23).f1=(void*)((
+void*)((_tmpBDD=_cycalloc(sizeof(*_tmpBDD)),((_tmpBDD[0]=((_tmpBDC.tag=0,((
+_tmpBDC.f1=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line),_tmpB67)))),_tmpB68))))),_tmpB66))));}break;case 75:
-_LL24B:{struct Cyc_Parse_Unsigned_spec_struct*_tmpB6E;struct Cyc_Parse_Unsigned_spec_struct
-_tmpB6D;union Cyc_YYSTYPE_union _tmpB6C;yyval=(union Cyc_YYSTYPE_union)(((_tmpB6C.YY23).tag=
-27,(((_tmpB6C.YY23).f1=(void*)((void*)((_tmpB6E=_cycalloc(sizeof(*_tmpB6E)),((
-_tmpB6E[0]=((_tmpB6D.tag=1,((_tmpB6D.f1=Cyc_Position_segment_of_abs((yyls[
+yylsp_offset)]).last_line),_tmpBDC)))),_tmpBDD))))),_tmpBDB))));}break;case 80:
+_LL250:{struct Cyc_Parse_Unsigned_spec_struct*_tmpBE3;struct Cyc_Parse_Unsigned_spec_struct
+_tmpBE2;union Cyc_YYSTYPE_union _tmpBE1;yyval=(union Cyc_YYSTYPE_union)(((_tmpBE1.YY23).tag=
+27,(((_tmpBE1.YY23).f1=(void*)((void*)((_tmpBE3=_cycalloc(sizeof(*_tmpBE3)),((
+_tmpBE3[0]=((_tmpBE2.tag=1,((_tmpBE2.f1=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpB6D)))),
-_tmpB6E))))),_tmpB6C))));}break;case 76: _LL24C: yyval=yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 77: _LL24D: yyval=
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 78: _LL24E:
-yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 79:
-_LL24F:{union Cyc_YYSTYPE_union _tmpB6F;yyval=(union Cyc_YYSTYPE_union)(((_tmpB6F.YY23).tag=
-27,(((_tmpB6F.YY23).f1=(void*)Cyc_Parse_type_spec(Cyc_yyget_YY44(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpBE2)))),
+_tmpBE3))))),_tmpBE1))));}break;case 81: _LL251: yyval=yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 82: _LL252: yyval=
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 83: _LL253:
+yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 84:
+_LL254:{union Cyc_YYSTYPE_union _tmpBE4;yyval=(union Cyc_YYSTYPE_union)(((_tmpBE4.YY23).tag=
+27,(((_tmpBE4.YY23).f1=(void*)Cyc_Parse_type_spec(Cyc_yyget_YY44(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpB6F))));}
-break;case 80: _LL250:{struct Cyc_Absyn_TupleType_struct*_tmpB75;struct Cyc_Absyn_TupleType_struct
-_tmpB74;union Cyc_YYSTYPE_union _tmpB73;yyval=(union Cyc_YYSTYPE_union)(((_tmpB73.YY23).tag=
-27,(((_tmpB73.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpB75=_cycalloc(
-sizeof(*_tmpB75)),((_tmpB75[0]=((_tmpB74.tag=9,((_tmpB74.f1=((struct Cyc_List_List*(*)(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpBE4))));}
+break;case 85: _LL255:{struct Cyc_Absyn_TupleType_struct*_tmpBEA;struct Cyc_Absyn_TupleType_struct
+_tmpBE9;union Cyc_YYSTYPE_union _tmpBE8;yyval=(union Cyc_YYSTYPE_union)(((_tmpBE8.YY23).tag=
+27,(((_tmpBE8.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpBEA=_cycalloc(
+sizeof(*_tmpBEA)),((_tmpBEA[0]=((_tmpBE9.tag=9,((_tmpBE9.f1=((struct Cyc_List_List*(*)(
 struct _tuple9*(*f)(struct Cyc_Position_Segment*,struct _tuple2*),struct Cyc_Position_Segment*
 env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_get_tqual_typ,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_YY38(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]))),_tmpB74)))),_tmpB75)))),
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]))),_tmpBE9)))),_tmpBEA)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpB73))));}break;case 81: _LL251:{struct Cyc_Absyn_RgnHandleType_struct*
-_tmpB7B;struct Cyc_Absyn_RgnHandleType_struct _tmpB7A;union Cyc_YYSTYPE_union
-_tmpB79;yyval=(union Cyc_YYSTYPE_union)(((_tmpB79.YY23).tag=27,(((_tmpB79.YY23).f1=(
-void*)Cyc_Parse_type_spec((void*)((_tmpB7B=_cycalloc(sizeof(*_tmpB7B)),((_tmpB7B[
-0]=((_tmpB7A.tag=14,((_tmpB7A.f1=(void*)Cyc_yyget_YY44(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpB7A)))),_tmpB7B)))),
+yylsp_offset)]).last_line)),_tmpBE8))));}break;case 86: _LL256:{struct Cyc_Absyn_RgnHandleType_struct*
+_tmpBF0;struct Cyc_Absyn_RgnHandleType_struct _tmpBEF;union Cyc_YYSTYPE_union
+_tmpBEE;yyval=(union Cyc_YYSTYPE_union)(((_tmpBEE.YY23).tag=27,(((_tmpBEE.YY23).f1=(
+void*)Cyc_Parse_type_spec((void*)((_tmpBF0=_cycalloc(sizeof(*_tmpBF0)),((_tmpBF0[
+0]=((_tmpBEF.tag=14,((_tmpBEF.f1=(void*)Cyc_yyget_YY44(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpBEF)))),_tmpBF0)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpB79))));}break;case 82: _LL252: {void*_tmp484=Cyc_Absyn_new_evar((
-struct Cyc_Core_Opt*)& Cyc_Tcutil_rk,0);{struct Cyc_Absyn_DynRgnType_struct*_tmpB81;
-struct Cyc_Absyn_DynRgnType_struct _tmpB80;union Cyc_YYSTYPE_union _tmpB7F;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpB7F.YY23).tag=27,(((_tmpB7F.YY23).f1=(void*)Cyc_Parse_type_spec((
-void*)((_tmpB81=_cycalloc(sizeof(*_tmpB81)),((_tmpB81[0]=((_tmpB80.tag=15,((
-_tmpB80.f1=(void*)Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]),((_tmpB80.f2=(void*)_tmp484,_tmpB80)))))),_tmpB81)))),Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line)),_tmpBEE))));}break;case 87: _LL257: {void*_tmp4D1=Cyc_Absyn_new_evar((
+struct Cyc_Core_Opt*)& Cyc_Tcutil_rk,0);{struct Cyc_Absyn_DynRgnType_struct*_tmpBF6;
+struct Cyc_Absyn_DynRgnType_struct _tmpBF5;union Cyc_YYSTYPE_union _tmpBF4;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpBF4.YY23).tag=27,(((_tmpBF4.YY23).f1=(void*)Cyc_Parse_type_spec((
+void*)((_tmpBF6=_cycalloc(sizeof(*_tmpBF6)),((_tmpBF6[0]=((_tmpBF5.tag=15,((
+_tmpBF5.f1=(void*)Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]),((_tmpBF5.f2=(void*)_tmp4D1,_tmpBF5)))))),_tmpBF6)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpB7F))));}
-break;}case 83: _LL253:{struct Cyc_Absyn_DynRgnType_struct*_tmpB87;struct Cyc_Absyn_DynRgnType_struct
-_tmpB86;union Cyc_YYSTYPE_union _tmpB85;yyval=(union Cyc_YYSTYPE_union)(((_tmpB85.YY23).tag=
-27,(((_tmpB85.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpB87=_cycalloc(
-sizeof(*_tmpB87)),((_tmpB87[0]=((_tmpB86.tag=15,((_tmpB86.f1=(void*)Cyc_yyget_YY44(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpB86.f2=(void*)
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpBF4))));}
+break;}case 88: _LL258:{struct Cyc_Absyn_DynRgnType_struct*_tmpBFC;struct Cyc_Absyn_DynRgnType_struct
+_tmpBFB;union Cyc_YYSTYPE_union _tmpBFA;yyval=(union Cyc_YYSTYPE_union)(((_tmpBFA.YY23).tag=
+27,(((_tmpBFA.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpBFC=_cycalloc(
+sizeof(*_tmpBFC)),((_tmpBFC[0]=((_tmpBFB.tag=15,((_tmpBFB.f1=(void*)Cyc_yyget_YY44(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpBFB.f2=(void*)
 Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),
-_tmpB86)))))),_tmpB87)))),Cyc_Position_segment_of_abs((yyls[
+_tmpBFB)))))),_tmpBFC)))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpB85))));}
-break;case 84: _LL254:{struct Cyc_Absyn_TagType_struct*_tmpB8D;struct Cyc_Absyn_TagType_struct
-_tmpB8C;union Cyc_YYSTYPE_union _tmpB8B;yyval=(union Cyc_YYSTYPE_union)(((_tmpB8B.YY23).tag=
-27,(((_tmpB8B.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpB8D=_cycalloc(
-sizeof(*_tmpB8D)),((_tmpB8D[0]=((_tmpB8C.tag=18,((_tmpB8C.f1=(void*)Cyc_yyget_YY44(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpB8C)))),_tmpB8D)))),
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpBFA))));}
+break;case 89: _LL259:{struct Cyc_Absyn_TagType_struct*_tmpC02;struct Cyc_Absyn_TagType_struct
+_tmpC01;union Cyc_YYSTYPE_union _tmpC00;yyval=(union Cyc_YYSTYPE_union)(((_tmpC00.YY23).tag=
+27,(((_tmpC00.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpC02=_cycalloc(
+sizeof(*_tmpC02)),((_tmpC02[0]=((_tmpC01.tag=18,((_tmpC01.f1=(void*)Cyc_yyget_YY44(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpC01)))),_tmpC02)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpB8B))));}break;case 85: _LL255:{struct Cyc_Absyn_TagType_struct*
-_tmpB93;struct Cyc_Absyn_TagType_struct _tmpB92;union Cyc_YYSTYPE_union _tmpB91;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpB91.YY23).tag=27,(((_tmpB91.YY23).f1=(void*)
-Cyc_Parse_type_spec((void*)((_tmpB93=_cycalloc(sizeof(*_tmpB93)),((_tmpB93[0]=((
-_tmpB92.tag=18,((_tmpB92.f1=(void*)Cyc_Absyn_new_evar((struct Cyc_Core_Opt*)& Cyc_Tcutil_ik,
-0),_tmpB92)))),_tmpB93)))),Cyc_Position_segment_of_abs((yyls[
+yylsp_offset)]).last_line)),_tmpC00))));}break;case 90: _LL25A:{struct Cyc_Absyn_TagType_struct*
+_tmpC08;struct Cyc_Absyn_TagType_struct _tmpC07;union Cyc_YYSTYPE_union _tmpC06;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpC06.YY23).tag=27,(((_tmpC06.YY23).f1=(void*)
+Cyc_Parse_type_spec((void*)((_tmpC08=_cycalloc(sizeof(*_tmpC08)),((_tmpC08[0]=((
+_tmpC07.tag=18,((_tmpC07.f1=(void*)Cyc_Absyn_new_evar((struct Cyc_Core_Opt*)& Cyc_Tcutil_ik,
+0),_tmpC07)))),_tmpC08)))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpB91))));}
-break;case 86: _LL256:{struct Cyc_Absyn_ValueofType_struct*_tmpB99;struct Cyc_Absyn_ValueofType_struct
-_tmpB98;union Cyc_YYSTYPE_union _tmpB97;yyval=(union Cyc_YYSTYPE_union)(((_tmpB97.YY23).tag=
-27,(((_tmpB97.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpB99=_cycalloc(
-sizeof(*_tmpB99)),((_tmpB99[0]=((_tmpB98.tag=17,((_tmpB98.f1=Cyc_yyget_YY3(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpB98)))),_tmpB99)))),
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpC06))));}
+break;case 91: _LL25B:{struct Cyc_Absyn_ValueofType_struct*_tmpC0E;struct Cyc_Absyn_ValueofType_struct
+_tmpC0D;union Cyc_YYSTYPE_union _tmpC0C;yyval=(union Cyc_YYSTYPE_union)(((_tmpC0C.YY23).tag=
+27,(((_tmpC0C.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpC0E=_cycalloc(
+sizeof(*_tmpC0E)),((_tmpC0E[0]=((_tmpC0D.tag=17,((_tmpC0D.f1=Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpC0D)))),_tmpC0E)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpB97))));}break;case 87: _LL257:{union Cyc_YYSTYPE_union
-_tmpB9A;yyval=(union Cyc_YYSTYPE_union)(((_tmpB9A.YY43).tag=47,(((_tmpB9A.YY43).f1=(
+yylsp_offset)]).last_line)),_tmpC0C))));}break;case 92: _LL25C:{union Cyc_YYSTYPE_union
+_tmpC0F;yyval=(union Cyc_YYSTYPE_union)(((_tmpC0F.YY43).tag=47,(((_tmpC0F.YY43).f1=(
 void*)Cyc_Parse_id_to_kind(Cyc_yyget_String_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpB9A))));}
-break;case 88: _LL258: {struct Cyc_Position_Segment*loc=Cyc_Absyn_porting_c_code?
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpC0F))));}
+break;case 93: _LL25D: {struct Cyc_Position_Segment*loc=Cyc_Absyn_porting_c_code?
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line): 0;{struct Cyc_Absyn_Tqual _tmpB9D;union Cyc_YYSTYPE_union
-_tmpB9C;yyval=(union Cyc_YYSTYPE_union)(((_tmpB9C.YY25).tag=29,(((_tmpB9C.YY25).f1=((
-_tmpB9D.print_const=1,((_tmpB9D.q_volatile=0,((_tmpB9D.q_restrict=0,((_tmpB9D.real_const=
-1,((_tmpB9D.loc=loc,_tmpB9D)))))))))),_tmpB9C))));}break;}case 89: _LL259:{struct
-Cyc_Absyn_Tqual _tmpBA0;union Cyc_YYSTYPE_union _tmpB9F;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpB9F.YY25).tag=29,(((_tmpB9F.YY25).f1=((_tmpBA0.print_const=0,((_tmpBA0.q_volatile=
-1,((_tmpBA0.q_restrict=0,((_tmpBA0.real_const=0,((_tmpBA0.loc=0,_tmpBA0)))))))))),
-_tmpB9F))));}break;case 90: _LL25A:{struct Cyc_Absyn_Tqual _tmpBA3;union Cyc_YYSTYPE_union
-_tmpBA2;yyval=(union Cyc_YYSTYPE_union)(((_tmpBA2.YY25).tag=29,(((_tmpBA2.YY25).f1=((
-_tmpBA3.print_const=0,((_tmpBA3.q_volatile=0,((_tmpBA3.q_restrict=1,((_tmpBA3.real_const=
-0,((_tmpBA3.loc=0,_tmpBA3)))))))))),_tmpBA2))));}break;case 91: _LL25B:{struct Cyc_Parse_Decl_spec_struct*
-_tmpBC7;struct Cyc_Absyn_Decl*_tmpBC6;struct Cyc_Absyn_Enum_d_struct _tmpBC5;struct
-Cyc_Core_Opt*_tmpBC4;struct Cyc_Absyn_Enumdecl*_tmpBC3;struct Cyc_Absyn_Enum_d_struct*
-_tmpBC2;struct Cyc_Parse_Decl_spec_struct _tmpBC1;union Cyc_YYSTYPE_union _tmpBC0;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpBC0.YY23).tag=27,(((_tmpBC0.YY23).f1=(void*)((
-void*)((_tmpBC7=_cycalloc(sizeof(*_tmpBC7)),((_tmpBC7[0]=((_tmpBC1.tag=5,((
-_tmpBC1.f1=((_tmpBC6=_cycalloc(sizeof(*_tmpBC6)),((_tmpBC6->r=(void*)((void*)((
-_tmpBC2=_cycalloc(sizeof(*_tmpBC2)),((_tmpBC2[0]=((_tmpBC5.tag=6,((_tmpBC5.f1=((
-_tmpBC3=_cycalloc(sizeof(*_tmpBC3)),((_tmpBC3->sc=(void*)((void*)2),((_tmpBC3->name=
+yylsp_offset)]).last_line): 0;{struct Cyc_Absyn_Tqual _tmpC12;union Cyc_YYSTYPE_union
+_tmpC11;yyval=(union Cyc_YYSTYPE_union)(((_tmpC11.YY25).tag=29,(((_tmpC11.YY25).f1=((
+_tmpC12.print_const=1,((_tmpC12.q_volatile=0,((_tmpC12.q_restrict=0,((_tmpC12.real_const=
+1,((_tmpC12.loc=loc,_tmpC12)))))))))),_tmpC11))));}break;}case 94: _LL25E:{struct
+Cyc_Absyn_Tqual _tmpC15;union Cyc_YYSTYPE_union _tmpC14;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpC14.YY25).tag=29,(((_tmpC14.YY25).f1=((_tmpC15.print_const=0,((_tmpC15.q_volatile=
+1,((_tmpC15.q_restrict=0,((_tmpC15.real_const=0,((_tmpC15.loc=0,_tmpC15)))))))))),
+_tmpC14))));}break;case 95: _LL25F:{struct Cyc_Absyn_Tqual _tmpC18;union Cyc_YYSTYPE_union
+_tmpC17;yyval=(union Cyc_YYSTYPE_union)(((_tmpC17.YY25).tag=29,(((_tmpC17.YY25).f1=((
+_tmpC18.print_const=0,((_tmpC18.q_volatile=0,((_tmpC18.q_restrict=1,((_tmpC18.real_const=
+0,((_tmpC18.loc=0,_tmpC18)))))))))),_tmpC17))));}break;case 96: _LL260:{struct Cyc_Parse_Decl_spec_struct*
+_tmpC3C;struct Cyc_Absyn_Decl*_tmpC3B;struct Cyc_Absyn_Enum_d_struct _tmpC3A;struct
+Cyc_Core_Opt*_tmpC39;struct Cyc_Absyn_Enumdecl*_tmpC38;struct Cyc_Absyn_Enum_d_struct*
+_tmpC37;struct Cyc_Parse_Decl_spec_struct _tmpC36;union Cyc_YYSTYPE_union _tmpC35;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpC35.YY23).tag=27,(((_tmpC35.YY23).f1=(void*)((
+void*)((_tmpC3C=_cycalloc(sizeof(*_tmpC3C)),((_tmpC3C[0]=((_tmpC36.tag=5,((
+_tmpC36.f1=((_tmpC3B=_cycalloc(sizeof(*_tmpC3B)),((_tmpC3B->r=(void*)((void*)((
+_tmpC37=_cycalloc(sizeof(*_tmpC37)),((_tmpC37[0]=((_tmpC3A.tag=8,((_tmpC3A.f1=((
+_tmpC38=_cycalloc(sizeof(*_tmpC38)),((_tmpC38->sc=(void*)((void*)2),((_tmpC38->name=
 Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((
-_tmpBC3->fields=((_tmpBC4=_cycalloc(sizeof(*_tmpBC4)),((_tmpBC4->v=Cyc_yyget_YY48(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpBC4)))),_tmpBC3)))))))),
-_tmpBC5)))),_tmpBC2))))),((_tmpBC6->loc=Cyc_Position_segment_of_abs((yyls[
+_tmpC38->fields=((_tmpC39=_cycalloc(sizeof(*_tmpC39)),((_tmpC39->v=Cyc_yyget_YY48(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpC39)))),_tmpC38)))))))),
+_tmpC3A)))),_tmpC37))))),((_tmpC3B->loc=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpBC6)))))),
-_tmpBC1)))),_tmpBC7))))),_tmpBC0))));}break;case 92: _LL25C:{struct Cyc_Absyn_EnumType_struct*
-_tmpBCD;struct Cyc_Absyn_EnumType_struct _tmpBCC;union Cyc_YYSTYPE_union _tmpBCB;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpBCB.YY23).tag=27,(((_tmpBCB.YY23).f1=(void*)
-Cyc_Parse_type_spec((void*)((_tmpBCD=_cycalloc(sizeof(*_tmpBCD)),((_tmpBCD[0]=((
-_tmpBCC.tag=12,((_tmpBCC.f1=Cyc_yyget_QualId_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpBCC.f2=0,_tmpBCC)))))),
-_tmpBCD)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpC3B)))))),
+_tmpC36)))),_tmpC3C))))),_tmpC35))));}break;case 97: _LL261:{struct Cyc_Absyn_EnumType_struct*
+_tmpC42;struct Cyc_Absyn_EnumType_struct _tmpC41;union Cyc_YYSTYPE_union _tmpC40;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpC40.YY23).tag=27,(((_tmpC40.YY23).f1=(void*)
+Cyc_Parse_type_spec((void*)((_tmpC42=_cycalloc(sizeof(*_tmpC42)),((_tmpC42[0]=((
+_tmpC41.tag=12,((_tmpC41.f1=Cyc_yyget_QualId_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC41.f2=0,_tmpC41)))))),
+_tmpC42)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpBCB))));}break;case 93: _LL25D:{struct Cyc_Parse_Type_spec_struct*
-_tmpBDC;struct Cyc_Absyn_AnonEnumType_struct*_tmpBDB;struct Cyc_Absyn_AnonEnumType_struct
-_tmpBDA;struct Cyc_Parse_Type_spec_struct _tmpBD9;union Cyc_YYSTYPE_union _tmpBD8;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpBD8.YY23).tag=27,(((_tmpBD8.YY23).f1=(void*)((
-void*)((_tmpBDC=_cycalloc(sizeof(*_tmpBDC)),((_tmpBDC[0]=((_tmpBD9.tag=4,((
-_tmpBD9.f1=(void*)((void*)((_tmpBDB=_cycalloc(sizeof(*_tmpBDB)),((_tmpBDB[0]=((
-_tmpBDA.tag=13,((_tmpBDA.f1=Cyc_yyget_YY48(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 1)]),_tmpBDA)))),_tmpBDB))))),((_tmpBD9.f2=Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line)),_tmpC40))));}break;case 98: _LL262:{struct Cyc_Parse_Type_spec_struct*
+_tmpC51;struct Cyc_Absyn_AnonEnumType_struct*_tmpC50;struct Cyc_Absyn_AnonEnumType_struct
+_tmpC4F;struct Cyc_Parse_Type_spec_struct _tmpC4E;union Cyc_YYSTYPE_union _tmpC4D;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpC4D.YY23).tag=27,(((_tmpC4D.YY23).f1=(void*)((
+void*)((_tmpC51=_cycalloc(sizeof(*_tmpC51)),((_tmpC51[0]=((_tmpC4E.tag=4,((
+_tmpC4E.f1=(void*)((void*)((_tmpC50=_cycalloc(sizeof(*_tmpC50)),((_tmpC50[0]=((
+_tmpC4F.tag=13,((_tmpC4F.f1=Cyc_yyget_YY48(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 1)]),_tmpC4F)))),_tmpC50))))),((_tmpC4E.f2=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpBD9)))))),
-_tmpBDC))))),_tmpBD8))));}break;case 94: _LL25E:{struct Cyc_Absyn_Enumfield*_tmpBDF;
-union Cyc_YYSTYPE_union _tmpBDE;yyval=(union Cyc_YYSTYPE_union)(((_tmpBDE.YY47).tag=
-51,(((_tmpBDE.YY47).f1=((_tmpBDF=_cycalloc(sizeof(*_tmpBDF)),((_tmpBDF->name=Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpBDF->tag=0,((
-_tmpBDF->loc=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpC4E)))))),
+_tmpC51))))),_tmpC4D))));}break;case 99: _LL263:{struct Cyc_Absyn_Enumfield*_tmpC54;
+union Cyc_YYSTYPE_union _tmpC53;yyval=(union Cyc_YYSTYPE_union)(((_tmpC53.YY47).tag=
+51,(((_tmpC53.YY47).f1=((_tmpC54=_cycalloc(sizeof(*_tmpC54)),((_tmpC54->name=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC54->tag=0,((
+_tmpC54->loc=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line),_tmpBDF)))))))),_tmpBDE))));}break;case 95: _LL25F:{
-struct Cyc_Absyn_Enumfield*_tmpBE2;union Cyc_YYSTYPE_union _tmpBE1;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpBE1.YY47).tag=51,(((_tmpBE1.YY47).f1=((_tmpBE2=_cycalloc(sizeof(*_tmpBE2)),((
-_tmpBE2->name=Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 2)]),((_tmpBE2->tag=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpBE2->loc=Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line),_tmpC54)))))))),_tmpC53))));}break;case 100: _LL264:{
+struct Cyc_Absyn_Enumfield*_tmpC57;union Cyc_YYSTYPE_union _tmpC56;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpC56.YY47).tag=51,(((_tmpC56.YY47).f1=((_tmpC57=_cycalloc(sizeof(*_tmpC57)),((
+_tmpC57->name=Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 2)]),((_tmpC57->tag=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC57->loc=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpBE2)))))))),
-_tmpBE1))));}break;case 96: _LL260:{struct Cyc_List_List*_tmpBE5;union Cyc_YYSTYPE_union
-_tmpBE4;yyval=(union Cyc_YYSTYPE_union)(((_tmpBE4.YY48).tag=52,(((_tmpBE4.YY48).f1=((
-_tmpBE5=_cycalloc(sizeof(*_tmpBE5)),((_tmpBE5->hd=Cyc_yyget_YY47(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpBE5->tl=0,_tmpBE5)))))),
-_tmpBE4))));}break;case 97: _LL261:{struct Cyc_List_List*_tmpBE8;union Cyc_YYSTYPE_union
-_tmpBE7;yyval=(union Cyc_YYSTYPE_union)(((_tmpBE7.YY48).tag=52,(((_tmpBE7.YY48).f1=((
-_tmpBE8=_cycalloc(sizeof(*_tmpBE8)),((_tmpBE8->hd=Cyc_yyget_YY47(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpBE8->tl=0,_tmpBE8)))))),
-_tmpBE7))));}break;case 98: _LL262:{struct Cyc_List_List*_tmpBEB;union Cyc_YYSTYPE_union
-_tmpBEA;yyval=(union Cyc_YYSTYPE_union)(((_tmpBEA.YY48).tag=52,(((_tmpBEA.YY48).f1=((
-_tmpBEB=_cycalloc(sizeof(*_tmpBEB)),((_tmpBEB->hd=Cyc_yyget_YY47(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpBEB->tl=Cyc_yyget_YY48(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpBEB)))))),_tmpBEA))));}
-break;case 99: _LL263:{struct Cyc_Absyn_AnonAggrType_struct*_tmpBF1;struct Cyc_Absyn_AnonAggrType_struct
-_tmpBF0;union Cyc_YYSTYPE_union _tmpBEF;yyval=(union Cyc_YYSTYPE_union)(((_tmpBEF.YY23).tag=
-27,(((_tmpBEF.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpBF1=_cycalloc(
-sizeof(*_tmpBF1)),((_tmpBF1[0]=((_tmpBF0.tag=11,((_tmpBF0.f1=(void*)Cyc_yyget_YY24(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpBF0.f2=Cyc_yyget_YY26(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpBF0)))))),
-_tmpBF1)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpC57)))))))),
+_tmpC56))));}break;case 101: _LL265:{struct Cyc_List_List*_tmpC5A;union Cyc_YYSTYPE_union
+_tmpC59;yyval=(union Cyc_YYSTYPE_union)(((_tmpC59.YY48).tag=52,(((_tmpC59.YY48).f1=((
+_tmpC5A=_cycalloc(sizeof(*_tmpC5A)),((_tmpC5A->hd=Cyc_yyget_YY47(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC5A->tl=0,_tmpC5A)))))),
+_tmpC59))));}break;case 102: _LL266:{struct Cyc_List_List*_tmpC5D;union Cyc_YYSTYPE_union
+_tmpC5C;yyval=(union Cyc_YYSTYPE_union)(((_tmpC5C.YY48).tag=52,(((_tmpC5C.YY48).f1=((
+_tmpC5D=_cycalloc(sizeof(*_tmpC5D)),((_tmpC5D->hd=Cyc_yyget_YY47(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpC5D->tl=0,_tmpC5D)))))),
+_tmpC5C))));}break;case 103: _LL267:{struct Cyc_List_List*_tmpC60;union Cyc_YYSTYPE_union
+_tmpC5F;yyval=(union Cyc_YYSTYPE_union)(((_tmpC5F.YY48).tag=52,(((_tmpC5F.YY48).f1=((
+_tmpC60=_cycalloc(sizeof(*_tmpC60)),((_tmpC60->hd=Cyc_yyget_YY47(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpC60->tl=Cyc_yyget_YY48(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpC60)))))),_tmpC5F))));}
+break;case 104: _LL268:{struct Cyc_Absyn_AnonAggrType_struct*_tmpC66;struct Cyc_Absyn_AnonAggrType_struct
+_tmpC65;union Cyc_YYSTYPE_union _tmpC64;yyval=(union Cyc_YYSTYPE_union)(((_tmpC64.YY23).tag=
+27,(((_tmpC64.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpC66=_cycalloc(
+sizeof(*_tmpC66)),((_tmpC66[0]=((_tmpC65.tag=11,((_tmpC65.f1=(void*)Cyc_yyget_YY24(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpC65.f2=Cyc_yyget_YY26(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpC65)))))),
+_tmpC66)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpBEF))));}break;case 100: _LL264: {struct Cyc_List_List*
-_tmp4B8=((struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Position_Segment*,
+yylsp_offset)]).last_line)),_tmpC64))));}break;case 105: _LL269: {struct Cyc_List_List*
+_tmp505=((struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Position_Segment*,
 void*),struct Cyc_Position_Segment*env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_typ2tvar,
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 5)]).first_line,(yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 5)]).last_line),Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 5)]));struct Cyc_List_List*_tmp4B9=((struct Cyc_List_List*(*)(
+10000,yyvsp_offset - 5)]));struct Cyc_List_List*_tmp506=((struct Cyc_List_List*(*)(
 struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Position_Segment*,void*),struct Cyc_Position_Segment*
 env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_typ2tvar,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line),Cyc_yyget_YY40(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]));{struct Cyc_Parse_Decl_spec_struct*
-_tmpBF7;struct Cyc_Parse_Decl_spec_struct _tmpBF6;union Cyc_YYSTYPE_union _tmpBF5;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpBF5.YY23).tag=27,(((_tmpBF5.YY23).f1=(void*)((
-void*)((_tmpBF7=_cycalloc(sizeof(*_tmpBF7)),((_tmpBF7[0]=((_tmpBF6.tag=5,((
-_tmpBF6.f1=Cyc_Absyn_aggr_decl(Cyc_yyget_YY24(yyvs[
+_tmpC6C;struct Cyc_Parse_Decl_spec_struct _tmpC6B;union Cyc_YYSTYPE_union _tmpC6A;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpC6A.YY23).tag=27,(((_tmpC6A.YY23).f1=(void*)((
+void*)((_tmpC6C=_cycalloc(sizeof(*_tmpC6C)),((_tmpC6C[0]=((_tmpC6B.tag=5,((
+_tmpC6B.f1=Cyc_Absyn_aggr_decl(Cyc_yyget_YY24(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 7)]),(void*)2,Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 6)]),_tmp4B8,(struct Cyc_Absyn_AggrdeclImpl*)
-Cyc_Absyn_aggrdecl_impl(_tmp4B9,Cyc_yyget_YY50(yyvs[
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 6)]),_tmp505,(struct Cyc_Absyn_AggrdeclImpl*)
+Cyc_Absyn_aggrdecl_impl(_tmp506,Cyc_yyget_YY50(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY26(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)])),0,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 7)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpBF6)))),
-_tmpBF7))))),_tmpBF5))));}break;}case 101: _LL265:{struct Cyc_Absyn_AggrType_struct*
-_tmpC06;struct Cyc_Absyn_AggrInfo _tmpC05;union Cyc_Absyn_AggrInfoU_union _tmpC04;
-struct Cyc_Absyn_AggrType_struct _tmpC03;union Cyc_YYSTYPE_union _tmpC02;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpC02.YY23).tag=27,(((_tmpC02.YY23).f1=(void*)Cyc_Parse_type_spec((
-void*)((_tmpC06=_cycalloc(sizeof(*_tmpC06)),((_tmpC06[0]=((_tmpC03.tag=10,((
-_tmpC03.f1=((_tmpC05.aggr_info=(union Cyc_Absyn_AggrInfoU_union)(((_tmpC04.UnknownAggr).tag=
-0,(((_tmpC04.UnknownAggr).f1=(void*)Cyc_yyget_YY24(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),(((_tmpC04.UnknownAggr).f2=
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpC6B)))),
+_tmpC6C))))),_tmpC6A))));}break;}case 106: _LL26A:{struct Cyc_Absyn_AggrType_struct*
+_tmpC7B;struct Cyc_Absyn_AggrInfo _tmpC7A;union Cyc_Absyn_AggrInfoU_union _tmpC79;
+struct Cyc_Absyn_AggrType_struct _tmpC78;union Cyc_YYSTYPE_union _tmpC77;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpC77.YY23).tag=27,(((_tmpC77.YY23).f1=(void*)Cyc_Parse_type_spec((
+void*)((_tmpC7B=_cycalloc(sizeof(*_tmpC7B)),((_tmpC7B[0]=((_tmpC78.tag=10,((
+_tmpC78.f1=((_tmpC7A.aggr_info=(union Cyc_Absyn_AggrInfoU_union)(((_tmpC79.UnknownAggr).tag=
+0,(((_tmpC79.UnknownAggr).f1=(void*)Cyc_yyget_YY24(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),(((_tmpC79.UnknownAggr).f2=
 Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),
-_tmpC04)))))),((_tmpC05.targs=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)]),_tmpC05)))),_tmpC03)))),_tmpC06)))),Cyc_Position_segment_of_abs((
+_tmpC79)))))),((_tmpC7A.targs=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)]),_tmpC7A)))),_tmpC78)))),_tmpC7B)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpC02))));}
-break;case 102: _LL266:{union Cyc_YYSTYPE_union _tmpC07;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC07.YY40).tag=44,(((_tmpC07.YY40).f1=0,_tmpC07))));}break;case 103: _LL267:{
-union Cyc_YYSTYPE_union _tmpC08;yyval=(union Cyc_YYSTYPE_union)(((_tmpC08.YY40).tag=
-44,(((_tmpC08.YY40).f1=Cyc_List_imp_rev(Cyc_yyget_YY40(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)])),_tmpC08))));}break;case
-104: _LL268:{union Cyc_YYSTYPE_union _tmpC09;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC09.YY24).tag=28,(((_tmpC09.YY24).f1=(void*)((void*)0),_tmpC09))));}break;
-case 105: _LL269:{union Cyc_YYSTYPE_union _tmpC0A;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC0A.YY24).tag=28,(((_tmpC0A.YY24).f1=(void*)((void*)1),_tmpC0A))));}break;
-case 106: _LL26A:{union Cyc_YYSTYPE_union _tmpC0B;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC0B.YY26).tag=30,(((_tmpC0B.YY26).f1=0,_tmpC0B))));}break;case 107: _LL26B:{
-union Cyc_YYSTYPE_union _tmpC0C;yyval=(union Cyc_YYSTYPE_union)(((_tmpC0C.YY26).tag=
-30,(((_tmpC0C.YY26).f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_flatten)(((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpC77))));}
+break;case 107: _LL26B:{union Cyc_YYSTYPE_union _tmpC7C;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpC7C.YY40).tag=44,(((_tmpC7C.YY40).f1=0,_tmpC7C))));}break;case 108: _LL26C:{
+union Cyc_YYSTYPE_union _tmpC7D;yyval=(union Cyc_YYSTYPE_union)(((_tmpC7D.YY40).tag=
+44,(((_tmpC7D.YY40).f1=Cyc_List_imp_rev(Cyc_yyget_YY40(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)])),_tmpC7D))));}break;case
+109: _LL26D:{union Cyc_YYSTYPE_union _tmpC7E;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpC7E.YY24).tag=28,(((_tmpC7E.YY24).f1=(void*)((void*)0),_tmpC7E))));}break;
+case 110: _LL26E:{union Cyc_YYSTYPE_union _tmpC7F;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpC7F.YY24).tag=28,(((_tmpC7F.YY24).f1=(void*)((void*)1),_tmpC7F))));}break;
+case 111: _LL26F:{union Cyc_YYSTYPE_union _tmpC80;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpC80.YY26).tag=30,(((_tmpC80.YY26).f1=0,_tmpC80))));}break;case 112: _LL270:{
+union Cyc_YYSTYPE_union _tmpC81;yyval=(union Cyc_YYSTYPE_union)(((_tmpC81.YY26).tag=
+30,(((_tmpC81.YY26).f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_flatten)(((
 struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_YY27(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))),_tmpC0C))));}break;
-case 108: _LL26C:{struct Cyc_List_List*_tmpC0F;union Cyc_YYSTYPE_union _tmpC0E;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpC0E.YY27).tag=31,(((_tmpC0E.YY27).f1=((_tmpC0F=
-_cycalloc(sizeof(*_tmpC0F)),((_tmpC0F->hd=Cyc_yyget_YY26(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC0F->tl=0,_tmpC0F)))))),
-_tmpC0E))));}break;case 109: _LL26D:{struct Cyc_List_List*_tmpC12;union Cyc_YYSTYPE_union
-_tmpC11;yyval=(union Cyc_YYSTYPE_union)(((_tmpC11.YY27).tag=31,(((_tmpC11.YY27).f1=((
-_tmpC12=_cycalloc(sizeof(*_tmpC12)),((_tmpC12->hd=Cyc_yyget_YY26(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC12->tl=Cyc_yyget_YY27(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpC12)))))),
-_tmpC11))));}break;case 110: _LL26E:{union Cyc_YYSTYPE_union _tmpC13;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC13.YY21).tag=25,(((_tmpC13.YY21).f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))),_tmpC81))));}break;
+case 113: _LL271:{struct Cyc_List_List*_tmpC84;union Cyc_YYSTYPE_union _tmpC83;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpC83.YY27).tag=31,(((_tmpC83.YY27).f1=((_tmpC84=
+_cycalloc(sizeof(*_tmpC84)),((_tmpC84->hd=Cyc_yyget_YY26(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC84->tl=0,_tmpC84)))))),
+_tmpC83))));}break;case 114: _LL272:{struct Cyc_List_List*_tmpC87;union Cyc_YYSTYPE_union
+_tmpC86;yyval=(union Cyc_YYSTYPE_union)(((_tmpC86.YY27).tag=31,(((_tmpC86.YY27).f1=((
+_tmpC87=_cycalloc(sizeof(*_tmpC87)),((_tmpC87->hd=Cyc_yyget_YY26(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC87->tl=Cyc_yyget_YY27(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpC87)))))),
+_tmpC86))));}break;case 115: _LL273:{union Cyc_YYSTYPE_union _tmpC88;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpC88.YY21).tag=25,(((_tmpC88.YY21).f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*
 x))Cyc_List_imp_rev)(Cyc_yyget_YY21(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)])),_tmpC13))));}break;case 111: _LL26F:{struct Cyc_List_List*_tmpC16;
-union Cyc_YYSTYPE_union _tmpC15;yyval=(union Cyc_YYSTYPE_union)(((_tmpC15.YY21).tag=
-25,(((_tmpC15.YY21).f1=((_tmpC16=_cycalloc(sizeof(*_tmpC16)),((_tmpC16->hd=Cyc_yyget_YY20(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC16->tl=0,
-_tmpC16)))))),_tmpC15))));}break;case 112: _LL270:{struct Cyc_List_List*_tmpC19;
-union Cyc_YYSTYPE_union _tmpC18;yyval=(union Cyc_YYSTYPE_union)(((_tmpC18.YY21).tag=
-25,(((_tmpC18.YY21).f1=((_tmpC19=_cycalloc(sizeof(*_tmpC19)),((_tmpC19->hd=Cyc_yyget_YY20(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC19->tl=Cyc_yyget_YY21(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpC19)))))),
-_tmpC18))));}break;case 113: _LL271:{struct _tuple15*_tmpC1C;union Cyc_YYSTYPE_union
-_tmpC1B;yyval=(union Cyc_YYSTYPE_union)(((_tmpC1B.YY20).tag=24,(((_tmpC1B.YY20).f1=((
-_tmpC1C=_cycalloc(sizeof(*_tmpC1C)),((_tmpC1C->f1=Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC1C->f2=0,_tmpC1C)))))),
-_tmpC1B))));}break;case 114: _LL272:{struct _tuple15*_tmpC1F;union Cyc_YYSTYPE_union
-_tmpC1E;yyval=(union Cyc_YYSTYPE_union)(((_tmpC1E.YY20).tag=24,(((_tmpC1E.YY20).f1=((
-_tmpC1F=_cycalloc(sizeof(*_tmpC1F)),((_tmpC1F->f1=Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpC1F->f2=(struct Cyc_Absyn_Exp*)
-Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpC1F)))))),
-_tmpC1E))));}break;case 115: _LL273:{struct _RegionHandle _tmp4D5=_new_region("temp");
-struct _RegionHandle*temp=& _tmp4D5;_push_region(temp);{struct _tuple16 _tmp4D7;
-struct Cyc_Absyn_Tqual _tmp4D8;struct Cyc_List_List*_tmp4D9;struct Cyc_List_List*
-_tmp4DA;struct _tuple16*_tmp4D6=Cyc_yyget_YY35(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp4D7=*_tmp4D6;_tmp4D8=
-_tmp4D7.f1;_tmp4D9=_tmp4D7.f2;_tmp4DA=_tmp4D7.f3;if(_tmp4D8.loc == 0)_tmp4D8.loc=
+yyvsp_offset)])),_tmpC88))));}break;case 116: _LL274:{struct Cyc_List_List*_tmpC8B;
+union Cyc_YYSTYPE_union _tmpC8A;yyval=(union Cyc_YYSTYPE_union)(((_tmpC8A.YY21).tag=
+25,(((_tmpC8A.YY21).f1=((_tmpC8B=_cycalloc(sizeof(*_tmpC8B)),((_tmpC8B->hd=Cyc_yyget_YY20(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC8B->tl=0,
+_tmpC8B)))))),_tmpC8A))));}break;case 117: _LL275:{struct Cyc_List_List*_tmpC8E;
+union Cyc_YYSTYPE_union _tmpC8D;yyval=(union Cyc_YYSTYPE_union)(((_tmpC8D.YY21).tag=
+25,(((_tmpC8D.YY21).f1=((_tmpC8E=_cycalloc(sizeof(*_tmpC8E)),((_tmpC8E->hd=Cyc_yyget_YY20(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC8E->tl=Cyc_yyget_YY21(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpC8E)))))),
+_tmpC8D))));}break;case 118: _LL276:{struct _tuple15*_tmpC91;union Cyc_YYSTYPE_union
+_tmpC90;yyval=(union Cyc_YYSTYPE_union)(((_tmpC90.YY20).tag=24,(((_tmpC90.YY20).f1=((
+_tmpC91=_cycalloc(sizeof(*_tmpC91)),((_tmpC91->f1=Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC91->f2=0,_tmpC91)))))),
+_tmpC90))));}break;case 119: _LL277:{struct _tuple15*_tmpC94;union Cyc_YYSTYPE_union
+_tmpC93;yyval=(union Cyc_YYSTYPE_union)(((_tmpC93.YY20).tag=24,(((_tmpC93.YY20).f1=((
+_tmpC94=_cycalloc(sizeof(*_tmpC94)),((_tmpC94->f1=Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpC94->f2=(struct Cyc_Absyn_Exp*)
+Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpC94)))))),
+_tmpC93))));}break;case 120: _LL278: {struct _RegionHandle _tmp522=_new_region("temp");
+struct _RegionHandle*temp=& _tmp522;_push_region(temp);{struct _tuple16 _tmp524;
+struct Cyc_Absyn_Tqual _tmp525;struct Cyc_List_List*_tmp526;struct Cyc_List_List*
+_tmp527;struct _tuple16*_tmp523=Cyc_yyget_YY35(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp524=*_tmp523;_tmp525=
+_tmp524.f1;_tmp526=_tmp524.f2;_tmp527=_tmp524.f3;if(_tmp525.loc == 0)_tmp525.loc=
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 2)]).last_line);{struct Cyc_List_List*_tmp4DC;struct Cyc_List_List*
-_tmp4DD;struct _tuple0 _tmp4DB=((struct _tuple0(*)(struct _RegionHandle*r1,struct
+yylsp_offset - 2)]).last_line);{struct Cyc_List_List*_tmp529;struct Cyc_List_List*
+_tmp52A;struct _tuple0 _tmp528=((struct _tuple0(*)(struct _RegionHandle*r1,struct
 _RegionHandle*r2,struct Cyc_List_List*x))Cyc_List_rsplit)(temp,temp,Cyc_yyget_YY21(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]));_tmp4DC=_tmp4DB.f1;
-_tmp4DD=_tmp4DB.f2;{void*_tmp4DE=Cyc_Parse_speclist2typ(_tmp4D9,Cyc_Position_segment_of_abs((
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]));_tmp529=_tmp528.f1;
+_tmp52A=_tmp528.f2;{void*_tmp52B=Cyc_Parse_speclist2typ(_tmp526,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line));struct Cyc_List_List*
-_tmp4DF=((struct Cyc_List_List*(*)(struct _RegionHandle*r1,struct _RegionHandle*r2,
+_tmp52C=((struct Cyc_List_List*(*)(struct _RegionHandle*r1,struct _RegionHandle*r2,
 struct Cyc_List_List*x,struct Cyc_List_List*y))Cyc_List_rzip)(temp,temp,Cyc_Parse_apply_tmss(
-temp,_tmp4D8,_tmp4DE,_tmp4DC,_tmp4DA),_tmp4DD);union Cyc_YYSTYPE_union _tmpC20;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpC20.YY26).tag=30,(((_tmpC20.YY26).f1=((
+temp,_tmp525,_tmp52B,_tmp529,_tmp527),_tmp52A);union Cyc_YYSTYPE_union _tmpC95;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpC95.YY26).tag=30,(((_tmpC95.YY26).f1=((
 struct Cyc_List_List*(*)(struct Cyc_Absyn_Aggrfield*(*f)(struct Cyc_Position_Segment*,
 struct _tuple8*),struct Cyc_Position_Segment*env,struct Cyc_List_List*x))Cyc_List_map_c)(
 Cyc_Parse_make_aggr_field,Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),_tmp4DF),
-_tmpC20))));}}};_pop_region(temp);}break;case 116: _LL274:{struct _tuple16*_tmpC26;
-struct Cyc_List_List*_tmpC25;union Cyc_YYSTYPE_union _tmpC24;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC24.YY35).tag=39,(((_tmpC24.YY35).f1=((_tmpC26=_cycalloc(sizeof(*_tmpC26)),((
-_tmpC26->f1=Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpC26->f2=((
-_tmpC25=_cycalloc(sizeof(*_tmpC25)),((_tmpC25->hd=(void*)Cyc_yyget_YY23(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC25->tl=0,_tmpC25)))))),((
-_tmpC26->f3=0,_tmpC26)))))))),_tmpC24))));}break;case 117: _LL275:{struct _tuple16*
-_tmpC2C;struct Cyc_List_List*_tmpC2B;union Cyc_YYSTYPE_union _tmpC2A;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpC2A.YY35).tag=39,(((_tmpC2A.YY35).f1=((_tmpC2C=
-_cycalloc(sizeof(*_tmpC2C)),((_tmpC2C->f1=(*Cyc_yyget_YY35(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)])).f1,((_tmpC2C->f2=((_tmpC2B=
-_cycalloc(sizeof(*_tmpC2B)),((_tmpC2B->hd=(void*)Cyc_yyget_YY23(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpC2B->tl=(*Cyc_yyget_YY35(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f2,_tmpC2B)))))),((
-_tmpC2C->f3=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)])).f3,_tmpC2C)))))))),_tmpC2A))));}break;case 118: _LL276:{struct
-_tuple16*_tmpC2F;union Cyc_YYSTYPE_union _tmpC2E;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC2E.YY35).tag=39,(((_tmpC2E.YY35).f1=((_tmpC2F=_cycalloc(sizeof(*_tmpC2F)),((
-_tmpC2F->f1=Cyc_yyget_YY25(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),((_tmpC2F->f2=0,((_tmpC2F->f3=0,_tmpC2F)))))))),_tmpC2E))));}
-break;case 119: _LL277:{struct _tuple16*_tmpC32;union Cyc_YYSTYPE_union _tmpC31;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpC31.YY35).tag=39,(((_tmpC31.YY35).f1=((_tmpC32=
-_cycalloc(sizeof(*_tmpC32)),((_tmpC32->f1=Cyc_Absyn_combine_tqual(Cyc_yyget_YY25(
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),_tmp52C),
+_tmpC95))));}}}_npop_handler(0);break;;_pop_region(temp);}case 121: _LL279:{struct
+_tuple16*_tmpC9B;struct Cyc_List_List*_tmpC9A;union Cyc_YYSTYPE_union _tmpC99;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpC99.YY35).tag=39,(((_tmpC99.YY35).f1=((_tmpC9B=
+_cycalloc(sizeof(*_tmpC9B)),((_tmpC9B->f1=Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((
+yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpC9B->f2=((
+_tmpC9A=_cycalloc(sizeof(*_tmpC9A)),((_tmpC9A->hd=(void*)Cyc_yyget_YY23(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC9A->tl=0,_tmpC9A)))))),((
+_tmpC9B->f3=0,_tmpC9B)))))))),_tmpC99))));}break;case 122: _LL27A:{struct _tuple16*
+_tmpCA1;struct Cyc_List_List*_tmpCA0;union Cyc_YYSTYPE_union _tmpC9F;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpC9F.YY35).tag=39,(((_tmpC9F.YY35).f1=((_tmpCA1=
+_cycalloc(sizeof(*_tmpCA1)),((_tmpCA1->f1=(*Cyc_yyget_YY35(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)])).f1,((_tmpCA1->f2=((_tmpCA0=
+_cycalloc(sizeof(*_tmpCA0)),((_tmpCA0->hd=(void*)Cyc_yyget_YY23(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpCA0->tl=(*Cyc_yyget_YY35(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f2,_tmpCA0)))))),((
+_tmpCA1->f3=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)])).f3,_tmpCA1)))))))),_tmpC9F))));}break;case 123: _LL27B:{struct
+_tuple16*_tmpCA4;union Cyc_YYSTYPE_union _tmpCA3;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpCA3.YY35).tag=39,(((_tmpCA3.YY35).f1=((_tmpCA4=_cycalloc(sizeof(*_tmpCA4)),((
+_tmpCA4->f1=Cyc_yyget_YY25(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),((_tmpCA4->f2=0,((_tmpCA4->f3=0,_tmpCA4)))))))),_tmpCA3))));}
+break;case 124: _LL27C:{struct _tuple16*_tmpCA7;union Cyc_YYSTYPE_union _tmpCA6;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpCA6.YY35).tag=39,(((_tmpCA6.YY35).f1=((_tmpCA7=
+_cycalloc(sizeof(*_tmpCA7)),((_tmpCA7->f1=Cyc_Absyn_combine_tqual(Cyc_yyget_YY25(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),(*Cyc_yyget_YY35(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f1),((_tmpC32->f2=(*
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f1),((_tmpCA7->f2=(*
 Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f2,((
-_tmpC32->f3=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)])).f3,_tmpC32)))))))),_tmpC31))));}break;case 120: _LL278:{struct
-_tuple16*_tmpC35;union Cyc_YYSTYPE_union _tmpC34;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC34.YY35).tag=39,(((_tmpC34.YY35).f1=((_tmpC35=_cycalloc(sizeof(*_tmpC35)),((
-_tmpC35->f1=Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((yyls[
+_tmpCA7->f3=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)])).f3,_tmpCA7)))))))),_tmpCA6))));}break;case 125: _LL27D:{struct
+_tuple16*_tmpCAA;union Cyc_YYSTYPE_union _tmpCA9;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpCA9.YY35).tag=39,(((_tmpCA9.YY35).f1=((_tmpCAA=_cycalloc(sizeof(*_tmpCAA)),((
+_tmpCAA->f1=Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpC35->f2=0,((
-_tmpC35->f3=Cyc_yyget_YY45(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmpC35)))))))),_tmpC34))));}break;case 121: _LL279:{struct
-_tuple16*_tmpC38;union Cyc_YYSTYPE_union _tmpC37;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC37.YY35).tag=39,(((_tmpC37.YY35).f1=((_tmpC38=_cycalloc(sizeof(*_tmpC38)),((
-_tmpC38->f1=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)])).f1,((_tmpC38->f2=(*Cyc_yyget_YY35(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)])).f2,((_tmpC38->f3=Cyc_List_append(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpCAA->f2=0,((
+_tmpCAA->f3=Cyc_yyget_YY45(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmpCAA)))))))),_tmpCA9))));}break;case 126: _LL27E:{struct
+_tuple16*_tmpCAD;union Cyc_YYSTYPE_union _tmpCAC;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpCAC.YY35).tag=39,(((_tmpCAC.YY35).f1=((_tmpCAD=_cycalloc(sizeof(*_tmpCAD)),((
+_tmpCAD->f1=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)])).f1,((_tmpCAD->f2=(*Cyc_yyget_YY35(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)])).f2,((_tmpCAD->f3=Cyc_List_append(
 Cyc_yyget_YY45(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),(*
 Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f3),
-_tmpC38)))))))),_tmpC37))));}break;case 122: _LL27A:{struct _tuple16*_tmpC3E;struct
-Cyc_List_List*_tmpC3D;union Cyc_YYSTYPE_union _tmpC3C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC3C.YY35).tag=39,(((_tmpC3C.YY35).f1=((_tmpC3E=_cycalloc(sizeof(*_tmpC3E)),((
-_tmpC3E->f1=Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((yyls[
+_tmpCAD)))))))),_tmpCAC))));}break;case 127: _LL27F:{struct _tuple16*_tmpCB3;struct
+Cyc_List_List*_tmpCB2;union Cyc_YYSTYPE_union _tmpCB1;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpCB1.YY35).tag=39,(((_tmpCB1.YY35).f1=((_tmpCB3=_cycalloc(sizeof(*_tmpCB3)),((
+_tmpCB3->f1=Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpC3E->f2=((
-_tmpC3D=_cycalloc(sizeof(*_tmpC3D)),((_tmpC3D->hd=(void*)Cyc_yyget_YY23(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC3D->tl=0,_tmpC3D)))))),((
-_tmpC3E->f3=0,_tmpC3E)))))))),_tmpC3C))));}break;case 123: _LL27B:{struct _tuple16*
-_tmpC44;struct Cyc_List_List*_tmpC43;union Cyc_YYSTYPE_union _tmpC42;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpC42.YY35).tag=39,(((_tmpC42.YY35).f1=((_tmpC44=
-_cycalloc(sizeof(*_tmpC44)),((_tmpC44->f1=(*Cyc_yyget_YY35(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)])).f1,((_tmpC44->f2=((_tmpC43=
-_cycalloc(sizeof(*_tmpC43)),((_tmpC43->hd=(void*)Cyc_yyget_YY23(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpC43->tl=(*Cyc_yyget_YY35(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f2,_tmpC43)))))),((
-_tmpC44->f3=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)])).f3,_tmpC44)))))))),_tmpC42))));}break;case 124: _LL27C:{struct
-_tuple16*_tmpC47;union Cyc_YYSTYPE_union _tmpC46;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC46.YY35).tag=39,(((_tmpC46.YY35).f1=((_tmpC47=_cycalloc(sizeof(*_tmpC47)),((
-_tmpC47->f1=Cyc_yyget_YY25(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),((_tmpC47->f2=0,((_tmpC47->f3=0,_tmpC47)))))))),_tmpC46))));}
-break;case 125: _LL27D:{struct _tuple16*_tmpC4A;union Cyc_YYSTYPE_union _tmpC49;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpC49.YY35).tag=39,(((_tmpC49.YY35).f1=((_tmpC4A=
-_cycalloc(sizeof(*_tmpC4A)),((_tmpC4A->f1=Cyc_Absyn_combine_tqual(Cyc_yyget_YY25(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpCB3->f2=((
+_tmpCB2=_cycalloc(sizeof(*_tmpCB2)),((_tmpCB2->hd=(void*)Cyc_yyget_YY23(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpCB2->tl=0,_tmpCB2)))))),((
+_tmpCB3->f3=0,_tmpCB3)))))))),_tmpCB1))));}break;case 128: _LL280:{struct _tuple16*
+_tmpCB9;struct Cyc_List_List*_tmpCB8;union Cyc_YYSTYPE_union _tmpCB7;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpCB7.YY35).tag=39,(((_tmpCB7.YY35).f1=((_tmpCB9=
+_cycalloc(sizeof(*_tmpCB9)),((_tmpCB9->f1=(*Cyc_yyget_YY35(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)])).f1,((_tmpCB9->f2=((_tmpCB8=
+_cycalloc(sizeof(*_tmpCB8)),((_tmpCB8->hd=(void*)Cyc_yyget_YY23(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpCB8->tl=(*Cyc_yyget_YY35(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f2,_tmpCB8)))))),((
+_tmpCB9->f3=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)])).f3,_tmpCB9)))))))),_tmpCB7))));}break;case 129: _LL281:{struct
+_tuple16*_tmpCBC;union Cyc_YYSTYPE_union _tmpCBB;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpCBB.YY35).tag=39,(((_tmpCBB.YY35).f1=((_tmpCBC=_cycalloc(sizeof(*_tmpCBC)),((
+_tmpCBC->f1=Cyc_yyget_YY25(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),((_tmpCBC->f2=0,((_tmpCBC->f3=0,_tmpCBC)))))))),_tmpCBB))));}
+break;case 130: _LL282:{struct _tuple16*_tmpCBF;union Cyc_YYSTYPE_union _tmpCBE;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpCBE.YY35).tag=39,(((_tmpCBE.YY35).f1=((_tmpCBF=
+_cycalloc(sizeof(*_tmpCBF)),((_tmpCBF->f1=Cyc_Absyn_combine_tqual(Cyc_yyget_YY25(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),(*Cyc_yyget_YY35(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f1),((_tmpC4A->f2=(*
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f1),((_tmpCBF->f2=(*
 Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f2,((
-_tmpC4A->f3=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)])).f3,_tmpC4A)))))))),_tmpC49))));}break;case 126: _LL27E:{struct
-_tuple16*_tmpC4D;union Cyc_YYSTYPE_union _tmpC4C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC4C.YY35).tag=39,(((_tmpC4C.YY35).f1=((_tmpC4D=_cycalloc(sizeof(*_tmpC4D)),((
-_tmpC4D->f1=Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((yyls[
+_tmpCBF->f3=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)])).f3,_tmpCBF)))))))),_tmpCBE))));}break;case 131: _LL283:{struct
+_tuple16*_tmpCC2;union Cyc_YYSTYPE_union _tmpCC1;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpCC1.YY35).tag=39,(((_tmpCC1.YY35).f1=((_tmpCC2=_cycalloc(sizeof(*_tmpCC2)),((
+_tmpCC2->f1=Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpC4D->f2=0,((
-_tmpC4D->f3=Cyc_yyget_YY45(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmpC4D)))))))),_tmpC4C))));}break;case 127: _LL27F:{struct
-_tuple16*_tmpC50;union Cyc_YYSTYPE_union _tmpC4F;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpC4F.YY35).tag=39,(((_tmpC4F.YY35).f1=((_tmpC50=_cycalloc(sizeof(*_tmpC50)),((
-_tmpC50->f1=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)])).f1,((_tmpC50->f2=(*Cyc_yyget_YY35(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)])).f2,((_tmpC50->f3=Cyc_List_append(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),((_tmpCC2->f2=0,((
+_tmpCC2->f3=Cyc_yyget_YY45(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmpCC2)))))))),_tmpCC1))));}break;case 132: _LL284:{struct
+_tuple16*_tmpCC5;union Cyc_YYSTYPE_union _tmpCC4;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpCC4.YY35).tag=39,(((_tmpCC4.YY35).f1=((_tmpCC5=_cycalloc(sizeof(*_tmpCC5)),((
+_tmpCC5->f1=(*Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)])).f1,((_tmpCC5->f2=(*Cyc_yyget_YY35(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)])).f2,((_tmpCC5->f3=Cyc_List_append(
 Cyc_yyget_YY45(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),(*
 Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f3),
-_tmpC50)))))))),_tmpC4F))));}break;case 128: _LL280:{union Cyc_YYSTYPE_union _tmpC51;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpC51.YY21).tag=25,(((_tmpC51.YY21).f1=((
+_tmpCC5)))))))),_tmpCC4))));}break;case 133: _LL285:{union Cyc_YYSTYPE_union _tmpCC6;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpCC6.YY21).tag=25,(((_tmpCC6.YY21).f1=((
 struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_YY21(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpC51))));}break;
-case 129: _LL281:{struct Cyc_List_List*_tmpC54;union Cyc_YYSTYPE_union _tmpC53;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpC53.YY21).tag=25,(((_tmpC53.YY21).f1=((_tmpC54=
-_cycalloc(sizeof(*_tmpC54)),((_tmpC54->hd=Cyc_yyget_YY20(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC54->tl=0,_tmpC54)))))),
-_tmpC53))));}break;case 130: _LL282:{struct Cyc_List_List*_tmpC57;union Cyc_YYSTYPE_union
-_tmpC56;yyval=(union Cyc_YYSTYPE_union)(((_tmpC56.YY21).tag=25,(((_tmpC56.YY21).f1=((
-_tmpC57=_cycalloc(sizeof(*_tmpC57)),((_tmpC57->hd=Cyc_yyget_YY20(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC57->tl=Cyc_yyget_YY21(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpC57)))))),
-_tmpC56))));}break;case 131: _LL283:{struct _tuple15*_tmpC5A;union Cyc_YYSTYPE_union
-_tmpC59;yyval=(union Cyc_YYSTYPE_union)(((_tmpC59.YY20).tag=24,(((_tmpC59.YY20).f1=((
-_tmpC5A=_cycalloc(sizeof(*_tmpC5A)),((_tmpC5A->f1=Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpC5A->f2=0,_tmpC5A)))))),
-_tmpC59))));}break;case 132: _LL284:{struct _tuple15*_tmpC69;struct _tuple1*_tmpC68;
-union Cyc_Absyn_Nmspace_union _tmpC67;struct Cyc_Parse_Declarator*_tmpC66;union Cyc_YYSTYPE_union
-_tmpC65;yyval=(union Cyc_YYSTYPE_union)(((_tmpC65.YY20).tag=24,(((_tmpC65.YY20).f1=((
-_tmpC69=_cycalloc(sizeof(*_tmpC69)),((_tmpC69->f1=((_tmpC66=_cycalloc(sizeof(*
-_tmpC66)),((_tmpC66->id=((_tmpC68=_cycalloc(sizeof(*_tmpC68)),((_tmpC68->f1=(
-union Cyc_Absyn_Nmspace_union)(((_tmpC67.Rel_n).tag=1,(((_tmpC67.Rel_n).f1=0,
-_tmpC67)))),((_tmpC68->f2=_init_dyneither_ptr(_cycalloc(sizeof(struct
-_dyneither_ptr)),"",sizeof(char),1),_tmpC68)))))),((_tmpC66->tms=0,_tmpC66)))))),((
-_tmpC69->f2=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpC69)))))),_tmpC65))));}
-break;case 133: _LL285:{struct _tuple15*_tmpC6C;union Cyc_YYSTYPE_union _tmpC6B;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpC6B.YY20).tag=24,(((_tmpC6B.YY20).f1=((_tmpC6C=
-_cycalloc(sizeof(*_tmpC6C)),((_tmpC6C->f1=Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpC6C->f2=(struct Cyc_Absyn_Exp*)
-Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpC6C)))))),
-_tmpC6B))));}break;case 134: _LL286: {struct Cyc_List_List*_tmp50C=((struct Cyc_List_List*(*)(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpCC6))));}break;
+case 134: _LL286:{struct Cyc_List_List*_tmpCC9;union Cyc_YYSTYPE_union _tmpCC8;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpCC8.YY21).tag=25,(((_tmpCC8.YY21).f1=((_tmpCC9=
+_cycalloc(sizeof(*_tmpCC9)),((_tmpCC9->hd=Cyc_yyget_YY20(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpCC9->tl=0,_tmpCC9)))))),
+_tmpCC8))));}break;case 135: _LL287:{struct Cyc_List_List*_tmpCCC;union Cyc_YYSTYPE_union
+_tmpCCB;yyval=(union Cyc_YYSTYPE_union)(((_tmpCCB.YY21).tag=25,(((_tmpCCB.YY21).f1=((
+_tmpCCC=_cycalloc(sizeof(*_tmpCCC)),((_tmpCCC->hd=Cyc_yyget_YY20(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpCCC->tl=Cyc_yyget_YY21(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpCCC)))))),
+_tmpCCB))));}break;case 136: _LL288:{struct _tuple15*_tmpCCF;union Cyc_YYSTYPE_union
+_tmpCCE;yyval=(union Cyc_YYSTYPE_union)(((_tmpCCE.YY20).tag=24,(((_tmpCCE.YY20).f1=((
+_tmpCCF=_cycalloc(sizeof(*_tmpCCF)),((_tmpCCF->f1=Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpCCF->f2=0,_tmpCCF)))))),
+_tmpCCE))));}break;case 137: _LL289:{struct _tuple15*_tmpCDE;struct _tuple1*_tmpCDD;
+union Cyc_Absyn_Nmspace_union _tmpCDC;struct Cyc_Parse_Declarator*_tmpCDB;union Cyc_YYSTYPE_union
+_tmpCDA;yyval=(union Cyc_YYSTYPE_union)(((_tmpCDA.YY20).tag=24,(((_tmpCDA.YY20).f1=((
+_tmpCDE=_cycalloc(sizeof(*_tmpCDE)),((_tmpCDE->f1=((_tmpCDB=_cycalloc(sizeof(*
+_tmpCDB)),((_tmpCDB->id=((_tmpCDD=_cycalloc(sizeof(*_tmpCDD)),((_tmpCDD->f1=(
+union Cyc_Absyn_Nmspace_union)(((_tmpCDC.Rel_n).tag=1,(((_tmpCDC.Rel_n).f1=0,
+_tmpCDC)))),((_tmpCDD->f2=_init_dyneither_ptr(_cycalloc(sizeof(struct
+_dyneither_ptr)),"",sizeof(char),1),_tmpCDD)))))),((_tmpCDB->tms=0,_tmpCDB)))))),((
+_tmpCDE->f2=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpCDE)))))),_tmpCDA))));}
+break;case 138: _LL28A:{struct _tuple15*_tmpCE1;union Cyc_YYSTYPE_union _tmpCE0;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpCE0.YY20).tag=24,(((_tmpCE0.YY20).f1=((_tmpCE1=
+_cycalloc(sizeof(*_tmpCE1)),((_tmpCE1->f1=Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpCE1->f2=(struct Cyc_Absyn_Exp*)
+Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpCE1)))))),
+_tmpCE0))));}break;case 139: _LL28B: {struct Cyc_List_List*_tmp559=((struct Cyc_List_List*(*)(
 struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Position_Segment*,void*),struct Cyc_Position_Segment*
 env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_typ2tvar,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line),Cyc_yyget_YY40(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]));{struct Cyc_Parse_Decl_spec_struct*
-_tmpC76;struct Cyc_Core_Opt*_tmpC75;struct Cyc_Parse_Decl_spec_struct _tmpC74;union
-Cyc_YYSTYPE_union _tmpC73;yyval=(union Cyc_YYSTYPE_union)(((_tmpC73.YY23).tag=27,(((
-_tmpC73.YY23).f1=(void*)((void*)((_tmpC76=_cycalloc(sizeof(*_tmpC76)),((_tmpC76[
-0]=((_tmpC74.tag=5,((_tmpC74.f1=Cyc_Absyn_tunion_decl((void*)2,Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),_tmp50C,((_tmpC75=
-_cycalloc(sizeof(*_tmpC75)),((_tmpC75->v=Cyc_yyget_YY34(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpC75)))),Cyc_yyget_YY31(
+_tmpCEB;struct Cyc_Core_Opt*_tmpCEA;struct Cyc_Parse_Decl_spec_struct _tmpCE9;union
+Cyc_YYSTYPE_union _tmpCE8;yyval=(union Cyc_YYSTYPE_union)(((_tmpCE8.YY23).tag=27,(((
+_tmpCE8.YY23).f1=(void*)((void*)((_tmpCEB=_cycalloc(sizeof(*_tmpCEB)),((_tmpCEB[
+0]=((_tmpCE9.tag=5,((_tmpCE9.f1=Cyc_Absyn_tunion_decl((void*)2,Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),_tmp559,((_tmpCEA=
+_cycalloc(sizeof(*_tmpCEA)),((_tmpCEA->v=Cyc_yyget_YY34(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpCEA)))),Cyc_yyget_YY31(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 6)]),Cyc_yyget_YY31(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 7)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 7)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpC74)))),
-_tmpC76))))),_tmpC73))));}break;}case 135: _LL287:{struct Cyc_Absyn_TunionType_struct*
-_tmpC8B;struct Cyc_Absyn_TunionInfo _tmpC8A;struct Cyc_Absyn_UnknownTunionInfo
-_tmpC89;union Cyc_Absyn_TunionInfoU_union _tmpC88;struct Cyc_Absyn_TunionType_struct
-_tmpC87;union Cyc_YYSTYPE_union _tmpC86;yyval=(union Cyc_YYSTYPE_union)(((_tmpC86.YY23).tag=
-27,(((_tmpC86.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpC8B=_cycalloc(
-sizeof(*_tmpC8B)),((_tmpC8B[0]=((_tmpC87.tag=2,((_tmpC87.f1=((_tmpC8A.tunion_info=(
-union Cyc_Absyn_TunionInfoU_union)(((_tmpC88.UnknownTunion).tag=0,(((_tmpC88.UnknownTunion).f1=((
-_tmpC89.name=Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]),((_tmpC89.is_xtunion=Cyc_yyget_YY31(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpC89.is_flat=Cyc_yyget_YY31(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),_tmpC89)))))),
-_tmpC88)))),((_tmpC8A.targs=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)]),((_tmpC8A.rgn=Cyc_yyget_YY49(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpC8A)))))),_tmpC87)))),
-_tmpC8B)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpCE9)))),
+_tmpCEB))))),_tmpCE8))));}break;}case 140: _LL28C:{struct Cyc_Absyn_TunionType_struct*
+_tmpD00;struct Cyc_Absyn_TunionInfo _tmpCFF;struct Cyc_Absyn_UnknownTunionInfo
+_tmpCFE;union Cyc_Absyn_TunionInfoU_union _tmpCFD;struct Cyc_Absyn_TunionType_struct
+_tmpCFC;union Cyc_YYSTYPE_union _tmpCFB;yyval=(union Cyc_YYSTYPE_union)(((_tmpCFB.YY23).tag=
+27,(((_tmpCFB.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpD00=_cycalloc(
+sizeof(*_tmpD00)),((_tmpD00[0]=((_tmpCFC.tag=2,((_tmpCFC.f1=((_tmpCFF.tunion_info=(
+union Cyc_Absyn_TunionInfoU_union)(((_tmpCFD.UnknownTunion).tag=0,(((_tmpCFD.UnknownTunion).f1=((
+_tmpCFE.name=Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]),((_tmpCFE.is_xtunion=Cyc_yyget_YY31(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpCFE.is_flat=Cyc_yyget_YY31(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),_tmpCFE)))))),
+_tmpCFD)))),((_tmpCFF.targs=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)]),((_tmpCFF.rgn=Cyc_yyget_YY49(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpCFF)))))),_tmpCFC)))),
+_tmpD00)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 4)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpC86))));}break;case 136: _LL288:{struct Cyc_Absyn_TunionFieldType_struct*
-_tmpCA0;struct Cyc_Absyn_TunionFieldInfo _tmpC9F;struct Cyc_Absyn_UnknownTunionFieldInfo
-_tmpC9E;union Cyc_Absyn_TunionFieldInfoU_union _tmpC9D;struct Cyc_Absyn_TunionFieldType_struct
-_tmpC9C;union Cyc_YYSTYPE_union _tmpC9B;yyval=(union Cyc_YYSTYPE_union)(((_tmpC9B.YY23).tag=
-27,(((_tmpC9B.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpCA0=_cycalloc(
-sizeof(*_tmpCA0)),((_tmpCA0[0]=((_tmpC9C.tag=3,((_tmpC9C.f1=((_tmpC9F.field_info=(
-union Cyc_Absyn_TunionFieldInfoU_union)(((_tmpC9D.UnknownTunionfield).tag=0,(((
-_tmpC9D.UnknownTunionfield).f1=((_tmpC9E.tunion_name=Cyc_yyget_QualId_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpC9E.field_name=Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpC9E.is_xtunion=
+yylsp_offset)]).last_line)),_tmpCFB))));}break;case 141: _LL28D:{struct Cyc_Absyn_TunionFieldType_struct*
+_tmpD15;struct Cyc_Absyn_TunionFieldInfo _tmpD14;struct Cyc_Absyn_UnknownTunionFieldInfo
+_tmpD13;union Cyc_Absyn_TunionFieldInfoU_union _tmpD12;struct Cyc_Absyn_TunionFieldType_struct
+_tmpD11;union Cyc_YYSTYPE_union _tmpD10;yyval=(union Cyc_YYSTYPE_union)(((_tmpD10.YY23).tag=
+27,(((_tmpD10.YY23).f1=(void*)Cyc_Parse_type_spec((void*)((_tmpD15=_cycalloc(
+sizeof(*_tmpD15)),((_tmpD15[0]=((_tmpD11.tag=3,((_tmpD11.f1=((_tmpD14.field_info=(
+union Cyc_Absyn_TunionFieldInfoU_union)(((_tmpD12.UnknownTunionfield).tag=0,(((
+_tmpD12.UnknownTunionfield).f1=((_tmpD13.tunion_name=Cyc_yyget_QualId_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpD13.field_name=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpD13.is_xtunion=
 Cyc_yyget_YY31(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 5)]),
-_tmpC9E)))))),_tmpC9D)))),((_tmpC9F.targs=Cyc_yyget_YY40(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpC9F)))),_tmpC9C)))),
-_tmpCA0)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_tmpD13)))))),_tmpD12)))),((_tmpD14.targs=Cyc_yyget_YY40(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpD14)))),_tmpD11)))),
+_tmpD15)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 6)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpC9B))));}break;case 137: _LL289:{union Cyc_YYSTYPE_union
-_tmpCA1;yyval=(union Cyc_YYSTYPE_union)(((_tmpCA1.YY31).tag=35,(((_tmpCA1.YY31).f1=
-1,_tmpCA1))));}break;case 138: _LL28A:{union Cyc_YYSTYPE_union _tmpCA2;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpCA2.YY31).tag=35,(((_tmpCA2.YY31).f1=0,_tmpCA2))));}
-break;case 139: _LL28B:{union Cyc_YYSTYPE_union _tmpCA3;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpCA3.YY31).tag=35,(((_tmpCA3.YY31).f1=0,_tmpCA3))));}break;case 140: _LL28C:{
-union Cyc_YYSTYPE_union _tmpCA4;yyval=(union Cyc_YYSTYPE_union)(((_tmpCA4.YY31).tag=
-35,(((_tmpCA4.YY31).f1=1,_tmpCA4))));}break;case 141: _LL28D:{struct Cyc_List_List*
-_tmpCA7;union Cyc_YYSTYPE_union _tmpCA6;yyval=(union Cyc_YYSTYPE_union)(((_tmpCA6.YY34).tag=
-38,(((_tmpCA6.YY34).f1=((_tmpCA7=_cycalloc(sizeof(*_tmpCA7)),((_tmpCA7->hd=Cyc_yyget_YY33(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpCA7->tl=0,
-_tmpCA7)))))),_tmpCA6))));}break;case 142: _LL28E:{struct Cyc_List_List*_tmpCAA;
-union Cyc_YYSTYPE_union _tmpCA9;yyval=(union Cyc_YYSTYPE_union)(((_tmpCA9.YY34).tag=
-38,(((_tmpCA9.YY34).f1=((_tmpCAA=_cycalloc(sizeof(*_tmpCAA)),((_tmpCAA->hd=Cyc_yyget_YY33(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpCAA->tl=0,
-_tmpCAA)))))),_tmpCA9))));}break;case 143: _LL28F:{struct Cyc_List_List*_tmpCAD;
-union Cyc_YYSTYPE_union _tmpCAC;yyval=(union Cyc_YYSTYPE_union)(((_tmpCAC.YY34).tag=
-38,(((_tmpCAC.YY34).f1=((_tmpCAD=_cycalloc(sizeof(*_tmpCAD)),((_tmpCAD->hd=Cyc_yyget_YY33(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpCAD->tl=Cyc_yyget_YY34(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpCAD)))))),_tmpCAC))));}
-break;case 144: _LL290:{struct Cyc_List_List*_tmpCB0;union Cyc_YYSTYPE_union _tmpCAF;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpCAF.YY34).tag=38,(((_tmpCAF.YY34).f1=((
-_tmpCB0=_cycalloc(sizeof(*_tmpCB0)),((_tmpCB0->hd=Cyc_yyget_YY33(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpCB0->tl=Cyc_yyget_YY34(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpCB0)))))),_tmpCAF))));}
-break;case 145: _LL291:{union Cyc_YYSTYPE_union _tmpCB1;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpCB1.YY32).tag=36,(((_tmpCB1.YY32).f1=(void*)((void*)2),_tmpCB1))));}break;
-case 146: _LL292:{union Cyc_YYSTYPE_union _tmpCB2;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpCB2.YY32).tag=36,(((_tmpCB2.YY32).f1=(void*)((void*)3),_tmpCB2))));}break;
-case 147: _LL293:{union Cyc_YYSTYPE_union _tmpCB3;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpCB3.YY32).tag=36,(((_tmpCB3.YY32).f1=(void*)((void*)0),_tmpCB3))));}break;
-case 148: _LL294:{struct Cyc_Absyn_Tunionfield*_tmpCB6;union Cyc_YYSTYPE_union
-_tmpCB5;yyval=(union Cyc_YYSTYPE_union)(((_tmpCB5.YY33).tag=37,(((_tmpCB5.YY33).f1=((
-_tmpCB6=_cycalloc(sizeof(*_tmpCB6)),((_tmpCB6->name=Cyc_yyget_QualId_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpCB6->typs=0,((_tmpCB6->loc=
+yylsp_offset)]).last_line)),_tmpD10))));}break;case 142: _LL28E:{union Cyc_YYSTYPE_union
+_tmpD16;yyval=(union Cyc_YYSTYPE_union)(((_tmpD16.YY31).tag=35,(((_tmpD16.YY31).f1=
+1,_tmpD16))));}break;case 143: _LL28F:{union Cyc_YYSTYPE_union _tmpD17;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpD17.YY31).tag=35,(((_tmpD17.YY31).f1=0,_tmpD17))));}
+break;case 144: _LL290:{union Cyc_YYSTYPE_union _tmpD18;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpD18.YY31).tag=35,(((_tmpD18.YY31).f1=0,_tmpD18))));}break;case 145: _LL291:{
+union Cyc_YYSTYPE_union _tmpD19;yyval=(union Cyc_YYSTYPE_union)(((_tmpD19.YY31).tag=
+35,(((_tmpD19.YY31).f1=1,_tmpD19))));}break;case 146: _LL292:{struct Cyc_List_List*
+_tmpD1C;union Cyc_YYSTYPE_union _tmpD1B;yyval=(union Cyc_YYSTYPE_union)(((_tmpD1B.YY34).tag=
+38,(((_tmpD1B.YY34).f1=((_tmpD1C=_cycalloc(sizeof(*_tmpD1C)),((_tmpD1C->hd=Cyc_yyget_YY33(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpD1C->tl=0,
+_tmpD1C)))))),_tmpD1B))));}break;case 147: _LL293:{struct Cyc_List_List*_tmpD1F;
+union Cyc_YYSTYPE_union _tmpD1E;yyval=(union Cyc_YYSTYPE_union)(((_tmpD1E.YY34).tag=
+38,(((_tmpD1E.YY34).f1=((_tmpD1F=_cycalloc(sizeof(*_tmpD1F)),((_tmpD1F->hd=Cyc_yyget_YY33(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpD1F->tl=0,
+_tmpD1F)))))),_tmpD1E))));}break;case 148: _LL294:{struct Cyc_List_List*_tmpD22;
+union Cyc_YYSTYPE_union _tmpD21;yyval=(union Cyc_YYSTYPE_union)(((_tmpD21.YY34).tag=
+38,(((_tmpD21.YY34).f1=((_tmpD22=_cycalloc(sizeof(*_tmpD22)),((_tmpD22->hd=Cyc_yyget_YY33(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpD22->tl=Cyc_yyget_YY34(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpD22)))))),_tmpD21))));}
+break;case 149: _LL295:{struct Cyc_List_List*_tmpD25;union Cyc_YYSTYPE_union _tmpD24;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpD24.YY34).tag=38,(((_tmpD24.YY34).f1=((
+_tmpD25=_cycalloc(sizeof(*_tmpD25)),((_tmpD25->hd=Cyc_yyget_YY33(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpD25->tl=Cyc_yyget_YY34(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpD25)))))),_tmpD24))));}
+break;case 150: _LL296:{union Cyc_YYSTYPE_union _tmpD26;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpD26.YY32).tag=36,(((_tmpD26.YY32).f1=(void*)((void*)2),_tmpD26))));}break;
+case 151: _LL297:{union Cyc_YYSTYPE_union _tmpD27;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpD27.YY32).tag=36,(((_tmpD27.YY32).f1=(void*)((void*)3),_tmpD27))));}break;
+case 152: _LL298:{union Cyc_YYSTYPE_union _tmpD28;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpD28.YY32).tag=36,(((_tmpD28.YY32).f1=(void*)((void*)0),_tmpD28))));}break;
+case 153: _LL299:{struct Cyc_Absyn_Tunionfield*_tmpD2B;union Cyc_YYSTYPE_union
+_tmpD2A;yyval=(union Cyc_YYSTYPE_union)(((_tmpD2A.YY33).tag=37,(((_tmpD2A.YY33).f1=((
+_tmpD2B=_cycalloc(sizeof(*_tmpD2B)),((_tmpD2B->name=Cyc_yyget_QualId_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpD2B->typs=0,((_tmpD2B->loc=
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line),((_tmpCB6->sc=(void*)Cyc_yyget_YY32(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpCB6)))))))))),
-_tmpCB5))));}break;case 149: _LL295: {struct Cyc_List_List*_tmp52E=((struct Cyc_List_List*(*)(
+yylsp_offset)]).last_line),((_tmpD2B->sc=(void*)Cyc_yyget_YY32(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpD2B)))))))))),
+_tmpD2A))));}break;case 154: _LL29A: {struct Cyc_List_List*_tmp57B=((struct Cyc_List_List*(*)(
 struct _tuple9*(*f)(struct Cyc_Position_Segment*,struct _tuple2*),struct Cyc_Position_Segment*
 env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_get_tqual_typ,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_YY38(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)])));{struct Cyc_Absyn_Tunionfield*
-_tmpCB9;union Cyc_YYSTYPE_union _tmpCB8;yyval=(union Cyc_YYSTYPE_union)(((_tmpCB8.YY33).tag=
-37,(((_tmpCB8.YY33).f1=((_tmpCB9=_cycalloc(sizeof(*_tmpCB9)),((_tmpCB9->name=Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpCB9->typs=
-_tmp52E,((_tmpCB9->loc=Cyc_Position_segment_of_abs((yyls[
+_tmpD2E;union Cyc_YYSTYPE_union _tmpD2D;yyval=(union Cyc_YYSTYPE_union)(((_tmpD2D.YY33).tag=
+37,(((_tmpD2D.YY33).f1=((_tmpD2E=_cycalloc(sizeof(*_tmpD2E)),((_tmpD2E->name=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpD2E->typs=
+_tmp57B,((_tmpD2E->loc=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpCB9->sc=(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpD2E->sc=(
 void*)Cyc_yyget_YY32(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),
-_tmpCB9)))))))))),_tmpCB8))));}break;}case 150: _LL296: yyval=yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 151: _LL297:{struct
-Cyc_Parse_Declarator*_tmpCBC;union Cyc_YYSTYPE_union _tmpCBB;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpCBB.YY29).tag=33,(((_tmpCBB.YY29).f1=((_tmpCBC=_cycalloc(sizeof(*_tmpCBC)),((
-_tmpCBC->id=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]))->id,((_tmpCBC->tms=Cyc_List_imp_append(Cyc_yyget_YY28(yyvs[
+_tmpD2E)))))))))),_tmpD2D))));}break;}case 155: _LL29B: yyval=yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 156: _LL29C:{struct
+Cyc_Parse_Declarator*_tmpD31;union Cyc_YYSTYPE_union _tmpD30;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpD30.YY29).tag=33,(((_tmpD30.YY29).f1=((_tmpD31=_cycalloc(sizeof(*_tmpD31)),((
+_tmpD31->id=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]))->id,((_tmpD31->tms=Cyc_List_imp_append(Cyc_yyget_YY28(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]))->tms),_tmpCBC)))))),
-_tmpCBB))));}break;case 152: _LL298: yyval=yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)];break;case 153: _LL299:{struct Cyc_Parse_Declarator*_tmpCBF;
-union Cyc_YYSTYPE_union _tmpCBE;yyval=(union Cyc_YYSTYPE_union)(((_tmpCBE.YY29).tag=
-33,(((_tmpCBE.YY29).f1=((_tmpCBF=_cycalloc(sizeof(*_tmpCBF)),((_tmpCBF->id=(Cyc_yyget_YY29(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->id,((_tmpCBF->tms=
+_check_known_subscript_notnull(10000,yyvsp_offset)]))->tms),_tmpD31)))))),
+_tmpD30))));}break;case 157: _LL29D: yyval=yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)];break;case 158: _LL29E:{struct Cyc_Parse_Declarator*_tmpD34;
+union Cyc_YYSTYPE_union _tmpD33;yyval=(union Cyc_YYSTYPE_union)(((_tmpD33.YY29).tag=
+33,(((_tmpD33.YY29).f1=((_tmpD34=_cycalloc(sizeof(*_tmpD34)),((_tmpD34->id=(Cyc_yyget_YY29(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->id,((_tmpD34->tms=
 Cyc_List_imp_append(Cyc_yyget_YY28(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 1)]),(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]))->tms),_tmpCBF)))))),_tmpCBE))));}break;case 154: _LL29A:{struct
-Cyc_Parse_Declarator*_tmpCC2;union Cyc_YYSTYPE_union _tmpCC1;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpCC1.YY29).tag=33,(((_tmpCC1.YY29).f1=((_tmpCC2=_cycalloc(sizeof(*_tmpCC2)),((
-_tmpCC2->id=Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),((_tmpCC2->tms=0,_tmpCC2)))))),_tmpCC1))));}break;case 155: _LL29B:
-yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)];break;case 156:
-_LL29C: {struct Cyc_Parse_Declarator*_tmp537=Cyc_yyget_YY29(yyvs[
+yyvsp_offset)]))->tms),_tmpD34)))))),_tmpD33))));}break;case 159: _LL29F:{struct
+Cyc_Parse_Declarator*_tmpD37;union Cyc_YYSTYPE_union _tmpD36;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpD36.YY29).tag=33,(((_tmpD36.YY29).f1=((_tmpD37=_cycalloc(sizeof(*_tmpD37)),((
+_tmpD37->id=Cyc_yyget_QualId_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),((_tmpD37->tms=0,_tmpD37)))))),_tmpD36))));}break;case 160: _LL2A0:
+yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)];break;case 161:
+_LL2A1: {struct Cyc_Parse_Declarator*_tmp584=Cyc_yyget_YY29(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]);{struct Cyc_Absyn_Attributes_mod_struct*
-_tmpCC8;struct Cyc_Absyn_Attributes_mod_struct _tmpCC7;struct Cyc_List_List*_tmpCC6;
-_tmp537->tms=((_tmpCC6=_cycalloc(sizeof(*_tmpCC6)),((_tmpCC6->hd=(void*)((void*)((
-_tmpCC8=_cycalloc(sizeof(*_tmpCC8)),((_tmpCC8[0]=((_tmpCC7.tag=5,((_tmpCC7.f1=
+_tmpD3D;struct Cyc_Absyn_Attributes_mod_struct _tmpD3C;struct Cyc_List_List*_tmpD3B;
+_tmp584->tms=((_tmpD3B=_cycalloc(sizeof(*_tmpD3B)),((_tmpD3B->hd=(void*)((void*)((
+_tmpD3D=_cycalloc(sizeof(*_tmpD3D)),((_tmpD3D[0]=((_tmpD3C.tag=5,((_tmpD3C.f1=
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 2)]).last_line),((_tmpCC7.f2=Cyc_yyget_YY45(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpCC7)))))),_tmpCC8))))),((
-_tmpCC6->tl=_tmp537->tms,_tmpCC6))))));}yyval=yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)];break;}case 157: _LL29D:{
-struct Cyc_Parse_Declarator*_tmpCD7;struct Cyc_Absyn_Carray_mod_struct*_tmpCD6;
-struct Cyc_Absyn_Carray_mod_struct _tmpCD5;struct Cyc_List_List*_tmpCD4;union Cyc_YYSTYPE_union
-_tmpCD3;yyval=(union Cyc_YYSTYPE_union)(((_tmpCD3.YY29).tag=33,(((_tmpCD3.YY29).f1=((
-_tmpCD7=_cycalloc(sizeof(*_tmpCD7)),((_tmpCD7->id=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpCD7->tms=((
-_tmpCD4=_cycalloc(sizeof(*_tmpCD4)),((_tmpCD4->hd=(void*)((void*)((_tmpCD6=
-_cycalloc(sizeof(*_tmpCD6)),((_tmpCD6[0]=((_tmpCD5.tag=0,((_tmpCD5.f1=Cyc_yyget_YY51(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpCD5.f2=Cyc_Position_segment_of_abs((
+yylsp_offset - 2)]).last_line),((_tmpD3C.f2=Cyc_yyget_YY45(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpD3C)))))),_tmpD3D))))),((
+_tmpD3B->tl=_tmp584->tms,_tmpD3B))))));}yyval=yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)];break;}case 162: _LL2A2:{
+struct Cyc_Parse_Declarator*_tmpD4C;struct Cyc_Absyn_Carray_mod_struct*_tmpD4B;
+struct Cyc_Absyn_Carray_mod_struct _tmpD4A;struct Cyc_List_List*_tmpD49;union Cyc_YYSTYPE_union
+_tmpD48;yyval=(union Cyc_YYSTYPE_union)(((_tmpD48.YY29).tag=33,(((_tmpD48.YY29).f1=((
+_tmpD4C=_cycalloc(sizeof(*_tmpD4C)),((_tmpD4C->id=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpD4C->tms=((
+_tmpD49=_cycalloc(sizeof(*_tmpD49)),((_tmpD49->hd=(void*)((void*)((_tmpD4B=
+_cycalloc(sizeof(*_tmpD4B)),((_tmpD4B[0]=((_tmpD4A.tag=0,((_tmpD4A.f1=Cyc_yyget_YY51(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpD4A.f2=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpCD5)))))),
-_tmpCD6))))),((_tmpCD4->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 3)]))->tms,_tmpCD4)))))),_tmpCD7)))))),_tmpCD3))));}break;
-case 158: _LL29E:{struct Cyc_Parse_Declarator*_tmpCE6;struct Cyc_Absyn_ConstArray_mod_struct*
-_tmpCE5;struct Cyc_Absyn_ConstArray_mod_struct _tmpCE4;struct Cyc_List_List*_tmpCE3;
-union Cyc_YYSTYPE_union _tmpCE2;yyval=(union Cyc_YYSTYPE_union)(((_tmpCE2.YY29).tag=
-33,(((_tmpCE2.YY29).f1=((_tmpCE6=_cycalloc(sizeof(*_tmpCE6)),((_tmpCE6->id=(Cyc_yyget_YY29(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->id,((_tmpCE6->tms=((
-_tmpCE3=_cycalloc(sizeof(*_tmpCE3)),((_tmpCE3->hd=(void*)((void*)((_tmpCE5=
-_cycalloc(sizeof(*_tmpCE5)),((_tmpCE5[0]=((_tmpCE4.tag=1,((_tmpCE4.f1=Cyc_yyget_YY3(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpCE4.f2=Cyc_yyget_YY51(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpCE4.f3=Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpD4A)))))),
+_tmpD4B))))),((_tmpD49->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 3)]))->tms,_tmpD49)))))),_tmpD4C)))))),_tmpD48))));}break;
+case 163: _LL2A3:{struct Cyc_Parse_Declarator*_tmpD5B;struct Cyc_Absyn_ConstArray_mod_struct*
+_tmpD5A;struct Cyc_Absyn_ConstArray_mod_struct _tmpD59;struct Cyc_List_List*_tmpD58;
+union Cyc_YYSTYPE_union _tmpD57;yyval=(union Cyc_YYSTYPE_union)(((_tmpD57.YY29).tag=
+33,(((_tmpD57.YY29).f1=((_tmpD5B=_cycalloc(sizeof(*_tmpD5B)),((_tmpD5B->id=(Cyc_yyget_YY29(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->id,((_tmpD5B->tms=((
+_tmpD58=_cycalloc(sizeof(*_tmpD58)),((_tmpD58->hd=(void*)((void*)((_tmpD5A=
+_cycalloc(sizeof(*_tmpD5A)),((_tmpD5A[0]=((_tmpD59.tag=1,((_tmpD59.f1=Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpD59.f2=Cyc_yyget_YY51(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpD59.f3=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpCE4)))))))),
-_tmpCE5))))),((_tmpCE3->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 4)]))->tms,_tmpCE3)))))),_tmpCE6)))))),_tmpCE2))));}break;
-case 159: _LL29F: {struct _tuple17 _tmp546;struct Cyc_List_List*_tmp547;int _tmp548;
-struct Cyc_Absyn_VarargInfo*_tmp549;struct Cyc_Core_Opt*_tmp54A;struct Cyc_List_List*
-_tmp54B;struct _tuple17*_tmp545=Cyc_yyget_YY39(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp546=*_tmp545;_tmp547=
-_tmp546.f1;_tmp548=_tmp546.f2;_tmp549=_tmp546.f3;_tmp54A=_tmp546.f4;_tmp54B=
-_tmp546.f5;{struct Cyc_Parse_Declarator*_tmpD02;struct Cyc_Absyn_Function_mod_struct*
-_tmpD01;struct Cyc_Absyn_WithTypes_struct*_tmpD00;struct Cyc_Absyn_WithTypes_struct
-_tmpCFF;struct Cyc_Absyn_Function_mod_struct _tmpCFE;struct Cyc_List_List*_tmpCFD;
-union Cyc_YYSTYPE_union _tmpCFC;yyval=(union Cyc_YYSTYPE_union)(((_tmpCFC.YY29).tag=
-33,(((_tmpCFC.YY29).f1=((_tmpD02=_cycalloc(sizeof(*_tmpD02)),((_tmpD02->id=(Cyc_yyget_YY29(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpD02->tms=((
-_tmpCFD=_cycalloc(sizeof(*_tmpCFD)),((_tmpCFD->hd=(void*)((void*)((_tmpD01=
-_cycalloc(sizeof(*_tmpD01)),((_tmpD01[0]=((_tmpCFE.tag=3,((_tmpCFE.f1=(void*)((
-void*)((_tmpD00=_cycalloc(sizeof(*_tmpD00)),((_tmpD00[0]=((_tmpCFF.tag=1,((
-_tmpCFF.f1=_tmp547,((_tmpCFF.f2=_tmp548,((_tmpCFF.f3=_tmp549,((_tmpCFF.f4=
-_tmp54A,((_tmpCFF.f5=_tmp54B,_tmpCFF)))))))))))),_tmpD00))))),_tmpCFE)))),
-_tmpD01))))),((_tmpCFD->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 3)]))->tms,_tmpCFD)))))),_tmpD02)))))),_tmpCFC))));}break;}
-case 160: _LL2A0:{struct Cyc_Parse_Declarator*_tmpD1E;struct Cyc_Absyn_Function_mod_struct*
-_tmpD1D;struct Cyc_Absyn_WithTypes_struct*_tmpD1C;struct Cyc_Absyn_WithTypes_struct
-_tmpD1B;struct Cyc_Absyn_Function_mod_struct _tmpD1A;struct Cyc_List_List*_tmpD19;
-union Cyc_YYSTYPE_union _tmpD18;yyval=(union Cyc_YYSTYPE_union)(((_tmpD18.YY29).tag=
-33,(((_tmpD18.YY29).f1=((_tmpD1E=_cycalloc(sizeof(*_tmpD1E)),((_tmpD1E->id=(Cyc_yyget_YY29(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->id,((_tmpD1E->tms=((
-_tmpD19=_cycalloc(sizeof(*_tmpD19)),((_tmpD19->hd=(void*)((void*)((_tmpD1D=
-_cycalloc(sizeof(*_tmpD1D)),((_tmpD1D[0]=((_tmpD1A.tag=3,((_tmpD1A.f1=(void*)((
-void*)((_tmpD1C=_cycalloc(sizeof(*_tmpD1C)),((_tmpD1C[0]=((_tmpD1B.tag=1,((
-_tmpD1B.f1=0,((_tmpD1B.f2=0,((_tmpD1B.f3=0,((_tmpD1B.f4=Cyc_yyget_YY49(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpD1B.f5=Cyc_yyget_YY50(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpD1B)))))))))))),
-_tmpD1C))))),_tmpD1A)))),_tmpD1D))))),((_tmpD19->tl=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->tms,_tmpD19)))))),
-_tmpD1E)))))),_tmpD18))));}break;case 161: _LL2A1:{struct Cyc_Parse_Declarator*
-_tmpD3A;struct Cyc_Absyn_Function_mod_struct*_tmpD39;struct Cyc_Absyn_NoTypes_struct*
-_tmpD38;struct Cyc_Absyn_NoTypes_struct _tmpD37;struct Cyc_Absyn_Function_mod_struct
-_tmpD36;struct Cyc_List_List*_tmpD35;union Cyc_YYSTYPE_union _tmpD34;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpD34.YY29).tag=33,(((_tmpD34.YY29).f1=((_tmpD3A=
-_cycalloc(sizeof(*_tmpD3A)),((_tmpD3A->id=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpD3A->tms=((
-_tmpD35=_cycalloc(sizeof(*_tmpD35)),((_tmpD35->hd=(void*)((void*)((_tmpD39=
-_cycalloc(sizeof(*_tmpD39)),((_tmpD39[0]=((_tmpD36.tag=3,((_tmpD36.f1=(void*)((
-void*)((_tmpD38=_cycalloc(sizeof(*_tmpD38)),((_tmpD38[0]=((_tmpD37.tag=0,((
-_tmpD37.f1=Cyc_yyget_YY36(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
-- 1)]),((_tmpD37.f2=Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpD59)))))))),
+_tmpD5A))))),((_tmpD58->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 4)]))->tms,_tmpD58)))))),_tmpD5B)))))),_tmpD57))));}break;
+case 164: _LL2A4: {struct _tuple17 _tmp593;struct Cyc_List_List*_tmp594;int _tmp595;
+struct Cyc_Absyn_VarargInfo*_tmp596;struct Cyc_Core_Opt*_tmp597;struct Cyc_List_List*
+_tmp598;struct _tuple17*_tmp592=Cyc_yyget_YY39(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp593=*_tmp592;_tmp594=
+_tmp593.f1;_tmp595=_tmp593.f2;_tmp596=_tmp593.f3;_tmp597=_tmp593.f4;_tmp598=
+_tmp593.f5;{struct Cyc_Parse_Declarator*_tmpD77;struct Cyc_Absyn_Function_mod_struct*
+_tmpD76;struct Cyc_Absyn_WithTypes_struct*_tmpD75;struct Cyc_Absyn_WithTypes_struct
+_tmpD74;struct Cyc_Absyn_Function_mod_struct _tmpD73;struct Cyc_List_List*_tmpD72;
+union Cyc_YYSTYPE_union _tmpD71;yyval=(union Cyc_YYSTYPE_union)(((_tmpD71.YY29).tag=
+33,(((_tmpD71.YY29).f1=((_tmpD77=_cycalloc(sizeof(*_tmpD77)),((_tmpD77->id=(Cyc_yyget_YY29(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpD77->tms=((
+_tmpD72=_cycalloc(sizeof(*_tmpD72)),((_tmpD72->hd=(void*)((void*)((_tmpD76=
+_cycalloc(sizeof(*_tmpD76)),((_tmpD76[0]=((_tmpD73.tag=3,((_tmpD73.f1=(void*)((
+void*)((_tmpD75=_cycalloc(sizeof(*_tmpD75)),((_tmpD75[0]=((_tmpD74.tag=1,((
+_tmpD74.f1=_tmp594,((_tmpD74.f2=_tmp595,((_tmpD74.f3=_tmp596,((_tmpD74.f4=
+_tmp597,((_tmpD74.f5=_tmp598,_tmpD74)))))))))))),_tmpD75))))),_tmpD73)))),
+_tmpD76))))),((_tmpD72->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 3)]))->tms,_tmpD72)))))),_tmpD77)))))),_tmpD71))));}break;}
+case 165: _LL2A5:{struct Cyc_Parse_Declarator*_tmpD93;struct Cyc_Absyn_Function_mod_struct*
+_tmpD92;struct Cyc_Absyn_WithTypes_struct*_tmpD91;struct Cyc_Absyn_WithTypes_struct
+_tmpD90;struct Cyc_Absyn_Function_mod_struct _tmpD8F;struct Cyc_List_List*_tmpD8E;
+union Cyc_YYSTYPE_union _tmpD8D;yyval=(union Cyc_YYSTYPE_union)(((_tmpD8D.YY29).tag=
+33,(((_tmpD8D.YY29).f1=((_tmpD93=_cycalloc(sizeof(*_tmpD93)),((_tmpD93->id=(Cyc_yyget_YY29(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->id,((_tmpD93->tms=((
+_tmpD8E=_cycalloc(sizeof(*_tmpD8E)),((_tmpD8E->hd=(void*)((void*)((_tmpD92=
+_cycalloc(sizeof(*_tmpD92)),((_tmpD92[0]=((_tmpD8F.tag=3,((_tmpD8F.f1=(void*)((
+void*)((_tmpD91=_cycalloc(sizeof(*_tmpD91)),((_tmpD91[0]=((_tmpD90.tag=1,((
+_tmpD90.f1=0,((_tmpD90.f2=0,((_tmpD90.f3=0,((_tmpD90.f4=Cyc_yyget_YY49(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpD90.f5=Cyc_yyget_YY50(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpD90)))))))))))),
+_tmpD91))))),_tmpD8F)))),_tmpD92))))),((_tmpD8E->tl=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->tms,_tmpD8E)))))),
+_tmpD93)))))),_tmpD8D))));}break;case 166: _LL2A6:{struct Cyc_Parse_Declarator*
+_tmpDAF;struct Cyc_Absyn_Function_mod_struct*_tmpDAE;struct Cyc_Absyn_NoTypes_struct*
+_tmpDAD;struct Cyc_Absyn_NoTypes_struct _tmpDAC;struct Cyc_Absyn_Function_mod_struct
+_tmpDAB;struct Cyc_List_List*_tmpDAA;union Cyc_YYSTYPE_union _tmpDA9;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpDA9.YY29).tag=33,(((_tmpDA9.YY29).f1=((_tmpDAF=
+_cycalloc(sizeof(*_tmpDAF)),((_tmpDAF->id=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpDAF->tms=((
+_tmpDAA=_cycalloc(sizeof(*_tmpDAA)),((_tmpDAA->hd=(void*)((void*)((_tmpDAE=
+_cycalloc(sizeof(*_tmpDAE)),((_tmpDAE[0]=((_tmpDAB.tag=3,((_tmpDAB.f1=(void*)((
+void*)((_tmpDAD=_cycalloc(sizeof(*_tmpDAD)),((_tmpDAD[0]=((_tmpDAC.tag=0,((
+_tmpDAC.f1=Cyc_yyget_YY36(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
+- 1)]),((_tmpDAC.f2=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpD37)))))),
-_tmpD38))))),_tmpD36)))),_tmpD39))))),((_tmpD35->tl=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->tms,_tmpD35)))))),
-_tmpD3A)))))),_tmpD34))));}break;case 162: _LL2A2: {struct Cyc_List_List*_tmp561=((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpDAC)))))),
+_tmpDAD))))),_tmpDAB)))),_tmpDAE))))),((_tmpDAA->tl=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->tms,_tmpDAA)))))),
+_tmpDAF)))))),_tmpDA9))));}break;case 167: _LL2A7: {struct Cyc_List_List*_tmp5AE=((
 struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Position_Segment*,
 void*),struct Cyc_Position_Segment*env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_typ2tvar,
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).last_line),Cyc_List_imp_rev(Cyc_yyget_YY40(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)])));{struct Cyc_Parse_Declarator*
-_tmpD49;struct Cyc_Absyn_TypeParams_mod_struct*_tmpD48;struct Cyc_Absyn_TypeParams_mod_struct
-_tmpD47;struct Cyc_List_List*_tmpD46;union Cyc_YYSTYPE_union _tmpD45;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpD45.YY29).tag=33,(((_tmpD45.YY29).f1=((_tmpD49=
-_cycalloc(sizeof(*_tmpD49)),((_tmpD49->id=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpD49->tms=((
-_tmpD46=_cycalloc(sizeof(*_tmpD46)),((_tmpD46->hd=(void*)((void*)((_tmpD48=
-_cycalloc(sizeof(*_tmpD48)),((_tmpD48[0]=((_tmpD47.tag=4,((_tmpD47.f1=_tmp561,((
-_tmpD47.f2=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_tmpDBE;struct Cyc_Absyn_TypeParams_mod_struct*_tmpDBD;struct Cyc_Absyn_TypeParams_mod_struct
+_tmpDBC;struct Cyc_List_List*_tmpDBB;union Cyc_YYSTYPE_union _tmpDBA;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpDBA.YY29).tag=33,(((_tmpDBA.YY29).f1=((_tmpDBE=
+_cycalloc(sizeof(*_tmpDBE)),((_tmpDBE->id=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpDBE->tms=((
+_tmpDBB=_cycalloc(sizeof(*_tmpDBB)),((_tmpDBB->hd=(void*)((void*)((_tmpDBD=
+_cycalloc(sizeof(*_tmpDBD)),((_tmpDBD[0]=((_tmpDBC.tag=4,((_tmpDBC.f1=_tmp5AE,((
+_tmpDBC.f2=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line),((_tmpD47.f3=0,_tmpD47)))))))),_tmpD48))))),((_tmpD46->tl=(
+yylsp_offset)]).last_line),((_tmpDBC.f3=0,_tmpDBC)))))))),_tmpDBD))))),((_tmpDBB->tl=(
 Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->tms,
-_tmpD46)))))),_tmpD49)))))),_tmpD45))));}break;}case 163: _LL2A3:{struct Cyc_Parse_Declarator*
-_tmpD58;struct Cyc_Absyn_Attributes_mod_struct*_tmpD57;struct Cyc_Absyn_Attributes_mod_struct
-_tmpD56;struct Cyc_List_List*_tmpD55;union Cyc_YYSTYPE_union _tmpD54;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpD54.YY29).tag=33,(((_tmpD54.YY29).f1=((_tmpD58=
-_cycalloc(sizeof(*_tmpD58)),((_tmpD58->id=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]))->id,((_tmpD58->tms=((
-_tmpD55=_cycalloc(sizeof(*_tmpD55)),((_tmpD55->hd=(void*)((void*)((_tmpD57=
-_cycalloc(sizeof(*_tmpD57)),((_tmpD57[0]=((_tmpD56.tag=5,((_tmpD56.f1=Cyc_Position_segment_of_abs((
+_tmpDBB)))))),_tmpDBE)))))),_tmpDBA))));}break;}case 168: _LL2A8:{struct Cyc_Parse_Declarator*
+_tmpDCD;struct Cyc_Absyn_Attributes_mod_struct*_tmpDCC;struct Cyc_Absyn_Attributes_mod_struct
+_tmpDCB;struct Cyc_List_List*_tmpDCA;union Cyc_YYSTYPE_union _tmpDC9;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpDC9.YY29).tag=33,(((_tmpDC9.YY29).f1=((_tmpDCD=
+_cycalloc(sizeof(*_tmpDCD)),((_tmpDCD->id=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]))->id,((_tmpDCD->tms=((
+_tmpDCA=_cycalloc(sizeof(*_tmpDCA)),((_tmpDCA->hd=(void*)((void*)((_tmpDCC=
+_cycalloc(sizeof(*_tmpDCC)),((_tmpDCC[0]=((_tmpDCB.tag=5,((_tmpDCB.f1=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpD56.f2=Cyc_yyget_YY45(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpD56)))))),_tmpD57))))),((
-_tmpD55->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]))->tms,_tmpD55)))))),_tmpD58)))))),_tmpD54))));}break;case 164:
-_LL2A4:{struct Cyc_Parse_Declarator*_tmpD5B;union Cyc_YYSTYPE_union _tmpD5A;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpD5A.YY29).tag=33,(((_tmpD5A.YY29).f1=((_tmpD5B=
-_cycalloc(sizeof(*_tmpD5B)),((_tmpD5B->id=Cyc_yyget_QualId_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpD5B->tms=0,_tmpD5B)))))),
-_tmpD5A))));}break;case 165: _LL2A5:{struct Cyc_Parse_Declarator*_tmpD5E;union Cyc_YYSTYPE_union
-_tmpD5D;yyval=(union Cyc_YYSTYPE_union)(((_tmpD5D.YY29).tag=33,(((_tmpD5D.YY29).f1=((
-_tmpD5E=_cycalloc(sizeof(*_tmpD5E)),((_tmpD5E->id=Cyc_yyget_QualId_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpD5E->tms=0,_tmpD5E)))))),
-_tmpD5D))));}break;case 166: _LL2A6: yyval=yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 1)];break;case 167: _LL2A7: {struct Cyc_Parse_Declarator*
-_tmp570=Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);{
-struct Cyc_Absyn_Attributes_mod_struct*_tmpD64;struct Cyc_Absyn_Attributes_mod_struct
-_tmpD63;struct Cyc_List_List*_tmpD62;_tmp570->tms=((_tmpD62=_cycalloc(sizeof(*
-_tmpD62)),((_tmpD62->hd=(void*)((void*)((_tmpD64=_cycalloc(sizeof(*_tmpD64)),((
-_tmpD64[0]=((_tmpD63.tag=5,((_tmpD63.f1=Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpDCB.f2=Cyc_yyget_YY45(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpDCB)))))),_tmpDCC))))),((
+_tmpDCA->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]))->tms,_tmpDCA)))))),_tmpDCD)))))),_tmpDC9))));}break;case 169:
+_LL2A9:{struct Cyc_Parse_Declarator*_tmpDD0;union Cyc_YYSTYPE_union _tmpDCF;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpDCF.YY29).tag=33,(((_tmpDCF.YY29).f1=((_tmpDD0=
+_cycalloc(sizeof(*_tmpDD0)),((_tmpDD0->id=Cyc_yyget_QualId_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpDD0->tms=0,_tmpDD0)))))),
+_tmpDCF))));}break;case 170: _LL2AA:{struct Cyc_Parse_Declarator*_tmpDD3;union Cyc_YYSTYPE_union
+_tmpDD2;yyval=(union Cyc_YYSTYPE_union)(((_tmpDD2.YY29).tag=33,(((_tmpDD2.YY29).f1=((
+_tmpDD3=_cycalloc(sizeof(*_tmpDD3)),((_tmpDD3->id=Cyc_yyget_QualId_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpDD3->tms=0,_tmpDD3)))))),
+_tmpDD2))));}break;case 171: _LL2AB: yyval=yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 1)];break;case 172: _LL2AC: {struct Cyc_Parse_Declarator*
+_tmp5BD=Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);{
+struct Cyc_Absyn_Attributes_mod_struct*_tmpDD9;struct Cyc_Absyn_Attributes_mod_struct
+_tmpDD8;struct Cyc_List_List*_tmpDD7;_tmp5BD->tms=((_tmpDD7=_cycalloc(sizeof(*
+_tmpDD7)),((_tmpDD7->hd=(void*)((void*)((_tmpDD9=_cycalloc(sizeof(*_tmpDD9)),((
+_tmpDD9[0]=((_tmpDD8.tag=5,((_tmpDD8.f1=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line),((_tmpD63.f2=
+_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line),((_tmpDD8.f2=
 Cyc_yyget_YY45(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),
-_tmpD63)))))),_tmpD64))))),((_tmpD62->tl=_tmp570->tms,_tmpD62))))));}yyval=yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)];break;}case 168: _LL2A8:{
-struct Cyc_Parse_Declarator*_tmpD73;struct Cyc_Absyn_Carray_mod_struct*_tmpD72;
-struct Cyc_Absyn_Carray_mod_struct _tmpD71;struct Cyc_List_List*_tmpD70;union Cyc_YYSTYPE_union
-_tmpD6F;yyval=(union Cyc_YYSTYPE_union)(((_tmpD6F.YY29).tag=33,(((_tmpD6F.YY29).f1=((
-_tmpD73=_cycalloc(sizeof(*_tmpD73)),((_tmpD73->id=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpD73->tms=((
-_tmpD70=_cycalloc(sizeof(*_tmpD70)),((_tmpD70->hd=(void*)((void*)((_tmpD72=
-_cycalloc(sizeof(*_tmpD72)),((_tmpD72[0]=((_tmpD71.tag=0,((_tmpD71.f1=Cyc_yyget_YY51(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpD71.f2=Cyc_Position_segment_of_abs((
+_tmpDD8)))))),_tmpDD9))))),((_tmpDD7->tl=_tmp5BD->tms,_tmpDD7))))));}yyval=yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)];break;}case 173: _LL2AD:{
+struct Cyc_Parse_Declarator*_tmpDE8;struct Cyc_Absyn_Carray_mod_struct*_tmpDE7;
+struct Cyc_Absyn_Carray_mod_struct _tmpDE6;struct Cyc_List_List*_tmpDE5;union Cyc_YYSTYPE_union
+_tmpDE4;yyval=(union Cyc_YYSTYPE_union)(((_tmpDE4.YY29).tag=33,(((_tmpDE4.YY29).f1=((
+_tmpDE8=_cycalloc(sizeof(*_tmpDE8)),((_tmpDE8->id=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpDE8->tms=((
+_tmpDE5=_cycalloc(sizeof(*_tmpDE5)),((_tmpDE5->hd=(void*)((void*)((_tmpDE7=
+_cycalloc(sizeof(*_tmpDE7)),((_tmpDE7[0]=((_tmpDE6.tag=0,((_tmpDE6.f1=Cyc_yyget_YY51(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpDE6.f2=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpD71)))))),
-_tmpD72))))),((_tmpD70->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 3)]))->tms,_tmpD70)))))),_tmpD73)))))),_tmpD6F))));}break;
-case 169: _LL2A9:{struct Cyc_Parse_Declarator*_tmpD82;struct Cyc_Absyn_ConstArray_mod_struct*
-_tmpD81;struct Cyc_Absyn_ConstArray_mod_struct _tmpD80;struct Cyc_List_List*_tmpD7F;
-union Cyc_YYSTYPE_union _tmpD7E;yyval=(union Cyc_YYSTYPE_union)(((_tmpD7E.YY29).tag=
-33,(((_tmpD7E.YY29).f1=((_tmpD82=_cycalloc(sizeof(*_tmpD82)),((_tmpD82->id=(Cyc_yyget_YY29(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->id,((_tmpD82->tms=((
-_tmpD7F=_cycalloc(sizeof(*_tmpD7F)),((_tmpD7F->hd=(void*)((void*)((_tmpD81=
-_cycalloc(sizeof(*_tmpD81)),((_tmpD81[0]=((_tmpD80.tag=1,((_tmpD80.f1=Cyc_yyget_YY3(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpD80.f2=Cyc_yyget_YY51(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpD80.f3=Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpDE6)))))),
+_tmpDE7))))),((_tmpDE5->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 3)]))->tms,_tmpDE5)))))),_tmpDE8)))))),_tmpDE4))));}break;
+case 174: _LL2AE:{struct Cyc_Parse_Declarator*_tmpDF7;struct Cyc_Absyn_ConstArray_mod_struct*
+_tmpDF6;struct Cyc_Absyn_ConstArray_mod_struct _tmpDF5;struct Cyc_List_List*_tmpDF4;
+union Cyc_YYSTYPE_union _tmpDF3;yyval=(union Cyc_YYSTYPE_union)(((_tmpDF3.YY29).tag=
+33,(((_tmpDF3.YY29).f1=((_tmpDF7=_cycalloc(sizeof(*_tmpDF7)),((_tmpDF7->id=(Cyc_yyget_YY29(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->id,((_tmpDF7->tms=((
+_tmpDF4=_cycalloc(sizeof(*_tmpDF4)),((_tmpDF4->hd=(void*)((void*)((_tmpDF6=
+_cycalloc(sizeof(*_tmpDF6)),((_tmpDF6[0]=((_tmpDF5.tag=1,((_tmpDF5.f1=Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpDF5.f2=Cyc_yyget_YY51(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpDF5.f3=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpD80)))))))),
-_tmpD81))))),((_tmpD7F->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 4)]))->tms,_tmpD7F)))))),_tmpD82)))))),_tmpD7E))));}break;
-case 170: _LL2AA: {struct _tuple17 _tmp57F;struct Cyc_List_List*_tmp580;int _tmp581;
-struct Cyc_Absyn_VarargInfo*_tmp582;struct Cyc_Core_Opt*_tmp583;struct Cyc_List_List*
-_tmp584;struct _tuple17*_tmp57E=Cyc_yyget_YY39(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp57F=*_tmp57E;_tmp580=
-_tmp57F.f1;_tmp581=_tmp57F.f2;_tmp582=_tmp57F.f3;_tmp583=_tmp57F.f4;_tmp584=
-_tmp57F.f5;{struct Cyc_Parse_Declarator*_tmpD9E;struct Cyc_Absyn_Function_mod_struct*
-_tmpD9D;struct Cyc_Absyn_WithTypes_struct*_tmpD9C;struct Cyc_Absyn_WithTypes_struct
-_tmpD9B;struct Cyc_Absyn_Function_mod_struct _tmpD9A;struct Cyc_List_List*_tmpD99;
-union Cyc_YYSTYPE_union _tmpD98;yyval=(union Cyc_YYSTYPE_union)(((_tmpD98.YY29).tag=
-33,(((_tmpD98.YY29).f1=((_tmpD9E=_cycalloc(sizeof(*_tmpD9E)),((_tmpD9E->id=(Cyc_yyget_YY29(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpD9E->tms=((
-_tmpD99=_cycalloc(sizeof(*_tmpD99)),((_tmpD99->hd=(void*)((void*)((_tmpD9D=
-_cycalloc(sizeof(*_tmpD9D)),((_tmpD9D[0]=((_tmpD9A.tag=3,((_tmpD9A.f1=(void*)((
-void*)((_tmpD9C=_cycalloc(sizeof(*_tmpD9C)),((_tmpD9C[0]=((_tmpD9B.tag=1,((
-_tmpD9B.f1=_tmp580,((_tmpD9B.f2=_tmp581,((_tmpD9B.f3=_tmp582,((_tmpD9B.f4=
-_tmp583,((_tmpD9B.f5=_tmp584,_tmpD9B)))))))))))),_tmpD9C))))),_tmpD9A)))),
-_tmpD9D))))),((_tmpD99->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 3)]))->tms,_tmpD99)))))),_tmpD9E)))))),_tmpD98))));}break;}
-case 171: _LL2AB:{struct Cyc_Parse_Declarator*_tmpDBA;struct Cyc_Absyn_Function_mod_struct*
-_tmpDB9;struct Cyc_Absyn_WithTypes_struct*_tmpDB8;struct Cyc_Absyn_WithTypes_struct
-_tmpDB7;struct Cyc_Absyn_Function_mod_struct _tmpDB6;struct Cyc_List_List*_tmpDB5;
-union Cyc_YYSTYPE_union _tmpDB4;yyval=(union Cyc_YYSTYPE_union)(((_tmpDB4.YY29).tag=
-33,(((_tmpDB4.YY29).f1=((_tmpDBA=_cycalloc(sizeof(*_tmpDBA)),((_tmpDBA->id=(Cyc_yyget_YY29(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->id,((_tmpDBA->tms=((
-_tmpDB5=_cycalloc(sizeof(*_tmpDB5)),((_tmpDB5->hd=(void*)((void*)((_tmpDB9=
-_cycalloc(sizeof(*_tmpDB9)),((_tmpDB9[0]=((_tmpDB6.tag=3,((_tmpDB6.f1=(void*)((
-void*)((_tmpDB8=_cycalloc(sizeof(*_tmpDB8)),((_tmpDB8[0]=((_tmpDB7.tag=1,((
-_tmpDB7.f1=0,((_tmpDB7.f2=0,((_tmpDB7.f3=0,((_tmpDB7.f4=Cyc_yyget_YY49(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpDB7.f5=Cyc_yyget_YY50(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpDB7)))))))))))),
-_tmpDB8))))),_tmpDB6)))),_tmpDB9))))),((_tmpDB5->tl=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->tms,_tmpDB5)))))),
-_tmpDBA)))))),_tmpDB4))));}break;case 172: _LL2AC:{struct Cyc_Parse_Declarator*
-_tmpDD6;struct Cyc_Absyn_Function_mod_struct*_tmpDD5;struct Cyc_Absyn_NoTypes_struct*
-_tmpDD4;struct Cyc_Absyn_NoTypes_struct _tmpDD3;struct Cyc_Absyn_Function_mod_struct
-_tmpDD2;struct Cyc_List_List*_tmpDD1;union Cyc_YYSTYPE_union _tmpDD0;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpDD0.YY29).tag=33,(((_tmpDD0.YY29).f1=((_tmpDD6=
-_cycalloc(sizeof(*_tmpDD6)),((_tmpDD6->id=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpDD6->tms=((
-_tmpDD1=_cycalloc(sizeof(*_tmpDD1)),((_tmpDD1->hd=(void*)((void*)((_tmpDD5=
-_cycalloc(sizeof(*_tmpDD5)),((_tmpDD5[0]=((_tmpDD2.tag=3,((_tmpDD2.f1=(void*)((
-void*)((_tmpDD4=_cycalloc(sizeof(*_tmpDD4)),((_tmpDD4[0]=((_tmpDD3.tag=0,((
-_tmpDD3.f1=Cyc_yyget_YY36(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
-- 1)]),((_tmpDD3.f2=Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpDF5)))))))),
+_tmpDF6))))),((_tmpDF4->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 4)]))->tms,_tmpDF4)))))),_tmpDF7)))))),_tmpDF3))));}break;
+case 175: _LL2AF: {struct _tuple17 _tmp5CC;struct Cyc_List_List*_tmp5CD;int _tmp5CE;
+struct Cyc_Absyn_VarargInfo*_tmp5CF;struct Cyc_Core_Opt*_tmp5D0;struct Cyc_List_List*
+_tmp5D1;struct _tuple17*_tmp5CB=Cyc_yyget_YY39(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp5CC=*_tmp5CB;_tmp5CD=
+_tmp5CC.f1;_tmp5CE=_tmp5CC.f2;_tmp5CF=_tmp5CC.f3;_tmp5D0=_tmp5CC.f4;_tmp5D1=
+_tmp5CC.f5;{struct Cyc_Parse_Declarator*_tmpE13;struct Cyc_Absyn_Function_mod_struct*
+_tmpE12;struct Cyc_Absyn_WithTypes_struct*_tmpE11;struct Cyc_Absyn_WithTypes_struct
+_tmpE10;struct Cyc_Absyn_Function_mod_struct _tmpE0F;struct Cyc_List_List*_tmpE0E;
+union Cyc_YYSTYPE_union _tmpE0D;yyval=(union Cyc_YYSTYPE_union)(((_tmpE0D.YY29).tag=
+33,(((_tmpE0D.YY29).f1=((_tmpE13=_cycalloc(sizeof(*_tmpE13)),((_tmpE13->id=(Cyc_yyget_YY29(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpE13->tms=((
+_tmpE0E=_cycalloc(sizeof(*_tmpE0E)),((_tmpE0E->hd=(void*)((void*)((_tmpE12=
+_cycalloc(sizeof(*_tmpE12)),((_tmpE12[0]=((_tmpE0F.tag=3,((_tmpE0F.f1=(void*)((
+void*)((_tmpE11=_cycalloc(sizeof(*_tmpE11)),((_tmpE11[0]=((_tmpE10.tag=1,((
+_tmpE10.f1=_tmp5CD,((_tmpE10.f2=_tmp5CE,((_tmpE10.f3=_tmp5CF,((_tmpE10.f4=
+_tmp5D0,((_tmpE10.f5=_tmp5D1,_tmpE10)))))))))))),_tmpE11))))),_tmpE0F)))),
+_tmpE12))))),((_tmpE0E->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 3)]))->tms,_tmpE0E)))))),_tmpE13)))))),_tmpE0D))));}break;}
+case 176: _LL2B0:{struct Cyc_Parse_Declarator*_tmpE2F;struct Cyc_Absyn_Function_mod_struct*
+_tmpE2E;struct Cyc_Absyn_WithTypes_struct*_tmpE2D;struct Cyc_Absyn_WithTypes_struct
+_tmpE2C;struct Cyc_Absyn_Function_mod_struct _tmpE2B;struct Cyc_List_List*_tmpE2A;
+union Cyc_YYSTYPE_union _tmpE29;yyval=(union Cyc_YYSTYPE_union)(((_tmpE29.YY29).tag=
+33,(((_tmpE29.YY29).f1=((_tmpE2F=_cycalloc(sizeof(*_tmpE2F)),((_tmpE2F->id=(Cyc_yyget_YY29(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->id,((_tmpE2F->tms=((
+_tmpE2A=_cycalloc(sizeof(*_tmpE2A)),((_tmpE2A->hd=(void*)((void*)((_tmpE2E=
+_cycalloc(sizeof(*_tmpE2E)),((_tmpE2E[0]=((_tmpE2B.tag=3,((_tmpE2B.f1=(void*)((
+void*)((_tmpE2D=_cycalloc(sizeof(*_tmpE2D)),((_tmpE2D[0]=((_tmpE2C.tag=1,((
+_tmpE2C.f1=0,((_tmpE2C.f2=0,((_tmpE2C.f3=0,((_tmpE2C.f4=Cyc_yyget_YY49(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpE2C.f5=Cyc_yyget_YY50(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpE2C)))))))))))),
+_tmpE2D))))),_tmpE2B)))),_tmpE2E))))),((_tmpE2A->tl=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->tms,_tmpE2A)))))),
+_tmpE2F)))))),_tmpE29))));}break;case 177: _LL2B1:{struct Cyc_Parse_Declarator*
+_tmpE4B;struct Cyc_Absyn_Function_mod_struct*_tmpE4A;struct Cyc_Absyn_NoTypes_struct*
+_tmpE49;struct Cyc_Absyn_NoTypes_struct _tmpE48;struct Cyc_Absyn_Function_mod_struct
+_tmpE47;struct Cyc_List_List*_tmpE46;union Cyc_YYSTYPE_union _tmpE45;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpE45.YY29).tag=33,(((_tmpE45.YY29).f1=((_tmpE4B=
+_cycalloc(sizeof(*_tmpE4B)),((_tmpE4B->id=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpE4B->tms=((
+_tmpE46=_cycalloc(sizeof(*_tmpE46)),((_tmpE46->hd=(void*)((void*)((_tmpE4A=
+_cycalloc(sizeof(*_tmpE4A)),((_tmpE4A[0]=((_tmpE47.tag=3,((_tmpE47.f1=(void*)((
+void*)((_tmpE49=_cycalloc(sizeof(*_tmpE49)),((_tmpE49[0]=((_tmpE48.tag=0,((
+_tmpE48.f1=Cyc_yyget_YY36(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
+- 1)]),((_tmpE48.f2=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpDD3)))))),
-_tmpDD4))))),_tmpDD2)))),_tmpDD5))))),((_tmpDD1->tl=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->tms,_tmpDD1)))))),
-_tmpDD6)))))),_tmpDD0))));}break;case 173: _LL2AD: {struct Cyc_List_List*_tmp59A=((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpE48)))))),
+_tmpE49))))),_tmpE47)))),_tmpE4A))))),((_tmpE46->tl=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->tms,_tmpE46)))))),
+_tmpE4B)))))),_tmpE45))));}break;case 178: _LL2B2: {struct Cyc_List_List*_tmp5E7=((
 struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Position_Segment*,
 void*),struct Cyc_Position_Segment*env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_typ2tvar,
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).last_line),Cyc_List_imp_rev(Cyc_yyget_YY40(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)])));{struct Cyc_Parse_Declarator*
-_tmpDE5;struct Cyc_Absyn_TypeParams_mod_struct*_tmpDE4;struct Cyc_Absyn_TypeParams_mod_struct
-_tmpDE3;struct Cyc_List_List*_tmpDE2;union Cyc_YYSTYPE_union _tmpDE1;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpDE1.YY29).tag=33,(((_tmpDE1.YY29).f1=((_tmpDE5=
-_cycalloc(sizeof(*_tmpDE5)),((_tmpDE5->id=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpDE5->tms=((
-_tmpDE2=_cycalloc(sizeof(*_tmpDE2)),((_tmpDE2->hd=(void*)((void*)((_tmpDE4=
-_cycalloc(sizeof(*_tmpDE4)),((_tmpDE4[0]=((_tmpDE3.tag=4,((_tmpDE3.f1=_tmp59A,((
-_tmpDE3.f2=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_tmpE5A;struct Cyc_Absyn_TypeParams_mod_struct*_tmpE59;struct Cyc_Absyn_TypeParams_mod_struct
+_tmpE58;struct Cyc_List_List*_tmpE57;union Cyc_YYSTYPE_union _tmpE56;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpE56.YY29).tag=33,(((_tmpE56.YY29).f1=((_tmpE5A=
+_cycalloc(sizeof(*_tmpE5A)),((_tmpE5A->id=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->id,((_tmpE5A->tms=((
+_tmpE57=_cycalloc(sizeof(*_tmpE57)),((_tmpE57->hd=(void*)((void*)((_tmpE59=
+_cycalloc(sizeof(*_tmpE59)),((_tmpE59[0]=((_tmpE58.tag=4,((_tmpE58.f1=_tmp5E7,((
+_tmpE58.f2=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line),((_tmpDE3.f3=0,_tmpDE3)))))))),_tmpDE4))))),((_tmpDE2->tl=(
+yylsp_offset)]).last_line),((_tmpE58.f3=0,_tmpE58)))))))),_tmpE59))))),((_tmpE57->tl=(
 Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->tms,
-_tmpDE2)))))),_tmpDE5)))))),_tmpDE1))));}break;}case 174: _LL2AE:{struct Cyc_Parse_Declarator*
-_tmpDF4;struct Cyc_Absyn_Attributes_mod_struct*_tmpDF3;struct Cyc_Absyn_Attributes_mod_struct
-_tmpDF2;struct Cyc_List_List*_tmpDF1;union Cyc_YYSTYPE_union _tmpDF0;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpDF0.YY29).tag=33,(((_tmpDF0.YY29).f1=((_tmpDF4=
-_cycalloc(sizeof(*_tmpDF4)),((_tmpDF4->id=(Cyc_yyget_YY29(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]))->id,((_tmpDF4->tms=((
-_tmpDF1=_cycalloc(sizeof(*_tmpDF1)),((_tmpDF1->hd=(void*)((void*)((_tmpDF3=
-_cycalloc(sizeof(*_tmpDF3)),((_tmpDF3[0]=((_tmpDF2.tag=5,((_tmpDF2.f1=Cyc_Position_segment_of_abs((
+_tmpE57)))))),_tmpE5A)))))),_tmpE56))));}break;}case 179: _LL2B3:{struct Cyc_Parse_Declarator*
+_tmpE69;struct Cyc_Absyn_Attributes_mod_struct*_tmpE68;struct Cyc_Absyn_Attributes_mod_struct
+_tmpE67;struct Cyc_List_List*_tmpE66;union Cyc_YYSTYPE_union _tmpE65;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpE65.YY29).tag=33,(((_tmpE65.YY29).f1=((_tmpE69=
+_cycalloc(sizeof(*_tmpE69)),((_tmpE69->id=(Cyc_yyget_YY29(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]))->id,((_tmpE69->tms=((
+_tmpE66=_cycalloc(sizeof(*_tmpE66)),((_tmpE66->hd=(void*)((void*)((_tmpE68=
+_cycalloc(sizeof(*_tmpE68)),((_tmpE68[0]=((_tmpE67.tag=5,((_tmpE67.f1=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpDF2.f2=Cyc_yyget_YY45(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpDF2)))))),_tmpDF3))))),((
-_tmpDF1->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]))->tms,_tmpDF1)))))),_tmpDF4)))))),_tmpDF0))));}break;case 175:
-_LL2AF: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case
-176: _LL2B0:{union Cyc_YYSTYPE_union _tmpDF5;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpDF5.YY28).tag=32,(((_tmpDF5.YY28).f1=Cyc_List_imp_append(Cyc_yyget_YY28(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpE67.f2=Cyc_yyget_YY45(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpE67)))))),_tmpE68))))),((
+_tmpE66->tl=(Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]))->tms,_tmpE66)))))),_tmpE69)))))),_tmpE65))));}break;case 180:
+_LL2B4: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case
+181: _LL2B5:{union Cyc_YYSTYPE_union _tmpE6A;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE6A.YY28).tag=32,(((_tmpE6A.YY28).f1=Cyc_List_imp_append(Cyc_yyget_YY28(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY28(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpDF5))));}break;case 177:
-_LL2B1: {struct Cyc_List_List*ans=0;if(Cyc_yyget_YY45(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpE6A))));}break;case 182:
+_LL2B6: {struct Cyc_List_List*ans=0;if(Cyc_yyget_YY45(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)])!= 0){struct Cyc_Absyn_Attributes_mod_struct*
-_tmpDFB;struct Cyc_Absyn_Attributes_mod_struct _tmpDFA;struct Cyc_List_List*_tmpDF9;
-ans=((_tmpDF9=_cycalloc(sizeof(*_tmpDF9)),((_tmpDF9->hd=(void*)((void*)((_tmpDFB=
-_cycalloc(sizeof(*_tmpDFB)),((_tmpDFB[0]=((_tmpDFA.tag=5,((_tmpDFA.f1=Cyc_Position_segment_of_abs((
+_tmpE70;struct Cyc_Absyn_Attributes_mod_struct _tmpE6F;struct Cyc_List_List*_tmpE6E;
+ans=((_tmpE6E=_cycalloc(sizeof(*_tmpE6E)),((_tmpE6E->hd=(void*)((void*)((_tmpE70=
+_cycalloc(sizeof(*_tmpE70)),((_tmpE70[0]=((_tmpE6F.tag=5,((_tmpE6F.f1=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),((_tmpDFA.f2=
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),((_tmpE6F.f2=
 Cyc_yyget_YY45(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),
-_tmpDFA)))))),_tmpDFB))))),((_tmpDF9->tl=ans,_tmpDF9))))));}{struct Cyc_Absyn_PtrLoc*
-ptrloc=0;if(Cyc_Absyn_porting_c_code){struct Cyc_Absyn_PtrLoc*_tmpDFC;ptrloc=((
-_tmpDFC=_cycalloc(sizeof(*_tmpDFC)),((_tmpDFC->ptr_loc=(*Cyc_yyget_YY1(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 4)])).f1,((_tmpDFC->rgn_loc=
+_tmpE6F)))))),_tmpE70))))),((_tmpE6E->tl=ans,_tmpE6E))))));}{struct Cyc_Absyn_PtrLoc*
+ptrloc=0;if(Cyc_Absyn_porting_c_code){struct Cyc_Absyn_PtrLoc*_tmpE71;ptrloc=((
+_tmpE71=_cycalloc(sizeof(*_tmpE71)),((_tmpE71->ptr_loc=(*Cyc_yyget_YY1(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 4)])).f1,((_tmpE71->rgn_loc=
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 2)]).last_line),((_tmpDFC->zt_loc=Cyc_Position_segment_of_abs((
+yylsp_offset - 2)]).last_line),((_tmpE71->zt_loc=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line),_tmpDFC))))))));}{
-struct Cyc_Absyn_Pointer_mod_struct*_tmpE06;struct Cyc_Absyn_PtrAtts _tmpE05;struct
-Cyc_Absyn_Pointer_mod_struct _tmpE04;struct Cyc_List_List*_tmpE03;ans=((_tmpE03=
-_cycalloc(sizeof(*_tmpE03)),((_tmpE03->hd=(void*)((void*)((_tmpE06=_cycalloc(
-sizeof(*_tmpE06)),((_tmpE06[0]=((_tmpE04.tag=2,((_tmpE04.f1=((_tmpE05.rgn=(void*)
+_check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line),_tmpE71))))))));}{
+struct Cyc_Absyn_Pointer_mod_struct*_tmpE7B;struct Cyc_Absyn_PtrAtts _tmpE7A;struct
+Cyc_Absyn_Pointer_mod_struct _tmpE79;struct Cyc_List_List*_tmpE78;ans=((_tmpE78=
+_cycalloc(sizeof(*_tmpE78)),((_tmpE78->hd=(void*)((void*)((_tmpE7B=_cycalloc(
+sizeof(*_tmpE7B)),((_tmpE7B[0]=((_tmpE79.tag=2,((_tmpE79.f1=((_tmpE7A.rgn=(void*)
 Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((
-_tmpE05.nullable=(*Cyc_yyget_YY1(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 4)])).f2,((_tmpE05.bounds=(*Cyc_yyget_YY1(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 4)])).f3,((_tmpE05.zero_term=
+_tmpE7A.nullable=(*Cyc_yyget_YY1(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 4)])).f2,((_tmpE7A.bounds=(*Cyc_yyget_YY1(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 4)])).f3,((_tmpE7A.zero_term=
 Cyc_yyget_YY51(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((
-_tmpE05.ptrloc=ptrloc,_tmpE05)))))))))),((_tmpE04.f2=Cyc_yyget_YY25(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpE04)))))),_tmpE06))))),((
-_tmpE03->tl=ans,_tmpE03))))));}{union Cyc_YYSTYPE_union _tmpE07;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE07.YY28).tag=32,(((_tmpE07.YY28).f1=ans,_tmpE07))));}break;}}case 178: _LL2B2: {
+_tmpE7A.ptrloc=ptrloc,_tmpE7A)))))))))),((_tmpE79.f2=Cyc_yyget_YY25(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpE79)))))),_tmpE7B))))),((
+_tmpE78->tl=ans,_tmpE78))))));}{union Cyc_YYSTYPE_union _tmpE7C;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE7C.YY28).tag=32,(((_tmpE7C.YY28).f1=ans,_tmpE7C))));}break;}}case 183: _LL2B7: {
 struct Cyc_Position_Segment*loc=Cyc_Absyn_porting_c_code?Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line): 0;{struct
-_tuple12*_tmpE0A;union Cyc_YYSTYPE_union _tmpE09;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE09.YY1).tag=5,(((_tmpE09.YY1).f1=((_tmpE0A=_cycalloc(sizeof(*_tmpE0A)),((
-_tmpE0A->f1=loc,((_tmpE0A->f2=Cyc_Absyn_true_conref,((_tmpE0A->f3=Cyc_yyget_YY2(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpE0A)))))))),
-_tmpE09))));}break;}case 179: _LL2B3: {struct Cyc_Position_Segment*loc=Cyc_Absyn_porting_c_code?
+_tuple12*_tmpE7F;union Cyc_YYSTYPE_union _tmpE7E;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE7E.YY1).tag=5,(((_tmpE7E.YY1).f1=((_tmpE7F=_cycalloc(sizeof(*_tmpE7F)),((
+_tmpE7F->f1=loc,((_tmpE7F->f2=Cyc_Absyn_true_conref,((_tmpE7F->f3=Cyc_yyget_YY2(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpE7F)))))))),
+_tmpE7E))));}break;}case 184: _LL2B8: {struct Cyc_Position_Segment*loc=Cyc_Absyn_porting_c_code?
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line): 0;{struct _tuple12*_tmpE0D;union Cyc_YYSTYPE_union
-_tmpE0C;yyval=(union Cyc_YYSTYPE_union)(((_tmpE0C.YY1).tag=5,(((_tmpE0C.YY1).f1=((
-_tmpE0D=_cycalloc(sizeof(*_tmpE0D)),((_tmpE0D->f1=loc,((_tmpE0D->f2=Cyc_Absyn_false_conref,((
-_tmpE0D->f3=Cyc_yyget_YY2(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),
-_tmpE0D)))))))),_tmpE0C))));}break;}case 180: _LL2B4: {struct Cyc_Position_Segment*
+yylsp_offset - 1)]).last_line): 0;{struct _tuple12*_tmpE82;union Cyc_YYSTYPE_union
+_tmpE81;yyval=(union Cyc_YYSTYPE_union)(((_tmpE81.YY1).tag=5,(((_tmpE81.YY1).f1=((
+_tmpE82=_cycalloc(sizeof(*_tmpE82)),((_tmpE82->f1=loc,((_tmpE82->f2=Cyc_Absyn_false_conref,((
+_tmpE82->f3=Cyc_yyget_YY2(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),
+_tmpE82)))))))),_tmpE81))));}break;}case 185: _LL2B9: {struct Cyc_Position_Segment*
 loc=Cyc_Absyn_porting_c_code?Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line): 0;{struct
-_tuple12*_tmpE10;union Cyc_YYSTYPE_union _tmpE0F;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE0F.YY1).tag=5,(((_tmpE0F.YY1).f1=((_tmpE10=_cycalloc(sizeof(*_tmpE10)),((
-_tmpE10->f1=loc,((_tmpE10->f2=Cyc_Absyn_true_conref,((_tmpE10->f3=Cyc_Absyn_bounds_dyneither_conref,
-_tmpE10)))))))),_tmpE0F))));}break;}case 181: _LL2B5:{union Cyc_YYSTYPE_union
-_tmpE11;yyval=(union Cyc_YYSTYPE_union)(((_tmpE11.YY2).tag=6,(((_tmpE11.YY2).f1=
-Cyc_Absyn_bounds_one_conref,_tmpE11))));}break;case 182: _LL2B6:{struct Cyc_Absyn_Upper_b_struct*
-_tmpE17;struct Cyc_Absyn_Upper_b_struct _tmpE16;union Cyc_YYSTYPE_union _tmpE15;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpE15.YY2).tag=6,(((_tmpE15.YY2).f1=Cyc_Absyn_new_conref((
-void*)((_tmpE17=_cycalloc(sizeof(*_tmpE17)),((_tmpE17[0]=((_tmpE16.tag=0,((
-_tmpE16.f1=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 
-1)]),_tmpE16)))),_tmpE17))))),_tmpE15))));}break;case 183: _LL2B7:{union Cyc_YYSTYPE_union
-_tmpE18;yyval=(union Cyc_YYSTYPE_union)(((_tmpE18.YY51).tag=55,(((_tmpE18.YY51).f1=((
-struct Cyc_Absyn_Conref*(*)())Cyc_Absyn_empty_conref)(),_tmpE18))));}break;case
-184: _LL2B8:{union Cyc_YYSTYPE_union _tmpE19;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE19.YY51).tag=55,(((_tmpE19.YY51).f1=Cyc_Absyn_true_conref,_tmpE19))));}
-break;case 185: _LL2B9:{union Cyc_YYSTYPE_union _tmpE1A;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE1A.YY51).tag=55,(((_tmpE1A.YY51).f1=Cyc_Absyn_false_conref,_tmpE1A))));}
-break;case 186: _LL2BA:{union Cyc_YYSTYPE_union _tmpE1B;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE1B.YY49).tag=53,(((_tmpE1B.YY49).f1=0,_tmpE1B))));}break;case 187: _LL2BB: Cyc_Parse_set_vartyp_kind(
+_tuple12*_tmpE85;union Cyc_YYSTYPE_union _tmpE84;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE84.YY1).tag=5,(((_tmpE84.YY1).f1=((_tmpE85=_cycalloc(sizeof(*_tmpE85)),((
+_tmpE85->f1=loc,((_tmpE85->f2=Cyc_Absyn_true_conref,((_tmpE85->f3=Cyc_Absyn_bounds_dyneither_conref,
+_tmpE85)))))))),_tmpE84))));}break;}case 186: _LL2BA:{union Cyc_YYSTYPE_union
+_tmpE86;yyval=(union Cyc_YYSTYPE_union)(((_tmpE86.YY2).tag=6,(((_tmpE86.YY2).f1=
+Cyc_Absyn_bounds_one_conref,_tmpE86))));}break;case 187: _LL2BB:{struct Cyc_Absyn_Upper_b_struct*
+_tmpE8C;struct Cyc_Absyn_Upper_b_struct _tmpE8B;union Cyc_YYSTYPE_union _tmpE8A;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpE8A.YY2).tag=6,(((_tmpE8A.YY2).f1=Cyc_Absyn_new_conref((
+void*)((_tmpE8C=_cycalloc(sizeof(*_tmpE8C)),((_tmpE8C[0]=((_tmpE8B.tag=0,((
+_tmpE8B.f1=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 
+1)]),_tmpE8B)))),_tmpE8C))))),_tmpE8A))));}break;case 188: _LL2BC:{union Cyc_YYSTYPE_union
+_tmpE8D;yyval=(union Cyc_YYSTYPE_union)(((_tmpE8D.YY51).tag=55,(((_tmpE8D.YY51).f1=((
+struct Cyc_Absyn_Conref*(*)())Cyc_Absyn_empty_conref)(),_tmpE8D))));}break;case
+189: _LL2BD:{union Cyc_YYSTYPE_union _tmpE8E;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE8E.YY51).tag=55,(((_tmpE8E.YY51).f1=Cyc_Absyn_true_conref,_tmpE8E))));}
+break;case 190: _LL2BE:{union Cyc_YYSTYPE_union _tmpE8F;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE8F.YY51).tag=55,(((_tmpE8F.YY51).f1=Cyc_Absyn_false_conref,_tmpE8F))));}
+break;case 191: _LL2BF:{union Cyc_YYSTYPE_union _tmpE90;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE90.YY49).tag=53,(((_tmpE90.YY49).f1=0,_tmpE90))));}break;case 192: _LL2C0: Cyc_Parse_set_vartyp_kind(
 Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),(void*)
-3,1);{struct Cyc_Core_Opt*_tmpE1E;union Cyc_YYSTYPE_union _tmpE1D;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE1D.YY49).tag=53,(((_tmpE1D.YY49).f1=((_tmpE1E=_cycalloc(sizeof(*_tmpE1E)),((
-_tmpE1E->v=(void*)Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmpE1E)))),_tmpE1D))));}break;case 188: _LL2BC:{struct Cyc_Core_Opt*
-_tmpE21;union Cyc_YYSTYPE_union _tmpE20;yyval=(union Cyc_YYSTYPE_union)(((_tmpE20.YY49).tag=
-53,(((_tmpE20.YY49).f1=((_tmpE21=_cycalloc(sizeof(*_tmpE21)),((_tmpE21->v=(void*)
-Cyc_Absyn_new_evar((struct Cyc_Core_Opt*)& Cyc_Tcutil_rk,0),_tmpE21)))),_tmpE20))));}
-break;case 189: _LL2BD:{union Cyc_YYSTYPE_union _tmpE22;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE22.YY44).tag=48,(((_tmpE22.YY44).f1=(void*)Cyc_Absyn_new_evar((struct Cyc_Core_Opt*)&
-Cyc_Tcutil_trk,0),_tmpE22))));}break;case 190: _LL2BE: Cyc_Parse_set_vartyp_kind(
+3,1);{struct Cyc_Core_Opt*_tmpE93;union Cyc_YYSTYPE_union _tmpE92;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE92.YY49).tag=53,(((_tmpE92.YY49).f1=((_tmpE93=_cycalloc(sizeof(*_tmpE93)),((
+_tmpE93->v=(void*)Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmpE93)))),_tmpE92))));}break;case 193: _LL2C1:{struct Cyc_Core_Opt*
+_tmpE96;union Cyc_YYSTYPE_union _tmpE95;yyval=(union Cyc_YYSTYPE_union)(((_tmpE95.YY49).tag=
+53,(((_tmpE95.YY49).f1=((_tmpE96=_cycalloc(sizeof(*_tmpE96)),((_tmpE96->v=(void*)
+Cyc_Absyn_new_evar((struct Cyc_Core_Opt*)& Cyc_Tcutil_rk,0),_tmpE96)))),_tmpE95))));}
+break;case 194: _LL2C2:{union Cyc_YYSTYPE_union _tmpE97;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE97.YY44).tag=48,(((_tmpE97.YY44).f1=(void*)Cyc_Absyn_new_evar((struct Cyc_Core_Opt*)&
+Cyc_Tcutil_trk,0),_tmpE97))));}break;case 195: _LL2C3: Cyc_Parse_set_vartyp_kind(
 Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),(void*)
 5,1);yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case
-191: _LL2BF:{union Cyc_YYSTYPE_union _tmpE23;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE23.YY44).tag=48,(((_tmpE23.YY44).f1=(void*)Cyc_Absyn_new_evar((struct Cyc_Core_Opt*)&
-Cyc_Tcutil_trk,0),_tmpE23))));}break;case 192: _LL2C0:{union Cyc_YYSTYPE_union
-_tmpE24;yyval=(union Cyc_YYSTYPE_union)(((_tmpE24.YY25).tag=29,(((_tmpE24.YY25).f1=
+196: _LL2C4:{union Cyc_YYSTYPE_union _tmpE98;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE98.YY44).tag=48,(((_tmpE98.YY44).f1=(void*)Cyc_Absyn_new_evar((struct Cyc_Core_Opt*)&
+Cyc_Tcutil_trk,0),_tmpE98))));}break;case 197: _LL2C5:{union Cyc_YYSTYPE_union
+_tmpE99;yyval=(union Cyc_YYSTYPE_union)(((_tmpE99.YY25).tag=29,(((_tmpE99.YY25).f1=
 Cyc_Absyn_empty_tqual(Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset + 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset + 1)]).last_line)),_tmpE24))));}
-break;case 193: _LL2C1:{union Cyc_YYSTYPE_union _tmpE25;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE25.YY25).tag=29,(((_tmpE25.YY25).f1=Cyc_Absyn_combine_tqual(Cyc_yyget_YY25(
+_check_known_subscript_notnull(10000,yylsp_offset + 1)]).last_line)),_tmpE99))));}
+break;case 198: _LL2C6:{union Cyc_YYSTYPE_union _tmpE9A;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE9A.YY25).tag=29,(((_tmpE9A.YY25).f1=Cyc_Absyn_combine_tqual(Cyc_yyget_YY25(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY25(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpE25))));}break;case 194:
-_LL2C2:{struct _tuple17*_tmpE28;union Cyc_YYSTYPE_union _tmpE27;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE27.YY39).tag=43,(((_tmpE27.YY39).f1=((_tmpE28=_cycalloc(sizeof(*_tmpE28)),((
-_tmpE28->f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(
+_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpE9A))));}break;case 199:
+_LL2C7:{struct _tuple17*_tmpE9D;union Cyc_YYSTYPE_union _tmpE9C;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpE9C.YY39).tag=43,(((_tmpE9C.YY39).f1=((_tmpE9D=_cycalloc(sizeof(*_tmpE9D)),((
+_tmpE9D->f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(
 Cyc_yyget_YY38(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)])),((
-_tmpE28->f2=0,((_tmpE28->f3=0,((_tmpE28->f4=Cyc_yyget_YY49(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpE28->f5=Cyc_yyget_YY50(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpE28)))))))))))),
-_tmpE27))));}break;case 195: _LL2C3:{struct _tuple17*_tmpE2B;union Cyc_YYSTYPE_union
-_tmpE2A;yyval=(union Cyc_YYSTYPE_union)(((_tmpE2A.YY39).tag=43,(((_tmpE2A.YY39).f1=((
-_tmpE2B=_cycalloc(sizeof(*_tmpE2B)),((_tmpE2B->f1=((struct Cyc_List_List*(*)(
+_tmpE9D->f2=0,((_tmpE9D->f3=0,((_tmpE9D->f4=Cyc_yyget_YY49(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpE9D->f5=Cyc_yyget_YY50(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpE9D)))))))))))),
+_tmpE9C))));}break;case 200: _LL2C8:{struct _tuple17*_tmpEA0;union Cyc_YYSTYPE_union
+_tmpE9F;yyval=(union Cyc_YYSTYPE_union)(((_tmpE9F.YY39).tag=43,(((_tmpE9F.YY39).f1=((
+_tmpEA0=_cycalloc(sizeof(*_tmpEA0)),((_tmpEA0->f1=((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_YY38(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 4)])),((_tmpE2B->f2=1,((
-_tmpE2B->f3=0,((_tmpE2B->f4=Cyc_yyget_YY49(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 1)]),((_tmpE2B->f5=Cyc_yyget_YY50(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpE2B)))))))))))),_tmpE2A))));}
-break;case 196: _LL2C4: {struct _tuple2 _tmp5CA;struct Cyc_Core_Opt*_tmp5CB;struct Cyc_Absyn_Tqual
-_tmp5CC;void*_tmp5CD;struct _tuple2*_tmp5C9=Cyc_yyget_YY37(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp5CA=*_tmp5C9;_tmp5CB=
-_tmp5CA.f1;_tmp5CC=_tmp5CA.f2;_tmp5CD=_tmp5CA.f3;{struct Cyc_Absyn_VarargInfo*
-_tmpE2C;struct Cyc_Absyn_VarargInfo*_tmp5CE=(_tmpE2C=_cycalloc(sizeof(*_tmpE2C)),((
-_tmpE2C->name=_tmp5CB,((_tmpE2C->tq=_tmp5CC,((_tmpE2C->type=(void*)_tmp5CD,((
-_tmpE2C->inject=Cyc_yyget_YY31(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 3)]),_tmpE2C)))))))));{struct _tuple17*_tmpE2F;union Cyc_YYSTYPE_union
-_tmpE2E;yyval=(union Cyc_YYSTYPE_union)(((_tmpE2E.YY39).tag=43,(((_tmpE2E.YY39).f1=((
-_tmpE2F=_cycalloc(sizeof(*_tmpE2F)),((_tmpE2F->f1=0,((_tmpE2F->f2=0,((_tmpE2F->f3=
-_tmp5CE,((_tmpE2F->f4=Cyc_yyget_YY49(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]),((_tmpE2F->f5=Cyc_yyget_YY50(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpE2F)))))))))))),_tmpE2E))));}
-break;}}case 197: _LL2C5: {struct _tuple2 _tmp5D3;struct Cyc_Core_Opt*_tmp5D4;struct
-Cyc_Absyn_Tqual _tmp5D5;void*_tmp5D6;struct _tuple2*_tmp5D2=Cyc_yyget_YY37(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp5D3=*_tmp5D2;_tmp5D4=
-_tmp5D3.f1;_tmp5D5=_tmp5D3.f2;_tmp5D6=_tmp5D3.f3;{struct Cyc_Absyn_VarargInfo*
-_tmpE30;struct Cyc_Absyn_VarargInfo*_tmp5D7=(_tmpE30=_cycalloc(sizeof(*_tmpE30)),((
-_tmpE30->name=_tmp5D4,((_tmpE30->tq=_tmp5D5,((_tmpE30->type=(void*)_tmp5D6,((
-_tmpE30->inject=Cyc_yyget_YY31(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 3)]),_tmpE30)))))))));{struct _tuple17*_tmpE33;union Cyc_YYSTYPE_union
-_tmpE32;yyval=(union Cyc_YYSTYPE_union)(((_tmpE32.YY39).tag=43,(((_tmpE32.YY39).f1=((
-_tmpE33=_cycalloc(sizeof(*_tmpE33)),((_tmpE33->f1=((struct Cyc_List_List*(*)(
+_check_known_subscript_notnull(10000,yyvsp_offset - 4)])),((_tmpEA0->f2=1,((
+_tmpEA0->f3=0,((_tmpEA0->f4=Cyc_yyget_YY49(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 1)]),((_tmpEA0->f5=Cyc_yyget_YY50(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpEA0)))))))))))),_tmpE9F))));}
+break;case 201: _LL2C9: {struct _tuple2 _tmp617;struct Cyc_Core_Opt*_tmp618;struct Cyc_Absyn_Tqual
+_tmp619;void*_tmp61A;struct _tuple2*_tmp616=Cyc_yyget_YY37(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp617=*_tmp616;_tmp618=
+_tmp617.f1;_tmp619=_tmp617.f2;_tmp61A=_tmp617.f3;{struct Cyc_Absyn_VarargInfo*
+_tmpEA1;struct Cyc_Absyn_VarargInfo*_tmp61B=(_tmpEA1=_cycalloc(sizeof(*_tmpEA1)),((
+_tmpEA1->name=_tmp618,((_tmpEA1->tq=_tmp619,((_tmpEA1->type=(void*)_tmp61A,((
+_tmpEA1->inject=Cyc_yyget_YY31(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 3)]),_tmpEA1)))))))));{struct _tuple17*_tmpEA4;union Cyc_YYSTYPE_union
+_tmpEA3;yyval=(union Cyc_YYSTYPE_union)(((_tmpEA3.YY39).tag=43,(((_tmpEA3.YY39).f1=((
+_tmpEA4=_cycalloc(sizeof(*_tmpEA4)),((_tmpEA4->f1=0,((_tmpEA4->f2=0,((_tmpEA4->f3=
+_tmp61B,((_tmpEA4->f4=Cyc_yyget_YY49(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]),((_tmpEA4->f5=Cyc_yyget_YY50(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpEA4)))))))))))),_tmpEA3))));}
+break;}}case 202: _LL2CA: {struct _tuple2 _tmp620;struct Cyc_Core_Opt*_tmp621;struct
+Cyc_Absyn_Tqual _tmp622;void*_tmp623;struct _tuple2*_tmp61F=Cyc_yyget_YY37(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp620=*_tmp61F;_tmp621=
+_tmp620.f1;_tmp622=_tmp620.f2;_tmp623=_tmp620.f3;{struct Cyc_Absyn_VarargInfo*
+_tmpEA5;struct Cyc_Absyn_VarargInfo*_tmp624=(_tmpEA5=_cycalloc(sizeof(*_tmpEA5)),((
+_tmpEA5->name=_tmp621,((_tmpEA5->tq=_tmp622,((_tmpEA5->type=(void*)_tmp623,((
+_tmpEA5->inject=Cyc_yyget_YY31(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 3)]),_tmpEA5)))))))));{struct _tuple17*_tmpEA8;union Cyc_YYSTYPE_union
+_tmpEA7;yyval=(union Cyc_YYSTYPE_union)(((_tmpEA7.YY39).tag=43,(((_tmpEA7.YY39).f1=((
+_tmpEA8=_cycalloc(sizeof(*_tmpEA8)),((_tmpEA8->f1=((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_YY38(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 6)])),((_tmpE33->f2=0,((
-_tmpE33->f3=_tmp5D7,((_tmpE33->f4=Cyc_yyget_YY49(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpE33->f5=Cyc_yyget_YY50(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpE33)))))))))))),
-_tmpE32))));}break;}}case 198: _LL2C6:{struct Cyc_Absyn_Unknown_kb_struct*_tmpE39;
-struct Cyc_Absyn_Unknown_kb_struct _tmpE38;union Cyc_YYSTYPE_union _tmpE37;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpE37.YY44).tag=48,(((_tmpE37.YY44).f1=(void*)Cyc_Parse_id2type(
+_check_known_subscript_notnull(10000,yyvsp_offset - 6)])),((_tmpEA8->f2=0,((
+_tmpEA8->f3=_tmp624,((_tmpEA8->f4=Cyc_yyget_YY49(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpEA8->f5=Cyc_yyget_YY50(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpEA8)))))))))))),
+_tmpEA7))));}break;}}case 203: _LL2CB:{struct Cyc_Absyn_Unknown_kb_struct*_tmpEAE;
+struct Cyc_Absyn_Unknown_kb_struct _tmpEAD;union Cyc_YYSTYPE_union _tmpEAC;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpEAC.YY44).tag=48,(((_tmpEAC.YY44).f1=(void*)Cyc_Parse_id2type(
 Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),(
-void*)((_tmpE39=_cycalloc(sizeof(*_tmpE39)),((_tmpE39[0]=((_tmpE38.tag=1,((
-_tmpE38.f1=0,_tmpE38)))),_tmpE39))))),_tmpE37))));}break;case 199: _LL2C7:{union
-Cyc_YYSTYPE_union _tmpE3A;yyval=(union Cyc_YYSTYPE_union)(((_tmpE3A.YY44).tag=48,(((
-_tmpE3A.YY44).f1=(void*)Cyc_Parse_id2type(Cyc_yyget_String_tok(yyvs[
+void*)((_tmpEAE=_cycalloc(sizeof(*_tmpEAE)),((_tmpEAE[0]=((_tmpEAD.tag=1,((
+_tmpEAD.f1=0,_tmpEAD)))),_tmpEAE))))),_tmpEAC))));}break;case 204: _LL2CC:{union
+Cyc_YYSTYPE_union _tmpEAF;yyval=(union Cyc_YYSTYPE_union)(((_tmpEAF.YY44).tag=48,(((
+_tmpEAF.YY44).f1=(void*)Cyc_Parse_id2type(Cyc_yyget_String_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_Tcutil_kind_to_bound(
 Cyc_yyget_YY43(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))),
-_tmpE3A))));}break;case 200: _LL2C8:{union Cyc_YYSTYPE_union _tmpE3B;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE3B.YY49).tag=53,(((_tmpE3B.YY49).f1=0,_tmpE3B))));}break;case 201: _LL2C9:{
-struct Cyc_Core_Opt*_tmpE45;struct Cyc_Absyn_JoinEff_struct _tmpE44;struct Cyc_Absyn_JoinEff_struct*
-_tmpE43;union Cyc_YYSTYPE_union _tmpE42;yyval=(union Cyc_YYSTYPE_union)(((_tmpE42.YY49).tag=
-53,(((_tmpE42.YY49).f1=((_tmpE45=_cycalloc(sizeof(*_tmpE45)),((_tmpE45->v=(void*)((
-void*)((_tmpE43=_cycalloc(sizeof(*_tmpE43)),((_tmpE43[0]=((_tmpE44.tag=20,((
-_tmpE44.f1=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),
-_tmpE44)))),_tmpE43))))),_tmpE45)))),_tmpE42))));}break;case 202: _LL2CA:{union Cyc_YYSTYPE_union
-_tmpE46;yyval=(union Cyc_YYSTYPE_union)(((_tmpE46.YY50).tag=54,(((_tmpE46.YY50).f1=
-0,_tmpE46))));}break;case 203: _LL2CB: yyval=yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)];break;case 204: _LL2CC: {struct Cyc_Absyn_Less_kb_struct
-_tmpE49;struct Cyc_Absyn_Less_kb_struct*_tmpE48;struct Cyc_Absyn_Less_kb_struct*
-_tmp5E5=(_tmpE48=_cycalloc(sizeof(*_tmpE48)),((_tmpE48[0]=((_tmpE49.tag=2,((
-_tmpE49.f1=0,((_tmpE49.f2=(void*)((void*)5),_tmpE49)))))),_tmpE48)));struct
-_dyneither_ptr _tmp5E6=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)]);void*_tmp5E7=Cyc_Parse_id2type(_tmp5E6,(void*)_tmp5E5);{
-struct Cyc_List_List*_tmpE58;struct Cyc_Absyn_JoinEff_struct*_tmpE57;struct Cyc_Absyn_JoinEff_struct
-_tmpE56;struct _tuple4*_tmpE55;union Cyc_YYSTYPE_union _tmpE54;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE54.YY50).tag=54,(((_tmpE54.YY50).f1=((_tmpE58=_cycalloc(sizeof(*_tmpE58)),((
-_tmpE58->hd=((_tmpE55=_cycalloc(sizeof(*_tmpE55)),((_tmpE55->f1=(void*)((_tmpE57=
-_cycalloc(sizeof(*_tmpE57)),((_tmpE57[0]=((_tmpE56.tag=20,((_tmpE56.f1=Cyc_yyget_YY40(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpE56)))),_tmpE57)))),((
-_tmpE55->f2=_tmp5E7,_tmpE55)))))),((_tmpE58->tl=0,_tmpE58)))))),_tmpE54))));}
-break;}case 205: _LL2CD: {struct Cyc_Absyn_Less_kb_struct _tmpE5B;struct Cyc_Absyn_Less_kb_struct*
-_tmpE5A;struct Cyc_Absyn_Less_kb_struct*_tmp5EF=(_tmpE5A=_cycalloc(sizeof(*
-_tmpE5A)),((_tmpE5A[0]=((_tmpE5B.tag=2,((_tmpE5B.f1=0,((_tmpE5B.f2=(void*)((void*)
-5),_tmpE5B)))))),_tmpE5A)));struct _dyneither_ptr _tmp5F0=Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);void*_tmp5F1=Cyc_Parse_id2type(
-_tmp5F0,(void*)_tmp5EF);{struct Cyc_List_List*_tmpE6A;struct Cyc_Absyn_JoinEff_struct*
-_tmpE69;struct Cyc_Absyn_JoinEff_struct _tmpE68;struct _tuple4*_tmpE67;union Cyc_YYSTYPE_union
-_tmpE66;yyval=(union Cyc_YYSTYPE_union)(((_tmpE66.YY50).tag=54,(((_tmpE66.YY50).f1=((
-_tmpE6A=_cycalloc(sizeof(*_tmpE6A)),((_tmpE6A->hd=((_tmpE67=_cycalloc(sizeof(*
-_tmpE67)),((_tmpE67->f1=(void*)((_tmpE69=_cycalloc(sizeof(*_tmpE69)),((_tmpE69[0]=((
-_tmpE68.tag=20,((_tmpE68.f1=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 4)]),_tmpE68)))),_tmpE69)))),((_tmpE67->f2=_tmp5F1,_tmpE67)))))),((
-_tmpE6A->tl=Cyc_yyget_YY50(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmpE6A)))))),_tmpE66))));}break;}case 206: _LL2CE:{union Cyc_YYSTYPE_union
-_tmpE6B;yyval=(union Cyc_YYSTYPE_union)(((_tmpE6B.YY31).tag=35,(((_tmpE6B.YY31).f1=
-0,_tmpE6B))));}break;case 207: _LL2CF:{const char*_tmpE6C;if(Cyc_zstrcmp((struct
+_tmpEAF))));}break;case 205: _LL2CD:{union Cyc_YYSTYPE_union _tmpEB0;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpEB0.YY49).tag=53,(((_tmpEB0.YY49).f1=0,_tmpEB0))));}break;case 206: _LL2CE:{
+struct Cyc_Core_Opt*_tmpEBA;struct Cyc_Absyn_JoinEff_struct _tmpEB9;struct Cyc_Absyn_JoinEff_struct*
+_tmpEB8;union Cyc_YYSTYPE_union _tmpEB7;yyval=(union Cyc_YYSTYPE_union)(((_tmpEB7.YY49).tag=
+53,(((_tmpEB7.YY49).f1=((_tmpEBA=_cycalloc(sizeof(*_tmpEBA)),((_tmpEBA->v=(void*)((
+void*)((_tmpEB8=_cycalloc(sizeof(*_tmpEB8)),((_tmpEB8[0]=((_tmpEB9.tag=20,((
+_tmpEB9.f1=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),
+_tmpEB9)))),_tmpEB8))))),_tmpEBA)))),_tmpEB7))));}break;case 207: _LL2CF:{union Cyc_YYSTYPE_union
+_tmpEBB;yyval=(union Cyc_YYSTYPE_union)(((_tmpEBB.YY50).tag=54,(((_tmpEBB.YY50).f1=
+0,_tmpEBB))));}break;case 208: _LL2D0: yyval=yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)];break;case 209: _LL2D1: {struct Cyc_Absyn_Less_kb_struct
+_tmpEBE;struct Cyc_Absyn_Less_kb_struct*_tmpEBD;struct Cyc_Absyn_Less_kb_struct*
+_tmp632=(_tmpEBD=_cycalloc(sizeof(*_tmpEBD)),((_tmpEBD[0]=((_tmpEBE.tag=2,((
+_tmpEBE.f1=0,((_tmpEBE.f2=(void*)((void*)5),_tmpEBE)))))),_tmpEBD)));struct
+_dyneither_ptr _tmp633=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)]);void*_tmp634=Cyc_Parse_id2type(_tmp633,(void*)_tmp632);{
+struct Cyc_List_List*_tmpECD;struct Cyc_Absyn_JoinEff_struct*_tmpECC;struct Cyc_Absyn_JoinEff_struct
+_tmpECB;struct _tuple4*_tmpECA;union Cyc_YYSTYPE_union _tmpEC9;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpEC9.YY50).tag=54,(((_tmpEC9.YY50).f1=((_tmpECD=_cycalloc(sizeof(*_tmpECD)),((
+_tmpECD->hd=((_tmpECA=_cycalloc(sizeof(*_tmpECA)),((_tmpECA->f1=(void*)((_tmpECC=
+_cycalloc(sizeof(*_tmpECC)),((_tmpECC[0]=((_tmpECB.tag=20,((_tmpECB.f1=Cyc_yyget_YY40(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpECB)))),_tmpECC)))),((
+_tmpECA->f2=_tmp634,_tmpECA)))))),((_tmpECD->tl=0,_tmpECD)))))),_tmpEC9))));}
+break;}case 210: _LL2D2: {struct Cyc_Absyn_Less_kb_struct _tmpED0;struct Cyc_Absyn_Less_kb_struct*
+_tmpECF;struct Cyc_Absyn_Less_kb_struct*_tmp63C=(_tmpECF=_cycalloc(sizeof(*
+_tmpECF)),((_tmpECF[0]=((_tmpED0.tag=2,((_tmpED0.f1=0,((_tmpED0.f2=(void*)((void*)
+5),_tmpED0)))))),_tmpECF)));struct _dyneither_ptr _tmp63D=Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);void*_tmp63E=Cyc_Parse_id2type(
+_tmp63D,(void*)_tmp63C);{struct Cyc_List_List*_tmpEDF;struct Cyc_Absyn_JoinEff_struct*
+_tmpEDE;struct Cyc_Absyn_JoinEff_struct _tmpEDD;struct _tuple4*_tmpEDC;union Cyc_YYSTYPE_union
+_tmpEDB;yyval=(union Cyc_YYSTYPE_union)(((_tmpEDB.YY50).tag=54,(((_tmpEDB.YY50).f1=((
+_tmpEDF=_cycalloc(sizeof(*_tmpEDF)),((_tmpEDF->hd=((_tmpEDC=_cycalloc(sizeof(*
+_tmpEDC)),((_tmpEDC->f1=(void*)((_tmpEDE=_cycalloc(sizeof(*_tmpEDE)),((_tmpEDE[0]=((
+_tmpEDD.tag=20,((_tmpEDD.f1=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 4)]),_tmpEDD)))),_tmpEDE)))),((_tmpEDC->f2=_tmp63E,_tmpEDC)))))),((
+_tmpEDF->tl=Cyc_yyget_YY50(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmpEDF)))))),_tmpEDB))));}break;}case 211: _LL2D3:{union Cyc_YYSTYPE_union
+_tmpEE0;yyval=(union Cyc_YYSTYPE_union)(((_tmpEE0.YY31).tag=35,(((_tmpEE0.YY31).f1=
+0,_tmpEE0))));}break;case 212: _LL2D4:{const char*_tmpEE1;if(Cyc_zstrcmp((struct
 _dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),((_tmpE6C="inject",_tag_dyneither(_tmpE6C,sizeof(char),7))))!= 0){
-const char*_tmpE6D;Cyc_Parse_err(((_tmpE6D="missing type in function declaration",
-_tag_dyneither(_tmpE6D,sizeof(char),37))),Cyc_Position_segment_of_abs((yyls[
+yyvsp_offset)]),((_tmpEE1="inject",_tag_dyneither(_tmpEE1,sizeof(char),7))))!= 0){
+const char*_tmpEE2;Cyc_Parse_err(((_tmpEE2="missing type in function declaration",
+_tag_dyneither(_tmpEE2,sizeof(char),37))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line));}}{union Cyc_YYSTYPE_union
-_tmpE6E;yyval=(union Cyc_YYSTYPE_union)(((_tmpE6E.YY31).tag=35,(((_tmpE6E.YY31).f1=
-1,_tmpE6E))));}break;case 208: _LL2D0: yyval=yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)];break;case 209: _LL2D1:{union Cyc_YYSTYPE_union _tmpE6F;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpE6F.YY40).tag=44,(((_tmpE6F.YY40).f1=Cyc_List_imp_append(
+_tmpEE3;yyval=(union Cyc_YYSTYPE_union)(((_tmpEE3.YY31).tag=35,(((_tmpEE3.YY31).f1=
+1,_tmpEE3))));}break;case 213: _LL2D5: yyval=yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)];break;case 214: _LL2D6:{union Cyc_YYSTYPE_union _tmpEE4;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpEE4.YY40).tag=44,(((_tmpEE4.YY40).f1=Cyc_List_imp_append(
 Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY40(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpE6F))));}break;
-case 210: _LL2D2:{union Cyc_YYSTYPE_union _tmpE70;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE70.YY40).tag=44,(((_tmpE70.YY40).f1=0,_tmpE70))));}break;case 211: _LL2D3:
-yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)];break;case 212:
-_LL2D4:{struct Cyc_List_List*_tmpE7A;struct Cyc_Absyn_RgnsEff_struct _tmpE79;struct
-Cyc_Absyn_RgnsEff_struct*_tmpE78;union Cyc_YYSTYPE_union _tmpE77;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE77.YY40).tag=44,(((_tmpE77.YY40).f1=((_tmpE7A=_cycalloc(sizeof(*_tmpE7A)),((
-_tmpE7A->hd=(void*)((void*)((_tmpE78=_cycalloc(sizeof(*_tmpE78)),((_tmpE78[0]=((
-_tmpE79.tag=21,((_tmpE79.f1=(void*)Cyc_yyget_YY44(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpE79)))),_tmpE78))))),((
-_tmpE7A->tl=0,_tmpE7A)))))),_tmpE77))));}break;case 213: _LL2D5: Cyc_Parse_set_vartyp_kind(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpEE4))));}break;
+case 215: _LL2D7:{union Cyc_YYSTYPE_union _tmpEE5;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpEE5.YY40).tag=44,(((_tmpEE5.YY40).f1=0,_tmpEE5))));}break;case 216: _LL2D8:
+yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)];break;case 217:
+_LL2D9:{struct Cyc_List_List*_tmpEEF;struct Cyc_Absyn_RgnsEff_struct _tmpEEE;struct
+Cyc_Absyn_RgnsEff_struct*_tmpEED;union Cyc_YYSTYPE_union _tmpEEC;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpEEC.YY40).tag=44,(((_tmpEEC.YY40).f1=((_tmpEEF=_cycalloc(sizeof(*_tmpEEF)),((
+_tmpEEF->hd=(void*)((void*)((_tmpEED=_cycalloc(sizeof(*_tmpEED)),((_tmpEED[0]=((
+_tmpEEE.tag=21,((_tmpEEE.f1=(void*)Cyc_yyget_YY44(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpEEE)))),_tmpEED))))),((
+_tmpEEF->tl=0,_tmpEEF)))))),_tmpEEC))));}break;case 218: _LL2DA: Cyc_Parse_set_vartyp_kind(
 Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),(void*)
-6,0);{struct Cyc_List_List*_tmpE7D;union Cyc_YYSTYPE_union _tmpE7C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE7C.YY40).tag=44,(((_tmpE7C.YY40).f1=((_tmpE7D=_cycalloc(sizeof(*_tmpE7D)),((
-_tmpE7D->hd=(void*)Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),((_tmpE7D->tl=0,_tmpE7D)))))),_tmpE7C))));}break;case 214: _LL2D6:
+6,0);{struct Cyc_List_List*_tmpEF2;union Cyc_YYSTYPE_union _tmpEF1;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpEF1.YY40).tag=44,(((_tmpEF1.YY40).f1=((_tmpEF2=_cycalloc(sizeof(*_tmpEF2)),((
+_tmpEF2->hd=(void*)Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),((_tmpEF2->tl=0,_tmpEF2)))))),_tmpEF1))));}break;case 219: _LL2DB:
 Cyc_Parse_set_vartyp_kind(Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)]),(void*)5,1);{struct Cyc_List_List*_tmpE87;struct Cyc_Absyn_AccessEff_struct
-_tmpE86;struct Cyc_Absyn_AccessEff_struct*_tmpE85;union Cyc_YYSTYPE_union _tmpE84;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpE84.YY40).tag=44,(((_tmpE84.YY40).f1=((
-_tmpE87=_cycalloc(sizeof(*_tmpE87)),((_tmpE87->hd=(void*)((void*)((_tmpE85=
-_cycalloc(sizeof(*_tmpE85)),((_tmpE85[0]=((_tmpE86.tag=19,((_tmpE86.f1=(void*)
-Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpE86)))),
-_tmpE85))))),((_tmpE87->tl=0,_tmpE87)))))),_tmpE84))));}break;case 215: _LL2D7: Cyc_Parse_set_vartyp_kind(
+10000,yyvsp_offset)]),(void*)5,1);{struct Cyc_List_List*_tmpEFC;struct Cyc_Absyn_AccessEff_struct
+_tmpEFB;struct Cyc_Absyn_AccessEff_struct*_tmpEFA;union Cyc_YYSTYPE_union _tmpEF9;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpEF9.YY40).tag=44,(((_tmpEF9.YY40).f1=((
+_tmpEFC=_cycalloc(sizeof(*_tmpEFC)),((_tmpEFC->hd=(void*)((void*)((_tmpEFA=
+_cycalloc(sizeof(*_tmpEFA)),((_tmpEFA[0]=((_tmpEFB.tag=19,((_tmpEFB.f1=(void*)
+Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpEFB)))),
+_tmpEFA))))),((_tmpEFC->tl=0,_tmpEFC)))))),_tmpEF9))));}break;case 220: _LL2DC: Cyc_Parse_set_vartyp_kind(
 Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),(
-void*)5,1);{struct Cyc_List_List*_tmpE91;struct Cyc_Absyn_AccessEff_struct _tmpE90;
-struct Cyc_Absyn_AccessEff_struct*_tmpE8F;union Cyc_YYSTYPE_union _tmpE8E;yyval=(
-union Cyc_YYSTYPE_union)(((_tmpE8E.YY40).tag=44,(((_tmpE8E.YY40).f1=((_tmpE91=
-_cycalloc(sizeof(*_tmpE91)),((_tmpE91->hd=(void*)((void*)((_tmpE8F=_cycalloc(
-sizeof(*_tmpE8F)),((_tmpE8F[0]=((_tmpE90.tag=19,((_tmpE90.f1=(void*)Cyc_yyget_YY44(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpE90)))),_tmpE8F))))),((
-_tmpE91->tl=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmpE91)))))),_tmpE8E))));}break;case 216: _LL2D8:{struct Cyc_List_List*
-_tmpE94;union Cyc_YYSTYPE_union _tmpE93;yyval=(union Cyc_YYSTYPE_union)(((_tmpE93.YY38).tag=
-42,(((_tmpE93.YY38).f1=((_tmpE94=_cycalloc(sizeof(*_tmpE94)),((_tmpE94->hd=Cyc_yyget_YY37(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpE94->tl=0,
-_tmpE94)))))),_tmpE93))));}break;case 217: _LL2D9:{struct Cyc_List_List*_tmpE97;
-union Cyc_YYSTYPE_union _tmpE96;yyval=(union Cyc_YYSTYPE_union)(((_tmpE96.YY38).tag=
-42,(((_tmpE96.YY38).f1=((_tmpE97=_cycalloc(sizeof(*_tmpE97)),((_tmpE97->hd=Cyc_yyget_YY37(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpE97->tl=Cyc_yyget_YY38(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpE97)))))),
-_tmpE96))));}break;case 218: _LL2DA: {struct _tuple16 _tmp612;struct Cyc_Absyn_Tqual
-_tmp613;struct Cyc_List_List*_tmp614;struct Cyc_List_List*_tmp615;struct _tuple16*
-_tmp611=Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);
-_tmp612=*_tmp611;_tmp613=_tmp612.f1;_tmp614=_tmp612.f2;_tmp615=_tmp612.f3;if(
-_tmp613.loc == 0)_tmp613.loc=Cyc_Position_segment_of_abs((yyls[
+void*)5,1);{struct Cyc_List_List*_tmpF06;struct Cyc_Absyn_AccessEff_struct _tmpF05;
+struct Cyc_Absyn_AccessEff_struct*_tmpF04;union Cyc_YYSTYPE_union _tmpF03;yyval=(
+union Cyc_YYSTYPE_union)(((_tmpF03.YY40).tag=44,(((_tmpF03.YY40).f1=((_tmpF06=
+_cycalloc(sizeof(*_tmpF06)),((_tmpF06->hd=(void*)((void*)((_tmpF04=_cycalloc(
+sizeof(*_tmpF04)),((_tmpF04[0]=((_tmpF05.tag=19,((_tmpF05.f1=(void*)Cyc_yyget_YY44(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpF05)))),_tmpF04))))),((
+_tmpF06->tl=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmpF06)))))),_tmpF03))));}break;case 221: _LL2DD:{struct Cyc_List_List*
+_tmpF09;union Cyc_YYSTYPE_union _tmpF08;yyval=(union Cyc_YYSTYPE_union)(((_tmpF08.YY38).tag=
+42,(((_tmpF08.YY38).f1=((_tmpF09=_cycalloc(sizeof(*_tmpF09)),((_tmpF09->hd=Cyc_yyget_YY37(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpF09->tl=0,
+_tmpF09)))))),_tmpF08))));}break;case 222: _LL2DE:{struct Cyc_List_List*_tmpF0C;
+union Cyc_YYSTYPE_union _tmpF0B;yyval=(union Cyc_YYSTYPE_union)(((_tmpF0B.YY38).tag=
+42,(((_tmpF0B.YY38).f1=((_tmpF0C=_cycalloc(sizeof(*_tmpF0C)),((_tmpF0C->hd=Cyc_yyget_YY37(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpF0C->tl=Cyc_yyget_YY38(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmpF0C)))))),
+_tmpF0B))));}break;case 223: _LL2DF: {struct _tuple16 _tmp65F;struct Cyc_Absyn_Tqual
+_tmp660;struct Cyc_List_List*_tmp661;struct Cyc_List_List*_tmp662;struct _tuple16*
+_tmp65E=Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);
+_tmp65F=*_tmp65E;_tmp660=_tmp65F.f1;_tmp661=_tmp65F.f2;_tmp662=_tmp65F.f3;if(
+_tmp660.loc == 0)_tmp660.loc=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line);{struct Cyc_Parse_Declarator
-_tmp617;struct _tuple1*_tmp618;struct Cyc_List_List*_tmp619;struct Cyc_Parse_Declarator*
-_tmp616=Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]);
-_tmp617=*_tmp616;_tmp618=_tmp617.id;_tmp619=_tmp617.tms;{void*_tmp61A=Cyc_Parse_speclist2typ(
-_tmp614,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
+_tmp664;struct _tuple1*_tmp665;struct Cyc_List_List*_tmp666;struct Cyc_Parse_Declarator*
+_tmp663=Cyc_yyget_YY29(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]);
+_tmp664=*_tmp663;_tmp665=_tmp664.id;_tmp666=_tmp664.tms;{void*_tmp667=Cyc_Parse_speclist2typ(
+_tmp661,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line));struct Cyc_Absyn_Tqual _tmp61C;void*_tmp61D;struct
-Cyc_List_List*_tmp61E;struct Cyc_List_List*_tmp61F;struct _tuple6 _tmp61B=Cyc_Parse_apply_tms(
-_tmp613,_tmp61A,_tmp615,_tmp619);_tmp61C=_tmp61B.f1;_tmp61D=_tmp61B.f2;_tmp61E=
-_tmp61B.f3;_tmp61F=_tmp61B.f4;if(_tmp61E != 0){const char*_tmpE98;Cyc_Parse_err(((
-_tmpE98="parameter with bad type params",_tag_dyneither(_tmpE98,sizeof(char),31))),
+yylsp_offset - 1)]).last_line));struct Cyc_Absyn_Tqual _tmp669;void*_tmp66A;struct
+Cyc_List_List*_tmp66B;struct Cyc_List_List*_tmp66C;struct _tuple6 _tmp668=Cyc_Parse_apply_tms(
+_tmp660,_tmp667,_tmp662,_tmp666);_tmp669=_tmp668.f1;_tmp66A=_tmp668.f2;_tmp66B=
+_tmp668.f3;_tmp66C=_tmp668.f4;if(_tmp66B != 0){const char*_tmpF0D;Cyc_Parse_err(((
+_tmpF0D="parameter with bad type params",_tag_dyneither(_tmpF0D,sizeof(char),31))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line));}if(Cyc_Absyn_is_qvar_qualified(_tmp618)){const char*
-_tmpE99;Cyc_Parse_err(((_tmpE99="parameter cannot be qualified with a namespace",
-_tag_dyneither(_tmpE99,sizeof(char),47))),Cyc_Position_segment_of_abs((yyls[
+yylsp_offset)]).last_line));}if(Cyc_Absyn_is_qvar_qualified(_tmp665)){const char*
+_tmpF0E;Cyc_Parse_err(((_tmpF0E="parameter cannot be qualified with a namespace",
+_tag_dyneither(_tmpF0E,sizeof(char),47))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line));}{struct Cyc_Core_Opt*
-_tmpE9A;struct Cyc_Core_Opt*_tmp622=(struct Cyc_Core_Opt*)((_tmpE9A=_cycalloc(
-sizeof(*_tmpE9A)),((_tmpE9A->v=(*_tmp618).f2,_tmpE9A))));if(_tmp61F != 0){const
-char*_tmpE9D;void*_tmpE9C;(_tmpE9C=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
+_tmpF0F;struct Cyc_Core_Opt*_tmp66F=(struct Cyc_Core_Opt*)((_tmpF0F=_cycalloc(
+sizeof(*_tmpF0F)),((_tmpF0F->v=(*_tmp665).f2,_tmpF0F))));if(_tmp66C != 0){const
+char*_tmpF12;void*_tmpF11;(_tmpF11=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpE9D="extra attributes on parameter, ignoring",
-_tag_dyneither(_tmpE9D,sizeof(char),40))),_tag_dyneither(_tmpE9C,sizeof(void*),0)));}{
-struct _tuple2*_tmpEA0;union Cyc_YYSTYPE_union _tmpE9F;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpE9F.YY37).tag=41,(((_tmpE9F.YY37).f1=((_tmpEA0=_cycalloc(sizeof(*_tmpEA0)),((
-_tmpEA0->f1=_tmp622,((_tmpEA0->f2=_tmp61C,((_tmpEA0->f3=_tmp61D,_tmpEA0)))))))),
-_tmpE9F))));}break;}}}}case 219: _LL2DB: {struct _tuple16 _tmp629;struct Cyc_Absyn_Tqual
-_tmp62A;struct Cyc_List_List*_tmp62B;struct Cyc_List_List*_tmp62C;struct _tuple16*
-_tmp628=Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]);
-_tmp629=*_tmp628;_tmp62A=_tmp629.f1;_tmp62B=_tmp629.f2;_tmp62C=_tmp629.f3;if(
-_tmp62A.loc == 0)_tmp62A.loc=Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpF12="extra attributes on parameter, ignoring",
+_tag_dyneither(_tmpF12,sizeof(char),40))),_tag_dyneither(_tmpF11,sizeof(void*),0)));}{
+struct _tuple2*_tmpF15;union Cyc_YYSTYPE_union _tmpF14;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpF14.YY37).tag=41,(((_tmpF14.YY37).f1=((_tmpF15=_cycalloc(sizeof(*_tmpF15)),((
+_tmpF15->f1=_tmp66F,((_tmpF15->f2=_tmp669,((_tmpF15->f3=_tmp66A,_tmpF15)))))))),
+_tmpF14))));}break;}}}}case 224: _LL2E0: {struct _tuple16 _tmp676;struct Cyc_Absyn_Tqual
+_tmp677;struct Cyc_List_List*_tmp678;struct Cyc_List_List*_tmp679;struct _tuple16*
+_tmp675=Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]);
+_tmp676=*_tmp675;_tmp677=_tmp676.f1;_tmp678=_tmp676.f2;_tmp679=_tmp676.f3;if(
+_tmp677.loc == 0)_tmp677.loc=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line);{void*_tmp62D=
-Cyc_Parse_speclist2typ(_tmp62B,Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line);{void*_tmp67A=
+Cyc_Parse_speclist2typ(_tmp678,Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line));if(_tmp62C != 0){
-const char*_tmpEA3;void*_tmpEA2;(_tmpEA2=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line));if(_tmp679 != 0){
+const char*_tmpF18;void*_tmpF17;(_tmpF17=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpEA3="bad attributes on parameter, ignoring",
-_tag_dyneither(_tmpEA3,sizeof(char),38))),_tag_dyneither(_tmpEA2,sizeof(void*),0)));}{
-struct _tuple2*_tmpEA6;union Cyc_YYSTYPE_union _tmpEA5;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpEA5.YY37).tag=41,(((_tmpEA5.YY37).f1=((_tmpEA6=_cycalloc(sizeof(*_tmpEA6)),((
-_tmpEA6->f1=0,((_tmpEA6->f2=_tmp62A,((_tmpEA6->f3=_tmp62D,_tmpEA6)))))))),
-_tmpEA5))));}break;}}case 220: _LL2DC: {struct _tuple16 _tmp633;struct Cyc_Absyn_Tqual
-_tmp634;struct Cyc_List_List*_tmp635;struct Cyc_List_List*_tmp636;struct _tuple16*
-_tmp632=Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);
-_tmp633=*_tmp632;_tmp634=_tmp633.f1;_tmp635=_tmp633.f2;_tmp636=_tmp633.f3;if(
-_tmp634.loc == 0)_tmp634.loc=Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpF18="bad attributes on parameter, ignoring",
+_tag_dyneither(_tmpF18,sizeof(char),38))),_tag_dyneither(_tmpF17,sizeof(void*),0)));}{
+struct _tuple2*_tmpF1B;union Cyc_YYSTYPE_union _tmpF1A;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpF1A.YY37).tag=41,(((_tmpF1A.YY37).f1=((_tmpF1B=_cycalloc(sizeof(*_tmpF1B)),((
+_tmpF1B->f1=0,((_tmpF1B->f2=_tmp677,((_tmpF1B->f3=_tmp67A,_tmpF1B)))))))),
+_tmpF1A))));}break;}}case 225: _LL2E1: {struct _tuple16 _tmp680;struct Cyc_Absyn_Tqual
+_tmp681;struct Cyc_List_List*_tmp682;struct Cyc_List_List*_tmp683;struct _tuple16*
+_tmp67F=Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);
+_tmp680=*_tmp67F;_tmp681=_tmp680.f1;_tmp682=_tmp680.f2;_tmp683=_tmp680.f3;if(
+_tmp681.loc == 0)_tmp681.loc=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line);{void*_tmp637=
-Cyc_Parse_speclist2typ(_tmp635,Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line);{void*_tmp684=
+Cyc_Parse_speclist2typ(_tmp682,Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line));struct Cyc_List_List*
-_tmp638=(Cyc_yyget_YY30(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tms;
-struct Cyc_Absyn_Tqual _tmp63A;void*_tmp63B;struct Cyc_List_List*_tmp63C;struct Cyc_List_List*
-_tmp63D;struct _tuple6 _tmp639=Cyc_Parse_apply_tms(_tmp634,_tmp637,_tmp636,_tmp638);
-_tmp63A=_tmp639.f1;_tmp63B=_tmp639.f2;_tmp63C=_tmp639.f3;_tmp63D=_tmp639.f4;if(
-_tmp63C != 0){const char*_tmpEA9;void*_tmpEA8;(_tmpEA8=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
+_tmp685=(Cyc_yyget_YY30(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tms;
+struct Cyc_Absyn_Tqual _tmp687;void*_tmp688;struct Cyc_List_List*_tmp689;struct Cyc_List_List*
+_tmp68A;struct _tuple6 _tmp686=Cyc_Parse_apply_tms(_tmp681,_tmp684,_tmp683,_tmp685);
+_tmp687=_tmp686.f1;_tmp688=_tmp686.f2;_tmp689=_tmp686.f3;_tmp68A=_tmp686.f4;if(
+_tmp689 != 0){const char*_tmpF1E;void*_tmpF1D;(_tmpF1D=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpEA9="bad type parameters on formal argument, ignoring",
-_tag_dyneither(_tmpEA9,sizeof(char),49))),_tag_dyneither(_tmpEA8,sizeof(void*),0)));}
-if(_tmp63D != 0){const char*_tmpEAC;void*_tmpEAB;(_tmpEAB=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpF1E="bad type parameters on formal argument, ignoring",
+_tag_dyneither(_tmpF1E,sizeof(char),49))),_tag_dyneither(_tmpF1D,sizeof(void*),0)));}
+if(_tmp68A != 0){const char*_tmpF21;void*_tmpF20;(_tmpF20=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpEAC="bad attributes on parameter, ignoring",
-_tag_dyneither(_tmpEAC,sizeof(char),38))),_tag_dyneither(_tmpEAB,sizeof(void*),0)));}{
-struct _tuple2*_tmpEAF;union Cyc_YYSTYPE_union _tmpEAE;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpEAE.YY37).tag=41,(((_tmpEAE.YY37).f1=((_tmpEAF=_cycalloc(sizeof(*_tmpEAF)),((
-_tmpEAF->f1=0,((_tmpEAF->f2=_tmp63A,((_tmpEAF->f3=_tmp63B,_tmpEAF)))))))),
-_tmpEAE))));}break;}}case 221: _LL2DD:{union Cyc_YYSTYPE_union _tmpEB0;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpEB0.YY36).tag=40,(((_tmpEB0.YY36).f1=((struct Cyc_List_List*(*)(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpF21="bad attributes on parameter, ignoring",
+_tag_dyneither(_tmpF21,sizeof(char),38))),_tag_dyneither(_tmpF20,sizeof(void*),0)));}{
+struct _tuple2*_tmpF24;union Cyc_YYSTYPE_union _tmpF23;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpF23.YY37).tag=41,(((_tmpF23.YY37).f1=((_tmpF24=_cycalloc(sizeof(*_tmpF24)),((
+_tmpF24->f1=0,((_tmpF24->f2=_tmp687,((_tmpF24->f3=_tmp688,_tmpF24)))))))),
+_tmpF23))));}break;}}case 226: _LL2E2:{union Cyc_YYSTYPE_union _tmpF25;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpF25.YY36).tag=40,(((_tmpF25.YY36).f1=((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_YY36(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpEB0))));}break;case 222:
-_LL2DE:{struct Cyc_List_List*_tmpEB6;struct _dyneither_ptr*_tmpEB5;union Cyc_YYSTYPE_union
-_tmpEB4;yyval=(union Cyc_YYSTYPE_union)(((_tmpEB4.YY36).tag=40,(((_tmpEB4.YY36).f1=((
-_tmpEB6=_cycalloc(sizeof(*_tmpEB6)),((_tmpEB6->hd=((_tmpEB5=_cycalloc(sizeof(*
-_tmpEB5)),((_tmpEB5[0]=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)]),_tmpEB5)))),((_tmpEB6->tl=0,_tmpEB6)))))),_tmpEB4))));}
-break;case 223: _LL2DF:{struct Cyc_List_List*_tmpEBC;struct _dyneither_ptr*_tmpEBB;
-union Cyc_YYSTYPE_union _tmpEBA;yyval=(union Cyc_YYSTYPE_union)(((_tmpEBA.YY36).tag=
-40,(((_tmpEBA.YY36).f1=((_tmpEBC=_cycalloc(sizeof(*_tmpEBC)),((_tmpEBC->hd=((
-_tmpEBB=_cycalloc(sizeof(*_tmpEBB)),((_tmpEBB[0]=Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpEBB)))),((_tmpEBC->tl=
+_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmpF25))));}break;case 227:
+_LL2E3:{struct Cyc_List_List*_tmpF2B;struct _dyneither_ptr*_tmpF2A;union Cyc_YYSTYPE_union
+_tmpF29;yyval=(union Cyc_YYSTYPE_union)(((_tmpF29.YY36).tag=40,(((_tmpF29.YY36).f1=((
+_tmpF2B=_cycalloc(sizeof(*_tmpF2B)),((_tmpF2B->hd=((_tmpF2A=_cycalloc(sizeof(*
+_tmpF2A)),((_tmpF2A[0]=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)]),_tmpF2A)))),((_tmpF2B->tl=0,_tmpF2B)))))),_tmpF29))));}
+break;case 228: _LL2E4:{struct Cyc_List_List*_tmpF31;struct _dyneither_ptr*_tmpF30;
+union Cyc_YYSTYPE_union _tmpF2F;yyval=(union Cyc_YYSTYPE_union)(((_tmpF2F.YY36).tag=
+40,(((_tmpF2F.YY36).f1=((_tmpF31=_cycalloc(sizeof(*_tmpF31)),((_tmpF31->hd=((
+_tmpF30=_cycalloc(sizeof(*_tmpF30)),((_tmpF30[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpF30)))),((_tmpF31->tl=
 Cyc_yyget_YY36(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),
-_tmpEBC)))))),_tmpEBA))));}break;case 224: _LL2E0: yyval=yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 225: _LL2E1: yyval=
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 226: _LL2E2:{
-struct Cyc_Absyn_UnresolvedMem_e_struct*_tmpEC2;struct Cyc_Absyn_UnresolvedMem_e_struct
-_tmpEC1;union Cyc_YYSTYPE_union _tmpEC0;yyval=(union Cyc_YYSTYPE_union)(((_tmpEC0.YY3).tag=
-7,(((_tmpEC0.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmpEC2=_cycalloc(sizeof(*
-_tmpEC2)),((_tmpEC2[0]=((_tmpEC1.tag=37,((_tmpEC1.f1=0,((_tmpEC1.f2=0,_tmpEC1)))))),
-_tmpEC2)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_tmpF31)))))),_tmpF2F))));}break;case 229: _LL2E5: yyval=yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 230: _LL2E6: yyval=
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 231: _LL2E7:{
+struct Cyc_Absyn_UnresolvedMem_e_struct*_tmpF37;struct Cyc_Absyn_UnresolvedMem_e_struct
+_tmpF36;union Cyc_YYSTYPE_union _tmpF35;yyval=(union Cyc_YYSTYPE_union)(((_tmpF35.YY3).tag=
+7,(((_tmpF35.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmpF37=_cycalloc(sizeof(*
+_tmpF37)),((_tmpF37[0]=((_tmpF36.tag=37,((_tmpF36.f1=0,((_tmpF36.f2=0,_tmpF36)))))),
+_tmpF37)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpEC0))));}break;case 227: _LL2E3:{struct Cyc_Absyn_UnresolvedMem_e_struct*
-_tmpEC8;struct Cyc_Absyn_UnresolvedMem_e_struct _tmpEC7;union Cyc_YYSTYPE_union
-_tmpEC6;yyval=(union Cyc_YYSTYPE_union)(((_tmpEC6.YY3).tag=7,(((_tmpEC6.YY3).f1=
-Cyc_Absyn_new_exp((void*)((_tmpEC8=_cycalloc(sizeof(*_tmpEC8)),((_tmpEC8[0]=((
-_tmpEC7.tag=37,((_tmpEC7.f1=0,((_tmpEC7.f2=((struct Cyc_List_List*(*)(struct Cyc_List_List*
+yylsp_offset)]).last_line)),_tmpF35))));}break;case 232: _LL2E8:{struct Cyc_Absyn_UnresolvedMem_e_struct*
+_tmpF3D;struct Cyc_Absyn_UnresolvedMem_e_struct _tmpF3C;union Cyc_YYSTYPE_union
+_tmpF3B;yyval=(union Cyc_YYSTYPE_union)(((_tmpF3B.YY3).tag=7,(((_tmpF3B.YY3).f1=
+Cyc_Absyn_new_exp((void*)((_tmpF3D=_cycalloc(sizeof(*_tmpF3D)),((_tmpF3D[0]=((
+_tmpF3C.tag=37,((_tmpF3C.f1=0,((_tmpF3C.f2=((struct Cyc_List_List*(*)(struct Cyc_List_List*
 x))Cyc_List_imp_rev)(Cyc_yyget_YY6(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)])),_tmpEC7)))))),_tmpEC8)))),Cyc_Position_segment_of_abs((yyls[
+yyvsp_offset - 1)])),_tmpF3C)))))),_tmpF3D)))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpEC6))));}
-break;case 228: _LL2E4:{struct Cyc_Absyn_UnresolvedMem_e_struct*_tmpECE;struct Cyc_Absyn_UnresolvedMem_e_struct
-_tmpECD;union Cyc_YYSTYPE_union _tmpECC;yyval=(union Cyc_YYSTYPE_union)(((_tmpECC.YY3).tag=
-7,(((_tmpECC.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmpECE=_cycalloc(sizeof(*
-_tmpECE)),((_tmpECE[0]=((_tmpECD.tag=37,((_tmpECD.f1=0,((_tmpECD.f2=((struct Cyc_List_List*(*)(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpF3B))));}
+break;case 233: _LL2E9:{struct Cyc_Absyn_UnresolvedMem_e_struct*_tmpF43;struct Cyc_Absyn_UnresolvedMem_e_struct
+_tmpF42;union Cyc_YYSTYPE_union _tmpF41;yyval=(union Cyc_YYSTYPE_union)(((_tmpF41.YY3).tag=
+7,(((_tmpF41.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmpF43=_cycalloc(sizeof(*
+_tmpF43)),((_tmpF43[0]=((_tmpF42.tag=37,((_tmpF42.f1=0,((_tmpF42.f2=((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_YY6(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)])),_tmpECD)))))),_tmpECE)))),
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)])),_tmpF42)))))),_tmpF43)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmpECC))));}break;case 229: _LL2E5: {union Cyc_Absyn_Nmspace_union
-_tmpED3;struct _dyneither_ptr*_tmpED2;struct _tuple1*_tmpED1;struct Cyc_Absyn_Vardecl*
-_tmp654=Cyc_Absyn_new_vardecl(((_tmpED1=_cycalloc(sizeof(*_tmpED1)),((_tmpED1->f1=(
-union Cyc_Absyn_Nmspace_union)(((_tmpED3.Loc_n).tag=0,_tmpED3)),((_tmpED1->f2=((
-_tmpED2=_cycalloc(sizeof(*_tmpED2)),((_tmpED2[0]=Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 5)]),_tmpED2)))),_tmpED1)))))),
+yylsp_offset)]).last_line)),_tmpF41))));}break;case 234: _LL2EA: {union Cyc_Absyn_Nmspace_union
+_tmpF48;struct _dyneither_ptr*_tmpF47;struct _tuple1*_tmpF46;struct Cyc_Absyn_Vardecl*
+_tmp6A1=Cyc_Absyn_new_vardecl(((_tmpF46=_cycalloc(sizeof(*_tmpF46)),((_tmpF46->f1=(
+union Cyc_Absyn_Nmspace_union)(((_tmpF48.Loc_n).tag=0,_tmpF48)),((_tmpF46->f2=((
+_tmpF47=_cycalloc(sizeof(*_tmpF47)),((_tmpF47[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 5)]),_tmpF47)))),_tmpF46)))))),
 Cyc_Absyn_uint_typ,(struct Cyc_Absyn_Exp*)Cyc_Absyn_uint_exp(0,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 5)]).last_line)));(_tmp654->tq).real_const=
-1;{struct Cyc_Absyn_Comprehension_e_struct*_tmpED9;struct Cyc_Absyn_Comprehension_e_struct
-_tmpED8;union Cyc_YYSTYPE_union _tmpED7;yyval=(union Cyc_YYSTYPE_union)(((_tmpED7.YY3).tag=
-7,(((_tmpED7.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmpED9=_cycalloc(sizeof(*
-_tmpED9)),((_tmpED9[0]=((_tmpED8.tag=29,((_tmpED8.f1=_tmp654,((_tmpED8.f2=Cyc_yyget_YY3(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpED8.f3=Cyc_yyget_YY3(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpED8.f4=0,
-_tmpED8)))))))))),_tmpED9)))),Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 5)]).last_line)));(_tmp6A1->tq).real_const=
+1;{struct Cyc_Absyn_Comprehension_e_struct*_tmpF4E;struct Cyc_Absyn_Comprehension_e_struct
+_tmpF4D;union Cyc_YYSTYPE_union _tmpF4C;yyval=(union Cyc_YYSTYPE_union)(((_tmpF4C.YY3).tag=
+7,(((_tmpF4C.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmpF4E=_cycalloc(sizeof(*
+_tmpF4E)),((_tmpF4E[0]=((_tmpF4D.tag=29,((_tmpF4D.f1=_tmp6A1,((_tmpF4D.f2=Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmpF4D.f3=Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpF4D.f4=0,
+_tmpF4D)))))))))),_tmpF4E)))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 7)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpED7))));}
-break;}case 230: _LL2E6:{struct Cyc_List_List*_tmpEDF;struct _tuple20*_tmpEDE;union
-Cyc_YYSTYPE_union _tmpEDD;yyval=(union Cyc_YYSTYPE_union)(((_tmpEDD.YY6).tag=10,(((
-_tmpEDD.YY6).f1=((_tmpEDF=_cycalloc(sizeof(*_tmpEDF)),((_tmpEDF->hd=((_tmpEDE=
-_cycalloc(sizeof(*_tmpEDE)),((_tmpEDE->f1=0,((_tmpEDE->f2=Cyc_yyget_YY3(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpEDE)))))),((_tmpEDF->tl=
-0,_tmpEDF)))))),_tmpEDD))));}break;case 231: _LL2E7:{struct Cyc_List_List*_tmpEE5;
-struct _tuple20*_tmpEE4;union Cyc_YYSTYPE_union _tmpEE3;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpEE3.YY6).tag=10,(((_tmpEE3.YY6).f1=((_tmpEE5=_cycalloc(sizeof(*_tmpEE5)),((
-_tmpEE5->hd=((_tmpEE4=_cycalloc(sizeof(*_tmpEE4)),((_tmpEE4->f1=Cyc_yyget_YY41(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpEE4->f2=Cyc_yyget_YY3(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpEE4)))))),((
-_tmpEE5->tl=0,_tmpEE5)))))),_tmpEE3))));}break;case 232: _LL2E8:{struct Cyc_List_List*
-_tmpEEB;struct _tuple20*_tmpEEA;union Cyc_YYSTYPE_union _tmpEE9;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpEE9.YY6).tag=10,(((_tmpEE9.YY6).f1=((_tmpEEB=_cycalloc(sizeof(*_tmpEEB)),((
-_tmpEEB->hd=((_tmpEEA=_cycalloc(sizeof(*_tmpEEA)),((_tmpEEA->f1=0,((_tmpEEA->f2=
-Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpEEA)))))),((
-_tmpEEB->tl=Cyc_yyget_YY6(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
-- 2)]),_tmpEEB)))))),_tmpEE9))));}break;case 233: _LL2E9:{struct Cyc_List_List*
-_tmpEF1;struct _tuple20*_tmpEF0;union Cyc_YYSTYPE_union _tmpEEF;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpEEF.YY6).tag=10,(((_tmpEEF.YY6).f1=((_tmpEF1=_cycalloc(sizeof(*_tmpEF1)),((
-_tmpEF1->hd=((_tmpEF0=_cycalloc(sizeof(*_tmpEF0)),((_tmpEF0->f1=Cyc_yyget_YY41(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpEF0->f2=Cyc_yyget_YY3(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpEF0)))))),((
-_tmpEF1->tl=Cyc_yyget_YY6(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
-- 3)]),_tmpEF1)))))),_tmpEEF))));}break;case 234: _LL2EA:{union Cyc_YYSTYPE_union
-_tmpEF2;yyval=(union Cyc_YYSTYPE_union)(((_tmpEF2.YY41).tag=45,(((_tmpEF2.YY41).f1=
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmpF4C))));}
+break;}case 235: _LL2EB:{struct Cyc_List_List*_tmpF54;struct _tuple20*_tmpF53;union
+Cyc_YYSTYPE_union _tmpF52;yyval=(union Cyc_YYSTYPE_union)(((_tmpF52.YY6).tag=10,(((
+_tmpF52.YY6).f1=((_tmpF54=_cycalloc(sizeof(*_tmpF54)),((_tmpF54->hd=((_tmpF53=
+_cycalloc(sizeof(*_tmpF53)),((_tmpF53->f1=0,((_tmpF53->f2=Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpF53)))))),((_tmpF54->tl=
+0,_tmpF54)))))),_tmpF52))));}break;case 236: _LL2EC:{struct Cyc_List_List*_tmpF5A;
+struct _tuple20*_tmpF59;union Cyc_YYSTYPE_union _tmpF58;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpF58.YY6).tag=10,(((_tmpF58.YY6).f1=((_tmpF5A=_cycalloc(sizeof(*_tmpF5A)),((
+_tmpF5A->hd=((_tmpF59=_cycalloc(sizeof(*_tmpF59)),((_tmpF59->f1=Cyc_yyget_YY41(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpF59->f2=Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpF59)))))),((
+_tmpF5A->tl=0,_tmpF5A)))))),_tmpF58))));}break;case 237: _LL2ED:{struct Cyc_List_List*
+_tmpF60;struct _tuple20*_tmpF5F;union Cyc_YYSTYPE_union _tmpF5E;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpF5E.YY6).tag=10,(((_tmpF5E.YY6).f1=((_tmpF60=_cycalloc(sizeof(*_tmpF60)),((
+_tmpF60->hd=((_tmpF5F=_cycalloc(sizeof(*_tmpF5F)),((_tmpF5F->f1=0,((_tmpF5F->f2=
+Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpF5F)))))),((
+_tmpF60->tl=Cyc_yyget_YY6(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
+- 2)]),_tmpF60)))))),_tmpF5E))));}break;case 238: _LL2EE:{struct Cyc_List_List*
+_tmpF66;struct _tuple20*_tmpF65;union Cyc_YYSTYPE_union _tmpF64;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpF64.YY6).tag=10,(((_tmpF64.YY6).f1=((_tmpF66=_cycalloc(sizeof(*_tmpF66)),((
+_tmpF66->hd=((_tmpF65=_cycalloc(sizeof(*_tmpF65)),((_tmpF65->f1=Cyc_yyget_YY41(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmpF65->f2=Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpF65)))))),((
+_tmpF66->tl=Cyc_yyget_YY6(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
+- 3)]),_tmpF66)))))),_tmpF64))));}break;case 239: _LL2EF:{union Cyc_YYSTYPE_union
+_tmpF67;yyval=(union Cyc_YYSTYPE_union)(((_tmpF67.YY41).tag=45,(((_tmpF67.YY41).f1=
 Cyc_List_imp_rev(Cyc_yyget_YY41(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)])),_tmpEF2))));}break;case 235: _LL2EB:{struct Cyc_List_List*
-_tmpEF5;union Cyc_YYSTYPE_union _tmpEF4;yyval=(union Cyc_YYSTYPE_union)(((_tmpEF4.YY41).tag=
-45,(((_tmpEF4.YY41).f1=((_tmpEF5=_cycalloc(sizeof(*_tmpEF5)),((_tmpEF5->hd=(void*)
+yyvsp_offset - 1)])),_tmpF67))));}break;case 240: _LL2F0:{struct Cyc_List_List*
+_tmpF6A;union Cyc_YYSTYPE_union _tmpF69;yyval=(union Cyc_YYSTYPE_union)(((_tmpF69.YY41).tag=
+45,(((_tmpF69.YY41).f1=((_tmpF6A=_cycalloc(sizeof(*_tmpF6A)),((_tmpF6A->hd=(void*)
 Cyc_yyget_YY42(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((
-_tmpEF5->tl=0,_tmpEF5)))))),_tmpEF4))));}break;case 236: _LL2EC:{struct Cyc_List_List*
-_tmpEF8;union Cyc_YYSTYPE_union _tmpEF7;yyval=(union Cyc_YYSTYPE_union)(((_tmpEF7.YY41).tag=
-45,(((_tmpEF7.YY41).f1=((_tmpEF8=_cycalloc(sizeof(*_tmpEF8)),((_tmpEF8->hd=(void*)
+_tmpF6A->tl=0,_tmpF6A)))))),_tmpF69))));}break;case 241: _LL2F1:{struct Cyc_List_List*
+_tmpF6D;union Cyc_YYSTYPE_union _tmpF6C;yyval=(union Cyc_YYSTYPE_union)(((_tmpF6C.YY41).tag=
+45,(((_tmpF6C.YY41).f1=((_tmpF6D=_cycalloc(sizeof(*_tmpF6D)),((_tmpF6D->hd=(void*)
 Cyc_yyget_YY42(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((
-_tmpEF8->tl=Cyc_yyget_YY41(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]),_tmpEF8)))))),_tmpEF7))));}break;case 237: _LL2ED:{struct Cyc_Absyn_ArrayElement_struct*
-_tmpEFE;struct Cyc_Absyn_ArrayElement_struct _tmpEFD;union Cyc_YYSTYPE_union _tmpEFC;
-yyval=(union Cyc_YYSTYPE_union)(((_tmpEFC.YY42).tag=46,(((_tmpEFC.YY42).f1=(void*)((
-void*)((_tmpEFE=_cycalloc(sizeof(*_tmpEFE)),((_tmpEFE[0]=((_tmpEFD.tag=0,((
-_tmpEFD.f1=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 
-1)]),_tmpEFD)))),_tmpEFE))))),_tmpEFC))));}break;case 238: _LL2EE:{struct Cyc_Absyn_FieldName_struct*
-_tmpF08;struct _dyneither_ptr*_tmpF07;struct Cyc_Absyn_FieldName_struct _tmpF06;
-union Cyc_YYSTYPE_union _tmpF05;yyval=(union Cyc_YYSTYPE_union)(((_tmpF05.YY42).tag=
-46,(((_tmpF05.YY42).f1=(void*)((void*)((_tmpF08=_cycalloc(sizeof(*_tmpF08)),((
-_tmpF08[0]=((_tmpF06.tag=1,((_tmpF06.f1=((_tmpF07=_cycalloc(sizeof(*_tmpF07)),((
-_tmpF07[0]=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmpF07)))),_tmpF06)))),_tmpF08))))),_tmpF05))));}break;case 239:
-_LL2EF: {struct _tuple16 _tmp674;struct Cyc_Absyn_Tqual _tmp675;struct Cyc_List_List*
-_tmp676;struct Cyc_List_List*_tmp677;struct _tuple16*_tmp673=Cyc_yyget_YY35(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]);_tmp674=*_tmp673;_tmp675=
-_tmp674.f1;_tmp676=_tmp674.f2;_tmp677=_tmp674.f3;{void*_tmp678=Cyc_Parse_speclist2typ(
-_tmp676,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
+_tmpF6D->tl=Cyc_yyget_YY41(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]),_tmpF6D)))))),_tmpF6C))));}break;case 242: _LL2F2:{struct Cyc_Absyn_ArrayElement_struct*
+_tmpF73;struct Cyc_Absyn_ArrayElement_struct _tmpF72;union Cyc_YYSTYPE_union _tmpF71;
+yyval=(union Cyc_YYSTYPE_union)(((_tmpF71.YY42).tag=46,(((_tmpF71.YY42).f1=(void*)((
+void*)((_tmpF73=_cycalloc(sizeof(*_tmpF73)),((_tmpF73[0]=((_tmpF72.tag=0,((
+_tmpF72.f1=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 
+1)]),_tmpF72)))),_tmpF73))))),_tmpF71))));}break;case 243: _LL2F3:{struct Cyc_Absyn_FieldName_struct*
+_tmpF7D;struct _dyneither_ptr*_tmpF7C;struct Cyc_Absyn_FieldName_struct _tmpF7B;
+union Cyc_YYSTYPE_union _tmpF7A;yyval=(union Cyc_YYSTYPE_union)(((_tmpF7A.YY42).tag=
+46,(((_tmpF7A.YY42).f1=(void*)((void*)((_tmpF7D=_cycalloc(sizeof(*_tmpF7D)),((
+_tmpF7D[0]=((_tmpF7B.tag=1,((_tmpF7B.f1=((_tmpF7C=_cycalloc(sizeof(*_tmpF7C)),((
+_tmpF7C[0]=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmpF7C)))),_tmpF7B)))),_tmpF7D))))),_tmpF7A))));}break;case 244:
+_LL2F4: {struct _tuple16 _tmp6C1;struct Cyc_Absyn_Tqual _tmp6C2;struct Cyc_List_List*
+_tmp6C3;struct Cyc_List_List*_tmp6C4;struct _tuple16*_tmp6C0=Cyc_yyget_YY35(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]);_tmp6C1=*_tmp6C0;_tmp6C2=
+_tmp6C1.f1;_tmp6C3=_tmp6C1.f2;_tmp6C4=_tmp6C1.f3;{void*_tmp6C5=Cyc_Parse_speclist2typ(
+_tmp6C3,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line));if(_tmp677 != 0){const char*_tmpF0B;void*_tmpF0A;(
-_tmpF0A=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((yyls[
+yylsp_offset)]).last_line));if(_tmp6C4 != 0){const char*_tmpF80;void*_tmpF7F;(
+_tmpF7F=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpF0B="ignoring attributes in type",
-_tag_dyneither(_tmpF0B,sizeof(char),28))),_tag_dyneither(_tmpF0A,sizeof(void*),0)));}{
-struct _tuple2*_tmpF0E;union Cyc_YYSTYPE_union _tmpF0D;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpF0D.YY37).tag=41,(((_tmpF0D.YY37).f1=((_tmpF0E=_cycalloc(sizeof(*_tmpF0E)),((
-_tmpF0E->f1=0,((_tmpF0E->f2=_tmp675,((_tmpF0E->f3=_tmp678,_tmpF0E)))))))),
-_tmpF0D))));}break;}}case 240: _LL2F0: {struct _tuple16 _tmp67E;struct Cyc_Absyn_Tqual
-_tmp67F;struct Cyc_List_List*_tmp680;struct Cyc_List_List*_tmp681;struct _tuple16*
-_tmp67D=Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);
-_tmp67E=*_tmp67D;_tmp67F=_tmp67E.f1;_tmp680=_tmp67E.f2;_tmp681=_tmp67E.f3;{void*
-_tmp682=Cyc_Parse_speclist2typ(_tmp680,Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpF80="ignoring attributes in type",
+_tag_dyneither(_tmpF80,sizeof(char),28))),_tag_dyneither(_tmpF7F,sizeof(void*),0)));}{
+struct _tuple2*_tmpF83;union Cyc_YYSTYPE_union _tmpF82;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpF82.YY37).tag=41,(((_tmpF82.YY37).f1=((_tmpF83=_cycalloc(sizeof(*_tmpF83)),((
+_tmpF83->f1=0,((_tmpF83->f2=_tmp6C2,((_tmpF83->f3=_tmp6C5,_tmpF83)))))))),
+_tmpF82))));}break;}}case 245: _LL2F5: {struct _tuple16 _tmp6CB;struct Cyc_Absyn_Tqual
+_tmp6CC;struct Cyc_List_List*_tmp6CD;struct Cyc_List_List*_tmp6CE;struct _tuple16*
+_tmp6CA=Cyc_yyget_YY35(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);
+_tmp6CB=*_tmp6CA;_tmp6CC=_tmp6CB.f1;_tmp6CD=_tmp6CB.f2;_tmp6CE=_tmp6CB.f3;{void*
+_tmp6CF=Cyc_Parse_speclist2typ(_tmp6CD,Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line));struct Cyc_List_List*
-_tmp683=(Cyc_yyget_YY30(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tms;
-struct _tuple6 _tmp684=Cyc_Parse_apply_tms(_tmp67F,_tmp682,_tmp681,_tmp683);if(
-_tmp684.f3 != 0){const char*_tmpF11;void*_tmpF10;(_tmpF10=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
+_tmp6D0=(Cyc_yyget_YY30(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tms;
+struct _tuple6 _tmp6D1=Cyc_Parse_apply_tms(_tmp6CC,_tmp6CF,_tmp6CE,_tmp6D0);if(
+_tmp6D1.f3 != 0){const char*_tmpF86;void*_tmpF85;(_tmpF85=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpF11="bad type params, ignoring",
-_tag_dyneither(_tmpF11,sizeof(char),26))),_tag_dyneither(_tmpF10,sizeof(void*),0)));}
-if(_tmp684.f4 != 0){const char*_tmpF14;void*_tmpF13;(_tmpF13=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpF86="bad type params, ignoring",
+_tag_dyneither(_tmpF86,sizeof(char),26))),_tag_dyneither(_tmpF85,sizeof(void*),0)));}
+if(_tmp6D1.f4 != 0){const char*_tmpF89;void*_tmpF88;(_tmpF88=0,Cyc_Tcutil_warn(Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpF14="bad specifiers, ignoring",
-_tag_dyneither(_tmpF14,sizeof(char),25))),_tag_dyneither(_tmpF13,sizeof(void*),0)));}{
-struct _tuple2*_tmpF17;union Cyc_YYSTYPE_union _tmpF16;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpF16.YY37).tag=41,(((_tmpF16.YY37).f1=((_tmpF17=_cycalloc(sizeof(*_tmpF17)),((
-_tmpF17->f1=0,((_tmpF17->f2=_tmp684.f1,((_tmpF17->f3=_tmp684.f2,_tmpF17)))))))),
-_tmpF16))));}break;}}case 241: _LL2F1:{union Cyc_YYSTYPE_union _tmpF18;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpF18.YY44).tag=48,(((_tmpF18.YY44).f1=(void*)(*Cyc_yyget_YY37(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f3,_tmpF18))));}
-break;case 242: _LL2F2:{struct Cyc_Absyn_JoinEff_struct*_tmpF1E;struct Cyc_Absyn_JoinEff_struct
-_tmpF1D;union Cyc_YYSTYPE_union _tmpF1C;yyval=(union Cyc_YYSTYPE_union)(((_tmpF1C.YY44).tag=
-48,(((_tmpF1C.YY44).f1=(void*)((void*)((_tmpF1E=_cycalloc(sizeof(*_tmpF1E)),((
-_tmpF1E[0]=((_tmpF1D.tag=20,((_tmpF1D.f1=0,_tmpF1D)))),_tmpF1E))))),_tmpF1C))));}
-break;case 243: _LL2F3:{struct Cyc_Absyn_JoinEff_struct*_tmpF24;struct Cyc_Absyn_JoinEff_struct
-_tmpF23;union Cyc_YYSTYPE_union _tmpF22;yyval=(union Cyc_YYSTYPE_union)(((_tmpF22.YY44).tag=
-48,(((_tmpF22.YY44).f1=(void*)((void*)((_tmpF24=_cycalloc(sizeof(*_tmpF24)),((
-_tmpF24[0]=((_tmpF23.tag=20,((_tmpF23.f1=Cyc_yyget_YY40(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpF23)))),_tmpF24))))),
-_tmpF22))));}break;case 244: _LL2F4:{struct Cyc_Absyn_RgnsEff_struct*_tmpF2A;struct
-Cyc_Absyn_RgnsEff_struct _tmpF29;union Cyc_YYSTYPE_union _tmpF28;yyval=(union Cyc_YYSTYPE_union)(((
-_tmpF28.YY44).tag=48,(((_tmpF28.YY44).f1=(void*)((void*)((_tmpF2A=_cycalloc(
-sizeof(*_tmpF2A)),((_tmpF2A[0]=((_tmpF29.tag=21,((_tmpF29.f1=(void*)Cyc_yyget_YY44(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpF29)))),_tmpF2A))))),
-_tmpF28))));}break;case 245: _LL2F5:{struct Cyc_Absyn_JoinEff_struct*_tmpF34;struct
-Cyc_List_List*_tmpF33;struct Cyc_Absyn_JoinEff_struct _tmpF32;union Cyc_YYSTYPE_union
-_tmpF31;yyval=(union Cyc_YYSTYPE_union)(((_tmpF31.YY44).tag=48,(((_tmpF31.YY44).f1=(
-void*)((void*)((_tmpF34=_cycalloc(sizeof(*_tmpF34)),((_tmpF34[0]=((_tmpF32.tag=
-20,((_tmpF32.f1=((_tmpF33=_cycalloc(sizeof(*_tmpF33)),((_tmpF33->hd=(void*)Cyc_yyget_YY44(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpF33->tl=Cyc_yyget_YY40(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpF33)))))),_tmpF32)))),
-_tmpF34))))),_tmpF31))));}break;case 246: _LL2F6:{struct Cyc_List_List*_tmpF37;
-union Cyc_YYSTYPE_union _tmpF36;yyval=(union Cyc_YYSTYPE_union)(((_tmpF36.YY40).tag=
-44,(((_tmpF36.YY40).f1=((_tmpF37=_cycalloc(sizeof(*_tmpF37)),((_tmpF37->hd=(void*)
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmpF89="bad specifiers, ignoring",
+_tag_dyneither(_tmpF89,sizeof(char),25))),_tag_dyneither(_tmpF88,sizeof(void*),0)));}{
+struct _tuple2*_tmpF8C;union Cyc_YYSTYPE_union _tmpF8B;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpF8B.YY37).tag=41,(((_tmpF8B.YY37).f1=((_tmpF8C=_cycalloc(sizeof(*_tmpF8C)),((
+_tmpF8C->f1=0,((_tmpF8C->f2=_tmp6D1.f1,((_tmpF8C->f3=_tmp6D1.f2,_tmpF8C)))))))),
+_tmpF8B))));}break;}}case 246: _LL2F6:{union Cyc_YYSTYPE_union _tmpF8D;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpF8D.YY44).tag=48,(((_tmpF8D.YY44).f1=(void*)(*Cyc_yyget_YY37(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f3,_tmpF8D))));}
+break;case 247: _LL2F7:{struct Cyc_Absyn_JoinEff_struct*_tmpF93;struct Cyc_Absyn_JoinEff_struct
+_tmpF92;union Cyc_YYSTYPE_union _tmpF91;yyval=(union Cyc_YYSTYPE_union)(((_tmpF91.YY44).tag=
+48,(((_tmpF91.YY44).f1=(void*)((void*)((_tmpF93=_cycalloc(sizeof(*_tmpF93)),((
+_tmpF93[0]=((_tmpF92.tag=20,((_tmpF92.f1=0,_tmpF92)))),_tmpF93))))),_tmpF91))));}
+break;case 248: _LL2F8:{struct Cyc_Absyn_JoinEff_struct*_tmpF99;struct Cyc_Absyn_JoinEff_struct
+_tmpF98;union Cyc_YYSTYPE_union _tmpF97;yyval=(union Cyc_YYSTYPE_union)(((_tmpF97.YY44).tag=
+48,(((_tmpF97.YY44).f1=(void*)((void*)((_tmpF99=_cycalloc(sizeof(*_tmpF99)),((
+_tmpF99[0]=((_tmpF98.tag=20,((_tmpF98.f1=Cyc_yyget_YY40(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpF98)))),_tmpF99))))),
+_tmpF97))));}break;case 249: _LL2F9:{struct Cyc_Absyn_RgnsEff_struct*_tmpF9F;struct
+Cyc_Absyn_RgnsEff_struct _tmpF9E;union Cyc_YYSTYPE_union _tmpF9D;yyval=(union Cyc_YYSTYPE_union)(((
+_tmpF9D.YY44).tag=48,(((_tmpF9D.YY44).f1=(void*)((void*)((_tmpF9F=_cycalloc(
+sizeof(*_tmpF9F)),((_tmpF9F[0]=((_tmpF9E.tag=21,((_tmpF9E.f1=(void*)Cyc_yyget_YY44(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpF9E)))),_tmpF9F))))),
+_tmpF9D))));}break;case 250: _LL2FA:{struct Cyc_Absyn_JoinEff_struct*_tmpFA9;struct
+Cyc_List_List*_tmpFA8;struct Cyc_Absyn_JoinEff_struct _tmpFA7;union Cyc_YYSTYPE_union
+_tmpFA6;yyval=(union Cyc_YYSTYPE_union)(((_tmpFA6.YY44).tag=48,(((_tmpFA6.YY44).f1=(
+void*)((void*)((_tmpFA9=_cycalloc(sizeof(*_tmpFA9)),((_tmpFA9[0]=((_tmpFA7.tag=
+20,((_tmpFA7.f1=((_tmpFA8=_cycalloc(sizeof(*_tmpFA8)),((_tmpFA8->hd=(void*)Cyc_yyget_YY44(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpFA8->tl=Cyc_yyget_YY40(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpFA8)))))),_tmpFA7)))),
+_tmpFA9))))),_tmpFA6))));}break;case 251: _LL2FB:{struct Cyc_List_List*_tmpFAC;
+union Cyc_YYSTYPE_union _tmpFAB;yyval=(union Cyc_YYSTYPE_union)(((_tmpFAB.YY40).tag=
+44,(((_tmpFAB.YY40).f1=((_tmpFAC=_cycalloc(sizeof(*_tmpFAC)),((_tmpFAC->hd=(void*)
 Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((
-_tmpF37->tl=0,_tmpF37)))))),_tmpF36))));}break;case 247: _LL2F7:{struct Cyc_List_List*
-_tmpF3A;union Cyc_YYSTYPE_union _tmpF39;yyval=(union Cyc_YYSTYPE_union)(((_tmpF39.YY40).tag=
-44,(((_tmpF39.YY40).f1=((_tmpF3A=_cycalloc(sizeof(*_tmpF3A)),((_tmpF3A->hd=(void*)
+_tmpFAC->tl=0,_tmpFAC)))))),_tmpFAB))));}break;case 252: _LL2FC:{struct Cyc_List_List*
+_tmpFAF;union Cyc_YYSTYPE_union _tmpFAE;yyval=(union Cyc_YYSTYPE_union)(((_tmpFAE.YY40).tag=
+44,(((_tmpFAE.YY40).f1=((_tmpFAF=_cycalloc(sizeof(*_tmpFAF)),((_tmpFAF->hd=(void*)
 Cyc_yyget_YY44(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((
-_tmpF3A->tl=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 2)]),_tmpF3A)))))),_tmpF39))));}break;case 248: _LL2F8:{struct Cyc_Parse_Abstractdeclarator*
-_tmpF3D;union Cyc_YYSTYPE_union _tmpF3C;yyval=(union Cyc_YYSTYPE_union)(((_tmpF3C.YY30).tag=
-34,(((_tmpF3C.YY30).f1=((_tmpF3D=_cycalloc(sizeof(*_tmpF3D)),((_tmpF3D->tms=Cyc_yyget_YY28(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpF3D)))),_tmpF3C))));}
-break;case 249: _LL2F9: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 250: _LL2FA:{struct Cyc_Parse_Abstractdeclarator*_tmpF40;
-union Cyc_YYSTYPE_union _tmpF3F;yyval=(union Cyc_YYSTYPE_union)(((_tmpF3F.YY30).tag=
-34,(((_tmpF3F.YY30).f1=((_tmpF40=_cycalloc(sizeof(*_tmpF40)),((_tmpF40->tms=Cyc_List_imp_append(
+_tmpFAF->tl=Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 2)]),_tmpFAF)))))),_tmpFAE))));}break;case 253: _LL2FD:{struct Cyc_Parse_Abstractdeclarator*
+_tmpFB2;union Cyc_YYSTYPE_union _tmpFB1;yyval=(union Cyc_YYSTYPE_union)(((_tmpFB1.YY30).tag=
+34,(((_tmpFB1.YY30).f1=((_tmpFB2=_cycalloc(sizeof(*_tmpFB2)),((_tmpFB2->tms=Cyc_yyget_YY28(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmpFB2)))),_tmpFB1))));}
+break;case 254: _LL2FE: yyval=yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)];break;case 255: _LL2FF:{struct Cyc_Parse_Abstractdeclarator*_tmpFB5;
+union Cyc_YYSTYPE_union _tmpFB4;yyval=(union Cyc_YYSTYPE_union)(((_tmpFB4.YY30).tag=
+34,(((_tmpFB4.YY30).f1=((_tmpFB5=_cycalloc(sizeof(*_tmpFB5)),((_tmpFB5->tms=Cyc_List_imp_append(
 Cyc_yyget_YY28(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),(Cyc_yyget_YY30(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tms),_tmpF40)))),
-_tmpF3F))));}break;case 251: _LL2FB: yyval=yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 1)];break;case 252: _LL2FC:{struct Cyc_Parse_Abstractdeclarator*
-_tmpF4F;struct Cyc_Absyn_Carray_mod_struct*_tmpF4E;struct Cyc_Absyn_Carray_mod_struct
-_tmpF4D;struct Cyc_List_List*_tmpF4C;union Cyc_YYSTYPE_union _tmpF4B;yyval=(union
-Cyc_YYSTYPE_union)(((_tmpF4B.YY30).tag=34,(((_tmpF4B.YY30).f1=((_tmpF4F=
-_cycalloc(sizeof(*_tmpF4F)),((_tmpF4F->tms=((_tmpF4C=_cycalloc(sizeof(*_tmpF4C)),((
-_tmpF4C->hd=(void*)((void*)((_tmpF4E=_cycalloc(sizeof(*_tmpF4E)),((_tmpF4E[0]=((
-_tmpF4D.tag=0,((_tmpF4D.f1=Cyc_yyget_YY51(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)]),((_tmpF4D.f2=Cyc_Position_segment_of_abs((yyls[
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]))->tms),_tmpFB5)))),
+_tmpFB4))));}break;case 256: _LL300: yyval=yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 1)];break;case 257: _LL301:{struct Cyc_Parse_Abstractdeclarator*
+_tmpFC4;struct Cyc_Absyn_Carray_mod_struct*_tmpFC3;struct Cyc_Absyn_Carray_mod_struct
+_tmpFC2;struct Cyc_List_List*_tmpFC1;union Cyc_YYSTYPE_union _tmpFC0;yyval=(union
+Cyc_YYSTYPE_union)(((_tmpFC0.YY30).tag=34,(((_tmpFC0.YY30).f1=((_tmpFC4=
+_cycalloc(sizeof(*_tmpFC4)),((_tmpFC4->tms=((_tmpFC1=_cycalloc(sizeof(*_tmpFC1)),((
+_tmpFC1->hd=(void*)((void*)((_tmpFC3=_cycalloc(sizeof(*_tmpFC3)),((_tmpFC3[0]=((
+_tmpFC2.tag=0,((_tmpFC2.f1=Cyc_yyget_YY51(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)]),((_tmpFC2.f2=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpF4D)))))),
-_tmpF4E))))),((_tmpF4C->tl=0,_tmpF4C)))))),_tmpF4F)))),_tmpF4B))));}break;case
-253: _LL2FD:{struct Cyc_Parse_Abstractdeclarator*_tmpF5E;struct Cyc_Absyn_Carray_mod_struct*
-_tmpF5D;struct Cyc_Absyn_Carray_mod_struct _tmpF5C;struct Cyc_List_List*_tmpF5B;
-union Cyc_YYSTYPE_union _tmpF5A;yyval=(union Cyc_YYSTYPE_union)(((_tmpF5A.YY30).tag=
-34,(((_tmpF5A.YY30).f1=((_tmpF5E=_cycalloc(sizeof(*_tmpF5E)),((_tmpF5E->tms=((
-_tmpF5B=_cycalloc(sizeof(*_tmpF5B)),((_tmpF5B->hd=(void*)((void*)((_tmpF5D=
-_cycalloc(sizeof(*_tmpF5D)),((_tmpF5D[0]=((_tmpF5C.tag=0,((_tmpF5C.f1=Cyc_yyget_YY51(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpF5C.f2=Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpFC2)))))),
+_tmpFC3))))),((_tmpFC1->tl=0,_tmpFC1)))))),_tmpFC4)))),_tmpFC0))));}break;case
+258: _LL302:{struct Cyc_Parse_Abstractdeclarator*_tmpFD3;struct Cyc_Absyn_Carray_mod_struct*
+_tmpFD2;struct Cyc_Absyn_Carray_mod_struct _tmpFD1;struct Cyc_List_List*_tmpFD0;
+union Cyc_YYSTYPE_union _tmpFCF;yyval=(union Cyc_YYSTYPE_union)(((_tmpFCF.YY30).tag=
+34,(((_tmpFCF.YY30).f1=((_tmpFD3=_cycalloc(sizeof(*_tmpFD3)),((_tmpFD3->tms=((
+_tmpFD0=_cycalloc(sizeof(*_tmpFD0)),((_tmpFD0->hd=(void*)((void*)((_tmpFD2=
+_cycalloc(sizeof(*_tmpFD2)),((_tmpFD2[0]=((_tmpFD1.tag=0,((_tmpFD1.f1=Cyc_yyget_YY51(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpFD1.f2=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpF5C)))))),
-_tmpF5D))))),((_tmpF5B->tl=(Cyc_yyget_YY30(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 3)]))->tms,_tmpF5B)))))),_tmpF5E)))),_tmpF5A))));}break;case
-254: _LL2FE:{struct Cyc_Parse_Abstractdeclarator*_tmpF6D;struct Cyc_Absyn_ConstArray_mod_struct*
-_tmpF6C;struct Cyc_Absyn_ConstArray_mod_struct _tmpF6B;struct Cyc_List_List*_tmpF6A;
-union Cyc_YYSTYPE_union _tmpF69;yyval=(union Cyc_YYSTYPE_union)(((_tmpF69.YY30).tag=
-34,(((_tmpF69.YY30).f1=((_tmpF6D=_cycalloc(sizeof(*_tmpF6D)),((_tmpF6D->tms=((
-_tmpF6A=_cycalloc(sizeof(*_tmpF6A)),((_tmpF6A->hd=(void*)((void*)((_tmpF6C=
-_cycalloc(sizeof(*_tmpF6C)),((_tmpF6C[0]=((_tmpF6B.tag=1,((_tmpF6B.f1=Cyc_yyget_YY3(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpF6B.f2=Cyc_yyget_YY51(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpF6B.f3=Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpFD1)))))),
+_tmpFD2))))),((_tmpFD0->tl=(Cyc_yyget_YY30(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 3)]))->tms,_tmpFD0)))))),_tmpFD3)))),_tmpFCF))));}break;case
+259: _LL303:{struct Cyc_Parse_Abstractdeclarator*_tmpFE2;struct Cyc_Absyn_ConstArray_mod_struct*
+_tmpFE1;struct Cyc_Absyn_ConstArray_mod_struct _tmpFE0;struct Cyc_List_List*_tmpFDF;
+union Cyc_YYSTYPE_union _tmpFDE;yyval=(union Cyc_YYSTYPE_union)(((_tmpFDE.YY30).tag=
+34,(((_tmpFDE.YY30).f1=((_tmpFE2=_cycalloc(sizeof(*_tmpFE2)),((_tmpFE2->tms=((
+_tmpFDF=_cycalloc(sizeof(*_tmpFDF)),((_tmpFDF->hd=(void*)((void*)((_tmpFE1=
+_cycalloc(sizeof(*_tmpFE1)),((_tmpFE1[0]=((_tmpFE0.tag=1,((_tmpFE0.f1=Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpFE0.f2=Cyc_yyget_YY51(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpFE0.f3=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpF6B)))))))),
-_tmpF6C))))),((_tmpF6A->tl=0,_tmpF6A)))))),_tmpF6D)))),_tmpF69))));}break;case
-255: _LL2FF:{struct Cyc_Parse_Abstractdeclarator*_tmpF7C;struct Cyc_Absyn_ConstArray_mod_struct*
-_tmpF7B;struct Cyc_Absyn_ConstArray_mod_struct _tmpF7A;struct Cyc_List_List*_tmpF79;
-union Cyc_YYSTYPE_union _tmpF78;yyval=(union Cyc_YYSTYPE_union)(((_tmpF78.YY30).tag=
-34,(((_tmpF78.YY30).f1=((_tmpF7C=_cycalloc(sizeof(*_tmpF7C)),((_tmpF7C->tms=((
-_tmpF79=_cycalloc(sizeof(*_tmpF79)),((_tmpF79->hd=(void*)((void*)((_tmpF7B=
-_cycalloc(sizeof(*_tmpF7B)),((_tmpF7B[0]=((_tmpF7A.tag=1,((_tmpF7A.f1=Cyc_yyget_YY3(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpF7A.f2=Cyc_yyget_YY51(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpF7A.f3=Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpFE0)))))))),
+_tmpFE1))))),((_tmpFDF->tl=0,_tmpFDF)))))),_tmpFE2)))),_tmpFDE))));}break;case
+260: _LL304:{struct Cyc_Parse_Abstractdeclarator*_tmpFF1;struct Cyc_Absyn_ConstArray_mod_struct*
+_tmpFF0;struct Cyc_Absyn_ConstArray_mod_struct _tmpFEF;struct Cyc_List_List*_tmpFEE;
+union Cyc_YYSTYPE_union _tmpFED;yyval=(union Cyc_YYSTYPE_union)(((_tmpFED.YY30).tag=
+34,(((_tmpFED.YY30).f1=((_tmpFF1=_cycalloc(sizeof(*_tmpFF1)),((_tmpFF1->tms=((
+_tmpFEE=_cycalloc(sizeof(*_tmpFEE)),((_tmpFEE->hd=(void*)((void*)((_tmpFF0=
+_cycalloc(sizeof(*_tmpFF0)),((_tmpFF0[0]=((_tmpFEF.tag=1,((_tmpFEF.f1=Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpFEF.f2=Cyc_yyget_YY51(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmpFEF.f3=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpF7A)))))))),
-_tmpF7B))))),((_tmpF79->tl=(Cyc_yyget_YY30(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 4)]))->tms,_tmpF79)))))),_tmpF7C)))),_tmpF78))));}break;case
-256: _LL300:{struct Cyc_Parse_Abstractdeclarator*_tmpF98;struct Cyc_Absyn_Function_mod_struct*
-_tmpF97;struct Cyc_Absyn_WithTypes_struct*_tmpF96;struct Cyc_Absyn_WithTypes_struct
-_tmpF95;struct Cyc_Absyn_Function_mod_struct _tmpF94;struct Cyc_List_List*_tmpF93;
-union Cyc_YYSTYPE_union _tmpF92;yyval=(union Cyc_YYSTYPE_union)(((_tmpF92.YY30).tag=
-34,(((_tmpF92.YY30).f1=((_tmpF98=_cycalloc(sizeof(*_tmpF98)),((_tmpF98->tms=((
-_tmpF93=_cycalloc(sizeof(*_tmpF93)),((_tmpF93->hd=(void*)((void*)((_tmpF97=
-_cycalloc(sizeof(*_tmpF97)),((_tmpF97[0]=((_tmpF94.tag=3,((_tmpF94.f1=(void*)((
-void*)((_tmpF96=_cycalloc(sizeof(*_tmpF96)),((_tmpF96[0]=((_tmpF95.tag=1,((
-_tmpF95.f1=0,((_tmpF95.f2=0,((_tmpF95.f3=0,((_tmpF95.f4=Cyc_yyget_YY49(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpF95.f5=Cyc_yyget_YY50(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpF95)))))))))))),
-_tmpF96))))),_tmpF94)))),_tmpF97))))),((_tmpF93->tl=0,_tmpF93)))))),_tmpF98)))),
-_tmpF92))));}break;case 257: _LL301: {struct _tuple17 _tmp6BD;struct Cyc_List_List*
-_tmp6BE;int _tmp6BF;struct Cyc_Absyn_VarargInfo*_tmp6C0;struct Cyc_Core_Opt*_tmp6C1;
-struct Cyc_List_List*_tmp6C2;struct _tuple17*_tmp6BC=Cyc_yyget_YY39(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp6BD=*_tmp6BC;_tmp6BE=
-_tmp6BD.f1;_tmp6BF=_tmp6BD.f2;_tmp6C0=_tmp6BD.f3;_tmp6C1=_tmp6BD.f4;_tmp6C2=
-_tmp6BD.f5;{struct Cyc_Parse_Abstractdeclarator*_tmpFB4;struct Cyc_Absyn_Function_mod_struct*
-_tmpFB3;struct Cyc_Absyn_WithTypes_struct*_tmpFB2;struct Cyc_Absyn_WithTypes_struct
-_tmpFB1;struct Cyc_Absyn_Function_mod_struct _tmpFB0;struct Cyc_List_List*_tmpFAF;
-union Cyc_YYSTYPE_union _tmpFAE;yyval=(union Cyc_YYSTYPE_union)(((_tmpFAE.YY30).tag=
-34,(((_tmpFAE.YY30).f1=((_tmpFB4=_cycalloc(sizeof(*_tmpFB4)),((_tmpFB4->tms=((
-_tmpFAF=_cycalloc(sizeof(*_tmpFAF)),((_tmpFAF->hd=(void*)((void*)((_tmpFB3=
-_cycalloc(sizeof(*_tmpFB3)),((_tmpFB3[0]=((_tmpFB0.tag=3,((_tmpFB0.f1=(void*)((
-void*)((_tmpFB2=_cycalloc(sizeof(*_tmpFB2)),((_tmpFB2[0]=((_tmpFB1.tag=1,((
-_tmpFB1.f1=_tmp6BE,((_tmpFB1.f2=_tmp6BF,((_tmpFB1.f3=_tmp6C0,((_tmpFB1.f4=
-_tmp6C1,((_tmpFB1.f5=_tmp6C2,_tmpFB1)))))))))))),_tmpFB2))))),_tmpFB0)))),
-_tmpFB3))))),((_tmpFAF->tl=0,_tmpFAF)))))),_tmpFB4)))),_tmpFAE))));}break;}case
-258: _LL302:{struct Cyc_Parse_Abstractdeclarator*_tmpFD0;struct Cyc_Absyn_Function_mod_struct*
-_tmpFCF;struct Cyc_Absyn_WithTypes_struct*_tmpFCE;struct Cyc_Absyn_WithTypes_struct
-_tmpFCD;struct Cyc_Absyn_Function_mod_struct _tmpFCC;struct Cyc_List_List*_tmpFCB;
-union Cyc_YYSTYPE_union _tmpFCA;yyval=(union Cyc_YYSTYPE_union)(((_tmpFCA.YY30).tag=
-34,(((_tmpFCA.YY30).f1=((_tmpFD0=_cycalloc(sizeof(*_tmpFD0)),((_tmpFD0->tms=((
-_tmpFCB=_cycalloc(sizeof(*_tmpFCB)),((_tmpFCB->hd=(void*)((void*)((_tmpFCF=
-_cycalloc(sizeof(*_tmpFCF)),((_tmpFCF[0]=((_tmpFCC.tag=3,((_tmpFCC.f1=(void*)((
-void*)((_tmpFCE=_cycalloc(sizeof(*_tmpFCE)),((_tmpFCE[0]=((_tmpFCD.tag=1,((
-_tmpFCD.f1=0,((_tmpFCD.f2=0,((_tmpFCD.f3=0,((_tmpFCD.f4=Cyc_yyget_YY49(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmpFCD.f5=Cyc_yyget_YY50(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmpFCD)))))))))))),
-_tmpFCE))))),_tmpFCC)))),_tmpFCF))))),((_tmpFCB->tl=(Cyc_yyget_YY30(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->tms,_tmpFCB)))))),
-_tmpFD0)))),_tmpFCA))));}break;case 259: _LL303: {struct _tuple17 _tmp6D2;struct Cyc_List_List*
-_tmp6D3;int _tmp6D4;struct Cyc_Absyn_VarargInfo*_tmp6D5;struct Cyc_Core_Opt*_tmp6D6;
-struct Cyc_List_List*_tmp6D7;struct _tuple17*_tmp6D1=Cyc_yyget_YY39(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp6D2=*_tmp6D1;_tmp6D3=
-_tmp6D2.f1;_tmp6D4=_tmp6D2.f2;_tmp6D5=_tmp6D2.f3;_tmp6D6=_tmp6D2.f4;_tmp6D7=
-_tmp6D2.f5;{struct Cyc_Parse_Abstractdeclarator*_tmpFEC;struct Cyc_Absyn_Function_mod_struct*
-_tmpFEB;struct Cyc_Absyn_WithTypes_struct*_tmpFEA;struct Cyc_Absyn_WithTypes_struct
-_tmpFE9;struct Cyc_Absyn_Function_mod_struct _tmpFE8;struct Cyc_List_List*_tmpFE7;
-union Cyc_YYSTYPE_union _tmpFE6;yyval=(union Cyc_YYSTYPE_union)(((_tmpFE6.YY30).tag=
-34,(((_tmpFE6.YY30).f1=((_tmpFEC=_cycalloc(sizeof(*_tmpFEC)),((_tmpFEC->tms=((
-_tmpFE7=_cycalloc(sizeof(*_tmpFE7)),((_tmpFE7->hd=(void*)((void*)((_tmpFEB=
-_cycalloc(sizeof(*_tmpFEB)),((_tmpFEB[0]=((_tmpFE8.tag=3,((_tmpFE8.f1=(void*)((
-void*)((_tmpFEA=_cycalloc(sizeof(*_tmpFEA)),((_tmpFEA[0]=((_tmpFE9.tag=1,((
-_tmpFE9.f1=_tmp6D3,((_tmpFE9.f2=_tmp6D4,((_tmpFE9.f3=_tmp6D5,((_tmpFE9.f4=
-_tmp6D6,((_tmpFE9.f5=_tmp6D7,_tmpFE9)))))))))))),_tmpFEA))))),_tmpFE8)))),
-_tmpFEB))))),((_tmpFE7->tl=(Cyc_yyget_YY30(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 3)]))->tms,_tmpFE7)))))),_tmpFEC)))),_tmpFE6))));}break;}
-case 260: _LL304: {struct Cyc_List_List*_tmp6DF=((struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*
-f)(struct Cyc_Position_Segment*,void*),struct Cyc_Position_Segment*env,struct Cyc_List_List*
-x))Cyc_List_map_c)(Cyc_Parse_typ2tvar,Cyc_Position_segment_of_abs((yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),Cyc_List_imp_rev(
-Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)])));{
-struct Cyc_Parse_Abstractdeclarator*_tmpFFB;struct Cyc_Absyn_TypeParams_mod_struct*
-_tmpFFA;struct Cyc_Absyn_TypeParams_mod_struct _tmpFF9;struct Cyc_List_List*_tmpFF8;
-union Cyc_YYSTYPE_union _tmpFF7;yyval=(union Cyc_YYSTYPE_union)(((_tmpFF7.YY30).tag=
-34,(((_tmpFF7.YY30).f1=((_tmpFFB=_cycalloc(sizeof(*_tmpFFB)),((_tmpFFB->tms=((
-_tmpFF8=_cycalloc(sizeof(*_tmpFF8)),((_tmpFF8->hd=(void*)((void*)((_tmpFFA=
-_cycalloc(sizeof(*_tmpFFA)),((_tmpFFA[0]=((_tmpFF9.tag=4,((_tmpFF9.f1=_tmp6DF,((
-_tmpFF9.f2=Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
-10000,yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line),((_tmpFF9.f3=0,_tmpFF9)))))))),_tmpFFA))))),((_tmpFF8->tl=(
-Cyc_yyget_YY30(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->tms,
-_tmpFF8)))))),_tmpFFB)))),_tmpFF7))));}break;}case 261: _LL305:{struct Cyc_Parse_Abstractdeclarator*
-_tmp100A;struct Cyc_Absyn_Attributes_mod_struct*_tmp1009;struct Cyc_Absyn_Attributes_mod_struct
-_tmp1008;struct Cyc_List_List*_tmp1007;union Cyc_YYSTYPE_union _tmp1006;yyval=(
-union Cyc_YYSTYPE_union)(((_tmp1006.YY30).tag=34,(((_tmp1006.YY30).f1=((_tmp100A=
-_cycalloc(sizeof(*_tmp100A)),((_tmp100A->tms=((_tmp1007=_cycalloc(sizeof(*
-_tmp1007)),((_tmp1007->hd=(void*)((void*)((_tmp1009=_cycalloc(sizeof(*_tmp1009)),((
-_tmp1009[0]=((_tmp1008.tag=5,((_tmp1008.f1=Cyc_Position_segment_of_abs((yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmp1008.f2=
-Cyc_yyget_YY45(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),
-_tmp1008)))))),_tmp1009))))),((_tmp1007->tl=(Cyc_yyget_YY30(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]))->tms,_tmp1007)))))),
-_tmp100A)))),_tmp1006))));}break;case 262: _LL306: yyval=yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 263: _LL307: yyval=
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 264: _LL308:
-yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 265:
-_LL309: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case
-266: _LL30A: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;
-case 267: _LL30B: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];
-break;case 268: _LL30C:{const char*_tmp100C;const char*_tmp100B;if(Cyc_zstrcmp((
-struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 3)]),((_tmp100C="`H",_tag_dyneither(_tmp100C,sizeof(char),3))))
-== 0  || Cyc_zstrcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmp100B="`U",
-_tag_dyneither(_tmp100B,sizeof(char),3))))== 0){const char*_tmp1010;void*_tmp100F[
-1];struct Cyc_String_pa_struct _tmp100E;Cyc_Parse_err((struct _dyneither_ptr)((
-_tmp100E.tag=0,((_tmp100E.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)])),((_tmp100F[0]=&
-_tmp100E,Cyc_aprintf(((_tmp1010="bad occurrence of heap region %s",
-_tag_dyneither(_tmp1010,sizeof(char),33))),_tag_dyneither(_tmp100F,sizeof(void*),
-1)))))))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 3)]).last_line));}}{struct _dyneither_ptr*_tmp1013;struct Cyc_Absyn_Tvar*
-_tmp1012;struct Cyc_Absyn_Tvar*tv=(_tmp1012=_cycalloc(sizeof(*_tmp1012)),((
-_tmp1012->name=((_tmp1013=_cycalloc(sizeof(*_tmp1013)),((_tmp1013[0]=Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),_tmp1013)))),((
-_tmp1012->identity=- 1,((_tmp1012->kind=(void*)Cyc_Tcutil_kind_to_bound((void*)3),
-_tmp1012)))))));struct Cyc_Absyn_VarType_struct _tmp1016;struct Cyc_Absyn_VarType_struct*
-_tmp1015;void*t=(void*)((_tmp1015=_cycalloc(sizeof(*_tmp1015)),((_tmp1015[0]=((
-_tmp1016.tag=1,((_tmp1016.f1=tv,_tmp1016)))),_tmp1015))));{struct Cyc_Absyn_Region_s_struct*
-_tmp1033;struct _tuple1*_tmp1032;struct _dyneither_ptr*_tmp1031;union Cyc_Absyn_Nmspace_union
-_tmp1030;struct Cyc_Absyn_RgnHandleType_struct*_tmp102F;struct Cyc_Absyn_RgnHandleType_struct
-_tmp102E;struct Cyc_Absyn_Region_s_struct _tmp102D;union Cyc_YYSTYPE_union _tmp102C;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp102C.YY9).tag=13,(((_tmp102C.YY9).f1=Cyc_Absyn_new_stmt((
-void*)((_tmp1033=_cycalloc(sizeof(*_tmp1033)),((_tmp1033[0]=((_tmp102D.tag=15,((
-_tmp102D.f1=tv,((_tmp102D.f2=Cyc_Absyn_new_vardecl(((_tmp1032=_cycalloc(sizeof(*
-_tmp1032)),((_tmp1032->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp1030.Loc_n).tag=0,
-_tmp1030)),((_tmp1032->f2=((_tmp1031=_cycalloc(sizeof(*_tmp1031)),((_tmp1031[0]=
-Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),
-_tmp1031)))),_tmp1032)))))),(void*)((_tmp102F=_cycalloc(sizeof(*_tmp102F)),((
-_tmp102F[0]=((_tmp102E.tag=14,((_tmp102E.f1=(void*)t,_tmp102E)))),_tmp102F)))),0),((
-_tmp102D.f3=0,((_tmp102D.f4=0,((_tmp102D.f5=Cyc_yyget_YY9(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp102D)))))))))))),
-_tmp1033)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
-10000,yylsp_offset - 5)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp102C))));}break;}case 269: _LL30D:{const char*
-_tmp1034;if(Cyc_zstrcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmp1034="H",
-_tag_dyneither(_tmp1034,sizeof(char),2))))== 0){const char*_tmp1035;Cyc_Parse_err(((
-_tmp1035="bad occurrence of heap region `H",_tag_dyneither(_tmp1035,sizeof(char),
-33))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 2)]).last_line));}}{struct _dyneither_ptr*_tmp1042;const char*
-_tmp1041;void*_tmp1040[1];struct Cyc_String_pa_struct _tmp103F;struct Cyc_Absyn_Tvar*
-_tmp103E;struct Cyc_Absyn_Tvar*tv=(_tmp103E=_cycalloc(sizeof(*_tmp103E)),((
-_tmp103E->name=((_tmp1042=_cycalloc(sizeof(*_tmp1042)),((_tmp1042[0]=(struct
-_dyneither_ptr)((_tmp103F.tag=0,((_tmp103F.f1=(struct _dyneither_ptr)((struct
-_dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 2)])),((_tmp1040[0]=& _tmp103F,Cyc_aprintf(((_tmp1041="`%s",
-_tag_dyneither(_tmp1041,sizeof(char),4))),_tag_dyneither(_tmp1040,sizeof(void*),
-1)))))))),_tmp1042)))),((_tmp103E->identity=- 1,((_tmp103E->kind=(void*)Cyc_Tcutil_kind_to_bound((
-void*)3),_tmp103E)))))));struct Cyc_Absyn_VarType_struct _tmp1045;struct Cyc_Absyn_VarType_struct*
-_tmp1044;void*t=(void*)((_tmp1044=_cycalloc(sizeof(*_tmp1044)),((_tmp1044[0]=((
-_tmp1045.tag=1,((_tmp1045.f1=tv,_tmp1045)))),_tmp1044))));{struct Cyc_Absyn_Region_s_struct*
-_tmp1062;struct _tuple1*_tmp1061;struct _dyneither_ptr*_tmp1060;union Cyc_Absyn_Nmspace_union
-_tmp105F;struct Cyc_Absyn_RgnHandleType_struct*_tmp105E;struct Cyc_Absyn_RgnHandleType_struct
-_tmp105D;struct Cyc_Absyn_Region_s_struct _tmp105C;union Cyc_YYSTYPE_union _tmp105B;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp105B.YY9).tag=13,(((_tmp105B.YY9).f1=Cyc_Absyn_new_stmt((
-void*)((_tmp1062=_cycalloc(sizeof(*_tmp1062)),((_tmp1062[0]=((_tmp105C.tag=15,((
-_tmp105C.f1=tv,((_tmp105C.f2=Cyc_Absyn_new_vardecl(((_tmp1061=_cycalloc(sizeof(*
-_tmp1061)),((_tmp1061->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp105F.Loc_n).tag=0,
-_tmp105F)),((_tmp1061->f2=((_tmp1060=_cycalloc(sizeof(*_tmp1060)),((_tmp1060[0]=
-Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),
-_tmp1060)))),_tmp1061)))))),(void*)((_tmp105E=_cycalloc(sizeof(*_tmp105E)),((
-_tmp105E[0]=((_tmp105D.tag=14,((_tmp105D.f1=(void*)t,_tmp105D)))),_tmp105E)))),0),((
-_tmp105C.f3=0,((_tmp105C.f4=Cyc_yyget_YY4(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 1)]),((_tmp105C.f5=Cyc_yyget_YY9(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp105C)))))))))))),
-_tmp1062)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
-10000,yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line)),_tmp105B))));}break;}case 270: _LL30E:{const char*
-_tmp1063;if(Cyc_zstrcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 6)]),((_tmp1063="resetable",
-_tag_dyneither(_tmp1063,sizeof(char),10))))!= 0){const char*_tmp1064;Cyc_Parse_err(((
-_tmp1064="expecting [resetable]",_tag_dyneither(_tmp1064,sizeof(char),22))),Cyc_Position_segment_of_abs((
-yyls[_check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 6)]).last_line));}}{const char*
-_tmp1066;const char*_tmp1065;if(Cyc_zstrcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmp1066="`H",
-_tag_dyneither(_tmp1066,sizeof(char),3))))== 0  || Cyc_zstrcmp((struct
-_dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 3)]),((_tmp1065="`U",_tag_dyneither(_tmp1065,sizeof(char),3))))){
-const char*_tmp106A;void*_tmp1069[1];struct Cyc_String_pa_struct _tmp1068;Cyc_Parse_err((
-struct _dyneither_ptr)((_tmp1068.tag=0,((_tmp1068.f1=(struct _dyneither_ptr)((
-struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 3)])),((_tmp1069[0]=& _tmp1068,Cyc_aprintf(((_tmp106A="bad occurrence of heap region %s",
-_tag_dyneither(_tmp106A,sizeof(char),33))),_tag_dyneither(_tmp1069,sizeof(void*),
-1)))))))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 3)]).last_line));}}{struct _dyneither_ptr*_tmp106D;struct Cyc_Absyn_Tvar*
-_tmp106C;struct Cyc_Absyn_Tvar*tv=(_tmp106C=_cycalloc(sizeof(*_tmp106C)),((
-_tmp106C->name=((_tmp106D=_cycalloc(sizeof(*_tmp106D)),((_tmp106D[0]=Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),_tmp106D)))),((
-_tmp106C->identity=- 1,((_tmp106C->kind=(void*)Cyc_Tcutil_kind_to_bound((void*)3),
-_tmp106C)))))));struct Cyc_Absyn_VarType_struct _tmp1070;struct Cyc_Absyn_VarType_struct*
-_tmp106F;void*t=(void*)((_tmp106F=_cycalloc(sizeof(*_tmp106F)),((_tmp106F[0]=((
-_tmp1070.tag=1,((_tmp1070.f1=tv,_tmp1070)))),_tmp106F))));{struct Cyc_Absyn_Region_s_struct*
-_tmp108D;struct _tuple1*_tmp108C;struct _dyneither_ptr*_tmp108B;union Cyc_Absyn_Nmspace_union
-_tmp108A;struct Cyc_Absyn_RgnHandleType_struct*_tmp1089;struct Cyc_Absyn_RgnHandleType_struct
-_tmp1088;struct Cyc_Absyn_Region_s_struct _tmp1087;union Cyc_YYSTYPE_union _tmp1086;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp1086.YY9).tag=13,(((_tmp1086.YY9).f1=Cyc_Absyn_new_stmt((
-void*)((_tmp108D=_cycalloc(sizeof(*_tmp108D)),((_tmp108D[0]=((_tmp1087.tag=15,((
-_tmp1087.f1=tv,((_tmp1087.f2=Cyc_Absyn_new_vardecl(((_tmp108C=_cycalloc(sizeof(*
-_tmp108C)),((_tmp108C->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp108A.Loc_n).tag=0,
-_tmp108A)),((_tmp108C->f2=((_tmp108B=_cycalloc(sizeof(*_tmp108B)),((_tmp108B[0]=
-Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),
-_tmp108B)))),_tmp108C)))))),(void*)((_tmp1089=_cycalloc(sizeof(*_tmp1089)),((
-_tmp1089[0]=((_tmp1088.tag=14,((_tmp1088.f1=(void*)t,_tmp1088)))),_tmp1089)))),0),((
-_tmp1087.f3=1,((_tmp1087.f4=0,((_tmp1087.f5=Cyc_yyget_YY9(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1087)))))))))))),
-_tmp108D)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
-10000,yylsp_offset - 8)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp1086))));}break;}case 271: _LL30F:{const char*
-_tmp108E;if(Cyc_zstrcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmp108E="resetable",
-_tag_dyneither(_tmp108E,sizeof(char),10))))!= 0){const char*_tmp108F;Cyc_Parse_err(((
-_tmp108F="expecting `resetable'",_tag_dyneither(_tmp108F,sizeof(char),22))),Cyc_Position_segment_of_abs((
-yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line));}}{const char*
-_tmp1090;if(Cyc_zstrcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmp1090="H",
-_tag_dyneither(_tmp1090,sizeof(char),2))))== 0){const char*_tmp1091;Cyc_Parse_err(((
-_tmp1091="bad occurrence of heap region `H",_tag_dyneither(_tmp1091,sizeof(char),
-33))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line));}}{struct _dyneither_ptr*_tmp109E;const char*
-_tmp109D;void*_tmp109C[1];struct Cyc_String_pa_struct _tmp109B;struct Cyc_Absyn_Tvar*
-_tmp109A;struct Cyc_Absyn_Tvar*tv=(_tmp109A=_cycalloc(sizeof(*_tmp109A)),((
-_tmp109A->name=((_tmp109E=_cycalloc(sizeof(*_tmp109E)),((_tmp109E[0]=(struct
-_dyneither_ptr)((_tmp109B.tag=0,((_tmp109B.f1=(struct _dyneither_ptr)((struct
-_dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)])),((_tmp109C[0]=& _tmp109B,Cyc_aprintf(((_tmp109D="`%s",
-_tag_dyneither(_tmp109D,sizeof(char),4))),_tag_dyneither(_tmp109C,sizeof(void*),
-1)))))))),_tmp109E)))),((_tmp109A->identity=- 1,((_tmp109A->kind=(void*)Cyc_Tcutil_kind_to_bound((
-void*)3),_tmp109A)))))));struct Cyc_Absyn_VarType_struct _tmp10A1;struct Cyc_Absyn_VarType_struct*
-_tmp10A0;void*t=(void*)((_tmp10A0=_cycalloc(sizeof(*_tmp10A0)),((_tmp10A0[0]=((
-_tmp10A1.tag=1,((_tmp10A1.f1=tv,_tmp10A1)))),_tmp10A0))));{struct Cyc_Absyn_Region_s_struct*
-_tmp10BE;struct _tuple1*_tmp10BD;struct _dyneither_ptr*_tmp10BC;union Cyc_Absyn_Nmspace_union
-_tmp10BB;struct Cyc_Absyn_RgnHandleType_struct*_tmp10BA;struct Cyc_Absyn_RgnHandleType_struct
-_tmp10B9;struct Cyc_Absyn_Region_s_struct _tmp10B8;union Cyc_YYSTYPE_union _tmp10B7;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp10B7.YY9).tag=13,(((_tmp10B7.YY9).f1=Cyc_Absyn_new_stmt((
-void*)((_tmp10BE=_cycalloc(sizeof(*_tmp10BE)),((_tmp10BE[0]=((_tmp10B8.tag=15,((
-_tmp10B8.f1=tv,((_tmp10B8.f2=Cyc_Absyn_new_vardecl(((_tmp10BD=_cycalloc(sizeof(*
-_tmp10BD)),((_tmp10BD->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp10BB.Loc_n).tag=0,
-_tmp10BB)),((_tmp10BD->f2=((_tmp10BC=_cycalloc(sizeof(*_tmp10BC)),((_tmp10BC[0]=
-Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),
-_tmp10BC)))),_tmp10BD)))))),(void*)((_tmp10BA=_cycalloc(sizeof(*_tmp10BA)),((
-_tmp10BA[0]=((_tmp10B9.tag=14,((_tmp10B9.f1=(void*)t,_tmp10B9)))),_tmp10BA)))),0),((
-_tmp10B8.f3=1,((_tmp10B8.f4=0,((_tmp10B8.f5=Cyc_yyget_YY9(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp10B8)))))))))))),
-_tmp10BE)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
-10000,yylsp_offset - 5)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp10B7))));}break;}case 272: _LL310:{struct Cyc_Absyn_ResetRegion_s_struct*
-_tmp10C4;struct Cyc_Absyn_ResetRegion_s_struct _tmp10C3;union Cyc_YYSTYPE_union
-_tmp10C2;yyval=(union Cyc_YYSTYPE_union)(((_tmp10C2.YY9).tag=13,(((_tmp10C2.YY9).f1=
-Cyc_Absyn_new_stmt((void*)((_tmp10C4=_cycalloc(sizeof(*_tmp10C4)),((_tmp10C4[0]=((
-_tmp10C3.tag=16,((_tmp10C3.f1=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 2)]),_tmp10C3)))),_tmp10C4)))),Cyc_Position_segment_of_abs((
-yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10C2))));}
-break;case 273: _LL311:{const char*_tmp10C5;if(Cyc_zstrcmp((struct _dyneither_ptr)
-Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((
-_tmp10C5="in",_tag_dyneither(_tmp10C5,sizeof(char),3))))!= 0){const char*_tmp10C6;
-Cyc_Parse_err(((_tmp10C6="expecting `in'",_tag_dyneither(_tmp10C6,sizeof(char),
-15))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line));}}{struct _dyneither_ptr*_tmp10CE;struct Cyc_Absyn_Eq_kb_struct*
-_tmp10CD;struct Cyc_Absyn_Eq_kb_struct _tmp10CC;struct Cyc_Absyn_Tvar*_tmp10CB;
-struct Cyc_Absyn_Tvar*tv=(_tmp10CB=_cycalloc(sizeof(*_tmp10CB)),((_tmp10CB->name=((
-_tmp10CE=_cycalloc(sizeof(*_tmp10CE)),((_tmp10CE[0]=Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 6)]),_tmp10CE)))),((_tmp10CB->identity=
-- 1,((_tmp10CB->kind=(void*)((void*)((_tmp10CD=_cycalloc(sizeof(*_tmp10CD)),((
-_tmp10CD[0]=((_tmp10CC.tag=0,((_tmp10CC.f1=(void*)((void*)3),_tmp10CC)))),
-_tmp10CD))))),_tmp10CB)))))));{struct Cyc_Absyn_Alias_s_struct*_tmp10E2;struct
-_tuple1*_tmp10E1;struct _dyneither_ptr*_tmp10E0;union Cyc_Absyn_Nmspace_union
-_tmp10DF;struct Cyc_Absyn_Alias_s_struct _tmp10DE;union Cyc_YYSTYPE_union _tmp10DD;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp10DD.YY9).tag=13,(((_tmp10DD.YY9).f1=Cyc_Absyn_new_stmt((
-void*)((_tmp10E2=_cycalloc(sizeof(*_tmp10E2)),((_tmp10E2[0]=((_tmp10DE.tag=17,((
-_tmp10DE.f1=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
-- 2)]),((_tmp10DE.f2=tv,((_tmp10DE.f3=Cyc_Absyn_new_vardecl(((_tmp10E1=_cycalloc(
-sizeof(*_tmp10E1)),((_tmp10E1->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp10DF.Loc_n).tag=
-0,_tmp10DF)),((_tmp10E1->f2=((_tmp10E0=_cycalloc(sizeof(*_tmp10E0)),((_tmp10E0[0]=
-Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),
-_tmp10E0)))),_tmp10E1)))))),(void*)0,0),((_tmp10DE.f4=Cyc_yyget_YY9(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp10DE)))))))))),_tmp10E2)))),
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmpFEF)))))))),
+_tmpFF0))))),((_tmpFEE->tl=(Cyc_yyget_YY30(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 4)]))->tms,_tmpFEE)))))),_tmpFF1)))),_tmpFED))));}break;case
+261: _LL305:{struct Cyc_Parse_Abstractdeclarator*_tmp100D;struct Cyc_Absyn_Function_mod_struct*
+_tmp100C;struct Cyc_Absyn_WithTypes_struct*_tmp100B;struct Cyc_Absyn_WithTypes_struct
+_tmp100A;struct Cyc_Absyn_Function_mod_struct _tmp1009;struct Cyc_List_List*
+_tmp1008;union Cyc_YYSTYPE_union _tmp1007;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1007.YY30).tag=34,(((_tmp1007.YY30).f1=((_tmp100D=_cycalloc(sizeof(*_tmp100D)),((
+_tmp100D->tms=((_tmp1008=_cycalloc(sizeof(*_tmp1008)),((_tmp1008->hd=(void*)((
+void*)((_tmp100C=_cycalloc(sizeof(*_tmp100C)),((_tmp100C[0]=((_tmp1009.tag=3,((
+_tmp1009.f1=(void*)((void*)((_tmp100B=_cycalloc(sizeof(*_tmp100B)),((_tmp100B[0]=((
+_tmp100A.tag=1,((_tmp100A.f1=0,((_tmp100A.f2=0,((_tmp100A.f3=0,((_tmp100A.f4=Cyc_yyget_YY49(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmp100A.f5=Cyc_yyget_YY50(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmp100A)))))))))))),
+_tmp100B))))),_tmp1009)))),_tmp100C))))),((_tmp1008->tl=0,_tmp1008)))))),
+_tmp100D)))),_tmp1007))));}break;case 262: _LL306: {struct _tuple17 _tmp70A;struct
+Cyc_List_List*_tmp70B;int _tmp70C;struct Cyc_Absyn_VarargInfo*_tmp70D;struct Cyc_Core_Opt*
+_tmp70E;struct Cyc_List_List*_tmp70F;struct _tuple17*_tmp709=Cyc_yyget_YY39(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp70A=*_tmp709;_tmp70B=
+_tmp70A.f1;_tmp70C=_tmp70A.f2;_tmp70D=_tmp70A.f3;_tmp70E=_tmp70A.f4;_tmp70F=
+_tmp70A.f5;{struct Cyc_Parse_Abstractdeclarator*_tmp1029;struct Cyc_Absyn_Function_mod_struct*
+_tmp1028;struct Cyc_Absyn_WithTypes_struct*_tmp1027;struct Cyc_Absyn_WithTypes_struct
+_tmp1026;struct Cyc_Absyn_Function_mod_struct _tmp1025;struct Cyc_List_List*
+_tmp1024;union Cyc_YYSTYPE_union _tmp1023;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1023.YY30).tag=34,(((_tmp1023.YY30).f1=((_tmp1029=_cycalloc(sizeof(*_tmp1029)),((
+_tmp1029->tms=((_tmp1024=_cycalloc(sizeof(*_tmp1024)),((_tmp1024->hd=(void*)((
+void*)((_tmp1028=_cycalloc(sizeof(*_tmp1028)),((_tmp1028[0]=((_tmp1025.tag=3,((
+_tmp1025.f1=(void*)((void*)((_tmp1027=_cycalloc(sizeof(*_tmp1027)),((_tmp1027[0]=((
+_tmp1026.tag=1,((_tmp1026.f1=_tmp70B,((_tmp1026.f2=_tmp70C,((_tmp1026.f3=_tmp70D,((
+_tmp1026.f4=_tmp70E,((_tmp1026.f5=_tmp70F,_tmp1026)))))))))))),_tmp1027))))),
+_tmp1025)))),_tmp1028))))),((_tmp1024->tl=0,_tmp1024)))))),_tmp1029)))),_tmp1023))));}
+break;}case 263: _LL307:{struct Cyc_Parse_Abstractdeclarator*_tmp1045;struct Cyc_Absyn_Function_mod_struct*
+_tmp1044;struct Cyc_Absyn_WithTypes_struct*_tmp1043;struct Cyc_Absyn_WithTypes_struct
+_tmp1042;struct Cyc_Absyn_Function_mod_struct _tmp1041;struct Cyc_List_List*
+_tmp1040;union Cyc_YYSTYPE_union _tmp103F;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp103F.YY30).tag=34,(((_tmp103F.YY30).f1=((_tmp1045=_cycalloc(sizeof(*_tmp1045)),((
+_tmp1045->tms=((_tmp1040=_cycalloc(sizeof(*_tmp1040)),((_tmp1040->hd=(void*)((
+void*)((_tmp1044=_cycalloc(sizeof(*_tmp1044)),((_tmp1044[0]=((_tmp1041.tag=3,((
+_tmp1041.f1=(void*)((void*)((_tmp1043=_cycalloc(sizeof(*_tmp1043)),((_tmp1043[0]=((
+_tmp1042.tag=1,((_tmp1042.f1=0,((_tmp1042.f2=0,((_tmp1042.f3=0,((_tmp1042.f4=Cyc_yyget_YY49(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmp1042.f5=Cyc_yyget_YY50(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmp1042)))))))))))),
+_tmp1043))))),_tmp1041)))),_tmp1044))))),((_tmp1040->tl=(Cyc_yyget_YY30(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 4)]))->tms,_tmp1040)))))),
+_tmp1045)))),_tmp103F))));}break;case 264: _LL308: {struct _tuple17 _tmp71F;struct
+Cyc_List_List*_tmp720;int _tmp721;struct Cyc_Absyn_VarargInfo*_tmp722;struct Cyc_Core_Opt*
+_tmp723;struct Cyc_List_List*_tmp724;struct _tuple17*_tmp71E=Cyc_yyget_YY39(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp71F=*_tmp71E;_tmp720=
+_tmp71F.f1;_tmp721=_tmp71F.f2;_tmp722=_tmp71F.f3;_tmp723=_tmp71F.f4;_tmp724=
+_tmp71F.f5;{struct Cyc_Parse_Abstractdeclarator*_tmp1061;struct Cyc_Absyn_Function_mod_struct*
+_tmp1060;struct Cyc_Absyn_WithTypes_struct*_tmp105F;struct Cyc_Absyn_WithTypes_struct
+_tmp105E;struct Cyc_Absyn_Function_mod_struct _tmp105D;struct Cyc_List_List*
+_tmp105C;union Cyc_YYSTYPE_union _tmp105B;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp105B.YY30).tag=34,(((_tmp105B.YY30).f1=((_tmp1061=_cycalloc(sizeof(*_tmp1061)),((
+_tmp1061->tms=((_tmp105C=_cycalloc(sizeof(*_tmp105C)),((_tmp105C->hd=(void*)((
+void*)((_tmp1060=_cycalloc(sizeof(*_tmp1060)),((_tmp1060[0]=((_tmp105D.tag=3,((
+_tmp105D.f1=(void*)((void*)((_tmp105F=_cycalloc(sizeof(*_tmp105F)),((_tmp105F[0]=((
+_tmp105E.tag=1,((_tmp105E.f1=_tmp720,((_tmp105E.f2=_tmp721,((_tmp105E.f3=_tmp722,((
+_tmp105E.f4=_tmp723,((_tmp105E.f5=_tmp724,_tmp105E)))))))))))),_tmp105F))))),
+_tmp105D)))),_tmp1060))))),((_tmp105C->tl=(Cyc_yyget_YY30(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->tms,_tmp105C)))))),
+_tmp1061)))),_tmp105B))));}break;}case 265: _LL309: {struct Cyc_List_List*_tmp72C=((
+struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Position_Segment*,
+void*),struct Cyc_Position_Segment*env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_typ2tvar,
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 8)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp10DD))));}break;}case 274: _LL312:{union Cyc_YYSTYPE_union
-_tmp10E3;yyval=(union Cyc_YYSTYPE_union)(((_tmp10E3.YY4).tag=8,(((_tmp10E3.YY4).f1=
-0,_tmp10E3))));}break;case 275: _LL313:{const char*_tmp10E4;if(Cyc_zstrcmp((struct
+yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
+yylsp_offset)]).last_line),Cyc_List_imp_rev(Cyc_yyget_YY40(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)])));{struct Cyc_Parse_Abstractdeclarator*
+_tmp1070;struct Cyc_Absyn_TypeParams_mod_struct*_tmp106F;struct Cyc_Absyn_TypeParams_mod_struct
+_tmp106E;struct Cyc_List_List*_tmp106D;union Cyc_YYSTYPE_union _tmp106C;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp106C.YY30).tag=34,(((_tmp106C.YY30).f1=((_tmp1070=
+_cycalloc(sizeof(*_tmp1070)),((_tmp1070->tms=((_tmp106D=_cycalloc(sizeof(*
+_tmp106D)),((_tmp106D->hd=(void*)((void*)((_tmp106F=_cycalloc(sizeof(*_tmp106F)),((
+_tmp106F[0]=((_tmp106E.tag=4,((_tmp106E.f1=_tmp72C,((_tmp106E.f2=Cyc_Position_segment_of_abs((
+yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmp106E.f3=0,
+_tmp106E)))))))),_tmp106F))))),((_tmp106D->tl=(Cyc_yyget_YY30(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]))->tms,_tmp106D)))))),
+_tmp1070)))),_tmp106C))));}break;}case 266: _LL30A:{struct Cyc_Parse_Abstractdeclarator*
+_tmp107F;struct Cyc_Absyn_Attributes_mod_struct*_tmp107E;struct Cyc_Absyn_Attributes_mod_struct
+_tmp107D;struct Cyc_List_List*_tmp107C;union Cyc_YYSTYPE_union _tmp107B;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp107B.YY30).tag=34,(((_tmp107B.YY30).f1=((_tmp107F=
+_cycalloc(sizeof(*_tmp107F)),((_tmp107F->tms=((_tmp107C=_cycalloc(sizeof(*
+_tmp107C)),((_tmp107C->hd=(void*)((void*)((_tmp107E=_cycalloc(sizeof(*_tmp107E)),((
+_tmp107E[0]=((_tmp107D.tag=5,((_tmp107D.f1=Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),((_tmp107D.f2=
+Cyc_yyget_YY45(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),
+_tmp107D)))))),_tmp107E))))),((_tmp107C->tl=(Cyc_yyget_YY30(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]))->tms,_tmp107C)))))),
+_tmp107F)))),_tmp107B))));}break;case 267: _LL30B: yyval=yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 268: _LL30C: yyval=
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 269: _LL30D:
+yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 270:
+_LL30E: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case
+271: _LL30F: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;
+case 272: _LL310: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];
+break;case 273: _LL311:{struct Cyc_Absyn_ResetRegion_s_struct*_tmp1085;struct Cyc_Absyn_ResetRegion_s_struct
+_tmp1084;union Cyc_YYSTYPE_union _tmp1083;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1083.YY9).tag=13,(((_tmp1083.YY9).f1=Cyc_Absyn_new_stmt((void*)((_tmp1085=
+_cycalloc(sizeof(*_tmp1085)),((_tmp1085[0]=((_tmp1084.tag=15,((_tmp1084.f1=Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmp1084)))),
+_tmp1085)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+10000,yylsp_offset - 4)]).first_line,(yyls[_check_known_subscript_notnull(10000,
+yylsp_offset)]).last_line)),_tmp1083))));}break;case 274: _LL312:{union Cyc_YYSTYPE_union
+_tmp1086;yyval=(union Cyc_YYSTYPE_union)(((_tmp1086.YY4).tag=8,(((_tmp1086.YY4).f1=
+0,_tmp1086))));}break;case 275: _LL313:{const char*_tmp1087;if(Cyc_zstrcmp((struct
 _dyneither_ptr)Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 3)]),((_tmp10E4="open",_tag_dyneither(_tmp10E4,sizeof(char),5))))
-!= 0){const char*_tmp10E5;Cyc_Parse_err(((_tmp10E5="expecting `open'",
-_tag_dyneither(_tmp10E5,sizeof(char),17))),Cyc_Position_segment_of_abs((yyls[
+yyvsp_offset - 3)]),((_tmp1087="open",_tag_dyneither(_tmp1087,sizeof(char),5))))
+!= 0){const char*_tmp1088;Cyc_Parse_err(((_tmp1088="expecting `open'",
+_tag_dyneither(_tmp1088,sizeof(char),17))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line));}}{union Cyc_YYSTYPE_union
-_tmp10E6;yyval=(union Cyc_YYSTYPE_union)(((_tmp10E6.YY4).tag=8,(((_tmp10E6.YY4).f1=(
+_tmp1089;yyval=(union Cyc_YYSTYPE_union)(((_tmp1089.YY4).tag=8,(((_tmp1089.YY4).f1=(
 struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]),_tmp10E6))));}break;case 276: _LL314:{struct Cyc_Absyn_Label_s_struct*
-_tmp10F0;struct _dyneither_ptr*_tmp10EF;struct Cyc_Absyn_Label_s_struct _tmp10EE;
-union Cyc_YYSTYPE_union _tmp10ED;yyval=(union Cyc_YYSTYPE_union)(((_tmp10ED.YY9).tag=
-13,(((_tmp10ED.YY9).f1=Cyc_Absyn_new_stmt((void*)((_tmp10F0=_cycalloc(sizeof(*
-_tmp10F0)),((_tmp10F0[0]=((_tmp10EE.tag=12,((_tmp10EE.f1=((_tmp10EF=_cycalloc(
-sizeof(*_tmp10EF)),((_tmp10EF[0]=Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmp10EF)))),((_tmp10EE.f2=
-Cyc_yyget_YY9(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp10EE)))))),
-_tmp10F0)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+yyvsp_offset - 1)]),_tmp1089))));}break;case 276: _LL314:{struct Cyc_Absyn_Label_s_struct*
+_tmp1093;struct _dyneither_ptr*_tmp1092;struct Cyc_Absyn_Label_s_struct _tmp1091;
+union Cyc_YYSTYPE_union _tmp1090;yyval=(union Cyc_YYSTYPE_union)(((_tmp1090.YY9).tag=
+13,(((_tmp1090.YY9).f1=Cyc_Absyn_new_stmt((void*)((_tmp1093=_cycalloc(sizeof(*
+_tmp1093)),((_tmp1093[0]=((_tmp1091.tag=12,((_tmp1091.f1=((_tmp1092=_cycalloc(
+sizeof(*_tmp1092)),((_tmp1092[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmp1092)))),((_tmp1091.f2=
+Cyc_yyget_YY9(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1091)))))),
+_tmp1093)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp10ED))));}break;case 277: _LL315:{union Cyc_YYSTYPE_union
-_tmp10F1;yyval=(union Cyc_YYSTYPE_union)(((_tmp10F1.YY9).tag=13,(((_tmp10F1.YY9).f1=
+yylsp_offset)]).last_line)),_tmp1090))));}break;case 277: _LL315:{union Cyc_YYSTYPE_union
+_tmp1094;yyval=(union Cyc_YYSTYPE_union)(((_tmp1094.YY9).tag=13,(((_tmp1094.YY9).f1=
 Cyc_Absyn_skip_stmt(Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10F1))));}
-break;case 278: _LL316:{union Cyc_YYSTYPE_union _tmp10F2;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp10F2.YY9).tag=13,(((_tmp10F2.YY9).f1=Cyc_Absyn_exp_stmt(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1094))));}
+break;case 278: _LL316:{union Cyc_YYSTYPE_union _tmp1095;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1095.YY9).tag=13,(((_tmp1095.YY9).f1=Cyc_Absyn_exp_stmt(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10F2))));}
-break;case 279: _LL317:{union Cyc_YYSTYPE_union _tmp10F3;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp10F3.YY9).tag=13,(((_tmp10F3.YY9).f1=Cyc_Absyn_skip_stmt(Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1095))));}
+break;case 279: _LL317:{union Cyc_YYSTYPE_union _tmp1096;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1096.YY9).tag=13,(((_tmp1096.YY9).f1=Cyc_Absyn_skip_stmt(Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10F3))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1096))));}
 break;case 280: _LL318: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)];break;case 281: _LL319:{union Cyc_YYSTYPE_union _tmp10F4;yyval=(
-union Cyc_YYSTYPE_union)(((_tmp10F4.YY9).tag=13,(((_tmp10F4.YY9).f1=Cyc_Parse_flatten_declarations(
+yyvsp_offset - 1)];break;case 281: _LL319:{union Cyc_YYSTYPE_union _tmp1097;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp1097.YY9).tag=13,(((_tmp1097.YY9).f1=Cyc_Parse_flatten_declarations(
 Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Absyn_skip_stmt(
-0)),_tmp10F4))));}break;case 282: _LL31A:{union Cyc_YYSTYPE_union _tmp10F5;yyval=(
-union Cyc_YYSTYPE_union)(((_tmp10F5.YY9).tag=13,(((_tmp10F5.YY9).f1=Cyc_Parse_flatten_declarations(
+0)),_tmp1097))));}break;case 282: _LL31A:{union Cyc_YYSTYPE_union _tmp1098;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp1098.YY9).tag=13,(((_tmp1098.YY9).f1=Cyc_Parse_flatten_declarations(
 Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY9(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmp10F5))));}break;
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmp1098))));}break;
 case 283: _LL31B: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];
-break;case 284: _LL31C:{union Cyc_YYSTYPE_union _tmp10F6;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp10F6.YY9).tag=13,(((_tmp10F6.YY9).f1=Cyc_Absyn_seq_stmt(Cyc_yyget_YY9(yyvs[
+break;case 284: _LL31C:{union Cyc_YYSTYPE_union _tmp1099;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1099.YY9).tag=13,(((_tmp1099.YY9).f1=Cyc_Absyn_seq_stmt(Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10F6))));}
-break;case 285: _LL31D:{struct Cyc_Absyn_Fn_d_struct*_tmp10FC;struct Cyc_Absyn_Fn_d_struct
-_tmp10FB;union Cyc_YYSTYPE_union _tmp10FA;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp10FA.YY9).tag=13,(((_tmp10FA.YY9).f1=Cyc_Parse_flatten_decl(Cyc_Absyn_new_decl((
-void*)((_tmp10FC=_cycalloc(sizeof(*_tmp10FC)),((_tmp10FC[0]=((_tmp10FB.tag=1,((
-_tmp10FB.f1=Cyc_yyget_YY17(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmp10FB)))),_tmp10FC)))),Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1099))));}
+break;case 285: _LL31D:{struct Cyc_Absyn_Fn_d_struct*_tmp109F;struct Cyc_Absyn_Fn_d_struct
+_tmp109E;union Cyc_YYSTYPE_union _tmp109D;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp109D.YY9).tag=13,(((_tmp109D.YY9).f1=Cyc_Parse_flatten_decl(Cyc_Absyn_new_decl((
+void*)((_tmp109F=_cycalloc(sizeof(*_tmp109F)),((_tmp109F[0]=((_tmp109E.tag=1,((
+_tmp109E.f1=Cyc_yyget_YY17(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmp109E)))),_tmp109F)))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),Cyc_Absyn_skip_stmt(
-0)),_tmp10FA))));}break;case 286: _LL31E:{struct Cyc_Absyn_Fn_d_struct*_tmp1102;
-struct Cyc_Absyn_Fn_d_struct _tmp1101;union Cyc_YYSTYPE_union _tmp1100;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1100.YY9).tag=13,(((_tmp1100.YY9).f1=Cyc_Parse_flatten_decl(
-Cyc_Absyn_new_decl((void*)((_tmp1102=_cycalloc(sizeof(*_tmp1102)),((_tmp1102[0]=((
-_tmp1101.tag=1,((_tmp1101.f1=Cyc_yyget_YY17(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 1)]),_tmp1101)))),_tmp1102)))),Cyc_Position_segment_of_abs((
+0)),_tmp109D))));}break;case 286: _LL31E:{struct Cyc_Absyn_Fn_d_struct*_tmp10A5;
+struct Cyc_Absyn_Fn_d_struct _tmp10A4;union Cyc_YYSTYPE_union _tmp10A3;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10A3.YY9).tag=13,(((_tmp10A3.YY9).f1=Cyc_Parse_flatten_decl(
+Cyc_Absyn_new_decl((void*)((_tmp10A5=_cycalloc(sizeof(*_tmp10A5)),((_tmp10A5[0]=((
+_tmp10A4.tag=1,((_tmp10A4.f1=Cyc_yyget_YY17(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 1)]),_tmp10A4)))),_tmp10A5)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),Cyc_yyget_YY9(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmp1100))));}break;
-case 287: _LL31F:{union Cyc_YYSTYPE_union _tmp1103;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1103.YY9).tag=13,(((_tmp1103.YY9).f1=Cyc_Absyn_ifthenelse_stmt(Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])),_tmp10A3))));}break;
+case 287: _LL31F:{union Cyc_YYSTYPE_union _tmp10A6;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10A6.YY9).tag=13,(((_tmp10A6.YY9).f1=Cyc_Absyn_ifthenelse_stmt(Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Absyn_skip_stmt(0),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1103))));}
-break;case 288: _LL320:{union Cyc_YYSTYPE_union _tmp1104;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1104.YY9).tag=13,(((_tmp1104.YY9).f1=Cyc_Absyn_ifthenelse_stmt(Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10A6))));}
+break;case 288: _LL320:{union Cyc_YYSTYPE_union _tmp10A7;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10A7.YY9).tag=13,(((_tmp10A7.YY9).f1=Cyc_Absyn_ifthenelse_stmt(Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1104))));}
-break;case 289: _LL321:{union Cyc_YYSTYPE_union _tmp1105;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1105.YY9).tag=13,(((_tmp1105.YY9).f1=Cyc_Absyn_switch_stmt(Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10A7))));}
+break;case 289: _LL321:{union Cyc_YYSTYPE_union _tmp10A8;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10A8.YY9).tag=13,(((_tmp10A8.YY9).f1=Cyc_Absyn_switch_stmt(Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),Cyc_yyget_YY10(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1105))));}
-break;case 290: _LL322: {struct Cyc_Absyn_UnknownId_e_struct _tmp1108;struct Cyc_Absyn_UnknownId_e_struct*
-_tmp1107;struct Cyc_Absyn_Exp*_tmp758=Cyc_Absyn_new_exp((void*)((_tmp1107=
-_cycalloc(sizeof(*_tmp1107)),((_tmp1107[0]=((_tmp1108.tag=2,((_tmp1108.f1=Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),_tmp1108)))),
-_tmp1107)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10A8))));}
+break;case 290: _LL322: {struct Cyc_Absyn_UnknownId_e_struct _tmp10AB;struct Cyc_Absyn_UnknownId_e_struct*
+_tmp10AA;struct Cyc_Absyn_Exp*_tmp751=Cyc_Absyn_new_exp((void*)((_tmp10AA=
+_cycalloc(sizeof(*_tmp10AA)),((_tmp10AA[0]=((_tmp10AB.tag=2,((_tmp10AB.f1=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),_tmp10AB)))),
+_tmp10AA)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 3)]).last_line));{union Cyc_YYSTYPE_union _tmp1109;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1109.YY9).tag=13,(((_tmp1109.YY9).f1=Cyc_Absyn_switch_stmt(_tmp758,Cyc_yyget_YY10(
+yylsp_offset - 3)]).last_line));{union Cyc_YYSTYPE_union _tmp10AC;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10AC.YY9).tag=13,(((_tmp10AC.YY9).f1=Cyc_Absyn_switch_stmt(_tmp751,Cyc_yyget_YY10(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1109))));}
-break;}case 291: _LL323: {struct Cyc_Absyn_Exp*_tmp75C=Cyc_Absyn_tuple_exp(Cyc_yyget_YY5(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10AC))));}
+break;}case 291: _LL323: {struct Cyc_Absyn_Exp*_tmp755=Cyc_Absyn_tuple_exp(Cyc_yyget_YY5(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line));{union Cyc_YYSTYPE_union
-_tmp110A;yyval=(union Cyc_YYSTYPE_union)(((_tmp110A.YY9).tag=13,(((_tmp110A.YY9).f1=
-Cyc_Absyn_switch_stmt(_tmp75C,Cyc_yyget_YY10(yyvs[_check_known_subscript_notnull(
+_tmp10AD;yyval=(union Cyc_YYSTYPE_union)(((_tmp10AD.YY9).tag=13,(((_tmp10AD.YY9).f1=
+Cyc_Absyn_switch_stmt(_tmp755,Cyc_yyget_YY10(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 7)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp110A))));}
-break;}case 292: _LL324:{union Cyc_YYSTYPE_union _tmp110B;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp110B.YY9).tag=13,(((_tmp110B.YY9).f1=Cyc_Absyn_trycatch_stmt(Cyc_yyget_YY9(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10AD))));}
+break;}case 292: _LL324:{union Cyc_YYSTYPE_union _tmp10AE;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10AE.YY9).tag=13,(((_tmp10AE.YY9).f1=Cyc_Absyn_trycatch_stmt(Cyc_yyget_YY9(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),Cyc_yyget_YY10(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp110B))));}
-break;case 293: _LL325:{union Cyc_YYSTYPE_union _tmp110C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp110C.YY10).tag=14,(((_tmp110C.YY10).f1=0,_tmp110C))));}break;case 294: _LL326:{
-struct Cyc_List_List*_tmp1112;struct Cyc_Absyn_Switch_clause*_tmp1111;union Cyc_YYSTYPE_union
-_tmp1110;yyval=(union Cyc_YYSTYPE_union)(((_tmp1110.YY10).tag=14,(((_tmp1110.YY10).f1=((
-_tmp1112=_cycalloc(sizeof(*_tmp1112)),((_tmp1112->hd=((_tmp1111=_cycalloc(
-sizeof(*_tmp1111)),((_tmp1111->pattern=Cyc_Absyn_new_pat((void*)0,Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10AE))));}
+break;case 293: _LL325:{union Cyc_YYSTYPE_union _tmp10AF;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10AF.YY10).tag=14,(((_tmp10AF.YY10).f1=0,_tmp10AF))));}break;case 294: _LL326:{
+struct Cyc_List_List*_tmp10B5;struct Cyc_Absyn_Switch_clause*_tmp10B4;union Cyc_YYSTYPE_union
+_tmp10B3;yyval=(union Cyc_YYSTYPE_union)(((_tmp10B3.YY10).tag=14,(((_tmp10B3.YY10).f1=((
+_tmp10B5=_cycalloc(sizeof(*_tmp10B5)),((_tmp10B5->hd=((_tmp10B4=_cycalloc(
+sizeof(*_tmp10B4)),((_tmp10B4->pattern=Cyc_Absyn_new_pat((void*)0,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line)),((_tmp1111->pat_vars=
-0,((_tmp1111->where_clause=0,((_tmp1111->body=Cyc_yyget_YY9(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmp1111->loc=Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset - 2)]).last_line)),((_tmp10B4->pat_vars=
+0,((_tmp10B4->where_clause=0,((_tmp10B4->body=Cyc_yyget_YY9(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmp10B4->loc=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmp1111)))))))))))),((
-_tmp1112->tl=0,_tmp1112)))))),_tmp1110))));}break;case 295: _LL327:{struct Cyc_List_List*
-_tmp1118;struct Cyc_Absyn_Switch_clause*_tmp1117;union Cyc_YYSTYPE_union _tmp1116;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp1116.YY10).tag=14,(((_tmp1116.YY10).f1=((
-_tmp1118=_cycalloc(sizeof(*_tmp1118)),((_tmp1118->hd=((_tmp1117=_cycalloc(
-sizeof(*_tmp1117)),((_tmp1117->pattern=Cyc_yyget_YY11(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmp1117->pat_vars=0,((
-_tmp1117->where_clause=0,((_tmp1117->body=Cyc_Absyn_fallthru_stmt(0,Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmp10B4)))))))))))),((
+_tmp10B5->tl=0,_tmp10B5)))))),_tmp10B3))));}break;case 295: _LL327:{struct Cyc_List_List*
+_tmp10BB;struct Cyc_Absyn_Switch_clause*_tmp10BA;union Cyc_YYSTYPE_union _tmp10B9;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp10B9.YY10).tag=14,(((_tmp10B9.YY10).f1=((
+_tmp10BB=_cycalloc(sizeof(*_tmp10BB)),((_tmp10BB->hd=((_tmp10BA=_cycalloc(
+sizeof(*_tmp10BA)),((_tmp10BA->pattern=Cyc_yyget_YY11(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmp10BA->pat_vars=0,((
+_tmp10BA->where_clause=0,((_tmp10BA->body=Cyc_Absyn_fallthru_stmt(0,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),((_tmp1117->loc=
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),((_tmp10BA->loc=
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line),_tmp1117)))))))))))),((_tmp1118->tl=Cyc_yyget_YY10(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1118)))))),
-_tmp1116))));}break;case 296: _LL328:{struct Cyc_List_List*_tmp111E;struct Cyc_Absyn_Switch_clause*
-_tmp111D;union Cyc_YYSTYPE_union _tmp111C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp111C.YY10).tag=14,(((_tmp111C.YY10).f1=((_tmp111E=_cycalloc(sizeof(*_tmp111E)),((
-_tmp111E->hd=((_tmp111D=_cycalloc(sizeof(*_tmp111D)),((_tmp111D->pattern=Cyc_yyget_YY11(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmp111D->pat_vars=
-0,((_tmp111D->where_clause=0,((_tmp111D->body=Cyc_yyget_YY9(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmp111D->loc=Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line),_tmp10BA)))))))))))),((_tmp10BB->tl=Cyc_yyget_YY10(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp10BB)))))),
+_tmp10B9))));}break;case 296: _LL328:{struct Cyc_List_List*_tmp10C1;struct Cyc_Absyn_Switch_clause*
+_tmp10C0;union Cyc_YYSTYPE_union _tmp10BF;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10BF.YY10).tag=14,(((_tmp10BF.YY10).f1=((_tmp10C1=_cycalloc(sizeof(*_tmp10C1)),((
+_tmp10C1->hd=((_tmp10C0=_cycalloc(sizeof(*_tmp10C0)),((_tmp10C0->pattern=Cyc_yyget_YY11(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmp10C0->pat_vars=
+0,((_tmp10C0->where_clause=0,((_tmp10C0->body=Cyc_yyget_YY9(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmp10C0->loc=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),_tmp111D)))))))))))),((
-_tmp111E->tl=Cyc_yyget_YY10(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmp111E)))))),_tmp111C))));}break;case 297: _LL329:{struct Cyc_List_List*
-_tmp1124;struct Cyc_Absyn_Switch_clause*_tmp1123;union Cyc_YYSTYPE_union _tmp1122;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp1122.YY10).tag=14,(((_tmp1122.YY10).f1=((
-_tmp1124=_cycalloc(sizeof(*_tmp1124)),((_tmp1124->hd=((_tmp1123=_cycalloc(
-sizeof(*_tmp1123)),((_tmp1123->pattern=Cyc_yyget_YY11(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),((_tmp1123->pat_vars=0,((
-_tmp1123->where_clause=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmp1123->body=Cyc_Absyn_fallthru_stmt(
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),_tmp10C0)))))))))))),((
+_tmp10C1->tl=Cyc_yyget_YY10(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmp10C1)))))),_tmp10BF))));}break;case 297: _LL329:{struct Cyc_List_List*
+_tmp10C7;struct Cyc_Absyn_Switch_clause*_tmp10C6;union Cyc_YYSTYPE_union _tmp10C5;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp10C5.YY10).tag=14,(((_tmp10C5.YY10).f1=((
+_tmp10C7=_cycalloc(sizeof(*_tmp10C7)),((_tmp10C7->hd=((_tmp10C6=_cycalloc(
+sizeof(*_tmp10C6)),((_tmp10C6->pattern=Cyc_yyget_YY11(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),((_tmp10C6->pat_vars=0,((
+_tmp10C6->where_clause=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmp10C6->body=Cyc_Absyn_fallthru_stmt(
 0,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line)),((_tmp1123->loc=Cyc_Position_segment_of_abs((yyls[
+yylsp_offset - 1)]).last_line)),((_tmp10C6->loc=Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmp1123)))))))))))),((
-_tmp1124->tl=Cyc_yyget_YY10(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmp1124)))))),_tmp1122))));}break;case 298: _LL32A:{struct Cyc_List_List*
-_tmp112A;struct Cyc_Absyn_Switch_clause*_tmp1129;union Cyc_YYSTYPE_union _tmp1128;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp1128.YY10).tag=14,(((_tmp1128.YY10).f1=((
-_tmp112A=_cycalloc(sizeof(*_tmp112A)),((_tmp112A->hd=((_tmp1129=_cycalloc(
-sizeof(*_tmp1129)),((_tmp1129->pattern=Cyc_yyget_YY11(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 5)]),((_tmp1129->pat_vars=0,((
-_tmp1129->where_clause=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmp1129->body=Cyc_yyget_YY9(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmp1129->loc=Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmp10C6)))))))))))),((
+_tmp10C7->tl=Cyc_yyget_YY10(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmp10C7)))))),_tmp10C5))));}break;case 298: _LL32A:{struct Cyc_List_List*
+_tmp10CD;struct Cyc_Absyn_Switch_clause*_tmp10CC;union Cyc_YYSTYPE_union _tmp10CB;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp10CB.YY10).tag=14,(((_tmp10CB.YY10).f1=((
+_tmp10CD=_cycalloc(sizeof(*_tmp10CD)),((_tmp10CD->hd=((_tmp10CC=_cycalloc(
+sizeof(*_tmp10CC)),((_tmp10CC->pattern=Cyc_yyget_YY11(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 5)]),((_tmp10CC->pat_vars=0,((
+_tmp10CC->where_clause=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmp10CC->body=Cyc_yyget_YY9(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmp10CC->loc=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmp1129)))))))))))),((
-_tmp112A->tl=Cyc_yyget_YY10(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),_tmp112A)))))),_tmp1128))));}break;case 299: _LL32B:{union Cyc_YYSTYPE_union
-_tmp112B;yyval=(union Cyc_YYSTYPE_union)(((_tmp112B.YY9).tag=13,(((_tmp112B.YY9).f1=
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line),_tmp10CC)))))))))))),((
+_tmp10CD->tl=Cyc_yyget_YY10(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),_tmp10CD)))))),_tmp10CB))));}break;case 299: _LL32B:{union Cyc_YYSTYPE_union
+_tmp10CE;yyval=(union Cyc_YYSTYPE_union)(((_tmp10CE.YY9).tag=13,(((_tmp10CE.YY9).f1=
 Cyc_Absyn_while_stmt(Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 2)]),Cyc_yyget_YY9(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 4)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp112B))));}break;case 300: _LL32C:{union Cyc_YYSTYPE_union
-_tmp112C;yyval=(union Cyc_YYSTYPE_union)(((_tmp112C.YY9).tag=13,(((_tmp112C.YY9).f1=
+yylsp_offset)]).last_line)),_tmp10CE))));}break;case 300: _LL32C:{union Cyc_YYSTYPE_union
+_tmp10CF;yyval=(union Cyc_YYSTYPE_union)(((_tmp10CF.YY9).tag=13,(((_tmp10CF.YY9).f1=
 Cyc_Absyn_do_stmt(Cyc_yyget_YY9(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 5)]),Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 2)]),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp112C))));}
-break;case 301: _LL32D:{union Cyc_YYSTYPE_union _tmp112D;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp112D.YY9).tag=13,(((_tmp112D.YY9).f1=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10CF))));}
+break;case 301: _LL32D:{union Cyc_YYSTYPE_union _tmp10D0;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10D0.YY9).tag=13,(((_tmp10D0.YY9).f1=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(
 0),Cyc_Absyn_true_exp(0),Cyc_Absyn_false_exp(0),Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp112D))));}
-break;case 302: _LL32E:{union Cyc_YYSTYPE_union _tmp112E;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp112E.YY9).tag=13,(((_tmp112E.YY9).f1=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10D0))));}
+break;case 302: _LL32E:{union Cyc_YYSTYPE_union _tmp10D1;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10D1.YY9).tag=13,(((_tmp10D1.YY9).f1=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(
 0),Cyc_Absyn_true_exp(0),Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 2)]),Cyc_yyget_YY9(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 6)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp112E))));}break;case 303: _LL32F:{union Cyc_YYSTYPE_union
-_tmp112F;yyval=(union Cyc_YYSTYPE_union)(((_tmp112F.YY9).tag=13,(((_tmp112F.YY9).f1=
+yylsp_offset)]).last_line)),_tmp10D1))));}break;case 303: _LL32F:{union Cyc_YYSTYPE_union
+_tmp10D2;yyval=(union Cyc_YYSTYPE_union)(((_tmp10D2.YY9).tag=13,(((_tmp10D2.YY9).f1=
 Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(0),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 3)]),Cyc_Absyn_false_exp(0),
 Cyc_yyget_YY9(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp112F))));}
-break;case 304: _LL330:{union Cyc_YYSTYPE_union _tmp1130;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1130.YY9).tag=13,(((_tmp1130.YY9).f1=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10D2))));}
+break;case 304: _LL330:{union Cyc_YYSTYPE_union _tmp10D3;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10D3.YY9).tag=13,(((_tmp10D3.YY9).f1=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(
 0),Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY9(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 7)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp1130))));}
-break;case 305: _LL331:{union Cyc_YYSTYPE_union _tmp1131;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1131.YY9).tag=13,(((_tmp1131.YY9).f1=Cyc_Absyn_for_stmt(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp10D3))));}
+break;case 305: _LL331:{union Cyc_YYSTYPE_union _tmp10D4;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10D4.YY9).tag=13,(((_tmp10D4.YY9).f1=Cyc_Absyn_for_stmt(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 4)]),Cyc_Absyn_true_exp(0),
 Cyc_Absyn_false_exp(0),Cyc_yyget_YY9(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 6)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp1131))));}break;case 306: _LL332:{union Cyc_YYSTYPE_union
-_tmp1132;yyval=(union Cyc_YYSTYPE_union)(((_tmp1132.YY9).tag=13,(((_tmp1132.YY9).f1=
+yylsp_offset)]).last_line)),_tmp10D4))));}break;case 306: _LL332:{union Cyc_YYSTYPE_union
+_tmp10D5;yyval=(union Cyc_YYSTYPE_union)(((_tmp10D5.YY9).tag=13,(((_tmp10D5.YY9).f1=
 Cyc_Absyn_for_stmt(Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 5)]),Cyc_Absyn_true_exp(0),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 7)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1132))));}
-break;case 307: _LL333:{union Cyc_YYSTYPE_union _tmp1133;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1133.YY9).tag=13,(((_tmp1133.YY9).f1=Cyc_Absyn_for_stmt(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10D5))));}
+break;case 307: _LL333:{union Cyc_YYSTYPE_union _tmp10D6;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10D6.YY9).tag=13,(((_tmp10D6.YY9).f1=Cyc_Absyn_for_stmt(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 5)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 3)]),Cyc_Absyn_false_exp(0),
 Cyc_yyget_YY9(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 7)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1133))));}
-break;case 308: _LL334:{union Cyc_YYSTYPE_union _tmp1134;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1134.YY9).tag=13,(((_tmp1134.YY9).f1=Cyc_Absyn_for_stmt(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10D6))));}
+break;case 308: _LL334:{union Cyc_YYSTYPE_union _tmp10D7;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10D7.YY9).tag=13,(((_tmp10D7.YY9).f1=Cyc_Absyn_for_stmt(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 6)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 4)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 8)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1134))));}
-break;case 309: _LL335: {struct Cyc_List_List*_tmp779=Cyc_yyget_YY18(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp10D7))));}
+break;case 309: _LL335: {struct Cyc_List_List*_tmp772=Cyc_yyget_YY18(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 3)]);struct Cyc_Absyn_Stmt*
-_tmp77A=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(0),Cyc_Absyn_true_exp(0),Cyc_Absyn_false_exp(
+_tmp773=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(0),Cyc_Absyn_true_exp(0),Cyc_Absyn_false_exp(
 0),Cyc_yyget_YY9(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line));{union Cyc_YYSTYPE_union
-_tmp1135;yyval=(union Cyc_YYSTYPE_union)(((_tmp1135.YY9).tag=13,(((_tmp1135.YY9).f1=
-Cyc_Parse_flatten_declarations(_tmp779,_tmp77A),_tmp1135))));}break;}case 310:
-_LL336: {struct Cyc_List_List*_tmp77C=Cyc_yyget_YY18(yyvs[
+_tmp10D8;yyval=(union Cyc_YYSTYPE_union)(((_tmp10D8.YY9).tag=13,(((_tmp10D8.YY9).f1=
+Cyc_Parse_flatten_declarations(_tmp772,_tmp773),_tmp10D8))));}break;}case 310:
+_LL336: {struct Cyc_List_List*_tmp775=Cyc_yyget_YY18(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 4)]);struct Cyc_Absyn_Stmt*
-_tmp77D=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(0),Cyc_yyget_YY3(yyvs[
+_tmp776=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(0),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 3)]),Cyc_Absyn_false_exp(0),
 Cyc_yyget_YY9(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line));{union Cyc_YYSTYPE_union
-_tmp1136;yyval=(union Cyc_YYSTYPE_union)(((_tmp1136.YY9).tag=13,(((_tmp1136.YY9).f1=
-Cyc_Parse_flatten_declarations(_tmp77C,_tmp77D),_tmp1136))));}break;}case 311:
-_LL337: {struct Cyc_List_List*_tmp77F=Cyc_yyget_YY18(yyvs[
+_tmp10D9;yyval=(union Cyc_YYSTYPE_union)(((_tmp10D9.YY9).tag=13,(((_tmp10D9.YY9).f1=
+Cyc_Parse_flatten_declarations(_tmp775,_tmp776),_tmp10D9))));}break;}case 311:
+_LL337: {struct Cyc_List_List*_tmp778=Cyc_yyget_YY18(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 4)]);struct Cyc_Absyn_Stmt*
-_tmp780=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(0),Cyc_Absyn_true_exp(0),Cyc_yyget_YY3(
+_tmp779=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(0),Cyc_Absyn_true_exp(0),Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line));{union Cyc_YYSTYPE_union
-_tmp1137;yyval=(union Cyc_YYSTYPE_union)(((_tmp1137.YY9).tag=13,(((_tmp1137.YY9).f1=
-Cyc_Parse_flatten_declarations(_tmp77F,_tmp780),_tmp1137))));}break;}case 312:
-_LL338: {struct Cyc_List_List*_tmp782=Cyc_yyget_YY18(yyvs[
+_tmp10DA;yyval=(union Cyc_YYSTYPE_union)(((_tmp10DA.YY9).tag=13,(((_tmp10DA.YY9).f1=
+Cyc_Parse_flatten_declarations(_tmp778,_tmp779),_tmp10DA))));}break;}case 312:
+_LL338: {struct Cyc_List_List*_tmp77B=Cyc_yyget_YY18(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 5)]);struct Cyc_Absyn_Stmt*
-_tmp783=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(0),Cyc_yyget_YY3(yyvs[
+_tmp77C=Cyc_Absyn_for_stmt(Cyc_Absyn_false_exp(0),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 4)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 7)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line));{union Cyc_YYSTYPE_union
-_tmp1138;yyval=(union Cyc_YYSTYPE_union)(((_tmp1138.YY9).tag=13,(((_tmp1138.YY9).f1=
-Cyc_Parse_flatten_declarations(_tmp782,_tmp783),_tmp1138))));}break;}case 313:
-_LL339:{struct _dyneither_ptr*_tmp113B;union Cyc_YYSTYPE_union _tmp113A;yyval=(
-union Cyc_YYSTYPE_union)(((_tmp113A.YY9).tag=13,(((_tmp113A.YY9).f1=Cyc_Absyn_goto_stmt(((
-_tmp113B=_cycalloc(sizeof(*_tmp113B)),((_tmp113B[0]=Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmp113B)))),Cyc_Position_segment_of_abs((
+_tmp10DB;yyval=(union Cyc_YYSTYPE_union)(((_tmp10DB.YY9).tag=13,(((_tmp10DB.YY9).f1=
+Cyc_Parse_flatten_declarations(_tmp77B,_tmp77C),_tmp10DB))));}break;}case 313:
+_LL339:{struct _dyneither_ptr*_tmp10DE;union Cyc_YYSTYPE_union _tmp10DD;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp10DD.YY9).tag=13,(((_tmp10DD.YY9).f1=Cyc_Absyn_goto_stmt(((
+_tmp10DE=_cycalloc(sizeof(*_tmp10DE)),((_tmp10DE[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmp10DE)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp113A))));}
-break;case 314: _LL33A:{union Cyc_YYSTYPE_union _tmp113C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp113C.YY9).tag=13,(((_tmp113C.YY9).f1=Cyc_Absyn_continue_stmt(Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp10DD))));}
+break;case 314: _LL33A:{union Cyc_YYSTYPE_union _tmp10DF;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10DF.YY9).tag=13,(((_tmp10DF.YY9).f1=Cyc_Absyn_continue_stmt(Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp113C))));}
-break;case 315: _LL33B:{union Cyc_YYSTYPE_union _tmp113D;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp113D.YY9).tag=13,(((_tmp113D.YY9).f1=Cyc_Absyn_break_stmt(Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp10DF))));}
+break;case 315: _LL33B:{union Cyc_YYSTYPE_union _tmp10E0;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10E0.YY9).tag=13,(((_tmp10E0.YY9).f1=Cyc_Absyn_break_stmt(Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp113D))));}
-break;case 316: _LL33C:{union Cyc_YYSTYPE_union _tmp113E;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp113E.YY9).tag=13,(((_tmp113E.YY9).f1=Cyc_Absyn_return_stmt(0,Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp10E0))));}
+break;case 316: _LL33C:{union Cyc_YYSTYPE_union _tmp10E1;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10E1.YY9).tag=13,(((_tmp10E1.YY9).f1=Cyc_Absyn_return_stmt(0,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp113E))));}
-break;case 317: _LL33D:{union Cyc_YYSTYPE_union _tmp113F;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp113F.YY9).tag=13,(((_tmp113F.YY9).f1=Cyc_Absyn_return_stmt((struct Cyc_Absyn_Exp*)
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp10E1))));}
+break;case 317: _LL33D:{union Cyc_YYSTYPE_union _tmp10E2;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10E2.YY9).tag=13,(((_tmp10E2.YY9).f1=Cyc_Absyn_return_stmt((struct Cyc_Absyn_Exp*)
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp113F))));}
-break;case 318: _LL33E:{union Cyc_YYSTYPE_union _tmp1140;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1140.YY9).tag=13,(((_tmp1140.YY9).f1=Cyc_Absyn_fallthru_stmt(0,Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp10E2))));}
+break;case 318: _LL33E:{union Cyc_YYSTYPE_union _tmp10E3;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10E3.YY9).tag=13,(((_tmp10E3.YY9).f1=Cyc_Absyn_fallthru_stmt(0,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp1140))));}
-break;case 319: _LL33F:{union Cyc_YYSTYPE_union _tmp1141;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1141.YY9).tag=13,(((_tmp1141.YY9).f1=Cyc_Absyn_fallthru_stmt(0,Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line)),_tmp10E3))));}
+break;case 319: _LL33F:{union Cyc_YYSTYPE_union _tmp10E4;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10E4.YY9).tag=13,(((_tmp10E4.YY9).f1=Cyc_Absyn_fallthru_stmt(0,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line)),_tmp1141))));}
-break;case 320: _LL340:{union Cyc_YYSTYPE_union _tmp1142;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1142.YY9).tag=13,(((_tmp1142.YY9).f1=Cyc_Absyn_fallthru_stmt(Cyc_yyget_YY5(
+_check_known_subscript_notnull(10000,yylsp_offset - 3)]).last_line)),_tmp10E4))));}
+break;case 320: _LL340:{union Cyc_YYSTYPE_union _tmp10E5;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10E5.YY9).tag=13,(((_tmp10E5.YY9).f1=Cyc_Absyn_fallthru_stmt(Cyc_yyget_YY5(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 4)]).last_line)),_tmp1142))));}
+_check_known_subscript_notnull(10000,yylsp_offset - 4)]).last_line)),_tmp10E5))));}
 break;case 321: _LL341: yyval=yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)];break;case 322: _LL342: yyval=yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)];break;case 323: _LL343:{union Cyc_YYSTYPE_union _tmp1143;yyval=(
-union Cyc_YYSTYPE_union)(((_tmp1143.YY11).tag=15,(((_tmp1143.YY11).f1=Cyc_Absyn_exp_pat(
+10000,yyvsp_offset)];break;case 323: _LL343:{union Cyc_YYSTYPE_union _tmp10E6;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp10E6.YY11).tag=15,(((_tmp10E6.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_Absyn_conditional_exp(Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 4)])),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1143))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10E6))));}
 break;case 324: _LL344: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 325: _LL345:{union Cyc_YYSTYPE_union _tmp1144;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1144.YY11).tag=15,(((_tmp1144.YY11).f1=Cyc_Absyn_exp_pat(
+yyvsp_offset)];break;case 325: _LL345:{union Cyc_YYSTYPE_union _tmp10E7;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10E7.YY11).tag=15,(((_tmp10E7.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_Absyn_or_exp(Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1144))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10E7))));}
 break;case 326: _LL346: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 327: _LL347:{union Cyc_YYSTYPE_union _tmp1145;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1145.YY11).tag=15,(((_tmp1145.YY11).f1=Cyc_Absyn_exp_pat(
+yyvsp_offset)];break;case 327: _LL347:{union Cyc_YYSTYPE_union _tmp10E8;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10E8.YY11).tag=15,(((_tmp10E8.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_Absyn_and_exp(Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1145))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10E8))));}
 break;case 328: _LL348: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 329: _LL349:{union Cyc_YYSTYPE_union _tmp1146;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1146.YY11).tag=15,(((_tmp1146.YY11).f1=Cyc_Absyn_exp_pat(
+yyvsp_offset)];break;case 329: _LL349:{union Cyc_YYSTYPE_union _tmp10E9;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10E9.YY11).tag=15,(((_tmp10E9.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_Absyn_prim2_exp((void*)14,Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1146))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10E9))));}
 break;case 330: _LL34A: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 331: _LL34B:{union Cyc_YYSTYPE_union _tmp1147;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1147.YY11).tag=15,(((_tmp1147.YY11).f1=Cyc_Absyn_exp_pat(
+yyvsp_offset)];break;case 331: _LL34B:{union Cyc_YYSTYPE_union _tmp10EA;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10EA.YY11).tag=15,(((_tmp10EA.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_Absyn_prim2_exp((void*)15,Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1147))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10EA))));}
 break;case 332: _LL34C: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 333: _LL34D:{union Cyc_YYSTYPE_union _tmp1148;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1148.YY11).tag=15,(((_tmp1148.YY11).f1=Cyc_Absyn_exp_pat(
+yyvsp_offset)];break;case 333: _LL34D:{union Cyc_YYSTYPE_union _tmp10EB;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10EB.YY11).tag=15,(((_tmp10EB.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_Absyn_prim2_exp((void*)13,Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1148))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10EB))));}
 break;case 334: _LL34E: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 335: _LL34F:{union Cyc_YYSTYPE_union _tmp1149;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1149.YY11).tag=15,(((_tmp1149.YY11).f1=Cyc_Absyn_exp_pat(
+yyvsp_offset)];break;case 335: _LL34F:{union Cyc_YYSTYPE_union _tmp10EC;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10EC.YY11).tag=15,(((_tmp10EC.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_Absyn_eq_exp(Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1149))));}
-break;case 336: _LL350:{union Cyc_YYSTYPE_union _tmp114A;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp114A.YY11).tag=15,(((_tmp114A.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_neq_exp(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10EC))));}
+break;case 336: _LL350:{union Cyc_YYSTYPE_union _tmp10ED;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10ED.YY11).tag=15,(((_tmp10ED.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_neq_exp(
 Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line))),_tmp114A))));}break;case 337: _LL351: yyval=yyvs[
+yylsp_offset)]).last_line))),_tmp10ED))));}break;case 337: _LL351: yyval=yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)];break;case 338: _LL352:{union
-Cyc_YYSTYPE_union _tmp114B;yyval=(union Cyc_YYSTYPE_union)(((_tmp114B.YY11).tag=15,(((
-_tmp114B.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_lt_exp(Cyc_Parse_pat2exp(Cyc_yyget_YY11(
+Cyc_YYSTYPE_union _tmp10EE;yyval=(union Cyc_YYSTYPE_union)(((_tmp10EE.YY11).tag=15,(((
+_tmp10EE.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_lt_exp(Cyc_Parse_pat2exp(Cyc_yyget_YY11(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp114B))));}
-break;case 339: _LL353:{union Cyc_YYSTYPE_union _tmp114C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp114C.YY11).tag=15,(((_tmp114C.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_gt_exp(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10EE))));}
+break;case 339: _LL353:{union Cyc_YYSTYPE_union _tmp10EF;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10EF.YY11).tag=15,(((_tmp10EF.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_gt_exp(
 Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line))),_tmp114C))));}break;case 340: _LL354:{union Cyc_YYSTYPE_union
-_tmp114D;yyval=(union Cyc_YYSTYPE_union)(((_tmp114D.YY11).tag=15,(((_tmp114D.YY11).f1=
+yylsp_offset)]).last_line))),_tmp10EF))));}break;case 340: _LL354:{union Cyc_YYSTYPE_union
+_tmp10F0;yyval=(union Cyc_YYSTYPE_union)(((_tmp10F0.YY11).tag=15,(((_tmp10F0.YY11).f1=
 Cyc_Absyn_exp_pat(Cyc_Absyn_lte_exp(Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp114D))));}
-break;case 341: _LL355:{union Cyc_YYSTYPE_union _tmp114E;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp114E.YY11).tag=15,(((_tmp114E.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_gte_exp(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10F0))));}
+break;case 341: _LL355:{union Cyc_YYSTYPE_union _tmp10F1;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10F1.YY11).tag=15,(((_tmp10F1.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_gte_exp(
 Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line))),_tmp114E))));}break;case 342: _LL356: yyval=yyvs[
+yylsp_offset)]).last_line))),_tmp10F1))));}break;case 342: _LL356: yyval=yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)];break;case 343: _LL357:{union
-Cyc_YYSTYPE_union _tmp114F;yyval=(union Cyc_YYSTYPE_union)(((_tmp114F.YY11).tag=15,(((
-_tmp114F.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_prim2_exp((void*)16,Cyc_Parse_pat2exp(
+Cyc_YYSTYPE_union _tmp10F2;yyval=(union Cyc_YYSTYPE_union)(((_tmp10F2.YY11).tag=15,(((
+_tmp10F2.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_prim2_exp((void*)16,Cyc_Parse_pat2exp(
 Cyc_yyget_YY11(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp114F))));}
-break;case 344: _LL358:{union Cyc_YYSTYPE_union _tmp1150;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1150.YY11).tag=15,(((_tmp1150.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_prim2_exp((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10F2))));}
+break;case 344: _LL358:{union Cyc_YYSTYPE_union _tmp10F3;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10F3.YY11).tag=15,(((_tmp10F3.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_prim2_exp((
 void*)17,Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1150))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10F3))));}
 break;case 345: _LL359: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 346: _LL35A:{union Cyc_YYSTYPE_union _tmp1151;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1151.YY11).tag=15,(((_tmp1151.YY11).f1=Cyc_Absyn_exp_pat(
+yyvsp_offset)];break;case 346: _LL35A:{union Cyc_YYSTYPE_union _tmp10F4;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10F4.YY11).tag=15,(((_tmp10F4.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_Absyn_prim2_exp((void*)0,Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1151))));}
-break;case 347: _LL35B:{union Cyc_YYSTYPE_union _tmp1152;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1152.YY11).tag=15,(((_tmp1152.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_prim2_exp((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10F4))));}
+break;case 347: _LL35B:{union Cyc_YYSTYPE_union _tmp10F5;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10F5.YY11).tag=15,(((_tmp10F5.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_prim2_exp((
 void*)2,Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1152))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10F5))));}
 break;case 348: _LL35C: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 349: _LL35D:{union Cyc_YYSTYPE_union _tmp1153;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1153.YY11).tag=15,(((_tmp1153.YY11).f1=Cyc_Absyn_exp_pat(
+yyvsp_offset)];break;case 349: _LL35D:{union Cyc_YYSTYPE_union _tmp10F6;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10F6.YY11).tag=15,(((_tmp10F6.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_Absyn_prim2_exp((void*)1,Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1153))));}
-break;case 350: _LL35E:{union Cyc_YYSTYPE_union _tmp1154;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1154.YY11).tag=15,(((_tmp1154.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_prim2_exp((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10F6))));}
+break;case 350: _LL35E:{union Cyc_YYSTYPE_union _tmp10F7;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10F7.YY11).tag=15,(((_tmp10F7.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_prim2_exp((
 void*)3,Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1154))));}
-break;case 351: _LL35F:{union Cyc_YYSTYPE_union _tmp1155;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1155.YY11).tag=15,(((_tmp1155.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_prim2_exp((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10F7))));}
+break;case 351: _LL35F:{union Cyc_YYSTYPE_union _tmp10F8;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10F8.YY11).tag=15,(((_tmp10F8.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_prim2_exp((
 void*)4,Cyc_Parse_pat2exp(Cyc_yyget_YY11(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset - 2)])),Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1155))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10F8))));}
 break;case 352: _LL360: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 353: _LL361:{union Cyc_YYSTYPE_union _tmp1156;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1156.YY11).tag=15,(((_tmp1156.YY11).f1=Cyc_Absyn_exp_pat(
+yyvsp_offset)];break;case 353: _LL361:{union Cyc_YYSTYPE_union _tmp10F9;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10F9.YY11).tag=15,(((_tmp10F9.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_Absyn_cast_exp((*Cyc_yyget_YY37(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 2)])).f3,Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)]),1,(void*)0,Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1156))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10F9))));}
 break;case 354: _LL362: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 355: _LL363:{union Cyc_YYSTYPE_union _tmp1157;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1157.YY11).tag=15,(((_tmp1157.YY11).f1=Cyc_Absyn_exp_pat(
+yyvsp_offset)];break;case 355: _LL363:{union Cyc_YYSTYPE_union _tmp10FA;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10FA.YY11).tag=15,(((_tmp10FA.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])),
-_tmp1157))));}break;case 356: _LL364:{union Cyc_YYSTYPE_union _tmp1158;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1158.YY11).tag=15,(((_tmp1158.YY11).f1=Cyc_Absyn_exp_pat(
+_tmp10FA))));}break;case 356: _LL364:{union Cyc_YYSTYPE_union _tmp10FB;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp10FB.YY11).tag=15,(((_tmp10FB.YY11).f1=Cyc_Absyn_exp_pat(
 Cyc_Absyn_prim1_exp(Cyc_yyget_YY7(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 1)]),Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line))),_tmp1158))));}break;case 357: _LL365:{union Cyc_YYSTYPE_union
-_tmp1159;yyval=(union Cyc_YYSTYPE_union)(((_tmp1159.YY11).tag=15,(((_tmp1159.YY11).f1=
+yylsp_offset)]).last_line))),_tmp10FB))));}break;case 357: _LL365:{union Cyc_YYSTYPE_union
+_tmp10FC;yyval=(union Cyc_YYSTYPE_union)(((_tmp10FC.YY11).tag=15,(((_tmp10FC.YY11).f1=
 Cyc_Absyn_exp_pat(Cyc_Absyn_sizeoftyp_exp((*Cyc_yyget_YY37(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)])).f3,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1159))));}
-break;case 358: _LL366:{union Cyc_YYSTYPE_union _tmp115A;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp115A.YY11).tag=15,(((_tmp115A.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_sizeofexp_exp(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10FC))));}
+break;case 358: _LL366:{union Cyc_YYSTYPE_union _tmp10FD;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp10FD.YY11).tag=15,(((_tmp10FD.YY11).f1=Cyc_Absyn_exp_pat(Cyc_Absyn_sizeofexp_exp(
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp115A))));}
-break;case 359: _LL367:{struct Cyc_Absyn_StructField_struct*_tmp1164;struct
-_dyneither_ptr*_tmp1163;struct Cyc_Absyn_StructField_struct _tmp1162;union Cyc_YYSTYPE_union
-_tmp1161;yyval=(union Cyc_YYSTYPE_union)(((_tmp1161.YY11).tag=15,(((_tmp1161.YY11).f1=
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp10FD))));}
+break;case 359: _LL367:{struct Cyc_Absyn_StructField_struct*_tmp1107;struct
+_dyneither_ptr*_tmp1106;struct Cyc_Absyn_StructField_struct _tmp1105;union Cyc_YYSTYPE_union
+_tmp1104;yyval=(union Cyc_YYSTYPE_union)(((_tmp1104.YY11).tag=15,(((_tmp1104.YY11).f1=
 Cyc_Absyn_exp_pat(Cyc_Absyn_offsetof_exp((*Cyc_yyget_YY37(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)])).f3,(void*)((_tmp1164=
-_cycalloc(sizeof(*_tmp1164)),((_tmp1164[0]=((_tmp1162.tag=0,((_tmp1162.f1=((
-_tmp1163=_cycalloc(sizeof(*_tmp1163)),((_tmp1163[0]=Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmp1163)))),_tmp1162)))),
-_tmp1164)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)])).f3,(void*)((_tmp1107=
+_cycalloc(sizeof(*_tmp1107)),((_tmp1107[0]=((_tmp1105.tag=0,((_tmp1105.f1=((
+_tmp1106=_cycalloc(sizeof(*_tmp1106)),((_tmp1106[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),_tmp1106)))),_tmp1105)))),
+_tmp1107)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 5)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line))),_tmp1161))));}break;case 360: _LL368:{struct Cyc_Absyn_TupleIndex_struct*
-_tmp116A;struct Cyc_Absyn_TupleIndex_struct _tmp1169;union Cyc_YYSTYPE_union
-_tmp1168;yyval=(union Cyc_YYSTYPE_union)(((_tmp1168.YY11).tag=15,(((_tmp1168.YY11).f1=
+yylsp_offset)]).last_line))),_tmp1104))));}break;case 360: _LL368:{struct Cyc_Absyn_TupleIndex_struct*
+_tmp110D;struct Cyc_Absyn_TupleIndex_struct _tmp110C;union Cyc_YYSTYPE_union
+_tmp110B;yyval=(union Cyc_YYSTYPE_union)(((_tmp110B.YY11).tag=15,(((_tmp110B.YY11).f1=
 Cyc_Absyn_exp_pat(Cyc_Absyn_offsetof_exp((*Cyc_yyget_YY37(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)])).f3,(void*)((_tmp116A=
-_cycalloc_atomic(sizeof(*_tmp116A)),((_tmp116A[0]=((_tmp1169.tag=1,((_tmp1169.f1=(
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)])).f3,(void*)((_tmp110D=
+_cycalloc_atomic(sizeof(*_tmp110D)),((_tmp110D[0]=((_tmp110C.tag=1,((_tmp110C.f1=(
 unsigned int)(Cyc_yyget_Int_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)])).f2,_tmp1169)))),_tmp116A)))),Cyc_Position_segment_of_abs((
+yyvsp_offset - 1)])).f2,_tmp110C)))),_tmp110D)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp1168))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line))),_tmp110B))));}
 break;case 361: _LL369: yyval=yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)];break;case 362: _LL36A: yyval=yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)];break;case 363: _LL36B:{union Cyc_YYSTYPE_union _tmp116B;yyval=(
-union Cyc_YYSTYPE_union)(((_tmp116B.YY11).tag=15,(((_tmp116B.YY11).f1=Cyc_Absyn_new_pat((
+10000,yyvsp_offset)];break;case 363: _LL36B:{union Cyc_YYSTYPE_union _tmp110E;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp110E.YY11).tag=15,(((_tmp110E.YY11).f1=Cyc_Absyn_new_pat((
 void*)0,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp116B))));}break;case 364: _LL36C:{union Cyc_YYSTYPE_union
-_tmp116C;yyval=(union Cyc_YYSTYPE_union)(((_tmp116C.YY11).tag=15,(((_tmp116C.YY11).f1=
+yylsp_offset)]).last_line)),_tmp110E))));}break;case 364: _LL36C:{union Cyc_YYSTYPE_union
+_tmp110F;yyval=(union Cyc_YYSTYPE_union)(((_tmp110F.YY11).tag=15,(((_tmp110F.YY11).f1=
 Cyc_Absyn_exp_pat(Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)])),_tmp116C))));}break;case 365: _LL36D: {struct Cyc_Absyn_Exp*e=
+yyvsp_offset - 1)])),_tmp110F))));}break;case 365: _LL36D: {struct Cyc_Absyn_Exp*e=
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]);{void*
-_tmp7AF=(void*)e->r;union Cyc_Absyn_Cnst_union _tmp7B0;void*_tmp7B1;char _tmp7B2;
-union Cyc_Absyn_Cnst_union _tmp7B3;void*_tmp7B4;short _tmp7B5;union Cyc_Absyn_Cnst_union
-_tmp7B6;void*_tmp7B7;int _tmp7B8;union Cyc_Absyn_Cnst_union _tmp7B9;struct
-_dyneither_ptr _tmp7BA;union Cyc_Absyn_Cnst_union _tmp7BB;union Cyc_Absyn_Cnst_union
-_tmp7BC;union Cyc_Absyn_Cnst_union _tmp7BD;_LL370: if(*((int*)_tmp7AF)!= 0)goto
-_LL372;_tmp7B0=((struct Cyc_Absyn_Const_e_struct*)_tmp7AF)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)
-_tmp7AF)->f1).Char_c).tag != 0)goto _LL372;_tmp7B1=(_tmp7B0.Char_c).f1;_tmp7B2=(
-_tmp7B0.Char_c).f2;_LL371:{struct Cyc_Absyn_Char_p_struct*_tmp1172;struct Cyc_Absyn_Char_p_struct
-_tmp1171;union Cyc_YYSTYPE_union _tmp1170;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1170.YY11).tag=15,(((_tmp1170.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp1172=
-_cycalloc_atomic(sizeof(*_tmp1172)),((_tmp1172[0]=((_tmp1171.tag=8,((_tmp1171.f1=
-_tmp7B2,_tmp1171)))),_tmp1172)))),e->loc),_tmp1170))));}goto _LL36F;_LL372: if(*((
-int*)_tmp7AF)!= 0)goto _LL374;_tmp7B3=((struct Cyc_Absyn_Const_e_struct*)_tmp7AF)->f1;
-if(((((struct Cyc_Absyn_Const_e_struct*)_tmp7AF)->f1).Short_c).tag != 1)goto _LL374;
-_tmp7B4=(_tmp7B3.Short_c).f1;_tmp7B5=(_tmp7B3.Short_c).f2;_LL373:{struct Cyc_Absyn_Int_p_struct*
-_tmp1178;struct Cyc_Absyn_Int_p_struct _tmp1177;union Cyc_YYSTYPE_union _tmp1176;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp1176.YY11).tag=15,(((_tmp1176.YY11).f1=Cyc_Absyn_new_pat((
-void*)((_tmp1178=_cycalloc(sizeof(*_tmp1178)),((_tmp1178[0]=((_tmp1177.tag=7,((
-_tmp1177.f1=(void*)_tmp7B4,((_tmp1177.f2=(int)_tmp7B5,_tmp1177)))))),_tmp1178)))),
-e->loc),_tmp1176))));}goto _LL36F;_LL374: if(*((int*)_tmp7AF)!= 0)goto _LL376;
-_tmp7B6=((struct Cyc_Absyn_Const_e_struct*)_tmp7AF)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)
-_tmp7AF)->f1).Int_c).tag != 2)goto _LL376;_tmp7B7=(_tmp7B6.Int_c).f1;_tmp7B8=(
-_tmp7B6.Int_c).f2;_LL375:{struct Cyc_Absyn_Int_p_struct*_tmp117E;struct Cyc_Absyn_Int_p_struct
-_tmp117D;union Cyc_YYSTYPE_union _tmp117C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp117C.YY11).tag=15,(((_tmp117C.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp117E=
-_cycalloc(sizeof(*_tmp117E)),((_tmp117E[0]=((_tmp117D.tag=7,((_tmp117D.f1=(void*)
-_tmp7B7,((_tmp117D.f2=_tmp7B8,_tmp117D)))))),_tmp117E)))),e->loc),_tmp117C))));}
-goto _LL36F;_LL376: if(*((int*)_tmp7AF)!= 0)goto _LL378;_tmp7B9=((struct Cyc_Absyn_Const_e_struct*)
-_tmp7AF)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)_tmp7AF)->f1).Float_c).tag != 
-4)goto _LL378;_tmp7BA=(_tmp7B9.Float_c).f1;_LL377:{struct Cyc_Absyn_Float_p_struct*
-_tmp1184;struct Cyc_Absyn_Float_p_struct _tmp1183;union Cyc_YYSTYPE_union _tmp1182;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp1182.YY11).tag=15,(((_tmp1182.YY11).f1=Cyc_Absyn_new_pat((
-void*)((_tmp1184=_cycalloc(sizeof(*_tmp1184)),((_tmp1184[0]=((_tmp1183.tag=9,((
-_tmp1183.f1=_tmp7BA,_tmp1183)))),_tmp1184)))),e->loc),_tmp1182))));}goto _LL36F;
-_LL378: if(*((int*)_tmp7AF)!= 0)goto _LL37A;_tmp7BB=((struct Cyc_Absyn_Const_e_struct*)
-_tmp7AF)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)_tmp7AF)->f1).Null_c).tag != 
-6)goto _LL37A;_LL379:{union Cyc_YYSTYPE_union _tmp1185;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1185.YY11).tag=15,(((_tmp1185.YY11).f1=Cyc_Absyn_new_pat((void*)1,e->loc),
-_tmp1185))));}goto _LL36F;_LL37A: if(*((int*)_tmp7AF)!= 0)goto _LL37C;_tmp7BC=((
-struct Cyc_Absyn_Const_e_struct*)_tmp7AF)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)
-_tmp7AF)->f1).String_c).tag != 5)goto _LL37C;_LL37B:{const char*_tmp1186;Cyc_Parse_err(((
-_tmp1186="strings cannot occur within patterns",_tag_dyneither(_tmp1186,sizeof(
+_tmp7A8=(void*)e->r;union Cyc_Absyn_Cnst_union _tmp7A9;void*_tmp7AA;char _tmp7AB;
+union Cyc_Absyn_Cnst_union _tmp7AC;void*_tmp7AD;short _tmp7AE;union Cyc_Absyn_Cnst_union
+_tmp7AF;void*_tmp7B0;int _tmp7B1;union Cyc_Absyn_Cnst_union _tmp7B2;struct
+_dyneither_ptr _tmp7B3;union Cyc_Absyn_Cnst_union _tmp7B4;union Cyc_Absyn_Cnst_union
+_tmp7B5;union Cyc_Absyn_Cnst_union _tmp7B6;_LL370: if(*((int*)_tmp7A8)!= 0)goto
+_LL372;_tmp7A9=((struct Cyc_Absyn_Const_e_struct*)_tmp7A8)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)
+_tmp7A8)->f1).Char_c).tag != 0)goto _LL372;_tmp7AA=(_tmp7A9.Char_c).f1;_tmp7AB=(
+_tmp7A9.Char_c).f2;_LL371:{struct Cyc_Absyn_Char_p_struct*_tmp1115;struct Cyc_Absyn_Char_p_struct
+_tmp1114;union Cyc_YYSTYPE_union _tmp1113;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1113.YY11).tag=15,(((_tmp1113.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp1115=
+_cycalloc_atomic(sizeof(*_tmp1115)),((_tmp1115[0]=((_tmp1114.tag=8,((_tmp1114.f1=
+_tmp7AB,_tmp1114)))),_tmp1115)))),e->loc),_tmp1113))));}goto _LL36F;_LL372: if(*((
+int*)_tmp7A8)!= 0)goto _LL374;_tmp7AC=((struct Cyc_Absyn_Const_e_struct*)_tmp7A8)->f1;
+if(((((struct Cyc_Absyn_Const_e_struct*)_tmp7A8)->f1).Short_c).tag != 1)goto _LL374;
+_tmp7AD=(_tmp7AC.Short_c).f1;_tmp7AE=(_tmp7AC.Short_c).f2;_LL373:{struct Cyc_Absyn_Int_p_struct*
+_tmp111B;struct Cyc_Absyn_Int_p_struct _tmp111A;union Cyc_YYSTYPE_union _tmp1119;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp1119.YY11).tag=15,(((_tmp1119.YY11).f1=Cyc_Absyn_new_pat((
+void*)((_tmp111B=_cycalloc(sizeof(*_tmp111B)),((_tmp111B[0]=((_tmp111A.tag=7,((
+_tmp111A.f1=(void*)_tmp7AD,((_tmp111A.f2=(int)_tmp7AE,_tmp111A)))))),_tmp111B)))),
+e->loc),_tmp1119))));}goto _LL36F;_LL374: if(*((int*)_tmp7A8)!= 0)goto _LL376;
+_tmp7AF=((struct Cyc_Absyn_Const_e_struct*)_tmp7A8)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)
+_tmp7A8)->f1).Int_c).tag != 2)goto _LL376;_tmp7B0=(_tmp7AF.Int_c).f1;_tmp7B1=(
+_tmp7AF.Int_c).f2;_LL375:{struct Cyc_Absyn_Int_p_struct*_tmp1121;struct Cyc_Absyn_Int_p_struct
+_tmp1120;union Cyc_YYSTYPE_union _tmp111F;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp111F.YY11).tag=15,(((_tmp111F.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp1121=
+_cycalloc(sizeof(*_tmp1121)),((_tmp1121[0]=((_tmp1120.tag=7,((_tmp1120.f1=(void*)
+_tmp7B0,((_tmp1120.f2=_tmp7B1,_tmp1120)))))),_tmp1121)))),e->loc),_tmp111F))));}
+goto _LL36F;_LL376: if(*((int*)_tmp7A8)!= 0)goto _LL378;_tmp7B2=((struct Cyc_Absyn_Const_e_struct*)
+_tmp7A8)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)_tmp7A8)->f1).Float_c).tag != 
+4)goto _LL378;_tmp7B3=(_tmp7B2.Float_c).f1;_LL377:{struct Cyc_Absyn_Float_p_struct*
+_tmp1127;struct Cyc_Absyn_Float_p_struct _tmp1126;union Cyc_YYSTYPE_union _tmp1125;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp1125.YY11).tag=15,(((_tmp1125.YY11).f1=Cyc_Absyn_new_pat((
+void*)((_tmp1127=_cycalloc(sizeof(*_tmp1127)),((_tmp1127[0]=((_tmp1126.tag=9,((
+_tmp1126.f1=_tmp7B3,_tmp1126)))),_tmp1127)))),e->loc),_tmp1125))));}goto _LL36F;
+_LL378: if(*((int*)_tmp7A8)!= 0)goto _LL37A;_tmp7B4=((struct Cyc_Absyn_Const_e_struct*)
+_tmp7A8)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)_tmp7A8)->f1).Null_c).tag != 
+6)goto _LL37A;_LL379:{union Cyc_YYSTYPE_union _tmp1128;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1128.YY11).tag=15,(((_tmp1128.YY11).f1=Cyc_Absyn_new_pat((void*)1,e->loc),
+_tmp1128))));}goto _LL36F;_LL37A: if(*((int*)_tmp7A8)!= 0)goto _LL37C;_tmp7B5=((
+struct Cyc_Absyn_Const_e_struct*)_tmp7A8)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)
+_tmp7A8)->f1).String_c).tag != 5)goto _LL37C;_LL37B:{const char*_tmp1129;Cyc_Parse_err(((
+_tmp1129="strings cannot occur within patterns",_tag_dyneither(_tmp1129,sizeof(
 char),37))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line));}goto _LL36F;_LL37C: if(*((int*)_tmp7AF)!= 0)goto
-_LL37E;_tmp7BD=((struct Cyc_Absyn_Const_e_struct*)_tmp7AF)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)
-_tmp7AF)->f1).LongLong_c).tag != 3)goto _LL37E;_LL37D:{const char*_tmp1187;Cyc_Parse_unimp(((
-_tmp1187="long long's in patterns",_tag_dyneither(_tmp1187,sizeof(char),24))),
+yylsp_offset)]).last_line));}goto _LL36F;_LL37C: if(*((int*)_tmp7A8)!= 0)goto
+_LL37E;_tmp7B6=((struct Cyc_Absyn_Const_e_struct*)_tmp7A8)->f1;if(((((struct Cyc_Absyn_Const_e_struct*)
+_tmp7A8)->f1).LongLong_c).tag != 3)goto _LL37E;_LL37D:{const char*_tmp112A;Cyc_Parse_unimp(((
+_tmp112A="long long's in patterns",_tag_dyneither(_tmp112A,sizeof(char),24))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line));}goto _LL36F;_LL37E:;_LL37F: {const char*_tmp1188;Cyc_Parse_err(((
-_tmp1188="bad constant in case",_tag_dyneither(_tmp1188,sizeof(char),21))),Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line));}goto _LL36F;_LL37E:;_LL37F: {const char*_tmp112B;Cyc_Parse_err(((
+_tmp112B="bad constant in case",_tag_dyneither(_tmp112B,sizeof(char),21))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line));}_LL36F:;}
-break;}case 366: _LL36E:{struct Cyc_Absyn_UnknownId_p_struct*_tmp118E;struct Cyc_Absyn_UnknownId_p_struct
-_tmp118D;union Cyc_YYSTYPE_union _tmp118C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp118C.YY11).tag=15,(((_tmp118C.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp118E=
-_cycalloc(sizeof(*_tmp118E)),((_tmp118E[0]=((_tmp118D.tag=12,((_tmp118D.f1=Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp118D)))),_tmp118E)))),
+break;}case 366: _LL36E:{struct Cyc_Absyn_UnknownId_p_struct*_tmp1131;struct Cyc_Absyn_UnknownId_p_struct
+_tmp1130;union Cyc_YYSTYPE_union _tmp112F;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp112F.YY11).tag=15,(((_tmp112F.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp1131=
+_cycalloc(sizeof(*_tmp1131)),((_tmp1131[0]=((_tmp1130.tag=12,((_tmp1130.f1=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1130)))),_tmp1131)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp118C))));}break;case 367: _LL380:{const char*
-_tmp118F;if(Cyc_strcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmp118F="as",
-_tag_dyneither(_tmp118F,sizeof(char),3))))!= 0){const char*_tmp1190;Cyc_Parse_err(((
-_tmp1190="expecting `as'",_tag_dyneither(_tmp1190,sizeof(char),15))),Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line)),_tmp112F))));}break;case 367: _LL380:{const char*
+_tmp1132;if(Cyc_strcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmp1132="as",
+_tag_dyneither(_tmp1132,sizeof(char),3))))!= 0){const char*_tmp1133;Cyc_Parse_err(((
+_tmp1133="expecting `as'",_tag_dyneither(_tmp1133,sizeof(char),15))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line));}}{struct Cyc_Absyn_Var_p_struct*
-_tmp11A4;struct _tuple1*_tmp11A3;struct _dyneither_ptr*_tmp11A2;union Cyc_Absyn_Nmspace_union
-_tmp11A1;struct Cyc_Absyn_Var_p_struct _tmp11A0;union Cyc_YYSTYPE_union _tmp119F;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp119F.YY11).tag=15,(((_tmp119F.YY11).f1=Cyc_Absyn_new_pat((
-void*)((_tmp11A4=_cycalloc(sizeof(*_tmp11A4)),((_tmp11A4[0]=((_tmp11A0.tag=0,((
-_tmp11A0.f1=Cyc_Absyn_new_vardecl(((_tmp11A3=_cycalloc(sizeof(*_tmp11A3)),((
-_tmp11A3->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp11A1.Loc_n).tag=0,_tmp11A1)),((
-_tmp11A3->f2=((_tmp11A2=_cycalloc(sizeof(*_tmp11A2)),((_tmp11A2[0]=Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmp11A2)))),
-_tmp11A3)))))),(void*)0,0),((_tmp11A0.f2=Cyc_yyget_YY11(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp11A0)))))),_tmp11A4)))),
+_tmp1147;struct _tuple1*_tmp1146;struct _dyneither_ptr*_tmp1145;union Cyc_Absyn_Nmspace_union
+_tmp1144;struct Cyc_Absyn_Var_p_struct _tmp1143;union Cyc_YYSTYPE_union _tmp1142;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp1142.YY11).tag=15,(((_tmp1142.YY11).f1=Cyc_Absyn_new_pat((
+void*)((_tmp1147=_cycalloc(sizeof(*_tmp1147)),((_tmp1147[0]=((_tmp1143.tag=0,((
+_tmp1143.f1=Cyc_Absyn_new_vardecl(((_tmp1146=_cycalloc(sizeof(*_tmp1146)),((
+_tmp1146->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp1144.Loc_n).tag=0,_tmp1144)),((
+_tmp1146->f2=((_tmp1145=_cycalloc(sizeof(*_tmp1145)),((_tmp1145[0]=Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmp1145)))),
+_tmp1146)))))),(void*)0,0),((_tmp1143.f2=Cyc_yyget_YY11(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1143)))))),_tmp1147)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 2)]).last_line)),_tmp119F))));}break;case 368: _LL381: {struct Cyc_List_List*
-_tmp7DA;int _tmp7DB;struct _tuple13 _tmp7D9=*Cyc_yyget_YY12(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp7DA=_tmp7D9.f1;
-_tmp7DB=_tmp7D9.f2;{struct Cyc_Absyn_Tuple_p_struct*_tmp11AA;struct Cyc_Absyn_Tuple_p_struct
-_tmp11A9;union Cyc_YYSTYPE_union _tmp11A8;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp11A8.YY11).tag=15,(((_tmp11A8.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp11AA=
-_cycalloc(sizeof(*_tmp11AA)),((_tmp11AA[0]=((_tmp11A9.tag=3,((_tmp11A9.f1=
-_tmp7DA,((_tmp11A9.f2=_tmp7DB,_tmp11A9)))))),_tmp11AA)))),Cyc_Position_segment_of_abs((
+yylsp_offset - 2)]).last_line)),_tmp1142))));}break;case 368: _LL381: {struct Cyc_List_List*
+_tmp7D3;int _tmp7D4;struct _tuple13 _tmp7D2=*Cyc_yyget_YY12(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);_tmp7D3=_tmp7D2.f1;
+_tmp7D4=_tmp7D2.f2;{struct Cyc_Absyn_Tuple_p_struct*_tmp114D;struct Cyc_Absyn_Tuple_p_struct
+_tmp114C;union Cyc_YYSTYPE_union _tmp114B;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp114B.YY11).tag=15,(((_tmp114B.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp114D=
+_cycalloc(sizeof(*_tmp114D)),((_tmp114D[0]=((_tmp114C.tag=3,((_tmp114C.f1=
+_tmp7D3,((_tmp114C.f2=_tmp7D4,_tmp114C)))))),_tmp114D)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp11A8))));}
-break;}case 369: _LL382: {struct Cyc_List_List*_tmp7E0;int _tmp7E1;struct _tuple13
-_tmp7DF=*Cyc_yyget_YY12(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 
-1)]);_tmp7E0=_tmp7DF.f1;_tmp7E1=_tmp7DF.f2;{struct Cyc_Absyn_UnknownCall_p_struct*
-_tmp11B0;struct Cyc_Absyn_UnknownCall_p_struct _tmp11AF;union Cyc_YYSTYPE_union
-_tmp11AE;yyval=(union Cyc_YYSTYPE_union)(((_tmp11AE.YY11).tag=15,(((_tmp11AE.YY11).f1=
-Cyc_Absyn_new_pat((void*)((_tmp11B0=_cycalloc(sizeof(*_tmp11B0)),((_tmp11B0[0]=((
-_tmp11AF.tag=13,((_tmp11AF.f1=Cyc_yyget_QualId_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmp11AF.f2=_tmp7E0,((
-_tmp11AF.f3=_tmp7E1,_tmp11AF)))))))),_tmp11B0)))),Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp114B))));}
+break;}case 369: _LL382: {struct Cyc_List_List*_tmp7D9;int _tmp7DA;struct _tuple13
+_tmp7D8=*Cyc_yyget_YY12(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 
+1)]);_tmp7D9=_tmp7D8.f1;_tmp7DA=_tmp7D8.f2;{struct Cyc_Absyn_UnknownCall_p_struct*
+_tmp1153;struct Cyc_Absyn_UnknownCall_p_struct _tmp1152;union Cyc_YYSTYPE_union
+_tmp1151;yyval=(union Cyc_YYSTYPE_union)(((_tmp1151.YY11).tag=15,(((_tmp1151.YY11).f1=
+Cyc_Absyn_new_pat((void*)((_tmp1153=_cycalloc(sizeof(*_tmp1153)),((_tmp1153[0]=((
+_tmp1152.tag=13,((_tmp1152.f1=Cyc_yyget_QualId_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmp1152.f2=_tmp7D9,((
+_tmp1152.f3=_tmp7DA,_tmp1152)))))))),_tmp1153)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp11AE))));}
-break;}case 370: _LL383: {struct Cyc_List_List*_tmp7E6;int _tmp7E7;struct _tuple13
-_tmp7E5=*Cyc_yyget_YY16(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 
-1)]);_tmp7E6=_tmp7E5.f1;_tmp7E7=_tmp7E5.f2;{struct Cyc_List_List*_tmp7E8=((struct
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1151))));}
+break;}case 370: _LL383: {struct Cyc_List_List*_tmp7DF;int _tmp7E0;struct _tuple13
+_tmp7DE=*Cyc_yyget_YY16(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 
+1)]);_tmp7DF=_tmp7DE.f1;_tmp7E0=_tmp7DE.f2;{struct Cyc_List_List*_tmp7E1=((struct
 Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Position_Segment*,void*),
 struct Cyc_Position_Segment*env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_typ2tvar,
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 2)]).first_line,(yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 2)]).last_line),Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 2)]));{struct Cyc_Absyn_Aggr_p_struct*_tmp11BF;struct Cyc_Absyn_AggrInfo
-_tmp11BE;union Cyc_Absyn_AggrInfoU_union _tmp11BD;struct Cyc_Absyn_Aggr_p_struct
-_tmp11BC;union Cyc_YYSTYPE_union _tmp11BB;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp11BB.YY11).tag=15,(((_tmp11BB.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp11BF=
-_cycalloc(sizeof(*_tmp11BF)),((_tmp11BF[0]=((_tmp11BC.tag=5,((_tmp11BC.f1=((
-_tmp11BE.aggr_info=(union Cyc_Absyn_AggrInfoU_union)(((_tmp11BD.UnknownAggr).tag=
-0,(((_tmp11BD.UnknownAggr).f1=(void*)((void*)0),(((_tmp11BD.UnknownAggr).f2=Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),_tmp11BD)))))),((
-_tmp11BE.targs=0,_tmp11BE)))),((_tmp11BC.f2=_tmp7E8,((_tmp11BC.f3=_tmp7E6,((
-_tmp11BC.f4=_tmp7E7,_tmp11BC)))))))))),_tmp11BF)))),Cyc_Position_segment_of_abs((
+10000,yyvsp_offset - 2)]));{struct Cyc_Absyn_Aggr_p_struct*_tmp1162;struct Cyc_Absyn_AggrInfo
+_tmp1161;union Cyc_Absyn_AggrInfoU_union _tmp1160;struct Cyc_Absyn_Aggr_p_struct
+_tmp115F;union Cyc_YYSTYPE_union _tmp115E;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp115E.YY11).tag=15,(((_tmp115E.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp1162=
+_cycalloc(sizeof(*_tmp1162)),((_tmp1162[0]=((_tmp115F.tag=5,((_tmp115F.f1=((
+_tmp1161.aggr_info=(union Cyc_Absyn_AggrInfoU_union)(((_tmp1160.UnknownAggr).tag=
+0,(((_tmp1160.UnknownAggr).f1=(void*)((void*)0),(((_tmp1160.UnknownAggr).f2=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),_tmp1160)))))),((
+_tmp1161.targs=0,_tmp1161)))),((_tmp115F.f2=_tmp7E1,((_tmp115F.f3=_tmp7DF,((
+_tmp115F.f4=_tmp7E0,_tmp115F)))))))))),_tmp1162)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp11BB))));}
-break;}}case 371: _LL384:{struct Cyc_Absyn_Pointer_p_struct*_tmp11C5;struct Cyc_Absyn_Pointer_p_struct
-_tmp11C4;union Cyc_YYSTYPE_union _tmp11C3;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp11C3.YY11).tag=15,(((_tmp11C3.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp11C5=
-_cycalloc(sizeof(*_tmp11C5)),((_tmp11C5[0]=((_tmp11C4.tag=4,((_tmp11C4.f1=Cyc_yyget_YY11(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp11C4)))),_tmp11C5)))),
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp115E))));}
+break;}}case 371: _LL384:{struct Cyc_Absyn_Pointer_p_struct*_tmp1168;struct Cyc_Absyn_Pointer_p_struct
+_tmp1167;union Cyc_YYSTYPE_union _tmp1166;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1166.YY11).tag=15,(((_tmp1166.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp1168=
+_cycalloc(sizeof(*_tmp1168)),((_tmp1168[0]=((_tmp1167.tag=4,((_tmp1167.f1=Cyc_yyget_YY11(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1167)))),_tmp1168)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp11C3))));}break;case 372: _LL385:{struct Cyc_Absyn_Pointer_p_struct*
-_tmp11D4;struct Cyc_Absyn_Pointer_p_struct*_tmp11D3;struct Cyc_Absyn_Pointer_p_struct
-_tmp11D2;struct Cyc_Absyn_Pointer_p_struct _tmp11D1;union Cyc_YYSTYPE_union _tmp11D0;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp11D0.YY11).tag=15,(((_tmp11D0.YY11).f1=Cyc_Absyn_new_pat((
-void*)((_tmp11D4=_cycalloc(sizeof(*_tmp11D4)),((_tmp11D4[0]=((_tmp11D1.tag=4,((
-_tmp11D1.f1=Cyc_Absyn_new_pat((void*)((_tmp11D3=_cycalloc(sizeof(*_tmp11D3)),((
-_tmp11D3[0]=((_tmp11D2.tag=4,((_tmp11D2.f1=Cyc_yyget_YY11(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp11D2)))),_tmp11D3)))),
+yylsp_offset)]).last_line)),_tmp1166))));}break;case 372: _LL385:{struct Cyc_Absyn_Pointer_p_struct*
+_tmp1177;struct Cyc_Absyn_Pointer_p_struct*_tmp1176;struct Cyc_Absyn_Pointer_p_struct
+_tmp1175;struct Cyc_Absyn_Pointer_p_struct _tmp1174;union Cyc_YYSTYPE_union _tmp1173;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp1173.YY11).tag=15,(((_tmp1173.YY11).f1=Cyc_Absyn_new_pat((
+void*)((_tmp1177=_cycalloc(sizeof(*_tmp1177)),((_tmp1177[0]=((_tmp1174.tag=4,((
+_tmp1174.f1=Cyc_Absyn_new_pat((void*)((_tmp1176=_cycalloc(sizeof(*_tmp1176)),((
+_tmp1176[0]=((_tmp1175.tag=4,((_tmp1175.f1=Cyc_yyget_YY11(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1175)))),_tmp1176)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp11D1)))),_tmp11D4)))),Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line)),_tmp1174)))),_tmp1177)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp11D0))));}
-break;case 373: _LL386:{struct Cyc_Absyn_Reference_p_struct*_tmp11E8;struct _tuple1*
-_tmp11E7;struct _dyneither_ptr*_tmp11E6;union Cyc_Absyn_Nmspace_union _tmp11E5;
-struct Cyc_Absyn_Reference_p_struct _tmp11E4;union Cyc_YYSTYPE_union _tmp11E3;yyval=(
-union Cyc_YYSTYPE_union)(((_tmp11E3.YY11).tag=15,(((_tmp11E3.YY11).f1=Cyc_Absyn_new_pat((
-void*)((_tmp11E8=_cycalloc(sizeof(*_tmp11E8)),((_tmp11E8[0]=((_tmp11E4.tag=1,((
-_tmp11E4.f1=Cyc_Absyn_new_vardecl(((_tmp11E7=_cycalloc(sizeof(*_tmp11E7)),((
-_tmp11E7->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp11E5.Loc_n).tag=0,_tmp11E5)),((
-_tmp11E7->f2=((_tmp11E6=_cycalloc(sizeof(*_tmp11E6)),((_tmp11E6[0]=Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp11E6)))),_tmp11E7)))))),(
-void*)0,0),((_tmp11E4.f2=Cyc_Absyn_new_pat((void*)0,Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1173))));}
+break;case 373: _LL386:{struct Cyc_Absyn_Reference_p_struct*_tmp118B;struct _tuple1*
+_tmp118A;struct _dyneither_ptr*_tmp1189;union Cyc_Absyn_Nmspace_union _tmp1188;
+struct Cyc_Absyn_Reference_p_struct _tmp1187;union Cyc_YYSTYPE_union _tmp1186;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp1186.YY11).tag=15,(((_tmp1186.YY11).f1=Cyc_Absyn_new_pat((
+void*)((_tmp118B=_cycalloc(sizeof(*_tmp118B)),((_tmp118B[0]=((_tmp1187.tag=1,((
+_tmp1187.f1=Cyc_Absyn_new_vardecl(((_tmp118A=_cycalloc(sizeof(*_tmp118A)),((
+_tmp118A->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp1188.Loc_n).tag=0,_tmp1188)),((
+_tmp118A->f2=((_tmp1189=_cycalloc(sizeof(*_tmp1189)),((_tmp1189[0]=Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1189)))),_tmp118A)))))),(
+void*)0,0),((_tmp1187.f2=Cyc_Absyn_new_pat((void*)0,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp11E4)))))),
-_tmp11E8)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1187)))))),
+_tmp118B)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 1)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp11E3))));}break;case 374: _LL387:{const char*
-_tmp11E9;if(Cyc_strcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmp11E9="as",
-_tag_dyneither(_tmp11E9,sizeof(char),3))))!= 0){const char*_tmp11EA;Cyc_Parse_err(((
-_tmp11EA="expecting `as'",_tag_dyneither(_tmp11EA,sizeof(char),15))),Cyc_Position_segment_of_abs((
+yylsp_offset)]).last_line)),_tmp1186))));}break;case 374: _LL387:{const char*
+_tmp118C;if(Cyc_strcmp((struct _dyneither_ptr)Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmp118C="as",
+_tag_dyneither(_tmp118C,sizeof(char),3))))!= 0){const char*_tmp118D;Cyc_Parse_err(((
+_tmp118D="expecting `as'",_tag_dyneither(_tmp118D,sizeof(char),15))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line));}}{struct Cyc_Absyn_Reference_p_struct*
-_tmp11FE;struct _tuple1*_tmp11FD;struct _dyneither_ptr*_tmp11FC;union Cyc_Absyn_Nmspace_union
-_tmp11FB;struct Cyc_Absyn_Reference_p_struct _tmp11FA;union Cyc_YYSTYPE_union
-_tmp11F9;yyval=(union Cyc_YYSTYPE_union)(((_tmp11F9.YY11).tag=15,(((_tmp11F9.YY11).f1=
-Cyc_Absyn_new_pat((void*)((_tmp11FE=_cycalloc(sizeof(*_tmp11FE)),((_tmp11FE[0]=((
-_tmp11FA.tag=1,((_tmp11FA.f1=Cyc_Absyn_new_vardecl(((_tmp11FD=_cycalloc(sizeof(*
-_tmp11FD)),((_tmp11FD->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp11FB.Loc_n).tag=0,
-_tmp11FB)),((_tmp11FD->f2=((_tmp11FC=_cycalloc(sizeof(*_tmp11FC)),((_tmp11FC[0]=
+_tmp11A1;struct _tuple1*_tmp11A0;struct _dyneither_ptr*_tmp119F;union Cyc_Absyn_Nmspace_union
+_tmp119E;struct Cyc_Absyn_Reference_p_struct _tmp119D;union Cyc_YYSTYPE_union
+_tmp119C;yyval=(union Cyc_YYSTYPE_union)(((_tmp119C.YY11).tag=15,(((_tmp119C.YY11).f1=
+Cyc_Absyn_new_pat((void*)((_tmp11A1=_cycalloc(sizeof(*_tmp11A1)),((_tmp11A1[0]=((
+_tmp119D.tag=1,((_tmp119D.f1=Cyc_Absyn_new_vardecl(((_tmp11A0=_cycalloc(sizeof(*
+_tmp11A0)),((_tmp11A0->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp119E.Loc_n).tag=0,
+_tmp119E)),((_tmp11A0->f2=((_tmp119F=_cycalloc(sizeof(*_tmp119F)),((_tmp119F[0]=
 Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),
-_tmp11FC)))),_tmp11FD)))))),(void*)0,0),((_tmp11FA.f2=Cyc_yyget_YY11(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp11FA)))))),_tmp11FE)))),
+_tmp119F)))),_tmp11A0)))))),(void*)0,0),((_tmp119D.f2=Cyc_yyget_YY11(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp119D)))))),_tmp11A1)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 2)]).last_line)),_tmp11F9))));}break;case 375: _LL388: {void*_tmp804=
+yylsp_offset - 2)]).last_line)),_tmp119C))));}break;case 375: _LL388: {void*_tmp7FD=
 Cyc_Parse_id2type(Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset - 1)]),Cyc_Tcutil_kind_to_bound((void*)7));{struct Cyc_Absyn_TagInt_p_struct*
-_tmp121B;struct _tuple1*_tmp121A;struct _dyneither_ptr*_tmp1219;union Cyc_Absyn_Nmspace_union
-_tmp1218;struct Cyc_Absyn_TagType_struct*_tmp1217;struct Cyc_Absyn_TagType_struct
-_tmp1216;struct Cyc_Absyn_TagInt_p_struct _tmp1215;union Cyc_YYSTYPE_union _tmp1214;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp1214.YY11).tag=15,(((_tmp1214.YY11).f1=Cyc_Absyn_new_pat((
-void*)((_tmp121B=_cycalloc(sizeof(*_tmp121B)),((_tmp121B[0]=((_tmp1215.tag=2,((
-_tmp1215.f1=Cyc_Parse_typ2tvar(Cyc_Position_segment_of_abs((yyls[
+_tmp11BE;struct _tuple1*_tmp11BD;struct _dyneither_ptr*_tmp11BC;union Cyc_Absyn_Nmspace_union
+_tmp11BB;struct Cyc_Absyn_TagType_struct*_tmp11BA;struct Cyc_Absyn_TagType_struct
+_tmp11B9;struct Cyc_Absyn_TagInt_p_struct _tmp11B8;union Cyc_YYSTYPE_union _tmp11B7;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp11B7.YY11).tag=15,(((_tmp11B7.YY11).f1=Cyc_Absyn_new_pat((
+void*)((_tmp11BE=_cycalloc(sizeof(*_tmp11BE)),((_tmp11BE[0]=((_tmp11B8.tag=2,((
+_tmp11B8.f1=Cyc_Parse_typ2tvar(Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),_tmp804),((
-_tmp1215.f2=Cyc_Absyn_new_vardecl(((_tmp121A=_cycalloc(sizeof(*_tmp121A)),((
-_tmp121A->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp1218.Loc_n).tag=0,_tmp1218)),((
-_tmp121A->f2=((_tmp1219=_cycalloc(sizeof(*_tmp1219)),((_tmp1219[0]=Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),_tmp1219)))),
-_tmp121A)))))),(void*)((_tmp1217=_cycalloc(sizeof(*_tmp1217)),((_tmp1217[0]=((
-_tmp1216.tag=18,((_tmp1216.f1=(void*)_tmp804,_tmp1216)))),_tmp1217)))),0),
-_tmp1215)))))),_tmp121B)))),Cyc_Position_segment_of_abs((yyls[
+_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line),_tmp7FD),((
+_tmp11B8.f2=Cyc_Absyn_new_vardecl(((_tmp11BD=_cycalloc(sizeof(*_tmp11BD)),((
+_tmp11BD->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp11BB.Loc_n).tag=0,_tmp11BB)),((
+_tmp11BD->f2=((_tmp11BC=_cycalloc(sizeof(*_tmp11BC)),((_tmp11BC[0]=Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),_tmp11BC)))),
+_tmp11BD)))))),(void*)((_tmp11BA=_cycalloc(sizeof(*_tmp11BA)),((_tmp11BA[0]=((
+_tmp11B9.tag=18,((_tmp11B9.f1=(void*)_tmp7FD,_tmp11B9)))),_tmp11BA)))),0),
+_tmp11B8)))))),_tmp11BE)))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1214))));}
-break;}case 376: _LL389: {struct Cyc_Absyn_Tvar*_tmp80D=Cyc_Tcutil_new_tvar(Cyc_Tcutil_kind_to_bound((
-void*)7));{struct Cyc_Absyn_TagInt_p_struct*_tmp1245;struct _tuple1*_tmp1244;
-struct _dyneither_ptr*_tmp1243;union Cyc_Absyn_Nmspace_union _tmp1242;struct Cyc_Absyn_TagType_struct*
-_tmp1241;struct Cyc_Absyn_VarType_struct*_tmp1240;struct Cyc_Absyn_VarType_struct
-_tmp123F;struct Cyc_Absyn_TagType_struct _tmp123E;struct Cyc_Absyn_TagInt_p_struct
-_tmp123D;union Cyc_YYSTYPE_union _tmp123C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp123C.YY11).tag=15,(((_tmp123C.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp1245=
-_cycalloc(sizeof(*_tmp1245)),((_tmp1245[0]=((_tmp123D.tag=2,((_tmp123D.f1=
-_tmp80D,((_tmp123D.f2=Cyc_Absyn_new_vardecl(((_tmp1244=_cycalloc(sizeof(*
-_tmp1244)),((_tmp1244->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp1242.Loc_n).tag=0,
-_tmp1242)),((_tmp1244->f2=((_tmp1243=_cycalloc(sizeof(*_tmp1243)),((_tmp1243[0]=
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp11B7))));}
+break;}case 376: _LL389: {struct Cyc_Absyn_Tvar*_tmp806=Cyc_Tcutil_new_tvar(Cyc_Tcutil_kind_to_bound((
+void*)7));{struct Cyc_Absyn_TagInt_p_struct*_tmp11E8;struct _tuple1*_tmp11E7;
+struct _dyneither_ptr*_tmp11E6;union Cyc_Absyn_Nmspace_union _tmp11E5;struct Cyc_Absyn_TagType_struct*
+_tmp11E4;struct Cyc_Absyn_VarType_struct*_tmp11E3;struct Cyc_Absyn_VarType_struct
+_tmp11E2;struct Cyc_Absyn_TagType_struct _tmp11E1;struct Cyc_Absyn_TagInt_p_struct
+_tmp11E0;union Cyc_YYSTYPE_union _tmp11DF;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp11DF.YY11).tag=15,(((_tmp11DF.YY11).f1=Cyc_Absyn_new_pat((void*)((_tmp11E8=
+_cycalloc(sizeof(*_tmp11E8)),((_tmp11E8[0]=((_tmp11E0.tag=2,((_tmp11E0.f1=
+_tmp806,((_tmp11E0.f2=Cyc_Absyn_new_vardecl(((_tmp11E7=_cycalloc(sizeof(*
+_tmp11E7)),((_tmp11E7->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp11E5.Loc_n).tag=0,
+_tmp11E5)),((_tmp11E7->f2=((_tmp11E6=_cycalloc(sizeof(*_tmp11E6)),((_tmp11E6[0]=
 Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),
-_tmp1243)))),_tmp1244)))))),(void*)((_tmp1241=_cycalloc(sizeof(*_tmp1241)),((
-_tmp1241[0]=((_tmp123E.tag=18,((_tmp123E.f1=(void*)((void*)((_tmp1240=_cycalloc(
-sizeof(*_tmp1240)),((_tmp1240[0]=((_tmp123F.tag=1,((_tmp123F.f1=_tmp80D,_tmp123F)))),
-_tmp1240))))),_tmp123E)))),_tmp1241)))),0),_tmp123D)))))),_tmp1245)))),Cyc_Position_segment_of_abs((
+_tmp11E6)))),_tmp11E7)))))),(void*)((_tmp11E4=_cycalloc(sizeof(*_tmp11E4)),((
+_tmp11E4[0]=((_tmp11E1.tag=18,((_tmp11E1.f1=(void*)((void*)((_tmp11E3=_cycalloc(
+sizeof(*_tmp11E3)),((_tmp11E3[0]=((_tmp11E2.tag=1,((_tmp11E2.f1=_tmp806,_tmp11E2)))),
+_tmp11E3))))),_tmp11E1)))),_tmp11E4)))),0),_tmp11E0)))))),_tmp11E8)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp123C))));}
-break;}case 377: _LL38A:{struct _tuple13*_tmp1248;union Cyc_YYSTYPE_union _tmp1247;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp1247.YY12).tag=16,(((_tmp1247.YY12).f1=((
-_tmp1248=_cycalloc(sizeof(*_tmp1248)),((_tmp1248->f1=((struct Cyc_List_List*(*)(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp11DF))));}
+break;}case 377: _LL38A:{struct _tuple13*_tmp11EB;union Cyc_YYSTYPE_union _tmp11EA;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp11EA.YY12).tag=16,(((_tmp11EA.YY12).f1=((
+_tmp11EB=_cycalloc(sizeof(*_tmp11EB)),((_tmp11EB->f1=((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_rev)(Cyc_yyget_YY13(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)])),((_tmp1248->f2=0,_tmp1248)))))),
-_tmp1247))));}break;case 378: _LL38B:{struct _tuple13*_tmp124B;union Cyc_YYSTYPE_union
-_tmp124A;yyval=(union Cyc_YYSTYPE_union)(((_tmp124A.YY12).tag=16,(((_tmp124A.YY12).f1=((
-_tmp124B=_cycalloc(sizeof(*_tmp124B)),((_tmp124B->f1=((struct Cyc_List_List*(*)(
+_check_known_subscript_notnull(10000,yyvsp_offset)])),((_tmp11EB->f2=0,_tmp11EB)))))),
+_tmp11EA))));}break;case 378: _LL38B:{struct _tuple13*_tmp11EE;union Cyc_YYSTYPE_union
+_tmp11ED;yyval=(union Cyc_YYSTYPE_union)(((_tmp11ED.YY12).tag=16,(((_tmp11ED.YY12).f1=((
+_tmp11EE=_cycalloc(sizeof(*_tmp11EE)),((_tmp11EE->f1=((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_rev)(Cyc_yyget_YY13(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)])),((_tmp124B->f2=1,
-_tmp124B)))))),_tmp124A))));}break;case 379: _LL38C:{struct _tuple13*_tmp124E;union
-Cyc_YYSTYPE_union _tmp124D;yyval=(union Cyc_YYSTYPE_union)(((_tmp124D.YY12).tag=16,(((
-_tmp124D.YY12).f1=((_tmp124E=_cycalloc(sizeof(*_tmp124E)),((_tmp124E->f1=0,((
-_tmp124E->f2=1,_tmp124E)))))),_tmp124D))));}break;case 380: _LL38D:{struct Cyc_List_List*
-_tmp1251;union Cyc_YYSTYPE_union _tmp1250;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1250.YY13).tag=17,(((_tmp1250.YY13).f1=((_tmp1251=_cycalloc(sizeof(*_tmp1251)),((
-_tmp1251->hd=Cyc_yyget_YY11(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),((_tmp1251->tl=0,_tmp1251)))))),_tmp1250))));}break;case 381:
-_LL38E:{struct Cyc_List_List*_tmp1254;union Cyc_YYSTYPE_union _tmp1253;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1253.YY13).tag=17,(((_tmp1253.YY13).f1=((_tmp1254=
-_cycalloc(sizeof(*_tmp1254)),((_tmp1254->hd=Cyc_yyget_YY11(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmp1254->tl=Cyc_yyget_YY13(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmp1254)))))),
-_tmp1253))));}break;case 382: _LL38F:{struct _tuple14*_tmp1257;union Cyc_YYSTYPE_union
-_tmp1256;yyval=(union Cyc_YYSTYPE_union)(((_tmp1256.YY14).tag=18,(((_tmp1256.YY14).f1=((
-_tmp1257=_cycalloc(sizeof(*_tmp1257)),((_tmp1257->f1=0,((_tmp1257->f2=Cyc_yyget_YY11(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1257)))))),
-_tmp1256))));}break;case 383: _LL390:{struct _tuple14*_tmp125A;union Cyc_YYSTYPE_union
-_tmp1259;yyval=(union Cyc_YYSTYPE_union)(((_tmp1259.YY14).tag=18,(((_tmp1259.YY14).f1=((
-_tmp125A=_cycalloc(sizeof(*_tmp125A)),((_tmp125A->f1=Cyc_yyget_YY41(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmp125A->f2=Cyc_yyget_YY11(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp125A)))))),
-_tmp1259))));}break;case 384: _LL391:{struct _tuple13*_tmp125D;union Cyc_YYSTYPE_union
-_tmp125C;yyval=(union Cyc_YYSTYPE_union)(((_tmp125C.YY16).tag=20,(((_tmp125C.YY16).f1=((
-_tmp125D=_cycalloc(sizeof(*_tmp125D)),((_tmp125D->f1=((struct Cyc_List_List*(*)(
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)])),((_tmp11EE->f2=1,
+_tmp11EE)))))),_tmp11ED))));}break;case 379: _LL38C:{struct _tuple13*_tmp11F1;union
+Cyc_YYSTYPE_union _tmp11F0;yyval=(union Cyc_YYSTYPE_union)(((_tmp11F0.YY12).tag=16,(((
+_tmp11F0.YY12).f1=((_tmp11F1=_cycalloc(sizeof(*_tmp11F1)),((_tmp11F1->f1=0,((
+_tmp11F1->f2=1,_tmp11F1)))))),_tmp11F0))));}break;case 380: _LL38D:{struct Cyc_List_List*
+_tmp11F4;union Cyc_YYSTYPE_union _tmp11F3;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp11F3.YY13).tag=17,(((_tmp11F3.YY13).f1=((_tmp11F4=_cycalloc(sizeof(*_tmp11F4)),((
+_tmp11F4->hd=Cyc_yyget_YY11(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),((_tmp11F4->tl=0,_tmp11F4)))))),_tmp11F3))));}break;case 381:
+_LL38E:{struct Cyc_List_List*_tmp11F7;union Cyc_YYSTYPE_union _tmp11F6;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp11F6.YY13).tag=17,(((_tmp11F6.YY13).f1=((_tmp11F7=
+_cycalloc(sizeof(*_tmp11F7)),((_tmp11F7->hd=Cyc_yyget_YY11(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmp11F7->tl=Cyc_yyget_YY13(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmp11F7)))))),
+_tmp11F6))));}break;case 382: _LL38F:{struct _tuple14*_tmp11FA;union Cyc_YYSTYPE_union
+_tmp11F9;yyval=(union Cyc_YYSTYPE_union)(((_tmp11F9.YY14).tag=18,(((_tmp11F9.YY14).f1=((
+_tmp11FA=_cycalloc(sizeof(*_tmp11FA)),((_tmp11FA->f1=0,((_tmp11FA->f2=Cyc_yyget_YY11(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp11FA)))))),
+_tmp11F9))));}break;case 383: _LL390:{struct _tuple14*_tmp11FD;union Cyc_YYSTYPE_union
+_tmp11FC;yyval=(union Cyc_YYSTYPE_union)(((_tmp11FC.YY14).tag=18,(((_tmp11FC.YY14).f1=((
+_tmp11FD=_cycalloc(sizeof(*_tmp11FD)),((_tmp11FD->f1=Cyc_yyget_YY41(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((_tmp11FD->f2=Cyc_yyget_YY11(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp11FD)))))),
+_tmp11FC))));}break;case 384: _LL391:{struct _tuple13*_tmp1200;union Cyc_YYSTYPE_union
+_tmp11FF;yyval=(union Cyc_YYSTYPE_union)(((_tmp11FF.YY16).tag=20,(((_tmp11FF.YY16).f1=((
+_tmp1200=_cycalloc(sizeof(*_tmp1200)),((_tmp1200->f1=((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_rev)(Cyc_yyget_YY15(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)])),((_tmp125D->f2=0,_tmp125D)))))),
-_tmp125C))));}break;case 385: _LL392:{struct _tuple13*_tmp1260;union Cyc_YYSTYPE_union
-_tmp125F;yyval=(union Cyc_YYSTYPE_union)(((_tmp125F.YY16).tag=20,(((_tmp125F.YY16).f1=((
-_tmp1260=_cycalloc(sizeof(*_tmp1260)),((_tmp1260->f1=((struct Cyc_List_List*(*)(
+_check_known_subscript_notnull(10000,yyvsp_offset)])),((_tmp1200->f2=0,_tmp1200)))))),
+_tmp11FF))));}break;case 385: _LL392:{struct _tuple13*_tmp1203;union Cyc_YYSTYPE_union
+_tmp1202;yyval=(union Cyc_YYSTYPE_union)(((_tmp1202.YY16).tag=20,(((_tmp1202.YY16).f1=((
+_tmp1203=_cycalloc(sizeof(*_tmp1203)),((_tmp1203->f1=((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_rev)(Cyc_yyget_YY15(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)])),((_tmp1260->f2=1,
-_tmp1260)))))),_tmp125F))));}break;case 386: _LL393:{struct _tuple13*_tmp1263;union
-Cyc_YYSTYPE_union _tmp1262;yyval=(union Cyc_YYSTYPE_union)(((_tmp1262.YY16).tag=20,(((
-_tmp1262.YY16).f1=((_tmp1263=_cycalloc(sizeof(*_tmp1263)),((_tmp1263->f1=0,((
-_tmp1263->f2=1,_tmp1263)))))),_tmp1262))));}break;case 387: _LL394:{struct Cyc_List_List*
-_tmp1266;union Cyc_YYSTYPE_union _tmp1265;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1265.YY15).tag=19,(((_tmp1265.YY15).f1=((_tmp1266=_cycalloc(sizeof(*_tmp1266)),((
-_tmp1266->hd=Cyc_yyget_YY14(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),((_tmp1266->tl=0,_tmp1266)))))),_tmp1265))));}break;case 388:
-_LL395:{struct Cyc_List_List*_tmp1269;union Cyc_YYSTYPE_union _tmp1268;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1268.YY15).tag=19,(((_tmp1268.YY15).f1=((_tmp1269=
-_cycalloc(sizeof(*_tmp1269)),((_tmp1269->hd=Cyc_yyget_YY14(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmp1269->tl=Cyc_yyget_YY15(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmp1269)))))),
-_tmp1268))));}break;case 389: _LL396: yyval=yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)];break;case 390: _LL397:{union Cyc_YYSTYPE_union _tmp126A;yyval=(
-union Cyc_YYSTYPE_union)(((_tmp126A.YY3).tag=7,(((_tmp126A.YY3).f1=Cyc_Absyn_seq_exp(
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)])),((_tmp1203->f2=1,
+_tmp1203)))))),_tmp1202))));}break;case 386: _LL393:{struct _tuple13*_tmp1206;union
+Cyc_YYSTYPE_union _tmp1205;yyval=(union Cyc_YYSTYPE_union)(((_tmp1205.YY16).tag=20,(((
+_tmp1205.YY16).f1=((_tmp1206=_cycalloc(sizeof(*_tmp1206)),((_tmp1206->f1=0,((
+_tmp1206->f2=1,_tmp1206)))))),_tmp1205))));}break;case 387: _LL394:{struct Cyc_List_List*
+_tmp1209;union Cyc_YYSTYPE_union _tmp1208;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1208.YY15).tag=19,(((_tmp1208.YY15).f1=((_tmp1209=_cycalloc(sizeof(*_tmp1209)),((
+_tmp1209->hd=Cyc_yyget_YY14(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),((_tmp1209->tl=0,_tmp1209)))))),_tmp1208))));}break;case 388:
+_LL395:{struct Cyc_List_List*_tmp120C;union Cyc_YYSTYPE_union _tmp120B;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp120B.YY15).tag=19,(((_tmp120B.YY15).f1=((_tmp120C=
+_cycalloc(sizeof(*_tmp120C)),((_tmp120C->hd=Cyc_yyget_YY14(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmp120C->tl=Cyc_yyget_YY15(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmp120C)))))),
+_tmp120B))));}break;case 389: _LL396: yyval=yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)];break;case 390: _LL397:{union Cyc_YYSTYPE_union _tmp120D;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp120D.YY3).tag=7,(((_tmp120D.YY3).f1=Cyc_Absyn_seq_exp(
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp126A))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp120D))));}
 break;case 391: _LL398: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 392: _LL399:{union Cyc_YYSTYPE_union _tmp126B;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp126B.YY3).tag=7,(((_tmp126B.YY3).f1=Cyc_Absyn_assignop_exp(
+yyvsp_offset)];break;case 392: _LL399:{union Cyc_YYSTYPE_union _tmp120E;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp120E.YY3).tag=7,(((_tmp120E.YY3).f1=Cyc_Absyn_assignop_exp(
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY8(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp126B))));}
-break;case 393: _LL39A:{union Cyc_YYSTYPE_union _tmp126C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp126C.YY8).tag=12,(((_tmp126C.YY8).f1=0,_tmp126C))));}break;case 394: _LL39B:{
-struct Cyc_Core_Opt*_tmp126F;union Cyc_YYSTYPE_union _tmp126E;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp126E.YY8).tag=12,(((_tmp126E.YY8).f1=((_tmp126F=_cycalloc(sizeof(*_tmp126F)),((
-_tmp126F->v=(void*)((void*)1),_tmp126F)))),_tmp126E))));}break;case 395: _LL39C:{
-struct Cyc_Core_Opt*_tmp1272;union Cyc_YYSTYPE_union _tmp1271;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1271.YY8).tag=12,(((_tmp1271.YY8).f1=((_tmp1272=_cycalloc(sizeof(*_tmp1272)),((
-_tmp1272->v=(void*)((void*)3),_tmp1272)))),_tmp1271))));}break;case 396: _LL39D:{
-struct Cyc_Core_Opt*_tmp1275;union Cyc_YYSTYPE_union _tmp1274;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1274.YY8).tag=12,(((_tmp1274.YY8).f1=((_tmp1275=_cycalloc(sizeof(*_tmp1275)),((
-_tmp1275->v=(void*)((void*)4),_tmp1275)))),_tmp1274))));}break;case 397: _LL39E:{
-struct Cyc_Core_Opt*_tmp1278;union Cyc_YYSTYPE_union _tmp1277;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1277.YY8).tag=12,(((_tmp1277.YY8).f1=((_tmp1278=_cycalloc(sizeof(*_tmp1278)),((
-_tmp1278->v=(void*)((void*)0),_tmp1278)))),_tmp1277))));}break;case 398: _LL39F:{
-struct Cyc_Core_Opt*_tmp127B;union Cyc_YYSTYPE_union _tmp127A;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp127A.YY8).tag=12,(((_tmp127A.YY8).f1=((_tmp127B=_cycalloc(sizeof(*_tmp127B)),((
-_tmp127B->v=(void*)((void*)2),_tmp127B)))),_tmp127A))));}break;case 399: _LL3A0:{
-struct Cyc_Core_Opt*_tmp127E;union Cyc_YYSTYPE_union _tmp127D;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp127D.YY8).tag=12,(((_tmp127D.YY8).f1=((_tmp127E=_cycalloc(sizeof(*_tmp127E)),((
-_tmp127E->v=(void*)((void*)16),_tmp127E)))),_tmp127D))));}break;case 400: _LL3A1:{
-struct Cyc_Core_Opt*_tmp1281;union Cyc_YYSTYPE_union _tmp1280;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1280.YY8).tag=12,(((_tmp1280.YY8).f1=((_tmp1281=_cycalloc(sizeof(*_tmp1281)),((
-_tmp1281->v=(void*)((void*)17),_tmp1281)))),_tmp1280))));}break;case 401: _LL3A2:{
-struct Cyc_Core_Opt*_tmp1284;union Cyc_YYSTYPE_union _tmp1283;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1283.YY8).tag=12,(((_tmp1283.YY8).f1=((_tmp1284=_cycalloc(sizeof(*_tmp1284)),((
-_tmp1284->v=(void*)((void*)13),_tmp1284)))),_tmp1283))));}break;case 402: _LL3A3:{
-struct Cyc_Core_Opt*_tmp1287;union Cyc_YYSTYPE_union _tmp1286;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1286.YY8).tag=12,(((_tmp1286.YY8).f1=((_tmp1287=_cycalloc(sizeof(*_tmp1287)),((
-_tmp1287->v=(void*)((void*)15),_tmp1287)))),_tmp1286))));}break;case 403: _LL3A4:{
-struct Cyc_Core_Opt*_tmp128A;union Cyc_YYSTYPE_union _tmp1289;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1289.YY8).tag=12,(((_tmp1289.YY8).f1=((_tmp128A=_cycalloc(sizeof(*_tmp128A)),((
-_tmp128A->v=(void*)((void*)14),_tmp128A)))),_tmp1289))));}break;case 404: _LL3A5:
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp120E))));}
+break;case 393: _LL39A:{union Cyc_YYSTYPE_union _tmp120F;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp120F.YY8).tag=12,(((_tmp120F.YY8).f1=0,_tmp120F))));}break;case 394: _LL39B:{
+struct Cyc_Core_Opt*_tmp1212;union Cyc_YYSTYPE_union _tmp1211;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1211.YY8).tag=12,(((_tmp1211.YY8).f1=((_tmp1212=_cycalloc(sizeof(*_tmp1212)),((
+_tmp1212->v=(void*)((void*)1),_tmp1212)))),_tmp1211))));}break;case 395: _LL39C:{
+struct Cyc_Core_Opt*_tmp1215;union Cyc_YYSTYPE_union _tmp1214;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1214.YY8).tag=12,(((_tmp1214.YY8).f1=((_tmp1215=_cycalloc(sizeof(*_tmp1215)),((
+_tmp1215->v=(void*)((void*)3),_tmp1215)))),_tmp1214))));}break;case 396: _LL39D:{
+struct Cyc_Core_Opt*_tmp1218;union Cyc_YYSTYPE_union _tmp1217;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1217.YY8).tag=12,(((_tmp1217.YY8).f1=((_tmp1218=_cycalloc(sizeof(*_tmp1218)),((
+_tmp1218->v=(void*)((void*)4),_tmp1218)))),_tmp1217))));}break;case 397: _LL39E:{
+struct Cyc_Core_Opt*_tmp121B;union Cyc_YYSTYPE_union _tmp121A;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp121A.YY8).tag=12,(((_tmp121A.YY8).f1=((_tmp121B=_cycalloc(sizeof(*_tmp121B)),((
+_tmp121B->v=(void*)((void*)0),_tmp121B)))),_tmp121A))));}break;case 398: _LL39F:{
+struct Cyc_Core_Opt*_tmp121E;union Cyc_YYSTYPE_union _tmp121D;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp121D.YY8).tag=12,(((_tmp121D.YY8).f1=((_tmp121E=_cycalloc(sizeof(*_tmp121E)),((
+_tmp121E->v=(void*)((void*)2),_tmp121E)))),_tmp121D))));}break;case 399: _LL3A0:{
+struct Cyc_Core_Opt*_tmp1221;union Cyc_YYSTYPE_union _tmp1220;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1220.YY8).tag=12,(((_tmp1220.YY8).f1=((_tmp1221=_cycalloc(sizeof(*_tmp1221)),((
+_tmp1221->v=(void*)((void*)16),_tmp1221)))),_tmp1220))));}break;case 400: _LL3A1:{
+struct Cyc_Core_Opt*_tmp1224;union Cyc_YYSTYPE_union _tmp1223;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1223.YY8).tag=12,(((_tmp1223.YY8).f1=((_tmp1224=_cycalloc(sizeof(*_tmp1224)),((
+_tmp1224->v=(void*)((void*)17),_tmp1224)))),_tmp1223))));}break;case 401: _LL3A2:{
+struct Cyc_Core_Opt*_tmp1227;union Cyc_YYSTYPE_union _tmp1226;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1226.YY8).tag=12,(((_tmp1226.YY8).f1=((_tmp1227=_cycalloc(sizeof(*_tmp1227)),((
+_tmp1227->v=(void*)((void*)13),_tmp1227)))),_tmp1226))));}break;case 402: _LL3A3:{
+struct Cyc_Core_Opt*_tmp122A;union Cyc_YYSTYPE_union _tmp1229;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1229.YY8).tag=12,(((_tmp1229.YY8).f1=((_tmp122A=_cycalloc(sizeof(*_tmp122A)),((
+_tmp122A->v=(void*)((void*)15),_tmp122A)))),_tmp1229))));}break;case 403: _LL3A4:{
+struct Cyc_Core_Opt*_tmp122D;union Cyc_YYSTYPE_union _tmp122C;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp122C.YY8).tag=12,(((_tmp122C.YY8).f1=((_tmp122D=_cycalloc(sizeof(*_tmp122D)),((
+_tmp122D->v=(void*)((void*)14),_tmp122D)))),_tmp122C))));}break;case 404: _LL3A5:
 yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 405:
-_LL3A6:{union Cyc_YYSTYPE_union _tmp128B;yyval=(union Cyc_YYSTYPE_union)(((_tmp128B.YY3).tag=
-7,(((_tmp128B.YY3).f1=Cyc_Absyn_conditional_exp(Cyc_yyget_YY3(yyvs[
+_LL3A6:{union Cyc_YYSTYPE_union _tmp122E;yyval=(union Cyc_YYSTYPE_union)(((_tmp122E.YY3).tag=
+7,(((_tmp122E.YY3).f1=Cyc_Absyn_conditional_exp(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 4)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp128B))));}
-break;case 406: _LL3A7:{union Cyc_YYSTYPE_union _tmp128C;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp128C.YY3).tag=7,(((_tmp128C.YY3).f1=Cyc_Absyn_throw_exp(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp122E))));}
+break;case 406: _LL3A7:{union Cyc_YYSTYPE_union _tmp122F;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp122F.YY3).tag=7,(((_tmp122F.YY3).f1=Cyc_Absyn_throw_exp(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp128C))));}
-break;case 407: _LL3A8:{union Cyc_YYSTYPE_union _tmp128D;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp128D.YY3).tag=7,(((_tmp128D.YY3).f1=Cyc_Absyn_New_exp(0,Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp122F))));}
+break;case 407: _LL3A8:{union Cyc_YYSTYPE_union _tmp1230;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1230.YY3).tag=7,(((_tmp1230.YY3).f1=Cyc_Absyn_New_exp(0,Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp128D))));}
-break;case 408: _LL3A9:{union Cyc_YYSTYPE_union _tmp128E;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp128E.YY3).tag=7,(((_tmp128E.YY3).f1=Cyc_Absyn_New_exp(0,Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1230))));}
+break;case 408: _LL3A9:{union Cyc_YYSTYPE_union _tmp1231;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1231.YY3).tag=7,(((_tmp1231.YY3).f1=Cyc_Absyn_New_exp(0,Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp128E))));}
-break;case 409: _LL3AA:{union Cyc_YYSTYPE_union _tmp128F;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp128F.YY3).tag=7,(((_tmp128F.YY3).f1=Cyc_Absyn_New_exp((struct Cyc_Absyn_Exp*)
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1231))));}
+break;case 409: _LL3AA:{union Cyc_YYSTYPE_union _tmp1232;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1232.YY3).tag=7,(((_tmp1232.YY3).f1=Cyc_Absyn_New_exp((struct Cyc_Absyn_Exp*)
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp128F))));}
-break;case 410: _LL3AB:{union Cyc_YYSTYPE_union _tmp1290;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1290.YY3).tag=7,(((_tmp1290.YY3).f1=Cyc_Absyn_New_exp((struct Cyc_Absyn_Exp*)
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1232))));}
+break;case 410: _LL3AB:{union Cyc_YYSTYPE_union _tmp1233;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1233.YY3).tag=7,(((_tmp1233.YY3).f1=Cyc_Absyn_New_exp((struct Cyc_Absyn_Exp*)
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1290))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1233))));}
 break;case 411: _LL3AC: yyval=yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)];break;case 412: _LL3AD: yyval=yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)];break;case 413: _LL3AE:{union Cyc_YYSTYPE_union _tmp1291;yyval=(
-union Cyc_YYSTYPE_union)(((_tmp1291.YY3).tag=7,(((_tmp1291.YY3).f1=Cyc_Absyn_or_exp(
+10000,yyvsp_offset)];break;case 413: _LL3AE:{union Cyc_YYSTYPE_union _tmp1234;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp1234.YY3).tag=7,(((_tmp1234.YY3).f1=Cyc_Absyn_or_exp(
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1291))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1234))));}
 break;case 414: _LL3AF: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 415: _LL3B0:{union Cyc_YYSTYPE_union _tmp1292;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1292.YY3).tag=7,(((_tmp1292.YY3).f1=Cyc_Absyn_and_exp(
+yyvsp_offset)];break;case 415: _LL3B0:{union Cyc_YYSTYPE_union _tmp1235;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp1235.YY3).tag=7,(((_tmp1235.YY3).f1=Cyc_Absyn_and_exp(
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1292))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1235))));}
 break;case 416: _LL3B1: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 417: _LL3B2:{union Cyc_YYSTYPE_union _tmp1293;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1293.YY3).tag=7,(((_tmp1293.YY3).f1=Cyc_Absyn_prim2_exp((
+yyvsp_offset)];break;case 417: _LL3B2:{union Cyc_YYSTYPE_union _tmp1236;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp1236.YY3).tag=7,(((_tmp1236.YY3).f1=Cyc_Absyn_prim2_exp((
 void*)14,Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1293))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1236))));}
 break;case 418: _LL3B3: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 419: _LL3B4:{union Cyc_YYSTYPE_union _tmp1294;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1294.YY3).tag=7,(((_tmp1294.YY3).f1=Cyc_Absyn_prim2_exp((
+yyvsp_offset)];break;case 419: _LL3B4:{union Cyc_YYSTYPE_union _tmp1237;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp1237.YY3).tag=7,(((_tmp1237.YY3).f1=Cyc_Absyn_prim2_exp((
 void*)15,Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1294))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1237))));}
 break;case 420: _LL3B5: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 421: _LL3B6:{union Cyc_YYSTYPE_union _tmp1295;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1295.YY3).tag=7,(((_tmp1295.YY3).f1=Cyc_Absyn_prim2_exp((
+yyvsp_offset)];break;case 421: _LL3B6:{union Cyc_YYSTYPE_union _tmp1238;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp1238.YY3).tag=7,(((_tmp1238.YY3).f1=Cyc_Absyn_prim2_exp((
 void*)13,Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1295))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1238))));}
 break;case 422: _LL3B7: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 423: _LL3B8:{union Cyc_YYSTYPE_union _tmp1296;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1296.YY3).tag=7,(((_tmp1296.YY3).f1=Cyc_Absyn_eq_exp(
+yyvsp_offset)];break;case 423: _LL3B8:{union Cyc_YYSTYPE_union _tmp1239;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp1239.YY3).tag=7,(((_tmp1239.YY3).f1=Cyc_Absyn_eq_exp(
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1296))));}
-break;case 424: _LL3B9:{union Cyc_YYSTYPE_union _tmp1297;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1297.YY3).tag=7,(((_tmp1297.YY3).f1=Cyc_Absyn_neq_exp(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1239))));}
+break;case 424: _LL3B9:{union Cyc_YYSTYPE_union _tmp123A;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp123A.YY3).tag=7,(((_tmp123A.YY3).f1=Cyc_Absyn_neq_exp(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1297))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp123A))));}
 break;case 425: _LL3BA: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 426: _LL3BB:{union Cyc_YYSTYPE_union _tmp1298;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1298.YY3).tag=7,(((_tmp1298.YY3).f1=Cyc_Absyn_lt_exp(
+yyvsp_offset)];break;case 426: _LL3BB:{union Cyc_YYSTYPE_union _tmp123B;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp123B.YY3).tag=7,(((_tmp123B.YY3).f1=Cyc_Absyn_lt_exp(
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1298))));}
-break;case 427: _LL3BC:{union Cyc_YYSTYPE_union _tmp1299;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1299.YY3).tag=7,(((_tmp1299.YY3).f1=Cyc_Absyn_gt_exp(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp123B))));}
+break;case 427: _LL3BC:{union Cyc_YYSTYPE_union _tmp123C;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp123C.YY3).tag=7,(((_tmp123C.YY3).f1=Cyc_Absyn_gt_exp(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1299))));}
-break;case 428: _LL3BD:{union Cyc_YYSTYPE_union _tmp129A;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp129A.YY3).tag=7,(((_tmp129A.YY3).f1=Cyc_Absyn_lte_exp(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp123C))));}
+break;case 428: _LL3BD:{union Cyc_YYSTYPE_union _tmp123D;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp123D.YY3).tag=7,(((_tmp123D.YY3).f1=Cyc_Absyn_lte_exp(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp129A))));}
-break;case 429: _LL3BE:{union Cyc_YYSTYPE_union _tmp129B;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp129B.YY3).tag=7,(((_tmp129B.YY3).f1=Cyc_Absyn_gte_exp(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp123D))));}
+break;case 429: _LL3BE:{union Cyc_YYSTYPE_union _tmp123E;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp123E.YY3).tag=7,(((_tmp123E.YY3).f1=Cyc_Absyn_gte_exp(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp129B))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp123E))));}
 break;case 430: _LL3BF: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 431: _LL3C0:{union Cyc_YYSTYPE_union _tmp129C;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp129C.YY3).tag=7,(((_tmp129C.YY3).f1=Cyc_Absyn_prim2_exp((
+yyvsp_offset)];break;case 431: _LL3C0:{union Cyc_YYSTYPE_union _tmp123F;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp123F.YY3).tag=7,(((_tmp123F.YY3).f1=Cyc_Absyn_prim2_exp((
 void*)16,Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp129C))));}
-break;case 432: _LL3C1:{union Cyc_YYSTYPE_union _tmp129D;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp129D.YY3).tag=7,(((_tmp129D.YY3).f1=Cyc_Absyn_prim2_exp((void*)17,Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp123F))));}
+break;case 432: _LL3C1:{union Cyc_YYSTYPE_union _tmp1240;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1240.YY3).tag=7,(((_tmp1240.YY3).f1=Cyc_Absyn_prim2_exp((void*)17,Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp129D))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1240))));}
 break;case 433: _LL3C2: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 434: _LL3C3:{union Cyc_YYSTYPE_union _tmp129E;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp129E.YY3).tag=7,(((_tmp129E.YY3).f1=Cyc_Absyn_prim2_exp((
+yyvsp_offset)];break;case 434: _LL3C3:{union Cyc_YYSTYPE_union _tmp1241;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp1241.YY3).tag=7,(((_tmp1241.YY3).f1=Cyc_Absyn_prim2_exp((
 void*)0,Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp129E))));}
-break;case 435: _LL3C4:{union Cyc_YYSTYPE_union _tmp129F;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp129F.YY3).tag=7,(((_tmp129F.YY3).f1=Cyc_Absyn_prim2_exp((void*)2,Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1241))));}
+break;case 435: _LL3C4:{union Cyc_YYSTYPE_union _tmp1242;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1242.YY3).tag=7,(((_tmp1242.YY3).f1=Cyc_Absyn_prim2_exp((void*)2,Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp129F))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1242))));}
 break;case 436: _LL3C5: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 437: _LL3C6:{union Cyc_YYSTYPE_union _tmp12A0;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp12A0.YY3).tag=7,(((_tmp12A0.YY3).f1=Cyc_Absyn_prim2_exp((
+yyvsp_offset)];break;case 437: _LL3C6:{union Cyc_YYSTYPE_union _tmp1243;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp1243.YY3).tag=7,(((_tmp1243.YY3).f1=Cyc_Absyn_prim2_exp((
 void*)1,Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A0))));}
-break;case 438: _LL3C7:{union Cyc_YYSTYPE_union _tmp12A1;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12A1.YY3).tag=7,(((_tmp12A1.YY3).f1=Cyc_Absyn_prim2_exp((void*)3,Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1243))));}
+break;case 438: _LL3C7:{union Cyc_YYSTYPE_union _tmp1244;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1244.YY3).tag=7,(((_tmp1244.YY3).f1=Cyc_Absyn_prim2_exp((void*)3,Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A1))));}
-break;case 439: _LL3C8:{union Cyc_YYSTYPE_union _tmp12A2;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12A2.YY3).tag=7,(((_tmp12A2.YY3).f1=Cyc_Absyn_prim2_exp((void*)4,Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1244))));}
+break;case 439: _LL3C8:{union Cyc_YYSTYPE_union _tmp1245;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1245.YY3).tag=7,(((_tmp1245.YY3).f1=Cyc_Absyn_prim2_exp((void*)4,Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A2))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1245))));}
 break;case 440: _LL3C9: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 441: _LL3CA:{union Cyc_YYSTYPE_union _tmp12A3;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp12A3.YY3).tag=7,(((_tmp12A3.YY3).f1=Cyc_Absyn_cast_exp((*
+yyvsp_offset)];break;case 441: _LL3CA:{union Cyc_YYSTYPE_union _tmp1246;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp1246.YY3).tag=7,(((_tmp1246.YY3).f1=Cyc_Absyn_cast_exp((*
 Cyc_yyget_YY37(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)])).f3,
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),1,(void*)
 0,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp12A3))));}break;case 442: _LL3CB: yyval=yyvs[
+yylsp_offset)]).last_line)),_tmp1246))));}break;case 442: _LL3CB: yyval=yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)];break;case 443: _LL3CC:{union
-Cyc_YYSTYPE_union _tmp12A4;yyval=(union Cyc_YYSTYPE_union)(((_tmp12A4.YY3).tag=7,(((
-_tmp12A4.YY3).f1=Cyc_Absyn_pre_inc_exp(Cyc_yyget_YY3(yyvs[
+Cyc_YYSTYPE_union _tmp1247;yyval=(union Cyc_YYSTYPE_union)(((_tmp1247.YY3).tag=7,(((
+_tmp1247.YY3).f1=Cyc_Absyn_pre_inc_exp(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A4))));}
-break;case 444: _LL3CD:{union Cyc_YYSTYPE_union _tmp12A5;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12A5.YY3).tag=7,(((_tmp12A5.YY3).f1=Cyc_Absyn_pre_dec_exp(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1247))));}
+break;case 444: _LL3CD:{union Cyc_YYSTYPE_union _tmp1248;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1248.YY3).tag=7,(((_tmp1248.YY3).f1=Cyc_Absyn_pre_dec_exp(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A5))));}
-break;case 445: _LL3CE:{union Cyc_YYSTYPE_union _tmp12A6;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12A6.YY3).tag=7,(((_tmp12A6.YY3).f1=Cyc_Absyn_address_exp(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1248))));}
+break;case 445: _LL3CE:{union Cyc_YYSTYPE_union _tmp1249;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp1249.YY3).tag=7,(((_tmp1249.YY3).f1=Cyc_Absyn_address_exp(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A6))));}
-break;case 446: _LL3CF:{union Cyc_YYSTYPE_union _tmp12A7;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12A7.YY3).tag=7,(((_tmp12A7.YY3).f1=Cyc_Absyn_deref_exp(Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1249))));}
+break;case 446: _LL3CF:{union Cyc_YYSTYPE_union _tmp124A;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp124A.YY3).tag=7,(((_tmp124A.YY3).f1=Cyc_Absyn_deref_exp(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A7))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp124A))));}
 break;case 447: _LL3D0: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)];break;case 448: _LL3D1:{union Cyc_YYSTYPE_union _tmp12A8;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp12A8.YY3).tag=7,(((_tmp12A8.YY3).f1=Cyc_Absyn_prim1_exp(
+yyvsp_offset)];break;case 448: _LL3D1:{union Cyc_YYSTYPE_union _tmp124B;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp124B.YY3).tag=7,(((_tmp124B.YY3).f1=Cyc_Absyn_prim1_exp(
 Cyc_yyget_YY7(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A8))));}
-break;case 449: _LL3D2:{union Cyc_YYSTYPE_union _tmp12A9;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12A9.YY3).tag=7,(((_tmp12A9.YY3).f1=Cyc_Absyn_sizeoftyp_exp((*Cyc_yyget_YY37(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp124B))));}
+break;case 449: _LL3D2:{union Cyc_YYSTYPE_union _tmp124C;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp124C.YY3).tag=7,(((_tmp124C.YY3).f1=Cyc_Absyn_sizeoftyp_exp((*Cyc_yyget_YY37(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)])).f3,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A9))));}
-break;case 450: _LL3D3:{union Cyc_YYSTYPE_union _tmp12AA;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12AA.YY3).tag=7,(((_tmp12AA.YY3).f1=Cyc_Absyn_sizeofexp_exp(Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp124C))));}
+break;case 450: _LL3D3:{union Cyc_YYSTYPE_union _tmp124D;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp124D.YY3).tag=7,(((_tmp124D.YY3).f1=Cyc_Absyn_sizeofexp_exp(Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12AA))));}
-break;case 451: _LL3D4:{struct Cyc_Absyn_StructField_struct*_tmp12B4;struct
-_dyneither_ptr*_tmp12B3;struct Cyc_Absyn_StructField_struct _tmp12B2;union Cyc_YYSTYPE_union
-_tmp12B1;yyval=(union Cyc_YYSTYPE_union)(((_tmp12B1.YY3).tag=7,(((_tmp12B1.YY3).f1=
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp124D))));}
+break;case 451: _LL3D4:{struct Cyc_Absyn_StructField_struct*_tmp1257;struct
+_dyneither_ptr*_tmp1256;struct Cyc_Absyn_StructField_struct _tmp1255;union Cyc_YYSTYPE_union
+_tmp1254;yyval=(union Cyc_YYSTYPE_union)(((_tmp1254.YY3).tag=7,(((_tmp1254.YY3).f1=
 Cyc_Absyn_offsetof_exp((*Cyc_yyget_YY37(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 3)])).f3,(void*)((_tmp12B4=_cycalloc(sizeof(*_tmp12B4)),((
-_tmp12B4[0]=((_tmp12B2.tag=0,((_tmp12B2.f1=((_tmp12B3=_cycalloc(sizeof(*_tmp12B3)),((
-_tmp12B3[0]=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]),_tmp12B3)))),_tmp12B2)))),_tmp12B4)))),Cyc_Position_segment_of_abs((
+10000,yyvsp_offset - 3)])).f3,(void*)((_tmp1257=_cycalloc(sizeof(*_tmp1257)),((
+_tmp1257[0]=((_tmp1255.tag=0,((_tmp1255.f1=((_tmp1256=_cycalloc(sizeof(*_tmp1256)),((
+_tmp1256[0]=Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]),_tmp1256)))),_tmp1255)))),_tmp1257)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12B1))));}
-break;case 452: _LL3D5:{struct Cyc_Absyn_TupleIndex_struct*_tmp12BA;struct Cyc_Absyn_TupleIndex_struct
-_tmp12B9;union Cyc_YYSTYPE_union _tmp12B8;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12B8.YY3).tag=7,(((_tmp12B8.YY3).f1=Cyc_Absyn_offsetof_exp((*Cyc_yyget_YY37(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1254))));}
+break;case 452: _LL3D5:{struct Cyc_Absyn_TupleIndex_struct*_tmp125D;struct Cyc_Absyn_TupleIndex_struct
+_tmp125C;union Cyc_YYSTYPE_union _tmp125B;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp125B.YY3).tag=7,(((_tmp125B.YY3).f1=Cyc_Absyn_offsetof_exp((*Cyc_yyget_YY37(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)])).f3,(void*)((
-_tmp12BA=_cycalloc_atomic(sizeof(*_tmp12BA)),((_tmp12BA[0]=((_tmp12B9.tag=1,((
-_tmp12B9.f1=(unsigned int)(Cyc_yyget_Int_tok(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 1)])).f2,_tmp12B9)))),_tmp12BA)))),Cyc_Position_segment_of_abs((
+_tmp125D=_cycalloc_atomic(sizeof(*_tmp125D)),((_tmp125D[0]=((_tmp125C.tag=1,((
+_tmp125C.f1=(unsigned int)(Cyc_yyget_Int_tok(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 1)])).f2,_tmp125C)))),_tmp125D)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12B8))));}
-break;case 453: _LL3D6: {struct Cyc_Position_Segment*_tmp86E=Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp125B))));}
+break;case 453: _LL3D6: {struct Cyc_Position_Segment*_tmp867=Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line);struct Cyc_List_List*
-_tmp86F=((struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Position_Segment*,
+_tmp868=((struct Cyc_List_List*(*)(struct Cyc_Absyn_Tvar*(*f)(struct Cyc_Position_Segment*,
 void*),struct Cyc_Position_Segment*env,struct Cyc_List_List*x))Cyc_List_map_c)(Cyc_Parse_typ2tvar,
-_tmp86E,Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]));{
-union Cyc_YYSTYPE_union _tmp12BB;yyval=(union Cyc_YYSTYPE_union)(((_tmp12BB.YY3).tag=
-7,(((_tmp12BB.YY3).f1=Cyc_Absyn_gentyp_exp(_tmp86F,(*Cyc_yyget_YY37(yyvs[
+_tmp867,Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]));{
+union Cyc_YYSTYPE_union _tmp125E;yyval=(union Cyc_YYSTYPE_union)(((_tmp125E.YY3).tag=
+7,(((_tmp125E.YY3).f1=Cyc_Absyn_gentyp_exp(_tmp868,(*Cyc_yyget_YY37(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)])).f3,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12BB))));}
-break;}case 454: _LL3D7:{struct Cyc_Absyn_Malloc_e_struct*_tmp12C5;struct Cyc_Absyn_MallocInfo
-_tmp12C4;struct Cyc_Absyn_Malloc_e_struct _tmp12C3;union Cyc_YYSTYPE_union _tmp12C2;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp12C2.YY3).tag=7,(((_tmp12C2.YY3).f1=Cyc_Absyn_new_exp((
-void*)((_tmp12C5=_cycalloc(sizeof(*_tmp12C5)),((_tmp12C5[0]=((_tmp12C3.tag=35,((
-_tmp12C3.f1=((_tmp12C4.is_calloc=0,((_tmp12C4.rgn=0,((_tmp12C4.elt_type=0,((
-_tmp12C4.num_elts=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]),((_tmp12C4.fat_result=0,_tmp12C4)))))))))),_tmp12C3)))),
-_tmp12C5)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp125E))));}
+break;}case 454: _LL3D7:{struct Cyc_Absyn_Malloc_e_struct*_tmp1268;struct Cyc_Absyn_MallocInfo
+_tmp1267;struct Cyc_Absyn_Malloc_e_struct _tmp1266;union Cyc_YYSTYPE_union _tmp1265;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp1265.YY3).tag=7,(((_tmp1265.YY3).f1=Cyc_Absyn_new_exp((
+void*)((_tmp1268=_cycalloc(sizeof(*_tmp1268)),((_tmp1268[0]=((_tmp1266.tag=35,((
+_tmp1266.f1=((_tmp1267.is_calloc=0,((_tmp1267.rgn=0,((_tmp1267.elt_type=0,((
+_tmp1267.num_elts=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]),((_tmp1267.fat_result=0,_tmp1267)))))))))),_tmp1266)))),
+_tmp1268)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp12C2))));}break;case 455: _LL3D8:{struct Cyc_Absyn_Malloc_e_struct*
-_tmp12CF;struct Cyc_Absyn_MallocInfo _tmp12CE;struct Cyc_Absyn_Malloc_e_struct
-_tmp12CD;union Cyc_YYSTYPE_union _tmp12CC;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12CC.YY3).tag=7,(((_tmp12CC.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmp12CF=
-_cycalloc(sizeof(*_tmp12CF)),((_tmp12CF[0]=((_tmp12CD.tag=35,((_tmp12CD.f1=((
-_tmp12CE.is_calloc=0,((_tmp12CE.rgn=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmp12CE.elt_type=0,((
-_tmp12CE.num_elts=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]),((_tmp12CE.fat_result=0,_tmp12CE)))))))))),_tmp12CD)))),
-_tmp12CF)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+yylsp_offset)]).last_line)),_tmp1265))));}break;case 455: _LL3D8:{struct Cyc_Absyn_Malloc_e_struct*
+_tmp1272;struct Cyc_Absyn_MallocInfo _tmp1271;struct Cyc_Absyn_Malloc_e_struct
+_tmp1270;union Cyc_YYSTYPE_union _tmp126F;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp126F.YY3).tag=7,(((_tmp126F.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmp1272=
+_cycalloc(sizeof(*_tmp1272)),((_tmp1272[0]=((_tmp1270.tag=35,((_tmp1270.f1=((
+_tmp1271.is_calloc=0,((_tmp1271.rgn=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),((_tmp1271.elt_type=0,((
+_tmp1271.num_elts=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]),((_tmp1271.fat_result=0,_tmp1271)))))))))),_tmp1270)))),
+_tmp1272)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 5)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp12CC))));}break;case 456: _LL3D9: {void*_tmp87A;
-struct _tuple2 _tmp879=*Cyc_yyget_YY37(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 2)]);_tmp87A=_tmp879.f3;{struct Cyc_Absyn_Malloc_e_struct*_tmp12DE;
-struct Cyc_Absyn_MallocInfo _tmp12DD;void**_tmp12DC;struct Cyc_Absyn_Malloc_e_struct
-_tmp12DB;union Cyc_YYSTYPE_union _tmp12DA;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12DA.YY3).tag=7,(((_tmp12DA.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmp12DE=
-_cycalloc(sizeof(*_tmp12DE)),((_tmp12DE[0]=((_tmp12DB.tag=35,((_tmp12DB.f1=((
-_tmp12DD.is_calloc=1,((_tmp12DD.rgn=0,((_tmp12DD.elt_type=((_tmp12DC=_cycalloc(
-sizeof(*_tmp12DC)),((_tmp12DC[0]=_tmp87A,_tmp12DC)))),((_tmp12DD.num_elts=Cyc_yyget_YY3(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 6)]),((_tmp12DD.fat_result=
-0,_tmp12DD)))))))))),_tmp12DB)))),_tmp12DE)))),Cyc_Position_segment_of_abs((yyls[
+yylsp_offset)]).last_line)),_tmp126F))));}break;case 456: _LL3D9: {void*_tmp873;
+struct _tuple2 _tmp872=*Cyc_yyget_YY37(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 2)]);_tmp873=_tmp872.f3;{struct Cyc_Absyn_Malloc_e_struct*_tmp1281;
+struct Cyc_Absyn_MallocInfo _tmp1280;void**_tmp127F;struct Cyc_Absyn_Malloc_e_struct
+_tmp127E;union Cyc_YYSTYPE_union _tmp127D;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp127D.YY3).tag=7,(((_tmp127D.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmp1281=
+_cycalloc(sizeof(*_tmp1281)),((_tmp1281[0]=((_tmp127E.tag=35,((_tmp127E.f1=((
+_tmp1280.is_calloc=1,((_tmp1280.rgn=0,((_tmp1280.elt_type=((_tmp127F=_cycalloc(
+sizeof(*_tmp127F)),((_tmp127F[0]=_tmp873,_tmp127F)))),((_tmp1280.num_elts=Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 6)]),((_tmp1280.fat_result=
+0,_tmp1280)))))))))),_tmp127E)))),_tmp1281)))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 8)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12DA))));}
-break;}case 457: _LL3DA: {void*_tmp881;struct _tuple2 _tmp880=*Cyc_yyget_YY37(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp881=_tmp880.f3;{
-struct Cyc_Absyn_Malloc_e_struct*_tmp12ED;struct Cyc_Absyn_MallocInfo _tmp12EC;void**
-_tmp12EB;struct Cyc_Absyn_Malloc_e_struct _tmp12EA;union Cyc_YYSTYPE_union _tmp12E9;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp12E9.YY3).tag=7,(((_tmp12E9.YY3).f1=Cyc_Absyn_new_exp((
-void*)((_tmp12ED=_cycalloc(sizeof(*_tmp12ED)),((_tmp12ED[0]=((_tmp12EA.tag=35,((
-_tmp12EA.f1=((_tmp12EC.is_calloc=1,((_tmp12EC.rgn=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 8)]),((_tmp12EC.elt_type=((
-_tmp12EB=_cycalloc(sizeof(*_tmp12EB)),((_tmp12EB[0]=_tmp881,_tmp12EB)))),((
-_tmp12EC.num_elts=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 6)]),((_tmp12EC.fat_result=0,_tmp12EC)))))))))),_tmp12EA)))),
-_tmp12ED)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp127D))));}
+break;}case 457: _LL3DA: {void*_tmp87A;struct _tuple2 _tmp879=*Cyc_yyget_YY37(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp87A=_tmp879.f3;{
+struct Cyc_Absyn_Malloc_e_struct*_tmp1290;struct Cyc_Absyn_MallocInfo _tmp128F;void**
+_tmp128E;struct Cyc_Absyn_Malloc_e_struct _tmp128D;union Cyc_YYSTYPE_union _tmp128C;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp128C.YY3).tag=7,(((_tmp128C.YY3).f1=Cyc_Absyn_new_exp((
+void*)((_tmp1290=_cycalloc(sizeof(*_tmp1290)),((_tmp1290[0]=((_tmp128D.tag=35,((
+_tmp128D.f1=((_tmp128F.is_calloc=1,((_tmp128F.rgn=(struct Cyc_Absyn_Exp*)Cyc_yyget_YY3(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 8)]),((_tmp128F.elt_type=((
+_tmp128E=_cycalloc(sizeof(*_tmp128E)),((_tmp128E[0]=_tmp87A,_tmp128E)))),((
+_tmp128F.num_elts=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 6)]),((_tmp128F.fat_result=0,_tmp128F)))))))))),_tmp128D)))),
+_tmp1290)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 10)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp12E9))));}break;}case 458: _LL3DB:{struct Cyc_Absyn_Swap_e_struct*
-_tmp12F3;struct Cyc_Absyn_Swap_e_struct _tmp12F2;union Cyc_YYSTYPE_union _tmp12F1;
-yyval=(union Cyc_YYSTYPE_union)(((_tmp12F1.YY3).tag=7,(((_tmp12F1.YY3).f1=Cyc_Absyn_new_exp((
-void*)((_tmp12F3=_cycalloc(sizeof(*_tmp12F3)),((_tmp12F3[0]=((_tmp12F2.tag=36,((
-_tmp12F2.f1=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
-- 3)]),((_tmp12F2.f2=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]),_tmp12F2)))))),_tmp12F3)))),Cyc_Position_segment_of_abs((yyls[
+yylsp_offset)]).last_line)),_tmp128C))));}break;}case 458: _LL3DB:{struct Cyc_Absyn_Swap_e_struct*
+_tmp1296;struct Cyc_Absyn_Swap_e_struct _tmp1295;union Cyc_YYSTYPE_union _tmp1294;
+yyval=(union Cyc_YYSTYPE_union)(((_tmp1294.YY3).tag=7,(((_tmp1294.YY3).f1=Cyc_Absyn_new_exp((
+void*)((_tmp1296=_cycalloc(sizeof(*_tmp1296)),((_tmp1296[0]=((_tmp1295.tag=36,((
+_tmp1295.f1=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset
+- 3)]),((_tmp1295.f2=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]),_tmp1295)))))),_tmp1296)))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 5)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12F1))));}
-break;case 459: _LL3DC:{struct Cyc_Absyn_Exp*_tmp12F6[1];union Cyc_YYSTYPE_union
-_tmp12F5;yyval=(union Cyc_YYSTYPE_union)(((_tmp12F5.YY3).tag=7,(((_tmp12F5.YY3).f1=
-Cyc_Absyn_primop_exp((void*)19,((_tmp12F6[0]=Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1294))));}
+break;case 459: _LL3DC:{struct Cyc_Absyn_Exp*_tmp1299[1];union Cyc_YYSTYPE_union
+_tmp1298;yyval=(union Cyc_YYSTYPE_union)(((_tmp1298.YY3).tag=7,(((_tmp1298.YY3).f1=
+Cyc_Absyn_primop_exp((void*)19,((_tmp1299[0]=Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),((struct Cyc_List_List*(*)(
-struct _dyneither_ptr))Cyc_List_list)(_tag_dyneither(_tmp12F6,sizeof(struct Cyc_Absyn_Exp*),
+struct _dyneither_ptr))Cyc_List_list)(_tag_dyneither(_tmp1299,sizeof(struct Cyc_Absyn_Exp*),
 1)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp12F5))));}break;case 460: _LL3DD: {void*_tmp88D;
-struct _tuple2 _tmp88C=*Cyc_yyget_YY37(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)]);_tmp88D=_tmp88C.f3;{union Cyc_YYSTYPE_union _tmp12F7;yyval=(
-union Cyc_YYSTYPE_union)(((_tmp12F7.YY3).tag=7,(((_tmp12F7.YY3).f1=Cyc_Absyn_valueof_exp(
-_tmp88D,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
+yylsp_offset)]).last_line)),_tmp1298))));}break;case 460: _LL3DD: {void*_tmp886;
+struct _tuple2 _tmp885=*Cyc_yyget_YY37(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]);_tmp886=_tmp885.f3;{union Cyc_YYSTYPE_union _tmp129A;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp129A.YY3).tag=7,(((_tmp129A.YY3).f1=Cyc_Absyn_valueof_exp(
+_tmp886,Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset - 3)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp12F7))));}break;}case 461: _LL3DE:{union Cyc_YYSTYPE_union
-_tmp12F8;yyval=(union Cyc_YYSTYPE_union)(((_tmp12F8.YY7).tag=11,(((_tmp12F8.YY7).f1=(
-void*)((void*)12),_tmp12F8))));}break;case 462: _LL3DF:{union Cyc_YYSTYPE_union
-_tmp12F9;yyval=(union Cyc_YYSTYPE_union)(((_tmp12F9.YY7).tag=11,(((_tmp12F9.YY7).f1=(
-void*)((void*)11),_tmp12F9))));}break;case 463: _LL3E0:{union Cyc_YYSTYPE_union
-_tmp12FA;yyval=(union Cyc_YYSTYPE_union)(((_tmp12FA.YY7).tag=11,(((_tmp12FA.YY7).f1=(
-void*)((void*)2),_tmp12FA))));}break;case 464: _LL3E1: yyval=yyvs[
+yylsp_offset)]).last_line)),_tmp129A))));}break;}case 461: _LL3DE:{union Cyc_YYSTYPE_union
+_tmp129B;yyval=(union Cyc_YYSTYPE_union)(((_tmp129B.YY7).tag=11,(((_tmp129B.YY7).f1=(
+void*)((void*)12),_tmp129B))));}break;case 462: _LL3DF:{union Cyc_YYSTYPE_union
+_tmp129C;yyval=(union Cyc_YYSTYPE_union)(((_tmp129C.YY7).tag=11,(((_tmp129C.YY7).f1=(
+void*)((void*)11),_tmp129C))));}break;case 463: _LL3E0:{union Cyc_YYSTYPE_union
+_tmp129D;yyval=(union Cyc_YYSTYPE_union)(((_tmp129D.YY7).tag=11,(((_tmp129D.YY7).f1=(
+void*)((void*)2),_tmp129D))));}break;case 464: _LL3E1: yyval=yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)];break;case 465: _LL3E2:{union
-Cyc_YYSTYPE_union _tmp12FB;yyval=(union Cyc_YYSTYPE_union)(((_tmp12FB.YY3).tag=7,(((
-_tmp12FB.YY3).f1=Cyc_Absyn_subscript_exp(Cyc_yyget_YY3(yyvs[
+Cyc_YYSTYPE_union _tmp129E;yyval=(union Cyc_YYSTYPE_union)(((_tmp129E.YY3).tag=7,(((
+_tmp129E.YY3).f1=Cyc_Absyn_subscript_exp(Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 3)]),Cyc_yyget_YY3(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12FB))));}
-break;case 466: _LL3E3:{union Cyc_YYSTYPE_union _tmp12FC;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12FC.YY3).tag=7,(((_tmp12FC.YY3).f1=Cyc_Absyn_unknowncall_exp(Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp129E))));}
+break;case 466: _LL3E3:{union Cyc_YYSTYPE_union _tmp129F;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp129F.YY3).tag=7,(((_tmp129F.YY3).f1=Cyc_Absyn_unknowncall_exp(Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),0,Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12FC))));}
-break;case 467: _LL3E4:{union Cyc_YYSTYPE_union _tmp12FD;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp12FD.YY3).tag=7,(((_tmp12FD.YY3).f1=Cyc_Absyn_unknowncall_exp(Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp129F))));}
+break;case 467: _LL3E4:{union Cyc_YYSTYPE_union _tmp12A0;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12A0.YY3).tag=7,(((_tmp12A0.YY3).f1=Cyc_Absyn_unknowncall_exp(Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 3)]),Cyc_yyget_YY5(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12FD))));}
-break;case 468: _LL3E5:{struct _dyneither_ptr*_tmp1300;union Cyc_YYSTYPE_union
-_tmp12FF;yyval=(union Cyc_YYSTYPE_union)(((_tmp12FF.YY3).tag=7,(((_tmp12FF.YY3).f1=
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A0))));}
+break;case 468: _LL3E5:{struct _dyneither_ptr*_tmp12A3;union Cyc_YYSTYPE_union
+_tmp12A2;yyval=(union Cyc_YYSTYPE_union)(((_tmp12A2.YY3).tag=7,(((_tmp12A2.YY3).f1=
 Cyc_Absyn_aggrmember_exp(Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 2)]),((_tmp1300=_cycalloc(sizeof(*_tmp1300)),((_tmp1300[0]=Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1300)))),Cyc_Position_segment_of_abs((
+yyvsp_offset - 2)]),((_tmp12A3=_cycalloc(sizeof(*_tmp12A3)),((_tmp12A3[0]=Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp12A3)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12FF))));}
-break;case 469: _LL3E6:{struct _dyneither_ptr*_tmp1303;union Cyc_YYSTYPE_union
-_tmp1302;yyval=(union Cyc_YYSTYPE_union)(((_tmp1302.YY3).tag=7,(((_tmp1302.YY3).f1=
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A2))));}
+break;case 469: _LL3E6:{struct _dyneither_ptr*_tmp12A6;union Cyc_YYSTYPE_union
+_tmp12A5;yyval=(union Cyc_YYSTYPE_union)(((_tmp12A5.YY3).tag=7,(((_tmp12A5.YY3).f1=
 Cyc_Absyn_aggrarrow_exp(Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 2)]),((_tmp1303=_cycalloc(sizeof(*_tmp1303)),((_tmp1303[0]=Cyc_yyget_String_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1303)))),Cyc_Position_segment_of_abs((
+yyvsp_offset - 2)]),((_tmp12A6=_cycalloc(sizeof(*_tmp12A6)),((_tmp12A6[0]=Cyc_yyget_String_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp12A6)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 2)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1302))));}
-break;case 470: _LL3E7:{union Cyc_YYSTYPE_union _tmp1304;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1304.YY3).tag=7,(((_tmp1304.YY3).f1=Cyc_Absyn_post_inc_exp(Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A5))));}
+break;case 470: _LL3E7:{union Cyc_YYSTYPE_union _tmp12A7;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12A7.YY3).tag=7,(((_tmp12A7.YY3).f1=Cyc_Absyn_post_inc_exp(Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1304))));}
-break;case 471: _LL3E8:{union Cyc_YYSTYPE_union _tmp1305;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1305.YY3).tag=7,(((_tmp1305.YY3).f1=Cyc_Absyn_post_dec_exp(Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A7))));}
+break;case 471: _LL3E8:{union Cyc_YYSTYPE_union _tmp12A8;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12A8.YY3).tag=7,(((_tmp12A8.YY3).f1=Cyc_Absyn_post_dec_exp(Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1305))));}
-break;case 472: _LL3E9:{struct Cyc_Absyn_CompoundLit_e_struct*_tmp130B;struct Cyc_Absyn_CompoundLit_e_struct
-_tmp130A;union Cyc_YYSTYPE_union _tmp1309;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1309.YY3).tag=7,(((_tmp1309.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmp130B=
-_cycalloc(sizeof(*_tmp130B)),((_tmp130B[0]=((_tmp130A.tag=27,((_tmp130A.f1=Cyc_yyget_YY37(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),((_tmp130A.f2=((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12A8))));}
+break;case 472: _LL3E9:{struct Cyc_Absyn_CompoundLit_e_struct*_tmp12AE;struct Cyc_Absyn_CompoundLit_e_struct
+_tmp12AD;union Cyc_YYSTYPE_union _tmp12AC;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12AC.YY3).tag=7,(((_tmp12AC.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmp12AE=
+_cycalloc(sizeof(*_tmp12AE)),((_tmp12AE[0]=((_tmp12AD.tag=27,((_tmp12AD.f1=Cyc_yyget_YY37(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),((_tmp12AD.f2=((
 struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_YY6(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)])),_tmp130A)))))),
-_tmp130B)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)])),_tmp12AD)))))),
+_tmp12AE)))),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset - 5)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp1309))));}break;case 473: _LL3EA:{struct Cyc_Absyn_CompoundLit_e_struct*
-_tmp1311;struct Cyc_Absyn_CompoundLit_e_struct _tmp1310;union Cyc_YYSTYPE_union
-_tmp130F;yyval=(union Cyc_YYSTYPE_union)(((_tmp130F.YY3).tag=7,(((_tmp130F.YY3).f1=
-Cyc_Absyn_new_exp((void*)((_tmp1311=_cycalloc(sizeof(*_tmp1311)),((_tmp1311[0]=((
-_tmp1310.tag=27,((_tmp1310.f1=Cyc_yyget_YY37(yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset - 5)]),((_tmp1310.f2=((struct Cyc_List_List*(*)(struct Cyc_List_List*
+yylsp_offset)]).last_line)),_tmp12AC))));}break;case 473: _LL3EA:{struct Cyc_Absyn_CompoundLit_e_struct*
+_tmp12B4;struct Cyc_Absyn_CompoundLit_e_struct _tmp12B3;union Cyc_YYSTYPE_union
+_tmp12B2;yyval=(union Cyc_YYSTYPE_union)(((_tmp12B2.YY3).tag=7,(((_tmp12B2.YY3).f1=
+Cyc_Absyn_new_exp((void*)((_tmp12B4=_cycalloc(sizeof(*_tmp12B4)),((_tmp12B4[0]=((
+_tmp12B3.tag=27,((_tmp12B3.f1=Cyc_yyget_YY37(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset - 5)]),((_tmp12B3.f2=((struct Cyc_List_List*(*)(struct Cyc_List_List*
 x))Cyc_List_imp_rev)(Cyc_yyget_YY6(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 2)])),_tmp1310)))))),_tmp1311)))),Cyc_Position_segment_of_abs((
+yyvsp_offset - 2)])),_tmp12B3)))))),_tmp12B4)))),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 6)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp130F))));}
-break;case 474: _LL3EB:{struct Cyc_Absyn_UnknownId_e_struct*_tmp1317;struct Cyc_Absyn_UnknownId_e_struct
-_tmp1316;union Cyc_YYSTYPE_union _tmp1315;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1315.YY3).tag=7,(((_tmp1315.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmp1317=
-_cycalloc(sizeof(*_tmp1317)),((_tmp1317[0]=((_tmp1316.tag=2,((_tmp1316.f1=Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1316)))),_tmp1317)))),
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12B2))));}
+break;case 474: _LL3EB:{struct Cyc_Absyn_UnknownId_e_struct*_tmp12BA;struct Cyc_Absyn_UnknownId_e_struct
+_tmp12B9;union Cyc_YYSTYPE_union _tmp12B8;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12B8.YY3).tag=7,(((_tmp12B8.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmp12BA=
+_cycalloc(sizeof(*_tmp12BA)),((_tmp12BA[0]=((_tmp12B9.tag=2,((_tmp12B9.f1=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp12B9)))),_tmp12BA)))),
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp1315))));}break;case 475: _LL3EC: yyval=yyvs[
+yylsp_offset)]).last_line)),_tmp12B8))));}break;case 475: _LL3EC: yyval=yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)];break;case 476: _LL3ED:{union
-Cyc_YYSTYPE_union _tmp1318;yyval=(union Cyc_YYSTYPE_union)(((_tmp1318.YY3).tag=7,(((
-_tmp1318.YY3).f1=Cyc_Absyn_string_exp(Cyc_yyget_String_tok(yyvs[
+Cyc_YYSTYPE_union _tmp12BB;yyval=(union Cyc_YYSTYPE_union)(((_tmp12BB.YY3).tag=7,(((
+_tmp12BB.YY3).f1=Cyc_Absyn_string_exp(Cyc_yyget_String_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1318))));}
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12BB))));}
 break;case 477: _LL3EE: yyval=yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset - 1)];break;case 478: _LL3EF:{union Cyc_YYSTYPE_union _tmp1319;yyval=(
-union Cyc_YYSTYPE_union)(((_tmp1319.YY3).tag=7,(((_tmp1319.YY3).f1=Cyc_Absyn_noinstantiate_exp(
+yyvsp_offset - 1)];break;case 478: _LL3EF:{union Cyc_YYSTYPE_union _tmp12BC;yyval=(
+union Cyc_YYSTYPE_union)(((_tmp12BC.YY3).tag=7,(((_tmp12BC.YY3).f1=Cyc_Absyn_noinstantiate_exp(
 Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1319))));}
-break;case 479: _LL3F0:{union Cyc_YYSTYPE_union _tmp131A;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp131A.YY3).tag=7,(((_tmp131A.YY3).f1=Cyc_Absyn_instantiate_exp(Cyc_yyget_YY3(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12BC))));}
+break;case 479: _LL3F0:{union Cyc_YYSTYPE_union _tmp12BD;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12BD.YY3).tag=7,(((_tmp12BD.YY3).f1=Cyc_Absyn_instantiate_exp(Cyc_yyget_YY3(
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),Cyc_List_imp_rev(
 Cyc_yyget_YY40(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)])),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp131A))));}
-break;case 480: _LL3F1:{union Cyc_YYSTYPE_union _tmp131B;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp131B.YY3).tag=7,(((_tmp131B.YY3).f1=Cyc_Absyn_tuple_exp(Cyc_yyget_YY5(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12BD))));}
+break;case 480: _LL3F1:{union Cyc_YYSTYPE_union _tmp12BE;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12BE.YY3).tag=7,(((_tmp12BE.YY3).f1=Cyc_Absyn_tuple_exp(Cyc_yyget_YY5(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 1)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 3)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp131B))));}
-break;case 481: _LL3F2:{struct Cyc_Absyn_Struct_e_struct*_tmp1321;struct Cyc_Absyn_Struct_e_struct
-_tmp1320;union Cyc_YYSTYPE_union _tmp131F;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp131F.YY3).tag=7,(((_tmp131F.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmp1321=
-_cycalloc(sizeof(*_tmp1321)),((_tmp1321[0]=((_tmp1320.tag=30,((_tmp1320.f1=Cyc_yyget_QualId_tok(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),((_tmp1320.f2=Cyc_yyget_YY40(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmp1320.f3=((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12BE))));}
+break;case 481: _LL3F2:{struct Cyc_Absyn_Struct_e_struct*_tmp12C4;struct Cyc_Absyn_Struct_e_struct
+_tmp12C3;union Cyc_YYSTYPE_union _tmp12C2;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12C2.YY3).tag=7,(((_tmp12C2.YY3).f1=Cyc_Absyn_new_exp((void*)((_tmp12C4=
+_cycalloc(sizeof(*_tmp12C4)),((_tmp12C4[0]=((_tmp12C3.tag=30,((_tmp12C3.f1=Cyc_yyget_QualId_tok(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 4)]),((_tmp12C3.f2=Cyc_yyget_YY40(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),((_tmp12C3.f3=((
 struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_yyget_YY6(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)])),((_tmp1320.f4=0,
-_tmp1320)))))))))),_tmp1321)))),Cyc_Position_segment_of_abs((yyls[
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)])),((_tmp12C3.f4=0,
+_tmp12C3)))))))))),_tmp12C4)))),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp131F))));}
-break;case 482: _LL3F3:{union Cyc_YYSTYPE_union _tmp1322;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1322.YY3).tag=7,(((_tmp1322.YY3).f1=Cyc_Absyn_stmt_exp(Cyc_yyget_YY9(yyvs[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12C2))));}
+break;case 482: _LL3F3:{union Cyc_YYSTYPE_union _tmp12C5;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12C5.YY3).tag=7,(((_tmp12C5.YY3).f1=Cyc_Absyn_stmt_exp(Cyc_yyget_YY9(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]),Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset - 4)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp1322))));}
-break;case 483: _LL3F4:{union Cyc_YYSTYPE_union _tmp1323;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1323.YY5).tag=9,(((_tmp1323.YY5).f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12C5))));}
+break;case 483: _LL3F4:{union Cyc_YYSTYPE_union _tmp12C6;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12C6.YY5).tag=9,(((_tmp12C6.YY5).f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*
 x))Cyc_List_imp_rev)(Cyc_yyget_YY5(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)])),_tmp1323))));}break;case 484: _LL3F5:{struct Cyc_List_List*
-_tmp1326;union Cyc_YYSTYPE_union _tmp1325;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1325.YY5).tag=9,(((_tmp1325.YY5).f1=((_tmp1326=_cycalloc(sizeof(*_tmp1326)),((
-_tmp1326->hd=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
-yyvsp_offset)]),((_tmp1326->tl=0,_tmp1326)))))),_tmp1325))));}break;case 485:
-_LL3F6:{struct Cyc_List_List*_tmp1329;union Cyc_YYSTYPE_union _tmp1328;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp1328.YY5).tag=9,(((_tmp1328.YY5).f1=((_tmp1329=
-_cycalloc(sizeof(*_tmp1329)),((_tmp1329->hd=Cyc_yyget_YY3(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmp1329->tl=Cyc_yyget_YY5(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmp1329)))))),
-_tmp1328))));}break;case 486: _LL3F7:{union Cyc_YYSTYPE_union _tmp132A;yyval=(union
-Cyc_YYSTYPE_union)(((_tmp132A.YY3).tag=7,(((_tmp132A.YY3).f1=Cyc_Absyn_int_exp((
+yyvsp_offset)])),_tmp12C6))));}break;case 484: _LL3F5:{struct Cyc_List_List*
+_tmp12C9;union Cyc_YYSTYPE_union _tmp12C8;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12C8.YY5).tag=9,(((_tmp12C8.YY5).f1=((_tmp12C9=_cycalloc(sizeof(*_tmp12C9)),((
+_tmp12C9->hd=Cyc_yyget_YY3(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset)]),((_tmp12C9->tl=0,_tmp12C9)))))),_tmp12C8))));}break;case 485:
+_LL3F6:{struct Cyc_List_List*_tmp12CC;union Cyc_YYSTYPE_union _tmp12CB;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp12CB.YY5).tag=9,(((_tmp12CB.YY5).f1=((_tmp12CC=
+_cycalloc(sizeof(*_tmp12CC)),((_tmp12CC->hd=Cyc_yyget_YY3(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),((_tmp12CC->tl=Cyc_yyget_YY5(
+yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 2)]),_tmp12CC)))))),
+_tmp12CB))));}break;case 486: _LL3F7:{union Cyc_YYSTYPE_union _tmp12CD;yyval=(union
+Cyc_YYSTYPE_union)(((_tmp12CD.YY3).tag=7,(((_tmp12CD.YY3).f1=Cyc_Absyn_int_exp((
 Cyc_yyget_Int_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f1,(
 Cyc_yyget_Int_tok(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)])).f2,
 Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(10000,
 yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp132A))));}break;case 487: _LL3F8:{union Cyc_YYSTYPE_union
-_tmp132B;yyval=(union Cyc_YYSTYPE_union)(((_tmp132B.YY3).tag=7,(((_tmp132B.YY3).f1=
+yylsp_offset)]).last_line)),_tmp12CD))));}break;case 487: _LL3F8:{union Cyc_YYSTYPE_union
+_tmp12CE;yyval=(union Cyc_YYSTYPE_union)(((_tmp12CE.YY3).tag=7,(((_tmp12CE.YY3).f1=
 Cyc_Absyn_char_exp(Cyc_yyget_Char_tok(yyvs[_check_known_subscript_notnull(10000,
 yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[_check_known_subscript_notnull(
 10000,yylsp_offset)]).first_line,(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset)]).last_line)),_tmp132B))));}break;case 488: _LL3F9:{union Cyc_YYSTYPE_union
-_tmp132C;yyval=(union Cyc_YYSTYPE_union)(((_tmp132C.YY3).tag=7,(((_tmp132C.YY3).f1=
+yylsp_offset)]).last_line)),_tmp12CE))));}break;case 488: _LL3F9:{union Cyc_YYSTYPE_union
+_tmp12CF;yyval=(union Cyc_YYSTYPE_union)(((_tmp12CF.YY3).tag=7,(((_tmp12CF.YY3).f1=
 Cyc_Absyn_float_exp(Cyc_yyget_String_tok(yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset)]),Cyc_Position_segment_of_abs((yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp132C))));}
-break;case 489: _LL3FA:{union Cyc_YYSTYPE_union _tmp132D;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp132D.YY3).tag=7,(((_tmp132D.YY3).f1=Cyc_Absyn_null_exp(Cyc_Position_segment_of_abs((
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12CF))));}
+break;case 489: _LL3FA:{union Cyc_YYSTYPE_union _tmp12D0;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12D0.YY3).tag=7,(((_tmp12D0.YY3).f1=Cyc_Absyn_null_exp(Cyc_Position_segment_of_abs((
 yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line,(yyls[
-_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp132D))));}
-break;case 490: _LL3FB:{struct _tuple1*_tmp1336;struct _dyneither_ptr*_tmp1335;union
-Cyc_Absyn_Nmspace_union _tmp1334;union Cyc_YYSTYPE_union _tmp1333;yyval=(union Cyc_YYSTYPE_union)(((
-_tmp1333.QualId_tok).tag=4,(((_tmp1333.QualId_tok).f1=((_tmp1336=_cycalloc(
-sizeof(*_tmp1336)),((_tmp1336->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp1334.Rel_n).tag=
-1,(((_tmp1334.Rel_n).f1=0,_tmp1334)))),((_tmp1336->f2=((_tmp1335=_cycalloc(
-sizeof(*_tmp1335)),((_tmp1335[0]=Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp1335)))),_tmp1336)))))),
-_tmp1333))));}break;case 491: _LL3FC: yyval=yyvs[_check_known_subscript_notnull(
-10000,yyvsp_offset)];break;case 492: _LL3FD:{struct _tuple1*_tmp133F;struct
-_dyneither_ptr*_tmp133E;union Cyc_Absyn_Nmspace_union _tmp133D;union Cyc_YYSTYPE_union
-_tmp133C;yyval=(union Cyc_YYSTYPE_union)(((_tmp133C.QualId_tok).tag=4,(((_tmp133C.QualId_tok).f1=((
-_tmp133F=_cycalloc(sizeof(*_tmp133F)),((_tmp133F->f1=(union Cyc_Absyn_Nmspace_union)(((
-_tmp133D.Rel_n).tag=1,(((_tmp133D.Rel_n).f1=0,_tmp133D)))),((_tmp133F->f2=((
-_tmp133E=_cycalloc(sizeof(*_tmp133E)),((_tmp133E[0]=Cyc_yyget_String_tok(yyvs[
-_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp133E)))),_tmp133F)))))),
-_tmp133C))));}break;case 493: _LL3FE: yyval=yyvs[_check_known_subscript_notnull(
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_line)),_tmp12D0))));}
+break;case 490: _LL3FB:{struct _tuple1*_tmp12D9;struct _dyneither_ptr*_tmp12D8;union
+Cyc_Absyn_Nmspace_union _tmp12D7;union Cyc_YYSTYPE_union _tmp12D6;yyval=(union Cyc_YYSTYPE_union)(((
+_tmp12D6.QualId_tok).tag=4,(((_tmp12D6.QualId_tok).f1=((_tmp12D9=_cycalloc(
+sizeof(*_tmp12D9)),((_tmp12D9->f1=(union Cyc_Absyn_Nmspace_union)(((_tmp12D7.Rel_n).tag=
+1,(((_tmp12D7.Rel_n).f1=0,_tmp12D7)))),((_tmp12D9->f2=((_tmp12D8=_cycalloc(
+sizeof(*_tmp12D8)),((_tmp12D8[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp12D8)))),_tmp12D9)))))),
+_tmp12D6))));}break;case 491: _LL3FC: yyval=yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)];break;case 492: _LL3FD:{struct _tuple1*_tmp12E2;struct
+_dyneither_ptr*_tmp12E1;union Cyc_Absyn_Nmspace_union _tmp12E0;union Cyc_YYSTYPE_union
+_tmp12DF;yyval=(union Cyc_YYSTYPE_union)(((_tmp12DF.QualId_tok).tag=4,(((_tmp12DF.QualId_tok).f1=((
+_tmp12E2=_cycalloc(sizeof(*_tmp12E2)),((_tmp12E2->f1=(union Cyc_Absyn_Nmspace_union)(((
+_tmp12E0.Rel_n).tag=1,(((_tmp12E0.Rel_n).f1=0,_tmp12E0)))),((_tmp12E2->f2=((
+_tmp12E1=_cycalloc(sizeof(*_tmp12E1)),((_tmp12E1[0]=Cyc_yyget_String_tok(yyvs[
+_check_known_subscript_notnull(10000,yyvsp_offset)]),_tmp12E1)))),_tmp12E2)))))),
+_tmp12DF))));}break;case 493: _LL3FE: yyval=yyvs[_check_known_subscript_notnull(
 10000,yyvsp_offset)];break;case 494: _LL3FF: yyval=yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset)];break;case 495: _LL400: yyval=
 yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;case 496: _LL401:
@@ -6595,91 +6587,93 @@ _LL402: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];break;cas
 break;}yyvsp_offset -=yylen;yyssp_offset -=yylen;yylsp_offset -=yylen;yyvs[
 _check_known_subscript_notnull(10000,++ yyvsp_offset)]=yyval;++ yylsp_offset;if(
 yylen == 0){(yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line=
-Cyc_yylloc.first_line;(yyls[yylsp_offset]).first_column=Cyc_yylloc.first_column;(
-yyls[yylsp_offset]).last_line=(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line;(yyls[yylsp_offset]).last_column=(yyls[
+Cyc_yylloc.first_line;(yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_column=
+Cyc_yylloc.first_column;(yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).last_line=(
+yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line;(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_column=(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_column;}else{(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line=(yyls[
 _check_known_subscript_notnull(10000,(yylsp_offset + yylen)- 1)]).last_line;(yyls[
-yylsp_offset]).last_column=(yyls[_check_known_subscript_notnull(10000,(
-yylsp_offset + yylen)- 1)]).last_column;}yyn=(int)Cyc_yyr1[
-_check_known_subscript_notnull(500,yyn)];yystate=Cyc_yypgoto[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_column=(yyls[
+_check_known_subscript_notnull(10000,(yylsp_offset + yylen)- 1)]).last_column;}
+yyn=(int)Cyc_yyr1[_check_known_subscript_notnull(500,yyn)];yystate=Cyc_yypgoto[
 _check_known_subscript_notnull(142,yyn - 134)]+ yyss[
 _check_known_subscript_notnull(10000,yyssp_offset)];if((yystate >= 0  && yystate <= 
-5991) && Cyc_yycheck[_check_known_subscript_notnull(5992,yystate)]== yyss[
+6136) && Cyc_yycheck[_check_known_subscript_notnull(6137,yystate)]== yyss[
 _check_known_subscript_notnull(10000,yyssp_offset)])yystate=(int)Cyc_yytable[
-_check_known_subscript_notnull(5992,yystate)];else{yystate=(int)Cyc_yydefgoto[
+_check_known_subscript_notnull(6137,yystate)];else{yystate=(int)Cyc_yydefgoto[
 _check_known_subscript_notnull(142,yyn - 134)];}goto yynewstate;yyerrlab: if(
-yyerrstatus == 0){++ Cyc_yynerrs;yyn=(int)Cyc_yypact[yystate];if(yyn > - 32768  && 
-yyn < 5991){int sze=0;struct _dyneither_ptr msg;int x;int count;count=0;for(x=yyn < 0?-
-yyn: 0;x < 276 / sizeof(char*);++ x){if(Cyc_yycheck[_check_known_subscript_notnull(
-5992,x + yyn)]== x)(sze +=Cyc_strlen((struct _dyneither_ptr)Cyc_yytname[
-_check_known_subscript_notnull(276,x)])+ 15,count ++);}{unsigned int _tmp1344;
-unsigned int _tmp1343;struct _dyneither_ptr _tmp1342;char*_tmp1341;unsigned int
-_tmp1340;msg=((_tmp1340=(unsigned int)(sze + 15),((_tmp1341=(char*)_region_malloc(
-yyregion,_check_times(sizeof(char),_tmp1340 + 1)),((_tmp1342=_tag_dyneither(
-_tmp1341,sizeof(char),_tmp1340 + 1),((((_tmp1343=_tmp1340,((_tmp1345(& _tmp1344,&
-_tmp1343,& _tmp1341),_tmp1341[_tmp1343]=(char)0)))),_tmp1342))))))));}{const char*
-_tmp1346;Cyc_strcpy(msg,((_tmp1346="parse error",_tag_dyneither(_tmp1346,sizeof(
+yyerrstatus == 0){++ Cyc_yynerrs;yyn=(int)Cyc_yypact[
+_check_known_subscript_notnull(1010,yystate)];if(yyn > - 32768  && yyn < 6136){int
+sze=0;struct _dyneither_ptr msg;int x;int count;count=0;for(x=yyn < 0?- yyn: 0;x < 276 / 
+sizeof(char*);++ x){if(Cyc_yycheck[_check_known_subscript_notnull(6137,x + yyn)]== 
+x)(sze +=Cyc_strlen((struct _dyneither_ptr)Cyc_yytname[
+_check_known_subscript_notnull(276,x)])+ 15,count ++);}{unsigned int _tmp12E7;
+unsigned int _tmp12E6;struct _dyneither_ptr _tmp12E5;char*_tmp12E4;unsigned int
+_tmp12E3;msg=((_tmp12E3=(unsigned int)(sze + 15),((_tmp12E4=(char*)_region_malloc(
+yyregion,_check_times(sizeof(char),_tmp12E3 + 1)),((_tmp12E5=_tag_dyneither(
+_tmp12E4,sizeof(char),_tmp12E3 + 1),((((_tmp12E6=_tmp12E3,((_tmp12E8(& _tmp12E7,&
+_tmp12E6,& _tmp12E4),_tmp12E4[_tmp12E6]=(char)0)))),_tmp12E5))))))));}{const char*
+_tmp12E9;Cyc_strcpy(msg,((_tmp12E9="parse error",_tag_dyneither(_tmp12E9,sizeof(
 char),12))));}if(count < 5){count=0;for(x=yyn < 0?- yyn: 0;x < 276 / sizeof(char*);++ x){
-if(Cyc_yycheck[_check_known_subscript_notnull(5992,x + yyn)]== x){{const char*
-_tmp1348;const char*_tmp1347;Cyc_strcat(msg,(struct _dyneither_ptr)(count == 0?(
-struct _dyneither_ptr)((_tmp1348=", expecting `",_tag_dyneither(_tmp1348,sizeof(
-char),14))):(struct _dyneither_ptr)((_tmp1347=" or `",_tag_dyneither(_tmp1347,
+if(Cyc_yycheck[_check_known_subscript_notnull(6137,x + yyn)]== x){{const char*
+_tmp12EB;const char*_tmp12EA;Cyc_strcat(msg,(struct _dyneither_ptr)(count == 0?(
+struct _dyneither_ptr)((_tmp12EB=", expecting `",_tag_dyneither(_tmp12EB,sizeof(
+char),14))):(struct _dyneither_ptr)((_tmp12EA=" or `",_tag_dyneither(_tmp12EA,
 sizeof(char),6)))));}Cyc_strcat(msg,(struct _dyneither_ptr)Cyc_yytname[
-_check_known_subscript_notnull(276,x)]);{const char*_tmp1349;Cyc_strcat(msg,((
-_tmp1349="'",_tag_dyneither(_tmp1349,sizeof(char),2))));}++ count;}}}Cyc_yyerror((
-struct _dyneither_ptr)msg);}else{const char*_tmp134A;Cyc_yyerror(((_tmp134A="parse error",
-_tag_dyneither(_tmp134A,sizeof(char),12))));}}goto yyerrlab1;yyerrlab1: if(
-yyerrstatus == 3){if(Cyc_yychar == 0){int _tmp8C6=1;_npop_handler(0);return _tmp8C6;}
+_check_known_subscript_notnull(276,x)]);{const char*_tmp12EC;Cyc_strcat(msg,((
+_tmp12EC="'",_tag_dyneither(_tmp12EC,sizeof(char),2))));}++ count;}}}Cyc_yyerror((
+struct _dyneither_ptr)msg);}else{const char*_tmp12ED;Cyc_yyerror(((_tmp12ED="parse error",
+_tag_dyneither(_tmp12ED,sizeof(char),12))));}}goto yyerrlab1;yyerrlab1: if(
+yyerrstatus == 3){if(Cyc_yychar == 0){int _tmp8BF=1;_npop_handler(0);return _tmp8BF;}
 Cyc_yychar=- 2;}yyerrstatus=3;goto yyerrhandle;yyerrdefault: yyerrpop: if(
-yyssp_offset == 0){int _tmp8C7=1;_npop_handler(0);return _tmp8C7;}-- yyvsp_offset;
+yyssp_offset == 0){int _tmp8C0=1;_npop_handler(0);return _tmp8C0;}-- yyvsp_offset;
 yystate=(int)yyss[_check_known_subscript_notnull(10000,-- yyssp_offset)];--
-yylsp_offset;yyerrhandle: yyn=(int)Cyc_yypact[_check_known_subscript_notnull(1011,
-yystate)];if(yyn == - 32768)goto yyerrdefault;yyn +=1;if((yyn < 0  || yyn > 5991) || 
-Cyc_yycheck[_check_known_subscript_notnull(5992,yyn)]!= 1)goto yyerrdefault;yyn=(
-int)Cyc_yytable[_check_known_subscript_notnull(5992,yyn)];if(yyn < 0){if(yyn == -
+yylsp_offset;yyerrhandle: yyn=(int)Cyc_yypact[_check_known_subscript_notnull(1010,
+yystate)];if(yyn == - 32768)goto yyerrdefault;yyn +=1;if((yyn < 0  || yyn > 6136) || 
+Cyc_yycheck[_check_known_subscript_notnull(6137,yyn)]!= 1)goto yyerrdefault;yyn=(
+int)Cyc_yytable[_check_known_subscript_notnull(6137,yyn)];if(yyn < 0){if(yyn == -
 32768)goto yyerrpop;yyn=- yyn;goto yyreduce;}else{if(yyn == 0)goto yyerrpop;}if(yyn == 
-1010){int _tmp8C8=0;_npop_handler(0);return _tmp8C8;}yyvs[
+1009){int _tmp8C1=0;_npop_handler(0);return _tmp8C1;}yyvs[
 _check_known_subscript_notnull(10000,++ yyvsp_offset)]=Cyc_yylval;yyls[
 _check_known_subscript_notnull(10000,++ yylsp_offset)]=Cyc_yylloc;goto yynewstate;};
 _pop_region(yyregion);}void Cyc_yyprint(int i,union Cyc_YYSTYPE_union v);void Cyc_yyprint(
-int i,union Cyc_YYSTYPE_union v){union Cyc_YYSTYPE_union _tmp8D2=v;struct _tuple11
-_tmp8D3;int _tmp8D4;char _tmp8D5;struct _dyneither_ptr _tmp8D6;struct _tuple1*_tmp8D7;
-struct _tuple1 _tmp8D8;union Cyc_Absyn_Nmspace_union _tmp8D9;struct _dyneither_ptr*
-_tmp8DA;_LL408: if((_tmp8D2.Int_tok).tag != 0)goto _LL40A;_tmp8D3=(_tmp8D2.Int_tok).f1;
-_tmp8D4=_tmp8D3.f2;_LL409:{const char*_tmp134E;void*_tmp134D[1];struct Cyc_Int_pa_struct
-_tmp134C;(_tmp134C.tag=1,((_tmp134C.f1=(unsigned long)_tmp8D4,((_tmp134D[0]=&
-_tmp134C,Cyc_fprintf(Cyc_stderr,((_tmp134E="%d",_tag_dyneither(_tmp134E,sizeof(
-char),3))),_tag_dyneither(_tmp134D,sizeof(void*),1)))))));}goto _LL407;_LL40A: if((
-_tmp8D2.Char_tok).tag != 1)goto _LL40C;_tmp8D5=(_tmp8D2.Char_tok).f1;_LL40B:{const
-char*_tmp1352;void*_tmp1351[1];struct Cyc_Int_pa_struct _tmp1350;(_tmp1350.tag=1,((
-_tmp1350.f1=(unsigned long)((int)_tmp8D5),((_tmp1351[0]=& _tmp1350,Cyc_fprintf(
-Cyc_stderr,((_tmp1352="%c",_tag_dyneither(_tmp1352,sizeof(char),3))),
-_tag_dyneither(_tmp1351,sizeof(void*),1)))))));}goto _LL407;_LL40C: if((_tmp8D2.String_tok).tag
-!= 2)goto _LL40E;_tmp8D6=(_tmp8D2.String_tok).f1;_LL40D:{const char*_tmp1356;void*
-_tmp1355[1];struct Cyc_String_pa_struct _tmp1354;(_tmp1354.tag=0,((_tmp1354.f1=(
-struct _dyneither_ptr)((struct _dyneither_ptr)_tmp8D6),((_tmp1355[0]=& _tmp1354,Cyc_fprintf(
-Cyc_stderr,((_tmp1356="\"%s\"",_tag_dyneither(_tmp1356,sizeof(char),5))),
-_tag_dyneither(_tmp1355,sizeof(void*),1)))))));}goto _LL407;_LL40E: if((_tmp8D2.QualId_tok).tag
-!= 4)goto _LL410;_tmp8D7=(_tmp8D2.QualId_tok).f1;_tmp8D8=*_tmp8D7;_tmp8D9=_tmp8D8.f1;
-_tmp8DA=_tmp8D8.f2;_LL40F: {struct Cyc_List_List*_tmp8E4=0;{union Cyc_Absyn_Nmspace_union
-_tmp8E5=_tmp8D9;struct Cyc_List_List*_tmp8E6;struct Cyc_List_List*_tmp8E7;_LL413:
-if((_tmp8E5.Rel_n).tag != 1)goto _LL415;_tmp8E6=(_tmp8E5.Rel_n).f1;_LL414: _tmp8E4=
-_tmp8E6;goto _LL412;_LL415: if((_tmp8E5.Abs_n).tag != 2)goto _LL417;_tmp8E7=(_tmp8E5.Abs_n).f1;
-_LL416: _tmp8E4=_tmp8E7;goto _LL412;_LL417: if((_tmp8E5.Loc_n).tag != 0)goto _LL412;
-_LL418: goto _LL412;_LL412:;}for(0;_tmp8E4 != 0;_tmp8E4=_tmp8E4->tl){const char*
-_tmp135A;void*_tmp1359[1];struct Cyc_String_pa_struct _tmp1358;(_tmp1358.tag=0,((
-_tmp1358.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*((struct _dyneither_ptr*)
-_tmp8E4->hd)),((_tmp1359[0]=& _tmp1358,Cyc_fprintf(Cyc_stderr,((_tmp135A="%s::",
-_tag_dyneither(_tmp135A,sizeof(char),5))),_tag_dyneither(_tmp1359,sizeof(void*),
-1)))))));}{const char*_tmp135E;void*_tmp135D[1];struct Cyc_String_pa_struct
-_tmp135C;(_tmp135C.tag=0,((_tmp135C.f1=(struct _dyneither_ptr)((struct
-_dyneither_ptr)*_tmp8DA),((_tmp135D[0]=& _tmp135C,Cyc_fprintf(Cyc_stderr,((
-_tmp135E="%s::",_tag_dyneither(_tmp135E,sizeof(char),5))),_tag_dyneither(
-_tmp135D,sizeof(void*),1)))))));}goto _LL407;}_LL410:;_LL411:{const char*_tmp1361;
-void*_tmp1360;(_tmp1360=0,Cyc_fprintf(Cyc_stderr,((_tmp1361="?",_tag_dyneither(
-_tmp1361,sizeof(char),2))),_tag_dyneither(_tmp1360,sizeof(void*),0)));}goto
+int i,union Cyc_YYSTYPE_union v){union Cyc_YYSTYPE_union _tmp8CB=v;struct _tuple11
+_tmp8CC;int _tmp8CD;char _tmp8CE;struct _dyneither_ptr _tmp8CF;struct _tuple1*_tmp8D0;
+struct _tuple1 _tmp8D1;union Cyc_Absyn_Nmspace_union _tmp8D2;struct _dyneither_ptr*
+_tmp8D3;_LL408: if((_tmp8CB.Int_tok).tag != 0)goto _LL40A;_tmp8CC=(_tmp8CB.Int_tok).f1;
+_tmp8CD=_tmp8CC.f2;_LL409:{const char*_tmp12F1;void*_tmp12F0[1];struct Cyc_Int_pa_struct
+_tmp12EF;(_tmp12EF.tag=1,((_tmp12EF.f1=(unsigned long)_tmp8CD,((_tmp12F0[0]=&
+_tmp12EF,Cyc_fprintf(Cyc_stderr,((_tmp12F1="%d",_tag_dyneither(_tmp12F1,sizeof(
+char),3))),_tag_dyneither(_tmp12F0,sizeof(void*),1)))))));}goto _LL407;_LL40A: if((
+_tmp8CB.Char_tok).tag != 1)goto _LL40C;_tmp8CE=(_tmp8CB.Char_tok).f1;_LL40B:{const
+char*_tmp12F5;void*_tmp12F4[1];struct Cyc_Int_pa_struct _tmp12F3;(_tmp12F3.tag=1,((
+_tmp12F3.f1=(unsigned long)((int)_tmp8CE),((_tmp12F4[0]=& _tmp12F3,Cyc_fprintf(
+Cyc_stderr,((_tmp12F5="%c",_tag_dyneither(_tmp12F5,sizeof(char),3))),
+_tag_dyneither(_tmp12F4,sizeof(void*),1)))))));}goto _LL407;_LL40C: if((_tmp8CB.String_tok).tag
+!= 2)goto _LL40E;_tmp8CF=(_tmp8CB.String_tok).f1;_LL40D:{const char*_tmp12F9;void*
+_tmp12F8[1];struct Cyc_String_pa_struct _tmp12F7;(_tmp12F7.tag=0,((_tmp12F7.f1=(
+struct _dyneither_ptr)((struct _dyneither_ptr)_tmp8CF),((_tmp12F8[0]=& _tmp12F7,Cyc_fprintf(
+Cyc_stderr,((_tmp12F9="\"%s\"",_tag_dyneither(_tmp12F9,sizeof(char),5))),
+_tag_dyneither(_tmp12F8,sizeof(void*),1)))))));}goto _LL407;_LL40E: if((_tmp8CB.QualId_tok).tag
+!= 4)goto _LL410;_tmp8D0=(_tmp8CB.QualId_tok).f1;_tmp8D1=*_tmp8D0;_tmp8D2=_tmp8D1.f1;
+_tmp8D3=_tmp8D1.f2;_LL40F: {struct Cyc_List_List*_tmp8DD=0;{union Cyc_Absyn_Nmspace_union
+_tmp8DE=_tmp8D2;struct Cyc_List_List*_tmp8DF;struct Cyc_List_List*_tmp8E0;_LL413:
+if((_tmp8DE.Rel_n).tag != 1)goto _LL415;_tmp8DF=(_tmp8DE.Rel_n).f1;_LL414: _tmp8DD=
+_tmp8DF;goto _LL412;_LL415: if((_tmp8DE.Abs_n).tag != 2)goto _LL417;_tmp8E0=(_tmp8DE.Abs_n).f1;
+_LL416: _tmp8DD=_tmp8E0;goto _LL412;_LL417: if((_tmp8DE.Loc_n).tag != 0)goto _LL412;
+_LL418: goto _LL412;_LL412:;}for(0;_tmp8DD != 0;_tmp8DD=_tmp8DD->tl){const char*
+_tmp12FD;void*_tmp12FC[1];struct Cyc_String_pa_struct _tmp12FB;(_tmp12FB.tag=0,((
+_tmp12FB.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)*((struct _dyneither_ptr*)
+_tmp8DD->hd)),((_tmp12FC[0]=& _tmp12FB,Cyc_fprintf(Cyc_stderr,((_tmp12FD="%s::",
+_tag_dyneither(_tmp12FD,sizeof(char),5))),_tag_dyneither(_tmp12FC,sizeof(void*),
+1)))))));}{const char*_tmp1301;void*_tmp1300[1];struct Cyc_String_pa_struct
+_tmp12FF;(_tmp12FF.tag=0,((_tmp12FF.f1=(struct _dyneither_ptr)((struct
+_dyneither_ptr)*_tmp8D3),((_tmp1300[0]=& _tmp12FF,Cyc_fprintf(Cyc_stderr,((
+_tmp1301="%s::",_tag_dyneither(_tmp1301,sizeof(char),5))),_tag_dyneither(
+_tmp1300,sizeof(void*),1)))))));}goto _LL407;}_LL410:;_LL411:{const char*_tmp1304;
+void*_tmp1303;(_tmp1303=0,Cyc_fprintf(Cyc_stderr,((_tmp1304="?",_tag_dyneither(
+_tmp1304,sizeof(char),2))),_tag_dyneither(_tmp1303,sizeof(void*),0)));}goto
 _LL407;_LL407:;}struct Cyc_List_List*Cyc_Parse_parse_file(struct Cyc___cycFILE*f);
 struct Cyc_List_List*Cyc_Parse_parse_file(struct Cyc___cycFILE*f){Cyc_Parse_parse_result=
 0;Cyc_yyparse(Cyc_Lexing_from_file(f));return Cyc_Parse_parse_result;}

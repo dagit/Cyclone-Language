@@ -1451,34 +1451,8 @@ doc_t stmt2doc(stmt_t st) {
             line_doc(),
             rb());
     break;
-  case &Region_s(tv,vd,resetable,open_exp_opt,s1):
-    s = cat(text("region"),
-            resetable ? nil_doc() : text("[resetable]"),
-            text("<"),
-            textptr(get_name(tv)),
-            text(">" ),
-            qvar2doc(vd->name),
-            ((open_exp_opt != NULL) ? 
-             cat(text(" = open("), exp2doc((exp_t)open_exp_opt), text(")")) :
-             nil_doc()),
-            lb(),
-            line_doc(),
-            nest(2,stmt2doc(s1)),
-            line_doc(),
-            rb());
-    break;
   case &ResetRegion_s(e):
     s = cat(text("reset_region("),exp2doc(e),text(");"));
-    break;
-  case &Alias_s(e,tv,vd,s1):
-    s = cat(text("alias("),exp2doc(e),text(") = "),
-	    text("<"),textptr(get_name(tv)),text(">" ),
-            qvar2doc(vd->name),
-            lb(),
-            line_doc(),
-            nest(2,stmt2doc(s1)),
-            line_doc(),
-            rb());
     break;
   }
   return s;
@@ -1694,6 +1668,21 @@ doc_t decl2doc(decl_t d) {
     break;
   case &Var_d(vd):
     s = vardecl2doc(vd);
+    break;
+  case &Region_d(tv,vd,resetable,open_exp_opt):
+    s = cat(text("region"),
+            resetable ? nil_doc() : text("[resetable]"),
+            text("<"),
+            textptr(get_name(tv)),
+            text(">" ),
+            qvar2doc(vd->name),
+            ((open_exp_opt != NULL) ? 
+             cat(text(" = open("), exp2doc((exp_t)open_exp_opt), text(")")) :
+             nil_doc()),text(";"));
+    break;
+  case &Alias_d(e,tv,vd):
+    s = cat(text("alias"),text(" <"),textptr(get_name(tv)),text("> "),
+            qvar2doc(vd->name),text(" = "),exp2doc(e),text(";"));
     break;
   case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion,is_flat)):
     if (fields==NULL)
@@ -2016,7 +2005,7 @@ static bool is_char_ptr(type_t t) {
 }
 
 doc_t tqtd2doc(tqual_t tq, type_t typ, opt_t<doc_t> dopt) {
-  region temp {
+  region temp; {
     let $(tq,t,tms) = to_tms(temp,tq,typ);
     tms = List::imp_rev(tms);
     if (tms==NULL && dopt==NULL)

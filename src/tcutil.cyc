@@ -1225,7 +1225,7 @@ void unify_it(type_t t1, type_t t2) {
   case $(&FnType(FnInfo{tvs2,eff2,rt2,args2,c_vararg2,cyc_vararg2,rpo2,atts2}), 
          &FnType(FnInfo{tvs1,eff1,rt1,args1,c_vararg1,cyc_vararg1,rpo1,atts1})):
     bool done = false;
-    region rgn {
+    region rgn; {
     list_t<$(tvar_t,type_t)@`rgn,`rgn> inst = NULL;
     while (tvs1 != NULL) {
       if (tvs2 == NULL) { 
@@ -1652,8 +1652,8 @@ bool will_lose_precision(type_t t1, type_t t2) {
 bool coerce_list(tenv_t te, type_t t, list_t<exp_t> es) {
   // find the biggest arithmetic type (if any) for the list and determine
   // if all of the elements are boxed.
-  region r {
-    opt_t<type_t,`r> max_arith_type = NULL;
+  TEMP_RGN(te, r) {
+    opt_t<type_t/*,`r*/> max_arith_type = NULL;
     for (list_t<exp_t> el = es; el != NULL; el = el->tl) {
       type_t t1 = compress(el->hd->topt->v);
       if (is_arithmetic_type(t1)) 
@@ -2153,8 +2153,8 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
       let tvs1 = f1.tvars;
       let tvs2 = f2.tvars;
       if (List::length(tvs1) != List::length(tvs2)) return false;
-      region r {
-        list_t<$(tvar_t,type_t)@`r,`r> inst = NULL;
+      TEMP_RGN(te, r) {
+        list_t<$(tvar_t,type_t)@/*`r,`r*/> inst = NULL;
         while (tvs1 != NULL) {
           if (tvar_kind(tvs1->hd) != tvar_kind(tvs2->hd)) return false;
           inst = rnew(r) List(rnew(r) $(tvs2->hd, new VarType(tvs1->hd)),inst);
@@ -2221,7 +2221,7 @@ static bool isomorphic(type_t t1, type_t t2) {
 //   and for each field, either (a) both t1 and t2 have qualifier "const"
 //   and the t1 field is a subtype of the t2 field, or (b) t1 = t2.
 static bool ptrsubtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume, type_t t1, type_t t2) {
-  region temp {
+  TEMP_RGN(te, temp) {
     list_t<$(tqual_t,type_t)@> tqs1 = flatten_typ(temp,te,t1);
     list_t<$(tqual_t,type_t)@> tqs2 = flatten_typ(temp,te,t2);
     for (; tqs2 != NULL; tqs2 = tqs2->tl, tqs1 = tqs1->tl) {
@@ -2337,6 +2337,15 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   case &IntType(_,_): 
   case FloatType :  
   case &DoubleType(_): return coerceable(t2) ? No_coercion : Unknown_coercion;
+    // region_t<`r1> <= region_t<`r2> when `r1 outlives `r2
+  case &RgnHandleType(r1):
+    switch(t2) {
+    case &RgnHandleType(r2):
+      if (region_outlives(te,r1,r2)) return No_coercion;
+      break;
+    default: break;
+    }
+    return Unknown_coercion;
   default: return Unknown_coercion;
   }
 }
@@ -3060,8 +3069,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
   case &AnonEnumType(fs):
     // Note: this code is duplicated almost exactly in tc.cyc
     genv_t ge = Dict::lookup(te->ae,te->ns);
-    region uprev_rgn {
-      list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
+    TEMP_RGN(te, uprev_rgn) {
+      list_t<field_name_t/*, `uprev_rgn*/> prev_fields = NULL;
       unsigned int tag_count = 0;
       for (; fs != NULL; fs = fs->tl) {
         let f = fs->hd;
@@ -3178,8 +3187,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         terr(loc,"unbound type tunion %s",qvar2string(tname));
       return cvtenv;
       }
-      try 
-        region r {
+      try {
+        TEMP_RGN(te, r) {
 	  switch(lookup_ordinary(r,te,loc,fname)) {
           case &TunionRes(tud2,tuf2):
             tuf = tuf2;
@@ -3193,7 +3202,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
             return cvtenv;
           }
       }
-      catch {
+      } catch {
       case Dict::Absent:
         terr(loc,"unbound field %s in type tunion %s",
              qvar2string(fname), qvar2string(tname));
@@ -3256,7 +3265,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     case No_constr:
     case Eq_constr(DynEither_b): break;
     case Eq_constr(&Upper_b(e)): // must be a constant expression
-      region temp {
+      TEMP_RGN(te, temp) {
         let te2 = allow_valueof(temp,te);
         Tcexp::tcExp(te2,NULL,e);
       }
@@ -3276,7 +3285,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // FIX:  when we have something like:
     // int foo<`i::I>(int *{valueof(`i)}`H x);
     // then the explicitly bound `i doesn't work out.
-    region temp {
+    TEMP_RGN(te, temp) {
       let te2 = allow_valueof(temp,te);
       Tcexp::tcExp(te2,NULL,e);
     }
@@ -3407,7 +3416,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
     // We use a fresh environment here so that we only track the free type
     // vars (and evars) of the function type in case we have to abstract them.
-    region newr {
+    TEMP_RGN(te, newr) {
       let new_cvtenv = 
         CVTEnv{newr,cvtenv.kind_env,NULL,NULL,cvtenv.generalize_evars,true};
 
@@ -3582,8 +3591,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
   case &AnonAggrType(k,fs):
     // FIX: this code is mostly duplicated in Tc::tcAggrdecl
-    region aprev_rgn {
-      list_t<field_name_t,`aprev_rgn> prev_fields = NULL;
+    TEMP_RGN(te, aprev_rgn) {
+      list_t<field_name_t/*,`aprev_rgn*/> prev_fields = NULL;
       for (; fs != NULL; fs = fs->tl) {
         let &Aggrfield{fn,*tqp,t,width,atts} = fs->hd;
         if (List::mem(strptrcmp,prev_fields,fn))
@@ -3662,8 +3671,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     tdn[0] = td->name[0];
     list_t<tvar_t> tvs = td->tvs;
     list_t<type_t> ts = targs;
-    region temp {
-      list_t<$(tvar_t,type_t)@`temp,`temp> inst = NULL;
+    TEMP_RGN(te, temp) {
+      list_t<$(tvar_t,type_t)@/*`temp,`temp*/> inst = NULL;
       // check type arguments
       for (; ts != NULL && tvs != NULL; ts = ts->tl, tvs = tvs->tl) {
         kind_t k = tvar_kind(tvs->hd);
@@ -3823,7 +3832,7 @@ static cvtenv_t<`r> check_valid_type(seg_t loc, tenv_t te,
 void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
   bool generalize_evars = is_function_type(t);
   let te_vars = lookup_type_vars(te);
-  region temp {
+  TEMP_RGN(te, temp) {
     let cvt = check_valid_type(loc, te, 
                                CVTEnv{temp, te_vars, NULL, NULL,
                                       generalize_evars,false},
@@ -3918,7 +3927,7 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
   default: impos("check_fndecl_valid_type: not a FnType");
   }
   // check for repeated paramater names (not allowed in C and makes no sense)
-  region r {
+  TEMP_RGN(te, r) {
     check_unique_vars(rmap(r,fst_fdarg,fd->args), loc, 
 		      "function declaration has repeated parameter");
   }
@@ -3931,7 +3940,7 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
 void check_type(seg_t loc, tenv_t te, 
                 list_t<tvar_t,`H> bound_tvars, 
                 kind_t expected_kind, bool allow_evars, type_t t) {
-  region r {
+  TEMP_RGN(te, r) {
     let cvt = check_valid_type(loc, te, 
                                CVTEnv{r,bound_tvars, NULL, NULL, false,false},
                                expected_kind, t);
@@ -4186,34 +4195,32 @@ bool is_noalias_pointer(type_t t) {
   }
 }
 
-bool is_noalias_pointer_or_aggr(type_t t) {
+bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
   let t = compress(t);
   if (is_noalias_pointer(t)) return true;
   switch (t) {
   case &TupleType(qts):
     while (qts != NULL) {
-      if (is_noalias_pointer_or_aggr((*qts->hd)[1])) return true;
+      if (is_noalias_pointer_or_aggr(rgn,(*qts->hd)[1])) return true;
       qts = qts->tl;
     }
     return false;
   case &AggrType(AggrInfo(KnownAggr(adp),ts)):
     if ((*adp)->impl == NULL) return false;
     else {
-      region rgn {
-	let inst = List::rzip(rgn,rgn,(*adp)->tvs,ts);
-	let x = (*adp)->impl->fields;
-	type_t t;
-	while (x != NULL) {
-	  t = rsubstitute(rgn,inst,x->hd->type);
-	  if (is_noalias_pointer_or_aggr(t)) return true;
-	  x = x->tl;
-	}
+      let inst = List::rzip(rgn,rgn,(*adp)->tvs,ts);
+      let x = (*adp)->impl->fields;
+      type_t t;
+      while (x != NULL) {
+        t = rsubstitute(rgn,inst,x->hd->type);
+        if (is_noalias_pointer_or_aggr(rgn,t)) return true;
+        x = x->tl;
       }
       return false;
     }
   case &AnonAggrType(_,x):
     while (x != NULL) {
-      if (is_noalias_pointer_or_aggr(x->hd->type)) return true;
+      if (is_noalias_pointer_or_aggr(rgn,x->hd->type)) return true;
       x = x->tl;
     }
     return false;
@@ -4236,19 +4243,17 @@ bool is_noalias_pointer_or_aggr(type_t t) {
 	if (flds == NULL)
 	  impos("got tunion with no fields");
 	else {
-	  region rgn {
-	    let inst = List::rzip(rgn,rgn,tvs,ts);
-	    let fs = flds->v; // assume not-NULL
-	    while (fs != NULL) {
-	      let typs = fs->hd->typs;
-	      while (typs != NULL) {
-		t = rsubstitute(rgn,inst,(*typs->hd)[1]);
-		if (is_noalias_pointer_or_aggr(t)) return true;
-		typs = typs->tl;
-	      }
-	      fs = fs->tl;
-	    }
-	  }
+          let inst = List::rzip(rgn,rgn,tvs,ts);
+          let fs = flds->v; // assume not-NULL
+          while (fs != NULL) {
+            let typs = fs->hd->typs;
+            while (typs != NULL) {
+              t = rsubstitute(rgn,inst,(*typs->hd)[1]);
+              if (is_noalias_pointer_or_aggr(rgn,t)) return true;
+              typs = typs->tl;
+            }
+            fs = fs->tl;
+          }
 	  return false;
 	}
       }
@@ -4258,14 +4263,12 @@ bool is_noalias_pointer_or_aggr(type_t t) {
     case UnknownTunionfield(_):
       impos("got unknown tunion field in is_noalias_aggr");
     case KnownTunionfield(td,fld):
-      region rgn {
-	let inst = List::rzip(rgn,rgn,td->tvs,ts);
-	let typs = fld->typs;
-	while (typs != NULL) {
-	  t = rsubstitute(rgn,inst,(*typs->hd)[1]);
-	  if (is_noalias_pointer_or_aggr(t)) return true;
-	  typs = typs->tl;
-	}
+      let inst = List::rzip(rgn,rgn,td->tvs,ts);
+      let typs = fld->typs;
+      while (typs != NULL) {
+        t = rsubstitute(rgn,inst,(*typs->hd)[1]);
+        if (is_noalias_pointer_or_aggr(rgn,t)) return true;
+        typs = typs->tl;
       }
       return false;
     }
@@ -4273,7 +4276,7 @@ bool is_noalias_pointer_or_aggr(type_t t) {
   }
 }
 
-static bool is_noalias_field(type_t t, field_name_t f) {
+static bool is_noalias_field(region_t<`r> r, type_t t, field_name_t f) {
   switch (compress(t)) {
   case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
     fallthru ((ad->impl == NULL) ? NULL : ad->impl->fields);
@@ -4282,7 +4285,7 @@ static bool is_noalias_field(type_t t, field_name_t f) {
     switch (finfo) {
     case NULL: Tcutil::impos("is_noalias_field: missing field");
     case &Aggrfield(_,_,t,_,_):
-      return is_noalias_pointer_or_aggr(t);
+      return is_noalias_pointer_or_aggr(r,t);
     }
     return false;
   default:
@@ -4294,7 +4297,7 @@ static bool is_noalias_field(type_t t, field_name_t f) {
 // returns true if the path [e] is entirely unique.  I.e. **x is unique
 // if x has type (e.g.) int *`U*`U*`U x but not if it has type (e.g.)
 // int *`U*`H*`U x
-static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
+static bool is_noalias_path_aux(region_t<`r> r, exp_t e,bool ignore_leaf) {
   switch (e->r) {
   case &Increment_e(_,_):
   case &And_e(_,_):
@@ -4318,13 +4321,13 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
   case &AggrArrow_e(_,_): return false;
 #else
   case &Deref_e(e1):
-    return (ignore_leaf || is_noalias_pointer_or_aggr(e->topt->v)) && 
-           is_noalias_path_aux(e1, false);
+    return (ignore_leaf || is_noalias_pointer_or_aggr(r,e->topt->v)) && 
+           is_noalias_path_aux(r, e1, false);
   case &AggrArrow_e(e1,f):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo(t2,_,_)): 
-      return (ignore_leaf || is_noalias_field(t2,f)) &&
-	     is_noalias_path_aux(e1,false);
+      return (ignore_leaf || is_noalias_field(r,t2,f)) &&
+	     is_noalias_path_aux(r, e1,false);
     default: Tcutil::impos("is_noalias_path_aux: -> on non-pointer");
     }
     return false;
@@ -4332,8 +4335,8 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
   // Flat aggregates are always directly available, so are considered part
   // of a unique path if they contain unique pointers
   case &AggrMember_e(e1,f):
-    return (ignore_leaf || is_noalias_field(e1->topt->v,f)) &&
-      is_noalias_path_aux(e1,false);
+    return (ignore_leaf || is_noalias_field(r,e1->topt->v,f)) &&
+      is_noalias_path_aux(r, e1,false);
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo(t,_,_)):
@@ -4341,16 +4344,16 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
 #ifdef NO_POINTER_PATHS
       return false;
 #else
-      return (ignore_leaf || is_noalias_pointer_or_aggr(t)) &&
-	is_noalias_path_aux(e1,false);
+      return (ignore_leaf || is_noalias_pointer_or_aggr(r, t)) &&
+	is_noalias_path_aux(r, e1,false);
 #endif
     case &TupleType(ts): 
       let $(i,known) = Evexp::eval_const_uint_exp(e2);
       if(!known) Tcutil::impos("is_noalias_path_aux: non-constant subscript");
       try {
 	let t = (*List::nth(ts,i))[1];
-	return (ignore_leaf || is_noalias_pointer_or_aggr(t)) &&
-	  is_noalias_path_aux(e1,false);
+	return (ignore_leaf || is_noalias_pointer_or_aggr(r, t)) &&
+	  is_noalias_path_aux(r, e1,false);
       } catch { case Nth:
 	return Tcutil::impos("is_noalias_path_aux: out-of-bounds subscript");
       }
@@ -4366,7 +4369,7 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
   case &Var_e(_,&Local_b(_)):
   case &Var_e(_,&Pat_b(_)):
   case &Var_e(_,&Param_b(_)):
-    let res = ignore_leaf || is_noalias_pointer_or_aggr(e->topt->v);
+    let res = ignore_leaf || is_noalias_pointer_or_aggr(r,e->topt->v);
 //     fprintf(stderr,"is_noalias_path checking |%s|, typ=|%s|, res=%s\n",
 // 	    Absynpp::exp2string(e), Absynpp::typ2string(e->topt->v),
 // 	    res ? "true" : "false");
@@ -4374,15 +4377,15 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
   case &Conditional_e(_,e1,_): fallthru(e1);
   case &SeqExp_e(_,e1): fallthru(e1);
   case &AssignOp_e(e1,_,_):
-    return is_noalias_path_aux(e1,ignore_leaf);
+    return is_noalias_path_aux(r,e1,ignore_leaf);
   case &FnCall_e(e1,_,_):
     switch (compress(e1->topt->v)) {
     case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
-      return ignore_leaf || is_noalias_pointer_or_aggr(rt);
+      return ignore_leaf || is_noalias_pointer_or_aggr(r,rt);
     case &PointerType(PtrInfo(t,_,_)):
       switch (compress(t)) {
       case &FnType(FnInfo(_,_,rt,_,_,_,_,_)):
-	return ignore_leaf || is_noalias_pointer_or_aggr(rt);
+	return ignore_leaf || is_noalias_pointer_or_aggr(r,rt);
       default: break;
       }
       fallthru;
@@ -4390,7 +4393,7 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
 			   typ2string(e1->topt->v));
     }
   case &Cast_e(t,e1,_,_): 
-    return is_noalias_pointer_or_aggr(t) && is_noalias_path_aux(e1,true);
+    return is_noalias_pointer_or_aggr(r,t) && is_noalias_path_aux(r,e1,true);
   case &StmtExp_e(s):
     // keep looking for the final expression of the statement,
     //   and recurse into that to find the unique path
@@ -4398,7 +4401,7 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
       switch(s->r) {
       case &Seq_s(s1,s2): s = s2; break;
       case &Decl_s(d,s1): s = s1; break;
-      case &Exp_s(e): return is_noalias_path_aux(e,ignore_leaf);
+      case &Exp_s(e): return is_noalias_path_aux(r,e,ignore_leaf);
       default: Tcutil::impos("is_noalias_stmt_exp: ill-formed StmtExp");
       }
     }
@@ -4406,8 +4409,8 @@ static bool is_noalias_path_aux(exp_t e,bool ignore_leaf) {
 			 exp2string(e));
   }
 }
-bool is_noalias_path(exp_t e) {
-  return is_noalias_path_aux(e,false);
+bool is_noalias_path(region_t<`r> r, exp_t e) {
+  return is_noalias_path_aux(r,e,false);
 }
 
 // used by address of.  
@@ -4592,7 +4595,7 @@ bool bits_only(type_t t) {
   case &AggrType(AggrInfo(KnownAggr(&ad),ts)):
     if(ad->impl==NULL)
       return false;
-    region rgn {
+    region rgn; {
       let inst = List::rzip(rgn,rgn,ad->tvs,ts);
       for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
 	if (!bits_only(rsubstitute(rgn,inst,fs->hd->type))) return false;
@@ -4713,7 +4716,7 @@ bool supports_default(type_t t) {
 
 static bool fields_support_default(list_t<tvar_t> tvs, list_t<type_t> ts, 
                                    list_t<aggrfield_t> fs) {
-  region rgn {
+  region rgn; {
     let inst = List::rzip(rgn,rgn,tvs,ts);
     for (; fs != NULL; fs = fs->tl) {
       type_t t = rsubstitute(rgn,inst,fs->hd->type);

@@ -109,7 +109,7 @@ int qvar_tag_cmp($(qvar_t,string_t)@ x, $(qvar_t,string_t)@ y) {
 
 type_t aggrdecl_type(qvar_t q, type_t type_maker(qvar_t)) {
   let TocState{<`d> .dyn = dyn, .aggrs_so_far = aggs, ...} = *toc_state;
-  region d = open(dyn) {
+  region d = open(dyn); {
     $(aggrdecl_t,type_t)@`d*`d v = Dict::lookup_opt(*aggs,q);
     if (v == NULL) {
       return type_maker(q);
@@ -436,7 +436,7 @@ static qvar_t collapse_qvar_tag(qvar_t x,string_t<`H> tag) {
   static $(nmspace_t,var_t) bogus_qvar = $(Loc_n,&bogus_string);
   static $(qvar_t,string_t) pair = $(&bogus_qvar,"");
   pair = $(x,tag);
-  region d = open(dyn) {
+  region d = open(dyn); {
     let qptr = Dict::lookup_opt(*qvs,&pair);
     if (qptr != NULL) return *qptr;
     let new_pair = new $(x,tag);
@@ -450,7 +450,7 @@ static qvar_t collapse_qvar_tag(qvar_t x,string_t<`H> tag) {
 // we share the struct definitions where possible.  
 static type_t add_tuple_type(list_t<$(tqual_t,type_t)@,`r> tqs0) {
   let TocState{.dyn = dyn, .tuple_types = tuple_types, ...} = *toc_state;
-  region d = open(dyn) {
+  region d = open(dyn); {
     // look for the same tuple-type already declared
     for (let tts = *tuple_types; tts != NULL; tts = tts->tl) {
       let &$(x,ts) = tts->hd;
@@ -494,7 +494,7 @@ qvar_t temp_var() {
 // FIX: need to guarantee these can't conflict
 static var_t fresh_label() {
   let TocState{.dyn = dyn, .temp_labels = temp_labels, ...} = *toc_state;
-  region d = open(dyn) {
+  region d = open(dyn); {
     let i = fresh_label_counter++;
     if (i < Xarray::length(temp_labels))
     return Xarray::get(temp_labels,i);
@@ -674,6 +674,12 @@ static type_t typ_to_c(type_t t) {
   case &AnonAggrType(k,fs): 
     return new AnonAggrType(k,List::map(aggrfield_to_c,fs));
   case &AggrType(AggrInfo(info,ts)):
+    // We may be in C code, in which case the implementation may not be set
+    // here.
+    switch (info) {
+    case UnknownAggr(...): return t;
+    default: break;
+    }
     let ad = get_known_aggrdecl(info);
     if(ad->kind==UnionA)
       return aggrdecl_type(ad->name,unionq_typ);
@@ -903,6 +909,7 @@ static struct Env<`r::R> {
   struct FallthruInfo<`r2> *`r2 fallthru_info;
   Dict::dict_t<qvar_t,exp_t,`r> varmap;
   bool toplevel;
+  region_t<`r> rgn;
 };
 typedef struct Env<`r> @`r env_t<`r>;
 
@@ -922,21 +929,22 @@ static env_t<`r> empty_env(region_t<`r> r) {
                      .continue_lab  = NULL,
                      .fallthru_info = NULL,
                      .varmap        = Dict::rempty(r,qvar_cmp),
-                     .toplevel      = true};
+                     .toplevel      = true,
+                     .rgn           = r};
 }
 
 static env_t<`r> share_env(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t} = e;
-  return rnew(r) Env{b,c,f,Dict::rshare(r,v),t};
+  let &Env{b,c,f,v,t,_} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),t,r};
 }
 
 static env_t<`r> clear_toplevel(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t} = e;
-  return rnew(r) Env{b,c,f,Dict::rshare(r,v),false};
+  let &Env{b,c,f,v,t,_} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),false,r};
 }
 static env_t<`r> set_toplevel(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t} = e;
-  return rnew(r) Env{b,c,f,Dict::rshare(r,v),true};
+  let &Env{b,c,f,v,t,_} = e;
+  return rnew(r) Env{b,c,f,Dict::rshare(r,v),true,r};
 }
 
 // add x->y to variable map in environment
@@ -946,16 +954,16 @@ static env_t<`r> add_varmap(region_t<`r> r, env_t<`r2> e, qvar_t x, exp_t y : {`
   case Rel_n(_): toc_impos("Toc::add_varmap on Rel_n: %s\n", qvar2string(x));
   default: break;
   }
-  let &Env{b,c,f,v,t} = e;
+  let &Env{b,c,f,v,t,_} = e;
   let new_v = Dict::insert(Dict::rshare(r,v), x, y);
-  return rnew(r) Env{b,c,f,new_v,t};
+  return rnew(r) Env{b,c,f,new_v,t,r};
 }
 
 // env for loop body: break and continue labels are set to null,
 // exception handler pop counters for break and continue are zeroed
 static env_t<`r> loop_env(region_t<`r> r, env_t<`r2> e : {`r2} > `r) {
-  let &Env{b,c,f,v,t} = e;
-  return rnew(r) Env{NULL,NULL,f,Dict::rshare(r,v),t};
+  let &Env{b,c,f,v,t,_} = e;
+  return rnew(r) Env{NULL,NULL,f,Dict::rshare(r,v),t,r};
 }
 
 // env for a switch clause: give new label for break, and zero its pop counter
@@ -968,19 +976,19 @@ non_last_switchclause_env(region_t<`r> r,
   for(; fallthru_binders != NULL; fallthru_binders = fallthru_binders->tl)
     fallthru_vars = rnew(r) List(fallthru_binders->hd->name, fallthru_vars);
   fallthru_vars = List::imp_rev(fallthru_vars);
-  let &Env{b,c,f,v,t} = e;
-  let &Env{_,_,_,next_case_varmap,_} = next_case_env;
+  let &Env{b,c,f,v,t,_} = e;
+  let &Env{_,_,_,next_case_varmap,_,_} = next_case_env;
   struct FallthruInfo<`r>*`r fi = 
     rnew(r) FallthruInfo{fallthru_l,fallthru_vars,
                            Dict::rshare(r,next_case_varmap)};
-  return rnew(r) Env{rnew(r) break_l, c, fi, Dict::rshare(r,v),t};
+  return rnew(r) Env{rnew(r) break_l, c, fi, Dict::rshare(r,v),t,r};
 }
 
 static env_t<`r> 
 last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l : 
                       {`r2} > `r) {
-  let &Env{b,c,f,v,t} = e;
-  return rnew(r) Env{rnew(r) break_l, c, NULL, Dict::rshare(r,v), t};
+  let &Env{b,c,f,v,t,_} = e;
+  return rnew(r) Env{rnew(r) break_l, c, NULL, Dict::rshare(r,v), t, r};
 }
 
 // must have no pattern vars and type is int, char, or tunion of a type
@@ -989,11 +997,17 @@ last_switchclause_env(region_t<`r> r, env_t<`r2> e, var_t break_l :
 static env_t<`r> 
 switch_as_switch_env(region_t<`r> r, env_t<`r2> e, var_t next_l :
                      {`r2} > `r) {
-  let &Env{b,c,f,v,t} = e;
+  let &Env{b,c,f,v,t,_} = e;
   return rnew(r) Env{NULL,c,rnew(r) FallthruInfo{next_l,NULL,
                                                    Dict::rempty(r,qvar_cmp)},
-                       Dict::rshare(r,v), t};
+                       Dict::rshare(r,v), t, r};
 }
+
+#ifdef COARSE_REGIONS
+#define TOC_RGN(env,r) let &Env{.rgn = r, ...} = (env);
+#else
+#define TOC_RGN(env,r) region r;
+#endif
 
 ///////////////////////////////////////////////////////////////
 //              Translation of Expressions                   //
@@ -1298,7 +1312,7 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
   let elt_typ = typ_to_c(e2->topt->v);
   if (!e1_already_translated)
     exp_to_c(nv,e1);
-  region r2 {
+  TOC_RGN(nv,r2) {
     env_t nv2 = add_varmap(r2,nv,x1,varb_exp(x1,new Local_b(vd),DL));
     qvar_t max = temp_var();
     exp_t ea = assign_exp(var_exp(x1,DL),signed_int_exp(0,DL),DL);
@@ -1384,7 +1398,7 @@ static exp_t init_tuple(env_t nv, bool pointer,
                         exp_opt_t rgnopt, list_t<exp_t> es) {
   // $(e1,...,en)  -> ({ t x;   x.f1 = e1; ... x.fn = en; x})
   // &$(e1,...,en) -> ({ t * x=malloc(sizeof(t); x->f1 = e1; ... x->fn = en; x})
-  region r {
+  TOC_RGN(nv,r) {
     let tqs = List::rmap(r,tup_to_c,es);
     let n   = add_tuple_type(tqs);
     
@@ -1438,7 +1452,7 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
     break;
   default: toc_impos("init_struct: bad struct type");
   }
-  region r {
+  TOC_RGN(nv,r) {
     for(let es = List::rrev(r,dles); es != NULL; es = es->tl) {
       let &$(ds,e) = es->hd;
       is_atomic = is_atomic && atomic_typ(e->topt->v);
@@ -1644,7 +1658,7 @@ static void zero_ptr_assign_to_c(env_t nv, exp_t e,
   default: toc_impos("found bad lhs for zero-terminated pointer assignment");
   }
   let x = temp_var();                // build ptr_type x = ea + eb;
-  region rgn2 {
+  TOC_RGN(nv, rgn2) {
     let nv = add_varmap(rgn2, nv, x, var_exp(x,DL));  // add x to the varmap
     let x_vd = new Vardecl {Public,x,mt_tq,c_fat_ptr_type,xinit,NULL,NULL,false};
     let x_bnd = new Local_b(x_vd);     // build *x -- need to translate here
@@ -2026,7 +2040,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     // else
     //    t argv[num_varargs] = {es[n-num_varargs+1], ..., es[n]};
     // e1(es[0], ..., es[n-num_varargs], tag_dyneither(argv, sizeof(t), num_varargs));
-    region r {
+    TOC_RGN(nv,r) {
       qvar_t argv = temp_var();
       exp_t argvexp = var_exp(argv,DL);
       exp_t  num_varargs_exp = uint_exp(num_varargs,DL);
@@ -2407,8 +2421,8 @@ DynCast:
       stmt_t s = init_comprehension(nv, var_exp(a,DL), vd, var_exp(max,DL), 
                                     e2, zero_term, skip_stmt_dl(), true);
       // FIX:  casts needed on exp_opts
-      region r {
-        list_t<$(qvar_t,type_t,exp_opt_t)@`r,`r> decls = 
+      TOC_RGN(nv,r) {
+        list_t<$(qvar_t,type_t,exp_opt_t)@/*`r,`r*/> decls = 
           rnew(r) List(rnew(r) $(max,uint_typ,(exp_opt_t)e1),NULL);
         exp_t ai;
         if (rgnopt == NULL || no_regions)
@@ -2780,7 +2794,7 @@ DynCast:
       if(sd == NULL)
 	toc_impos("Struct_e: missing aggrdecl pointer");
       aggrdecl_t sd2 = (aggrdecl_t)sd;
-      region rgn {
+      TOC_RGN(nv,rgn) {
       let fields = Tcutil::resolve_struct_designators(rgn, e->loc, dles, 
                                                       sd2->impl->fields);
       // here is where we now sort
@@ -2809,7 +2823,7 @@ DynCast:
     case &AnonAggrType(_,afs): fs = afs; break;
     default: toc_impos("anon struct has type %s",typ2string(st));
     }
-    region rgn {
+    TOC_RGN(nv,rgn) {
       let fields = Tcutil::resolve_struct_designators(rgn, e->loc, dles, fs);
       for (; fields != NULL; fields = fields->tl) {
         let &$(field,fieldexp) = fields->hd;
@@ -3349,7 +3363,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
       let s = scs1->hd->body;
       scs1->hd->body = label_stmt(next_l,s,DL);
       next_l = fresh_label();
-      region rgn {
+      TOC_RGN(nv,rgn) {
         stmt_to_c(switch_as_switch_env(rgn,nv,next_l),s);
       }
     }
@@ -3361,13 +3375,13 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   exp_t  path  = var_exp(v,DL);
   var_t  end_l = fresh_label();
   // for each case, generate a test label and an entry label
-  region rgn {
+  TOC_RGN(nv,rgn) {
     let nv = share_env(rgn,nv);
-    list_t<$(var_t,var_t,switch_clause_t)@`rgn,`rgn> lscs = 
+    list_t<$(var_t,var_t,switch_clause_t)@/*`rgn,`rgn*/> lscs = 
       List::rmap_c(rgn,gen_label,rgn,scs);
-    list_t<stmt_t,`rgn>                test_stmts = NULL;
-    list_t<env_t,`rgn>                 nvs        = NULL;
-    list_t<$(qvar_t,type_t)@`rgn,`rgn> decls      = NULL;
+    list_t<stmt_t/*,`rgn*/>                test_stmts = NULL;
+    list_t<env_t/*,`rgn*/>                 nvs        = NULL;
+    list_t<$(qvar_t,type_t)@/*`rgn,`rgn*/> decls      = NULL;
     bool is_tunion = is_mixed_tunion(t);
     bool needs_tag_test = is_tunion;
     // generate the tests for each case, continuing to the case's
@@ -3377,7 +3391,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
     for (let lscs2 = lscs; lscs2 != NULL; lscs2 = lscs2->tl) {
       switch_clause_t sc = (*lscs2->hd)[2];
       var_t fail_lab = (lscs2->tl == NULL) ? end_l : (*lscs2->tl->hd)[0];
-      stmt_t *`rgn tag_fail_stmt = NULL;
+      stmt_t */*`rgn*/ tag_fail_stmt = NULL;
       // we're going to have to check if r <= max_tag.  On failure,
       // we jump to the next pattern that might satisfy this, skipping
       // over the tests that also require r <= max_tag.  We also record
@@ -3420,7 +3434,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
       let &$(test_lab,body_lab,body_sc) = lscs->hd;
       let env = nvs->hd;
       stmt_t s = body_sc->body;
-      region rgn2 {
+      TOC_RGN(nv, rgn2) {
         if(lscs->tl != NULL) {
           let &$(_,fallthru_lab,next_sc) = lscs->tl->hd;
           stmt_to_c(non_last_switchclause_env(rgn2, env, end_l, fallthru_lab,
@@ -3502,7 +3516,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       continue;
     case &While_s($(e,_),s2):
       exp_to_c(nv,e);
-      region temp {
+      TOC_RGN(nv,temp) {
         stmt_to_c(loop_env(temp,nv),s2);
       }
       return;
@@ -3526,7 +3540,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
     case &For_s(e1,$(e2,_),$(e3,_),s2):
       // FIX:  should e3 be translated in nv?
       exp_to_c(nv,e1); exp_to_c(nv,e2); exp_to_c(nv,e3);
-      region temp {
+      TOC_RGN(nv, temp) {
         stmt_to_c(loop_env(temp,nv),s2);
       }
       return;
@@ -3556,7 +3570,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       // "statements".  See letdecl_to_c and decls_to_c below.
       switch (d->r) {
       case &Var_d(vd):
-        region temp {
+        TOC_RGN(nv, temp) {
           let nv2 = add_varmap(temp,nv,vd->name,
                                varb_exp(vd->name,new Local_b(vd),DL));
           local_decl_to_c(nv2, nv2, vd, s1);
@@ -3572,7 +3586,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	  vd->name = new_name;
           vd->initializer = e;
           d->r = new Var_d(vd);
-          region temp {
+          TOC_RGN(nv, temp) {
             let nv2 = 
               add_varmap(temp,nv,old_name,
                          varb_exp(new_name,new Local_b(vd),DL));
@@ -3612,19 +3626,90 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         break;
       case &Fn_d(fd):
         let c_name = fd->name;
-        region temp {
+        TOC_RGN(nv, temp) {
           let nv = add_varmap(temp,nv,fd->name,var_exp(c_name,DL));
           fndecl_to_c(nv, fd, false);
           stmt_to_c(nv,s1);
         }
         break;
+      case &Region_d(tv, vd, resetable, open_exp_opt):
+        let body = s1;
+        // NOTE:  _npop_handler has to deal with regions as well as exceptions
+        // When open_exp_opt is NULL:
+        // { struct _RegionHandle rh = _new_region();
+        //   struct _RegionHandle *x = &rh;
+        //   _push_region(x);
+        //   body; 
+        //   _pop_region(x);
+        // }
+        // When open_exp_opt is not NULL:
+        // { struct _DynRegionFrame f;
+        //   struct _RegionHandle *x = _open_dynregion(&f,open_exp_opt);
+        //   body;
+        //   _pop_dynregion();
+        // }
+        // Note that _open_dynregion implicitly pushes the dynregion.
+        type_t rh_struct_typ     = strct(_RegionHandle_sp);
+        type_t rh_struct_ptr_typ = cstar_typ(rh_struct_typ,mt_tq);
+        qvar_t rh_var = temp_var();
+        qvar_t x_var  = vd->name;
+        exp_t  rh_exp = var_exp(rh_var,DL);
+        exp_t  x_exp  = var_exp(x_var, DL);
+
+        TOC_RGN(nv, temp) {
+          stmt_to_c(add_varmap(temp,nv,x_var,x_exp),body);
+        }
+        if (no_regions) {
+          s->r = declare_stmt(x_var, rh_struct_ptr_typ, 
+                              uint_exp(0,DL), body, DL)->r;
+        } else if (open_exp_opt == NULL) {
+          s->r = 
+            declare_stmt(rh_var,rh_struct_typ, 
+                         fncall_exp(_new_region_e,
+                                    new List(string_exp(qvar2string(x_var),DL),
+                                             NULL),DL),
+            declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
+    	    seq_stmt(exp_stmt(fncall_exp(_push_region_e, list(x_exp), DL),DL),
+            seq_stmt(body,
+                     exp_stmt(fncall_exp(_pop_region_e,  list(x_exp), DL),DL),
+                     DL),DL),DL),DL)->r;
+        } else {
+          exp_to_c(nv, (exp_t)open_exp_opt);
+          s->r = 
+            declare_stmt(rh_var, strct(_DynRegionFrame_sp), NULL, 
+	    declare_stmt(x_var, rh_struct_ptr_typ,
+                         fncall_exp(_open_dynregion_e,
+                                    list(address_exp(rh_exp,DL),
+                                         (exp_t)open_exp_opt),
+                                    DL),
+            seq_stmt(body,
+                     exp_stmt(fncall_exp(_pop_dynregion_e,  
+                                         list(x_exp), DL),DL),
+                     DL),DL),DL)->r;
+        }
+        return;
+      case &Alias_d(e,tv,vd):
+        // Handle this like a variable declaration 
+        qvar_t old_name = vd->name;
+        qvar_t new_name = temp_var();
+        vd->name = new_name;
+        vd->initializer = e;
+        s->r = new Decl_s(new Decl(new Var_d(vd),DL),s1);
+        TOC_RGN(nv, temp) {
+          let nv2 = 
+            add_varmap(temp,nv,old_name,
+                       varb_exp(new_name,new Local_b(vd),DL));
+          local_decl_to_c(nv2, nv, vd, s1);
+        }
+        return;
+
       default: impos("bad nested declaration within function");
       }
       return;
     case &Label_s(lab,s1):
       s = s1; continue;
     case &Do_s(s2,$(e,_)):
-      region temp {
+      TOC_RGN(nv, temp) {
         stmt_to_c(loop_env(temp,nv),s2);
         exp_to_c(nv,e);
       }
@@ -3657,7 +3742,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       // e_exp needs a typ because it'll go through exp_to_c;
       // as well, it must be in varmap
       e_exp->topt = new Opt(e_typ);
-      region temp {
+      TOC_RGN(nv, temp) {
         let nv = add_varmap(temp,nv,e_var,e_exp);
         // translate the body
         stmt_to_c(nv,body);
@@ -3708,80 +3793,12 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                           handler_stmt,DL),DL),DL),DL),DL),DL)->r;
       }
       return;
-    case &Region_s(tv, vd, resetable, open_exp_opt, body):
-      // NOTE:  _npop_handler has to deal with regions as well as exceptions
-      // When open_exp_opt is NULL:
-      // { struct _RegionHandle rh = _new_region();
-      //   struct _RegionHandle *x = &rh;
-      //   _push_region(x);
-      //   body; 
-      //   _pop_region(x);
-      // }
-      // When open_exp_opt is not NULL:
-      // { struct _DynRegionFrame f;
-      //   struct _RegionHandle *x = _open_dynregion(&f,open_exp_opt);
-      //   body;
-      //   _pop_dynregion();
-      // }
-      // Note that _open_dynregion implicitly pushes the dynregion.
-      type_t rh_struct_typ     = strct(_RegionHandle_sp);
-      type_t rh_struct_ptr_typ = cstar_typ(rh_struct_typ,mt_tq);
-      qvar_t rh_var = temp_var();
-      qvar_t x_var  = vd->name;
-      exp_t  rh_exp = var_exp(rh_var,DL);
-      exp_t  x_exp  = var_exp(x_var, DL);
-
-      region temp {
-        stmt_to_c(add_varmap(temp,nv,x_var,x_exp),body);
-      }
-      if (no_regions) {
-        s->r = declare_stmt(x_var, rh_struct_ptr_typ, 
-                            uint_exp(0,DL), body, DL)->r;
-      } else if (open_exp_opt == NULL) {
-        s->r = 
-	  declare_stmt(rh_var,rh_struct_typ, 
-		       fncall_exp(_new_region_e,
-			  	  new List(string_exp(qvar2string(x_var),DL),
-					   NULL),DL),
-  	  declare_stmt(x_var, rh_struct_ptr_typ,address_exp(rh_exp,DL),
-  	  seq_stmt(exp_stmt(fncall_exp(_push_region_e, list(x_exp), DL),DL),
-          seq_stmt(body,
-		   exp_stmt(fncall_exp(_pop_region_e,  list(x_exp), DL),DL),
-		   DL),DL),DL),DL)->r;
-      } else {
-        exp_to_c(nv, (exp_t)open_exp_opt);
-        s->r = 
-          declare_stmt(rh_var, strct(_DynRegionFrame_sp), NULL, 
-	  declare_stmt(x_var, rh_struct_ptr_typ,
-		       fncall_exp(_open_dynregion_e,
-                                  list(address_exp(rh_exp,DL),
-                                       (exp_t)open_exp_opt),
-                                  DL),
-          seq_stmt(body,
-		   exp_stmt(fncall_exp(_pop_dynregion_e,  list(x_exp), DL),DL),
-		   DL),DL),DL)->r;
-      }
-      return;
     case &ResetRegion_s(e):
       if (no_regions) {
         s->r = Skip_s;
       } else {
         exp_to_c(nv,e);
         s->r = exp_stmt_r(fncall_exp(_reset_region_e,new List(e,NULL),DL));
-      }
-      return;
-    case &Alias_s(e,tv,vd,s1):
-      // Handle this like a variable declaration 
-      qvar_t old_name = vd->name;
-      qvar_t new_name = temp_var();
-      vd->name = new_name;
-      vd->initializer = e;
-      s->r = new Decl_s(new Decl(new Var_d(vd),DL),s1);
-      region temp {
-	let nv2 = 
-	  add_varmap(temp,nv,old_name,
-		     varb_exp(new_name,new Local_b(vd),DL));
-	local_decl_to_c(nv2, nv, vd, s1);
       }
       return;
     }
@@ -3798,7 +3815,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   f->effect   = NULL;
   f->rgn_po   = NULL;
   f->ret_type = typ_to_c(f->ret_type);
-  region frgn {
+  region frgn; {
     let nv = share_env(frgn,nv);
     for (let args=f->args; args != NULL; args = args->tl) {
       let x = new $((nmspace_t)Loc_n,(*args->hd)[0]);
@@ -3840,7 +3857,7 @@ static scope_t scope_to_c(scope_t s) {
 static void aggrdecl_to_c(aggrdecl_t ad) {
   let n = ad->name;
   let TocState{.dyn = dyn, .aggrs_so_far = aggrs_so_far, ...} = *toc_state;
-  region d = open(dyn) {
+  region d = open(dyn); {
     bool seen_defn_before;
     let dopt = Dict::lookup_opt(*aggrs_so_far, n);
     if (dopt == NULL) {
@@ -3917,7 +3934,7 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
 //    };
 static void tuniondecl_to_c(tuniondecl_t tud) {
   let TocState{.dyn = dyn, .tunions_so_far = tunions_so_far, ...} = *toc_state;
-  region d = open(dyn) {
+  region d = open(dyn); {
     let n = tud->name;
     if(tud->fields == NULL || Set::member(*tunions_so_far, n))
       return;
@@ -3992,7 +4009,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
   if(xd->fields == NULL)
     return;
   let TocState{.dyn = dyn, .xtunions_so_far = xtunions_so_far, ...} = *toc_state;
-  region d = open(dyn) {
+  region d = open(dyn); {
     let n = xd->name;
     for (let fs = xd->fields->v; fs != NULL; fs = fs->tl) {
       tunionfield_t f  = fs->hd;
@@ -4086,7 +4103,7 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
         // static declarations have to be treated as if they're toplevel
         // w.r.t. the translation.  NB: Any other generated declarations
 	// will also be left at top-level??
-        region temp {
+        TOC_RGN(init_nv, temp) {
           let nv2 = set_toplevel(temp,init_nv);
           exp_to_c(nv2, init);
         }
@@ -4127,7 +4144,7 @@ static stmt_t throw_match_stmt() {
 static stmt_t letdecl_to_c(env_t nv, pat_t p, type_t t, exp_t e, stmt_t s) {
   exp_to_c(nv,e);
   qvar_t x = temp_var();
-  region prgn {
+  TOC_RGN(nv, prgn) {
     let fail = throw_match_stmt();
     let nv = share_env(prgn,nv);
     let $(nv,vars,test_stmt) =
@@ -4235,6 +4252,8 @@ static void decltypes_to_c(decl_t d) {
   case &Using_d(_,_):
   case &ExternC_d(_):
   case &ExternCinclude_d(_,_): 
+  case &Region_d(...):
+  case &Alias_d(...):
     Tcutil::terr(d->loc,"Cyclone declaration within C code");
     break;
   case Porton_d:
@@ -4268,8 +4287,6 @@ static void stmttypes_to_c(stmt_t s) {
   case &Fallthru_s(_,_):
   case &Label_s(_,_):
   case &TryCatch_s(_,_):
-  case &Region_s(_,_,_,_,_):
-  case &Alias_s(_,_,_,_):
   case &ResetRegion_s(_): Tcutil::terr(s->loc,"Cyclone statement in C code");
     break;
   }
@@ -4317,6 +4334,10 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
     case &Let_d(_,_,_): 
     case &Letv_d(_):
       toc_impos("letdecl at toplevel");
+    case &Region_d(...):
+      toc_impos("region decl at toplevel");
+    case &Alias_d(...):
+      toc_impos("alias decl at toplevel");
     case &Aggr_d(sd):
       aggrdecl_to_c(sd);
       result_decls = new List(d,result_decls);
@@ -4359,7 +4380,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
 // initialize all globals
 static void init() {
   let NewRegion{dyn} = Core::new_dynregion();
-  region d = open(dyn) {
+  region d = open(dyn); {
     toc_state = 
       new TocState{ .dyn = dyn,
                     .tuple_types = rnew(d) NULL,
@@ -4422,7 +4443,7 @@ static void init() {
 // a list of C declarations.
 list_t<decl_t> toc(list_t<decl_t> ds) {
   init();
-  region start {
+  region start; {
     decls_to_c(start,empty_env(start),ds,true,false);
 #ifdef BCE_DEBUG
     fprintf(stderr,"***eliminated %d out of %d bounds checks\n",

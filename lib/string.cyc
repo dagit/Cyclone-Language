@@ -220,7 +220,7 @@ mstring_t<`r> rstrconcat_l(region_t<`r> r,list_t<stringptr_t>strs)
   size_t len;                           // temp
   size_t total_len  = 0;                // sum of lengths of the strings
   mstring_t<`r> ans;
-  region temp {
+  region temp; {
     list_t<size_t,`temp> lens = 
       rnew(temp) List((size_t)0,        // save length of each string
                       NULL);            // (with junk 0 on front)
@@ -256,7 +256,7 @@ mstring_t<`r> rstr_sepstr(region_t<`r> r,list_t<stringptr_t> strs, buffer_t sepa
   if (strs == NULL)    return rnew_string(r,0);
   if (strs->tl == NULL) return rstrdup(r,*(strs->hd));
   let p = strs;
-  region temp {
+  region temp; {
     list_t lens = rnew(temp) List((size_t)0,NULL);// see comments in strconcat_l
     list_t end = lens;
     size_t len;

@@ -33,6 +33,12 @@ using List;
 using Absynpp;
 namespace CfFlowInfo;
 
+#ifdef COARSE_REGIONS
+#define ANAL_RGN(ae,x) let x = (ae)->r;
+#else
+#define ANAL_RGN(ae,x) region x;
+#endif
+
 ////////////////////////// Shared Constants //////////////////////////
 int place_cmp(place_t p1, place_t p2);
 int root_cmp(root_t r1, root_t r2);
@@ -140,7 +146,7 @@ uplace_set_t<`r> union_uplace_set(uplace_set_t<`r> s1, uplace_set_t<`r> s2,
 bool place_set_subset(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2) {
   if ((int)s1.t == (int)s2.t) return true;
   try {
-    region temp { 
+    region temp; { 
       let iter = Dict::make_iter(temp,s1);
       let elem = *Dict::rchoose(temp,s1);
       while(Iter::next(iter,&elem)) {
@@ -341,7 +347,7 @@ absRval_t<`r> typ_to_absrval(flow_env_t<`r> fenv, type_t t, absRval_t<`r> leafva
 static bool 
 prefix_of_member(place_t<`r2,`r3> place,
                  Dict::dict_t<place_t<`r2,`r3>,Position::seg_t,`r4> set) {
-  region r {
+  region r; {
     let elem = $(place,NULL);
     let iter = Dict::make_iter(r,set);
     while(Iter::next(iter,&elem)) {
@@ -447,7 +453,7 @@ static flowdict_t<`r> escape_these(flow_env_t<`r> fenv,
     absRval_t oldval, newval;
     try oldval = lookup_place(d,place); 
     catch { case Dict::Absent: continue; }
-    switch(initlevel(d,oldval)) {
+    switch(initlevel(fenv,d,oldval)) {
     case AllIL:  newval = fenv->esc_all;  break;
     case ThisIL: newval = fenv->esc_this; break;
     case NoneIL: newval = fenv->esc_none; break;
@@ -514,8 +520,8 @@ static initlevel_t initlevel_rec(struct InitlevelEnv<`r,`e> @ env,
   if(this_ans == ThisIL || acc == ThisIL) return ThisIL;
   return AllIL;
 }
-initlevel_t initlevel(flowdict_t<`r> d, absRval_t<`r> r) {
-  region env_rgn {
+initlevel_t initlevel(flow_env_t env, flowdict_t<`r> d, absRval_t<`r> r) {
+  ANAL_RGN(env,env_rgn) {
     let env = InitlevelEnv(env_rgn,d,NULL);
     return initlevel_rec(&env,r,AllIL);
   }
@@ -551,7 +557,7 @@ bool is_unescaped(flowdict_t<`r> d, place_t<`r,`r> place) {
 
 // only things pointed to escape
 flowdict_t<`r> escape_deref(flow_env_t<`r> fenv, flowdict_t<`r> d, place_set_t<`r> * all_changed, absRval_t<`r> r) {
-  region rgn {
+  ANAL_RGN(fenv, rgn) {
     escpile_t pile = rnew(rgn) EscPile(rgn,NULL);
     add_places(pile, r);
     return escape_these(fenv, pile, all_changed, d);
@@ -572,7 +578,7 @@ static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env,
   switch($(oldval,newval)) {
   case $(&Esc(_), &AddressOf(p)): add_place(env->pile,p); fallthru;
   case $(&Esc(_), _):
-    if(initlevel(env->d,newval) != AllIL)
+    if(initlevel(env->fenv,env->d,newval) != AllIL)
       Tcutil::terr(env->loc, "assignment puts possibly-uninitialized data in "
 		   "an escaped location");
     return env->fenv->esc_all;
@@ -625,9 +631,9 @@ flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
                             place_t<`r,`r> place, 
                             absRval_t<`r> r) {
   update_place_set(all_changed,place,NULL);
-  region rgn {
+  ANAL_RGN(fenv, rgn) {
     let &Place{root,fs} = place;
-    struct AssignEnv<`rgn> env = AssignEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d, loc);
+    struct AssignEnv/*<`rgn>*/ env = AssignEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d, loc);
     absRval_t newval= assign_place_outer(&env,fs,Dict::lookup(d,root),r);
     return escape_these(fenv, env.pile, all_changed, Dict::insert(d, root, newval));
   }
@@ -739,8 +745,8 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
     
   default: break;
   }
-  initlevel_t il1 = initlevel(env->d1,r1);
-  initlevel_t il2 = initlevel(env->d2,r2);
+  initlevel_t il1 = initlevel(env->fenv,env->d1,r1);
+  initlevel_t il2 = initlevel(env->fenv,env->d2,r2);
   switch($(r1,r2)) {
   case $(&Esc(_),_):
   case $(_,&Esc(_)):
@@ -815,7 +821,11 @@ static consume_t<`r> or_consume(region_t<`r> r,
   DEBUG_PRINT_F(print_dict_set,c2.consumed,print_place);
   // merge the may_consume lists
   List::list_t<place_t<`r>,`r> mc = c2.may_consume;
-  region temp {
+#ifdef COARSE_REGIONS
+  let temp = r; {
+#else
+  region temp; {
+#endif
     // duplicate the first list, since it will be side-effected by delete.
     let x = rcopy(temp,c1.may_consume);
     List::iter_c(remove_f,&x,c2.may_consume);
@@ -855,7 +865,7 @@ flow_t<`r> join_flow(flow_env_t<`r> fenv,
        c1.consumed.t == c2.consumed.t) return f1;
     if(flow_lessthan_approx(f1,f2)) return f2;
     if(flow_lessthan_approx(f2,f1)) return f1;
-    region rgn {
+    ANAL_RGN(fenv, rgn) {
       let env     = JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL),d1,d2);
       let outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
       let r       = join_relns(fenv->r,r1,r2);
@@ -883,7 +893,7 @@ join_flow_and_rval(flow_env_t<`r> fenv,
 	 ReachableFL(outd,relns,cinfo)):
     if(absRval_lessthan_approx(0,r1,r2)) return $(outflow,r2);
     if(absRval_lessthan_approx(0,r2,r1)) return $(outflow,r1);
-    region rgn {
+    ANAL_RGN(fenv, rgn) {
       let env  = JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL),d1,d2);
       let outr = join_absRval(&env,0,r1,r2);
       return $(ReachableFL(escape_these(fenv, env.pile,all_changed,outd),
@@ -978,7 +988,7 @@ flow_t<`r> after_flow(flow_env_t<`r> fenv,
        c1.consumed.t == c2.consumed.t) return f1;
     // Should think about ways to avoid allocation here: (curr_place and
     // cut-off in presence of changes)
-    region rgn {
+    ANAL_RGN(fenv, rgn) {
       let curr_place = fenv->dummy_place;
       let env  = AfterEnv(JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d1, d2), 
 			  chg1, chg2, 
@@ -1317,7 +1327,7 @@ void print_list(List::list_t<`a> x, void (@pr)(`a)) {
 }
 
 void print_dict_set(dict_set_t<`a> p, void (@pr)(`a)) {
-  region r {
+  region r; {
     try {
       let iter = Dict::make_iter(r,p);
       let elem = *Dict::rchoose(r,p);
