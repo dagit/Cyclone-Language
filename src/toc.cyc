@@ -72,6 +72,7 @@ static `a toc_impos<`a>(string s) {
   fprintf(cyc_stderr,"%s\n",s);
   throw Toc_Impossible();
 }
+xenum exn {Match_error};
 
 // return true if t is a nullable pointer type i.e., *
 static bool is_nullable(typ t) {
@@ -831,7 +832,8 @@ static exp printf_to_c(primop p,Opt_t<exp> aopt,list<exp> args,list<typ> typs) {
   typs = typs->tl; // and its type
 
   list<Char>             rev_fmt    = null; // reversed fmt to return
-  list<exp>              rev_result = null; // reversed args to return, minus fmt
+  list<exp>              rev_result = null; // reversed args to return,
+                                                // minus fmt
   list<$(qvar,typ,exp)@> rev_temps  = null; // reversed temps to return
 
   for (i=0; i<len; i++) {
@@ -1023,7 +1025,8 @@ static void lvalue_assign_stmt(stmt s,list<field_name> fs,
 // These two functions find that lvalue and insert an assignment to it.
 // We assume that variables of e2 will not be captured by any
 // declarations in e1 (they should all be temps).
-static void lvalue_assign(exp e1,list<field_name> fs,Opt_t<primop> popt,exp e2) {
+static void lvalue_assign(exp e1,list<field_name> fs,Opt_t<primop> popt,exp e2)
+{
   switch (e1->r) {
   case StmtExp_e(s): lvalue_assign_stmt(s,fs,popt,e2); break;
   case Cast_e(t,e):  lvalue_assign(e,fs,popt,e2);      break;
@@ -1109,7 +1112,9 @@ static void exp_to_c(env nv, exp e) {
       // Any sscanf expression should be rejected by the typechecker;
       // sometimes we disable this to help debug fscanf and scanf.
       if (es == null) toc_impos("sscanf without arguments");
-      es->hd->r = structarrow_exp(new_exp(es->hd->r,es->hd->loc),"contents",DL)->r;
+      es->hd->r = structarrow_exp(new_exp(es->hd->r,es->hd->loc),
+                                  "contents",
+                                  DL)->r;
       break;
     default: break; //skip
     }
@@ -1832,7 +1837,14 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     for (_ dlps = List::rev(dlps0); dlps != null; dlps = dlps->tl) {
       _ tup = dlps->hd;
       _ p2  = tup[1];
-      let FieldName(f) = tup[0]->hd;  // FIX:  assumes one field name designator
+      _ f;
+      switch (tup[0]->hd) {
+        case FieldName(f2):
+          f=f2;
+          break;
+        default:  // FIX:  assumes one field name designator
+          throw Match_error();
+      }
       _ v   = temp_var();
       _ t2  = p2->topt->v;
       _ lab = fresh_label();

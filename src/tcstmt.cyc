@@ -147,7 +147,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
       terr(s0->loc,"fallthru not in a non-last case");
       return;
     }
-    let &$(_,tvs,ts) = trip_opt;
+    let &$(_,tvs,ts) = (_@)(trip_opt);
     list<$(tvar,typ)@> instantiation = List::map(make_inst_var,tvs);
     ts = List::map_c(substitute,instantiation,ts);
     for(; ts != null && es != null; ts = ts->tl, es = es->tl) {

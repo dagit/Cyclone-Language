@@ -155,9 +155,13 @@ static bool var_redecl_okay(genv_t ge, segment loc, var name, typ t, scope sc) {
   switch (ans->v[0]) {
   case VarRes(Global_b(vd)):
     if (sc == Static && vd->sc != Static) 
-      warn(loc,xprintf("static declaration of %s follows non-static declaration",name));
+      warn(loc,
+           xprintf("static declaration of %s follows non-static declaration",
+                   name));
     if (vd->sc == Static && sc != Static)
-      warn(loc,xprintf("non-static declaration of %s follows static declaration",name));
+      warn(loc,
+           xprintf("non-static declaration of %s follows static declaration",
+                   name));
     // either they must both be static, both public, or at most one non-extern
     if ((sc != Extern && vd->sc != Extern) && 
 	!(sc == Static && vd->sc == Static) &&
@@ -304,7 +308,7 @@ static void tcStructdecl(tenv te, genv_t ge, segment loc, structdecl sd) {
   switch (Dict::lookup_opt(ge->structdecls,v)) {
   case null: 
     // add the declaration to the environment, then go check the fields
-    ge->structdecls = Dict::insert(ge->structdecls, v, &$(sd));
+    ge->structdecls = Dict::insert(ge->structdecls, v, (structdecl@)(&$(sd)));
     if(sd->fields == null) {
       for(; tvs != null; tvs = tvs->tl)
 	switch(tvs->hd[1]) {
@@ -417,7 +421,7 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
   switch (Dict::lookup_opt(ge->enumdecls, v)) {
   case null: 
     // add the declaration to the environment, then go check the fields
-    ge->enumdecls = Dict::insert(ge->enumdecls, v, &$(ed));
+    ge->enumdecls = Dict::insert(ge->enumdecls, v, (enumdecl@)(&$(ed)));
     if(ed->fields == null) {
       for(; tvs != null; tvs = tvs->tl)
 	switch(tvs->hd[1]) {
@@ -503,7 +507,7 @@ static void tcEnumdecl(tenv te, genv_t ge, segment loc, enumdecl ed) {
   }
   // add the decl to the environment -- must be after variant-checking
   // (where we added an abstract version)
-  ge->enumdecls = Dict::insert(ge->enumdecls, v, &$(ed));
+  ge->enumdecls = Dict::insert(ge->enumdecls, v, (enumdecl@)(&$(ed)));
   // undo our clobbering with the abstract version
   *edp = ed;
 }
@@ -525,7 +529,9 @@ static void tcXenumdecl(tenv te, genv_t ge, segment loc, xenumdecl xd) {
   //       and add it to the environment
   // if we're not new, compare scopes
   if(xd2o == null) {
-    xenumdecl @ x = &$(&Xenumdecl{.sc=xd->sc, .name=xd->name, .fields=null});
+    xenumdecl @ x = (xenumdecl@)(&$(&Xenumdecl{.sc=xd->sc,
+                                               .name=xd->name,
+					       .fields=null}));
     xd2o = &Opt(x);
     ge->xenumdecls = Dict::insert(ge->xenumdecls, v, x);
   } else {

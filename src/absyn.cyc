@@ -123,7 +123,9 @@ typ file_typ() {
     typedef_name_t file_t_name     = &$(null,(string)"__sFILE");
     structdecl     sd              = &Structdecl(Abstract,&Opt(file_t_name),
 						 null, null);
-    typ            file_struct_typ = StructType(&Opt(file_t_name),null,&$(sd));
+    typ            file_struct_typ = StructType(&Opt(file_t_name),
+                                                null,
+                                                (structdecl*)(&$(sd)));
     file_t_opt = &Opt(PointerType(file_struct_typ,
 				  HeapRgnType,
 				  new_conref(false),

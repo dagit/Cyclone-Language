@@ -712,7 +712,7 @@ static tqual empty_tq = &empty_tq_v;
 void dumptqtd<`a>(struct Tqual * tq, typ t, void f(`a), `a a) {
   if(tq == null)
     tq = empty_tq;
-  let &$(tq,t,tms) = Absynpp::to_tms(tq,t);
+  let &$(tq,t,tms) = Absynpp::to_tms((tqual)tq,t);
   dumptq(tq);
   dumpntyp(t);
   dumptms(List::rev(tms),f,a);

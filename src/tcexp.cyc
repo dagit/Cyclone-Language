@@ -145,11 +145,11 @@ static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst_t c, exp e) {
       switch (topt->v) {
       case IntType(sn,B1,_):
         t = (sn == Unsigned) ? uchar_t : schar_t;
-        e->r = Const_e(Char_c(sn,i)); // i gets truncated here
+        e->r = Const_e(Char_c(sn,(char)(i))); // i gets truncated here
         break;
       case IntType(sn,B2,_):
 	t = (sn == Unsigned) ? ushort_t : sshort_t;
-        e->r = Const_e(Short_c(sn,i)); // i gets truncated here
+        e->r = Const_e(Short_c(sn,(short)(i))); // i gets truncated here
         break;
       case IntType(sn,_,_):
         t = (sn == Unsigned) ? uint_t : sint_t;
@@ -962,7 +962,7 @@ static synth tcStruct(tenv_t te, seg_t loc, Opt_t<typ> topt,
   // calculate the instantiation and final type
   _ inst    = List::map(make_inst_var,sd->tvs);
   _ typs    = List::map(snd,inst); 
-  _ res_typ = StructType(&Opt(*tn),typs,&$(sd));
+  _ res_typ = StructType(&Opt(*tn),typs,(structdecl@)(&$(sd)));
   *otyps = &Opt(typs);
   // make sure each argument has the right type
   list<$($(field_name,tqual,typ)@,exp)@> fields =
@@ -993,7 +993,7 @@ static synth tcStruct(tenv_t te, seg_t loc, Opt_t<typ> topt,
    _ inst       = List::append(all_inst,exist_inst);
    *all_ref   = &Opt(all_typs);
    *exist_ref = &Opt(exist_typs);
-   typ res = EnumType(ed->name,all_typs,&$(ed));
+   typ res = EnumType(ed->name,all_typs,(enumdecl*)(&$(ed)));
    list<$(tqual,typ)@> ts = ef->typs;
    while (es != null && ts != null) {
      exp e = es->hd; 
@@ -1012,8 +1012,10 @@ static synth tcStruct(tenv_t te, seg_t loc, Opt_t<typ> topt,
 		     xprintf("too many arguments for enum constructor %s",
 			     qvar2string(ef->name)));
    if (ts != null) 
-     return expr_err(te,loc, xprintf("too few arguments for enum constructor %s",
-				     qvar2string(ef->name)));
+     return expr_err(te,
+                     loc,
+                     xprintf("too few arguments for enum constructor %s",
+                             qvar2string(ef->name)));
    return standard_synth(te,res);
  }
 
@@ -1026,7 +1028,7 @@ static synth tcStruct(tenv_t te, seg_t loc, Opt_t<typ> topt,
    tcExpList(te,es);
    _ exist_inst = List::map(make_inst_var,ef->tvs);
    _ exist_typs = List::map(snd,exist_inst); 
-   _ res        = XenumType(xd->name,&$(xd));
+   _ res        = XenumType(xd->name,(xenumdecl*)(&$(xd)));
    _ ts         = ef->typs;
    *exist_ref = &Opt(exist_typs);
    while (es != null && ts != null) {

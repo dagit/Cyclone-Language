@@ -103,7 +103,7 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p,typ *`p region_opt) {
     _ all_inst = List::map(make_inst_var,sd->tvs);
     _ all_typs = List::map(snd,all_inst); 
     *topt_ref = &Opt(all_typs); // side effect
-    t = StructType(sd->name,all_typs,&$(sd));
+    t = StructType(sd->name,all_typs,(structdecl@)(&$(sd)));
     // unify with the struct type
     list<$($(field_name,tqual,typ)@,pat)@> fields = 
       resolve_struct_designators(p->loc,dps,sd);
@@ -124,7 +124,7 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p,typ *`p region_opt) {
     tv_result = List::append(tv_result, tvs);
     _ all_inst = List::map(make_inst_var,ed->tvs);
     _ all_typs = List::map(snd,all_inst); 
-    t = EnumType(ed->name,all_typs,&$(ed));
+    t = EnumType(ed->name,all_typs,(enumdecl@)(&$(ed)));
     list<$(tqual,typ)@> tqts = ef->typs;
     for(; ps != null && tqts != null; ps = ps->tl, tqts = tqts->tl) {
       _ p2 = ps->hd;
@@ -149,7 +149,7 @@ $(list<tvar>, list<vardecl>)@ tcPat<`p>(tenv_t te,pat p,typ *`p region_opt) {
     typ heap = HeapRgnType;
     tenv_t te2 = add_type_vars(p->loc,te,tvs);
     tv_result = List::append(tv_result, tvs);
-    t = XenumType(xed->name,&$(xed));
+    t = XenumType(xed->name,(xenumdecl@)(&$(xed)));
     list<$(tqual,typ)@> tqts = ef->typs;
     for(; ps != null && tqts != null; ps = ps->tl, tqts = tqts->tl) {
       _ p2 = ps->hd;
@@ -578,7 +578,8 @@ match<`rhs>(simple_pat_t p, access_t obj, term_desc_t dsc, context_t ctx,
 
 // Checks to see that the term (thus far described by dsc) matches one
 // of the match_t rules.
-static decision_t<`rhs> or_match<`rhs>(term_desc_t dsc, match_t(`rhs) allmrules){
+static decision_t<`rhs> or_match<`rhs>(term_desc_t dsc, match_t(`rhs) allmrules)
+{
   switch(allmrules) {
   case null: return Tcpat::Failure;
   case &cons{.hd = &$(pat1, rhs1), .tl = rulerest}:
@@ -603,9 +604,9 @@ static decision_t<`rhs> and_match<`rhs>(context_t ctx, work_stack work,
   case &cons{.hd = &$(pats,objs,dscs), .tl = workr }:
     if (pats == null || objs == null || dscs == null)
       return impos("tcpat:and_match: malformed work frame");    
-    let &cons(pat1,patr) = pats;
-    let &cons(obj1,objr) = objs;
-    let &cons(dsc1,dscr) = dscs;
+    let &cons(pat1,patr) = (_@)(pats);
+    let &cons(obj1,objr) = (_@)(objs);
+    let &cons(dsc1,dscr) = (_@)(dscs);
     _ wf = &$(patr, objr, dscr);
     return match(pat1,obj1,dsc1,ctx,&cons(wf,workr),right_hand_side,rules);
   } 

@@ -6,9 +6,9 @@
 #include "syntax.h"
 
 #ifdef LEXGEN_CYC
-#define EXTERN_DEFINITION
+#define LEXGEN_EXTERN_DEFINITION
 #else
-#define EXTERN_DEFINITION extern
+#define LEXGEN_EXTERN_DEFINITION extern
 #endif
 
 using Core {
@@ -16,25 +16,25 @@ using List {
 namespace Lexgen {
 
 // Representation of automata
-EXTERN_DEFINITION enum Automata_trans {
+LEXGEN_EXTERN_DEFINITION enum Automata_trans {
   No_remember;
   Remember(int);
 };
 typedef enum Automata_trans automata_trans_t;
 
-EXTERN_DEFINITION enum Automata_move {
+LEXGEN_EXTERN_DEFINITION enum Automata_move {
   Backtrack;
   Goto(int);
 };
 typedef enum Automata_move automata_move_t;
 
-EXTERN_DEFINITION enum Automata { 
+LEXGEN_EXTERN_DEFINITION enum Automata { 
   Perform(int); 
   Shift(automata_trans_t, automata_move_t[?]);
 };
 typedef enum Automata automata_t;
 
-EXTERN_DEFINITION struct Automata_entry {
+LEXGEN_EXTERN_DEFINITION struct Automata_entry {
   string                           name;
   int                              initial_state;
   list<$(int,Syntax::location_t)@> actions;
