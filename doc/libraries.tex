@@ -1582,163 +1582,6 @@ glist_t<`a,`r2> \textbf{rfilter}(region_t<`r2> r2,bool f(`a),glist_t<`a,`r> l);
 
 ???
 
-\subsection{Printf}
-
-Cyclone provides safe versions of \code{printf} and \code{fprintf} as
-built-in primitives.  It also provides a built-in function,
-\code{xprintf}, that allocates a string, prints to it, and returns it.
-Cyclone protects against format string attacks by requiring the format
-string argument of the \code{printf} functions to be a string constant,
-and by doing more rigorous checks than the C version of \code{printf}.
-
-\subsubsection*{Functions}
-\begin{verbatim}
-int    printf(string s, ...);
-int    fprintf(FILE @f, string s, ...);
-string xprintf(string s, ...);
-\end{verbatim}
-
-\subsubsection*{Use}
-
-\begin{defun}{printf}{(s,...)}
-Prints to the standard output according to the format string \var{s} and
-the remaining arguments.  It returns the number of characters printed,
-or a negative value if an output error or encoding error occurred.
-\end{defun}
-
-\begin{defun}{fprintf}{(f,s,...)}
-Prints to the stream pointed to by \var{f} according to the format
-string \var{s} and the remaining arguments.  It returns the number of
-characters printed, or a negative value if an output error or encoding
-error occurred.
-\end{defun}
-
-\begin{defun}{xprintf}{(s,...)}
-Allocates and returns a string whose contents are given by printing
-according to the format string \var{s} and the remaining arguments.
-FIX: is an error possible?  What do we do then?
-\end{defun}
-
-\subsubsection*{Format strings}
-
-Cyclone requires the format string arguments of \code{printf},
-\code{fprintf}, and \code{xprintf} to be string constants, and it checks
-the remaining arguments for consistency at compile time.
-
-The format string consists of ordinary (non-\code{\%}) characters, which
-are copied to the output, and \emph{conversion specifications}, which
-are sequences of characters introduced by \code{\%}.  Each conversion
-specification `converts' zero or more arguments to the output, as
-described below.
-
-A conversion specification has the following parts, described, in order,
-by regular expressions:
-\begin{itemize}
-\item Zero or more \emph{flags}:
-[\code{-} \code{+} \emph{space} \code{\#} \code{0}]*
-\item An optional minimal \emph{width}:
-(\code{*} | [\code{0}-\code{9}]+)?
-\item An optional \emph{precision}:
-(\code{.} (\code{*} | [\code{0}-\code{9}]+)? )?
-\item An optional \emph{length modifier}:
-(\code{l} | \code{h} | \code{hh} )
-\item A \emph{conversion specifier}:
-[\code{d} \code{i} \code{o} \code{u} \code{x} \code{X} \code{f} \code{F} \code{e} \code{E} \code{g} \code{G} \code{a} \code{A} \code{c} \code{s} \code{n} \code{\%}]
-\end{itemize}
-
-The flag \code{-} causes left justification; right justification is the
-default.  The flag \code{+} is valid for numeric conversions only; it
-forces a \code{+} sign to be printed for positive arguments.  The flag
-\emph{space} (the space character) is valid for numeric conversions only;
-it causes an extra space to be printed in front of positive arguments.
-It is ignored if the \code{+} flag is also given.
-The flag \code{\#} is valid for \code{o}, \code{x}, \code{X}, \code{a},
-\code{A}, \code{e}, \code{E}, \code{f}, \code{F}, \code{g}, \code{G}
-only; it causes an ``alternative form'' to be printed.  For \code{o} it
-forces a leading zero to be printed; for \code{x} and \code{X}, a
-leading \code{0x} or \code{0X} is added to non-zero conversions; for the
-other conversions, a decimal point is always printed.
-
-The width of a conversion specification gives a minimum width for the
-result of the conversion; if the conversion naturally gives a shorter
-result, it is padded by spaces to the minimum width.  If the width has
-the form \code{*}, the minimum width is given by an integer argument.
-
-A precision is valid for numeric conversions only.  It gives the minimum
-number of digits to appear for the \code{d}, \code{i}, \code{o},
-\code{u}, \code{x}, and \code{X} conversions, the number of digits to
-appear after the decimal point in the \code{a}, \code{A}, \code{e},
-\code{E}, \code{f}, and \code{F} conversions, and the maximum number of
-significant digits for the \code{g} and \code{G} conversions.  If the
-precision has the form \code{.} \code{*}, it is given by an integer
-argument.
-
-The optional length modifier and conversion specifier give the type of
-the corresponding argument, as shown in the table below.  If no type
-appears, then the combination of conversion specifier and length
-modifier is not allowed.
-
-\begin{tt}
-\begin{tabular}{r|llll}
-  & none         & l             & h              & hh\\\hline
-d & int          & long          & short          & char \\
-i & int          & long          & short          & char \\
-o & unsigned int & unsigned long & unsigned short & unsigned char \\
-u & unsigned int & unsigned long & unsigned short & unsigned char \\
-x & unsigned int & unsigned long & unsigned short & unsigned char \\
-X & unsigned int & unsigned long & unsigned short & unsigned char \\
-f & double \\
-F & double \\
-e & double \\
-E & double \\
-g & double \\
-G & double \\
-a & double \\
-A & double \\
-c & int \\
-s & string \\
-n & int @        & unsigned long @ & short @      & char @ \\
-\% & \textrm{(no arg)}
-\end{tabular}
-\end{tt}
-
-No flags, width, precision, or length modifiers are allowed for the
-\code{s} and \code{\%} conversions.
-
-The \code{d} and \code{i} specifiers print their arguments as signed
-decimal integers.
-
-The \code{o} specifier prints its argument as an unsigned octal number.
-
-The \code{u} specifier prints its argument as an unsigned decimal number.
-
-The \code{x} and \code{X} specifiers print their arguments as unsigned
-hexidecimal integers.
-
-The \code{f} and \code{F} specifiers print their arguments in the form
-[-]ddd.ddd (no exponents).
-
-The \code{e} and \code{E} specifiers print their arguments using exponents.
-
-The \code{g} and \code{G} specifiers print their arguments using either
-the \code{f}/\code{F}
-style or the \code{e}/\code{E} style, depending on the precision and the
-argument.
-
-The \code{a} and \code{A} specifiers print their arguments as
-hexidecimal floating point numbers.
-
-The \code{c} specifier prints its argument as an unsigned character.
-
-The \code{s} specifier prints its argument as a zero terminated string.
-
-The \code{n} specifier does not print its argument; instead, the number
-of characters written up to the \code{n} specifier is stored where the
-argument points.
-
-The \code{\%} specifier prints a \code{\%} character.
-
-
 \subsection{Position}
 
 \subsubsection*{Header}
@@ -1963,114 +1806,6 @@ Returns a rope containing the concatenation of the ropes in list
 \var{l}, from left to right.
 \end{defun}
 
-\subsection{Scanf}
-
-Cyclone provides safe versions of \code{scanf} and \code{fscanf} as
-built-in primitives.  \code{sscanf} is not yet supported.
-
-\subsubsection*{Functions}
-\begin{verbatim}
-int    scanf(string s,...);
-int    fscanf(FILE @ f, string s,...);
-\end{verbatim}
-
-\subsubsection*{Use}
-
-\begin{defun}{scanf}{(s,...)}
-Reads from the standard input according to the format string \var{s}.
-Results are stored in the remaining arguments.
-\code{scanf} returns the number of arguments successfully read.
-If an error occurs before any arguments are converted, \code{EOF} is
-returned.
-\end{defun}
-
-\begin{defun}{fprintf}{(f,s,...)}
-Reads from the stream \var{f} according to the format string \var{s}.
-Results are stored in the remaining arguments.
-\code{fscanf} returns the number of arguments successfully read.
-If an error occurs before any arguments are converted, \code{EOF} is
-returned.
-\end{defun}
-
-\subsubsection*{Format strings}
-
-Cyclone requires the format string arguments of \code{scanf} and
-\code{fscanf} to be string constants, and it checks the remaining
-arguments for consistency at compile time.
-
-The format string consists of white space characters (which match any
-(possible empty) sequence of white space characters), ordinary
-(non-\code{\%}) characters (which match themselves), and \emph{conversion
-specifications}, which are sequences of characters introduced by
-\code{\%}.  Each conversion specification `converts' a sequence of
-characters from the input stream, placing the result into storage
-pointed to by the corresponding argument of \code{scanf} or
-\code{fscanf}.
-
-A conversion specification has the following parts, described, in order,
-by regular expressions:
-\begin{itemize}
-\item An optional assignment suppression character, \code{*}
-\item An optional maximal \emph{width}:
-([\code{0}-\code{9}]+)?
-\item An optional \emph{length modifier}:
-(\code{l} | \code{h} | \code{hh} )
-\item A \emph{conversion specifier}:
-[\code{d} \code{i} \code{o} \code{u} \code{x} \code{X} \code{f} \code{F} \code{e} \code{E} \code{g} \code{G} \code{a} \code{A} \code{n} \code{\%}]
-\end{itemize}
-
-If the assignment suppression character \code{*} is given, the
-characters corresponding to the conversion specifier are read, but no
-argument is assigned, and no argument is required for that specifier.
-
-The optional length modifier and conversion specifier give the type of
-the corresponding argument, as shown in the table below.  If no type
-appears, then the combination of conversion specifier and length
-modifier is not allowed.
-
-\begin{tt}
-\begin{tabular}{r|llll}
-  & none           & l               & h                &  hh\\\hline
-d & int @          & long @          & short @          & char @ \\
-i & int @          & long @          & short @          & char @ \\
-o & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
-u & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
-x & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
-X & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
-f & float @        & double @ \\
-F & float @        & double @ \\
-e & float @        & double @ \\
-E & float @        & double @ \\
-g & float @        & double @ \\
-G & float @        & double @ \\
-a & float @        & double @ \\
-A & float @        & double @ \\
-n & int @          & unsigned long @ & short @          & char @ \\
-\% & \texttt{(no arg)}
-\end{tabular}
-\end{tt}
-
-The \code{d} and \code{i} specifiers match optionally signed decimal
-integers.
-
-The \code{o} specifier matches an optionally signed octal integer.
-
-The \code{u} specifier matches an optionally signed decimal integer.
-
-The \code{x} and \code{X} specifiers match optionally signed hexidecimal
-integers.
-
-The \code{f}, \code{F}, \code{e}, \code{E}, \code{g}, \code{G},
-\code{a}, and \code{A} specifiers match floating point numbers.
-
-The \code{n} specifier does not match any input; instead, the number of
-characters read by the call of \code{fscanf} or \code{scanf} up to the
-\code{n} specifier is stored where the argument points.
-
-The \code{\%} specifier matches a \code{\%} character.  No assignment
-suppression, width, or length modifiers are allowed for the \code{\%}
-conversion.
-
 \subsection{Set}
 
 Namespace \code{Set} defines polymorphic, functional, finite sets of
@@ -2267,6 +2002,312 @@ Returns all of the elements of set \var{s} in some unspecified order.
 #include <splay.h>
 using Splay;
 \end{verbatim}
+
+\subsection{Stdio}
+
+\begin{verbatim}
+#include <stdio.h>
+using Stdio;
+\end{verbatim}
+
+The namespace \texttt{Stdio} provides input and output primitives.
+
+
+\subsubsection*{Printing}
+
+Cyclone provides safe versions of \code{printf} and \code{fprintf} as
+built-in primitives.  It also provides a built-in function,
+\code{xprintf}, that allocates a string, prints to it, and returns it.
+Cyclone protects against format string attacks by using its type safe
+vararg features; the library verifies the format string and
+corresponding arguments at run time.
+
+The permissible types for the varargs of \texttt{printf},
+\texttt{fprintf}, and \texttt{xprintf} are given by the type
+\texttt{parg_t}; if you need to know the details of \texttt{parg_t},
+consult \texttt{stdio.h}.
+
+\begin{defun2}{int}{fprintf}{(FILE @\var{f},const char {?}`r \var{fmt}, ...`r1 inject parg_t<`r2>);}
+  Prints to the stream pointed to by \var{f} according to the format
+  string \var{fmt} and the remaining arguments.  It returns the number
+  of characters printed, or a negative value if an output error or
+  encoding error occurred.
+\end{defun2}
+\begin{defun2}{int}{printf}{(const char {?}`r \var{fmt}, ...`r1 inject parg_t<`r2>);}
+  Prints to the standard output according to the format string \var{fmt}
+  and the remaining arguments.  It returns the number of characters
+  printed, or a negative value if an output error or encoding error
+  occurred.
+\end{defun2}
+\begin{defun2}{int}{sprintf}{(char {?}`r1 \var{s}, const char {?}`r2 \var{fmt}, ...`r3 inject parg_t<`r4>);}
+  Writes into string \var{s} according to format string \var{fmt} and
+  the remaining arguments.  It returns the number of characters
+  printed, or a negative value if an output error or encoding error
+  occurred.
+\end{defun2}
+\begin{defun2}{char ?}{xprintf(const char {?}`r2 \var{fmt}, ...`r3 inject parg_t<`r4>);}
+  Allocates and returns a string whose contents are given by printing
+  according to the format string \var{fmt} and the remaining arguments.
+  \texttt{FIX: is an error possible?  What do we do then?}
+\end{defun2}
+\begin{defun2}{char {?}`r1}{rxprintf}{(region_t<`r1>, const char {?}`r2 fmt, ...`r3 inject parg_t<`r4> ap);}
+\end{defun2}
+
+\begin{defun2}{int}{vfprintf}{(FILE @,const char {?}`r fmt, parg_t<`r2> ? `r1 ap);}
+  A version of \code{fprintf} suitable for calling from a user's
+  vararg function.
+\end{defun2}
+\begin{defun2}{int}{vprintf}{(const char {?}`r fmt, parg_t<`r2> ? `r1);}
+  A version of \code{printf} suitable for calling from a user's
+  vararg function.
+\end{defun2}
+\begin{defun2}{int}{vsprintf}{(char {?}`r1 s, const char {?}`r2 fmt, parg_t<`r4> ? `r3);}
+  A version of \code{sprintf} suitable for calling from a user's
+  vararg function.
+\end{defun2}
+\begin{defun2}{char {?}`r1}{vrxprintf}{(region_t<`r1> r1, const char {?}`r2 fmt, parg_t<`r4> ? `r3 ap);}
+  A version of \code{rxprintf} suitable for calling from a user's
+  vararg function.
+\end{defun2}
+
+\subsubsection*{Output format strings}
+
+Cyclone requires the format string arguments of \code{printf},
+\code{fprintf}, and \code{xprintf} to be string constants, and it checks
+the remaining arguments for consistency at compile time.
+
+The format string consists of ordinary (non-\code{\%}) characters, which
+are copied to the output, and \emph{conversion specifications}, which
+are sequences of characters introduced by \code{\%}.  Each conversion
+specification `converts' zero or more arguments to the output, as
+described below.
+
+A conversion specification has the following parts, described, in order,
+by regular expressions:
+\begin{itemize}
+\item Zero or more \emph{flags}:
+[\code{-} \code{+} \emph{space} \code{\#} \code{0}]*
+\item An optional minimal \emph{width}:
+(\code{*} | [\code{0}-\code{9}]+)?
+\item An optional \emph{precision}:
+(\code{.} (\code{*} | [\code{0}-\code{9}]+)? )?
+\item An optional \emph{length modifier}:
+(\code{l} | \code{h} | \code{hh} )
+\item A \emph{conversion specifier}:
+[\code{d} \code{i} \code{o} \code{u} \code{x} \code{X} \code{f} \code{F} \code{e} \code{E} \code{g} \code{G} \code{a} \code{A} \code{c} \code{s} \code{n} \code{\%}]
+\end{itemize}
+
+The flag \code{-} causes left justification; right justification is the
+default.  The flag \code{+} is valid for numeric conversions only; it
+forces a \code{+} sign to be printed for positive arguments.  The flag
+\emph{space} (the space character) is valid for numeric conversions only;
+it causes an extra space to be printed in front of positive arguments.
+It is ignored if the \code{+} flag is also given.
+The flag \code{\#} is valid for \code{o}, \code{x}, \code{X}, \code{a},
+\code{A}, \code{e}, \code{E}, \code{f}, \code{F}, \code{g}, \code{G}
+only; it causes an ``alternative form'' to be printed.  For \code{o} it
+forces a leading zero to be printed; for \code{x} and \code{X}, a
+leading \code{0x} or \code{0X} is added to non-zero conversions; for the
+other conversions, a decimal point is always printed.
+
+The width of a conversion specification gives a minimum width for the
+result of the conversion; if the conversion naturally gives a shorter
+result, it is padded by spaces to the minimum width.  If the width has
+the form \code{*}, the minimum width is given by an integer argument.
+
+A precision is valid for numeric conversions only.  It gives the minimum
+number of digits to appear for the \code{d}, \code{i}, \code{o},
+\code{u}, \code{x}, and \code{X} conversions, the number of digits to
+appear after the decimal point in the \code{a}, \code{A}, \code{e},
+\code{E}, \code{f}, and \code{F} conversions, and the maximum number of
+significant digits for the \code{g} and \code{G} conversions.  If the
+precision has the form \code{.} \code{*}, it is given by an integer
+argument.
+
+The optional length modifier and conversion specifier give the type of
+the corresponding argument, as shown in the table below.  If no type
+appears, then the combination of conversion specifier and length
+modifier is not allowed.
+
+\begin{tt}
+\begin{tabular}{r|llll}
+  & none         & l             & h              & hh\\\hline
+d & int          & long          & short          & char \\
+i & int          & long          & short          & char \\
+o & unsigned int & unsigned long & unsigned short & unsigned char \\
+u & unsigned int & unsigned long & unsigned short & unsigned char \\
+x & unsigned int & unsigned long & unsigned short & unsigned char \\
+X & unsigned int & unsigned long & unsigned short & unsigned char \\
+f & double \\
+F & double \\
+e & double \\
+E & double \\
+g & double \\
+G & double \\
+a & double \\
+A & double \\
+c & int \\
+s & string \\
+n & int @        & unsigned long @ & short @      & char @ \\
+\% & \textrm{(no arg)}
+\end{tabular}
+\end{tt}
+
+No flags, width, precision, or length modifiers are allowed for the
+\code{s} and \code{\%} conversions.
+
+The \code{d} and \code{i} specifiers print their arguments as signed
+decimal integers.
+
+The \code{o} specifier prints its argument as an unsigned octal number.
+
+The \code{u} specifier prints its argument as an unsigned decimal number.
+
+The \code{x} and \code{X} specifiers print their arguments as unsigned
+hexidecimal integers.
+
+The \code{f} and \code{F} specifiers print their arguments in the form
+[-]ddd.ddd (no exponents).
+
+The \code{e} and \code{E} specifiers print their arguments using exponents.
+
+The \code{g} and \code{G} specifiers print their arguments using either
+the \code{f}/\code{F}
+style or the \code{e}/\code{E} style, depending on the precision and the
+argument.
+
+The \code{a} and \code{A} specifiers print their arguments as
+hexidecimal floating point numbers.
+
+The \code{c} specifier prints its argument as an unsigned character.
+
+The \code{s} specifier prints its argument as a zero terminated string.
+
+The \code{n} specifier does not print its argument; instead, the number
+of characters written up to the \code{n} specifier is stored where the
+argument points.
+
+The \code{\%} specifier prints a \code{\%} character.
+
+
+\subsubsection*{Formatted input}
+
+Cyclone provides safe versions of \code{scanf}, \code{fscanf}, and
+\code{sscanf}, using its type safe vararg feature; the library
+verifies the format string and corresponding arguments at run time.
+
+The permissible types for the varargs of the input functions are given
+by the type \texttt{sarg_t}; if you need to know the details of
+\texttt{sarg_t}, consult \texttt{stdio.h}.
+
+\begin{defun2}{int}{scanf}{(const char {?}`r1 \var{fmt}, ...`r2 inject sarg_t<`r3,`r4>);}
+  Reads from the standard input according to the format string
+  \var{fmt}.  Results are stored in the remaining arguments.
+  \code{scanf} returns the number of arguments successfully read.  If
+  an error occurs before any arguments are converted, \code{EOF} is
+  returned.
+\end{defun2}
+\begin{defun2}{int}{fscanf}{(FILE @ \var{stream}, const char {?}`r1 \var{fmt}, ...`r2 inject sarg_t<`r3,`r4>);}
+  Reads from the \var{stream} according to the format string
+  \var{fmt}.  Results are stored in the remaining arguments.
+  \code{fscanf} returns the number of arguments successfully read.  If
+  an error occurs before any arguments are converted, \code{EOF} is
+  returned.
+\end{defun2}
+\begin{defun2}{int}{sscanf}{(const char {?}`r \var{src}, const char {?}`r1 \var{fmt}, ...`r2 inject sarg_t<`r3,`r4>);}
+  Reads from the string \var{src} according to the format string
+  \var{fmt}.  Results are stored in the remaining arguments.
+  \code{sscanf} returns the number of arguments successfully read.  If
+  an error occurs before any arguments are converted, \code{EOF} is
+  returned.
+\end{defun2}
+\begin{defun2}{int}{vfscanf}{(FILE @ stream, const char {?}`r1 \var{fmt}, sarg_t<`r3,`r4> {?}`r2);}
+  A version of \code{fscanf} suitable for calling from a user's
+  vararg function.
+\end{defun2}
+\begin{defun2}{int}{vsscanf}{(const char {?}`r \var{src}, const char {?}`r1 \var{fmt}, sarg_t<`r3,`r4> {?}`r2);}
+  A version of \code{sscanf} suitable for calling from a user's
+  vararg function.
+\end{defun2}
+
+\subsubsection*{Input format strings}
+
+Cyclone requires the format string arguments of \code{scanf} and
+\code{fscanf} to be string constants, and it checks the remaining
+arguments for consistency at compile time.
+
+The format string consists of white space characters (which match any
+(possible empty) sequence of white space characters), ordinary
+(non-\code{\%}) characters (which match themselves), and \emph{conversion
+specifications}, which are sequences of characters introduced by
+\code{\%}.  Each conversion specification `converts' a sequence of
+characters from the input stream, placing the result into storage
+pointed to by the corresponding argument of \code{scanf} or
+\code{fscanf}.
+
+A conversion specification has the following parts, described, in order,
+by regular expressions:
+\begin{itemize}
+\item An optional assignment suppression character, \code{*}
+\item An optional maximal \emph{width}:
+([\code{0}-\code{9}]+)?
+\item An optional \emph{length modifier}:
+(\code{l} | \code{h} | \code{hh} )
+\item A \emph{conversion specifier}:
+[\code{d} \code{i} \code{o} \code{u} \code{x} \code{X} \code{f} \code{F} \code{e} \code{E} \code{g} \code{G} \code{a} \code{A} \code{n} \code{\%}]
+\end{itemize}
+
+If the assignment suppression character \code{*} is given, the
+characters corresponding to the conversion specifier are read, but no
+argument is assigned, and no argument is required for that specifier.
+
+The optional length modifier and conversion specifier give the type of
+the corresponding argument, as shown in the table below.  If no type
+appears, then the combination of conversion specifier and length
+modifier is not allowed.
+
+\begin{tt}
+\begin{tabular}{r|llll}
+  & none           & l               & h                &  hh\\\hline
+d & int @          & long @          & short @          & char @ \\
+i & int @          & long @          & short @          & char @ \\
+o & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
+u & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
+x & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
+X & unsigned int @ & unsigned long @ & unsigned short @ & unsigned char @ \\
+f & float @        & double @ \\
+F & float @        & double @ \\
+e & float @        & double @ \\
+E & float @        & double @ \\
+g & float @        & double @ \\
+G & float @        & double @ \\
+a & float @        & double @ \\
+A & float @        & double @ \\
+n & int @          & unsigned long @ & short @          & char @ \\
+\% & \texttt{(no arg)}
+\end{tabular}
+\end{tt}
+
+The \code{d} and \code{i} specifiers match optionally signed decimal
+integers.
+
+The \code{o} specifier matches an optionally signed octal integer.
+
+The \code{u} specifier matches an optionally signed decimal integer.
+
+The \code{x} and \code{X} specifiers match optionally signed hexidecimal
+integers.
+
+The \code{f}, \code{F}, \code{e}, \code{E}, \code{g}, \code{G},
+\code{a}, and \code{A} specifiers match floating point numbers.
+
+The \code{n} specifier does not match any input; instead, the number of
+characters read by the call of \code{fscanf} or \code{scanf} up to the
+\code{n} specifier is stored where the argument points.
+
+The \code{\%} specifier matches a \code{\%} character.  No assignment
+suppression, width, or length modifiers are allowed for the \code{\%}
+conversion.
 
 \subsection{String}
 
