@@ -417,7 +417,7 @@ void dumpntyp(type_t t) {
     case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
       fallthru(tname,is_x,fname);
     case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
-			   &Tunionfield(fname,_,_,_,_)):
+			   &Tunionfield(fname,_,_,_)):
       if(is_x) dump("xtunion "); else dump("tunion ");
       dumpqvar(tname);
       dump(".");
@@ -886,17 +886,15 @@ void dumppat(pat_t p) {
   case &Pointer_p(p2):   dump("&"); dumppat(p2); break;
   case &Reference_p(vd): dump("*"); dumpqvar(vd->name); break;
   case &UnknownId_p(q):  dumpqvar(q); break;
-  case &UnknownCall_p(q,tvs,ps):
-    dumpqvar(q); dumptvars(tvs); group(dumppat,ps,"(",")",","); break;
+  case &UnknownCall_p(q,ps): dumpqvar(q); group(dumppat,ps,"(",")",","); break;
   case &Aggr_p(AggrInfo(info,_),exists,dps):
     let $(_,n) = aggr_kinded_name(info);
     dumpqvar(n); dump_char('{');
     egroup(dumptvar,exists,"[","]",",");
     group(dumpdp,dps,"","}",",");
     break;
-  case &Tunion_p(_,tuf,tvs,ps):
+  case &Tunion_p(_,tuf,ps):
     dumpqvar(tuf->name); 
-    dumptvars(tvs);
     if (ps != NULL) group(dumppat,ps,"(",")",",");
     break;
   case &Enum_p(_,ef): fallthru(ef);
@@ -904,7 +902,7 @@ void dumppat(pat_t p) {
   }
 }
 
-void dumptunionfield(tunionfield_t ef) {
+void dumptunionfield(tunionfield_t ef) { 
   dumpqvar(ef->name);
   if(ef->typs != NULL)
     dumpargs(ef->typs);

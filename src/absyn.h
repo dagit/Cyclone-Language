@@ -561,11 +561,11 @@ namespace Absyn {
     Pointer_p(pat_t); // &p
     Reference_p(vardecl_t);// *p. only name field is right until tcPat is called
     Aggr_p(aggr_info_t,list_t<tvar_t>,list_t<$(list_t<designator_t>,pat_t)@>);
-    Tunion_p(tuniondecl_t, tunionfield_t, list_t<tvar_t>, list_t<pat_t>);
+    Tunion_p(tuniondecl_t, tunionfield_t, list_t<pat_t>);
     Enum_p(enumdecl_t,enumfield_t);
     AnonEnum_p(type_t,enumfield_t);
     UnknownId_p(qvar_t); // the rest are resolved by tcpat
-    UnknownCall_p(qvar_t,list_t<tvar_t>,list_t<pat_t>); 
+    UnknownCall_p(qvar_t,list_t<pat_t>); 
   };
   // patterns with auxiliary information
   EXTERN_ABSYN struct Pat {
@@ -663,7 +663,6 @@ namespace Absyn {
 
   EXTERN_ABSYN struct Tunionfield {
     qvar_t                     name; 
-    list_t<tvar_t>             tvs; // exist vars -- days are numbered
     list_t<$(tqual_t,type_t)@> typs;
     seg_t                      loc;
     scope_t                    sc; // relevant only for xtunions

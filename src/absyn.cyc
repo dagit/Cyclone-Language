@@ -198,7 +198,7 @@ qvar_t exn_name   = &exn_name_v;
   static $(nmspace_t, var_t) str##_pr    = $((nmspace_t)&abs_null, &str##_str);\
   qvar_t                     str##_name  = &str##_pr;\
   static struct Tunionfield  str##_tuf_v = Tunionfield(&str##_pr,\
-				 		       NULL,NULL,NULL,Extern);\
+				 		       NULL,NULL,Extern);\
   tunionfield_t              str##_tuf   = &str##_tuf_v
 
 MAKE_BUILTIN_EXN(Null_Exception);

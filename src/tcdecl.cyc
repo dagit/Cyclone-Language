@@ -251,16 +251,6 @@ merge_tunionfield(tunionfield_t f0, tunionfield_t f1,
   let $(new_scope, res) = 
     merge_scope(f0->sc, f1->sc, aprintf("in %s %s, field",t,v), name, loc, msg);
 
-  // check tvars
-  let tvs0 = f0->tvs;
-  let tvs1 = f1->tvs;
-  if (List::length(tvs0) != List::length(tvs1)) {
-    merr(loc, msg, "%s %s, field %s: type parameter number mismatch", t,v,name);
-    return NULL;
-  }
-  
-  let inst2 = build_tvs_map(tvs0, tvs1);
-
   // must have same number of types
   let typs0 = f0->typs;
   let typs1 = f1->typs;
@@ -275,7 +265,7 @@ merge_tunionfield(tunionfield_t f0, tunionfield_t f1,
       merr(loc, msg, "%s %s, field %s: parameter qualifier", t, v, name);
       res = false;
     }
-    type_t subst_t1 = substitute(List::append(inst2, inst), (*typs1->hd)[1]);
+    type_t subst_t1 = substitute(inst, (*typs1->hd)[1]);
     // and be the same type
     if (! check_type((*typs0->hd)[1], subst_t1)) {
       merr(loc, msg, "%s %s, field %s: parameter type mismatch %s != %s",
@@ -293,10 +283,6 @@ merge_tunionfield(tunionfield_t f0, tunionfield_t f1,
   } else return f0;
 }
 
-static bool substitute_tunionfield_f1(string_t @ name, tvar_t x) {
-  return (strptrcmp(x->name, name) == 0);
-}
-
 static $(tqual_t,type_t)@ 
 substitute_tunionfield_f2(list_t<$(tvar_t,type_t)@`H,`H> inst,
 			  $(tqual_t,type_t)@ x) {
@@ -307,35 +293,9 @@ substitute_tunionfield_f2(list_t<$(tvar_t,type_t)@`H,`H> inst,
 // given d0->tvs and d1->tvs, given the maping inst1 = build_tvs_map(d0->tvs, d1->tvs),
 // rewrite the types of tunionfield f1 so that it could be added to d0
 static tunionfield_t 
-substitute_tunionfield(list_t<tvar_t,`H> d0tvs, list_t<tvar_t,`H> d1tvs,
-		       list_t<$(tvar_t,type_t)@`H,`H> inst1, tunionfield_t f1) {
+substitute_tunionfield(list_t<$(tvar_t,type_t)@`H,`H> inst1, tunionfield_t f1) {
   let f0 = new *f1;
-  // first build a new list of tvars that is disjoint from d0->tvs and d1->tvs
-  let tvs0 = NULL;
-  for(let tvs = f1->tvs; tvs != NULL; tvs = tvs->tl) {
-    tvar_t tv = tvs->hd;
-    if(List::exists_c(substitute_tunionfield_f1, tv->name, d0tvs) ||
-       List::exists_c(substitute_tunionfield_f1, tv->name, d1tvs)) {
-      int i = 0;
-      string_t base = *(tv->name);
-      string_t @ new_name;
-      do {
-	new_name = new ((string_t)strconcat(base, aprintf("%d",i)));
-	i++;
-      } while(List::exists_c(substitute_tunionfield_f1, new_name, d0tvs) ||
-	      List::exists_c(substitute_tunionfield_f1, tv->name, d1tvs));
-
-      tv = new (*tv);
-      tv->name = new_name;
-    }
-    tvs0 = new List(tv,tvs0);
-  }
-  tvs0 = imp_rev(tvs0);
-  f0->tvs = tvs0;
-  let inst2 = build_tvs_map(tvs0, f1->tvs);
-  
-  let inst = List::append(inst2, inst1);
-  f0->typs = List::map_c(substitute_tunionfield_f2, inst, f1->typs);
+  f0->typs = List::map_c(substitute_tunionfield_f2, inst1, f1->typs);
 
   return f0;
 }
@@ -367,7 +327,7 @@ merge_xtunion_fields(list_t<tunionfield_t,`H> f0s, list_t<tunionfield_t,`H> f1s,
     if (f0s == NULL || cmp > 0) {
       // f1s->hd is not in f0s, let's add it to f2s
       *incl = false;
-      let node = new List(substitute_tunionfield(tvs0,tvs1,inst,f1s->hd), NULL);
+      let node = new List(substitute_tunionfield(inst,f1s->hd), NULL);
       *next = node;
       next = & node->tl;
     } else {

@@ -684,10 +684,9 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
   }
   // try to find an exact match first
   for (fields = fs; fields != NULL; fields = fields->tl) {
-    let Tunionfield{n,tvs,typs,loc,sc} = *fields->hd;
-    // should have exactly one argument and I don't want to deal with
-    // existential types FIX: going away
-    if (typs == NULL || typs->tl != NULL || tvs != NULL) continue;
+    let Tunionfield{n,typs,loc,sc} = *fields->hd;
+    // should have exactly one argument
+    if (typs == NULL || typs->tl != NULL) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
     if (unify(t1,t2)) {
@@ -696,10 +695,9 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
   }
   // now try to find a match supported by silent conversions
   for (fields = fs; fields != NULL; fields = fields->tl) {
-    let Tunionfield{n,tvs,typs,loc,sc} = *fields->hd;
-    // should have exactly one argument and I don't want to deal with
-    // existential types
-    if (typs == NULL || typs->tl != NULL || tvs != NULL) continue;
+    let Tunionfield{n,typs,loc,sc} = *fields->hd;
+    // should have exactly one argument 
+    if (typs == NULL || typs->tl != NULL) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
     if (coerce_arg(te,e,t2)) {
@@ -1427,12 +1425,9 @@ static type_t tcAnonStruct(tenv_t te, seg_t loc, type_t ts,
 static type_t tcTunion(tenv_t te, seg_t loc, type_t * topt, exp_t e,
 		       list_t<exp_t> es, tuniondecl_t tud, tunionfield_t tuf) {
   region rgn {
-  let env = $(lookup_type_vars(te),rgn);
-  let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
-  let exist_inst = List::rmap_c(rgn,r_make_inst_var,&env,tuf->tvs);
-  let all_typs   = List::map(snd,all_inst);
-  let exist_typs = List::map(snd,exist_inst);
-  let inst       = List::rappend(rgn,all_inst,exist_inst);
+  let env      = $(lookup_type_vars(te),rgn);
+  let inst     = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
+  let all_typs = List::map(snd,inst);
   type_t res =
     new TunionFieldType(TunionFieldInfo{new KnownTunionfield(tud,tuf),
 					all_typs});
@@ -1620,10 +1615,6 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
   // Don't yet support existential types (to do it, add to TunionFieldInfo
   // and here generate fresh evars).
   switch(elt_type) {
-  case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(_,tuf),_)):
-    if(tuf->tvs != NULL)
-      terr(loc,"malloc with existential types not yet implemented");
-    break;
   case &AggrType(AggrInfo(&KnownAggr(&ad),_)):
     if(ad->exist_vars != NULL && ad->exist_vars->v != NULL)
       terr(loc,"malloc with existential types not yet implemented");

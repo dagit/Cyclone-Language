@@ -504,45 +504,32 @@ array_decls(type_t type, list_t<exp_t,`H> exps, seg_t loc) {
 
 static type_t 
 check_tunionfield_and_get_type(tunionfield_t tuf) {
-  if(tuf->tvs != NULL) {
-    Tcutil::impos("gen(): tunionfield type variables not handled");
-  }
   // preserves tquals of original tunion...
   return new TupleType(List::imp_append(List::list(new $(tq_none,uint_t)),tuf->typs));
 }
 static qvar_t
 check_tunionfield_and_get_name(tunionfield_t tuf) {
-  if(tuf->tvs != NULL) {
-    Tcutil::impos("gen(): tunionfield type variables not handled");
-  }
   // preserves tquals of original tunion...
   return tuf->name;
 }
 
 static $(qvar_t,type_t)@
 check_tunionfield_and_get_nmtype(tunionfield_t tuf) {
-  if(tuf->tvs != NULL) {
-    Tcutil::impos("gen(): tunionfield type variables not handled");
-  }
   // preserves tquals of original tunion...
   return new $(tuf->name,new TupleType(List::imp_append(List::list(new $(tq_none,uint_t)),tuf->typs)));
 }
 static $(var_t,type_t)@
 check_xtunionfield_and_get_name_type(tunionfield_t tuf) {
-  if(tuf->tvs != NULL) {
-    Tcutil::impos("gen(): tunionfield type varaibles not handled");
-  }
-  ;
   // preserves tquals of original tunion...
   return new $((*tuf->name)[1],new TupleType(List::imp_append(List::list(new $(tq_none,star_typ(uchar_t,HeapRgn,tq_none))),tuf->typs)));
 }
 
-
+// FIX: get rid of this useless stuff
 static bool filter_empty_tunionfield(tunionfield_t tuf) {
-  return (tuf->typs != NULL);
+  return false;
 }
 static bool filter_nonempty_tunionfield(tunionfield_t tuf) {
-  return (tuf->typs == NULL);
+  return true;
 }
 
 static var_t get_tunionfield_name(tunionfield_t tuf) {
@@ -563,9 +550,9 @@ $(tqual_t,type_t)@ substitute_tqual_type(list_t<$(tvar_t,type_t)@`H,`H> subst,
 }
 tunionfield_t substitute_tunionfield_type(list_t<$(tvar_t,type_t)@`H,`H> subst,
 					  tunionfield_t tf) {
-  return new Tunionfield{tf->name,tf->tvs,
-			   List::map_c(substitute_tqual_type,subst,tf->typs),
-			   tf->loc,tf->sc};
+  return new Tunionfield{tf->name,
+			 List::map_c(substitute_tqual_type,subst,tf->typs),
+			 tf->loc,tf->sc};
 }
 
 
@@ -1192,8 +1179,6 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       Tcutil::impos("gen(): tunionfield type parameters not handled yet");
     switch (tfieldinfo.field_info) {
     case &KnownTunionfield(decl,field):
-      if(field->tvs != NULL) 
-	Tcutil::impos("gen(): tunionfield type parameters not handled yet");
       let types = List::map(get_second,field->typs);
       let types2 = new List(uint_t,types);
       let varname = toplevel_name(new_gen_id("rep"));

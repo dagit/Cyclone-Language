@@ -617,7 +617,7 @@ doc_t ntyp2doc(type_t t) {
     case &UnknownTunionfield(UnknownTunionFieldInfo(tname,fname,is_x)):
       fallthru(tname,is_x,fname);
     case &KnownTunionfield(&Tuniondecl(_,tname,_,_,is_x),
-			   &Tunionfield(fname,_,_,_,_)):
+			   &Tunionfield(fname,_,_,_)):
 			     let kw = text(is_x ? "xtunion " : "tunion ");
       s = cat(kw, qvar2doc(tname),text("."),qvar2doc(fname));
       break;
@@ -1371,10 +1371,8 @@ doc_t pat2doc(pat_t p) {
   case &UnknownId_p(q):
     s = qvar2doc(q);
     break;
-  case &UnknownCall_p(q,tvs,ps):
-    s = cat(qvar2doc(q),
-            tvars2doc(tvs),
-            group("(",")",",",List::map(pat2doc,ps)));
+  case &UnknownCall_p(q,ps):
+    s = cat(qvar2doc(q), group("(",")",",",List::map(pat2doc,ps)));
     break;
   case &Aggr_p(AggrInfo(info,_),exists,dps):
     let $(_,n) = aggr_kinded_name(info);
@@ -1383,12 +1381,10 @@ doc_t pat2doc(pat_t p) {
 	    group("","}",",",List::map(dp2doc,dps)));
     break;
   case &Enum_p(_,ef): fallthru(ef);
-  case &AnonEnum_p(_,ef): s = qvar2doc(ef->name); break;
-  case &Tunion_p(_,tuf,_,NULL): s = qvar2doc(tuf->name); break;
-  case &Tunion_p(_,tuf,tvs,ps):
-    s = cat(qvar2doc(tuf->name),
-	    tvars2doc(tvs),
-	    egroup("(",")",",",List::map(pat2doc,ps)));
+  case &AnonEnum_p(_,ef):     s = qvar2doc(ef->name);  break;
+  case &Tunion_p(_,tuf,NULL): s = qvar2doc(tuf->name); break;
+  case &Tunion_p(_,tuf,ps):
+    s = cat(qvar2doc(tuf->name), egroup("(",")",",",List::map(pat2doc,ps)));
     break;
   }
   return s;
@@ -1796,7 +1792,6 @@ doc_t aggrfields2doc(list_t<aggrfield_t> fields) {
 
 doc_t tunionfield2doc(tunionfield_t f) {
   return cat(scope2doc(f->sc), typedef_name2doc(f->name),
-             (f->tvs==NULL)?nil_doc(): ktvars2doc(f->tvs),
              (f->typs==NULL)?nil_doc():args2doc(f->typs));
 }
 

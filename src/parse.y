@@ -1449,11 +1449,10 @@ tunionfield_scope:
 
 tunionfield:
   tunionfield_scope qual_opt_identifier
-    { $$=^$(new Tunionfield($2,NULL,NULL,LOC(@1,@2),$1)); }
-| tunionfield_scope qual_opt_identifier type_params_opt '(' parameter_list ')'
-    { let typs = List::map_c(get_tqual_typ,LOC(@5,@5),List::imp_rev($5));
-      let tvs  = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      $$=^$(new Tunionfield($2,tvs,typs,LOC(@1,@6),$1)); }
+    { $$=^$(new Tunionfield($2,NULL,LOC(@1,@2),$1)); }
+| tunionfield_scope qual_opt_identifier '(' parameter_list ')'
+    { let typs = List::map_c(get_tqual_typ,LOC(@4,@4),List::imp_rev($4));
+      $$=^$(new Tunionfield($2,typs,LOC(@1,@5),$1)); }
 ;
 
 declarator:
@@ -2048,22 +2047,20 @@ pattern:
     { $$=^$(new_pat(new UnknownId_p($1),LOC(@1,@1))); }
 | '$' '(' tuple_pattern_list ')'
     {$$=^$(new_pat(new Tuple_p(List::imp_rev($3)),LOC(@1,@4)));}
-| qual_opt_identifier type_params_opt '(' tuple_pattern_list ')'
-{ // $2 gets deleted real soon now!
-  let tvs = List::map_c(typ2tvar,LOC(@2,@2),$2);
-      $$=^$(new_pat(new UnknownCall_p($1,tvs,List::imp_rev($4)),LOC(@1,@5))); }
+| qual_opt_identifier '(' tuple_pattern_list ')'
+  { $$=^$(new_pat(new UnknownCall_p($1,List::imp_rev($3)),LOC(@1,@4))); }
 | qual_opt_identifier '{' exist_vars_opt field_pattern_list '}'
-{ let exist_ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
+   { let exist_ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
       $$=^$(new_pat(new Aggr_p(AggrInfo(new UnknownAggr(StructA,$1),NULL),
 			       exist_ts, List::imp_rev($4)),
 		    LOC(@1,@5)));
     }
 | '&' pattern
-    {$$=^$(new_pat(new Pointer_p($2),LOC(@1,@2)));}
+    { $$=^$(new_pat(new Pointer_p($2),LOC(@1,@2))); }
 | '*' IDENTIFIER
-    {$$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
-                                               VoidType,NULL)),
-		   LOC(@1,@2)));}
+    { $$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
+						VoidType,NULL)),
+		    LOC(@1,@2))); }
 ;
 
 tuple_pattern_list:

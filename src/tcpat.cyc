@@ -55,7 +55,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
     case &AggrRes(_):
       terr(p->loc,"struct tag used without arguments in pattern");
       return;
-    case &TunionRes(tud,tuf): p->r = new Tunion_p(tud,tuf,NULL,NULL); return;
+    case &TunionRes(tud,tuf): p->r = new Tunion_p(tud,tuf,NULL); return;
     case &EnumRes(ed,ef):     p->r = new Enum_p(ed,ef); return;
     case &AnonEnumRes(t,ef):  p->r = new AnonEnum_p(t,ef); return;
     case &VarRes(_): break; // shadows an outer definition, but that's fine
@@ -69,7 +69,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
       return;
     default: terr(p->loc,"qualified variable in pattern"); return;
     }
-  case &UnknownCall_p(q,tvs,ps):
+  case &UnknownCall_p(q,ps):
     try switch (lookup_ordinary(te,p->loc,q)) {
     case &AggrRes(ad):
       if(ad->kind == UnionA) {
@@ -82,7 +82,7 @@ static void resolve_pat(tenv_t te, pat_t p) {
       p->r = new Aggr_p(AggrInfo(new KnownAggr(new ad),NULL),
 			NULL,imp_rev(new_ps));
       return;
-    case &TunionRes(tud,tuf): p->r = new Tunion_p(tud,tuf,tvs,ps); return;
+    case &TunionRes(tud,tuf): p->r = new Tunion_p(tud,tuf,ps); return;
     case &EnumRes(_,_):
     case &AnonEnumRes(_,_):
       terr(p->loc,"enum tag used with arguments in pattern");
@@ -311,50 +311,14 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     }
     break;
 
-  case &Tunion_p(tud,tuf,tvs,ps): 
-    // FIX: but going away (allow too few arguments -- just add them)
-    if(length(tvs) != length(tuf->tvs))
-      terr(p->loc,"wrong number of existential type variables in pattern");
-    // this avoids a subtle violation of type-safety.  It's only necessary
-    // when we're matching against a TunionFieldType, but I find it cleaner
-    // to always ban reference patterns directly under existentials.
-    // (FIX The error message isn't accurate though.)
-    if(length(tvs) != 0)
-      region_opt = NULL;
-
+  case &Tunion_p(tud,tuf,ps): 
     region rgn {
-      // constrain the type variables to have box kind (still necessary?)
-      let var_tvs = NULL;
-      for (_ t = tvs; t != NULL; t = t->tl) {
-	tvar_t tv = t->hd;
-	switch (compress_kb(tv->kind)) {
-	case &Eq_kb(BoxKind): break;
-        case &Unknown_kb(*f):      fallthru(f);
-        case &Less_kb(*f,MemKind): fallthru(f);
-        case &Less_kb(*f,AnyKind): 
-          *f = new Opt(new Eq_kb(BoxKind)); break;
-	case &Eq_kb(k): fallthru(k);
-        case &Less_kb(_,k): 
-	  terr(p->loc,"tunion member %s abstracts type "
-               "variable %s of kind %s != B",
-               qvar2string(tud->name),*tv->name,kind2string(k)); 
-	  break;
-	}
-	var_tvs = rnew(rgn) List((type_t)(new VarType(tv)),var_tvs);
-      }
-      var_tvs = imp_rev(var_tvs);
-
-      tv_result = List::append(tv_result, tvs);
-      tenv_t te2 = add_type_vars(p->loc,te,tvs);
       list_t<$(tqual_t,type_t)@> tqts = tuf->typs;
 
       let tenv_tvs = lookup_type_vars(te);
       let env = $(tenv_tvs,rgn);
-      let all_inst   = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
-      let exist_inst = List::rzip(rgn,rgn,tuf->tvs,var_tvs);
-      let all_typs   = List::map(snd,all_inst);
-      let exist_typs = List::map(snd,exist_inst);
-      let inst       = List::rappend(rgn,all_inst,exist_inst);
+      let inst    = List::rmap_c(rgn,r_make_inst_var,&env,tud->tvs);
+      let all_typs = List::map(snd,inst);
       // unless topt says otherwise, guess we want Tunion when there are no args
       if(tqts == NULL)
 	t = new TunionType(TunionInfo{new KnownTunion(new tud),
@@ -383,7 +347,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 	// Note:  we don't pass in ptr_rgn here because for value-carrying
 	// constructors, the pointer's region is passed down as region_opt.
 	let field_typ = rsubstitute(rgn, inst, (*tqts->hd)[1]);
-	let $(sub_tvs,sub_vs) = tcPatRec(te2,p2,&field_typ,region_opt);
+	let $(sub_tvs,sub_vs) = tcPatRec(te,p2,&field_typ,region_opt);
 	tv_result = List::append(tv_result, sub_tvs);
 	v_result  = List::append(v_result,  sub_vs);
 	// must unify here or the type we gave pat won't ever get checked
@@ -405,7 +369,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
 
   case &Aggr_p(AggrInfo(&UnknownAggr(_,_),_),_,_):
   case &UnknownId_p(_):         
-  case &UnknownCall_p(_,_,_): t = wildtyp(new Opt(lookup_type_vars(te))); break;
+  case &UnknownCall_p(_,_): t = wildtyp(new Opt(lookup_type_vars(te))); break;
   }
  tcpat_end:
   p->topt = new Opt(t);
@@ -436,7 +400,7 @@ void check_pat_regions(tenv_t te, pat_t p) {
       return;
     default: impos("check_pat_regions: bad pointer type");
     }
-  case &Tunion_p(_,_,_,ps): 
+  case &Tunion_p(_,_,ps): 
     for(; ps != NULL; ps = ps->tl) check_pat_regions(te,ps->hd);
     switch (p->topt->v) {
     case &TunionType(TunionInfo{_,_,rt}):
@@ -608,7 +572,7 @@ static simple_pat_t compile_pat(pat_t p) {
       break;
     case &TunionType(_):
       switch(pp->r) {
-      case &Tunion_p(tud,tuf,_,ps):
+      case &Tunion_p(tud,tuf,ps):
 	opt_t<int> span;
 	if(tud->is_xtunion)
 	  span = NULL;
@@ -623,7 +587,7 @@ static simple_pat_t compile_pat(pat_t p) {
     }
     break;
 
-  case &Tunion_p(tud,tuf,_,NULL):
+  case &Tunion_p(tud,tuf,NULL):
     opt_t<int,`H> span;
     switch(compress(p->topt->v)) {
     case &TunionType(_):     
@@ -638,7 +602,7 @@ static simple_pat_t compile_pat(pat_t p) {
     s = con_pat(*((*tuf->name)[1]),span, NULL); 
     break;
     
-  case &Tunion_p(_,_,_,ps): fallthru(ps); // ps != NULL
+  case &Tunion_p(_,_,ps): fallthru(ps); // ps != NULL
   case &Tuple_p(ps): s = tuple_pat(List::map(compile_pat,ps)); break;
 
   case &Aggr_p(AggrInfo(&KnownAggr(&ad),_),_,dlps):
@@ -686,9 +650,9 @@ static simple_pat_t compile_pat(pat_t p) {
     s = con_pat(*((*ef->name)[1]), new Opt(span), NULL);
     break;
 
-  case &UnknownId_p(_):       impos("compile_pat: unknownid");     
-  case &UnknownCall_p(_,_,_): impos("compile_pat: unknowncall");   
-  case &Aggr_p(_,_,_):        impos("compile_pat: bad aggr");
+  case &UnknownId_p(_):     impos("compile_pat: unknownid");     
+  case &UnknownCall_p(_,_): impos("compile_pat: unknowncall");   
+  case &Aggr_p(_,_,_):      impos("compile_pat: bad aggr");
   }
   return s;
 }

@@ -475,27 +475,8 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
   for(let fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
 
-    for (_ tvs = f->tvs; tvs != NULL; tvs = tvs->tl) {
-      let tv = tvs->hd;
-      switch (compress_kb(tv->kind)) {
-      case &Eq_kb(MemKind):
-        terr(f->loc,"field %s abstracts type variable of kind M", 
-             *(*f->name)[1]); break;
-      case &Unknown_kb(*f): fallthru(f);
-      case &Less_kb(*f,MemKind): fallthru(f);
-      case &Less_kb(*f,AnyKind): 
-        *f = new Opt(new Eq_kb(BoxKind)); break;
-      default: break;
-      }
-    }
-
-    list_t<tvar_t> alltvs = List::append(tvs,f->tvs);
-    check_unique_tvars(loc,alltvs);
-    // give the bound type variables identities
-    add_tvar_identities(f->tvs);
-
     for (_ typs = f->typs; typs != NULL; typs=typs->tl)
-      check_type(f->loc, te, alltvs, MemKind, false, (*typs->hd)[1]);
+      check_type(f->loc, te, tvs, MemKind, false, (*typs->hd)[1]);
 
     switch((*f->name)[0]) {
     case &Rel_n(NULL): 
