@@ -1795,12 +1795,21 @@ static void check_malloc_type(bool allow_zero, seg_t loc,
        allow_zero ? ((string_t)"calloc") : (string_t)"malloc", typ2string(t));
 }
 
+static type_t mallocRgn(type_t rgn) {
+  switch (typ_kind(compress(rgn))) {
+  case UniqueRgnKind:
+    return UniqueRgn;
+  default:
+    return HeapRgn;
+  }
+}
+
 static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt, 
                        type_t *@t, exp_t @e, bool @is_calloc,
                        bool @is_fat) {
-  // by default, we allocate heap pointers; this is for making inference
-  // simpler.  If you want a unique pointer, do rnew (Core::unique_region)
-  type_t rgn = HeapRgn; 
+  // by default, we allocate heap pointers unless the topt tells us
+  //   to do otherwise (see below)
+  type_t rgn = HeapRgn;
   if (ropt != NULL) {
     // check that the region handle is still valid
     type_t expected_type = 
@@ -1817,6 +1826,15 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t ropt,
       break;
     }
   }
+  // if the type passed down constrains the region in any way
+  // switched to the constrained one.
+  else if (topt != NULL) {
+    type_t optrgn = VoidType;
+    if (rgn_of_pointer(*topt,&optrgn)) {
+      rgn = mallocRgn(optrgn);
+    }
+  }
+
   tcExp(te,&uint_typ,*e);
   // crawl over e and look for the following cases:
   //   sizeof(T):  result is T@ or T* depending upon topt
@@ -2017,6 +2035,14 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       terr(rgn_handle->loc,"expecting region_t type but found %s",
            typ2string(handle_type));
       break;
+    }
+  }
+  // if the type passed down constrains the region in any way
+  // switched to the constrained one.
+  else if (topt != NULL) {
+    type_t optrgn = VoidType;
+    if (rgn_of_pointer(*topt,&optrgn)) {
+      rgn = mallocRgn(optrgn);
     }
   }
 

@@ -164,7 +164,6 @@ static $(string_t,short,bool) rw_array[] = {
   $("sizeof", SIZEOF, true),
   $("static", STATIC, true),
   $("struct", STRUCT, true),
-  $("cycswap", SWAP, false),
   $("switch", SWITCH, true),
   $("tag_t", TAG_T, false),
   $("throw", THROW, false),
@@ -664,6 +663,7 @@ rule token = parse
 | "&="   { return  AND_ASSIGN; }
 | "<<="  { return  LEFT_ASSIGN; }
 | ">>="  { return  RIGHT_ASSIGN; } 
+| ":=:"  { return  SWAP; }
 | "&&" { return  AND_OP; }
 | "||" { return  OR_OP; }  
 | "<<" { return  LEFT_OP; }

@@ -2104,7 +2104,7 @@ _tmp28C=env->r;union Cyc_CfFlowInfo_FlowInfo_union _tmp28F;struct Cyc_List_List*
 _tmp290;struct _tuple11 _tmp28E=Cyc_NewControlFlow_anal_unordered_Rexps(_tmp28C,
 env,inflow,({struct Cyc_Absyn_Exp*_tmp28D[2];_tmp28D[1]=_tmp175;_tmp28D[0]=
 _tmp174;((struct Cyc_List_List*(*)(struct _RegionHandle*,struct _dyneither_ptr))Cyc_List_rlist)(
-_tmp28C,_tag_dyneither(_tmp28D,sizeof(struct Cyc_Absyn_Exp*),2));}),1);_tmp28F=
+_tmp28C,_tag_dyneither(_tmp28D,sizeof(struct Cyc_Absyn_Exp*),2));}),0);_tmp28F=
 _tmp28E.f1;_tmp290=_tmp28E.f2;_tmp28F=Cyc_CfFlowInfo_readthrough_unique_rvals(
 _tmp175->loc,_tmp28F);{union Cyc_CfFlowInfo_FlowInfo_union _tmp291=_tmp28F;{union
 Cyc_CfFlowInfo_FlowInfo_union _tmp292=_tmp28F;struct Cyc_Dict_Dict _tmp293;struct
@@ -2494,7 +2494,7 @@ union Cyc_CfFlowInfo_FlowInfo_union _tmp38E;struct Cyc_List_List*_tmp38F;struct
 _tuple11 _tmp38D=Cyc_NewControlFlow_anal_unordered_Rexps(_tmp38B,env,inflow,({
 struct Cyc_Absyn_Exp*_tmp38C[2];_tmp38C[1]=_tmp371;_tmp38C[0]=_tmp370;((struct Cyc_List_List*(*)(
 struct _RegionHandle*,struct _dyneither_ptr))Cyc_List_rlist)(_tmp38B,
-_tag_dyneither(_tmp38C,sizeof(struct Cyc_Absyn_Exp*),2));}),1);_tmp38E=_tmp38D.f1;
+_tag_dyneither(_tmp38C,sizeof(struct Cyc_Absyn_Exp*),2));}),0);_tmp38E=_tmp38D.f1;
 _tmp38F=_tmp38D.f2;_tmp38E=Cyc_CfFlowInfo_readthrough_unique_rvals(_tmp371->loc,
 _tmp38E);{union Cyc_CfFlowInfo_FlowInfo_union _tmp390=_tmp38E;{union Cyc_CfFlowInfo_FlowInfo_union
 _tmp391=_tmp38E;struct Cyc_Dict_Dict _tmp392;struct Cyc_List_List*_tmp393;struct Cyc_CfFlowInfo_ConsumeInfo

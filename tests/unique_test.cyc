@@ -7,13 +7,13 @@ int rand() { return 7; }
 void g(int x, int y) {}
 
 void f() {
-  int *`U x = unew 3;
+  int *`U x = new 3;
 }
 
 #ifdef ONE
 int outoforder() {
   int d = 0;
-  int *`U x = unew 3;
+  int *`U x = new 3;
   int *`U y;
   while (!d || (y = x)) {
     if (rand())
@@ -30,50 +30,50 @@ struct s1 {
 // just checks basic variable stuff
 
 int *`U h(int b) {
-  int *`U x = unew 3;
-  int *`U y = unew 4;
-  int *`U z = unew 5;
+  int *`U x = new 3;
+  int *`U y = new 4;
+  int *`U z = new 5;
   
-  let a1 = unew { x, y };  // consumed = { x, y }
+  let a1 = new { x, y };  // consumed = { x, y }
 
-  x = unew 3; // consumed = { y }
-  y = unew 3; // consumed = { }
+  x = new 3; // consumed = { y }
+  y = new 3; // consumed = { }
   int ok = 1;
-  int ?`U a2 = unew { (ok = rand(), (int)z), (ok ? (int)x : (int)y) }; // consumed = { x, y, z }
+  int ?`U a2 = new { (ok = rand(), (int)z), (ok ? (int)x : (int)y) }; // consumed = { x, y, z }
 
 //    a2++; // consumed = { x, y, z }
   int yy = ((int)(int *`H)a2) * 1; // consumed = { x, y, z }
 //    a2 = a2 + 1; // consumed = { x, y, z }
 
-  y = unew 4; // consumed = { x, z }
+  y = new 4; // consumed = { x, z }
   try {
-    z = unew 5; // consumed = { x }
+    z = new 5; // consumed = { x }
   } catch {
   case Core::Not_found:
     x = y; // consumed = { y, z }
     break;
   }
   // @join: consumed = { x, y, z }
-  x = unew 3; // consumed = { y, z }
+  x = new 3; // consumed = { y, z }
   int *`H h = (int *`H)x; // consumed = { x, y, z }
 
-  struct s1 *`U ps1 = unew s1(1,2);
+  struct s1 *`U ps1 = new s1(1,2);
   int i;
   i = (*ps1).x;
   i = (*ps1).y;
 
-  x = unew 5; // consumed = { y, z }
-  y = unew 4; // consumed = { z }
+  x = new 5; // consumed = { y, z }
+  y = new 4; // consumed = { z }
   struct s1 ls1 = { (int)x, (int)y }; // consumed = { x, y, z }
 
-  x = unew 3; // consumed = { y, z }
+  x = new 3; // consumed = { y, z }
 
   g(*x,*x);
   i = *x;
   i = x[0];
   i = x[(x[0],0)];
 
-  y = unew 3; // consumed = { z }
+  y = new 3; // consumed = { z }
 
   switch (b) {
   case 1:
@@ -83,7 +83,7 @@ int *`U h(int b) {
     z = y; // consumed = { x, y }
     break;
   default:
-    z = unew 7; // consumed = { }
+    z = new 7; // consumed = { }
     break;
   }
   // @join: consumed = { x, y }
@@ -91,19 +91,19 @@ int *`U h(int b) {
  retry:
   x = z; // consumed = { y, z }
   if (b) {
-    z = unew 7; // consumed = { y }
+    z = new 7; // consumed = { y }
     b = rand();
     b = 0;
     goto retry; 
   }
   // @join: consumed = { y, z }
 
-  y = unew 1; // consumed = { z }
+  y = new 1; // consumed = { z }
 
   int zz;
   zz = ({ z; *y; y; }); // consumed = { y, z }
 
-  y = (z = unew 4, unew 1); // consumed = { }
+  y = (z = new 4, new 1); // consumed = { }
 
   while (i < 5) {
     x = y; // consumed = { y }
@@ -116,7 +116,7 @@ int *`U h(int b) {
     z = y; // consumed = { x, y }
     y = z; // consumed = { x, z }
     i--;
-  } while ((x = unew 4) && (i > 0));
+  } while ((x = new 4) && (i > 0));
   // @join: consumed = { z }
 
   for (i=0, y = x /* consumed = { z, x } */; i<5; i++) {
@@ -128,13 +128,28 @@ int *`U h(int b) {
   if (b) // b is 0 due to above test, so first clause not invoked
     y = z;
   else
-    y = unew 5; // consumed = { x, z }
+    y = new 5; // consumed = { x, z }
   // @join: consumed = { x, z }
 
   Core::ufree(y);
 
-  y = unew 7;
+  y = new 7;
   return y;
+}
+
+// for testing unique dynamic-sized pointers
+struct another {
+  int *`U x;
+  int *y;
+};
+void arr() {
+  struct another *`U?`U arr = new { for i < 5 : new another(new i, new (i+1)) };  int *`U x = NULL;
+  arr[0] :=: arr[1];
+  struct another *`U x = NULL;
+  struct another *`U y = new another(new 1, new 2);
+  arr[1] :=: x;
+  Core::ufree(x);
+  arr[1] = y;
 }
 
 // can be parameterized by either kind of region
@@ -147,7 +162,7 @@ typedef struct Mylist<`a,`r> *`r mylist_u_t<`a,`r>;
 // this checks paths, etc.
 int p(int b) {
   struct Mylist<int,`U> e = Mylist(1,NULL);
-  e.tl = unew Mylist(3,NULL);
+  e.tl = new Mylist(3,NULL);
 //    mylist_u_t l = e.tl;
 }
 
@@ -159,14 +174,14 @@ struct foo {
 };
 
 void f2(int b) {
-  struct foo f = { unew 1, unew 2 };
+  struct foo f = { new 1, new 2 };
   struct foo g;
   g = f; // this should consume f.0 and f.1
 //   Core::ufree(f.x); // not allowed
   Core::ufree(g.x);
   g.x = NULL;
-  struct foo @ h = new foo(unew 1, unew 2);
-  cycswap(g.x,h->x);
+  struct foo @ h = new foo(new 1, new 2);
+  g.x :=: h->x;
   $(int *`U, int *`U) tup = $(g.x, g.y);
   g.x = tup[0];
   g.y = tup[1];
@@ -177,13 +192,13 @@ struct f { int *`U x; struct g y; };
 
 void f3(int b) {
   struct f z;
-  z.y.x = unew 1;
-  z.y.y = unew 2;
+  z.y.x = new 1;
+  z.y.y = new 2;
   struct g zg = z.y;
   Core::ufree(zg.x);
   zg.x = NULL;
-  struct f @pf = new f(unew 1, g(NULL,unew 2));
-  cycswap(zg.x,(pf->y).x);
+  struct f @pf = new f(new 1, g(NULL,new 2));
+  zg.x :=: (pf->y).x;
   (pf->y).x = NULL;
 }
 
@@ -192,4 +207,3 @@ int main() {
   Core::ufree(v);
   return 0;
 }
-

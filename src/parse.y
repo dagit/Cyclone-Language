@@ -2549,6 +2549,8 @@ assignment_expression:
     { $$=$!1; }
 | unary_expression assignment_operator assignment_expression
     { $$=^$(assignop_exp($1,$2,$3,LOC(@1,@3))); }
+| unary_expression SWAP assignment_expression
+   { $$=^$(new_exp(new Swap_e($1,$3), LOC(@1,@3))); }
 ;
 
 assignment_operator:
@@ -2706,8 +2708,6 @@ unary_expression:
    { let $(_,_,t) = *($9);
      $$=^$(new_exp(new Malloc_e(MallocInfo{true,$3,new(t),$5,false}),
                    LOC(@1,@11))); }
-| SWAP '(' assignment_expression ',' expression ')'
-   { $$=^$(new_exp(new Swap_e($3,$5), LOC(@1,@6))); }
 | NUMELTS '(' expression ')'
    { $$=^$(primop_exp(Numelts, list($3), LOC(@1,@4))); }
 | VALUEOF '(' type_name ')'

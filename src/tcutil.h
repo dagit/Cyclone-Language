@@ -282,5 +282,9 @@ extern bool extract_const_from_typedef(seg_t, bool declared_const, type_t);
 // Transfer any function type attributes from the given list to the
 // function type.  
 extern attributes_t transfer_fn_type_atts(type_t t, attributes_t atts);
+
+// If the given type is a pointer type, returns the region it points
+// into.  Returns NULL if not a pointer type.
+extern bool rgn_of_pointer(type_t t, type_t @rgn);
 }
 #endif

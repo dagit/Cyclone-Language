@@ -277,8 +277,8 @@ static $(flow_t<`r>,list_t<absRval_t<`r>,`rgn>)
     rvals = rnew(rgn) List(r,NULL);
     this_all_changed = union_place_set(this_all_changed,
 				       *env->all_changed, false);
-    // if the first argument is special (e.g. the source pointer of a
-    // subscript), do not consume its first argument
+    // if the first argument is special (e.g. the function pointer of a
+    // application), do not consume its first argument
     if (arg1_unconsumed) {
       switch (outflow) {
       case BottomFL: break;
@@ -1302,7 +1302,9 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   case &Subscript_e(e1,e2): 
     ANAL_RGN(env, temp) {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
-                                            rlist(temp,e1,e2),true);
+                                            rlist(temp,e1,e2),false);
+      DEBUG_PRINT("in Rexp:subscript: after anal, flow is\n");
+      DEBUG_PRINT_F(print_flow,f);
       f = readthrough_unique_rvals(e2->loc,f); // deref e1
       let f2 = f;
       switch(f) {
@@ -1624,7 +1626,7 @@ static $(flow_t<`r>,absLval_t<`r>)
       // the root pointer
       ANAL_RGN(env, temp) {
         let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
-                                              rlist(temp,e1,e2),true);
+                                              rlist(temp,e1,e2),false);
         f = readthrough_unique_rvals(e2->loc,f); // read index expr
         let f2 = f;
         switch(f) {
