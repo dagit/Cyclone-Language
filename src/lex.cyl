@@ -182,7 +182,6 @@ static $(string_t,short,bool) rw_array[] = {
   $("region", REGION, false),
   $("regions", REGIONS, false),
   $("register", REGISTER, true),
-  $("reset_region", RESET_REGION, false),
   $("restrict", RESTRICT, true),
   $("return", RETURN, true),
   $("rmalloc", RMALLOC, false),
@@ -821,7 +820,6 @@ rule token = parse
 | "@zeroterm"notidchar    { --lexbuf->lex_curr_pos; return ZEROTERM_QUAL; }
 | "@nozeroterm"notidchar  { --lexbuf->lex_curr_pos; return NOZEROTERM_QUAL; }
 | "@extensible"notidchar  { --lexbuf->lex_curr_pos; return EXTENSIBLE_QUAL; }
-| "@resetable"notidchar   { --lexbuf->lex_curr_pos; return RESETABLE_QUAL; }
 | "@region"notidchar      { --lexbuf->lex_curr_pos; return REGION_QUAL; }
 | "@numelts"notidchar     { --lexbuf->lex_curr_pos; return NUMELTS_QUAL; }
 | "@thin"notidchar        { --lexbuf->lex_curr_pos; return THIN_QUAL; }

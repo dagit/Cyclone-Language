@@ -687,7 +687,6 @@ namespace Absyn {
     Label_s(var_t,stmt_t); // L:s
     Do_s(stmt_t,$(exp_t,stmt_t));
     TryCatch_s(stmt_t,list_t<switch_clause_t>, Tcpat::decision_opt_t);
-    ResetRegion_s(exp_t); // reset_region(e)
   };
   extern_datacon(Raw_stmt,Skip_s);
 
@@ -875,10 +874,8 @@ namespace Absyn {
           opt_t<list_t<$(vardecl_t *,exp_opt_t)@>>, // set by type-checker, used downstream
           exp_t, Tcpat::decision_opt_t);
     Letv_d(list_t<vardecl_t>); // multi-let
-    Region_d(tvar_t,vardecl_t,bool,exp_opt_t); // region declaration
-    // region<`r> h;  or  region [resetable] <`r> h;   or
-    // region<`r> h = open(k);  
-    // When bool is true, resetable.  
+    Region_d(tvar_t,vardecl_t,exp_opt_t); // region declaration
+    // region<`r> h; or region<`r> h = open(k);  
     Aggr_d(aggrdecl_t);    // [struct|union] Foo { ... }
     Datatype_d(datatypedecl_t);    // datatype Bar { ... }
     Enum_d(enumdecl_t);        // enum Baz { ... }
@@ -1111,7 +1108,7 @@ namespace Absyn {
   extern decl_t new_decl(raw_decl_t r, seg_t loc);
   extern decl_t let_decl(pat_t p, exp_t e, seg_t loc);
   extern decl_t letv_decl(list_t<vardecl_t,`H>, seg_t loc);
-  extern decl_t region_decl(tvar_t,vardecl_t,bool,exp_opt_t open_exp, seg_t); 
+  extern decl_t region_decl(tvar_t,vardecl_t,exp_opt_t open_exp, seg_t); 
   extern decl_t alias_decl(tvar_t,vardecl_t,exp_t,seg_t);
   extern vardecl_t new_vardecl(seg_t varloc, qvar_t x, type_t t, exp_opt_t init);
   extern vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);

@@ -2759,7 +2759,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
 
     // have to deal with region open's here since we need to unconsume
     // the key.
-  case &Decl_s(&Decl{.r = &Region_d(_,vd,_,open_exp_opt),.loc=loc},s1) &&
+  case &Decl_s(&Decl{.r = &Region_d(_,vd,open_exp_opt),.loc=loc},s1) &&
     open_exp_opt != NULL:
 
     DEBUG_PRINT("analyzing open(), Flow = {\n");
@@ -2830,15 +2830,6 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
 
   case &Label_s(_,s): return anal_stmt(env,inflow,s,rval_opt);
 
-  case &ResetRegion_s(e):
-    let $(f,r) = anal_Rexp(env,true,inflow,e);
-    let f2 = use_Rval(env,e->loc,f,r);
-    switch (Tcutil::compress((type_t)e->topt)) {
-    case &RgnHandleType(r):
-      return kill_flow_region(fenv,f,r);
-    default: throw new Core::Impossible("anal_stmt -- reset_region");
-    }
-
   default: throw new Core::Impossible("anal_stmt -- bad stmt syntax"
                                       " or unimplemented stmt form");
   }
@@ -2878,7 +2869,7 @@ static flow_t<`r> anal_decl(analenv_t<`r> env, flow_t<`r> inflow, decl_t decl) {
     // to unknown-init-level.
     return add_vars(fenv,inflow,rnew(env->r) List(vd,NULL),fenv->unknown_all,decl->loc,false);
 
-  case &Region_d(tv,vd,resetable,open_exp_opt):
+  case &Region_d(tv,vd,open_exp_opt):
     if (open_exp_opt != NULL)
       throw new Core::Impossible("found open expression in declaration!");
     let vds = List(vd,NULL);

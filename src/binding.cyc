@@ -364,7 +364,6 @@ void resolve_stmt(env_t env, stmt_t s) {
       resolve_exp(env,es->hd); 
     return;
   case &Label_s(_,s1): resolve_stmt(env,s1); return;
-  case &ResetRegion_s(e): resolve_exp(env,e); return;
   case &Decl_s(d,s1):
     let old_locals = *env->local_vars;
     resolve_decl(env,d);
@@ -1009,7 +1008,7 @@ void resolve_decl(env_t env, decl_t d) {
       resolve_and_add_vardecl(loc,env,vds->hd);
     break;
 
-  case &Region_d(tv,vd,resetable,open_exp_opt): 
+  case &Region_d(tv,vd,open_exp_opt): 
     if(open_exp_opt != NULL)
       resolve_exp(env,(exp_t)open_exp_opt);
     resolve_and_add_vardecl(loc,env,vd);

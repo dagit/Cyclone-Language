@@ -32,15 +32,14 @@ using Absynpp;
 namespace RgnOrder;
 
 // Encodes partial order for region lifetimes
-struct RgnInfo {
+struct RgnInfo { // FIX: unnecessary indirection now that resetable is gone
   type_t these_outlive; // EffKind
-  bool   resetable;
 };
 struct RgnPO<`r::R> {
   Dict::dict_t<tvar_t, struct RgnInfo@`r,`r> d;
   type_t these_outlive_heap; // EffKind
   type_t these_outlive_unique; // EffKind
-  tvar_t youngest_unresettable; // fact: there always is one
+  tvar_t youngest; // fact: there always is one
 };
 
 /* Can assign a (col) to a (row):
@@ -72,7 +71,7 @@ static bool valid_constraint(type_t eff, type_t rgn) {
       if (!valid_constraint(es->hd, rgn)) return false;
     return true;
     // FIX: do I need to worry about how the effect might be instantiated?
-  case &Evar(_,_,_,_):
+  case &Evar(...):
   case &VarType(_): return true;
   case &RgnsEff(t): 
     // Only let regions(`a) outlive things that are aliasable or
@@ -109,12 +108,12 @@ rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po,
     let d = po->d;
     if(Dict::member(d,tv)) {
       let old = Dict::lookup(d,tv)->these_outlive;
-      d = Dict::insert(d,tv,rnew(r) RgnInfo(new JoinEff(list(eff,old)), false));
+      d = Dict::insert(d,tv,rnew(r) RgnInfo(new JoinEff(list(eff,old))));
     } else
-      d = Dict::insert(d,tv,rnew(r) RgnInfo(eff,false));
+      d = Dict::insert(d,tv,rnew(r) RgnInfo(eff));
     ans->d = d;
     return ans;
-  case &Evar(_,_,_,_):
+  case &Evar(...):
     unify(rgn,&HeapRgn_val);
     fallthru;
   case &HeapRgn:
@@ -129,22 +128,21 @@ rgn_po_t<`r> add_outlives_constraint(region_t<`r> r, rgn_po_t<`r> po,
   }
 }
 
-rgn_po_t<`r> add_youngest(region_t<`r> r,rgn_po_t<`r> po, tvar_t rgn, bool resettable, bool opened) {
+rgn_po_t<`r> add_youngest(region_t<`r> r,rgn_po_t<`r> po, tvar_t rgn, bool opened) {
   // sanity check
   if(!opened && Dict::member(po->d,rgn))
     impos("RgnOrder::add_youngest: repeated region");
   let ans = rnew(r) *po;
-  let eff = new AccessEff(new VarType(po->youngest_unresettable));
-  ans->d = Dict::insert(po->d, rgn, rnew(r) RgnInfo(eff, resettable));
-  if(!resettable); //  && !opened
-    ans->youngest_unresettable = rgn;
+  let eff = new AccessEff(new VarType(po->youngest));
+  ans->d = Dict::insert(po->d, rgn, rnew(r) RgnInfo(eff));
+  ans->youngest = rgn;
   return ans;
 }
 rgn_po_t<`r> add_unordered(region_t<`r> r, rgn_po_t<`r> po, tvar_t rgn) {
   if(Dict::member(po->d,rgn))
     impos("RgnOrder::add_unordered: repeated region");
   let ans = rnew(r) *po;
-  ans->d = Dict::insert(ans->d, rgn, rnew(r) RgnInfo(empty_effect,false));
+  ans->d = Dict::insert(ans->d, rgn, rnew(r) RgnInfo(empty_effect));
   return ans;
 }
 
@@ -157,7 +155,7 @@ rgn_po_t<`r> initial_fn_po(region_t<`r> r,
     if (tvar_kind(tvs2->hd,&bk)->kind == RgnKind) {
 //       fprintf(stderr,"  Adding tvar %s to dict\n",
 // 	      Absynpp::typ2string(new VarType(tvs2->hd)));
-      d = Dict::insert(d,tvs2->hd,rnew (r) RgnInfo(empty_effect,false));
+      d = Dict::insert(d,tvs2->hd,rnew (r) RgnInfo(empty_effect));
     }
 
   // make sure we don't have any bogus constraints
@@ -169,7 +167,7 @@ rgn_po_t<`r> initial_fn_po(region_t<`r> r,
 //   fprintf(stderr,"  Relating %s <= effect %s\n",
 // 	  Absynpp::typ2string(new VarType(fst_rgn)),
 // 	  Absynpp::typ2string(effect));	  
-  d = Dict::insert(d, fst_rgn, rnew(r) RgnInfo(effect,false));
+  d = Dict::insert(d, fst_rgn, rnew(r) RgnInfo(effect));
   // add in the explicit partial order -- no longer detects cycles
   let ans = rnew(r) RgnPO(d,empty_effect,empty_effect,fst_rgn);
   for(; po != NULL; po = po->tl)
@@ -198,11 +196,6 @@ rgn_po_t<`r> initial_fn_po(region_t<`r> r,
 //      ans = add_outlives_constraint(r, ans, (*po2->hd)[0], (*po2->hd)[1], NULL);
 //    return satisfies_constraints(ans,po1,&HeapRgn_val,false);
 //  }
-
-// Note: rgn better be in the dict!
-bool is_region_resetable(rgn_po_t po, Absyn::tvar_t r) {
-  return Dict::lookup(po->d,r)->resetable;
-}
 
 // is regions(`rgns_of_var) in eff?
 static bool contains_rgnseff(tvar_t rgns_of_var, type_t eff) {

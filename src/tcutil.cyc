@@ -2471,21 +2471,19 @@ static bool can_insert_alias(exp_t e, type_t e_typ,
 			     type_t wants_typ, seg_t loc) {
   // check if the given expression is a pointer into a no-alias region
   region r;
-  if (is_noalias_path(r,e) && is_noalias_pointer(e_typ,false) &&
-      is_pointer_type(e_typ)) {
+  if (is_noalias_path(r,e) 
+      && is_noalias_pointer(e_typ,false) 
+      && is_pointer_type(e_typ)) {
     // check if the expected type is has a pointer type into an
     // aliasable region but not the heap region
     switch (compress(wants_typ)) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(r2,_,_,_,_))):
+    case &PointerType(PtrInfo(_,_,PtrAtts(r2,...))):
       switch (compress(r2)) {
       case &HeapRgn: return false;
       default:
 	let k = typ_kind(r2);
 	return k->kind == RgnKind && k->aliasqual == Aliasable;
       }
-    case &TypedefType(_,_,_,_):
-      impos("got typedef %s in can_insert_alias at %s\n",
-	    typ2string(compress(wants_typ)), Position::string_of_segment(loc));
     default: return false;
     }
   }
@@ -4252,8 +4250,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         (*trip)[1].real_const = ec;
         // after resolving t, it may be an array type.  if so, as an argument
         // to a function, we need to convert it to a pointer type.
-	if (is_array(t))
-	{
+	if (is_array(t)) {
           // create a new region variable for the pointer
           let ptr_rgn = new_evar(NULL,NULL);
           new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&rk,ptr_rgn,true,true);          
@@ -5319,10 +5316,9 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
     // disallow & on @tagged union members -- see Dan's ESOP paper
     if (is_tagged) return bogus_ans;
     // we have a boxed thing, so the region is in the pointer-type.
-    // must check that f isn't a bitfield. DAN: why?  JGM: because
-    // you can't get a pointer to a bitfield in C.
+    // must check that f isn't a bitfield. 
     switch (compress((type_t)e1->topt)) {
-    case &PointerType(PtrInfo(t1,_,PtrAtts(r,_,_,_,_))):
+    case &PointerType(PtrInfo(t1,_,PtrAtts(r,...))):
       struct Aggrfield * finfo;
       switch (compress(t1)) {
       case &AnonAggrType(_,fs):
@@ -5339,7 +5335,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
   case &Deref_e(e1):
     // we have a boxed thing, so the region is in the pointer-type.
     switch (compress((type_t)e1->topt)) {
-    case &PointerType(PtrInfo(_,tq,PtrAtts(r,_,_,_,_))):
+    case &PointerType(PtrInfo(_,tq,PtrAtts(r,...))):
       return $(tq.real_const, r); // FIX: is tq set correctly?
     default: return bogus_ans;
     }

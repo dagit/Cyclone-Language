@@ -797,9 +797,8 @@ decl_t let_decl(pat_t p, exp_t e, seg_t loc) {
 decl_t letv_decl(list_t<vardecl_t,`H> vds, seg_t loc) {
   return new_decl(new Letv_d(vds),loc);
 }
-decl_t region_decl(tvar_t tv,vardecl_t vd,bool resetable,exp_opt_t open_exp,
-                   seg_t loc) {
-  return new_decl(new Region_d(tv,vd,resetable,open_exp),loc);
+decl_t region_decl(tvar_t tv,vardecl_t vd,exp_opt_t open_exp,seg_t loc) {
+  return new_decl(new Region_d(tv,vd,open_exp),loc);
 }
 decl_t alias_decl(tvar_t tv,vardecl_t vd,exp_t e,seg_t loc) {
   // assumes the variable's initializer is NULL

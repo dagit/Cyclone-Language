@@ -133,11 +133,9 @@ extern tenv_t add_region_equality(tenv_t te, type_t r1, type_t r2,
 
 extern type_t curr_rgn(tenv_t);
 
-extern tenv_t add_region(tenv_t, type_t, bool resetable, bool opened);
+extern tenv_t add_region(tenv_t, type_t, bool opened);
 // Check that the region is in the current capability
 extern void check_rgn_accessible(tenv_t,seg_t,type_t rgn);
-// Check that the region is in the current capability and is resetable
-extern void check_rgn_resetable(tenv_t,seg_t,type_t rgn);
 // Check that an effect is a sub-effect of the current capability, may delay
 extern void check_effect_accessible(tenv_t te, seg_t loc, type_t eff);
 // Returns true when region r1 outlives region r2 -- assumes r1 <> r2

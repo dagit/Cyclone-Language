@@ -366,10 +366,9 @@ void check_format_args(tenv_t te, exp_t fmt,
       }
       if (alias_coercion)
 	*alias_arg_exps = new List(arg_cnt,*alias_arg_exps);
-      TEMP_RGN(te, temp) {
-        if (is_noalias_pointer_or_aggr(temp,t) && !is_noalias_path(temp,e))
-          terr(args->hd->loc,UNIQUE_ERR_MSG);
-      }
+      if (is_noalias_pointer_or_aggr(heap_region,t) 
+	  && !is_noalias_path(heap_region,e))
+	terr(args->hd->loc,UNIQUE_ERR_MSG);
     }
     // check arity
     if (desc_types != NULL)
@@ -2650,49 +2649,47 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
 // alias_arg_exps is sorted in ascending order.
 static void insert_alias_stmts(tenv_t te, exp_t e, exp_t fn_exp,
 			       list_t<int> alias_arg_exps) {
-  TEMP_RGN(te, r) {
-    let decls = NULL;
-    // first update the function's arguments to include the coercions
-    switch (fn_exp->r) {
-    case &FnCall_e(_,es,...):
-      switch (e->r) {
-      case &FnCall_e(_,es2,...): // for getting the types
-	let arg_exps = alias_arg_exps;
-	let arg_cnt = 0;
-	while (arg_exps != NULL) {
-	  while (arg_cnt != arg_exps->hd) {
-	    if (es == NULL)
-	      Tcutil::impos(aprintf("bad count %d/%d for alias coercion!",
-				    arg_cnt, arg_exps->hd));
-	    arg_cnt++;
-	    es = es->tl;
-	    es2 = es2->tl;
-	  }
-	  // create the coercion here
-	  let $(d,ve) = insert_alias(es->hd,copy_type((type_t)es2->hd->topt));
-	  es->hd = ve;   // update the argument expression
-	  decls = rnew (r) List(d, decls); // note the alias decl
-	  arg_exps = arg_exps->tl;
+  let decls = NULL;
+  // first update the function's arguments to include the coercions
+  switch (fn_exp->r) {
+  case &FnCall_e(_,es,...):
+    switch (e->r) {
+    case &FnCall_e(_,es2,...): // for getting the types
+      let arg_exps = alias_arg_exps;
+      let arg_cnt = 0;
+      while (arg_exps != NULL) {
+	while (arg_cnt != arg_exps->hd) {
+	  if (es == NULL)
+	    Tcutil::impos(aprintf("bad count %d/%d for alias coercion!",
+				  arg_cnt, arg_exps->hd));
+	  arg_cnt++;
+	  es = es->tl;
+	  es2 = es2->tl;
 	}
-	break;
-      default: Tcutil::impos("not a function call!");
+	// create the coercion here
+	let $(d,ve) = insert_alias(es->hd,copy_type((type_t)es2->hd->topt));
+	es->hd = ve;   // update the argument expression
+	decls = new List(d, decls); // note the alias decl
+	arg_exps = arg_exps->tl;
       }
       break;
     default: Tcutil::impos("not a function call!");
     }
-    // wrap function call with alias statements introducing
-    // fresh type vars
-    while (decls != NULL) {
-      let d = decls->hd;
-      fn_exp = stmt_exp(decl_stmt(d,exp_stmt(fn_exp,e->loc),e->loc),e->loc);
-      decls = decls->tl;
-    }
-    // update the current expression to be the newly created one
-    //   and re-typecheck
-    e->topt = NULL;
-    e->r = fn_exp->r;
-    //fprintf(stderr,"New expression is:\n\t%s\n",exp2string(e));
+    break;
+  default: Tcutil::impos("not a function call!");
   }
+  // wrap function call with alias statements introducing
+  // fresh type vars
+  while (decls != NULL) {
+    let d = decls->hd;
+    fn_exp = stmt_exp(decl_stmt(d,exp_stmt(fn_exp,e->loc),e->loc),e->loc);
+    decls = decls->tl;
+  }
+  // update the current expression to be the newly created one
+  //   and re-typecheck
+  e->topt = NULL;
+  e->r = fn_exp->r;
+  //fprintf(stderr,"New expression is:\n\t%s\n",exp2string(e));
 }
 
  // Type-check the expression -- don't do any implicit instantiation.
@@ -2746,7 +2743,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     try {
       fn_exp = deep_copy_exp(false,e);
     } catch {
-    case &Core::Failure(s):
+    case &Core::Failure(_):
       ok = false;
       fn_exp = e;
       break;

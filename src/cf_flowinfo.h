@@ -220,20 +220,6 @@ extern flow_t<`r> after_flow(flow_env_t<`r>,place_set_t<`r>*,
                              flow_t<`r>,flow_t<`r>,
                              place_set_t<`r>,place_set_t<`r>);
                              
-  // reset anything that points into rgn to be uninitialized
-extern flow_t<`r> kill_flow_region(flow_env_t<`r> fenv, flow_t<`r> f, Absyn::type_t rgn);
-
-datatype KillRgn {
-  UniqueRgn_k;
-  RefCntRgn_k;
-  Region_k(Absyn::tvar_t);
-};
-extern_datacon(KillRgn,UniqueRgn_k);
-extern_datacon(KillRgn,RefCntRgn_k);
-typedef datatype KillRgn @`r killrgn_t<`r::R>;
-
-extern bool contains_region(killrgn_t rgn, Absyn::type_t t);
-
 extern string_t place_err_string(place_t place);
 }
 #endif

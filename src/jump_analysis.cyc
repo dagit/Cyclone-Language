@@ -273,7 +273,7 @@ static void anal_stmt(senv_t env, stmt_t s) {
     // since all we are worried about is that you do not jump into scope.
     env = add_encloser(s,env);
     switch(d->r) {
-    case &Region_d(_,_,_,eo): 
+    case &Region_d(_,_,eo): 
       // we push an exception handler and count this as a pattern?!
       if(eo != NULL) {
 	anal_exp(env,eo);
@@ -308,7 +308,6 @@ static void anal_stmt(senv_t env, stmt_t s) {
     anal_stmt(env,s1);
     break; 
 
-  case &ResetRegion_s(e): anal_exp(env,e); break;
   }
 }
 

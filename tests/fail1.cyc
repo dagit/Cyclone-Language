@@ -202,16 +202,16 @@ void f37() {
 }
 */
 
-void f38(int x) {
-  // expecting region_t but found int
-  // Region `f38 is not resetable
-  reset_region(x);
-}
 
-void f39(region_t<`r> r) {
-  // Region `r is not reseable
-  reset_region(r);
-}
+
+
+
+
+
+
+
+
+
 
 // void f40() {
 //   // undeclared identifier x

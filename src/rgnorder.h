@@ -37,9 +37,8 @@ rgn_po_t<`r> initial_fn_po(region_t<`r>, list_t<tvar_t> tvs,
 //  		     list_t<$(type_t,type_t)@> po1, 
 //  		     list_t<$(type_t,type_t)@> po2);
 rgn_po_t<`r> add_outlives_constraint(region_t<`r>, rgn_po_t<`r> po, type_t eff, type_t rgn, Position::seg_t loc);
-rgn_po_t<`r> add_youngest(region_t<`r>, rgn_po_t<`r> po, tvar_t rgn, bool resetable, bool opened);
+rgn_po_t<`r> add_youngest(region_t<`r>,rgn_po_t<`r> po,tvar_t rgn,bool opened);
 rgn_po_t<`r> add_unordered(region_t<`r>, rgn_po_t<`r> po, tvar_t rgn);
-bool is_region_resetable(rgn_po_t po, tvar_t r);
 bool effect_outlives(rgn_po_t po, type_t eff, type_t rgn);
 bool satisfies_constraints(rgn_po_t po, list_t<$(type_t,type_t)@> constraints,
 			   type_t default_bound, bool do_pin);

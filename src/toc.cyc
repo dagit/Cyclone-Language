@@ -276,7 +276,6 @@ MAKE_VAR(_pop_region);
 MAKE_VAR(_open_dynregion);
 MAKE_VAR(_push_dynregion);
 MAKE_VAR(_pop_dynregion);
-MAKE_VAR(_reset_region);
 MAKE_VAR(_throw_arraybounds);
 MAKE_VAR(_dyneither_ptr_decrease_size);
 MAKE_VAR(_swap_word);
@@ -4460,7 +4459,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
 	fndecl_to_c(nv, fd, false);
 	stmt_to_c(nv,s1);
         break;
-      case &Region_d(tv, vd, resetable, open_exp_opt):
+      case &Region_d(tv, vd, open_exp_opt):
         let body = s1;
         // NOTE:  _npop_handler has to deal with regions as well as exceptions
         // { struct _RegionHandle rh = _new_region(); (or *open_exp_opt)
@@ -4566,14 +4565,6 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                           declare_stmt(e_var,e_typ,
                                        cast_it(e_typ,_exn_thrown_e),
                           handler_stmt,DL),DL),DL),DL),DL),DL)->r;
-      }
-      return;
-    case &ResetRegion_s(e):
-      if (no_regions) {
-        s->r = &Skip_s_val;
-      } else {
-        exp_to_c(nv,e);
-        s->r = exp_stmt_r(fncall_exp(_reset_region_e,new List(e,NULL),DL));
       }
       return;
     }
@@ -5142,7 +5133,6 @@ static void stmttypes_to_c(stmt_t s) {
     s->r = new Skip_s;
     break;
   case &TryCatch_s(...):
-  case &ResetRegion_s(_): 
     Tcutil::terr(s->loc,aprintf("Cyclone statement in C code: %s",stmt2string(s)));
     break;
   }
@@ -5272,7 +5262,6 @@ static void init() {
     &_open_dynregion_str,
     &_push_dynregion_str,
     &_pop_dynregion_str,
-    &_reset_region_str,
     &_throw_arraybounds_str,
     &_dyneither_ptr_decrease_size_str,
     &_throw_match_str,

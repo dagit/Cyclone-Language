@@ -1065,14 +1065,14 @@ using Parse;
 %token NULL_kw LET THROW TRY CATCH EXPORT
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
 %token MALLOC RMALLOC RMALLOC_INLINE CALLOC RCALLOC SWAP
-%token REGION_T TAG_T REGION RNEW REGIONS RESET_REGION
+%token REGION_T TAG_T REGION RNEW REGIONS 
 %token PORTON PORTOFF DYNREGION_T
 // %token ALIAS
 %token NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
 %token FAT_QUAL NOTNULL_QUAL NULLABLE_QUAL REQUIRES_QUAL ENSURES_QUAL
 // Cyc:  CYCLONE qualifiers (e.g., @zeroterm, @tagged)
 %token REGION_QUAL NOZEROTERM_QUAL ZEROTERM_QUAL TAGGED_QUAL 
-%token EXTENSIBLE_QUAL RESETABLE_QUAL
+%token EXTENSIBLE_QUAL
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -1158,7 +1158,7 @@ using Parse;
 %type <$(declarator_t<`yy>,exp_opt_t,exp_opt_t)@`yy> struct_declarator
 %type <list_t<$(declarator_t<`yy>,exp_opt_t,exp_opt_t)@`yy,`yy>> struct_declarator_list struct_declarator_list0
 %type <abstractdeclarator_t<`yy>> abstract_declarator direct_abstract_declarator
-%type <bool> optional_inject resetable_qual_opt qual_datatype extern_c_action
+%type <bool> optional_inject qual_datatype extern_c_action
 %type <scope_t> datatypefield_scope
 %type <datatypefield_t> datatypefield
 %type <list_t<datatypefield_t,`H>> datatypefield_list
@@ -1363,52 +1363,44 @@ declaration:
       $$=^$(new List(letv_decl(vds,LOC(@1,@3)),NULL));
     }
 /* Cyc: region declaration */
-/* region <`r> h;  and region <`r> h @resetable; */
-| resetable_qual_opt REGION '<' TYPE_VAR '>' IDENTIFIER ';'
-  { let four = $4;
+/* region <`r> h;  */
+| REGION '<' TYPE_VAR '>' IDENTIFIER ';'
+  { let three = $3;
     // FIX: need to check for `RC as well?  Should factor these out?
-    if (zstrcmp(four,"`H") == 0)
-      Warn::err(SLOC(@4),"bad occurrence of heap region");
-    if (zstrcmp(four,"`U") == 0)
-      Warn::err(SLOC(@4),"bad occurrence of unique region");
-    tvar_t tv = new Tvar(new four,-1,Tcutil::kind_to_bound(&Tcutil::rk));
+    if (zstrcmp(three,"`H") == 0)
+      Warn::err(SLOC(@3),"bad occurrence of heap region");
+    if (zstrcmp(three,"`U") == 0)
+      Warn::err(SLOC(@3),"bad occurrence of unique region");
+    tvar_t tv = new Tvar(new three,-1,Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t  = new VarType(tv);
-    vardecl_t vd = new_vardecl(SLOC(@6),new $(Loc_n,new $6),new RgnHandleType(t),NULL);
-    $$ = ^$(new List(region_decl(tv,vd,$1,NULL,LOC(@1,@7)),NULL));
+    vardecl_t vd = new_vardecl(SLOC(@5), new $(Loc_n,new $5),new RgnHandleType(t),NULL);
+    $$ = ^$(new List(region_decl(tv,vd,NULL,LOC(@1,@6)),NULL));
   }
 /* region h; */
-| resetable_qual_opt REGION IDENTIFIER ';'
-  { let one = $1;
-    let three = $3;
-    if (zstrcmp(three,"H") == 0)
-      Warn::err(SLOC(@3),"bad occurrence of heap region `H");
-    if (zstrcmp(three,"U") == 0)
-      Warn::err(SLOC(@3),"bad occurrence of unique region `U");
-    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",three), -1,
+| REGION IDENTIFIER ';'
+  { let two = $2;
+    if (zstrcmp(two,"H") == 0)
+      Warn::err(SLOC(@2),"bad occurrence of heap region `H");
+    if (zstrcmp(two,"U") == 0)
+      Warn::err(SLOC(@2),"bad occurrence of unique region `U");
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",two), -1,
 			 Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t = new VarType(tv);
-    vardecl_t vd = new_vardecl(SLOC(@3),new $(Loc_n,new three),new RgnHandleType(t),NULL);
-
-    $$ = ^$(new List(region_decl(tv,vd,one,NULL,LOC(@1,@5)),NULL));
+    vardecl_t vd = new_vardecl(SLOC(@2), new $(Loc_n,new two),new RgnHandleType(t),NULL);
+    $$ = ^$(new List(region_decl(tv,vd,NULL,LOC(@1,@4)),NULL));
   }
 /* region h = open(k); */
-| resetable_qual_opt REGION IDENTIFIER '=' IDENTIFIER '(' expression ')' ';'
-  { let three = $3;
-    let five = $5;
-    let seven = $7;
-    if (strcmp(five,"open") != 0) Warn::err(SLOC(@4),"expecting `open'");
-    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",three), -1,
+| REGION IDENTIFIER '=' IDENTIFIER '(' expression ')' ';'
+  { let two = $2;
+    let four = $4;
+    let six = $6;
+    if (strcmp(four,"open") != 0) Warn::err(SLOC(@4),"expecting `open'");
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",two), -1,
 			 Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t = new VarType(tv);
-    vardecl_t vd = new_vardecl(SLOC(@3),new $(Loc_n,new three),new RgnHandleType(t),NULL);
-
-    $$ = ^$(new List(region_decl(tv,vd,false,seven,LOC(@1,@5)),NULL));
+    vardecl_t vd = new_vardecl(SLOC(@3),new $(Loc_n,new two),new RgnHandleType(t),NULL);
+    $$ = ^$(new List(region_decl(tv,vd,six,LOC(@1,@8)),NULL));
   }
-;
-
-resetable_qual_opt:
-  /* empty */ { $$=^$(false); }
-| RESETABLE_QUAL { $$=^$(true); }
 ;
 
 declaration_list:
@@ -2451,9 +2443,6 @@ statement:
 | selection_statement   { $$=$!1; }
 | iteration_statement   { $$=$!1; }
 | jump_statement        { $$=$!1; }
-// Cyc: reset_region(e) statement
-| RESET_REGION '(' expression ')' ';'
-  { $$=^$(new_stmt(new ResetRegion_s($3),LOC(@1,@5))); }
 ;
 
 /* Cyc: Unlike C, we do not treat case and default statements as labeled */

@@ -484,19 +484,6 @@ void _free_region(struct _RegionHandle *r) {
   r->last_plus_one = 0;
 }
 
-// reset the region by freeing its pages and then reallocating a fresh page.
-//   (assumes r is not heap or unique region)
-void _reset_region(struct _RegionHandle *r) {
-#ifdef CYC_REGION_PROFILE  
-  _profile_free_region(r,NULL,NULL,0);
-  *r = _new_region(r->name);
-#else
-  _free_region(r);
-  *r = _new_region(NULL);
-#endif
-}
-
-
 // Dynamic Regions
 // Note that struct Cyc_Core_DynamicRegion is defined in cyc_include.h.
 

@@ -50,7 +50,6 @@ datatype exn {Env_error};
 datacon(exn,Env_error);
 
 `a env_err(string_t msg) __attribute__((noreturn)) {
-  //fprintf(stderr,"Internal error in tcenv: %s\n",msg); fflush(stderr);
   throw &Env_error_val;
 }
 
@@ -301,12 +300,12 @@ tenv_t enter_extern_c_include(tenv_t te) {
   return ans;
 }  
 
-tenv_t add_region(tenv_t te, type_t rgn, bool resetable, bool opened) {
+tenv_t add_region(tenv_t te, type_t rgn, bool opened) {
   let ans = new *get_fenv(te,"add_region");
   let region_order = ans->region_order;
   switch (compress(rgn)) {
   case &VarType(x): 
-    region_order = add_youngest(heap_region,region_order, x, resetable, opened);
+    region_order = add_youngest(heap_region,region_order, x, opened);
     break;
   default: break;
   }
@@ -322,7 +321,7 @@ tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
   ans->type_vars = new List(block_rgn, ans->type_vars);
   check_unique_tvars(loc, ans->type_vars); // DJG: FIX -- very wasteful
   ans->region_order = add_youngest(heap_region, ans->region_order, 
-				   block_rgn, false, false);
+				   block_rgn, false);
   ans->capability = new JoinEff(new List(new AccessEff(block_typ), 
 					 new List(ans->capability,NULL)));
   ans->curr_rgn = block_typ;
@@ -400,19 +399,6 @@ void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
   if(eff_outlives_eff(ro,new AccessEff(rgn),capability))
     return;
   terr(loc, "Expression accesses unavailable region %s", typ2string(rgn));
-}
-
-// Check to see if a region is accessible and resetable
-void check_rgn_resetable(tenv_t te, seg_t loc, type_t rgn) {
-  check_rgn_accessible(te,loc,rgn);
-  let ro = get_fenv(te,"check_rgn_resetable")->region_order;
-  switch (compress(rgn)) {
-  case &VarType(r):
-    if(!RgnOrder::is_region_resetable(ro,r))
-      terr(loc, "Region %s is not resetable", typ2string(rgn));
-    return;
-  default: impos("check_rgn_resetable");
-  }
 }
 
 // check that region rt_a outlives region rt_b using the partial order in
@@ -551,7 +537,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
       else
 	impos("non-intuitionistic tvar in nested_fenv");
   }
-  rgn_po = add_youngest(r, rgn_po, rgn0, false, false);
+  rgn_po = add_youngest(r, rgn_po, rgn0, false);
   for(let po2 = fd->rgn_po; po2 != NULL; po2=po2->tl)
     rgn_po = add_outlives_constraint(r,rgn_po,(*po2->hd)[0],(*po2->hd)[1],loc);
   let tvs = new List(rgn0,List::append(fd->tvs,type_vars));

@@ -63,7 +63,7 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
   let rgns = (p==NULL) ? NULL : map(fst,filter(snd,(*p)[0]));
   tenv_t te2 = add_type_vars(loc,te,tvs);
   for (; rgns != NULL; rgns=rgns->tl)
-    te2 = add_region(te2,new VarType(rgns->hd),false,true);
+    te2 = add_region(te2,new VarType(rgns->hd),true);
   te2 = new_outlives_constraints(te2,bds,loc);
   if(new_block)
     te2 = Tcenv::new_block(loc,te2);
@@ -485,7 +485,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       tcStmt(te2,s,false);
       return;
 
-      case &Region_d(tv,vd,resetable,open_exp_opt):
+      case &Region_d(tv,vd,open_exp_opt):
         // Same KLUDGE as with TryCatch_s -- we need a next statement that is
         // not outside of the handler.
         s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
@@ -521,7 +521,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           rgn_typ = new VarType(tv);
           te2 = add_type_vars(s0->loc,te2,new List(tv,NULL));
         }
-        te2 = add_region(te2, rgn_typ, resetable, true);
+        te2 = add_region(te2, rgn_typ, true);
         check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,false,*t);
         if (!unify(*t,new RgnHandleType(rgn_typ)))
           impos("region stmt: type of region handle is wrong!");
@@ -574,14 +574,5 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       }
     throw impos("tcStmt: nested %s declarations unimplemented",unimp_msg_part);
 
-  case &ResetRegion_s(e):
-    // check that e is an intuitionistic region_t<`r> 
-    type_t rgn_type = new_evar(&rko,lookup_opt_type_vars(te));
-    type_t etype = new RgnHandleType(rgn_type);
-    if (!unify(tcExp(te,&etype,e),etype))
-      terr(e->loc, "expecting region_t but found %s", typ2string((type_t)e->topt));
-    // check that `r is resetable
-    check_rgn_resetable(te,s0->loc,rgn_type);
-    return;
   }
 }

@@ -13,8 +13,8 @@ fail1.cyc:60: too many arguments in explicit fallthru
 fail1.cyc:68: too few arguments in explicit fallthru
 fail1.cyc:75: Cannot consume non-unique paths; do swap instead
 fail1.cyc:75: pattern for variable _stmttmp0 dereferences a alias-free pointer from a non-unique path
-fail1.cyc:83: switch on type int, but case expects type `EA133 *`ETR134
-  `EA133 *`ETR134 and int are not compatible. 
+fail1.cyc:83: switch on type int, but case expects type `EA132 *`ETR133
+  `EA132 *`ETR133 and int are not compatible. 
 fail1.cyc:93: expected datatype exn@ but found int
 fail1.cyc:99: bad abstract scope for local variable
 fail1.cyc:111: type int () has kind A but as used here needs kind TM
@@ -22,27 +22,24 @@ fail1.cyc:111: extern declarations are not yet supported within functions
 fail1.cyc:118: initializer for static variable needs to be a constant expression
 fail1.cyc:123: x was declared with type int * but initialized with type int.
   int * and int are not compatible. 
-fail1.cyc:128: pattern type `EM137 *`ETR136 does not match definition type int
-  `EM137 *`ETR136 and int are not compatible. 
+fail1.cyc:128: pattern type `EM136 *`ETR135 does not match definition type int
+  `EM136 *`ETR135 and int are not compatible. 
 fail1.cyc:138: type mismatch: int *`r2 != int *`r
   `r and `r2 are not compatible. (variable types are not the same)
 fail1.cyc:160: bad storage class for inner function
 fail1.cyc:174: bad attribute packed for function
 fail1.cyc:180: bad attribute aligned for function
-fail1.cyc:208: expecting region_t but found int
-fail1.cyc:208: Region `f38 is not resetable
-fail1.cyc:213: Region `r is not resetable
 fail1.cyc:241: test of if statement has type $(int,int) instead of integral or pointer type
 fail1.cyc:247: test of conditional expression has type $(int,int) instead of integral or pointer type
 fail1.cyc:253: Cannot consume non-unique paths; do swap instead
-fail1.cyc:258: descriptor has type const char ?@nozeroterm`ER168 but argument has type int
-  int and const char ?@nozeroterm`ER168 are not compatible. 
+fail1.cyc:258: descriptor has type const char ?@nozeroterm`ER161 but argument has type int
+  int and const char ?@nozeroterm`ER161 are not compatible. 
 fail1.cyc:263: descriptor has type int but argument has type $(int,int)
   $(int,int) and int are not compatible. 
-fail1.cyc:263: can't find a field in datatype PrintArg<`GR121> to inject a value of type $(int,int)
+fail1.cyc:263: can't find a field in datatype PrintArg<`GR116> to inject a value of type $(int,int)
 fail1.cyc:268: descriptor has type double but argument has type $(int,int)
   $(int,int) and double are not compatible. 
-fail1.cyc:268: can't find a field in datatype PrintArg<`GR122> to inject a value of type $(int,int)
+fail1.cyc:268: can't find a field in datatype PrintArg<`GR117> to inject a value of type $(int,int)
 fail1.cyc:273: too many arguments
 fail1.cyc:278: too few arguments
 fail1.cyc:283: expecting numeric type but found $(int,int)
@@ -124,7 +121,7 @@ fail1.cyc:615: Swap not allowed for non-pointer or non-word-sized types.
 fail1.cyc:615: attempt to write an abstract aggregate
 fail1.cyc:615: attempt to write an abstract aggregate
 fail1.cyc:620: statement expression returns type tag_t<`i>
-  `ETM197 and tag_t<`i> are not compatible. (type variable would escape scope)
+  `ETM190 and tag_t<`i> are not compatible. (type variable would escape scope)
 fail1.cyc:626: statement expression must end with expression
 fail1.cyc:631: expecting @tagged union but found int
 fail1.cyc:636: expecting region_t type but found int

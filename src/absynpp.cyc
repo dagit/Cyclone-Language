@@ -1571,9 +1571,6 @@ doc_t stmt2doc(stmt_t st, bool stmtexp) {
             line_doc(),
             rb());
     break;
-  case &ResetRegion_s(e):
-    s = cat(text("reset_region("),exp2doc(e),text(");"));
-    break;
   }
   return s;
 }
@@ -1841,7 +1838,7 @@ doc_t decl2doc(decl_t d) {
   case &Var_d(vd):
     s = vardecl2doc(vd);
     break;
-  case &Region_d(tv,vd,resetable,open_exp_opt):
+  case &Region_d(tv,vd,open_exp_opt):
     s = cat(text("region"),
             text("<"),
             tvar2doc(tv),
@@ -1849,7 +1846,6 @@ doc_t decl2doc(decl_t d) {
             qvar2doc(vd->name),
             (open_exp_opt ? cat(text(" = open("),exp2doc(open_exp_opt),
                                 text(")")) : nil_doc()),
-            (resetable ? text(" @resetable") : nil_doc()),
             text(";"));
     break;
   case &Datatype_d(dd):

@@ -1022,10 +1022,6 @@ void dumpstmt(stmt_t s,bool expstmt) {
     dumpswitchclauses(ss); dump_char('}');
     break;
 
-  case &ResetRegion_s(e):
-    dump("reset_region("); dumpexp(e); dump(");");
-    break;
-
   }
 }
 
@@ -1336,7 +1332,7 @@ void dumpdecl(decl_t d) {
     dumpids(vds);
     dump_semi();
     break;
-  case &Region_d(tv,vd,resetable,open_exp_opt):
+  case &Region_d(tv,vd,open_exp_opt):
     dump("region"); 
     dump("<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
     if (open_exp_opt) {
@@ -1344,7 +1340,6 @@ void dumpdecl(decl_t d) {
       dumpexp(open_exp_opt);
       dump(")");
     }
-    if (resetable) dump("@resetable");
     dump_semi();
     break;
 

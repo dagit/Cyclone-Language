@@ -314,7 +314,7 @@ list_t<`a,`r2> rrev(region_t<`r2> r2, list_t<`a> x) {
   // avoid allocation for length-one lists
   if (x==NULL) // || x->tl==NULL)
     return NULL;
-  return(rrevappend(r2,x,NULL));
+  return rrevappend(r2,x,NULL);
 }
 
 list_t<`a> rev(list_t<`a> x) {
@@ -352,7 +352,7 @@ list_t<`a,`r2> rappend(region_t<`r2> r2,list_t<`a> x,list_t<`a,`r2> y) {
     prev = temp;
   }
   prev->tl = y;
-  return(result);
+  return result;
 }
 
 list_t<`a> append(list_t<`a> x,list_t<`a,`H> y) {
@@ -368,8 +368,7 @@ list_t<`a,`r> imp_append(list_t<`a::TB,`r> x,list_t<`a,`r> y) {
   if (x == NULL) return y;
   if (y == NULL) return x;
   for (z = x; z->tl != NULL; z = z->tl) 
-    // skip
-    ;
+    ; // skip
   z->tl = y;
   return x;
 }
