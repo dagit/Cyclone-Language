@@ -23,7 +23,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    derives[i - ntokens] points to a vector of rule numbers,
    terminated with -1.  */
 
-#include "stdio.h"
+#include <stdio.h>
 #include "system.h"
 #include "new.h"
 #include "types.h"

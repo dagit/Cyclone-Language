@@ -21,7 +21,7 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 /* set up nullable, a vector saying which nonterminals can expand into the null string.
    nullable[i - ntokens] is nonzero if symbol i can do so.  */
 
-#include "stdio.h"
+#include <stdio.h>
 #include "system.h"
 #include "types.h"
 #include "gram.h"

@@ -29,15 +29,17 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
 #endif
 #endif
 
-#include "stdio.h"
-#include "stdlib.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
 #include "system.h"
 #include "files.h"
 #include "new.h"
 #include "gram.h"
-#include "string.h"
+#include <string.h>
 using String;
 using Stdlib;
+using Unistd;
 
 FILE *finput=NULL;
 FILE *foutput=NULL;
@@ -259,13 +261,11 @@ openfiles()
 
 #ifndef MSDOS
   /*fix:: unlink not supported yet*/
-  /*
   if (! noparserflag)
     unlink(actfile);
   unlink(tmpattrsfile);
   unlink(tmptabfile);
   unlink(tmpdefsfile);
-  */
 #endif
 
 	/* These are opened by `done' or `open_extra_files', if at all */

@@ -25,9 +25,9 @@ the Free Software Foundation, 675 Mass Ave, Cambridge, MA 02139, USA.  */
    and the name is looked up in the symbol table using symtab.c;
    symval is set to a pointer to the entry found.  */
 
-#include "stdio.h"
-#include "ctype.h"
-#include "string.h"
+#include <stdio.h>
+#include <ctype.h>
+#include <string.h>
 #include "system.h"
 #include "files.h"
 #include "getopt.h"		/* for optarg */
