@@ -675,7 +675,7 @@ static void inc_linenumber() {
       newlinenums[i] = linenums[i];
     linenums :=: newlinenums;
     // free old array of positions
-    Core::ufree(newlinenums);
+    Core::ufree((_*)newlinenums);
   }
   // plug in the current position for this line number
   linenums[offset] = yylloc.first_line;
@@ -744,16 +744,16 @@ $(const char ?, unsigned int) xlate_pos(seg_t char_offset) {
 
 
 // Forward declarations of lexing functions 
-int token(Lexbuf<`a>);
-int scan_charconst(Lexbuf<`a>);
-int strng(Lexbuf<`a>);
-int strng_next(Lexbuf<`a>);
-int wstrng(Lexbuf<`a>);
-int wstrng_next(Lexbuf<`a>);
-int comment(Lexbuf<`a>);
-int cyc_qual(Lexbuf<`a>);
-int snarf_asm(Lexbuf<`a>);
-int snarf_asm_body(Lexbuf<`a>);
+int token(Lexbuf);
+int scan_charconst(Lexbuf);
+int strng(Lexbuf);
+int strng_next(Lexbuf);
+int wstrng(Lexbuf);
+int wstrng_next(Lexbuf);
+int comment(Lexbuf);
+int cyc_qual(Lexbuf);
+int snarf_asm(Lexbuf);
+int snarf_asm_body(Lexbuf);
 } // namespace Lex
 
 // for parser -- must not be prefixed
@@ -797,6 +797,7 @@ namespace Lex;
 }
 
 let newline = ('\n' | '\r' | "\r\n")
+let notidchar = [^'A'-'Z''a'-'z''0'-'9''_'] 
 
 rule token = parse
 | "asm" { return snarf_asm(lexbuf); }
@@ -941,46 +942,20 @@ and cyc_qual = parse
 /* HACK: If we see @taggedfoo then this should be lexed as '@' 'taggedfoo', not
  * '@tagged' 'foo' -- so we back up the lexer if necessary -- I don't
  * see an easier way to do this... */
-  "tagged"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("taggedZ"); return '@'; }
-| "zeroterm"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("zerotermZ"); return '@'; }
-| "nozeroterm"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("nozerotermZ"); return '@'; }
-| "extensible"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("extensibleZ"); return '@'; }
-| "resetable"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("resetableZ"); return '@'; }
-| "region"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("regionZ"); return '@'; }
-| "numelts"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("numeltsZ"); return '@'; }
-| "thin"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("thinZ"); return '@'; }
-| "fat"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("fatZ"); return '@'; }
-| "notnull"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("notnullZ"); return '@'; }
-| "nullable"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("nullableZ"); return '@'; }
-| "requires"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("requiresZ"); return '@'; }
-| "ensures"['A'-'Z''a'-'z''0'-'9''_'] 
-    { lexbuf->lex_curr_pos -= strlen("ensuresZ"); return '@'; }
-| "tagged" { return TAGGED_QUAL; }
-| "zeroterm" { return ZEROTERM_QUAL; }
-| "nozeroterm" { return NOZEROTERM_QUAL; }
-| "extensible" { return EXTENSIBLE_QUAL; }
-| "resetable" { return RESETABLE_QUAL; }
-| "region" { return REGION_QUAL; }
-| "numelts" { return NUMELTS_QUAL; }
-| "thin" { return THIN_QUAL; }
-| "fat" { return FAT_QUAL; }
-| "notnull" { return NOTNULL_QUAL; }
-| "nullable" { return NULLABLE_QUAL; }
-| "requires" { return REQUIRES_QUAL; }
-| "ensures" { return ENSURES_QUAL; }
-| _ { lexbuf->lex_curr_pos -= 1; return '@'; }
+  "tagged"notidchar      { --lexbuf->lex_curr_pos; return TAGGED_QUAL; }
+| "notnull"notidchar     { --lexbuf->lex_curr_pos; return NOTNULL_QUAL; }
+| "zeroterm"notidchar    { --lexbuf->lex_curr_pos; return ZEROTERM_QUAL; }
+| "nozeroterm"notidchar  { --lexbuf->lex_curr_pos; return NOZEROTERM_QUAL; }
+| "extensible"notidchar  { --lexbuf->lex_curr_pos; return EXTENSIBLE_QUAL; }
+| "resetable"notidchar   { --lexbuf->lex_curr_pos; return RESETABLE_QUAL; }
+| "region"notidchar      { --lexbuf->lex_curr_pos; return REGION_QUAL; }
+| "numelts"notidchar     { --lexbuf->lex_curr_pos; return NUMELTS_QUAL; }
+| "thin"notidchar        { --lexbuf->lex_curr_pos; return THIN_QUAL; }
+| "fat"notidchar         { --lexbuf->lex_curr_pos; return FAT_QUAL; }
+| "nullable"notidchar    { --lexbuf->lex_curr_pos; return NULLABLE_QUAL; }
+| "requires"notidchar    { --lexbuf->lex_curr_pos; return REQUIRES_QUAL; }
+| "ensures"notidchar     { --lexbuf->lex_curr_pos; return ENSURES_QUAL; }
+| _                      { --lexbuf->lex_curr_pos; return '@'; }
 
 and scan_charconst = parse
     "'"     { return 0; }
