@@ -162,6 +162,23 @@ static bool rop_contains_var(reln_op_t r, Absyn::vardecl_t v) {
   }
 }
 
+reln_op_t subst_rop_var(reln_op_t r, Absyn::vardecl_t v, reln_op_t new_rop) {
+  switch (r) {
+  case {.RVar = v2}:      return (v == v2) ? new_rop : r;
+  case {.RNumelts = v2}:  return (v == v2) ? new_rop : r;
+  case {.RType = _}:
+  case {.RParam = _}:
+  case {.RParamNumelts = _}:
+  case {.RReturn = _}:
+  case {.RConst = _}:     return r;
+  }
+}
+
+reln_t<`r> substitute_rop_var(region_t<`r> rgn, reln_t reln, 
+                              Absyn::vardecl_t v, reln_op_t new_rop) {
+  return rnew(rgn) Reln{subst_rop_var(reln->rop1,v,new_rop),reln->relation,
+                          subst_rop_var(reln->rop2,v,new_rop)};
+}
 relns_t<`r> reln_kill_var(region_t<`r> rgn, relns_t<`r> rs, Absyn::vardecl_t v) {
   relns_t p;
   bool found = false;
@@ -173,12 +190,17 @@ relns_t<`r> reln_kill_var(region_t<`r> rgn, relns_t<`r> rs, Absyn::vardecl_t v) 
     }
   }
   if (!found) return rs;
-
+  // substitute a fresh type variable for the variable being killed.
+  let tv = Tcutil::new_tvar(Tcutil::kind_to_bound(&Tcutil::ik));
+  let new_rop = RType(Absyn::var_type(tv));
   let new_rs = NULL;
   for (p = rs; p != NULL; p = p->tl) {
     let r = p->hd;
-    if (rop_contains_var(r->rop1,v) || rop_contains_var(r->rop2,v)) continue;
-    new_rs = rnew(rgn) List(r,new_rs);
+    if (rop_contains_var(r->rop1,v) || rop_contains_var(r->rop2,v)) {
+      new_rs = rnew(rgn) List(substitute_rop_var(rgn,r,v,new_rop),new_rs);
+    } else {
+      new_rs = rnew(rgn) List(r,new_rs);
+    }
   }
   return new_rs;
 }

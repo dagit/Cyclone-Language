@@ -55,7 +55,14 @@ static fndecl_set_t cg_exps(fndefns_t fds, list_t<exp_t> es, fndecl_set_t s) {
 
 static fndecl_set_t cg_exp(fndefns_t fds, exp_t e, fndecl_set_t s) {
   switch (e->r) {
-  case &Var_e(&Funname_b(fd)): return Set::insert(s,fd);
+  case &Var_e(&Funname_b(fd)): 
+    try {
+      // we don't want to enter any extern "C include" functions --
+      // these don't occur in the fds set.
+      return Set::insert(s,Hashtable::lookup(fds,fd->name));
+    } catch {
+    case &Core::Not_found: return s;
+    }
   case &Var_e(&Global_b(vd)):
     try {
       return Set::insert(s,Hashtable::lookup(fds,vd->name));

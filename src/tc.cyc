@@ -1012,8 +1012,12 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
 
 void tc(tenv_t te, bool check_var_init, list_t<decl_t,`H> ds) {
   set_params(&tc_params_r);
-//   let cg = Callgraph::compute_callgraph(ds);
-//   let scc = Graph::scc(cg);
+  let cg = Callgraph::compute_callgraph(ds);
+  //fprintf(stderr,"Callgraph:\n");
+  //Callgraph::print_callgraph(stderr, cg);
+  let scc = Graph::scc(cg);
+  //fprintf(stderr,"Connected components:\n");
+  //Callgraph::print_callgraph(stderr, scc);
   tc_decls(te,ds,false,check_var_init,NULL);
 }
 

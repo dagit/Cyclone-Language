@@ -1673,11 +1673,17 @@ void unify_it(type_t t1, type_t t2) {
     t1_failure = t1;
     t2_failure = t2;
     let orig_failure = failure_reason;
-    failure_reason = "(not both zero terminated)";
-    unify_it(zt1,zt2);
+    if (!unify(zt1,zt2)) {
+      t1_failure = t1; t2_failure = t2;
+      failure_reason = "(not both zero terminated)";
+      break;
+    }
     unify_tqual(tqual1a,t1a,tqual2a,t2a);
-    failure_reason = "(different pointer bounds)";
-    unify_it(b1,b2);
+    if (!unify(b1,b2)) {
+      t1_failure = t1; t2_failure = t2;
+      failure_reason = "(different pointer bounds)";
+      break;
+    }
     // Don't force the nullable's to be the same when the bounds are dyn.
     switch (compress(b1)) {
     case &AppType(&FatCon,_): 
