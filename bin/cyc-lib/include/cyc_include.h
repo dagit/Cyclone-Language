@@ -75,6 +75,8 @@ extern void _pop_region();
 
 #ifndef _throw
 extern int _throw_null();
+extern int _throw_arraybounds();
+extern int _throw_badalloc();
 extern int _throw(void * e);
 #endif
 
@@ -83,8 +85,12 @@ extern struct _xtunion_struct *_exn_thrown;
 //// Built-in Exceptions
 extern struct _xtunion_struct ADD_PREFIX(Null_Exception_struct);
 extern struct _xtunion_struct * ADD_PREFIX(Null_Exception);
+extern struct _xtunion_struct ADD_PREFIX(Array_bounds_struct);
+extern struct _xtunion_struct * ADD_PREFIX(Array_bounds);
 extern struct _xtunion_struct ADD_PREFIX(Match_Exception_struct);
 extern struct _xtunion_struct * ADD_PREFIX(Match_Exception);
+extern struct _xtunion_struct ADD_PREFIX(Bad_alloc_struct);
+extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
 
 //// Built-in Run-time Checks and company
 static inline 
@@ -103,7 +109,7 @@ char * _check_known_subscript_null(void * ptr, unsigned bound,
 static inline 
 unsigned _check_known_subscript_notnull(unsigned bound, unsigned index) {
   if(index >= bound)
-    _throw_null();
+    _throw_arraybounds();
   return index;
 }
 static inline 
@@ -113,8 +119,12 @@ char * _check_unknown_subscript(struct _tagged_arr arr,
   // multiplication looks inefficient, but C compiler has to insert it otherwise
   // by inlining, it should be able to avoid actual multiplication
   unsigned char * ans = arr.curr + elt_sz * index;
-  if(!arr.base || ans < arr.base || ans >= arr.last_plus_one)
+  // might be faster not to distinguish these two cases. definitely would be
+  // smaller.
+  if(!arr.base) 
     _throw_null();
+  if(ans < arr.base || ans >= arr.last_plus_one)
+    _throw_arraybounds();
   return ans;
 }
 static inline 
@@ -142,7 +152,7 @@ char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
   //       is correct (caller checks for null if untagging to @ type)
   // base may not be null if you use t ? pointer subtraction to get 0 -- oh well
   if(arr.curr < arr.base || arr.curr + elt_sz * num_elts > arr.last_plus_one)
-    _throw_null();
+    _throw_arraybounds();
   return arr.curr;
 }
 static inline 
@@ -173,13 +183,36 @@ struct _tagged_arr _tagged_arr_inplace_plus_post(struct _tagged_arr * arr_ptr,
 //// Allocation
 extern void * GC_malloc(int);
 extern void * GC_malloc_atomic(int);
+
+static inline void * _cycalloc(int n) {
+  void * ans = GC_malloc(n);
+  if(!ans)
+    _throw_badalloc();
+  return ans;
+}
+static inline void * _cycalloc_atomic(int n) {
+  void * ans = GC_malloc(n);
+  if(!ans)
+    _throw_badalloc();
+  return ans;
+}
+#define MAX_MALLOC_SIZE (1 << 28)
+static inline unsigned int _check_times(unsigned int x, unsigned int y) {
+  unsigned long long whole_ans = 
+    ((unsigned long long)x)*((unsigned long long)y);
+  unsigned int word_ans = (unsigned int)whole_ans;
+  if(word_ans < whole_ans || word_ans > MAX_MALLOC_SIZE)
+    _throw_badalloc();
+  return word_ans;
+}
+
 #ifdef CYC_REGION_PROFILE
 extern void * _profile_GC_malloc(int,char *file,int lineno);
 extern void * _profile_GC_malloc_atomic(int,char *file,int lineno);
 extern void * _profile_region_malloc(struct _RegionHandle *, unsigned int,
                                      char *file,int lineno);
-#define GC_malloc(n) _profile_GC_malloc(n,__FUNCTION__,__LINE__)
-#define GC_malloc_atomic(n) _profile_GC_malloc_atomic(n,__FUNCTION__,__LINE__)
+#define _cycalloc(n) _profile_cycalloc(n,__FUNCTION__,__LINE__)
+#define _cycalloc_atomic(n) _profile_cycalloc_atomic(n,__FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FUNCTION__,__LINE__)
 #endif
 

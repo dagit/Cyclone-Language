@@ -2454,8 +2454,9 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         if (fmt_arg_start != 0) {
           // check the type of the varargs is either tunion PrintArg or 
           // tunion ScanfArg according to format_type_t ft.
+	  // FIX: shouldn't we just do this once when the declaration is made?
           let va_type = compress(cyc_vararg->type);
-          let problem = false;
+          bool problem;
           switch (ft) {
           case Printf_ft:
             switch (va_type) {
@@ -2634,6 +2635,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     if (sd->name != NULL) // sanity check
       *tdnopt = sd->name->v[0];
     list_t<tvar_t> tvs = sd->tvs;
+    // FIX: allow partial instantiation with defaults
     int lvs   = List::length(tvs);
     int largs = List::length(targs);
     if (lvs != largs) 

@@ -165,7 +165,7 @@ unsigned char*) _check_unknown_subscript( dest, sizeof( unsigned char),( int)( i
 unsigned char), i));} if( i !=  dsize){*(( unsigned char*)
 _check_unknown_subscript( dest, sizeof( unsigned char),( int)( i +  dlen)))='\000';}}
 else{( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp0=(
-struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
 _temp0[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp1; _temp1.tag= Cyc_Core_Invalid_argument;
 _temp1.f1= error; _temp1;}); _temp0;}));} return dest;} struct _tagged_arr Cyc_Std_strcat(
 struct _tagged_arr dest, struct _tagged_arr src){ return Cyc_Std_int_strcato(
@@ -238,7 +238,7 @@ struct _tagged_arr dest, struct _tagged_arr src, unsigned int n){ unsigned int
 _temp14= _get_arr_size( dest, sizeof( unsigned char)); unsigned int _temp15=
 _get_arr_size( src, sizeof( unsigned char)); if( n <=  0){ return dest;} if( n > 
 _temp14? 1: n >  _temp15){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp16=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+_temp16=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp16[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp17; _temp17.tag= Cyc_Core_Invalid_argument; _temp17.f1= _tag_arr("Std::strncpy",
 sizeof( unsigned char), 13u); _temp17;}); _temp16;}));}{ int i; for( i= 0; i < 
@@ -252,7 +252,7 @@ src, unsigned int n){ unsigned int _temp19= _get_arr_size( dest, sizeof(
 unsigned char)); unsigned int _temp20= _get_arr_size( src, sizeof( unsigned char));
 if( n <=  0){ return dest;} if( n >  _temp19? 1: n >  _temp20){( int) _throw((
 void*)({ struct Cyc_Core_Invalid_argument_struct* _temp21=( struct Cyc_Core_Invalid_argument_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp21[ 0]=({
+_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp21[ 0]=({
 struct Cyc_Core_Invalid_argument_struct _temp22; _temp22.tag= Cyc_Core_Invalid_argument;
 _temp22.f1= _tag_arr("Std::zstrncpy", sizeof( unsigned char), 14u); _temp22;});
 _temp21;}));}{ int i; for( i= 0; i <  n; i ++){*(( unsigned char*)
@@ -287,7 +287,7 @@ Cyc_Std_rsubstring( struct _RegionHandle* r, struct _tagged_arr s, int start,
 unsigned int amt){ if(( start <  0? 1: amt <  0)? 1:( start + ( int) amt) -  1 > (
 int) _get_arr_size( s, sizeof( unsigned char))){( int) _throw(( void*)({ struct
 Cyc_Core_Invalid_argument_struct* _temp23=( struct Cyc_Core_Invalid_argument_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp23[ 0]=({
+_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp23[ 0]=({
 struct Cyc_Core_Invalid_argument_struct _temp24; _temp24.tag= Cyc_Core_Invalid_argument;
 _temp24.f1= _tag_arr("Std::substring", sizeof( unsigned char), 15u); _temp24;});
 _temp23;}));}{ struct _tagged_arr ans= Cyc_Core_rnew_string( r,( int)( amt +  1));{
@@ -303,14 +303,14 @@ struct _tagged_arr new_suffix){ unsigned int m= _get_arr_size( src, sizeof(
 unsigned char)); unsigned int n= _get_arr_size( curr_suffix, sizeof(
 unsigned char)); struct _tagged_arr err= _tag_arr("Std::replace_suffix", sizeof(
 unsigned char), 20u); if( m <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp25=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+_temp25=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp25[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp26; _temp26.tag= Cyc_Core_Invalid_argument; _temp26.f1= err; _temp26;});
 _temp25;}));}{ unsigned int i= 1; for( 0; i <=  n; ++ i){ if(*(( const
 unsigned char*) _check_unknown_subscript( src, sizeof( unsigned char),( int)( m
 -  i))) != *(( const unsigned char*) _check_unknown_subscript( curr_suffix,
 sizeof( unsigned char),( int)( n -  i)))){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp27=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+_temp27=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp27[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp28; _temp28.tag= Cyc_Core_Invalid_argument; _temp28.f1= err; _temp28;});
 _temp27;}));}}}{ struct _tagged_arr ans= Cyc_Core_rnew_string( r,( int)(( m -  n)
@@ -344,7 +344,7 @@ return s;}} return _tag_arr( 0u, 0u, 0u);} struct _tagged_arr Cyc_Std_strstr(
 struct _tagged_arr haystack, struct _tagged_arr needle){ if( !(( unsigned int)
 haystack.curr)? 1: !(( unsigned int) needle.curr)){( int) _throw(( void*)({
 struct Cyc_Core_Invalid_argument_struct* _temp29=( struct Cyc_Core_Invalid_argument_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp29[ 0]=({
+_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp29[ 0]=({
 struct Cyc_Core_Invalid_argument_struct _temp30; _temp30.tag= Cyc_Core_Invalid_argument;
 _temp30.f1= _tag_arr("Std::strstr", sizeof( unsigned char), 12u); _temp30;});
 _temp29;}));} if(*(( const unsigned char*) _check_unknown_subscript( needle,
@@ -390,7 +390,7 @@ const unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i))):
 0) { digit_seen= 1; ans= ans *  10 + ( int)(*(( const unsigned char*)
 _check_unknown_subscript( s, sizeof( unsigned char), i)) - '0'); i ++;} ans= ans
 *  sn; if( ! digit_seen){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp32=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+_temp32=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp32[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp33; _temp33.tag= Cyc_Core_Invalid_argument; _temp33.f1= _tag_arr("Std::to_int",
 sizeof( unsigned char), 12u); _temp33;}); _temp32;}));} if( offset !=  0){*((
@@ -413,7 +413,7 @@ _check_unknown_subscript( s, sizeof( unsigned char), i))): 0) { digit_seen= 1;
 ans= ans + ( double)(*(( const unsigned char*) _check_unknown_subscript( s,
 sizeof( unsigned char), i)) - '0') *  divisor; divisor= divisor /  10.0; i ++;}}}
 if( ! digit_seen){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp34=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+_temp34=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp34[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp35; _temp35.tag= Cyc_Core_Invalid_argument; _temp35.f1= _tag_arr("Std::to_double",
 sizeof( unsigned char), 15u); _temp35;}); _temp34;}));} if( i <  _get_arr_size(
@@ -430,7 +430,7 @@ unsigned char*) _check_unknown_subscript( s, sizeof( unsigned char), i))): 0) {
 digit_seen= 1; exponent= exponent *  10 + ( int)(*(( const unsigned char*)
 _check_unknown_subscript( s, sizeof( unsigned char), i)) - '0'); i ++;} if( !
 digit_seen){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp36=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+_temp36=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp36[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp37; _temp37.tag= Cyc_Core_Invalid_argument; _temp37.f1= _tag_arr("Std::to_double",
 sizeof( unsigned char), 15u); _temp37;}); _temp36;}));} ans= ans *  pow(( double)

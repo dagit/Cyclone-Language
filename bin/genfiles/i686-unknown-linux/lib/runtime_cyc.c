@@ -33,12 +33,19 @@ int *__errno(void) { return &errno; }
 //////////////////////////////////////////////////////////
 
 // FIX: makes alignment and pointer-size assumptions
+// FIX: what about -nocyc???
 char Cyc_Null_Exception_tag[] = "\0\0\0\0Cyc_Null_Exception";
 struct _xtunion_struct Cyc_Null_Exception_struct = { Cyc_Null_Exception_tag };
 struct _xtunion_struct * Cyc_Null_Exception = &Cyc_Null_Exception_struct;
+char Cyc_Array_bounds_tag[] = "\0\0\0\0Cyc_Array_bounds";
+struct _xtunion_struct Cyc_Array_bounds_struct = { Cyc_Array_bounds_tag };
+struct _xtunion_struct * Cyc_Array_bounds = &Cyc_Array_bounds_struct;
 char Cyc_Match_Exception_tag[] = "\0\0\0\0Cyc_Match_Exception";
 struct _xtunion_struct Cyc_Match_Exception_struct = { Cyc_Match_Exception_tag };
 struct _xtunion_struct * Cyc_Match_Exception = &Cyc_Match_Exception_struct;
+char Cyc_Bad_alloc_tag[] = "\0\0\0\0Cyc_Bad_alloc";
+struct _xtunion_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc_tag };
+struct _xtunion_struct * Cyc_Bad_alloc = &Cyc_Bad_alloc_struct;
 
 #ifdef CYC_REGION_PROFILE
 static FILE *alloc_log = NULL;
@@ -133,7 +140,12 @@ int _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
 int _throw_null() {
   throw(Cyc_Null_Exception);
 }
-
+int _throw_arraybounds() {
+  throw(Cyc_Array_bounds);
+}
+int _throw_badalloc() {
+  throw(Cyc_Bad_alloc);
+}
 
 // The C include file precore_c.h is produced (semi) automatically
 // from the Cyclone include file precore.h.
@@ -158,10 +170,8 @@ struct _tagged_arr Cstring_to_string(Cstring s) {
   else {
     int sz = strlen(s)+1;
     str.base = (char *)GC_malloc_atomic(sz);
-    if (str.base == NULL) {
-      fprintf(stderr, "internal error: out of memory in Cstring_to_string\n");
-      exit(1);
-    }
+    if (str.base == NULL) 
+      _throw_badalloc();
     str.curr = str.base;
     str.last_plus_one = str.base + sz;
 
@@ -182,12 +192,10 @@ Cstring string_to_Cstring(struct _tagged_arr s) {
   if (s.curr == NULL) return NULL;
 
   if (s.curr < s.base || s.curr >= s.last_plus_one)
-    throw(Cyc_Null_Exception); // FIX: this should be a bounds error, not null exn
+    throw(Cyc_Null_Exception); // FIX: this should be a bounds error
   str = (char *)GC_malloc_atomic(sz+1);
-  if (str == NULL) {
-    fprintf(stderr,"internal error: out of memory in string_to_Cstring\n");
-    exit(1);
-  }
+  if (str == NULL) 
+    _throw_badalloc();
 
   for(i=0; i < sz; i++) str[i]=contents[i];
   str[sz]='\0';
@@ -205,10 +213,9 @@ struct _tagged_arr ntCsl_to_ntsl(Cstring *ntCsl) {
 
   for (ptr = ntCsl; *ptr; numstrs++); // not safe!
   result.base = (char *)GC_malloc_atomic(numstrs+1);
-  if (result.base == NULL) {
-    fprintf(stderr, "internal error: out of memory in ntCsl_to_ntsl\n");
-    exit(1);
-  }
+  if (result.base == NULL) 
+    _throw_badalloc();
+
   result.curr = result.base;
   result.last_plus_one = (char*)(((string_t*)result.base) + numstrs+1);
   for (i = 0; i <= numstrs; i++)
@@ -318,10 +325,9 @@ extern unsigned char *Cyc_Std_sockaddr_in;
 struct sa_xtunion *Csockaddr_to_sockaddr(struct sockaddr *addr, int len) {
   // I hope structure alignment doesn't cause any problem here
   struct sa_xtunion *result = GC_malloc_atomic(sizeof(unsigned char*)+len);
-  if (result == NULL) {
-    fprintf(stderr, "internal error: out of memory in Csockaddr_to_sockaddr\n");
-    exit(1);
-  }
+  if (result == NULL) 
+    _throw_badalloc();
+
   memcpy(&result->sa, addr, len);
   switch (addr->sa_family) {
   case AF_INET: result->tag = Cyc_Std_sockaddr_in; break;
@@ -489,12 +495,6 @@ int main(int argc, char **argv) {
   }
 }
 
-#ifdef CYC_REGION_PROFILE
-#undef _region_malloc
-#undef GC_malloc
-#undef GC_malloc_atomic
-#endif
-
 static void grow_region(struct _RegionHandle *r, unsigned int s) {
   struct _RegionPage *p;
   unsigned int prev_size, next_size;
@@ -506,10 +506,8 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
     next_size = s + default_region_page_size;
 
   p = GC_malloc(sizeof(struct _RegionPage) + next_size);
-  if (p == NULL) {
+  if (!p)
     fprintf(stderr,"grow_region failure");
-    throw(Cyc_Null_Exception);
-  }
   p->next = r->curr;
 #ifdef CYC_REGION_PROFILE
   p->total_bytes = sizeof(struct _RegionPage) + next_size;
@@ -528,7 +526,10 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
 #ifdef CYC_REGION_PROFILE
     heap_total_bytes += s;
 #endif
-    return GC_malloc(s);
+    result = GC_malloc(s);
+    if(!result)
+      _throw_badalloc;
+    return result;
   }
   // round s up to the nearest MIN_ALIGNMENT value
   s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
@@ -551,10 +552,8 @@ struct _RegionHandle _new_region() {
 
   p = (struct _RegionPage *)GC_malloc(sizeof(struct _RegionPage) + 
                                       default_region_page_size);
-  if (p == NULL) {
-    fprintf(stderr,"_new_region failure");
-    throw(Cyc_Null_Exception);
-  }
+  if (p == NULL) 
+    _throw_badalloc();
   p->next = NULL;
 #ifdef CYC_REGION_PROFILE
   p->total_bytes = sizeof(struct _RegionPage) + default_region_page_size;
@@ -567,8 +566,6 @@ struct _RegionHandle _new_region() {
   r.last_plus_one = r.offset + default_region_page_size;
   return r;
 }
-
-
 
 #ifdef CYC_REGION_PROFILE
 
@@ -583,16 +580,21 @@ void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
 }
 
 void * _profile_GC_malloc(int n, char *file, int lineno) {
+  void * result;
   heap_total_bytes += n;
   if (alloc_log != NULL) {
     fputs(file,alloc_log);
     fprintf(alloc_log,":%d\t%d\t%d\t%d\t%d\n",lineno,n,GC_get_heap_size(),
             GC_get_free_bytes(),GC_get_total_bytes());
   }
-  return GC_malloc(n);
+  result =  GC_malloc(n);
+  if(!result)
+    _throw_badalloc();
+  return result;
 }
 
 void * _profile_GC_malloc_atomic(int n, char *file, int lineno) {
+  void * result;
   heap_total_bytes += n;
   heap_total_atomic_bytes +=n;
   if (alloc_log != NULL) {
@@ -600,7 +602,10 @@ void * _profile_GC_malloc_atomic(int n, char *file, int lineno) {
     fprintf(alloc_log,":%d\t%d\t%d\t%d\t%d\n",lineno,n,GC_get_heap_size(),
             GC_get_free_bytes(),GC_get_total_bytes());
   }
-  return GC_malloc_atomic(n);
+  result =  GC_malloc_atomic(n);
+  if(!result)
+    _throw_badalloc();
+  return result;
 }
 
 #endif

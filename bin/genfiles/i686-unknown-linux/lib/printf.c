@@ -104,7 +104,7 @@ _LL7: return _tag_arr("double", sizeof( unsigned char), 7u); _LL9: return
 _tag_arr("short *", sizeof( unsigned char), 8u); _LL11: return _tag_arr("unsigned long *",
 sizeof( unsigned char), 16u); _LL1:;} static void* Cyc_Std_badarg( struct
 _tagged_arr s){ return( void*) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp12=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+_temp12=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp12[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp13; _temp13.tag= Cyc_Core_Invalid_argument; _temp13.f1= s; _temp13;});
 _temp12;}));} static int Cyc_Std_va_arg_int( struct _tagged_arr ap){ void*
@@ -447,7 +447,7 @@ unsigned char), -1), sizeof( unsigned char), 0u)) == '0': 0) {;} if(*((
 unsigned char*) _check_unknown_subscript( t, sizeof( unsigned char), 0u)) != '.'){
 _tagged_arr_inplace_plus(& t, sizeof( unsigned char), 1);}}} break; default:
 _LL132:( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp134=(
-struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp134[ 0]=({ struct Cyc_Core_Impossible_struct _temp135; _temp135.tag= Cyc_Core_Impossible;
 _temp135.f1= _tag_arr("Std::__cvt_double", sizeof( unsigned char), 18u);
 _temp135;}); _temp134;}));} return( t.curr -  startp.curr) /  sizeof(
@@ -479,10 +479,10 @@ _RegionHandle* r1, struct _tagged_arr fmt, struct _tagged_arr ap){ int size=((
 int(*)( int(* ioputc)( int, int), int ioputc_env, struct _tagged_arr fmt0,
 struct _tagged_arr ap)) Cyc_Std__IO_vfprintf)( Cyc_Std_putc_void, 0, fmt, ap) + 
 1; struct _tagged_arr s=({ unsigned int _temp137=( unsigned int) size;
-unsigned char* _temp138=( unsigned char*) _region_malloc( r1, sizeof(
-unsigned char) *  _temp137); struct _tagged_arr _temp140= _tag_arr( _temp138,
-sizeof( unsigned char),( unsigned int) size);{ unsigned int _temp139= _temp137;
-unsigned int i; for( i= 0; i <  _temp139; i ++){ _temp138[ i]='\000';}};
+unsigned char* _temp138=( unsigned char*) _region_malloc( r1, _check_times(
+sizeof( unsigned char), _temp137)); struct _tagged_arr _temp140= _tag_arr(
+_temp138, sizeof( unsigned char),( unsigned int) size);{ unsigned int _temp139=
+_temp137; unsigned int i; for( i= 0; i <  _temp139; i ++){ _temp138[ i]='\000';}};
 _temp140;}); Cyc_Std_vsprintf( s, fmt, ap); return s;} struct _tagged_arr Cyc_Std_rprintf(
 struct _RegionHandle* r1, struct _tagged_arr fmt, struct _tagged_arr ap){ return
 Cyc_Std_vrprintf( r1, fmt, ap);} struct _tagged_arr Cyc_Std_aprintf( struct

@@ -40,6 +40,6 @@ Cyc_Std_stderr, _tag_arr("%s:%u: Assertion `%s' failed.\n", sizeof(
 unsigned char), 31u), _tag_arr( _temp0, sizeof( void*), 3u));}}}}); Cyc_Std_fflush((
 struct Cyc_Std___sFILE*) Cyc_Std_stderr); exit( - 1);( int) _throw(( void*)({
 struct Cyc_Core_Unreachable_struct* _temp4=( struct Cyc_Core_Unreachable_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Unreachable_struct)); _temp4[ 0]=({ struct
+_cycalloc( sizeof( struct Cyc_Core_Unreachable_struct)); _temp4[ 0]=({ struct
 Cyc_Core_Unreachable_struct _temp5; _temp5.tag= Cyc_Core_Unreachable; _temp5.f1=
 _tag_arr("assert", sizeof( unsigned char), 7u); _temp5;}); _temp4;}));}

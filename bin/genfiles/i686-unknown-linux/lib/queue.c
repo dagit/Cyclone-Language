@@ -26,7 +26,7 @@ struct Cyc_Queue_Queue{ struct Cyc_List_List* front; struct Cyc_List_List* rear;
 } ; int Cyc_Queue_is_empty( struct Cyc_Queue_Queue* q){ return q->front ==  0;}
 unsigned char Cyc_Queue_Empty[ 10u]="\000\000\000\000Empty"; struct Cyc_Queue_Queue*
 Cyc_Queue_create(){ return({ struct Cyc_Queue_Queue* _temp0=( struct Cyc_Queue_Queue*)
-GC_malloc( sizeof( struct Cyc_Queue_Queue)); _temp0->front= 0; _temp0->rear= 0;
+_cycalloc( sizeof( struct Cyc_Queue_Queue)); _temp0->front= 0; _temp0->rear= 0;
 _temp0;});} void Cyc_Queue_radd( struct _RegionHandle* r, struct Cyc_Queue_Queue*
 q, void* x){ struct Cyc_List_List* cell=({ struct Cyc_List_List* _temp1=( struct
 Cyc_List_List*) _region_malloc( r, sizeof( struct Cyc_List_List)); _temp1->hd=(

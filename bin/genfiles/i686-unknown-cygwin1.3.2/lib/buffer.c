@@ -29,7 +29,7 @@ struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Buffer_t{ struct
 _tagged_arr buffer; unsigned int position; unsigned int length; struct
 _tagged_arr initial_buffer; } ; struct Cyc_Buffer_t* Cyc_Buffer_create(
 unsigned int n){ if( n <  1){ n= 1;}{ struct _tagged_arr s= Cyc_Core_new_string((
-int) n); return({ struct Cyc_Buffer_t* _temp0=( struct Cyc_Buffer_t*) GC_malloc(
+int) n); return({ struct Cyc_Buffer_t* _temp0=( struct Cyc_Buffer_t*) _cycalloc(
 sizeof( struct Cyc_Buffer_t)); _temp0->buffer= s; _temp0->position= 0; _temp0->length=
 n; _temp0->initial_buffer= s; _temp0;});}} struct _tagged_arr Cyc_Buffer_contents(
 struct Cyc_Buffer_t* b){ return Cyc_Std_substring(( struct _tagged_arr) b->buffer,
@@ -49,7 +49,7 @@ unsigned char), pos))= c; b->position=( unsigned int)( pos +  1); return;} void
 Cyc_Buffer_add_substring( struct Cyc_Buffer_t* b, struct _tagged_arr s, int
 offset, int len){ if(( offset <  0? 1: len <  0)? 1: offset +  len > 
 _get_arr_size( s, sizeof( unsigned char))){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp1=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+_temp1=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
 _temp1[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp2; _temp2.tag= Cyc_Core_Invalid_argument;
 _temp2.f1= _tag_arr("Buffer::add_substring", sizeof( unsigned char), 22u);
 _temp2;}); _temp1;}));}{ int new_position=( int)( b->position +  len); if(

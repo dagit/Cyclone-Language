@@ -530,7 +530,7 @@ struct _tuple4*)(( struct Cyc_List_List*) _check_null( _temp139))->hd; _temp154=
 _temp152; _LL156: _temp155= _temp154.f2; goto _LL153; _LL153: d=(( struct Cyc_Dict_Dict*(*)(
 struct Cyc_Dict_Dict* d, int key, void* data)) Cyc_Dict_insert)( d, i, Cyc_CfFlowInfo_typ_to_unesc_none_pinfo(
 _temp155));}} return( void*)({ struct Cyc_CfFlowInfo_TuplePI_struct* _temp157=(
-struct Cyc_CfFlowInfo_TuplePI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_TuplePI_struct));
+struct Cyc_CfFlowInfo_TuplePI_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_TuplePI_struct));
 _temp157[ 0]=({ struct Cyc_CfFlowInfo_TuplePI_struct _temp158; _temp158.tag= Cyc_CfFlowInfo_TuplePI;
 _temp158.f1= d; _temp158;}); _temp157;});} _LL128: _temp150= _temp141; goto
 _LL130; _LL130: { struct Cyc_Dict_Dict* d=(( struct Cyc_Dict_Dict*(*)( int(*
@@ -544,7 +544,7 @@ goto _LL160; _LL160: if( Cyc_Std_strcmp(* _temp164, _tag_arr("", sizeof(
 unsigned char), 1u)) !=  0){ d=(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict*
 d, struct _tagged_arr* key, void* data)) Cyc_Dict_insert)( d, _temp164, Cyc_CfFlowInfo_typ_to_unesc_none_pinfo(
 _temp162));}} return( void*)({ struct Cyc_CfFlowInfo_StructPI_struct* _temp166=(
-struct Cyc_CfFlowInfo_StructPI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_StructPI_struct));
+struct Cyc_CfFlowInfo_StructPI_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_StructPI_struct));
 _temp166[ 0]=({ struct Cyc_CfFlowInfo_StructPI_struct _temp167; _temp167.tag=
 Cyc_CfFlowInfo_StructPI; _temp167.f1= d; _temp167;}); _temp166;});} _LL132:
 return Cyc_CfFlowInfo_leaf_unesc_none; _LL122:;} void* Cyc_CfFlowInfo_lookup_place(
@@ -572,7 +572,7 @@ _temp175=(( void*(*)( struct Cyc_Dict_Dict* d, int key)) Cyc_Dict_lookup)(
 _temp191, _temp187); goto _LL178; _LL182: _temp175=(( void*(*)( struct Cyc_Dict_Dict*
 d, struct _tagged_arr* key)) Cyc_Dict_lookup)( _temp199, _temp195); goto _LL178;
 _LL184:( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp201=(
-struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp201[ 0]=({ struct Cyc_Core_Impossible_struct _temp202; _temp202.tag= Cyc_Core_Impossible;
 _temp202.f1= _tag_arr("bad lookup_place", sizeof( unsigned char), 17u); _temp202;});
 _temp201;})); _LL178:;} return _temp175;}} struct _tuple5{ void* f1; struct Cyc_List_List*
@@ -599,20 +599,20 @@ Cyc_CfFlowInfo_StructF_struct*) _temp230)->f1; goto _LL229;} else{ goto _LL210;}
 _LL229: _temp228= _temp227.tl; goto _LL209;} _LL210: goto _LL211; _LL207: { void*
 _temp238=(( void*(*)( struct Cyc_Dict_Dict* d, int key)) Cyc_Dict_lookup)(
 _temp223, _temp219); return( void*)({ struct Cyc_CfFlowInfo_TuplePI_struct*
-_temp239=( struct Cyc_CfFlowInfo_TuplePI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_TuplePI_struct));
+_temp239=( struct Cyc_CfFlowInfo_TuplePI_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_TuplePI_struct));
 _temp239[ 0]=({ struct Cyc_CfFlowInfo_TuplePI_struct _temp240; _temp240.tag= Cyc_CfFlowInfo_TuplePI;
 _temp240.f1=(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict* d, int key, void*
 data)) Cyc_Dict_insert)( _temp223, _temp219, Cyc_CfFlowInfo_insert_place_rec(
 _temp238, _temp215, pinfo)); _temp240;}); _temp239;});} _LL209: { void* _temp241=((
 void*(*)( struct Cyc_Dict_Dict* d, struct _tagged_arr* key)) Cyc_Dict_lookup)(
 _temp236, _temp232); return( void*)({ struct Cyc_CfFlowInfo_StructPI_struct*
-_temp242=( struct Cyc_CfFlowInfo_StructPI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_StructPI_struct));
+_temp242=( struct Cyc_CfFlowInfo_StructPI_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_StructPI_struct));
 _temp242[ 0]=({ struct Cyc_CfFlowInfo_StructPI_struct _temp243; _temp243.tag=
 Cyc_CfFlowInfo_StructPI; _temp243.f1=(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict*
 d, struct _tagged_arr* key, void* data)) Cyc_Dict_insert)( _temp236, _temp232,
 Cyc_CfFlowInfo_insert_place_rec( _temp241, _temp228, pinfo)); _temp243;});
 _temp242;});} _LL211:( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
-_temp244=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp244=( struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp244[ 0]=({ struct Cyc_Core_Impossible_struct _temp245; _temp245.tag= Cyc_Core_Impossible;
 _temp245.f1= _tag_arr("bad insert_place", sizeof( unsigned char), 17u); _temp245;});
 _temp244;})); _LL205:;}} struct Cyc_Dict_Dict* Cyc_CfFlowInfo_insert_place(
@@ -640,7 +640,7 @@ _LL266; _LL266: if((( int(*)( int(* compare)( struct Cyc_CfFlowInfo_Place*,
 struct Cyc_CfFlowInfo_Place*), struct Cyc_List_List* l, struct Cyc_CfFlowInfo_Place*
 x)) Cyc_List_mem)( Cyc_CfFlowInfo_place_cmp,* _temp270, _temp263)){ return 1;}*
 _temp270=( struct Cyc_List_List*)({ struct Cyc_List_List* _temp273=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp273->hd=( void*) _temp263;
+_cycalloc( sizeof( struct Cyc_List_List)); _temp273->hd=( void*) _temp263;
 _temp273->tl=* _temp270; _temp273;}); return Cyc_CfFlowInfo_isAllInit_pinfo( env,
 Cyc_CfFlowInfo_lookup_place( _temp271, _temp263));} _LL254:;} int Cyc_CfFlowInfo_isAllInit_f(
 struct _tuple6* env, void* a, void* path){ return Cyc_CfFlowInfo_isAllInit_pinfo(
@@ -694,12 +694,12 @@ _temp298, _temp312))){ return Cyc_CfFlowInfo_mkLeafPI(( void*) Cyc_CfFlowInfo_Es
 void*) Cyc_CfFlowInfo_AllIL);} return Cyc_CfFlowInfo_mkLeafPI(( void*) Cyc_CfFlowInfo_Esc,(
 void*) Cyc_CfFlowInfo_ThisIL); _LL305: return Cyc_CfFlowInfo_mkLeafPI(( void*)
 Cyc_CfFlowInfo_Esc, _temp316); _LL307: return( void*)({ struct Cyc_CfFlowInfo_TuplePI_struct*
-_temp322=( struct Cyc_CfFlowInfo_TuplePI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_TuplePI_struct));
+_temp322=( struct Cyc_CfFlowInfo_TuplePI_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_TuplePI_struct));
 _temp322[ 0]=({ struct Cyc_CfFlowInfo_TuplePI_struct _temp323; _temp323.tag= Cyc_CfFlowInfo_TuplePI;
 _temp323.f1=(( struct Cyc_Dict_Dict*(*)( void*(* f)( struct _tuple7*, void*),
 struct _tuple7* env, struct Cyc_Dict_Dict* d)) Cyc_Dict_map_c)( Cyc_CfFlowInfo_pinfo_getplaces_esc,
 env, _temp318); _temp323;}); _temp322;}); _LL309: return( void*)({ struct Cyc_CfFlowInfo_StructPI_struct*
-_temp324=( struct Cyc_CfFlowInfo_StructPI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_StructPI_struct));
+_temp324=( struct Cyc_CfFlowInfo_StructPI_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_StructPI_struct));
 _temp324[ 0]=({ struct Cyc_CfFlowInfo_StructPI_struct _temp325; _temp325.tag=
 Cyc_CfFlowInfo_StructPI; _temp325.f1=(( struct Cyc_Dict_Dict*(*)( void*(* f)(
 struct _tuple7*, void*), struct _tuple7* env, struct Cyc_Dict_Dict* d)) Cyc_Dict_map_c)(
@@ -765,12 +765,12 @@ _LL389: _temp388=(( struct Cyc_CfFlowInfo_StructPI_struct*) _temp372)->f1; goto
 _LL381;} else{ goto _LL373;} _LL375: return Cyc_CfFlowInfo_mkLeafPI(( void*) Cyc_CfFlowInfo_Esc,
 level); _LL377: return Cyc_CfFlowInfo_mkLeafPI(( void*) Cyc_CfFlowInfo_Unesc,
 level); _LL379: return( void*)({ struct Cyc_CfFlowInfo_TuplePI_struct* _temp390=(
-struct Cyc_CfFlowInfo_TuplePI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_TuplePI_struct));
+struct Cyc_CfFlowInfo_TuplePI_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_TuplePI_struct));
 _temp390[ 0]=({ struct Cyc_CfFlowInfo_TuplePI_struct _temp391; _temp391.tag= Cyc_CfFlowInfo_TuplePI;
 _temp391.f1=(( struct Cyc_Dict_Dict*(*)( void*(* f)( void*, void*), void* env,
 struct Cyc_Dict_Dict* d)) Cyc_Dict_map_c)( Cyc_CfFlowInfo_assign_unknown_dict,
 level, _temp386); _temp391;}); _temp390;}); _LL381: return( void*)({ struct Cyc_CfFlowInfo_StructPI_struct*
-_temp392=( struct Cyc_CfFlowInfo_StructPI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_StructPI_struct));
+_temp392=( struct Cyc_CfFlowInfo_StructPI_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_StructPI_struct));
 _temp392[ 0]=({ struct Cyc_CfFlowInfo_StructPI_struct _temp393; _temp393.tag=
 Cyc_CfFlowInfo_StructPI; _temp393.f1=(( struct Cyc_Dict_Dict*(*)( void*(* f)(
 void*, void*), void* env, struct Cyc_Dict_Dict* d)) Cyc_Dict_map_c)( Cyc_CfFlowInfo_assign_unknown_dict,
@@ -842,7 +842,7 @@ env->rgn, env->places, _temp469); return Cyc_CfFlowInfo_mkLeafPI( _temp465,
 _temp463);} return Cyc_CfFlowInfo_mkLeafPI( _temp465, Cyc_CfFlowInfo_join_initlevel((
 void*) Cyc_CfFlowInfo_ThisIL, _temp463));} _LL438: if( Cyc_CfFlowInfo_place_cmp(
 _temp477, _temp473) ==  0){ return( void*)({ struct Cyc_CfFlowInfo_LeafPI_struct*
-_temp483=( struct Cyc_CfFlowInfo_LeafPI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_LeafPI_struct));
+_temp483=( struct Cyc_CfFlowInfo_LeafPI_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_LeafPI_struct));
 _temp483[ 0]=({ struct Cyc_CfFlowInfo_LeafPI_struct _temp484; _temp484.tag= Cyc_CfFlowInfo_LeafPI;
 _temp484.f1=( void*) state1; _temp484;}); _temp483;});}{ struct _tuple6 _temp485=({
 struct _tuple6 _temp488; _temp488.f1= env->d1; _temp488.f2= 0; _temp488;});
@@ -877,21 +877,21 @@ _temp516)->f1; goto _LL497;} else{ goto _LL498;} _LL498: goto _LL499; _LL493:
 if( _temp506 ==  _temp502){ return pinfo1;} return Cyc_CfFlowInfo_join_initstate(
 env, _temp506, _temp502); _LL495: if( _temp514 ==  _temp510){ return pinfo1;}
 return( void*)({ struct Cyc_CfFlowInfo_TuplePI_struct* _temp524=( struct Cyc_CfFlowInfo_TuplePI_struct*)
-GC_malloc( sizeof( struct Cyc_CfFlowInfo_TuplePI_struct)); _temp524[ 0]=({
+_cycalloc( sizeof( struct Cyc_CfFlowInfo_TuplePI_struct)); _temp524[ 0]=({
 struct Cyc_CfFlowInfo_TuplePI_struct _temp525; _temp525.tag= Cyc_CfFlowInfo_TuplePI;
 _temp525.f1=(( struct Cyc_Dict_Dict*(*)( void*(* f)( struct Cyc_CfFlowInfo_JoinEnv*,
 void*, void*), struct Cyc_CfFlowInfo_JoinEnv* env, struct Cyc_Dict_Dict* d1,
 struct Cyc_Dict_Dict* d2)) Cyc_Dict_intersect_c)( Cyc_CfFlowInfo_join_pathinfo,
 env, _temp514, _temp510); _temp525;}); _temp524;}); _LL497: if( _temp522 == 
 _temp518){ return pinfo1;} return( void*)({ struct Cyc_CfFlowInfo_StructPI_struct*
-_temp526=( struct Cyc_CfFlowInfo_StructPI_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_StructPI_struct));
+_temp526=( struct Cyc_CfFlowInfo_StructPI_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_StructPI_struct));
 _temp526[ 0]=({ struct Cyc_CfFlowInfo_StructPI_struct _temp527; _temp527.tag=
 Cyc_CfFlowInfo_StructPI; _temp527.f1=(( struct Cyc_Dict_Dict*(*)( void*(* f)(
 struct Cyc_CfFlowInfo_JoinEnv*, void*, void*), struct Cyc_CfFlowInfo_JoinEnv*
 env, struct Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2)) Cyc_Dict_intersect_c)(
 Cyc_CfFlowInfo_join_pathinfo, env, _temp522, _temp518); _temp527;}); _temp526;});
 _LL499:( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp528=(
-struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp528[ 0]=({ struct Cyc_Core_Impossible_struct _temp529; _temp529.tag= Cyc_Core_Impossible;
 _temp529.f1= _tag_arr("join_pathinfo", sizeof( unsigned char), 14u); _temp529;});
 _temp528;})); _LL491:;}} void* Cyc_CfFlowInfo_join_flow( void* f1, void* f2){
@@ -917,7 +917,7 @@ struct Cyc_Dict_Dict* _temp554=(( struct Cyc_Dict_Dict*(*)( void*(* f)( struct
 Cyc_CfFlowInfo_JoinEnv*, void*, void*), struct Cyc_CfFlowInfo_JoinEnv* env,
 struct Cyc_Dict_Dict* d1, struct Cyc_Dict_Dict* d2)) Cyc_Dict_intersect_c)( Cyc_CfFlowInfo_join_pathinfo,&
 _temp553, _temp549, _temp545); void* _temp557=( void*)({ struct Cyc_CfFlowInfo_InitsFL_struct*
-_temp555=( struct Cyc_CfFlowInfo_InitsFL_struct*) GC_malloc( sizeof( struct Cyc_CfFlowInfo_InitsFL_struct));
+_temp555=( struct Cyc_CfFlowInfo_InitsFL_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_InitsFL_struct));
 _temp555[ 0]=({ struct Cyc_CfFlowInfo_InitsFL_struct _temp556; _temp556.tag= Cyc_CfFlowInfo_InitsFL;
 _temp556.f1= Cyc_CfFlowInfo_escape_these( r, _temp552, _temp554); _temp556;});
 _temp555;}); _npop_handler( 0u); return _temp557;}; _pop_region( r);} _LL532:;}}
@@ -972,7 +972,7 @@ struct _tagged_arr*, void*, void*), struct Cyc_Dict_Dict* d1, struct Cyc_Dict_Di
 d2)) Cyc_Dict_forall_intersect)(( int(*)( struct _tagged_arr* ignore, void*
 pinfo1, void* pinfo2)) Cyc_CfFlowInfo_pinfo_lessthan_approx, _temp621, _temp617);
 _LL598:( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp623=(
-struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp623[ 0]=({ struct Cyc_Core_Impossible_struct _temp624; _temp624.tag= Cyc_Core_Impossible;
 _temp624.f1= _tag_arr("pinfo_lessthan", sizeof( unsigned char), 15u); _temp624;});
 _temp623;})); _LL590:;}} int Cyc_CfFlowInfo_flow_lessthan_approx( void* f1, void*

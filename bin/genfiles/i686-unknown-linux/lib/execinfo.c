@@ -57,7 +57,7 @@ int fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
 _tagged_arr pathname); extern int backtrace( int*, int); int Cyc_Execinfo_backtrace(
 struct _tagged_arr array, int size){ if( size >  _get_arr_size( array, sizeof(
 int))){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct
-Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
+Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
 _temp1.f1= _tag_arr("backtrace: size > array.size", sizeof( unsigned char), 29u);
 _temp1;}); _temp0;}));} return backtrace(( int*) _check_null( _untag_arr( array,

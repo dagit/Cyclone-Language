@@ -117,7 +117,7 @@ _check_unknown_subscript( argv, sizeof( void*), i)); _temp0->tl= result; _temp0;
 return result;} struct Cyc_List_List* Cyc_List_list( struct _tagged_arr argv){
 struct Cyc_List_List* result= 0;{ int i=( int)( _get_arr_size( argv, sizeof(
 void*)) -  1); for( 0; i >=  0; i --){ result=({ struct Cyc_List_List* _temp1=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp1->hd=(
+struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp1->hd=(
 void*)*(( void**) _check_unknown_subscript( argv, sizeof( void*), i)); _temp1->tl=
 result; _temp1;});}} return result;} struct Cyc_List_List* Cyc_List_rcopy(
 struct _RegionHandle* r2, struct Cyc_List_List* x){ struct Cyc_List_List* result;
@@ -440,18 +440,18 @@ Cyc_List_check_unique( int(* compare)( void*, void*), struct Cyc_List_List* x){
 while( x !=  0) { if((( struct Cyc_List_List*) _check_null( x))->tl !=  0){ if(
 compare(( void*)(( struct Cyc_List_List*) _check_null( x))->hd,( void*)(( struct
 Cyc_List_List*) _check_null((( struct Cyc_List_List*) _check_null( x))->tl))->hd)
-==  0){ return({ struct Cyc_Core_Opt* _temp35=( struct Cyc_Core_Opt*) GC_malloc(
+==  0){ return({ struct Cyc_Core_Opt* _temp35=( struct Cyc_Core_Opt*) _cycalloc(
 sizeof( struct Cyc_Core_Opt)); _temp35->v=( void*)(( void*)(( struct Cyc_List_List*)
 _check_null( x))->hd); _temp35;});}} x=(( struct Cyc_List_List*) _check_null( x))->tl;}
 return 0;} struct _tagged_arr Cyc_List_rto_array( struct _RegionHandle* r2,
 struct Cyc_List_List* x){ int s; struct _tagged_arr arr; s= Cyc_List_length( x);
 arr=({ unsigned int _temp36=( unsigned int) s; void** _temp37=( void**)
-_region_malloc( r2, sizeof( void*) *  _temp36); struct _tagged_arr _temp39=
-_tag_arr( _temp37, sizeof( void*),( unsigned int) s);{ unsigned int _temp38=
-_temp36; unsigned int i; for( i= 0; i <  _temp38; i ++){ _temp37[ i]=( void*)((
-struct Cyc_List_List*) _check_null( x))->hd;}}; _temp39;});{ int i= 0; for( 0; i
-<  s;( ++ i, x=(( struct Cyc_List_List*) _check_null( x))->tl)){*(( void**)
-_check_unknown_subscript( arr, sizeof( void*), i))=( void*)(( struct Cyc_List_List*)
+_region_malloc( r2, _check_times( sizeof( void*), _temp36)); struct _tagged_arr
+_temp39= _tag_arr( _temp37, sizeof( void*),( unsigned int) s);{ unsigned int
+_temp38= _temp36; unsigned int i; for( i= 0; i <  _temp38; i ++){ _temp37[ i]=(
+void*)(( struct Cyc_List_List*) _check_null( x))->hd;}}; _temp39;});{ int i= 0;
+for( 0; i <  s;( ++ i, x=(( struct Cyc_List_List*) _check_null( x))->tl)){*((
+void**) _check_unknown_subscript( arr, sizeof( void*), i))=( void*)(( struct Cyc_List_List*)
 _check_null( x))->hd;}} return arr;} struct _tagged_arr Cyc_List_to_array(
 struct Cyc_List_List* x){ return Cyc_List_rto_array( Cyc_Core_heap_region, x);}
 struct Cyc_List_List* Cyc_List_rfrom_array( struct _RegionHandle* r2, struct

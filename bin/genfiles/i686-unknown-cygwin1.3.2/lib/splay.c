@@ -38,7 +38,7 @@ r, sizeof( struct Cyc_Splay_node)); _temp11->key=( void*)(( void*) _temp9->key);
 _temp11->data=( void*)(( void*) _temp9->data); _temp11->left=( void*)(( void*)
 _temp9->left); _temp11->right=( void*)(( void*) _temp10); _temp11;}); goto _LL2;}
 _LL6:( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp16=(
-struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
 _temp16[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp17; _temp17.tag= Cyc_Core_Invalid_argument;
 _temp17.f1= _tag_arr("Splay::rotate_left", sizeof( unsigned char), 19u); _temp17;});
 _temp16;})); _LL2:;} static void Cyc_Splay_rotate_right( struct _RegionHandle* r,
@@ -61,7 +61,7 @@ r, sizeof( struct Cyc_Splay_node)); _temp29->key=( void*)(( void*) _temp27->key)
 _temp29->data=( void*)(( void*) _temp27->data); _temp29->left=( void*)(( void*)
 _temp28); _temp29->right=( void*)(( void*) _temp27->right); _temp29;}); goto
 _LL20;} _LL24:( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp34=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+_temp34=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp34[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp35; _temp35.tag= Cyc_Core_Invalid_argument; _temp35.f1= _tag_arr("Splay::rotate_right",
 sizeof( unsigned char), 20u); _temp35;}); _temp34;})); _LL20:;} struct _tuple0{

@@ -120,12 +120,12 @@ MAKE_STRING(_RegionHandle);
 
 // some pre-allocated qvars -- use foo_e for exp that is var "foo"
 #define MAKE_VAR(str)\
-  static string_t                  str##_str = #str;\
-  static $(nmspace_t, stringptr_t) str##_pr  = $((nmspace_t)&rel_ns_null_value,\
-						  &str##_str);\
-  static tunion Raw_exp.Var_e      str##_re  = Var_e(&str##_pr,Unresolved_b);\
-  static struct Exp                str##_ev  = Exp{NULL, &str##_re, NULL};\
-  static exp_t                     str##_e   = &str##_ev
+  static string_t              str##_str = #str;\
+  static $(nmspace_t, var_t)   str##_pr  = $((nmspace_t)&rel_ns_null_value,\
+					     &str##_str);\
+  static tunion Raw_exp.Var_e  str##_re  = Var_e(&str##_pr,Unresolved_b);\
+  static struct Exp            str##_ev  = Exp{NULL, &str##_re, NULL};\
+  static exp_t                 str##_e   = &str##_ev
 
 MAKE_VAR(_throw);
 MAKE_VAR(setjmp);
@@ -145,9 +145,10 @@ MAKE_VAR(_get_arr_size);
 MAKE_VAR(_tagged_arr_plus);
 MAKE_VAR(_tagged_arr_inplace_plus);
 MAKE_VAR(_tagged_arr_inplace_plus_post);
-MAKE_VAR(GC_malloc);
-MAKE_VAR(GC_malloc_atomic);
+MAKE_VAR(_cycalloc);
+MAKE_VAR(_cycalloc_atomic);
 MAKE_VAR(_region_malloc);
+MAKE_VAR(_check_times);
 MAKE_VAR(_new_region);
 MAKE_VAR(_push_region);
 MAKE_VAR(_pop_region);
@@ -486,11 +487,11 @@ static bool is_poly_project(exp_t e) {
 
 // possible pointer malloc
 static exp_t malloc_ptr(exp_t s) {
-  return fncall_exp(GC_malloc_e, new List(s,NULL),DL);
+  return fncall_exp(_cycalloc_e, new List(s,NULL),DL);
 }
 // no pointers possible malloc
 static exp_t malloc_atomic(exp_t s) {
-  return fncall_exp(GC_malloc_atomic_e, new List(s,NULL),DL);
+  return fncall_exp(_cycalloc_atomic_e, new List(s,NULL),DL);
 }
 // malloc something -- choose malloc routine according to the (Cyclone) type
 static exp_t malloc_exp(type_t t,exp_t s) {
@@ -1473,13 +1474,17 @@ static void exp_to_c(env_t nv, exp_t e) {
           rnew(r) List(rnew(r) $(max,uint_t,(exp_opt_t)e1),NULL);
         exp_t ai;
         if (rgnopt == NULL)
-          ai = malloc_exp(old_elt_typ,times_exp(sizeoftyp_exp(elt_typ,DL),
-                                                var_exp(max,DL),DL));
+          ai = malloc_exp(old_elt_typ,
+			  fncall_exp(_check_times_e,
+				     list(sizeoftyp_exp(elt_typ,DL),
+					  var_exp(max,DL)), DL));
         else {
           exp_t r = (exp_t)rgnopt;
           exp_to_c(nv,r);
-          ai = rmalloc_exp(r,times_exp(sizeoftyp_exp(elt_typ,DL),
-                                       var_exp(max,DL),DL));
+          ai = rmalloc_exp(r, fncall_exp(_check_times_e,
+					 list(sizeoftyp_exp(elt_typ,DL),
+					      var_exp(max,DL)), DL));
+
         }
         exp_t ainit = cast_exp(ptr_typ,ai,DL);
         decls = rnew(r) List(rnew(r) $(a,ptr_typ,(exp_opt_t)ainit),decls);
@@ -1896,7 +1901,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 // we could collapse a lot of if-then-else's and avoid some of the
 // jumping around, GCC -O does this for us.  So the only reason to
 // make that any better is to improve the readability of the code.
-static stmt_t if_eq_goto_stmt(exp_t e1, exp_t e2, var_t succ_lab, var_t fail_lab) {
+static stmt_t if_eq_goto_stmt(exp_t e1,exp_t e2,var_t succ_lab,var_t fail_lab) {
   return ifthenelse_stmt(eq_exp(e1,e2,DL),
 			 goto_stmt(succ_lab,DL),
 			 goto_stmt(fail_lab,DL), DL);

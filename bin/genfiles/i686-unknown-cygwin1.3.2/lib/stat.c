@@ -30,7 +30,7 @@ _get_arr_size( mode, sizeof( int)) ==  0){ my_mode= - 1;} else{ if(
 _get_arr_size( mode, sizeof( int)) ==  1){ my_mode=*(( int*)
 _check_unknown_subscript( mode, sizeof( int), 0));} else{( int) _throw(( void*)({
 struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
+_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
 _temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("open: too many args",
 sizeof( unsigned char), 20u); _temp1;}); _temp0;}));}} return open(
 string_to_Cstring( pathname), flags, my_mode);} int Cyc_Std_stat( struct

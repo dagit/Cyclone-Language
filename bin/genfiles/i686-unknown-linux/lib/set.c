@@ -44,15 +44,15 @@ s); extern unsigned char Cyc_Set_Absent[ 11u]; extern void* Cyc_Set_choose(
 struct Cyc_Set_Set* s); struct Cyc_Set_Set{ int(* compare)( void*, void*); int
 cardinality; struct Cyc_List_List* nodes; } ; struct Cyc_Set_Set* Cyc_Set_empty(
 int(* comp)( void*, void*)){ return({ struct Cyc_Set_Set* _temp0=( struct Cyc_Set_Set*)
-GC_malloc( sizeof( struct Cyc_Set_Set)); _temp0->compare= comp; _temp0->cardinality=
+_cycalloc( sizeof( struct Cyc_Set_Set)); _temp0->compare= comp; _temp0->cardinality=
 0; _temp0->nodes= 0; _temp0;});} struct Cyc_Set_Set* Cyc_Set_rempty( struct
 _RegionHandle* rgn, int(* comp)( void*, void*)){ return({ struct Cyc_Set_Set*
 _temp1=( struct Cyc_Set_Set*) _region_malloc( rgn, sizeof( struct Cyc_Set_Set));
 _temp1->compare= comp; _temp1->cardinality= 0; _temp1->nodes= 0; _temp1;});}
 struct Cyc_Set_Set* Cyc_Set_singleton( int(* comp)( void*, void*), void* x){
-return({ struct Cyc_Set_Set* _temp2=( struct Cyc_Set_Set*) GC_malloc( sizeof(
+return({ struct Cyc_Set_Set* _temp2=( struct Cyc_Set_Set*) _cycalloc( sizeof(
 struct Cyc_Set_Set)); _temp2->compare= comp; _temp2->cardinality= 1; _temp2->nodes=({
-struct Cyc_List_List* _temp3=( struct Cyc_List_List*) GC_malloc( sizeof( struct
+struct Cyc_List_List* _temp3=( struct Cyc_List_List*) _cycalloc( sizeof( struct
 Cyc_List_List)); _temp3->hd=( void*) x; _temp3->tl= 0; _temp3;}); _temp2;});}
 int Cyc_Set_cardinality( struct Cyc_Set_Set* s){ return s->cardinality;} int Cyc_Set_is_empty(
 struct Cyc_Set_Set* s){ return s->cardinality ==  0;} static int Cyc_Set_member_b(
@@ -82,7 +82,7 @@ _check_null( prev))->tl=({ struct Cyc_List_List* _temp7=( struct Cyc_List_List*)
 _region_malloc( rgn, sizeof( struct Cyc_List_List)); _temp7->hd=( void*) elt;
 _temp7->tl= n; _temp7;}); return result;}}} struct Cyc_Set_Set* Cyc_Set_insert(
 struct Cyc_Set_Set* s, void* elt){ if( Cyc_Set_member( s, elt)){ return s;}
-else{ return({ struct Cyc_Set_Set* _temp9=( struct Cyc_Set_Set*) GC_malloc(
+else{ return({ struct Cyc_Set_Set* _temp9=( struct Cyc_Set_Set*) _cycalloc(
 sizeof( struct Cyc_Set_Set)); _temp9->compare= s->compare; _temp9->cardinality=
 s->cardinality +  1; _temp9->nodes= Cyc_Set_insert_b( Cyc_Core_heap_region, s->compare,
 s->nodes, elt); _temp9;});}} struct Cyc_Set_Set* Cyc_Set_rinsert( struct
@@ -99,44 +99,44 @@ struct Cyc_List_List* curr= 0; while( x1 !=  0? x2 !=  0: 0) { int i= comp((
 void*)(( struct Cyc_List_List*) _check_null( x1))->hd,( void*)(( struct Cyc_List_List*)
 _check_null( x2))->hd); if( i ==  0){ x2=(( struct Cyc_List_List*) _check_null(
 x2))->tl;} else{ if( i <  0){ if( curr ==  0){ nodes=({ struct Cyc_List_List*
-_temp11=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp11=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
 _temp11->hd=( void*)(( void*)(( struct Cyc_List_List*) _check_null( x1))->hd);
 _temp11->tl= 0; _temp11;}); curr= nodes;} else{(( struct Cyc_List_List*)
 _check_null( curr))->tl=({ struct Cyc_List_List* _temp12=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp12->hd=( void*)(( void*)((
+_cycalloc( sizeof( struct Cyc_List_List)); _temp12->hd=( void*)(( void*)((
 struct Cyc_List_List*) _check_null( x1))->hd); _temp12->tl= 0; _temp12;}); curr=((
 struct Cyc_List_List*) _check_null( curr))->tl;} x1=(( struct Cyc_List_List*)
 _check_null( x1))->tl; ++ cardinality;} else{ if( curr ==  0){ nodes=({ struct
-Cyc_List_List* _temp13=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+Cyc_List_List* _temp13=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
 _temp13->hd=( void*)(( void*)(( struct Cyc_List_List*) _check_null( x2))->hd);
 _temp13->tl= 0; _temp13;}); curr= nodes;} else{(( struct Cyc_List_List*)
 _check_null( curr))->tl=({ struct Cyc_List_List* _temp14=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp14->hd=( void*)(( void*)((
+_cycalloc( sizeof( struct Cyc_List_List)); _temp14->hd=( void*)(( void*)((
 struct Cyc_List_List*) _check_null( x2))->hd); _temp14->tl= 0; _temp14;}); curr=((
 struct Cyc_List_List*) _check_null( curr))->tl;} x2=(( struct Cyc_List_List*)
 _check_null( x2))->tl; ++ cardinality;}}} if( x1 !=  0){ if( curr ==  0){ nodes=
 x1;} else{(( struct Cyc_List_List*) _check_null( curr))->tl= x1;} cardinality +=
 Cyc_List_length( x1);} else{ if( x2 !=  0){ if( curr ==  0){ nodes= x2;} else{((
 struct Cyc_List_List*) _check_null( curr))->tl= x2;} cardinality += Cyc_List_length(
-x2);}} return({ struct Cyc_Set_Set* _temp15=( struct Cyc_Set_Set*) GC_malloc(
+x2);}} return({ struct Cyc_Set_Set* _temp15=( struct Cyc_Set_Set*) _cycalloc(
 sizeof( struct Cyc_Set_Set)); _temp15->compare= comp; _temp15->cardinality=
 cardinality; _temp15->nodes= nodes; _temp15;});}} static struct Cyc_List_List*
 Cyc_Set_delete_b( int(* compare)( void*, void*), struct Cyc_List_List* n, void*
 elt){ if( compare(( void*)(( struct Cyc_List_List*) _check_null( n))->hd, elt)
 ==  0){ return(( struct Cyc_List_List*) _check_null( n))->tl;}{ struct Cyc_List_List*
-result=({ struct Cyc_List_List* _temp17=( struct Cyc_List_List*) GC_malloc(
+result=({ struct Cyc_List_List* _temp17=( struct Cyc_List_List*) _cycalloc(
 sizeof( struct Cyc_List_List)); _temp17->hd=( void*)(( void*)(( struct Cyc_List_List*)
 _check_null( n))->hd); _temp17->tl= 0; _temp17;}); struct Cyc_List_List* prev=
 result; n=(( struct Cyc_List_List*) _check_null( n))->tl; while( n !=  0?
 compare(( void*)(( struct Cyc_List_List*) _check_null( n))->hd, elt) !=  0: 0) {((
 struct Cyc_List_List*) _check_null( prev))->tl=({ struct Cyc_List_List* _temp16=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp16->hd=(
+struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp16->hd=(
 void*)(( void*)(( struct Cyc_List_List*) _check_null( n))->hd); _temp16->tl= 0;
 _temp16;}); prev=(( struct Cyc_List_List*) _check_null( prev))->tl; n=(( struct
 Cyc_List_List*) _check_null( n))->tl;}(( struct Cyc_List_List*) _check_null(
 prev))->tl=(( struct Cyc_List_List*) _check_null( n))->tl; return result;}}
 struct Cyc_Set_Set* Cyc_Set_delete( struct Cyc_Set_Set* s, void* elt){ if( Cyc_Set_member(
-s, elt)){ return({ struct Cyc_Set_Set* _temp18=( struct Cyc_Set_Set*) GC_malloc(
+s, elt)){ return({ struct Cyc_Set_Set* _temp18=( struct Cyc_Set_Set*) _cycalloc(
 sizeof( struct Cyc_Set_Set)); _temp18->compare= s->compare; _temp18->cardinality=
 s->cardinality -  1; _temp18->nodes= Cyc_Set_delete_b( s->compare, s->nodes, elt);
 _temp18;});} else{ return s;}} struct Cyc_List_List* Cyc_Set_elements( struct
@@ -158,17 +158,17 @@ struct Cyc_List_List* result= 0; struct Cyc_List_List* prev= 0; int card= 0; if(
 x1 ==  0){ return s1;} if( x2 ==  0){ return s2;} while( x1 !=  0? x2 !=  0: 0) {
 int i= comp(( void*)(( struct Cyc_List_List*) _check_null( x1))->hd,( void*)((
 struct Cyc_List_List*) _check_null( x2))->hd); if( i ==  0){ if( result ==  0){
-result=({ struct Cyc_List_List* _temp19=( struct Cyc_List_List*) GC_malloc(
+result=({ struct Cyc_List_List* _temp19=( struct Cyc_List_List*) _cycalloc(
 sizeof( struct Cyc_List_List)); _temp19->hd=( void*)(( void*)(( struct Cyc_List_List*)
 _check_null( x1))->hd); _temp19->tl= 0; _temp19;}); prev= result;} else{((
 struct Cyc_List_List*) _check_null( prev))->tl=({ struct Cyc_List_List* _temp20=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp20->hd=(
+struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp20->hd=(
 void*)(( void*)(( struct Cyc_List_List*) _check_null( x1))->hd); _temp20->tl= 0;
 _temp20;}); prev=(( struct Cyc_List_List*) _check_null( prev))->tl;} ++ card; x1=((
 struct Cyc_List_List*) _check_null( x1))->tl; x2=(( struct Cyc_List_List*)
 _check_null( x2))->tl;} else{ if( i <  0){ x1=(( struct Cyc_List_List*)
 _check_null( x1))->tl;} else{ x2=(( struct Cyc_List_List*) _check_null( x2))->tl;}}}
-return({ struct Cyc_Set_Set* _temp21=( struct Cyc_Set_Set*) GC_malloc( sizeof(
+return({ struct Cyc_Set_Set* _temp21=( struct Cyc_Set_Set*) _cycalloc( sizeof(
 struct Cyc_Set_Set)); _temp21->compare= comp; _temp21->cardinality= card;
 _temp21->nodes= result; _temp21;});}} struct Cyc_Set_Set* Cyc_Set_from_list( int(*
 comp)( void*, void*), struct Cyc_List_List* x){ struct Cyc_List_List* z= Cyc_List_merge_sort(
@@ -178,7 +178,7 @@ comp(( void*)(( struct Cyc_List_List*) _check_null( y))->hd,( void*)(( struct
 Cyc_List_List*) _check_null((( struct Cyc_List_List*) _check_null( y))->tl))->hd)
 ==  0: 0){(( struct Cyc_List_List*) _check_null( y))->tl=(( struct Cyc_List_List*)
 _check_null((( struct Cyc_List_List*) _check_null( y))->tl))->tl;}}} return({
-struct Cyc_Set_Set* _temp22=( struct Cyc_Set_Set*) GC_malloc( sizeof( struct Cyc_Set_Set));
+struct Cyc_Set_Set* _temp22=( struct Cyc_Set_Set*) _cycalloc( sizeof( struct Cyc_Set_Set));
 _temp22->compare= comp; _temp22->cardinality= Cyc_List_length( z); _temp22->nodes=
 z; _temp22;});} int Cyc_Set_subset( struct Cyc_Set_Set* s1, struct Cyc_Set_Set*
 s2){ int(* comp)( void*, void*)= s1->compare; struct Cyc_List_List* x1= s1->nodes;
@@ -194,7 +194,7 @@ card= s1->cardinality; if( x2 ==  0){ return s1;} while( x2 !=  0) { void* elt=(
 void*)(( struct Cyc_List_List*) _check_null( x2))->hd; if( Cyc_Set_member_b(
 comp, x1, elt)){ -- card; x1= Cyc_Set_delete_b( comp, x1, elt);} x2=(( struct
 Cyc_List_List*) _check_null( x2))->tl;} return({ struct Cyc_Set_Set* _temp23=(
-struct Cyc_Set_Set*) GC_malloc( sizeof( struct Cyc_Set_Set)); _temp23->compare=
+struct Cyc_Set_Set*) _cycalloc( sizeof( struct Cyc_Set_Set)); _temp23->compare=
 comp; _temp23->cardinality= card; _temp23->nodes= x1; _temp23;});} int Cyc_Set_compare(
 struct Cyc_Set_Set* s1, struct Cyc_Set_Set* s2){ if( s1->cardinality !=  s2->cardinality){
 return s1->cardinality -  s2->cardinality;}{ struct Cyc_List_List* x1= s1->nodes;

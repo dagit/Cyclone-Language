@@ -12,11 +12,6 @@ For the release:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
-* new { for i < x : ' ' }
-  causes core dump for negative x.  (Not surprising -- x is treated as
-  unsigned so that's a really big number and likely, malloc is returning
-  null which we're not checking for when we allocate...)  Let's check
-  for it and throw an exception Bad_alloc if malloc returns NULL.
 
 * make command line arguments more like gcc: what happens
   when no files are given?  what happens when we have the wrong extension?

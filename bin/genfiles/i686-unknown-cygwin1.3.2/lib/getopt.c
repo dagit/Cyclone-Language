@@ -270,11 +270,11 @@ _check_unknown_subscript( argv, sizeof( struct _tagged_arr), 0));{ void* _temp16
 3u]={& _temp17,& _temp18,& _temp19}; Cyc_Std_fprintf( Cyc_Std_stderr, _tag_arr("%s: unrecognized option `%c%s'\n",
 sizeof( unsigned char), 32u), _tag_arr( _temp16, sizeof( void*), 3u));}}}});}}
 Cyc_Std_nextchar= _tag_arr(({ unsigned int _temp20=( unsigned int) 1;
-unsigned char* _temp21=( unsigned char*) GC_malloc_atomic( sizeof( unsigned char)
-*  _temp20);{ unsigned int _temp22= _temp20; unsigned int i; for( i= 0; i < 
-_temp22; i ++){ _temp21[ i]='\000';}}; _temp21;}), sizeof( unsigned char),(
-unsigned int) 1); Cyc_Std_optind ++; Cyc_Std_optopt= 0; return( int)'?';}}{
-unsigned char c=*(( unsigned char*) _check_unknown_subscript(
+unsigned char* _temp21=( unsigned char*) _cycalloc_atomic( _check_times( sizeof(
+unsigned char), _temp20));{ unsigned int _temp22= _temp20; unsigned int i; for(
+i= 0; i <  _temp22; i ++){ _temp21[ i]='\000';}}; _temp21;}), sizeof(
+unsigned char),( unsigned int) 1); Cyc_Std_optind ++; Cyc_Std_optopt= 0; return(
+int)'?';}}{ unsigned char c=*(( unsigned char*) _check_unknown_subscript(
 _tagged_arr_inplace_plus_post(& Cyc_Std_nextchar, sizeof( unsigned char), 1),
 sizeof( unsigned char), 0u)); struct _tagged_arr temp= Cyc_Std_strchr( optstring,
 c); if(*(( unsigned char*) _check_unknown_subscript( Cyc_Std_nextchar, sizeof(

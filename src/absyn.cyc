@@ -178,29 +178,31 @@ static tunion Nmspace.Abs_n abs_null = Abs_n(NULL);
 static string_t exn_str = "exn";
 static $(nmspace_t,var_t) exn_name_v = $((nmspace_t)&abs_null,&exn_str);
 qvar_t exn_name   = &exn_name_v;
-static string_t null_pointer_exn_str = "Null_Exception";
-static $(nmspace_t,var_t) null_pointer_exn_name_v = 
-  $((nmspace_t)&abs_null, &null_pointer_exn_str);
-static string_t match_exn_str = "Match_Exception";
-static $(nmspace_t,var_t) match_exn_name_v = 
-  $((nmspace_t)&abs_null, &match_exn_str);
-qvar_t null_pointer_exn_name   = &null_pointer_exn_name_v;
-qvar_t match_exn_name   = &match_exn_name_v;
-static struct Tunionfield null_pointer_exn_tuf_v =
-  Tunionfield(&null_pointer_exn_name_v, NULL, NULL, NULL, Extern);
-static struct Tunionfield match_exn_tuf_v =
-  Tunionfield(&match_exn_name_v, NULL, NULL, NULL, Extern);
-tunionfield_t null_pointer_exn_tuf = &null_pointer_exn_tuf_v;
-tunionfield_t match_exn_tuf = &match_exn_tuf_v;
-static struct List<tunionfield_t, `H> exn_l0 = List(&null_pointer_exn_tuf_v, NULL);
-static struct List<tunionfield_t, `H> exn_l1= List(&match_exn_tuf_v, &exn_l0);
-static struct Opt<list_t<tunionfield_t>> exn_ol = Opt(&exn_l1);
-static struct Tuniondecl exn_tud_v = Tuniondecl(Extern,
-						&exn_name_v,
-						NULL,
-						&exn_ol,
-						true);
+
+#define MAKE_BUILTIN_EXN(str)\
+  static string_t            str##_str   = #str;\
+  static $(nmspace_t, var_t) str##_pr    = $((nmspace_t)&abs_null, &str##_str);\
+  qvar_t                     str##_name  = &str##_pr;\
+  static struct Tunionfield  str##_tuf_v = Tunionfield(&str##_pr,\
+				 		       NULL,NULL,NULL,Extern);\
+  tunionfield_t              str##_tuf   = &str##_tuf_v
+
+MAKE_BUILTIN_EXN(Null_Exception);
+MAKE_BUILTIN_EXN(Array_bounds);
+MAKE_BUILTIN_EXN(Match_Exception);
+MAKE_BUILTIN_EXN(Bad_alloc);
+#undef MAKE_BUILTIN_EXN
+
+static struct List<tunionfield_t,`H> exn_l0 = List(&Null_Exception_tuf_v, NULL);
+static struct List<tunionfield_t,`H> exn_l1 = List(&Array_bounds_tuf_v,   &exn_l0);
+static struct List<tunionfield_t,`H> exn_l2 = List(&Match_Exception_tuf_v,&exn_l1);
+static struct List<tunionfield_t,`H> exn_l3 = List(&Bad_alloc_tuf_v,      &exn_l2);
+
+static struct Opt<list_t<tunionfield_t>> exn_ol = Opt(&exn_l3);
+static struct Tuniondecl exn_tud_v = Tuniondecl(Extern, &exn_name_v, NULL,
+						&exn_ol, true);
 tuniondecl_t exn_tud = &exn_tud_v;
+
 static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud_v);
 static tunion Type.TunionType exn_typ_tt =
                   TunionType(TunionInfo(&exn_tinfou,NULL,HeapRgn));
@@ -460,12 +462,8 @@ exp_t tuple_exp(list_t<exp_t,`H> es, seg_t loc) {
 }
 exp_t stmt_exp(stmt_t s,seg_t loc) { return new_exp(new StmtExp_e(s), loc); }
 
-exp_t null_pointer_exn_exp(seg_t loc) { 
-  return var_exp(&null_pointer_exn_name_v, loc); 
-}
-
 exp_t match_exn_exp(seg_t loc) { 
-  return var_exp(&match_exn_name_v, loc); 
+  return var_exp(Match_Exception_name, loc); 
 }
 
 exp_t array_exp(list_t<exp_t,`H> es, seg_t loc) {

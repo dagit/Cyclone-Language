@@ -36,14 +36,14 @@ getenv( string_to_Cstring( name)));} int Cyc_Std_putenv( struct _tagged_arr s){
 return putenv( string_to_Cstring( s));} static void Cyc_Std_check_valid_cstring(
 struct _tagged_arr s){ if( s.curr == (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){(
 int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp0=( struct
-Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
 _temp0[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp1; _temp1.tag= Cyc_Core_Invalid_argument;
 _temp1.f1= _tag_arr("strtox NULL pointer", sizeof( unsigned char), 20u); _temp1;});
 _temp0;}));}{ int found_zero= 0;{ int i=( int)( _get_arr_size( s, sizeof(
 unsigned char)) -  1); for( 0; i >=  0; i --){ if(*(( const unsigned char*)
 _check_unknown_subscript( s, sizeof( unsigned char), i)) == '\000'){ found_zero=
 1; break;}}} if( ! found_zero){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp2=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+_temp2=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
 _temp2[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp3; _temp3.tag= Cyc_Core_Invalid_argument;
 _temp3.f1= _tag_arr("strtox: not a C string", sizeof( unsigned char), 23u);
 _temp3;}); _temp2;}));}}} double Cyc_Std_strtod( struct _tagged_arr nptr, struct

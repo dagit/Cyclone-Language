@@ -20,7 +20,7 @@ int cmd, struct Cyc_Std_flock* lock); int Cyc_Std_fcntl( int fd, int cmd, struct
 _tagged_arr argv){ if( _get_arr_size( argv, sizeof( void*)) ==  0){ return fcntl(
 fd, cmd);} else{ if( _get_arr_size( argv, sizeof( void*)) !=  1){( int) _throw((
 void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
+_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
 _temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("fcntl: too many args",
 sizeof( unsigned char), 21u); _temp1;}); _temp0;}));} else{ void* _temp2=*((
 void**) _check_unknown_subscript( argv, sizeof( void*), 0)); int _temp8; struct

@@ -34,7 +34,7 @@ _LL7: _temp6=(( struct Cyc_Std_sockaddr_in_struct*) _temp0)->f1; goto _LL3;}
 else{ goto _LL4;} _LL4: goto _LL5; _LL3: return({ struct _tuple1 _temp8; _temp8.f1=
 ptr; _temp8.f2=( unsigned int) sizeof( struct Cyc_Std_sockaddr_in); _temp8;});
 _LL5:( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp9=( struct
-Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
+Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp9[ 0]=({ struct Cyc_Core_Failure_struct _temp10; _temp10.tag= Cyc_Core_Failure;
 _temp10.f1= _tag_arr("Unexpected xtunion sockaddr found", sizeof( unsigned char),
 34u); _temp10;}); _temp9;})); _LL1:;} void* Cyc_Csocket_Csa2sa( const struct Cyc_Std_sockaddr_in*

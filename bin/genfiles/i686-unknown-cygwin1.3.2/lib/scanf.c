@@ -59,7 +59,7 @@ _temp0)->f1; goto _LL3;} else{ goto _LL4;} _LL4: if(*(( int*) _temp0) ==  Cyc_St
 _LL11: _temp10=(( struct Cyc_Std_UShortPtr_sa_struct*) _temp0)->f1; goto _LL5;}
 else{ goto _LL6;} _LL6: goto _LL7; _LL3: return _temp8; _LL5: return( short*)
 _temp10; _LL7:( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp12=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+_temp12=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp12[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp13; _temp13.tag= Cyc_Core_Invalid_argument; _temp13.f1= _tag_arr("scan expects short pointer",
 sizeof( unsigned char), 27u); _temp13;}); _temp12;})); _LL1:;} static int* Cyc_Std_va_arg_int_ptr(
@@ -69,7 +69,7 @@ _temp14)->f1; goto _LL17;} else{ goto _LL18;} _LL18: if(*(( int*) _temp14) ==
 Cyc_Std_UIntPtr_sa){ _LL25: _temp24=(( struct Cyc_Std_UIntPtr_sa_struct*)
 _temp14)->f1; goto _LL19;} else{ goto _LL20;} _LL20: goto _LL21; _LL17: return
 _temp22; _LL19: return( int*) _temp24; _LL21:( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp26=( struct Cyc_Core_Invalid_argument_struct*) GC_malloc( sizeof( struct
+_temp26=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp26[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp27; _temp27.tag= Cyc_Core_Invalid_argument; _temp27.f1= _tag_arr("scan expects int pointer",
 sizeof( unsigned char), 25u); _temp27;}); _temp26;})); _LL15:;} static struct
@@ -78,7 +78,7 @@ _tagged_arr _temp34; _LL30: if(*(( int*) _temp28) ==  Cyc_Std_StringPtr_sa){
 _LL35: _temp34=(( struct Cyc_Std_StringPtr_sa_struct*) _temp28)->f1; goto _LL31;}
 else{ goto _LL32;} _LL32: goto _LL33; _LL31: return _temp34; _LL33:( int) _throw((
 void*)({ struct Cyc_Core_Invalid_argument_struct* _temp36=( struct Cyc_Core_Invalid_argument_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp36[ 0]=({
+_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp36[ 0]=({
 struct Cyc_Core_Invalid_argument_struct _temp37; _temp37.tag= Cyc_Core_Invalid_argument;
 _temp37.f1= _tag_arr("scan expects char pointer", sizeof( unsigned char), 26u);
 _temp37;}); _temp36;})); _LL29:;} static double* Cyc_Std_va_arg_double_ptr( void*
@@ -86,7 +86,7 @@ a){ void* _temp38= a; double* _temp44; _LL40: if(*(( int*) _temp38) ==  Cyc_Std_
 _LL45: _temp44=(( struct Cyc_Std_DoublePtr_sa_struct*) _temp38)->f1; goto _LL41;}
 else{ goto _LL42;} _LL42: goto _LL43; _LL41: return _temp44; _LL43:( int) _throw((
 void*)({ struct Cyc_Core_Invalid_argument_struct* _temp46=( struct Cyc_Core_Invalid_argument_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp46[ 0]=({
+_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp46[ 0]=({
 struct Cyc_Core_Invalid_argument_struct _temp47; _temp47.tag= Cyc_Core_Invalid_argument;
 _temp47.f1= _tag_arr("scan expects double pointer", sizeof( unsigned char), 28u);
 _temp47;}); _temp46;})); _LL39:;} static float* Cyc_Std_va_arg_float_ptr( void*
@@ -94,7 +94,7 @@ a){ void* _temp48= a; float* _temp54; _LL50: if(*(( int*) _temp48) ==  Cyc_Std_F
 _LL55: _temp54=(( struct Cyc_Std_FloatPtr_sa_struct*) _temp48)->f1; goto _LL51;}
 else{ goto _LL52;} _LL52: goto _LL53; _LL51: return _temp54; _LL53:( int) _throw((
 void*)({ struct Cyc_Core_Invalid_argument_struct* _temp56=( struct Cyc_Core_Invalid_argument_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp56[ 0]=({
+_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp56[ 0]=({
 struct Cyc_Core_Invalid_argument_struct _temp57; _temp57.tag= Cyc_Core_Invalid_argument;
 _temp57.f1= _tag_arr("scan expects float pointer", sizeof( unsigned char), 27u);
 _temp57;}); _temp56;})); _LL49:;} int Cyc_Std__IO_vfscanf( int(* _IO_getc)( void*),
@@ -269,7 +269,7 @@ void**) _check_unknown_subscript( ap, sizeof( void*), 0u)))=( float) res;}
 _tagged_arr_inplace_plus_post(& ap, sizeof( void*), 1); nassigned ++;} nread +=(
 p.curr - ( _tag_arr( buf, sizeof( unsigned char), 350u)).curr) /  sizeof(
 unsigned char); break; default: _LL132:( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
-_temp151=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp151=( struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp151[ 0]=({ struct Cyc_Core_Impossible_struct _temp152; _temp152.tag= Cyc_Core_Impossible;
 _temp152.f1= _tag_arr("scanf3", sizeof( unsigned char), 7u); _temp152;});
 _temp151;}));}} eof_failure: seen_eof ++; input_failure: if( nassigned ==  0){

@@ -21,7 +21,7 @@ extern struct Cyc_Cpwd_Cpasswd* getpwnam( unsigned char* name); extern struct
 Cyc_Cpwd_Cpasswd* getpwuid( unsigned short uid); struct Cyc_Std_passwd* Cyc_Std_getpwnam(
 struct _tagged_arr name){ struct Cyc_Cpwd_Cpasswd* src= getpwnam(
 string_to_Cstring( name)); return( unsigned int) src?({ struct Cyc_Std_passwd*
-_temp0=( struct Cyc_Std_passwd*) GC_malloc( sizeof( struct Cyc_Std_passwd));
+_temp0=( struct Cyc_Std_passwd*) _cycalloc( sizeof( struct Cyc_Std_passwd));
 _temp0->pw_name=( struct _tagged_arr) Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*)
 _check_null( src))->pw_name); _temp0->pw_passwd=( struct _tagged_arr)
 Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_passwd);
@@ -33,7 +33,7 @@ _check_null( src))->pw_dir); _temp0->pw_shell=( struct _tagged_arr)
 Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_shell);
 _temp0;}): 0;} struct Cyc_Std_passwd* Cyc_Std_getpwuid( unsigned short uid){
 struct Cyc_Cpwd_Cpasswd* src= getpwuid( uid); return( unsigned int) src?({
-struct Cyc_Std_passwd* _temp1=( struct Cyc_Std_passwd*) GC_malloc( sizeof(
+struct Cyc_Std_passwd* _temp1=( struct Cyc_Std_passwd*) _cycalloc( sizeof(
 struct Cyc_Std_passwd)); _temp1->pw_name=( struct _tagged_arr) Cstring_to_string(((
 struct Cyc_Cpwd_Cpasswd*) _check_null( src))->pw_name); _temp1->pw_passwd=(
 struct _tagged_arr) Cstring_to_string((( struct Cyc_Cpwd_Cpasswd*) _check_null(

@@ -106,14 +106,13 @@ i_t final() {
   let exn_d = new *exn_tud;
   exn_d->sc = Public;
   ie1->tuniondecls = Dict::insert(ie1->tuniondecls, (*exn_name)[1], exn_d);
-  let np_exn_f = new *null_pointer_exn_tuf;
-  np_exn_f->sc = Public;
-  let np_exn_fd = new Tcdecl::Xtunionfielddecl(exn_d, np_exn_f);
-  ie1->xtunionfielddecls = Dict::insert(ie1->xtunionfielddecls, (*null_pointer_exn_name)[1], np_exn_fd);
-  let m_exn_f = new *match_exn_tuf;
-  m_exn_f->sc = Public;
-  let m_exn_fd = new Tcdecl::Xtunionfielddecl(exn_d, m_exn_f);
-  ie1->xtunionfielddecls = Dict::insert(ie1->xtunionfielddecls, (*match_exn_name)[1], m_exn_fd);
+  for(let tufs = exn_tud->fields->v; tufs != NULL; tufs = tufs->tl) {
+    let exn_f = new *tufs->hd;
+    exn_f->sc = Public;
+    let exn_fd = new Tcdecl::Xtunionfielddecl(exn_d, exn_f);
+    ie1->xtunionfielddecls = Dict::insert(ie1->xtunionfielddecls,
+					  (*tufs->hd->name)[1], exn_fd);
+  }    
   i->exports = Dict::insert(i->exports, NULL, ie1);
   // add requirement of function main
   let ie2 = new_ienv();

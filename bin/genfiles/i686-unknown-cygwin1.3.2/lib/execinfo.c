@@ -31,7 +31,7 @@ int tag; float* f1; } ; extern int wait( int* status); extern int waitpid( int
 pid, int* status, int options); void(* Cyc_Std_signal( int sig, void(* func)(
 int)))( int); extern int raise( int sig); extern int kill( int, int); int Cyc_Execinfo_backtrace(
 struct _tagged_arr array, int size){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
-_temp0=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
+_temp0=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
 _temp1.f1= _tag_arr("backtrace: unsupported except under Linux", sizeof(
 unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){

@@ -44,7 +44,7 @@ Cyc_Id_id*); extern struct _tagged_arr Cyc_Id_id_to_source( struct Cyc_Id_id*);
 extern int Cyc_Id_id_compare( struct Cyc_Id_id*, struct Cyc_Id_id*); struct Cyc_Id_id{
 struct _tagged_arr s; int i; } ; struct Cyc_Id_id* Cyc_Id_id_make( struct
 _tagged_arr s, int i){ return({ struct Cyc_Id_id* _temp0=( struct Cyc_Id_id*)
-GC_malloc( sizeof( struct Cyc_Id_id)); _temp0->s= s; _temp0->i= i; _temp0;});}
+_cycalloc( sizeof( struct Cyc_Id_id)); _temp0->s= s; _temp0->i= i; _temp0;});}
 static int Cyc_Id_counter= 0; struct Cyc_Id_id* Cyc_Id_id_new( struct
 _tagged_arr s){ ++ Cyc_Id_counter; return Cyc_Id_id_make( s, Cyc_Id_counter);}
 struct Cyc_Id_id* Cyc_Id_id_renew( struct Cyc_Id_id* i){ ++ Cyc_Id_counter;
@@ -53,15 +53,15 @@ struct _tagged_arr s){ return Cyc_Id_id_make( s, - 1);} struct Cyc_Id_id* Cyc_Id
 struct _tagged_arr s){ return Cyc_Id_id_new( s);} struct _tagged_arr Cyc_Id_id_to_string(
 struct Cyc_Id_id* x){ if( x->i ==  - 1){ return Cyc_Std_strdup( x->s);} return
 Cyc_Std_strconcat_l(({ struct Cyc_List_List* _temp1=( struct Cyc_List_List*)
-GC_malloc( sizeof( struct Cyc_List_List)); _temp1->hd=( void*)({ struct
-_tagged_arr* _temp7=( struct _tagged_arr*) GC_malloc( sizeof( struct _tagged_arr)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp1->hd=( void*)({ struct
+_tagged_arr* _temp7=( struct _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)
 *  1); _temp7[ 0]= x->s; _temp7;}); _temp1->tl=({ struct Cyc_List_List* _temp2=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp2->hd=(
-void*) _init_tag_arr(( struct _tagged_arr*) GC_malloc( sizeof( struct
+struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp2->hd=(
+void*) _init_tag_arr(( struct _tagged_arr*) _cycalloc( sizeof( struct
 _tagged_arr)),"$", sizeof( unsigned char), 2u); _temp2->tl=({ struct Cyc_List_List*
-_temp3=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
+_temp3=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
 _temp3->hd=( void*)({ struct _tagged_arr* _temp4=( struct _tagged_arr*)
-GC_malloc( sizeof( struct _tagged_arr) *  1); _temp4[ 0]=( struct _tagged_arr)({
+_cycalloc( sizeof( struct _tagged_arr) *  1); _temp4[ 0]=( struct _tagged_arr)({
 struct Cyc_Std_Int_pa_struct _temp6; _temp6.tag= Cyc_Std_Int_pa; _temp6.f1=( int)((
 unsigned int) x->i);{ void* _temp5[ 1u]={& _temp6}; Cyc_Std_aprintf( _tag_arr("%d",
 sizeof( unsigned char), 3u), _tag_arr( _temp5, sizeof( void*), 1u));}}); _temp4;});

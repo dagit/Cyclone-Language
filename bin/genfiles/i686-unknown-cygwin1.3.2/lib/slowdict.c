@@ -47,7 +47,7 @@ struct Cyc_SlowDict_Dict* d); unsigned char Cyc_SlowDict_Absent[ 11u]="\000\000\
 unsigned char Cyc_SlowDict_Present[ 12u]="\000\000\000\000Present"; struct Cyc_SlowDict_Dict{
 int(* reln)( void*, void*); void* tree; } ; struct Cyc_SlowDict_Dict* Cyc_SlowDict_empty(
 int(* comp)( void*, void*)){ void* t=( void*) Cyc_Splay_Leaf; return({ struct
-Cyc_SlowDict_Dict* _temp0=( struct Cyc_SlowDict_Dict*) GC_malloc( sizeof( struct
+Cyc_SlowDict_Dict* _temp0=( struct Cyc_SlowDict_Dict*) _cycalloc( sizeof( struct
 Cyc_SlowDict_Dict)); _temp0->reln= comp; _temp0->tree=( void*) t; _temp0;});}
 int Cyc_SlowDict_is_empty( struct Cyc_SlowDict_Dict* d){ void* _temp1=( void*) d->tree;
 _LL3: if( _temp1 == ( void*) Cyc_Splay_Leaf){ goto _LL4;} else{ goto _LL5;} _LL5:
@@ -68,31 +68,31 @@ _temp21=(( struct Cyc_Splay_Node_struct*) _temp15)->f1; goto _LL18;} else{ goto
 _LL19;} _LL19: if( _temp15 == ( void*) Cyc_Splay_Leaf){ goto _LL20;} else{ goto
 _LL16;} _LL18: { struct Cyc_Splay_node* _temp23= _temp21->v; if(( d->reln)( key,(
 void*) _temp23->key) <  0){ newleft=( void*) _temp23->left; newright=( void*)({
-struct Cyc_Splay_Node_struct* _temp24=( struct Cyc_Splay_Node_struct*) GC_malloc(
+struct Cyc_Splay_Node_struct* _temp24=( struct Cyc_Splay_Node_struct*) _cycalloc(
 sizeof( struct Cyc_Splay_Node_struct)); _temp24[ 0]=({ struct Cyc_Splay_Node_struct
 _temp25; _temp25.tag= Cyc_Splay_Node; _temp25.f1=({ struct Cyc_Splay_noderef*
-_temp26=( struct Cyc_Splay_noderef*) GC_malloc( sizeof( struct Cyc_Splay_noderef));
-_temp26->v=({ struct Cyc_Splay_node* _temp27=( struct Cyc_Splay_node*) GC_malloc(
+_temp26=( struct Cyc_Splay_noderef*) _cycalloc( sizeof( struct Cyc_Splay_noderef));
+_temp26->v=({ struct Cyc_Splay_node* _temp27=( struct Cyc_Splay_node*) _cycalloc(
 sizeof( struct Cyc_Splay_node)); _temp27->key=( void*)(( void*) _temp23->key);
 _temp27->data=( void*)(( void*) _temp23->data); _temp27->left=( void*)(( void*)
 Cyc_Splay_Leaf); _temp27->right=( void*)(( void*) _temp23->right); _temp27;});
 _temp26;}); _temp25;}); _temp24;});} else{ newleft=( void*)({ struct Cyc_Splay_Node_struct*
-_temp28=( struct Cyc_Splay_Node_struct*) GC_malloc( sizeof( struct Cyc_Splay_Node_struct));
+_temp28=( struct Cyc_Splay_Node_struct*) _cycalloc( sizeof( struct Cyc_Splay_Node_struct));
 _temp28[ 0]=({ struct Cyc_Splay_Node_struct _temp29; _temp29.tag= Cyc_Splay_Node;
 _temp29.f1=({ struct Cyc_Splay_noderef* _temp30=( struct Cyc_Splay_noderef*)
-GC_malloc( sizeof( struct Cyc_Splay_noderef)); _temp30->v=({ struct Cyc_Splay_node*
-_temp31=( struct Cyc_Splay_node*) GC_malloc( sizeof( struct Cyc_Splay_node));
+_cycalloc( sizeof( struct Cyc_Splay_noderef)); _temp30->v=({ struct Cyc_Splay_node*
+_temp31=( struct Cyc_Splay_node*) _cycalloc( sizeof( struct Cyc_Splay_node));
 _temp31->key=( void*)(( void*) _temp23->key); _temp31->data=( void*)(( void*)
 _temp23->data); _temp31->left=( void*)(( void*) _temp23->left); _temp31->right=(
 void*)(( void*) Cyc_Splay_Leaf); _temp31;}); _temp30;}); _temp29;}); _temp28;});
 newright=( void*) _temp23->right;} goto _LL16;} _LL20: goto _LL16; _LL16:;}
 return({ struct Cyc_SlowDict_Dict* _temp32=( struct Cyc_SlowDict_Dict*)
-GC_malloc( sizeof( struct Cyc_SlowDict_Dict)); _temp32->reln= d->reln; _temp32->tree=(
+_cycalloc( sizeof( struct Cyc_SlowDict_Dict)); _temp32->reln= d->reln; _temp32->tree=(
 void*)(( void*)({ struct Cyc_Splay_Node_struct* _temp33=( struct Cyc_Splay_Node_struct*)
-GC_malloc( sizeof( struct Cyc_Splay_Node_struct)); _temp33[ 0]=({ struct Cyc_Splay_Node_struct
+_cycalloc( sizeof( struct Cyc_Splay_Node_struct)); _temp33[ 0]=({ struct Cyc_Splay_Node_struct
 _temp34; _temp34.tag= Cyc_Splay_Node; _temp34.f1=({ struct Cyc_Splay_noderef*
-_temp35=( struct Cyc_Splay_noderef*) GC_malloc( sizeof( struct Cyc_Splay_noderef));
-_temp35->v=({ struct Cyc_Splay_node* _temp36=( struct Cyc_Splay_node*) GC_malloc(
+_temp35=( struct Cyc_Splay_noderef*) _cycalloc( sizeof( struct Cyc_Splay_noderef));
+_temp35->v=({ struct Cyc_Splay_node* _temp36=( struct Cyc_Splay_node*) _cycalloc(
 sizeof( struct Cyc_Splay_node)); _temp36->key=( void*) key; _temp36->data=( void*)
 data; _temp36->left=( void*) newleft; _temp36->right=( void*) newright; _temp36;});
 _temp35;}); _temp34;}); _temp33;})); _temp32;});} struct Cyc_SlowDict_Dict* Cyc_SlowDict_insert_new(
@@ -105,12 +105,12 @@ struct Cyc_List_List*) _check_null( kds))->hd)).f1,(*(( struct _tuple0*)((
 struct Cyc_List_List*) _check_null( kds))->hd)).f2);} return d;} struct Cyc_SlowDict_Dict*
 Cyc_SlowDict_singleton( int(* comp)( void*, void*), void* key, void* data){
 return({ struct Cyc_SlowDict_Dict* _temp37=( struct Cyc_SlowDict_Dict*)
-GC_malloc( sizeof( struct Cyc_SlowDict_Dict)); _temp37->reln= comp; _temp37->tree=(
+_cycalloc( sizeof( struct Cyc_SlowDict_Dict)); _temp37->reln= comp; _temp37->tree=(
 void*)(( void*)({ struct Cyc_Splay_Node_struct* _temp38=( struct Cyc_Splay_Node_struct*)
-GC_malloc( sizeof( struct Cyc_Splay_Node_struct)); _temp38[ 0]=({ struct Cyc_Splay_Node_struct
+_cycalloc( sizeof( struct Cyc_Splay_Node_struct)); _temp38[ 0]=({ struct Cyc_Splay_Node_struct
 _temp39; _temp39.tag= Cyc_Splay_Node; _temp39.f1=({ struct Cyc_Splay_noderef*
-_temp40=( struct Cyc_Splay_noderef*) GC_malloc( sizeof( struct Cyc_Splay_noderef));
-_temp40->v=({ struct Cyc_Splay_node* _temp41=( struct Cyc_Splay_node*) GC_malloc(
+_temp40=( struct Cyc_Splay_noderef*) _cycalloc( sizeof( struct Cyc_Splay_noderef));
+_temp40->v=({ struct Cyc_Splay_node* _temp41=( struct Cyc_Splay_node*) _cycalloc(
 sizeof( struct Cyc_Splay_node)); _temp41->key=( void*) key; _temp41->data=( void*)
 data; _temp41->left=( void*)(( void*) Cyc_Splay_Leaf); _temp41->right=( void*)((
 void*) Cyc_Splay_Leaf); _temp41;}); _temp40;}); _temp39;}); _temp38;})); _temp37;});}
@@ -121,7 +121,7 @@ _temp48; _LL44: if(( unsigned int) _temp42 >  1u?*(( int*) _temp42) ==  Cyc_Spla
 else{ goto _LL46;} _LL46: if( _temp42 == ( void*) Cyc_Splay_Leaf){ goto _LL47;}
 else{ goto _LL43;} _LL45: return( void*)( _temp48->v)->data; _LL47:( int) _throw((
 void*)({ struct Cyc_Core_Impossible_struct* _temp50=( struct Cyc_Core_Impossible_struct*)
-GC_malloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp50[ 0]=({ struct
+_cycalloc( sizeof( struct Cyc_Core_Impossible_struct)); _temp50[ 0]=({ struct
 Cyc_Core_Impossible_struct _temp51; _temp51.tag= Cyc_Core_Impossible; _temp51.f1=
 _tag_arr("Dict::lookup", sizeof( unsigned char), 13u); _temp51;}); _temp50;}));
 _LL43:;}( int) _throw(( void*) Cyc_SlowDict_Absent);} struct Cyc_Core_Opt* Cyc_SlowDict_lookup_opt(
@@ -131,9 +131,9 @@ _temp58; _LL54: if(( unsigned int) _temp52 >  1u?*(( int*) _temp52) ==  Cyc_Spla
 0){ _LL59: _temp58=(( struct Cyc_Splay_Node_struct*) _temp52)->f1; goto _LL55;}
 else{ goto _LL56;} _LL56: if( _temp52 == ( void*) Cyc_Splay_Leaf){ goto _LL57;}
 else{ goto _LL53;} _LL55: return({ struct Cyc_Core_Opt* _temp60=( struct Cyc_Core_Opt*)
-GC_malloc( sizeof( struct Cyc_Core_Opt)); _temp60->v=( void*)(( void*)( _temp58->v)->data);
+_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp60->v=( void*)(( void*)( _temp58->v)->data);
 _temp60;}); _LL57:( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
-_temp61=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp61=( struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp61[ 0]=({ struct Cyc_Core_Impossible_struct _temp62; _temp62.tag= Cyc_Core_Impossible;
 _temp62.f1= _tag_arr("Dict::lookup", sizeof( unsigned char), 13u); _temp62;});
 _temp61;})); _LL53:;} return 0;} static int Cyc_SlowDict_get_largest( void* x,
@@ -144,7 +144,7 @@ _temp63=( void*) d->tree; struct Cyc_Splay_noderef* _temp69; _LL65: if( _temp63
 unsigned int) _temp63 >  1u?*(( int*) _temp63) ==  Cyc_Splay_Node: 0){ _LL70:
 _temp69=(( struct Cyc_Splay_Node_struct*) _temp63)->f1; goto _LL68;} else{ goto
 _LL64;} _LL66:( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
-_temp71=( struct Cyc_Core_Impossible_struct*) GC_malloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp71=( struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
 _temp71[ 0]=({ struct Cyc_Core_Impossible_struct _temp72; _temp72.tag= Cyc_Core_Impossible;
 _temp72.f1= _tag_arr("Dict::lookup", sizeof( unsigned char), 13u); _temp72;});
 _temp71;})); _LL68: { struct Cyc_Splay_node* n= _temp69->v; void* _temp73=( void*)
@@ -152,23 +152,23 @@ n->left; struct Cyc_Splay_noderef* _temp79; _LL75: if( _temp73 == ( void*) Cyc_S
 goto _LL76;} else{ goto _LL77;} _LL77: if(( unsigned int) _temp73 >  1u?*(( int*)
 _temp73) ==  Cyc_Splay_Node: 0){ _LL80: _temp79=(( struct Cyc_Splay_Node_struct*)
 _temp73)->f1; goto _LL78;} else{ goto _LL74;} _LL76: return({ struct Cyc_SlowDict_Dict*
-_temp81=( struct Cyc_SlowDict_Dict*) GC_malloc( sizeof( struct Cyc_SlowDict_Dict));
+_temp81=( struct Cyc_SlowDict_Dict*) _cycalloc( sizeof( struct Cyc_SlowDict_Dict));
 _temp81->reln= d->reln; _temp81->tree=( void*)(( void*) n->right); _temp81;});
 _LL78: { void* _temp82=( void*) n->right; struct Cyc_Splay_noderef* _temp88;
 _LL84: if( _temp82 == ( void*) Cyc_Splay_Leaf){ goto _LL85;} else{ goto _LL86;}
 _LL86: if(( unsigned int) _temp82 >  1u?*(( int*) _temp82) ==  Cyc_Splay_Node: 0){
 _LL89: _temp88=(( struct Cyc_Splay_Node_struct*) _temp82)->f1; goto _LL87;}
 else{ goto _LL83;} _LL85: return({ struct Cyc_SlowDict_Dict* _temp90=( struct
-Cyc_SlowDict_Dict*) GC_malloc( sizeof( struct Cyc_SlowDict_Dict)); _temp90->reln=
+Cyc_SlowDict_Dict*) _cycalloc( sizeof( struct Cyc_SlowDict_Dict)); _temp90->reln=
 d->reln; _temp90->tree=( void*)(( void*) n->left); _temp90;}); _LL87: Cyc_Splay_splay(
 Cyc_SlowDict_get_largest, key,( void*) n->left);{ struct Cyc_Splay_node* newtop=
 _temp79->v; return({ struct Cyc_SlowDict_Dict* _temp91=( struct Cyc_SlowDict_Dict*)
-GC_malloc( sizeof( struct Cyc_SlowDict_Dict)); _temp91->reln= d->reln; _temp91->tree=(
+_cycalloc( sizeof( struct Cyc_SlowDict_Dict)); _temp91->reln= d->reln; _temp91->tree=(
 void*)(( void*)({ struct Cyc_Splay_Node_struct* _temp92=( struct Cyc_Splay_Node_struct*)
-GC_malloc( sizeof( struct Cyc_Splay_Node_struct)); _temp92[ 0]=({ struct Cyc_Splay_Node_struct
+_cycalloc( sizeof( struct Cyc_Splay_Node_struct)); _temp92[ 0]=({ struct Cyc_Splay_Node_struct
 _temp93; _temp93.tag= Cyc_Splay_Node; _temp93.f1=({ struct Cyc_Splay_noderef*
-_temp94=( struct Cyc_Splay_noderef*) GC_malloc( sizeof( struct Cyc_Splay_noderef));
-_temp94->v=({ struct Cyc_Splay_node* _temp95=( struct Cyc_Splay_node*) GC_malloc(
+_temp94=( struct Cyc_Splay_noderef*) _cycalloc( sizeof( struct Cyc_Splay_noderef));
+_temp94->v=({ struct Cyc_Splay_node* _temp95=( struct Cyc_Splay_node*) _cycalloc(
 sizeof( struct Cyc_Splay_node)); _temp95->key=( void*)(( void*) newtop->key);
 _temp95->data=( void*)(( void*) newtop->data); _temp95->left=( void*)(( void*)
 newtop->left); _temp95->right=( void*)(( void*) n->right); _temp95;}); _temp94;});
@@ -242,18 +242,18 @@ unsigned int) _temp146 >  1u?*(( int*) _temp146) ==  Cyc_Splay_Node: 0){ _LL153:
 _temp152=(( struct Cyc_Splay_Node_struct*) _temp146)->f1; goto _LL151;} else{
 goto _LL147;} _LL149: return( void*) Cyc_Splay_Leaf; _LL151: { struct Cyc_Splay_node*
 _temp154= _temp152->v; return( void*)({ struct Cyc_Splay_Node_struct* _temp155=(
-struct Cyc_Splay_Node_struct*) GC_malloc( sizeof( struct Cyc_Splay_Node_struct));
+struct Cyc_Splay_Node_struct*) _cycalloc( sizeof( struct Cyc_Splay_Node_struct));
 _temp155[ 0]=({ struct Cyc_Splay_Node_struct _temp156; _temp156.tag= Cyc_Splay_Node;
 _temp156.f1=({ struct Cyc_Splay_noderef* _temp157=( struct Cyc_Splay_noderef*)
-GC_malloc( sizeof( struct Cyc_Splay_noderef)); _temp157->v=({ struct Cyc_Splay_node*
-_temp158=( struct Cyc_Splay_node*) GC_malloc( sizeof( struct Cyc_Splay_node));
+_cycalloc( sizeof( struct Cyc_Splay_noderef)); _temp157->v=({ struct Cyc_Splay_node*
+_temp158=( struct Cyc_Splay_node*) _cycalloc( sizeof( struct Cyc_Splay_node));
 _temp158->key=( void*)(( void*) _temp154->key); _temp158->data=( void*) f(( void*)
 _temp154->data); _temp158->left=( void*) Cyc_SlowDict_map_tree( f,( void*)
 _temp154->left); _temp158->right=( void*) Cyc_SlowDict_map_tree( f,( void*)
 _temp154->right); _temp158;}); _temp157;}); _temp156;}); _temp155;});} _LL147:;}
 struct Cyc_SlowDict_Dict* Cyc_SlowDict_map( void*(* f)( void*), struct Cyc_SlowDict_Dict*
 d){ return({ struct Cyc_SlowDict_Dict* _temp159=( struct Cyc_SlowDict_Dict*)
-GC_malloc( sizeof( struct Cyc_SlowDict_Dict)); _temp159->reln= d->reln; _temp159->tree=(
+_cycalloc( sizeof( struct Cyc_SlowDict_Dict)); _temp159->reln= d->reln; _temp159->tree=(
 void*) Cyc_SlowDict_map_tree( f,( void*) d->tree); _temp159;});} static void*
 Cyc_SlowDict_map_tree_c( void*(* f)( void*, void*), void* env, void* t){ void*
 _temp160= t; struct Cyc_Splay_noderef* _temp166; _LL162: if( _temp160 == ( void*)
@@ -262,18 +262,18 @@ _temp160 >  1u?*(( int*) _temp160) ==  Cyc_Splay_Node: 0){ _LL167: _temp166=((
 struct Cyc_Splay_Node_struct*) _temp160)->f1; goto _LL165;} else{ goto _LL161;}
 _LL163: return( void*) Cyc_Splay_Leaf; _LL165: { struct Cyc_Splay_node* n=
 _temp166->v; return( void*)({ struct Cyc_Splay_Node_struct* _temp168=( struct
-Cyc_Splay_Node_struct*) GC_malloc( sizeof( struct Cyc_Splay_Node_struct));
+Cyc_Splay_Node_struct*) _cycalloc( sizeof( struct Cyc_Splay_Node_struct));
 _temp168[ 0]=({ struct Cyc_Splay_Node_struct _temp169; _temp169.tag= Cyc_Splay_Node;
 _temp169.f1=({ struct Cyc_Splay_noderef* _temp170=( struct Cyc_Splay_noderef*)
-GC_malloc( sizeof( struct Cyc_Splay_noderef)); _temp170->v=({ struct Cyc_Splay_node*
-_temp171=( struct Cyc_Splay_node*) GC_malloc( sizeof( struct Cyc_Splay_node));
+_cycalloc( sizeof( struct Cyc_Splay_noderef)); _temp170->v=({ struct Cyc_Splay_node*
+_temp171=( struct Cyc_Splay_node*) _cycalloc( sizeof( struct Cyc_Splay_node));
 _temp171->key=( void*)(( void*) n->key); _temp171->data=( void*) f( env,( void*)
 n->data); _temp171->left=( void*) Cyc_SlowDict_map_tree_c( f, env,( void*) n->left);
 _temp171->right=( void*) Cyc_SlowDict_map_tree_c( f, env,( void*) n->right);
 _temp171;}); _temp170;}); _temp169;}); _temp168;});} _LL161:;} struct Cyc_SlowDict_Dict*
 Cyc_SlowDict_map_c( void*(* f)( void*, void*), void* env, struct Cyc_SlowDict_Dict*
 d){ return({ struct Cyc_SlowDict_Dict* _temp172=( struct Cyc_SlowDict_Dict*)
-GC_malloc( sizeof( struct Cyc_SlowDict_Dict)); _temp172->reln= d->reln; _temp172->tree=(
+_cycalloc( sizeof( struct Cyc_SlowDict_Dict)); _temp172->reln= d->reln; _temp172->tree=(
 void*) Cyc_SlowDict_map_tree_c( f, env,( void*) d->tree); _temp172;});} struct
 _tuple0* Cyc_SlowDict_choose( struct Cyc_SlowDict_Dict* d){ void* _temp173=(
 void*) d->tree; struct Cyc_Splay_noderef* _temp179; _LL175: if( _temp173 == (
@@ -281,12 +281,12 @@ void*) Cyc_Splay_Leaf){ goto _LL176;} else{ goto _LL177;} _LL177: if((
 unsigned int) _temp173 >  1u?*(( int*) _temp173) ==  Cyc_Splay_Node: 0){ _LL180:
 _temp179=(( struct Cyc_Splay_Node_struct*) _temp173)->f1; goto _LL178;} else{
 goto _LL174;} _LL176:( int) _throw(( void*) Cyc_SlowDict_Absent); _LL178: return({
-struct _tuple0* _temp181=( struct _tuple0*) GC_malloc( sizeof( struct _tuple0));
+struct _tuple0* _temp181=( struct _tuple0*) _cycalloc( sizeof( struct _tuple0));
 _temp181->f1=( void*)( _temp179->v)->key; _temp181->f2=( void*)( _temp179->v)->data;
 _temp181;}); _LL174:;} struct Cyc_List_List* Cyc_SlowDict_to_list_f( void* k,
 void* v, struct Cyc_List_List* accum){ return({ struct Cyc_List_List* _temp182=(
-struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp182->hd=(
-void*)({ struct _tuple0* _temp183=( struct _tuple0*) GC_malloc( sizeof( struct
+struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp182->hd=(
+void*)({ struct _tuple0* _temp183=( struct _tuple0*) _cycalloc( sizeof( struct
 _tuple0)); _temp183->f1= k; _temp183->f2= v; _temp183;}); _temp182->tl= accum;
 _temp182;});} struct Cyc_List_List* Cyc_SlowDict_to_list( struct Cyc_SlowDict_Dict*
 d){ return(( struct Cyc_List_List*(*)( struct Cyc_List_List*(* f)( void*, void*,
