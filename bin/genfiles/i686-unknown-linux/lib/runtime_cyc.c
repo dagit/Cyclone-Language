@@ -23,6 +23,7 @@
 #include <string.h> // for memcpy
 #include <stdarg.h>
 // #include <errno.h>
+#include <signal.h>
 
 // The C include file precore_c.h is produced (semi) automatically
 // from the Cyclone include file precore.h.  Note, it now includes
@@ -561,10 +562,7 @@ int main(int argc, char **argv) {
     else
       exn_name = _exn_thrown->tag + 4;
     fprintf(stderr,"Uncaught exception %s\n",exn_name);
-    // jcheney: changing this to abort so that GDB stops at the program point
-    // where the exception was raised
-    // return 1;
-    abort();
+    return 1;
   }
   // set standard file descriptors
   Cyc_Std_stdin->file = stdin;
