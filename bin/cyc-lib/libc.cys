@@ -3666,7 +3666,9 @@ sys/sem.h:
 
 sys/select.h:
 cpp {
-  #include <sys/types.h> // For fd_set on OS X
+  #include <sys/types.h>  // For fd_set on OS X
+  #include <sys/time.h>   // For struct timeval on OS X
+  #include <unistd.h> // For select on OS X
 }
 include {
 time_t
