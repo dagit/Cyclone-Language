@@ -3245,10 +3245,10 @@ epilogue exit {
   extern "C" void exit(int);
 }
 epilogue free {
-  void free(`a *);
+  extern void free(`a::A ?);
 }
 cycstub free {
-  void free(`a *ptr) {}
+  void free(`a::A ?ptr) {}
 }
 epilogue getenv {
   extern char ?getenv(const char ?);

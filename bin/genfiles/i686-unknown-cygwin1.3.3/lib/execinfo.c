@@ -261,7 +261,10 @@ int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double
 f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_Std_timeval{ int tv_sec; int tv_usec; } ;
 struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; } ; extern int
-gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z);
+gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); struct
+Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
+it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
+setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
 typedef struct { unsigned int __val[ 64u]; } Cyc_Std___sigset_t; typedef Cyc_Std___sigset_t
 Cyc_Std_sigset_t; struct Cyc_Std_timespec{ int tv_sec; int tv_nsec; } ; struct
 Cyc_Std_timeval; extern int select( int, struct Cyc_Std__types_fd_set*, struct

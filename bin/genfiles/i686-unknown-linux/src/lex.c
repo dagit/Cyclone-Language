@@ -1386,66 +1386,61 @@ lexbuf); case 35: _LL253: return Cyc_Lex_token( lexbuf); case 36: _LL254: return
 Cyc_Lex_token( lexbuf); case 37: _LL255: Cyc_Lex_comment_depth= 1; Cyc_Lex_runaway_start=
 Cyc_Lexing_lexeme_start( lexbuf); Cyc_Lex_comment( lexbuf); return Cyc_Lex_token(
 lexbuf); case 38: _LL256: Cyc_Lex_string_pos= 0; Cyc_Lex_runaway_start= Cyc_Lexing_lexeme_start(
-lexbuf); Cyc_Lex_strng( lexbuf); Cyc_Lex_token_string=( struct _tagged_arr) Cyc_Lex_get_stored_string();
-return 343; case 39: _LL257: Cyc_Lex_token_char='\a'; return 344; case 40:
-_LL258: Cyc_Lex_token_char='\b'; return 344; case 41: _LL259: Cyc_Lex_token_char='\f';
-return 344; case 42: _LL260: Cyc_Lex_token_char='\n'; return 344; case 43:
-_LL261: Cyc_Lex_token_char='\r'; return 344; case 44: _LL262: Cyc_Lex_token_char='\t';
-return 344; case 45: _LL263: Cyc_Lex_token_char='\v'; return 344; case 46:
-_LL264: Cyc_Lex_token_char='\\'; return 344; case 47: _LL265: Cyc_Lex_token_char='\'';
-return 344; case 48: _LL266: Cyc_Lex_token_char='"'; return 344; case 49: _LL267:
-Cyc_Lex_token_char='?'; return 344; case 50: _LL268: Cyc_Lex_token_char=(
-unsigned char)(* Cyc_Lex_intconst( lexbuf, 2, 1, 8)).f2; return 344; case 51:
-_LL269: Cyc_Lex_token_char=( unsigned char)(* Cyc_Lex_intconst( lexbuf, 3, 1, 16)).f2;
-return 344; case 52: _LL270: Cyc_Lex_token_char= Cyc_Lexing_lexeme_char( lexbuf,
-1); return 344; case 53: _LL271: return - 1; case 54: _LL272: return( int) Cyc_Lexing_lexeme_char(
-lexbuf, 0); default: _LL273:( lexbuf->refill_buff)( lexbuf); return Cyc_Lex_token_rec(
-lexbuf, lexstate);}( int) _throw(( void*)({ struct Cyc_Lexing_Error_struct*
-_temp275=( struct Cyc_Lexing_Error_struct*) _cycalloc( sizeof( struct Cyc_Lexing_Error_struct));
-_temp275[ 0]=({ struct Cyc_Lexing_Error_struct _temp276; _temp276.tag= Cyc_Lexing_Error;
-_temp276.f1= _tag_arr("some action didn't return!", sizeof( unsigned char), 27u);
-_temp276;}); _temp275;}));} int Cyc_Lex_token( struct Cyc_Lexing_lexbuf* lexbuf){
-return Cyc_Lex_token_rec( lexbuf, 0);} int Cyc_Lex_strng_rec( struct Cyc_Lexing_lexbuf*
-lexbuf, int lexstate){ lexstate= Cyc_Lex_lex_engine( lexstate, lexbuf); switch(
-lexstate){ case 0: _LL277: return Cyc_Lex_strng( lexbuf); case 1: _LL278: return
-0; case 2: _LL279: return Cyc_Lex_strng( lexbuf); case 3: _LL280: Cyc_Lex_store_string_char('\a');
-return Cyc_Lex_strng( lexbuf); case 4: _LL281: Cyc_Lex_store_string_char('\b');
-return Cyc_Lex_strng( lexbuf); case 5: _LL282: Cyc_Lex_store_string_char('\f');
-return Cyc_Lex_strng( lexbuf); case 6: _LL283: Cyc_Lex_store_string_char('\n');
-return Cyc_Lex_strng( lexbuf); case 7: _LL284: Cyc_Lex_store_string_char('\r');
-return Cyc_Lex_strng( lexbuf); case 8: _LL285: Cyc_Lex_store_string_char('\t');
-return Cyc_Lex_strng( lexbuf); case 9: _LL286: Cyc_Lex_store_string_char('\v');
-return Cyc_Lex_strng( lexbuf); case 10: _LL287: Cyc_Lex_store_string_char('\\');
-return Cyc_Lex_strng( lexbuf); case 11: _LL288: Cyc_Lex_store_string_char('\'');
-return Cyc_Lex_strng( lexbuf); case 12: _LL289: Cyc_Lex_store_string_char('"');
-return Cyc_Lex_strng( lexbuf); case 13: _LL290: Cyc_Lex_store_string_char('?');
-return Cyc_Lex_strng( lexbuf); case 14: _LL291: Cyc_Lex_store_string_char((
-unsigned char)(* Cyc_Lex_intconst( lexbuf, 1, 0, 8)).f2); return Cyc_Lex_strng(
-lexbuf); case 15: _LL292: Cyc_Lex_store_string_char(( unsigned char)(* Cyc_Lex_intconst(
-lexbuf, 2, 0, 16)).f2); return Cyc_Lex_strng( lexbuf); case 16: _LL293: Cyc_Lex_store_string_char(
-Cyc_Lexing_lexeme_char( lexbuf, 0)); return Cyc_Lex_strng( lexbuf); case 17:
-_LL294: Cyc_Lex_runaway_err( _tag_arr("string ends in newline", sizeof(
-unsigned char), 23u), lexbuf); return 0; case 18: _LL295: Cyc_Lex_runaway_err(
-_tag_arr("unterminated string", sizeof( unsigned char), 20u), lexbuf); return 0;
-case 19: _LL296: Cyc_Lex_err( _tag_arr("bad character following backslash in string",
-sizeof( unsigned char), 44u), lexbuf); return Cyc_Lex_strng( lexbuf); default:
-_LL297:( lexbuf->refill_buff)( lexbuf); return Cyc_Lex_strng_rec( lexbuf,
-lexstate);}( int) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp299=(
-struct Cyc_Lexing_Error_struct*) _cycalloc( sizeof( struct Cyc_Lexing_Error_struct));
-_temp299[ 0]=({ struct Cyc_Lexing_Error_struct _temp300; _temp300.tag= Cyc_Lexing_Error;
-_temp300.f1= _tag_arr("some action didn't return!", sizeof( unsigned char), 27u);
-_temp300;}); _temp299;}));} int Cyc_Lex_strng( struct Cyc_Lexing_lexbuf* lexbuf){
-return Cyc_Lex_strng_rec( lexbuf, 1);} int Cyc_Lex_comment_rec( struct Cyc_Lexing_lexbuf*
-lexbuf, int lexstate){ lexstate= Cyc_Lex_lex_engine( lexstate, lexbuf); switch(
-lexstate){ case 0: _LL301: ++ Cyc_Lex_comment_depth; return Cyc_Lex_comment(
-lexbuf); case 1: _LL302: -- Cyc_Lex_comment_depth; if( Cyc_Lex_comment_depth > 
-0){ return Cyc_Lex_comment( lexbuf);} return 0; case 2: _LL303: Cyc_Lex_runaway_err(
-_tag_arr("unterminated comment", sizeof( unsigned char), 21u), lexbuf); return 0;
-case 3: _LL304: return Cyc_Lex_comment( lexbuf); case 4: _LL305: return Cyc_Lex_comment(
-lexbuf); case 5: _LL306: return Cyc_Lex_comment( lexbuf); default: _LL307:(
-lexbuf->refill_buff)( lexbuf); return Cyc_Lex_comment_rec( lexbuf, lexstate);}(
-int) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp309=( struct Cyc_Lexing_Error_struct*)
-_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp309[ 0]=({ struct Cyc_Lexing_Error_struct
+lexbuf); while( Cyc_Lex_strng( lexbuf)) {;} Cyc_Lex_token_string=( struct
+_tagged_arr) Cyc_Lex_get_stored_string(); return 343; case 39: _LL257: Cyc_Lex_token_char='\a';
+return 344; case 40: _LL258: Cyc_Lex_token_char='\b'; return 344; case 41:
+_LL259: Cyc_Lex_token_char='\f'; return 344; case 42: _LL260: Cyc_Lex_token_char='\n';
+return 344; case 43: _LL261: Cyc_Lex_token_char='\r'; return 344; case 44:
+_LL262: Cyc_Lex_token_char='\t'; return 344; case 45: _LL263: Cyc_Lex_token_char='\v';
+return 344; case 46: _LL264: Cyc_Lex_token_char='\\'; return 344; case 47:
+_LL265: Cyc_Lex_token_char='\''; return 344; case 48: _LL266: Cyc_Lex_token_char='"';
+return 344; case 49: _LL267: Cyc_Lex_token_char='?'; return 344; case 50: _LL268:
+Cyc_Lex_token_char=( unsigned char)(* Cyc_Lex_intconst( lexbuf, 2, 1, 8)).f2;
+return 344; case 51: _LL269: Cyc_Lex_token_char=( unsigned char)(* Cyc_Lex_intconst(
+lexbuf, 3, 1, 16)).f2; return 344; case 52: _LL270: Cyc_Lex_token_char= Cyc_Lexing_lexeme_char(
+lexbuf, 1); return 344; case 53: _LL271: return - 1; case 54: _LL272: return(
+int) Cyc_Lexing_lexeme_char( lexbuf, 0); default: _LL273:( lexbuf->refill_buff)(
+lexbuf); return Cyc_Lex_token_rec( lexbuf, lexstate);}( int) _throw(( void*)({
+struct Cyc_Lexing_Error_struct* _temp275=( struct Cyc_Lexing_Error_struct*)
+_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp275[ 0]=({ struct Cyc_Lexing_Error_struct
+_temp276; _temp276.tag= Cyc_Lexing_Error; _temp276.f1= _tag_arr("some action didn't return!",
+sizeof( unsigned char), 27u); _temp276;}); _temp275;}));} int Cyc_Lex_token(
+struct Cyc_Lexing_lexbuf* lexbuf){ return Cyc_Lex_token_rec( lexbuf, 0);} int
+Cyc_Lex_strng_rec( struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate=
+Cyc_Lex_lex_engine( lexstate, lexbuf); switch( lexstate){ case 0: _LL277: return
+1; case 1: _LL278: return 0; case 2: _LL279: return 1; case 3: _LL280: Cyc_Lex_store_string_char('\a');
+return 1; case 4: _LL281: Cyc_Lex_store_string_char('\b'); return 1; case 5:
+_LL282: Cyc_Lex_store_string_char('\f'); return 1; case 6: _LL283: Cyc_Lex_store_string_char('\n');
+return 1; case 7: _LL284: Cyc_Lex_store_string_char('\r'); return 1; case 8:
+_LL285: Cyc_Lex_store_string_char('\t'); return 1; case 9: _LL286: Cyc_Lex_store_string_char('\v');
+return 1; case 10: _LL287: Cyc_Lex_store_string_char('\\'); return 1; case 11:
+_LL288: Cyc_Lex_store_string_char('\''); return 1; case 12: _LL289: Cyc_Lex_store_string_char('"');
+return 1; case 13: _LL290: Cyc_Lex_store_string_char('?'); return 1; case 14:
+_LL291: Cyc_Lex_store_string_char(( unsigned char)(* Cyc_Lex_intconst( lexbuf, 1,
+0, 8)).f2); return 1; case 15: _LL292: Cyc_Lex_store_string_char(( unsigned char)(*
+Cyc_Lex_intconst( lexbuf, 2, 0, 16)).f2); return 1; case 16: _LL293: Cyc_Lex_store_string_char(
+Cyc_Lexing_lexeme_char( lexbuf, 0)); return 1; case 17: _LL294: Cyc_Lex_runaway_err(
+_tag_arr("string ends in newline", sizeof( unsigned char), 23u), lexbuf); return
+0; case 18: _LL295: Cyc_Lex_runaway_err( _tag_arr("unterminated string", sizeof(
+unsigned char), 20u), lexbuf); return 0; case 19: _LL296: Cyc_Lex_err( _tag_arr("bad character following backslash in string",
+sizeof( unsigned char), 44u), lexbuf); return 1; default: _LL297:( lexbuf->refill_buff)(
+lexbuf); return Cyc_Lex_strng_rec( lexbuf, lexstate);}( int) _throw(( void*)({
+struct Cyc_Lexing_Error_struct* _temp299=( struct Cyc_Lexing_Error_struct*)
+_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp299[ 0]=({ struct Cyc_Lexing_Error_struct
+_temp300; _temp300.tag= Cyc_Lexing_Error; _temp300.f1= _tag_arr("some action didn't return!",
+sizeof( unsigned char), 27u); _temp300;}); _temp299;}));} int Cyc_Lex_strng(
+struct Cyc_Lexing_lexbuf* lexbuf){ return Cyc_Lex_strng_rec( lexbuf, 1);} int
+Cyc_Lex_comment_rec( struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate=
+Cyc_Lex_lex_engine( lexstate, lexbuf); switch( lexstate){ case 0: _LL301: ++ Cyc_Lex_comment_depth;
+return Cyc_Lex_comment( lexbuf); case 1: _LL302: -- Cyc_Lex_comment_depth; if(
+Cyc_Lex_comment_depth >  0){ return Cyc_Lex_comment( lexbuf);} return 0; case 2:
+_LL303: Cyc_Lex_runaway_err( _tag_arr("unterminated comment", sizeof(
+unsigned char), 21u), lexbuf); return 0; case 3: _LL304: return Cyc_Lex_comment(
+lexbuf); case 4: _LL305: return Cyc_Lex_comment( lexbuf); case 5: _LL306: return
+Cyc_Lex_comment( lexbuf); default: _LL307:( lexbuf->refill_buff)( lexbuf);
+return Cyc_Lex_comment_rec( lexbuf, lexstate);}( int) _throw(( void*)({ struct
+Cyc_Lexing_Error_struct* _temp309=( struct Cyc_Lexing_Error_struct*) _cycalloc(
+sizeof( struct Cyc_Lexing_Error_struct)); _temp309[ 0]=({ struct Cyc_Lexing_Error_struct
 _temp310; _temp310.tag= Cyc_Lexing_Error; _temp310.f1= _tag_arr("some action didn't return!",
 sizeof( unsigned char), 27u); _temp310;}); _temp309;}));} int Cyc_Lex_comment(
 struct Cyc_Lexing_lexbuf* lexbuf){ return Cyc_Lex_comment_rec( lexbuf, 2);} void

@@ -45,6 +45,7 @@ cyclone:
 tools:
 	$(MAKE) install -C tools/bison
 	$(MAKE) install -C tools/cyclex
+	$(MAKE) install -C tools/flex
 .PHONY: tools
 
 libs:
@@ -76,7 +77,7 @@ endif
 
 ifdef BIN_INSTALL
 bin_install:
-	$(SHELL) config/cyc_install bin/cyclone$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) $(BIN_INSTALL)
+	$(SHELL) config/cyc_install bin/cyclone$(EXE) bin/cycbison$(EXE) bin/cyclex$(EXE) bin/cycflex$(EXE) $(BIN_INSTALL)
 bin_uninstall:
 	$(SHELL) config/cyc_install -u $(BIN_INSTALL)
 else
@@ -246,6 +247,7 @@ clean_src_prefix:
 clean_nogc:
 	$(MAKE) clean -C tools/bison
 	$(MAKE) clean -C tools/cyclex
+	$(MAKE) clean -C tools/flex
 	$(MAKE) clean -C tools/aprof
 	$(MAKE) clean -C src
 	$(MAKE) clean -C lib
@@ -265,6 +267,7 @@ clean_nogc:
 	$(RM) bin/buildlib bin/buildlib.exe 
 	$(RM) bin/cycbison bin/cycbison.exe 
 	$(RM) bin/cyclex bin/cyclex.exe
+	$(RM) bin/cycflex bin/cycflex.exe
 	$(RM) bin/aprof bin/aprof.exe
 	$(RM) *~ doc/*~ amon.out
 

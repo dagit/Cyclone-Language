@@ -281,33 +281,32 @@ struct _tagged_arr s, unsigned char c, unsigned int n); extern struct
 _tagged_arr Cyc_Std_mmemchr( struct _tagged_arr s, unsigned char c, unsigned int
 n); extern struct _tagged_arr Cyc_Std_memset( struct _tagged_arr s,
 unsigned char c, unsigned int n); extern void Cyc_Std_bzero( struct _tagged_arr
-s, unsigned int n, unsigned int sz); extern void Cyc_Std_bcopy( struct
-_tagged_arr src, struct _tagged_arr dst, unsigned int n, unsigned int sz);
-extern struct _tagged_arr Cyc_Std_expand( struct _tagged_arr s, unsigned int sz);
-extern struct _tagged_arr Cyc_Std_rexpand( struct _RegionHandle*, struct
-_tagged_arr s, unsigned int sz); extern struct _tagged_arr Cyc_Std_realloc_str(
-struct _tagged_arr str, unsigned int sz); extern struct _tagged_arr Cyc_Std_rrealloc_str(
-struct _RegionHandle* r, struct _tagged_arr str, unsigned int sz); extern struct
-_tagged_arr Cyc_Std_strdup( struct _tagged_arr src); extern struct _tagged_arr
-Cyc_Std_rstrdup( struct _RegionHandle*, struct _tagged_arr src); extern struct
-_tagged_arr Cyc_Std_substring( struct _tagged_arr, int ofs, unsigned int n);
-extern struct _tagged_arr Cyc_Std_rsubstring( struct _RegionHandle*, struct
-_tagged_arr, int ofs, unsigned int n); extern struct _tagged_arr Cyc_Std_replace_suffix(
-struct _tagged_arr, struct _tagged_arr, struct _tagged_arr); extern struct
-_tagged_arr Cyc_Std_rreplace_suffix( struct _RegionHandle* r, struct _tagged_arr
-src, struct _tagged_arr curr_suffix, struct _tagged_arr new_suffix); extern
-struct _tagged_arr Cyc_Std_strchr( struct _tagged_arr s, unsigned char c);
-extern struct _tagged_arr Cyc_Std_mstrchr( struct _tagged_arr s, unsigned char c);
-extern struct _tagged_arr Cyc_Std_mstrrchr( struct _tagged_arr s, unsigned char
-c); extern struct _tagged_arr Cyc_Std_strrchr( struct _tagged_arr s,
-unsigned char c); extern struct _tagged_arr Cyc_Std_mstrstr( struct _tagged_arr
-haystack, struct _tagged_arr needle); extern struct _tagged_arr Cyc_Std_strstr(
+s, unsigned int n); extern void Cyc_Std_bcopy( struct _tagged_arr src, struct
+_tagged_arr dst, unsigned int n, unsigned int sz); extern struct _tagged_arr Cyc_Std_expand(
+struct _tagged_arr s, unsigned int sz); extern struct _tagged_arr Cyc_Std_rexpand(
+struct _RegionHandle*, struct _tagged_arr s, unsigned int sz); extern struct
+_tagged_arr Cyc_Std_realloc_str( struct _tagged_arr str, unsigned int sz);
+extern struct _tagged_arr Cyc_Std_rrealloc_str( struct _RegionHandle* r, struct
+_tagged_arr str, unsigned int sz); extern struct _tagged_arr Cyc_Std_strdup(
+struct _tagged_arr src); extern struct _tagged_arr Cyc_Std_rstrdup( struct
+_RegionHandle*, struct _tagged_arr src); extern struct _tagged_arr Cyc_Std_substring(
+struct _tagged_arr, int ofs, unsigned int n); extern struct _tagged_arr Cyc_Std_rsubstring(
+struct _RegionHandle*, struct _tagged_arr, int ofs, unsigned int n); extern
+struct _tagged_arr Cyc_Std_replace_suffix( struct _tagged_arr, struct
+_tagged_arr, struct _tagged_arr); extern struct _tagged_arr Cyc_Std_rreplace_suffix(
+struct _RegionHandle* r, struct _tagged_arr src, struct _tagged_arr curr_suffix,
+struct _tagged_arr new_suffix); extern struct _tagged_arr Cyc_Std_strchr( struct
+_tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_mstrchr(
+struct _tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_mstrrchr(
+struct _tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_strrchr(
+struct _tagged_arr s, unsigned char c); extern struct _tagged_arr Cyc_Std_mstrstr(
 struct _tagged_arr haystack, struct _tagged_arr needle); extern struct
-_tagged_arr Cyc_Std_strpbrk( struct _tagged_arr s, struct _tagged_arr accept);
-extern struct _tagged_arr Cyc_Std_mstrpbrk( struct _tagged_arr s, struct
-_tagged_arr accept); extern unsigned int Cyc_Std_strspn( struct _tagged_arr s,
-struct _tagged_arr accept); extern unsigned int Cyc_Std_strcspn( struct
-_tagged_arr s, struct _tagged_arr accept); extern struct _tagged_arr Cyc_Std_strtok(
+_tagged_arr Cyc_Std_strstr( struct _tagged_arr haystack, struct _tagged_arr
+needle); extern struct _tagged_arr Cyc_Std_strpbrk( struct _tagged_arr s, struct
+_tagged_arr accept); extern struct _tagged_arr Cyc_Std_mstrpbrk( struct
+_tagged_arr s, struct _tagged_arr accept); extern unsigned int Cyc_Std_strspn(
+struct _tagged_arr s, struct _tagged_arr accept); extern unsigned int Cyc_Std_strcspn(
+struct _tagged_arr s, struct _tagged_arr accept); extern struct _tagged_arr Cyc_Std_strtok(
 struct _tagged_arr s, struct _tagged_arr delim); extern struct Cyc_List_List*
 Cyc_Std_explode( struct _tagged_arr s); extern struct Cyc_List_List* Cyc_Std_rexplode(
 struct _RegionHandle*, struct _tagged_arr s); extern struct _tagged_arr Cyc_Std_implode(
@@ -727,17 +726,18 @@ struct Cyc_Core_Invalid_argument_struct _temp53; _temp53.tag= Cyc_Core_Invalid_a
 _temp53.f1= _tag_arr("Std::memset", sizeof( unsigned char), 12u); _temp53;});
 _temp52;}));} memset(( unsigned char*) _check_null( _untag_arr( s, sizeof(
 unsigned char), 1u)), c, n); return s;} void Cyc_Std_bzero( struct _tagged_arr s,
-unsigned int n, unsigned int sz){ if( s.curr == ( _tag_arr( 0u, 0u, 0u)).curr? 1:
-_get_arr_size( s, sizeof( void)) <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+unsigned int n){ if( s.curr == ( _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size(
+s, sizeof( unsigned char)) <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
 _temp54=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp54[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp55; _temp55.tag= Cyc_Core_Invalid_argument; _temp55.f1= _tag_arr("Std::bzero",
-sizeof( unsigned char), 11u); _temp55;}); _temp54;}));} bzero(( void*)
-_check_null( _untag_arr( s, sizeof( void), 1u)), n *  sz);} void Cyc_Std_bcopy(
-struct _tagged_arr src, struct _tagged_arr dst, unsigned int n, unsigned int sz){
-if((( src.curr == (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1:
-_get_arr_size( src, sizeof( void)) <  n)? 1: dst.curr == ( _tag_arr( 0u, 0u, 0u)).curr)?
-1: _get_arr_size( dst, sizeof( void)) <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+sizeof( unsigned char), 11u); _temp55;}); _temp54;}));}(( void(*)( unsigned char*
+s, unsigned int n)) bzero)(( unsigned char*) _check_null( _untag_arr( s, sizeof(
+unsigned char), 1u)), n);} void Cyc_Std_bcopy( struct _tagged_arr src, struct
+_tagged_arr dst, unsigned int n, unsigned int sz){ if((( src.curr == (( struct
+_tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( src, sizeof( void))
+<  n)? 1: dst.curr == ( _tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( dst,
+sizeof( void)) <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
 _temp56=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
 Cyc_Core_Invalid_argument_struct)); _temp56[ 0]=({ struct Cyc_Core_Invalid_argument_struct
 _temp57; _temp57.tag= Cyc_Core_Invalid_argument; _temp57.f1= _tag_arr("Std::bcopy",

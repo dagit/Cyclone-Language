@@ -84,7 +84,7 @@ extern int memcmp(const char ?s1, const char ?s2, size_t n);
 extern const char ?`r memchr(const char ?`r s, char c, size_t n);
 extern char ?`r mmemchr(char ?`r s, char c, size_t n);
 extern char ?`r memset(char ?`r s, char c, size_t n);
-extern void bzero(`a::A? s, size_t n, sizeof_t<`a> sz);
+extern void bzero(char? s, size_t n);
 extern void bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz);
                                         
 // Allocating

@@ -259,8 +259,8 @@ _tagged_arr* end, int base); extern unsigned int Cyc_Std_mstrtoul( struct
 _tagged_arr n, struct _tagged_arr* endptr, int base); extern void Cyc_Std_qsort(
 struct _tagged_arr tab, unsigned int nmemb, unsigned int szmemb, int(* compar)(
 const void*, const void*)); extern int Cyc_Std_system( struct _tagged_arr);
-extern void Cyc_Std_free( void*); extern double atof( unsigned char*); extern
-int atoi( unsigned char*); extern int atol( unsigned char*); extern
+extern void Cyc_Std_free( struct _tagged_arr); extern double atof( unsigned char*);
+extern int atoi( unsigned char*); extern int atol( unsigned char*); extern
 unsigned char* getenv( unsigned char*); extern int putenv( unsigned char*);
 extern double strtod( unsigned char*, unsigned char**); extern int strtol(
 unsigned char*, unsigned char**, int); extern unsigned int strtoul(
@@ -316,4 +316,4 @@ _temp5.f1= _tag_arr("Std::qsort", sizeof( unsigned char), 11u); _temp5;});
 _temp4;}));} qsort(( void*) _check_null( _untag_arr( tab, sizeof( void), 1u)),
 nmemb,( unsigned int) szmemb,( int(*)( const void*, const void*)) compar);} int
 Cyc_Std_system( struct _tagged_arr cmd){ return system( string_to_Cstring( cmd));}
-void Cyc_Std_free( void* ptr){;}
+void Cyc_Std_free( struct _tagged_arr ptr){;}

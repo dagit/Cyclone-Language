@@ -346,73 +346,75 @@ Cyc_Std_Long= 1; struct Cyc_Std_Long_struct{ int tag; int f1; } ; extern int Cyc
 struct _tagged_arr, int, struct _tagged_arr); struct Cyc_Std_timeval{ int tv_sec;
 int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; }
 ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
-__z); typedef struct { unsigned int __val[ 64u]; } Cyc_Std___sigset_t; typedef
-Cyc_Std___sigset_t Cyc_Std_sigset_t; struct Cyc_Std_timespec{ int tv_sec; int
-tv_nsec; } ; struct Cyc_Std_timeval; struct Cyc_Std___fd_set{ int __fds_bits[ 32u];
-} ; extern int select( int, struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*,
-struct Cyc_Std___fd_set*, struct Cyc_Std_timeval*); struct Cyc_Std_option{
-struct _tagged_arr name; int has_arg; int* flag; int val; } ; extern
-unsigned int alarm( unsigned int seconds); extern int close( int); extern void
-_exit( int); extern int getpid(); extern int getppid(); extern int fork();
-extern int fchdir( int); extern int fchown( int, unsigned int, unsigned int);
-extern int fsync( int); extern int ftruncate( int, int); extern int dup( int);
-extern int dup2( int, int); extern int setsid(); extern int getsid( int pid);
-extern unsigned int getuid(); extern int setuid( unsigned int uid); extern
-unsigned int geteuid(); extern int seteuid( unsigned int euid); extern
-unsigned int getgid(); extern int setgid( unsigned int gid); extern unsigned int
-getegid(); extern int setegid( unsigned int egid); extern int nice( int); extern
-int pause(); extern int pipe( int* filedes); extern int lseek( int filedes, int
-offset, int whence); extern unsigned int sleep( unsigned int); extern int isatty(
-int); extern int daemon( int nochdir, int noclose); int Cyc_Std_access( struct
-_tagged_arr, int); int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown(
-struct _tagged_arr, unsigned int, unsigned int); struct _tagged_arr Cyc_Std_getcwd(
-struct _tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct
-_tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp(
-struct _tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int
-Cyc_Std_execve( struct _tagged_arr filename, struct _tagged_arr argv, struct
-_tagged_arr envp); int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr);
-int Cyc_Std_read( int fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir(
-struct _tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr);
-int Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd,
-struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
-_tagged_arr pathname); int Cyc_Std_gethostname( struct _tagged_arr, unsigned int);
-int Cyc_Std_chroot( struct _tagged_arr); struct _tagged_arr Cyc_Std_getpass(
-struct _tagged_arr prompt); extern int isalnum( int); extern int isalpha( int);
-extern int isascii( int); extern int iscntrl( int); extern int isdigit( int);
-extern int isgraph( int); extern int islower( int); extern int isprint( int);
-extern int ispunct( int); extern int isspace( int); extern int isupper( int);
-extern int isxdigit( int); extern int toascii( int); extern int tolower( int);
-extern int toupper( int); extern int _tolower( int); extern int _toupper( int);
-static const int Cyc_Absyn_Loc_n= 0; static const int Cyc_Absyn_Rel_n= 0; struct
-Cyc_Absyn_Rel_n_struct{ int tag; struct Cyc_List_List* f1; } ; static const int
-Cyc_Absyn_Abs_n= 1; struct Cyc_Absyn_Abs_n_struct{ int tag; struct Cyc_List_List*
-f1; } ; struct _tuple0{ void* f1; struct _tagged_arr* f2; } ; struct Cyc_Absyn_Conref;
-static const int Cyc_Absyn_Static= 0; static const int Cyc_Absyn_Abstract= 1;
-static const int Cyc_Absyn_Public= 2; static const int Cyc_Absyn_Extern= 3;
-static const int Cyc_Absyn_ExternC= 4; struct Cyc_Absyn_Tqual{ int q_const: 1;
-int q_volatile: 1; int q_restrict: 1; } ; static const int Cyc_Absyn_B1= 0;
-static const int Cyc_Absyn_B2= 1; static const int Cyc_Absyn_B4= 2; static const
-int Cyc_Absyn_B8= 3; static const int Cyc_Absyn_AnyKind= 0; static const int Cyc_Absyn_MemKind=
-1; static const int Cyc_Absyn_BoxKind= 2; static const int Cyc_Absyn_RgnKind= 3;
-static const int Cyc_Absyn_EffKind= 4; static const int Cyc_Absyn_Signed= 0;
-static const int Cyc_Absyn_Unsigned= 1; struct Cyc_Absyn_Conref{ void* v; } ;
-static const int Cyc_Absyn_Eq_constr= 0; struct Cyc_Absyn_Eq_constr_struct{ int
-tag; void* f1; } ; static const int Cyc_Absyn_Forward_constr= 1; struct Cyc_Absyn_Forward_constr_struct{
-int tag; struct Cyc_Absyn_Conref* f1; } ; static const int Cyc_Absyn_No_constr=
-0; static const int Cyc_Absyn_Eq_kb= 0; struct Cyc_Absyn_Eq_kb_struct{ int tag;
-void* f1; } ; static const int Cyc_Absyn_Unknown_kb= 1; struct Cyc_Absyn_Unknown_kb_struct{
-int tag; struct Cyc_Core_Opt* f1; } ; static const int Cyc_Absyn_Less_kb= 2;
-struct Cyc_Absyn_Less_kb_struct{ int tag; struct Cyc_Core_Opt* f1; void* f2; } ;
-struct Cyc_Absyn_Tvar{ struct _tagged_arr* name; int* identity; void* kind; } ;
-static const int Cyc_Absyn_Unknown_b= 0; static const int Cyc_Absyn_Upper_b= 0;
-struct Cyc_Absyn_Upper_b_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; struct
-Cyc_Absyn_PtrInfo{ void* elt_typ; void* rgn_typ; struct Cyc_Absyn_Conref*
-nullable; struct Cyc_Absyn_Tqual tq; struct Cyc_Absyn_Conref* bounds; } ; struct
-Cyc_Absyn_VarargInfo{ struct Cyc_Core_Opt* name; struct Cyc_Absyn_Tqual tq; void*
-type; int inject; } ; struct Cyc_Absyn_FnInfo{ struct Cyc_List_List* tvars;
-struct Cyc_Core_Opt* effect; void* ret_typ; struct Cyc_List_List* args; int
-c_varargs; struct Cyc_Absyn_VarargInfo* cyc_varargs; struct Cyc_List_List*
-rgn_po; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_UnknownTunionInfo{
+__z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
+it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
+setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
+typedef struct { unsigned int __val[ 64u]; } Cyc_Std___sigset_t; typedef Cyc_Std___sigset_t
+Cyc_Std_sigset_t; struct Cyc_Std_timespec{ int tv_sec; int tv_nsec; } ; struct
+Cyc_Std_timeval; struct Cyc_Std___fd_set{ int __fds_bits[ 32u]; } ; extern int
+select( int, struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*, struct Cyc_Std___fd_set*,
+struct Cyc_Std_timeval*); struct Cyc_Std_option{ struct _tagged_arr name; int
+has_arg; int* flag; int val; } ; extern unsigned int alarm( unsigned int seconds);
+extern int close( int); extern void _exit( int); extern int getpid(); extern int
+getppid(); extern int fork(); extern int fchdir( int); extern int fchown( int,
+unsigned int, unsigned int); extern int fsync( int); extern int ftruncate( int,
+int); extern int dup( int); extern int dup2( int, int); extern int setsid();
+extern int getsid( int pid); extern unsigned int getuid(); extern int setuid(
+unsigned int uid); extern unsigned int geteuid(); extern int seteuid(
+unsigned int euid); extern unsigned int getgid(); extern int setgid(
+unsigned int gid); extern unsigned int getegid(); extern int setegid(
+unsigned int egid); extern int nice( int); extern int pause(); extern int pipe(
+int* filedes); extern int lseek( int filedes, int offset, int whence); extern
+unsigned int sleep( unsigned int); extern int isatty( int); extern int daemon(
+int nochdir, int noclose); int Cyc_Std_access( struct _tagged_arr, int); int Cyc_Std_chdir(
+struct _tagged_arr); int Cyc_Std_chown( struct _tagged_arr, unsigned int,
+unsigned int); struct _tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf,
+unsigned int size); int Cyc_Std_execl( struct _tagged_arr path, struct
+_tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp( struct
+_tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execve(
+struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp);
+int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr); int Cyc_Std_read( int
+fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir( struct
+_tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr); int
+Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd, struct
+_tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct _tagged_arr
+pathname); int Cyc_Std_gethostname( struct _tagged_arr, unsigned int); int Cyc_Std_chroot(
+struct _tagged_arr); struct _tagged_arr Cyc_Std_getpass( struct _tagged_arr
+prompt); extern int isalnum( int); extern int isalpha( int); extern int isascii(
+int); extern int iscntrl( int); extern int isdigit( int); extern int isgraph(
+int); extern int islower( int); extern int isprint( int); extern int ispunct(
+int); extern int isspace( int); extern int isupper( int); extern int isxdigit(
+int); extern int toascii( int); extern int tolower( int); extern int toupper(
+int); extern int _tolower( int); extern int _toupper( int); static const int Cyc_Absyn_Loc_n=
+0; static const int Cyc_Absyn_Rel_n= 0; struct Cyc_Absyn_Rel_n_struct{ int tag;
+struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_Abs_n= 1; struct Cyc_Absyn_Abs_n_struct{
+int tag; struct Cyc_List_List* f1; } ; struct _tuple0{ void* f1; struct
+_tagged_arr* f2; } ; struct Cyc_Absyn_Conref; static const int Cyc_Absyn_Static=
+0; static const int Cyc_Absyn_Abstract= 1; static const int Cyc_Absyn_Public= 2;
+static const int Cyc_Absyn_Extern= 3; static const int Cyc_Absyn_ExternC= 4;
+struct Cyc_Absyn_Tqual{ int q_const: 1; int q_volatile: 1; int q_restrict: 1; }
+; static const int Cyc_Absyn_B1= 0; static const int Cyc_Absyn_B2= 1; static
+const int Cyc_Absyn_B4= 2; static const int Cyc_Absyn_B8= 3; static const int
+Cyc_Absyn_AnyKind= 0; static const int Cyc_Absyn_MemKind= 1; static const int
+Cyc_Absyn_BoxKind= 2; static const int Cyc_Absyn_RgnKind= 3; static const int
+Cyc_Absyn_EffKind= 4; static const int Cyc_Absyn_Signed= 0; static const int Cyc_Absyn_Unsigned=
+1; struct Cyc_Absyn_Conref{ void* v; } ; static const int Cyc_Absyn_Eq_constr= 0;
+struct Cyc_Absyn_Eq_constr_struct{ int tag; void* f1; } ; static const int Cyc_Absyn_Forward_constr=
+1; struct Cyc_Absyn_Forward_constr_struct{ int tag; struct Cyc_Absyn_Conref* f1;
+} ; static const int Cyc_Absyn_No_constr= 0; static const int Cyc_Absyn_Eq_kb= 0;
+struct Cyc_Absyn_Eq_kb_struct{ int tag; void* f1; } ; static const int Cyc_Absyn_Unknown_kb=
+1; struct Cyc_Absyn_Unknown_kb_struct{ int tag; struct Cyc_Core_Opt* f1; } ;
+static const int Cyc_Absyn_Less_kb= 2; struct Cyc_Absyn_Less_kb_struct{ int tag;
+struct Cyc_Core_Opt* f1; void* f2; } ; struct Cyc_Absyn_Tvar{ struct _tagged_arr*
+name; int* identity; void* kind; } ; static const int Cyc_Absyn_Unknown_b= 0;
+static const int Cyc_Absyn_Upper_b= 0; struct Cyc_Absyn_Upper_b_struct{ int tag;
+struct Cyc_Absyn_Exp* f1; } ; struct Cyc_Absyn_PtrInfo{ void* elt_typ; void*
+rgn_typ; struct Cyc_Absyn_Conref* nullable; struct Cyc_Absyn_Tqual tq; struct
+Cyc_Absyn_Conref* bounds; } ; struct Cyc_Absyn_VarargInfo{ struct Cyc_Core_Opt*
+name; struct Cyc_Absyn_Tqual tq; void* type; int inject; } ; struct Cyc_Absyn_FnInfo{
+struct Cyc_List_List* tvars; struct Cyc_Core_Opt* effect; void* ret_typ; struct
+Cyc_List_List* args; int c_varargs; struct Cyc_Absyn_VarargInfo* cyc_varargs;
+struct Cyc_List_List* rgn_po; struct Cyc_List_List* attributes; } ; struct Cyc_Absyn_UnknownTunionInfo{
 struct _tuple0* name; int is_xtunion; } ; static const int Cyc_Absyn_UnknownTunion=
 0; struct Cyc_Absyn_UnknownTunion_struct{ int tag; struct Cyc_Absyn_UnknownTunionInfo
 f1; } ; static const int Cyc_Absyn_KnownTunion= 1; struct Cyc_Absyn_KnownTunion_struct{
