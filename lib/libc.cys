@@ -5,6 +5,11 @@
 // ;
 
 arpa/inet.h:
+cpp {
+ // OS X does not include struct in_addr in arpa/inet.h, but here instead
+ #include <sys/types.h>
+ #include <netinet/in.h>
+}
 include {
 in_port_t
 in_addr_t
@@ -17,13 +22,16 @@ uint16_t
 epilogue {
   /* Cygwin does not define these types so we take a guess :-( */
   /* FIX: make this specific to cygwin ?? */
-  #ifndef _uint32_t_def_
+  #ifndef _in_addr_t_def_
+  #define _in_addr_t_def_
   typedef unsigned long in_addr_t;
   #endif
-  #ifndef _uint32_t_def_
+  #ifndef _uint16_t_def_
+  #define _uint16_t_def_
   typedef unsigned short uint16_t;
   #endif
   #ifndef _uint32_t_def_
+  #define _uint32_t_def_
   typedef unsigned long uint32_t;
   #endif
 }
@@ -385,6 +393,9 @@ epilogue _toupper {
 // ;
 
 dirent.h:
+cpp {
+  #include <sys/types.h>
+}
 include {
 dirent
 ino_t
@@ -406,6 +417,8 @@ cycstub {
   };
 }
 cstub {
+  /* OS X needs sys/types.h before dirent.h */
+  #include <sys/types.h>
   #include <dirent.h>
   struct Cyc_Std___cycDIR { // must match defn in cyclone stub
     DIR *dir;
@@ -1788,6 +1801,9 @@ epilogue {
 // ;
 
 netinet/in.h:
+cpp {
+  #include <sys/types.h>
+}
 include {
 in_port_t
 in_addr_t
@@ -3532,6 +3548,10 @@ epilogue {
 ;
 
 sys/resource.h:
+cpp {
+  // This is needed on OS X to get struct timeval
+  #include <sys/time.h>
+}
 include {
 PRIO_PROCESS
 PRIO_PGRP
@@ -3563,6 +3583,11 @@ epilogue {
   // which Cyclone can't handle
 }
 epilogue getpriority {
+  /* OS X doesn't define id_t */
+  #ifndef _id_t_def_
+  #define _id_t_def_
+  typedef int id_t;
+  #endif
   extern "C" int getpriority(int, id_t);
 }
 epilogue getrlimit {
@@ -3600,6 +3625,15 @@ epilogue {
      is omitted by mistake.  This ugly hack fixes it in Cygwin for now. */
   #ifdef __types_fd_set_def_
   typedef struct _types_fd_set _types_fd_set;
+  #endif
+}
+epilogue {
+  /* FIX: OS X defines a struct fd_set and then a typedef with the
+     same name.  Our current scheme for omitting repeated declarations does
+     not use separate namespaces for structs and typedefs, so the typedef
+     is omitted by mistake.  This ugly hack fixes it in OS X for now. */
+  #ifdef __APPLE__
+  typedef struct fd_set fd_set;
   #endif
 }
 epilogue pselect {
@@ -3720,6 +3754,13 @@ epilogue {
   */
 }
 epilogue {
+  /* Many architectures don't define this :-( */
+  #ifndef _socklen_t_def_
+  #define _socklen_t_def_
+  typedef int socklen_t;
+  #endif
+}
+epilogue {
   extern tunion SockAddr<`r::R> {
     SA_sockaddr_in(struct sockaddr_in @`r);
     /* We will add other cases as necessary, e.g., SockAddr_In6 */
@@ -3752,6 +3793,11 @@ cycstub {
 cstub {
   #include <sys/socket.h>
   #include <netinet/in.h>
+}
+cstub {
+  #ifdef __APPLE__
+  typedef int socklen_t;
+  #endif
 }
 cycstub accept {
   namespace Csocket {
@@ -3879,6 +3925,8 @@ cycstub getsockopt {
   }
 }
 cstub getsockopt {
+  /* sys/time.h is needed on some systems (OS X) for struct timeval */
+  #include <sys/time.h>
   int getsockopt_int(int a, int b, int c, int *d, socklen_t *e) {
     return getsockopt(a,b,c,d,e);
   }

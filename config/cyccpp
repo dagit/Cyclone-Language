@@ -9,7 +9,22 @@
 #
 # Note: We are assuming (as is ../configure) that no architecture ends in .undef
 
-CPP="gcc -w -x c -E -U__GNUC__ -nostdinc"
+# Figure out CC (taken from realconfigure)
+ARCH=`../../config/config.guess`
+TYPE=`echo ${ARCH} | awk -F'-' '{ print $2 }'`
+if [ "$TYPE" = "apple" ]; then
+  CC="cc -no-cpp-precomp"
+else
+  for comp in gcc cc; do
+    CC=`which $comp 2> /dev/null`
+    if [ -n "$CC" -a -x "$CC" ]; then
+      CC=$comp
+      break
+    fi
+  done
+fi
+
+CPP="$CC -w -x c -E -U__GNUC__ -nostdinc"
 
 if [ $# -lt 3 ]; then
   echo usage: $0 this_architecture target_architecture

@@ -19,47 +19,16 @@
    precalculate the sizes using gcc, and do a textual replace of the
    sizeof expression with the actual size.
 
-   Suppose foo() has void return type.  Then Cyclone complains if we
-       return foo();
-   C doesn't complain, maybe we shouldn't.
+   Cyclone does not currently handle long double complex, which is
+   needed in <complex.h>.
 
-   Some of the C libraries define types (typedef) as anonymous
-   structs.  When our pretty-printer expands them the result is C code
-   that gcc complains about.  We should never expand such a typedef.
-   In the meantime -noexpandtypedefs works.  An example of this is
-   fpos_t in stdio.h.
+   On some systems types aren't defined where they should be.  I
+   added cpp for this case, but it would be better to do things
+   automatically.
 
-   Cygwin stdio.h has an inline function.  Probably we don't have to
-   worry about inline functions because they are used in function
-   macros, and we're planning on hand-coding all the functions.
-
-   Cygwin netinet/in.h and arpa/tcp.h don't work because of asm.
-   Also, __inline__ not on a function.
-
-   Consider a macro foo defined as follows:
-     extern int __foo();
-     #define foo (__foo())
-   We don't want __foo to be declared as extern in the Cyclone file,
-   we want it to be declared extern "C".  Furthermore, if __foo appears
-   in the Std namespace, we want foo defined as
-     #define foo(Std::__foo())
-   so that it can be used whether or not Std is open.
-
-   On Linux in dirent.h we have:
-     // This is the data type of directory stream objects.
-     // The actual structure is opaque to users.
-     typedef struct __dirstream DIR;
-   Currently this means that whenever dirent.h is included we have a
-   bunch of function declarations that use a previously undeclared
-   struct, and we get warnings like
-     warning: `struct Cyc_Std___dirstream' declared inside parameter list
-   We can get rid of these warnings by adding the declaration
-     namespace Std {extern struct __dirstream;}
-   before including dirent.h, but maybe we should not print the
-   warning in the first place ???
-
-   Cyclone does not currently handle long double, which is needed
-   in <math.h>.
+   Some systems don't define types at all -- e.g., socklen_t.  In
+   such cases we might be able to derive the type from a function
+   that uses it; we currently just take a guess.
 
  */
 
@@ -166,6 +135,7 @@ list_t<ifdefined_t> current_cycstubs = NULL;
 list_t<ifdefined_t> current_prologue = NULL;
 list_t<ifdefined_t> current_epilogue = NULL;
 list_t<stringptr_t> current_omit_symbols = NULL;
+list_t<stringptr_t> current_cpp = NULL;
 struct Buffer::t *specbuf = NULL;
 int braces_to_match = 0;
 int parens_to_match = 0;
@@ -444,6 +414,10 @@ and slurp = parse
 { fputs("*__IGNORE_FOR_CYCLONE_CALLOC ",(FILE @)slurp_out);
   log("Warning: declaration of calloc sidestepped\n");
   return slurp(lexbuf); }
+| "*region" /* Used in OS X in mach/vm_map.h, conflicts with our keyword */
+{ fputs("__region",(FILE @)slurp_out);
+  log("Warning: use of region sidestepped\n");
+  return slurp(lexbuf); }
 | "__extension__" /* Used in cygwin in sys/reent.h */
 { return slurp(lexbuf); }
 | "__attribute__ ((__mode__ (__HI__)))" /* Used in linux in _G_config.h */
@@ -457,6 +431,8 @@ and slurp = parse
 | "__attribute__ ((__mode__ (__word__)))" /* Used in linux in sys/types.h */
 { return slurp(lexbuf); }
 | "__inline__" /* Used in cygwin in stdio.h */
+{ fputs("inline",(FILE @)slurp_out); return slurp(lexbuf); }
+| "__inline" /* Used in OS X */
 { fputs("inline",(FILE @)slurp_out); return slurp(lexbuf); }
 | "__const__"
 { fputs("const",(FILE @)slurp_out); return slurp(lexbuf); }
@@ -715,6 +691,13 @@ and commands = parse
   ifdefined_t x = new $((string_t)symbol,
                         (string_t)Buffer::contents((Buffer::T)specbuf));
   current_cycstubs = new List(x,current_cycstubs);
+  return commands(lexbuf); }
+| "cpp" ws* '{'
+{ braces_to_match = 1;
+  specbuf = Buffer::create(255);
+  if (block(lexbuf)) return 1;
+  stringptr_t x = new (string_t)Buffer::contents((Buffer::T)specbuf);
+  current_cpp = new List(x,current_cpp);
   return commands(lexbuf); }
 | "//" [^'\n''\r']*
 { return commands(lexbuf); }
@@ -1257,6 +1240,7 @@ and block_comment = parse
        filename = sys/types.h
        basename = types.h
        choppedname = types
+       cppinfile = types.iI
        preprocfile = types.i
        filteredfile = types.iX
        dirname = sys
@@ -1264,6 +1248,7 @@ and block_comment = parse
     */
     let basename = Filename::basename(filename);
     let choppedname = Filename::chop_extension(basename);
+    let cppinfile = strconcat(choppedname, ".iI");
     let preprocfile = strconcat(choppedname, ".i");
     let filteredfile = strconcat(choppedname, ".iX");
     let dirname = Filename::dirname(filename);
@@ -1281,9 +1266,21 @@ and block_comment = parse
 
     /* Get the macros out of the file */
     let GCC = Cstring_to_string(Ccomp);
-    let cmd = aprintf("echo '#include <%s>' | %s -E -dM -o %s -",
-                      filename,GCC,preprocfile);
+    maybe = fopen(cppinfile,"w");
+    if (!maybe) {
+      fprintf(stderr,"Error: could not create file %s\n",cppinfile);
+      return 1;
+    }
+    out_file = (FILE@)maybe;
+    current_cpp = imp_rev(current_cpp);
+    for (let l = current_cpp; l != NULL; l = l->tl)
+      fputs(*(l->hd),out_file);
+    fprintf(out_file,"#include <%s>\n",filename);
+    fclose(out_file);
+    let cmd = aprintf("%s -E -dM -o %s %s",
+                      GCC,preprocfile,cppinfile);
     if (system(cmd) != 0) {
+      remove(cppinfile);
       /* The header probably doesn't exist on this system;
          create a default header. */
       maybe = fopen(filename,"w");
@@ -1334,8 +1331,8 @@ and block_comment = parse
     fclose(in_file);
 
     /* Get the type declarations out of the file */
-    cmd = aprintf("echo '#include <%s>' | %s -E -o %s -",
-                  filename,GCC,preprocfile);
+    cmd = aprintf("%s -E -o %s %s",
+                  GCC,preprocfile,cppinfile);
     if (system(cmd) != 0) {
       return 1;
     }
@@ -1354,6 +1351,7 @@ and block_comment = parse
       fprintf(stderr,"Error: Unclosed string in %s\n",filename);
       fclose(in_file);
       fclose((FILE @)slurp_out);
+      remove(cppinfile);
       remove(preprocfile);
       remove(filteredfile);
       return 1;
@@ -1371,8 +1369,7 @@ and block_comment = parse
     let decls = Parse::parse_file(in_file);
     Lex::lex_init(); // garbage collect those big tries
     fclose(in_file);
-    // TEMP
-    //    remove(filteredfile);
+    remove(filteredfile);
 
     for (let d = decls; d != NULL; d = d->tl) {
       let entry = scan_decl(d->hd);
@@ -1563,8 +1560,8 @@ and block_comment = parse
     }
 
     /* Print reachable macros */
-    cmd = aprintf("echo '#include <%s>' | %s -E -dM -o %s -",
-                  filename,GCC,preprocfile);
+    cmd = aprintf("%s -E -dM -o %s %s",
+                  GCC,preprocfile,cppinfile);
     if (system(cmd) != 0) {
       return 1;
     }
@@ -1584,6 +1581,7 @@ and block_comment = parse
       }
     }
     fclose(in_file);
+    remove(cppinfile);
     remove(preprocfile);
 
     if (epilogue != NULL) {
@@ -1708,7 +1706,9 @@ and block_comment = parse
     return w;
   }
 
+  extern "C" void GC_blacklist_warn_clear();
   int main(int argc, char ??argv) {
+    GC_blacklist_warn_clear();
     if (argc < 3) {
       fprintf(stderr,
               "Usage: buildlib <dir> <spec>\n"
@@ -1757,12 +1757,14 @@ and block_comment = parse
     sizeof_shortint = getsize(dir,"","short int");
     sizeof_int = getsize(dir,"","int");
     sizeof_short = getsize(dir,"","short");
-    sizeof_fdmask = getsize(dir,"#include <sys/select.h>","fd_mask");
-    sizeof___fdmask = getsize(dir,"#include <sys/select.h>","__fd_mask");
+    /* sys/types is needed on OS X b/c it defines needed typedef u_int */
+    sizeof_fdmask = getsize(dir,"#include <sys/types.h>\n#include <sys/select.h>","fd_mask");
+    sizeof___fdmask = getsize(dir,"#include <sys/types.h>\n#include <sys/select.h>","__fd_mask");
     sizeof_uint32 = getsize(dir,"#include <sys/types.h>","__uint32_t");
-    sizeof_sockaddr = getsize(dir,"#include <sys/socket.h>","struct sockaddr");
-    sizeof_inport = getsize(dir,"#include <netinet/in.h>","in_port_t");
-    sizeof_inaddr = getsize(dir,"#include <netinet/in.h>","struct in_addr");
+    /* sys/types is needed on OS X b/c it defines needed typedef u_char */
+    sizeof_sockaddr = getsize(dir,"#include <sys/types.h>\n#include <sys/socket.h>","struct sockaddr");
+    sizeof_inport = getsize(dir,"#include <sys/types.h>\n#include <netinet/in.h>","in_port_t");
+    sizeof_inaddr = getsize(dir,"#include <sys/types.h>\n#include <netinet/in.h>","struct in_addr");
             
     for (int i = 2; i<argc; i++) {
       process_specfile(argv[i],dir);
