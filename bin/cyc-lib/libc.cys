@@ -931,10 +931,10 @@ hstub getgroups {
 hstub setgroups {
   extern "C" int setgroups(tag_t<`i> size, const gid_t @{valueof(`i)} list);
 }
-hstub getgrname {
+hstub getgrnam {
   // This and getgrid won't work quite right, since the imported group type
   // has a list of members; the * pointer will only reveal one of these.
-  extern "C" struct group *getgrnam(const char @ @zeroterm name);
+  extern "C" struct group *getgrnam(const char @ name);
 }
 hstub getgrgid {
   extern "C" struct group *getgrgid(gid_t gid);
