@@ -119,6 +119,9 @@ static bool print_zeroterm;
 // keep a track of the current namespace
 static list_t<var_t> curr_namespace = NULL;
 
+// used by cycdoc to suppress printing extern, etc.
+int print_for_cycdoc = false;
+
 struct Params {
   bool expand_typedefs :1;
   bool qvar_to_Cids :1;
@@ -690,7 +693,7 @@ doc_t ntyp2doc(type_t t) {
 //  		text(aprintf("%d",i)));
 //  	  break;
 //        default:
-	s = cat(text("%"),
+	s = cat(print_for_cycdoc?text("\\%"):text("%"),
 		text("("),
 		text(aprintf("%d",i)),
 		(!print_full_evars || tvs == NULL) ?
@@ -1279,7 +1282,7 @@ string_t prim2str(primop_t p) {
   case Times: return "*";
   case Minus: return "-";
   case Div: return "/";
-  case Mod: return "%";
+  case Mod: return (print_for_cycdoc?"\\%":"%");
   case Eq: return "==";
   case Neq: return "!=";
   case Gt: return ">";
@@ -1838,10 +1841,8 @@ doc_t decl2doc(decl_t d) {
   return s;
 }
 
-int print_scopes = true; // used by cycdoc to suppress printing extern, etc.
-
 doc_t scope2doc(scope_t sc) {
-  if (!print_scopes) return nil_doc();
+  if (print_for_cycdoc) return nil_doc();
   switch (sc) {
   case Static:   return text("static ");
   case Public:   return nil_doc();

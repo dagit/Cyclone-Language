@@ -50,7 +50,8 @@ extern struct Params {
   list_t<var_t> curr_namespace;
 };
 
-extern int print_scopes; // used by cycdoc to suppress printing extern, etc.
+// used by cycdoc to suppress printing extern, etc.
+extern int print_for_cycdoc;
 
 extern void set_params(struct Params @ `r fs);
 

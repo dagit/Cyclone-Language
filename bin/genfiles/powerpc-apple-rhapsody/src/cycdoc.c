@@ -1055,7 +1055,7 @@ qvar_to_Cids: 1;int add_cyc_prefix: 1;int to_VC: 1;int decls_first: 1;int
 rewrite_temp_tvars: 1;int print_all_tvars: 1;int print_all_kinds: 1;int
 print_all_effects: 1;int print_using_stmts: 1;int print_externC_stmts: 1;int
 print_full_evars: 1;int print_zeroterm: 1;int generate_line_directives: 1;int
-use_curr_namespace: 1;struct Cyc_List_List*curr_namespace;};extern int Cyc_Absynpp_print_scopes;
+use_curr_namespace: 1;struct Cyc_List_List*curr_namespace;};extern int Cyc_Absynpp_print_for_cycdoc;
 struct Cyc_PP_Doc*Cyc_Absynpp_decl2doc(struct Cyc_Absyn_Decl*d);void Cyc_Lex_lex_init(
 int use_cyclone_keywords);struct Cyc_Position_Segment{int start;int end;};struct Cyc_MatchDecl_struct{
 int tag;struct _dyneither_ptr f1;};struct Cyc_Standalone_struct{int tag;struct
@@ -1399,7 +1399,7 @@ struct _dyneither_ptr))Cyc_List_list)(_tag_dyneither(_tmp11F,sizeof(struct
 _tuple17*),5)))))))))));{const char*_tmp13E;Cyc_Arg_parse(options,Cyc_add_other,((
 _tmp13E="Options:",_tag_dyneither(_tmp13E,sizeof(char),9))),argv);}if(Cyc_cycdoc_files
 == 0){{const char*_tmp13F;Cyc_Arg_usage(options,((_tmp13F="Usage: cycdoc [options] file1 file2 ...\nOptions:",
-_tag_dyneither(_tmp13F,sizeof(char),49))));}exit(1);}Cyc_PP_tex_output=1;Cyc_Absynpp_print_scopes=
-0;{struct Cyc_List_List*_tmp6E=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))
+_tag_dyneither(_tmp13F,sizeof(char),49))));}exit(1);}Cyc_PP_tex_output=1;Cyc_Absynpp_print_for_cycdoc=
+1;{struct Cyc_List_List*_tmp6E=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))
 Cyc_List_rev)(Cyc_cycdoc_files);for(0;_tmp6E != 0;_tmp6E=_tmp6E->tl){Cyc_process_file(*((
 struct _dyneither_ptr*)_tmp6E->hd));}}return 0;}}
