@@ -356,6 +356,13 @@ void random_generate4() {
   for (int i = 0; i < n; i++) generate_end_tag();
 }
 
+/* Empty nest */
+void random_generate5() {
+  let n = len; // Need to keep because len is side-effected
+  for (int i = 0; i < n; i++) generate_tag();
+  for (int i = 0; i < n; i++) generate_end_tag();
+}
+
 /**********************************************************************/
 
 int main(int argc, char ??argv) {
@@ -371,7 +378,8 @@ int main(int argc, char ??argv) {
             " -1 n    string w/n printables by alg 1\n"
             " -2 n    string w/n printables, flat colors\n"
             " -3 n    string w/n printables, flat sizes\n"
-            " -4 n    string nested to n, one printable, len ~ 7n\n"
+            " -4 n    string nested to n, one printable, 725000 for 5MB\n"
+            " -5 n    string nested to n, no printables, 725000 for 5MB\n"
             " -help   print usage\n"
             "(n is always optional, default is 100000)\n"
             );
@@ -405,8 +413,12 @@ int main(int argc, char ??argv) {
     random_generate2();
   else if (algorithm == 3)
     random_generate3();
-  else
+  else if (algorithm == 4)
     random_generate4();
+  else if (algorithm == 5)
+    random_generate5();
+  else
+    random_generate0();
 
   return 0;
 }

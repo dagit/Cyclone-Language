@@ -59,15 +59,67 @@ doc_t copy_doc(doc_t d) {
   }
 }
 
-void dump(buf_t b, doc_t d) {
+/* Iterative dump so we don't go over the stack limit.
+   The old, recursive dump is now called dump_rec, see
+   below. */
+tunion finish {
+  EndTag(tag_t);
+  DocSeq(List::list_t<doc_t>);
+};
+typedef tunion finish dump_finish_t;
+void dump_iter(buf_t b, doc_t d) {
+  List::list_t<dump_finish_t> fs = List::list(new DocSeq(List::list(d)));
+  while (fs != null) {
+    let f = fs->hd;
+    fs = fs->tl;
+    switch (f) {
+    case &EndTag(tag):
+      try {
+        fwrite(end_tags[tag],1,strlen(end_tags[tag]),stdout);
+      } catch {
+      default: fprintf(stderr,"bad tag %d\n",tag); exit(1); break;
+      }
+      break;
+    case &DocSeq(docs):
+      while (docs != null) {
+        let d2 = docs->hd;
+        docs = docs->tl;
+        switch (d2) {
+        case &Text(i): Buffer::write_buf(stdout,b,i); break;
+        case &Spc(i): Buffer::write_buf(stdout,b,i); break;
+        case &Tagged(tag,d3):
+          try {
+            fwrite(start_tags[tag],1,strlen(start_tags[tag]),stdout); 
+            fs = new List::List(new DocSeq(List::list(d3)),
+                                new List::List(new EndTag(tag),
+                                               new List::List(new DocSeq(docs),
+                                                              fs)));
+            docs = null; // To get out of the inner while loop
+          } catch {
+          default: fprintf(stderr,"bad tag %d\n",tag); exit(1); break;
+          }
+          break;
+        case &Seq(ds):
+          docs = List::imp_append(ds,docs);
+          break;
+        case Mt: break;
+        }
+      }
+      break;
+    }
+  }
+}
+
+/* Old version of dump: simple but can go over stack limit */
+void dump_rec(buf_t b, doc_t d) {
   switch (d) {
-  case &Seq(ds): for (; ds != null; ds=ds->tl) dump(b,ds->hd); break;
+  case &Seq(ds): for (; ds != null; ds=ds->tl) dump_rec(b,ds->hd); break;
   case &Text(i): Buffer::write_buf(stdout,b,i); break;
   case &Spc(i): Buffer::write_buf(stdout,b,i); break;
   case &Tagged(tag,d):
     try {
       fwrite(start_tags[tag],1,strlen(start_tags[tag]),stdout); 
-      dump(b,d); 
+      dump_rec(b,d); 
       fwrite(end_tags[tag],1,strlen(end_tags[tag]),stdout);
     } catch {
     default: fprintf(stderr,"bad tag %d\n",tag); exit(1); break;
@@ -373,6 +425,9 @@ int main(int argc, char ??argv) {
   // fprintf(stderr,"%d\ncopying docs...",check_time()); fflush(stderr);
   // doc_t d = copy_doc(orig);
   doc_t d = get_docs(init_context,b,f);
+  //  fprintf(stderr,"\ndumping..."); fflush(stderr);
+  //  dump(b,d);
+  //  fprintf(stderr,"\nfinished!\n"); fflush(stderr);
   //  printf("\nDONE PARSING\n");
   d = remove_Mt(d);
 
@@ -422,7 +477,7 @@ int main(int argc, char ??argv) {
     break;
   }
   fprintf(stderr,"%d\ndumping docs...",check_time()); fflush(stderr);
-  dump(b,d);
+  dump_iter(b,d);
   let t = check_time();
   fprintf(stderr,"time left: %d sec out of %s sec\n",t,tlimit); fflush(stderr);
   //fprintf(stderr,"validating docs\n",t); fflush(stderr);
