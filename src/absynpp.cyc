@@ -531,6 +531,31 @@ doc_t group_braces(string_t<`H> sep, list_t<doc_t,`H> ss) {
   return cat(lb(), seq(sep,ss), rb());
 }
 
+// for debugging
+static void print_tms(list_t<type_modifier_t> tms) {
+  for (; tms != NULL; tms = tms->tl)
+    switch (tms->hd) {
+    case &Carray_mod(_): fprintf(stderr,"Carray_mod "); break;
+    case &ConstArray_mod(_,_):fprintf(stderr,"ConstArray_mod "); break;
+    case &Function_mod(&WithTypes(ys,_,_,_,_)):
+      fprintf(stderr,"Function_mod(");
+      for (; ys != NULL; ys = ys->tl) {
+        let v = (*ys->hd)[0];
+        if (v == NULL) fprintf(stderr,"?");
+        else fprintf(stderr,*v->v);
+        if (ys->tl != NULL) fprintf(stderr,",");
+      }
+      fprintf(stderr,") ");
+      break;
+    case &Function_mod(_):
+      fprintf(stderr,"Function_mod()"); break;
+    case &Attributes_mod(_,_):fprintf(stderr,"Attributes_mod "); break;
+    case &TypeParams_mod(_,_,_):fprintf(stderr,"TypeParams_mod "); break;
+    case &Pointer_mod(_,_):fprintf(stderr,"Pointer_mod "); break;
+    }
+  fprintf(stderr,"\n");
+}
+
 doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   if (tms==NULL) return d;
   doc_t rest = dtms2doc(false,d,tms->tl);
@@ -1828,6 +1853,20 @@ bool is_anon_aggrtype(type_t t) {
   }
 }
 
+// bubble the attribute modifier past a running series of 
+// Pointer_mod Function_mod's
+static list_t<type_modifier_t> bubble_attributes(type_modifier_t atts,
+                                                 list_t<type_modifier_t,`H> tms) {
+  if (tms != NULL && tms->tl != NULL) {
+    switch ($(tms->hd,tms->tl->hd)) {
+    case $(&Pointer_mod(_,_),&Function_mod(_)):
+      return new List(tms->hd,new List(tms->tl->hd,bubble_attributes(atts,tms->tl->tl)));
+    default: return new List(atts,tms);
+    }
+  } else return new List(atts,tms);
+}
+
+
 // Conversion between alternate forms of types
 $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
   switch (t) {
@@ -1843,8 +1882,8 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
 
   case &PointerType(PtrInfo(t2,tq2,ptratts)):
     let $(tq3,t3,tml3) = to_tms(tq2,t2);
-    type_modifier_t tm = new Pointer_mod(ptratts,tq);
-    return $(tq3, t3, new List(tm,tml3));
+    tml3 = new List(new Pointer_mod(ptratts,tq),tml3);
+    return $(tq3, t3, tml3);
 
   case &FnType(FnInfo{typvars,effopt,t2,args,c_varargs,cyc_varargs,
                         rgn_po,fn_atts}):
@@ -1875,8 +1914,11 @@ $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
     //   o for calling conventions, we put them before the args and rely
     //     on the caller to move them to the right place. KLUDGE! FIX!
     //     (I doubt this is right in all cases.)
-    if (fn_atts != NULL && !to_VC)
-      tms = new List(new Attributes_mod(NULL,fn_atts),tms);
+    if (fn_atts != NULL && !to_VC) {
+      // if the return type is a function pointer, then we have to
+      // move the attributes past that function modifier and so forth
+      tms = bubble_attributes(new Attributes_mod(NULL,fn_atts),tms);
+    }
     tms = new List(new Function_mod(new WithTypes(args,c_varargs,
                                                   cyc_varargs,effopt,
                                                   rgn_po)),tms);
@@ -1933,8 +1975,8 @@ doc_t tqtd2doc(tqual_t tq, type_t typ, opt_t<doc_t> dopt) {
   tms = List::imp_rev(tms);
   if (tms==NULL && dopt==NULL)
     return cat(tqual2doc(tq),ntyp2doc(t));
-  else
-    return
+  else 
+    return 
       cat(tqual2doc(tq),
           ntyp2doc(t),
           text(" "),

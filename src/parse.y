@@ -757,9 +757,6 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
         }
         decls = new List(d,decls);
       }
-      if (atts != NULL)
-	Tcutil::warn(loc,aprintf("attribute %s in typedef; ignoring",
-				 attribute2string(atts->hd)));
       return decls;
     } else {
       // here, we have a bunch of variable declarations
