@@ -147,9 +147,9 @@ Lexbuf<bool> from_string(mstring_t s) {
                true);
 }
 
-mstring_t lexeme(Lexbuf<`a> lbuf) {
-   int    len = lbuf->lex_curr_pos - lbuf->lex_start_pos;
-   mstring_t s   = new_string(len+1);
+mstring_t<`r> rlexeme(region_t<`r> r, Lexbuf<`a> lbuf) {
+   int       len = lbuf->lex_curr_pos - lbuf->lex_start_pos;
+   mstring_t s   = rnew_string(r,len+1);
    zstrncpy((char ? @nozeroterm)s, lbuf->lex_buffer + lbuf->lex_start_pos, len);
    s[len] = '\000';
 //     if (len == 0) {
@@ -158,6 +158,10 @@ mstring_t lexeme(Lexbuf<`a> lbuf) {
 //       fprintf(cyc_stderr,"!! Lexing::lexeme: 0 length!!\n");
 //     }
    return s;
+}
+
+mstring_t lexeme(Lexbuf<`a> lbuf) {
+  return rlexeme(Core::heap_region,lbuf);
 }
 
 char lexeme_char(Lexbuf<`a> lbuf, int i) {

@@ -80,6 +80,7 @@ extern Lexbuf<Function_lexbuf_state<`b>>
 extern Lexbuf<Function_lexbuf_state<FILE@`r>> from_file(FILE@`r);
 extern Lexbuf<bool> from_string(mstring_t);
 
+extern mstring_t<`r> rlexeme (region_t<`r>,Lexbuf<`a>);
 extern mstring_t lexeme      (Lexbuf<`a>);
 extern char      lexeme_char (Lexbuf<`a>, int);
 extern int       lexeme_start(Lexbuf<`a>);

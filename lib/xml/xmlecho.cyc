@@ -26,14 +26,25 @@ using Core;
 
 void doit(string_t file) {
   let fd = file_open(file,"r");
-  region r;
-  XmlDump::dumpContents(stdout,XmlParse::rparse_file(r,fd));
+  try {
+    region r;
+    let rslt = XmlParse::rparse_file(r,fd);
+    XmlDump::dumpContents(stdout,rslt);
+  } catch {
+  case &Failure(s):
+    fprintf(stderr,"Failure: %s\n",s);
+    fclose(fd);
+    exit(1);
+  case x:
+    fclose(fd);
+    throw x;
+  }
   fclose(fd);
 }
 
 int main(int argc, string_t ? argv) {
   argv++; // skip the name of the executable
-  for (int n = numelts(argv); n > 0; n--,argv++)
+  for (int n = numelts(argv); n > 0 && *argv; n--,argv++)
     doit(*argv);
   return 0;
 }

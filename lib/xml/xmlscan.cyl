@@ -54,19 +54,21 @@ int yylex(YYLEX_PARAM_ARG) {
   case InTag: ans = XmlScan::intag(lbuf->v); break;
   }
   switch (ans) {
-  case ATTVALUE1: fallthru;
-  case ATTVALUE2: fallthru;
-  case CDSECT: fallthru;
-  case CHARDATA: fallthru;
-  case COMMENT: fallthru;
-  case NAME: fallthru;
-  case OPEN: fallthru;
-  case OPENSLASH: fallthru;
+  case ATTVALUE1:
+  case ATTVALUE2:
+  case CDSECT:
+  case CHARDATA:
+  case COMMENT:
+  case NAME:
+  case OPEN:
+  case OPENSLASH:
   case REFERENCE:
-    yylval = YYSTYPE{.String_tok = XmlScan::token_string}; break;
+    *yylval_ptr = YYSTYPE{.String_tok = XmlScan::token_string}; break;
   case PI:
-    yylval = YYSTYPE{.Pi_tok = new $((string_t)XmlScan::token_pi,
-                                     (string_t)XmlScan::token_string)}; 
+    *yylval_ptr =
+      YYSTYPE{.Pi_tok = rnew(yyoutregion)
+                        $(XmlScan::token_pi,
+                          XmlScan::token_string)}; 
     break;
   default: break;
   }
@@ -93,14 +95,8 @@ static string_t pi_cell = NULL;
 static void pi_set(string_t<`H> s) { pi_cell = s; }
 static string_t pi_get() { return pi_cell; }
 
-static string_t after(int n,string_t s) {
-  try
-    return substring(s,n,strlen(s)-n);
-  catch {
-    case &Core::Invalid_argument(_):
-      error("internal lexing error");
-      return ""; // Unreachable
-  }
+static string_t after(int n,Lexbuf<`a> lexbuf) {
+  return get(lexbuf)+n;
 }
 
 void warning(string_t msg) {
@@ -116,16 +112,16 @@ let name = ['a'-'z' 'A'-'Z' '_' ':']
 
 /* The normal lexer */
 rule data = parse
-  '<' name            { token_string = after(1,get(lexbuf));
+  '<' name            { token_string = after(1,lexbuf);
                         return OPEN; } 
-| "</" name           { token_string = after(2,get(lexbuf));
+| "</" name           { token_string = after(2,lexbuf);
                         return OPENSLASH; } 
 | "&#" ['0'-'9']+ ';' { token_string = get(lexbuf);
                         return REFERENCE; }
 | '&' name ';'        { token_string = get(lexbuf);
                         return REFERENCE; }
 | "<![CDATA["         { purge(); return cdsect(lexbuf); }
-| "<?" name           { pi_set(after(2,get(lexbuf))); purge();
+| "<?" name           { pi_set(after(2,lexbuf)); purge();
                         return pi(lexbuf); }
 | "<!--"              { purge(); return comment(lexbuf); }
 | eof                 { return ENDOFFILE; }

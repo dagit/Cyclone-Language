@@ -27,8 +27,8 @@
 
 #define YYPARSE_PARAM_ARG region_t<`yy> yyoutregion, List::list_t<Xml::content_t<`yy>,`yy> @parse_result
 //#define YYPARSE_RET $(int, List::list_t<Xml::content_t<`yy>,`yy>)
-#define YYLEX_PARAM_ARG union YYSTYPE<`r> yylval
-#define YYLEX_ARG yylval
+#define YYLEX_PARAM_ARG region_t<`r> yyoutregion, union YYSTYPE<`r> @yylval_ptr
+#define YYLEX_ARG yyoutregion,&yylval
 
 extern int yyparse(YYPARSE_PARAM_ARG);
 
