@@ -99,3 +99,17 @@ This will build a cyclone executable that understands the -b flag:
   cyclone -b ARCH -o foo foo.cyc
 
 will produce an executable, foo, suitable for running on ARCH.
+
+
+BUILDING WITHOUT THE AP PACKAGE
+
+This should only be done for performance comparison purposes between the 
+old (unsound) Pratt code that uses ints, and the new code that uses 
+arbitrary-precision integers.
+
+To build without the AP package do
+
+  make clean
+  mv Makefile.in.in.noap Makefile.inc.in
+  ./configure
+  make
