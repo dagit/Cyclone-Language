@@ -22,6 +22,8 @@ The Cyclone compiler has the following command-line options:
 \item[-c]
   Produce an object (\texttt{.o}) file instead of an executable; do
   not link.
+\item[-x language]
+  Specify \textit{language} for the following input files
 \item[-s]
   Remove all symbol table and relocation information from the executable.
 \item[-O]
@@ -36,6 +38,8 @@ The Cyclone compiler has the following command-line options:
   Compile for profiling with the \texttt{gprof} tool.
 \item[-pa]
   Compile for profiling with the \texttt{aprof} tool.
+\item[-S]
+  Stop after producing assembly code.
 \item[-M]
   Produce dependencies for inclusion in a makefile.
 \item[-MG]
@@ -46,8 +50,6 @@ The Cyclone compiler has the following command-line options:
   the \texttt{-M} flag.
 \item[-E]
   Stop after preprocessing.
-\item[-S]
-  Stop after producing assembly code.
 \item[-nogc]
   Don't link in the garbage collector.
 \end{description}
@@ -58,9 +60,11 @@ In addition, the compiler has some options that are primarily of use
 to its developers:
 \begin{description}
 \item[-g]
-  Compile for debugging.  This is currently only useful for compiler
+  Compile for debugging.  This is bulletproof for compiler
   developers, as the debugging information reflects the C code that
   the Cyclone code is compiled to, and not the Cyclone code itself.
+  To have a look at Cyclone code during debugging (but not very
+  cleanly as of yet), also pass in \textit{--lineno} (see below).
 \item[-stopafter-parse]
   Stop after parsing.
 \item[-stopafter-tc]
@@ -79,8 +83,22 @@ to its developers:
   Don't delete temporary files.
 \item[-save-c]
   Don't delete temporary C files.
+\item[--lineno]
+  Insert \texttt{#line} directives in generated C code.  This slows down
+  compilation, but helps debugging.  Works best when also using
+  \texttt{-pp}.
+\item[--nochecks]
+  Disable all null and array bounds checks (still uses ``fat''
+  representation of \texttt{?} pointers).
+\item[--nonullchecks]
+  Disable null checks.
+\item[--noboundschecks]
+  Disable array bounds checks  (still uses ``fat''
+  representation of \texttt{?} pointers).
 \item[-use-cpp\textit{path}]
   Indicate which preprocessor to use.
+\item[-no-cpp-precomp]
+  Disable smart preprocessing (mac only).
 \item[-nocyc]
   Don't add the implicit namespace Cyc to variable names in the C output.
 \item[-noremoveunused]
