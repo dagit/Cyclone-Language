@@ -1119,6 +1119,11 @@ void dumpdecl(decl_t d, string_t comment) {
   static void add_cycarg(string_t<`H> s) {
     cycargs = new List(new s,cycargs);
   }
+  static string_t cyclone_file = "cyclone";
+  static void set_cyclone_file(string_t<`H> s) {
+    cyclone_file = s;
+  }
+
 
   /* Main loop */
   static void process_file(string_t<`H> filename) {
@@ -1129,13 +1134,11 @@ void dumpdecl(decl_t d, string_t comment) {
       str_sepstr(new List(new (string_t)"",
                           List::map(sh_escape_stringptr,rev(cycargs))),
                  " ");
-    let cmd = aprintf("cyclone %s -E -o %s -x cyc %s",
+    let cmd = aprintf("%s %s -E -o %s -x cyc %s",
+                      cyclone_file,
                       cycargs_string,
                       sh_escape_string(preprocfile),
                       sh_escape_string(filename));
-    //     let cmd = aprintf("gcc -E -B../lib -I../lib -D_PLATFORM_INCLUDES_=\\\"../include/arch/i686-unknown-cygwin1.3.2.h\\\" -nostdinc -o %s -x c %s",
-    //                       sh_escape_string(preprocfile),
-    //                       sh_escape_string(filename));
     if (system(string_to_Cstring(cmd)) != 0) {
       fprintf(stderr,"\nError: preprocessing\n");
       return;
@@ -1151,6 +1154,7 @@ void dumpdecl(decl_t d, string_t comment) {
     /* Find the location (pos_t) of each declaration */
     let poss = map(start2pos,map(decl2start,decls));
     Lineno::poss_of_abss(preprocfile, poss);
+    remove(preprocfile);
     let pos_decls = zip(map(snd,poss),decls);
     /* Filter out declarations from other files (from #include) */
     pos_decls = this_file(filename,pos_decls);
@@ -1171,7 +1175,6 @@ void dumpdecl(decl_t d, string_t comment) {
     /* Find the location (pos_t) of each comment */
     let poss = map(start2pos,map(fst,comments));
     Lineno::poss_of_abss(filename,poss);
-    remove(preprocfile);
     let pos_comments = zip(map(snd,poss),map(snd,comments));
     /* Filter out comments from other files (from #include) */
     pos_comments = this_file(filename,pos_comments);
@@ -1232,7 +1235,10 @@ void dumpdecl(decl_t d, string_t comment) {
   int main(int argc, string_t<`H> ?`H argv) {
 
     Arg::speclist_t<`H,`H> options =
-      list(new $("-D",true,"<name>[=<value>]",
+      list(new $("-cyclone",false," <file>",
+                 new String_spec(set_cyclone_file),
+                 "Use <file> as the cyclone compiler"),
+           new $("-D",true,"<name>[=<value>]",
                  new Flag_spec(add_cycarg),
                  "Pass definition to preprocessor"),
            new $("-I",true,"<dir>",

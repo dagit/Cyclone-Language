@@ -37,7 +37,7 @@ main-a4.pdf: gen-libdoc.tex
 
 gen-libdoc.tex: ../include/buffer.h ../include/hashtable.h \
   ../include/xarray.h
-	../src/cycdoc $^ > gen-libdoc.tex
+	../src/cycdoc -cyclone ../bin/cyclone $^ > gen-libdoc.tex
 
 clean:
 	$(RM) *.aux *.dvi *.hind *.haux *.idx *.ilg *.ind *.ing *.log
