@@ -421,9 +421,10 @@ static void do_exp(env_t nv, exp_t e) {
       if(bds_ck) {
 	if(bd) { // thin pointer
 	  if(!Evexp::c_can_eval(bd)) {
+            let $(c,_) = Vcgen::exp2ctxt_assn(nv.assn_info, e1);
 	    err(e->loc,"cannot determine subscript is in bounds");
-            fprintf(stderr,"[all that I can prove is ");
-            Relations::print_relns(stderr,get_relns(e1));
+            fprintf(stderr,"[all that I can prove is %s",
+                    AssnDef::assn2string(AssnDef::reduce(c)));
             fprintf(stderr,"]\n");
           }
 	  e->annot =
