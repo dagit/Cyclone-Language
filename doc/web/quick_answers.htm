@@ -1,0 +1,321 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Language" content="en-us">
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Cyclone Quick Answers</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta name="Microsoft Border" content="l, default">
+</head>
+
+<body><!--msnavigation--><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="1%">
+
+<nobr><a href="index.htm">Home</a></nobr><br><nobr><a href="quick_questions.htm">Quick&nbsp;Questions</a></nobr><br><nobr>Quick&nbsp;Answers</nobr><br><nobr><a href="known_bugs.htm">Known&nbsp;Bugs</a></nobr><br><nobr><a href="pointers.htm">Pointers</a></nobr><br><nobr><a href="discriminated_unions.htm">Discriminated&nbsp;Unions</a></nobr><br><nobr><a href="pattern-matching.htm">Pattern-Matching</a></nobr><br><nobr><a href="type_inference.htm">Type&nbsp;Inference</a></nobr><br><nobr><a href="polymorphism.htm">Polymorphism</a></nobr><br><nobr><a href="regions_and_effects.htm">Regions&nbsp;and&nbsp;Effects</a></nobr><br><nobr><a href="definite_assignment.htm">Definite&nbsp;Assignment</a></nobr><br><nobr><a href="namespaces.htm">Namespaces</a></nobr><br><nobr><a href="interfacing_with_c.htm">Interfacing&nbsp;with&nbsp;C</a></nobr>
+
+</td><td valign="top" width="24"></td><!--msnavigation--><td valign="top">
+<h1 align="center">Quick Answers About Cyclone</h1>
+<p align="center"><b>Version 1.0</b></p>
+<p align="center">[See the <a href="quick_questions.htm">Quick Questions</a>
+page for a structured list of contents]</p>
+<p><b><a name="types_tuple"></a>What does $(type1,type2) mean?&nbsp; What does
+$(exp1, exp2) mean?</b></p>
+<p>Cyclone has tuples, which are anonymous structs with fields &quot;named&quot;
+0,1,2,...&nbsp; For example, $(int,string) is a pair of an int and a
+string.&nbsp; An example value of this type is $(4,&quot;cyclone&quot;).&nbsp;
+Getting fields uses array-like notation: you write x[0], not x.0.</p>
+<p><b><a name="types_at"></a>What does &quot;int @&quot; mean?</b></p>
+<p>@ builds types exactly the same way that * does, except that values of
+&quot;@ types&quot; cannot be null.&nbsp; So &quot;int * x = null&quot; will
+typecheck, but &quot;int @ x = null&quot; will not.</p>
+<p><b><a name="types_bound"></a>What does &quot;int *{37}&quot; mean?</b></p>
+<p>This type is for (heap-allocated) arrays containing at least 37
+elements.&nbsp; Because Cyclone checks array bounds, it must know the length of
+an array.&nbsp; If x has type int *{37}, then the compiler will translate x[e]
+to code that evaluates e, checks that it is less than 37 and then do the
+subscript operation.&nbsp; Note&nbsp; that &quot;int *&quot; is just short-hand
+for &quot;int *{1}&quot;.&nbsp; Currently, the expression in the braces must be
+a compile-time constant.</p>
+<p><b><a name="types_region"></a>What does &quot;int *r&quot; mean?</b></p>
+<p>The type is for pointers to ints in <i>region</i> r.&nbsp; Because Cyclone
+prevents dereferencing pointers to deallocated space, the compiler must know
+where a pointer points.&nbsp; A region is just a group of objects with the same
+lifetime.&nbsp; The heap region is written `H and contains objects that live
+&quot;forever&quot; (they may be garbage collected).&nbsp; &quot;int *&quot; is
+just shorthand for &quot;int *`H&quot;.&nbsp;&nbsp; If the region for a function
+parameter is a type variable (eg. `r), then the function may assume the
+parameter points into a region whose lifetime includes the lifetime of the
+function, but possibly no longer.</p>
+<p><b><a name="types_together"></a>So what does &quot;int @{37}r&quot; mean?</b></p>
+<p>All the refinements of pointer types fit together nicely.&nbsp; This type is
+for non-null pointers to arrays of at least 37 elements that reside in region r.&nbsp;
+Note that int * is just short-hand for int *{1}`H.</p>
+<p><b><a name="types_size"></a>What does &quot;int ?&quot; mean?</b></p>
+<p>This type is for heap-allocated arrays of ints that carry their size with
+them.&nbsp; That way, the compiler can insert array-bounds checks even if the
+array's size is unknown at compile-time.&nbsp; These arrays are best
+understood in terms of their implementation: There is the &quot;underlying&quot;
+array of elements and three pointers.&nbsp; One pointer is to the beginning of
+the underlying array and one is to the end.&nbsp; These pointers are not
+accessible to the programmer.&nbsp; The third pointer is under programmer
+control; you can do pointer arithmetic on it.&nbsp; On arr[e], a
+compiler-inserted check ensures that arr+e is between the other two pointers.</p>
+<p><b><a name="types_tyvar"></a>What does `a mean?</b></p>
+<p>`a is a type variable.&nbsp; For example, if a function takes a parameter of
+type `a, then the function can be called with a value of any suitable
+type.&nbsp; If there are two arguments of type `a, then any call will have to
+give values of the <i>same</i> type.&nbsp; Exactly those identifiers beginning
+with ` are type variables.</p>
+<p><b><a name="types_boxkind"></a>What types can a type variable stand for?</b></p>
+<p>Suppose we have &quot; <font face="Courier New">`a identity(`a x)</font>
+&quot;.&nbsp; Then identity can be passed an int, an unsigned int, a pointer, a
+tunion, or an xtunion.&nbsp; Arguments of other numeric types are converted to
+int or unsigned int using C's rules.&nbsp; <font face="Courier New">identity</font>
+cannot be passed a floating point, a struct, a tuple, or a checked array (eg.
+int ?).&nbsp; In short, `a can be instantiated with any 4-byte type that is not
+float.&nbsp; (In Cyclone, int and pointers always take 4 bytes.)&nbsp; These are
+the types of &quot;box kind&quot;.&nbsp; The types of each kind are described <a href="#types_kinds">below</a>.</p>
+<p><b><a name="types_voidstar"></a>How do I cast from void *?</b></p>
+<p>You can't because we don't allow unsafe casts.&nbsp; Cyclone programs should
+use type variables and polymorphism instead of void *.</p>
+<p><b><a name="types_infer"></a>What does _ (underscore) as part of a type mean?</b></p>
+<p>You can write _ in place of a type or region anywhere inside a function. (_
+is not allowed as part of top-level declarations.)&nbsp; The compiler will use
+context to try to determine what type or region belongs &quot;in the
+blank&quot;.&nbsp; For many useful idioms, the compiler will succeed.&nbsp; For
+example, _ pr = new Pair(3,4), the compiler can easily infer &quot;struct Pair
+@&quot; for the blank.&nbsp; In fact, if pr is later assigned null, the compiler
+will infer &quot;struct Pair *&quot;.&nbsp; If you are using _ and get strange
+error messages, simply fill in the blanks yourself.</p>
+<p><a name="types_infer_region"></a><b>In particular, what does int *_ mean?</b></p>
+<p>Because int * stands for pointers into the heap, you must give a region for
+pointers into other regions.&nbsp; But with _, you don't have to give such
+regions explicit names.&nbsp; This feature is most often used with stack
+pointers.&nbsp; For example, you can write: &quot;int x; int *_ y =
+&amp;x;&quot;.&nbsp; (You could also have written _ y = &amp;x; but the former
+provides more documentation.)</p>
+<p><a name="types_kinds"></a><b>What do `a::B, `a::M, `a::A, `a::R, and `a::E
+mean?</b></p>
+<p>Types are divided into different groups, which we call kinds.&nbsp; Type
+variables can be instantiated with any type of the correct kind.&nbsp; B stands
+for Box, M for Memory, A for Any, R for Region and E for Effect.&nbsp; Box types
+include int, pointers (not including int ?), tunions, and xtunions.&nbsp; Memory
+types include all box types, tuples, tunion an xtunion variants, and
+non-abstract structs.&nbsp; Any types include all types not of kind Region or
+Effect.&nbsp; Region types are regions, i.e. the heap and stack regions.&nbsp;
+Effect types are sets of regions -- effects are explained elsewhere.</p>
+<p><b><a name="types_kindinfer"></a>What does it mean when type variables don't
+have explicit kinds?</b></p>
+<p>Every type variable has one kind, but the programmer often does not have to
+write the kind.&nbsp; In function prototypes, the compiler will infer the most
+permissive kind.&nbsp; For example, &quot;void f(`a *`b x, `c * y, `a z)&quot;
+is shorthand for, &quot;void f(`a::B *`b::R, `c::M * y, `a::B z)&quot;.&nbsp; In
+type definitions, no inference is performed: an elided kind is shortand for ::B.
+For example, struct S&lt;`a,`r::R&gt; { `a *`r x; }; is shorthand for struct
+S&lt;`a::B,`r::R&gt; { `a *`r x;};, but struct S&lt;`a,`r&gt;{`a *`r x;}; is
+not.</p>
+<p><b><a name="types_list_eg"></a>What does struct List&lt;`a,`r::R&gt; mean?</b></p>
+<p>struct List takes a type of box kind (roughly an int or a pointer) and a
+region and produces a type.&nbsp; Examples are struct List&lt;int, `H&gt; and
+struct List&lt;struct List&lt;int,`H&gt;@, `H&gt;.&nbsp; In terms of the Cyclone
+library's struct List, the elements of the list have type `a and the cons cells
+are all in region `r.</p>
+<p><b><a name="types_abstract"></a>What does &quot;abstract&quot; mean?</b></p>
+<p>&quot;abstract&quot; is a scope declarator is a storage-class specifier, like
+&quot;static&quot; or &quot;extern&quot;.&nbsp; When attached to a top-level
+type declaration, it means other files may only declare the type abstractly
+(e.g.. &quot;struct Foo;&quot;).&nbsp; Otherwise, abstract has the same meaning
+as the auto (default) storage class.&nbsp; Hence abstract is a way to state
+within a Cyclone file that a type's representation cannot be exported.</p>
+<p><b><a name="add_keywords"></a>What are the Cyclone keywords?</b></p>
+<p>In addition to the C keywords, the following have special meaning and cannot
+be used as identifiers: abstract,&nbsp; catch, codegen, cut, fallthru, fill,
+fprintf, fscanf, let, malloc, namespace, new, null, printf, sscanf, splice,
+throw, try, tunion, using, xprintf, xscanf, xtunion.&nbsp; As in gcc,
+__attribute__ is reserved.</p>
+<p><b><a name="add_fallthru"></a>What does fallthru mean?</b></p>
+<p>In Cyclone, you cannot implicitly fall-through from one switch case to the
+next.&nbsp; You can explicitly fall-through with the statement &quot;fallthru;&quot;.&nbsp;
+fallthru may not appear in the last case of a switch.&nbsp; So to port C code,
+place fallthru; at the end of each case that implicitly falls through.&nbsp;
+Fallthru is more powerful for two reasons.&nbsp; First, it can appear anywhere
+in a case; its meaning is to immediately goto the next case.&nbsp; Second, when
+the next case has pattern-matching variables, a fallthru must take expressions
+that are bound to the variables before the goto.&nbsp; Hence fallthru is more
+powerful (but more verbose) than &quot;or patterns&quot; in ML.</p>
+<p align="left"><b><a name="add_exncost"></a>How efficient is exception handling?</b><p align="left">Entering
+a try block is implemented with setjmp.&nbsp; Creating an xtunion (exception
+packets are xtunion's) requires a heap allocation.&nbsp; Throwing an exception
+is implemented with longjmp.&nbsp; Pattern-matching an xtunion against each case
+variant in the catch clause is a pointer-comparsion.&nbsp; In short, exception
+handling is fairly lightweight.
+<p align="left"><b><a name="add_nottemplates"></a>Do functions with type variables get
+duplicated like C++
+      template functions?&nbsp; Is there run-time overhead for using type
+variables?</b><p>No and no.&nbsp; Each Cyclone function gives rise to one
+function in the output.&nbsp; Types are not present at run-time.&nbsp; In case
+you still don't believe us: When a function is called, it does not need to know
+the types with which the caller is instantiating the type variables, so no
+instantiation actually occurs -- the types are not present at run-time.&nbsp; We
+do not have to duplicate the code because we either know the size of the type or
+the size does not matter.&nbsp; This is why we don't allow type variables of
+memory kind as parameters -- doing so would require code duplication or run-time
+types.</p>
+<p><b><a name="del_varargs"></a>Can I use varargs?</b></p>
+<p>No, but we intend to support varags in the future. printf, scanf, etc. take a
+variable number of arguments, but these are primitive constructs.</p>
+<p><b><a name="del_nestedtype"></a>Why can't I declare types within functions?</b></p>
+<p>We just haven't implemented this support yet.&nbsp; For now, you need to
+hoist type declarations and typedefs to the top-level.</p>
+<p><b><a name="del_fallthru"></a>Why can't I implicitly fall-through to the next switch
+      case?</b></p>
+<p>This &quot;feature&quot; of C is the one thing that doesn't impair memory
+safety but we still found too unpleasant to allow.&nbsp; You can get C's
+behavior with an explicit <a href="#add_fallthru">fallthru</a>.</p>
+<p><b><a name="del_globals"></a>Do I have to initialize global variables?</b></p>
+<p>Yes, you currently must provide explicit initializers for global variables so
+that the compiler is sure uninitialized memory is not read.&nbsp; In the future,
+we will provide some support for initializing globals in constructor
+functions.&nbsp; Two techniques help with initializing global arrays.&nbsp;
+First, if an array element could be 0 or null, the compiler will insert 0 for
+any elements you do not specify.&nbsp; For example, int x[37] = {}; works.&nbsp;
+Second, you can use the comprehension form: int x[37] = {for i &lt; e1 : e2}
+provided e1 and e2 are constant expressions.&nbsp; Currently e2 may not use i,
+but in the future it will be able to.&nbsp; Note that it is not possible to have
+a global variable of an abstract type because it is impossible to know any
+constant expression of that type.</p>
+<p><a name="del_threads"></a><b>Are there threads?</b></p>
+<p>Cyclone does not yet have a threads library and some of the libraries are not
+re-entrant.&nbsp; However, it should be fine to call Cyclone code from multiple
+C threads (provided the garbage collector is correctly configured).&nbsp; In the
+future, we will support threads directly as well as static analysis for
+preventing data races.</p>
+<p><b><a name="del_setjmp"></a>Can I use setjmp/longjmp?</b>.&nbsp;</p>
+<p>No.&nbsp; However, Cyclone has exceptions, which can be used for non-local
+control flow.&nbsp; The problem&nbsp; setjmp/longjmp is that safety demands we
+prohibit a longjmp to a place no longer on the stack.&nbsp; A future release may
+have more support for non-local control flow.</p>
+      <p align="left"><b><a name="del_union"></a>What types are allowed for union members?</b><p>Currently,
+union members cannot contain pointers.&nbsp; You can have numeric types
+(including bit fields) and structs and tuples of allowable union-member types.</p>
+<p><b><a name="types_struct_fun"></a>How do I make a struct with
+function-pointer fields?</b></p>
+<p>Follow this pattern:</p>
+<p style="line-height: 50%"><font face="Courier New">struct S&lt;`e1::E,
+`e2::E&gt; {</font></p>
+<p style="line-height: 50%"><font face="Courier New">&nbsp;&nbsp; void
+f1(int,int; `e1);</font></p>
+<p style="line-height: 50%"><font face="Courier New">&nbsp;&nbsp; int f2(; `e2);</font></p>
+<p style="line-height: 50%"><font face="Courier New">};</font></p>
+<p>To understand what is going on here requires a pretty full understanding of
+regions and effects.</p>
+      <p align="left">Printf, fprintf, etc. are primitives in
+      Cyclone.&nbsp;&nbsp;
+      <p align="left"><b><a name="io_printf_literal"></a>Why doesn't printf(s) work?</b><p>The
+first argument to printf (second to fprintf) must be a literal string (eg.
+&quot;Your name is %s.&nbsp; Your age is %d&quot;); the type-checker ensures
+that the remaining arguments have the right types and are in the right
+order.&nbsp; Hence you cannot say printf(s) where s is some array of characters.
+(Allowing such calls is unsafe because s may contain '%' characters.)</p>
+<p><b><a name="pointer_stringlit"></a>What is the type of a literal string?</b></p>
+<p>The type of &quot;foo&quot; is char @{4} (remember the trailing '\0').&nbsp;
+However, there are implicit casts from char @{4} to char @{2}, char *{4}, and
+char ?, so it often &quot;feels like&quot; literal strings have whatever type
+you want them to have.</p>
+<p><b><a name="pointer_zero"></a>Why can't I assign 0 to a pointer?</b></p>
+<p>We currently distinguish the keyword null from 0, so you have to write int *
+x = null;, not int * x = 0;.&nbsp; We intend to be more flexible in the
+future.&nbsp; You can use pointers in guards: (e.g. if(p) ...); the guard
+evaluates to true if and only if the pointer is not null.</p>
+<p><b><a name="tools_pp"></a>Can I get a readable version of the output?</b></p>
+<p>Yes, with caveats.&nbsp; Pass Cyclone the flag -pp and the C output will be
+pretty-printed.&nbsp; (The default is to &quot;ugly print&quot; because
+pretty-printing is slower.)&nbsp; Several things still make the output a bit
+unpleasant: Files generally begin with many extern declarations (because
+#include has been pre-processed away) and generated type definitions (because of
+tuples and &quot;? types&quot;).&nbsp; Pattern-matching code gets translated to
+a mess of temporary variables and goto statements.&nbsp;&nbsp; Array-bounds
+checks can clutter array-intensive code.&nbsp; All typedefs are expanded away
+before printing the output.</p>
+<p><b><a name="tools_gdb"></a>Can I use gdb on the output?</b></p>
+<p>Yes, but doing more than getting a stack trace on a segfault requires some
+sophistication.&nbsp; First, you have to know how Cyclone translates top-level
+identifiers to C identifiers (it prepends Cyc_ and separates namespaces by _
+instead of ::) so you can set breakpoints at functions.&nbsp; Second, it can be
+hard to print values because many Cyclone types get translated to void *.&nbsp;
+Third, we do not yet have source correlation, so if you step through code,
+you're stepping through C code, not Cyclone code.</p>
+<p>Two more hints: First, on some architectures, the first memory allocation
+appears to seg fault in GC_findlimit. This is correct and documented
+garbage-collector behavior (it handles the signal but gdb doesn't know that);
+simply continue execution.&nbsp; Second, a common use of gdb is to find the
+location of an uncaught exception.&nbsp; To do this, set a breakpoint at
+&quot;throw&quot; (a function in Cyclone runtime).</p>
+      <p align="left"><b><a name="tools_gprof"></a>Can I use gprof on the output?</b><p align="left">Yes,
+just compile the C code with the -pg flag.&nbsp; You should also
+rebuild the Cyclone libraries and the garbage collector with the -pg flag.&nbsp;
+The results of gprof make sense because a Cyclone function is compiled to a C
+function.&nbsp;&nbsp;<p align="left">Notes for Cygwin users: First, the versions
+of libgmon.a we have downloaded from cygnus are wrong (every call gets counted
+as a self-call).&nbsp; We have modified libgmon.a to fix this bug, so download
+our version and put it in your cygwin/lib directory.&nbsp; Second, timing
+information should be ignored because gprof is only sampling 100 or 1000 times a
+second (because it is launching threads instead of using native Windows
+profiling).&nbsp; Neither of these problems are Cyclone-specific.
+      <p align="left"><b><a name="tools_emacs"></a>Is there an Emacs mode for Cyclone?</b><p>Sort
+of. In the doc/ directory of the distribution is a font-lock.el file and elisp
+code (in cyclone_dot_emacs.el) suitable for inclusion in your .emacs.&nbsp;
+However, these files <i>change </i>C++ mode and use it for Cyclone rather than
+creating a new Cyclone mode.&nbsp; Of course, we intend to make our own mode
+rather than destroy C++-mode's ability to be good for C++.&nbsp; Note that we
+have not changed the C++ indentation rules at all; our elisp code is useful only
+for syntax highlighting.</p>
+<p><a name="meta_rtcg"></a><b>Does Cyclone have something to do with runtime
+code generation?</b></p>
+<p>Your confusion is warranted, but this Cyclone currently has no support for
+runtime code generation.&nbsp; Because of possible future support, we have
+reserved the words codegen, splice, cut, and fill.&nbsp; There is an extension
+to the older Popcorn language for runtime code generation.&nbsp; That extension
+is also called Cyclone.</p>
+<p><b><a name="meta_name"></a>Couldn't you folks come up with a better name than
+Cyclone?</b></p>
+<p>We've tried.&nbsp; Do you have a suggestion?</p>
+<p><b><a name="meta_gcc"></a>Do I have to compile the output with gcc?</b></p>
+<p>Yes; the compiler uses gcc extensions (such as statement expressions and
+attributes) in its output.</p>
+<p><b><a name="meta_platforms"></a>What platforms are supported?</b></p>
+<p>A platform needs gcc 2.9, gnumake, ar, and the ability to build the
+Boehm-Demers-Weiser garbage collector.&nbsp; Furthermore, the size of int and
+all C pointers must be the same.&nbsp; We have built Cyclone on cygwin (Windows
+98, NT, 2K), Linux (insert distributions here), Solaris, and OpenBSD.&nbsp;
+Information on how to build on various platforms is available elsewhere?</p>
+<p><b><a name="meta_libs"></a>Why aren't there more libraries?</b></p>
+<p>We are eager to have a wider code base, but we are compiler writers with
+limited resources.&nbsp; Let us know of useful code you write.</p>
+<p><b><a name="meta_speares"></a>What does Cyclone have in common with Britney
+Speares?</b></p>
+<p>Nothing that we know of, but the question may help our web-page hit count.</p>
+<p><b><a name="other_imprev"></a>How come List::imp_rev(l1) doesn't change l1 to
+its reverse?</b></p>
+<p>The library function List::imp_rev mutates its argument by reversing the tl
+fields.&nbsp; It returns a pointer to the new first (old last) cell, but l1
+still points to the old first (new last) cell.</p>
+<p><b><a name="other_inline"></a>Can I inline functions?</b></p>
+<p>Sure, functions can be declared inline as in gcc (and C++).&nbsp; You can get
+additional inlining by compiling the Cyclone output with gcc -O2.&nbsp; Whether
+a function is inlined or not has no effect on Cyclone type-checking.</p>
+<p><b><a name="other_constants"></a>What are compile-time constants?</b></p>
+<p>Compile-time constants are null, sizeof(typ), integer (and character)
+constants, and arithmetic operations over compile-time constants.&nbsp;
+Constructs requiring compile-time constants are: tuple-subscript (eg. x[3] for
+tuple x), case argument when the switch argument has a numeric type (eg. case
+3+4:), size in array declaration (eg. int y[37], and size in pointer bound (eg.
+int * x{124}).</p>
+<p><b><a name="other_arraysize"></a>How can I get the size of an array?</b></p>
+<p>If e is an array, then e.size returns the array's size.&nbsp; Note that for
+&quot;? types&quot; (eg. int ?) the size is retrieved at runtime from the
+object.&nbsp; For other array types (eg. int x[37]), the evaluation is at
+compile-time.</p>
+&nbsp;<!--msnavigation--></td></tr><!--msnavigation--></table></body>
+
+</html>

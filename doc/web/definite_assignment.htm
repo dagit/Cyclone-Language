@@ -1,0 +1,295 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Definite Assignment</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta name="Microsoft Border" content="l, default">
+</head>
+
+<body><!--msnavigation--><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="1%">
+
+<nobr><a href="index.htm">Home</a></nobr><br><nobr><a href="quick_questions.htm">Quick&nbsp;Questions</a></nobr><br><nobr><a href="quick_answers.htm">Quick&nbsp;Answers</a></nobr><br><nobr><a href="known_bugs.htm">Known&nbsp;Bugs</a></nobr><br><nobr><a href="pointers.htm">Pointers</a></nobr><br><nobr><a href="discriminated_unions.htm">Discriminated&nbsp;Unions</a></nobr><br><nobr><a href="pattern-matching.htm">Pattern-Matching</a></nobr><br><nobr><a href="type_inference.htm">Type&nbsp;Inference</a></nobr><br><nobr><a href="polymorphism.htm">Polymorphism</a></nobr><br><nobr><a href="regions_and_effects.htm">Regions&nbsp;and&nbsp;Effects</a></nobr><br><nobr>Definite&nbsp;Assignment</nobr><br><nobr><a href="namespaces.htm">Namespaces</a></nobr><br><nobr><a href="interfacing_with_c.htm">Interfacing&nbsp;with&nbsp;C</a></nobr>
+
+</td><td valign="top" width="24"></td><!--msnavigation--><td valign="top">
+<h1 align="center">Definite Assignment (Memory Initialization)</h1>
+<p align="center">&nbsp;</p>
+<p align="left">It is unsafe to allow memory to be used as a value of a
+particular type just because the memory has been allocated at that type.&nbsp;
+In other words, you cannot use memory that has not been properly
+initialized.&nbsp; Most safe languages enforce this invariant by making
+allocation and initialization a single operation.&nbsp; This solution is
+undesirable in Cyclone for at least two reasons:</p>
+<ul>
+  <li>
+    <p align="left">Many idioms require declaring variables in a wider scope
+    than is convenient for initializing the variable.</li>
+  <li>
+    <p align="left">C code, which we wish to port to Cyclone, is full of
+    separated allocation and initialization, including all heap-allocated
+    storage (i.e. malloc).</li>
+</ul>
+<p align="left">Inspired by Java's rules for separate declaration and
+initialization of local variables, Cyclone has a well-defined sound system for
+checking that memory is written before it is used.&nbsp; The rules are more
+complicated than in Java because we support pointers to uninitialized memory, as
+is necessary for malloc.</p>
+<p align="left">Here we begin with idioms that the analysis does and does not
+permit.&nbsp; With a basic sense of the idea, we expect programmers can
+generally not worry about the exact rules of the analysis.&nbsp; However, when
+the compiler rejects code because memory may be uninitialized, the programmer
+needs to know how to re-write the code in order to pass the analysis.&nbsp; For
+this reason, we also give a more complete description of the rules.</p>
+<p align="left">We begin with examples not involving pointers.&nbsp; If you are
+familiar with Java's definite assignment, you can skip this part, but note that
+struct and tuple fields are tracked separately.&nbsp; So you can use an
+initialized field before another field of the same object is initialized.&nbsp;
+(Java does not allow separate allocation and initialization of object
+fields.&nbsp; Rather, it inserts null or 0 for you.)</p>
+<p align="left">The following code is accepted:</p>
+<p align="left" style="line-height: 0%"><font face="Courier New">extern int
+maybe();</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">int f() {</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp; int x,
+y, z;</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp; if(maybe())</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+x = 3;</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp; else</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+x = 4;</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp; while(1)
+{</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+y = x;</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+break;</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp; }</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp; if(z =
+maybe() &amp;&amp; q = maybe())</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+return q;</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp; else</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+return z;</font></p>
+<p align="left" style="line-height: 0%"><font face="Courier New">}</font></p>
+<p>In short, the analysis checks that every control-flow path between a
+variable's declaration and use includes an assignment to the variable.&nbsp;
+More generally, the analysis works on memory locations, not just
+variables.&nbsp; The analysis knows that loop bodies and conditional branches
+are only executed if the value of certain expressions are 0 or not 0.</p>
+<p>The following code is safe, but is not accepted:</p>
+<p style="line-height: 0%"><font face="Courier New">int f() {</font></p>
+<p style="line-height: 0%"><font face="Courier New">&nbsp; int x = 1;</font></p>
+<p style="line-height: 0%"><font face="Courier New">&nbsp; int y;</font></p>
+<p style="line-height: 0%"><font face="Courier New">&nbsp; if(x)&nbsp;</font></p>
+<p style="line-height: 0%"><font face="Courier New">&nbsp;&nbsp;&nbsp; y = 2;</font></p>
+<p style="line-height: 0%"><font face="Courier New">&nbsp; if(x)</font></p>
+<p style="line-height: 0%"><font face="Courier New">&nbsp;&nbsp; return y;</font></p>
+<p style="line-height: 0%"><font face="Courier New">&nbsp;return 0;</font></p>
+<p style="line-height: 0%"><font face="Courier New">}</font></p>
+<p style="line-height: 100%">The problem is that the analysis does not know that
+the second if-guard is true only if the first one is.&nbsp; General support for
+such &quot;data correlation&quot; would require reasoning about two different
+expressions at different times evaluating to the same value.</p>
+<p>Unlike Java, Cyclone supports pointers to uninitialized memory.&nbsp; The
+following code is accepted:</p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">extern int
+maybe();</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">int</font><font face="Courier New">
+f() {</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; int x;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; int z;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; int *_
+y;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp;
+if(maybe()) {</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+x = 3;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+y = &amp;x;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; } else
+{</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+y = &amp;z;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+z = 3;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; }</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; return
+*y;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">}</font></p>
+<p style="line-height: 100%; margin-top: 0">The analysis does not know which
+branch of the if will be taken, so after the conditional it knows that either
+&quot;x is initialized and y points to x&quot; or &quot;z is initialized and y
+points to z&quot;.&nbsp; It merges this information to &quot;y points to
+somewhere initialized&quot;, so the function returns an initialized value, as
+required.&nbsp; (It is safe to return uninitialized ints, but we reject such
+programs anyway.)</p>
+<p style="line-height: 100%; margin-top: 0">However, this code is rejected even
+though it is safe:</p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">extern int
+maybe();</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">int</font><font face="Courier New">
+f() {</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; int x;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; int z;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; int *_
+y;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp;
+if(maybe()) {</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+y = &amp;x;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; } else
+{</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp;
+y = &amp;z;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; }</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; x = 3;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; z = 3;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; return
+*y;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">}</font></p>
+<p style="line-height: 100%; margin-top: 0">The problem is that the analysis
+loses too much information after the conditional, remembering only that &quot;y
+points somewhere that may be uninitialized&quot;.&nbsp; After such a loss of
+information, only an assignment to *y would be enough to convince the analysis
+that *y is initialized.</p>
+<p style="line-height: 100%; margin-top: 0">A compelling use of pointers to
+uninitialized memory is porting C code that uses malloc, such as the following
+(the cast is not necessary in Cyclone):</p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">struct
+IntPair { int x; int y; };</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">struct
+IntPair * same(int z) {</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp;&nbsp;
+struct IntPair * ans =&nbsp;</font></p>
+<p style="line-height: 0%; margin-top: 0">&nbsp;&nbsp;&nbsp;<font face="Courier New">&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font face="Courier New">(struct IntPair *)malloc(sizeof(struct IntPair));</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; ans-&gt;x
+= ans-&gt;y = z;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">&nbsp; return
+ans;</font></p>
+<p style="line-height: 0%; margin-top: 0"><font face="Courier New">}</font></p>
+<p style="line-height: 100%; margin-top: 0">In the near future, we will support
+another compelling use.&nbsp; By adding an &quot;initializes&quot; qualifier for
+function parameters, you will be able to pass a pointer to uninitialized memory
+to a function that initializes it.&nbsp; We need the qualifier to ensure both
+that the function actually does initialization and that the function does not
+read through its parameter before initialization.&nbsp; Here is an example:</p>
+<p style="line-height: 0; margin-top: 0"><font face="Courier New">void
+initInt(initializes int @ ip);</font></p>
+<p style="line-height: 0; margin-top: 0"><font face="Courier New">int f() {</font></p>
+<p style="line-height: 0; margin-top: 0"><font face="Courier New">&nbsp; int x;</font></p>
+<p style="line-height: 0; margin-top: 0"><font face="Courier New">&nbsp; return
+*initInt(&amp;x);</font></p>
+<p style="line-height: 0; margin-top: 0"><font face="Courier New">}</font></p>
+<p>Certain expression forms require their arguments to be fully initialized
+(that is, everything reachable from the expression must be initialized) even
+though the memory is not all immediately used.&nbsp; These forms are casts, the
+expression in &quot;let p = e&quot;, the argument to switch, and any access of a
+union field.&nbsp; We plan to relax these restrictions in the future.</p>
+<p>You should now know enough to program effectively in Cyclone without
+immediately initializing all memory.&nbsp; For those wanting a more complete
+view of the language definition (i.e. what the analysis does and does not
+accept), we now go into the details.&nbsp; Note that the analysis is sound and
+well-specified -- there is never a reason that the compiler rejects your program
+for unexplainable reasons.</p>
+<p>For each local variable and for each program point that allocates memory, the
+analysis tracks information about each field.&nbsp; We call each such field a <i>place</i>.
+For example, in this code:</p>
+<p style="line-height: 0%"><font face="Courier New">struct B { int x; $(int,int)
+y;};&nbsp;</font></p>
+<p style="line-height: 0%"><font face="Courier New">void f() {</font></p>
+<p style="line-height: 0%"><font face="Courier New">&nbsp; struct B b;</font></p>
+<p style="line-height: 0%"><font face="Courier New">&nbsp; struct B @ bp =
+malloc(sizeof(B));</font></p>
+<p style="line-height: 0%"><font face="Courier New">&nbsp; ...</font></p>
+<p style="line-height: 0%"><font face="Courier New">}</font></p>
+<p style="line-height: 100%">the places are b.x, b.y[0], b.y[1], bp,
+&lt;1&gt;.x, &lt;1&gt;.y[0], and &lt;1&gt;.y[1] where we use &lt;1&gt; to stand
+for the malloc expression (a program point that does allocation).&nbsp; An
+initialization state can be &quot;<i>must point to P</i>&quot; where P is a
+path.&nbsp; For example, after the second declaration above, we have &quot;bp
+must point to &lt;1&gt;&quot;.&nbsp; An ensuing assignment of the form &quot;bp-&gt;x
+= 3&quot; would therefore change the initialization state of &lt;1&gt;.x.&nbsp;
+If there is not a unique path to which a place definitely points, then we keep
+track of the place's <i>initialization level</i> and <i>escapedness</i>.&nbsp; A
+place is escaped if we do not know exactly all of the places that must point to
+it.&nbsp; For example, both of the following fragments would cause all the
+places starting with &lt;1&gt; to be escaped afterwards (assuming bp must point
+to &lt;1&gt;):</p>
+<p style="line-height: 0"><font face="Courier New">struct B @
+bp2;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+some_fun(bp);&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</font>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;if(maybe())&nbsp;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp;&nbsp; bp2 = bp;</font></p>
+<p style="line-height: 100%">Note that if &quot;p must point to P&quot;, then p
+is implicitly unescaped because we cannot know that p points to P if we don't
+know all the pointers to p.&nbsp; The initialization level is one of None, This,
+or All.&nbsp; None means the place may be uninitialized.&nbsp; This means the
+place is an initialized pointer, but everything it points to may be
+uninitialized.&nbsp; All means p and everying reachable from p (following as
+many pointers as you want) is initialized.&nbsp;&nbsp;</p>
+<p style="line-height: 100%">Note that our choice of tracking &quot;must point
+to&quot; instead of &quot;must alias&quot; forces us to reject some safe
+programs, such as this one:</p>
+<p style="line-height: 0"><font face="Courier New">int f() {</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; int x, int y;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; int @_ p1, @_ p2;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; if(maybe())</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp; p1 = &amp;x;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; else</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp;&nbsp; p1 = &amp;y;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; p2 = p1;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; *p2 = 7;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; return *p1;</font></p>
+<p style="line-height: 0"><font face="Courier New">}</font></p>
+<p style="line-height: 100%">Even though p1 and p2 have not escaped, our
+analysis says that they each point to an unknown place without saying that they
+point to the <i>same</i> unknown place.&nbsp;&nbsp;</p>
+<p style="line-height: 100%">For safety reasons, once a place is escaped, any
+assignment to it must be a value that is fully initialized, meaning everything
+reachable from the value is initialized.This phenomenon is why the first
+function below is accepted but not the second (the list_t and glist_t typedefs
+are defined in the List library):</p>
+<p style="line-height: 100%"><font face="Courier New">list_t&lt;`a> copy(glist_t&lt;`a,`r> x) {<br>
+&nbsp; list_t&lt;`a> result, prev;<br>
+<br>
+&nbsp; if (x == null) return null;<br>
+&nbsp; result = malloc(sizeof(_));<br>
+&nbsp; result-&gt;hd = x->hd;<br>
+&nbsp; result-&gt;tl = null;<br>
+&nbsp; prev = result;<br>
+&nbsp; for (x=x->tl; x != null; x=x->tl) {<br>
+&nbsp;&nbsp;&nbsp; list_t&lt;`a> next = malloc(sizeof(_));<br>
+&nbsp;&nbsp;&nbsp; next-&gt;hd = x->hd;<br>
+&nbsp;&nbsp;&nbsp; next-&gt;tl = null;<br>
+&nbsp;&nbsp;&nbsp; prev-&gt;tl = next;<br>
+&nbsp;&nbsp;&nbsp; prev = prev->tl;<br>
+&nbsp; }<br>
+&nbsp; return result;<br>
+}&nbsp;</font></p>
+<p style="line-height: 100%"><font face="Courier New">list_t&lt;`a> copy(glist_t&lt;`a,`r> x) {<br>
+&nbsp;  list_t&lt;`a> result, prev;<br>
+<br>
+&nbsp;  if (x == null) return null;<br>
+&nbsp;  result = malloc(sizeof(_));<br>
+&nbsp; result-&gt;hd = x->hd;<br>
+&nbsp; result-&gt;tl = null;<br>
+&nbsp;  prev = result;<br>
+&nbsp;  for (x=x->tl; x != null; x=x->tl) {<br>
+&nbsp;&nbsp;&nbsp; prev-&gt;tl = malloc(sizeof(_));<br>
+&nbsp;&nbsp;&nbsp; prev-&gt;tl-&gt;hd = x->hd;<br>
+&nbsp;&nbsp;&nbsp; prev-&gt;tl-&gt;tl = null;<br>
+&nbsp; }<br>
+&nbsp;  return result;<br>
+} </font></p>
+<p style="line-height: 100%">In the for body, we do not know where prev must
+point (on the first loop iteration it points to the first malloc site, but on
+ensuing iterations it points to the second).&nbsp; Hence prev-&gt;tl may be
+assigned only fully initialized objects.</p>
+<p style="line-height: 100%">&nbsp;</p>
+<!--msnavigation--></td></tr><!--msnavigation--></table></body>
+
+</html>

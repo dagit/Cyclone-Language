@@ -1,0 +1,65 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Cyclone Known Bugs</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta name="Microsoft Border" content="l, default">
+</head>
+
+<body><!--msnavigation--><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="1%">
+
+<nobr><a href="index.htm">Home</a></nobr><br><nobr><a href="quick_questions.htm">Quick&nbsp;Questions</a></nobr><br><nobr><a href="quick_answers.htm">Quick&nbsp;Answers</a></nobr><br><nobr>Known&nbsp;Bugs</nobr><br><nobr><a href="pointers.htm">Pointers</a></nobr><br><nobr><a href="discriminated_unions.htm">Discriminated&nbsp;Unions</a></nobr><br><nobr><a href="pattern-matching.htm">Pattern-Matching</a></nobr><br><nobr><a href="type_inference.htm">Type&nbsp;Inference</a></nobr><br><nobr><a href="polymorphism.htm">Polymorphism</a></nobr><br><nobr><a href="regions_and_effects.htm">Regions&nbsp;and&nbsp;Effects</a></nobr><br><nobr><a href="definite_assignment.htm">Definite&nbsp;Assignment</a></nobr><br><nobr><a href="namespaces.htm">Namespaces</a></nobr><br><nobr><a href="interfacing_with_c.htm">Interfacing&nbsp;with&nbsp;C</a></nobr>
+
+</td><td valign="top" width="24"></td><!--msnavigation--><td valign="top">
+<h1 align="center"><b>Cyclone Implementation Bugs</b></h1>
+<p align="center"><b>Version 1.0</b></p>
+<ul>
+  <li>
+    <p align="left">Potential name clashes</li>
+  <li>
+    <p align="left">Variables in exception handlers may have the wrong value</li>
+  <li>
+    <p align="left">ints and pointers must be 32 bits.&nbsp; (This restriction
+    is not pervasive in the compiler, so we should be able to support a 64-bit
+    architecture with a bit of work.)</li>
+  <li>
+    <p align="left">casts with respect to alignment on struct fields</li>
+  <li>
+    <p align="left">We generally do not detect null
+    pointer exceptions, so you'll seg fault.</li>
+  <li>
+    <p align="left">gcc must be in Cyclone's path and called gcc b/c of
+    pre-processor call (should allow redirection somehow)</li>
+  <li>
+    <p align="left">type declarations can only appear at top-level</li>
+  <li>
+    <p align="left">type qualifiers (eg. const) are not yet checked for
+    correctness in the Cyclone type-checker.</li>
+  <li>
+    <p align="left">Should Null_Exception by Cyc_Null_Exception?</li>
+  <li>
+    <p align="left">Switch clauses should be checked in the other order (a pain
+    b/c of fallthru)</li>
+  <li>
+    <p align="left">Arraybounds errors should throw Array_Bounds, not
+    Null_Exception.</li>
+  <li>
+    <p align="left">Subtraction of t? types is translated incorrectly.</li>
+  <li>
+    <p align="left">Link-checker (or somebody) should check the type of Cyc_main.</li>
+  <li>
+    <p align="left">We don't actually prevent a tunion with an enormouse number
+    of non-value-carrying variants.</li>
+  <li>
+    <p align="left">Pattern-matching against a pointer to tunion Foo.Bar where
+    tunion Foo.Bar carries variants is busted.</li>
+  <li>
+    <p align="left">Non-uniqueness of existential tyvars allows capture?</li>
+  <li>
+    <p align="left">&nbsp;</li>
+</ul>
+&nbsp;<!--msnavigation--></td></tr><!--msnavigation--></table></body>
+
+</html>
