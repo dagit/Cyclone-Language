@@ -37,3 +37,8 @@ fi
 export CONFIGSHELL
 
 $CONFIGSHELL config/realconfigure $*
+EXITC=$?
+if [ $EXITC != 0 ]; then
+  echo configuration failed!
+  exit $EXITC
+fi
