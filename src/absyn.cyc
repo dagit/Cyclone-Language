@@ -755,7 +755,7 @@ stmt_t for_stmt(exp_t e1,exp_t e2,exp_t e3,stmt_t s,seg_t loc) {
 		  loc);
 }
 stmt_t switch_stmt(exp_t e, list_t<switch_clause_t,`H> scs, seg_t loc) {
-  return new_stmt(new Switch_s(e,scs), loc);
+  return new_stmt(new Switch_s(e,scs,NULL), loc);
 }
 stmt_t seq_stmt(stmt_t s1, stmt_t s2, seg_t loc) { 
   switch ($(s1->r,s2->r)) {
@@ -781,7 +781,7 @@ stmt_t do_stmt(stmt_t s, exp_t e, seg_t loc) {
   return new_stmt(new Do_s(s,$(e,skip_stmt(e->loc))), loc);
 }
 stmt_t trycatch_stmt(stmt_t s, list_t<switch_clause_t,`H> scs, seg_t loc) {
-  return new_stmt(new TryCatch_s(s,scs), loc);
+  return new_stmt(new TryCatch_s(s,scs,NULL), loc);
 }
 stmt_t goto_stmt(var_t lab, seg_t loc) {
   return new_stmt(new Goto_s(lab,NULL), loc);
@@ -798,7 +798,7 @@ datatype Raw_pat.Null_p Null_p_val = Null_p;
 ////////////////////////// Declarations ///////////////////////////
 decl_t new_decl(raw_decl_t r, seg_t loc) { return new Decl{.r=r, .loc=loc}; }
 decl_t let_decl(pat_t p, exp_t e, seg_t loc) {
-  return new_decl(new Let_d(p,NULL,e),loc);
+  return new_decl(new Let_d(p,NULL,e,NULL),loc);
 }
 decl_t letv_decl(list_t<vardecl_t,`H> vds, seg_t loc) {
   return new_decl(new Letv_d(vds),loc);
@@ -809,7 +809,7 @@ decl_t region_decl(tvar_t tv,vardecl_t vd,bool resetable,exp_opt_t open_exp,
 }
 decl_t alias_decl(tvar_t tv,vardecl_t vd,exp_t e,seg_t loc) {
   // assumes the variable's initializer is NULL
-  return new_decl(new Let_d(new_pat(new AliasVar_p(tv,vd),loc),NULL,e),loc);
+  return new_decl(new Let_d(new_pat(new AliasVar_p(tv,vd),loc),NULL,e,NULL),loc);
 }
 
 vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {

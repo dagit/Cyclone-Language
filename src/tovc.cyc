@@ -307,7 +307,7 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
       BOX_EXP_AND_UPDATE(env,*e);
       s = s2;
       continue;
-    case &Switch_s(*e,scs):
+    case &Switch_s(*e,scs,_):
       // most switches have been translated away -- so no binding occurrences!
       BOX_EXP_AND_UPDATE(env,*e);
       for (; scs != NULL; scs = scs->tl)
@@ -625,7 +625,7 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
       exp_to_vc(env, e);
       s = s2;
       continue;
-    case &Switch_s(e,scs):
+    case &Switch_s(e,scs,_):
       // most switches have been translated away -- only C switches remain.
       // there should be no where clauses, so ignore them.
       exp_to_vc(env, e);
@@ -719,7 +719,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
       }
       fallthru;
     case &Var_d(_):         
-    case &Let_d(_,_,_): 
+    case &Let_d(...): 
     case &Letv_d(_):        
     case &Region_d(...):
     case &Aggr_d(_):

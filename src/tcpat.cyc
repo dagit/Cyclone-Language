@@ -903,6 +903,40 @@ void check_pat_regions(tenv_t te, pat_t p,
 // Constant patterns (e.g., 1, true, 3[0]4) have 0 arity.  The span
 // for bool is 2, for char is 256, and for integers, floats, and
 // Xdatatypes is infinite (i.e., NULL).
+datatype PatTest {
+  WhereTest(exp_opt_t);
+  EqNull;
+  NeqNull;
+  EqEnum(enumdecl_t, enumfield_t);
+  EqAnonEnum(type_t, enumfield_t);
+  EqFloat(string_t,int);
+  EqConst(unsigned int);
+  EqDatatypeTag(int,datatypedecl_t,datatypefield_t);
+  EqTaggedUnion(field_name_t,int);
+  EqExtensibleDatatype(datatypedecl_t,datatypefield_t);
+};
+datatype PatTest.EqNull EqNull_val = EqNull;
+datatype PatTest.NeqNull NeqNull_val = NeqNull;
+
+datatype Access {
+  Dummy;
+  Deref;
+  TupleField(unsigned);
+  DatatypeField(datatypedecl_t, datatypefield_t, unsigned);
+  AggrField(bool tagged, stringptr_t);
+};
+datatype Access.Dummy Dummy_val = Dummy;
+datatype Access.Deref Deref_val = Deref;
+
+@tagged union PatOrWhere {
+  pat_t     pattern;
+  exp_opt_t where_clause;
+};
+struct PathNode {
+  union PatOrWhere orig_pat;
+  access_t  access;
+};
+
 static @tagged union Name_value { string_t Name_v; int Int_v; };
 typedef union Name_value name_value_t;
 name_value_t Name_v(string_t<`H> s) { return Name_value{.Name_v = s}; }
@@ -912,14 +946,14 @@ static struct Con_s<`r::R> {
   int          arity;
   int *`r const span;
   // pointer back to original pattern that generated it
-  struct Pat  *`H orig_pat;  
+  union PatOrWhere orig_pat;
 };
-typedef struct Con_s<`r> @`r con_t<`r>;
-static datatype Simple_pat<`r::R> { 
+typedef struct Con_s @ con_t;
+static datatype Simple_pat { 
   Any; 
-  Con(con_t<`r>,list_t<datatype Simple_pat<`r>@`r,`r>); 
+  Con(con_t,list_t<datatype Simple_pat@>); 
 };
-typedef datatype Simple_pat<`r> @`r simple_pat_t<`r>;
+typedef datatype Simple_pat @ simple_pat_t;
 
 // used for creating sets of constructors
 static int compare_con(con_t c1, con_t c2) {
@@ -938,77 +972,145 @@ static int compare_con(con_t c1, con_t c2) {
 }
 
 // build various cons
-static Set::set_t<con_t<`r>,`r> empty_con_set(region_t<`r> r) { 
-  return Set::rempty(r,compare_con); 
+static Set::set_t<con_t> empty_con_set() {
+  return Set::rempty(heap_region,compare_con); 
 }
 
 static int one_opt = 1;
 static int two_opt = 2;
 static int twofiftysix_opt = 256;
 
-static con_t<`r> null_con(region_t<`r> r, pat_t p) { 
-  return rnew(r) Con_s{Name_v("NULL"), 0, (int*`r)(&two_opt), p};
+static unsigned int datatype_tag_number(datatypedecl_t td, qvar_t name) {
+  unsigned int ans = 0;
+  let fs  = td->fields->v;
+  while(qvar_cmp(name,fs->hd->name)!=0) {
+    ++ans;
+    fs = fs->tl;
+  }
+  return ans;
 }
-static con_t<`r> null_ptr_con(region_t<`r> r, pat_t p) { 
-  return rnew(r) Con_s{Name_v("&"), 1, (int*`r)&two_opt, p};
+
+static int get_member_offset(aggrdecl_t ad, field_name_t f) {
+  int i = 1;
+  for (let fields = ad->impl->fields; fields != NULL; fields = fields->tl) {
+    let field = fields->hd;
+    if (strcmp(*field->name,*f) == 0) return i;
+    ++i;
+  }
+  impos(aprintf("get_member_offset %s failed",*f));
 }
-static con_t<`r> ptr_con(region_t<`r> r, pat_t p) { 
-  return rnew(r) Con_s{Name_v("&"), 1, (int*`r)&one_opt, p};
+
+static pat_test_t get_pat_test(union PatOrWhere pw) {
+  switch (pw) {
+  case {.where_clause = e}: return new WhereTest(e);
+  case {.pattern = p}:
+    switch (p->r) {
+    case &Var_p(_, p1): fallthru(p1);
+    case &Reference_p(_, p1): return get_pat_test(PatOrWhere{.pattern = p1});
+    case &Null_p: return &EqNull_val;
+    case &Int_p(s,i): return new EqConst(i);
+    case &Char_p(c): return new EqConst((unsigned int)c);
+    case &Float_p(f,i): return new EqFloat(f,i);
+    case &Enum_p(ed,ef): return new EqEnum(ed,ef);
+    case &AnonEnum_p(t,ef): return new EqAnonEnum(t,ef);
+    case &Pointer_p(_): 
+      switch (compress((type_t)p->topt)) {
+      case &PointerType(PtrInfo{_,_,PtrAtts{.nullable = n,...}}):
+        if (conref_constr(false,n))
+          return &NeqNull_val;
+        break;
+      default: break;
+      }
+      impos("non-null pointer type or non-pointer type in pointer pattern");
+    case &Datatype_p(ddecl, df, _, _):
+      if (ddecl->is_extensible) 
+        return new EqExtensibleDatatype(ddecl, df);
+      else 
+        return new EqDatatypeTag(datatype_tag_number(ddecl, df->name), ddecl, df);
+    case &Aggr_p(&AggrInfo(info,_),_,dlps,_):
+      let ad = get_known_aggrdecl(info);
+      if (ad->impl->tagged) {
+        let &$(designators,pat) = dlps->hd;
+        field_name_t f;
+        switch (designators->hd) {
+        case &FieldName(fn): f = fn; break;
+        default: impos("no field name in tagged union pattern");
+        }
+        return new EqTaggedUnion(f,get_member_offset(ad,f));
+      } else 
+        impos("non-tagged aggregate in pattern test");
+    default: impos("non-test pattern in pattern test");
+    }
+  }
+}  
+
+static union PatOrWhere pw(pat_t p) {
+  return PatOrWhere{.pattern = p};
 }
-static con_t<`r> int_con(region_t<`r> r, int i,struct Pat *`H p) { 
-  return rnew(r) Con_s(Int_v(i), 0, NULL, p); 
+
+static con_t null_con(pat_t p) { 
+  return new Con_s{Name_v("NULL"), 0, &two_opt, pw(p)};
 }
-static con_t<`r> float_con(region_t<`r> r, string_t<`H> f, pat_t p) {
-  return rnew(r) Con_s(Name_v(f),0,NULL,p);
+static con_t null_ptr_con(pat_t p) { 
+  return new Con_s{Name_v("&"), 1, &two_opt, pw(p)};
 }
-static con_t<`r> char_con(region_t<`r> r, char c, pat_t p) {
-  return rnew(r) Con_s(Int_v(c), 0,(int*`r)&twofiftysix_opt, p);
+static con_t ptr_con(pat_t p) { 
+  return new Con_s{Name_v("&"), 1, &one_opt, pw(p)};
 }
-static con_t<`r> tuple_con(region_t<`r> r, int i, struct Pat *`H p)     { 
-  return rnew(r) Con_s(Name_v("$"), i, &one_opt, p); 
+static con_t int_con(int i,union PatOrWhere p) {
+  return new Con_s(Int_v(i), 0, NULL, p); 
+}
+static con_t float_con(string_t<`H> f, pat_t p) {
+  return new Con_s(Name_v(f),0,NULL,pw(p));
+}
+static con_t char_con(char c, pat_t p) {
+  return new Con_s(Int_v(c), 0, &twofiftysix_opt, pw(p));
+}
+static con_t tuple_con(int i, union PatOrWhere p)     { 
+  return new Con_s(Name_v("$"), i, &one_opt, p); 
 }
 
 // build various simple patterns
-static simple_pat_t<`r> null_pat(region_t<`r> r, pat_t p) {
-  return rnew(r) Con(null_con(r,p),     NULL); 
+static simple_pat_t null_pat(pat_t p) {
+  return new Con(null_con(p),     NULL); 
 }
-static simple_pat_t<`r> int_pat(region_t<`r> r, int i, struct Pat *`H p) {
-  return rnew(r) Con(int_con(r,i,p),   NULL); 
+static simple_pat_t int_pat(int i, union PatOrWhere p) {
+  return new Con(int_con(i,p),   NULL); 
 }
-static simple_pat_t<`r> char_pat(region_t<`r> r, char c, pat_t p) {
-  return rnew(r) Con(char_con(r,c,p),  NULL); 
+static simple_pat_t char_pat(char c, pat_t p) {
+  return new Con(char_con(c,p),  NULL); 
 }
-static simple_pat_t<`r> float_pat(region_t<`r> r, string_t<`H> f, pat_t p) {
-  return rnew(r) Con(float_con(r,f,p),NULL);
+static simple_pat_t float_pat(string_t<`H> f, pat_t p) {
+  return new Con(float_con(f,p),NULL);
 }
-static simple_pat_t<`r> null_ptr_pat(region_t<`r> r, simple_pat_t<`r> p, pat_t p0) {
-  return rnew(r) Con(null_ptr_con(r,p0),rnew(r) List(p,NULL));
+static simple_pat_t null_ptr_pat(simple_pat_t p, pat_t p0) {
+  return new Con(null_ptr_con(p0),new List(p,NULL));
 }
-static simple_pat_t<`r> ptr_pat(region_t<`r> r, simple_pat_t<`r> p, pat_t p0) { 
-  return rnew(r) Con(ptr_con(r,p0),rnew(r) List(p,NULL)); 
+static simple_pat_t ptr_pat(simple_pat_t p, pat_t p0) { 
+  return new Con(ptr_con(p0),new List(p,NULL)); 
 }
-static simple_pat_t<`r> tuple_pat(region_t<`r> r, list_t<simple_pat_t<`r>,`r> ss, struct Pat *`H p) {
-  return rnew(r) Con(tuple_con(r,List::length(ss),p),ss);
+static simple_pat_t tuple_pat(list_t<simple_pat_t,`H> ss, union PatOrWhere p) {
+  return new Con(tuple_con(List::length(ss),p),ss);
 }
-static simple_pat_t<`r> con_pat(region_t<`r> r, string_t<`H> con_name, int*`r span,
-			    list_t<simple_pat_t<`r>,`r> ps, pat_t p) {
-  con_t c = rnew(r) Con_s(Name_v(con_name), List::length(ps), span, p);
-  return rnew(r) Con(c,ps);
+static simple_pat_t con_pat(string_t<`H> con_name, int*`H span,
+			    list_t<simple_pat_t,`H> ps, pat_t p) {
+  con_t c = new Con_s(Name_v(con_name), List::length(ps), span, pw(p));
+  return new Con(c,ps);
 }
 
 // compile a Cyclone pattern to a simple pattern
-static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
-  simple_pat_t<`r> s;
+static simple_pat_t compile_pat(pat_t p) {
+  simple_pat_t s;
   switch (p->r) {
   case &Wild_p:          
   case &AliasVar_p(_,_):
-  case &TagInt_p(_,_):  s = rnew(r) Any; break;
-  case &Null_p:         s = null_pat(r,p); break;
-  case &Int_p(sn,i):    s = int_pat(r,i,p); break;
-  case &Char_p(c):      s = char_pat(r,c,p); break;
-  case &Float_p(f,_):   s = float_pat(r,f,p); break;
-  case &Var_p(_,p2):    s = compile_pat(r,p2); break;
-  case &Reference_p(_,p2): s = compile_pat(r,p2); break;
+  case &TagInt_p(_,_):  s = new Any; break;
+  case &Null_p:         s = null_pat(p); break;
+  case &Int_p(sn,i):    s = int_pat(i,pw(p)); break;
+  case &Char_p(c):      s = char_pat(c,p); break;
+  case &Float_p(f,_):   s = float_pat(f,p); break;
+  case &Var_p(_,p2):    s = compile_pat(p2); break;
+  case &Reference_p(_,p2): s = compile_pat(p2); break;
   case &Pointer_p(pp):
     switch (compress((type_t)p->topt)) {
     case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
@@ -1030,38 +1132,38 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
           break;
 	}
       }
-      simple_pat_t ss = compile_pat(r,pp);
+      simple_pat_t ss = compile_pat(pp);
       if (is_nullable) 
-	s = null_ptr_pat(r,ss,p);
+	s = null_ptr_pat(ss,p);
       else 
-	s = ptr_pat(r,ss,p);
+	s = ptr_pat(ss,p);
       break;
     default: impos("expecting pointertype for pattern!");
     }
     break;
   case &Datatype_p(tud,tuf,ps,_):
-    int*`r span;
+    int*`H span;
     switch(compress((type_t)p->topt)) {
     case &DatatypeType(_):     
       if(tud->is_extensible)
         span = NULL;
       else
-        span = rnew(r) (List::length(tud->fields->v)); 
+        span = new (List::length(tud->fields->v)); 
       break;
     case &DatatypeFieldType(_): span = &one_opt; break;
     default: span = impos("void datatype pattern has bad type"); break;
     }
-    s = con_pat(r,*((*tuf->name)[1]),span, List::rmap_c(r,compile_pat,r,ps),p);
+    s = con_pat(*((*tuf->name)[1]),span, List::map(compile_pat,ps),p);
     break;
     
   case &Tuple_p(ps,_): 
-    s = tuple_pat(r,List::rmap_c(r,compile_pat,r,ps),p); break;
+    s = tuple_pat(List::map(compile_pat,ps),pw(p)); break;
     
   case &Aggr_p(&AggrInfo({.KnownAggr = &ad},_),_,dlps,_):
     // FIX: doesn't look like multiple designators are right
     // we do different things for structs and unions:
     if (ad->kind == StructA) {
-      list_t<simple_pat_t<`r>,`r> ps = NULL;
+      list_t<simple_pat_t> ps = NULL;
       for (_ fields = ad->impl->fields; fields != NULL; fields = fields->tl) {
         // leave out bit fields without a name
         bool found = (strcmp(*fields->hd->name,"") == 0);
@@ -1070,7 +1172,7 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
           switch (dl) {
           case &List{.hd=&FieldName(f), .tl=NULL}: 
             if(strptrcmp(f,fields->hd->name) == 0) {
-              ps = rnew(r) List(compile_pat(r,p),ps);
+              ps = new List(compile_pat(p),ps);
               found = true;
             }
             break;
@@ -1080,15 +1182,15 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
         if(!found)
           impos("bad designator");
       }
-      s = tuple_pat(r,ps,p);
+      s = tuple_pat(List::imp_rev(ps),pw(p));
     } else {
       // ad->kind == UnionA-- want to treat this like a datatype
       if (!ad->impl->tagged) 
         terr(p->loc,"patterns on untagged unions not yet supported.");
-      int *`r span = rnew(r) List::length(ad->impl->fields);
+      int * span = new List::length(ad->impl->fields);
       switch (dlps) {
       case &List{.hd=&$(&List{.hd=&FieldName(f),.tl=NULL},p2),.tl=NULL}:
-        s = con_pat(r,*f,span,rnew(r) List{compile_pat(r,p2),NULL},p);
+        s = con_pat(*f,span,new List{compile_pat(p2),NULL},p);
         break;
       default: impos("bad union pattern");
       }
@@ -1102,11 +1204,11 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
     case &IntType(...): 
       // When it's an integer, we have to pretend like there's an infinite
       // span...
-      s = con_pat(r, *((*ef->name)[1]), NULL, NULL, p);
+      s = con_pat(*((*ef->name)[1]), NULL, NULL, p);
       break;
     default:
       int span = List::length(ed->fields->v);
-      s = con_pat(r, *((*ef->name)[1]), rnew(r) span, NULL, p);
+      s = con_pat(*((*ef->name)[1]), new span, NULL, p);
       break;
     }
     break;
@@ -1125,18 +1227,18 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
     case &IntType(...): 
       // When it's an integer, we have to pretend like there's an infinite
       // span to avoid errors for redundant patterns.
-      s = con_pat(r, *((*ef->name)[1]), NULL, NULL, p);
+      s = con_pat(*((*ef->name)[1]), NULL, NULL, p);
       break;
     default:
       int span = List::length(fields);
-      s = con_pat(r,*((*ef->name)[1]), rnew(r) span, NULL, p);
+      s = con_pat(*((*ef->name)[1]), new span, NULL, p);
       break;
     }
     break;
   case &UnknownId_p(_):     
   case &UnknownCall_p(_,_,_): 
   case &Aggr_p(_,_,_,_):      
-  case &Exp_p(_): s = rnew(r) Any;
+  case &Exp_p(_): s = new Any;
   }
   return s;
 }
@@ -1146,46 +1248,71 @@ static simple_pat_t<`r> compile_pat(region_t<`r> r, pat_t p) {
 // for compilation later on.  What we should really do is go ahead
 // and compile to a decision tree and attach this to the abstract
 // syntax...
-typedef list_t<$(simple_pat_t<`r>,`rhs)@`r,`r> match_t<`rhs,`r>;
+typedef list_t<$(simple_pat_t,rhs_t)@> match_t;
 // A term descriptor describes a set of values using positive and/or
 // negative information.  The descriptor Pos(c,[td1,...,tdn]) describes
 // all values v of the form c(v1,...,vn), where vi is in the set
 // described by tdi.  The descriptor Neg[c1,...,cn] describes all
 // values v that are not of the form ci(v1,...,vm) (1 <= i <= n).
 // Note that Neg[] denotes any possible value.
-static datatype Term_desc<`r::R> {
-  Pos(con_t<`r>,list_t<datatype Term_desc<`r>@`r,`r>);
-  Neg(Set::set_t<con_t<`r>,`r>);
+static datatype Term_desc {
+  Pos(con_t,list_t<datatype Term_desc@>);
+  Neg(Set::set_t<con_t>);
 };
-typedef datatype Term_desc<`r> @`r term_desc_t<`r>;
 
 // Contexts represent a partial term-description matched thus far,
 // from the root node of the object in a left-to-right fashion.
-typedef list_t<$(con_t<`r>,list_t<term_desc_t<`r>,`r>)@`r,`r> context_t<`r>;
+typedef list_t<$(con_t,list_t<term_desc_t>)@> context_t;
 // A decision tree for compiling pattern-matches.  Failure denotes
 // that an exception should be thrown.  Success triggers a right-hand-side.
 // IfEq is a constructor test -- conceptually, the access path is a sequence
 // of projections applied to the root object to get at the field being
-// tested -- this will eventually have to change to have enough type
-// information to really generate the right code.
-typedef list_t<int,`r> access_t<`r>;
+// tested.
 
-static datatype Decision<`rhs,`r::R> {
-  Failure(term_desc_t<`r>);
-  Success(`rhs);
-  IfEq(access_t<`r>, con_t<`r>, 
-       datatype Decision<`rhs,`r>@`r, 
-       datatype Decision<`rhs,`r>@`r);
-};
-typedef datatype Decision<`rhs,`r> @`r decision_t<`rhs,`r>;
+static bool same_access(access_t a1, access_t a2) {
+  switch $(a1,a2) {
+  case $(&Dummy,&Dummy): return true;
+  case $(&Deref,&Deref): return true;
+  case $(&TupleField(i1),&TupleField(i2)): return i1 == i2;
+  case $(&DatatypeField(_,df1,i1),&DatatypeField(_,df2,i2)): 
+    return (df1 == df2) && (i1 == i2);
+  case $(&AggrField(b1,f1), &AggrField(b2,f2)):
+    return (b1 == b2) && (strptrcmp(f1,f2) == 0);
+  default: return false;
+  }
+}
+
+static bool same_path(path_t p1, path_t p2) {
+  while (p1 != NULL && p2 != NULL) {
+    if (!same_access(p1->hd->access,p2->hd->access)) return false;
+    p1 = p1->tl;
+    p2 = p2->tl;
+  }
+  if (p1 != p2) return false;
+  return true;
+}
+
+static decision_t ifeq(path_t access, con_t con, decision_t d1, decision_t d2) {
+  let test = get_pat_test(con->orig_pat);
+  switch (d2) {
+  case &SwitchDec(access2, switch_clauses, default_decision):
+    if (same_path(access,access2) && tagcheck(con->orig_pat.pattern))
+      return new SwitchDec(access2, 
+                           new List(new $(test, d1), switch_clauses), 
+                           default_decision);
+    else break;
+  default:  break;
+  }
+  return new SwitchDec(access, new List(new $(test, d1), NULL), d2);
+}
 
 // A work_stack records what tests we have to continue to do.  An
 // implicit invariant is that for each frame on the stack, the
 // length of the pattern, access, and term_desc lists are the same.
-typedef  $(list_t<simple_pat_t<`r>,`r>,
-	   list_t<access_t<`r>,`r>,
-	   list_t<term_desc_t<`r>,`r>)@`r work_stack_frame_t<`r>;
-typedef list_t<work_stack_frame_t<`r>,`r> work_stack_t<`r>;
+typedef $(list_t<simple_pat_t>, list_t<path_t>, list_t<term_desc_t>)@ 
+  work_stack_frame_t;
+
+typedef list_t<work_stack_frame_t> work_stack_t;
 // Used during primitive match compilation
 static enum Answer { Yes, No, Maybe };
 typedef enum Answer answer_t;
@@ -1204,37 +1331,83 @@ static void print_con(con_t c) {
   }
 }
 
-static void print_dec_tree(decision_t<`rhs> d, void print_rhs(`rhs), int tab) {
+static void print_access(access_t a) {
+  switch (a) {
+  case &Dummy: fprintf(stderr,"DUMMY"); break;
+  case &Deref: fprintf(stderr,"*"); break;
+  case &TupleField(i): fprintf(stderr,"[%d]",i); break;
+  case &DatatypeField(_,f,i):
+    fprintf(stderr,"%s[%d]",qvar2string(f->name),i); break;
+  case &AggrField(tagged, f):
+    if (tagged)
+      fprintf(stderr,".tagunion.%s",*f);
+    else
+      fprintf(stderr,".%s",*f);
+    break;
+  }
+}
+
+static void print_pat_test(pat_test_t p) {
+  switch (p) {
+  case &WhereTest(NULL): fprintf(stderr,"where(NULL)"); break;
+  case &WhereTest(e): fprintf(stderr,"where(%s)",Absynpp::exp2string((exp_t)e)); break;
+  case &EqNull: fprintf(stderr,"NULL"); break;
+  case &NeqNull: fprintf(stderr,"NOT-NULL:"); break;
+  case &EqAnonEnum(_,ef): fallthru(ef);
+  case &EqEnum(_,ef): fprintf(stderr,"%s",qvar2string(ef->name)); break;
+  case &EqFloat(s,_): fprintf(stderr,"%s",s); break;
+  case &EqConst(i): fprintf(stderr,"%d",i); break;
+  case &EqDatatypeTag(i,_,_): fprintf(stderr,"datatypetag(%d)",i); break;
+  case &EqTaggedUnion(f,i): fprintf(stderr,"uniontag[%s](%d)",*f,i); break;
+  case &EqExtensibleDatatype(_,f):
+    fprintf(stderr,"datatypefield(%s)",qvar2string(f->name));
+  }
+}
+
+static void print_rhs(rhs_t r) {
+  fprintf(stderr,"%s",Absynpp::stmt2string(r->rhs));
+}
+
+static void print_dec_tree(decision_t d, int tab) {
   switch (d) {
   case &Success(rhs): 
     print_tab(tab);
     fprintf(stderr,"Success("); print_rhs(rhs); fprintf(stderr,")\n");
     break;
   case &Failure(_): fprintf(stderr,"Failure\n"); break;
-  case &IfEq(a,c,left,right):
+  case &SwitchDec(a,cases,def):
     print_tab(tab);
-    fprintf(stderr,"Access[");
+    fprintf(stderr,"Switch[");
     for (; a != NULL; a = a->tl) { 
-      fprintf(stderr,"%d",a->hd);
+      print_access(a->hd->access);
       if (a->tl != NULL) fprintf(stderr,",");
     }
-    fprintf(stderr,"],");
-    print_con(c);
-    fprintf(stderr,",\n");
-    print_dec_tree(left,print_rhs,tab+7);
-    print_dec_tree(right,print_rhs,tab+7);
+    fprintf(stderr,"] {\n");
+    for (; cases != NULL; cases = cases->tl) {
+      let $(pt,d) = *cases->hd;
+      print_tab(tab);
+      fprintf(stderr,"case ");
+      print_pat_test(pt);
+      fprintf(stderr,":\n");
+      print_dec_tree(d,tab+7);
+    }
+    print_tab(tab);
+    fprintf(stderr,"default:\n");
+    print_dec_tree(def,tab+7);
+    print_tab(tab);
+    fprintf(stderr,"}\n");
   }
 }
 
-static void print_swrhs($(bool,seg_t)@`r x) {
-  return;
+void print_decision_tree(decision_t d) {
+  print_dec_tree(d,0);
 }
 
 // Add c to a set of negative constructors for a term description.
 // Assumes that td is a negative term description, that c is not
 // already in the set, and that adding c does not cover all of the
 // possible constructors.
-static term_desc_t<`r> add_neg(region_t<`r> r, term_desc_t<`r> td, con_t<`r> c) {
+static term_desc_t add_neg(term_desc_t td, con_t c) {
   switch (td) {
   case &Neg(cs):
     /* JGM: I'm commenting these out to avoid spurious compiler errors
@@ -1244,14 +1417,14 @@ static term_desc_t<`r> add_neg(region_t<`r> r, term_desc_t<`r> td, con_t<`r> c) 
     if (c->span != NULL && (Set::cardinality(cs) + 1) >= *c->span)
       impos("add_neg called when |cs U {c}| >= span(c)");
     */
-    return rnew(r) Neg(Set::rinsert(r,cs,c));
+    return new Neg(Set::insert(cs,c));
   case &Pos(_,_): impos("add_neg called when td is Positive");
   }
 }
 
 // Returns whether or not values that start with constructor c are in the set
 // described by the term descriptor td.
-static answer_t static_match(con_t<`r> c, term_desc_t<`r> td) {
+static answer_t static_match(con_t c, term_desc_t td) {
   switch (td) {
   case &Pos(c2,_):
     // td is the set of all values that start with c2
@@ -1273,24 +1446,23 @@ static answer_t static_match(con_t<`r> c, term_desc_t<`r> td) {
 // is always at the beginning of the context.  Furthermore, the current
 // node's sub-term-descriptors are in reverse order.  Thus, we just
 // cons the dsc onto the first con's list of sub-term-desc's.
-static context_t<`r> augment(region_t<`r> r, 
-			     context_t<`r> ctxt, term_desc_t<`r> dsc) {
+static context_t augment(context_t ctxt, term_desc_t dsc) {
   switch (ctxt) {
   case NULL: return NULL; // ???
   case &List{.hd=&$(c,args), .tl=rest}:
-    return rnew(r) 
-      List(rnew(r) $(c, (list_t<term_desc_t>)(rnew(r) List(dsc,args))),rest);
+    return new 
+      List(new $(c, (list_t<term_desc_t>)(new List(dsc,args))),rest);
   }
 }
 
 // When argument descriptions [dn,dn-1,...,d2,d1] have been found
 // for all arguments of the local-most constructor c, we turn it
 // into a positive descriptor Pos(c,[d1,d2,...,dn-1,dn]).
-static context_t<`r> norm_context(region_t<`r> r, context_t<`r> ctxt) {
+static context_t norm_context(context_t ctxt) {
   switch (ctxt) {
   case NULL: impos("norm_context: empty context");
   case &List{.hd=&$(c,args), .tl=rest}: 
-    return augment(r, rest, rnew(r) Pos(c, List::rrev(r,args)));
+    return augment(rest, new Pos(c, List::rev(args)));
   }
 }
 
@@ -1299,121 +1471,144 @@ static context_t<`r> norm_context(region_t<`r> r, context_t<`r> ctxt) {
 // up to the left of the current subterm), the current subterm description,
 // and the term descriptions on the work stack, which, when taken together,
 // describe the object to the right of the current subterm.
-static term_desc_t<`r> build_desc(region_t<`r> r, context_t<`r> ctxt,
-				  term_desc_t<`r> dsc, work_stack_t<`r> work){
+static term_desc_t build_desc(context_t ctxt, 
+                              term_desc_t dsc, work_stack_t work){
   switch ($(ctxt,work)) {
   case $(NULL,NULL): return dsc;
   case $(NULL,_):    
   case $(_,   NULL): impos("build_desc: ctxt and work don't match");
   case $(&List{.hd=&$(c,args), .tl=rest}, &List{.hd=&$(_,_,dargs), .tl=work2}):
-    let td = rnew(r) Pos(c, List::rappend(r, List::rrev(r,args), 
-					  rnew(r) List(dsc,dargs)));
-    return build_desc(r, rest, td, work2);
+    let td = new Pos(c, List::append(List::rev(args), new List(dsc,dargs)));
+    return build_desc(rest, td, work2);
   } 
 }
 
-static decision_t<`rhs,`r> 
-match(region_t<`r> r,simple_pat_t<`r> p, access_t<`r> obj, term_desc_t<`r> dsc,
-      context_t<`r> ctx, work_stack_t<`r> work,
-      `rhs right_hand_side, match_t<`rhs,`r> rules);
+static decision_t 
+match(simple_pat_t p, path_t obj, term_desc_t dsc,
+      context_t ctx, work_stack_t work,
+      rhs_t right_hand_side, match_t rules);
 
 // Checks to see that the term (thus far described by dsc) matches one
 // of the match_t rules.
-static decision_t<`rhs,`r> or_match(region_t<`r> r, term_desc_t<`r> dsc,
-				    match_t<`rhs,`r> allmrules) {
+static decision_t or_match(term_desc_t dsc, match_t allmrules) {
   switch(allmrules) {
   case NULL: return new Tcpat::Failure(dsc);
   case &List{.hd = &$(pat1, rhs1), .tl = rulerest}:
-    return match(r, pat1, NULL, dsc, NULL, NULL, rhs1, rulerest);
+    return match(pat1, NULL, dsc, NULL, NULL, rhs1, rulerest);
   }
 }
 
 // Compiles a set of match rules to a decision tree.
-static decision_t<`rhs,`r> match_compile(region_t<`r> r,
-					 match_t<`rhs,`r> allmrules) {
-  return or_match(r, rnew(r) Neg(empty_con_set(r)), allmrules);
+static decision_t match_compile(match_t allmrules) {
+  return or_match(new Neg(empty_con_set()), allmrules);
 }
 
 // Succeeds returning the right-hand-side if every pattern matches the
 // associated term-description in the work stack, or else the original
 // object matches some rule from rules.
-static 
-decision_t<`rhs,`r> and_match(region_t<`r> r, context_t<`r> ctx,
-			      work_stack_t<`r> work, `rhs right_hand_side, 
-			      match_t<`rhs,`r> rules) {
+static decision_t and_match(context_t ctx,
+                            work_stack_t work, rhs_t right_hand_side, 
+                            match_t rules) {
   switch (work) {
-  case NULL: return rnew(r) Success(right_hand_side);
+  case NULL: return new Success(right_hand_side);
   case &List{.hd = &$(NULL,NULL,NULL), .tl = workr }:
-    return and_match(r, norm_context(r,ctx), workr, right_hand_side, rules);
+    return and_match(norm_context(ctx), workr, right_hand_side, rules);
   case &List{.hd = &$(pats,objs,dscs), .tl = workr }:
     if (pats == NULL || objs == NULL || dscs == NULL)
       impos("tcpat:and_match: malformed work frame");    
     let &List(pat1,patr) = (_@)pats;
     let &List(obj1,objr) = (_@)objs;
     let &List(dsc1,dscr) = (_@)dscs;
-    let wf = rnew(r) $(patr, objr, dscr);
-    return match(r,pat1,obj1,dsc1,ctx, rnew(r) List(wf,workr),
-		 right_hand_side,rules);
+    let wf = new $(patr, objr, dscr);
+    return match(pat1,obj1,dsc1,ctx, new List(wf,workr),right_hand_side,rules);
   } 
 }
 
 // Get the term description arguments for a constructor term-description.
-static list_t<term_desc_t<`r>,`r> 
-getdargs(region_t<`r> r,con_t<`r> pcon,term_desc_t<`r> dsc) {
+static list_t<term_desc_t> getdargs(con_t pcon,term_desc_t dsc) {
   switch (dsc) {
   case &Neg(ncs):
     // We only know that the term is con which is never in the set ncs.
     // So return Neg{} for each argument, reflecting that no information
     // is known about the arguments.
-    term_desc_t any = rnew(r) Neg(empty_con_set(r));
+    term_desc_t any = new Neg(empty_con_set());
     let res = NULL;
     for (int i = 0; i < pcon->arity; ++i)
-      res = rnew(r) List(any,res);
+      res = new List(any,res);
     return res;
   case &Pos(_, dargs): return dargs;
   }
 }
 
-// Compute the paths for each argument when disassembling a constructor.
-static access_t<`r> getoarg($(region_t<`r>,access_t<`r>)@ env, int i) {
-  let &$(r,obj) = env;
-  return rnew(r) List(i+1,obj);
+static access_t get_access(union PatOrWhere pw, int i) {
+  switch (pw) {
+  case {.where_clause = _}: return &Dummy_val;
+  case {.pattern = p}:
+    switch (p->r) {
+    case &Pointer_p(...): 
+      if (i != 0) 
+        impos(aprintf("get_access on pointer pattern with offset %d\n",i));
+      return &Deref_val;
+    case &Tuple_p(...): return new TupleField(i);
+    case &Datatype_p(tud,tuf,...): return new DatatypeField(tud,tuf,i);
+    case &Aggr_p(&AggrInfo(info,_),_,dlps,_):
+      let ad = get_known_aggrdecl(info);
+      if (ad->impl->tagged) {
+        switch ((*dlps->hd)[0]) {
+        case &List{&FieldName(f),NULL}:
+          return new AggrField(ad->impl->tagged,f);
+        default: impos(aprintf("get_access on bad aggr pattern: %s",pat2string(p)));
+        }
+      }
+      let fields = ad->impl->fields;
+      let orig_i = i;
+      for (; i != 0; i--) fields = fields->tl;
+      return new AggrField(ad->impl->tagged,fields->hd->name);
+    default: impos(aprintf("get_access on bad pattern: %s",pat2string(p)));
+    }
+  }
 }
-static 
-list_t<access_t<`r>,`r> getoargs(region_t<`r> r, con_t<`r> pcon, access_t<`r> obj) {
-  let env = $(r,obj);
-  return List::rtabulate_c(r, pcon->arity, getoarg, &env);
+
+// Compute the paths for each argument when disassembling a constructor.
+static path_t getoarg($(path_t,con_t pcon)@ env, int i) {
+  let &$(obj,pcon) = env;
+  access_t acc = get_access(pcon->orig_pat,i);
+  return new List(new PathNode{pcon->orig_pat,acc},obj);
+}
+static list_t<path_t> getoargs(con_t pcon, path_t obj) {
+  let env = $(obj,pcon);
+  return List::tabulate_c(pcon->arity, getoarg, &env);
 }
 
 // Succeeds returning the right-hand-side if the pattern matches the
 // description and every pattern matches the associated description
 // in the work stack, or if the original object matches one of the rules.
-static decision_t<`rhs,`r> 
-match(region_t<`r> r,simple_pat_t<`r> p, access_t<`r> obj, term_desc_t<`r> dsc,
-      context_t<`r> ctx, work_stack_t<`r> work,
-      `rhs right_hand_side, match_t<`rhs,`r> rules) {
+static decision_t 
+match(simple_pat_t p, path_t obj, term_desc_t dsc,
+      context_t ctx, work_stack_t work,
+      rhs_t right_hand_side, match_t rules) {
   switch (p) {
   case &Any: 
-    return and_match(r,augment(r,ctx, dsc),work,right_hand_side,rules);
+    return and_match(augment(ctx, dsc),work,right_hand_side,rules);
   case &Con(pcon, pargs):
     switch (static_match(pcon, dsc)) {
     case Yes:
-      context_t<`r> ctx2       = rnew(r) List(rnew(r) $(pcon,NULL), ctx);
-      work_stack_frame_t<`r> work_frame = rnew(r) $(pargs,getoargs(r,pcon,obj),
-                                                    getdargs(r,pcon,dsc));
-      work_stack_t<`r> work2  = rnew(r) List(work_frame, work);
-      return and_match(r,ctx2,work2,right_hand_side,rules);
+      context_t ctx2       = new List(new $(pcon,NULL), ctx);
+      work_stack_frame_t work_frame = new $(pargs,getoargs(pcon,obj),
+                                            getdargs(pcon,dsc));
+      work_stack_t work2  = new List(work_frame, work);
+      return and_match(ctx2,work2,right_hand_side,rules);
     case No:
-      return or_match(r,build_desc(r,ctx,dsc,work),rules);
+      return or_match(build_desc(ctx,dsc,work),rules);
     case Maybe:
-      context_t<`r> ctx2       = rnew(r) List(rnew(r) $(pcon,NULL), ctx);
-      work_stack_frame_t<`r> work_frame = rnew(r) $(pargs,getoargs(r,pcon,obj),
-                                                    getdargs(r,pcon,dsc));
-      work_stack_t<`r> work2   = rnew(r) List(work_frame, work);
-      let s          = and_match(r, ctx2, work2, right_hand_side, rules);
-      let f          = or_match(r,build_desc(r,ctx, add_neg(r,dsc,pcon), work),
+      context_t ctx2       = new List(new $(pcon,NULL), ctx);
+      work_stack_frame_t work_frame = new $(pargs,getoargs(pcon,obj),
+                                                    getdargs(pcon,dsc));
+      work_stack_t work2   = new List(work_frame, work);
+      let s          = and_match(ctx2, work2, right_hand_side, rules);
+      let f          = or_match(build_desc(ctx, add_neg(dsc,pcon), work),
 				rules);
-      return rnew(r) IfEq(obj, pcon, s, f);
+      return ifeq(obj, pcon, s, f);
     }
   }
 }
@@ -1423,21 +1618,23 @@ match(region_t<`r> r,simple_pat_t<`r> p, access_t<`r> obj, term_desc_t<`r> dsc,
 // implies the patterns are not exhaustive.  Note also that if
 // any rhs for a match does not show up in the decision tree, then
 // the associated pattern was redundant.
-static void check_exhaust_overlap(region_t<`r> r,
-                                  decision_t<`rhs,`r> d,
-				  void not_exhaust(region_t<`r>,`a,term_desc_t<`r>), 
+static void check_exhaust_overlap(decision_t d,
+				  void not_exhaust(`a,term_desc_t), 
                                   `a env1,
-				  void rhs_appears(`b,`rhs), `b env2,
+				  void rhs_appears(`b,rhs_t), `b env2,
                                   bool @exhaust_done) {
   switch (d) {
   case &Tcpat::Failure(td): 
-    if (!(*exhaust_done)) { not_exhaust(r,env1,td); *exhaust_done = true; }
+    if (!(*exhaust_done)) { not_exhaust(env1,td); *exhaust_done = true; }
     break;
   case &Success(r):    rhs_appears(env2,r); break;
-  case &IfEq(_,_,left,right):
-    check_exhaust_overlap(r,left,  not_exhaust, env1, rhs_appears, env2, 
-                          exhaust_done);
-    check_exhaust_overlap(r,right, not_exhaust, env1, rhs_appears, env2,
+  case &SwitchDec(_,cases,def):
+    for (; cases != NULL; cases = cases->tl) {
+      let $(_,d) = *cases->hd;
+      check_exhaust_overlap(d, not_exhaust, env1, rhs_appears, env2, 
+                            exhaust_done);
+    }
+    check_exhaust_overlap(def, not_exhaust, env1, rhs_appears, env2,
                           exhaust_done);
     break;
   }
@@ -1448,33 +1645,32 @@ static void check_exhaust_overlap(region_t<`r> r,
 // any pattern doesn't show up in the tree (pattern is redundant.)
 // Both are considered errors as far as the type-checker is concerned.
 static 
-$(simple_pat_t<`r>, $(bool,seg_t)@`r)@`r get_match($(region_t<`r>,int @)@ env, 
-                                                   switch_clause_t swc) {
-  let &$(r,ctr) = env;
-  simple_pat_t   sp0 = compile_pat(r,swc->pattern);
-  $(bool,seg_t)@ rhs = rnew(r) $(false,swc->pattern->loc);
+$(simple_pat_t, rhs_t)@ get_match(int @ctr, switch_clause_t swc) {
+  simple_pat_t   sp0 = compile_pat(swc->pattern);
+  rhs_t rhs = new Rhs{false,swc->pattern->loc,swc->body};
   simple_pat_t sp;
   if (swc->where_clause != NULL) {
-    sp = tuple_pat(r,rnew(r) 
-                   List(sp0,rnew(r) List(int_pat(r,*ctr,NULL),NULL)),NULL);
+    let w = PatOrWhere{.where_clause = swc->where_clause};
+    sp = tuple_pat(list(sp0, int_pat(*ctr,w)), w);
     *ctr = (*ctr) + 1;
   } else
-    sp = tuple_pat(r,rnew(r) List(sp0,rnew(r) List(rnew(r) Any,NULL)),NULL);
-  return rnew(r) $(sp, rhs);
+    sp = tuple_pat(list(sp0,new Any),PatOrWhere{.where_clause = NULL});
+  return new $(sp, rhs);
 }
 
 // Turn a descriptor into an example for reporting an inexhaustive match
 datatype exn { Desc2string };
 datacon(exn,Desc2string);
 
-static string_t descs2string(region_t<`r> r, list_t<term_desc_t<`r>,`r>);
-static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
+static string_t descs2string(list_t<term_desc_t>);
+static string_t desc2string(term_desc_t d) {
   switch (d) {
   case &Pos(c,ds):
     let n = c->name;
-    let p = c->orig_pat;
-    if (p == NULL) {
-      return desc2string(r,ds->hd);
+    pat_t p;
+    switch (c->orig_pat) {
+    case {.where_clause = _}: return desc2string(ds->hd);
+    case {.pattern = p2}: p = p2; break;
     }
     switch (p->r) {
     case &Wild_p: return "_";
@@ -1482,24 +1678,24 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
     case &Reference_p(vd,_): return aprintf("*%s",qvar2string(vd->name));
     case &TagInt_p(tv,vd): return aprintf("%s<`%s>",qvar2string(vd->name),
                                           *tv->name);
-    case &Tuple_p(_,_): return aprintf("$(%s)",descs2string(r,ds));
+    case &Tuple_p(_,_): return aprintf("$(%s)",descs2string(ds));
     case &Pointer_p(_):
-      return aprintf("&%s",descs2string(r,ds));
+      return aprintf("&%s",descs2string(ds));
     case &Aggr_p(&AggrInfo({.KnownAggr = &ad},_),_,dlps,_): 
       if (ad->kind == UnionA) {
         switch (dlps) {
         case &List{&$(&List{&FieldName(f),_},_),_}:
           return aprintf("%s{.%s = %s}",qvar2string(ad->name),*f,
-                         descs2string(r,ds));
+                         descs2string(ds));
         default: break;
         }
       }
-      return aprintf("%s{%s}",qvar2string(ad->name),descs2string(r,ds));
+      return aprintf("%s{%s}",qvar2string(ad->name),descs2string(ds));
     case &Datatype_p(_, tuf, _, _): 
       if (ds == NULL)
         return aprintf("%s",qvar2string(tuf->name));
       else 
-        return aprintf("%s(%s)",qvar2string(tuf->name),descs2string(r,ds));
+        return aprintf("%s(%s)",qvar2string(tuf->name),descs2string(ds));
     case &Null_p: return "NULL";
     case &Int_p(_,i): return aprintf("%d",i);
     case &Char_p(c): return aprintf("%d",c);
@@ -1512,15 +1708,15 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
   case &Neg(s):
     if (Set::is_empty(s)) return "_";
     let c = Set::choose(s);
-    let orig_pat = c->orig_pat;
     // we need to figure out what the type of the pattern is
     // orig_pat is NULL when we have an && clause on a pattern
-    if (orig_pat == NULL) throw &Desc2string_val;
+    if (tagcheck(c->orig_pat.where_clause)) throw &Desc2string_val;
+    let orig_pat = c->orig_pat.pattern;
     switch (compress((type_t)orig_pat->topt)) {
     case &IntType(_,Char_sz): 
       // find a character not in the constructor set
       for (int i = 0; i < 256; i++) {
-        let c = char_con(r,(char)i,orig_pat);
+        let c = char_con((char)i,orig_pat);
         if (!Set::member(s,c)) 
           return aprintf("%d",i);
       }
@@ -1528,7 +1724,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
     case &IntType(_,_):
       // find an integer not in the constructor set
       for (unsigned int i = 0; i < (0 - 1); i++) {
-        let c = int_con(r,(int)i,orig_pat);
+        let c = int_con((int)i,c->orig_pat);
         if (!Set::member(s,c)) 
           return aprintf("%d",i);
       }
@@ -1537,7 +1733,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
       let n = patts.nullable;
       bool is_nullable = conref_def(false,n);
       if (is_nullable) {
-        if (!Set::member(s,null_con(r,orig_pat))) 
+        if (!Set::member(s,null_con(orig_pat))) 
           return "NULL";
       }
       return "&_";
@@ -1548,7 +1744,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
       for (; fields; fields = fields->tl) {
         string_t n = *((*fields->hd->name)[1]);
         let args = fields->hd->typs;
-        if (!Set::member(s,new Con_s(Name_v(n), 0, NULL, orig_pat))) {
+        if (!Set::member(s,new Con_s(Name_v(n), 0, NULL, c->orig_pat))) {
           if (List::length(args) == 0)
             return n;
           else 
@@ -1562,7 +1758,7 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
       let &$(_,&union_name) = ad->name;
       for (; fields; fields = fields->tl) {
         string_t n = *fields->hd->name;
-        if (!Set::member(s,new Con_s(Name_v(n), 0, NULL, orig_pat)))
+        if (!Set::member(s,new Con_s(Name_v(n), 0, NULL, c->orig_pat)))
           return aprintf("%s{.%s = _}",union_name,n);
       }
       throw &Desc2string_val;
@@ -1570,11 +1766,11 @@ static string_t desc2string(region_t<`r> r, term_desc_t<`r> d) {
     }
   }
 }
-static stringptr_t desc2stringptr(region_t<`r> r, term_desc_t<`r> d) {
-  return new (desc2string(r,d));
+static stringptr_t desc2stringptr(term_desc_t d) {
+  return new (desc2string(d));
 }
-static string_t descs2string(region_t<`r> r,list_t<term_desc_t<`r>,`r> ds) {
-  let ss = List::rmap_c(r,desc2stringptr,r,ds);
+static string_t descs2string(list_t<term_desc_t> ds) {
+  let ss = List::map(desc2stringptr,ds);
   stringptr_t comma = new ",";
   for (let x = ss; x != NULL; x = x->tl) {
     if (x->tl != NULL) {
@@ -1585,9 +1781,9 @@ static string_t descs2string(region_t<`r> r,list_t<term_desc_t<`r>,`r> ds) {
   return strconcat_l(ss);
 }
 
-static void not_exhaust_err(region_t<`r> r, seg_t loc, term_desc_t<`r> desc) {
+static void not_exhaust_err(seg_t loc, term_desc_t desc) {
   try {
-    let s = desc2string(r,desc);
+    let s = desc2string(desc);
     terr(loc,"patterns may not be exhaustive.\n\tmissing case for %s",s);
   } catch {
   case &Desc2string: 
@@ -1595,31 +1791,32 @@ static void not_exhaust_err(region_t<`r> r, seg_t loc, term_desc_t<`r> desc) {
     break;
   }
 }
-static void rule_occurs(int dummy, $(bool,seg_t)@ rhs) {
-  (*rhs)[0] = true;
+static void rule_occurs(int dummy, rhs_t rhs) {
+  rhs->used = true;
 }
 
-void check_switch_exhaustive(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs) {
+void check_switch_exhaustive(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs,
+                             decision_opt_t@ dopt) {
   // We represent "pat && e" as (simple_pat,i) where i is a unique integer.
   // We represent patterns without where clauses as (simple_pat,_).
   // This way, if we have the same pattern repeated, we get exhuastiveness
   // right as long as one of the copies does not have a where-clause.
-  TEMP_RGN(te, r) {
   let where_ctr   = 0;
-  let env = $(r,&where_ctr);
-  let match_rules = List::rmap_c(r,get_match,&env,swcs);
-  let dec_tree    = match_compile(r,match_rules);
+  let env = &where_ctr;
+  let match_rules = List::map_c(get_match,env,swcs);
+  let dec_tree    = match_compile(match_rules);
+  *dopt = dec_tree;
+  //print_decision_tree(dec_tree);
   let ex_done = false;
-  check_exhaust_overlap(r, dec_tree, not_exhaust_err, loc, rule_occurs, 0, 
+  check_exhaust_overlap(dec_tree, not_exhaust_err, loc, rule_occurs, 0, 
                         &ex_done);
   for (; match_rules != NULL; match_rules = match_rules->tl) {
-    let &$(_,&$(b,loc2)) = match_rules->hd;
+    let &$(_,&Rhs{b,loc2,_}) = match_rules->hd;
     if (!b) {
       terr(loc2,"redundant pattern (check for misspelled constructors in earlier patterns)"); 
       //print_dec_tree(dec_tree, print_swrhs, 0);
       break; // only give one error
     }
-  }
   }
 }
 
@@ -1627,10 +1824,10 @@ void check_switch_exhaustive(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs)
 // the pattern is not exhaustive (a warning).  There's no way to get
 // something that's redundant (unless we add support for "or" patterns
 // of some sort.)
-static void not_exhaust_warn(region_t<`r> r, $(seg_t, bool) @ pr, term_desc_t<`r> desc) {
+static void not_exhaust_warn($(seg_t, bool) @ pr, term_desc_t desc) {
   (*pr)[1] = false;
   try {
-    let s = desc2string(r, desc);
+    let s = desc2string(desc);
     warn((*pr)[0],"pattern not exhaustive.\n\tmissing case for %s",s);
   } catch {
   case &Desc2string:
@@ -1638,48 +1835,51 @@ static void not_exhaust_warn(region_t<`r> r, $(seg_t, bool) @ pr, term_desc_t<`r
     break;
   }
 }
-static void dummy_fn(int i,int j) {
+static void dummy_fn(int i,rhs_t rhs) {
   return;
 }
-bool check_let_pat_exhaustive(seg_t loc,tenv_t te,pat_t p) {
-  TEMP_RGN(te,r) {
-  let match_rules = rnew(r) List(rnew(r) $(compile_pat(r,p),0),NULL);
-  let dec_tree    = match_compile(r, match_rules);
+
+bool check_let_pat_exhaustive(seg_t loc,tenv_t te,pat_t p,decision_opt_t @dopt) {
+  rhs_t rhs = new Rhs{false,p->loc,skip_stmt(0)};
+  let match_rules = new List(new $(compile_pat(p),rhs),NULL);
+  let dec_tree    = match_compile(match_rules);
   let exhaust_env = $(loc,true);
   let ex_done = false;
-  check_exhaust_overlap(r, dec_tree, not_exhaust_warn, &exhaust_env, dummy_fn, 0,
+  check_exhaust_overlap(dec_tree, not_exhaust_warn, &exhaust_env, dummy_fn, 0,
                         &ex_done);
+  *dopt = dec_tree;
   return exhaust_env[1];
-  }
 }
 
 
 // Check that the patterns in a catch switch are non-overlapping.
 // There's an implicit "re-throw on wild" pattern here, so no need
 // to check for exhaustiveness.
-static $(simple_pat_t<`r>, $(bool,seg_t)@`r)@`r get_match2(region_t<`r> r,
-                                                           switch_clause_t swc) {
-  simple_pat_t<`r>   sp0 = compile_pat(r,swc->pattern);
-  $(bool,seg_t)@`r rhs = rnew(r) $(false,swc->pattern->loc);
-  return rnew(r) $(sp0, rhs);
+static $(simple_pat_t, rhs_t)@ get_match2(switch_clause_t swc) {
+  simple_pat_t   sp0 = compile_pat(swc->pattern);
+  rhs_t rhs = new Rhs{false,swc->pattern->loc,swc->body};
+  return new $(sp0, rhs);
 }
-static void not_exhaust_err2(region_t<`r> r, seg_t loc, term_desc_t d) {
+static void not_exhaust_err2(seg_t loc, term_desc_t d) {
   // skip
 }
-void check_catch_overlap(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs) {
+void check_catch_overlap(seg_t loc, tenv_t te, list_t<switch_clause_t> swcs,
+                         decision_opt_t @dopt) {
+  // JGM FIX!  need to deal with where clauses now that we use the decision tree
   // We ignore where clauses here because catch's need not be exhaustive.
-  TEMP_RGN(te, r) {
-    let match_rules = List::rmap_c(r,get_match2,r,swcs);
-    let dec_tree    = match_compile(r,match_rules);
-    let ex_done = false;
-    check_exhaust_overlap(r, dec_tree, not_exhaust_err2, loc, rule_occurs, 0,
-                          &ex_done);
-    for (; match_rules != NULL; match_rules = match_rules->tl) {
-      let &$(_,&$(b,loc2)) = match_rules->hd;
-      if (!b) {
-        terr(loc2,"redundant pattern (check for misspelled constructors in earlier patterns)");
-        break; // only give one error
-      }
+  let match_rules = List::map(get_match2,swcs);
+  let dec_tree    = match_compile(match_rules);
+  *dopt = dec_tree;
+  let ex_done = false;
+  check_exhaust_overlap(dec_tree, not_exhaust_err2, loc, rule_occurs, 0,
+                        &ex_done);
+  for (; match_rules != NULL; match_rules = match_rules->tl) {
+    // skip the last of the match rules since that's the default case
+    if (match_rules->tl == NULL) break;
+    let &$(_,&Rhs{b,loc2,_}) = match_rules->hd;
+    if (!b) {
+      terr(loc2,"redundant pattern (check for misspelled constructors in earlier patterns)");
+      break; // only give one error
     }
   }
 }

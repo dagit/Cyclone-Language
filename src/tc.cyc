@@ -1077,7 +1077,7 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
     seg_t  loc = d->loc;
 
     switch (d->r) {
-    case &Let_d(_,_,_): 
+    case &Let_d(...): 
     case &Letv_d(_): // FIX
       terr(loc,"top level let-declarations are not implemented");
       break;

@@ -78,6 +78,11 @@ namespace Relations {
   typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
 }
 
+namespace Tcpat {
+  extern datatype Decision;  // see tcpat.h
+  typedef datatype Decision *decision_opt_t;
+}
+
 namespace Absyn {
   using Core;
   using List;
@@ -697,13 +702,14 @@ namespace Absyn {
     Continue_s(stmt_opt_t); // stmt is dest, set by type-checking
     Goto_s(var_t,stmt_opt_t); // stmt is dest, set by type-checking
     For_s(exp_t,$(exp_t,stmt_t),$(exp_t,stmt_t),stmt_t); 
-    Switch_s(exp_t,list_t<switch_clause_t>);  // switch statement
+    // switch statement
+    Switch_s(exp_t,list_t<switch_clause_t>, Tcpat::decision_opt_t);  
     // next case set by type-checking
     Fallthru_s(list_t<exp_t>,switch_clause_t *);
     Decl_s(decl_t,stmt_t); // declarations
     Label_s(var_t,stmt_t); // L:s
     Do_s(stmt_t,$(exp_t,stmt_t));
-    TryCatch_s(stmt_t,list_t<switch_clause_t>);
+    TryCatch_s(stmt_t,list_t<switch_clause_t>, Tcpat::decision_opt_t);
     ResetRegion_s(exp_t); // reset_region(e)
   };
   extern_datacon(Raw_stmt,Skip_s);
@@ -893,7 +899,7 @@ namespace Absyn {
     Fn_d(fndecl_t);    // functions  t f(t1 x1,...,tn xn) { ... }
     Let_d(pat_t,       // let p = e
           opt_t<list_t<$(vardecl_t *,exp_opt_t)@>>, // set by type-checker, used downstream
-          exp_t);
+          exp_t, Tcpat::decision_opt_t);
     Letv_d(list_t<vardecl_t>); // multi-let
     Region_d(tvar_t,vardecl_t,bool,exp_opt_t); // region declaration
     // region<`r> h;  or  region [resetable] <`r> h;   or

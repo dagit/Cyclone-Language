@@ -1514,7 +1514,7 @@ doc_t stmt2doc(stmt_t st, bool stmtexp) {
             line_doc(),
             rb());
     break;
-  case &Switch_s(e,ss):
+  case &Switch_s(e,ss,_):
     s = cat(text("switch ("),
             exp2doc(e),
             text(") "),
@@ -1564,7 +1564,7 @@ doc_t stmt2doc(stmt_t st, bool stmtexp) {
             exp2doc(e),
             text(");"));
     break;
-  case &TryCatch_s(s1,ss):
+  case &TryCatch_s(s1,ss,_):
     s = cat(text("try "),
             lb(),
             line_doc(),
@@ -1862,7 +1862,7 @@ doc_t decl2doc(decl_t d) {
   case &Datatype_d(dd):
     s = cat(datatypedecl2doc(dd),text(";"));
     break;
-  case &Let_d(p,_,e):
+  case &Let_d(p,_,e,_):
     s = cat(text("let "),
             pat2doc(p),
             text(" = "),

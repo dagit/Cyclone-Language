@@ -989,7 +989,7 @@ void dumpstmt(stmt_t s,bool expstmt) {
     dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
     dump_nospace("){"); dumpstmt(s1,false); dump_char('}');
     break;
-  case &Switch_s(e,ss):
+  case &Switch_s(e,ss,_):
     dump("switch("); dumpexp(e); dump_nospace("){");
     dumpswitchclauses(ss);
     dump_char('}');
@@ -1020,7 +1020,7 @@ void dumpstmt(stmt_t s,bool expstmt) {
   case &Fallthru_s(es,_):
     dump("fallthru("); dumpexps_prec(20,es); dump_nospace(");"); break;
 
-  case &TryCatch_s(s1,ss):
+  case &TryCatch_s(s1,ss,_):
     dump("try"); dumpstmt(s1,false); 
     dump("catch{");
     dumpswitchclauses(ss); dump_char('}');
@@ -1328,7 +1328,7 @@ void dumpdecl(decl_t d) {
   case &Enum_d(ed): 
     dump_enumdecl(ed); dump_semi();
     break;
-  case &Let_d(p,_,e):
+  case &Let_d(p,_,e,_):
     dump("let");
     dumppat(p);
     dump_char('=');

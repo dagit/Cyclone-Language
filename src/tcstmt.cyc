@@ -308,7 +308,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     }
     return;
 
-  case &Switch_s(*exp,scs0):
+  case &Switch_s(*exp,scs0,*dtp):
     // if e is not a variable expression, add an assignment and 
     // recurse.  This is needed for interpreting patterns cleanly in
     // the flow analysis
@@ -366,10 +366,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	}
       }
     }
-    check_switch_exhaustive(s0->loc,te,scs0);
+    check_switch_exhaustive(s0->loc,te,scs0,dtp);
     return;
 
-  case &TryCatch_s(s,scs0):
+  case &TryCatch_s(s,*scs0,*dtp):
     // This is a KLUDGE so that we have a next statement that is not
     // outside of the handler, eg. for try while(b) break; catch ...
     // We have to do this b/c the translation to C uses the destinations
@@ -382,11 +382,19 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       tcStmt(set_encloser(r,enter_try(r,te),s0),s,true);
     }
 
+    // add a default case that re-throws the exception
+    qvar_t def_v = new $(Loc_n,new "exn");
+    let def_pat = new_pat(new Var_p(new_vardecl(def_v,&VoidType_val,0),
+                                    new_pat(&Wild_p_val,0)),0);
+    let def_stmt = exp_stmt(new_exp(new Throw_e(var_exp(def_v,0),true),0),0);
+    let def_clause = new Switch_clause{def_pat, NULL, NULL, def_stmt, 0};
+    *scs0 = List::append(*scs0,list(def_clause));
+    
     TEMP_RGN(te,r2) {
       // similar to Switch_s -- check the patterns in reverse order:
       let te = set_in_switch(r2,te);
       te = clear_fallthru(r2,te);
-      for (let scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
+      for (let scs = List::rev(*scs0); scs != NULL; scs = scs->tl) {
         let p = scs->hd->pattern;
         let exception_type = exn_typ();
         let pat_res = tcPat(te,p,&exception_type,NULL);
@@ -413,7 +421,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	}
       }
     }
-    check_catch_overlap(s0->loc,te,scs0);
+    check_catch_overlap(s0->loc,te,*scs0,dtp);
     return;
 
   case &Decl_s(d,s):
@@ -527,7 +535,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         tcStmt(set_encloser(decl_rgn,te2,s0),s,false);
         return;
 
-      case &Let_d(p,*vds,*exp):
+      case &Let_d(p,*vds,*exp,*dtp):
 	// if e is not a variable expression, add an assignment and 
 	// recurse.  This is needed for interpreting patterns cleanly in
 	// the flow analysis.  Exception: when the pattern is just itself
@@ -570,7 +578,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         }
         else
           check_pat_regions(te,p,pat_res.patvars);
-        check_let_pat_exhaustive(p->loc,te,p);
+        check_let_pat_exhaustive(p->loc,te,p,dtp);
         pattern_synth(s0->loc, te, pat_res, s, NULL, false);
         return;
 

@@ -1528,7 +1528,7 @@ static void gen_stmt(cenv_t env, stmt_t s) {
     gen_exp(env,e3);
     gen_stmt(env,s);
     return;
-  case &Switch_s(e,scs):
+  case &Switch_s(e,scs,_):
     leq(gen_exp(env,e),arith_ct());
     for (; scs; scs = scs->tl) {
       // ignore the patterns...
@@ -1542,7 +1542,7 @@ static void gen_stmt(cenv_t env, stmt_t s) {
     gen_stmt(env,s);
     leq(gen_exp(env,e),arith_ct());
     return;
-  case &TryCatch_s(_,_): impos("try/catch");
+  case &TryCatch_s(...): impos("try/catch");
   case &ResetRegion_s(_): impos("reset region");
   }
 }

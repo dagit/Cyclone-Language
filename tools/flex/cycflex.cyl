@@ -1174,6 +1174,9 @@ rule mangle = parse
     other = s; // remember in case we need to make up an output file name
     add_flexarg(s);
   }
+  static bool add_other_flag(string_t<`H> s) {
+    return false;
+  }
   static const char ?skeletonfile = NULL;
   static void add_skeleton(const char ?s) {
     let len = strlen(s);
@@ -1202,7 +1205,7 @@ rule mangle = parse
                  "")
            );
 
-    Arg::parse(options, add_other, "Options:", argv);
+    Arg::parse(options, add_other, add_other_flag, "Options:", argv);
 
     let flexargstring = str_sepstr(rev(flexargs), " ");
 

@@ -1624,7 +1624,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       return $(f, res);
     }
   case &Aggregate_e(_,_,_,_):
-    throw new Core::Impossible("anal_Rexp:missing aggrdeclimpl");
+    Tcutil::impos("anal_Rexp:missing aggrdeclimpl in %s",Absynpp::exp2string(e));
   case &Array_e(dles):
     ANAL_RGN(env, temp) {
       let es = rmap(temp,Core::snd,dles);
@@ -2536,7 +2536,7 @@ static void check_dropped_unique(analenv_t<`r> env, flow_t<`r> inflow,
     case &Var_d(vd):
       check_dropped_unique_vd(&vdenv,vd);
       break;
-    case &Let_d(_,&Core::Opt(vds),_):
+    case &Let_d(_,&Core::Opt(vds),_,_):
       let $(vs,_) = List::split(vds);
       let vs = Tcutil::filter_nulls(vs);
       fallthru(vs);
@@ -2749,12 +2749,12 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     update_flow(env, (stmt_t)dest, inflow);
     return BottomFL();
 
-  case &Switch_s(e,scs):
+  case &Switch_s(e,scs,dec_tree):
     // NOTE: we don't need to analyze e since the relevant parts of
     // it are part of scs, as set by tcPat
     return anal_scs(env,inflow,scs,e->loc);
 
-  case &TryCatch_s(s1,scs):
+  case &TryCatch_s(s1,scs,dec_tree):
     // order very important here
     DEBUG_PRINT("in anal_stmt:TryCatch_e\n");
     bool   old_in_try  = env->in_try;
@@ -2780,7 +2780,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
 
     // must handle alias and let declarations separate from other
     // decls because we need to reset some reachable stuff.
-  case &Decl_s(&Decl{.r =&Let_d(_,&Core::Opt(vds),e),.loc=loc},s1):
+  case &Decl_s(&Decl{.r =&Let_d(_,&Core::Opt(vds),e,_),.loc=loc},s1):
     DEBUG_PRINT("analyzing let, Flow = {\n");
     DEBUG_PRINT_F(print_flow,inflow);
     DEBUG_PRINT("}\n");

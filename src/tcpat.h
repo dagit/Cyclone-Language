@@ -59,10 +59,63 @@ extern tcpat_result_t tcPat(tenv_t te,pat_t p,type_t @ topt,
 			    exp_opt_t pat_var_exp);
 extern void check_pat_regions(tenv_t te, pat_t p,
 			      list_t<$(vardecl_t *,exp_opt_t)@> patvars);
-extern void check_switch_exhaustive(seg_t,tenv_t,list_t<switch_clause_t>);
-extern bool check_let_pat_exhaustive(seg_t,tenv_t,pat_t p); // true => exhaustive
-extern void check_catch_overlap(seg_t,tenv_t,list_t<switch_clause_t>);
 
+extern datatype PatTest {
+  WhereTest(exp_opt_t);
+  EqNull;
+  NeqNull;
+  EqEnum(enumdecl_t, enumfield_t);
+  EqAnonEnum(type_t, enumfield_t);
+  EqFloat(string_t,int);
+  EqConst(unsigned int);
+  EqDatatypeTag(int, datatypedecl_t, datatypefield_t);
+  EqTaggedUnion(field_name_t,int);
+  EqExtensibleDatatype(datatypedecl_t, datatypefield_t);
+};
+typedef datatype PatTest@ pat_test_t;
+extern datatype Access {
+  Dummy;  // used to deal with the dummy tuple we create for handling where clauses
+  Deref;
+  TupleField(unsigned);
+  DatatypeField(datatypedecl_t, datatypefield_t, unsigned);
+  AggrField(bool tagged, stringptr_t);
+};
+typedef datatype Access@ access_t;
+
+@tagged union PatOrWhere {
+  pat_t     pattern;
+  exp_opt_t where_clause;
+};
+struct PathNode {
+  union PatOrWhere orig_pat;
+  access_t  access;
+};
+typedef struct PathNode@ path_node_t;
+extern datatype Term_desc;
+typedef datatype Term_desc @ term_desc_t;
+typedef list_t<path_node_t> path_t;
+
+struct Rhs {
+  bool used;
+  seg_t pat_loc;
+  stmt_t rhs;
+};
+typedef struct Rhs @rhs_t;
+
+typedef datatype Decision @decision_t;
+extern datatype Decision {
+  Failure(term_desc_t);
+  Success(rhs_t);
+  SwitchDec(path_t, list_t<$(pat_test_t, decision_t)@>, decision_t);
+};
+
+extern void check_switch_exhaustive(seg_t,tenv_t,list_t<switch_clause_t>,
+                                    decision_opt_t@);
+extern bool check_let_pat_exhaustive(seg_t,tenv_t,pat_t p,
+                                     decision_opt_t@); // true => exhaustive
+extern void check_catch_overlap(seg_t,tenv_t,list_t<switch_clause_t>,
+                                decision_opt_t@);
+extern void print_decision_tree(decision_t);
 }
 
 #endif

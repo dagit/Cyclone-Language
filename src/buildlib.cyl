@@ -1104,7 +1104,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Portoff_d:
       fprintf(stderr,"Error: unexpected __cyclone_port_off__");
       exit(1);
-    case &Let_d(_,_,_):
+    case &Let_d(...):
       fprintf(stderr,"Error: unexpected let declaration\n");
       exit(1);
     case &Datatype_d(_):
@@ -1502,7 +1502,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         break;
       case &Porton_d:
       case &Portoff_d:
-      case &Let_d(_,_,_):
+      case &Let_d(...):
       case &Datatype_d(_):
       case &Letv_d(_):
       case &Namespace_d(_,_):
@@ -1569,7 +1569,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 //       case &Alias_d(...):
       case &Porton_d:
       case &Portoff_d:
-      case &Let_d(_,_,_):
+      case &Let_d(...):
       case &Datatype_d(_):
       case &Letv_d(_):
       case &Namespace_d(_,_):

@@ -4166,7 +4166,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         break;
       }
       break;
-    case &Constraint{.Eq_constr = true}:
+    case &Constraint{.Eq_constr = i} && i:
       // check that t1 admits zero as an element
       if (!admits_zero(t1))
         terr(loc,"cannot have a pointer to zero-terminated %s elements",
@@ -4246,7 +4246,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       }
       */
       break;
-    case &Constraint{.Eq_constr = true}:
+    case &Constraint{.Eq_constr = i} && i:
       // check that t1 supports 0 as an element
       if (!admits_zero(t1))
         terr(loc,"cannot have a zero-terminated array of %s elements",

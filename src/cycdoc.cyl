@@ -269,7 +269,7 @@ rule token "$(int,comment_t)*" = parse
       case &Enum_d(_):
       case &Typedef_d(_):
       case &Fn_d(_):
-      case &Let_d(_,_,_):
+      case &Let_d(...):
       case &Letv_d(_):
       case &Porton_d:
       case &Portoff_d:

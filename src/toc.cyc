@@ -54,6 +54,7 @@
 #include "relations.h"
 #include "cf_flowinfo.h"
 #include "toc.h"
+#include "tcpat.h"
 using Core;
 using List;
 using Set;
@@ -316,7 +317,10 @@ static stmt_t skip_stmt_dl() {
 // These constructors are useful when we want to just update the
 // raw part of an expression or statement.
 static exp_t cast_it(type_t t, exp_t e) {
-  return cast_exp(t,e,false,No_coercion,DL);
+  switch (e->r) {
+  case &Cast_e(_,e,_,No_coercion): return cast_it(t,e);
+  default: return cast_exp(t,e,false,No_coercion,DL);
+  }
 }
 static raw_exp_t cast_it_r(type_t t, exp_t e) {
   return new Cast_e(t,e,false,No_coercion);
@@ -4158,142 +4162,548 @@ xlate_pat(env_t<`rgn> nv,
 ///////////////////////////////////////////////////////////////
 //              Translation of Switch Statements             //
 ///////////////////////////////////////////////////////////////
-// FIX:  Should use decision tree stuff from tcpat.
-//
-// For performance, we try to leave switches as switches.  We do this when
-// all of the following hold:
-// * We are switching on a char or int type.
-//   (Could also do datatype without value contructors, but we didn't pass in
-//    access to the type definitions!)
-// * No switch_clause has any variables. (reject switch(3) { case x: ... }
-// The hitch is we could still have something like
-//    switch(e) { case 0: if(b) fallthru; else return; }
-// Therefore, we give each case body
-// a fresh label so we can translate fallthru to goto.
-// Then we just hope gcc cleans up the mess and can still use jump tables.
-//
-// For all other switches,
-// switch (e) { case p1: s1 ... case pn:sn } turns into (roughly)
-//
-//  x = e;
-//  <lots of temp declarations>
-//    if !matches(p1,x) goto L2; L1: s1;
-// L2:if !matches(p2,x) goto L4; L3: s2;
-// L4:if !matches(p3,x) goto L4; L5: s3;
-//     ...
-// L2n: ; // destination of break within the original switch cases
-// L2n-2:if matches(pn,x) goto L2n-1 else goto L2n;
-// L1: s1;
-// L3: s2;
-// L5: s3;
-// ...
-// L2n-1: sn;
-// L2n: ;
-static $(var_t,var_t,switch_clause_t)@`r gen_label(region_t<`r> r,
-                                                   switch_clause_t sc) {
-  return rnew(r) $(fresh_label(),fresh_label(),sc);
+// We use the decision tree built by tcpat to compile switch/catch
+// statements.  This is somewhat complicated by fallthru and
+// where clauses as noted.  We use a switch statement if the
+// pattern tests admit it and there's more than 1 alternative.
+// Otherwise, we use if-then-else's.  The basic idea is to take
+// the decision tree and compile it so that each right-hand-side (rhs)
+// has two entry points:  One entry point, called init, extracts all of the values
+// for the variables in the pattern and initializes the associated
+// compiler temporary variables with those values.  The other entry
+// point, called body, has the actual statement for the switch clause.
+// For a fallthru, we jump to the next clauses's body.  If a statement
+// shows up multiple times in the decision tree, we only generate
+// the body once, and goto the body the other times.  
+
+
+// generates a bool and two labels to be associated with the right-hand-side
+// of a switch clause.  The bool records whether we've already emitted the
+// code for this clause.  The first label is used for the code that extracts
+// and initializes the variables of the pattern.  The second label is the
+// entry point for the right-hand-side and is used for fallthru of previous
+// switch cases.
+static $(bool used,var_t,var_t,switch_clause_t)@`r gen_labels(region_t<`r> r,
+                                                              switch_clause_t sc) {
+  return rnew(r) $(false,fresh_label(),fresh_label(),sc);
 }
 
+// given a path from the match compiler and a root expression v,
+// generate code for extracting the value.
+static exp_t compile_path(Tcpat::path_t ps, exp_t v) {
+  for (; ps != NULL; ps = ps->tl) {
+    let p = ps->hd;
+    // we cast the expression at each stage to avoid having to deal
+    // with polymorphism and the like.  This generates bigger code
+    // but it's a lot more uniform.
+    if (tagcheck(p->orig_pat.pattern)) {
+      type_t t = (type_t)p->orig_pat.pattern->topt; 
+      let t2 = Tcutil::compress(typ_to_c_array(t));
+      switch (t2) {
+        // avoid casts that C will not like.
+      case &VoidType: 
+      case &AggrType(...):
+      case &AnonAggrType(...): break;
+      default:  v = cast_it(typ_to_c_array(t),v); break;
+      }
+    }
+    switch (p->access) {
+    case &Tcpat::Dummy: 
+      // dummy accesses correspond to the extra tuple inserted
+      // to deal with && clauses in patterns.  We handle those
+      // somewhat separately.
+      break;
+    case &Tcpat::Deref: 
+      // if the next access is a datatypefield, then we want to
+      // make sure that we cast the pointer to the appropriate
+      // struct pointer before dereferencing.  
+      if (ps->tl != NULL) {
+        switch (ps->tl->hd->access) {
+        case &Tcpat::DatatypeField(tud, tuf, i):
+          ps = ps->tl;
+          v = cast_it(cstar_typ(strctq(collapse_qvars(tuf->name, tud->name)),mt_tq),v);
+          v = aggrarrow_exp(v, fieldname(i+1), DL);
+          continue;
+        default: 
+          break;
+        }
+      }
+      v = deref_exp(v,DL);
+      break;
+    case &Tcpat::TupleField(i): v = member_exp(v,fieldname(i+1),DL); break;
+    case &Tcpat::AggrField(tagged, f): 
+      v = member_exp(v,f,DL); 
+      if (tagged)  // tagged unions require getting the .val member
+        v = member_exp(v,val_sp,DL);
+      break;
+    case &Tcpat::DatatypeField(tud, tuf, i): 
+      v = member_exp(v, fieldname(i+1), DL);
+      break;
+    }
+  }
+  return v;
+}
+
+// given a root expression v and a pattern test, generate an
+// expression suitable for an if-then-else.
+static exp_t compile_pat_test(exp_t v, Tcpat::pat_test_t t) {
+  switch (t) {
+  case &Tcpat::WhereTest(e): 
+    // FIX: we really shouldn't have e being null...
+    if (e == NULL) return v; else return e;  
+  case &Tcpat::EqNull: return eq_exp(v, signed_int_exp(0,DL),DL);
+  case &Tcpat::NeqNull: return neq_exp(v, signed_int_exp(0,DL),DL);
+  case &Tcpat::EqEnum(ed, ef): 
+    return eq_exp(v, new_exp(new Enum_e(ef->name, ed, ef),DL), DL);
+  case &Tcpat::EqAnonEnum(t, ef): 
+    return eq_exp(v, new_exp(new AnonEnum_e(ef->name, t, ef),DL), DL);
+  case &Tcpat::EqFloat(s,i): return eq_exp(v, float_exp(s,i,DL), DL);
+  case &Tcpat::EqConst(i): return eq_exp(v, uint_exp(i,DL), DL);
+  case &Tcpat::EqDatatypeTag(i,tud,tuf):
+    // The compilation of the path has already done a dereference, so
+    // get rid of any dereference in the path (peeking under casts.)
+  LOOP1:
+    switch (v->r) {
+    case &Cast_e(_,e,...): v = e; goto LOOP1;
+    case &Deref_e(e): v = e; break;
+    default: break;
+    }
+    // cast v to a pointer to the datatype field
+    v = cast_it(cstar_typ(strctq(collapse_qvars(tuf->name, tud->name)), mt_tq),v);
+    return eq_exp(aggrarrow_exp(v,tag_sp,DL), uint_exp(i,DL),DL);
+  case &Tcpat::EqTaggedUnion(f,i):
+    v = member_exp(member_exp(v,f,DL),tag_sp,DL);
+    return eq_exp(v,uint_exp(i,DL),DL);
+  case &Tcpat::EqExtensibleDatatype(tud,tuf): 
+    // Same as with datatypes, so get rid of any dereference in the path.
+  LOOP2:
+    switch (v->r) {
+    case &Cast_e(_,e,...): v = e; goto LOOP2;
+    case &Deref_e(e): v = e; break;
+    default: break;
+    }
+    // cast v to a pointer to the datatype field
+    v = cast_it(cstar_typ(strctq(collapse_qvars(tuf->name, tud->name)), mt_tq),v);
+    return eq_exp(aggrarrow_exp(v,tag_sp,DL), var_exp(tuf->name,DL), DL);
+  }
+}
+
+// used to determine what kind of code to emit for the test of the switch
+datatype TestKind { 
+  OtherTest; 
+  DatatypeTagTest;
+  WhereTest(exp_t);
+  TaggedUnionTest(field_name_t);
+};
+datatype TestKind.OtherTest OtherTest_val = OtherTest;
+datatype TestKind.DatatypeTagTest DatatypeTagTest_val = DatatypeTagTest;
+
+
+// returns the number of pattern tests that admit a switch, and whether
+// the pattern test is a datatype test, a tagged union test, a where-clause
+// test, or something else. If any pattern test does not support a switch, 
+// then we return 0.
+static $(int, datatype TestKind@) 
+  admits_switch(list_t<$(Tcpat::pat_test_t, Tcpat::decision_t)@> ss) {
+  int c = 0;
+  datatype TestKind @ k = &OtherTest_val;
+  for (; ss != NULL; ss = ss->tl, c = c+1) {
+    let $(ptest,_) = *ss->hd;
+    switch (ptest) {
+      // these can all be put in switches
+    case &Tcpat::EqEnum(_,_): 
+    case &Tcpat::EqAnonEnum(_,_): 
+    case &Tcpat::EqConst(_): 
+      continue;
+    case &Tcpat::EqTaggedUnion(f,_): 
+      if (k == &OtherTest_val)
+        k = new TaggedUnionTest(f);
+      continue;
+    case &Tcpat::EqDatatypeTag(_,_,_): 
+      k = &DatatypeTagTest_val;
+      continue;
+      // the rest cannot be in a switch.
+    case &Tcpat::WhereTest(e) && e != NULL:
+      k = new WhereTest(e);
+      return $(0, k);
+    case &Tcpat::WhereTest(_):
+    case &Tcpat::EqNull:
+    case &Tcpat::NeqNull:
+    case &Tcpat::EqFloat(_,_):
+    case &Tcpat::EqExtensibleDatatype(_,_): return $(0,k);
+    }
+  }
+  return $(c,k);
+}
+
+// given a pattern test to be used in a generated switch statement,
+// extract the appropriate C-pattern (i.e., an integer).
+static pat_t compile_pat_test_as_case(Tcpat::pat_test_t p) {
+  exp_t e;
+  switch (p) {
+  case &Tcpat::EqEnum(ed,ef): 
+    e = new_exp(new Enum_e(ef->name, ed, ef), DL); break;
+  case &Tcpat::EqAnonEnum(t, ef):
+    e = new_exp(new AnonEnum_e(ef->name, t, ef), DL); break;
+  case &Tcpat::EqConst(i): fallthru(i);
+  case &Tcpat::EqDatatypeTag(i,_,_): fallthru(i);
+  case &Tcpat::EqTaggedUnion(_,i):
+    e = uint_exp(i,DL);
+    break;
+  default: toc_impos("compile_pat_test_as_case!");
+  }
+  return new_pat(new Exp_p(e), DL);
+}
+
+// sequence two optional statements.
+static stmt_opt_t seq_stmt_opt(stmt_opt_t s1, stmt_opt_t s2) {
+  if (s1 == NULL) return s2;
+  if (s2 == NULL) return s1;
+  return seq_stmt(s1,s2,DL);
+}
+
+// given a pattern, produce code and environment to initialize the pattern
+// variables with the appropriate values.  Essentially the same code as
+// xlate_pat above, but without the tests.  Updates the environment and
+// decls which are passed in by reference.
+static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
+                                       list_t<$(qvar_t,type_t)@`rgn,`rgn>@ decls,
+                                       exp_t path, pat_t p) {
+  type_t t = (type_t)p->topt;
+  switch (p->r) {
+  case &AliasVar_p(_,&Vardecl(_,x,_,_,_,_,_,_)):
+    let p2 = new_pat(&Wild_p_val,0);
+    p2->topt = p->topt;
+    fallthru(x,p2);
+  case &Var_p(&Vardecl(_,x,_,_,_,_,_,_),p2):
+    // v = r (and substitute v for x) and continue matching p2 against r
+    qvar_t v = temp_var();
+    let t2 = (type_t)p2->topt;
+    *decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c_array(t2)), *decls);
+    *nv = add_varmap(rgn,*nv,x,var_exp(v,DL));
+    let s = assign_stmt(var_exp(v,DL),copy_exp(path),DL);
+    return seq_stmt_opt(s,extract_pattern_vars(rgn,nv,decls,path,p2));
+  case &TagInt_p(_,&Vardecl(_,x,_,_,_,_,_,_)): // type translation erases tvar
+    // v = r  (and substitute v for x)
+    let v = temp_var();
+    let t2 = (type_t)p->topt;
+    *decls = rnew(rgn) List(rnew(rgn) $(v,typ_to_c_array(t2)), *decls);
+    *nv = add_varmap(rgn,*nv,x,var_exp(v,DL));
+    return assign_stmt(var_exp(v,DL),copy_exp(path),DL);
+  case &Wild_p: return NULL;
+  case &Reference_p(vd,p2):
+    // v = &path
+    let v = temp_var();
+    *decls = rnew(rgn) List(rnew(rgn) $(v,cstar_typ(typ_to_c_array(t),mt_tq)),*decls);
+    *nv    = add_varmap(rgn,*nv,vd->name,var_exp(v,DL));
+    // cast is needed to avoid a C warning when pointing to a polymorphic field
+    let s = assign_stmt(var_exp(v,DL),
+			cast_it(cstar_typ(typ_to_c_array(t),mt_tq),
+                                push_address_exp(copy_exp(path))),DL);
+    return seq_stmt_opt(s, extract_pattern_vars(rgn,nv,decls,path,p2));
+  // for these cases, no initialization.
+  case &Null_p:      
+  case &Int_p(...):  
+  case &Char_p(_):   
+  case &Float_p(...):
+  case &Enum_p(...): 
+  case &AnonEnum_p(...): return NULL;
+
+    // special case for pointer to datatype
+  case &Pointer_p(&Pat{&Datatype_p(tud,tuf,ps,_),_,_}):
+    stmt_opt_t s    = NULL;
+    qvar_t tufstrct = collapse_qvars(tuf->name,tud->name);
+    let field_ptr_typ = cstar_typ(strctq(tufstrct),mt_tq);
+    int cnt      = 1;
+    let tuf_tqts = tuf->typs;
+    path = cast_it(field_ptr_typ, path);
+    for(; ps != NULL; ps = ps->tl, tuf_tqts = tuf_tqts->tl, ++cnt) {
+      let p2  = ps->hd;
+      if(p2->r == &Wild_p_val) continue;
+      let tuf_typ = (*tuf_tqts->hd)[1];
+      let t2  = (type_t)p2->topt;
+      let t2c = typ_to_c_array(t2);
+      let arrow_exp = aggrarrow_exp(path, fieldname(cnt), DL);
+      if(is_void_star_or_boxed_tvar(typ_to_c(tuf_typ)))
+	arrow_exp = cast_it(t2c, arrow_exp);
+      s = seq_stmt_opt(s,extract_pattern_vars(rgn,nv,decls,arrow_exp,p2));
+    }
+    return s;
+
+  case &Datatype_p(_,_,ps,_): fallthru(ps);
+  case &Tuple_p(ps,_):
+    stmt_opt_t s = NULL;
+    int cnt = 1;
+    for(; ps != NULL; ps = ps->tl, ++cnt) {
+      let p2  = ps->hd;
+      if(p2->r == &Wild_p_val)
+	continue;
+      let t2  = (type_t)p2->topt;
+      let f = fieldname(cnt);
+      s = seq_stmt_opt(s, extract_pattern_vars(rgn,nv,decls,member_exp(path,f,DL),p2));
+    }
+    return s;
+  case &Aggr_p(NULL,...): toc_impos("unresolved aggregate pattern!");
+  case &Aggr_p(&AggrInfo(info,_),_,dlps,_):
+    // similar to translation of tuple pattern, but must account for designators.
+    let ad = get_known_aggrdecl(info);
+    stmt_opt_t s = NULL;
+    for (; dlps != NULL; dlps = dlps->tl) {
+      let tup = dlps->hd;
+      let p2  = (*tup)[1];
+      if(p2->r == &Wild_p_val)
+        continue;
+      _ f;
+      switch ((*tup)[0]->hd) {
+      case &FieldName(f2): f=f2; break;
+      default: throw new Match_error; // FIX:  assumes one field name designator
+      }
+      let t2 = (type_t)p2->topt;
+      let t2c = typ_to_c_array(t2);
+      let memexp = member_exp(path,f,DL);
+      // tagged unions require an extra .val
+      if (ad->impl->tagged) memexp = member_exp(memexp,val_sp,DL);
+      let ftype = lookup_field(ad->impl->fields,f)->type;
+      if (is_void_star_or_boxed_tvar(ftype))
+        memexp = cast_it(t2c, memexp);
+      else if (!is_array_type(ftype) && kind_leq(&ak,typ_kind(ftype))) {
+        // for abstract members, we have to convert to the right
+        // pointer type...
+        memexp = deref_exp(cast_it(cstar_typ(t2c,mt_tq), 
+                                   address_exp(memexp,DL)),DL);
+      }
+      s = seq_stmt_opt(s, extract_pattern_vars(rgn,nv,decls,memexp,p2));
+    }
+    return s;
+
+  case &Pointer_p(p2): return extract_pattern_vars(rgn,nv,decls,deref_exp(path,DL),p2);
+
+  case &UnknownId_p(_):       toc_impos("unknownid pat");
+  case &UnknownCall_p(_,_,_): toc_impos("unknowncall pat");
+  case &Exp_p(_):             toc_impos("exp pat");
+  }
+}
+
+// compiles a decision tree that was generated from the match compiler
+// into a set of tests, switches, goto's, etc.  dopt is the decision tree
+// and lscs is the original list of switch clauses, together with the labels
+// we generated to jump to.  The variable v is used as the root value that
+// we're matching on.
+static stmt_t compile_decision_tree(region_t<`rgn> rgn,
+                                    env_t<`rgn> nv,
+                                    list_t<$(qvar_t,type_t)@`rgn,`rgn>@ decls,
+                                    list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn>@ 
+                                      bodies,
+                                    Tcpat::decision_opt_t dopt,
+                                    list_t<$(bool,var_t,var_t,switch_clause_t)@> lscs,
+                                    qvar_t v) {
+  switch (dopt) {
+  // these two cases shouldn't occur -- we let them through silently.
+  case NULL: fallthru;
+  case &Tcpat::Failure(_): return skip_stmt(0);
+
+  case &Tcpat::Success(rhs):
+    // find the corresponding rhs in lscs
+    for (; lscs != NULL; lscs = lscs->tl) {
+      let &$(*already_emitted,init_lab,code_lab,sc) = lscs->hd;
+      let body = sc->body;
+      if (body == rhs->rhs) {
+        // if we've already emitted this rhs, then just goto it.
+        if (*already_emitted) 
+          return goto_stmt(init_lab,DL);
+        *already_emitted = true;
+        // extract all of the pattern variables for this case
+        stmt_opt_t init_opt = extract_pattern_vars(rgn,&nv,decls,var_exp(v,DL),
+                                                   sc->pattern);
+        // generate init_lab: <code to extract vars>; code_lab: <rhs>
+        stmt_t res = label_stmt(code_lab,sc->body,DL);
+        if (init_opt != NULL)
+          res = seq_stmt(init_opt, res, DL);
+        res = label_stmt(init_lab, res, DL);
+        *bodies = rnew(rgn) List{rnew(rgn) $(nv,code_lab,body), *bodies};
+        return res;
+      }
+    }
+    toc_impos("couldn't find rhs!");
+  case &Tcpat::SwitchDec(symbolic_path, switches, other_decision):
+    // start by compiling the default
+    stmt_t res = compile_decision_tree(rgn,nv,decls,bodies,other_decision,lscs,v);
+    // now we compile the path to the thing we're testing
+    let p = compile_path(List::rev(symbolic_path), var_exp(v,DL));
+    let ss = List::rev(switches);
+    // see if we can/should translate this to a switch or a sequence of if's
+    let $(allows_switch, test_kind) = admits_switch(ss);
+    if (allows_switch > 1) {
+      // we'll generate a switch statement here
+      // start with the default clause at the end.
+      list_t<switch_clause_t> new_lscs = 
+        new List{new Switch_clause{new_pat(&Wild_p_val,DL),NULL,NULL,res,DL},NULL};
+      // add in each switch clause
+      for (; ss != NULL; ss = ss->tl) {
+        let $(pat_test, dec_tree) = *ss->hd;
+        // compile the pattern test for this clause as a case expression
+        let case_exp = compile_pat_test_as_case(pat_test);
+        // compile the decision tree for this case
+        let s = compile_decision_tree(rgn,nv,decls,bodies,dec_tree,lscs,v);
+        // add in the new switch clause
+        new_lscs = new List(new Switch_clause{case_exp,NULL,NULL,s,DL},new_lscs);
+      }
+      switch (test_kind) {
+      case &DatatypeTagTest:
+        // get rid of any extra dereference for datatypes
+      LOOP1:
+        switch (p->r) {
+        case &Cast_e(_,e,...): p = e; goto LOOP1;
+        case &Deref_e(e): p = e; break;
+        default: break;
+        }
+        p = deref_exp(cast_it(cstar_typ(sint_typ,mt_tq),p),DL); break;
+      case &TaggedUnionTest(f): 
+        // add an extra .tag for tagged unions
+        p = member_exp(member_exp(p,f,DL),tag_sp,DL); break;
+        // where shouldn't really happen here.
+      case &WhereTest(_): break;
+      case &OtherTest: break;
+      }
+      res = new_stmt(new Switch_s(p,new_lscs,NULL),DL);
+    } else {
+      // We're going to have to compile the test as an if-then-else
+      // We could be down to a where clause
+      switch (test_kind) {
+      case &WhereTest(e):
+        switch (ss) {
+          // where-clauses should only occur in a switch with a single case
+          // other than the default.
+        case &List{&$(pat_test, &Tcpat::Success(rhs)),NULL}:
+          // find the corresponding rhs -- this is quite similar to the 
+          // rhs code above for Success.
+          for (; lscs != NULL; lscs = lscs->tl) {
+            let &$(*already_emitted,init_lab,code_lab,sc) = lscs->hd;
+            let body = sc->body;
+            if (body == rhs->rhs) {
+              // if we've already emitted code for this case, then goto it.
+              if (*already_emitted) 
+                return goto_stmt(init_lab,DL);
+              *already_emitted = true;
+              // extract all of the pattern variables for this case
+              stmt_opt_t init_opt = extract_pattern_vars(rgn,&nv,decls,var_exp(v,DL),
+                                                         sc->pattern);
+              // compile the where-clause
+              exp_to_c(nv,e);
+              // generate init_lab: <code to extract vars>; 
+              //          if (e) { code_lab: <rhs> } else <default>
+              stmt_t r = label_stmt(code_lab,sc->body,DL);
+              r = ifthenelse_stmt(e,r,res,DL);
+              if (init_opt != NULL)
+                r = seq_stmt(init_opt, r, DL);
+              r = label_stmt(init_lab, r, DL);
+              *bodies = rnew(rgn) List{rnew(rgn) $(nv,code_lab,body), *bodies};
+              return r;
+            }
+          }
+          toc_impos("couldn't find rhs!");
+        default: toc_impos("bad where clause in match compiler");
+        }
+      default:
+        // generate a sequence of nested ifs
+        for (; ss != NULL; ss = ss->tl) {
+          let $(pat_test, dec_tree) = *ss->hd;
+          let test_exp = compile_pat_test(p, pat_test);
+          let s = compile_decision_tree(rgn,nv,decls,bodies,dec_tree,lscs,v);
+          res = ifthenelse_stmt(test_exp,s,res,DL);
+        }
+      }
+    }
+    return res;
+  }
+}
+
+// We record the compiler environment that gets generated for each rhs of
+// the case.  This allows us to look it up so that we can use it for fallthru's.
+// The only rhs's that will not have an associated env are those that never
+// show up in the decision tree.  That should only happen for a catch where
+// we added in a default clause that was unnecessary.  The good news is that
+// we discover this during switch-compilation and just skip over that clause.
+static env_t<`rgn>*`rgn 
+find_case_env(list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> bodies, stmt_t s) {
+  for (; bodies != NULL; bodies = bodies->tl) {
+    let &$(*nv,_,s2) = bodies->hd;
+    if (s2 == s) return nv;
+  }
+  // if we got this far, then we're dealing with a try/catch's default
+  // which is never called.
+  return NULL;
+}
+
+// translate a switch according to the given decision tree.
 static void xlate_switch(env_t nv, stmt_t whole_s,
-			 exp_t e, list_t<switch_clause_t> scs) {
+			 exp_t e, list_t<switch_clause_t> scs,
+                         Tcpat::decision_opt_t dopt) {
   exp_to_c(nv,e);
   let t = (type_t)e->topt;
 
-  // decide if we can leave it as a switch
-  // FIX: cannot have Float_p in any cases.
-  bool leave_as_switch;
-  switch (compress(t)) {
-  case &IntType(_,_):
-  case &EnumType(_,_): leave_as_switch = true;  break;
-  default:             leave_as_switch = false; break;
-  }
-  for(let scs1 = scs; scs1 != NULL; scs1 = scs1->tl)
-    if(scs1->hd->pat_vars->v != NULL || scs1->hd->where_clause != NULL) {
-      leave_as_switch = false;
-      break;
-    }
-  if(leave_as_switch) {
-    // note: fallthru in last case can't happen, else this is busted
-    var_t next_l = fresh_label();
-    for(let scs1 = scs; scs1 != NULL; scs1 = scs1->tl) {
-      let s = scs1->hd->body;
-      scs1->hd->body = label_stmt(next_l,s,DL);
-      next_l = fresh_label();
-      TOC_RGN(nv,rgn) {
-        stmt_to_c(switch_as_switch_env(rgn,nv,next_l),s);
-      }
-    }
-    return;
-  }
-  // no dice, translate to a nest of gotos...
   qvar_t v     = temp_var();
   exp_t  r     = var_exp(v,DL);
+  r->topt      = typ_to_c((type_t)e->topt);
   exp_t  path  = var_exp(v,DL);
   var_t  end_l = fresh_label();
-  // for each case, generate a test label and an entry label
   TOC_RGN(nv,rgn) {
     let nv = share_env(rgn,nv);
-    list_t<$(var_t,var_t,switch_clause_t)@/*`rgn,`rgn*/> lscs =
-      List::rmap_c(rgn,gen_label,rgn,scs);
-    list_t<stmt_t/*,`rgn*/>                test_stmts = NULL;
-    list_t<env_t/*,`rgn*/>                 nvs        = NULL;
-    list_t<$(qvar_t,type_t)@/*`rgn,`rgn*/> decls      = NULL;
-    // generate the tests for each case, continuing to the case's
-    // label on success and to the next test on false.
-    // do tests first so as to get vars for fallthrus
-    // the last case is different b/c there's no fallthru so fake it with end_l
+    // for each clause, generate a test label and an entry label, and flag indicating
+    // whether we've already emitted code for the rhs of the clause.
+    list_t<$(bool,var_t,var_t,switch_clause_t)@/*`rgn,`rgn*/> lscs =
+      List::rmap_c(rgn,gen_labels,rgn,scs);
+    // compile the decision tree -- generates a list of declarations and
+    // a list of case bodies with associated labels and environments, as
+    // well as a big test statement.  
+    list_t<$(qvar_t,type_t)@`rgn,`rgn> mydecls = NULL;
+    list_t<$(env_t<`rgn>,var_t,stmt_t)@`rgn,`rgn> mybodies = NULL;
+    stmt_t test_tree = compile_decision_tree(rgn, nv, &mydecls, &mybodies, dopt, 
+                                             lscs, v);
+    // Note that at this point, test_tree contains all of the rhs's, but they
+    // have not yet been translated.  That's because we need the compiler environment
+    // for the fallthru case which is only generated after compiling the decision
+    // tree.  So, now we step through each rhs and compile it.
     for (let lscs2 = lscs; lscs2 != NULL; lscs2 = lscs2->tl) {
-      switch_clause_t sc = (*lscs2->hd)[2];
-      var_t fail_lab = (lscs2->tl == NULL) ? end_l : (*lscs2->tl->hd)[0];
-      let $(nv2,decls2,test_stmt) = xlate_pat(nv,rgn,t,r,path,sc->pattern,
-					      goto_stmt(fail_lab,DL),
-                                              decls);
-      if(sc->where_clause!=NULL) {
-	let e = (exp_t)sc->where_clause;
-	exp_to_c(nv2,e); // nv2 b/c pattern vars are in scope
-	test_stmt = seq_stmt(test_stmt, ifthenelse_stmt(prim1_exp(Not,e,DL),
-							goto_stmt(fail_lab,DL),
-							skip_stmt_dl(), DL),DL);
-      }
-      decls = decls2;
-      nvs = rnew(rgn) List(nv2,nvs);
-      test_stmts = rnew(rgn) List(test_stmt,test_stmts);
-    }
-    nvs = List::imp_rev(nvs);
-    test_stmts = List::imp_rev(test_stmts);
-    list_t<stmt_t> stmts = NULL;
-    // now generate all of the statements for the cases
-    // note: first test_lab is unnecessary
-    for (; lscs != NULL;
-	 lscs = lscs->tl, nvs = nvs->tl, test_stmts = test_stmts->tl) {
-      let &$(test_lab,body_lab,body_sc) = lscs->hd;
-      let env = nvs->hd;
+      let &$(_,_,body_lab,body_sc) = lscs2->hd;
       stmt_t s = body_sc->body;
-      TOC_RGN(nv, rgn2) {
-        if(lscs->tl != NULL) {
-          let &$(_,fallthru_lab,next_sc) = lscs->tl->hd;
-	  let vs = Tcutil::filter_nulls(List::split(next_sc->pat_vars->v)[0]);
-	  vs = List::imp_rev(vs);
-          stmt_to_c(non_last_switchclause_env(rgn2, env, end_l, fallthru_lab,
-                                              vs,
-                                              nvs->tl->hd),
-                    s);
-        } else
-          stmt_to_c(last_switchclause_env(rgn2,env, end_l), s);
-      }
-      s = seq_stmt(label_stmt(test_lab,test_stmts->hd,DL),
-		   label_stmt(body_lab,s,DL), DL);
-      stmts = rnew(rgn) List(s, stmts);
+      // find the environment for this rhs.
+      env_t<`rgn>* envp = find_case_env(mybodies,s);
+      // skip over any case that is never called (i.e., has no envp), as it
+      // must be dead code (not reachable in the decision tree.)
+      if (envp == NULL) continue; 
+      let env = *envp;
+      // find the environment for the fallthru case if it's there.
+      if (lscs2->tl != NULL) {
+        let &$(_,_,fallthru_lab,next_sc) = lscs2->tl->hd;
+        let next_case_env = find_case_env(mybodies,next_sc->body);
+        // if the next case is never called, then it must've been the default
+        // case added for a try/catch in which case, we cannot have this case
+        // fallthru to it.  So, we can treat this case as if it were the last
+        // of the switch clauses.
+        if (next_case_env == NULL) {
+          stmt_to_c(last_switchclause_env(rgn,env,end_l),s);
+        } else {
+          // set up the environment with the fallthru information.
+          let vs = Tcutil::filter_nulls(List::split(next_sc->pat_vars->v)[0]);
+          vs = List::imp_rev(vs);
+          stmt_to_c(non_last_switchclause_env(rgn, env, end_l, fallthru_lab,
+                                              vs, *next_case_env),s);
+        }
+      } else
+        stmt_to_c(last_switchclause_env(rgn,env,end_l),s);
     }
-    stmt_t res = seq_stmt(seq_stmts(List::imp_rev(stmts),DL),
-			  label_stmt(end_l, skip_stmt_dl(), DL), DL);
-    // add in all of the variable declarations with a wide enough scope
-    for (decls; decls != NULL; decls = decls->tl) {
-      let &$(qv,t) = decls->hd;
-      res = declare_stmt(qv, t, NULL, res, DL);
+    // almost done -- need to build the declarations, followed by the
+    // test tree, followed by the end label.  We construct it backwards...
+    stmt_t res = seq_stmt(test_tree,label_stmt(end_l,skip_stmt_dl(),DL),DL);
+    // now add in declarations.
+    for (; mydecls != NULL; mydecls = mydecls->tl) {
+      let &$(qv,t) = mydecls->hd;
+      res = declare_stmt(qv,t,NULL,res,DL);
     }
-    // add in the variable holding the test and clobber the abstract syntax
-    whole_s->r = declare_stmt(v,typ_to_c((type_t)e->topt),e, res, DL)->r;
+    // overwrite original switch with new code.
+    whole_s->r = declare_stmt(v,typ_to_c((type_t)e->topt),e,res,DL)->r;
+    return;
   }
 }
 
@@ -4381,8 +4791,8 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         stmt_to_c(loop_env(temp,nv),s2);
       }
       return;
-    case &Switch_s(e,scs):
-      xlate_switch(nv,s,e,scs);
+    case &Switch_s(e,scs,dec_tree_opt):
+      xlate_switch(nv,s,e,scs,dec_tree_opt);
       return;
     case &Fallthru_s(es,dest_clause):
       let &Env{.fallthru_info = fi,...} = nv;
@@ -4413,7 +4823,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           local_decl_to_c(nv2, nv2, vd, s1);
         }
 	break;
-      case &Let_d(p,_,e):
+      case &Let_d(p,_,e,dec_tree):
         // Handle the special case where the pattern is a variable just like
 	// a variable declaration, except variable's scope does NOT include e
         switch (p->r) {
@@ -4519,10 +4929,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
         exp_to_c(nv,e);
       }
       return;
-    case &TryCatch_s(body,scs):
-      // NOTE: Because explicit fallthru is not allowed in the last case,
-      //       appending a new last case can't change the meaning of any
-      //       control flow.
+    case &TryCatch_s(body,scs,dec_tree):
       // struct handler_cons h;
       // _push_handler(&h);
       // int was_thrown = 0;
@@ -4555,21 +4962,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
                                       exp_stmt(fncall_exp(_pop_handler_e,
                                                           NULL,
                                                           DL), DL),DL);
-        // add a default case which re-throws the exception
-        let x    = temp_var();
-        let xexp = var_exp(x,DL);
-        let x_vd = new_vardecl(x,exn_typ(),NULL);
-        xexp->topt = exn_typ();
-        let p = new Pat{.r=new Var_p(x_vd,new Pat{.r=&Wild_p_val,.topt = exn_typ(), .loc = DL}), .topt=exn_typ(), .loc=DL};
-        let te = rethrow_exp(xexp,DL);
-        te->topt = &VoidType_val;
-        let rs = exp_stmt(te,DL);
-        let default_case =
-          new Switch_clause{.pattern=p,.pat_vars=new Opt(new List(new $(new x_vd,xexp),NULL)),
-                            .where_clause=NULL,.body=rs,.loc=DL};
-        let handler_stmt = switch_stmt(e_exp,
-                                       List::append(scs,
-                                                    new List(default_case,NULL)),DL);
+        let handler_stmt = new_stmt(new Switch_s(e_exp,scs,dec_tree), DL);
         // translate the switches
         stmt_to_c(nv,handler_stmt);
 
@@ -5080,7 +5473,7 @@ static void decltypes_to_c(decl_t d) {
       }
     break;
   case &Typedef_d(td): td->defn = typ_to_c((type_t)td->defn); break;
-  case &Let_d(_,_,_):
+  case &Let_d(...):
   case &Letv_d(_):
   case &Datatype_d(_):
   case &Namespace_d(_,_):
@@ -5109,7 +5502,7 @@ static void stmttypes_to_c(stmt_t s) {
   case &For_s(e1,$(e2,_),$(e3,_),s):
     exptypes_to_c(e1); exptypes_to_c(e2); exptypes_to_c(e3);
     stmttypes_to_c(s); break;
-  case &Switch_s(e,scs):
+  case &Switch_s(e,scs,dec_tree):
     exptypes_to_c(e);
     for (; scs != NULL; scs=scs->tl) stmttypes_to_c(scs->hd->body);
     break;
@@ -5119,13 +5512,13 @@ static void stmttypes_to_c(stmt_t s) {
   case &Skip_s:
   case &Break_s(_):
   case &Continue_s(_):
-  case &Goto_s(_,_): 
+  case &Goto_s(...): 
     break;
-  case &Fallthru_s(_,_): 
+  case &Fallthru_s(...): 
     // in C code, this is implicit, so we replace it with a skip
     s->r = new Skip_s;
     break;
-  case &TryCatch_s(_,_):
+  case &TryCatch_s(...):
   case &ResetRegion_s(_): 
     Tcutil::terr(s->loc,aprintf("Cyclone statement in C code: %s",stmt2string(s)));
     break;
@@ -5172,7 +5565,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       fndecl_to_c(nv, fd, cinclude);
       result_decls = new List(d,result_decls);
       break;
-    case &Let_d(_,_,_):
+    case &Let_d(...):
     case &Letv_d(_):
       toc_impos("letdecl at toplevel");
     case &Region_d(...):
