@@ -1132,7 +1132,7 @@ using Parse;
 %type <list_t<designator_t,`H>> designation designator_list
 %type <designator_t> designator
 %type <kind_t> kind
-%type <type_t> any_type_name type_var rgn_opt qual_bnd_term
+%type <type_t> any_type_name type_var rgn_opt qual_bnd_term qual_bnd_const
 %type <list_t<attribute_t,`H>> attributes_opt attributes attribute_list
 %type <attribute_t> attribute
 %type <enumfield_t> enum_field
@@ -1514,7 +1514,7 @@ type_specifier_notypedef:
     { $$=^$(type_spec(rgn_handle_type($3),LOC(@1,@4))); }
 | REGION_T 
     { $$=^$(type_spec(rgn_handle_type(new_evar(&Kinds::rko, NULL)), SLOC(@1)));}
-| AQUAL_T '<' qual_bnd_term right_angle
+| AQUAL_T '<' qual_bnd_const right_angle
     { $$=^$(type_spec(aqual_handle_type($3),LOC(@1,@4))); }
 | TAG_T '<' any_type_name right_angle
     { $$=^$(type_spec(tag_type($3),LOC(@1,@4))); }
@@ -1903,7 +1903,7 @@ aqual_specifier:
   }
 | AQUALS '(' any_type_name ')'
   {
-    $$ = ^$(aqualsof_type($3));
+    $$ = ^$(aqual_var_type(aqualsof_type($3), al_qual_type));
   }
 ;
 
@@ -2015,26 +2015,34 @@ rgn_order_elt:
 ;
 
 qual_bnd_elt:
-  qual_bnd_term GE_OP TYPE_VAR
+  qual_bnd_const GE_OP qual_bnd_term
 { 
-  let kb = new Eq_kb(&Kinds::aqk);
-  let t = id2type($3,kb);
-  $$ = ^$(new $(t, $1));
+  $$ = ^$(new $($3, $1));
 }
 ;
 
-qual_bnd_term:
+qual_bnd_const:
   AQ_ALIASABLE { $$ = ^$(al_qual_type);}
 | AQ_UNIQUE { $$ = ^$(un_qual_type);}
 | AQ_REFCNT { $$ = ^$(rc_qual_type);}
 | AQ_DYNTRK { $$ = ^$(dt_qual_type);}
 | AQ_RESTRICTED  { $$ = ^$(rtd_qual_type);}
 | AQUALS '(' any_type_name ')'
-  { 
-    /*    let kb = new Eq_kb(&Kinds::bk);
-	  let t = id2type($3,kb);*/
-    $$ = ^$(aqualsof_type($3));
-  }
+{ 
+  $$ = ^$(aqual_var_type(aqualsof_type($3), al_qual_type));
+}
+;
+
+qual_bnd_term:
+  TYPE_VAR
+{ 
+  let kb = new Eq_kb(&Kinds::aqk);
+  $$ = ^$(id2type($1,kb)); 
+}
+| AQUALS '(' any_type_name ')'
+{ 
+  $$ = ^$(aqualsof_type($3));
+}
 ;
 
 //not used anymore ... merged with qual_bnd
@@ -2228,7 +2236,7 @@ any_type_name:
 | '{' region_set '}'              { $$ = ^$(join_eff($2)); }
 | REGIONS '(' any_type_name ')'   { $$ = ^$(regionsof_eff($3)); }
 | any_type_name '+' atomic_effect { $$ = ^$(join_eff(new List($1,$3))); }
-| qual_bnd_term                 {$$ = ^$($1); }
+| qual_bnd_const                 {$$ = ^$($1); }
 ;
 
 /* Cyc: new */

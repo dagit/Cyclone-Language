@@ -216,5 +216,107 @@ void try_table() {
   list_t<int@`H> l = create_list();
 }
 
+//Tests for aquals(`a) 
+/* //aquals(`a) in functions */
+void explicit(`a arg : RESTRICTED >= aquals(`a)){}// :  >= aquals(`a)){}
+void def_aliasable(`a arg){}
+void use_def(int *@aqual(UNIQUE) a) {
+  //    def_aliasable(a);//fail
+  explicit(a);
+}
 
-int main() { return 0; }
+//recursive aquals
+void rec(`a *@aqual(aquals(`a)) arg : RESTRICTED >= aquals(`a)) {}
+void testrec(int *@aqual(RESTRICTED) *@aqual(ALIASABLE) in) {
+  rec(in);// succeed .. subtyping
+}
+void testrec2(int *@aqual(ALIASABLE) *@aqual(UNIQUE) in) __attribute((consume(1))) {
+  {
+    let alias<`r> int **`r ii = in;
+    rec(ii);
+  }
+  rec(in);// auto alias coercion fails because static bound on rec is RESTRICTED... i.e can_insert_alias is false
+}
+
+//aquals(`a) in aggregates -- test sugar .. TB
+struct test_agg1<`a::TB> { // : RESTRICTED >= aquals(`a)
+  `a elt;
+  int b;
+};
+
+struct test_agg2<`a> {  : ALIASABLE >= aquals(`a)
+  `a elt;
+  int b;
+};
+
+void use_tagg1(int *@aqual(RESTRICTED) a) __attribute((consume(1))) {
+  let t = test_agg1{a, 0}; //succeed
+}
+
+void use_tagg2(int *@aqual(RESTRICTED) a, int *b) __attribute((consume(1))) {
+  //    let t1 = test_agg2{a, 0}; //fail
+  let t2 = test_agg2{b, 0}; //succeed
+}
+struct Queue<`a::TB,`r::R> {
+  `a a;
+  int *`r r;
+};
+typedef struct Queue<`a,`r::R> @`r queue_t<`a,`r::R>;
+`a take2(queue_t<`a::TB> q, `a v)__attribute((consume(2))) {return v;}//: RESTRICTED >= aquals(`a)){}return q->a;}
+void use_queue_foobar(queue_t<int*> q2){
+  let a = take2(q2, new 1);
+}
+
+
+//aquals(`a) in datatypes
+datatype test_dat<`a> { //: ALIASABLE >= aquals(`a)
+  TD1_1(`a);
+};
+
+void use_test_dat(int *@aqual(UNIQUE) a, int *b){
+  //  let y = new TD1_1(a); //fail -XXX
+  let v = new TD1_1(b); //succeed
+}
+
+void dum1(`a arg) {} //: ALIASABLE >= aquals(`a)
+void dum2(`b arg) { //: ALIASABLE >= aquals(`b)
+  dum1(arg); //how to typecheck this without qual_partial_order in the fenv?
+  dum2(arg);// same problem
+}
+
+table_t<`a> createsz(int sz) { return NULL; }
+table_t<int*@aqual(ALIASABLE) `H> use_tab() {
+  table_t<int*> a = createsz(101);
+  return a;
+}
+
+//tests unconstraineed aquals(`a) in return type
+datatype exn { AssertExn; };
+`a myassert(int a){ throw new AssertExn;}
+void use_assert() {
+  myassert(0);
+}
+
+//test kind
+//struct Env<`r::R>;
+struct Env<`rr> {
+  int *`rr a;
+};
+//typedef struct Env<`r>*`r env_t<`r>;
+struct Stack<`r> {
+  struct Stack<`r>* next;
+  struct Env<`r> e;
+};
+
+//test delayed constraints on evars ... from lib/sexp.cyc
+static void next_list(list_t<int@`H,`H> xs) {}
+extern void imp_rev(list_t<`a::TB,`r> x){}
+
+// parse in a tuple of objects
+static void parse_tuple(){
+  list_t<int@@aqual(ALIASABLE) `H,`H> xs = NULL;
+  imp_rev(xs);
+  next_list(xs);
+}
+
+int main() {return 0;}

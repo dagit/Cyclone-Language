@@ -110,12 +110,12 @@ coercion_t castable(RgnOrder::rgn_po_opt_t,seg_t,type_t,type_t);
 bool subtype(RgnOrder::rgn_po_opt_t, list_t<$(type_t,type_t)@`H,`H> assume, 
 	     type_t t1, type_t t2);
 bool alias_qual_subtype(aqualtype_t sub, aqualtype_t sup);
-  bool check_aqual_bounds(aqualtype_t sub, aqualtype_t bnd);
+  bool check_aqual_bounds(list_t<$(type_t, type_t)@> aqb, aqualtype_t sub, aqualtype_t bnd);
 // if t is a nullable pointer type and e is 0, changes e to null 
 bool zero_to_null(type_t, exp_t);
 
 // used to alias the given expression, assumed to have non-Aliasable type
-$(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ);
+$(decl_t,exp_t,bool) insert_alias(exp_t e, type_t e_typ);
 
 type_t max_arithmetic_type(type_t, type_t);
 

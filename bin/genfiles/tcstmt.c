@@ -496,9 +496,9 @@ struct Cyc_Tcenv_Tenv*Cyc_Tcenv_new_outlives_constraints(struct Cyc_Tcenv_Tenv*,
 void*Cyc_Tcenv_curr_rgn(struct Cyc_Tcenv_Tenv*);
 # 140
 struct Cyc_RgnOrder_RgnPO*Cyc_Tcenv_curr_rgnpo(struct Cyc_Tcenv_Tenv*);
-# 142
+# 144
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_add_region(struct Cyc_Tcenv_Tenv*,void*,int,int);
-# 153
+# 155
 void Cyc_Tcenv_check_delayed_effects(struct Cyc_Tcenv_Tenv*);
 void Cyc_Tcenv_check_delayed_constraints(struct Cyc_Tcenv_Tenv*);
 # 35 "tctyp.h"

@@ -685,6 +685,10 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
       case &AppType(&AqualVarCon, tv):
 	aqd=cat(text("@aqual("), typ2doc(tv->hd), text(")"));
 	break;
+	//can never appear unwrapped  in a pointer qualifier
+	/*       case &AppType(&AqualsCon, tv): */
+	/* 	aqd=cat(text("aquals("), typ2doc(tv->hd), text(")")); */
+	/* 	break; */
       default:
 	Warn::impos2("unexpected alias qualifier",  aq);
       }
@@ -848,7 +852,7 @@ doc_t ntyp2doc(type_t t) {
   case &AppType(&ThinCon,&List{t,_}):  
     return cat(text("@thin @numelts"),lb(),typ2doc(t),rb());
   case &AppType(&AqualConstCon(aqv), _): return aqual_val2doc(aqv); 
-  case &AppType(&AqualsCon, qtv): return cat(text("aquals("), ntyp2doc(qtv->hd), text(")"));
+  case &AppType(&AqualsCon, qtv): return cat(text("aquals("), typ2doc(qtv->hd), text(")"));
   case &AppType(&ThinCon,_):  return text("@thin");
   case &AppType(&FatCon,_):   return text("@fat"); 
   case &AppType(&TrueCon,_):  return text("@true");  

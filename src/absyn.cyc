@@ -494,6 +494,20 @@ type_t compress(type_t t) {
     let t2 = e->topt;
     return (t2 != NULL) ? t2 : t;
   case &TypeDeclType(_,&t): return compress(t);
+  case &AppType(&AqualsCon, &List(tv, _)):
+    let ctv = compress(tv);
+    if(ctv == tv)
+      return t;
+    switch(ctv) {
+    case &PointerType(PtrInfo{_,_, PtrAtts{_,_,_,_,_,_,aq}}):
+      return compress(aq);
+    case &VarType(...):
+    case &Evar(...):
+      break;
+    default: //non pointers of boxed kind are aliasable 
+      return al_qual_type;
+    }
+    return aqualsof_type(ctv);
   case &AppType(&AqualVarCon, tv_bnd):
     _ comp = compress(tv_bnd->hd);
     switch(comp) {
@@ -501,6 +515,7 @@ type_t compress(type_t t) {
       return comp;
     case &VarType(_):
     case &Evar(...):
+    case &AppType(&AqualsCon, _):
       return aqual_var_type(comp, compress(tv_bnd->tl->hd));
     case &AppType(&AqualVarCon, tvb2):
       return compress(comp);

@@ -104,6 +104,7 @@ abstract struct Fenv {
   struct SharedFenv @ shared;
   list_t<tvar_t>      type_vars; //type variables that can occur free
   rgn_po_t            region_order; // partial order on region variables
+  list_t<$(type_t, type_t)@> aquals_bounds; //need this to decide the bounds of aquals(`a)
   ftclause_t          ctrl_env;
   type_t              capability;
   type_t              curr_rgn;   // current block's region
@@ -410,6 +411,24 @@ rgn_po_opt_t curr_rgnpo(tenv_t te) {
   if(le == NULL) return NULL;
   return le->region_order;
 }
+list_t<$(type_t, type_t)@> curr_aquals_bounds(tenv_t te) {
+  let le = te->le;
+  if(le == NULL) return NULL;
+  return le->aquals_bounds;
+}
+tenv_t add_aquals_bound(tenv_t te, type_t aq, type_t bnd) {
+  let ans = new *get_fenv(te,"add_aquals_bound");
+  let aqb = ans->aquals_bounds;
+  try {
+    let found = List::assoc_cmp(Tcutil::typecmp, aqb, aq);
+    Warn::impos2("repeated add of aquals_bound");
+  }catch {
+  case &Core::Not_found:
+    break;
+  }
+  ans->aquals_bounds  = new List{new $(aq, bnd), aqb};
+  return put_fenv(te,ans);
+}
 
 // Check that rgn_typ is currently accessible:  the heap region is always
 // accessible, and a region variable r is accessible if it appears in the
@@ -494,6 +513,15 @@ static struct SharedFenv @`H new_shared_fenv(type_t ret) {
 			.delayed_constraint_checks = NULL };
 }
 
+static bool aquals_bnds_pred($(type_t, type_t)@ bnd) {
+  switch((*bnd)[0]) {
+  case &AppType(&AqualsCon, _):
+    return true;
+  default:
+    return false;
+  }
+}
+
 fenv_t new_fenv(seg_t loc, fndecl_t fd) {
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
@@ -520,10 +548,12 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
       }
     }
   }
+  
   return new
     Fenv{.shared = new_shared_fenv(ret_t),
          .type_vars     = tvs,
          .region_order  = rgn_po,
+	 .aquals_bounds = List::filter(aquals_bnds_pred, fd->i.qual_bnd),
          .ctrl_env      = NULL,
          .capability    = join_eff(new List(access_eff(param_rgn),
 					    new List(cap,NULL))),
@@ -534,7 +564,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
 }
 
 fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
-  let &Fenv{.region_order = rgn_po,
+  let &Fenv{.region_order = rgn_po, .aquals_bounds = aqb, 
             .type_vars = type_vars, .shared = shared, ...} = old_fenv;
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
@@ -570,6 +600,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
     Fenv{.shared = new_shared_fenv(fd->i.ret_type),
          .type_vars   = tvs,
          .region_order = rgn_po,
+         .aquals_bounds = aqb,
          .ctrl_env    = NULL,
          .capability  = join_eff(new List(access_eff(param_rgn),
 					  new List((type_t)fd->i.effect,NULL))),
@@ -589,6 +620,7 @@ fenv_t bogus_fenv(type_t ret_type,
     Fenv{.shared = new_shared_fenv(ret_type),
          .type_vars   = tvs,
          .region_order = rgn_po,
+	 .aquals_bounds = NULL,
          .ctrl_env    = NULL,
          .capability  = join_eff(new List(access_eff(param_rgn),NULL)),
          .curr_rgn    = param_rgn,

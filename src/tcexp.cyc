@@ -857,6 +857,37 @@ static struct Datatypefield *tcInjection(tenv_t te,exp_t e,type_t tu,
   return NULL;
 }
 
+static void check_all_aqual_bounds(seg_t loc, tenv_t te, 
+				   list_t<$(type_t, type_t)@> fn_or_aggr_qual_bnd) {
+  //check qualifier bounds are satisfied  -- 
+  //make sure these are present even for the default cases: see check_valid_type
+  for(_ qbit =fn_or_aggr_qual_bnd; qbit != NULL; qbit = qbit->tl) {
+    let &$(qv,bnd) = qbit->hd;
+    let qvc = compress(qv);
+    switch(qvc) { //used to force unconstrained vars to the upper bound ... but that is unnecessarily aggressive
+    case &Evar(_, *ref, _, _): //completely unconstrained 
+      //      *ref = bnd;
+      break;
+    case &AppType(&AqualVarCon, &List{&Evar(_, *ref, _, _), ebnd}):  //still unconstrained, but has a bound
+      if(!Tcutil::check_aqual_bounds(NULL, bnd, ebnd->hd)) //make sure the evar can be instantiated to the upper bound
+	//	*ref = bnd; 
+	//      else 
+	Warn::err2(loc, "alias qualifier bounds violated: ", ebnd, " <> ", bnd); 
+      break;
+    case &AppType(&AqualsCon, &List{&Evar(...), _}): //uninstantiated aquals(`a) -- assume default ALIASABLE
+      //shouldn't we add this assumption to the env's aquals_bounds?
+      if(!Tcutil::check_aqual_bounds(Tcenv::curr_aquals_bounds(te), al_qual_type, bnd)) 
+	Warn::err2(loc, "alias qualifier bounds violated: ", qvc, " <> ", bnd);       
+      break;
+    default:
+      if(!Tcutil::check_aqual_bounds(Tcenv::curr_aquals_bounds(te), qvc, bnd)) 
+	Warn::err2(loc, "alias qualifier bounds violated: ", qvc, " <> ", bnd); 
+      break;
+    }
+  }
+}
+				   
+
 // e(es)
 static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
 		       list_t<exp_t> args,
@@ -1026,21 +1057,7 @@ static type_t tcFnCall(tenv_t te_orig,seg_t loc,type_t * topt,exp_t e,
       }
       //check qualifier bounds are satisfied  -- 
       //make sure these are present even for the default cases: see check_valid_type
-      for(_ qbit =qb; qbit != NULL; qbit = qbit->tl) {
-	let &$(qv,bnd) = qbit->hd;
-	let qvc = compress(qv);
-	if(qvc == qv) {
-	  switch(qv) {
-	  case &Evar(_, *ref, _, _): //still unconstrained ...force it to the upper bound
-	    *ref = bnd;
-	    break;
-	  default:
-	    Warn::impos2("Unconstrained typevar is not an evar");
-	  }
-	}
-	else if(!check_aqual_bounds(qvc, bnd)) 
-	  Warn::err2(loc, "alias qualifier bounds violated: ", qvc, " <> ", bnd); 
-      }
+      check_all_aqual_bounds(loc, te, qb);
       if (*alias_arg_exps == NULL) {
 	// JGM: we can't do these checks when we're going to re-type
  	// something due to insertion of alias's because they're likely
@@ -1851,22 +1868,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   rpo_inst = imp_rev(rpo_inst);
   Tcenv::check_rgn_partial_order(te2,loc,rpo_inst);
   //check qualifier bounds are obeyed
-  for(_ qb=qb_inst; qb != NULL; qb = qb->tl) {
-    let &$(qv,bnd) = qb->hd;
-    let qvc = compress(qv);
-    if(qvc == qv) {
-      switch(qv) {
-      case &Evar(_, *ref, _, _): //still unconstrained ...force it to the upper bound
-	*ref = bnd;
-	break;
-      default:
-	Warn::impos2("Unconstrained typevar is not an evar");
-      }
-    }
-    else if(!check_aqual_bounds(qvc, bnd))
-      Warn::err2(loc, "alias qualifier bounds violated: ", qvc, " <> ", bnd);
-  }
-  
+  check_all_aqual_bounds(loc, te2, qb_inst);
   return res_typ;
 }
 
@@ -2435,7 +2437,8 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
 // argument is a copy of e (before it was typechecked), so we modify
 // that, and then update the expression e.  Assumes that
 // alias_arg_exps is sorted in ascending order.
-static void insert_alias_stmts(tenv_t te, exp_t e, exp_t fn_exp,
+// bool return value indicates if the recheck has any chance of success
+static bool insert_alias_stmts(tenv_t te, exp_t e, exp_t fn_exp,
 			       list_t<int> alias_arg_exps) {
   let decls = NULL;
   // first update the function's arguments to include the coercions
@@ -2455,7 +2458,9 @@ static void insert_alias_stmts(tenv_t te, exp_t e, exp_t fn_exp,
 	  es2 = es2->tl;
 	}
 	// create the coercion here
-	let $(d,ve) = insert_alias(es->hd,copy_type((type_t)es2->hd->topt));
+	let $(d,ve,succ) = insert_alias(es->hd,copy_type((type_t)es2->hd->topt));
+	if(!succ)
+	  return false;
 	es->hd = ve;   // update the argument expression
 	decls = new List(d, decls); // note the alias decl
 	arg_exps = arg_exps->tl;
@@ -2475,6 +2480,7 @@ static void insert_alias_stmts(tenv_t te, exp_t e, exp_t fn_exp,
   // update the current expression to be the newly created one and re-typecheck
   e->topt = NULL;
   e->r = fn_exp->r;
+  return true;
 }
 
  // Type-check the expression -- don't do any implicit instantiation.
@@ -2526,9 +2532,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcFnCall(te,loc,topt,e1,es,vci,&alias_arg_exps);
     if (alias_arg_exps != NULL && ok) {
       alias_arg_exps = imp_rev(alias_arg_exps);
-      insert_alias_stmts(te, e, fn_exp, alias_arg_exps);
-      tcExpNoInst(te,topt,e);
-      return;
+      if(insert_alias_stmts(te, e, fn_exp, alias_arg_exps))
+	tcExpNoInst(te,topt,e);
     }
     break;
   case &Throw_e(e1,_):         t = tcThrow(te,loc,topt,e1); break;

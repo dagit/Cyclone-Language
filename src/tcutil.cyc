@@ -1036,6 +1036,7 @@ static int tycon2int(tycon_t t) {
   case &ComplexCon:                   return 37;
   case &AqualVarCon:                  return 38;
   case &AqualConstCon(...):           return 39;
+  case &AqualsCon:               return 40;
   default: Warn::impos2("bad con");
   }
 }
@@ -1614,13 +1615,26 @@ bool zero_to_null(type_t t2, exp_t e1) {
   }
 }
 
-// returns a pair by doing the following
+static bool is_aliasable_qual(aqualtype_t aq) {
+  switch(compress(aq)) {
+  case &AppType(&AqualConstCon(aqv), _):
+    return aqv == Aliasable_qual;
+  case &AppType(&AqualVarCon, tv_bnd):
+    return is_aliasable_qual(tv_bnd->tl->hd);
+  default:  
+    return false;
+  }
+}
+
+
+// returns a triple by doing the following
 // (1) gensym's a variable name and creates an expression with that variable
 // (2) generates an alias statement that defines that variable as aliasing
 // the given expression, using the given tvar as the region
-$(decl_t,exp_t) insert_alias(exp_t e, type_t e_type) {
+// the bool indicates if the alias coercion has a chance of being succesful
+$(decl_t,exp_t,bool) insert_alias(exp_t e, type_t e_type) {
   static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&Kinds::rk);
-
+  bool success = true;
   // generate a fresh variable to alias the given expression to
   static int counter = 0;
   qvar_t v = new $(Loc_n, new ((string_t)aprintf("__aliasvar%d",counter++)));
@@ -1633,15 +1647,35 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_type) {
   // the new type variable.  
   tvar_t tv = new_tvar(&rgn_kb);
   switch (compress(e_type)) {
-  case &PointerType(PtrInfo{et,tq,PtrAtts{old_r,...}}):
+  case &PointerType(PtrInfo{et,tq,PtrAtts{.rgn=old_r,.aqual=aq,...}}):
     switch (compress(old_r)) {
     case &Evar(_,*topt,_,ts): 
       let new_r = var_type(tv);
       *topt = new_r;
       break;
-    default: break;
+      //this may be a vartype in the case where we have a `r::TR pointer
+      //the region outlives rules prevent a (t *`r1::TR) from being cast to a (t *`r2::R)
+      //we should allow this somehow ... but for now just bail out here to prevent infinite loop
+    case &VarType(rtv):      
+      switch(rtv->kind) {
+      case &Eq_kb(knd):
+	if(knd->aliasqual == Top) {
+	  Warn::err2(e->loc, "Automatic alias coercion of top-kinded pointers not supported");
+	  success = false;
+	}
+	break;
+      default: break;
+      }
+      break;
+    default:
+      break;
     }
-    break;
+    //similarly, alias_qual_subtype rules prevent coercion from RESTRICTED to ALIASABLE
+    //So, if we have a RESTRICTED pointer here ... then bail out to prevent infinite loop
+    if(!is_aliasable_qual(aq)) { //should have been cast to aliasable by the previous tcfncall
+      Warn::err2(e->loc, "Automatic alias coercion of restricted pointers not supported");
+      success = false;
+    }
   default: break;
   }
   e->topt = NULL;
@@ -1650,18 +1684,7 @@ $(decl_t,exp_t) insert_alias(exp_t e, type_t e_type) {
   // generate the alias decl
   decl_t d = alias_decl(tv,vd,e,e->loc);
 
-  return $(d,ve);
-}
-
-static bool is_aliasable_qual(aqualtype_t aq) {
-  switch(compress(aq)) {
-  case &AppType(&AqualConstCon(aqv), _):
-    return aqv == Aliasable_qual;
-  case &AppType(&AqualVarCon, tv_bnd):
-    return is_aliasable_qual(tv_bnd->tl->hd);
-  default:  
-    return false;
-  }
+  return $(d,ve,success);
 }
 
 // returns true if we could insert an alias construct around the context
@@ -1986,43 +2009,59 @@ static bool ptrsubtype(RgnOrder::rgn_po_opt_t po,
   return true;
 }
 
-bool check_aqual_bounds(aqualtype_t aq, aqualtype_t bnd) {
+
+//compress handles aquals(`a) case too
+bool check_aqual_bounds(list_t<$(type_t, type_t)@> aquals_bnd, 
+			aqualtype_t aq, aqualtype_t bnd) {
   switch ($(compress(aq), compress(bnd))) {
   case $(&AppType(&AqualConstCon(v_sub), _), &AppType(&AqualConstCon(v_sup), _)):
     return (v_sup==v_sub || v_sup==Restricted_qual);
   case $(&AppType(&AqualVarCon, tv_sub), &AppType(&AqualConstCon(v_sup), _)):
-    return check_aqual_bounds(tv_sub->tl->hd, bnd);
-  default: //revise for aquals(`a) support
-    Warn::impos2("check_aqual_bounds expects a constant bound; got ", bnd);
+    return check_aqual_bounds(aquals_bnd, tv_sub->tl->hd, bnd);
+  case $(&AppType(&AqualsCon, _),  &AppType(&AqualConstCon(v_sup), _)):
+    try { 
+      let aq_bound = List::assoc_cmp(typecmp, aquals_bnd, aq);
+      return check_aqual_bounds(aquals_bnd, aq_bound, bnd);
+    }catch {
+    case &Not_found:
+      return false; 
+    }
+  default: 
+    Warn::impos2("check_aqual_bounds expects a constant bound; got ", aq, ",", bnd);
   }
 }
 
-//also need to handle aquals(`a) types 
+
 //can't use unify ... don't want side effects
+//If aquals(`a) is present force identities to be the same
+//otherwise dependencies to outer scopes gets ugly
 bool alias_qual_subtype(aqualtype_t aq_sub, aqualtype_t aq_sup) {
   switch ($(compress(aq_sub), compress(aq_sup))) {
-  case $(&AppType(&AqualConstCon(v_sub), _), &AppType(&AqualConstCon(v_sup), _)):
+  case $(&AppType(&AqualConstCon(v_sub), _), &AppType(&AqualConstCon(v_sup), _))://c,c
     return ((v_sup==v_sub || v_sup==Restricted_qual)
 	    ||(v_sup == Aliasable_qual && (v_sub == Unique_qual || v_sub == Refcnt_qual)));
-  case $(&AppType(&AqualVarCon, &List(&VarType(tv1), bnd1)), &AppType(&AqualVarCon, &List(&VarType(tv2), bnd2))):
+  case $(&AppType(&AqualVarCon, &List(&VarType(tv1), _)), &AppType(&AqualVarCon, &List(&VarType(tv2), _)))://v,v
     return (tv2->identity == tv1->identity);
-  case $(&AppType(&AqualVarCon, &List(&VarType(tv1), bnd1)), &AppType(&AqualVarCon, &List(&Evar(k, ...), bnd2))):
+  case $(&AppType(&AqualVarCon, &List(&AppType(&AqualsCon, &List{tv1, NULL}), _)), 
+	 &AppType(&AqualVarCon, &List(&AppType(&AqualsCon, &List{tv2, NULL}), _))): //v,v
+    return (typecmp(tv1, tv2)==0);
+  case $(&AppType(&AqualVarCon, &List(&VarType(tv1), bnd1)), &AppType(&AqualVarCon, &List(&Evar(k, ...), bnd2)))://v,e
     return (Kinds::kind_eq(Kinds::tvar_kind(tv1,&Kinds::aqk), k->v) && alias_qual_subtype(bnd1->hd, bnd2->hd));
-  case $(&AppType(&AqualVarCon, &List(&Evar(k1, ...), bnd1)), &AppType(&AqualVarCon, &List(&VarType(tv2), bnd2))):
-    return (Kinds::kind_eq(k1->v, Kinds::tvar_kind(tv2, &Kinds::aqk)) && check_aqual_bounds(bnd2->hd, bnd1->hd));
-  case $(&AppType(&AqualVarCon, &List(&Evar(k1, ...), bnd1)), &AppType(&AqualVarCon, &List(&Evar(k2, ...), bnd2))):
+  case $(&AppType(&AqualVarCon, &List(&Evar(k1, ...), bnd1)), &AppType(&AqualVarCon, &List(&VarType(tv2), bnd2)))://e,v
+    return (Kinds::kind_eq(k1->v, Kinds::tvar_kind(tv2, &Kinds::aqk)) && check_aqual_bounds(NULL, bnd2->hd, bnd1->hd));//fix NULL
+  case $(&AppType(&AqualVarCon, &List(&Evar(k1, ...), bnd1)), &AppType(&AqualVarCon, &List(&Evar(k2, ...), bnd2)))://e,e
     return (Kinds::kind_eq(k1->v, k2->v) && alias_qual_subtype(bnd1->hd, bnd2->hd));
-  case $(&AppType(&AqualVarCon, tv_sub), &AppType(&AqualVarCon, tv_sup)):
-    return (unify(tv_sub->hd, tv_sup->hd) && alias_qual_subtype(tv_sub->tl->hd, tv_sup->tl->hd));
+    //  case $(&AppType(&AqualVarCon, tv_sub), &AppType(&AqualVarCon, tv_sup)): 
+    //    return (unify(tv_sub->hd, tv_sup->hd) && alias_qual_subtype(tv_sub->tl->hd, tv_sup->tl->hd));
     //we can use an @aqual(`q <= C) in place of C ... 
-  case $(&AppType(&AqualVarCon, &List(&VarType(tv), bnd)), &AppType(&AqualConstCon(v_sup),_)):
+  case $(&AppType(&AqualVarCon, &List(&VarType(tv), bnd)), &AppType(&AqualConstCon(v_sup),_))://v,c
     return alias_qual_subtype(bnd->hd, aq_sup);
-  case $(&AppType(&AqualVarCon, &List(&Evar(k, ...), bnd)), &AppType(&AqualConstCon(v_sup),_)):
-    return (Kinds::kind_eq(k->v, &Kinds::aqk) && check_aqual_bounds(aq_sup, bnd->hd));//, aq_sup));
+  case $(&AppType(&AqualVarCon, &List(&Evar(k, ...), bnd)), &AppType(&AqualConstCon(v_sup),_))://e,c
+    return (Kinds::kind_eq(k->v, &Kinds::aqk) && check_aqual_bounds(NULL, aq_sup, bnd->hd));//, aq_sup));//fix NULL
     //but not C in place of @aqual(`q <= C) (VarType does not unify with AqualConst, but Evar does)
-  case $(&AppType(&AqualConstCon(v_sub),_), &AppType(&AqualVarCon, &List(&VarType(tv), ...))):
+  case $(&AppType(&AqualConstCon(v_sub),_), &AppType(&AqualVarCon, &List(&VarType(tv), ...)))://c,v
     return false;
-  case $(&AppType(&AqualConstCon(v_sub),_), &AppType(&AqualVarCon, &List(&Evar(k, ...), bnd))):
+  case $(&AppType(&AqualConstCon(v_sub),_), &AppType(&AqualVarCon, &List(&Evar(k, ...), bnd)))://c,e
     return (Kinds::kind_eq(k->v, &Kinds::aqk) && alias_qual_subtype(aq_sub, bnd->hd));
   default:
     return false;
@@ -2457,9 +2496,9 @@ type_t rsubstitute(region_t<`r> rgn,
     return (fs==new_fs) ? t : new AnonAggrType(k,new_fs);
   case &Evar(_,r,_,_):
     return (r==NULL) ? t : rsubstitute(rgn,inst,(type_t)r);
-  case &AppType(&AqualVarCon, ts): //special case this, because the bounds info is mutated by unification...so no sharing
-    return aqual_var_type(rsubstitute(rgn, inst,ts->hd), 
-			  rsubstitute(rgn, inst,ts->tl->hd));
+    /*   case &AppType(&AqualVarCon, ts): *///no need to special case this anymore
+/*     return aqual_var_type(rsubstitute(rgn, inst,ts->hd),  */
+/* 			  rsubstitute(rgn, inst,ts->tl->hd)); */
   case &AppType(c,ts):
     let new_ts = substs(rgn,inst,ts);
     return (ts==new_ts) ? t : new AppType(c,new_ts);
@@ -2742,14 +2781,16 @@ bool is_noalias_pointer(type_t t, bool must_be_unique) {
 	default: return false;
 	}
       }
-      case &AppType(&AqualVarCon, &List(&VarType(...), bnd)): {
+	//ignore unconstrained evars -- show up in (_ a= NULL; &a;)...will be constrained later  	
+      case &AppType(&AqualVarCon, &List(&VarType(...), bnd)): fallthru(bnd);
+      case &AppType(&AqualVarCon, &List(&AppType(...), bnd)): { 
 	switch(bnd->hd) {
 	case &AppType(&AqualConstCon(Unique_qual), _): return true;
 	case &AppType(&AqualConstCon(Refcnt_qual), _): 
 	case &AppType(&AqualConstCon(Restricted_qual), _): return !must_be_unique;
 	default: return false;
 	}
-      }//how about aquals(`a)?
+      }
       default:
 	return false;
       }

@@ -331,23 +331,6 @@ static void unify_it(type_t t1, type_t t2) {
     // we can constrain the Evar to be equal to t2 only when the kind of
     // the evar is greater than or equal to the kind of t2 
     if (Kinds::kind_leq(kind2,kind1->v)) {
-      // check the aliasability qualifier if t2 is a pointer
-      switch(t2) {
-      case &PointerType(PtrInfo(_,_,PtrAtts(_,_,_,_,_,_,aq))):
-	//hack for the default aliasability aquals(`a::B) in function types is ALIASABLE
-	//need to fix this for aggregates where default aliasability of aquals(`a::B) is RESTRICTED
-	_ bnd = al_qual_type;
-	switch(kind1->v->aliasqual) {
-	case Unique: bnd = un_qual_type; break;
-	case Top: bnd = rtd_qual_type; break;
-	default: break;
-	}
-	if(!Tcutil::alias_qual_subtype(aq, bnd))
-	  fail_because("(aliasing qualifiers are incompatible)");
-	break;
-      default:
-	break;
-      }
       *ref1_ref = t2;
       return;
     } 
@@ -400,6 +383,10 @@ static void unify_it(type_t t1, type_t t2) {
   case $(&AppType(&AqualVarCon, &List{&VarType(tv2),_}), &AppType(&AqualVarCon, &List{&VarType(tv1),_})): //case 4
     if (tv2->identity != tv1->identity) //this is the case of existential pattern matching, function return, ...
       fail_because("(variable types are not the same)");
+    break;
+  case $(&AppType(&AqualVarCon, &List{&AppType(&AqualsCon, &List{tv2, _}),_}), &AppType(&AqualVarCon, &List{&AppType(&AqualsCon, &List{tv1, _}),_})): //case 4'
+    if (Tcutil::typecmp(tv2, tv1))
+      fail_because("(aquals(`a) variables are not the same)");
     break;
   case $(&AppType(&AqualVarCon, &List{&VarType(...),_}), &AppType(&AqualVarCon, &List{&Evar(...), _})): //5'
     unify_it(t2, t1);
