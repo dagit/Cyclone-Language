@@ -24,7 +24,7 @@ LIB=../../bin/cyc-lib/$(OUT_PREFIX)$(CYCLIB)
 all: $(CYCC) $(LIB) \
   smlng$(EXE) generate$(EXE)
 
-smlng$(EXE): smlng.o tag_elim.o timer.o
+smlng$(EXE): smlng.o tag_elim.o timer.o parser.o
 	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 #	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 

@@ -12,6 +12,6 @@ extern tunion Document {
   Text(char ?);
   Tagged(tag_t,doc_t);
 };
-
+#define DONT_KNOW 255
 void dump(doc_t d);
 #endif _SMLNG_H_

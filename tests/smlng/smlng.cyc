@@ -23,6 +23,7 @@ tunion Document {
   Text(char ?);
   Tagged(tag_t,doc_t);
 };
+extern doc_t get_docs(FILE @f);
 
 void dump(doc_t d) {
   switch (d) {
@@ -155,15 +156,17 @@ doc_t down_opt(context_t ctxt, doc_t d) {
 
 
 int main(int argc, char ??argv) {
-  if(argc < 2) {
-    fprintf(stderr, "pass a time limit on the command-line");
-    return 1;
-  }
-  TagElim::up_opt_test();
-  start_timer(argv[1]);
+  //if(argc < 2) {
+  //fprintf(stderr, "pass a time limit on the command-line");
+  //return 1;
+  //}
+  // TagElim::up_opt_test();
+  //start_timer(argv[1]);
   //time_test(argv[1]);
-  printf("hello\n");
+  
+  doc_t d = get_docs(stdin);
+  dump(d);
   return 0;
 }
 
-      
+

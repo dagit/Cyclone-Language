@@ -30,6 +30,34 @@ using Stdio;
 #define TAGk	23
 #define TAGw	24
 
+string_t tag_strings[] = {
+  "<B>",
+  "<EM>",
+  "<I>",
+  "<PL>",
+  "<S>",
+  "<TT>",
+  "<U>",
+  "<0>",
+  "<1>",
+  "<2>",
+  "<3>",
+  "<4>",
+  "<5>",
+  "<6>",
+  "<7>",
+  "<8>",
+  "<9>",
+  "<r>",
+  "<g>",
+  "<b>",
+  "<c>",
+  "<m>",
+  "<y>",
+  "<k>",
+  "<w>"
+};
+
 string_t end_tag_strings[] = {
   "</B>",
   "</EM>",
@@ -127,38 +155,7 @@ void generate_printable() {
 /* generate an tag ending */
 void generate_end_tag() {
   let tag = pop();
-  //printf("%s",end_tag_strings[tag]); // SEEMS BUGGY!
-  switch (tag) {
-  case 0: printf("</B>"); break;
-  case 1: printf("</EM>"); break;
-  case 2: printf("</I>"); break;
-  case 3: printf("</PL>"); break;
-  case 4: printf("</S>"); break;
-  case 5: printf("</TT>"); break;
-  case 6: printf("</U>"); break;
-  case 7: printf("</0>"); break;
-  case 8: printf("</1>"); break;
-  case 9: printf("</2>"); break;
-  case 10: printf("</3>"); break;
-  case 11: printf("</4>"); break;
-  case 12: printf("</5>"); break;
-  case 13: printf("</6>"); break;
-  case 14: printf("</7>"); break;
-  case 15: printf("</8>"); break;
-  case 16: printf("</9>"); break;
-  case 17: printf("</r>"); break;
-  case 18: printf("</g>"); break;
-  case 19: printf("</b>"); break;
-  case 20: printf("</c>"); break;
-  case 21: printf("</m>"); break;
-  case 22: printf("</y>"); break;
-  case 23: printf("</k>"); break;
-  case 24: printf("</w>"); break;
-  default:
-    fprintf(stderr,"Error: bad random tag %d\n",tag);
-    exit(1);
-    break;
-  }
+  printf(end_tag_strings[tag]); // SEEMS BUGGY!
   printable_ok = true;
 }
 
@@ -166,38 +163,7 @@ void generate_end_tag() {
 void generate_tag() {
   /* generate 1 of 25 possible tags */
   int tag = random(25);
-  //printf("%s",tag_strings[tag]); // SEEMS BUGGY!
-  switch (tag) {
-  case 0: printf("<B>"); break;
-  case 1: printf("<EM>"); break;
-  case 2: printf("<I>"); break;
-  case 3: printf("<PL>"); break;
-  case 4: printf("<S>"); break;
-  case 5: printf("<TT>"); break;
-  case 6: printf("<U>"); break;
-  case 7: printf("<0>"); break;
-  case 8: printf("<1>"); break;
-  case 9: printf("<2>"); break;
-  case 10: printf("<3>"); break;
-  case 11: printf("<4>"); break;
-  case 12: printf("<5>"); break;
-  case 13: printf("<6>"); break;
-  case 14: printf("<7>"); break;
-  case 15: printf("<8>"); break;
-  case 16: printf("<9>"); break;
-  case 17: printf("<r>"); break;
-  case 18: printf("<g>"); break;
-  case 19: printf("<b>"); break;
-  case 20: printf("<c>"); break;
-  case 21: printf("<m>"); break;
-  case 22: printf("<y>"); break;
-  case 23: printf("<k>"); break;
-  case 24: printf("<w>"); break;
-  default:
-    fprintf(stderr,"Error: bad random tag %d\n",tag);
-    exit(1);
-    break;
-  }
+  printf(tag_strings[tag]); // SEEMS BUGGY!
   push(tag);
   len -= size_tag(tag);
   printable_ok = true;
