@@ -226,7 +226,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t *`r topt, cnst_t c, exp_t e) 
     return t;
   case Null_c:
     // FIX: take advantage of topt
-    t = new PointerType(PtrInfo(new_evar(MemKind), 
+    t = new PointerType(PtrInfo(new_evar(AnyKind), 
                                 new_evar(RgnKind), new_conref(true),
                                 empty_tqual(), empty_conref()));
     break;
