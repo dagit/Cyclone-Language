@@ -93,8 +93,6 @@ char char_for_backslash(char c) {
   }
 }
 
-// FIX: Maybe the Cyclone version should interpret things in octal instead
-//      of decimal.  If so, change this code and all existing lexers.
 char char_for_octal_code(Lexbuf<`a> lbuf, int i) {
   return (char)(64 * (((int) lexeme_char(lbuf,i))   - '0') +
 		 8 * (((int) lexeme_char(lbuf,i+1)) - '0') +
@@ -191,20 +189,20 @@ int lexmain_rec(Lexbuf<`a> lexbuf, int lexstate) {
   switch (lexstate) {
 
 case 0: 
-#line 140 "lexer.cyl"
+#line 137 "lexer.cyl"
                           return lexmain(lexbuf); 
 case 1: 
-#line 141 "lexer.cyl"
+#line 138 "lexer.cyl"
          line_start_pos = lexeme_end(lexbuf);
          ++line_num;
          return lexmain(lexbuf); 
 case 2: 
-#line 144 "lexer.cyl"
+#line 141 "lexer.cyl"
          comment_depth = 1;
          handle_lexical_error(comment,lexbuf); 
          return lexmain(lexbuf); 
 case 3: 
-#line 148 "lexer.cyl"
+#line 145 "lexer.cyl"
     mstring_t s = lexeme(lexbuf);
     if     (strcmp(s,"rule")  == 0) return TRULE;
     else if(strcmp(s,"parse") == 0) return TPARSE;
@@ -214,26 +212,32 @@ case 3:
     else { token_string = s; return TIDENT; }
   
 case 4: 
-#line 156 "lexer.cyl"
+#line 153 "lexer.cyl"
         reset_string_buffer();
-        handle_lexical_error(strng, lexbuf);
+        int line = line_num;
+        int column = lexeme_start(lexbuf) - line_start_pos;
+        try 
+          while (strng(lexbuf))
+            ; /* skip */
+        catch { case &Lexical_error(msg,_,_):
+          throw new Lexical_error(msg,line,column); }
 	token_string = get_stored_string();
 	return TSTRING;
       
 case 5: 
-#line 162 "lexer.cyl"
+#line 165 "lexer.cyl"
       token_char = (int)lexeme_char(lexbuf,1); 
       return TCHAR; 
 case 6: 
-#line 165 "lexer.cyl"
+#line 168 "lexer.cyl"
       token_char = (int)char_for_backslash(lexeme_char(lexbuf,2)); 
       return TCHAR; 
 case 7: 
-#line 168 "lexer.cyl"
+#line 171 "lexer.cyl"
       token_char = (int)char_for_octal_code(lexbuf,2);
       return TCHAR; 
 case 8: 
-#line 171 "lexer.cyl"
+#line 174 "lexer.cyl"
       
      int n1 = lexeme_end(lexbuf);
      int l1 = line_num;
@@ -244,46 +248,46 @@ case 8:
      return TACTION;
    
 case 9: 
-#line 180 "lexer.cyl"
+#line 183 "lexer.cyl"
         return TEQUAL; 
 case 10: 
-#line 181 "lexer.cyl"
+#line 184 "lexer.cyl"
         return TOR; 
 case 11: 
-#line 182 "lexer.cyl"
+#line 185 "lexer.cyl"
         return TUNDERSCORE; 
 case 12: 
-#line 183 "lexer.cyl"
+#line 186 "lexer.cyl"
         return TLBRACKET; 
 case 13: 
-#line 184 "lexer.cyl"
+#line 187 "lexer.cyl"
         return TRBRACKET; 
 case 14: 
-#line 185 "lexer.cyl"
+#line 188 "lexer.cyl"
         return TSTAR; 
 case 15: 
-#line 186 "lexer.cyl"
+#line 189 "lexer.cyl"
         return TMAYBE; 
 case 16: 
-#line 187 "lexer.cyl"
+#line 190 "lexer.cyl"
         return TPLUS; 
 case 17: 
-#line 188 "lexer.cyl"
+#line 191 "lexer.cyl"
         return TLPAREN; 
 case 18: 
-#line 189 "lexer.cyl"
+#line 192 "lexer.cyl"
         return TRPAREN; 
 case 19: 
-#line 190 "lexer.cyl"
+#line 193 "lexer.cyl"
         return TCARET; 
 case 20: 
-#line 191 "lexer.cyl"
+#line 194 "lexer.cyl"
         return TDASH; 
 case 21: 
-#line 192 "lexer.cyl"
+#line 195 "lexer.cyl"
         return -1; 
 case 22: 
-#line 193 "lexer.cyl"
+#line 196 "lexer.cyl"
       throw new Lexical_error(aprintf("illegal character %s", lexeme(lexbuf)),
 			      line_num, 
 			      lexeme_start(lexbuf) - line_start_pos);  default: lexbuf->refill_buff(lexbuf); return lexmain_rec(lexbuf,lexstate);
@@ -296,49 +300,50 @@ int action_rec(Lexbuf<`a> lexbuf, int lexstate) {
   switch (lexstate) {
 
 case 0: 
-#line 198 "lexer.cyl"
+#line 201 "lexer.cyl"
         ++brace_depth; return action(lexbuf); 
 case 1: 
-#line 199 "lexer.cyl"
+#line 202 "lexer.cyl"
         --brace_depth; 
         if(brace_depth == 0) return lexeme_start(lexbuf);
 	else return action(lexbuf); 
 case 2: 
-#line 202 "lexer.cyl"
+#line 205 "lexer.cyl"
         reset_string_buffer();
-        strng(lexbuf);
+        while (strng(lexbuf))
+          ; /* skip */
         reset_string_buffer();
         return action(lexbuf);
       
 case 3: 
-#line 208 "lexer.cyl"
-      return action(lexbuf); 
-case 4: 
-#line 210 "lexer.cyl"
-      return action(lexbuf); 
-case 5: 
 #line 212 "lexer.cyl"
       return action(lexbuf); 
+case 4: 
+#line 214 "lexer.cyl"
+      return action(lexbuf); 
+case 5: 
+#line 216 "lexer.cyl"
+      return action(lexbuf); 
 case 6: 
-#line 213 "lexer.cyl"
+#line 217 "lexer.cyl"
          comment_depth = 1; /* FIX: Add // style too! */
          comment(lexbuf); 
          return action(lexbuf);
        
 case 7: 
-#line 217 "lexer.cyl"
+#line 221 "lexer.cyl"
          throw new Lexical_error("unterminated action", 0, 0); 
 case 8: 
-#line 218 "lexer.cyl"
+#line 222 "lexer.cyl"
          line_start_pos = lexeme_end(lexbuf);
          ++line_num;
          return action(lexbuf);
        
 case 9: 
-#line 222 "lexer.cyl"
+#line 226 "lexer.cyl"
                                     return action(lexbuf); 
 case 10: 
-#line 223 "lexer.cyl"
+#line 227 "lexer.cyl"
       return action(lexbuf);  default: lexbuf->refill_buff(lexbuf); return action_rec(lexbuf,lexstate);
   }
  throw new Error("some action didn't return!");
@@ -349,35 +354,35 @@ int strng_rec(Lexbuf<`a> lexbuf, int lexstate) {
   switch (lexstate) {
 
 case 0: 
-#line 226 "lexer.cyl"
-        return 0; /* ignored */ 
+#line 230 "lexer.cyl"
+        return 0; 
 case 1: 
-#line 228 "lexer.cyl"
+#line 232 "lexer.cyl"
     line_start_pos = lexeme_end(lexbuf);
     ++line_num;
-    return strng(lexbuf);
+    return 1;
   
 case 2: 
-#line 233 "lexer.cyl"
+#line 237 "lexer.cyl"
     store_string_char(char_for_backslash(lexeme_char(lexbuf,1)));
-    return strng(lexbuf); 
+    return 1; 
 case 3: 
-#line 236 "lexer.cyl"
+#line 240 "lexer.cyl"
     store_string_char(char_for_octal_code(lexbuf,1)); 
-    return strng(lexbuf); 
+    return 1; 
 case 4: 
-#line 239 "lexer.cyl"
+#line 243 "lexer.cyl"
     throw new Lexical_error("unterminated string", 0, 0); 
 case 5: 
-#line 241 "lexer.cyl"
+#line 245 "lexer.cyl"
     store_string_char('\n'); 
     line_start_pos = lexeme_end(lexbuf);
     ++line_num;
-    return strng(lexbuf);
+    return 1;
   
 case 6: 
-#line 246 "lexer.cyl"
-      store_string_char(lexeme_char(lexbuf,0)); return strng(lexbuf);  default: lexbuf->refill_buff(lexbuf); return strng_rec(lexbuf,lexstate);
+#line 250 "lexer.cyl"
+      store_string_char(lexeme_char(lexbuf,0)); return 1;  default: lexbuf->refill_buff(lexbuf); return strng_rec(lexbuf,lexstate);
   }
  throw new Error("some action didn't return!");
 }
@@ -387,41 +392,42 @@ int comment_rec(Lexbuf<`a> lexbuf, int lexstate) {
   switch (lexstate) {
 
 case 0: 
-#line 249 "lexer.cyl"
+#line 253 "lexer.cyl"
          ++comment_depth; return comment(lexbuf); /* should we nest? */ 
 case 1: 
-#line 250 "lexer.cyl"
+#line 254 "lexer.cyl"
          --comment_depth; return ((comment_depth == 0) ? 0 : comment(lexbuf)); 
 case 2: 
-#line 251 "lexer.cyl"
+#line 255 "lexer.cyl"
          reset_string_buffer();
-         strng(lexbuf);
+         while (strng(lexbuf))
+           ; /* skip */
          reset_string_buffer();
          return comment(lexbuf);
        
 case 3: 
-#line 256 "lexer.cyl"
+#line 261 "lexer.cyl"
                                             return comment(lexbuf); 
 case 4: 
-#line 257 "lexer.cyl"
+#line 262 "lexer.cyl"
                                             return comment(lexbuf); 
 case 5: 
-#line 258 "lexer.cyl"
+#line 263 "lexer.cyl"
                                             return comment(lexbuf); 
 case 6: 
-#line 259 "lexer.cyl"
+#line 264 "lexer.cyl"
                                             return comment(lexbuf); 
 case 7: 
-#line 260 "lexer.cyl"
+#line 265 "lexer.cyl"
         throw new Lexical_error("unterminated comment", 0, 0); 
 case 8: 
-#line 261 "lexer.cyl"
+#line 266 "lexer.cyl"
          line_start_pos = lexeme_end(lexbuf);
          ++line_num;
          return comment(lexbuf);
        
 case 9: 
-#line 265 "lexer.cyl"
+#line 270 "lexer.cyl"
       return comment(lexbuf);  default: lexbuf->refill_buff(lexbuf); return comment_rec(lexbuf,lexstate);
   }
  throw new Error("some action didn't return!");
@@ -429,5 +435,5 @@ case 9:
 int comment(Lexbuf<`a> lexbuf) { return comment_rec(lexbuf,3); }
 
 }
-#line 267 "lexer.cyl"
+#line 272 "lexer.cyl"
  

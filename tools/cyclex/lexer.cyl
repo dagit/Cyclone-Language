@@ -92,8 +92,6 @@ char char_for_backslash(char c) {
   }
 }
 
-// FIX: Maybe the Cyclone version should interpret things in octal instead
-//      of decimal.  If so, change this code and all existing lexers.
 char char_for_octal_code(Lexbuf<`a> lbuf, int i) {
   return (char)(64 * (((int) lexeme_char(lbuf,i))   - '0') +
 		 8 * (((int) lexeme_char(lbuf,i+1)) - '0') +
@@ -153,7 +151,13 @@ rule lexmain = parse
     else { token_string = s; return TIDENT; }
   }
 | '"' { reset_string_buffer();
-        handle_lexical_error(strng, lexbuf);
+        int line = line_num;
+        int column = lexeme_start(lexbuf) - line_start_pos;
+        try 
+          while (strng(lexbuf))
+            ; /* skip */
+        catch { case &Lexical_error(msg,_,_):
+          throw new Lexical_error(msg,line,column); }
 	token_string = get_stored_string();
 	return TSTRING;
       }
@@ -199,7 +203,8 @@ and action = parse
         if(brace_depth == 0) return lexeme_start(lexbuf);
 	else return action(lexbuf); }
 | '"' { reset_string_buffer();
-        strng(lexbuf);
+        while (strng(lexbuf))
+          ; /* skip */
         reset_string_buffer();
         return action(lexbuf);
       }
@@ -222,33 +227,34 @@ and action = parse
 | _ { return action(lexbuf); }
 
 and strng = parse
-  '"' { return 0; /* ignored */ }
+  '"' { return 0; }
 | '\\' [' ' '\r' '\t' '\f'] * '\n' [' ' '\r' '\t' '\f'] *
   { line_start_pos = lexeme_end(lexbuf);
     ++line_num;
-    return strng(lexbuf);
+    return 1;
   }
 | '\\' ['a' 'b' 'f' 'n' 'r' 't' 'v' '\\' '"' '?'] 
   { store_string_char(char_for_backslash(lexeme_char(lexbuf,1)));
-    return strng(lexbuf); }
+    return 1; }
 | '\\' ['0'-'7'] ['0'-'7'] ['0'-'7'] 
   { store_string_char(char_for_octal_code(lexbuf,1)); 
-    return strng(lexbuf); }
+    return 1; }
 | eof
   { throw new Lexical_error("unterminated string", 0, 0); }
 | '\n'
   { store_string_char('\n'); 
     line_start_pos = lexeme_end(lexbuf);
     ++line_num;
-    return strng(lexbuf);
+    return 1;
   }
-| _ { store_string_char(lexeme_char(lexbuf,0)); return strng(lexbuf); }
+| _ { store_string_char(lexeme_char(lexbuf,0)); return 1; }
 
 and comment = parse
   "/*" { ++comment_depth; return comment(lexbuf); /* should we nest? */ }
 | "*/" { --comment_depth; return ((comment_depth == 0) ? 0 : comment(lexbuf)); }
 | '"'  { reset_string_buffer();
-         strng(lexbuf);
+         while (strng(lexbuf))
+           ; /* skip */
          reset_string_buffer();
          return comment(lexbuf);
        }
