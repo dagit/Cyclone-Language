@@ -288,8 +288,9 @@ extern Iter::iter_t<$(`a,`b),`bd> make_iter(region_t<`r1> rgn,
 					    dict_t<`a,`b,`r2> d
 					    : regions($(`a,`b)) > `bd,
                                               {`r1,`r2} > `bd);
-/** [make_iter(s)] returns an iterator over the set [s]; O(log n) space
-    is allocated in [rgn] where n is the number of elements in d*/
+/** [make_iter(rgn,d)] returns an iterator over the dictionary [d];
+    O(log n) space is allocated in [rgn] where n is the number of
+    elements in [d]. */
 
 extern `c marshal(region_t<`r> rgn,
 		  `c env,

@@ -432,6 +432,5 @@ List::list_t<`a> tsort(graph_t<`a> input) {
     if (Dict::lookup(N,x) == 0)
       tsort0(input,&output,&N,&S,x,1);
   }
-  output = List::imp_rev(output);
   return output;
 }

@@ -420,7 +420,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 
 # 1 "ap.cyc"
- static char Cyc_rcsid[52U]="$Id: ap.c,v 1.18 2004-08-23 21:07:49 trevor Exp $";
+ static char Cyc_rcsid[52U]="$Id: ap.c,v 1.19 2004-08-23 21:54:10 trevor Exp $";
 # 22 "ctype.h"
 int isspace(int);struct _tuple0{int quot;int rem;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 168 "core.h"
