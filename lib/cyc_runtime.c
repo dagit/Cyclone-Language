@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "cyc_include.h"
+#include <errno.h>
 
 //////////////////////////////////////////////////////////
 // First, definitions for things declared in cyc_include.h

@@ -4,6 +4,9 @@
 #include "list.h"
 #include "character.h"
 #include "string.h"
+// from math.h
+extern double pow(double,double);
+
 
 namespace String;
 using Core;
@@ -480,4 +483,93 @@ string implode(list<Char> chars) {
     chars = chars->tl;
   }
   return(s);
+}
+
+
+// Fix:  should check for overflow
+int to_int(string s, int *offset) {
+  int ans = 0;
+  int sn = 1;
+  bool digit_seen = false;
+  int i = (offset == null) ? 0 : *offset;
+
+  // skip any white space
+  while (i < s.size && Character::isspace(s[i])) i++;
+  // check for a sign
+  if (i < s.size && s[i] == '-') {
+    i++;
+    sn = -1;
+  }
+  // skip any white space
+  while (i < s.size && Character::isspace(s[i])) i++;
+  // parse digits
+  while (i < s.size && Character::isdigit(s[i])) {
+    digit_seen = true;
+    ans = (ans * 10) + (int)(s[i] - '0');
+    i++;
+  }
+  ans = ans*sn;
+  if (!digit_seen) throw InvalidArg("String::to_int");
+  if (offset != null) *offset = i;
+  return ans;
+}
+
+// FIX:  this probably does NOT preserve precision appropriately
+// FIX:  this does not deal with overflow properly
+// FIX:  would use the built in version of strtod but it appears to be
+// broken...
+double to_double(string s, int *offset) {
+  double ans = 0.0;
+  int sn = 1;
+  bool digit_seen = false;
+  int i = (offset == null) ? 0 : *offset;
+  
+  // skip any white space
+  while (i < s.size && Character::isspace(s[i])) i++;
+  // check for a sign
+  if (i < s.size && s[i] == '-') {
+    i++;
+    sn = -1;
+  }
+  // get mantissa
+  while (i < s.size && Character::isdigit(s[i])) {
+    digit_seen = true;
+    ans = (ans * 10.0) + (double)(s[i] - '0');
+    i++;
+  }
+  // look for period -- not locale like, but oh well.
+  if (i < s.size && s[i] == '.') {
+    i++;
+    // get fractional part
+    double divisor = 0.1;
+    while (i < s.size && Character::isdigit(s[i])) {
+      digit_seen = true;
+      ans = ans + (((double)(s[i] - '0')) * divisor);
+      divisor = divisor / 10.0;
+      i++;
+    }
+  }
+  if (!digit_seen) throw InvalidArg("String::to_double");
+  // look for exponent
+  if (i < s.size && (s[i] == 'e' || s[i] == 'E')) {
+    i++;
+    int exponent = 0;
+    int exp_sign = 1;
+    digit_seen = false;
+    // look for sign for the exponent
+    if (i < s.size && s[i] == '-') {
+      i++;
+      exp_sign = -1;
+    } else if (i < s.size && s[i] == '+') i++;
+    // get exponent
+    while (i < s.size && Character::isdigit(s[i])) {
+      digit_seen = true;
+      exponent = exponent * 10 + ((int)(s[i] - '0'));
+      i++;
+    }
+    if (!digit_seen) throw InvalidArg("String::to_double");
+    ans = ans * pow(10.0, (double)(exponent*exp_sign));
+  }
+  if (offset != null) *offset = i;
+  return ans*sn;
 }

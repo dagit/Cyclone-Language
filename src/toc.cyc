@@ -1063,17 +1063,7 @@ static void exp_to_c(env nv, exp e) {
     // null -> 0  -- this is okay according to C's rules!
     e->r = signed_int_exp(0,DL)->r; break;
   case Const_e(_): break;
-  case Var_e(qv,b):
-    switch (b) {
-    case Local_b(vd): fallthru(vd);
-    case Pat_b(vd):
-      if (vd->shadow != 0)
-	warn(e->loc,xprintf("shadowed variable %s won't be translated correctly",qvar2string(qv)));
-      break;
-    default: break;
-    }
-    // FIX!
-    // must look variables up in the nv->varmap
+  case Var_e(qv,b): 
     try
       e->r = Dict::lookup(nv->varmap,qv)->r;
     catch {

@@ -44,6 +44,9 @@ void fail() {
   no_errors = false;
   printf("\n!!!!!!!!!!!!!!!!!!!!! FAILED !!!!!!!!!!!!!!!!!!!!!\n");
 }
+void okfailn(int n,bool b) {
+  if (b) ok(); else {printf("test %d",n); fail();}
+}
 void okfail(bool b) {
   if (b) ok(); else fail();
 }
@@ -375,9 +378,24 @@ void string_test() {
 
   test_begin("String");
 
-  okfail(String::strcmp("hello","world") < 0);
-  okfail(String::strcmp("hello","hello") == 0);
-  okfail(String::strcmp("world","hello") > 0);
+  okfailn(1,String::to_int("1234",null) == 1234);
+  okfailn(2,String::to_int("-1234",null) == -1234);
+  okfailn(3,String::to_int("  -1234   ",null) == -1234);
+  int x = 1;
+  okfailn(4,String::to_int("-1234  ",&x) == 1234);
+  okfailn(5,x == 5);
+  okfailn(6,String::to_double("0",null) == 0.0);
+  okfailn(7,String::to_double(".0",null) == 0.0);
+  okfailn(8,String::to_double("1.",null) == 1.0);
+  okfailn(9,(String::to_double("3.14159",null) - 3.14159) < 0.000000001);
+  okfailn(10,(String::to_double("-3.14159",null) - -3.14159) < 0.000000001);
+  okfailn(11,(String::to_double("3.14e3",null) - 3.14e3) < 0.000000001);
+  okfailn(12,(String::to_double("3.14e-3",null) - 3.14e-3) < 0.000000001);
+  okfailn(13,(String::to_double("  \t3.14e-3",null) - 3.14e-3) < 0.000000001);
+
+  okfailn(14,String::strcmp("hello","world") < 0);
+  okfailn(15,String::strcmp("hello","hello") == 0);
+  okfailn(16,String::strcmp("world","hello") > 0);
 
   okfail(String::strcmp(String::substring("hello",2,2),"ll")==0);
   okfail(String::strcmp(String::replace_suffix("hello.world","world","bar"),
