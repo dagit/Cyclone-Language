@@ -494,6 +494,7 @@ namespace Absyn {
     Pure_att;
     Mode_att(string_t);
     Alias_att(string_t);
+    Always_inline_att;
   };
   extern_datacon(Attribute,Stdcall_att);      
   extern_datacon(Attribute,Cdecl_att);        
@@ -512,6 +513,7 @@ namespace Absyn {
   extern_datacon(Attribute,Destructor_att);
   extern_datacon(Attribute,No_check_memory_usage_att);
   extern_datacon(Attribute,Pure_att);
+  extern_datacon(Attribute,Always_inline_att);
 
   // Type modifiers are used for parsing/pretty-printing
   EXTERN_ABSYN datatype Type_modifier<`r::R> {

@@ -989,6 +989,7 @@ datacon(Attribute,Constructor_att);
 datacon(Attribute,Destructor_att);
 datacon(Attribute,No_check_memory_usage_att);
 datacon(Attribute,Pure_att);
+datacon(Attribute,Always_inline_att);
 
 string_t attribute2string(attribute_t a) {
   switch (a) {
@@ -1023,6 +1024,7 @@ string_t attribute2string(attribute_t a) {
   case &Noliveunique_att(n): return aprintf("noliveunique(%d)",n);
   case &Noconsume_att(n): return aprintf("noconsume(%d)",n);
   case &Pure_att: return "pure";
+  case &Always_inline_att: return "always_inline";
   case &Mode_att(s): return aprintf("__mode__(\"%s\")",s); 
   case &Alias_att(s): return aprintf("alias(\"%s\")",s); 
  }
