@@ -12,7 +12,7 @@ _tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
 wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
 ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{ void* hd; struct Cyc_List_List*
 tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern struct Cyc_List_List*
-Cyc_List_rcopy( struct _RegionHandle*, struct Cyc_List_List* src); extern
+Cyc_List_rcopy( struct _RegionHandle*, struct Cyc_List_List* x); extern
 unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List* Cyc_List_imp_rev(
 struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append( struct
 Cyc_List_List* x, struct Cyc_List_List* y); extern unsigned char Cyc_List_Nth[ 8u];
@@ -968,7 +968,7 @@ _temp615=({ struct Cyc_List_List** _temp617=( struct Cyc_List_List**)
 _region_malloc( rgn, sizeof( struct Cyc_List_List*)); _temp617[ 0]= 0; _temp617;});
 Cyc_Tovc_stmt_to_vc(({ struct Cyc_Tovc_ToExpEnv _temp616; _temp616.rgn= rgn;
 _temp616.all_locals=(( struct Cyc_List_List*(*)( struct _RegionHandle*, struct
-Cyc_List_List* src)) Cyc_List_rcopy)( rgn,( struct Cyc_List_List*)(( struct Cyc_Core_Opt*)
+Cyc_List_List* x)) Cyc_List_rcopy)( rgn,( struct Cyc_List_List*)(( struct Cyc_Core_Opt*)
 _check_null( _temp606->param_vardecls))->v); _temp616.varmap=(( struct Cyc_Dict_Dict*(*)(
 struct _RegionHandle*, int(* cmp)( struct _tagged_arr*, struct _tagged_arr*)))
 Cyc_Dict_rempty)( rgn, Cyc_Std_zstrptrcmp); _temp616.encloser= _temp606->body;

@@ -14,10 +14,10 @@ void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty
 15u]; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char
 Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_List_to_array( struct Cyc_List_List*
 x); extern struct Cyc_List_List* Cyc_List_from_array( struct _tagged_arr arr);
-extern void Cyc_Array_qsort( int(* less_eq)( void*, void*), struct _tagged_arr x,
-int len); extern void Cyc_Array_msort( int(* less_eq)( void*, void*), struct
+extern void Cyc_Array_qsort( int(* cmp)( void*, void*), struct _tagged_arr x,
+int len); extern void Cyc_Array_msort( int(* cmp)( void*, void*), struct
 _tagged_arr x, int len); extern struct _tagged_arr Cyc_Array_from_list( struct
-Cyc_List_List* x); extern struct Cyc_List_List* Cyc_Array_to_list( struct
+Cyc_List_List* l); extern struct Cyc_List_List* Cyc_Array_to_list( struct
 _tagged_arr x); extern struct _tagged_arr Cyc_Array_copy( struct _tagged_arr x);
 extern struct _tagged_arr Cyc_Array_map( void*(* f)( void*), struct _tagged_arr
 x); extern struct _tagged_arr Cyc_Array_map_c( void*(* f)( void*, void*), void*
@@ -50,16 +50,16 @@ void* f2; } ; extern struct _tagged_arr Cyc_Array_zip( struct _tagged_arr x,
 struct _tagged_arr y); struct _tuple1{ struct _tagged_arr f1; struct _tagged_arr
 f2; } ; extern struct _tuple1 Cyc_Array_split( struct _tagged_arr x); extern int
 Cyc_Array_memq( struct _tagged_arr l, void* x); extern int Cyc_Array_mem( int(*
-compare)( void*, void*), struct _tagged_arr l, void* x); extern struct
-_tagged_arr Cyc_Array_extract( struct _tagged_arr x, int start, int* n_opt);
-static int Cyc_Array_sp[ 40u]={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; void
-Cyc_Array_qsort( int(* less_eq)( void*, void*), struct _tagged_arr arr, int len){
-int base_ofs= 0; void* temp; int sp_ofs; int i; int j; int limit_ofs; if((
-base_ofs <  0? 1: base_ofs +  len >  _get_arr_size( arr, sizeof( void*)))? 1:
-len <  0){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp0=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
-_temp0[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp1; _temp1.tag= Cyc_Core_Invalid_argument;
+cmp)( void*, void*), struct _tagged_arr l, void* x); extern struct _tagged_arr
+Cyc_Array_extract( struct _tagged_arr x, int start, int* len_opt); static int
+Cyc_Array_sp[ 40u]={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; void Cyc_Array_qsort(
+int(* less_eq)( void*, void*), struct _tagged_arr arr, int len){ int base_ofs= 0;
+void* temp; int sp_ofs; int i; int j; int limit_ofs; if(( base_ofs <  0? 1:
+base_ofs +  len >  _get_arr_size( arr, sizeof( void*)))? 1: len <  0){( int)
+_throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp0=( struct Cyc_Core_Invalid_argument_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp0[ 0]=({
+struct Cyc_Core_Invalid_argument_struct _temp1; _temp1.tag= Cyc_Core_Invalid_argument;
 _temp1.f1= _tag_arr("Array::qsort", sizeof( unsigned char), 13u); _temp1;});
 _temp0;}));} limit_ofs= base_ofs +  len; sp_ofs= 0; for( 0; 1; 0){ if( limit_ofs
 -  base_ofs >  3){ temp=*(( void**) _check_unknown_subscript( arr, sizeof( void*),(

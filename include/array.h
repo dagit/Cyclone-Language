@@ -23,128 +23,158 @@
 
 namespace Array {
 
+  /*** \subsection{\texttt{<array.h>}} */
+  /*** Defines namespace Array, implementing utility functions on
+       arrays. */
 
-// Sorting functions (quicksort and mergesort)
-// Input is a comparison function, the array to be sorted (in place),
-// and number of elements from that point to sort.
-// The advantage of quicksort is speed (presumed -- feel free to 
-// benchmark), however it is not a stable sort.  Mergesort, as 
-// implemented here, is stable.
+extern void qsort(int cmp(`a,`a), `a ?x, int len);
+  /** [qsort(cmp,x,len)] sorts the first [len] elements of array [x]
+      into ascending order (according to the comparison function
+      [cmp]) by the QuickSort algorithm.  [cmp(a,b)] should return a
+      number less than, equal to, or greater than 0 according to
+      whether [a] is less than, equal to, or greater than [b].
+      [qsort] throws [Core::InvalidArg("Array::qsort")] if [len] is
+      negative or specifies a segment outside the bounds of [x].
 
-extern void qsort(int less_eq(`a,`a), `a ?x, int len);
+      [qsort] is not a stable sort. */
+extern void msort(int cmp(`a,`a), `a ?`H x, int len);
+  /** [msort(cmp,x,len)] sorts the first [len] elements of array [x]
+      into ascending order (according to the comparison function
+      [cmp]), by the MergeSort algorithm.  [msort] throws
+      [Core::InvalidArg("Array::msort")] if [len] is negative or
+      specifies a segment outside the bounds of [x].
 
-extern void msort(int less_eq(`a,`a), `a ?`H x, int len);
+      [msort] is a stable sort. */
 
+extern `a? from_list(List::list_t<`a> l);
+  /** [from_list(l)] returns a heap-allocated array with the same
+      elements as the list [l]. */
 
-//////// Below are bunches of stuff mimicking the List library
-
-// make array from list
-extern `a? from_list(List::list_t<`a> x);
-
-// convert array to list
 extern List::list_t<`a> to_list(`a ? x);
+  /** [to_list(x)] returns a new heap-allocated list with the same
+      elements as the array [x]. */
 
-// return a fresh copy of the array (same as map of the identity) 
-extern `a ?copy(`a::B ? x);
+extern `a ?copy(`a::B ?x);
+  /** [copy(x)] returns a fresh copy of array [x], allocated on the
+      heap. */
 
-// Apply a function to each element in an array, returning a new array. 
 extern `b ?map(`b f(`a),`a ? x);
+  /** [map(f,x)] applies [f] to each element of [x], returning the
+      results in a new heap-allocated array. */
 
-// Apply a function to each element in an array, returning a new array. 
-// This uses an additional argument to simulate function closures.
 extern `b ?map_c(`b f(`c,`a),`c env,`a ? x);
-//
-// Apply a function to each element in an array, writing the results
-// back into the array.
-extern void imp_map(`a f(`a),`a ? x);
-extern void imp_map_c(`a f(`b,`a),`b env,`a ? x);
+  /** [map_c(f,env,x)] is like [map(f,x)] except that [f] requires a
+      closure [env] as its first argument. */
 
-// thrown when two arrays don't have the same size 
+extern void imp_map(`a f(`a),`a ? x);
+  /** [imp_map(f,x)] replaces each element [xi] of [x] with [f(xi)].  */
+extern void imp_map_c(`a f(`b,`a),`b env,`a ? x);
+  /** [imp_map_c] is a version of [imp_map] where the function
+      argument requires a closure as its first argument. */
+
 extern xtunion exn {extern Array_mismatch};
+  /** [Array_mismatch] is thrown when two arrays don't have the same
+      length. */
 
 // Given two arrays of the same length and a function, apply the function
 // to each pair of elements (in order) and collect the results in a new array.
 // Throws Array_mismatch if the sizes of the arrays aren't the same.
 extern `c ?map2(`c f(`a,`b),`a ? x,`b ? y);
-
-// Apply some function to each element of the array, but don't bother to
-// save the result.  Similar to Ocaml's List.iter but doesn't require
-// void type for the result of the function.
+  /** If [x] has elements [x1] through [xn], and [y] has elements [y1]
+      through [yn], then [map2(f,x,y)] returns a new heap-allocated
+      array with elements [f(x1,y1)] through [f(xn,yn)].  If [x] and
+      [y] don't have the same number of elements, [Array_mismatch] is
+      thrown. */
 extern void app(`b f(`a),`a ?`r x);
-
+  /** [app(f,x)] applies [f] to each element of [x], discarding the
+      results.  Note that [f] must not return [void]. */
 extern void app_c(`c f(`a,`b),`a env,`b ? x);
-
-// same as app but with void functions -- unlike Popcorn, the iter
-// functions are no longer needed because we treat "void" as a boxed
-// type.  
+  /** [app_c(f,env,x)] is like [app(f,x)], except that [f] requires a
+      closure [env] as its first argument. */
 extern void iter(void f(`a),`a ? x);
-
-// same as app_c but with void functions
+  /** [iter(f,x)] is like [app(f,x)], except that [f] returns [void]. */
 extern void iter_c(void f(`b,`a),`b env,`a ? x);
+  /** [iter_c(f,env,x)] is like [app_c(f,env,x)] except that [f]
+      returns [void]. */
 
-// Same as app, but generalized to a pair of arrays.  Throws Array_mismatch
-// if the lengths of the arrays aren't the same.  
 extern void app2(`c f(`a,`b),`a ? x,`b ? y);
-
+  /** If [x] has elements [x1] through [xn], and [y] has elements [y1]
+      through [yn], then [app2(f,x,y)] performs [f(x1,y1)] through
+      [f(xn,yn)] and discards the results.  If [x] and [y] don't have
+      the same number of elements, [Array_mismatch] is thrown. */
 extern void app2_c(`d f(`a,`b,`c),`a env,`b ? x,`c ? y);
-
-// Same as iter, but generalized to a pair of arrays.  Throws Array_mismatch
-// if the lengths of the arrays aren't the same.  
+  /** [app2_c] is a version of [app] where the function argument
+      requires a closure as its first argument. */
 extern void iter2(void f(`a,`b),`a ? x,`b ? y);
-
+  /** [iter2] is a version of [app2] where the function returns [void]. */
 extern void iter2_c(void f(`a,`b,`c),`a env,`b ? x,`c ? y);
+  /** [iter2_c] is a version of [app2_c] where the function returns
+      [void]. */
 
-
-
-// Given an array [|x1,x2,...,xn-1,xn|], a function f, and an accumulator
-// a, return f(f(...(f(x2,f(x1,a))),xn-1),xn).  Notice that the function
-// is first applied to the left-most element of the array.
 extern `a fold_left(`a f(`a,`b),`a accum,`b ? x);
+  /** If [x] has elements [x1] through [xn], then
+      [fold_left(f,accum,x)] returns
+      [f(f(...(f(x2,f(x1,accum))),xn-1),xn)]. */
 extern `a fold_left_c(`a f(`c,`a,`b),`c env,`a accum,`b ? x);
-
-// Given an array [|x1,x2,....,xn-1,xn|], a function f, and an accumulator
-// a, return f(x1,f(x2,...,f(xn-1,f(xn,a))...)).  Notice that the function
-// is first applied to the right-most element of the list. 
+  /** [fold_left_c] is a version of [fold_left] where the function
+      argument requires a closure as its first argument. */
 extern `b fold_right(`b f(`a,`b),`a ? x,`b accum);
+  /** If [x] has elements [x1] through [xn], then
+      [fold_left(f,accum,x)] returns
+      [f(x1,f(x2,...,f(xn-1,f(xn,a))...))]. */
 extern `b fold_right_c(`b f(`c,`a,`b),`c env,`a ? x,`b accum);
+  /** [fold_right_c] is a version of [fold_right] where the function
+      argument requires a closure as its first argument. */
 
-// Return a copy of an array in reverse.
 extern `a ?rev_copy(`a::B ? x);
-
-// Imperatively reverse an array.
+  /** [rev_copy(x)] returns a new heap-allocated array whose elements
+      are the elements of [x] in reverse order. */
 extern void imp_rev(`a::B ? x);
+  /** [imp_rev(x)] reverses the elements of array [x]. */
 
-// Given a predicate on 'a values, determine whether every element in an
-// array satisfies the predicate.
 extern bool forall(bool pred(`a),`a ? x);
+  /** [forall(pred,x)] returns true if [pred] returns true when
+      applied to every element of [x], and returns false otherwise. */
 extern bool forall_c(bool pred(`a,`b),`a env,`b ? x);
+  /** [forall_c] is a version of [forall] where the predicate argument
+      requires a closure as its first argument. */
 
-// Given a predicate on 'a values, determine whether there exists an element
-// in the array that satisfies the predicate.
 extern bool exists(bool pred(`a),`a ? x);
+  /** [exists(pred,x)] returns true if [pred] returns true when
+      applied to some element of [x], and returns false otherwise. */
 extern bool exists_c(bool pred(`a,`b),`a env,`b ? x);
+  /** [exists_c] is a version of [exists] where the predicate argument
+      requires a closure as its first argument. */
 
-// Given [|x1,...,xn|] and [|y1,...,yn|], return [|(x1,y1),...,(xn,yn)|].  
-// Throws Array_mismatch if the lengths are not the same.
 extern $(`a,`b) ?zip(`a ?`r1 x,`b ? y);
-
-// Given [|(x1,y1),...,(xn,yn)|], return ([|x1,...,xn|],[|y1,...,yn|]) 
+  /** If [x] has elements [x1] through [xn], and [y] has elements [y1]
+      through [yn], then [zip(x,y)] returns a new heap-allocated array
+      with elements [\$(x1,y1)] through [\$(xn,yn)].  If [x] and [y]
+      don't have the same number of elements, [Array_mismatch] is
+      thrown. */
+  
 extern $(`a?,`b?) split($(`a,`b) ? x);
+  /** If [x] has elements [\$(a1,b1)] through [\$(an,bn)], then
+      [split(x)] returns a pair of new heap-allocated arrays with
+      elements [a1] through [an], and [b1] through [bn]. */
 
+extern bool memq(`a ?l, `a x);
+  /** [memq(l,x)] returns true if [x] is [==] an element of array [l],
+      and returns false otherwise. */
 
-// Given an array [|x1,...,xn|] and x, determine if x is in the array.
-// Uses physical equality for comparison.
-extern bool memq(`a ? l, `a x);
+extern bool mem(int cmp(`a,`a), `a ?l, `a x);
+  /** [mem(cmp,l,x)] is like [memq(l,x)] except that the comparison
+      function [cmp] is used to determine if [x] is an element of [l].
+      [cmp(a,b)] should return 0 if [a] is equal to [b], and return a
+      non-zero number otherwise. */
 
-extern bool mem(int compare(`a,`a), `a ? l, `a x);
-
-
-// Creates a new (smaller) array containing the specified slice of the
-// target array.  The last parameter is an int option of the number of 
-// elements to take, or NULL for "take until the end of the array".
-extern `a ?extract(`a::B ? x,int start,int * n_opt);
-
-
+extern `a ?extract(`a::B ? x,int start,int *len_opt);
+  /** [extract(x,start,len_opt)] returns a new array whose elements
+      are the elements of [x] beginning at index [start], and
+      continuing to the end of [x] if [len_opt] is NULL; if [len_opt]
+      points to an integer [n], then [n] elements are extracted.  If
+      [n<0] or there are less than [n] elements in [x] starting at
+      [start], then [Core::InvalidArg("Array::extract")] is thrown. */
 
 }
 

@@ -21,13 +21,15 @@
 
 #include <core.h> // for string_t, stringptr_t
 
-// TODO: add region support
-
 namespace Hashtable {
 
   /*** \subsection{\texttt{<hashtable.h>}} */
-  /*** Defines namespace Hashtable, which implements an imperative
-       hash table datatype. */
+  /*** Defines namespace Hashtable, which implements mappings from
+       keys to values.  These hashtables are imperative---values are
+       added and deleted destructively.  (Use namespace Dict or
+       SlowDict if you need functional (non-destructive) mappings.)
+       To enable an efficient implementation, you are required to
+       provide a total order on keys (a comparison function).  */
 
 extern struct Table<`a,`b>;
 typedef struct Table<`a,`b> @table_t<`a,`b>;
@@ -40,8 +42,8 @@ extern table_t<`a,`b> create(int sz, int cmp(`a,`a), int hash(`a));
       keys: [cmp(k1,k2)] should return a number less than, equal to,
       or greater than 0 according to whether [k1] is less than, equal
       to, or greater than [k2].  [hash] should be a hash function on
-      keys, and if [cmp(k1,k2)] is 0, then [hash(k1)] must equal
-      [hash(k2)]. */
+      keys.  [cmp] and [hash] should satisfy the following property:
+      if [cmp(k1,k2)] is 0, then [hash(k1)] must equal [hash(k2)]. */
 extern void insert(table_t<`a,`b> t, `a key, `b val);
   /** [insert(t,key,val)] binds [key] to [value] in [t]. */
 extern `b lookup(table_t<`a,`b> t, `a key);
@@ -49,17 +51,24 @@ extern `b lookup(table_t<`a,`b> t, `a key);
       or throws [Not_found] if there is no value associate with [key]
       in [t]. */
 extern void resize(table_t<`a,`b> t);
-  /** [resize(t)] increases the size (number of buckets) in table [t]. */
+  /** [resize(t)] increases the size (number of buckets) in table [t].
+      [resize] is called automatically by functions like [insert] when
+      the buckets of a hash table get large, however, it can also be
+      called by the programmer explicitly. */
 extern void remove(table_t<`a,`b> t, `a key);
   /** [remove(t,key)] removes the most recent binding of [key] from
-      [t].  If there is no value associated with [key] in [t],
-      [remove] returns silently. */
+      [t]; the next-most-recent binding of [key] (if any) is restored.
+      If there is no value associated with [key] in [t], [remove]
+      returns silently. */
 extern int hash_string(string_t s);
-  /** A hash function for strings. */
-extern int hash_stringptr(stringptr_t s);
-  /** A hash function for string pointers. */
+  /** [hash_string(s)] returns a hash of a string [s].  It is provided
+      as a convenience for making hash tables mapping strings to
+      values. */
+extern int hash_stringptr(stringptr_t p);
+  /** [hash_stringptr(p)] returns a hash of a string pointer [p]. */
+
 extern void iter(void f(`a,`b), table_t<`a,`b> t);
-  /** [iter(f,t)] applies [f] to each [(key,val)] pair in [t]. */
+  /** [iter(f,t)] applies [f] to each key/value pair in [t]. */
 
 // debugging
 extern 

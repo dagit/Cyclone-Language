@@ -18,7 +18,7 @@ Cyc_List_rev( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_im
 struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append( struct
 Cyc_List_List* x, struct Cyc_List_List* y); extern unsigned char Cyc_List_Nth[ 8u];
 extern struct Cyc_List_List* Cyc_List_filter( int(* f)( void*), struct Cyc_List_List*
-l); extern unsigned char Cyc_Arg_Bad[ 8u]; struct Cyc_Arg_Bad_struct{
+x); extern unsigned char Cyc_Arg_Bad[ 8u]; struct Cyc_Arg_Bad_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Arg_Error[
 10u]; static const int Cyc_Arg_Unit_spec= 0; struct Cyc_Arg_Unit_spec_struct{
 int tag; void(* f1)(); } ; static const int Cyc_Arg_Flag_spec= 1; struct Cyc_Arg_Flag_spec_struct{
@@ -1361,9 +1361,9 @@ _tag_arr(" %s %s", sizeof( unsigned char), 7u), _tag_arr( _temp232, sizeof( void
 2u));}}});} if( Cyc_ic_r){ struct _handler_cons _temp235; _push_handler(&
 _temp235);{ int _temp237= 0; if( setjmp( _temp235.handler)){ _temp237= 1;} if( !
 _temp237){ Cyc_ccargs=(( struct Cyc_List_List*(*)( int(* f)( struct _tagged_arr*),
-struct Cyc_List_List* l)) Cyc_List_filter)( Cyc_is_cfile, Cyc_ccargs); Cyc_libargs=((
+struct Cyc_List_List* x)) Cyc_List_filter)( Cyc_is_cfile, Cyc_ccargs); Cyc_libargs=((
 struct Cyc_List_List*(*)( int(* f)( struct _tagged_arr*), struct Cyc_List_List*
-l)) Cyc_List_filter)( Cyc_is_cfile, Cyc_libargs);{ struct Cyc_List_List*
+x)) Cyc_List_filter)( Cyc_is_cfile, Cyc_libargs);{ struct Cyc_List_List*
 _temp238=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct Cyc_List_List*
 y)) Cyc_List_append)( stdlib,(( struct Cyc_List_List*(*)( struct Cyc_List_List*
 x, struct Cyc_List_List* y)) Cyc_List_append)( Cyc_ccargs, Cyc_libargs)); if( !

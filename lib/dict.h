@@ -25,13 +25,19 @@
 namespace Dict {
 
   /*** \subsection{\texttt{<dict.h>}}*/
-  /*** Defines namespace Dict, which implements polymorphic,
-       functional, finite maps whose domain must have a total order.
+  /*** Defines namespace Dict, which implements dictionaries: mappings
+       from keys to values.  The dictionaries are implemented
+       functionally: adding a mapping to an existing dictionary
+       produces a new dictionary, without affecting the existing
+       dictionary.  To enable an efficient implementation, you are
+       required to provide a total order on keys (a comparison
+       function).
+
        We follow the conventions of the Objective Caml Dict library as
        much as possible.
 
-       The interface is a superset of SlowDict, except that
-       [delete_present] is not supported. */
+       Namespace Dict implements a superset of namespace SlowDict,
+       except that [delete_present] is not supported. */
 
   using List {
 

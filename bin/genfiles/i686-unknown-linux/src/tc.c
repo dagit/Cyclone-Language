@@ -16,7 +16,7 @@ x); extern unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_Lis
 struct Cyc_List_List* y); extern unsigned char Cyc_List_Nth[ 8u]; extern int Cyc_List_mem(
 int(* compare)( void*, void*), struct Cyc_List_List* l, void* x); extern struct
 Cyc_List_List* Cyc_List_filter_c( int(* f)( void*, void*), void* env, struct Cyc_List_List*
-l); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct _tagged_arr s2);
+x); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct _tagged_arr s2);
 extern int Cyc_Std_strptrcmp( struct _tagged_arr* s1, struct _tagged_arr* s2);
 extern int Cyc_Std_zstrptrcmp( struct _tagged_arr*, struct _tagged_arr*); struct
 Cyc_Lineno_Pos{ struct _tagged_arr logical_file; struct _tagged_arr line; int
@@ -1302,7 +1302,7 @@ ds){ Cyc_Absynpp_set_params(& Cyc_Absynpp_tc_params_r); Cyc_Tc_tc_decls( te, ds,
 struct Cyc_Absyn_Decl* d); static struct Cyc_List_List* Cyc_Tc_treeshake_f(
 struct Cyc_Dict_Dict* env, struct Cyc_List_List* ds){ return(( struct Cyc_List_List*(*)(
 int(* f)( struct Cyc_Dict_Dict*, struct Cyc_Absyn_Decl*), struct Cyc_Dict_Dict*
-env, struct Cyc_List_List* l)) Cyc_List_filter_c)( Cyc_Tc_vardecl_needed, env,
+env, struct Cyc_List_List* x)) Cyc_List_filter_c)( Cyc_Tc_vardecl_needed, env,
 ds);} struct _tuple6{ struct Cyc_Tcenv_Genv* f1; struct Cyc_Set_Set* f2; } ;
 static int Cyc_Tc_vardecl_needed( struct Cyc_Dict_Dict* env, struct Cyc_Absyn_Decl*
 d){ void* _temp719=( void*) d->r; struct Cyc_Absyn_Vardecl* _temp729; struct Cyc_List_List*

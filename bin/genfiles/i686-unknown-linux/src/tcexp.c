@@ -21,10 +21,10 @@ Cyc_List_imp_rev( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_Lis
 struct Cyc_List_List* x, struct Cyc_List_List* y); extern struct Cyc_List_List*
 Cyc_List_rappend( struct _RegionHandle*, struct Cyc_List_List* x, struct Cyc_List_List*
 y); extern unsigned char Cyc_List_Nth[ 8u]; extern void* Cyc_List_nth( struct
-Cyc_List_List* x, int i); extern struct Cyc_List_List* Cyc_List_nth_tail( struct
+Cyc_List_List* x, int n); extern struct Cyc_List_List* Cyc_List_nth_tail( struct
 Cyc_List_List* x, int i); extern struct Cyc_List_List* Cyc_List_zip( struct Cyc_List_List*
 x, struct Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_rzip( struct
-_RegionHandle* r3, struct _RegionHandle* r4, struct Cyc_List_List* x, struct Cyc_List_List*
+_RegionHandle* r1, struct _RegionHandle* r2, struct Cyc_List_List* x, struct Cyc_List_List*
 y); struct Cyc_Lineno_Pos{ struct _tagged_arr logical_file; struct _tagged_arr
 line; int line_no; int col; } ; extern unsigned char Cyc_Position_Exit[ 9u];
 struct Cyc_Position_Segment; static const int Cyc_Position_Lex= 0; static const
@@ -1083,7 +1083,7 @@ _LL506; _LL512: { unsigned int i= Cyc_Evexp_eval_const_uint_exp( _temp487);{
 struct _handler_cons _temp523; _push_handler(& _temp523);{ int _temp525= 0; if(
 setjmp( _temp523.handler)){ _temp525= 1;} if( ! _temp525){{ struct _tuple8
 _temp528; struct Cyc_Absyn_Tqual _temp529; struct _tuple8* _temp526=(( struct
-_tuple8*(*)( struct Cyc_List_List* x, int i)) Cyc_List_nth)( _temp521,( int) i);
+_tuple8*(*)( struct Cyc_List_List* x, int n)) Cyc_List_nth)( _temp521,( int) i);
 _temp528=* _temp526; _LL530: _temp529= _temp528.f1; goto _LL527; _LL527: if( !
 _temp529.q_const){ _npop_handler( 0u); return;}}; _pop_handler();} else{ void*
 _temp524=( void*) _exn_thrown; void* _temp532= _temp524; _LL534: if( _temp532 == 
@@ -1348,7 +1348,7 @@ void* _temp748[ 0u]={}; Cyc_Tcutil_terr( loc, _tag_arr("bad region for injected 
 sizeof( unsigned char), 32u), _tag_arr( _temp748, sizeof( void*), 0u));});}{
 struct _RegionHandle _temp749= _new_region(); struct _RegionHandle* rgn=&
 _temp749; _push_region( rgn);{ struct Cyc_List_List* _temp750=(( struct Cyc_List_List*(*)(
-struct _RegionHandle* r3, struct _RegionHandle* r4, struct Cyc_List_List* x,
+struct _RegionHandle* r1, struct _RegionHandle* r2, struct Cyc_List_List* x,
 struct Cyc_List_List* y)) Cyc_List_rzip)( rgn, rgn, _temp745->tvs, _temp739);
 for( 0; _temp671 !=  0; _temp671=(( struct Cyc_List_List*) _check_null( _temp671))->tl){((
 struct Cyc_Absyn_VarargCallInfo*) _check_null( _temp725))->num_varargs ++;{
@@ -1373,7 +1373,7 @@ goto _LL762; _LL762: _temp761=(( struct Cyc_Absyn_Format_att_struct*) _temp755)-
 goto _LL758;} else{ goto _LL759;} _LL759: goto _LL760; _LL758:{ struct
 _handler_cons _temp767; _push_handler(& _temp767);{ int _temp769= 0; if( setjmp(
 _temp767.handler)){ _temp769= 1;} if( ! _temp769){{ struct Cyc_Absyn_Exp*
-_temp770=(( struct Cyc_Absyn_Exp*(*)( struct Cyc_List_List* x, int i)) Cyc_List_nth)(
+_temp770=(( struct Cyc_Absyn_Exp*(*)( struct Cyc_List_List* x, int n)) Cyc_List_nth)(
 args, _temp763 -  1); struct Cyc_Core_Opt* fmt_args; if( _temp761 ==  0){
 fmt_args= 0;} else{ fmt_args=({ struct Cyc_Core_Opt* _temp771=( struct Cyc_Core_Opt*)
 _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp771->v=( void*)(( struct Cyc_List_List*(*)(
@@ -1583,7 +1583,7 @@ _temp959}; Cyc_Tcexp_expr_err( te, loc, _tag_arr("struct %s has no %s field",
 sizeof( unsigned char), 26u), _tag_arr( _temp957, sizeof( void*), 2u));}}});}{
 void* t2;{ struct _RegionHandle _temp960= _new_region(); struct _RegionHandle*
 rgn=& _temp960; _push_region( rgn);{ struct Cyc_List_List* _temp961=(( struct
-Cyc_List_List*(*)( struct _RegionHandle* r3, struct _RegionHandle* r4, struct
+Cyc_List_List*(*)( struct _RegionHandle* r1, struct _RegionHandle* r2, struct
 Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_rzip)( rgn, rgn, _temp937->tvs,
 _temp938); t2= Cyc_Tcutil_rsubstitute( rgn, _temp961,( void*)(( struct Cyc_Absyn_Structfield*)
 _check_null( _temp956))->type);}; _pop_region( rgn);} return t2;}} _LL924: {
@@ -1674,7 +1674,7 @@ _temp1030[ 2u]={& _temp1031,& _temp1032}; Cyc_Tcexp_expr_err( te, loc, _tag_arr(
 sizeof( unsigned char), 26u), _tag_arr( _temp1030, sizeof( void*), 2u));}}});}{
 void* t3;{ struct _RegionHandle _temp1033= _new_region(); struct _RegionHandle*
 rgn=& _temp1033; _push_region( rgn);{ struct Cyc_List_List* _temp1034=(( struct
-Cyc_List_List*(*)( struct _RegionHandle* r3, struct _RegionHandle* r4, struct
+Cyc_List_List*(*)( struct _RegionHandle* r1, struct _RegionHandle* r2, struct
 Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_rzip)( rgn, rgn, _temp1013->tvs,
 _temp1014); t3= Cyc_Tcutil_rsubstitute( rgn, _temp1034,( void*)(( struct Cyc_Absyn_Structfield*)
 _check_null( _temp1029))->type);}; _pop_region( rgn);} Cyc_Tcenv_check_rgn_accessible(
@@ -1716,7 +1716,7 @@ struct Cyc_Position_Segment* loc, struct Cyc_List_List* ts, struct Cyc_Absyn_Exp
 index){ unsigned int i= Cyc_Evexp_eval_const_uint_exp( index); struct
 _handler_cons _temp1051; _push_handler(& _temp1051);{ int _temp1053= 0; if(
 setjmp( _temp1051.handler)){ _temp1053= 1;} if( ! _temp1053){{ void* _temp1054=(*((
-struct _tuple8*(*)( struct Cyc_List_List* x, int i)) Cyc_List_nth)( ts,( int) i)).f2;
+struct _tuple8*(*)( struct Cyc_List_List* x, int n)) Cyc_List_nth)( ts,( int) i)).f2;
 _npop_handler( 0u); return _temp1054;}; _pop_handler();} else{ void* _temp1052=(
 void*) _exn_thrown; void* _temp1056= _temp1052; _LL1058: if( _temp1056 ==  Cyc_List_Nth){
 goto _LL1059;} else{ goto _LL1060;} _LL1060: goto _LL1061; _LL1059: return({

@@ -39,7 +39,7 @@ struct _tagged_arr); struct Cyc_Hashtable_Table; extern struct Cyc_Hashtable_Tab
 Cyc_Hashtable_create( int sz, int(* cmp)( void*, void*), int(* hash)( void*));
 extern void Cyc_Hashtable_insert( struct Cyc_Hashtable_Table* t, void* key, void*
 val); extern void* Cyc_Hashtable_lookup( struct Cyc_Hashtable_Table* t, void*
-key); extern int Cyc_Hashtable_hash_stringptr( struct _tagged_arr* s); static
+key); extern int Cyc_Hashtable_hash_stringptr( struct _tagged_arr* p); static
 const int Cyc_Fn_Fun= 0; struct Cyc_Fn_Fun_struct{ int tag; void*(* f1)( void*,
 void*); void* f2; } ; extern void* Cyc_Fn_make_fn( void*(* f)( void*, void*),
 void* x); extern void* Cyc_Fn_fp2fn( void*(* f)( void*)); extern void* Cyc_Fn_apply(

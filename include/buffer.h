@@ -51,7 +51,9 @@ extern T create(unsigned int n);
       initial size of an internal character array that holds the
       buffer's contents.  The internal array grows when more than [n]
       character have been stored in the buffer; it shrinks back to the
-      initial size when [reset] is called. */
+      initial size when [reset] is called.  If [n] is negative, no
+      exception is thrown; a buffer with a small amount of internal
+      storage is returned instead. */
 extern mstring_t contents(T);
   /** [contents(b)] heap allocates and returns a string whose contents
       are the contents of buffer [b]. */
@@ -69,7 +71,13 @@ extern void add_char(T,char);
   /** [add_char(b,c)] appends character [c] to the end of [b]. */
 extern void add_substring(T,string_t,int offset,int len);
   /** [add_substring(b,s,ofs,len)] takes [len] characters starting at
-      offset [ofs] in string [s] and appends them to the end of [b]. */
+      offset [ofs] in string [s] and appends them to the end of [b].
+      If [ofs] and [len] do not specify a valid substring of [s], then
+      the function throws [InvalidArg("Buffer::add_substring")].
+      Note, the substring specified by [offset] and [len] may contain
+      NUL (0) characters; in any case, the entire substring is
+      appended to [b], not just the substring up to the first NUL
+      character.  */
 extern void add_string(T,string_t);
   /** [add_string(b,s)] appends the string [s] to the end of [b]. */
 extern void add_buffer(T buf_dest, T buf_source);

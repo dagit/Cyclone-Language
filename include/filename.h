@@ -25,7 +25,7 @@ namespace Filename {
 
   /*** \subsection{\texttt{<filename.h>}} */
   /*** Defines a namespace Filename, which implements some useful
-       operations on file names. */
+       operations on file names that are represented as strings. */
 
 extern mstring_t concat(string_t, string_t);
   /** Assuming that [s1] is a directory name and [s2] is a file name,

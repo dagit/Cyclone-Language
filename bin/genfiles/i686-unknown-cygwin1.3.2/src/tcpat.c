@@ -24,7 +24,7 @@ struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append( struct
 Cyc_List_List* x, struct Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_rappend(
 struct _RegionHandle*, struct Cyc_List_List* x, struct Cyc_List_List* y); extern
 unsigned char Cyc_List_Nth[ 8u]; extern struct Cyc_List_List* Cyc_List_rzip(
-struct _RegionHandle* r3, struct _RegionHandle* r4, struct Cyc_List_List* x,
+struct _RegionHandle* r1, struct _RegionHandle* r2, struct Cyc_List_List* x,
 struct Cyc_List_List* y); extern struct Cyc_List_List* Cyc_List_tabulate_c( int
 n, void*(* f)( void*, int), void* env); struct Cyc_Dict_Dict; extern
 unsigned char Cyc_Dict_Present[ 12u]; extern unsigned char Cyc_Dict_Absent[ 11u];
@@ -810,7 +810,7 @@ Cyc_List_List* _temp344=(( struct Cyc_List_List*(*)( struct _RegionHandle*,
 struct _tuple5*(* f)( struct _tuple4*, struct Cyc_Absyn_Tvar*), struct _tuple4*
 env, struct Cyc_List_List* x)) Cyc_List_rmap_c)( rgn, Cyc_Tcutil_r_make_inst_var,&
 _temp343, _temp202->tvs); struct Cyc_List_List* _temp345=(( struct Cyc_List_List*(*)(
-struct _RegionHandle* r3, struct _RegionHandle* r4, struct Cyc_List_List* x,
+struct _RegionHandle* r1, struct _RegionHandle* r2, struct Cyc_List_List* x,
 struct Cyc_List_List* y)) Cyc_List_rzip)( rgn, rgn, _temp200->tvs, _temp317);
 struct Cyc_List_List* _temp346=(( struct Cyc_List_List*(*)( void*(* f)( struct
 _tuple5*), struct Cyc_List_List* x)) Cyc_List_map)(( void*(*)( struct _tuple5*))

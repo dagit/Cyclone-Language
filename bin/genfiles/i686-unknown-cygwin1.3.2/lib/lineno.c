@@ -44,8 +44,8 @@ struct Cyc_Std___sFILE*); extern struct _tagged_arr Cyc_Lexing_lexeme( struct
 Cyc_Lexing_lexbuf*); extern int Cyc_Lexing_lexeme_end( struct Cyc_Lexing_lexbuf*);
 struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
 unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
-18u]; extern struct Cyc_List_List* Cyc_List_merge_sort( int(* less_eq)( void*,
-void*), struct Cyc_List_List* x); extern unsigned char Cyc_List_Nth[ 8u]; extern
+18u]; extern struct Cyc_List_List* Cyc_List_merge_sort( int(* cmp)( void*, void*),
+struct Cyc_List_List* x); extern unsigned char Cyc_List_Nth[ 8u]; extern
 unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern struct _tagged_arr
 Cyc_Std_strdup( struct _tagged_arr src); extern struct _tagged_arr Cyc_Std_substring(
 struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Lineno_Pos{ struct
@@ -148,7 +148,7 @@ _throw( _temp21); _LL22:;}}} struct _tuple1{ int f1; struct Cyc_Lineno_Pos* f2;
 } ; int Cyc_Lineno_place_cmp( struct _tuple1* place1, struct _tuple1* place2){
 return Cyc_Core_intcmp((* place1).f1,(* place2).f1);} void Cyc_Lineno_poss_of_abss(
 struct _tagged_arr filename, struct Cyc_List_List* places){ places=(( struct Cyc_List_List*(*)(
-int(* less_eq)( struct _tuple1*, struct _tuple1*), struct Cyc_List_List* x)) Cyc_List_merge_sort)(
+int(* cmp)( struct _tuple1*, struct _tuple1*), struct Cyc_List_List* x)) Cyc_List_merge_sort)(
 Cyc_Lineno_place_cmp, places);{ struct Cyc_Std___sFILE* f= Cyc_Std_file_open(
 filename, _tag_arr("r", sizeof( unsigned char), 2u));{ struct _handler_cons
 _temp27; _push_handler(& _temp27);{ int _temp29= 0; if( setjmp( _temp27.handler)){
