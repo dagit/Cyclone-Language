@@ -165,7 +165,9 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
 	env.todo = env.todo->tl;
 	if(tvar_cmp(next,tv)==0)
 	  return true;
-	add_to_search(&env,Dict::lookup(po->d,next)->these_outlive);
+	if(Dict::member(po->d,next)) {
+	  add_to_search(&env,Dict::lookup(po->d,next)->these_outlive);
+	}
       }
       return false;
     default: return false;
@@ -179,10 +181,12 @@ static bool atomic_effect_outlives(rgn_po_t po, type_t eff, type_t rgn) {
       while(env.todo != NULL) {
 	let next = env.todo->hd;
 	env.todo = env.todo->tl;
-	let next_eff = Dict::lookup(po->d,next)->these_outlive;
-	if(contains_rgnseff(tv,next_eff))
-	  return true;
-	add_to_search(&env,next_eff);
+	if(Dict::member(po->d,next)) {
+	  let next_eff = Dict::lookup(po->d,next)->these_outlive;
+	  if(contains_rgnseff(tv,next_eff))
+	    return true;
+	  add_to_search(&env,next_eff);
+	}
       }
       return false;
     default: return false;

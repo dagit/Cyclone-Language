@@ -183,7 +183,7 @@ to_xml_base(typestruct_t ts, addr_index_t env, `a::A@ val) {
       mem = index_lookup(env,y);
       int typ_szb = size_type(typ);
       for (int i = 0; i<sz; i++) {
-	let $(env2,child) = to_xml_base(typ,env,(`a@)unsafe_cast(y));
+	let $(env2,child) = to_xml_base(typ,env,unsafe_cast(y));
 	env = env2;
 	children = new List{child, children};
 	y += typ_szb;
@@ -211,7 +211,7 @@ to_xml_base(typestruct_t ts, addr_index_t env, `a::A@ val) {
       list_t<content_t,`H> children = NULL;
       env=index_insert(env,base);
       for (unsigned int i = base; i<last_plus_one; i += typ_szb) {
-	let $(env2,child) = to_xml_base(typ, env, (`a@)unsafe_cast(i));
+	let $(env2,child) = to_xml_base(typ, env, unsafe_cast(i));
 	env = env2;
 	children = new List{child, children};
       }
@@ -229,7 +229,7 @@ to_xml_base(typestruct_t ts, addr_index_t env, `a::A@ val) {
     for(int i = 0; i < l.size; i++) {
       let $(ofs, fnm,typ) = *(l[i]);
       int x_ofs = x+ofs;
-      let $(env2,child) = to_xml_base(typ,env,(`a@)unsafe_cast(x_ofs));
+      let $(env2,child) = to_xml_base(typ,env,unsafe_cast(x_ofs));
       env=env2;
       child = new Element(new StartEnd("Field",list(string_att("nm",fnm)),list(child)));
       children = new List{child,children};
@@ -244,7 +244,7 @@ to_xml_base(typestruct_t ts, addr_index_t env, `a::A@ val) {
     for(int i = 0; i < l.size; i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x+ofs;
-      let $(env2,child) = to_xml_base(typ,env,(`a@)unsafe_cast(x_ofs));
+      let $(env2,child) = to_xml_base(typ,env,unsafe_cast(x_ofs));
       env=env2;
       children = new List{child,children};
     } 
@@ -259,7 +259,7 @@ to_xml_base(typestruct_t ts, addr_index_t env, `a::A@ val) {
     for (int i = 0; i < l.size; i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x + ofs;
-      let $(env2,child) = to_xml_base(typ, env, (`a@)unsafe_cast(x_ofs));
+      let $(env2,child) = to_xml_base(typ, env, unsafe_cast(x_ofs));
       env=env2;
       children=new List{child,children};
     }
@@ -457,7 +457,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
       // fill it in
       int y = bufptr;
       for(int i = 0; i < sz; i++) {
-	env = from_xml_base(typ,env,child->hd,(`a@)unsafe_cast(y));
+	env = from_xml_base(typ,env,child->hd,unsafe_cast(y));
 	y += typ_szb;
 	child = child->tl;
       }
@@ -483,7 +483,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
       int y = bufptr;
       let child = children;
       for(int i = 0; i < sz; i++) {
-	env = from_xml_base(typ,env,child->hd,(`a@)unsafe_cast(y));
+	env = from_xml_base(typ,env,child->hd,unsafe_cast(y));
 	y += typ_szb;
 	child = child->tl;
       }
@@ -504,7 +504,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
       let $(ofs, _,typ) = *(l[i]);
       int x_ofs = x+ofs;
       let $(contents, _) = getElemData(child->hd,"Field");
-      env = from_xml_base(typ,env,contents->hd,(`a@)unsafe_cast(x_ofs));
+      env = from_xml_base(typ,env,contents->hd,unsafe_cast(x_ofs));
       child = child->tl;
     } 
     break;
@@ -516,7 +516,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
     for(int i = 0; i < l.size; i++) {
       let $(ofs,typ) = *(l[i]);
       int x_ofs = x+ofs;
-      env = from_xml_base(typ,env,child->hd,(`a@)unsafe_cast(x_ofs));
+      env = from_xml_base(typ,env,child->hd,unsafe_cast(x_ofs));
       child = child->tl;
     } 
     break;
@@ -528,7 +528,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
     for(int i = 0; i < l.size; i++) {
       let $(ofs, typ) = *(l[i]);
       int x_ofs = x+ofs;
-      env = from_xml_base(typ,env,child->hd,(`a@)unsafe_cast(x_ofs));
+      env = from_xml_base(typ,env,child->hd,unsafe_cast(x_ofs));
       child = child->tl;
     } 
     break;
@@ -559,7 +559,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
 	// fill in buf
 	unsigned int@ tagptr = unsafe_cast(bufptr);
 	*tagptr = tag;
-	env = from_xml_base(typ, env, children->hd, (`a@)unsafe_cast(bufptr+off));
+	env = from_xml_base(typ, env, children->hd, unsafe_cast(bufptr+off));
       }
     }
     break;
@@ -585,7 +585,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
 	// fill in buf
 	unsigned int@ tagptr = unsafe_cast(bufptr);
 	*tagptr = (unsigned int)(_*)s;
-	env=from_xml_base(typ, env, children->hd, (`a@)unsafe_cast(bufptr+off));
+	env=from_xml_base(typ, env, children->hd, unsafe_cast(bufptr+off));
       } else { // build a non-data carrying xtunion: a pointer to NULL followed by an untagged pointer to 0000Tagname.
 	unsigned int@ x = unsafe_cast(result);
 	*x = (unsigned int)(_*)s;
@@ -609,7 +609,7 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
     for(int i = 0; i < l.size; i++) {
       let $(_,typ) = *(l[i]);
       let $(contents, _) = getElemData(child->hd,"Field");
-      env = from_xml_base(typ,env,contents->hd,(`a@)unsafe_cast(x));
+      env = from_xml_base(typ,env,contents->hd,unsafe_cast(x));
       child = child->tl;
     } 
     break;

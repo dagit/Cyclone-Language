@@ -112,7 +112,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   unsigned _cks_index = (index); \
   if (!_cks_ptr) _throw_null(); \
   if (!_cks_index >= _cks_bound) _throw_arraybounds(); \
-  ((char *)cks_ptr) + cks_elt_sz*cks_index; })
+  ((char *)_cks_ptr) + _cks_elt_sz*_cks_index; })
 #endif
 
 #ifdef NO_CYC_BOUNDS_CHECKS

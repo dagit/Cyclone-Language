@@ -268,21 +268,36 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       break;
     }
     region rgn {
-      // constrain the type variables to have box kind (still necessary?)
-      // FIX: jcheney: this gets in my way, turning error into warning...
+      // constrain type variables to have at least the kind they were abstracted over
       let var_tvs = NULL;
-      for (_ t = exist_ts; t != NULL; t = t->tl) {
+      let u = ad->impl->exist_vars;
+      for (_ t = exist_ts ; t != NULL; t = t->tl) {
 	tvar_t tv = t->hd;
-	switch (compress_kb(tv->kind)) {
-	case &Eq_kb(BoxKind):      break;
-        case &Unknown_kb(*f):      fallthru(f);
-        case &Less_kb(*f,MemKind): fallthru(f);
-        case &Less_kb(*f,AnyKind): *f = new Opt(new Eq_kb(BoxKind)); break;
-	case &Eq_kb(k): fallthru(k);
-        case &Less_kb(_,k): 
-	  warn(p->loc,"struct %s abstracts type variable %s of kind %s != B",
-               qvar2string(ad->name),*tv->name,kind2string(k)); 
+	tvar_t uv = u->hd;
+	u = u->tl;
+	let kb1 = compress_kb(tv->kind);
+	let kb2 = compress_kb(uv->kind);
+	bool error=false;
+	kind_t k2;
+	switch(kb2) {
+	case &Less_kb(_,k): fallthru(k);
+	case &Eq_kb(k): k2 = k; break;
+	default: impos("unconstrained existential type variable in struct");
+	}
+	switch (kb1) {
+	  // ensure that kind of quantified var <:: kind of pattern var
+	case &Eq_kb(k1): 
+	  if(!kind_leq(k2,k1)) 
+	    error = true;
 	  break;
+	case &Less_kb(*f,k): fallthru(f);
+	case &Unknown_kb(*f): *f = new Opt(kb2); break;
+	}
+	if(error) {
+	  terr(p->loc,"type variable %s has kind %s "
+	              "but must have at least kind %s",
+	       *tv->name,
+	       kindbound2string(kb1),kind2string(k2));
 	}
 	var_tvs = rnew(rgn) List((type_t)(new VarType(tv)),var_tvs);
       }

@@ -264,7 +264,7 @@ cnst_t eval_const_exp(exp_t e) {
   case &AnonEnum_e(_,_,ef): fallthru(ef);
   case &Enum_e(_,_,ef): return eval_const_exp((exp_t)ef->tag);
   default: 
-    terr(e->loc,"bad static expression");
+    terr(e->loc,"bad static expression %s", exp2string(e));
     return new Int_c(Signed,0);
   }
   e->r = new Const_e(cn);
