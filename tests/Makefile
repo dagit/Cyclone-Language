@@ -91,9 +91,9 @@ clean:
 	$(RM) *test_regions.o *test_regions.c
 	$(RM) hello cyctest foo histogram merge_sort finger test_getopt
 	$(RM) *~ *.exe *.output *.stackdump
-	$(MAKE) clean -C benchmarks
-	$(MAKE) clean -C compress/cacm
-	$(MAKE) clean -C compress/ppm
+#	$(MAKE) clean -C benchmarks
+#	$(MAKE) clean -C compress/cacm
+#	$(MAKE) clean -C compress/ppm
 	$(MAKE) clean -C shootout
 	$(MAKE) clean -C smlng
 #	$(MAKE) clean -C tpop

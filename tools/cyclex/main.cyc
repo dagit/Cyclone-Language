@@ -15,7 +15,7 @@ using Core;
 
 int main(int argc, string_t ? argv) {
   if(argc < 2 || argc > 3) {
-    fprintf(stderr, "Usage: cycocamllex <input file> [<output file>]");
+    fprintf(stderr, "Usage: cyclex <input file> [<output file>]");
     return 1;
   }
   string_t source_name = argv[1];
