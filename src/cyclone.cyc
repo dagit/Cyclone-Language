@@ -46,7 +46,6 @@ namespace Lex {
   void lex_init(bool use_cyclone_keywords);
 }
 
-using Cyclone;
 using Core;
 using List;
 typedef Hashtable::table_t<`a,`b> table_t<`a,`b>;
@@ -887,14 +886,15 @@ static void process_file(string_t<`H> filename) {
     tds = do_stage("post-pass to L-to-R evaluation order", tds, do_toseqc, 
 		   true, tds);
   // Clean up state common to last three passes
-  if(!compile_failure)
+  if(!compile_failure && Flags::stop_after_pass >= Flags::Toc)
     Toc::finish();
 
  // removal of gcc extensions (tovc is an antiquated name)
   if (!compile_failure && (Flags::tovc_r || elim_se_r))
     tds = do_stage("post-pass to VC", tds, do_tovc, true, tds);
 
-  Warn::flush_warnings(); // cannot do after preprocfile is removed
+  if(!compile_failure) // errors trump warnings
+    Warn::flush_warnings(); // cannot do after preprocfile is removed
   remove_file(preprocfile);
   if(uncaught_exn != NULL) {// cannot use rethrow b/c file and line is wrong now
     let &$(e,fn,line) = (_@)uncaught_exn;

@@ -36,7 +36,6 @@
 
 #include <dict.h>
 #include "warn.h"
-#include "absynpp.h"
 #include "toc.h" // for temp_var and Dest
 #include "tcutil.h" // for is_array
 #include "remove_aggregates.h"
@@ -92,8 +91,7 @@ static void remove_aggrs_stmt(stmt_t s);
 static void noarray_remove_aggrs_exp(env_t env, exp_t e) {
   let Result(r) = remove_aggrs_exp(env,e);
   if(r != OtherRes)
-    Warn::impos("remove_aggrs_exp -- unexpected array or comprehension: %s",
-		Absynpp::exp2string(e));
+    Warn::impos2("remove_aggrs_exp -- unexpected array or comprehension: ",e);
 }
 
 static result_t remove_aggrs_exp(env_t env, exp_t e) {
@@ -299,10 +297,7 @@ static result_t remove_aggrs_exp(env_t env, exp_t e) {
     remove_aggrs_stmt(s);
     break;
     
-  default: 
-    Warn::err2(e->loc, "bad exp after translation to C: ", e);
-    Warn::impos("bad exp after translation to C: %s",
-		Absynpp::exp2string(e));
+  default: Warn::impos2("bad exp after translation to C: ",e);
   }
   if(env.ctxt == AggrField && !did_assign)
     e->r = assign_exp((exp_t)env.dest,copy_exp(e),DL)->r;

@@ -2715,7 +2715,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_to_c(nv,cur_e);
       if (is_void_star_or_boxed_tvar(field_typ) && 
 	  !is_pointer_or_boxed_tvar(cur_e_typ))
-	  cur_e->r = cast_it(field_typ,cur_e)->r;
+	  cur_e->r = cast_it(field_typ,copy_exp(cur_e))->r;
     }
     // create the tag initializer
     let tag_exp = 
