@@ -590,11 +590,11 @@ bool coerce_list(tenv te, typ t, list<exp> es) {
   return true;
 }
 
-/* coerce e to have type bool -- used in conditionals */
-bool coerce_bool_t(tenv te, exp e) {
+// coerce e to have type bool -- used in conditionals 
+bool coerce_to_bool(tenv te, exp e) {
   if (unify(e->topt->v,bool_t)) return true; // e : bool_t
   if (unify(e->topt->v,Bool_t)) { // e : Bool_t
-    unchecked_cast(te,e,bool_t);      // unbox e
+    unchecked_cast(te,e,bool_t);  // unbox e
     return true;
   }
   return false;
@@ -912,7 +912,7 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
    cast is safe. */
 void unchecked_cast(tenv te, exp e, typ t) {
   if (!unify(e->topt->v,t)) {
-    exp inner = &Exp{.topt = e->topt, .r = e->r, .loc = e->loc};
+    exp inner = copy_exp(e);
     e->r = Cast_e(t,inner);
     e->topt = &Opt(t);
   }
@@ -1090,10 +1090,9 @@ typ substitute(list<$(var,typ)@> inst, typ t) {
   case FnType(vs,rtyp,args,varargs):
     for (let p = vs; p != null; p = p->tl)
       inst = &cons(&$(p->hd,VarType(p->hd)),inst);
-    let p = List::split(List::map(substitute_f1, args));
-    let ts = p[1];
-    let ts2 = substs(inst,ts);
-    let args2 = List::map(substitute_f2, List::zip(p[0],ts2));
+    let $(qs,ts) = List::split(List::map(substitute_f1, args));
+    let ts2      = substs(inst,ts);
+    let args2    = List::map(substitute_f2, List::zip(qs,ts2));
     return FnType(vs,substitute(inst,rtyp), args2, varargs);
   case TupleType(tqts):
     let p = List::split(tqts);
@@ -1119,7 +1118,7 @@ static list<typ> substs(list<$(var,typ)@> inst, list<typ> ts) {
 }
 
 exp default_initializer(tenv te, typ t, segment loc) {
-  exp e = &Exp(null,Const_e(Null_c),loc);
+  exp e = new_exp(Const_e(Null_c),loc);
 
   switch (compress(t)) {
   case PointerType(_,_,_):
@@ -1132,7 +1131,7 @@ exp default_initializer(tenv te, typ t, segment loc) {
     else {
       e->r = Const_e(Int_c(sg,0));
       if (sz != B4)
-        e = &Exp(null,Cast_e(t,e),loc);
+        e = new_exp(Cast_e(t,e),loc);
     }
     break;
   case BoolType(bx):
@@ -1146,8 +1145,7 @@ exp default_initializer(tenv te, typ t, segment loc) {
     else e->r = Const_e(Float_c("0.0"));
     break;
   case DoubleType(bx):
-    e->r =
-      Cast_e(t,&Exp(null, Const_e(Float_c("0.0")), loc));
+    e->r = Cast_e(t,new_exp(Const_e(Float_c("0.0")), loc));
     break;
 /*
   case ArrayType*(t,eopt):

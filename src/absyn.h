@@ -55,6 +55,7 @@ namespace Absyn {
   extern enum Raw_decl;
   extern struct Decl;
   extern enum Designator;
+  extern enum WireDest;
 
   typedef enum Scope scope;
   typedef struct Tqual @tqual;
@@ -88,7 +89,8 @@ namespace Absyn {
   typedef enum Raw_decl raw_decl;
   typedef struct Decl @decl;
   typedef enum Designator designator;
-  
+  typedef enum WireDest wiredest_t;
+
   EXTERN_DEFINITION enum Scope { Static, Abstract, Public, Extern };
   EXTERN_DEFINITION struct Tqual { 
     bool q_const; bool q_volatile; bool q_restrict; 
@@ -159,7 +161,8 @@ namespace Absyn {
 
   EXTERN_DEFINITION enum Raw_exp {
     Const_e(cnst);
-    Var_e(qvar);
+          // ptr to binder disambiguates shadowing (null means not set yet)
+    Var_e(qvar,struct Vardecl *); 
     UnknownId_e(qvar);
     Primop_e(primop,list<exp>);
     AssignOp_e(exp,Opt_t<primop>,exp);
@@ -197,6 +200,8 @@ namespace Absyn {
     Opt_t<typ> topt;
     raw_exp    r;
     segment    loc;
+    list<wiredest_t> preds;
+    list<wiredest_t> succs;
   };
 
   EXTERN_DEFINITION enum Raw_stmt {
@@ -223,11 +228,13 @@ namespace Absyn {
   EXTERN_DEFINITION struct Stmt {
     raw_stmt r;
     segment  loc;
+    list<wiredest_t> preds;
+    list<wiredest_t> succs;
   };
 
   EXTERN_DEFINITION enum Raw_pat {
     Wild_p;
-    Var_p(var);
+    Var_p(vardecl); // only name field is right until tcPat is called
     Null_p;
     Int_p(sign,int);
     Char_p(char);
@@ -235,7 +242,7 @@ namespace Absyn {
     Bool_p(bool);
     Tuple_p(list<pat>);
     Pointer_p(pat);
-    Reference_p(var);
+    Reference_p(vardecl); // only name field is right until tcpat is called
     Struct_p(structdecl,Opt_t<list<typ>>,list<tvar>,
 	     list<$(list<designator>,pat)@>);
     Enum_p(qvar,Opt_t<list<typ>>,list<tvar>,list<pat>,enumdecl,enumfield);
@@ -259,11 +266,14 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION struct Vardecl {
-    scope      sc;
+    scope      sc; 
     qvar       name;
     tqual      tq;
     typ        type;
-    Opt_t<exp> initializer;
+    Opt_t<exp> initializer; // ignored for pattern variables
+    int        shadow_depth; 
+    // -1 not computed, 0 global, 
+    // 1 local not shadowing other local, 2 shadows a 1, ...
   };
 
   EXTERN_DEFINITION struct Fndecl {
@@ -334,6 +344,13 @@ namespace Absyn {
     FieldName(var);
   };
 
+  EXTERN_DEFINITION enum WireDest {
+    Exp_w(exp);
+    Stmt_w(stmt);
+    Entry_w;
+    Exit_w;
+  };
+
   // compare variables 
   extern int qvar_cmp(qvar, qvar);
   extern int varlist_cmp(list<var>, list<var>);
@@ -382,6 +399,7 @@ namespace Absyn {
 
   /////////////////////////////// Expressions ////////////////////////
   extern exp new_exp(raw_exp, segment);
+  extern exp copy_exp(exp);
   extern exp const_exp(cnst, segment);
   extern exp null_exp(segment);
   extern exp bool_exp(bool, segment);
@@ -476,7 +494,7 @@ namespace Absyn {
   // return true if p is printf, sprintf, fprintf
   extern bool is_format_prim(primop p);
 
-  extern typ function_t(list<tvar>, typ, list<$(Opt_t<var>,tqual,typ)@>, bool);
+  extern typ function_typ(list<tvar>,typ,list<$(Opt_t<var>,tqual,typ)@>,bool);
   extern typ pointer_expand(typ);
   // extern typ pointer_abbrev(typ);
   extern bool is_lvalue(exp);

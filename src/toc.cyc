@@ -898,7 +898,7 @@ static void lvalue_assign(exp e1,list<field_name> fs,Opt_t<primop> popt,exp e2) 
       toc_impos(xprintf("lvalue_assign: could not find lvalue in `%s'",
 			exp2string(e1)));
     // make a copy so we don't create a loop
-    exp e1_copy = &Exp{.topt=e1->topt, .r=e1->r, .loc=e1->loc};
+    exp e1_copy = copy_exp(e1);
     // add the path back on to the expression
     for (; fs != null; fs = fs->tl) 
       e1_copy = structmember_exp(e1_copy,fs->hd,e1_copy->loc);
@@ -963,7 +963,8 @@ static void exp_to_c(env nv, exp e) {
     default:  break; // skip
     }
     break;
-  case Var_e(qv): 
+  case Var_e(qv,vd): 
+    // FIX!
     // must look variables up in the nv->varmap
     try {
       e->r = Dict::lookup(nv->varmap,qv)->r;
@@ -1049,14 +1050,14 @@ static void exp_to_c(env nv, exp e) {
     switch (e1->r) {
     case Struct_e(_,_,_,_): break; // skip
     case Tuple_e(_): break; // skip
-    case Var_e(x):
+    case Var_e(x,_):
       if (!nv->toplevel)
 	warn(e1->loc,
 	     xprintf("unary & applied to %s, may be unsafe",qvar2string(x)));
       break;
     case NoInstantiate_e(e2):
       switch (e2->r) {
-      case Var_e(x):
+      case Var_e(x,_):
 	if (!nv->toplevel)
 	  warn(e1->loc,
 	       xprintf("unary & applied to %s, may be unsafe",qvar2string(x)));
@@ -1068,7 +1069,7 @@ static void exp_to_c(env nv, exp e) {
       break;
     case Instantiate_e(e2,_):
       switch (e2->r) {
-      case Var_e(x):
+      case Var_e(x,_):
 	if (!nv->toplevel)
 	  warn(e1->loc,
 	       xprintf("unary & applied to %s, may be unsafe",qvar2string(x)));
@@ -1083,16 +1084,16 @@ static void exp_to_c(env nv, exp e) {
       break;
     }
     switch (e1->r) {
-    case Var_e(x): exp_to_c(nv, e1); break;
+    case Var_e(x,_): exp_to_c(nv, e1); break;
     case NoInstantiate_e(e2):
       switch (e2->r) {
-      case Var_e(x): exp_to_c(nv, e1); break;
+      case Var_e(x,_): exp_to_c(nv, e1); break;
       default: toc_impos("& on non-struct/tuple"); break;
       }
       break;
     case Instantiate_e(e2,_):
       switch (e2->r) {
-      case Var_e(x): exp_to_c(nv, e1); break;
+      case Var_e(x,_): exp_to_c(nv, e1); break;
       default: toc_impos("& on non-struct/tuple"); break;
       }
       break;
@@ -1679,20 +1680,21 @@ static $(env,list<$(qvar,typ)@>,stmt)@
       s = s2;
     }
     break;
-  case Reference_p(x):
+  case Reference_p(vd):
     // v = path; goto succ_lab
     let v = temp_var();
     decls = &cons(&$(v,nullableptr_t(typ_to_c(t),empty_tqual())),decls);
-    nv = add_varmap(nv,&$(null,x),var_exp(v,DL));
+    nv = add_varmap(nv,vd->name,var_exp(v,DL));
     s = seq_stmt(assign_stmt(var_exp(v,DL),address_exp(path,DL),DL),
                  goto_stmt(succ_lab,DL),DL);
     break;
   case UnknownId_p(_):         s = toc_impos("unknownid");     break;
   case UnknownCall_p(_,_,_):   s = toc_impos("unknowncall");   break;
   case UnknownFields_p(_,_,_): s = toc_impos("unknownfields"); break;
-  case Var_p(x):
+  case Var_p(&Vardecl(_,x,_,_,_,_)):
+    // FIX: use vardecls in the varmap, not qvars.
     // in essence, x = r; but achieved through the varmap
-    nv = add_varmap(nv,&$(null,x),r);
+    nv = add_varmap(nv,x,r);
     s = goto_stmt(succ_lab,DL);
     break;
   case Struct_p(sd,ot,ts,dlps0):
@@ -1905,7 +1907,7 @@ static stmt xlate_switch(typ t,exp r,exp path,env nv,
 
 extern stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e, 
 			 bool exhaust, stmt s);
-extern $(env,list<decl>)@ decls_to_c(env nv, list<decl> ds);
+extern $(env,list<decl>) decls_to_c(env nv, list<decl> ds);
 
 
 ///////////////////////////////////////////////////////////////
@@ -2015,10 +2017,9 @@ static void stmt_to_c(env nv, stmt s) {
 	s->r = letdecl_to_c(nv, p, topt, e, exhaust, s1)->r;
         break;
       default:
-	let p = decls_to_c(nv,&cons(d,null)); 
-	nv = p[0];
+	let $(nv,decls) = decls_to_c(nv,&cons(d,null)); 
 	stmt_to_c(nv,s1);
-	for (let decls = p[1]; decls != null; decls = decls->tl)
+	for (; decls != null; decls = decls->tl)
 	  s1 = decl_stmt(decls->hd,s1,DL);
 	s->r = s1->r;
         break;
@@ -2066,7 +2067,9 @@ static void stmt_to_c(env nv, stmt s) {
       let x = temp_var();
       let xexp = var_exp(x,DL);
       xexp->topt = &Opt(exn_t);
-      let p = &Pat{.r=Var_p(x[1]),.topt=&Opt(exn_t),.loc=DL};
+      let p = &Pat{.r=Var_p(new_vardecl(x,exn_t,null)),
+		   .topt=&Opt(exn_t), 
+		   .loc=DL};
       let te = throw_exp(xexp,DL);
       te->topt = &Opt(VoidType);
       let rs = exp_stmt(te,DL);
@@ -2234,17 +2237,19 @@ static list<decl> enumdecl_to_c(enumdecl ed, list<decl> res) {
                         .tq = &Tqual{.q_const = true, .q_volatile = false,
 				     .q_restrict = false},
                         .type = t,
-                        .initializer = eopt};
+                        .initializer = eopt,
+                        .shadow_depth = -1};
       res = &cons(new_decl(Var_d(vd),DL),res);
     } else {
       // Declare an integer constant for the tag and a struct for the field
       let eopt = (ed->sc == Extern) ? null :
                &Opt(signed_int_exp(box_count++,DL));
       let vd = &Vardecl{.sc = scope_to_c(ed->sc),
-		      .name = collapse_qvar_tag(f->name,"_tag"),
-		      .tq = &Tqual{.q_const = true, .q_volatile = false,
+			.name = collapse_qvar_tag(f->name,"_tag"),
+			.tq = &Tqual{.q_const = true, .q_volatile = false,
 				     .q_restrict = false},
-                        .type = sint_t, .initializer = eopt};
+                        .type = sint_t, .initializer = eopt,
+                        .shadow_depth = -1};
       res = &cons(new_decl(Var_d(vd),DL),res);
       // compute the fields for the struct, adding in a tag field
       if (!seen_defn_before) {
@@ -2315,7 +2320,8 @@ static list<decl> xenumdecl_to_c(xenumdecl xd, list<decl> res) {
       let tag_decl = &Vardecl{.sc = xd->sc, 
                             .name = collapse_qvar_tag(f->name,"_tag"),
                             .tq = empty_tqual(), .type = tag_typ,
-                            .initializer = initopt};
+                            .initializer = initopt,
+                            .shadow_depth = -1};
       res = &cons(new_decl(Var_d(tag_decl),DL),res);
 
       bool seen_before;
@@ -2396,7 +2402,7 @@ static stmt letdecl_to_c(env nv, pat p, Opt_t<typ> topt, exp e,
 // FIX:  the translation of top-level variable declarations needs to be
 // fixed to make expressions "constant" initializers for C (e.g., 
 // constructor expressions, new structs, etc.)
-static $(env,list<decl>)@ decls_to_c(env nv, list<decl> ds) {
+static $(env,list<decl>) decls_to_c(env nv, list<decl> ds) {
   list<decl> res = null;
   for (; ds != null; ds = ds->tl) {
     decl d = ds->hd;
@@ -2411,7 +2417,7 @@ static $(env,list<decl>)@ decls_to_c(env nv, list<decl> ds) {
       }
       nv = add_varmap(nv,vd->name,var_exp(n,DL));
       vd->name = n;
-      vd->sc = scope_to_c(vd->sc);
+      vd->sc   = scope_to_c(vd->sc);
       vd->type = top_typ_to_c(vd->type);
       res = &cons(d,res);
       break;
@@ -2452,7 +2458,7 @@ static $(env,list<decl>)@ decls_to_c(env nv, list<decl> ds) {
       break;
     }
   }
-  return &$(nv,List::rev(res));
+  return $(nv,List::rev(res));
 }
 
 // initialize all globals
@@ -2476,7 +2482,7 @@ static void init() {
 // to a struct type...  (I think this is okay, though.)
 list<decl> toc(list<decl> ds) {
   init();
-  let &$(_,ds) = decls_to_c(empty_env(),ds);
+  let $(_,ds) = decls_to_c(empty_env(),ds);
   // add the tagged array types in
   for (let ts = tagged_array_types; ts != null; ts = ts->tl) {
     let &$(x,t) = ts->hd;

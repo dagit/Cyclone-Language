@@ -408,11 +408,11 @@ list<$(`a,`b)@> zip<`a,`b>(list<`a> x,list<`b> y) {
 }
 
 // Given [(x1,y1),...,(xn,yn)], return ([x1,...,xn],[y1,...,yn]) 
-$(list<`a>,list<`b>)@ split<`a,`b>(list<$(`a,`b)@> x) {
+$(list<`a>,list<`b>) split<`a,`b>(list<$(`a,`b)@> x) {
   list<`a> result1, prev1;
   list<`b> result2, prev2;
   
-  if (x == null) return &$(null,null);
+  if (x == null) return $(null,null);
 
   prev1 = result1 = &cons(x->hd[0],null);
   prev2 = result2 = &cons(x->hd[1],null);
@@ -423,16 +423,16 @@ $(list<`a>,list<`b>)@ split<`a,`b>(list<$(`a,`b)@> x) {
     prev1 = prev1->tl;
     prev2 = prev2->tl;
   }
-  return(&$(result1,result2));
+  return $(result1,result2);
 }
 
 // Given [(x1,y1),...,(xn,yn)], return ([x1,...,xn],[y1,...,yn]) 
-$(list<`a>,list<`b>,list<`c>)@ split3<`a,`b,`c>(list<$(`a,`b,`c)@> x) {
+$(list<`a>,list<`b>,list<`c>) split3<`a,`b,`c>(list<$(`a,`b,`c)@> x) {
   list<`a> result1,prev1;
   list<`b> result2,prev2;
   list<`c> result3,prev3;
   
-  if (x == null) return &$(null,null,null);
+  if (x == null) return $(null,null,null);
 
   prev1 = result1 = &cons(x->hd[0],null);
   prev2 = result2 = &cons(x->hd[1],null);
@@ -446,7 +446,7 @@ $(list<`a>,list<`b>,list<`c>)@ split3<`a,`b,`c>(list<$(`a,`b,`c)@> x) {
     prev2 = prev2->tl;
     prev3 = prev3->tl;
   }
-  return(&$(result1,result2,result3));
+  return $(result1,result2,result3);
 }
 
 

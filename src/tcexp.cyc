@@ -43,14 +43,14 @@ extern synth tcExpNoInst(tenv te, Opt_t<typ> topt, exp e);
 // the expression e with the appropriate r. 
 static void resolve_unknown_id(tenv te, exp e, qvar q) {
   switch (lookup_ordinary(te,e->loc,q)) {
-  case LocalRes(_):      e->r = Var_e(q); break;
-  case GlobalRes(_,_):   e->r = Var_e(q); break;
+  case LocalRes(_):      e->r = Var_e(q,null); break;
+  case GlobalRes(_,_):   e->r = Var_e(q,null); break;
   case EnumRes(ed,ef):   e->r = Enum_e(ef->name,null,null,null,ed,ef); break;
   case XenumRes(xed,ef): e->r = Xenum_e(ef->name,null,null,xed,ef); break;
-  case UnknownRes:       e->r = Var_e(q); break; // error reporting done in tcVar
+  case UnknownRes:       e->r = Var_e(q,null); break; //error reporting in tcVar
   case StructRes(_):
     terr(e->loc,xprintf("bad occurrence of struct name %s",qvar2string(q)));
-    e->r = Var_e(q);
+    e->r = Var_e(q,null);
     break;
   }
 }
@@ -117,8 +117,8 @@ static void resolve_unresolved_mem(tenv te, segment loc, Opt_t<typ> topt, exp e,
   case StructType(tdopt,ts): e->r = Struct_e(tdopt->v,null,des,null); break;
   default:
     terr(loc, 
-     xprintf("invalid initializer for type %s -- expecting array or struct type",
-	     typ2string(t)));
+     xprintf("invalid initializer for type %s "
+	     "-- expecting array or struct type", typ2string(t)));
     // guess it's an array
     e->r = Array_e(des);
     break;
@@ -150,39 +150,31 @@ static synth tcExpList(tenv te, list<exp> es) {
 static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst c) {
   typ t;
   switch (c) {
-  case Char_c(sn,_):
-    t = (sn == Unsigned) ? uchar_t : schar_t;
-    break;
-  case Short_c(sn,_):
-    t = (sn == Unsigned) ? ushort_t : sshort_t;
-    break;
-  case Int_c(sn,i):
+  case Char_c(sn,_):     t = (sn == Unsigned) ? uchar_t  : schar_t;  break;
+  case Short_c(sn,_):    t = (sn == Unsigned) ? ushort_t : sshort_t; break;
     // FIX: take i into account
-    t = (sn == Unsigned) ? uint_t : sint_t;
-    break;
-  case LongLong_c(sn,_):
-    t = (sn == Unsigned) ? ulong_t : slong_t;
-    break;
-  case Bool_c(_)  : t = bool_t; break;
+  case Int_c(sn,i):      t = (sn == Unsigned) ? uint_t   : sint_t;   break;
+  case LongLong_c(sn,_): t = (sn == Unsigned) ? ulong_t  : slong_t;  break;
+  case Bool_c(_)  : t = bool_t;  break;
   case Float_c(_) : t = float_t; break;
   case String_c(s):
     int len = String::strlen(s)+1; // len to include a trailing 0 character
     let r = Const_e(Int_c(Unsigned,len));
-    exp e = &Exp {.topt = &Opt(uint_t), .r = r, .loc = loc};
+    exp e = new_exp(r,loc);
+    e->topt = &Opt(uint_t);
     t = ArrayType(uchar_t,empty_tqual(),FixedArray(e));
     break;
   case Null_c:
     // FIX: take advantage of topt
-    t = PointerType(wildtyp(),&Conref(Eq_constr((Bool)true)),
-                    empty_tqual());
+    t = PointerType(wildtyp(), &Conref(Eq_constr((Bool)true)), empty_tqual());
     break;
   }
   return standard_synth(te,t);
 }
 
-/* variables */
+// variables 
 static synth tcVar(tenv te, segment loc, Opt_t<typ> topt, qvar q, exp e) {
-  // ?? argument e is not used
+  // FIX: update vd through e
   switch (lookup_ordinary(te,loc,q)) {
   case UnknownRes:
     return expr_err(te,loc,xprintf("unbound identifier %s",qvar2string(q)));
@@ -190,18 +182,13 @@ static synth tcVar(tenv te, segment loc, Opt_t<typ> topt, qvar q, exp e) {
     // Invariant: q[0]==null
     if (Set::member(get_unassigned(te),q[1]))
       terr(loc,xprintf("identifier %s might not be initialized",q[1]));
-    vi->is_used = true;
     return standard_synth(te,vi->t);
   case GlobalRes(fullname,vi):
     q[0] = fullname[0];
-    vi->is_used = true;
     return standard_synth(te,vi->t);
-  case StructRes(_):
-    return impos("StructRes in lhs_const");
-  case EnumRes(_,_):
-    return impos("EnumRes in lhs_const");
-  case XenumRes(_,_):
-    return impos("XenumRes in lhs_const");
+  case StructRes(_):  return impos("StructRes in lhs_const");
+  case EnumRes(_,_):  return impos("EnumRes in lhs_const");
+  case XenumRes(_,_): return impos("XenumRes in lhs_const");
   }
 }
 
@@ -232,13 +219,13 @@ static void check_format_args(tenv te, exp fmt, list<exp> args) {
       if (i < len) {
 	// FIX: should deal with real formatting
 	switch (fmt_str[i]) {
-	case 'c': desc_types = &cons(uchar_t, desc_types); break;
-	case 'd': desc_types = &cons(sint_t, desc_types); break;
-	case 'u': desc_types = &cons(uint_t, desc_types); break;
-	case 'x': desc_types = &cons(uint_t, desc_types); break;
-	case 'f': desc_types = &cons(float_t, desc_types); break;
+	case 'c': desc_types = &cons(uchar_t,    desc_types); break;
+	case 'd': desc_types = &cons(sint_t,     desc_types); break;
+	case 'u': desc_types = &cons(uint_t,     desc_types); break;
+	case 'x': desc_types = &cons(uint_t,     desc_types); break;
+	case 'f': desc_types = &cons(float_t,    desc_types); break;
 	case 's': desc_types = &cons(string_t(), desc_types); break;
-	case 'g': desc_types = &cons(double_t, desc_types); break;
+	case 'g': desc_types = &cons(double_t,   desc_types); break;
 	case '%': break; // skip
 	default: 
 	  terr(fmt->loc, xprintf("bad format character %c",fmt_str[i]));
@@ -252,56 +239,48 @@ static void check_format_args(tenv te, exp fmt, list<exp> args) {
   desc_types = List::imp_rev(desc_types);
   // now check that each desc_type matches the expression types
   for (; desc_types != null && args != null; desc_types = desc_types->tl, 
-	 args = args->tl) {
+	                                     args = args->tl) {
     typ t = desc_types->hd;
     exp e = args->hd;
     if (!coerce_arg(te,e,t))
       terr(e->loc,xprintf("descriptor has type %s but argument has type %s",
-		       typ2string(t), typ2string(e->topt->v)));
+			  typ2string(t), typ2string(e->topt->v)));
   }
   if (desc_types != null)
     terr(fmt->loc,xprintf("descriptor expects another value of type %s",
-		     typ2string(desc_types->hd)));
+			  typ2string(desc_types->hd)));
   else if (args != null)
     terr(args->hd->loc,"too many arguments");
 }
 
 
-/* Unary primops like -e, !e, etc. */
+// Unary primops like -e, !e, etc. 
 static typ tcUnPrimop(tenv te, segment loc, Opt_t<typ> topt, primop p, exp e) {
   typ t = compress(e->topt->v);
   switch (p) {
   case Plus:
-    if (!arithmetic_promote(te,e)) {
-      terr(loc,xprintf("expecting arithmetic type but found %s",
-			  typ2string(t)));
-    }
+    if (!arithmetic_promote(te,e)) 
+      terr(loc,xprintf("expecting arithmetic type but found %s",typ2string(t)));
     return e->topt->v;
   case Minus:
-    if (!arithmetic_promote(te,e)) {
-      terr(loc,xprintf("expecting arithmetic type but found %s",
-			  typ2string(t)));
-    }
+    if (!arithmetic_promote(te,e)) 
+      terr(loc,xprintf("expecting arithmetic type but found %s",typ2string(t)));
     return e->topt->v;
   case Not:
-    if (!coerce_bool_t(te,e))
+    if (!coerce_to_bool(te,e))
       terr(loc,xprintf("expecting bool but found %s",typ2string(t)));
     return bool_t;
   case Bitnot:
     if (!integral_promote(te,e)) {
-      terr(loc,xprintf("expecting integral type but found %s",
-			  typ2string(t)));
+      terr(loc,xprintf("expecting integral type but found %s",typ2string(t)));
     }
     return e->topt->v;
   case Size:
     switch (t) {
-    case ArrayType(_,_,ak):
-      switch (ak) {
-      case UntaggedArray:
-	terr(loc,"size not applicable to indetermine arrays");
-        break;
-      default: break; // skip
-      }
+    case ArrayType(_,_,UntaggedArray):
+      terr(loc,"size not applicable to indeterminate arrays"); 
+      break;
+    case ArrayType(_,_,_): 
       break;
     default:
       terr(loc,xprintf("size requires array type, not %s",typ2string(t)));
@@ -316,41 +295,42 @@ static typ tcUnPrimop(tenv te, segment loc, Opt_t<typ> topt, primop p, exp e) {
 static typ tcArithBinop(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) {
   if (!arithmetic_promote(te,e1)) {
     terr(e1->loc,xprintf("expecting arithmetic type but found %s",
-                        typ2string(e1->topt->v)));
+			 typ2string(e1->topt->v)));
     return wildtyp();
   }
   if (!arithmetic_promote(te,e2)) {
     terr(e2->loc,xprintf("expecting arithmetic type but found %s",
-                        typ2string(e2->topt->v)));
+			 typ2string(e2->topt->v)));
     return wildtyp();
   }
-  typ t1 = compress(e1->topt->v);
-  typ t2 = compress(e2->topt->v);
-  typ res_t = max_arithmetic_type(t1,t2);
+  typ t1  = compress(e1->topt->v);
+  typ t2  = compress(e2->topt->v);
+  typ res = max_arithmetic_type(t1,t2);
   // these casts should always succeed
-  unchecked_cast(te,e1,res_t);
-  unchecked_cast(te,e2,res_t);
-  return res_t;
+  unchecked_cast(te,e1,res);
+  unchecked_cast(te,e2,res);
+  return res;
 }
 
-static typ tcIntegralBinop(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) {
+static 
+typ tcIntegralBinop(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) {
   if (!integral_promote(te,e1)) {
     terr(e1->loc,xprintf("expecting integral type but found %s",
-                        typ2string(e1->topt->v)));
+			 typ2string(e1->topt->v)));
     return wildtyp();
   }
   if (!integral_promote(te,e2)) {
     terr(e2->loc,xprintf("expecting integral type but found %s",
-                        typ2string(e1->topt->v)));
+			 typ2string(e1->topt->v)));
     return wildtyp();
   }
-  typ t1 = compress(e1->topt->v);
-  typ t2 = compress(e2->topt->v);
-  typ res_t = max_arithmetic_type(t1,t2);
+  typ t1  = compress(e1->topt->v);
+  typ t2  = compress(e2->topt->v);
+  typ res = max_arithmetic_type(t1,t2);
   // these casts should always succeed
-  unchecked_cast(te,e1,res_t);
-  unchecked_cast(te,e2,res_t);
-  return res_t;
+  unchecked_cast(te,e1,res);
+  unchecked_cast(te,e2,res);
+  return res;
 }
 
 
@@ -361,20 +341,18 @@ static typ tcAnyBinop(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) {
   typ t1 = compress(e1->topt->v);
   typ t2 = compress(e2->topt->v);
   if (e1_is_unboxed_arith && e2_is_unboxed_arith) {
-    typ res_t = max_arithmetic_type(t1,t2);
-    unchecked_cast(te,e1,t1);
-    unchecked_cast(te,e2,t2);
-  } else {
-    if (!unify(t1,t2)) {
-      terr(loc,xprintf("comparison not allowed between %s and %s",
-                       typ2string(t1),typ2string(t2)));
-      return wildtyp();
-    }
+    typ res = max_arithmetic_type(t1,t2);
+    unchecked_cast(te,e1,res);
+    unchecked_cast(te,e2,res);
+  } else if (!unify(t1,t2)) {
+    terr(loc,xprintf("comparison not allowed between %s and %s",
+		     typ2string(t1),typ2string(t2)));
+    return wildtyp();
   }
   return bool_t;
 }
 
-/* Binary primops like e1+e2, e1>>e2, etc. */
+// Binary primops like e1+e2, e1>>e2, etc. 
 static typ tcBinPrimop(tenv te, segment loc, Opt_t<typ> topt, 
 		       primop p, exp e1, exp e2) {
   typ t;
@@ -397,17 +375,16 @@ static typ tcBinPrimop(tenv te, segment loc, Opt_t<typ> topt,
   case Bitlshift:  t = tcIntegralBinop(te,loc,topt,e1,e2); break;
   case Bitlrshift: t = tcIntegralBinop(te,loc,topt,e1,e2); break;
   case Bitarshift: t = tcIntegralBinop(te,loc,topt,e1,e2); break;
-  default:
-    throw Failure("bad binary primop");
+  default: throw Failure("bad binary primop");
   }
   return t;
 }
 
-/* Primops.
-   Unlike Java, the only binops on bools are == and !=.  (The parser
-   expands && and || into Conditionals and there's no ^ or | or & on
-   booleans.) For == and != on booleans we do nothing special yet,
-   unlike Java so for example, true == true will behave differently. */
+// Primops.
+// Unlike Java, the only binops on bools are == and !=.  (The parser
+// expands && and || into Conditionals and there's no ^ or | or & on
+// booleans.) For == and != on booleans we do nothing special yet,
+// unlike Java so for example, true == true will behave differently. 
 static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
                       primop p, list<exp> es) {
   // FIX: sizeof(f) where f is a function (or expression of function type)
@@ -429,7 +406,7 @@ static synth tcPrimop(tenv te, segment loc, Opt_t<typ> topt,
         expr_err(te,loc,"missing file descriptor or format string in fprintf");
     if (!unify(es->hd->topt->v, file_t()))
       terr(es->hd->loc,xprintf("expecting FILE @ but found %s",
-			     typ2string(es->hd->topt->v)));
+			       typ2string(es->hd->topt->v)));
     check_format_args(te, es->tl->hd, es->tl->tl);
     t = VoidType;
     break;
@@ -472,50 +449,44 @@ static synth tcIncrement(tenv te, segment loc, Opt_t<typ> topt,
   return synth_set_typ(esyn, e->topt->v);
 }
 
-/* e1 ? e2 : e3
-   NB: some care is taken here to more accurately track initialization,
-   hence the complexity. */
+// e1 ? e2 : e3
+//  NB: some care is taken here to more accurately track initialization,
+//  hence the complexity. 
 static synth tcConditional(tenv te, segment loc, Opt_t<typ> topt, 
 			   exp e1, exp e2, exp e3) {
   synth esyn1,esyn2,esyn3;
   esyn1 = tcExp(te,&Opt(bool_t),e1);
-  if (!coerce_bool_t(te,e1))
+  if (!coerce_to_bool(te,e1))
     terr(e1->loc,xprintf("conditional argument has type %s instead of bool",
-                        typ2string(e1->topt->v)));
-  let te_pr = bool_layer_synth(te, esyn1);
-  esyn2 = tcExp(te_pr[0], topt, e2);
-  esyn3 = tcExp(te_pr[1], topt, e3);
+			 typ2string(e1->topt->v)));
+  let $(true_te, false_te) = bool_layer_synth(te, esyn1);
+  esyn2 = tcExp(true_te,  topt, e2);
+  esyn3 = tcExp(false_te, topt, e3);
   typ t = wildtyp();
   if (!coerce_list(te,t,&cons(e2,&cons(e3,null)))) {
     expr_err(te,loc,
-	    xprintf("clauses of conditional do not match type: %s != %s",
-		    typ2string(e2->topt->v),typ2string(e3->topt->v)));
+	     xprintf("clauses of conditional do not match type: %s != %s",
+		     typ2string(e2->topt->v),typ2string(e3->topt->v)));
   }
   return join_synth(seq_synth(esyn1,esyn2), seq_synth(esyn1,esyn3));
 }
 
-/* Assignments with optional operations, e.g., x = 3, x += 5
-   Note that as in tcPrimop, we violate Java by not considering
-   various boolean operators to have meaning.  Must check lhs before
-   rhs, but if lhs is a Var, and there's no Op, then the Var is
-   allowed to be undefined. */
-static
-synth tcAssignOp(tenv te,segment loc,Opt_t<typ> topt,exp e0,exp e1,Opt_t<primop> po,
-		 exp e2) {
+// Assignments with optional operations, e.g., x = 3, x += 5
+// Note that as in tcPrimop, we violate Java by not considering
+// various boolean operators to have meaning.  Must check lhs before
+// rhs, but if lhs is a Var, and there's no Op, then the Var is
+// allowed to be undefined. 
+static synth tcAssignOp(tenv te,segment loc, Opt_t<typ> topt, exp e0, exp e1,
+			Opt_t<primop> po, exp e2) {
   tenv te_lhs;
   resolve_any_unknown_id(te,e1);
   resolve_any_unknown_id(te,e2);
-  switch (e1->r) {
-  case Var_e(q):
-    if (po == null && q[0] == null)
-      // assignment without an operator to a local variable
-      te_lhs = set_unassigned(te,Set::delete(get_unassigned(te),q[1]));
-    else
-      te_lhs = te;
-    break;
+  switch ($(e1->r, po)) {
+  case $(Var_e(&$(null,v),*vd), null): // FIX: set vd!!
+    // assignment without an operator to a variable
+    te_lhs = set_unassigned(te,Set::delete(get_unassigned(te),v)); break;
   default:
-    te_lhs = te;
-    break;
+    te_lhs = te; break;
   }
   let esyn_lhs = tcExp(te_lhs, null, e1);
   let t1       = synth_typ(esyn_lhs);
@@ -528,15 +499,15 @@ synth tcAssignOp(tenv te,segment loc,Opt_t<typ> topt,exp e0,exp e1,Opt_t<primop>
   */
   tenv te_rhs;
   switch (e1->r) {
-  case Var_e(_): te_rhs = te; break;
-  default:       te_rhs = layer_synth(te,esyn_lhs); break;
+  case Var_e(_,_): te_rhs = te; break;
+  default:         te_rhs = layer_synth(te,esyn_lhs); break;
   }
   let esyn_rhs    = tcExp(te_rhs, null, e2);
   let t2          = synth_typ(esyn_rhs);
   let synth_after = esyn_rhs;
 
   switch (e1->r) {
-  case Var_e(v):
+  case Var_e(v,*vd): // FIX: set vd!!
     synth_after = initialize_var_synth(seq_synth(esyn_lhs,esyn_rhs),v[1]);
     break;
   default:
@@ -544,28 +515,29 @@ synth tcAssignOp(tenv te,segment loc,Opt_t<typ> topt,exp e0,exp e1,Opt_t<primop>
     break;
   }
   if (po == null) {
-    if (!coerce_assign(te,e2,t1)) {
+    if (!coerce_assign(te,e2,t1)) 
       return expr_err(te,loc,xprintf("type mismatch: %s != %s",
-				    typ2string(t1), typ2string(t2)));
-    }
+				     typ2string(t1), typ2string(t2)));
   } else {
     let p        = po->v;
     let t_result = tcBinPrimop(te,loc,null,p,e1,e2);
     if (!(unify(t_result,t1) || coerceable(t_result))) {
-      return expr_err(te,loc,"Cannot use this operator in front of an assignment");
+      return expr_err(te,loc,
+		      "Cannot use this operator in front of an assignment");
     }
   }
   return synth_after;
 }
 
-/* e1,e2 */
+// e1,e2 
 static synth tcSeqExp(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) {
   let r = tcExpList(te,&cons(e1,&cons(e2,null)));
   return synth_set_typ(r,e2->topt->v);
 }
 
-/* e(es) */
-static synth tcFnCall(tenv te, segment loc, Opt_t<typ> topt, exp e, list<exp> es) {
+// e(es) 
+static 
+synth tcFnCall(tenv te, segment loc, Opt_t<typ> topt, exp e, list<exp> es) {
   let list_result = tcExpList(te,&cons(e,es));
   typ t = compress(e->topt->v);
   // NB: we should really unify t with an unconstrained FnType with the
@@ -591,12 +563,10 @@ static synth tcFnCall(tenv te, segment loc, Opt_t<typ> topt, exp e, list<exp> es
         es = es->tl;
         args_info = args_info->tl;
       }
-      if (es != null) {
+      if (es != null) 
         return expr_err(te,loc,"too many arguments for function");
-      }
-      else if (args_info != null) {
+      else if (args_info != null) 
         return expr_err(te,loc,"too few arguments for function");
-      }
       return synth_set_typ(list_result,res_t);
     default:
       return expr_err(te,loc,"expected pointer to function");
@@ -606,16 +576,15 @@ static synth tcFnCall(tenv te, segment loc, Opt_t<typ> topt, exp e, list<exp> es
   }
 }
 
-/* throw e */
+// throw e 
 static synth tcThrow(tenv te, segment loc, Opt_t<typ> topt, exp e) {
   typ t = synth_typ(tcExp(te,&Opt(exn_t),e));
-  if (!unify(t,exn_t)) {
+  if (!unify(t,exn_t)) 
     expr_err(te, loc,xprintf("expected xenum exn but found %s",typ2string(t)));
-  }
   return empty_synth(te);
 }
 
-/* (implicit) instantiation */
+// (implicit) instantiation 
 // TODO: this is really untested, because the parser does not
 // insert Instantiate expressions, only the typechecker does,
 // and the output of the typechecker isn't passed through itself...
@@ -631,7 +600,7 @@ static synth tcInstantiate(tenv te, segment loc, Opt_t<typ> topt,
       list<$(var,typ)@> instantiation;
       if (topts == null) {
         instantiation = List::map(make_inst_var,tvars);
-        *opt_ref = &Opt(snd(List::split(instantiation))); // side-effect
+        *opt_ref = &Opt(List::split(instantiation)[1]); // side-effect
       } else {
         try
           instantiation = List::zip(tvars,topts->v);
@@ -653,15 +622,14 @@ static synth tcInstantiate(tenv te, segment loc, Opt_t<typ> topt,
   }
 }
 
-/* (t)e */
+// (t)e 
 static synth tcCast(tenv te, segment loc, Opt_t<typ> topt, typ t, exp e) {
   check_valid_type(loc,te,lookup_type_vars(te),t);
   synth esyn = tcExp(te,null,e);
   typ t2 = synth_typ(esyn);
-  if (!castable(te,loc,t2,t)) {
+  if (!castable(te,loc,t2,t)) 
     return expr_err(te,loc,xprintf("cannot cast %s to %s",typ2string(t2),
-				  typ2string(t)));
-  }
+				   typ2string(t)));
   return synth_set_typ(esyn,t);
 }
 
@@ -670,19 +638,14 @@ static synth tcCast(tenv te, segment loc, Opt_t<typ> topt, typ t, exp e) {
 static bool lhs_const(tenv te, exp e) {
   // in some situations, the pointer must actually be const
   switch (e->r) {
-  case Var_e(q):
+  case Var_e(q,_):
     switch (lookup_ordinary(te,e->loc,q)) {
-    case LocalRes(vi): return vi->tq->q_const;
+    case LocalRes(vi):    return vi->tq->q_const;
     case GlobalRes(_,vi): return vi->tq->q_const;
-    case UnknownRes:
-      terr(e->loc,"UnknownVar in lhs_const");
-      return false;
-    case StructRes(_):
-      throw impos("StructRes in lhs_const");
-    case EnumRes(_,_):
-      throw impos("EnumRes in lhs_const");
-    case XenumRes(_,_):
-      throw impos("XenumRes in lhs_const");
+    case UnknownRes:      terr(e->loc,"UnknownVar in lhs_const"); return false;
+    case StructRes(_):    throw impos("StructRes in lhs_const");
+    case EnumRes(_,_):    throw impos("EnumRes in lhs_const");
+    case XenumRes(_,_):   throw impos("XenumRes in lhs_const");
     }
   case Cast_e(_,e2): return lhs_const(te,e2);
   case StructMember_e(e2,f):
@@ -691,11 +654,9 @@ static bool lhs_const(tenv te, exp e) {
     case StructType(nopt,ts):
       let sd = lookup_structdecl(te,e2->loc,nopt->v);
       let fields = sd->fields == null ? null : sd->fields->v;
-      while (fields != null) {
+      for(; fields != null; fields = fields->tl)
 	if (String::strcmp(fields->hd[0],f) == 0)
 	  return fields->hd[1]->q_const;
-	fields = fields->tl;
-      }
       terr(e2->loc,xprintf("bad field %s in struct %s",f,qvar2string(nopt->v)));
       return false;
     default:
@@ -715,14 +676,14 @@ static bool lhs_const(tenv te, exp e) {
       return ts->hd[0]->q_const;
     default:
       terr(e->loc,xprintf("expression is not an array or tuple, it has type %s",
-                         typ2string(t)));
+			  typ2string(t)));
       return false;
     }
   default: return false;
   }
 }
 
-/* &e */
+// &e 
 static synth tcAddress(tenv te, segment loc, Opt_t<typ> topt, exp e) {
   //  if (!is_lvalue(e))
   //    return expr_err(te,loc,"unary & applied to non-lvalue");
@@ -762,9 +723,7 @@ static void ok_sizeof(tenv te, segment loc, typ t) {
     case TaggedArray: return;
     case FixedArray(_): ok_sizeof(te,loc,t2); return;
     }
-  case FnType(_,_,_,_):
-    terr(loc,"sizeof applied to function type");
-    return;
+  case FnType(_,_,_,_): terr(loc,"sizeof applied to function type"); return;
   case TupleType(tqts):
     for (; tqts != null; tqts = tqts->tl)
       ok_sizeof(te,loc,tqts->hd[1]);
@@ -779,41 +738,34 @@ static void ok_sizeof(tenv te, segment loc, typ t) {
 			 qvar2string(td)));
 	return;
       }
-      for (let fs = sd->fields->v; fs != null; fs = fs->tl) {
+      for (let fs = sd->fields->v; fs != null; fs = fs->tl) 
 	ok_sizeof(te,loc,substitute(inst,fs->hd[2]));
-      }
     }
     return;
-  case UnionType: 
-    impos("ok_sizeof: uniontype");
-    return;
-  case TypedefType(_,_,_):
-    impos("ok_sizeof: typedeftype");
-    return;
+  case UnionType: impos("ok_sizeof: uniontype"); return;
+  case TypedefType(_,_,_): impos("ok_sizeof: typedeftype"); return;
   }
 }
 
-/* sizeof t */
+// sizeof t 
 static synth tcSizeof(tenv te, segment loc, Opt_t<typ> topt, typ t) {
   check_valid_type(loc,te,lookup_type_vars(te),t);
   ok_sizeof(te,loc,t);
   return standard_synth(te,uint_t);
 }
 
-/* *e */
+// *e 
 static synth tcDeref(tenv te, segment loc, Opt_t<typ> topt, exp e) {
   synth esyn = tcExp(te,null,e);
   typ t = compress(e->topt->v);
   switch (t) {
-  case PointerType(t2,_,_):
-    return synth_set_typ(esyn,t2);
-  default:
-    return expr_err(te,loc,xprintf("expecting * or @ type but found %s",
-				  typ2string(t)));
+  case PointerType(t2,_,_): return synth_set_typ(esyn,t2);
+  default: return expr_err(te,loc,xprintf("expecting * or @ type but found %s",
+					  typ2string(t)));
   }
 }
 
-/* e->f */
+// e->f 
 static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt, 
 			    exp e, field_name f) {
   synth esyn = tcExp(te,null,e);
@@ -825,10 +777,9 @@ static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt,
     let n = nopt->v; // FIX: is this guaranteed non-null?
     let sd = lookup_structdecl(te,loc,n);
     let finfo_opt = lookup_struct_field(sd,f);
-    if (finfo_opt == null) {
+    if (finfo_opt == null) 
       return expr_err(te,loc,xprintf("struct %s has no %s field",
-				    qvar2string(n),f));
-    }
+				     qvar2string(n),f));
     let inst = List::zip(sd->tvs,ts);
     let t2 = substitute(inst,finfo_opt->v[1]);
     return synth_set_typ(esyn,t2);
@@ -862,14 +813,15 @@ static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt,
                               typ2string(t)));
     }
   default:
-      return expr_err(te,loc,xprintf("expecting struct pointer, found %s",typ2string(t)));
+      return expr_err(te,loc,xprintf("expecting struct pointer, found %s",
+				     typ2string(t)));
   }
 }
 
 /* e1[e2] */
 static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) {
   let list_result = tcExpList(te,&cons(e1,&cons(e2,null)));
-  typ res_t;
+  typ res;
   typ t1 = compress(e1->topt->v);
   typ t2 = compress(e2->topt->v);
   // NOTE: we use unsigned int here, unlike C, because we do not support
@@ -886,12 +838,12 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) 
     case TupleType(ts):
       unsigned int i = eval_const_uint_exp(e2);
       try {
-        res_t = List::nth(ts,i)[1];
+        res = List::nth(ts,i)[1];
       } catch {
       case Nth:
         return expr_err(te,loc,
-                        xprintf("index is %d but tuple has only %d fields",
-                                i,List::length(ts)));
+			xprintf("index is %d but tuple has only %d fields",
+                                i, List::length(ts)));
       }
       break;
     default:
@@ -904,7 +856,7 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) 
   case TupleType(ts):
     unsigned int i = eval_const_uint_exp(e2);
     try {
-      res_t = List::nth(ts,i)[1];
+      res = List::nth(ts,i)[1];
     } catch {
     case Nth:
       return
@@ -916,33 +868,33 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2) 
   case ArrayType(ta,q,ak):
     if (ak == UntaggedArray)
       expr_err(te,loc,xprintf("can't safely index into untagged array"));
-    res_t = ta;
+    res = ta;
     break;
   default:
     return expr_err(te,loc,
 		   xprintf("subscript applied to %s (array or tuple required)",
 			   typ2string(t2)));
   }
-  return synth_set_typ(list_result,res_t);
+  return synth_set_typ(list_result,res);
 }
 
 static typ exp_typ(exp e) {
   return e->topt->v;
 }
 
-/* $(es) */
+// $(es) 
 static $(tqual,typ)@ make_tuple_field(typ t) {
   return &$(&Tqual{.q_const = false,
                       .q_volatile = false, .q_restrict = false},t);
 }
 static synth tcTuple(tenv te, segment loc, Opt_t<typ> topt, list<exp> es) {
   let list_result = tcExpList(te,es);
-  list<typ> ts = List::map(exp_typ,es);
+  list<typ>           ts     = List::map(exp_typ,es);
   list<$(tqual,typ)@> fields = List::map(make_tuple_field,ts);
   return synth_set_typ(list_result,TupleType(fields));
 }
 
-/* Compound literals, e.g., (struct foo){3,"abc"} */
+// Compound literals, e.g., (struct foo){3,"abc"} 
 static synth tcCompoundLit(tenv te, segment loc, Opt_t<typ> topt,
 			   $(Opt_t<string>,tqual,typ)@ t,
 			   list<$(list<designator>,exp)@> des) {
@@ -970,18 +922,21 @@ static synth tcArray(tenv te,segment loc,Opt_t<typ> topt,
     }
   }
   let list_result = tcExpList(te,es);
-  typ res_t = wildtyp();
-  if (!coerce_list(te,res_t,es))
-    terr(es->hd->loc,xprintf("elements of array do not all have the same type (%s)",typ2string(res_t)));
+  typ res = wildtyp();
+  if (!coerce_list(te,res,es))
+    terr(es->hd->loc,
+	 xprintf("elements of array do not all have the same type (%s)",
+		 typ2string(res)));
   let sz_rexp = Const_e(Int_c(Unsigned,List::length(es)));
-  exp sz_exp = &Exp{.topt=&Opt(uint_t),.r=sz_rexp,.loc=loc};
-  typ res_t2 = ArrayType(res_t,empty_tqual(),FixedArray(sz_exp));
+  exp sz_exp = new_exp(sz_rexp,loc);
+  sz_exp->topt = &Opt(uint_t);
+  typ res_t2 = ArrayType(res,empty_tqual(),FixedArray(sz_exp));
   // check that any designators make sense
   for(int offset = 0; des != null; offset++, des = des->tl) {
     list<designator> ds = des->hd[0];
     if (ds != null) {
-      //      if (ds->hd->tl != null)
-      //	terr(ds->hd[1]->loc,"only array index designators are supported");
+      //   if (ds->hd->tl != null)
+      //     terr(ds->hd[1]->loc,"only array index designators are supported");
       switch (ds->hd) {
       case FieldName(_):
 	terr(loc,"only array index designators are supported");
@@ -990,9 +945,8 @@ static synth tcArray(tenv te,segment loc,Opt_t<typ> topt,
 	tcExp(te,null,e);
 	unsigned int i = eval_const_uint_exp(e);
 	if (i != offset)
-	  terr(e->loc,
-               xprintf("expecting index designator %d but found %d",
-                       offset,i));
+	  terr(e->loc, xprintf("expecting index designator %d but found %d",
+			       offset,i));
         break;
       }
     }
@@ -1012,9 +966,8 @@ static synth tcComprehension(tenv te,segment loc,Opt_t<typ> topt,
   // if topt is present, cast the body to topt's element type
   if (topt != null) {
     switch (compress(topt->v)) {
-    case ArrayType(elt_t,_,_):
-      body->r = cast_exp(elt_t,
-			      new_exp(body->r,body->loc),body->loc)->r;
+    case ArrayType(elt_typ,_,_):
+      body->r = cast_exp(elt_typ, new_exp(body->r,body->loc),body->loc)->r;
       break;
     default:
       terr(loc,xprintf("initializer for %s is an array",typ2string(topt->v)));
@@ -1024,11 +977,11 @@ static synth tcComprehension(tenv te,segment loc,Opt_t<typ> topt,
   // type-check the body in the new environment
   let esyn_body = tcExp(te2,null,body);
   array_kind k;
-  if (is_const_exp(te2,bound)) {
+  if (is_const_exp(te2,bound)) 
     k = FixedArray(bound);
-  } else {
+  else 
     k = TaggedArray;
-  }
+
   typ t = ArrayType(synth_typ(esyn_body), empty_tqual(), k);
   // the body may never be executed -- like a while or for loop
   return synth_set_typ(loop_synth(esyn_bound,esyn_body),t);
@@ -1041,15 +994,14 @@ static synth tcComprehension(tenv te,segment loc,Opt_t<typ> topt,
 // the first field that has not yet been explicitly mentioned.  So,
 // for instance, if we have:
 //  struct Foo {int a,b,c,d,e;}
-//  Foo{->c=3,->d=4,1,2,5};
+//  Foo{.c=3,.d=4,1,2,5};
 // then this is the same as Foo{->a=1,->b=2,->c=3,->d=4,->e=5};
 // Later, we should support array designators and so forth.
-static synth
-tcStruct(tenv te, segment loc, Opt_t<typ> topt,
-         typedef_name @tn,                    // arg[0]
-         Opt_t<list<typ>> @otyps,             // arg[1]
-         list<$(list<designator>,exp)@> args, // arg[2]
-         Opt_t<structdecl> sd_opt) {          // arg[3] 
+static synth tcStruct(tenv te, segment loc, Opt_t<typ> topt,
+		      typedef_name @tn,                    // arg[0]
+		      Opt_t<list<typ>> @otyps,             // arg[1]
+		      list<$(list<designator>,exp)@> args, // arg[2]
+		      Opt_t<structdecl> sd_opt) {          // arg[3] 
   structdecl sd;
   if (sd_opt != null)
     sd = sd_opt->v;
@@ -1074,15 +1026,13 @@ tcStruct(tenv te, segment loc, Opt_t<typ> topt,
   let list_result = tcExpList(te,List::map(snd,args)); //@<list<designator>,exp>
   // for each argument find its field and make sure its type matches
   while (args != null) {
-    let ds = args->hd[0];
-    let e = args->hd[1];
+    let &$(ds,e) = args->hd;
     $(field_name,tqual,typ)@ field;
     if (ds == null) {
       // no explicit designator -- take the first field
-      if (fields == null) {
+      if (fields == null) 
 	return expr_err(te,e->loc,xprintf("extra argument to struct %s",
-					qvar2string(*tn)));
-      }
+					  qvar2string(*tn)));
       field = fields->hd;
       args->hd[0] = &cons(FieldName(field[0]),null);
       fields = fields->tl;
@@ -1110,8 +1060,8 @@ tcStruct(tenv te, segment loc, Opt_t<typ> topt,
     let field_typ = substitute(inst,field[2]);
     if (!coerce_arg(te,e,field_typ))
       terr(e->loc,xprintf("field %s of struct %s expects type %s != %s",
-			    field[0],qvar2string(*tn),typ2string(field_typ),
-			    typ2string(e->topt->v)));
+			  field[0],qvar2string(*tn),typ2string(field_typ),
+			  typ2string(e->topt->v)));
     args = args->tl;
   }
   if (fields != null)
@@ -1120,25 +1070,24 @@ tcStruct(tenv te, segment loc, Opt_t<typ> topt,
   return synth_set_typ(list_result,res_t);
 }
 
-/* f(es)   where f is an enum */
-static synth
-tcEnum(tenv te, segment loc, Opt_t<typ> topt,
-       qvar f,
-       Opt_t<list<typ>> @all_ref,
-       Opt_t<list<typ>> @exist_ref,
-       list<exp> es,
-       enumdecl ed,
-       enumfield ef) {
+// f(es)   where f is an enum 
+static synth tcEnum(tenv te, segment loc, Opt_t<typ> topt,
+		    qvar f,
+		    Opt_t<list<typ>> @all_ref,
+		    Opt_t<list<typ>> @exist_ref,
+		    list<exp> es,
+		    enumdecl  ed,
+		    enumfield ef) {
   // FIX: the topt arg is not used ??
   let list_result = tcExpList(te,es);
-  let all_inst = List::map(make_inst_var,ed->tvs);
-  let exist_inst = List::map(make_inst_var,ef->tvs);
-  let all_typs = List::map(snd,all_inst); // @<var,typ>
-  let exist_typs = List::map(snd,exist_inst); //@<var,typ>
+  let all_inst    = List::map(make_inst_var,ed->tvs);
+  let exist_inst  = List::map(make_inst_var,ef->tvs);
+  let all_typs    = List::map(snd,all_inst);   // @<var,typ>
+  let exist_typs  = List::map(snd,exist_inst); // @<var,typ>
   let inst = List::append(all_inst,exist_inst);
   *all_ref = &Opt(all_typs);
   *exist_ref = &Opt(exist_typs);
-  typ res_t = EnumType(ed->name,all_typs);
+  typ res = EnumType(ed->name,all_typs);
   list<$(tqual,typ)@> ts = ef->typs;
   while (es != null && ts != null) {
     exp e = es->hd; es = es->tl;
@@ -1146,72 +1095,72 @@ tcEnum(tenv te, segment loc, Opt_t<typ> topt,
     ts = ts->tl;
     if (!coerce_arg(te,e,t))
       terr(e->loc,
-           xprintf("enum constructor %s expects argument of type %s but this argument has type %s",qvar2string(f),typ2string(t),
+           xprintf("enum constructor %s expects argument of type %s "
+		   "but this argument has type %s",
+		   qvar2string(f),typ2string(t),
 		   (e->topt == null) ? (string)"?" : typ2string(e->topt->v)));
   }
-  if (es != null) {
+  if (es != null) 
     return expr_err(te,es->hd->loc,
 		    xprintf("too many arguments for enum constructor %s",
-			   qvar2string(f)));
-  }
-  else if (ts != null) {
-    return expr_err(te,loc,
-		    xprintf("too few arguments for enum constructor %s",
-                           qvar2string(f)));
-  }
-  return synth_set_typ(list_result,res_t);
+			    qvar2string(f)));
+  else if (ts != null) 
+    return expr_err(te,loc, xprintf("too few arguments for enum constructor %s",
+				    qvar2string(f)));
+  else
+    return synth_set_typ(list_result,res);
 }
 
-/* f(es)   where f is an xenum */
-static synth
-tcXenum(tenv te, segment loc, Opt_t<typ> topt,
-	qvar f,
-        Opt_t<list<typ>> @exist_ref,
-        list<exp> es,
-        xenumdecl xd,
-        enumfield ef) {
+// f(es)   where f is an xenum 
+static synth tcXenum(tenv te, segment loc, Opt_t<typ> topt,
+		     qvar f,
+		     Opt_t<list<typ>> @exist_ref,
+		     list<exp> es,
+		     xenumdecl xd,
+		     enumfield ef) {
   let list_result = tcExpList(te,es);
-  let exist_inst = List::map(make_inst_var,ef->tvs);
-  let exist_typs = List::map(snd,exist_inst); //@<var,typ>
+  let exist_inst  = List::map(make_inst_var,ef->tvs);
+  let exist_typs  = List::map(snd,exist_inst); //@<var,typ>
   *exist_ref = &Opt(exist_typs);
-  typ res_t = XenumType(xd->name);
+  typ res = XenumType(xd->name);
   list<$(tqual,typ)@> ts = ef->typs;
   while (es != null && ts != null) {
     exp e = es->hd; es = es->tl;
     typ t = substitute(exist_inst,ts->hd[1]); 
     ts = ts->tl;
     if (!coerce_arg(te,e,t))
-      terr(e->loc,xprintf("xenum constructor %s expects argument of type %s but this argument has type %s",qvar2string(f),typ2string(t),typ2string(e->topt->v)));
+      terr(e->loc,xprintf("xenum constructor %s expects argument of type %s "
+			  "but this argument has type %s",
+			  qvar2string(f),typ2string(t),typ2string(e->topt->v)));
   }
   if (es != null)
     terr(es->hd->loc,xprintf("too many arguments for xenum constructor %s",
-                           qvar2string(f)));
+			     qvar2string(f)));
   else if (ts != null)
     terr(es->hd->loc,xprintf("too few arguments for xenum constructor %s",
-                           qvar2string(f)));
-  return synth_set_typ(list_result,res_t);
+			     qvar2string(f)));
+  return synth_set_typ(list_result,res);
 
 }
 
-/* ({ s }) */
+// ({ s }) 
 static Opt_t<typ> find_stmt_typ(stmt s) {
   switch (s->r) {
-  case Exp_s(e): return e->topt;
+  case Exp_s(e):     return e->topt;
   case Seq_s(s1,s2): return find_stmt_typ(s2);
   case Decl_s(d,s1): return find_stmt_typ(s1);
-  default: return null;
+  default:           return null;
   }
 }
 static synth tcStmtExp(tenv te, segment loc, Opt_t<typ> topt, stmt s) {
-  let ssyn = tcStmt(te,s);
+  let ssyn  = tcStmt(te,s);
   let topt2 = find_stmt_typ(s);
-  if (topt2 == null) {
+  if (topt2 == null) 
     return expr_err(te,loc,"cannot determine type of statement expression");
-  }
   return synth_set_typ(ssyn,topt2->v);
 }
 
-/* codegen(fd) */
+// codegen(fd) 
 static synth tcCodegen(tenv te, segment loc, Opt_t<typ> topt, fndecl fd) {
   typ t = fndecl2typ(fd);
   /*
@@ -1227,7 +1176,7 @@ static void tcFn_d(tenv te, segment loc, Opt_t<typ> topt, fndecl fd) {
   return;
 }
 
-/* fill(e) */
+// fill(e) 
 static synth tcFill(tenv te, segment loc, Opt_t<typ> topt, exp e) {
   return expr_err(te,loc,"tcFill");
 //  switch te->local {
@@ -1248,7 +1197,7 @@ static bool cnst_exp(tenv te, bool var_okay, exp e) {
   switch (e->r) {
   case Const_e(_):
     return true;
-  case Var_e(qv): 
+  case Var_e(qv,_): 
     // NB: top-level function names are "constant" 
     // Fix: what about arrays?
     switch (lookup_ordinary(te, e->loc, qv)) {
@@ -1264,7 +1213,7 @@ static bool cnst_exp(tenv te, bool var_okay, exp e) {
   case Primop_e(p,es):
     return (List::forall_c(is_const_exp,te,es));
   case Conditional_e(e1,e2,e3):
-    return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2) && 
+    return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2) &&
 	    cnst_exp(te,false,e3));
   case SeqExp_e(e1,e2):
     return (cnst_exp(te,false,e1) && cnst_exp(te,false,e2));
@@ -1337,9 +1286,7 @@ synth tcExp(tenv te, Opt_t<typ> topt, exp e) {
           typ ftyp = substitute(instantiation,
                                 FnType(null,rtyp,args,varargs));
           typ new_typ = PointerType(ftyp,x,tq);
-          exp inner = &Exp{.topt=e->topt,
-                           .r=e->r,
-                           .loc=e->loc};
+	  exp inner = copy_exp(e);
           e->r = Instantiate_e(inner,&Opt(ts));
           e->topt = &Opt(new_typ);
           esyn = synth_set_typ(esyn,new_typ);
@@ -1357,57 +1304,58 @@ synth tcExp(tenv te, Opt_t<typ> topt, exp e) {
   return esyn;
 }
 
-/* Type-check the expression -- don't do any implicit instantiation. */
+// Type-check the expression -- don't do any implicit instantiation. 
 static synth tcExpNoInst(tenv te, Opt_t<typ> topt, exp e) {
   segment loc = e->loc;
   synth esyn;
 
   switch (e->r) {
-  case NoInstantiate_e(e2)        :
+  case NoInstantiate_e(e2):
     // This would handle two NoInstantiates in a row; but note that
     // for now the parser does not produce this ( x<><> won't parse ).
     return tcExpNoInst(te,null,e2);
-  case UnknownId_e(q)            :
+  case UnknownId_e(q):
     // resolve the identifier and then re-type-check the expression
     resolve_unknown_id(te,e,q);
     return tcExpNoInst(te,topt,e);
-  case UnknownCall_e(e1,es)     :
+  case UnknownCall_e(e1,es):
     // resolve e1 as a function or struct, enum, or xenum constructor and
     // then re-type-check the expression
     resolve_unknown_fn(te,e,e1,es);
     return tcExpNoInst(te,topt,e);
-  case UnresolvedMem_e(nopt,ds) :
+  case UnresolvedMem_e(nopt,ds):
     // resolve as an array or struct and then re-type-check the expression
     resolve_unresolved_mem(te,loc,topt,e,nopt,ds);
     return tcExpNoInst(te,topt,e);
     // Dispatch the other cases 
-  case Const_e(c)               : esyn = tcConst(te,loc,topt,c); break;
-  case Var_e(q)                 : esyn = tcVar(te,loc,topt,q,e); break;
-  case Primop_e(p,es)           : esyn = tcPrimop(te,loc,topt,p,es); break;
-  case Increment_e(e1,i)        : esyn = tcIncrement(te,loc,topt,e1,i); break;
-  case AssignOp_e(e1,popt,e2)   : esyn = tcAssignOp(te,loc,topt,e,e1,popt,e2); break;
-  case Conditional_e(e1,e2,e3)  : esyn = tcConditional(te,loc,topt,e1,e2,e3); break;
-  case SeqExp_e(e1,e2)          : esyn = tcSeqExp(te,loc,topt,e1,e2); break;
-  case FnCall_e(e1,es)          : esyn = tcFnCall(te,loc,topt,e1,es); break;
-  case Throw_e(e1)              : esyn = tcThrow(te,loc,topt,e1); break;
-  case Instantiate_e(e2,*o)     : esyn = tcInstantiate(te,loc,topt,e2,o); break;
-  case Cast_e(t,e1)             : esyn = tcCast(te,loc,topt,t,e1); break;
-  case Address_e(e1)            : esyn = tcAddress(te,loc,topt,e1); break;
-  case Sizeof_e(t)              : esyn = tcSizeof(te,loc,topt,t); break;
-  case Deref_e(e1)              : esyn = tcDeref(te,loc,topt,e1); break;
-  case StructMember_e(e1,f)     : esyn = tcStructMember(te,loc,topt,e1,f); break;
-  case StructArrow_e(e1,f)      : esyn = tcStructArrow(te,loc,topt,e1,f); break;
-  case Subscript_e(e1,e2)       : esyn = tcSubscript(te,loc,topt,e1,e2); break;
-  case Tuple_e(es)              : esyn = tcTuple(te,loc,topt,es); break;
-  case CompoundLit_e(t,des)     : esyn = tcCompoundLit(te,loc,topt,t,des); break;
-  case Array_e(des)             : esyn = tcArray(te,loc,topt,des); break;
-  case Comprehension_e(v,e1,e2) : esyn = tcComprehension(te,loc,topt,v,e1,e2); break;
-  case Struct_e(*tn,*otyps,args,sd_opt)
-    : esyn = tcStruct(te,loc,topt,tn,otyps,args,sd_opt); break;
-  case Enum_e(f,*all_ref,*exist_ref,es,ed,ef)
-    : esyn = tcEnum(te,loc,topt,f,all_ref,exist_ref,es,ed,ef); break;
-  case Xenum_e(f,*exist_ref,es,xd,ef)
-    : esyn = tcXenum(te,loc,topt,f,exist_ref,es,xd,ef); break;
+  case Const_e(c)               : esyn=tcConst(te,loc,topt,c); break;
+  case Var_e(q,vd)              : esyn=tcVar(te,loc,topt,q,e); break;
+  case Primop_e(p,es)           : esyn=tcPrimop(te,loc,topt,p,es); break;
+  case Increment_e(e1,i)        : esyn=tcIncrement(te,loc,topt,e1,i); break;
+  case AssignOp_e(e1,popt,e2): esyn=tcAssignOp(te,loc,topt,e,e1,popt,e2); break;
+  case Conditional_e(e1,e2,e3): esyn=tcConditional(te,loc,topt,e1,e2,e3); break;
+  case SeqExp_e(e1,e2)          : esyn=tcSeqExp(te,loc,topt,e1,e2); break;
+  case FnCall_e(e1,es)          : esyn=tcFnCall(te,loc,topt,e1,es); break;
+  case Throw_e(e1)              : esyn=tcThrow(te,loc,topt,e1); break;
+  case Instantiate_e(e2,*o)     : esyn=tcInstantiate(te,loc,topt,e2,o); break;
+  case Cast_e(t,e1)             : esyn=tcCast(te,loc,topt,t,e1); break;
+  case Address_e(e1)            : esyn=tcAddress(te,loc,topt,e1); break;
+  case Sizeof_e(t)              : esyn=tcSizeof(te,loc,topt,t); break;
+  case Deref_e(e1)              : esyn=tcDeref(te,loc,topt,e1); break;
+  case StructMember_e(e1,f)     : esyn=tcStructMember(te,loc,topt,e1,f); break;
+  case StructArrow_e(e1,f)      : esyn=tcStructArrow(te,loc,topt,e1,f); break;
+  case Subscript_e(e1,e2)       : esyn=tcSubscript(te,loc,topt,e1,e2); break;
+  case Tuple_e(es)              : esyn=tcTuple(te,loc,topt,es); break;
+  case CompoundLit_e(t,des)     : esyn=tcCompoundLit(te,loc,topt,t,des); break;
+  case Array_e(des)             : esyn=tcArray(te,loc,topt,des); break;
+  case Comprehension_e(v,e1,e2) : esyn=tcComprehension(te,loc,topt,v,e1,e2); 
+                                  break;
+  case Struct_e(*tn,*otyps,args,sd_opt): 
+    esyn = tcStruct(te,loc,topt,tn,otyps,args,sd_opt); break;
+  case Enum_e(f,*all_ref,*exist_ref,es,ed,ef): 
+    esyn = tcEnum(te,loc,topt,f,all_ref,exist_ref,es,ed,ef); break;
+  case Xenum_e(f,*exist_ref,es,xd,ef): 
+    esyn = tcXenum(te,loc,topt,f,exist_ref,es,xd,ef); break;
   case StmtExp_e(s)             : esyn = tcStmtExp(te,loc,topt,s); break;
   case Codegen_e(fd)            : esyn = tcCodegen(te,loc,topt,fd); break;
   case Fill_e(e1)               : esyn = tcFill(te,loc,topt,e1); break;

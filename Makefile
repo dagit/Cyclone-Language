@@ -41,7 +41,7 @@ bin/gc.a:
 ifdef WINDIR
 	ln bin/gc.windows $@
 else
-	ln bin/gc.libc5 $@
+	ln bin/gc.libc6 $@
 endif
 
 # These targets build off the Cyclone source files, 

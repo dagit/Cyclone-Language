@@ -351,9 +351,9 @@ Doc typ2doc(typ t) {
 //            in key places
 int exp_prec(exp e) {
   switch (e->r) {
-  case Const_e(_):        return 10000;
-  case Var_e(_):          return 10000;
-  case UnknownId_e(_):    return 10000;
+  case Const_e(_):       return 10000;
+  case Var_e(_,_):       return 10000;
+  case UnknownId_e(_):   return 10000;
   case Primop_e(p,_):
     switch (p) {
     case Plus:           return 100; 
@@ -419,7 +419,15 @@ Doc exp2doc_prec(int inprec, exp e) {
   Doc s; 
   switch (e->r) {
   case Const_e(c): s = cnst2doc(c); break;
-  case Var_e(x): s = qvar2doc(x); break;
+    // FIX:
+    //  case Var_e(x,null): throw Failure("var reference without pointer to binder");
+  case Var_e(x,vd):
+    s = qvar2doc(x); 
+    if(vd != null && vd->shadow_depth > 0)
+//    if(d > 0)
+      s = cat2(text(xprintf("%d",vd->shadow_depth)),s);
+    // DO PUT ID IN IF IT'S > 0
+    break;
   case UnknownId_e(x): s = qvar2doc(x); break;
   case Primop_e(p,es): s = primapp2doc(myprec,p,es); break;
   case AssignOp_e(e1,popt,e2): 
@@ -432,8 +440,8 @@ Doc exp2doc_prec(int inprec, exp e) {
   case Increment_e(e2,i):
     let es = exp2doc_prec(myprec,e2);
     switch (i) {
-    case PreInc: s = cat2(text("++"),es); break;
-    case PreDec: s = cat2(text("--"),es); break;
+    case PreInc:  s = cat2(text("++"),es); break;
+    case PreDec:  s = cat2(text("--"),es); break;
     case PostInc: s = cat2(es,text("++")); break;
     case PostDec: s = cat2(es,text("--")); break;
     }
@@ -443,15 +451,11 @@ Doc exp2doc_prec(int inprec, exp e) {
     bool is_and = false;
     bool is_or  = false;
     switch (e2->r) {
-    case Const_e(c):
-      switch (c) {case Bool_c(b): is_or = b; break; default: break;}
-      break;
+    case Const_e(Bool_c(true)):  is_or  = true; break;
     default: break;
     }
     switch (e3->r) {
-    case Const_e(c):
-      switch (c) {case Bool_c(b): is_and = !b; break; default: break;}
-      break;
+    case Const_e(Bool_c(false)): is_and = true; break;
     default: break;
     }
     if (is_or) 
@@ -553,7 +557,7 @@ Doc exp2doc_prec(int inprec, exp e) {
              egroup("(",")",",",List::map(exp2doc,es)));
     break;
   case UnresolvedMem_e(n,des): 
-    /* Currently n is always null from the parser */
+    // Currently n is always null from the parser 
     s = group("{","}",",",List::map(de2doc,des));
     break;
   case StmtExp_e(s2):
@@ -967,7 +971,7 @@ Doc pat2doc(pat p) {
   case Char_p(ch): s = text(xprintf("'%s'",char_escape(ch))); break;
   case Bool_p(b): s = text(b ? (string)"true" : (string)"false"); break;
   case Float_p(x): s = text(x); break;
-  case Var_p(v): s = text(v); break;
+  case Var_p(vd): s = qvar2doc(vd->name); break;
   case Tuple_p(ts):
     s = cat3(text("$("),
              ppseq(pat2doc,",",ts),
@@ -976,8 +980,8 @@ Doc pat2doc(pat p) {
   case Pointer_p(p2):
     s = cat2(text("&"),pat2doc(p2));
     break;
-  case Reference_p(v):
-    s = cat2(text("*"),var2doc(v));
+  case Reference_p(vd):
+    s = cat2(text("*"),qvar2doc(vd->name));
     break;
   case UnknownId_p(q):
     s = qvar2doc(q);
@@ -1075,11 +1079,15 @@ Doc decl2doc(decl d) {
                line_doc(),
                text("};"));
     break;
-  case Var_d(vd):
-    s = cat4(scope2doc(vd->sc),
-             tqtd2doc(vd->tq,vd->type,&Opt(qvar2doc(vd->name))),
-             (vd->initializer == null) ? text("")
-               : cat2(text(" = "),exp2doc(vd->initializer->v)),
+  case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth)):
+    Doc sn = qvar2doc(name);
+    if(shadow_depth > 0)
+      sn = cat2(text(xprintf("%d",shadow_depth)), sn);
+    s = cat4(scope2doc(sc),
+             tqtd2doc(tq,type,&Opt(sn)),
+             (initializer == null) 
+	       ? text("")
+	       : cat2(text(" = "),exp2doc(initializer->v)),
              text(";"));
     break;
   case Union_d:

@@ -214,7 +214,7 @@ static void tcVardecl(tenv te, genv ge, segment loc, vardecl vd) {
   // add to environment
   ge->ordinaries = Dict::insert(ge->ordinaries, v,
 				GlobalRes(&$(te->ns,v),
-					  &Var_info(sc, vd->tq, t, false)));
+					  &Var_info(sc, vd->tq, t)));
 }
 
 static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
@@ -236,8 +236,7 @@ static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
   // due to recursion, add function to environment before checking body
   ge->ordinaries = Dict::insert(ge->ordinaries, v,
 				GlobalRes(&$(te->ns,v),
-					  &Var_info(sc, empty_tqual(), t,
-						    false)));
+					  &Var_info(sc, empty_tqual(), t)));
   // DAN: Here is where I'm assuming the te can be imperatively screwed with
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
@@ -250,9 +249,7 @@ static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
 			   .type_vars  = fd->tvs // FIX: check unique
                           }));
   for (let args = fd->args; args != null; args = args->tl) {
-    var v2 = args->hd[0];
-    tqual tq = args->hd[1];
-    typ t2 = args->hd[2];
+    let &$(v2,tq,t2) = args->hd;
     te = add_local_var(loc,te,v2,tq,t2,true); // add_local_var is functional!
   }
   // check the body, then get rid of local environment
@@ -260,9 +257,8 @@ static void tcFndecl(tenv te, genv ge, segment loc, fndecl fd) {
   te->le = null;
   // check for return
   if (fd->ret_type != VoidType && synth_may_implicit_fallthru(ssyn))
-    terr(loc,
-         xprintf("function may complete without returning a value of type %s",
-                 typ2string(fd->ret_type)));
+    terr(loc, xprintf("function may complete without returning a value of type"
+		      " %s", typ2string(fd->ret_type)));
 }
 
 static void tcTypedefdecl(tenv te, genv ge, segment loc, typedefdecl td) {

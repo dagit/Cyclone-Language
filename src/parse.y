@@ -625,7 +625,7 @@ apply_tms(tqual tq,typ t,list<type_modifier> tms)
         // anyway.  TODO: maybe we should issue a warning.  But right
         // now we don't have a loc so the warning will be confusing.
         return apply_tms(empty_tqual(),
-			 function_t(typvars,t,args2,vararg),tms->tl);
+			 function_typ(typvars,t,args2,vararg),tms->tl);
       case NoTypes(_,loc):
         return(abort("function declaration without parameter types",loc));
       }
@@ -730,9 +730,7 @@ make_declarations(Opt_t<decl_spec_t> dso,list<$(declarator_t,Opt_t<exp>)@> ids,
   scope s = (scopeopt == null ? Public : scopeopt->v);
 
   /* separate the declarators from their initializers */
-  let pair = List::split(ids);
-  list<declarator_t> declarators = pair[0];
-  list<Opt_t<exp>> exprs = pair[1];
+  let $(declarators, exprs) = List::split(ids);
   /* check to see if there are no initializers -- useful later on */
   bool exps_empty = true;
   for (list<Opt_t<exp>> es = exprs; es != null; es = es->tl)
@@ -766,11 +764,11 @@ make_declarations(Opt_t<decl_spec_t> dso,list<$(declarator_t,Opt_t<exp>)@> ids,
       switch (t) {
       case StructType(n,ts):
         let ts2 = List::map_c(typ2tvar,loc,ts);
-        let sd = &Structdecl{.sc = s, .name = n, .tvs = ts2, .fields = null};
+        let sd  = &Structdecl{.sc = s, .name = n, .tvs = ts2, .fields = null};
         return &cons(&Decl(Struct_d(sd),loc),null);
       case EnumType(n,ts):
         let ts2 = List::map_c(typ2tvar,loc,ts);
-        let ed = &Enumdecl{.sc = s, .name = n, .tvs = ts2, .fields = null};
+        let ed  = &Enumdecl{.sc = s, .name = n, .tvs = ts2, .fields = null};
         return &cons(&Decl(Enum_d(ed),loc),null);
       case XenumType(n):
         let ed = &Xenumdecl{.sc=s, .name=n, .fields=null};
@@ -813,18 +811,15 @@ make_declarations(Opt_t<decl_spec_t> dso,list<$(declarator_t,Opt_t<exp>)@> ids,
       list<decl> decls = null;
       list<$(qvar,tqual,typ,list<tvar>)@> ds;
       for (ds = fields; ds != null; ds = ds->tl) {
-        let q = ds->hd;
-        if (q[3] != null)
+	let &$(x,tq2,t2,tvs2) = ds->hd;
+        if (tvs2 != null)
           warn("bad type params, ignoring",loc);
-        let x = q[0];
-        let tq2 = q[1];
-        let t2 = q[2];
         if (exprs == null)
           abort("unexpected null in parse!",loc);
         let eopt = exprs->hd;
         exprs = exprs->tl;
         let vd = &Vardecl {.sc = s, .name = x, .tq = tq2, .type = t2,
-			   .initializer = eopt};
+			   .initializer = eopt, .shadow_depth = -1};
         let d = &Decl(Var_d(vd),loc);
         decls = &cons(d,decls);
       }
@@ -1920,7 +1915,8 @@ pattern:
 | '&' pattern
     {$$=^$(new_pat(Pointer_p($2),LOC(@1,@2)));}
 | '*' IDENTIFIER
-    {$$=^$(new_pat(Reference_p($2),LOC(@1,@2)));}
+    {$$=^$(new_pat(Reference_p(new_vardecl(&$(null,$2),VoidType,null)),
+		   LOC(@1,@2)));}
 ;
 
 tuple_pattern_list:

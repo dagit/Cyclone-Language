@@ -125,8 +125,8 @@ extern bool exists<`a>(bool pred(`a),list<`a> x);
 extern list<$(`a,`b)@> zip<`a,`b>(list<`a> x,list<`b> y);
 
 // Given [(x1,y1),...,(xn,yn)], return ([x1,...,xn],[y1,...,yn])
-extern $(list<`a>,list<`b>)@ split<`a,`b>(list<$(`a,`b)@> x);
-extern $(list<`a>,list<`b>,list<`c>)@ split3<`a,`b,`c>(list<$(`a,`b,`c)@> x);
+extern $(list<`a>,list<`b>) split<`a,`b>(list<$(`a,`b)@> x);
+extern $(list<`a>,list<`b>,list<`c>) split3<`a,`b,`c>(list<$(`a,`b,`c)@> x);
   
 // Given a list [x1,...,xn] and x, determine if x is in the list.  Uses
 // physical equality for comparison.

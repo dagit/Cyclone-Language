@@ -21,15 +21,14 @@ extern struct Var_info {
   scope sc;
   tqual tq;
   typ   t;
-  bool  is_used;
 };
 typedef struct Var_info @var_info;
 
-/* Flags that control whether an operation (e.g., break) is okay */
+// Flags that control whether an operation (e.g., break) is okay 
 extern struct Ok_ctrl;
-typedef struct Ok_ctrl @ok_ctrl;
+typedef struct Ok_ctrl @ok_ctrl_t;
 
-/* Used to tell what an ordinary identifer refers to */
+// Used to tell what an ordinary identifer refers to 
 extern enum Resolved {
   UnknownRes;
   LocalRes(var_info);
@@ -40,7 +39,7 @@ extern enum Resolved {
 };
 typedef enum Resolved resolved;
 
-/* Global environments -- what's declared in a global scope */
+// Global environments -- what's declared in a global scope 
 extern struct Genv {
   Set<var>              namespaces;
   Dict<var,structdecl>  structdecls;
@@ -52,18 +51,18 @@ extern struct Genv {
 };
 typedef struct Genv @genv;
 
-/* Local function environments */
+// Local function environments 
 extern struct Fenv {
   list<var>             labels;
   Dict<var,var_info>    locals;
-  ok_ctrl               ok;
+  ok_ctrl_t             ok;
   Set<var>              uv; // maybe-unassigned variables
   typ                   return_typ;
   list<tvar>            type_vars; // type variables that can occur free
 };
 typedef struct Fenv @fenv; 
 
-/* Models the nesting of the RTCG constructs */
+// Models the nesting of the RTCG constructs 
 extern enum Frames<`a> {
   Outermost(`a);
   Frame(`a,enum Frames<`a>);
@@ -71,7 +70,7 @@ extern enum Frames<`a> {
 };
 typedef enum Frames<`a> frames<`a>;
 
-/* Type environments */
+// Type environments 
 extern struct Tenv {
   list<var>            ns; // current namespace
   Dict<list<var>,genv> ae; // absolute environment
@@ -86,12 +85,12 @@ extern bool is_ok_continue(tenv);
 extern bool is_ok_break(tenv);
 extern bool is_ok_fallthru(tenv);
 
-extern ok_ctrl default_ok_ctrl;
+extern ok_ctrl_t default_ok_ctrl;
  
 extern tenv enter_ns(tenv, var);
 extern genv genv_concat(genv, genv);
 
-/* lookup functions */
+// lookup functions 
 extern list<var>   resolve_namespace(tenv,segment,list<var>);
 extern genv        lookup_namespace(tenv,segment,list<var>);
 extern resolved    lookup_ordinary(tenv,segment,qvar);
@@ -121,26 +120,27 @@ extern synth synth_set_typ(synth s,typ t);
 
 // we refine the flow-through edge for boolean expressions to the "on true"
 // and "on false" cases.  
+  // FIX: separate pass and include var id's
 extern enum Unassigned {
   Always(Set<var>);  // unassigned after expression
   Boolean(Set<var>,Set<var>); // unassigned when true, when false
 };
-typedef enum Unassigned unassigned;
+typedef enum Unassigned unassigned_t;
 
-extern unassigned merge_unassigned(unassigned, unassigned);
+extern unassigned_t merge_unassigned(unassigned_t, unassigned_t);
 
 // make the unassigned set in the resulting tenv come from the 
 // "fallthrough" edge of the synth
 extern tenv layer_synth(tenv,synth);
 // give back two environments -- one when the exp is true and one when false
-extern $(tenv,tenv)@ bool_layer_synth(tenv,synth);
+extern $(tenv,tenv) bool_layer_synth(tenv,synth);
 // synth we get for most expressions and atomic statements -- implicit 
 // fallthru with no forward jump, and all currently unassigned variables as
 // unassigned on the normal edge, empty set of unassigned variables on
 // the forward jump edge.
 extern synth standard_synth(tenv, typ);
 // synth we get on error in expressions (type is wild)
- extern synth wild_synth(tenv);
+extern synth wild_synth(tenv);
 // synth we get for most statements -- standard_synth with void type
 extern synth skip_synth(tenv te);
 // synth we get upon return, continue, raise -- no fallthru or forward jump,
@@ -174,7 +174,7 @@ extern synth drop_fallthru_synth(synth s);
 // set of variables unassigned on fallthru edge
 extern Set<var> maybe_unassigned(synth);
 // set of variables unassigned on "true"/"false" branches respectively
-extern $(Set<var>,Set<var>)@ maybe_unassigned_bool(synth);
+extern $(Set<var>,Set<var>) maybe_unassigned_bool(synth);
 
 extern Set<var> get_unassigned(tenv);
 extern tenv     set_unassigned(tenv, Set<var>);

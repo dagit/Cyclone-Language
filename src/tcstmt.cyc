@@ -32,23 +32,25 @@ using Tcexp;
 using Tcpat;
 
 static tenv add_local_vars(segment loc, tenv te,
-                           list<$(var,tqual,typ)@> x, bool init) {
+                           list<vardecl> x, bool init) {
   tenv te2 = te;
-  for (; x != null; x = x->tl)
-    te2 = add_local_var(loc,te2,x->hd[0],x->hd[1],x->hd[2],init);
+  for (; x != null; x = x->tl) {
+    let &Vardecl(_,&$(_,v),tq,t,_,_) = x->hd;
+    te2 = add_local_var(loc,te2,v,tq,t,init);
+  }
   return te2;
 }
 
-static synth remove_local_vars(tenv te, list<$(var,tqual,typ)@> x,synth ssyn) {
+static synth remove_local_vars(tenv te, list<vardecl> x, synth ssyn) {
   Set::Set<var> vs = Set::empty(String::strcmp);
   for (; x != null; x = x->tl)
-    vs = Set::insert(vs,x->hd[0]);
+    vs = Set::insert(vs,x->hd->name[1]);
   Set::Set<var> shadowed = Set::intersect(get_unassigned(te),vs);
   return add_var_synth(shadowed,ssyn);
 }
 
-static synth decl_synth(tenv te, list<$(var,tqual,typ)@> x, bool init, stmt s) {
-  tenv te2 = add_local_vars(s->loc,te,x,init);
+static synth decl_synth(tenv te, list<vardecl> x, bool init, stmt s) {
+  tenv  te2  = add_local_vars(s->loc,te,x,init);
   synth ssyn = tcStmt(te2,s);
   return remove_local_vars(te,x,ssyn);
 }
@@ -58,13 +60,12 @@ synth tcStmt(tenv te, stmt s0) {
 
   case Skip_s: return skip_synth(te);
 
-  case Exp_s(e): return tcExp(clear_fallthru(te),null,e);
+  case Exp_s(e): return tcExp(te,null,e);
 
   case Seq_s(s1,s2):
     let te1 = clear_fallthru(te);
     let ssyn1 = tcStmt(te1,s1);
-    // JGM: try to treat sequences as "tail-calls" to avoid a deep
-    // stack.
+    // JGM: try to treat sequences as "tail-calls" to avoid a deep stack.
     bool still_working = true;
     while (still_working) {
       switch (s2->r) {
@@ -73,7 +74,7 @@ synth tcStmt(tenv te, stmt s0) {
 	s2 = s4;
 	continue;
       default:
-        still_working = false; // GET OUT OF LOOP
+        still_working = false; // get out of loop
         break;
       }
     }
@@ -94,38 +95,34 @@ synth tcStmt(tenv te, stmt s0) {
       exp e = eopt->v;
       let esyn = tcExp(te,&Opt(t),e);
       if (!coerce_use(te,e,t))
-	terr(s0->loc,
-             xprintf("returns value of type %s but requires %s",
-                     typ2string(synth_typ(esyn)), typ2string(t)));
+	terr(s0->loc, xprintf("returns value of type %s but requires %s",
+			      typ2string(synth_typ(esyn)), typ2string(t)));
       switch (compress(t)) {
-      case VoidType:
-        terr(s0->loc,"attempt to return void expression");
-        break;
+      case VoidType: terr(s0->loc,"attempt to return void expression"); break;
       default: break; // skip
       }
     }
     return empty_synth(te);
 
   case IfThenElse_s(e,s1,s2):
-    let te2 = clear_fallthru(te);
-    let esyn = tcExp(te2,&Opt(bool_t),e);
-    if (!coerce_bool_t(te2,e))
+    te = clear_fallthru(te);
+    let esyn = tcExp(te,&Opt(bool_t),e);
+    if (!coerce_to_bool(te,e))
       terr(e->loc,xprintf("test of if statement has type %s instead of bool",
                           typ2string(synth_typ(esyn))));
-    let te_pr = bool_layer_synth(te2,esyn);
-    let ssyn1 = tcStmt(te_pr[0],s1);
-    let ssyn2 = tcStmt(te_pr[1],s2);
+    let $(true_te,false_te) = bool_layer_synth(te,esyn);
+    let ssyn1 = tcStmt(true_te, s1);
+    let ssyn2 = tcStmt(false_te,s2);
     return join_synth(seq_synth(esyn,ssyn1),seq_synth(esyn,ssyn2));
 
   case While_s(e,s):
-    let te2 = clear_fallthru(te);
+    let te2  = clear_fallthru(te);
     let esyn = tcExp(te2,&Opt(bool_t),e);
-    if (!coerce_bool_t(te2,e))
+    if (!coerce_to_bool(te2,e))
       terr(e->loc,xprintf("test of while loop has type %s instead of bool",
                           typ2string(synth_typ(esyn))));
-    let te_pr = bool_layer_synth(te2,esyn);
-    let te_true = te_pr[0];
-    let ssyn = tcStmt(set_in_loop(te_true),s);
+    let $(true_te,_) = bool_layer_synth(te2,esyn);
+    let ssyn = tcStmt(set_in_loop(true_te),s);
     return loop_synth(esyn,ssyn);
 
   case Break_s:
@@ -150,11 +147,11 @@ synth tcStmt(tenv te, stmt s0) {
     let esyn1 = tcExp(te,null,e1);
     te = layer_synth(te,esyn1);
     let esyn2 = tcExp(te,&Opt(bool_t),e2);
-    let te_pr = bool_layer_synth(te,esyn2);
-    let te_body = set_in_loop(te_pr[0]);
-    if (!coerce_bool_t(te,e2))
+    let $(true_te,_) = bool_layer_synth(te,esyn2);
+    let te_body = set_in_loop(true_te);
+    if (!coerce_to_bool(te,e2))
       terr(e2->loc,xprintf("test of for loop has type %s instead of bool",
-                          typ2string(synth_typ(esyn2))));
+			   typ2string(synth_typ(esyn2))));
     let ssyn = tcStmt(te_body,s);
     te_body = layer_synth(te_body,ssyn);
     let esyn3 = seq_synth(ssyn,tcExp(te_body,null,e3));
@@ -163,24 +160,22 @@ synth tcStmt(tenv te, stmt s0) {
   case Switch_s(e,scs0):
     te = clear_fallthru(te);
     let esyn = tcExp(te,null,e);
-    let t = synth_typ(esyn);
+    let t    = synth_typ(esyn);
     te = layer_synth(te,esyn);
     synth swsyn = (scs0 == null) ? esyn : empty_synth(te);
     for (let scs = scs0; scs != null; scs = scs->tl) {
       let p = scs->hd->pattern;
-      let pat_r = tcPat(te,p);
-      let new_tvs = pat_r[0];
-      let x = pat_r[1];
+      let &$(new_tvs,x) = tcPat(te,p);
       if (!unify(p->topt->v,t))
-	terr(scs->hd->loc,
-	     xprintf("switch on type %s, but case expects type %s",
-		     typ2string(t), typ2string(p->topt->v)));
+	terr(scs->hd->loc,xprintf("switch on type %s, but case expects type %s",
+				  typ2string(t), typ2string(p->topt->v)));
       tenv te2 = add_local_vars(scs->hd->loc,
-                                add_type_vars(scs->hd->loc,te,new_tvs),x,true);
+				add_type_vars(scs->hd->loc,te,new_tvs),
+				x,true);
       let where_opt = scs->hd->where_clause;
       if (where_opt != null) {
 	let esyn1 = tcExp(te2,&Opt(bool_t),where_opt->v);
-	if (!coerce_bool_t(te,where_opt->v))
+	if (!coerce_to_bool(te,where_opt->v))
 	  terr(where_opt->v->loc,
 	       xprintf("where clause has type %s instead of bool",
 		       typ2string(synth_typ(esyn1))));
@@ -188,7 +183,7 @@ synth tcStmt(tenv te, stmt s0) {
 	te2 = layer_synth(te2,esyn1);
       }
       te2 = set_in_switch(te2);
-      let s = scs->hd->body;
+      let s    = scs->hd->body;
       let ssyn = remove_local_vars(te,x,tcStmt(te2,s));
       if (synth_may_implicit_fallthru(ssyn))
 	terr(s->loc,
@@ -204,9 +199,7 @@ synth tcStmt(tenv te, stmt s0) {
 	if (scs->tl == null) terr(s->loc,"last case of switch does a fallthru");
 	else {
 	  let p2 = scs->tl->hd->pattern;
-	  let pat_r2 = tcPat(te,p);
-	  let new_tvs2 = pat_r2[0];
-	  let x2 = pat_r[1];
+	  let &$(new_tvs2,x2) = tcPat(te,p);
 	  for (; new_tvs != null && new_tvs2 != null; new_tvs = new_tvs->tl,
 		 new_tvs2 = new_tvs2->tl) {
 	    if (String::strcmp(new_tvs->hd,new_tvs2->hd) != 0) {
@@ -217,10 +210,11 @@ synth tcStmt(tenv te, stmt s0) {
 	  if (new_tvs != null || new_tvs2 != null)
 	    terr(p2->loc,"case fallthru: bound type variable mismatch");
 	  for (; x != null && x2 != null; x = x->tl, x2 = x2->tl) {
-	    let vqt1 = x->hd;
-	    let vqt2 = x2->hd;
-	    if (String::strcmp(vqt1[0],vqt2[0]) != 0 || !equal_tqual(vqt1[1],vqt2[1]) ||
-		unify(vqt1[2],vqt2[2])) {
+	    let &Vardecl(_,&$(_,v1),q1,t1,_,_) = x->hd;
+	    let &Vardecl(_,&$(_,v2),q2,t2,_,_) = x2->hd;
+	    if (String::strcmp(v1,v2) != 0 
+		|| !equal_tqual(q1,q2)
+		|| unify(t1,t2)) {
 	      terr(p2->loc,"case fallthru: bound pattern variable mismatch");
 	      break;
 	    }
@@ -241,20 +235,17 @@ synth tcStmt(tenv te, stmt s0) {
 
     for (let scs = scs0; scs != null; scs = scs->tl) {
       let p = scs->hd->pattern;
-      let pat_r = tcPat(te1,p);
-      let new_tvs = pat_r[0];
-      let x = pat_r[1];
+      let &$(new_tvs,x) = tcPat(te1,p);
 
       if (!unify(p->topt->v,exn_t))
-        terr(scs->hd->loc,
-             xprintf("expected xenum exn but found %s",
-                     typ2string(p->topt->v)));
+        terr(scs->hd->loc, xprintf("expected xenum exn but found %s",
+				   typ2string(p->topt->v)));
 
       tenv te2 = add_type_vars(scs->hd->loc,te1,new_tvs);
       let where_opt = scs->hd->where_clause;
       if (where_opt != null) {
 	let esyn = tcExp(te2,&Opt(bool_t),where_opt->v);
-	if (!coerce_bool_t(te1,where_opt->v))
+	if (!coerce_to_bool(te1,where_opt->v))
 	  terr(where_opt->v->loc,
 	       xprintf("where clause has type %s instead of bool",
 		       typ2string(synth_typ(esyn))));
@@ -274,23 +265,21 @@ synth tcStmt(tenv te, stmt s0) {
 	if (scs->tl == null) terr(s1->loc,"last case of catch does a fallthru");
 	else {
 	  let p2 = scs->tl->hd->pattern;
-	  let pat_r2 = tcPat(te1,p);
-	  let new_tvs2 = pat_r2[0];
-	  let x2 = pat_r[1];
+	  let &$(new_tvs2,x2) = tcPat(te1,p);
 	  for (; new_tvs != null && new_tvs2 != null; new_tvs = new_tvs->tl,
-		 new_tvs2 = new_tvs2->tl) {
+		 new_tvs2 = new_tvs2->tl) 
 	    if (String::strcmp(new_tvs->hd,new_tvs2->hd) != 0) {
 	      terr(p2->loc,"case fallthru: bound type variable mismatch");
 	      break;
 	    }
-	  }
 	  if (new_tvs != null || new_tvs2 != null)
 	    terr(p2->loc,"case fallthru: bound type variable mismatch");
 	  for (; x != null && x2 != null; x = x->tl, x2 = x2->tl) {
-	    let vqt1 = x->hd;
-	    let vqt2 = x2->hd;
-	    if (String::strcmp(vqt1[0],vqt2[0]) != 0 || !equal_tqual(vqt1[1],vqt2[1]) ||
-		unify(vqt1[2],vqt2[2])) {
+	    let &Vardecl(_,&$(_,v1),q1,t1,_,_) = x->hd;
+	    let &Vardecl(_,&$(_,v2),q2,t2,_,_) = x2->hd;
+	    if (String::strcmp(v1,v2) != 0 
+		|| !equal_tqual(q1,q2) 
+		|| unify(t1,t2)) {
 	      terr(p2->loc,"case fallthru: bound pattern variable mismatch");
 	      break;
 	    }
@@ -346,32 +335,26 @@ synth tcStmt(tenv te, stmt s0) {
     case Typedef_d(tdd):
       return impos("tcStmt: nested typedef declarations are not implemented");
     case Var_d(vd):
-      if (vd->name[0] != null)
+      let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_) = vd;
+      if (nsl != null)
         terr(d->loc, "local variables cannot be qualified");
-      let x = vd->name[1];
-      let tq = vd->tq;
-      let t = vd->type;
       check_valid_type(s0->loc,te,lookup_type_vars(te),t);
       bool init = false;
-      if (vd->initializer != null) {
+      if (initializer != null) {
         init = true;
-        let esyn = tcExp(te,&Opt(t),vd->initializer->v);
-        if (!coerce_assign(te,vd->initializer->v,t))
+        let esyn = tcExp(te,&Opt(t),initializer->v);
+        if (!coerce_assign(te,initializer->v,t))
             terr(d->loc,
                  xprintf("%s declared with type %s, initialized with type %s",
-                         x,
-                         typ2string(t),
-                         typ2string(synth_typ(esyn))));
+                         x, typ2string(t), typ2string(synth_typ(esyn))));
         te = set_unassigned(te,maybe_unassigned(esyn));
       }
-      return decl_synth(te,&cons(&$(x,tq,t),null),init,s);
+      return decl_synth(te,&cons(vd,null),init,s);
     case Let_d(p,*topt_ref,e,*exhaust):
       let topt = *topt_ref;
       let esyn = tcExp(te,null,e);
       *topt_ref = e->topt; // side effect
-      let pat_res = tcPat(te,p);
-      let new_tvars = pat_res[0];
-      let x = pat_res[1];
+      let &$(new_tvars,x) = tcPat(te,p);
       // FIX: if let-declarations were of the form "let pat = e in S" then
       // we could allow any type variables within e to be used within S.
       if (new_tvars != null)
@@ -446,14 +429,13 @@ synth tcStmt(tenv te, stmt s0) {
   case Do_s(s,e):
     te = clear_fallthru(te);
     let ssyn = tcStmt(set_in_loop(te),s);
-    let te2 = layer_synth(te,ssyn);
+    let te2  = layer_synth(te,ssyn);
     let esyn = tcExp(te2,&Opt(bool_t),e);
-    if (!coerce_bool_t(te,e))
+    if (!coerce_to_bool(te,e))
       terr(e->loc,xprintf("test of do loop has type %s instead of bool",
-                         typ2string(synth_typ(esyn))));
+			  typ2string(synth_typ(esyn))));
     return loop_synth(esyn,ssyn);
   }
 
-  return impos("UNREACHABLE");
-
+  throw Unreachable("tcStmt");
 }

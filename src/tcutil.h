@@ -32,7 +32,7 @@ extern conref<`a> compress_conref<`a>(conref<`a> x);
 extern void unchecked_cast(tenv, exp, typ);
 extern bool coerce_arg(tenv, exp, typ); 
 extern bool coerce_assign(tenv, exp, typ);
-extern bool coerce_bool_t(tenv, exp);
+extern bool coerce_to_bool(tenv, exp);
 extern bool coerce_list(tenv, typ, list<exp>);
 extern bool coerce_uint_t(tenv, exp);
 extern bool coerce_use(tenv, exp, typ);

@@ -151,7 +151,11 @@ typ strct(var name) {
 
 ///////////////////////// Expressions //////////////////////////////
 exp new_exp(raw_exp r, segment loc) {
-  return &Exp{.topt=null, .r=r, .loc=loc};
+  return &Exp{.topt=null, .r=r, .loc=loc, .preds=null, .succs=null};
+}
+exp copy_exp(exp e) {
+  return &Exp{.topt=e->topt, .r=e->r, .loc=e->loc,
+	      .preds=e->preds, .succs=e->succs};
 }
 exp const_exp(cnst c, segment loc) { return new_exp(Const_e(c), loc); }
 exp null_exp(segment loc) { return new_exp(Const_e(Null_c), loc); }
@@ -176,7 +180,7 @@ exp float_exp(string f,segment loc) {
 exp string_exp(string s,segment loc) {
   return const_exp(String_c(s),loc);
 }
-exp var_exp(qvar q, segment loc) { return new_exp(Var_e(q), loc); }
+exp var_exp(qvar q, segment loc) { return new_exp(Var_e(q,null), loc); }
 exp unknownid_exp(qvar q, segment loc) { 
   return new_exp(UnknownId_e(q), loc); 
 }
@@ -293,7 +297,8 @@ exp unresolvedmem_exp(Opt_t<typedef_name> n,
   return new_exp(UnresolvedMem_e(n,dles),loc);
 }
 ///////////////////////// Statements ///////////////////////////////
-stmt new_stmt(raw_stmt s, segment loc) { return &Stmt{.r=s, .loc=loc}; }
+stmt new_stmt(raw_stmt s, segment loc) { 
+  return &Stmt{.r=s, .loc=loc, .preds=null, .succs=null}; }
 stmt skip_stmt(segment loc) { return new_stmt(Skip_s, loc); }
 stmt exp_stmt(exp e,segment loc) { return new_stmt(Exp_s(e),loc); }
 stmt seq_stmt(stmt s1, stmt s2, segment loc) { 
@@ -360,11 +365,11 @@ decl let_decl(pat p, Opt_t<typ> t_opt, exp e, segment loc) {
 }
 vardecl new_vardecl(qvar x, typ t, Opt_t<exp> init) {
   return &Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
-		  .type=t, .initializer=init};
+		  .type=t, .initializer=init, .shadow_depth=-1};
 }
 vardecl static_vardecl(qvar x, typ t, Opt_t<exp> init) {
   return &Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
-                     .type=t, .initializer=init};
+                  .type=t, .initializer=init, .shadow_depth=-1};
 }
 decl struct_decl(scope s,Opt_t<typedef_name> n,list<var> ts,
 		 Opt_t<list<$(field_name,tqual,typ)@>> fs,segment loc) {
@@ -386,13 +391,13 @@ decl xenum_decl(scope s,typedef_name n,list<enumfield> fs,segment loc) {
 //   int f(void g())(float)
 // is the same as
 //   int (@f(void (@g)()))(float)
-// We do this by constructing every function type using function_t,
+// We do this by constructing every function type using function_typ,
 // rather than mucking with the typechecker/unifier/etc.
 static $(Opt_t<var>,tqual,typ)@ expand_arg($(Opt_t<var>,tqual,typ)@ a) {
   return &$(a[0],a[1],pointer_expand(a[2]));
 }
 
-typ function_t(list<tvar> tvs, typ t, list<$(Opt_t<var>,tqual,typ)@> args,
+typ function_typ(list<tvar> tvs, typ t, list<$(Opt_t<var>,tqual,typ)@> args,
                bool varargs) {
   return FnType(tvs, pointer_expand(t),List::map(expand_arg,args),varargs);
 }
@@ -455,7 +460,7 @@ typ pointer_expand(typ t) {
 //
 bool is_lvalue(exp e) {
   switch (e->r) {
-  case Var_e(_): return true;
+  case Var_e(_,_): return true;
   case Subscript_e(e1,e2): return true;
   case StructMember_e(e1,f): return is_lvalue(e1);
   case StructArrow_e(e1,f): return true;
