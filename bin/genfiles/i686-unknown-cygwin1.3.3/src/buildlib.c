@@ -599,10 +599,10 @@ void*_tmp0[0]={};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("Internal error: log fi
 sizeof(char),34),_tag_arr(_tmp0,sizeof(void*),0));});exit(1);}{int _tmp1=Cyc_Std_vfprintf((
 struct Cyc_Std___cycFILE*)_check_null(Cyc_log_file),fmt,ap);Cyc_Std_fflush((
 struct Cyc_Std___cycFILE*)((struct Cyc_Std___cycFILE*)_check_null(Cyc_log_file)));
-return _tmp1;}}int Cyc_sizeof_unsignedlongint=- 1;int Cyc_sizeof_unsignedshortint=- 1;
-int Cyc_sizeof_shortint=- 1;int Cyc_sizeof_int=- 1;int Cyc_sizeof_short=- 1;int Cyc_sizeof_fdmask=
-- 1;int Cyc_sizeof___fdmask=- 1;int Cyc_sizeof_uint32=- 1;int Cyc_sizeof_sockaddr=- 1;
-int Cyc_sizeof_inport=- 1;int Cyc_sizeof_inaddr=- 1;static struct _tagged_arr*Cyc_current_source=
+return _tmp1;}}int Cyc_sizeof_unsignedlongint=4;int Cyc_sizeof_unsignedshortint=2;
+int Cyc_sizeof_shortint=2;int Cyc_sizeof_int=4;int Cyc_sizeof_short=2;int Cyc_sizeof_fdmask=
+4;int Cyc_sizeof___fdmask=4;int Cyc_sizeof_uint32=4;int Cyc_sizeof_sockaddr=16;int
+Cyc_sizeof_inport=2;int Cyc_sizeof_inaddr=4;static struct _tagged_arr*Cyc_current_source=
 0;static struct Cyc_List_List*Cyc_current_args=0;static struct Cyc_Set_Set**Cyc_current_targets=
 0;static void Cyc_add_target(struct _tagged_arr*sptr){Cyc_current_targets=({struct
 Cyc_Set_Set**_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2[0]=((struct Cyc_Set_Set*(*)(
@@ -2310,31 +2310,13 @@ _tagged_arr)Cyc_output_dir;{void*_tmp262[1]={& _tmp263};Cyc_Std_fprintf(Cyc_Std_
 _tag_arr("Error: could not create cycstubs.c in directory %s\n",sizeof(char),52),
 _tag_arr(_tmp262,sizeof(void*),1));}});return 1;}({void*_tmp264[0]={};Cyc_Std_fprintf((
 struct Cyc_Std___cycFILE*)_check_null(Cyc_cycstubs_file),_tag_arr("#include <core.h>\nusing Core;\n\n",
-sizeof(char),32),_tag_arr(_tmp264,sizeof(void*),0));});Cyc_sizeof_unsignedlongint=
-Cyc_getsize(Cyc_output_dir,_tag_arr("",sizeof(char),1),_tag_arr("unsigned long int",
-sizeof(char),18));Cyc_sizeof_unsignedshortint=Cyc_getsize(Cyc_output_dir,
-_tag_arr("",sizeof(char),1),_tag_arr("unsigned short int",sizeof(char),19));Cyc_sizeof_shortint=
-Cyc_getsize(Cyc_output_dir,_tag_arr("",sizeof(char),1),_tag_arr("short int",
-sizeof(char),10));Cyc_sizeof_int=Cyc_getsize(Cyc_output_dir,_tag_arr("",sizeof(
-char),1),_tag_arr("int",sizeof(char),4));Cyc_sizeof_short=Cyc_getsize(Cyc_output_dir,
-_tag_arr("",sizeof(char),1),_tag_arr("short",sizeof(char),6));Cyc_sizeof_fdmask=
-Cyc_getsize(Cyc_output_dir,_tag_arr("#include <sys/types.h>\n#include <sys/select.h>",
-sizeof(char),47),_tag_arr("fd_mask",sizeof(char),8));Cyc_sizeof___fdmask=Cyc_getsize(
-Cyc_output_dir,_tag_arr("#include <sys/types.h>\n#include <sys/select.h>",
-sizeof(char),47),_tag_arr("__fd_mask",sizeof(char),10));Cyc_sizeof_uint32=Cyc_getsize(
-Cyc_output_dir,_tag_arr("#include <sys/types.h>",sizeof(char),23),_tag_arr("__uint32_t",
-sizeof(char),11));Cyc_sizeof_sockaddr=Cyc_getsize(Cyc_output_dir,_tag_arr("#include <sys/types.h>\n#include <sys/socket.h>",
-sizeof(char),47),_tag_arr("struct sockaddr",sizeof(char),16));Cyc_sizeof_inport=
-Cyc_getsize(Cyc_output_dir,_tag_arr("#include <sys/types.h>\n#include <netinet/in.h>",
-sizeof(char),47),_tag_arr("in_port_t",sizeof(char),10));Cyc_sizeof_inaddr=Cyc_getsize(
-Cyc_output_dir,_tag_arr("#include <sys/types.h>\n#include <netinet/in.h>",
-sizeof(char),47),_tag_arr("struct in_addr",sizeof(char),15));}for(0;Cyc_spec_files
-!= 0;Cyc_spec_files=((struct Cyc_List_List*)_check_null(Cyc_spec_files))->tl){if(
-Cyc_process_specfile(*((struct _tagged_arr*)((struct Cyc_List_List*)_check_null(
-Cyc_spec_files))->hd),Cyc_output_dir)){({void*_tmp265[0]={};Cyc_Std_fprintf(Cyc_Std_stderr,
-_tag_arr("FATAL ERROR -- QUIT!\n",sizeof(char),22),_tag_arr(_tmp265,sizeof(void*),
-0));});exit(1);}}if(Cyc_mode == (void*)2)Cyc_Std_fclose((struct Cyc_Std___cycFILE*)
-_check_null(Cyc_script_file));else{if(!Cyc_gathering()){Cyc_Std_fclose((struct
-Cyc_Std___cycFILE*)_check_null(Cyc_log_file));Cyc_Std_fclose((struct Cyc_Std___cycFILE*)
-_check_null(Cyc_cstubs_file));Cyc_Std_fclose((struct Cyc_Std___cycFILE*)
-_check_null(Cyc_cycstubs_file));}}return 0;}}
+sizeof(char),32),_tag_arr(_tmp264,sizeof(void*),0));});}for(0;Cyc_spec_files != 0;
+Cyc_spec_files=((struct Cyc_List_List*)_check_null(Cyc_spec_files))->tl){if(Cyc_process_specfile(*((
+struct _tagged_arr*)((struct Cyc_List_List*)_check_null(Cyc_spec_files))->hd),Cyc_output_dir)){({
+void*_tmp265[0]={};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("FATAL ERROR -- QUIT!\n",
+sizeof(char),22),_tag_arr(_tmp265,sizeof(void*),0));});exit(1);}}if(Cyc_mode == (
+void*)2)Cyc_Std_fclose((struct Cyc_Std___cycFILE*)_check_null(Cyc_script_file));
+else{if(!Cyc_gathering()){Cyc_Std_fclose((struct Cyc_Std___cycFILE*)_check_null(
+Cyc_log_file));Cyc_Std_fclose((struct Cyc_Std___cycFILE*)_check_null(Cyc_cstubs_file));
+Cyc_Std_fclose((struct Cyc_Std___cycFILE*)_check_null(Cyc_cycstubs_file));}}
+return 0;}}

@@ -103,17 +103,18 @@ int log(const char ?fmt, ... inject parg_t<`r2> ap)
 }
 
 /* These will be filled in using gcc later */
-int sizeof_unsignedlongint = -1;
-int sizeof_unsignedshortint = -1;
-int sizeof_shortint = -1;
-int sizeof_int = -1;
-int sizeof_short = -1;
-int sizeof_fdmask = -1;
-int sizeof___fdmask = -1;
-int sizeof_uint32 = -1;
-int sizeof_sockaddr = -1;
-int sizeof_inport = -1;
-int sizeof_inaddr = -1;
+/* HARDCODED TEMPORARILY */
+int sizeof_unsignedlongint = 4;
+int sizeof_unsignedshortint = 2;
+int sizeof_shortint = 2;
+int sizeof_int = 4;
+int sizeof_short = 2;
+int sizeof_fdmask = 4;
+int sizeof___fdmask = 4;
+int sizeof_uint32 = 4;
+int sizeof_sockaddr = 16;
+int sizeof_inport = 2;
+int sizeof_inaddr = 4;
 
 static string_t *current_source = NULL;
 static list_t<stringptr_t> current_args = NULL;
@@ -1862,19 +1863,20 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
               "using Core;\n\n");
 
       /* Find the sizes of various types, for use in constant expressions */
-      sizeof_unsignedlongint = getsize(output_dir,"","unsigned long int");
-      sizeof_unsignedshortint = getsize(output_dir,"","unsigned short int");
-      sizeof_shortint = getsize(output_dir,"","short int");
-      sizeof_int = getsize(output_dir,"","int");
-      sizeof_short = getsize(output_dir,"","short");
-      /* sys/types is needed on OS X b/c it defines needed typedef u_int */
-      sizeof_fdmask = getsize(output_dir,"#include <sys/types.h>\n#include <sys/select.h>","fd_mask");
-      sizeof___fdmask = getsize(output_dir,"#include <sys/types.h>\n#include <sys/select.h>","__fd_mask");
-      sizeof_uint32 = getsize(output_dir,"#include <sys/types.h>","__uint32_t");
-      /* sys/types is needed on OS X b/c it defines needed typedef u_char */
-      sizeof_sockaddr = getsize(output_dir,"#include <sys/types.h>\n#include <sys/socket.h>","struct sockaddr");
-      sizeof_inport = getsize(output_dir,"#include <sys/types.h>\n#include <netinet/in.h>","in_port_t");
-      sizeof_inaddr = getsize(output_dir,"#include <sys/types.h>\n#include <netinet/in.h>","struct in_addr");
+      // DISABLED FOR NOW
+//      sizeof_unsignedlongint = getsize(output_dir,"","unsigned long int");
+//      sizeof_unsignedshortint = getsize(output_dir,"","unsigned short int");
+//      sizeof_shortint = getsize(output_dir,"","short int");
+//      sizeof_int = getsize(output_dir,"","int");
+//      sizeof_short = getsize(output_dir,"","short");
+//      /* sys/types is needed on OS X b/c it defines needed typedef u_int */
+//      sizeof_fdmask = getsize(output_dir,"#include <sys/types.h>\n#include <sys/select.h>","fd_mask");
+//      sizeof___fdmask = getsize(output_dir,"#include <sys/types.h>\n#include <sys/select.h>","__fd_mask");
+//      sizeof_uint32 = getsize(output_dir,"#include <sys/types.h>","__uint32_t");
+//      /* sys/types is needed on OS X b/c it defines needed typedef u_char */
+//      sizeof_sockaddr = getsize(output_dir,"#include <sys/types.h>\n#include <sys/socket.h>","struct sockaddr");
+//      sizeof_inport = getsize(output_dir,"#include <sys/types.h>\n#include <netinet/in.h>","in_port_t");
+//      sizeof_inaddr = getsize(output_dir,"#include <sys/types.h>\n#include <netinet/in.h>","struct in_addr");
     }
             
     /* Main loop -- process each spec file */
