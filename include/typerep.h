@@ -23,6 +23,7 @@
 #define _TYPEREP_H_
 
 #include <core.h>
+#include <set.h>
 using Core;
 
 // A cute hack to avoid defining the abstract syntax twice.
@@ -88,11 +89,26 @@ EXTERN_TYPEREP tunion Typestruct {
   App(tunion Typestruct, tunion Typestruct?);
 };
   
-typedef tunion `r Typestruct typestruct_t<`r>;
+  typedef tunion `r Typestruct typestruct_t<`r>;
   
-extern void print_typestruct(typestruct_t rep);
-extern void xmlize_typestruct(typestruct_t rep);
-extern typestruct_t<`H> normalize(typestruct_t<`H> ts);
+  extern void print_typestruct(typestruct_t rep);
+  extern void xmlize_typestruct(typestruct_t rep);
+  extern typestruct_t<`H> normalize(typestruct_t<`H> ts);
+  
+  // utilities for addressing
+  typedef Set::set_t<unsigned int> addr_set_t;
+
+  extern addr_set_t empty_addr_set();
+  extern $(bool,addr_set_t)@ member_insert(addr_set_t, unsigned int);
+
+  extern typestruct_t<`r>
+  get_unionbranch(unsigned int tag,
+		  $(unsigned int,typestruct_t<`r>)@ ? l);
+  extern typestruct_t<`r>
+  get_xtunionbranch(string_t<`H> tag,
+		    $(string_t<`H>,typestruct_t<`r>)@ ? l);
+  unsigned int size_type(typestruct_t rep);
+
 }
 
 #endif

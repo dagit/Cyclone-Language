@@ -33,6 +33,93 @@ using Dict;
 namespace Typerep;
 
 
+static int int_cmp(unsigned int a, unsigned int b) {
+  if(a == b) return 0;
+  else if (a < b) return 1;
+  else return -1;
+}
+
+addr_set_t empty_addr_set () {
+  return Set::empty(int_cmp);
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* given a tag and a list of typereps, each assumed to be a TUnionField,
+   look up the tag in the list and return the corresponding type
+   (assumed to be a tuple) */
+tunion `r Typestruct
+get_unionbranch(unsigned int tag,
+		$(unsigned int,tunion `r Typestruct)@ ? l)
+{
+//    fprintf(stderr,"looking for tag %d\n",tag);
+  for (int i = 0; i < l.size; i++) {
+    let $(btag,typ) = *(l[i]);
+//      fprintf(stderr,"  checking tag %d\n",btag);
+    if (btag == tag)
+      return typ;
+  }
+//    fprintf(stderr,"didn't find it\n");
+  throw new Core::Failure("Could not find tag in TUnion");
+}
+
+
+/*-------------------------------------------------------------------------*/
+/* given a tag and a list of typereps, each assumed to be a TUnionField,
+   look up the tag in the list and return the corresponding type
+   (assumed to be a tuple) */
+tunion `r Typestruct
+get_xtunionbranch(string_t<`H> tag,
+		$(string_t<`H>,tunion `r Typestruct)@ ? l)
+{
+  //fprintf(stderr,"looking for tag %s (%x)\n",tag,(int)tag);
+  for (int i = 0; i < l.size; i++) {
+    let $(btag,typ) = *(l[i]);
+    //fprintf(stderr,"  checking tag %s (%x)\n",btag,(int)btag);
+    if (strcmp(btag,tag) == 0)
+      return typ;
+  }
+  //fprintf(stderr,"didn't find it\n");
+  throw new Core::Failure("Could not find tag in XTUnion");
+}
+
+/*-------------------------------------------------------------------------*/
+/* returns the size, in bytes, of the toplevel type */
+unsigned int 
+size_type(typestruct_t rep) 
+{
+  switch (rep) {
+  case &Int(szbits): return (szbits>>3);
+  case Float: return sizeof(float);
+  case Double: return sizeof(double);
+  case &ThinPtr(_,_): return sizeof(void *);
+  case &FatPtr(_): return sizeof(void ?);
+  case &Tuple(szb,_): return szb;
+  case &TUnion(_): return sizeof(void *);
+  case &XTUnion(_): return sizeof(void *);
+  case &Union(tss): 
+    int max = 0;
+    for(int i = 0; i < tss.size; i++) {
+      let sz = size_type(*tss[i]);
+      max = (max < sz)? sz : max;
+    }
+    return max;
+  case &Var(_): return sizeof(void*); // everything of mem kind has same size as void*
+  case &Forall(_,rep): return sizeof(rep);
+  case &App(rep,_): return sizeof(rep);
+
+    //  default: throw new Core::Failure("Unhandled case in size_type");
+  }
+}
+
+
+
+// returns whether elt is a member, inserts if it's not
+$(bool, addr_set_t)@ member_insert(addr_set_t set, unsigned int val) {
+  return new $(Set::member(set,val), Set::insert(set,val));
+}
+
+
 /*-------------------------------------------------------------------------*/
 /* Pretty-prints a typestruct for debugging purposes */
 void 
@@ -225,7 +312,6 @@ xmlize_typestruct(typestruct_t rep)
    break;
   }
 }
-// something wron with this
 
 
 static typestruct_t<`H>
@@ -309,3 +395,190 @@ typestruct_t<`H> normalize(typestruct_t<`H> ts) {
   return normalize_env(Dict::empty(name_order),ts);
 }			  
 
+/*
+$(addr_set_t,int) genreic_cmp_base(typestruct_t rep, 
+				   addr_set_t base, 
+				   `a@ val1, `a@ val2) {
+  switch (rep) {
+  case &Int(sz):
+    switch (sz) {
+    case 8:
+      char @x = unsafe_cast(val1);
+      char @y = unsafe_cast(val2);
+      if(*x < *y) return 1;
+      else if (*x == *y) return 0;
+      else return -1;
+      break;
+    case 16:
+      short @x = unsafe_cast(val1);
+      short @y = unsafe_cast(val2);
+      if(*x < *y) return 1;
+      else if (*x == *y) return 0;
+      else return -1;
+      break;
+    case 32:
+      int @x = unsafe_cast(val1);
+      int @y = unsafe_cast(val2);
+      if(*x < *y) return 1;
+      else if (*x == *y) return 0;
+      else return -1;
+      break;
+    default:
+      fprintf(stderr,"print_type_base: illegal int size %d bits\n", sz);
+      exit(1);
+    }
+    break;
+  
+  case Float:
+    float @x = unsafe_cast(val1);
+    float @y = unsafe_cast(val2);
+    if(*x < *y) return 1;
+    else if (*x == *y) return 0;
+    else return -1;
+    break;
+  
+  case Double:
+    double @x = unsafe_cast(val1);
+    souble @y = unsafe_cast(val2);
+    if(*x < *y) return 1;
+    else if (*x == *y) return 0;
+    else return -1;
+    break;
+  
+  case &ThinPtr(sz,typ):
+    // val is a pointer to a pointer to whatever typ represents
+    int *x = unsafe_cast(val1);
+    int *y = unsafe_case(val2);
+    int xx = *x;
+    int yy = *y;
+    let &$(mem,env2) = member_insert(env,xx);
+    env = env2;
+    // lexicographic order
+    if(!mem) {
+      printf("{(@%x) ",xx);
+      if (y != 0) {
+	int typ_szb = size_type(typ);
+	for (int i = 0; i<sz; i++) {
+	  let &$(env2,lt
+	  env = print_type_base(typ,env, (`a@)unsafe_cast(xx));
+	  if (i != (sz-1))
+	    printf(", ");
+	  y += typ_szb;
+	}
+      }
+      else printf ("NULL");
+      printf(" }");
+    }
+    else {
+      printf("(#%x)",y);
+    }
+    break;
+
+  case &FatPtr(typ): 
+    $(unsigned int, unsigned int, unsigned int) @`H x = unsafe_cast(val);
+    unsigned int typ_szb = size_type(typ);
+    unsigned int base = (*x)[0], curr = (*x)[1], last_plus_one = (*x)[2];
+    let &$(mem,env2) = member_insert(env,base);
+    env = env2;
+    if(!mem) {
+      printf("[(@%x) ",base);
+      for (unsigned int i = base; i<last_plus_one; i += typ_szb) {
+	env = print_type_base(typ, env, (`a@)unsafe_cast(i));
+	if ((i+typ_szb) < last_plus_one)
+	  printf(", ");
+      }
+      printf(" ]");
+    }
+    else {
+      printf("(#%x)",base);
+    }
+    break;
+
+  case &Tuple(_,l):
+    printf("$( ");
+    int x = unsafe_cast(val); 
+    for (int i = 0; i < l.size; i++) {
+      let $(ofs,typ) = *(l[i]);
+      int x_ofs = x + ofs;
+      env = print_type_base(typ, env, (`a@)unsafe_cast(x_ofs));
+      if (i != (l.size-1))
+	printf(", ");
+    }
+    printf(" )");
+    break;
+
+  case &TUnion(l):
+    printf("&[( ");
+    // get the tag
+    unsigned int@ tagp = unsafe_cast(val);
+    if (*tagp < 1024) {
+      printf("%d",*tagp);
+    }
+    else {
+      let &$(mem,env2) = member_insert(env,*tagp);
+      env = env2;
+      if(!mem) {
+	printf("(@%x)",*tagp);
+	unsigned int @x = unsafe_cast(*tagp);
+	unsigned int tag = *x;
+	// figure out which variant it is 
+	typestruct_t typ = get_unionbranch(tag,l);
+	env = print_type_base(typ, env, x);
+      }
+      else {
+	printf("(#%x)",*tagp);
+      }
+    }
+    printf(" )]");
+    break;
+
+  case &XTUnion(l):
+    // val is a pointer to a xtunion, hich is a pointer to a struct consisting of a char* tag that points to "\0\0\0\0Name", followed by any arguments
+    unsigned int@ xtunionp = unsafe_cast(val);
+    let &$(mem,env2) = member_insert(env,*xtunionp);
+    env = env2;
+    if(!mem) {
+      printf("(@%x)",*xtunionp);
+      // get the pointer to the name string "\0\0\0\0Name"
+      unsigned int* xtstructp = unsafe_cast(*xtunionp);
+      if(*xtstructp != 0) {
+	Cstring<`H> xtnamec = unsafe_cast(*xtstructp+4);
+	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
+	printf("&%s[( ",xtname);
+	// figure out which variant it is 
+	typestruct_t typ = get_xtunionbranch(xtname,l);
+	env = print_type_base(typ, env, (_@)xtstructp);
+      }
+      else {
+	Cstring<`H> xtnamec = unsafe_cast(*xtunionp+4);
+	string_t<`H> xtname = Core::Cstring_to_string(xtnamec);
+	printf("&%s[( ",xtname);
+      }
+    }
+    else {
+      printf("(#%x)",*xtunionp);
+    }
+    printf(" )]");
+    break;
+
+  case &Union(l):
+    printf("[[");
+    // Print out each case; safe because no pointers
+    for(int i = 0; i < l.size; i++) {
+      print_type_base(*l[i],env,val);
+      if(i < l.size-1) printf(" | ");
+    }
+    printf("]]");
+    break;
+    
+
+  default: throw new Core::Failure("Unhandled case in print_type_base");
+  }
+  return env;
+}
+
+int generic_cmp(typestruct_t rep, `a@ val1, `a@ val2) {
+  return generic_cmp_base(typestruct_t rep, addr_set_t env, `a@ val1, `a@ val2)[1];
+}
+
+*/

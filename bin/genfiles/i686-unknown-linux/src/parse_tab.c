@@ -1172,8 +1172,8 @@ struct _tagged_arr msg, struct Cyc_Position_Segment* sg)) Cyc_Parse_abort)(
 _tag_arr("bad declaration within type specifier", sizeof( unsigned char), 38u),
 _temp282->loc); goto _LL291; _LL291:;}} else{ Cyc_Parse_err( Cyc_Parse_msg3,
 _temp282->loc);} goto _LL257; _LL257:;} if( ! seen_type){ if( ! seen_sign? !
-seen_size: 0){ Cyc_Parse_err( _tag_arr("missing type withing specifier", sizeof(
-unsigned char), 31u), last_loc);} t=( void*)({ struct Cyc_Absyn_IntType_struct*
+seen_size: 0){ Cyc_Parse_err( _tag_arr("missing type within specifier", sizeof(
+unsigned char), 30u), last_loc);} t=( void*)({ struct Cyc_Absyn_IntType_struct*
 _temp329=( struct Cyc_Absyn_IntType_struct*) _cycalloc( sizeof( struct Cyc_Absyn_IntType_struct));
 _temp329[ 0]=({ struct Cyc_Absyn_IntType_struct _temp330; _temp330.tag= Cyc_Absyn_IntType;
 _temp330.f1=( void*) sgn; _temp330.f2=( void*) sz; _temp330;}); _temp329;});}

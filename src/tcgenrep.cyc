@@ -25,6 +25,7 @@
 #include <hashtable.h>
 #include <position.h>
 #include <typerep.h>
+#include <time.h>
 #include "absyn.h"
 #include "absynpp.h"
 #include "evexp.h"
@@ -71,19 +72,9 @@ typedef struct RepInfo {
 /*------------------------------------------------------------------------*/
 /* Helper functions & data */
 
-// Used for the dictionary;
-//   For now, we convert to a string and then compare the
-//   two strings.  This is not as robust as it could be, but
-//   we'll see how it goes ...
-static int typecmp(type_t t1, type_t t2) {
-  set_params(&c_params_r);
-  string_t t1str = typ2string(t1);
-  string_t t2str = typ2string(t2);
-  return strcmp(t1str,t2str);
-}
 
 dict_t<type_t,repinfo_t> empty_typerep_dict() {
-  return empty(typecmp);
+  return empty(Tcutil::typecmp);
 }
 
 void print_dict_entry(type_t type, repinfo_t info) {
@@ -523,9 +514,6 @@ static var_t get_tunionfield_name(tunionfield_t tuf) {
   return ((*tuf->name)[1]);
 }
 
-static `a id(`a x) {
-  return x;
-}
 
 structfield_t substitute_structfield_type(list_t<$(tvar_t,type_t)@`H,`H> subst,
 					  structfield_t sf) {
@@ -616,7 +604,7 @@ string_t make_type_cstring(type_t t) {
       s[i] = (char)('0' + (s[i] % 10));
     }
   }
-  return s;
+  return strconcat(s,"_rep");
 }
 
 // forward declaration
@@ -645,7 +633,7 @@ buildRepTuple(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t var
   // that way, the dicts will be merged right in the end
   let &$(dict2,ris) = List::fold_right_c(lookupRepsCls,env,types,carry);
   dict = dict2;
-  let indices = List::tabulate(List::length(types),id);
+  let indices = List::tabulate(List::length(types),identity);
   let offsetofs = List::map_c(make_offsetof_exp,new $(type,loc),indices);
   let riexps = List::map_c(get_and_cast_ri_exp,loc,ris);
   let tuplelist = List::map_c(tuple2_exp_cls,loc,List::zip(offsetofs,riexps));
@@ -706,7 +694,7 @@ buildRepTunion(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, qvar_t va
   let &$(dict2,ris) = List::fold_right_c(lookupRepsCls,env,types,carry);
   dict = dict2;
   // build tag list of appropriate length
-  let tagints = List::tabulate(List::length(ris),id);
+  let tagints = List::tabulate(List::length(ris),identity);
   let tags = List::map_c(cnst_int_cls,loc,tagints);
   // build list of tunion case types
   let riexps = List::map_c(get_and_cast_ri_exp,loc,ris);

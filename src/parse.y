@@ -544,7 +544,7 @@ static $(type_t,opt_t<decl_t>)
   // it's okay to not have an explicit type as long as we have some
   // combination of signed, unsigned, short, long, or longlong
   if (!seen_type) {
-    if(!seen_sign && !seen_size) err("missing type withing specifier",last_loc);
+    if(!seen_sign && !seen_size) err("missing type within specifier",last_loc);
     t = new IntType(sgn, sz);
   } else {
     if(seen_sign)

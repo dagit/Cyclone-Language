@@ -278,12 +278,13 @@ extern int Cyc_Position_error_p(); extern unsigned int Cyc_Std_strlen( struct
 _tagged_arr s); extern int Cyc_Std_strcmp( struct _tagged_arr s1, struct
 _tagged_arr s2); extern struct _tagged_arr Cyc_Std_strncpy( struct _tagged_arr,
 struct _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std_substring(
-struct _tagged_arr, int ofs, unsigned int n); static const int Cyc_Typerep_Var=
-0; struct Cyc_Typerep_Var_struct{ int tag; struct _tagged_arr* f1; } ; static
-const int Cyc_Typerep_Int= 1; struct Cyc_Typerep_Int_struct{ int tag;
-unsigned int f1; } ; static const int Cyc_Typerep_Float= 0; static const int Cyc_Typerep_Double=
-1; static const int Cyc_Typerep_ThinPtr= 2; struct Cyc_Typerep_ThinPtr_struct{
-int tag; unsigned int f1; void* f2; } ; static const int Cyc_Typerep_FatPtr= 3;
+struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Set_Set; extern
+unsigned char Cyc_Set_Absent[ 11u]; static const int Cyc_Typerep_Var= 0; struct
+Cyc_Typerep_Var_struct{ int tag; struct _tagged_arr* f1; } ; static const int
+Cyc_Typerep_Int= 1; struct Cyc_Typerep_Int_struct{ int tag; unsigned int f1; } ;
+static const int Cyc_Typerep_Float= 0; static const int Cyc_Typerep_Double= 1;
+static const int Cyc_Typerep_ThinPtr= 2; struct Cyc_Typerep_ThinPtr_struct{ int
+tag; unsigned int f1; void* f2; } ; static const int Cyc_Typerep_FatPtr= 3;
 struct Cyc_Typerep_FatPtr_struct{ int tag; void* f1; } ; static const int Cyc_Typerep_Tuple=
 4; struct _tuple0{ unsigned int f1; void* f2; } ; struct Cyc_Typerep_Tuple_struct{
 int tag; unsigned int f1; struct _tagged_arr f2; } ; static const int Cyc_Typerep_TUnion=
@@ -294,9 +295,9 @@ static const int Cyc_Typerep_Union= 7; struct Cyc_Typerep_Union_struct{ int tag;
 struct _tagged_arr f1; } ; static const int Cyc_Typerep_Forall= 8; struct Cyc_Typerep_Forall_struct{
 int tag; struct _tagged_arr f1; void** f2; } ; static const int Cyc_Typerep_App=
 9; struct Cyc_Typerep_App_struct{ int tag; void* f1; struct _tagged_arr f2; } ;
-extern struct Cyc_Typerep_Tuple_struct Cyc_struct_Position_Segment;
-unsigned char Cyc_Position_Exit[ 9u]="\000\000\000\000Exit"; static
-unsigned char _temp0[ 1u]=""; static struct _tagged_arr Cyc_Position_source={
+unsigned int Cyc_Typerep_size_type( void* rep); extern struct Cyc_Typerep_Tuple_struct
+Cyc_struct_Position_Segment_rep; unsigned char Cyc_Position_Exit[ 9u]="\000\000\000\000Exit";
+static unsigned char _temp0[ 1u]=""; static struct _tagged_arr Cyc_Position_source={
 _temp0, _temp0, _temp0 +  1u}; struct Cyc_Position_Segment{ int start; int end;
 } ; struct Cyc_Position_Segment* Cyc_Position_segment_of_abs( int start, int end){
 return({ struct Cyc_Position_Segment* _temp1=( struct Cyc_Position_Segment*)
@@ -493,12 +494,12 @@ void Cyc_Position_reset_position( struct _tagged_arr s){ Cyc_Position_source= s;
 Cyc_Position_error_b= 0;} void Cyc_Position_set_position_file( struct
 _tagged_arr s){ Cyc_Position_source= s; Cyc_Position_error_b= 0;} struct
 _tagged_arr Cyc_Position_get_position_file(){ return Cyc_Position_source;}
-extern struct Cyc_Typerep_Tuple_struct Cyc_struct_Position_Segment; static
+extern struct Cyc_Typerep_Tuple_struct Cyc_struct_Position_Segment_rep; static
 struct Cyc_Typerep_Int_struct Cyc__genrep_0={ 1u, 32}; static struct _tuple0 Cyc__gentuple_1={
 offsetof( struct Cyc_Position_Segment,start),( void*)& Cyc__genrep_0}; static
 struct _tuple0 Cyc__gentuple_2={ offsetof( struct Cyc_Position_Segment,end),(
 void*)& Cyc__genrep_0}; static struct _tuple0* Cyc__genarr_3[ 2u]={& Cyc__gentuple_1,&
-Cyc__gentuple_2}; struct Cyc_Typerep_Tuple_struct Cyc_struct_Position_Segment={
+Cyc__gentuple_2}; struct Cyc_Typerep_Tuple_struct Cyc_struct_Position_Segment_rep={
 4u, sizeof( struct Cyc_Position_Segment),{( void*)(( struct _tuple0**) Cyc__genarr_3),(
 void*)(( struct _tuple0**) Cyc__genarr_3),( void*)(( struct _tuple0**) Cyc__genarr_3
-+  2u)}}; void* Cyc_segment_rep=( void*)& Cyc_struct_Position_Segment;
++  2u)}}; void* Cyc_segment_rep=( void*)& Cyc_struct_Position_Segment_rep;
