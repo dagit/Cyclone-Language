@@ -59,7 +59,7 @@ nogc.a: nogc.o
 
 precore_c.h: precore.h $(CYCC)
 	cp precore.h precore.cyc
-	$(CYCC) -toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ precore.cyc
+	$(CYCC) -stopafter-toc -pp -D_CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs -o $@ precore.cyc
 	rm -f precore.cyc
 
 xml/libxml.a: 
@@ -81,7 +81,7 @@ $(OUT_PREFIX)%.o : %.cyc $(CYCC) $(CYCINC_H)
 	$(CYCC) $(CYC_FLAGS) -o $@ -c $<
 
 $(OUT_PREFIX)%.c: %.cyc $(CYCC) $(CYCINC_H)
-	$(CYCC) $(CYC_FLAGS) -save-c -toc -c -o $@ $<
+	$(CYCC) $(CYC_FLAGS) -save-c -stopafter-toc -c -o $@ $<
 
 ifdef MS
 %.obj: %.c
@@ -114,7 +114,7 @@ $(TARGET): $(addprefix $(TARGETDIR), $(C_LIBS)) $(RUNTIME).c precore_c.h nogc.c
 	cp nogc.c $(TARGETDIR)nogc.c
 
 $(TARGETDIR)%.c: %.cyc $(CYCC) $(CYCINC_H)
-	$(CYCC) -D_PLATFORM_INCLUDES_="\"arch/$(TARGET).h\"" -I$(CYC_INC_PATH) -toc $(TOVC_FLAG) -save-c -use-cpp '$(CONFIGDIR)/cyccpp $(CONFIGDIR)/arch/$(ARCH) $(CONFIGDIR)/arch/$(TARGET)' -o $@ $<
+	$(CYCC) -D_PLATFORM_INCLUDES_="\"arch/$(TARGET).h\"" -I$(CYC_INC_PATH) -stopafter-toc $(TOVC_FLAG) -save-c -use-cpp '$(CONFIGDIR)/cyccpp $(CONFIGDIR)/arch/$(ARCH) $(CONFIGDIR)/arch/$(TARGET)' -o $@ $<
 endif
 
 # delete generated files with a particular prefix
