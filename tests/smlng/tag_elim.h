@@ -30,6 +30,14 @@ extern union Synth {
 };
 typedef union Synth synth_t; // not a pointer
 extern $(doc_t, synth_t) up_opt(Buffer::buf_t, doc_t);
+
+extern struct ShuffleSynth {
+  bool color: 1;
+  bool sz: 1;
+};
+typedef struct ShuffleSynth shuffle_synth_t;
+
+$(doc_t,shuffle_synth_t) up_shuffle(doc_t d);
 }
 
 #endif

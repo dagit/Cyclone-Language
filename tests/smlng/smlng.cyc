@@ -277,12 +277,25 @@ int main(int argc, char ??argv) {
   // d = new Seq(fds);
   
   is_change = true;
+  int round_num = 1;
   while(is_change && check_time() > 2) {
-    is_change = false;
-    fprintf(stderr,"%d\nup_opt...", check_time()); fflush(stderr);
-    let $(d2, _) = TagElim::up_opt(b,d);
-    fprintf(stderr,"%d\ndown_opt...", check_time()); fflush(stderr);
-    d = down_opt(init_context,d2);
+    while(is_change && check_time() > 2) {
+      is_change = false;
+      fprintf(stderr,"%d\nup_opt...", check_time()); fflush(stderr);
+      let $(d2, _) = TagElim::up_opt(b,d);
+      fprintf(stderr,"%d\ndown_opt...", check_time()); fflush(stderr);
+      d = down_opt(init_context,d2);
+      ++round_num;
+    }
+    if(round_num > 1 && check_time() > 5) {
+      fprintf(stderr,"%d\nup_shuffle...", check_time()); fflush(stderr);
+      d = TagElim::up_shuffle(d)[0];
+      // down_opt must precede up_opt
+      fprintf(stderr,"%d\ndown_opt...", check_time()); fflush(stderr);
+      d = down_opt(init_context,d);
+      is_change = true;
+      round_num = 0;
+    }
   }
   fprintf(stderr,"%d\ndumping docs...",check_time()); fflush(stderr);
   dump(b,d);

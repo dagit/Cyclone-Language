@@ -108,8 +108,9 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
 	else {
 	  prev = new List(d,next);
 	  prevprev->tl = null;
-	  *dsp = new List(new Seq(*dsp), prev);
-	  prevprev = *dsp;
+	  *dsp =// imp_append(*dsp,prev);
+	    new List(new Seq(*dsp), prev);
+	  prevprev = *dsp; // comment this line if use imp_append!
 	}
 	ds = next;
       } else {
@@ -186,3 +187,130 @@ $(doc_t, synth_t) up_opt(Buffer::buf_t b, doc_t doc) {
   }
 }
 
+$(list_t<doc_t>,list_t<doc_t>*) flatten_top_seq(doc_t d) {
+  switch(d) {
+  case &Seq(*dsp):
+    list_t<doc_t> * prev = dsp;
+    for(list_t<doc_t> ds = *dsp; ds != null; ds = ds->tl) {
+      let $(start,end) = flatten_top_seq(ds->hd);
+      if(start != null) {
+	*prev = start;
+	*end  = ds->tl;
+	prev  = end;
+      } else
+	prev = &ds->tl;
+    }
+    return $(*dsp, prev);
+  case &Text(_): fallthru;
+  case &Tagged(_,_): return $(null,null);
+  }
+}
+
+// This should be run after up_opt/down_opt have converged because we want
+// to assume there are no useless tags in the sense of their optimizations
+
+struct ShuffleSynth {
+  bool color: 1;
+  bool sz: 1;
+};
+
+$(doc_t,shuffle_synth_t) up_shuffle(doc_t d) {
+  switch(d) {
+  case &Tagged(tag, *d2):
+    bool is_color = false;
+    bool is_size  = false;
+    switch(tag) {
+    case Zero: case One: case Two:   case  Three: case  Four: 
+    case Five: case Six: case Seven: case  Eight: case  Nine:
+      is_size = true;
+      break;
+    case r_tag: case g_tag: case b_tag: case c_tag: case  m_tag: 
+    case y_tag: case k_tag: case w_tag:      
+      is_color = true;
+      break;
+    default: break;
+    }
+    switch(*d2) {
+    case &Text(_): return $(d,ShuffleSynth(is_color,is_size));
+    case &Tagged(_,_):
+      let pr = up_shuffle(*d2);
+      *d2 = pr[0];
+      return $(d,ShuffleSynth(is_color | pr[1].color,
+			      is_size  | pr[1].sz));
+    case &Seq(*dsp):
+      flatten_top_seq(*d2);
+      let ds = *dsp;
+      // now for the good stuff...
+      int num_from_front  = 0;
+      int start_from_back = 0;
+      int num_from_back   = 0;
+      let ds2 = ds;
+      for(; ds2 != null; ds2 = ds2->tl) {
+	++start_from_back;
+	let pr = up_shuffle(ds2->hd);
+	ds2->hd = pr[0];
+	if(pr[1].color && is_color)
+	  ++num_from_front;
+	else if(pr[1].sz && is_size)
+	  ++num_from_front;
+	else
+	  break;
+      }
+      if(ds2 != null)
+	ds2 = ds2->tl;
+      for(; ds2 != null; ds2 = ds2->tl) {
+	let pr = up_shuffle(ds2->hd);
+	ds2->hd = pr[0];
+	if(pr[1].color && is_color)
+	  ++num_from_back;
+	else if(pr[1].sz && is_size)
+	  ++num_from_back;
+	else {
+	  start_from_back += num_from_back + 1;
+	  num_from_back = 0;
+	}
+      }
+      //      fprintf(stderr,"D %d %d %d %d", length(ds), num_from_front, start_from_back, num_from_back);
+      if(num_from_front == 0 && num_from_back == 0) {
+	return $(d,ShuffleSynth(is_color,is_size));
+      }
+      list_t<doc_t> front_docs  = null;
+      list_t<doc_t> middle_docs = null;
+      list_t<doc_t> back_docs   = null;
+      let ds3 = ds;
+      if(num_from_front > 0) {
+	front_docs = ds;
+	--start_from_back;
+	while(--num_from_front) {
+	  --start_from_back;
+	  ds3 = ds3->tl;
+	}
+	middle_docs = ds3->tl;
+	ds3->tl = null;
+	ds3 = middle_docs;
+      } else
+	middle_docs = ds;
+      while(--start_from_back)
+	ds3 = ds3->tl;
+      back_docs = ds3->tl;
+      ds3->tl = null;
+      *dsp = middle_docs;
+      // FIX: don't generate so much gunk here
+      return $(new Seq(new List(new Seq(front_docs), new List(d, back_docs))),
+	       ShuffleSynth(is_color,is_size));
+    }
+
+  case &Text(_): 
+    return $(d,ShuffleSynth(0,0));
+
+      // these cases really only get called at the very top of a file,
+      // but could help on short examples
+  case &Seq(ds): 
+    flatten_top_seq(d);
+    for(; ds != null; ds = ds->tl)
+      ds->hd = up_shuffle(ds->hd)[0];
+    return $(d,ShuffleSynth(0,0));
+
+  }
+}
+        
