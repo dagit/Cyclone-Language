@@ -995,7 +995,7 @@ goto _LL57;default: _LL64: _LL65:
 goto _LL50;}else{goto _LL55;}}else{goto _LL55;}default: _LL55: _LL56:
  goto _LL50;}_LL50:;}{
 # 459
-struct Cyc_List_List*_tmpAC=!is_local?0:((struct Cyc_List_List*(*)(struct Cyc_Tcenv_Tenv*))_check_null(Cyc_Tcenv_lookup_type_vars))(_tmp96);
+struct Cyc_List_List*_tmpAC=!is_local?0: Cyc_Tcenv_lookup_type_vars(_tmp96);
 int _tmpAD=!is_local?0: 1;
 Cyc_Tcutil_check_type(s0->loc,_tmp96,_tmpAC,& Cyc_Tcutil_tmk,_tmpAD,1,_tmpC8);
 ({int _tmp1D3=Cyc_Tcutil_extract_const_from_typedef(s0->loc,(_tmp113->tq).print_const,_tmpC8);(_tmp113->tq).real_const=_tmp1D3;});{

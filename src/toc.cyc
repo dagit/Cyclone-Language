@@ -45,8 +45,8 @@
 #include "absynpp.h"
 #include "tcutil.h"
 #include "evexp.h"
-#include "relations-ap.h"
-#include "cf_flowinfo.h"
+#include "cf_flowinfo.h" // should go away very soon
+#include "insert_checks.h"
 #include "toc.h"
 #include "tcpat.h"
 using Core;
@@ -1281,137 +1281,29 @@ switch_as_switch_env(region_t<`r> r, env_t<`r2> e, var_t next_l :
 static void exp_to_c(env_t nv, exp_t e); // forward declaration
 static void stmt_to_c(env_t nv, stmt_t s); // forward declaration
 
-static bool need_null_check(exp_t e) { // e must be pre-translation!
-  //fprintf(stderr,"checking need_null_check on %s\n",exp2string(e));
+static bool do_null_check(exp_t e) { 
   switch(e->annot) {
-  case &CfFlowInfo::UnknownZ(_): 
-    //fprintf(stderr,"annotation is unknown\n");
-    switch (compress((type_t)e->topt)) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))): 
-      //fprintf(stderr,"pointer type is %s\n",force_type2bool(false,n) ? "nullable" : "notnull");
-      return force_type2bool(false,n);
-    default: toc_impos("Toc::is_nullable");
-  }
-  case &CfFlowInfo::NotZero(_):  
-    //fprintf(stderr,"annotation is notzero\n");
-    return false;
-  case &CfFlowInfo::IsZero:
-    terr(e->loc,"NULL pointer check will definitely fail");
-    return false;
-  case &EmptyAnnot:
-    // warning is unfounded under sizeof as in memcpy
-    // Tcutil::warn(e->loc,"unreachable dereference");
-    //fprintf(stderr,"annotation is empty\n");
-    return true;
-  default: toc_impos("need_null_check");
+  case &InsertChecks::NoCheck: return false;
+  case &InsertChecks::NullOnly:
+  case &InsertChecks::NullAndFatBound: 
+  case &InsertChecks::NullAndThinBound(_): return true;
+  case &InsertChecks::FatBound:
+  case &InsertChecks::ThinBound(_): return false;
+  case &EmptyAnnot: return true; // late-generated code
+  default: Warn::impos_loc(e->loc,aprintf("Toc: do_null_check %s",Absynpp::exp2string(e)));
   }
 }
-
-static Relations::relns_t get_relns(exp_t e) { // e must be pre-translation!
-  switch (e->annot) {
-  case &CfFlowInfo::UnknownZ(r): return r;
-  case &CfFlowInfo::NotZero(r):  return r;
-  case &CfFlowInfo::IsZero:
-    terr(e->loc,"dereference of NULL pointer");
-    return NULL;
-  case &EmptyAnnot: return NULL;
-  default: toc_impos("get_relns");
+static bool do_bounds_check(exp_t e) { 
+  switch(e->annot) {
+  case &InsertChecks::NoCheck: 
+  case &InsertChecks::NullOnly: return false;
+  case &InsertChecks::NullAndFatBound: 
+  case &InsertChecks::NullAndThinBound(_): 
+  case &InsertChecks::FatBound:
+  case &InsertChecks::ThinBound(_): return true;
+  case &EmptyAnnot: return true; // late-generated code
+  default: Warn::impos_loc(e->loc,"Toc: do_bounds_check");
   }
-}
-
-// return true if we can prove from relns that i < numelts(a)
-//  FIX: doesn't deal with the case where i is a constant and a's size
-//  can be found.
-static bool check_bounds(type_t a_typ, Relations::relns_t<`H> relns,
-                         exp_t a, exp_t i) {
-#ifdef BCE_DEBUG
-  fprintf(stderr,"bounds check on %s:%s and %s\n",exp2string(a),
-          typ2string(a_typ),exp2string(i));
-  fprintf(stderr,"relns: ["); Relations::print_relns(stderr,relns);
-  fprintf(stderr,"]\n");
-#endif
-  // if a has type T*{x} or T[x], then we can pretend like it's
-  // a variable to get the rest of this code to work out.
-  Relations::reln_op_t rop_i = Relations::RConst(0); // dummy value
-  bool valid_rop_i = Relations::exp2relnop(i,&rop_i);
-
-  vardecl_t x;
-  switch (a->r) {
-  case &Var_e(b):
-    let x1 = Tcutil::nonesc_vardecl(b);
-    if (x1 == NULL) fallthru;
-    x = (vardecl_t)x1;
-    break;
-  default:
-    // we're going to fake up a vardecl here
-    static string_t bogus_string = "*bogus*";
-    static $(nmspace_t,var_t) bogus_qvar =
-      $(Nmspace{.Loc_n = 0},&bogus_string);
-    static datatype Type.TupleType tt = TupleType(NULL);
-    static struct Vardecl bogus_vardecl =
-      {.sc = Public, .name = &bogus_qvar,.varloc =0,
-     .tq = Tqual{false,false,false,false,0},
-     .type = &tt, .initializer = NULL, .rgn = NULL,
-     .attributes = NULL, .escapes = false};
-
-    x = &bogus_vardecl;
-    x->type = a_typ;
-  }
-  // We need to temporarily swap in the original type of the
-  // expression so that we have size information correct for
-  // the relations machinery.  
-  let xtype = a_typ;
-  let oldtype = x->type;
-  x->type = xtype;
-  Relations::reln_op_t rop_a = Relations::RNumelts(x);
-
-  //fprintf(stderr,"vardecl %s has type %s\n",Absynpp::qvar2string(x->name),
-  //        Absynpp::typ2string(x->type));
-  // if x's type is T*{e}, T@{e}, or T[e] then we want to 
-  // add a constraint of the form e <= numelts(x)
-  exp_opt_t bound = Tcutil::get_type_bound(xtype);
-  if (bound != NULL) {
-    //fprintf(stderr,"bound is %s\n",exp2string((exp_t)bound));
-    Relations::reln_op_t rop_bound = Relations::RConst(0); // bogus value
-    if (Relations::exp2relnop(bound,&rop_bound))
-      relns = Relations::add_relation(heap_region,rop_bound,
-                                      Relations::Rlte,rop_a,relns);
-  }
-
-  // check to see if adding numelts(x) <= i to relns is inconsistent
-  if (valid_rop_i) {
-    let rlns = Relations::add_relation(heap_region,rop_a,
-                                       Relations::Rlte,rop_i,relns);
-#ifdef BCE_DEBUG
-    fprintf(stderr,"checking consistency of: "); 
-    Relations::print_relns(stderr,rlns);
-    fprintf(stderr,"\n");
-#endif
-    let consistent = Relations::consistent_relations(rlns); 
-    x->type = oldtype;
-    if (!consistent) return true;
-  }
-
-inner_loop:
-  switch (i->r) {
-  case &Cast_e(t,e2,_,_): i = e2; goto inner_loop;
-  case &Primop_e(Mod,&List(e1,&List(e2,_))):
-    // we have x[e1 % e2]
-    // if e2 is numelts(x) or z such that z <= numelts(x) then it's okay
-    Relations::reln_op_t rop_z = Relations::RConst(0); // dummy
-    if (Relations::exp2relnop(e2,&rop_z)) {
-      // add numelts(x) < z and check to see if it's inconsistent
-      let rlns = Relations::add_relation(heap_region,rop_a,
-                                         Relations::Rlt,rop_z,relns);
-      let consist = Relations::consistent_relations(rlns);
-      x->type = oldtype;
-      return !consist;
-    }
-    break;
-  default: break;
-  }
-  x->type = oldtype;
-  return false;
 }
 
 static type_t get_cyc_type(exp_t e) {
@@ -2027,7 +1919,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_to_c(nv,e);
       return;
     }
-    let need_null_ck = is_nullable_pointer_type(old_typ) && need_null_check(e2);
+    let need_null_ck = is_nullable_pointer_type(old_typ) && do_null_check(e);
     set_lhs(nv,true);
     exp_to_c(nv,e2);
     set_lhs(nv,false);
@@ -2178,10 +2070,10 @@ static void exp_to_c(env_t nv, exp_t e) {
     exp_to_c(nv,e2);
     break;
   case &FnCall_e(e1,es,NULL,_):
-    bool do_null_check = !in_sizeof(nv) && need_null_check(e1);
+    bool null_ck = !in_sizeof(nv) && do_null_check(e);
     type_t e1_typ = (type_t)e1->topt;
     exp_to_c(nv,e1);
-    if(do_null_check) { 
+    if(null_ck) { 
       if(warn_all_null_deref)
 	warn(e->loc, "inserted null check");
       //*((t *)_check_null(e)) (cast necessary b/c void* not a function type)
@@ -2224,10 +2116,10 @@ static void exp_to_c(env_t nv, exp_t e) {
 			  new_args);
       new_args = imp_rev(new_args);
       // make the function call
-      bool do_null_check = !in_sizeof(nv) && need_null_check(e1);
+      bool null_ck = !in_sizeof(nv) && do_null_check(e);
       type_t e1_typ = (type_t)e1->topt;
       exp_to_c(nv,e1);
-      if(do_null_check) { 
+      if(null_ck) { 
 	if(warn_all_null_deref)
 	  warn(e->loc, "inserted null check");
 	// ((t *)_check_null(e1))
@@ -2352,11 +2244,10 @@ static void exp_to_c(env_t nv, exp_t e) {
       let zt2 = force_type2bool(false,p2.ptr_atts.zero_term);
       switch($(b1,b2)) {
       case $(&_, &_):
-        let b1 = (exp_t)b1;
-        let b2 = (exp_t)b2;
-        if ((!Evexp::c_can_eval(b1) || !Evexp::c_can_eval(b2)) &&
-            !Evexp::same_const_exp(b1,b2))
-          terr(e->loc,"can't validate cast due to potential size differences");
+	// neither is fat -- guaranteed sound statically (in type-checker)
+        if ((!Evexp::c_can_eval((exp_t)b1) || !Evexp::c_can_eval((exp_t)b2)) &&
+            !Evexp::same_const_exp((exp_t)b1,(exp_t)b2))
+          Warn::impos_loc(e->loc,"Toc: cast to possibly shorter pointer type");
 	if(n1 && !n2) {
 	  if(is_toplevel(nv))
 	    unimp("can't do NULL-check conversion at top-level");
@@ -2364,9 +2255,8 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  // flow analysis may not set annotation correctly here!
           // sanity checking:
           if (coercion != Null_to_NonNull)
-            impos("null-check conversion mis-classified: %s",exp2string(e));
-          bool do_null_check = need_null_check(e1);
-          if (do_null_check) {
+            Warn::impos_loc(e->loc,"null-check conversion mis-classified");
+          if (do_null_check(e)) {
             if (!user_inserted)
               warn(e->loc,"inserted null check due to implicit "
 		          "cast from * to @ type");
@@ -2477,8 +2367,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	// cast from t ? to t* or t@ -- run-time check:
 	// for t*: (t *)_untag_arr(e1, sizeof(t), new_e2)
 	// for t@: (t *)_check_null(_untag_arr(e1, sizeof(t), new_e2))
-        let untag_e = _untag_dyneither_ptr_e;
-	let ptr_exp = fncall_exp(untag_e,
+	let ptr_exp = fncall_exp(_untag_dyneither_ptr_e,
 				 list(e1,
                                       sizeoftype_exp(typ_to_c(p1.elt_type),DL),
 				      new_e2), DL);
@@ -2494,8 +2383,7 @@ DynCast:
         if (zt1 && !zt2 && !p2.elt_tq.real_const) {
           if (is_toplevel(nv))
             unimp("can't coerce a ZEROTERM to a non-const NOZEROTERM pointer at toplevel");
-          let td_e = _dyneither_ptr_decrease_size_e;
-          e->r = fncall_exp_r(td_e,
+          e->r = fncall_exp_r(_dyneither_ptr_decrease_size_e,
                               list(e1,sizeoftype_exp(typ_to_c(p1.elt_type),DL),
                                    uint_exp(1,DL)));
         }
@@ -2649,9 +2537,9 @@ DynCast:
       switch (get_bounds_exp(bounds_one(),b)) {
       case neltsopt as &_:
         let nelts = (exp_t)neltsopt;
-	bool do_null_check = !in_sizeof(nv) && need_null_check(e1);
+	bool null_ck = !in_sizeof(nv) && do_null_check(e);
 	exp_to_c(nv,e1);
-        if (do_null_check) {
+        if (null_ck) {
           if (warn_all_null_deref)
             warn(e->loc, "inserted null check due to dereference");
 	  // *((t *)_check_null(e))
@@ -2702,7 +2590,7 @@ DynCast:
     let old_lhs = in_lhs(nv);
     set_lhs(nv,false);
     type_t e1typ = compress((type_t)e1->topt);
-    bool do_null_check = need_null_check(e1);
+    bool null_ck = do_null_check(e);
     exp_to_c(nv, e1);
     bool is_poly = is_poly_project(e); // decide before mutating e
     let PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt,_)} = get_ptr_type(e1typ);
@@ -2715,7 +2603,7 @@ DynCast:
       if(known) {
 	if (j < 1)
 	  impos("exp_to_c:  AggrArrow_e on pointer of size 0");
-	if (do_null_check) {
+	if (null_ck) {
           if (warn_all_null_deref)
             warn(e->loc, "inserted null check due to dereference");
 	  // ((t *)_check_null(e))->f
@@ -2761,7 +2649,7 @@ DynCast:
     // e1 could be a tuple or an array of various sorts
     switch (e1_typ) {
     case &TupleType(ts):
-      // e1->fi  where i = e2+1
+      // e1.fi  where i = e2+1
       exp_to_c(nv, e1);
       exp_to_c(nv, e2);
       let $(i,known) = Evexp::eval_const_uint_exp(e2);
@@ -2770,18 +2658,12 @@ DynCast:
       e->r = aggrmember_exp_r(e1,fieldname(i+1));
       break;
     case &PointerType(PtrInfo{ta,tq,PtrAtts(rgn,bcr,b,zt,_)}):
-      let relns = get_relns(e1);
-      let need_nullchk = need_null_check(e1);
+      let need_nullchk = do_null_check(e);
       let in_sz = in_sizeof(nv);
-#ifdef BCE_DEBUG
-      fprintf(stderr,"subscript %s, array has type %s: relns:",exp2string(e),
-              typ2string((type_t)e1->topt));
-      Relations::print_relns(stderr,relns); fprintf(stderr,"\n");
-#endif
       bool in_bnds = in_sz;
       switch (get_bounds_exp(bounds_one(),b)) {
       default:
-	in_bnds = in_bnds || check_bounds(e1_typ,relns,e1,e2);
+	in_bnds = in_bnds || !do_bounds_check(e);
 	if(warn_bounds_checks && !in_bnds)
 	  warn(e->loc,"bounds check necessary for %s", exp2string(e));
 #ifdef BCE_DEBUG
@@ -2845,9 +2727,8 @@ DynCast:
                                          member_exp(e1,curr_sp,DL)),e2);
         } else {
           // *((ta1 *) _check_unknown_subscript(e1, sizeof(ta1), e2))
-          let _check_f = _check_dyneither_subscript_e;
           e->r = deref_exp_r(cast_it(cstar_type(ta1,tq),
-                                     fncall_exp(_check_f,
+                                     fncall_exp(_check_dyneither_subscript_e,
                                                 list(e1,sizeoftype_exp(ta1,DL),
                                                      e2),DL)));
         }
@@ -2908,7 +2789,7 @@ DynCast:
       list_t<$(list_t<designator_t>,exp_t)@> es = NULL;
       // if e2 is 0, generate an "empty" array intializer to avoid giant arrays
       if (!is_zero(e2)) {
-	if(!known)
+	if(!known) // FIX: type-checker should do the same test
 	  terr(e1->loc, "cannot determine value of constant");
 	for (unsigned int i = 0; i < sz; i++)
 	  es = new List(new $(NULL,e2),es);
@@ -3151,8 +3032,6 @@ DynCast:
   case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,num_elts,is_fat,inline_call}):
     type_t t_c = typ_to_c(*topt);
     exp_to_c(nv,num_elts);
-    // FIX: we shouldn't be able to calloc a zero-terminated array of
-    // size less than 1.
     if (is_fat) {
       let x = temp_var();
       let p = temp_var();
@@ -3977,7 +3856,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
           s->r = declare_stmt(x_var, rh_struct_ptr_typ,
                               uint_exp(0,DL), body, DL)->r;
         } else if (open_exp_opt) { 
-	  // { struct _REgionHandle *x = open_exp_opt -> h; body }
+	  // { struct _RegionHandle *x = open_exp_opt -> h; body }
           exp_to_c(nv,open_exp_opt);
           exp_t arg = address_exp(aggrarrow_exp(open_exp_opt,new "h",DL),DL);
           s->r = declare_stmt(x_var,rh_struct_ptr_typ,arg,body,DL)->r;
@@ -4547,7 +4426,8 @@ static void exptypes_to_c(exp_t e) {
   case &Instantiate_e(...): 
   case &New_e(...):         
   case &Valueof_e(...):       
-  case &Tagcheck_e(...): terr(e->loc,"Cyclone expression within C code"); break;
+  case &Tagcheck_e(...): 
+    Warn::impos_loc(e->loc,"Cyclone expression within C code"); break;
   }
 }
 
@@ -4580,11 +4460,9 @@ static void decltypes_to_c(decl_t d) {
   case &ExternC_d(_):
   case &ExternCinclude_d(_,_):
   case &Region_d(...): // DJG: impossible because of parser, no?
-    terr(d->loc,"Cyclone declaration within C code");
-    break;
+    Warn::impos_loc(d->loc,"Cyclone declaration within C code"); break;
   case &Porton_d:
-  case &Portoff_d:
-    break;
+  case &Portoff_d: break;
   }
 }
 
@@ -4617,8 +4495,7 @@ static void stmttypes_to_c(stmt_t s) {
     s->r = new Skip_s;
     break;
   case &TryCatch_s(...):
-    terr(s->loc,aprintf("Cyclone statement in C code: %s",stmt2string(s)));
-    break;
+    Warn::impos_loc(s->loc,"Cyclone statement in C code"); break;
   }
 }
 

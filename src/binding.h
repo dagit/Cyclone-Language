@@ -1,5 +1,5 @@
 /* Name resolution
-   Copyright (C) 2003 Greg Morrisett, AT&T
+   Copyright (C) 2003 Dan Grossman, AT&T
    This file is part of the Cyclone compiler.
 
    The Cyclone compiler is free software; you can redistribute it

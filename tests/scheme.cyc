@@ -577,7 +577,8 @@ static struct Prim primop_table[] = {
 // constructs the initial run-time environment which has a binding
 // for each of the primops.
 static env_t<`r> initial_env(region_t<`r> r) {
-  object_t<`r>?`r primops = rnew(r) {for i < numelts(primop_table) : NULL};
+  int x = numelts(primop_table);
+  object_t<`r>?`r primops = rnew(r) {for i < x : NULL};
   for (unsigned i = 0; i < numelts(primop_table); i++) {
     primops[i] = rnew(r) Primop_v((primop_table[i].primop)<>);
   }

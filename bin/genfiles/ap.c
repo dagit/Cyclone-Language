@@ -427,7 +427,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
 
 # 1 "ap.cyc"
- static char Cyc_rcsid[52U]="$Id: ap.c,v 1.5 2004-07-27 01:41:45 mwh Exp $";
+ static char Cyc_rcsid[52U]="$Id: ap.c,v 1.6 2004-07-27 18:38:41 djg Exp $";
 # 22 "ctype.h"
 int isspace(int);struct _tuple0{int quot;int rem;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _dyneither_ptr f1;};extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _dyneither_ptr f1;};
 # 300 "cycboot.h"
@@ -578,7 +578,7 @@ struct Cyc_AP_T*Cyc_AP_neg(struct Cyc_AP_T*x){
 struct Cyc_AP_T*z;
 (unsigned int)x?0:({struct _dyneither_ptr _tmp6A=({const char*_tmp6="x";_tag_dyneither(_tmp6,sizeof(char),2U);});((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(_tmp6A,({const char*_tmp7="ap.cyc";_tag_dyneither(_tmp7,sizeof(char),7U);}),97U);});
 ({struct Cyc_AP_T*_tmp6B=Cyc_mk(x->ndigits);z=_tmp6B;});
-((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned int,unsigned int))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _dyneither_ptr)x->digits,x->ndigits / sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U])+ (x->ndigits % sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U])== 0?0: 1),sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U]));
+((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned int,unsigned int))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _dyneither_ptr)x->digits,x->ndigits / sizeof(((unsigned char*)(x->digits).curr)[0U])+ (x->ndigits % sizeof(((unsigned char*)(x->digits).curr)[0U])== 0?0: 1),sizeof(((unsigned char*)(x->digits).curr)[0U]));
 z->ndigits=x->ndigits;
 z->sign=z->ndigits == 1  && *((unsigned char*)_check_dyneither_subscript(z->digits,sizeof(unsigned char),0))== 0?1: - x->sign;
 return z;}
@@ -587,7 +587,7 @@ struct Cyc_AP_T*Cyc_AP_abs(struct Cyc_AP_T*x){
 struct Cyc_AP_T*z;
 (unsigned int)x?0:({struct _dyneither_ptr _tmp6C=({const char*_tmp8="x";_tag_dyneither(_tmp8,sizeof(char),2U);});((int(*)(struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line))Cyc___assert_fail)(_tmp6C,({const char*_tmp9="ap.cyc";_tag_dyneither(_tmp9,sizeof(char),7U);}),106U);});
 ({struct Cyc_AP_T*_tmp6D=Cyc_mk(x->ndigits);z=_tmp6D;});
-((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned int,unsigned int))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _dyneither_ptr)x->digits,x->ndigits / sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U])+ (x->ndigits % sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U])== 0?0: 1),sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U]));
+((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned int,unsigned int))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _dyneither_ptr)x->digits,x->ndigits / sizeof(((unsigned char*)(x->digits).curr)[0U])+ (x->ndigits % sizeof(((unsigned char*)(x->digits).curr)[0U])== 0?0: 1),sizeof(((unsigned char*)(x->digits).curr)[0U]));
 z->ndigits=x->ndigits;
 z->sign=1;
 return z;}
@@ -857,7 +857,7 @@ if(x->sign == - 1)
 ++ size;
 ({struct _dyneither_ptr _tmpD3=({unsigned int _tmp48=size;char*_tmp49=_cyccalloc_atomic(sizeof(char),_tmp48);_tag_dyneither(_tmp49,sizeof(char),_tmp48);});str=_tmpD3;});
 ({struct _dyneither_ptr _tmpD4=({unsigned int _tmp4A=x->ndigits * sizeof(unsigned char);unsigned char*_tmp4B=_cycalloc_atomic(_tmp4A);_tag_dyneither(_tmp4B,1U,_tmp4A);});q=_tmpD4;});
-((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned int,unsigned int))Cyc__memcpy)(q,(struct _dyneither_ptr)x->digits,x->ndigits / sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U])+ (x->ndigits % sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U])== 0?0: 1),sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U]));
+((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned int,unsigned int))Cyc__memcpy)(q,(struct _dyneither_ptr)x->digits,x->ndigits / sizeof(((unsigned char*)(x->digits).curr)[0U])+ (x->ndigits % sizeof(((unsigned char*)(x->digits).curr)[0U])== 0?0: 1),sizeof(((unsigned char*)(x->digits).curr)[0U]));
 if(x->sign == - 1){
 ({struct _dyneither_ptr _tmp4C=_dyneither_ptr_plus(str,sizeof(char),0);char _tmp4D=*((char*)_check_dyneither_subscript(_tmp4C,sizeof(char),0U));char _tmp4E='-';if(_get_dyneither_size(_tmp4C,sizeof(char))== 1U  && (_tmp4D == '\000'  && _tmp4E != '\000'))_throw_arraybounds();*((char*)_tmp4C.curr)=_tmp4E;});
 ({struct _dyneither_ptr _tmpD8=_dyneither_ptr_plus(str,sizeof(char),1);int _tmpD7=size - 1;int _tmpD6=base;int _tmpD5=x->ndigits;Cyc_XP_tostr(_tmpD8,_tmpD7,_tmpD6,_tmpD5,q);});}else{
@@ -875,7 +875,7 @@ x=y;
 y=tmp;}
 # 402
 ({struct Cyc_AP_T*_tmpDC=Cyc_mk(x->ndigits);z=_tmpDC;});
-((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned int,unsigned int))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _dyneither_ptr)x->digits,x->ndigits / sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U])+ (x->ndigits % sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U])== 0?0: 1),sizeof(((unsigned char*)(((struct Cyc_AP_T*)_check_null(x))->digits).curr)[0U]));
+((struct _dyneither_ptr(*)(struct _dyneither_ptr d,struct _dyneither_ptr s,unsigned int,unsigned int))Cyc__memcpy)(((struct Cyc_AP_T*)_check_null(z))->digits,(struct _dyneither_ptr)x->digits,x->ndigits / sizeof(((unsigned char*)(x->digits).curr)[0U])+ (x->ndigits % sizeof(((unsigned char*)(x->digits).curr)[0U])== 0?0: 1),sizeof(((unsigned char*)(x->digits).curr)[0U]));
 z->ndigits=x->ndigits;
 z->sign=x->sign;
 return z;}

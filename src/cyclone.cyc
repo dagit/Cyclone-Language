@@ -31,6 +31,7 @@
 #include "toseqc.h"
 #include "tovc.h"
 #include "new_control_flow.h"
+#include "insert_checks.h"
 #include "interface.h"
 #include "warn.h"
 #include "specsfile.h"
@@ -490,6 +491,11 @@ list_t<Absyn::decl_t> do_cfcheck(JumpAnalysis::jump_anal_res_t tables,
   return tds;
 }
 
+bool do_insert_checks(bool ignore, list_t<Absyn::decl_t,`H> tds) {
+  InsertChecks::insert_checks(tds);
+  return true;
+}
+
 // do_interface [te] [if] [ifo] [decls] where [if] is the interface (cyci)
 // file, and [ifo] is the cycio file for the output
 list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE *`H, FILE @`H)@ params,
@@ -859,10 +865,13 @@ static void process_file(string_t<`H> filename) {
 
     // Control-flow checking
     if (tc_r) goto PRINTC;
-    tds = do_stage("control-flow checking", tds, do_cfcheck, jump_tables,
-		   remove_fileptr, preprocfileptr);
+    do_stage("control-flow checking", tds, do_cfcheck, jump_tables,
+	     remove_fileptr, preprocfileptr);
     if (compile_failure) return;
-
+    do_stage("check insertion", tds, do_insert_checks, true,
+	     remove_fileptr, preprocfileptr);
+    if (compile_failure) return;
+    
     // Generate interface file
     if (generate_interface_r) {
       FILE *inter_file = try_file_open((const char @)interfacefile,"w","interface file");

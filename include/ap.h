@@ -1,7 +1,7 @@
-/* $Id: ap.h,v 1.1 2004-07-06 17:49:20 gwprice Exp $ */
+/* $Id: ap.h,v 1.2 2004-07-27 18:39:03 djg Exp $ */
 #ifndef AP_INCLUDED
 #define AP_INCLUDED
-#include <stdarg.h>
+#include <cycboot.h>
 #define T AP_T
 typedef struct T *T;
 extern T AP_zero;
