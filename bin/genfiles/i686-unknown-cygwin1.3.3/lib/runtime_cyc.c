@@ -36,8 +36,6 @@
 
 extern void exit(int);
 
-// int *__errno(void) { return &errno; }
-
 //////////////////////////////////////////////////////////
 // First, definitions for things declared in cyc_include.h
 //////////////////////////////////////////////////////////
@@ -80,7 +78,6 @@ void *GC_calloc_atomic(unsigned int n, unsigned int t) {
   return res;
 }
 
-// Need one of these per thread (we don't have threads)
 static struct _RuntimeStack *_current_handler = NULL;
 
 // Need one per thread
@@ -692,8 +689,6 @@ void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t)
 
 // allocate a new page and return a region handle for a new region.
 struct _RegionHandle _new_region(const char *rgn_name) {
-//  struct _RegionHandle _new_region() {
-//    char *rgn_name = "foo";
   struct _RegionHandle r;
   struct _RegionPage *p;
 
@@ -716,7 +711,7 @@ struct _RegionHandle _new_region(const char *rgn_name) {
   return r;
 }
 
-extern void _free_region(struct _RegionHandle *r) {
+void _free_region(struct _RegionHandle *r) {
   struct _RegionPage *p = r->curr;
   while (p != NULL) {
     struct _RegionPage *n = p->next;

@@ -1,8 +1,8 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd2.8/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Sat Dec  1 17:17:21 2001
---- i386-unknown-openbsd2.8/lib/execinfo.c	Sun Dec  2 11:26:30 2001
+*** i686-unknown-linux/lib/execinfo.c	Sun Dec  2 16:26:04 2001
+--- i386-unknown-openbsd2.8/lib/execinfo.c	Sun Dec  2 16:27:30 2001
 ***************
-*** 274,396 ****
+*** 265,387 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); int Cyc_Execinfo_backtrace(
   struct _tagged_arr, int); int Cyc_Execinfo_bt(); struct Cyc_Cstdio___sFILE;
@@ -126,7 +126,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd
 ! Cyc_Std_putc( d, Cyc_Std_stdout);} Cyc_Std_putc(( int)'\n', Cyc_Std_stdout);}}
 ! Cyc_Std_fclose( r); Cyc_Std_fclose( w); kill( pid, 15); waitpid( pid, 0, 0);
 ! return 0;}}}
---- 274,316 ----
+--- 265,307 ----
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
   extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); int Cyc_Execinfo_backtrace(
   struct _tagged_arr, int); int Cyc_Execinfo_bt(); struct Cyc_Cstdio___sFILE;
@@ -171,10 +171,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd
 ! sizeof( unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-openbsd2.8/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Sat Dec  1 17:17:21 2001
---- i386-unknown-openbsd2.8/lib/getopt.c	Sun Dec  2 11:26:30 2001
+*** i686-unknown-linux/lib/getopt.c	Sun Dec  2 16:26:06 2001
+--- i386-unknown-openbsd2.8/lib/getopt.c	Sun Dec  2 16:27:32 2001
 ***************
-*** 306,318 ****
+*** 297,309 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -188,7 +188,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-openbsd2.
   int __argc, struct _tagged_arr __argv, struct _tagged_arr __shortopts); extern
   int Cyc_Std__getopt_internal( int __argc, struct _tagged_arr __argv, struct
   _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind, int
---- 306,314 ----
+--- 297,305 ----
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -199,10 +199,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c i386-unknown-openbsd2.
   int Cyc_Std__getopt_internal( int __argc, struct _tagged_arr __argv, struct
   _tagged_arr __shortopts, struct _tagged_arr __longopts, int* __longind, int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-openbsd2.8/lib/in.c
-*** i686-unknown-linux/lib/in.c	Sat Dec  1 17:17:21 2001
---- i386-unknown-openbsd2.8/lib/in.c	Sun Dec  2 11:26:30 2001
+*** i686-unknown-linux/lib/in.c	Sun Dec  2 16:26:06 2001
+--- i386-unknown-openbsd2.8/lib/in.c	Sun Dec  2 16:27:32 2001
 ***************
-*** 278,291 ****
+*** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -217,7 +217,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-openbsd2.8/li
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
---- 278,287 ----
+--- 269,278 ----
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -229,10 +229,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/in.c i386-unknown-openbsd2.8/li
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-openbsd2.8/lib/inet.c
-*** i686-unknown-linux/lib/inet.c	Sat Dec  1 17:17:21 2001
---- i386-unknown-openbsd2.8/lib/inet.c	Sun Dec  2 11:26:30 2001
+*** i686-unknown-linux/lib/inet.c	Sun Dec  2 16:26:04 2001
+--- i386-unknown-openbsd2.8/lib/inet.c	Sun Dec  2 16:27:30 2001
 ***************
-*** 278,291 ****
+*** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -247,7 +247,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-openbsd2.8/
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
---- 278,287 ----
+--- 269,278 ----
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -259,10 +259,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/inet.c i386-unknown-openbsd2.8/
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-openbsd2.8/lib/netdb.c
-*** i686-unknown-linux/lib/netdb.c	Sat Dec  1 17:17:21 2001
---- i386-unknown-openbsd2.8/lib/netdb.c	Sun Dec  2 11:26:30 2001
+*** i686-unknown-linux/lib/netdb.c	Sun Dec  2 16:26:06 2001
+--- i386-unknown-openbsd2.8/lib/netdb.c	Sun Dec  2 16:27:32 2001
 ***************
-*** 278,291 ****
+*** 269,282 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -277,7 +277,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-openbsd2.8
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
---- 278,287 ----
+--- 269,278 ----
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -289,10 +289,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/netdb.c i386-unknown-openbsd2.8
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-openbsd2.8/lib/socket.c
-*** i686-unknown-linux/lib/socket.c	Sat Dec  1 17:17:21 2001
---- i386-unknown-openbsd2.8/lib/socket.c	Sun Dec  2 11:26:30 2001
+*** i686-unknown-linux/lib/socket.c	Sun Dec  2 16:26:08 2001
+--- i386-unknown-openbsd2.8/lib/socket.c	Sun Dec  2 16:27:34 2001
 ***************
-*** 299,312 ****
+*** 290,303 ****
   Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -307,7 +307,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-openbsd2.
   int tag; struct Cyc_Std_sockaddr* f1; } ; static const int Cyc_Std_SA_socklenptr=
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
---- 299,308 ----
+--- 290,299 ----
   Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -319,10 +319,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-openbsd2.
   2; struct Cyc_Std_SA_socklenptr_struct{ int tag; unsigned int* f1; } ; static
   const int Cyc_Std_SA_socklen= 3; struct Cyc_Std_SA_socklen_struct{ int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-openbsd2.8/lib/stat.c
-*** i686-unknown-linux/lib/stat.c	Sat Dec  1 17:17:21 2001
---- i386-unknown-openbsd2.8/lib/stat.c	Sun Dec  2 11:26:30 2001
+*** i686-unknown-linux/lib/stat.c	Sun Dec  2 16:26:08 2001
+--- i386-unknown-openbsd2.8/lib/stat.c	Sun Dec  2 16:27:34 2001
 ***************
-*** 277,288 ****
+*** 268,279 ****
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
   int* t); extern struct Cyc_Std_tm* gmtime( const int* timep); extern struct Cyc_Std_tm*
   localtime( const int* timep); extern int timezone; extern int daylight; struct
@@ -335,7 +335,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-openbsd2.8/
   struct _tagged_arr filename, struct Cyc_Std_stat_t* buf); extern int fstat( int
   fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
---- 277,286 ----
+--- 268,277 ----
   tm_wday; int tm_yday; int tm_isdst; } ; extern void tzset(); extern int time(
   int* t); extern struct Cyc_Std_tm* gmtime( const int* timep); extern struct Cyc_Std_tm*
   localtime( const int* timep); extern int timezone; extern int daylight; struct
@@ -347,10 +347,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/stat.c i386-unknown-openbsd2.8/
   fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
   filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-openbsd2.8/lib/time.c
-*** i686-unknown-linux/lib/time.c	Sat Dec  1 17:17:21 2001
---- i386-unknown-openbsd2.8/lib/time.c	Sun Dec  2 11:26:30 2001
+*** i686-unknown-linux/lib/time.c	Sun Dec  2 16:26:08 2001
+--- i386-unknown-openbsd2.8/lib/time.c	Sun Dec  2 16:27:34 2001
 ***************
-*** 288,307 ****
+*** 279,298 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -371,7 +371,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-openbsd2.8/
   wrap_Cstring_as_string( asctime( timeptr), - 1);} struct _tagged_arr Cyc_Std_ctime(
   const int* timep){ return wrap_Cstring_as_string( ctime( timep), - 1);}
   unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
---- 288,303 ----
+--- 279,294 ----
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -389,10 +389,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/time.c i386-unknown-openbsd2.8/
   const int* timep){ return wrap_Cstring_as_string( ctime( timep), - 1);}
   unsigned int Cyc_Std_strftime( struct _tagged_arr s, unsigned int maxsize,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-openbsd2.8/lib/unistd.c
-*** i686-unknown-linux/lib/unistd.c	Sat Dec  1 17:17:21 2001
---- i386-unknown-openbsd2.8/lib/unistd.c	Sun Dec  2 11:26:30 2001
+*** i686-unknown-linux/lib/unistd.c	Sun Dec  2 16:26:08 2001
+--- i386-unknown-openbsd2.8/lib/unistd.c	Sun Dec  2 16:27:34 2001
 ***************
-*** 278,321 ****
+*** 269,312 ****
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -437,7 +437,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-openbsd2.
   unsigned char* buf, unsigned int count); extern int rmdir( unsigned char*);
   extern int symlink( unsigned char* path1, unsigned char* path2); extern int
   truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
---- 278,316 ----
+--- 269,307 ----
   __z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
   it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
   setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
@@ -478,10 +478,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/unistd.c i386-unknown-openbsd2.
   extern int symlink( unsigned char* path1, unsigned char* path2); extern int
   truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-openbsd2.8/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Sat Dec  1 22:16:50 2001
---- i386-unknown-openbsd2.8/src/buildlib.c	Sun Dec  2 11:26:30 2001
+*** i686-unknown-linux/src/buildlib.c	Sun Dec  2 16:26:04 2001
+--- i386-unknown-openbsd2.8/src/buildlib.c	Sun Dec  2 16:27:30 2001
 ***************
-*** 364,392 ****
+*** 355,383 ****
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
   gmtime( const int* timep); extern struct Cyc_Std_tm* localtime( const int* timep);
   extern int timezone; extern int daylight; struct Cyc_Std_stat_t{
@@ -511,7 +511,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c i386-unknown-openbsd
   has_arg; int* flag; int val; } ; extern unsigned int alarm( unsigned int seconds);
   extern int close( int); extern void _exit( int); extern int getpid(); extern int
   getppid(); extern int fork(); extern int fchdir( int); extern int fchown( int,
---- 364,386 ----
+--- 355,377 ----
   tm_isdst; } ; extern void tzset(); extern int time( int* t); extern struct Cyc_Std_tm*
   gmtime( const int* timep); extern struct Cyc_Std_tm* localtime( const int* timep);
   extern int timezone; extern int daylight; struct Cyc_Std_stat_t{

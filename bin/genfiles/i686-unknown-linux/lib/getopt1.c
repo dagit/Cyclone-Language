@@ -1,7 +1,5 @@
 // This is a C header file to be used by the output of the Cyclone
-// to C translator.  The corresponding definitions are in
-// the file lib/runtime_cyc.c
-
+// to C translator.  The corresponding definitions are in file lib/runtime_cyc.c
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
@@ -24,15 +22,11 @@ struct _tagged_arr {
   unsigned char *base; 
   unsigned char *last_plus_one; 
 };
-struct _tagged_string {  // delete after bootstrapping
-  unsigned char *curr; 
-  unsigned char *base; 
-  unsigned char *last_plus_one; 
-};
 
 //// Discriminated Unions
 struct _xtunion_struct { char *tag; };
 
+// Need one of these per thread (we don't have threads)
 // The runtime maintains a stack that contains either _handler_cons
 // structs or _RegionHandle structs.  The tag is 0 for a handler_cons
 // and 1 for a region handle.  
@@ -62,10 +56,8 @@ struct _RegionHandle {
 };
 
 extern struct _RegionHandle _new_region(const char *);
-//  extern struct _RegionHandle _new_region();
-extern void * _region_malloc(struct _RegionHandle *, unsigned int);
-extern void * _region_calloc(struct _RegionHandle *, unsigned int t,
-                             unsigned int n);
+extern void * _region_malloc(struct _RegionHandle *, unsigned);
+extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
 extern void   _free_region(struct _RegionHandle *);
 
 //// Exceptions 
@@ -259,7 +251,6 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc(n) _profile_GC_malloc(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
-
 #endif
  struct Cyc_Std_option{ struct _tagged_arr name; int has_arg; int* flag; int val;
 } ; extern int Cyc_Std_getopt_long( int __argc, struct _tagged_arr __argv,
