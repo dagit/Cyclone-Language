@@ -49,8 +49,8 @@ inline int ht_hashcode(struct ht_ht @ht, const char ?`r key) {
 
 struct ht_node @ht_node_create(char ? key) {
     char ?newkey;
-    struct ht_node @node;
-    if ((node = (struct ht_node @)malloc(sizeof(struct ht_node))) == 0) {
+    struct ht_node *node;
+    if ((node = (struct ht_node *)malloc(sizeof(struct ht_node))) == 0) {
 	perror("malloc ht_node");
 	exit(1);
     }
@@ -66,7 +66,7 @@ struct ht_node @ht_node_create(char ? key) {
 
 struct ht_ht @ht_create(int size) {
     int i = 0;
-    struct ht_ht @ht = (struct ht_ht @)malloc(sizeof(struct ht_ht));
+    struct ht_ht *ht = (struct ht_ht *)malloc(sizeof(struct ht_ht));
     while (ht_prime_list[i] < size) { i++; }
     ht->size = ht_prime_list[i];
     ht->tbl = new {for i<ht_prime_list[i]: NULL};

@@ -86,7 +86,7 @@ void list_print(char ?msg, DLL @x) {
 }
 
 DLL @list_new() {
-    DLL @l = (DLL @)malloc(sizeof(DLL));
+    DLL *l = (DLL *)malloc(sizeof(DLL));
     l->next = l;
     l->prev = l;
     l->val = 0;
