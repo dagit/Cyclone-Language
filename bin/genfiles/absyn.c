@@ -372,7 +372,9 @@ struct Cyc_Absyn_Decl*Cyc_Absyn_new_decl(void*,unsigned);
 # 1057
 struct Cyc_Absyn_Vardecl*Cyc_Absyn_new_vardecl(unsigned,struct _tuple0*,void*,struct Cyc_Absyn_Exp*);
 # 1090
-void*Cyc_Absyn_pointer_expand(void*,int);struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};
+void*Cyc_Absyn_pointer_expand(void*,int);
+# 1123
+void Cyc_Absyn_visit_stmt(int(*)(void*,struct Cyc_Absyn_Exp*),int(*)(void*,struct Cyc_Absyn_Stmt*),void*,struct Cyc_Absyn_Stmt*);struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};
 # 73 "cycboot.h"
 extern struct _fat_ptr Cyc_aprintf(struct _fat_ptr,struct _fat_ptr);struct Cyc_Warn_String_Warn_Warg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Warn_Int_Warn_Warg_struct{int tag;int f1;};
 # 71 "warn.h"

@@ -4076,132 +4076,57 @@ static stmt_t letdecl_to_c(env_t nv, pat_t p, Tcpat::decision_opt_t dopt,
 
 // These next few functions clean up the types in C code, getting
 // rid of stuff inserted by the parser (e.g., region evars).
-
-static void exptypes_to_c(exp_t e) {
-  switch (e->r) {
-  case &Extension_e(e):      fallthru(e);
-  case &Deref_e(e):          fallthru(e);
-  case &AggrMember_e(e,...): fallthru(e);
-  case &AggrArrow_e(e,...):  fallthru(e);
-  case &Address_e(e):        fallthru(e);
-  case &Throw_e(e,_):        fallthru(e);
-  case &NoInstantiate_e(e):  fallthru(e);
-  case &Sizeofexp_e(e):      fallthru(e);
-  case &Increment_e(e1,_):   exptypes_to_c(e1); break;
-  case &Primop_e(_,es):      List::iter(exptypes_to_c,es); break;
-  case &And_e(e1,e2):        fallthru(e1,e2);
-  case &Or_e(e1,e2):         fallthru(e1,e2);
-  case &SeqExp_e(e1,e2):     fallthru(e1,e2);
-  case &Subscript_e(e1,e2):  fallthru(e1,e2);
-  case &Swap_e(e1,e2):       fallthru(e1,e2);
-  case &AssignOp_e(e1,_,e2): exptypes_to_c(e1); exptypes_to_c(e2); break;
-  case &Conditional_e(e1,e2,e3):
-    exptypes_to_c(e1); exptypes_to_c(e2); exptypes_to_c(e3); break;
-  case &FnCall_e(e,es,...):
-    exptypes_to_c(e); List::iter(exptypes_to_c,es); break;
-  case &Cast_e(*t,e,_,_): *t = typ_to_c(*t); exptypes_to_c(e); break;
-  case &CompoundLit_e(&$(_,_,*t),dles):
-    *t = typ_to_c(*t);
-    fallthru(dles);
-  case &UnresolvedMem_e(_,dles): fallthru(dles);
-  case &Array_e(dles):
-    for (; dles != NULL; dles = dles->tl)
-      exptypes_to_c((*dles->hd)[1]);
-    break;
+static bool types_to_c_f1(bool ignore, exp_t e) {
+  switch(e->r) {
+  case &CompoundLit_e(&$(_,_,*t),_): fallthru(t);
   case &Offsetof_e(*t,_): fallthru(t);
+  case &Cast_e(*t,...): fallthru(t);
   case &Sizeoftype_e(*t): *t = typ_to_c(*t); break;
-  case &StmtExp_e(s):     stmttypes_to_c(s); break;
   case &Malloc_e(*m):
     if (m->elt_type != NULL)
       m->elt_type = new (typ_to_c(*m->elt_type));
-    exptypes_to_c(m->num_elts);
     break;
   case &Asm_e(_,_,o,i,_):
     asm_iolist_types_toc(o);
     asm_iolist_types_toc(i);
     break;
-  case &Const_e(_):
-  case &Var_e(_):
-  case &Enum_e(...):
-  case &AnonEnum_e(...): break;
-
-  case &Assert_e(...):
-  case &Pragma_e(...):
-  case &AnonStruct_e(...):
-  case &Datatype_e(...):
-  case &Aggregate_e(...):
-  case &Comprehension_e(...):
-  case &ComprehensionNoinit_e(...):
-  case &Tuple_e(...):
-  case &Instantiate_e(...):
-  case &New_e(...):
-  case &Valueof_e(...):
-  case &Tagcheck_e(...): Warn::impos_loc(e->loc,"Cyclone expression in C code");
+  default: break;
   }
+  return true;
 }
-
-static void decltypes_to_c(decl_t d) {
-  switch (d->r) {
-  case &Var_d(vd):
-    vd->type = typ_to_c(vd->type);
-    if (vd->initializer != NULL) exptypes_to_c((exp_t)vd->initializer);
+static bool types_to_c_f2(bool ignore, stmt_t s) {
+  switch(s->r) {
+  case &Decl_s(d,_):
+    switch(d->r) {
+    case &Var_d(vd): vd->type = typ_to_c(vd->type); break;
+    case &Fn_d(fd):
+      fd->i.ret_type = typ_to_c(fd->i.ret_type);
+      for (let args=fd->i.args; args != NULL; args = args->tl)
+	(*args->hd)[2] = typ_to_c((*args->hd)[2]);
+      break;
+    case &Aggr_d(ad): aggrdecl_to_c(ad); break;
+    case &Enum_d(ed):
+      if (ed->fields != NULL)
+	for (let fs = ed->fields->v; fs != NULL; fs = fs->tl)
+	  if (fs->hd->tag != NULL) exptypes_to_c((exp_t)fs->hd->tag);
+      break;
+    case &Typedef_d(td): td->defn = typ_to_c((type_t)td->defn); break;
+    default: break;
+    }
     break;
-  case &Fn_d(fd):
-    fd->i.ret_type = typ_to_c(fd->i.ret_type);
-    for (let args=fd->i.args; args != NULL; args = args->tl)
-      (*args->hd)[2] = typ_to_c((*args->hd)[2]);
-    break;
-  case &Aggr_d(ad): aggrdecl_to_c(ad); break;
-  case &Enum_d(ed):
-    if (ed->fields != NULL)
-      for (let fs = ed->fields->v; fs != NULL; fs = fs->tl)
-        if (fs->hd->tag != NULL) exptypes_to_c((exp_t)fs->hd->tag);
-    break;
-  case &Typedef_d(td): td->defn = typ_to_c((type_t)td->defn); break;
-  case &Let_d(...):
-  case &Letv_d(_):
-  case &Datatype_d(_):
-  case &Namespace_d(_,_):
-  case &Using_d(_,_):
-  case &ExternC_d(...):
-  case &ExternCinclude_d(...):
-  case &Region_d(...): // DJG: impossible because of parser?
-    Warn::impos_loc(d->loc,"Cyclone declaration in C code");
-  case &Porton_d:
-  case &Portoff_d:
-  case &Tempeston_d:
-  case &Tempestoff_d: break;
-  }
-}
-
-static void stmttypes_to_c(stmt_t s) {
-  switch (s->r) {
-  case &Exp_s(e):       exptypes_to_c(e); break;
-  case &Seq_s(s1,s2):   stmttypes_to_c(s1); stmttypes_to_c(s2); break;
-  case &Return_s(eopt): if (eopt != NULL) exptypes_to_c(eopt); break;
-  case &IfThenElse_s(e,s1,s2):
-    exptypes_to_c(e); stmttypes_to_c(s1); stmttypes_to_c(s2); break;
-  case &While_s($(e,_),s):
-    exptypes_to_c(e); stmttypes_to_c(s); break;
-  case &For_s(e1,$(e2,_),$(e3,_),s):
-    exptypes_to_c(e1); exptypes_to_c(e2); exptypes_to_c(e3);
-    stmttypes_to_c(s); break;
-  case &Switch_s(e,scs,dec_tree):
-    exptypes_to_c(e);
-    for (; scs != NULL; scs=scs->tl) stmttypes_to_c(scs->hd->body);
-    break;
-  case &Decl_s(d,s):    decltypes_to_c(d); stmttypes_to_c(s); break;
-  case &Do_s(s,$(e,_)): stmttypes_to_c(s); exptypes_to_c(e);  break;
-  case &Label_s(_,s):   stmttypes_to_c(s); break;
-  case &Skip_s:
-  case &Break_s:
-  case &Continue_s:
-  case &Goto_s(...): break;
   case &Fallthru_s(...):
     // in C code, this is implicit, so we replace it with a skip
-    s->r = new Skip_s; break;
-  case &TryCatch_s(...): Warn::impos_loc(s->loc,"Cyclone statement in C code");
+    s->r = new Skip_s; 
+    return false;
+  default: break;
   }
+  return true;
+}
+static void exptypes_to_c(exp_t e) {
+  visit_exp(types_to_c_f1,types_to_c_f2,true,e);
+}
+static void stmttypes_to_c(stmt_t s) {
+  visit_stmt(types_to_c_f1,types_to_c_f2,true,s);
 }
 
 // Translate the given declarations, producing a new list of declarations
