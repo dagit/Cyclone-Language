@@ -223,7 +223,7 @@ static node_t @term2node(graph_t @g, term_t t);
 static void set_distance(graph_t @g, term_t s, term_t t, int dist, bool is_signed);
 static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
 static void add_eq(graph_t @g, term_t t1, term_t t2);
-static $(bool,unsigned) term_is_const(graph_t @g, term_t t);
+static $(bool,unsigned,term_opt_t) subst_term_with_const(graph_t @g, term_t t);
 
 // Depending upon the type of a term, we can sometimes add extra
 // information to a graph.  For instance, if t : int@{42} then we
@@ -342,8 +342,8 @@ static bool equal_nodes(node_t @`H s, node_t @`H r) {
 }
 
 static bool equal_terms(graph_t @g, term_t t1, term_t t2){
-  let $(ok1,c1) = term_is_const(g,t1);
-  let $(ok2,c2) = term_is_const(g,t2);
+  let $(ok1,c1,_) = subst_term_with_const(g,t1);
+  let $(ok2,c2,_) = subst_term_with_const(g,t2);
   if (ok1 && ok2 && c1 == c2) return true;
   let n1 = term2node(g,t1);
   let n2 = term2node(g,t2);
@@ -549,6 +549,9 @@ static bool is_relation(Absyn::primop_t p){
 }
 
 static unsigned eval_binop(Absyn::primop_t p, unsigned c1, unsigned c2){
+  // wangyl: FIX??  here we are assuming that all operations are performed
+  // on 32 bit words, and their type (whether sighed/unsigned) would not
+  // change the result of the operation.
   switch (p){
   case Absyn::Plus: return c1 + c2;
   case Absyn::Times: return c1 * c2;
@@ -575,28 +578,49 @@ static unsigned eval_unop(Absyn::primop_t p, unsigned c){
   case Absyn::Minus: return -c;
   default: Warn::impos(aprintf("Invalid unop %s during constant evaluation", Absynpp::prim2string(p)));
   }
-  return 0;;
+  return 0;
 }
 // when ok, the term t is equal to the value i in the graph g.
-static $(bool ok, unsigned i) term_is_const(graph_t @g, term_t t) {
+static $(bool, unsigned,term_opt_t) subst_term_with_const(graph_t @g, term_t t) {
+  term_opt_t newterm = NULL;
   switch(t){
-  case &Uint(c): return $(true,c);
-  case &Binop(Absyn::Plus,t1,t2,topt):
-    let $(ok1,c1) = term_is_const(g,t1);
-    if (ok1) add_eq(g,t,binop(Absyn::Plus,t2,uint(c1),topt));
-    let $(ok2,c2) = term_is_const(g,t2);
-    if (ok2) add_eq(g,t,binop(Absyn::Plus,t1,uint(c2),topt));
-    break;
-  case &Binop(p, t1, t2, topt):
+  case &Uint(c): return $(true,c,NULL);
+  case &Binop(p,t1,t2,topt):
+    // wangyl: for relations, since we are not keeping track of 
+    // whether we are comparing between signed or unsigned here
+    // so we can't actually evaluate it correctly
     if (is_relation(p)) break;
-    let $(ok1,c1) = term_is_const(g,t1);
-    let $(ok2,c2) = term_is_const(g,t2);
-    if (ok1 && ok2) add_eq(g,t,uint(eval_binop(p,c1,c2)));
+    let $(ok1,c1,nt1) = subst_term_with_const(g,t1);
+    let $(ok2,c2,nt2) = subst_term_with_const(g,t2);
+    // t1(or t2) was partially substituted with constant 
+    // and is equivalent to a new term.
+    if (nt1 != NULL){
+      newterm = binop(p,nt1,t2,topt);
+      add_eq(g,t,newterm);
+    }
+    if (nt2 != NULL){
+      newterm = binop(p,t1,nt2,topt);
+      add_eq(g,t,newterm);
+    }
+    if (ok1) {
+      newterm = binop(p,uint(c1),t2,topt);
+      add_eq(g,t,newterm);
+    }
+    if (ok2) {
+      newterm = binop(p,t1,uint(c2),topt);
+      add_eq(g,t,newterm);
+    }
+    if (ok1 && ok2) {
+      return $(true,eval_binop(p,c1,c2),NULL);
+    }
     break;
-  case &Unop(p, t1, topt):
+  case &Unop(p,t1,topt):
     if (p == Absyn::Numelts) break;
-    let $(ok1, c1) = term_is_const(g,t1);
-    if (ok1) add_eq(g,t,uint(eval_unop(p,c1)));
+    let $(ok1,c1,_) = subst_term_with_const(g,t1);
+    if (ok1) {
+      add_eq(g,t,uint(eval_unop(p,c1)));
+      return $(true,eval_unop(p,c1),NULL);
+    }
     break;
   default: break;
   }
@@ -605,14 +629,17 @@ static $(bool ok, unsigned i) term_is_const(graph_t @g, term_t t) {
   let n2z_s = lookup_dist(n,z,true);
   if (n2z_s != NULL) {
     let z2n_s = lookup_dist(z,n,true);
-    if (z2n_s != NULL && *n2z_s == -(*z2n_s)) return $(true,*n2z_s);
+    if (z2n_s != NULL && *n2z_s == -(*z2n_s)) return $(true,*n2z_s,NULL);
   }
   let n2z_u = lookup_dist(n,z,false);
   if (n2z_u != NULL) {
     let z2n_u = lookup_dist(z,n,false);
-    if (z2n_u != NULL && *n2z_u == -(*z2n_u)) return $(true,*n2z_u);
+    if (z2n_u != NULL && *n2z_u == -(*z2n_u)) return $(true,*n2z_u,NULL);
   }
-  return $(false,0xbad);
+  if (newterm != NULL){
+    if (t == newterm) newterm = NULL;
+  }
+  return $(false,0xbad,newterm);
 }
 
 // If we have two nodes with representatives of the form Prim(p,[t11,...,tn1])
@@ -706,7 +733,7 @@ static void break_term_in_graph(int dummy, graph_t @g){
 	  set_distance(g,t1,rs->rep,-c1,false);
       }
     }
-    let $(ok,c1) = term_is_const(g,rs->rep);
+    let $(ok,c1,_) = subst_term_with_const(g,rs->rep);
     // we know that rs->rep == c, we try to solve subpart of rs->rep;
     if (ok){
       switch (rs->rep){

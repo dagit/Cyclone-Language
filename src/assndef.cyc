@@ -298,24 +298,24 @@ static term_t flatten_merge(Absyn::primop_t p, term_t t1, term_t t2, type_opt_t 
   }
   if (ip1 == NULL) {
     if (ip2 != NULL) {
-//       if (((p == Absyn::Plus) && (*ip2 == 0))||
-// 	  ((p == Absyn::Times) && (*ip2 == 1)))
-// 	return t;
+      if (((p == Absyn::Plus) && (*ip2 == 0))||
+	  ((p == Absyn::Times) && (*ip2 == 1)))
+	return t;
       let ptr = Binop(p, t, uint(*ip2),topt);
       t = hash_cons_term(&ptr);
     }
   } else {
     if (ip2 != NULL) {
       term_t binres = eval_binop(p, *ip1, *ip2);
-//       if (((p == Absyn::Plus) && (cmp_term(binres, zero())==0)) ||
-// 	  ((p == Absyn::Times) && (cmp_term(binres, one())==0)))
-// 	return t;
+      if (((p == Absyn::Plus) && (cmp_term(binres, zero())==0)) ||
+	  ((p == Absyn::Times) && (cmp_term(binres, one())==0)))
+	return t;
       let ptr = Binop(p, t, binres, topt);
       t = hash_cons_term(&ptr);
     } else {
-//       if (((p == Absyn::Plus) && (*ip1 == 0))||
-// 	  ((p == Absyn::Times) && (*ip1 == 1)))
-// 	return t;
+      if (((p == Absyn::Plus) && (*ip1 == 0))||
+	  ((p == Absyn::Times) && (*ip1 == 1)))
+	return t;
       let ptr = Binop(p, t, uint(*ip1), topt);
       t = hash_cons_term(&ptr);
     }

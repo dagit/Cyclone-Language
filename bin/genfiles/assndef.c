@@ -610,18 +610,25 @@ termlist=termlist->tl;}
 # 299
 if(ip1==0){
 if(ip2!=0){
-# 304
+if((int)p==0 &&*ip2==0U ||
+(int)p==1 &&*ip2==1U)
+return t;{
 struct Cyc_AssnDef_Binop_AssnDef_Term_struct ptr=({struct Cyc_AssnDef_Binop_AssnDef_Term_struct _Tmp6;_Tmp6.tag=5,_Tmp6.f1=p,_Tmp6.f2=t,({void*_Tmp7=Cyc_AssnDef_uint(*ip2);_Tmp6.f3=_Tmp7;}),_Tmp6.f4=topt;_Tmp6;});
-t=Cyc_AssnDef_hash_cons_term((void*)& ptr);}}else{
+t=Cyc_AssnDef_hash_cons_term((void*)& ptr);}}}else{
 # 308
 if(ip2!=0){
 void*binres=Cyc_AssnDef_eval_binop(p,*ip1,*ip2);
-# 313
+if((int)p==0 &&({void*_Tmp6=binres;Cyc_AssnDef_cmp_term(_Tmp6,Cyc_AssnDef_zero());})==0 ||
+(int)p==1 &&({void*_Tmp6=binres;Cyc_AssnDef_cmp_term(_Tmp6,Cyc_AssnDef_one());})==0)
+return t;{
 struct Cyc_AssnDef_Binop_AssnDef_Term_struct ptr=({struct Cyc_AssnDef_Binop_AssnDef_Term_struct _Tmp6;_Tmp6.tag=5,_Tmp6.f1=p,_Tmp6.f2=t,_Tmp6.f3=binres,_Tmp6.f4=topt;_Tmp6;});
-t=Cyc_AssnDef_hash_cons_term((void*)& ptr);}else{
-# 319
+t=Cyc_AssnDef_hash_cons_term((void*)& ptr);}}else{
+# 316
+if((int)p==0 &&*ip1==0U ||
+(int)p==1 &&*ip1==1U)
+return t;{
 struct Cyc_AssnDef_Binop_AssnDef_Term_struct ptr=({struct Cyc_AssnDef_Binop_AssnDef_Term_struct _Tmp6;_Tmp6.tag=5,_Tmp6.f1=p,_Tmp6.f2=t,({void*_Tmp7=Cyc_AssnDef_uint(*ip1);_Tmp6.f3=_Tmp7;}),_Tmp6.f4=topt;_Tmp6;});
-t=Cyc_AssnDef_hash_cons_term((void*)& ptr);}}
+t=Cyc_AssnDef_hash_cons_term((void*)& ptr);}}}
 # 323
 return t;}}}}struct _tuple25{enum Cyc_Absyn_Primop f1;void*f2;void*f3;};
 # 326
