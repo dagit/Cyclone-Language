@@ -2,7 +2,7 @@ include ../../Makefile.inc
 
 CYCC = $(CYCDIR)/bin/$(CYCCOMP)
 CFLAGS = -O3 -DTIMING
-CYC_FLAGS = -pg -O3 -DTIMING
+CYC_FLAGS = -O3 -DTIMING
 
 # Not working yet: echo moments
 # Not implemented at all: lists methcall objinst prodcons regexmatch
