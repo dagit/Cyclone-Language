@@ -22,9 +22,6 @@ all: $(addsuffix $(EXE), cyctest foo hello test_regions histogram finger test_ge
 hello$(EXE): hello.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 
-merge_sort$(EXE): merge_sort.o
-	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
-
 test_regions$(EXE): test_regions.o
 	$(CYCC) $(CYCFLAGS) -o $@ $^ $(LDFLAGS)
 

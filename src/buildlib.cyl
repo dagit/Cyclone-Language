@@ -902,7 +902,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &Array_e(_):
       fprintf(stderr,"Error: unexpected Array_e\n");
       exit(1); return;
-    case &Comprehension_e(_,_,_):
+    case &Comprehension_e(_,_,_,_):
       fprintf(stderr,"Error: unexpected Comprehension_e\n");
       exit(1); return;
     case &Struct_e(_,_,_,_):
@@ -945,7 +945,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     case &PointerType(x):
       scan_type(x.elt_typ);
       return;
-    case &ArrayType(t,_,sz):
+    case &ArrayType(ArrayInfo{t,_,sz,zt}):
       scan_type(t);
       scan_exp_opt(sz);
       return;
@@ -1202,7 +1202,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   }
 
   /* Exception for handling error cases of process_file */
-  xtunion exn { NO_SUPPORT };
+  xtunion exn { NO_SUPPORT(string_t) };
 
   /* Returns 1 on a fatal error (can't create files, etc.) or 0 otherwise. */
   int process_file(string_t filename,
@@ -1303,7 +1303,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     /* Put the macros in the table of dependencies */
     dep_t t = new_deps();
     maybe = fopen(macrosfile,"r");
-    if (!maybe) throw NO_SUPPORT;
+    if (!maybe) throw new NO_SUPPORT(aprintf("can't open macrosfile %s",
+                                             macrosfile));
 
     in_file = (FILE@)maybe;
     let l = Lexing::from_file(in_file);
@@ -1318,7 +1319,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     /* Get the type declarations out of the file */
     maybe = fopen(declsfile,"r");
-    if (!maybe) throw NO_SUPPORT;
+    if (!maybe) throw new NO_SUPPORT(aprintf("can't open declsfile %s",
+                                             declsfile));
 
     in_file = (FILE@)maybe;
     l = Lexing::from_file(in_file);
@@ -1529,7 +1531,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     /* Print reachable macros */
     maybe = fopen(macrosfile,"r");
-    if (!maybe) throw NO_SUPPORT;
+    if (!maybe) throw new NO_SUPPORT(aprintf("can't open macrosfile %s",
+                                             macrosfile));
     in_file = (FILE@)maybe;
     l = Lexing::from_file(in_file);
     let entry2;
@@ -1589,6 +1592,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     return 0;
 
     } catch {
+    case &NO_SUPPORT(s): 
+      fprintf(stderr,"No support because %s\n",s);
+      fallthru;
     default:
       /* We could get here because of a throw NO_SUPPORT or because of
          a parse error or other error.  In either case, we create a

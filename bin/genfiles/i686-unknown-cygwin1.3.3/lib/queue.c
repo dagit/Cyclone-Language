@@ -192,6 +192,59 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
+// Decrease the upper bound on a fat pointer by numelts where sz is
+// the size of the pointer's type.  Note that this can't be a macro
+// if we're to get initializers right.
+static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
+                                                    unsigned int sz,
+                                                    unsigned int numelts) {
+  x.last_plus_one -= sz * numelts; 
+  return x; 
+}
+
+// Add i to zero-terminated pointer x.  Checks for x being null and
+// ensures that x[0..i-1] are not 0.
+#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
+  typedef _czs_tx = (*orig_x); \
+  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
+  unsigned int _czs_sz = (orig_sz); \
+  int _czs_i = (orig_i); \
+  unsigned int _czs_temp; \
+  if ((_czs_x) == NULL) _throw_null(); \
+  if (_czs_i < 0) _throw_arraybounds(); \
+  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
+    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
+  _czs_x+_czs_i; })
+
+// Calculates the number of elements in a zero-terminated, thin array.
+// If non-null, the array is guaranteed to have orig_offset elements.
+#define _get_zero_arr_size(orig_x,orig_offset) ({ \
+  typedef _gres_tx = (*orig_x); \
+  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
+  unsigned int _gres_offset = (orig_offset); \
+  unsigned int _gres = 0; \
+  if (_gres_x != NULL) { \
+     _gres = _gres_offset; \
+     _gres_x += _gres_offset - 1; \
+     while (*_gres_x != 0) { _gres_x++; _gres++; } \
+  } _gres; })
+
+// Does in-place addition of a zero-terminated pointer (x += e and ++x).  
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+
+// Does in-place increment of a zero-terminated pointer (e.g., x++).
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  _zap_tx *_zap_res = *_zap_x; \
+  *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
+  _zap_res; })
+  
 //// Allocation
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
@@ -267,29 +320,29 @@ void Cyc_Queue_remove(struct Cyc_Queue_Queue*,void*);int Cyc_Queue_length(struct
 void Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*);void Cyc_Queue_app(
 void*(*f)(void*),struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue{struct Cyc_List_List*
 front;struct Cyc_List_List*rear;unsigned int len;};int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*
-q){return q->front == 0;}char Cyc_Queue_Empty[10]="\000\000\000\000Empty";struct Cyc_Queue_Queue*
-Cyc_Queue_create(){return({struct Cyc_Queue_Queue*_tmp0=_cycalloc(sizeof(*_tmp0));
-_tmp0->front=0;_tmp0->rear=0;_tmp0->len=0;_tmp0;});}void Cyc_Queue_radd(struct
-_RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){struct Cyc_List_List*cell=({
-struct Cyc_List_List*_tmp1=_region_malloc(r,sizeof(*_tmp1));_tmp1->hd=(void*)x;
-_tmp1->tl=0;_tmp1;});if(q->front == 0){q->front=cell;q->rear=cell;}else{((struct
-Cyc_List_List*)_check_null(q->rear))->tl=cell;q->rear=cell;}q->len ++;}void Cyc_Queue_add(
-struct Cyc_Queue_Queue*q,void*x){Cyc_Queue_radd(Cyc_Core_heap_region,q,x);}void
-Cyc_Queue_rpush(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){q->front=({
-struct Cyc_List_List*_tmp2=_region_malloc(r,sizeof(*_tmp2));_tmp2->hd=(void*)x;
-_tmp2->tl=q->front;_tmp2;});if(q->rear == 0)q->rear=q->front;q->len ++;}void Cyc_Queue_push(
-struct Cyc_Queue_Queue*q,void*x){Cyc_Queue_rpush(Cyc_Core_heap_region,q,x);}void*
-Cyc_Queue_take(struct Cyc_Queue_Queue*q){if(q->front == 0)(int)_throw((void*)Cyc_Queue_Empty);
-else{void*_tmp3=(void*)((struct Cyc_List_List*)_check_null(q->front))->hd;q->front=((
-struct Cyc_List_List*)_check_null(q->front))->tl;if(q->front == 0)q->rear=0;q->len
---;return _tmp3;}}void*Cyc_Queue_peek(struct Cyc_Queue_Queue*q){if(q->front == 0)(
-int)_throw((void*)Cyc_Queue_Empty);else{return(void*)((struct Cyc_List_List*)
-_check_null(q->front))->hd;}}void Cyc_Queue_clear(struct Cyc_Queue_Queue*q){q->front=
-0;q->rear=0;q->len=0;}void Cyc_Queue_remove(struct Cyc_Queue_Queue*q,void*v){
-struct Cyc_List_List*x;struct Cyc_List_List*y;for((x=q->front,y=0);x != 0;(y=x,x=x->tl)){
-if((void*)x->hd == v){if(q->front == x)q->front=x->tl;else{((struct Cyc_List_List*)
-_check_null(y))->tl=x->tl;}if(q->rear == x)q->rear=y;break;}}}int Cyc_Queue_length(
-struct Cyc_Queue_Queue*q){return(int)q->len;}void Cyc_Queue_iter(void(*f)(void*),
-struct Cyc_Queue_Queue*q){struct Cyc_List_List*x=q->front;for(0;x != 0;x=x->tl){f((
-void*)x->hd);}}void Cyc_Queue_app(void*(*f)(void*),struct Cyc_Queue_Queue*q){
-struct Cyc_List_List*x=q->front;for(0;x != 0;x=x->tl){f((void*)x->hd);}}
+q){return q->front == 0;}char Cyc_Queue_Empty[10]="\000\000\000\000Empty\000";
+struct Cyc_Queue_Queue*Cyc_Queue_create(){return({struct Cyc_Queue_Queue*_tmp0=
+_cycalloc(sizeof(*_tmp0));_tmp0->front=0;_tmp0->rear=0;_tmp0->len=0;_tmp0;});}
+void Cyc_Queue_radd(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){struct
+Cyc_List_List*cell=({struct Cyc_List_List*_tmp1=_region_malloc(r,sizeof(*_tmp1));
+_tmp1->hd=(void*)x;_tmp1->tl=0;_tmp1;});if(q->front == 0){q->front=cell;q->rear=
+cell;}else{((struct Cyc_List_List*)_check_null(q->rear))->tl=cell;q->rear=cell;}q->len
+++;}void Cyc_Queue_add(struct Cyc_Queue_Queue*q,void*x){Cyc_Queue_radd(Cyc_Core_heap_region,
+q,x);}void Cyc_Queue_rpush(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){
+q->front=({struct Cyc_List_List*_tmp2=_region_malloc(r,sizeof(*_tmp2));_tmp2->hd=(
+void*)x;_tmp2->tl=q->front;_tmp2;});if(q->rear == 0)q->rear=q->front;q->len ++;}
+void Cyc_Queue_push(struct Cyc_Queue_Queue*q,void*x){Cyc_Queue_rpush(Cyc_Core_heap_region,
+q,x);}void*Cyc_Queue_take(struct Cyc_Queue_Queue*q){if(q->front == 0)(int)_throw((
+void*)Cyc_Queue_Empty);else{void*_tmp3=(void*)((struct Cyc_List_List*)_check_null(
+q->front))->hd;q->front=((struct Cyc_List_List*)_check_null(q->front))->tl;if(q->front
+== 0)q->rear=0;q->len --;return _tmp3;}}void*Cyc_Queue_peek(struct Cyc_Queue_Queue*
+q){if(q->front == 0)(int)_throw((void*)Cyc_Queue_Empty);else{return(void*)((
+struct Cyc_List_List*)_check_null(q->front))->hd;}}void Cyc_Queue_clear(struct Cyc_Queue_Queue*
+q){q->front=0;q->rear=0;q->len=0;}void Cyc_Queue_remove(struct Cyc_Queue_Queue*q,
+void*v){struct Cyc_List_List*x;struct Cyc_List_List*y;for((x=q->front,y=0);x != 0;(
+y=x,x=x->tl)){if((void*)x->hd == v){if(q->front == x)q->front=x->tl;else{((struct
+Cyc_List_List*)_check_null(y))->tl=x->tl;}if(q->rear == x)q->rear=y;break;}}}int
+Cyc_Queue_length(struct Cyc_Queue_Queue*q){return(int)q->len;}void Cyc_Queue_iter(
+void(*f)(void*),struct Cyc_Queue_Queue*q){struct Cyc_List_List*x=q->front;for(0;x
+!= 0;x=x->tl){f((void*)x->hd);}}void Cyc_Queue_app(void*(*f)(void*),struct Cyc_Queue_Queue*
+q){struct Cyc_List_List*x=q->front;for(0;x != 0;x=x->tl){f((void*)x->hd);}}

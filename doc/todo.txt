@@ -13,6 +13,13 @@ CONFIGURATION BUGS:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
+* There's a bug in subtyping or coercions.  $(int,int) can be cast to int.
+
+* For zero-terminated arrays, we do not require an initializer even
+though we should.  Also, we allow zero-terminated arrays of size 0
+though there are parts of the system that rely upon them having at
+least one element.  
+
 * C code from void f() { let x = NULL; } doesn't compile b/c we
 underconstrain the constant NULL and the unused type of x differently.
 
@@ -57,19 +64,6 @@ underconstrain the constant NULL and the unused type of x differently.
   during the pattern match.  
   Alternatively, we could do like O'Caml and copy the values out
   before doing any tests.
-
-* the unifier is a bit too eager about nailing down effects.  The problem
-  is that when we do a function call, we need to ensure that the effect
-  of the function is a subset of the current capability.  To do this we,
-  check that each primitive effect is in the capability.  When we encounter
-  regions(%(_)) where the %(_) is an evar that does not occur in the
-  capability, we eagerly instantiate the evar to int (thereby making
-  the regions(-) reduce to the empty effect, and thus satisfying the
-  constraint.)  But all we need to do is cut down the set of free type
-  variables that %(_) can have to include those region, type, and effect
-  variables that show up in the current capability.  Alternatively, we
-  can look at the set associated with the evar and just check that all
-  of those things are in the capability...
 
 * We rely on C to catch incomplete types, such as 
   struct X {

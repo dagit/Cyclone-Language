@@ -192,6 +192,59 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
+// Decrease the upper bound on a fat pointer by numelts where sz is
+// the size of the pointer's type.  Note that this can't be a macro
+// if we're to get initializers right.
+static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
+                                                    unsigned int sz,
+                                                    unsigned int numelts) {
+  x.last_plus_one -= sz * numelts; 
+  return x; 
+}
+
+// Add i to zero-terminated pointer x.  Checks for x being null and
+// ensures that x[0..i-1] are not 0.
+#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
+  typedef _czs_tx = (*orig_x); \
+  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
+  unsigned int _czs_sz = (orig_sz); \
+  int _czs_i = (orig_i); \
+  unsigned int _czs_temp; \
+  if ((_czs_x) == NULL) _throw_null(); \
+  if (_czs_i < 0) _throw_arraybounds(); \
+  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
+    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
+  _czs_x+_czs_i; })
+
+// Calculates the number of elements in a zero-terminated, thin array.
+// If non-null, the array is guaranteed to have orig_offset elements.
+#define _get_zero_arr_size(orig_x,orig_offset) ({ \
+  typedef _gres_tx = (*orig_x); \
+  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
+  unsigned int _gres_offset = (orig_offset); \
+  unsigned int _gres = 0; \
+  if (_gres_x != NULL) { \
+     _gres = _gres_offset; \
+     _gres_x += _gres_offset - 1; \
+     while (*_gres_x != 0) { _gres_x++; _gres++; } \
+  } _gres; })
+
+// Does in-place addition of a zero-terminated pointer (x += e and ++x).  
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+
+// Does in-place increment of a zero-terminated pointer (e.g., x++).
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  _zap_tx *_zap_res = *_zap_x; \
+  *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
+  _zap_res; })
+  
 //// Allocation
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
@@ -282,15 +335,15 @@ int);int Cyc_Lexing_lexeme_start(struct Cyc_Lexing_lexbuf*);int Cyc_Lexing_lexem
 struct Cyc_Lexing_lexbuf*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct _tagged_arr
 Cyc_Std_zstrncpy(struct _tagged_arr,struct _tagged_arr,unsigned int);struct
-_tagged_arr Cyc_Std_strdup(struct _tagged_arr src);char Cyc_Lexing_Error[10]="\000\000\000\000Error";
+_tagged_arr Cyc_Std_strdup(struct _tagged_arr src);char Cyc_Lexing_Error[10]="\000\000\000\000Error\000";
 struct Cyc_Lexing_lexbuf;struct Cyc_Lexing_function_lexbuf_state;struct Cyc_Lexing_lex_tables;
 static char Cyc_Lexing_aux_buffer_v[1]={'\000'};static struct _tagged_arr Cyc_Lexing_aux_buffer={(
 void*)((char*)Cyc_Lexing_aux_buffer_v),(void*)((char*)Cyc_Lexing_aux_buffer_v),(
 void*)((char*)Cyc_Lexing_aux_buffer_v + 1)};void Cyc_Lexing_lex_refill(struct Cyc_Lexing_lexbuf*
 lexbuf){if(_get_arr_size(Cyc_Lexing_aux_buffer,sizeof(char))== 1)Cyc_Lexing_aux_buffer=
-Cyc_Core_new_string(4096);{int read=(((struct Cyc_Lexing_function_lexbuf_state*)
-lexbuf->refill_state)->read_fun)(Cyc_Lexing_aux_buffer,(int)_get_arr_size(Cyc_Lexing_aux_buffer,
-sizeof(char)),(void*)((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun_state);
+Cyc_Core_new_string((unsigned int)(4096 + 1));{int read=(((struct Cyc_Lexing_function_lexbuf_state*)
+lexbuf->refill_state)->read_fun)(Cyc_Lexing_aux_buffer,(int)(_get_arr_size(Cyc_Lexing_aux_buffer,
+sizeof(char))- 1),(void*)((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun_state);
 int n=read > 0?read:((lexbuf->lex_eof_reached=1,0));if(lexbuf->lex_start_pos < n){
 int oldlen=lexbuf->lex_buffer_len;int newlen=oldlen * 2;struct _tagged_arr newbuf=Cyc_Core_new_string((
 unsigned int)(newlen + 1));Cyc_Std_zstrncpy(_tagged_arr_plus(newbuf,sizeof(char),
@@ -309,9 +362,9 @@ _tagged_arr,int,void*),void*read_fun_state){return({struct Cyc_Lexing_lexbuf*
 _tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->refill_buff=Cyc_Lexing_lex_refill;_tmp0->refill_state=({
 struct Cyc_Lexing_function_lexbuf_state*_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1->read_fun=
 read_fun;_tmp1->read_fun_state=(void*)read_fun_state;_tmp1;});_tmp0->lex_buffer=
-Cyc_Core_new_string(8192);_tmp0->lex_buffer_len=8192;_tmp0->lex_abs_pos=- 8192;
-_tmp0->lex_start_pos=8192;_tmp0->lex_curr_pos=8192;_tmp0->lex_last_pos=8192;
-_tmp0->lex_last_action=0;_tmp0->lex_eof_reached=0;_tmp0;});}int Cyc_Lexing_read_from_file(
+Cyc_Core_new_string((unsigned int)(8192 + 1));_tmp0->lex_buffer_len=8192;_tmp0->lex_abs_pos=
+- 8192;_tmp0->lex_start_pos=8192;_tmp0->lex_curr_pos=8192;_tmp0->lex_last_pos=
+8192;_tmp0->lex_last_action=0;_tmp0->lex_eof_reached=0;_tmp0;});}int Cyc_Lexing_read_from_file(
 struct _tagged_arr aux,int n,struct Cyc_Std___cycFILE*f){return Cyc_Std_file_string_read(
 f,aux,0,n);}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc_Std___cycFILE*
 f){return((struct Cyc_Lexing_lexbuf*(*)(int(*read_fun)(struct _tagged_arr,int,
@@ -326,9 +379,12 @@ _tmp2->lex_last_pos=0;_tmp2->lex_last_action=0;_tmp2->lex_eof_reached=1;_tmp2;})
 struct _tagged_arr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*lbuf){int len=lbuf->lex_curr_pos
 - lbuf->lex_start_pos;struct _tagged_arr s=Cyc_Core_new_string((unsigned int)(len + 
 1));Cyc_Std_zstrncpy(s,(struct _tagged_arr)_tagged_arr_plus(lbuf->lex_buffer,
-sizeof(char),lbuf->lex_start_pos),(unsigned int)len);*((char*)
-_check_unknown_subscript(s,sizeof(char),len))='\000';return s;}char Cyc_Lexing_lexeme_char(
-struct Cyc_Lexing_lexbuf*lbuf,int i){return*((char*)_check_unknown_subscript(lbuf->lex_buffer,
-sizeof(char),lbuf->lex_start_pos + i));}int Cyc_Lexing_lexeme_start(struct Cyc_Lexing_lexbuf*
-lbuf){return lbuf->lex_abs_pos + lbuf->lex_start_pos;}int Cyc_Lexing_lexeme_end(
-struct Cyc_Lexing_lexbuf*lbuf){return lbuf->lex_abs_pos + lbuf->lex_curr_pos;}
+sizeof(char),lbuf->lex_start_pos),(unsigned int)len);({struct _tagged_arr _tmp3=
+_tagged_arr_plus(s,sizeof(char),len);char _tmp4=*((char*)_check_unknown_subscript(
+_tmp3,sizeof(char),0));char _tmp5='\000';if(_get_arr_size(_tmp3,sizeof(char))== 1?
+_tmp4 == '\000'?_tmp5 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp3.curr)=
+_tmp5;});return s;}char Cyc_Lexing_lexeme_char(struct Cyc_Lexing_lexbuf*lbuf,int i){
+return*((char*)_check_unknown_subscript(lbuf->lex_buffer,sizeof(char),lbuf->lex_start_pos
++ i));}int Cyc_Lexing_lexeme_start(struct Cyc_Lexing_lexbuf*lbuf){return lbuf->lex_abs_pos
++ lbuf->lex_start_pos;}int Cyc_Lexing_lexeme_end(struct Cyc_Lexing_lexbuf*lbuf){
+return lbuf->lex_abs_pos + lbuf->lex_curr_pos;}

@@ -51,7 +51,8 @@ set_nullable()
   fprintf(stderr, "Entering set_nullable");
 #endif
 
-  nullable = NEW2(nvars, char) - ntokens;
+  char ?temp_string = new {for i<nvars:(char)0};
+  nullable = temp_string - ntokens;
 
   squeue = NEW2(nvars, short);
   s1 = s2 = squeue;

@@ -23,6 +23,10 @@ maintainer _does_ refer to them as "public".
 And I (Jeff Vinocur) hereby make the ported versions as free as
 I'm allowed to under the original licenses.
 
+JGM: I note that the output of tfftdp does not match with gcc
+(though it's close for some of the cases.)  I've verified that
+it's not our printf code so I suspect that it's someting else
+(e.g., a coercion gone bad or else a difference with math.h.)
 
 
 The relevant portion of the original README:

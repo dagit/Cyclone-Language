@@ -33,8 +33,9 @@ using Array;
 
 void test_begin(string_t t) {
   int x = 12-t.size;
-  if (x<0) x=0;
-  mstring_t padding = new { for i < x : ' ' };
+  if (x<0) x=1;
+  mstring_t padding = new { for i < x : 0 };
+  for (unsigned i = 0; i < x-1; i++) padding[i] = ' ';
   printf("%s%s: ",padding,t);
 }
 void test_end() {
@@ -466,11 +467,7 @@ void string_test() {
                                                  new List(allocstr("world"),NULL)),
                                            "**"),
                         "hello**world")==0);
-  // FIX:  polymorphism requires the cast char->int
-  okfail(strcmp(implode(new List((int)'a',
-                                              new List((int)'b',
-                                                    new List((int)'c',NULL)))),
-                        "abc")==0);
+  okfail(strcmp(implode(list('a','b','c')),"abc")==0);
   switch ((char)explode("abc")->tl->hd) {
   case 'a': fail(); break;
   case 'b': ok(); break;
@@ -991,6 +988,7 @@ void sig_handler(int sig) {
 }
 
 void sig_test() {
+#ifdef __linux__
   test_begin("Signal");
   signal(SIGUSR1,sig_handler);
   signal(SIGUSR2,sig_handler);
@@ -999,6 +997,7 @@ void sig_test() {
   raise(SIGUSR2);
   okfail(sigcnt == 2);
   test_end();
+#endif
 }
 
 int main(int argc, string_t<`H> ?`H args) {
@@ -1020,30 +1019,40 @@ int main(int argc, string_t<`H> ?`H args) {
 
   printf("\nLIBRARIES:\n");
 
-  list_test();
-  array_test();
-  tuple_test();
-  pattern_match_test();
-  set_test();
-  dict_test();
-  hashtable_test();
-  string_test();
-  buffer_test();
-  queue_test();
-  rope_test();
-  ctype_test();
-  xarray_test();
-  bitvec_test();
-  filename_test();
-  float_test();
-  fn_test();
-  pp_test();
-  arg_test(args);
-  printf_test();
-  att_test();
-  letv_test();
-  sig_test();
-  // scanf_test(); // commented out because sscanf is insecure
+  try {
+    list_test();
+    array_test();
+    tuple_test();
+    pattern_match_test();
+    set_test();
+    dict_test();
+    hashtable_test();
+    string_test();
+    buffer_test();
+    queue_test();
+    rope_test();
+    ctype_test();
+    xarray_test();
+    bitvec_test();
+    filename_test();
+    float_test();
+    fn_test();
+    pp_test();
+    arg_test(args);
+    printf_test();
+    att_test();
+    letv_test();
+    sig_test();
+    // scanf_test(); // commented out because sscanf is insecure
+  } catch {
+  case Array_bounds:
+    fflush(stdout);
+    fflush(stderr);
+    fprintf(stderr,"Uncaught Array_bounds!\n");
+    fflush(stderr);
+    no_errors = false;
+    break;
+  }
 
   if (no_errors) {
     printf("\nDONE: there were no errors\n");

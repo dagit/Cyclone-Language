@@ -347,11 +347,16 @@ void print_type(typestruct_t ts, `a::A@ val) {
 
 // FIX: getw returns -1==EOF both when EOF is reached and when the next wird is a -1.  Write put/get{8,16,32} functions using fread, fwrite.  Redo using those.
 
-#define CYCPUT(X) void cycput##X(X x, FILE@ fp) { \
+/* JGMFIX:
+define CYCPUT(X) void cycput##X(X x, FILE@ fp) { \
   if(fwrite( (char?)(X?)&x, sizeof(X), 1, fp) < 1) { \
     throw new Core::Failure("Write failure"); \
   } \
 } 
+*/
+#define CYCPUT(X) void cycput##X(X x, FILE@ fp) { \
+    throw new Core::Failure("Write failure"); \
+  } \
 
 CYCPUT(char)
 CYCPUT(short)

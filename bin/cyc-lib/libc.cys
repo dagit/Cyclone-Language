@@ -3110,7 +3110,7 @@ epilogue setvbuf {
 }
 cycstub setvbuf {
   namespace Cstdio {
-    extern "C" int setvbuf(__cFILE @, char *{0}`H, int, size_t);
+    extern "C" int setvbuf(__cFILE @, char *`H, int, size_t);
   }
   static xtunion exn.Failure __setvbuf_failure =
     Failure("setvbuf: buffer insufficient");

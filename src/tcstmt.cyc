@@ -363,18 +363,19 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       }
       // if it's an array or string, fill in the size on the type
       switch (compress(t)) {
-      case &ArrayType(telt,tq,NULL) && vd->initializer != NULL:
+      case &ArrayType(ArrayInfo{telt,tq,NULL,zt}) && vd->initializer != NULL:
         switch (vd->initializer->r) {
           case &Const_e(&String_c(s)):
-          t = vd->type = new ArrayType(telt,tq,uint_exp(s.size,NULL));
+          t = vd->type = array_typ(telt,tq,uint_exp(s.size,NULL),zt);
           break;
-	  case &Comprehension_e(_,e,_):
-	  // FIX: copy e here!
-	  t = vd->type = new ArrayType(telt,tq,e); break;
+	  case &Comprehension_e(_,e,_,_):
+	  // FIX: copy e here!  
+	  t = vd->type = array_typ(telt,tq,e,zt); 
+          break;
           case &UnresolvedMem_e(_,es): fallthru(es);
           case &Array_e(es):
-          t = vd->type = 
-            new ArrayType(telt,tq,uint_exp(List::length(es),NULL));
+          t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),NULL),
+                                   zt);
           break;
           default: break;
         }

@@ -180,7 +180,7 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
       let &Aggrfield(fn0,tq0,t0,width0,atts0) = f0s->hd;
       let &Aggrfield(fn1,tq1,t1,width1,atts1) = f1s->hd;
       // names, qualifiers, types, widths, and attributes all must agree
-      if (zstrptrcmp(fn0, fn1) != 0) {
+      if (strptrcmp(fn0, fn1) != 0) {
 	merr(loc, msg, "%s %s : field name mismatch %s != %s", "type",
 	     v,*fn0,*fn1);
 	return NULL; // we don't need further messages
@@ -248,7 +248,7 @@ merge_tunionfield(tunionfield_t f0, tunionfield_t f1,
   seg_t loc = f1->loc;
 
   // check name
-  if (zstrptrcmp((*f0->name)[1],(*f1->name)[1]) != 0) {
+  if (strptrcmp((*f0->name)[1],(*f1->name)[1]) != 0) {
     merr(loc, msg, "%s %s: field name mismatch %s != %s",
 	 t, v, *((*f1->name)[1]), *((*f0->name)[1]));
     return NULL;
@@ -497,7 +497,7 @@ struct Enumdecl * merge_enumdecl(enumdecl_t d0, enumdecl_t d1,
       let &Enumfield{&$(_,fname1),tag1,loc1} = f1s->hd;
 
       // names and tags must agree
-      if (zstrptrcmp(fname0,fname1) != 0) {
+      if (strptrcmp(fname0,fname1) != 0) {
 	merr(loc,msg,"enum %s: field name mismatch %s != %s",v,*fname0,*fname1);
 	res = false;
       }

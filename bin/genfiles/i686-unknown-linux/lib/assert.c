@@ -192,6 +192,59 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
+// Decrease the upper bound on a fat pointer by numelts where sz is
+// the size of the pointer's type.  Note that this can't be a macro
+// if we're to get initializers right.
+static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
+                                                    unsigned int sz,
+                                                    unsigned int numelts) {
+  x.last_plus_one -= sz * numelts; 
+  return x; 
+}
+
+// Add i to zero-terminated pointer x.  Checks for x being null and
+// ensures that x[0..i-1] are not 0.
+#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
+  typedef _czs_tx = (*orig_x); \
+  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
+  unsigned int _czs_sz = (orig_sz); \
+  int _czs_i = (orig_i); \
+  unsigned int _czs_temp; \
+  if ((_czs_x) == NULL) _throw_null(); \
+  if (_czs_i < 0) _throw_arraybounds(); \
+  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
+    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
+  _czs_x+_czs_i; })
+
+// Calculates the number of elements in a zero-terminated, thin array.
+// If non-null, the array is guaranteed to have orig_offset elements.
+#define _get_zero_arr_size(orig_x,orig_offset) ({ \
+  typedef _gres_tx = (*orig_x); \
+  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
+  unsigned int _gres_offset = (orig_offset); \
+  unsigned int _gres = 0; \
+  if (_gres_x != NULL) { \
+     _gres = _gres_offset; \
+     _gres_x += _gres_offset - 1; \
+     while (*_gres_x != 0) { _gres_x++; _gres++; } \
+  } _gres; })
+
+// Does in-place addition of a zero-terminated pointer (x += e and ++x).  
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+
+// Does in-place increment of a zero-terminated pointer (e.g., x++).
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  _zap_tx *_zap_res = *_zap_x; \
+  *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
+  _zap_res; })
+  
 //// Allocation
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
@@ -272,9 +325,9 @@ _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct C
 int tag;float*f1;};extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
 18];struct Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};void*Cyc_Std___assert_fail(
 struct _tagged_arr assertion,struct _tagged_arr file,unsigned int line){({struct Cyc_Std_String_pa_struct
-_tmp3;_tmp3.tag=0;_tmp3.f1=(struct _tagged_arr)assertion;{struct Cyc_Std_Int_pa_struct
-_tmp2;_tmp2.tag=1;_tmp2.f1=line;{struct Cyc_Std_String_pa_struct _tmp1;_tmp1.tag=0;
-_tmp1.f1=(struct _tagged_arr)file;{void*_tmp0[3]={& _tmp1,& _tmp2,& _tmp3};Cyc_Std_fprintf(
-Cyc_Std_stderr,_tag_arr("%s:%u: Assertion `%s' failed.\n",sizeof(char),31),
-_tag_arr(_tmp0,sizeof(void*),3));}}}});Cyc_Std_fflush((struct Cyc_Std___cycFILE*)
-Cyc_Std_stderr);exit(- 1);}
+_tmp4;_tmp4.tag=0;_tmp4.f1=(struct _tagged_arr)assertion;{struct Cyc_Std_Int_pa_struct
+_tmp3;_tmp3.tag=1;_tmp3.f1=line;{struct Cyc_Std_String_pa_struct _tmp2;_tmp2.tag=0;
+_tmp2.f1=(struct _tagged_arr)file;{void*_tmp0[3]={& _tmp2,& _tmp3,& _tmp4};Cyc_Std_fprintf(
+Cyc_Std_stderr,({const char*_tmp1="%s:%u: Assertion `%s' failed.\n";_tag_arr(
+_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,31));}),_tag_arr(_tmp0,sizeof(void*),
+3));}}}});Cyc_Std_fflush((struct Cyc_Std___cycFILE*)Cyc_Std_stderr);exit(- 1);}

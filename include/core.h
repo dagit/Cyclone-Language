@@ -30,7 +30,7 @@
    how. */
 
 /*** These declarations are made outside of any namespace. */
-typedef char *{0}`r Cstring<`r>;
+typedef char *`r Cstring<`r>;
 typedef const char ?`r string_t<`r>;
 /** A [string_t<`r>] is a constant array of characters allocated in
     region [`r].  */

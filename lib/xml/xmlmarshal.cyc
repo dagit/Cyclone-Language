@@ -569,7 +569,12 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
     int data = getIntAttribute(atts,"data");
     if(hasAttribute(atts,"id")) {
       string_t xtname = getStringAttribute(atts,"tag");
-      char? s = new {for i < xtname.size+4: i < 4?0:xtname[i-4]};
+      // JGM: this no longer works unless we make s NOZEROTERM
+      // char? s = new {for i < xtname.size+4: i < 4?0:xtname[i-4]};
+      char? s = new {for i < xtname.size+4 : 0};
+      for (unsigned i = 4; i < xtname.size+4; i++) {
+        s[i] = xtname[i-4];
+      }
       int mem = getIntAttribute(atts,"id");
       if(data) {
 	// figure out what branch

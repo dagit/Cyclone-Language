@@ -155,6 +155,8 @@ double  a,e,a3,cc1,ss1,cc3,ss3,r1,r2,s1,s2,s3,xt,tpi;
   return(n);
 }
 
+extern "C" void printit(double);
+
 int main(int argc, char? argv[])
 {
 int i,j,np,npm,lp,n2,kr,ki;
@@ -171,7 +173,7 @@ pxi = xi;
 	for (lp = 1; lp <= 15; lp++ )
 	{ 
 	  np = np * 2; 
-	  printf(" %7d ",np);
+          printf(" %7d ",np);
 	  enp = np; 
 	  npm = np / 2  - 1;  
 	  t = PI / enp;

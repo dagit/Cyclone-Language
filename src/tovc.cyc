@@ -109,15 +109,15 @@ static void box_free_vars_exp(boxingenv_t<`r,`r2> env, exp_t e) {
     }
     // now determine if it's free or bound
     for(; env.boundvars != NULL; env.boundvars = env.boundvars->tl)
-      if(zstrptrcmp(v,(*env.boundvars->hd->name)[1])==0)
+      if(strptrcmp(v,(*env.boundvars->hd->name)[1])==0)
 	return;
     // okay, it's free
     for(; env.all_locals != NULL; env.all_locals = env.all_locals->tl) {
       let vd = env.all_locals->hd;
-      if(zstrptrcmp(v,(*vd->name)[1])==0) {
+      if(strptrcmp(v,(*vd->name)[1])==0) {
 	// don't deref if it's a stack-allocated array 
 	switch(vd->type) {
-	case &ArrayType(_,_,_): break;
+	case &ArrayType(_): break;
 	default: e->r = deref_exp(var_exp(vd->name,DL),DL)->r; break;
 	}
 	*env.freevars = Set::rinsert(env.rgn,*env.freevars,vd);
@@ -255,7 +255,7 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
     // don't box if it's a stack-allocated array
   while(Iter::next(iter,&vd))
     switch(vd->type) {
-    case &ArrayType(elt_typ,_,_): 
+    case &ArrayType(ArrayInfo{elt_typ,_,_,_}): 
       params = new List(new $((*vd->name)[1], vd->tq, 
 			      cstar_typ(elt_typ,empty_tqual())),
 			params);
@@ -497,7 +497,7 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
 	// it's a C++ and gcc extension.  Who new?)
 	// FIX: ignores designators (assumes sorted already)
 	switch(Tcutil::compress(vd->type)) {
-	case &ArrayType(_,_,_):
+	case &ArrayType(_):
 	  if(vd->initializer != NULL)
 	    switch(vd->initializer->r) {
 	    case &UnresolvedMem_e(_,dles):
@@ -542,7 +542,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
 	let gen_ds = rnew(rgn) NULL;
 	stmt_to_vc(ToExpEnv(rgn,
 			    rcopy(rgn,fd->param_vardecls->v),
-			    Dict::rempty(rgn,zstrptrcmp), // ptr eq possible?
+			    Dict::rempty(rgn,strptrcmp), // ptr eq possible?
 			    fd->body,
 			    gen_ds), 
 		   fd->body);

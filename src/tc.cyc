@@ -82,18 +82,18 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   (*vd->name)[0] = new Abs_n(te->ns);
   // if it's an array or string, fill in the size on the type
   switch (compress(t)) {
-  case &ArrayType(telt,tq,NULL) && initializer != NULL:
+  case &ArrayType(ArrayInfo{telt,tq,NULL,zt}) && initializer != NULL:
     switch (initializer->r) {
       case &Const_e(&String_c(s)):
-      t = vd->type = new ArrayType(telt,tq,uint_exp(s.size,NULL));
+      t = vd->type = array_typ(telt,tq,uint_exp(s.size,NULL),zt);
       break;
-      case &Comprehension_e(_,e,_):
+      case &Comprehension_e(_,e,_,_):
       // FIX: need to copy e here!
-      t = vd->type = new ArrayType(telt,tq,e); 
+      t = vd->type = array_typ(telt,tq,e,zt); 
       break;
       case &UnresolvedMem_e(_,es): fallthru(es);
       case &Array_e(es):
-      t = vd->type = new ArrayType(telt,tq,uint_exp(List::length(es),NULL));
+      t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),NULL),zt);
       break;
       default: break;
     }
@@ -105,7 +105,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   // top-level arrays don't escape because they can't be assigned to, so
   // their sizes do not change over time. All other globals escape.
   switch (compress(t)) {
-  case &ArrayType(_,_,_): vd->escapes = false; break;
+  case &ArrayType(_): vd->escapes = false; break;
   default: vd->escapes = true; break;
   }
   // move any function type attributes into the function's type
@@ -210,7 +210,7 @@ static bool is_main(qvar_t n) {
   let &$(nms,v) = n;
   switch (nms) {
   case &Abs_n(NULL):
-    return (zstrcmp(*v,"main") == 0);
+    return (strcmp(*v,"main") == 0);
   default: return false;
   }
 }
@@ -325,18 +325,18 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->tvs);
         if (!unify(t2,tagged_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
-                                 empty_tqual())) &&
+                                 empty_tqual(),empty_conref())) &&
             !unify(t2,tagged_typ(const_string_typ(new_evar(new Opt(RgnKind),
                                                            tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
-                                 empty_tqual())) &&
+                                 empty_tqual(),empty_conref())) &&
             !unify(t2,tagged_typ(string_typ(new_evar(new Opt(RgnKind),tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
-                                 const_tqual())) &&
+                                 const_tqual(),empty_conref())) &&
             !unify(t2,tagged_typ(const_string_typ(new_evar(new Opt(RgnKind),
                                                            tvs)),
                                  new_evar(new Opt(RgnKind),tvs),
-                                 const_tqual()))) {
+                                 const_tqual(),empty_conref()))) {
           terr(loc,"second argument of main has type %s instead of char??",
                typ2string(t2));
         }
@@ -406,7 +406,7 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
     for (let fs = fields; fs != NULL; fs = fs->tl) {
       let &Aggrfield(fn,tq,t,width,atts) = fs->hd;
       
-      if (List::mem(zstrptrcmp,prev_fields,fn))
+      if (List::mem(strptrcmp,prev_fields,fn))
 	terr(loc, "duplicate field %s", *fn);
       // add the field to previous fields only if it's not an empty name
       // (empty names arise for bitfield padding.)
@@ -581,7 +581,7 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
     list_t<var_t, `uprev_rgn> prev_fields = NULL;
     for (_ fs = fields; fs != NULL; fs = fs-> tl) {
       let f = fs->hd;
-      if (List::mem(zstrptrcmp, prev_fields, (*f->name)[1]))
+      if (List::mem(strptrcmp, prev_fields, (*f->name)[1]))
 	terr(f->loc,"duplicate field name %s in %s", *((*f->name)[1]), obj);
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1], prev_fields);
@@ -725,7 +725,7 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
     for (_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
       let f = fs->hd;
       
-      if (List::mem(zstrptrcmp,prev_fields,(*f->name)[1]))
+      if (List::mem(strptrcmp,prev_fields,(*f->name)[1]))
 	terr(f->loc,"duplicate field name %s",*((*f->name)[1]));
       else
 	prev_fields = rnew(uprev_rgn) List((*f->name)[1],prev_fields);

@@ -183,6 +183,8 @@ resolve_struct_designators(region_t<`r>rgn, seg_t loc,
 extern bool is_tagged_pointer_typ(type_t);
 // like above, but puts element type in elt_typ_dest when returning true.
 extern bool is_tagged_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest);
+// like above but checks to see if the pointer is zero-terminated
+extern bool is_zero_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest);
 
 // if exp is of array type, cast it to an appropriate pointer type --
 // assumes the expression has already been type-checked and that t is
@@ -226,8 +228,13 @@ extern bool is_const_exp(tenv_t te, exp_t e);
 // like Core::snd, but first argument is a tqual_t (not a BoxKind)
 extern type_t snd_tqt($(tqual_t,type_t)@`r);
 
-// does the type support "0" as a default value?
+// does the type support "0" as a default value? -- used for toplevel
+// variables where we don't have an initializer
 extern bool supports_default(type_t);
+
+// does the type support "0" as a value?  -- used for testing whether or
+// not we can have a zero-terminated array.
+extern bool admits_zero(type_t t);
 
 // does the function type have the "noreturn" attribute?
 extern bool is_noreturn(type_t);

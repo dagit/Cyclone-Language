@@ -192,6 +192,59 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
+// Decrease the upper bound on a fat pointer by numelts where sz is
+// the size of the pointer's type.  Note that this can't be a macro
+// if we're to get initializers right.
+static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
+                                                    unsigned int sz,
+                                                    unsigned int numelts) {
+  x.last_plus_one -= sz * numelts; 
+  return x; 
+}
+
+// Add i to zero-terminated pointer x.  Checks for x being null and
+// ensures that x[0..i-1] are not 0.
+#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
+  typedef _czs_tx = (*orig_x); \
+  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
+  unsigned int _czs_sz = (orig_sz); \
+  int _czs_i = (orig_i); \
+  unsigned int _czs_temp; \
+  if ((_czs_x) == NULL) _throw_null(); \
+  if (_czs_i < 0) _throw_arraybounds(); \
+  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
+    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
+  _czs_x+_czs_i; })
+
+// Calculates the number of elements in a zero-terminated, thin array.
+// If non-null, the array is guaranteed to have orig_offset elements.
+#define _get_zero_arr_size(orig_x,orig_offset) ({ \
+  typedef _gres_tx = (*orig_x); \
+  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
+  unsigned int _gres_offset = (orig_offset); \
+  unsigned int _gres = 0; \
+  if (_gres_x != NULL) { \
+     _gres = _gres_offset; \
+     _gres_x += _gres_offset - 1; \
+     while (*_gres_x != 0) { _gres_x++; _gres++; } \
+  } _gres; })
+
+// Does in-place addition of a zero-terminated pointer (x += e and ++x).  
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+
+// Does in-place increment of a zero-terminated pointer (e.g., x++).
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  _zap_tx *_zap_res = *_zap_x; \
+  *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
+  _zap_res; })
+  
 //// Allocation
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
@@ -295,35 +348,42 @@ _tagged_arr Cyc_Std_getpass(struct _tagged_arr);int getpid();int pipe(int*);int
 backtrace(int*,int);int Cyc_Execinfo_backtrace(struct _tagged_arr array,int size){
 if(size > _get_arr_size(array,sizeof(int)))(int)_throw((void*)({struct Cyc_Core_Failure_struct*
 _tmp0=_cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Failure_struct _tmp1;
-_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=_tag_arr("backtrace: size > array.size",
-sizeof(char),29);_tmp1;});_tmp0;}));return backtrace((int*)_check_null(_untag_arr(
-array,sizeof(int),1)),size);}int Cyc_Execinfo_bt(){int bt[20];{unsigned int _tmpA=
-20;unsigned int i;for(i=0;i < _tmpA;i ++){bt[i]=0;}}{int tochild[2]={0,0};int
-fromchild[2]={0,0};int pid;int self_pid;if(pipe(tochild)?1: pipe(fromchild))return 1;
-self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[0],0)== - 1?1: dup2(
-fromchild[1],1)== - 1)return 1;({struct _tagged_arr _tmp2[4];_tmp2[3]=(struct
-_tagged_arr)_tag_arr(0,0,0);_tmp2[2]=(struct _tagged_arr)({struct Cyc_Std_Int_pa_struct
-_tmp4;_tmp4.tag=1;_tmp4.f1=(int)((unsigned int)self_pid);{void*_tmp3[1]={& _tmp4};
-Cyc_Std_aprintf(_tag_arr("/proc/%d/exe",sizeof(char),13),_tag_arr(_tmp3,sizeof(
-void*),1));}});_tmp2[1]=_tag_arr("-e",sizeof(char),3);_tmp2[0]=_tag_arr("--functions",
-sizeof(char),12);Cyc_Std_execlp(_tag_arr("addr2line",sizeof(char),10),_tag_arr("addr2line",
-sizeof(char),10),_tag_arr(_tmp2,sizeof(struct _tagged_arr),4));});return 1;}else{
-if(pid < 0){close(tochild[0]);close(tochild[1]);close(fromchild[0]);close(
-fromchild[1]);return 1;}}{struct Cyc_Std___cycFILE*w=({struct Cyc_Std___cycFILE*f=
-Cyc_Std_fdopen(tochild[1],_tag_arr("w",sizeof(char),2));if(!((unsigned int)f))
-return 1;(struct Cyc_Std___cycFILE*)_check_null(f);});struct Cyc_Std___cycFILE*r=({
-struct Cyc_Std___cycFILE*f=Cyc_Std_fdopen(fromchild[0],_tag_arr("r",sizeof(char),
-2));if(!((unsigned int)f)){Cyc_Std_fclose(w);return 1;}(struct Cyc_Std___cycFILE*)
+_tmp1.tag=Cyc_Core_Failure;_tmp1.f1=({const char*_tmp2="backtrace: size > array.size";
+_tag_arr(_tmp2,sizeof(char),_get_zero_arr_size(_tmp2,29));});_tmp1;});_tmp0;}));
+return backtrace((int*)_check_null(_untag_arr(array,sizeof(int),1)),size);}int Cyc_Execinfo_bt(){
+int bt[20];{unsigned int _tmp16=20;unsigned int i;for(i=0;i < _tmp16;i ++){bt[i]=0;}}{
+int tochild[2]={0,0};int fromchild[2]={0,0};int pid;int self_pid;if(pipe(tochild)?1:
+pipe(fromchild))return 1;self_pid=getpid();if((pid=fork())== 0){if(dup2(tochild[0],
+0)== - 1?1: dup2(fromchild[1],1)== - 1)return 1;({struct _tagged_arr _tmp3[4];_tmp3[3]=(
+struct _tagged_arr)_tag_arr(0,0,0);_tmp3[2]=(struct _tagged_arr)({struct Cyc_Std_Int_pa_struct
+_tmpA;_tmpA.tag=1;_tmpA.f1=(int)((unsigned int)self_pid);{void*_tmp8[1]={& _tmpA};
+Cyc_Std_aprintf(({const char*_tmp9="/proc/%d/exe";_tag_arr(_tmp9,sizeof(char),
+_get_zero_arr_size(_tmp9,13));}),_tag_arr(_tmp8,sizeof(void*),1));}});_tmp3[1]=({
+const char*_tmp7="-e";_tag_arr(_tmp7,sizeof(char),_get_zero_arr_size(_tmp7,3));});
+_tmp3[0]=({const char*_tmp6="--functions";_tag_arr(_tmp6,sizeof(char),
+_get_zero_arr_size(_tmp6,12));});Cyc_Std_execlp(({const char*_tmp4="addr2line";
+_tag_arr(_tmp4,sizeof(char),_get_zero_arr_size(_tmp4,10));}),({const char*_tmp5="addr2line";
+_tag_arr(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,10));}),_tag_arr(_tmp3,
+sizeof(struct _tagged_arr),4));});return 1;}else{if(pid < 0){close(tochild[0]);
+close(tochild[1]);close(fromchild[0]);close(fromchild[1]);return 1;}}{struct Cyc_Std___cycFILE*
+w=({struct Cyc_Std___cycFILE*f=Cyc_Std_fdopen(tochild[1],({const char*_tmp15="w";
+_tag_arr(_tmp15,sizeof(char),_get_zero_arr_size(_tmp15,2));}));if(!((
+unsigned int)f))return 1;(struct Cyc_Std___cycFILE*)_check_null(f);});struct Cyc_Std___cycFILE*
+r=({struct Cyc_Std___cycFILE*f=Cyc_Std_fdopen(fromchild[0],({const char*_tmp14="r";
+_tag_arr(_tmp14,sizeof(char),_get_zero_arr_size(_tmp14,2));}));if(!((
+unsigned int)f)){Cyc_Std_fclose(w);return 1;}(struct Cyc_Std___cycFILE*)
 _check_null(f);});int n=Cyc_Execinfo_backtrace(_tag_arr(bt,sizeof(int),20),(int)
-20);{int c=0;for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct _tmp6;_tmp6.tag=1;_tmp6.f1=(
-unsigned int)bt[_check_known_subscript_notnull(20,c)];{void*_tmp5[1]={& _tmp6};
-Cyc_Std_fprintf(w,_tag_arr("%#x\n",sizeof(char),5),_tag_arr(_tmp5,sizeof(void*),
-1));}});}}Cyc_Std_fflush((struct Cyc_Std___cycFILE*)w);({void*_tmp7[0]={};Cyc_Std_printf(
-_tag_arr("Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n",
-sizeof(char),94),_tag_arr(_tmp7,sizeof(void*),0));});{int c=0;for(0;c < n;c ++){int
-d;int pos=0;({void*_tmp8[0]={};Cyc_Std_printf(_tag_arr("  ",sizeof(char),3),
-_tag_arr(_tmp8,sizeof(void*),0));});while((d=Cyc_Std_getc(r))!= '\n'){(putchar(d),
-pos ++);}while(pos ++ < 16){putchar((int)' ');}({void*_tmp9[0]={};Cyc_Std_printf(
-_tag_arr("  ",sizeof(char),3),_tag_arr(_tmp9,sizeof(void*),0));});while((d=Cyc_Std_getc(
-r))!= '\n'){putchar(d);}putchar((int)'\n');}}Cyc_Std_fclose(r);Cyc_Std_fclose(w);
-kill(pid,15);waitpid(pid,0,0);return 0;}}}
+20);{int c=0;for(0;c < n;c ++){({struct Cyc_Std_Int_pa_struct _tmpD;_tmpD.tag=1;_tmpD.f1=(
+unsigned int)bt[_check_known_subscript_notnull(20,c)];{void*_tmpB[1]={& _tmpD};
+Cyc_Std_fprintf(w,({const char*_tmpC="%#x\n";_tag_arr(_tmpC,sizeof(char),
+_get_zero_arr_size(_tmpC,5));}),_tag_arr(_tmpB,sizeof(void*),1));}});}}Cyc_Std_fflush((
+struct Cyc_Std___cycFILE*)w);({void*_tmpE[0]={};Cyc_Std_printf(({const char*_tmpF="Backtrace:\n  Function          Location\n  ----------------  --------------------------------\n";
+_tag_arr(_tmpF,sizeof(char),_get_zero_arr_size(_tmpF,94));}),_tag_arr(_tmpE,
+sizeof(void*),0));});{int c=0;for(0;c < n;c ++){int d;int pos=0;({void*_tmp10[0]={};
+Cyc_Std_printf(({const char*_tmp11="  ";_tag_arr(_tmp11,sizeof(char),
+_get_zero_arr_size(_tmp11,3));}),_tag_arr(_tmp10,sizeof(void*),0));});while((d=
+Cyc_Std_getc(r))!= '\n'){(putchar(d),pos ++);}while(pos ++ < 16){putchar((int)' ');}({
+void*_tmp12[0]={};Cyc_Std_printf(({const char*_tmp13="  ";_tag_arr(_tmp13,sizeof(
+char),_get_zero_arr_size(_tmp13,3));}),_tag_arr(_tmp12,sizeof(void*),0));});
+while((d=Cyc_Std_getc(r))!= '\n'){putchar(d);}putchar((int)'\n');}}Cyc_Std_fclose(
+r);Cyc_Std_fclose(w);kill(pid,15);waitpid(pid,0,0);return 0;}}}

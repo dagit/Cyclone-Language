@@ -70,7 +70,7 @@ static unsigned int flatten_it(mstring_t s, unsigned int i, rope_t r) {
 }
 
 mstring_t to_string(rope_t r) {
-  mstring_t s = new_string(length(r));
+  mstring_t s = new_string(length(r)+1);
   flatten_it(s,0,r);
   // memoize the flattening
   r->v = new String_rope(s);

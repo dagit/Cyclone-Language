@@ -279,7 +279,7 @@ int const_exp_cmp(exp_t e1, exp_t e2) {
     switch($(f1,f2)) {
     case $(&StructField(_),&TupleIndex(_)): return -1;
     case $(&TupleIndex(_),&StructField(_)): return 1;
-    case $(&StructField(fn1),&StructField(fn2)): return zstrptrcmp(fn1,fn2);
+    case $(&StructField(fn1),&StructField(fn2)): return strptrcmp(fn1,fn2);
     case $(&TupleIndex(i1),&TupleIndex(i2)): return i1-i2;
     }
   case $(&Cast_e(t1,e1a), &Cast_e(t2,e2a)):
@@ -323,7 +323,7 @@ bool okay_szofarg(type_t t) {
 
   case &TunionFieldType(_): return false;
 
-  case &PointerType(PtrInfo{_,_,_,_,b}):  // ???
+  case &PointerType(PtrInfo{_,_,_,_,b,_}):  // ???
     switch (compress_conref(b)->v) {
     case &Eq_constr(_): return true;
     default: return false;
@@ -333,7 +333,7 @@ bool okay_szofarg(type_t t) {
   case &IntType(_,_): 
   case FloatType:    
   case &DoubleType(_): return true;
-  case &ArrayType(t2,_,e): // assume e constant checked elsewhere
+  case &ArrayType(ArrayInfo{t2,_,e,_}): // assume e constant checked elsewhere
     return (e != NULL); 
   case &FnType(_): return false;
   case &RgnHandleType(_): return true;

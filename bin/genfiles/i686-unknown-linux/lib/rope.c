@@ -192,6 +192,59 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
+// Decrease the upper bound on a fat pointer by numelts where sz is
+// the size of the pointer's type.  Note that this can't be a macro
+// if we're to get initializers right.
+static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
+                                                    unsigned int sz,
+                                                    unsigned int numelts) {
+  x.last_plus_one -= sz * numelts; 
+  return x; 
+}
+
+// Add i to zero-terminated pointer x.  Checks for x being null and
+// ensures that x[0..i-1] are not 0.
+#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
+  typedef _czs_tx = (*orig_x); \
+  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
+  unsigned int _czs_sz = (orig_sz); \
+  int _czs_i = (orig_i); \
+  unsigned int _czs_temp; \
+  if ((_czs_x) == NULL) _throw_null(); \
+  if (_czs_i < 0) _throw_arraybounds(); \
+  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
+    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
+  _czs_x+_czs_i; })
+
+// Calculates the number of elements in a zero-terminated, thin array.
+// If non-null, the array is guaranteed to have orig_offset elements.
+#define _get_zero_arr_size(orig_x,orig_offset) ({ \
+  typedef _gres_tx = (*orig_x); \
+  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
+  unsigned int _gres_offset = (orig_offset); \
+  unsigned int _gres = 0; \
+  if (_gres_x != NULL) { \
+     _gres = _gres_offset; \
+     _gres_x += _gres_offset - 1; \
+     while (*_gres_x != 0) { _gres_x++; _gres++; } \
+  } _gres; })
+
+// Does in-place addition of a zero-terminated pointer (x += e and ++x).  
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+
+// Does in-place increment of a zero-terminated pointer (e.g., x++).
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  _zap_tx *_zap_res = *_zap_x; \
+  *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
+  _zap_res; })
+  
 //// Allocation
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
@@ -289,13 +342,12 @@ _tmpB=_cycalloc(sizeof(*_tmpB));_tmpB[0]=({struct Cyc_Rope_Array_rope_struct _tm
 _tmpC.tag=1;_tmpC.f1=({unsigned int _tmpD=(unsigned int)((int(*)(struct Cyc_List_List*
 x))Cyc_List_length)(l);struct Cyc_Rope_Rope_node**_tmpE=(struct Cyc_Rope_Rope_node**)
 _cycalloc(_check_times(sizeof(struct Cyc_Rope_Rope_node*),_tmpD));struct
-_tagged_arr _tmp10=_tag_arr(_tmpE,sizeof(struct Cyc_Rope_Rope_node*),(unsigned int)((
-int(*)(struct Cyc_List_List*x))Cyc_List_length)(l));{unsigned int _tmpF=_tmpD;
-unsigned int i;for(i=0;i < _tmpF;i ++){_tmpE[i]=({struct Cyc_Rope_Rope_node*r=(
-struct Cyc_Rope_Rope_node*)((struct Cyc_List_List*)_check_null(l))->hd;l=l->tl;r;});}}
-_tmp10;});_tmpC;});_tmpB;}));_tmpA;});}unsigned int Cyc_Rope_length(struct Cyc_Rope_Rope_node*
-r){void*_tmp11=(void*)r->v;struct _tagged_arr _tmp12;struct _tagged_arr _tmp13;_LL1:
-if(*((int*)_tmp11)!= 0)goto _LL3;_tmp12=((struct Cyc_Rope_String_rope_struct*)
+_tagged_arr _tmp10=_tag_arr(_tmpE,sizeof(struct Cyc_Rope_Rope_node*),_tmpD);{
+unsigned int _tmpF=_tmpD;unsigned int i;for(i=0;i < _tmpF;i ++){_tmpE[i]=({struct Cyc_Rope_Rope_node*
+r=(struct Cyc_Rope_Rope_node*)((struct Cyc_List_List*)_check_null(l))->hd;l=l->tl;
+r;});}}_tmp10;});_tmpC;});_tmpB;}));_tmpA;});}unsigned int Cyc_Rope_length(struct
+Cyc_Rope_Rope_node*r){void*_tmp11=(void*)r->v;struct _tagged_arr _tmp12;struct
+_tagged_arr _tmp13;_LL1: if(*((int*)_tmp11)!= 0)goto _LL3;_tmp12=((struct Cyc_Rope_String_rope_struct*)
 _tmp11)->f1;_LL2: return(unsigned int)Cyc_Std_strlen(_tmp12);_LL3: if(*((int*)
 _tmp11)!= 1)goto _LL0;_tmp13=((struct Cyc_Rope_Array_rope_struct*)_tmp11)->f1;_LL4: {
 unsigned int total=0;unsigned int sz=_get_arr_size(_tmp13,sizeof(struct Cyc_Rope_Rope_node*));{
@@ -311,10 +363,10 @@ unsigned int _tmp18=_get_arr_size(_tmp16,sizeof(struct Cyc_Rope_Rope_node*));{in
 0;for(0;j < _tmp18;j ++){i=Cyc_Rope_flatten_it(s,i,*((struct Cyc_Rope_Rope_node**)
 _check_unknown_subscript(_tmp16,sizeof(struct Cyc_Rope_Rope_node*),j)));}}return i;}
 _LL5:;}struct _tagged_arr Cyc_Rope_to_string(struct Cyc_Rope_Rope_node*r){struct
-_tagged_arr s=Cyc_Core_new_string(Cyc_Rope_length(r));Cyc_Rope_flatten_it(s,0,r);(
-void*)(r->v=(void*)((void*)({struct Cyc_Rope_String_rope_struct*_tmp19=_cycalloc(
-sizeof(*_tmp19));_tmp19[0]=({struct Cyc_Rope_String_rope_struct _tmp1A;_tmp1A.tag=
-0;_tmp1A.f1=(struct _tagged_arr)s;_tmp1A;});_tmp19;})));return s;}int Cyc_Rope_cmp(
-struct Cyc_Rope_Rope_node*r1,struct Cyc_Rope_Rope_node*r2){return Cyc_Std_strcmp((
+_tagged_arr s=Cyc_Core_new_string(Cyc_Rope_length(r)+ 1);Cyc_Rope_flatten_it(s,0,
+r);(void*)(r->v=(void*)((void*)({struct Cyc_Rope_String_rope_struct*_tmp19=
+_cycalloc(sizeof(*_tmp19));_tmp19[0]=({struct Cyc_Rope_String_rope_struct _tmp1A;
+_tmp1A.tag=0;_tmp1A.f1=(struct _tagged_arr)s;_tmp1A;});_tmp19;})));return s;}int
+Cyc_Rope_cmp(struct Cyc_Rope_Rope_node*r1,struct Cyc_Rope_Rope_node*r2){return Cyc_Std_strcmp((
 struct _tagged_arr)Cyc_Rope_to_string(r1),(struct _tagged_arr)Cyc_Rope_to_string(
 r2));}

@@ -192,6 +192,59 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
+// Decrease the upper bound on a fat pointer by numelts where sz is
+// the size of the pointer's type.  Note that this can't be a macro
+// if we're to get initializers right.
+static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
+                                                    unsigned int sz,
+                                                    unsigned int numelts) {
+  x.last_plus_one -= sz * numelts; 
+  return x; 
+}
+
+// Add i to zero-terminated pointer x.  Checks for x being null and
+// ensures that x[0..i-1] are not 0.
+#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
+  typedef _czs_tx = (*orig_x); \
+  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
+  unsigned int _czs_sz = (orig_sz); \
+  int _czs_i = (orig_i); \
+  unsigned int _czs_temp; \
+  if ((_czs_x) == NULL) _throw_null(); \
+  if (_czs_i < 0) _throw_arraybounds(); \
+  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
+    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
+  _czs_x+_czs_i; })
+
+// Calculates the number of elements in a zero-terminated, thin array.
+// If non-null, the array is guaranteed to have orig_offset elements.
+#define _get_zero_arr_size(orig_x,orig_offset) ({ \
+  typedef _gres_tx = (*orig_x); \
+  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
+  unsigned int _gres_offset = (orig_offset); \
+  unsigned int _gres = 0; \
+  if (_gres_x != NULL) { \
+     _gres = _gres_offset; \
+     _gres_x += _gres_offset - 1; \
+     while (*_gres_x != 0) { _gres_x++; _gres++; } \
+  } _gres; })
+
+// Does in-place addition of a zero-terminated pointer (x += e and ++x).  
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+
+// Does in-place increment of a zero-terminated pointer (e.g., x++).
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  _zap_tx *_zap_res = *_zap_x; \
+  *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
+  _zap_res; })
+  
 //// Allocation
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
@@ -306,11 +359,12 @@ _tagged_arr),middle + i))=tem;}bottom +=len;}}Cyc_Std_first_nonopt +=Cyc_Std_opt
 - Cyc_Std_last_nonopt;Cyc_Std_last_nonopt=Cyc_Std_optind;}static struct
 _tagged_arr Cyc_Std__getopt_initialize(int argc,struct _tagged_arr argv,struct
 _tagged_arr optstring){Cyc_Std_first_nonopt=(Cyc_Std_last_nonopt=Cyc_Std_optind);
-Cyc_Std_nextchar=_tag_arr(0,0,0);Cyc_Std_posixly_correct=Cyc_Std_getenv(_tag_arr("POSIXLY_CORRECT",
-sizeof(char),16));if(*((const char*)_check_unknown_subscript(optstring,sizeof(
-char),0))== '-'){Cyc_Std_ordering=Cyc_Std_RETURN_IN_ORDER;
-_tagged_arr_inplace_plus(& optstring,sizeof(char),1);}else{if(*((const char*)
-_check_unknown_subscript(optstring,sizeof(char),0))== '+'){Cyc_Std_ordering=Cyc_Std_REQUIRE_ORDER;
+Cyc_Std_nextchar=_tag_arr(0,0,0);Cyc_Std_posixly_correct=Cyc_Std_getenv(({const
+char*_tmp0="POSIXLY_CORRECT";_tag_arr(_tmp0,sizeof(char),_get_zero_arr_size(
+_tmp0,16));}));if(*((const char*)_check_unknown_subscript(optstring,sizeof(char),
+0))== '-'){Cyc_Std_ordering=Cyc_Std_RETURN_IN_ORDER;_tagged_arr_inplace_plus(&
+optstring,sizeof(char),1);}else{if(*((const char*)_check_unknown_subscript(
+optstring,sizeof(char),0))== '+'){Cyc_Std_ordering=Cyc_Std_REQUIRE_ORDER;
 _tagged_arr_inplace_plus(& optstring,sizeof(char),1);}else{if(Cyc_Std_posixly_correct.curr
 != (_tag_arr(0,0,0)).curr)Cyc_Std_ordering=Cyc_Std_REQUIRE_ORDER;else{Cyc_Std_ordering=
 Cyc_Std_PERMUTE;}}}return optstring;}int Cyc_Std__getopt_internal(int argc,struct
@@ -332,12 +386,13 @@ char),0))!= '-'?1:*((char*)_check_unknown_subscript(*((struct _tagged_arr*)
 _check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind)),sizeof(
 char),1))== '\000': 0){Cyc_Std_optind ++;}Cyc_Std_last_nonopt=Cyc_Std_optind;}if(
 Cyc_Std_optind != argc?!Cyc_Std_strcmp((struct _tagged_arr)*((struct _tagged_arr*)
-_check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind)),
-_tag_arr("--",sizeof(char),3)): 0){Cyc_Std_optind ++;if(Cyc_Std_first_nonopt != Cyc_Std_last_nonopt?
-Cyc_Std_last_nonopt != Cyc_Std_optind: 0)Cyc_Std_exchange(argv);else{if(Cyc_Std_first_nonopt
-== Cyc_Std_last_nonopt)Cyc_Std_first_nonopt=Cyc_Std_optind;}Cyc_Std_last_nonopt=
-argc;Cyc_Std_optind=argc;}if(Cyc_Std_optind == argc){if(Cyc_Std_first_nonopt != 
-Cyc_Std_last_nonopt)Cyc_Std_optind=Cyc_Std_first_nonopt;return - 1;}if(*((char*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind)),({const
+char*_tmp1="--";_tag_arr(_tmp1,sizeof(char),_get_zero_arr_size(_tmp1,3));})): 0){
+Cyc_Std_optind ++;if(Cyc_Std_first_nonopt != Cyc_Std_last_nonopt?Cyc_Std_last_nonopt
+!= Cyc_Std_optind: 0)Cyc_Std_exchange(argv);else{if(Cyc_Std_first_nonopt == Cyc_Std_last_nonopt)
+Cyc_Std_first_nonopt=Cyc_Std_optind;}Cyc_Std_last_nonopt=argc;Cyc_Std_optind=
+argc;}if(Cyc_Std_optind == argc){if(Cyc_Std_first_nonopt != Cyc_Std_last_nonopt)
+Cyc_Std_optind=Cyc_Std_first_nonopt;return - 1;}if(*((char*)
 _check_unknown_subscript(*((struct _tagged_arr*)_check_unknown_subscript(argv,
 sizeof(struct _tagged_arr),Cyc_Std_optind)),sizeof(char),0))!= '-'?1:*((char*)
 _check_unknown_subscript(*((struct _tagged_arr*)_check_unknown_subscript(argv,
@@ -381,116 +436,125 @@ struct Cyc_Std_option*)_check_unknown_subscript(p,sizeof(struct Cyc_Std_option),
 1:((const struct Cyc_Std_option*)_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),
 0))->val != ((const struct Cyc_Std_option*)_check_unknown_subscript(p,sizeof(struct
 Cyc_Std_option),0))->val)ambig=1;}}}}if(ambig?!exact: 0){if(print_errors)({struct
-Cyc_Std_String_pa_struct _tmp2;_tmp2.tag=0;_tmp2.f1=(struct _tagged_arr)*((struct
+Cyc_Std_String_pa_struct _tmp5;_tmp5.tag=0;_tmp5.f1=(struct _tagged_arr)*((struct
 _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind));{
-struct Cyc_Std_String_pa_struct _tmp1;_tmp1.tag=0;_tmp1.f1=(struct _tagged_arr)*((
+struct Cyc_Std_String_pa_struct _tmp4;_tmp4.tag=0;_tmp4.f1=(struct _tagged_arr)*((
 struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{
-void*_tmp0[2]={& _tmp1,& _tmp2};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s: option `%s' is ambiguous\n",
-sizeof(char),30),_tag_arr(_tmp0,sizeof(void*),2));}}});_tagged_arr_inplace_plus(&
-Cyc_Std_nextchar,sizeof(char),(int)Cyc_Std_strlen((struct _tagged_arr)Cyc_Std_nextchar));
-Cyc_Std_optind ++;Cyc_Std_optopt=0;return(int)'?';}if(pfound.curr != ((struct
-_tagged_arr)_tag_arr(0,0,0)).curr){option_index=indfound;Cyc_Std_optind ++;if((
-int)*((char*)_check_unknown_subscript(nameend,sizeof(char),0))){if(((const struct
-Cyc_Std_option*)_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->has_arg)
-Cyc_Std_optarg=_tagged_arr_plus(nameend,sizeof(char),1);else{if(print_errors){
-if(*((char*)_check_unknown_subscript(*((struct _tagged_arr*)
-_check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind - 1)),
-sizeof(char),1))== '-')({struct Cyc_Std_String_pa_struct _tmp5;_tmp5.tag=0;_tmp5.f1=(
-struct _tagged_arr)((const struct Cyc_Std_option*)_check_unknown_subscript(pfound,
-sizeof(struct Cyc_Std_option),0))->name;{struct Cyc_Std_String_pa_struct _tmp4;
-_tmp4.tag=0;_tmp4.f1=(struct _tagged_arr)*((struct _tagged_arr*)
-_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmp3[2]={&
-_tmp4,& _tmp5};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s: option `--%s' doesn't allow an argument\n",
-sizeof(char),45),_tag_arr(_tmp3,sizeof(void*),2));}}});else{({struct Cyc_Std_String_pa_struct
+void*_tmp2[2]={& _tmp4,& _tmp5};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp3="%s: option `%s' is ambiguous\n";
+_tag_arr(_tmp3,sizeof(char),_get_zero_arr_size(_tmp3,30));}),_tag_arr(_tmp2,
+sizeof(void*),2));}}});_tagged_arr_inplace_plus(& Cyc_Std_nextchar,sizeof(char),(
+int)Cyc_Std_strlen((struct _tagged_arr)Cyc_Std_nextchar));Cyc_Std_optind ++;Cyc_Std_optopt=
+0;return(int)'?';}if(pfound.curr != ((struct _tagged_arr)_tag_arr(0,0,0)).curr){
+option_index=indfound;Cyc_Std_optind ++;if((int)*((char*)_check_unknown_subscript(
+nameend,sizeof(char),0))){if(((const struct Cyc_Std_option*)
+_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->has_arg)Cyc_Std_optarg=
+_tagged_arr_plus(nameend,sizeof(char),1);else{if(print_errors){if(*((char*)
+_check_unknown_subscript(*((struct _tagged_arr*)_check_unknown_subscript(argv,
+sizeof(struct _tagged_arr),Cyc_Std_optind - 1)),sizeof(char),1))== '-')({struct Cyc_Std_String_pa_struct
 _tmp9;_tmp9.tag=0;_tmp9.f1=(struct _tagged_arr)((const struct Cyc_Std_option*)
 _check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->name;{struct
-Cyc_Std_Int_pa_struct _tmp8;_tmp8.tag=1;_tmp8.f1=(int)((unsigned int)((int)*((
+Cyc_Std_String_pa_struct _tmp8;_tmp8.tag=0;_tmp8.f1=(struct _tagged_arr)*((struct
+_tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*
+_tmp6[2]={& _tmp8,& _tmp9};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp7="%s: option `--%s' doesn't allow an argument\n";
+_tag_arr(_tmp7,sizeof(char),_get_zero_arr_size(_tmp7,45));}),_tag_arr(_tmp6,
+sizeof(void*),2));}}});else{({struct Cyc_Std_String_pa_struct _tmpE;_tmpE.tag=0;
+_tmpE.f1=(struct _tagged_arr)((const struct Cyc_Std_option*)
+_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->name;{struct
+Cyc_Std_Int_pa_struct _tmpD;_tmpD.tag=1;_tmpD.f1=(int)((unsigned int)((int)*((
 char*)_check_unknown_subscript(*((struct _tagged_arr*)_check_unknown_subscript(
 argv,sizeof(struct _tagged_arr),Cyc_Std_optind - 1)),sizeof(char),0))));{struct Cyc_Std_String_pa_struct
-_tmp7;_tmp7.tag=0;_tmp7.f1=(struct _tagged_arr)*((struct _tagged_arr*)
-_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmp6[3]={&
-_tmp7,& _tmp8,& _tmp9};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s: option `%c%s' doesn't allow an argument\n",
-sizeof(char),45),_tag_arr(_tmp6,sizeof(void*),3));}}}});}}
-_tagged_arr_inplace_plus(& Cyc_Std_nextchar,sizeof(char),(int)Cyc_Std_strlen((
-struct _tagged_arr)Cyc_Std_nextchar));Cyc_Std_optopt=((const struct Cyc_Std_option*)
-_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->val;return(int)'?';}}
-else{if(((const struct Cyc_Std_option*)_check_unknown_subscript(pfound,sizeof(
-struct Cyc_Std_option),0))->has_arg == 1){if(Cyc_Std_optind < argc)Cyc_Std_optarg=*((
-struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind
-++));else{if(print_errors)({struct Cyc_Std_String_pa_struct _tmpC;_tmpC.tag=0;
-_tmpC.f1=(struct _tagged_arr)*((struct _tagged_arr*)_check_unknown_subscript(argv,
-sizeof(struct _tagged_arr),Cyc_Std_optind - 1));{struct Cyc_Std_String_pa_struct
-_tmpB;_tmpB.tag=0;_tmpB.f1=(struct _tagged_arr)*((struct _tagged_arr*)
-_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmpA[2]={&
-_tmpB,& _tmpC};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s: option `%s' requires an argument\n",
-sizeof(char),38),_tag_arr(_tmpA,sizeof(void*),2));}}});_tagged_arr_inplace_plus(&
-Cyc_Std_nextchar,sizeof(char),(int)Cyc_Std_strlen((struct _tagged_arr)Cyc_Std_nextchar));
-Cyc_Std_optopt=((const struct Cyc_Std_option*)_check_unknown_subscript(pfound,
-sizeof(struct Cyc_Std_option),0))->val;return(int)(*((const char*)
-_check_unknown_subscript(optstring,sizeof(char),0))== ':'?':':'?');}}}
-_tagged_arr_inplace_plus(& Cyc_Std_nextchar,sizeof(char),(int)Cyc_Std_strlen((
-struct _tagged_arr)Cyc_Std_nextchar));if(longind != 0)*longind=option_index;if((
-unsigned int)((const struct Cyc_Std_option*)_check_unknown_subscript(pfound,
-sizeof(struct Cyc_Std_option),0))->flag){*((int*)_check_null(((const struct Cyc_Std_option*)
-_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->flag))=((const
+_tmpC;_tmpC.tag=0;_tmpC.f1=(struct _tagged_arr)*((struct _tagged_arr*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmpA[3]={&
+_tmpC,& _tmpD,& _tmpE};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmpB="%s: option `%c%s' doesn't allow an argument\n";
+_tag_arr(_tmpB,sizeof(char),_get_zero_arr_size(_tmpB,45));}),_tag_arr(_tmpA,
+sizeof(void*),3));}}}});}}_tagged_arr_inplace_plus(& Cyc_Std_nextchar,sizeof(char),(
+int)Cyc_Std_strlen((struct _tagged_arr)Cyc_Std_nextchar));Cyc_Std_optopt=((const
 struct Cyc_Std_option*)_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),
-0))->val;return 0;}return((const struct Cyc_Std_option*)_check_unknown_subscript(
-pfound,sizeof(struct Cyc_Std_option),0))->val;}if((!long_only?1:*((char*)
-_check_unknown_subscript(*((struct _tagged_arr*)_check_unknown_subscript(argv,
-sizeof(struct _tagged_arr),Cyc_Std_optind)),sizeof(char),1))== '-')?1:(Cyc_Std_strchr(
-optstring,*((char*)_check_unknown_subscript(Cyc_Std_nextchar,sizeof(char),0)))).curr
-== ((struct _tagged_arr)_tag_arr(0,0,0)).curr){if(print_errors){if(*((char*)
+0))->val;return(int)'?';}}else{if(((const struct Cyc_Std_option*)
+_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->has_arg == 1){
+if(Cyc_Std_optind < argc)Cyc_Std_optarg=*((struct _tagged_arr*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind ++));else{
+if(print_errors)({struct Cyc_Std_String_pa_struct _tmp12;_tmp12.tag=0;_tmp12.f1=(
+struct _tagged_arr)*((struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(
+struct _tagged_arr),Cyc_Std_optind - 1));{struct Cyc_Std_String_pa_struct _tmp11;
+_tmp11.tag=0;_tmp11.f1=(struct _tagged_arr)*((struct _tagged_arr*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmpF[2]={&
+_tmp11,& _tmp12};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp10="%s: option `%s' requires an argument\n";
+_tag_arr(_tmp10,sizeof(char),_get_zero_arr_size(_tmp10,38));}),_tag_arr(_tmpF,
+sizeof(void*),2));}}});_tagged_arr_inplace_plus(& Cyc_Std_nextchar,sizeof(char),(
+int)Cyc_Std_strlen((struct _tagged_arr)Cyc_Std_nextchar));Cyc_Std_optopt=((const
+struct Cyc_Std_option*)_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),
+0))->val;return(int)(*((const char*)_check_unknown_subscript(optstring,sizeof(
+char),0))== ':'?':':'?');}}}_tagged_arr_inplace_plus(& Cyc_Std_nextchar,sizeof(
+char),(int)Cyc_Std_strlen((struct _tagged_arr)Cyc_Std_nextchar));if(longind != 0)*((
+int*)longind)=option_index;if((unsigned int)((const struct Cyc_Std_option*)
+_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->flag){*((int*)
+_check_null(((const struct Cyc_Std_option*)_check_unknown_subscript(pfound,sizeof(
+struct Cyc_Std_option),0))->flag))=((const struct Cyc_Std_option*)
+_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->val;return 0;}
+return((const struct Cyc_Std_option*)_check_unknown_subscript(pfound,sizeof(struct
+Cyc_Std_option),0))->val;}if((!long_only?1:*((char*)_check_unknown_subscript(*((
+struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind)),
+sizeof(char),1))== '-')?1:(Cyc_Std_strchr(optstring,*((char*)
+_check_unknown_subscript(Cyc_Std_nextchar,sizeof(char),0)))).curr == ((struct
+_tagged_arr)_tag_arr(0,0,0)).curr){if(print_errors){if(*((char*)
 _check_unknown_subscript(*((struct _tagged_arr*)_check_unknown_subscript(argv,
 sizeof(struct _tagged_arr),Cyc_Std_optind)),sizeof(char),1))== '-')({struct Cyc_Std_String_pa_struct
-_tmpF;_tmpF.tag=0;_tmpF.f1=(struct _tagged_arr)Cyc_Std_nextchar;{struct Cyc_Std_String_pa_struct
-_tmpE;_tmpE.tag=0;_tmpE.f1=(struct _tagged_arr)*((struct _tagged_arr*)
-_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmpD[2]={&
-_tmpE,& _tmpF};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s: unrecognized option `--%s'\n",
-sizeof(char),32),_tag_arr(_tmpD,sizeof(void*),2));}}});else{({struct Cyc_Std_String_pa_struct
-_tmp13;_tmp13.tag=0;_tmp13.f1=(struct _tagged_arr)Cyc_Std_nextchar;{struct Cyc_Std_Int_pa_struct
-_tmp12;_tmp12.tag=1;_tmp12.f1=(int)((unsigned int)((int)*((char*)
+_tmp16;_tmp16.tag=0;_tmp16.f1=(struct _tagged_arr)Cyc_Std_nextchar;{struct Cyc_Std_String_pa_struct
+_tmp15;_tmp15.tag=0;_tmp15.f1=(struct _tagged_arr)*((struct _tagged_arr*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmp13[2]={&
+_tmp15,& _tmp16};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp14="%s: unrecognized option `--%s'\n";
+_tag_arr(_tmp14,sizeof(char),_get_zero_arr_size(_tmp14,32));}),_tag_arr(_tmp13,
+sizeof(void*),2));}}});else{({struct Cyc_Std_String_pa_struct _tmp1B;_tmp1B.tag=0;
+_tmp1B.f1=(struct _tagged_arr)Cyc_Std_nextchar;{struct Cyc_Std_Int_pa_struct _tmp1A;
+_tmp1A.tag=1;_tmp1A.f1=(int)((unsigned int)((int)*((char*)
 _check_unknown_subscript(*((struct _tagged_arr*)_check_unknown_subscript(argv,
 sizeof(struct _tagged_arr),Cyc_Std_optind)),sizeof(char),0))));{struct Cyc_Std_String_pa_struct
-_tmp11;_tmp11.tag=0;_tmp11.f1=(struct _tagged_arr)*((struct _tagged_arr*)
-_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmp10[3]={&
-_tmp11,& _tmp12,& _tmp13};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s: unrecognized option `%c%s'\n",
-sizeof(char),32),_tag_arr(_tmp10,sizeof(void*),3));}}}});}}Cyc_Std_nextchar=
-_tag_arr(({unsigned int _tmp14=(unsigned int)1;char*_tmp15=(char*)
-_cycalloc_atomic(_check_times(sizeof(char),_tmp14));{unsigned int _tmp16=_tmp14;
-unsigned int i;for(i=0;i < _tmp16;i ++){_tmp15[i]='\000';}}_tmp15;}),sizeof(char),(
-unsigned int)1);Cyc_Std_optind ++;Cyc_Std_optopt=0;return(int)'?';}}{char c=*((
-char*)_check_unknown_subscript(_tagged_arr_inplace_plus_post(& Cyc_Std_nextchar,
-sizeof(char),1),sizeof(char),0));struct _tagged_arr temp=Cyc_Std_strchr(optstring,
-c);if(*((char*)_check_unknown_subscript(Cyc_Std_nextchar,sizeof(char),0))== '\000')
-++ Cyc_Std_optind;if(temp.curr == ((struct _tagged_arr)_tag_arr(0,0,0)).curr?1: c == ':'){
-if(print_errors){if((unsigned int)Cyc_Std_posixly_correct.curr)({struct Cyc_Std_Int_pa_struct
-_tmp19;_tmp19.tag=1;_tmp19.f1=(int)((unsigned int)((int)c));{struct Cyc_Std_String_pa_struct
-_tmp18;_tmp18.tag=0;_tmp18.f1=(struct _tagged_arr)*((struct _tagged_arr*)
-_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmp17[2]={&
-_tmp18,& _tmp19};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s: illegal option -- %c\n",
-sizeof(char),26),_tag_arr(_tmp17,sizeof(void*),2));}}});else{({struct Cyc_Std_Int_pa_struct
-_tmp1C;_tmp1C.tag=1;_tmp1C.f1=(int)((unsigned int)((int)c));{struct Cyc_Std_String_pa_struct
-_tmp1B;_tmp1B.tag=0;_tmp1B.f1=(struct _tagged_arr)*((struct _tagged_arr*)
-_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmp1A[2]={&
-_tmp1B,& _tmp1C};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s: invalid option -- %c\n",
-sizeof(char),26),_tag_arr(_tmp1A,sizeof(void*),2));}}});}}Cyc_Std_optopt=(int)c;
-return(int)'?';}if(*((const char*)_check_unknown_subscript(temp,sizeof(char),0))
-== 'W'?*((const char*)_check_unknown_subscript(temp,sizeof(char),1))== ';': 0){
-struct _tagged_arr nameend;struct _tagged_arr p;struct _tagged_arr pfound=(struct
-_tagged_arr)_tag_arr(0,0,0);int exact=0;int ambig=0;int indfound=0;int option_index;
-if(*((char*)_check_unknown_subscript(Cyc_Std_nextchar,sizeof(char),0))!= '\000'){
-Cyc_Std_optarg=Cyc_Std_nextchar;Cyc_Std_optind ++;}else{if(Cyc_Std_optind == argc){
-if(print_errors)({struct Cyc_Std_Int_pa_struct _tmp1F;_tmp1F.tag=1;_tmp1F.f1=(int)((
-unsigned int)((int)c));{struct Cyc_Std_String_pa_struct _tmp1E;_tmp1E.tag=0;_tmp1E.f1=(
+_tmp19;_tmp19.tag=0;_tmp19.f1=(struct _tagged_arr)*((struct _tagged_arr*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmp17[3]={&
+_tmp19,& _tmp1A,& _tmp1B};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp18="%s: unrecognized option `%c%s'\n";
+_tag_arr(_tmp18,sizeof(char),_get_zero_arr_size(_tmp18,32));}),_tag_arr(_tmp17,
+sizeof(void*),3));}}}});}}Cyc_Std_nextchar=({char*_tmp1F=({unsigned int _tmp1C=(
+unsigned int)1;char*_tmp1D=(char*)_cycalloc_atomic(_check_times(sizeof(char),
+_tmp1C + 1));{unsigned int _tmp1E=_tmp1C;unsigned int i;for(i=0;i < _tmp1E;i ++){
+_tmp1D[i]='\000';}_tmp1D[_tmp1E]=(char)0;}_tmp1D;});_tag_arr(_tmp1F,sizeof(char),
+_get_zero_arr_size(_tmp1F,(unsigned int)1 + 1));});Cyc_Std_optind ++;Cyc_Std_optopt=
+0;return(int)'?';}}{char c=*((char*)_check_unknown_subscript(
+_tagged_arr_inplace_plus_post(& Cyc_Std_nextchar,sizeof(char),1),sizeof(char),0));
+struct _tagged_arr temp=Cyc_Std_strchr(optstring,c);if(*((char*)
+_check_unknown_subscript(Cyc_Std_nextchar,sizeof(char),0))== '\000')++ Cyc_Std_optind;
+if(temp.curr == ((struct _tagged_arr)_tag_arr(0,0,0)).curr?1: c == ':'){if(
+print_errors){if((unsigned int)Cyc_Std_posixly_correct.curr)({struct Cyc_Std_Int_pa_struct
+_tmp23;_tmp23.tag=1;_tmp23.f1=(int)((unsigned int)((int)c));{struct Cyc_Std_String_pa_struct
+_tmp22;_tmp22.tag=0;_tmp22.f1=(struct _tagged_arr)*((struct _tagged_arr*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmp20[2]={&
+_tmp22,& _tmp23};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp21="%s: illegal option -- %c\n";
+_tag_arr(_tmp21,sizeof(char),_get_zero_arr_size(_tmp21,26));}),_tag_arr(_tmp20,
+sizeof(void*),2));}}});else{({struct Cyc_Std_Int_pa_struct _tmp27;_tmp27.tag=1;
+_tmp27.f1=(int)((unsigned int)((int)c));{struct Cyc_Std_String_pa_struct _tmp26;
+_tmp26.tag=0;_tmp26.f1=(struct _tagged_arr)*((struct _tagged_arr*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmp24[2]={&
+_tmp26,& _tmp27};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp25="%s: invalid option -- %c\n";
+_tag_arr(_tmp25,sizeof(char),_get_zero_arr_size(_tmp25,26));}),_tag_arr(_tmp24,
+sizeof(void*),2));}}});}}Cyc_Std_optopt=(int)c;return(int)'?';}if(*((const char*)
+_check_unknown_subscript(temp,sizeof(char),0))== 'W'?*((const char*)
+_check_unknown_subscript(temp,sizeof(char),1))== ';': 0){struct _tagged_arr nameend;
+struct _tagged_arr p;struct _tagged_arr pfound=(struct _tagged_arr)_tag_arr(0,0,0);
+int exact=0;int ambig=0;int indfound=0;int option_index;if(*((char*)
+_check_unknown_subscript(Cyc_Std_nextchar,sizeof(char),0))!= '\000'){Cyc_Std_optarg=
+Cyc_Std_nextchar;Cyc_Std_optind ++;}else{if(Cyc_Std_optind == argc){if(
+print_errors)({struct Cyc_Std_Int_pa_struct _tmp2B;_tmp2B.tag=1;_tmp2B.f1=(int)((
+unsigned int)((int)c));{struct Cyc_Std_String_pa_struct _tmp2A;_tmp2A.tag=0;_tmp2A.f1=(
 struct _tagged_arr)*((struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(
-struct _tagged_arr),0));{void*_tmp1D[2]={& _tmp1E,& _tmp1F};Cyc_Std_fprintf(Cyc_Std_stderr,
-_tag_arr("%s: option requires an argument -- %c\n",sizeof(char),39),_tag_arr(
-_tmp1D,sizeof(void*),2));}}});Cyc_Std_optopt=(int)c;if(*((const char*)
-_check_unknown_subscript(optstring,sizeof(char),0))== ':')c=':';else{c='?';}
-return(int)c;}else{Cyc_Std_optarg=*((struct _tagged_arr*)_check_unknown_subscript(
-argv,sizeof(struct _tagged_arr),Cyc_Std_optind ++));}}for(Cyc_Std_nextchar=(
-nameend=Cyc_Std_optarg);(int)*((char*)_check_unknown_subscript(nameend,sizeof(
-char),0))?*((char*)_check_unknown_subscript(nameend,sizeof(char),0))!= '=': 0;
+struct _tagged_arr),0));{void*_tmp28[2]={& _tmp2A,& _tmp2B};Cyc_Std_fprintf(Cyc_Std_stderr,({
+const char*_tmp29="%s: option requires an argument -- %c\n";_tag_arr(_tmp29,
+sizeof(char),_get_zero_arr_size(_tmp29,39));}),_tag_arr(_tmp28,sizeof(void*),2));}}});
+Cyc_Std_optopt=(int)c;if(*((const char*)_check_unknown_subscript(optstring,
+sizeof(char),0))== ':')c=':';else{c='?';}return(int)c;}else{Cyc_Std_optarg=*((
+struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind
+++));}}for(Cyc_Std_nextchar=(nameend=Cyc_Std_optarg);(int)*((char*)
+_check_unknown_subscript(nameend,sizeof(char),0))?*((char*)
+_check_unknown_subscript(nameend,sizeof(char),0))!= '=': 0;
 _tagged_arr_inplace_plus_post(& nameend,sizeof(char),1)){;}for((p=longopts,
 option_index=0);(unsigned int)(((const struct Cyc_Std_option*)
 _check_unknown_subscript(p,sizeof(struct Cyc_Std_option),0))->name).curr;(
@@ -506,58 +570,63 @@ option_index;exact=1;break;}else{if(pfound.curr == ((struct _tagged_arr)_tag_arr
 0,0)).curr){pfound=_tag_arr((const struct Cyc_Std_option*)_check_null(_untag_arr(p,
 sizeof(struct Cyc_Std_option),1)),sizeof(struct Cyc_Std_option),1);indfound=
 option_index;}else{ambig=1;}}}}if(ambig?!exact: 0){if(print_errors)({struct Cyc_Std_String_pa_struct
-_tmp22;_tmp22.tag=0;_tmp22.f1=(struct _tagged_arr)*((struct _tagged_arr*)
+_tmp2F;_tmp2F.tag=0;_tmp2F.f1=(struct _tagged_arr)*((struct _tagged_arr*)
 _check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind));{struct
-Cyc_Std_String_pa_struct _tmp21;_tmp21.tag=0;_tmp21.f1=(struct _tagged_arr)*((
+Cyc_Std_String_pa_struct _tmp2E;_tmp2E.tag=0;_tmp2E.f1=(struct _tagged_arr)*((
 struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{
-void*_tmp20[2]={& _tmp21,& _tmp22};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s: option `-W %s' is ambiguous\n",
-sizeof(char),33),_tag_arr(_tmp20,sizeof(void*),2));}}});_tagged_arr_inplace_plus(&
-Cyc_Std_nextchar,sizeof(char),(int)Cyc_Std_strlen((struct _tagged_arr)Cyc_Std_nextchar));
-Cyc_Std_optind ++;return(int)'?';}if(pfound.curr != ((struct _tagged_arr)_tag_arr(0,
-0,0)).curr){option_index=indfound;if((int)*((char*)_check_unknown_subscript(
-nameend,sizeof(char),0))){if(((const struct Cyc_Std_option*)
+void*_tmp2C[2]={& _tmp2E,& _tmp2F};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*
+_tmp2D="%s: option `-W %s' is ambiguous\n";_tag_arr(_tmp2D,sizeof(char),
+_get_zero_arr_size(_tmp2D,33));}),_tag_arr(_tmp2C,sizeof(void*),2));}}});
+_tagged_arr_inplace_plus(& Cyc_Std_nextchar,sizeof(char),(int)Cyc_Std_strlen((
+struct _tagged_arr)Cyc_Std_nextchar));Cyc_Std_optind ++;return(int)'?';}if(pfound.curr
+!= ((struct _tagged_arr)_tag_arr(0,0,0)).curr){option_index=indfound;if((int)*((
+char*)_check_unknown_subscript(nameend,sizeof(char),0))){if(((const struct Cyc_Std_option*)
 _check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->has_arg)Cyc_Std_optarg=
 _tagged_arr_plus(nameend,sizeof(char),1);else{if(print_errors)({struct Cyc_Std_String_pa_struct
-_tmp25;_tmp25.tag=0;_tmp25.f1=(struct _tagged_arr)((const struct Cyc_Std_option*)
+_tmp33;_tmp33.tag=0;_tmp33.f1=(struct _tagged_arr)((const struct Cyc_Std_option*)
 _check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->name;{struct
-Cyc_Std_String_pa_struct _tmp24;_tmp24.tag=0;_tmp24.f1=(struct _tagged_arr)*((
+Cyc_Std_String_pa_struct _tmp32;_tmp32.tag=0;_tmp32.f1=(struct _tagged_arr)*((
 struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{
-void*_tmp23[2]={& _tmp24,& _tmp25};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s: option `-W %s' doesn't allow an argument\n",
-sizeof(char),46),_tag_arr(_tmp23,sizeof(void*),2));}}});_tagged_arr_inplace_plus(&
-Cyc_Std_nextchar,sizeof(char),(int)Cyc_Std_strlen((struct _tagged_arr)Cyc_Std_nextchar));
-return(int)'?';}}else{if(((const struct Cyc_Std_option*)_check_unknown_subscript(
-pfound,sizeof(struct Cyc_Std_option),0))->has_arg == 1){if(Cyc_Std_optind < argc)
-Cyc_Std_optarg=*((struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct
-_tagged_arr),Cyc_Std_optind ++));else{if(print_errors)({struct Cyc_Std_String_pa_struct
-_tmp28;_tmp28.tag=0;_tmp28.f1=(struct _tagged_arr)*((struct _tagged_arr*)
-_check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind - 1));{
-struct Cyc_Std_String_pa_struct _tmp27;_tmp27.tag=0;_tmp27.f1=(struct _tagged_arr)*((
-struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{
-void*_tmp26[2]={& _tmp27,& _tmp28};Cyc_Std_fprintf(Cyc_Std_stderr,_tag_arr("%s: option `%s' requires an argument\n",
-sizeof(char),38),_tag_arr(_tmp26,sizeof(void*),2));}}});_tagged_arr_inplace_plus(&
-Cyc_Std_nextchar,sizeof(char),(int)Cyc_Std_strlen((struct _tagged_arr)Cyc_Std_nextchar));
-return(int)(*((const char*)_check_unknown_subscript(optstring,sizeof(char),0))== ':'?':':'?');}}}
+void*_tmp30[2]={& _tmp32,& _tmp33};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*
+_tmp31="%s: option `-W %s' doesn't allow an argument\n";_tag_arr(_tmp31,sizeof(
+char),_get_zero_arr_size(_tmp31,46));}),_tag_arr(_tmp30,sizeof(void*),2));}}});
 _tagged_arr_inplace_plus(& Cyc_Std_nextchar,sizeof(char),(int)Cyc_Std_strlen((
-struct _tagged_arr)Cyc_Std_nextchar));if(longind != 0)*longind=option_index;if((
-unsigned int)((const struct Cyc_Std_option*)_check_unknown_subscript(pfound,
-sizeof(struct Cyc_Std_option),0))->flag){*((int*)_check_null(((const struct Cyc_Std_option*)
-_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->flag))=((const
-struct Cyc_Std_option*)_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),
-0))->val;return 0;}return((const struct Cyc_Std_option*)_check_unknown_subscript(
-pfound,sizeof(struct Cyc_Std_option),0))->val;}Cyc_Std_nextchar=_tag_arr(0,0,0);
-return(int)'W';}if(*((const char*)_check_unknown_subscript(temp,sizeof(char),1))
-== ':'){if(*((const char*)_check_unknown_subscript(temp,sizeof(char),2))== ':'){
-if(*((char*)_check_unknown_subscript(Cyc_Std_nextchar,sizeof(char),0))!= '\000'){
-Cyc_Std_optarg=Cyc_Std_nextchar;Cyc_Std_optind ++;}else{Cyc_Std_optarg=_tag_arr(0,
-0,0);}Cyc_Std_nextchar=_tag_arr(0,0,0);}else{if(*((char*)
-_check_unknown_subscript(Cyc_Std_nextchar,sizeof(char),0))!= '\000'){Cyc_Std_optarg=
-Cyc_Std_nextchar;Cyc_Std_optind ++;}else{if(Cyc_Std_optind == argc){if(
-print_errors)({struct Cyc_Std_Int_pa_struct _tmp2B;_tmp2B.tag=1;_tmp2B.f1=(int)((
-unsigned int)((int)c));{struct Cyc_Std_String_pa_struct _tmp2A;_tmp2A.tag=0;_tmp2A.f1=(
+struct _tagged_arr)Cyc_Std_nextchar));return(int)'?';}}else{if(((const struct Cyc_Std_option*)
+_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->has_arg == 1){
+if(Cyc_Std_optind < argc)Cyc_Std_optarg=*((struct _tagged_arr*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),Cyc_Std_optind ++));else{
+if(print_errors)({struct Cyc_Std_String_pa_struct _tmp37;_tmp37.tag=0;_tmp37.f1=(
 struct _tagged_arr)*((struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(
-struct _tagged_arr),0));{void*_tmp29[2]={& _tmp2A,& _tmp2B};Cyc_Std_fprintf(Cyc_Std_stderr,
-_tag_arr("%s: option requires an argument -- %c\n",sizeof(char),39),_tag_arr(
-_tmp29,sizeof(void*),2));}}});Cyc_Std_optopt=(int)c;if(*((const char*)
+struct _tagged_arr),Cyc_Std_optind - 1));{struct Cyc_Std_String_pa_struct _tmp36;
+_tmp36.tag=0;_tmp36.f1=(struct _tagged_arr)*((struct _tagged_arr*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmp34[2]={&
+_tmp36,& _tmp37};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp35="%s: option `%s' requires an argument\n";
+_tag_arr(_tmp35,sizeof(char),_get_zero_arr_size(_tmp35,38));}),_tag_arr(_tmp34,
+sizeof(void*),2));}}});_tagged_arr_inplace_plus(& Cyc_Std_nextchar,sizeof(char),(
+int)Cyc_Std_strlen((struct _tagged_arr)Cyc_Std_nextchar));return(int)(*((const
+char*)_check_unknown_subscript(optstring,sizeof(char),0))== ':'?':':'?');}}}
+_tagged_arr_inplace_plus(& Cyc_Std_nextchar,sizeof(char),(int)Cyc_Std_strlen((
+struct _tagged_arr)Cyc_Std_nextchar));if(longind != 0)*((int*)longind)=
+option_index;if((unsigned int)((const struct Cyc_Std_option*)
+_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->flag){*((int*)
+_check_null(((const struct Cyc_Std_option*)_check_unknown_subscript(pfound,sizeof(
+struct Cyc_Std_option),0))->flag))=((const struct Cyc_Std_option*)
+_check_unknown_subscript(pfound,sizeof(struct Cyc_Std_option),0))->val;return 0;}
+return((const struct Cyc_Std_option*)_check_unknown_subscript(pfound,sizeof(struct
+Cyc_Std_option),0))->val;}Cyc_Std_nextchar=_tag_arr(0,0,0);return(int)'W';}if(*((
+const char*)_check_unknown_subscript(temp,sizeof(char),1))== ':'){if(*((const char*)
+_check_unknown_subscript(temp,sizeof(char),2))== ':'){if(*((char*)
+_check_unknown_subscript(Cyc_Std_nextchar,sizeof(char),0))!= '\000'){Cyc_Std_optarg=
+Cyc_Std_nextchar;Cyc_Std_optind ++;}else{Cyc_Std_optarg=_tag_arr(0,0,0);}Cyc_Std_nextchar=
+_tag_arr(0,0,0);}else{if(*((char*)_check_unknown_subscript(Cyc_Std_nextchar,
+sizeof(char),0))!= '\000'){Cyc_Std_optarg=Cyc_Std_nextchar;Cyc_Std_optind ++;}
+else{if(Cyc_Std_optind == argc){if(print_errors)({struct Cyc_Std_Int_pa_struct
+_tmp3B;_tmp3B.tag=1;_tmp3B.f1=(int)((unsigned int)((int)c));{struct Cyc_Std_String_pa_struct
+_tmp3A;_tmp3A.tag=0;_tmp3A.f1=(struct _tagged_arr)*((struct _tagged_arr*)
+_check_unknown_subscript(argv,sizeof(struct _tagged_arr),0));{void*_tmp38[2]={&
+_tmp3A,& _tmp3B};Cyc_Std_fprintf(Cyc_Std_stderr,({const char*_tmp39="%s: option requires an argument -- %c\n";
+_tag_arr(_tmp39,sizeof(char),_get_zero_arr_size(_tmp39,39));}),_tag_arr(_tmp38,
+sizeof(void*),2));}}});Cyc_Std_optopt=(int)c;if(*((const char*)
 _check_unknown_subscript(optstring,sizeof(char),0))== ':')c=':';else{c='?';}}
 else{Cyc_Std_optarg=*((struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(
 struct _tagged_arr),Cyc_Std_optind ++));}}Cyc_Std_nextchar=_tag_arr(0,0,0);}}

@@ -192,6 +192,59 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
+// Decrease the upper bound on a fat pointer by numelts where sz is
+// the size of the pointer's type.  Note that this can't be a macro
+// if we're to get initializers right.
+static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
+                                                    unsigned int sz,
+                                                    unsigned int numelts) {
+  x.last_plus_one -= sz * numelts; 
+  return x; 
+}
+
+// Add i to zero-terminated pointer x.  Checks for x being null and
+// ensures that x[0..i-1] are not 0.
+#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
+  typedef _czs_tx = (*orig_x); \
+  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
+  unsigned int _czs_sz = (orig_sz); \
+  int _czs_i = (orig_i); \
+  unsigned int _czs_temp; \
+  if ((_czs_x) == NULL) _throw_null(); \
+  if (_czs_i < 0) _throw_arraybounds(); \
+  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
+    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
+  _czs_x+_czs_i; })
+
+// Calculates the number of elements in a zero-terminated, thin array.
+// If non-null, the array is guaranteed to have orig_offset elements.
+#define _get_zero_arr_size(orig_x,orig_offset) ({ \
+  typedef _gres_tx = (*orig_x); \
+  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
+  unsigned int _gres_offset = (orig_offset); \
+  unsigned int _gres = 0; \
+  if (_gres_x != NULL) { \
+     _gres = _gres_offset; \
+     _gres_x += _gres_offset - 1; \
+     while (*_gres_x != 0) { _gres_x++; _gres++; } \
+  } _gres; })
+
+// Does in-place addition of a zero-terminated pointer (x += e and ++x).  
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+
+// Does in-place increment of a zero-terminated pointer (e.g., x++).
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  _zap_tx *_zap_res = *_zap_x; \
+  *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
+  _zap_res; })
+  
 //// Allocation
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
@@ -293,18 +346,18 @@ _tagged_arr arr,int len){int base_ofs=0;void*temp;int sp[40];int sp_ofs;int i;in
 limit_ofs;if((base_ofs < 0?1: base_ofs + len > _get_arr_size(arr,sizeof(void*)))?1:
 len < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp0=
 _cycalloc(sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct _tmp1;
-_tmp1.tag=Cyc_Core_Invalid_argument;_tmp1.f1=_tag_arr("Array::qsort",sizeof(char),
-13);_tmp1;});_tmp0;}));limit_ofs=base_ofs + len;sp_ofs=0;for(0;1;0){if(limit_ofs - 
-base_ofs > 3){temp=*((void**)_check_unknown_subscript(arr,sizeof(void*),(
-limit_ofs - base_ofs)/ 2 + base_ofs));*((void**)_check_unknown_subscript(arr,
-sizeof(void*),(limit_ofs - base_ofs)/ 2 + base_ofs))=*((void**)
-_check_unknown_subscript(arr,sizeof(void*),base_ofs));*((void**)
-_check_unknown_subscript(arr,sizeof(void*),base_ofs))=temp;i=base_ofs + 1;j=
-limit_ofs - 1;if(less_eq((void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),i),
-sizeof(void*),1),(void**)_untag_arr(_tagged_arr_plus(arr,sizeof(void*),j),
-sizeof(void*),1))> 0){temp=*((void**)_check_unknown_subscript(arr,sizeof(void*),
-i));*((void**)_check_unknown_subscript(arr,sizeof(void*),i))=*((void**)
-_check_unknown_subscript(arr,sizeof(void*),j));*((void**)
+_tmp1.tag=Cyc_Core_Invalid_argument;_tmp1.f1=({const char*_tmp2="Array::qsort";
+_tag_arr(_tmp2,sizeof(char),_get_zero_arr_size(_tmp2,13));});_tmp1;});_tmp0;}));
+limit_ofs=base_ofs + len;sp_ofs=0;for(0;1;0){if(limit_ofs - base_ofs > 3){temp=*((
+void**)_check_unknown_subscript(arr,sizeof(void*),(limit_ofs - base_ofs)/ 2 + 
+base_ofs));*((void**)_check_unknown_subscript(arr,sizeof(void*),(limit_ofs - 
+base_ofs)/ 2 + base_ofs))=*((void**)_check_unknown_subscript(arr,sizeof(void*),
+base_ofs));*((void**)_check_unknown_subscript(arr,sizeof(void*),base_ofs))=temp;
+i=base_ofs + 1;j=limit_ofs - 1;if(less_eq((void**)_untag_arr(_tagged_arr_plus(arr,
+sizeof(void*),i),sizeof(void*),1),(void**)_untag_arr(_tagged_arr_plus(arr,
+sizeof(void*),j),sizeof(void*),1))> 0){temp=*((void**)_check_unknown_subscript(
+arr,sizeof(void*),i));*((void**)_check_unknown_subscript(arr,sizeof(void*),i))=*((
+void**)_check_unknown_subscript(arr,sizeof(void*),j));*((void**)
 _check_unknown_subscript(arr,sizeof(void*),j))=temp;}if(less_eq((void**)
 _untag_arr(_tagged_arr_plus(arr,sizeof(void*),base_ofs),sizeof(void*),1),(void**)
 _untag_arr(_tagged_arr_plus(arr,sizeof(void*),j),sizeof(void*),1))> 0){temp=*((
@@ -346,22 +399,23 @@ if(sp_ofs != 0){sp_ofs -=2;base_ofs=sp[_check_known_subscript_notnull(40,sp_ofs)
 limit_ofs=sp[_check_known_subscript_notnull(40,sp_ofs + 1)];}else{break;}}}}void
 Cyc_Array_msort(int(*less_eq)(void**,void**),struct _tagged_arr arr,int len){if(len
 > _get_arr_size(arr,sizeof(void*))?1: len < 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmp2=_cycalloc(sizeof(*_tmp2));_tmp2[0]=({struct Cyc_Core_Invalid_argument_struct
-_tmp3;_tmp3.tag=Cyc_Core_Invalid_argument;_tmp3.f1=_tag_arr("Array::msort",
-sizeof(char),13);_tmp3;});_tmp2;}));{struct _tagged_arr from=({unsigned int _tmp4=(
-unsigned int)len;void**_tmp5=(void**)_cycalloc(_check_times(sizeof(void*),_tmp4));
-struct _tagged_arr _tmp7=_tag_arr(_tmp5,sizeof(void*),(unsigned int)len);{
-unsigned int _tmp6=_tmp4;unsigned int i;for(i=0;i < _tmp6;i ++){_tmp5[i]=*((void**)
-_check_unknown_subscript(arr,sizeof(void*),0));}}_tmp7;});struct _tagged_arr to=
-arr;struct _tagged_arr swap;int swapped=0;int stepsize;int start;int lstart;int lend;
-int rstart;int rend;int dest;for(stepsize=1;stepsize < len;stepsize=stepsize * 2){
-swap=from;from=to;to=swap;dest=0;for(start=0;start < len;start=start + stepsize * 2){
-lstart=start;rstart=start + stepsize < len?start + stepsize: len;lend=rstart;rend=
-start + stepsize * 2 < len?start + stepsize * 2: len;while(lstart < lend?rstart < rend: 0){
-if(less_eq((void**)_untag_arr(_tagged_arr_plus(from,sizeof(void*),lstart),
-sizeof(void*),1),(void**)_untag_arr(_tagged_arr_plus(from,sizeof(void*),rstart),
-sizeof(void*),1))<= 0)*((void**)_check_unknown_subscript(to,sizeof(void*),dest ++))=*((
-void**)_check_unknown_subscript(from,sizeof(void*),lstart ++));else{*((void**)
+_tmp3=_cycalloc(sizeof(*_tmp3));_tmp3[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp4;_tmp4.tag=Cyc_Core_Invalid_argument;_tmp4.f1=({const char*_tmp5="Array::msort";
+_tag_arr(_tmp5,sizeof(char),_get_zero_arr_size(_tmp5,13));});_tmp4;});_tmp3;}));{
+struct _tagged_arr from=({unsigned int _tmp6=(unsigned int)len;void**_tmp7=(void**)
+_cycalloc(_check_times(sizeof(void*),_tmp6));struct _tagged_arr _tmp9=_tag_arr(
+_tmp7,sizeof(void*),_tmp6);{unsigned int _tmp8=_tmp6;unsigned int i;for(i=0;i < 
+_tmp8;i ++){_tmp7[i]=*((void**)_check_unknown_subscript(arr,sizeof(void*),0));}}
+_tmp9;});struct _tagged_arr to=arr;struct _tagged_arr swap;int swapped=0;int stepsize;
+int start;int lstart;int lend;int rstart;int rend;int dest;for(stepsize=1;stepsize < 
+len;stepsize=stepsize * 2){swap=from;from=to;to=swap;dest=0;for(start=0;start < 
+len;start=start + stepsize * 2){lstart=start;rstart=start + stepsize < len?start + 
+stepsize: len;lend=rstart;rend=start + stepsize * 2 < len?start + stepsize * 2: len;
+while(lstart < lend?rstart < rend: 0){if(less_eq((void**)_untag_arr(
+_tagged_arr_plus(from,sizeof(void*),lstart),sizeof(void*),1),(void**)_untag_arr(
+_tagged_arr_plus(from,sizeof(void*),rstart),sizeof(void*),1))<= 0)*((void**)
+_check_unknown_subscript(to,sizeof(void*),dest ++))=*((void**)
+_check_unknown_subscript(from,sizeof(void*),lstart ++));else{*((void**)
 _check_unknown_subscript(to,sizeof(void*),dest ++))=*((void**)
 _check_unknown_subscript(from,sizeof(void*),rstart ++));}}while(lstart < lend){*((
 void**)_check_unknown_subscript(to,sizeof(void*),dest ++))=*((void**)
@@ -373,56 +427,56 @@ void**)_check_unknown_subscript(to,sizeof(void*),i));}}}}struct _tagged_arr Cyc_
 struct Cyc_List_List*x){return Cyc_List_to_array(x);}struct Cyc_List_List*Cyc_Array_to_list(
 struct _tagged_arr x){return Cyc_List_from_array(x);}struct _tagged_arr Cyc_Array_copy(
 struct _tagged_arr x){int sx=(int)_get_arr_size(x,sizeof(void*));return({
-unsigned int _tmp8=(unsigned int)sx;void**_tmp9=(void**)_cycalloc(_check_times(
-sizeof(void*),_tmp8));struct _tagged_arr _tmpB=_tag_arr(_tmp9,sizeof(void*),(
-unsigned int)sx);{unsigned int _tmpA=_tmp8;unsigned int i;for(i=0;i < _tmpA;i ++){
-_tmp9[i]=((void**)x.curr)[(int)i];}}_tmpB;});}struct _tagged_arr Cyc_Array_map(
+unsigned int _tmpA=(unsigned int)sx;void**_tmpB=(void**)_cycalloc(_check_times(
+sizeof(void*),_tmpA));struct _tagged_arr _tmpD=_tag_arr(_tmpB,sizeof(void*),_tmpA);{
+unsigned int _tmpC=_tmpA;unsigned int i;for(i=0;i < _tmpC;i ++){_tmpB[i]=((void**)x.curr)[(
+int)i];}}_tmpD;});}struct _tagged_arr Cyc_Array_map(void*(*f)(void*),struct
+_tagged_arr x){int sx=(int)_get_arr_size(x,sizeof(void*));return({unsigned int
+_tmpE=(unsigned int)sx;void**_tmpF=(void**)_cycalloc(_check_times(sizeof(void*),
+_tmpE));struct _tagged_arr _tmp11=_tag_arr(_tmpF,sizeof(void*),_tmpE);{
+unsigned int _tmp10=_tmpE;unsigned int i;for(i=0;i < _tmp10;i ++){_tmpF[i]=f(((void**)
+x.curr)[(int)i]);}}_tmp11;});}struct _tagged_arr Cyc_Array_map_c(void*(*f)(void*,
+void*),void*env,struct _tagged_arr x){int sx=(int)_get_arr_size(x,sizeof(void*));
+return({unsigned int _tmp12=(unsigned int)sx;void**_tmp13=(void**)_cycalloc(
+_check_times(sizeof(void*),_tmp12));struct _tagged_arr _tmp15=_tag_arr(_tmp13,
+sizeof(void*),_tmp12);{unsigned int _tmp14=_tmp12;unsigned int i;for(i=0;i < _tmp14;
+i ++){_tmp13[i]=f(env,((void**)x.curr)[(int)i]);}}_tmp15;});}void Cyc_Array_imp_map(
 void*(*f)(void*),struct _tagged_arr x){int sx=(int)_get_arr_size(x,sizeof(void*));
-return({unsigned int _tmpC=(unsigned int)sx;void**_tmpD=(void**)_cycalloc(
-_check_times(sizeof(void*),_tmpC));struct _tagged_arr _tmpF=_tag_arr(_tmpD,sizeof(
-void*),(unsigned int)sx);{unsigned int _tmpE=_tmpC;unsigned int i;for(i=0;i < _tmpE;
-i ++){_tmpD[i]=f(((void**)x.curr)[(int)i]);}}_tmpF;});}struct _tagged_arr Cyc_Array_map_c(
+int i=0;for(0;i < sx;i ++){*((void**)_check_unknown_subscript(x,sizeof(void*),i))=f(*((
+void**)_check_unknown_subscript(x,sizeof(void*),i)));}}void Cyc_Array_imp_map_c(
 void*(*f)(void*,void*),void*env,struct _tagged_arr x){int sx=(int)_get_arr_size(x,
-sizeof(void*));return({unsigned int _tmp10=(unsigned int)sx;void**_tmp11=(void**)
-_cycalloc(_check_times(sizeof(void*),_tmp10));struct _tagged_arr _tmp13=_tag_arr(
-_tmp11,sizeof(void*),(unsigned int)sx);{unsigned int _tmp12=_tmp10;unsigned int i;
-for(i=0;i < _tmp12;i ++){_tmp11[i]=f(env,((void**)x.curr)[(int)i]);}}_tmp13;});}
-void Cyc_Array_imp_map(void*(*f)(void*),struct _tagged_arr x){int sx=(int)
-_get_arr_size(x,sizeof(void*));int i=0;for(0;i < sx;i ++){*((void**)
-_check_unknown_subscript(x,sizeof(void*),i))=f(*((void**)
-_check_unknown_subscript(x,sizeof(void*),i)));}}void Cyc_Array_imp_map_c(void*(*f)(
+sizeof(void*));int i=0;for(0;i < sx;i ++){*((void**)_check_unknown_subscript(x,
+sizeof(void*),i))=f(env,*((void**)_check_unknown_subscript(x,sizeof(void*),i)));}}
+char Cyc_Array_Array_mismatch[19]="\000\000\000\000Array_mismatch\000";struct
+_tagged_arr Cyc_Array_map2(void*(*f)(void*,void*),struct _tagged_arr x,struct
+_tagged_arr y){int sx=(int)_get_arr_size(x,sizeof(void*));if(sx != _get_arr_size(y,
+sizeof(void*)))(int)_throw((void*)Cyc_Array_Array_mismatch);return({unsigned int
+_tmp16=(unsigned int)sx;void**_tmp17=(void**)_cycalloc(_check_times(sizeof(void*),
+_tmp16));struct _tagged_arr _tmp19=_tag_arr(_tmp17,sizeof(void*),_tmp16);{
+unsigned int _tmp18=_tmp16;unsigned int i;for(i=0;i < _tmp18;i ++){_tmp17[i]=f(((
+void**)x.curr)[(int)i],*((void**)_check_unknown_subscript(y,sizeof(void*),(int)i)));}}
+_tmp19;});}void Cyc_Array_app(void*(*f)(void*),struct _tagged_arr x){int sx=(int)
+_get_arr_size(x,sizeof(void*));int i=0;for(0;i < sx;i ++){f(*((void**)
+_check_unknown_subscript(x,sizeof(void*),i)));}}void Cyc_Array_app_c(void*(*f)(
 void*,void*),void*env,struct _tagged_arr x){int sx=(int)_get_arr_size(x,sizeof(void*));
-int i=0;for(0;i < sx;i ++){*((void**)_check_unknown_subscript(x,sizeof(void*),i))=f(
-env,*((void**)_check_unknown_subscript(x,sizeof(void*),i)));}}char Cyc_Array_Array_mismatch[
-19]="\000\000\000\000Array_mismatch";struct _tagged_arr Cyc_Array_map2(void*(*f)(
-void*,void*),struct _tagged_arr x,struct _tagged_arr y){int sx=(int)_get_arr_size(x,
-sizeof(void*));if(sx != _get_arr_size(y,sizeof(void*)))(int)_throw((void*)Cyc_Array_Array_mismatch);
-return({unsigned int _tmp14=(unsigned int)sx;void**_tmp15=(void**)_cycalloc(
-_check_times(sizeof(void*),_tmp14));struct _tagged_arr _tmp17=_tag_arr(_tmp15,
-sizeof(void*),(unsigned int)sx);{unsigned int _tmp16=_tmp14;unsigned int i;for(i=0;
-i < _tmp16;i ++){_tmp15[i]=f(((void**)x.curr)[(int)i],*((void**)
-_check_unknown_subscript(y,sizeof(void*),(int)i)));}}_tmp17;});}void Cyc_Array_app(
-void*(*f)(void*),struct _tagged_arr x){int sx=(int)_get_arr_size(x,sizeof(void*));
-int i=0;for(0;i < sx;i ++){f(*((void**)_check_unknown_subscript(x,sizeof(void*),i)));}}
-void Cyc_Array_app_c(void*(*f)(void*,void*),void*env,struct _tagged_arr x){int sx=(
-int)_get_arr_size(x,sizeof(void*));int i=0;for(0;i < sx;i ++){f(env,*((void**)
-_check_unknown_subscript(x,sizeof(void*),i)));}}void Cyc_Array_iter(void(*f)(void*),
-struct _tagged_arr x){int sx=(int)_get_arr_size(x,sizeof(void*));int i=0;for(0;i < sx;
-i ++){f(*((void**)_check_unknown_subscript(x,sizeof(void*),i)));}}void Cyc_Array_iter_c(
-void(*f)(void*,void*),void*env,struct _tagged_arr x){int sx=(int)_get_arr_size(x,
-sizeof(void*));int i=0;for(0;i < sx;i ++){f(env,*((void**)_check_unknown_subscript(
-x,sizeof(void*),i)));}}void Cyc_Array_app2(void*(*f)(void*,void*),struct
+int i=0;for(0;i < sx;i ++){f(env,*((void**)_check_unknown_subscript(x,sizeof(void*),
+i)));}}void Cyc_Array_iter(void(*f)(void*),struct _tagged_arr x){int sx=(int)
+_get_arr_size(x,sizeof(void*));int i=0;for(0;i < sx;i ++){f(*((void**)
+_check_unknown_subscript(x,sizeof(void*),i)));}}void Cyc_Array_iter_c(void(*f)(
+void*,void*),void*env,struct _tagged_arr x){int sx=(int)_get_arr_size(x,sizeof(void*));
+int i=0;for(0;i < sx;i ++){f(env,*((void**)_check_unknown_subscript(x,sizeof(void*),
+i)));}}void Cyc_Array_app2(void*(*f)(void*,void*),struct _tagged_arr x,struct
+_tagged_arr y){int sx=(int)_get_arr_size(x,sizeof(void*));if(sx != _get_arr_size(y,
+sizeof(void*)))(int)_throw((void*)Cyc_Array_Array_mismatch);{int i=0;for(0;i < sx;
+i ++){f(*((void**)_check_unknown_subscript(x,sizeof(void*),i)),*((void**)
+_check_unknown_subscript(y,sizeof(void*),i)));}}}void Cyc_Array_app2_c(void*(*f)(
+void*,void*,void*),void*env,struct _tagged_arr x,struct _tagged_arr y){int sx=(int)
+_get_arr_size(x,sizeof(void*));if(sx != _get_arr_size(y,sizeof(void*)))(int)
+_throw((void*)Cyc_Array_Array_mismatch);{int i=0;for(0;i < sx;i ++){f(env,*((void**)
+_check_unknown_subscript(x,sizeof(void*),i)),*((void**)_check_unknown_subscript(
+y,sizeof(void*),i)));}}}void Cyc_Array_iter2(void(*f)(void*,void*),struct
 _tagged_arr x,struct _tagged_arr y){int sx=(int)_get_arr_size(x,sizeof(void*));if(sx
 != _get_arr_size(y,sizeof(void*)))(int)_throw((void*)Cyc_Array_Array_mismatch);{
-int i=0;for(0;i < sx;i ++){f(*((void**)_check_unknown_subscript(x,sizeof(void*),i)),*((
-void**)_check_unknown_subscript(y,sizeof(void*),i)));}}}void Cyc_Array_app2_c(
-void*(*f)(void*,void*,void*),void*env,struct _tagged_arr x,struct _tagged_arr y){int
-sx=(int)_get_arr_size(x,sizeof(void*));if(sx != _get_arr_size(y,sizeof(void*)))(
-int)_throw((void*)Cyc_Array_Array_mismatch);{int i=0;for(0;i < sx;i ++){f(env,*((
-void**)_check_unknown_subscript(x,sizeof(void*),i)),*((void**)
-_check_unknown_subscript(y,sizeof(void*),i)));}}}void Cyc_Array_iter2(void(*f)(
-void*,void*),struct _tagged_arr x,struct _tagged_arr y){int sx=(int)_get_arr_size(x,
-sizeof(void*));if(sx != _get_arr_size(y,sizeof(void*)))(int)_throw((void*)Cyc_Array_Array_mismatch);{
 int i=0;for(0;i < sx;i ++){f(*((void**)_check_unknown_subscript(x,sizeof(void*),i)),*((
 void**)_check_unknown_subscript(y,sizeof(void*),i)));}}}void Cyc_Array_iter2_c(
 void(*f)(void*,void*,void*),void*env,struct _tagged_arr x,struct _tagged_arr y){int
@@ -443,11 +497,11 @@ void*,void*,void*),void*env,struct _tagged_arr x,void*accum){{int i=(int)(
 _get_arr_size(x,sizeof(void*))- 1);for(0;i >= 0;i --){accum=f(env,*((void**)
 _check_unknown_subscript(x,sizeof(void*),i)),accum);}}return accum;}struct
 _tagged_arr Cyc_Array_rev_copy(struct _tagged_arr x){int sx=(int)_get_arr_size(x,
-sizeof(void*));int n=sx - 1;return({unsigned int _tmp18=(unsigned int)sx;void**
-_tmp19=(void**)_cycalloc(_check_times(sizeof(void*),_tmp18));struct _tagged_arr
-_tmp1B=_tag_arr(_tmp19,sizeof(void*),(unsigned int)sx);{unsigned int _tmp1A=
-_tmp18;unsigned int i;for(i=0;i < _tmp1A;i ++){_tmp19[i]=*((void**)
-_check_unknown_subscript(x,sizeof(void*),(int)(n - i)));}}_tmp1B;});}void Cyc_Array_imp_rev(
+sizeof(void*));int n=sx - 1;return({unsigned int _tmp1A=(unsigned int)sx;void**
+_tmp1B=(void**)_cycalloc(_check_times(sizeof(void*),_tmp1A));struct _tagged_arr
+_tmp1D=_tag_arr(_tmp1B,sizeof(void*),_tmp1A);{unsigned int _tmp1C=_tmp1A;
+unsigned int i;for(i=0;i < _tmp1C;i ++){_tmp1B[i]=*((void**)
+_check_unknown_subscript(x,sizeof(void*),(int)(n - i)));}}_tmp1D;});}void Cyc_Array_imp_rev(
 struct _tagged_arr x){void*temp;int i=0;int j=(int)(_get_arr_size(x,sizeof(void*))- 
 1);while(i < j){temp=*((void**)_check_unknown_subscript(x,sizeof(void*),i));*((
 void**)_check_unknown_subscript(x,sizeof(void*),i))=*((void**)
@@ -466,35 +520,35 @@ sizeof(void*));{int i=0;for(0;i < sx;i ++){if(pred(env,*((void**)
 _check_unknown_subscript(x,sizeof(void*),i))))return 1;}}return 0;}struct
 _tagged_arr Cyc_Array_zip(struct _tagged_arr x,struct _tagged_arr y){int sx=(int)
 _get_arr_size(x,sizeof(void*));if(sx != _get_arr_size(y,sizeof(void*)))(int)
-_throw((void*)Cyc_Array_Array_mismatch);return({unsigned int _tmp1C=(unsigned int)
-sx;struct _tuple0*_tmp1D=(struct _tuple0*)_cycalloc(_check_times(sizeof(struct
-_tuple0),_tmp1C));struct _tagged_arr _tmp20=_tag_arr(_tmp1D,sizeof(struct _tuple0),(
-unsigned int)sx);{unsigned int _tmp1E=_tmp1C;unsigned int i;for(i=0;i < _tmp1E;i ++){
-_tmp1D[i]=({struct _tuple0 _tmp1F;_tmp1F.f1=((void**)x.curr)[(int)i];_tmp1F.f2=*((
-void**)_check_unknown_subscript(y,sizeof(void*),(int)i));_tmp1F;});}}_tmp20;});}
-struct _tuple1 Cyc_Array_split(struct _tagged_arr x){int sx=(int)_get_arr_size(x,
-sizeof(struct _tuple0));return({struct _tuple1 _tmp21;_tmp21.f1=({unsigned int
-_tmp26=(unsigned int)sx;void**_tmp27=(void**)_cycalloc(_check_times(sizeof(void*),
-_tmp26));struct _tagged_arr _tmp29=_tag_arr(_tmp27,sizeof(void*),(unsigned int)sx);{
-unsigned int _tmp28=_tmp26;unsigned int i;for(i=0;i < _tmp28;i ++){_tmp27[i]=(((
-struct _tuple0*)x.curr)[(int)i]).f1;}}_tmp29;});_tmp21.f2=({unsigned int _tmp22=(
-unsigned int)sx;void**_tmp23=(void**)_cycalloc(_check_times(sizeof(void*),_tmp22));
-struct _tagged_arr _tmp25=_tag_arr(_tmp23,sizeof(void*),(unsigned int)sx);{
-unsigned int _tmp24=_tmp22;unsigned int i;for(i=0;i < _tmp24;i ++){_tmp23[i]=(((
-struct _tuple0*)x.curr)[(int)i]).f2;}}_tmp25;});_tmp21;});}int Cyc_Array_memq(
-struct _tagged_arr l,void*x){int s=(int)_get_arr_size(l,sizeof(void*));{int i=0;for(
-0;i < s;i ++){if(*((void**)_check_unknown_subscript(l,sizeof(void*),i))== x)return
-1;}}return 0;}int Cyc_Array_mem(int(*compare)(void*,void*),struct _tagged_arr l,void*
-x){int s=(int)_get_arr_size(l,sizeof(void*));{int i=0;for(0;i < s;i ++){if(0 == 
-compare(*((void**)_check_unknown_subscript(l,sizeof(void*),i)),x))return 1;}}
-return 0;}struct _tagged_arr Cyc_Array_extract(struct _tagged_arr x,int start,int*
-n_opt){int sx=(int)_get_arr_size(x,sizeof(void*));int n=n_opt == 0?sx - start:*n_opt;
-if((start < 0?1: n <= 0)?1: start + (n_opt == 0?0: n)> sx)(int)_throw((void*)({struct
-Cyc_Core_Invalid_argument_struct*_tmp2A=_cycalloc(sizeof(*_tmp2A));_tmp2A[0]=({
-struct Cyc_Core_Invalid_argument_struct _tmp2B;_tmp2B.tag=Cyc_Core_Invalid_argument;
-_tmp2B.f1=_tag_arr("Array::extract",sizeof(char),15);_tmp2B;});_tmp2A;}));return({
-unsigned int _tmp2C=(unsigned int)n;void**_tmp2D=(void**)_cycalloc(_check_times(
-sizeof(void*),_tmp2C));struct _tagged_arr _tmp2F=_tag_arr(_tmp2D,sizeof(void*),(
-unsigned int)n);{unsigned int _tmp2E=_tmp2C;unsigned int i;for(i=0;i < _tmp2E;i ++){
-_tmp2D[i]=*((void**)_check_unknown_subscript(x,sizeof(void*),(int)(start + i)));}}
-_tmp2F;});}
+_throw((void*)Cyc_Array_Array_mismatch);return({unsigned int _tmp1E=(unsigned int)
+sx;struct _tuple0*_tmp1F=(struct _tuple0*)_cycalloc(_check_times(sizeof(struct
+_tuple0),_tmp1E));struct _tagged_arr _tmp22=_tag_arr(_tmp1F,sizeof(struct _tuple0),
+_tmp1E);{unsigned int _tmp20=_tmp1E;unsigned int i;for(i=0;i < _tmp20;i ++){_tmp1F[i]=({
+struct _tuple0 _tmp21;_tmp21.f1=((void**)x.curr)[(int)i];_tmp21.f2=*((void**)
+_check_unknown_subscript(y,sizeof(void*),(int)i));_tmp21;});}}_tmp22;});}struct
+_tuple1 Cyc_Array_split(struct _tagged_arr x){int sx=(int)_get_arr_size(x,sizeof(
+struct _tuple0));return({struct _tuple1 _tmp23;_tmp23.f1=({unsigned int _tmp28=(
+unsigned int)sx;void**_tmp29=(void**)_cycalloc(_check_times(sizeof(void*),_tmp28));
+struct _tagged_arr _tmp2B=_tag_arr(_tmp29,sizeof(void*),_tmp28);{unsigned int
+_tmp2A=_tmp28;unsigned int i;for(i=0;i < _tmp2A;i ++){_tmp29[i]=(((struct _tuple0*)x.curr)[(
+int)i]).f1;}}_tmp2B;});_tmp23.f2=({unsigned int _tmp24=(unsigned int)sx;void**
+_tmp25=(void**)_cycalloc(_check_times(sizeof(void*),_tmp24));struct _tagged_arr
+_tmp27=_tag_arr(_tmp25,sizeof(void*),_tmp24);{unsigned int _tmp26=_tmp24;
+unsigned int i;for(i=0;i < _tmp26;i ++){_tmp25[i]=(((struct _tuple0*)x.curr)[(int)i]).f2;}}
+_tmp27;});_tmp23;});}int Cyc_Array_memq(struct _tagged_arr l,void*x){int s=(int)
+_get_arr_size(l,sizeof(void*));{int i=0;for(0;i < s;i ++){if(*((void**)
+_check_unknown_subscript(l,sizeof(void*),i))== x)return 1;}}return 0;}int Cyc_Array_mem(
+int(*compare)(void*,void*),struct _tagged_arr l,void*x){int s=(int)_get_arr_size(l,
+sizeof(void*));{int i=0;for(0;i < s;i ++){if(0 == compare(*((void**)
+_check_unknown_subscript(l,sizeof(void*),i)),x))return 1;}}return 0;}struct
+_tagged_arr Cyc_Array_extract(struct _tagged_arr x,int start,int*n_opt){int sx=(int)
+_get_arr_size(x,sizeof(void*));int n=n_opt == 0?sx - start:*((int*)n_opt);if((start
+< 0?1: n <= 0)?1: start + (n_opt == 0?0: n)> sx)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tmp2C=_cycalloc(sizeof(*_tmp2C));_tmp2C[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp2D;_tmp2D.tag=Cyc_Core_Invalid_argument;_tmp2D.f1=({const char*_tmp2E="Array::extract";
+_tag_arr(_tmp2E,sizeof(char),_get_zero_arr_size(_tmp2E,15));});_tmp2D;});_tmp2C;}));
+return({unsigned int _tmp2F=(unsigned int)n;void**_tmp30=(void**)_cycalloc(
+_check_times(sizeof(void*),_tmp2F));struct _tagged_arr _tmp32=_tag_arr(_tmp30,
+sizeof(void*),_tmp2F);{unsigned int _tmp31=_tmp2F;unsigned int i;for(i=0;i < _tmp31;
+i ++){_tmp30[i]=*((void**)_check_unknown_subscript(x,sizeof(void*),(int)(start + i)));}}
+_tmp32;});}

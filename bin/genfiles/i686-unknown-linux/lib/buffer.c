@@ -192,6 +192,59 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
+// Decrease the upper bound on a fat pointer by numelts where sz is
+// the size of the pointer's type.  Note that this can't be a macro
+// if we're to get initializers right.
+static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
+                                                    unsigned int sz,
+                                                    unsigned int numelts) {
+  x.last_plus_one -= sz * numelts; 
+  return x; 
+}
+
+// Add i to zero-terminated pointer x.  Checks for x being null and
+// ensures that x[0..i-1] are not 0.
+#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
+  typedef _czs_tx = (*orig_x); \
+  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
+  unsigned int _czs_sz = (orig_sz); \
+  int _czs_i = (orig_i); \
+  unsigned int _czs_temp; \
+  if ((_czs_x) == NULL) _throw_null(); \
+  if (_czs_i < 0) _throw_arraybounds(); \
+  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
+    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
+  _czs_x+_czs_i; })
+
+// Calculates the number of elements in a zero-terminated, thin array.
+// If non-null, the array is guaranteed to have orig_offset elements.
+#define _get_zero_arr_size(orig_x,orig_offset) ({ \
+  typedef _gres_tx = (*orig_x); \
+  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
+  unsigned int _gres_offset = (orig_offset); \
+  unsigned int _gres = 0; \
+  if (_gres_x != NULL) { \
+     _gres = _gres_offset; \
+     _gres_x += _gres_offset - 1; \
+     while (*_gres_x != 0) { _gres_x++; _gres++; } \
+  } _gres; })
+
+// Does in-place addition of a zero-terminated pointer (x += e and ++x).  
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+
+// Does in-place increment of a zero-terminated pointer (e.g., x++).
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  _zap_tx *_zap_res = *_zap_x; \
+  *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
+  _zap_res; })
+  
 //// Allocation
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
@@ -270,32 +323,35 @@ struct _tagged_arr,unsigned int);struct _tagged_arr Cyc_Std_substring(struct
 _tagged_arr,int ofs,unsigned int n);struct Cyc_Buffer_t{struct _tagged_arr buffer;
 unsigned int position;unsigned int length;struct _tagged_arr initial_buffer;};struct
 Cyc_Buffer_t*Cyc_Buffer_create(unsigned int n){if(n < 1)n=1;{struct _tagged_arr s=
-Cyc_Core_new_string(n);return({struct Cyc_Buffer_t*_tmp0=_cycalloc(sizeof(*_tmp0));
-_tmp0->buffer=s;_tmp0->position=0;_tmp0->length=n;_tmp0->initial_buffer=s;_tmp0;});}}
-struct _tagged_arr Cyc_Buffer_contents(struct Cyc_Buffer_t*b){return Cyc_Std_substring((
-struct _tagged_arr)b->buffer,0,b->position);}unsigned int Cyc_Buffer_length(struct
-Cyc_Buffer_t*b){return(unsigned int)b->position;}void Cyc_Buffer_clear(struct Cyc_Buffer_t*
-b){b->position=0;return;}void Cyc_Buffer_reset(struct Cyc_Buffer_t*b){b->position=
-0;b->buffer=b->initial_buffer;b->length=_get_arr_size(b->buffer,sizeof(char));
-return;}static void Cyc_Buffer_resize(struct Cyc_Buffer_t*b,unsigned int more){
-unsigned int len=b->length;unsigned int new_len=len;struct _tagged_arr new_buffer;
-while(b->position + more > new_len){new_len=2 * new_len;}new_buffer=Cyc_Core_new_string(
-new_len);Cyc_Std_strncpy(new_buffer,(struct _tagged_arr)b->buffer,b->position);b->buffer=
-new_buffer;b->length=new_len;return;}void Cyc_Buffer_add_char(struct Cyc_Buffer_t*
-b,char c){int pos=(int)b->position;if(pos >= b->length)Cyc_Buffer_resize(b,1);*((
-char*)_check_unknown_subscript(b->buffer,sizeof(char),pos))=c;b->position=(
-unsigned int)(pos + 1);return;}void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*b,
-struct _tagged_arr s,int offset,int len){if((offset < 0?1: len < 0)?1: offset + len > 
-_get_arr_size(s,sizeof(char)))(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
-_tmp1=_cycalloc(sizeof(*_tmp1));_tmp1[0]=({struct Cyc_Core_Invalid_argument_struct
-_tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;_tmp2.f1=_tag_arr("Buffer::add_substring",
-sizeof(char),22);_tmp2;});_tmp1;}));{int new_position=(int)(b->position + len);if(
-new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);Cyc_Std_zstrncpy(
-_tagged_arr_plus(b->buffer,sizeof(char),(int)b->position),_tagged_arr_plus(s,
-sizeof(char),offset),(unsigned int)len);b->position=(unsigned int)new_position;
-return;}}void Cyc_Buffer_add_string(struct Cyc_Buffer_t*b,struct _tagged_arr s){int
-len=(int)Cyc_Std_strlen(s);int new_position=(int)(b->position + len);if(
-new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);Cyc_Std_strncpy(
+Cyc_Core_new_string(n + 1);return({struct Cyc_Buffer_t*_tmp0=_cycalloc(sizeof(*
+_tmp0));_tmp0->buffer=s;_tmp0->position=0;_tmp0->length=n;_tmp0->initial_buffer=
+s;_tmp0;});}}struct _tagged_arr Cyc_Buffer_contents(struct Cyc_Buffer_t*b){return
+Cyc_Std_substring((struct _tagged_arr)b->buffer,0,b->position);}unsigned int Cyc_Buffer_length(
+struct Cyc_Buffer_t*b){return(unsigned int)b->position;}void Cyc_Buffer_clear(
+struct Cyc_Buffer_t*b){b->position=0;return;}void Cyc_Buffer_reset(struct Cyc_Buffer_t*
+b){b->position=0;b->buffer=b->initial_buffer;b->length=_get_arr_size(b->buffer,
+sizeof(char))- 1;return;}static void Cyc_Buffer_resize(struct Cyc_Buffer_t*b,
+unsigned int more){unsigned int len=b->length;unsigned int new_len=len;struct
+_tagged_arr new_buffer;while(b->position + more > new_len){new_len=2 * new_len;}
+new_buffer=Cyc_Core_new_string(new_len + 1);Cyc_Std_strncpy(new_buffer,(struct
+_tagged_arr)b->buffer,b->position);b->buffer=new_buffer;b->length=new_len;
+return;}void Cyc_Buffer_add_char(struct Cyc_Buffer_t*b,char c){int pos=(int)b->position;
+if(pos >= b->length)Cyc_Buffer_resize(b,1);({struct _tagged_arr _tmp1=
+_tagged_arr_plus(b->buffer,sizeof(char),pos);char _tmp2=*((char*)
+_check_unknown_subscript(_tmp1,sizeof(char),0));char _tmp3=c;if(_get_arr_size(
+_tmp1,sizeof(char))== 1?_tmp2 == '\000'?_tmp3 != '\000': 0: 0)_throw_arraybounds();*((
+char*)_tmp1.curr)=_tmp3;});b->position=(unsigned int)(pos + 1);return;}void Cyc_Buffer_add_substring(
+struct Cyc_Buffer_t*b,struct _tagged_arr s,int offset,int len){if((offset < 0?1: len < 0)?
+1: offset + len > _get_arr_size(s,sizeof(char)))(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tmp4=_cycalloc(sizeof(*_tmp4));_tmp4[0]=({struct Cyc_Core_Invalid_argument_struct
+_tmp5;_tmp5.tag=Cyc_Core_Invalid_argument;_tmp5.f1=({const char*_tmp6="Buffer::add_substring";
+_tag_arr(_tmp6,sizeof(char),_get_zero_arr_size(_tmp6,22));});_tmp5;});_tmp4;}));{
+int new_position=(int)(b->position + len);if(new_position > b->length)Cyc_Buffer_resize(
+b,(unsigned int)len);Cyc_Std_zstrncpy(_tagged_arr_plus(b->buffer,sizeof(char),(
+int)b->position),_tagged_arr_plus(s,sizeof(char),offset),(unsigned int)len);b->position=(
+unsigned int)new_position;return;}}void Cyc_Buffer_add_string(struct Cyc_Buffer_t*
+b,struct _tagged_arr s){int len=(int)Cyc_Std_strlen(s);int new_position=(int)(b->position
++ len);if(new_position > b->length)Cyc_Buffer_resize(b,(unsigned int)len);Cyc_Std_strncpy(
 _tagged_arr_plus(b->buffer,sizeof(char),(int)b->position),s,(unsigned int)len);b->position=(
 unsigned int)new_position;return;}void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*b,
 struct Cyc_Buffer_t*bs){Cyc_Buffer_add_substring(b,(struct _tagged_arr)bs->buffer,

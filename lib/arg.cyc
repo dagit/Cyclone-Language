@@ -132,14 +132,20 @@ justify_b(Buffer::T b, int indent, int margin, string_t item, string_t desc) {
   if (indent < 0) indent = 0;
   if (margin < 0) margin = 0;
 
-  string_t indentstr = new {for i<indent+1: (i==0)?'\n':' '};
+  //string_t indentstr = new {for i<indent+1: (i==0)?'\n':' '};
+  mstring_t indentstr = new {for i < indent + 2 : 0};
+  for (unsigned i = 0; i < indent + 1; i++) 
+    indentstr[i] = (i == 0) ? '\n' : ' ';
   let itemlen = strlen(item);
   let itemsep;
   if (strlen(desc)>0) {
     if (itemlen+1>indent)
       itemsep = indentstr;
-    else
-      itemsep = new {for i<indent-itemlen: ' '};
+    else {
+      mstring_t temp = new {for i < indent-itemlen + 1 : 0};
+      for (unsigned i = 0; i < indent-itemlen; i++) temp[i] = ' ';
+      itemsep = temp;
+    }
   }
   else return;
 

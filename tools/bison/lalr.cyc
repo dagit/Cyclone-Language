@@ -64,7 +64,7 @@ short ?lookaheads;
 short ?LAruleno;
 unsigned ?LA;
 short ?accessing_symbol;
-char ?consistent;
+char ? consistent;
 core *?state_table;
 shifts *?shift_table;
 reductions *?reduction_table;
@@ -206,7 +206,7 @@ initialize_LA()
   register shifts *sp;
   register short ?np;
 
-  consistent = NEW2(nstates, char);
+  consistent = NEW2(nstates + 1, char);
   lookaheads = NEW2(nstates + 1, short);
 
   count = 0;

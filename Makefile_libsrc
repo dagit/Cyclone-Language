@@ -30,7 +30,7 @@ LIBR:=$(CYCLIB)
 #   On the other hand if there is no lib/cyc_include.h, then a rule
 #   below will copy bin/lib/cyc-lib/cyc_include.h to the current
 #   directory, and the -B. ensures we use that one.
-override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B. -B$(LIB_PATH) -save-c
+override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B. -B$(LIB_PATH) -save-c 
 
 # cross compilation -- will be changed to use -b shortly
 ifneq ($(UPDATEARCH),$(ARCH))

@@ -138,7 +138,9 @@ int strncmp(string_t s1, string_t s2, size_t n) {
 }
 
 // Like strcmp but don't consider zeros (NUL characters) as marking
-// the end of strings.
+// the end of strings. 
+// JGM: I'm changing this because we no longer get such strong guarantees
+// about things being the right size.
 int zstrcmp(string_t a, string_t b) {
   if(a == b)
     return 0;
@@ -294,7 +296,7 @@ mstring_t<`r> rstr_sepstr(region_t<`r> r,list_t<stringptr_t> strs, string_t sepa
     lens = lens->tl;
     size_t seplen = strlen(separator);
     total_len += (list_len - 1)*seplen;
-    mstring_t ans = rnew_string(r,total_len);
+    mstring_t ans = rnew_string(r,total_len+1);
     size_t i = 0;
     while (strs->tl != NULL) {
       let next    = *(strs->hd);
@@ -662,7 +664,7 @@ list_t<int> explode(string_t s) {
 }
 
 mstring_t implode(list_t<int> chars) {
-  mstring_t s = new_string(List::length(chars));
+  mstring_t s = new_string(List::length(chars)+1);
   size_t i = 0;
   while (chars != NULL) {
     s[i++] = (char)chars->hd;

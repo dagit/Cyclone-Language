@@ -24,6 +24,7 @@
 #include <core.h>
 #include <stdio.h>
 #include <list.h>
+#include <string.h>
 #include "absyn.h"
 #include "absynpp.h"
 #include "evexp.h"
@@ -117,28 +118,26 @@ bool need_space_before() {
 }
 
 void dump(dump_string_t s) {
-  int sz = s.size;
-  if(!s[sz-1])
-    --sz;
+  int sz = strlen(s);
   pos += sz;
   if (pos > 80) {
     pos = sz;
     fputc('\n',*dump_file);
   } else if(need_space_before())
     fputc(' ',*dump_file);
-  file_string_write(*dump_file, s, 0, sz);
-  if(sz >= 1)
+  if(sz >= 1) {
     prev_char = s[sz-1];
+    file_string_write(*dump_file, s, 0, sz);
+  }
 }
 
 void dump_nospace(dump_string_t s) {
-  int sz = s.size;
-  if(!s[sz-1])
-    --sz;
+  int sz = strlen(s);
   pos += sz;
-  file_string_write(*dump_file, s, 0, sz);
-  if(sz >= 1)
+  if(sz >= 1) {
+    file_string_write(*dump_file, s, 0, sz);
     prev_char = s[sz-1];
+  }
 }
 void dump_char(int c) { // no space
   ++pos;
@@ -393,7 +392,7 @@ static void dumpeff(type_t t) {
 void dumpntyp(type_t t) {
   switch (t) {
     // The first three cases never turn up in normalized types.
-  case &ArrayType(_,_,_): 
+  case &ArrayType(_): 
   case &FnType(_): 
   case &PointerType(_): return;
   case VoidType: dump("void"); return;
@@ -678,7 +677,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     group(dumpde,des,"{","}",",");
     break;
 
-  case &Comprehension_e(vd,e1,e2):
+  case &Comprehension_e(vd,e1,e2,_):
     dump("new {for"); dump_str((*vd->name)[1]); dump_char('<'); dumpexp(e1);
     dump_char(':'); dumpexp(e2); dump_char('}');
     break;
@@ -1169,20 +1168,32 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
   }
   switch(tms->hd) {
     // FIX?? What about tq2?
-  case &Pointer_mod(&Nullable_ps(ue),  HeapRgn,  tq2):
-    dump_char('*'); dump_upperbound(ue); dumptms(tms->tl,f,a); return;
-  case &Pointer_mod(&NonNullable_ps(ue), HeapRgn,  tq2):
-    dump_char('@'); dump_upperbound(ue); dumptms(tms->tl,f,a); return;
-  case &Pointer_mod(TaggedArray_ps, HeapRgn,  tq2):
-    dump_char('?'); dumptms(tms->tl,f,a); return;
-  case &Pointer_mod(&Nullable_ps(ue),  &VarType(tv), tq2):
-    dump_char('*'); dump_upperbound(ue); dump_str(tv->name);
+  case &Pointer_mod(&Nullable_ps(ue,zt),  HeapRgn,  tq2):
+    dump_char('*'); 
+    dump_upperbound(ue); 
+    if (conref_def(false,zt)) dump("ZEROTERM");
     dumptms(tms->tl,f,a); return;
-  case &Pointer_mod(&NonNullable_ps(ue), &VarType(tv), tq2):
+  case &Pointer_mod(&NonNullable_ps(ue,zt), HeapRgn,  tq2):
+    dump_char('@'); dump_upperbound(ue); 
+    if (conref_def(false,zt)) dump("ZEROTERM");
+    dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(&TaggedArray_ps(zt), HeapRgn,  tq2):
+    dump_char('?'); 
+    if (conref_def(false,zt)) dump("ZEROTERM");
+    dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(&Nullable_ps(ue,zt),  &VarType(tv), tq2):
+    dump_char('*'); dump_upperbound(ue); 
+    if (conref_def(false,zt)) dump("ZEROTERM");
+    dump_str(tv->name);
+    dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(&NonNullable_ps(ue,zt), &VarType(tv), tq2):
     dump_char('@'); dump_upperbound(ue);
+    if (conref_def(false,zt)) dump("ZEROTERM");
     dump_str(tv->name); dumptms(tms->tl,f,a); return;
-  case &Pointer_mod(TaggedArray_ps, &VarType(tv), tq2):
-    dump_char('?'); dump_str(tv->name); dumptms(tms->tl,f,a); return;
+  case &Pointer_mod(&TaggedArray_ps(zt), &VarType(tv), tq2):
+    dump_char('?'); 
+    if (conref_def(false,zt)) dump("ZEROTERM");
+    dump_str(tv->name); dumptms(tms->tl,f,a); return;
   case &Pointer_mod(_,_,_): throw new Impossible("dumptms: bad Pointer_mod");
 
   default:
@@ -1198,9 +1209,14 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     if(next_is_pointer)
       dump_char(')');
     switch(tms->hd) {
-    case Carray_mod: dump("[]"); break;
-    case &ConstArray_mod(e):
-      dump_char('['); dumpexp(e); dump_char(']'); break;
+    case &Carray_mod(zeroterm): 
+      dump("[]"); 
+      if (conref_def(false,zeroterm)) dump("ZEROTERM");
+      break;
+    case &ConstArray_mod(e,zeroterm):
+      dump_char('['); dumpexp(e); dump_char(']'); 
+      if (conref_def(false,zeroterm)) dump("ZEROTERM");
+      break;
     case &Function_mod(&WithTypes(args,c_varargs,cyc_varargs,effopt,rgn_po)):
       dumpfunargs(args,c_varargs,cyc_varargs,effopt,rgn_po); break;
     case &Function_mod(&NoTypes(sl,loc)):

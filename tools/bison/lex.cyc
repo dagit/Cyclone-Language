@@ -86,8 +86,10 @@ char ? grow_token_buffer (char ?`H p)
   int offset = p - token_buffer;
   maxtoken *= 2;
   //  token_buffer = (char *) xrealloc(token_buffer, maxtoken + 1);
-  token_buffer = new {for _temp_<maxtoken+1:
-                      (_temp_<token_buffer.size)?token_buffer[_temp_]:0};
+  char ? new_token_buffer = new {for _temp_<maxtoken+1: 0};
+  for (unsigned i =0; i < token_buffer.size; i++) 
+    new_token_buffer[i] = token_buffer[i];
+  token_buffer = new_token_buffer;
   return token_buffer + offset;
 }
 

@@ -145,7 +145,7 @@ string_t nlblanks(int i) {  // a newline followed by i blanks
     if (!tex_output) {
       let num_tabs   = i / 8;
       let num_spaces = i % 8;
-      let total = 1 + num_tabs + num_spaces;
+      let total = 2 + num_tabs + num_spaces;
       mstring_t nlb = new_string(total);
       nlb[0] = '\n';
       for (int j = 0; j < num_tabs; j++)
@@ -159,7 +159,7 @@ string_t nlblanks(int i) {  // a newline followed by i blanks
       /* Use tildes instead of spaces, and \\ for newline,
          if we are producing output for TeX */
       let total = 3 + i;
-      mstring_t nlb = new_string(total);
+      mstring_t nlb = new_string(total+1);
       nlb[0] = '\\';
       nlb[1] = '\\';
       nlb[2] = '\n';

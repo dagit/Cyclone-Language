@@ -107,6 +107,7 @@ namespace Absyn {
   typedef struct TunionInfo tunion_info_t;
   typedef struct TunionFieldInfo tunion_field_info_t;
   typedef struct AggrInfo aggr_info_t;
+  typedef struct ArrayInfo array_info_t;
   typedef tunion Type type_t, rgntype_t;
   typedef tunion Funcparams funcparams_t;
   typedef tunion Type_modifier type_modifier_t;
@@ -218,6 +219,7 @@ namespace Absyn {
     conref_t<bool>     nullable;  // * or @
     tqual_t            tq;        // determines whether the elts are const
     conref_t<bounds_t> bounds;    // legal bounds for pointer indexing
+    conref_t<bool>     zero_term; // true => zero terminated array
   };
 
   // information about vararg functions
@@ -285,6 +287,12 @@ namespace Absyn {
     tunion AggrInfoU aggr_info;
     list_t<type_t> targs; // actual type parameters
   };
+  EXTERN_ABSYN struct ArrayInfo {
+    type_t    elt_type;       // element type
+    tqual_t   tq;             // qualifiers
+    exp_opt_t num_elts;       // number of elements
+    conref_t<bool> zero_term; // true => zero-terminated
+  };
 
   // Note: The last fields of AggrType, TypedefType, and the decl 
   // are set by check_valid_type which most of the compiler assumes
@@ -310,7 +318,7 @@ namespace Absyn {
     IntType(sign_t,size_of_t); // char, short, int.  MemKind unless B4
     FloatType;  // MemKind
     DoubleType(bool); // MemKind.  when bool is true, long double
-    ArrayType(type_t/* element typ*/,tqual_t,exp_opt_t/* size */); // MemKind
+    ArrayType(array_info_t);// MemKind
     FnType(fn_info_t); // MemKind
     TupleType(list_t<$(tqual_t,type_t)@>); // MemKind
     AggrType(aggr_info_t); // MemKind (named structs and unions)
@@ -343,11 +351,12 @@ namespace Absyn {
               list_t<$(type_t,type_t)@>);              // region partial order
   };
 
-  // used when parsing/pretty-printing pointers
+  // used when parsing/pretty-printing pointers.  The conref_t<bool>s
+  // determine whether or not the array/pointer is zero-terminated.
   EXTERN_ABSYN tunion Pointer_Sort {
-    NonNullable_ps(exp_t), // exp is upper bound
-    Nullable_ps(exp_t),    // exp is upper bound
-    TaggedArray_ps
+    NonNullable_ps(exp_t,conref_t<bool>), // exp is upper bound
+    Nullable_ps(exp_t,conref_t<bool>),    // exp is upper bound
+    TaggedArray_ps(conref_t<bool>)        // true->zero terminated
   };
 
   // Used in attributes below.
@@ -384,8 +393,8 @@ namespace Absyn {
 
   // Type modifiers are used for parsing/pretty-printing
   EXTERN_ABSYN tunion Type_modifier {
-    Carray_mod; // []
-    ConstArray_mod(exp_t); // [c]
+    Carray_mod(conref_t<bool>); // [], conref controls zero-termination
+    ConstArray_mod(exp_t,conref_t<bool>); // [c], conref controls zero-term
     // for Pointer_mod, the typ has RgnKind, default is RgnType(HeapRgn)
     Pointer_mod(tunion Pointer_Sort,type_t,tqual_t); 
     Function_mod(funcparams_t);
@@ -477,8 +486,8 @@ namespace Absyn {
     CompoundLit_e($(opt_t<var_t>,tqual_t,type_t)@,
                   list_t<$(list_t<designator_t>,exp_t)@>); 
     Array_e(list_t<$(list_t<designator_t>,exp_t)@>); // {.0=e1,...,.n=en}
-    // {for i < e1 : e2}
-    Comprehension_e(vardecl_t,exp_t,exp_t); // much of vardecl is known
+    // {for i < e1 : e2} -- the bool tells us whether it's zero-terminated
+    Comprehension_e(vardecl_t,exp_t,exp_t,bool); // much of vardecl is known
     // Foo{.x1=e1,...,.xn=en} (with optional witness types)
     Struct_e(typedef_name_t,
 	     list_t<type_t>, // witness types, maybe fewer before type-checking
@@ -759,6 +768,8 @@ namespace Absyn {
   extern conref_t<`a> compress_conref(conref_t<`a> x);
   extern `a conref_val(conref_t<`a> x);
   extern `a conref_def(`a, conref_t<`a> x);
+  extern conref_t<bool> true_conref;
+  extern conref_t<bool> false_conref;
 
   extern kindbound_t compress_kb(kindbound_t);
   extern kind_t force_kb(kindbound_t kb);
@@ -796,17 +807,22 @@ namespace Absyn {
   extern exp_t exp_unsigned_one; // good for sharing
   extern tunion Bounds bounds_one; // Upper(1) (good for sharing)
   // t *{e}`r
-  extern type_t starb_typ(type_t t, type_t rgn, tqual_t tq, bounds_t b);
+  extern type_t starb_typ(type_t t, type_t rgn, tqual_t tq, bounds_t b,
+                          conref_t<bool> zero_term);
   // t @{e}`r
-  extern type_t atb_typ(type_t t, type_t rgn, tqual_t tq, bounds_t b);
+  extern type_t atb_typ(type_t t, type_t rgn, tqual_t tq, bounds_t b,
+                        conref_t<bool> zero_term);
   // t *`r
-  extern type_t star_typ(type_t t, type_t rgn, tqual_t tq);// bounds = Upper(1)
+  extern type_t star_typ(type_t t, type_t rgn, tqual_t tq, 
+                         conref_t<bool> zero_term);// bounds = Upper(1)
   // t @`r
-  extern type_t at_typ(type_t t, type_t rgn, tqual_t tq);  // bounds = Upper(1)
+  extern type_t at_typ(type_t t, type_t rgn, tqual_t tq,
+                       conref_t<bool> zero_term);  // bounds = Upper(1)
   // t*`H
   extern type_t cstar_typ(type_t t, tqual_t tq); 
   // t?`r
-  extern type_t tagged_typ(type_t t, type_t rgn, tqual_t tq);
+  extern type_t tagged_typ(type_t t, type_t rgn, tqual_t tq, 
+                           conref_t<bool> zero_term);
   // void*
   extern type_t void_star_typ();
   extern opt_t<type_t> void_star_typ_opt();
@@ -816,6 +832,9 @@ namespace Absyn {
   extern type_t unionq_typ(qvar_t name);
   // unions
   extern type_t union_typ(var_t name);
+  // arrays
+  extern type_t array_typ(type_t elt_type, tqual_t tq, exp_opt_t num_elts, 
+                          conref_t<bool> zero_term);
 
   /////////////////////////////// Expressions ////////////////////////
   extern exp_t new_exp(raw_exp_t, seg_t);

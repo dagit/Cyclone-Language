@@ -48,7 +48,7 @@ abstract struct t
 
 T create (unsigned int n) {
   if (n < 1) n=1;
-  mstring_t s = new_string(n);
+  mstring_t s = new_string(n+1);
   return new t(s, 0, n, s);
 }
 
@@ -68,7 +68,7 @@ void clear (T b) {
 void reset (T b) {
   b->position = 0;
   b->buffer = b->initial_buffer;
-  b->length = (b->buffer).size;
+  b->length = (b->buffer).size - 1;
   return;
 }
 
@@ -79,7 +79,7 @@ static void resize(T b, unsigned int more) {
   while (b->position + more > new_len) {
     new_len = 2 * new_len;
   }
-  new_buffer = new_string(new_len);
+  new_buffer = new_string(new_len + 1);
   Std::strncpy(new_buffer, b->buffer, b->position);
   b->buffer = new_buffer;
   b->length = new_len;

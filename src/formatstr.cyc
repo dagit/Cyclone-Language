@@ -324,7 +324,7 @@ list_t<type_t> get_format_typs(tenv_t te,string_t s,seg_t loc) {
 	     implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual());
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(),false_conref);
       typs = new List(t,typs);
       break;
     case '%':
@@ -476,7 +476,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
               implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual());
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(),false_conref);
       typs = new List(t,typs);
       break;
     case 'u':
@@ -494,7 +494,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
 	     implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual());
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(),false_conref);
       typs = new List(t,typs);
       break;
     case 'f': 
@@ -515,7 +515,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
               implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual());
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(),false_conref);
       typs = new List(t,typs);
       break;
       //JGM: need to fix and synch up with lib/scanf.cyc
@@ -540,7 +540,7 @@ list_t<type_t> get_scanf_typs(tenv_t te,string_t s,seg_t loc) {
 	     implode(lenmod), c);
         return NULL;
       }
-      t = at_typ(t,new_evar(&rk,tvs),empty_tqual());
+      t = at_typ(t,new_evar(&rk,tvs),empty_tqual(),false_conref);
       typs = new List(t,typs);
       break;
     case '%':

@@ -131,7 +131,7 @@ MAKE_VAR(_push_handler);
 MAKE_VAR(_pop_handler);
 MAKE_VAR(_exn_thrown);
 MAKE_VAR(_npop_handler);
-MAKE_VAR(_check_null);
+MAKE_VAR(_check_null); 
 MAKE_VAR(_check_known_subscript_null);
 MAKE_VAR(_check_known_subscript_notnull);
 MAKE_VAR(_check_unknown_subscript);
@@ -140,9 +140,13 @@ MAKE_VAR(_tag_arr);
 MAKE_VAR(_init_tag_arr);
 MAKE_VAR(_untag_arr);
 MAKE_VAR(_get_arr_size);
+MAKE_VAR(_get_zero_arr_size);
 MAKE_VAR(_tagged_arr_plus);
+MAKE_VAR(_zero_arr_plus);
 MAKE_VAR(_tagged_arr_inplace_plus);
+MAKE_VAR(_zero_arr_inplace_plus);
 MAKE_VAR(_tagged_arr_inplace_plus_post);
+MAKE_VAR(_zero_arr_inplace_plus_post);
 MAKE_VAR(_cycalloc);
 MAKE_VAR(_cyccalloc);
 MAKE_VAR(_cycalloc_atomic);
@@ -154,6 +158,9 @@ MAKE_VAR(_new_region);
 MAKE_VAR(_push_region);
 MAKE_VAR(_pop_region);
 MAKE_VAR(_reset_region);
+MAKE_VAR(_throw_arraybounds);
+MAKE_VAR(_tagged_ptr_decrease_size);
+MAKE_VAR(_bogus); // used for initializing expressions
 
 #undef MAKE_STRING
 #undef MAKE_VAR
@@ -198,7 +205,7 @@ static bool is_zero(exp_t e) {
 // return true if t is a nullable pointer type i.e., *
 static bool is_nullable(type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{_,_,b,_,_}): return conref_def(false,b);
+  case &PointerType(PtrInfo{_,_,b,_,_,_}): return conref_def(false,b);
   default: toc_impos("is_nullable");
   }
 }
@@ -306,9 +313,9 @@ static $(tqual_t,type_t)@ typ_to_c_f($(tqual_t,type_t)@ x) {
 // The function typ_to_c_array leaves them alone, while typ_to_c
 // changes them to pointers.
 static type_t typ_to_c_array(type_t t) {
-  switch(t) {
-  case &ArrayType(t2,tq,x): // FIX: do we handle tq correctly?
-    return new ArrayType(typ_to_c_array(t2),tq,x);
+  switch(compress(t)) {
+  case &ArrayType(ArrayInfo{t2,tq,x,zt}): // FIX: do we handle tq correctly?
+    return array_typ(typ_to_c_array(t2),tq,x,false_conref);
   case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c_array(t2);
   default: return typ_to_c(t);
   }
@@ -339,22 +346,24 @@ static type_t typ_to_c(type_t t) {
     // for xtunion fields that carry no argument, it's a char *.
     // for fields that carry arguments, it's a struct _Field_struct;
     if (tuf->typs == NULL) 
-      if(tud->is_xtunion) return star_typ(char_typ,HeapRgn,mt_tq);
+      if(tud->is_xtunion) 
+        return star_typ(char_typ,HeapRgn,mt_tq,false_conref);
       else return uint_typ;
     else return strctq(collapse_qvar_tag(tuf->name,"_struct"));
   case &TunionFieldType(_): toc_impos("unresolved TunionFieldType");
-  case &PointerType(PtrInfo{t2,_,_,tq,bnds}):
+  case &PointerType(PtrInfo{t2,_,_,tq,bnds,_}):
     // t2? maps to struct tagged_arr.
-    // t2* and t2@ map to t2*.  Regions are irrelevant.
+    // t2* and t2@ map to t2*.  Regions and zero-term are irrelevant.
     t2 = typ_to_c_array(t2);
     switch (compress_conref(bnds)->v) {
     case &Eq_constr(Unknown_b): return tagged_arr_typ;
-    default: return star_typ(t2,HeapRgn,tq);
+    default: return star_typ(t2,HeapRgn,tq,false_conref);
     }
   case &IntType(_,_): 
   case FloatType:     
   case &DoubleType(_): return t;
-  case &ArrayType(t2,tq,e): return new ArrayType(typ_to_c_array(t2),tq,e);
+  case &ArrayType(ArrayInfo{t2,tq,e,_}): 
+    return array_typ(typ_to_c_array(t2),tq,e,false_conref);
   case &FnType(FnInfo{_,_,t2,args,c_vararg,cyc_vararg,_,atts}):
     // just drop the type arguments & effect and translate the nested types
     // also, drop any format descriptors 
@@ -372,7 +381,7 @@ static type_t typ_to_c(type_t t) {
     let new_args = List::map(arg_to_c,args);
     if (cyc_vararg != NULL) {
       // region for array type irrelevant
-      let t = typ_to_c(tagged_typ(cyc_vararg->type,HeapRgn,mt_tq));
+      let t =typ_to_c(tagged_typ(cyc_vararg->type,HeapRgn,mt_tq,false_conref));
       let vararg = new $(cyc_vararg->name,cyc_vararg->tq,t);
       new_args = List::imp_append(new_args,new List(vararg,NULL));
     }
@@ -419,8 +428,9 @@ static type_t typ_to_c(type_t t) {
 
 static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
   switch (t) {
-  case &ArrayType(t2,tq,_): return cast_exp(star_typ(t2,HeapRgn,tq),e,l);
-  default:                  return cast_exp(t,e,l);
+  case &ArrayType(ArrayInfo{t2,tq,_,_}): 
+    return cast_exp(star_typ(t2,HeapRgn,tq,false_conref),e,l);
+  default: return cast_exp(t,e,l);
   }
 }
 
@@ -438,7 +448,7 @@ static bool atomic_typ(type_t t) {
   case &FnType(_):     
   case &TagType(_):
   case &SizeofType(_): return true;
-  case &ArrayType(t,_,_): return atomic_typ(t);
+  case &ArrayType(ArrayInfo{t,_,_,_}): return atomic_typ(t);
     // FIX: really should compute in terms of the instantiation
     // to be as aggressive as possible.
     // note even without this we'll allocate Position::seg_t with atomic.
@@ -476,7 +486,7 @@ static bool atomic_typ(type_t t) {
 
 static bool is_void_star(type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo{t2,_,_,_,_}):
+  case &PointerType(PtrInfo{t2,_,_,_,_,_}):
     switch (compress(t2)) {
     case VoidType: return true;
     default:       return false;
@@ -510,7 +520,7 @@ static bool is_poly_project(exp_t e) {
   case &AggrMember_e(e1,f): return is_poly_field(e1->topt->v,f);
   case &AggrArrow_e(e1,f):
     switch (compress(e1->topt->v)) {
-    case &PointerType(PtrInfo{t,_,_,_,_}): return is_poly_field(t,f);
+    case &PointerType(PtrInfo{t,_,_,_,_,_}): return is_poly_field(t,f);
     default: toc_impos("is_poly_project:  bad type %s",typ2string(e1->topt->v));
     }
   default: return false;
@@ -570,7 +580,7 @@ static exp_t make_toplevel_tagged_arr(type_t t, exp_t sz, exp_t e) {
   exp_t xplussz;
   if (is_string) {
     qvar_t    x      = temp_var();
-    type_t    vd_typ = new ArrayType(char_typ,mt_tq,sz);
+    type_t    vd_typ = array_typ(char_typ,mt_tq,sz,false_conref);
     vardecl_t vd     = static_vardecl(x,vd_typ,e);
     result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
     xexp = var_exp(x,DL);
@@ -719,14 +729,14 @@ static CfFlowInfo::relns_t get_relns(exp_t e) { // e must be pre-translation!
 static bool check_const_array(unsigned i, type_t t) {
   //fprintf(stderr,"checking const array %d and %s\n",i,typ2string(t));
   switch (compress(t)) {
-  case &PointerType(PtrInfo{_,_,_,_,b}):
+  case &PointerType(PtrInfo{_,_,_,_,b,zt}):
     switch (conref_def(bounds_one,b)) {
     case Unknown_b: return false;
     case &Upper_b(e):
       let $(j,known) = Evexp::eval_const_uint_exp(e);
       return known && i <= j;
     }
-  case &ArrayType(_,_,e):
+  case &ArrayType(ArrayInfo{_,_,e,_}):
     if (e == NULL) return false;
     let $(j,known) = Evexp::eval_const_uint_exp((exp_t)e);
     return known && i <= j;
@@ -889,7 +899,7 @@ static exp_t make_struct(env_t nv, qvar_t x, type_t struct_typ, stmt_t s,
 }
 
 static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd, 
-                                 exp_t e1, exp_t e2, stmt_t s, 
+                                 exp_t e1, exp_t e2, bool zero_term, stmt_t s, 
                                  bool e1_already_translated);
 
 static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
@@ -926,8 +936,8 @@ static stmt_t init_array(env_t nv, exp_t lhs,
     case &Array_e(dles0):
       s = init_array(nv, lval, dles0, s);
       break;
-    case &Comprehension_e(vd,g1,g2):
-      s = init_comprehension(nv, lval, vd, g1, g2, s, false);
+    case &Comprehension_e(vd,g1,g2,zt):
+      s = init_comprehension(nv, lval, vd, g1, g2, zt, s, false);
       break;
     case &AnonStruct_e(st,dles):
       s = init_anon_struct(nv, lval, st, dles, s);
@@ -944,9 +954,10 @@ static stmt_t init_array(env_t nv, exp_t lhs,
 // code to initialize a comprehension
 // WARNING: Changing the translation here will break Tovc.
 static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd, 
-                                 exp_t e1, exp_t e2, stmt_t s, 
-                                 bool e1_already_translated) {
+                                 exp_t e1, exp_t e2, bool zero_term,
+                                 stmt_t s, bool e1_already_translated) {
   let x1 = vd->name;
+  let elt_typ = typ_to_c(e2->topt->v);
   if (!e1_already_translated)
     exp_to_c(nv,e1);
   env_t nv2 = add_varmap(nv,x1,varb_exp(x1,new Local_b(vd),DL));
@@ -954,6 +965,8 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
   exp_t ea = assign_exp(var_exp(x1,DL),signed_int_exp(0,DL),DL);
   exp_t eb = lt_exp(var_exp(x1,DL),var_exp(max,DL),DL);
   exp_t ec = post_inc_exp(var_exp(x1,DL),DL);
+  // FIX: lval may be "const" -- we need to use pointer arithmetic
+  // here and cast it to be a non-const pointer to the element type.
   exp_t lval = subscript_exp(lhs,var_exp(x1,DL),DL);
   stmt_t body;
   // since we don't yet allow arrays or comprehensions within comprehensions
@@ -962,8 +975,8 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
   case &Array_e(dles):
     body = init_array(nv2, lval, dles, skip_stmt_dl());
     break;
-  case &Comprehension_e(vd2,g1,g2):
-    body = init_comprehension(nv2, lval, vd2, g1,g2, skip_stmt_dl(), false);
+  case &Comprehension_e(vd2,g1,g2,zt):
+    body = init_comprehension(nv2, lval, vd2, g1,g2,zt,skip_stmt_dl(), false);
     break;
   case &AnonStruct_e(st,dles):
     body = init_anon_struct(nv, lval, st, dles, skip_stmt_dl());
@@ -974,6 +987,14 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
     break;
   }
   stmt_t s2 = for_stmt(ea,eb,ec,body,DL);
+  // for zero-terminated comprehensions, we must initialize the last elt to 0
+  if (zero_term) {
+    // FIX: lhs[max] may be "const" -- we need to use pointer arithmetic
+    // here and cast it to be a non-const pointer to the element type.
+    exp_t ex = assign_exp(subscript_exp(lhs,var_exp(max,DL),DL),
+                          cast_exp(elt_typ,uint_exp(0,DL),DL),DL);
+    s2 = seq_stmt(s2,exp_stmt(ex,DL),DL);
+  }
   // note that we get rid of the const on the index variable x1 here
   return seq_stmt(declare_stmt(max,uint_typ,e1,
 			       declare_stmt(x1,uint_typ,NULL,s2,DL),DL),s,DL);
@@ -994,8 +1015,8 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
       switch (e->r) {
       case &Array_e(dles):
         s = init_array(nv, lval, dles, s); break;
-      case &Comprehension_e(vd,e1,e2):
-        s = init_comprehension(nv, lval, vd, e1, e2, s, false); break;
+      case &Comprehension_e(vd,e1,e2,zt):
+        s = init_comprehension(nv, lval, vd, e1, e2, zt, s, false); break;
       case &AnonStruct_e(st2,dles):
         s = init_anon_struct(nv, lval, st2, dles, s); break;
       default:
@@ -1040,8 +1061,8 @@ static exp_t init_tuple(env_t nv, bool pointer,
       case &Array_e(dles):
         s = init_array(nv, lval, dles, s);
         break;
-      case &Comprehension_e(vd,e1,e2):
-        s = init_comprehension(nv, lval, vd, e1, e2, s, false);
+      case &Comprehension_e(vd,e1,e2,zt):
+        s = init_comprehension(nv, lval, vd, e1, e2, zt, s, false);
         break;
         // FIX: deal with comprehensions
       default:
@@ -1104,8 +1125,8 @@ static exp_t init_struct(env_t nv, type_t struct_type, bool has_exists,
           switch (e->r) {
           case &Array_e(dles):
             s = init_array(nv, lval, dles, s); break;
-          case &Comprehension_e(vd,e1,e2):
-            s = init_comprehension(nv, lval, vd, e1, e2, s, false); break;
+          case &Comprehension_e(vd,e1,e2,zt):
+            s = init_comprehension(nv, lval, vd, e1, e2, zt, s, false); break;
           case &AnonStruct_e(st,dles):
             s = init_anon_struct(nv, lval, st, dles, s); break;
           default:
@@ -1211,6 +1232,179 @@ static struct PtrInfo get_ptr_type(type_t t) {
   }
 }
 
+// return true if t is a zero-terminated pointer or array type and set the
+// elt_type and ptr_type as appropriate.
+static bool is_zero_ptr_type(type_t t, type_t @ptr_type, 
+                             bool @is_fat, type_t @elt_type) {
+  switch (compress(t)) {
+  case &PointerType(PtrInfo{elt,_,_,_,bnds,zt}):
+    if (conref_def(false,zt)) {
+      *ptr_type = t;
+      *elt_type = elt;
+      switch (conref_def(bounds_one,bnds)) {
+      case Unknown_b: *is_fat = true; break;
+      default: *is_fat = false; break;
+      }
+      return true;
+    } else return false;
+  case &ArrayType(ArrayInfo{elt,tq,n,zt}):
+    if (conref_def(false,zt)) {
+      *elt_type = elt;
+      *is_fat = false;
+      *ptr_type = new PointerType(PtrInfo{elt,HeapRgn,new_conref(false),tq, 
+                                          new_conref(new Upper_b((exp_t)n)),
+                                          zt});
+      return true;
+    } else return false;
+  default: return false;
+  }
+}
+
+// is e1 of the form *ea or ea[eb] where ea is a zero-terminated pointer?
+// If so, return true and set ea and eb appropriately (for *ea set eb to 0).
+// Finally, if the pointer is fat, set is_fat to true.
+static bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type, 
+                              bool @is_fat, type_t @elt_type) {
+  switch (e1->r) {
+  case &Cast_e(_,_): toc_impos("we have a cast in a lhs:  %s",exp2string(e1));
+  case &Deref_e(e1a): fallthru(e1a);
+  case &Subscript_e(e1a,_):
+    return is_zero_ptr_type(e1a->topt->v,ptr_type,is_fat,elt_type);
+  case &AggrArrow_e(e1a,_): fallthru(e1a);
+  case &AggrMember_e(e1a,_):
+    // sanity check
+    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_fat,elt_type))
+      toc_impos("found zero pointer aggregate member assignment: %s",
+                exp2string(e1));
+    return false;
+  case &Instantiate_e(e1a,_): fallthru(e1a);
+  case &NoInstantiate_e(e1a):
+    if (is_zero_ptr_type(e1a->topt->v,ptr_type,is_fat,elt_type))
+      toc_impos("found zero pointer instantiate/noinstantiate: %s",
+                exp2string(e1));
+    return false;
+  case &Var_e(_,_): return false;
+  default: 
+    toc_impos("found bad lhs in is_zero_ptr_deref: %s",exp2string(e1));
+  }
+}
+
+// given a type t that admits "zero", return an expression representing
+// zero for that type.  For pointers, this is NULL.  For integral types,
+// this is the appropriate integral 0.
+static exp_t generate_zero(type_t t) {
+  exp_t res;
+  switch (compress(t)) {
+  case &PointerType(_) : res = null_exp(DL); break;
+  case &IntType(sn,B1) : res = const_exp(new Char_c(sn,0),DL); break;
+  case &IntType(sn,B2) : res = const_exp(new Short_c(sn,0),DL); break;
+  case &EnumType(_,_)  : fallthru;
+  case &AnonEnumType(_): fallthru(Unsigned);
+  case &IntType(sn,B4) : res = const_exp(new Int_c(sn,0),DL); break;
+  case &IntType(sn,B8) : res = const_exp(new LongLong_c(sn,0),DL); break;
+  case FloatType       : fallthru;
+  case &DoubleType(_)  : res = const_exp(new Float_c("0.0"),DL); break;
+  default: 
+    toc_impos("found non-zero type %s in generate_zero",typ2string(t));
+  }
+  res->topt = new Opt(t);
+  return res;
+}
+
+// We're translating e which is of the form e_1 op= e_2 where e_1 
+// involves a zero-terminated pointer and is of the form *ea or
+// ea[eb].  We need to prevent overwriting the last zero in the array.  
+static void zero_ptr_assign_to_c(env_t nv, exp_t e, 
+                                 exp_t e1, opt_t<primop_t> popt, exp_t e2,
+                                 type_t ptr_type, bool is_fat, 
+                                 type_t elt_type) {
+  // To simplify the translation, we always use a fat pointer and generate:
+  //  ({ fat_ptr_type x = ((fat_ptr_type)ea) + eb; 
+  //     elt_type y = *x; // check here that x is not null and in bounds
+  //     elt_type z = y op e2;
+  //     if (x.size == 1 && y == zero && z != zero) _throw_arraybounds();
+  //     *x.curr = z; })
+  // Note that this is generated and *then* translated to ensure the
+  // proper constraints.  
+  let fat_ptr_type = tagged_typ(elt_type, HeapRgn, mt_tq, true_conref);
+  let c_elt_type = typ_to_c(elt_type);
+  let c_fat_ptr_type = typ_to_c(fat_ptr_type);
+  let c_ptr_type = cstar_typ(c_elt_type, mt_tq);
+  let c_ptr_type_opt = new Opt(c_ptr_type);
+  exp_t xinit;
+  switch (e1->r) {
+  case &Deref_e(ea):
+    if (!is_fat)
+      ea = cast_exp(fat_ptr_type,ea,DL); ea->topt = new Opt(fat_ptr_type);
+    exp_to_c(nv,ea); xinit = ea; break;
+  case &Subscript_e(ea,eb):
+    if (!is_fat) 
+      ea = cast_exp(fat_ptr_type,ea,DL); ea->topt = new Opt(fat_ptr_type);
+    exp_to_c(nv,ea); exp_to_c(nv,eb);
+    xinit = fncall_exp(_tagged_arr_plus_e,
+                       list(ea,sizeoftyp_exp(typ_to_c(elt_type),DL),eb),DL);
+    break;
+  default: toc_impos("found bad lhs for zero-terminated pointer assignment");
+  }
+  let x = temp_var();                // build ptr_type x = ea + eb;
+  nv = add_varmap(nv, x, var_exp(x,DL));  // add x to the varmap
+  let x_vd = new Vardecl {Public,x,mt_tq,c_fat_ptr_type,xinit,NULL,NULL,false};
+  let x_bnd = new Local_b(x_vd);     // build *x -- need to translate here
+  let x_exp = varb_exp(x,x_bnd,DL);  // to check the bound and for NULL
+  x_exp->topt = new Opt(fat_ptr_type);
+  let deref_x = deref_exp(x_exp,DL);
+  deref_x->topt = new Opt(elt_type);
+  exp_to_c(nv,deref_x);
+  let y = temp_var();                // build elt_type y = *x;
+  nv = add_varmap(nv, y, var_exp(y,DL));  // add y to the varmap
+  let y_vd = new Vardecl {Public,y,mt_tq,c_elt_type,deref_x,NULL,NULL,false};
+  let y_bnd = new Local_b(y_vd);
+  exp_t z_init = e2;                 // build y op e2 and translate
+  if (popt != NULL) {
+    let y_exp = varb_exp(y,y_bnd,DL);
+    y_exp->topt = deref_x->topt;
+    z_init = prim2_exp(popt->v,y_exp,e2,DL);
+    z_init->topt = y_exp->topt;
+  }
+  exp_to_c(nv,z_init);
+  let z = temp_var();                // build z = y op e2;
+  let z_vd = new Vardecl {Public,z,mt_tq,c_elt_type,z_init,NULL,NULL,false};
+  let z_bnd = new Local_b(z_vd);
+  nv = add_varmap(nv, z, var_exp(z,DL));  // add z to the varmap
+  // build y == zero and translate -- here, we need to know what
+  // the element type is to generate the right zero.  
+  let y2_exp = varb_exp(y,y_bnd,DL); y2_exp->topt = deref_x->topt;
+  let zero1_exp = generate_zero(elt_type);
+  let comp1_exp = prim2_exp(Eq,y2_exp,zero1_exp,DL);
+  comp1_exp->topt = new Opt(sint_typ);
+  exp_to_c(nv,comp1_exp);
+  // build z != zero and translate
+  let z_exp = varb_exp(z,z_bnd,DL); z_exp->topt = deref_x->topt;
+  let zero2_exp = generate_zero(elt_type);
+  let comp2_exp = prim2_exp(Neq,z_exp,zero2_exp,DL);
+  comp2_exp->topt = new Opt(sint_typ);
+  exp_to_c(nv,comp2_exp);
+  // build x.size == 1 directly (no translation)
+  let xsize = prim2_exp(Eq,fncall_exp(_get_arr_size_e,
+                                      list(varb_exp(x,x_bnd,DL),
+                                           sizeoftyp_exp(typ_to_c(elt_type),
+                                                         DL)),DL),
+                        uint_exp(1,DL),DL);
+  // start assembling the statement
+  let comp_exp = and_exp(xsize,and_exp(comp1_exp,comp2_exp,DL),DL);
+  let thr_stmt = exp_stmt(fncall_exp(_throw_arraybounds_e,NULL,DL),DL);
+  let xcurr = aggrmember_exp(varb_exp(x,x_bnd,DL),curr_sp,DL);
+  xcurr = cast_exp(c_ptr_type,xcurr,DL);
+  let deref_xcurr = deref_exp(xcurr,DL);
+  let asn_exp = assign_exp(deref_xcurr,var_exp(z,DL),DL);
+  let s = exp_stmt(asn_exp,DL);
+  s = seq_stmt(ifthenelse_stmt(comp_exp,thr_stmt,skip_stmt(DL),DL),s,DL);
+  s = decl_stmt(new Decl(new Var_d(z_vd),DL),s,DL);
+  s = decl_stmt(new Decl(new Var_d(y_vd),DL),s,DL);
+  s = decl_stmt(new Decl(new Var_d(x_vd),DL),s,DL);
+  e->r = stmt_exp(s,DL)->r;
+}
+
 static void exp_to_c(env_t nv, exp_t e) {
   let r = e->r;
   if(e->topt == NULL)
@@ -1248,8 +1442,10 @@ static void exp_to_c(env_t nv, exp_t e) {
     case Size:
       exp_t arg = es->hd;
       switch (compress(arg->topt->v)) {
-      case &ArrayType(_,_,e2): e->r = e2->r;  break;
-      case &PointerType(PtrInfo{elt_typ,_,nbl,_,bound}):
+      case &ArrayType(ArrayInfo{_,_,e2,_}): 
+        // FIX: copy the expression e2 here.
+        e->r = e2->r;  break;
+      case &PointerType(PtrInfo{elt_typ,_,nbl,_,bound,zt}):
 	switch(conref_def(bounds_one,bound)) {
 	case Unknown_b: // retrieve (last_plus_one - curr) via runtime call
 	  e->r = fncall_exp(_get_arr_size_e,
@@ -1257,8 +1453,11 @@ static void exp_to_c(env_t nv, exp_t e) {
 				 sizeoftyp_exp(typ_to_c(elt_typ),DL)), DL)->r;
 	  break;
 	case &Upper_b(e2): 
-          // careful! when this is a nullable pointer, the size might be 0
-          if (conref_def(false,nbl)) {
+          // when zero-terminated, we have to call "strlen"
+          if (conref_def(false,zt)) {
+            e->r = fncall_exp(_get_zero_arr_size_e,list(es->hd,e2),DL)->r;
+          } else if (conref_def(false,nbl)) {
+            // careful! when this is a nullable pointer, the size might be 0
             e->r = conditional_exp(arg,e2,uint_exp(0,DL),DL)->r;
           } else {
             e->r = e2->r; break; // compile-time evaluation
@@ -1271,16 +1470,30 @@ static void exp_to_c(env_t nv, exp_t e) {
       }
       break;
     case Plus:
-      // only translation is for tagged arrays:
+      // only translation is for tagged arrays or zero-terminated arrays
       //   _tag_arr_plus(e1,sizeof(elt_typ),e2)
       // FIX: allow arithmetic on t ? types at top-level!
-      type_t elt_typ = VoidType;
-      if(is_tagged_pointer_typ_elt(old_typs->hd,&elt_typ)) {
-	exp_t e1 = es->hd;
-	exp_t e2 = es->tl->hd;
-	e->r = fncall_exp(_tagged_arr_plus_e,
-			  list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),e2),
-			  DL)->r;
+      switch (compress(old_typs->hd)) {
+      case &PointerType(PtrInfo{elt_typ,_,_,_,b,zt}):
+        switch (conref_def(bounds_one,b)) {
+        case Unknown_b:
+          exp_t e1 = es->hd;
+          exp_t e2 = es->tl->hd;
+          e->r = fncall_exp(_tagged_arr_plus_e,
+                            list(e1,sizeoftyp_exp(typ_to_c(elt_typ),DL),e2),
+                            DL)->r;
+          break;
+        case &Upper_b(esz):
+          if (conref_def(false,zt)) {
+            exp_t e1 = es->hd;
+            exp_t e2 = es->tl->hd;
+            e->r = fncall_exp(_zero_arr_plus_e,list(e1,esz,e2),DL)->r;
+          }
+          break;
+        }
+        break;
+      default:
+        break;
       }
       break;
     case Minus:
@@ -1324,8 +1537,23 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Increment_e(e2,incr):
     type_t e2_cyc_typ = e2->topt->v;
+    // we need to worry about the case where e2 is of the form
+    // *ea or ea[eb] and ea is a zero-terminated pointer, for
+    // then we need to know that the inc/dec doesn't destroy the
+    // trailing 0.  See the special code in the AssignOp_e case.
+    // To combat this, I'm simply disallowing it.  
+    type_t ptr_type = VoidType;
+    type_t elt_type = VoidType;
+    bool fat_ptr = false;
+    string_t incr_str = "increment";
+    if (incr == PreDec || incr == PostDec) incr_str = "decrement";
+    if (is_zero_ptr_deref(e2,&ptr_type,&fat_ptr,&elt_type)) {
+      Tcutil::terr(e->loc,"in-place %s is not supported when dereferencing a zero-terminated pointer", incr_str);
+      throw new Core::Impossible("in-place inc on zero-term");
+    }
     exp_to_c(nv,e2);
-    // only t ? types are translated funny, note that e2 is an lvalue!
+    // only t ? or zero-terminated types are translated funny, 
+    // note that e2 is an lvalue!
     type_t elt_typ = VoidType;
     if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
       // eg. x++ becomes _tagged_arr_inplace_plus_post(&x,sizeof(elt_typ),1)
@@ -1336,14 +1564,35 @@ static void exp_to_c(env_t nv, exp_t e) {
       e->r = fncall_exp(fn_e, list(address_exp(e2,DL),
 				   sizeoftyp_exp(typ_to_c(elt_typ),DL),
 				   signed_int_exp(change,DL)), DL)->r;
-    }
-    if(elt_typ == VoidType && !is_lvalue(e2)) {
+    } else if (is_zero_pointer_typ_elt(old_typ,&elt_typ)) {
+      // e.g, x++ becomes _zero_arr_inplace_plus_post(x,1)
+      let fn_e = (incr == PostInc) ? _zero_arr_inplace_plus_post_e :
+        _zero_arr_inplace_plus_e;
+      e->r = fncall_exp(fn_e, list(e2,signed_int_exp(1,DL)), DL)->r;
+    } else if(elt_typ == VoidType && !is_lvalue(e2)) {
       lvalue_assign(e2,NULL,incr_lvalue,incr);
       e->r = e2->r;
     }
     break;
   case &AssignOp_e(e1,popt,e2):
-    // FIX: not sure all these special-cases work right *together*
+    // FIX: not sure all these special-cases work right *together*...
+    // 
+    // We need to know whether or not the expression is of the form
+    // *ea op= e2 or ea[eb] op= e2 where ea is a zero-terminated pointer.
+    // The reason is that we need to ensure not only that the pointer
+    // is in bounds, but also, if it's pointing to the last element 
+    // (i.e., the zero) then the value written in should continue to
+    // be zero.  So, for instance, if we have *ea = e2, then either ea
+    // can't point to the last element or e2 must be 0.  If we have
+    // *ea op= e2 then we need to know that either ea can't point to
+    // the last element or (0 op= e2) is 0.
+    type_t ptr_type = VoidType;
+    type_t elt_type = VoidType;
+    bool is_fat = false;
+    if (is_zero_ptr_deref(e1,&ptr_type,&is_fat, &elt_type)) {
+      zero_ptr_assign_to_c(nv, e, e1, popt, e2, ptr_type, is_fat, elt_type);
+      return;
+    } 
     // See if e1 is a polymorphic field (i.e., is an instantiated type
     // variable) -- if so, coerce e2 to void*.
     bool e1_poly    = is_poly_project(e1);
@@ -1351,36 +1600,46 @@ static void exp_to_c(env_t nv, exp_t e) {
     type_t  e2_old_typ = e2->topt->v;
     exp_to_c(nv,e1); 
     exp_to_c(nv,e2);
-    // special case for pointer arithmetic of t ? types
+    // special case for pointer arithmetic of t ? or zero-terminated types
     bool done = false;
     if(popt != NULL) {
       type_t elt_typ = VoidType;
       if(is_tagged_pointer_typ_elt(old_typ,&elt_typ)) {
-	_ change;
-	switch(popt->v) {
-	case Plus:  change = e2; break;
-	case Minus: change = prim1_exp(Minus,e2,DL); break;
-	default:    toc_impos("bad t ? pointer arithmetic");
-	}
-	done = true;
-	// FIX: Is e1 definitely still an lvalue? Probably not!!
-	e->r = fncall_exp(_tagged_arr_inplace_plus_e,
-			  list(address_exp(e1,DL),
-			       sizeoftyp_exp(typ_to_c(elt_typ),DL),
-			       change), DL)->r;
+        _ change;
+        switch(popt->v) {
+        case Plus:  change = e2; break;
+        case Minus: change = prim1_exp(Minus,e2,DL); break;
+        default:    toc_impos("bad t ? pointer arithmetic");
+        }
+        done = true;
+        // FIX: Is e1 definitely still an lvalue? Probably not!!
+        e->r = fncall_exp(_tagged_arr_inplace_plus_e,
+                          list(address_exp(e1,DL),
+                               sizeoftyp_exp(typ_to_c(elt_typ),DL),
+                               change), DL)->r;
+      } else if (is_zero_pointer_typ_elt(old_typ,&elt_typ)) {
+        // We're doing x += e where x is a zero-terminated pointer.
+        // Make sure we don't run off the end.
+        switch (popt->v) {
+        case Plus: 
+          done = true;
+          e->r = fncall_exp(_zero_arr_inplace_plus_e,list(e1,e2),DL)->r;
+          break;
+        default: toc_impos("bad zero-terminated pointer arithmetic");
+        }
       }
     }
     if(!done) {
       // this cast is necessary to avoid gcc warnings
       if (e1_poly) 
-	e2->r = cast_exp(void_star_typ(), new_exp(e2->r, DL), DL)->r;
+        e2->r = cast_exp(void_star_typ(), new_exp(e2->r, DL), DL)->r;
       // The typechecker guarantees that e1 starts out as an lvalue, but
       // the translation might have to insert casts, NULL checks,
       // declarations of temps, bound checks, etc.  If so we look into e1,
       // find the lvalue, and put the assignment there.
       if (!is_lvalue(e1)) {
-	lvalue_assign(e1,NULL,assignop_lvalue,new{$(popt,e2)});
-	e->r = e1->r;
+        lvalue_assign(e1,NULL,assignop_lvalue,new{$(popt,e2)});
+        e->r = e1->r;
       }
     }
     break;
@@ -1412,7 +1671,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_t  argvexp  = var_exp(argv,DL);
       exp_t  num_varargs_exp = uint_exp(num_varargs,DL);
       type_t cva_type = typ_to_c(vai->type);
-      type_t arr_type = new ArrayType(cva_type,mt_tq,num_varargs_exp);
+      type_t arr_type = array_typ(cva_type,mt_tq,num_varargs_exp,false_conref);
 
       int num_args     = List::length(es);
       int num_normargs = num_args - num_varargs;
@@ -1544,8 +1803,10 @@ static void exp_to_c(env_t nv, exp_t e) {
       let n2 = conref_def(false,p2.nullable);
       let b1 = conref_def(bounds_one,p1.bounds);
       let b2 = conref_def(bounds_one,p2.bounds);
+      let zt1 = conref_def(false,p1.zero_term);
+      let zt2 = conref_def(false,p2.zero_term);
       switch($(b1,b2)) {
-      case $(&Upper_b(_), &Upper_b(_)):
+      case $(&Upper_b(b1), &Upper_b(b2)):
 	if(n1 && !n2) {
 	  if(nv->toplevel)
 	    unimp("can't do NULL-check conversion at top-level");
@@ -1554,32 +1815,84 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  e->r = cast_exp(*t,fncall_exp(_check_null_e,
 					new List(e1,NULL),DL),DL)->r;
 	}
+        // FIX: the type-checker doesn't currently allow the case
+        // where b1 > b2, but this can be allowed for zero-terminated
+        // arrays (since the true length isn't known.)  Of course,
+        // this obligates a run-time check.
 	break;
       case $(&Upper_b(e2), Unknown_b):
-	if(nv->toplevel)
+	if(nv->toplevel) {
 	  // can't use a function at top-level and don't want macros
+          if (zt1 && !p2.tq.q_const && !zt2) {
+            // If p2 is not zero-terminated and not const, then we subtract
+            // one from the size so that no one can write the last location.
+            e2 = prim2_exp(Minus,e2,uint_exp(1,DL),DL);
+          }
 	  e->r = make_toplevel_tagged_arr(old_t2,e2,e1)->r;
-	else
-	  // cast from t*{n} or t@{n} to t ? -- build the t ? struct
-	  e->r = fncall_exp(_tag_arr_e,
-			    list(e1, sizeoftyp_exp(typ_to_c(p2.elt_typ),DL),
-				 e2), DL)->r;
+	} else {
+	  // cast from t*{n} or t@{n} to t ? 
+          if (zt1) {
+            // if p1 is zero-terminated then calculate the size dynamically:
+            //   ({ t *x = e1;
+            //      _tag_arr(x, sizeof(t), _get_zero_arr_size(x,n));
+            //   })
+            let x = temp_var();
+            let x_exp = var_exp(x,DL);
+            let arg3 = fncall_exp(_get_zero_arr_size_e,list(x_exp,e2),DL);
+            if (!zt2 && !p2.tq.q_const) {
+              // If p2 is not zero-terminated and not const, then we subtract
+              // one from the size so that no one can write the last location.
+              arg3 = prim2_exp(Minus,arg3,uint_exp(1,DL),DL);
+            }
+            let arg2 = sizeoftyp_exp(typ_to_c(p2.elt_typ),DL);
+            let tg_exp = fncall_exp(_tag_arr_e,list(x_exp,arg2,arg3),DL);
+            let s = exp_stmt(tg_exp,DL);
+            s = declare_stmt(x,typ_to_c(old_t2),e1,s,DL);
+            e->r = stmt_exp(s,DL)->r;
+          } else {
+            // build the t ? struct
+            e->r = fncall_exp(_tag_arr_e,
+                              list(e1, sizeoftyp_exp(typ_to_c(p2.elt_typ),DL),
+                                   e2), DL)->r;
+          }
+        }
 	break;
       case $(Unknown_b, &Upper_b(e2)):
 	if(nv->toplevel)
 	  unimp("can't coerce t? to t* or t@ at the top-level");
+        // When we have t?ZEROTERM and are casting to 
+        // t*{e2} or t@{e2} *without* the ZEROTERM, then we
+        // can't allow e2 to be the actual size of the array -- 
+        // it needs to be one less to ensure that you can't
+        // overwrite the trailing 0.  We achieve this by 
+        // incrementing e2 by one.  That is if x has type t?Z,
+        // and we're casting it to t@{2}, then we'd better check
+        // that the size is at least 2+1=3.
+        let new_e2 = e2;
+        if (zt1 && !zt2) {
+          new_e2 = add_exp(e2,uint_exp(1,NULL),NULL);
+        }
 	// cast from t ? to t* or t@ -- run-time check: 
-	// for t*: (t *)_untag_arr(e1, sizeof(t), e2)
-	// for t@: (t *)_check_null(_untag_arr(e1, sizeof(t), e2))
+	// for t*: (t *)_untag_arr(e1, sizeof(t), new_e2)
+	// for t@: (t *)_check_null(_untag_arr(e1, sizeof(t), new_e2))
 	let ptr_exp = fncall_exp(_untag_arr_e,
 				 list(e1,sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
-				      e2), DL);
+				      new_e2), DL);
 	if(n2)
 	  ptr_exp->r = fncall_exp(_check_null_e,
 				  new List(copy_exp(ptr_exp), NULL), DL)->r;
 	e->r = cast_exp(*t, ptr_exp, DL)->r;
 	break;
-      default: break;
+      case $(Unknown_b, Unknown_b):
+        // If p1 is zero-terminated and p2 is not, then p2 had better
+        // be const or else we have to decrement its size by 1.
+        if (zt1 && !zt2 && !p2.tq.q_const) {
+          if (nv->toplevel)
+            unimp("can't coerce a ?ZEROTERM to a non-const ?NOZEROTERM at toplevel");
+          e->r = fncall_exp(_tagged_ptr_decrease_size_e,
+                            list(e1,sizeoftyp_exp(typ_to_c(p1.elt_typ),DL),
+                                 uint_exp(1,DL)),DL)->r;
+        }
       }
       break;
     case $(&PointerType(p1), &IntType(_,_)):
@@ -1619,6 +1932,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     }
     break;
   case &New_e(rgnopt,e1):
+    // FIX: need to deal with zero-terminated arrays
     if (nv->toplevel)
       unimp("%s: new at top-level", Position::string_of_segment(e1->loc));
     switch (e1->r) {
@@ -1631,7 +1945,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       let s = init_array(nv, xexp, dles0, exp_stmt(xexp,DL));
       type_t old_elt_typ;
       switch (compress(old_typ)) {
-      case &PointerType(PtrInfo{et,_,_,tq,_}):
+      case &PointerType(PtrInfo{et,_,_,tq,_,zt}):
 	old_elt_typ = et; break;
       default:
 	old_elt_typ =
@@ -1653,8 +1967,10 @@ static void exp_to_c(env_t nv, exp_t e) {
       e->r = stmt_exp(declare_stmt(x,ptr_typ,e1,s,DL),DL)->r;
       break;
 
-    case &Comprehension_e(vd,e1,e2):
-      // Drop the "tagged_ptr_t" struct stuff when type is a fixed-size array
+    case &Comprehension_e(vd,e1,e2,zero_term):
+      // Drop the "tagged_ptr_t" struct stuff when type is a fixed-size array.
+      // Slight twist for zero-terminated arrays -- must allocate one more
+      // element and initialize the last element to 0.
       // ({ unsigned int max = e1;
       //    t *a = (t*)malloc(sizeof(t)*max);
       //    struct tagged_arr b = _tag_arr(a);
@@ -1663,7 +1979,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       //    b; })
       bool is_tagged_ptr = false;
       switch (compress(old_typ)) {
-      case &PointerType(PtrInfo{et,_,_,tq,b}):
+      case &PointerType(PtrInfo{et,_,_,tq,b,zt}):
         is_tagged_ptr = (conref_def(bounds_one,b) == Unknown_b);
         break;
       default: toc_impos("exp_to_c: comprehension not an array type");
@@ -1674,8 +1990,12 @@ static void exp_to_c(env_t nv, exp_t e) {
       type_t elt_typ = typ_to_c(old_elt_typ);
       type_t ptr_typ = cstar_typ(elt_typ,mt_tq);
       exp_to_c(nv,e1);
+      let malloc_size_exp = var_exp(max,DL);
+      // add one to max for zero-terminated arrays
+      if (zero_term) 
+        malloc_size_exp = add_exp(malloc_size_exp,uint_exp(1,DL),DL);
       stmt_t s = init_comprehension(nv, var_exp(a,DL), vd, var_exp(max,DL), 
-                                    e2, skip_stmt_dl(), true);
+                                    e2, zero_term, skip_stmt_dl(), true);
       // FIX:  casts needed on exp_opts
       region r {
         list_t<$(qvar_t,type_t,exp_opt_t)@`r,`r> decls = 
@@ -1685,13 +2005,13 @@ static void exp_to_c(env_t nv, exp_t e) {
           ai = malloc_exp(old_elt_typ,
 			  fncall_exp(_check_times_e,
 				     list(sizeoftyp_exp(elt_typ,DL),
-					  var_exp(max,DL)), DL));
+					  malloc_size_exp), DL));
         else {
           exp_t r = (exp_t)rgnopt;
           exp_to_c(nv,r);
           ai = rmalloc_exp(r, fncall_exp(_check_times_e,
 					 list(sizeoftyp_exp(elt_typ,DL),
-					      var_exp(max,DL)), DL));
+					      malloc_size_exp), DL));
 
         }
         exp_t ainit = cast_exp(ptr_typ,ai,DL);
@@ -1701,7 +2021,8 @@ static void exp_to_c(env_t nv, exp_t e) {
           let t = typ_to_c(old_typ);
           let binit = 
 	    fncall_exp(_tag_arr_e,
-		       list(var_exp(a,DL), sizeoftyp_exp(elt_typ, DL), e1), DL);
+		       list(var_exp(a,DL), sizeoftyp_exp(elt_typ, DL), 
+                            malloc_size_exp), DL);
           decls = rnew(r) List(rnew(r) $(b,t,(exp_opt_t)binit),decls);
           s = seq_stmt(s,exp_stmt(var_exp(b,DL),DL),DL);
         } else // not a tagged array -- just return a
@@ -1748,8 +2069,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       switch(e1->r) {
       case &Cast_e(t2,e2):
 	switch($(compress(t2),compress(e2->topt->v))) {
-	case $(&PointerType(PtrInfo(arr_typ,_,_,_,bc)),
-	       &PointerType(PtrInfo(_,_,_,_,be))):
+	case $(&PointerType(PtrInfo{arr_typ,_,_,_,bc,_}),
+	       &PointerType(PtrInfo{_,_,_,_,be,_})):
 	  switch($(conref_def(bounds_one,bc),conref_def(bounds_one,be))) {
 	  case $(Unknown_b,&Upper_b(arr_sz)):
 	    exp_to_c(nv,e2);
@@ -1811,17 +2132,20 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Deref_e(e1):
     let e1_typ = compress(e1->topt->v);
     switch (e1_typ) {
-    case &PointerType(PtrInfo{t2,rgn,cr,tq,b}):
+    case &PointerType(PtrInfo{t2,rgn,cr,tq,b,zt}):
       switch (conref_def(bounds_one,b)) {
       case &Upper_b(_):
 	bool do_null_check = need_null_check(e1);
 	exp_to_c(nv,e1);
-	if (do_null_check) {
-	  // *((t *)_check_null(e))
-	  e->r = deref_exp(cast_exp(typ_to_c(e1->topt->v),
-				    fncall_exp(_check_null_e,
-					       new List(e1,NULL),DL),DL),DL)->r;
-	}
+        if (do_null_check) {
+          e1 = fncall_exp(_check_null_e,new List(e1,NULL),DL);
+        }
+        // Note that a null check is sufficient for zero-terminated arrays
+        // too, because we guarantee that there's something to read here,
+        // even if it's just a 0.  Note that writes are handled specially
+        // by the AssignOp_e case.  
+        // *((t *)_check_null(e))
+        e->r = deref_exp(cast_exp(typ_to_c(e1_typ),e1,DL),DL)->r;
 	break;
       case Unknown_b:
 	// do it as e1[0], could share all the 0's but who cares
@@ -1845,7 +2169,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     bool do_null_check = need_null_check(e1);
     exp_to_c(nv, e1);
     bool is_poly = is_poly_project(e); // decide before mutating e
-    let PtrInfo{ta,rgn,bcr,tq,b} = get_ptr_type(e1typ);
+    let PtrInfo{ta,rgn,bcr,tq,b,zt} = get_ptr_type(e1typ);
     switch (conref_def(bounds_one,b)) {
     case &Upper_b(esz):
       // the type-checker should've ensured the size is at least 1
@@ -1900,7 +2224,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	impos("unknown tuple subscript in translation to C");
       e->r = aggrmember_exp(e1,fieldname(i+1),DL)->r;
       break;
-    case &PointerType(PtrInfo{ta,rgn,bcr,tq,b}):
+    case &PointerType(PtrInfo{ta,rgn,bcr,tq,b,zt}):
       let relns = get_relns(e1);
       let in_bnds = check_bounds(relns,e1,e2);
       if(warn_bounds_checks && !in_bnds) 
@@ -1919,14 +2243,19 @@ static void exp_to_c(env_t nv, exp_t e) {
 	type_t ta2 = cstar_typ(ta1, tq);
         if (in_bnds)
 	  bounds_checks_eliminated++;
+        // check if zero terminated
+        else if (conref_def(false,zt))
+          // *((ta2)_zero_arr_plus(e1, esz, e2)
+          e->r = deref_exp(cast_exp(ta2,
+                                    fncall_exp(_zero_arr_plus_e,
+                                               list(e1,esz,e2),DL),DL),DL)->r;
 	else if(possibly_null)
 	  // *((ta2)_check_known_subscript_null(e1, esz, sizeof(ta), e2)
 	  e->r = deref_exp(cast_exp(ta2,
 				    fncall_exp(_check_known_subscript_null_e,
 					       list(e1,esz,
 						    sizeoftyp_exp(ta1,DL),
-						    e2),DL),DL),
-			   DL)->r;
+						    e2),DL),DL),DL)->r;
 	else
 	  // e1[_check_known_subscript_notnull(esz,e2)]
 	  e2->r = fncall_exp(_check_known_subscript_notnull_e,
@@ -1981,10 +2310,11 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_to_c(nv,e);
     }
     break;
-  case &Comprehension_e(vd,e1,e2):
+  case &Comprehension_e(vd,e1,e2,iszeroterm):
     // a comprehension not under a "new" -- should only be the case
     // when e1 is constant.  For now, e2 must be too...
     let $(sz,known) = Evexp::eval_const_uint_exp(e1);
+    let elt_typ = typ_to_c(e2->topt->v);
     exp_to_c(nv,e2);
     list_t<$(list_t<designator_t>,exp_t)@> es = NULL;
     // generate an "empty" array intializer to avoid giant arrays
@@ -1993,6 +2323,11 @@ static void exp_to_c(env_t nv, exp_t e) {
 	Tcutil::terr(e1->loc, "cannot determine value of constant");
       for (unsigned int i = 0; i < sz; i++)
         es = new List(new $(NULL,e2),es);
+      // for a zero-terminated comprehension, add in an implicit 0 to the end
+      if (iszeroterm) {
+        let ezero = cast_exp(elt_typ,uint_exp(0,DL),DL);
+        es = List::imp_append(es,new List{new $(NULL,ezero), NULL});
+      }
     }
     e->r = unresolvedmem_exp(NULL,es,DL)->r;
     break;
@@ -2111,6 +2446,8 @@ static void exp_to_c(env_t nv, exp_t e) {
   case &Malloc_e(MallocInfo{is_calloc,rgnopt,topt,num_elts,is_fat}): 
     type_t t_c = typ_to_c(*topt);
     exp_to_c(nv,num_elts);
+    // FIX: we shouldn't be able to calloc a zero-terminated array of
+    // size less than 1.  
     if (is_fat) {
       let x = temp_var();
       let p = temp_var();
@@ -2805,7 +3142,7 @@ static void fndecl_to_c(env_t nv, fndecl_t f) {
   }
   if (f->cyc_varargs && f->cyc_varargs->name != NULL) {
     let VarargInfo{n,tq,t,i} = *f->cyc_varargs;
-    let t2 = typ_to_c(tagged_typ(t,HeapRgn,tq));// region irrelevant
+    let t2 = typ_to_c(tagged_typ(t,HeapRgn,tq,false_conref));// region irrelevant
     let x2 = new $((nmspace_t)Loc_n,n->v);
     f->args = List::append(f->args,new List(new $(n->v,tq,t2),NULL));
     nv = add_varmap(nv,x2,var_exp(x2,DL));
@@ -2947,13 +3284,17 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
     tunionfield_t f  = fs->hd;
     stringptr_t fn = (*f->name)[1];
     let sz_exp  = uint_exp((*fn).size+4,DL);
-    let tag_typ = new ArrayType(char_typ,mt_tq,sz_exp);
+    let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref);
     // FIX: making bad alignment and pointer-size assumptions!
     switch (Dict::lookup_opt(xtunion_fields_so_far->v,f->name)) {
     case NULL:
       exp_opt_t initopt = NULL;
       if (f->sc != Extern) {
-	initopt = string_exp(aprintf("%c%c%c%c%s",'\0','\0','\0','\0',*fn),DL);
+        // JGMFIX: bug -- the printf functions fail miserably when we use
+        // a 0 constants here because it thinks the 0 should be cast to a
+        // NULL string.
+        char zero = '\0';
+	initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),DL);
       }
       let tag_decl = new_vardecl(f->name, tag_typ, initopt);
       tag_decl->sc = f->sc;
@@ -2985,7 +3326,11 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
 
     case &Opt(false):
       if (f->sc != Extern) {
-	let initopt = string_exp(aprintf("%c%c%c%c%s",'\0','\0','\0','\0',*fn),
+        // JGMFIX: bug -- the printf functions fail miserably when we use
+        // a 0 constants here because it thinks the 0 should be cast to a
+        // NULL string.
+        char zero = '\0';
+	let initopt = string_exp(aprintf("%c%c%c%c%s",zero,zero,zero,zero,*fn),
 				 DL);
 	let tag_decl = new_vardecl(f->name, tag_typ, initopt);
 	tag_decl->sc = f->sc;
@@ -3008,15 +3353,19 @@ static void enumdecl_to_c(env_t nv,enumdecl_t ed) {
 // we've decided let x = e and t x = e have different rules on e's
 // environment, so we make the caller pass us an environment.
 static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
-  vd->type = typ_to_c_array(vd->type);
+  type_t old_typ = vd->type;
+  vd->type = typ_to_c_array(old_typ);
+  // Fat pointers can't be declared with "register" scope
+  if (vd->sc == Register && is_tagged_pointer_typ(old_typ)) 
+    vd->sc = Public;
   stmt_to_c(body_nv,s);
   if(vd->initializer != NULL) {
     exp_t init = (exp_t)vd->initializer;
     switch(init->r) {
-    case &Comprehension_e(vd2,e1,e2):
+    case &Comprehension_e(vd2,e1,e2,zt):
       vd->initializer = NULL;
       s->r = init_comprehension(init_nv, var_exp(vd->name, DL), vd2, e1, e2,
-				new_stmt(s->r,DL), false)->r;
+                                zt, new_stmt(s->r,DL), false)->r;
       break;
     default:
       if (vd->sc == Static) {

@@ -272,7 +272,7 @@ static $(flow_t,flow_t) splitzero(analenv_t env, flow_t inflow, flow_t outflow,
 static $(flow_t,absRval_t) anal_derefR(analenv_t env, flow_t inflow,
 				       flow_t f, exp_t e, absRval_t r) {
   switch(Tcutil::compress(e->topt->v)) {
-  case &PointerType(PtrInfo(elttype,_,_,_,bd)):
+  case &PointerType(PtrInfo(elttype,_,_,_,bd,zt)):
     switch(f) {
     case BottomFL: return $(f,typ_to_absrval(elttype,unknown_all));
     case &ReachableFL(outdict,relns):
@@ -466,7 +466,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     // we just just "use" each argument except for the "initializes" attribute
     list_t<int> init_params = NULL;
     switch(Tcutil::compress(e1->topt->v)) {
-    case &PointerType(PtrInfo(t,_,_,_,_)):
+    case &PointerType(PtrInfo(t,_,_,_,_,_)):
       switch(Tcutil::compress(t)) {
       case &FnType(FnInfo(_,_,_,_,_,_,_,atts)):
 	for(; atts != NULL; atts = atts->tl)
@@ -498,7 +498,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
 	  switch(rvals->hd) {
 	  case &AddressOf(p): 
 	    switch(Tcutil::compress(es->hd->topt->v)) {
-	    case &PointerType(PtrInfo(t,_,_,_,_)):
+	    case &PointerType(PtrInfo(t,_,_,_,_,_)):
 	      ans_d = assign_place(es->hd->loc, ans_d, env->all_changed,
 				   p, typ_to_absrval(t,esc_all));
 	      break;
@@ -590,7 +590,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     let $(f1,r1) = anal_Rexp(env,inflow,e1);
     let $(f2,r2) = anal_derefR(env,inflow,f1,e1,r1);
     switch(Tcutil::compress(e1->topt->v)) {
-    case &PointerType(PtrInfo(t2,_,_,_,_)):
+    case &PointerType(PtrInfo{t2,_,_,_,_,_}):
       if(is_union_type(t2))
 	return $(f2,typ_to_absrval(e->topt->v,unknown_all)); 
       break;
@@ -645,7 +645,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
   case &Tunion_e(es,_,_): fallthru(es); // NULL case handled above
   case &Tuple_e(es):
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,es);
-    aggrdict_t aggrdict = Dict::empty(zstrptrcmp);
+    aggrdict_t aggrdict = Dict::empty(strptrcmp);
     for(int i=0; rvals != NULL; rvals = rvals->tl, ++i)
       aggrdict = Dict::insert(aggrdict, fieldname(i), rvals->hd);
     return $(f, new Aggregate(aggrdict));
@@ -653,7 +653,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
   case &AnonStruct_e(_,des): fallthru(des);
   case &Struct_e(_,_,des,_): // FIX: avoid more allocation
     let $(f,rvals) = anal_unordered_Rexps(env,inflow,map(Core::snd,des));
-    aggrdict_t aggrdict = Dict::empty(zstrptrcmp);
+    aggrdict_t aggrdict = Dict::empty(strptrcmp);
     for(int i=0; rvals != NULL; rvals = rvals->tl, des = des->tl, ++i)
       for(_ ds = (*des->hd)[0]; ds != NULL; ds = ds->tl)
 	switch (ds->hd) {
@@ -669,7 +669,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
       outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
     return $(outflow,typ_to_absrval(e->topt->v,unknown_all));
 
-  case &Comprehension_e(vd,e1,e2): 
+  case &Comprehension_e(vd,e1,e2,zt): 
 
     let $(f1,r1) = anal_Rexp(env,inflow,e1);
     switch(f1) {
@@ -784,7 +784,7 @@ static $(flow_t,absLval_t) anal_derefL(analenv_t env, flow_t inflow, flow_t f,
 				       exp_t e, absRval_t r, 
 				       list_t<field_name_t,`H> flds) {
   switch(Tcutil::compress(e->topt->v)) {
-  case &PointerType(PtrInfo(elttype,_,_,_,bd)):
+  case &PointerType(PtrInfo{elttype,_,_,_,bd,zt}):
     switch(f) {
     case BottomFL: return $(f,UnknownL);
     case &ReachableFL(outdict,relns):
@@ -1343,13 +1343,16 @@ static void check_fun(fndecl_t fd) {
 	}
 	let vd = List::nth(fd->param_vardecls->v,j-1);
 	switch(Tcutil::compress(vd->type)) {
-	case &PointerType(PtrInfo(t,_,nullable,_,bd)):
+	case &PointerType(PtrInfo(t,_,nullable,_,bd,zt)):
 	  if(conref_val(nullable))
 	    Tcutil::terr(loc, "initializes attribute not allowed on "
 			 "nullable pointers");
 	  if(!Tcutil::is_bound_one(bd))
 	    Tcutil::terr(loc, "initializes attribute allowed only on pointers"
 			 " of size 1");
+          if(conref_def(false,zt))
+	    Tcutil::terr(loc, "initializes attribute allowed only on pointers"
+			 " to non-zero-terminated arrays");
 	  let r = new InitParam(j,t);
 	  let rp = new Place(r,NULL);
 	  d = Dict::insert(d,r,typ_to_absrval(t,esc_none));

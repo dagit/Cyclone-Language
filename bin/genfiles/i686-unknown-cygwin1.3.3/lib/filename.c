@@ -192,6 +192,59 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
+// Decrease the upper bound on a fat pointer by numelts where sz is
+// the size of the pointer's type.  Note that this can't be a macro
+// if we're to get initializers right.
+static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
+                                                    unsigned int sz,
+                                                    unsigned int numelts) {
+  x.last_plus_one -= sz * numelts; 
+  return x; 
+}
+
+// Add i to zero-terminated pointer x.  Checks for x being null and
+// ensures that x[0..i-1] are not 0.
+#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
+  typedef _czs_tx = (*orig_x); \
+  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
+  unsigned int _czs_sz = (orig_sz); \
+  int _czs_i = (orig_i); \
+  unsigned int _czs_temp; \
+  if ((_czs_x) == NULL) _throw_null(); \
+  if (_czs_i < 0) _throw_arraybounds(); \
+  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
+    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
+  _czs_x+_czs_i; })
+
+// Calculates the number of elements in a zero-terminated, thin array.
+// If non-null, the array is guaranteed to have orig_offset elements.
+#define _get_zero_arr_size(orig_x,orig_offset) ({ \
+  typedef _gres_tx = (*orig_x); \
+  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
+  unsigned int _gres_offset = (orig_offset); \
+  unsigned int _gres = 0; \
+  if (_gres_x != NULL) { \
+     _gres = _gres_offset; \
+     _gres_x += _gres_offset - 1; \
+     while (*_gres_x != 0) { _gres_x++; _gres++; } \
+  } _gres; })
+
+// Does in-place addition of a zero-terminated pointer (x += e and ++x).  
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+
+// Does in-place increment of a zero-terminated pointer (e.g., x++).
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  _zap_tx *_zap_res = *_zap_x; \
+  *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
+  _zap_res; })
+  
 //// Allocation
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
@@ -265,42 +318,55 @@ tl;};extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct
 _tagged_arr Cyc_Std_strconcat(struct _tagged_arr,struct _tagged_arr);struct
 _tagged_arr Cyc_Std_substring(struct _tagged_arr,int ofs,unsigned int n);struct
 _tagged_arr Cyc_Filename_concat(struct _tagged_arr s1,struct _tagged_arr s2){return
-Cyc_Std_strconcat(s1,(struct _tagged_arr)Cyc_Std_strconcat(_tag_arr("/",sizeof(
-char),2),s2));}struct _tagged_arr Cyc_Filename_chop_extension(struct _tagged_arr
+Cyc_Std_strconcat(s1,(struct _tagged_arr)Cyc_Std_strconcat(({const char*_tmp0="/";
+_tag_arr(_tmp0,sizeof(char),_get_zero_arr_size(_tmp0,2));}),s2));}struct
+_tagged_arr Cyc_Filename_chop_extension(struct _tagged_arr filename){int i=(int)(
+_get_arr_size(filename,sizeof(char))- 1);while(i >= 0?*((const char*)
+_check_unknown_subscript(filename,sizeof(char),i))!= '.': 0){-- i;}if(i < 0)(int)
+_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp1=_cycalloc(sizeof(*
+_tmp1));_tmp1[0]=({struct Cyc_Core_Invalid_argument_struct _tmp2;_tmp2.tag=Cyc_Core_Invalid_argument;
+_tmp2.f1=({const char*_tmp3="chop_extension";_tag_arr(_tmp3,sizeof(char),
+_get_zero_arr_size(_tmp3,15));});_tmp2;});_tmp1;}));return Cyc_Std_substring(
+filename,0,(unsigned int)i);}struct _tagged_arr Cyc_Filename_dirname(struct
+_tagged_arr filename){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);while(i
+>= 0?*((const char*)_check_unknown_subscript(filename,sizeof(char),i))!= '/': 0){
+-- i;}if(i < 0)return Cyc_Core_new_string(0);return Cyc_Std_substring(filename,0,(
+unsigned int)i);}struct _tagged_arr Cyc_Filename_basename(struct _tagged_arr
 filename){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);while(i >= 0?*((
-const char*)_check_unknown_subscript(filename,sizeof(char),i))!= '.': 0){-- i;}if(i
-< 0)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp0=_cycalloc(
-sizeof(*_tmp0));_tmp0[0]=({struct Cyc_Core_Invalid_argument_struct _tmp1;_tmp1.tag=
-Cyc_Core_Invalid_argument;_tmp1.f1=_tag_arr("chop_extension",sizeof(char),15);
-_tmp1;});_tmp0;}));return Cyc_Std_substring(filename,0,(unsigned int)i);}struct
-_tagged_arr Cyc_Filename_dirname(struct _tagged_arr filename){int i=(int)(
-_get_arr_size(filename,sizeof(char))- 1);while(i >= 0?*((const char*)
-_check_unknown_subscript(filename,sizeof(char),i))!= '/': 0){-- i;}if(i < 0)return
-Cyc_Core_new_string(0);return Cyc_Std_substring(filename,0,(unsigned int)i);}
-struct _tagged_arr Cyc_Filename_basename(struct _tagged_arr filename){int i=(int)(
-_get_arr_size(filename,sizeof(char))- 1);while(i >= 0?*((const char*)
-_check_unknown_subscript(filename,sizeof(char),i))!= '/': 0){-- i;}return Cyc_Std_substring(
-filename,i + 1,_get_arr_size(filename,sizeof(char))- (i + 1));}int Cyc_Filename_check_suffix(
-struct _tagged_arr filename,struct _tagged_arr suffix){int i=(int)(_get_arr_size(
-filename,sizeof(char))- 1);int j=(int)(_get_arr_size(suffix,sizeof(char))- 1);
-while(i >= 0?j >= 0: 0){if(*((const char*)_check_unknown_subscript(filename,sizeof(
-char),i --))!= *((const char*)_check_unknown_subscript(suffix,sizeof(char),j --)))
-return 0;}if(j >= 0)return 0;else{return 1;}}struct _tagged_arr Cyc_Filename_gnuify(
-struct _tagged_arr filename){int has_drive_name=_get_arr_size(filename,sizeof(char))
-> 1?*((const char*)_check_unknown_subscript(filename,sizeof(char),1))== ':': 0;int
-i;int j;struct _tagged_arr ans;int ans_sz;if(has_drive_name){ans_sz=(int)(
-_get_arr_size(filename,sizeof(char))+ 1);ans=({unsigned int _tmp2=(unsigned int)
-ans_sz;char*_tmp3=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp2));
-struct _tagged_arr _tmp5=_tag_arr(_tmp3,sizeof(char),(unsigned int)ans_sz);{
-unsigned int _tmp4=_tmp2;unsigned int k;for(k=0;k < _tmp4;k ++){_tmp3[k]='\000';}}
-_tmp5;});*((char*)_check_unknown_subscript(ans,sizeof(char),0))=(*((char*)
-_check_unknown_subscript(ans,sizeof(char),1))='/');*((char*)
-_check_unknown_subscript(ans,sizeof(char),2))=*((const char*)
-_check_unknown_subscript(filename,sizeof(char),0));i=3;j=2;}else{ans_sz=(int)
-_get_arr_size(filename,sizeof(char));ans=({unsigned int _tmp6=(unsigned int)
-ans_sz;char*_tmp7=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp6));
-struct _tagged_arr _tmp9=_tag_arr(_tmp7,sizeof(char),(unsigned int)ans_sz);{
-unsigned int _tmp8=_tmp6;unsigned int k;for(k=0;k < _tmp8;k ++){_tmp7[k]='\000';}}
-_tmp9;});i=0;j=0;}while(i < ans_sz){char c=*((const char*)_check_unknown_subscript(
-filename,sizeof(char),j ++));*((char*)_check_unknown_subscript(ans,sizeof(char),i
-++))=c == '\\'?'/': c;}return ans;}
+const char*)_check_unknown_subscript(filename,sizeof(char),i))!= '/': 0){-- i;}
+return Cyc_Std_substring(filename,i + 1,_get_arr_size(filename,sizeof(char))- (i + 
+1));}int Cyc_Filename_check_suffix(struct _tagged_arr filename,struct _tagged_arr
+suffix){int i=(int)(_get_arr_size(filename,sizeof(char))- 1);int j=(int)(
+_get_arr_size(suffix,sizeof(char))- 1);while(i >= 0?j >= 0: 0){if(*((const char*)
+_check_unknown_subscript(filename,sizeof(char),i --))!= *((const char*)
+_check_unknown_subscript(suffix,sizeof(char),j --)))return 0;}if(j >= 0)return 0;
+else{return 1;}}struct _tagged_arr Cyc_Filename_gnuify(struct _tagged_arr filename){
+int has_drive_name=_get_arr_size(filename,sizeof(char))> 1?*((const char*)
+_check_unknown_subscript(filename,sizeof(char),1))== ':': 0;int i;int j;struct
+_tagged_arr ans;int ans_sz;if(has_drive_name){ans_sz=(int)(_get_arr_size(filename,
+sizeof(char))+ 1);ans=({unsigned int _tmp4=(unsigned int)ans_sz;char*_tmp5=(char*)
+_cycalloc_atomic(_check_times(sizeof(char),_tmp4 + 1));struct _tagged_arr _tmp7=
+_tag_arr(_tmp5,sizeof(char),_tmp4 + 1);{unsigned int _tmp6=_tmp4;unsigned int k;
+for(k=0;k < _tmp6;k ++){_tmp5[k]='\000';}_tmp5[_tmp6]=(char)0;}_tmp7;});({struct
+_tagged_arr _tmp8=_tagged_arr_plus(ans,sizeof(char),0);char _tmp9=*((char*)
+_check_unknown_subscript(_tmp8,sizeof(char),0));char _tmpD=({struct _tagged_arr
+_tmpA=_tagged_arr_plus(ans,sizeof(char),1);char _tmpB=*((char*)
+_check_unknown_subscript(_tmpA,sizeof(char),0));char _tmpC='/';if(_get_arr_size(
+_tmpA,sizeof(char))== 1?_tmpB == '\000'?_tmpC != '\000': 0: 0)_throw_arraybounds();*((
+char*)_tmpA.curr)=_tmpC;});if(_get_arr_size(_tmp8,sizeof(char))== 1?_tmp9 == '\000'?
+_tmpD != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp8.curr)=_tmpD;});({struct
+_tagged_arr _tmpE=_tagged_arr_plus(ans,sizeof(char),2);char _tmpF=*((char*)
+_check_unknown_subscript(_tmpE,sizeof(char),0));char _tmp10=*((const char*)
+_check_unknown_subscript(filename,sizeof(char),0));if(_get_arr_size(_tmpE,
+sizeof(char))== 1?_tmpF == '\000'?_tmp10 != '\000': 0: 0)_throw_arraybounds();*((
+char*)_tmpE.curr)=_tmp10;});i=3;j=2;}else{ans_sz=(int)_get_arr_size(filename,
+sizeof(char));ans=({unsigned int _tmp11=(unsigned int)ans_sz;char*_tmp12=(char*)
+_cycalloc_atomic(_check_times(sizeof(char),_tmp11 + 1));struct _tagged_arr _tmp14=
+_tag_arr(_tmp12,sizeof(char),_tmp11 + 1);{unsigned int _tmp13=_tmp11;unsigned int k;
+for(k=0;k < _tmp13;k ++){_tmp12[k]='\000';}_tmp12[_tmp13]=(char)0;}_tmp14;});i=0;j=
+0;}while(i < ans_sz){char c=*((const char*)_check_unknown_subscript(filename,
+sizeof(char),j ++));({struct _tagged_arr _tmp15=_tagged_arr_plus(ans,sizeof(char),i
+++);char _tmp16=*((char*)_check_unknown_subscript(_tmp15,sizeof(char),0));char
+_tmp17=c == '\\'?'/': c;if(_get_arr_size(_tmp15,sizeof(char))== 1?_tmp16 == '\000'?
+_tmp17 != '\000': 0: 0)_throw_arraybounds();*((char*)_tmp15.curr)=_tmp17;});}return
+ans;}

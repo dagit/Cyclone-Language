@@ -376,6 +376,10 @@ list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
 /* The absolute file name of cyc_include.h */
 static string_t cyc_include = "";
 
+static void set_cyc_include(string_t<`H> f) {
+  cyc_include = f;
+}
+
 list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   struct Absynpp::Params params_r;
 
@@ -574,7 +578,7 @@ static string_t sh_escape_string(string_t<`H> s) {
 
   /* We'll quote all special chars by prefixing with a backslash */
   let len2 = len + single_quotes + other_special;
-  let s2 = new {for i < len2+1 : '\0'}; // add trailing NUL
+  mstring_t s2 = new {for i < len2+1 : '\0'}; // add trailing NUL
   let i = 0;
   let j = 0;
   for (; i < len; i++) {
@@ -964,6 +968,9 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-printfullevars",false,"",
                new Set_spec(&print_full_evars_r),
                "Print full information for evars (type debugging)"),
+         new $("-CI",false," <file>",
+               new String_spec(set_cyc_include),
+               "Set cyc_include.h to be <file>"),
 	 new $("-warnboundschecks", false, "",
 	       new Set_spec(&Toc::warn_bounds_checks),
 	       "Warn when bounds checks can't be eliminated"),
@@ -999,8 +1006,9 @@ int main(int argc, string_t<`H> ?`H argv) {
   let cyclone_arch_path = also_subdir(cyclone_exec_path, target_arch);
 
   /* The absolute file name is kept in a global variable */
-  if (!stop_after_cpp_r) /* don't bother if we won't translate to C */
-    cyc_include = do_find(cyclone_exec_path, "cyc_include.h");
+  /* don't bother if we won't translate to C or if set explicitly */
+  if (!stop_after_cpp_r && strlen(cyc_include) == 0)
+    cyc_include = do_find(cyclone_exec_path,"cyc_include.h");
 
   /* Process each .cyc file */
   for (let l = rev(cyclone_files); l != NULL; l = l->tl) {

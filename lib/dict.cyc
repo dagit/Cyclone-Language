@@ -465,11 +465,13 @@ static dict_t<`a,`b,`r> filter_f($(bool (@`r5)(`a,`b), region_t<`r>)@`r3 env,
 dict_t<`a,`b,`r2> rfilter(region_t<`r2> r2, bool f(`a, `b), 
                           dict_t<`a,`b,`r1> d) {
   let env = $(f, r2);
-  //return fold_c(filter_f, &env, d, rempty(r2, d -> rel));
+  return fold_c(filter_f, &env, d, rempty(r2, d -> rel));
+  /*
   dict_t<`a,`b,`r2> (@ff)($(bool (@`H)(`a,`b;regions(`a)+regions(`b)), 
                                region_t<`r2>)@`rfilter,`a,`b,
                              dict_t<`a,`b,`r2>;regions(`a)+regions(`b)+{`r2,`rfilter}) = filter_f;
   return fold_c(ff,&env,d,rempty(r2,d->rel));
+  */
 }
 dict_t<`a,`b> filter(bool f(`a, `b), dict_t<`a,`b,`r1> d) {
   return rfilter(Core::heap_region, f, d);
@@ -574,9 +576,10 @@ Iter::iter_t<$(`a,`b),{`r1,`r2}> make_iter(region_t<`r1> rgn,
 {
   List::list_t<$(`a,`b)@`r,`r> dict_list = rto_list(rgn, dict);
   int len = List::length(dict_list);
-  if(fwrite( (char?)(int?)&len, sizeof(int), 1, fp) < 1) {
+  // JGMFIX
+  // if(fwrite( (char?)(int?)&len, sizeof(int), 1, fp) < 1) {
     throw new Core::Failure("Dict::marshal: Write failure");
-  }
+    //}
   while (dict_list != NULL) {
     env = write_key(env,fp,dict_list->hd);
     env = write_val(env,fp,dict_list->hd);

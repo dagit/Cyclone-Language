@@ -158,11 +158,12 @@ static type_specifier_t type_spec(type_t t,seg_t loc) {
 // convert any array types to pointer types
 static type_t array2ptr(type_t t, bool argposn) {
   switch (t) {
-  case &ArrayType(t1,tq,eopt):
+  case &ArrayType(ArrayInfo{t1,tq,eopt,zeroterm}):
     return starb_typ(t1,
                      argposn ? new_evar(new Opt(RgnKind), NULL) : HeapRgn,
                      tq,
-                     eopt == NULL ? Unknown_b : new Upper_b((exp_t)eopt));
+                     eopt == NULL ? Unknown_b : new Upper_b((exp_t)eopt),
+                     zeroterm);
   default: return t;
   }
 }
@@ -514,10 +515,10 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
             list_t<type_modifier_t> tms) {
   if (tms==NULL) return $(tq,t,NULL,atts);
   switch (tms->hd) {
-  case Carray_mod:
-    return apply_tms(empty_tqual(),new ArrayType(t,tq,NULL),atts,tms->tl);
-  case &ConstArray_mod(e):
-    return apply_tms(empty_tqual(),new ArrayType(t,tq,e),atts,tms->tl);
+  case &Carray_mod(zeroterm):
+    return apply_tms(empty_tqual(),array_typ(t,tq,NULL,zeroterm),atts,tms->tl);
+  case &ConstArray_mod(e,zeroterm):
+    return apply_tms(empty_tqual(),array_typ(t,tq,e,zeroterm),atts,tms->tl);
   case &Function_mod(args): {
     switch (args) {
     case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po):
@@ -582,14 +583,14 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
   }
   case &Pointer_mod(ps,rgntyp,tq2): {
     switch (ps) {
-    case &NonNullable_ps(ue):
+    case &NonNullable_ps(ue,zeroterm):
       return apply_tms(tq2,atb_typ(t,rgntyp,tq,
-				   new Upper_b(ue)),atts,tms->tl);
-    case &Nullable_ps(ue):
+				   new Upper_b(ue),zeroterm),atts,tms->tl);
+    case &Nullable_ps(ue,zeroterm):
       return apply_tms(tq2,starb_typ(t,rgntyp,tq,
-				     new Upper_b(ue)),atts,tms->tl);
-    case TaggedArray_ps:
-      return apply_tms(tq2,tagged_typ(t,rgntyp,tq),atts,tms->tl);
+				     new Upper_b(ue),zeroterm),atts,tms->tl);
+    case &TaggedArray_ps(zeroterm):
+      return apply_tms(tq2,tagged_typ(t,rgntyp,tq,zeroterm),atts,tms->tl);
     }
   }
   case &Attributes_mod(loc,atts2):
@@ -831,7 +832,7 @@ using Parse;
 %token FILL CODEGEN CUT SPLICE
 %token MALLOC RMALLOC CALLOC RCALLOC
 %token REGION_T SIZEOF_T TAG_T REGION RNEW REGIONS RESET_REGION
-%token GEN
+%token GEN NOZEROTERM_kw ZEROTERM_kw
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -973,6 +974,7 @@ using Parse;
 %type <list_t<enumfield_t>> enum_declaration_list
 %type <opt_t<type_t>> optional_effect
 %type <list_t<$(type_t,type_t)@>> optional_rgn_order rgn_order
+%type <conref_t<bool>> zeroterm_qual_opt
 /* start production */
 %start prog
 %%
@@ -1491,10 +1493,11 @@ direct_declarator:
     { $$=^$(new Declarator($1,NULL)); }
 | '(' declarator ')'
     { $$=$!2; }
-| direct_declarator '[' ']'
-    { $$=^$(new Declarator($1->id,new List(Carray_mod,$1->tms)));}
-| direct_declarator '[' assignment_expression ']'
-    { $$=^$(new Declarator($1->id,new List(new ConstArray_mod($3),$1->tms)));}
+| direct_declarator '[' ']' zeroterm_qual_opt
+    { $$=^$(new Declarator($1->id,new List(new Carray_mod($4),$1->tms)));}
+| direct_declarator '[' assignment_expression ']' zeroterm_qual_opt
+    { $$=^$(new Declarator($1->id,
+                           new List(new ConstArray_mod($3,$5),$1->tms)));}
 | direct_declarator '(' parameter_type_list ')'
     { let &$(lis,b,c,eff,po) = $3;
       $$=^$(new Declarator($1->id,new List(new Function_mod(new WithTypes(lis,b,c,eff,po)),$1->tms)));
@@ -1525,7 +1528,13 @@ direct_declarator:
   { $$=^$(new Declarator(exn_name,NULL)); }
 ;
 
-/* CYC: region annotations allowed */
+zeroterm_qual_opt:
+/* empty */ { $$ = ^$(empty_conref()); }
+| ZEROTERM_kw { $$ = ^$(true_conref); }
+| NOZEROTERM_kw { $$ = ^$(false_conref); }
+;
+
+/* CYC: region annotations allowed, as is zero-termination qualifier */
 pointer:
   pointer_char rgn_opt attributes_opt
     { $$=^$(new List(new Pointer_mod($1,$2,empty_tqual()),
@@ -1542,15 +1551,17 @@ pointer:
 ;
 
 pointer_char:
-  '*' { $$=^$(new Nullable_ps(exp_unsigned_one)); }
+  '*' zeroterm_qual_opt { $$=^$(new Nullable_ps(exp_unsigned_one,$2)); }
 /* CYC: pointers that cannot be NULL */
-| '@' { $$=^$(new NonNullable_ps(exp_unsigned_one)); }
+| '@' zeroterm_qual_opt { $$=^$(new NonNullable_ps(exp_unsigned_one,$2)); }
 /* possibly NULL, with array bound given by the expresion */
-| '*' '{' assignment_expression '}' {$$=^$(new Nullable_ps($3));}
+| '*' '{' assignment_expression '}' zeroterm_qual_opt 
+  {$$=^$(new Nullable_ps($3,$5));}
 /* not NULL, with array bound given by the expresion */
-| '@' '{' assignment_expression '}' {$$=^$(new NonNullable_ps($3));}
+| '@' '{' assignment_expression '}' zeroterm_qual_opt 
+  {$$=^$(new NonNullable_ps($3,$5));}
 /* tagged pointer -- bounds maintained dynamically */
-| '?' { $$=^$(TaggedArray_ps); }
+| '?' zeroterm_qual_opt { $$=^$(new TaggedArray_ps($2)); }
 
 rgn_opt:
     /* empty */ { $$ = ^$(new_evar(new Opt(RgnKind),NULL)); }
@@ -1726,7 +1737,7 @@ array_initializer:
                            uint_exp(0,LOC(@3,@3)));
       // make the index variable const
       vd->tq = Tqual{.q_const = true, .q_volatile = false, .q_restrict = true};
-      $$=^$(new_exp(new Comprehension_e(vd, $5, $7),LOC(@1,@8)));
+      $$=^$(new_exp(new Comprehension_e(vd, $5, $7, false),LOC(@1,@8)));
     }
 ;
 
@@ -1810,14 +1821,15 @@ abstract_declarator:
 direct_abstract_declarator:
   '(' abstract_declarator ')'
     { $$=$!2; }
-| '[' ']'
-    { $$=^$(new Abstractdeclarator(new List(Carray_mod,NULL))); }
-| direct_abstract_declarator '[' ']'
-    { $$=^$(new Abstractdeclarator(new List(Carray_mod,$1->tms))); }
-| '[' assignment_expression ']'
-    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($2),NULL))); }
-| direct_abstract_declarator '[' assignment_expression ']'
-    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($3),$1->tms)));
+| '[' ']' zeroterm_qual_opt
+    { $$=^$(new Abstractdeclarator(new List(new Carray_mod($3),NULL))); }
+| direct_abstract_declarator '[' ']' zeroterm_qual_opt
+    { $$=^$(new Abstractdeclarator(new List(new Carray_mod($4),$1->tms))); }
+| '[' assignment_expression ']' zeroterm_qual_opt
+    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($2,$4),NULL)));}
+| direct_abstract_declarator '[' assignment_expression ']' zeroterm_qual_opt
+    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($3,$5),
+                                            $1->tms)));
     }
 | '(' optional_effect optional_rgn_order ')'
     { $$=^$(new Abstractdeclarator(new List(new Function_mod(new WithTypes(NULL,false,NULL,$2,$3)),NULL)));

@@ -67,12 +67,12 @@ struct I {
 
 static ienv_t new_ienv() {
   return new Ienv {
-    .aggrdecls    = Dict::empty(Std::zstrptrcmp),
-    .tuniondecls  = Dict::empty(Std::zstrptrcmp),
-    .enumdecls    = Dict::empty(Std::zstrptrcmp),
-    .typedefdecls = Dict::empty(Std::zstrptrcmp),
-    .vardecls     = Dict::empty(Std::zstrptrcmp),
-    .xtunionfielddecls = Dict::empty(Std::zstrptrcmp)
+    .aggrdecls    = Dict::empty(Std::strptrcmp),
+    .tuniondecls  = Dict::empty(Std::strptrcmp),
+    .enumdecls    = Dict::empty(Std::strptrcmp),
+    .typedefdecls = Dict::empty(Std::strptrcmp),
+    .vardecls     = Dict::empty(Std::strptrcmp),
+    .xtunionfielddecls = Dict::empty(Std::strptrcmp)
   };
 }
 
@@ -121,9 +121,9 @@ i_t final() {
 					     new List(new $(NULL, empty_tqual(),
 							    tagged_typ(tagged_typ(char_typ,
 										  HeapRgn,
-										  empty_tqual()),
+										  empty_tqual(),false_conref),
 								       HeapRgn,
-								       empty_tqual())),
+								       empty_tqual(),false_conref)),
 						      NULL)),
 				    false, NULL, NULL, NULL),
 		       NULL);
@@ -270,8 +270,8 @@ static list_t<var_t> get_abs_ns(tunion Nmspace ns) {
 
 static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name, type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo(t,_,_,_,_)): fallthru(t);
-  case &ArrayType(t,_,_): fallthru(t);
+  case &PointerType(PtrInfo{t,_,_,_,_,_}): fallthru(t);
+  case &ArrayType(ArrayInfo{t,_,_,_}): fallthru(t);
   case &TypedefType(_,_,_, &Opt(t)):
     return check_public_type(ae, seen, obj, name, t);
 
@@ -923,13 +923,13 @@ opt_t<Dict::dict_t<var_t, `a>> disj_merge_dict(Dict::dict_t<var_t, `a,`H> dic1,
 
 struct Ienv * disj_merge_ienv(ienv_t ie1, ienv_t ie2, string_t<`H> *`H msg) {
   let r1 = compat_merge_dict(ie1->aggrdecls, ie2->aggrdecls, 
-			     Dict::empty(zstrptrcmp),
+			     Dict::empty(strptrcmp),
 			     Tcdecl::merge_aggrdecl, "type", msg);
   let r2 = disj_merge_dict(ie1->tuniondecls,ie2->tuniondecls,"[x]tunion",msg);
   let r3 = disj_merge_dict(ie1->enumdecls, ie2->enumdecls, "enum", msg);
   /* special case for typedefs */
   let r4 = compat_merge_dict(ie1->typedefdecls, ie2->typedefdecls, 
-			     Dict::empty(zstrptrcmp),
+			     Dict::empty(strptrcmp),
 			     Tcdecl::merge_typedefdecl, "typedef", msg);
   let r5 = disj_merge_dict(ie1->vardecls, ie2->vardecls, "variable", msg);
   let r6 = disj_merge_dict(ie1->xtunionfielddecls, ie2->xtunionfielddecls,

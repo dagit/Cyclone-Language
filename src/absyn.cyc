@@ -33,12 +33,12 @@ namespace Absyn {
 
 // return a negative, zero, or positive int according to whether the
 // first string list is less than, equal to, or greater than the second 
-static int zstrlist_cmp(list_t<stringptr_t> ss1, list_t<stringptr_t> ss2) {
-  return list_cmp(zstrptrcmp,ss1,ss2);
+static int strlist_cmp(list_t<stringptr_t> ss1, list_t<stringptr_t> ss2) {
+  return list_cmp(strptrcmp,ss1,ss2);
 }
 int varlist_cmp(list_t<var_t> vs1, list_t<var_t> vs2) {
   if((int)vs1==(int)vs2) return 0;
-  return zstrlist_cmp(vs1,vs2);
+  return strlist_cmp(vs1,vs2);
 }
 int qvar_cmp(qvar_t q1, qvar_t q2) {
   let n1 = (*q1)[0];
@@ -47,7 +47,7 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
   case $(Loc_n,     Loc_n): break;
   case $(&Rel_n(x1),&Rel_n(x2)): fallthru(x1,x2);
   case $(&Abs_n(x1),&Abs_n(x2)):
-    int i = zstrlist_cmp(x1,x2);
+    int i = strlist_cmp(x1,x2);
     if (i != 0) return i;
     break;
   // we arbitrarily decide that Loc_n < Rel_n < Abs_n
@@ -56,11 +56,11 @@ int qvar_cmp(qvar_t q1, qvar_t q2) {
   case $(&Rel_n(_),_): return -1;
   case $(_,&Rel_n(_)): return 1;
   }
-  return zstrptrcmp((*q1)[1],(*q2)[1]);
+  return strptrcmp((*q1)[1],(*q2)[1]);
 }
 // WARNING: Ignores the kinds.
 int tvar_cmp(tvar_t tv1, tvar_t tv2) {
-  int i = zstrptrcmp(tv1->name,tv2->name);
+  int i = strptrcmp(tv1->name,tv2->name);
   if (i != 0) return i;
   if (tv1->identity == tv2->identity) return 0;
   if (tv1->identity != NULL && tv2->identity != NULL) 
@@ -242,10 +242,10 @@ qvar_t tunion_scanf_arg_qvar = &tunion_scanf_arg_qvar_p;
 static opt_t<type_t> string_t_opt = NULL;
 type_t string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(char_typ,rgn,empty_tqual(),Unknown_b);
+    return starb_typ(char_typ,rgn,empty_tqual(),Unknown_b,true_conref);
   else {
     if (string_t_opt == NULL) {
-      type_t t = starb_typ(char_typ,HeapRgn,empty_tqual(),Unknown_b);
+      type_t t = starb_typ(char_typ,HeapRgn,empty_tqual(),Unknown_b,true_conref);
       string_t_opt = new Opt(t);
     }
     return string_t_opt->v;
@@ -254,10 +254,10 @@ type_t string_typ(type_t rgn) {
 static opt_t<type_t> const_string_t_opt = NULL;
 type_t const_string_typ(type_t rgn) {
   if (rgn != HeapRgn)
-    return starb_typ(char_typ,rgn,const_tqual(),Unknown_b);
+    return starb_typ(char_typ,rgn,const_tqual(),Unknown_b,true_conref);
   else {
     if (const_string_t_opt == NULL) {
-      type_t t = starb_typ(char_typ,HeapRgn,const_tqual(),Unknown_b);
+      type_t t = starb_typ(char_typ,HeapRgn,const_tqual(),Unknown_b,true_conref);
       const_string_t_opt = new Opt(t);
     }
     return const_string_t_opt->v;
@@ -273,30 +273,41 @@ exp_t exp_unsigned_one = &exp_unsigned_one_v;
 static tunion Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
 tunion Bounds bounds_one = &one_bt;
 
-type_t starb_typ(type_t t, type_t r, tqual_t tq, bounds_t b) {
+type_t starb_typ(type_t t, type_t r, tqual_t tq, bounds_t b, 
+                 conref_t<bool> zeroterm) {
   return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r,
                                   .nullable = true_conref, .tq = tq, 
-                                  .bounds = new_conref(b)});
+                                  .bounds = new_conref(b),
+                                  .zero_term = zeroterm});
 }
-type_t atb_typ(type_t t, type_t r, tqual_t tq, bounds_t b) {
+type_t atb_typ(type_t t, type_t r, tqual_t tq, bounds_t b,
+               conref_t<bool> zeroterm) {
   return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r, 
 				  .nullable = false_conref, .tq = tq, 
-				  .bounds = new_conref(b)});
+				  .bounds = new_conref(b),
+                                  .zero_term = zeroterm});
 }
-type_t star_typ(type_t t, type_t r, tqual_t tq) { 
-  return starb_typ(t, r, tq, bounds_one);
+type_t star_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) { 
+  return starb_typ(t, r, tq, bounds_one, zeroterm);
 }
 type_t cstar_typ(type_t t, tqual_t tq) { 
-  return starb_typ(t, HeapRgn, tq, bounds_one);
+  return starb_typ(t, HeapRgn, tq, bounds_one, false_conref);
 }
-type_t at_typ(type_t t, type_t r, tqual_t tq) {
-  return atb_typ(t, r, tq, bounds_one);
+type_t at_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
+  return atb_typ(t, r, tq, bounds_one, zeroterm);
 }
-type_t tagged_typ(type_t t, type_t r, tqual_t tq) {
+type_t tagged_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
   return new PointerType(PtrInfo {.elt_typ = t, .rgn_typ = r, 
 				     .nullable = true_conref, .tq = tq,
-				     .bounds = new_conref(Unknown_b) });
+				     .bounds = new_conref(Unknown_b),
+                                     .zero_term = zeroterm});
 }
+
+type_t array_typ(type_t elt_type, tqual_t tq, exp_opt_t num_elts, 
+                 conref_t<bool> zero_term) {
+  return new ArrayType(ArrayInfo{elt_type,tq,num_elts,zero_term});
+}
+
 
 // FILE
 static opt_t<type_t> file_t_opt = NULL;
@@ -314,7 +325,7 @@ type_t file_typ() {
     typedef_name_t file_t_name = new $(new Abs_n(list(st)), sf);
     aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL);
     type_t file_struct_typ = new AggrType(AggrInfo(new KnownAggr(new sd),NULL));
-    file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual()));
+    file_t_opt = new Opt(at_typ(file_struct_typ, HeapRgn, empty_tqual(), false_conref));
   }
   return file_t_opt->v;
 }
@@ -322,12 +333,12 @@ type_t file_typ() {
 static opt_t<type_t> void_star_t_opt = NULL;
 type_t void_star_typ() {
   if (void_star_t_opt == NULL)
-    void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual()));
+    void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual(),false_conref));
   return void_star_t_opt->v;
 }
 opt_t<type_t> void_star_typ_opt() {
   if (void_star_t_opt == NULL)
-    void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual()));
+    void_star_t_opt = new Opt(star_typ(VoidType, HeapRgn, empty_tqual(),false_conref));
   return void_star_t_opt;
 }
 static tunion Type.JoinEff empty_eff = JoinEff(NULL);
@@ -639,7 +650,7 @@ type_t function_typ(list_t<tvar_t,`H> tvs, opt_t<type_t,`H> eff_typ,
 }
 type_t pointer_expand(type_t t) {
   switch (Tcutil::compress(t)) {
-  case &FnType(_): return at_typ(t,HeapRgn,empty_tqual());
+  case &FnType(_): return at_typ(t,HeapRgn,empty_tqual(),false_conref);
   default: return t;
   }
 }
@@ -663,7 +674,7 @@ bool is_lvalue(exp_t e) {
   case &Var_e(_,&Global_b(vd)): fallthru(vd);
   case &Var_e(_,&Local_b(vd)):
     switch (Tcutil::compress(vd->type)) {
-    case &ArrayType(_,_,_): return false;
+    case &ArrayType(_): return false;
     default: return true; 
     }
   case &Var_e(_,_):    
@@ -679,7 +690,7 @@ bool is_lvalue(exp_t e) {
 
 struct Aggrfield * lookup_field(list_t<aggrfield_t> fields, var_t v) {
   for(let fs = fields; fs != NULL; fs = fs->tl)
-    if (zstrptrcmp(fs->hd->name,v) == 0)
+    if (strptrcmp(fs->hd->name,v) == 0)
       return fs->hd;
   return NULL;
 }

@@ -192,6 +192,59 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   _arr_ptr->curr += ((int)(elt_sz))*(change); \
   _ans; })
 
+// Decrease the upper bound on a fat pointer by numelts where sz is
+// the size of the pointer's type.  Note that this can't be a macro
+// if we're to get initializers right.
+static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
+                                                    unsigned int sz,
+                                                    unsigned int numelts) {
+  x.last_plus_one -= sz * numelts; 
+  return x; 
+}
+
+// Add i to zero-terminated pointer x.  Checks for x being null and
+// ensures that x[0..i-1] are not 0.
+#define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
+  typedef _czs_tx = (*orig_x); \
+  _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
+  unsigned int _czs_sz = (orig_sz); \
+  int _czs_i = (orig_i); \
+  unsigned int _czs_temp; \
+  if ((_czs_x) == NULL) _throw_null(); \
+  if (_czs_i < 0) _throw_arraybounds(); \
+  for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
+    if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
+  _czs_x+_czs_i; })
+
+// Calculates the number of elements in a zero-terminated, thin array.
+// If non-null, the array is guaranteed to have orig_offset elements.
+#define _get_zero_arr_size(orig_x,orig_offset) ({ \
+  typedef _gres_tx = (*orig_x); \
+  _gres_tx *_gres_x = (_gres_tx *)(orig_x); \
+  unsigned int _gres_offset = (orig_offset); \
+  unsigned int _gres = 0; \
+  if (_gres_x != NULL) { \
+     _gres = _gres_offset; \
+     _gres_x += _gres_offset - 1; \
+     while (*_gres_x != 0) { _gres_x++; _gres++; } \
+  } _gres; })
+
+// Does in-place addition of a zero-terminated pointer (x += e and ++x).  
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  *_zap_x = _zero_arr_plus(*_zap_x,1,(orig_i)); })
+
+// Does in-place increment of a zero-terminated pointer (e.g., x++).
+// Note that this expands to call _zero_arr_plus.
+#define _zero_arr_inplace_plus_post(x,orig_i) ({ \
+  typedef _zap_tx = (*x); \
+  _zap_tx **_zap_x = &((_zap_tx*)x); \
+  _zap_tx *_zap_res = *_zap_x; \
+  *_zap_x = _zero_arr_plus(_zap_res,1,(orig_i)); \
+  _zap_res; })
+  
 //// Allocation
 extern void* GC_malloc(int);
 extern void* GC_malloc_atomic(int);
@@ -386,13 +439,14 @@ return s1->cardinality - s2->cardinality;{struct Cyc_List_List*x1=s1->nodes;stru
 Cyc_List_List*x2=s2->nodes;int(*cmp)(void*,void*)=s1->cmp;while(x1 != 0){int diff=
 cmp((void*)x1->hd,(void*)((struct Cyc_List_List*)_check_null(x2))->hd);if(diff != 
 0)return diff;x1=x1->tl;x2=x2->tl;}return 0;}}int Cyc_Set_equals(struct Cyc_Set_Set*
-s1,struct Cyc_Set_Set*s2){return Cyc_Set_setcmp(s1,s2)== 0;}char Cyc_Set_Absent[11]="\000\000\000\000Absent";
+s1,struct Cyc_Set_Set*s2){return Cyc_Set_setcmp(s1,s2)== 0;}char Cyc_Set_Absent[11]="\000\000\000\000Absent\000";
 void*Cyc_Set_choose(struct Cyc_Set_Set*s){if(s->nodes == 0)(int)_throw((void*)Cyc_Set_Absent);
 return(void*)((struct Cyc_List_List*)_check_null(s->nodes))->hd;}int Cyc_Set_iter_f(
-struct Cyc_List_List**elts_left,void**dest){if(!((unsigned int)*elts_left))return
-0;*dest=(void*)((struct Cyc_List_List*)_check_null(*elts_left))->hd;*elts_left=((
-struct Cyc_List_List*)_check_null(*elts_left))->tl;return 1;}struct Cyc_Iter_Iter
-Cyc_Set_make_iter(struct _RegionHandle*rgn,struct Cyc_Set_Set*s){return({struct Cyc_Iter_Iter
-_tmp18;_tmp18.env=(void*)({struct Cyc_List_List**_tmp19=_region_malloc(rgn,
-sizeof(*_tmp19));_tmp19[0]=s->nodes;_tmp19;});_tmp18.next=(int(*)(void*env,void*
-dest))Cyc_Set_iter_f;_tmp18;});}
+struct Cyc_List_List**elts_left,void**dest){if(!((unsigned int)*((struct Cyc_List_List**)
+elts_left)))return 0;*((void**)dest)=(void*)((struct Cyc_List_List*)_check_null(*((
+struct Cyc_List_List**)elts_left)))->hd;*((struct Cyc_List_List**)elts_left)=((
+struct Cyc_List_List*)_check_null(*((struct Cyc_List_List**)elts_left)))->tl;
+return 1;}struct Cyc_Iter_Iter Cyc_Set_make_iter(struct _RegionHandle*rgn,struct Cyc_Set_Set*
+s){return({struct Cyc_Iter_Iter _tmp18;_tmp18.env=(void*)({struct Cyc_List_List**
+_tmp19=_region_malloc(rgn,sizeof(*_tmp19));_tmp19[0]=s->nodes;_tmp19;});_tmp18.next=(
+int(*)(void*env,void*dest))Cyc_Set_iter_f;_tmp18;});}

@@ -202,7 +202,7 @@ rule token "$(int,comment_t)*" = parse
 
     /* We'll quote all special chars by prefixing with a backslash */
     let len2 = len + single_quotes + other_special;
-    let s2 = new {for i < len2+1 : '\0'}; // add trailing NUL
+    mstring_t s2 = new {for i < len2+1 : '\0'}; // add trailing NUL
     let i = 0;
     let j = 0;
     for (; i < len; i++) {
