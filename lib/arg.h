@@ -8,11 +8,14 @@ namespace Arg {
 extern xtunion exn {extern Error, extern Bad(string)};
 
 extern tunion Spec<`e::E> {
-  Unit_spec(void (@f)(;`e)),        // Call the function with unit argument
+  Unit_spec(void (@f)(;`e)),        // Call f with unit argument
+  Flag_spec(void (@f)(string;`e)),  // Call f with flag argument
+  FlagString_spec(void (@f)(string,string;`e)),
+                                    // Call f with flag & string arguments
   Set_spec(bool@),                  // Set the reference to true
   Clear_spec(bool@),                // Set the reference to false
-  String_spec(void (@f)(string;`e)),// Call the function with a string argument
-  Int_spec(void (@f)(int;`e)),      // Call the function with an int argument
+  String_spec(void (@f)(string;`e)),// Call f with a string argument
+  Int_spec(void (@f)(int;`e)),      // Call f with an int argument
   Rest_spec(void (@f)(string;`e))   // Stop interpreting keywords and call the
                                     // function with each remaining argument
 };

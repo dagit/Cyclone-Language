@@ -21,11 +21,14 @@ using List;
 xtunion exn {Error, Bad(string)};
 
 tunion Spec<`e::E> {
-  Unit_spec(void (@f)(;`e)),        // Call the function with unit argument
+  Unit_spec(void (@f)(;`e)),        // Call f with unit argument
+  Flag_spec(void (@f)(string;`e)),  // Call f with flag argument
+  FlagString_spec(void (@f)(string,string;`e)),
+                                    // Call f with flag & string arguments
   Set_spec(bool@),                  // Set the reference to true
   Clear_spec(bool@),                // Set the reference to false
-  String_spec(void (@f)(string;`e)),// Call the function with a string argument
-  Int_spec(void (@f)(int;`e)),      // Call the function with an int argument
+  String_spec(void (@f)(string;`e)),// Call f with a string argument
+  Int_spec(void (@f)(int;`e)),      // Call f with an int argument
   Rest_spec(void (@f)(string;`e))   // Stop interpreting keywords and call the
                                     // function with each remaining argument
 };
@@ -40,7 +43,13 @@ static tunion error {
 static gspec_t<`e> lookup (glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> l, 
                            string x) {
   while (l != null) {
-    if (String::strcmp(x,(*l->hd)[0]) == 0)
+    let flag = (*l->hd)[0];
+    let len = String::strlen(flag);
+    if (len > 0 && flag[len-1] == '*') {
+      if (String::strncmp(x,(*l->hd)[0],len-1) == 0)
+        return (*l->hd)[1];
+    }
+    else if (String::strcmp(x,(*l->hd)[0]) == 0)
       return (*l->hd)[1];
     l = l->tl;
   }
@@ -103,8 +112,16 @@ void parse(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist,
       try
 	switch (action) {
 	case &Unit_spec(f)  : f();        break;
+	case &Flag_spec(f)  : f(s);       break;
 	case &Set_spec(r)   : *r = true;  break;
 	case &Clear_spec(r) : *r = false; break;
+	case &FlagString_spec(f):
+	  if (current+1 < l) {
+	    f(s,args[current+1]);
+	    ++current;
+	  } else
+	    stop(initpos, new Missing(s), speclist, errmsg);
+	  break;
 	case &String_spec(f):
 	  if (current+1 < l) {
 	    f(args[current+1]);
