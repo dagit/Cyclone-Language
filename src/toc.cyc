@@ -92,10 +92,8 @@ static string base_string = "base";
 static stringptr base_sp = (&base_string);
 static string _tagged_string_string = "_tagged_string";
 static stringptr _tagged_string_sp = (&_tagged_string_string);
-static string _tunion_struct_string = "_tunion_struct";
-static stringptr _tunion_struct_sp = (&_tunion_struct_string);
-static string _xtunion_struct_string = "_xtunion_struct";
-static stringptr _xtunion_struct_sp = (&_xtunion_struct_string);
+static string xtunion_string = "xtunion";
+static stringptr xtunion_sp = &xtunion_string;
 static string v_string = "v";
 static stringptr v_sp = (&v_string);
 static string tag_string = "tag";
@@ -2165,10 +2163,8 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
     }
     exp_t test_exp;
     if(tud->is_xtunion) {
-      exp_t e3 = cast_exp(cstar_typ(strct(_xtunion_struct_sp),mt_tq),
-			  r,DL);
-      exp_t e2 = deref_exp(e3,DL);
-      exp_t e1 = cast_exp(void_star_typ(),structmember_exp(e2,tag_sp,DL),DL);
+      exp_t e2 = cast_exp(cstar_typ(void_star_typ(),mt_tq), r,DL);
+      exp_t e1 = deref_exp(e2,DL);
       exp_t e  = var_exp(tuf->name,DL);
       test_exp = eq_exp(e1,e,DL);
       s = ifthenelse_stmt(eq_exp(e1,e,DL),
@@ -2183,9 +2179,9 @@ xlate_pat(env_t nv, type_t t, exp_t r, exp_t path, pat_t p,
 	}
       }
       exp_t max_tag_exp = uint_exp(max_tag,DL);
-      exp_t e3 = cast_exp(cstar_typ(strct(_tunion_struct_sp),mt_tq),
+      exp_t e3 = cast_exp(cstar_typ(sint_t,mt_tq),
 			  r,DL);
-      exp_t e1 = structarrow_exp(e3,tag_sp,DL);
+      exp_t e1 = deref_exp(e3,DL);
       exp_t e5 = gt_exp(cast_exp(uint_t,r,DL), max_tag_exp, DL);
       exp_t e  = var_exp(tuf->name,DL);
       test_exp = (max_tag>0) ? and_exp(e5,eq_exp(e1,e,DL),DL) : eq_exp(e1,e,DL);
@@ -2923,8 +2919,9 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
     let       sz_exp  = uint_exp((*fn).size+4,DL);
     let       tag_typ = new ArrayType(uchar_t,mt_tq,sz_exp);
     exp_opt_t initopt = null;
+    // FIX: making bad alignment and pointer-size assumptions!
     if (xd->sc != Extern && !Set::member(xtunion_fields_so_far->v,f->name))
-      initopt = string_exp(String::strconcat("\0\0\0\0",*fn),DL);
+      initopt = string_exp(xprintf("%c%c%c%c%s",0,0,0,0,*fn),DL);
     let tag_decl = new_vardecl(f->name, tag_typ, initopt);
     tag_decl->sc = xd->sc;
     result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);

@@ -599,15 +599,14 @@ struct Cyc_Interface_Ienv* f2; int f3; } ; static void Cyc_Interface_extract_ord
 struct _tuple10* env, struct _tagged_string* x, struct _tuple3* v){ struct Cyc_Interface_Ienv*
 ext=(* env).f1; struct Cyc_Interface_Ienv* pub=(* env).f2; int
 check_fun_definition=(* env).f3; void* r=(* v).f1; void* _temp53= r; void*
-_temp59; _LL55: if((( struct _tunion_struct*) _temp53)->tag == Cyc_Tcenv_VarRes){
-_LL60: _temp59=( void*)(( struct Cyc_Tcenv_VarRes_struct*) _temp53)->f1; goto
-_LL56;} else{ goto _LL57;} _LL57: goto _LL58; _LL56:{ void* _temp61= _temp59;
-struct Cyc_Absyn_Fndecl* _temp69; struct Cyc_Absyn_Vardecl* _temp71; _LL63: if((
-unsigned int) _temp61 > 1u?(( struct _tunion_struct*) _temp61)->tag == Cyc_Absyn_Funname_b:
-0){ _LL70: _temp69=( struct Cyc_Absyn_Fndecl*)(( struct Cyc_Absyn_Funname_b_struct*)
-_temp61)->f1; goto _LL64;} else{ goto _LL65;} _LL65: if(( unsigned int) _temp61
-> 1u?(( struct _tunion_struct*) _temp61)->tag == Cyc_Absyn_Global_b: 0){ _LL72:
-_temp71=( struct Cyc_Absyn_Vardecl*)(( struct Cyc_Absyn_Global_b_struct*)
+_temp59; _LL55: if(*(( int*) _temp53) == Cyc_Tcenv_VarRes){ _LL60: _temp59=(
+void*)(( struct Cyc_Tcenv_VarRes_struct*) _temp53)->f1; goto _LL56;} else{ goto
+_LL57;} _LL57: goto _LL58; _LL56:{ void* _temp61= _temp59; struct Cyc_Absyn_Fndecl*
+_temp69; struct Cyc_Absyn_Vardecl* _temp71; _LL63: if(( unsigned int) _temp61 >
+1u?*(( int*) _temp61) == Cyc_Absyn_Funname_b: 0){ _LL70: _temp69=( struct Cyc_Absyn_Fndecl*)((
+struct Cyc_Absyn_Funname_b_struct*) _temp61)->f1; goto _LL64;} else{ goto _LL65;}
+_LL65: if(( unsigned int) _temp61 > 1u?*(( int*) _temp61) == Cyc_Absyn_Global_b:
+0){ _LL72: _temp71=( struct Cyc_Absyn_Vardecl*)(( struct Cyc_Absyn_Global_b_struct*)
 _temp61)->f1; goto _LL66;} else{ goto _LL67;} _LL67: goto _LL68; _LL64: { struct
 Cyc_Absyn_Vardecl* vd=({ struct Cyc_Absyn_Vardecl* _temp73=( struct Cyc_Absyn_Vardecl*)
 GC_malloc( sizeof( struct Cyc_Absyn_Vardecl)); _temp73->sc=( void*)(( void*)
@@ -679,8 +678,8 @@ Cyc_Interface_extract_f,({ struct _tuple11* _temp93=( struct _tuple11*)
 GC_malloc( sizeof( struct _tuple11)); _temp93->f1= i; _temp93->f2=
 check_fun_definition; _temp93;}), ae); return i;} struct Cyc_Interface_T* Cyc_Interface_extract(
 struct Cyc_Dict_Dict* ae){ return Cyc_Interface_gen_extract( ae, 1);} char Cyc_Interface_Check_False[
-10u]="False"; static void Cyc_Interface_Check_is_true( int b){ if( ! b){( void)
-_throw(( void*) Cyc_Interface_Check_False);}} static void Cyc_Interface_Check_box(
+10u]="\000\000\000\000False"; static void Cyc_Interface_Check_is_true( int b){
+if( ! b){( void) _throw(( void*) Cyc_Interface_Check_False);}} static void Cyc_Interface_Check_box(
 void* x, void* y){ Cyc_Interface_Check_is_true( x == y);} static void Cyc_Interface_Check_list(
 void(* f)( void*, void*), struct Cyc_List_List* l1, struct Cyc_List_List* l2){((
 void(*)( void(* f)( void*, void*), struct Cyc_List_List* x, struct Cyc_List_List*

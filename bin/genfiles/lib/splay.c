@@ -40,10 +40,10 @@ void* left; void* right; } ; extern int Cyc_Splay_splay( int(* f)( void*, void*)
 void*, void*); static const int Cyc_Splay_LEFT= 0; static const int Cyc_Splay_RIGHT=
 1; static void Cyc_Splay_rotate_left( struct Cyc_Splay_noderef* nr){ struct Cyc_Splay_node*
 n= nr->v; void* _temp0=( void*) n->left; struct Cyc_Splay_noderef* _temp6; _LL2:
-if(( unsigned int) _temp0 > 1u?(( struct _tunion_struct*) _temp0)->tag == Cyc_Splay_Node:
-0){ _LL7: _temp6=( struct Cyc_Splay_noderef*)(( struct Cyc_Splay_Node_struct*)
-_temp0)->f1; goto _LL3;} else{ goto _LL4;} _LL4: goto _LL5; _LL3: { struct Cyc_Splay_node*
-n2= _temp6->v; struct Cyc_Splay_Node_struct* t=({ struct Cyc_Splay_Node_struct*
+if(( unsigned int) _temp0 > 1u?*(( int*) _temp0) == Cyc_Splay_Node: 0){ _LL7:
+_temp6=( struct Cyc_Splay_noderef*)(( struct Cyc_Splay_Node_struct*) _temp0)->f1;
+goto _LL3;} else{ goto _LL4;} _LL4: goto _LL5; _LL3: { struct Cyc_Splay_node* n2=
+_temp6->v; struct Cyc_Splay_Node_struct* t=({ struct Cyc_Splay_Node_struct*
 _temp9=( struct Cyc_Splay_Node_struct*) GC_malloc( sizeof( struct Cyc_Splay_Node_struct));
 _temp9[ 0]=({ struct Cyc_Splay_Node_struct _temp10; _temp10.tag= Cyc_Splay_Node;
 _temp10.f1=({ struct Cyc_Splay_noderef* _temp11=( struct Cyc_Splay_noderef*)
@@ -63,8 +63,8 @@ struct _tagged_string _temp16; _temp16.curr= _temp15; _temp16.base= _temp15;
 _temp16.last_plus_one= _temp15 + 19; _temp16;}); _temp14;}); _temp13;})); _LL1:;}
 static void Cyc_Splay_rotate_right( struct Cyc_Splay_noderef* nr){ struct Cyc_Splay_node*
 n= nr->v; void* _temp17=( void*) n->right; struct Cyc_Splay_noderef* _temp23;
-_LL19: if(( unsigned int) _temp17 > 1u?(( struct _tunion_struct*) _temp17)->tag
-== Cyc_Splay_Node: 0){ _LL24: _temp23=( struct Cyc_Splay_noderef*)(( struct Cyc_Splay_Node_struct*)
+_LL19: if(( unsigned int) _temp17 > 1u?*(( int*) _temp17) == Cyc_Splay_Node: 0){
+_LL24: _temp23=( struct Cyc_Splay_noderef*)(( struct Cyc_Splay_Node_struct*)
 _temp17)->f1; goto _LL20;} else{ goto _LL21;} _LL21: goto _LL22; _LL20: { struct
 Cyc_Splay_node* n2= _temp23->v; struct Cyc_Splay_Node_struct* t=({ struct Cyc_Splay_Node_struct*
 _temp26=( struct Cyc_Splay_Node_struct*) GC_malloc( sizeof( struct Cyc_Splay_Node_struct));
@@ -128,8 +128,8 @@ _temp65);(( void(*)( struct Cyc_Splay_noderef* nr)) Cyc_Splay_rotate_right)(
 _temp65); goto _LL84; _LL84:;} goto _LL72; _LL72:;}}}}} int Cyc_Splay_splay( int(*
 reln)( void*, void*), void* reln_first_arg, void* tree){ struct Cyc_List_List*
 path= 0; while( 1) { void* _temp89= tree; struct Cyc_Splay_noderef* _temp95;
-_LL91: if(( unsigned int) _temp89 > 1u?(( struct _tunion_struct*) _temp89)->tag
-== Cyc_Splay_Node: 0){ _LL96: _temp95=( struct Cyc_Splay_noderef*)(( struct Cyc_Splay_Node_struct*)
+_LL91: if(( unsigned int) _temp89 > 1u?*(( int*) _temp89) == Cyc_Splay_Node: 0){
+_LL96: _temp95=( struct Cyc_Splay_noderef*)(( struct Cyc_Splay_Node_struct*)
 _temp89)->f1; goto _LL92;} else{ goto _LL93;} _LL93: if( _temp89 ==( void*) Cyc_Splay_Leaf){
 goto _LL94;} else{ goto _LL90;} _LL92: { struct Cyc_Splay_node* n= _temp95->v;
 int comp= reln( reln_first_arg,( void*) n->key); if( comp == 0){(( void(*)(

@@ -591,18 +591,18 @@ _tagged_string _temp47; _temp47.curr= _temp46; _temp47.base= _temp46; _temp47.la
 _temp46 + 1; _temp47;}); _temp45;}); _temp44;}); struct Cyc_List_List* ans= 0;{
 struct _handler_cons _temp17; _push_handler(& _temp17);{ void* _temp18=( void*)
 setjmp( _temp17.handler); if( ! _temp18){ ans= f( env, tds);; _pop_handler();}
-else{ void* _temp20= _temp18; struct _tagged_string _temp30; _LL22: if(( void*)(*((
-struct _xtunion_struct*) _temp20)).tag == Cyc_Core_Impossible){ _LL31: _temp30=(
-struct _tagged_string)(( struct Cyc_Core_Impossible_struct*) _temp20)->f1; goto
-_LL23;} else{ goto _LL24;} _LL24: if( _temp20 == Cyc_Dict_Absent){ goto _LL25;}
-else{ goto _LL26;} _LL26: goto _LL27; _LL28: goto _LL29; _LL23: exn_string=(
-struct _tagged_string)({ char* _temp32=( char*)"Exception Core::Impossible";
-struct _tagged_string _temp33; _temp33.curr= _temp32; _temp33.base= _temp32;
-_temp33.last_plus_one= _temp32 + 27; _temp33;}); explain_string= _temp30; goto
-_LL21; _LL25: exn_string=( struct _tagged_string)({ char* _temp34=( char*)"Exception Dict::Absent";
-struct _tagged_string _temp35; _temp35.curr= _temp34; _temp35.base= _temp34;
-_temp35.last_plus_one= _temp34 + 23; _temp35;}); goto _LL21; _LL27: ex= _temp20;
-other_exn= 1; exn_string=( struct _tagged_string)({ char* _temp36=( char*)"Uncaught exception";
+else{ void* _temp20= _temp18; struct _tagged_string _temp30; _LL22: if(*(( void**)
+_temp20) == Cyc_Core_Impossible){ _LL31: _temp30=( struct _tagged_string)((
+struct Cyc_Core_Impossible_struct*) _temp20)->f1; goto _LL23;} else{ goto _LL24;}
+_LL24: if( _temp20 == Cyc_Dict_Absent){ goto _LL25;} else{ goto _LL26;} _LL26:
+goto _LL27; _LL28: goto _LL29; _LL23: exn_string=( struct _tagged_string)({ char*
+_temp32=( char*)"Exception Core::Impossible"; struct _tagged_string _temp33;
+_temp33.curr= _temp32; _temp33.base= _temp32; _temp33.last_plus_one= _temp32 +
+27; _temp33;}); explain_string= _temp30; goto _LL21; _LL25: exn_string=( struct
+_tagged_string)({ char* _temp34=( char*)"Exception Dict::Absent"; struct
+_tagged_string _temp35; _temp35.curr= _temp34; _temp35.base= _temp34; _temp35.last_plus_one=
+_temp34 + 23; _temp35;}); goto _LL21; _LL27: ex= _temp20; other_exn= 1;
+exn_string=( struct _tagged_string)({ char* _temp36=( char*)"Uncaught exception";
 struct _tagged_string _temp37; _temp37.curr= _temp36; _temp37.base= _temp36;
 _temp37.last_plus_one= _temp36 + 19; _temp37;}); goto _LL21; _LL29:( void)
 _throw( _temp20); _LL21:;}}} if( Cyc_Position_error_p()){ Cyc_compile_failure= 1;}

@@ -928,25 +928,25 @@ Null_Exception);} _temp369;}); Cyc_Lex_recompute_typedefs();} void Cyc_Lex_enter
 struct _tuple0* q){ struct Cyc_List_List* ns;{ void* _temp370=(* q).f1; struct
 Cyc_List_List* _temp378; struct Cyc_List_List* _temp380; _LL372: if( _temp370 ==(
 void*) Cyc_Absyn_Loc_n){ goto _LL373;} else{ goto _LL374;} _LL374: if((
-unsigned int) _temp370 > 1u?(( struct _tunion_struct*) _temp370)->tag == Cyc_Absyn_Rel_n:
-0){ _LL379: _temp378=( struct Cyc_List_List*)(( struct Cyc_Absyn_Rel_n_struct*)
-_temp370)->f1; goto _LL375;} else{ goto _LL376;} _LL376: if(( unsigned int)
-_temp370 > 1u?(( struct _tunion_struct*) _temp370)->tag == Cyc_Absyn_Abs_n: 0){
-_LL381: _temp380=( struct Cyc_List_List*)(( struct Cyc_Absyn_Abs_n_struct*)
-_temp370)->f1; goto _LL377;} else{ goto _LL371;} _LL373: ns=( struct Cyc_List_List*)({
-struct Cyc_List_List* _temp382=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp382->hd=( void*)(* q).f2; _temp382->tl= 0; _temp382;});
-goto _LL371; _LL375: _temp380= _temp378; goto _LL377; _LL377: ns=( struct Cyc_List_List*)({
-struct Cyc_List_List* _temp384=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
-x, struct Cyc_List_List* y)) Cyc_List_append)( _temp380,({ struct Cyc_List_List*
-_temp383=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp383->hd=( void*)(* q).f2; _temp383->tl= 0; _temp383;})); if( _temp384 == 0){
-_throw( Null_Exception);} _temp384;}); goto _LL371; _LL371:;}{ struct Cyc_List_List*
-ans= Cyc_Lex_get_absolute_namespace( ns); struct Cyc_List_List* imported=((
-struct Cyc_Lex_Lvis*)((( struct Cyc_Lex_Lstate*)({ struct Cyc_Core_Opt* _temp387=
-Cyc_Lex_lstate; if( _temp387 == 0){ _throw( Null_Exception);} _temp387->v;}))->lstack)->hd)->imported_namespaces;((
-struct Cyc_Lex_Lvis*)((( struct Cyc_Lex_Lstate*)({ struct Cyc_Core_Opt* _temp385=
-Cyc_Lex_lstate; if( _temp385 == 0){ _throw( Null_Exception);} _temp385->v;}))->lstack)->hd)->imported_namespaces=({
+unsigned int) _temp370 > 1u?*(( int*) _temp370) == Cyc_Absyn_Rel_n: 0){ _LL379:
+_temp378=( struct Cyc_List_List*)(( struct Cyc_Absyn_Rel_n_struct*) _temp370)->f1;
+goto _LL375;} else{ goto _LL376;} _LL376: if(( unsigned int) _temp370 > 1u?*((
+int*) _temp370) == Cyc_Absyn_Abs_n: 0){ _LL381: _temp380=( struct Cyc_List_List*)((
+struct Cyc_Absyn_Abs_n_struct*) _temp370)->f1; goto _LL377;} else{ goto _LL371;}
+_LL373: ns=( struct Cyc_List_List*)({ struct Cyc_List_List* _temp382=( struct
+Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp382->hd=( void*)(*
+q).f2; _temp382->tl= 0; _temp382;}); goto _LL371; _LL375: _temp380= _temp378;
+goto _LL377; _LL377: ns=( struct Cyc_List_List*)({ struct Cyc_List_List*
+_temp384=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct Cyc_List_List*
+y)) Cyc_List_append)( _temp380,({ struct Cyc_List_List* _temp383=( struct Cyc_List_List*)
+GC_malloc( sizeof( struct Cyc_List_List)); _temp383->hd=( void*)(* q).f2;
+_temp383->tl= 0; _temp383;})); if( _temp384 == 0){ _throw( Null_Exception);}
+_temp384;}); goto _LL371; _LL371:;}{ struct Cyc_List_List* ans= Cyc_Lex_get_absolute_namespace(
+ns); struct Cyc_List_List* imported=(( struct Cyc_Lex_Lvis*)((( struct Cyc_Lex_Lstate*)({
+struct Cyc_Core_Opt* _temp387= Cyc_Lex_lstate; if( _temp387 == 0){ _throw(
+Null_Exception);} _temp387->v;}))->lstack)->hd)->imported_namespaces;(( struct
+Cyc_Lex_Lvis*)((( struct Cyc_Lex_Lstate*)({ struct Cyc_Core_Opt* _temp385= Cyc_Lex_lstate;
+if( _temp385 == 0){ _throw( Null_Exception);} _temp385->v;}))->lstack)->hd)->imported_namespaces=({
 struct Cyc_List_List* _temp386=( struct Cyc_List_List*) GC_malloc( sizeof(
 struct Cyc_List_List)); _temp386->hd=( void*) ans; _temp386->tl= imported;
 _temp386;}); Cyc_Lex_recompute_typedefs();}} void Cyc_Lex_leave_using(){ struct

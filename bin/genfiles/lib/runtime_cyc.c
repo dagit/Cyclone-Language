@@ -12,12 +12,13 @@
 // First, definitions for things declared in cyc_include.h
 //////////////////////////////////////////////////////////
 
-char _Null_Exception_tag[15] = "Null_Exception";
+// FIX: makes alignment and pointer-size assumptions
+char _Null_Exception_tag[] = "\0\0\0\0Null_Exception";
 struct _xtunion_struct _Null_Exception_struct = { _Null_Exception_tag };
-exn Null_Exception = &_Null_Exception_struct;
-char _Match_Exception_tag[16] = "Match_Exception";
+struct _xtunion_struct * Null_Exception = &_Null_Exception_struct;
+char _Match_Exception_tag[] = "\0\0\0\0Match_Exception";
 struct _xtunion_struct _Match_Exception_struct = { _Match_Exception_tag };
-exn Match_Exception = &_Match_Exception_struct;
+struct _xtunion_struct * Match_Exception = &_Match_Exception_struct;
 
 struct _tagged_string xprintf(char *fmt, ...) {
   char my_buff[1];
@@ -95,12 +96,6 @@ void _throw(void* e) {
 }
 
 
-////////////////////////////////////////////////////////////////
-// The rest of the code is stuff declared in core.h or otherwise
-// used in core.c
-// It's taken from talc/runtime/stdlib.c
-////////////////////////////////////////////////////////////////
-
 // The C include file precore_c.h is produced (semi) automatically
 // from the Cyclone include file precore.h.
 #include "precore_c.h"
@@ -112,8 +107,8 @@ struct _tagged_string Cstring_to_string(Cstring s) {
   str.curr = str.base;
   str.last_plus_one = str.base + sz;
 
+  // Copy the string in case the C code frees it or mangles it
   while(--sz>=0)
-    // Copy the string in case the C code frees it or mangles it
     str.curr[sz]=s[sz];
 
   return str;
@@ -190,24 +185,6 @@ int f_seek(FILE *fd, int offset) {
   }
   return 0;
 }
-// extern int fflush(FILE *); // supplied by stdio
-// extern int fgetc(FILE *);  // supplied by stdio
-
-
-/////////////////////////////////////
-// THIS SECTION ONLY USED IN CORE.CYC
-
-// extern FILE    *fopen            (Cstring,Cstring);  // supplied by stdio
-/*
-int f_close(FILE *fd) {
-  if(!fd) {
-    fprintf(stderr,"Attempt to close null file descriptor.\n");
-    exit(255);
-  }
-  return fclose(fd);
-}
-*/
-#include <stdio.h>
 
 FILE *Cyc_Stdio_stdin; 
 FILE *Cyc_Stdio_stdout;
@@ -255,8 +232,7 @@ static void grow_region(struct _RegionHandle *r, unsigned int s) {
   struct _RegionPage *p;
   unsigned int prev_size, next_size;
 
-  prev_size = r->last_plus_one - 
-    ((char *)r->curr + sizeof(struct _RegionPage));
+  prev_size = r->last_plus_one - ((char *)r->curr + sizeof(struct _RegionPage));
   next_size = prev_size * 2;
 
   if (next_size < s) 
@@ -316,7 +292,14 @@ int main(int argc, char **argv) {
   int status = setjmp(top_handler.handler);
   _push_handler(&top_handler);
   if(status) {
-    fprintf(stderr,"Uncaught exception %s\n",(((exn)status)->tag)+4);
+    // void and value variants are different now
+    struct _xtunion_struct * exn = (struct _xtunion_struct *)status;
+    char * exn_name;
+    if(exn->tag == 0)
+      exn_name = (((char *)exn)+4);
+    else
+      exn_name = exn->tag + 4;
+    fprintf(stderr,"Uncaught exception %s\n",exn_name);
     return 1;
   }
   // set standard file descriptors

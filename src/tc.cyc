@@ -1244,7 +1244,8 @@ static bool treeshake_remove_f(Set::set_t<var_t> set, var_t x, _ y) {
   return !Set::member(set, x);
 }
 
-static void treeshake_remove(list_t<var_t> ns, $(genv_t, Set::set_t<var_t>) @ nsenv) {
+static void treeshake_remove(list_t<var_t> ns, 
+			     $(genv_t, Set::set_t<var_t>) @ nsenv) {
   let ge = (*nsenv)[0];
   let set = (*nsenv)[1];
   ge->ordinaries = Dict::filter_c(treeshake_remove_f, set, ge->ordinaries);

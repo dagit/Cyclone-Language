@@ -91,16 +91,16 @@ _temp1.f1=( void*) a1; _temp1.f2=( void*) a2; _temp1;}); _temp0;});}}} struct
 Cyc_List_List* Cyc_PP_list_of_alist_f( void* y, struct Cyc_List_List* l){ void*
 _temp2= y; void* _temp10; void* _temp12; void* _temp14; _LL4: if( _temp2 ==(
 void*) Cyc_PP_Empty){ goto _LL5;} else{ goto _LL6;} _LL6: if(( unsigned int)
-_temp2 > 1u?(( struct _tunion_struct*) _temp2)->tag == Cyc_PP_Single: 0){ _LL11:
-_temp10=( void*)(( struct Cyc_PP_Single_struct*) _temp2)->f1; goto _LL7;} else{
-goto _LL8;} _LL8: if(( unsigned int) _temp2 > 1u?(( struct _tunion_struct*)
-_temp2)->tag == Cyc_PP_Append: 0){ _LL15: _temp14=( void*)(( struct Cyc_PP_Append_struct*)
-_temp2)->f1; goto _LL13; _LL13: _temp12=( void*)(( struct Cyc_PP_Append_struct*)
-_temp2)->f2; goto _LL9;} else{ goto _LL3;} _LL5: return l; _LL7: return({ struct
-Cyc_List_List* _temp16=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
-_temp16->hd=( void*) _temp10; _temp16->tl= l; _temp16;}); _LL9: return(( struct
+_temp2 > 1u?*(( int*) _temp2) == Cyc_PP_Single: 0){ _LL11: _temp10=( void*)((
+struct Cyc_PP_Single_struct*) _temp2)->f1; goto _LL7;} else{ goto _LL8;} _LL8:
+if(( unsigned int) _temp2 > 1u?*(( int*) _temp2) == Cyc_PP_Append: 0){ _LL15:
+_temp14=( void*)(( struct Cyc_PP_Append_struct*) _temp2)->f1; goto _LL13; _LL13:
+_temp12=( void*)(( struct Cyc_PP_Append_struct*) _temp2)->f2; goto _LL9;} else{
+goto _LL3;} _LL5: return l; _LL7: return({ struct Cyc_List_List* _temp16=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp16->hd=(
+void*) _temp10; _temp16->tl= l; _temp16;}); _LL9: return(( struct Cyc_List_List*(*)(
+void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)( _temp14,(( struct
 Cyc_List_List*(*)( void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)(
-_temp14,(( struct Cyc_List_List*(*)( void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)(
 _temp12, l)); _LL3:;} struct Cyc_List_List* Cyc_PP_list_of_alist( void* x){
 return(( struct Cyc_List_List*(*)( void* y, struct Cyc_List_List* l)) Cyc_PP_list_of_alist_f)(
 x, 0);} struct Cyc_PP_Ppstate{ int ci; int cc; int cl; int pw; int epw; } ;
@@ -112,15 +112,14 @@ void*)) Cyc_Xarray_add)( xarr, al);{ int last= 0; while( last >= 0) { void*
 _temp17=(( void*(*)( struct Cyc_Xarray_Xarray*, int)) Cyc_Xarray_get)( xarr,
 last); struct _tagged_string* _temp25; void* _temp27; void* _temp29; _LL19: if(
 _temp17 ==( void*) Cyc_PP_Empty){ goto _LL20;} else{ goto _LL21;} _LL21: if((
-unsigned int) _temp17 > 1u?(( struct _tunion_struct*) _temp17)->tag == Cyc_PP_Single:
-0){ _LL26: _temp25=( struct _tagged_string*)(( struct Cyc_PP_Single_struct*)
-_temp17)->f1; goto _LL22;} else{ goto _LL23;} _LL23: if(( unsigned int) _temp17
-> 1u?(( struct _tunion_struct*) _temp17)->tag == Cyc_PP_Append: 0){ _LL30:
-_temp29=( void*)(( struct Cyc_PP_Append_struct*) _temp17)->f1; goto _LL28; _LL28:
-_temp27=( void*)(( struct Cyc_PP_Append_struct*) _temp17)->f2; goto _LL24;}
-else{ goto _LL18;} _LL20: -- last; goto _LL18; _LL22: -- last;({ struct
-_tagged_string _temp31=* _temp25; fprintf( f,"%.*s", _temp31.last_plus_one -
-_temp31.curr, _temp31.curr);}); goto _LL18; _LL24:(( void(*)( struct Cyc_Xarray_Xarray*,
+unsigned int) _temp17 > 1u?*(( int*) _temp17) == Cyc_PP_Single: 0){ _LL26:
+_temp25=( struct _tagged_string*)(( struct Cyc_PP_Single_struct*) _temp17)->f1;
+goto _LL22;} else{ goto _LL23;} _LL23: if(( unsigned int) _temp17 > 1u?*(( int*)
+_temp17) == Cyc_PP_Append: 0){ _LL30: _temp29=( void*)(( struct Cyc_PP_Append_struct*)
+_temp17)->f1; goto _LL28; _LL28: _temp27=( void*)(( struct Cyc_PP_Append_struct*)
+_temp17)->f2; goto _LL24;} else{ goto _LL18;} _LL20: -- last; goto _LL18; _LL22:
+-- last;({ struct _tagged_string _temp31=* _temp25; fprintf( f,"%.*s", _temp31.last_plus_one
+- _temp31.curr, _temp31.curr);}); goto _LL18; _LL24:(( void(*)( struct Cyc_Xarray_Xarray*,
 int, void*)) Cyc_Xarray_set)( xarr, last, _temp27); if( last ==(( int(*)( struct
 Cyc_Xarray_Xarray*)) Cyc_Xarray_length)( xarr) - 1){(( void(*)( struct Cyc_Xarray_Xarray*,
 void*)) Cyc_Xarray_add)( xarr, _temp29);} else{(( void(*)( struct Cyc_Xarray_Xarray*,

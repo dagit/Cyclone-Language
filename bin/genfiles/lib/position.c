@@ -228,9 +228,9 @@ _temp100.last_plus_one - _temp100.curr, _temp100.curr);}); _temp96->f2=( int)
 Cyc_String_strlen( sec_one); _temp96->f3=( int)((( Cyc_String_strlen( sec_one) +
 Cyc_String_strlen( sec_two)) + 3) + Cyc_String_strlen( sec_three)); _temp96;});}}}}}
 static int Cyc_Position_error_b= 0; int Cyc_Position_error_p(){ return Cyc_Position_error_b;}
-char Cyc_Position_Error[ 10u]="Error"; struct Cyc_Position_Error_struct{ char*
-tag; struct Cyc_Position_Error* f1; } ; int Cyc_Position_print_context= 0; int
-Cyc_Position_first_error= 1; void Cyc_Position_post_error( struct Cyc_Position_Error*
+char Cyc_Position_Error[ 10u]="\000\000\000\000Error"; struct Cyc_Position_Error_struct{
+char* tag; struct Cyc_Position_Error* f1; } ; int Cyc_Position_print_context= 0;
+int Cyc_Position_first_error= 1; void Cyc_Position_post_error( struct Cyc_Position_Error*
 e){ Cyc_Position_error_b= 1; Cyc_Stdio_fflush( Cyc_Stdio_stdout); if( Cyc_Position_first_error){
 fprintf( Cyc_Stdio_stderr,"\n"); Cyc_Position_first_error= 0;}({ struct
 _tagged_string _temp101= Cyc_Position_string_of_segment( e->seg); struct

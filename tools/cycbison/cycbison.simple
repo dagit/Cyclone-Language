@@ -77,14 +77,7 @@ extern int yylex();
 xtunion YYSTYPE { YYINITIALSVAL };
 
 static int	yychar = '\000';       /*  the lookahead symbol		*/
-#ifdef OLD_CYC
-xtunion YYSTYPE.YYINITIALSVAL yyinitval = YYINITIALSVAL;
-xtunion YYSTYPE	yylval = &yyinitval;/*  the semantic value of the	*/
- 				       /*  lookahead symbol		*/
-#else
 xtunion YYSTYPE yylval = YYINITIALSVAL;/* semantic value of lookahead symbol */
-#endif
-
 
 static int yynerrs = 0;		/*  number of parse errors so far       */
 
@@ -189,11 +182,7 @@ yynewstate:
     // grow the stacks
     if (yystacksize >= YYMAXDEPTH) {
       yyerror("parser stack overflow");
-#ifdef OLD_CYC
-      throw new Yystack_overflow;
-#else
       throw Yystack_overflow;
-#endif
     }
     yystacksize *= 2;
     if (yystacksize > YYMAXDEPTH)
@@ -354,11 +343,7 @@ yyreduce:
 #endif
 
 $    /* the action file gets copied in place of this dollarsign */
-#ifdef OLD_CYC
-  default: throw new Yyimpossible;
-#else
  default: throw Yyimpossible;
-#endif
   }
 
 #line 371 "cyc_bison.simple"

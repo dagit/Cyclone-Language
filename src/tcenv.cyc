@@ -157,8 +157,7 @@ tenv_t tc_init() {
   empty_var_set = new Opt(Set::empty(String::zstrptrcmp));
 
   // Set up initial environment so that xtunion exn is defined
-  // Note: Absyn::exn_xed must be fresh for each file b/c fields gets mutated!!
-  // In turn, we need to reset exn_typ!!
+  // FIX: put Null_Exception and Match_Exception in the environment
   let ge     = empty_genv();
   let top_ns = null;
   ge->tuniondecls = Dict::insert(ge->tuniondecls, (*exn_name)[1], &exn_xed);

@@ -48,21 +48,21 @@ _temp0;});} static void* Cyc_Fn_fp_apply( void*(* f)( void*), void* x){ return f
 x);} void* Cyc_Fn_fp2fn( void*(* f)( void*)){ return(( void*(*)( void*(* f)(
 void*(*)( void*), void*), void*(* x)( void*))) Cyc_Fn_make_fn)(( void*(*)( void*(*
 f)( void*), void* x)) Cyc_Fn_fp_apply, f);} void* Cyc_Fn_apply( void* f, void* x){
-void* _temp4; void*(* _temp6)( void*, void*); void* _temp2= f; if((( struct
-_tunion_struct*) _temp2)->tag == Cyc_Fn_Fun){ _LL7: _temp6=( void*(*)( void*,
-void*))(( struct Cyc_Fn_Fun_struct*) _temp2)->f1; goto _LL5; _LL5: _temp4=( void*)((
-struct Cyc_Fn_Fun_struct*) _temp2)->f2; goto _LL3;} else{ goto _LL3;} _LL3:
-return _temp6( _temp4, x);} struct _tuple0{ void* f1; void* f2; } ; static void*
-Cyc_Fn_fn_compose( struct _tuple0* f_and_g, void* arg){ struct _tuple0 _temp10;
-void* _temp11; void* _temp13; struct _tuple0* _temp8= f_and_g; _temp10=* _temp8;
-_LL14: _temp13= _temp10.f1; goto _LL12; _LL12: _temp11= _temp10.f2; goto _LL9;
-_LL9: return(( void*(*)( void* f, void* x)) Cyc_Fn_apply)( _temp13,(( void*(*)(
-void* f, void* x)) Cyc_Fn_apply)( _temp11, arg));} void* Cyc_Fn_compose( void* g,
-void* f){ return(( void*(*)( void*(* f)( struct _tuple0*, void*), struct _tuple0*
-x)) Cyc_Fn_make_fn)(( void*(*)( struct _tuple0* f_and_g, void* arg)) Cyc_Fn_fn_compose,({
-struct _tuple0* _temp15=( struct _tuple0*) GC_malloc( sizeof( struct _tuple0));
-_temp15->f1= f; _temp15->f2= g; _temp15;}));} static void* Cyc_Fn_inner( struct
-_tuple0* env, void* second){ return(( void*(*)( void* f, struct _tuple0* x)) Cyc_Fn_apply)((*
+void* _temp4; void*(* _temp6)( void*, void*); void* _temp2= f; if(*(( int*)
+_temp2) == Cyc_Fn_Fun){ _LL7: _temp6=( void*(*)( void*, void*))(( struct Cyc_Fn_Fun_struct*)
+_temp2)->f1; goto _LL5; _LL5: _temp4=( void*)(( struct Cyc_Fn_Fun_struct*)
+_temp2)->f2; goto _LL3;} else{ goto _LL3;} _LL3: return _temp6( _temp4, x);}
+struct _tuple0{ void* f1; void* f2; } ; static void* Cyc_Fn_fn_compose( struct
+_tuple0* f_and_g, void* arg){ struct _tuple0 _temp10; void* _temp11; void*
+_temp13; struct _tuple0* _temp8= f_and_g; _temp10=* _temp8; _LL14: _temp13=
+_temp10.f1; goto _LL12; _LL12: _temp11= _temp10.f2; goto _LL9; _LL9: return((
+void*(*)( void* f, void* x)) Cyc_Fn_apply)( _temp13,(( void*(*)( void* f, void*
+x)) Cyc_Fn_apply)( _temp11, arg));} void* Cyc_Fn_compose( void* g, void* f){
+return(( void*(*)( void*(* f)( struct _tuple0*, void*), struct _tuple0* x)) Cyc_Fn_make_fn)((
+void*(*)( struct _tuple0* f_and_g, void* arg)) Cyc_Fn_fn_compose,({ struct
+_tuple0* _temp15=( struct _tuple0*) GC_malloc( sizeof( struct _tuple0)); _temp15->f1=
+f; _temp15->f2= g; _temp15;}));} static void* Cyc_Fn_inner( struct _tuple0* env,
+void* second){ return(( void*(*)( void* f, struct _tuple0* x)) Cyc_Fn_apply)((*
 env).f1,({ struct _tuple0* _temp16=( struct _tuple0*) GC_malloc( sizeof( struct
 _tuple0)); _temp16->f1=(* env).f2; _temp16->f2= second; _temp16;}));} static
 void* Cyc_Fn_outer( void* f, void* first){ return(( void*(*)( void*(* f)( struct

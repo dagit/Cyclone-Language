@@ -373,9 +373,11 @@ exp_t tuple_exp(list_t<exp_t> es, seg_t loc) {
 exp_t stmt_exp(stmt_t s,seg_t loc) { return new_exp(new StmtExp_e(s), loc); }
 
 static string ne_str = "Null_Exception";
-static stringptr ne = &ne_str;
+static tunion Nmspace.Abs_n top_ns = Abs_n(null);
+static $(nmspace_t,stringptr) ne = $((tunion Nmspace)&top_ns,&ne_str);
+
 exp_t null_pointer_exn_exp(seg_t loc) { 
-  return var_exp(new $(new Abs_n(null),ne), loc); 
+  return var_exp(&ne, loc); 
 }
 exp_t array_exp(list_t<exp_t> es, seg_t loc) {
   let dles = null;

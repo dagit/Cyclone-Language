@@ -41,8 +41,8 @@ struct _tagged_string Cyc_Core_string_of_char( char); extern char*
 string_to_Cstring( struct _tagged_string); extern char* underlying_Cstring(
 struct _tagged_string); extern struct _tagged_string Cstring_to_string( char*);
 extern int system( char*); char Cyc_Core_InvalidArg[ 15u]; char Cyc_Core_SysError[
-13u]="SysError"; struct Cyc_Core_SysError_struct{ char* tag; int f1; } ; char
-Cyc_Core_Failure[ 12u]; char Cyc_Core_Impossible[ 15u]; char Cyc_Core_Not_found[
+13u]="\000\000\000\000SysError"; struct Cyc_Core_SysError_struct{ char* tag; int
+f1; } ; char Cyc_Core_Failure[ 12u]; char Cyc_Core_Impossible[ 15u]; char Cyc_Core_Not_found[
 14u]; char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Opt* Cyc_Core_opt_map(
 void*(* f)( void*), struct Cyc_Core_Opt* o){ if( o == 0){ return 0;} return({
 struct Cyc_Core_Opt* _temp0=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct

@@ -92,11 +92,10 @@ r=( struct Cyc_Rope_Rope_node*)({ struct Cyc_List_List* _temp20= l; if( _temp20
 _temp19= l; if( _temp19 == 0){ _throw( Null_Exception);} _temp19->tl;}); r;});}};
 _temp21;}); _temp14;}); _temp13;})); _temp12;});} unsigned int Cyc_Rope_length(
 struct Cyc_Rope_Rope_node* r){ void* _temp22=( void*) r->v; struct
-_tagged_string _temp28; struct _tagged_ptr0 _temp30; _LL24: if((( struct
-_tunion_struct*) _temp22)->tag == Cyc_Rope_String_rope){ _LL29: _temp28=( struct
-_tagged_string)(( struct Cyc_Rope_String_rope_struct*) _temp22)->f1; goto _LL25;}
-else{ goto _LL26;} _LL26: if((( struct _tunion_struct*) _temp22)->tag == Cyc_Rope_Array_rope){
-_LL31: _temp30=( struct _tagged_ptr0)(( struct Cyc_Rope_Array_rope_struct*)
+_tagged_string _temp28; struct _tagged_ptr0 _temp30; _LL24: if(*(( int*) _temp22)
+== Cyc_Rope_String_rope){ _LL29: _temp28=( struct _tagged_string)(( struct Cyc_Rope_String_rope_struct*)
+_temp22)->f1; goto _LL25;} else{ goto _LL26;} _LL26: if(*(( int*) _temp22) ==
+Cyc_Rope_Array_rope){ _LL31: _temp30=( struct _tagged_ptr0)(( struct Cyc_Rope_Array_rope_struct*)
 _temp22)->f1; goto _LL27;} else{ goto _LL23;} _LL25: return Cyc_String_strlen(
 _temp28); _LL27: { unsigned int total=( unsigned int) 0; unsigned int sz=({
 struct _tagged_ptr0 _temp35= _temp30;( unsigned int)( _temp35.last_plus_one -
@@ -107,11 +106,11 @@ _temp34= _temp32.curr +( int) i; if( _temp32.base == 0? 1:( _temp34 < _temp32.ba
 return total;} _LL23:;} static unsigned int Cyc_Rope_flatten_it( struct
 _tagged_string s, unsigned int i, struct Cyc_Rope_Rope_node* r){ void* _temp36=(
 void*) r->v; struct _tagged_string _temp42; struct _tagged_ptr0 _temp44; _LL38:
-if((( struct _tunion_struct*) _temp36)->tag == Cyc_Rope_String_rope){ _LL43:
-_temp42=( struct _tagged_string)(( struct Cyc_Rope_String_rope_struct*) _temp36)->f1;
-goto _LL39;} else{ goto _LL40;} _LL40: if((( struct _tunion_struct*) _temp36)->tag
-== Cyc_Rope_Array_rope){ _LL45: _temp44=( struct _tagged_ptr0)(( struct Cyc_Rope_Array_rope_struct*)
-_temp36)->f1; goto _LL41;} else{ goto _LL37;} _LL39: { unsigned int len= Cyc_String_strlen(
+if(*(( int*) _temp36) == Cyc_Rope_String_rope){ _LL43: _temp42=( struct
+_tagged_string)(( struct Cyc_Rope_String_rope_struct*) _temp36)->f1; goto _LL39;}
+else{ goto _LL40;} _LL40: if(*(( int*) _temp36) == Cyc_Rope_Array_rope){ _LL45:
+_temp44=( struct _tagged_ptr0)(( struct Cyc_Rope_Array_rope_struct*) _temp36)->f1;
+goto _LL41;} else{ goto _LL37;} _LL39: { unsigned int len= Cyc_String_strlen(
 _temp42); Cyc_String_strncpy( s,( int) i, _temp42, 0, len); return i + len;}
 _LL41: { unsigned int len=({ struct _tagged_ptr0 _temp49= _temp44;( unsigned int)(
 _temp49.last_plus_one - _temp49.curr);});{ int j= 0; for( 0; j < len; j ++){ i=
