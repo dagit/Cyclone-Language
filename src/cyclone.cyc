@@ -503,6 +503,9 @@ static string_t do_find(list_t<stringptr_t> dirs, string_t file) {
   if (f == NULL) {
     compile_failure = true;
     remove_cfiles();
+    fprintf(stderr,"Error: can't find internal compiler file %s in path %s\n", 
+            file, sprint_list(dirs));
+    fflush(stderr);
     throw new Core::Failure
       (aprintf("Error: can't find internal compiler file %s in path %s\n", 
 	       file, sprint_list(dirs)));
@@ -1060,7 +1063,7 @@ int main(int argc, string_t<`H> ?`H argv) {
       runtime_filename = "runtime_cyc.o";
     } else if(pg_r) {
       libcyc_flag = "-lcyc_pg";
-      runtime_filename = "runtime_cyc_pg.a";
+      runtime_filename = "runtime_cyc_pg.o";
       nogc_filename = "nogc_pg.a";
     } else {
       libcyc_flag = "-lcyc";
@@ -1151,7 +1154,7 @@ int main(int argc, string_t<`H> ?`H argv) {
             ccargs_string,
 	    stdlib_string,
             libargs_string);
-  if (v_r) fprintf(stderr,"%s\n",cccmd);
+  if (v_r) { fprintf(stderr,"%s\n",cccmd); fflush(stderr); }
   if (system((const char @)cccmd) != 0) {
     fprintf(stderr,"Error: C compiler failed\n");
     compile_failure = true;

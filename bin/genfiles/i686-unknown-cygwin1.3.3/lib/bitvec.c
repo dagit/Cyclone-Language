@@ -204,6 +204,9 @@ static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
 
 // Add i to zero-terminated pointer x.  Checks for x being null and
 // ensures that x[0..i-1] are not 0.
+#ifdef NO_CYC_BOUNDS_CHECK
+#define _zero_arr_plus(orig_x,orig_sz,orig_i) ((orig_x)+(orig_i))
+#else
 #define _zero_arr_plus(orig_x,orig_sz,orig_i) ({ \
   typedef _czs_tx = (*orig_x); \
   _czs_tx *_czs_x = (_czs_tx *)(orig_x); \
@@ -215,6 +218,7 @@ static struct _tagged_arr _tagged_ptr_decrease_size(struct _tagged_arr x,
   for (_czs_temp=_czs_sz; _czs_temp < _czs_i; _czs_temp++) \
     if (_czs_x[_czs_temp] == 0) _throw_arraybounds(); \
   _czs_x+_czs_i; })
+#endif
 
 // Calculates the number of elements in a zero-terminated, thin array.
 // If non-null, the array is guaranteed to have orig_offset elements.
