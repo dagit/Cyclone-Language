@@ -227,7 +227,9 @@ endif
 	     if [ -f "bin/genfiles/$$arch.patch" ]; then\
 	       echo "PATCHIFYING $$arch";\
 	       $(MAKE) -s -C bin/genfiles $$arch.patch && \
-	       $(RM) -rf bin/genfiles/$$arch;\
+	       if [ "$(ARCH)" != "$$arch" ]; then\
+	         $(RM) -rf bin/genfiles/$$arch;\
+	       fi;\
 	     fi;\
 	   done;\
 	 elif [ -f "$(ARCHDIR).patch" ]; then\

@@ -13,7 +13,7 @@ CYC_BIN_PATH=$(CYCDIR)/bin
 install: $(ARCH) $(CYC_LIB_PATH)/$(CYCLIB)\
   $(addprefix $(CYC_LIB_PATH)/cyc-lib/$(ARCH)/, nogc.a $(RUNTIME).$(O))\
   $(addprefix $(CYC_BIN_PATH)/, $(addsuffix $(EXE), cyclone cycdoc buildlib))
-	if [ -f "$(ARCH).patch" ]; then $(RM) -r $(ARCH); fi
+#	if [ -f "$(ARCH).patch" ]; then $(RM) -r $(ARCH); fi
 $(CYC_LIB_PATH)/$(CYCLIB): $(ARCH)/lib/$(CYCLIB)
 	cp -p $< $@
 $(CYC_LIB_PATH)/nocheck_$(CYCLIB): $(ARCH)/lib/$(CYCLIB)
