@@ -478,8 +478,8 @@ static inline struct _dynforward_ptr
 _dynforward_ptr_inplace_plus(struct _dynforward_ptr *arr_ptr,unsigned elt_sz,
                              int change) {
   struct _dynforward_ptr * _arr_ptr = (arr_ptr);
-  unsigned int _dfpp_elts = (((unsigned)_ans->last_plus_one) - 
-                             ((unsigned)_ans->curr)) / elt_sz;
+  unsigned int _dfpp_elts = (((unsigned)_arr_ptr->last_plus_one) - 
+                             ((unsigned)_arr_ptr->curr)) / elt_sz;
   if (change < 0 || ((unsigned)change) > _dfpp_elts) 
     _arr_ptr->last_plus_one = 0;
   _arr_ptr->curr += ((int)(elt_sz))*(change);
