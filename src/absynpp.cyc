@@ -64,9 +64,11 @@ bool qvar_to_Cids = false;
 // Flag controlling whether declarations have to be at the beginning of the blocks
 bool decls_first = false;
 
+// Flag controlling whether to rewrite temporary type variables
+// makes reparsing impossible, but gives nicer error messages
+bool dont_rewrite_temp_tvars = false;
+
 // Flag controlling whether to print all type variables
-// (make reparsing impossible, for the temporary type variables "#xxx" generated
-// while computing the defaut effect are not parsable)
 bool print_all_tvars = false;
 
 // Flag controlling whether to print all kinds
@@ -411,7 +413,7 @@ doc_t ntyp2doc(typ t) {
     }
     //FIX: sometimes need explicit kinds!
     //Mathieu: only if we try to declare kinds inside functions arguments 
-    if (is_temp_tvar(tv)) {
+    if (! dont_rewrite_temp_tvars && is_temp_tvar(tv)) {
       // we're trying to print a temporary tvar,
       // replace it by _ followed by a comment
       s = cat3(text("_ /* "), s, text(" */"));
@@ -559,6 +561,9 @@ doc_t qvar2doc(qvar q) {
 }
 
 doc_t typedef_name2doc(qvar v) {
+  // avoid the ugly 'wrong namespace' warning when translating to C
+  if (qvar_to_Cids) return qvar2doc(v);
+
   switch ((*v)[0]) {
   case Abs_n(l):
     if (list_cmp(String::strptrcmp, l, curr_namespace) == 0) {
@@ -1425,7 +1430,7 @@ doc_t decl2doc(decl d) {
     
     break;
   case Namespace_d(v,tdl):
-    curr_namespace_add(v);
+    if (! qvar_to_Cids) curr_namespace_add(v);
     s = cat7(text("namespace "),
              textptr(v),
              text(" {"),
@@ -1433,7 +1438,7 @@ doc_t decl2doc(decl d) {
              ppseql(decl2doc,"",tdl),
              line_doc(),
              text("}"));
-    curr_namespace_drop();
+    if (! qvar_to_Cids) curr_namespace_drop();
     break;
   case Using_d(q,tdl):
     if (print_using_stmts) {
@@ -1539,9 +1544,11 @@ $(tqual,typ,list_t<type_modifier>) to_tms(tqual tq,typ t) {
 	typvars = null;
       }
     } else {
-      // rewrite the temp variables so that they could parse
-      // WARNING : we don't check for conflicts with some user-defined tvars
-      iter(rewrite_temp_tvar, typvars);
+      if (! dont_rewrite_temp_tvars) {
+	// rewrite the temp variables so that they could parse
+	// WARNING : we don't check for conflicts with some user-defined tvars
+	iter(rewrite_temp_tvar, typvars);
+      }
     }
 
     // discard tq because you can't qualify a function
@@ -1620,7 +1627,12 @@ string decllist2string(list_t<decl> tdl) {
 }
 string exp2string(exp e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
 string stmt2string(stmt s)   {return string_of_doc(stmt2doc(s), PP_WIDTH);}
-string typ2string(typ t)     {return string_of_doc(typ2doc(t),  PP_WIDTH);}
+string typ2string(typ t)     {
+  dont_rewrite_temp_tvars = true; // so that error messages remain 'nice'
+  let s = string_of_doc(typ2doc(t),  PP_WIDTH);
+  dont_rewrite_temp_tvars = false;
+  return s;
+}
 string qvar2string(qvar v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
 string prim2string(primop p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
 string pat2string(pat p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}
