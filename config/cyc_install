@@ -35,7 +35,7 @@ function get_files {
       echo $file $2
     # directory; recurse
     elif [ -d "$file" ]; then
-      files=`find $file -mindepth 1 -maxdepth 1 -print | grep -v CVS`
+      files=`find $file/* -print -prune | grep -v CVS`
       get_files "$files" "$2/`basename $file`"
     else
       echo file $file has unsupported file type!
