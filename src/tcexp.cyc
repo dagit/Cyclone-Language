@@ -342,7 +342,7 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
       let args = opt_args->v;
       for (; args != NULL; args = args->tl) {
         tcExp(te,NULL,args->hd);
-        TEMP_RGN(te, temp) {
+        { TEMP_RGN(te, temp)
           if (is_noalias_pointer_or_aggr(temp,(type_t)args->hd->topt) &&
               !is_noalias_path(temp,args->hd))
             terr(args->hd->loc, UNIQUE_ERR_MSG);
@@ -377,7 +377,9 @@ void check_format_args(tenv_t<`g,`r> te, exp_t fmt,
       terr(fmt->loc,"too few arguments");
     if (args != NULL) {
       terr(args->hd->loc,"too many arguments");
-      throw new Tcutil::AbortTypeCheckingFunction;
+      // else later code will bomb because type not set
+      for(; args != NULL; args = args->tl)
+	tcExp(te,NULL,args->hd);
     }
   }
 }

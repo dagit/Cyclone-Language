@@ -38,8 +38,7 @@ namespace Tc;
 static string_t tc_msg_c = "";
 static string_t * tc_msg = &tc_msg_c;
 
-// used to control when we warn for bits-only unions, shadowing
-// a struct name with a variable, etc.
+// used to control when we warn for bits-only unions
 bool aggressive_warn = false;
 
 static bool export_member(qvar_t x, list_t<$(seg_t,qvar_t,bool)@> exports) {
@@ -163,10 +162,7 @@ static void tcVardecl(tenv_t te, seg_t loc, vardecl_t vd, bool check_var_init,
   vd->tq.real_const = extract_const_from_typedef(loc,vd->tq.print_const,t);
   // top-level arrays don't escape because they can't be assigned to, so
   // their sizes do not change over time. All other globals escape.
-  switch (compress(t)) {
-  case &ArrayType(_): vd->escapes = false; break;
-  default: vd->escapes = true; break;
-  }
+  vd->escapes = !is_array(t);
   // move any function type attributes into the function's type
   if (is_function_type(t)) {
     atts = transfer_fn_type_atts(t,atts);
@@ -332,16 +328,10 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
           te->ae->ordinaries = Dict::insert(te->ae->ordinaries, q,
                                         new $(new VarRes(b), true));
       break;
-    case &AggrRes(_):
-      warn(loc,"function declaration shadows previous type declaration");
-      break;
-    case &DatatypeRes(_,_): 
-      warn(loc,"function declaration shadows previous datatype constructor");
-      break;
-    case &AnonEnumRes(_,_):
-    case &EnumRes(_,_): 
-      warn(loc,"function declaration shadows previous enum tag");
-      break;
+    case &AggrRes(...): // shadowing warnings now handled by Binding
+    case &DatatypeRes(...): 
+    case &AnonEnumRes(...): 
+    case &EnumRes(...): break;
     }
   } catch { case &Dict::Absent:
     if (exports == NULL || export_member(fd->name,*exports)) {
@@ -362,16 +352,11 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
     let fenv = new_fenv(fnrgn,loc,fd);
     let te = rnew(fnrgn) Tenv{te->ns, te->ae, fenv, false, false};
     // check the body, then get rid of local environment
-    try {
-      Tcstmt::tcStmt(te,fd->body,false);
-      // we've delayed checking some capabilities and constraints so that inference
-      // works a bit better, and now it's time to check them:
-      check_delayed_effects(te);
-      check_delayed_constraints(te);
-          } catch {
-    case &Tcutil::AbortTypeCheckingFunction: break;
-    case e: Core::rethrow(e);
-    }
+    Tcstmt::tcStmt(te,fd->body,false);
+    // we delayed checking some capabilities and constraints so that inference
+    // works a bit better, and now it's time to check them:
+    check_delayed_effects(te);
+    check_delayed_constraints(te);
   }
   // look for main and check that it has a good type
   if (is_main(q)) {
@@ -598,7 +583,6 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
 
   // reject ill-formed type
   check_unique_tvars(loc, ad->tvs);
-  // give the bound type variables identities
   add_tvar_identities(ad->tvs);
 
   // check the fields and update the environment
@@ -621,7 +605,6 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     // FIX: should be distinct from tvs but these already have
     // identities so they will never compare the same.
     check_unique_tvars(loc, exist_vars);
-    // give the bound type variables identities
     add_tvar_identities(exist_vars);
     // disallow MemKinds and set unconstrained kinds to BoxKind
     // reject struct with @tagged qualifier
@@ -659,7 +642,6 @@ void tcAggrdecl(tenv_t te, seg_t loc, aggrdecl_t ad) {
     // FIX: should be distinct from tvs but these already have
     // identities so they will never compare the same.
     check_unique_tvars(loc, exist_vars);
-    // give the bound type variables identities
     add_tvar_identities(exist_vars);
     // reject struct with @tagged qualifier
     if (tagged && (ad->kind == StructA))
@@ -796,7 +778,6 @@ void tcDatatypedecl(tenv_t te, seg_t loc, datatypedecl_t tud) {
   // disallow MemKinds and set unconstrained kinds to BoxKind
   // reject ill-formed type
   check_unique_tvars(loc,tvs);
-  // give the bound type variables identities
   add_tvar_identities(tvs);
 
   // determine datatype type's qualified name

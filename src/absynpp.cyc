@@ -925,8 +925,7 @@ string_t qvar2string(qvar_t q) {
   let prefix = NULL;
   let match;
   switch ((*q)[0]) {
-  case {.Loc_n = _}:
-    fallthru(NULL);
+  case {.Loc_n = _}: fallthru(NULL);
   case {.Rel_n = x}:
     match = false;
     prefix = x;
@@ -948,8 +947,7 @@ string_t qvar2string(qvar_t q) {
     if (match)
       return *((*q)[1]);
     else
-      return str_sepstr(List::append(prefix,
-                                     new List((*q)[1],NULL)),"::");
+      return str_sepstr(List::append(prefix, new List((*q)[1],NULL)),"::");
   }
 }
 

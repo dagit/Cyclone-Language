@@ -37,14 +37,6 @@ extern void warn(seg_t, string_t fmt, ... inject parg_t<`r2> ap)
 extern void flush_warnings();
   // bextern void err_noloc(string_t);
 
-// Used when you just have to break out of type-checking the
-// current function to avoid cascading problems.  Throw only
-// when you've already called terr.
-datatype exn { extern AbortTypeCheckingFunction };
-
-// set by by Tcenv::tc_init, just to reduce allocation and calls to Set::empty.
-extern Core::opt_t<Set::set_t<var_t>> empty_var_set;
-
 // returns a deep copy of a type -- note that the evars will
 // still share and if the identity is set on type variables,
 // they will share, otherwise they won't.

@@ -30,11 +30,6 @@ using Absyn;
 using Tcutil;
 using Absynpp;
 namespace RgnOrder;
-static string_t tvar2string(tvar_t t) {
-  return *t->name;
-}
-static bool valid_constraint(type_t eff, type_t rgn);
-static type_t filter_effect(type_t eff, kind_t k);
 
 // Encodes partial order for region lifetimes
 struct RgnInfo {
@@ -95,24 +90,6 @@ static bool valid_constraint(type_t eff, type_t rgn) {
   }
 }
 
-// removes all elements from the effect having kind k
-static type_t filter_effect(type_t eff, kind_t k) {
-  let e = compress(eff);
-  switch (e) {
-  case &JoinEff(es):
-    _ effs = NULL;
-    for (; es != NULL; es = es->tl) {
-      let e2 = filter_effect(es->hd,k);
-      if (e2 != &VoidType_val) effs = new List(e2,effs);
-    }
-    return new JoinEff(List::imp_rev(effs));
-  case &Evar(_,_,_,_):
-  case &RgnsEff(_): return e;
-  case &AccessEff(t): if (typ_kind(t) != k) return e; else return &VoidType_val;
-  default: impos("bad effect passed to filter_effect");
-  }
-}
-
 // adds constraint: [eff] outlives [rgn]
 // Note: Evars get constrained to HeapRgn!
 // Note: assumes not resettable and all regions of RgnKind
@@ -161,6 +138,13 @@ rgn_po_t<`r> add_youngest(region_t<`r> r,rgn_po_t<`r> po, tvar_t rgn, bool reset
   ans->d = Dict::insert(po->d, rgn, rnew(r) RgnInfo(eff, resettable));
   if(!resettable); //  && !opened
     ans->youngest_unresettable = rgn;
+  return ans;
+}
+rgn_po_t<`r> add_unordered(region_t<`r> r, rgn_po_t<`r> po, tvar_t rgn) {
+  if(Dict::member(po->d,rgn))
+    impos("RgnOrder::add_unordered: repeated region");
+  let ans = rnew(r) *po;
+  ans->d = Dict::insert(ans->d, rgn, rnew(r) RgnInfo(empty_effect,false));
   return ans;
 }
 
@@ -500,10 +484,9 @@ void print_region_po(rgn_po_t po) {
     Iter::iter_t<_,`r> iter = Dict::make_iter(r,po->d);
     let elem = *Dict::rchoose(r,po->d);
     fprintf(stderr,"region po:\n");
-    while(Iter::next(iter,&elem)) {
+    while(Iter::next(iter,&elem))
       fprintf(stderr,"  %s outlived by %s\n",*(elem[0]->name),
 	      Absynpp::typ2string(elem[1]->these_outlive));
-    }
     fprintf(stderr,"  these outlive heap: %s\n",
 	    Absynpp::typ2string(po->these_outlive_heap));
     fprintf(stderr,"  these outlive unique: %s\n",

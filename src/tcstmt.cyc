@@ -40,7 +40,6 @@ using Tcutil;
 using Tcenv;
 using Tcexp;
 using Tcpat;
-
 namespace Tcstmt;
 
 // we're trying to simplify the situation where we have x++
@@ -49,10 +48,8 @@ namespace Tcstmt;
 // important for pointer ops because x++ is fairly expensive.
 static void simplify_unused_result_exp(exp_t e) {
   switch (e->r) {
-  case &Increment_e(e1,PostInc):
-    e->r = new Increment_e(e1,PreInc); break;
-  case &Increment_e(e1,PostDec):
-    e->r = new Increment_e(e1,PreDec); break;
+  case &Increment_e(e1,PostInc): e->r = new Increment_e(e1,PreInc); break;
+  case &Increment_e(e1,PostDec): e->r = new Increment_e(e1,PreDec); break;
   default: break;
   }
 }
@@ -85,8 +82,7 @@ static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
   }
 }
 
-static list_t<`b,`r> cmap_c(region_t<`r> r,`b f(`c,`a), `c env, clist_t<`a> x)
-{
+static list_t<`b,`r> cmap_c(region_t<`r> r,`b f(`c,`a), `c env, clist_t<`a> x) {
   if (x == NULL) return NULL;
   else return rnew(r) List(f(env,x->hd),cmap_c(r,f,env,x->tl));
 }

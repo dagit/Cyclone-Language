@@ -69,7 +69,6 @@ namespace Relations {
   typedef struct Reln@`r reln_t<`r>;
   typedef List::list_t<reln_t<`r>,`r> relns_t<`r>;
 }
-
 namespace Tcpat {
   extern datatype Decision;  // see tcpat.h
   typedef datatype Decision *decision_opt_t;
@@ -169,10 +168,10 @@ namespace Absyn {
   //   attributes with respect to type-checking.  After type-well-formedness,
   //   it should be that print_const implies real_const
   EXTERN_ABSYN struct Tqual { 
-    bool print_const; 
-    bool q_volatile; 
-    bool q_restrict; 
-    bool real_const;
+    bool print_const :1; 
+    bool q_volatile  :1; 
+    bool q_restrict  :1; 
+    bool real_const  :1;
     seg_t loc; // only present when porting C code
   };
 
@@ -180,9 +179,8 @@ namespace Absyn {
     Char_sz, Short_sz, Int_sz, Long_sz, LongLong_sz
   };
                                   
-  // Used to classify kinds  
+  // Used to classify kinds: Aliasable <= Unique <= Top
   EXTERN_ABSYN enum AliasQual { 
-    // Aliasable <= Unique <= Top
     Aliasable, // for types that can be aliased
     Unique,    // for types that cannot be aliased
     Top        // either one

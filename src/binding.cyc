@@ -961,6 +961,9 @@ void resolve_decl(env_t env, decl_t d) {
 			       fd->args, fd->cyc_varargs);
     fd->param_vardecls = new Core::Opt(vds);
 
+    if(warn_override) // need to do before changing env->local_vars
+      check_warn_override(loc,env,fd->name);
+
     let old_locals = env->local_vars; // non-NULL only for nested functions
     if(old_locals != NULL) 
       env->local_vars = new *env->local_vars; // can refer to callers' vars

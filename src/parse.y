@@ -3215,23 +3215,12 @@ right_angle:
 
 void yyprint(int i, union YYSTYPE<`yy> v) {
   switch (v) {
-  case {.Int_tok = c}: fprintf(stderr,"%s",Absynpp::cnst2string(c)); break;
-  case {.Char_tok = c}:       fprintf(stderr,"%c",c);     break;
-  case {.String_tok = s}:     fprintf(stderr,"\"%s\"",s); break;
-  case {.QualId_tok = &$(p,v2)}:
-    let prefix = NULL;
-    switch (p) {
-    case {.Rel_n = x}: prefix = x; break;
-    case {.Abs_n = x}: prefix = x; break;
-    case {.C_n = x}: prefix = x; break;
-    case {.Loc_n = _}: break;
-    }
-    for (; prefix != NULL; prefix = prefix->tl)
-      fprintf(stderr,"%s::",*(prefix->hd));
-    fprintf(stderr,"%s::",*v2);
-    break;
-  case {.Exp_tok = e}: fprintf(stderr,"%s",Absynpp::exp2string(e)); break;
-  case {.Stmt_tok = s}: fprintf(stderr,"%s",Absynpp::stmt2string(s)); break;
+  case {.Int_tok = c}:    fprintf(stderr,"%s",Absynpp::cnst2string(c)); break;
+  case {.Char_tok = c}:   fprintf(stderr,"%c",c); break;
+  case {.String_tok = s}: fprintf(stderr,"\"%s\"",s); break;
+  case {.QualId_tok = q}: fprintf(stderr,"%s",Absynpp::qvar2string(q)); break;
+  case {.Exp_tok = e}:    fprintf(stderr,"%s",Absynpp::exp2string(e)); break;
+  case {.Stmt_tok = s}:   fprintf(stderr,"%s",Absynpp::stmt2string(s)); break;
   default: fprintf(stderr,"?"); break;
   }
 }

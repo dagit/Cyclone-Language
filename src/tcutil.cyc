@@ -124,24 +124,7 @@ void warn(seg_t sg, string_t fmt, ... inject parg_t ap)
   Warn::vwarn(sg, fmt, ap);
 }
 
-datatype exn { AbortTypeCheckingFunction };
-
-static string_t tvar2string(tvar_t tv) {
-  return *tv->name;
-}
-
-void print_tvars(list_t<tvar_t> tvs) {
-  for (; tvs != NULL; tvs = tvs->tl)
-    fprintf(stderr,"%s::%s ",
-	    tvar2string(tvs->hd),kindbound2string(tvs->hd->kind));
-  fprintf(stderr,"\n"); fflush(stderr);
-}
-
-// set by by Tcenv::tc_init, used to reduce allocation and calls to Set::empty.
-opt_t<set_t<var_t>> empty_var_set = NULL;
-
-// fast type-variable comparison -- can only be used when a tvar has
-// an identity.
+//fast type-variable comparison -- can only be used when a tvar has an identity.
 static int fast_tvar_cmp(tvar_t tv1, tvar_t tv2) {
   return (tv1->identity - tv2->identity);
 }
@@ -371,20 +354,20 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   case &NoInstantiate_e(e1): new_e = noinstantiate_exp(DC(pt,e1),e->loc);
     break;
   case &Instantiate_e(e1,ts):
-    new_e = instantiate_exp(DC(pt,e1),map(Tcutil::copy_type,ts),e->loc);
+    new_e = instantiate_exp(DC(pt,e1),map(copy_type,ts),e->loc);
     break;
   case &Cast_e(t,e1,b,c):
-    new_e = cast_exp(Tcutil::copy_type(t),DC(pt,e1),b,c,e->loc); break;
+    new_e = cast_exp(copy_type(t),DC(pt,e1),b,c,e->loc); break;
   case &Address_e(e1): new_e = address_exp(DC(pt,e1),e->loc); break;
   case &New_e(eo,e1):
     exp_opt_t eo1 = eo; if (eo != NULL) eo1 = DC(pt,eo);
     new_e = New_exp(eo1,DC(pt,e1),e->loc);
     break;
-  case &Sizeoftyp_e(t): new_e = sizeoftyp_exp(Tcutil::copy_type(t),e->loc);
+  case &Sizeoftyp_e(t): new_e = sizeoftyp_exp(copy_type(t),e->loc);
     break;
   case &Sizeofexp_e(e1): new_e = sizeofexp_exp(DC(pt,e1),e->loc); break;
   case &Offsetof_e(t,ofs):
-    new_e = offsetof_exp(Tcutil::copy_type(t),ofs,e->loc); break;
+    new_e = offsetof_exp(copy_type(t),ofs,e->loc); break;
   case &Deref_e(e1): new_e = deref_exp(DC(pt,e1),e->loc); break;
   case &AggrMember_e(e1,n,f1,f2):
     new_e = new_exp(new AggrMember_e(DC(pt,e1),n,f1,f2),e->loc); break;
@@ -405,7 +388,7 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
     new_e = new_exp(new Comprehension_e(vd,DC(pt,e1),DC(pt,e2),b),e->loc);
     break;
   case &ComprehensionNoinit_e(e,t,b):
-    new_e = new_exp(new ComprehensionNoinit_e(DC(pt,e),Tcutil::copy_type(t),b),
+    new_e = new_exp(new ComprehensionNoinit_e(DC(pt,e),copy_type(t),b),
 		   e->loc);
     break;
   case &Aggregate_e(n,ts,eds,agr):
@@ -439,7 +422,7 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
     throw new Core::Failure("deep_copy: statement expressions unsupported");
   case &Tagcheck_e(e1, fn): new_e=new_exp(new Tagcheck_e(DC(pt,e1),fn),e->loc);
     break;
-  case &Valueof_e(t): new_e = valueof_exp(Tcutil::copy_type(t),e->loc);
+  case &Valueof_e(t): new_e = valueof_exp(copy_type(t),e->loc);
     break;
   case &Asm_e(v,s): new_e = asm_exp(v,s,e->loc); break;
   }
@@ -834,8 +817,7 @@ static int boundscmp(bounds_t b1, bounds_t b2) {
   case $(&DynEither_b,&DynEither_b): return 0;
   case $(&DynEither_b,_): return -1;
   case $(_,&DynEither_b): return 1;
-  case $(&Upper_b(e1),&Upper_b(e2)):
-    return Evexp::const_exp_cmp(e1,e2);
+  case $(&Upper_b(e1),&Upper_b(e2)): return Evexp::const_exp_cmp(e1,e2);
   }
 }
 
@@ -965,7 +947,7 @@ static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
   case &Kind(RgnKind,Aliasable): t = &HeapRgn_val;   break;
   case &Kind(EffKind,_):         t = empty_effect;   break;
   case &Kind(IntKind,_):         t = new ValueofType(uint_exp(0,0)); break;
-  default:                   t = sint_typ;       break; // lives in every kind
+  default:                       t = sint_typ; break; // lives in every kind
   }
   return new $(tv,t);
 }
@@ -2461,7 +2443,7 @@ bool warn_alias_coerce = false;
 // (2) generates an alias statement that defines that variable as aliasing
 // the given expression, using the given tvar as the region
 $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ) {
-  static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&Tcutil::rk);
+  static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&rk);
 
   // generate a fresh variable to alias the given expression to
   static int counter = 0;
@@ -3940,7 +3922,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
         if (f->tag == NULL)
           f->tag = uint_exp(tag_count, f->loc);
-        else if (!Tcutil::is_const_exp((exp_t)f->tag))
+        else if (!is_const_exp((exp_t)f->tag))
           terr(loc,"enum field %s: expression is not constant",*(*f->name)[1]);
 
         unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
@@ -4415,12 +4397,13 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       *req_relns = req_rs;
       List::iter_c(replace_rops, args, req_rs);
       // add a bogus "return_value" variable for the @ensures clause
-      let var = new "return_value";
-      let vd = new Vardecl{.sc = Public, .name = new $((nmspace_t)Loc_n,var),
-                           .tq = empty_tqual(0), .type = tr, 
-                           .initializer = NULL, .rgn = curr_rgn(ftenv), 
-                           .attributes = NULL, .escapes = false};
-      //      ftenv = add_local_var(newr,0,ftenv,vd);
+      // DJG: this is done in the binding phase now
+//       let var = new "return_value";
+//       let vd = new Vardecl{.sc = Public, .name = new $((nmspace_t)Loc_n,var),
+//                            .tq = empty_tqual(0), .type = tr, 
+//                            .initializer = NULL, .rgn = curr_rgn(ftenv), 
+//                            .attributes = NULL, .escapes = false};
+//      ftenv = add_local_var(newr,0,ftenv,vd);
       let $(nenv,ens_rs) = check_clause(loc,ftenv,new_cvtenv,"@ensures",ens);
       new_cvtenv = nenv;
       *ens_relns = ens_rs;
@@ -4770,7 +4753,6 @@ static cvtenv_t<`r> check_valid_type(seg_t loc, tenv_t te,
                                      kind_t expected_kind,
                                      bool allow_abs_aggr,
                                      type_t t) {
-
   let kind_env = cvt.kind_env;
   cvt = i_check_valid_type(loc,te,cvt,expected_kind,t,true,allow_abs_aggr);
 
@@ -4807,8 +4789,7 @@ static cvtenv_t<`r> check_valid_type(seg_t loc, tenv_t te,
 // we can constrain the region evars to HeapRgn and the
 // effect evars to the empty effect, but we're out of luck
 // for the type and int variables.
-void check_free_evars(list_t<type_t> free_evars, type_t in_t, seg_t loc)
-{
+void check_free_evars(list_t<type_t> free_evars, type_t in_t, seg_t loc) {
   for (; free_evars != NULL; free_evars = free_evars->tl) {
     type_t e = free_evars->hd;
     switch (typ_kind(e)) {
@@ -5285,24 +5266,6 @@ bool is_noalias_pointer_or_aggr(region_t<`r> rgn, type_t t) {
   }
 }
 
-static bool is_noalias_field(region_t<`r> r, type_t t, field_name_t f) {
-  switch (compress(t)) {
-  case &AggrType(AggrInfo({.KnownAggr = &ad},ts)):
-    fallthru ((ad->impl == NULL) ? NULL : ad->impl->fields);
-  case &AnonAggrType(_,x):
-    let finfo = lookup_field(x,f);
-    switch (finfo) {
-    case NULL: Tcutil::impos("is_noalias_field: missing field");
-    case &Aggrfield(_,_,t,_,_,_):
-      return is_noalias_pointer_or_aggr(r,t);
-    }
-    return false;
-  default:
-    Tcutil::impos("is_noalias_field: invalid type |%s|",
-		  Absynpp::typ2string(t));
-  }
-}
-
 // returns true if the path [e] is entirely unique.  I.e. **x is unique
 // if x has type (e.g.) int *`U*`U*`U x but not if it has type (e.g.)
 // int *`U*`H*`U x
@@ -5329,7 +5292,7 @@ bool is_noalias_path(region_t<`r> r, exp_t e) {
       case &Seq_s(s1,s2): s = s2; break;
       case &Decl_s(d,s1): s = s1; break;
       case &Exp_s(e): return is_noalias_path(r,e);
-      default: Tcutil::impos("is_noalias_stmt_exp: ill-formed StmtExp");
+      default: impos("is_noalias_stmt_exp: ill-formed StmtExp");
       }
     }
   default: return true;
@@ -5770,17 +5733,14 @@ list_t<`a> filter_nulls(list_t<`a *,`H> l) {
   return res;
 }
 
-bool is_array(type_t t)
-{
-  switch(compress(t))
-  {
+bool is_array(type_t t) {
+  switch(compress(t)) {
   case &ArrayType(_): return true;
   default: return false;
   }
 }
 
-type_t promote_array(type_t t, type_t rgn, bool convert_tag)
-{
+type_t promote_array(type_t t, type_t rgn, bool convert_tag) {
   switch(compress(t)) { 
   case &ArrayType(ArrayInfo(et,tq,eopt,zt,ztl)):
     bounds_t b;
@@ -5816,15 +5776,15 @@ type_t promote_array(type_t t, type_t rgn, bool convert_tag)
 bool zeroable_type(type_t t) {
   switch (compress(t)) {
   case &VoidType: return true;
-  case &Evar(_,_,_,_):
-  case &VarType(_):
-  case &DatatypeType(_):
-  case &DatatypeFieldType(_): return false;
+  case &Evar(...):
+  case &VarType(...):
+  case &DatatypeType(...):
+  case &DatatypeFieldType(...): return false;
   case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
     return (conref_def(true,n));
-  case &IntType(_,_):
-  case &FloatType(_): return true;
-  case &ArrayType(ArrayInfo{t,_,_,_,_}): return zeroable_type(t);
+  case &IntType(...):
+  case &FloatType(...): return true;
+  case &ArrayType(ArrayInfo{t,...}): return zeroable_type(t);
   case &FnType(_): return false;
   case &TupleType(tqs):
     for (; tqs; tqs = tqs->tl)
@@ -5839,27 +5799,27 @@ bool zeroable_type(type_t t) {
     for (_ fs = ad->impl->fields; fs != NULL; fs = fs->tl)
       if (!zeroable_type(rsubstitute(r,inst,fs->hd->type))) return false;
     return true;
-  case &EnumType(_,_): return true; // FIX: explicit tags?
-  case &TagType(_): return true; // FIX: true iff 0? Is sizeof right?
+  case &EnumType(...): // FIX: explicit tags?
+  case &TagType(...): return true; // FIX: true iff 0? Is sizeof right?
   case &AnonAggrType(_,fs):
     for (; fs != NULL; fs = fs->tl)
       if (!zeroable_type(fs->hd->type)) return false;
     return true;
-  case &AnonEnumType(_): return true; // FIX: explicit tags?
-  case &TypedefType(_,_,_,_): return false;
-  case &DynRgnType(_,_): return false;
-  case &RgnHandleType(_): return false;
+  case &AnonEnumType(...): return true; // FIX: explicit tags?
+  case &TypedefType(...):
+  case &DynRgnType(...): 
+  case &RgnHandleType(...): 
   case &BuiltinType(...): return false;
 
   case &TypeDeclType(...):
-  case &TypeofType(_):
-  case &ValueofType(_):
+  case &TypeofType(...):
+  case &ValueofType(...):
   case &HeapRgn:
   case &UniqueRgn:
   case &RefCntRgn:
-  case &AccessEff(_):
-  case &JoinEff(_):
-  case &RgnsEff(_): impos("bad type `%s' in zeroable type",typ2string(t));
+  case &AccessEff(...):
+  case &JoinEff(...):
+  case &RgnsEff(...): impos("bad type `%s' in zeroable type",typ2string(t));
   }
 }
 

@@ -55,8 +55,7 @@ datatype exn {Env_error};
 datacon(exn,Env_error);
 
 `a env_err(string_t msg) __attribute__((noreturn)) {
-  //fprintf(stderr,"Internal error in tcenv: %s\n",msg);
-  //fflush(stderr);
+  //fprintf(stderr,"Internal error in tcenv: %s\n",msg); fflush(stderr);
   throw &Env_error_val;
 }
 
@@ -240,7 +239,7 @@ tenv_t<`g,`r> add_type_vars(region_t<`r> r, seg_t loc,tenv_t<`g,`r2> te,
 
   add_tvar_identities(tvs);
   let new_tvs = List::append(tvs,type_vars);
-  Tcutil::check_unique_tvars(loc,new_tvs);
+  check_unique_tvars(loc,new_tvs);
   let fe = rnew(r) Fenv(shared,new_tvs,region_order,
                         (ftclause_t<`r>)ctrl_env,capability,curr_rgn,flags,r);
   return put_fenv(r,te,fe);
@@ -454,7 +453,7 @@ tenv_t<`g,`r> new_named_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
   fenv_t fe = copy_fenv(r,get_fenv(te,"new_block"));
   type_t block_typ = new VarType(block_rgn);
   type_vars = new List(block_rgn, type_vars);
-  Tcutil::check_unique_tvars(loc, type_vars);
+  check_unique_tvars(loc, type_vars);
   region_order = add_youngest(shared->frgn, region_order, block_rgn, false, false);
   capability = new JoinEff(new List(new AccessEff(block_typ), new List(capability,NULL)));
   curr_rgn = block_typ;
@@ -464,7 +463,7 @@ tenv_t<`g,`r> new_named_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te,
   return put_fenv(r,te,fe);
 }
 
-static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&Tcutil::rk);
+static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&rk);
 
 tenv_t<`g,`r> new_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te
                         : {`r2} > `r) {
@@ -472,7 +471,6 @@ tenv_t<`g,`r> new_block(region_t<`r> r, seg_t loc, tenv_t<`g,`r2> te
   add_tvar_identity(t);
   return new_named_block(r, loc, te, t);
 }
-
 
 tenv_t<`g,`r> new_outlives_constraints(region_t<`r> r, tenv_t<`g,`r2> te,
                                        list_t<$(type_t,type_t)@> cs,
@@ -497,9 +495,7 @@ tenv_t<`g,`r> add_region_equality(region_t<`r> r, tenv_t<`g,`r2> te,
 				  $(tvar_t,kindbound_t) *`r @oldtv,
 				  seg_t loc
 				  : {`r2} > `r) {
-
-  // we add outlives constraints and also refine the kind of
-  // the type variable
+  // we add outlives constraints and refine the kind of the type variable
   let r1 = compress(r1);
   let r2 = compress(r2);
   let r1k = typ_kind(r1);
@@ -585,7 +581,7 @@ bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
     switch (rt_a) {
     case &RefCntRgn: return rt_b != &UniqueRgn_val;
     case &UniqueRgn: return rt_b != &RefCntRgn_val;
-    case &HeapRgn: return rt_b == &HeapRgn_val;
+    case &HeapRgn:   return rt_b == &HeapRgn_val;
     default: return false;
     }
   // When typechecking a function body:
@@ -660,6 +656,13 @@ void check_delayed_constraints(tenv_t te) {
   }
 }
 
+static struct SharedFenv<`r> @`r new_shared_fenv(region_t<`r> r, type_t ret) {
+  return rnew(r) SharedFenv{.frgn = r,
+			    .return_typ = ret,
+			    .delayed_effect_checks = NULL,
+			    .delayed_constraint_checks = NULL };
+}
+
 fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
@@ -684,12 +687,7 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
     }
   }
   return rnew(r)
-    Fenv{.shared = rnew(r) SharedFenv{
-                     .frgn = r,
-                     .return_typ = fd->ret_type,
-		     .delayed_effect_checks = NULL,
-		     .delayed_constraint_checks = NULL
-                   },
+    Fenv{.shared = new_shared_fenv(r, fd->ret_type),
          .type_vars   = tvs,
          .region_order = rgn_po,
          .ctrl_env    = NULL,
@@ -708,18 +706,19 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
   tvar_t rgn0 =
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(), &rgn_kb);
-  // add in all of the region vars
   for (let tvars = fd->tvs; tvars != NULL; tvars = tvars->tl) {
     let &Kind(k,a) = tvar_kind(tvars->hd,&bk);
     if (k == RgnKind)
       if (a == Aliasable)
-	rgn_po = add_youngest(r, rgn_po, tvars->hd, false, false);
+	rgn_po = add_unordered(r, rgn_po, tvars->hd);
       else
 	impos("non-intuitionistic tvar in nested_fenv");
   }
   rgn_po = add_youngest(r, rgn_po, rgn0, false, false);
+  for(let po2 = fd->rgn_po; po2 != NULL; po2=po2->tl)
+    rgn_po = add_outlives_constraint(r,rgn_po,(*po2->hd)[0],(*po2->hd)[1],loc);
   let tvs = new List(rgn0,List::append(fd->tvs,type_vars));
-  Tcutil::check_unique_tvars(loc,tvs);
+  check_unique_tvars(loc,tvs);
   type_t param_rgn = new VarType(rgn0);
   for(let vds = fd->param_vardecls->v; vds != NULL; vds = vds->tl)
     vds->hd->rgn = param_rgn;
@@ -735,12 +734,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
     }
   }
   return rnew(r)
-    Fenv{.shared = rnew(r) SharedFenv{
-                     .frgn = r,
-                     .return_typ = fd->ret_type,
-		     .delayed_effect_checks = NULL,
-		     .delayed_constraint_checks = NULL
-                   },
+    Fenv{.shared = new_shared_fenv(r, fd->ret_type),
          .type_vars   = tvs,
          .region_order = rgn_po,
          .ctrl_env    = NULL,
@@ -759,12 +753,7 @@ fenv_t<`r> bogus_fenv(region_t<`r> r, type_t ret_type,
   let rgn_po = initial_fn_po(r,NULL,NULL,new JoinEff(NULL),rgn0,0);
   type_t param_rgn = new VarType(rgn0);
   return rnew(r)
-    Fenv{.shared = rnew(r) SharedFenv{
-                     .frgn = r,
-                     .return_typ = ret_type,
-		     .delayed_effect_checks = NULL,
-		     .delayed_constraint_checks = NULL
-                   },
+    Fenv{.shared = new_shared_fenv(r, ret_type),
          .type_vars   = tvs,
          .region_order = rgn_po,
          .ctrl_env    = NULL,
