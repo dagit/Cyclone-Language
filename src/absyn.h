@@ -609,6 +609,7 @@ namespace Absyn {
   extern exp lte_exp(exp, exp, seg_t);
   extern exp assignop_exp(exp, opt_t<primop>, exp, seg_t);
   extern exp assign_exp(exp, exp, seg_t);
+  extern exp increment_exp(exp, incrementor_t, seg_t);
   extern exp post_inc_exp(exp, seg_t);
   extern exp post_dec_exp(exp, seg_t);
   extern exp pre_inc_exp(exp, seg_t);

@@ -270,10 +270,13 @@ exp assignop_exp(exp e1, opt_t<primop> popt, exp e2, seg_t loc) {
 exp assign_exp(exp e1, exp e2, seg_t loc) {
   return assignop_exp(e1,null,e2,loc);
 }
-exp post_inc_exp(exp e,seg_t loc){return new_exp(Increment_e(e,PostInc),loc);}
-exp pre_inc_exp(exp e, seg_t loc){return new_exp(Increment_e(e,PreInc),loc);}
-exp pre_dec_exp(exp e, seg_t loc){return new_exp(Increment_e(e,PreDec),loc);}
-exp post_dec_exp(exp e,seg_t loc){return new_exp(Increment_e(e,PostDec),loc);}
+exp increment_exp(exp e,incrementor_t i,seg_t loc) {
+  return new_exp(Increment_e(e,i),loc);
+}
+exp post_inc_exp(exp e,seg_t loc){return increment_exp(e,PostInc,loc);}
+exp pre_inc_exp(exp e, seg_t loc){return increment_exp(e,PreInc,loc);}
+exp pre_dec_exp(exp e, seg_t loc){return increment_exp(e,PreDec,loc);}
+exp post_dec_exp(exp e,seg_t loc){return increment_exp(e,PostDec,loc);}
 exp conditional_exp(exp e1,exp e2,exp e3,seg_t loc) {
   return new_exp(Conditional_e(e1,e2,e3), loc);
 }

@@ -5,21 +5,21 @@ Cyc_Core_Opt* f1; struct Cyc_Absyn_Tqual* f2; void* f3; } ; struct _tuple2{
 struct Cyc_Absyn_Exp* f1; struct Cyc_Absyn_Stmt* f2; } ; struct _tagged_ptr0{
 int* curr; int* base; int* last_plus_one; } ; struct _tuple3{ void* f1; int f2;
 } ; struct _tuple4{ struct Cyc_Declarator* f1; struct Cyc_Absyn_Exp* f2; } ;
-struct _tuple5{ struct Cyc_Absyn_Tqual* f1; struct Cyc_List_List* f2; } ; struct
-_tuple6{ struct Cyc_List_List* f1; int f2; struct Cyc_Core_Opt* f3; } ; struct
-_tuple7{ struct Cyc_List_List* f1; struct Cyc_Absyn_Pat* f2; } ; struct _tuple8{
-struct _tagged_string f1; } ; struct _tuple9{ struct _tagged_string f1; void* f2;
-struct _tagged_string f3; } ; typedef unsigned int Cyc_uint; typedef char* Cyc_Cstring;
-typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
-exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
-struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[ 11u];
-struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
-extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char* tag;
-struct _tagged_string f1; } ; extern char Cyc_Core_Impossible_tag[ 11u]; struct
-Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1; } ; extern char
-Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char* tag; } ;
-extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
+struct _tuple5{ struct Cyc_Absyn_Tqual* f1; struct Cyc_List_List* f2; struct Cyc_List_List*
+f3; } ; struct _tuple6{ struct Cyc_List_List* f1; int f2; struct Cyc_Core_Opt*
+f3; } ; struct _tuple7{ struct Cyc_List_List* f1; struct Cyc_Absyn_Pat* f2; } ;
+struct _tuple8{ struct _tagged_string f1; } ; struct _tuple9{ struct
+_tagged_string f1; void* f2; struct _tagged_string f3; } ; typedef unsigned int
+Cyc_uint; typedef char* Cyc_Cstring; typedef struct _tagged_string Cyc_string;
+typedef struct _tagged_string Cyc_string_t; typedef struct _tagged_string* Cyc_stringptr;
+typedef int Cyc_bool; extern void* exit( int); extern void* abort(); struct Cyc_Core_Opt{
+void* v; } ; typedef struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg_tag[
+11u]; struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; }
+; extern char Cyc_Core_Failure_tag[ 8u]; struct Cyc_Core_Failure_struct{ char*
+tag; struct _tagged_string f1; } ; extern char Cyc_Core_Impossible_tag[ 11u];
+struct Cyc_Core_Impossible_struct{ char* tag; struct _tagged_string f1; } ;
+extern char Cyc_Core_Not_found_tag[ 10u]; struct Cyc_Core_Not_found_struct{ char*
+tag; } ; extern char Cyc_Core_Unreachable_tag[ 12u]; struct Cyc_Core_Unreachable_struct{
 char* tag; struct _tagged_string f1; } ; extern char* string_to_Cstring( struct
 _tagged_string); extern char* underlying_Cstring( struct _tagged_string); extern
 struct _tagged_string Cstring_to_string( char*); extern int system( char*);

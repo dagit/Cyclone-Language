@@ -546,6 +546,17 @@ static list_t<$(qvar,tqual,typ,list_t<tvar>,list_t<attribute_t>)@>
                apply_tmss(tq,t,ds->tl,shared_atts));
 }
 
+static bool fn_type_att(attribute_t a) {
+  switch (a) {
+  case Regparm_att(_): fallthru;
+  case Stdcall_att: fallthru;
+  case Cdecl_att: fallthru;
+  case Noreturn_att: fallthru;
+  case Const_att: return true;
+  default: return false;
+  }
+}
+
 static $(tqual,typ,list_t<tvar>,list_t<attribute_t>) 
   apply_tms(tqual tq, typ t, list_t<attribute_t> atts,
             list_t<type_modifier> tms) {
@@ -560,7 +571,15 @@ static $(tqual,typ,list_t<tvar>,list_t<attribute_t>)
       switch (args) {
       case WithTypes(args2,vararg,eff):
         list_t<tvar> typvars = null;
-        attributes_t fn_atts = null;
+        // any function type attributes seen thus far get put in the function
+        // type
+        attributes_t fn_atts = null, new_atts = null;
+        for (_ as = atts; as != null; as = as->tl) {
+          if (fn_type_att(as->hd))
+            fn_atts = &List(as->hd,fn_atts);
+          else 
+            new_atts = &List(as->hd,new_atts);
+        }
         // functions consume type parameters
         if (tms->tl != null) {
           switch (tms->tl->hd) {
@@ -570,17 +589,6 @@ static $(tqual,typ,list_t<tvar>,list_t<attribute_t>)
 	    break;
           default:
             break;
-          }
-        }
-        // functions consume attributes seen immediately after
-        // NOTE:  this may not be GCC's behavior...
-        if (tms->tl != null) {
-          switch (tms->tl->hd) {
-          case Attributes_mod(loc,a): 
-            fn_atts = a;
-            tms=tms->tl; 
-            break;
-          default: break;
           }
         }
         // special case where the parameters are void, e.g., int f(void)
@@ -604,7 +612,7 @@ static $(tqual,typ,list_t<tvar>,list_t<attribute_t>)
         // now we don't have a loc so the warning will be confusing.
         return apply_tms(empty_tqual(),
 			 function_typ(typvars,eff,t,args2,vararg,fn_atts),
-                         atts,
+                         new_atts,
                          tms->tl);
       case NoTypes(_,loc):
         throw abort("function declaration without parameter types",loc);
@@ -633,7 +641,10 @@ static $(tqual,typ,list_t<tvar>,list_t<attribute_t>)
       }
     }
     case Attributes_mod(loc,atts2):
-      return apply_tms(tq,t,append(atts,atts2),tms->tl);
+      // FIX: get this in line with GCC
+      // attributes get attached to function types -- I doubt that this
+      // is GCC's behavior but what else to do?
+      return apply_tms(tq,t,List::append(atts,atts2),tms->tl);
   }
 }
 
@@ -887,7 +898,7 @@ using Parse;
   InitDeclList_tok(list_t<$(declarator_t,exp_opt)@>);
   StorageClass_tok(storage_class_t);
   TypeSpecifier_tok(type_specifier_t);
-  QualSpecList_tok($(tqual,list_t<type_specifier_t>)@);
+  QualSpecList_tok($(tqual,list_t<type_specifier_t>,attributes_t)@);
   TypeQual_tok(tqual);
   StructFieldDeclList_tok(list_t<structfield_t>);
   StructFieldDeclListList_tok(list_t<list_t<structfield_t>>);
@@ -1406,22 +1417,26 @@ struct_declaration:
        * and then convert this to a list of struct fields: (1) id,
        * (2) tqual, (3) type. */
       tqual tq = (*$1)[0];
+      let atts = (*$1)[2];
       let t = speclist2typ((*$1)[1], LOC(@1,@1));
-      let info = apply_tmss(tq,t,$2,null);
+      let info = apply_tmss(tq,t,$2,atts);
       $$=^$(List::map_c(make_struct_field,LOC(@1,@2),info));
     }
 ;
 
 specifier_qualifier_list:
-  type_specifier
+  type_specifier attributes_opt
     // FIX: casts needed
-    { $$=^$(&$(empty_tqual(),(list_t<type_specifier_t>)(&List($1,null)))); }
-| type_specifier specifier_qualifier_list
-    { $$=^$(&$((*$2)[0],(list_t<type_specifier_t>)(&List($1,(*$2)[1])))); }
-| type_qualifier
-    { $$=^$(&$($1,null)); }
-| type_qualifier specifier_qualifier_list
-    { $$=^$(&$(combine_tqual($1,(*$2)[0]),(*$2)[1])); }
+    { $$=^$(&$(empty_tqual(),(list_t<type_specifier_t>)(&List($1,null)),
+               $2)); }
+| type_specifier attributes_opt specifier_qualifier_list
+    { $$=^$(&$((*$3)[0],(list_t<type_specifier_t>)(&List($1,(*$3)[1])),
+               List::append($2,(*$3)[2]))); }
+| type_qualifier attributes_opt
+    { $$=^$(&$($1,null,$2)); }
+| type_qualifier attributes_opt specifier_qualifier_list
+    { $$=^$(&$(combine_tqual($1,(*$3)[0]),(*$3)[1],
+               List::append($2,(*$3)[2]))); }
 
 struct_declarator_list:
   struct_declarator_list0 { $$=^$(List::imp_rev($1)); }
@@ -1633,9 +1648,10 @@ parameter_list:
 parameter_declaration:
   specifier_qualifier_list declarator
    {  let t   = speclist2typ((*$1)[1], LOC(@1,@1));
+      let atts = (*$1)[2];
       let tq  = (*$1)[0];
       let tms = $2->tms;
-      let t_info = apply_tms(tq,t,null,tms);
+      let t_info = apply_tms(tq,t,atts,tms);
       if (t_info[2] != null)
         err("parameter with bad type params",LOC(@2,@2));
       let q = $2->id;
@@ -1648,21 +1664,31 @@ parameter_declaration:
         break;
       }
       let idopt = (opt_t<var>)&Opt((*q)[1]);
+      if (t_info[3] != null) 
+        warn("extra attributes on parameter, ignoring",LOC(@1,@2));
+      if (t_info[2] != null)
+        warn("extra type variables on parameter, ignoring",LOC(@1,@2));
       $$=^$(&$(idopt,t_info[0],t_info[1]));
     }
 | specifier_qualifier_list
     { let t  = speclist2typ((*$1)[1], LOC(@1,@1));
+      let atts = (*$1)[2];
       let tq = (*$1)[0];
+      if (atts != null)
+        warn("bad attributes on parameter, ignoring",LOC(@1,@1));
       $$=^$(&$(null,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
     { let t   = speclist2typ((*$1)[1], LOC(@1,@1));
+      let atts = (*$1)[2];
       let tq  = (*$1)[0];
       let tms = $2->tms;
-      let t_info = apply_tms(tq,t,null,tms);
+      let t_info = apply_tms(tq,t,atts,tms);
       if (t_info[2] != null)
         // Ex: int (@)<`a>
-        warn("bad type params, ignoring",LOC(@2,@2));
+        warn("bad type parameters on formal argument, ignoring",LOC(@1,@2));
+      if (t_info[3] != null)
+        warn("bad attributes on parameter, ignoring",LOC(@1,@2));
       $$=^$(&$(null,t_info[0],t_info[1]));
     }
 /*
@@ -1727,17 +1753,23 @@ designator:
 type_name:
   specifier_qualifier_list
     { let t  = speclist2typ((*$1)[1], LOC(@1,@1));
+      let atts = (*$1)[2];
+      if (atts != null)
+        warn("ignoring attributes in type",LOC(@1,@1));
       let tq = (*$1)[0];
       $$=^$(new{$(null,tq,t)});
     }
 | specifier_qualifier_list abstract_declarator
     { let t   = speclist2typ((*$1)[1], LOC(@1,@1));
+      let atts = (*$1)[2];
       let tq  = (*$1)[0];
       let tms = $2->tms;
-      let t_info = apply_tms(tq,t,null,tms);
+      let t_info = apply_tms(tq,t,atts,tms);
       if (t_info[2] != null)
         // Ex: int (@)<`a>
         warn("bad type params, ignoring",LOC(@2,@2));
+      if (t_info[3] != null)
+        warn("bad specifiers, ignoring",LOC(@2,@2));
       $$=^$(&$(null,t_info[0],t_info[1]));
     }
 ;

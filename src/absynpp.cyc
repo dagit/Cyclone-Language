@@ -1244,10 +1244,10 @@ doc_t decl2doc(decl d) {
                           fd->ret_type,
                           List::map(arg_mk_opt,fd->args),
                           fd->varargs, null});
-    s = cat8(text(fd->is_inline?(string)"inline ":(string)""),
+    s = cat7(text(fd->is_inline?(string)"inline ":(string)""),
              scope2doc(fd->sc),
-             tqtd2doc(&Tqual(false,false,false),t,&Opt(qvar2doc(fd->name))),
-             atts2doc(fd->attributes),
+             tqtd2doc(&Tqual(false,false,false),t,
+                      &Opt(cat2(atts2doc(fd->attributes),qvar2doc(fd->name)))),
              text(" {"),
              nest(2,cat2(line_doc(),stmt2doc(fd->body))),
              line_doc(),
@@ -1407,13 +1407,12 @@ $(tqual,typ,list_t<type_modifier>) to_tms(tqual tq,typ t) {
   case FnType(FnInfo{typvars,effopt,t2,args,varargs,fn_atts}):
     // discard tq because you can't qualify a function
     let $(tq3,t3,tml3) = to_tms(empty_tqual(),t2);
-    list_t<type_modifier> tms = 
-      &List(Function_mod(WithTypes(args,varargs,effopt)),tml3);
+    list_t<type_modifier> tms = tml3;
+    if (fn_atts != null) 
+      tms = &List(Attributes_mod(null,fn_atts),tms);
+    tms = &List(Function_mod(WithTypes(args,varargs,effopt)),tms);
     if (typvars != null)
       tms = &List(TypeParams_mod(typvars,null,true),tms);
-    if (fn_atts != null) {
-      tms = &List(Attributes_mod(null,fn_atts),tms);
-    }
     return $(tq3,t3,tms);
 
   case Evar(k,topt,i):

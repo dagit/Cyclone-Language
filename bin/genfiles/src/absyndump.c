@@ -1696,13 +1696,15 @@ struct _tagged_string*)) Cyc_Absyndump_dumptqtd)(( struct Cyc_Absyn_Tqual*)
 _temp1127, _temp1125, Cyc_Absyndump_dump_str, _temp1129); Cyc_Absyndump_dumpatts(
 _temp1123); Cyc_Absyndump_dump_semi();}} void Cyc_Absyndump_dumptypedefname(
 struct Cyc_Absyn_Typedefdecl* td){ Cyc_Absyndump_dumpqvar( td->name); Cyc_Absyndump_dumptvars(
-td->tvs);} void Cyc_Absyndump_dumpdecl( struct Cyc_Absyn_Decl* d){ void*
-_temp1131=( void*) d->r; struct Cyc_Absyn_Fndecl* _temp1155; struct Cyc_Absyn_Structdecl*
-_temp1157; struct Cyc_Absyn_Vardecl* _temp1159; struct Cyc_Absyn_Vardecl
-_temp1161; struct Cyc_List_List* _temp1162; struct Cyc_Core_Opt* _temp1164; int
-_temp1166; struct Cyc_Absyn_Exp* _temp1168; void* _temp1170; struct Cyc_Absyn_Tqual*
-_temp1172; struct _tuple0* _temp1174; void* _temp1176; struct Cyc_Absyn_Enumdecl*
-_temp1178; struct Cyc_Absyn_Xenumdecl* _temp1180; int _temp1182; struct Cyc_Absyn_Exp*
+td->tvs);} static void Cyc_Absyndump_dump_atts_qvar( struct Cyc_Absyn_Fndecl* fd){
+Cyc_Absyndump_dumpatts( fd->attributes); Cyc_Absyndump_dumpqvar( fd->name);}
+void Cyc_Absyndump_dumpdecl( struct Cyc_Absyn_Decl* d){ void* _temp1131=( void*)
+d->r; struct Cyc_Absyn_Fndecl* _temp1155; struct Cyc_Absyn_Structdecl* _temp1157;
+struct Cyc_Absyn_Vardecl* _temp1159; struct Cyc_Absyn_Vardecl _temp1161; struct
+Cyc_List_List* _temp1162; struct Cyc_Core_Opt* _temp1164; int _temp1166; struct
+Cyc_Absyn_Exp* _temp1168; void* _temp1170; struct Cyc_Absyn_Tqual* _temp1172;
+struct _tuple0* _temp1174; void* _temp1176; struct Cyc_Absyn_Enumdecl* _temp1178;
+struct Cyc_Absyn_Xenumdecl* _temp1180; int _temp1182; struct Cyc_Absyn_Exp*
 _temp1184; struct Cyc_Core_Opt* _temp1186; struct Cyc_Core_Opt* _temp1188;
 struct Cyc_Absyn_Pat* _temp1190; struct Cyc_Absyn_Typedefdecl* _temp1192; struct
 Cyc_List_List* _temp1194; struct _tagged_string* _temp1196; struct Cyc_List_List*
@@ -1765,12 +1767,12 @@ _temp1207.ret_typ=( void*)(( void*) _temp1155->ret_type); _temp1207.args=((
 struct Cyc_List_List*(*)( struct _tuple1*(* f)( struct _tuple3*), struct Cyc_List_List*
 x)) Cyc_List_map)( Cyc_Absynpp_arg_mk_opt, _temp1155->args); _temp1207.varargs=
 _temp1155->varargs; _temp1207.attributes= 0; _temp1207;});( void*) _temp1206;});((
-void(*)( struct Cyc_Absyn_Tqual*, void*, void(* f)( struct _tuple0*), struct
-_tuple0*)) Cyc_Absyndump_dumptqtd)( 0, t, Cyc_Absyndump_dumpqvar, _temp1155->name);
-Cyc_Absyndump_dumpatts( _temp1155->attributes); Cyc_Absyndump_dump_char(( int)'{');
-Cyc_Absyndump_dumpstmt( _temp1155->body); Cyc_Absyndump_dump_char(( int)'}');
-goto _LL1132;} _LL1136: Cyc_Absyndump_dumpscope(( void*) _temp1157->sc); Cyc_Absyndump_dump((
-struct _tagged_string)({ char* _temp1208=( char*)"struct"; struct _tagged_string
+void(*)( struct Cyc_Absyn_Tqual*, void*, void(* f)( struct Cyc_Absyn_Fndecl*),
+struct Cyc_Absyn_Fndecl*)) Cyc_Absyndump_dumptqtd)( 0, t, Cyc_Absyndump_dump_atts_qvar,
+_temp1155); Cyc_Absyndump_dump_char(( int)'{'); Cyc_Absyndump_dumpstmt(
+_temp1155->body); Cyc_Absyndump_dump_char(( int)'}'); goto _LL1132;} _LL1136:
+Cyc_Absyndump_dumpscope(( void*) _temp1157->sc); Cyc_Absyndump_dump(( struct
+_tagged_string)({ char* _temp1208=( char*)"struct"; struct _tagged_string
 _temp1209; _temp1209.curr= _temp1208; _temp1209.base= _temp1208; _temp1209.last_plus_one=
 _temp1208 + 7; _temp1209;})); if( _temp1157->name != 0){ Cyc_Absyndump_dumpqvar((
 struct _tuple0*)( _temp1157->name)->v);} Cyc_Absyndump_dumptvars( _temp1157->tvs);

@@ -6,11 +6,11 @@ void* f1; struct _tagged_string* f2; } ; struct _tuple1{ struct Cyc_Core_Opt* f1
 struct Cyc_Absyn_Tqual* f2; void* f3; } ; struct _tuple2{ struct Cyc_Absyn_Exp*
 f1; struct Cyc_Absyn_Stmt* f2; } ; struct _tuple3{ void* f1; int f2; } ; struct
 _tuple4{ struct Cyc_Declarator* f1; struct Cyc_Absyn_Exp* f2; } ; struct _tuple5{
-struct Cyc_Absyn_Tqual* f1; struct Cyc_List_List* f2; } ; struct _tuple6{ struct
-Cyc_List_List* f1; int f2; struct Cyc_Core_Opt* f3; } ; struct _tuple7{ struct
-Cyc_List_List* f1; struct Cyc_Absyn_Pat* f2; } ; struct _tuple8{ struct
-_tagged_string f1; short f2; } ; struct _tuple9{ struct Cyc_Lex_Trie** f1; } ;
-typedef unsigned int Cyc_uint; typedef char* Cyc_Cstring; typedef struct
+struct Cyc_Absyn_Tqual* f1; struct Cyc_List_List* f2; struct Cyc_List_List* f3;
+} ; struct _tuple6{ struct Cyc_List_List* f1; int f2; struct Cyc_Core_Opt* f3; }
+; struct _tuple7{ struct Cyc_List_List* f1; struct Cyc_Absyn_Pat* f2; } ; struct
+_tuple8{ struct _tagged_string f1; short f2; } ; struct _tuple9{ struct Cyc_Lex_Trie**
+f1; } ; typedef unsigned int Cyc_uint; typedef char* Cyc_Cstring; typedef struct
 _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t; typedef
 struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void* exit(
 int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef struct Cyc_Core_Opt*

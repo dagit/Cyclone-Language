@@ -218,7 +218,8 @@ static void tcVardecl(tenv te, genv_t ge, seg_t loc, vardecl vd) {
     for (; atts != null; atts = atts->tl) {
       switch (atts->hd) {
       case Aligned_att(_): continue;
-      case Packed_att:     continue;
+        // GCC doesn't allow variables to be packed
+        // case Packed_att:     continue;
       case Section_att(_): continue;
       case Nocommon_att:   continue;
       case Shared_att:     continue;

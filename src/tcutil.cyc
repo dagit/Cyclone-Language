@@ -1277,15 +1277,11 @@ typ fndecl2typ(fndecl fd) {
     // First, separate the function type attributes from the rest
     // of the attributes and update the function declaration appropriately.
     let fn_type_atts = null;
-    let fd_atts = null;
     for (_ atts = fd->attributes; atts != null; atts = atts->tl) {
       if (fntype_att(atts->hd)) {
         fn_type_atts = &List(atts->hd,fn_type_atts); 
-      } else {
-        fd_atts = &List(atts->hd,fd_atts); 
-      }
+      } 
     }
-    fd->attributes = fd_atts;
     return FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                            List::map(fndecl2typ_f, fd->args),
                            fd->varargs, fn_type_atts});

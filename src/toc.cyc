@@ -1241,10 +1241,40 @@ static void exp_to_c(env nv, exp e) {
     typ e2_cyc_typ = e2->topt->v;
     exp_to_c(nv,e2);
     if (is_tagged_pointer_typ(e2_cyc_typ)) {
-      // e2.curr++
-      e2->r = structmember_exp(new_exp(e2->r,DL),curr_sp,DL)->r;
-    }
-    if(!is_lvalue(e2)) {
+      if (incr == PreInc || incr == PreDec) {
+        // When we have a pre-increment or decrement:
+        // ({ struct tagged_ptr *temp = &e2;
+        //    ++temp->curr; 
+        //    *temp
+        // })
+        let temp = temp_var();
+        let temp_typ = star_typ(typ_to_c(e2_cyc_typ),HeapRgn,empty_tqual());
+        let s = exp_stmt(deref_exp(var_exp(temp,DL),DL),DL);
+        let e3 = increment_exp(structarrow_exp(var_exp(temp,DL),curr_sp,DL),
+                               incr,DL);
+        s = seq_stmt(exp_stmt(e3,DL),s,DL);
+        s = declare_stmt(temp,temp_typ,address_exp(e2,DL),s,DL);
+        e->r = stmt_exp(s,DL)->r;
+      } else {
+        // When we have a post-increment or decrement:
+        // ({ struct tagged_ptr *temp = &e2;
+        //    struct tagged_ptr temp2 = *e2;
+        //    temp->curr++;
+        //    temp2;
+        // })
+        let temp = temp_var();
+        let temp2 = temp_var();
+        let temp2_typ = typ_to_c(e2_cyc_typ);
+        let temp_typ = star_typ(typ_to_c(e2_cyc_typ),HeapRgn,empty_tqual());
+        let s = exp_stmt(var_exp(temp2,DL),DL);
+        let e3 = increment_exp(structarrow_exp(var_exp(temp,DL),curr_sp,DL),
+                               incr,DL);
+        s = seq_stmt(exp_stmt(e3,DL),s,DL);
+        s = declare_stmt(temp2,temp2_typ,deref_exp(var_exp(temp,DL),DL),s,DL);
+        s = declare_stmt(temp,temp_typ,address_exp(e2,DL),s,DL);
+        e->r = stmt_exp(s,DL)->r;
+      }
+    } else if(!is_lvalue(e2)) {
       lvalue_assign(e2,null,incr_lvalue,incr);
       e->r = e2->r;
     }

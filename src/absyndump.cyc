@@ -666,6 +666,11 @@ void dumptypedefname(typedefdecl td) {
   dumptvars(td->tvs);
 }
 
+static void dump_atts_qvar(fndecl fd) {
+  dumpatts(fd->attributes);
+  dumpqvar(fd->name);
+}
+
 void dumpdecl(decl d) {
   switch(d->r) {
   case Fn_d(fd):
@@ -674,8 +679,7 @@ void dumpdecl(decl d) {
     typ t = FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                           List::map(Absynpp::arg_mk_opt,fd->args), 
                           fd->varargs, null});
-    dumptqtd(null,t,dumpqvar,fd->name);
-    dumpatts(fd->attributes);
+    dumptqtd(null,t,dump_atts_qvar,fd);
     dump_char('{');
     dumpstmt(fd->body);
     dump_char('}');

@@ -17,6 +17,7 @@
 #include "array.h"
 #include "id.h"
 #include "arg.h"
+#include "errno.h"
 
 using Stdio;
 using List;
@@ -990,6 +991,30 @@ namespace MyMath {
   }
 }
 
+// test out attribute stuff
+using Errno {
+  int att_f(int g(int) __attribute__((stdcall)) , int i) {
+    return g(i);
+  }
+
+  int __attribute__((stdcall)) att_foo(int i) {
+    return i+1;
+  }
+
+  short __attribute__((aligned(4))) att_x = 0;
+
+  struct AttFoo {
+    short __attribute__((aligned(4))) x ;
+    short y;
+  } __attribute__((packed));
+
+  void att_test() {
+    test_begin("Attributes");
+    okfail(_sys_nerr == 135);
+    okfail(att_f(att_foo,3) == 4);
+    test_end();
+  }
+}
 
 int main() {
   printf("*************** CYCLONE TEST SUITE ***************\n\n");
@@ -1032,6 +1057,7 @@ int main() {
   id_test();
   arg_test();
   printf_test();
+  att_test();
   // scanf_test(); // commented out because sscanf is insecure
 
   if (no_errors) {
