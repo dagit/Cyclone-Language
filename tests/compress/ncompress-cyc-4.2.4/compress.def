@@ -1,6 +1,6 @@
 # Current parameters.
 CC='cyclone'
-CCOPT='-O'
+CCOPT='-pg'
 LBOPT=''
 BINDIR='/usr/bin'
 MANDIR='/usr/man/man1'
@@ -15,4 +15,4 @@ BYTEORDER='4321'
 NOALLIGN='yes'
 EXTRA=''
 DEFINED='yes'
-UTIME_H='no'
+UTIME_H='yes'

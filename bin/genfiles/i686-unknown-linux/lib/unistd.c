@@ -242,19 +242,19 @@ unsigned int euid); extern unsigned int getgid(); extern int setgid(
 unsigned int gid); extern unsigned int getegid(); extern int setegid(
 unsigned int egid); extern int nice( int); extern int pause(); extern int pipe(
 int* filedes); extern int lseek( int filedes, int offset, int whence); extern
-unsigned int sleep( unsigned int); int Cyc_Std_access( struct _tagged_arr, int);
-int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown( struct _tagged_arr,
-unsigned int, unsigned int); struct _tagged_arr Cyc_Std_getcwd( struct
-_tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct _tagged_arr path,
-struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp( struct
-_tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execve(
-struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp);
-int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr); int Cyc_Std_read( int
-fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir( struct
-_tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr); int
-Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd, struct
-_tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct _tagged_arr
-pathname); extern int access( unsigned char*, int); extern int chdir(
+unsigned int sleep( unsigned int); extern int isatty( int); int Cyc_Std_access(
+struct _tagged_arr, int); int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown(
+struct _tagged_arr, unsigned int, unsigned int); struct _tagged_arr Cyc_Std_getcwd(
+struct _tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct
+_tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp(
+struct _tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int
+Cyc_Std_execve( struct _tagged_arr filename, struct _tagged_arr argv, struct
+_tagged_arr envp); int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr);
+int Cyc_Std_read( int fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir(
+struct _tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr);
+int Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd,
+struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
+_tagged_arr pathname); extern int access( unsigned char*, int); extern int chdir(
 unsigned char*); extern int chown( unsigned char*, unsigned int, unsigned int);
 extern unsigned char* getcwd( unsigned char* buf, unsigned int size); extern int
 execv( unsigned char* path, unsigned char** argv); extern int execvp(

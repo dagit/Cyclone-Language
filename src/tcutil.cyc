@@ -3665,7 +3665,8 @@ void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b) {
   case &Eq_constr(Unknown_b): return; // checked dynamically
   case &Eq_constr(&Upper_b(e)):
     if (Evexp::eval_const_uint_exp(e) <= i)
-      terr(loc, "dereference is out of bounds");
+      terr(loc, "dereference is out of bounds: %d <= %d", 
+	   Evexp::eval_const_uint_exp(e), i);
     return;
   default:
     // constrain the bounds to be i+1

@@ -68,7 +68,10 @@ namespace Std {
     int pipe(int @{2}`r filedes);
     off_t lseek(int filedes, off_t offset, int whence);
     unsigned sleep(unsigned);
-  }
+#if defined(__linux__)
+    int isatty(int);
+#endif  
+}
 
   int access(string_t,int);
   int chdir(string_t);

@@ -1,5 +1,5 @@
 # Current parameters.
-CC='cc'
+CC='gcc'
 CCOPT='-O'
 LBOPT=''
 BINDIR='/usr/bin'

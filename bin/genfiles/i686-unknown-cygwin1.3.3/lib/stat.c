@@ -240,12 +240,15 @@ st_spare3; int st_blksize; int st_blocks; int st_spare4[ 2u]; } ; extern int Cyc
 struct _tagged_arr filename, struct Cyc_Std_stat_t* buf); extern int fstat( int
 fd, struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
 filename, struct Cyc_Std_stat_t* buf); extern int umask( int mask); extern int
-Cyc_Std_mkdir( struct _tagged_arr pathname, int mode); extern int stat(
-unsigned char* filename, struct Cyc_Std_stat_t* buf); extern int fstat( int fd,
-struct Cyc_Std_stat_t* buf); extern int lstat( unsigned char* filename, struct
-Cyc_Std_stat_t* buf); extern int mkdir( unsigned char* pathname, int mode); int
-Cyc_Std_stat( struct _tagged_arr filename, struct Cyc_Std_stat_t* buf){ return
-stat( string_to_Cstring( filename), buf);} int Cyc_Std_lstat( struct _tagged_arr
+Cyc_Std_mkdir( struct _tagged_arr pathname, int mode); extern int Cyc_Std_chmod(
+struct _tagged_arr path, int mode); extern int fchmod( int fd, int mode); extern
+int stat( unsigned char* filename, struct Cyc_Std_stat_t* buf); extern int fstat(
+int fd, struct Cyc_Std_stat_t* buf); extern int lstat( unsigned char* filename,
+struct Cyc_Std_stat_t* buf); extern int mkdir( unsigned char* pathname, int mode);
+extern int chmod( unsigned char* pathname, int mode); int Cyc_Std_stat( struct
+_tagged_arr filename, struct Cyc_Std_stat_t* buf){ return stat(
+string_to_Cstring( filename), buf);} int Cyc_Std_lstat( struct _tagged_arr
 filename, struct Cyc_Std_stat_t* buf){ return lstat( string_to_Cstring( filename),
 buf);} int Cyc_Std_mkdir( struct _tagged_arr pathname, int mode){ return mkdir(
-string_to_Cstring( pathname), mode);}
+string_to_Cstring( pathname), mode);} int Cyc_Std_chmod( struct _tagged_arr
+pathname, int mode){ return chmod( string_to_Cstring( pathname), mode);}

@@ -42,6 +42,7 @@ typedef	unsigned short		uid_t;
 #else
 /* linux */
 typedef long int 		blkcnt_t;
+typedef long                    blksize_t;
 typedef int                     clockid_t;
 typedef unsigned long long int  dev_t;
 typedef unsigned long 		fsblkcnt_t;

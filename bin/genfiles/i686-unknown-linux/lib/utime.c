@@ -232,27 +232,8 @@ extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_tm{
 int tm_sec; int tm_min; int tm_hour; int tm_mday; int tm_mon; int tm_year; int
 tm_wday; int tm_yday; int tm_isdst; } ; extern int time( int* t); extern struct
 Cyc_Std_tm* gmtime( const int* timep); extern struct Cyc_Std_tm* localtime(
-const int* timep); extern int timezone; extern int daylight; struct Cyc_Std_stat_t{
-unsigned long long st_dev; unsigned short __pad1; unsigned int st_ino;
-unsigned int st_mode; unsigned int st_nlink; unsigned int st_uid; unsigned int
-st_gid; unsigned long long st_rdev; unsigned short __pad2; int st_size; int
-st_blksize; int st_blocks; int st_atime; unsigned int __unused1; int st_mtime;
-unsigned int __unused2; int st_ctime; unsigned int __unused3; unsigned int
-__unused4; unsigned int __unused5; } ; extern int Cyc_Std_stat( struct
-_tagged_arr filename, struct Cyc_Std_stat_t* buf); extern int fstat( int fd,
-struct Cyc_Std_stat_t* buf); extern int Cyc_Std_lstat( struct _tagged_arr
-filename, struct Cyc_Std_stat_t* buf); extern unsigned int umask( unsigned int
-mask); extern int Cyc_Std_mkdir( struct _tagged_arr pathname, unsigned int mode);
-extern int Cyc_Std_chmod( struct _tagged_arr path, unsigned int mode); extern
-int fchmod( int fd, unsigned int mode); extern int stat( unsigned char* filename,
-struct Cyc_Std_stat_t* buf); extern int fstat( int fd, struct Cyc_Std_stat_t*
-buf); extern int lstat( unsigned char* filename, struct Cyc_Std_stat_t* buf);
-extern int mkdir( unsigned char* pathname, unsigned int mode); extern int chmod(
-unsigned char* pathname, unsigned int mode); int Cyc_Std_stat( struct
-_tagged_arr filename, struct Cyc_Std_stat_t* buf){ return stat(
-string_to_Cstring( filename), buf);} int Cyc_Std_lstat( struct _tagged_arr
-filename, struct Cyc_Std_stat_t* buf){ return lstat( string_to_Cstring( filename),
-buf);} int Cyc_Std_mkdir( struct _tagged_arr pathname, unsigned int mode){
-return mkdir( string_to_Cstring( pathname), mode);} int Cyc_Std_chmod( struct
-_tagged_arr pathname, unsigned int mode){ return chmod( string_to_Cstring(
-pathname), mode);}
+const int* timep); extern int timezone; extern int daylight; struct Cyc_utimbuf{
+int actime; int modtime; } ; extern int Cyc_utime( struct _tagged_arr file,
+struct Cyc_utimbuf* file_times); extern int utime( unsigned char* filename,
+struct Cyc_utimbuf* buf); int Cyc_utime( struct _tagged_arr filename, struct Cyc_utimbuf*
+buf){ return utime( string_to_Cstring( filename), buf);}

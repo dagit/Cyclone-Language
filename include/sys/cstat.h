@@ -89,6 +89,30 @@ struct	stat_t
 #endif
 };
 #else
+#if defined(__linux__)
+  struct stat_t {
+    dev_t st_dev;
+    unsigned short int __pad1;
+    ino_t st_ino;
+    mode_t st_mode;
+    nlink_t st_nlink;
+    uid_t st_uid;
+    gid_t st_gid;
+    dev_t st_rdev;
+    unsigned short int __pad2;
+    off_t st_size;
+    blksize_t st_blksize;
+    blkcnt_t st_blocks;
+    time_t st_atime;
+    unsigned long int __unused1;
+    time_t st_mtime;
+    unsigned long int __unused2;
+    time_t st_ctime;
+    unsigned long int __unused3;
+    unsigned long int __unused4;
+    unsigned long int __unused5;
+  };
+#else 
   struct stat_t {
     dev_t st_dev;
     ino_t st_ino;
@@ -105,12 +129,14 @@ struct	stat_t
     time_t st_ctime;
   };
 #endif
+#endif
   extern int stat(string_t filename, struct stat_t @`r buf);
   extern "C" int fstat(int fd, struct stat_t @`r buf);
   extern int lstat(string_t filename, struct stat_t @`r buf);
   extern "C" mode_t umask(mode_t mask);
   extern int mkdir(string_t pathname, mode_t mode);
-
+  extern int chmod(string_t path,mode_t mode);
+  extern "C" int fchmod(int fd, mode_t mode);
 }
 
 #endif

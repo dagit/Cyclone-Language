@@ -273,21 +273,21 @@ unsigned int euid); extern unsigned int getgid(); extern int setgid(
 unsigned int gid); extern unsigned int getegid(); extern int setegid(
 unsigned int egid); extern int nice( int); extern int pause(); extern int pipe(
 int* filedes); extern int lseek( int filedes, int offset, int whence); extern
-unsigned int sleep( unsigned int); int Cyc_Std_access( struct _tagged_arr, int);
-int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown( struct _tagged_arr,
-unsigned int, unsigned int); struct _tagged_arr Cyc_Std_getcwd( struct
-_tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct _tagged_arr path,
-struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp( struct
-_tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execve(
-struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp);
-int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr); int Cyc_Std_read( int
-fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir( struct
-_tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr); int
-Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd, struct
-_tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct _tagged_arr
-pathname); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
-unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
-extern unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern int Cyc_Std_strcmp(
+unsigned int sleep( unsigned int); extern int isatty( int); int Cyc_Std_access(
+struct _tagged_arr, int); int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown(
+struct _tagged_arr, unsigned int, unsigned int); struct _tagged_arr Cyc_Std_getcwd(
+struct _tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct
+_tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp(
+struct _tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int
+Cyc_Std_execve( struct _tagged_arr filename, struct _tagged_arr argv, struct
+_tagged_arr envp); int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr);
+int Cyc_Std_read( int fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir(
+struct _tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr);
+int Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd,
+struct _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct
+_tagged_arr pathname); struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
+} ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[
+8u]; extern unsigned int Cyc_Std_strlen( struct _tagged_arr s); extern int Cyc_Std_strcmp(
 struct _tagged_arr s1, struct _tagged_arr s2); extern int Cyc_Std_strncmp(
 struct _tagged_arr s1, struct _tagged_arr s2, unsigned int len); extern struct
 _tagged_arr Cyc_Std_strchr( struct _tagged_arr s, unsigned char c); struct

@@ -68,6 +68,7 @@ CYCLONE_LIBS:=arg\
         time\
         typerep\
 	unistd\
+	utime\
         xarray
 
 CYCLONE_H:=arg.h\
@@ -97,6 +98,7 @@ CYCLONE_H:=arg.h\
 	ctime.h\
 	ctype.h\
 	cunistd.h\
+	cutime.h\
 	dict.h\
 	dirent.h\
 	errno.h\
@@ -151,6 +153,7 @@ CYCLONE_H:=arg.h\
 	time.h\
 	typerep.h\
 	unistd.h\
+	utime.h\
 	xarray.h
 
 CYCLONE_SRCS:=absyn\
