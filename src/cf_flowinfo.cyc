@@ -24,6 +24,7 @@
 #include "absyn.h"
 #include "tcutil.h"
 #include "absynpp.h"
+#include "evexp.h"
 
 #define CF_FLOWINFO_CYC
 #include "cf_flowinfo.h"
@@ -54,8 +55,7 @@ flow_env_t<`r> new_flow_env(region_t<`r> r) {
 
 // updates the given set if not NULL.  Returns true if the place
 // is already in the set.
-bool update_place_set(place_set_t<`r> *set, place_t<`r,`r> place,
-		      Position::seg_t loc) {
+bool update_place_set(dict_set_t<`a,`r> *set, `a place, Position::seg_t loc) {
   if (set != NULL) {
     // see if there's already an entry here
     if (Dict::member(*set,place))
@@ -68,21 +68,31 @@ bool update_place_set(place_set_t<`r> *set, place_t<`r,`r> place,
 
 // creates a string to identify the given place in error messages
 string_t place_err_string(place_t place) {
-  let Place{root,_} = *place;
+  let Place{root,fields} = *place;
   switch (root) {
-  case &VarRoot(vd): return Absynpp::qvar2string(vd->name);
+  case &VarRoot(vd): 
+    if (fields == NULL)
+      return Absynpp::qvar2string(vd->name);
+    else
+      return aprintf("reachable from %s", Absynpp::qvar2string(vd->name));
   default: Tcutil::impos("error locations not for VarRoots");
   }  
+}
+
+// creates a string to identify the given place in error messages
+string_t uplace_err_string(unique_place_t place) {
+  return place_err_string(&(place->place));
 }
 
 #define CONSUME_ERR2 "May consume non-aliased pointer %s more than once"
 #define CONSUME_ERR1 (CONSUME_ERR2 " (cf. %s)")
 
-static void unique_err(place_t place,
+static void unique_err(`a place,
+		       string_t (@toString)(`a),
 		       string_t err_msg1, string_t err_msg2,
 		       Position::seg_t consumed_loc,
 		       Position::seg_t loc) {  
-  let pstr = place_err_string(place);
+  let pstr = toString(place);
   if (!Position::segment_equals(consumed_loc,loc)) {
     let s = Position::string_of_segment(consumed_loc);
     Tcutil::terr(loc,err_msg1,pstr,s);
@@ -92,12 +102,15 @@ static void unique_err(place_t place,
 }
 
 // checks for conflicts when merging consumed sets
-static Position::seg_t combine_consume_f(bool isErr,
-					 place_t<`r> place,
+static Position::seg_t combine_consume_f($(bool,string_t (@)(`a)) @env,
+					 `a place,
 					 Position::seg_t loc1,
 					 Position::seg_t loc2) {
-  if (isErr)
-    unique_err(place, CONSUME_ERR1, CONSUME_ERR2, loc1, loc2);
+  let &$(disjoint,toString) = env;
+  if (disjoint)
+    unique_err(place, toString, 
+	       CONSUME_ERR1, CONSUME_ERR2,
+	       loc1, loc2);
   return loc1;
 }
 
@@ -110,15 +123,21 @@ place_set_t<`r> union_place_set(place_set_t<`r> s1, place_set_t<`r> s2,
 //    print_place_set(s1);
 //    DEBUG_PRINT("\n  s2= ");
 //    print_place_set(s2);
-  let res = Dict::union_two_c(combine_consume_f,disjoint,s1,s2);
+  let env = $(disjoint,place_err_string);
+  let res = Dict::union_two_c(combine_consume_f,&env,s1,s2);
 //    DEBUG_PRINT("\n  res= ");
 //    print_place_set(res);
 //    DEBUG_PRINT("\n");
   return res;
 }
 
-void print_place(place_t p);
-bool place_set_subset(place_set_t<`r> s1, place_set_t<`r> s2) {
+uplace_set_t<`r> union_uplace_set(uplace_set_t<`r> s1, uplace_set_t<`r> s2, 
+				  bool disjoint) {
+  let env = $(disjoint,uplace_err_string);
+  return Dict::union_two_c(combine_consume_f,&env,s1,s2);
+}
+
+bool place_set_subset(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2) {
   if ((int)s1.t == (int)s2.t) return true;
   try {
     region temp { 
@@ -127,9 +146,9 @@ bool place_set_subset(place_set_t<`r> s1, place_set_t<`r> s2) {
       while(Iter::next(iter,&elem)) {
 	let place = elem[0];
 	if (!Dict::member(s2,place)) {
-	  DEBUG_PRINT("could not find ");
-	  DEBUG_PRINT_F(print_place,place);
-	  DEBUG_PRINT("  in s2\n");
+// 	  DEBUG_PRINT("could not find ");
+// 	  DEBUG_PRINT_F(print_place,place);
+// 	  DEBUG_PRINT("  in s2\n");
 	  return false;
 	}
       }
@@ -141,18 +160,35 @@ bool place_set_subset(place_set_t<`r> s1, place_set_t<`r> s2) {
   }
 }
 
-bool place_set_equals(place_set_t<`r> s1, place_set_t<`r> s2) {
-//    let sz1 = Dict::cardinality(s1);
-//    let sz2 = Dict::cardinality(s2);
-//    if (sz1 == sz2) {
-//      let d = Dict::intersect_c(combine_consume_f,false,s1,s2);
-//      return (Dict::cardinality(d) == sz1);
-//    }
-//    else return false;
+bool place_set_equals(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2) {
   return place_set_subset(s1,s2) && place_set_subset(s2,s1);
 }
 
 //////////////////////////// Utilities ///////////////////////////////
+
+int get_field_index_fs(list_t<aggrfield_t> fs, field_name_t f) {
+  int n = 0;
+  for (; fs; fs = fs->tl) {
+    let f2 = fs->hd->name;
+    if (strptrcmp(f2,f) == 0) return n;
+    n = n+1;
+  }
+  throw new Core::Impossible(aprintf("get_field_index_fs failed: %s",*f));
+}
+
+int get_field_index(type_t t, field_name_t f) {
+  switch (Tcutil::compress(t)) {
+  case &AggrType(AggrInfo(info,_)):
+    let fs = get_known_aggrdecl(info)->impl->fields;
+    fallthru(fs);
+  case &AnonAggrType(_,fs):
+    return get_field_index_fs(fs, f);
+  default: 
+    throw new Core::Impossible(aprintf("get_field_index failed: %s",
+                                       Absynpp::typ2string(t)));
+  }
+}
+
 int root_cmp(root_t r1, root_t r2) {
   if(((int)r1) == ((int)r2))
     return 0;
@@ -167,6 +203,11 @@ int root_cmp(root_t r1, root_t r2) {
   }
 }
 
+static int intlist_cmp(List::list_t<int> list1,
+		       List::list_t<int> list2) {
+  return list_cmp(Core::intcmp,list1,list2);
+}
+
 int place_cmp(place_t p1, place_t p2) {
   if(((int)p1) == ((int)p2))
     return 0;
@@ -175,7 +216,18 @@ int place_cmp(place_t p1, place_t p2) {
   int i = root_cmp(root1,root2);
   if(i != 0)
     return i;
-  return list_cmp(Core::intcmp,fields1,fields2);
+  return intlist_cmp(fields1,fields2);
+}
+
+int uplace_cmp(unique_place_t p1, unique_place_t p2) {
+  if(((int)p1) == ((int)p2))
+    return 0;
+  let UniquePlace{place1,path1} = *p1;
+  let UniquePlace{place2,path2} = *p2;
+  int i = place_cmp(&place1,&place2);
+  if(i != 0)
+    return i;
+  return list_cmp(intlist_cmp,path1,path2);
 }
 
 // for debugging
@@ -749,27 +801,18 @@ static void remove_f(List::list_t<place_t<`r,`r2>> @l,place_t<`r,`r2> place) {
     break; // no sweat if it's not there
   }
 }
-void print_place_list(List::list_t<place_t> x) {
-  let first = true;
-  while (x != NULL) {
-    if (!first) { fprintf(stderr,", "); first = false; }
-    print_place(x->hd);
-    x = x->tl;
-  }
-  fprintf(stderr,"\n");
-}
 
 static consume_t<`r> or_consume(region_t<`r> r,
                                 consume_t<`r> c1, consume_t<`r> c2) {
   DEBUG_PRINT("in or_consume:\n");
   DEBUG_PRINT("  c1.may_consume = ");
-  DEBUG_PRINT_F(print_place_list,c1.may_consume);
+  DEBUG_PRINT_F(print_list,c1.may_consume,print_place);
   DEBUG_PRINT("  c1.consume = ");
-  DEBUG_PRINT_F(print_place_set,c1.consumed);
+  DEBUG_PRINT_F(print_dict_set,c1.consumed,print_place);
   DEBUG_PRINT("  c2.may_consume = ");
-  DEBUG_PRINT_F(print_place_list,c2.may_consume);
+  DEBUG_PRINT_F(print_list,c2.may_consume,print_place);
   DEBUG_PRINT("  c2.consume = ");
-  DEBUG_PRINT_F(print_place_set,c2.consumed);
+  DEBUG_PRINT_F(print_dict_set,c2.consumed,print_place);
   // merge the may_consume lists
   List::list_t<place_t<`r>,`r> mc = c2.may_consume;
   region temp {
@@ -784,7 +827,7 @@ static consume_t<`r> or_consume(region_t<`r> r,
   }
   // merge the consume sets: just union
   DEBUG_PRINT("  final may_consume = ");
-  DEBUG_PRINT_F(print_place_list,mc);
+  DEBUG_PRINT_F(print_list,mc,print_place);
   return ConsumeInfo(union_place_set(c1.consumed,c2.consumed,false),mc);
 }
 
@@ -1263,7 +1306,17 @@ void print_place(place_t p) {
   fprintf(stderr," ");
 }
 
-void print_place_set(place_set_t p) {
+void print_list(List::list_t<`a> x, void (@pr)(`a)) {
+  let first = true;
+  while (x != NULL) {
+    if (!first) { fprintf(stderr,", "); first = false; }
+    pr(x->hd);
+    x = x->tl;
+  }
+  fprintf(stderr,"\n");
+}
+
+void print_dict_set(dict_set_t<`a> p, void (@pr)(`a)) {
   region r {
     try {
       let iter = Dict::make_iter(r,p);
@@ -1276,7 +1329,7 @@ void print_place_set(place_set_t p) {
 	  fprintf(stderr,", ");
 	  first = false;
 	}
-	print_place(p);
+	pr(p);
       }
       fprintf(stderr,"}\n");
     } catch {
@@ -1329,9 +1382,9 @@ void print_flow(flow_t f) {
     fprintf(stderr,"  ReachableFL:\n");
     Dict::iter(print_flow_mapping,fd);
     fprintf(stderr,"\n    consumed: ");
-    print_place_set(cinfo.consumed);
+    print_dict_set(cinfo.consumed,print_place);
     fprintf(stderr,"\n    may_consume: ");
-    print_place_list(cinfo.may_consume);
+    print_list(cinfo.may_consume,print_place);
     fprintf(stderr,"\n");
     break;
   }
@@ -1467,6 +1520,68 @@ flow_t<`r> kill_flow_region(flow_env_t<`r> fenv, flow_t<`r> f, type_t rgn) {
   }
 }
 
+//////////////////////// Unique value stuff //////////////////////////////
+
+// Assumes that this is a unique path.
+static unique_place_t<`r,`r>
+unique_place_of_rec(region_t<`r> r, exp_t e,
+		    list_t<int,`r> flds,
+		    list_t<List::list_t<int,`r>,`r> path) {
+  switch(e->r) {
+  case &Cast_e(_,e1,_,_):    fallthru(e1);
+  case &NoInstantiate_e(e1): fallthru(e1);
+  case &Instantiate_e(e1,_): return unique_place_of_rec(r,e1,flds,path);
+
+  case &Var_e(_,&Param_b(vd)): fallthru(vd);
+  case &Var_e(_,&Local_b(vd)): fallthru(vd);
+  case &Var_e(_,&Pat_b(vd)):
+    return rnew (r) UniquePlace(Place(rnew (r) VarRoot(vd), flds),path);
+
+  case &Var_e(_,&Global_b(vd)): throw new Core::Impossible("non-unique path");
+
+  case &AggrArrow_e(e1,f):
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &PointerType(PtrInfo{t2,_,_}):
+      if(!is_union_type(t2))
+	flds = rnew(r) List(get_field_index(t2,f),flds);
+      break;
+    default: throw new Core::Impossible("anal_Rexp: AggrArrow ptr");
+    }
+    fallthru(e1);
+  case &Deref_e(e1): 
+    return unique_place_of_rec(r,e1,NULL,rnew (r) List(flds,path));
+
+  case &Subscript_e(e1,e2): 
+    // assumes that tuple-projection implies e2 is pure and is evaluable
+    switch(Tcutil::compress(e1->topt->v)) {
+    case &TupleType(_):
+      let fld = Evexp::eval_const_uint_exp(e2)[0];
+      return unique_place_of_rec(r,e1,rnew(r) List(fld,flds),path);
+    case &PointerType(PtrInfo(t,_,PtrAtts(_,_,bd,_,_))):
+      // FIX: allow subscripts to unique places; only for fixed-sized arrays
+      throw new Core::Impossible("subscripts unsupported for unique places");
+    default: 
+      throw new Core::Impossible("unique place subscript -- bad type");
+    }
+    // KLUDGE: unions (see comment at top of file)
+  case &AggrMember_e(e1,fld): 
+    if(is_union_type(e1->topt->v))
+      throw new Core::Impossible("unions can't contain unique places");
+    let idx = get_field_index(e1->topt->v,fld);
+    return unique_place_of_rec(r,e1,rnew(r) List(idx,flds),path); 
+
+    //FIX: assignment, funcall, stmtexp, conditionalexp, seqexp, ...
+    //  I'm thinking we don't need to deal with any of these, since they
+    //  aren't lhs's ...
+
+  default: throw new Core::Impossible("bad unique path");
+  }
+}
+
+unique_place_t<`r,`r> unique_place_of(region_t<`r> r, exp_t e) {
+  return unique_place_of_rec(r,e,NULL,NULL);
+}
+
 static void consume_f($(place_set_t<`r> @,
 			flowdict_t<`r>, 
 			Position::seg_t) @env, 
@@ -1481,7 +1596,8 @@ static void consume_f($(place_set_t<`r> @,
   DEBUG_PRINT("  to consumed\n");
   if (update_place_set(consume, place, loc)) {
     let consume_loc = Dict::lookup(*consume,place);
-    unique_err(place, CONSUME_ERR1, CONSUME_ERR2, consume_loc, loc);
+    unique_err(place, place_err_string, 
+	       CONSUME_ERR1, CONSUME_ERR2, consume_loc, loc);
   }
 }
 
@@ -1511,6 +1627,7 @@ void check_unique_rvals(Position::seg_t loc, flow_t f) {
       if (Dict::member(c.consumed,x->hd)) {
 	let consume_loc = Dict::lookup(c.consumed, x->hd);
 	unique_err(x->hd, 
+		   place_err_string,
 		   "Read through possibly consumed unique pointer %s (cf. %s)",
 		   "Read through possibly consumed unique pointer %s",
 		   consume_loc, loc);
@@ -1558,10 +1675,14 @@ $(consume_t<`r>,flow_t<`r>) save_consume_info(flow_env_t<`r> fenv,
   }
 }
 
-flow_t<`r> restore_consume_info(flow_t<`r> f, consume_t<`r> c) {
+flow_t<`r> restore_consume_info(flow_t<`r> f, consume_t<`r> c,
+				bool may_consume_only) {
   switch (f) {
   case BottomFL: return f;
-  case ReachableFL(d,r,_):
+  case ReachableFL(d,r,oldc):
+    if (may_consume_only) {
+      return ReachableFL(d,r,ConsumeInfo(oldc.consumed,c.may_consume));
+    }
     return ReachableFL(d,r,c);
   }
 }
@@ -1611,4 +1732,3 @@ bool is_unique_pointer(type_t t) {
   }
 }
 #endif
-

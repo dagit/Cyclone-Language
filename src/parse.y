@@ -2133,7 +2133,7 @@ statement:
 /* Cyc: reset_region(e) statement */
 | RESET_REGION '(' expression ')' ';'
   { $$=^$(new_stmt(new ResetRegion_s($3),LOC(@1,@5))); }
-/* Cyc: alias e = v<t> s statement */
+/* Cyc: alias <r>t v = e in s */
 | ALIAS '<' TYPE_VAR '>' IDENTIFIER '=' expression IDENTIFIER statement
   { if (zstrcmp($8,"in") != 0)
       err("expecting `in'",LOC(@8,@8));

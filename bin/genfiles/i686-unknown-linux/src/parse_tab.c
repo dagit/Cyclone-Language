@@ -3030,24 +3030,24 @@ _check_known_subscript_notnull(1011,yystate)];if(yyn == 0)goto yyerrlab;yyreduce
 yylen=(int)Cyc_yyr2[_check_known_subscript_notnull(500,yyn)];if(yylen > 0)yyval=
 yyvs[_check_known_subscript_notnull(10000,(yyvsp_offset + 1)- yylen)];switch(yyn){
 case 1: _LL1E8: yyval=yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)];Cyc_Parse_parse_result=
-Cyc_yyget_YY18(yyvs[yyvsp_offset]);break;case 2: _LL1E9: {struct Cyc_List_List*x;
-struct Cyc_List_List*y;{struct _handler_cons _tmp383;_push_handler(& _tmp383);{int
-_tmp385=0;if(setjmp(_tmp383.handler))_tmp385=1;if(!_tmp385){x=Cyc_yyget_YY18(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset - 1)]);;_pop_handler();}
-else{void*_tmp384=(void*)_exn_thrown;void*_tmp387=_tmp384;_LL1EC: if(*((void**)
-_tmp387)!= Cyc_Core_Failure)goto _LL1EE;_LL1ED: x=0;goto _LL1EB;_LL1EE:;_LL1EF:(
-void)_throw(_tmp387);_LL1EB:;}}}{struct _handler_cons _tmp388;_push_handler(&
-_tmp388);{int _tmp38A=0;if(setjmp(_tmp388.handler))_tmp38A=1;if(!_tmp38A){y=Cyc_yyget_YY18(
-yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]);;_pop_handler();}else{
-void*_tmp389=(void*)_exn_thrown;void*_tmp38C=_tmp389;_LL1F1: if(*((void**)_tmp38C)
-!= Cyc_Core_Failure)goto _LL1F3;_LL1F2: y=0;goto _LL1F0;_LL1F3:;_LL1F4:(void)_throw(
-_tmp38C);_LL1F0:;}}}yyval=(union Cyc_YYSTYPE_union)({union Cyc_YYSTYPE_union
-_tmp38D;(_tmp38D.YY18).tag=22;(_tmp38D.YY18).f1=((struct Cyc_List_List*(*)(struct
-Cyc_List_List*x,struct Cyc_List_List*y))Cyc_List_imp_append)(x,y);_tmp38D;});
-break;}case 3: _LL1EA: yyval=(union Cyc_YYSTYPE_union)({union Cyc_YYSTYPE_union
-_tmp38E;(_tmp38E.YY18).tag=22;(_tmp38E.YY18).f1=({struct Cyc_List_List*_tmp38F=
-_cycalloc(sizeof(*_tmp38F));_tmp38F->hd=({struct Cyc_Absyn_Decl*_tmp390=_cycalloc(
-sizeof(*_tmp390));_tmp390->r=(void*)((void*)({struct Cyc_Absyn_Using_d_struct*
+Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,yyvsp_offset)]);break;
+case 2: _LL1E9: {struct Cyc_List_List*x;struct Cyc_List_List*y;{struct _handler_cons
+_tmp383;_push_handler(& _tmp383);{int _tmp385=0;if(setjmp(_tmp383.handler))_tmp385=
+1;if(!_tmp385){x=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(10000,
+yyvsp_offset - 1)]);;_pop_handler();}else{void*_tmp384=(void*)_exn_thrown;void*
+_tmp387=_tmp384;_LL1EC: if(*((void**)_tmp387)!= Cyc_Core_Failure)goto _LL1EE;
+_LL1ED: x=0;goto _LL1EB;_LL1EE:;_LL1EF:(void)_throw(_tmp387);_LL1EB:;}}}{struct
+_handler_cons _tmp388;_push_handler(& _tmp388);{int _tmp38A=0;if(setjmp(_tmp388.handler))
+_tmp38A=1;if(!_tmp38A){y=Cyc_yyget_YY18(yyvs[_check_known_subscript_notnull(
+10000,yyvsp_offset)]);;_pop_handler();}else{void*_tmp389=(void*)_exn_thrown;void*
+_tmp38C=_tmp389;_LL1F1: if(*((void**)_tmp38C)!= Cyc_Core_Failure)goto _LL1F3;
+_LL1F2: y=0;goto _LL1F0;_LL1F3:;_LL1F4:(void)_throw(_tmp38C);_LL1F0:;}}}yyval=(
+union Cyc_YYSTYPE_union)({union Cyc_YYSTYPE_union _tmp38D;(_tmp38D.YY18).tag=22;(
+_tmp38D.YY18).f1=((struct Cyc_List_List*(*)(struct Cyc_List_List*x,struct Cyc_List_List*
+y))Cyc_List_imp_append)(x,y);_tmp38D;});break;}case 3: _LL1EA: yyval=(union Cyc_YYSTYPE_union)({
+union Cyc_YYSTYPE_union _tmp38E;(_tmp38E.YY18).tag=22;(_tmp38E.YY18).f1=({struct
+Cyc_List_List*_tmp38F=_cycalloc(sizeof(*_tmp38F));_tmp38F->hd=({struct Cyc_Absyn_Decl*
+_tmp390=_cycalloc(sizeof(*_tmp390));_tmp390->r=(void*)((void*)({struct Cyc_Absyn_Using_d_struct*
 _tmp391=_cycalloc(sizeof(*_tmp391));_tmp391[0]=({struct Cyc_Absyn_Using_d_struct
 _tmp392;_tmp392.tag=9;_tmp392.f1=Cyc_yyget_QualId_tok(yyvs[
 _check_known_subscript_notnull(10000,yyvsp_offset - 2)]);_tmp392.f2=Cyc_yyget_YY18(
@@ -6392,25 +6392,27 @@ _LL403: break;case 499: _LL404: yylex_buf->lex_curr_pos -=1;break;default: _LL40
 break;}yyvsp_offset -=yylen;yyssp_offset -=yylen;yylsp_offset -=yylen;yyvs[
 _check_known_subscript_notnull(10000,++ yyvsp_offset)]=yyval;++ yylsp_offset;if(
 yylen == 0){(yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_line=
-Cyc_yylloc.first_line;(yyls[yylsp_offset]).first_column=Cyc_yylloc.first_column;(
-yyls[yylsp_offset]).last_line=(yyls[_check_known_subscript_notnull(10000,
-yylsp_offset - 1)]).last_line;(yyls[yylsp_offset]).last_column=(yyls[
+Cyc_yylloc.first_line;(yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).first_column=
+Cyc_yylloc.first_column;(yyls[_check_known_subscript_notnull(10000,yylsp_offset)]).last_line=(
+yyls[_check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_line;(yyls[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_column=(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset - 1)]).last_column;}else{(yyls[
 _check_known_subscript_notnull(10000,yylsp_offset)]).last_line=(yyls[
 _check_known_subscript_notnull(10000,(yylsp_offset + yylen)- 1)]).last_line;(yyls[
-yylsp_offset]).last_column=(yyls[_check_known_subscript_notnull(10000,(
-yylsp_offset + yylen)- 1)]).last_column;}yyn=(int)Cyc_yyr1[
-_check_known_subscript_notnull(500,yyn)];yystate=Cyc_yypgoto[
+_check_known_subscript_notnull(10000,yylsp_offset)]).last_column=(yyls[
+_check_known_subscript_notnull(10000,(yylsp_offset + yylen)- 1)]).last_column;}
+yyn=(int)Cyc_yyr1[_check_known_subscript_notnull(500,yyn)];yystate=Cyc_yypgoto[
 _check_known_subscript_notnull(142,yyn - 134)]+ yyss[
 _check_known_subscript_notnull(10000,yyssp_offset)];if((yystate >= 0  && yystate <= 
 5991) && Cyc_yycheck[_check_known_subscript_notnull(5992,yystate)]== yyss[
 _check_known_subscript_notnull(10000,yyssp_offset)])yystate=(int)Cyc_yytable[
 _check_known_subscript_notnull(5992,yystate)];else{yystate=(int)Cyc_yydefgoto[
 _check_known_subscript_notnull(142,yyn - 134)];}goto yynewstate;yyerrlab: if(
-yyerrstatus == 0){++ Cyc_yynerrs;yyn=(int)Cyc_yypact[yystate];if(yyn > - 32768  && 
-yyn < 5991){int sze=0;struct _dyneither_ptr msg;int x;int count;count=0;for(x=yyn < 0?-
-yyn: 0;x < 276 / sizeof(char*);++ x){if(Cyc_yycheck[_check_known_subscript_notnull(
-5992,x + yyn)]== x)(sze +=Cyc_strlen((struct _dyneither_ptr)Cyc_yytname[
+yyerrstatus == 0){++ Cyc_yynerrs;yyn=(int)Cyc_yypact[
+_check_known_subscript_notnull(1011,yystate)];if(yyn > - 32768  && yyn < 5991){int
+sze=0;struct _dyneither_ptr msg;int x;int count;count=0;for(x=yyn < 0?- yyn: 0;x < 276 / 
+sizeof(char*);++ x){if(Cyc_yycheck[_check_known_subscript_notnull(5992,x + yyn)]== 
+x)(sze +=Cyc_strlen((struct _dyneither_ptr)Cyc_yytname[
 _check_known_subscript_notnull(276,x)])+ 15,count ++);}msg=({unsigned int _tmp8BD=(
 unsigned int)(sze + 15);char*_tmp8BE=(char*)_region_malloc(yyregion,_check_times(
 sizeof(char),_tmp8BD + 1));struct _dyneither_ptr _tmp8C0=_tag_dyneither(_tmp8BE,

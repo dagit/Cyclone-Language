@@ -59,6 +59,20 @@ EXTERN_CFFLOW struct Place<`r::R> {
 };
 typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
 
+  // NOTE: UniquePlace not currently in use; will finish up later ...
+EXTERN_CFFLOW struct UniquePlace<`r::R> {
+  struct Place<`r> place;
+  List::list_t<List::list_t<int,`r>,`r> path;
+  //this is a path between unique places.  That is, each element in
+  //the path is a list of fields that define the place reached from
+  //there, before doing a dereference.  For example, the difference
+  //between x.hd and x->hd is that we will have x.0 in both cases, but
+  //a path of NULL in the former case, and a path of [[ ]] in the
+  //latter, signifying the dereference.  Likewise, x->tl->hd would
+  //have initial place x.1, and then path [[0]; []].
+};
+typedef struct UniquePlace<`r1> @`r2 unique_place_t<`r1,`r2>;
+
 EXTERN_CFFLOW tunion InitLevel { 
   NoneIL, // may not be initialized
   ThisIL, // this is initialized, but things it points to may not be
@@ -125,12 +139,19 @@ EXTERN_CFFLOW tunion AbsRVal<`r::R> {
   Aggregate(aggrdict_t<`r>); // if you're a struct or tuple, you should always
   // evaluate to an Aggregate in the abstract interpretation (tunion?)
 };
-typedef Dict::dict_t<place_t<`r,`r>,Position::seg_t,`r> place_set_t<`r>;
-extern bool update_place_set(place_set_t<`r> *set, place_t<`r,`r> place,
+
+typedef Dict::dict_t<`a,Position::seg_t,`r> dict_set_t<`a,`r>;
+
+extern bool update_place_set(dict_set_t<`a,`r> *set, `a place,
 			     Position::seg_t loc);
+extern bool place_set_subset(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2);
+extern bool place_set_equals(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2);
+
+typedef Dict::dict_t<place_t<`r,`r>,Position::seg_t,`r> place_set_t<`r>;
 extern place_set_t<`r> union_place_set(place_set_t<`r> s1, place_set_t<`r> s2, bool disjoint);
-extern bool place_set_subset(place_set_t<`r> s1, place_set_t<`r> s2);
-extern bool place_set_equals(place_set_t<`r> s1, place_set_t<`r> s2);
+
+typedef Dict::dict_t<unique_place_t<`r,`r>,Position::seg_t,`r> uplace_set_t<`r>;
+extern uplace_set_t<`r> union_uplace_set(uplace_set_t<`r> s1, uplace_set_t<`r> s2, bool disjoint);
 
 EXTERN_CFFLOW struct ConsumeInfo<`r::R> {
   place_set_t<`r> consumed;              // variables consumed by this flow
@@ -171,6 +192,9 @@ EXTERN_CFFLOW struct FlowEnv<`r::R> {
 typedef struct FlowEnv<`r> @`r flow_env_t<`r>;
 extern flow_env_t<`r> new_flow_env(region_t<`r> r);
 
+extern int get_field_index(Absyn::type_t t, Absyn::field_name_t f);
+extern int get_field_index_fs(List::list_t<Absyn::aggrfield_t> fs,
+			      Absyn::field_name_t f);
 extern int root_cmp(root_t, root_t);
 extern int place_cmp(place_t, place_t);
 
@@ -186,13 +210,14 @@ extern void print_absrval(absRval_t rval);
 extern void print_initlevel(initlevel_t il);
 extern void print_root(root_t root);
 extern void print_place(place_t p);
-extern void print_place_set(place_set_t p);
-extern void print_place_list(List::list_t<place_t> p);
+extern void print_dict_set(dict_set_t<`a> p, void (@pr)(`a));
+extern void print_list(List::list_t<`a> p, void (@pr)(`a));
 extern void print_flowdict(flowdict_t d);
 extern void print_flow(flow_t f);
 
 // debugging
 // #define DEBUG_FLOW
+#define SANITY
 #ifdef DEBUG_FLOW
 #define DEBUG_PRINT(arg...) fprintf(stderr,##arg)
 #define DEBUG_PRINT_F(f,arg...) f ## (##arg)
@@ -248,7 +273,10 @@ extern flow_t<`r> readthrough_unique_rvals(Position::seg_t loc,flow_t<`r> f);
 extern flow_t<`r> drop_unique_rvals(Position::seg_t loc,flow_t<`r> f);
 
 extern $(consume_t<`r>,flow_t<`r>) save_consume_info(flow_env_t<`r>,flow_t<`r> f, bool clear);
-extern flow_t<`r> restore_consume_info(flow_t<`r> f, consume_t<`r> c);
+extern flow_t<`r> restore_consume_info(flow_t<`r> f, consume_t<`r> c, bool may_consume_only);
 extern string_t place_err_string(place_t place);
+
+extern unique_place_t<`r,`r> unique_place_of(region_t<`r> r, Absyn::exp_t e);
+  // calculates the unique place of the unique path [e]
 }
 #endif

@@ -137,29 +137,6 @@ static $(cf_stmt_annot_t@,flow_t<`r>@`r) pre_stmt_check(analenv_t<`r> env, flow_
   return $(annot,sflow);
 }
 
-static int get_field_index_fs(list_t<aggrfield_t> fs, field_name_t f) {
-  int n = 0;
-  for (; fs; fs = fs->tl) {
-    let f2 = fs->hd->name;
-    if (strptrcmp(f2,f) == 0) return n;
-    n = n+1;
-  }
-  throw new Core::Impossible(aprintf("get_field_index_fs failed: %s",*f));
-}
-
-static int get_field_index(type_t t, field_name_t f) {
-  switch (Tcutil::compress(t)) {
-  case &AggrType(AggrInfo(info,_)):
-    let fs = get_known_aggrdecl(info)->impl->fields;
-    fallthru(fs);
-  case &AnonAggrType(_,fs):
-    return get_field_index_fs(fs, f);
-  default: 
-    throw new Core::Impossible(aprintf("get_field_index failed: %s",
-                                       Absynpp::typ2string(t)));
-  }
-}
-
 // Sound KLUDGE: The changed should go on the destination, but it's easier
 // to put it on the source and nobody is ever going to notice the difference
 // in precision (it takes a goto or caught throw from an inner unordered
@@ -179,7 +156,7 @@ static void update_tryflow(analenv_t<`r> env, flow_t<`r> new_flow) {
     env->tryflow = join_flow(env->fenv, env->all_changed, new_flow, env->tryflow, true);
     let $(ConsumeInfo(c,mc),_) = save_consume_info(env->fenv, env->tryflow, 
 						   false);
-    env->tryflow = restore_consume_info(env->tryflow, ConsumeInfo(c,NULL));
+    env->tryflow = restore_consume_info(env->tryflow, ConsumeInfo(c,NULL), false);
     DEBUG_PRINT("update_tryflow: joined flow:\n");
     DEBUG_PRINT_F(print_flow,env->tryflow);
     DEBUG_PRINT("\n");
@@ -285,8 +262,8 @@ static $(flow_t<`r>,list_t<absRval_t<`r>,`rgn>)
   bool init_consume = false;
   do { // unnecessarily recomputes rvals each time
     this_all_changed = env->fenv->mt_place_set;
-    // need to reset consume stuff on each iteration
-    inflow = restore_consume_info(inflow,saved_cinfo);
+    // need to reset consume info on each iteration
+    inflow = restore_consume_info(inflow,saved_cinfo,false);
     // wouldn't need to peel off the head if we had a TopFL
     env->all_changed = rnew(env->r) env->fenv->mt_place_set;
     let $(f,r) = anal_Rexp(env,inflow,es->hd);
@@ -317,20 +294,20 @@ static $(flow_t<`r>,list_t<absRval_t<`r>,`rgn>)
     let $(c,_) = save_consume_info(env->fenv, outflow, false);
     if (init_consume) {
 #ifdef SANITY
-      if (consume_approx(c, outflow_consume)) {
-	DEBUG_PRINT("sanity consumed: ");
-	DEBUG_PRINT_F(print_place_set,outflow_consume.consumed);
-	DEBUG_PRINT("\ncurrent consumed: ");
-	DEBUG_PRINT_F(print_place_set,c.consumed);
-	DEBUG_PRINT("\nsanity may_consume: ");
-	DEBUG_PRINT_F(print_place_list,outflow_consume.may_consume);
-	DEBUG_PRINT("\ncurrent may_consume: ");
-	DEBUG_PRINT_F(print_place_list,c.may_consume);
-	DEBUG_PRINT("\n");
+      if (!consume_approx(outflow_consume, c)) {
+	fprintf(stderr,"sanity consumed: ");
+	print_dict_set(outflow_consume.consumed,print_place);
+	fprintf(stderr,"\ncurrent consumed: ");
+	print_dict_set(c.consumed,print_place);
+	fprintf(stderr,"\nsanity may_consume: ");
+	print_list(outflow_consume.may_consume,print_place);
+	fprintf(stderr,"\ncurrent may_consume: ");
+	print_list(c.may_consume,print_place);
+	fprintf(stderr,"\n");
 	Tcutil::impos("anal_unordered_exps failed to preserve consumed info");
       }
 #endif
-      old_inflow = restore_consume_info(inflow, outflow_consume);
+      old_inflow = restore_consume_info(inflow, outflow_consume, false);
     }
     else
       old_inflow = inflow;
@@ -386,7 +363,7 @@ anal_use_ints(analenv_t<`r> env, flow_t<`r> inflow,
 static flow_t<`r> 
 notzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
         exp_t e, initlevel_t il) {
-//   fprintf(stderr,"in notzero for exp |%s|\n",Absynpp::exp2string(e));
+  DEBUG_PRINT("in notzero for exp |%s|\n",Absynpp::exp2string(e));
   DEBUG_PRINT("inflow=\n");
   DEBUG_PRINT_F(print_flow,inflow);
   switch(outflow) {
@@ -833,14 +810,15 @@ static list_t<place_t<`r,`r>,`r> noalias_ptrs_rec(analenv_t<`r> env,
   }
 }
 
-// called once for each legal flow in an assignment: left to right order,
-// and right to left order.  See anal_Rexp's AssignOp_e case below.
+// assigns [rexp] to [lexp], which have abstract values [rval] and
+// [lval], respectively, in [outflow].
 static $(flow_t<`r>,absRval_t<`r>) 
   do_assign(flow_env_t<`r> fenv,
 	    analenv_t<`r> env,
 	    flow_t<`r> outflow,
 	    exp_t lexp, absLval_t<`r> lval,
 	    exp_t rexp, absRval_t<`r> rval,
+	    consume_t<`r> outer_cinfo,
 	    Position::seg_t loc) {
 
   outflow = consume_unique_rvals(loc, outflow); // consume rhs
@@ -849,6 +827,8 @@ static $(flow_t<`r>,absRval_t<`r>)
     DEBUG_PRINT("leaving AssignOp_e\n");
     return $(BottomFL,rval);
   case ReachableFL(outdict,relns,cinfo):
+    // make sure we haven't used a unique value > 1 time
+    cinfo = and_consume(fenv->r,outer_cinfo,cinfo);
     switch(lval) {
     case PlaceL(p): 
       cinfo = consume_assignment(env,p,cinfo,outdict,lexp);
@@ -989,32 +969,61 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
   case &AssignOp_e(e1,NULL,e2):
     DEBUG_PRINT("in Rexp:AssignOp_e for |%s|\n",Absynpp::exp2string(e));
     let outer_all_changed = env->all_changed;
-    // First try left to right eval order
-    let $(left_out, lval_lr)   = anal_Lexp(env,inflow,e1);
-    let $(outflow_lr, rval_lr) = anal_Rexp(env,left_out,e2);
-    let fl                     = do_assign(fenv,env,outflow_lr,e1,lval_lr,
-					   e2,rval_lr,e->loc);
-    let all_changed_l = env->all_changed;
-    // Now do right to left eval order
-    env->all_changed = outer_all_changed;
-    let $(right_out, rval_rl)  = anal_Rexp(env,inflow,e2);
-    let $(outflow_rl, lval_rl) = anal_Lexp(env,right_out,e1);
-    let fr                     = do_assign(fenv,env,outflow_rl,e1,lval_rl,
-					   e2,rval_rl,e->loc);
-    // Now join the flows
-    if(outer_all_changed == NULL)
-      env->all_changed = NULL;
-    else
-      *env->all_changed = union_place_set(*all_changed_l, *env->all_changed,
-					  false);
-    let ret = join_flow_and_rval(fenv, outer_all_changed, fl, fr, true);
-    DEBUG_PRINT("ltor flow is ");
-    DEBUG_PRINT_F(print_flow,fr[0]);
-    DEBUG_PRINT("rtol flow is ");
-    DEBUG_PRINT_F(print_flow,fl[0]);
-    DEBUG_PRINT("joined flow is ");
-    DEBUG_PRINT_F(print_flow,ret[0]);
-    return ret;
+    let $(outer_cinfo,inflow) = save_consume_info(fenv,inflow,true);
+    consume_t<`r> empty_consume = { fenv->mt_place_set, NULL };
+    consume_t<`r> outflow_consume = empty_consume;
+    bool init_consume = false;
+    while(true) { // local iteration
+      env->all_changed  = rnew(env->r) fenv->mt_place_set;
+      let $(left_out, lval) = anal_Lexp(env,inflow,e1);
+      let left_changed      = *env->all_changed;
+      env->all_changed      = rnew(env->r) fenv->mt_place_set;
+      let $(right_out,rval) = anal_Rexp(env,inflow,e2);
+      let right_changed     = *env->all_changed;
+      let outflow = after_flow(fenv,&left_changed, left_out,right_out,
+                               left_changed, right_changed);
+      // FIX: need to kill any variables assigned in e1 or e2?
+      let new_inflow = join_flow(fenv,outer_all_changed,inflow,outflow,true);
+
+      // restore consume information to old inflow if necessary
+      let $(c,_) = save_consume_info(fenv,new_inflow,false);
+      if (init_consume) {
+#ifdef SANITY
+        if (!consume_approx(outflow_consume, c)) {
+          fprintf(stderr,"sanity consumed: ");
+          print_dict_set(outflow_consume.consumed,print_place);
+          fprintf(stderr,"\ncurrent consumed: ");
+          print_dict_set(c.consumed,print_place);
+          fprintf(stderr,"\nsanity may_consume: ");
+          print_list(outflow_consume.may_consume,print_place);
+          fprintf(stderr,"\ncurrent may_consume: ");
+          print_list(c.may_consume,print_place);
+          fprintf(stderr,"\n");
+          Tcutil::impos("assignOp_e failed to preserve consume info");
+        }
+#endif
+        inflow = restore_consume_info(inflow, outflow_consume, false);
+      }
+      outflow_consume = c;
+      init_consume = true;
+//        DEBUG_PRINT("assignOp: old_inflow=\n");
+//        DEBUG_PRINT_F(print_flow,inflow);
+//        DEBUG_PRINT("assignOp: joined flow=\n");
+//        DEBUG_PRINT_F(print_flow,new_inflow);
+      // see if we've reached a fixpoint
+      if(flow_lessthan_approx(new_inflow,inflow)) {
+        if(outer_all_changed == NULL)
+          env->all_changed = NULL;
+        else
+          *env->all_changed = union_place_set(*outer_all_changed,
+                              union_place_set(left_changed, right_changed,
+                                              false), false);
+	return do_assign(fenv,env,outflow,e1,lval,e2,rval,outer_cinfo,e->loc);
+      }
+      // iterate again; need to go back to empty consume info
+      inflow = restore_consume_info(new_inflow,empty_consume, false);
+      DEBUG_PRINT("inflow changed; recalculating\n");
+    }
 
   case &SeqExp_e(e1,e2): 
     let $(f,r) = anal_Rexp(env,inflow,e1);
@@ -1202,7 +1211,7 @@ anal_Rexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     let $(f,_) = anal_Rexp(env,inflow,e1);
     let $(c,_) = save_consume_info(env->fenv,f,false);
     let $(f,l) = anal_Lexp(env,inflow,e1);
-    f = restore_consume_info(f,c);
+    f = restore_consume_info(f,c,false);
     switch(l) {
     case UnknownL:   return $(f, NotZeroAll);
     case PlaceL(p): return $(f, rnew(env->r) AddressOf(p));
@@ -1652,13 +1661,13 @@ static $(flow_t<`r>,absLval_t<`r>)
 static $(flow_t<`r>,absLval_t<`r>) 
 anal_Lexp(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
 #ifdef SANITY
-  let $(saved_cinfo,_) = save_consume_info(inflow,false); // sanity check
+  let $(saved_cinfo,_) = save_consume_info(env->fenv,inflow,false);
 #endif
   let $(f,r) = anal_Lexp_rec(env,inflow,e,NULL);
 #ifdef SANITY
-  let $(end_cinfo,_) = save_consume_info(inflow,false);
+  let $(end_cinfo,_) = save_consume_info(env->fenv,inflow,false);
   if (saved_cinfo.may_consume != end_cinfo.may_consume ||
-      saved_cinfo.consumed != end_cinfo.consumed)
+      saved_cinfo.consumed.t != end_cinfo.consumed.t)
     Tcutil::impos("oops: anal_Lexp modified consume lists");
 #endif
   return $(f,r);
@@ -2161,7 +2170,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env, flow_t<`r> inflow, stmt_t s) {
   switch (outflow) {
   case ReachableFL(_,_,cinfo):
     DEBUG_PRINT("  consumed: ");
-    DEBUG_PRINT_F(print_place_set,cinfo.consumed);
+    DEBUG_PRINT_F(print_dict_set,cinfo.consumed,print_place);
     DEBUG_PRINT("\n");
     break;
   default: break;

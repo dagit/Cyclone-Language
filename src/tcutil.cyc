@@ -401,7 +401,7 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
   t = compress(t);
   switch (t) {
   case &VarType(tv): 
-    if (!List::mem(fast_tvar_cmp,env,tv)) { 
+    if (!List::mem(fast_tvar_cmp,env,tv)) {
       failure_reason = "(type variable would escape scope)"; 
       throw Unify; 
     }
