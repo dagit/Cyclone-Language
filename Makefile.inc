@@ -27,6 +27,7 @@ ifndef MS
   endif
 endif
 
+
 CYCLONE_LIBS:=arg\
 	inet\
         array\
@@ -36,6 +37,7 @@ CYCLONE_LIBS:=arg\
         core\
         dict\
         errno\
+	fcntl\
         filename\
         fn\
         getopt\
@@ -75,6 +77,7 @@ CYCLONE_H:=arg.h\
         core.h\
         dict.h\
         errno.h\
+	fcntl.h\
         filename.h\
         fn.h\
         getopt.h\
@@ -115,7 +118,6 @@ CYCLONE_H:=arg.h\
 	sys/signal.h\
 	sys/stat.h\
 	sys/types.h\
-	types.h\
 	unistd.h
 
 CYCLONE_SRCS:=absyn\

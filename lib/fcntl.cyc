@@ -1,0 +1,20 @@
+#include <fcntl.h>
+#include <core.h>
+using Core;
+
+namespace Cfcntl {
+  extern "C" int fcntl(int fd, int cmd);
+  extern "C" int fcntl_with_arg(int fd, int cmd, long arg);
+  extern "C" int fcntl_with_lock(int fd, int cmd, struct Fcntl::flock *lock);
+}
+
+namespace Fcntl;
+
+int fcntl(int fd, int cmd, ...`r tunion FcntlArg argv) {
+  if (argv.size == 0) return Cfcntl::fcntl(fd, cmd);
+  else if (argv.size != 1) throw new Failure("fcntl: too many args");
+  else switch (argv[0]) {
+  case &Long(arg): return Cfcntl::fcntl_with_arg(fd, cmd, arg);
+  case &Flock(lock): return Cfcntl::fcntl_with_lock(fd, cmd, lock);
+  }
+}
