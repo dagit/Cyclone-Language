@@ -161,6 +161,7 @@ CYCLONE_SRCS:=absyn\
          tcstmt\
          tcpat\
          tcexp\
+	 tcgenrep\
 	 formatstr\
          evexp\
          tc\

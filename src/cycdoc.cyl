@@ -599,6 +599,10 @@ void dumpexp_prec(int inprec, exp_t e) {
     dump_char(')'); 
     break;
 
+  case &Gentyp_e(t):
+    dump_alpha("__gen"); dump_char('(');
+    dumptyp(t); dump_char(')'); break;
+
   case &Deref_e(e1):
     dump_char('*'); dumpexp_prec(myprec,e1); break;
 

@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Mon Sep 10 13:15:24 2001
---- powerpc-apple-rhapsody/lib/execinfo.c	Mon Sep 24 17:17:44 2001
+*** i686-unknown-linux/lib/execinfo.c	Mon Sep 10 12:33:26 2001
+--- powerpc-apple-rhapsody/lib/execinfo.c	Tue Sep 25 16:27:46 2001
 ***************
 *** 230,324 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -128,8 +128,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c powerpc-apple-rhapsody/lib/socket.c
-*** i686-unknown-linux/lib/socket.c	Mon Sep 10 13:15:28 2001
---- powerpc-apple-rhapsody/lib/socket.c	Mon Sep 24 17:17:44 2001
+*** i686-unknown-linux/lib/socket.c	Mon Sep 10 12:33:26 2001
+--- powerpc-apple-rhapsody/lib/socket.c	Tue Sep 25 16:27:46 2001
 ***************
 *** 240,259 ****
   16u]; struct Cyc_Std_sockaddr_in_struct{ unsigned char* tag; struct Cyc_Std_sockaddr_in
@@ -202,7 +202,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c powerpc-apple-rhapsody
 ! Caddr, len); _temp23;});}
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c.rej powerpc-apple-rhapsody/src/install_path.c.rej
 *** i686-unknown-linux/src/install_path.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/src/install_path.c.rej	Mon Sep 24 17:17:44 2001
+--- powerpc-apple-rhapsody/src/install_path.c.rej	Tue Sep 25 16:27:46 2001
 ***************
 *** 0 ****
 --- 1,6 ----

@@ -1,0 +1,262 @@
+/* Generating typereps from types.
+   Copyright (C) 2001 Greg Morrisett, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+#include <core.h>
+#include <list.h>
+#include <dict.h>
+#include <string.h>
+#include <hashtable.h>
+#include <position.h>
+#include "absyn.h"
+#include "absynpp.h"
+#include "tcutil.h"
+#include "tcenv.h"
+#include "toc.h"
+
+// #include "typerep.h"
+
+using Absyn;
+using Tcenv;
+using Dict;
+using List;
+using Position;
+
+namespace Tcgenrep;
+
+  /* the dictionary entries should be indexed by types and be a three-tuple
+     1) A LIST of declarations
+     2) A string indicating the variable name of the final expression
+        (i.e., the one to use)
+     3) A list of pointers to other three tuples that these declarations
+        depend on.
+     4) A flag indicating whether this series of declarations has
+        been emitted yet for the current file.
+
+     At the end, we pull out the three tuples and sort them
+     topologically.  We then reverse the list and have our list of
+     declarations to return.
+  */
+
+/*------------------------------------------------------------------------*/
+/* Data used to keep track of generated typestruct declarations based
+   on the user-provided type */
+typedef tunion StringorDecl {
+  String(string_t);
+  Decl(decl_t);
+} stringordecl_t;
+
+typedef struct RepInfo {
+  list_t<stringordecl_t> decls;
+  stringptr_t varname;
+  list_t<struct RepInfo @> dependencies;
+  int emitted;
+} @repinfo_t;
+
+/*------------------------------------------------------------------------*/
+/* Helper functions & data */
+
+// Used for the dictionary;
+//   For now, we convert to a string and then compare the
+//   two strings.  This is not as robust as it could be, but
+//   we'll see how it goes ...
+static int typecmp(type_t t1, type_t t2) {
+  Absynpp::set_params(&Absynpp::c_params_r);
+  string_t t1str = Absynpp::typ2string(t1);
+  string_t t2str = Absynpp::typ2string(t2);
+  return strcmp(t1str,t2str);
+}
+
+// These routines are used to hash repinfos to keep track of nodes visited
+static int rephash(repinfo_t ri) {
+  return (int)ri;
+}
+
+static int repcmp(repinfo_t r1, repinfo_t r2) {
+  unsigned int r1p, r2p;
+  r1p = (unsigned int)r1;
+  r2p = (unsigned int)r2;
+  if (r1 < r2) return -1;
+  else if (r1 == r2) return 0;
+  else return 1;
+}
+
+// get field from known tunion type
+static tunionfield_t getField(tuniondecl_t td, qvar_t fieldname) {
+  if (td->fields == NULL)
+    Tcutil::impos("Could not find field in tuniondecl");
+  else {
+    for (list_t<tunionfield_t> l = td->fields->v; l != NULL; l = l->tl)
+      if (!qvar_cmp(l->hd->name,fieldname))
+	return l->hd;
+  }
+  Tcutil::impos("Could not find field in tuniondecl");
+  throw Tcutil::TypeErr; // redundant, as impos will do this
+}
+
+// defines the Tcgenrep namespace as an absyn value
+static string_t tcgenrep_nm = "Tcgenrep";
+static struct List<var_t,`H> l = { .hd=&tcgenrep_nm, .tl=NULL };
+static tunion Nmspace.Abs_n tcgenrep_nmspace = Abs_n(&l);
+
+/*------------------------------------------------------------------------*/
+// depth-first-search on repinfo_t's, based on the dependency edges.
+//   this allows for a topological sort to extract the relevant
+//   declarations.
+static list_t<list_t<stringordecl_t>>
+dfsvisit(repinfo_t ri, Hashtable::table_t<repinfo_t, int> visited) {
+  try {
+    Hashtable::lookup(visited,ri);
+    // did not raise exception, so we already visited it
+    // FIX: must detect cycle and insert prototype in that case
+    return NULL;
+  } catch {
+  case Not_found:
+    // mark the node as visited
+    Hashtable::insert(visited,ri,1);
+    // process the children
+    list_t ds = NULL;
+    for (list_t l = ri->dependencies; l != NULL; l = l->tl)
+      ds = imp_append(ds,dfsvisit(l->hd,visited));
+    // add our own decls
+    let l = new List(ri->decls,NULL);
+    return imp_append(ds,l);
+  }
+}    
+static list_t<stringordecl_t> dfs(repinfo_t ri)
+{
+  Hashtable::table_t tab = Hashtable::create(53,repcmp,rephash);
+  list_t ds = dfsvisit(ri,tab);
+  return (flatten(ds));
+} 
+
+// We look up the Typestruct tunion declaration
+// once and for all, and then use that when generating
+// syntax
+static string_t typestruct_str = "Typestruct";
+static $(nmspace_t,var_t) typestruct_name =
+  $((tunion Nmspace)&tcgenrep_nmspace, &typestruct_str);
+static tuniondecl_t *`H typestruct_decl = NULL;
+
+/*------------------------------------------------------------------------*/
+// Given a type, looks for the typestruct decl for that type in the
+// dictionary.  If found, it returns the dictionary back, along
+// with an expression containing the variable name of the decl.
+// If not found, it generates the decl(s), enters them into the
+// dictionary, and returns as before.  Will operate recursively.
+static $(dict_t<type_t,repinfo_t,`H>,repinfo_t) @
+  lookupRep(tenv_t te, seg_t loc, type_t type, 
+	    dict_t<type_t,repinfo_t,`H> dict)
+{
+  if (typestruct_decl == NULL)
+    lookup_tuniondecl(te,loc,&typestruct_name);
+
+  Core::opt_t<repinfo_t> info = lookup_opt(dict,type);
+  if (info != NULL)
+    return new $(dict,info->v);
+  else {
+//      switch (type) {
+//      case VoidType: 
+//        Tcutil::terr(loc,"found void in gen() expression");
+//      case Evar(_,_,_,_):
+//        Tcutil::impos("Evar in gen() expression");
+//      case VarType(_):
+//        Tcutil::terr(loc,"found variable type in gen() expression");
+//      case TunionType(tui): // tunion_info_t
+//        // XXX need to check that tui->targs applied to
+//        // the tunion is closed
+//        switch (tui->tunion_info) {
+//        case UnknownTunion(_):
+//  	Tcutil::terr(loc,"found unknown tunion type in gen() expression");
+//        case KnownTunion(tud):
+//  	if (tud->is_xtunion)
+//  	  Tcutil::terr(loc,"found xtunion type in gen() expression");
+//  	else {
+//  	  // for each of the tunion fields that has associated
+//  	  // data, output a Tuple.  For tag-only fields, do
+//  	  // nothing.	
+//  	}
+//      case TunionFieldType(t): // tunion_field_info_t
+//      case PointerType(pt): // ptr_info_t
+//      case IntType(_,sz): // size_of_t
+//        /* SYNTAX for tunion Typestruct.Int int_tag = Int(32); */
+//        /*-----------------------------------------------------*/
+//        // generate fresh varname
+//        let v = Toc::temp_var();
+//        // tunion field type
+//        let IntF = $((tunion Nmspace)&tgcenrep_nmspace, &typestruct_name);
+//        let tuf = getField(*typestruct_decl, &IntF);
+//        let tui =
+//  	new TunionFieldInfo
+//  	(new TunionFieldInfoU
+//  	 (new KnownTunionField(*typestruct_decl, tuf)), // XXX make copy?
+//  	 NULL);
+//        let t = new TunionFieldType(tui);
+//        // initialization expression
+//        let inite = new ;
+//        let exp = new Tunion_e(NULL,NULL,
+//  			     new struct List{.hd=inite,.tl=NULL},
+//  			     *typestruct_decl,tuf);
+//        vardecl_t vd = static_vardecl(v,t,new struct Opt{.v=exp});
+//      case FloatType:
+//      case DoubleType:
+//      case ArrayType(type_t/* element typ*/,tqual_t,exp_opt_t/* size */):
+//      case FnType(fn_info_t): 
+//        Tcutil::terr(loc,"found function type in gen() expression");
+//      case TupleType(list_t<$(tqual_t,type_t)@>): // MemKind
+//      case StructType(typedef_name_opt_t,list_t<type_t>,structdecl_t *): // MemKind
+//      case UnionType(typedef_name_opt_t,list_t<type_t>,uniondecl_t *): // MemKind 
+//      case AnonStructType(list_t<structfield_t>): // MemKind
+//      case AnonUnionType(list_t<structfield_t>): // MemKind
+//      case EnumType(typedef_name_t,struct Enumdecl *): // BoxKind
+//      case RgnHandleType(type_t):   // BoxKind
+//      // An abbreviation -- the opt_t<typ> contains the definition if any
+//      case TypedefType(typedef_name_t,list_t<type_t>,opt_t<type_t>):
+//      case HeapRgn:                 // RgnKind
+//      case AccessEff(type_t):       // RgnKind -> EffKind
+//      case JoinEff(list_t<type_t>): // EffKind list -> EffKind
+//      case RgnsEff(type_t):         // AnyKind -> EffKind
+//      }
+    Tcutil::impos("gen() expression not yet supported");
+    throw Tcutil::TypeErr; // redundant, as impos will do this
+  }
+}
+
+/*------------------------------------------------------------------------*/
+// Replaces a gen(t) expression with a Typestruct value.  As a result,
+// it needs to generate a number of static declarations of data, and 
+// finally an expression of type tunion Typestruct.  FIX: take in
+// and return a Dictionary so that we can reuse declarations from
+// previous gen()'s in the same file.
+$(list_t<decl_t>,exp_t)
+  tcGenrep(tenv_t te, genv_t ge, seg_t loc, type_t type)
+{
+  dict_t<type_t,repinfo_t> dict = empty(typecmp);
+
+  // first check that type is well-formed
+  Tcutil::check_valid_toplevel_type(loc,te,type);
+
+  // generate the declarations
+  let &$(dict,ri) = lookupRep(te, loc, type, dict);  
+  let decls = dfs(ri);
+  let varname = new $((tunion Nmspace)&tcgenrep_nmspace,ri->varname);
+  let varexp = var_exp(varname,loc);
+
+  return $(NULL /* FIX:parse decls, above, and fill in here */, varexp);
+}
+

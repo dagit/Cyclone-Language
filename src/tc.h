@@ -30,7 +30,7 @@ using List;
 using Absyn;
 using Tcenv;
 
-extern void tc(tenv_t te, bool var_default_init, list_t<decl_t> ds);
+extern void tc(tenv_t te, bool var_default_init, list_t<decl_t,`H> ds);
 
   // if called, must be after tc is called
   // removes extern variables that are never referred to

@@ -28,6 +28,9 @@ using Typerep;
 
 extern "C" `b unsafe_cast<`b,`a>(`a x);
 
+/* to "encourage" the user to include this file, we make gen() a macro */
+#define gen(t) __gen(t)
+
 namespace Typerep;
 
 /*-------------------------------------------------------------------------*/

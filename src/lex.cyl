@@ -116,6 +116,7 @@ static $(string_t,short) rw_array[] = {
   $("fill", FILL),
   $("float", FLOAT),
   $("for", FOR),
+  $("__gen", GEN),
   $("goto", GOTO),
   $("if", IF),
   $("inline", INLINE),

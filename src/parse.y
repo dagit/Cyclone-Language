@@ -892,6 +892,7 @@ using Parse;
 %token FILL CODEGEN CUT SPLICE
 %token MALLOC
 %token REGION_T REGION RNEW RMALLOC REGIONS
+%token GEN
 // double and triple-character tokens
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -2390,6 +2391,8 @@ unary_expression:
 | SIZEOF unary_expression        { $$=^$(sizeofexp_exp($2,LOC(@1,@2))); }
 | OFFSETOF '(' type_name ',' IDENTIFIER ')' 
    { $$=^$(offsetof_exp((*$3)[2],new $5,LOC(@1,@6))); }
+/* Cyc: __gen for generic, type-based marshallers */
+| GEN '(' type_name ')'      { $$=^$(gentyp_exp((*$3)[2],LOC(@1,@4))); }
 /* Cyc: malloc, rmalloc */
 | MALLOC '(' SIZEOF '(' specifier_qualifier_list ')' ')'
 { $$=^$(new_exp(new Malloc_e(NULL,speclist2typ((*$5)[1],LOC(@5,@5))),

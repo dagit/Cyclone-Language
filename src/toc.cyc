@@ -1559,6 +1559,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Sizeofexp_e(e1): exp_to_c(nv,e1); break;
   case &Sizeoftyp_e(t):  e->r = new Sizeoftyp_e(typ_to_c_array(t));  break;
+  case &Gentyp_e(t): throw toc_impos("__gen() in code generator"); 
   case &Offsetof_e(t,n): e->r = new Offsetof_e(typ_to_c_array(t),n); break;
   case &Deref_e(e1):
     let e1_typ = compress(e1->topt->v);

@@ -31,6 +31,7 @@
 #include "tc.h"
 #include <stdio.h>
 #include "tcdecl.h"
+#include "tcgenrep.h"
 using Core;
 using List;
 using Position;
@@ -38,6 +39,7 @@ using Absyn;
 using Absynpp;
 using Tcutil;
 using Tcenv;
+using Tcgenrep;
 
 namespace Tc;
 
@@ -777,11 +779,12 @@ static bool okay_externC(seg_t loc, scope_t sc) {
 // absolute, so later passes just recurse through namespace and using
 // New: a second pass shakes out unnecessary vardecls.
 // FIX: shake out type definitions too.
-static void tc_decls(tenv_t te, list_t<decl_t> ds0, bool in_externC, bool check_var_init) {
+static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0, bool in_externC, bool check_var_init) {
 
   genv_t ge = Dict::lookup(te->ae,te->ns); // no longer a copy!!!
+  list_t<decl_t,`H> last = NULL;
 
-  for (let ds = ds0; ds != NULL; ds = ds->tl) {
+  for (let ds = ds0; ds != NULL; last = ds, ds = ds->tl) {
     decl_t    d   = ds->hd;
     seg_t loc = d->loc;
 
@@ -795,6 +798,35 @@ static void tc_decls(tenv_t te, list_t<decl_t> ds0, bool in_externC, bool check_
     case &Var_d(vd):
       if (in_externC && okay_externC(d->loc,vd->sc))
 	vd->sc = ExternC;
+      if (vd->initializer != NULL) {
+	switch (vd->initializer->r) {
+	case &Gentyp_e(t):
+	  /* FIX: should pass in a dictionary and use that throughout
+	     typechecking to share generated declarations */
+	  let &$(ds2,e) = tcGenrep(te,ge,loc,t);
+	  /* typecheck the generated declarations */
+	  tc_decls(te,ds2,in_externC,check_var_init);
+	  /* replace the gentype expression with the generated one */
+	  vd->initializer = e;
+	  /* then typecheck the vardecl */
+	  tcVardecl(te,ge,loc,vd,check_var_init);
+	  /* splice in the new declarations */
+	  if (last != NULL) {
+	    imp_append(ds2,ds);
+	    last->tl = ds2;
+	  }
+	  else {
+	    ds->hd = ds2->hd;
+	    /* need to replace the first element's hd with the new
+	       declarations and then create */
+	  }
+	  /* continue the loop */
+	  continue;
+	default:
+	  break;
+	}
+      }
+      // catches the non gen() cases
       tcVardecl(te,ge,loc,vd,check_var_init);
       break;
     case &Fn_d(fd):
@@ -868,7 +900,7 @@ static void tc_decls(tenv_t te, list_t<decl_t> ds0, bool in_externC, bool check_
   }
 }
 
-void tc(tenv_t te, bool check_var_init, list_t<decl_t> ds) {
+void tc(tenv_t te, bool check_var_init, list_t<decl_t,`H> ds) {
   set_params(&tc_params_r);
   tc_decls(te,ds,false,check_var_init);
 }

@@ -29,6 +29,8 @@
 #define EXTERN_TYPEREP extern
 #endif
 
+#define gen(t) __gen(t)
+
 namespace Typerep {
 
 EXTERN_TYPEREP tunion Typestruct {

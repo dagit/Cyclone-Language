@@ -3181,6 +3181,7 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
   case &Const_e(_):     return true;
   case &Sizeoftyp_e(_): return true;
   case &Sizeofexp_e(_): return true; // exp is not evaluated
+  case &Gentyp_e(_):    return true;
   case &Enum_e(_,_,_):  return true;
   case &Var_e(qv,_):
     // NB: top-level function names and arrays are "constant"
