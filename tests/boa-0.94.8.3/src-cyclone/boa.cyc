@@ -21,15 +21,15 @@
  *
  */
 
-/* $Id: boa.cyc,v 1.1 2001-09-24 21:59:18 mharris Exp $*/
+/* $Id: boa.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $*/
 
 #include "boa.h"
 #include <sys/resource.h>       /* setrlimit */
 #include <grp.h>
 #include <arpa/inet.h>          /* inet_ntoa */
-
-using Resource;
-using Grp;
+#include <getopt.h>
+#include <fcntl.h>
+#include <unistd.h>
 
 void fdset_update(void);
 void fixup_server_root(void);
@@ -40,7 +40,7 @@ int max_connections = 0;
 
 struct timeval req_timeout;     /* timeval for select */
 
-extern char ?optarg;            /* getopt */
+//extern char ?optarg;            /* getopt */
 
 fd_set block_read_fdset;
 fd_set block_write_fdset;
@@ -53,7 +53,7 @@ time_t current_time;
 int sock_opt = 1;
 int do_fork = 1;
 
-int main(int argc, char ??argv)
+int main(int argc, char ?`H?argv)
 {
     int c;                      /* command line arg */
 
@@ -104,7 +104,7 @@ int main(int argc, char ??argv)
         exit(errno);
     }
 
-    if ((setsockopt(server_s, SOL_SOCKET, SO_REUSEADDR, (void *) &sock_opt,
+    if ((setsockopt(server_s, SOL_SOCKET, SO_REUSEADDR, (char ?) &sock_opt,
                     sizeof (sock_opt))) == -1) {
         log_error_mesg(__FILE__, __LINE__, "setsockopt");
         exit(errno);

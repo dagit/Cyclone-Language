@@ -19,10 +19,11 @@
  *
  */
 
-/* $Id: buffer.cyc,v 1.1 2001-09-24 21:59:18 mharris Exp $ */
+/* $Id: buffer.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $ */
 
 #include "boa.h"
 #include "escape.h"
+#include <unistd.h>
 
 #define INT_TO_HEX(x) \
     ((char)((((x)-10)>=0)?('A'+((x)-10)):('0'+(x))))

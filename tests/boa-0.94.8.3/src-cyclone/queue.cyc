@@ -19,7 +19,7 @@
  *
  */
 
-/* $Id: queue.cyc,v 1.1 2001-09-24 21:59:18 mharris Exp $*/
+/* $Id: queue.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $*/
 
 #include "boa.h"
 
@@ -33,7 +33,7 @@ request *request_free = NULL;   /* free list head */
  * Description: Moves a request from the ready queue to the blocked queue
  */
 
-void block_request(request @ req)
+void block_request(request @`H req)
 {
     dequeue(&request_ready, req);
     enqueue(&request_block, req);
@@ -65,7 +65,7 @@ void block_request(request @ req)
  * Description: Moves a request from the blocked queue to the ready queue
  */
 
-void ready_request(request @ req)
+void ready_request(request @`H req)
 {
     dequeue(&request_block, req);
     enqueue(&request_ready, req);
@@ -118,7 +118,7 @@ void dequeue(request *@ head, request @ req)
  * Description: Adds a request to the head of a queue
  */
 
-void enqueue(request *@ head, request @ req)
+void enqueue(request *`H@ head, request @`H req)
 {
     if (*head)
         (*head)->prev = req;    /* previous head's prev is us */

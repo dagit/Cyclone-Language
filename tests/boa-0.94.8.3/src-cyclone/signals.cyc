@@ -21,15 +21,13 @@
  *
  */
 
-/* $Id: signals.cyc,v 1.1 2001-09-24 21:59:19 mharris Exp $*/
+/* $Id: signals.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $*/
 
 #include "boa.h"
 #ifdef HAVE_SYS_WAIT_H
 #include <sys/wait.h>           /* wait */
-using Wait;
 #endif
 #include <signal.h>             /* signal */
-using Signal;
 
 void sigsegv(int);
 void sigbus(int);

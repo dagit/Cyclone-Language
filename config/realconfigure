@@ -173,7 +173,8 @@ cd config
 
 # see if we have #defines for this architecture
 if [ ! -f "arch/${ARCH}" ]; then
-  echo "This architecture is currently unsupported.  Set it up (y/n)?"
+  echo "This architecture ($ARCH) is currently unsupported."
+  echo "Set it up (y/n)?"
   read resp
   if [ "$resp" = "y" ]; then
     echo | ${CC} -E -dM - > arch/$ARCH

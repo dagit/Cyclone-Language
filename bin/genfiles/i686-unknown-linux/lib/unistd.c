@@ -231,40 +231,52 @@ extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
 extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
 int tv_sec; int tv_usec; } ; struct Cyc_Std_option{ struct _tagged_arr name; int
 has_arg; int* flag; int val; } ; extern unsigned int alarm( unsigned int seconds);
-extern int close( int); extern int getpid(); extern int getppid(); extern int
-fork(); extern int fchdir( int); extern int dup( int); extern int dup2( int, int);
-extern unsigned int getuid(); extern int setuid( unsigned int uid); extern
-unsigned int geteuid(); extern int seteuid( unsigned int euid); extern
-unsigned int getgid(); extern int setgid( unsigned int gid); extern unsigned int
-getegid(); extern int setegid( unsigned int egid); extern int pipe( int* filedes);
-extern int lseek( int filedes, int offset, int whence); int Cyc_Std_access(
-struct _tagged_arr, int); int Cyc_Std_chdir( struct _tagged_arr); struct
-_tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf, unsigned int size); int Cyc_Std_execl(
-struct _tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv); int
-Cyc_Std_execlp( struct _tagged_arr file, struct _tagged_arr arg0, struct
-_tagged_arr argv); int Cyc_Std_execve( struct _tagged_arr filename, struct
-_tagged_arr argv, struct _tagged_arr envp); int Cyc_Std_read( int fd, struct
-_tagged_arr buf, unsigned int count); int Cyc_Std_write( int fd, struct
+extern int close( int); extern void _exit( int); extern int getpid(); extern int
+getppid(); extern int fork(); extern int fchdir( int); extern int fchown( int,
+unsigned int, unsigned int); extern int fsync( int); extern int ftruncate( int,
+int); extern int dup( int); extern int dup2( int, int); extern unsigned int
+getuid(); extern int setuid( unsigned int uid); extern unsigned int geteuid();
+extern int seteuid( unsigned int euid); extern unsigned int getgid(); extern int
+setgid( unsigned int gid); extern unsigned int getegid(); extern int setegid(
+unsigned int egid); extern int nice( int); extern int pause(); extern int pipe(
+int* filedes); extern int lseek( int filedes, int offset, int whence); extern
+unsigned int sleep( unsigned int); int Cyc_Std_access( struct _tagged_arr, int);
+int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown( struct _tagged_arr,
+unsigned int, unsigned int); struct _tagged_arr Cyc_Std_getcwd( struct
+_tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct _tagged_arr path,
+struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp( struct
+_tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execve(
+struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp);
+int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr); int Cyc_Std_read( int
+fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir( struct
+_tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr); int
+Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd, struct
 _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct _tagged_arr
 pathname); extern int access( unsigned char*, int); extern int chdir(
-unsigned char*); extern unsigned char* getcwd( unsigned char* buf, unsigned int
-size); extern int execv( unsigned char* path, unsigned char** argv); extern int
-execvp( unsigned char* file, unsigned char** argv); extern int execve(
-unsigned char* path, unsigned char** argv, unsigned char** envp); extern int
-read( int fd, unsigned char* buf, unsigned int count); extern int write( int fd,
-unsigned char* buf, unsigned int count); extern int unlink( unsigned char*
-pathname); int Cyc_Std_access( struct _tagged_arr path, int mode){ return access(
-string_to_Cstring( path), mode);} int Cyc_Std_chdir( struct _tagged_arr path){
-return chdir( string_to_Cstring( path));} struct _tagged_arr Cyc_Std_getcwd(
-struct _tagged_arr buf, unsigned int size){ if( !(( unsigned int) buf.curr)? 1:
-_get_arr_size( buf, sizeof( unsigned char)) <  size){( int) _throw(( void*)({
-struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
-_temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("getcwd: invalid buf argument",
-sizeof( unsigned char), 29u); _temp1;}); _temp0;}));}{ unsigned char* response=
-getcwd(( unsigned char*) _check_null( _untag_arr( buf, sizeof( unsigned char), 0u)),
-size); return( unsigned int) response? buf: _tag_arr( 0u, 0u, 0u);}} int Cyc_Std_execl(
-struct _tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv){ if((*((
+unsigned char*); extern int chown( unsigned char*, unsigned int, unsigned int);
+extern unsigned char* getcwd( unsigned char* buf, unsigned int size); extern int
+execv( unsigned char* path, unsigned char** argv); extern int execvp(
+unsigned char* file, unsigned char** argv); extern int execve( unsigned char*
+path, unsigned char** argv, unsigned char** envp); extern int link(
+unsigned char* path1, unsigned char* path2); extern int read( int fd,
+unsigned char* buf, unsigned int count); extern int rmdir( unsigned char*);
+extern int symlink( unsigned char* path1, unsigned char* path2); extern int
+truncate( unsigned char*, int); extern int write( int fd, unsigned char* buf,
+unsigned int count); extern int unlink( unsigned char* pathname); int Cyc_Std_access(
+struct _tagged_arr path, int mode){ return access( string_to_Cstring( path),
+mode);} int Cyc_Std_chdir( struct _tagged_arr path){ return chdir(
+string_to_Cstring( path));} int Cyc_Std_chown( struct _tagged_arr path,
+unsigned int owner, unsigned int group){ return chown( string_to_Cstring( path),
+owner, group);} struct _tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf,
+unsigned int size){ if( !(( unsigned int) buf.curr)? 1: _get_arr_size( buf,
+sizeof( unsigned char)) <  size){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
+_temp0=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
+_temp0[ 0]=({ struct Cyc_Core_Failure_struct _temp1; _temp1.tag= Cyc_Core_Failure;
+_temp1.f1= _tag_arr("getcwd: invalid buf argument", sizeof( unsigned char), 29u);
+_temp1;}); _temp0;}));}{ unsigned char* response= getcwd(( unsigned char*)
+_check_null( _untag_arr( buf, sizeof( unsigned char), 0u)), size); return(
+unsigned int) response? buf: _tag_arr( 0u, 0u, 0u);}} int Cyc_Std_execl( struct
+_tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv){ if((*((
 struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr),(
 int)( _get_arr_size( argv, sizeof( struct _tagged_arr)) -  1)))).curr != ((
 struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){( int) _throw(( void*)({ struct
@@ -334,18 +346,25 @@ sizeof( unsigned char*), i))= string_to_Cstring(*(( const struct _tagged_arr*)
 _check_unknown_subscript( envp, sizeof( struct _tagged_arr), i)));}} return
 execve( string_to_Cstring( filename),( unsigned char**) _check_null( _untag_arr(
 newargs, sizeof( unsigned char*), 1u)),( unsigned char**) _check_null(
-_untag_arr( newenvp, sizeof( unsigned char*), 1u)));}}} int Cyc_Std_read( int fd,
-struct _tagged_arr buf, unsigned int count){ if( count >  _get_arr_size( buf,
-sizeof( unsigned char))){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
+_untag_arr( newenvp, sizeof( unsigned char*), 1u)));}}} int Cyc_Std_link( struct
+_tagged_arr path1, struct _tagged_arr path2){ return link( string_to_Cstring(
+path1), string_to_Cstring( path2));} int Cyc_Std_read( int fd, struct
+_tagged_arr buf, unsigned int count){ if( count >  _get_arr_size( buf, sizeof(
+unsigned char))){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
 _temp24=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp24[ 0]=({ struct Cyc_Core_Failure_struct _temp25; _temp25.tag= Cyc_Core_Failure;
 _temp25.f1= _tag_arr("read: called with count > buf.size", sizeof( unsigned char),
 35u); _temp25;}); _temp24;}));} return read( fd, underlying_Cstring(( struct
-_tagged_arr) buf), count);} int Cyc_Std_write( int fd, struct _tagged_arr buf,
-unsigned int count){ if( count >  _get_arr_size( buf, sizeof( unsigned char))){(
-int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp26=( struct Cyc_Core_Failure_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Failure_struct)); _temp26[ 0]=({ struct Cyc_Core_Failure_struct
-_temp27; _temp27.tag= Cyc_Core_Failure; _temp27.f1= _tag_arr("write: called with count > buf.size",
-sizeof( unsigned char), 36u); _temp27;}); _temp26;}));} return write( fd,
+_tagged_arr) buf), count);} int Cyc_Std_rmdir( struct _tagged_arr path){ return
+rmdir( string_to_Cstring( path));} int Cyc_Std_symlink( struct _tagged_arr path1,
+struct _tagged_arr path2){ return symlink( string_to_Cstring( path1),
+string_to_Cstring( path2));} int Cyc_Std_truncate( struct _tagged_arr path, int
+length){ return truncate( string_to_Cstring( path), length);} int Cyc_Std_write(
+int fd, struct _tagged_arr buf, unsigned int count){ if( count >  _get_arr_size(
+buf, sizeof( unsigned char))){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
+_temp26=( struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
+_temp26[ 0]=({ struct Cyc_Core_Failure_struct _temp27; _temp27.tag= Cyc_Core_Failure;
+_temp27.f1= _tag_arr("write: called with count > buf.size", sizeof(
+unsigned char), 36u); _temp27;}); _temp26;}));} return write( fd,
 string_to_Cstring( buf), count);} int Cyc_Std_unlink( struct _tagged_arr
 pathname){ return unlink( string_to_Cstring( pathname));}

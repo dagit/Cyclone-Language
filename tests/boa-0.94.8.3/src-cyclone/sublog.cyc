@@ -18,7 +18,7 @@
  *
  */
 
-/* $Id: sublog.cyc,v 1.1 2001-09-24 21:59:19 mharris Exp $*/
+/* $Id: sublog.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $*/
 
 #include <core.h>
 #include <errno.h>
@@ -35,32 +35,22 @@
 #include <arpa/inet.h>
 
 using Core;
-using Errno;
-using Stdio;
-using Stdlib;
-using String;
-using NetDB;
-using Unistd;
-using Fcntl;
-using Stat;
-using Socket;
-using Inet;
 
-// Cyclone-specific
-char ?`r1 mstrchr(char ?`r1 s, char c) {
-  if (0 > s.size) throw new InvalidArg("mstrchr");
-  int len;
-  for (len = 0; len<s.size; len++) {
-    if (s[len] == '\000')
-      break;
-  }
-  char c2 = '\000';
-  for (; len>0 && (c2=*s)!=0; len--,s++) {
-    if (c2 == c)
-      return s;
-  }
-  return null;
-}
+// // Cyclone-specific
+// char ?`r1 mstrchr(char ?`r1 s, char c) {
+//   if (0 > s.size) throw new InvalidArg("mstrchr");
+//   int len;
+//   for (len = 0; len<s.size; len++) {
+//     if (s[len] == '\000')
+//       break;
+//   }
+//   char c2 = '\000';
+//   for (; len>0 && (c2=*s)!=0; len--,s++) {
+//     if (c2 == c)
+//       return s;
+//   }
+//   return null;
+// }
 
 /* Like popen, but gives fd instead of FILE * */
 int open_pipe_fd(char ?command)

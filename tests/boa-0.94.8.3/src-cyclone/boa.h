@@ -20,7 +20,7 @@
  *
  */
 
-/* $Id: boa.h,v 1.2 2001-09-27 22:04:43 tjim Exp $*/
+/* $Id: boa.h,v 1.3 2001-09-29 00:23:51 tjim Exp $*/
 
 #ifndef _BOA_H
 #define _BOA_H
@@ -86,10 +86,10 @@ void log_error_mesg(const char ?file, int line, const char ?mesg);
 
 /* queue */
 
-void block_request(request @ req);
-void ready_request(request @ req);
+void block_request(request @`H req);
+void ready_request(request @`H req);
 void dequeue(request *@ head, request @ req);
-void enqueue(request *@ head, request @ req);
+void enqueue(request *`H@ head, request @`H req);
 
 /* read */
 
@@ -155,8 +155,8 @@ char ?simple_itoa(int i);
 char ?`r escape_string(const char ?inp, char ?`r buf);
 int month2int(const char ?month);
 int modified_since(time_t * mtime, const char ?if_modified_since);
-char ?to_upper(char ?str);
-int unescape_uri(const char ?uri);
+char ?`r to_upper(char ?`r str);
+int unescape_uri(char ?uri);
 char ?`r mstrstr(char ?`r haystack, const char ?`r2 needle); // Cyclone-specific
 char ?`r memmove(char ?`r dest, const char ?`r2 src, size_t n); // Cyclone-specific
 

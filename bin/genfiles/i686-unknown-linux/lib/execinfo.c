@@ -259,20 +259,26 @@ pid, int* status, int options); void(* Cyc_Std_signal( int sig, void(* func)(
 int)))( int); extern int raise( int sig); extern int kill( int, int); struct Cyc_Std_timeval{
 int tv_sec; int tv_usec; } ; struct Cyc_Std_option{ struct _tagged_arr name; int
 has_arg; int* flag; int val; } ; extern unsigned int alarm( unsigned int seconds);
-extern int close( int); extern int getpid(); extern int getppid(); extern int
-fork(); extern int fchdir( int); extern int dup( int); extern int dup2( int, int);
-extern unsigned int getuid(); extern int setuid( unsigned int uid); extern
-unsigned int geteuid(); extern int seteuid( unsigned int euid); extern
-unsigned int getgid(); extern int setgid( unsigned int gid); extern unsigned int
-getegid(); extern int setegid( unsigned int egid); extern int pipe( int* filedes);
-extern int lseek( int filedes, int offset, int whence); int Cyc_Std_access(
-struct _tagged_arr, int); int Cyc_Std_chdir( struct _tagged_arr); struct
-_tagged_arr Cyc_Std_getcwd( struct _tagged_arr buf, unsigned int size); int Cyc_Std_execl(
-struct _tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv); int
-Cyc_Std_execlp( struct _tagged_arr file, struct _tagged_arr arg0, struct
-_tagged_arr argv); int Cyc_Std_execve( struct _tagged_arr filename, struct
-_tagged_arr argv, struct _tagged_arr envp); int Cyc_Std_read( int fd, struct
-_tagged_arr buf, unsigned int count); int Cyc_Std_write( int fd, struct
+extern int close( int); extern void _exit( int); extern int getpid(); extern int
+getppid(); extern int fork(); extern int fchdir( int); extern int fchown( int,
+unsigned int, unsigned int); extern int fsync( int); extern int ftruncate( int,
+int); extern int dup( int); extern int dup2( int, int); extern unsigned int
+getuid(); extern int setuid( unsigned int uid); extern unsigned int geteuid();
+extern int seteuid( unsigned int euid); extern unsigned int getgid(); extern int
+setgid( unsigned int gid); extern unsigned int getegid(); extern int setegid(
+unsigned int egid); extern int nice( int); extern int pause(); extern int pipe(
+int* filedes); extern int lseek( int filedes, int offset, int whence); extern
+unsigned int sleep( unsigned int); int Cyc_Std_access( struct _tagged_arr, int);
+int Cyc_Std_chdir( struct _tagged_arr); int Cyc_Std_chown( struct _tagged_arr,
+unsigned int, unsigned int); struct _tagged_arr Cyc_Std_getcwd( struct
+_tagged_arr buf, unsigned int size); int Cyc_Std_execl( struct _tagged_arr path,
+struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execlp( struct
+_tagged_arr file, struct _tagged_arr arg0, struct _tagged_arr argv); int Cyc_Std_execve(
+struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp);
+int Cyc_Std_link( struct _tagged_arr, struct _tagged_arr); int Cyc_Std_read( int
+fd, struct _tagged_arr buf, unsigned int count); int Cyc_Std_rmdir( struct
+_tagged_arr); int Cyc_Std_symlink( struct _tagged_arr, struct _tagged_arr); int
+Cyc_Std_truncate( struct _tagged_arr, int); int Cyc_Std_write( int fd, struct
 _tagged_arr buf, unsigned int count); int Cyc_Std_unlink( struct _tagged_arr
 pathname); extern int backtrace( int*, int); int Cyc_Execinfo_backtrace( struct
 _tagged_arr array, int size){ if( size >  _get_arr_size( array, sizeof( int))){(

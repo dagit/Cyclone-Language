@@ -24,11 +24,16 @@ namespace Cunistd {
   extern "C" {
     int access(Cstring,int);
     int chdir(Cstring);
+    int chown(Cstring,uid_t,gid_t);
     Cstring<`r> getcwd(Cstring<`r> buf, size_t size);
     int execv(Cstring path, Cstring *argv);
     int execvp(Cstring file, Cstring *argv);
     int execve(Cstring path, Cstring *argv, Cstring *envp);
+    int link(Cstring path1, Cstring path2);
     ssize_t read(int fd, Cstring buf, size_t count);
+    int rmdir(Cstring);
+    int symlink(Cstring path1, Cstring path2);
+    int truncate(Cstring,off_t);
     ssize_t write(int fd, Cstring buf, size_t count);
     int unlink(Cstring pathname);
   }
@@ -42,6 +47,10 @@ int access(string_t path, int mode) {
 
 int chdir(string_t path) {
   return Cunistd::chdir(string_to_Cstring(path));
+}
+
+int chown(string_t path, uid_t owner, gid_t group) {
+  return Cunistd::chown(string_to_Cstring(path),owner,group);
 }
 
 char ?`r getcwd(char ?`r buf, size_t size) {
@@ -93,10 +102,26 @@ int execve(string_t filename, string_t const ?argv, string_t const ?envp) {
                          (Cstring*) newargs, (Cstring*) newenvp);
 }
 
+int link(string_t path1,string_t path2) {
+  return Cunistd::link(string_to_Cstring(path1),string_to_Cstring(path2));
+}
+
 ssize_t read(int fd, mstring_t buf, size_t count) {
   if (count > buf.size)
     throw new Failure("read: called with count > buf.size");
   return Cunistd::read(fd, underlying_Cstring(buf), count);
+}
+
+int rmdir(string_t path) {
+  return Cunistd::rmdir(string_to_Cstring(path));
+}
+
+int symlink(string_t path1,string_t path2) {
+  return Cunistd::symlink(string_to_Cstring(path1),string_to_Cstring(path2));
+}
+
+int truncate(string_t path, off_t length) {
+  return Cunistd::truncate(string_to_Cstring(path),length);
 }
 
 ssize_t write(int fd, string_t buf, size_t count) {

@@ -21,7 +21,7 @@
  *
  */
 
-/* $Id: util.cyc,v 1.1 2001-09-24 21:59:19 mharris Exp $ */
+/* $Id: util.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $ */
 
 #include "boa.h"
 
@@ -33,25 +33,25 @@ const char month_tab[48] =
     "Jan Feb Mar Apr May Jun Jul Aug Sep Oct Nov Dec ";
 const char day_tab[] = "Sun,Mon,Tue,Wed,Thu,Fri,Sat,";
 
-// Cyclone-specific
-char ?`r1 mstrchr(char ?`r1 s, char c) {
-  if (0 > s.size) throw new InvalidArg("mstrchr");
-  int len;
-  for (len = 0; len<s.size; len++) {
-    if (s[len] == '\000')
-      break;
-  }
-  char c2 = '\000';
-  for (; len>0 && (c2=*s)!=0; len--,s++) {
-    if (c2 == c)
-      return s;
-  }
-  return null;
-}
+// // Cyclone-specific
+// char ?`r1 mstrchr(char ?`r1 s, char c) {
+//   if (0 > s.size) throw new Invalid_argument("mstrchr");
+//   int len;
+//   for (len = 0; len<s.size; len++) {
+//     if (s[len] == '\000')
+//       break;
+//   }
+//   char c2 = '\000';
+//   for (; len>0 && (c2=*s)!=0; len--,s++) {
+//     if (c2 == c)
+//       return s;
+//   }
+//   return null;
+// }
 
 // Cyclone-specific
 char ?`r mstrstr(char ?`r haystack, const char ?`r2 needle) {
-  if (!haystack || !needle) throw new InvalidArg("String::strstr");
+  if (!haystack || !needle) throw new Invalid_argument("String::strstr");
   if (*needle == '\0') return haystack;
 
   int len = strlen(needle);
@@ -66,7 +66,7 @@ char ?`r mstrstr(char ?`r haystack, const char ?`r2 needle) {
 
 // Cyclone-specific
 char ?`r memmove(char ?`r dest, const char ?`r2 src, size_t n) {
-  if (dest.size < n || src.size < n) throw new InvalidArg("memmove");
+  if (dest.size < n || src.size < n) throw new Invalid_argument("memmove");
   if (dest > src && dest < src + n) {
     // We're sliding the string forwards a little, so copy from the far side
     dest += n; src += n;
@@ -286,7 +286,7 @@ int month2int(const char ?monthname)
 int modified_since(time_t * mtime, const char ?if_modified_since)
 {
     struct tm *file_gmt;
-    char ?ims_info;
+    const char ?_ ims_info;
     char monthname[3 + 1];
     int day, month, year, hour, minute, second;
     int comp;
@@ -342,7 +342,7 @@ int modified_since(time_t * mtime, const char ?if_modified_since)
  * AND changes - into _
  */
 
-char ?to_upper(char ?str)
+char ?`r to_upper(char ?`r str)
 {
     char ?start = str;
 
@@ -369,10 +369,10 @@ char ?to_upper(char ?str)
  *  0: illegal string
  */
 
-int unescape_uri(const char ?uri)
+int unescape_uri(char ?uri)
 {
     char c, d;
-    char ?uri_old;
+    const char ?uri_old;
 
     uri_old = uri;
 
@@ -447,7 +447,7 @@ void rfc822_time_buf(char ?buf, time_t s)
 
 char ?simple_itoa(int i)
 {
-    /* 21 digits plus null terminator, good for 64-bit or smaller ints */
+    /* 21 digits plus NUL terminator, good for 64-bit or smaller ints */
     /* for bigger ints, use a bigger buffer! */
     static char local[22];
     char ?p = &local[21];

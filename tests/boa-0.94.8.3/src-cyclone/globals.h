@@ -20,7 +20,7 @@
  *
  */
 
-/* $Id: globals.h,v 1.2 2001-09-27 22:04:43 tjim Exp $*/
+/* $Id: globals.h,v 1.3 2001-09-29 00:23:51 tjim Exp $*/
 
 #ifndef _GLOBALS_H
 #define _GLOBALS_H
@@ -40,7 +40,7 @@ struct mmap_entry {
     size_t len;
 };
 
-struct request {                /* pending requests */
+struct request_t {                /* pending requests */
     int fd;                     /* client's socket fd */
     int status;                 /* see #defines.h */
     time_t time_last;           /* time of last succ. op. */
@@ -99,8 +99,8 @@ struct request {                /* pending requests */
 
     struct mmap_entry *mmap_entry_var;
 
-    struct request *next;       /* next */
-    struct request *prev;       /* previous */
+    struct request_t *next;       /* next */
+    struct request_t *prev;       /* previous */
 
     /* everything below this line is kept regardless */
     char buffer[BUFFER_SIZE + 1]; /* generic I/O buffer */
@@ -112,7 +112,7 @@ struct request {                /* pending requests */
 #endif
 };
 
-typedef struct request request;
+typedef struct request_t request;
 
 struct Alias {
     char ?fakename;             /* URI path to file */
@@ -125,16 +125,17 @@ struct Alias {
 
 typedef struct Alias alias;
 
-struct status {
+// FIX: had to rename struct status to struct status_t
+struct status_t {
     long requests;
     long errors;
 };
 
-struct status status;
+struct status_t status;
 
 struct mmap_entry mmap_list[MMAP_LIST_SIZE];
 
-extern char ?optarg;            /* For getopt */
+//extern char ?optarg;            /* For getopt */
 extern FILE *yyin;              /* yacc input */
 
 extern request *request_ready;  /* first in ready list */

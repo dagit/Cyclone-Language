@@ -21,9 +21,11 @@
  *
  */
 
-/* $Id: cgi.cyc,v 1.1 2001-09-24 21:59:18 mharris Exp $ */
+/* $Id: cgi.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $ */
 
 #include "boa.h"
+#include <unistd.h>
+#include <fcntl.h>
 
 int verbose_cgi_logs = 0;
 
@@ -40,7 +42,7 @@ void create_common_env()
 {
     int index = 0;
 
-    common_cgi_env = new { for i < COMMON_CGI_COUNT + 4 : null };
+    common_cgi_env = new { for i < COMMON_CGI_COUNT + 4 : NULL };
     /* The +4 is to handle the extra 3 environment variables + the NULL in
        complete_env
      */
@@ -88,7 +90,7 @@ void create_env(request @ req)
 {
     int i;
 
-    req->cgi_env = new { for i < CGI_ENV_MAX + 4 : null };
+    req->cgi_env = new { for i < CGI_ENV_MAX + 4 : NULL };
 
     for (i = 0; common_cgi_env[i]; i++)
         req->cgi_env[i] = common_cgi_env[i];
@@ -96,7 +98,7 @@ void create_env(request @ req)
     req->cgi_env_index = i;
 
     {
-        char ?w;
+        const char ?w;
 
         switch (req->method) {
         case M_POST:
@@ -241,7 +243,7 @@ void create_argv(request @ req, char ??aargv)
         q = strdup(q);
         for (aargc = 1; q && (aargc < CGI_ARGC_MAX);) {
             r = q;
-            if ((p = strchr(q, '+'))) {
+            if ((p = mstrchr(q, '+'))) {
                 *p = '\0';
                 q = p + 1;
             } else {

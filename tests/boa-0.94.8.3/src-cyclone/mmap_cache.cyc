@@ -18,9 +18,11 @@
  *
  */
 
-/* $Id: mmap_cache.cyc,v 1.1 2001-09-24 21:59:18 mharris Exp $*/
+/* $Id: mmap_cache.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $*/
 
 #include "boa.h"
+#include <unistd.h>
+#include <fcntl.h>
 
 int mmap_list_entries_used = 0;
 int mmap_list_total_requests = 0;

@@ -20,12 +20,16 @@
  *
  */
 
-/* $Id: request.cyc,v 1.1 2001-09-24 21:59:19 mharris Exp $*/
+/* $Id: request.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $*/
 
 #include "boa.h"
 #include <netinet/tcp.h>
 #include <arpa/inet.h>          /* inet_ntoa */
 #include <stddef.h>
+#define free(x) (0)
+#include <unistd.h>
+#include <fcntl.h>
+#include <strings.h>
 
 int sockbufsize = SOCKETBUF_SIZE;
 int total_connections;
@@ -46,49 +50,49 @@ request @new_request(void)
         req = request_free;     /* first on free list */
         dequeue(&request_free, request_free); /* dequeue the head */
     } else {
-      req = new request {
+      req = new request_t {
         .fd = 0,
         .status = 0,
         .time_last = 0,
-        .pathname = null;
+        .pathname = NULL,
         .simple = 0,
         .keepalive = 0,
         .kacount = 0,
         .data_fd = 0,
         .filesize = 0,
         .filepos = 0,
-        .data_mem = null,
+        .data_mem = NULL,
         .method = 0,
-        .logline = null,
-        .header_line = null,
-        .header_end = null,
+        .logline = NULL,
+        .header_line = NULL,
+        .header_end = NULL,
         .parse_pos = 0,
         .client_stream_pos = 0,
         .buffer_start = 0,
         .buffer_end = 0,
-        .http_version = null,
+        .http_version = NULL,
         .response_status = 0,
-        .if_modified_since = null,
+        .if_modified_since = NULL,
         .last_modified = 0,
         .local_ip_addr = new { for i < NI_MAXHOST : '\0' },
         .remote_port = 0,
         .remote_ip_addr = new { for i < NI_MAXHOST : '\0' },
         .is_cgi = 0,
         .cgi_status = 0,
-        .cgi_env = null,
+        .cgi_env = NULL,
         .cgi_env_index = 0,
-        .header_user_agent = null,
-        .header_referer = null,
+        .header_user_agent = NULL,
+        .header_referer = NULL,
         .post_data_fd = 0,
-        .path_info = null,
-        .path_translated = null,
-        .script_name = null,
-        .query_string = null,
-        .content_type = null,
-        .content_length = null,
-        .mmap_entry_var = null,
-        .next = null,
-        .prev = null,
+        .path_info = NULL,
+        .path_translated = NULL,
+        .script_name = NULL,
+        .query_string = NULL,
+        .content_type = NULL,
+        .content_length = NULL,
+        .mmap_entry_var = NULL,
+        .next = NULL,
+        .prev = NULL,
         .buffer = new { for i < BUFFER_SIZE + 1 : '\0' },
         .request_uri = new { for i < MAX_HEADER_LENGTH + 1 : '\0' },
         .client_stream = new { for i < CLIENT_STREAM_SIZE : '\0' }
@@ -96,6 +100,7 @@ request @new_request(void)
         ,.accept = new { for i < MAX_ACCEPT_LENGTH : '\0' }
 #endif
       };
+    }
 
     return req;
 }

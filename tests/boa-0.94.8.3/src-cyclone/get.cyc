@@ -20,10 +20,13 @@
  *
  */
 
-/* $Id: get.cyc,v 1.1 2001-09-24 21:59:18 mharris Exp $*/
+/* $Id: get.cyc,v 1.2 2001-09-29 00:23:51 tjim Exp $*/
 
 #include "boa.h"
 #include <sys/mman.h>
+#include <unistd.h>
+#include <fcntl.h>
+#include <dirent.h>
 
 /* local prototypes */
 int get_cachedir_file(request @ req, struct stat_t @statbuf);
