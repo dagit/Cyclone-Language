@@ -116,10 +116,6 @@ static void resolve_pat(tenv_t te, pat_t p) {
 static var_t get_name(vardecl_t vd) {
   return (*vd->name)[1];
 }
-static struct Opt<kind_t> mk = {MemKind};
-static struct Opt<kind_t> rk = {RgnKind};
-static struct Opt<kind_t> ak = {AnyKind};
-
 static type_t any_type(list_t<tvar_t,`H> s, type_t *`r topt) {
   if(topt != NULL)
     return *topt;

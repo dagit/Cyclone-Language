@@ -52,17 +52,12 @@ namespace Array;
 /******************************************************************/
 
 #define  SWAP(a, b)  { temp = arr[a]; arr[a] = arr[b]; arr[b] = temp; }
-#define  COMP(a, b)  (less_eq(&(arr[a]), &(arr[b])))
+typedef `a@`r ptr_t<`a,`r>;
+#define  COMP(a, b)  (less_eq((ptr_t)(arr+a), (ptr_t)(arr+b)))
 #define  T           3    /* subfiles of T or fewer elements will */
                           /* be sorted by a simple insertion sort */
                           /* Note!  T must be at least 3          */
 
-
-// FIX: had to lift this out of the qsort function.  The problem is,
-// no default initializers, and translation of initializers within
-// function does not give legal C.
-static int sp[40] = {0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 void qsort<`a,`r::R>(cmpfn_t<`a,`r,`r> less_eq, `a ?`r arr, int len)
 //  void qsort(cmpfn_t less_eq,`a ?`r arr, int len)
@@ -70,7 +65,7 @@ void qsort<`a,`r::R>(cmpfn_t<`a,`r,`r> less_eq, `a ?`r arr, int len)
   int base_ofs = 0;  // FIX: this used to be an arg; need to get rid of it completely, but it's assigned to
 
   `a temp;
-  // int sp[40]; // FIX: complains not initialized
+  int sp[40]; // FIX: complains not initialized
   int sp_ofs;           /* stack and stack pointer        */
   int i, j, limit_ofs;         /* scan and limit pointers        */
 
@@ -140,7 +135,7 @@ void qsort<`a,`r::R>(cmpfn_t<`a,`r,`r> less_eq, `a ?`r arr, int len)
 
 // Mergesort (stable)
 
-#define LESSEQ(a,b) (less_eq(&from[a],&from[b]))
+#define LESSEQ(a,b) (less_eq((ptr_t)(&from[a]),(ptr_t)(&from[b])))
 #define MIN(a,b) (a < b ? a : b)
 #define PUT(a) to[dest++] = from[a++]
 

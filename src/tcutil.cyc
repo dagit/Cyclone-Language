@@ -1864,6 +1864,41 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   }
 }
 
+bool is_pointer_type(type_t t) {
+  switch (compress(t)) {
+  case &PointerType(_): return true;
+  default: return false;
+  }
+}
+
+bool is_zero(exp_t e) {
+  switch (e->r) {
+  case &Const_e(&Int_c(_,0)): return true;
+  default: return false;
+  }
+}
+
+struct Opt<kind_t> rk = {RgnKind};
+struct Opt<kind_t> ak = {AnyKind};
+struct Opt<kind_t> bk = {BoxKind};
+struct Opt<kind_t> mk = {MemKind};
+
+// if e1 is zero, and t2 a pointer type, changes e1 to NULL and
+// returns true if t2 is a nullable pointer type
+bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
+  if (is_pointer_type(t2) && is_zero(e1)) {
+    e1->r = new Const_e(Null_c);
+    let tenv_tvs = lookup_type_vars(te);
+    let t1 = new PointerType(PtrInfo(new_evar(&ak,new Opt(tenv_tvs)), 
+                                     new_evar(&rk,new Opt(tenv_tvs)), 
+                                     new_conref(true),
+                                     empty_tqual(), empty_conref()));
+    e1->topt->v = t1;
+    return unify(t1,t2);
+  }
+  return false;
+}
+
 // coerce e to have type t -- used in function call and explicit fallthru
 bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
   type_t t1 = compress(e->topt->v);
@@ -1878,6 +1913,8 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
     return true;
   } else if (silent_castable(te,e->loc,t1,t2)) {
     unchecked_cast(te,e,t2);
+    return true;
+  } else if (zero_to_null(te,t2,e)) { 
     return true;
   } else if (castable(te,e->loc,t1,t2)) {
     unchecked_cast(te,e,t2);

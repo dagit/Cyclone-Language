@@ -2810,7 +2810,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
     case NULL:
       exp_opt_t initopt = NULL;
       if (f->sc != Extern) {
-	initopt = string_exp(aprintf("%c%c%c%c%s",0,0,0,0,*fn),DL);
+	initopt = string_exp(aprintf("%c%c%c%c%s",'\0','\0','\0','\0',*fn),DL);
       }
       let tag_decl = new_vardecl(f->name, tag_typ, initopt);
       tag_decl->sc = f->sc;
@@ -2842,7 +2842,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
 
     case &Opt(false):
       if (f->sc != Extern) {
-	let initopt = string_exp(aprintf("%c%c%c%c%s",0,0,0,0,*fn),DL);
+	let initopt = string_exp(aprintf("%c%c%c%c%s",'\0','\0','\0','\0',*fn),DL);
 	let tag_decl = new_vardecl(f->name, tag_typ, initopt);
 	tag_decl->sc = f->sc;
 	result_decls = new List(new_decl(new Var_d(tag_decl),DL),result_decls);

@@ -76,6 +76,18 @@ extern bool castable(tenv_t,seg_t,type_t,type_t);
 extern bool is_integral(exp_t);
 extern bool is_numeric(exp_t);
 extern bool is_function_type(type_t t);
+extern bool is_pointer_type(type_t t);
+extern bool is_zero(exp_t e);
+
+// useful kinds
+extern struct Core::Opt<kind_t> rk;
+extern struct Core::Opt<kind_t> ak;
+extern struct Core::Opt<kind_t> bk;
+extern struct Core::Opt<kind_t> mk;
+
+// if t is a pointer type and e is 0, changes e to null and checks
+// that t is nullable pointer type by unifying e's type with t.
+extern bool zero_to_null(tenv_t, type_t t, exp_t e);
 
 extern type_t max_arithmetic_type(type_t, type_t);
 

@@ -194,6 +194,14 @@ Cstring string_to_Cstring(struct _tagged_arr s) {
 
   if (s.curr < s.base || s.curr >= s.last_plus_one)
     throw(Cyc_Null_Exception); // FIX: this should be a bounds error
+  // check that there's a '\0' somewhere in the string -- if not,
+  // throw an exception.
+  for (str = s.last_plus_one-1; str >= contents; str--) {
+    if (*str == '\0') return contents;
+  }
+  throw(Cyc_Null_Exception);
+  /*
+  // slow path -- have to copy the string to ensure it's null terminated
   str = (char *)GC_malloc_atomic(sz+1);
   if (str == NULL) 
     _throw_badalloc();
@@ -201,6 +209,7 @@ Cstring string_to_Cstring(struct _tagged_arr s) {
   for(i=0; i < sz; i++) str[i]=contents[i];
   str[sz]='\0';
   return str;
+  */
 }
 
 // Copy a null-terminated list of Cstrings to a tagged,

@@ -270,15 +270,13 @@ struct _tagged_arr y); struct _tuple1{ struct _tagged_arr f1; struct _tagged_arr
 f2; } ; extern struct _tuple1 Cyc_Array_split( struct _tagged_arr x); extern int
 Cyc_Array_memq( struct _tagged_arr l, void* x); extern int Cyc_Array_mem( int(*
 cmp)( void*, void*), struct _tagged_arr l, void* x); extern struct _tagged_arr
-Cyc_Array_extract( struct _tagged_arr x, int start, int* len_opt); static int
-Cyc_Array_sp[ 40u]={ 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0}; void Cyc_Array_qsort(
+Cyc_Array_extract( struct _tagged_arr x, int start, int* len_opt); void Cyc_Array_qsort(
 int(* less_eq)( void**, void**), struct _tagged_arr arr, int len){ int base_ofs=
-0; void* temp; int sp_ofs; int i; int j; int limit_ofs; if(( base_ofs <  0? 1:
-base_ofs +  len >  _get_arr_size( arr, sizeof( void*)))? 1: len <  0){( int)
-_throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp0=( struct Cyc_Core_Invalid_argument_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp0[ 0]=({
-struct Cyc_Core_Invalid_argument_struct _temp1; _temp1.tag= Cyc_Core_Invalid_argument;
+0; void* temp; int sp[ 40u]; int sp_ofs; int i; int j; int limit_ofs; if((
+base_ofs <  0? 1: base_ofs +  len >  _get_arr_size( arr, sizeof( void*)))? 1:
+len <  0){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+_temp0=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+_temp0[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp1; _temp1.tag= Cyc_Core_Invalid_argument;
 _temp1.f1= _tag_arr("Array::qsort", sizeof( unsigned char), 13u); _temp1;});
 _temp0;}));} limit_ofs= base_ofs +  len; sp_ofs= 0; for( 0; 1; 0){ if( limit_ofs
 -  base_ofs >  3){ temp=*(( void**) _check_unknown_subscript( arr, sizeof( void*),(
@@ -286,50 +284,53 @@ limit_ofs -  base_ofs) /  2 +  base_ofs));*(( void**) _check_unknown_subscript(
 arr, sizeof( void*),( limit_ofs -  base_ofs) /  2 +  base_ofs))=*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), base_ofs));*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), base_ofs))= temp; i= base_ofs + 
-1; j= limit_ofs -  1; if( less_eq(&(*(( void**) _check_unknown_subscript( arr,
-sizeof( void*), i))),&(*(( void**) _check_unknown_subscript( arr, sizeof( void*),
-j)))) >  0){ temp=*(( void**) _check_unknown_subscript( arr, sizeof( void*), i));*((
-void**) _check_unknown_subscript( arr, sizeof( void*), i))=*(( void**)
-_check_unknown_subscript( arr, sizeof( void*), j));*(( void**)
-_check_unknown_subscript( arr, sizeof( void*), j))= temp;} if( less_eq(&(*((
-void**) _check_unknown_subscript( arr, sizeof( void*), base_ofs))),&(*(( void**)
-_check_unknown_subscript( arr, sizeof( void*), j)))) >  0){ temp=*(( void**)
-_check_unknown_subscript( arr, sizeof( void*), base_ofs));*(( void**)
-_check_unknown_subscript( arr, sizeof( void*), base_ofs))=*(( void**)
-_check_unknown_subscript( arr, sizeof( void*), j));*(( void**)
-_check_unknown_subscript( arr, sizeof( void*), j))= temp;} if( less_eq(&(*((
-void**) _check_unknown_subscript( arr, sizeof( void*), i))),&(*(( void**)
-_check_unknown_subscript( arr, sizeof( void*), base_ofs)))) >  0){ temp=*(( void**)
+1; j= limit_ofs -  1; if( less_eq(( void**) _untag_arr( _tagged_arr_plus( arr,
+sizeof( void*), i), sizeof( void*), 1u),( void**) _untag_arr( _tagged_arr_plus(
+arr, sizeof( void*), j), sizeof( void*), 1u)) >  0){ temp=*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), i));*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), i))=*(( void**)
+_check_unknown_subscript( arr, sizeof( void*), j));*(( void**)
+_check_unknown_subscript( arr, sizeof( void*), j))= temp;} if( less_eq(( void**)
+_untag_arr( _tagged_arr_plus( arr, sizeof( void*), base_ofs), sizeof( void*), 1u),(
+void**) _untag_arr( _tagged_arr_plus( arr, sizeof( void*), j), sizeof( void*), 1u))
+>  0){ temp=*(( void**) _check_unknown_subscript( arr, sizeof( void*), base_ofs));*((
+void**) _check_unknown_subscript( arr, sizeof( void*), base_ofs))=*(( void**)
+_check_unknown_subscript( arr, sizeof( void*), j));*(( void**)
+_check_unknown_subscript( arr, sizeof( void*), j))= temp;} if( less_eq(( void**)
+_untag_arr( _tagged_arr_plus( arr, sizeof( void*), i), sizeof( void*), 1u),(
+void**) _untag_arr( _tagged_arr_plus( arr, sizeof( void*), base_ofs), sizeof(
+void*), 1u)) >  0){ temp=*(( void**) _check_unknown_subscript( arr, sizeof( void*),
+i));*(( void**) _check_unknown_subscript( arr, sizeof( void*), i))=*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), base_ofs));*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), base_ofs))= temp;} for( 0; 1; 0){
-do { i ++;} while ( less_eq(&(*(( void**) _check_unknown_subscript( arr, sizeof(
-void*), i))),&(*(( void**) _check_unknown_subscript( arr, sizeof( void*),
-base_ofs)))) <  0); do { j --;} while ( less_eq(&(*(( void**)
-_check_unknown_subscript( arr, sizeof( void*), j))),&(*(( void**)
-_check_unknown_subscript( arr, sizeof( void*), base_ofs)))) >  0); if( i >  j){
-break;} temp=*(( void**) _check_unknown_subscript( arr, sizeof( void*), i));*((
-void**) _check_unknown_subscript( arr, sizeof( void*), i))=*(( void**)
+do { i ++;} while ( less_eq(( void**) _untag_arr( _tagged_arr_plus( arr, sizeof(
+void*), i), sizeof( void*), 1u),( void**) _untag_arr( _tagged_arr_plus( arr,
+sizeof( void*), base_ofs), sizeof( void*), 1u)) <  0); do { j --;} while (
+less_eq(( void**) _untag_arr( _tagged_arr_plus( arr, sizeof( void*), j), sizeof(
+void*), 1u),( void**) _untag_arr( _tagged_arr_plus( arr, sizeof( void*),
+base_ofs), sizeof( void*), 1u)) >  0); if( i >  j){ break;} temp=*(( void**)
+_check_unknown_subscript( arr, sizeof( void*), i));*(( void**)
+_check_unknown_subscript( arr, sizeof( void*), i))=*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), j));*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), j))= temp;;} temp=*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), base_ofs));*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), base_ofs))=*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), j));*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), j))= temp; if( j -  base_ofs > 
-limit_ofs -  i){ Cyc_Array_sp[ _check_known_subscript_notnull( 40u, sp_ofs)]=
-base_ofs; Cyc_Array_sp[ _check_known_subscript_notnull( 40u, sp_ofs +  1)]= j;
-base_ofs= i;} else{ Cyc_Array_sp[ _check_known_subscript_notnull( 40u, sp_ofs)]=
-i; Cyc_Array_sp[ _check_known_subscript_notnull( 40u, sp_ofs +  1)]= limit_ofs;
-limit_ofs= j;} sp_ofs += 2;} else{ for(( j= base_ofs, i= j +  1); i <  limit_ofs;(
-j= i, i ++)){ for( 0; less_eq(&(*(( void**) _check_unknown_subscript( arr,
-sizeof( void*), j))),&(*(( void**) _check_unknown_subscript( arr, sizeof( void*),
-j +  1)))) >  0; j --){ temp=*(( void**) _check_unknown_subscript( arr, sizeof(
-void*), j));*(( void**) _check_unknown_subscript( arr, sizeof( void*), j))=*((
-void**) _check_unknown_subscript( arr, sizeof( void*), j +  1));*(( void**)
+limit_ofs -  i){ sp[ _check_known_subscript_notnull( 40u, sp_ofs)]= base_ofs; sp[
+_check_known_subscript_notnull( 40u, sp_ofs +  1)]= j; base_ofs= i;} else{ sp[
+_check_known_subscript_notnull( 40u, sp_ofs)]= i; sp[
+_check_known_subscript_notnull( 40u, sp_ofs +  1)]= limit_ofs; limit_ofs= j;}
+sp_ofs += 2;} else{ for(( j= base_ofs, i= j +  1); i <  limit_ofs;( j= i, i ++)){
+for( 0; less_eq(( void**) _untag_arr( _tagged_arr_plus( arr, sizeof( void*), j),
+sizeof( void*), 1u),( void**) _untag_arr( _tagged_arr_plus( _tagged_arr_plus(
+arr, sizeof( void*), j), sizeof( void*), 1), sizeof( void*), 1u)) >  0; j --){
+temp=*(( void**) _check_unknown_subscript( arr, sizeof( void*), j));*(( void**)
+_check_unknown_subscript( arr, sizeof( void*), j))=*(( void**)
+_check_unknown_subscript( arr, sizeof( void*), j +  1));*(( void**)
 _check_unknown_subscript( arr, sizeof( void*), j +  1))= temp; if( j == 
-base_ofs){ break;}}} if( sp_ofs !=  0){ sp_ofs -= 2; base_ofs= Cyc_Array_sp[
-_check_known_subscript_notnull( 40u, sp_ofs)]; limit_ofs= Cyc_Array_sp[
+base_ofs){ break;}}} if( sp_ofs !=  0){ sp_ofs -= 2; base_ofs= sp[
+_check_known_subscript_notnull( 40u, sp_ofs)]; limit_ofs= sp[
 _check_known_subscript_notnull( 40u, sp_ofs +  1)];} else{ break;}}}} void Cyc_Array_msort(
 int(* less_eq)( void**, void**), struct _tagged_arr arr, int len){ if( len > 
 _get_arr_size( arr, sizeof( void*))? 1: len <  0){( int) _throw(( void*)({
@@ -348,12 +349,12 @@ for( stepsize= 1; stepsize <  len; stepsize= stepsize *  2){ swap= from; from=
 to; to= swap; dest= 0; for( start= 0; start <  len; start= start +  stepsize * 
 2){ lstart= start; rstart= start +  stepsize <  len? start +  stepsize: len;
 lend= rstart; rend= start +  stepsize *  2 <  len? start +  stepsize *  2: len;
-while( lstart <  lend? rstart <  rend: 0) { if( less_eq(&(*(( void**)
-_check_unknown_subscript( from, sizeof( void*), lstart))),&(*(( void**)
-_check_unknown_subscript( from, sizeof( void*), rstart)))) <=  0){*(( void**)
-_check_unknown_subscript( to, sizeof( void*), dest ++))=*(( void**)
-_check_unknown_subscript( from, sizeof( void*), lstart ++));} else{*(( void**)
-_check_unknown_subscript( to, sizeof( void*), dest ++))=*(( void**)
+while( lstart <  lend? rstart <  rend: 0) { if( less_eq(( void**) _untag_arr(
+_tagged_arr_plus( from, sizeof( void*), lstart), sizeof( void*), 1u),( void**)
+_untag_arr( _tagged_arr_plus( from, sizeof( void*), rstart), sizeof( void*), 1u))
+<=  0){*(( void**) _check_unknown_subscript( to, sizeof( void*), dest ++))=*((
+void**) _check_unknown_subscript( from, sizeof( void*), lstart ++));} else{*((
+void**) _check_unknown_subscript( to, sizeof( void*), dest ++))=*(( void**)
 _check_unknown_subscript( from, sizeof( void*), rstart ++));}} while( lstart < 
 lend) {*(( void**) _check_unknown_subscript( to, sizeof( void*), dest ++))=*((
 void**) _check_unknown_subscript( from, sizeof( void*), lstart ++));} while(

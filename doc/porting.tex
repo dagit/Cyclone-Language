@@ -45,7 +45,6 @@ detailed below:
 \item \hyperlink{port:const}{Copy ``const'' code or values to make it non-const.}  
 \item \hyperlink{port:free}{Get rid of calls to free, realloc, memset, memcpy, etc.}
 \item \hyperlink{port:poly}{Use polymorphism or tunions to get rid of void*.}  
-\item \hyperlink{port:arrays}{Be careful with \& and arrays.}
 \item \hyperlink{port:vararg}{Rewrite the bodies of vararg functions.}
 \item \hyperlink{port:setjmp}{Use exceptions instead of setjmp.}
 \end{itemize}
@@ -407,34 +406,6 @@ int foo(i_or_s y) {
   }
 }
 \end{verbatim}
-\end{porta}
-
-\begin{porta}{port:arrays}{Be careful with \& and arrays.}
-
-There's currently a bug in Cyclone that involves a very subtle problem
-with arrays.  The issue is that in C, the expressions
-``\texttt{\&A[i]}'', ``\texttt{A+i}'' and ``\texttt{i+A}'' are
-all equivalent.  In Cyclone, this is currently not the case because
-of array bounds checking.  Consider the following code:
-\begin{verbatim}
-  int Arr[100] = {for i < 100 : 0};
-  int ?A = Arr;
-  int ?B = A+3
-  int ?C = &A[3];
-  B[77] = C[77];
-\end{verbatim}
-The code looks perfectly reasonable but it will cause an out-of-bounds
-exception.  The problem is that \texttt{A} will be considered an
-array of size 100, \texttt{B} will be considered an array of size
-97, but \texttt{C} will be considered an array of size 1!  In
-particular, the expression ``\texttt{\&A[3]}'' has type
-\texttt{int@} $=$ \texttt{int@\{1\}} which is a sub-type of
-\texttt{int?}, so the initialization of \texttt{C} is type-correct.
-However, while passing through the type \texttt{int@\{1\}} the
-size of the array is effectively truncated to one.  Consequently,
-the expression ``\texttt{C[77]}'' will cause an out-of-bounds
-exception.  
-
 \end{porta}
 
 \begin{porta}{port:vararg}{Rewrite the bodies of vararg functions.}

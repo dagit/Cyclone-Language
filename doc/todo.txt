@@ -51,9 +51,6 @@ BUG FIXES and UNSOUNDNESSES:
   can look at the set associated with the evar and just check that all
   of those things are in the capability...
 
-* when you have int x[56] and do int ?z = &x[1], z has size 1 instead
-  of size 55.  
-
 * We rely on C to catch incomplete types, such as 
   struct X {
     struct X x;
@@ -163,8 +160,6 @@ THINGS NEEDED TO SIMPLIFY PORTING:
 
 * remove cyc_include.h's dependency on setjmp.h, since that really
   pollutes the namespace
-
-* buf+n should have the same type as &buf[n]
 
 * sscanf should support %s when a field width is provided
 
