@@ -40,6 +40,10 @@
 
 namespace CfFlowInfo {
 
+bool anal_error;
+void aerr(Position::seg_t loc, string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,2,3)));
+
 // Do not ever mutate any data structures built from these -- they share a lot!
 EXTERN_CFFLOW datatype Root {
   VarRoot(Absyn::vardecl_t);

@@ -33,6 +33,14 @@ using List;
 using Absynpp;
 namespace CfFlowInfo;
 
+bool anal_error = false; // set to true before checking each top-level decl
+void aerr(Position::seg_t loc, string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,2,3)))
+{
+  anal_error = true;
+  Position::post_error(Position::mk_err_elab(loc,vrprintf(Core::heap_region,fmt,ap)));
+}
+
 #define ANAL_COARSE_REGIONS
 
 #ifdef ANAL_COARSE_REGIONS
@@ -738,8 +746,8 @@ static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env,
   case $(&Esc(_), &AddressOf(p)): add_place(env->pile,p); fallthru;
   case $(&Esc(_), _):
     if(initlevel(env->fenv,env->d,newval) != AllIL)
-      Tcutil::terr(env->loc, "assignment puts possibly-uninitialized data in "
-		   "an escaped location");
+      aerr(env->loc, "assignment puts possibly-uninitialized data in "
+	             "an escaped location");
     return env->fenv->esc_all;
   case $(&Aggregate(is_union1,d1), &Aggregate(is_union2,d2)):
     aggrdict_t new_d =
