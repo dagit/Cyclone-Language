@@ -446,7 +446,7 @@ namespace Absyn {
   extern exp pre_dec_exp(exp, segment);
   extern exp conditional_exp(exp, exp, exp, segment);
   extern exp and_exp(exp, exp, segment); // &&
-  extern exp or_exp(exp, exp, segment); // ||
+  extern exp or_exp(exp, exp, segment);  // ||
   extern exp seq_exp(exp, exp, segment);
   extern exp unknowncall_exp(exp, list<exp>, segment);
   extern exp fncall_exp(exp, list<exp>, segment);

@@ -36,6 +36,8 @@ typedef struct Opt<`a> *Opt_t<`a>;
 
 extern Opt_t<`b> opt_map<`a,`b>(`b f(`a), Opt_t<`a> x);
 
+extern string new_string(int);
+
 extern bool true_f<`a>(`a);
 extern bool false_f<`a>(`a);
 

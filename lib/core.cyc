@@ -77,6 +77,10 @@ Opt_t<`b> opt_map<`a,`b>(`b f(`a), Opt_t<`a> o) {
   return &Opt(f(o->v));
 }
 
+string new_string(int i) {
+  return (string)(new {for j < i : '\000'});
+}
+
 bool true_f<`a>(`a x)  {  return true;  }
 bool false_f<`a>(`a x) {  return false; }
 
@@ -119,7 +123,8 @@ int int_of_string(string s)
   int sign = 1;
 
   // skip leading whitespace and eat the sign
-  for(i=0; i<size(s) && is_space(s[i]); ++i);
+  for(i=0; i<size(s) && is_space(s[i]); ++i)
+    ;
   while (i<size(s) &&(s[i]=='-' || s[i]=='+')) {
     if (s[i]=='-') sign = - sign;
     i++;
@@ -139,7 +144,7 @@ int int_of_string(string s)
     }
   }
   // do the math
-  for(n=0; i<size(s); ++i) {
+  for(n=0; i<size(s) && s[i] != '\000'; ++i) {
     int digit = int_of_char(s[i]);
     if (digit >= base) 
       throw InvalidArg("string to integer conversion");
@@ -159,7 +164,7 @@ string string_of_int_width(int n, int minWidth) {
   int m = n;
   do ++len; while ((m /= 10) > 0);
   len = len > minWidth ? len : minWidth;
-  string ans = new_string(len);
+  string ans = new_string(len+1);
   for(i=len-1; n > 0; --i) { 
     ans[i] = (char)('0' + (n % 10));
     n /= 10;
@@ -180,7 +185,7 @@ string string_of_uint(unsigned int n) {
   int len = 0;
   unsigned int m = n;
   do ++len; while ((m /= 10) > 0);
-  string ans = new_string(len);
+  string ans = new_string(len+1);
   for(int i=len-1; i>=0; --i) {
     ans[i] = (char)('0' + n % 10);
     n /= 10;
@@ -189,7 +194,7 @@ string string_of_uint(unsigned int n) {
 }
 
 string string_of_char(char c) {
-  string ans = new_string(1);
+  string ans = new_string(2);
   ans[0] = c;
   return ans;
 }

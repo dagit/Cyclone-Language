@@ -727,7 +727,7 @@ bool castable(tenv te, segment loc, typ t1, typ t2) {
       bool okay;
       switch ($(ak1a,ak2a)) {
       case $(FixedArray(e1),FixedArray(e2)):
-	okay = (eval_const_uint_exp(e1) == eval_const_uint_exp(e2)); break;
+	okay = (eval_const_uint_exp(e1) >= eval_const_uint_exp(e2)); break;
       default: okay = true; break;
       }
       return (okay && unify(t1a,t2a) && (!tq1a->q_const || tq2a->q_const));

@@ -23,7 +23,6 @@ typedef unsigned int uint;
 typedef char Cstring[];
 // a boxed and tagged string: struct {uint sz; Cstring *contents;}@
 typedef char string[?];
-extern string new_string(int);
 extern Cstring string_to_Cstring(string);
 extern int system(Cstring);
 

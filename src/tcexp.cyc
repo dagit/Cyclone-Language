@@ -152,7 +152,7 @@ static synth tcConst(tenv te, segment loc, Opt_t<typ> topt, cnst c) {
   case Bool_c(_)  : t = bool_t;  break;
   case Float_c(_) : t = float_t; break;
   case String_c(s):
-    int len = String::strlen(s); // len to include a trailing 0 character
+    int len = size(s); // includes the trailing 0 character
     let r   = Const_e(Int_c(Unsigned,len));
     exp e   = new_exp(r,loc);
     e->topt = &Opt(uint_t);
@@ -956,7 +956,7 @@ static synth tcComprehension(tenv te,segment loc,Opt_t<typ> topt,
   let esyn_bound = tcExp(te,null,bound);
   if (!coerce_uint_typ(te,bound))
     terr(bound->loc,xprintf("expecting unsigned int, found %s",
-                           typ2string(synth_typ(esyn_bound))));
+			    typ2string(synth_typ(esyn_bound))));
   // add x to the environment with the type unsigned int, note it is inited
   tenv te2 = add_local_var(loc, te, vd);
   // if topt is present, cast the body to topt's element type

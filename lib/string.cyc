@@ -185,7 +185,7 @@ string strcato(string dest,string src,int srcOfs) {
 string strconcat(string a, string b) {
   let alen = strlen(a);
   let blen = strlen(b);
-  string ans = new_string(alen+blen);
+  string ans = new_string(alen+blen+1);
   int i, j;
   for (i=0; i < alen; ++i) ans[i]   = a[i];
   for (j=0; j < blen; ++j) ans[i+j] = b[j];
@@ -200,7 +200,7 @@ string strconcat_l(list<string> strs) {
     total_len += strlen(p->hd);
     p = p->tl;
   }  
-  string ans = new_string(total_len);
+  string ans = new_string(total_len+1);
   size_t i = 0;
   while (strs != null) {
     string next    = strs->hd;
@@ -227,7 +227,7 @@ string str_sepstr(list<string> strs, string separator) {
   }
   size_t seplen = strlen(separator);
   total_len += (list_len - 1)*seplen;
-  string ans = new_string(total_len);
+  string ans = new_string(total_len+1);
   size_t i = 0;
   while (strs->tl != null) {
     string next    = strs->hd;
@@ -316,14 +316,12 @@ string strcpy(string dest,string src) {
 // Allocating functions
 
 // Not an ISO function, but available in gcc
-// Note, currently the trailing 0 will not be within the bounds of the
-// return value.
 string strdup(string src) {
   size_t len;
   string temp;
 
   len = strlen(src);
-  temp = new_string(len);
+  temp = new_string(len+1);
   strncpy(temp,0,src,0,len);
   return temp;
 }
@@ -367,9 +365,10 @@ string realloc_str(string str, size_t sz)
 string substring(string s, int start, size_t amt) {
   if (start < 0 || amt < 0 || start + ((int)amt) - 1 > (int)size(s))
     throw InvalidArg("String::substring");
-  string ans = new_string(amt);
+  string ans = new_string(amt+1);
   for(size_t i=0; i<amt; ++i)
     ans[i] = s[start+i];
+  ans[amt] = '\000';
   return ans;
 }
 
@@ -468,7 +467,7 @@ list<Char> explode(string s) {
 }
 
 string implode(list<Char> chars) {
-  string s = new_string(List::length(chars));
+  string s = new_string(List::length(chars)+1);
   size_t i = 0;
   while (chars != null) {
     s[i++] = chars->hd;

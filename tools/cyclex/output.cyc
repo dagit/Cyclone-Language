@@ -79,7 +79,7 @@ void output_lexdef(string sourcename,
 		   Compact::lex_tables_t tables,
 		   List::list<Lexgen::automata_entry_t> entry_points,
 		   Syntax::location_t    trailer) {
-  copy_buffer = new_string(1024);
+  copy_buffer = Core::new_string(1024);
   fprintf(cyc_stderr, "%d states, %d transitions, table size %d bytes\n",
 	  size(tables->base),
 	  size(tables->trans),

@@ -18,40 +18,6 @@ char _Match_Exception_tag[16] = "Match_Exception";
 struct _xenum_struct _Match_Exception_struct = { _Match_Exception_tag };
 exn Match_Exception = &_Match_Exception_struct;
 
-struct _tagged_string *new_string(int sz) {
-  struct _tagged_string *t;
-  char *c = 0;
-  int i;
-
-  if (sz < 0) {
-    // FIX:  this should probably raise an exception
-    fprintf(stderr,"new_string called with negative argument\n");
-    exit(1);
-  }
-
-  t = (struct _tagged_string *)GC_malloc(sizeof(struct _tagged_string));
-  if (t == NULL) {
-    fprintf(stderr,"internal error: out of memory in new_string\n");
-    exit(1);
-  }
-  if(sz > 0) {
-    c = (char *)GC_malloc(sz);
-    if (c == NULL) {
-      fprintf(stderr,"internal error: out of memory in new_string\n");
-      exit(1);
-    }
-    i = 0;
-    // Zero the array -- not needed if we use the proper malloc...
-    for (; i <= sz; i++) c[i] = 0; 
-  }
-  t->sz       = sz;
-  t->contents = c;
-  return t;
-}
-
-#define XPRINTF_BUFFER_SIZE 20000
-char xprintf_buffer[XPRINTF_BUFFER_SIZE];
-
 struct _tagged_string *xprintf(char *fmt, ...) {
   va_list argp;
   int len1;
@@ -59,27 +25,24 @@ struct _tagged_string *xprintf(char *fmt, ...) {
   struct _tagged_string *result;
 
   va_start(argp,fmt);
-  // JGM:  I'm changing this for the moment because I don't have vsnprintf
   len1 = vsnprintf(NULL,0,fmt,argp); // how much space do we need
-  //len1 = vsprintf(xprintf_buffer,fmt,argp);
-  if (len1 >= XPRINTF_BUFFER_SIZE) {
-    fprintf(stderr,"internal error: xprintf buffer too small\n");
-    exit(1);
-  }
   va_end(argp);
+
   // Presumably the Cyclone typechecker rules this out, but check anyway
   if (len1 < 0) {
     fprintf(stderr,"internal error: encoding error in xprintf\n");
     exit(1);
   }
-  // Careful: we need space for a trailing zero
-  result = new_string(len1+1);
+
+  // Careful: we need space for a trailing zero (???)
+  result = (struct _tagged_string *)GC_malloc(sizeof(struct _tagged_string));
+  result->sz       = len1+1;
+  result->contents = (char *)GC_malloc(len1+1);
+
   va_start(argp,fmt);
-  // JGM:  I'm changing this to sprintf for the moment because 
-  // I don't have vsnprintf
   len2 = vsnprintf(result->contents,len1+1,fmt,argp);
-  //len2 = vsprintf(result->contents,fmt,argp);
   va_end(argp);
+
   if (len1 != len2) {
     fprintf(stderr, "internal error: encoding error in xprintf\n");
     exit(1);
@@ -194,7 +157,9 @@ if (!e) {
 struct _tagged_string *Cstring_to_string(Cstring s) {
   struct _tagged_string *str;
   int sz=(s?strlen(s):0);
-  str = new_string(sz);
+  str = (struct _tagged_string *)GC_malloc(sizeof(struct _tagged_string));
+  str->sz       = sz;
+  str->contents = (char *)GC_malloc(sz);
 
   while(--sz>=0)
     // Copy the string in case the C code frees it or mangles it

@@ -419,11 +419,10 @@ static short process_qual_id(string s) {
     if (start == i) // no progress -- first char is ':'
       throw Impossible("bad namespace");
     int vlen = i - start;
-    if (vlen == 0) {
+    if (vlen == 0)
       fprintf(cyc_stderr,"Impossible vlen!");
-    }
-    var v = new_string(vlen);
-    strncpy(v,0,s,start,vlen);
+    var v = new_string(vlen+1);
+    zstrncpy(v,0,s,start,vlen);
     rev_vs = &cons(v,rev_vs);
     i += 2;
   }

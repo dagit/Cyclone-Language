@@ -100,7 +100,7 @@ static string trunc(int n, string s) {
     return s;
   int len_one = (n-3)/2;
   int len_two = n-3-len_one;
-  string ans = new_string(n);
+  string ans = new_string(n+1);
   strncpy(ans, 0,         s,     0,           len_one);
   strncpy(ans, len_one,   "...", 0,           3);
   strncpy(ans, len_one+3, s,     len-len_two, len_two);
