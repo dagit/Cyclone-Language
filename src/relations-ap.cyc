@@ -20,6 +20,7 @@
 #include "relations-ap.h"
 #include "unify.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "pratt-ap.h"
 #include "absynpp.h"
 #include "evexp.h"
@@ -179,7 +180,7 @@ relns_t<`r> reln_kill_var(region_t<`r> rgn, relns_t<`r> rs, Absyn::vardecl_t v) 
   }
   if (!found) return rs;
   // substitute a fresh type variable for the variable being killed.
-  let tv = Tcutil::new_tvar(Tcutil::kind_to_bound(&Tcutil::ik));
+  let tv = Tcutil::new_tvar(Kinds::kind_to_bound(&Kinds::ik));
   let new_rop = RType(Absyn::var_type(tv));
   let new_rs = NULL;
   for (p = rs; p != NULL; p = p->tl) {

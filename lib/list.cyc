@@ -16,13 +16,11 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-
 // list.cyc: defines generic lists and various operations over them,
 //           following the conventions of the Ocaml list library as much
 //           as possible.  Also, a reasonable attempt to make things as
 //           space efficient as possible, while remaining "functional".
 //
-#include <core.h>
 #include <list.h>
 
 namespace List;
@@ -31,11 +29,8 @@ using Core;
 // Return the length of a list. 
 int length(list_t<`a::TB> x) {
   int i = 0;
-
-  while (x != NULL) {
+  for(; x != NULL; x = x->tl)
     ++i;
-    x = x->tl;
-  }
   return i;
 }
 
@@ -51,31 +46,23 @@ list_t<`a,`r> tl(List_t<`a::TB,`r> x) {
 
 // allows one to write rlist(r,e1,e2,...,en) to create a list
 // out of e1,e2,...,en.
-list_t<`a,`r> rlist(region_t<`r::TR> r, ... `a argv) {
-  List::list_t result = NULL;
-  for (unsigned int i = numelts(argv) - 1; i < numelts(argv); i--) 
-    result = rnew(r) List{argv[i],result};
-  return result;
+list_t<`a,`r> rlist(region_t<`r> r, ... `a argv) {
+  return rfrom_array(r,argv);
 }
 
-// can't write this in terms of rlist yet because there's no way
-// to forward varargs yet.
 list_t<`a> list(... `a argv) {
-  list_t result = NULL;
-  for (int i = numelts(argv) - 1; i >= 0; i--) 
-    result = new List{argv[i],result};
-  return result;
+  return from_array(argv);
 }
 
 // return a fresh copy of the list (same as map of the identity) 
-list_t<`a,`r2> rcopy(region_t<`r2> r2, list_t<`a> x) {
+list_t<`a,`r> rcopy(region_t<`r> r, list_t<`a> x) {
   struct List @ result, @ prev;
 
   if (x == NULL) return NULL;
-  result = rnew(r2) List{.hd=x->hd,.tl=NULL};
+  result = rnew(r) List{.hd=x->hd,.tl=NULL};
   prev = result;
   for (x=x->tl; x != NULL; x=x->tl) {
-    struct List @ temp = rnew(r2) List(x->hd,NULL);
+    struct List @ temp = rnew(r) List(x->hd,NULL);
     prev->tl = temp;
     prev = temp;
   }
@@ -87,14 +74,14 @@ list_t<`a> copy(list_t<`a> x) {
 }
 
 // Apply a function to each element in a list, returning a new list. 
-list_t<`b,`r2> rmap(region_t<`r2> r2,`b f(`a),list_t<`a> x) {
+list_t<`b,`r> rmap(region_t<`r> r,`b f(`a),list_t<`a> x) {
   struct List @result,@prev;
 
   if (x == NULL) return NULL;
-  result = rnew(r2) List(f(x->hd),NULL);
+  result = rnew(r) List(f(x->hd),NULL);
   prev = result;
   for (x=x->tl; x != NULL; x=x->tl) {
-    struct List @temp = rnew(r2) List(f(x->hd),NULL);
+    struct List @temp = rnew(r) List(f(x->hd),NULL);
     prev->tl = temp;
     prev = temp;
   }
@@ -106,14 +93,14 @@ list_t<`b> map(`b f(`a),list_t<`a> x) {
 }
 
 // Apply a function to each element in a list, returning a new list. 
-list_t<`b,`r2> rmap_c(region_t<`r2> r2,`b f(`c,`a),`c env,list_t<`a> x) {
+list_t<`b,`r> rmap_c(region_t<`r> r,`b f(`c,`a),`c env,list_t<`a> x) {
   struct List @result, @prev;
 
   if (x == NULL) return NULL;
-  result = rnew(r2) List(f(env,x->hd),NULL);
+  result = rnew(r) List(f(env,x->hd),NULL);
   prev = result;
   for (x=x->tl; x != NULL; x=x->tl) {
-    struct List @ e = rnew(r2) List(f(env,x->hd),NULL);
+    struct List @ e = rnew(r) List(f(env,x->hd),NULL);
     prev->tl = e;
     prev = e;
   }
@@ -131,28 +118,26 @@ datatype exn.List_mismatch List_mismatch_val = List_mismatch;
 // Given two lists of the same length and a function, apply the function
 // to each pair of elements (in order) and collect the results in a new list.
 // Throws List_mismatch if the sizes of the lists aren't the same.
-list_t<`c,`r3> rmap2(region_t<`r3> r3,`c f(`a,`b),
-		     list_t<`a> x,list_t<`b> y) {
+list_t<`c,`r> rmap2(region_t<`r> r,`c f(`a,`b), list_t<`a> x,list_t<`b> y) {
   struct List @result, @prev;
 
   if (x == NULL && y == NULL) return NULL;
   if (x == NULL || y == NULL) throw &List_mismatch_val;
 
-  result = rnew(r3) List(f(x->hd,y->hd),NULL);
+  result = rnew(r) List(f(x->hd,y->hd),NULL);
   prev = result;
-
   x = x->tl;
   y = y->tl;
 
   while (x != NULL && y != NULL) {
-    struct List @temp = rnew(r3) List(f(x->hd,y->hd),NULL);
+    struct List @temp = rnew(r) List(f(x->hd,y->hd),NULL);
     prev->tl = temp;
     prev = temp;
     x = x->tl;
     y = y->tl;
   }
   if (x != NULL || y != NULL) throw &List_mismatch_val;
-  return(result);
+  return result;
 }
 
 list_t<`c> map2(`c f(`a,`b),list_t<`a> x,list_t<`b> y) {
@@ -160,14 +145,14 @@ list_t<`c> map2(`c f(`a,`b),list_t<`a> x,list_t<`b> y) {
 }
 
 // same as rmap2 but with three lists.
-list_t<`d,`r3> rmap3(region_t<`r3> r3,`d f(`a,`b,`c),
-		     list_t<`a> x,list_t<`b> y,list_t<`c> z) {
+list_t<`d,`r> rmap3(region_t<`r> r,`d f(`a,`b,`c),
+		    list_t<`a> x,list_t<`b> y,list_t<`c> z) {
   struct List @result, @prev;
 
   if (x == NULL && y == NULL && z == NULL) return NULL;
   if (x == NULL || y == NULL || z == NULL) throw &List_mismatch_val;
 
-  result = rnew(r3) List(f(x->hd,y->hd,z->hd),NULL);
+  result = rnew(r) List(f(x->hd,y->hd,z->hd),NULL);
   prev = result;
 
   x = x->tl;
@@ -175,7 +160,7 @@ list_t<`d,`r3> rmap3(region_t<`r3> r3,`d f(`a,`b,`c),
   z = z->tl;
 
   while (x != NULL && y != NULL && z != NULL) {
-    struct List @temp = rnew(r3) List(f(x->hd,y->hd,z->hd),NULL);
+    struct List @temp = rnew(r) List(f(x->hd,y->hd,z->hd),NULL);
     prev->tl = temp;
     prev = temp;
     x = x->tl;
@@ -194,72 +179,52 @@ list_t<`d> map3(`d f(`a,`b,`c),list_t<`a> x,list_t<`b> y,list_t<`c> z) {
 // save the result.  Similar to Ocaml's List.iter but doesn't require
 // void type for the result of the function.
 void app(`b f(`a),list_t<`a> x) {
-  while (x != NULL) {
+  for(; x != NULL; x=x->tl)
     f(x->hd);
-    x = x->tl;
-  }
 }
 
 void app_c(`c f(`a,`b),`a env,list_t<`b> x) {
-  while (x != NULL) {
+  for(; x != NULL; x=x->tl)
     f(env,x->hd);
-    x = x->tl;
-  }
 }
 
 // same as app but with void functions -- unlike Popcorn, the iter
 // functions are no longer needed because we treat "void" as a boxed
 // type.  
 void iter(void f(`a),list_t<`a> x) {
-  while (x != NULL) {
+  for(; x != NULL; x=x->tl)
     f(x->hd);
-    x = x->tl;
-  }
 }
 // same as app_c but with void functions
 void iter_c(void f(`b,`a),`b env,list_t<`a> x) {
-  while (x != NULL) {
+  for(; x != NULL; x=x->tl)
     f(env,x->hd);
-    x = x->tl;
-  }
 }
 
 // Same as app, but generalized to a pair of lists.  Throws List_mismatch
 // if the lengths of the list aren't the same.  
 void app2(`c f(`a,`b),list_t<`a> x,list_t<`b> y) {
-  while (x != NULL && y != NULL) {
+  for(; x != NULL && y != NULL; x=x->tl, y=y->tl)
     f(x->hd,y->hd);
-    x = x->tl;
-    y = y->tl;
-  }
   if (x != NULL || y != NULL) throw &List_mismatch_val;
 }
 
 void app2_c(`d f(`a,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
-  while (x != NULL && y != NULL) {
+  for(; x != NULL && y != NULL; x=x->tl, y=y->tl)
     f(env,x->hd,y->hd);
-    x = x->tl;
-    y = y->tl;
-  }
   if (x != NULL || y != NULL) throw &List_mismatch_val;
 }
 
 // Same as iter, but generalized to a pair of lists.  Throws List_mismatch
 // if the lengths of the list aren't the same.  
 void iter2(void f(`a,`b),list_t<`a> x,list_t<`b> y) {
-  while (x != NULL && y != NULL) {
+  for(; x != NULL && y != NULL; x=x->tl, y=y->tl)
     f(x->hd,y->hd);
-    x = x->tl;
-    y = y->tl;
-  }
   if (x != NULL || y != NULL) throw &List_mismatch_val;
 }
 void iter2_c(void f(`a,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
-  while (x != NULL && y != NULL) {
+  for(; x != NULL && y != NULL; x=x->tl, y=y->tl)
     f(env,x->hd,y->hd);
-    x = x->tl;
-    y = y->tl;
-  }
   if (x != NULL || y != NULL) throw &List_mismatch_val;
 }
 
@@ -267,19 +232,15 @@ void iter2_c(void f(`a,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
 // return f(f(...(f(x2,f(x1,a))),xn-1),xn).  Notice that the function is
 // first applied to the left-most element of the list.
 `a fold_left(`a f(`a,`b),`a accum,list_t<`b> x) {
-  while (x != NULL) {
+  for(; x != NULL; x=x->tl)
     accum = f(accum,x->hd);
-    x = x->tl;
-  }
-  return(accum);
+  return accum;
 }
 
 `a fold_left_c(`a f(`c,`a,`b),`c env,`a accum,list_t<`b> x) {
-  while (x != NULL) {
+  for(; x != NULL; x=x->tl)
     accum = f(env,accum,x->hd);
-    x = x->tl;
-  }
-  return(accum);
+  return accum;
 }
 
 // Given a list [x1,x2,....,xn-1,xn], a function f, and an accumulator a,
@@ -287,22 +248,20 @@ void iter2_c(void f(`a,`b,`c),`a env,list_t<`b> x,list_t<`c> y) {
 // first applied to the right-most element of the list. 
 `b fold_right(`b f(`a,`b),list_t<`a> x,`b accum) {
   if (x == NULL) return accum;
-  else return(f(x->hd,fold_right(f,x->tl,accum)));
+  return(f(x->hd,fold_right(f,x->tl,accum)));
 }
 `b fold_right_c(`b f(`c,`a,`b),`c env,list_t<`a> x,`b accum) {
   if (x == NULL) return accum;
-  else return(f(env,x->hd,fold_right_c(f,env,x->tl,accum)));
+  return(f(env,x->hd,fold_right_c(f,env,x->tl,accum)));
 }
 
 // Given [x1,...,xn] and [y1,...,ym], return [xn,...,x1,y1,...,ym].
 // That is, the first list reversed and appended to the second list.
 list_t<`a,`r2> rrevappend(region_t<`r2> r2,list_t<`a> x,
                            list_t<`a,`r2> y) {
-  while (x != NULL) {
+  for(; x != NULL; x = x->tl) 
     y = rnew(r2) List(x->hd,y);
-    x = x->tl;
-  }
-  return(y);
+  return y;
 }
 
 list_t<`a> revappend(list_t<`a> x,list_t<`a,`H> y) {
@@ -311,10 +270,7 @@ list_t<`a> revappend(list_t<`a> x,list_t<`a,`H> y) {
 
 // Return the reverse of a list. 
 list_t<`a,`r2> rrev(region_t<`r2> r2, list_t<`a> x) {
-  // avoid allocation for length-one lists
-  if (x==NULL) // || x->tl==NULL)
-    return NULL;
-  return rrevappend(r2,x,NULL);
+  return (x==NULL) ? NULL : rrevappend(r2,x,NULL);
 }
 
 list_t<`a> rev(list_t<`a> x) {
@@ -324,18 +280,16 @@ list_t<`a> rev(list_t<`a> x) {
 // Imperatively reverse a list 
 list_t<`a,`r> imp_rev(list_t<`a::TB,`r> x) {
   if (x == NULL) return x;
-  else {
-    list_t<`a,`r> first  = x;
-    list_t<`a,`r> second = x->tl;
-    x->tl = NULL;
-    while (second != NULL) {
-      list_t<`a,`r> temp = second->tl;
-      second->tl = first;
-      first = second;
-      second = temp;
-    } 
-    return first;
-  }
+  list_t<`a,`r> first  = x;
+  list_t<`a,`r> second = x->tl;
+  x->tl = NULL;
+  while (second != NULL) {
+    list_t<`a,`r> temp = second->tl;
+    second->tl = first;
+    first = second;
+    second = temp;
+  } 
+  return first;
 }
       
 // Return two appended lists -- creates sharing.
@@ -373,8 +327,8 @@ list_t<`a,`r> imp_append(list_t<`a::TB,`r> x,list_t<`a,`r> y) {
 }
 
 // Flatten a list of lists into a new list 
-list_t<`a,`r3> rflatten(region_t<`r3> r3, list_t<list_t<`a,`r3>> x) {
-  return fold_right_c(rappend,r3,x,NULL);
+list_t<`a,`r> rflatten(region_t<`r> r, list_t<list_t<`a,`r>> x) {
+  return fold_right_c(rappend,r,x,NULL);
 }
 
 list_t<`a> flatten(list_t<list_t<`a,`H>> x) {
@@ -414,10 +368,7 @@ list_t<`a,`r> imp_merge(int less_eq(`a,`a), list_t<`a,`r> a, list_t<`a,`r> b){
     }
   }
   // splice in the rest of the other list
-  if (a == NULL)
-    c->tl = b;
-  else
-    c->tl = a;
+  c->tl = (a == NULL) ? b : a;
   return(d);
 }
 
@@ -451,30 +402,28 @@ list_t<`a,`r> rimp_merge_sort(int less_eq(`a,`a), list_t<`a,`r> x) {
 // the list sorted by less_eq.  Uses a merge sort.  The less_eq
 // function should return 0 if the elements are equal, i < 0 if
 // the first is less than the second, and i > 0 otherwise.
-list_t<`a,`r2> rmerge_sort(region_t<`r2> r2, int less_eq(`a,`a), list_t<`a> x) {
-  return rimp_merge_sort(less_eq, rcopy(r2, x));
+list_t<`a,`r> rmerge_sort(region_t<`r> r, int less_eq(`a,`a), list_t<`a> x) {
+  return rimp_merge_sort(less_eq, rcopy(r, x));
 }
 
 
-list_t<`a,`r3> rmerge(region_t<`r3> r3,
-		      int less_eq(`a,`a),
-		      list_t<`a> a,
-		      list_t<`a> b) {
+list_t<`a,`r> rmerge(region_t<`r> r, int less_eq(`a,`a), 
+		     list_t<`a> a, list_t<`a> b) {
   struct List @c,@d;
 
   // Dan bug fix: now works on empty lists by special-casing it first:
-  if (a==NULL) return rcopy(r3,b);
-  if (b==NULL) return rcopy(r3,a);
+  if (a==NULL) return rcopy(r,b);
+  if (b==NULL) return rcopy(r,a);
   
   // merge the two lists:
   //   d = beginning of the merged list
   //   c = current cons cell
  
   if (less_eq(a->hd,b->hd) <= 0) {
-    c = rnew(r3) List{a->hd,NULL};
+    c = rnew(r) List{a->hd,NULL};
     a = a->tl;
   } else {
-    c = rnew(r3) List{b->hd,NULL};
+    c = rnew(r) List{b->hd,NULL};
     b = b->tl;
   }
   d = c;
@@ -483,23 +432,20 @@ list_t<`a,`r3> rmerge(region_t<`r3> r3,
     // add a to the list else add b
     struct List @ temp;
     if (less_eq(a->hd, b->hd) <= 0) {
-      temp = rnew(r3) List{a->hd,NULL};
+      temp = rnew(r) List{a->hd,NULL};
       c->tl = temp;
       c = temp;
       a = a->tl;
     } else {
-      temp = rnew(r3) List{b->hd,NULL};
+      temp = rnew(r) List{b->hd,NULL};
       c->tl = temp;
       c = temp;
       b = b->tl;
     }
   }
   // splice in the rest of the other list
-  if (a == NULL)
-    c->tl = rcopy(r3,b);
-  else
-    c->tl = rcopy(r3,a);
-  return(d);
+  c->tl = (a == NULL) ? rcopy(r,b) : rcopy(r,a);
+  return d;
 }
 
 list_t<`a> merge_sort(int less_eq(`a,`a), list_t<`a> x) {
@@ -518,56 +464,55 @@ datatype exn.Nth Nth_val = Nth;
 // Throw Nth if the list doesn't have enough elements.  Notice that the
 // indexing is zero-based.
 `a nth(list_t<`a> x,int i) {
-
-  while (i > 0 && x != NULL) {
-    --i;
-    x = x->tl;
-  }
-  if (i < 0 || x == NULL) throw &Nth_val;
-  return(x->hd);
+  return nth_tail(x,i)->hd;
 }
 
 // Given [x0,x1,...,xi-1,xi,xi+1,...,xn], return [xi,xi+1,...,xn].  Raise
 // Nth if the list doesn't have enough elements.  
 list_t<`a,`r> nth_tail(list_t<`a,`r> x, int i) {
   if (i < 0) throw &Nth_val;
-  while (i != 0) {
-    if (x == NULL) throw &Nth_val;
-    x = x->tl;
-    --i;
-  }
+  for(; i > 0; --i, x=x->tl)
+    if(x == NULL)
+      throw &Nth_val;
   return x;
 }
 
 // Given a predicate on 'a values, determine whether every element in a list
 // satisfies the predicate.
 bool forall(bool pred(`a),list_t<`a> x) {
-  while (x != NULL && pred(x->hd)) x=x->tl;
-  return(x == NULL);
+  for(; x != NULL; x = x->tl)
+    if(!pred(x->hd)) 
+      return false;
+  return true;
 }
 bool forall_c(bool pred(`a,`b),`a env,list_t<`b> x) {
-  while (x != NULL && pred(env,x->hd)) x=x->tl; 
-  return(x == NULL);
+  for(; x != NULL; x = x->tl)
+    if(!pred(env,x->hd)) 
+      return false;
+  return true;
 }
 
 // Given a predicate on 'a values, determine whether there exists an element
 // in the list that satisfies the predicate.
 bool exists(bool pred(`a),list_t<`a> x) {
-  while (x != NULL && (!pred(x->hd))) x=x->tl;
-  return(x != NULL);
+  for(; x != NULL; x = x->tl)
+    if(pred(x->hd))
+      return true;
+  return false;
 }
 bool exists_c(bool pred(`a,`b),`a env,list_t<`b> x) {
-  while (x != NULL && (!pred(env,x->hd))) x=x->tl;
-  return(x != NULL);
+  for(; x != NULL; x = x->tl)
+    if(pred(env,x->hd))
+      return true;
+  return false;
 }
 
 `c *`r find_c(`c::TA *`r pred(`a,`b),`a env,list_t<`b> x) {
-  `c *v = NULL;
   for (; x != NULL; x=x->tl) {
-    v = pred(env,x->hd);
-    if (v) break;
+    let v = pred(env,x->hd);
+    if (v) return v;
   }
-  return v;
+  return NULL;
 }
 
 // Given [x1,...,xn] and [y1,...,yn], return [(x1,y1),...,(xn,yn)].  
@@ -601,7 +546,7 @@ list_t<$(`a,`b)@`H,`H> zip(list_t<`a> x,list_t<`b> y) {
 }
 
 list_t<$(`a,`b,`c)@`r4,`r3> rzip3(region_t<`r3> r3, region_t<`r4> r4,
-                               list_t<`a> x, list_t<`b> y, list_t<`c> z) {
+				  list_t<`a> x, list_t<`b> y, list_t<`c> z) {
   struct List<$(`a,`b,`c)@`r4,`r3> @result, @prev, @temp;
   
   if (x == NULL && y == NULL && z == NULL) return NULL;
@@ -633,7 +578,7 @@ list_t<$(`a,`b,`c)@`H,`H> zip3(list_t<`a> x,list_t<`b> y,list_t<`c> z) {
 
 // Given [(x1,y1),...,(xn,yn)], return ([x1,...,xn],[y1,...,yn]) 
 $(list_t<`a,`r3>,list_t<`b,`r4>) rsplit(region_t<`r3> r3, region_t<`r4> r4,
-                                          list_t<$(`a,`b)@> x) {
+					list_t<$(`a,`b)@> x) {
   struct List @ result1, @ prev1, @ temp1;
   struct List @ result2, @ prev2, @ temp2;
   
@@ -690,22 +635,19 @@ $(list_t<`a>,list_t<`b>,list_t<`c>) split3(list_t<$(`a,`b,`c)@> x) {
   return rsplit3(heap_region, heap_region, heap_region, x);
 }
 
-
 // Given a list [x1,...,xn] and x, determine if x is in the list.  Uses
 // physical equality for comparison.
 bool memq(list_t<`a> l, `a x) {
-  while (l != NULL) {
-    if (l->hd == x) return(true);
-    l = l->tl;
-  }
-  return(false);
+  for(; l != NULL; l = l->tl)
+    if (l->hd == x) 
+      return true;
+  return false;
 }
 
 bool mem(int cmp(`a,`a), list_t<`a> l, `a x) {
-  while (l != NULL) {
-    if (cmp(l->hd,x)==0) return true;
-    l = l->tl;
-  }
+  for(; l != NULL; l = l->tl)
+    if (cmp(l->hd,x)==0) 
+      return true;
   return false;
 }
 
@@ -713,41 +655,37 @@ bool mem(int cmp(`a,`a), list_t<`a> l, `a x) {
 // return the first di such that ki = x.  Uses physical equality.
 // Throws Not_found if no such ki exists.
 `b assoc(list_t<$(`a,`b)@> l,`a x) {
-  while (l != NULL) {
-    if (l->hd[0][0] == x) return(l->hd[0][1]);
-    l = l->tl;
-  }
-  throw &Core::Not_found_val;
+  for(; l != NULL; l=l->tl)
+    if (l->hd[0][0] == x) 
+      return(l->hd[0][1]);
+  throw &Not_found_val;
 }
 
 `b assoc_cmp(int cmp(`a,`c),list_t<$(`a,`b)@> l,`c x) {
-  while (l != NULL) {
-    if (cmp((*l->hd)[0],x) == 0) return (*l->hd)[1];
-    l = l->tl;
-  }
-  throw &Core::Not_found_val;
+  for(; l != NULL; l = l->tl) 
+    if (cmp((*l->hd)[0],x) == 0) 
+      return (*l->hd)[1];
+  throw &Not_found_val;
 }
 
 // Given a list [x1,x2,...xn] and a key y, removes the first occurence
 // x1 in the list, if cmp(x1,y) == 0.  Uses side effects, and will
 // return the whole list (in case it's the first element that is
 // removed).
-list_t<`a,`r::R> delete_cmp(int cmp(`a,`a), list_t<`a,`r::R> l, `a x) {
+list_t<`a,`r> delete_cmp(int cmp(`a,`a), list_t<`a,`r> l, `a x) {
   list_t<`a,`r> prev = NULL;
   let iter = l;
   while (iter != NULL) {
     if (cmp(iter->hd,x) == 0) {
       if (prev == NULL)
 	return l->tl;
-      else {
-	prev->tl = iter->tl;
-	return l;
-      }
+      prev->tl = iter->tl;
+      return l;
     }
     prev = iter;
     iter = iter->tl;
   }
-  throw &Core::Not_found_val;
+  throw &Not_found_val;
 }
 
 static int ptrequal(`a x, `a y) {
@@ -757,45 +695,42 @@ static int ptrequal(`a x, `a y) {
 // occurence x1 in the list, if x1 == y.  Uses side effects,
 // and will return the whole list (in case it's the first
 // element that is removed).
-list_t<`a,`r::R> delete(list_t<`a,`r::R> l, `a x) {
+list_t<`a,`r> delete(list_t<`a,`r> l, `a x) {
   return delete_cmp(ptrequal, l, x);
 }
 
 // Given an association list [(k1,d1),...,(kn,dn)] and a key x,
-// returns true iff there exists a ki = x.
+// returns true iff there exists a ki == x.
 bool mem_assoc(list_t<$(`a,`b)@> l,`a x) {
-  while (l != NULL) {
-    if (l->hd[0][0] == x) return(true);
-    l = l->tl;
-  }
-  return(false);
+  for(; l != NULL; l = l->tl)
+    if (l->hd[0][0] == x) 
+      return true;
+  return false;
 }
 
 // Given an association list [(k1,d1),...,(kn,dn)] and a key x,
 // returns true iff there exists a ki s.t. cmp(ki,x) == 0.
 bool mem_assoc_cmp(int cmp(`a,`c),list_t<$(`a,`b)@> l,`c x) {
-  while (l != NULL) {
-    if (cmp(l->hd[0][0],x) == 0) return(true);
-    l = l->tl;
-  }
-  return(false);
+  for(; l != NULL; l = l->tl)
+    if (cmp(l->hd[0][0],x) == 0) 
+      return true;
+  return false;
 }
 
 // checks that a list of elements is unique -- assumes they're sorted
-// returns an element that is duplicated if one exists, otherwise returns
-// NULL.
-Core::opt_t<`a> check_unique(int cmp(`a,`a),list_t<`a> x) {
+// returns an element that is duplicated if one exists, else returns NULL.
+opt_t<`a> check_unique(int cmp(`a,`a),list_t<`a> x) {
   while (x != NULL) {
-    let tl = x->tl;
-    if (tl != NULL) 
-      if (cmp(x->hd,tl->hd) == 0) return new Core::Opt(x->hd);
-    x = tl;
+    let hd = x->hd;
+    x = x->tl;
+    if (x != NULL && cmp(hd,x->hd) == 0) 
+      return new Opt(hd);
   }
   return NULL;
 }
 
 // makes a new array with index i being the ith element of the list
-`a ?`r2 rto_array(region_t<`r2> r2, list_t<`a> x) {
+`a ?`r rto_array(region_t<`r> r2, list_t<`a> x) {
   int s = length(x);
   return rnew(r2) {for i < s : ({let v = x->hd; x=x->tl; v;})};
 }
@@ -805,8 +740,8 @@ Core::opt_t<`a> check_unique(int cmp(`a,`a),list_t<`a> x) {
 }
 
 // makes a new list with ith element arr[i]
-list_t<`a,`r2> rfrom_array(region_t<`r2> r2, `a ? arr) {
-  list_t<`a,`r2> ans = NULL;
+list_t<`a,`r> rfrom_array(region_t<`r> r2, `a ? arr) {
+  list_t<`a,`r> ans = NULL;
   for (int i = numelts(arr)-1; i >= 0; --i)
     ans = rnew(r2) List(arr[i],ans);
   return ans;
@@ -818,9 +753,8 @@ list_t<`a> from_array(`a ? arr) {
 
 list_t<`a,`r> rtabulate(region_t<`r> r, int n, `a f(int)) {
   list_t res = NULL;
-  for (int i = 0; i < n; ++i) {
+  for (int i = 0; i < n; ++i)
     res = rnew(r) List(f(i),res);
-  }
   return imp_rev(res);
 }
 
@@ -859,13 +793,12 @@ int list_cmp(int cmp(`a,`b), list_t<`a> l1, list_t<`b> l2) {
 bool list_prefix(int cmp(`a,`b), list_t<`a> l1, list_t<`b> l2) {
   for (; l1 != NULL && l2 != NULL; l1 = l1->tl, l2 = l2->tl) {
     // The casts are needed here else the lists are forced into the same region.
-    if ((unsigned int)l1 == (unsigned int)l2)
+    if ((unsigned)l1 == (unsigned)l2)
       return true;
-    let i = cmp(l1->hd,l2->hd);
-    if (i != 0)
+    if (cmp(l1->hd,l2->hd) != 0)
       return false;
   }
-  return (l1 == NULL);
+  return l1 == NULL;
 }
 
 list_t<`a,`r> rfilter_c(region_t<`r> r, bool f(`b,`a), `b env, list_t<`a> l){
@@ -875,13 +808,12 @@ list_t<`a,`r> rfilter_c(region_t<`r> r, bool f(`b,`a), `b env, list_t<`a> l){
   struct List @ result = rnew(r) List(l->hd,NULL); 
   struct List @ end = result; // pointer to last cons cell
   struct List @ temp;
-  for (;l != NULL;l=l->tl) {
+  for (;l != NULL;l=l->tl)
     if (f(env,l->hd)) {
       temp = rnew(r) List(l->hd,NULL);
       end->tl = temp;
       end = temp;
     }
-  }
   return result->tl; // Ditch the placeholder we inserted earlier.
 }
 
@@ -896,14 +828,13 @@ list_t<`a,`r> rfilter(region_t<`r> r, bool f(`a), list_t<`a> l) {
   struct List @ result = rnew(r) List(l->hd,NULL); 
   struct List @ end = result; // pointer to last cons cell
   struct List @ temp;
-  for (;l != NULL;l=l->tl) {
+  for (;l != NULL;l=l->tl)
     if (f(l->hd)) {
       temp = rnew(r) List(l->hd,NULL);
       end->tl = temp;
       end = temp;
     }
-  }
-  return (result->tl); // Ditch the placeholder we inserted earlier.
+  return result->tl; // Ditch the placeholder we inserted earlier.
 }
 
 list_t<`a> filter(bool f(`a), list_t<`a> l) {

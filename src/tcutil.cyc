@@ -19,6 +19,7 @@
 
 #include <string.h>
 #include "absynpp.h"
+#include "kinds.h"
 #include "warn.h"
 #include "flags.h"
 #include "evexp.h"
@@ -297,18 +298,8 @@ int fast_tvar_cmp(tvar_t tv1, tvar_t tv2) {
   return (tv1->identity - tv2->identity);
 }
 
-// does a deep copy of a type to avoid sharing type variables.
-// Note that any evars continue to be shared.  This should
-// be run only before feeding the type to the well-formedness checker.
-static kindbound_t copy_kindbound(kindbound_t kb) {
-  switch (compress_kb(kb)) {
-  case &Unknown_kb(_): return new Unknown_kb(NULL);
-  case &Less_kb(_,k):  return new Less_kb(NULL,k);
-  default: return kb;
-  }
-}
 static tvar_t copy_tvar(tvar_t tv) {  // NB: loses sharing of identity here!
-  return new Tvar(tv->name,-1,copy_kindbound(tv->kind));
+  return new Tvar(tv->name,-1,Kinds::copy_kindbound(tv->kind));
 }
 static $(var_opt_t,tqual_t,type_t)@ copy_arg($(var_opt_t,tqual_t,type_t) @arg) {
   let &$(x,y,t) = arg;
@@ -509,59 +500,12 @@ exp_t deep_copy_exp(bool preserve_types, exp_t e) {
   return new_e;
 }
 
-// Our lattice looks like this:
-//          AbsType   EffKind  RgnKind  * Top
-//             V                          V V
-//          MemType               Aliasable Unique
-//             V
-//          BoxType
-// Only used during unification -- we can constrain an Evar or VarType
-// as long as we move down in the lattice.
-bool kind_leq(kind_t ka1, kind_t ka2) {
-  let &Kind(k1,a1) = ka1;
-  let &Kind(k2,a2) = ka2;
-  // check the kind part
-  if (k1 != k2)
-    switch ($(k1,k2)) {
-    case $(BoxKind, MemKind):
-    case $(BoxKind, AnyKind):
-    case $(MemKind, AnyKind): break;
-    default: return false;
-    }
-  // check the aliasable part
-  if (a1 != a2)
-    switch ($(a1,a2)) {
-    case $(Aliasable, Top):
-    case $(Unique, Top): return true;
-    default: return false;
-    }
-  return true;
-}
-
-kind_t tvar_kind(tvar_t tv, kind_t def) {
-  switch (compress_kb(tv->kind)) {
-  case &Eq_kb(k):     return k;
-  case &Less_kb(_,k): return k;
-  default: tv->kind = new Less_kb(NULL,def); return def;
-  }
-}
-
-$(tvar_t,kindbound_t) swap_kind(type_t t, kindbound_t kb) {
-  switch (compress(t)) {
-  case &VarType(tv):
-    let oldkb = tv->kind;
-    tv->kind = kb;
-    return $(tv,oldkb);
-  default: Warn::impos2("swap_kind: cannot update the kind of ", t);
-  }
-}
-
 // figures out the kind of a field in a struct or union; used
 // by type_kind below
 static kind_t field_kind(type_t field_type,
 			 list_t<type_t> ts, list_t<tvar_t> tvs) {
   kind_t k = type_kind(field_type);
-  if (ts != NULL && (k == &ak || k == &tak)) {
+  if (ts != NULL && (k == &Kinds::ak || k == &Kinds::tak)) {
     // we have to substitute here, because the last type might be
     // instantiated with a ground type.
     region r;
@@ -570,7 +514,7 @@ static kind_t field_kind(type_t field_type,
     for (; tvs != NULL; tvs=tvs->tl, ts=ts->tl) {
       let tv = tvs->hd;
       let t = ts->hd;
-      switch (tvar_kind(tv,&bk)->kind) {
+      switch (Kinds::tvar_kind(tv,&Kinds::bk)->kind) {
       case IntKind:
       case AnyKind: inst = rnew(r) List(rnew(r) $(tv,t), inst); break;
       default: break;
@@ -592,100 +536,96 @@ kind_t type_kind(type_t t) {
   // FIX: we're assuming sizeof(int) = sizeof(long) = sizeof(void *) here
   switch (compress(t)) {
   case &Evar(k,...):    return k->v;
-  case &VarType(tv):    return tvar_kind(tv,&bk);
+  case &VarType(tv):    return Kinds::tvar_kind(tv,&Kinds::bk);
   case &AppType(c,ts):
     switch (c) {
-    case &VoidCon:      return &mk;
-    case &IntCon(_,sz): return (sz==Int_sz || sz==Long_sz) ? &bk : &mk;
-    case &FloatCon(_):  return &mk;
+    case &VoidCon:      return &Kinds::mk;
+    case &IntCon(_,sz): 
+      return (sz==Int_sz || sz==Long_sz) ? &Kinds::bk : &Kinds::mk;
+    case &FloatCon(_):  return &Kinds::mk;
     case &EnumCon(_,_):
     case &AnonEnumCon(_):
-    case &RgnHandleCon:    return &bk;
-    case &UniqueCon:	   return &urk;
-    case &HeapCon:         return &rk;
-    case &RefCntCon:	   return &trk;
+    case &RgnHandleCon:    return &Kinds::bk;
+    case &UniqueCon:	   return &Kinds::urk;
+    case &HeapCon:         return &Kinds::rk;
+    case &RefCntCon:	   return &Kinds::trk;
     case &BuiltinCon(_,k): return k;
-    case &TagCon:          return &bk;
+    case &TagCon:          return &Kinds::bk;
     case &AccessCon:
     case &JoinCon:
-    case &RgnsCon:         return &ek;
+    case &RgnsCon:         return &Kinds::ek;
     case &FalseCon:
-    case &TrueCon:         return &boolk;
+    case &TrueCon:         return &Kinds::boolk;
     case &ThinCon:
-    case &FatCon:          return &ptrbk;
-    case &DatatypeCon(...): return &ak; // datatypes always have abstract kind
-    case &DatatypeFieldCon({.KnownDatatypefield = _}): return &mk;
+    case &FatCon:          return &Kinds::ptrbk;
+    case &DatatypeCon(...): return &Kinds::ak; // datatypes always have abstract kind
+    case &DatatypeFieldCon({.KnownDatatypefield = _}): return &Kinds::mk;
     case &DatatypeFieldCon({.UnknownDatatypefield = _}):
       Warn::impos2("type_kind: Unresolved DatatypeFieldType");
       // for structs or unions without definitions, we must be
       // conservative and treat them as having AnyKind
-    case &AggrCon({.UnknownAggr = _}): return &ak;
+    case &AggrCon({.UnknownAggr = _}): return &Kinds::ak;
     case &AggrCon({.KnownAggr= & &Aggrdecl(strOrU,_,_,tvs,i,_,expected_mem_kind)}):
       if (i == NULL) 
-	return expected_mem_kind ? &mk : &ak;
+	return expected_mem_kind ? &Kinds::mk : &Kinds::ak;
       let fields = i->fields;
-      if (fields == NULL) return &mk;
+      if (fields == NULL) return &Kinds::mk;
       // the kind of a struct depends upon the kind of its last field
       if (strOrU == StructA) {
         for (; fields->tl != NULL; fields = fields->tl)
 	  ;
         let last_type = fields->hd->type;
         let k = field_kind(last_type, ts, tvs);
-        if (k == &ak || k == &tak) return k;
+        if (k == &Kinds::ak || k == &Kinds::tak) return k;
       }
       // the kind of a union depends upon the kind of all its fields
       else
         for (; fields != NULL; fields = fields->tl) {
           let type = fields->hd->type;
           let k = field_kind(type, ts, tvs);
-          if (k == &ak || k == &tak) return k;
+          if (k == &Kinds::ak || k == &Kinds::tak) return k;
         }
-      return &mk;
+      return &Kinds::mk;
     }
-  case &FnType(_):         return &ak;
-  case &AnonAggrType(_,_): return &mk;
+  case &FnType(_):         return &Kinds::ak;
+  case &AnonAggrType(_,_): return &Kinds::mk;
   case &PointerType(pinfo):
     switch (compress(pinfo.ptr_atts.bounds)) {
     case &AppType(&ThinCon,_):
       switch (type_kind(pinfo.ptr_atts.rgn)->aliasqual) {
-      case Aliasable: return &bk;
-      case Unique: return &ubk;
-      case Top: default: return &tbk;
+      case Aliasable: return &Kinds::bk;
+      case Unique: return &Kinds::ubk;
+      case Top: default: return &Kinds::tbk;
       }
     // must assume worst case when the bounds are unconstrained
     case &AppType(&FatCon,_):
     default:
       switch (type_kind(pinfo.ptr_atts.rgn)->aliasqual) {
-      case Aliasable: return &mk;
-      case Unique: return &umk;
-      case Top: default: return &tmk;
+      case Aliasable: return &Kinds::mk;
+      case Unique: return &Kinds::umk;
+      case Top: default: return &Kinds::tmk;
       }
     }
-  case &ValueofType(_): return &ik;
+  case &ValueofType(_): return &Kinds::ik;
   case &TypeofType(_): 
     // compress should've returned the type of the expression if we know it.
     // if we don't, then we must treat it as abstract.
-    return &ak; 
+    return &Kinds::ak; 
   case &ArrayType(ArrayInfo{_,_,num_elts,_,_}):
-    if (num_elts == NULL || is_const_exp(num_elts)) return &mk;
-    return &ak;
-  case &TupleType(_): return &mk;
+    if (num_elts == NULL || is_const_exp(num_elts)) return &Kinds::mk;
+    return &Kinds::ak;
+  case &TupleType(_): return &Kinds::mk;
   case &TypedefType(_,_,td,_):
     if (td == NULL || td->kind == NULL)
       Warn::impos2("type_kind: typedef found: ",t);
     return td->kind->v;
-  case &TypeDeclType(&{.r = &Enum_td(_),...},_): return &bk;
+  case &TypeDeclType(&{.r = &Enum_td(_),...},_): return &Kinds::bk;
   case &TypeDeclType(&{.r = &Aggr_td(_),...},_): 
-  case &TypeDeclType(&{.r = &Datatype_td(_),...},_): return &ak;
+  case &TypeDeclType(&{.r = &Datatype_td(_),...},_): return &Kinds::ak;
   }
 }
 
-bool kind_eq(kind_t k1, kind_t k2) {
-  return k1 == k2 || (k1->kind == k2->kind && k1->aliasqual == k2->aliasqual);
-}
-
-// forward declarations
-static type_t rgns_of(type_t t);
+static type_t rgns_of(type_t);
 
 static type_t rgns_of_field(aggrfield_t af) {
   return rgns_of(af->type);
@@ -693,7 +633,7 @@ static type_t rgns_of_field(aggrfield_t af) {
 
 static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
   type_t t;
-  switch (tvar_kind(tv,&bk)) {
+  switch (Kinds::tvar_kind(tv,&Kinds::bk)) {
   case &Kind(RgnKind,Unique):    t = unique_rgn_type; break;
   case &Kind(RgnKind,Aliasable): t = heap_rgn_type;   break;
   case &Kind(EffKind,_):         t = empty_effect;    break;
@@ -840,7 +780,7 @@ bool region_in_effect(bool constrain, type_t r, type_t e) {
       case &Evar(k,*p,_,s):
         // we found regions(ev) -- constrain ev to a dummy function type
         // t such that regions(t) = ev2+{`r} where ev2 is a fresh effect evar
-        let ev = new_evar(&eko,s);
+        let ev = new_evar(&Kinds::eko,s);
         // this has the effect of checking that any free variables in r
         // are contained in s.
         occurs(ev,heap_region,s->v,r);
@@ -856,7 +796,7 @@ bool region_in_effect(bool constrain, type_t r, type_t e) {
     if (!constrain) return false;
     // we found a non-canonical evar -- we can grow it to include r
     // but this may cause problems later on with other constraints.
-    let ev = new_evar(&eko,s);
+    let ev = new_evar(&Kinds::eko,s);
     // this has the effect of checking that any free variables in r
     // are contained in s.
     occurs(ev,heap_region,s->v,r);
@@ -896,7 +836,7 @@ static bool type_in_effect(bool may_constrain_evars, type_t t, type_t e) {
     if (!may_constrain_evars) return false;
     // we found a non-canonical evar -- we can grow it to include t
     // but this may cause problems later on with other constraints.
-    let ev = new_evar(&eko,s);
+    let ev = new_evar(&Kinds::eko,s);
     // this has the effect of checking that any free variables in t
     // are contained in s.
     occurs(ev,heap_region,s->v,t);
@@ -927,7 +867,7 @@ static bool variable_in_effect(bool may_constrain_evars, tvar_t v, type_t e) {
         // we found regions(ev) where ev is an evar -- set ev to
         // be a dummy type t such that regions(t) = ev2+`e where ev2
         // is a fresh evar.
-        let ev = new_evar(&eko,s);
+        let ev = new_evar(&Kinds::eko,s);
         // make sure v is in the allowed set of type variables in the evar
         if (!List::mem(fast_tvar_cmp,s->v,v)) return false;
         *p = dummy_fntype(join_eff(list(ev,var_type(v))));
@@ -941,7 +881,7 @@ static bool variable_in_effect(bool may_constrain_evars, tvar_t v, type_t e) {
       Warn::impos2("effect evar has wrong kind");
     // we found a non-canonical evar -- we can grow it to include v
     // but this may cause problems later on with other constraints.
-    let ev = new_evar(&eko,s);
+    let ev = new_evar(&Kinds::eko,s);
     // make sure v is in the allowed set of type variables for the evar
     if (!List::mem(fast_tvar_cmp,s->v,v))
       return false;
@@ -1482,11 +1422,11 @@ exp_opt_t get_ptr_bounds_exp(ptrbound_t def, type_t t) {
 
 // unconstrained boolean-kinded type node
 type_t any_bool(list_t<tvar_t,`H> tvs) {
-  return new_evar(&boolko,new Opt(tvs));
+  return new_evar(&Kinds::boolko,new Opt(tvs));
 }
 // unconstrained pointer bound type node
 type_t any_bounds(list_t<tvar_t,`H> tvs) {
-  return new_evar(&ptrbko,new Opt(tvs));
+  return new_evar(&Kinds::ptrbko,new Opt(tvs));
 }
 
 // defined below
@@ -1556,7 +1496,8 @@ bool silent_castable(RgnOrder::rgn_po_opt_t po,seg_t loc,type_t t1,type_t t2) {
     if(!unify(bounds_one(), pinfo_b.ptr_atts.bounds) 
        || force_type2bool(false,pinfo_b.ptr_atts.zero_term))
       return false;
-    if(!pinfo_b.elt_tq.real_const && !kind_leq(&ak,type_kind(pinfo_b.elt_type)))
+    if(!pinfo_b.elt_tq.real_const 
+       && !Kinds::kind_leq(&Kinds::ak,type_kind(pinfo_b.elt_type)))
       return false;
     return ptrsubtype(po,NULL,pinfo_a.elt_type,pinfo_b.elt_type);
 
@@ -1636,88 +1577,6 @@ bool is_zero(exp_t e) {
   }
 }
 
-struct Kind rk = Kind(RgnKind,Aliasable);
-struct Kind ak = Kind(AnyKind,Aliasable);
-struct Kind bk = Kind(BoxKind,Aliasable);
-struct Kind mk = Kind(MemKind,Aliasable);
-struct Kind ik = Kind(IntKind,Aliasable);
-struct Kind ek = Kind(EffKind,Aliasable);
-struct Kind boolk = Kind(BoolKind,Aliasable);
-struct Kind ptrbk = Kind(PtrBndKind,Aliasable);
-
-struct Kind trk = Kind(RgnKind,Top);
-struct Kind tak = Kind(AnyKind,Top);
-struct Kind tbk = Kind(BoxKind,Top);
-struct Kind tmk = Kind(MemKind,Top);
-
-struct Kind urk = Kind(RgnKind,Unique);
-struct Kind uak = Kind(AnyKind,Unique);
-struct Kind ubk = Kind(BoxKind,Unique);
-struct Kind umk = Kind(MemKind,Unique);
-
-struct Opt<kind_t> rko = {&rk};
-struct Opt<kind_t> ako = {&ak};
-struct Opt<kind_t> bko = {&bk};
-struct Opt<kind_t> mko = {&mk};
-struct Opt<kind_t> iko = {&ik};
-struct Opt<kind_t> eko = {&ek};
-struct Opt<kind_t> boolko = {&boolk};
-struct Opt<kind_t> ptrbko = {&ptrbk};
-
-struct Opt<kind_t> trko = {&trk};
-struct Opt<kind_t> tako = {&tak};
-struct Opt<kind_t> tbko = {&tbk};
-struct Opt<kind_t> tmko = {&tmk};
-
-struct Opt<kind_t> urko = {&urk};
-struct Opt<kind_t> uako = {&uak};
-struct Opt<kind_t> ubko = {&ubk};
-struct Opt<kind_t> umko = {&umk};
-
-opt_t<kind_t> kind_to_opt(kind_t ka) {
-  let &Kind(k,a) = ka;
-  switch (a) {
-  case Aliasable:
-    switch (k) {
-    case AnyKind: return &ako;
-    case MemKind: return &mko;
-    case BoxKind: return &bko;
-    case RgnKind: return &rko;
-    case EffKind: return &eko;
-    case IntKind: return &iko;
-    case BoolKind: return &bko;
-    case PtrBndKind: default: return &ptrbko;
-    }
-  case Unique:
-    switch (k) {
-    case AnyKind: return &uako;
-    case MemKind: return &umko;
-    case BoxKind: return &ubko;
-    case RgnKind: return &urko;
-    default: break;
-    }
-    break;
-  case Top: 
-    switch (k) {
-    case AnyKind: return &tako;
-    case MemKind: return &tmko;
-    case BoxKind: return &tbko;
-    case RgnKind: return &trko;
-    default: break;
-    }
-    break;
-  default: break;
-  }
-  Warn::impos2("kind_to_opt: bad kind ",ka);
-}
-
-kindbound_t kind_to_bound(kind_t k) {
-  return new Eq_kb(k);
-}
-opt_t<kindbound_t> kind_to_bound_opt(kind_t k) {
-  return new Opt(kind_to_bound(k));
-}
-
 // if e1 is zero, and t2 a pointer type, changes e1 to NULL and
 // returns true if t2 is a nullable pointer type
 bool zero_to_null(type_t t2, exp_t e1) {
@@ -1739,7 +1598,7 @@ bool zero_to_null(type_t t2, exp_t e1) {
 // (2) generates an alias statement that defines that variable as aliasing
 // the given expression, using the given tvar as the region
 $(decl_t,exp_t) insert_alias(exp_t e, type_t e_type) {
-  static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&rk);
+  static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&Kinds::rk);
 
   // generate a fresh variable to alias the given expression to
   static int counter = 0;
@@ -1976,7 +1835,7 @@ bool subtype(RgnOrder::rgn_po_opt_t po, list_t<$(type_t,type_t)@`H,`H> assume,
     // check that qualifiers are the same or that t2's is at least const
     // (or it's element type is abstract).
     if (!q_b.real_const && q_a.real_const)
-      if (!kind_leq(&ak,type_kind(t_b)))
+      if (!Kinds::kind_leq(&Kinds::ak,type_kind(t_b)))
         return false;
     // Note, we can only allow ptrsubtype when the second pointer has a
     // bound of 1, is not fat, and is not zero-terminated!
@@ -2075,7 +1934,7 @@ static bool ptrsubtype(RgnOrder::rgn_po_opt_t po,
     let &$(tq1,t1a) = tqs1->hd;
     let &$(tq2,t2a) = tqs2->hd;
     if (tq1.real_const && !tq2.real_const) return false;
-    if ((tq2.real_const || kind_leq(&ak,type_kind(t2a)))
+    if ((tq2.real_const || Kinds::kind_leq(&Kinds::ak,type_kind(t2a)))
 	&& subtype(po,assume,t1a,t2a))
       continue;
     if (unify(t1a,t2a) || isomorphic(t1a,t2a))
@@ -2548,14 +2407,14 @@ type_t substitute_nofun(list_t<$(tvar_t,type_t)@`H,`H> inst, type_t t) {
 
 // Generate an appropriate evar for an instantiation of a type var
 $(tvar_t,type_t)@ make_inst_var(list_t<tvar_t,`H> s, tvar_t tv) {
-  let k = kind_to_opt(tvar_kind(tv,&bk));
+  let k = Kinds::kind_to_opt(Kinds::tvar_kind(tv,&Kinds::bk));
   return new $(tv, new_evar(k,new Opt(s)));
 }
 
 $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@ env,
                                     tvar_t tv) {
   let &$(s,rgn) = env;
-  let k = kind_to_opt(tvar_kind(tv,&bk));
+  let k = Kinds::kind_to_opt(Kinds::tvar_kind(tv,&Kinds::bk));
   return rnew(rgn) $(tv, new_evar(k,new Opt(s)));
 }
 
@@ -2760,11 +2619,11 @@ bool is_noalias_region(type_t r, bool must_be_unique) {
 //     fallthru(k,a);
 //   case &Evar(&Core::Opt{.v=&Kind(k,a)},NULL,_,_):
   case &VarType(tv):
-    let &Kind(k,a) = tvar_kind(tv,&rk);
+    let &Kind(k,a) = Kinds::tvar_kind(tv,&Kinds::rk);
     if ((k == RgnKind) && (a == Unique || (a == Top && !must_be_unique)))
-      switch (compress_kb(tv->kind)) {
+      switch (Kinds::compress_kb(tv->kind)) {
       case &Less_kb(*x,&Kind(RgnKind,Top)):
-        *x = new Opt(new Less_kb(NULL,&rk));
+        *x = new Opt(new Less_kb(NULL,&Kinds::rk));
         return false;
       default: return true;
       }
@@ -2780,11 +2639,11 @@ bool is_noalias_pointer(type_t t, bool must_be_unique) {
   case &PointerType(PtrInfo(_,_,PtrAtts(r,...))):
     return is_noalias_region(r,must_be_unique);
   case &VarType(tv):
-    let &Kind(k,a) = tvar_kind(tv,&bk);
+    let &Kind(k,a) = Kinds::tvar_kind(tv,&Kinds::bk);
     switch (k) {
     case BoxKind: case AnyKind: case MemKind:
       if (a == Unique || (a == Top && !must_be_unique))
-	switch (compress_kb(tv->kind)) {
+	switch (Kinds::compress_kb(tv->kind)) {
 	case &Less_kb(*x,&Kind(k,Top)):
 	  *x = new Opt(new Less_kb(NULL,new Kind(k,Aliasable)));
 	  return false;

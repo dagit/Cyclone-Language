@@ -896,9 +896,6 @@ namespace Absyn {
   tqual_t combine_tqual(tqual_t,tqual_t);
   bool equal_tqual(tqual_t,tqual_t);
 
-  ////////////////////////// Kind bounds //////////////////////////
-  kindbound_t compress_kb(kindbound_t);
-  kind_t force_kb(kindbound_t);
   ////////////////////////////// Types //////////////////////////////
 
   type_t compress(type_t);

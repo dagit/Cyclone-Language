@@ -367,7 +367,7 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif
 #endif
  struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
-# 173 "core.h"
+# 171 "core.h"
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};
 # 172 "list.h"
 extern struct Cyc_List_List*Cyc_List_rev(struct Cyc_List_List*x);
@@ -431,19 +431,19 @@ extern struct Cyc_Absyn_Wild_p_Absyn_Raw_pat_struct Cyc_Absyn_Wild_p_val;struct 
 int Cyc_Absyn_qvar_cmp(struct _tuple0*,struct _tuple0*);
 # 887
 int Cyc_Absyn_varlist_cmp(struct Cyc_List_List*,struct Cyc_List_List*);
-# 930
+# 927
 extern void*Cyc_Absyn_heap_rgn_type;
-# 934
+# 931
 extern void*Cyc_Absyn_false_type;
-# 936
+# 933
 extern void*Cyc_Absyn_void_type;
-# 952
+# 949
 struct Cyc_Absyn_Datatypedecl*Cyc_Absyn_exn_tud (void);
-# 979
+# 976
 void*Cyc_Absyn_fatptr_type(void*t,void*rgn,struct Cyc_Absyn_Tqual,void*zt);
-# 1089
+# 1086
 struct Cyc_Absyn_Pat*Cyc_Absyn_new_pat(void*,unsigned);
-# 1098
+# 1095
 struct Cyc_Absyn_Vardecl*Cyc_Absyn_new_vardecl(unsigned varloc,struct _tuple0*,void*,struct Cyc_Absyn_Exp*init);
 # 35 "warn.h"
 void Cyc_Warn_err(unsigned,struct _fat_ptr fmt,struct _fat_ptr);

@@ -20,6 +20,7 @@
 #include <dict.h>
 #include <string.h>
 #include "tcutil.h"
+#include "kinds.h"
 #include "absynpp.h"
 #include "evexp.h"
 #include "warn.h"
@@ -28,7 +29,6 @@
 #include "cf_flowinfo.h"
 using Absyn;
 using List;
-using Absynpp;
 namespace CfFlowInfo;
 
 #ifdef DEBUG_FLOW
@@ -209,7 +209,7 @@ static aggrdict_t substitute_aggrfields_to_aggrdict(flow_env_t fenv,
   for (; tvs != NULL; tvs = tvs->tl, targs = targs->tl) {
     let tv = tvs->hd;
     let t = targs->hd;
-    switch (Tcutil::tvar_kind(tv,&Tcutil::bk)) {
+    switch (Kinds::tvar_kind(tv,&Kinds::bk)) {
     case &{.kind = RgnKind, ...}:
     case &{.kind = EffKind, ...}: continue;
     default: break;
@@ -374,7 +374,7 @@ absRval_t make_unique_consumed(flow_env_t fenv, type_t t, exp_t consumer, int it
   default: 
     if (Tcutil::is_noalias_pointer(t,false))
       return new Consumed(consumer,iteration,r);
-    else return r;
+    return r;
   }
 }
 

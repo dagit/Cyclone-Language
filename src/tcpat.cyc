@@ -23,6 +23,7 @@
 #include "warn.h"
 #include "unify.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "tctyp.h"
 #include "tcexp.h"
 #include "tcpat.h"
@@ -122,7 +123,7 @@ static var_t get_name(vardecl_t vd) {
   return (*vd->name)[1];
 }
 static type_t any_type(list_t<tvar_t,`H> s, type_t * topt) {
-  return (topt==NULL) ? new_evar(&mko,new Opt(s)) : *topt;
+  return (topt==NULL) ? new_evar(&Kinds::mko,new Opt(s)) : *topt;
 }
 static type_t num_type(type_t * topt, type_t numt) {
   // by setting to whatever topt is, unification will succeed.  Because
@@ -165,7 +166,7 @@ static tcpat_result_t combine_results(tcpat_result_t res1, tcpat_result_t res2){
 // Promote an array, using an evar for the region if necessary.
 static type_t pat_promote_array(tenv_t te, type_t t, type_opt_t rgn_opt) {
   return is_array_type(t) ?
-    promote_array(t, (rgn_opt == NULL) ? new_evar(&Tcutil::rko,new Opt(lookup_type_vars(te))) : rgn_opt,false) : t;
+    promote_array(t, (rgn_opt == NULL) ? new_evar(&Kinds::rko,new Opt(lookup_type_vars(te))) : rgn_opt,false) : t;
 }
 
 #define DL 0
@@ -202,7 +203,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
         Warn::err2(p->loc,"array reference would point into unknown/unallowed region");
       break;
     default:
-      if (!kind_leq(type_kind(t),&tmk))
+      if (!Kinds::kind_leq(type_kind(t),&Kinds::tmk))
         Warn::err2(p->loc, "pattern would point to an abstract member");
       break;
     }
@@ -214,7 +215,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
       res.tvars_and_bounds_opt = new $(NULL,NULL);
     (*res.tvars_and_bounds_opt)[0] = 
       append((*res.tvars_and_bounds_opt)[0],new List(new $(tv,true),NULL));
-    Tctyp::check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,false,vd->type);
+    Tctyp::check_type(p->loc,te2,lookup_type_vars(te2),&Kinds::tmk,true,false,vd->type);
     // Now we repeat checks for the Var_p case above (except the var's type)
     //   this is the type of the access expression
     t = any_type(lookup_type_vars(te),topt);
@@ -224,7 +225,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
         Warn::err2(p->loc, "array reference would point into unknown/unallowed region");
       break;
     default:
-      if (!kind_leq(type_kind(t),&tmk))
+      if (!Kinds::kind_leq(type_kind(t),&Kinds::tmk))
         Warn::err2(p->loc, "pattern would point to an abstract member");
       break;
     }
@@ -302,7 +303,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
     
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
-    type_t ptr_rgn = new_evar(&trko,lookup_opt_type_vars(te));
+    type_t ptr_rgn = new_evar(&Kinds::trko,lookup_opt_type_vars(te));
     exp_opt_t new_access_exp = NULL;
     if (access_exp) new_access_exp = deref_exp(access_exp,DL);
     res = combine_results(res,tcPatRec(te,p2,inner_topt,ptr_rgn,true,
@@ -395,7 +396,7 @@ DONT_PROMOTE:
       // we can allow a reference as long as the whole structure is abstract;
       // this is because there's no way to alter the structure and thus
       // violate the assumption of the open existential
-      if (topt == NULL || type_kind(*topt) != &ak)
+      if (topt == NULL || type_kind(*topt) != &Kinds::ak)
         allow_ref_pat = false;
     }
     { region rgn;
@@ -407,8 +408,8 @@ DONT_PROMOTE:
 	tvar_t tv = t->hd;
 	tvar_t uv = u->hd;
 	u = u->tl;
-	let kb1 = compress_kb(tv->kind);
-	let kb2 = compress_kb(uv->kind);
+	let kb1 = Kinds::compress_kb(tv->kind);
+	let kb2 = Kinds::compress_kb(uv->kind);
 	kind_t k2;
 	switch(kb2) {
 	case &Less_kb(_,k): fallthru(k);
@@ -418,7 +419,7 @@ DONT_PROMOTE:
 	switch (kb1) {
 	  // ensure that kind of quantified var <:: kind of pattern var
 	case &Eq_kb(k1): 
-	  if(!kind_leq(k2,k1)) 
+	  if(!Kinds::kind_leq(k2,k1)) 
 	    Warn::err2(p->loc,"type variable ",tv," has kind ",kb1,
 		       " but must have at least kind ",k2);
 	  break;

@@ -42,6 +42,7 @@
 #include "flags.h"
 #include "unify.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "attributes.h"
 #include "evexp.h"
 #include "insert_checks.h"
@@ -638,7 +639,7 @@ add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
     //DJG: FIX I think this is broken for an array with element-type
     //     of abstract mem kind
     if (fields->tl == NULL 
-	&& kind_leq(&ak,type_kind(t))
+	&& Kinds::kind_leq(&Kinds::ak,type_kind(t))
 	&& !is_array_type(t))
       atts = new List(new Aligned_att(NULL),atts);
     t = typ_to_c(rsubstitute(r,inst,t));
@@ -752,7 +753,7 @@ static void enumfields_to_c(list_t<enumfield_t> fs) {
 
 static bool is_boxed_tvar(type_t t) {
   switch (compress(t)) {
-  case &VarType(tv): return kind_leq(type_kind(t),&tbk);
+  case &VarType(tv): return Kinds::kind_leq(type_kind(t),&Kinds::tbk);
   default: return false;
   }
 }
@@ -787,9 +788,9 @@ type_t typ_to_c(type_t t) {
     }
     return typ_to_c((type_t)(*t2));
   case &VarType(tv):
-    if (tvar_kind(tv,&bk)->kind == AnyKind)
+    if (Kinds::tvar_kind(tv,&Kinds::bk)->kind == AnyKind)
       return void_type;
-    else return void_star_type(); // map `a to void *
+    return void_star_type(); // map `a to void *
   case &AppType(&DatatypeCon(_),_): return void_type;
   case &AppType(&DatatypeFieldCon({.KnownDatatypefield=$(tud,tuf)}),_):
     return strctq(collapse_qvars(tuf->name,tud->name));
@@ -857,7 +858,7 @@ type_t typ_to_c(type_t t) {
     if (fs == NULL) return aggrdecl_type(ad->name,strctq);
     for (; fs->tl != NULL; fs = fs->tl);
     let last_type = fs->hd->type;
-    if (kind_leq(&ak,type_kind(last_type))) {
+    if (Kinds::kind_leq(&Kinds::ak,type_kind(last_type))) {
       if (ad->expected_mem_kind)
         Warn::warn2(0, ad, " ended up being abstract.");
       // To avoid looping, make sure the instantiation of the last
@@ -2301,7 +2302,7 @@ static void exp_to_c(env_t nv, exp_t e) {
       lvalue_assign(e1,NULL,address_lvalue,true);
       // the wrong cast got pushed out, so as a kludge, just re-cast
       e->r = cast_it_r(typ_to_c((type_t)e->topt),e1);
-    } else if (kind_leq(&ak,type_kind((type_t)e1->topt))) {
+    } else if (Kinds::kind_leq(&Kinds::ak,type_kind((type_t)e1->topt))) {
       // we could be taking the address of an abstract member, so
       // insert a cast here.
       e->r = cast_it_r(typ_to_c((type_t)e->topt),e1);
@@ -2640,7 +2641,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 		//DJG: FIX I think this is broken for an array with element-type
 		//     of abstract mem kind
 		if(!is_array_type(old_f->type) &&
-		   kind_leq(&ak,type_kind(old_f->type)))
+		   Kinds::kind_leq(&Kinds::ak,type_kind(old_f->type)))
 		  new_f->attributes = new List(new Aligned_att(NULL),
 					       new_f->attributes);
 	      }
@@ -3129,7 +3130,8 @@ extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
       let ftype = lookup_field(ad->impl->fields,f)->type;
       if (is_void_star_or_boxed_tvar(ftype))
         memexp = cast_it(t2c, memexp);
-      else if (!is_array_type(ftype) && kind_leq(&ak,type_kind(ftype))) {
+      else if (!is_array_type(ftype) 
+	       && Kinds::kind_leq(&Kinds::ak,type_kind(ftype))) {
         // for abstract members, we have to convert to the right
         // pointer type...
         memexp = deref_exp(cast_it(cstar_type(t2c,mt_tq), 
@@ -3783,7 +3785,7 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
       let old_field = fields->hd;
       let old_type = old_field->type;
       let old_atts = old_field->attributes;
-      if (kind_leq(&ak,type_kind(old_type)) && 
+      if (Kinds::kind_leq(&Kinds::ak,type_kind(old_type)) && 
           ((ad->kind == StructA && fields->tl == NULL) ||
            ad->kind == UnionA)) {
         // HACK ALERT:

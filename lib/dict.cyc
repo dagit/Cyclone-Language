@@ -146,9 +146,9 @@ ins(region_t<`r> r, int rel(`a,`a), $(`a,`b) key_val, tree<`a,`b,`r> t) {
   case NULL: return rnew(r) T(R,NULL,NULL,key_val);
   case &T(color, a, b, y):
     let i = rel(key_val[0], y[0]);
-    if(i < 0)       return balance(r, $(color, ins(r,rel,key_val,a), b, y));
-    else if (i > 0) return balance(r, $(color, a, ins(r,rel,key_val,b), y));
-    else            return rnew(r) T(color,a,b,key_val);
+    if(i < 0) return balance(r, $(color, ins(r,rel,key_val,a), b, y));
+    if(i > 0) return balance(r, $(color, a, ins(r,rel,key_val,b), y));
+    return rnew(r) T(color,a,b,key_val);
   }
 }
 

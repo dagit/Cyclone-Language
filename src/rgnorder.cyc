@@ -25,6 +25,7 @@
 #include "rgnorder.h"
 #include "warn.h"
 #include "unify.h"
+#include "kinds.h"
 #include "tcutil.h"
 #include "absynpp.h"
 using List;
@@ -153,7 +154,7 @@ rgn_po_t initial_fn_po(list_t<tvar_t> tvs, list_t<$(type_t,type_t)@> po,
   // put all region tvs in the dict and make fst_rgn outlive all tvs
   let d = Dict::empty(tvar_cmp);
   for(let tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
-    if (Tcutil::tvar_kind(tvs2->hd,&Tcutil::bk)->kind == RgnKind)
+    if (Kinds::tvar_kind(tvs2->hd,&Kinds::bk)->kind == RgnKind)
       d = Dict::insert(d,tvs2->hd,empty_effect);
 
   if (!valid_constraint(effect,var_type(fst_rgn))) {

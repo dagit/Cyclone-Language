@@ -88,44 +88,47 @@ typedef struct Opt<`a> *`r opt_t<`a,`r>;
       return a pointer to [t].  The [opt_t] type is useful primarily
       when porting Objective Caml code, which has a corresponding
       type. */
-extern opt_t<`b,`U> opt_map(`b f(`a), opt_t<`a,`r> x);
+ opt_t<`b,`U> opt_map(`b f(`a), opt_t<`a> x);
   /** [opt_map(f,x)] applies [f] to the value contained in option [x],
       if any, and returns the result as an option; if [x] is NULL,
       [opt_map(f,x)] returns NULL. */
-extern mstring_t<`H> new_string(unsigned int);
+ mstring_t<`H> new_string(unsigned int);
   /** [new_string(n)] allocates space for [n] characters on the heap
       and returns a pointer to the space.  All of the characters are
       set to NUL (0). */
-extern mstring_t<`r::TR> rnew_string(region_t<`r>,unsigned int);
+ mstring_t<`r::TR> rnew_string(region_t<`r>,unsigned int);
   /** [rnew_string(r,n)] allocates space for [n] characters in the
       region with handle [r], and returns a pointer to the space.  All
       of the characters are set to NUL (0). */
-extern bool true_f(`a);
+ bool true_f(`a);
   /** [true_f] is the constant [true] function: [true_f(x)] returns
       [true] regardless of the value of [x]. */
-extern bool false_f(`a);
+ bool false_f(`a);
   /** [false_f] is the constant [false] function. */
-extern `a fst($(`a,`b)@);
-  /** [fst(x)] returns the first element of the pair pointed to by
-      [x].  */
-extern `b snd($(`a,`b)@);
-  /** [snd(x)] returns the second element of the pair pointed to by
-      [x].  */
-extern `c third($(`a,`b,`c)@);
-  /** [third(x)] returns the third element of the triple pointed to by
-      [x].  */
-extern `a identity(`a);
+ `a fst($(`a,`b)@);
+  /** [fst(x)] returns the first element of the pair pointed to by [x].  */
+ `b snd($(`a,`b)@);
+  /** [snd(x)] returns the second element of the pair pointed to by [x].  */
+ `c third($(`a,`b,`c)@);
+  /** [third(x)] returns the third element of the triple pointed to by [x].  */
+ `a identity(`a);
   /** [identity] is the identity function: [identity(x)] returns [x].  */
-extern int intcmp(int,int);
+ int intcmp(int,int);
   /** [intcmp] is a comparison function on integers: [intcmp(i1,i2)]
       returns a number less than, equal to, or greater than 0
       according to whether [i1] is less than, equal to, or greater
       than [i2].  */
-extern int charcmp(char,char);
+ int charcmp(char,char);
   /** [charcmp] is a comparison function on [char]. */
-extern int ptrcmp(`a::TA @ `r, `a @ `r);
+ int ptrcmp(`a::TA @ `r, `a @ `r);
   /** [ptrcmp] is a comparison function on pointers. */
-extern int nptrcmp(`a::TA * `r, `a * `r);
+ int nptrcmp(`a::TA * `r, `a * `r);
+
+  region_t<`C> current_handle(void);
+  /** [current_handle()] returns the region handle on the top of the
+      LIFO region stack.  If the region stack is empty, then this will
+      be the heap region. */
+
   /** [nptrcmp] is a comparison function on nullable pointers. */
 extern datatype exn  { extern Invalid_argument(string_t) };
   /** [Invalid_argument] is an exception thrown by library functions
@@ -162,11 +165,6 @@ extern "C" int region_alloc_bytes(region_t<`r>);
       yields the "wasted" bytes: space in non-current region
       pages that won't be used for new Cyclone objects. */
 
-extern region_t<`C> current_handle(void);
-  /** [current_handle()] returns the region handle on the top of the
-      LIFO region stack.  If the region stack is empty, then this will
-      be the heap region. */
-
 extern region_t<`H> heap_region;
   /** [heap_region] is the region handle of the heap. */
 
@@ -177,7 +175,7 @@ extern region_t<`U> unique_region;
 #define unew rnew (Core::unique_region)
 #define umalloc(arg) rmalloc (Core::unique_region,arg)
   /** [unew] and [umalloc] are for allocating uniquely-pointed-to data. */
-extern void ufree(`a::TA *`U ptr) __attribute__((noliveunique(1)));
+ void ufree(`a::TA *`U ptr) __attribute__((noliveunique(1)));
   /** [ufree] frees a unique pointer. */
 
 extern region_t<`RC> refcnt_region;
@@ -187,13 +185,13 @@ extern region_t<`RC> refcnt_region;
 #define rcnew rnew (Core::refcnt_region)
 #define rcmalloc(arg) rmalloc (Core::refcnt_region,arg)
   /** [rcnew] and [rcmalloc] are for allocating reference-counted data. */
-extern int refptr_count(`a::TA *`RC ptr);
+ int refptr_count(`a::TA *`RC ptr);
   /** [refptr_count(p)] returns the current reference count for [p]
       (always >= 1); [p] is not consumed. */
-extern `a ?`RC alias_refptr(`a::TA ?`RC ptr;{});
+ `a ?`RC alias_refptr(`a::TA ?`RC ptr;{});
   /** [alias_refptr(p)] returns an alias to [p], and increments the
       reference count by 1.  [p] is not consumed.  */
-extern void drop_refptr(`a::TA *`RC ptr;{}) __attribute__((noliveunique(1)));
+ void drop_refptr(`a::TA *`RC ptr;{}) __attribute__((noliveunique(1)));
   /** [drop_refptr(p)] decrements the reference count on [p] by 1.  If
       the reference count goes to 0, it frees p.  This will not
       recursively decrement reference counts to embedded pointers,
@@ -233,15 +231,15 @@ struct NewDynamicRegion<`r2> {
       region and must be opened, guaranteeing that the type-level
       name is unique. */
 
-extern struct NewDynamicRegion<`U> _new_ukey(const char *file,
-					     const char *func,
-					     int lineno);
+ struct NewDynamicRegion<`U> _new_ukey(const char *file,
+				       const char *func,
+				       int lineno);
   /** [new_ukey()] creates a fresh dynamic region [`r] and returns
       a unique key for that region. */
 
-extern struct NewDynamicRegion<`RC> _new_rckey(const char *file,
-					       const char *func,
-					       int lineno);
+ struct NewDynamicRegion<`RC> _new_rckey(const char *file,
+					 const char *func,
+					 int lineno);
   /** [new_rckey()] creates a fresh dynamic region [`r] and returns
       a reference-counted key for that region. */
 
@@ -253,21 +251,20 @@ extern struct NewDynamicRegion<`RC> _new_rckey(const char *file,
 #define new_rckey() _new_rckey(__FILE__,"",__LINE__)
 #endif
 
-extern void free_ukey(uregion_key_t<`r> k; {}) __attribute__((consume(1)));
+ void free_ukey(uregion_key_t<`r> k; {}) __attribute__((consume(1)));
   /** [free_ukey(k)] takes a unique key for the region [`r] and
       deallocates the region [`r] and destroys the key [k]. */
 
-extern void free_rckey(rcregion_key_t<`r> k; {}) __attribute__((consume(1)));
+ void free_rckey(rcregion_key_t<`r> k; {}) __attribute__((consume(1)));
   /** [free_rckey(k)] takes a reference-counted key for the region [`r],
       decrements the reference count and destroyes the key [k].  If the
       reference count becomes zero, then all keys have been destroyed
       and the region [`r] is deallocated. */
 
-extern `result open_region(region_key_t<`r,`r2::TR> key,
-                           `arg arg,
-                           `result body(region_t<`r> h, 
-                                        `arg arg;{`r,`r2}+`eff);
-                           {`r2}+`eff);
+ `result open_region(region_key_t<`r,`r2::TR> key,
+		     `arg arg,
+		     `result body(region_t<`r> h, `arg arg;{`r,`r2}+`eff);
+                     {`r2}+`eff);
   /** [open_region(k,arg,body)] extracts a region handle [h] for
       the region [`r] which the [k] provides access to.  The handle
       and value [arg] are passed to the function pointer [body]
@@ -277,20 +274,20 @@ extern `result open_region(region_key_t<`r,`r2::TR> key,
       that capability is allowed within [body].  In essence, the
       key [k] provides dynamic evidence that [`r] is still live. */
 
-extern void rethrow(datatype exn @) __attribute__((noreturn));
+ void rethrow(datatype exn @) __attribute__((noreturn));
   /** throws the exception without updating the source or line number
       information.  Useful for try { ... } catch { case e: ... rethrow(e); }
   */
-extern const char *get_exn_name(datatype exn @);
+ const char *get_exn_name(datatype exn @);
   /** returns the name of the exception as a string */
-extern const char *get_exn_filename();
+ const char *get_exn_filename();
   /** if an exception is thrown, then you can use @get_exn_filename@ to
       determine what source file caused the exception. */
-extern void set_uncaught_exn_fun(int (*)());
+ void set_uncaught_exn_fun(int (*)());
   /** if an exception is thrown and no handler is installed, the function
       passed as an argument is executed _before_ the exception is actually
       thrown.  (A useful argument is Execinfo::bt.) */
-extern int get_exn_lineno();
+ int get_exn_lineno();
   /** if an exception is thrown, then you can use @get_exn_lineno@ to
       determine what source line caused the exception. */
 
@@ -300,15 +297,15 @@ typedef `a::A*{valueof(`i)}`r __cyclone_internal_array_t<`a,`i,`r>;
 typedef `a::A@{valueof(`i)}`r __nn_cyclone_internal_array_t<`a,`i,`r>;
 typedef tag_t<`i> __cyclone_internal_singleton<`i>;
 
-extern __cyclone_internal_array_t<`a,`i,`r>
+ __cyclone_internal_array_t<`a,`i,`r>
 arrcast(`a ?`r dyn, __cyclone_internal_singleton<`i> bd, sizeof_t<`a> sz);
   /** Converts [dyn] to a thin pointer with length [bd], assuming that
       [bd] is less than numelts([dyn]); [sz] is the size of the
       elements in [dyn].  This routine is useful for eliminating
       bounds checks within loops. */
 
-extern `a?`r mkfat(__nn_cyclone_internal_array_t<`a,`i,`r::TR> arr,
-		   sizeof_t<`a> s, __cyclone_internal_singleton<`i> n);
+ `a?`r mkfat(__nn_cyclone_internal_array_t<`a,`i,`r::TR> arr,
+	     sizeof_t<`a> s, __cyclone_internal_singleton<`i> n);
   /** mkfat can be used to convert a thin pointer (@) of elements of type `a
       to a fat pointer (?).  It requires that you pass in the size of the
       element type, as well as the number of elements. */
@@ -323,12 +320,12 @@ struct ThinRes<`a::A,`r>{
       to a vector of [`i] values of type [`a], living in region [`r],
       and a [tag_t<`i>] value [nelts] which has the value of [`i]. */
 
-extern struct ThinRes<`a,`r> mkthin(`a ?`r dyn, sizeof_t<`a> sz);
+ struct ThinRes<`a,`r> mkthin(`a ?`r dyn, sizeof_t<`a> sz);
   /** mkthin is a special case of arrcast, which converts a fat
       pointer to a thin pointer and its bound.  It requires that you
       pass in the size of the element type. */
 
-extern unsigned int arr_prevsize(`a ?`r arr, sizeof_t<`a> elt_sz);
+ unsigned int arr_prevsize(`a ? arr, sizeof_t<`a> elt_sz);
   /** Returns the distance, in terms of elements of size [elt_sz], to
       the start of the buffer pointed to by [arr]. */
 }

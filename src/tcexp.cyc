@@ -28,6 +28,7 @@
 #include "absynpp.h"
 #include "unify.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "currgn.h"
 #include "evexp.h"
 #include "tcstmt.h"
@@ -35,7 +36,6 @@
 #include "tctyp.h"
 #include "tcexp.h"
 #include "attributes.h"
-
 using Core;
 using List;
 using Absyn;
@@ -65,8 +65,8 @@ void check_consume(seg_t loc, type_t t, exp_t e) {
 
 ptr_info_t fresh_pointer_type(tenv_t te) {
   let tenv_tvs = lookup_type_vars(te);
-  let t2  = new_evar(&tako,new Opt(tenv_tvs));
-  let rt  = new_evar(&trko,new Opt(tenv_tvs));
+  let t2  = new_evar(&Kinds::tako,new Opt(tenv_tvs));
+  let rt  = new_evar(&Kinds::trko,new Opt(tenv_tvs));
   let nbl = any_bool(tenv_tvs);
   let b   = any_bounds(tenv_tvs);
   let zt  = any_bool(tenv_tvs);
@@ -381,7 +381,7 @@ static type_t tcPlus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t2 = compress((type_t)e2->topt);
   switch (t1) {
   case &PointerType(PtrInfo(et,tq,PtrAtts(r,n,b,zt,_))):
-    if (!kind_leq(type_kind(et),&tmk))
+    if (!Kinds::kind_leq(type_kind(et),&Kinds::tmk))
       Warn::err2(e1->loc,"can't do arithmetic on abstract pointer type");
     if (is_noalias_pointer(t1,false))
       Warn::err2(e1->loc,"can't do arithmetic on non-aliasing pointer type");
@@ -436,7 +436,7 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
                      Other_coercion);
       return sint_type;
     } 
-    if (!kind_leq(type_kind(t1_elt),&tmk))
+    if (!Kinds::kind_leq(type_kind(t1_elt),&Kinds::tmk))
       Warn::err2(e1->loc,"can't perform arithmetic on abstract pointer type");
     if (is_noalias_pointer(t1,false))
       Warn::err2(e1->loc,"can't perform arithmetic on non-aliasing pointer type");
@@ -478,7 +478,7 @@ static type_t tcCmpBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
   }
   // okay if same types and boxed
   if ((type_kind(t1)->kind == BoxKind) ||
-      (Unify::unify(t1,new_evar(&bko,lookup_opt_type_vars(te))))) {
+      (Unify::unify(t1,new_evar(&Kinds::bko,lookup_opt_type_vars(te))))) {
     if (Unify::unify(t1,t2))
       return sint_type;
     // okay if t1 can be silently cast to t2 or vice versa
@@ -706,7 +706,7 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
     type_t telt = void_type;
     if (is_fat_pointer_type_elt(t,&telt) ||
         (is_zero_pointer_type_elt(t,&telt) && (i == PreInc || i == PostInc))) {
-      if (!kind_leq(type_kind(telt),&tmk))
+      if (!Kinds::kind_leq(type_kind(telt),&Kinds::tmk))
         terr(e->loc,"can't perform arithmetic on abstract pointer type");
       if (is_noalias_pointer(t,false))
         terr(e->loc,"can't perform arithmetic on non-aliasing pointer type");
@@ -722,7 +722,7 @@ static type_t tcConditional(tenv_t te, seg_t loc, type_t * topt,
   tcTest(clear_abstract_val_ok(te), e1, "conditional expression");
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
-  let ko = abstract_val_ok(te) ? &tako : &tmko;
+  let ko = abstract_val_ok(te) ? &Kinds::tako : &Kinds::tmko;
   let t  = new_evar(ko,lookup_opt_type_vars(te));
   let l1 = List(e3,NULL);
   let l2 = List(e2,&l1);
@@ -764,7 +764,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t * topt,
   default: break;
   }
   // check to see that the type is not an abstract type
-  if (!kind_leq(type_kind(t1),&tmk))
+  if (!Kinds::kind_leq(type_kind(t1),&Kinds::tmk))
     Warn::err2(loc,"type is abstract (can't determine size)");
   // Check to see if e1 is an lvalue after typechecking, so that
   // UnknownIds have been resolved.
@@ -1053,7 +1053,7 @@ static type_t doInstantiate(tenv_t te, seg_t loc, type_t * topt,
       list_t<$(tvar_t,type_t)@> instantiation = NULL;
       // now allows partial instantiation
       for (; ts != NULL && tvars != NULL; ts = ts->tl, tvars = tvars->tl) {
-	kind_t k = tvar_kind(tvars->hd,&bk);
+	kind_t k = Kinds::tvar_kind(tvars->hd,&Kinds::bk);
 	check_type(loc,te,lookup_type_vars(te),k,true,true,ts->hd);
 	check_no_qual(loc,ts->hd);
 	instantiation = new List(new $(tvars->hd,ts->hd),instantiation);
@@ -1092,7 +1092,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
 static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
                      coercion_t *c) {
   check_type(loc,te,lookup_type_vars(te),
-	     abstract_val_ok(te) ? &tak : &tmk,true,false,t);
+	     abstract_val_ok(te) ? &Kinds::tak : &Kinds::tmk,true,false,t);
   check_no_qual(loc,t);
   tcExp(te,&t,e);
   type_t t2 = (type_t)e->topt;
@@ -1201,7 +1201,7 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
   // we shouldn't check the type yet -- it will be done later
   if (te->allow_valueof)
     return uint_type;
-  check_type(loc,te,lookup_type_vars(te),&tmk,true,false,t);
+  check_type(loc,te,lookup_type_vars(te),&Kinds::tmk,true,false,t);
   check_no_qual(loc,t);
   if(!Evexp::okay_szofarg(t))
     Warn::err2(loc,"sizeof applied to type ",t," which has unknown size here");
@@ -1226,7 +1226,7 @@ type_opt_t structfield_type(field_name_t n, aggrfield_t sf) {
 // FIX?: check if t is allowed to be a union type
 static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 			 type_t t_orig, list_t<offsetof_field_t> fs) {
-  check_type(loc,te,lookup_type_vars(te),&tmk,true,false,t_orig);
+  check_type(loc,te,lookup_type_vars(te),&Kinds::tmk,true,false,t_orig);
   check_no_qual(loc,t_orig);
   let l = fs;
   let t = t_orig;
@@ -1316,7 +1316,7 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   switch (t) {
   case &Evar(...):
     let pi = fresh_pointer_type(te);
-    pi.elt_type = new_evar(&ako,new Opt(lookup_type_vars(te)));
+    pi.elt_type = new_evar(&Kinds::ako,new Opt(lookup_type_vars(te)));
     let new_typ = pointer_type(pi);
     Unify::unify(t,new_typ);
     t = compress(t);
@@ -1327,7 +1327,7 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t * topt, exp_t e) {
   case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
     check_rgn_accessible(te,loc,rt);
     check_nonzero_bound(loc, b);
-    if (!kind_leq(type_kind(t2),&tmk) && !abstract_val_ok(te))
+    if (!Kinds::kind_leq(type_kind(t2),&Kinds::tmk) && !abstract_val_ok(te))
       switch (compress(t2)) {
       case &FnType(...):
         if (Flags::tc_aggressive_warn)
@@ -1359,7 +1359,7 @@ static type_t tcAggrMember2(tenv_t te, seg_t loc, type_t * topt,
     // the resulting value can be abstract only if we're in an abstract
     // context, or if it's an array (it'll be promoted to a pointer)
     // (this test should be redundant in the e.f case, but not e->f)
-    if (kind_leq(&ak,t2_kind) && !abstract_val_ok(te))
+    if (Kinds::kind_leq(&Kinds::ak,t2_kind) && !abstract_val_ok(te))
       switch (compress(t2)) {
       case &ArrayType(_): break;
       default: return expr_err(te,loc,topt,"cannot get member ",*f,
@@ -1460,8 +1460,8 @@ static type_t tcSubscript(tenv_t te_orig, seg_t loc, type_t * topt,
       }
     }
     check_rgn_accessible(te,loc,rt);
-    if (!kind_leq(type_kind(t),&tmk) && !abstract_val_ok(te))
-      terr(e1->loc,"can't subscript an abstract pointer");
+    if (!Kinds::kind_leq(type_kind(t),&Kinds::tmk) && !abstract_val_ok(te))
+      Warn::err2(e1->loc,"can't subscript an abstract pointer");
     return t;
   case &TupleType(ts): 
     let $(i,known) = Evexp::eval_const_uint_exp(e2);
@@ -1515,7 +1515,7 @@ static type_t tcCompoundLit(tenv_t te, seg_t loc, exp_t orig_exp,
   // treat this similar to casting an initializer
   let &$(_,_,t) = targ;
   check_type(loc,te,lookup_type_vars(te),
-	     abstract_val_ok(te) ? &tak : &tmk,true,false,t);
+	     abstract_val_ok(te) ? &Kinds::tak : &Kinds::tmk,true,false,t);
   orig_exp->r = new UnresolvedMem_e(NULL,des);
   resolve_unresolved_mem(loc,&t,orig_exp,des);
   tcExpNoInst(te,topt,orig_exp);
@@ -1535,7 +1535,7 @@ static type_t tcArray(tenv_t te, seg_t loc, type_t *elt_topt,
   type_t res_t2;
   let           num_es  = List::length(des);
   list_t<exp_t> es      = List::map(snd,des);
-  type_t        res     = new_evar(&tmko,lookup_opt_type_vars(te));
+  type_t        res     = new_evar(&Kinds::tmko,lookup_opt_type_vars(te));
   let           sz_rexp = new Const_e(Int_c(Unsigned,num_es));
   exp_t         sz_exp  = new_exp(sz_rexp,loc);
   // if zero_term, check that last element in array is zero terminated.
@@ -1664,7 +1664,7 @@ static type_t tcComprehensionNoinit(tenv_t te, seg_t loc, type_t * topt,
   let $(topt2,tqopt,ztopt) = ptrEltAtts(topt);
 
   // make sure the expected topt unifies with the declared one
-  check_type(loc,te,lookup_type_vars(te),&tmk,true,true,t);
+  check_type(loc,te,lookup_type_vars(te),&Kinds::tmk,true,true,t);
   if (topt2 != NULL) 
     Unify::unify(*topt2,t);
   // the bound must be a constant expression at top-level
@@ -1695,13 +1695,10 @@ static bool ensure_typqual_nothrow(type_t t) {
 
 static bool ensure_nothrow_initializer(exp_t e) {
   switch(e->r) {
-  case &Cast_e(_, e1, _, _):
-    return ensure_nothrow_initializer(e1);
-  default:
-    return ensure_typqual_nothrow(e->topt);
+  case &Cast_e(_, e1, _, _): return ensure_nothrow_initializer(e1);
+  default: return ensure_typqual_nothrow(e->topt);
   }
 }
-
 
  //////////////////// Struct/Union (f{e1,...,en}) ///////////////////
  // FIX:
@@ -1777,7 +1774,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
   let ex_ts = exist_typs;
   while(user_ex_ts != NULL && ex_ts != NULL) {
     // FIX: allow other kinds
-    check_type(loc,te2,lookup_type_vars(te2),&ak,true,false,user_ex_ts->hd);
+    check_type(loc,te2,lookup_type_vars(te2),&Kinds::ak,true,false,user_ex_ts->hd);
     check_no_qual(loc,user_ex_ts->hd);
     Unify::unify(user_ex_ts->hd,ex_ts->hd);
     user_ex_ts = user_ex_ts->tl;
@@ -1912,7 +1909,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     // check that the region handle is still valid
     // JGMFIX: should just unify here...
     type_t expected_type =
-      rgn_handle_type(new_evar(&trko,lookup_opt_type_vars(te)));
+      rgn_handle_type(new_evar(&Kinds::trko,lookup_opt_type_vars(te)));
     type_t handle_type = tcExp(te,&expected_type,(exp_t)*ropt);
     switch (compress(handle_type)) {
     case &AppType(&RgnHandleCon,&List{r,_}):
@@ -1949,7 +1946,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     if (*t == NULL) 
       Warn::impos2("calloc with empty type");
     elt_type = **t;
-    check_type(loc,te,lookup_type_vars(te),&tmk,true,false,elt_type);
+    check_type(loc,te,lookup_type_vars(te),&Kinds::tmk,true,false,elt_type);
     check_no_qual(loc,elt_type);
     if (!check_malloc_type(true,loc,topt,elt_type))
       Warn::err2(loc,"calloc cannot be used with type ",elt_type,
@@ -2153,7 +2150,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // check that the region handle is still valid
     //JGMFIX: should just unify here
     type_t expected_type =
-      rgn_handle_type(new_evar(&trko,lookup_opt_type_vars(te)));
+      rgn_handle_type(new_evar(&Kinds::trko,lookup_opt_type_vars(te)));
     type_t handle_type = tcExp(te,&expected_type,(exp_t)*rgn_handle);
     switch (compress(handle_type)) {
     case &AppType(&RgnHandleCon,&List{r,_}):

@@ -22,6 +22,7 @@
 #include <string.h>
 #include "unify.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "warn.h"
 #include "evexp.h"
 using Core;
@@ -637,7 +638,7 @@ bool okay_szofarg(type_t t) {
 	  return false;
       return true;
     }
-  case &VarType(tv): return Tcutil::tvar_kind(tv,&Tcutil::bk)->kind == BoxKind;
+  case &VarType(tv): return Kinds::tvar_kind(tv,&Kinds::bk)->kind == BoxKind;
   case &Evar(&Opt{&Kind(BoxKind,_)},...): return true; // Possible?
   case &Evar(...): return false;
 

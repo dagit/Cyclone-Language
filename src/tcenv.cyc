@@ -38,6 +38,7 @@
 #include "rgnorder.h"
 #include "tcutil.h"
 #include "warn.h"
+#include "kinds.h"
 #include "tcenv.h"
 #include "currgn.h"
 using Core;
@@ -347,7 +348,7 @@ tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
   return put_fenv(te,ans);
 }
 
-static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&rk);
+static datatype KindBound.Eq_kb rgn_kb = Eq_kb(&Kinds::rk);
 
 tenv_t new_block(seg_t loc, tenv_t te) {
   tvar_t t = new_tvar(&rgn_kb);
@@ -374,17 +375,17 @@ tenv_t add_region_equality(tenv_t te, type_t r1, type_t r2,
   let r2k = type_kind(r2);
 
   // first do kind refinement
-  bool r1_le_r2 = kind_leq(r1k,r2k);
-  bool r2_le_r1 = kind_leq(r2k,r1k);
+  bool r1_le_r2 = Kinds::kind_leq(r1k,r2k);
+  bool r2_le_r1 = Kinds::kind_leq(r2k,r1k);
   if (!r1_le_r2 && !r2_le_r1) {
     Warn::err2(loc,"Cannot compare region handles for ",r1," and ",r2,
 	       "\n  kinds ",r1k," and ",r2k," are not compatible");
     return new_outlives_constraints(te,NULL,loc);
   }
   else if (r1_le_r2 && !r2_le_r1)
-    *oldtv = new swap_kind(r2,kind_to_bound(r1k));
+    *oldtv = new Kinds::swap_kind(r2,Kinds::kind_to_bound(r1k));
   else if (!r1_le_r2 && r2_le_r1)
-    *oldtv = new swap_kind(r1,kind_to_bound(r2k));
+    *oldtv = new Kinds::swap_kind(r1,Kinds::kind_to_bound(r2k));
 
   // now update the outlives constraints
   let bds = NULL;
@@ -541,7 +542,7 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(), &rgn_kb);
   for (let tvars = fd->i.tvars; tvars != NULL; tvars = tvars->tl) {
-    let &Kind(k,a) = tvar_kind(tvars->hd,&bk);
+    let &Kind(k,a) = Kinds::tvar_kind(tvars->hd,&Kinds::bk);
     if (k == RgnKind)
       if (a == Aliasable)
 	rgn_po = add_unordered(rgn_po, tvars->hd);

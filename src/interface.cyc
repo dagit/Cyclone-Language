@@ -32,6 +32,7 @@
 #include "tc.h"
 #include "parse.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "tcdecl.h"
 #include "binding.h"
 namespace Lex {
@@ -1016,7 +1017,7 @@ static stringptr_t us_p = &us;
 
 static $(tqual_t,type_t)@ rewrite_datatypefield_type($(tqual_t,type_t)@`H x) {
   return new $(empty_tqual(0),
-	       new VarType(new Tvar(us_p, -1, Tcutil::kind_to_bound(&Tcutil::bk))));
+	       new VarType(new Tvar(us_p, -1, Kinds::kind_to_bound(&Kinds::bk))));
 }
 
 static datatypefield_t rewrite_datatypefield(datatypefield_t f) {

@@ -19,6 +19,7 @@
 #include "warn.h"
 #include "unify.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "attributes.h"
 #include "tctyp.h"
 #include "tcexp.h"
@@ -182,7 +183,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     // We make new_block false because we explicitly create a new block here
     // Note: NewControlFlow requires we add the label with s, not s0 !!
     let tv = new Tvar(new (string_t)aprintf("`%s",*l),
-		      new_tvar_id(), kind_to_bound(&rk));
+		      new_tvar_id(), Kinds::kind_to_bound(&Kinds::rk));
     tcStmt(new_named_block(s0->loc,te,tv),s,false);
     return;
 
@@ -382,7 +383,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       //  are in scope)
       let bound_vars = (!is_local) ? NULL : lookup_type_vars(te);
       let allow_evars = is_local;
-      Tctyp::check_type(s0->loc,te,bound_vars,&tmk,allow_evars,true,t);
+      Tctyp::check_type(s0->loc,te,bound_vars,&Kinds::tmk,allow_evars,true,t);
       vd->tq.real_const = extract_const_from_typedef(s0->loc,
 						     vd->tq.print_const,t);
       if (sc == Extern || sc == ExternC)
@@ -440,7 +441,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       let curr_bl = Tcenv::curr_rgn(te);
       for (; vds != NULL; vds = vds->tl) {
 	vds->hd->rgn = curr_bl; // side effect
-	Tctyp::check_type(s0->loc,te,lookup_type_vars(te),&tmk,
+	Tctyp::check_type(s0->loc,te,lookup_type_vars(te),&Kinds::tmk,
 			  true,true,vds->hd->type);
       }
       tcStmt(te,s,false);
@@ -460,11 +461,11 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	// the open expression should have type 
 	// struct Core::DynamicRegion<`r1::R>@`r2::TR
 	let drname = new $(Abs_n(list(new "Core"),false), new "DynamicRegion");
-	let outer_rgn = new_evar(new Opt(&Tcutil::trk), NULL);
-	rgn_typ = new_evar(new Opt(&Tcutil::rk),NULL);
+	let outer_rgn = new_evar(new Opt(&Kinds::trk), NULL);
+	rgn_typ = new_evar(new Opt(&Kinds::rk),NULL);
 	let dr_type = aggr_type(UnknownAggr(StructA,drname,NULL),list(rgn_typ));
 	let exp_type = at_type(dr_type, outer_rgn, empty_tqual(0),false_type);
-	Tctyp::check_type(s0->loc,te,lookup_type_vars(te),&tmk,
+	Tctyp::check_type(s0->loc,te,lookup_type_vars(te),&Kinds::tmk,
 			  true,false,exp_type);
 	let key_typ = tcExp(te,&exp_type,open_exp_opt);
 	if (!Unify::unify(exp_type,key_typ) && 
@@ -480,7 +481,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
 	te2 = add_type_vars(s0->loc,te2,new List(tv,NULL));
 	te2 = add_region(te2, rgn_typ, false,true);
       }
-      Tctyp::check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,false,*t);
+      Tctyp::check_type(s0->loc,te,lookup_type_vars(te2),&Kinds::bk,true,false,*t);
       if (!Unify::unify(*t,rgn_handle_type(rgn_typ)))
 	Warn::impos("region stmt: type of region handle is wrong!");
       //        tcStmt(add_local_var(decl_rgn,s->loc,te2,vd),s,false);

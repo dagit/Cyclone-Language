@@ -21,6 +21,7 @@
 #include "absynpp.h"
 #include "evexp.h"
 #include "warn.h"
+#include "kinds.h"
 #include "flags.h"
 #include "toc.h"
 namespace Lex {
@@ -277,7 +278,7 @@ static void dumptvar(tvar_t tv) {
   const char ?n = *tv->name;
   if (n[0] == '#') {
     dump("`G");
-    switch (compress_kb(tv->kind)) {
+    switch (Kinds::compress_kb(tv->kind)) {
     case &Eq_kb(k): fallthru(k);
     case &Less_kb(_,k): dumpkind(k); break;
     default: dump_nospace("K"); break;
@@ -288,7 +289,7 @@ static void dumptvar(tvar_t tv) {
 }
 static void dumpkindedtvar(tvar_t tv) {
   dumptvar(tv);
-  switch (compress_kb(tv->kind)) {
+  switch (Kinds::compress_kb(tv->kind)) {
   case &Unknown_kb(_): 
   case &Less_kb(...):  
   case &Eq_kb(&Kind(BoxKind,Aliasable)): break;

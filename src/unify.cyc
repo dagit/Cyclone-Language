@@ -23,12 +23,12 @@
 #include "evexp.h"
 #include "relations-ap.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "attributes.h"
 #include "unify.h"
 using Core;
 using List;
 using Absyn;
-using Tcutil;
 namespace Unify;
 
 datatype exn {Unify};
@@ -109,17 +109,17 @@ static bool check_logical_equivalence(Relations::relns_t<`H> r1,
 }
 
 bool unify_kindbound(kindbound_t kb1, kindbound_t kb2) {
-  switch $(compress_kb(kb1), compress_kb(kb2)) {
+  switch $(Kinds::compress_kb(kb1), Kinds::compress_kb(kb2)) {
   case $(&Eq_kb(k1), &Eq_kb(k2)): return k1 == k2;
   case $(&Less_kb(...), &Eq_kb(_)): return unify_kindbound(kb2,kb1);
   case $(&Less_kb(*y,k1), &Less_kb(*x,k2)):
-    if (kind_leq(k2,k1)) {
+    if (Kinds::kind_leq(k2,k1)) {
       *y = new Opt(kb2);
       return true;
     }
     fallthru(k1,x,k2);
   case $(&Eq_kb(k1), &Less_kb(*x,k2)): 
-    if (!kind_leq(k1,k2)) 
+    if (!Kinds::kind_leq(k1,k2)) 
       return false;
     *x = new Opt(kb1);
     return true;
@@ -136,7 +136,7 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
   t = compress(t);
   switch (t) {
   case &VarType(tv):
-    if (!List::mem(fast_tvar_cmp,env,tv))
+    if (!List::mem(Tcutil::fast_tvar_cmp,env,tv))
       fail_because("(type variable would escape scope)");
     break;
   case &Evar(_,rg,_,*sopt):
@@ -147,13 +147,13 @@ void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     // check to see if sopt is a subset of env
     bool problem = false;
     for (_ s = (*sopt)->v; s != NULL && !problem; s = s->tl)
-      if (!List::mem(fast_tvar_cmp,env,s->hd))
+      if (!List::mem(Tcutil::fast_tvar_cmp,env,s->hd))
 	problem = true; 
     // for sopt to be a subset of env
     if (problem) {
       let result = NULL;
       for (_ s = (*sopt)->v; s != NULL; s = s->tl)
-	if (List::mem(fast_tvar_cmp,env,s->hd))
+	if (List::mem(Tcutil::fast_tvar_cmp,env,s->hd))
 	  result = new List(s->hd,result);
       *sopt = new Opt(result);
     }
@@ -262,11 +262,11 @@ static void unify_tqual(tqual_t tq1, type_t t1, tqual_t tq2, type_t t2) {
 // on to them.  Then try to simplify and solve them later on after
 // things have become more constrained.
 static bool unify_effect(type_t e1, type_t e2) {
-  e1 = normalize_effect(e1);
-  e2 = normalize_effect(e2);
-  if(subset_effect(false, e1, e2) && subset_effect(false, e2, e1))
+  e1 = Tcutil::normalize_effect(e1);
+  e2 = Tcutil::normalize_effect(e2);
+  if(Tcutil::subset_effect(false,e1,e2) && Tcutil::subset_effect(false,e2,e1))
     return true;
-  if(subset_effect(true, e1, e2) && subset_effect(true, e2, e1))
+  if(Tcutil::subset_effect(true,e1,e2) && Tcutil::subset_effect(true,e2,e1))
     return true;
   return false;
 }
@@ -292,11 +292,11 @@ static void unify_it(type_t t1, type_t t2) {
     // check that the evar doesn't occur in t2 and that any free variables
     // of t2 are contained in s1.
     occurs(t1,heap_region,s1opt->v,t2);
-    let kind2 = type_kind(t2);
+    let kind2 = Tcutil::type_kind(t2);
     // we can constrain the Evar to be equal to t2 only when the kind of
     // the evar is greater than or equal to the kind of t2 or t2 is an
     // evar that we can constrain to be equal to t1.
-    if (kind_leq(kind2,kind1->v)) {
+    if (Kinds::kind_leq(kind2,kind1->v)) {
       *ref1_ref = t2;
       return;
     } 
@@ -305,9 +305,9 @@ static void unify_it(type_t t1, type_t t2) {
       // check that s2 is a subset of s1
       let s1 = s1opt->v;
       for (_ s2 = s2opt->v; s2 != NULL; s2 = s2->tl)
-	if (!List::mem(fast_tvar_cmp,s1,s2->hd))
+	if (!List::mem(Tcutil::fast_tvar_cmp,s1,s2->hd))
 	  fail_because("(type variable would escape scope)");
-      if (!kind_leq(kind1->v,kind2)) 
+      if (!Kinds::kind_leq(kind1->v,kind2)) 
 	fail_because("(kinds are incompatible)");
       *ref2_ref = t1; 
       return;
@@ -345,7 +345,7 @@ static void unify_it(type_t t1, type_t t2) {
     return;
 
   case $(&AppType(c1,ts1),&AppType(c2,ts2)):
-    if (tycon_cmp(c1,c2) != 0) 
+    if (Tcutil::tycon_cmp(c1,c2) != 0) 
       fail_because("(different type constructors)");
     unify_list(ts1,ts2);
     return;
@@ -408,8 +408,10 @@ static void unify_it(type_t t1, type_t t2) {
       if (!unify_kindbound(kb1,kb2))
 	fail_because(aprintf("(type var %s has different kinds %s and %s)",
 			     Absynpp::tvar2string(tvs1->hd),
-			     Absynpp::kind2string(tvar_kind(tvs1->hd,&bk)),
-			     Absynpp::kind2string(tvar_kind(tvs2->hd,&bk))));
+			     Kinds::kind2string(Kinds::tvar_kind(tvs1->hd,
+								 &Kinds::bk)),
+			     Kinds::kind2string(Kinds::tvar_kind(tvs2->hd,
+								 &Kinds::bk))));
       inst = rnew(rgn) List(rnew(rgn) $(tvs2->hd,var_type(tvs1->hd)),inst);
       tvs1 = tvs1->tl;
       tvs2 = tvs2->tl;
@@ -420,11 +422,11 @@ static void unify_it(type_t t1, type_t t2) {
       unify_it(new FnType(FnInfo{NULL,eff1,rt_tq1,rt1,args1,c_vararg1,
 				   cyc_vararg1,rpo1,atts1,req1,req_relns1,ens1,
                                    ens_relns1,return_value1}),
-	       rsubstitute(rgn, inst,
-                           new FnType(FnInfo{NULL,eff2,rt_tq2,rt2,args2,
-                                               c_vararg2,cyc_vararg2,rpo2,
-                                               atts2,req2,req_relns2,
-                                               ens2,ens_relns2,return_value2})));
+	       Tcutil::rsubstitute(rgn, inst,
+				   new FnType(FnInfo{NULL,eff2,rt_tq2,rt2,args2,
+						       c_vararg2,cyc_vararg2,rpo2,
+						       atts2,req2,req_relns2,
+						       ens2,ens_relns2,return_value2})));
       return;
     }
     }
@@ -467,7 +469,7 @@ static void unify_it(type_t t1, type_t t2) {
 			   eff2 ? Absynpp::typ2string(eff2) : (string_t)"-"));
     if (!Atts::equiv_fn_atts(atts2,atts1))
       fail_because("(function types have different attributes)");
-    if (!same_rgn_po(rpo2,rpo1))
+    if (!Tcutil::same_rgn_po(rpo2,rpo1))
       fail_because("(function types have different region lifetime orderings)");
     if (!check_logical_equivalence(req_relns1,req_relns2))
       fail_because("(@requires clauses not equivalent)");

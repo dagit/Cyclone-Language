@@ -21,10 +21,10 @@
 #include <hashtable.h>
 #include "currgn.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "warn.h"
 
 using Absyn;
-using Tcutil;
 using List;
 using Hashtable;
 
@@ -39,7 +39,7 @@ tvar_t curr_rgn_tvar (void) {
   if (curr_tvar == NULL) {
     curr_tvar = new Tvar(new curr_rgn_name,
 			 Tcutil::new_tvar_id(),
-			 Tcutil::kind_to_bound(&Tcutil::rk));
+			 Kinds::kind_to_bound(&Kinds::rk));
     curr_rgn_typ = var_type((tvar_t)curr_tvar);
   }
   return (tvar_t)curr_tvar;
@@ -57,11 +57,11 @@ static $(var_opt_t,tqual_t,type_t)@ argtype($(var_opt_t,tqual_t,type_t)@`H arg) 
   let &$(vopt,tq,t) = arg;
   switch (t) {
   case &PointerType(PtrInfo(t1,...)):
-    if (!is_function_type(t1)) return arg;
+    if (!Tcutil::is_function_type(t1)) return arg;
     break;
   default: return arg;
   }
-  let t2 = copy_type(t);
+  let t2 = Tcutil::copy_type(t);
   switch (compress(t2)) {
   case &PointerType(PtrInfo(t1,...)):
     switch (compress(t1)) {
@@ -93,7 +93,7 @@ type_t instantiate(type_t fntype, type_t currgn) {
     *args_info = List::map(argtype,*args_info);
     // instantiate `C
     let inst = new List(new $((tvar_t)curr_tvar,currgn),NULL);
-    let fntype2 = substitute(inst,fntype);
+    let fntype2 = Tcutil::substitute(inst,fntype);
     // restore the old bound variables in both types
     switch (fntype2) {
     case &FnType(FnInfo{_,_,_,_,*args_info2,...}):
@@ -210,7 +210,7 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
   case &Sizeoftype_e(*t): 
     rgnsubtype(e->loc,env,*t);
     if (!env.toplevel)
-      *t = substitute_nofun(env.inst,*t);
+      *t = Tcutil::substitute_nofun(env.inst,*t);
     break;
 
   case &Conditional_e(e1,e2,e3):
@@ -239,7 +239,7 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
   case &Cast_e(*t,e1,...):
     rgnsubtype(e->loc,env,*t);
     if (!env.toplevel)
-      *t = substitute_nofun(env.inst,*t);
+      *t = Tcutil::substitute_nofun(env.inst,*t);
     fallthru(e1);
 
   case &AggrMember_e(e1,...): fallthru(e1);
@@ -256,7 +256,7 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
   case &Valueof_e(*t):
     rgnsubtype(e->loc,env,*t);
     if (!env.toplevel) {
-      let new_typ = substitute_nofun(env.inst,*t);
+      let new_typ = Tcutil::substitute_nofun(env.inst,*t);
       if (new_typ == *t) break;
       // reduce valueof(valueof_t(e)) to e
       switch (compress(new_typ)) {
@@ -280,7 +280,7 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
     while (ts != NULL) {
       rgnsubtype(e->loc,env,ts->hd);
       if (!env.toplevel) 
-	ts->hd = substitute_nofun(env.inst,ts->hd);
+	ts->hd = Tcutil::substitute_nofun(env.inst,ts->hd);
       ts = ts->tl;
     }
     rgnsubexp(env,e1);
@@ -292,7 +292,7 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
   case &CompoundLit_e(i,ds):
     rgnsubtype(e->loc,env,(*i)[2]);
     if (!env.toplevel)
-      (*i)[2] = substitute_nofun(env.inst,(*i)[2]);
+      (*i)[2] = Tcutil::substitute_nofun(env.inst,(*i)[2]);
     rgnsubds(env,ds);
     break;
 
@@ -303,7 +303,7 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
     for (;ts != NULL; ts = ts->tl) {
       rgnsubtype(e->loc,env,ts->hd);
       if (!env.toplevel)
-	ts->hd = substitute_nofun(env.inst,ts->hd);
+	ts->hd = Tcutil::substitute_nofun(env.inst,ts->hd);
     }
     rgnsubds(env,ds);
     break;    
@@ -311,7 +311,7 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
   case &AnonStruct_e(*t,ds):
     rgnsubtype(e->loc,env,*t);
     if (!env.toplevel)
-      *t = substitute_nofun(env.inst,*t);
+      *t = Tcutil::substitute_nofun(env.inst,*t);
     rgnsubds(env,ds);
     break;
 
@@ -320,7 +320,7 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
     rgnsubexpopt(env,rgnopt);
     if (elt_t != NULL) {
       rgnsubtype(e->loc,env,*elt_t);
-      *elt_t = substitute_nofun(env.inst,*elt_t);
+      *elt_t = Tcutil::substitute_nofun(env.inst,*elt_t);
     }
     rgnsubexp(env,e1);
     break;
@@ -330,7 +330,7 @@ static void rgnsubexp(struct rgnsubenv env, exp_t e) {
   if (e->topt != NULL) {
     rgnsubtype(e->loc,env,(type_t)e->topt);
     if (!env.toplevel)
-      e->topt = substitute_nofun(env.inst,(type_t)e->topt);
+      e->topt = Tcutil::substitute_nofun(env.inst,(type_t)e->topt);
   }
 //   } catch {
 //   case ex:
@@ -365,7 +365,7 @@ static void rgnsubpat(struct rgnsubenv env, pat_t p) {
     // FIX: is this the right thing to do here?
     if (vd->type != NULL) {
       rgnsubtype(p->loc,env,vd->type);
-      vd->type = substitute_nofun(env.inst,vd->type);
+      vd->type = Tcutil::substitute_nofun(env.inst,vd->type);
     }
     rgnsubpat(env,p1);
     return;
@@ -374,7 +374,7 @@ static void rgnsubpat(struct rgnsubenv env, pat_t p) {
     check_tvar(p->loc,tv);
     if (vd->type != NULL) {
       rgnsubtype(p->loc,env,vd->type);
-      vd->type = substitute_nofun(env.inst,vd->type);
+      vd->type = Tcutil::substitute_nofun(env.inst,vd->type);
     }
     return;
 
@@ -382,7 +382,7 @@ static void rgnsubpat(struct rgnsubenv env, pat_t p) {
     // FIX: is this the right thing to do here?
     if (vd->type != NULL) {
       rgnsubtype(p->loc,env,vd->type);
-      vd->type = substitute_nofun(env.inst,vd->type);
+      vd->type = Tcutil::substitute_nofun(env.inst,vd->type);
     }
     check_tvar(p->loc,tv);
     return;
@@ -460,7 +460,7 @@ static void rgnsubdecl(struct rgnsubenv env, decl_t d) {
     rgnsubexpopt(env,initializer);
     rgnsubtype(d->loc,env,*t);
     if (!env.toplevel)
-      *t = substitute_nofun(env.inst,*t);
+      *t = Tcutil::substitute_nofun(env.inst,*t);
     return;
     
   case &Fn_d(fd):
@@ -473,7 +473,7 @@ static void rgnsubdecl(struct rgnsubenv env, decl_t d) {
     env.inst = new List(new $((tvar_t)curr_tvar,(type_t)curr_rgn_typ),NULL);
     rgnsubstmt(env,fd->body);
 //     rgnsubtype(d->loc,env,fd->i.ret_type);
-//     fd->i.ret_type = substitute_nofun(env.inst,fd->i.ret_type);
+//     fd->i.ret_type = Tcutil::substitute_nofun(env.inst,fd->i.ret_type);
     return;
 
   case &Typedef_d(td):
@@ -514,7 +514,7 @@ static void rgnsubdecl(struct rgnsubenv env, decl_t d) {
     assert(!env.toplevel);
     for (; vds != NULL; vds = vds->tl) {
       rgnsubtype(d->loc,env,vds->hd->type);
-      vds->hd->type = substitute_nofun(env.inst,vds->hd->type);
+      vds->hd->type = Tcutil::substitute_nofun(env.inst,vds->hd->type);
     }
     return;
   case &Region_d(...):

@@ -367,9 +367,9 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif
 #endif
  struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
-# 170 "core.h"
+# 168 "core.h"
 extern struct _RegionHandle*Cyc_Core_heap_region;
-# 173
+# 171
 extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
 # 61 "list.h"
 extern int Cyc_List_length(struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[14U];struct Cyc_List_List_mismatch_exn_struct{char*tag;};extern char Cyc_List_Nth[4U];struct Cyc_List_Nth_exn_struct{char*tag;};struct Cyc___cycFILE;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};
@@ -514,9 +514,9 @@ const struct Cyc_Dict_T*_tmp3D=t;struct _tuple0 _tmp41;const struct Cyc_Dict_T*_
  return({struct Cyc_Dict_T*_tmp42=_region_malloc(r,sizeof(*_tmp42));_tmp42->color=Cyc_Dict_R,_tmp42->left=0,_tmp42->right=0,_tmp42->key_val=key_val;_tmp42;});}else{_LL3: _tmp3E=_tmp3D->color;_tmp3F=_tmp3D->left;_tmp40=_tmp3D->right;_tmp41=_tmp3D->key_val;_LL4: {enum Cyc_Dict_Color color=_tmp3E;const struct Cyc_Dict_T*a=_tmp3F;const struct Cyc_Dict_T*b=_tmp40;struct _tuple0 y=_tmp41;
 # 148
 int _tmp43=rel(key_val.f1,y.f1);int i=_tmp43;
-if(i < 0)return({struct _RegionHandle*_tmpF7=r;Cyc_Dict_balance(_tmpF7,({struct _tuple1 _tmpD5;_tmpD5.f1=color,({const struct Cyc_Dict_T*_tmpF6=(const struct Cyc_Dict_T*)Cyc_Dict_ins(r,rel,key_val,a);_tmpD5.f2=_tmpF6;}),_tmpD5.f3=b,_tmpD5.f4=y;_tmpD5;}));});else{
-if(i > 0)return({struct _RegionHandle*_tmpF9=r;Cyc_Dict_balance(_tmpF9,({struct _tuple1 _tmpD6;_tmpD6.f1=color,_tmpD6.f2=a,({const struct Cyc_Dict_T*_tmpF8=(const struct Cyc_Dict_T*)Cyc_Dict_ins(r,rel,key_val,b);_tmpD6.f3=_tmpF8;}),_tmpD6.f4=y;_tmpD6;}));});else{
-return({struct Cyc_Dict_T*_tmp44=_region_malloc(r,sizeof(*_tmp44));_tmp44->color=color,_tmp44->left=a,_tmp44->right=b,_tmp44->key_val=key_val;_tmp44;});}}}}_LL0:;}
+if(i < 0)return({struct _RegionHandle*_tmpF7=r;Cyc_Dict_balance(_tmpF7,({struct _tuple1 _tmpD5;_tmpD5.f1=color,({const struct Cyc_Dict_T*_tmpF6=(const struct Cyc_Dict_T*)Cyc_Dict_ins(r,rel,key_val,a);_tmpD5.f2=_tmpF6;}),_tmpD5.f3=b,_tmpD5.f4=y;_tmpD5;}));});
+if(i > 0)return({struct _RegionHandle*_tmpF9=r;Cyc_Dict_balance(_tmpF9,({struct _tuple1 _tmpD6;_tmpD6.f1=color,_tmpD6.f2=a,({const struct Cyc_Dict_T*_tmpF8=(const struct Cyc_Dict_T*)Cyc_Dict_ins(r,rel,key_val,b);_tmpD6.f3=_tmpF8;}),_tmpD6.f4=y;_tmpD6;}));});
+return({struct Cyc_Dict_T*_tmp44=_region_malloc(r,sizeof(*_tmp44));_tmp44->color=color,_tmp44->left=a,_tmp44->right=b,_tmp44->key_val=key_val;_tmp44;});}}_LL0:;}
 # 155
 struct Cyc_Dict_Dict Cyc_Dict_insert(struct Cyc_Dict_Dict d,void*key,void*data){
 struct Cyc_Dict_T*_tmp45=({struct _RegionHandle*_tmpFC=d.r;int(*_tmpFB)(void*,void*)=d.rel;struct _tuple0 _tmpFA=({struct _tuple0 _tmpD8;_tmpD8.f1=key,_tmpD8.f2=data;_tmpD8;});Cyc_Dict_ins(_tmpFC,_tmpFB,_tmpFA,d.t);});struct Cyc_Dict_T*ans=_tmp45;

@@ -111,6 +111,7 @@ CYCLONE_H:=ap.h\
 CYCLONE_SRCS:=absyn\
 	 warn\
          flags\
+ 	 kinds\
          parse_tab\
          parse_errors\
          lex\
@@ -161,6 +162,7 @@ CYCDOC_SRCS:=cycdoc\
 	unify\
         attributes\
 	tcutil\
+	kinds\
 	tctyp\
 	rgnorder\
         relations-ap\
@@ -193,6 +195,7 @@ BUILDLIB_SRCS:=buildlib\
         flags\
         parse_errors\
 	lex\
+	kinds\
 	parse_tab\
 	unify\
         attributes\

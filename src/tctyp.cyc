@@ -19,6 +19,7 @@
 #include <string.h>
 #include "unify.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "attributes.h"
 #include "evexp.h"
 #include "tcexp.h"
@@ -157,40 +158,6 @@ static void check_free_evars(free_evars_t free_evars, type_t in_typ, seg_t loc){
 }
 
 
-// Given two kind constraint refs, merge them so that they will
-// point to the most constrained kind -- if they're compatible
-// return true, otherwise return false.
-static bool constrain_kinds(kindbound_t c1, kindbound_t c2) {
-  c1 = compress_kb(c1);
-  c2 = compress_kb(c2);
-  if (c1 == c2) return true;
-  switch ($(c1,c2)) {
-  case $(&Eq_kb(k1),&Eq_kb(k2)): return k1 == k2;
-  case $(_,&Unknown_kb(*f)): *f = new Opt(c1); return true;
-  case $(&Unknown_kb(*f),_): *f = new Opt(c2); return true;
-  case $(&Less_kb(*f,k1),&Eq_kb(k2)):
-    if (!kind_leq(k2,k1)) 
-      return false;
-    *f = new Opt(c2); 
-    return true;
-  case $(&Eq_kb(k1),&Less_kb(*f,k2)):
-    if (!kind_leq(k1,k2)) 
-      return false;
-    *f = new Opt(c1); 
-    return true;
-  case $(&Less_kb(*f1,k1),&Less_kb(*f2,k2)):
-    if (kind_leq(k1,k2)) {
-      *f2 = new Opt(c1); 
-      return true;
-    } 
-    if (kind_leq(k2,k1)) {
-      *f1 = new Opt(c2); 
-      return true;
-    } 
-    return false;
-  }
-}
-
 // Adds tv to the list of tvars unless it's already present.  If it's
 // already present, makes sure the kinds are compatible by choosing the
 // most constrained kind as the kind of the variable, and in fact
@@ -201,7 +168,7 @@ static list_t<tvar_t> add_free_tvar(seg_t loc,list_t<tvar_t,`H> tvs,tvar_t tv) {
     if (strptrcmp(tvs2->hd->name, tv->name) == 0) {
       kindbound_t k1 = tvs2->hd->kind;
       kindbound_t k2 = tv->kind;
-      if (!constrain_kinds(k1,k2))
+      if (!Kinds::constrain_kinds(k1,k2))
         err2(loc,"type variable ",tv," used with inconsistent kinds ",
 	     k1," and ",k2);
       if (tv->identity == -1)
@@ -274,11 +241,11 @@ static cvtenv_t i_check_type_level_exp(exp_t e, cvtenv_t env) {
     break;
   case &Cast_e(t,e1,_,_):
     env = i_check_type_level_exp(e1,env);
-    env = i_check_type(env,&tak,t,true,false);
+    env = i_check_type(env,&Kinds::tak,t,true,false);
     break;
   case &Offsetof_e(t,_): fallthru(t);
-  case &Sizeoftype_e(t): env = i_check_type(env,&tak,t,true,false); break;
-  case &Valueof_e(t):    env = i_check_type(env,&ik,t,true,false);  break;
+  case &Sizeoftype_e(t): env=i_check_type(env,&Kinds::tak,t,true,false); break;
+  case &Valueof_e(t):    env=i_check_type(env,&Kinds::ik,t,true,false);  break;
   case &Sizeofexp_e(e):  fallthru(e);
   case &Extension_e(e):  env = i_check_type_level_exp(e,env); break;
   default: impos2("bad expression in Tctyp::i_check_type_level_exp");
@@ -303,7 +270,7 @@ static bool typedef_tvar_is_ptr_rgn(tvar_t tvar, struct Typedefdecl *td) {
 
 static kind_t tvar_inst_kind(tvar_t tvar, kind_t def_kind, kind_t expected_kind,
 			     struct Typedefdecl *td) {
-  switch (compress_kb(tvar->kind)) {
+  switch (Kinds::compress_kb(tvar->kind)) {
   case &Less_kb(_,&Kind(RgnKind,Top)):
   case &Eq_kb(&Kind(RgnKind,Top)):
     // we may have to adjust the kind constraint of the
@@ -316,12 +283,12 @@ static kind_t tvar_inst_kind(tvar_t tvar, kind_t def_kind, kind_t expected_kind,
     if ((k == BoxKind || k == MemKind || k == AnyKind) &&
 	typedef_tvar_is_ptr_rgn(tvar,td)) {
       if (expected_kind->aliasqual == Aliasable)
-	return &rk;
+	return &Kinds::rk;
       if (expected_kind->aliasqual == Unique)
-	return &urk;
+	return &Kinds::urk;
     }
-    return &trk;
-  default: return tvar_kind(tvar,def_kind);
+    return &Kinds::trk;
+  default: return Kinds::tvar_kind(tvar,def_kind);
   }
 }
 static cvtenv_t check_type_inst(cvtenv_t env, types_t @ targsp, 
@@ -335,14 +302,14 @@ static cvtenv_t check_type_inst(cvtenv_t env, types_t @ targsp,
     tvar_t tv = tvs->hd;
     // special case for recursive type where the parameters kinds
     // have not yet been figured out.
-    switch $(compress_kb(tv->kind),t) {
+    switch $(Kinds::compress_kb(tv->kind),t) {
     case $(&Unknown_kb(_), &VarType(tv2)):
       env.kind_env  = add_free_tvar(env.loc, env.kind_env, tv2);
       env.free_vars = fast_add_free_tvar_bool(env.free_vars, tv2, true);
       continue;
     default: break;
     }
-    kind_t k = tvar_kind(tv,&bk);
+    kind_t k = Kinds::tvar_kind(tv,&Kinds::bk);
     env = i_check_type(env,k,t,true,allow_abs_aggr);
     check_no_qual(env.loc,t);
   }
@@ -353,7 +320,7 @@ static cvtenv_t check_type_inst(cvtenv_t env, types_t @ targsp,
   for (; tvs != NULL; tvs = tvs->tl) {
     type_t e = new_evar(NULL,NULL);
     hidden_ts = new List(e,hidden_ts);
-    kind_t k = tvar_inst_kind(tvs->hd, &bk, expected_kind, td);
+    kind_t k = tvar_inst_kind(tvs->hd, &Kinds::bk, expected_kind, td);
     env = i_check_type(env,k,e,true,allow_abs_aggr);
   }
   *targsp = imp_append(*targsp,imp_rev(hidden_ts));
@@ -415,7 +382,8 @@ static cvtenv_t i_check_aggr(cvtenv_t env, kind_t expected_kind,
   case {.KnownAggr = &ad}:
     env = check_type_inst(env,targs,ad->tvs,
 			  expected_kind,allow_abs_aggr,ad->name,NULL);
-    if (allow_abs_aggr && ad->impl == NULL && !kind_leq(&ak, expected_kind))
+    if (allow_abs_aggr && ad->impl == NULL 
+	&& !Kinds::kind_leq(&Kinds::ak, expected_kind))
       // this must be later resolved as having at least the expected kind!
       // For now, we just force that to be &mk.  And come back to check that
       // it is later.
@@ -507,7 +475,7 @@ static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind,
     return env;
   case &JoinCon: 
     for (; ts != NULL; ts = ts->tl)
-      env = i_check_type(env,&ek,ts->hd,true,true);
+      env = i_check_type(env,&Kinds::ek,ts->hd,true,true);
     return env;
   case &EnumCon(n,*edp): // FIX: do this in binding phase
     if (ts != NULL) impos2("enum applied to argument(s)");
@@ -539,11 +507,11 @@ static cvtenv_t i_check_type_app(cvtenv_t env, kind_t expected_kind,
       tag_count = 1 + Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
     }
     return env;
-  case &RgnsCon:      return i_check_unary_app(env,&tak,ts,true,"regions");
-  case &RgnHandleCon: return i_check_unary_app(env,&trk,ts,true,"region_t");
-  case &AccessCon:    return i_check_unary_app(env,&trk,ts,true,"access");
-  case &TagCon:       return i_check_unary_app(env,&ik,ts,false,"tag_t");
-  case &ThinCon:      return i_check_unary_app(env,&ik,ts,false,"@thin");
+  case &RgnsCon:    return i_check_unary_app(env,&Kinds::tak,ts,true,"regions");
+  case &RgnHandleCon: return i_check_unary_app(env,&Kinds::trk,ts,true,"region_t");
+  case &AccessCon:  return i_check_unary_app(env,&Kinds::trk,ts,true,"access");
+  case &TagCon:     return i_check_unary_app(env,&Kinds::ik,ts,false,"tag_t");
+  case &ThinCon:    return i_check_unary_app(env,&Kinds::ik,ts,false,"@thin");
   case &AggrCon(*info):
     return i_check_aggr(env,expected_kind,info,targsp,allow_abs_aggr);
   case &DatatypeCon(*info):
@@ -565,8 +533,9 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
   case &Evar(*k,*ref,_,_):
     // if we have some latitude with moving the type var, do it here
     if ((*k == NULL) ||
-	(kind_leq(expected_kind,(*k)->v) && !kind_leq((*k)->v,expected_kind)))
-      *k = kind_to_opt(expected_kind);
+	(Kinds::kind_leq(expected_kind,(*k)->v) 
+	 && !Kinds::kind_leq((*k)->v,expected_kind)))
+      *k = Kinds::kind_to_opt(expected_kind);
     if (env.fn_result && env.generalize_evars &&
 	expected_kind->kind == RgnKind && !te->tempest_generalize) {
       if (expected_kind->aliasqual == Unique)
@@ -584,7 +553,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     }
     break;
   case &VarType(v):
-    switch (compress_kb(v->kind)) {
+    switch (Kinds::compress_kb(v->kind)) {
     case &Unknown_kb(*f): *f = new Opt(new Less_kb(NULL,expected_kind)); break;
     default: break;
     }
@@ -595,9 +564,9 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     // it hasn't already been added.
     env.free_vars = fast_add_free_tvar_bool(env.free_vars, v, put_in_effect);
     // if we have some latitude with moving the type var, do it here
-    switch (compress_kb(v->kind)) {
+    switch (Kinds::compress_kb(v->kind)) {
     case &Less_kb(*f,k): 
-      if (kind_leq(expected_kind,k))
+      if (Kinds::kind_leq(expected_kind,k))
 	*f = new Opt(new Less_kb(NULL,expected_kind));
       break;
     default: break;
@@ -627,15 +596,15 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     // FIX: check that tqual is valid?
     kind_t rgnk;
     switch (expected_kind->aliasqual) {
-    case Aliasable:    rgnk = &rk;  break;
-    case Unique:       rgnk = &urk; break;
-    case Top: default: rgnk = &trk; break;
+    case Aliasable:    rgnk = &Kinds::rk;  break;
+    case Unique:       rgnk = &Kinds::urk; break;
+    case Top: default: rgnk = &Kinds::trk; break;
     }
-    env = i_check_type(env,&tak,  t1,      true, true);//allow AnyKind under ptr
-    env = i_check_type(env,rgnk,  rgn_type,true, true);
-    env = i_check_type(env,&boolk,zt,      false,true);
-    env = i_check_type(env,&boolk,nullable,false,true);
-    env = i_check_type(env,&ptrbk,b,       false,allow_abs_aggr);
+    env = i_check_type(env,&Kinds::tak,t1,true,true);//allow AnyKind under ptr
+    env = i_check_type(env,rgnk,           rgn_type,true, true);
+    env = i_check_type(env,&Kinds::boolk,  zt,      false,true);
+    env = i_check_type(env,&Kinds::boolk,  nullable,false,true);
+    env = i_check_type(env,&Kinds::ptrbk,  b,       false,allow_abs_aggr);
 
     tqp->real_const = extract_const_from_typedef(env.loc,tqp->print_const,t1);
 
@@ -673,7 +642,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     // FIX: check that tqual is valid?
     // we don't allow abstract mem types as the elt type of an array type
     let e = *eptr;
-    env = i_check_type(env,&tmk,t1,true,allow_abs_aggr);
+    env = i_check_type(env,&Kinds::tmk,t1,true,allow_abs_aggr);
     tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t1);
     // if zero_term is unconstrained, then set it to false.
     bool is_zero_terminated = force_type2bool(false, zt);
@@ -745,7 +714,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     for (_ b = *btvs; b != NULL; b = b->tl) {
       b->hd->identity = new_tvar_id();
       env.kind_env = add_bound_tvar(env.kind_env,b->hd);
-      switch (compress_kb(b->hd->kind)) {
+      switch (Kinds::compress_kb(b->hd->kind)) {
       case &Eq_kb(&Kind(MemKind,_)):
 	err2(loc,"function abstracts Mem type variable ", b->hd); break;
       default: break;
@@ -754,7 +723,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     // We use a fresh environment here so that we only track the free type
     // vars (and evars) of the function type in case we have to abstract them.
     _ new_env = CVTEnv{loc,te,env.kind_env,true,env.generalize_evars,NULL,NULL};
-    new_env = i_check_type(new_env,&tmk,tr,true,true);
+    new_env = i_check_type(new_env,&Kinds::tmk,tr,true,true);
     rtq->real_const = extract_const_from_typedef(loc,rtq->print_const,tr);
     new_env.fn_result = false;
     // results and arguments of functions cannot be abstract mem types
@@ -762,7 +731,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     for (_ a = args; a != NULL; a = a->tl) {
       let trip = a->hd;
       let t = (*trip)[2];
-      new_env = i_check_type(new_env,&tmk,t,true,true);
+      new_env = i_check_type(new_env,&Kinds::tmk,t,true,true);
       let ec = extract_const_from_typedef(loc,(*trip)[1].print_const,t);
       (*trip)[1].real_const = ec;
       // after resolving t, it may be an array type.  if so, as an argument
@@ -770,7 +739,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       if (is_array_type(t)) {
 	// create a new region variable for the pointer
 	let ptr_rgn = new_evar(NULL,NULL);
-	new_env = i_check_type(new_env,&rk,ptr_rgn,true,true);
+	new_env = i_check_type(new_env,&Kinds::rk,ptr_rgn,true,true);
 	(*trip)[2] = promote_array(t,ptr_rgn,false);
       }
     }
@@ -778,7 +747,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     if (cyc_vararg != NULL) {
       if (c_vararg) impos2("both c_vararg and cyc_vararg"); // sanity
       let VarargInfo{_,_,vt,vi} = *cyc_vararg;
-      new_env = i_check_type(new_env,&tmk,vt,true,true);
+      new_env = i_check_type(new_env,&Kinds::tmk,vt,true,true);
       cyc_vararg->tq.real_const = extract_const_from_typedef(loc,cyc_vararg->tq.print_const,vt);
       // if inject, then check the type is an appropriate datatype
       if (vi)
@@ -851,8 +820,8 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     //       actually, allow circularities, but forbid effect variables
     for (_ rpo = rgn_po; rpo != NULL; rpo = rpo->tl) {
       let &$(r1,r2) = rpo->hd;
-      new_env = i_check_type(new_env,&ek,r1,true,true);
-      new_env = i_check_type(new_env,&trk,r2,true,true);
+      new_env = i_check_type(new_env,&Kinds::ek,r1,true,true);
+      new_env = i_check_type(new_env,&Kinds::trk,r2,true,true);
     }
     // check the @requires clause -- we build a bogus function environment
     // to make it possible to enter the parameters as variables that can
@@ -874,7 +843,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     new_env.te = old_te;
     // finally, the effect -- usually inferred
     if (*eff != NULL)
-      new_env = i_check_type(new_env,&ek,(type_t)(*eff),true,true);
+      new_env = i_check_type(new_env,&Kinds::ek,(type_t)(*eff),true,true);
     else {
       list_t<type_t> effect = NULL;
       // Add in any free region or effect variables to the effect.
@@ -884,13 +853,14 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
       for (_ tvs = new_env.free_vars; tvs != NULL; tvs = tvs->tl) {
 	let $(tv,put_in_eff) = *tvs->hd;
 	if (!put_in_eff) continue; // skip variables that shouldn't go in effs
-	switch (compress_kb(tv->kind)) {
+	switch (Kinds::compress_kb(tv->kind)) {
 	  // Coerce Top RgnKind to RgnKind if an upper bound
 	case &Less_kb(*f,r) && r->kind == RgnKind:
-	  if (r->aliasqual == Top) {
-	    *f = kind_to_bound_opt(&rk); fallthru(r);
-	  }
-	  *f = kind_to_bound_opt(r); fallthru(r);
+	  if (r->aliasqual == Top)
+	    *f = Kinds::kind_to_bound_opt(&Kinds::rk);
+	  else
+	    *f = Kinds::kind_to_bound_opt(r); 
+	  fallthru(r);
 	case &Eq_kb(r) && r->kind == RgnKind:
 	  effect = new List(access_eff(var_type(tv)),effect); break;
 	case &Less_kb(_,&Kind(BoolKind,_)):
@@ -900,11 +870,11 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	case &Eq_kb(&Kind(PtrBndKind,_)): 
 	case &Eq_kb(&Kind(IntKind,_)): break;
 	case &Less_kb(*f,&Kind(EffKind,_)):
-	  *f = kind_to_bound_opt(&ek); fallthru;
+	  *f = Kinds::kind_to_bound_opt(&Kinds::ek); fallthru;
 	case &Eq_kb(&Kind(EffKind,_)):
 	  effect = new List(var_type(tv),effect); break;
 	case &Unknown_kb(*f):
-	  *f = new Opt(new Less_kb(NULL,&ak)); fallthru;
+	  *f = new Opt(new Less_kb(NULL,&Kinds::ak)); fallthru;
 	default:
 	  // add regions(`a) to the default effect for every type variable `a.
 	  effect = new List(regionsof_eff(var_type(tv)), effect); break;
@@ -928,11 +898,11 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     // variables to BoxKind to ensure that we don't abstract a MemKind
     // variable.  Also drive Top kinds to Aliasable.
     if (*btvs != NULL)
-      for(list_t<tvar_t> bs = *btvs; bs != NULL; bs = bs->tl) {
-	switch (compress_kb(bs->hd->kind)) {
+      for(list_t<tvar_t> bs = *btvs; bs != NULL; bs = bs->tl)
+	switch (Kinds::compress_kb(bs->hd->kind)) {
 	case &Unknown_kb(*f):
 	  warn2(loc,"type variable ",bs->hd," unconstrained, assuming boxed");
-	  *f = kind_to_bound_opt(&bk);  
+	  *f = Kinds::kind_to_bound_opt(&Kinds::bk);  
 	  break;
 	case &Less_kb(*f,k):
 	  switch(k) {
@@ -940,18 +910,21 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	  case &Kind(MemKind,Top):
 	  case &Kind(MemKind,Aliasable):
 	  case &Kind(AnyKind,Top):
-	  case &Kind(AnyKind,Aliasable): *f = kind_to_bound_opt(&bk);  break;
+	  case &Kind(AnyKind,Aliasable): 
+	    *f = Kinds::kind_to_bound_opt(&Kinds::bk);  break;
 	  case &Kind(MemKind,Unique):
-	  case &Kind(AnyKind,Unique):    *f = kind_to_bound_opt(&ubk); break;
-	  case &Kind(RgnKind,Top):       *f = kind_to_bound_opt(&rk);  break;
-	  default:                       *f = kind_to_bound_opt(k);    break;
+	  case &Kind(AnyKind,Unique):    
+	    *f = Kinds::kind_to_bound_opt(&Kinds::ubk); break;
+	  case &Kind(RgnKind,Top):       
+	    *f = Kinds::kind_to_bound_opt(&Kinds::rk);  break;
+	  default:                       
+	    *f = Kinds::kind_to_bound_opt(k);    break;
 	  }
 	  break;
 	case &Eq_kb(&Kind(MemKind,_)):
-	  err2(loc,"functions can't abstract M types"); break;
+	  Warn::err2(loc,"functions can't abstract M types"); break;
 	default: break;
 	}
-      }
     // remove the bound vars from the kind environment and the list of free vars
     env.kind_env = remove_bound_tvars(new_env.kind_env,*btvs,identity);
     new_env.free_vars = remove_bound_tvars(new_env.free_vars,*btvs,fst);
@@ -970,7 +943,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
   case &TupleType(tq_ts):
     for (; tq_ts != NULL; tq_ts = tq_ts->tl) {
       let p = tq_ts->hd;
-      env = i_check_type(env,&tmk,(*p)[1],true,false);
+      env = i_check_type(env,&Kinds::tmk,(*p)[1],true,false);
       (*p)[0].real_const =
         extract_const_from_typedef(loc,(*p)[0].print_const,(*p)[1]);
     }
@@ -985,7 +958,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
 	err2(loc,"duplicate field ",*fn);
       if (strcmp(*fn,"") != 0)
 	prev_fields = new List(fn,prev_fields);
-      env = i_check_type(env,&tmk,t,true,false);
+      env = i_check_type(env,&Kinds::tmk,t,true,false);
       tqp->real_const = extract_const_from_typedef(loc,tqp->print_const,t);
       check_bitfield(loc,t,width,fn);
       Atts::check_field_atts(loc,fn,atts);
@@ -1023,7 +996,7 @@ static cvtenv_t i_check_type(cvtenv_t env, kind_t expected_kind, type_t t,
     }
     break;
   }
-  if (!kind_leq(type_kind(t), expected_kind))
+  if (!Kinds::kind_leq(type_kind(t), expected_kind))
     err2(loc,"type ",t," has kind ",type_kind(t),
 	 " but as used here needs kind ",expected_kind);
   return env;
@@ -1068,7 +1041,7 @@ static cvtenv_t check_valid_type(cvtenv_t cvt, kind_t expected_kind,
 void check_valid_toplevel_type(seg_t loc, Tcenv::tenv_t te, type_t t) {
   bool generalize_evars = 
     is_function_type(t) && (!te->in_tempest || te->tempest_generalize);
-  kind_t expected_kind = is_function_type(t) ? &tak : &tmk;
+  kind_t expected_kind = is_function_type(t) ? &Kinds::tak : &Kinds::tmk;
   let te_vars = Tcenv::lookup_type_vars(te);
   let cvt = check_valid_type(CVTEnv{loc,te,
 				    te_vars,false,generalize_evars,NULL,NULL},
@@ -1092,16 +1065,20 @@ void check_valid_toplevel_type(seg_t loc, Tcenv::tenv_t te, type_t t) {
   // be less than Mem, make it boxed.  If there's a Top RgnKind
   // type variable, make it RgnKind
   for (_ x = free_tvars; x != NULL; x = x->tl) {
-    switch (compress_kb(x->hd->kind)) {
-    case &Unknown_kb(*f): *f = kind_to_bound_opt(&bk); break;
+    switch (Kinds::compress_kb(x->hd->kind)) {
+    case &Unknown_kb(*f): *f = Kinds::kind_to_bound_opt(&Kinds::bk); break;
     case &Less_kb(*f,k):
       switch(k) {
       case &Kind(BoxKind,Top): 
       case &Kind(MemKind,Top): 
-      case &Kind(MemKind,Aliasable): *f = kind_to_bound_opt(&bk);  break;
-      case &Kind(MemKind,Unique):    *f = kind_to_bound_opt(&ubk); break;
-      case &Kind(RgnKind,Top):       *f = kind_to_bound_opt(&rk);  break;
-      default:                       *f = kind_to_bound_opt(k);    break;
+      case &Kind(MemKind,Aliasable): 
+	*f = Kinds::kind_to_bound_opt(&Kinds::bk);  break;
+      case &Kind(MemKind,Unique):    
+	*f = Kinds::kind_to_bound_opt(&Kinds::ubk); break;
+      case &Kind(RgnKind,Top):       
+	*f = Kinds::kind_to_bound_opt(&Kinds::rk);  break;
+      default:                       
+	*f = Kinds::kind_to_bound_opt(k);    break;
       }
       break;
     case &Eq_kb(&Kind(MemKind,a)):

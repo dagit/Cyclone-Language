@@ -95,13 +95,8 @@ type_t copy_type(type_t);
 // if [preserve_types], then copies the type, too; otherwise null
 exp_t deep_copy_exp(bool preserve_types, exp_t);
 
-// returns true if first-arg is a sub-kind of second-arg
-bool kind_leq(kind_t,kind_t);
-bool kind_eq(kind_t,kind_t);
-
 // returns the type of a function declaration
 type_t fd_type(fndecl_t); 
-kind_t tvar_kind(tvar_t,kind_t def);
 kind_t type_kind(type_t);
 void unchecked_cast(exp_t, type_t, coercion_t);
 bool coerce_uint_type(exp_t);
@@ -123,51 +118,6 @@ bool zero_to_null(type_t, exp_t);
 
 // used to alias the given expression, assumed to have non-Aliasable type
 $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ);
-
-// useful kinds
-extern struct Kind rk; // shareable region kind
-extern struct Kind ak; // shareable abstract kind
-extern struct Kind bk; // shareable boxed kind
-extern struct Kind mk; // shareable mem kind
-extern struct Kind ek; // effect kind
-extern struct Kind ik; // int kind
-extern struct Kind boolk; // boolean kind
-extern struct Kind ptrbk; // pointer bound kind
-
-extern struct Kind trk; // top region kind
-extern struct Kind tak; // top abstract kind
-extern struct Kind tbk; // top boxed kind
-extern struct Kind tmk; // top memory kind
-
-extern struct Kind urk;  // unique region kind
-extern struct Kind uak;  // unique abstract kind
-extern struct Kind ubk;  // unique boxed kind
-extern struct Kind umk;  // unique memory kind
-
-extern struct Core::Opt<kind_t> rko;
-extern struct Core::Opt<kind_t> ako;
-extern struct Core::Opt<kind_t> bko;
-extern struct Core::Opt<kind_t> mko;
-extern struct Core::Opt<kind_t> iko;
-extern struct Core::Opt<kind_t> eko;
-extern struct Core::Opt<kind_t> boolko;
-extern struct Core::Opt<kind_t> ptrbko;
-
-extern struct Core::Opt<kind_t> trko;
-extern struct Core::Opt<kind_t> tako;
-extern struct Core::Opt<kind_t> tbko;
-extern struct Core::Opt<kind_t> tmko;
-
-extern struct Core::Opt<kind_t> urko;
-extern struct Core::Opt<kind_t> uako;
-extern struct Core::Opt<kind_t> ubko;
-extern struct Core::Opt<kind_t> umko;
-
-Core::opt_t<kind_t> kind_to_opt(kind_t k);
-kindbound_t kind_to_bound(kind_t k);
-
-$(tvar_t,kindbound_t) swap_kind(type_t, kindbound_t);
-  // for temporary kind refinement
 
 type_t max_arithmetic_type(type_t, type_t);
 
@@ -293,7 +243,6 @@ type_t any_bounds(list_t<tvar_t,`H>);
   bool admits_zero(type_t);
   void replace_rops(list_t<$(var_opt_t,tqual_t,type_t)@>, 
 		    Relations::reln_t);
-  Core::opt_t<kindbound_t> kind_to_bound_opt(kind_t k);
   int fast_tvar_cmp(tvar_t,tvar_t);
 
   // This stuff is used only by unify and tcutil

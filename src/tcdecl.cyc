@@ -20,6 +20,7 @@
 #include <string.h>
 #include "unify.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "attributes.h"
 #include "absynpp.h"
 #include "tcdecl.h"
@@ -118,8 +119,8 @@ static bool check_tvs(list_t<tvar_t> tvs0, list_t<tvar_t> tvs1,
   let x1 = tvs1;
   for (; x0 != NULL; x0 = x0->tl, x1=x1->tl) {
     Unify::unify_kindbound(x0->hd->kind,x1->hd->kind);
-    let c0 = force_kb(x0->hd->kind);
-    let c1 = force_kb(x1->hd->kind);
+    let c0 = Kinds::force_kb(x0->hd->kind);
+    let c1 = Kinds::force_kb(x1->hd->kind);
     if (c0 == c1) continue;
     merr(loc, msg, "%s %s has a different kind (%s) for type parameter %s (%s)",
          t, v, kind2string(c0), *x0->hd->name, kind2string(c1));

@@ -54,7 +54,7 @@ namespace List {
   extern list_t<`a> list(... `a);
   /** [list(x1,...,xn)] builds a heap-allocated list with elements
       [x1] through [xn]. */
-  extern list_t<`a,`r> rlist(region_t<`r::TR>,... `a);
+  extern list_t<`a,`r> rlist(region_t<`r>,... `a);
   /** [rlist(r, x1,...,xn)] builds a list with elements [x1] through
       [xn], allocated in the region with handle [r]. */
 
@@ -351,7 +351,7 @@ namespace List {
       removed from it, if [x] was in the list; otherwise raises
       [Core::Not_found].  Side-effects original list [l]. */
 
-  extern list_t<`a,`r::R> delete_cmp(int cmp(`a,`a), list_t<`a,`r::R> l, `a x);
+  extern list_t<`a,`r> delete_cmp(int cmp(`a,`a), list_t<`a,`r> l, `a x);
   /** [delete(l,k)] returns the list with the first [e] in the list
       such that [cmp]([x],[e]) == 0.  If no such [e] exists, raises
       [Core::Not_found].  Side-effects original list [l]. */
@@ -371,7 +371,7 @@ namespace List {
   extern list_t<`a> from_array(`a ? arr);
   /** [from_array(x)] returns a new heap-allocated list with the same
       elements as array [x].  */
-  extern list_t<`a,`r2> rfrom_array(region_t<`r2> r2, `a ? arr);
+  list_t<`a,`r> rfrom_array(region_t<`r> r, `a ? arr);
   /** [rfrom_array(r,x)] is like [from_array(x)], except that the
       resulting list is allocated in the region with handle [r]. */
 

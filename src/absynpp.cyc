@@ -21,6 +21,7 @@
 #include <string.h>
 #include "evexp.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "warn.h"
 #include "flags.h"
 #include "absynpp.h"
@@ -28,7 +29,6 @@ using Core;
 using PP;
 using Absyn;
 using List;
-using Tcutil;
 namespace Absynpp;
 
 // forward references
@@ -367,43 +367,11 @@ doc_t tqual2doc(tqual_t tq) {
   return egroup(""," "," ",List::map(textptr,l));
 }
 
-string_t kind2string(kind_t ka) {
-  let &Kind(k,a) = ka;
-  switch (k) {
-  case AnyKind:
-    switch (a) {
-    case Aliasable: return "A";
-    case Unique: return "UA";
-    case Top: default: return "TA";
-    }
-  case MemKind:
-    switch (a) {
-    case Aliasable: return "M";
-    case Unique: return "UM";
-    case Top: default: return "TM";
-    }
-  case BoxKind:
-    switch (a) {
-    case Aliasable: return "B";
-    case Unique: return "UB";
-    case Top: default: return "TB";
-    }
-  case RgnKind:
-    switch (a) {
-    case Aliasable: return "R";
-    case Unique: return "UR";
-    case Top: default: return "TR";
-    }
-  case EffKind: return "E";
-  case IntKind: return "I";
-  case BoolKind: return "BOOL";
-  case PtrBndKind: default: return "PTRBND";
-  }
-}
+string_t kind2string(kind_t ka) { return Kinds::kind2string(ka); }
 doc_t kind2doc(kind_t k) { return text(kind2string(k)); }
 
 string_t kindbound2string(kindbound_t c) {
-  switch (compress_kb(c)) {
+  switch (Kinds::compress_kb(c)) {
   case &Eq_kb(k): return kind2string(k);
   case &Unknown_kb(_):
     if (PP::tex_output)
@@ -414,7 +382,7 @@ string_t kindbound2string(kindbound_t c) {
 }
 /* Code duplication so we can get spacing correct in TeX */
 doc_t kindbound2doc(kindbound_t c) {
-  switch (compress_kb(c)) {
+  switch (Kinds::compress_kb(c)) {
   case &Eq_kb(k): return text(kind2string(k));
   case &Unknown_kb(_):
     if (PP::tex_output)
@@ -435,7 +403,7 @@ doc_t tvar2doc(tvar_t tv) {
   if (rewrite_temp_tvars && Tcutil::is_temp_tvar(tv))
     { 
       string_t kstring = "K";
-      switch (compress_kb(tv->kind)) {
+      switch (Kinds::compress_kb(tv->kind)) {
       case &Less_kb(_,k): fallthru(k);
       case &Eq_kb(k): kstring = kind2string(k); break;
       default: break;
@@ -446,7 +414,7 @@ doc_t tvar2doc(tvar_t tv) {
 }
 
 doc_t ktvar2doc(tvar_t tv) {
-  switch (compress_kb(tv->kind)) {
+  switch (Kinds::compress_kb(tv->kind)) {
   case &Unknown_kb(_):
   case &Eq_kb(&Kind(BoxKind,Aliasable)): return tvar2doc(tv);
   case &Less_kb(_,k):   fallthru(k);
@@ -2019,7 +1987,7 @@ doc_t scope2doc(scope_t sc) {
 // needed to detect default effect
 bool exists_temp_tvar_in_effect(type_t t) {
   switch (compress(t)) {
-  case &VarType(tv): return is_temp_tvar(tv);
+  case &VarType(tv): return Tcutil::is_temp_tvar(tv);
   case &AppType(&JoinCon,l):  return exists(exists_temp_tvar_in_effect, l);
   default: return false;
   }
@@ -2056,7 +2024,7 @@ bubble_attributes(region_t<`r> r,type_modifier_t<`r> atts,
 }
 
 static void rewrite_temp_tvar(tvar_t t){ // change t->name from "#xxx" to "`xxx"
-  if (! is_temp_tvar(t)) return;
+  if (! Tcutil::is_temp_tvar(t)) return;
   let s = strconcat("`", *(t -> name));
   s[1] = 't';
   t -> name = new{(string_t)s};

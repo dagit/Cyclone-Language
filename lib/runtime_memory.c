@@ -296,29 +296,29 @@ void pool_pushnew() {
 }
 void pool_pop() {
   if (!pool_stack) return; // Maybe print a warning?
-  struct pool *p = pool_stack->hd;
+  {struct pool *p = pool_stack->hd;
   struct pool_cons *s = pool_stack->tl;
+  int i;
   free(pool_stack);
   pool_stack = s;
-  int i;
   while (p) {
     for (i = 0; i < p->count; i++)
       Cyc_Core_drop_refptr(p->pointers[i]);
-    struct pool *next = p->next;
+    {struct pool *next = p->next;
     free(p);
-    p = next;
-  }
+    p = next;}
+  }}
 }
 void autorelease(unsigned char *x) { // x must be a base pointer so we can find the refcount later
   if (!pool_stack) return;         // No pool, so x will leak
-  struct pool *p = pool_stack->hd;
+  {struct pool *p = pool_stack->hd;
   if (!p) return;                  // No pool, so x will leak
   if (p->count >= POOLSIZE) {
     p = (struct pool *)calloc(1,sizeof(struct pool));
     p->next = pool_stack->hd;
     pool_stack->hd = p;
   }
-  p->pointers[p->count++] = x;
+  p->pointers[p->count++] = x;}
 }
 
 

@@ -22,9 +22,9 @@
 #include "absyn.h"
 #include "warn.h"
 #include "flags.h"
+#include "kinds.h"
 #include <string.h>
 #include <hashtable.h>
-#include "tcutil.h"
 #include "evexp.h"
 using Core;
 using List;
@@ -94,7 +94,7 @@ type_t new_evar(opt_t<kind_t,`H> k, opt_t<list_t<tvar_t,`H>,`H> env) {
   return new Evar(k,NULL,new_type_counter++,env);
 }
 type_t wildtyp(opt_t<list_t<tvar_t,`H>,`H> tenv) {
-  return new_evar(&Tcutil::tmko,tenv); 
+  return new_evar(&Kinds::tmko,tenv); 
 }
 
 tqual_t empty_tqual(seg_t loc) { return Tqual(false,false,false,false,loc); }
@@ -132,27 +132,6 @@ union AggrInfo UnknownAggr(aggr_kind_t ak,typedef_name_t n,opt_t<bool,`H> tagged
 union AggrInfo KnownAggr(aggrdecl_t@`H ad) {
   return AggrInfo{.KnownAggr = ad};
 }
-kindbound_t compress_kb(kindbound_t k) {
-  switch (k) {
-  case &Eq_kb(_): 
-  case &Unknown_kb(NULL):
-  case &Less_kb(NULL,_): return k;
-  case &Unknown_kb(&Opt(*k2)): fallthru(k2);
-  case &Less_kb(&Opt(*k2),_): 
-    *k2 = compress_kb(*k2);
-    return *k2;
-  }
-}
-kind_t force_kb(kindbound_t kb) {
-  switch (compress_kb(kb)) {
-  case &Eq_kb(k): return k;
-  case &Unknown_kb(*f): fallthru(f,&Tcutil::bk);
-  case &Less_kb(*f,k):
-    *f = new Opt(Tcutil::kind_to_bound(k)); 
-    return k;
-  }
-}
-
 //////////////////////////// Types ///////////////////////////////
 type_t app_type(tycon_t c, ...type_t args) {
   return new AppType(c,from_array(args));
@@ -842,7 +821,7 @@ type_t pointer_expand(type_t t,bool fresh_evar) {
   switch (compress(t)) {
   case &FnType(_): return at_type(t,
                                   fresh_evar ? 
-                                  new_evar(new Opt(&Tcutil::rk), NULL) 
+                                  new_evar(new Opt(&Kinds::rk), NULL) 
 				  : heap_rgn_type,
                                   empty_tqual(0),false_type);
   default: return t;

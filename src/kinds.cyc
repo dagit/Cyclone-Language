@@ -1,0 +1,292 @@
+/* Kind constants and utility functions.
+   Copyright (C) 2004 Dan Grossman, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+#include <string.h>
+#include "warn.h"
+#include "kinds.h"
+using Core;
+using Absyn;
+namespace Kinds;
+
+struct Kind rk = Kind(RgnKind,Aliasable);
+struct Kind ak = Kind(AnyKind,Aliasable);
+struct Kind bk = Kind(BoxKind,Aliasable);
+struct Kind mk = Kind(MemKind,Aliasable);
+struct Kind ik = Kind(IntKind,Aliasable);
+struct Kind ek = Kind(EffKind,Aliasable);
+struct Kind boolk = Kind(BoolKind,Aliasable);
+struct Kind ptrbk = Kind(PtrBndKind,Aliasable);
+
+struct Kind trk = Kind(RgnKind,Top);
+struct Kind tak = Kind(AnyKind,Top);
+struct Kind tbk = Kind(BoxKind,Top);
+struct Kind tmk = Kind(MemKind,Top);
+
+struct Kind urk = Kind(RgnKind,Unique);
+struct Kind uak = Kind(AnyKind,Unique);
+struct Kind ubk = Kind(BoxKind,Unique);
+struct Kind umk = Kind(MemKind,Unique);
+
+struct Opt<kind_t> rko = {&rk};
+struct Opt<kind_t> ako = {&ak};
+struct Opt<kind_t> bko = {&bk};
+struct Opt<kind_t> mko = {&mk};
+struct Opt<kind_t> iko = {&ik};
+struct Opt<kind_t> eko = {&ek};
+struct Opt<kind_t> boolko = {&boolk};
+struct Opt<kind_t> ptrbko = {&ptrbk};
+
+struct Opt<kind_t> trko = {&trk};
+struct Opt<kind_t> tako = {&tak};
+struct Opt<kind_t> tbko = {&tbk};
+struct Opt<kind_t> tmko = {&tmk};
+
+struct Opt<kind_t> urko = {&urk};
+struct Opt<kind_t> uako = {&uak};
+struct Opt<kind_t> ubko = {&ubk};
+struct Opt<kind_t> umko = {&umk};
+
+opt_t<kind_t> kind_to_opt(kind_t ka) {
+  let &Kind(k,a) = ka;
+  switch (a) {
+  case Aliasable:
+    switch (k) {
+    case AnyKind: return &ako;
+    case MemKind: return &mko;
+    case BoxKind: return &bko;
+    case RgnKind: return &rko;
+    case EffKind: return &eko;
+    case IntKind: return &iko;
+    case BoolKind: return &bko;
+    case PtrBndKind: default: return &ptrbko;
+    }
+  case Unique:
+    switch (k) {
+    case AnyKind: return &uako;
+    case MemKind: return &umko;
+    case BoxKind: return &ubko;
+    case RgnKind: return &urko;
+    default: break;
+    }
+    break;
+  case Top: 
+    switch (k) {
+    case AnyKind: return &tako;
+    case MemKind: return &tmko;
+    case BoxKind: return &tbko;
+    case RgnKind: return &trko;
+    default: break;
+    }
+    break;
+  default: break;
+  }
+  Warn::impos2("kind_to_opt: bad kind ",ka);
+}
+
+kindbound_t kind_to_bound(kind_t k) {
+  return new Eq_kb(k);
+}
+opt_t<kindbound_t> kind_to_bound_opt(kind_t k) {
+  return new Opt(kind_to_bound(k));
+}
+
+// Convert an identifier to a kind
+kind_t id_to_kind(string_t<`H> s, seg_t loc) {
+  if(strlen(s)==1 || strlen(s)==2)
+    switch (s[0]) {
+    case 'A': return &ak;
+    case 'M': return &mk;
+    case 'B': return &bk;
+    case 'R': return &rk;
+    case 'E': return &ek;
+    case 'I': return &ik;
+    case 'U': 
+      switch (s[1]) {
+      case 'R':	return &urk;
+      case 'A': return &uak;
+      case 'M': return &umk;
+      case 'B': return &ubk;
+      default: break;
+      }
+      break;
+    case 'T':
+      switch (s[1]) {
+      case 'R':	return &trk;
+      case 'A': return &tak;
+      case 'M': return &tmk;
+      case 'B': return &tbk;
+      default: break;
+      }
+      break;
+    default:  break;
+  }
+  Warn::err2(loc,"bad kind: ",s," strlen=",s,strlen(s));
+  return &bk;
+}
+
+string_t kind2string(kind_t ka) {
+  let &Kind(k,a) = ka;
+  switch (k) {
+  case AnyKind:
+    switch (a) {
+    case Aliasable: return "A";
+    case Unique: return "UA";
+    case Top: default: return "TA";
+    }
+  case MemKind:
+    switch (a) {
+    case Aliasable: return "M";
+    case Unique: return "UM";
+    case Top: default: return "TM";
+    }
+  case BoxKind:
+    switch (a) {
+    case Aliasable: return "B";
+    case Unique: return "UB";
+    case Top: default: return "TB";
+    }
+  case RgnKind:
+    switch (a) {
+    case Aliasable: return "R";
+    case Unique: return "UR";
+    case Top: default: return "TR";
+    }
+  case EffKind: return "E";
+  case IntKind: return "I";
+  case BoolKind: return "BOOL";
+  case PtrBndKind: default: return "PTRBND";
+  }
+}
+
+kindbound_t compress_kb(kindbound_t k) {
+  switch (k) {
+  case &Eq_kb(_): 
+  case &Unknown_kb(NULL):
+  case &Less_kb(NULL,_): return k;
+  case &Unknown_kb(&Opt(*k2)): fallthru(k2);
+  case &Less_kb(&Opt(*k2),_): 
+    *k2 = compress_kb(*k2);
+    return *k2;
+  }
+}
+kind_t force_kb(kindbound_t kb) {
+  switch (compress_kb(kb)) {
+  case &Eq_kb(k): return k;
+  case &Unknown_kb(*f): fallthru(f,&bk);
+  case &Less_kb(*f,k):
+    *f = new Opt(kind_to_bound(k)); 
+    return k;
+  }
+}
+
+// does a deep copy of a type to avoid sharing type variables.
+// Note that any evars continue to be shared.  This should
+// be run only before feeding the type to the well-formedness checker.
+kindbound_t copy_kindbound(kindbound_t kb) {
+  switch (compress_kb(kb)) {
+  case &Unknown_kb(_): return new Unknown_kb(NULL);
+  case &Less_kb(_,k):  return new Less_kb(NULL,k);
+  default: return kb;
+  }
+}
+
+// Our lattice looks like this:
+//          AbsType   EffKind  RgnKind  * Top
+//             V                          V V
+//          MemType               Aliasable Unique
+//             V
+//          BoxType
+// Only used during unification -- we can constrain an Evar or VarType
+// as long as we move down in the lattice.
+bool kind_leq(kind_t ka1, kind_t ka2) {
+  let &Kind(k1,a1) = ka1;
+  let &Kind(k2,a2) = ka2;
+  // check the kind part
+  if (k1 != k2)
+    switch ($(k1,k2)) {
+    case $(BoxKind, MemKind):
+    case $(BoxKind, AnyKind):
+    case $(MemKind, AnyKind): break;
+    default: return false;
+    }
+  // check the aliasable part
+  if (a1 != a2)
+    switch ($(a1,a2)) {
+    case $(Aliasable, Top):
+    case $(Unique, Top): return true;
+    default: return false;
+    }
+  return true;
+}
+
+kind_t tvar_kind(tvar_t tv, kind_t def) {
+  switch (compress_kb(tv->kind)) {
+  case &Eq_kb(k):     return k;
+  case &Less_kb(_,k): return k;
+  default: tv->kind = new Less_kb(NULL,def); return def;
+  }
+}
+
+$(tvar_t,kindbound_t) swap_kind(type_t t, kindbound_t kb) {
+  switch (compress(t)) {
+  case &VarType(tv):
+    let oldkb = tv->kind;
+    tv->kind = kb;
+    return $(tv,oldkb);
+  default: Warn::impos2("swap_kind: cannot update the kind of ", t);
+  }
+}
+
+bool kind_eq(kind_t k1, kind_t k2) {
+  return k1 == k2 || (k1->kind == k2->kind && k1->aliasqual == k2->aliasqual);
+}
+
+// Given two kind constraint refs, merge them so that they will
+// point to the most constrained kind -- if they're compatible
+// return true, otherwise return false.
+bool constrain_kinds(kindbound_t c1, kindbound_t c2) {
+  c1 = compress_kb(c1);
+  c2 = compress_kb(c2);
+  if (c1 == c2) return true;
+  switch ($(c1,c2)) {
+  case $(&Eq_kb(k1),&Eq_kb(k2)): return k1 == k2;
+  case $(_,&Unknown_kb(*f)): *f = new Opt(c1); return true;
+  case $(&Unknown_kb(*f),_): *f = new Opt(c2); return true;
+  case $(&Less_kb(*f,k1),&Eq_kb(k2)):
+    if (!kind_leq(k2,k1)) 
+      return false;
+    *f = new Opt(c2); 
+    return true;
+  case $(&Eq_kb(k1),&Less_kb(*f,k2)):
+    if (!kind_leq(k1,k2)) 
+      return false;
+    *f = new Opt(c1); 
+    return true;
+  case $(&Less_kb(*f1,k1),&Less_kb(*f2,k2)):
+    if (kind_leq(k1,k2)) {
+      *f2 = new Opt(c1); 
+      return true;
+    } 
+    if (kind_leq(k2,k1)) {
+      *f1 = new Opt(c2); 
+      return true;
+    } 
+    return false;
+  }
+}
+

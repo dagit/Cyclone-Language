@@ -22,6 +22,7 @@
 #include "flags.h"
 #include "unify.h"
 #include "tcutil.h"
+#include "kinds.h"
 #include "attributes.h"
 #include "tctyp.h"
 #include "tcexp.h"
@@ -288,19 +289,19 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
         if (args != NULL)
           Warn::err2(loc,"main declared with too many arguments");
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->i.tvars);
-        if (!Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
-                                     new_evar(new Opt(&rk),tvs),
+        if (!Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&Kinds::rk),tvs)),
+                                     new_evar(new Opt(&Kinds::rk),tvs),
                                      empty_tqual(0),any_bool(tvs->v))) &&
-            !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&rk),
+            !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&Kinds::rk),
                                                                tvs)),
-                                     new_evar(new Opt(&rk),tvs),
+                                     new_evar(new Opt(&Kinds::rk),tvs),
                                      empty_tqual(0),any_bool(tvs->v))) &&
-            !Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&rk),tvs)),
-                                     new_evar(new Opt(&rk),tvs),
+            !Unify::unify(t2,fatptr_type(string_type(new_evar(new Opt(&Kinds::rk),tvs)),
+                                     new_evar(new Opt(&Kinds::rk),tvs),
                                      const_tqual(0),any_bool(tvs->v))) &&
-            !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&rk),
+            !Unify::unify(t2,fatptr_type(const_string_type(new_evar(new Opt(&Kinds::rk),
                                                                tvs)),
-                                     new_evar(new Opt(&rk),tvs),
+                                     new_evar(new Opt(&Kinds::rk),tvs),
                                      const_tqual(0),any_bool(tvs->v)))) {
           Warn::err2(loc,"second argument of main has type ",t2,
 		     " instead of char??");
@@ -324,25 +325,25 @@ static void tcTypedefdecl(tenv_t te, seg_t loc, typedefdecl_t td) {
   check_unique_tvars(loc,td->tvs);
   add_tvar_identities(td->tvs);
   if (td->defn != NULL) {
-    check_type(loc,te,td->tvs,&tak,false,true,(type_t)td->defn);
+    check_type(loc,te,td->tvs,&Kinds::tak,false,true,(type_t)td->defn);
     td->tq.real_const = 
       extract_const_from_typedef(loc,td->tq.print_const,(type_t)td->defn);
     // FIX: check that attributes are okay for this kind of type
   } 
   // run through and constrain the kinds of unconstrained tvs
   for (_ tvs = td->tvs; tvs != NULL; tvs = tvs->tl)
-    switch (compress_kb(tvs->hd->kind)) {
+    switch (Kinds::compress_kb(tvs->hd->kind)) {
     case &Unknown_kb(*f): 
       if (td->defn != NULL)
         Warn::warn2(loc,"type variable ",tvs->hd, " is not used in typedef");
-      *f = new Opt(kind_to_bound(&tbk)); break;
+      *f = new Opt(Kinds::kind_to_bound(&Kinds::tbk)); break;
     case &Less_kb(*f,k):
       // treat region kinds specially; unconstrained region kinds
       //   should be made Aliasable
 //       if (k->kind == RgnKind && k->aliasqual == Top)
 // 	*f = new Opt(kind_to_bound(new Kind(RgnKind,Aliasable)));
 //       else
-	*f = new Opt(kind_to_bound(k));
+	*f = new Opt(Kinds::kind_to_bound(k));
       break;
     default: continue;
     }
@@ -361,8 +362,8 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
   // FIX?: forbid effect variables (but they're going away)
   for(; rpo != NULL; rpo = rpo->tl) {
     let &$(e,r) = rpo->hd;
-    check_type(loc,te,tvs,&ek,false,false,e);
-    check_type(loc,te,tvs,&trk,false,false,r); 
+    check_type(loc,te,tvs,&Kinds::ek,false,false,e);
+    check_type(loc,te,tvs,&Kinds::trk,false,false,r); 
   }
 
   list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
@@ -378,13 +379,13 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
     if (strcmp(*fn,"") != 0)
       prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
 
-    kind_t field_kind = &tmk;
+    kind_t field_kind = &Kinds::tmk;
     // FIX:  we can get ill-founded cycles of the form
     // struct Foo<`a::A> { struct Foo<`a> x; } here, and
     // it can cut across multiple definitions...  
     if (str_or_union == UnionA || 
 	(fs->tl == NULL && str_or_union == StructA)) 
-      field_kind = &tak; // we allow abstract kind for the last field
+      field_kind = &Kinds::tak; // we allow abstract kind for the last field
     check_type(loc,te,tvs,field_kind,false,false,t);
 
     fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
@@ -402,7 +403,7 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
 		   "@requires clause has type ",(type_t)requires_clause->topt,
 		   " instead of integral type");
       else {
-	check_type(requires_clause->loc,te,tvs,&ik,false,false,new ValueofType(requires_clause));
+	check_type(requires_clause->loc,te,tvs,&Kinds::ik,false,false,new ValueofType(requires_clause));
         // convert the requires expression to a CNF formula
 	let relns = Relations::exp2relns(uprev_rgn,requires_clause);
 
@@ -427,42 +428,41 @@ static void tcAggrImpl(tenv_t te, seg_t loc,
 
 static void rule_out_memkind(seg_t loc, qvar_t n, list_t<tvar_t> tvs,
 			     bool constrain_top_kind) {
-  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
-    switch (compress_kb(tvs2->hd->kind)) {
+  for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl)
+    switch (Kinds::compress_kb(tvs2->hd->kind)) {
     case &Unknown_kb(*f):
-      *f = new Opt(kind_to_bound(&bk)); continue;
+      *f = new Opt(Kinds::kind_to_bound(&Kinds::bk)); continue;
     case &Less_kb(*f,&Kind(MemKind,a)):
       if (constrain_top_kind && a == Top)
-	*f = new Opt(kind_to_bound(new Kind(BoxKind,Aliasable)));
+	*f = new Opt(Kinds::kind_to_bound(new Kind(BoxKind,Aliasable)));
       else
-	*f = new Opt(kind_to_bound(new Kind(BoxKind,a)));
+	*f = new Opt(Kinds::kind_to_bound(new Kind(BoxKind,a)));
       continue;
     case &Less_kb(*f,&Kind(BoxKind,Top)) && constrain_top_kind:
-      *f = new Opt(kind_to_bound(new Kind(BoxKind,Aliasable)));
+      *f = new Opt(Kinds::kind_to_bound(new Kind(BoxKind,Aliasable)));
       continue;
     case &Less_kb(*f,k): 
-      *f = new Opt(kind_to_bound(k)); continue;
+      *f = new Opt(Kinds::kind_to_bound(k)); continue;
     case &Eq_kb(&Kind(MemKind,a)):
       Warn::err2(loc,"type ",n," attempts to abstract type variable ",
 		 tvs2->hd," of kind ",new Kind(MemKind,a)); 
       continue;
     default: continue;
     }
-  }
 }
 static void rule_out_mem_and_unique(seg_t loc, qvar_t q, list_t<tvar_t> tvs) {
   for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
-    switch (compress_kb(tvs2->hd->kind)) {
+    switch (Kinds::compress_kb(tvs2->hd->kind)) {
     case &Unknown_kb(*f): fallthru(f);
 //     case &Less_kb(*f,&Kind(BoxKind,Top)): fallthru(f);
     case &Less_kb(*f,&Kind(MemKind,Top)): fallthru(f);
     case &Less_kb(*f,&Kind(MemKind,Aliasable)): 
-      *f = new Opt(kind_to_bound(&bk)); break;
+      *f = new Opt(Kinds::kind_to_bound(&Kinds::bk)); break;
     case &Less_kb(*f,&Kind(AnyKind,Top)): fallthru(f);
     case &Less_kb(*f,&Kind(AnyKind,Aliasable)): 
-      *f = new Opt(kind_to_bound(&ak)); break;
+      *f = new Opt(Kinds::kind_to_bound(&Kinds::ak)); break;
     case &Less_kb(*f,&Kind(RgnKind,Top)):
-      *f = new Opt(kind_to_bound(&rk)); break;
+      *f = new Opt(Kinds::kind_to_bound(&Kinds::rk)); break;
     case &Eq_kb(&Kind(RgnKind,Top)):
       Warn::err2(loc,"type ",q," attempts to abstract type variable ",
 		 tvs2->hd," of kind TR"); break;
@@ -582,7 +582,7 @@ static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, seg_t loc,
   for(let fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
     for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
-      check_type(f->loc, te, tvs, &tmk, false, false, (*typs->hd)[1]);
+      check_type(f->loc, te, tvs, &Kinds::tmk, false, false, (*typs->hd)[1]);
       // make sure no no-alias fields in datatype
       if (is_noalias_pointer_or_aggr((*typs->hd)[1]))
 	Warn::err2(f->loc, "noalias pointers in datatypes are not allowed: ",
