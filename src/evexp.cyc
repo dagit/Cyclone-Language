@@ -362,7 +362,7 @@ bool okay_szofarg(type_t t) {
   case &IntType(_,_): 
   case FloatType:    
   case &DoubleType(_): return true;
-  case &ArrayType(ArrayInfo{t2,_,e,_}): // assume e constant checked elsewhere
+  case &ArrayType(ArrayInfo{t2,_,e,_,_}): //assume e constant checked elsewhere
     return (e != NULL); 
   case &FnType(_): return false;
   case &RgnHandleType(_): return true;

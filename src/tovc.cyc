@@ -256,7 +256,7 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
     // don't box if it's a stack-allocated array
   while(Iter::next(iter,&vd))
     switch(vd->type) {
-    case &ArrayType(ArrayInfo{elt_typ,_,_,_}): 
+    case &ArrayType(ArrayInfo{elt_typ,_,_,_,_}): 
       params = new List(new $((*vd->name)[1], vd->tq, 
 			      cstar_typ(elt_typ,empty_tqual(NULL))),
 			params);

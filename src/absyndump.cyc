@@ -1203,11 +1203,11 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
     if(next_is_pointer)
       dump_char(')');
     switch(tms->hd) {
-    case &Carray_mod(zeroterm): 
+    case &Carray_mod(zeroterm,_): 
       dump("[]"); 
       if (conref_def(false,zeroterm)) dump("ZEROTERM");
       break;
-    case &ConstArray_mod(e,zeroterm):
+    case &ConstArray_mod(e,zeroterm,_):
       dump_char('['); dumpexp(e); dump_char(']'); 
       if (conref_def(false,zeroterm)) dump("ZEROTERM");
       break;

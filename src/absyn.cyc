@@ -279,21 +279,24 @@ type_t starb_typ(type_t t, type_t r, tqual_t tq, bounds_t b,
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = true_conref, 
 					  .bounds = new_conref(b),
-					  .zero_term = zeroterm, .loc=NULL}});
+					  .zero_term = zeroterm, 
+                                          .ptrloc=NULL}});
 }
 type_t atb_typ(type_t t, type_t r, tqual_t tq, bounds_t b,
 	       conref_t<bool> zeroterm) {
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = false_conref, 
 					  .bounds = new_conref(b),
-					  .zero_term = zeroterm, .loc=NULL}});
+					  .zero_term = zeroterm, 
+                                          .ptrloc=NULL}});
 }
 
 type_t star_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) { 
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = true_conref, 
 					  .bounds = bounds_one_conref,
-					  .zero_term = zeroterm, .loc=NULL}});
+					  .zero_term = zeroterm, 
+                                          .ptrloc=NULL}});
 }
 type_t cstar_typ(type_t t, tqual_t tq) { 
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
@@ -301,24 +304,26 @@ type_t cstar_typ(type_t t, tqual_t tq) {
 					  .nullable = true_conref, 
 					  .bounds = bounds_one_conref,
 					  .zero_term = false_conref,
-                                          .loc=NULL}});
+                                          .ptrloc=NULL}});
 }
 type_t at_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = false_conref, 
 					  .bounds = bounds_one_conref,
-					  .zero_term = zeroterm, .loc=NULL}});
+					  .zero_term = zeroterm, 
+                                          .ptrloc=NULL}});
 }
 type_t tagged_typ(type_t t, type_t r, tqual_t tq, conref_t<bool> zeroterm) {
   return new PointerType(PtrInfo {.elt_typ = t, .elt_tq = tq,
 				  PtrAtts{.rgn = r, .nullable = true_conref, 
 					  .bounds = bounds_unknown_conref,
-					  .zero_term = zeroterm, .loc=NULL}});
+					  .zero_term = zeroterm, 
+                                          .ptrloc=NULL}});
 }
 
 type_t array_typ(type_t elt_type, tqual_t tq, exp_opt_t num_elts, 
-                 conref_t<bool> zero_term) {
-  return new ArrayType(ArrayInfo{elt_type,tq,num_elts,zero_term});
+                 conref_t<bool> zero_term, seg_t ztloc) {
+  return new ArrayType(ArrayInfo{elt_type,tq,num_elts,zero_term,ztloc});
 }
 
 // FILE

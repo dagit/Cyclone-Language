@@ -534,8 +534,8 @@ doc_t group_braces(string_t<`H> sep, list_t<doc_t,`H> ss) {
 static void print_tms(list_t<type_modifier_t> tms) {
   for (; tms != NULL; tms = tms->tl)
     switch (tms->hd) {
-    case &Carray_mod(_): fprintf(stderr,"Carray_mod "); break;
-    case &ConstArray_mod(_,_):fprintf(stderr,"ConstArray_mod "); break;
+    case &Carray_mod(_,_): fprintf(stderr,"Carray_mod "); break;
+    case &ConstArray_mod(_,_,_):fprintf(stderr,"ConstArray_mod "); break;
     case &Function_mod(&WithTypes(ys,_,_,_,_)):
       fprintf(stderr,"Function_mod(");
       for (; ys != NULL; ys = ys->tl) {
@@ -560,11 +560,11 @@ doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   doc_t rest = dtms2doc(false,d,tms->tl);
   doc_t p_rest = cat(text("("),rest,text(")"));
   switch (tms->hd) {
-  case &Carray_mod(zeroterm):
+  case &Carray_mod(zeroterm,_):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     return cat(rest,conref_def(false,zeroterm) ? 
                text("[]ZEROTERM ") : text("[]"));
-  case &ConstArray_mod(e,zeroterm):
+  case &ConstArray_mod(e,zeroterm,_):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     return cat(rest, text("["), exp2doc(e), 
                conref_def(false,zeroterm) ? text("]ZEROTERM ") : text("]"));
@@ -1845,14 +1845,14 @@ static list_t<type_modifier_t> bubble_attributes(type_modifier_t atts,
 // Conversion between alternate forms of types
 $(tqual_t,type_t,list_t<type_modifier_t>) to_tms(tqual_t tq,type_t t) {
   switch (t) {
-  case &ArrayType(ArrayInfo{t2,tq2,e,zeroterm}):
+  case &ArrayType(ArrayInfo{t2,tq2,e,zeroterm,ztl}):
     // Throw away tq, can't qualify an array
     let $(tq3,t3,tml3) = to_tms(tq2,t2);
     type_modifier_t tm;
     if (e == NULL)
-      tm = new Carray_mod(zeroterm);
+      tm = new Carray_mod(zeroterm,ztl);
     else
-      tm = new ConstArray_mod((exp_t)e,zeroterm);
+      tm = new ConstArray_mod((exp_t)e,zeroterm,ztl);
     return $(tq3, t3, new List(tm,tml3));
 
   case &PointerType(PtrInfo(t2,tq2,ptratts)):

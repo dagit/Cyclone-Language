@@ -131,7 +131,7 @@ static absRval_t i_typ_to_absrval(bool allow_zeroterm,
 	d = Dict::insert(d, n, i_typ_to_absrval(false, t2,leafval));
     }
     return new Aggregate(d);
-  case &ArrayType(ArrayInfo{et,_,_,zeroterm}) && conref_def(false,zeroterm):
+  case &ArrayType(ArrayInfo{et,_,_,zeroterm,_}) && conref_def(false,zeroterm):
     // special case for zero-terminated arrays of bits-only things -- 
     // here, we initialize them at translation by putting a 0 in at the end.
     return (allow_zeroterm && Tcutil::bits_only(et)) ? unknown_all : leafval;
@@ -936,7 +936,7 @@ static bool contains_region(tvar_t rgn, type_t t) {
     for (; fds != NULL; fds = fds->tl) 
       if (contains_region(rgn,fds->hd->type)) return true;
     return false;
-  case &ArrayType(ArrayInfo{t2,_,_,_}): fallthru(t2);
+  case &ArrayType(ArrayInfo{t2,_,_,_,_}): fallthru(t2);
   case &AccessEff(t2):     fallthru(t2);
   case &RgnsEff(t2):       return contains_region(rgn,t2);
   // careful: we don't want to kill any region handles to the region in

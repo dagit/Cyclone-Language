@@ -1164,15 +1164,15 @@ int main(int argc, string_t<`H> ?`H argv) {
   } catch { case e: 
     switch(e) {
     case &Core::Failure(s):
-      printf ("Exception Core::Failure %s\n", s); break;
+      fprintf (stderr,"Exception Core::Failure %s\n", s); break;
     case &Core::Impossible(s):
-      printf ("Exception Core::Impossible %s\n", s); break;
+      fprintf (stderr,"Exception Core::Impossible %s\n", s); break;
     case Dict::Absent:
-      printf("Exception Dict::Absent\n"); break;
+      fprintf (stderr,"Exception Dict::Absent\n"); break;
     case &Core::Invalid_argument(s):
-      printf ("Exception Core::Invalid_argument %s\n", s); break;
+      fprintf (stderr,"Exception Core::Invalid_argument %s\n", s); break;
     case _:
-      printf ("Uncaught exception\n"); break;
+      fprintf (stderr,"Uncaught exception\n"); break;
     }
     compile_failure = true;
     remove_cfiles();

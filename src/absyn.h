@@ -142,6 +142,7 @@ namespace Absyn {
   typedef tunion OffsetofField offsetof_field_t;
   typedef struct MallocInfo malloc_info_t;
   typedef tunion Coercion coercion_t;
+  typedef struct PtrLoc *ptrloc_t;
 
   // scopes for declarations 
   EXTERN_ABSYN tunion Scope { 
@@ -219,12 +220,18 @@ namespace Absyn {
     AbsUpper_b(type_t); // abstract bound -- type has IntKind
   };
 
+  EXTERN_ABSYN struct PtrLoc {
+    seg_t  ptr_loc;
+    seg_t  rgn_loc;
+    seg_t  zt_loc;
+  };
+
   EXTERN_ABSYN struct PtrAtts {
     rgntype_t          rgn;       // region of value to which pointer points
     conref_t<bool>     nullable;  // type admits NULL (* vs. @)
     conref_t<bounds_t> bounds;    // legal bounds for pointer indexing
     conref_t<bool>     zero_term; // true => zero terminated array
-    seg_t              loc;       // location of *,@, or ?
+    ptrloc_t           ptrloc;    // location information
   };
 
   // information about a pointer type
@@ -304,6 +311,7 @@ namespace Absyn {
     tqual_t   tq;             // qualifiers
     exp_opt_t num_elts;       // number of elements
     conref_t<bool> zero_term; // true => zero-terminated
+    seg_t     zt_loc;         // location of zeroterm qualifier
   };
 
   // Note: The last fields of AggrType, TypedefType, and the decl 
@@ -398,8 +406,8 @@ namespace Absyn {
 
   // Type modifiers are used for parsing/pretty-printing
   EXTERN_ABSYN tunion Type_modifier {
-    Carray_mod(conref_t<bool>); // [], conref controls zero-term
-    ConstArray_mod(exp_t,conref_t<bool>); // [c], conref controls zero-term
+    Carray_mod(conref_t<bool>,seg_t); // [], conref controls zero-term
+    ConstArray_mod(exp_t,conref_t<bool>,seg_t); // [c], conref controls zero-term
     Pointer_mod(ptr_atts_t,tqual_t); // qualifer for the point (**not** elts)
     Function_mod(funcparams_t);
     TypeParams_mod(list_t<tvar_t>,seg_t,bool);// when bool is true, print kinds
@@ -843,7 +851,7 @@ namespace Absyn {
   extern type_t union_typ(var_t name);
   // arrays
   extern type_t array_typ(type_t elt_type, tqual_t tq, exp_opt_t num_elts, 
-                          conref_t<bool> zero_term);
+                          conref_t<bool> zero_term, seg_t ztloc);
 
   /////////////////////////////// Expressions ////////////////////////
   extern exp_t new_exp(raw_exp_t, seg_t);

@@ -243,9 +243,9 @@ type_t copy_type(type_t t) {
   case &IntType(sn,sz): return new IntType(sn,sz); // copy necessary???
   case FloatType: return t;
   case &DoubleType(b): return new DoubleType(b); // copy necessarry???
-  case &ArrayType(ArrayInfo{et,tq,eopt,zt}): 
+  case &ArrayType(ArrayInfo{et,tq,eopt,zt,ztl}): 
     // FIX: should really copy eopt???
-    return new ArrayType(ArrayInfo{copy_type(et),tq,eopt,copy_conref(zt)});
+    return new ArrayType(ArrayInfo{copy_type(et),tq,eopt,copy_conref(zt),ztl});
   case &FnType(FnInfo{tvs,effopt,rt,args,c_varargs,cyc_varargs,rgn_po,atts}):
     let tvs2 = List::map(copy_tvar,tvs);
     let effopt2 = (effopt == NULL) ? NULL : new Opt(copy_type(effopt->v));
@@ -417,7 +417,7 @@ static void occurs(type_t evar,region_t<`r> r,list_t<tvar_t,`r> env,type_t t) {
     default: break;
     }
     break;
-  case &ArrayType(ArrayInfo{t2,_,_,_}): occurs(evar,r,env,t2); break;
+  case &ArrayType(ArrayInfo{t2,_,_,_,_}): occurs(evar,r,env,t2); break;
   case &FnType(FnInfo{tvs,eff,rt,args,c_varargs,cyc_varargs,rgn_po,atts}): 
     env = List::rappend(r,tvs,env);
     if (eff != NULL) occurs(evar,r,env,eff->v);
@@ -659,7 +659,7 @@ static type_t rgns_of(type_t t) {
   case &PointerType(PtrInfo(et,_,PtrAtts(r,_,_,_,_))):
     // ignoring a sizeof(int*`r) in the bounds -- nobody will notice
     return normalize_effect(new JoinEff(list(new AccessEff(r),rgns_of(et))));
-  case &ArrayType(ArrayInfo{et,_,_,_}):
+  case &ArrayType(ArrayInfo{et,_,_,_,_}):
     return normalize_effect(rgns_of(et));
   case &TupleType(tqts):
     let ts = NULL;
@@ -1154,8 +1154,8 @@ void unify_it(type_t t1, type_t t2) {
     failure_reason = "(different tunion field types)";
     break;
 
-  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,loc1))),
-         &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1,loc2)))):
+  case $(&PointerType(PtrInfo(t2a,tqual2a,PtrAtts(rgn2,null2a,b2,zt2,_))),
+         &PointerType(PtrInfo(t1a,tqual1a,PtrAtts(rgn1,null1a,b1,zt1,_)))):
     unify_it(t1a,t2a);
     unify_it(rgn2,rgn1); // the whole reason regions are "types"
     t1_failure = t1;
@@ -1189,8 +1189,8 @@ void unify_it(type_t t1, type_t t2) {
 
   case $(&TagType(t1),&TagType(t2)): unify_it(t1,t2); return;
 
-  case $(&ArrayType(ArrayInfo{t2a,tq2a,e1,zt1}), 
-         &ArrayType(ArrayInfo{t1a,tq1a,e2,zt2})):
+  case $(&ArrayType(ArrayInfo{t2a,tq2a,e1,zt1,_}), 
+         &ArrayType(ArrayInfo{t1a,tq1a,e2,zt2,_})):
     unify_it(t1a,t2a);
     unify_tqual(tq1a,t1a,tq2a,t2a);
     t1_failure = t1;
@@ -1530,8 +1530,8 @@ int typecmp(type_t t1, type_t t2) {
     else if (b1) return -1;
     else return 1;
 
-  case $(&ArrayType(ArrayInfo{t2a,tq2a,e1,zt1}), 
-         &ArrayType(ArrayInfo{t1a,tq1a,e2,zt2})):
+  case $(&ArrayType(ArrayInfo{t2a,tq2a,e1,zt1,_}), 
+         &ArrayType(ArrayInfo{t1a,tq1a,e2,zt2,_})):
     let tqc = tqual_cmp(tq1a,tq2a);
     if(tqc != 0) return tqc;
     let tc = typecmp(t1a,t2a);
@@ -1767,8 +1767,8 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
                         pinfo_b.elt_tq.real_const));
     return okay;
 
-  case $(&ArrayType(ArrayInfo{t1a,tq1a,e1,zt1}),
-         &ArrayType(ArrayInfo{t2a,tq2a,e2,zt2})):
+  case $(&ArrayType(ArrayInfo{t1a,tq1a,e1,zt1,_}),
+         &ArrayType(ArrayInfo{t2a,tq2a,e2,zt2,_})):
     bool okay;
     // we could allow e1 >= e2 but I think it's best to give an error
     okay = unify_conrefs(intcmp,zt1,zt2) && 
@@ -2002,8 +2002,8 @@ static bool subtype(tenv_t te, list_t<$(type_t,type_t)@`H,`H> assume,
   switch ($(t1,t2)) {
     // the following allows us to cast an unsigned int pointer to an int 
     // pointer and vice versa.  This is okay because the types are isomorphic.
-   case $(&PointerType(PtrInfo(t_a, q_a, PtrAtts(rt_a, null_a, b_a, zt_a,_))),
-          &PointerType(PtrInfo(t_b, q_b, PtrAtts(rt_b, null_b, b_b, zt_b,_)))):
+   case $(&PointerType(PtrInfo(t_a, q_a, PtrAtts(rt_a,null_a,b_a,zt_a,_))),
+          &PointerType(PtrInfo(t_b, q_b, PtrAtts(rt_b,null_b,b_b,zt_b,_)))):
     // if t1 is const then t2 must be const
     // FIX: we need to take any qualifiers into account on typedefs
     if (q_a.real_const && !q_b.real_const) 
@@ -2192,9 +2192,9 @@ coercion_t castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     default: break;
     }
     return Unknown_coercion;
-  case &ArrayType(ArrayInfo{t1a,tq1a,e1,zt1}):
+  case &ArrayType(ArrayInfo{t1a,tq1a,e1,zt1,_}):
     switch (t2) {
-    case &ArrayType(ArrayInfo{t2a,tq2a,e2,zt2}):
+    case &ArrayType(ArrayInfo{t2a,tq2a,e2,zt2,_}):
       bool okay;
       okay=
         (e1 != NULL && e2 != NULL && unify_conrefs(intcmp,zt1,zt2) &&
@@ -2424,9 +2424,9 @@ type_t rsubstitute(region_t<`r> rgn,
   case &TypedefType(n,ts,td,topt): 
     let new_ts = substs(rgn,inst,ts);
     return new_ts == ts ? t : new TypedefType(n,new_ts,td,topt);
-  case &ArrayType(ArrayInfo{t1,tq,e,zt}):     
+  case &ArrayType(ArrayInfo{t1,tq,e,zt,ztl}):     
     let new_t1 = rsubstitute(rgn,inst,t1);
-    return new_t1 == t1 ? t : new ArrayType(ArrayInfo{new_t1,tq,e,zt});
+    return new_t1 == t1 ? t : new ArrayType(ArrayInfo{new_t1,tq,e,zt,ztl});
   case &PointerType(PtrInfo(t1,tq,PtrAtts(r,n,b,zt,_))): 
     let new_t1 = rsubstitute(rgn,inst,t1);
     let new_r  = rsubstitute(rgn,inst,r);
@@ -2973,7 +2973,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
   case &IntType(_,_): 
   case FloatType:    
   case &DoubleType(_): break; 
-  case &ArrayType(ArrayInfo{t1,*tqp,*eptr,zt}):
+  case &ArrayType(ArrayInfo{t1,*tqp,*eptr,zt,ztl}):
     // FIX: check that tqual is valid?
     // we don't allow abstract mem types as the elt type of an array type
     let e = *eptr;
@@ -3751,7 +3751,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       return bogus_ans;
     case &PointerType(PtrInfo(_,tq,PtrAtts(r,_,_,_,_))): 
       return $(tq.real_const,r);
-    case &ArrayType(ArrayInfo{_,tq,_,_}): 
+    case &ArrayType(ArrayInfo{_,tq,_,_,_}): 
       // Actually, this should be impossible since we've surely
       // promoted e1 to a pointer.
       // NOTE: Unlike C, we cannot allow any e1 -- it must be an lvalue.
@@ -3774,7 +3774,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
 //     corresponding field that has type t 
 type_t array_to_ptr(tenv_t te, type_t e_typ, exp_t e) {
   switch (compress(e_typ)) {
-  case &ArrayType(ArrayInfo{t,tq,_,zt}):
+  case &ArrayType(ArrayInfo{t,tq,_,zt,_}):
     let $(_,rgn) = addressof_props(te,e);
     return atb_typ(t,rgn,tq,new Upper_b(e),zt);
   default: 
@@ -3823,7 +3823,7 @@ bool bits_only(type_t t) {
   case &DoubleType(_): return true;
   case &EnumType(_,_): 
   case &AnonEnumType(_): return false; //could be true but for pattern exhaustion!
-  case &ArrayType(ArrayInfo{t,_,_,zero_term}): 
+  case &ArrayType(ArrayInfo{t,_,_,zero_term,_}): 
     // can't allow a zero-terminated array to be treated as bits only
     // for initialization purposes
     return (!conref_def(false,zero_term)) && bits_only(t);
@@ -3935,7 +3935,7 @@ bool supports_default(type_t t) {
       return conref_def(true,nullable);
     }
 
-  case &ArrayType(ArrayInfo{t,_,_,_}): return supports_default(t);
+  case &ArrayType(ArrayInfo{t,_,_,_,_}): return supports_default(t);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
       if (!supports_default((*tqs->hd)[1])) return false;

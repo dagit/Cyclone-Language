@@ -173,7 +173,8 @@ static type_specifier_t type_spec(type_t t,seg_t loc) {
 // convert any array types to pointer types
 static type_t array2ptr(type_t t, bool argposn) {
   switch (t) {
-  case &ArrayType(ArrayInfo{t1,tq,eopt,zeroterm}):
+    // FIX: don't lose zero-term location
+  case &ArrayType(ArrayInfo{t1,tq,eopt,zeroterm,ztl}):
     return starb_typ(t1,
                      argposn ? new_evar(new Opt(RgnKind), NULL) : HeapRgn,
                      tq,
@@ -530,12 +531,12 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
             list_t<type_modifier_t> tms) {
   if (tms==NULL) return $(tq,t,NULL,atts);
   switch (tms->hd) {
-  case &Carray_mod(zeroterm):
+  case &Carray_mod(zeroterm,ztloc):
     return apply_tms(empty_tqual(NULL),
-                     array_typ(t,tq,NULL,zeroterm),atts,tms->tl);
-  case &ConstArray_mod(e,zeroterm):
+                     array_typ(t,tq,NULL,zeroterm,ztloc),atts,tms->tl);
+  case &ConstArray_mod(e,zeroterm,ztloc):
     return apply_tms(empty_tqual(NULL),
-                     array_typ(t,tq,e,zeroterm),atts,tms->tl);
+                     array_typ(t,tq,e,zeroterm,ztloc),atts,tms->tl);
   case &Function_mod(args): {
     switch (args) {
     case &WithTypes(args2,c_vararg,cyc_vararg,eff,rgn_po):
@@ -1645,10 +1646,10 @@ direct_declarator:
       $$=$!3;
     }
 | direct_declarator '[' ']' zeroterm_qual_opt
-    { $$=^$(new Declarator($1->id,new List(new Carray_mod($4),$1->tms)));}
+    { $$=^$(new Declarator($1->id,new List(new Carray_mod($4,LOC(@4,@4)),$1->tms)));}
 | direct_declarator '[' assignment_expression ']' zeroterm_qual_opt
     { $$=^$(new Declarator($1->id,
-                           new List(new ConstArray_mod($3,$5),$1->tms)));}
+                           new List(new ConstArray_mod($3,$5,LOC(@5,@5)),$1->tms)));}
 | direct_declarator '(' parameter_type_list ')'
     { let &$(lis,b,c,eff,po) = $3;
       $$=^$(new Declarator($1->id,new List(new Function_mod(new WithTypes(lis,b,c,eff,po)),$1->tms)));
@@ -1695,10 +1696,10 @@ direct_declarator_withtypedef:
       $$=$!3;
     }
 | direct_declarator_withtypedef '[' ']' zeroterm_qual_opt
-    { $$=^$(new Declarator($1->id,new List(new Carray_mod($4),$1->tms)));}
+    { $$=^$(new Declarator($1->id,new List(new Carray_mod($4,LOC(@4,@4)),$1->tms)));}
 | direct_declarator_withtypedef '[' assignment_expression ']' zeroterm_qual_opt
     { $$=^$(new Declarator($1->id,
-                           new List(new ConstArray_mod($3,$5),$1->tms)));}
+                           new List(new ConstArray_mod($3,$5,LOC(@5,@5)),$1->tms)));}
 | direct_declarator_withtypedef '(' parameter_type_list ')'
     { let &$(lis,b,c,eff,po) = $3;
       $$=^$(new Declarator($1->id,new List(new Function_mod(new WithTypes(lis,b,c,eff,po)),$1->tms)));
@@ -1739,7 +1740,9 @@ one_pointer:
   { list_t<type_modifier_t> ans = NULL;
     if($4 != NULL)
       ans = new List(new Attributes_mod(LOC(@4,@4),$4), ans);
-    ans = new List(new Pointer_mod(PtrAtts($3,(*$1)[1],(*$1)[2],$2,(*$1)[0]),$5), ans);
+    let ptrloc = new PtrLoc{.ptr_loc=(*$1)[0],.rgn_loc=LOC(@3,@3),
+                            .zt_loc=LOC(@2,@2)};
+    ans = new List(new Pointer_mod(PtrAtts($3,(*$1)[1],(*$1)[2],$2,ptrloc),$5), ans);
     $$ = ^$(ans);
   }
 
@@ -2008,13 +2011,13 @@ direct_abstract_declarator:
   '(' abstract_declarator ')'
     { $$=$!2; }
 | '[' ']' zeroterm_qual_opt
-    { $$=^$(new Abstractdeclarator(new List(new Carray_mod($3),NULL))); }
+    { $$=^$(new Abstractdeclarator(new List(new Carray_mod($3,LOC(@3,@3)),NULL))); }
 | direct_abstract_declarator '[' ']' zeroterm_qual_opt
-    { $$=^$(new Abstractdeclarator(new List(new Carray_mod($4),$1->tms))); }
+    { $$=^$(new Abstractdeclarator(new List(new Carray_mod($4,LOC(@4,@4)),$1->tms))); }
 | '[' assignment_expression ']' zeroterm_qual_opt
-    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($2,$4),NULL)));}
+    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($2,$4,LOC(@4,@4)),NULL)));}
 | direct_abstract_declarator '[' assignment_expression ']' zeroterm_qual_opt
-    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($3,$5),
+    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($3,$5,LOC(@5,@5)),
                                             $1->tms)));
     }
 | '(' optional_effect optional_rgn_order ')'

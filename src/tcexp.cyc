@@ -145,7 +145,7 @@ void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t * topt, exp_t e,
     case &KnownAggr(&ad):   e->r = new Struct_e(ad->name,NULL,des,ad);
     }
     break;
-  case &ArrayType(ArrayInfo{at,aq,_,_}): e->r = new Array_e(des); break;
+  case &ArrayType(ArrayInfo{at,aq,_,_,_}): e->r = new Array_e(des); break;
   case &AnonAggrType(_,_):  e->r = new AnonStruct_e(t,des); break;
   default:                  e->r = new Array_e(des);        break;//do something
   }
@@ -243,10 +243,10 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
                 new Upper_b(elen),true_conref);
     if (topt != NULL) {
       switch (compress(*topt)) {
-      case &ArrayType(ArrayInfo{_,tq,_,_}):
+      case &ArrayType(ArrayInfo{_,tq,_,_,_}):
         // as an array initializer, a string literal can be either
         // treated as zero-terminated or not, hence the empty_conref.
-        return array_typ(char_typ, tq, elen, empty_conref());
+        return array_typ(char_typ, tq, elen, empty_conref(),NULL);
       case &PointerType(_):
         if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
           e->topt = new Opt(t);
@@ -276,6 +276,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t c, exp_t e){
 				PtrAtts(new_evar(&rk,new Opt(tenv_tvs)), 
 					true_conref,
 					empty_conref(),empty_conref(),NULL)));
+                                       
     break;
   }
   return t;
@@ -558,7 +559,7 @@ static void check_writable(tenv_t te, exp_t e) {
   case &Subscript_e(e1,e2):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{_,tq,_}): fallthru(tq);
-    case &ArrayType(ArrayInfo{_,tq,_,_}): if (!tq.real_const) return; break;
+    case &ArrayType(ArrayInfo{_,tq,_,_,_}): if (!tq.real_const) return; break;
     case &TupleType(ts):
       let $(i,known) = Evexp::eval_const_uint_exp(e2);
       if(!known) {
@@ -609,7 +610,7 @@ static void check_writable(tenv_t te, exp_t e) {
   case &Deref_e(e1):
     switch (compress(e1->topt->v)) {
     case &PointerType(PtrInfo{_,tq,_}): fallthru(tq);
-    case &ArrayType(ArrayInfo{_,tq,_,_}): if (!tq.real_const) return; break;
+    case &ArrayType(ArrayInfo{_,tq,_,_,_}): if (!tq.real_const) return; break;
     default: break;
     }
     break;
@@ -1378,7 +1379,7 @@ static type_t tcArray(tenv_t te,seg_t loc,type_t * elt_topt, bool zero_term,
   }
   sz_exp->topt = new Opt(uint_typ);
   type_t res_t2   = array_typ(res, empty_tqual(NULL), sz_exp, 
-                              zero_term ? true_conref : false_conref);
+                              zero_term ? true_conref : false_conref,NULL);
 
   for (_ es2 = es; es2 != NULL; es2 = es2->tl)
     tcExpInitializer(te,elt_topt,es2->hd);
@@ -1445,7 +1446,7 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
       tqopt = &pinfo.elt_tq;
       ztopt = &pinfo.ptr_atts.zero_term;
       break;
-    case &ArrayType(ArrayInfo{*t,*tq,b,*zt}):
+    case &ArrayType(ArrayInfo{*t,*tq,b,*zt,_}):
       topt2 = t;
       tqopt = tq;
       ztopt = zt;
@@ -1471,7 +1472,7 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
   }
   // FIX:  bound may not be a constant here...
   return array_typ(t,(tqopt == NULL) ? empty_tqual(NULL) : *tqopt, bound, 
-                   (ztopt == NULL) ? false_conref : *ztopt);
+                   (ztopt == NULL) ? false_conref : *ztopt, NULL);
 }
 
  //////////////////// Struct (f{e1,...,en}) ///////////////////
@@ -1652,7 +1653,7 @@ static bool zeroable_type(type_t t) {
   case &IntType(_,_):
   case FloatType:
   case &DoubleType(_): return true;
-  case &ArrayType(ArrayInfo{t,_,_,_}): return zeroable_type(t);
+  case &ArrayType(ArrayInfo{t,_,_,_,_}): return zeroable_type(t);
   case &FnType(_): return false;
   case &TupleType(tqs):
     for (; tqs; tqs = tqs->tl) 
@@ -1853,7 +1854,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // Note: tcComprehension expects the pointer type, not an array type.
     let t_arr = tcExpNoPromote(te,topt,e1);
     switch (compress(t_arr)) {
-    case &ArrayType(ArrayInfo{et_arr,tq_arr,bndopt,zt}):
+    case &ArrayType(ArrayInfo{et_arr,tq_arr,bndopt,zt,_}):
       exp_t bnd = (exp_t)bndopt;
       bounds_t b;
       switch(compress(bnd->topt->v)) {
@@ -1898,7 +1899,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     e1->topt = new Opt(t_array);
     type_t res_typ;
     switch (compress(t_array)) {
-    case &ArrayType(ArrayInfo{et,tq,sz,zt}): 
+    case &ArrayType(ArrayInfo{et,tq,sz,zt,_}): 
       res_typ = 
 	new PointerType(PtrInfo(et,tq,
 				PtrAtts(rgn,empty_conref(),
@@ -1965,7 +1966,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
 type_t tcExp(tenv_t te, type_t * topt, exp_t e) {
   type_t t = compress(tcExpNoPromote(te, topt, e));
   switch (t) {
-  case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt}):
+  case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt,_}):
     let $(_,rgn) = addressof_props(te,e);
     let b = (e2 == NULL) ? (bounds_t)Unknown_b : new Upper_b((exp_t)e2);
     t = atb_typ(elt_typ,rgn,tq,b,zt);
@@ -1988,7 +1989,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   default:
     t = compress(t);
     switch (t) {
-    case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt}):
+    case &ArrayType(ArrayInfo{elt_typ,tq,e2,zt,_}):
       let $(_,rgn) = addressof_props(te,e);
       bounds_t b = (e2 == NULL) ? (bounds_t)Unknown_b : new Upper_b((exp_t)e2);
       t = atb_typ(elt_typ,rgn,tq,b,zt);
@@ -2139,7 +2140,7 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     bool zero_term = false;
     if (topt != NULL) {
       switch (compress(*topt)) {
-      case &ArrayType(ArrayInfo{*et,_,_,zt}): 
+      case &ArrayType(ArrayInfo{*et,_,_,zt,_}): 
         elt_topt = et; 
         zero_term = conref_def(false,zt);
         break;

@@ -97,18 +97,18 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   (*vd->name)[0] = new Abs_n(te->ns);
   // if it's an array or string, fill in the size on the type
   switch (compress(t)) {
-  case &ArrayType(ArrayInfo{telt,tq,NULL,zt}) && initializer != NULL:
+  case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && initializer != NULL:
     switch (initializer->r) {
       case &Const_e(&String_c(s)):
-      t = vd->type = array_typ(telt,tq,uint_exp(s.size,NULL),zt);
+      t = vd->type = array_typ(telt,tq,uint_exp(s.size,NULL),zt,ztl);
       break;
       case &Comprehension_e(_,e,_,_):
       // FIX: need to copy e here!
-      t = vd->type = array_typ(telt,tq,e,zt); 
+      t = vd->type = array_typ(telt,tq,e,zt,ztl); 
       break;
       case &UnresolvedMem_e(_,es): fallthru(es);
       case &Array_e(es):
-      t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),NULL),zt);
+      t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),NULL),zt,ztl);
       break;
       default: break;
     }

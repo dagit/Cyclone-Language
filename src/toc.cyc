@@ -318,8 +318,8 @@ static $(tqual_t,type_t)@ typ_to_c_f($(tqual_t,type_t)@ x) {
 // changes them to pointers.
 static type_t typ_to_c_array(type_t t) {
   switch(compress(t)) {
-  case &ArrayType(ArrayInfo{t2,tq,x,zt}): // FIX: do we handle tq correctly?
-    return array_typ(typ_to_c_array(t2),tq,x,false_conref);
+  case &ArrayType(ArrayInfo{t2,tq,x,zt,ztl}): // FIX: do we handle tq correctly?
+    return array_typ(typ_to_c_array(t2),tq,x,false_conref,ztl);
   case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c_array(t2);
   default: return typ_to_c(t);
   }
@@ -367,8 +367,8 @@ static type_t typ_to_c(type_t t) {
   case &IntType(_,_): 
   case FloatType:     
   case &DoubleType(_): return t;
-  case &ArrayType(ArrayInfo{t2,tq,e,_}): 
-    return array_typ(typ_to_c_array(t2),tq,e,false_conref);
+  case &ArrayType(ArrayInfo{t2,tq,e,_,ztl}): 
+    return array_typ(typ_to_c_array(t2),tq,e,false_conref,ztl);
   case &FnType(FnInfo{_,_,t2,args,c_vararg,cyc_vararg,_,atts}):
     // just drop the type arguments & effect and translate the nested types
     // also, drop any format descriptors 
@@ -431,7 +431,7 @@ static type_t typ_to_c(type_t t) {
 
 static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
   switch (t) {
-  case &ArrayType(ArrayInfo{t2,tq,_,_}): 
+  case &ArrayType(ArrayInfo{t2,tq,_,_,_}): 
     return cast_it(star_typ(t2,HeapRgn,tq,false_conref),e);
   default: return cast_it(t,e);
   }
@@ -451,7 +451,7 @@ static bool atomic_typ(type_t t) {
   case &FnType(_):     
   case &TagType(_):
   case &SizeofType(_): return true;
-  case &ArrayType(ArrayInfo{t,_,_,_}): return atomic_typ(t);
+  case &ArrayType(ArrayInfo{t,_,_,_,_}): return atomic_typ(t);
     // FIX: really should compute in terms of the instantiation
     // to be as aggressive as possible.
     // note even without this we'll allocate Position::seg_t with atomic.
@@ -583,7 +583,7 @@ static exp_t make_toplevel_tagged_arr(type_t t, exp_t sz, exp_t e) {
   exp_t xplussz;
   if (is_string) {
     qvar_t    x      = temp_var();
-    type_t    vd_typ = array_typ(char_typ,mt_tq,sz,false_conref);
+    type_t    vd_typ = array_typ(char_typ,mt_tq,sz,false_conref,DL);
     vardecl_t vd     = static_vardecl(x,vd_typ,e);
     result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
     xexp = var_exp(x,DL);
@@ -744,7 +744,7 @@ static bool check_const_array(unsigned i, type_t t) {
       return known && i <= j;
     case &AbsUpper_b(_): unimp("check_const_array: AbsUpper_b");
     }
-  case &ArrayType(ArrayInfo{_,_,e,_}):
+  case &ArrayType(ArrayInfo{_,_,e,_,_}):
     if (e == NULL) return false;
     let $(j,known) = Evexp::eval_const_uint_exp((exp_t)e);
     return known && i <= j;
@@ -1256,7 +1256,7 @@ static bool is_zero_ptr_type(type_t t, type_t @ptr_type,
       }
       return true;
     } else return false;
-  case &ArrayType(ArrayInfo{elt,tq,n,zt}):
+  case &ArrayType(ArrayInfo{elt,tq,n,zt,_}):
     if (conref_def(false,zt)) {
       *elt_type = elt;
       *is_fat = false;
@@ -1458,7 +1458,7 @@ static void exp_to_c(env_t nv, exp_t e) {
     case Size:
       exp_t arg = es->hd;
       switch (compress(arg->topt->v)) {
-      case &ArrayType(ArrayInfo{_,_,e2,_}): 
+      case &ArrayType(ArrayInfo{_,_,e2,_,_}): 
         // FIX: copy the expression e2 here.
         e->r = e2->r;  break;
       case &PointerType(PtrInfo(elt_typ,_,PtrAtts(_,nbl,bound,zt,_))):
@@ -1698,7 +1698,8 @@ static void exp_to_c(env_t nv, exp_t e) {
       exp_t  argvexp  = var_exp(argv,DL);
       exp_t  num_varargs_exp = uint_exp(num_varargs,DL);
       type_t cva_type = typ_to_c(vai->type);
-      type_t arr_type = array_typ(cva_type,mt_tq,num_varargs_exp,false_conref);
+      type_t arr_type = array_typ(cva_type,mt_tq,num_varargs_exp,false_conref,
+                                  NULL);
 
       int num_args     = List::length(es);
       int num_normargs = num_args - num_varargs;
@@ -3374,7 +3375,7 @@ static void xtuniondecl_to_c(tuniondecl_t xd) {
     tunionfield_t f  = fs->hd;
     stringptr_t fn = (*f->name)[1];
     let sz_exp  = uint_exp((*fn).size+4,DL);
-    let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref);
+    let tag_typ = array_typ(char_typ,mt_tq,sz_exp,false_conref,NULL);
     // FIX: making bad alignment and pointer-size assumptions!
     switch (Dict::lookup_opt(xtunion_fields_so_far->v,f->name)) {
     case NULL:
@@ -3472,7 +3473,7 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
   } else {
     // must put in zero for zero-terminated arrays
     switch (compress(old_typ)) {
-    case &ArrayType(ArrayInfo{et,_,num_elts_opt,zt}) && conref_def(false,zt):
+    case &ArrayType(ArrayInfo{et,_,num_elts_opt,zt,_}) && conref_def(false,zt):
       if (num_elts_opt == NULL)
         toc_impos("can't initialize zero-terminated array -- size unknown");
       exp_t num_elts = (exp_t)num_elts_opt;

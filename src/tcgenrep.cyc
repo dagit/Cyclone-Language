@@ -503,7 +503,7 @@ array_decls(type_t type, list_t<exp_t,`H> exps, seg_t loc) {
   // step 4: declare an unspecified-length array initialized to this
   let arrname = new_gen_id("arr");
   let pptr_type = at_typ(type,HeapRgn,tq_none,false_conref);
-  let arrty = array_typ(pptr_type,tq_none,NULL,false_conref);
+  let arrty = array_typ(pptr_type,tq_none,NULL,false_conref,NULL);
   let d1 = gen_decl(arrname,arrty,addrnamesexp,loc);
   let resultexp = unknownid_exp(toplevel_name(arrname),loc);
   return new $(imp_append(decls,list(d1)),resultexp);
@@ -1035,7 +1035,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       Tcutil::impos("tcgenregp: no support for abstract array bounds");
     }
     break;
-  case &ArrayType(ArrayInfo{arrtype,tq,e,zt}):
+  case &ArrayType(ArrayInfo{arrtype,tq,e,zt,_}):
     // FIX: need to deal with zero-termination
     if(e == NULL) {
       Tcutil::impos("tcgenrep:At this point, array bounds must be constants");
@@ -1260,7 +1260,7 @@ lookupRep(tenv_t te, dict_t<type_t,repinfo_t,`H> dict, seg_t loc, type_t type)
       let bits = fold_left(add_bitfield_sizes,0,fields);
       let bytes = bits / 8 + ((bits % 8) == 0 ? 0 : 1);
       type_t base_type = array_typ(char_typ,tq_none,cnst_int(bytes,loc),
-                                   true_conref);
+                                   true_conref,NULL);
       let &$(dict2,base_info) = lookupRep(te,dict,loc,base_type);
       dict = insert(dict2,type,base_info);
     } else {
