@@ -186,7 +186,8 @@ extern int place_cmp(place_t, place_t);
 extern aggrdict_t<`r> aggrfields_to_aggrdict(flow_env_t<`r>, List::list_t<struct Absyn::Aggrfield@>, bool no_init_bits_only, absRval_t<`r>);
 extern absRval_t<`r> typ_to_absrval(flow_env_t<`r>, Absyn::type_t t, bool no_init_bits_only, absRval_t<`r> leafval);
 extern absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, Absyn::type_t t, Absyn::exp_t consumer, int iteration, absRval_t<`r>);
-extern bool is_unique_consumed(Absyn::exp_t e, int env_iteration, absRval_t<`r> r);
+extern bool is_unique_consumed(Absyn::exp_t e, int env_iteration, absRval_t<`r> r, bool @needs_unconsume);
+extern absRval_t<`r> make_unique_unconsumed(flow_env_t<`r> fenv, absRval_t<`r> r);
 
 extern initlevel_t initlevel(flow_env_t,flowdict_t<`r> d, absRval_t<`r> r);
 extern absRval_t<`r> lookup_place(flowdict_t<`r> d, place_t<`r,`r> place);

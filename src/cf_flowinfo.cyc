@@ -339,20 +339,44 @@ absRval_t<`r> typ_to_absrval(flow_env_t<`r> fenv, type_t t, bool no_init_bits_on
   return i_typ_to_absrval(fenv, true, no_init_bits_only, t, leafval);
 }
 
-bool is_unique_consumed(exp_t e, int env_iteration, absRval_t<`r> r) {
+bool is_unique_consumed(exp_t e, int env_iteration, absRval_t<`r> r, bool @needs_unconsume) {
   switch (r) {
   case &Consumed(consumer,iteration,r):
-    return !(consumer==e && iteration==env_iteration);
+    if (consumer==e && iteration==env_iteration) {
+      *needs_unconsume = true;
+      return false;
+    }
+    return true;
   case &Aggregate(_,d):
     let sz = numelts(d);
     for (int i=0; i<sz; i++) {
-      if (is_unique_consumed(e,env_iteration,d[i]))
+      if (is_unique_consumed(e,env_iteration,d[i],needs_unconsume))
 	return true;
     }
     return false;
   default: return false;
   }
 }  
+
+absRval_t<`r> make_unique_unconsumed(flow_env_t<`r> fenv, absRval_t<`r> r) {
+  switch (r) {
+  case &Consumed(consumer,iteration,r):
+    return r;
+  case &Aggregate(uinfo,d):
+    let sz = numelts(d);
+    bool change = false;
+    aggrdict_t d2 = rnew(fenv->r) { for i < sz : d[i] };
+    for (int i=0; i<sz; i++) {
+      d2[i] = make_unique_unconsumed(fenv,d[i]);
+      if (d2[i] != d[i])
+	change = true;
+    }
+    if (change)
+      return rnew(fenv->r) Aggregate(uinfo,d2);
+    else return r;
+  default: return r;
+  }  
+}
 
 absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, type_t t, exp_t consumer, int iteration, absRval_t<`r> r) {
   if (Tcutil::is_noalias_pointer(t)) 
@@ -375,12 +399,8 @@ absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, type_t t, exp_t consumer
     unsigned sz = List::length(fs);
     for (int i = 0; i < sz; i++, fs = fs->tl) {
       let &Aggrfield(n,_,t2,_,_) = fs->hd;
-      if (numelts(*n) != 1) {
-// 	DEBUG_PRINT("Aggregate: consuming ");
-// 	DEBUG_PRINT_F(print_absrval,d[i]);
-// 	DEBUG_PRINT(":%s\n",typ2string(t2));
+      if (numelts(*n) != 1)
         d2[i] = make_unique_consumed(fenv,t2,consumer,iteration,d[i]);
-      }
     }
     return rnew(fenv->r) Aggregate(b,d2);
   default: return r;
@@ -1519,51 +1539,3 @@ flow_t<`r> kill_flow_region(flow_env_t<`r> fenv, flow_t<`r> f, type_t rgn) {
     return ReachableFL(fd2,r2);
   }
 }
-
-//////////////////////// Unique value stuff //////////////////////////////
-
-#ifdef NOTDEF
-// returns true when t is a unique pointer (regardless of what it points to)
-bool is_unique_pointer(type_t t) {
-  switch (Tcutil::compress(t)) {
-  case VoidType:
-  case &IntType(_,_):    
-  case FloatType:        
-  case &DoubleType(_):   
-  case &EnumType(_,_):   
-  case &AnonEnumType(_): 
-  case &TagType(_):      
-  case HeapRgn:
-  case UniqueRgn:
-  case &VarType(tv): 
-  case &Evar(_,_,_,_): return false; // because of compress above
-    // for parameterized types, we really need to substitute and descend
-    // to figure out whether the outermost pointer is unique.
-  case &DatatypeType(DatatypeInfo{_,targs,r}): 
-    if (contains_region(rgn,r)) return true;
-    fallthru(targs);
-  case &TypedefType(_,targs,_,_):    fallthru(targs);
-  case &AggrType(AggrInfo{_,targs}): fallthru(targs);
-  case &DatatypeFieldType(DatatypeFieldInfo{_,targs}): fallthru(targs);
-  case &JoinEff(targs): 
-    return List::exists_c(contains_region,rgn,targs);
-  case &PointerType(PtrInfo{t2,_,PtrAtts(r,_,_,_,_)}):
-    return contains_region(rgn,r) || contains_region(rgn,t2);
-  case &FnType(_): return false;
-  case &TupleType(tqs):
-    for (; tqs != NULL; tqs = tqs->tl)
-      if (contains_region(rgn,(*tqs->hd)[1])) return true;
-    return false;
-  case &AnonAggrType(_,fds):
-    for (; fds != NULL; fds = fds->tl) 
-      if (contains_region(rgn,fds->hd->type)) return true;
-    return false;
-  case &ArrayType(ArrayInfo{t2,_,_,_,_}): fallthru(t2);
-  case &AccessEff(t2):     fallthru(t2);
-  case &RgnsEff(t2):       return contains_region(rgn,t2);
-  // careful: we don't want to kill any region handles to the region in
-  // question.
-  case &RgnHandleType(t2): return false;
-  }
-}
-#endif

@@ -766,33 +766,29 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     switch $(flval,lval) {
     case $({.ReachableFL = $(fd,r)},{.PlaceL = p}):
       let old_rval = lookup_place(fd,p);
-      switch (old_rval) {
-      case &Consumed(consumer,iteration,r):
-        if (consumer==e && iteration==env->iteration_num) {
-          DEBUG_PRINT("consuming again\n");
-          return $(flval,r);
-        }
-        Tcutil::terr(e->loc,"expression attempts to copy unique value that may be copied elsewhere.");
-        return $(BottomFL(),fenv->unknown_all);
-      default:
-	if (is_unique_consumed(e,env->iteration_num,old_rval)) {
-	  Tcutil::terr(e->loc,"expression attempts to copy unique value that may be copied elsewhere.");
-	  return $(BottomFL(),fenv->unknown_all);
-	}
-	break;
+      bool needs_unconsume = false;
+      if (is_unique_consumed(e,env->iteration_num,old_rval,&needs_unconsume)) {
+	Tcutil::terr(e->loc,"expression attempts to copy unique value that may be copied elsewhere.");
+	return $(BottomFL(),fenv->unknown_all);
       }
-      let new_rval = make_unique_consumed(fenv,e->topt->v,e,env->iteration_num,old_rval);
-      let outdict = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
-      DEBUG_PRINT("place is ");
-      DEBUG_PRINT_F(print_place,p);
-      DEBUG_PRINT(", old_rval is ");
-      DEBUG_PRINT_F(print_absrval,old_rval);
-      DEBUG_PRINT(", new_rval is ");
-      DEBUG_PRINT_F(print_absrval,new_rval);
-      DEBUG_PRINT("\nOutput Flow {\n");
-      DEBUG_PRINT_F(print_flowdict,outdict);
-      DEBUG_PRINT("}\n ");
-      return $(ReachableFL(outdict,r),old_rval);
+      else if (needs_unconsume) {
+	DEBUG_PRINT("consuming again\n");
+	return $(flval,make_unique_unconsumed(fenv,old_rval));
+      }
+      else {
+	let new_rval = make_unique_consumed(fenv,e->topt->v,e,env->iteration_num,old_rval);
+	let outdict = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
+	DEBUG_PRINT("place is ");
+	DEBUG_PRINT_F(print_place,p);
+	DEBUG_PRINT(", old_rval is ");
+	DEBUG_PRINT_F(print_absrval,old_rval);
+	DEBUG_PRINT(", new_rval is ");
+	DEBUG_PRINT_F(print_absrval,new_rval);
+	DEBUG_PRINT("\nOutput Flow {\n");
+	DEBUG_PRINT_F(print_flowdict,outdict);
+	DEBUG_PRINT("}\n ");
+	return $(ReachableFL(outdict,r),old_rval);
+      }	
     default: break;
     }
   }
