@@ -122,7 +122,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     } else {
       exp_t e = (exp_t)eopt;
       tcExp(te,&t,e);
-      if (!coerce_use(te,e,t))
+      if (!coerce_arg(te,e,t))
 	terr(s0->loc, "returns value of type %s but requires %s",
              typ2string(e->topt->v), typ2string(t));
       switch (compress(t)) {

@@ -271,8 +271,8 @@ struct _tagged_arr src); unsigned char Cyc_Lexing_Error[ 10u]="\000\000\000\000E
 struct Cyc_Lexing_lexbuf; struct Cyc_Lexing_function_lexbuf_state; struct Cyc_Lexing_lex_tables;
 static unsigned char Cyc_Lexing_aux_buffer_v[ 1u]={'\000'}; static struct
 _tagged_arr Cyc_Lexing_aux_buffer={( void*)(( unsigned char*) Cyc_Lexing_aux_buffer_v),(
-void*)(( unsigned char*) Cyc_Lexing_aux_buffer_v),( void*)(( unsigned char*) Cyc_Lexing_aux_buffer_v)
-+  1u}; void Cyc_Lexing_lex_refill( struct Cyc_Lexing_lexbuf* lexbuf){ if(
+void*)(( unsigned char*) Cyc_Lexing_aux_buffer_v),( void*)(( unsigned char*) Cyc_Lexing_aux_buffer_v
++  1u)}; void Cyc_Lexing_lex_refill( struct Cyc_Lexing_lexbuf* lexbuf){ if(
 _get_arr_size( Cyc_Lexing_aux_buffer, sizeof( unsigned char)) ==  1){ Cyc_Lexing_aux_buffer=
 Cyc_Core_new_string( 4096);}{ int read=((( struct Cyc_Lexing_function_lexbuf_state*)
 lexbuf->refill_state)->read_fun)( Cyc_Lexing_aux_buffer,( int) _get_arr_size(

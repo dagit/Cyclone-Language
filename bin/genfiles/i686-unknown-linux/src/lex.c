@@ -693,7 +693,7 @@ struct Cyc_Lex_Trie; static const int Cyc_Lex_Zero= 0; static const int Cyc_Lex_
 static const int Cyc_Lex_Many= 1; struct Cyc_Lex_Many_struct{ int tag; struct
 Cyc_Lex_Trie** f1; } ; struct Cyc_Lex_Trie{ void* children; int shared_str; } ;
 static int Cyc_Lex_num_kws= 0; static struct _tagged_arr Cyc_Lex_kw_nums={( void*)
-0u,( void*) 0u,( void*) 0u +  0u}; static struct Cyc_Xarray_Xarray* Cyc_Lex_symbols=
+0u,( void*) 0u,( void*)( 0u +  0u)}; static struct Cyc_Xarray_Xarray* Cyc_Lex_symbols=
 0; static struct Cyc_Lex_Trie* Cyc_Lex_ids_trie= 0; static struct Cyc_Lex_Trie*
 Cyc_Lex_typedefs_trie= 0; static int Cyc_Lex_comment_depth= 0; static struct
 _tuple5 Cyc_Lex_token_int_pair={( void*) 0u, 0}; static unsigned char _temp0[ 8u]="*bogus*";
@@ -853,10 +853,10 @@ break;}}} return({ struct _tuple5* _temp101=( struct _tuple5*) _cycalloc(
 sizeof( struct _tuple5)); _temp101->f1=( void*) Cyc_Absyn_Signed; _temp101->f2=(
 int) n; _temp101;});} unsigned char Cyc_Lex_string_buffer_v[ 10u]={'x','x','x','x','x','x','x','x','x','x'};
 struct _tagged_arr Cyc_Lex_string_buffer={( void*) Cyc_Lex_string_buffer_v,(
-void*) Cyc_Lex_string_buffer_v,( void*) Cyc_Lex_string_buffer_v +  10u}; int Cyc_Lex_string_pos=
-0; void Cyc_Lex_store_string_char( unsigned char c){ int sz=( int) _get_arr_size(
-Cyc_Lex_string_buffer, sizeof( unsigned char)); if( Cyc_Lex_string_pos >=  sz){
-int newsz= sz; while( Cyc_Lex_string_pos >=  newsz) { newsz= newsz *  2;}{
+void*) Cyc_Lex_string_buffer_v,( void*)( Cyc_Lex_string_buffer_v +  10u)}; int
+Cyc_Lex_string_pos= 0; void Cyc_Lex_store_string_char( unsigned char c){ int sz=(
+int) _get_arr_size( Cyc_Lex_string_buffer, sizeof( unsigned char)); if( Cyc_Lex_string_pos
+>=  sz){ int newsz= sz; while( Cyc_Lex_string_pos >=  newsz) { newsz= newsz *  2;}{
 struct _tagged_arr str=({ unsigned int _temp102=( unsigned int) newsz;
 unsigned char* _temp103=( unsigned char*) _cycalloc_atomic( _check_times(
 sizeof( unsigned char), _temp102)); struct _tagged_arr _temp105= _tag_arr(

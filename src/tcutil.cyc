@@ -166,7 +166,7 @@ static $(type_t,type_t)@ copy_rgncmp($(type_t,type_t)@ x) {
 }
 type_t copy_type(type_t t) {
   switch (compress(t)) {
-  case VoidType: return t;
+  case VoidType:
   case &Evar(_,_,_,_): return t;
   case &VarType(tv):
     return new VarType(copy_tvar(tv));
@@ -183,7 +183,7 @@ type_t copy_type(type_t t) {
     let bs2 = copy_conref(bs);
     return new PointerType(PtrInfo{elt2,rgn2,nbl2,tq2,bs2});
   case &IntType(sn,sz): return new IntType(sn,sz);
-  case FloatType: fallthru;
+  case FloatType: 
   case DoubleType: return t;
   case &ArrayType(et,tq,eopt): 
     // FIX: should really copy eopt
@@ -237,8 +237,8 @@ type_t copy_type(type_t t) {
 static bool kind_leq(kind_t k1, kind_t k2) {
   if (k1 == k2) return true;
   switch ($(k1,k2)) {
-  case $(BoxKind, MemKind): return true;
-  case $(BoxKind, AnyKind): return true;
+  case $(BoxKind, MemKind): 
+  case $(BoxKind, AnyKind): 
   case $(MemKind, AnyKind): return true;
   default: return false;
   }
@@ -258,8 +258,8 @@ kind_t typ_kind(type_t t) {
   case &VarType(tv):      return conref_val(tv->kind);
   case VoidType:          return MemKind;
   case &IntType(_,sz):    return (sz==(size_of_t)B4) ? BoxKind : MemKind;
-  case FloatType:         return MemKind;
-  case DoubleType:        return MemKind;
+  case FloatType:         
+  case DoubleType:        
   case &FnType(_):        return MemKind;
   case &RgnHandleType(_): return BoxKind; 
   case HeapRgn:           return RgnKind;
@@ -270,30 +270,30 @@ kind_t typ_kind(type_t t) {
   case &TunionFieldType(TunionFieldInfo(&UnknownTunionfield(_),_)):
     return impos("typ_kind: Unresolved TunionFieldType");
     // for structs or unions without definitions, we must be conservative
-  case &StructType(_,_,NULL): return AnyKind;
+  case &StructType(_,_,NULL): 
   case &UnionType(_,_,NULL) : return AnyKind;
-  case &StructType(_,_,_):    return MemKind;
-  case &UnionType(_,_,_):     return MemKind;
-  case &AnonStructType(_):    return MemKind;
+  case &StructType(_,_,_):    
+  case &UnionType(_,_,_):     
+  case &AnonStructType(_):    
   case &AnonUnionType(_):     return MemKind;
   case &EnumType(_,_):        return BoxKind;
   case &PointerType(pinfo):
     switch (compress_conref(pinfo.bounds)->v) {
-    case &Eq_constr(Unknown_b):  return MemKind;
+    case &Eq_constr(Unknown_b): return MemKind;
     case &Eq_constr(&Upper_b(_)): return BoxKind;
-    case No_constr:             return MemKind; 
+    case No_constr: return MemKind; 
       // be conservative -- this may later be constrained with an Unknown_b
     case &Forward_constr(_): 
       return impos("typ_kind: forward constraint in ptr bounds");
     }
   // Arrays are always of memkind
-  case &ArrayType(t,_,_): return MemKind;
-  case &TupleType(tqts):  return MemKind;
+  case &ArrayType(_,_,_): 
+  case &TupleType(_): return MemKind;
   case &TypedefType(_,_,topt): 
     return impos("typ_kind: typedef found: %s", typ2string(t));
-  case &AccessEff(_):     return EffKind;
-  case &JoinEff(_):       return EffKind;
-  case &RgnsEff(_):       return EffKind;
+  case &AccessEff(_):     
+  case &JoinEff(_):       
+  case &RgnsEff(_): return EffKind;
   }
 }
 
@@ -488,13 +488,13 @@ static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
 // in normalizing effects.
 static type_t rgns_of(type_t t) {
   switch (compress(t)) {
-  case VoidType     : fallthru;
-  case FloatType    : fallthru;
-  case DoubleType   : fallthru;
-  case &EnumType(_,_): fallthru;
+  case VoidType: 
+  case FloatType: 
+  case DoubleType: 
+  case &EnumType(_,_):
   case &IntType(_,_): return empty_effect;
-  case &Evar(_,_,_,_): fallthru;
-  case &VarType(_)   : 
+  case &Evar(_,_,_,_):
+  case &VarType(_): 
     switch (typ_kind(t)) {
     case RgnKind: return new AccessEff(t);
     case EffKind: return t;
@@ -513,10 +513,8 @@ static type_t rgns_of(type_t t) {
     for (; tqts != NULL; tqts = tqts->tl)
       ts = new List((*tqts->hd)[1],ts);
     fallthru(ts);
-  case &TunionFieldType(TunionFieldInfo{_,ts}):
-    fallthru(ts);
-  case &StructType(_,ts,_):
-    fallthru(ts);
+  case &TunionFieldType(TunionFieldInfo{_,ts}): fallthru(ts);
+  case &StructType(_,ts,_): fallthru(ts);
   case &UnionType(_,ts,_):
     return normalize_effect(new JoinEff(map(rgns_of,ts)));
   case &AnonStructType(sfs): fallthru(sfs);
@@ -533,7 +531,7 @@ static type_t rgns_of(type_t t) {
     let e = substitute(map(region_free_subst,tvs),eff->v);
     return normalize_effect(e);
   case HeapRgn: return empty_effect;
-  case &AccessEff(_): return t;
+  case &AccessEff(_):
   case &JoinEff(_): return t;
   case &RgnsEff(t2): return rgns_of(t2);
   case &TypedefType(_,_,_): return impos("typedef in compressed type");
@@ -1114,7 +1112,7 @@ void unify_it(type_t t1, type_t t2) {
     bool bad_cyc_vararg = false;
     switch ($(cyc_vararg1, cyc_vararg2)) {
     case $(NULL,NULL): break;
-    case $(NULL,_): fallthru;
+    case $(NULL,_): 
     case $(_,NULL): bad_cyc_vararg = true; break;
     case $(&VarargInfo{n1,tq1,tp1,i1}, &VarargInfo{n2,tq2,tp2,i2}):
       unify_tqual(tq1,tq2);
@@ -1128,7 +1126,7 @@ void unify_it(type_t t1, type_t t2) {
     bool bad_effect = false;
     switch($(eff1,eff2)) {
     case $(NULL,NULL): break;
-    case $(NULL,_): fallthru;
+    case $(NULL,_): 
     case $(_,NULL): bad_effect = true; break;
     default: bad_effect = !unify_effect(eff1->v,eff2->v); break;
     }
@@ -1169,11 +1167,11 @@ void unify_it(type_t t1, type_t t2) {
   case $(&RgnHandleType(rt1),&RgnHandleType(rt2)):
     unify_it(rt1,rt2);
     return;
-  case $(&JoinEff(_), _)  : fallthru;
-  case $(_, &JoinEff(_))  : fallthru;
-  case $(&AccessEff(_), _): fallthru;
-  case $(&RgnsEff(_), _)  : fallthru;
-  case $(_, &RgnsEff(_))  : fallthru;
+  case $(&JoinEff(_), _)  : 
+  case $(_, &JoinEff(_))  : 
+  case $(&AccessEff(_), _): 
+  case $(&RgnsEff(_), _)  : 
+  case $(_, &RgnsEff(_))  : 
   case $(_, &AccessEff(_)): 
     if (unify_effect(t1,t2)) return;
     else break;
@@ -1184,11 +1182,11 @@ void unify_it(type_t t1, type_t t2) {
 
 bool is_arithmetic_type(type_t t) {
   switch (compress(t)) {
-  case &IntType(_,_): return true;
-  case FloatType:     return true;
-  case DoubleType:    return true;
-  case &EnumType(_,_):return true;
-  default:            return false;
+  case &IntType(_,_): 
+  case FloatType:     
+  case DoubleType:    
+  case &EnumType(_,_): return true;
+  default: return false;
   }
 }
 
@@ -1198,15 +1196,15 @@ bool will_lose_precision(type_t t1, type_t t2) {
   t1 = compress(t1);
   t2 = compress(t2);
   switch ($(t1,t2)) {
-  case $(DoubleType,     FloatType):       return true;
-  case $(DoubleType,     &IntType(_,_)):   return true;
-  case $(FloatType,      &IntType(_,_)):   return true;
-  case $(&IntType(_,B8), &IntType(_,B8)):  return false;
-  case $(&IntType(_,B8), _):               return true; // see prev case
-  case $(&IntType(_,B4), FloatType):       return true;
-  case $(&IntType(_,B4), &IntType(_,B2)):  return true;
-  case $(&IntType(_,B4), &IntType(_,B1)):  return true;
-  case $(&IntType(_,B2), &IntType(_,B1)):  return true;
+  case $(DoubleType,     FloatType):       
+  case $(DoubleType,     &IntType(_,_)):   
+  case $(FloatType,      &IntType(_,_)):  return true;
+  case $(&IntType(_,B8), &IntType(_,B8)): return false;
+  case $(&IntType(_,B8), _): // see prev case
+  case $(&IntType(_,B4), FloatType):       
+  case $(&IntType(_,B4), &IntType(_,B2)):  
+  case $(&IntType(_,B4), &IntType(_,B1)):  
+  case $(&IntType(_,B2), &IntType(_,B1)): return true;
   default: return false;
   }
 }
@@ -1250,7 +1248,7 @@ bool coerce_to_bool(tenv_t te, exp_t e) {
 
 bool is_integral_type(type_t t) {
   switch (compress(t)) {
-  case &IntType(_,_): return true;
+  case &IntType(_,_): 
   case &EnumType(_,_): return true;
   default: return false;
   }
@@ -1420,58 +1418,12 @@ bool coerce_assign(tenv_t te, exp_t e, type_t t) {
   return coerce_arg(te,e,t);
 }
 
-static bool any_promote(tenv_t te, exp_t e) {
-  type_t old_typ = compress(e->topt->v);
-  type_t t;
-  switch (old_typ) {
-  case &EnumType(_,_): t = sint_t; break;
-  case &IntType(sn,sz):
-    switch (sz) {
-    case B1: t = sint_t; break; // convert to unboxed, signed int
-    case B2: t = sint_t; break; // convert to unboxed, signed int
-    case B4: 
-      t = (sn == (sign_t)Unsigned) ? uint_t : sint_t; break;   // make unboxed
-    case B8: 
-      t = (sn == (sign_t)Unsigned) ? ulonglong_t : slonglong_t; break; // make unboxed
-    }
-    break;
-  case FloatType:  t = float_t;  break; // make unboxed
-  case DoubleType: t = double_t; break; // make unboxed
-  default: return false;
-  }
-  unchecked_cast(te,e,t);
-  return true;
-}
-
-// Convert e so that it has type t, possibly by casting t.  This is
-// used in routines like function call or assignment where we may have
-// to promote an integral type.
-// FIX: THIS IS NOT RIGHT.
-bool coerce_use(tenv_t te, exp_t e, type_t t2) {
-  type_t t1 = compress(e->topt->v);
-  if (unify(t1,t2)) 
-    return true;
-  // unification failed, try promoting
-  any_promote(te,e);
-  if (unify(e->topt->v,t2)) 
-    return true;
-  else if (silent_castable(te,e->loc,t1,t2)) {
-    unchecked_cast(te,e,t2);
-    return true;
-  } else if (castable(te,e->loc,t1,t2)) {
-    unchecked_cast(te,e,t2);
-    warn(e->loc,"implicit cast from %s to %s",typ2string(t1),typ2string(t2));
-    return true;
-  } else 
-    return false;
-}
-
 bool coerceable(type_t t) {
   switch (compress(t)) {
-  case &IntType(_,_): return true;
-  case FloatType:     return true;
-  case DoubleType:    return true;
-  default:            return false;
+  case &IntType(_,_): 
+  case FloatType:     
+  case DoubleType: return true;
+  default: return false;
   }
 }
 
@@ -1492,7 +1444,7 @@ static $(tqual_t,type_t)@ flatten_typ_f(list_t<$(tvar_t,type_t)@`H,`H> inst,
 static list_t<$(tqual_t,type_t)@> flatten_typ(tenv_t te,type_t t1) {
   t1 = compress(t1);
   switch (t1) {
-  case VoidType:       return NULL;
+  case VoidType: return NULL;
   case &TupleType(tqs): return tqs; // FIX: recursively flatten here
   case &StructType(tdnopt,ts,sdp):
     if (sdp == NULL || tdnopt == NULL) 
@@ -1660,10 +1612,10 @@ bool castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     default: break;
     }
     fallthru;
-  case &IntType(_,_): fallthru;
-  case FloatType :  fallthru;
-  case DoubleType:  return coerceable(t2) || t2 == VoidType;
-  case VoidType: return t2 == VoidType;
+  case &IntType(_,_): 
+  case FloatType :  
+  case DoubleType: return coerceable(t2) || t2 == VoidType;
+  case VoidType:   return t2 == VoidType;
   default: return false;
   }
 }
@@ -1679,12 +1631,9 @@ void unchecked_cast(tenv_t te, exp_t e, type_t t) {
 
 bool is_integral(exp_t e) {
   switch (compress(e->topt->v)) {
-  case &EnumType(_,_):  fallthru;
+  case &EnumType(_,_):
   case &IntType(_,_): return true;
-  case &Evar(_,_,_,_):
-    if (unify(e->topt->v,sint_t))
-      return true;
-    return false;
+  case &Evar(_,_,_,_): return unify(e->topt->v,sint_t);
   default: return false;
   }
 }
@@ -1693,7 +1642,7 @@ bool is_numeric(exp_t e) {
   if(is_integral(e))
     return true;
   switch (compress(e->topt->v)) {
-  case FloatType:  fallthru;
+  case FloatType:  
   case DoubleType: return true;
   default:         return false;
   }
@@ -1708,15 +1657,15 @@ bool is_function_type(type_t t) {
 
 type_t max_arithmetic_type(type_t t1, type_t t2) {
   switch ($(t1,t2)) {
-  case $(DoubleType,_): fallthru;
+  case $(DoubleType,_): 
   case $(_,DoubleType): return DoubleType;
-  case $(FloatType,_):  fallthru;
+  case $(FloatType,_):  
   case $(_,FloatType):  return FloatType;
-  case $(&IntType(Unsigned,B8),_): fallthru;
+  case $(&IntType(Unsigned,B8),_): 
   case $(_,&IntType(Unsigned,B8)): return ulonglong_t;
-  case $(&IntType(Signed,B8),_):   fallthru;
+  case $(&IntType(Signed,B8),_):   
   case $(_,&IntType(Signed,B8)):   return slonglong_t;
-  case $(&IntType(Unsigned,B4),_): fallthru;
+  case $(&IntType(Unsigned,B4),_): 
   case $(_,&IntType(Unsigned,B4)): return uint_t;
   default: return sint_t;
   }
@@ -2713,8 +2662,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     break;
   case HeapRgn:
     break;
-  case &RgnHandleType(t2): 
-    fallthru(t2);
+  case &RgnHandleType(t2): fallthru(t2);
   case &AccessEff(t2): 
     cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,t2);
     break;
@@ -2785,10 +2733,8 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
   for (_ x = free_tvars; x != NULL; x = x->tl) {
     conref_t<kind_t> c = compress_conref(x->hd->kind);
     switch (c->v) {
-    case No_constr: fallthru;
-    case &Eq_constr(MemKind):
-      c->v = new Eq_constr(BoxKind);
-      break;
+    case No_constr: 
+    case &Eq_constr(MemKind): c->v = new Eq_constr(BoxKind); break;
     default: break;
     }
   }
@@ -3296,12 +3242,12 @@ static bool fields_support_default(list_t<tvar_t> tvs, list_t<type_t> ts,
                                    list_t<structfield_t> fs);
 bool supports_default(type_t t) {
   switch (compress(t)) {
-  case VoidType: return true;
-  case &Evar(_,_,_,_): return false;
-  case &VarType(_): return false;
-  case &TunionType(_): return false;
-  case &TunionFieldType(_): return false;
-  case &PointerType(PtrInfo{elt_typ,_,nullable,_,bounds}):
+  case VoidType: 
+  case &IntType(_,_): 
+  case FloatType: 
+  case DoubleType: return true;
+
+  case &PointerType(PtrInfo{_,_,nullable,_,bounds}):
     switch (compress_conref(bounds)->v) {
     case &Eq_constr(Unknown_b): return true;
     case &Eq_constr(&Upper_b(_)):
@@ -3311,11 +3257,7 @@ bool supports_default(type_t t) {
       }
     default: return false;
     }
-  case &IntType(_,_): return true;
-  case FloatType: return true;
-  case DoubleType: return true;
   case &ArrayType(t,_,_): return supports_default(t);
-  case &FnType(_): return false;
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl)
       if (!supports_default((*tqs->hd)[1])) return false;
@@ -3333,9 +3275,11 @@ bool supports_default(type_t t) {
   case &AnonStructType(fs): fallthru(fs);
   case &AnonUnionType(fs):
     return fields_support_default(NULL,NULL,fs);
+
   case &EnumType(_,_): 
     // FIX: may not include 0!
     return true;
+
   default: return false;
   }
 }

@@ -354,7 +354,7 @@ _temp16; _temp16.tag= Cyc_Std_String_pa; _temp16.f1=( struct _tagged_arr) Cyc_Bu
 _temp14);{ void* _temp15[ 1u]={& _temp16}; Cyc_Std_fprintf( Cyc_Std_stderr,
 _tag_arr("%s", sizeof( unsigned char), 3u), _tag_arr( _temp15, sizeof( void*), 1u));}});}}
 int Cyc_Arg_current= 0; static struct _tagged_arr Cyc_Arg_args={( void*) 0u,(
-void*) 0u,( void*) 0u +  0u}; static void Cyc_Arg_stop( int prog_pos, void* e,
+void*) 0u,( void*)( 0u +  0u)}; static void Cyc_Arg_stop( int prog_pos, void* e,
 struct Cyc_List_List* speclist, struct _tagged_arr errmsg){ struct _tagged_arr
 progname= prog_pos <  _get_arr_size( Cyc_Arg_args, sizeof( struct _tagged_arr))?*((
 struct _tagged_arr*) _check_unknown_subscript( Cyc_Arg_args, sizeof( struct

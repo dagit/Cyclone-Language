@@ -320,8 +320,8 @@ static type_t typ_to_c(type_t t) {
     let new_atts = NULL;
     for (; atts != NULL; atts = atts->tl)
       switch (atts->hd) {
-      case Noreturn_att: fallthru;
-      case Const_att   : fallthru;
+      case Noreturn_att: 
+      case Const_att   : 
       case &Format_att(_,_,_): continue;
       default: new_atts = new List(atts->hd,new_atts); break;
       }
@@ -510,15 +510,19 @@ static exp_t make_toplevel_tagged_arr(type_t t, exp_t sz, exp_t e) {
   default: break;
   }
   exp_t xexp;
+  exp_t xplussz;
   if (is_string) {
     qvar_t    x      = temp_var();
     type_t    vd_typ = new ArrayType(uchar_t,mt_tq,sz);
     vardecl_t vd     = static_vardecl(x,vd_typ,e);
     result_decls = new List(new_decl(new Var_d(vd),DL),result_decls);
     xexp = var_exp(x,DL);
-  } else 
+    xplussz = add_exp(xexp,sz,DL);
+  } else {
     xexp = cast_exp(void_star_typ(),e,DL);
-  exp_t xplussz = add_exp(xexp,sz,DL);
+    // Note: If e is NULL, element size of 0 is fine!
+    xplussz = cast_exp(void_star_typ(),add_exp(e,sz,DL),DL);
+  }
   exp_t urm_exp = unresolvedmem_exp(NULL,list(new $(NULL,xexp),
 					      new $(NULL,xexp),
 					      new $(NULL,xplussz)),DL);
@@ -2157,7 +2161,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s,
   // FIX: cannot have Float_p in any cases.
   bool leave_as_switch;
   switch (compress(t)) {
-  case &IntType(_,_):  fallthru;
+  case &IntType(_,_):  
   case &EnumType(_,_): leave_as_switch = true;  break;
   default:             leave_as_switch = false; break;
   }
@@ -2898,7 +2902,7 @@ static env_t decls_to_c(env_t nv, list_t<decl_t> ds, bool top) {
       fndecl_to_c(nv, fd);
       result_decls = new List(d,result_decls);
       break;
-    case &Let_d(_,_,_,_,_): fallthru;
+    case &Let_d(_,_,_,_,_): 
     case &Letv_d(_):
       toc_impos("letdecl at toplevel");
       break;

@@ -1382,8 +1382,8 @@ int*) _temp505) ==  Cyc_Absyn_Const_e){ _LL512: _temp511=( void*)(( struct Cyc_A
 _temp505)->f1; if(( unsigned int) _temp511 >  1u?*(( int*) _temp511) ==  Cyc_Absyn_String_c:
 0){ goto _LL508;} else{ goto _LL509;}} else{ goto _LL509;} _LL509: goto _LL510;
 _LL508: is_string= 1; goto _LL506; _LL510: goto _LL506; _LL506:;}{ struct Cyc_Absyn_Exp*
-xexp; if( is_string){ struct _tuple0* x= Cyc_Toc_temp_var(); void* vd_typ=( void*)({
-struct Cyc_Absyn_ArrayType_struct* _temp516=( struct Cyc_Absyn_ArrayType_struct*)
+xexp; struct Cyc_Absyn_Exp* xplussz; if( is_string){ struct _tuple0* x= Cyc_Toc_temp_var();
+void* vd_typ=( void*)({ struct Cyc_Absyn_ArrayType_struct* _temp516=( struct Cyc_Absyn_ArrayType_struct*)
 _cycalloc( sizeof( struct Cyc_Absyn_ArrayType_struct)); _temp516[ 0]=({ struct
 Cyc_Absyn_ArrayType_struct _temp517; _temp517.tag= Cyc_Absyn_ArrayType; _temp517.f1=(
 void*) Cyc_Absyn_uchar_t; _temp517.f2= Cyc_Toc_mt_tq; _temp517.f3=( struct Cyc_Absyn_Exp*)
@@ -1394,9 +1394,10 @@ _temp513->hd=( void*) Cyc_Absyn_new_decl(( void*)({ struct Cyc_Absyn_Var_d_struc
 _temp514=( struct Cyc_Absyn_Var_d_struct*) _cycalloc( sizeof( struct Cyc_Absyn_Var_d_struct));
 _temp514[ 0]=({ struct Cyc_Absyn_Var_d_struct _temp515; _temp515.tag= Cyc_Absyn_Var_d;
 _temp515.f1= vd; _temp515;}); _temp514;}), 0); _temp513->tl= Cyc_Toc_result_decls;
-_temp513;}); xexp= Cyc_Absyn_var_exp( x, 0);} else{ xexp= Cyc_Absyn_cast_exp(
-Cyc_Absyn_void_star_typ(), e, 0);}{ struct Cyc_Absyn_Exp* xplussz= Cyc_Absyn_add_exp(
-xexp, sz, 0); struct Cyc_Absyn_Exp* urm_exp= Cyc_Absyn_unresolvedmem_exp( 0,({
+_temp513;}); xexp= Cyc_Absyn_var_exp( x, 0); xplussz= Cyc_Absyn_add_exp( xexp,
+sz, 0);} else{ xexp= Cyc_Absyn_cast_exp( Cyc_Absyn_void_star_typ(), e, 0);
+xplussz= Cyc_Absyn_cast_exp( Cyc_Absyn_void_star_typ(), Cyc_Absyn_add_exp( e, sz,
+0), 0);}{ struct Cyc_Absyn_Exp* urm_exp= Cyc_Absyn_unresolvedmem_exp( 0,({
 struct _tuple4* _temp518[ 3u]; _temp518[ 2u]=({ struct _tuple4* _temp521=(
 struct _tuple4*) _cycalloc( sizeof( struct _tuple4)); _temp521->f1= 0; _temp521->f2=
 xplussz; _temp521;}); _temp518[ 1u]=({ struct _tuple4* _temp520=( struct _tuple4*)

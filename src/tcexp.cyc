@@ -131,8 +131,9 @@ static void resolve_unknown_fn(tenv_t te, exp_t e, exp_t e1, list_t<exp_t,`H> es
   }
 }
 
-static void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t *`r topt, exp_t e,
-                                   list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> des) {
+static 
+void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t *`r topt, exp_t e,
+			    list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> des){
   // NOTE: must always bang e->r or caller will loop!
   if (topt == NULL) {
     // guess it is an array
@@ -312,10 +313,11 @@ static void check_format_args(tenv_t te, exp_t fmt,
       terr(args->hd->loc,"too many arguments");
   }
 }
-static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t *`r topt, primop_t p, exp_t e){
+static type_t tcUnPrimop(tenv_t te, seg_t loc, type_t *`r topt,
+			 primop_t p,exp_t e){
   type_t t = compress(e->topt->v);
   switch (p) {
-  case Plus: fallthru;
+  case Plus: 
   case Minus:
     if (!is_numeric(e))
       terr(loc,"expecting arithmetic type but found %s",typ2string(t));
@@ -435,8 +437,7 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
     case $(&PointerType(PtrInfo{t1a,_,_,_,_}),
 	   &PointerType(PtrInfo{t2a,_,_,_,_})):
       if (unify(t1a,t2a)) return sint_t; break;
-    default:
-      break;
+    default: break;
     }
     terr(loc,"comparison not allowed between %s and %s",
          typ2string(t1),typ2string(t2));
@@ -449,27 +450,28 @@ static type_t tcAnyBinop(tenv_t te, seg_t loc, exp_t e1, exp_t e2) {
 static type_t tcBinPrimop(tenv_t te, seg_t loc, type_t *`r topt,
                           primop_t p, exp_t e1, exp_t e2) {
   switch (p) {
-  case Plus:       return tcPlus(te,e1,e2);
-  case Minus:      return tcMinus(te,e1,e2);
-  case Times:      fallthru;
-  case Div:        return tcArithBinop(te,e1,e2,is_numeric);
+  case Plus:  return tcPlus(te,e1,e2);
+  case Minus: return tcMinus(te,e1,e2);
 
-  case Mod:        fallthru;
-  case Bitand:     fallthru;
-  case Bitor:      fallthru;
-  case Bitxor:     fallthru;
-  case Bitlshift:  fallthru;
-  case Bitlrshift: fallthru;
+  case Times:      
+  case Div: return tcArithBinop(te,e1,e2,is_numeric);
+
+  case Mod:        
+  case Bitand:     
+  case Bitor:      
+  case Bitxor:     
+  case Bitlshift:  
+  case Bitlrshift: 
   case Bitarshift: return tcArithBinop(te,e1,e2,is_integral);
 
     // Note: comparing pointers relies on memory-manager properties
     //       (but darned useful for dictionaries)
-  case Eq:         fallthru;
-  case Neq:        fallthru;
-  case Gt:         fallthru;
-  case Lt:         fallthru;
-  case Gte:        fallthru;
-  case Lte:        return tcAnyBinop(te,loc,e1,e2);
+  case Eq:         
+  case Neq:        
+  case Gt:         
+  case Lt:         
+  case Gte:        
+  case Lte: return tcAnyBinop(te,loc,e1,e2);
 
   default: throw new Failure("bad binary primop");
   }
@@ -503,7 +505,7 @@ static void check_writable(tenv_t te, exp_t e) {
   switch (e->r) {
   case &Var_e(_,&Param_b(vd)): fallthru(vd);
   case &Var_e(_,&Local_b(vd)): fallthru(vd);
-  case &Var_e(_,&Pat_b(vd)): fallthru(vd);
+  case &Var_e(_,&Pat_b(vd)):   fallthru(vd);
   case &Var_e(_,&Global_b(vd)):
     if (!vd->tq.q_const) return;
     break;
@@ -622,9 +624,8 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
   type_t t2 = e2->topt->v;
   // Check to see that the type is not an array type
   switch (compress(t1)) {
-  case &ArrayType(_,_,_):
-    terr(loc,"cannot assign to an array"); break;
-  default:  break;
+  case &ArrayType(_,_,_): terr(loc,"cannot assign to an array"); break;
+  default: break;
   }
   // Check to see if e1 is an lvalue after typechecking, so that
   // UnknownIds have been resolved.
@@ -648,7 +649,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
 }
 
 // e1,e2
-static type_t tcSeqExp(tenv_t te, seg_t loc, type_t *`r topt, exp_t e1, exp_t e2) {
+static type_t tcSeqExp(tenv_t te,seg_t loc,type_t *`r topt,exp_t e1,exp_t e2) {
   tcExp(te,NULL,e1);
   tcExp(te,topt,e2);
   return e2->topt->v;
@@ -663,9 +664,8 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
   type_t t1 = e->topt->v;
   // must promote float to double, and char/short to int
   switch (compress(t1)) {
-  case FloatType: 
-    unchecked_cast(te,e,DoubleType); t1 = DoubleType; break;
-  case &IntType(_,B1): fallthru;
+  case FloatType: unchecked_cast(te,e,DoubleType); t1 = DoubleType; break;
+  case &IntType(_,B1): 
   case &IntType(_,B2): unchecked_cast(te,e,sint_t); t1 = sint_t; break;
   default: break;
   }
@@ -809,12 +809,10 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
               fmt_args = new Opt(nth_tail(args,arg_start_pos - 1));
             switch (ft) {
             case Printf_ft:
-              check_format_args(te,fmt_arg,fmt_args,
-                                Formatstr::get_format_typs);
+              check_format_args(te,fmt_arg,fmt_args,Formatstr::get_format_typs);
               break;
             case Scanf_ft:
-              check_format_args(te,fmt_arg,fmt_args,
-                                Formatstr::get_scanf_typs);
+              check_format_args(te,fmt_arg,fmt_args,Formatstr::get_scanf_typs);
               break;
             }
           } catch {
@@ -840,7 +838,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
 // throw e1
 static type_t tcThrow(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
   tcExp(te,&exn_typ,e); 
-  if (!coerce_use(te,e,exn_typ))
+  if (!coerce_arg(te,e,exn_typ))
     terr(loc,"expected xtunion exn but found %s",typ2string(e->topt->v));
   return wildtyp(new Opt(lookup_type_vars(te)));
 }
@@ -916,7 +914,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
   // first, dispense with the malloc-and-initialize cases
   // Note: We're heap region b/c this is translated to an actual malloc
   switch (e->r) {
-  case &Struct_e(_,_,_,_): fallthru;
+  case &Struct_e(_,_,_,_): 
   case &Tuple_e(_):
     warn(loc,"& used to allocate");
     // Avoid casts when we're passed down a nullable type
