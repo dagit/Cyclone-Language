@@ -710,7 +710,7 @@ doc_t vo2doc(opt_t<var_t> vo) {
 
 doc_t rgn_cmp2doc($(type_t,type_t)@ cmp) {
   let &$(r1,r2) = cmp;
-  return cat(rgn2doc(r1),text(" < "),rgn2doc(r2));
+  return cat(rgn2doc(r1),text(" > "),rgn2doc(r2));
 }
 
 doc_t rgnpo2doc(list_t<$(type_t,type_t)@> po) {
@@ -1537,12 +1537,12 @@ doc_t decl2doc(decl_t d) {
       s = cat(scope2doc(ad->sc),
 	      aggr_kind2doc(ad->kind),
 	      qvar2doc(ad->name),
-              ktvars2doc(ad->impl->exist_vars),
               text(" {"),
-              nest(2, cat(line_doc(),aggrfields2doc(ad->impl->fields))),
-	      (ad->impl->rgn_po==NULL ? nil_doc() : 
+              ktvars2doc(ad->impl->exist_vars),
+              (ad->impl->rgn_po==NULL ? nil_doc() : 
 	       cat(text(":"),rgnpo2doc(ad->impl->rgn_po))),
-              line_doc(),
+	      nest(2, cat(line_doc(),aggrfields2doc(ad->impl->fields))),
+	      line_doc(),
               text("}"),
               atts2doc(ad->attributes),
               text(";"));

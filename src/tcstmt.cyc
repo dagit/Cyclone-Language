@@ -49,10 +49,13 @@ static void decorate_stmt(tenv_t te, stmt_t s) {
 }
 
 // used to type-check Let_d, switch clauses, and catch clauses
-static void pattern_synth(seg_t loc, tenv_t te, list_t<tvar_t> tvs,
-			  list_t<vardecl_t> vs, stmt_t s, exp_opt_t where_opt,
-			  bool new_block) {
+static void pattern_synth(seg_t loc, tenv_t te, tcpat_result_t pat_res,
+			  stmt_t s, exp_opt_t where_opt, bool new_block) {
+  let TcPatResult(p,vs) = pat_res;
+  let tvs = (p==NULL) ? NULL : (*p)[0];
+  let bds = (p==NULL) ? NULL : (*p)[1];
   tenv_t te2 = add_type_vars(loc,te,tvs);
+  te2 = new_outlives_constraints(te2,bds);
   if(new_block)
     te2 = Tcenv::new_block(loc,te2);
   let ropt = new Opt(Tcenv::curr_rgn(te2));
@@ -140,12 +143,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
              typ2string(e->topt->v), typ2string(t));
         explain_failure();
       }
-      /*
-      switch (compress(t)) {
-      case VoidType: terr(s0->loc,"function returns void expression"); break;
-      default: break;
-      }
-      */
     }
     return;
 
@@ -248,8 +245,9 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     te = clear_fallthru(te);
     for (_ scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
       let p = scs->hd->pattern;
-      // FIX: can pass region if e is an lvalue
-      let $(new_tvs,vds) = tcPat(te,p,&t,NULL);
+      let pat_res = tcPat(te,p,&t);
+      let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
+	: (*pat_res.tvars_and_bounds_opt)[0];
       if (!unify(p->topt->v,t)) {
 	terr(scs->hd->loc, "switch on type %s, but case expects type %s",
              typ2string(t), typ2string(p->topt->v));
@@ -257,11 +255,15 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       }
       else
 	check_pat_regions(te,p);
-      scs->hd->pat_vars = new Opt(vds);
+      scs->hd->pat_vars = new Opt(pat_res.patvars);
       // type-checking the body will type-check any explicit fallthrus.
-      pattern_synth(scs->hd->loc, te, new_tvs, vds, scs->hd->body,
+      pattern_synth(scs->hd->loc, te, pat_res, scs->hd->body,
 		    scs->hd->where_clause, true);
-      te = set_fallthru(te, new_tvs, vds, scs->hd);
+      if(pat_res.tvars_and_bounds_opt != NULL
+	 && (*pat_res.tvars_and_bounds_opt)[1] != NULL)
+	te = clear_fallthru(te);
+      else
+	te = set_fallthru(te, new_tvs, pat_res.patvars, scs->hd);
     }
     check_switch_exhaustive(s0->loc,scs0);
     return;
@@ -302,17 +304,23 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     te = clear_fallthru(te);
     for (let scs = List::rev(scs0); scs != NULL; scs = scs->tl) {
       let p = scs->hd->pattern;
-      let $(new_tvs,x) = tcPat(te,p,&exn_typ,NULL);
+      let pat_res = tcPat(te,p,&exn_typ);
+      let new_tvs = pat_res.tvars_and_bounds_opt==NULL ? NULL 
+	: (*pat_res.tvars_and_bounds_opt)[0];
       if (!unify(p->topt->v,exn_typ))
         terr(scs->hd->loc, "expected xtunion exn but found %s",
              typ2string(p->topt->v));
       else
 	check_pat_regions(te,p);
-      scs->hd->pat_vars = new Opt(x);
+      scs->hd->pat_vars = new Opt(pat_res.patvars);
       // type-checking the body will type-check any explicit fallthrus
-      pattern_synth(scs->hd->loc, te, new_tvs, x, scs->hd->body,
+      pattern_synth(scs->hd->loc, te, pat_res, scs->hd->body,
 		    scs->hd->where_clause, true);
-      te = set_fallthru(te, new_tvs, x, scs->hd);
+      if(pat_res.tvars_and_bounds_opt != NULL
+	 && (*pat_res.tvars_and_bounds_opt)[1] != NULL)
+	te = clear_fallthru(te);
+      else
+	te = set_fallthru(te, new_tvs, pat_res.patvars, scs->hd);
     }
     check_catch_overlap(s0->loc,scs0);
     return;
@@ -398,8 +406,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     case &Let_d(p,*vds,e):
       tcExpInitializer(te,NULL,e);
       //FIX: can pass region if e an lvalue
-      let $(new_tvs,x) = tcPat(te,p,&e->topt->v,NULL);
-      *vds = new Opt(x);
+      let pat_res = tcPat(te,p,&e->topt->v);
+      *vds = new Opt(pat_res.patvars);
       if (!unify(p->topt->v,e->topt->v)) {
 	terr(d->loc,"pattern type %s does not match definition type %s",
              typ2string(p->topt->v),typ2string(e->topt->v));
@@ -408,7 +416,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       else
 	check_pat_regions(te,p);
       check_let_pat_exhaustive(p->loc,p);
-      pattern_synth(s0->loc, te, new_tvs, x, s, NULL, false);
+      pattern_synth(s0->loc, te, pat_res, s, NULL, false);
       return;
 
     case &Letv_d(vds):

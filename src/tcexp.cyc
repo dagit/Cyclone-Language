@@ -685,9 +685,8 @@ static struct Tunionfield *tcInjection(tenv_t te,exp_t e,type_t tu,
     if (typs == NULL || typs->tl != NULL) continue;
     type_t t2 = rsubstitute(r,inst,(*typs->hd)[1]);
     // I hate doing this because it has side-effects, but oh well...
-    if (unify(t1,t2)) {
+    if (unify(t1,t2))
       return fields->hd;
-    }
   }
   // now try to find a match supported by silent conversions
   for (fields = fs; fields != NULL; fields = fields->tl) {
@@ -1374,12 +1373,14 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
     ex_ts      = ex_ts->tl;
   }
   if(user_ex_ts != NULL)
-    terr(loc, "too many explicit witness types"); // TEST ME!
+    terr(loc, "too many explicit witness types");
     
   *ts = exist_typs;
 
   // this will instantiate the struct if we have type information in topt
-  // unfortunately, I think it allows topt to cause failure
+  // unfortunately, I think it allows topt to cause failure.
+  // It's important for region partial order stuff though (so user can pick
+  // the region bound)
   if (topt != NULL) unify(res_typ,*topt);
   // make sure each argument has the right type
   list_t<$(aggrfield_t,exp_t)@`rgn,`rgn> fields =
@@ -1395,6 +1396,13 @@ static type_t tcStruct(tenv_t te, seg_t loc, type_t * topt,
       explain_failure();
     }
   }
+  let rpo_inst = NULL;
+  for(let rpo=ad->impl->rgn_po; rpo != NULL; rpo = rpo->tl)
+    rpo_inst = new List(new $(rsubstitute(rgn,inst,(*rpo->hd)[0]),
+			      rsubstitute(rgn,inst,(*rpo->hd)[1])),
+			rpo_inst);
+  rpo_inst = imp_rev(rpo_inst);
+  Tcenv::check_rgn_partial_order(te,loc,rpo_inst);
   return res_typ;
   }
 }

@@ -267,6 +267,9 @@ struct _tagged_arr pntlp_toCyc(void **in) {
   return result;
 }
 
+// Returns the size of an array from the current pointer back to
+// its starting point.  If the curr pointer = start pointer, or 
+// the curr pointer is out of bounds, then this is 0.
 unsigned int arr_prevsize(struct _tagged_arr arr,size_t elt_sz) {
   unsigned char *_get_arr_size_curr=arr.curr;
   unsigned char *_get_arr_size_base=arr.base;

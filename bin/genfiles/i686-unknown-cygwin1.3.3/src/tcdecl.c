@@ -614,7 +614,10 @@ _tmp45,_tag_arr("type",sizeof(char),5),_tmp35,loc,msg))return 0;{struct Cyc_List
 _tmp48=Cyc_Tcdecl_build_tvs_map(((struct Cyc_List_List*(*)(struct Cyc_List_List*x,
 struct Cyc_List_List*y))Cyc_List_append)(d0->tvs,_tmp40),((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x,struct Cyc_List_List*y))Cyc_List_append)(d1->tvs,_tmp45));
-for(0;_tmp42 != 0?_tmp47 != 0: 0;(_tmp42=_tmp42->tl,_tmp47=_tmp47->tl)){struct Cyc_Absyn_Aggrfield
+for(0;_tmp41 != 0?_tmp46 != 0: 0;(_tmp41=_tmp41->tl,_tmp46=_tmp46->tl)){Cyc_Tcdecl_check_type((*((
+struct _tuple4*)_tmp41->hd)).f1,(*((struct _tuple4*)_tmp46->hd)).f1);Cyc_Tcdecl_check_type((*((
+struct _tuple4*)_tmp41->hd)).f2,(*((struct _tuple4*)_tmp46->hd)).f2);}for(0;_tmp42
+!= 0?_tmp47 != 0: 0;(_tmp42=_tmp42->tl,_tmp47=_tmp47->tl)){struct Cyc_Absyn_Aggrfield
 _tmp4A;struct _tagged_arr*_tmp4B;struct Cyc_Absyn_Tqual _tmp4C;void*_tmp4D;struct
 Cyc_Absyn_Exp*_tmp4E;struct Cyc_List_List*_tmp4F;struct Cyc_Absyn_Aggrfield*_tmp49=(
 struct Cyc_Absyn_Aggrfield*)_tmp42->hd;_tmp4A=*_tmp49;_tmp4B=_tmp4A.name;_tmp4C=

@@ -371,6 +371,7 @@ static $(list_t<type_t>, list_t<type_t>) effects_split(type_t t) {
   return $(rgions, effects);
 }
 
+// FIX: does not print regions(`a)
 static void dumpeff(type_t t) {
   let $(rgions,effects) = effects_split(t);
   rgions = List::imp_rev(rgions);
@@ -475,7 +476,7 @@ void dumpfunarg($(opt_t<var_t>,tqual_t,type_t)@ t) {
 }
 void dump_rgncmp($(type_t,type_t)@ cmp) {
   let &$(r1,r2) = cmp;
-  dumptyp(r1); dump_char('<'); dumptyp(r2);
+  dumpeff(r1); dump_char('>'); dumprgn(r2);
 }
 void dump_rgnpo(list_t<$(type_t,type_t)@> rgn_po) {
   dump_sep(dump_rgncmp,rgn_po,",");
@@ -1062,11 +1063,11 @@ void dumpdecl(decl_t d) {
       dump_char('{');
       if(ad->impl->exist_vars != NULL)
 	egroup(dumpkindedtvar,ad->impl->exist_vars,"<",">",",");
-      dumpaggrfields(ad->impl->fields);
       if(ad->impl->rgn_po != NULL) {
 	dump_char(':');
 	dump_rgnpo(ad->impl->rgn_po);
       }
+      dumpaggrfields(ad->impl->fields);
       dump("}");
       dumpatts(ad->attributes);
       dump(";");

@@ -797,7 +797,7 @@ struct Cyc_Absyn_Tqual,void*,void(*f)(struct Cyc_Core_Opt*),struct Cyc_Core_Opt*
 Cyc_Absyndump_dumptqtd)((*t).f2,(*t).f3,Cyc_Absyndump_dumpvaropt,(*t).f1);}void
 Cyc_Absyndump_dump_rgncmp(struct _tuple6*cmp){struct _tuple6 _tmp70;void*_tmp71;
 void*_tmp72;struct _tuple6*_tmp6F=cmp;_tmp70=*_tmp6F;_tmp71=_tmp70.f1;_tmp72=
-_tmp70.f2;Cyc_Absyndump_dumptyp(_tmp71);Cyc_Absyndump_dump_char((int)'<');Cyc_Absyndump_dumptyp(
+_tmp70.f2;Cyc_Absyndump_dumpeff(_tmp71);Cyc_Absyndump_dump_char((int)'>');Cyc_Absyndump_dumprgn(
 _tmp72);}void Cyc_Absyndump_dump_rgnpo(struct Cyc_List_List*rgn_po){((void(*)(void(*
 f)(struct _tuple6*),struct Cyc_List_List*l,struct _tagged_arr sep))Cyc_Absyndump_dump_sep)(
 Cyc_Absyndump_dump_rgncmp,rgn_po,_tag_arr(",",sizeof(char),2));}void Cyc_Absyndump_dumpfunargs(
@@ -1389,22 +1389,22 @@ int)'{');if(((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp156->impl))->exist_
 _tagged_arr start,struct _tagged_arr end,struct _tagged_arr sep))Cyc_Absyndump_egroup)(
 Cyc_Absyndump_dumpkindedtvar,((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp156->impl))->exist_vars,
 _tag_arr("<",sizeof(char),2),_tag_arr(">",sizeof(char),2),_tag_arr(",",sizeof(
-char),2));Cyc_Absyndump_dumpaggrfields(((struct Cyc_Absyn_AggrdeclImpl*)
-_check_null(_tmp156->impl))->fields);if(((struct Cyc_Absyn_AggrdeclImpl*)
-_check_null(_tmp156->impl))->rgn_po != 0){Cyc_Absyndump_dump_char((int)':');Cyc_Absyndump_dump_rgnpo(((
-struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp156->impl))->rgn_po);}Cyc_Absyndump_dump(
-_tag_arr("}",sizeof(char),2));Cyc_Absyndump_dumpatts(_tmp156->attributes);Cyc_Absyndump_dump(
-_tag_arr(";",sizeof(char),2));}goto _LL1AB;_LL1B2: if(*((int*)_tmp153)!= 5)goto
-_LL1B4;_tmp157=((struct Cyc_Absyn_Tunion_d_struct*)_tmp153)->f1;_tmp158=*_tmp157;
-_tmp159=(void*)_tmp158.sc;_tmp15A=_tmp158.name;_tmp15B=_tmp158.tvs;_tmp15C=
-_tmp158.fields;_tmp15D=_tmp158.is_xtunion;_LL1B3: Cyc_Absyndump_dumpscope(_tmp159);
-Cyc_Absyndump_dump(_tmp15D?_tag_arr("xtunion",sizeof(char),8): _tag_arr("tunion",
-sizeof(char),7));Cyc_Absyndump_dumpqvar(_tmp15A);Cyc_Absyndump_dumptvars(_tmp15B);
-if(_tmp15C == 0)Cyc_Absyndump_dump_semi();else{Cyc_Absyndump_dump_char((int)'{');
-Cyc_Absyndump_dumptunionfields((struct Cyc_List_List*)_tmp15C->v);Cyc_Absyndump_dump_nospace(
-_tag_arr("};",sizeof(char),3));}goto _LL1AB;_LL1B4: if(*((int*)_tmp153)!= 6)goto
-_LL1B6;_tmp15E=((struct Cyc_Absyn_Enum_d_struct*)_tmp153)->f1;_tmp15F=*_tmp15E;
-_tmp160=(void*)_tmp15F.sc;_tmp161=_tmp15F.name;_tmp162=_tmp15F.fields;_LL1B5: Cyc_Absyndump_dumpscope(
+char),2));if(((struct Cyc_Absyn_AggrdeclImpl*)_check_null(_tmp156->impl))->rgn_po
+!= 0){Cyc_Absyndump_dump_char((int)':');Cyc_Absyndump_dump_rgnpo(((struct Cyc_Absyn_AggrdeclImpl*)
+_check_null(_tmp156->impl))->rgn_po);}Cyc_Absyndump_dumpaggrfields(((struct Cyc_Absyn_AggrdeclImpl*)
+_check_null(_tmp156->impl))->fields);Cyc_Absyndump_dump(_tag_arr("}",sizeof(char),
+2));Cyc_Absyndump_dumpatts(_tmp156->attributes);Cyc_Absyndump_dump(_tag_arr(";",
+sizeof(char),2));}goto _LL1AB;_LL1B2: if(*((int*)_tmp153)!= 5)goto _LL1B4;_tmp157=((
+struct Cyc_Absyn_Tunion_d_struct*)_tmp153)->f1;_tmp158=*_tmp157;_tmp159=(void*)
+_tmp158.sc;_tmp15A=_tmp158.name;_tmp15B=_tmp158.tvs;_tmp15C=_tmp158.fields;
+_tmp15D=_tmp158.is_xtunion;_LL1B3: Cyc_Absyndump_dumpscope(_tmp159);Cyc_Absyndump_dump(
+_tmp15D?_tag_arr("xtunion",sizeof(char),8): _tag_arr("tunion",sizeof(char),7));
+Cyc_Absyndump_dumpqvar(_tmp15A);Cyc_Absyndump_dumptvars(_tmp15B);if(_tmp15C == 0)
+Cyc_Absyndump_dump_semi();else{Cyc_Absyndump_dump_char((int)'{');Cyc_Absyndump_dumptunionfields((
+struct Cyc_List_List*)_tmp15C->v);Cyc_Absyndump_dump_nospace(_tag_arr("};",
+sizeof(char),3));}goto _LL1AB;_LL1B4: if(*((int*)_tmp153)!= 6)goto _LL1B6;_tmp15E=((
+struct Cyc_Absyn_Enum_d_struct*)_tmp153)->f1;_tmp15F=*_tmp15E;_tmp160=(void*)
+_tmp15F.sc;_tmp161=_tmp15F.name;_tmp162=_tmp15F.fields;_LL1B5: Cyc_Absyndump_dumpscope(
 _tmp160);Cyc_Absyndump_dump(_tag_arr("enum ",sizeof(char),6));Cyc_Absyndump_dumpqvar(
 _tmp161);if(_tmp162 == 0)Cyc_Absyndump_dump_semi();else{Cyc_Absyndump_dump_char((
 int)'{');Cyc_Absyndump_dumpenumfields((struct Cyc_List_List*)_tmp162->v);Cyc_Absyndump_dump_nospace(

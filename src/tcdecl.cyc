@@ -42,7 +42,7 @@ namespace Tcdecl;
 xtunion exn {Incompatible};
 
 void merr(seg_t loc,string_t<`r2> * msg1,string_t fmt, ... inject parg_t<`r> ap
-	  : `r2 > `r)
+	  : {`r2} > `r)
   __attribute__((format(printf,3,4)))
 {
   if (msg1 == NULL)
@@ -166,8 +166,13 @@ struct Aggrdecl * merge_aggrdecl(aggrdecl_t d0, aggrdecl_t d1,
     let inst = build_tvs_map(append(d0->tvs,exist_vars0), 
 			     append(d1->tvs,exist_vars1));
 
-    // check region partial order under the map FIX: DO ME! 
-    // semantic equality check: each in one must be implied by the other
+    // check region partial order under the map 
+    // FIX: a semantic equality check would be more permissive
+    for(; rgn_po0 != NULL && rgn_po1 != NULL; 
+	rgn_po0=rgn_po0->tl, rgn_po1=rgn_po1->tl) {      
+      check_type((*rgn_po0->hd)[0], (*rgn_po1->hd)[0]);
+      check_type((*rgn_po0->hd)[1], (*rgn_po1->hd)[1]);
+    }
 
     // check each field under the map
     for(; f0s != NULL && f1s != NULL; f0s = f0s->tl, f1s = f1s->tl) {

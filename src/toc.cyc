@@ -2835,6 +2835,7 @@ static void aggrdecl_to_c(aggrdecl_t ad) {
   ad->tvs  = NULL;
   if(ad->impl != NULL) {
     ad->impl->exist_vars = NULL;
+    ad->impl->rgn_po     = NULL;
     if (seen_defn_before)
       ad->impl = NULL;
     else

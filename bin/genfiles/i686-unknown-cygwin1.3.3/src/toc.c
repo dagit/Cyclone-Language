@@ -2888,28 +2888,29 @@ struct Cyc_Dict_Dict*d,struct _tagged_arr*k,struct Cyc_Absyn_Aggrdecl*v))Cyc_Dic
 struct Cyc_Dict_Dict*)((struct Cyc_Core_Opt*)_check_null(Cyc_Toc_aggrs_so_far))->v,(*
 _tmp453).f2,ad));seen_defn_before=0;}else{seen_defn_before=1;}}(void*)(ad->sc=(
 void*)((void*)2));ad->tvs=0;if(ad->impl != 0){((struct Cyc_Absyn_AggrdeclImpl*)
-_check_null(ad->impl))->exist_vars=0;if(seen_defn_before)ad->impl=0;else{struct
-Cyc_List_List*_tmp456=((struct Cyc_Absyn_AggrdeclImpl*)_check_null(ad->impl))->fields;
-for(0;_tmp456 != 0;_tmp456=_tmp456->tl){(void*)(((struct Cyc_Absyn_Aggrfield*)
-_tmp456->hd)->type=(void*)Cyc_Toc_typ_to_c_array((void*)((struct Cyc_Absyn_Aggrfield*)
-_tmp456->hd)->type));}}}}}static struct Cyc_Core_Opt*Cyc_Toc_tunions_so_far=0;
-static void Cyc_Toc_tuniondecl_to_c(struct Cyc_Absyn_Tuniondecl*tud){if(Cyc_Toc_tunions_so_far
-== 0)Cyc_Toc_tunions_so_far=({struct Cyc_Core_Opt*_tmp457=_cycalloc(sizeof(*
-_tmp457));_tmp457->v=((struct Cyc_Set_Set*(*)(int(*cmp)(struct _tuple1*,struct
-_tuple1*)))Cyc_Set_empty)(Cyc_Absyn_qvar_cmp);_tmp457;});{struct _tuple1*_tmp458=
-tud->name;if(tud->fields == 0?1:((int(*)(struct Cyc_Set_Set*s,struct _tuple1*elt))
-Cyc_Set_member)((struct Cyc_Set_Set*)((struct Cyc_Core_Opt*)_check_null(Cyc_Toc_tunions_so_far))->v,
-_tmp458))return;(struct Cyc_Set_Set*)(((struct Cyc_Core_Opt*)_check_null(Cyc_Toc_tunions_so_far))->v=(
-void*)((struct Cyc_Set_Set*(*)(struct Cyc_Set_Set*s,struct _tuple1*elt))Cyc_Set_insert)((
-struct Cyc_Set_Set*)((struct Cyc_Core_Opt*)_check_null(Cyc_Toc_tunions_so_far))->v,
-_tmp458));{struct Cyc_List_List*_tmp459=(struct Cyc_List_List*)((struct Cyc_Core_Opt*)
-_check_null(tud->fields))->v;for(0;_tmp459 != 0;_tmp459=_tmp459->tl){struct Cyc_Absyn_Tunionfield*
-f=(struct Cyc_Absyn_Tunionfield*)_tmp459->hd;if(f->typs != 0){struct Cyc_List_List*
-_tmp45A=0;int i=1;{struct Cyc_List_List*_tmp45B=f->typs;for(0;_tmp45B != 0;(_tmp45B=
-_tmp45B->tl,i ++)){struct _tagged_arr*_tmp45C=Cyc_Absyn_fieldname(i);struct Cyc_Absyn_Aggrfield*
-_tmp45D=({struct Cyc_Absyn_Aggrfield*_tmp45F=_cycalloc(sizeof(*_tmp45F));_tmp45F->name=
-_tmp45C;_tmp45F->tq=(*((struct _tuple4*)_tmp45B->hd)).f1;_tmp45F->type=(void*)Cyc_Toc_typ_to_c_array((*((
-struct _tuple4*)_tmp45B->hd)).f2);_tmp45F->width=0;_tmp45F->attributes=0;_tmp45F;});
+_check_null(ad->impl))->exist_vars=0;((struct Cyc_Absyn_AggrdeclImpl*)_check_null(
+ad->impl))->rgn_po=0;if(seen_defn_before)ad->impl=0;else{struct Cyc_List_List*
+_tmp456=((struct Cyc_Absyn_AggrdeclImpl*)_check_null(ad->impl))->fields;for(0;
+_tmp456 != 0;_tmp456=_tmp456->tl){(void*)(((struct Cyc_Absyn_Aggrfield*)_tmp456->hd)->type=(
+void*)Cyc_Toc_typ_to_c_array((void*)((struct Cyc_Absyn_Aggrfield*)_tmp456->hd)->type));}}}}}
+static struct Cyc_Core_Opt*Cyc_Toc_tunions_so_far=0;static void Cyc_Toc_tuniondecl_to_c(
+struct Cyc_Absyn_Tuniondecl*tud){if(Cyc_Toc_tunions_so_far == 0)Cyc_Toc_tunions_so_far=({
+struct Cyc_Core_Opt*_tmp457=_cycalloc(sizeof(*_tmp457));_tmp457->v=((struct Cyc_Set_Set*(*)(
+int(*cmp)(struct _tuple1*,struct _tuple1*)))Cyc_Set_empty)(Cyc_Absyn_qvar_cmp);
+_tmp457;});{struct _tuple1*_tmp458=tud->name;if(tud->fields == 0?1:((int(*)(struct
+Cyc_Set_Set*s,struct _tuple1*elt))Cyc_Set_member)((struct Cyc_Set_Set*)((struct Cyc_Core_Opt*)
+_check_null(Cyc_Toc_tunions_so_far))->v,_tmp458))return;(struct Cyc_Set_Set*)(((
+struct Cyc_Core_Opt*)_check_null(Cyc_Toc_tunions_so_far))->v=(void*)((struct Cyc_Set_Set*(*)(
+struct Cyc_Set_Set*s,struct _tuple1*elt))Cyc_Set_insert)((struct Cyc_Set_Set*)((
+struct Cyc_Core_Opt*)_check_null(Cyc_Toc_tunions_so_far))->v,_tmp458));{struct Cyc_List_List*
+_tmp459=(struct Cyc_List_List*)((struct Cyc_Core_Opt*)_check_null(tud->fields))->v;
+for(0;_tmp459 != 0;_tmp459=_tmp459->tl){struct Cyc_Absyn_Tunionfield*f=(struct Cyc_Absyn_Tunionfield*)
+_tmp459->hd;if(f->typs != 0){struct Cyc_List_List*_tmp45A=0;int i=1;{struct Cyc_List_List*
+_tmp45B=f->typs;for(0;_tmp45B != 0;(_tmp45B=_tmp45B->tl,i ++)){struct _tagged_arr*
+_tmp45C=Cyc_Absyn_fieldname(i);struct Cyc_Absyn_Aggrfield*_tmp45D=({struct Cyc_Absyn_Aggrfield*
+_tmp45F=_cycalloc(sizeof(*_tmp45F));_tmp45F->name=_tmp45C;_tmp45F->tq=(*((struct
+_tuple4*)_tmp45B->hd)).f1;_tmp45F->type=(void*)Cyc_Toc_typ_to_c_array((*((struct
+_tuple4*)_tmp45B->hd)).f2);_tmp45F->width=0;_tmp45F->attributes=0;_tmp45F;});
 _tmp45A=({struct Cyc_List_List*_tmp45E=_cycalloc(sizeof(*_tmp45E));_tmp45E->hd=
 _tmp45D;_tmp45E->tl=_tmp45A;_tmp45E;});}}_tmp45A=((struct Cyc_List_List*(*)(
 struct Cyc_List_List*x))Cyc_List_imp_rev)(_tmp45A);_tmp45A=({struct Cyc_List_List*

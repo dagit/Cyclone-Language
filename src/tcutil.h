@@ -199,6 +199,9 @@ extern $(bool,type_t) addressof_props(tenv_t te, exp_t e);
 // variables respectively.
 extern $(list_t<tvar_t>,list_t<tvar_t>) split_effect(Core::opt_t<type_t> effect);
 
+// Given an effect, express/mutate it to have only regions(`a), `r, and joins.
+extern type_t normalize_effect(type_t e);
+
 // Gensym a new type variable with kind bounded by k
 extern tvar_t new_tvar(kindbound_t k);
 // Get an identity for a type variable

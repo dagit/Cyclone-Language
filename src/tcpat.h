@@ -26,18 +26,20 @@
 #include "tcenv.h"
 
 namespace Tcpat {
-
 using List;
 using Position;
 using Absyn;
 using Tcenv;
 
+struct TcPatResult {
+  $(list_t<tvar_t>,list_t<$(type_t,type_t)@>) * tvars_and_bounds_opt;
+  list_t<vardecl_t> patvars;
+};
+typedef struct TcPatResult tcpat_result_t;
   // You must call tcPat, then unify with the type of the value on which
   // you're switching, then call check_pat_regions.
   // If someone has a less clumsy proposal, I'd love to hear it.
-extern 
-$(list_t<tvar_t>, list_t<vardecl_t>)
-   tcPat(tenv_t te,pat_t p,type_t *`r1 topt, type_t *`r2 region_opt);
+extern tcpat_result_t tcPat(tenv_t te,pat_t p,type_t * topt);
 extern void check_pat_regions(tenv_t te, pat_t p);
 extern void check_switch_exhaustive(seg_t,list_t<switch_clause_t>);
 extern bool check_let_pat_exhaustive(seg_t,pat_t p); // true => exhaustive

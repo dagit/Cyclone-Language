@@ -26,18 +26,22 @@
 #include "absyn.h"
 
 namespace RgnOrder {
+using Absyn;
+using List;
 
 struct RgnPO;
-typedef List::list_t<struct RgnPO @> rgn_po_t;
+typedef struct RgnPO @ rgn_po_t;
 
-  // means initial for a function, currently rejects cycles but needn't
-  // (with effects in outlives, cycles -- especially of length 1 probably
-  //  should be permitted)
-rgn_po_t initial_region_po(Position::seg_t loc, List::list_t<Absyn::tvar_t> tvs,
-			   List::list_t<$(Absyn::type_t,Absyn::type_t)@> po);
-rgn_po_t add_region_po(rgn_po_t po, Absyn::tvar_t tv, bool resetable);
-bool is_region_resetable(rgn_po_t po, Absyn::tvar_t r); // going away?
-bool check_region_outlives(rgn_po_t po, Absyn::tvar_t r1, Absyn::tvar_t r2);
+rgn_po_t initial_fn_po(list_t<tvar_t> tvs, 
+		       list_t<$(type_t,type_t)@> po,
+		       tvar_t fst_rgn);
+rgn_po_t add_outlives_constraint(rgn_po_t po, type_t eff, type_t rgn);
+rgn_po_t add_youngest(rgn_po_t po, tvar_t rgn, bool resetable);
+bool is_region_resetable(rgn_po_t po, tvar_t r);
+bool effect_outlives(rgn_po_t po, type_t eff, type_t rgn);
+bool satisfies_constraints(rgn_po_t po, list_t<$(type_t,type_t)@> constraints,
+			   type_t default_bound);
+
 }
 
 #endif

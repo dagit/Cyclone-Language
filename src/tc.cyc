@@ -297,7 +297,8 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd) {
     case &IntType(_,B4): break;
     default: 
       terr(loc,"main declared with return type %s instead of int",
-           typ2string(fd->ret_type)); break;
+	   typ2string(fd->ret_type)); 
+      break;
     }
     if (fd->c_varargs || fd->cyc_varargs != NULL)
       terr(loc,"main declared with varargs");
@@ -368,9 +369,9 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   add_tvar_identities(td->tvs);
   if (td->defn != NULL)
     check_type(loc,te,td->tvs,AnyKind,false,td->defn->v);
-  else {
+  else
     // run through and constrain the kinds of unconstrained tvs to boxkind
-    for (_ tvs = td->tvs; tvs != NULL; tvs = tvs->tl) {
+    for (_ tvs = td->tvs; tvs != NULL; tvs = tvs->tl)
       switch (compress_kb(tvs->hd->kind)) {
       case &Unknown_kb(*f): 
         *f = new Opt(new Eq_kb(BoxKind)); break;
@@ -378,17 +379,24 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
         *f = new Opt(new Eq_kb(k)); break;
       default: continue;
       }
-    }
-  }
+  
   // add to environment
   ge->typedefs = Dict::insert(ge->typedefs,v,td);
 }
 
-static void tcAggrFields(tenv_t te, genv_t ge, seg_t loc,
-			 list_t<aggrfield_t> fields, list_t<tvar_t,`H> tvs) {
+static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc, list_t<tvar_t,`H> tvs,
+		       list_t<$(type_t,type_t)@> rpo, 
+		       list_t<aggrfield_t> fields) {
   // check fields, rejecting ill-formed types, bad fields, and duplicates
   // (unless the field name is empty)
   region uprev_rgn {
+    // FIX?: forbid effect variables (but they're going away)
+    for(; rpo != NULL; rpo = rpo->tl) {
+      let &$(e,r) = rpo->hd;
+      check_type(loc,te,tvs,EffKind,false,e);
+      check_type(loc,te,tvs,RgnKind,false,r);
+    }
+
     list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
 
     for (let fs = fields; fs != NULL; fs = fs->tl) {
@@ -476,8 +484,8 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     check_unique_tvars(loc, exist_vars);
     // give the bound type variables identities
     add_tvar_identities(exist_vars);
-
-    tcAggrFields(te, ge, loc, fs, append(tvs,exist_vars));
+    
+    tcAggrImpl(te, ge, loc, append(tvs,exist_vars), rgn_po, fs);
 
     if(ad->kind == UnionA)
           // must check that fields are bits-only
@@ -502,7 +510,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     // give the bound type variables identities
     add_tvar_identities(exist_vars);
 
-    tcAggrFields(te, ge, loc, fs, append(tvs, exist_vars));
+    tcAggrImpl(te, ge, loc, append(tvs,exist_vars), rgn_po, fs);
     
     *adp = ad0;// restore the previous declaration and go update the environment
     fallthru(adp);

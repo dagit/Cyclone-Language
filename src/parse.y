@@ -1603,12 +1603,12 @@ optional_rgn_order:
 ;
 
 rgn_order:
-  specifier_qualifier_list '>' TYPE_VAR
-{ $$ = ^$(new List(new $(speclist2typ((*($1))[1],LOC(@1,@1)),
+  atomic_effect '>' TYPE_VAR
+{ $$ = ^$(new List(new $(new JoinEff($1),
 			 id2type($3,new Eq_kb(RgnKind))),NULL)); }
-| specifier_qualifier_list '>' TYPE_VAR ',' rgn_order 
-  { $$ = ^$(new List(new $(speclist2typ((*($1))[1],LOC(@1,@1)),
-                           id2type($3,new Eq_kb(RgnKind))),$5)); }
+| atomic_effect '>' TYPE_VAR ',' rgn_order 
+{ $$ = ^$(new List(new $(new JoinEff($1),
+			 id2type($3,new Eq_kb(RgnKind))),$5)); }
 ;
 
 optional_inject:

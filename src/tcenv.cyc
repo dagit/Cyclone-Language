@@ -454,13 +454,13 @@ frames_t<`b> map_frames(`b g(`a), frames_t<`a> f) {
   }
 }
 
-fenv_t get_fenv(tenv_t te) {
-  if (te->le == NULL) throw Env_error;
+static fenv_t get_fenv(tenv_t te) {
+  if (te->le == NULL) env_err("get_fenv");
   return get_visible(te->le->v);
 }
 
-tenv_t put_fenv(tenv_t te, fenv_t fe) {
-  if (te->le == NULL) throw Env_error;
+static tenv_t put_fenv(tenv_t te, fenv_t fe) {
+  if (te->le == NULL) env_err("put_fenv");
   return new Tenv(te->ns, te->ae, new Opt(put_visible(te->le->v,fe)));
 }
 
@@ -488,7 +488,7 @@ list_t<tvar_t> lookup_type_vars(tenv_t te) {
 
 tenv_t add_type_vars(seg_t loc,tenv_t te,list_t<tvar_t> tvs) {
   if(te->le == NULL) env_err("Tcenv: unexpected add_type_vars");
-  let fe      = copy_fenv_old_ctrl(get_fenv(te));
+  let fe = copy_fenv_old_ctrl(get_fenv(te));
   // add unique identities to the type variables;
   add_tvar_identities(tvs);
   let new_tvs = List::append(tvs,fe->type_vars);
@@ -600,7 +600,7 @@ process_fallthru(tenv_t te,stmt_t s, switch_clause_t *@ clauseopt){
   if(ans != NULL) {
     (*ans)[0]->body->non_local_preds = 
       new List(s, (*ans)[0]->body->non_local_preds);
-    *clauseopt = new{(*ans)[0]};
+    *clauseopt = new (*ans)[0];
   }
   return ans;
 }
@@ -707,7 +707,7 @@ tenv_t add_region(tenv_t te, type_t r, bool resetable) {
   case &VarType(x): tv = x; break;
   default: tv = env_err("bad add region"); break;
   }
-  fe->region_order = add_region_po(fe->region_order, tv, resetable);
+  fe->region_order = add_youngest(fe->region_order, tv, resetable);
   fe->capability = new JoinEff(new List(new AccessEff(r),
                                         new List(fe->capability,NULL)));
   return put_fenv(te,fe);
@@ -719,7 +719,7 @@ tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
   type_t block_typ = new VarType(block_rgn);
   fe->type_vars = new List(block_rgn, fe->type_vars);
   Tcutil::check_unique_tvars(loc,fe->type_vars);
-  fe->region_order = add_region_po(fe->region_order, block_rgn, false);
+  fe->region_order = add_youngest(fe->region_order, block_rgn, false);
   fe->capability = new JoinEff(new List(new AccessEff(block_typ), 
                                         new List(fe->capability,NULL)));
   fe->curr_rgn = block_typ;
@@ -732,25 +732,75 @@ tenv_t new_block(seg_t loc, tenv_t te) {
   return new_named_block(loc, te, t);
 }
 
+tenv_t new_outlives_constraints(tenv_t te, list_t<$(type_t,type_t)@> cs) {
+  if (te->le == NULL) env_err("Tcenv: unexpected new_outlives_constraints");
+  fenv_t fe = copy_fenv_old_ctrl(get_fenv(te));
+  let po = fe->region_order;
+  for(; cs != NULL; cs = cs->tl)
+    po = add_outlives_constraint(po,(*cs->hd)[0],(*cs->hd)[1]);
+  fe->region_order = po;
+  return put_fenv(te,fe);
+}
+
 type_t curr_rgn(tenv_t te) {
   if (te->le == NULL) return HeapRgn; 
   return get_fenv(te)->curr_rgn;
 }
 
-// Check that rgn_typ is currently accessible:  the heap region is always
-// accessible, and a region variable r is accessible iff it appears in the
-// capability.
-void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
-  if (te->le != NULL) {
-    type_t capability = get_fenv(te)->capability;
-    if (region_in_effect(false, rgn, capability) ||
-        region_in_effect(true, rgn, capability)) return;
+static bool eff_outlives_atomic_eff(rgn_po_t po, type_t eff1, type_t eff2) {
+  // assumes eff1 is compressed and normalized
+  eff2 = compress(normalize_effect(eff2));
+  switch(eff2) {
+  case &JoinEff(effs):
+    for(; effs != NULL; effs = effs->tl)
+      if(eff_outlives_atomic_eff(po, eff1, effs->hd))
+	return true;
+    return false;
+  case &AccessEff(vt): return effect_outlives(po, eff1, vt);
+  case &RgnsEff(vt1):
+    switch(eff1) {
+    case &RgnsEff(vt2):
+      switch ($(compress(vt1),compress(vt2))) {
+      case $(&VarType(tv1),&VarType(tv2)): return tvar_cmp(tv1,tv2)==0;
+      default: break;
+      }
+      fallthru;
+    default: return eff1==HeapRgn;
+    }
+  default: return eff1==HeapRgn;
   }
+}
+
+static bool eff_outlives_eff(rgn_po_t po, type_t eff1, type_t eff2) {
+  eff1 = compress(normalize_effect(eff1));
+  switch(eff1) {
+  case &JoinEff(effs):
+    for(; effs != NULL; effs = effs->tl)
+      if(!eff_outlives_eff(po,effs->hd,eff2))
+	return false;
+    return true;
+  default: return eff_outlives_atomic_eff(po, eff1, eff2);
+  }
+}
+
+// Check that rgn_typ is currently accessible:  the heap region is always
+// accessible, and a region variable r is accessible if it appears in the
+// capability or outlives something in the capability.
+void check_rgn_accessible(tenv_t te, seg_t loc, type_t rgn) {
+  if(te->le == NULL) env_err("Tcenv: unexpected check_rgn_accessible");
+  let fe = get_fenv(te);
+  let capability = fe->capability;
+  if (region_in_effect(false, rgn, capability) ||
+      region_in_effect(true, rgn, capability)) 
+    return;
+  if(eff_outlives_eff(fe->region_order,new AccessEff(rgn),capability))
+    return;
   terr(loc, "Expression accesses unavailable region %s", typ2string(rgn));
 }
 
 // Check to see if a region is accessible and resetable
 void check_rgn_resetable(tenv_t te, seg_t loc, type_t rgn) {
+  if(te->le == NULL) env_err("Tcenv: unexpected check_rgn_resetable");
   check_rgn_accessible(te,loc,rgn);
   switch (compress(rgn)) {
   case &VarType(r):
@@ -764,46 +814,42 @@ void check_rgn_resetable(tenv_t te, seg_t loc, type_t rgn) {
 
 // check that region rt_a outlives region rt_b using the partial order in
 // the environment.  Assumes that rt_a <> rt_b.
+// Note: inefficient allocation here!
 bool region_outlives(tenv_t te, type_t rt_a, type_t rt_b) {
-  rt_a = compress(rt_a);
-  rt_b = compress(rt_b);
-  if (rt_a == HeapRgn) return true;
-  if (te->le != NULL) {
-    switch ($(rt_a,rt_b)) {
-    case $(&VarType(va), &VarType(vb)):
-      return check_region_outlives(get_fenv(te)->region_order, va, vb);
-    default: return false;
-    }
-  }
-  return false;
+  if(te->le==NULL) 
+    return rt_a==HeapRgn;
+  return effect_outlives(get_fenv(te)->region_order,new AccessEff(rt_a),rt_b);
 }
 
 // Check that a function call's effect is contained in the current capability.
 void check_effect_accessible(tenv_t te, seg_t loc, type_t eff) {
-  type_t capability;
-  if (te->le == NULL) 
-    capability = new JoinEff(NULL);
-  else {
-    let fenv = get_fenv(te);
-    capability = fenv->capability;
-  }
-  // for function calls, we drive the slack in the function's effect to 
-  // the empty effect
-  if (!subset_effect(true, eff, capability))
-    terr(loc, "Capability %s does not cover function's effect %s",
-         typ2string(capability), typ2string(eff));
+  if(te->le == NULL) env_err("Tcenv: unexpected check_effect_accessible");
+  let fe = get_fenv(te);
+  let capability = fe->capability;
+  if(subset_effect(true, eff, capability))
+    return;
+  if(eff_outlives_eff(fe->region_order, eff, capability))
+    return;
+  terr(loc, "Capability %s does not cover function's effect %s",
+       typ2string(capability), typ2string(eff));
 }
 
 // Check that a function call's region partial order is compatible
 // with the current region partial order
+// FIX: better error message!
 void check_rgn_partial_order(tenv_t te, seg_t loc, 
                              list_t<$(type_t,type_t)@> po) {
-  for (; po != NULL; po = po->tl) {
-    let &$(r1,r2) = po->hd;
-    if (!region_outlives(te, r1, r2))
-      terr(loc, "function requires that region %s outlive %s",
-           typ2string(r1),typ2string(r2));
+  if(te->le == NULL) {
+    // not sure this could ever fail
+    for(; po != NULL; po=po->tl)
+      if((!subset_effect(true, (*po->hd)[0], empty_effect))
+	 || !subset_effect(true, (*po->hd)[1], empty_effect))
+	terr(loc,"the required region ordering is not satisfied here");
+    return;
   }
+  let fe = get_fenv(te);
+  if(!satisfies_constraints(fe->region_order,po,fe->curr_rgn))
+    terr(loc,"the required region ordering is not satisfied here");
 }
 
 fenv_t new_fenv(seg_t loc, fndecl_t fd) {
@@ -814,8 +860,7 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
              new Eq_kb(RgnKind));
   let tvs = new List(rgn0,fd->tvs);
   Tcutil::check_unique_tvars(loc,tvs);
-  let rgn_po = add_region_po(initial_region_po(loc,fd->tvs,fd->rgn_po),rgn0,
-                             false);
+  let rgn_po = initial_fn_po(fd->tvs,fd->rgn_po,rgn0);
   type_t param_rgn = new VarType(rgn0);
   let vds = NULL;
   for(let args = fd->args; args != NULL; args = args->tl) {
