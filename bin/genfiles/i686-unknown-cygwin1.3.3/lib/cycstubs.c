@@ -774,29 +774,28 @@ timezone;short dstflag;};struct Cyc_Std_tms{unsigned int tms_utime;unsigned int
 tms_stime;unsigned int tms_cutime;unsigned int tms_cstime;};struct Cyc_Std_sockaddr_un{
 unsigned short sun_family;char sun_path[108];};struct Cyc_Std_utsname{char sysname[
 20];char nodename[20];char release[20];char version[20];char machine[20];};struct Cyc_Std_itimerspec{
-struct Cyc_Std_timespec it_interval;struct Cyc_Std_timespec it_value;};extern int
-timezone;int Cyc_Std_access(struct _tagged_arr,int);int Cyc_Std_chdir(struct
-_tagged_arr);int Cyc_Std_chown(struct _tagged_arr,unsigned short,unsigned short);
-int Cyc_Std_chroot(struct _tagged_arr);int Cyc_Std_execlp(struct _tagged_arr,struct
-_tagged_arr,struct _tagged_arr);int Cyc_Std_execve(struct _tagged_arr,struct
-_tagged_arr,struct _tagged_arr);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr
-buf,unsigned int size);int Cyc_Std_gethostname(struct _tagged_arr,unsigned int);
-struct _tagged_arr Cyc_Std_getpass(struct _tagged_arr);int Cyc_Std_link(struct
-_tagged_arr,struct _tagged_arr);int Cyc_Std_read(int,struct _tagged_arr,
-unsigned int);int Cyc_Std_rmdir(struct _tagged_arr);int Cyc_Std_symlink(struct
-_tagged_arr,struct _tagged_arr);int Cyc_Std_truncate(struct _tagged_arr,int);int Cyc_Std_unlink(
-struct _tagged_arr);int Cyc_Std_write(int,struct _tagged_arr,unsigned int);int
-access(char*,int);int Cyc_Std_access(struct _tagged_arr path,int mode){return access(
-string_to_Cstring(path),mode);}int chdir(char*);int Cyc_Std_chdir(struct
-_tagged_arr path){return chdir(string_to_Cstring(path));}int chown(char*,
-unsigned short,unsigned short);int Cyc_Std_chown(struct _tagged_arr path,
-unsigned short owner,unsigned short group){return chown(string_to_Cstring(path),
-owner,group);}int chroot(char*);int Cyc_Std_chroot(struct _tagged_arr pathname){
-return chroot(string_to_Cstring(pathname));}int execvp(char*file,char**argv);int
-Cyc_Std_execlp(struct _tagged_arr path,struct _tagged_arr arg0,struct _tagged_arr argv){
-if((*((struct _tagged_arr*)_check_unknown_subscript(argv,sizeof(struct _tagged_arr),(
-int)(_get_arr_size(argv,sizeof(struct _tagged_arr))- 1)))).curr != ((struct
-_tagged_arr)_tag_arr(0,0,0)).curr)(int)_throw((void*)({struct Cyc_Core_Failure_struct*
+struct Cyc_Std_timespec it_interval;struct Cyc_Std_timespec it_value;};int Cyc_Std_access(
+struct _tagged_arr,int);int Cyc_Std_chdir(struct _tagged_arr);int Cyc_Std_chown(
+struct _tagged_arr,unsigned short,unsigned short);int Cyc_Std_chroot(struct
+_tagged_arr);int Cyc_Std_execlp(struct _tagged_arr,struct _tagged_arr,struct
+_tagged_arr);int Cyc_Std_execve(struct _tagged_arr,struct _tagged_arr,struct
+_tagged_arr);struct _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,unsigned int
+size);int Cyc_Std_gethostname(struct _tagged_arr,unsigned int);struct _tagged_arr
+Cyc_Std_getpass(struct _tagged_arr);int Cyc_Std_link(struct _tagged_arr,struct
+_tagged_arr);int Cyc_Std_read(int,struct _tagged_arr,unsigned int);int Cyc_Std_rmdir(
+struct _tagged_arr);int Cyc_Std_symlink(struct _tagged_arr,struct _tagged_arr);int
+Cyc_Std_truncate(struct _tagged_arr,int);int Cyc_Std_unlink(struct _tagged_arr);int
+Cyc_Std_write(int,struct _tagged_arr,unsigned int);int access(char*,int);int Cyc_Std_access(
+struct _tagged_arr path,int mode){return access(string_to_Cstring(path),mode);}int
+chdir(char*);int Cyc_Std_chdir(struct _tagged_arr path){return chdir(
+string_to_Cstring(path));}int chown(char*,unsigned short,unsigned short);int Cyc_Std_chown(
+struct _tagged_arr path,unsigned short owner,unsigned short group){return chown(
+string_to_Cstring(path),owner,group);}int chroot(char*);int Cyc_Std_chroot(struct
+_tagged_arr pathname){return chroot(string_to_Cstring(pathname));}int execvp(char*
+file,char**argv);int Cyc_Std_execlp(struct _tagged_arr path,struct _tagged_arr arg0,
+struct _tagged_arr argv){if((*((struct _tagged_arr*)_check_unknown_subscript(argv,
+sizeof(struct _tagged_arr),(int)(_get_arr_size(argv,sizeof(struct _tagged_arr))- 1)))).curr
+!= ((struct _tagged_arr)_tag_arr(0,0,0)).curr)(int)_throw((void*)({struct Cyc_Core_Failure_struct*
 _tmp9A=_cycalloc(sizeof(*_tmp9A));_tmp9A[0]=({struct Cyc_Core_Failure_struct
 _tmp9B;_tmp9B.tag=Cyc_Core_Failure;_tmp9B.f1=_tag_arr("execl: arg list must be NULL-terminated",
 sizeof(char),40);_tmp9B;});_tmp9A;}));{struct _tagged_arr newargs=({unsigned int

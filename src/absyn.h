@@ -956,7 +956,7 @@ namespace Absyn {
   extern field_name_t fieldname(int);
   // get the name and aggr_kind of an aggregate type
   extern $(aggr_kind_t,qvar_t) aggr_kinded_name(tunion AggrInfoU);
-  // given a checked type, bget the decl
+  // given a checked type, get the decl
   extern aggrdecl_t get_known_aggrdecl(tunion AggrInfoU info);
   // is a type a union-type (anonymous or otherwise)
   extern bool is_union_type(type_t);

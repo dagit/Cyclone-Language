@@ -866,9 +866,9 @@ tms_utime;int tms_stime;int tms_cutime;int tms_cstime;};struct Cyc_Std_sockaddr_
 unsigned short sun_family;char sun_path[108];};struct Cyc_Std_utsname{char sysname[
 65];char nodename[65];char release[65];char version[65];char machine[65];char
 __domainname[65];};struct Cyc_Std_itimerspec{struct Cyc_Std_timespec it_interval;
-struct Cyc_Std_timespec it_value;};extern int timezone;enum Cyc_Std___anonymous_enum_362__{
-Cyc_Std__PC_LINK_MAX  = 0,Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX
- = 3,Cyc_Std__PC_PATH_MAX  = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED
+struct Cyc_Std_timespec it_value;};enum Cyc_Std___anonymous_enum_362__{Cyc_Std__PC_LINK_MAX
+ = 0,Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 
+3,Cyc_Std__PC_PATH_MAX  = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED
  = 6,Cyc_Std__PC_NO_TRUNC  = 7,Cyc_Std__PC_VDISABLE  = 8,Cyc_Std__PC_SYNC_IO  = 9,
 Cyc_Std__PC_ASYNC_IO  = 10,Cyc_Std__PC_PRIO_IO  = 11,Cyc_Std__PC_SOCK_MAXBUF  = 12,
 Cyc_Std__PC_FILESIZEBITS  = 13,Cyc_Std__PC_REC_INCR_XFER_SIZE  = 14,Cyc_Std__PC_REC_MAX_XFER_SIZE

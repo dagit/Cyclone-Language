@@ -314,8 +314,10 @@ kind_t typ_kind(type_t t) {
     impos("typ_kind: Unresolved TunionFieldType");
     // for structs, unions, or enums without definitions, we must be 
     // conservative and treat them as having AnyKind
-  case &EnumType(_,NULL):     return AnyKind;
-  case &AggrType(_):    
+  case &EnumType(_,NULL):     
+  case &AggrType(AggrInfo(&UnknownAggr(_,_),_)): return AnyKind;
+  case &AggrType(AggrInfo(&KnownAggr(& &Aggrdecl(_,_,_,_,i,_)),_)):    
+    return (i==NULL ? AnyKind : MemKind);
   case &AnonAggrType(_,_):    
   case &AnonEnumType(_):   return MemKind;
   case &EnumType(_,ed): 
@@ -2710,11 +2712,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     // check that any bound is a constant expression
     switch (compress_conref(b)->v) {
     case &Eq_constr(&Upper_b(e)): 
-      if (!is_const_exp(te,e)) 
-        terr(loc,"pointer bounds expression is not a constant");
       Tcexp::tcExp(te,NULL,e);
-      if (!coerce_uint_typ(te,e))
-        terr(loc,"pointer bounds expression is not an unsigned int");
       Evexp::eval_const_uint_exp(e); 
       break;
     default: break;
@@ -2736,12 +2734,12 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     cvtenv = i_check_valid_type(loc,te,cvtenv,MemKind,t1);
     // FIX: should memoize the size so that we don't have to worry about
     // evaluating it during unification
-    if (e == NULL || !is_const_exp(te,(exp_t)e))
-      terr(loc,"array bounds expression is not constant");
-    Tcexp::tcExp(te,NULL,(exp_t)e);
-    if (!coerce_uint_typ(te,(exp_t)e))
-      terr(loc,"array bounds expression is not an unsigned int");
-    Evexp::eval_const_uint_exp((exp_t)e); // check that e is of constant size
+    if(e==NULL)
+      terr(loc,"an explicit array bound is required here");
+    else {
+      Tcexp::tcExp(te,NULL,(exp_t)e);
+      Evexp::eval_const_uint_exp((exp_t)e);
+    }
     break;
   case &FnType(FnInfo{*btvs,*eff,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
     // This is an unusual and complicated case because (a) we may have to

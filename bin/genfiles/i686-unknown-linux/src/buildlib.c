@@ -588,10 +588,9 @@ st_ino;unsigned int st_mode;unsigned int st_nlink;unsigned int st_uid;unsigned i
 st_gid;unsigned long long st_rdev;unsigned short __pad2;int st_size;int st_blksize;
 int st_blocks;int st_atime;unsigned int __unused1;int st_mtime;unsigned int __unused2;
 int st_ctime;unsigned int __unused3;unsigned int __unused4;unsigned int __unused5;};
-int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode);int Cyc_Std_stat(
-struct _tagged_arr,struct Cyc_Std_stat*);struct Cyc_Std_flock{short l_type;short
-l_whence;int l_start;int l_len;int l_pid;};struct Cyc_Std_Flock_struct{int tag;struct
-Cyc_Std_flock*f1;};struct Cyc_Std_Long_struct{int tag;int f1;};int Cyc_Std_open(
+int Cyc_Std_mkdir(struct _tagged_arr pathname,unsigned int mode);struct Cyc_Std_flock{
+short l_type;short l_whence;int l_start;int l_len;int l_pid;};struct Cyc_Std_Flock_struct{
+int tag;struct Cyc_Std_flock*f1;};struct Cyc_Std_Long_struct{int tag;int f1;};int Cyc_Std_open(
 struct _tagged_arr,int,struct _tagged_arr);enum Cyc_Std___anonymous_enum_362__{Cyc_Std__PC_LINK_MAX
  = 0,Cyc_Std__PC_MAX_CANON  = 1,Cyc_Std__PC_MAX_INPUT  = 2,Cyc_Std__PC_NAME_MAX  = 
 3,Cyc_Std__PC_PATH_MAX  = 4,Cyc_Std__PC_PIPE_BUF  = 5,Cyc_Std__PC_CHOWN_RESTRICTED

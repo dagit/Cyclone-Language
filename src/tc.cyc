@@ -183,12 +183,12 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
     case &VarRes(b0):
       let b1 = new Global_b(vd);
       let b = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
-      if (b == Unresolved_b) break; // error in merging
-      if (b == b0 && (*ans)[1]) break; // no need to reinsert the entry
+      if (b == Unresolved_b) return; // error in merging
+      if (b == b0 && (*ans)[1]) return; // no need to reinsert the entry
       // otherwise make the update
       ge->ordinaries = Dict::insert(ge->ordinaries, v,
 				    new $(new VarRes(b), true));
-      break;
+      return;
     case &AggrRes(_): 
       warn(loc,"variable declaration shadows previous struct declaration");
       break;
@@ -200,11 +200,9 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
       warn(loc,"variable declaration shadows previous enum tag");
       break;
     }
-  } catch { case Dict::Absent:
-    ge->ordinaries = Dict::insert(ge->ordinaries, v,
-				  new $(new VarRes(new Global_b(vd)), false));
-    break;
-  }
+  } catch { case Dict::Absent: break; }
+  ge->ordinaries = Dict::insert(ge->ordinaries, v,
+				new $(new VarRes(new Global_b(vd)), false));
 }
 
 static bool is_main(qvar_t n) {
