@@ -50,8 +50,8 @@ void dump_nospace(dump_string_t s) {
   fprintf((FILE @)dump_file, "%s", s);
 } 
 // this needs to take a boxed type b/c it's used to instantiate `a
-void dump_str(string s) {
-  dump(s);
+void dump_str(stringptr s) {
+  dump(derefstr(s));
 }
 
 void dump_semi() {
@@ -98,20 +98,20 @@ void egroup<`a>(void f(`a), list<`a> l,
 // should do the right thing!
 void dumpqvar(qvar v) {
   if(v[0] == null) {
-    dump(v[1]);
+    dump_str(v[1]);
     return;
   }
 
   let nsl = v[0];
-  dump(nsl->hd);
+  dump_str(nsl->hd);
   for(nsl = nsl->tl; nsl != null; nsl = nsl->tl) {
     if(Absynpp::qvar_to_Cids) dump_nospace("_");
     else dump_nospace("::");
-    dump_nospace(nsl->hd);
+    dump_nospace(derefstr(nsl->hd));
   }
   if(Absynpp::qvar_to_Cids) dump_nospace("_");
   else dump_nospace("::");
-  dump_nospace(v[1]);
+  dump_nospace(derefstr(v[1]));
 }
 
 void dumptq(tqual tq) {
@@ -133,10 +133,8 @@ void dumpscope(scope sc) {
 void dumpkind(kind_t k) {
   switch (k) {
   case MemUKind: dump("mu"); return;
-  case RegUKind: dump("ru"); return;
   case BoxUKind: dump("bu"); return;
   case MemPKind: dump("mp"); return;
-  case RegPKind: dump("rp"); return;
   case BoxPKind: dump("bp"); return;
   case RgnKind:  dump("rgn"); return;
   case UnresolvedKind: dump("U"); return;
@@ -176,7 +174,7 @@ void dumpntyp(typ t) {
   case FnType(_,_,_,_):      return;
   case PointerType(_,_,_,_): return;
   case VoidType:         dump("void"); return;
-  case VarType(&$(v,k)): dump(v); return; // FIX: may want explicit kinds
+  case VarType(&$(v,k)): dump_str(v); return; // FIX: may want explicit kinds
   case Evar(k,null,i): dump("?"); dumpkind(k); dump(xprintf("(%d)",i)); return;
   case Evar(k,&Opt(t),i): dumpntyp(t); return; // shouldn't happen!
   case EnumType(null,ts,_):    dump("enum");               dumptps(ts); return;
@@ -213,7 +211,7 @@ void dumpntyp(typ t) {
 }
 
 void dumpvaropt(Opt_t<var> vo) {
-  if(vo != null) dump(vo->v);
+  if(vo != null) dump_str(vo->v);
 }
 void dumpfunarg($(Opt_t<var>,tqual,typ)@ t) {
   dumptqtd(t[1],t[2],dumpvaropt,t[0]);
@@ -237,7 +235,7 @@ void dumptyp(typ t) {
 void dumpdesignator(designator d) {
   switch (d) {
   case ArrayElement(e): dump(".["); dumpexp(e); dump_nospace("]"); break;
-  case FieldName(v):    dump("."); dump_nospace(v); break;
+  case FieldName(v):    dump("."); dump_nospace(derefstr(v)); break;
   }
 }
 
@@ -352,10 +350,12 @@ void dumpexp_prec(int inprec, exp e) {
     dump("*"); dumpexp_prec(myprec,e1); break;
 
   case StructMember_e(e1,n):
-    dumpexp_prec(myprec,e1); dump_nospace(".");  dump_nospace(n); break;
+    dumpexp_prec(myprec,e1); dump_nospace(".");  dump_nospace(derefstr(n)); 
+    break;
 
   case StructArrow_e(e1,n):
-    dumpexp_prec(myprec,e1); dump_nospace("->"); dump_nospace(n); break;
+    dumpexp_prec(myprec,e1); dump_nospace("->"); dump_nospace(derefstr(n)); 
+    break;
 
   case Subscript_e(e1,e2):
     dumpexp_prec(myprec,e1); 
@@ -376,7 +376,7 @@ void dumpexp_prec(int inprec, exp e) {
     break;
 
   case Comprehension_e(vd,e1,e2):
-    dump("new {for"); dump(vd->name[1]); dump("<"); dumpexp(e1);
+    dump("new {for"); dump_str(vd->name[1]); dump("<"); dumpexp(e1);
     dump(":"); dumpexp(e2); dump("}");
     break;
 
@@ -468,7 +468,7 @@ void dumpstmt(stmt s) {
     break;
   case Break_s(_):         dump("break;");        break;
   case Continue_s(_):      dump("continue;");     break;
-  case Goto_s(x,_):        dump("goto"); dump(x); dump_semi(); break;
+  case Goto_s(x,_):        dump("goto"); dump_str(x); dump_semi(); break;
   case Fallthru_s(null,_): dump("fallthru;");     break;
   case Fallthru_s(es,_):
     dump("fallthru("); dumpexps_prec(20,es); dump(");"); break;
@@ -492,9 +492,9 @@ void dumpstmt(stmt s) {
     // labels.  This next case forces an explicit block to be written.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
     if(Absynpp::is_declaration(s1)) {
-      dump(x); dump_nospace(": {"); dumpstmt(s1); dump("}");
+      dump_str(x); dump_nospace(": {"); dumpstmt(s1); dump("}");
     } else {
-      dump(x); dump_nospace(":"); dumpstmt(s1);
+      dump_str(x); dump_nospace(":"); dumpstmt(s1);
     }
     break;
 
@@ -649,7 +649,7 @@ void dumpdecl(decl d) {
     break;
   case Namespace_d(v,tdl):
     dump("namespace");
-    dump(v);
+    dump_str(v);
     dump("{");
     for(; tdl != null; tdl = tdl->tl)
       dumpdecl(tdl->hd);
@@ -684,9 +684,9 @@ void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
   case Pointer_mod(false, HeapRgnType,  tq2): 
     dump_nospace("@"); dumptms(tms->tl,f,a); return;
   case Pointer_mod(true,  VarType(&$(r,k)), tq2):  
-    dump_nospace("*"); dump(r); dumptms(tms->tl,f,a); return;
+    dump_nospace("*"); dump_str(r); dumptms(tms->tl,f,a); return;
   case Pointer_mod(false, VarType(&$(r,k)), tq2): 
-    dump_nospace("@"); dump(r); dumptms(tms->tl,f,a); return;
+    dump_nospace("@"); dump_str(r); dumptms(tms->tl,f,a); return;
   case Pointer_mod(_,_,_): throw Impossible("dumptms: bad Pointer_mod");
 
   default: 

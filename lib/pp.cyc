@@ -63,7 +63,7 @@ struct ppstate {
 struct out {
   int newcc;           // new current column
   int newcl;           // new current line
-  Alist<string> ppout; // pretty-printed output
+  Alist<stringptr> ppout; // pretty-printed output
   Alist<$(int,int,int,string)@> links;   // hyperlinks
 };
 
@@ -73,14 +73,14 @@ struct doc {
   fn<Ppstate,Out> f; // thunk for doing a step of pretty printing
 };
 
-static void dump_out(FILE @f, Alist<string> al) {
+static void dump_out(FILE @f, Alist<stringptr> al) {
   let xarr = Xarray::create(16,al);
   Xarray::add(xarr,al);
   int last = 0;
   while(last >= 0) {
     switch(Xarray::get(xarr,last)) {
     case Empty:     --last;                    break;
-    case Single(s): --last; fprintf(f,"%s",s); break;
+    case Single(s): --last; fprintf(f,"%s",derefstr(s)); break;
     case Append(a1,a2): 
       Xarray::set(xarr,last,a2); 
       if(last == Xarray::length(xarr)-1)
@@ -113,14 +113,14 @@ $(string,list<$(int,int,int,string)@>) @string_and_links(Doc d, int w) {
             list_of_alist(o->links));
 }
 
-static Opt_t<Table<int,string>> bhashtbl = null;
+static Opt_t<Table<int,stringptr>> bhashtbl = null;
 
 string nlblanks(int i) {  // a newline followed by i blanks
   if (bhashtbl == null)
     bhashtbl = &Opt(Hashtable::create(61,intcmp,identity));
   if (i<0) throw Failure("nlblanks");
   try
-    return Hashtable::lookup(bhashtbl->v,i);
+    return derefstr(Hashtable::lookup(bhashtbl->v,i));
   catch {
   case Not_found:
     let num_tabs   = i / 8;
@@ -132,13 +132,13 @@ string nlblanks(int i) {  // a newline followed by i blanks
       nlb[j+1] = '\t';
     for (int j = 0; j < num_spaces; j++)
       nlb[j+1+num_tabs] = ' ';
-    Hashtable::insert(bhashtbl->v,i,nlb);
+    Hashtable::insert(bhashtbl->v,i,allocstr(nlb));
     return nlb;
   }
 }
 
 // hash the strings...
-static Opt_t<Table<string,Doc>> str_hashtbl = null;
+static Opt_t<Table<stringptr,Doc>> str_hashtbl = null;
 
 int infinity = 9999999;
 
@@ -146,7 +146,7 @@ static Out text_doc_f($(int,string) @clo,Ppstate st) {
   let &$(slen,s) = clo;
   return &out(st->cc+slen,
               st->cl,
-              Single(s),
+              Single(allocstr(s)),
               Empty);
 }
 static Doc text_doc(string s) {
@@ -159,19 +159,19 @@ static Doc text_doc(string s) {
           &$(slen,s)));
 }
 Doc text(string s) {
-  Table<string,Doc> t;
+  Table<stringptr,Doc> t;
   if (str_hashtbl == null) {
-    t = Hashtable::create(101,zstrcmp,hash_string);
+    t = Hashtable::create(101,zstrptrcmp,hash_stringptr);
     str_hashtbl = &Opt(t);
   } else {
     t = str_hashtbl->v;
   }
   try
-    return Hashtable::lookup(t,s);
+    return Hashtable::lookup(t,allocstr(s));
   catch {
   case Not_found:
     Doc d = text_doc(s);
-    Hashtable::insert(t,s,d);
+    Hashtable::insert(t,allocstr(s),d);
     return d;
   }
 }
@@ -199,7 +199,7 @@ static Out hyperlink_f($(int,string,string) @clo, Ppstate st) {
   let &$(slen,shrt,full) = clo;
   return &out(st->cc+slen,
               st->cl,
-              Single(shrt),
+              Single(allocstr(shrt)),
               Single(&$(st->cl,st->cc,slen,full)));
 }
 Doc hyperlink(string shrt, string full) {
@@ -213,7 +213,7 @@ Doc hyperlink(string shrt, string full) {
 static Out line_f(Ppstate st) {
   return &out(st->ci,
               st->cl+1,
-              Single(nlblanks(st->ci)),
+              Single(allocstr(nlblanks(st->ci))),
               Empty);
 }
 Doc line_doc() {
@@ -282,7 +282,7 @@ static Out long_concats_f(list<Doc> ds0, Ppstate st) {
   }
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
-  Alist<string> s = Empty;
+  Alist<stringptr> s = Empty;
   let links = Empty;
   for(; os != null; os = os->tl) {
     s = append(os->hd->ppout,s);
@@ -328,7 +328,7 @@ static Out concats_arr_f(Doc docs[?], Ppstate st) {
   }
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
-  Alist<string> s = Empty;
+  Alist<stringptr> s = Empty;
   let links = Empty;
   for(; os != null; os = os->tl) {
     s = append(os->hd->ppout,s);

@@ -145,22 +145,22 @@ string string_escape(string s) {
   return t;
 }
 
-Doc tqual2doc(tqual tq) {
-  list<string> l = null;
+static Doc textptr(stringptr s) { return text(derefstr(s)); }
 
-  if (tq->q_restrict) l = &cons((string)"restrict",l);
-  if (tq->q_volatile) l = &cons((string)"volatile",l);
-  if (tq->q_const)    l = &cons((string)"const",   l);
-  return egroup(""," "," ",List::map(text,l));
+Doc tqual2doc(tqual tq) {
+  list<stringptr> l = null;
+
+  if (tq->q_restrict) l = &cons(allocstr("restrict"),l);
+  if (tq->q_volatile) l = &cons(allocstr("volatile"),l);
+  if (tq->q_const)    l = &cons(allocstr("const"),   l);
+  return egroup(""," "," ",List::map(textptr,l));
 }
 
 Doc kind2doc(kind_t k) {
   switch (k) {
   case MemUKind: return text("mu");
-  case RegUKind: return text("ru");
   case BoxUKind: return text("bu");
   case MemPKind: return text("mp");
-  case RegPKind: return text("rp");
   case BoxPKind: return text("bp");
   case RgnKind:  return text("rgn");
   case UnresolvedKind: return text("U");
@@ -194,7 +194,7 @@ Doc tps2doc(list<typ> ts) {
 
 // FIX: may want explicit kinds
 Doc tvars2doc(list<tvar> tvs) {
-  return egroup("<",">",",",List::map(text,List::map(fst,tvs)));
+  return egroup("<",">",",",List::map(textptr,List::map(fst,tvs)));
 }
 
 Doc arg2doc($(tqual,typ)@ t) {
@@ -235,7 +235,7 @@ Doc dtms2doc(Doc d,list<type_modifier> tms) {
     case WithTypes(args2,varargs):
       return cat2(rest,funargs2doc(args2,varargs));
     case NoTypes(sl,loc):
-      return cat2(rest,group("(",")",",",List::map(text,sl)));
+      return cat2(rest,group("(",")",",",List::map(textptr,sl)));
     }
   case TypeParams_mod(ts,loc):
     if (next_is_pointer(tms->tl)) rest = p_rest;
@@ -268,7 +268,8 @@ Doc ntyp2doc(typ t) {
                   text(xprintf("%d",i)),
                   text(")"));
     break;
-  case VarType(&$(v,k)): s=text(v); break;//FIX: sometimes need explicit kinds!
+  case VarType(&$(v,k)): 
+    s=text(derefstr(v)); break;//FIX: sometimes need explicit kinds!
   case EnumType(n,ts,_):
     if (n == null)
       s = cat2(text("enum "),
@@ -340,11 +341,11 @@ Doc ntyp2doc(typ t) {
 }
 
 Doc vo2doc(Opt_t<var> vo) {
-  return (vo==null)?nil_doc():text(vo->v);
+  return (vo==null)?nil_doc():text(derefstr(vo->v));
 }
 
 Doc funarg2doc($(Opt_t<var>,tqual,typ)@ t) {
-  Opt_t<Doc> dopt = (t[0]==null)?null:&Opt(text(t[0]->v));
+  Opt_t<Doc> dopt = (t[0]==null)?null:&Opt(text(derefstr(t[0]->v)));
   return tqtd2doc(t[1],t[2],dopt);
 }
 
@@ -362,7 +363,7 @@ $(Opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg) {
             arg[1],arg[2]);
 }
 
-Doc var2doc(var v) { return text(v); }
+Doc var2doc(var v) { return text(derefstr(v)); }
 
 Doc qvar2doc(qvar q) {
   if(q[0] == null)
@@ -557,10 +558,10 @@ Doc exp2doc_prec(int inprec, exp e) {
              exp2doc_prec(myprec,e1));
     break;
   case StructMember_e(e1,n):
-    s = cat3(exp2doc_prec(myprec,e1), text("."), text(n));
+    s = cat3(exp2doc_prec(myprec,e1), text("."), textptr(n));
     break;
   case StructArrow_e(e1,n):
-    s = cat3(exp2doc_prec(myprec,e1), text("->"), text(n));
+    s = cat3(exp2doc_prec(myprec,e1), text("->"), textptr(n));
     break;
   case Subscript_e(e1,e2):
     s = cat4(exp2doc_prec(myprec,e1),
@@ -584,7 +585,7 @@ Doc exp2doc_prec(int inprec, exp e) {
     break;
   case Comprehension_e(vd,e1,e2):
     s = cat7(text("new {for "),
-             text(vd->name[1]),
+             text(derefstr(vd->name[1])),
              text(" < "),
              exp2doc(e1),
              text(" : "),
@@ -628,7 +629,7 @@ Doc exp2doc_prec(int inprec, exp e) {
 Doc designator2doc(designator d) {
   switch (d) {
   case ArrayElement(e): return cat3(text(".["), exp2doc(e), text("]"));
-  case FieldName(v):    return cat2(text("."), text(v));
+  case FieldName(v):    return cat2(text("."), textptr(v));
   }
 }
 
@@ -721,7 +722,7 @@ Doc prim2doc(primop p) {
 Doc structarg2doc($(Opt_t<var>,exp)@ t) {
   if (t[0] == null)
      return exp2doc(t[1]);
-  else return cat3(text(t[0]->v),
+  else return cat3(textptr(t[0]->v),
                    text(" = "),
                    exp2doc(t[1]));
 }
@@ -925,7 +926,7 @@ Doc stmt2doc(stmt st) {
     break;
   case Break_s(_):    s = text("break;"); break;
   case Continue_s(_): s = text("continue;"); break;
-  case Goto_s(x,_):   s = text(xprintf("goto %s;",x)); break;
+  case Goto_s(x,_):   s = text(xprintf("goto %s;",derefstr(x))); break;
   case For_s(e1,$(e2,_),$(e3,_),s1):
     s = cat10(text("for("),
 	      exp2doc(e1),
@@ -968,14 +969,14 @@ Doc stmt2doc(stmt st) {
     // labels.  This next case forces an explicit block to be written.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
     if (is_declaration(s1)) {
-      s = cat6(text(x),
+      s = cat6(textptr(x),
                text(": {"),
                line_doc(),
                nest(2,stmt2doc(s1)),
                line_doc(),
                text("}"));
     } else
-      s = cat3(text(x),text(": "),stmt2doc(s1));
+      s = cat3(textptr(x),text(": "),stmt2doc(s1));
     break;
   case Do_s(s1,$(e,_)):
     s = cat7(text("do {"),
@@ -1180,7 +1181,7 @@ Doc decl2doc(decl d) {
     break;
   case Namespace_d(v,tdl):
     s = cat7(text("namespace "),
-             text(v),
+             textptr(v),
              text(" {"),
              line_doc(),
              ppseql(decl2doc,"",tdl),
@@ -1283,7 +1284,7 @@ Doc tqtd2doc(tqual tq, typ t, Opt_t<Doc> dopt) {
 }
 
 Doc structfield2doc($(field_name,tqual,typ)@ f) {
-  return cat2(tqtd2doc(f[1],f[2],&Opt(text(f[0]))),
+  return cat2(tqtd2doc(f[1],f[2],&Opt(textptr(f[0]))),
               text(";"));
 }
 

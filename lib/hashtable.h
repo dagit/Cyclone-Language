@@ -17,6 +17,7 @@ extern void resize<`a,`b>(Table<`a,`b> t);
 extern void remove<`a,`b>(Table<`a,`b> t, `a key);
 
 extern int hash_string(string s);
+extern int hash_stringptr(stringptr s);
 extern void iter<`a,`b>(void f(`a,`b), Table<`a,`b> t);
 
 // debugging

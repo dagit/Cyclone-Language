@@ -33,11 +33,13 @@ extern size_t strleno(string s, int ofs);
 // zstrcmp and zstrncmp do not consider zero (null) characters
 //   to be end-of-string markers. 
 extern int strcmp(string s1, string s2);
+extern int strptrcmp(stringptr s1, stringptr s2);
 extern int strcmpo(string s1, int ofs1, string s2, int ofs2);
 extern int strncmp(string s1, int ofs1, string s2, int ofs2, size_t len);
 extern int strncasecmp(string s1, int ofs1, string s2, int ofs2, size_t len);
 extern int zstrcmp(string,string);
 extern int zstrncmp(string s1,string s2,size_t n);
+extern int zstrptrcmp(stringptr,stringptr);
 
 ///////////////////////// CONCATENATION
 // These functions modify their first arguments, and return them
@@ -45,8 +47,8 @@ extern string strcat(string dest,string src);
 extern string strcato(string dest,string src,int srcOfs);
 // These functions return newly allocated strings
 extern string strconcat(string,string);
-extern string strconcat_l(list<string>);
-extern string str_sepstr(list<string>,string);
+extern string strconcat_l(list<stringptr>);
+extern string str_sepstr(list<stringptr>,string);
 
 ///////////////////////// COPYING
 // Non-allocating

@@ -195,9 +195,9 @@ void list_test() {
 
   // FIX:  casts are required for typechecking.  Should string constants
   // have type char[?] or char[sz] ??
-  let slist = &cons((string)"hello",&cons((string)"world",null));
+  let slist = &cons(allocstr("hello"),&cons(allocstr("world"),null));
   let rlist = List::rev(slist);
-  okfail(0==list_cmp(String::strcmp,slist,List::rev(rlist)));
+  okfail(0==list_cmp(String::strptrcmp,slist,List::rev(rlist)));
 
   list<int> xx = null;
   list<int> yy = null;
@@ -360,16 +360,16 @@ void set_test() {
   okfail(Set::member(Set::union_two(x,x3),11));
   okfail(!Set::is_empty(x));
 
-  Set<string> s = Set::empty(String::strcmp);
-  s = Set::insert(s,"hello");
-  s = Set::insert(s,"world");
-  s = Set::insert(s,"sphinx");
-  s = Set::insert(s,"quartz");
-  okfail(list_cmp(String::strcmp,Set::elements(s),
-                  &cons((string)"hello",
-                        &cons((string)"quartz",
-                              &cons((string)"sphinx",
-                                    &cons((string)"world",null))))) == 0);
+  Set<stringptr> s = Set::empty(String::strptrcmp);
+  s = Set::insert(s,allocstr("hello"));
+  s = Set::insert(s,allocstr("world"));
+  s = Set::insert(s,allocstr("sphinx"));
+  s = Set::insert(s,allocstr("quartz"));
+  okfail(list_cmp(String::strptrcmp,Set::elements(s),
+                  &cons(allocstr("hello"),
+                        &cons(allocstr("quartz"),
+                              &cons(allocstr("sphinx"),
+                                    &cons(allocstr("world"),null))))) == 0);
   test_end();;
 }
 
@@ -402,11 +402,14 @@ void hashtable_test() {
   okfail(Hashtable::lookup(x,-4)==445);
   okfail(Hashtable::lookup(x,300)==2828);
 
-  Table<string,string> x2 = Hashtable::create(17,String::strcmp,hash_string);
-  Hashtable::insert(x2,"foo","bar");
-  Hashtable::insert(x2,"baz","rogue");
-  okfail(String::strcmp(Hashtable::lookup(x2,"foo"),"bar")==0);
-  okfail(String::strcmp(Hashtable::lookup(x2,"baz"),"rogue")==0);
+  Table<stringptr,stringptr> x2 = 
+    Hashtable::create(17,String::strptrcmp,hash_stringptr);
+  Hashtable::insert(x2,allocstr("foo"),allocstr("bar"));
+  Hashtable::insert(x2,allocstr("baz"),allocstr("rogue"));
+  okfail(String::strptrcmp(Hashtable::lookup(x2,allocstr("foo")),
+			   allocstr("bar"))==0);
+  okfail(String::strptrcmp(Hashtable::lookup(x2,allocstr("baz")),
+			   allocstr("rogue"))==0);
 
   test_end();;
 }
@@ -443,11 +446,11 @@ void string_test() {
   okfail(String::strcmp(String::replace_suffix("hello.world","world","bar"),
                         "hello.bar")==0);
   // FIX:  polymorphism requires the cast char[sz]->char[?]
-  okfail(String::strcmp(String::strconcat_l(&cons((string)"hello ",
-                                                  &cons((string)"world",null))),
+  okfail(String::strcmp(String::strconcat_l(&cons(allocstr("hello "),
+                                                  &cons(allocstr("world"),null))),
                         "hello world")==0);
-  okfail(String::strcmp(String::str_sepstr(&cons((string)"hello",
-                                                 &cons((string)"world",null)),
+  okfail(String::strcmp(String::str_sepstr(&cons(allocstr("hello"),
+                                                 &cons(allocstr("world"),null)),
                                            "**"),
                         "hello**world")==0);
   // FIX:  polymorphism requires the cast char->Char
@@ -516,13 +519,13 @@ void buffer_test() {
 
 void queue_test() {
   test_begin("Queue");
-  Queue::Queue<string> q = Queue::create();
+  Queue::Queue<stringptr> q = Queue::create();
   okfail(Queue::is_empty(q));
-  Queue::add(q,"a");
+  Queue::add(q,allocstr("a"));
   okfail(!Queue::is_empty(q));
-  Queue::add(q,"b");
-  okfail(String::strcmp(Queue::peek(q),"a") == 0);
-  okfail(String::strcmp(Queue::take(q),"a") == 0);
+  Queue::add(q,allocstr("b"));
+  okfail(String::strcmp(derefstr(Queue::peek(q)),"a") == 0);
+  okfail(String::strcmp(derefstr(Queue::take(q)),"a") == 0);
   okfail(Queue::length(q) == 1);
   test_end();;
 }
@@ -645,12 +648,12 @@ void ref_test() {
   okfail(Ref::get(x)==2);
   okfail(Ref::get(x)!=4);
 
-  ref<string> y = new_ref((string)"hello"); // FIX: cast required!
-  okfail(0==String::strcmp(Ref::get(y),"hello"));
-  okfail(0!=String::strcmp(Ref::get(y),"world"));
-  Ref::set(y,"world");
-  okfail(0!=String::strcmp(Ref::get(y),"hello"));
-  okfail(0==String::strcmp(Ref::get(y),"world"));
+  ref<stringptr> y = new_ref(allocstr("hello")); // FIX: cast required!
+  okfail(0==String::strcmp(derefstr(Ref::get(y)),"hello"));
+  okfail(0!=String::strcmp(derefstr(Ref::get(y)),"world"));
+  Ref::set(y,allocstr("world"));
+  okfail(0!=String::strcmp(derefstr(Ref::get(y)),"hello"));
+  okfail(0==String::strcmp(derefstr(Ref::get(y)),"world"));
   test_end();
 }
 

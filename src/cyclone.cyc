@@ -60,13 +60,13 @@ static void set_check_null() {
 static void set_out_file_name(string s) {
   out_file_name_opt = (string *)(&$(s));
 }
-static list<string> includes = null;
+static list<stringptr> includes = null;
 static void add_include(string s) {
-  includes = &cons(s,includes);
+  includes = &cons(allocstr(s),includes);
 }
-static list<string> defines = null;
+static list<stringptr> defines = null;
 static void add_define(string s) {
-  defines = &cons(s,defines);
+  defines = &cons(allocstr(s),defines);
 }
 
 bool compile_failure = false; // for exit code (helps Makefile)
@@ -83,8 +83,10 @@ void compile_file(string filename) {
 
   // Run the preprocessor, by building and running a command-line
   // Pass -I and -D things onto pre-processor
-  string inc_string = String::str_sepstr(&cons((string)"",rev(includes))," -I");
-  string def_string = String::str_sepstr(&cons((string)"",rev(defines)), " -D");
+  string inc_string = 
+    String::str_sepstr(&cons(allocstr(""),rev(includes))," -I");
+  string def_string = 
+    String::str_sepstr(&cons(allocstr(""),rev(defines)), " -D");
   string cmd = xprintf("gcc -x c -E -U__GNUC__ %s %s %s > %s",
                        inc_string, def_string, filename, preprocfile);
   if (*v) fprintf(stderr,"%s\n",cmd);

@@ -108,7 +108,7 @@ static struct Trie {
 
 static struct Trie                     ids_trie_v = Trie(null,-1);
 static trie_t                          ids_trie   = &ids_trie_v;
-static struct Xarray::xarray<string> * symbols    = null;
+static struct Xarray::xarray<stringptr> * symbols = null;
 static int                             num_kws    = 0;
 static int                             kw_nums[?] = {};
 
@@ -129,7 +129,8 @@ static int str_index(string buff, int offset, int len) {
       }
       let newstr = new_string(len+1);
       String::zstrncpy(newstr,0,buff,offset,len);
-      int ans = Xarray::add_ind((Xarray::Xarray<string>)symbols, newstr);
+      int ans = Xarray::add_ind((Xarray::Xarray<stringptr>)symbols, 
+				allocstr(newstr));
       t->shared_str = ans;
       return ans;
     }
@@ -143,7 +144,8 @@ static int str_index(string buff, int offset, int len) {
   if(t->shared_str == -1) {
     let newstr = new_string(len+1);
     String::zstrncpy(newstr,0,buff,offset,len);
-    int ans = Xarray::add_ind((Xarray::Xarray<string>)symbols, newstr);
+    int ans = Xarray::add_ind((Xarray::Xarray<stringptr>)symbols, 
+			      allocstr(newstr));
     t->shared_str = ans;
     return ans;
   }
@@ -161,7 +163,8 @@ static int str_index_lbuf<`a>(Lexbuf<`a> lbuf) {
 static struct Trie typedefs_trie_v = Trie(null,false);
 static trie_t      typedefs_trie   = &typedefs_trie_v;
 
-static void insert_typedef(string s) {
+static void insert_typedef(stringptr sptr) {
+  string s = derefstr(sptr);
   int    len = s.size - 1;
   trie_t t   = typedefs_trie;
   for(int i=0; i < len; ++i) {
@@ -187,12 +190,17 @@ static void insert_typedef(string s) {
 }
 
 
-static string get_symbol(int symbol_num) {
-  return Xarray::get((Xarray::Xarray<string>)symbols, symbol_num);
+static stringptr get_symbol(int symbol_num) {
+  return Xarray::get((Xarray::Xarray<stringptr>)symbols, symbol_num);
 }
 
 static $(sign,int)      token_int_pair = $(Signed,0);
+#ifdef OLD_STRING_REP
 static $(list<var>,var) token_id_pair  = $(null,(string)"*bogus*");
+#else
+static string bogus_string = "*bogus*";
+static $(list<var>,var) token_id_pair  = $(null,&bogus_string);
+#endif
 
 static char         token_char   = '\000';
 static string       token_string = "";
@@ -328,8 +336,8 @@ static void typedef_init() {
   _ init_lstack = &cons(init_lvis, null);
   _ init_decls  = Dict::insert(Dict::empty(varlist_cmp),
 			       null,
-			       &Ldecls{.typedefs=Set::empty(zstrcmp),
-				       .namespaces=Set::empty(zstrcmp)});
+			       &Ldecls{.typedefs=Set::empty(zstrptrcmp),
+				       .namespaces=Set::empty(zstrptrcmp)});
   lstate = &Opt(&Lstate{.lstack=init_lstack,
                         .decls=init_decls});
 }
@@ -384,10 +392,10 @@ static bool is_typedef_in_namespace(List<var> ns, var v) {
 }
 static bool is_typedef(qvar q) {
   if (q[0] != null)
-    return is_typedef_in_namespace((List<string>)q[0],q[1]);
+    return is_typedef_in_namespace((List<stringptr>)q[0],q[1]);
   // all unqualified typedefs must be in the trie 
   // look ma -- fast lookup
-  string s   = q[1];
+  string s   = derefstr(q[1]);
   int    len = s.size - 1;
   trie_t t   = typedefs_trie;
   for(int i = 0; i < len; ++i)
@@ -419,8 +427,9 @@ void enter_namespace(var s) {
 					    Set::insert(ld->namespaces, s)});
     lstate->v->decls = Dict::insert(lstate->v->decls,
 				    new_ns,
-				    &Ldecls{.typedefs   = Set::empty(zstrcmp),
-					    .namespaces = Set::empty(zstrcmp)});
+				    &Ldecls{.typedefs= Set::empty(zstrptrcmp),
+					    .namespaces= Set::empty(zstrptrcmp)
+				    });
 
   }
   recompute_typedefs();
@@ -432,7 +441,7 @@ void leave_namespace() {
   recompute_typedefs();
 }
 void enter_using(qvar q) {
-  _ ns       = (List<string>)List::append(q[0],&cons(q[1],null));
+  _ ns       = (List<stringptr>)List::append(q[0],&cons(q[1],null));
   _ ans      = get_absolute_namespace(ns);
   _ imported = lstate->v->lstack->hd->imported_namespaces;
 
@@ -466,7 +475,13 @@ void register_typedef(qvar q) {
 }
 
 // This kludge isn't necessary to avoid allocation once we have stack pointers.
+#ifdef OLD_STRING_REP
 static $(List::list<var>,var) kludge_qvar_v = $(null,(string)"");
+#else
+static string empty_string = "";
+static $(List::list<var>,var) kludge_qvar_v = 
+  $(null,&empty_string);
+#endif
 static qvar kludge_qvar = &kludge_qvar_v;
 
 static short process_id<`a>(Lexbuf<`a> lbuf) {
@@ -476,7 +491,7 @@ static short process_id<`a>(Lexbuf<`a> lbuf) {
   if(symbol_num < num_kws)
     return (short)kw_nums[symbol_num]; // cast should be unnecessary
 
-  string s = get_symbol(symbol_num);
+  stringptr s = get_symbol(symbol_num);
   kludge_qvar[1] = s;
 
   // maybe it's a typedef
@@ -486,7 +501,7 @@ static short process_id<`a>(Lexbuf<`a> lbuf) {
   }
 
   // alas, it's an identifier
-  token_string = s;
+  token_string = derefstr(s);
   return IDENTIFIER;
 }
 
@@ -562,7 +577,7 @@ rule token = parse
       { return process_qual_id(lexbuf); }
 /* Type variables */
 | '`'['A'-'Z''a'-'z''0'-'9''_']+
-   { token_string = get_symbol(str_index_lbuf(lexbuf)); 
+   { token_string = derefstr(get_symbol(str_index_lbuf(lexbuf))); 
       return TYPE_VAR; }
 /* Integer constants */
 | '0'['x''X']['0'-'9''a'-'f''A'-'F']+((['u''U']['l''L']?)|(['l''L']['u''U']?))?
@@ -732,7 +747,7 @@ and comment = parse
 {
 
 void lex_init() {
-  symbols = Xarray::create(101,(string)"");
+  symbols = Xarray::create(101,allocstr(""));
   num_kws = rw_array.size;
   kw_nums = new {for i < num_kws : 0};
   for (int i=0; i < num_kws; ++i) {

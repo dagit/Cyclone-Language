@@ -1,5 +1,16 @@
 Todo now:
 
+* if we write:
+
+  let slist = &cons((string)"hello",null)
+
+  then we do not get a type-error, in spite of the fact that we're
+  instantiating a boxed type variable with an unboxed type (char[?]).
+
+* shouldn't allow comparisons on strings or other "structs"
+
+* "sizeof e" doesn't do the right thing.
+
 * we don't verify that cyc_main has the right type:  we should rename
   it to "main" (and translate it to _cyc_main or something like this)
   and force it to return an int and take argc, argv as arguments.

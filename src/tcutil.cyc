@@ -36,23 +36,24 @@ void terr(segment loc, string s) {
 }
 
 static list<segment> warning_segs = null;
-static list<string>  warning_msgs = null;
+static list<stringptr>  warning_msgs = null;
 
 // we batch warnings because we have to parse the file to determine
 // line and column information.
 void warn(segment sg, string msg) {
   warning_segs = &cons(sg, warning_segs);
-  warning_msgs = &cons(msg,warning_msgs);
+  warning_msgs = &cons(allocstr(msg),warning_msgs);
 }
 void flush_warnings() {
   if(warning_segs == null)
     return;
   fprintf(stderr,"***Warnings***\n");
-  list<string> seg_strs = strings_of_segments(warning_segs);
+  list<stringptr> seg_strs = strings_of_segments(warning_segs);
   warning_segs = null;
   warning_msgs = List::imp_rev(warning_msgs);
   while(warning_msgs != null) {
-    fprintf(stderr,"%s: %s\n", seg_strs->hd, warning_msgs->hd);
+    fprintf(stderr,"%s: %s\n", derefstr(seg_strs->hd), 
+	    derefstr(warning_msgs->hd));
     seg_strs     = seg_strs->tl;
     warning_msgs = warning_msgs->tl;
   }
@@ -91,9 +92,9 @@ typ compress(typ t) {
 //                       /         |
 //                   MemU         Rgn
 //                    |   \
-//                   RegU  MemP   
-//                    |  \  |
-//                   BoxU  RegP
+//                    |   MemP   
+//                    |     |
+//                   BoxU   |
 //                       \  |
 //                         BoxP               
 static bool kind_leq(kind_t k1, kind_t k2) {
@@ -102,11 +103,9 @@ static bool kind_leq(kind_t k1, kind_t k2) {
   switch (k2) {
   case UnresolvedKind: return true; // okay, so I snuck in 1 important fast-path
   case BoxPKind: return false;
-  case RegPKind: return kind_leq(k1,BoxPKind);
   case BoxUKind: return kind_leq(k1,BoxPKind);
-  case MemPKind: return kind_leq(k1,RegPKind);
-  case RegUKind: return kind_leq(k1,BoxUKind) || kind_leq(k1,RegPKind);
-  case MemUKind: return kind_leq(k1,RegUKind) || kind_leq(k1,MemPKind);
+  case MemPKind: return kind_leq(k1,BoxPKind);
+  case MemUKind: return kind_leq(k1,BoxUKind) || kind_leq(k1,MemPKind);
   case RgnKind:  return false;
   }
 }
@@ -125,9 +124,9 @@ static kind_t typ_kind(typ t) {
 
   case VarType(&$(_,k)):  return k;
   case VoidType:          return MemPKind;
-  case IntType(_,sz,bx):  return (sz==B4 || bx==Boxed) ? BoxPKind : RegPKind;
-  case FloatType(bx):     return (bx==Boxed)           ? BoxPKind : RegPKind;
-  case DoubleType(bx):    return (bx==Boxed)           ? BoxPKind : RegPKind;
+  case IntType(_,sz,bx):  return (sz==B4 || bx==Boxed) ? BoxPKind : MemPKind;
+  case FloatType(bx):     return (bx==Boxed)           ? BoxPKind : MemPKind;
+  case DoubleType(bx):    return (bx==Boxed)           ? BoxPKind : MemPKind;
   case FnType(_,_,_,_):   return MemPKind;
   case RgnHandleType(_):  return BoxUKind; // the whole point on packability
   case HeapRgnType:       return RgnKind;
@@ -142,9 +141,13 @@ static kind_t typ_kind(typ t) {
   // imply the capability to access.
   case PointerType(t,rgntyp,_,_): return is_packable(t) ? BoxPKind : BoxUKind;
 
-  // FIX: should tagged arrays be allowed to point at arrays not in the heap?
-  case ArrayType(t,_,TaggedArray): return is_packable(t) ? BoxPKind : BoxUKind;
-  case ArrayType(t,_,_):           return is_packable(t) ? MemPKind : MemUKind;
+  // C arrays are always just pointers so we can treat them as boxed
+  case ArrayType(t,_,UntaggedArray): 
+    return is_packable(t) ? BoxPKind : BoxUKind;
+  // TaggedArrays are structs with 3 components so they can't be boxed
+  // FIX:  FixedArray's can be boxed as long as they're not in data
+  // structures...
+  case ArrayType(t,_,_): return is_packable(t) ? MemPKind : MemUKind;
   case TupleType(tqts):
     for(; tqts != null; tqts = tqts->tl)
       if(!is_packable(tqts->hd[1]))
@@ -162,10 +165,8 @@ static bool is_packable(typ t) {
   default: 
     switch(typ_kind(t)) {
     case MemUKind: return false;
-    case RegUKind: return false;
     case BoxUKind: return false;
     case MemPKind: return true;
-    case RegPKind: return true;
     case BoxPKind: return true;
     case RgnKind:        throw Impossible("is_packable found RgnKind");
     case UnresolvedKind: throw Impossible("is_packable found UnresolvedKind");
@@ -325,7 +326,7 @@ void unify_it(typ t1, typ t2) {
   case $(VarType(&$(x2,k2)),VarType(&$(x1,k1))):
     // kinds should already be resolved, otherwise we could "unify"
     // UnresolvedKind with something else???
-    if(k2 == k1 && String::zstrcmp(x2,x1) == 0) return;
+    if(k2 == k1 && String::zstrptrcmp(x2,x1) == 0) return;
     break;
 
   case $(StructType(nopt2,ts2,sd2), StructType(nopt1,ts1,sd1)): 
@@ -613,7 +614,7 @@ bool coerce_arg(tenv te, exp e, typ t2) {
   // see if types immediately match
   if (unify(t1,t2)) return true;
   // try unboxing e
-  if (typ_kind(t1) == BoxPKind && typ_kind(t2) == RegPKind) {
+  if (typ_kind(t1) == BoxPKind && typ_kind(t2) == MemPKind) {
     unbox_exp(te,e);
     if (unify(t1,t2)) return true;
   }
@@ -671,7 +672,7 @@ bool coerce_use(tenv te, exp e, typ t2) {
   typ    t1 = compress(e->topt->v);
   kind_t k1 = typ_kind(t1);
   kind_t k2 = typ_kind(t2);
-  if (k1 == BoxPKind && k2 == RegPKind)
+  if (k1 == BoxPKind && k2 == MemPKind)
     unbox_exp(te,e);
   if (unify(t1,t2)) 
     return true;
@@ -1160,7 +1161,7 @@ void check_valid_rgn(segment loc,tenv te,list<tvar> bound_vars, typ t){
   case VarType(pr):
     let &$(tv,k) = pr;
     for(; bound_vars != null; bound_vars = bound_vars->tl)
-      if(String::zstrcmp(bound_vars->hd[0],tv)==0) {
+      if(String::zstrptrcmp(bound_vars->hd[0],tv)==0) {
 	_ bk = bound_vars->hd[1];
 	if((bk != RgnKind && bk != UnresolvedKind)
 	   || (k != RgnKind && k != UnresolvedKind)) {
@@ -1170,7 +1171,7 @@ void check_valid_rgn(segment loc,tenv te,list<tvar> bound_vars, typ t){
 	pr[1] = bound_vars->hd[1] = RgnKind;
 	return;
       }
-    terr(loc,xprintf("unbound type variable %s",tv));
+    terr(loc,xprintf("unbound type variable %s",derefstr(tv)));
     return;
     
   default: terr(loc,"This type should be a region."); return;
@@ -1190,7 +1191,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
   case VarType(pr):
     let &$(tv,k) = pr;
     for(; bound_vars != null; bound_vars = bound_vars->tl)
-      if(String::zstrcmp(bound_vars->hd[0],tv)==0)
+      if(String::zstrptrcmp(bound_vars->hd[0],tv)==0)
 	switch ($(bound_vars->hd[1],k)) {
 	case $(_,RgnKind): fallthru;
 	case $(RgnKind,_): terr(loc,"Region variable used as type"); return;
@@ -1208,7 +1209,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
 	    terr(loc,"Wrong kind for type variable");
 	  return;
 	}
-    terr(loc,xprintf("unbound type variable %s",tv));
+    terr(loc,xprintf("unbound type variable %s",derefstr(tv)));
     return;
   case EnumType(tdnopt,targs,*edp):
     if (tdnopt == null) {
@@ -1295,7 +1296,7 @@ void check_valid_type(segment loc, tenv te, list<tvar> bound_vars, typ t) {
     for(; btvs != null; btvs = btvs->tl)
       if(btvs->hd[1] == UnresolvedKind) {
 	warn(loc,xprintf("Type variable %s unused, assuming boxed",
-			 btvs->hd[0]));
+			 derefstr(btvs->hd[0])));
 	btvs->hd[1] = BoxPKind;
       }
     break;
@@ -1380,7 +1381,7 @@ static void check_unique_unsorted<`a>(int (@cmp)(`a,`a), list<`a> vs,
 }
 
 void check_unique_vars(list<var> vs, segment loc, string msg) {
-  check_unique_unsorted(String::zstrcmp,vs,loc,msg);
+  check_unique_unsorted(String::zstrptrcmp,vs,loc,msg);
 }
 
 void check_unique_tvars(segment loc, list<tvar> tvs) {
@@ -1438,16 +1439,17 @@ resolve_struct_designators<`a>(seg_t loc,
       case FieldName(v):
 	_ fields2 = fields;
 	for(; fields2 != null; fields2 = fields2->tl)
-	  if(String::zstrcmp(v,fields2->hd[0][0]) == 0) {
+	  if(String::zstrptrcmp(v,fields2->hd[0][0]) == 0) {
 	    if(fields2->hd[1])
 	      terr(loc, 
-		   xprintf("field %s has already been used as an argument", v));
+		   xprintf("field %s has already been used as an argument", 
+			   derefstr(v)));
 	    fields2->hd[1] = true;
 	    ans = &cons(&$(fields2->hd[0],a), ans);
 	    break;
 	  }
 	if(fields2 == null)
-	  terr(loc, xprintf("bad field designator %s", v));
+	  terr(loc, xprintf("bad field designator %s", derefstr(v)));
 	break;
       }
   }

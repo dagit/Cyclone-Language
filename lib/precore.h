@@ -13,6 +13,21 @@ typedef unsigned int uint;
 typedef char *Cstring;
 // a boxed and tagged string: struct {uint sz; Cstring *contents;}@
 typedef char string[?];
+
+//#define OLD_STRING_REP
+#ifdef OLD_STRING_REP
+typedef string stringptr;
+#define allocstr(x) ((string)x)
+#define derefstr(x) (x)
+#define str2cstr(x) (x)
+#else
+typedef string @stringptr;
+#define allocstr(x) (stringptr)(&$((string)x))
+#define allocstr_top(x,y) (&x)
+#define derefstr(x) (*(x))
+#define str2cstr(x) ((char[])(x))
+#endif
+
 typedef int bool;
 #ifndef false 
 #define false (0)

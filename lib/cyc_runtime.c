@@ -19,11 +19,11 @@ char _Match_Exception_tag[16] = "Match_Exception";
 struct _xenum_struct _Match_Exception_struct = { _Match_Exception_tag };
 exn Match_Exception = &_Match_Exception_struct;
 
-struct _tagged_string *xprintf(char *fmt, ...) {
+struct _tagged_string xprintf(char *fmt, ...) {
   va_list argp;
   int len1;
   int len2;
-  struct _tagged_string *result;
+  struct _tagged_string result;
 
   va_start(argp,fmt);
   len1 = vsnprintf(NULL,0,fmt,argp); // how much space do we need
@@ -36,13 +36,13 @@ struct _tagged_string *xprintf(char *fmt, ...) {
   }
 
   // Careful: we need space for a trailing zero (???)
-  result = (struct _tagged_string *)GC_malloc(sizeof(struct _tagged_string));
-  result->sz       = len1+1;
-  result->contents = (char *)GC_malloc(len1+1);
-  result->contents[len1] = '\0';
+  result.base     = (char *)GC_malloc(len1+1);
+  result.base[len1] = '\0';
+  result.curr     = result.base;
+  result.last_plus_one = result.base + (len1+1);
 
   va_start(argp,fmt);
-  len2 = vsnprintf(result->contents,len1+1,fmt,argp);
+  len2 = vsnprintf(result.curr,len1+1,fmt,argp);
   va_end(argp);
 
   if (len1 != len2) {
@@ -156,39 +156,45 @@ if (!e) {
 // from the Cyclone include file precore.h.
 #include "precore_c.h"
 
-struct _tagged_string *Cstring_to_string(Cstring s) {
-  struct _tagged_string *str;
+struct _tagged_string Cstring_to_string(Cstring s) {
+  struct _tagged_string str;
   int sz=(s?strlen(s):0);
-  str = (struct _tagged_string *)GC_malloc(sizeof(struct _tagged_string));
-  str->sz       = sz;
-  str->contents = (char *)GC_malloc(sz);
+  str.base = (char *)GC_malloc(sz);
+  str.curr = str.base;
+  str.last_plus_one = str.base + sz;
 
   while(--sz>=0)
     // Copy the string in case the C code frees it or mangles it
-    str->contents[sz]=s[sz];
+    str.curr[sz]=s[sz];
 
   return str;
 }
 
 Cstring string_to_Cstring(string s) {
   int i;
-  char *contents;
-  char *str=(char *)GC_malloc(s->sz+1);
+  char *contents = s.curr;
+  size_t sz = s.last_plus_one - s.curr;
+  char *str;
+
+  if (s.curr < s.base || s.curr >= s.last_plus_one)
+    throw(Null_Exception);
+  str = (char *)GC_malloc(sz+1);
   if (str == NULL) {
     fprintf(stderr,"internal error: out of memory in string_to_Cstring\n");
     exit(1);
   }
-  contents = s->contents;
 
-  for(i=0; i<s->sz; i++) str[i]=contents[i];
-  str[s->sz]='\0';
+  for(i=0; i < sz; i++) str[i]=contents[i];
+  str[sz]='\0';
   return str;
 }
 
+// FIX:  this isn't really needed since you can cast char[?] to char[]
 Cstring underlying_Cstring(string s) {
-  char *str=s->contents;
-  if (s->sz == 0) 
-    str = NULL;
+  char *str=s.curr;
+  // FIX:  should throw exception?  
+  if (s.curr < s.base || s.curr >= s.last_plus_one)
+    throw(Null_Exception);
   return str;
 }
 
@@ -202,21 +208,29 @@ static void check_fd(FILE *fd) {
 }
 int Cyc_Stdio_file_string_read(FILE *fd, string dest, int dest_offset, 
 			       int max_count) {
+  char *new_curr = dest.curr + dest_offset;
+  size_t sz = dest.last_plus_one - new_curr;
+  if (new_curr < dest.base || new_curr >= dest.last_plus_one)
+    throw(Null_Exception);
   check_fd(fd);
-  if(dest_offset + max_count > dest->sz) {
+  if(dest_offset + max_count > sz) {
     fprintf(stderr,"Attempt to read off end of string.\n");
     exit(255);
   }
-  return fread((dest->contents)+dest_offset, 1, max_count, fd);
+  return fread(new_curr, 1, max_count, fd);
 }
 int Cyc_Stdio_file_string_write(FILE *fd, string src, int src_offset, 
 				int max_count) {
+  size_t sz = src.last_plus_one - src.curr;
+  char *new_curr = src.curr + src_offset;
+  if (new_curr < src.base || new_curr >= src.last_plus_one)
+    throw(Null_Exception);
   check_fd(fd);
-  if(src_offset + max_count > src->sz) {
+  if(src_offset + max_count > sz) {
     fprintf(stderr,"Attempt to write off end of string.\n");
     exit(255);
   } 
-  return fwrite((src->contents)+src_offset, 1, max_count, fd);
+  return fwrite(new_curr, 1, max_count, fd);
 }
 // FIX: Make more C-like.
 int f_seek(FILE *fd, int offset) {
@@ -272,8 +286,8 @@ void start_args() {
   current_argv = cyc_argv;
 }
 
-struct _tagged_string *next_arg() {
-  struct _tagged_string *arg;
+struct _tagged_string next_arg() {
+  struct _tagged_string arg;
   if (current_argc <= 0) {
     fprintf(stderr,"next_arg called when there is no next arg\n");
     exit(1);

@@ -46,7 +46,12 @@ namespace ControlFlow;
 typedef Set<vardecl> flow_info_t;
 
 static struct Tqual     bogus_tqual     = Tqual(false,false,false);
+#ifdef OLD_STRING_REP
 static $(list<var>,var) bogus_qvar      = $(null,(string)"");
+#else
+static string           empty_string    = "";
+static $(list<var>,var) bogus_qvar      = $(null,&empty_string);
+#endif
 static struct Vardecl   bogus_vardecl_v = Vardecl(Public, &bogus_qvar,
 						  &bogus_tqual, VoidType, null,
 						  0, 0);
@@ -181,7 +186,7 @@ cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
 
   case Var_e(&$(_,v),Local_b(vd)):
     if(is_unassigned(env,vd))
-      terr(e0->loc, xprintf("variable %s may not be initialized", v));
+      terr(e0->loc, xprintf("variable %s may not be initialized",derefstr(v)));
     return CFExpSyn(env,env);
   case Var_e(_,_):     
     return CFExpSyn(env,env);

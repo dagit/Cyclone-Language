@@ -50,7 +50,7 @@ static Lineno::Pos new_pos() {
   return &Lineno::pos("","",0,0);
 }
 
-list<string> strings_of_segments(list<segment> segs) {
+list<stringptr> strings_of_segments(list<segment> segs) {
   list<$(int,Lineno::Pos)@> places = null;
   for(let segs2 = segs; segs2 != null; segs2 = segs2->tl) {
     if(segs2->hd == null)
@@ -60,13 +60,14 @@ list<string> strings_of_segments(list<segment> segs) {
 		   places));
   }
   Lineno::poss_of_abss(source, places); // mutates places
-  list<string> ans = null;
+  list<stringptr> ans = null;
   places = List::imp_rev(places);
   for(; segs != null; segs = segs->tl) 
     if(segs->hd == null)
-      ans = &cons(xprintf("%s(unknown)", source), ans);
+      ans = &cons(allocstr(xprintf("%s(unknown)", source)), ans);
     else {
-      ans = &cons(string_of_pos_pr(places->hd[1], places->tl->hd[1]), ans);
+      ans = &cons(allocstr(string_of_pos_pr(places->hd[1], places->tl->hd[1])),
+		  ans);
       places = places->tl->tl;
     }
   return ans;

@@ -29,7 +29,7 @@ namespace Parser {
 Opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = null;
 
 xenum exn {Parser_error(string)};
-typedef struct Hashtable::table<string,regular_expression_t> htbl;
+typedef struct Hashtable::table<stringptr,regular_expression_t> htbl;
   // must be initialized!
 htbl * named_regexps = null;
 lexer_definition_t parse_result = null;
@@ -124,7 +124,8 @@ header:
 
 named_regexps:
   named_regexps TLET TIDENT TEQUAL regexp 
-    { Hashtable::insert((Parser::htbl @)named_regexps, $3, $5); $$=^$(0); }
+    { Hashtable::insert((Parser::htbl @)named_regexps, allocstr($3), 
+			$5); $$=^$(0); }
 | /* empty */ { $$=^$(0); }
 
 other_definitions:
@@ -157,7 +158,8 @@ regexp:
 | regexp TOR regexp { $$=^$(Alternative($1,$3)); }
 | regexp regexp %prec CONCAT { $$=^$(Sequence($1,$2)); }
 | TLPAREN regexp TRPAREN { $$=^$($2); }
-| TIDENT { try $$=^$(Hashtable::lookup((Parser::htbl @)named_regexps,$1));
+| TIDENT { try $$=^$(Hashtable::lookup((Parser::htbl @)named_regexps,
+				       allocstr($1)));
 	   catch { 
 	     case Not_found:
 	     yyerror(xprintf("Reference to unbound regexp name `%s'", $1));
@@ -178,7 +180,8 @@ char_class1:
 
 namespace Parser {
 lexer_definition_t parse_file(FILE @f) {
-  named_regexps = Hashtable::create(13, String::strcmp, Hashtable::hash_string);
+  named_regexps = Hashtable::create(13, String::strptrcmp, 
+				    Hashtable::hash_stringptr);
   parse_result = null;
   lbuf = &Opt(Lexing::from_file(f));
   yyparse();

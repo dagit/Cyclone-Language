@@ -2,8 +2,8 @@
 // to C translator.  The corresponding definitions are in
 // the file cyc_helpers.c
 
-#ifndef CYC_INCLUDE_H
-#define CYC_INCLUDE_H
+#ifndef _CYC_INCLUDE_H_
+#define _CYC_INCLUDE_H_
 
 ///////////////////// Basic types
 typedef int Int;
@@ -15,8 +15,15 @@ typedef struct _boxed_long_long_struct { long long v; } *_LongLong;
 typedef int Char;
 
 ///////////////////// Strings
+//#define OLD_STRING_REP
+#ifdef OLD_STRING_REP
 struct _tagged_string { unsigned int sz; char *contents; };
 extern struct _tagged_string *xprintf(char *fmt, ...);
+#else
+struct _tagged_string { char *curr; char *base; char *last_plus_one; };
+extern struct _tagged_string xprintf(char *fmt, ...);
+#endif
+
 //extern struct _tagged_string *new_string(unsigned int sz);
 
 ///////////////////// Exceptions

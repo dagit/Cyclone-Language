@@ -33,9 +33,9 @@ namespace Absyn {
   using List;
   using Position;
 
-  typedef string field_name;
-  typedef string var;
-  typedef string tvarname_t;
+  typedef stringptr field_name;
+  typedef stringptr var;
+  typedef stringptr tvarname_t;
   typedef $(List::list<var>,var)@ qvar;
   typedef qvar typedef_name_t;
   
@@ -130,10 +130,8 @@ namespace Absyn {
   //      translating to C which allows mem assignment and param passing?
   EXTERN_DEFINITION enum Kind { 
     MemUKind,
-    RegUKind,
     BoxUKind,
     MemPKind,
-    RegPKind,
     BoxPKind,
     RgnKind,
     UnresolvedKind
@@ -181,7 +179,7 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION enum Funcparams {
-    NoTypes(list<string>,segment);
+    NoTypes(list<var>,segment);
     WithTypes(list<$(Opt_t<var>,tqual,typ)@>,bool);
   };
 
@@ -234,7 +232,7 @@ namespace Absyn {
     StructArrow_e(exp,field_name);
     Subscript_e(exp,exp);
     Tuple_e(list<exp>);
-    CompoundLit_e($(Opt_t<string>,tqual,typ)@,list<$(list<designator>,exp)@>);
+    CompoundLit_e($(Opt_t<var>,tqual,typ)@,list<$(list<designator>,exp)@>);
     Array_e(list<$(list<designator>,exp)@>);
     Comprehension_e(vardecl,exp,exp); // much of vardecl is known
     Struct_e(typedef_name_t,Opt_t<list<typ>>,list<$(list<designator>,exp)@>,
@@ -473,7 +471,10 @@ namespace Absyn {
   extern exp primop_exp(primop, list<exp> es, segment);
   extern exp prim1_exp(primop, exp, segment);
   extern exp prim2_exp(primop, exp, exp, segment);
+  extern exp add_exp(exp, exp, segment);
+  extern exp subtract_exp(exp, exp, segment);
   extern exp times_exp(exp, exp, segment);
+  extern exp divide_exp(exp, exp, segment);
   extern exp eq_exp(exp, exp, segment);
   extern exp neq_exp(exp, exp, segment);
   extern exp gt_exp(exp, exp, segment);

@@ -78,6 +78,10 @@ int hash_string(string s) {
   return ans;
 }
 
+int hash_stringptr(stringptr s) {
+  return hash_string(derefstr(s));
+}
+
 // For resizing
 void insert_bucket<`a,`b>(list<$(`a,`b)@> tab[?], int (@hash)(`a),
                           list<$(`a,`b)@> elems) {

@@ -553,7 +553,7 @@ static synth tcCast(tenv te, segment loc, Opt_t<typ> topt, typ t, exp e) {
   check_valid_type(loc,te,lookup_type_vars(te),t);
   tcExp(te,null,e);
   typ t2 = e->topt->v;
-  if (!castable(te,loc,t2,t)) 
+  if (!silent_castable(te,loc,t2,t) && !castable(te,loc,t2,t)) 
     return expr_err(te,loc,xprintf("cannot cast %s to %s",
 				   typ2string(t2), typ2string(t)));
   return standard_synth(te,t);
@@ -728,11 +728,11 @@ static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt,
     _ finfo = lookup_struct_field(sd,f);
     if (finfo == null) 
       return expr_err(te,loc,xprintf("struct %s has no %s field",
-				     qvar2string(nopt->v), f));
+				     qvar2string(nopt->v), derefstr(f)));
     _ inst = List::zip(sd->tvs,ts);
     _ t2   = substitute(inst,finfo[2]);
     return standard_synth(te,t2);
-  case ArrayType(_,_,ak) && (String::zstrcmp(f,"size") == 0): 
+  case ArrayType(_,_,ak) && (String::zstrcmp(derefstr(f),"size") == 0): 
     switch (ak) {
     case UntaggedArray:
       return expr_err(te,loc,
@@ -743,7 +743,7 @@ static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt,
       return standard_synth(te,uint_t);
     }
   default:
-    if (String::zstrcmp(f,"size") == 0)
+    if (String::zstrcmp(derefstr(f),"size") == 0)
       return expr_err(te,loc,xprintf("expecting struct or array, found %s",
 				     typ2string(t)));
     else 
@@ -764,7 +764,7 @@ static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt,
       _ finfo = lookup_struct_field(sd,f);
       if (finfo == null)
 	return expr_err(te,loc,xprintf("struct %s has no %s field",
-				       qvar2string(nopt->v),f));
+				       qvar2string(nopt->v),derefstr(f)));
       _ inst = List::zip(sd->tvs,ts);
       _ t3   = substitute(inst,finfo[2]);
       check_rgn_accessible(te,loc,rt);
@@ -794,15 +794,13 @@ static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
   tcExp(te,null,e2);
   typ t1 = compress(e1->topt->v);
   typ t2 = compress(e2->topt->v);
-  // NOTE: we use unsigned int here, unlike C, because we do not support
-  // negative indexing on arrays.
-  if (!coerce_uint_typ(te,e2))
-    return expr_err(te,e2->loc,xprintf("expecting unsigned int, found %s",
+  if (!coerce_sint_typ(te,e2))
+    return expr_err(te,e2->loc,xprintf("expecting int subscript, found %s",
 				       typ2string(t2)));
   // the subscript could be on a tuple, a pointer to a tuple, or an array
   switch (t1) {
   case PointerType(t,rt,_,tq):
-    // FIX: see whether pointer is nullable? Consider tq?
+    // FIX: Consider tq?
     switch (compress(t)) {
     case TupleType(ts): 
       check_rgn_accessible(te,loc,rt);
@@ -853,7 +851,7 @@ static synth tcTuple(tenv te, segment loc, Opt_t<typ> topt, list<exp> es) {
 
 // Compound literals, e.g., (struct foo){3,"abc"} 
 static synth tcCompoundLit(tenv te, segment loc, Opt_t<typ> topt,
-			   $(Opt_t<string>,tqual,typ)@ t,
+			   $(Opt_t<stringptr>,tqual,typ)@ t,
 			   list<$(list<designator>,exp)@> des) {
   return expr_err(te,loc,"tcCompoundLit");
 }
@@ -924,11 +922,13 @@ static synth tcComprehension(tenv te,segment loc,Opt_t<typ> topt,
   // add x to the environment with the type unsigned int
   te = Tcenv::new_block(te);
   te = add_local_var(loc, te, vd);
+  Opt_t<array_kind_t> kopt = null;
   // if topt is present, cast the body to topt's element type
   if (topt != null) {
     switch (compress(topt->v)) {
-    case ArrayType(elt_typ,_,_):
+    case ArrayType(elt_typ,_,ak):
       body->r = cast_exp(elt_typ, new_exp(body->r,body->loc),body->loc)->r;
+      kopt = &Opt(ak);
       break;
     default:
       terr(loc,xprintf("initializer for %s is an array",typ2string(topt->v)));
@@ -937,7 +937,9 @@ static synth tcComprehension(tenv te,segment loc,Opt_t<typ> topt,
   }
   // type-check the body in the new environment
   tcExp(te,null,body);
-  array_kind_t k = is_const_exp(te,bound) ? FixedArray(bound) : TaggedArray;
+  array_kind_t k = 
+    (kopt != null) ? kopt->v : 
+    is_const_exp(te,bound) ? FixedArray(bound) : TaggedArray;
   return standard_synth(te, ArrayType(body->topt->v, empty_tqual(), k));
 }
 
@@ -978,9 +980,11 @@ static synth tcStruct(tenv_t te, seg_t loc, Opt_t<typ> topt,
     let &$(&$(n,tq,fieldtyp),field_exp) = fields->hd;
     _ inst_fieldtyp = substitute(inst,fieldtyp);
     if (!coerce_arg(te,field_exp,inst_fieldtyp))
-      terr(field_exp->loc,xprintf("field %s of struct %s expects type %s != %s",
-				  n,qvar2string(*tn),typ2string(inst_fieldtyp),
-				  typ2string(field_exp->topt->v)));
+      terr(field_exp->loc,
+	   xprintf("field %s of struct %s expects type %s != %s",
+		   derefstr(n),qvar2string(*tn),
+		   typ2string(inst_fieldtyp),
+		   typ2string(field_exp->topt->v)));
   }
   return standard_synth(te,res_typ);
 }

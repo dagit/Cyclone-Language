@@ -16,7 +16,7 @@ CYCBISON=../bin/cycbison.exe
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
 
-CFLAGS=-fwritable-strings -I.. 
+CFLAGS= -fwritable-strings -I.. 
 #CFLAGS=-pg -fwritable-strings -I.. 
 #CFLAGS=-O -fwritable-strings -I.. 
 
@@ -30,7 +30,7 @@ LIB=../lib/$(OUT_PREFIX)$(CYCLIB)
 all: $(OUT_PREFIX)$(CYCCOMP)
 
 $(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIB)
-	gcc -o $@ $^ ../bin/gc.a $(LDFLAGS)
+	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 #	gcc -o $@ $^ ../bin/gc_pg.a -pg $(LDFLAGS)
 
 # For machine-generated we need special targets (the .cyc is prefixed)
