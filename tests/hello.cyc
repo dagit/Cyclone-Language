@@ -1,0 +1,15 @@
+#include "core.h"  
+
+using Core;
+
+// "main" is always called cyc_main in Cyclone
+void cyc_main() {
+  // Get the command line arguments as an array of strings.
+  // The first string is the name of the program.
+  string args[?] = std_args();  
+
+  if (size(args) <= 1) 
+    throw Failure("missing name!");
+  else
+    printf("Hello, %s.\n",args[1]);
+}

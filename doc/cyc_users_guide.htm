@@ -10,12 +10,52 @@
 
 <body>
 
-<h1 align="center">Cyclone Version 1.0 User's Guide</h1>
+<h1 align="center"><img border="0" src="cyclone.gif" width="50" height="46">Cyclone Version 1.0 User's Guide</h1>
 <h2 align="center">Greg Morrisett</h2>
 <h2 align="center">Cornell University</h2>
 <p align="center">November, 2000</p>
 <hr>
-<h2>Goals</h2>
+<h2 align="left">Table of Contents</h2>
+<p align="left"><a href="#Goals of the Cyclone Project">Goals of the Cyclone
+Project<br>
+</a><a href="#Installing Cyclone">Installing Cyclone<br>
+</a><a href="#Using Cyclone">Using Cyclone<br>
+</a>&nbsp;&nbsp;&nbsp; <a href="#Hello World">Hello World<br>
+</a><a href="#Quick Guide to Cyclone">Quick Overview<br>
+</a>&nbsp;&nbsp;&nbsp; <a href="#Features Added">Features added<br>
+</a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; <a href="#GCC and C-9X Additions:&nbsp;">GCC and C-9X
+    features</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Namespaces">Namespaces</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Tuples">Tuples</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Non-null Pointers:">Non-Null Pointers</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Exceptions">Exceptions</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Variable Sized Arrays">Variable-Sized Arrays</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Subtyping">Subtyping and Coercions</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Datatype Enums:">Datatype Enums</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Pattern Matching:">Pattern Matching</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Let Declarations:">Let Declarations</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Extensible Enums (xenums):">Extensible Enums</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Polymorphic Functions:">Polymorphic Functions</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Polymorphic Data Structures:">Polymorphic Data Structures</a><br>
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+    <a href="#Abstract and Existential Types:">Abstract and Existential Types<br>
+</a>&nbsp;&nbsp;&nbsp; <a href="#Restrictions">Restrictions<br>
+</a><a href="#The Grammar of Cyclone">Annotated Grammar<br>
+</a>The Standard Library</p>
+<hr>
+<h2><a name="Goals of the Cyclone Project">Goals of the Cyclone Project</a></h2>
 <p>Cyclone is intended to be a type-safe variant of C.&nbsp; The primary goals
 of Cyclone are to:</p>
 <ol>
@@ -50,8 +90,16 @@ from using Cyclone for latency-critical or space-sensitive applications.&nbsp;
 One of the big research goals of Cyclone is to introduce new typing
 abstractions, such as linear types or regions, that support programmer control
 over memory management without sacrificing safety.</p>
+<p>Cyclone is a work in progress by people at Cornell and AT&amp;T.&nbsp; In
+particular, Trevor Jim and I have worked out most of the initial design and
+implementation.&nbsp; Dan Grossman is working on version 2.0 of the system which
+should add support for a number of other features and clean up the type-checker
+considerably.&nbsp; Fred Smith, Dave Walker, and Stephanie Weirich have
+contributed greatly through discussions, if not code.&nbsp; Many of the ideas
+contained within Cyclone are derived from our previous experience and work on
+the Popcorn safe-C language and the Typed Assembly Language project.&nbsp;&nbsp;</p>
 <hr>
-<h2>Installing Cyclone</h2>
+<h2><a name="Installing Cyclone">Installing Cyclone</a></h2>
 <p>Cyclone currently only runs on 32-bit machines, and has only been tested on
 Win32 and Linux platforms.&nbsp; Other platforms might or might not work.&nbsp;
 There are definitely 32-bit dependencies, so the system will not work on a
@@ -64,11 +112,12 @@ your path.</p>
 need to build and install the system.&nbsp; After unzipping the file into a
 directory, you should have a directory structure that looks like this:</p>
 <pre>cyclone/
-    bin/
+     bin/
         genfiles/
              lib/
              src/
      doc/
+     gc/
      lib/
      src/
      tests/
@@ -90,11 +139,9 @@ want to add the bin/ directory to your path (and possibly the lib directory to
 your include path.)</p>
 <p>The cycbison utility is written in C (soon to be ported to Cyclone) and its
 source is in the tools/cycbison/ sub-directory.&nbsp; The BDW garbage collector
-is also written in C and can be found on<a href="http://www.hpl.hp.com/personal/Hans_Boehm/gc/">
-Hans Boehm's GC page</a>.&nbsp; We just include pre-built libraries for Windows
-and Linux.&nbsp; If you have another platform, you'll need to grab the sources
-and compile this yourself.</p>
-<p>The rest of the code is written in Cyclone.&nbsp; However, the directory bin/genfiles
+is also written in C and can be found in the gc/ directory (this was obtained
+directly from<a href="http://www.hpl.hp.com/personal/Hans_Boehm/gc/"> Hans Boehm's GC page</a>.)&nbsp;
+The rest of the code is written in Cyclone.&nbsp; However, the directory bin/genfiles
 contains the C code that the Cyclone compiler produces when run on itself.&nbsp;
 This is what allows you to build the initial executable.&nbsp;&nbsp;</p>
 <p>Once you've built the compiler from the C courses, you can use it to compile
@@ -108,7 +155,7 @@ which will update the genfiles/ with any different C files that you
 generated.&nbsp; Then you can type &quot;make cyclone&quot; to bootstrap with
 the new code.</p>
 <hr>
-<h2>Using Cyclone</h2>
+<h2><a name="Using Cyclone">Using Cyclone</a></h2>
 <p>Once you've successfully installed Cyclone, you can use it to compile Cyclone
 programs to C, and then use GCC to compile the resulting code to machine
 code.&nbsp; Typically, if one wants to compile the file foo.cyc to an object
@@ -141,13 +188,71 @@ to C requires the -toc flag.&nbsp;&nbsp;</p>
 <p>The output of Cyclone includes the file &quot;cyc_include.h&quot; in the
 top-level directory, so make sure it's accessible when you invoke GCC on the
 resulting code.&nbsp;&nbsp;</p>
-<p>To write standalone Cyclone applications, your best best is to follow the
+<hr>
+<h2><a name="Hello World">Hello World</a></h2>
+<p>As a simple example of Cyclone, here is the canonical &quot;Hello&quot; world
+program:</p>
+<pre>  <font color="#008000">#include</font> &quot;<font color="#0000FF">core.h</font>&quot;  </pre>
+<pre>  <b>using</b> Core;
+  
+  <font color="#FF0000"><i>// &quot;main&quot; is always called cyc_main in Cyclone</i></font>
+  void <b>cyc_main</b>() {
+    <font color="#FF0000"><i>// Get the command line arguments as an array of strings.
+    // The first string is the name of the program.</i></font>
+    string args[?] = std_args();  
+   
+    <i><font color="#FF0000">// if there was no argument to the program, raise an error.</font></i>
+    <b>if</b> (<b>size</b>(args) &lt;= 1) 
+      <b>throw</b> Failure(&quot;missing name!&quot;);
+    <b>else</b>
+      <b>printf</b>(&quot;<font color="#0000FF">Hello, %s.\n</font>&quot;,args[1]);
+  }
+  </pre>
+<p>There are a few things to note about the example:&nbsp; First, Cyclone uses
+the C-Preprocessor, hence the #include line.&nbsp; The file core.h can be found
+in the lib/ directory and includes a number of core definitions that just about
+any Cyclone compilation unit will need.&nbsp; The declaration &quot;using
+Core;&quot; opens up the Core namespace to make the operations in Core
+immediately available to the following code.&nbsp; The declaration &quot;void
+cyc_main() { ... }&quot; declares the &quot;main&quot; function for the Cyclone
+program, which takes no arguments and returns no result.&nbsp; Note that
+failures in Cyclone are signalled using exceptions instead of returning error
+codes.</p>
+<p>The first line of the cyc_main function declares a variable &quot;args&quot;
+to be a variable-sized array of strings.&nbsp; The declaration also initializes
+args by calling the function std_args() which is part of the Core
+namespace.&nbsp; After initializing args, the function checks to see if the size
+(in terms of the number of elements in the array) of size is less than or equal
+to 1.&nbsp; If so, a failure is signalled by throwing the Failure exception
+(with an argument string reading &quot;missing name!&quot;).&nbsp; Otherwise,
+the program prints to standard output &quot;Hello &lt;name&gt;&quot; where
+&lt;name&gt; is the first argument to the program.&nbsp;&nbsp;</p>
+<p>The file tests/hello.cyc contains the code above.&nbsp; If you change into
+the tests directory, then you can compile the file to C by typing:</p>
+<pre>  cyclone -I ../lib -tc -toc -pp hello.cyc &gt; hello.c</pre>
+<p>(This assumes that you have the bin directory on your path.)&nbsp; This
+should produce the file hello.c.&nbsp; You can look at the C code to see what it
+looks like.&nbsp; Most of it is definitions that are imported from core.h.&nbsp;
+The part that corresponds to the Cyclone code will be found at the bottom. The
+code is pretty similar to the Cyclone except that you can see that there is
+extra gunk that corresponds to an array bounds check, and extra gunk to deal
+with the variable-sized arrays, etc.</p>
+<p>After generating hello.c, you can use GCC to compile it to an
+executable.&nbsp; To do so, you need to make sure that the file cyc_include.h is
+accessible, and to link against the cyclib.a and gclib.a libraries.&nbsp; Here's
+an example of this:</p>
+<pre>  gcc -I .. -o hello.exe hello.c ..\bin\cyclib.a ..\bin\gc.a</pre>
+<p>This will produce an executable program hello.exe.&nbsp; Typing
+&quot;hello&quot; under Win32 (&quot;hello.exe&quot; resp. under Unix) will
+yield &quot;Uncaught exception Core_Failure&quot;.&nbsp; Typing &quot;hello
+Fred&quot; will yield &quot;Hello, Fred.&quot;&nbsp;&nbsp;</p>
+<p>To write real, standalone Cyclone applications, your best best is to follow the
 Makefile examples in the directories.&nbsp; For instance, the Makefile in tests/
 builds an application cyctest.exe which we've used during development to test
 various features. At a minimum, you'll need to link against the cyclib.a and
 gc.a libraries in the bin/ directory.&nbsp;&nbsp;</p>
 <hr>
-<h2>Quick Guide to Cyclone for C/C++ Programmers</h2>
+<h2><a name="Quick Guide to Cyclone">Quick Overview of the Language</a></h2>
 <p>C programmers should find it fairly easy to get up to speed in Cyclone.&nbsp;
 In particular, the syntax that we use is lifted directly from ANSI C and
 wherever possible, we try to follow the static and dynamic semantics.&nbsp;
@@ -156,25 +261,53 @@ know in order to use the language effectively.</p>
 <p>We'll begin by going over the new features that Cyclone adds to C.&nbsp; Then
 we'll go over the common idioms that Cyclone prohibits, and see how these can be
 coded using the new facilities.</p>
-<h4>C-9X Additions:&nbsp;</h4>
+<hr>
+<h2><a name="Features Added">Features Added</a></h2>
+<p>Cyclone adds a number of features to C, ranging from convenient expression
+forms, to advanced typing constructs.&nbsp; For instance, Cyclone includes many
+of the GCC and proposed C-9X extensions that make writing code a bit
+easier.&nbsp; Variables need not be declared at the top of a block, a
+declaration can appear within a for-statement, expressions can have statements
+nested inside them, etc.&nbsp; Cyclone also adds support for ML or Haskell-style
+algebraic datatypes and pattern matching.&nbsp; Datatypes can seriously lift the
+level of abstraction for code, and pattern matching can be an effective tool for
+ensuring that all cases in a tricky test are covered.&nbsp;&nbsp;</p>
+<p>In addition, Cyclone adds advanced typing support in the form of (a)
+parametric polymorphism, (b) structural subtyping, (c) some unification-based,
+local-type inference.&nbsp; These features are necessary to type-check or port a
+number of (potentially) unsafe C idioms, usually involving &quot;void*&quot; or
+the like.&nbsp; Similarly, datatypes can be used to code around many of the uses
+for C's union types -- another potential source of unsoundness.&nbsp; Cyclone
+also adds new support for variable length arrays and ensures that all array
+indices are in bounds.&nbsp; Again, these features are aimed at making it easy
+to port C code to Cyclone.</p>
+<p>In what follows, we give a brief overview of these added
+features.&nbsp;&nbsp;</p>
+<hr>
+<h4><a name="GCC and C-9X Additions:&nbsp;">GCC and C-9X Additions:&nbsp;</a></h4>
 <p>Cyclone includes a number of features that GCC and the proposed <a href="http://web.onetelnet.ch/~twolf/tw/c/c9x_changes.html">ANSI
 C-9X</a> standard include.&nbsp; A quick summary of the ones that Cyclone
 currently includes are as follows:</p>
 <ul>
-  <li>expressions can include statements of the form <font face="Courier New">({<i>stmt;</i>
+  <li>Expressions can include statements of the form <font face="Courier New">({<i>stmt;</i>
     <i>exp</i>})</font></li>
-  <li>struct expressions:&nbsp; If you've declared <font face="Courier New">struct
+  <li>Struct expressions:&nbsp; If you've declared <font face="Courier New">struct
     point{int x; int y;};</font> then you can write <font face="Courier New">point{.x=<i>exp,
     </i>.y=<i>exp</i>}</font> as a <font face="Courier New">struct point</font>
     expression.&nbsp;&nbsp;</li>
-  <li>the implicit &quot;int&quot; for the return type of a function is removed</li>
+  <li>The implicit &quot;int&quot; for the return type of a function is removed</li>
   <li>// comments as in Java or C++</li>
-  <li>trailing comma allowed in enum declarations.&nbsp; Also, you can use
+  <li>Trailing comma allowed in enum declarations.&nbsp; Also, you can use
     semi-colons instead of commas.</li>
-  <li>the boolean type is built in</li>
+  <li>The boolean type is built in</li>
+  <li>Declarations can appear in any statement position.&nbsp; It is not
+    necessary to wrap braces around the declaration of a local variable.</li>
+  <li>For-statements can include a declaration. For instance:&nbsp; <font face="courier new"><b>for</b>(int
+    x=0; x &lt; n; x++) { ... }</font></li>
 </ul>
 <p>We expect to follow the C-9X standard fairly closely.&nbsp;&nbsp;</p>
-<h4>Namespaces:&nbsp;&nbsp;</h4>
+<hr>
+<h4><a name="Namespaces">Namespaces</a>:&nbsp;&nbsp;</h4>
 <p>As in C++, namespaces are used to avoid name clashes in code.&nbsp; For
 example:&nbsp;</p>
 <pre><font face="Courier New"><b>    </b></font><font face="Courier New"><b>namespace</b> Foo { 
@@ -190,23 +323,25 @@ We could also simply write &quot;<font face="Courier New"><b>namespace</b> Foo;<
 declaration following this namespace declaration would be placed in the <font face="courier new">Foo</font>
 namespace.&nbsp;&nbsp;</p>
 <p>As noted before, you can refer to elements of a namespace using the
-&quot;::&quot; notation.&nbsp; Alternatively, you can open up a namespace.&nbsp;
+&quot;::&quot; notation.&nbsp; Alternatively, you can open up a namespace with a
+&quot;using&quot; declaration.&nbsp;
 For example, we could follow the above code with:</p>
 <pre>    <b>namespace </b>Bar {
-      <b>open </b>Foo {
+      <b>using </b>Foo {
         int g() { <b>return</b> f(); }
       }
       int h() { <b>return</b> Foo::f(); }
     }</pre>
 <p>Here, we opened the <font face="courier new">Foo</font> namespace within the
 definition of <font face="courier new">Bar::g</font>.&nbsp; One can also write
-&quot;<b><font face="courier new">open</font></b><font face="courier new"> Foo;</font>&quot;
+&quot;<b><font face="courier new">using</font></b><font face="courier new"> Foo;</font>&quot;
 to open a namespace for the remaining definitions in the current block.</p>
 <p>Namespaces can nest as in C++.&nbsp;&nbsp;</p>
 <p>Currently, namespaces are only supported at the top-level and you can't
 declare a qualified variable directly.&nbsp; Rather, you have to write a
 namespace declaration to encapsulate it.&nbsp;&nbsp;</p>
-<h4>Tuples:</h4>
+<hr>
+<h4><a name="Tuples">Tuples</a>:</h4>
 <p>Tuples are like lightweight structs.&nbsp; They need not be declared in
 advance, and have member or field names that are implicitly 0, 1, 2, 3,
 etc.&nbsp; For example, the following code declares x to be a 3-tuple of an
@@ -231,7 +366,8 @@ then you can continue to access the fields using the subscript notation.</p>
 structurally equivalent.&nbsp; As in C, struct types are equivalent only if they
 have the same <i>tag</i> or name.&nbsp; (Note that in C, all struct declarations
 have a tag, even if the compiler has to gensym one.)&nbsp;&nbsp;</p>
-<h4>Non-null Pointers:</h4>
+<hr>
+<h4><a name="Non-null Pointers:">Non-null Pointers:</a></h4>
 <p>In Cyclone, when a variable has a pointer type (e.g., int *x), then you can't
 be sure at compile time whether or not the pointer is null.&nbsp; To avoid
 memory safety problems, the compiler and/or runtime system checks each time you
@@ -247,10 +383,12 @@ exception.&nbsp;&nbsp;</p>
 that point to are the same type.&nbsp; You can also cast a * pointer to a @
 pointer, but this induces a run-time check.&nbsp; If the pointer is null, then
 the (NullPointer???) exception is raised.</p>
-<h4>Exceptions:</h4>
+<hr>
+<h4><a name="Exceptions">Exceptions</a>:</h4>
 <p>Cyclone provides exceptions, <font face="courier new">throw</font>, and<font face="courier new">
 try</font>/<font face="courier new">catch</font> statements similar to
-Java.&nbsp; This avoids the error-prone and type-unsafe approach in C of
+Java.&nbsp; (We'll probably add support for finally clauses at some
+point.)&nbsp; This avoids the error-prone and type-unsafe approach in C of
 returning a value (e.g., -1) to indicate an error.&nbsp; Exception values are a special case of
 extensible datatype enums (xenums) described below.&nbsp; The following example
 shows how to declare a couple of exceptions, how to throw an exception, and how
@@ -272,7 +410,8 @@ to catch an exception:</p>
     }
     <b>printf</b>(&quot;no exception raised.\n&quot;);
   }</pre>
-<h4>Variable Sized Arrays:</h4>
+<hr>
+<h4><a name="Variable Sized Arrays">Variable Sized Arrays</a>:</h4>
 <p>C purposefully confuses arrays and pointers.&nbsp; Cyclone does not, in large
 part for type-safety reasons.&nbsp; All array accesses are guaranteed to be in
 bounds.&nbsp; To support arrays of variable size, Cyclone provides the
@@ -313,12 +452,13 @@ arrays need not carry size information and so that bounds checks can be
 statically verified.&nbsp; In addition, we hope to add support for regions or
 linear types so that arrays can be stack allocated (or managed manually in some
 other fashion.)</p>
-<h4>Subtyping:</h4>
+<hr>
+<h4><a name="Subtyping">Subtyping</a>:</h4>
 <p>Cyclone supports &quot;extension on the right&quot; and &quot;covariant depth
 on const&quot; subtyping for pointers.&nbsp; This simply means that you can cast
-a value x from having a pointer to a struct with 10 fields, to a struct having
+a value x from having a pointer to a struct with 10 fields, to a pointer to a struct having
 only the first 5 fields.&nbsp; Or, you can cast a pointer to a tuple having 3
-fields to a tuple having only 2 fields.&nbsp; In other words, you can forget
+fields to a pointer to a tuple having only 2 fields.&nbsp; In other words, you can forget
 about the &quot;tail&quot; of the object.&nbsp; This allows a degree of
 polymorphism that is useful when porting C code.&nbsp; In addition, you can do
 &quot;deep&quot; casts on pointer fields that are const.&nbsp; (It is unsound to
@@ -329,7 +469,8 @@ to allow you to cast one type to another as long as it is safe.&nbsp; Note,
 however, that these casts must be explicit.</p>
 <p>We expect to add more support for subtyping in the future (e.g., subtyping on
 function pointers, bounded subtyping, etc.)</p>
-<h4>Datatype Enums:</h4>
+<hr>
+<h4><a name="Datatype Enums:">Datatype Enums:</a></h4>
 <p>Enums in Cyclone are more like datatypes in ML.&nbsp; In particular, they can
 be used to build algebraic or inductively defined structures, such a lists,
 trees, graphs, etc.&nbsp; For instance, the following enum declarations give a
@@ -341,7 +482,7 @@ way to construct abstract syntax trees for a simple calculator language:</p>
   }</pre>
 <pre>  <b>enum </b>absyn e1 = Term(Integer(3),Plus,Integer(4));
   <b>enum </b>absyn e2 = Term(e1,Times,Integer(5));</pre>
-<p>The operator definition is like a normal Enum -- it just defines symbolic
+<p>The operator definition is like a normal enum -- it just defines symbolic
 constants for Plus, Times, Minus, and Divide.&nbsp; The absyn definition defines
 an inductive tree-like data type for abstract syntax.&nbsp; The Integer
 constructor takes an int argument and returns an absyn value.&nbsp; The Term
@@ -354,7 +495,17 @@ with Plus, Times, Minus, and Divide) or a pointer to an object containing a <i>t
 and the arguments to the constructor.&nbsp; The object is always allocated on
 the heap.&nbsp; To traverse the tree, we use pattern matching, again in the
 style of functional languages such as ML or Haskell.</p>
-<h4>Pattern Matching:</h4>
+<p>Why did we choose to extend enums instead of adding a datatype declaration (a
+la ML)?&nbsp; We wanted to minimize the number of keywords that we added to the
+language, so adding an explicit datatype declaration and keyword was not seen as
+desirable.&nbsp; In addition, enums already provided primitive symbolic
+names.&nbsp;&nbsp;</p>
+<p>In the future, we plan to make the representation of enums explicit and to
+allow programmers to control tag placement and do explicit tests on the tag to
+refine the type of an object in a more traditional, data-flow fashion.&nbsp; We
+will probably keep the enum construct as is for convenience.</p>
+<hr>
+<h4><a name="Pattern Matching:">Pattern Matching:</a></h4>
 <p>Pattern matching in Cyclone generalizes the switch construct of C allowing
 you to not only test integral values, but also to test structured values such as
 the abstract syntax trees above.&nbsp; For example, the following function takes
@@ -409,7 +560,8 @@ in the following code:</p>
 <p>if we pass it a tree Term(Integer(3),Plus,Integer(4)) then we will see
 &quot;It's a plus 4 3 &quot;, but if we pass it
 Term(Integer(3),Times,Integer(4)) we will see &quot;3 4 &quot;.</p>
-<h4>Let Declarations:</h4>
+<hr>
+<h4><a name="Let Declarations:">Let Declarations:</a></h4>
 <p>Sometimes, it's painful to declare a variable because you have to write down
 its type.&nbsp; Cyclone includes some limited support for type inference using
 let declarations.&nbsp; In particular, you can write:</p>
@@ -428,7 +580,8 @@ pass a tuple to a function, then you can extract the components as follows:</p>
     <b>let</b> (x,y,z) = args;
     <b>return</b> (x+y+z);
   }</pre>
-<h4>Extensible Enums (xenums):</h4>
+<hr>
+<h4><a name="Extensible Enums (xenums):">Extensible Enums (xenums):</a></h4>
 <p>Extensible enums (xenums) are just like enums except that you can add new
 constructors anytime you want.&nbsp; Thus, enums are &quot;closed world&quot;
 datatypes, whereas xenums are &quot;open world&quot; datatypes.&nbsp; Both are
@@ -440,7 +593,8 @@ xenums.&nbsp; Right now, we really only use xenums in the parser (for various
 semantic values) and for exceptions.&nbsp; We might add better subtyping support
 for them so that you can extend them depth-wise as well as
 width-wise.&nbsp;&nbsp;</p>
-<h4>Polymorphic Functions:</h4>
+<hr>
+<h4><a name="Polymorphic Functions:">Polymorphic Functions:</a></h4>
 <p>As mentioned above, Cyclone supports a limited amount of subtyping
 polymorphism.&nbsp; It also supports a fairly powerful form of parametric
 polymorphism.&nbsp; Those of you coming from ML or Haskell will find this
@@ -517,7 +671,8 @@ the downside, this style of polymorphism does not allow you to do any
 type-specific things (e.g., overloading or ad-hoc polymorphism.)&nbsp; Someday,
 we may add support for this, but in the short run, we're happy not to have
 it&nbsp;</p>
-<h4>Polymorphic Data Structures:</h4>
+<hr>
+<h4><a name="Polymorphic Data Structures:">Polymorphic Data Structures:</a></h4>
 <p>Just as function definitions can be parameterized by types, so can struct
 definitions, enum definitions, and even typedefs.&nbsp; For instance, the
 following struct definition is used in the standard library for lists:</p>
@@ -532,17 +687,55 @@ instance, we can declare both integer and string lists like this:</p>
   list&lt;string&gt; slist = &amp;cons{.hd=&quot;<font color="#0000FF">foo</font>&quot;,.tl=&amp;cons{&quot;<font color="#0000FF">bar</font>&quot;,null}};</pre>
 <p>Note that we use &quot;&amp;&quot; like &quot;new&quot; in C++ to allocate a
 new struct cons on the heap and return a pointer to the resulting (initialized)
-cons object.&nbsp; Note also that the field designatore (&quot;.hd&quot;,
+cons object.&nbsp; Note also that the field designator (&quot;.hd&quot;,
 &quot;.tl&quot;) are optional.</p>
 <p>Once you have polymorphic data structures, you can write lots of useful
 polymorphic code and use it over and over again.&nbsp; For instance, the
 standard list library includes functions for mapping over a list, looking up
 items in a list, concatenating two lists, copying lists, sorting lists,
 etc.&nbsp;&nbsp;</p>
-<h4>Abstract Types:</h4>
-<h4>Existential Types:</h4>
 <hr>
-<h2>The Grammar of Cyclone</h2>
+<h4><a name="Abstract and Existential Types:">Abstract and Existential Types:</a></h4>
+<p>Suppose you want to declare an abstract type for implementing stacks.&nbsp;
+In Cyclone, the way this is accomplished is by declaring a struct that
+encapsulates the implementation type, and by adding the &quot;abstract&quot;
+qualifier to the struct definition.&nbsp; For instance, if we write:</p>
+<pre>  <b>abstract </b><b>struct</b> Queue&lt;`a&gt; { list&lt;`a&gt; front, rear; };</pre>
+<p>then this declares a polymorphic Queue implementation that is abstract.&nbsp;
+The definition of the struct is available within the unit that declares the
+Queue, but will not be made available to the outside world.&nbsp; (This will be
+enforced by a link-time type-checker which we are currently putting
+together.)&nbsp; Typically, the provider of the Queue abstraction would write in
+an interface file:</p>
+<pre>  <b>extern struct </b>Queue&lt;`a&gt;;</pre>
+<p>The abstract keyword in the implementation ensures that the definition does
+not leak to a client.&nbsp; One can also declare enums to be abstract, though I
+find it more useful to always use a struct to encapsulate the enum, and make the
+enum static, and the struct abstract.&nbsp; That way, clients are always given
+an abstract struct to manipulate.&nbsp;&nbsp;</p>
+<p>Typedefs cannot be made abstract.&nbsp; As in C, typedefs are type
+abbreviations and are expanded at compile time.&nbsp; If we chose to make them
+(potentially) abstract, then we'd have to enforce a &quot;boxedness&quot;
+restriction, similar to the restrictions on type variables.&nbsp; To simplify
+the language, we chose to make structs abstract.&nbsp;&nbsp;</p>
+<p>It's also possible to code up &quot;first-class&quot; abstract data types
+using enums or xenums.&nbsp; Individual [x]enum constructors can be
+parameterized by additional type variables that are local to the
+type-constructor.&nbsp; (From a type-theoretic point of view, these are
+existentially-quantified variables.)&nbsp; I won't bother to say a lot more
+about these here, except that the approach used is quite similar to the
+treatment of existential types in Haskell.&nbsp; In particular, pattern matching
+one of these constructors requires you to introduce explicit type variables into
+which the actual types are &quot;unpacked&quot;.&nbsp; These variables are
+treated abstractly in the body of a case.&nbsp; However, when creating one of
+the values, it is not necessary to explicitly &quot;pack&quot; the types to be
+abstracted.&nbsp; Rather, the types are discovered through unification.&nbsp;
+For an example of the use of existential types, see the fn.h and fn.cyc files in
+the standard library which implement first-class closures.</p>
+<hr>
+<h2><a name="Restrictions">Restrictions</a></h2>
+<hr>
+<h2><a name="The Grammar of Cyclone">The Grammar of Cyclone</a></h2>
 
 Cyclone's grammar is derived from the next proposed OSI C standard,
 C9X.  Changes from and additions to the C9X grammar are noted in red.
@@ -559,16 +752,40 @@ The start symbol is <i>translation-unit</i>.
 <a href=#expression><i>expression</i></a>
 
 <p>
+&nbsp;
 <font color=blue>
 <ul>
 <i>translation-unit</i>:<br>
 <ul>
   <i>external-declaration</i> <i>translation-unit<sub>opt</sub></i><br>
 <font color=red>
-  <code>using</code> <i>identifier</i> <code>;</code> <i>translation-unit</i><br>
-  <code>namespace</code> <i>identifier</i> <code>;</code> <i>translation-unit</i><br>
-  <code>using</code> <i>identifier</i> <code>{</code> <i>translation-unit</i> <code>}</code><br>
-  <code>namespace</code> <i>identifier</i> <code>{</code> <i>translation-unit</i> <code>}</code><br>
+  <code>using</code> <i>identifier</i> <code>;</code> <i>translation-unit</i></font></font><font color="red"><i>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</i></font><font color="#008000">// open namespace <i>identifier </i>within <i>translation-unit&nbsp;</i></font>
+<font color=blue>
+<font color=red>
+  <br>
+</font>
+</font><font color="#FF0000">
+  <code>namespace</code> <i>identifier</i> <code>;</code> <i>translation-unit&nbsp;&nbsp;&nbsp;
+  </i></font><font color="#008000">// encapsulate <i>translation-unit </i>within
+namespace <i>identifier</i></font>
+<font color=blue>
+<font color=red>
+  <br>
+</font></font><font color="#FF0000">
+  <code>using</code> <i>identifier</i> <code>{</code> <i>translation-unit</i> <code>}</code>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+</font><font color="#008000">// open namespace <i>identifier </i>within <i>translation-unit</i></font>
+<font color=blue>
+<font color=red>
+  <br>
+</font></font><font color="#FF0000">
+  <code>namespace</code> <i>identifier</i> <code>{</code> <i>translation-unit</i> <code>}</code>
+ </font>
+<font color="#008000">
+// encapsulate <i>translation-unit </i>within namespace <i>identifier</i></font>
+<font color=blue>
+<font color=red>
+  <br>
 </font>
 </ul>
 <br>
@@ -588,7 +805,11 @@ The start symbol is <i>translation-unit</i>.
 <ul>
   <i>declaration-specifiers</i> <i>init-declarator-list<sub>opt</sub></i> <code>;</code><br>
 <font color=red>
-  <code>let</code> <i>pattern</i> <code>=</code> <i>expression</i> <code>;</code><br>
+  <code>let</code> <i>pattern</i> <code>=</code> <i>expression</i> <code>;</code></font></font><code><font color="red">&nbsp;
+</font></code><font color="#008000">// match <i>expression </i>against <i>pattern </i>and declare pattern variables</font>
+<font color=blue>
+<font color=red>
+  <br>
 </font>
 </ul>
 <br>
@@ -956,9 +1177,14 @@ see <code>switch-clauses</code>)
   <code>break</code> <code>;</code><br>
   <code>return</code> <code>;</code><br>
   <code>return</code> <i>expression</i> <code>;</code><br>
+  <code>
 <font color=red>
-  <code>fallthru</code> <code>;</code><br>
+  fallthr</font></code></font><code><font color="red">u ;</font></code>
+<font color=blue>
+<br>
 </font>
+
+<font color="red"><code>fallthru ( <i>argument-expression-list</i> ) ;</code></font><br>
 </ul>
 <br>
 <font color=red>
@@ -1123,7 +1349,8 @@ see <code>switch-clauses</code>)
   <code>--</code> <i>unary-expression</i><br>
   <i>unary-operator</i> <i>cast-expression</i><br>
   <code>sizeof</code> <i>unary-expression</i><br>
-  <code>sizeof</code> <code>(</code> <i>type-name</i> <code>)</code><br>
+  <code>sizeof</code> <code>(</code> <i>type-name</i> <code>)<br>
+  <font color="#FF0000">size ( <i>expression </i>)</font></code><br>
 <font color=red>
   <code>raise</code> <i>unary-expression</i><br>
 </ul>
@@ -1193,7 +1420,6 @@ see <code>switch-clauses</code>)
 </font>
 </ul>
 </ul>
-</font>
 
 </body>
 
