@@ -65,6 +65,7 @@ struct Tenv {
   bool in_extern_c_include : 1;
   bool in_tempest : 1;
   bool tempest_generalize : 1;
+  bool in_extern_c_inc_repeat : 1;
 };
 
 // Global environments -- what's declared in a global scope
@@ -118,7 +119,7 @@ tenv_t tc_init() {
 		    .typedefs      = Dict::empty(qvar_cmp),
 		    .ordinaries    = Dict::empty(qvar_cmp)};
   ae->datatypedecls = Dict::insert(ae->datatypedecls, exn_name, new exn_tud());
-  return new Tenv(NULL,ae,NULL,false,false,false,false);
+  return new Tenv(NULL,ae,NULL,false,false,false,false,false);
 }
 binding_t lookup_ordinary_global(tenv_t te,seg_t loc,qvar_t q,bool is_use) {
   let ans = Dict::lookup(te->ae->ordinaries, q);
@@ -582,4 +583,16 @@ fenv_t bogus_fenv(type_t ret_type,
          .curr_rgn    = param_rgn,
 	 .flags       = FenvFlags{NoneNew,false,false,false,false}
        };
+}
+
+tenv_t copy_tenv_dicts(tenv_t te) {
+  let ans = new *te;
+  ans->ae = new *te->ae;
+  ans->ae->aggrdecls = Dict::copy(te->ae->aggrdecls);
+  ans->ae->enumdecls = Dict::copy(te->ae->enumdecls);
+  ans->ae->datatypedecls = Dict::copy(te->ae->datatypedecls);
+  ans->ae->typedefs = Dict::copy(te->ae->typedefs);
+  ans->ae->ordinaries = Dict::copy(te->ae->ordinaries);
+  ans->le = NULL; 
+  return ans;
 }

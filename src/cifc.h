@@ -20,18 +20,20 @@
 #define _CIFC_H_
 
 #include "absyn.h"
+#include "tcenv.h"
 
 namespace Cifc {
 using Absyn;
 using List;
+using Tcenv;
 
   /* Merges a C version of definition with a user-provided Cyclone
      version, but only if the Cyclone version is
      "representation-compatible" with the C one.  If so, the c_decl is
      changed in place. */
-void merge_sys_user_decl(seg_t,bool is_buildlib,decl_t user_decl,decl_t c_decl);
+void merge_sys_user_decl(seg_t, tenv_t, bool is_buildlib,decl_t user_decl,decl_t c_decl);
 
-void user_overrides(seg_t, list_t<decl_t> ds, list_t<decl_t> ovrs);
+void user_overrides(seg_t, tenv_t, list_t<decl_t> *ds, list_t<decl_t> ovrs);
 }
 
 #endif /* _CIFC_H_ */

@@ -1703,7 +1703,8 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 	  default: break;
 	  }
 	}
-	Cifc::merge_sys_user_decl(0, true, user_decl, decl);
+// merging now done in Tc phase
+//	Cifc::merge_sys_user_decl(0, Tcenv::tc_init(), true, user_decl, decl);
 	print_decls = new List(decl,print_decls);
       }
       else

@@ -29,6 +29,9 @@
 #include "callgraph.h"
 #include "relations-ap.h"
 #include "tc.h"
+#include "cifc.h"
+#include "toc.h"
+
 using Core;
 using List;
 using Absyn;
@@ -281,6 +284,7 @@ static bool is_main(qvar_t n) {
   }
 }
 
+
 static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
                      list_t<$(seg_t,qvar_t,bool)@>* exports) {
   qvar_t q = fd->name;
@@ -301,6 +305,8 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
     }
 
   // reject ill-formed type
+  if(te->in_extern_c_inc_repeat)
+    fd->cached_type = NULL;
   check_fndecl_valid_type(loc,te,fd);
   type_t t = fndecl2type(fd);
   // move any function type attributes into the function's type
@@ -315,12 +321,15 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
     let b = Tcdecl::merge_binding(b0, b1, loc, tc_msg);
     if (b != NULL) { // NULL implies error in merging (error reported already)
       // make the update if the function is exported
-      if (exports == NULL || export_member(q,*exports))
-	if (!(b == b0 && (*ans)[1])) // no need to reinsert the entry
+      if (exports == NULL || export_member(q,*exports)) {
+	if (!(b == b0 && (*ans)[1])) { // no need to reinsert the entry
 	  te->ae->ordinaries = Dict::insert(te->ae->ordinaries, 
 					    q, new $(b, (*ans)[1]));
+	}
+      }
     }
-  } catch { case &Dict::Absent:
+  } catch { 
+  case &Dict::Absent:
     if (exports == NULL || export_member(fd->name,*exports)) {
       let b = new Funname_b(fd);
       te->ae->ordinaries = Dict::insert(te->ae->ordinaries, q,
@@ -336,7 +345,7 @@ static void tcFndecl(tenv_t te, seg_t loc, fndecl_t fd,
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
   let fenv = new_fenv(loc,fd);
-  let te = new Tenv{te->ns, te->ae, fenv, false, false, te->in_tempest, te->tempest_generalize};
+  let te = new Tenv{te->ns, te->ae, fenv, false, false, te->in_tempest, te->tempest_generalize, false};
   // check the body, then get rid of local environment
   Tcstmt::tcStmt(te,fd->body,false);
   // we delayed checking some capabilities and constraints so that inference
@@ -889,7 +898,7 @@ void tcEnumdecl(tenv_t te, seg_t loc, enumdecl_t ed) {
     }
 }
 
-static bool okay_externC(seg_t loc, scope_t sc, bool in_include) {
+static bool okay_externC(seg_t loc, scope_t sc, bool in_include, bool in_inc_rep) {
   switch (sc) {
   case Static:
     if(!in_include)
@@ -903,10 +912,28 @@ static bool okay_externC(seg_t loc, scope_t sc, bool in_include) {
   case Extern: return true;
   case ExternC:
   default: 
-    warn(loc,"nested extern \"C\" declaration");
+    if(!in_inc_rep)
+      warn(loc,"nested extern \"C\" declaration");
     return true;
   }
 }
+
+static void set_scopes(list_t<decl_t> ovrs, scope_t sc) {
+  while(ovrs) {
+    let d = ovrs->hd;
+    switch(d->r) {
+    case &Var_d(vd): vd->sc = sc; break;
+    case &Fn_d(fd): fd->sc = sc; break;
+    case &Aggr_d(ad): ad->sc = sc; break;
+    case &Datatype_d(tud): tud->sc = sc; break;
+    case &Enum_d(ed): ed->sc = sc; break;
+    default: //no scope attr.
+      break;
+    }
+    ovrs = ovrs->tl;
+  }
+}
+
 
 // Typecheck a list, ds, of declarations in environment te.
 // As a side effect, all declarations and variable references are made
@@ -927,12 +954,12 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
     case &Region_d(...):
       terr(loc,"top level region declarations are not implemented"); break;
     case &Var_d(vd):
-      if (in_externC && okay_externC(d->loc,vd->sc,te->in_extern_c_include))
+      if (in_externC && okay_externC(d->loc,vd->sc,te->in_extern_c_include,te->in_extern_c_inc_repeat))
         vd->sc = ExternC;
       tcVardecl(te,loc,vd,check_var_init,te->in_extern_c_include,exports);
       break;
     case &Fn_d(fd):
-      if (in_externC && okay_externC(d->loc,fd->sc,te->in_extern_c_include))
+      if (in_externC && okay_externC(d->loc,fd->sc,te->in_extern_c_include,te->in_extern_c_inc_repeat))
 	fd->sc = ExternC;
       tcFndecl(te,loc,fd,exports);
       break;
@@ -944,17 +971,17 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
       tcTypedefdecl(te,loc,td);
       break;
     case &Aggr_d(ad):
-      if (in_externC &&  okay_externC(d->loc,ad->sc,te->in_extern_c_include))
+      if (in_externC &&  okay_externC(d->loc,ad->sc,te->in_extern_c_include, te->in_extern_c_inc_repeat))
 	ad->sc = ExternC;
       tcAggrdecl(te,loc,ad);
       break;
     case &Datatype_d(tud):
-      if (in_externC && okay_externC(d->loc,tud->sc,te->in_extern_c_include))
+      if (in_externC && okay_externC(d->loc,tud->sc,te->in_extern_c_include,te->in_extern_c_inc_repeat))
 	tud->sc = ExternC;
       tcDatatypedecl(te,loc,tud);
       break;
     case &Enum_d(ed):
-      if (in_externC && okay_externC(d->loc,ed->sc,te->in_extern_c_include))
+      if (in_externC && okay_externC(d->loc,ed->sc,te->in_extern_c_include,te->in_extern_c_inc_repeat))
         ed->sc = ExternC;
       tcEnumdecl(te,loc,ed);
       break;
@@ -978,11 +1005,26 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
 
       // FIX: there's a simpler way to do this that does not require remembering
       // to mutate bools other places.  (See binding.)
-    case &ExternCinclude_d(ds2,ovrs,exports2,wc): //<--- wc handled in binding 
+    case &ExternCinclude_d(*ds2,ovrs,exports2,wc): 
+      if(ovrs) {
+	let tecpy = copy_tenv_dicts(te);
+	tecpy->in_extern_c_include = true;
+	tc_decls(tecpy,*ds2,true,check_var_init,NULL);
+	
+	//      fprintf(stderr, "Done tc extern C include phase 1\n");
+	//	fprintf(stderr, "Before overrides extern C include: \n\t %s\n", Absynpp::decllist2string(*ds2));
+	
+	Toc::init();
+	set_scopes(ovrs, ExternC); //ow scope mismatch warnings -- ovrs are not typechecked independently
+	Cifc::user_overrides(d->loc, tecpy, ds2, ovrs);
+	Toc::finish();
+      }	
       list_t<$(seg_t,qvar_t,bool)@> newexs = 
-        List::append(exports2,exports ? *exports : NULL);
+	List::append(exports2,exports ? *exports : NULL);
       let te2 = enter_extern_c_include(te);
-      tc_decls(te2,ds2,true,check_var_init,&newexs);
+      te2->in_extern_c_inc_repeat = (ovrs != NULL);
+      tc_decls(te2,*ds2,true,check_var_init,&newexs);
+      
       // check that all of the exports were actually present
       for (; exports2 != NULL; exports2 = exports2->tl) {
 	let exp = exports2->hd;

@@ -681,12 +681,14 @@ extern struct Cyc_InsertChecks_NoCheck_Absyn_AbsynAnnot_struct Cyc_InsertChecks_
 extern struct Cyc_InsertChecks_NullAndFatBound_Absyn_AbsynAnnot_struct Cyc_InsertChecks_NullAndFatBound_val;struct Cyc_Hashtable_Table;
 # 52 "hashtable.h"
 void*Cyc_Hashtable_lookup(struct Cyc_Hashtable_Table*t,void*key);
-# 38 "toc.h"
+# 39 "toc.h"
 void*Cyc_Toc_typ_to_c(void*);
-# 40
+# 41
 struct _tuple1*Cyc_Toc_temp_var();
-extern struct _fat_ptr Cyc_Toc_globals;extern char Cyc_Toc_Dest[5U];struct Cyc_Toc_Dest_Absyn_AbsynAnnot_struct{char*tag;struct Cyc_Absyn_Exp*f1;};extern char Cyc_Tcenv_Env_error[10U];struct Cyc_Tcenv_Env_error_exn_struct{char*tag;};struct Cyc_Tcenv_Genv{struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict datatypedecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict ordinaries;};struct Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Tcenv_Genv*ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof: 1;int in_extern_c_include: 1;int in_tempest: 1;int tempest_generalize: 1;};
-# 88 "tcenv.h"
+extern struct _fat_ptr Cyc_Toc_globals;extern char Cyc_Toc_Dest[5U];struct Cyc_Toc_Dest_Absyn_AbsynAnnot_struct{char*tag;struct Cyc_Absyn_Exp*f1;};
+# 47
+void Cyc_Toc_init();extern char Cyc_Tcenv_Env_error[10U];struct Cyc_Tcenv_Env_error_exn_struct{char*tag;};struct Cyc_Tcenv_Genv{struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict datatypedecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict ordinaries;};struct Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Tcenv_Genv*ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof: 1;int in_extern_c_include: 1;int in_tempest: 1;int tempest_generalize: 1;int in_extern_c_inc_repeat: 1;};
+# 89 "tcenv.h"
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew =0U,Cyc_Tcenv_InNew =1U,Cyc_Tcenv_InNewAggr =2U};struct Cyc_Tcpat_TcPatResult{struct _tuple0*tvars_and_bounds_opt;struct Cyc_List_List*patvars;};struct Cyc_Tcpat_WhereTest_Tcpat_PatTest_struct{int tag;struct Cyc_Absyn_Exp*f1;};struct Cyc_Tcpat_EqNull_Tcpat_PatTest_struct{int tag;};struct Cyc_Tcpat_NeqNull_Tcpat_PatTest_struct{int tag;};struct Cyc_Tcpat_EqEnum_Tcpat_PatTest_struct{int tag;struct Cyc_Absyn_Enumdecl*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcpat_EqAnonEnum_Tcpat_PatTest_struct{int tag;void*f1;struct Cyc_Absyn_Enumfield*f2;};struct Cyc_Tcpat_EqFloat_Tcpat_PatTest_struct{int tag;struct _fat_ptr f1;int f2;};struct Cyc_Tcpat_EqConst_Tcpat_PatTest_struct{int tag;unsigned f1;};struct Cyc_Tcpat_EqDatatypeTag_Tcpat_PatTest_struct{int tag;int f1;struct Cyc_Absyn_Datatypedecl*f2;struct Cyc_Absyn_Datatypefield*f3;};struct Cyc_Tcpat_EqTaggedUnion_Tcpat_PatTest_struct{int tag;struct _fat_ptr*f1;int f2;};struct Cyc_Tcpat_EqExtensibleDatatype_Tcpat_PatTest_struct{int tag;struct Cyc_Absyn_Datatypedecl*f1;struct Cyc_Absyn_Datatypefield*f2;};struct Cyc_Tcpat_Dummy_Tcpat_Access_struct{int tag;};struct Cyc_Tcpat_Deref_Tcpat_Access_struct{int tag;};struct Cyc_Tcpat_TupleField_Tcpat_Access_struct{int tag;unsigned f1;};struct Cyc_Tcpat_DatatypeField_Tcpat_Access_struct{int tag;struct Cyc_Absyn_Datatypedecl*f1;struct Cyc_Absyn_Datatypefield*f2;unsigned f3;};struct Cyc_Tcpat_AggrField_Tcpat_Access_struct{int tag;int f1;struct _fat_ptr*f2;};struct _union_PatOrWhere_pattern{int tag;struct Cyc_Absyn_Pat*val;};struct _union_PatOrWhere_where_clause{int tag;struct Cyc_Absyn_Exp*val;};union Cyc_Tcpat_PatOrWhere{struct _union_PatOrWhere_pattern pattern;struct _union_PatOrWhere_where_clause where_clause;};struct Cyc_Tcpat_PathNode{union Cyc_Tcpat_PatOrWhere orig_pat;void*access;};struct Cyc_Tcpat_Rhs{int used;unsigned pat_loc;struct Cyc_Absyn_Stmt*rhs;};struct Cyc_Tcpat_Failure_Tcpat_Decision_struct{int tag;void*f1;};struct Cyc_Tcpat_Success_Tcpat_Decision_struct{int tag;struct Cyc_Tcpat_Rhs*f1;};struct Cyc_Tcpat_SwitchDec_Tcpat_Decision_struct{int tag;struct Cyc_List_List*f1;struct Cyc_List_List*f2;void*f3;};
 # 55 "toc.cyc"
 extern int Cyc_noexpand_r;char Cyc_Toc_Dest[5U]="Dest";
@@ -4124,8 +4126,8 @@ nv=Cyc_Toc_decls_to_c(r,nv,ds2,cinclude);goto _LL0;}default: _LL21: _tmp748=((st
 nv=Cyc_Toc_decls_to_c(r,nv,ds2,1);goto _LL0;}}_LL0:;}}
 # 4298
 return nv;}
-# 4302
-static void Cyc_Toc_init(){
+# 4303
+void Cyc_Toc_init(){
 struct Cyc_Core_NewDynamicRegion _tmp770=Cyc_Core__new_rckey("internal-error","internal-error",0);struct Cyc_Core_NewDynamicRegion _stmttmp7E=_tmp770;struct Cyc_Core_NewDynamicRegion _tmp771=_stmttmp7E;struct Cyc_Core_DynamicRegion*_tmp772;_LL1: _tmp772=_tmp771.key;_LL2: {struct Cyc_Core_DynamicRegion*dyn=_tmp772;
 struct Cyc_Toc_TocState*ts;
 {struct _RegionHandle*h=& dyn->h;
@@ -4136,30 +4138,30 @@ Cyc_Toc_tuple_type_counter=0;
 Cyc_Toc_temp_var_counter=0;
 Cyc_Toc_fresh_label_counter=0;
 Cyc_Toc_globals=_tag_fat(({unsigned _tmp776=34;struct _fat_ptr**_tmp775=_cycalloc(_check_times(_tmp776,sizeof(struct _fat_ptr*)));_tmp775[0]=& Cyc_Toc__throw_str,_tmp775[1]=& Cyc_Toc_setjmp_str,_tmp775[2]=& Cyc_Toc__push_handler_str,_tmp775[3]=& Cyc_Toc__pop_handler_str,_tmp775[4]=& Cyc_Toc__exn_thrown_str,_tmp775[5]=& Cyc_Toc__npop_handler_str,_tmp775[6]=& Cyc_Toc__check_null_str,_tmp775[7]=& Cyc_Toc__check_known_subscript_null_str,_tmp775[8]=& Cyc_Toc__check_known_subscript_notnull_str,_tmp775[9]=& Cyc_Toc__check_fat_subscript_str,_tmp775[10]=& Cyc_Toc__tag_fat_str,_tmp775[11]=& Cyc_Toc__untag_fat_ptr_str,_tmp775[12]=& Cyc_Toc__get_fat_size_str,_tmp775[13]=& Cyc_Toc__get_zero_arr_size_str,_tmp775[14]=& Cyc_Toc__fat_ptr_plus_str,_tmp775[15]=& Cyc_Toc__zero_arr_plus_str,_tmp775[16]=& Cyc_Toc__fat_ptr_inplace_plus_str,_tmp775[17]=& Cyc_Toc__zero_arr_inplace_plus_str,_tmp775[18]=& Cyc_Toc__fat_ptr_inplace_plus_post_str,_tmp775[19]=& Cyc_Toc__zero_arr_inplace_plus_post_str,_tmp775[20]=& Cyc_Toc__cycalloc_str,_tmp775[21]=& Cyc_Toc__cyccalloc_str,_tmp775[22]=& Cyc_Toc__cycalloc_atomic_str,_tmp775[23]=& Cyc_Toc__cyccalloc_atomic_str,_tmp775[24]=& Cyc_Toc__region_malloc_str,_tmp775[25]=& Cyc_Toc__region_calloc_str,_tmp775[26]=& Cyc_Toc__check_times_str,_tmp775[27]=& Cyc_Toc__new_region_str,_tmp775[28]=& Cyc_Toc__push_region_str,_tmp775[29]=& Cyc_Toc__pop_region_str,_tmp775[30]=& Cyc_Toc__throw_arraybounds_str,_tmp775[31]=& Cyc_Toc__fat_ptr_decrease_size_str,_tmp775[32]=& Cyc_Toc__throw_match_str,_tmp775[33]=& Cyc_Toc__fast_region_malloc_str;_tmp775;}),sizeof(struct _fat_ptr*),34U);}}
-# 4350
+# 4351
 void Cyc_Toc_finish(){
 struct Cyc_Toc_TocStateWrap*ts=0;
 ({struct Cyc_Toc_TocStateWrap*_tmp777=ts;struct Cyc_Toc_TocStateWrap*_tmp778=Cyc_Toc_toc_state;ts=_tmp778;Cyc_Toc_toc_state=_tmp777;});{
 struct Cyc_Toc_TocStateWrap _tmp779=*((struct Cyc_Toc_TocStateWrap*)_check_null(ts));struct Cyc_Toc_TocStateWrap _stmttmp7F=_tmp779;struct Cyc_Toc_TocStateWrap _tmp77A=_stmttmp7F;struct Cyc_Toc_TocState*_tmp77C;struct Cyc_Core_DynamicRegion*_tmp77B;_LL1: _tmp77B=_tmp77A.dyn;_tmp77C=_tmp77A.state;_LL2: {struct Cyc_Core_DynamicRegion*dyn=_tmp77B;struct Cyc_Toc_TocState*s=_tmp77C;
-# 4355
+# 4356
 {struct _RegionHandle*h=& dyn->h;
 {struct Cyc_Toc_TocState _tmp77E=*s;struct Cyc_Toc_TocState _stmttmp80=_tmp77E;struct Cyc_Toc_TocState _tmp77F=_stmttmp80;struct Cyc_Xarray_Xarray*_tmp780;_LL4: _tmp780=_tmp77F.temp_labels;_LL5: {struct Cyc_Xarray_Xarray*tls=_tmp780;
 ((void(*)(struct Cyc_Xarray_Xarray*xarr))Cyc_Xarray_reuse)(tls);}}
-# 4356
+# 4357
 ;}
-# 4359
+# 4360
 Cyc_Core_free_rckey(dyn);
 ((void(*)(struct Cyc_Toc_TocStateWrap*ptr))Cyc_Core_ufree)(ts);
-# 4362
+# 4363
 Cyc_Toc_gpop_tables=0;
 Cyc_Toc_fn_pop_table=0;}}}
-# 4368
+# 4369
 struct Cyc_List_List*Cyc_Toc_toc(struct Cyc_Hashtable_Table*pop_tables,struct Cyc_List_List*ds){
-# 4370
+# 4371
 Cyc_Toc_gpop_tables=({struct Cyc_Hashtable_Table**_tmp781=_cycalloc(sizeof(*_tmp781));*_tmp781=pop_tables;_tmp781;});
 Cyc_Toc_init();{
 struct _RegionHandle _tmp782=_new_region("start");struct _RegionHandle*start=& _tmp782;_push_region(start);
 ({struct _RegionHandle*_tmpB0B=start;struct Cyc_Toc_Env*_tmpB0A=Cyc_Toc_empty_env(start);Cyc_Toc_decls_to_c(_tmpB0B,_tmpB0A,ds,0);});{
 struct Cyc_List_List*_tmp783=((struct Cyc_List_List*(*)(struct Cyc_List_List*x))Cyc_List_imp_rev)(Cyc_Toc_result_decls);_npop_handler(0U);return _tmp783;}
-# 4373
+# 4374
 ;_pop_region(start);}}

@@ -863,7 +863,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       default: break;
       }
     }
-
     // We use a fresh environment here so that we only track the free type
     // vars (and evars) of the function type in case we have to abstract them.
     let new_cvtenv =
@@ -871,7 +870,9 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       new_cvtenv = i_check_valid_type(loc,te,new_cvtenv,&tmk,tr,true,true);
       rtq->real_const = extract_const_from_typedef(loc,rtq->print_const,tr);
       new_cvtenv.fn_result = false;
-
+      /*      fprintf(stderr, "i_check(%s) -- 1. free_vars = <%s>\n", 
+	      Absynpp::typ2string(t),
+	      list2string(List::map(fst, new_cvtenv.free_vars), Absynpp::tvar2string)); */
       // results and arguments of functions cannot be abstract mem types
       // FIX?: should check that variables are unique and that tquals are ok
       for (_ a = args; a != NULL; a = a->tl) {
@@ -889,7 +890,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           (*trip)[2] = promote_array(t,ptr_rgn,false);
 	}
       }
-
       // varargs
       if (cyc_vararg != NULL) {
         if (c_vararg) impos2("both c_vararg and cyc_vararg"); // sanity
@@ -913,7 +913,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           default: err2(loc,"expecting a datatype pointer type"); break;
           }
       }
-
       // check the format attribute is consistent
       if (seen_format) {
         let num_args = List::length(args);
@@ -975,7 +974,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       // to make it possible to enter the parameters as variables that can
       // be mentioned in the @requires clause.  
       let fenv = bogus_fenv(tr, args);
-      let ftenv = new Tenv{te->ns, te->ae, fenv, true, te->in_extern_c_include, te->in_tempest,te->tempest_generalize};
+      let ftenv = new Tenv{te->ns, te->ae, fenv, true, te->in_extern_c_include, 
+			   te->in_tempest,te->tempest_generalize, te->in_extern_c_inc_repeat};
       let $(nenv,req_rs) = check_clause(loc,ftenv,new_cvtenv,"@requires",req);
       new_cvtenv = nenv;
       *req_relns = req_rs;
@@ -1252,6 +1252,8 @@ static cvtenv_t<`r> check_valid_type(seg_t loc, tenv_t te,
   return cvt;
 }
 
+
+
 // Same as check_valid_type except that for function types, we check
 // that either the bound type variables are empty (in which case we
 // plug them in) or else the free type variables are contained in the
@@ -1267,7 +1269,6 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
 			     expected_kind, true, t);
   let free_tvars = List::map(fst,cvt.free_vars);
   let free_evars = List::map(fst,cvt.free_evars);
-
   // filter out free tvars that are in the environment
   if (te_vars != NULL) {
     let res = NULL;
@@ -1281,7 +1282,6 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
     }
     free_tvars = List::imp_rev(res);
   }
-
   // resolve the kinds of type variables.  If there's a kind that must
   // be less than Mem, make it boxed.  If there's a Top RgnKind
   // type variable, make it RgnKind
@@ -1317,7 +1317,7 @@ void check_valid_toplevel_type(seg_t loc, tenv_t te, type_t t) {
     default: break;
     }
     if (free_tvars != NULL)
-      err2(loc,"unbound type variable ",free_tvars->hd);
+      err2(loc,"unbound type variable ",free_tvars->hd, " when checking ", t);
     if (!is_function_type(t) || !te->in_tempest)
       check_free_evars(free_evars,t,loc);
   }

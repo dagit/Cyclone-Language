@@ -29,7 +29,8 @@ using List;
 using Absyn;
 
 typedef Hashtable::table_t<`a,`b> table_t<`a,`b>;
-
+ 
+ 
 // translate the declarations to C
 extern list_t<decl_t> toc(table_t<fndecl_t,table_t<stmt_t,int>> pop_tables,
 			  list_t<decl_t> ds);
@@ -43,7 +44,7 @@ extern stringptr_t ?globals;
 @extensible datatype Absyn::AbsynAnnot { 
   extern Dest(exp_t);
 };
-
+void init();
 void finish(); // call this when done with a batch of typ_to_c calls
 }
 #endif

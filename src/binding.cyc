@@ -32,6 +32,7 @@
 #include "warn.h"
 #include "binding.h"
 #include "cifc.h"
+
 using List;
 using Absyn;
 using Warn;
@@ -204,6 +205,7 @@ typedef struct ResolveNSEnv@ renv_t;
 // but type-checker throws Unimplemented on it anyway
 static struct Env {
   bool in_cinclude;
+  bool in_cyc_override;
   nsctxt_t<renv_t> ns;
   dict_t<var_t,resolved_t>* local_vars; // NULL iff top-level
 };
@@ -331,7 +333,7 @@ void resolve_and_add_vardecl(seg_t loc, env_t env, vardecl_t vd) {
   if(!at_toplevel(env))
     *env->local_vars = Dict::insert(*env->local_vars, decl_name,
 				    new VarRes(new Local_b(vd)));
-  else {
+  else if(!env->in_cyc_override) { //leave the original binding in place
     let decl_ns_data = get_ns_data(env->ns,decl_ns);
     decl_ns_data->ordinaries = Dict::insert(decl_ns_data->ordinaries,
 					    decl_name,
@@ -913,10 +915,14 @@ void export_all_symbols($(list_t<$(seg_t, qvar_t, bool)@>@, dict_t<var_t, resolv
     *out_dict = Dict::insert(*out_dict, name, res);
     break;
   case &EnumRes(ed, ef):
-    *out_dict = Dict::insert(*out_dict, name, res);break;
+    *out_dict = Dict::insert(*out_dict, name, res);
+    break;
     //the types below are exported by default ... no need to add them
-  case &AggrRes(ad): break;
-  case &AnonEnumRes(t, ef): break;
+  case &AggrRes(ad): 
+    *out_dict = Dict::insert(*out_dict, name, res);
+    break;
+  case &AnonEnumRes(t, ef): 
+    break;
   case &DatatypeRes(dd, df): //impos for extern C
     err(wcloc, "Unexpected binding from extern C Include");
     break;
@@ -947,10 +953,12 @@ void resolve_decl(env_t env, decl_t d) {
       resolve_exp(env,(exp_t)vd->initializer);
     break;
 
-  case &Fn_d(fd):
+  case &Fn_d(fd): //should never be in cyc_override
+    if(env->in_cyc_override) 
+      err2(loc, "Function declaration not permitted within cyclone_override block");
     absolutize_decl(loc,env,fd->name,fd->sc);
     let &$(decl_ns,decl_name) = fd->name;
-
+    let argit = fd->i.args;
     let vds = get_fun_vardecls(true, loc, env, fd->i.args, fd->i.cyc_varargs);
     fd->param_vardecls = new Core::Opt(vds);
 
@@ -1019,8 +1027,10 @@ void resolve_decl(env_t env, decl_t d) {
     if(td->defn != NULL)
       resolve_type(loc,env,(type_t)td->defn);
     // type-checker rejects redeclared typedef, but not our concern
-    decl_ns_data->typedefs = Dict::insert(decl_ns_data->typedefs,
-					  decl_name, td);
+    if(!env->in_cyc_override) {
+      decl_ns_data->typedefs = Dict::insert(decl_ns_data->typedefs,
+					    decl_name, td);
+    }
     break;
 
   case &Aggr_d(ad): 
@@ -1036,10 +1046,12 @@ void resolve_decl(env_t env, decl_t d) {
     if(Dict::member(decl_ns_data->aggrdecls,decl_name) && ad->impl==NULL)
       break;
     // otherwise just add aggrdecl and constructor, and resolve fields
-    decl_ns_data->aggrdecls = Dict::insert(decl_ns_data->aggrdecls,
-					   decl_name, ad);
-    decl_ns_data->ordinaries = Dict::insert(decl_ns_data->ordinaries,
-					    decl_name, new AggrRes(ad));
+    if(!env->in_cyc_override) {
+      decl_ns_data->aggrdecls = Dict::insert(decl_ns_data->aggrdecls,
+					     decl_name, ad);
+      decl_ns_data->ordinaries = Dict::insert(decl_ns_data->ordinaries,
+					      decl_name, new AggrRes(ad));
+    }
     if(ad->impl != NULL) {
       let &AggrdeclImpl(_,rpo,fs,_) = (struct AggrdeclImpl@)ad->impl;
       resolve_rgnpo(loc,env,rpo);
@@ -1061,8 +1073,9 @@ void resolve_decl(env_t env, decl_t d) {
       break;
     // otherwise just add enumdecl and absolutized fields.
     // type-chcecker ensures any redeclaration is redundant
-    decl_ns_data->enumdecls = Dict::insert(decl_ns_data->enumdecls,
-					   decl_name, ed);
+    if(!env->in_cyc_override) 
+      decl_ns_data->enumdecls = Dict::insert(decl_ns_data->enumdecls,
+					     decl_name, ed);
     if(ed->fields != NULL)
       // tags can refer to earlier fields
       for(_ fs = ed->fields->v; fs != NULL; fs = fs->tl) {
@@ -1070,9 +1083,10 @@ void resolve_decl(env_t env, decl_t d) {
 	absolutize_decl(f->loc,env,f->name,ed->sc);
 	if(f->tag != NULL)
 	  resolve_exp(env,(exp_t)f->tag);
-	decl_ns_data->ordinaries = Dict::insert(decl_ns_data->ordinaries,
-						(*f->name)[1], 
-						new EnumRes(ed,f));
+	if(!env->in_cyc_override) 
+	  decl_ns_data->ordinaries = Dict::insert(decl_ns_data->ordinaries,
+						  (*f->name)[1], 
+						  new EnumRes(ed,f));
       }
     break;
 
@@ -1169,7 +1183,9 @@ void resolve_decl(env_t env, decl_t d) {
     let old = env->in_cinclude;
     env->in_cinclude = true;
     resolve_decls(env,ds2);
-    resolve_decls(env,ovrs);
+    env->in_cyc_override = true; //i.e don't export symbols to the dictionary
+    resolve_decls(env,ovrs); //want to resolve bindings but not export new symbols -- o.w shared bindings are busted
+    env->in_cyc_override = false;
     let new_dict = data->ordinaries;
     let out_dict = old_dict;
     if((*hides)[0] > 0) { //wildcard case -- export all symbols in new_dict
@@ -1193,7 +1209,7 @@ void resolve_decl(env_t env, decl_t d) {
     env->in_cinclude = old;
 
     // FIX: this should go in a separate pass
-    Cifc::user_overrides(loc,ds2,ovrs);
+    //    Cifc::user_overrides(loc,ds2,ovrs);
     break;
 
   case &Porton_d: // let Tc warn for now
@@ -1209,7 +1225,7 @@ void resolve_decls(env_t env, list_t<decl_t> tds) {
 }
 
 void resolve_all(list_t<Absyn::decl_t,`H> tds) {
-  let env = new Env(false,mt_nsctxt(true,mt_renv),NULL);
+  let env = new Env(false,false,mt_nsctxt(true,mt_renv),NULL);
   resolve_decl(env, new Decl(new Datatype_d(exn_tud()),0));
   resolve_decls(env, tds);
 }

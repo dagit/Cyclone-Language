@@ -2428,6 +2428,7 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   }
 }
 
+
 // Type check an expression e.  The value topt is an optional type
 // that we expect e to have.  This is useful for propagating type
 // information down (i.e., to resolve certain ambiguous expression
@@ -2453,8 +2454,8 @@ static type_t tcExpNoPromote(tenv_t te, type_t * topt, exp_t e) {
       switch (compress(t)) {
       case &FnType(FnInfo{tvs,eff,rtq,rtyp,args,c_varargs,cyc_varargs,rpo,atts,req,req_relns,ens,ens_relns}):
 	if (tvs != NULL) {    // then, instantiate if necessary
-           let env = $(lookup_type_vars(te),heap_region);
-	   list_t<$(tvar_t,type_t)@> inst =
+	  let env = $(lookup_type_vars(te),heap_region);
+	  list_t<$(tvar_t,type_t)@> inst =
 	     List::map_c(r_make_inst_var,&env,tvs);
 	   list_t<type_t> ts = List::map(snd,inst);
 	   // Check that the function's partial-order on region lifetimes

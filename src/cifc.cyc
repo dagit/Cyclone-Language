@@ -20,21 +20,36 @@
 #include "cifc.h"
 #include "absynpp.h"
 #include "unify.h"
-#include "tcutil.h"
 #include "toc.h"
+#include "warn.h"
+#include "tctyp.h"
+#include "tcutil.h"
+
 using Absyn;
 using List;
-using Tcutil;
+using Tcenv;
+using Warn;
 
 // This file contains routines for smoothing the interface between C
 // and Cyclone.
 
 namespace Cifc;
+static int glob_tvar_id=0;
+
+//debug function
+string_t list2string(list_t<`a> l, string_t (*tostr)(`a)){
+  let ret = aprintf("(");
+  while(l) {
+    ret = aprintf("%s %s,", ret, tostr(l->hd));
+    l =l->tl;
+  }
+  return aprintf("%s)", ret);
+}
 
 // Merges the user definition of a type and the slurped C version.  On
 // success, this mutates user_decl with the changes.
 static void fail_merge(bool warn,seg_t loc, bool is_buildlib,
-		       qvar_t n, string_t s) {
+		       qvar_t n, string_t<`H> s) {
   if (is_buildlib) {
     string_t preamble = warn ? "Warning: user-defined" : "User-defined";
     fprintf(stderr,"%s type for %s incompatible with "
@@ -42,25 +57,104 @@ static void fail_merge(bool warn,seg_t loc, bool is_buildlib,
 	    preamble, Absynpp::qvar2string(n),s);
   }
   else if (warn)
-    Tcutil::warn(loc,"User-defined type for %s incompatible with system version %s",
-		 Absynpp::qvar2string(n),s);
+    warn2(loc,"User-defined type for ", n, " incompatible with system version ", s);
   else
-    Tcutil::terr(loc,"User-defined type for %s incompatible with system version %s",
-		 Absynpp::qvar2string(n),s);
+    err2(loc,"User-defined type for ", n, " incompatible with system version ", s);
 }
 
 #define FAIL_MERGE(w,l,b,n,s) { fail_merge(w,l,b,n,s); if (!w) return; }
+
+static type_t expand_c_type(seg_t loc, tenv_t te, type_t ctyp) {
+  //  fprintf(stderr, "expand_c_type(%s)\n", Absynpp::typ2string(ctyp));
+  switch(ctyp) {
+  case &TypedefType(...):
+    //    fprintf(stderr, "Got typedef type %s expanded to--> ", Absynpp::typ2string(ctyp));
+    Tctyp::check_valid_toplevel_type(loc, te, ctyp);
+    switch(ctyp) {
+    case &TypedefType(_,_,_,to):
+      //      fprintf(stderr, "%s\n", Absynpp::typ2string(to));
+      return to;
+    default:
+      err2(loc, "Impos");
+      break;
+    }
+    return ctyp;
+  case &FnType(*finfo):
+    Tctyp::check_valid_toplevel_type(loc, te, ctyp);
+    //    fprintf(stderr, "Got function type %s -- \n", Absynpp::typ2string(ctyp));
+    finfo->ret_type = expand_c_type(loc, te, Toc::typ_to_c(finfo->ret_type));
+    let args = finfo->args;
+    while(args) {
+      let &$(_,_,*argType) = args->hd;
+      *argType = expand_c_type(loc, te, Toc::typ_to_c(*argType));
+      args = args->tl;
+    }
+    //nuke tvars reintroduced  by check_valid_toplevel_type
+    finfo->tvars = NULL; 
+    finfo->effect = NULL; 
+    return ctyp;
+  case &PointerType(*pinfo):
+    //    Tctyp::check_valid_toplevel_type(loc, te, ctyp);
+    //    fprintf(stderr, "Got pointer type %s\n", Absynpp::typ2string(ctyp));
+    pinfo->elt_type = expand_c_type(loc, te, Toc::typ_to_c(pinfo->elt_type));
+    return ctyp;
+  case &ArrayType(*ainfo):
+    Tctyp::check_valid_toplevel_type(loc, te, ctyp);
+    //    fprintf(stderr, "Got array type %s\n", Absynpp::typ2string(ctyp));
+    ainfo->elt_type = expand_c_type(loc, te, Toc::typ_to_c(ainfo->elt_type));
+    return ctyp;
+  case &TupleType(tlst):     
+    Tctyp::check_valid_toplevel_type(loc, te, ctyp);
+    //    fprintf(stderr, "Got tuple type %s\n", Absynpp::typ2string(ctyp));
+    while(tlst) {
+      let &$(tq, *elt_type) = tlst->hd;
+      *elt_type = expand_c_type(loc, te, Toc::typ_to_c(*elt_type));
+      tlst = tlst->tl;
+    }
+    //    fprintf(stderr, "Got tuple type %s\n", Absynpp::typ2string(ctyp));
+    return ctyp;
+  case &AnonAggrType(knd, flst):     
+    //    fprintf(stderr, "Got anonaggr type %s\n", Absynpp::typ2string(ctyp));
+    return ctyp;
+  case &TypeDeclType(td, tptr):      
+    //    fprintf(stderr, "Got typedecl type %s\n", Absynpp::typ2string(ctyp));
+    return ctyp;
+  case &ValueofType(e): 
+    //    fprintf(stderr, "Got valueof type %s\n", Absynpp::typ2string(ctyp));
+    return ctyp;
+  case &TypeofType(e): 
+    //    fprintf(stderr, "Got typeof type %s\n", Absynpp::typ2string(ctyp));
+    return ctyp;
+  case &AppType(...): //exclude toplevel check here -- introduces free tvars
+    //    fprintf(stderr, "Got app type %s\n", Absynpp::typ2string(ctyp));
+    return ctyp;
+  case &Evar(...):
+    //    fprintf(stderr, "Got evar type %s\n", Absynpp::typ2string(ctyp));
+    return ctyp;
+  case &VarType(...):
+    //    fprintf(stderr, "Got var type %s\n", Absynpp::typ2string(ctyp));
+    return ctyp;
+  }
+}
 
 // Make copies of the types to make sure we don't get screwed up by]
 // side-effects with unification
 // FIX: we could be more liberal than unification alone.  E.g. we could allow
 //   an int where an unsigned int is expected.
-static bool c_types_ok(type_t ctyp, type_t cyctyp) {
-  let c_typ = Toc::typ_to_c(copy_type(ctyp));
-  let u_typ = Toc::typ_to_c(copy_type(cyctyp));
-//   printf("c_typ = %s, u_typ = %s\n",
-// 	 Absynpp::typ2string(c_typ),
-// 	 Absynpp::typ2string(u_typ));
+static bool c_types_ok(seg_t loc, tenv_t te, type_t ctyp, type_t cyctyp) {
+  tqual_t tq;
+  
+  let c_typ = Toc::typ_to_c(Tcutil::copy_type(ctyp));
+  let u_typ = Toc::typ_to_c(Tcutil::copy_type(cyctyp));
+  if(Tcutil::is_function_type(c_typ) && Tcutil::is_function_type(u_typ)) {
+    c_typ = expand_c_type(loc, te, c_typ);
+    u_typ = expand_c_type(loc, te, u_typ);
+  }
+  /*  fprintf(stderr, "\n Converted types --> \n\t c_typ = %s-->%s,\n\t u_typ = %s-->%s\n",
+      Absynpp::typ2string(ctyp),
+      Absynpp::typ2string(c_typ),
+      Absynpp::typ2string(cyctyp),
+      Absynpp::typ2string(u_typ)); */
   return Unify::unify(c_typ,u_typ);
 }
 
@@ -75,11 +169,11 @@ static attributes_t merge_attributes(attributes_t a1, attributes_t a2) {
 // Merges a C declaration with a representation-compatible Cyclone
 // one.  If successful, [c_decl] is side-effected to be changed
 // appropriately.  Otherwise it is left alone.
-void merge_sys_user_decl(seg_t loc, bool is_buildlib,
+void merge_sys_user_decl(seg_t loc, tenv_t te, bool is_buildlib,
 			 decl_t user_decl, decl_t c_decl) {
   switch ($(c_decl->r,user_decl->r)) {
   case $(&Var_d(cd),&Var_d(ud)):
-    if (!c_types_ok(cd->type,ud->type)) {
+    if (!c_types_ok(loc, te, cd->type,ud->type)) {
       FAIL_MERGE(false,loc,is_buildlib,cd->name,
 		 aprintf(": type %s != %s",
 			 Absynpp::typ2string(ud->type),
@@ -95,7 +189,7 @@ void merge_sys_user_decl(seg_t loc, bool is_buildlib,
     break;
 
   case $(&Fn_d(cd),&Var_d(ud)):
-    if (!is_function_type(ud->type))
+    if (!Tcutil::is_function_type(ud->type))
       FAIL_MERGE(false,loc,is_buildlib,ud->name,
 		 ": type must be a function type to match decl\n");
     type_t cdtype;
@@ -103,7 +197,7 @@ void merge_sys_user_decl(seg_t loc, bool is_buildlib,
       cdtype = cd->cached_type;
     else
       cdtype = new FnType(cd->i);
-    if (!c_types_ok(ud->type,cdtype)) {
+    if (!c_types_ok(loc, te, cdtype, ud->type)) {
       FAIL_MERGE(false,loc,is_buildlib,ud->name,
 		 aprintf(": type %s != %s",
 			 Absynpp::typ2string(cdtype),
@@ -113,11 +207,13 @@ void merge_sys_user_decl(seg_t loc, bool is_buildlib,
       // Copy the user type, qualifier, and attributes to the C version.
       switch (ud->type) {
       case &FnType(fi):
+	let old_tvars = fi.tvars;
+	Tctyp::check_valid_toplevel_type(loc, te, ud->type);
 	if (cd->i.attributes != NULL)
 	  fi.attributes = merge_attributes(fi.attributes,cd->i.attributes);
 	cd->i = fi;
 	break;
-      default: terr(0,"oops!\n");
+      default: err2(0,"oops!\n");
       }
     }
     break;
@@ -153,7 +249,7 @@ void merge_sys_user_decl(seg_t loc, bool is_buildlib,
 	if (ufield != NULL) {
 	  // make sure these are representation-compatible.  To so this, convert
 	  // them to C types, and then unify these.  If they match, we're OK.
-	  if (!c_types_ok(cfield->type,ufield->type)) {
+	  if (!c_types_ok(loc, te, cfield->type,ufield->type)) {
 	    FAIL_MERGE(false,loc,is_buildlib,cd->name,
 		       aprintf(": type %s of user definition of field %s != %s",
 			       Absynpp::typ2string(ufield->type),
@@ -215,7 +311,7 @@ void merge_sys_user_decl(seg_t loc, bool is_buildlib,
       return;
     }
     // Now check that the actual definitions are representation-compatible
-    if (!c_types_ok((type_t)cd->defn,(type_t)ud->defn)) {
+    if (!c_types_ok(loc, te, (type_t)cd->defn,(type_t)ud->defn)) {
       FAIL_MERGE(false,loc,is_buildlib,cd->name,
 		 aprintf(": type definition %s of user definition != %s",
 			 Absynpp::typ2string((type_t)ud->defn),
@@ -236,22 +332,341 @@ void merge_sys_user_decl(seg_t loc, bool is_buildlib,
       fprintf(stderr,"Error in .cys file: bad (or unsupported) user-defined type %s\n",
 	      Absynpp::decllist2string(list(user_decl)));
     else
-      terr(loc,"bad (or unsupported) user-defined type %s",
+      err2(loc,"bad (or unsupported) user-defined type %s",
 	   Absynpp::decllist2string(list(user_decl)));      
     return;
   }
 }
 
-void user_overrides(seg_t loc, list_t<decl_t> ds, list_t<decl_t> ovrs) {
-  for (let x = ovrs; x != NULL; x = x->tl) {
-    let ud = x->hd;
-    let un = decl_name(ud);
-//    printf("trying to merge decl %s\n",*un);
-    if (!un) warn(ud->loc,"Overriding decl without a name\n");
-    else {
-      let d = lookup_decl(ds,un);
-      if (!d)  warn(ud->loc,"%s is overridden but not defined",*un);
-      else     merge_sys_user_decl(loc, false, ud, d);
+static bool contains_type_vars(decl_t ud) {
+  switch(ud->r) {
+  case &Aggr_d(ad):
+    return ad->tvs != NULL;
+  default:
+    break;
+  }
+  return false;
+}
+
+static decl_t make_abstract_decl(decl_t ud) {
+  switch(ud->r) {
+  case &Aggr_d(ad):
+    let absad = new *ad;
+    absad->impl = NULL;
+    let nd = new_decl(new Aggr_d(absad), ud->loc);
+    return nd;
+  default:
+    impos("Only aggrdecls");
+  }
+}
+
+//NOT used for now -- may resurrect
+static bool kindbound_subsumed(kindbound_t kb1, kindbound_t kb2) {
+  switch(kb1) {
+  case &Eq_kb(k1):
+    switch(kb2) {
+    case &Eq_kb(k2):
+      return k1->kind == k2->kind && k1->aliasqual == k2->aliasqual;
+    default:
+      return false;
+    }
+  case &Unknown_kb(&Core::Opt(kbb1)):
+    switch(kb2) {
+    case &Unknown_kb(&Core::Opt(kbb2)):
+      return kindbound_subsumed(kbb1, kbb2);
+    default:
+      return true;
+    }
+  case &Unknown_kb(NULL):
+      return true;
+  case &Less_kb(&Core::Opt(kbb1), k1):
+    switch(kb2) {
+    case &Less_kb(&Core::Opt(kbb2), k2):
+      return (k1->kind == k2->kind && k1->aliasqual == k2->aliasqual) && kindbound_subsumed(kbb1, kbb2);
+    default:
+      return false;
+    }
+  case &Less_kb(NULL, k1):
+    switch(kb2) {
+    case &Less_kb(NULL, k2):
+      return (k1->kind == k2->kind && k1->aliasqual == k2->aliasqual);
+    default:
+      return false;
     }
   }
 }
+
+static bool find_and_remove(list_t<type_t> @lst, kindbound_t kind) {
+  let cur = *lst;
+  list_t<type_t> prev = NULL;
+  while(cur) {
+    let t = cur->hd;
+    switch(t) {
+    case &VarType(tv):
+      if(kindbound_subsumed(tv->kind, kind)) {
+	if(prev)
+	  prev->tl = cur->tl;
+	else 
+	  *lst = cur->tl;
+	cur->tl = NULL;
+	return true;
+      }
+      break;
+    default:
+      impos("expects a VarType list only -- got %s(%s)", Absynpp::typ2string(t), Absynpp::get_type_kind(t));
+    }
+    prev = cur;
+    cur = cur->tl;
+  }
+  return false;
+}
+
+static list_t<tvar_t> get_tvar_difference(list_t<tvar_t> tvs, list_t<type_t> remove) {
+  list_t<tvar_t> ret = NULL;
+  while(tvs) {
+    let can = tvs->hd;
+    if(!find_and_remove(&remove, can->kind))
+      ret = new List(can, ret);
+    tvs = tvs->tl;
+  }
+  return ret;
+}
+
+
+datatype exn  { Contains_nontvar };
+datatype exn.Contains_nontvar Contains_nontvar_val=Contains_nontvar;
+
+static list_t<tvar_t> extract_tvars(types_t ts) {
+  list_t<tvar_t> res = NULL;
+  while(ts) {
+    let t = ts->hd;
+    switch(t) {
+    case &VarType(tv):
+      res = new List(tv, res);
+      break;
+    default: 
+      throw &Contains_nontvar_val;
+    }
+    ts = ts->tl;
+  }
+  return res;
+}
+
+static $(list_t<tvar_t>, list_t<tvar_t>)* update_tvars(tenv_t te, list_t<decl_t> tv_ovrs, type_t t) {
+  //  fprintf(stderr, "!!!!update_tvars for %s -- (%s)\n", Absynpp::typ2string(t), Absynpp::get_type_kind(t));
+  switch(t) {
+  case &AppType(tc, *ts):
+    switch(tc) {
+    case &AggrCon(ai):
+      switch(ai) {
+      case {.KnownAggr = &ad}:
+	let &$(ns, name) = ad->name;
+	//	fprintf(stderr, "!!!!Got app type <%s> with types(%s) ", 
+	//     Absynpp::typ2string(t), list2string(*ts, Absynpp::typ2string));
+ 	let ovd = lookup_decl(tv_ovrs, name);
+ 	if(ovd) {
+	  //	  fprintf(stderr, "\t overriden by decl <%s>\n",
+	  //		  Absynpp::decllist2string(new List(ovd, NULL)));
+	  switch(ovd->r) {
+	  case &Aggr_d(ad):
+	    /*	    let tvs = get_tvar_difference(ad->tvs, copy(*ts));
+		    if((length(tvs) + length(*ts)) != length(ad->tvs)) {
+		    impos("Tvar list lengths don't match (%s, %s, %s)", list2string(tvs, Absynpp::tvar2string),  
+		    list2string(*ts, Absynpp::typ2string), list2string(tvs, Absynpp::tvar2string));
+		    }
+	    */
+	    list_t<tvar_t> removed_tvars = NULL;
+	    try {
+	      removed_tvars = extract_tvars(*ts);
+	    }catch {
+	    case &Contains_nontvar: 
+	      //don't attempt to introduce new tvars -- the tvar has been instantiated by the user 
+	      return NULL;
+	    }
+	    if(*ts) 
+	      *ts = NULL; //nuke any existing tvars
+	    list_t<tvar_t> added_tvars=NULL;
+	    let tvs = ad->tvs;
+	    while(tvs) {
+	      let tv = tvs->hd;
+	      let tvcpy = new *tv;
+	      let tvn = new ((string_t)aprintf("`ovr_%d", ++glob_tvar_id));
+	      tvcpy->name = tvn;
+	      added_tvars = new List(tvcpy, added_tvars);
+	      *ts = new List(new VarType(tvcpy), *ts);
+	      tvs = tvs->tl;
+	    }
+	    *ts = imp_rev(*ts);
+	    return new $(added_tvars, removed_tvars);
+	  default:
+	    impos("ovd must be an aggr type");
+	  }
+	}
+	else 
+	  return NULL;
+      case {.UnknownAggr = ua}:
+	return NULL;
+      }
+    default:
+      break;
+    }
+    return NULL;
+  case &PointerType(*pi): 
+    return update_tvars(te, tv_ovrs, pi->elt_type);
+  default:
+    return NULL;
+  }
+  return NULL;
+}
+
+//if a type struct foo {..} --override--> struct foo<`a>{...}
+//then usages of struct foo require the additional tvar inserted 
+// for instance void func(struct foo *a) ----> void func<`ovr_1>(struct foo<`ovr_1> *a)
+static void update_usages(seg_t loc, tenv_t te, list_t<decl_t> tv_ovrs, list_t<decl_t> ds) {
+  while(ds) {
+    let d=ds->hd;
+    switch(d->r) {
+    case &Var_d(vd):
+      break;
+    case &Fn_d(fd):
+      update_tvars(te, tv_ovrs, fd->i.ret_type); //how to bind the dependent tvar in the return type?  -- Revisit
+      let argit = fd->i.args;
+      list_t<tvar_t> added_tvars = NULL;
+      list_t<tvar_t> removed_tvars = NULL;
+      while(argit) {
+	let &$(_,_,*at) = argit->hd;
+	let ad = update_tvars(te, tv_ovrs, *at);
+	if(ad) {
+ 	  added_tvars = append((*ad)[0], added_tvars);
+ 	  removed_tvars = append((*ad)[1], removed_tvars);
+	}
+ 	argit=argit->tl;
+      }
+      while(removed_tvars) {
+	let rtv = removed_tvars->hd;
+	try {
+	  fd->i.tvars = List::delete(fd->i.tvars, rtv);
+	}
+	catch {
+	case  &Core::Not_found: 
+	  warn(loc, "Removed tvar %s not found", Absynpp::tvar2string(rtv));
+	  break;
+	}
+	removed_tvars = removed_tvars->tl;
+      }
+      if(added_tvars) 
+ 	fd->i.tvars = append(added_tvars, fd->i.tvars);
+      //nuke the effect, tvar names may have changed ... recomputed in phase2
+      fd->i.effect = NULL;
+      //      fprintf(stderr, "Result tvarlist <%s>\n", list2string(fd->i.tvars, Absynpp::tvar2string));
+      break;
+    case &Aggr_d(ad):
+      break;
+    case &Typedef_d(td):
+      break;
+    default: //ds are extern C include decls ... the other cases are impos or cannot contain tvars
+      break;
+    }
+    ds = ds->tl;
+  }
+}
+
+static void i_clear_vartype_ids(type_t t) {
+  switch(t) {
+  case &VarType(tv):
+    tv->identity = -1;
+    break;
+  case &AppType(_, ts):
+    while(ts) {
+      i_clear_vartype_ids(ts->hd);
+      ts=ts->tl;
+    }
+    break;
+  case &PointerType(pi):
+    i_clear_vartype_ids(pi.elt_type);
+    break;
+  case &ArrayType(ai):
+    i_clear_vartype_ids(ai.elt_type);
+    break;
+  case &FnType(fi):
+    i_clear_vartype_ids(fi.ret_type);
+    let argit = fi.args;
+    while(argit) {
+      let &$(_,_,at) = argit->hd;
+      i_clear_vartype_ids(at);
+      argit = argit->tl;
+    }
+    break;
+  case &TupleType(ts):
+    while(ts) {
+      let &$(_,et) = ts->hd;
+      i_clear_vartype_ids(et);
+      ts = ts->tl;
+    }
+    break;
+  case &TypedefType(_,ts,_,to):
+    /*    fprintf(stderr, "i_clear_var_ids got TypedefType (to=%s) with ts = <%s><%s>\n", 
+	  to ? Absynpp::typ2string(to) : (string_t)"NULL",
+	  list2string(ts, Absynpp::typ2string),list2string(ts, Absynpp::get_type_kind));*/
+    while(ts) {
+      i_clear_vartype_ids(ts->hd);
+      ts=ts->tl;
+    }
+    break;
+  default: 
+    //    fprintf(stderr, "i_clear_var_ids ignoring %s (%s)\n", Absynpp::typ2string(t),Absynpp::get_type_kind(t));
+    //ignore -- either no tvars, or not possible because of override decl
+    //what about Evar?
+    break;
+  }
+}
+
+static void clear_vartype_ids(decl_t d) {
+  switch(d->r) {
+  case &Var_d(vd):
+    i_clear_vartype_ids(vd->type);
+    break;
+  case &Fn_d(fd): 
+    i_clear_vartype_ids(fd->i.ret_type);
+    let ai = fd->i.args;
+    while(ai) {
+      i_clear_vartype_ids((*(ai->hd))[2]);
+    }
+    fd->i.tvars = NULL;
+    break;
+  case &Aggr_d(ad):    //ignore  check_valid_type is idempotent
+    break;
+  case &Typedef_d(td):  
+    break;
+  default://cannot occur in override block, or do not contain VarType
+    //    fprintf(stderr, "clear_var_id Skipping decl <%s>\n", Absynpp::decllist2string(new List(d,NULL)));
+    break; 
+  }
+}
+
+void user_overrides(seg_t loc, tenv_t te, list_t<decl_t> *ds, list_t<decl_t> ovrs) {
+  list_t<decl_t> type_overrides = NULL;
+  for (let x = ovrs; x != NULL; x = x->tl) {
+    let ud = x->hd;
+    let un = decl_name(ud);
+    if (!un) warn(ud->loc,"Overriding decl without a name\n");
+    else {
+      let d = lookup_decl(*ds,un);
+      if (!d)  warn(ud->loc,"%s is overridden but not defined",*un);
+      else {    
+	let pre_tvars_d =contains_type_vars(d);
+	merge_sys_user_decl(loc, te, false, ud, d);
+	clear_vartype_ids(ud);
+	if(contains_type_vars(ud) && !pre_tvars_d) {
+	  let absdecl = make_abstract_decl(ud);
+	  type_overrides = new List(d, type_overrides);
+	  *ds = new List(absdecl, *ds);
+	}
+      }
+    }
+  }
+  update_usages(loc, te, type_overrides, *ds);
+}
+
+
+

@@ -27,6 +27,9 @@
 
 namespace Absynpp;
 
+
+
+
 using Cyclone;
 using Core;
 using PP;
@@ -2219,3 +2222,23 @@ string_t prim2string(primop_t p) {return string_of_doc(prim2doc(p),  PP_WIDTH);}
 string_t pat2string(pat_t p)     {return string_of_doc(pat2doc(p),   PP_WIDTH);}
 string_t scope2string(scope_t sc){return string_of_doc(scope2doc(sc),PP_WIDTH);}
 string_t cnst2string(cnst_t c)   {return string_of_doc(cnst2doc(c),  PP_WIDTH);}
+
+string_t get_type_kind(type_t t) {
+  if(t==NULL)
+    return (string_t)"NULL";
+  switch(t) {
+  case &AppType(...): return (string_t)"AppType"; 
+  case &Evar(...):  return(string_t) "Evar";  
+  case &VarType(...): return (string_t) "Vartype";  // type variables, kind induced by tvar
+  case &PointerType(...): return (string_t) "Pointertype";  // t*, t?, t@, etc.  BoxKind when not Unknown_b
+  case &ArrayType(...): return (string_t) "ArrayType"; // MemKind
+  case &FnType(...): return (string_t) "FnType";  // MemKind
+  case &TupleType(...): return (string_t) "TupleType";  // MemKind
+  case &AnonAggrType(...): return (string_t) "AnonAggrType";  // MemKind
+  case &TypedefType(_, _, td, _): 
+    return (string_t) "Typedeftype"; 
+  case &ValueofType(...): return (string_t) "Valueoftype";       // IntKind -- exp must be a type-level expression
+  case &TypeDeclType(...): return (string_t) "Typedecltype";  
+  case &TypeofType(...): return (string_t) "Typeoftype"; 
+  }
+}

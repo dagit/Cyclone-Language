@@ -212,7 +212,14 @@ bool unify(type_t t1, type_t t2) {
   try {
     unify_it(t1,t2);
     return true;
-  } catch { case &Unify: return false; }
+  } catch { 
+  case &Unify: 
+#ifdef DEBUG
+    fprintf(stderr, "Unification of <%s,%s> failed because %s\n", 
+	    Absynpp::typ2string(t1), Absynpp::typ2string(t2), failure_reason);
+#endif
+    return false; 
+  }
 }
 
 // unify two lists of types
@@ -270,6 +277,7 @@ static bool unify_const_exp_opt(exp_opt_t e1, exp_opt_t e2) {
     return false;
   return Evexp::same_const_exp(e1,e2);
 }
+
 
 // the real work of unification
 static void unify_it(type_t t1, type_t t2) {
@@ -454,7 +462,8 @@ static void unify_it(type_t t1, type_t t2) {
       bad_effect = !unify_effect(eff1,eff2);
     ts_failure = $(t1,t2);
     if(bad_effect)
-      fail_because("(function effects do not match)");
+      fail_because(aprintf("(function effects (%s,%s) do not match)", eff1 ? Absynpp::typ2string(eff1) : (string_t)"-",  
+			   eff2 ? Absynpp::typ2string(eff2) : (string_t)"-"));
     if (!equiv_fn_atts(atts2,atts1))
       fail_because("(function types have different attributes)");
     if (!same_rgn_po(rpo2,rpo1))

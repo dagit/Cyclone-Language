@@ -4299,7 +4299,8 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds,
 }
 
 // initialize all globals
-static void init() {
+//static 
+void init() {
   let NewDynamicRegion{dyn} = new_rckey();
   let ts;
   {region h = open(dyn);

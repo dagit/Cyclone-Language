@@ -60,6 +60,7 @@ extern struct Tenv {
   bool in_extern_c_include : 1;
   bool in_tempest : 1;
   bool tempest_generalize : 1; // used when generalizing types for tempest
+  bool in_extern_c_inc_repeat : 1;
 };
 typedef struct Tenv@ tenv_t; 
 
@@ -150,6 +151,6 @@ void check_rgn_partial_order(tenv_t, seg_t, list_t<$(type_t,type_t)@`H,`H> po);
 
 void check_delayed_effects(tenv_t);
 void check_delayed_constraints(tenv_t);
-
+tenv_t copy_tenv_dicts(tenv_t);
 }
 #endif
