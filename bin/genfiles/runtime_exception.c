@@ -35,16 +35,28 @@ struct _xtunion_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc };
 struct _xtunion_struct * Cyc_Bad_alloc_val = &Cyc_Bad_alloc_struct;
 
 // The exception that was thrown
-#ifdef _HAVE_PTHREAD_
-extern pthread_key_t _exn_thrown_key;
-extern pthread_key_t _exn_filename_key;
-extern pthread_key_t _exn_lineno_key;
+#ifdef HAVE_THREADS
+static tlocal_key_t _exn_thrown_key;
+static tlocal_key_t _exn_filename_key;
+static tlocal_key_t _exn_lineno_key;
 #else
 static const char *_exn_filename = "?";
-static unsigned _exn_lineno = 0;
+static int _exn_lineno = 0; // MWH: should be unsigned? Must match core.h
+static struct _xtunion_struct *_exn_thrown = NULL;
 #endif
 
-struct _xtunion_struct *_exn_thrown = NULL;
+void _init_exceptions() {
+#ifdef HAVE_THREADS
+  int status;
+  //  fprintf(stderr, "Initing keys ... \n");
+  if((status = create_tlocal_key(&_exn_thrown_key, NULL)))
+    errquit("Thread local storage key creation failed (%d)", status);
+  if((status = create_tlocal_key(&_exn_filename_key, NULL)))
+    errquit("Thread local storage key creation failed (%d)", status);
+  if((status = create_tlocal_key(&_exn_lineno_key, NULL)))
+    errquit("Thread local storage key creation failed (%d)", status);
+#endif
+}
 
 // create a new handler, put it on the stack, and return it so its
 // jmp_buf can be filled in by the caller
@@ -72,23 +84,23 @@ struct _handler_cons top_handler;
 static int in_uncaught_fun = 0; // avoid infinite exception chain
 
 struct _xtunion_struct* Cyc_Core_get_exn_thrown() {
-#ifdef _HAVE_PTHREAD_
-  return (struct _xtunion_struct*)pthread_getspecific(_exn_thrown_key);
+#ifdef HAVE_THREADS
+  return (struct _xtunion_struct*)get_tlocal(_exn_thrown_key);
 #else
   return _exn_thrown;
 #endif
 }
 
 const char *Cyc_Core_get_exn_filename() {
-#ifdef _HAVE_PTHREAD_
-  return (const char*)pthread_getspecific(_exn_filename_key);
+#ifdef HAVE_THREADS
+  return (const char*)get_tlocal(_exn_filename_key);
 #else
   return _exn_filename;
 #endif
 }
 int Cyc_Core_get_exn_lineno() {
-#ifdef _HAVE_PTHREAD_
-  return (int)pthread_getspecific(_exn_lineno_key);
+#ifdef HAVE_THREADS
+  return (int)get_tlocal(_exn_lineno_key);
 #else
   return _exn_lineno;
 #endif
@@ -134,10 +146,10 @@ void* _throw_fn(void* e, const char *filename, unsigned lineno) {
   // pop handlers until exception handler found
   my_handler = (struct _handler_cons *)_pop_frame_until(0);
   _npop_frame(0);
-#ifdef _HAVE_PTHREAD_
-  pthread_setspecific(_exn_thrown_key, e);
-  pthread_setspecific(_exn_filename_key, filename);
-  pthread_setspecific(_exn_lineno_key, lineno);
+#ifdef HAVE_THREADS
+  put_tlocal(_exn_thrown_key, e);
+  put_tlocal(_exn_filename_key, filename);
+  put_tlocal(_exn_lineno_key, (void *)lineno);
 #else
   _exn_thrown = e; 
   _exn_filename = filename;

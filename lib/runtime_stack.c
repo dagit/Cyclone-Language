@@ -20,23 +20,31 @@
 
 #include "runtime_internal.h"
 
-#ifdef _HAVE_PTHREAD_
-extern pthread_key_t _current_frame_key;
+#ifdef HAVE_THREADS
+static tlocal_key_t _current_frame_key;
 #else
 static struct _RuntimeStack *_current_frame = NULL;
 #endif
 
+void _init_stack() {
+#ifdef HAVE_THREADS
+  int status;
+  if((status = create_tlocal_key(&_current_frame_key, NULL)))
+    errquit("Thread local storage key creation failed (%d)", status);
+#endif
+}
+
 struct _RuntimeStack *get_current_frame() {
-#ifdef _HAVE_PTHREAD_
-  return (struct _RuntimeStack *)pthread_getspecific(_current_frame_key); 
+#ifdef HAVE_THREADS
+  return (struct _RuntimeStack *)get_tlocal(_current_frame_key); 
 #else
   return _current_frame;
 #endif
 }
 
 void set_current_frame(struct _RuntimeStack *frame) {
-#ifdef _HAVE_PTHREAD_
-  pthread_setspecific(_current_frame_key, frame);
+#ifdef HAVE_THREADS
+  put_tlocal(_current_frame_key, frame);
 #else
   _current_frame = frame;
 #endif

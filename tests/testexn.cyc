@@ -1,47 +1,98 @@
 #include <core.h>
 #include <stdio.h>
+#include <stdlib.h>
 
 typedef unsigned long int pthread_t;
 extern "C" int pthread_create(pthread_t *, void*, void *(*_start)(int), int);
-// extern "C" int pthread_yield(void);
+extern "C" int pthread_join(pthread_t, void**);
+extern "C" int pthread_yield(void);
 using Core;
 
 datatype exn {OneException};
-datatype exn {OtherException};
+datatype exn {TwoException};
+datatype exn {ThreeException};
+datatype exn {FourException};
+datatype exn {FiveException};
+datatype exn {SixException};
+datatype exn {SevenException};
+datatype exn {EightException};
+datatype exn {NineException};
+datatype exn {TenException};
 
-datatype exn.OneException fe_val = OneException;
-datatype exn.OtherException se_val = OtherException;
+datatype exn.OneException e1_val = OneException;
+datatype exn.TwoException e2_val = TwoException;
+datatype exn.ThreeException e3_val = ThreeException;
+datatype exn.FourException e4_val = FourException;
+datatype exn.FiveException e5_val = FiveException;
+datatype exn.SixException e6_val = SixException;
+datatype exn.SevenException e7_val = SevenException;
+datatype exn.EightException e8_val = EightException;
+datatype exn.NineException e9_val = NineException;
+datatype exn.TenException e10_val = TenException;
 
 void foo(int i) {
-  if(i%2)
-    throw &fe_val;
-  throw &se_val;
+  int busywait = rand() % 1000000;
+  if (busywait < 0) busywait = -busywait;
+  int yields = rand() % 5;
+  if (yields < 0) yields = -yields;
+  for (int j = 0; j<yields; j++) {
+    for (int i = 0; i<busywait; i++);
+    pthread_yield();
+  }
+  if (i%10 == 1) throw &e1_val;
+  if (i%10 == 2) throw &e2_val;
+  if (i%10 == 3) throw &e3_val;
+  if (i%10 == 4) throw &e4_val;
+  if (i%10 == 5) throw &e5_val;
+  if (i%10 == 6) throw &e6_val;
+  if (i%10 == 7) throw &e7_val;
+  if (i%10 == 8) throw &e8_val;
+  if (i%10 == 9) throw &e9_val;
+  if (i%10 == 0) throw &e10_val;
 }
+
+static int exn_caught[100];
 
 void* runthread(int i) {
   try {
     if(i%3 == 0)
-      // pthread_yield();
+      pthread_yield();
     foo(i);
+    exn_caught[i] = -3;
   }
   catch {
-  case &OneException:
-    fprintf(stdout, "%d Caught OneException\n", i);
-    fflush(stdout);
-    return NULL;
-  case &OtherException:
-    fprintf(stdout, "%d Caught OtherException\n", i);
-    fflush(stdout);
-    return NULL;
+  case &OneException:    exn_caught[i] = 1; break;
+  case &TwoException:    exn_caught[i] = 2; break;
+  case &ThreeException:  exn_caught[i] = 3; break;
+  case &FourException:   exn_caught[i] = 4; break;
+  case &FiveException:   exn_caught[i] = 5; break;
+  case &SixException:    exn_caught[i] = 6; break;
+  case &SevenException:  exn_caught[i] = 7; break;
+  case &EightException:  exn_caught[i] = 8; break;
+  case &NineException:   exn_caught[i] = 9; break;
+  case &TenException:    exn_caught[i] = 0; break;
+  default:               exn_caught[i] = -2; break;
   }
   return NULL;
 }
 
 int main(int argc, string_t ?args) {
   pthread_t t[100];
-  int *arg =new 1;
   for(int i=0;i<100;i++) {
-    pthread_create(&t[i], NULL, runthread, i);
+    exn_caught[i] = -1;
+    if (pthread_create(&t[i], NULL, runthread, i)) {
+      printf("main: couldn't create thread %d\n",i);
+      return -1;
+    }
   }
+  for(int i=0;i<100;i++)
+    pthread_join(t[i], NULL);
+  for (int i=0;i<100;i++) {
+    if (exn_caught[i] != (i%10)) {
+      printf("multi-threaded test failed! thread %d did not catch exn %d\n",i,i%10);
+      return -1;
+    }
+  }
+  return 0;
 }
 

@@ -18,14 +18,11 @@
 #ifndef RUNTIME_INTERNAL_H
 #define RUNTIME_INTERNAL_H
 
-// only need things here that are not in cyc_include.h, which end up
-// included because of the following:
-
-// The C include file precore_c.h is produced (semi) automatically
-// from the Cyclone include file core.h.  Note, it now includes
-// the contents of cyc_include.h
+/************* PLATFORM-SPECIFIC ELEMENTS *****************/
 
 #if defined(GEEKOS)
+
+#define HAVE_THREADS 1
 
 #include <geekos/setjmp.h>
 #include <geekos/screen.h>  // for error printing
@@ -40,13 +37,25 @@
 #define errprintf Print
 #define errquit(arg...) { Print(arg); Exit(1); }
 
+// thread-local accessor functions
+#define create_tlocal_key Tlocal_Create
+#define get_tlocal Tlocal_Get
+#define put_tlocal Tlocal_Put
+
 #else
 
 #include <setjmp.h> // precore_c.h uses jmp_buf without defining it
 #include <stdio.h>  // for error printing
 #include <limits.h> // for magic numbers
 #ifdef _HAVE_PTHREAD_
+#define HAVE_THREADS 1
 #include <pthread.h>
+
+// thread-local accessor functions
+#define tlocal_key_t pthread_key_t
+#define create_tlocal_key pthread_key_create
+#define get_tlocal pthread_getspecific
+#define put_tlocal pthread_setspecific
 #endif
 
 // error printing functions
@@ -57,10 +66,32 @@
 
 #define MAX_ALLOC_SIZE INT_MAX
 
-/* RUNTIME_CYC defined to prevent including parts of precore_c.h 
-   that might cause problems, particularly relating to region profiling */
+// only need things here that are not in cyc_include.h, which end up
+// included because of the following:
+
+// The C include file precore_c.h is produced (semi) automatically
+// from the Cyclone include file core.h.  Note, it now includes
+// the contents of cyc_include.h
+
+/* RUNTIME_CYC defined to prevent including parts of precore_c.h that
+   might cause problems, particularly relating to region profiling */
 #define RUNTIME_CYC
 #include "precore_c.h"
+
+/************** INIT and FINI ROUTINES ************/
+
+/* These should be called before executing any Cyclone code from C.
+   Only call them once (see runtime_cyc.c). */
+
+extern void _init_exceptions();  // defined in runtime_exception.c
+extern void _init_regions();     // defined in runtime_memory.c
+extern void _init_stack();       // defined in runtime_stack.c
+
+/* This is called when the program is finished, to finalize
+   any profiling or other bookkeeping. */
+extern void _fini_regions();     // defined in runtime_memory.c
+
+/*************** STACK ROUTINES *******************/
 
 // pushes a frame on the stack
 void _push_frame(struct _RuntimeStack *frame);

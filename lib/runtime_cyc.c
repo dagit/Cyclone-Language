@@ -21,9 +21,7 @@
 
 #include <stdio.h>
 #include "runtime_internal.h"
-#ifdef _HAVE_PTHREAD_
-#include <pthread.h>
-#endif
+
 /* struct _dyneither_ptr Cstring_to_string(Cstring s) { */
 /*   struct _dyneither_ptr str; */
 /*   if (s == NULL) { */
@@ -76,48 +74,30 @@ struct Cyc___cycFILE { // must match defn in boot_cstubs.c and boot_cycstubs.cyc
 
 extern int Cyc_main(int argc, struct _dyneither_ptr argv);
 extern char *_set_top_handler(); // defined in runtime_exception.c
-extern int _init_regions();    // defined in runtime_memory.c
-extern int _fini_regions();    // defined in runtime_memory.c
 
-#ifdef _HAVE_PTHREAD_
-pthread_key_t _exn_thrown_key;
-pthread_key_t _exn_filename_key;
-pthread_key_t _exn_lineno_key;
-pthread_key_t _current_frame_key;
-
-static pthread_once_t key_once = PTHREAD_ONCE_INIT;
-#endif
-
-void do_exit(char *msg, int code) {
-  fprintf(stderr, msg);
-  exit(code);
-}
-
-void init_keys_once() {
-#ifdef _HAVE_PTHREAD_
-  int status;
-  //  fprintf(stderr, "Initing keys ... \n");
-  if((status = pthread_key_create(&_exn_thrown_key, NULL)))
-    do_exit("Thread local storage key creation failed", status);
-  if((status = pthread_key_create(&_exn_filename_key, NULL)))
-    do_exit("Thread local storage key creation failed", status);
-  if((status = pthread_key_create(&_exn_lineno_key, NULL)))
-    do_exit("Thread local storage key creation failed", status);
-  if((status = pthread_key_create(&_current_frame_key, NULL)))
-    do_exit("Thread local storage key creation failed", status);
-#endif
-}
+/* #ifdef _HAVE_PTHREAD_ */
+/* static pthread_once_t key_once = PTHREAD_ONCE_INIT; */
+/* void init_keys_once() { */
+/*   int status; */
+/*   //  fprintf(stderr, "Initing keys ... \n"); */
+/*   _init_exceptions(); */
+/*   _init_stack(); */
+/* } */
+/* #endif */
 
 int main(int argc, char **argv) {
   // initialize region system
   int status;
   _init_regions();
-#ifdef _HAVE_PTHREAD_
-  if((status = pthread_once(&key_once, init_keys_once)))
-    do_exit("Failed pthread_once", status);
-#endif
+  // MWH: could do this in pthread_once above, but there's no need
+  // because we won't have multiple main() threads
+  _init_stack();
+  _init_exceptions();
+/* #ifdef _HAVE_PTHREAD_ */
+/*   if((status = pthread_once(&key_once, init_keys_once))) */
+/*     do_exit("Failed pthread_once", status); */
+/* #endif */
   // install outermost exception handler
-/*   if (_set_catchall_handler(&top_handler) != NULL) return 1; */
   if (_set_top_handler() != NULL) return 1;
   // set standard file descriptors
   Cyc_stdin->file  = stdin;

@@ -6971,7 +6971,7 @@ if test "$no_create" != yes; then
 # FIX HERE TREVOR; should adjust Makefile.inc.in etc.
   if test "$ac_cv_pthreads" = pthreads; then
     echo "HAVE_PTHREAD=yes" >> Makefile.inc
-#    echo "LDFLAGS+=-lpthread" >> Makefile.inc
+    echo "LDFLAGS+=-lpthread" >> Makefile.inc
     echo "CFLAGS+=-D_HAVE_PTHREAD_" >> Makefile.inc
   fi
   # Use ||, not &&, to avoid exiting from the if with $? = 1, which
