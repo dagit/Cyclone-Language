@@ -52,7 +52,8 @@
     !defined(MSWIN32) && !defined(MSWINCE) && \
     !(defined(ALPHA) && defined(OSF1)) && \
     !defined(HPUX) && !(defined(LINUX) && defined(__ELF__)) && \
-    !defined(RS6000) && !defined(SCO_ELF)
+    !defined(RS6000) && !defined(SCO_ELF) && \
+    !(defined(NETBSD) && defined(__ELF__)) && !defined(HURD)
  --> We only know how to find data segments of dynamic libraries for the
  --> above.  Additional SVR4 variants might not be too
  --> hard to add.
@@ -123,6 +124,11 @@ GC_FirstDLOpenedLinkMap()
 
 #endif /* SUNOS5DL ... */
 
+/* BTL: added to fix circular dlopen definition if SOLARIS_THREADS defined */
+# if defined(GC_must_restore_redefined_dlopen)
+#   define dlopen GC_dlopen
+# endif
+
 #if defined(SUNOS4) && !defined(USE_PROC_FOR_LIBRARIES)
 
 #ifdef LINT
@@ -162,69 +168,6 @@ static ptr_t GC_first_common()
 }
 
 #endif  /* SUNOS4 ... */
-
-# if defined(LINUX_THREADS) || defined(SOLARIS_THREADS) \
-     || defined(HPUX_THREADS) || defined(IRIX_THREADS)
-  /* Make sure we're not in the middle of a collection, and make	*/
-  /* sure we don't start any.	Returns previous value of GC_dont_gc.	*/
-  /* This is invoked prior to a dlopen call to avoid synchronization	*/
-  /* issues.  We can't just acquire the allocation lock, since startup 	*/
-  /* code in dlopen may try to allocate.				*/
-  /* This solution risks heap growth in the presence of many dlopen	*/
-  /* calls in either a multithreaded environment, or if the library	*/
-  /* initialization code allocates substantial amounts of GC'ed memory.	*/
-  /* But I don't know of a better solution.				*/
-  /* This can still deadlock if the client explicitly starts a GC 	*/
-  /* during the dlopen.  He shouldn't do that.				*/
-  static GC_bool disable_gc_for_dlopen()
-  {
-    GC_bool result;
-    LOCK();
-    result = GC_dont_gc;
-    while (GC_incremental && GC_collection_in_progress()) {
-	GC_collect_a_little_inner(1000);
-    }
-    GC_dont_gc = TRUE;
-    UNLOCK();
-    return(result);
-  }
-
-  /* Redefine dlopen to guarantee mutual exclusion with	*/
-  /* GC_register_dynamic_libraries.			*/
-  /* Should probably happen for other operating	systems, too. */
-
-#include <dlfcn.h>
-
-#ifdef GC_USE_LD_WRAP
-  void * __wrap_dlopen(const char *path, int mode)
-#else
-  void * GC_dlopen(path, mode)
-  GC_CONST char * path;
-  int mode;
-#endif
-{
-    void * result;
-    GC_bool dont_gc_save;
-    
-#   ifndef USE_PROC_FOR_LIBRARIES
-      dont_gc_save = disable_gc_for_dlopen();
-#   endif
-#   ifdef GC_USE_LD_WRAP
-      result = (void *)__real_dlopen(path, mode);
-#   else
-      result = dlopen(path, mode);
-#   endif
-#   ifndef USE_PROC_FOR_LIBRARIES
-      GC_dont_gc = dont_gc_save;
-#   endif
-    return(result);
-}
-# endif  /* SOLARIS_THREADS */
-
-/* BTL: added to fix circular dlopen definition if SOLARIS_THREADS defined */
-# if defined(GC_must_restore_redefined_dlopen)
-#   define dlopen GC_dlopen
-# endif
 
 # if defined(SUNOS4) || defined(SUNOS5DL)
 /* Add dynamic library data sections to the root set.		*/
@@ -299,17 +242,13 @@ void GC_register_dynamic_libraries()
 # endif /* !USE_PROC ... */
 # endif /* SUNOS */
 
-#if defined(LINUX) && defined(__ELF__) || defined(SCO_ELF)
+#if defined(LINUX) && defined(__ELF__) || defined(SCO_ELF) || \
+    (defined(NETBSD) && defined(__ELF__)) || defined(HURD)
+
 
 #ifdef USE_PROC_FOR_LIBRARIES
 
 #include <string.h>
-
-#ifdef GC_USE_LD_WRAP
-#   define READ __real_read
-#else
-#   define READ read
-#endif
 
 #include <sys/stat.h>
 #include <fcntl.h>
@@ -317,21 +256,9 @@ void GC_register_dynamic_libraries()
 
 #define MAPS_BUF_SIZE (32*1024)
 
-/* Repeatedly perform a read call until the buffer is filled or	*/
-/* we encounter EOF.						*/
-static ssize_t repeat_read(int fd, char *buf, size_t count)
-{
-    ssize_t num_read = 0;
-    ssize_t result;
-    
-    while (num_read < count) {
-	result = READ(fd, buf + num_read, count - num_read);
-	if (result < 0) return result;
-	if (result == 0) break;
-	num_read += result;
-    }
-    return num_read;
-}
+extern ssize_t GC_repeat_read(int fd, char *buf, size_t count);
+	/* Repeatedly read until buffer is filled, or EOF is encountered */
+	/* Defined in os_dep.c.  					 */
 
 static char *parse_map_entry(char *buf_ptr, word *start, word *end,
                              char *prot_buf, unsigned int *maj_dev);
@@ -360,7 +287,7 @@ void GC_register_dynamic_libraries()
 	   read it to find out how large it is... */
 	maps_size = 0;
 	do {
-	    result = repeat_read(f, maps_temp, sizeof(maps_temp));
+	    result = GC_repeat_read(f, maps_temp, sizeof(maps_temp));
 	    if (result <= 0) ABORT("Couldn't read /proc/self/maps");
 	    maps_size += result;
 	} while (result == sizeof(maps_temp));
@@ -372,7 +299,7 @@ void GC_register_dynamic_libraries()
 	    if (-1 == f) ABORT("Couldn't open /proc/self/maps");
 	    maps_buf = alloca(maps_size);
 	    if (NULL == maps_buf) ABORT("/proc/self/maps alloca failed");
-	    result = repeat_read(f, maps_buf, maps_size);
+	    result = GC_repeat_read(f, maps_buf, maps_size);
 	    if (result <= 0) ABORT("Couldn't read /proc/self/maps");
 	} else {
 	    /* Otherwise use the fixed size buffer */
@@ -490,14 +417,18 @@ static char *parse_map_entry(char *buf_ptr, word *start, word *end,
     return buf_ptr;
 }
 
-#else
+#else /* !USE_PROC_FOR_LIBRARIES */
 
 /* Dynamic loading code for Linux running ELF. Somewhat tested on
  * Linux/x86, untested but hopefully should work on Linux/Alpha. 
  * This code was derived from the Solaris/ELF support. Thanks to
  * whatever kind soul wrote that.  - Patrick Bridges */
 
-#include <elf.h>
+#if defined(NETBSD)
+#  include <sys/exec_elf.h>
+#else
+#  include <elf.h>
+#endif
 #include <link.h>
 
 /* Newer versions of Linux/Alpha and Linux/x86 define this macro.  We
@@ -583,6 +514,10 @@ void GC_register_dynamic_libraries()
 #include <fcntl.h>
 #include <elf.h>
 #include <errno.h>
+#include <signal.h>  /* Only for the following test. */
+#ifndef _sigargs
+# define IRIX6
+#endif
 
 extern void * GC_roots_present();
 	/* The type is a lie, since the real type doesn't make sense here, */
@@ -644,7 +579,8 @@ void GC_register_dynamic_libraries()
         if ((flags & (MA_BREAK | MA_STACK | MA_PHYS)) != 0) goto irrelevant;
         if ((flags & (MA_READ | MA_WRITE)) != (MA_READ | MA_WRITE))
             goto irrelevant;
-          /* The latter test is empirically useless.  Other than the	*/
+          /* The latter test is empirically useless in very old Irix	*/
+	  /* versions.  Other than the					*/
           /* main data and stack segments, everything appears to be	*/
           /* mapped readable, writable, executable, and shared(!!).	*/
           /* This makes no sense to me.	- HB				*/
@@ -657,7 +593,11 @@ void GC_register_dynamic_libraries()
 #	endif /* MMAP_STACKS */
 
         limit = start + addr_map[i].pr_size;
-	if (addr_map[i].pr_off == 0 && strncmp(start, ELFMAG, 4) == 0) {
+	/* The following seemed to be necessary for very old versions 	*/
+	/* of Irix, but it has been reported to discard relevant	*/
+	/* segments under Irix 6.5.  					*/
+#	ifndef IRIX6
+	  if (addr_map[i].pr_off == 0 && strncmp(start, ELFMAG, 4) == 0) {
 	    /* Discard text segments, i.e. 0-offset mappings against	*/
 	    /* executable files which appear to have ELF headers.	*/
 	    caddr_t arg;
@@ -684,7 +624,8 @@ void GC_register_dynamic_libraries()
 	            goto irrelevant;
 	        }
 	    }
-	}
+	  }
+#	endif /* !IRIX6 */
         GC_add_roots_inner(start, limit, TRUE);
       irrelevant: ;
     }

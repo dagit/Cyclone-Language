@@ -50,6 +50,8 @@ static __inline__ long quick_thread_id() {
     return (long)(&dummy) >> 12;
 }
 
+#define INVALID_QTID ((unsigned long)(-1))
+
 typedef struct thread_specific_data {
     tse * volatile cache[TS_CACHE_SIZE];
 			/* A faster index to the hash table */
