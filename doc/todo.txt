@@ -1,7 +1,50 @@
 Todo list:
 
+For the release:
+-----------------
+* Java-doc-like thing for the libraries incorporated into documentation.
+  (TJ).
+
+* Rework documentation to be up to date. (JGM)
+
+* Web-page:
+  * graphic (Mike)
+  * get ADM to set up www.cs.cornell.edu/cyclone (JGM)
+  * introductory page and links (JGM)
+
+* Licensing (TJ)
+  * libraries
+  * tests (in particular, James Cheney's code and the Shootout code)
+  * INRIA and ocamllex
+
+* Install script and target directory structure (Matthew & Mike)
+  * script to build release tar files or whatever
+  * target directory structure -- follow GNU here
+  * uninstall
+  * RPM's and precompiled setups for linux and Win32
+  * automatically get version number into things
+
+* as many bug fixes as possible (see below)
+  * get rid of need for "using" for the C standard library -- two sets of
+    .h files, one that does the using automatically.
+
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
+* make command line arguments more like gcc:  version? what happens
+  when no files are given?  what happens when we have the wrong extension?
+  (need flags to say how to treat it, ie. as cyc file, as .o file, as .c
+  file, etc.)
+
+* name mangling needs to be dealt with
+
+* minimize initializing
+
+* should allow casting to void
+
+* need two versions of the .h files for the standard C library --
+  one which uses the namespace automatically, and one that doesn't.
+  Note that this requires fixing the using Foo; using Foo; bug.
+
 * FIX all of the FIX things.
 
 * need to add anonymous enums
@@ -10,6 +53,12 @@ BUG FIXES and UNSOUNDNESSES:
 
 * can't cast char?? to const char? const ? (or whatever it is.)
 
+<<<<<<< todo.txt
+* int foo[] = { 0,0,0 } works but int foo[] = { for i < 3 : 0 }
+  doesn't
+
+=======
+>>>>>>> 1.49
 * add F-bounded polymorphism or at least make it possible to abstract
   qualifiers.  The string library isn't polymorphic enough because in
   many places, we want to pass in a mutable string and get out the
