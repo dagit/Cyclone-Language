@@ -245,10 +245,10 @@ bin/genfiles/install_path.c: $(CYCDIR)/Makefile.inc
 
 bin/lib/$(CYCLIB): bin/lib/cyc-lib/$(build)/cyc_setjmp.h
 bin/lib/$(CYCLIB): \
-  $(addprefix build/$(build)/, $(O_LIBS)) \
-  $(addprefix build/$(build)/, $(O_BOOT_LIBS)) \
   build/$(build)/include/cstubs.$(O) \
-  build/$(build)/include/cycstubs.$(O)
+  build/$(build)/include/cycstubs.$(O) \
+  $(addprefix build/$(build)/, $(O_BOOT_LIBS)) \
+  $(addprefix build/$(build)/, $(O_LIBS))
 	-$(RM) $@
 	ar rc $@ \
 	  $(addprefix build/$(build)/, $(O_LIBS)) \
@@ -260,10 +260,10 @@ bin/lib/$(CYCLIB): \
 ifneq ($(build),$(target))
 bin/lib/cyc-lib/$(target)/$(CYCLIB): bin/lib/cyc-lib/$(target)/cyc_setjmp.h
 bin/lib/cyc-lib/$(target)/$(CYCLIB): \
-  $(addprefix build/$(target)/, $(O_LIBS)) \
-  $(addprefix build/$(target)/, $(O_BOOT_LIBS)) \
   build/$(target)/include/cstubs.$(O) \
-  build/$(target)/include/cycstubs.$(O)
+  build/$(target)/include/cycstubs.$(O) \
+  $(addprefix build/$(target)/, $(O_LIBS)) \
+  $(addprefix build/$(target)/, $(O_BOOT_LIBS))
 	-$(RM) $@
 	ar rc $@ \
 	  $(addprefix build/$(target)/, $(O_LIBS)) \
@@ -440,12 +440,14 @@ endif
 # FIX: the cp moves some temp files ??
 build/$(build)/include/cycstubs.cyc: bin/cyc-lib/libc.cys
 	bin/buildlib -Bbin/lib/cyc-lib -d $(@D) $<
-	cp $(@D)/*.h bin/lib/cyc-lib/$(build)/include
+	cp -r $(@D)/* bin/lib/cyc-lib/$(build)/include
+#	cp $(@D)/*.h bin/lib/cyc-lib/$(build)/include
 
 ifneq ($(build),$(target))
 build/$(target)/include/cycstubs.cyc: bin/cyc-lib/libc.cys
 	bin/buildlib $(BTARGET) -Bbin/lib/cyc-lib -d $(@D) $<
-	cp $(@D)/*.h bin/lib/cyc-lib/$(target)/include
+	cp -r $(@D)/* bin/lib/cyc-lib/$(target)/include
+#	cp $(@D)/*.h bin/lib/cyc-lib/$(target)/include
 endif
 
 build/$(build)/include/precore_c.h: \
@@ -471,11 +473,11 @@ build/$(target)/include/cstubs.$(O): build/$(target)/include/cstubs.c build/$(ta
 endif
 
 build/$(build)/include/cycstubs.$(O): build/$(build)/include/cycstubs.cyc bin/cyclone$(EXE)
-	bin/cyclone$(EXE) -save-c -Iinclude -Bbin/lib/cyc-lib -c -o $@ $<
+	bin/cyclone$(EXE) -save-c -Iinclude -Ibin/lib/cyc-lib/$(build)/include -Bbin/lib/cyc-lib -c -o $@ $<
 
 ifneq ($(build),$(target))
 build/$(target)/include/cycstubs.$(O): build/$(target)/include/cycstubs.cyc bin/cyclone$(EXE)
-	bin/cyclone$(EXE) $(BTARGET) -save-c -Iinclude -Bbin/lib/cyc-lib -c -o $@ $<
+	bin/cyclone$(EXE) $(BTARGET) -save-c -Iinclude -Ibin/lib/cyc-lib/$(build)/include -Bbin/lib/cyc-lib -c -o $@ $<
 endif
 
 bin/lib/cyc-lib/$(build)/gc.a: gc/.libs/libgc.a
