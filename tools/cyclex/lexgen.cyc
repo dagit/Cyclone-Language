@@ -112,10 +112,10 @@ static Set<transition_t> firstpos(regexp_t r) {
   case Chars(pos):  return Set::insert(Set::empty(transition_cmp),OnChars(pos));
   case Action(act): return Set::insert(Set::empty(transition_cmp),ToAction(act));
   case Seq(r1,r2):  if(nullable(r1)) 
-                      return union_two(firstpos(r1),firstpos(r2));
+                      return Set::union_two(firstpos(r1),firstpos(r2));
                     else
 		      return firstpos(r1);
-  case Alt(r1,r2):  return union_two(firstpos(r1),firstpos(r2));
+  case Alt(r1,r2):  return Set::union_two(firstpos(r1),firstpos(r2));
   case Star(r1):    return firstpos(r1);
   }
 }
@@ -126,10 +126,10 @@ static Set<transition_t> lastpos(regexp_t r) {
   case Chars(pos):  return Set::insert(Set::empty(transition_cmp),OnChars(pos));
   case Action(act): return Set::insert(Set::empty(transition_cmp),ToAction(act));
   case Seq(r1,r2):  if(nullable(r2)) 
-                      return union_two(lastpos(r1),lastpos(r2));
+                      return Set::union_two(lastpos(r1),lastpos(r2));
                     else
 		      return lastpos(r2);
-  case Alt(r1,r2):  return union_two(lastpos(r1),lastpos(r2));
+  case Alt(r1,r2):  return Set::union_two(lastpos(r1),lastpos(r2));
   case Star(r1):    return lastpos(r1);
   }
 }
@@ -138,7 +138,7 @@ static
 void fill_pos($(Set<transition_t> ?, Set<transition_t>)@env, transition_t t) {
   let &$(v, first) = env;
   switch (t) {
-  case OnChars(pos): v[pos] = union_two(v[pos], first); break;
+  case OnChars(pos): v[pos] = Set::union_two(v[pos], first); break;
   case ToAction(_):  break;
   }
 }

@@ -573,7 +573,6 @@ static $(tqual,typ,list<tvar>) apply_tms(tqual tq, typ t,
       case NoTypes(_,loc):
         throw abort("function declaration without parameter types",loc);
       }
-      throw abort("can't get here 1",DUMMYLOC); // Fix
     }
     case TypeParams_mod(ts,loc): {
       // If we are the last type modifier, this could be the list of
@@ -598,7 +597,6 @@ static $(tqual,typ,list<tvar>) apply_tms(tqual tq, typ t,
       }
     }
   }
-  throw abort("can't get here 2",DUMMYLOC); // Fix
 }
 
 

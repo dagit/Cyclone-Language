@@ -82,7 +82,7 @@ STRING_H    := string.h     $(CORE_H) $(LIST_H) $(STDIO_H)
 XARRAY_H    := xarray.h     $(CORE_H)
 ARG_H       := arg.h        $(CORE_H) $(LIST_H)
 POSITION_H  := position.h   $(CORE_H) $(LIST_H) $(LINENO_H)
-BITVEC_H    := bitvec.h     $(CORE_H) $(LIST_H) $(SET_H)    $(DICT_H)
+BITVEC_H    := bitvec.h     $(LIST_H) $(SET_H)  
 MATH_H      := math.h
 ASSERT_H    := assert.h     $(CORE_H)
 

@@ -183,6 +183,9 @@ Set<`a> delete<`a>(Set<`a> s,`a elt) {
   else return(s);
 }
 
+/* Note: For efficiency we don't copy, but that means clients can
+         screw up our invariants!
+*/
 list<`a> elements<`a>(Set<`a> s) {
   return(s->nodes);
 }

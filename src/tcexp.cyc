@@ -39,13 +39,20 @@ static typ expr_err(tenv te,segment loc,string msg) {
 // The qualified identifier q could be a variable, an enum
 // constructor, or an xenum constructor.  We resolve q and overwrite
 // the expression e with the appropriate r.
+// We must always overwrite e to prevent the compiler from diverging.
 static void resolve_unknown_id(tenv te, exp e, qvar q) {
-  switch (lookup_ordinary(te,e->loc,q)) {
+  try switch (lookup_ordinary(te,e->loc,q)) {
   case VarRes(b):        e->r = Var_e(q,b); break;
   case EnumRes(ed,ef):   e->r = Enum_e(null,null,null,ed,ef); break;
   case XenumRes(xed,ef): e->r = Xenum_e(null,null,xed,ef);    break;
   case StructRes(_):
     terr(e->loc,xprintf("bad occurrence of struct name %s",qvar2string(q)));
+    e->r = Var_e(q,Unresolved_b);
+    break;
+  } catch { 
+  case Dict::Absent:
+    // This is an error, but the message will be printed elsewhere.
+    // Here we just put the "I don't know" answer in e->r
     e->r = Var_e(q,Unresolved_b);
     break;
   }
@@ -62,19 +69,23 @@ static void resolve_unknown_fn(tenv te, exp e, exp e1, list<exp> es) {
   case UnknownId_e(q):
     try {
       switch (lookup_ordinary(te,e1->loc,q)) {
-      case VarRes(b):        e->r = FnCall_e(e1,es);            return;
+      case VarRes(b):        
+	e->r = FnCall_e(e1,es); 
+	return;
       case EnumRes(ed,ef):
         if (ef->typs == null)
           // Don't allow "foo()", require "foo"
           terr(e->loc,xprintf("%s is a constant, not a function",
                               qvar2string(ef->name)));
-        e->r = Enum_e(null,null,es,ed,ef); return;
+        e->r = Enum_e(null,null,es,ed,ef); 
+	return;
       case XenumRes(xed,ef):
         if (ef->typs == null)
           // Don't allow "foo()", require "foo"
           terr(e->loc,xprintf("%s is a constant, not a function",
                               qvar2string(ef->name)));
-        e->r = Xenum_e(null,es,xed,ef);    return;
+        e->r = Xenum_e(null,es,xed,ef);    
+	return;
       case StructRes(sd):
 	let des = List::map(make_struct_arg,es);
 	if (sd->name != null)
@@ -90,7 +101,9 @@ static void resolve_unknown_fn(tenv te, exp e, exp e1, list<exp> es) {
       terr(e1->loc, xprintf("unbound identifier %s",qvar2string(q)));
       return;
     }
-  default: e->r = FnCall_e(e1,es); return;
+  default: 
+    e->r = FnCall_e(e1,es); 
+    return;
   }
 }
 
@@ -1160,7 +1173,8 @@ static bool cnst_exp(tenv te, bool var_okay, exp e) {
 
   case Var_e(qv,_):
     // NB: top-level function names and arrays are "constant"
-    switch (lookup_ordinary(te, e->loc, qv)) {
+    // Ignore unbound variables b/c should be reported elsewhere
+    try switch (lookup_ordinary(te, e->loc, qv)) {
     case VarRes(Funname_b(_)): return true;
     case VarRes(Global_b(vd)):
       switch (compress(vd->type)) {
@@ -1168,7 +1182,7 @@ static bool cnst_exp(tenv te, bool var_okay, exp e) {
       default: return var_okay;
       }
     default: return var_okay;
-    }
+    } catch { case Dict::Absent: return false; }
 
   case Conditional_e(e1,e2,e3):
     return (cnst_exp(te,false,e1)

@@ -213,6 +213,48 @@ $(`a,`b)@ choose<`a,`b>(Dict<`a,`b> d) {
   return &$(d->t->key_val[0], d->t->key_val[1]);
 }
 
+static bool forall_tree_c<`a,`b,`c>(bool f(`c,`a,`b),`c env,struct T<`a,`b>@ t){
+  let &T(_,left,right,$(key,val)) = t;
+  return 
+    f(env,key,val) 
+    && (left  == null || forall_tree_c(f,env,(struct T<`a,`b>@)left))
+    && (right == null || forall_tree_c(f,env,(struct T<`a,`b>@)right));
+}
+
+bool forall_c<`a,`b,`c>(bool f(`c,`a,`b), `c env, Dict<`a,`b> d) {
+  if(d->t == null)
+    return true;
+  return forall_tree_c(f, env, (struct T<`a,`b>@)d->t);
+}
+
+// TO DO: Add the env version for union and intersect.
+static Dict<`a,`b> union_f<`a,`b>(`b f(`b,`b), `a a, `b b, Dict<`a,`b> d1) {
+  if(Dict::member(d1,a))
+    return Dict::insert(d1, a, f(Dict::lookup(d1, a), b));
+  else
+    return Dict::insert(d1, a, b);
+}
+Dict<`a,`b> union_two<`a,`b>( `b f(`b,`b), Dict<`a,`b> d1, Dict<`a,`b> d2) {
+  if(d1 == d2)
+    return d1;
+  return Dict::fold_c(union_f, f, d2, d1);
+}
+
+static void intersect_f<`a,`b>($(`b (@f)(`b,`b),Dict<`a,`b>,Dict<`a,`b>) @ trip,
+			       `a a, `b b) {
+  let &$(f,d1,*d3_ptr) = trip;
+  if(Dict::member(d1,a))
+    *d3_ptr = Dict::insert(*d3_ptr, a, f(Dict::lookup(d1, a), b));
+}
+Dict<`a,`b> intersect<`a,`b>(`b (@f)(`b,`b), Dict<`a,`b> d1, Dict<`a,`b> d2) {
+  if(d1 == d2)
+    return d1;
+  // must enrich regions so env can be stack allocated
+  let env = &$(f, d1, Dict::empty(d1->rel));
+  Dict::iter_c(intersect_f, env, d2);
+  return (*env)[2];
+}
+
 List::list<$(`a,`b)@> to_list_f<`a,`b>(`a k, `b v, List::list<$(`a,`b)@> accum){
   return &List::cons(&$(k,v),accum);
 }

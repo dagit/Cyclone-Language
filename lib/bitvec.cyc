@@ -19,22 +19,22 @@ namespace Bitvec {
 #define POS_TO_BIT(pos)  (pos & 0x1F)
 #define INTSZ 32
 
-bool get(BITVEC bvec, int pos) {
+bool get(bitvec_t bvec, int pos) {
   int word   = POS_TO_WORD(pos);
   int offset = POS_TO_BIT(pos);
   return ((bvec[word] >> offset) & 1) == 1;
 }  
-void set(BITVEC bvec, int pos) {
+void set(bitvec_t bvec, int pos) {
   int word   = POS_TO_WORD(pos);
   int offset = POS_TO_BIT(pos);
   bvec[word] = bvec[word] | (1 << offset);
 }
-void clear(BITVEC bvec, int pos) {
+void clear(bitvec_t bvec, int pos) {
   int word   = POS_TO_WORD(pos);
   int offset = POS_TO_BIT(pos);
   bvec[word] = bvec[word] & ~(1 << offset);
 }
-bool get_and_set(BITVEC bvec, int pos) {
+bool get_and_set(bitvec_t bvec, int pos) {
   int  word   = POS_TO_WORD(pos);
   int  offset = POS_TO_BIT(pos);
   int  slot   = bvec[word];
@@ -43,22 +43,22 @@ bool get_and_set(BITVEC bvec, int pos) {
     bvec[word] = slot | (1 << offset);
   return ans;
 }
-void union_two(BITVEC dest, BITVEC src1, BITVEC src2) {
+void union_two(bitvec_t dest, bitvec_t src1, bitvec_t src2) {
   int len = dest.size;
   for(int i=0; i<len; ++i)
     dest[i] = src1[i] | src2[i];
 }
-void intersect_two(BITVEC dest, BITVEC src1, BITVEC src2) {
+void intersect_two(bitvec_t dest, bitvec_t src1, bitvec_t src2) {
   int len = dest.size;
   for(int i=0; i<len; ++i)
     dest[i] = (src1[i] & src2[i]);
 } 
-void diff_two(BITVEC dest, BITVEC src1, BITVEC src2) {
+void diff_two(bitvec_t dest, bitvec_t src1, bitvec_t src2) {
  int len = dest.size;
  for(int i=0; i<len; ++i)
     dest[i] = src1[i] & ~src2[i];
 } 
-bool compare_two(BITVEC src1, BITVEC src2) {
+bool compare_two(bitvec_t src1, bitvec_t src2) {
   int len = src1.size;
   for (int i=0; i<len; ++i)
     if (src1[i] != src2[i])
@@ -67,27 +67,27 @@ bool compare_two(BITVEC src1, BITVEC src2) {
 }
 
 // makes one more entry then necessary when sz ia multiple of INTSZ
-BITVEC new_empty(int sz) {
-  BITVEC ans = new {for i < (sz / INTSZ)+1 : 0};
+bitvec_t new_empty(int sz) {
+  bitvec_t ans = new {for i < (sz / INTSZ)+1 : 0};
   return ans;
 }
-BITVEC new_full(int sz) {
-  BITVEC ans = new {for i < (sz / INTSZ)+1 : 0xFFFFFFFF};
+bitvec_t new_full(int sz) {
+  bitvec_t ans = new {for i < (sz / INTSZ)+1 : 0xFFFFFFFF};
   return ans;
 }
-BITVEC new_copy(BITVEC old) {
-  BITVEC copy = new_empty(old.size);
+bitvec_t new_copy(bitvec_t old) {
+  bitvec_t copy = new_empty(old.size);
   union_two(copy,copy,old);
   return copy;
 }
-BITVEC from_list<`a,`b>(Dict::Dict<`a,`b> d, int f(`b), 
+bitvec_t from_list<`a,`b>(Dict::Dict<`a,`b> d, int f(`b), 
 			int sz, List::list<`a> l) {
-  BITVEC ans = new {for i < (sz % INTSZ)+1 : 0};
+  bitvec_t ans = new {for i < (sz % INTSZ)+1 : 0};
   for(; l!=null;l=l->tl)
     set(ans, f(Dict::lookup(d,l->hd)));
   return ans;
 }
-List::list<int> to_sorted_list(BITVEC bvec,int sz) {
+List::list<int> to_sorted_list(bitvec_t bvec,int sz) {
   List::list<int> ans = null;
   for(int pos=sz-1; pos >= 0; ) {
     int word = POS_TO_WORD(pos);
@@ -99,32 +99,32 @@ List::list<int> to_sorted_list(BITVEC bvec,int sz) {
   return ans;
 }  
   
-void clear_all(BITVEC bvec) {
+void clear_all(bitvec_t bvec) {
   int len = bvec.size;
   for (int i=0; i < len; ++i)
     bvec[i] = 0;
 }
-void set_all(BITVEC bvec) {
+void set_all(bitvec_t bvec) {
   int len = bvec.size;
   for (int i=0; i < len; ++i)
     bvec[i] = 0xFFFFFFFF;
 }
 
-bool all_set(BITVEC bvec, int sz) {
+bool all_set(bitvec_t bvec, int sz) {
   int words = POS_TO_WORD(sz);
 
-  for(int i=0; i < words; i++) {
-    if (bvec[i] != 0xFFFFFFFF) return false;
-  }
-  for(int i=words*INTSZ; i < sz; i++) {
-    if (!get(bvec,i)) return false;
-  }
+  for(int i=0; i < words; i++)
+    if (bvec[i] != 0xFFFFFFFF)
+      return false;
+  for(int i=words*INTSZ; i < sz; i++)
+    if (!get(bvec,i)) 
+      return false;
   return true;
 }
     
 
 // for debugging
-void print_bvec(BITVEC bvec) {
+void print_bvec(bitvec_t bvec) {
   for (int i=0; i<INTSZ*(bvec.size); ++i)
     printf("%d",get(bvec,i)?1:0);
   printf("\n");

@@ -385,6 +385,8 @@ namespace Absyn {
     stmt                    body;
   };
 
+  // for structs and enums, we should really memoize the string to 
+  // field-number mapping!
   EXTERN_DEFINITION struct Structdecl {
     scope                                 sc;
     Opt_t<typedef_name_t>                 name;
@@ -549,12 +551,12 @@ namespace Absyn {
   /////////////////////////// Statements ///////////////////////////////
   extern stmt new_stmt(raw_stmt_t s, seg_t loc);
   extern stmt skip_stmt(seg_t loc);
-  extern stmt exp_stmt(exp e,seg_t loc);
+  extern stmt exp_stmt(exp e, seg_t loc);
   extern stmt seq_stmt(stmt s1, stmt s2, seg_t loc);
   extern stmt seq_stmts(list<stmt>, seg_t loc);
-  extern stmt return_stmt(exp_opt e,seg_t loc);
-  extern stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,seg_t loc);
-  extern stmt while_stmt(exp e,stmt s,seg_t loc);
+  extern stmt return_stmt(exp_opt e, seg_t loc);
+  extern stmt ifthenelse_stmt(exp e,stmt s1,stmt s2, seg_t loc);
+  extern stmt while_stmt(exp e,stmt s, seg_t loc);
   extern stmt break_stmt(seg_t loc);
   extern stmt continue_stmt(seg_t loc);
   extern stmt for_stmt(exp e1,exp e2,exp e3,stmt s, seg_t loc);

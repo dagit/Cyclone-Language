@@ -617,7 +617,7 @@ void xarray_test() {
 
 void bitvec_test() {
   test_begin("Bitvec");
-  BITVEC b1 = Bitvec::new_empty(24);  // a 24-bit vector
+  bitvec_t b1 = Bitvec::new_empty(24);  // a 24-bit vector
   Bitvec::set(b1,3);                  // set fourth and fifth bits
   Bitvec::set(b1,4);
   okfail(Bitvec::get(b1,3));
@@ -626,13 +626,13 @@ void bitvec_test() {
   let l1 = Bitvec::to_sorted_list(b1,24);
   okfail(0==list_cmp(int_cmp,l1,
                      &cons(3,&cons(4,null))));
-  BITVEC b2 = Bitvec::new_full(24);
-  BITVEC b3 = Bitvec::new_empty(24);
+  bitvec_t b2 = Bitvec::new_full(24);
+  bitvec_t b3 = Bitvec::new_empty(24);
   Bitvec::intersect_two(b3,b1,b2);
   okfail(Bitvec::compare_two(b3,b1));
   Bitvec::union_two(b3,b1,b2);
   okfail(Bitvec::compare_two(b3,b2));
-  BITVEC b4 = Bitvec::new_empty(24);
+  bitvec_t b4 = Bitvec::new_empty(24);
   Bitvec::diff_two(b3,b2,b1);
   Bitvec::intersect_two(b3,b3,b1);
   okfail(Bitvec::compare_two(b3,b4));

@@ -71,6 +71,16 @@ extern Dict<`a,`c> map<`a,`b,`c>(`c f(`b),Dict<`a,`b> d);
 // Same but map an unboxed closure across the dictionary
 extern Dict<`a,`c> map_c<`a,`b,`c,`d>(`c f(`d,`b),`d env,Dict<`a,`b> d);
 
+// Combine two dicts. Domain is union of old domains.  For values in both
+// dictionaries, compute new value using f.
+extern Dict<`a,`b> union_two<`a,`b>(`b (@f)(`b,`b),
+				    Dict<`a,`b> d1,Dict<`a,`b> d2);
+
+extern Dict<`a,`b> intersect<`a,`b>(`b (@f)(`b,`b),
+				    Dict<`a,`b> d1, Dict<`a,`b> d2);
+
+extern bool forall_c<`a,`b,`c>(bool f(`c,`a,`b), `c env, Dict<`a,`b> d);
+
 // Return a key/data pair (in this case -- the first one in the dict).
 // If the dict is empty, raise Absent.
 extern $(`a,`b)@ choose<`a,`b>(Dict<`a,`b> d);

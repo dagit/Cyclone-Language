@@ -1,6 +1,7 @@
 // A pass over the code, after type-checking that:
-// * Ensures variables are defined before they are used
-// * Ensures goto doesn't enter a declaration or exception handler
+// * Ensures variables (and local-aggregate fields) 
+//   are defined before they are used
+// * Ensures goto does not enter a declaration or exception handler
 // * Ensures non-void functions return
 // * Ensures cases do not implicitly fall-through
 
@@ -22,28 +23,48 @@
 //       monotonic.  We'll need expression annotations to do null-check
 //       warning correctly w.r.t. undefined evaluation order.  It will be
 //       interesting to see how well such expression munging scales.
+//       Alertnately, we'll do something more conservative for obfuscated
+//       expressions, eg., one that assigns a variable null in the "middle".
 
 #include "core.h"
 #include "list.h"
 #include "set.h"
+#include "dict.h"
 #include "string.h"
 #include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"
+#include "evexp.h"
 #include "control_flow.h"
 
 using Core;
 using List;
-using Set;
 using Absyn;
 using Absynpp;
 using Tcutil;
 
 namespace ControlFlow;
 
+typedef vardecl           vardecl_t;
+typedef field_name        field_name_t;
+typedef Set::Set<`a>      set_t<`a>;
+typedef Dict::Dict<`a,`b> dict_t<`a,`b>;
+
 // The set of variables that may be unassigned.
-// Note it is imperative that vardecls are shared -- we use pointer equality.
-typedef Set<vardecl> flow_info_t;
+// Note we exploit that vardecls are shared -- we use pointer equality
+// to compare fields of this type.
+// Note we could treat a simple var as a one-field thing, but it seems
+// worth special-casing (more intuitive and more efficient)
+// FIX: Would be better to tie the knot so we can allow nested structs
+//      and tuples.  (The question is how this interacts with pointers
+//      which are the real issue.)  Probably suffices to just make the codomain
+//      a set of list of "int or field_name".
+static struct FlowInfo {
+  set_t<vardecl_t>                     simples; // vars are uninitialized
+  dict_t<vardecl_t, set_t<int>>        tuples;  // codomain is uninitialized
+  dict_t<vardecl_t, set_t<field_name>> structs; // codomain is uninitialized
+};
+typedef struct FlowInfo flow_info_t; // NOT a pointer!!!
 
 static struct Tqual     bogus_tqual     = Tqual(false,false,false);
 static string           empty_string    = "";
@@ -51,40 +72,118 @@ static $(enum Nmspace,var) bogus_qvar   = $(Abs_n(null),&empty_string);
 static struct Vardecl   bogus_vardecl_v = Vardecl(Public, &bogus_qvar,
 						  &bogus_tqual, VoidType, null,
 						  0, 0);
-static vardecl bogus_vardecl = &bogus_vardecl_v;
+static vardecl_t bogus_vardecl = &bogus_vardecl_v;
 
-static Opt_t<Set<vardecl>> empty_vardecl_set_opt = null;
-
-// Can't use Core::ptrcmp because Vardecl is a memory type
-static int vardecl_cmp(vardecl vd1, vardecl vd2) {
-  if(vd1 == vd2) return 0;
-  if(vd1 >  vd2) return 1;
-  return -1;
-}
+static flow_info_t * empty_flow_info = null;
 
 static flow_info_t empty_flow() {
-  if(empty_vardecl_set_opt == null)
-    empty_vardecl_set_opt = (Opt_t<Set<vardecl>>)&Opt(Set::empty(vardecl_cmp));
-  return empty_vardecl_set_opt->v;
+  if(empty_flow_info == null)
+    empty_flow_info = &FlowInfo(Set::empty(ptrcmp), 
+				Dict::empty(ptrcmp),
+				Dict::empty(ptrcmp));
+  return *empty_flow_info;
 }
+
 // There's exactly a 50% chance I've named merge and meet correctly. :-)
+// WARNING: You can try to do all this with a lot less allocation (of sets
+//  and dicts) or with less live space (with bit vectors), but the code gets
+//  a lot muckier.  Let's hope this stuff is fast enough in practice.
 static flow_info_t merge_flow(flow_info_t f1, flow_info_t f2) {
-  return Set::union_two(f1,f2);
+  return FlowInfo(Set::union_two(f1.simples, f2.simples),
+		  Dict::union_two(Set::union_two, f1.tuples,  f2.tuples),
+		  Dict::union_two(Set::union_two, f1.structs, f2.structs));
 }
 static flow_info_t meet_flow(flow_info_t f1, flow_info_t f2) {
-  return Set::intersect(f1,f2);
+  return FlowInfo(Set::intersect(f1.simples, f2.simples),
+		  Dict::intersect(Set::intersect, f1.tuples,  f2.tuples),
+		  Dict::intersect(Set::intersect, f1.structs, f2.structs));
 } 
+
+static bool dict_less_than_f<`a,`b>(dict_t<`a,set_t<`b>> d2, `a a, set_t<`b> s){
+  return !Dict::member(d2,a) || Set::subset(s, Dict::lookup(d2,a));
+}
 static bool less_than_flow(flow_info_t f1, flow_info_t f2) {
-  return subset(f1,f2);
+  return 
+    Set::subset(f1.simples,f2.simples) 
+    && Dict::forall_c(dict_less_than_f, f1.tuples,  f2.tuples)
+    && Dict::forall_c(dict_less_than_f, f1.structs, f2.structs);
 }
-static flow_info_t add_unassigned(flow_info_t f, vardecl vd) {
-  return Set::insert(f,vd);
+static flow_info_t add_unassigned(flow_info_t f, vardecl_t vd) {
+  // track aggregate types more precisely.  For under-constrained types,
+  // I think it's sound and reasonable to just treat them as simple.
+  switch (compress(vd->type)) {
+  case TupleType(l):
+    let n = List::length(l) - 1;
+    let s = Set::empty(intcmp);
+    for(; n >= 0; --n)
+      s = Set::insert(s, n);
+    return FlowInfo(f.simples, Dict::insert(f.tuples, vd, s), f.structs);
+  case StructType(_,_, & &Structdecl(_,_,_,&Opt(fs))):
+    let s = Set::empty(String::zstrptrcmp);
+    for(; fs != null; fs = fs->tl)
+      s = Set::insert(s, (*fs->hd)[0]);
+    return FlowInfo(f.simples, f.tuples, Dict::insert(f.structs, vd, s));
+  default:
+    return FlowInfo(Set::insert(f.simples,vd), f.tuples, f.structs);
+  }
 }
-static flow_info_t remove_unassigned(flow_info_t f, vardecl vd) {
-  return Set::delete(f,vd);
+// Note: Dict doesn't support delete, whereas SlowDict does.
+//       Instead I leave a "zombie" in the dict as an empty set.
+//       (For efficiency should share the empty sets.)
+static flow_info_t remove_unassigned(flow_info_t f, vardecl_t vd) {
+  if(Set::member(f.simples,vd))
+    return FlowInfo(Set::delete(f.simples,vd), 
+		    f.tuples, 
+		    f.structs);
+  if(Dict::member(f.tuples,vd))
+    return FlowInfo(f.simples, 
+		    Dict::insert(f.tuples,vd,Set::empty(intcmp)),
+		    f.structs);
+  if(Dict::member(f.structs,vd))
+    return FlowInfo(f.simples,
+		    f.tuples,
+		    Dict::insert(f.structs,vd,Set::empty(String::zstrptrcmp)));
+  return f;
 }
-static bool is_unassigned(flow_info_t f, vardecl vd) {
-  return Set::member(f,vd);
+static flow_info_t remove_unassigned_tuplefield(flow_info_t f, vardecl_t vd, 
+						int field) {
+  if(Dict::member(f.tuples,vd)) {
+    let s = Dict::lookup(f.tuples,vd);
+    if(Set::member(s, field))
+      return FlowInfo(f.simples,
+		      Dict::insert(f.tuples, vd, Set::delete(s, field)),
+		      f.structs);
+  }
+  return f;
+}
+static flow_info_t remove_unassigned_structfield(flow_info_t f, vardecl_t vd, 
+						 field_name_t field) {
+  if(Dict::member(f.structs,vd)) {
+    let s = Dict::lookup(f.structs,vd);
+    if(Set::member(s, field))
+      return FlowInfo(f.simples,
+		      f.tuples,
+		      Dict::insert(f.structs, vd, Set::delete(s, field)));
+  }
+  return f;
+}
+
+// Note: We're now doing significantly more work per variable access.
+//   Could avoid the Dict::member calls when type is non-tuple or non-struct.
+static bool is_unassigned(flow_info_t f, vardecl_t vd) {
+  return Set::member(f.simples,vd)
+    || Dict::member(f.tuples, vd) && !Set::is_empty(Dict::lookup(f.tuples, vd))
+    || Dict::member(f.structs,vd) && !Set::is_empty(Dict::lookup(f.structs,vd));
+}
+static bool is_unassigned_tuplefield(flow_info_t f, vardecl_t vd, 
+				     int field) {
+  return Dict::member(f.tuples,vd) 
+    && Set::member(Dict::lookup(f.tuples,vd),field);
+}
+static bool is_unassigned_structfield(flow_info_t f, vardecl_t vd,
+				      field_name_t field) {
+  return Dict::member(f.structs,vd) 
+    && Set::member(Dict::lookup(f.structs,vd),field);
 }
 
 abstract struct CFStmtAnnot {
@@ -114,8 +213,7 @@ struct CFExpSyn {
 typedef struct CFExpSyn cfexpsyn_t; // NOT a pointer!!!
 
 static flow_info_t expsynth_to_flow(cfexpsyn_t syn) {
-  return merge_flow(syn.when_true, 
-		    syn.when_false);
+  return merge_flow(syn.when_true, syn.when_false);
 }
 
 // s1 and s2 are from an e1 and e2 that may execute in either order, but
@@ -163,7 +261,6 @@ static void update_flow(stmt s, flow_info_t new_flow) {
 static flow_info_t cf_check_stmt(flow_info_t, stmt);
 static cfexpsyn_t  cf_check_exp (flow_info_t, exp);
 
-// Note how monotonicity (things only become defined) helps us.
 static cfexpsyn_t cf_check_explist_unordered(flow_info_t env, list<exp> es) {
   cfexpsyn_t accum = CFExpSyn(env,env);
   // undefined eval order means we check each exp under env
@@ -178,38 +275,75 @@ static cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
   case Const_e(Int_c(Signed,_)): return CFExpSyn(env, empty_flow());
     // could try to evaluate expressions here, but I think it makes more
     // sense to do such constant folding earlier and separately.
-  case Const_e(_):             return CFExpSyn(env, env);
+  case Const_e(_):     return CFExpSyn(env, env);
+  case Primop_e(_,es): return cf_check_explist_unordered(env,es);
 
+    // FIX: Once we support nested aggregates, we will need recursion to
+    // detect "interesting" lvalues.
+  // Var, StructMember and Subscript need to check for iniialization
   case Var_e(&$(_,v),Local_b(vd)):
     if(is_unassigned(env,vd))
-      terr(e0->loc, xprintf("variable %s may not be initialized",*v));
+      terr(e0->loc, xprintf("variable %s may be uninitialized",*v));
     return CFExpSyn(env,env);
   case Var_e(_,_):     
     return CFExpSyn(env,env);
-
-  case Primop_e(_,es): return cf_check_explist_unordered(env,es);
-
-  case AssignOp_e(&Exp(_,Var_e(_,Local_b(vd)),_),null,e2):
-    // notice we check e2 before initializing the var
-    // also notice the primop must be null
-    let flow = remove_unassigned(expsynth_to_flow(cf_check_exp(env,e2)), vd);
-    return CFExpSyn(flow,flow);
+  case StructMember_e(&Exp(_,Var_e(&$(_,v),Local_b(vd)),_),field): 
+    if(is_unassigned_structfield(env,vd,field))
+      terr(e0->loc, xprintf("field %s of struct %s may be uninitialized",
+			    *field, *v));
+    return CFExpSyn(env,env);
+  case StructMember_e(e,_):
+    return cf_check_exp(env,e);
+  case Subscript_e(e1,e2):
+    switch ($(e1->r,compress(e1->topt->v))) {
+    case $(Var_e(&$(_,v),Local_b(vd)), TupleType(_)):
+      // no need to deal with e2 initializing b/c it is a constant exp
+      // I wonder how many times the compiler computes the field number.
+      let field = Evexp::eval_const_uint_exp(e2);
+      if(is_unassigned_tuplefield(env,vd,field))
+	terr(e0->loc, xprintf("field %u of tuple %s may be uninitialized",
+	                      field, *v));
+      return CFExpSyn(env,env);
+    default: return meet_expsynth(cf_check_exp(env,e1), cf_check_exp(env,e2));
+    }
+    
+    // AssignOp of Var, StructMember, and Subscript (of tuple) must initialize
+    // Note: we check e2 before initializing the var.
+    // Note: we must not have a primop (eg. +=).
+  case AssignOp_e(e1,null,e2):
+    let syn2 = cf_check_exp(env,e2);
+    _ flow;
+    switch (e1->r) {
+    case Var_e(_,Local_b(vd)):
+      flow = remove_unassigned(expsynth_to_flow(syn2),vd);
+      return CFExpSyn(flow,flow);
+    case StructMember_e(&Exp(_,Var_e(_,Local_b(vd)),_),field): 
+      flow = remove_unassigned_structfield(expsynth_to_flow(syn2),vd,field);
+      return CFExpSyn(flow,flow);
+    case Subscript_e(e3,e4):
+      switch ($(e3->r,compress(e3->topt->v))) {
+      case $(Var_e(_,Local_b(vd)), TupleType(_)):
+	let field = Evexp::eval_const_uint_exp(e4);
+	flow = remove_unassigned_tuplefield(expsynth_to_flow(syn2),vd,field);
+	return CFExpSyn(flow,flow);
+      default: return meet_expsynth(cf_check_exp(env,e1), syn2);
+      }
+    default: return meet_expsynth(cf_check_exp(env,e1), syn2);
+    }
   case AssignOp_e(e1,_,e2):
     // Perhaps C guarantees left before right, in which case we're
     // overly conservative here.
-    return meet_expsynth(cf_check_exp(env,e1), 
-			 cf_check_exp(env,e2));
+    return meet_expsynth(cf_check_exp(env,e1), cf_check_exp(env,e2));
 
   case Conditional_e(e1,e2,e3):
-    let syn1 = cf_check_exp(env, e1);
+    let syn1 = cf_check_exp(env,             e1);
     let syn2 = cf_check_exp(syn1.when_true,  e2);
     let syn3 = cf_check_exp(syn1.when_false, e3);
     return CFExpSyn(merge_flow(syn2.when_true,  syn3.when_true),
 		    merge_flow(syn2.when_false, syn3.when_false));
 
   case FnCall_e(e,es):
-    // Perhaps C guarantees function before arguments, in which case we're
-    // overly conservative here.
+    // If C evaluates e before es, then we are overly conservative.
     return meet_expsynth(cf_check_exp(env,e),
 			 cf_check_explist_unordered(env, es));
   case Throw_e(e):
@@ -220,18 +354,15 @@ static cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
   case NoInstantiate_e(e):  fallthru(e);
   case Instantiate_e(e,_):  fallthru(e);
   case Cast_e(_,e):         fallthru(e);
-    // we current assume pointers always point at initialized memory
+    // we currently assume pointers always point at initialized memory
     // so we cannot allow &x when x is uninitialized.
   case Address_e(e):        fallthru(e);
   case Deref_e(e):          fallthru(e);
-  case StructMember_e(e,_): fallthru(e);
+    // FIX: StructMember with a lhs of a local needs to be checked for 
+    //      partial initialization.
   case StructArrow_e(e,_):  return cf_check_exp(env,e);
 
   case Sizeof_e(_): return CFExpSyn(env,env);
-
-  case Subscript_e(e1,e2):
-    return meet_expsynth(cf_check_exp(env,e1), 
-			 cf_check_exp(env,e2));
 
   case Tuple_e(es):        fallthru(es);
   case Enum_e(_,_,es,_,_): fallthru(es); 
@@ -272,7 +403,7 @@ static cfexpsyn_t cf_check_exp(flow_info_t env, exp e0) {
 }
 
 // true means the statement might fall-through
-// The cute hack is adding a variable that can't be assigned to.
+// The cute hack is adding a variable that cannot be assigned to.
 // That way, we can distinguish all-real-varibles-assigned from a jump.
 static bool cf_check_stmt_ft(flow_info_t env, stmt s) {
   return !less_than_flow(cf_check_stmt(add_unassigned(env,bogus_vardecl), s),
@@ -320,7 +451,7 @@ static flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
     return syn_e.when_false;
   case Do_s(body,$(e,cont)):
     let syn_b = cf_check_stmt(env,body);
-    _ syn_e = cf_check_exp(pre_stmt_check(syn_b,cont),e);
+    let syn_e = cf_check_exp(pre_stmt_check(syn_b,cont),e);
     update_flow(body, syn_e.when_true);
     return syn_e.when_false;
   case For_s(e1,$(e2,guard),$(e3,cont),body):
@@ -350,8 +481,7 @@ static flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
 
   case Break_s(null): // eg. break dest is function end.
     return empty_flow(); 
-  case Break_s(dest):    
-    fallthru(dest);
+  case Break_s(dest):     fallthru(dest);
   case Continue_s(dest):
     update_flow((stmt)dest, env);
     return empty_flow();
@@ -359,7 +489,6 @@ static flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
     update_flow((stmt)dest, 
 		expsynth_to_flow(cf_check_explist_unordered(env,es)));
     return empty_flow();
-
 
   // could someday refine env for branches, but seems rather unuseful
   // in non-pathological cases and/or a lot of work.

@@ -2495,7 +2495,7 @@ static void structdecl_to_c(structdecl s) {
 //
 // Then "Bar" maps to "Bar" and "Baz(e1,e2,e3)" maps to
 // ({ struct _Baz_struct *t = (struct _Baz_struct*)malloc(sizeof(_Baz_struct));
-//    *t = (struct _Baz_struct){->tag = _Baz_tag, ->f1 = e1, ->f2 = e2, ->f3 = e3};
+//    *t = (struct _Baz_struct){.tag = _Baz_tag, .f1 = e1, .f2 = e2, .f3 = e3};
 //    t; })
 //
 // NB: we allow any number of extern enum declarations and we require

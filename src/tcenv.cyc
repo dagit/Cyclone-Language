@@ -504,7 +504,12 @@ resolved_t lookup_ordinary(tenv te,segment loc,qvar q) {
     try return VarRes(Dict::lookup(fe->locals,v));
     catch {case Dict::Absent: return lookup_ordinary_global(te,loc,q);}
   default:
-    return lookup_ordinary_global(te,loc,q);    
+    try return lookup_ordinary_global(te,loc,q);    
+    catch {
+    case Dict::Absent: 
+      terr(loc,xprintf("unbound identifer: %s", Absynpp::qvar2string(q)));
+      return VarRes(Unresolved_b);
+    }
   }
 }
 
