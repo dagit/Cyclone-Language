@@ -576,50 +576,50 @@ int Cyc_Tcutil_is_void_type(void*);
 # 43
 int Cyc_Tcutil_is_any_int_type(void*);
 int Cyc_Tcutil_is_any_float_type(void*);
-# 114
+# 115
 void*Cyc_Tcutil_compress(void*t);
-# 116
+# 117
 int Cyc_Tcutil_coerce_arg(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,void*,int*alias_coercion);
 int Cyc_Tcutil_coerce_assign(struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Exp*,void*);
-# 141
+# 142
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
-# 143
+# 144
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 150
+# 151
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_trk;
-# 153
+# 154
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tmk;
-# 180
+# 181
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 194
+# 195
 void Cyc_Tcutil_explain_failure();
-# 196
+# 197
 int Cyc_Tcutil_unify(void*,void*);
-# 201
+# 202
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
-# 225
+# 226
 void*Cyc_Tcutil_fndecl2type(struct Cyc_Absyn_Fndecl*);struct _tuple13{struct Cyc_Absyn_Tvar*f1;void*f2;};
-# 229
+# 230
 struct _tuple13*Cyc_Tcutil_make_inst_var(struct Cyc_List_List*,struct Cyc_Absyn_Tvar*);
-# 264 "tcutil.h"
+# 265 "tcutil.h"
 void Cyc_Tcutil_check_fndecl_valid_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_Absyn_Fndecl*);
-# 272
+# 273
 void Cyc_Tcutil_check_type(unsigned int,struct Cyc_Tcenv_Tenv*,struct Cyc_List_List*bound_tvars,struct Cyc_Absyn_Kind*k,int allow_evars,int allow_abs_aggr,void*);
-# 309
+# 310
 int Cyc_Tcutil_is_noalias_path(struct Cyc_Absyn_Exp*e);
-# 314
+# 315
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*t);
-# 331
+# 332
 int Cyc_Tcutil_new_tvar_id();
-# 344
+# 345
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*e);
-# 347
+# 348
 int Cyc_Tcutil_is_var_exp(struct Cyc_Absyn_Exp*e);
-# 362
+# 363
 int Cyc_Tcutil_extract_const_from_typedef(unsigned int,int declared_const,void*);
-# 366
+# 367
 struct Cyc_List_List*Cyc_Tcutil_transfer_fn_type_atts(void*t,struct Cyc_List_List*atts);
-# 376
+# 377
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*l);
 # 28 "tcexp.h"
 void*Cyc_Tcexp_tcExp(struct Cyc_Tcenv_Tenv*,void**,struct Cyc_Absyn_Exp*);

@@ -716,61 +716,61 @@ void Cyc_Tcutil_warn(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_pt
 int Cyc_Tcutil_is_void_type(void*);
 # 46
 int Cyc_Tcutil_is_arithmetic_type(void*);
-# 48
+# 49
 int Cyc_Tcutil_is_pointer_type(void*t);
 int Cyc_Tcutil_is_array_type(void*t);
 int Cyc_Tcutil_is_boxed(void*t);
-# 53
+# 54
 int Cyc_Tcutil_is_dyneither_ptr(void*t);
-# 55
+# 56
 int Cyc_Tcutil_is_nullable_pointer_type(void*t);
-# 58
+# 59
 int Cyc_Tcutil_is_tagged_pointer_type(void*);
-# 68
+# 69
 void*Cyc_Tcutil_pointer_elt_type(void*t);
-# 76
+# 77
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*def,void*b);
-# 79
+# 80
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_type_bound(void*t);
-# 81
+# 82
 int Cyc_Tcutil_is_tagged_pointer_type_elt(void*t,void**elt_dest);
-# 83
+# 84
 int Cyc_Tcutil_is_zero_pointer_type_elt(void*t,void**elt_type_dest);
-# 89
+# 90
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*def,void*b);
-# 104
+# 105
 struct Cyc_Absyn_Exp*Cyc_Tcutil_deep_copy_exp(int preserve_types,struct Cyc_Absyn_Exp*);
-# 107
+# 108
 int Cyc_Tcutil_kind_leq(struct Cyc_Absyn_Kind*k1,struct Cyc_Absyn_Kind*k2);
-# 111
+# 112
 struct Cyc_Absyn_Kind*Cyc_Tcutil_tvar_kind(struct Cyc_Absyn_Tvar*t,struct Cyc_Absyn_Kind*def);
 struct Cyc_Absyn_Kind*Cyc_Tcutil_type_kind(void*t);
-# 114
+# 115
 void*Cyc_Tcutil_compress(void*t);
-# 142
+# 143
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_ak;
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 152
+# 153
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_tbk;
-# 196
+# 197
 int Cyc_Tcutil_unify(void*,void*);
-# 199
+# 200
 int Cyc_Tcutil_aggrfield_cmp(struct Cyc_Absyn_Aggrfield*,struct Cyc_Absyn_Aggrfield*);
-# 201
+# 202
 void*Cyc_Tcutil_substitute(struct Cyc_List_List*,void*);
-# 203
+# 204
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 288 "tcutil.h"
+# 289 "tcutil.h"
 struct Cyc_List_List*Cyc_Tcutil_resolve_aggregate_designators(struct _RegionHandle*rgn,unsigned int loc,struct Cyc_List_List*des,enum Cyc_Absyn_AggrKind,struct Cyc_List_List*fields);
-# 296
+# 297
 int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*e1,void**ptr_type,int*is_dyneither,void**elt_type);struct _tuple12{struct Cyc_Absyn_Tqual f1;void*f2;};
-# 350
+# 351
 void*Cyc_Tcutil_snd_tqt(struct _tuple12*);
-# 373
+# 374
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*b);
-# 376
+# 377
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*l);
-# 387
+# 388
 int Cyc_Tcutil_force_type2bool(int desired,void*t);struct _tuple13{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple13 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);

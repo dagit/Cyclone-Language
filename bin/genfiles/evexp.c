@@ -492,17 +492,17 @@ enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0U,Cyc_Tcenv_InNew  = 1U,Cyc_Tcenv
 void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 33
 void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
-# 111
+# 112
 struct Cyc_Absyn_Kind*Cyc_Tcutil_tvar_kind(struct Cyc_Absyn_Tvar*t,struct Cyc_Absyn_Kind*def);
-# 114
+# 115
 void*Cyc_Tcutil_compress(void*t);
-# 143
+# 144
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 196
+# 197
 int Cyc_Tcutil_unify(void*,void*);
-# 198
+# 199
 int Cyc_Tcutil_typecmp(void*,void*);
-# 203
+# 204
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);struct _tuple10{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple10 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);

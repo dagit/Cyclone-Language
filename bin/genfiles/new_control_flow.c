@@ -540,33 +540,33 @@ int Cyc_Tcutil_is_void_type(void*);
 # 43
 int Cyc_Tcutil_is_any_int_type(void*);
 int Cyc_Tcutil_is_any_float_type(void*);
-# 54
+# 55
 int Cyc_Tcutil_is_zeroterm_pointer_type(void*t);
-# 56
+# 57
 int Cyc_Tcutil_is_bound_one(void*b);
-# 63
+# 64
 int Cyc_Tcutil_is_noreturn_fn_type(void*);
-# 68
+# 69
 void*Cyc_Tcutil_pointer_elt_type(void*t);
-# 79
+# 80
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_type_bound(void*t);
-# 114
+# 115
 void*Cyc_Tcutil_compress(void*t);
-# 203
+# 204
 void*Cyc_Tcutil_rsubstitute(struct _RegionHandle*,struct Cyc_List_List*,void*);
-# 216
+# 217
 struct Cyc_Absyn_Exp*Cyc_Tcutil_rsubsexp(struct _RegionHandle*r,struct Cyc_List_List*,struct Cyc_Absyn_Exp*);
-# 225
+# 226
 void*Cyc_Tcutil_fndecl2type(struct Cyc_Absyn_Fndecl*);
-# 296 "tcutil.h"
+# 297 "tcutil.h"
 int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*e1,void**ptr_type,int*is_dyneither,void**elt_type);
-# 304
+# 305
 int Cyc_Tcutil_is_noalias_pointer(void*t,int must_be_unique);
-# 314
+# 315
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*t);
-# 373
+# 374
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*b);
-# 376
+# 377
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*l);struct _tuple12{unsigned int f1;int f2;};
 # 28 "evexp.h"
 struct _tuple12 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);struct _union_RelnOp_RConst{int tag;unsigned int val;};struct _union_RelnOp_RVar{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_RelnOp_RNumelts{int tag;struct Cyc_Absyn_Vardecl*val;};struct _union_RelnOp_RType{int tag;void*val;};struct _union_RelnOp_RParam{int tag;unsigned int val;};struct _union_RelnOp_RParamNumelts{int tag;unsigned int val;};struct _union_RelnOp_RReturn{int tag;unsigned int val;};union Cyc_Relations_RelnOp{struct _union_RelnOp_RConst RConst;struct _union_RelnOp_RVar RVar;struct _union_RelnOp_RNumelts RNumelts;struct _union_RelnOp_RType RType;struct _union_RelnOp_RParam RParam;struct _union_RelnOp_RParamNumelts RParamNumelts;struct _union_RelnOp_RReturn RReturn;};

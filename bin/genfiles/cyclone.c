@@ -594,9 +594,9 @@ void Cyc_RgnOrder_print_region_po(struct Cyc_RgnOrder_RgnPO*po);extern char Cyc_
 struct Cyc_Tcenv_Tenv*Cyc_Tcenv_tc_init();
 # 84
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew  = 0U,Cyc_Tcenv_InNew  = 1U,Cyc_Tcenv_InNewAggr  = 2U};
-# 134 "tcutil.h"
+# 135 "tcutil.h"
 extern int Cyc_Tcutil_warn_alias_coerce;
-# 137
+# 138
 extern int Cyc_Tcutil_warn_region_coerce;
 # 31 "tc.h"
 extern int Cyc_Tc_aggressive_warn;

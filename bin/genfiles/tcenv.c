@@ -572,32 +572,32 @@ void Cyc_Tcenv_check_delayed_constraints(struct Cyc_Tcenv_Tenv*te);
 void*Cyc_Tcutil_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 33
 void Cyc_Tcutil_terr(unsigned int,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
-# 107
+# 108
 int Cyc_Tcutil_kind_leq(struct Cyc_Absyn_Kind*k1,struct Cyc_Absyn_Kind*k2);
-# 111
+# 112
 struct Cyc_Absyn_Kind*Cyc_Tcutil_tvar_kind(struct Cyc_Absyn_Tvar*t,struct Cyc_Absyn_Kind*def);
 struct Cyc_Absyn_Kind*Cyc_Tcutil_type_kind(void*t);
-# 114
+# 115
 void*Cyc_Tcutil_compress(void*t);
-# 141
+# 142
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_rk;
-# 143
+# 144
 extern struct Cyc_Absyn_Kind Cyc_Tcutil_bk;
-# 180
+# 181
 void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
-# 183
+# 184
 struct _tuple11 Cyc_Tcutil_swap_kind(void*t,void*kb);
-# 219
+# 220
 int Cyc_Tcutil_subset_effect(int may_constrain_evars,void*e1,void*e2);
-# 223
+# 224
 int Cyc_Tcutil_region_in_effect(int constrain,void*r,void*e);
-# 276 "tcutil.h"
+# 277 "tcutil.h"
 void Cyc_Tcutil_check_unique_tvars(unsigned int,struct Cyc_List_List*);
-# 329
+# 330
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*k);
-# 331
+# 332
 int Cyc_Tcutil_new_tvar_id();
-# 333
+# 334
 void Cyc_Tcutil_add_tvar_identity(struct Cyc_Absyn_Tvar*);
 void Cyc_Tcutil_add_tvar_identities(struct Cyc_List_List*);char Cyc_Tcenv_Env_error[10U]="Env_error";
 # 50 "tcenv.cyc"
