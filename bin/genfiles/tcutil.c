@@ -3318,7 +3318,7 @@ unsigned long _tmp496=Cyc_strlen((struct _dyneither_ptr)_tmp497);
 int i=0;
 if(_tmp496 >= 2  && *((const char*)_check_dyneither_subscript(_tmp497,sizeof(char),0))== '\\'){
 if(*((const char*)_check_dyneither_subscript(_tmp497,sizeof(char),1))== '0')i=2;else{
-if((*((const char*)_check_dyneither_subscript(_tmp497,sizeof(char),1))== 'x'  && _tmp496 >= 3) && *((const char*)_check_dyneither_subscript(_tmp497,sizeof(char),2))== '0')i=3;else{
+if((((const char*)_tmp497.curr)[1]== 'x'  && _tmp496 >= 3) && *((const char*)_check_dyneither_subscript(_tmp497,sizeof(char),2))== '0')i=3;else{
 return 0;}}
 for(0;i < _tmp496;++ i){
 if(*((const char*)_check_dyneither_subscript(_tmp497,sizeof(char),i))!= '0')return 0;}

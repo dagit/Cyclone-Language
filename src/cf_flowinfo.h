@@ -116,17 +116,6 @@ EXTERN_CFFLOW datatype AbsRVal<`r::R> {
   // changes, so can be compared via physical equality.
 };
 
-typedef Dict::dict_t<`a,Position::seg_t,`r> dict_set_t<`a,`r>;
-
-extern bool update_place_set(dict_set_t<`a,`r> *set, `a place,
-			     Position::seg_t loc);
-extern bool place_set_subset(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2);
-extern bool place_set_equals(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2);
-
-typedef Dict::dict_t<place_t<`r,`r>,Position::seg_t,`r> place_set_t<`r>;
-extern place_set_t<`r> union_place_set(place_set_t<`r> s1, place_set_t<`r> s2, bool disjoint);
-
-
 // Note: It would be correct to make the domain of the flowdict_t
 //       constant (all roots in the function), but it easy to argue
 //       that we at program point p, we only need those roots that
@@ -155,7 +144,6 @@ EXTERN_CFFLOW struct FlowEnv<`r::R> {
   absRval_t<`r>   esc_this;
   absRval_t<`r>   esc_all;
   flowdict_t<`r>  mt_flowdict;
-  place_set_t<`r> mt_place_set;
   place_t<`r,`r>  dummy_place;
 };
 typedef struct FlowEnv<`r> @`r flow_env_t<`r>;
@@ -184,7 +172,6 @@ extern void print_absrval(absRval_t rval);
 extern void print_initlevel(initlevel_t il);
 extern void print_root(root_t root);
 extern void print_place(place_t p);
-extern void print_dict_set(dict_set_t<`a> p, void (@pr)(`a));
 extern void print_list(List::list_t<`a> p, void (@pr)(`a));
 extern void print_flowdict(flowdict_t d);
 extern void print_flow(flow_t f);
@@ -203,22 +190,16 @@ extern void print_flow(flow_t f);
 // the field list in the thrown place_t might be empty even if it shouldn't be
 extern flowdict_t<`r> escape_deref(flow_env_t<`r> fenv,
                                    flowdict_t<`r> d, 
-                                   place_set_t<`r> * all_changed,
                                    absRval_t<`r> r);
 extern flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
                                    Position::seg_t loc, flowdict_t<`r> d,
-                                   place_set_t<`r> * all_changed, 
                                    place_t<`r,`r> place,
                                    absRval_t<`r> r);
-extern flow_t<`r> join_flow(flow_env_t<`r>,place_set_t<`r>*,flow_t<`r>,flow_t<`r>); 
+extern flow_t<`r> join_flow(flow_env_t<`r>,flow_t<`r>,flow_t<`r>); 
 extern $(flow_t<`r>,absRval_t<`r>) 
   join_flow_and_rval(flow_env_t<`r>,
-                     place_set_t<`r>* all_changed,
                      $(flow_t<`r>,absRval_t<`r>) pr1,
                      $(flow_t<`r>,absRval_t<`r>) pr2);
-extern flow_t<`r> after_flow(flow_env_t<`r>,place_set_t<`r>*,
-                             flow_t<`r>,flow_t<`r>,
-                             place_set_t<`r>,place_set_t<`r>);
                              
 extern string_t place_err_string(place_t place);
 }

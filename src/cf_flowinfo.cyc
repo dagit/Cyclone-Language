@@ -77,22 +77,8 @@ flow_env_t<`r> new_flow_env(region_t<`r> r) {
               .esc_this = rnew(r) Esc(ThisIL),
               .esc_all = rnew(r) Esc(AllIL),
               .mt_flowdict = Dict::rempty(r,root_cmp),
-              .mt_place_set = Dict::rempty(r,place_cmp),
               .dummy_place = rnew(r) Place(rnew(r) MallocPt(&dummy_exp,&VoidType_val),NULL)
             };
-}
-
-// updates the given set if not NULL.  Returns true if the place
-// is already in the set.
-bool update_place_set(dict_set_t<`a,`r> *set, `a place, Position::seg_t loc) {
-  if (set != NULL) {
-    // see if there's already an entry here
-    if (Dict::member(*set,place))
-      return true;
-    else
-      *set = Dict::insert(*set, place, loc);
-  }
-  return false;
 }
 
 // creates a string to identify the given place in error messages
@@ -106,58 +92,6 @@ string_t place_err_string(place_t place) {
       return aprintf("reachable from %s", Absynpp::qvar2string(vd->name));
   default: Tcutil::impos("error locations not for VarRoots");
   }
-}
-
-// checks for conflicts when merging consumed sets
-static Position::seg_t combine_consume_f(`b env,
-					 `a place,
-					 Position::seg_t loc1,
-					 Position::seg_t loc2) {
-  return loc1;
-}
-
-// updates the given set if not NULL.  Returns true if the place
-// is already in the set.
-place_set_t<`r> union_place_set(place_set_t<`r> s1, place_set_t<`r> s2,
-                                bool disjoint) {
-//    DEBUG_PRINT("**union_place_set:\n");
-//    DEBUG_PRINT("  s1= ");
-//    print_place_set(s1);
-//    DEBUG_PRINT("\n  s2= ");
-//    print_place_set(s2);
-  let env = 0;
-  let res = Dict::union_two_c(combine_consume_f,&env,s1,s2);
-//    DEBUG_PRINT("\n  res= ");
-//    print_place_set(res);
-//    DEBUG_PRINT("\n");
-  return res;
-}
-
-bool place_set_subset(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2) {
-  if ((int)s1.t == (int)s2.t) return true;
-  try {
-    region temp; {
-      Iter::iter_t<_,`temp> iter = Dict::make_iter(temp,s1);
-      let elem = *Dict::rchoose(temp,s1);
-      while(Iter::next(iter,&elem)) {
-	let place = elem[0];
-	if (!Dict::member(s2,place)) {
-// 	  DEBUG_PRINT("could not find ");
-// 	  DEBUG_PRINT_F(print_place,place);
-// 	  DEBUG_PRINT("  in s2\n");
-	  return false;
-	}
-      }
-      return true;
-    }
-  } catch {
-  case Absent: // only if rchoose fails, which means s1 is empty
-    return true;
-  }
-}
-
-bool place_set_equals(dict_set_t<`a,`r> s1, dict_set_t<`a,`r> s2) {
-  return place_set_subset(s1,s2) && place_set_subset(s2,s1);
 }
 
 //////////////////////////// Utilities ///////////////////////////////
@@ -569,12 +503,10 @@ static absRval_t<`r> insert_place_outer(region_t<`r> r,
 // Note: There's a quadratic behavior here that won't be a problem in practice.
 static flowdict_t<`r> escape_these(flow_env_t<`r> fenv,
                                    escpile_t<`r,`r> pile,
-                                   place_set_t<`r> * all_changed,
                                    flowdict_t<`r> d) {
   while(pile->places != NULL) {
     let place = pile->places->hd;
     pile->places = pile->places->tl;
-    update_place_set(all_changed,place,0);
     absRval_t oldval, newval;
     try oldval = lookup_place(d,place);
     catch { case &Dict::Absent: continue; }
@@ -708,11 +640,11 @@ bool is_unescaped(flowdict_t<`r> d, place_t<`r,`r> place) {
 }
 
 // only things pointed to escape
-flowdict_t<`r> escape_deref(flow_env_t<`r> fenv, flowdict_t<`r> d, place_set_t<`r> * all_changed, absRval_t<`r> r) {
+flowdict_t<`r> escape_deref(flow_env_t<`r> fenv, flowdict_t<`r> d, absRval_t<`r> r) {
   ANAL_RGN(fenv, rgn) {
     escpile_t pile = rnew(rgn) EscPile(rgn,NULL);
     add_places(pile, r);
-    return escape_these(fenv, pile, all_changed, d);
+    return escape_these(fenv, pile, d);
   }
 }
 
@@ -724,7 +656,6 @@ static struct AssignEnv<`r::R,`r2::R,`r3::R> {
   Position::seg_t  loc;
 
   place_t<`r,`r> root_place;
-  place_set_t<`r> *`r3 all_changed;
 };
 static absRval_t<`r2> assign_place_inner(struct AssignEnv<`r,`r2> @ env,
                                          absRval_t<`r2> oldval,
@@ -827,7 +758,6 @@ static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env,
 	let &Place{root,fs} = env->root_place;
 	let new_fs = List::rfilter_c(env->pile->rgn,nprefix,new fs_prefix,fs);
 	let curr_place = rnew (env->pile->rgn) Place(root,new_fs);
-	update_place_set(env->all_changed,curr_place,0);
       }
     }
     return rnew(env->fenv->r) Aggregate(UnionRInfo(is_union,hd),d);
@@ -836,7 +766,6 @@ static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env,
 }
 flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
                             Position::seg_t loc, flowdict_t<`r> d,
-                            place_set_t<`r> * all_changed,
                             place_t<`r,`r> place,
                             absRval_t<`r> r) {
   DEBUG_PRINT("assigning to place ");
@@ -845,16 +774,15 @@ flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
   DEBUG_PRINT_F(print_absrval,r);
   DEBUG_PRINT("\n");
 
-  update_place_set(all_changed,place,0);
   ANAL_RGN(fenv, rgn) {
     let &Place{root,fs} = place;
-    struct AssignEnv/*<`rgn>*/ env = AssignEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d, loc, place, all_changed);
+    struct AssignEnv/*<`rgn>*/ env = AssignEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d, loc, place);
     absRval_t newval= assign_place_outer(&env,fs,0,Dict::lookup(d,root),r);
-    return escape_these(fenv, env.pile, all_changed, Dict::insert(d, root, newval));
+    return escape_these(fenv, env.pile, Dict::insert(d, root, newval));
   }
 }
 
-/////////////////// Join, After, and Lessthan ///////////////////////////////
+/////////////////// Join, Lessthan ///////////////////////////////
 static struct JoinEnv<`r::R,`r2::R> {
   flow_env_t<`r2> fenv;
   escpile_t<`r2,`r2,`r,`r> pile;
@@ -862,16 +790,6 @@ static struct JoinEnv<`r::R,`r2::R> {
   flowdict_t<`r2>  d2;
 };
 typedef struct JoinEnv<`r1,`r2> @`r3 joinenv_t<`r1,`r2,`r3>;
-static enum WhoIsChanged { Neither, One, Two }; // if both changed, take join
-static struct AfterEnv<`r::R> {
-  struct JoinEnv<`r,`r> joinenv;
-  place_set_t<`r> chg1; // should region-allocate!
-  place_set_t<`r> chg2; // should region-allocate!
-  place_t<`r,`r> curr_place; // a pain to stack-allocate, but should!
-  list_t<int,`r> @`r last_field_cell;
-  enum WhoIsChanged changed;
-};
-typedef struct AfterEnv<`r1> @`r2 afterenv_t<`r1,`r2>;
 
 static bool absRval_lessthan_approx(`a ignore, absRval_t<`r> r1, absRval_t<`r> r2);
 
@@ -995,8 +913,7 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
   }
 }
 
-flow_t<`r> join_flow(flow_env_t<`r> fenv,
-                     place_set_t<`r>* all_changed, flow_t<`r> f1, flow_t<`r> f2){
+flow_t<`r> join_flow(flow_env_t<`r> fenv, flow_t<`r> f1, flow_t<`r> f2){
   // if(f1 == f2) return f1;
   switch($(f1,f2)) {
   case $({.BottomFL = _},_): return f2;
@@ -1011,21 +928,20 @@ flow_t<`r> join_flow(flow_env_t<`r> fenv,
       let env     = JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL),d1,d2);
       let outdict = Dict::intersect_c(join_absRval,&env,d1,d2);
       let r       = Relations::join_relns(fenv->r,r1,r2);
-      return ReachableFL(escape_these(fenv, env.pile, all_changed, outdict),r);
+      return ReachableFL(escape_these(fenv, env.pile, outdict),r);
     }
   }
 }
 
 $(flow_t<`r>,absRval_t<`r>)
 join_flow_and_rval(flow_env_t<`r> fenv,
-                   place_set_t<`r>* all_changed,
                    $(flow_t<`r>,absRval_t<`r>) pr1,
                    $(flow_t<`r>,absRval_t<`r>) pr2) {
   // possibly wasteful because it could do the escape shtuff twice
   // and it can because of && and || using 0 which abstracts to Zero. Sigh.
   let $(f1,r1) = pr1;
   let $(f2,r2) = pr2;
-  flow_t outflow = join_flow(fenv,all_changed,f1,f2);
+  flow_t outflow = join_flow(fenv,f1,f2);
   switch($(f1,f2,outflow)) {
   case $({.BottomFL = _},_,_): return $(outflow,r2);
   case $(_,{.BottomFL = _},_): return $(outflow,r1);
@@ -1036,135 +952,10 @@ join_flow_and_rval(flow_env_t<`r> fenv,
     ANAL_RGN(fenv, rgn) {
       let env  = JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL),d1,d2);
       let outr = join_absRval(&env,0,r1,r2);
-      return $(ReachableFL(escape_these(fenv, env.pile,all_changed,outd),
+      return $(ReachableFL(escape_these(fenv, env.pile,outd),
                            relns), outr);
     }
   default: throw new Core::Impossible("join_flow_and_rval: BottomFL outflow");
-  }
-}
-
-static absRval_t<`r> after_absRval_d(afterenv_t<`r,`r2>,int,absRval_t<`r>,absRval_t<`r>);
-static absRval_t<`r> after_absRval(afterenv_t<`r,`r2> env, absRval_t<`r> r1, absRval_t<`r> r2) {
-  bool changed1 = env->changed == One || Dict::member(env->chg1,env->curr_place);
-  bool changed2 = env->changed == Two || Dict::member(env->chg2,env->curr_place);
-  if(changed1 && changed2)
-    return join_absRval(&env->joinenv, 0, r1, r2);
-  // checking for "is a contained object changed in the other pinfo" is
-  // quadratic because we'll do it "all the way down", but in practice
-  // "all the way down" is small.
-  if(changed1) {
-    if(!prefix_of_member(env->curr_place, env->chg2))
-      return r1;
-    env->changed = One;
-  }
-  if(changed2) {
-    if(!prefix_of_member(env->curr_place, env->chg1))
-      return r2;
-    env->changed = Two;
-  }
-
-  // neither one changed, but they are not pointer equal.  Thus we assume
-  // that they point to things that have changed.
-  switch($(r1,r2)) {
-    // XXX: could I do better here?
-  case $(&Consumed(...),_):
-  case $(_,&Consumed(...)): return join_absRval(&env->joinenv, 0, r1, r2);
-  case $(&NamedLocation(n1,rval1),&NamedLocation(n2,rval2)):
-    if (n1 == n2) {
-      let rval = after_absRval(env,rval1,rval2);
-      if (rval == rval1) return r1;
-      if (rval == rval2) return r2;
-      return rnew (env->joinenv.fenv->r) NamedLocation(n1,rval);
-    }
-    else return join_absRval(&env->joinenv, 0, r1, r2);
-  case $(_,&NamedLocation(...)):
-  case $(&NamedLocation(...),_):
-    return join_absRval(&env->joinenv, 0, r1, r2);
-  case $(&Aggregate(UnionRInfo(is_union1,field_no1),d1),
-	 &Aggregate(UnionRInfo(is_union2,field_no2),d2)):
-    aggrdict_t new_d =
-      rnew(env->joinenv.fenv->r)
-        {for i < numelts(d1) : after_absRval_d(env,i,d1[i],d2[i]) };
-
-    // try to preserve sharing by returning one of the original arrays
-    // if there was no change; moreover, we will preserve the fieldnum
-    // information for the unchanged side if this is a union
-    bool change = false;
-    for (int i = 0; i < numelts(d1); i++)
-      if (new_d[i] != d1[i]) {
-        change = true; break;
-      }
-    if (!change)
-      return r1;
-    change = false;
-    for (int i = 0; i < numelts(d1); i++)
-      if (new_d[i] != d2[i]) {
-        change = true; break;
-      }
-    if (!change)
-      return r2;
-    // both sides changed, so we have to be conservative about union
-    // field information here
-    return rnew(env->joinenv.fenv->r) Aggregate(UnionRInfo(is_union1,field_no1 == field_no2 ? field_no1 : -1),new_d);
-
-  default:
-    DEBUG_PRINT("after_absRval, rvalues are ");
-    DEBUG_PRINT_F(print_absrval,r1);
-    DEBUG_PRINT(" and ");
-    DEBUG_PRINT_F(print_absrval,r2);
-    DEBUG_PRINT("\n");
-    throw new Core::Impossible("after_absRval -- non-aggregates!");
-  }
-}
-static absRval_t<`r>
-after_absRval_d(afterenv_t<`r,`r2> env, int key,
-                absRval_t<`r> r1, absRval_t<`r> r2) {
-  if(r1 == r2) return r1;
-  let old_last_field = env->last_field_cell;
-  let old_changed    = env->changed;
-  *env->last_field_cell = rnew(env->joinenv.fenv->r) List(key,NULL);
-//     `r2                 `r1  `r        `r
-// env -> .last_field_cell -> * -> [hd,tl -> ...]
-  env->last_field_cell  = &(*env->last_field_cell)->tl;
-  let ans = after_absRval(env,r1,r2);
-  env->last_field_cell        = old_last_field;
-  (*env->last_field_cell)->tl = NULL;
-  env->changed                = old_changed;
-  return ans;
-}
-static absRval_t<`r> after_root(afterenv_t<`r,`r2> env, root_t<`r> root,
-                                absRval_t<`r> r1, absRval_t<`r> r2) {
-  if(r1 == r2) return r1;
-  *env->curr_place     = Place(root,NULL);
-  env->last_field_cell = &env->curr_place->fields;
-  env->changed         = Neither;
-  return after_absRval(env, r1, r2);
-}
-// FIX: region-allocate chg1 and chg2
-flow_t<`r> after_flow(flow_env_t<`r> fenv,
-                      place_set_t<`r>* all_changed,
-                      flow_t<`r> f1, flow_t<`r> f2,
-                      place_set_t<`r> chg1, place_set_t<`r> chg2) {
-
-  //if(f1 == f2) return f1;
-  switch($(f1,f2)) {
-  case $({.BottomFL = _},_):
-  case $(_,{.BottomFL = _}): return BottomFL();
-  case $({.ReachableFL = $(d1,r1)},{.ReachableFL = $(d2,r2)}):
-    if(d1.t == d2.t && r1 == r2) return f1;
-    // Should think about ways to avoid allocation here: (curr_place and
-    // cut-off in presence of changes)
-    ANAL_RGN(fenv, rgn) {
-      let curr_place = fenv->dummy_place;
-      let env  = AfterEnv(JoinEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d1, d2),
-			  chg1, chg2,
-			  curr_place, &curr_place->fields,
-			  Neither);
-      let new_d = Dict::union_two_c(after_root,&env,d1,d2);
-      let new_r = Relations::join_relns(fenv->r,r1,r2);
-      return ReachableFL(escape_these(fenv,env.joinenv.pile,all_changed,new_d),
-                         new_r);
-    }
   }
 }
 
@@ -1276,30 +1067,6 @@ void print_list(List::list_t<`a> x, void (@pr)(`a)) {
     x = x->tl;
   }
   fprintf(stderr,"\n");
-}
-
-void print_dict_set(dict_set_t<`a> p, void (@pr)(`a)) {
-  region r; {
-    try {
-      Iter::iter_t<_,`r> iter = Dict::make_iter(r,p);
-      let elem = *Dict::rchoose(r,p);
-      bool first = true;
-      fprintf(stderr,"{ ");
-      while(Iter::next(iter,&elem)) {
-	let p = elem[0];
-	if (!first) {
-	  fprintf(stderr,", ");
-	  first = false;
-	}
-	pr(p);
-      }
-      fprintf(stderr,"}\n");
-    } catch {
-    case Absent:
-      fprintf(stderr,"{ }\n");
-      return;
-    }
-  }
 }
 
 void print_absrval(absRval_t rval) {

@@ -907,7 +907,7 @@ state=(- state)- 1;}
 while(1){
 base=Cyc_Lineno_lex_base[_check_known_subscript_notnull(10,state)];
 if(base < 0)return(- base)- 1;
-backtrk=Cyc_Lineno_lex_backtrk[_check_known_subscript_notnull(10,state)];
+backtrk=Cyc_Lineno_lex_backtrk[state];
 if(backtrk >= 0){
 lbuf->lex_last_pos=lbuf->lex_curr_pos;
 lbuf->lex_last_action=backtrk;}
@@ -924,7 +924,7 @@ if(c == - 1)c=256;}
 if(Cyc_Lineno_lex_check[_check_known_subscript_notnull(273,base + c)]== state)
 state=Cyc_Lineno_lex_trans[_check_known_subscript_notnull(273,base + c)];else{
 # 73
-state=Cyc_Lineno_lex_default[_check_known_subscript_notnull(10,state)];}
+state=Cyc_Lineno_lex_default[state];}
 if(state < 0){
 lbuf->lex_curr_pos=lbuf->lex_last_pos;
 if(lbuf->lex_last_action == - 1)

@@ -81,7 +81,6 @@ struct AnalEnv<`r::R> {
   int           iteration_num; // update annotations with this on each visit
   bool          in_try;      // an optimization for the common case
   flow_t<`r>    tryflow;     // updated by any flow change while in a try-block
-  place_set_t<`r>*`r all_changed;// NULL for "not in unorderd so don't bother"
   bool          noreturn;    // true when function is "noreturn"
   type_t        return_type; // return type for function
   list_t<$(bool,stmt_t,list_t<place_t<`r,`r>,`r>,list_t<exp_t,`r>)@`r,`r> unique_pat_vars;
@@ -141,7 +140,7 @@ static $(cf_stmt_annot_t@,flow_t<`r>@`r) pre_stmt_check(analenv_t<`r> env, flow_
 //   DEBUG_PRINT("}\n  inflow is {");
 //   DEBUG_PRINT_F(print_flow,inflow);
   // join inflow with flow from non-local preds and earlier iterations
-  *sflow = join_flow(env->fenv, env->all_changed, inflow, *sflow);
+  *sflow = join_flow(env->fenv, inflow, *sflow);
 //   DEBUG_PRINT("}\n  joined flow is {");
 //   DEBUG_PRINT_F(print_flow,*sflow);
 //   DEBUG_PRINT("}\n");
@@ -165,7 +164,7 @@ static void update_tryflow(analenv_t<`r> env, flow_t<`r> new_flow) {
     DEBUG_PRINT("update_tryflow: new flow:\n");
     DEBUG_PRINT_F(print_flow,new_flow);
     DEBUG_PRINT("\n");
-    env->tryflow = join_flow(env->fenv, env->all_changed, new_flow, env->tryflow);
+    env->tryflow = join_flow(env->fenv, new_flow, env->tryflow);
     DEBUG_PRINT("update_tryflow: joined flow:\n");
     DEBUG_PRINT_F(print_flow,env->tryflow);
     DEBUG_PRINT("\n");
@@ -201,7 +200,7 @@ static void check_unique_root($(analenv_t<`r>,seg_t,flowdict_t<`r>)@ckenv,
 static void update_flow(analenv_t<`r> env, stmt_t s, flow_t<`r> flow) {
   let annot    = get_stmt_annot(s);
   let sflow    = get_stmt_flow(env,s);
-  let new_flow = join_flow(env->fenv, env->all_changed, flow, *sflow);
+  let new_flow = join_flow(env->fenv, flow, *sflow);
   // check for variables that might be going out of scope and have
   // unique pointers in them.
   if (warn_lose_unique) {
@@ -320,7 +319,7 @@ static flow_t<`r> use_Rval(analenv_t<`r> env, seg_t loc, flow_t<`r> inflow, absR
   case {.ReachableFL = $(d,relns)}:
     if(initlevel(env->fenv,d,r) != AllIL)
       aerr(loc,"expression may not be fully initialized");
-    let ans_d = escape_deref(env->fenv, d, env->all_changed, r);
+    let ans_d = escape_deref(env->fenv, d, r);
     if(d.t == ans_d.t) return inflow;
     let ans = ReachableFL(ans_d,relns);
     update_tryflow(env, ans);
@@ -388,7 +387,7 @@ static flow_t<`r> use_nounique_Rval(analenv_t<`r> env, seg_t loc, Absyn::type_t 
 	Tcutil::warn(loc,"argument may contain live alias-free pointers");
       return use_Rval(env,loc,inflow,r);
     }
-    let ans_d = escape_deref(env->fenv, d, env->all_changed, r);
+    let ans_d = escape_deref(env->fenv, d, r);
     if(d.t == ans_d.t) return inflow;
     let ans = ReachableFL(ans_d,relns);
     update_tryflow(env, ans);
@@ -396,63 +395,30 @@ static flow_t<`r> use_nounique_Rval(analenv_t<`r> env, seg_t loc, Absyn::type_t 
   }
 }
 
-
+// Analyzes a list of expressions left to right; the code generator
+// enforces that l-to-r eval order actually happens ...
 static $(flow_t<`r>,list_t<absRval_t<`r>,`rgn>)
-  anal_unordered_Rexps(region_t<`rgn> rgn,
-                       analenv_t<`r> env,
-                       flow_t<`r> inflow,
-                       list_t<exp_t> es,
-                       bool first_is_copy,
-                       bool others_are_copy) {
+  anal_Rexps(region_t<`rgn> rgn,
+	     analenv_t<`r> env,
+	     flow_t<`r> inflow,
+	     list_t<exp_t> es,
+	     bool first_is_copy,
+	     bool others_are_copy) {
+  list_t<absRval_t,`rgn> rvals = NULL;
   if(es == NULL)
     return $(inflow, NULL);
-  if(es->tl == NULL) {
-    let $(f,r) = anal_Rexp(env,first_is_copy,inflow,es->hd);
-    return $(f, rnew(rgn) List(r,NULL));
-  }
-  place_set_t * outer_all_changed = env->all_changed;
-  place_set_t this_all_changed; // keep separate b/c we iterate
-  flow_t old_inflow;
-  flow_t outflow;
-  list_t<absRval_t,`rgn> rvals;
   // expand out any unique paths in the flow before iterating
-  DEBUG_PRINT("anal_unordered begin\n");
-  inflow = expand_unique_places(env,inflow,es);
-  do { // unnecessarily recomputes rvals each time
-    this_all_changed = env->fenv->mt_place_set;
-    // wouldn't need to peel off the head if we had a TopFL
-    env->all_changed = rnew(env->r) env->fenv->mt_place_set;
+//   inflow = expand_unique_places(env,inflow,es);
+  do {
     let $(f,r) = anal_Rexp(env,first_is_copy,inflow,es->hd);
-    outflow = f;
-    rvals = rnew(rgn) List(r,NULL);
-    this_all_changed = union_place_set(this_all_changed,
-				       *env->all_changed, false);
-    for(_ es2 = es->tl; es2 != NULL; es2 = es2->tl) {
-      env->all_changed = rnew(env->r) env->fenv->mt_place_set;
-      let $(f,r) = anal_Rexp(env,others_are_copy,inflow,es2->hd);
-      rvals = rnew(rgn) List(r,rvals);
-      outflow = after_flow(env->fenv, &this_all_changed, outflow, f,
-			   this_all_changed, *env->all_changed);
-      this_all_changed = union_place_set(this_all_changed, *env->all_changed,
-					 false);
-    }
-    old_inflow = inflow;
-    // need to check for less than after the join b/c of the approximation
-    // else may not terminate.
-    inflow = join_flow(env->fenv,outer_all_changed,inflow,outflow);
-     DEBUG_PRINT("anal_unordered: old_inflow=\n");
-     DEBUG_PRINT_F(print_flow,old_inflow);
-     DEBUG_PRINT("anal_unordered: joined flow=\n");
-     DEBUG_PRINT_F(print_flow,inflow);
-  } while(!flow_lessthan_approx(inflow,old_inflow));
-  if(outer_all_changed == NULL)
-    env->all_changed = NULL;
-  else
-    env->all_changed = rnew(env->r) union_place_set(*outer_all_changed,
-                                                    this_all_changed, false);
-  update_tryflow(env,outflow);
-  DEBUG_PRINT("anal_unordered completed\n");
-  return $(outflow,imp_rev(rvals));
+    inflow = f;
+    rvals = rnew(rgn) List(r,rvals);
+    es = es->tl;
+    first_is_copy = others_are_copy;
+  } while (es != NULL);
+
+  update_tryflow(env,inflow);
+  return $(inflow,imp_rev(rvals));
 }
 
 // though the name doesn't indicate it, this is fine for the size primop too
@@ -462,7 +428,7 @@ anal_use_ints(analenv_t<`r> env, flow_t<`r> inflow,
               list_t<exp_t> es) {
   ANAL_RGN(env, rgn) {
     let $(afterflow, rvals) =
-      anal_unordered_Rexps(rgn,env,inflow,es,false,false);
+      anal_Rexps(rgn,env,inflow,es,false,false);
     switch(afterflow) {
     case {.ReachableFL = $(d,_)}:
       for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
@@ -530,7 +496,7 @@ notzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
 	nzval = rnew (env->fenv->r) NamedLocation(names->hd,nzval);
       // if this was consumed in the old dictionary, consume it here too
       nzval = consume_zero_rval(env,d,p,e,nzval);
-      let outflow = ReachableFL(assign_place(env->fenv,e->loc,d,env->all_changed,
+      let outflow = ReachableFL(assign_place(env->fenv,e->loc,d,
 					     p,nzval),relns);
       DEBUG_PRINT("outflow=\n");
       DEBUG_PRINT_F(print_flow,outflow);
@@ -561,10 +527,8 @@ splitzero(analenv_t<`r> env, flow_t<`r> inflow, flow_t<`r> outflow,
       nzval = consume_zero_rval(env,d,p,e,nzval);
       zval = consume_zero_rval(env,d,p,e,zval);
       return
-        $(ReachableFL(assign_place(env->fenv,e->loc,d,env->all_changed,
-                                   p,nzval),relns),
-          ReachableFL(assign_place(env->fenv,e->loc,d,env->all_changed,p,
-                                   zval),relns));
+        $(ReachableFL(assign_place(env->fenv,e->loc,d,p,nzval),relns),
+          ReachableFL(assign_place(env->fenv,e->loc,d,p,zval),relns));
     }
   }
 }
@@ -739,7 +703,7 @@ static flow_t<`r> restore_noconsume_arg(analenv_t<`r> env,
       new_rval = rnew (env->fenv->r) NamedLocation(names->hd,new_rval);
     DEBUG_PRINT("unconsuming noconsume(_) arg %s, inflow {",exp2string(exp));
     DEBUG_PRINT_F(print_flow,inflow);
-    fd=assign_place(env->fenv,loc,fd,env->all_changed,p,new_rval);
+    fd=assign_place(env->fenv,loc,fd,p,new_rval);
     inflow = ReachableFL(fd,relns);
     update_tryflow(env, inflow);
     DEBUG_PRINT("}\n and outflow is {\n");
@@ -770,7 +734,7 @@ static $(flow_t<`r>,absRval_t<`r>)
   case {.ReachableFL = $(indict,relns)}:
     switch(lval) {
     case {.PlaceL = p}:
-      let outdict = assign_place(fenv,loc,indict,env->all_changed,p,rval);
+      let outdict = assign_place(fenv,loc,indict,p,rval);
       relns   = reln_assign_exp(fenv->r,relns,lexp,rexp);
       outflow = ReachableFL(outdict,relns);
       if (warn_lose_unique &&
@@ -808,7 +772,7 @@ static flow_t<`r> do_initialize_var(flow_env_t<`r> fenv,
   case {.ReachableFL = $(outdict,relns)}:
     DEBUG_PRINT("initializing pattern var %s:%s to %s\n",
 		qvar2string(vd->name),typ2string(vd->type),exp2string(rexp));
-    outdict = assign_place(fenv,loc,outdict,env->all_changed,
+    outdict = assign_place(fenv,loc,outdict,
 			   rnew(env->r) Place(rnew(env->r) VarRoot(vd),NULL),
 			   rval);
     relns = reln_assign_var(env->r,relns,vd,rexp);
@@ -878,7 +842,7 @@ static flow_t<`r> initialize_pat_vars(flow_env_t<`r> fenv,
 	    // we can check whether it was changed at the end of the block.
 	    let new_rval = lookup_place(fd,p);
 	    new_rval = rnew (fenv->r) NamedLocation(*vd, new_rval);
-	    fd = assign_place(fenv,exp_loc,fd,env->all_changed,p,new_rval);
+	    fd = assign_place(fenv,exp_loc,fd,p,new_rval);
 	    f = ReachableFL(fd,relns);
 	    break;
 
@@ -1044,7 +1008,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       }
       else {
 	let new_rval = make_unique_consumed(fenv,(type_t)e->topt,e,env->iteration_num,old_rval);
-	let outdict = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
+	let outdict = assign_place(fenv,e->loc,fd,p,new_rval);
 	// FIX: do I need to update the tryflow here?
 	DEBUG_PRINT("place is ");
 	DEBUG_PRINT_F(print_place,p);
@@ -1113,7 +1077,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     case $({.PlaceL = p},{.ReachableFL = $(outdict,relns)}):
       relns = reln_kill_exp(fenv->r,relns,e1);
       f = ReachableFL(assign_place(fenv,e1->loc,outdict,
-                                   env->all_changed,p,fenv->unknown_all),
+                                   p,fenv->unknown_all),
                       relns);
       // FIX: do I need to update the tryflow here?
       break;
@@ -1126,10 +1090,8 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       aerr(e->loc,"cannot track alias-free pointers through multiple assignments");
       return $(BottomFL(), fenv->unknown_all);
     }
-    let arg2 = List{r,NULL};
-    let arg1 = List{l,&arg2};
-    let $(f,_) = anal_use_ints(env,inflow,&arg1);
-    let $(_,lval) = anal_Lexp(env,f,false,false,l);
+    let $(right_out,rval) = anal_Rexp(env,true,inflow,r);
+    let $(f,lval) = anal_Lexp(env,right_out,false,false,l);
     switch(f) {
     case {.ReachableFL = $(outdict,relns)}:
       switch (lval) {
@@ -1138,7 +1100,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       DEBUG_PRINT_F(print_flow,f);
 	relns = reln_kill_exp(fenv->r,relns,l);
 	outdict = assign_place(fenv,l->loc,outdict,
-			       env->all_changed,p,fenv->unknown_all);
+			       p,fenv->unknown_all);
 	f = ReachableFL(outdict,relns);
 	// FIX: do I need to update the tryflow here?
         DEBUG_PRINT("assignOp: new flow=\n");
@@ -1159,35 +1121,12 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       aerr(e->loc,"cannot track alias-free pointers through multiple assignments");
       return $(BottomFL(), fenv->unknown_all);
     }
-    let outer_all_changed = env->all_changed;
     // expand out any unique places, as necessary
-    inflow = expand_unique_places(env, inflow, rlist(env->r,e1,e2));
-    while(true) { // local iteration
-      env->all_changed  = rnew(env->r) fenv->mt_place_set;
-      let $(left_out, lval) = anal_Lexp(env,inflow,false,false,e1);
-      let left_changed      = *env->all_changed;
-      env->all_changed      = rnew(env->r) fenv->mt_place_set;
-      let $(right_out,rval) = anal_Rexp(env,true,inflow,e2);
-      let right_changed     = *env->all_changed;
-      let outflow = after_flow(fenv,&left_changed, left_out,right_out,
-                               left_changed, right_changed);
-      // FIX: need to kill any variables assigned in e1 or e2?
-      let new_inflow = join_flow(fenv,outer_all_changed,inflow,outflow);
-
-      // see if we've reached a fixpoint
-      if(flow_lessthan_approx(new_inflow,inflow)) {
-        if(outer_all_changed == NULL)
-          env->all_changed = NULL;
-        else
-          *env->all_changed = union_place_set(*outer_all_changed,
-                              union_place_set(left_changed, right_changed,
-                                              false), false);
-	return do_assign(fenv,env,outflow,e1,lval,e2,rval,e->loc);
-      }
-      // iterate again
-      inflow = new_inflow;
-      DEBUG_PRINT("inflow changed; recalculating\n");
-    }
+//     inflow = expand_unique_places(env, inflow, rlist(env->r,e1,e2));
+    // right to left evaluation order
+    let $(right_out,rval) = anal_Rexp(env,true,inflow,e2);
+    let $(outflow, lval) = anal_Lexp(env,right_out,false,false,e1); 
+    return do_assign(fenv,env,outflow,e1,lval,e2,rval,e->loc);
 
   case &SeqExp_e(e1,e2):
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
@@ -1201,7 +1140,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &FnCall_e(e1,es,...):
     ANAL_RGN(env,temp) {
       let orig_es = es;
-      let $(fst_outflow,rvals) = anal_unordered_Rexps(temp,env,inflow,rnew(temp) List(e1,rcopy(temp,es)),false,true);
+      let $(fst_outflow,rvals) = anal_Rexps(temp,env,inflow,rnew(temp) List(e1,rcopy(temp,es)),false,true);
       // for strange reasons, use_Rval is fine for the function pointer:
       let outflow = use_Rval(env,e1->loc,fst_outflow,rvals->hd);
       rvals = rvals->tl;
@@ -1249,13 +1188,12 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	    case {.ReachableFL = $(d,relns)}:
 	      // do the escape, but then set to esc_all (i.e. initialized)
 	      // in outflow
-	      let ans_d = escape_deref(fenv, d, env->all_changed, rvals->hd);
+	      let ans_d = escape_deref(fenv, d, rvals->hd);
 	      switch(rvals->hd) {
 	      case &AddressOf(p):
 		switch(Tcutil::compress((type_t)es->hd->topt)) {
 		case &PointerType(PtrInfo(t,_,_)):
 		  ans_d = assign_place(fenv, es->hd->loc, ans_d,
-				       env->all_changed,
 				       p, typ_to_absrval(fenv,t,false,
 							 fenv->esc_all));
 		  // FIX: update the tryflow here?
@@ -1310,11 +1248,10 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     else if(iscalloc) place_val = typ_to_absrval(fenv,*topt,false,fenv->zero);
     else place_val = typ_to_absrval(fenv,*topt,false,fenv->unknown_none);
     flow_t    outflow;
-    update_place_set(env->all_changed,place,0);
     if(eopt!=NULL) {
       ANAL_RGN(env,temp) {
-        let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
-                                              rlist(temp,(exp_t)eopt,exp),true,true);
+        let $(f,rvals) = anal_Rexps(temp,env,inflow,
+				    rlist(temp,(exp_t)eopt,exp),true,true);
         outflow = f;
       }
     } else {
@@ -1335,8 +1272,8 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 		Absynpp::exp2string(e1),Absynpp::exp2string(e2));
     DEBUG_PRINT_F(print_flow,inflow);
     ANAL_RGN(env, temp) {
-      let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
-					    rlist(temp,e1,e2),false,false);
+      let $(f,rvals) = anal_Rexps(temp,env,inflow,
+				  rlist(temp,e1,e2),false,false);
       left_rval = rvals->hd;
       right_rval = rvals->tl->hd;
       outflow = f;
@@ -1348,8 +1285,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     case {.ReachableFL = $(outdict,relns)}:
       switch(left_lval) {
       case {.PlaceL = lp}:
-	outdict = assign_place(fenv,e1->loc,outdict,env->all_changed,
-			       lp,right_rval);
+	outdict = assign_place(fenv,e1->loc,outdict,lp,right_rval);
 	break;
       case {.UnknownL = _}: 
 	// if we don't have a place for this, then it must be a global
@@ -1361,8 +1297,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
       }
       switch(right_lval) {
       case {.PlaceL = rp}:
-	outdict = assign_place(fenv,e2->loc,outdict,env->all_changed,
-			       rp,left_rval);
+	outdict = assign_place(fenv,e2->loc,outdict,rp,left_rval);
 	break;
       case {.UnknownL = _}:
 	if (initlevel(fenv,outdict,left_rval) != AllIL)
@@ -1386,13 +1321,12 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     root_t    root      = rnew(fenv->r) MallocPt(e2,(type_t)e->topt);
     place_t   place     = rnew(fenv->r) Place(root,NULL);
     absRval_t rval      = rnew(fenv->r) AddressOf(place);
-    update_place_set(env->all_changed,place,0);
     flow_t    outflow;
     absRval_t place_val;
     if(eopt!=NULL) {
       ANAL_RGN(env, temp) {
-        let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
-                                              rlist(temp,(exp_t)eopt,e2),true,true);
+        let $(f,rvals) = anal_Rexps(temp,env,inflow,
+				    rlist(temp,(exp_t)eopt,e2),true,true);
       outflow   = f;
       place_val = rvals->tl->hd;
       }
@@ -1503,26 +1437,26 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     let pr2 = anal_Rexp(env,copy_ctxt,f1t,e2);
     let pr3 = anal_Rexp(env,copy_ctxt,f1f,e3);
     // merge the consume information on the join
-    return join_flow_and_rval(fenv,env->all_changed,pr2,pr3);
+    return join_flow_and_rval(fenv,pr2,pr3);
 
   case &And_e(e1,e2):
     let $(f1t,f1f) = anal_test(env,inflow,e1);
     let $(f2t,f2r) = anal_Rexp(env,copy_ctxt,f1t,e2);
     let pr2 = $(f2t,f2r);
     let pr3 = $(f1f,fenv->zero);
-    return join_flow_and_rval(fenv,env->all_changed,pr2,pr3);
+    return join_flow_and_rval(fenv,pr2,pr3);
 
   case &Or_e(e1,e2):
     let $(f1t,f1f) = anal_test(env,inflow,e1);
     let $(f2t,f2r) = anal_Rexp(env,copy_ctxt,f1f,e2);
     let pr2 = $(f2t,f2r);
     let pr3 = $(f1t,fenv->notzeroall);
-    return join_flow_and_rval(fenv,env->all_changed,pr2,pr3);
+    return join_flow_and_rval(fenv,pr2,pr3);
 
   case &Subscript_e(e1,e2):
     ANAL_RGN(env, temp) {
-      let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
-                                            rlist(temp,e1,e2),false,true);
+      let $(f,rvals) = anal_Rexps(temp,env,inflow,
+				  rlist(temp,e1,e2),false,true);
       DEBUG_PRINT("in Rexp:subscript |%s|: after anal, flow is\n",
 		  Absynpp::exp2string(e));
       DEBUG_PRINT_F(print_flow,f);
@@ -1562,7 +1496,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     fallthru(es);
   case &Tuple_e(es):
     ANAL_RGN(env, temp) {
-      let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,es,true,true);
+      let $(f,rvals) = anal_Rexps(temp,env,inflow,es,true,true);
       aggrdict_t aggrdict =
         rnew(env->r) {for i < List::length(es) :
               ({ let temp = rvals->hd;
@@ -1581,8 +1515,8 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &Aggregate_e(_,_,des,&Aggrdecl{.kind = kind, .impl = &AggrdeclImpl{.fields=fs,...},...}):
     type_t exp_type = (type_t)e->topt;
     ANAL_RGN(env, temp) {
-      let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
-                                            rmap(temp,Core::snd,des),true,true);
+      let $(f,rvals) = anal_Rexps(temp,env,inflow,
+				  rmap(temp,Core::snd,des),true,true);
       aggrdict_t aggrdict =
 	aggrfields_to_aggrdict(fenv,fs,kind==UnionA,fenv->unknown_all);
 
@@ -1611,7 +1545,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &Array_e(dles):
     ANAL_RGN(env, temp) {
       let es = rmap(temp,Core::snd,dles);
-      let $(outflow,rvals) = anal_unordered_Rexps(temp,env,inflow,es,true,true);
+      let $(outflow,rvals) = anal_Rexps(temp,env,inflow,es,true,true);
       for(; rvals != NULL; rvals = rvals->tl, es = es->tl)
         outflow = use_Rval(env,es->hd->loc,outflow,rvals->hd);
       return $(outflow,typ_to_absrval(fenv,(type_t)e->topt,false,fenv->unknown_all));
@@ -1668,7 +1602,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	      return $(BottomFL(), fenv->unknown_all);
 	    }
 	  }
-	  let newflow = join_flow(fenv,env->all_changed,f1,f2);
+	  let newflow = join_flow(fenv,f1,f2);
 	  if(flow_lessthan_approx(newflow,f1))
 	    break;
 	  f1 = newflow;
@@ -1689,7 +1623,6 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 //     else
     place_val = typ_to_absrval(fenv,typ,false,fenv->unknown_none);
     flow_t    outflow;
-    update_place_set(env->all_changed,place,0);
     let $(f,_) = anal_Rexp(env,true,inflow,exp);
     outflow = f;
     switch(outflow) {
@@ -1874,9 +1807,8 @@ static $(flow_t<`r>,absLval_t<`r>)
           absRval_t res = rnew(fenv->r) AddressOf(place);
 	  for (;names != NULL; names=names->tl)
 	    res = rnew(fenv->r) NamedLocation(names->hd,res);
-          update_place_set(env->all_changed,place,0);
           fd = Dict::insert(fd,new_root,new_rval);
-          fd = assign_place(fenv,e->loc,fd,env->all_changed,p,res);
+          fd = assign_place(fenv,e->loc,fd,p,res);
           let outflow = ReachableFL(fd,r);
 	  // FIX: update try flow here?
           DEBUG_PRINT("after expansion, flow is ");
@@ -1900,8 +1832,8 @@ static $(flow_t<`r>,absLval_t<`r>)
       return anal_Lexp_rec(env,inflow,expand_unique,passthrough_consumes,e1,rnew(env->r) List(fld,flds));
     case &PointerType(PtrInfo(_,_,PtrAtts(_,_,b,_,_))):
       ANAL_RGN(env, temp) {
-        let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
-                                              rlist(temp,e1,e2),false,true);
+        let $(f,rvals) = anal_Rexps(temp,env,inflow,
+				    rlist(temp,e1,e2),false,true);
         let f2 = f;
         switch(f) {
         case {.ReachableFL = $(d2,relns)}:
@@ -1973,7 +1905,7 @@ anal_primop_test(analenv_t<`r> env, flow_t<`r> inflow,
   absRval_t r1,r2;
   flow_t f;
   ANAL_RGN(env, temp) {
-    let $(fl,rvals) = anal_unordered_Rexps(temp,env,inflow,es,false,false);
+    let $(fl,rvals) = anal_Rexps(temp,env,inflow,es,false,false);
     r1 = rvals->hd;
     r2 = rvals->tl->hd;
     f = fl;
@@ -2089,16 +2021,16 @@ anal_test(analenv_t<`r> env, flow_t<`r> inflow, exp_t e) {
     let $(f1t,f1f) = anal_test(env,inflow,e1);
     let $(f2t,f2f) = anal_test(env,f1t,e2);
     let $(f3t,f3f) = anal_test(env,f1f,e3);
-    return $(join_flow(fenv, env->all_changed, f2t, f3t),
-	     join_flow(fenv, env->all_changed, f2f, f3f));
+    return $(join_flow(fenv, f2t, f3t),
+	     join_flow(fenv, f2f, f3f));
   case &And_e(e1,e2):
     let $(f1t,f1f) = anal_test(env,inflow,e1);
     let $(f2t,f2f) = anal_test(env,f1t,e2);
-    return $(f2t, join_flow(fenv,env->all_changed, f1f, f2f));
+    return $(f2t, join_flow(fenv, f1f, f2f));
   case &Or_e(e1,e2):
     let $(f1t,f1f) = anal_test(env,inflow,e1);
     let $(f2t,f2f) = anal_test(env,f1f,e2);
-    return $(join_flow(fenv,env->all_changed, f1t, f2t), f2f);
+    return $(join_flow(fenv, f1t, f2t), f2f);
   case &SeqExp_e(e1,e2):
     let $(f,r) = anal_Rexp(env,false,inflow,e1);
     return anal_test(env, f, e2);
@@ -2337,7 +2269,6 @@ static flow_t<`r> unconsume_exp(analenv_t<`r> env,
 	      DEBUG_PRINT("\n");
 	      let $(f2,new_rval2) =
 		join_flow_and_rval(env->fenv,
-				   env->all_changed,
 				   $(f,old_rval),
 				   $(f,(absRval_t)ropt));
 	      f = f2; new_rval = new_rval2;
@@ -2352,10 +2283,7 @@ static flow_t<`r> unconsume_exp(analenv_t<`r> env,
 	  // update the flow
 	  switch (f) {
 	  case {.ReachableFL = $(d2,relns)}:
-	    flow = ReachableFL(assign_place(env->fenv,loc,d2,
-					    env->all_changed,p,
-					    new_rval),
-			       relns);
+	    flow = ReachableFL(assign_place(env->fenv,loc,d2,p,new_rval),relns);
 	    break;
 	  default:
 	    Tcutil::impos("unconsume_params: joined flow became bot!");
@@ -2611,7 +2539,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     DEBUG_PRINT("}\n");
     let ff = anal_stmt(env,f1f,s2,NULL);
     let ft = anal_stmt(env,f1t,s1,NULL);
-    return join_flow(fenv, env->all_changed, ft, ff);
+    return join_flow(fenv, ft, ff);
 
   case &While_s($(e,cont),body):
     DEBUG_PRINT("in anal_stmt:While_s for |%s| (cont=|%s|)\n",
@@ -2649,7 +2577,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
 
   case &Fallthru_s(es,&destclause):
     ANAL_RGN(env, temp) {
-      let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,es,true,true);
+      let $(f,rvals) = anal_Rexps(temp,env,inflow,es,true,true);
       // attempt to unconsume any bound pattern variables
       inflow = unconsume_pat_vars(env,s,inflow,(stmt_t)destclause->body);
       // The gunk is because the next case's binding vars are still in scope!
@@ -2785,8 +2713,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
 	// we can check whether it was changed at the end of the block.
 	let new_rval = lookup_place(fd,p);
 	new_rval = rnew (fenv->r) NamedLocation(vd, new_rval);
-	fd = assign_place(fenv,open_exp_opt->loc,fd,
-			  env->all_changed,p,new_rval);
+	fd = assign_place(fenv,open_exp_opt->loc,fd,p,new_rval);
 	f = ReachableFL(fd,relns);
 	let root = rnew(fenv->r) VarRoot(vd);
 	let rp = rnew(fenv->r) Place(root,NULL);
@@ -2993,7 +2920,7 @@ static void check_nested_fun(JumpAnalysis::jump_anal_res_t tables,
     rnew(frgn) AnalEnv(tables,
 		       Hashtable::lookup(tables->succ_tables,fd),
 		       Hashtable::lookup(tables->pat_pop_tables,fd),
-		       frgn,fenv,true,0,false,inflow,NULL,noreturn,fd->ret_type,
+		       frgn,fenv,true,0,false,inflow,noreturn,fd->ret_type,
 		       NULL,param_roots,noconsume_roots,
 		       flow_table,fd->ensures_relns);
   flow_t    outflow  = inflow;

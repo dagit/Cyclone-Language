@@ -1193,9 +1193,9 @@ while(i <= last){
 union Cyc_Lex_TrieChildren _tmp5D=((struct Cyc_Lex_Trie*)_check_null(t))->children;union Cyc_Lex_TrieChildren _tmp5E=_tmp5D;int _tmp6A;struct Cyc_Lex_Trie*_tmp69;struct Cyc_Lex_Trie**_tmp68;switch((_tmp5E.One).tag){case 3: _LLA: _tmp68=(_tmp5E.Many).val;_LLB: {
 # 244
 int ch=Cyc_Lex_trie_char((int)*((const char*)_check_dyneither_subscript(buff,sizeof(char),i)));
-if(_tmp68[_check_known_subscript_notnull(64,ch)]== 0)
-({struct Cyc_Lex_Trie*_tmp17F=({struct Cyc_Lex_Trie*_tmp5F=_region_malloc(r,sizeof(*_tmp5F));({union Cyc_Lex_TrieChildren _tmp17E=Cyc_Lex_Zero();_tmp5F->children=_tmp17E;});_tmp5F->shared_str=0;_tmp5F;});_tmp68[_check_known_subscript_notnull(64,ch)]=_tmp17F;});
-t=_tmp68[_check_known_subscript_notnull(64,ch)];
+if(_tmp68[ch]== 0)
+({struct Cyc_Lex_Trie*_tmp17F=({struct Cyc_Lex_Trie*_tmp5F=_region_malloc(r,sizeof(*_tmp5F));({union Cyc_Lex_TrieChildren _tmp17E=Cyc_Lex_Zero();_tmp5F->children=_tmp17E;});_tmp5F->shared_str=0;_tmp5F;});_tmp68[ch]=_tmp17F;});
+t=_tmp68[ch];
 ++ i;
 goto _LL9;}case 2: _LLC: _tmp6A=((_tmp5E.One).val).f1;_tmp69=((_tmp5E.One).val).f2;_LLD:
 # 252
@@ -1204,7 +1204,7 @@ t=_tmp69;else{
 # 255
 struct Cyc_Lex_Trie**_tmp60=({unsigned int _tmp63=64;struct Cyc_Lex_Trie**_tmp64=(struct Cyc_Lex_Trie**)({struct _RegionHandle*_tmp180=r;_region_malloc(_tmp180,_check_times(sizeof(struct Cyc_Lex_Trie*),_tmp63));});{unsigned int _tmp65=_tmp63;unsigned int j;for(j=0;j < _tmp65;j ++){_tmp64[j]=(struct Cyc_Lex_Trie*)0;}}_tmp64;});
 _tmp60[({_check_known_subscript_notnull(64,Cyc_Lex_trie_char(_tmp6A));})]=_tmp69;{
-int _tmp61=Cyc_Lex_trie_char((int)*((const char*)_check_dyneither_subscript(buff,sizeof(char),i)));
+int _tmp61=Cyc_Lex_trie_char((int)((const char*)buff.curr)[i]);
 ({struct Cyc_Lex_Trie*_tmp182=({struct Cyc_Lex_Trie*_tmp62=_region_malloc(r,sizeof(*_tmp62));({union Cyc_Lex_TrieChildren _tmp181=Cyc_Lex_Zero();_tmp62->children=_tmp181;});_tmp62->shared_str=0;_tmp62;});_tmp60[_tmp61]=_tmp182;});
 ({union Cyc_Lex_TrieChildren _tmp183=Cyc_Lex_Many(_tmp60);t->children=_tmp183;});
 t=_tmp60[_tmp61];};}
@@ -1404,7 +1404,7 @@ union Cyc_Lex_TrieChildren _tmpD0=((struct Cyc_Lex_Trie*)_check_null(_tmpD8))->c
  return 0;}else{_LL35: _tmpD5=((_tmpD1.One).val).f2;_LL36:
  _tmpD8=_tmpD5;goto _LL30;}default: _LL37: _tmpD6=(_tmpD1.Many).val;_LL38: {
 # 507
-struct Cyc_Lex_Trie*_tmpD2=_tmpD6[({_check_known_subscript_notnull(64,Cyc_Lex_trie_char((int)*((const char*)_check_dyneither_subscript(_tmpD7,sizeof(char),i))));})];
+struct Cyc_Lex_Trie*_tmpD2=_tmpD6[({_check_known_subscript_notnull(64,Cyc_Lex_trie_char((int)((const char*)_tmpD7.curr)[i]));})];
 if(_tmpD2 == 0)
 return 0;
 _tmpD8=_tmpD2;
@@ -1657,7 +1657,7 @@ state=(- state)- 1;}
 while(1){
 base=Cyc_Lex_lex_base[_check_known_subscript_notnull(322,state)];
 if(base < 0)return(- base)- 1;
-backtrk=Cyc_Lex_lex_backtrk[_check_known_subscript_notnull(322,state)];
+backtrk=Cyc_Lex_lex_backtrk[state];
 if(backtrk >= 0){
 lbuf->lex_last_pos=lbuf->lex_curr_pos;
 lbuf->lex_last_action=backtrk;}
@@ -1674,7 +1674,7 @@ if(c == - 1)c=256;}
 if(Cyc_Lex_lex_check[_check_known_subscript_notnull(3971,base + c)]== state)
 state=Cyc_Lex_lex_trans[_check_known_subscript_notnull(3971,base + c)];else{
 # 831
-state=Cyc_Lex_lex_default[_check_known_subscript_notnull(322,state)];}
+state=Cyc_Lex_lex_default[state];}
 if(state < 0){
 lbuf->lex_curr_pos=lbuf->lex_last_pos;
 if(lbuf->lex_last_action == - 1)
