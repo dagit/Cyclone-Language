@@ -134,10 +134,11 @@ Cyclone:
 \begin{itemize}
 \item You can't cast an integer to a pointer.  Cyclone prevents this
   because it would let you overwrite arbitrary memory locations.  In
-  fact, you can't use C's \texttt{NULL} in Cyclone, because
-  \texttt{NULL} is typically defined as \texttt{(void *)0}.  Instead,
-  Cyclone provides a new keyword, \texttt{null}, for writing the null
-  pointer.
+  fact, you can't use \texttt{(void *)0} (C's typical definition of
+  \texttt{NULL}) as a pointer in Cyclone.  Instead, Cyclone provides a
+  new keyword, \texttt{null}, for writing the null pointer.  (Also,
+  \texttt{NULL} is macro-defined as \texttt{null} in Cyclone's
+  \texttt{<stddef.h>}.)
 \item You can't do pointer arithmetic on a \texttt{*} pointer.
   Pointer arithmetic in C can take a pointer out of bounds, so that
   when the pointer is eventually dereferenced, it corrupts memory or
