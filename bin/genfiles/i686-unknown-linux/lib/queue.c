@@ -259,25 +259,30 @@ struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_List_List{void*hd;struct Cy
 tl;};extern char Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];struct Cyc_Queue_Queue;
 int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue*Cyc_Queue_create();
 void Cyc_Queue_add(struct Cyc_Queue_Queue*,void*x);void Cyc_Queue_radd(struct
-_RegionHandle*,struct Cyc_Queue_Queue*,void*x);extern char Cyc_Queue_Empty[10];void*
-Cyc_Queue_take(struct Cyc_Queue_Queue*);void*Cyc_Queue_peek(struct Cyc_Queue_Queue*);
-void Cyc_Queue_clear(struct Cyc_Queue_Queue*);void Cyc_Queue_remove(struct Cyc_Queue_Queue*,
-void*);int Cyc_Queue_length(struct Cyc_Queue_Queue*);void Cyc_Queue_iter(void(*f)(
-void*),struct Cyc_Queue_Queue*);void Cyc_Queue_app(void*(*f)(void*),struct Cyc_Queue_Queue*);
-struct Cyc_Queue_Queue{struct Cyc_List_List*front;struct Cyc_List_List*rear;
-unsigned int len;};int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*q){return q->front
-== 0;}char Cyc_Queue_Empty[10]="\000\000\000\000Empty";struct Cyc_Queue_Queue*Cyc_Queue_create(){
-return({struct Cyc_Queue_Queue*_tmp0=_cycalloc(sizeof(*_tmp0));_tmp0->front=0;
-_tmp0->rear=0;_tmp0->len=0;_tmp0;});}void Cyc_Queue_radd(struct _RegionHandle*r,
-struct Cyc_Queue_Queue*q,void*x){struct Cyc_List_List*cell=({struct Cyc_List_List*
-_tmp1=_region_malloc(r,sizeof(*_tmp1));_tmp1->hd=(void*)x;_tmp1->tl=0;_tmp1;});
-if(q->front == 0){q->front=cell;q->rear=cell;}else{((struct Cyc_List_List*)
-_check_null(q->rear))->tl=cell;q->rear=cell;}q->len ++;}void Cyc_Queue_add(struct
-Cyc_Queue_Queue*q,void*x){Cyc_Queue_radd(Cyc_Core_heap_region,q,x);}void*Cyc_Queue_take(
-struct Cyc_Queue_Queue*q){if(q->front == 0)(int)_throw((void*)Cyc_Queue_Empty);
-else{void*_tmp2=(void*)((struct Cyc_List_List*)_check_null(q->front))->hd;q->front=((
+_RegionHandle*,struct Cyc_Queue_Queue*,void*x);void Cyc_Queue_push(struct Cyc_Queue_Queue*
+q,void*x);void Cyc_Queue_rpush(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*
+x);extern char Cyc_Queue_Empty[10];void*Cyc_Queue_take(struct Cyc_Queue_Queue*);
+void*Cyc_Queue_peek(struct Cyc_Queue_Queue*);void Cyc_Queue_clear(struct Cyc_Queue_Queue*);
+void Cyc_Queue_remove(struct Cyc_Queue_Queue*,void*);int Cyc_Queue_length(struct Cyc_Queue_Queue*);
+void Cyc_Queue_iter(void(*f)(void*),struct Cyc_Queue_Queue*);void Cyc_Queue_app(
+void*(*f)(void*),struct Cyc_Queue_Queue*);struct Cyc_Queue_Queue{struct Cyc_List_List*
+front;struct Cyc_List_List*rear;unsigned int len;};int Cyc_Queue_is_empty(struct Cyc_Queue_Queue*
+q){return q->front == 0;}char Cyc_Queue_Empty[10]="\000\000\000\000Empty";struct Cyc_Queue_Queue*
+Cyc_Queue_create(){return({struct Cyc_Queue_Queue*_tmp0=_cycalloc(sizeof(*_tmp0));
+_tmp0->front=0;_tmp0->rear=0;_tmp0->len=0;_tmp0;});}void Cyc_Queue_radd(struct
+_RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){struct Cyc_List_List*cell=({
+struct Cyc_List_List*_tmp1=_region_malloc(r,sizeof(*_tmp1));_tmp1->hd=(void*)x;
+_tmp1->tl=0;_tmp1;});if(q->front == 0){q->front=cell;q->rear=cell;}else{((struct
+Cyc_List_List*)_check_null(q->rear))->tl=cell;q->rear=cell;}q->len ++;}void Cyc_Queue_add(
+struct Cyc_Queue_Queue*q,void*x){Cyc_Queue_radd(Cyc_Core_heap_region,q,x);}void
+Cyc_Queue_rpush(struct _RegionHandle*r,struct Cyc_Queue_Queue*q,void*x){q->front=({
+struct Cyc_List_List*_tmp2=_region_malloc(r,sizeof(*_tmp2));_tmp2->hd=(void*)x;
+_tmp2->tl=q->front;_tmp2;});if(q->rear == 0)q->rear=q->front;q->len ++;}void Cyc_Queue_push(
+struct Cyc_Queue_Queue*q,void*x){Cyc_Queue_rpush(Cyc_Core_heap_region,q,x);}void*
+Cyc_Queue_take(struct Cyc_Queue_Queue*q){if(q->front == 0)(int)_throw((void*)Cyc_Queue_Empty);
+else{void*_tmp3=(void*)((struct Cyc_List_List*)_check_null(q->front))->hd;q->front=((
 struct Cyc_List_List*)_check_null(q->front))->tl;if(q->front == 0)q->rear=0;q->len
---;return _tmp2;}}void*Cyc_Queue_peek(struct Cyc_Queue_Queue*q){if(q->front == 0)(
+--;return _tmp3;}}void*Cyc_Queue_peek(struct Cyc_Queue_Queue*q){if(q->front == 0)(
 int)_throw((void*)Cyc_Queue_Empty);else{return(void*)((struct Cyc_List_List*)
 _check_null(q->front))->hd;}}void Cyc_Queue_clear(struct Cyc_Queue_Queue*q){q->front=
 0;q->rear=0;q->len=0;}void Cyc_Queue_remove(struct Cyc_Queue_Queue*q,void*v){

@@ -2827,19 +2827,19 @@ static scope_t scope_to_c(scope_t s) {
 }
 
 // struct declarations -- straightforward
-opt_t<Dict::dict_t<var_t,aggrdecl_t>> aggrs_so_far = NULL;
+opt_t<Dict::dict_t<qvar_t,aggrdecl_t>> aggrs_so_far = NULL;
 static void aggrdecl_to_c(aggrdecl_t ad) {
   let n = ad->name;
   if (aggrs_so_far == NULL) 
-    aggrs_so_far = new Opt(Dict::empty(zstrptrcmp));
+    aggrs_so_far = new Opt(Dict::empty(qvar_cmp));
   bool seen_defn_before;
-  let dopt = Dict::lookup_opt(aggrs_so_far->v, (*n)[1]);
+  let dopt = Dict::lookup_opt(aggrs_so_far->v, n);
   if (dopt == NULL) {
     seen_defn_before = false;
-    aggrs_so_far->v = Dict::insert(aggrs_so_far->v,(*n)[1],ad);
+    aggrs_so_far->v = Dict::insert(aggrs_so_far->v,n,ad);
   } else {
     if (dopt->v->impl == NULL) {
-      aggrs_so_far->v = Dict::insert(aggrs_so_far->v,(*n)[1],ad);
+      aggrs_so_far->v = Dict::insert(aggrs_so_far->v,n,ad);
       seen_defn_before = false;
     } else
       seen_defn_before = true;
