@@ -9,65 +9,82 @@
 
 namespace Fn;
 
-enum Function<`arg,`res> {
-  Fun<`env>(`res (@)(`env,`arg), `env)
+// JGM: you'll note that a lot of explicit abstraction and
+// instantiation is necessary due to the shortcomings of the
+// unifier...or my ability to figure out what effects to put
+// on things.
+
+enum Function<`arg,`res,`e1> {
+  Fun<`env>(`res (@)(`env,`arg;`e1), `env)
 };
 
 // make a closure out of a function pointer and environment
-fn<`arg,`res> make_fn<`arg,`res,`env>(`res f(`env,`arg), `env x) {
+fn<`arg,`res,`e1> make_fn(`res f(`env,`arg;`e1), `env x;`e2)
+{
   return Fun(f,x);
 }
 
-static `res fp_apply<`arg,`res>(`res f(`arg), `arg x) {
+static `res fp_apply(`res f(`arg;`e1), `arg x; `e1) {
   return f(x);
 }
 
 // convert a function pointer to a closure
-fn<`arg,`res> fp2fn<`arg,`res>(`res f(`arg)) {
-  return make_fn(fp_apply, f);
+fn<`arg,`res,`e1> fp2fn(`res f(`arg;`e1)) {
+  return make_fn(fp_apply/*@<`arg,`res,`e1>*/, f);
 }
 
 // apply closure f to argument x
-`res apply<`arg,`res>(fn<`arg,`res> f, `arg x) {
+`res apply(fn<`arg,`res,`eff> f, `arg x; `eff) {
   switch (f) {
   case Fun<`env>(code,env):
     return code(env,x);
   }
 }
 
-static `c fn_compose<`a,`b,`c>($(fn<`b,`c>, fn<`a,`b>)@ f_and_g,`a arg) {
+// heh, heh, heh:  try explaining this to your Mom...
+static 
+`c fn_compose<`a,`b,`c,`e1,`e2>
+             ($(fn<`b,`c,`e1>, fn<`a,`b,`e2>)@ f_and_g,`a arg;`e1+`e2) {
   let &$(f,g) = f_and_g;
   return apply(f,apply(g,arg));
 }
 
 // compose closures
-fn<`a,`c> compose<`a,`b,`c>(fn<`a,`b> g, fn<`b,`c> f) {
-  return make_fn(fn_compose,&$(f,g));
+fn<`a,`c,`e1+`e2> compose<`a,`b,`c,`e1,`e2,`e3>(fn<`a,`b,`e1> g, 
+                                                fn<`b,`c,`e2> f;
+                                                `e1+`e2+`e3) {
+  return make_fn(fn_compose@<`a,`b,`c,`e2,`e1>,&$(f,g));
 }
 
+
 // These next two functions are used for curring
-static `c inner<`a,`b,`c>($(fn<$(`a,`b)@,`c>,`a)@ env, `b second) {
+static `c inner($(fn<$(`a,`b)@,`c,`e1>,`a)@ env, `b second;`e1) {
   return apply((*env)[0],&$((*env)[1],second));
 }
-static fn<`b,`c> outer<`a,`b,`c>(fn<$(`a,`b)@,`c> f,`a first) {
+
+static fn<`b,`c,`e1> outer(fn<$(`a,`b)@,`c,`e1> f,`a first; 
+                                             `e1+`e2) {
   return make_fn(inner, &$(f,first));
 }
 
 // curry a closure that takes a pair
-fn<`a,fn<`b,`c>> curry<`a,`b,`c>(fn<$(`a,`b)@,`c> f) {
+fn<`a,fn<`b,`c,`e1>,`e1+`e2> curry(fn<$(`a,`b)@,`c,`e1> f) {
   return make_fn(outer,f);
 }
 
-static `c lambda<`a,`b,`c>(fn<`a,fn<`b,`c>> f,$(`a,`b)@ arg) {
+static `c lambda<`a,`b,`c,`e1,`e2>(fn<`a,fn<`b,`c,`e1>,`e2> f,$(`a,`b)@ arg; 
+                                   `e1+`e2) {
   return apply(apply(f,(*arg)[0]),(*arg)[1]);
 }
 
 // uncurry a closure
-fn<$(`a,`b)@,`c> uncurry<`a,`b,`c>(fn<`a,fn<`b,`c>> f) {
-  return make_fn(lambda,f);
+fn<$(`a,`b)@,`c,`e1+`e2> uncurry(fn<`a,fn<`b,`c,`e1>,`e2> f) {
+  return make_fn(lambda@<`a,`b,`c,`e1,`e2>,f);
 }
 
 // map a closure across a list
-List::list<`b> map_fn<`a,`b>(fn<`a,`b> f,List::list<`a> x) {
+List::list_t<`b> map_fn(fn<`a,`b,`e> f,List::glist_t<`a,`r> x) {
   return List::map_c(apply,f,x);
 }
+
+

@@ -5,15 +5,15 @@
 
 namespace Lineno {
 
-extern struct pos {
+extern struct Pos {
   string logical_file;
   string line;
   int    line_no;
   int    col;
 };
-typedef struct pos @Pos;
-extern Pos  pos_of_abs(string,int);
-extern void poss_of_abss(string filename, List::list<$(int,Pos)@> places);
+typedef struct Pos @pos_t;
+extern pos_t  pos_of_abs(string,int);
+extern void poss_of_abss(string filename, List::list_t<$(int,pos_t)@> places);
 
 }
 #endif

@@ -1,10 +1,10 @@
 #ifndef _REF_H_
 #define _REF_H_
 namespace Ref {
-extern struct Reference<`a> {`a v;};
-typedef struct Reference<`a> @ ref<`a>;
-extern ref<`a> new_ref<`a>(`a);
-extern `a get<`a>(ref<`a>);
-extern void set<`a>(ref<`a>,`a);
+extern struct Ref<`a> {`a v;};
+typedef struct Ref<`a> @ ref_t<`a>;
+extern ref_t<`a> new_ref(`a);
+extern `a get(ref_t<`a>);
+extern void set(ref_t<`a>,`a);
 }
 #endif 

@@ -15,6 +15,7 @@ typedef unsigned int uint;
 typedef char *{0} Cstring;
 // a boxed and tagged string: struct {uint sz; Cstring *contents;}@
 typedef char ? string;
+typedef string string_t;
 
 typedef string @stringptr;
 
@@ -27,7 +28,7 @@ typedef int bool;
 #ifndef true
 #define true (1)
 #endif
-extern "C" `a exit<`a>(int);
-extern "C" `a abort<`a>();
+extern "C" `a exit(int);
+extern "C" `a abort();
 
 #endif /* _PRECORE_H_ */

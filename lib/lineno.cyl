@@ -29,14 +29,14 @@ using Stdio;
 using Lexing;
 using String;
 
-struct pos {
+struct Pos {
   string logical_file;
   string line;
   int    line_no;
   int    col;
 };
 
-static Opt_t<$(string,int)@> parse_linedef(string line) {
+static opt_t<$(string,int)@> parse_linedef(string line) {
   try {
     int i = 0;
     while (i < line.size && (line[i] < '0' || line[i] > '9')) ++i;
@@ -57,12 +57,12 @@ static Opt_t<$(string,int)@> parse_linedef(string line) {
   }      
 }
 
-int place_cmp($(int,Pos)@ place1, $(int,Pos)@ place2) {
+int place_cmp($(int,pos_t)@ place1, $(int,pos_t)@ place2) {
   return intcmp((*place1)[0],(*place2)[0]);
 }
 
 // mutates its second argument's elements
-void poss_of_abss(string filename, List::list<$(int,Pos)@> places) {
+void poss_of_abss(string filename, List::list_t<$(int,pos_t)@> places) {
   places = List::merge_sort(place_cmp, places);
   FILE @f = file_open(filename, "r");
   try {
@@ -84,7 +84,7 @@ void poss_of_abss(string filename, List::list<$(int,Pos)@> places) {
 	case END:     throw Failure("Lineno: Invalid file position");
 	case NEWLINE: ++line; break;
 	case LINEDEF: 
-	  Opt_t<$(string,int)@> fno = parse_linedef(this_line);
+	  opt_t<$(string,int)@> fno = parse_linedef(this_line);
 	  if (fno == null) {
 	    ++line;
 	    fprintf(stderr, "Unknown directive: %s\n", this_line);
@@ -111,9 +111,9 @@ void poss_of_abss(string filename, List::list<$(int,Pos)@> places) {
   return;
 }
 
-Pos pos_of_abs(string filename, int abs) {
-  Pos ans = &pos("","",0,0);
-  poss_of_abss(filename, &List::cons(&$(abs,ans),null));
+pos_t pos_of_abs(string filename, int abs) {
+  pos_t ans = &Pos("","",0,0);
+  poss_of_abss(filename, &List::List(&$(abs,ans),null));
   return ans;
 }
 

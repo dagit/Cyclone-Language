@@ -10,6 +10,7 @@
 #include "absyn.h"
 #include "absynpp.h"
 #include "evexp.h"
+#include "tcutil.h"
 
 using Core;
 using Stdio;
@@ -19,12 +20,13 @@ using Absyn;
 namespace Absyndump;
 
 extern void dumptyp(typ);
+extern void dumpntyp(typ t);
 extern void dumpexp(exp);
 extern void dumpexp_prec(int,exp);
 extern void dumppat(pat);
 extern void dumpstmt(stmt);
 extern void dumpdecl(decl);
-extern void dumptqtd<`a>(struct Tqual *, typ, void f(`a), `a);
+extern void dumptqtd(struct Tqual *, typ, void f(`a), `a);
 
 // really want to change this to char[] (need a control character for format
 // prims and the ability to cast to untagged (from Tagged requires Toc hlep,
@@ -33,7 +35,7 @@ typedef string dump_string_t;
 
 FILE * dump_file; // set by dumpdecllist2file (this module is not re-entrant)
 
-void ignore<`a>(`a x) { return; }
+void ignore(`a x) { return; }
 
 static unsigned int pos = 0;
 // It would be really nice to have a control character for untagged arrays!
@@ -59,7 +61,7 @@ void dump_semi() {
   dump_nospace(";");
 }
 
-void dump_sep<`a>(void f(`a), list<`a> l, dump_string_t sep) {
+void dump_sep(void f(`a), list_t<`a> l, dump_string_t sep) {
   if(l == null)
     return;
   for(; l->tl != null; l = l->tl) {
@@ -68,7 +70,7 @@ void dump_sep<`a>(void f(`a), list<`a> l, dump_string_t sep) {
   }
   f(l->hd);
 }
-void dump_sep_c<`b,`a>(void f(`b,`a), `b env, list<`a> l, dump_string_t sep) {
+void dump_sep_c(void f(`b,`a), `b env, list_t<`a> l, dump_string_t sep) {
   if(l == null)
     return;
   for(; l->tl != null; l = l->tl) {
@@ -77,20 +79,20 @@ void dump_sep_c<`b,`a>(void f(`b,`a), `b env, list<`a> l, dump_string_t sep) {
   }
   f(env,l->hd);
 }
-void group<`a>(void f(`a), list<`a> l,
-	       dump_string_t start, dump_string_t end, dump_string_t sep) {
+void group(void f(`a), list_t<`a> l,
+           dump_string_t start, dump_string_t end, dump_string_t sep) {
   dump_nospace(start);
   dump_sep(f,l,sep);
   dump_nospace(end);
 }
-void group_c<`b,`a>(void f(`b,`a), `b env, list<`a> l,
-		    dump_string_t start, dump_string_t end, dump_string_t sep) {
+void group_c(void f(`b,`a), `b env, list_t<`a> l,
+             dump_string_t start, dump_string_t end, dump_string_t sep) {
   dump_nospace(start);
   dump_sep_c(f,env,l,sep);
   dump_nospace(end);
 }
-void egroup<`a>(void f(`a), list<`a> l,
-		dump_string_t start, dump_string_t end, dump_string_t sep) {
+void egroup(void f(`a), list_t<`a> l,
+            dump_string_t start, dump_string_t end, dump_string_t sep) {
   if(l != null)
     group(f,l,start,end,sep);
 }
@@ -135,33 +137,42 @@ void dumpscope(scope sc) {
 
 void dumpkind(kind_t k) {
   switch (k) {
-  case MemUKind: dump("mu"); return;
-  case BoxUKind: dump("bu"); return;
-  case MemPKind: dump("mp"); return;
-  case BoxPKind: dump("bp"); return;
-  case RgnKind:  dump("rgn"); return;
-  case UnresolvedKind: dump("U"); return;
+  case MemKind: dump("M"); return;
+  case BoxKind: dump("B"); return;
+  case RgnKind: dump("R"); return;
+  case EffKind: dump("E"); return;
+  case UnresolvedKind: dump("?"); return;
   }
 }
 
-void dumptps(list<typ> ts) {
+void dumptps(list_t<typ> ts) {
   egroup(dumptyp,ts,"<",">",",");
 }
 void dumptvar(tvar tv) {
-  dump_str((*tv)[0]); // FIX: may want explicit kind
+  dump_str((*tv)[0]); 
 }
-void dumptvars(list<tvar> tvs) {
+void dumpkindedtvar(tvar tv) {
+  dump_str((*tv)[0]); 
+  switch ((*tv)[1]) {
+  case BoxKind: break;
+  case k: dump("::"); dumpkind(k); break;
+  }
+}
+void dumptvars(list_t<tvar> tvs) {
   egroup(dumptvar,tvs,"<",">",",");
+}
+void dumpkindedtvars(list_t<tvar> tvs) {
+  egroup(dumpkindedtvar,tvs,"<",">",",");
 }
 
 void dumparg($(tqual,typ)@ pr) {
   dumptqtd((*pr)[0],(*pr)[1],ignore,0);
 }
-void dumpargs(list<$(tqual,typ)@> ts) {
+void dumpargs(list_t<$(tqual,typ)@> ts) {
   group(dumparg,ts,"(",")",",");
 }
 
-bool next_is_pointer(list<type_modifier> tms) {
+bool next_is_pointer(list_t<type_modifier> tms) {
   if (tms==null) return false;
   switch (tms->hd) {
   case Pointer_mod(_,_,_): return true;
@@ -169,13 +180,54 @@ bool next_is_pointer(list<type_modifier> tms) {
   }
 }
 
+static void dumprgn(typ t) {
+  switch (Tcutil::compress(t)) {
+  case HeapRgn: dump("`H"); break;
+  default: dumpntyp(t); break;
+  }
+}
+
+static $(list_t<typ>, list_t<typ>) effects_split(typ t) {
+  list_t<typ> regions = null;
+  list_t<typ> effects = null;
+
+  switch (Tcutil::compress(t)) {
+  case AccessEff(r): regions = &List(r,regions); break;
+  case JoinEff(ts):
+    for (; ts != null; ts = ts->tl) {
+      let $(rs,es) = effects_split(ts->hd);
+      regions = List::imp_append(rs,regions);
+      effects = List::imp_append(es,effects);
+    }
+    break;
+  default: effects = &List(t,effects); break;
+  }
+  return $(regions, effects);
+}
+
+static void dumpeff(typ t) {
+  let $(regions,effects) = effects_split(t);
+  regions = List::imp_rev(regions);
+  effects = List::imp_rev(effects);
+  for (; effects != null; effects = effects->tl) {
+    dumpntyp(effects->hd);
+    dump("+");
+  }
+  dump("{");
+  for (; regions != null; regions = regions->tl) {
+    dumprgn(regions->hd);
+    if (regions->tl != null) dump(",");
+  }
+  dump("}");
+}
+
 // Convert a normalized typ to a doc
 void dumpntyp(typ t) {
   switch (t) {
     // The first three cases never turn up in normalized types.
-  case ArrayType(_,_,_):   return;
-  case FnType(_,_,_,_):      return;
-  case PointerType(_):       return;
+  case ArrayType(_,_,_): return;
+  case FnType(_)       : return;
+  case PointerType(_)  : return;
   case VoidType:         dump("void"); return;
   case VarType(&$(v,k)): dump_str(v); return; // FIX: may want explicit kinds
   case Evar(k,null,i): dump("?"); dumpkind(k); dump(xprintf("(%d)",i)); return;
@@ -198,29 +250,34 @@ void dumpntyp(typ t) {
   case StructType(n,  ts,_):
     dump("struct"); dumpqvar((qvar)n); dumptps(ts); return;
   case TypedefType(n,ts,topt):  dumpqvar(n), dumptps(ts); return;
-  case RgnHandleType(rgn):
-    dump("<<REGION HANDLE UNIMPLEMENTED>>"); return;//FIX
-  case HeapRgnType: return; // FIX: may want explicit rgn some times
   case UnionType: dump("union {/* unimplemented */}"); return;
+  case RgnHandleType(rgn):
+    dumprgn(rgn); return;
+  case HeapRgn: return; 
+  case AccessEff(_): return;
+  case JoinEff(_): return;
   }
 }
 
-void dumpvaropt(Opt_t<var> vo) {
+void dumpvaropt(opt_t<var> vo) {
   if(vo != null) dump_str(vo->v);
 }
-void dumpfunarg($(Opt_t<var>,tqual,typ)@ t) {
+void dumpfunarg($(opt_t<var>,tqual,typ)@ t) {
   dumptqtd((*t)[1],(*t)[2],dumpvaropt,(*t)[0]);
 }
-void dumpfunargs(list<$(Opt_t<var>,tqual,typ)@> args, bool varargs) {
-  if(varargs) {
-    dump("(");
-    for(; args != null; args = args->tl) {
-      dumpfunarg(args->hd);
-      dump_nospace(",");
-    }
-    dump("...)");
-  } else
-    group(dumpfunarg,args,"(",")",",");
+void dumpfunargs(list_t<$(opt_t<var>,tqual,typ)@> args, bool varargs, 
+                 opt_t<typ> effopt) {
+  dump("(");
+  for (; args != null; args = args->tl) {
+    dumpfunarg(args->hd);
+    if (args->tl != null || varargs) dump(",");
+  }
+  if (varargs) dump("...");
+  if (effopt != null) {
+    dump(";");
+    dumpeff(effopt->v);
+  }
+  dump(")");
 }
 
 void dumptyp(typ t) {
@@ -234,12 +291,12 @@ void dumpdesignator(designator d) {
   }
 }
 
-void dumpde($(list<designator>,exp)@ de) {
+void dumpde($(list_t<designator>,exp)@ de) {
   egroup(dumpdesignator,(*de)[0],"","=","=");
   dumpexp((*de)[1]);
 }
 
-void dumpexps_prec(int inprec, list<exp> es) {
+void dumpexps_prec(int inprec, list_t<exp> es) {
   group_c(dumpexp_prec, inprec, es, "", "", ",");
 }
 
@@ -412,7 +469,7 @@ void dumpexp(exp e) {
   dumpexp_prec(0,e);
 }
 
-void dumpswitchclauses(list<switch_clause> scs) {
+void dumpswitchclauses(list_t<switch_clause> scs) {
   for(; scs != null; scs = scs->tl) {
     let c = scs->hd;
     if(c->where_clause == null && c->pattern->r == Wild_p)
@@ -506,7 +563,7 @@ void dumpstmt(stmt s) {
   }
 }
 
-void dumpdp($(list<designator>,pat)@ dp) {
+void dumpdp($(list_t<designator>,pat)@ dp) {
   egroup(dumpdesignator,(*dp)[0],"","=","=");
   dumppat((*dp)[1]);
 }
@@ -552,11 +609,11 @@ void dumpenumfield(enumfield ef) {
   if(ef->typs != null)
     dumpargs(ef->typs);
 }
-void dumpenumfields(list<enumfield> fields) {
+void dumpenumfields(list_t<enumfield> fields) {
   dump_sep(dumpenumfield,fields,",");
 }
 
-void dumpstructfields(list<$(field_name,tqual,typ)@> fields) {
+void dumpstructfields(list_t<$(field_name,tqual,typ)@> fields) {
   for(; fields != null; fields = fields->tl) {
     let &$(name,tq,type) = fields->hd;
     dumptqtd(tq,type,dump_str,name);
@@ -574,10 +631,9 @@ void dumpdecl(decl d) {
   case Fn_d(fd):
     if(fd->is_inline) dump("inline");
     dumpscope(fd->sc);
-    typ t = FnType(fd->tvs,
-                   fd->ret_type,
-                   List::map(Absynpp::arg_mk_opt,fd->args),
-                   fd->varargs);
+    typ t = FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
+                          List::map(Absynpp::arg_mk_opt,fd->args), 
+                          fd->varargs});
     dumptqtd(null,t,dumpqvar,fd->name);
     dump("{");
     dumpstmt(fd->body);
@@ -678,18 +734,18 @@ static void dump_upperbound(exp e) {
   }
 }
 
-void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
+void dumptms(list_t<type_modifier> tms, void f(`a), `a a) {
   if(tms == null) {
     f(a);
     return;
   }
   switch(tms->hd) {
     // FIX?? What about tq2?
-  case Pointer_mod(Nullable_ps(ue),  HeapRgnType,  tq2):
+  case Pointer_mod(Nullable_ps(ue),  HeapRgn,  tq2):
     dump_nospace("*"); dump_upperbound(ue); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(NonNullable_ps(ue), HeapRgnType,  tq2):
+  case Pointer_mod(NonNullable_ps(ue), HeapRgn,  tq2):
     dump_nospace("@"); dump_upperbound(ue); dumptms(tms->tl,f,a); return;
-  case Pointer_mod(TaggedArray_ps, HeapRgnType,  tq2):
+  case Pointer_mod(TaggedArray_ps, HeapRgn,  tq2):
     dump_nospace("?"); dumptms(tms->tl,f,a); return;
   case Pointer_mod(Nullable_ps(ue),  VarType(&$(r,k)), tq2):
     dump_nospace("*"); dump_upperbound(ue); dump_str(r);
@@ -717,11 +773,12 @@ void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
     case Carray_mod: dump("[]"); break;
     case ConstArray_mod(e):
       dump("["); dumpexp(e); dump("]"); break;
-    case Function_mod(WithTypes(args,varargs)):
-      dumpfunargs(args,varargs); break;
+    case Function_mod(WithTypes(args,varargs,effopt)):
+      dumpfunargs(args,varargs,effopt); break;
     case Function_mod(NoTypes(sl,loc)):
       group(dump_str,sl,"(",")",","); break;
-    case TypeParams_mod(ts,loc): dumptvars(ts); break;
+    case TypeParams_mod(ts,loc,print_kinds): 
+      if (print_kinds) dumpkindedtvars(ts); else dumptvars(ts); break;
     case Pointer_mod(nullable,tq2,_): throw Impossible("dumptms");
     }
     return;
@@ -730,7 +787,7 @@ void dumptms<`a>(list<type_modifier> tms, void f(`a), `a a) {
 
 static struct Tqual empty_tq_v = Tqual{false,false,false};
 static tqual empty_tq = &empty_tq_v;
-void dumptqtd<`a>(struct Tqual * tq, typ t, void f(`a), `a a) {
+void dumptqtd(struct Tqual * tq, typ t, void f(`a), `a a) {
   if(tq == null)
     tq = empty_tq;
   let &$(tq,t,tms) = Absynpp::to_tms((tqual)tq,t);
@@ -739,7 +796,7 @@ void dumptqtd<`a>(struct Tqual * tq, typ t, void f(`a), `a a) {
   dumptms(List::rev(tms),f,a);
 }
 
-void dumpdecllist2file(list<decl> tdl, FILE @f) {
+void dumpdecllist2file(list_t<decl> tdl, FILE @f) {
   pos = 0;
   dump_file = f;
   for(; tdl != null; tdl = tdl->tl)

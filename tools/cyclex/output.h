@@ -16,7 +16,7 @@ extern void output_lexdef(string sourcename,
 			  FILE @ outfile,
 			  Syntax::location_t    header,
 			  Compact::lex_tables_t tables,
-			  List::list<Lexgen::automata_entry_t> entry_points,
+			  List::list_t<Lexgen::automata_entry_t> entry_points,
 			  Syntax::location_t    trailer);
 
 extern xenum exn { Table_overflow };

@@ -56,7 +56,7 @@ xenum exn { Impossible(string) };
 xenum exn { Not_found };
 xenum exn { Unreachable(string) };
 
-Opt_t<`b> opt_map<`a,`b>(`b f(`a), Opt_t<`a> o) {
+opt_t<`b> opt_map(`b f(`a), opt_t<`a> o) {
   if (o==null)
     return null;
   return &Opt(f(o->v));
@@ -66,25 +66,25 @@ string new_string(int i) {
   return (new {for j < i : '\000'});
 }
 
-bool true_f<`a>(`a x)  {  return true;  }
-bool false_f<`a>(`a x) {  return false; }
+bool true_f(`a x)  {  return true;  }
+bool false_f(`a x) {  return false; }
 
 int intcmp(int a, int b)   { return a - b; }
 int charcmp(char a,char b) { return (int)a - (int)b; }
-int ptrcmp<`a>(`a @ a, `a @ b) {
+int ptrcmp(`a::M @ `r a, `a @ `r b) {
   if(a == b) return 0;
   if(a >  b) return 1;
   return -1;
 }
 
-`a fst<`a,`b>($(`a,`b) @pair) { return((*pair)[0]); }
-`b snd<`a,`b>($(`a,`b) @pair) { return((*pair)[1]); }
+`a fst($(`a,`b) @pair) { return((*pair)[0]); }
+`b snd($(`a,`b) @pair) { return((*pair)[1]); }
 
-`c third<`a,`b,`c>($(`a,`b,`c) @triple) {
+`c third($(`a,`b,`c) @triple) {
   return((*triple)[2]);
 }
 
-`a identity<`a>(`a x) {
+`a identity(`a x) {
   return x;
 }
 

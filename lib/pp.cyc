@@ -24,27 +24,27 @@ using Fn;
 
 namespace PP;
 
-enum alist<`a> {
+enum Alist<`a> {
   Empty;
   Single(`a);
-  Append(enum alist<`a>,enum alist<`a>);
+  Append(enum Alist<`a>,enum Alist<`a>);
 };
-typedef enum alist<`a> Alist<`a>;
+typedef enum Alist<`a> alist_t<`a>;
 
-Alist<`a> append<`a>(Alist<`a> a1, Alist<`a> a2) {
+alist_t<`a> append(alist_t<`a> a1, alist_t<`a> a2) {
   if (a1==Empty) return a2;
   else if (a2==Empty) return a1;
   else return Append(a1,a2);
 }
 
-list<`a> list_of_alist_f<`a>(Alist<`a> y,list<`a> l) {
+list_t<`a> list_of_alist_f(alist_t<`a> y,list_t<`a> l) {
   switch (y) {
   case Empty:         return l;
-  case Single(z):     return &cons(z,l);
+  case Single(z):     return &List(z,l);
   case Append(a1,a2): return list_of_alist_f(a1,list_of_alist_f(a2,l));
   }
 }
-list<`a> list_of_alist<`a>(Alist<`a> x) {
+list_t<`a> list_of_alist(alist_t<`a> x) {
   return list_of_alist_f(x,null);
 }
 
@@ -52,7 +52,7 @@ list<`a> list_of_alist<`a>(Alist<`a> x) {
 // it is line, char, length, link content
 // (I'm having problems getting the preprocessor to do it)
 
-struct ppstate {
+struct Ppstate {
   int ci;  // current indent
   int cc;  // current column
   int cl;  // current line
@@ -60,20 +60,20 @@ struct ppstate {
   int epw; // effective page width
 };
 
-struct out {
+struct Out {
   int newcc;           // new current column
   int newcl;           // new current line
-  Alist<stringptr> ppout; // pretty-printed output
-  Alist<$(int,int,int,string)@> links;   // hyperlinks
+  alist_t<stringptr> ppout; // pretty-printed output
+  alist_t<$(int,int,int,string)@> links;   // hyperlinks
 };
 
-struct doc {
+struct Doc {
   int mwo;           // min width, w/o newline
   int mw;            // min width, w/newline
-  fn<Ppstate,Out> f; // thunk for doing a step of pretty printing
+  fn<ppstate_t,out_t,{}> f; // thunk for doing a step of pretty printing
 };
 
-static void dump_out(FILE @f, Alist<stringptr> al) {
+static void dump_out(FILE @f, alist_t<stringptr> al) {
   let xarr = Xarray::create(16,al);
   Xarray::add(xarr,al);
   int last = 0;
@@ -94,26 +94,26 @@ static void dump_out(FILE @f, Alist<stringptr> al) {
 }
 
 // Dump a doc to a file descriptor
-void file_of_doc(Doc d,int w,FILE @f) {
-  Out o = apply(d->f,&ppstate(0,0,1,w,w));
+void file_of_doc(doc_t d,int w,FILE @f) {
+  out_t o = apply(d->f,&Ppstate(0,0,1,w,w));
   dump_out(f,o->ppout);
 }
 
-// Convert a Doc to a string.  Takes a Doc and a width as arguments.
-string string_of_doc(Doc d, int w) {
-  Out o = apply(d->f,&ppstate(0,0,1,w,w));
+// Convert a doc_t to a string.  Takes a doc_t and a width as arguments.
+string string_of_doc(doc_t d, int w) {
+  out_t o = apply(d->f,&Ppstate(0,0,1,w,w));
   return String::str_sepstr(list_of_alist(o->ppout),"");
 }
 
-// Convert a Doc to a string and hyperlinks.
-// Takes a Doc and a width as arguments.
-$(string,list<$(int,int,int,string)@>) @string_and_links(Doc d, int w) {
-  Out o = apply(d->f,&ppstate(0,0,1,w,w));
+// Convert a doc_t to a string and hyperlinks.
+// Takes a doc_t and a width as arguments.
+$(string,list_t<$(int,int,int,string)@>) @string_and_links(doc_t d, int w) {
+  out_t o = apply(d->f,&Ppstate(0,0,1,w,w));
   return &$(String::str_sepstr(list_of_alist(o->ppout),""),
             list_of_alist(o->links));
 }
 
-static Opt_t<Table<int,stringptr>> bhashtbl = null;
+static opt_t<table_t<int,stringptr,{},{}>> bhashtbl = null;
 
 string nlblanks(int i) {  // a newline followed by i blanks
   if (bhashtbl == null)
@@ -138,28 +138,28 @@ string nlblanks(int i) {  // a newline followed by i blanks
 }
 
 // hash the strings...
-static Opt_t<Table<stringptr,Doc>> str_hashtbl = null;
+static opt_t<table_t<stringptr,doc_t,{},{}>> str_hashtbl = null;
 
 int infinity = 9999999;
 
-static Out text_doc_f($(int,string) @clo,Ppstate st) {
+static out_t text_doc_f($(int,string) @clo,ppstate_t st) {
   let &$(slen,s) = clo;
-  return &out(st->cc+slen,
+  return &Out(st->cc+slen,
               st->cl,
               Single(new {s}),
               Empty);
 }
-static Doc text_doc(string s) {
+static doc_t text_doc(string s) {
   int slen = String::strlen(s);
   return
-    &doc(slen,
+    &Doc(slen,
          infinity,
          make_fn
          (text_doc_f,
           &$(slen,s)));
 }
-Doc text(string s) {
-  Table<stringptr,Doc> t;
+doc_t text(string s) {
+  table_t<stringptr,doc_t,{},{}> t;
   if (str_hashtbl == null) {
     t = Hashtable::create(101,zstrptrcmp,hash_stringptr);
     str_hashtbl = &Opt(t);
@@ -170,70 +170,70 @@ Doc text(string s) {
     return Hashtable::lookup(t,new {s});
   catch {
   case Not_found:
-    Doc d = text_doc(s);
+    doc_t d = text_doc(s);
     Hashtable::insert(t,new {s},d);
     return d;
   }
 }
 
-Opt_t<Doc> nil_doc_opt   = null;
-Opt_t<Doc> blank_doc_opt = null;
-Opt_t<Doc> line_doc_opt  = null;
+opt_t<doc_t> nil_doc_opt   = null;
+opt_t<doc_t> blank_doc_opt = null;
+opt_t<doc_t> line_doc_opt  = null;
 
-// FIX: ineffecient to create an Out for the empty string!!
+// FIX: ineffecient to create an out_t for the empty string!!
 // This is made a function because non-constant initializers not allowed
-Doc nil_doc() {
+doc_t nil_doc() {
   if (nil_doc_opt == null) 
     nil_doc_opt = &Opt(text(""));
   return nil_doc_opt->v;
 }
 
 // This is made a function because non-constant initializers not allowed
-Doc blank_doc() {
+doc_t blank_doc() {
   if (blank_doc_opt == null) 
     blank_doc_opt = &Opt(text(""));
   return blank_doc_opt->v;
 }
 
-static Out hyperlink_f($(int,string,string) @clo, Ppstate st) {
+static out_t hyperlink_f($(int,string,string) @clo, ppstate_t st) {
   let &$(slen,shrt,full) = clo;
-  return &out(st->cc+slen,
+  return &Out(st->cc+slen,
               st->cl,
               Single(new {shrt}),
               Single(&$(st->cl,st->cc,slen,full)));
 }
-Doc hyperlink(string shrt, string full) {
+doc_t hyperlink(string shrt, string full) {
   int slen = String::strlen(shrt);
-  return &doc(slen,
+  return &Doc(slen,
 	      infinity,
 	      make_fn (hyperlink_f, &$(slen,shrt,full)));
 }
 
 // This is made a function because non-constant initializers not allowed
-static Out line_f(Ppstate st) {
-  return &out(st->ci,
+static out_t line_f(ppstate_t st) {
+  return &Out(st->ci,
               st->cl+1,
               Single(new {nlblanks(st->ci)}),
               Empty);
 }
-Doc line_doc() {
+doc_t line_doc() {
   if (line_doc_opt == null) 
-    line_doc_opt = &Opt(&doc(0,0,fp2fn(line_f)));
+    line_doc_opt = &Opt(&Doc(0,0,fp2fn(line_f)));
   return line_doc_opt->v;
 }
 
-static Out nest_f($(int,Doc) @clo, Ppstate st) {
+static out_t nest_f($(int,doc_t) @clo, ppstate_t st) {
   let &$(k,d) = clo;
-  Ppstate st2 = 
-    &ppstate(st->ci + k,
+  ppstate_t st2 = 
+    &Ppstate(st->ci + k,
              st->cc,
              st->cl,
              st->pw,
              st->epw);
   return apply(d->f,st2);
 }
-Doc nest(int k, Doc d) {
-  return &doc
+doc_t nest(int k, doc_t d) {
+  return &Doc
     (d->mwo,
      d->mw,
      make_fn
@@ -251,51 +251,51 @@ int max(int x, int y) {
    else return y;
 }
 
-static Out concat_f($(Doc,Doc) @clo, Ppstate st) {
+static out_t concat_f($(doc_t,doc_t) @clo, ppstate_t st) {
   let &$(d1,d2) = clo;
   int epw2 = max(st->pw-d2->mw, st->epw-d1->mwo);
-  Ppstate st2 = &ppstate(st->ci,st->cc,st->cl,st->pw,epw2);
-  Out     o1  = apply(d1->f,st2);
-  Ppstate st3 = &ppstate(st->ci,o1->newcc,o1->newcl,st->pw,epw2);
-  Out     o2  = apply(d2->f,st3);
-  Out     o3  = &out(o2->newcc,
+  ppstate_t st2 = &Ppstate(st->ci,st->cc,st->cl,st->pw,epw2);
+  out_t     o1  = apply(d1->f,st2);
+  ppstate_t st3 = &Ppstate(st->ci,o1->newcc,o1->newcl,st->pw,epw2);
+  out_t     o2  = apply(d2->f,st3);
+  out_t     o3  = &Out(o2->newcc,
 		     o2->newcl,
 		     append(o1->ppout, o2->ppout),
 		     append(o1->links, o2->links));
   return o3;
 }
-Doc concat(Doc d1, Doc d2) {
-  return &doc(min(d1->mw, d1->mwo+d2->mwo),
+doc_t concat(doc_t d1, doc_t d2) {
+  return &Doc(min(d1->mw, d1->mwo+d2->mwo),
               min(d1->mw, d1->mwo+d2->mw),
               make_fn(concat_f, &$(d1,d2)));
 }    
 
 // good places in here for passing address of locals (eg. st)
 
-static Out long_concats_f(list<Doc> ds0, Ppstate st) {
-  list<Out> os = null;
+static out_t long_concats_f(list_t<doc_t> ds0, ppstate_t st) {
+  list_t<out_t> os = null;
   for (let ds = ds0; ds != null; ds = ds->tl) {
-    Doc d = ds->hd;
-    Out o = apply(d->f,st);
-    st = &ppstate(st->ci,o->newcc,o->newcl,st->pw,st->epw-d->mwo);
-    os = &cons(o,os);
+    doc_t d = ds->hd;
+    out_t o = apply(d->f,st);
+    st = &Ppstate(st->ci,o->newcc,o->newcl,st->pw,st->epw-d->mwo);
+    os = &List(o,os);
   }
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
-  Alist<stringptr> s = Empty;
+  alist_t<stringptr> s = Empty;
   let links = Empty;
   for(; os != null; os = os->tl) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);
   }
-  return &out(newcc,newcl,s,links);
+  return &Out(newcc,newcl,s,links);
 }
-static Doc long_concats(list<Doc> doclist) {
+static doc_t long_concats(list_t<doc_t> doclist) {
 #ifdef DEBUG
   fprintf(stderr,"doing long concats %d\n",List::length(doclist));
 #endif
-  list<Doc> orig = doclist;
-  Doc d = doclist->hd;
+  list_t<doc_t> orig = doclist;
+  doc_t d = doclist->hd;
   doclist = doclist->tl;
   int mw  = d->mw;
   int mwo = d->mw;
@@ -306,10 +306,10 @@ static Doc long_concats(list<Doc> doclist) {
     mw  = mw2;
     mwo = mwo2;
   }
-  return &doc(mw,mwo,make_fn(long_concats_f,orig));
+  return &Doc(mw,mwo,make_fn(long_concats_f,orig));
 }
 
-Doc concats(list<Doc> doclist) {
+doc_t concats(list_t<doc_t> doclist) {
   if (doclist==null) return nil_doc();
   else if (doclist->tl==null) return doclist->hd;
   // JGM: a hack to avoid stack overflow
@@ -317,31 +317,31 @@ Doc concats(list<Doc> doclist) {
   else return concat(doclist->hd,concats(doclist->tl));
 }
 
-static Out concats_arr_f(Doc ?docs, Ppstate st) {
-  list<Out> os = null;
+static out_t concats_arr_f(doc_t ?docs, ppstate_t st) {
+  list_t<out_t> os = null;
   int sz = docs.size;
   for (int i=0; i < sz; ++i) {
-    Doc d = docs[i];
-    Out o = apply(d->f,st);
-    st = &ppstate(st->ci,o->newcc,o->newcl,st->pw,st->epw-d->mwo);
-    os = &cons(o,os);
+    doc_t d = docs[i];
+    out_t o = apply(d->f,st);
+    st = &Ppstate(st->ci,o->newcc,o->newcl,st->pw,st->epw-d->mwo);
+    os = &List(o,os);
   }
   int newcc = os->hd->newcc;
   int newcl = os->hd->newcl;
-  Alist<stringptr> s = Empty;
+  alist_t<stringptr> s = Empty;
   let links = Empty;
   for(; os != null; os = os->tl) {
     s = append(os->hd->ppout,s);
     links = append(os->hd->links,links);
   }
-  return &out(newcc,newcl,s,links);
+  return &Out(newcc,newcl,s,links);
 }
 
-Doc concats_arr(Doc ?docs) {
+doc_t concats_arr(doc_t ?docs) {
   int sz = docs.size;
   if(sz==0)
     throw Failure("concats_arr -- size zero array");
-  Doc d = docs[0];
+  doc_t d = docs[0];
   int mw  = d->mw;
   int mwo = d->mw;
   for(int i=1; i < sz; ++i) {
@@ -350,34 +350,34 @@ Doc concats_arr(Doc ?docs) {
     mw  = mw2;
     mwo = mwo2;
   }
-  return &doc(mw,mwo,make_fn(concats_arr_f,docs));
+  return &Doc(mw,mwo,make_fn(concats_arr_f,docs));
 }
 
-static Out doc_union_f($(Doc,Doc) @clo, Ppstate st) {
+static out_t doc_union_f($(doc_t,doc_t) @clo, ppstate_t st) {
   let &$(d,d2) = clo;
   bool dfits = (st->cc+d->mwo <= st->epw)
     || (st->cc+d->mw <= st->pw);
   if (dfits) return apply(d->f,st);
   else return apply(d2->f,st);
 }
-Doc doc_union(Doc d, Doc d2) {
-  return &doc(min(d->mwo, d2->mwo),
+doc_t doc_union(doc_t d, doc_t d2) {
+  return &Doc(min(d->mwo, d2->mwo),
 	      min(d->mw, d2->mw),
 	      make_fn (doc_union_f, &$(d,d2)));
 }
 
 // This is made a function because non-constant initializers not allowed
-Doc oline_doc() {
+doc_t oline_doc() {
   return doc_union(nil_doc(),line_doc());
 }
 
-static Out tab_f(Doc d, Ppstate st) {
-  Ppstate st2 = &ppstate(st->cc,st->cc,st->cl,st->pw,st->epw);
+static out_t tab_f(doc_t d, ppstate_t st) {
+  ppstate_t st2 = &Ppstate(st->cc,st->cc,st->cl,st->pw,st->epw);
   return apply(d->f,st2);
 }
-Doc tab(Doc d) {
-  Doc d2 =
-    &doc(d->mwo,
+doc_t tab(doc_t d) {
+  doc_t d2 =
+    &Doc(d->mwo,
          d->mw,
          make_fn (tab_f, d));
   return d2;
@@ -385,64 +385,64 @@ Doc tab(Doc d) {
 
 
 /* Sequences */
-static Doc ppseq_f<`a>(Doc pp(`a), string sep, list<`a> l) {
+static doc_t ppseq_f(doc_t pp(`a), string sep, list_t<`a> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return pp(l->hd);
-  else return concats(&cons(pp(l->hd),
-                            &cons(text(sep),
-                                  &cons(oline_doc(),
-                                        &cons(ppseq_f(pp,sep,l->tl),null)))));
+  else return concats(&List(pp(l->hd),
+                            &List(text(sep),
+                                  &List(oline_doc(),
+                                        &List(ppseq_f(pp,sep,l->tl),null)))));
 }
-Doc ppseq<`a>(Doc pp(`a), string sep, list<`a> l0) {
+doc_t ppseq(doc_t pp(`a), string sep, list_t<`a> l0) {
   return tab(ppseq_f(pp,sep,l0));
 }
 
-Doc seq_f(string sep, list<Doc> l) {
+doc_t seq_f(string sep, list_t<doc_t> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return l->hd;
   else {
-    Doc sep2 = text(sep);
-    Doc oline = oline_doc();
+    doc_t sep2 = text(sep);
+    doc_t oline = oline_doc();
     let x = l;
     while (x->tl != null) {
       let temp = x->tl;
-      x->tl = &cons(sep2,&cons(oline,temp));
+      x->tl = &List(sep2,&List(oline,temp));
       x = temp;
     }
     return concats(l);
     // This causes stack overflow on big sequences
-    //return concats(&cons(l->hd,
-    //                        &cons(text(sep),
-    //                              &cons(oline_doc(),
-    //                                    &cons(f(sep,l->tl),null)))));
+    //return concats(&List(l->hd,
+    //                        &List(text(sep),
+    //                              &List(oline_doc(),
+    //                                    &List(f(sep,l->tl),null)))));
   }
 }
-Doc seq(string sep, list<Doc> l0) {
+doc_t seq(string sep, list_t<doc_t> l0) {
   return tab(seq_f(sep,l0));
 }
 
 // Sequences broken by lines 
-Doc ppseql_f<`a>(Doc pp(`a), string sep, list<`a> l) {
+doc_t ppseql_f(doc_t pp(`a), string sep, list_t<`a> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return pp(l->hd);
-  else return concats(&cons(pp(l->hd),
-                            &cons(text(sep),
-                                  &cons(line_doc(),
-                                        &cons(ppseql_f(pp,sep,l->tl),null)))));
+  else return concats(&List(pp(l->hd),
+                            &List(text(sep),
+                                  &List(line_doc(),
+                                        &List(ppseql_f(pp,sep,l->tl),null)))));
 }
-Doc ppseql<`a>(Doc pp(`a), string sep, list<`a> l0) {
+doc_t ppseql(doc_t pp(`a), string sep, list_t<`a> l0) {
   return tab(ppseql_f(pp,sep,l0));
 }
 
-static Doc seql_f(string sep, list<Doc> l) {
+static doc_t seql_f(string sep, list_t<doc_t> l) {
   if (l==null) return nil_doc();
   else if (l->tl==null) return l->hd;
-  else return concats(&cons(l->hd,
-                            &cons(text(sep),
-                                  &cons(line_doc(),
-                                        &cons(seql_f(sep,l->tl),null)))));
+  else return concats(&List(l->hd,
+                            &List(text(sep),
+                                  &List(line_doc(),
+                                        &List(seql_f(sep,l->tl),null)))));
 }
-Doc seql(string sep, list<Doc> l0) {
+doc_t seql(string sep, list_t<doc_t> l0) {
   return tab(seql_f(sep,l0));
 }
 

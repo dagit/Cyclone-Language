@@ -16,15 +16,16 @@ using PP;
 extern bool expand_typedefs;
 extern bool qvar_to_Cids;
 
-extern void decllist2file(list<decl> tdl, FILE @f);
+extern void decllist2file(list_t<decl> tdl, FILE @f);
 
-extern Doc decl2doc(decl d);
+extern doc_t decl2doc(decl d);
 
 extern string typ2string(typ);
+extern string kind2string(kind_t);
 extern string exp2string(exp);
 extern string stmt2string(stmt);
 extern string qvar2string(qvar);
-extern string decllist2string(list<decl> tdl);
+extern string decllist2string(list_t<decl> tdl);
 extern string prim2string(primop p);
 extern string pat2string(pat p);
 
@@ -34,8 +35,8 @@ extern string pat2string(pat p);
   extern string string_escape(string);
   extern string prim2str(primop p);
   extern bool is_declaration(stmt s);
-  extern $(Core::Opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg);
-  extern $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t);
+  extern $(Core::opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg);
+  extern $(tqual,typ,list_t<type_modifier>)@ to_tms(tqual tq,typ t);
 
 }
 #endif

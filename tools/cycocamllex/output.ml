@@ -10,7 +10,7 @@
 (*                                                                     *)
 (***********************************************************************)
 
-(* $Id: output.ml,v 1.3 2001-01-30 21:50:23 jgm Exp $ *)
+(* $Id: output.ml,v 1.4 2001-03-15 23:37:55 jgm Exp $ *)
 
 (* Output the DFA tables and its entry points *)
 
@@ -88,7 +88,7 @@ let output_tables oc tbl =
 (* Output the entries *)
 
 let output_entry sourcefile ic oc e =
-  fprintf oc "int %s_rec<`a>(Lexbuf<`a> lexbuf, int lexstate) {\n" e.auto_name;
+  fprintf oc "int %s_rec(Lexbuf<`a> lexbuf, int lexstate) {\n" e.auto_name;
   (* save new state, then switch on it, so default case can use it.
      (int switch can't get the value being switched on) *)
   fprintf oc "  if (lt == null) lt = &lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);\n";
@@ -103,7 +103,7 @@ let output_entry sourcefile ic oc e =
     " default: lexbuf->refill_buff(lexbuf); return %s_rec(lexbuf,lexstate);\n"
     e.auto_name;
   fprintf oc "  }\n throw Error(\"some action didn't return!\");\n}\n";
-  fprintf oc "int %s<`a>(Lexbuf<`a> lexbuf) { return %s_rec(lexbuf,%d); }\n"
+  fprintf oc "int %s(Lexbuf<`a> lexbuf) { return %s_rec(lexbuf,%d); }\n"
           e.auto_name e.auto_name e.auto_initial_state
 
 

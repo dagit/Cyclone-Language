@@ -18,13 +18,12 @@ namespace Position {
 
   //////// Location Tracking /////////
   extern struct Segment;
-  typedef struct Segment *segment;
   typedef struct Segment *seg_t; // same as segment, but better emacs coloring
   extern seg_t  segment_of_abs(int,int);
   extern seg_t  segment_join(seg_t,seg_t);
   extern string string_of_loc(int);
   extern string string_of_segment(seg_t);
-  extern list<stringptr> strings_of_segments(list<seg_t>);
+  extern list_t<stringptr> strings_of_segments(glist_t<seg_t,`r>);
 
   //////// Errors ////////////////////
   extern enum Error_kind { Lex, Parse, Elab };

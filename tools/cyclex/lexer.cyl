@@ -55,7 +55,7 @@ static int comment_depth = 0;
 static string string_buff  = (string)"01234567012345670123456701234567";
 static int    string_index = 0;
 
-typedef int lexfun_t <`a>(Lexing::Lexbuf<`a>);
+  //typedef int lexfun_t <`a>(Lexing::Lexbuf<`a>;{});
 
 #define SHRINK_THRESHOLD 16384
 void reset_string_buffer() {
@@ -92,13 +92,14 @@ char char_for_backslash(char c) {
 
 // FIX: Maybe the Cyclone version should interpret things in octal instead
 //      of decimal.  If so, change this code and all existing lexers.
-char char_for_octal_code<`a>(Lexbuf<`a> lbuf, int i) {
+char char_for_octal_code(Lexbuf<`a> lbuf, int i) {
   return (char)(64 * (((int) lexeme_char(lbuf,i))   - '0') +
 		 8 * (((int) lexeme_char(lbuf,i+1)) - '0') +
 		     (((int) lexeme_char(lbuf,i+2)) - '0'));
 }
 
-static int handle_lexical_error<`a>(lexfun_t fn, Lexbuf<`a>lbuf) {
+static int handle_lexical_error(int fn<`b,`e>(Lexing::Lexbuf<`b>;`e), 
+                                Lexbuf<`a>lbuf) {
   int line = line_num;
   int column = lexeme_start(lbuf) - line_start_pos;
   try return fn(lbuf);
@@ -106,7 +107,11 @@ static int handle_lexical_error<`a>(lexfun_t fn, Lexbuf<`a>lbuf) {
 }
 
 // Forward declarations of lexing functions
-extern lexfun_t lexmain, action, strng, comment;
+  //extern lexfun_t lexmain, action, strng, comment;
+extern int lexmain(Lexing::Lexbuf<`a>);
+extern int action(Lexing::Lexbuf<`a>);
+extern int strng(Lexing::Lexbuf<`a>);
+extern int comment(Lexing::Lexbuf<`a>);
 
 } // namespace Lexer
 
@@ -133,7 +138,7 @@ rule lexmain = parse
          ++line_num;
          return lexmain(lexbuf); }
 | "/*" { comment_depth = 1;
-         handle_lexical_error(comment<>,lexbuf); 
+         handle_lexical_error(comment,lexbuf); 
          return lexmain(lexbuf); }
 | ['A'-'Z' 'a'-'z'] ['A'-'Z' 'a'-'z' '\'' '_' '0'-'9'] *
   { string s = lexeme(lexbuf);
@@ -145,7 +150,7 @@ rule lexmain = parse
     else { token_string = s; return TIDENT; }
   }
 | '"' { reset_string_buffer();
-        handle_lexical_error(strng<>, lexbuf);
+        handle_lexical_error(strng, lexbuf);
 	token_string = get_stored_string();
 	return TSTRING;
       }
@@ -164,7 +169,7 @@ rule lexmain = parse
      int l1 = line_num;
      int s1 = line_start_pos;
      brace_depth = 1;
-     int n2 = handle_lexical_error(action<>,lexbuf);
+     int n2 = handle_lexical_error(action,lexbuf);
      token_action = &Syntax::Location(n1,n2,l1,n1-s1);
      return TACTION;
    }

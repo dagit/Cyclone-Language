@@ -10,7 +10,7 @@ namespace ControlFlow {
   extern void set_encloser(Absyn::stmt enclosee, Absyn::stmt encloser);
 
   // top-level entry for this pass
-  extern void cf_check(List::list<Absyn::decl>);
+  extern void cf_check(List::list_t<Absyn::decl>);
 }
 
 #endif

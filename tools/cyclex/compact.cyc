@@ -23,13 +23,13 @@ struct Lex_tables {
 
 // Determine the integer occurring most frequently in an array
 static int most_frequent_elt(int ?v) {
-  Hashtable::Table<int,Ref::ref<int>> frequencies = 
+  Hashtable::table_t<int,Ref::ref_t<int>,{},{}> frequencies = 
      Hashtable::create(17, intcmp, identity);
   int max_freq  = 0;
   int most_freq = 0;
   for(int i=0; i < v.size; ++i) {
     int      e = v[i];
-    Ref::ref<int> r;
+    Ref::ref_t<int> r;
     try r = Hashtable::lookup(frequencies, e);
     catch {
     case Not_found: 
@@ -49,12 +49,12 @@ static int most_frequent_elt(int ?v) {
 
 // Transform an array into a list of (position, non-default element)
 
-static list<$(int,int)@> non_default_elements(int def, int ?v) {
-  list<$(int,int)@> ans = null;
+static list_t<$(int,int)@> non_default_elements(int def, int ?v) {
+  list_t<$(int,int)@> ans = null;
   for(int i=v.size-1; i >= 0; --i) {
     int e = v[i];
     if(e != def)
-      ans = &cons(&$(i,e), ans);
+      ans = &List(&$(i,e), ans);
   }
   return ans;
 }
@@ -72,12 +72,12 @@ static void grow_transitions() {
   check = new {for i < 2*n : i < last_used ? old_check[i] : -1};
 }
 
-static int pack_from(list<$(int,int)@> nondef, int b); // forward declaration
+static int pack_from(list_t<$(int,int)@> nondef, int b); // forward declaration
 
-static int try_pack(list<$(int,int)@> nondef, list<$(int,int)@> rem, int b) {
+static int try_pack(list_t<$(int,int)@> nondef, list_t<$(int,int)@> rem, int b) {
   switch (rem) {
   case null: return b;
-  case &cons{.hd= &$(pos,v), .tl= rem2}:
+  case &List{.hd= &$(pos,v), .tl= rem2}:
     if(check[b+pos] == -1)
       return try_pack(nondef, rem2, b);
     else
@@ -85,7 +85,7 @@ static int try_pack(list<$(int,int)@> nondef, list<$(int,int)@> rem, int b) {
   }
 }
 
-static int pack_from(list<$(int,int)@> nondef, int b) {
+static int pack_from(list_t<$(int,int)@> nondef, int b) {
   while(b+257 > trans.size)
     grow_transitions();
   return try_pack(nondef, nondef, b);
@@ -101,7 +101,7 @@ static $(int,int)@ pack_moves(int state_num, automata_move_t ?moves) {
 		       x;
 		       })};
   int               def    = most_frequent_elt(moves_v);
-  list<$(int,int)@> nondef = non_default_elements(def, moves_v);
+  list_t<$(int,int)@> nondef = non_default_elements(def, moves_v);
   int               base   = pack_from(nondef,0);
 
   for(; nondef != null; nondef = nondef->tl) {

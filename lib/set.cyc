@@ -19,33 +19,32 @@ using List;
  * first elt is greater than the second elt.  The list of nodes is
  * always maintained in sorted order with no duplicates.
  */
-abstract
-struct set<`a> {
-  int (@compare)(`a,`a);
+abstract struct Set<`a,`r,`e> {
+  int (@compare)(`a,`a;`e);
   int cardinality;
-  list<`a> nodes;
+  glist_t<`a,`r> nodes;
 };
 
 /* Given a comparison function, return an empty set. */
-Set<`a> empty<`a>(int (@comp)(`a,`a)) {
-  return &set(comp,0,null);
+hset_t<`a,`e> empty(int (@comp)(`a,`a;`e)) {
+  return &Set(comp,0,null);
 }
 
-Set<`a> singleton<`a>(int (@comp)(`a,`a),`a x) {
-  return &set(comp,1,&cons(x,null));
+hset_t<`a,`e> singleton(int (@comp)(`a,`a;`e),`a x) {
+  return &Set(comp,1,&List(x,null));
 }
 
-int cardinality<`a>(Set<`a> s) {
+int cardinality(gset_t<`a,`r,`e> s) {
   return(s->cardinality);
 }
 
 /* Determine whether a set is empty */
-bool is_empty<`a>(Set<`a> s) {
+bool is_empty(gset_t<`a,`r,`e> s) {
   return(s->cardinality == 0);
 }
 
 /* Return true if element is present, false otherwise */
-static bool member_b<`a>(int compare(`a,`a),list<`a> n,`a elt) {
+static bool member_b(int compare(`a,`a;`e),glist_t<`a,`r> n,`a elt) {
   while (n != null) {
     int i = compare(elt,n->hd);
     if (i == 0) return(true);
@@ -55,7 +54,7 @@ static bool member_b<`a>(int compare(`a,`a),list<`a> n,`a elt) {
   return(false);
 }
 
-bool member<`a>(Set<`a> s,`a elt) {
+bool member(gset_t<`a,`r,`e> s,`a elt) {
   return(member_b(s->compare,s->nodes,elt));
 }
 
@@ -63,38 +62,38 @@ bool member<`a>(Set<`a> s,`a elt) {
  * returning a new list of nodes (that shares with the old one).
  * Assumes elt is not in the list.
  */
-static list<`a> insert_b<`a>(int compare(`a,`a),list<`a> n,`a elt) {
+static list_t<`a> insert_b(int compare(`a,`a;`e),list_t<`a> n,`a elt) {
 
   if (n == null)
-    return &cons(elt,null);
+    return &List(elt,null);
   else {
     int i = compare(elt,n->hd);
     if (i < 0) 
-      return &cons(elt,n);
+      return &List(elt,n);
     else {
-      list<`a> result = &cons(n->hd,null);
-      list<`a> prev = result;
+      list_t<`a> result = &List(n->hd,null);
+      list_t<`a> prev = result;
       n = n->tl;
       while (n != null && (i = compare(n->hd,elt)) < 0) {
-	prev->tl = &cons(n->hd,null);
+	prev->tl = &List(n->hd,null);
 	prev = prev->tl;
 	n = n->tl;
       }
-      prev->tl = &cons(elt,n);
+      prev->tl = &List(elt,n);
       return(result);
     }
   }
 }
 
 /* Inserts an elt into a set. */
-Set<`a> insert<`a>(Set<`a> s,`a elt) {
+hset_t<`a,`e> insert(hset_t<`a,`e> s,`a elt) {
   if (member(s,elt)) return(s);
-  else return &set(s->compare,s->cardinality+1,
+  else return &Set(s->compare,s->cardinality+1,
                    insert_b(s->compare,s->nodes,elt));
 }
 
 /* Unions two sets by merging the nodes */
-Set<`a> union_two<`a>(Set<`a> s1,Set<`a> s2) {
+hset_t<`a,`e> union_two(hset_t<`a,`e> s1,hset_t<`a,`e> s2) {
   if(s1 == s2)
     return s1;
   if(s1->cardinality == 0)
@@ -102,13 +101,13 @@ Set<`a> union_two<`a>(Set<`a> s1,Set<`a> s2) {
   if(s2->cardinality == 0)
     return s1;
 
-  list<`a> nodes = null;
+  list_t<`a> nodes = null;
   int cardinality = 0;
-  int (@comp)(`a,`a) = s1->compare;
+  int (@comp)(`a,`a;`e) = s1->compare;
 
-  list<`a> x1 = s1->nodes;
-  list<`a> x2 = s2->nodes;
-  list<`a> curr = null;
+  list_t<`a> x1 = s1->nodes;
+  list_t<`a> x2 = s2->nodes;
+  list_t<`a> curr = null;
 
   while ((x1 != null) && (x2 != null)) {
     int i = comp(x1->hd,x2->hd);
@@ -118,10 +117,10 @@ Set<`a> union_two<`a>(Set<`a> s1,Set<`a> s2) {
     } else if (i < 0) {
       // x1->hd <= x2->hd -- insert x1 into nodes
       if (curr == null) {
-	nodes = &cons(x1->hd,null);
+	nodes = &List(x1->hd,null);
 	curr = nodes;
       } else {
-	curr->tl = &cons(x1->hd,null);
+	curr->tl = &List(x1->hd,null);
 	curr = curr->tl;
       }
       x1 = x1->tl;
@@ -129,10 +128,10 @@ Set<`a> union_two<`a>(Set<`a> s1,Set<`a> s2) {
     } else {
       // x2->hd <= x1->hd -- insert x2 into nodes
       if (curr == null) {
-	nodes = &cons(x2->hd,null);
+	nodes = &List(x2->hd,null);
 	curr = nodes;
       } else {
-	curr->tl = &cons(x2->hd,null);
+	curr->tl = &List(x2->hd,null);
 	curr = curr->tl;
       }
       x2 = x2->tl;
@@ -154,20 +153,20 @@ Set<`a> union_two<`a>(Set<`a> s1,Set<`a> s2) {
       curr->tl = x2;
     cardinality += List::length(x2);
   }
-  return &set(comp,cardinality,nodes);
+  return &Set(comp,cardinality,nodes);
 }
       
 /* Internal function used to delete an elt from a list of nodes --
  * assumes the elt is in the list exactly once and that the nodes are sorted.
  */
-static list<`a> delete_b<`a>(int compare(`a,`a),list<`a> n,`a elt) {
+static list_t<`a> delete_b(int compare(`a,`a;`e),list_t<`a> n,`a elt) {
   if (compare(n->hd,elt) == 0) return(n->tl);
 
-  list<`a> result = &cons(n->hd,null);
-  list<`a> prev = result;
+  list_t<`a> result = &List(n->hd,null);
+  list_t<`a> prev = result;
   n = n->tl;
   while (n != null && (compare(n->hd,elt) != 0)) {
-    prev->tl = &cons(n->hd,null);
+    prev->tl = &List(n->hd,null);
     prev = prev->tl;
     n = n->tl;
   }
@@ -176,23 +175,23 @@ static list<`a> delete_b<`a>(int compare(`a,`a),list<`a> n,`a elt) {
 }
 
 /* Delete a elt/pair from the set if present. */
-Set<`a> delete<`a>(Set<`a> s,`a elt) {
+hset_t<`a,`e> delete(hset_t<`a,`e> s,`a elt) {
   if (member(s,elt)) 
-    return &set(s->compare,s->cardinality - 1,
+    return &Set(s->compare,s->cardinality - 1,
                 delete_b(s->compare,s->nodes,elt));
   else return(s);
 }
 
+list_t<`a> elements(hset_t<`a,`e> s) {
 /* Note: For efficiency we don't copy, but that means clients can
          screw up our invariants!
 */
-list<`a> elements<`a>(Set<`a> s) {
   return(s->nodes);
 }
 
 /* Fold a function f across the set yielding an accumulator. */
-`b fold<`a,`b>(`b f(`a,`b),Set<`a> s,`b accum) {
-  list<`a> n = s->nodes;
+`b fold(`b f(`a,`b),gset_t<`a,`r,`e> s,`b accum) {
+  glist_t<`a,`r> n = s->nodes;
 
   while (n != null) {
     accum = f(n->hd,accum);
@@ -200,8 +199,8 @@ list<`a> elements<`a>(Set<`a> s) {
   }
   return(accum);
 }
-`b fold_c<`a,`b,`c>(`b f(`c,`a,`b),`c env,Set<`a> s,`b accum) {
-  list<`a> n = s->nodes;
+`b fold_c(`b f(`c,`a,`b),`c env,gset_t<`a,`r,`e> s,`b accum) {
+  glist_t<`a,`r> n = s->nodes;
 
   while (n != null) {
     accum = f(env,n->hd,accum);
@@ -212,26 +211,26 @@ list<`a> elements<`a>(Set<`a> s) {
 
 
 /* Apply a function to each element in a set */
-void app<`a,`b>(`b f(`a),Set<`a> s) {
+void app(`b f(`a),gset_t<`a,`r,`e> s) {
   List::app(f,s->nodes);
 }
-void iter<`a>(void f(`a),Set<`a> s) {
+void iter(void f(`a),gset_t<`a,`r,`e> s) {
   List::iter(f,s->nodes);
 }
-void iter_c<`a,`c>(void f(`c,`a),`c env,Set<`a> s) {
+void iter_c(void f(`c,`a),`c env,gset_t<`a,`r,`e> s) {
   List::iter_c(f,env,s->nodes);
 }
 
 
 /* return the intersection of two sets */
 // could try to prevent more allocation with subset checks
-Set<`a> intersect<`a>(Set<`a> s1,Set<`a> s2) {
+hset_t<`a,`e> intersect(hset_t<`a,`e> s1,hset_t<`a,`e> s2) {
   if(s1 == s2) 
     return s1;
-  int (@comp)(`a,`a) = s1->compare;
-  list<`a> x1 = s1->nodes;
-  list<`a> x2 = s2->nodes;
-  list<`a> result=null,prev=null;
+  int (@comp)(`a,`a;`e) = s1->compare;
+  list_t<`a> x1 = s1->nodes;
+  list_t<`a> x2 = s2->nodes;
+  list_t<`a> result=null,prev=null;
   int card = 0;
   if(x1 == null)
     return s1;
@@ -242,10 +241,10 @@ Set<`a> intersect<`a>(Set<`a> s1,Set<`a> s2) {
     int i = comp(x1->hd,x2->hd);
     if (i == 0) {
       if (result == null) {
-	result = &cons(x1->hd,null);
+	result = &List(x1->hd,null);
 	prev = result;
       } else {
-	prev->tl = &cons(x1->hd,null);
+	prev->tl = &List(x1->hd,null);
 	prev = prev->tl;
       }
       ++card;
@@ -257,23 +256,23 @@ Set<`a> intersect<`a>(Set<`a> s1,Set<`a> s2) {
       x2 = x2->tl;
     }
   }
-  return &set(comp,card,result);
+  return &Set(comp,card,result);
 }
 
-Set<`a> from_list<`a>(int comp(`a,`a),list<`a> x) {
-  x = List::merge_sort(comp,x);
+hset_t<`a,`e> from_list(int comp(`a,`a;`e),glist_t<`a,`r> x) {
+  list_t<`a> z = List::merge_sort(comp,x);
   // remove duplicates
-  for (list<`a> y=x; y!=null; y=y->tl) {
+  for (list_t<`a> y=z; y!=null; y=y->tl) {
     if ((y->tl != null) && (comp(y->hd,y->tl->hd) == 0))
       y->tl = y->tl->tl;
   }
-  return &set(comp,List::length(x),x);
+  return &Set(comp,List::length(z),z);
 }
 
-bool subset<`a>(Set<`a> s1,Set<`a> s2) {
-  int (@comp)(`a,`a) = s1->compare;
-  list<`a> x1 = s1->nodes;
-  list<`a> x2 = s2->nodes;
+bool subset(gset_t<`a,`r1,`e> s1,gset_t<`a,`r2,`e> s2) {
+  int (@comp)(`a,`a;`e) = s1->compare;
+  glist_t<`a,`r1> x1 = s1->nodes;
+  glist_t<`a,`r2> x2 = s2->nodes;
 
   while (true) {
     if (x1 == null) return true;
@@ -289,10 +288,10 @@ bool subset<`a>(Set<`a> s1,Set<`a> s2) {
   return true;
 }
 
-Set<`a> diff<`a>(Set<`a> s1,Set<`a> s2) {
-  int (@comp)(`a,`a) = s1->compare;
-  list<`a> x1 = s1->nodes;
-  list<`a> x2 = s2->nodes;
+hset_t<`a,`e> diff(hset_t<`a,`e> s1,hset_t<`a,`e> s2) {
+  int (@comp)(`a,`a;`e) = s1->compare;
+  list_t<`a> x1 = s1->nodes;
+  list_t<`a> x2 = s2->nodes;
   int card = s1->cardinality;
 
   if (x2 == null) return(s1); 
@@ -306,15 +305,17 @@ Set<`a> diff<`a>(Set<`a> s1,Set<`a> s2) {
     }
     x2 = x2->tl;
   }
-  return &set(comp,card,x1);
+  return &Set(comp,card,x1);
 }
 
-int compare<`a>(Set<`a> s1,Set<`a> s2) {
-  if (s1 == s2) return 0;
+int compare(gset_t<`a,`r1,`e> s1,gset_t<`a,`r2,`e> s2) {
+  // type-checker doesn't allow us to compare because the types aren't the same
+  // if (s1 == s2) return 0; 
   if (s1->cardinality != s2->cardinality) return s1->cardinality-s2->cardinality;
 
-  list<`a> x1 = s1->nodes, x2 = s2->nodes;
-  int (@comp)(`a,`a) = s1->compare;
+  glist_t<`a,`r1> x1 = s1->nodes;
+  glist_t<`a,`r2> x2 = s2->nodes;
+  int (@comp)(`a,`a;`e) = s1->compare;
   while (x1 != null) {
     int diff = comp(x1->hd,x2->hd);
     if (diff != 0) return diff;
@@ -324,7 +325,7 @@ int compare<`a>(Set<`a> s1,Set<`a> s2) {
   return 0;
 }
 
-bool equals<`a>(Set<`a> s1, Set<`a> s2) {
+bool equals(gset_t<`a,`r1,`e> s1, gset_t<`a,`r2,`e> s2) {
   return compare(s1,s2) == 0;
 }
     
@@ -333,7 +334,7 @@ xenum exn {Absent};
 /* Return an elt (in this case -- the first one in the set).
  * If the set is empty, throw Absent.
  */
-`a choose<`a>(Set<`a> s) {
+`a choose(gset_t<`a,`r,`e> s) {
   if (s->nodes == null) throw Absent;
   return(s->nodes->hd);
 }

@@ -12,6 +12,7 @@
 #include "control_flow.h"
 #include "tcstmt.h"
 #include "evexp.h"
+#include "stdio.h"
 
 namespace Tcstmt;
 
@@ -24,18 +25,20 @@ using Tcutil;
 using Tcenv;
 using Tcexp;
 using Tcpat;
+using Stdio;
 
 // used to type-check Let_d, switch clauses, and catch clauses
-static void pattern_synth(segment loc, tenv te, list<tvar> tvs,
-			  list<vardecl> vs, stmt s, exp_opt where_opt,
+static void pattern_synth(seg_t loc, tenv te, list_t<tvar> tvs,
+			  list_t<vardecl> vs, stmt s, exp_opt where_opt,
 			  bool new_block) {
   tenv te2 = add_type_vars(loc,te,tvs);
   if(new_block && vs != null)
     te2 = Tcenv::new_block(te2);
   let block = Tcenv::curr_block(te2);
+  let ropt = &Opt(block);
   for(let vs2 = vs; vs2 != null; vs2 = vs2->tl) {
     te2 = add_pat_var(loc, te2, vs2->hd);
-    vs2->hd->block = block;
+    vs2->hd->region = ropt;
   }
 
   if(where_opt != null)
@@ -149,7 +152,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
       return;
     }
     let &$(_,tvs,ts) = (_@)(trip_opt);
-    list<$(tvar,typ)@> instantiation = List::map(make_inst_var,tvs);
+    list_t<$(tvar,typ)@> instantiation = List::map(make_inst_var,tvs);
     ts = List::map_c(substitute,instantiation,ts);
     for(; ts != null && es != null; ts = ts->tl, es = es->tl) {
       tcExp(te,null,es->hd);
@@ -231,7 +234,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     case Var_d(vd):
       let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*block_ptr) = vd;
       let curr_bl = Tcenv::curr_block(te);
-      *block_ptr = curr_bl; // side effect
+      *block_ptr = &Opt(curr_bl); // side effect
       switch (nsl) {
       case Loc_n: break;
       case Rel_n(null):

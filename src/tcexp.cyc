@@ -29,7 +29,7 @@ using Stdio;
 
 namespace Tcexp;
 
-static typ expr_err(tenv te,segment loc,string msg) {
+static typ expr_err(tenv te,seg_t loc,string msg) {
   terr(loc,msg);
   return wildtyp();
 }
@@ -58,13 +58,13 @@ static void resolve_unknown_id(tenv te, exp e, qvar q) {
   }
 }
 
-static $(list<designator>,exp)@ make_struct_arg(exp e) {
+static $(list_t<designator>,exp)@ make_struct_arg(exp e) {
   return &$(null,e);
 }
 // Resolve whether this is a function call or enum, xenum, or struct
 // constructor -- let normal type-checking do the rest of the work.
 // NOTE: We assume q is a relative qvar.
-static void resolve_unknown_fn(tenv te, exp e, exp e1, list<exp> es) {
+static void resolve_unknown_fn(tenv te, exp e, exp e1, list_t<exp> es) {
   switch (e1->r) {
   case UnknownId_e(q):
     try {
@@ -99,6 +99,7 @@ static void resolve_unknown_fn(tenv te, exp e, exp e1, list<exp> es) {
     } catch {
     case Dict::Absent:
       terr(e1->loc, xprintf("unbound identifier %s",qvar2string(q)));
+      e->r = FnCall_e(e1,es);
       return;
     }
   default: 
@@ -107,9 +108,8 @@ static void resolve_unknown_fn(tenv te, exp e, exp e1, list<exp> es) {
   }
 }
 
-static void
-resolve_unresolved_mem<`r>(tenv te, seg_t loc, typ *`r topt, exp e,
-			   list<$(list<designator>,exp)@> des) {
+static void resolve_unresolved_mem(tenv te, seg_t loc, typ *`r topt, exp e,
+                                   list_t<$(list_t<designator>,exp)@> des) {
   // NOTE: must always bang e->r or caller will loop!
   if (topt == null) {
     // guess it is an array
@@ -136,11 +136,11 @@ resolve_unresolved_mem<`r>(tenv te, seg_t loc, typ *`r topt, exp e,
 //////////////////////// Actual Type-checking //////////////////////////////
 
 // forward reference just b/c of how things are organized at the moment
-static void tcExpNoInst<`r>(tenv te, typ *`r topt, exp e);
-static typ tcExpNoPromote<`r>(tenv te, typ *`r topt, exp e);
+static void tcExpNoInst(tenv te, typ *`r topt, exp e);
+static typ tcExpNoPromote(tenv te, typ *`r topt, exp e);
 
 // Type check a list of expressions
-static void tcExpList(tenv te, list<exp> es) {
+static void tcExpList(tenv te, list_t<exp> es) {
   for(; es != null; es = es->tl)
     tcExp(te,null,es->hd);
 }
@@ -155,7 +155,7 @@ void tcTest(tenv te, exp e, string msg_part) {
 }
 
 // constants
-static typ tcConst<`r>(tenv te, seg_t loc, typ *`r topt, cnst_t c, exp e) {
+static typ tcConst(tenv te, seg_t loc, typ *`r topt, cnst_t c, exp e) {
   typ t;
   switch (c) {
   case Char_c(sn,_):     t = (sn == Unsigned) ? uchar_t  : schar_t;  break;
@@ -195,7 +195,7 @@ static typ tcConst<`r>(tenv te, seg_t loc, typ *`r topt, cnst_t c, exp e) {
     elen->topt = &Opt(uint_t);
     // The default is to treat a string as if it's heap allocated
     // Note that such strings are shared...
-    t = atb_typ(uchar_t, HeapRgnType, empty_tqual(), Upper_b(elen));
+    t = atb_typ(uchar_t, HeapRgn, empty_tqual(), Upper_b(elen));
     if (topt != null) {
       switch (compress(*topt)) {
       case ArrayType(telt,tq,e2):
@@ -212,7 +212,7 @@ static typ tcConst<`r>(tenv te, seg_t loc, typ *`r topt, cnst_t c, exp e) {
 	if (!unify(telt,uchar_t))
 	  terr(loc,xprintf("string cannot be used as %s pointer",
 			   typ2string(telt)));
-	if (!unify(trgn,HeapRgnType))
+	if (!unify(trgn,HeapRgn))
 	  terr(loc,"this string literal is heap allocated");
 	b = compress_conref(b);
 	switch (b->v) {
@@ -246,7 +246,7 @@ static typ tcConst<`r>(tenv te, seg_t loc, typ *`r topt, cnst_t c, exp e) {
 }
 
 // variables
-static typ tcVar<`r>(tenv te, segment loc, qvar q, binding_t b) {
+static typ tcVar(tenv te, seg_t loc, qvar q, binding_t b) {
   switch(b) {
   case Unresolved_b:
     return expr_err(te,loc,xprintf("unbound identifier %s",qvar2string(q)));
@@ -266,10 +266,10 @@ static typ tcVar<`r>(tenv te, segment loc, qvar q, binding_t b) {
   }
 }
 
-static void check_format_args(tenv te, exp fmt, list<exp> args,
-			      list<typ> type_getter(string,segment)) {
+static void check_format_args(tenv te, exp fmt, list_t<exp> args,
+			      list_t<typ> type_getter(string,seg_t)) {
   // check the format string and get the types it requires
-  list<typ> desc_types;
+  list_t<typ> desc_types;
   switch (fmt->r) {
   case Const_e(String_c(false,s)): desc_types = type_getter(s,fmt->loc); break;
   default: terr(fmt->loc, "expecting a literal format string"); return;
@@ -289,7 +289,7 @@ static void check_format_args(tenv te, exp fmt, list<exp> args,
   if (args != null)
     terr(args->hd->loc,"too many arguments");
 }
-static typ tcUnPrimop<`r>(tenv te, segment loc, typ *`r topt, primop p, exp e){
+static typ tcUnPrimop(tenv te, seg_t loc, typ *`r topt, primop p, exp e){
   typ t = compress(e->topt->v);
   switch (p) {
   case Plus: fallthru;
@@ -373,7 +373,7 @@ static typ tcMinus(tenv te, exp e1, exp e2) {
   } else return tcArithBinop(te, e1, e2, arithmetic_promote);
 }
 
-static typ tcAnyBinop(tenv te, segment loc, exp e1, exp e2) {
+static typ tcAnyBinop(tenv te, seg_t loc, exp e1, exp e2) {
   bool e1_is_unboxed_arith = comparison_promote(te,e1);
   bool e2_is_unboxed_arith = comparison_promote(te,e2);
   typ t1 = compress(e1->topt->v);
@@ -385,7 +385,7 @@ static typ tcAnyBinop(tenv te, segment loc, exp e1, exp e2) {
     return sint_t;
   }
   // okay if same types and boxed
-  else if (unify(t1,t2) && unify(t1,new_evar(BoxPKind))) {
+  else if (unify(t1,t2) && unify(t1,new_evar(BoxKind))) {
     return sint_t;
   // support comparisons on pointers
   } else {
@@ -406,8 +406,8 @@ static typ tcAnyBinop(tenv te, segment loc, exp e1, exp e2) {
 
 // Binary primops like e1+e2, e1>>e2, etc.
 // Note: e1 and e2 must have already been type-checked.
-static typ tcBinPrimop<`r>(tenv te, segment loc, typ *`r topt,
-                           primop p, exp e1, exp e2) {
+static typ tcBinPrimop(tenv te, seg_t loc, typ *`r topt,
+                       primop p, exp e1, exp e2) {
   switch (p) {
   case Plus:       return tcPlus(te,e1,e2);
   case Minus:      return tcMinus(te,e1,e2);
@@ -435,8 +435,8 @@ static typ tcBinPrimop<`r>(tenv te, segment loc, typ *`r topt,
   }
 }
 
-static typ tcPrimop<`r>(tenv te, segment loc, typ *`r topt,
-                        primop p, list<exp> es) {
+static typ tcPrimop(tenv te, seg_t loc, typ *`r topt,
+                    primop p, list_t<exp> es) {
   // An ugly hack to push topt below unary minus.  This comes in
   // handy because it stops warnings from being printed on array
   // initializers generated by bison (where (short)4 looks like
@@ -519,8 +519,8 @@ static typ tcPrimop<`r>(tenv te, segment loc, typ *`r topt,
   return t;
 }
 
-static typ tcIncrement<`r>(tenv te, segment loc, typ *`r topt,
-                           exp e, incrementor_t i) {
+static typ tcIncrement(tenv te, seg_t loc, typ *`r topt,
+                       exp e, incrementor_t i) {
   // Don't promote any arrays to pointers, as per K&R
   tcExpNoPromote(te,null,e);
   typ t = e->topt->v;
@@ -532,13 +532,13 @@ static typ tcIncrement<`r>(tenv te, segment loc, typ *`r topt,
 }
 
 // e1 ? e2 : e3
-static typ tcConditional<`r>(tenv te, segment loc, typ *`r topt,
-                             exp e1, exp e2, exp e3) {
+static typ tcConditional(tenv te, seg_t loc, typ *`r topt,
+                         exp e1, exp e2, exp e3) {
   tcTest(te, e1, "conditional expression");
   tcExp(te,topt,e2);
   tcExp(te,topt,e3);
   typ t = wildtyp();
-  if (!coerce_list(te,t,&cons(e2,&cons(e3,null))))
+  if (!coerce_list(te,t,&List(e2,&List(e3,null))))
     terr(loc,xprintf("conditional clause types do not match: %s != %s",
 			    typ2string(e2->topt->v),typ2string(e3->topt->v)));
   return t;
@@ -546,8 +546,8 @@ static typ tcConditional<`r>(tenv te, segment loc, typ *`r topt,
 
 // Assignments with optional operations, e.g., x = 3, x += 5
 // FIX: reject assignment to unmodifiable (eg. const) lvalues.
-static typ tcAssignOp<`r>(tenv te, segment loc, typ *`r topt,
-                          exp e1, Opt_t<primop> po, exp e2) {
+static typ tcAssignOp(tenv te, seg_t loc, typ *`r topt,
+                      exp e1, opt_t<primop> po, exp e2) {
   // FIX: Not right b/c of funcions vs. function pointers???
   // As per K&R, don't promote any array types to pointer types in the lhs
   tcExpNoPromote(te,null,e1);
@@ -578,14 +578,14 @@ static typ tcAssignOp<`r>(tenv te, segment loc, typ *`r topt,
 }
 
 // e1,e2
-static typ tcSeqExp<`r>(tenv te, segment loc, typ *`r topt, exp e1, exp e2) {
+static typ tcSeqExp(tenv te, seg_t loc, typ *`r topt, exp e1, exp e2) {
   tcExp(te,null,e1);
   tcExp(te,topt,e2);
   return e2->topt->v;
 }
 
 // e(es)
-static typ tcFnCall<`r>(tenv te,segment loc,typ *`r topt,exp e,list<exp> es){
+static typ tcFnCall(tenv te,seg_t loc,typ *`r topt,exp e,list_t<exp> es){
   tcExp(te,null,e);
   typ t = compress(e->topt->v);
   // NB: we should really unify t with an unconstrained FnType with the
@@ -600,7 +600,8 @@ static typ tcFnCall<`r>(tenv te,segment loc,typ *`r topt,exp e,list<exp> es){
     // Check that the bounds on the pointer aren't 0
     check_nonzero_bound(loc,b);
     switch (compress(t1)) {
-    case FnType(tvars,res_typ,args_info,is_vararg): //FIX: handle tvars
+    case FnType(FnInfo{tvars,eff,res_typ,args_info,is_vararg}): 
+      //FIX: handle tvars
       if (is_vararg)
         terr(loc,"vararg functions (...) not supported yet");
       // unify the result type with the expected type to get better
@@ -612,12 +613,6 @@ static typ tcFnCall<`r>(tenv te,segment loc,typ *`r topt,exp e,list<exp> es){
         exp e1 = es->hd;
         typ t2 = (*args_info->hd)[2];
 	tcExp(te, &t2, e1);
-	/*	switch(e1->topt->v) {
-	case PointerType(PtrInfo{_,r,_,_,_}):
-	  check_rgn_accessible(te,loc,r);
-	  break;
-	default: break;
-	}*/
         if (!coerce_arg(te,e1,t2))
           terr(loc,
                xprintf("actual argument has type %s but formal has type %s",
@@ -629,6 +624,9 @@ static typ tcFnCall<`r>(tenv te,segment loc,typ *`r topt,exp e,list<exp> es){
         terr(loc,"too many arguments for function");
       if (args_info != null)
         terr(loc,"too few arguments for function");
+      // Check that the effect of the function is compatible with the current
+      // capability.
+      Tcenv::check_effect_accessible(te, loc, eff->v);
       return res_typ;
     default: return expr_err(te,loc,"expected pointer to function");
     }
@@ -637,7 +635,7 @@ static typ tcFnCall<`r>(tenv te,segment loc,typ *`r topt,exp e,list<exp> es){
 }
 
 // throw e
-static typ tcThrow<`r>(tenv te, segment loc, typ *`r topt, exp e) {
+static typ tcThrow(tenv te, seg_t loc, typ *`r topt, exp e) {
   tcExp(te,&exn_typ,e); // unnecessary allocation
   typ t = e->topt->v;
   if (!unify(t,exn_typ))
@@ -645,38 +643,48 @@ static typ tcThrow<`r>(tenv te, segment loc, typ *`r topt, exp e) {
   return wildtyp();
 }
 
-// (implicit) instantiation
-// FIX: this is really untested, because the parser does not
-// insert Instantiate expressions, only the typechecker does,
-// and the output of the typechecker isn't passed through itself...
-static typ tcInstantiate<`r>(tenv te, segment loc, typ *`r topt,
-			       exp e, Opt_t<list<typ>> @opt_ref) {
-  tcExp(te,null,e);
-  Opt_t<list<typ>> topts = *opt_ref;
-  typ              t0    = e->topt->v;
-  switch (t0) {
-  case PointerType(PtrInfo{FnType(tvars,rtyp,args,varargs),_,_,_,b}):
-    list<$(tvar,typ)@> instantiation;
-    check_nonzero_bound(loc, b);
-    if (topts == null) {
-      instantiation = List::map(make_inst_var,tvars);
-      *opt_ref = &Opt(List::split(instantiation)[1]); // side-effect
-    } else {
-      try instantiation = List::zip(tvars,topts->v);
-      catch { case List::List_mismatch:
-	return expr_err(te,loc,"type instantiation mismatch");
+// explicit instantiation
+static typ tcInstantiate(tenv te, seg_t loc, typ *`r topt,
+                         exp e, opt_t<list_t<typ>> @opt_ref) {
+  tcExpNoInst(te,null,e);
+  // turn any functions into function pointers
+  e->topt->v = pointer_expand(compress(e->topt->v));
+  opt_t<list_t<typ>> topts = *opt_ref;
+  typ              t1    = compress(e->topt->v);
+  switch (t1) {
+  case PointerType(PtrInfo{t0,rt,x,tq,b}):
+    switch (compress(t0)) {
+    case FnType(FnInfo{tvars,eff,rtyp,args,varargs}):
+      list_t<$(tvar,typ)@> instantiation;
+      if (topts == null) {
+        instantiation = List::map(make_inst_var,tvars);
+        *opt_ref = &Opt(List::split(instantiation)[1]); // side-effect
+      } else {
+        _ ts = topts->v;
+        instantiation = null;
+        if (List::length(ts) != List::length(tvars))
+          return expr_err(te,loc,"type instantiation mismatch");
+        for (; ts != null; ts = ts->tl, tvars = tvars->tl) {
+          kind_t k = (*tvars->hd)[1];
+          check_valid_kinded_type(loc,te,lookup_type_vars(te),k,ts->hd);
+          instantiation = &List(&$(tvars->hd,ts->hd),instantiation);
+        }
       }
+      typ new_fn_typ = 
+        substitute(instantiation,FnType(FnInfo{null,eff,rtyp,args,varargs}));
+      typ new_typ = PointerType(PtrInfo{new_fn_typ,rt,x,tq,b});
+      return new_typ;
+    default: break;
     }
-    typ new_typ = substitute(instantiation, FnType(null,rtyp,args,varargs));
-    return new_typ;
-  default:
-    return expr_err(te,loc,xprintf("expecting polymorphic type but found %s",
-                                   typ2string(t0)));
+    break;
+  default: break;
   }
+  return expr_err(te,loc,xprintf("expecting polymorphic type but found %s",
+                                 typ2string(t1)));
 }
 
 // (t)e
-static typ tcCast<`r>(tenv te, segment loc, typ *`r topt, typ t, exp e) {
+static typ tcCast(tenv te, seg_t loc, typ *`r topt, typ t, exp e) {
   check_valid_type(loc,te,lookup_type_vars(te),t);
   tcExp(te,null,e);
   typ t2 = e->topt->v;
@@ -686,8 +694,8 @@ static typ tcCast<`r>(tenv te, segment loc, typ *`r topt, typ t, exp e) {
   return t;
 }
 
- // &e
-static typ tcAddress<`r>(tenv te, segment loc, typ *`r topt, exp e) {
+// &e
+static typ tcAddress(tenv te, seg_t loc, typ *`r topt, exp e) {
   // This is really two things b/c we're still overloading
   // & throughout the compiler as address-of and malloc-and-initialize.
   let topt2 = null;
@@ -726,7 +734,7 @@ static typ tcAddress<`r>(tenv te, segment loc, typ *`r topt, exp e) {
 	break;
       default: break;
       }
-    return ptr_maker(e->topt->v,HeapRgnType,tq2);
+    return ptr_maker(e->topt->v,HeapRgn,tq2);
   default: break;
   }
 
@@ -740,7 +748,7 @@ static typ tcAddress<`r>(tenv te, segment loc, typ *`r topt, exp e) {
 }
 
  // sizeof t
-static typ tcSizeof<`r>(tenv te, segment loc, typ *`r topt, typ t) {
+static typ tcSizeof(tenv te, seg_t loc, typ *`r topt, typ t) {
   check_valid_type(loc,te,lookup_type_vars(te),t);
   Evexp::szof(t,loc); // just ignore result -- posts error for bad type
   return uint_t;
@@ -748,7 +756,7 @@ static typ tcSizeof<`r>(tenv te, segment loc, typ *`r topt, typ t) {
 
  // *e
  // FIX: check static region capability, also in arrow, subscript
-static typ tcDeref<`r>(tenv te, segment loc, typ *`r topt, exp e) {
+static typ tcDeref(tenv te, seg_t loc, typ *`r topt, exp e) {
   tcExp(te,null,e);
   typ t = compress(e->topt->v);
   switch (t) {
@@ -764,8 +772,8 @@ static typ tcDeref<`r>(tenv te, segment loc, typ *`r topt, exp e) {
 }
 
 // e.f
-static typ tcStructMember<`r>(tenv te, segment loc, typ *`r topt,
-                              exp outer_e, exp e, field_name f) {
+static typ tcStructMember(tenv te, seg_t loc, typ *`r topt,
+                          exp outer_e, exp e, field_name f) {
   // As per K&R, don't promote e from array to pointer type
   tcExpNoPromote(te,null,e);
   typ t = compress(e->topt->v);
@@ -781,10 +789,10 @@ static typ tcStructMember<`r>(tenv te, segment loc, typ *`r topt,
     let t2   = substitute(inst,(*finfo)[2]);
     return t2;
   case ArrayType(_,_,_) && (String::zstrcmp(*f,"size") == 0):
-    outer_e->r = Primop_e(Size,&cons(e,null));
+    outer_e->r = Primop_e(Size,&List(e,null));
     return uint_t;
   case PointerType(_) && (String::zstrcmp(*f,"size") == 0):
-    outer_e->r = Primop_e(Size,&cons(e,null));
+    outer_e->r = Primop_e(Size,&List(e,null));
     return uint_t;
   default:
     if (String::zstrcmp(*f,"size") == 0)
@@ -797,8 +805,8 @@ static typ tcStructMember<`r>(tenv te, segment loc, typ *`r topt,
 }
 
 // e->f
-static typ tcStructArrow<`r>(tenv te, segment loc, typ *`r topt,
-                             exp e, field_name f) {
+static typ tcStructArrow(tenv te, seg_t loc, typ *`r topt, exp e, field_name f)
+{
   tcExp(te,null,e);
   typ t = compress(e->topt->v);
   switch (t) {
@@ -825,7 +833,7 @@ static typ tcStructArrow<`r>(tenv te, segment loc, typ *`r topt,
 }
 
 // e1[e2]
-static typ ithTupleType(tenv te,segment loc,list<$(tqual,typ)@> ts,exp index){
+static typ ithTupleType(tenv te,seg_t loc,list_t<$(tqual,typ)@> ts,exp index) {
   unsigned int i = Evexp::eval_const_uint_exp(index);
   try
     return (*List::nth(ts,i))[1];
@@ -835,8 +843,7 @@ static typ ithTupleType(tenv te,segment loc,list<$(tqual,typ)@> ts,exp index){
   }
 }
  // FIX: look at topt
-static typ tcSubscript<`r>(tenv te, segment loc, typ *`r topt,
-                           exp e1, exp e2) {
+static typ tcSubscript(tenv te, seg_t loc, typ *`r topt, exp e1, exp e2) {
   tcExp(te,null,e1);
   tcExp(te,null,e2);
   typ t1 = compress(e1->topt->v);
@@ -861,10 +868,10 @@ static typ tcSubscript<`r>(tenv te, segment loc, typ *`r topt,
   }
 }
 
- // $(es)
-static typ tcTuple<`r>(tenv te, segment loc, typ *`r topt, list<exp> es) {
+// $(es)
+static typ tcTuple(tenv te, seg_t loc, typ *`r topt, list_t<exp> es) {
   bool done = false;
-  list<$(tqual,typ)@> fields = null;
+  list_t<$(tqual,typ)@> fields = null;
   if(topt != null)
     switch (compress(*topt)) {
     case TupleType(ts):
@@ -876,7 +883,7 @@ static typ tcTuple<`r>(tenv te, segment loc, typ *`r topt, list<exp> es) {
       for(; es != null; es = es->tl, ts = ts->tl) {
 	topt2 = (*ts->hd)[1];
 	tcExpInitializer(te,&topt2,es->hd);
-	fields = &cons(&$((*ts->hd)[0], es->hd->topt->v), fields);
+	fields = &List(&$((*ts->hd)[0], es->hd->topt->v), fields);
       }
       done = true;
       break;
@@ -887,32 +894,31 @@ static typ tcTuple<`r>(tenv te, segment loc, typ *`r topt, list<exp> es) {
   if(!done)
     for(; es != null; es = es->tl) {
       tcExpInitializer(te,null,es->hd);
-      fields = &cons(&$(empty_tqual(), es->hd->topt->v), fields);
+      fields = &List(&$(empty_tqual(), es->hd->topt->v), fields);
     }
   return TupleType(List::imp_rev(fields));
 }
 
 // Compound literals, e.g., (struct foo){3,"abc"}
-static typ tcCompoundLit<`r>(tenv te, segment loc, typ *`r topt,
-                             $(Opt_t<stringptr>,tqual,typ)@ t,
-                             list<$(list<designator>,exp)@> des) {
+static typ tcCompoundLit(tenv te, seg_t loc, typ *`r topt,
+                             $(opt_t<stringptr>,tqual,typ)@ t,
+                             list_t<$(list_t<designator>,exp)@> des) {
   return expr_err(te,loc,"tcCompoundLit");
 }
 
  ///////////////////// Array ({e1,...,en}) /////////////////////////
  // FIX:  only a very limited class of designators (basically, the proper
  // index) is supported and all of the array elements must be present.
-static typ tcArray<`r>(tenv te,segment loc,typ *`r topt,
-                       exp e, bool heap_allocated,
-                       list<$(list<designator>,exp)@> des) {
-  list<exp> es = List::map(snd,des);
+static typ tcArray(tenv te,seg_t loc,typ *`r topt, exp e, bool heap_allocated,
+                   list_t<$(list_t<designator>,exp)@> des) {
+  list_t<exp> es = List::map(snd,des);
   typ res      = wildtyp();
   let sz_rexp  = Const_e(Int_c(Unsigned,List::length(es)));
   exp sz_exp   = new_exp(sz_rexp,loc);
   sz_exp->topt = &Opt(uint_t);
   typ res_t2;
   if (heap_allocated)
-    res_t2 = atb_typ(res,HeapRgnType,empty_tqual(),Upper_b(sz_exp));
+    res_t2 = atb_typ(res,HeapRgn,empty_tqual(),Upper_b(sz_exp));
   else
     res_t2 = ArrayType(res, empty_tqual(), sz_exp);
 
@@ -945,7 +951,7 @@ static typ tcArray<`r>(tenv te,segment loc,typ *`r topt,
 		 typ2string(res)));
   // check that any designators make sense
   for(int offset = 0; des != null; offset++, des = des->tl) {
-    list<designator> ds = (*des->hd)[0];
+    list_t<designator> ds = (*des->hd)[0];
     if (ds != null)
       //   if (ds->hd->tl != null)
       //     terr(ds->hd[1]->loc,"only array index designators are supported");
@@ -973,8 +979,8 @@ static typ tcArray<`r>(tenv te,segment loc,typ *`r topt,
 }
 
  // {for x < e1 : e2}
-static typ tcComprehension<`r>(tenv te,segment loc,typ *`r topt,
-                               vardecl vd,exp bound,exp body) {
+static typ tcComprehension(tenv te,seg_t loc,typ *`r topt,
+                           vardecl vd,exp bound,exp body) {
   tcExp(te,null,bound);
   if (!coerce_uint_typ(te,bound))
     terr(bound->loc,xprintf("expecting unsigned int, found %s",
@@ -1022,8 +1028,8 @@ static typ tcComprehension<`r>(tenv te,segment loc,typ *`r topt,
   tqual tq_result = (tqopt != null) ? *tqopt : empty_tqual();
   typ result =
     (b_result == Unknown_b) ?
-    starb_typ(body->topt->v,HeapRgnType,tq_result,b_result) :
-      atb_typ(body->topt->v,HeapRgnType,tq_result,b_result);
+    starb_typ(body->topt->v,HeapRgn,tq_result,b_result) :
+      atb_typ(body->topt->v,HeapRgn,tq_result,b_result);
   return result;
 }
 
@@ -1037,11 +1043,11 @@ static typ tcComprehension<`r>(tenv te,segment loc,typ *`r topt,
  //  Foo{.c=3,.d=4,1,2,5};
  // then this is the same as Foo{.a=1,.b=2,.c=3,.d=4,.e=5};
  // Later, we should support array designators and so forth.
-static typ tcStruct<`r>(tenv_t te, seg_t loc, typ *`r topt,
-                        typedef_name_t @tn,
-                        Opt_t<list<typ>> @otyps,
-                        list<$(list<designator>,exp)@> args,
-                        struct Structdecl *@ sd_opt) {
+static typ tcStruct(tenv_t te, seg_t loc, typ *`r topt,
+                    typedef_name_t @tn,
+                    opt_t<list_t<typ>> @otyps,
+                    list_t<$(list_t<designator>,exp)@> args,
+                    struct Structdecl *@ sd_opt) {
   structdecl sd;
   if (*sd_opt != null)
     sd = (structdecl)(*sd_opt);
@@ -1059,7 +1065,7 @@ static typ tcStruct<`r>(tenv_t te, seg_t loc, typ *`r topt,
   if (topt != null) unify(res_typ,*topt);
   *otyps = &Opt(typs);
   // make sure each argument has the right type
-  list<$($(field_name,tqual,typ)@,exp)@> fields =
+  list_t<$($(field_name,tqual,typ)@,exp)@> fields =
     resolve_struct_designators(loc,args,sd);
   for(; fields != null; fields = fields->tl) {
     let &$(&$(n,tq,fieldtyp),field_exp) = fields->hd;
@@ -1075,12 +1081,12 @@ static typ tcStruct<`r>(tenv_t te, seg_t loc, typ *`r topt,
 }
 
 // f(es)   where f is an enum and is ef->name
-static typ tcEnum<`r>(tenv te, segment loc, typ *`r topt,
-                      Opt_t<list<typ>> @all_ref,
-                      Opt_t<list<typ>> @exist_ref,
-                      list<exp> es,
-                      enumdecl ed,
-                      enumfield ef) {
+static typ tcEnum(tenv te, seg_t loc, typ *`r topt,
+                  opt_t<list_t<typ>> @all_ref,
+                  opt_t<list_t<typ>> @exist_ref,
+                  list_t<exp> es,
+                  enumdecl ed,
+                  enumfield ef) {
   let all_inst   = List::map(make_inst_var,ed->tvs);
   let exist_inst = List::map(make_inst_var,ef->tvs);
   let all_typs   = List::map(snd,all_inst);
@@ -1091,7 +1097,7 @@ static typ tcEnum<`r>(tenv te, segment loc, typ *`r topt,
   typ res = EnumType(ed->name->v,all_typs,(enumdecl*)(&$(ed)));
   // this instantiates the type variables if we have top-down type info
   if (topt != null) unify(*topt,res);
-  list<$(tqual,typ)@> ts = ef->typs;
+  list_t<$(tqual,typ)@> ts = ef->typs;
   while (es != null && ts != null) {
     exp e = es->hd;
     typ t = substitute(inst,(*ts->hd)[1]);
@@ -1118,11 +1124,11 @@ static typ tcEnum<`r>(tenv te, segment loc, typ *`r topt,
 }
 
 // f(es)   where f is an xenum and is ef->name
-static typ tcXenum<`r>(tenv te, segment loc, typ *`r topt,
-                       Opt_t<list<typ>> @exist_ref,
-                       list<exp> es,
-                       xenumdecl xd,
-                       enumfield ef) {
+static typ tcXenum(tenv te, seg_t loc, typ *`r topt,
+                   opt_t<list_t<typ>> @exist_ref,
+                   list_t<exp> es,
+                   xenumdecl xd,
+                   enumfield ef) {
   let exist_inst = List::map(make_inst_var,ef->tvs);
   let exist_typs = List::map(snd,exist_inst);
   let res        = XenumType(xd->name,(xenumdecl*)(&$(xd)));
@@ -1150,7 +1156,7 @@ static typ tcXenum<`r>(tenv te, segment loc, typ *`r topt,
 }
 
 // ({ s })
-static typ tcStmtExp<`r>(tenv te, segment loc, typ *`r topt, stmt s) {
+static typ tcStmtExp(tenv te, seg_t loc, typ *`r topt, stmt s) {
   Tcstmt::tcStmt(set_encloser(te,s),s,true);
   // The encloser of s is not s, so reset it properly.
   ControlFlow::set_encloser(s,get_encloser(te));
@@ -1166,11 +1172,11 @@ static typ tcStmtExp<`r>(tenv te, segment loc, typ *`r topt, stmt s) {
 }
 
  // codegen(fd)
-static typ tcCodegen<`r>(tenv te, segment loc, typ *`r topt, fndecl fd) {
+static typ tcCodegen(tenv te, seg_t loc, typ *`r topt, fndecl fd) {
   return expr_err(te,loc,"tcCodegen");
 }
  // fill(e)
-static typ tcFill<`r>(tenv te, segment loc, typ *`r topt, exp e) {
+static typ tcFill(tenv te, seg_t loc, typ *`r topt, exp e) {
   return expr_err(te,loc,"tcFill");
 }
 
@@ -1233,7 +1239,7 @@ bool is_const_exp(tenv te, exp e) {
 }
 
 // The default:  type-check and promote any array types to pointer types
-typ tcExp<`r>(tenv te, typ *`r topt, exp e) {
+typ tcExp(tenv te, typ *`r topt, exp e) {
   typ t = tcExpNoPromote(te, topt, e);
   t = compress(t);
   switch (t) {
@@ -1249,7 +1255,7 @@ typ tcExp<`r>(tenv te, typ *`r topt, exp e) {
 
 // Type-check the expression -- if it's an Array_e or String_c expression,
 // do not promote its type from array to pointer.  Otherwise, do so.
-typ tcExpInitializer<`r>(tenv te, typ *`r topt, exp e) {
+typ tcExpInitializer(tenv te, typ *`r topt, exp e) {
   typ t = tcExpNoPromote(te, topt, e);
   switch (e->r) {
   case Array_e(_,_): return t;
@@ -1275,7 +1281,7 @@ typ tcExpInitializer<`r>(tenv te, typ *`r topt, exp e) {
 // e has the expected type.  If e="e2<>" and e2 has a poly-type,
 // we do not instantiate the type quantifiers.  Otherwise if e has a
 // poly-type, we instantiate the quantifiers.
-static typ tcExpNoPromote<`r>(tenv te, typ *`r topt, exp e) {
+static typ tcExpNoPromote(tenv te, typ *`r topt, exp e) {
   switch (e->r) {
   case NoInstantiate_e(e2):
     // the user has asked not to implicitly instantiate any quantifiers
@@ -1290,11 +1296,12 @@ static typ tcExpNoPromote<`r>(tenv te, typ *`r topt, exp e) {
     switch (compress(e->topt->v)) {
     case PointerType(PtrInfo{t,rt,x,tq,b}):
       switch (compress(t)) {
-      case FnType(tvs,rtyp,args,varargs):
+      case FnType(FnInfo{tvs,eff,rtyp,args,varargs}):
 	if (tvs != null) {   // then, instantiate if necessary
-	  list<$(tvar,typ)@> inst = List::map(make_inst_var,tvs);
-	  list<typ>          ts   = List::map(snd,inst);
-	  typ ftyp    = substitute(inst,FnType(null,rtyp,args,varargs));
+	  list_t<$(tvar,typ)@> inst = List::map(make_inst_var,tvs);
+	  list_t<typ>          ts   = List::map(snd,inst);
+	  typ ftyp = substitute(inst,
+                                FnType(FnInfo{null,eff,rtyp,args,varargs}));
 	  typ new_typ = PointerType(PtrInfo{ftyp,rt,x,tq,b});
 	  exp inner   = copy_exp(e);
 	  e->r    = Instantiate_e(inner,&Opt(ts));
@@ -1312,8 +1319,8 @@ static typ tcExpNoPromote<`r>(tenv te, typ *`r topt, exp e) {
 }
 
  // Type-check the expression -- don't do any implicit instantiation.
-static void tcExpNoInst<`r>(tenv te, typ *`r topt, exp e) {
-  segment loc = e->loc;
+static void tcExpNoInst(tenv te, typ *`r topt, exp e) {
+  seg_t loc = e->loc;
   typ t;
 
   switch (e->r) {
@@ -1421,3 +1428,4 @@ static void tcExpNoInst<`r>(tenv te, typ *`r topt, exp e) {
   }
   e->topt = &Opt(t);
 }
+

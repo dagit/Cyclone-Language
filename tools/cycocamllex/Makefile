@@ -22,7 +22,8 @@
 PROG=cycocamllex.exe
 BINDIR=../../bin
 
-CAMLC=ocamlopt
+#CAMLC=ocamlopt
+CAMLC=ocamlc
 COMPFLAGS=
 LINKFLAGS=
 CAMLYACC=ocamlyacc
@@ -31,7 +32,7 @@ CAMLLEX=ocamllex
 CAMLDEP=ocamldep
 DEPFLAGS=
 
-OBJS=parser.cmx lexer.cmx lexgen.cmx compact.cmx output.cmx main.cmx
+OBJS=parser.cmo lexer.cmo lexgen.cmo compact.cmo output.cmo main.cmo
 
 all: $(PROG)
 

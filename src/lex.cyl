@@ -63,12 +63,12 @@ static qvar             token_qvar     = &token_id_pair;
 
 static int runaway_start = 0;
 
-static void err<`a>(string msg,Lexbuf<`a> lb) {
-  segment s = segment_of_abs(lexeme_start(lb),lexeme_end(lb));
+static void err(string msg,Lexbuf<`a> lb) {
+  seg_t s = segment_of_abs(lexeme_start(lb),lexeme_end(lb));
   post_error(mk_err_lex (s,msg));
 }
-static void runaway_err<`a>(string msg,Lexbuf<`a> lb) {
-  segment s = segment_of_abs(runaway_start,lexeme_start(lb));
+static void runaway_err(string msg,Lexbuf<`a> lb) {
+  seg_t s = segment_of_abs(runaway_start,lexeme_start(lb));
   post_error(mk_err_lex (s,msg));
 }
 
@@ -174,7 +174,7 @@ static int str_index(string buff, int offset, int len) {
   return t->shared_str;
 }
 
-static int str_index_lbuf<`a>(Lexbuf<`a> lbuf) {
+static int str_index_lbuf(Lexbuf<`a> lbuf) {
   return str_index(lbuf->lex_buffer, 
 		   lbuf->lex_start_pos,
 		   lbuf->lex_curr_pos - lbuf->lex_start_pos);
@@ -229,7 +229,7 @@ static int int_of_char(char c) {
  * FIX: We should really have 8-bytes to store a long literal!!!
  *      That is, we and the previous version totally ignore the L!!!
  */
-$(sign, int)@ intconst<`a>(Lexbuf<`a> lbuf, int start, int base) {
+$(sign, int)@ intconst(Lexbuf<`a> lbuf, int start, int base) {
   unsigned int n    = 0;
   int          end  = lbuf->lex_curr_pos;
   string       buff = lbuf->lex_buffer;
@@ -250,7 +250,7 @@ $(sign, int)@ intconst<`a>(Lexbuf<`a> lbuf, int start, int base) {
 
 /*********************** CHARACTER CONSTANTS ***********************/
 
-static char char_for_octal_code<`a>(Lexbuf<`a> lb, int start, int howmany) {
+static char char_for_octal_code(Lexbuf<`a> lb, int start, int howmany) {
   int c = 0;
   for (int i = 0; i<howmany; i++)
     c = (8 * c) + lexeme_char(lb,start+i) - 48;
@@ -299,32 +299,32 @@ string get_stored_string () {
 
 static struct Ldecls {
   // records typedefs and namespaces declared in a scope
-  Set::Set<var> typedefs;
-  Set::Set<var> namespaces;
+  Set::set_t<var> typedefs;
+  Set::set_t<var> namespaces;
 };
 typedef struct Ldecls @ldecls_t;
 
 static struct Lvis {  // the King lives!
   // records the namespaces whose declarations are visible in a scope
-  list<var>       current_namespace;
-  list<list<var>> imported_namespaces;
+  list_t<var>       current_namespace;
+  list_t<list_t<var>> imported_namespaces;
 };
 typedef struct Lvis @lvis;
 
 static struct Lstate {
   // lstack is the current nested scope structure,
   // decls is the global declaration mapping
-  List<lvis>                     lstack; 
-  Dict::Dict<list<var>,ldecls_t> decls;
+  List_t<lvis>                     lstack; 
+  Dict::dict_t<list_t<var>,ldecls_t> decls;
 };
 typedef struct Lstate @lstate_t;
 
-static Opt_t<lstate_t> lstate = null;
+static opt_t<lstate_t> lstate = null;
 
 static void typedef_init() {
   let init_lvis   = &Lvis{.current_namespace=null,
                           .imported_namespaces=null};
-  let init_lstack = &cons(init_lvis, null);
+  let init_lstack = &List(init_lvis, null);
   let init_decls  = Dict::insert(Dict::empty(varlist_cmp),
                                  null,
                                  &Ldecls{.typedefs=Set::empty(zstrptrcmp),
@@ -333,15 +333,15 @@ static void typedef_init() {
                         .decls=init_decls});
 }
 
-static list<var> get_absolute_namespace(List<var> ns) {
+static list_t<var> get_absolute_namespace(struct List<var,`H> @ns) {
   // ns is a relative namespace, we return the absolute namespace
   // Invariant: ns != null -- in the type!
   var n = ns->hd;
   // For each enclosing scope...
-  for (list<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
+  for (list_t<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
     lvis lv = ls->hd; // ... see what namespaces are visible
     // ... and look in each such visible namespace
-    list<list<var>> x = &cons(lv->current_namespace,lv->imported_namespaces);
+    list_t<list_t<var>> x = &List(lv->current_namespace,lv->imported_namespaces);
     for (; x != null; x = x->tl) {
       ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
       // ... for namespace n
@@ -361,9 +361,9 @@ static void recompute_typedefs() {
   
   // For each enclosing scope, get the visible namespaces and add all
   // of their typedefs
-  for (list<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
+  for (list_t<lvis> ls = lstate->v->lstack; ls != null; ls = ls->tl) {
     lvis lv = ls->hd; 
-    list<list<var>> x = &cons(lv->current_namespace, lv->imported_namespaces);
+    list_t<list_t<var>> x = &List(lv->current_namespace, lv->imported_namespaces);
     for (; x != null; x = x->tl) {
       ldecls_t ld = Dict::lookup(lstate->v->decls,x->hd);
       Set::iter(insert_typedef,ld->typedefs);
@@ -372,8 +372,8 @@ static void recompute_typedefs() {
 }
 
 // This can stay the slow way because most identifiers are not qualified.
-static bool is_typedef_in_namespace(List<var> ns, var v) {
-  list<var> ans = get_absolute_namespace(ns);
+static bool is_typedef_in_namespace(List_t<var> ns, var v) {
+  list_t<var> ans = get_absolute_namespace(ns);
   try {
     ldecls_t ld = Dict::lookup(lstate->v->decls,ans);
     return Set::member(ld->typedefs,v);
@@ -381,9 +381,9 @@ static bool is_typedef_in_namespace(List<var> ns, var v) {
     return false;
   }
 }
-static bool is_typedef(List::list<var> ns, var v) {
+static bool is_typedef(List::list_t<var> ns, var v) {
   if (ns != null)
-    return is_typedef_in_namespace((List<stringptr>)ns,v);
+    return is_typedef_in_namespace((List_t<stringptr>)ns,v);
   // all unqualified typedefs must be in the trie 
   // look ma -- fast lookup
   string s   = *v;
@@ -400,11 +400,11 @@ static bool is_typedef(List::list<var> ns, var v) {
 }
 
 void enter_namespace(var s) {
-  list<var> ns = lstate->v->lstack->hd->current_namespace;
-  list<var> new_ns = List::append(ns,&cons(s,null));
+  list_t<var> ns = lstate->v->lstack->hd->current_namespace;
+  list_t<var> new_ns = List::append(ns,&List(s,null));
   // Push the new namespace on the stack
   lstate->v->lstack =
-    &cons(&Lvis{.current_namespace = new_ns,.imported_namespaces = null},
+    &List(&Lvis{.current_namespace = new_ns,.imported_namespaces = null},
           lstate->v->lstack);
   // If this is the first time the new namespace has been encountered,
   // make sure it is bound in the old namespace, and add an empty
@@ -427,25 +427,25 @@ void enter_namespace(var s) {
 }
 void leave_namespace() {
   // we never leave the outermost namespace, so the cast is okay
-  lstate->v->lstack = (List<lvis>)lstate->v->lstack->tl;
+  lstate->v->lstack = (List_t<lvis>)lstate->v->lstack->tl;
   recompute_typedefs();
 }
 void enter_using(qvar q) {
   _ ns;
   switch ((*q)[0]) {
   case Loc_n:
-    ns = (List<stringptr>)&cons((*q)[1],null);
+    ns = (List_t<stringptr>)&List((*q)[1],null);
     break;
   case Rel_n(y): fallthru(y);
   case Abs_n(y):
-    ns = (List<stringptr>)List::append(y,&cons((*q)[1],null));
+    ns = (List_t<stringptr>)List::append(y,&List((*q)[1],null));
     break;
   }
 
   let ans      = get_absolute_namespace(ns);
   let imported = lstate->v->lstack->hd->imported_namespaces;
 
-  lstate->v->lstack->hd->imported_namespaces = &cons(ans,imported);
+  lstate->v->lstack->hd->imported_namespaces = &List(ans,imported);
   
   // some more typedefs may be visible
   recompute_typedefs();
@@ -472,7 +472,7 @@ void register_typedef(qvar q) {
   insert_typedef((*q)[1]);
 }
 
-static short process_id<`a>(Lexbuf<`a> lbuf) {
+static short process_id(Lexbuf<`a> lbuf) {
   int symbol_num = str_index_lbuf(lbuf);
 
   // maybe it's a keyword
@@ -492,12 +492,12 @@ static short process_id<`a>(Lexbuf<`a> lbuf) {
   return IDENTIFIER;
 }
 
-static short process_qual_id<`a>(Lexbuf<`a> lbuf) {
+static short process_qual_id(Lexbuf<`a> lbuf) {
   int    i   = lbuf->lex_start_pos;
   int    end = lbuf->lex_curr_pos;
   string s   = lbuf->lex_buffer;
 
-  list<var> rev_vs = null;
+  list_t<var> rev_vs = null;
 
   while (i<end) {
     int start = i;
@@ -507,13 +507,13 @@ static short process_qual_id<`a>(Lexbuf<`a> lbuf) {
       throw Impossible("bad namespace");
     int vlen = i - start;
     var v    = get_symbol(str_index(s, start, vlen));
-    rev_vs = &cons(v,rev_vs);
+    rev_vs = &List(v,rev_vs);
     i += 2;
   }
   if (rev_vs == null)
     throw Impossible("bad namespace");
   var       v  = rev_vs->hd;
-  list<var> vs = List::imp_rev(rev_vs->tl);
+  list_t<var> vs = List::imp_rev(rev_vs->tl);
   token_qvar = &$(Rel_n(vs),v);
   if (is_typedef(vs,v))
     return QUAL_TYPEDEF_NAME;
@@ -522,9 +522,9 @@ static short process_qual_id<`a>(Lexbuf<`a> lbuf) {
 }
 
 // Forward declarations of lexing functions 
-extern int token<`a>(Lexbuf<`a>);
-extern int strng<`a>(Lexbuf<`a>);
-extern int comment<`a>(Lexbuf<`a>);
+extern int token(Lexbuf<`a>);
+extern int strng(Lexbuf<`a>);
+extern int comment(Lexbuf<`a>);
 } // namespace Lex
 
 // for parser -- must not be prefixed
@@ -616,6 +616,7 @@ rule token = parse
 | "<>" { return  LEFT_RIGHT; }
 | "->" { return PTR_OP; }
 | "..." { return ELLIPSIS; }
+| "::" { return COLON_COLON; }
 /* comments */
 | "#"[^ '\n' '\r']*(newline)      { return  token(lexbuf); }
 | [' ' '\t' '\v' '\f' '\n' '\r']+     { return  token(lexbuf); }

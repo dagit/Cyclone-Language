@@ -208,17 +208,17 @@ string strconcat(string a, string b) {
 }
 
 // Allocate a new string and fill it with the concatenation of strs
-string strconcat_l(list<stringptr> strs) {
-  list<stringptr> p = strs;             // temp
+string strconcat_l(glist_t<stringptr,`r> strs) {
   size_t len;                           // temp
   size_t total_len  = 0;                // sum of lengths of the strings
-  list<size_t> lens = &cons((size_t)0,  // save length of each string
-                            null);         // (with junk 0 on front)
-  list<size_t> end = lens;              // last cons cell in 'lens'
-  for(list<stringptr> p = strs; p!=null; p = p->tl) {
+  list_t<size_t> lens = 
+    &List((size_t)0,                    // save length of each string
+          null);                        // (with junk 0 on front)
+  list_t<size_t> end = lens;            // last cons cell in 'lens'
+  for(_ p = strs; p!=null; p = p->tl) {
     len = strlen(*(p->hd));
     total_len += len;
-    end->tl = &cons(len,null);
+    end->tl = &List(len,null);
     end = end->tl;
   } 
   lens = lens->tl;                      // remove junk/temporary 0
@@ -237,19 +237,19 @@ string strconcat_l(list<stringptr> strs) {
 
 // Allocate a new string and fill it with the concatenation of strs,
 // using separator between each element
-string str_sepstr(list<stringptr> strs, string separator) {
+string str_sepstr(glist_t<stringptr,`r> strs, string separator) {
   if (strs == null)    return "";
   if (strs->tl == null) return strdup(*(strs->hd));
-  list<stringptr> p = strs;
-  list<size_t> lens = &cons((size_t)0,null);  // see comments in strconcat_l
-  list<size_t> end = lens;
+  glist_t<stringptr,`r> p = strs;
+  list_t<size_t> lens = &List((size_t)0,null);  // see comments in strconcat_l
+  list_t<size_t> end = lens;
   size_t len        = 0;   // initialized to avoid warning
   size_t total_len  = 0;
   size_t list_len   = 0;
   for(;p!=null;p=p->tl) {
     len = strlen(*(p->hd));
     total_len += len;
-    end->tl = &cons(len,null);
+    end->tl = &List(len,null);
     end = end->tl;
     ++list_len;
   }
@@ -491,14 +491,14 @@ int strspn(string s, int ofs, string accept) {
 }
 
 ////////////////////////// CONVERSIONS
-list<int> explode(string s) {
-  list<int> result = null;
+list_t<int> explode(string s) {
+  list_t<int> result = null;
   for (int i = strlen(s) - 1; i >= 0; i--)
-    result = &cons((int)s[i],result);
+    result = &List((int)s[i],result);
   return result;
 }
 
-string implode(list<int> chars) {
+string implode(glist_t<int,`r> chars) {
   string s = new_string(List::length(chars));
   size_t i = 0;
   while (chars != null) {
@@ -510,7 +510,7 @@ string implode(list<int> chars) {
 
 
 // Fix:  should check for overflow
-int to_int<`r>(string s, int *`r offset) {
+int to_int(string s, int *`r offset) {
   int ans = 0;
   int sn = 1;
   bool digit_seen = false;
@@ -541,7 +541,7 @@ int to_int<`r>(string s, int *`r offset) {
 // FIX:  this does not deal with overflow properly
 // FIX:  would use the built in version of strtod but it appears to be
 // broken...
-double to_double<`r>(string s, int *`r offset) {
+double to_double(string s, int *`r offset) {
   double ans = 0.0;
   int sn = 1;
   bool digit_seen = false;

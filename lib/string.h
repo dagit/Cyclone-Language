@@ -47,8 +47,8 @@ extern string strcat(string dest,string src);
 extern string strcato(string dest,string src,int srcOfs);
 // These functions return newly allocated strings
 extern string strconcat(string,string);
-extern string strconcat_l(list<stringptr>);
-extern string str_sepstr(list<stringptr>,string);
+extern string strconcat_l(glist_t<stringptr,`r>);
+extern string str_sepstr(glist_t<stringptr,`r>,string);
 
 ///////////////////////// COPYING
 // Non-allocating
@@ -76,20 +76,20 @@ extern int strspn(string s, int ofs, string accept);
 
 ////////////////////////// CONVERSIONS
 
-extern list<int> explode(string s);
-extern string implode(list<int> c);
+extern list_t<int> explode(string s);
+extern string implode(glist_t<int,`r> c);
 
 // convert s to an int.  if offset is null, starts at offset 0. 
 // otherwise, starts at *offset.  Skips leading whitespace.  Raises
 // InvalidArg if no valid int is found.  If offset is non-null, 
 // returns the index of the last character consumed + 1.
-extern int to_int<`r>(string s, int *`r offset);
+extern int to_int(string s, int *`r offset);
 
 // convert s to a double.  if offset is null, starts at offset 0. 
 // otherwise, starts at *offset.  Skips leading whitespace.  Raises
 // InvalidArg if no valid int is found.  If offset is non-null, 
 // returns the index of the last character consumed + 1.
-extern double to_double<`r>(string s, int *`r offset); // raises InvalidArg
+extern double to_double(string s, int *`r offset); // raises InvalidArg
 }
 
 #endif

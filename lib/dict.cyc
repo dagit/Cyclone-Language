@@ -9,7 +9,8 @@ xenum exn {Absent,Present};
 
 static enum Color { R, B };
 
-static struct T<`a,`b> {
+// JGM: we need to put the kinds in explicitly here to avoid a warning
+static struct T<`a::B,`b::B> {
   enum   Color color;
   struct T<`a,`b> *   left;
   struct T<`a,`b> *   right;
@@ -17,23 +18,23 @@ static struct T<`a,`b> {
 };
 typedef struct T<`a,`b> * tree<`a,`b>;
 
-abstract struct dict<`a,`b> {
-  int (@rel)(`a,`a);
+abstract struct Dict<`a,`b,`e> {
+  int (@rel)(`a,`a;`e);
   tree<`a,`b> t;
 };
 
-Dict<`a,`b> empty<`a,`b>(int comp(`a,`a)) {
-  return &dict(comp,null);
+hdict_t<`a,`b,`e> empty(int comp(`a,`a;`e)) {
+  return &Dict(comp,null);
 }
-Dict<`a,`b> singleton<`a,`b>(int comp(`a,`a),`a key,`b data) {
-  return &dict(comp,&T(B,null,null,$(key,data)));
+hdict_t<`a,`b,`e> singleton(int comp(`a,`a;`e),`a key,`b data) {
+  return &Dict(comp,&T(B,null,null,$(key,data)));
 }
 
-bool is_empty<`a,`b>(Dict<`a,`b> d) {
+bool is_empty(hdict_t<`a,`b,`e> d) {
   return d->t == null;
 }
 
-bool member<`a,`b>(Dict<`a,`b> d, `a key) {
+bool member(hdict_t<`a,`b,`e> d, `a key) {
   let rel = d->rel;
   let t   = d->t;
   while(t != null) {
@@ -44,7 +45,7 @@ bool member<`a,`b>(Dict<`a,`b> d, `a key) {
   }
   return false;
 }
-`b lookup<`a,`b>(Dict<`a,`b> d, `a key) {
+`b lookup(hdict_t<`a,`b,`e> d, `a key) {
   let rel = d->rel;
   let t   = d->t;
   while(t != null) {
@@ -55,7 +56,7 @@ bool member<`a,`b>(Dict<`a,`b> d, `a key) {
   }
   throw Absent;
 }
-Core::Opt_t<`b> lookup_opt<`a,`b>(Dict<`a,`b> d, `a key) {
+Core::opt_t<`b> lookup_opt(hdict_t<`a,`b,`e> d, `a key) {
   let rel = d->rel;
   let t   = d->t;
   while(t != null) {
@@ -68,7 +69,7 @@ Core::Opt_t<`b> lookup_opt<`a,`b>(Dict<`a,`b> d, `a key) {
 }
 
 static tree<`a,`b> 
-balance<`a,`b>($(enum Color, tree<`a,`b>, tree<`a,`b>, $(`a,`b)) quad) {
+balance($(enum Color, tree<`a,`b>, tree<`a,`b>, $(`a,`b)) quad) {
   switch(quad) {
   case $(B,&T(R,&T(R,a,b,x),c,y),d,z): return &T(R,&T(B,a,b,x),&T(B,c,d,z),y);
   case $(B,&T(R,a,&T(R,b,c,y),x),d,z): return &T(R,&T(B,a,b,x),&T(B,c,d,z),y);
@@ -78,7 +79,7 @@ balance<`a,`b>($(enum Color, tree<`a,`b>, tree<`a,`b>, $(`a,`b)) quad) {
   }
 }
 static tree<`a,`b>
-ins<`a,`b>(int rel(`a,`a), $(`a,`b) key_val, tree<`a,`b> t) {
+ins(int rel(`a,`a), $(`a,`b) key_val, tree<`a,`b> t) {
   switch (t) {
   case null: return &T(R,null,null,key_val);
   case &T(color, a, b, y):
@@ -89,131 +90,130 @@ ins<`a,`b>(int rel(`a,`a), $(`a,`b) key_val, tree<`a,`b> t) {
   }
 }
 
-Dict<`a,`b> insert<`a,`b>(Dict<`a,`b> d,`a key,`b data) {
+hdict_t<`a,`b,`e> insert(hdict_t<`a,`b,`e> d,`a key,`b data) {
   let ans = ins(d->rel, $(key,data), d->t);
   ans->color = B;
-  return &dict(d->rel, ans);
+  return &Dict(d->rel, ans);
 }
 
 // notice we descend twice -- we can live
-Dict<`a,`b> insert_new<`a,`b>(Dict<`a,`b> d,`a key,`b data) {
+hdict_t<`a,`b,`e> insert_new(hdict_t<`a,`b,`e> d,`a key,`b data) {
   if(member(d,key))
     throw Absent;
   return insert(d, key, data);
 }
 
-Dict<`a,`b> inserts<`a,`b>(Dict<`a,`b> d,List::list<$(`a,`b)@> kds) {
+hdict_t<`a,`b,`e> inserts(hdict_t<`a,`b,`e> d,List::glist_t<$(`a,`b)@`r1,`r2> kds) {
   for(; kds != null; kds = kds->tl)
     d = insert(d, kds->hd[0][0], kds->hd[0][1]);
   return d;
 }
 
-static `c fold_tree<`a,`b,`c>(`c f(`a,`b,`c), struct T<`a,`b> @ t, `c accum) {
+static `c fold_tree(`c f(`a,`b,`c), struct T<`a,`b> @ t, `c accum) {
   let &T(_,left,right,$(key,val)) = t;
   accum = f(key, val, accum);
   if(left  != null) accum = fold_tree(f,(struct T<`a,`b>@)left,accum);
   if(right != null) accum = fold_tree(f,(struct T<`a,`b>@)right,accum);
   return accum;
 }
-`c fold<`a,`b,`c>(`c f(`a,`b,`c),Dict<`a,`b> d,`c accum) {
+`c fold(`c f(`a,`b,`c),hdict_t<`a,`b,`e> d,`c accum) {
   if(d->t == null)
     return accum;
   return fold_tree(f, (struct T<`a,`b>@)(d->t), accum);
 }
 
-static `c fold_tree_c<`a,`b,`c,`d>(`c f(`d,`a,`b,`c),   `d env,
-				   struct T<`a,`b> @ t, `c accum) {
+static `c fold_tree_c(`c f(`d,`a,`b,`c),   `d env,
+                      struct T<`a,`b> @ t, `c accum) {
   let &T(_,left,right,$(key,val)) = t;
   accum = f(env, key, val, accum);
   if(left  != null) accum = fold_tree_c(f,env,(struct T<`a,`b>@)left,accum);
   if(right != null) accum = fold_tree_c(f,env,(struct T<`a,`b>@)right,accum);
   return accum;
 }
-`c fold_c<`a,`b,`c,`d>(`c f(`d,`a,`b,`c),`d env,Dict<`a,`b> d,`c accum) {
+`c fold_c(`c f(`d,`a,`b,`c),`d env,hdict_t<`a,`b,`e> d,`c accum) {
   if(d->t == null)
     return accum;
   return fold_tree_c(f, env, (struct T<`a,`b>@)(d->t), accum);
 }
 
-static void app_tree<`a,`b,`c>(`c f(`a,`b), struct T<`a,`b> @ t) {
+static void app_tree(`c f(`a,`b), struct T<`a,`b> @ t) {
   let &T(_,left,right,$(key,val)) = t;
   f(key, val);
   if(left  != null) app_tree(f,(struct T<`a,`b>@)left);
   if(right != null) app_tree(f,(struct T<`a,`b>@)right);
 }
-void app<`a,`b,`c>(`c f(`a,`b),Dict<`a,`b> d) {
+void app(`c f(`a,`b),hdict_t<`a,`b,`e> d) {
   if(d->t != null)
     app_tree(f,(struct T<`a,`b>@)(d->t));
 }
 
-static void app_tree_c<`a,`b,`c,`d>(`c f(`d,`a,`b), `d env, struct T<`a,`b>@ t){
+static void app_tree_c(`c f(`d,`a,`b), `d env, struct T<`a,`b>@ t){
   let &T(_,left,right,$(key,val)) = t;
   f(env, key, val);
   if(left  != null) app_tree_c(f,env,(struct T<`a,`b>@)left);
   if(right != null) app_tree_c(f,env,(struct T<`a,`b>@)right);
 }
-void app_c<`a,`b,`c,`d>(`c f(`d,`a,`b),`d env, Dict<`a,`b> d) {
+void app_c(`c f(`d,`a,`b),`d env, hdict_t<`a,`b,`e> d) {
   if(d->t != null)
     app_tree_c(f,env,(struct T<`a,`b>@)(d->t));
 }
 
-static void iter_tree<`a,`b>(void f(`a,`b), struct T<`a,`b> @ t) {
+static void iter_tree(void f(`a,`b), struct T<`a,`b> @ t) {
   let &T(_,left,right,$(key,val)) = t;
   f(key, val);
   if(left  != null) iter_tree(f,(struct T<`a,`b>@)left);
   if(right != null) iter_tree(f,(struct T<`a,`b>@)right);
 }
-void iter<`a,`b>(void f(`a,`b),Dict<`a,`b> d) {
+void iter(void f(`a,`b),hdict_t<`a,`b,`e> d) {
   if(d->t != null)
     iter_tree(f,(struct T<`a,`b>@)(d->t));
 }
 
-static void iter_tree_c<`a,`b,`c>(void f(`c,`a,`b), `c env, struct T<`a,`b>@ t){
+static void iter_tree_c(void f(`c,`a,`b), `c env, struct T<`a,`b>@ t){
   let &T(_,left,right,$(key,val)) = t;
   f(env, key, val);
   if(left  != null) iter_tree_c(f,env,(struct T<`a,`b>@)left);
   if(right != null) iter_tree_c(f,env,(struct T<`a,`b>@)right);
 }
-void iter_c<`a,`b,`c>(void f(`c,`a,`b),`c env, Dict<`a,`b> d) {
+void iter_c(void f(`c,`a,`b),`c env, hdict_t<`a,`b,`e> d) {
   if(d->t != null)
     iter_tree_c(f,env,(struct T<`a,`b>@)(d->t));
 }
 
-static tree<`a,`c> map_tree<`a,`b,`c>(`c f(`b), struct T<`a,`b>@ t) {
+static tree<`a,`c> map_tree(`c f(`b), struct T<`a,`b>@ t) {
   let &T(c,left,right,$(key,val)) = t;
   let new_left  = left  == null ? null : map_tree(f,(struct T<`a,`b>@)left);
   let new_right = right == null ? null : map_tree(f,(struct T<`a,`b>@)right);
   return &T(c,new_left,new_right,$(key,f(val)));
 } 
 
-Dict<`a,`c> map<`a,`b,`c>(`c f(`b),Dict<`a,`b> d) {
+hdict_t<`a,`c,`e> map(`c f(`b),hdict_t<`a,`b,`e> d) {
   if(d->t == null)
-    return &dict(d->rel,null);
-  return &dict(d->rel,map_tree(f,(struct T<`a,`b>@)(d->t)));
+    return &Dict(d->rel,null);
+  return &Dict(d->rel,map_tree(f,(struct T<`a,`b>@)(d->t)));
 }
 
 // Note: walk is post-order
-static tree<`a,`c> map_tree_c<`a,`b,`c,`d>(`c f(`d,`b), `d env,
-					   struct T<`a,`b>@ t) {
+static tree<`a,`c> map_tree_c(`c f(`d,`b), `d env, struct T<`a,`b>@ t) {
   let &T(c,left,right,$(key,val)) = t;
   let new_left = left ==null ? null : map_tree_c(f,env,(struct T<`a,`b>@)left);
   let new_right= right==null ? null : map_tree_c(f,env,(struct T<`a,`b>@)right);
   return &T(c,new_left,new_right,$(key,f(env,val)));
 } 
 
-Dict<`a,`c> map_c<`a,`b,`c,`d>(`c f(`d,`b),`d env,Dict<`a,`b> d) {
+hdict_t<`a,`c,`e> map_c(`c f(`d,`b),`d env,hdict_t<`a,`b,`e> d) {
   if(d->t == null)
-    return &dict(d->rel,null);
-  return &dict(d->rel,map_tree_c(f,env,(struct T<`a,`b>@)(d->t)));
+    return &Dict(d->rel,null);
+  return &Dict(d->rel,map_tree_c(f,env,(struct T<`a,`b>@)(d->t)));
 }
 
-$(`a,`b)@ choose<`a,`b>(Dict<`a,`b> d) {
+$(`a,`b)@ choose(hdict_t<`a,`b,`e> d) {
   if(d->t == null)
     throw Absent;
   return &$(d->t->key_val[0], d->t->key_val[1]);
 }
 
-static bool forall_tree_c<`a,`b,`c>(bool f(`c,`a,`b),`c env,struct T<`a,`b>@ t){
+static bool forall_tree_c(bool f(`c,`a,`b),`c env,struct T<`a,`b>@ t){
   let &T(_,left,right,$(key,val)) = t;
   return 
     f(env,key,val) 
@@ -221,44 +221,71 @@ static bool forall_tree_c<`a,`b,`c>(bool f(`c,`a,`b),`c env,struct T<`a,`b>@ t){
     && (right == null || forall_tree_c(f,env,(struct T<`a,`b>@)right));
 }
 
-bool forall_c<`a,`b,`c>(bool f(`c,`a,`b), `c env, Dict<`a,`b> d) {
+bool forall_c(bool f(`c,`a,`b), `c env, hdict_t<`a,`b,`e> d) {
   if(d->t == null)
     return true;
   return forall_tree_c(f, env, (struct T<`a,`b>@)d->t);
 }
 
 // TO DO: Add the env version for union and intersect.
-static Dict<`a,`b> union_f<`a,`b>(`b f(`b,`b), `a a, `b b, Dict<`a,`b> d1) {
+static hdict_t<`a,`b,`e> union_f(`b f(`b,`b), `a a, `b b, hdict_t<`a,`b,`e> d1)
+{
   if(Dict::member(d1,a))
     return Dict::insert(d1, a, f(Dict::lookup(d1, a), b));
   else
     return Dict::insert(d1, a, b);
 }
-Dict<`a,`b> union_two<`a,`b>( `b f(`b,`b), Dict<`a,`b> d1, Dict<`a,`b> d2) {
+hdict_t<`a,`b,`e> union_two(`b f(`b,`b), hdict_t<`a,`b,`e> d1, 
+                            hdict_t<`a,`b,`e> d2) {
   if(d1 == d2)
     return d1;
   return Dict::fold_c(union_f, f, d2, d1);
 }
 
-static void intersect_f<`a,`b>($(`b (@f)(`b,`b),Dict<`a,`b>,Dict<`a,`b>) @ trip,
-			       `a a, `b b) {
-  let &$(f,d1,*d3_ptr) = trip;
+// FIX:  the following causes the compiler to core dump -- the culprit
+// seems to be the tuple, so I've recoded using a struct:
+/*
+static void 
+intersect_f($(`b f(`b,`b;{}), hdict_t<`a,`b,`e>, hdict_t<`a,`b,`e>) @ trip, 
+            `a a, `b b) {
+  let &$(f,d1,d3_ptr) = trip;
   if(Dict::member(d1,a))
     *d3_ptr = Dict::insert(*d3_ptr, a, f(Dict::lookup(d1, a), b));
+  return;
 }
-Dict<`a,`b> intersect<`a,`b>(`b (@f)(`b,`b), Dict<`a,`b> d1, Dict<`a,`b> d2) {
+*/
+
+struct IntArg<`a,`b,`e1,`e2> {
+  `b (@f)(`b,`b;`e1);
+  hdict_t<`a,`b,`e2> d1;
+  hdict_t<`a,`b,`e2> d2;
+};
+
+typedef struct IntArg<`a,`b,`e1,`e2> intarg_t<`a,`b,`e1,`e2>;
+
+static void 
+intersect_f(intarg_t<`a,`b,`e1,`e2> @ `r trip, `a a, `b b) {
+  let &IntArg{f, d1, *d2} = trip;
+  if (Dict::member(d1,a))
+    *d2 = Dict::insert(*d2,a,f(Dict::lookup(d1,a),b));
+}
+    
+
+hdict_t<`a,`b,`e> intersect(`b (@f)(`b,`b), hdict_t<`a,`b,`e> d1, 
+                            hdict_t<`a,`b,`e> d2) {
   if(d1 == d2)
     return d1;
-  // must enrich regions so env can be stack allocated
-  let env = &$(f, d1, Dict::empty(d1->rel));
-  Dict::iter_c(intersect_f, env, d2);
-  return (*env)[2];
+  // NB: env is stack allocated!
+  let env = IntArg{f, d1, Dict::empty(d1->rel)};
+  Dict::iter_c(intersect_f, &env, d2);
+  return env.d2;
 }
 
-List::list<$(`a,`b)@> to_list_f<`a,`b>(`a k, `b v, List::list<$(`a,`b)@> accum){
-  return &List::cons(&$(k,v),accum);
+static List::list_t<$(`a,`b)@> 
+  to_list_f(`a k, `b v, List::list_t<$(`a,`b)@> accum){
+  return &List::List(&$(k,v),accum);
 }
-
-List::list<$(`a,`b)@> to_list<`a,`b>(Dict<`a,`b> d) {
+List::list_t<$(`a,`b)@> to_list(hdict_t<`a,`b,`e> d) {
   return fold(to_list_f, d, null);
 }
+

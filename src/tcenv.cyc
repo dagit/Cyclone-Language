@@ -52,11 +52,12 @@
 #include "dict.h"
 #include "slowdict.h"
 #include "position.h"
-#include "absyn.h"
-#include "tcenv.h"
-#include "tcutil.h"
 #include "string.h"
 #include "absynpp.h"
+#include "absyn.h"
+#include "tcutil.h"
+#include "tcenv.h"
+
 
 namespace Tcenv;
 
@@ -67,10 +68,11 @@ using Set;
 using Position;
 using Absyn;
 using Tcutil;
+using Absynpp;
 
 xenum exn {Env_error};
 
-`a env_err<`a>(string msg) {
+`a env_err(string msg) {
   fprintf(stderr,"Error: %s\n",msg);
   fflush(stderr);
   throw Env_error;
@@ -80,20 +82,20 @@ xenum exn {Env_error};
 
 // Type environments
 struct Tenv {
-  list<var>                    ns; // current namespace
-  Dict::Dict<list<var>,genv_t> ae; // absolute environment
-  Opt_t<frames<fenv_t>>        le; // is null except in functions
+  list_t<var>                    ns; // current namespace
+  Dict::dict_t<list_t<var>,genv_t> ae; // absolute environment
+  opt_t<frames<fenv_t>>        le; // is null except in functions
 };
 
 // Global environments -- what's declared in a global scope
 struct Genv {
-  Set<var>                    namespaces;
-  Dict::Dict<var,structdecl@> structdecls;
-  Dict::Dict<var,enumdecl@>   enumdecls;
-  Dict::Dict<var,xenumdecl@>  xenumdecls;
-  Dict::Dict<var,typedefdecl> typedefs; // no indirection b/c no redeclaration
-  Dict::Dict<var,$(resolved_t,bool)@> ordinaries; // bool for tree-shaking
-  list<list<var>>             availables; // abs. names of "using" namespaces
+  set_t<var>                    namespaces;
+  Dict::dict_t<var,structdecl@> structdecls;
+  Dict::dict_t<var,enumdecl@>   enumdecls;
+  Dict::dict_t<var,xenumdecl@>  xenumdecls;
+  Dict::dict_t<var,typedefdecl> typedefs; // no indirection b/c no redeclaration
+  Dict::dict_t<var,$(resolved_t,bool)@> ordinaries; // bool for tree-shaking
+  list_t<list_t<var>>             availables; // abs. names of "using" namespaces
 };
 
 // Used to tell what an ordinary identifer refers to
@@ -121,7 +123,7 @@ enum Jumpee {
 static struct CtrlEnv {
   jumpee_t continue_stmt;
   jumpee_t break_stmt;
-  $(stmt, list<tvar>, list<typ>) * fallthru_stmt; // null => not allowed
+  $(stmt, list_t<tvar>, list_t<typ>) * fallthru_stmt; // null => not allowed
   jumpee_t next_stmt; // needed to calculate break_stmt
   // The next_stmt field needs to be correct only when we might enter
   // a loop or switch. (i.e. when we call set_in_loop or set_in_switch)
@@ -133,20 +135,21 @@ typedef struct CtrlEnv @ ctrl_env_t;
 // than threading labels which must be function-wide unique anyway.
 static struct SharedFenv {
   typ                            return_typ;
-  Dict::Dict<var,stmt>           seen_labels;
-  SlowDict::Dict<var,list<stmt>> needed_labels;  // FIX: check empty when done!
-  Dict::Dict<int,typ>            block_to_rgn;   // adding tvars lazily
-  int                            next_block_num; // for "gensymming" blocks
+  Dict::dict_t<var,stmt>           seen_labels;
+  SlowDict::dict_t<var,list_t<stmt>> needed_labels;  // FIX: check empty when done!
+  int                            curr_block_num; // for "gensymming" blocks
+  typ                            parameter_rgn;  // region of parameters
 };
 
 // Local function environments -- this is getting a bit out of hand, no?
 struct Fenv {
   struct SharedFenv @   shared;
-  list<tvar>            type_vars; // type variables that can occur free
-  Dict::Dict<var,binding_t> locals;// binding will be Param_b, Local_b, or Pat_b
+  list_t<tvar>            type_vars; // type variables that can occur free
+  Dict::dict_t<var,binding_t> locals;// binding will be Param_b, Local_b, or Pat_b
   stmt                  encloser;  // nearest stmt with a binder or a try
   ctrl_env_t            ctrl_env;
-  List<int>             curr_blocks;
+  typ                   capability; // current capability -- 
+  typ                   curr_rgn;   // current block's region
 };
 
 //////////////////////// Top-level Environment Manipulation //////////////////
@@ -168,13 +171,13 @@ tenv tc_init() {
 }
 
 // Lookup a namespace relative to the current namespace
-static genv_t lookup_namespace(tenv te, segment loc,
-                               var n, list<var> ns) {
+static genv_t lookup_namespace(tenv te, seg_t loc,
+                               var n, list_t<var> ns) {
   return Dict::lookup(te->ae, resolve_namespace(te,loc,n,ns));
 }
 
 // lookup functions
-static list<var> outer_namespace(list<var> ns) {
+static list_t<var> outer_namespace(list_t<var> ns) {
   if (ns == null)
     return env_err("Tcenv::outer_namespace");
   return List::rev(List::rev(ns)->tl);
@@ -182,8 +185,8 @@ static list<var> outer_namespace(list<var> ns) {
 
 // FIX: We should eagerly detect repeats by having one big dict
 // that we recompute on namespace and using boundaries
-static void check_repeat<`a>(tenv_t te, seg_t loc, `a lookup(genv_t,var),
-			     var v, list<list<var>> nss) {
+static void check_repeat(tenv_t te, seg_t loc, `a lookup(genv_t,var),
+			     var v, list_t<list_t<var>> nss) {
   for(; nss != null; nss = nss->tl) {
     genv_t ge2 = Dict::lookup(te->ae,nss->hd);
     try {
@@ -194,8 +197,8 @@ static void check_repeat<`a>(tenv_t te, seg_t loc, `a lookup(genv_t,var),
   return;
 }
 
-static `a scoped_lookup<`a>(tenv_t te, seg_t loc, `a lookup(genv_t,var), var v){
-  list<var> cns = te->ns; // current namespace
+static `a scoped_lookup(tenv_t te, seg_t loc, `a lookup(genv_t,var), var v){
+  list_t<var> cns = te->ns; // current namespace
   `a result; // def assignment too dumb
   while (true) {
     genv_t ge = Dict::lookup(te->ae,cns);
@@ -226,13 +229,13 @@ static resolved_t lookup_ordinary_global_f(genv_t ge,var v) {
   (*ans)[1] = true;
   return (*ans)[0];
 }
-static resolved_t lookup_ordinary_global(tenv te,segment loc,qvar q) {
+static resolved_t lookup_ordinary_global(tenv te,seg_t loc,qvar q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n: fallthru;
   case Rel_n(null):
     return scoped_lookup(te, loc, lookup_ordinary_global_f, v);
-  case Rel_n(&cons(x,y)):
+  case Rel_n(&List(x,y)):
     let ge = lookup_namespace(te,loc,x,y);
     return lookup_ordinary_global_f(ge,v);
   case Abs_n(y):
@@ -240,9 +243,9 @@ static resolved_t lookup_ordinary_global(tenv te,segment loc,qvar q) {
   }
 }
 
-// Return the absolute name of relative namespace &cons(n,ns)
-list<var> resolve_namespace(tenv te, segment loc,
-                            var n, list<var> ns) {
+// Return the absolute name of relative namespace &List(n,ns)
+list_t<var> resolve_namespace(tenv te, seg_t loc,
+                            var n, list_t<var> ns) {
   let cns = te->ns; // current namespace
   let possible_results = null;
   while (true) {
@@ -251,12 +254,12 @@ list<var> resolve_namespace(tenv te, segment loc,
     for (let nss = ge->availables; nss != null; nss = nss->tl) {
       genv_t ge2 = Dict::lookup(te->ae,nss->hd);
       if (Set::member(ge2->namespaces, n))
-        possible_results = &cons(List::append(cns,&cons(n,ns)),
+        possible_results = &List(List::append(cns,&List(n,ns)),
                                  possible_results);
     }
     // Check current namespace
     if (Set::member(ge->namespaces, n))
-      possible_results = &cons(List::append(cns,&cons(n,ns)),
+      possible_results = &List(List::append(cns,&List(n,ns)),
                                possible_results);
     // Is this right? We check for ambiguity between the current namespace
     // and used namespaces in the current scope, but not outer namespaces.
@@ -279,7 +282,7 @@ list<var> resolve_namespace(tenv te, segment loc,
 static structdecl @ lookup_structdecl_f(genv_t ge,var v) {
   return Dict::lookup(ge->structdecls,v);
 }
-structdecl @ lookup_structdecl(tenv te,segment loc,qvar q) {
+structdecl @ lookup_structdecl(tenv te,seg_t loc,qvar q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n: fallthru;
@@ -288,25 +291,25 @@ structdecl @ lookup_structdecl(tenv te,segment loc,qvar q) {
   case Abs_n(y):
     let ge = Dict::lookup(te->ae,y);
     return Dict::lookup(ge->structdecls,v);
-  case Rel_n(&cons(x,y)):
+  case Rel_n(&List(x,y)):
     let ge = lookup_namespace(te,loc,x,y);
     return Dict::lookup(ge->structdecls,v);
   }
 }
-//structdecl @ lookup_structdecl_abs(tenv te, segment loc,qvar q) {
+//structdecl @ lookup_structdecl_abs(tenv te, seg_t loc,qvar q) {
 //  return Dict::lookup(Dict::lookup(te->ae,(*q)[0])->structdecls, (*q)[1]);
 //}
 
 static enumdecl @ lookup_enumdecl_f(genv_t ge,var v) {
   return Dict::lookup(ge->enumdecls,v);
 }
-enumdecl @ lookup_enumdecl(tenv te,segment loc,qvar q) {
+enumdecl @ lookup_enumdecl(tenv te,seg_t loc,qvar q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n: fallthru;
   case Rel_n(null):
     return scoped_lookup(te, loc, lookup_enumdecl_f, v);
-  case Rel_n(&cons(x,y)):
+  case Rel_n(&List(x,y)):
     let ge = lookup_namespace(te,loc,x,y);
     return Dict::lookup(ge->enumdecls,v);
   case Abs_n(y):
@@ -314,7 +317,7 @@ enumdecl @ lookup_enumdecl(tenv te,segment loc,qvar q) {
     return Dict::lookup(ge->enumdecls,v);
   }
 }
-//enumdecl @ lookup_enumdecl_abs(tenv te, segment loc,qvar q) {
+//enumdecl @ lookup_enumdecl_abs(tenv te, seg_t loc,qvar q) {
 //  return Dict::lookup(Dict::lookup(te->ae,(*q)[0])->enumdecls, (*q)[1]);
 //}
 
@@ -323,7 +326,7 @@ static xenumdecl @ lookup_xenumdecl_f(genv_t ge,var v) {
 }
 
 // DAN: some functionality from tcXenumdecl has moved to here.
-Opt_t<xenumdecl@> lookup_xenumdecl(tenv te,segment loc,qvar q) {
+opt_t<xenumdecl@> lookup_xenumdecl(tenv te,seg_t loc,qvar q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Rel_n(null):
@@ -333,7 +336,7 @@ Opt_t<xenumdecl@> lookup_xenumdecl(tenv te,segment loc,qvar q) {
   case Loc_n: // impossible case
     terr(loc,"lookup_xenumdecl: impossible");
     return null;
-  case Rel_n(&cons(x,y)):
+  case Rel_n(&List(x,y)):
     // qualified name, it's an error if the namespace is bad or the
     // xenum doesn't already exist.  In either case, we'll raise
     // Dict::Absent, so we give a more descriptive message for the
@@ -353,20 +356,20 @@ Opt_t<xenumdecl@> lookup_xenumdecl(tenv te,segment loc,qvar q) {
 }
 //// FIX: We probably need some of the lenience of lookup_xenumdecl here too.
 ////      I would add it, but I think xenums are still generally sorta busted.
-//Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv te, segment loc,qvar q) {
+//opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv te, seg_t loc,qvar q) {
 //  return &Opt(Dict::lookup(Dict::lookup(te->ae,(*q)[0])->xenumdecls, (*q)[1]));
 //}
 
 static typedefdecl lookup_typedefdecl_f(genv_t ge,var v) {
   return Dict::lookup(ge->typedefs,v);
 }
-typedefdecl lookup_typedefdecl(tenv te, segment loc, qvar q) {
+typedefdecl lookup_typedefdecl(tenv te, seg_t loc, qvar q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n: fallthru;
   case Rel_n(null):
     return scoped_lookup(te, loc, lookup_typedefdecl_f, v);
-  case Rel_n(&cons(x,y)):
+  case Rel_n(&List(x,y)):
     let ge = lookup_namespace(te,loc,x,y);
     return Dict::lookup(ge->typedefs,v);
   case Abs_n(y):
@@ -387,7 +390,7 @@ genv_t empty_genv() {
 
 ////////////////////////////// Frames Manipulation //////////////////////////
 
-`a get_visible<`a>(frames<`a> f) {
+`a get_visible(frames<`a> f) {
   while(true)
     switch (f) {
     case Outermost(x): return x;
@@ -396,7 +399,7 @@ genv_t empty_genv() {
     }
 }
 
-frames<`a> put_visible<`a>(frames<`a> f, `a x) {
+frames<`a> put_visible(frames<`a> f, `a x) {
   switch (f) {
   case Outermost(x2): return Outermost(x);
   case Frame(x2,f2):  return Frame(x,f2);
@@ -404,11 +407,11 @@ frames<`a> put_visible<`a>(frames<`a> f, `a x) {
   }
 }
 
-frames<`a> apply_to_visible<`a>(`a g(`a), frames<`a> f) {
+frames<`a> apply_to_visible(`a g(`a), frames<`a> f) {
   return put_visible(f,g(get_visible(f)));
 }
 
-frames<`b> map_frames<`a,`b>(`b g(`a), frames<`a> f) {
+frames<`b> map_frames(`b g(`a), frames<`a> f) {
   switch (f) {
   case Outermost(x): return Outermost(g(x));
   case Frame(x,f2):  return Frame(g(x),map_frames(g,f2));
@@ -430,7 +433,7 @@ tenv put_fenv(tenv te, fenv_t fe) {
 
 static fenv_t copy_fenv_old_ctrl(fenv_t f) {
   return &Fenv(f->shared, f->type_vars, f->locals, f->encloser, f->ctrl_env,
-	       f->curr_blocks);
+	       f->capability, f->curr_rgn);
 }
 static fenv_t copy_fenv_new_ctrl(fenv_t f) {
   // WARNING: fallthru_stmt shared with old
@@ -438,7 +441,7 @@ static fenv_t copy_fenv_new_ctrl(fenv_t f) {
   return &Fenv(f->shared, f->type_vars, f->locals, f->encloser,
 	       &CtrlEnv(c->continue_stmt, c->break_stmt, c->fallthru_stmt,
 			c->next_stmt),
-	       f->curr_blocks);
+	       f->capability, f->curr_rgn);
 }
 
 typ return_typ(tenv te) {
@@ -446,12 +449,12 @@ typ return_typ(tenv te) {
   return get_fenv(te)->shared->return_typ;
 }
 
-list<tvar> lookup_type_vars(tenv te) {
+list_t<tvar> lookup_type_vars(tenv te) {
   if(te->le == null) return null;
   return get_fenv(te)->type_vars;
 }
 
-tenv add_type_vars(segment loc,tenv te,list<tvar> tvs) {
+tenv add_type_vars(seg_t loc,tenv te,list_t<tvar> tvs) {
   if(te->le == null) env_err("Tcenv: unexpected add_type_vars");
   let fe      = copy_fenv_old_ctrl(get_fenv(te));
   let new_tvs = List::append(tvs,fe->type_vars);
@@ -463,7 +466,7 @@ tenv add_type_vars(segment loc,tenv te,list<tvar> tvs) {
 // FIX: This can cause clashes with other programmer variables!!!!
 static int shadow_ctr = 1;
 
-tenv add_local_var(segment loc, tenv te, vardecl vd) {
+tenv add_local_var(seg_t loc, tenv te, vardecl vd) {
   if(te->le == null) env_err("Tcenv: unexpected add_local_var");
   let fe = copy_fenv_old_ctrl(get_fenv(te));
   let v  = (*vd->name)[1];
@@ -482,7 +485,7 @@ tenv add_local_var(segment loc, tenv te, vardecl vd) {
 }
 
 // assume uniqueness has been checked elsewhere
-tenv add_pat_var(segment loc, tenv te, vardecl vd) {
+tenv add_pat_var(seg_t loc, tenv te, vardecl vd) {
   if(te->le == null) env_err("Tcenv: unexpected add_pat_var");
   let fe = copy_fenv_old_ctrl(get_fenv(te));
   let v  = (*vd->name)[1];
@@ -492,7 +495,7 @@ tenv add_pat_var(segment loc, tenv te, vardecl vd) {
   return put_fenv(te,fe);
 }
 
-resolved_t lookup_ordinary(tenv te,segment loc,qvar q) {
+resolved_t lookup_ordinary(tenv te,seg_t loc,qvar q) {
   let &$(nsl,v) = q;
   switch (nsl) {
   case Loc_n:
@@ -517,7 +520,7 @@ void process_continue(tenv te, stmt s, stmt_opt @sopt) {
   if (te->le == null) env_err("Tcenv: unexpected process_continue");
   switch (get_fenv(te)->ctrl_env->continue_stmt) {
   case Stmt_j(s2):
-    s2->non_local_preds = &cons(s,s2->non_local_preds);
+    s2->non_local_preds = &List(s,s2->non_local_preds);
     *sopt = s2;
     return;
   case NotLoop_j: terr(s->loc, "continue not in a loop");     return;
@@ -530,7 +533,7 @@ void process_break(tenv te, stmt s, stmt_opt @sopt) {
   fenv_t fe = get_fenv(te);
   switch (fe->ctrl_env->break_stmt) {
   case Stmt_j(s2):
-    s2->non_local_preds = &cons(s,s2->non_local_preds);
+    s2->non_local_preds = &List(s,s2->non_local_preds);
     *sopt = s2;
     return;
   case NotLoop_j:
@@ -558,28 +561,28 @@ void process_goto(tenv te, stmt s, var l, stmt_opt @sopt) {
     let slopt  = SlowDict::lookup_opt(needed, l);
     if(slopt == null)
       slopt = &Opt(null);
-    fe->shared->needed_labels = SlowDict::insert(needed,l,&cons(s,slopt->v));
+    fe->shared->needed_labels = SlowDict::insert(needed,l,&List(s,slopt->v));
   } else {
-    sopt2->v->non_local_preds = &cons(s, sopt2->v->non_local_preds);
+    sopt2->v->non_local_preds = &List(s, sopt2->v->non_local_preds);
     *sopt = sopt2->v;
   }
 }
-$(stmt,list<tvar>,list<typ>)* process_fallthru(tenv te,stmt s,stmt_opt @sopt){
+$(stmt,list_t<tvar>,list_t<typ>)* process_fallthru(tenv te,stmt s,stmt_opt @sopt){
   if (te->le == null) env_err("Tcenv: unexpected process_fallthru");
   let fe  = get_fenv(te);
   let ans = fe->ctrl_env->fallthru_stmt;
   if(ans != null) {
-    (*ans)[0]->non_local_preds = &cons(s, (*ans)[0]->non_local_preds);
+    (*ans)[0]->non_local_preds = &List(s, (*ans)[0]->non_local_preds);
     *sopt = (*ans)[0];
   }
   return ans;
 }
 
-tenv set_fallthru(tenv te, $(list<tvar>,list<vardecl>) * pat_typ, stmt body) {
+tenv set_fallthru(tenv te, $(list_t<tvar>,list_t<vardecl>) * pat_typ, stmt body) {
   if(te->le == null) env_err("Tcenv: unexpected set_fallthru");
   let ft_typ = null;
   for(let vds = (*pat_typ)[1]; vds!=null; vds=vds->tl)
-    ft_typ = &cons(vds->hd->type,ft_typ);
+    ft_typ = &List(vds->hd->type,ft_typ);
   ft_typ = List::imp_rev(ft_typ);
   fenv_t fe = copy_fenv_new_ctrl(get_fenv(te));
   fe->ctrl_env->fallthru_stmt = &$(body,(*pat_typ)[0],ft_typ);
@@ -656,75 +659,86 @@ tenv set_encloser(tenv te, stmt s) {
   return put_fenv(te,fe);
 }
 
+// We're entering a new block, so add a new region
+// FIX:  we need to be able to specify the name of the region
+// explicitly somehow...
 tenv new_block(tenv te) {
   if (te->le == null) env_err("Tcenv: unexpected new_block");
   fenv_t fe = copy_fenv_old_ctrl(get_fenv(te));
-  int block_num = ++fe->shared->next_block_num;
-  fe->curr_blocks = &cons(block_num, fe->curr_blocks);
+  int block_num = ++fe->shared->curr_block_num;
+  tvar block_rgn = new_tvar(RgnKind);
+  typ block_typ = VarType(block_rgn);
+  // NOTE:  no need to check uniqueness since the variable is gensymed
+  fe->type_vars = &List(block_rgn, fe->type_vars);
+  fe->capability = JoinEff(&List(AccessEff(block_typ), 
+                                 &List(fe->capability,null)));
+  fe->curr_rgn = block_typ;
   return put_fenv(te,fe);
 }
-int curr_block(tenv te) {
-  if (te->le == null) return -1; // KLUDGE:  top-level is -1
-  return get_fenv(te)->curr_blocks->hd;
-}
-bool valid_block(tenv te, int block_num) {
-  if (te->le == null) return false;
-  let blocks = get_fenv(te)->curr_blocks;
-  return List::memq(blocks,block_num);
-}
-typ block_to_typ(tenv te, int block_num) {
-  // KLUDGE:  top-level block is -1 -- return HeapRgnType
-  if (block_num == -1) return HeapRgnType;
-  if (te->le == null) env_err("Tcenv: unexpected block_to_typ");
-  let fe = get_fenv(te);
-  let d  = fe->shared->block_to_rgn;
-  if(Dict::member(d,block_num))
-    return Dict::lookup(d,block_num);
-  // KLUDGE: The tyvar will be fresh b/c block_num is unique and
-  //         all user tyvars start with `.
-  let ans = VarType(&$(new {string_of_int(block_num)},RgnKind));
-  fe->shared->block_to_rgn =
-    Dict::insert(fe->shared->block_to_rgn,block_num,ans);
-  return ans;
-}
-// KLUDGE: Should really not confuse type variables and ints like this.
-// I'll clean it up later. Sorry.
-void check_rgn_accessible(tenv te, seg_t loc, typ rgn_typ) {
-  if (te->le == null) env_err("Tcenv: unexpected rgn_accessible");
-  fenv_t fe = get_fenv(te);
-  switch (compress(rgn_typ)) {
-  case HeapRgnType: return;
-  case VarType(tv):
-    if(List::mem(tvar_cmp, fe->type_vars, tv))
-      return;
-    // here's the kludge
-    try
-      if(List::mem(intcmp, fe->curr_blocks, int_of_string(*((*tv)[0]))))
-	return;
-    catch { case InvalidArg(_): break; }
-    terr(loc, xprintf("Expression accesses unavailable region %s",
-		      *((*tv)[0])));
-    return;
-  default:
-    terr(loc,"Region of pointer cannot be determined");
-    return;
-  }
+
+// Return the region in which the current function's parameters live
+typ parameter_rgn(tenv te) {
+  if (te->le == null) env_err("Tcenv: unexpected parameter_rgn");
+  return get_fenv(te)->shared->parameter_rgn;
 }
 
-// KLUDGE: Tcexp::lhs_const assumes the outermost block is 0 and
-// decides that the parameters live in that block!
+typ curr_block(tenv te) {
+  if (te->le == null) return HeapRgn; // KLUDGE:  top-level is -1
+  return get_fenv(te)->curr_rgn;
+}
+
+// Check that rgn_typ is currently accessible:  the heap region is always
+// accessible, and a region variable r is accessible iff it appears in the
+// list of available regions.
+void check_rgn_accessible(tenv te, seg_t loc, typ rgn) {
+  if (te->le != null) {
+    typ capability = get_fenv(te)->capability;
+    if (region_in_effect(false, rgn, capability) ||
+        region_in_effect(true, rgn, capability)) return;
+  }
+  terr(loc, xprintf("Expression accesses unavailable region %s",
+                    typ2string(rgn)));
+}
+
+// Check that a function call's effect is contained in the current
+// capability.
+void check_effect_accessible(tenv te, seg_t loc, typ eff) {
+  typ capability;
+  if (te->le == null) 
+    capability = JoinEff(null);
+  else {
+    let fenv = get_fenv(te);
+    capability = fenv->capability;
+  }
+  // for function calls, we drive the slack in the function's effect to 
+  // the empty effect
+  if (!subset_effect(true, eff, capability))
+    terr(loc, xprintf("Capability %s does not cover function's effect %s",
+                      typ2string(capability), typ2string(eff)));
+}
+
 fenv_t new_fenv(fndecl fd) {
   let locals = Dict::empty(String::zstrptrcmp);
+  // FIX:  the user may need to get their hands on the region name
+  // but if it's gensym'd, they can't.  
+  tvar rgn0 = new_tvar(RgnKind);
+  typ param_rgn = VarType(rgn0);
   for(let args = fd->args; args != null; args = args->tl)
     locals = Dict::insert(locals, (*args->hd)[0], Param_b(args->hd));
-  return &Fenv{.shared      = &SharedFenv(fd->ret_type,
-					  Dict::empty(String::zstrptrcmp),
-					  SlowDict::empty(String::zstrptrcmp),
-					  Dict::empty(Core::intcmp),
-					  0),
- 	       .type_vars   = fd->tvs, // assumed unique
+  return &Fenv{.shared      = 
+                  &SharedFenv{.return_typ = fd->ret_type,
+			      .seen_labels = Dict::empty(String::zstrptrcmp),
+			      .needed_labels = 
+                                SlowDict::empty(String::zstrptrcmp),
+                              .curr_block_num = 0,
+                              .parameter_rgn = param_rgn
+                             }, 
+ 	       .type_vars   = &List(rgn0,fd->tvs), // assumed unique
 	       .locals      = locals,  // assumed unique
 	       .encloser    = fd->body, // careful -- self loop at top!!!
 	       .ctrl_env    = &CtrlEnv(NotLoop_j, NotLoop_j, null, FnEnd_j),
-	       .curr_blocks = &cons(0,null)};
+               .capability  = JoinEff(&List(AccessEff(param_rgn),
+                                            &List(fd->effect->v,null))),
+               .curr_rgn    = param_rgn
+              };
 }

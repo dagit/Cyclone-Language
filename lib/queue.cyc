@@ -15,10 +15,10 @@ namespace Queue;
 
 using List;
 
-struct queue<`a> { list<`a> front; list<`a> rear; };
+struct Queue<`a,`r> { glist_t<`a,`r> front; glist_t<`a,`r> rear; };
 
 // true when the queue is empty
-bool is_empty<`a>(Queue<`a> q)  {
+bool is_empty(gqueue_t<`a,`r> q)  {
    return(q->front == null);
 }
 
@@ -26,13 +26,13 @@ bool is_empty<`a>(Queue<`a> q)  {
 xenum exn { Empty };
 
 // create a new queue
-Queue<`a> create<`a>() {
-  return &queue(null,null);
+queue_t<`a> create() {
+  return &Queue(null,null);
 }
 
 // insert an element into the rear of the queue (side effect)
-void add<`a>(Queue<`a> q,`a x) {
-  list<`a> cell = &cons(x,null);
+void add(queue_t<`a> q,`a x) {
+  list_t<`a> cell = &List(x,null);
 
   if (q->front == null) {
     q->front = cell;
@@ -44,7 +44,7 @@ void add<`a>(Queue<`a> q,`a x) {
 }
 
 // get and remove an element from the front of the queue (side effect)
-`a take<`a>(Queue<`a> q) {
+`a take(gqueue_t<`a,`r> q) {
   if (q->front == null)
     throw Empty; // FIX: toc problems if we try to return this.
   //    return (throw Empty);
@@ -59,7 +59,7 @@ void add<`a>(Queue<`a> q,`a x) {
 }
 
 // return the first element in the queue without removing it
-`a peek<`a>(Queue<`a> q) {
+`a peek(gqueue_t<`a,`r> q) {
   if (q->front == null)
     throw Empty; // FIX: toc problems if we try to return this.
   else {
@@ -68,24 +68,24 @@ void add<`a>(Queue<`a> q,`a x) {
 }
 
 // clear out the entire queue (side effect)
-void clear<`a>(Queue<`a> q) {
+void clear(gqueue_t<`a,`r> q) {
   q->front = null;
   q->rear = null;
 }
 
 // return the number of elements in the queue
-int length<`a>(Queue<`a> q) {
+int length(gqueue_t<`a,`r> q) {
   return(List::length(q->front));
 }
 
 // apply f to each element in the queue from the front to the back
-void iter<`a>(void f(`a), Queue<`a> q) {
-  for (list<`a> x = q->front; x != null; x = x->tl) {
+void iter(void f(`a), gqueue_t<`a,`r> q) {
+  for (glist_t<`a,`r> x = q->front; x != null; x = x->tl) {
     f(x->hd);
   }
 }
-void app<`a,`b>(`b f(`a), Queue<`a> q) {
-  for (list<`a> x = q->front; x != null; x = x->tl) {
+void app(`b f(`a), gqueue_t<`a,`r> q) {
+  for (glist_t<`a,`r> x = q->front; x != null; x = x->tl) {
     f(x->hd);
   }
 }

@@ -37,12 +37,12 @@ typedef enum Automata automata_t;
 LEXGEN_EXTERN_DEFINITION struct Automata_entry {
   string                           name;
   int                              initial_state;
-  list<$(int,Syntax::location_t)@> actions;
+  list_t<$(int,Syntax::location_t)@> actions;
 };
 typedef struct Automata_entry @ automata_entry_t;
 
 extern 
-$(list<automata_entry_t>,automata_t?)@ make_dfa(Syntax::lexer_definition_t);
+$(list_t<automata_entry_t>,automata_t?)@ make_dfa(Syntax::lexer_definition_t);
 
 }}}
 #endif

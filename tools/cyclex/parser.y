@@ -18,7 +18,7 @@ using List;
 using Syntax;
 
 namespace Lexer {
-  extern int lexmain<`a>(Lexing::Lexbuf<`a>);
+  extern int lexmain(Lexing::Lexbuf<`a>);
   extern xenum exn { Lexical_error(string,int,int) };
   extern int line_num;
   extern int line_start_pos;
@@ -26,10 +26,10 @@ namespace Lexer {
 
 namespace Parser {
 
-Opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = null;
+opt_t<Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>>> lbuf = null;
 
 xenum exn {Parser_error(string)};
-typedef struct Hashtable::table<stringptr,regular_expression_t> htbl;
+typedef struct Hashtable::Table<stringptr,regular_expression_t,{},{}> htbl;
   // must be initialized!
 htbl * named_regexps = null;
 lexer_definition_t parse_result = null;
@@ -38,31 +38,31 @@ regular_expression_t regexp_for_string(string s) {
   int len = String::strlen(s);
   if(len == 0)
     return Epsilon;
-  regular_expression_t ans = Characters(&cons((int)(s[len-1]), null));
+  regular_expression_t ans = Characters(&List((int)(s[len-1]), null));
   for(int n = len - 2; n >= 0; --n)
-    ans = Sequence(Characters(&cons((int)(s[n]), null)), ans);
+    ans = Sequence(Characters(&List((int)(s[n]), null)), ans);
   return ans;
 }
 
-list<int> char_class(int c1, int c2) {
-  list<int> ans = null;
+list_t<int> char_class(int c1, int c2) {
+  list_t<int> ans = null;
   for(int n = c2; n >= c1; --n)
-    ans = &cons(n,ans);
+    ans = &List(n,ans);
   return ans;
 }
 
-static list<int> all_chars_s = null;
-static list<int> all_chars() {  
+static list_t<int> all_chars_s = null;
+static list_t<int> all_chars() {  
   if(all_chars_s == null)
     all_chars_s = char_class(0,255);
   return all_chars_s;
 }
 
-static list<int> subtract(list<int> l1, list<int> l2) {
-  list<int> rev_ans = null;
+static list_t<int> subtract(list_t<int> l1, list_t<int> l2) {
+  list_t<int> rev_ans = null;
   for(; l1 != null; l1 = l1->tl)
     if(!memq(l2, l1->hd))
-      rev_ans = &cons(l1->hd, rev_ans);
+      rev_ans = &List(l1->hd, rev_ans);
   return imp_rev(rev_ans);
 }
 
@@ -87,14 +87,14 @@ using Parser;
   Lexer_definition_tok(lexer_definition_t);
   Location_tok(location_t);
   Int_tok(int);
-  Entrypoint_List_tok(list<entrypoint_t>);
+  Entrypoint_List_tok(list_t<entrypoint_t>);
   Entrypoint_tok(entrypoint_t);
-  Acase_List_tok(list<acase_t>);
+  Acase_List_tok(list_t<acase_t>);
   Acase_tok(acase_t);
   Regexp_tok(regular_expression_t);
   Char_tok(char);
   String_tok(string);
-  Charclass_tok(list<int>);
+  Charclass_tok(list_t<int>);
 }
 
 %type <Lexer_definition_tok> lexer_definition
@@ -113,7 +113,7 @@ using Parser;
 
 lexer_definition: 
   header named_regexps TRULE definition other_definitions header
-{ lexer_definition_t ans = &Lexer_definition($1, &cons($4,rev($5)), $6);
+{ lexer_definition_t ans = &Lexer_definition($1, &List($4,rev($5)), $6);
   $$=^$(ans);
   parse_result = ans;
 }
@@ -130,17 +130,17 @@ named_regexps:
 
 other_definitions:
   other_definitions TAND definition 
-     { $$=^$(&cons($3,$1)); }
+     { $$=^$(&List($3,$1)); }
 | /* empty */ { $$=^$(null); }
 
 definition: TIDENT TEQUAL entry { $$=^$(&$($1,$3)); }
 
 entry:
-  TPARSE acase rest_of_entry { $$=^$(&cons($2,rev($3))); }
+  TPARSE acase rest_of_entry { $$=^$(&List($2,rev($3))); }
 | TPARSE rest_of_entry       { $$=^$(rev($2)); }
 
 rest_of_entry:
-  rest_of_entry TOR acase { $$=^$(&cons($3,$1)); }
+  rest_of_entry TOR acase { $$=^$(&List($3,$1)); }
 | /* empty */ { $$=^$(null); }
 
 acase: regexp TACTION { $$=^$(&$($1,$2)); }
@@ -148,8 +148,8 @@ acase: regexp TACTION { $$=^$(&$($1,$2)); }
 regexp:
   TUNDERSCORE { $$=^$(Characters(all_chars())); }
 | TEOF        { /* FIX: may change to -1 like C library? */ 
-                $$=^$(Characters(&cons(256,null))); }
-| TCHAR       { $$=^$(Characters(&cons((int)($1),null))); }
+                $$=^$(Characters(&List(256,null))); }
+| TCHAR       { $$=^$(Characters(&List((int)($1),null))); }
 | TSTRING     { $$=^$(regexp_for_string($1)); }
 | TLBRACKET char_class TRBRACKET { $$=^$(Characters($2)); }
 | regexp TSTAR      { $$=^$(Repetition($1)); }
@@ -173,7 +173,7 @@ char_class:
 
 char_class1:
   TCHAR TDASH TCHAR                    { $$=^$(char_class($1,$3)); }
-| TCHAR                                { $$=^$(&cons((int)($1),null)); }
+| TCHAR                                { $$=^$(&List((int)($1),null)); }
 | char_class1 char_class1 %prec CONCAT { $$=^$(append($1,$2)); }
 
 %%

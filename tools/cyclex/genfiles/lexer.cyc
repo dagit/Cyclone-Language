@@ -55,7 +55,7 @@ static int comment_depth = 0;
 static string string_buff  = (string)"01234567012345670123456701234567";
 static int    string_index = 0;
 
-typedef int lexfun_t <`a>(Lexing::Lexbuf<`a>);
+  //typedef int lexfun_t <`a>(Lexing::Lexbuf<`a>);
 
 #define SHRINK_THRESHOLD 16384
 void reset_string_buffer() {
@@ -92,13 +92,13 @@ char char_for_backslash(char c) {
 
 // FIX: Maybe the Cyclone version should interpret things in octal instead
 //      of decimal.  If so, change this code and all existing lexers.
-char char_for_octal_code<`a>(Lexbuf<`a> lbuf, int i) {
+char char_for_octal_code(Lexbuf<`a> lbuf, int i) {
   return (char)(64 * (((int) lexeme_char(lbuf,i))   - '0') +
 		 8 * (((int) lexeme_char(lbuf,i+1)) - '0') +
 		     (((int) lexeme_char(lbuf,i+2)) - '0'));
 }
 
-static int handle_lexical_error<`a>(lexfun_t fn, Lexbuf<`a>lbuf) {
+static int handle_lexical_error(int fn(Lexbuf<`a>), Lexbuf<`a>lbuf) {
   int line = line_num;
   int column = lexeme_start(lbuf) - line_start_pos;
   try return fn(lbuf);
@@ -106,7 +106,11 @@ static int handle_lexical_error<`a>(lexfun_t fn, Lexbuf<`a>lbuf) {
 }
 
 // Forward declarations of lexing functions
-extern lexfun_t lexmain, action, strng, comment;
+  //extern lexfun_t lexmain, action, strng, comment;
+int lexmain(Lexbuf<`a>);
+int action(Lexbuf<`a>);
+int strng(Lexbuf<`a>);
+int comment(Lexbuf<`a>);
 
 } // namespace Lexer
 
@@ -133,7 +137,7 @@ int lbacktrk[] = {-1,-1,-1,-1,-1,-1,-1,9,9,9,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1
 int ldefault[] = {45,31,20,4,0,0,0,13,-1,-1,0,0,0,-1,0,-1,-1,-1,-1,-1,0,0,0,0,0,-1,-1,-1,0,-1,-1,44,0,0,38,-1,0,0,-1,-1,-1,-1,-1,-1,44,0,-1,0,0,67,0,0,0,0,0,-1,0,0,-1,0,0,0,0,0,0,0,-1,-1,-1,-1,-1,-1,-1,-1};
 int ltrans[] = {0,0,0,0,0,0,0,0,0,46,47,0,46,46,23,0,0,0,0,0,32,0,5,0,0,0,0,0,0,0,0,0,46,27,48,0,27,27,24,49,50,51,52,53,33,54,6,55,12,34,11,7,22,21,8,20,27,35,20,9,14,56,22,57,21,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,59,14,60,61,62,25,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,63,64,39,28,16,21,20,10,0,0,36,0,37,17,17,17,17,17,17,17,17,68,15,18,18,18,18,18,18,18,18,19,19,19,19,19,19,19,19,0,-1,0,0,26,27,0,26,26,26,27,73,26,26,73,73,73,0,16,73,73,0,0,0,16,-1,0,26,0,28,-1,0,26,0,73,0,16,0,-1,73,16,0,16,29,29,29,29,29,29,29,29,0,0,0,0,0,0,0,28,30,30,30,30,30,30,30,30,14,14,14,14,14,14,14,14,42,42,42,42,42,42,42,42,0,0,0,0,28,0,0,0,0,28,28,65,0,0,28,22,0,0,0,0,0,10,28,10,0,40,28,0,28,-1,28,-1,0,-1,41,41,41,41,41,41,41,41,0,0,-1,43,43,43,43,43,43,43,43,-1,0,0,0,0,-1,69,0,0,0,-1,-1,0,-1,0,70,70,70,70,70,70,70,70,0,0,40,0,0,0,0,69,40,71,71,71,71,71,71,71,71,0,0,0,40,0,0,0,40,0,40,72,72,72,72,72,72,72,72,0,69,0,0,0,0,69,69,0,0,0,69,0,0,0,0,0,0,0,69,0,0,0,69,0,69,0,69,66,0,0,-1,0,-1,0,0,0,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,-1,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,66,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,0,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,-1,0,0,0,66,0,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 int lcheck[] = {-1,-1,-1,-1,-1,-1,-1,-1,-1,0,0,-1,0,0,2,-1,-1,-1,-1,-1,1,-1,3,-1,-1,-1,-1,-1,-1,-1,-1,-1,0,27,0,-1,27,27,2,0,0,0,0,0,1,0,3,0,8,1,9,3,13,16,3,19,27,1,35,3,38,0,40,0,43,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,7,0,0,0,2,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,34,55,15,67,69,72,-1,-1,1,-1,1,15,15,15,15,15,15,15,15,49,7,17,17,17,17,17,17,17,17,18,18,18,18,18,18,18,18,-1,31,-1,-1,25,25,-1,25,25,26,26,46,26,26,46,46,73,-1,15,73,73,-1,-1,-1,15,31,-1,25,-1,25,31,-1,26,-1,46,-1,15,-1,31,73,15,-1,15,25,25,25,25,25,25,25,25,-1,-1,-1,-1,-1,-1,-1,25,29,29,29,29,29,29,29,29,30,30,30,30,30,30,30,30,41,41,41,41,41,41,41,41,-1,-1,-1,-1,25,-1,-1,-1,-1,25,25,0,-1,-1,25,2,-1,-1,-1,-1,-1,1,25,3,-1,39,25,-1,25,44,25,31,-1,31,39,39,39,39,39,39,39,39,-1,-1,34,42,42,42,42,42,42,42,42,44,-1,-1,-1,-1,44,68,-1,-1,-1,49,7,-1,44,-1,68,68,68,68,68,68,68,68,-1,-1,39,-1,-1,-1,-1,68,39,70,70,70,70,70,70,70,70,-1,-1,-1,39,-1,-1,-1,39,-1,39,71,71,71,71,71,71,71,71,-1,68,-1,-1,-1,-1,68,68,-1,-1,-1,68,-1,-1,-1,-1,-1,-1,-1,68,-1,-1,-1,68,-1,68,-1,68,58,-1,-1,44,-1,44,-1,-1,-1,58,58,58,58,58,58,58,58,58,58,-1,-1,-1,-1,-1,-1,31,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,-1,-1,-1,-1,58,-1,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,58,66,-1,-1,-1,-1,-1,-1,-1,-1,66,66,66,66,66,66,66,66,66,66,-1,-1,-1,-1,-1,-1,-1,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,44,-1,-1,-1,66,-1,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,66,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,-1};
-int lexmain_rec<`a>(Lexbuf<`a> lexbuf, int lexstate) {
+int lexmain_rec(Lexbuf<`a> lexbuf, int lexstate) {
   if (lt == null) lt = &lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);
   lexstate = lex_engine((LexTables)lt,lexstate,lexbuf);
   switch (lexstate) {
@@ -149,7 +153,7 @@ case 1:
 case 2: 
 #line 132 "lexer.cyl"
          comment_depth = 1;
-         handle_lexical_error(comment<>,lexbuf); 
+         handle_lexical_error(comment,lexbuf); 
          return lexmain(lexbuf); 
 case 3: 
 #line 136 "lexer.cyl"
@@ -164,7 +168,7 @@ case 3:
 case 4: 
 #line 144 "lexer.cyl"
         reset_string_buffer();
-        handle_lexical_error(strng<>, lexbuf);
+        handle_lexical_error(strng, lexbuf);
 	token_string = get_stored_string();
 	return TSTRING;
       
@@ -187,7 +191,7 @@ case 8:
      int l1 = line_num;
      int s1 = line_start_pos;
      brace_depth = 1;
-     int n2 = handle_lexical_error(action<>,lexbuf);
+     int n2 = handle_lexical_error(action,lexbuf);
      token_action = &Syntax::Location(n1,n2,l1,n1-s1);
      return TACTION;
    
@@ -238,8 +242,8 @@ case 22:
   }
  throw Error("some action didn't return!");
 }
-int lexmain<`a>(Lexbuf<`a> lexbuf) { return lexmain_rec(lexbuf,0); }
-int action_rec<`a>(Lexbuf<`a> lexbuf, int lexstate) {
+int lexmain(Lexbuf<`a> lexbuf) { return lexmain_rec(lexbuf,0); }
+int action_rec(Lexbuf<`a> lexbuf, int lexstate) {
   if (lt == null) lt = &lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);
   lexstate = lex_engine((LexTables)lt,lexstate,lexbuf);
   switch (lexstate) {
@@ -292,8 +296,8 @@ case 10:
   }
  throw Error("some action didn't return!");
 }
-int action<`a>(Lexbuf<`a> lexbuf) { return action_rec(lexbuf,1); }
-int strng_rec<`a>(Lexbuf<`a> lexbuf, int lexstate) {
+int action(Lexbuf<`a> lexbuf) { return action_rec(lexbuf,1); }
+int strng_rec(Lexbuf<`a> lexbuf, int lexstate) {
   if (lt == null) lt = &lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);
   lexstate = lex_engine((LexTables)lt,lexstate,lexbuf);
   switch (lexstate) {
@@ -331,8 +335,8 @@ case 6:
   }
  throw Error("some action didn't return!");
 }
-int strng<`a>(Lexbuf<`a> lexbuf) { return strng_rec(lexbuf,2); }
-int comment_rec<`a>(Lexbuf<`a> lexbuf, int lexstate) {
+int strng(Lexbuf<`a> lexbuf) { return strng_rec(lexbuf,2); }
+int comment_rec(Lexbuf<`a> lexbuf, int lexstate) {
   if (lt == null) lt = &lex_tables(lbase, lbacktrk, ldefault, ltrans, lcheck);
   lexstate = lex_engine((LexTables)lt,lexstate,lexbuf);
   switch (lexstate) {
@@ -377,7 +381,7 @@ case 9:
   }
  throw Error("some action didn't return!");
 }
-int comment<`a>(Lexbuf<`a> lexbuf) { return comment_rec(lexbuf,3); }
+int comment(Lexbuf<`a> lexbuf) { return comment_rec(lexbuf,3); }
 
 }
 #line 255 "lexer.cyl"

@@ -9,14 +9,13 @@ include ../Makefile.inc
 # an absolute path)
 CYCC:=../bin/$(CYCCOMP)
 
-#CYCLEX:=../bin/cyclex.exe
 CYCLEX:=../bin/cyclex.exe
 CYCBISON:=../bin/cycbison.exe
 
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
 
-CFLAGS:= -fwritable-strings -I.. 
+CFLAGS:= -fwritable-strings -g -I.. 
 #CFLAGS:=-pg -fwritable-strings -I.. 
 #CFLAGS:=-O -fwritable-strings -I.. 
 

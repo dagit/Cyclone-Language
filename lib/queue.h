@@ -13,36 +13,37 @@ namespace Queue {
 //           following the conventions of the Ocaml queue library as much
 //           as possible.  
 
-extern struct queue<`a>;
-typedef struct queue<`a> @Queue<`a>;
+extern struct Queue<`a,`r::R>;
+typedef struct Queue<`a,`r> @gqueue_t<`a,`r>;
+typedef struct Queue<`a,`H> @queue_t<`a>;
 
 // true when the queue is empty
-extern bool is_empty<`a>(Queue<`a>);
+extern bool is_empty(gqueue_t<`a,`r>);
 
 // raised by queue_take and queue_peek
 extern xenum exn { Empty };
 
 // create a new queue
-extern Queue<`a> create<`a>();
+extern queue_t<`a> create();
 
 // insert an element into the rear of the queue (side effect)
-extern void add<`a>(Queue<`a>,`a x);
+extern void add(queue_t<`a>,`a x);
 
 // get and remove an element from the front of the queue (side effect)
-extern `a take<`a>(Queue<`a>);
+extern `a take(gqueue_t<`a,`r>);
 
 // return the first element in the queue without removing it
-extern `a peek<`a>(Queue<`a>);
+extern `a peek(gqueue_t<`a,`r>);
 
 // clear out the entire queue (side effect)
-extern void clear<`a>(Queue<`a>);
+extern void clear(gqueue_t<`a,`r>);
 
 // return the number of lements in the queue
-extern int length<`a>(Queue<`a>);
+extern int length(gqueue_t<`a,`r>);
 
 // apply f to each element in the queue from the front to the back
-extern void iter<`a>(void f(`a), Queue<`a>);
-extern void app<`a,`b>(`b f(`a), Queue<`a>);
+extern void iter(void f(`a), gqueue_t<`a,`r>);
+extern void app(`b f(`a), gqueue_t<`a,`r>);
 
 }
 

@@ -20,19 +20,18 @@ namespace Core {
 extern string get_env(string);
 extern string ?std_args();
 struct Opt<`a> { `a v; };
-typedef struct Opt<`a> *Opt_t<`a>;
-extern Opt_t<`b> opt_map<`a,`b>(`b f(`a), Opt_t<`a> x);
+typedef struct Opt<`a> *opt_t<`a>;
+extern opt_t<`b> opt_map(`b f(`a), opt_t<`a> x);
 extern string new_string(int);
-extern bool true_f<`a>(`a);
-extern bool false_f<`a>(`a);
-extern `a fst<`a,`b>($(`a,`b)@);
-extern `b snd<`a,`b>($(`a,`b)@);
-extern `c third<`a,`b,`c>($(`a,`b,`c)@);
-extern `a identity<`a>(`a);
+extern bool true_f(`a);
+extern bool false_f(`a);
+extern `a fst($(`a,`b)@);
+extern `b snd($(`a,`b)@);
+extern `c third($(`a,`b,`c)@);
+extern `a identity(`a);
 extern int intcmp(int,int);
 extern int charcmp(char,char);
-// fairly useless until we can give `a a memory kind
-extern int ptrcmp<`a>(`a @, `a @); 
+extern int ptrcmp(`a::M @ `r, `a::M @ `r); 
 extern xenum exn { InvalidArg(string) };
 extern xenum exn { Failure(string) };
 extern xenum exn { Impossible(string) };

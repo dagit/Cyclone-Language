@@ -1,6 +1,8 @@
 #ifndef _SPLAY_H_
 #define _SPLAY_H_
 
+// TO DO:  add region support
+
 #include "core.h"
 #include "list.h"
 
@@ -24,7 +26,7 @@ struct node<`a,`b> {
   enum tree<`a,`b> right;
 };
 
-extern bool splay<`a,`b>(int f(`a,`a), `a, enum tree<`a,`b>);
+extern bool splay(int f(`a,`a), `a, enum tree<`a,`b>);
 
 }
 #endif

@@ -68,6 +68,7 @@ namespace Absyn {
   extern enum Constraint<`a>;
   extern enum Bounds;
   extern struct PtrInfo;
+  extern struct FnInfo;
   extern enum Typ;
   extern enum Funcparams;
   extern enum Type_modifier;
@@ -104,6 +105,7 @@ namespace Absyn {
   typedef enum Constraint<`a> constraint_t<`a>;
   typedef enum Bounds bounds_t;
   typedef struct PtrInfo ptr_info_t;
+  typedef struct FnInfo fn_info_t;
   typedef enum Typ typ;
   typedef enum Funcparams funcparams_t;
   typedef enum Type_modifier type_modifier;
@@ -132,32 +134,20 @@ namespace Absyn {
 
   EXTERN_DEFINITION enum Nmspace {
     Loc_n,                  // Local name
-    Rel_n(List::list<var>), // Relative name
-    Abs_n(List::list<var>)  // Absolute name
+    Rel_n(list_t<var>),     // Relative name
+    Abs_n(list_t<var>)      // Absolute name
   };
   EXTERN_DEFINITION enum Scope { Static, Abstract, Public, Extern, ExternC };
   EXTERN_DEFINITION struct Tqual { 
     bool q_const; bool q_volatile; bool q_restrict; 
   };
   EXTERN_DEFINITION enum Size_of { B1, B2, B4, B8 };
-  // Note: RgnKind is incomparable to any other kind.
-  // Note: Perhaps unpackable should be the default since existentials are
-  //       rare??
-  // FIX: There is no way to create tyvars of unpackable kinds in the 
-  //      concrete syntax.
-  // FIX: There is no concrete syntax for abstract types take a type of
-  //      some kind other than BoxPKind (which should remain the default).
-  // FIX: There's no reason data types couldn't be packable polymorphic,
-  //      but it's not at all clear what sane syntax would look like.
-  //      Until then, you won't be able to create a list of region handles.
-  // FIX: Is there any reason to distinguish Reg and Mem so long as we're
-  //      translating to C which allows mem assignment and param passing?
+
   EXTERN_DEFINITION enum Kind { 
-    MemUKind,
-    BoxUKind,
-    MemPKind,
-    BoxPKind,
-    RgnKind,
+    MemKind,       // kind of all types
+    BoxKind,       // types whose values go in a gp register
+    RgnKind,       // regions
+    EffKind,       // effects
     UnresolvedKind
   };
   EXTERN_DEFINITION enum Sign { Signed, Unsigned };
@@ -179,6 +169,14 @@ namespace Absyn {
     conref<bounds_t> bounds;    // legal bounds for pointer indexing
   };
 
+  EXTERN_DEFINITION struct FnInfo {
+    list_t<tvar>                     tvars;
+    opt_t<typ>                     effect; // null => default effect
+    typ                            ret_typ;
+    list_t<$(opt_t<var>,tqual,typ)@> args;
+    bool                           varargs;
+  };
+
   // Note: The last fields of EnumType, XenumType, StructType and TypedefType
   // are all set by check_valid_type which most of the compiler assumes
   // has been called.  Doing so avoids the need for some code to have and use
@@ -192,28 +190,32 @@ namespace Absyn {
   //      For example, the last field of TypedefType
   // FIX: May want to make this raw_typ and store the kinds with the types.
   EXTERN_DEFINITION enum Typ {
-    VoidType;
-    Evar(kind_t,Opt_t<typ>,int);
-    VarType(tvar); // kind induced by tvar
-    EnumType(typedef_name_opt_t,list<typ>,enumdecl *);
-    XenumType(typedef_name_t,xenumdecl *);
-    PointerType(ptr_info_t);
-    IntType(sign,size_of_t);
-    FloatType;
-    DoubleType;
-    ArrayType(typ/* element typ*/,tqual,exp /* size */);
-    FnType(list<tvar>,typ,list<$(Opt_t<var>,tqual,typ)@>,bool);
-    TupleType(list<$(tqual,typ)@>);
-    StructType(typedef_name_opt_t,list<typ>,structdecl *);
-    TypedefType(typedef_name_t,list<typ>,Opt_t<typ>);
-    HeapRgnType; // has RgnKind
-    RgnHandleType(typ);//singleton for deep alloc, has BoxUKind, typ has RgnKind
-    UnionType;
+    VoidType;                                              // MemKind
+    Evar(kind_t,opt_t<typ>,int); 
+    VarType(tvar);                            // kind induced by tvar
+    EnumType(typedef_name_opt_t,list_t<typ>,enumdecl *);     // BoxKind
+    XenumType(typedef_name_t,xenumdecl *);                 // BoxKind
+    PointerType(ptr_info_t);            // BoxKind when not Unknown_b
+    IntType(sign,size_of_t);                     // MemKind unless B4
+    FloatType;                                             // MemKind
+    DoubleType;                                            // MemKind
+    ArrayType(typ/* element typ*/,tqual,exp /* size */);   // MemKind
+    FnType(fn_info_t);                                     // MemKind
+    TupleType(list_t<$(tqual,typ)@>); // MemKind
+    StructType(typedef_name_opt_t,list_t<typ>,structdecl *); // MemKind
+    UnionType;                    // MemKind -- currently unsupported
+    RgnHandleType(typ);                             // BoxKind -- mem?  
+    // An abbreviation -- the opt_t<typ> contains the definition if any
+    TypedefType(typedef_name_t,list_t<typ>,opt_t<typ>);
+    HeapRgn;                                              // RgnKind
+    AccessEff(typ);                            // RgnKind -> EffKind
+    JoinEff(list_t<typ>);                   // EffKind list -> EffKind
   };
 
   EXTERN_DEFINITION enum Funcparams {
-    NoTypes(list<var>,seg_t);
-    WithTypes(list<$(Opt_t<var>,tqual,typ)@>,bool);
+    NoTypes(list_t<var>,seg_t);
+    // bool is true when varargs, opt_t<typ> is effect
+    WithTypes(list_t<$(opt_t<var>,tqual,typ)@>,bool,opt_t<typ>); 
   };
 
   EXTERN_DEFINITION enum Pointer_Sort {
@@ -228,7 +230,7 @@ namespace Absyn {
     // for Pointer_mod, the typ has RgnKind, default is RgnType(HeapRgn)
     Pointer_mod(enum Pointer_Sort,typ,tqual); 
     Function_mod(funcparams_t);
-    TypeParams_mod(list<tvar>,seg_t);
+    TypeParams_mod(list_t<tvar>,seg_t,bool); // when bool is true, print kinds
   };
 
   EXTERN_DEFINITION enum Cnst {
@@ -253,16 +255,16 @@ namespace Absyn {
     Const_e(cnst_t);
     Var_e(qvar,binding_t); 
     UnknownId_e(qvar);
-    Primop_e(primop,list<exp>);
-    AssignOp_e(exp,Opt_t<primop>,exp);
+    Primop_e(primop,list_t<exp>);
+    AssignOp_e(exp,opt_t<primop>,exp);
     Increment_e(exp,incrementor_t);
     Conditional_e(exp,exp,exp);
     SeqExp_e(exp,exp);
-    UnknownCall_e(exp,list<exp>);
-    FnCall_e(exp,list<exp>);
+    UnknownCall_e(exp,list_t<exp>);
+    FnCall_e(exp,list_t<exp>);
     Throw_e(exp);
     NoInstantiate_e(exp);
-    Instantiate_e(exp,Opt_t<list<typ>>);
+    Instantiate_e(exp,opt_t<list_t<typ>>);
     Cast_e(typ,exp);
     Address_e(exp);
     Sizeof_e(typ);
@@ -270,22 +272,22 @@ namespace Absyn {
     StructMember_e(exp,field_name);
     StructArrow_e(exp,field_name);
     Subscript_e(exp,exp);
-    Tuple_e(list<exp>);
-    CompoundLit_e($(Opt_t<var>,tqual,typ)@,list<$(list<designator>,exp)@>);
-    Array_e(bool,list<$(list<designator>,exp)@>);//true == came with "new"
+    Tuple_e(list_t<exp>);
+    CompoundLit_e($(opt_t<var>,tqual,typ)@,list_t<$(list_t<designator>,exp)@>);
+    Array_e(bool,list_t<$(list_t<designator>,exp)@>);//true == came with "new"
     Comprehension_e(vardecl,exp,exp); // much of vardecl is known
-    Struct_e(typedef_name_t,Opt_t<list<typ>>,list<$(list<designator>,exp)@>,
+    Struct_e(typedef_name_t,opt_t<list_t<typ>>,list_t<$(list_t<designator>,exp)@>,
 	     struct Structdecl *);
-    Enum_e(Opt_t<list<typ>>,Opt_t<list<typ>>,list<exp>,enumdecl,enumfield);
-    Xenum_e(Opt_t<list<typ>>,list<exp>,xenumdecl,enumfield);
-    UnresolvedMem_e(Opt_t<typedef_name_t>,list<$(list<designator>,exp)@>);
+    Enum_e(opt_t<list_t<typ>>,opt_t<list_t<typ>>,list_t<exp>,enumdecl,enumfield);
+    Xenum_e(opt_t<list_t<typ>>,list_t<exp>,xenumdecl,enumfield);
+    UnresolvedMem_e(opt_t<typedef_name_t>,list_t<$(list_t<designator>,exp)@>);
     StmtExp_e(stmt);
     Codegen_e(fndecl);
     Fill_e(exp);
   };
 
   EXTERN_DEFINITION struct Exp {
-    Opt_t<typ> topt;
+    opt_t<typ> topt;
     raw_exp_t  r;
     seg_t      loc;
   };
@@ -304,20 +306,20 @@ namespace Absyn {
     Continue_s(stmt_opt); // stmt is dest, set by type-checking
     Goto_s(var,stmt_opt); // stmt is dest, set by type-checking
     For_s(exp,$(exp,stmt),$(exp,stmt),stmt); 
-    Switch_s(exp,list<switch_clause>); 
-    Fallthru_s(list<exp>,stmt_opt); // stmt is dest, set by type-checking
+    Switch_s(exp,list_t<switch_clause>); 
+    Fallthru_s(list_t<exp>,stmt_opt); // stmt is dest, set by type-checking
     Decl_s(decl,stmt);
     Cut_s(stmt);
     Splice_s(stmt);
     Label_s(var,stmt); 
     Do_s(stmt,$(exp,stmt));
-    TryCatch_s(stmt,list<switch_clause>);
+    TryCatch_s(stmt,list_t<switch_clause>);
   };
 
   EXTERN_DEFINITION struct Stmt {
     raw_stmt_t   r;
     seg_t        loc;
-    list<stmt>   non_local_preds; // set by type-checking
+    list_t<stmt>   non_local_preds; // set by type-checking
     stmt_annot_t annot;
   };
 
@@ -328,30 +330,30 @@ namespace Absyn {
     Int_p(sign,int);
     Char_p(char);
     Float_p(string);
-    Tuple_p(list<pat>);
+    Tuple_p(list_t<pat>);
     Pointer_p(pat);
     Reference_p(vardecl); // only name field is right until tcpat is called
-    Struct_p(structdecl,Opt_t<list<typ>>,list<tvar>,
-	     list<$(list<designator>,pat)@>);
-    Enum_p(qvar,Opt_t<list<typ>>,list<tvar>,list<pat>,enumdecl,enumfield);
-    Xenum_p(qvar,list<tvar>,list<pat>,xenumdecl,enumfield);
+    Struct_p(structdecl,opt_t<list_t<typ>>,list_t<tvar>,
+	     list_t<$(list_t<designator>,pat)@>);
+    Enum_p(qvar,opt_t<list_t<typ>>,list_t<tvar>,list_t<pat>,enumdecl,enumfield);
+    Xenum_p(qvar,list_t<tvar>,list_t<pat>,xenumdecl,enumfield);
     UnknownId_p(qvar);
-    UnknownCall_p(qvar,list<tvar>,list<pat>);
-    UnknownFields_p(qvar,list<tvar>,list<$(list<designator>,pat)@>);
+    UnknownCall_p(qvar,list_t<tvar>,list_t<pat>);
+    UnknownFields_p(qvar,list_t<tvar>,list_t<$(list_t<designator>,pat)@>);
   };
 
   EXTERN_DEFINITION struct Pat {
     raw_pat_t   r;
-    Opt_t<typ>  topt;
+    opt_t<typ>  topt;
     seg_t       loc;
   };
 
   EXTERN_DEFINITION struct Switch_clause {
-    pat                  pattern;
-    Opt_t<list<vardecl>> pat_vars; // set by type-checker, used downstream
-    exp_opt              where_clause;
-    stmt                 body;
-    seg_t                loc;
+    pat               pattern;
+    opt_t<list_t<vardecl>> pat_vars; // set by type-checker, used downstream
+    exp_opt           where_clause;
+    stmt              body;
+    seg_t             loc;
   };
 
   // only local and pat cases need to worry about shadowing
@@ -370,54 +372,56 @@ namespace Absyn {
     tqual      tq;
     typ        type;
     exp_opt    initializer; // ignored for pattern variables
-    int        shadow; // FIX: NOT USED PROPERLY RIGHT NOW!!!
-    int        block;  
+    int        shadow;      // FIX: NOT USED PROPERLY RIGHT NOW!!!
+    opt_t<typ> region;      // filled in by type-checker
   };
 
   EXTERN_DEFINITION struct Fndecl {
     scope                   sc;
     bool                    is_inline;
     qvar                    name;
-    list<tvar>              tvs;
+    list_t<tvar>              tvs; 
+    opt_t<typ>              effect; // null => default effect
     typ                     ret_type;
-    list<$(var,tqual,typ)@> args;
+    list_t<$(var,tqual,typ)@> args;
     bool                    varargs;
     stmt                    body;
+    opt_t<typ>              cached_typ; // cached type of the function
   };
 
   // for structs and enums, we should really memoize the string to 
   // field-number mapping!
   EXTERN_DEFINITION struct Structdecl {
     scope                                 sc;
-    Opt_t<typedef_name_t>                 name;
-    list<tvar>                            tvs;
-    Opt_t<list<$(field_name,tqual,typ)@>> fields;
+    opt_t<typedef_name_t>                 name;
+    list_t<tvar>                            tvs;
+    opt_t<list_t<$(field_name,tqual,typ)@>> fields;
   };
 
   EXTERN_DEFINITION struct Enumfield {
     qvar                name;
     exp_opt             tag;
-    list<tvar>          tvs;
-    list<$(tqual,typ)@> typs;
+    list_t<tvar>          tvs;
+    list_t<$(tqual,typ)@> typs;
     seg_t               loc;
   };
 
   EXTERN_DEFINITION struct Enumdecl {
     scope                  sc;
-    Opt_t<typedef_name_t>  name;
-    list<tvar>             tvs;
-    Opt_t<list<enumfield>> fields;
+    opt_t<typedef_name_t>  name;
+    list_t<tvar>             tvs;
+    opt_t<list_t<enumfield>> fields;
   };
 
   EXTERN_DEFINITION struct Xenumdecl {
     scope           sc;
     typedef_name_t  name;
-    list<enumfield> fields;
+    list_t<enumfield> fields;
   };
 
   EXTERN_DEFINITION struct Typedefdecl {
     typedef_name_t name;
-    list<tvar>     tvs;
+    list_t<tvar>     tvs;
     typ            defn;
   };
 
@@ -425,18 +429,18 @@ namespace Absyn {
     Var_d(vardecl);
     Fn_d(fndecl);
     Let_d(pat,
-	  Opt_t<list<vardecl>>, // set by type-checker, used downstream
-	  Opt_t<typ>,
-	  exp,
-	  bool); // true => exhaustive
+          opt_t<list_t<vardecl>>, // set by type-checker, used downstream
+          opt_t<typ>,
+          exp,
+          bool); // true => exhaustive
     Struct_d(structdecl);
     Union_d;
     Enum_d(enumdecl);
     Xenum_d(xenumdecl);
     Typedef_d(typedefdecl);
-    Namespace_d(var,list<decl>);
-    Using_d(qvar,list<decl>);
-    ExternC_d(list<decl>);
+    Namespace_d(var,list_t<decl>);
+    Using_d(qvar,list_t<decl>);
+    ExternC_d(list_t<decl>);
   };
 
   EXTERN_DEFINITION struct Decl {
@@ -453,7 +457,7 @@ namespace Absyn {
 
   // compare variables 
   extern int qvar_cmp(qvar, qvar);
-  extern int varlist_cmp(list<var>, list<var>);
+  extern int varlist_cmp(list_t<var>, list_t<var>);
   extern int tvar_cmp(tvar, tvar); // WARNING: ignores the kinds
 
   ///////////////////////// Constructors ////////////////////////////
@@ -461,8 +465,8 @@ namespace Absyn {
   extern tqual empty_tqual();
   
   //////////////////////////// Constraints /////////////////////////
-  extern conref<`a> new_conref<`a>(`a x); 
-  extern conref<`a> empty_conref<`a>();
+  extern conref<`a> new_conref(`a x); 
+  extern conref<`a> empty_conref();
 
   ////////////////////////////// Types //////////////////////////////
   // return a fresh type variable of the given kind 
@@ -511,7 +515,7 @@ namespace Absyn {
   extern exp var_exp(qvar, seg_t);
   extern exp varb_exp(qvar, binding_t, seg_t);
   extern exp unknownid_exp(qvar, seg_t);
-  extern exp primop_exp(primop, list<exp> es, seg_t);
+  extern exp primop_exp(primop, list_t<exp> es, seg_t);
   extern exp prim1_exp(primop, exp, seg_t);
   extern exp prim2_exp(primop, exp, exp, seg_t);
   extern exp add_exp(exp, exp, seg_t);
@@ -524,7 +528,7 @@ namespace Absyn {
   extern exp lt_exp(exp, exp, seg_t);
   extern exp gte_exp(exp, exp, seg_t);
   extern exp lte_exp(exp, exp, seg_t);
-  extern exp assignop_exp(exp, Opt_t<primop>, exp, seg_t);
+  extern exp assignop_exp(exp, opt_t<primop>, exp, seg_t);
   extern exp assign_exp(exp, exp, seg_t);
   extern exp post_inc_exp(exp, seg_t);
   extern exp post_dec_exp(exp, seg_t);
@@ -534,11 +538,11 @@ namespace Absyn {
   extern exp and_exp(exp, exp, seg_t); // &&
   extern exp or_exp(exp, exp, seg_t);  // ||
   extern exp seq_exp(exp, exp, seg_t);
-  extern exp unknowncall_exp(exp, list<exp>, seg_t);
-  extern exp fncall_exp(exp, list<exp>, seg_t);
+  extern exp unknowncall_exp(exp, list_t<exp>, seg_t);
+  extern exp fncall_exp(exp, list_t<exp>, seg_t);
   extern exp throw_exp(exp, seg_t);
   extern exp noinstantiate_exp(exp, seg_t);
-  extern exp instantiate_exp(exp, Opt_t<list<typ>>, seg_t);
+  extern exp instantiate_exp(exp, opt_t<list_t<typ>>, seg_t);
   extern exp cast_exp(typ, exp, seg_t);
   extern exp address_exp(exp, seg_t);
   extern exp sizeof_exp(typ t, seg_t);
@@ -546,33 +550,33 @@ namespace Absyn {
   extern exp structmember_exp(exp, field_name, seg_t);
   extern exp structarrow_exp(exp, field_name, seg_t);
   extern exp subscript_exp(exp, exp, seg_t);
-  extern exp tuple_exp(list<exp>, seg_t);
+  extern exp tuple_exp(list_t<exp>, seg_t);
   extern exp stmt_exp(stmt, seg_t);
   extern exp null_pointer_exn_exp(seg_t);
-  extern exp array_exp(bool heap_allocate, list<exp>, seg_t);
-  extern exp unresolvedmem_exp(Opt_t<typedef_name_t>,
-			       list<$(list<designator>,exp)@>,seg_t);
+  extern exp array_exp(bool heap_allocate, list_t<exp>, seg_t);
+  extern exp unresolvedmem_exp(opt_t<typedef_name_t>,
+			       list_t<$(list_t<designator>,exp)@>,seg_t);
   /////////////////////////// Statements ///////////////////////////////
   extern stmt new_stmt(raw_stmt_t s, seg_t loc);
   extern stmt skip_stmt(seg_t loc);
   extern stmt exp_stmt(exp e, seg_t loc);
   extern stmt seq_stmt(stmt s1, stmt s2, seg_t loc);
-  extern stmt seq_stmts(list<stmt>, seg_t loc);
-  extern stmt return_stmt(exp_opt e, seg_t loc);
-  extern stmt ifthenelse_stmt(exp e,stmt s1,stmt s2, seg_t loc);
-  extern stmt while_stmt(exp e,stmt s, seg_t loc);
+  extern stmt seq_stmts(list_t<stmt>, seg_t loc);
+  extern stmt return_stmt(exp_opt e,seg_t loc);
+  extern stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,seg_t loc);
+  extern stmt while_stmt(exp e,stmt s,seg_t loc);
   extern stmt break_stmt(seg_t loc);
   extern stmt continue_stmt(seg_t loc);
   extern stmt for_stmt(exp e1,exp e2,exp e3,stmt s, seg_t loc);
-  extern stmt switch_stmt(exp e, list<switch_clause>, seg_t loc);
-  extern stmt fallthru_stmt(list<exp> el, seg_t loc);
+  extern stmt switch_stmt(exp e, list_t<switch_clause>, seg_t loc);
+  extern stmt fallthru_stmt(list_t<exp> el, seg_t loc);
   extern stmt decl_stmt(decl d, stmt s, seg_t loc); 
   extern stmt declare_stmt(qvar, typ, exp_opt init, stmt, seg_t loc);
   extern stmt cut_stmt(stmt s, seg_t loc);
   extern stmt splice_stmt(stmt s, seg_t loc);
   extern stmt label_stmt(var v, stmt s, seg_t loc);
   extern stmt do_stmt(stmt s, exp e, seg_t loc);
-  extern stmt trycatch_stmt(stmt s, list<switch_clause> scs, seg_t loc);
+  extern stmt trycatch_stmt(stmt s, list_t<switch_clause> scs, seg_t loc);
   extern stmt goto_stmt(var lab, seg_t loc);
   extern stmt assign_stmt(exp e1, exp e2, seg_t loc);
 
@@ -581,26 +585,27 @@ namespace Absyn {
 
   ////////////////////////// Declarations ///////////////////////////
   extern decl new_decl(raw_decl r, seg_t loc);
-  extern decl let_decl(pat p, Opt_t<typ> t_opt, exp e, seg_t loc);
+  extern decl let_decl(pat p, opt_t<typ> t_opt, exp e, seg_t loc);
   extern vardecl new_vardecl(qvar x, typ t, exp_opt init);
   extern vardecl static_vardecl(qvar x, typ t, exp_opt init);
-  extern decl struct_decl(scope s,Opt_t<typedef_name_t> n,list<tvar> ts,
-			  Opt_t<list<$(field_name,tqual,typ)@>> fs,
+  extern decl struct_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
+			  opt_t<list_t<$(field_name,tqual,typ)@>> fs,
 			  seg_t loc);
-  extern decl enum_decl(scope s,Opt_t<typedef_name_t> n,list<tvar> ts,
-			Opt_t<list<enumfield>> fs,seg_t loc);
-  extern decl xenum_decl(scope s,typedef_name_t n,list<enumfield> fs,
+  extern decl enum_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
+			opt_t<list_t<enumfield>> fs,seg_t loc);
+  extern decl xenum_decl(scope s,typedef_name_t n,list_t<enumfield> fs,
 			 seg_t loc);
 
   // return true if p is printf, sprintf, fprintf, scanf, fscanf, sscanf
   extern bool is_format_prim(primop p);
 
-  extern typ function_typ(list<tvar>,typ,list<$(Opt_t<var>,tqual,typ)@>,bool);
+  extern typ function_typ(list_t<tvar> tvs,opt_t<typ> eff_typ,typ ret_typ,
+                          list_t<$(opt_t<var>,tqual,typ)@> args,bool varargs);
   extern typ pointer_expand(typ);
   // extern typ pointer_abbrev(typ);
   extern bool is_lvalue(exp);
 
   extern $(field_name,tqual,typ) * lookup_struct_field(structdecl,var);
-  extern $(tqual,typ) * lookup_tuple_field(list<$(tqual,typ)@>,int);
+  extern $(tqual,typ) * lookup_tuple_field(list_t<$(tqual,typ)@>,int);
 }
 #endif

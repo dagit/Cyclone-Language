@@ -10,7 +10,7 @@ using Absyn;
 using Position;
 
 extern unsigned int eval_const_uint_exp(exp e);
-extern unsigned int szof(typ t, segment loc);
+extern unsigned int szof(typ t, seg_t loc);
 
 }
 #endif

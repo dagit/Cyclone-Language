@@ -2,11 +2,11 @@
 
 namespace Ref;
 
-ref<`a> new_ref<`a>(`a x) {
-  return &Reference{.v = x};
+ref_t<`a> new_ref(`a x) {
+  return &Ref{.v = x};
 }
 
-`a get<`a>(ref<`a> r) { return r->v; }
+`a get(ref_t<`a> r) { return r->v; }
 
-void set<`a>(ref<`a> r,`a x) { r->v = x; }
+void set(ref_t<`a> r,`a x) { r->v = x; }
 

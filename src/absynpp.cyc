@@ -19,36 +19,39 @@ using List;
 using Tcutil;
 
 // forward references
-extern Doc egroup(string start, string stop, string sep, list<Doc> ss);
-extern Doc cat12(Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc);
-extern Doc cat11(Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc);
-extern Doc cat10(Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc);
-extern Doc cat9(Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc);
-extern Doc cat8(Doc,Doc,Doc,Doc,Doc,Doc,Doc,Doc);
-extern Doc cat7(Doc,Doc,Doc,Doc,Doc,Doc,Doc);
-extern Doc cat6(Doc,Doc,Doc,Doc,Doc,Doc);
-extern Doc cat5(Doc,Doc,Doc,Doc,Doc);
-extern Doc cat4(Doc,Doc,Doc,Doc);
-extern Doc cat3(Doc,Doc,Doc);
-extern Doc cat2(Doc,Doc);
-extern Doc dp2doc($(list<designator>,pat)@ dp);
-extern Doc switchclauses2doc(list<switch_clause> cs);
-extern Doc typ2doc(typ);
-extern Doc structfields2doc(list<$(field_name,tqual,typ)@> fields);
-extern Doc scope2doc(scope);
-extern Doc stmt2doc(stmt);
-extern Doc exp2doc(exp);
-extern Doc exp2doc_prec(int inprec, exp e);
-extern Doc exps2doc_prec(int inprec, list<exp> es);
-extern Doc qvar2doc(qvar);
-extern Doc cnst2doc(cnst_t);
-extern Doc prim2doc(primop);
-extern Doc primapp2doc(int inprec, primop p,list<exp> es);
-extern Doc de2doc($(list<designator>,exp)@ de);
-extern Doc tqtd2doc(tqual tq, typ t, Opt_t<Doc> dopt);
-extern Doc funargs2doc(list<$(Opt_t<var>,tqual,typ)@> args,bool varargs);
-extern Doc enumfields2doc(list<enumfield> fields);
-
+extern doc_t egroup(string start, string stop, string sep, list_t<doc_t> ss);
+extern doc_t cat12(doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,
+                   doc_t,doc_t,doc_t);
+extern doc_t cat11(doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,
+                   doc_t,doc_t);
+extern doc_t cat10(doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,
+                   doc_t);
+extern doc_t cat9(doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t);
+extern doc_t cat8(doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t);
+extern doc_t cat7(doc_t,doc_t,doc_t,doc_t,doc_t,doc_t,doc_t);
+extern doc_t cat6(doc_t,doc_t,doc_t,doc_t,doc_t,doc_t);
+extern doc_t cat5(doc_t,doc_t,doc_t,doc_t,doc_t);
+extern doc_t cat4(doc_t,doc_t,doc_t,doc_t);
+extern doc_t cat3(doc_t,doc_t,doc_t);
+extern doc_t cat2(doc_t,doc_t);
+extern doc_t dp2doc($(list_t<designator>,pat)@ dp);
+extern doc_t switchclauses2doc(list_t<switch_clause> cs);
+extern doc_t typ2doc(typ);
+extern doc_t structfields2doc(list_t<$(field_name,tqual,typ)@> fields);
+extern doc_t scope2doc(scope);
+extern doc_t stmt2doc(stmt);
+extern doc_t exp2doc(exp);
+extern doc_t exp2doc_prec(int inprec, exp e);
+extern doc_t exps2doc_prec(int inprec, list_t<exp> es);
+extern doc_t qvar2doc(qvar);
+extern doc_t cnst2doc(cnst_t);
+extern doc_t prim2doc(primop);
+extern doc_t primapp2doc(int inprec, primop p,list_t<exp> es);
+extern doc_t de2doc($(list_t<designator>,exp)@ de);
+extern doc_t tqtd2doc(tqual tq, typ t, opt_t<doc_t> dopt);
+extern doc_t funargs2doc(list_t<$(opt_t<var>,tqual,typ)@> args,
+                       bool varargs,opt_t<typ> effopt);
+extern doc_t enumfields2doc(list_t<enumfield> fields);
 
 // Flag controlling whether typedefs are expanded during printing
 bool expand_typedefs = false;
@@ -147,8 +150,7 @@ string string_escape(string s) {
   return t;
 }
 
-static Doc textptr(stringptr s) { return text(*s); }
-
+static doc_t textptr(stringptr s) { return text(*s); }
 static string restrict_string = "restrict";
 static string volatile_string = "volatile";
 static string const_string = "const";
@@ -156,65 +158,77 @@ static stringptr restrict_sp = &restrict_string;
 static stringptr volatile_sp = &volatile_string;
 static stringptr const_sp = &const_string;
 
-Doc tqual2doc(tqual tq) {
-  list<stringptr> l = null;
+doc_t tqual2doc(tqual tq) {
+  list_t<stringptr> l = null;
 
-  if (tq->q_restrict) l = &cons(restrict_sp,l);
-  if (tq->q_volatile) l = &cons(volatile_sp,l);
-  if (tq->q_const)    l = &cons(const_sp,l);
+  if (tq->q_restrict) l = &List(restrict_sp,l);
+  if (tq->q_volatile) l = &List(volatile_sp,l);
+  if (tq->q_const)    l = &List(const_sp,l);
   return egroup(""," "," ",List::map(textptr,l));
 }
 
-Doc kind2doc(kind_t k) {
+string kind2string(kind_t k) {
   switch (k) {
-  case MemUKind: return text("mu");
-  case BoxUKind: return text("bu");
-  case MemPKind: return text("mp");
-  case BoxPKind: return text("bp");
-  case RgnKind:  return text("rgn");
-  case UnresolvedKind: return text("U");
+  case MemKind: return "M";
+  case BoxKind: return "B";
+  case RgnKind: return "R";
+  case EffKind: return "E";
+  case UnresolvedKind: return "?";
   }
 }
 
-Doc group(string start, string stop, string sep, list<Doc> ss) {
+doc_t kind2doc(kind_t k) { return text(kind2string(k)); }
+
+doc_t group(string start, string stop, string sep, list_t<doc_t> ss) {
   return cat3(text(start),
               seq(sep,ss),
               text(stop));
 }
 
-/* Like group but return the empty doc if the list is empty */
-Doc egroup(string start, string stop, string sep, list<Doc> ss) {
+// Like group but return the empty doc if the list is empty 
+doc_t egroup(string start, string stop, string sep, list_t<doc_t> ss) {
   if (ss==null) return nil_doc();
   else return cat3(text(start),
                    seq(sep,ss),
                    text(stop));
 }
 
-Doc groupl(string start, string stop, string sep, list<Doc> ss) {
+doc_t groupl(string start, string stop, string sep, list_t<doc_t> ss) {
   return cat3(text(start),
               seql(sep,ss),
               text(stop));
 }
 
 
-Doc tps2doc(list<typ> ts) {
+doc_t tps2doc(list_t<typ> ts) {
   return egroup("<",">",",",List::map(typ2doc,ts));
 }
 
-// FIX: may want explicit kinds
-Doc tvars2doc(list<tvar> tvs) {
+doc_t tvars2doc(list_t<tvar> tvs) {
   return egroup("<",">",",",List::map(textptr,List::map(fst,tvs)));
 }
 
-Doc arg2doc($(tqual,typ)@ t) {
+doc_t ktvar2doc(tvar tv) {
+  let $(n,k) = *tv;
+  switch (k) {
+  case BoxKind: return textptr(n);
+  default: return cat3(textptr(n), text("::"), kind2doc(k));
+  }
+}
+
+doc_t kinded_tvars2doc(list_t<tvar> tvs) {
+  return egroup("<",">",",",List::map(ktvar2doc,tvs));
+}
+
+doc_t arg2doc($(tqual,typ)@ t) {
   return tqtd2doc((*t)[0],(*t)[1],null);
 }
 
-Doc args2doc(list<$(tqual,typ)@> ts) {
+doc_t args2doc(list_t<$(tqual,typ)@> ts) {
   return(group("(",")",",",List::map(arg2doc,ts)));
 }
 
-bool next_is_pointer(list<type_modifier> tms) {
+bool next_is_pointer(list_t<type_modifier> tms) {
   if (tms==null) return false;
   switch (tms->hd) {
   case Pointer_mod(_,_,_): return true;
@@ -222,12 +236,12 @@ bool next_is_pointer(list<type_modifier> tms) {
   }
 }
 
-extern Doc ntyp2doc(typ t);
+extern doc_t ntyp2doc(typ t);
 
-Doc dtms2doc(Doc d,list<type_modifier> tms) {
+doc_t dtms2doc(doc_t d,list_t<type_modifier> tms) {
   if (tms==null) return d;
-  Doc rest = dtms2doc(d,tms->tl);
-  Doc p_rest = cat3(text("("),rest,text(")"));
+  doc_t rest = dtms2doc(d,tms->tl);
+  doc_t p_rest = cat3(text("("),rest,text(")"));
   switch (tms->hd) {
   case Carray_mod:
     if (next_is_pointer(tms->tl)) rest = p_rest;
@@ -238,14 +252,17 @@ Doc dtms2doc(Doc d,list<type_modifier> tms) {
   case Function_mod(args):
     if (next_is_pointer(tms->tl)) rest = p_rest;
     switch (args) {
-    case WithTypes(args2,varargs):
-      return cat2(rest,funargs2doc(args2,varargs));
+    case WithTypes(args2,varargs,effopt):
+      return cat2(rest,funargs2doc(args2,varargs,effopt));
     case NoTypes(sl,loc):
       return cat2(rest,group("(",")",",",List::map(textptr,sl)));
     }
-  case TypeParams_mod(ts,loc):
+  case TypeParams_mod(ts,loc,print_kinds):
     if (next_is_pointer(tms->tl)) rest = p_rest;
-    return cat2(rest, tvars2doc(ts));
+    if (print_kinds) 
+      return cat2(rest, kinded_tvars2doc(ts));
+    else
+      return cat2(rest, tvars2doc(ts));
     // FIX?? What about tq2?
   case Pointer_mod(ps, rgn, tq2):
     _ ptr;
@@ -264,19 +281,55 @@ Doc dtms2doc(Doc d,list<type_modifier> tms) {
       break;
     case TaggedArray_ps: ptr = text("?"); break;
     }
-    let r = ntyp2doc(rgn);
-    return cat3(ptr,r,rest);
+    switch (compress(rgn)) {
+    case HeapRgn: return cat2(ptr,rest);
+    default: return cat3(ptr,ntyp2doc(rgn),rest);
+    }
   }
 }
 
+doc_t rgn2doc(typ t) {
+  switch (compress(t)) {
+  case HeapRgn: return text("`H");
+  default: return ntyp2doc(t);
+  }
+}
+
+static $(list_t<doc_t>, list_t<doc_t>) effects2docs(typ t) {
+  list_t<doc_t> regions = null;
+  list_t<doc_t> effects = null;
+
+  switch (compress(t)) {
+  case AccessEff(r): regions = &List(rgn2doc(r),regions); break;
+  case JoinEff(ts):
+    for (; ts != null; ts = ts->tl) {
+      let $(rs,es) = effects2docs(ts->hd);
+      regions = List::imp_append(rs,regions);
+      effects = List::imp_append(es,effects);
+    }
+    break;
+  default: effects = &List(ntyp2doc(t),effects); break;
+  }
+  return $(regions, effects);
+}
+
+doc_t eff2doc(typ t) {
+  let $(regions, effects) = effects2docs(t);
+  regions = List::imp_rev(regions);
+  effects = List::imp_rev(effects);
+  let doc1 = group("{","}",",",regions);
+  return group("","","+",List::imp_append(effects,&List(doc1,null)));
+}
+    
+
 // Convert a normalized typ to a doc
-Doc ntyp2doc(typ t) {
-  Doc s;
+doc_t ntyp2doc(typ t) {
+  doc_t s;
   switch (t) {
     // The first three cases never turn up in normalized types.
   case ArrayType(_,_,_): return text("[[[array]]]"); //nil_doc();
-  case FnType(_,_,_,_):    return nil_doc();
-  case PointerType(_):     return nil_doc();
+  case FnType(_)       : return nil_doc();
+  case PointerType(_)  : return nil_doc();
     // The remaining cases are possible.
   case VoidType: s = text("void"); break;
   case Evar(k,topt,i):
@@ -297,7 +350,7 @@ Doc ntyp2doc(typ t) {
                tps2doc(ts));
     else
       s = cat3(text("enum "),
-               (n==null)?nil_doc():qvar2doc((qvar)n),
+               qvar2doc((qvar)n),
                tps2doc(ts));
     break;
   case XenumType(n,_):
@@ -346,46 +399,65 @@ Doc ntyp2doc(typ t) {
     s = cat2(qvar2doc(n),tps2doc(ts));
     break;
   case RgnHandleType(t):
-    // FIX! (note an explicit HeapRgnType will be needed)
-    s = text("<<REGION HANDLE UNIMPLEMENTED>>");
-    break;
-  case HeapRgnType:
-    // FIX: May need explicit type in some places
-    s = nil_doc();
+    s = rgn2doc(t);
     break;
   case UnionType:
-    s = text("union {/* unimplemented */}");
+    s = text("union {unimplemented}");
+    break;
+  case HeapRgn:
+    s = rgn2doc(t); 
+    break;
+  case AccessEff(_):
+    s = eff2doc(t);
+    break;
+  case JoinEff(_):
+    s = eff2doc(t);
     break;
   }
   return s;
 }
 
-Doc vo2doc(Opt_t<var> vo) {
+doc_t vo2doc(opt_t<var> vo) {
   return (vo==null)?nil_doc():text(*(vo->v));
 }
 
-Doc funarg2doc($(Opt_t<var>,tqual,typ)@ t) {
-  Opt_t<Doc> dopt = ((*t)[0]==null)?null:&Opt(text(*((*t)[0]->v)));
+doc_t funarg2doc($(opt_t<var>,tqual,typ)@ t) {
+  opt_t<doc_t> dopt = ((*t)[0]==null)?null:&Opt(text(*((*t)[0]->v)));
   return tqtd2doc((*t)[1],(*t)[2],dopt);
 }
 
-Doc funargs2doc(list<$(Opt_t<var>,tqual,typ)@> args,bool varargs) {
-  if (varargs) // Varargs
-    return(group("(",")",",",
-                 List::append(List::map(funarg2doc,args),
-                              &cons(text("..."),null))));
-  else      // Not varargs
-    return(group("(",")",",",List::map(funarg2doc,args)));
+doc_t funargs2doc(list_t<$(opt_t<var>,tqual,typ)@> args,bool varargs,
+                opt_t<typ> effopt) {
+  if (effopt == null) {
+    if (varargs) // Varargs
+      return(group("(",")",",",
+                   List::append(List::map(funarg2doc,args),
+                                &List(text("..."),null))));
+    else      // Not varargs
+      return(group("(",")",",",List::map(funarg2doc,args)));
+  } else {
+    if (varargs)
+      return(group("(",")",";",
+                   &List(group("","",",",
+                               List::append(List::map(funarg2doc,args),
+                                            &List(text("..."),null))),
+                         &List(eff2doc(effopt->v),null))));
+    else 
+      return(group("(",")",";",
+                   &List(group("","",",",
+                               List::map(funarg2doc,args)),
+                         &List(eff2doc(effopt->v),null))));
+  }
 }
 
-$(Opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg) {
-  return &$((Opt_t<var>)&Opt((*arg)[0]), // FIX: can we get rid of the cast?
+$(opt_t<var>,tqual,typ)@ arg_mk_opt($(var,tqual,typ)@ arg) {
+  return &$((opt_t<var>)&Opt((*arg)[0]), // FIX: can we get rid of the cast?
             (*arg)[1],(*arg)[2]);
 }
 
-Doc var2doc(var v) { return text(*v); }
+doc_t var2doc(var v) { return text(*v); }
 
-Doc qvar2doc(qvar q) {
+doc_t qvar2doc(qvar q) {
   let prefix = null;
   switch ((*q)[0]) {
   case Loc_n:       fallthru;
@@ -396,14 +468,14 @@ Doc qvar2doc(qvar q) {
   }
   if (qvar_to_Cids) {
     return text(String::str_sepstr(List::append(prefix,
-						&cons((*q)[1],null)),"_"));
+						&List((*q)[1],null)),"_"));
   } else {
     return cat2(egroup("","::","::",List::map(var2doc,prefix)),
 		var2doc((*q)[1]));
   }
 }
 
-Doc typ2doc(typ t) {
+doc_t typ2doc(typ t) {
   return tqtd2doc(empty_tqual(), t, null);
 }
 
@@ -478,13 +550,13 @@ int exp_prec(exp e) {
   }
 }
 
-Doc exp2doc(exp e) {
+doc_t exp2doc(exp e) {
    return exp2doc_prec(0,e);
 }
 
-Doc exp2doc_prec(int inprec, exp e) {
+doc_t exp2doc_prec(int inprec, exp e) {
   int myprec = exp_prec(e);
-  Doc s;
+  doc_t s;
   switch (e->r) {
   case Const_e(c): s = cnst2doc(c); break;
   case Var_e(x,Local_b(vd)):
@@ -519,15 +591,15 @@ Doc exp2doc_prec(int inprec, exp e) {
   case Conditional_e(e1,e2,e3):
     // decompile to && and || if possible
     switch ($(e2->r,e3->r)) {
-      /* JGM:  this causes a bug in some places...notably the
-       * file tools/cyclex/compact.cyc
-    case $(Const_e(Int_c(Signed,1)),_):
-      s = cat3(exp2doc_prec(33,e1), text(" || "), exp2doc_prec(33,e3));
-      break;
-    case $(_,Const_e(Int_c(Signed,0))):
-      s = cat3(exp2doc_prec(37,e1), text(" && "), exp2doc_prec(37,e2));
-      break;
-      */
+      // JGM:  this causes a bug in some places...notably the
+      //   file tools/cyclex/compact.cyc
+      //case $(Const_e(Int_c(Signed,1)),_):
+      //s = cat3(exp2doc_prec(33,e1), text(" || "), exp2doc_prec(33,e3));
+      //break;
+      //case $(_,Const_e(Int_c(Signed,0))):
+      //s = cat3(exp2doc_prec(37,e1), text(" && "), exp2doc_prec(37,e2));
+      //break;
+      //
     default:
       s = cat5(exp2doc_prec(myprec,e1), text(" ? "), exp2doc_prec(0,e2),
 	                                text(" : "), exp2doc_prec(myprec,e3));
@@ -650,25 +722,25 @@ Doc exp2doc_prec(int inprec, exp e) {
   return s;
 }
 
-Doc designator2doc(designator d) {
+doc_t designator2doc(designator d) {
   switch (d) {
   case ArrayElement(e): return cat3(text(".["), exp2doc(e), text("]"));
   case FieldName(v):    return cat2(text("."), textptr(v));
   }
 }
 
-Doc de2doc($(list<designator>,exp)@ de) {
+doc_t de2doc($(list_t<designator>,exp)@ de) {
   if ((*de)[0] == null) return exp2doc((*de)[1]);
   else return cat2(egroup("","=","=",List::map(designator2doc,(*de)[0])),
 		   exp2doc((*de)[1]));
 }
 
-Doc exps2doc_prec(int inprec, list<exp> es) {
+doc_t exps2doc_prec(int inprec, list_t<exp> es) {
   return group("","",",",List::map_c(exp2doc_prec,inprec,es));
 }
 
 // FIX: take care of sign for Char_c and Short_c
-Doc cnst2doc(cnst_t c) {
+doc_t cnst2doc(cnst_t c) {
   switch (c) {
   case Char_c(sg,ch):     return text(xprintf("'%s'",char_escape(ch)));
   case Short_c(sg,s):     return text(xprintf("(short)%d",(int)s));
@@ -684,8 +756,8 @@ Doc cnst2doc(cnst_t c) {
   }
 }
 
-Doc primapp2doc(int inprec, primop p,list<exp> es) {
-  Doc ps = prim2doc(p);
+doc_t primapp2doc(int inprec, primop p,list_t<exp> es) {
+  doc_t ps = prim2doc(p);
   if (p == Size) {
     if (es == null || es->tl != null)
       throw Failure(xprintf("Absynpp::primapp2doc Size: %s with bad args",
@@ -694,7 +766,7 @@ Doc primapp2doc(int inprec, primop p,list<exp> es) {
     return cat2(d,text(".size"));
 
   } else if (!is_format_prim(p)) {
-    list<Doc> ds = List::map_c(exp2doc_prec,inprec,es);
+    list_t<doc_t> ds = List::map_c(exp2doc_prec,inprec,es);
     if (ds == null)
       throw Failure(xprintf("Absynpp::primapp2doc: %s with no args",
 			    string_of_doc(ps,72)));
@@ -742,11 +814,11 @@ string prim2str(primop p) {
   }
 }
 
-Doc prim2doc(primop p) {
+doc_t prim2doc(primop p) {
   return text(prim2str(p));
 }
 
-Doc structarg2doc($(Opt_t<var>,exp)@ t) {
+doc_t structarg2doc($(opt_t<var>,exp)@ t) {
   if ((*t)[0] == null)
      return exp2doc((*t)[1]);
   else return cat3(textptr((*t)[0]->v),
@@ -754,17 +826,17 @@ Doc structarg2doc($(Opt_t<var>,exp)@ t) {
                    exp2doc((*t)[1]));
 }
 
-Doc cat2(Doc d1,Doc d2) {
+doc_t cat2(doc_t d1,doc_t d2) {
   return concat(d1, d2);
 }
-Doc cat3(Doc d1,Doc d2,Doc d3) {
+doc_t cat3(doc_t d1,doc_t d2,doc_t d3) {
   return
     concat(d1,
     concat(d2,
            d3));
 }
 
-Doc cat4(Doc d1,Doc d2,Doc d3,Doc d4) {
+doc_t cat4(doc_t d1,doc_t d2,doc_t d3,doc_t d4) {
   return
     concat(d1,
     concat(d2,
@@ -772,7 +844,7 @@ Doc cat4(Doc d1,Doc d2,Doc d3,Doc d4) {
            d4)));
 }
 
-Doc cat5(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5) {
+doc_t cat5(doc_t d1,doc_t d2,doc_t d3,doc_t d4,doc_t d5) {
   return
     concat(d1,
     concat(d2,
@@ -781,7 +853,7 @@ Doc cat5(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5) {
            d5))));
 }
 
-Doc cat6(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6) {
+doc_t cat6(doc_t d1,doc_t d2,doc_t d3,doc_t d4,doc_t d5,doc_t d6) {
   return
     concat(d1,
     concat(d2,
@@ -791,7 +863,7 @@ Doc cat6(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6) {
            d6)))));
 }
 
-Doc cat7(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7) {
+doc_t cat7(doc_t d1,doc_t d2,doc_t d3,doc_t d4,doc_t d5,doc_t d6,doc_t d7) {
   return
     concat(d1,
     concat(d2,
@@ -802,7 +874,7 @@ Doc cat7(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7) {
            d7))))));
 }
 
-Doc cat8(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7,Doc d8) {
+doc_t cat8(doc_t d1,doc_t d2,doc_t d3,doc_t d4,doc_t d5,doc_t d6,doc_t d7,doc_t d8) {
   return
     concat(d1,
     concat(d2,
@@ -814,7 +886,7 @@ Doc cat8(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7,Doc d8) {
            d8)))))));
 }
 
-Doc cat9(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7,Doc d8,Doc d9) {
+doc_t cat9(doc_t d1,doc_t d2,doc_t d3,doc_t d4,doc_t d5,doc_t d6,doc_t d7,doc_t d8,doc_t d9) {
   return
     concat(d1,
     concat(d2,
@@ -827,8 +899,8 @@ Doc cat9(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7,Doc d8,Doc d9) {
            d9))))))));
 }
 
-Doc cat10(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7,Doc d8,Doc d9,
-          Doc d10) {
+doc_t cat10(doc_t d1,doc_t d2,doc_t d3,doc_t d4,doc_t d5,doc_t d6,doc_t d7,doc_t d8,doc_t d9,
+          doc_t d10) {
   return
     concat(d1,
     concat(d2,
@@ -842,8 +914,8 @@ Doc cat10(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7,Doc d8,Doc d9,
            d10)))))))));
 }
 
-Doc cat11(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7,Doc d8,Doc d9,
-          Doc d10,Doc d11) {
+doc_t cat11(doc_t d1,doc_t d2,doc_t d3,doc_t d4,doc_t d5,doc_t d6,doc_t d7,doc_t d8,doc_t d9,
+          doc_t d10,doc_t d11) {
   return
     concat(d1,
     concat(d2,
@@ -858,8 +930,8 @@ Doc cat11(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7,Doc d8,Doc d9,
            d11))))))))));
 }
 
-Doc cat12(Doc d1,Doc d2,Doc d3,Doc d4,Doc d5,Doc d6,Doc d7,Doc d8,Doc d9,
-          Doc d10,Doc d11,Doc d12) {
+doc_t cat12(doc_t d1,doc_t d2,doc_t d3,doc_t d4,doc_t d5,doc_t d6,doc_t d7,doc_t d8,doc_t d9,
+          doc_t d10,doc_t d11,doc_t d12) {
   return
     concat(d1,
     concat(d2,
@@ -882,8 +954,8 @@ bool is_declaration(stmt s) {
   }
 }
 
-Doc stmt2doc(stmt st) {
-  Doc s;
+doc_t stmt2doc(stmt st) {
+  doc_t s;
   switch (st->r) {
   case Skip_s:
     s = text(";"); break;
@@ -913,7 +985,7 @@ Doc stmt2doc(stmt st) {
                text("}"),
                line_doc());
     else
-      s = ppseql(stmt2doc,"",&cons(s1,&cons(s2,null)));
+      s = ppseql(stmt2doc,"",&List(s1,&List(s2,null)));
     break;
   case Return_s(eopt):
     if (eopt == null)
@@ -1029,8 +1101,8 @@ Doc stmt2doc(stmt st) {
   return s;
 }
 
-Doc pat2doc(pat p) {
-  Doc s;
+doc_t pat2doc(pat p) {
+  doc_t s;
   switch (p->r) {
   case Wild_p: s = text("_"); break;
   case Null_p: s = text("null"); break;
@@ -1085,12 +1157,12 @@ Doc pat2doc(pat p) {
   return s;
 }
 
-Doc dp2doc($(list<designator>,pat)@ dp) {
+doc_t dp2doc($(list_t<designator>,pat)@ dp) {
   return cat2(egroup("","=","=",List::map(designator2doc,(*dp)[0])),
               pat2doc((*dp)[1]));
 }
 
-Doc switchclause2doc(switch_clause c) {
+doc_t switchclause2doc(switch_clause c) {
   if (c->where_clause == null && c->pattern->r == Wild_p)
     return
       cat2(text("default: "),
@@ -1111,18 +1183,19 @@ Doc switchclause2doc(switch_clause c) {
            nest(2,cat2(line_doc(),stmt2doc(c->body))));
 }
 
-Doc switchclauses2doc(list<switch_clause> cs) {
+doc_t switchclauses2doc(list_t<switch_clause> cs) {
   return ppseql(switchclause2doc,"",cs);
 }
 
-Doc decl2doc(decl d) {
-  Doc s;
+doc_t decl2doc(decl d) {
+  doc_t s;
   switch (d->r) {
   case Fn_d(fd):
-    typ t = FnType(fd->tvs,
-                   fd->ret_type,
-                   List::map(arg_mk_opt,fd->args),
-                   fd->varargs);
+    typ t = FnType(FnInfo{fd->tvs,
+                          fd->effect,
+                          fd->ret_type,
+                          List::map(arg_mk_opt,fd->args),
+                          fd->varargs});
     s = cat7(text(fd->is_inline?(string)"inline ":(string)""),
              scope2doc(fd->sc),
              tqtd2doc(&Tqual(false,false,false),t,&Opt(qvar2doc(fd->name))),
@@ -1150,7 +1223,7 @@ Doc decl2doc(decl d) {
                text("};"));
     break;
   case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_)):
-    Doc sn = qvar2doc(name);
+    doc_t sn = qvar2doc(name);
     if(shadow_depth > 0)
       sn = cat2(sn, text(xprintf("%d",shadow_depth)));
     s = cat4(scope2doc(sc),
@@ -1235,7 +1308,7 @@ Doc decl2doc(decl d) {
   return s;
 }
 
-Doc scope2doc(scope sc) {
+doc_t scope2doc(scope sc) {
   switch (sc) {
   case Static:   return text("static ");
   case Public:   return nil_doc();
@@ -1246,7 +1319,7 @@ Doc scope2doc(scope sc) {
 }
 
 // Conversion between alternate forms of types
-$(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
+$(tqual,typ,list_t<type_modifier>)@ to_tms(tqual tq,typ t) {
   switch (t) {
   case ArrayType(t2,tq2,e):
     // Throw away tq, can't qualify an array
@@ -1256,7 +1329,7 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
       tm = Carray_mod;
     else
       tm = ConstArray_mod(e);
-    return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3));
+    return &$(tq3, t3, (list_t<type_modifier>)&List(tm,tml3));
 
   case PointerType(PtrInfo{.elt_typ = t2, .rgn_typ = rgntyp,
 			   .nullable = nullable, .tq = tq2, .bounds = b}):
@@ -1275,14 +1348,16 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
       // ps = impos("bad pointer type in Absynpp::to_tms"); break;
     }
     type_modifier tm = Pointer_mod(ps,rgntyp,tq);
-    return &$(tq3, t3, (list<type_modifier>)&cons(tm,tml3));
+    return &$(tq3, t3, (list_t<type_modifier>)&List(tm,tml3));
 
-  case FnType(typvars,t2,args,varargs):
+    // FIX: deal with effect?
+  case FnType(FnInfo{typvars,effopt,t2,args,varargs}):
     // discard tq because you can't qualify a function
     let &$(tq3,t3,tml3) = to_tms(empty_tqual(),t2);
-    list<type_modifier> tms = &cons(Function_mod(WithTypes(args,varargs)),tml3);
+    list_t<type_modifier> tms = 
+      &List(Function_mod(WithTypes(args,varargs,effopt)),tml3);
     if (typvars != null)
-      tms = &cons(TypeParams_mod(typvars,null),tms);
+      tms = &List(TypeParams_mod(typvars,null,true),tms);
     return &$(tq3,t3,tms);
 
   case Evar(k,topt,i):
@@ -1301,9 +1376,9 @@ $(tqual,typ,list<type_modifier>)@ to_tms(tqual tq,typ t) {
   }
 }
 
-Doc tqtd2doc(tqual tq, typ t, Opt_t<Doc> dopt) {
-  $(tqual,typ,list<type_modifier>)@ x = to_tms(tq,t);
-  list<type_modifier> tms = List::rev((*x)[2]);
+doc_t tqtd2doc(tqual tq, typ t, opt_t<doc_t> dopt) {
+  $(tqual,typ,list_t<type_modifier>)@ x = to_tms(tq,t);
+  list_t<type_modifier> tms = List::rev((*x)[2]);
   if (tms==null && dopt==null)
     return cat2(tqual2doc((*x)[0]),ntyp2doc((*x)[1]));
   else
@@ -1314,22 +1389,22 @@ Doc tqtd2doc(tqual tq, typ t, Opt_t<Doc> dopt) {
            dtms2doc((dopt==null)?nil_doc():dopt->v,tms));
 }
 
-Doc structfield2doc($(field_name,tqual,typ)@ f) {
+doc_t structfield2doc($(field_name,tqual,typ)@ f) {
   return cat2(tqtd2doc((*f)[1],(*f)[2],&Opt(textptr((*f)[0]))),
               text(";"));
 }
 
-Doc structfields2doc(list<$(field_name,tqual,typ)@> fields) {
+doc_t structfields2doc(list_t<$(field_name,tqual,typ)@> fields) {
   return ppseql(structfield2doc,"",fields);
 }
 
-Doc enumfield2doc(enumfield f) {
+doc_t enumfield2doc(enumfield f) {
   return cat3(qvar2doc(f->name),
 	      (f->tag==null)?nil_doc():cat2(text("="),exp2doc((exp)f->tag)),
 	      (f->typs==null)?nil_doc():args2doc(f->typs));
 }
 
-Doc enumfields2doc(list<enumfield> fields) {
+doc_t enumfields2doc(list_t<enumfield> fields) {
   return ppseql(enumfield2doc,",",fields);
 }
 
@@ -1338,14 +1413,14 @@ Doc enumfields2doc(list<enumfield> fields) {
 #endif
 
 //// Public interface -- extend with what clients actually want to print
-void decllist2file(list<decl> tdl, FILE @f) {
+void decllist2file(list_t<decl> tdl, FILE @f) {
   for (; tdl != null; tdl = tdl->tl) {
     file_of_doc(decl2doc(tdl->hd),PP_WIDTH,f);
     fprintf(f,"\n");
   }
 }
 
-string decllist2string(list<decl> tdl) {
+string decllist2string(list_t<decl> tdl) {
   return string_of_doc(seql("",List::map(decl2doc,tdl)),PP_WIDTH);
 }
 string exp2string(exp e)     {return string_of_doc(exp2doc(e),  PP_WIDTH);}
@@ -1354,3 +1429,4 @@ string typ2string(typ t)     {return string_of_doc(typ2doc(t),  PP_WIDTH);}
 string qvar2string(qvar v)   {return string_of_doc(qvar2doc(v), PP_WIDTH);}
 string prim2string(primop p) {return string_of_doc(prim2doc(p), PP_WIDTH);}
 string pat2string(pat p)     {return string_of_doc(pat2doc(p),  PP_WIDTH);}
+

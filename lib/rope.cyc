@@ -6,27 +6,27 @@ using Core;
 
 static enum R {
   String_rope(string),
-  Array_rope(rope?)
+  Array_rope(rope_t?)
 };
 abstract struct Rope_node {
   enum R v;
 };
 
-rope from_string(string s) {
+rope_t from_string(string s) {
   return &Rope_node{String_rope(s)};
 }
-rope concat(rope r1,rope r2) {
+rope_t concat(rope_t r1,rope_t r2) {
   return &Rope_node{Array_rope(new {r1,r2})};
 }
-rope concata(rope ?rs) {
+rope_t concata(rope_t ?rs) {
   return &Rope_node(Array_rope(rs));
 }
-rope concatl(List::list<rope> l) {
+rope_t concatl(List::list_t<rope_t> l) {
   return &Rope_node(Array_rope(new {for i < List::length(l) : 
-                                    ({rope r = l->hd; l = l->tl; r;})}));
+                                    ({rope_t r = l->hd; l = l->tl; r;})}));
 }
 
-uint length(rope r) {
+uint length(rope_t r) {
   switch (r->v) {
   case String_rope(ss): return String::strlen(ss);
   case Array_rope(rs):
@@ -37,7 +37,7 @@ uint length(rope r) {
   }
 }
 
-static uint flatten_it(string s, uint i, rope r) {
+static uint flatten_it(string s, uint i, rope_t r) {
   switch (r->v) {
   case String_rope(ss):
     let len = String::strlen(ss);
@@ -51,7 +51,7 @@ static uint flatten_it(string s, uint i, rope r) {
   }
 }
 
-string to_string(rope r) {
+string to_string(rope_t r) {
   string s = new_string(length(r));
   flatten_it(s,0,r);
   // memoize the flattening
@@ -59,6 +59,6 @@ string to_string(rope r) {
   return s;
 }
 
-int cmp(rope r1, rope r2) {
+int cmp(rope_t r1, rope_t r2) {
   return String::strcmp(to_string(r1), to_string(r2));
 }

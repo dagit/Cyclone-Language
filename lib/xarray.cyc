@@ -4,42 +4,42 @@
 namespace Xarray;
 using Core;
 
-int length<`a>(Xarray<`a> xarr) {
+int length(Xarray<`a> xarr) {
   return xarr->num_elmts;
 }
 
-`a get<`a>(Xarray<`a> xarr, int i) {
+`a get(Xarray<`a> xarr, int i) {
   if (i < 0 || i >= xarr->num_elmts)
     throw InvalidArg("Xarray::get: bad index");
   return xarr->elmts[i];
 }
 
-void set<`a>(Xarray<`a> xarr, int i, `a a) {
+void set(Xarray<`a> xarr, int i, `a a) {
   if (i < 0 || i >= xarr->num_elmts)
     throw InvalidArg("Xarray::set: bad index");
   xarr->elmts[i] = a;
 }
 
-Xarray<`a> create_empty<`a>() {
+Xarray<`a> create_empty() {
   `a ?x = new { };
   return &xarray{.elmts=x,.num_elmts=0};
 }
 
  // create an xarray with zero elements, but space for len elements
-Xarray<`a> create<`a>(int len, `a a) {
+Xarray<`a> create(int len, `a a) {
   if (len < 0)
     throw InvalidArg("xarrays must have a non-negative size buffer");
   return &xarray{.elmts=new {for i < len : a}, .num_elmts=0};
 }
 
-Xarray<`a> singleton<`a>(int len, `a a) {
+Xarray<`a> singleton(int len, `a a) {
   if(len<1) throw InvalidArg("singleton xarray must have size >=1");
   Xarray<`a> x = create(len,a);
   x->num_elmts=1;
   return x;
 }
 
-void add<`a>(Xarray<`a> xarr, `a a) {
+void add(Xarray<`a> xarr, `a a) {
   if (xarr->num_elmts == (xarr->elmts).size) {
     if (xarr->num_elmts == 0)
       xarr->elmts = new {for i < 10 : a};
@@ -53,19 +53,19 @@ void add<`a>(Xarray<`a> xarr, `a a) {
   xarr->elmts[xarr->num_elmts++] = a;
 }
 
-int add_ind<`a>(Xarray<`a> xarr, `a a) {
+int add_ind(Xarray<`a> xarr, `a a) {
   add(xarr,a);
   return xarr->num_elmts-1;
 }
 
-`a ?to_array<`a>(Xarray<`a> xarr) {
+`a ?to_array(Xarray<`a> xarr) {
   if (xarr->num_elmts == 0)
     return new {};
   `a ?ans = new {for i < xarr->num_elmts : xarr->elmts[i]};
   return ans;
 }
 
-Xarray<`a> from_array<`a>(`a ?arr) {
+Xarray<`a> from_array(`a ?arr) {
   if (arr.size == 0)
     return create_empty();
   Xarray<`a> ans = &xarray{.elmts=new {for i<arr.size : arr[i]},
@@ -74,7 +74,7 @@ Xarray<`a> from_array<`a>(`a ?arr) {
 }
 
 // append is functional -- it creates a new xarray every time
-Xarray<`a> append<`a>(Xarray<`a> xarr1,
+Xarray<`a> append(Xarray<`a> xarr1,
                              Xarray<`a> xarr2) {
   int        newsz = (xarr1->elmts).size + (xarr2->elmts).size;
   if(newsz == 0)
@@ -89,27 +89,27 @@ Xarray<`a> append<`a>(Xarray<`a> xarr1,
   return ans;
 }
 
-void app<`a,`b>(`b f(`a), Xarray<`a> xarr) {
+void app(`b f(`a), Xarray<`a> xarr) {
   for(int i=0; i<xarr->num_elmts; ++i)
     f(xarr->elmts[i]);
 }
 
-void app_c<`a,`b,`c>(`b f(`c,`a), `c env, Xarray<`a> xarr) {
+void app_c(`b f(`c,`a), `c env, Xarray<`a> xarr) {
   for(int i=0; i<xarr->num_elmts; ++i)
     f(env, xarr->elmts[i]);
 }
 
-void iter<`a>(void f(`a), Xarray<`a> xarr) {
+void iter(void f(`a), Xarray<`a> xarr) {
   for(int i=0; i<xarr->num_elmts; ++i)
     f(xarr->elmts[i]);
 }
 
-void iter_c<`a,`c>(void f(`c,`a), `c env, Xarray<`a> xarr) {
+void iter_c(void f(`c,`a), `c env, Xarray<`a> xarr) {
   for(int i=0; i<xarr->num_elmts; ++i)
     f(env, xarr->elmts[i]);
 }
 
-Xarray<`b> map<`a,`b>(`b f(`a), Xarray<`a> xarr) {
+Xarray<`b> map(`b f(`a), Xarray<`a> xarr) {
   if(xarr->num_elmts==0) return create_empty();
 
   Xarray<`b> ans =
@@ -120,7 +120,7 @@ Xarray<`b> map<`a,`b>(`b f(`a), Xarray<`a> xarr) {
   return ans;
 }
 
-Xarray<`b> map_c<`a,`b,`c>(`b f(`c,`a), `c env, Xarray<`a> xarr) {
+Xarray<`b> map_c(`b f(`c,`a), `c env, Xarray<`a> xarr) {
   if(xarr->num_elmts==0) return create_empty();
 
   Xarray<`b> ans =
@@ -131,6 +131,6 @@ Xarray<`b> map_c<`a,`b,`c>(`b f(`c,`a), `c env, Xarray<`a> xarr) {
   return ans;
 }
 
-void reuse<`a>(Xarray<`a> xarr) {
+void reuse(Xarray<`a> xarr) {
   xarr->num_elmts = 0;
 }

@@ -9,7 +9,7 @@
 // not re-entrant.  Entire file ends up on one line!
 
 namespace Absyndump {
-extern void dumpdecllist2file(List::list<Absyn::decl> tdl, Stdio::FILE @f);
+extern void dumpdecllist2file(List::list_t<Absyn::decl> tdl, Stdio::FILE @f);
 }
 
 #endif

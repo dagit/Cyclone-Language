@@ -30,7 +30,7 @@ static enum direction {
   LEFT, RIGHT
 };
 
-static void rotate_left<`a,`b>(struct noderef<`a,`b> @nr) {
+static void rotate_left(struct noderef<`a,`b> @nr) {
   let n = nr->v;
   switch (n->left) {
   case Node(nr2):
@@ -43,7 +43,7 @@ static void rotate_left<`a,`b>(struct noderef<`a,`b> @nr) {
   }
 }
 
-static void rotate_right<`a,`b>(struct noderef<`a,`b> @nr) {
+static void rotate_right(struct noderef<`a,`b> @nr) {
   let n = nr->v;
   switch (n->right) {
   case Node(nr2):
@@ -58,7 +58,7 @@ static void rotate_right<`a,`b>(struct noderef<`a,`b> @nr) {
 
 // THIS VERSION TRIPS OVER A GCC BUG
 //
-// static void rotate_left<`a,`b>(struct noderef<`a,`b> @nr) {
+// static void rotate_left(struct noderef<`a,`b> @nr) {
 //   let n = nr->v;
 //   switch (n->left) {
 //   case Node(nr2):
@@ -72,7 +72,7 @@ static void rotate_right<`a,`b>(struct noderef<`a,`b> @nr) {
 //   }
 // }
 //
-// static void rotate_right<`a,`b>(struct noderef<`a,`b> @nr) {
+// static void rotate_right(struct noderef<`a,`b> @nr) {
 //   let n = nr->v;
 //   switch (n->right) {
 //   case Node(nr2):
@@ -87,7 +87,7 @@ static void rotate_right<`a,`b>(struct noderef<`a,`b> @nr) {
 //   }
 // }
 
-static void lift<`a,`b>(list<$(enum direction,struct noderef<`a,`b> @)@> dnl) {
+static void lift(list_t<$(enum direction,struct noderef<`a,`b> @)@> dnl) {
   while (dnl != null) {
     if (dnl->tl == null) {
       switch (dnl->hd) {
@@ -118,8 +118,8 @@ static void lift<`a,`b>(list<$(enum direction,struct noderef<`a,`b> @)@> dnl) {
 
 // maybe want a splay_c too, but dict doesn't need it and that's the immediate
 // concern
-bool splay<`a,`b>(int reln(`a,`a), `a reln_first_arg, enum tree<`a,`b> tree) {
-  list<$(enum direction, struct noderef<`a,`b>@)@> path = null;
+bool splay(int reln(`a,`a), `a reln_first_arg, enum tree<`a,`b> tree) {
+  list_t<$(enum direction, struct noderef<`a,`b>@)@> path = null;
   while(true) {
     switch (tree) {
     case Node(nr):
@@ -129,10 +129,10 @@ bool splay<`a,`b>(int reln(`a,`a), `a reln_first_arg, enum tree<`a,`b> tree) {
 	lift(path);
 	return true;
       } else if (comp < 0) {
-	path = &cons(&$(LEFT, nr), path);
+	path = &List(&$(LEFT, nr), path);
 	tree = n->left;
       } else {
-	path = &cons(&$(RIGHT, nr), path);
+	path = &List(&$(RIGHT, nr), path);
 	tree = n->right;
       }
       break;

@@ -23,14 +23,14 @@ using List;
 
 xenum exn {Error, Bad(string)};
 
-enum Spec {
-  Unit_spec(void (@f)()),         // Call the function with unit argument
-  Set_spec(bool@),                // Set the reference to true
-  Clear_spec(bool@),              // Set the reference to false
-  String_spec(void (@f)(string)), // Call the function with a string argument
-  Int_spec(void (@f)(int)),       // Call the function with an int argument
-  Rest_spec(void (@f)(string))    // Stop interpreting keywords and call the
-                                  // function with each remaining argument
+enum Spec<`e> {
+  Unit_spec(void (@f)(;`e)),        // Call the function with unit argument
+  Set_spec(bool@),                  // Set the reference to true
+  Clear_spec(bool@),                // Set the reference to false
+  String_spec(void (@f)(string;`e)),// Call the function with a string argument
+  Int_spec(void (@f)(int;`e)),      // Call the function with an int argument
+  Rest_spec(void (@f)(string;`e))   // Stop interpreting keywords and call the
+                                    // function with each remaining argument
 };
 
 static enum error {
@@ -40,7 +40,8 @@ static enum error {
   Wrong(string,string,string)  // option, actual, expected
 };
 
-static spec lookup (list<$(string,spec,string)@> l, string x) {
+static gspec_t<`e> lookup (glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> l, 
+                         string x) {
   while (l != null) {
     if (String::strcmp(x,(*l->hd)[0]) == 0)
       return (*l->hd)[1];
@@ -49,7 +50,8 @@ static spec lookup (list<$(string,spec,string)@> l, string x) {
   throw Not_found;
 }
 
-void usage(list<$(string,spec,string)@> speclist, string errmsg) {
+void usage(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist, 
+           string errmsg) {
   fprintf(stderr, "%s\n", errmsg);
   while (speclist != null) {
     fprintf(stderr, " %s %s\n", (*speclist->hd)[0], (*speclist->hd)[2]);
@@ -61,7 +63,8 @@ int current = 0;
 static string ?args = null;
 
 static void stop(int prog_pos, enum error e,
-		 list<$(string,spec,string)@> speclist, string errmsg) {
+		 glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist, 
+                 string errmsg) {
   string progname = prog_pos < args.size ? args[prog_pos] : "(?)";
   switch (e) {
   case Unknown(s):
@@ -83,7 +86,8 @@ static void stop(int prog_pos, enum error e,
   throw Error; // should exit here
 }
 
-void parse(list<$(string,spec,string)@> speclist, void anonfun(string),
+void parse(glist_t<$(string,gspec_t<`e>,string)@`r1,`r2> speclist, 
+           void anonfun(string),
 	   string errmsg) {
   args = std_args();
 
@@ -93,7 +97,7 @@ void parse(list<$(string,spec,string)@> speclist, void anonfun(string),
   while (current < l) {
     string s = args[current];
     if (s.size >= 1 && s[0] == '-') {
-      spec action;
+      gspec_t<`e> action;
       try action = lookup(speclist, s);
       catch {
       case Not_found: stop(initpos, Unknown(s), speclist, errmsg); return;

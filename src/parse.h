@@ -10,8 +10,8 @@ using Absyn {
 using List {
 using Lexing {
 namespace Parse {
-extern list<decl> parse_file(FILE @f);
-extern Opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
+extern list_t<decl> parse_file(FILE @f);
+extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
 }
 extern enum Struct_or_union;
 typedef enum Struct_or_union struct_or_union_t;

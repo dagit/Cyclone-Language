@@ -17,7 +17,7 @@ using Tcutil;
 
 namespace Evexp;
 
-void exp_err(segment loc, string msg) {
+void exp_err(seg_t loc, string msg) {
   Position::post_error(Position::mk_err_elab(loc, xprintf("Exp_err: %s",msg)));
 }
 
@@ -26,7 +26,7 @@ extern cnst_t promote_const(cnst_t cn);
 extern cnst_t eval_const_exp(exp e);
 extern cnst_t eval_const_unprimop(primop p,exp e);
 extern cnst_t eval_const_binprimop(primop p,exp e1,exp e2);
-extern cnst_t eval_sizeof(typ t, segment loc);
+extern cnst_t eval_sizeof(typ t, seg_t loc);
 
 unsigned int eval_const_uint_exp(exp e) {
   switch (promote_const(eval_const_exp(e))) {
@@ -111,17 +111,17 @@ cnst_t eval_const_exp(exp e) {
 // Note in the latter case, this code really needs to be in sync with the
 // type translation to C.
 // Note that a StructType better be checked so we can get the structdecl
-unsigned int szof(typ t, segment loc) {
+unsigned int szof(typ t, seg_t loc) {
   switch (Tcutil::compress(t)) {
   case VoidType:   terr(loc,"cannot apply sizeof to void type"); return 0u;
-  case VarType(&$(_,BoxPKind)): return 4u;
-  case VarType(&$(_,BoxUKind)): return 4u;
-  case VarType(&$(_,RgnKind)):
+  case VarType(&$(_,BoxKind)): return 4u;
+  case VarType(&$(_,RgnKind)): 
     terr(loc,"cannot apply sizeof to a region"); return 0u;
+  case VarType(&$(_,EffKind)): 
+    terr(loc,"cannot apply sizeof to an effect"); return 0u;
   case VarType(&$(_,_)): 
     terr(loc,"cannot apply sizeof to unknown type"); return 0u;
-  case Evar(BoxPKind,_,_): return 4u; // Possible?
-  case Evar(BoxUKind,_,_): return 4u; // Possible?
+  case Evar(BoxKind,_,_): return 4u; // Possible?
   case Evar(_,_,_): terr(loc,"cannot apply sizeof to unknown type"); return 0u;
   case EnumType(_,_,_):  return 4u;
   case XenumType(_,_):   return 4u;
@@ -141,7 +141,7 @@ unsigned int szof(typ t, segment loc) {
   case ArrayType(t2,_,e): 
     // FIX: insert padding for alignment
     return szof(t2,loc) * eval_const_uint_exp(e);
-  case FnType(_,_,_,_): return 4u;
+  case FnType(_): terr(loc, "cannot apply sizeof to function type"); return 0u;
   case TupleType(tqs):
     // FIX: we need to insert padding to ensure alignment
     unsigned int s = 0;
@@ -160,13 +160,15 @@ unsigned int szof(typ t, segment loc) {
     for(let fs = sd->fields->v; fs != null; fs = fs->tl)
       s += szof((*fs->hd)[2],loc);
     return s;
-  case HeapRgnType: terr(loc, "cannot apply sizoef to a region"); return 0u;
+  case HeapRgn: terr(loc, "cannot apply sizoef to a region"); return 0u;
   case TypedefType(_,_,_): return Tcutil::impos("szof typedeftype");
   case UnionType:          return Tcutil::impos("szof uniontype");
+  case JoinEff(_): fallthru;
+  case AccessEff(_): terr(loc, "cannot apply sizoef to an effect"); return 0u;
   }
 }
 
-cnst_t eval_sizeof(typ t,segment loc) {
+cnst_t eval_sizeof(typ t,seg_t loc) {
   return Int_c(Unsigned,(int)szof(t,loc));
 }
 

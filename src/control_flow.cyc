@@ -47,8 +47,8 @@ namespace ControlFlow;
 
 typedef vardecl           vardecl_t;
 typedef field_name        field_name_t;
-typedef Set::Set<`a>      set_t<`a>;
-typedef Dict::Dict<`a,`b> dict_t<`a,`b>;
+typedef Set::set_t<`a> set_t<`a>;
+typedef Dict::dict_t<`a,`b> dict_t<`a,`b>;
 
 // The set of variables that may be unassigned.
 // Note we exploit that vardecls are shared -- we use pointer equality
@@ -71,8 +71,9 @@ static string           empty_string    = "";
 static $(enum Nmspace,var) bogus_qvar   = $(Abs_n(null),&empty_string);
 static struct Vardecl   bogus_vardecl_v = Vardecl(Public, &bogus_qvar,
 						  &bogus_tqual, VoidType, null,
-						  0, 0);
+						  0, null);
 static vardecl_t bogus_vardecl = &bogus_vardecl_v;
+
 
 static flow_info_t * empty_flow_info = null;
 
@@ -99,7 +100,7 @@ static flow_info_t meet_flow(flow_info_t f1, flow_info_t f2) {
 		  Dict::intersect(Set::intersect, f1.structs, f2.structs));
 } 
 
-static bool dict_less_than_f<`a,`b>(dict_t<`a,set_t<`b>> d2, `a a, set_t<`b> s){
+static bool dict_less_than_f(dict_t<`a,set_t<`b>> d2, `a a, set_t<`b> s){
   return !Dict::member(d2,a) || Set::subset(s, Dict::lookup(d2,a));
 }
 static bool less_than_flow(flow_info_t f1, flow_info_t f2) {
@@ -261,7 +262,7 @@ static void update_flow(stmt s, flow_info_t new_flow) {
 static flow_info_t cf_check_stmt(flow_info_t, stmt);
 static cfexpsyn_t  cf_check_exp (flow_info_t, exp);
 
-static cfexpsyn_t cf_check_explist_unordered(flow_info_t env, list<exp> es) {
+static cfexpsyn_t cf_check_explist_unordered(flow_info_t env, list_t<exp> es) {
   cfexpsyn_t accum = CFExpSyn(env,env);
   // undefined eval order means we check each exp under env
   for(; es != null; es = es->tl)
@@ -413,7 +414,7 @@ static bool cf_check_stmt_ft(flow_info_t env, stmt s) {
 // NOTE: all control-flow to below a switch is currently done
 // via break, i.e. non-local-preds. That is why we seem to ignore
 // the synth from the clauses.
-static void cf_check_switch_clauses(flow_info_t env, list<switch_clause> scs) {
+static void cf_check_switch_clauses(flow_info_t env, list_t<switch_clause> scs) {
   for(; scs != null; scs = scs->tl) {
     let &Switch_clause(_,_,where_opt,body,_) = scs->hd;
     if(where_opt!=null) 
@@ -545,7 +546,7 @@ static void cf_check_fun(fndecl fd) {
   }
 }
 
-void cf_check(list<decl> ds) {
+void cf_check(list_t<decl> ds) {
   for(; ds != null; ds = ds->tl) {
     switch(ds->hd->r) {
     case Fn_d(fd):           cf_check_fun(fd); break;

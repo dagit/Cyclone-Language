@@ -23,7 +23,7 @@ xenum exn { Error(string) };
 
 struct lexbuf<`a> { // use `a for state that refill_buff might need 
 
-  void   (@refill_buff)(struct lexbuf<`a> @);
+  void   (@refill_buff)(struct lexbuf<`a> @;{});
   `a     refill_state;
 
   string lex_buffer;
@@ -38,7 +38,7 @@ struct lexbuf<`a> { // use `a for state that refill_buff might need
 
 struct function_lexbuf_state<`b> {
 // instantiation for using function to read
-  int (@read_fun)(string,int,`b);
+  int (@read_fun)(string,int,`b;{});
   `b read_fun_state;
 };
 
@@ -53,7 +53,7 @@ struct lex_tables {
 
 static string aux_buffer = "";
 
-void lex_refill<`c> (Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
+void lex_refill(Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
   if (aux_buffer.size==1) aux_buffer = new_string(AUX_SIZE);
   int read =
     lexbuf->refill_state->read_fun(aux_buffer,
@@ -85,7 +85,7 @@ void lex_refill<`c> (Lexbuf<Function_lexbuf_state<`c>> lexbuf) {
 }
 
 Lexbuf<Function_lexbuf_state<`b>>
-from_function<`b>(int read_fun(string,int,`b),
+from_function(int read_fun(string,int,`b;{}),
                   `b read_fun_state) {
   return &lexbuf(lex_refill, // @ <`b>,
                  &function_lexbuf_state(read_fun, read_fun_state),
@@ -120,7 +120,7 @@ Lexbuf<bool> from_string(string s) {
                  true);
 }
 
-string lexeme<`a> (Lexbuf<`a> lbuf) {
+string lexeme(Lexbuf<`a> lbuf) {
    int    len = lbuf->lex_curr_pos - lbuf->lex_start_pos;
    string s   = new_string(len+1);
    String::zstrncpy(s, 0, lbuf->lex_buffer, lbuf->lex_start_pos, len);
@@ -133,21 +133,21 @@ string lexeme<`a> (Lexbuf<`a> lbuf) {
    return s;
 }
 
-char lexeme_char<`a> (Lexbuf<`a> lbuf, int i) {
+char lexeme_char(Lexbuf<`a> lbuf, int i) {
    return lbuf->lex_buffer[lbuf->lex_start_pos + i];
 }
 
-int lexeme_start<`a>(Lexbuf<`a> lbuf) {
+int lexeme_start(Lexbuf<`a> lbuf) {
    return lbuf->lex_abs_pos + lbuf->lex_start_pos;
 }
 
-int lexeme_end<`a>(Lexbuf<`a> lbuf) {
+int lexeme_end(Lexbuf<`a> lbuf) {
    return lbuf->lex_abs_pos + lbuf->lex_curr_pos;
 }
 
 ////////////////// Now here's what was lexing.c /////////////
 
-int lex_engine<`a>(LexTables tbl, int start_state, Lexbuf<`a> lbuf) {
+int lex_engine(LexTables tbl, int start_state, Lexbuf<`a> lbuf) {
 
    int state, base, backtrk;
    int c;

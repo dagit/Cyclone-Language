@@ -11,31 +11,33 @@
 
 namespace Fn {
 
-extern enum Function<`arg,`res> {
-  Fun<`env>(`res (@)(`env,`arg), `env)
+extern enum Function<`arg,`res,`eff> {
+  Fun<`env>(`res (@)(`env,`arg;`eff), `env)
 };
 
-typedef enum Function<`arg,`res> fn<`arg,`res>;
+typedef enum Function<`arg,`res,`eff> fn<`arg,`res,`eff>;
 
 // make a closure out of a function pointer and environment
-extern fn<`arg,`res> make_fn<`arg,`res,`env>(`res f(`env,`arg), `env x);
+extern fn<`arg,`res,`e1> make_fn(`res f(`env,`arg;`e1), `env x; `e2);
 
 // convert a function pointer to a closure
-extern fn<`arg,`res> fp2fn<`arg,`res>(`res f(`arg));
+extern fn<`arg,`res,`e1> fp2fn(`res f(`arg;`e1));
 
 // apply closure f to argument x
-extern `res apply<`arg,`res>(fn<`arg,`res> f, `arg x);
+extern `res apply(fn<`arg,`res,`eff> f, `arg x; `eff);
 
 // compose closures
-extern fn<`a,`c> compose<`a,`b,`c>(fn<`a,`b> g, fn<`b,`c> f);
+extern fn<`a,`c,`e1+`e2> compose<`a,`b,`c,`e1,`e2,`e3>(fn<`a,`b,`e1> g, 
+                                                       fn<`b,`c,`e2> f;
+                                                       `e1+`e2+`e3);
 
 // curry a closure that takes a pair
-extern fn<`a,fn<`b,`c>> curry<`a,`b,`c>(fn<$(`a,`b)@,`c> f);
+extern fn<`a,fn<`b,`c,`e1>,`e1+`e2> curry(fn<$(`a,`b)@,`c,`e1> f);
 
 // uncurry a closure
-extern fn<$(`a,`b)@,`c> uncurry<`a,`b,`c>(fn<`a,fn<`b,`c>> f);
+extern fn<$(`a,`b)@,`c,`e1+`e2> uncurry(fn<`a,fn<`b,`c,`e1>,`e2> f);
 
 // map a closure across a list
-extern List::list<`b> map_fn<`a,`b>(fn<`a,`b> f,List::list<`a> x);
+extern List::list_t<`b> map_fn(fn<`a,`b,`e> f,List::glist_t<`a,`r> x);
 }
 #endif

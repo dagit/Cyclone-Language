@@ -60,13 +60,13 @@ static void set_check_null() {
 static void set_out_file_name(string s) {
   out_file_name_opt = (string *)(&$(s));
 }
-static list<stringptr> includes = null;
+static list_t<stringptr> includes = null;
 static void add_include(string s) {
-  includes = &cons((stringptr)new {s},includes);
+  includes = &List((stringptr)new {s},includes);
 }
-static list<stringptr> defines = null;
+static list_t<stringptr> defines = null;
 static void add_define(string s) {
-  defines = &cons((stringptr)new {s},defines);
+  defines = &List((stringptr)new {s},defines);
 }
 
 bool compile_failure = false; // for exit code (helps Makefile)
@@ -86,9 +86,9 @@ void compile_file(string filename) {
   // Run the preprocessor, by building and running a command-line
   // Pass -I and -D things onto pre-processor
   string inc_string = 
-    String::str_sepstr(&cons(new {""},rev(includes))," -I");
+    String::str_sepstr(&List(new {""},rev(includes))," -I");
   string def_string = 
-    String::str_sepstr(&cons(new {""},rev(defines)), " -D");
+    String::str_sepstr(&List(new {""},rev(defines)), " -D");
   // check that the input file exists
   try {
     FILE @f0 = file_open(filename, "r");
@@ -122,7 +122,7 @@ void compile_file(string filename) {
   }
 
   // parse
-  list<Absyn::decl> tds = null;
+  list_t<Absyn::decl> tds = null;
   try {
     tds = Parse::parse_file(f);
   } catch {
@@ -237,32 +237,32 @@ void compile_file(string filename) {
 
 int main() {
 
-  list<$(string,Arg::spec,string)@> options =
-    &cons(&$("-o",String_spec(set_out_file_name),
+  list_t<$(string,Arg::spec_t,string)@> options =
+    &List(&$("-o",String_spec(set_out_file_name),
              "output file name"),
-    &cons(&$("-pp",Set_spec(pp), 
+    &List(&$("-pp",Set_spec(pp), 
              "pretty print"),
-    &cons(&$("-up",Set_spec(up), 
+    &List(&$("-up",Set_spec(up), 
              "ugly print"),
-    &cons(&$("-noexpandtypedefs",Set_spec(noexpand),
+    &List(&$("-noexpandtypedefs",Set_spec(noexpand),
              "don't expand typedefs in pretty printing"),
-    &cons(&$("-noremoveunused",Set_spec(noshake),
+    &List(&$("-noremoveunused",Set_spec(noshake),
              "don't remove externed variables that aren't used"),
-    &cons(&$("-tc",Set_spec(tc), 
+    &List(&$("-tc",Set_spec(tc), 
              "type check"),
-    &cons(&$("-toc",Set_spec(toc), 
+    &List(&$("-toc",Set_spec(toc), 
              "translate to C"),
-    &cons(&$("-I",String_spec(add_include), 
+    &List(&$("-I",String_spec(add_include), 
              "include directory"),
-    &cons(&$("-D",String_spec(add_define), 
+    &List(&$("-D",String_spec(add_define), 
              "pass definition to pre-processor"),
-    &cons(&$("-check_null",Unit_spec(set_check_null), 
+    &List(&$("-check_null",Unit_spec(set_check_null), 
              "turn on null-checking in generated C code"),
-    &cons(&$("-v",Set_spec(v), 
+    &List(&$("-v",Set_spec(v), 
              "print compilation stages verbosely"),
-    &cons(&$("-q",Set_spec(q), 
+    &List(&$("-q",Set_spec(q), 
              "compile quietly"),
-    &cons(&$("-nocyc",Clear_spec(add_cyc_namespace), 
+    &List(&$("-nocyc",Clear_spec(add_cyc_namespace), 
 	     "does not add implicit namespace Cyc"),
           null)))))))))))));
 
