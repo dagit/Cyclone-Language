@@ -23,7 +23,7 @@ CYC_FLAGS_PP := -tc -toc -pp
 #CYC_FLAGS:= -tc -toc -pp
 CYC_FLAGS:= -tc -toc -up
 
-all: $(OUT_PREFIX)$(CYCLIB)
+all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 
 $(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).o)
 	-rm -f $@
@@ -31,6 +31,9 @@ $(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).o)
 
 precore_c.h: precore.h $(CYCC)
 	$(CYCC) $(CYC_FLAGS_PP) -nocyc -noremoveunused -noexpandtypedefs $< | grep -v __sFILE > $@
+
+xml/libxml.a: 
+	$(MAKE) -C xml CYCC=../$(CYCC)
 
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lineno.c : $(OUT_PREFIX)lineno.cyc $(CYCC)
@@ -56,6 +59,7 @@ clean:
 	rm -f $(addprefix *, $(C_LIBS) $(O_LIBS) $(RUNTIME).o $(CYCLIB))
 	rm -f $(addprefix *, precore_c.h lineno.cyc)
 	rm -f *~ *.output *.stackdump
+	$(MAKE) clean -C xml
 
 # dependencies -- maintained by hand for now
 PRECORE_H   := precore.h
