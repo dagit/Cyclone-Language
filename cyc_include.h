@@ -49,6 +49,7 @@ extern void _npop_handler(int);
 extern void _pop_handler();
 extern void _pop_region();
 extern void _throw(void * e);
+extern struct _xtunion_struct *_exn_thrown;
 
 //// Built-in Exceptions
 extern struct _xtunion_struct _Null_Exception_struct;

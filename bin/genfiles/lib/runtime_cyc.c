@@ -57,6 +57,9 @@ struct _tagged_string xprintf(char *fmt, ...) {
 // Need one of these per thread (we don't have threads)
 static struct _RuntimeStack *_current_handler = NULL;
 
+// Need one per thread
+struct _xtunion_struct *_exn_thrown = NULL;
+
 // create a new handler, put it on the stack, and return it so its
 // jmp_buf can be filled in by the caller
 void _push_handler(struct _handler_cons * new_handler) {
@@ -110,15 +113,16 @@ void _pop_region() {
   }
   _npop_handler(0);
 }
-void throw(void* e) {
+void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   struct _handler_cons *my_handler;
   while (_current_handler->tag != 0)
     _pop_region();
   my_handler = (struct _handler_cons *)_current_handler;
   _pop_handler();
-  longjmp(my_handler->handler,(int)e);
+  _exn_thrown = e;
+  longjmp(my_handler->handler,1);
 }
-void _throw(void* e) {
+void _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   throw(e);
 }
 
@@ -318,16 +322,15 @@ extern int Cyc_main(int argc, struct _tagged_argv argv);
 int main(int argc, char **argv) {
   // install outermost exception handler
   struct _handler_cons top_handler;
-  int status = setjmp(top_handler.handler);
+  int status = 0;
+  if (setjmp(top_handler.handler)) status = 1;
   _push_handler(&top_handler);
-  if(status) {
-    // void and value variants are different now
-    struct _xtunion_struct * exn = (struct _xtunion_struct *)status;
-    char * exn_name;
-    if(exn->tag == 0)
-      exn_name = (((char *)exn)+4);
+  if (status) {
+    char *exn_name;
+    if(_exn_thrown->tag == 0)
+      exn_name = (((char *)_exn_thrown)+4);
     else
-      exn_name = exn->tag + 4;
+      exn_name = _exn_thrown->tag + 4;
     fprintf(stderr,"Uncaught exception %s\n",exn_name);
     return 1;
   }
