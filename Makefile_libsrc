@@ -28,8 +28,8 @@ LIBR:=$(CYCLIB)
 #   If cyc_include.h is being changed, the new version should be in
 #   lib/cyc_include.h; the -B$(LIB_PATH) makes sure we use that one.
 #   On the other hand if there is no lib/cyc_include.h, then a rule
-#   below will copy bin/cyc-lib/cyc_include.h to the current directory,
-#   and the -B. ensures we use that one.
+#   below will copy bin/lib/cyc-lib/cyc_include.h to the current
+#   directory, and the -B. ensures we use that one.
 override CYCFLAGS += $(addprefix -I, $(INC_PATH)) -B. -B$(LIB_PATH) -save-c
 
 CYC_SRCS := $(addsuffix .cyc, $(CYCLONE_SRCS))
@@ -44,23 +44,23 @@ cfiles: cstdio.h csignal.h $(C_SRCS) cycdoc.c buildlib.c $(C_LIBS) cstubs.c $(RU
 $(CYCCOMP): $(O_SRCS) $(LIBR) install_path.$(O)
 ifdef MS
 #FIX: Ignore fewer flags.
-	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/cyc-lib/gc.lib
+	cl /Fe$@ $(CYC_LIB_PATH)/snprintf.obj $^ $(CYCDIR)/bin/lib/cyc-lib/gc.lib
 else
-	$(CYCC) $(CYCFLAGS) -v -B. -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) $(CYCFLAGS) -v -L. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 endif
 
-# Why do these want two -B arguments -- because the first one makes sure
-#  that we pick up the libcyc.a of the current directory and the second
-#  makes sure we pick up the gc.a of the current $(CYCDIR), and we avoid
-#  the libcyc.a and gc.a of any version of Cyclone currently installed
-#  in the usual place.
+# The -L. makes sure that we pick up the libcyc.a of the current
+#   directory.  The -B makes sure we pick up the gc.a of the current
+#   $(CYCDIR), and we avoid the libcyc.a and gc.a of any version of
+#   Cyclone currently installed in the usual place.
 # Why don't these use $(CYCFLAGS) -- because that has -save-c which is
-#  irrelevant and does not have a needed -B
+#  irrelevant and the -B flags used there are to find cyc_include.h,
+#  not the .a files.
 cycdoc$(EXE): $(addsuffix .$(O), $(CYCDOC_SRCS))
-	$(CYCC) -v -B. -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) -v -L. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 
 buildlib$(EXE): $(addsuffix .$(O), $(BUILDLIB_SRCS)) install_path.$(O)
-	$(CYCC) -v -B. -B$(CYCDIR)/bin/cyc-lib -o $@ $^ $(LDFLAGS)
+	$(CYCC) -v -L. -B$(CYCDIR)/bin/lib/cyc-lib -o $@ $^ $(LDFLAGS)
 
 install_path.c: $(CYCDIR)/.version $(CYCDIR)/Makefile.inc
 	 (echo "char *Carch = \"$(ARCH)\";"; \
@@ -89,7 +89,7 @@ nogc.a: nogc.o
 	@echo Trying ranlib, if not found, probably ok to ignore error messages
 	-ranlib $@
 
-cyc_include.h: $(CYCDIR)/bin/cyc-lib/cyc_include.h
+cyc_include.h: $(CYCDIR)/bin/lib/cyc-lib/cyc_include.h
 	cp $< $@
 
 core.h: $(CYCDIR)/include/core.h
