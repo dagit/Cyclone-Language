@@ -1,5 +1,8 @@
 include ../../Makefile.inc
 
+OLDCFLAGS := $(CFLAGS)
+CFLAGS += -O3
+
 # I don't know why these need to be repeated here, but they do
 CYC_LIB_PATH=$(CYCDIR)/bin/cyc-lib
 CYC_BIN_PATH=$(CYCDIR)/bin
@@ -22,7 +25,7 @@ $(CYC_BIN_PATH)/cycdoc$(EXE): $(ARCH)/src/cycdoc$(EXE)
 $(CYC_BIN_PATH)/buildlib$(EXE): $(ARCH)/src/buildlib$(EXE)
 	cp $< $@
 
-install_a: $(CYC_LIB_PATH)/libcyc_a.a $(CYC_LIB_PATH)/nogc_a.a
+install_a: $(ARCH) $(CYC_LIB_PATH)/libcyc_a.a $(CYC_LIB_PATH)/nogc_a.a
 
 $(CYC_LIB_PATH)/libcyc_a.a: $(ARCH)/lib/libcyc_a.a
 	cp $< $@
@@ -71,7 +74,7 @@ $(ARCH)/src/install_path.c: ../../Makefile.inc
 	@(echo "char *Cdef_inc_path = \"$(INC_INSTALL)\";"; \
 	  echo "char *Carch = \"$(ARCH)\";"; \
 	  echo "char *Cdef_lib_path = \"$(LIB_INSTALL)\";"; \
-	  echo "char *Ccflags = \"$(CFLAGS)\";"; \
+	  echo "char *Ccflags = \"$(OLDCFLAGS)\";"; \
 	  echo "char *Ccomp = \"$(CC)\";") > $@
 
 clean_arch:
@@ -83,10 +86,15 @@ clean:
 	if [ -d "$$arch" ]; then $(MAKE) clean_arch ARCH=$$arch; fi; \
 	done
 
+# specific file rules
+
+$(ARCH)/src/%.o: $(ARCH)/src/%.c
+	$(CC) $(OLDCFLAGS) -c -o $@ $<
+
 # general rules
 
 a_%.o: %.c
-	$(CC) -c  -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
+	$(CC) -c -o $@ -DCYC_REGION_PROFILE $(CFLAGS) $<
 
 # for creating genfiles from patches
 

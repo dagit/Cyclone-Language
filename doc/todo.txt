@@ -1,5 +1,11 @@
 Todo list:
 
+CONFIGURATION BUGS:
+------------------
+* when building on an architecture that uses a .patch file, need to
+  not remove the bin/genfiles directory after it's been extracted
+  and built.  This currently screws up make install.
+
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * there's a bug in control-flow checking of catch-phrases.  If you leave
