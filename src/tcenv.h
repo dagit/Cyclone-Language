@@ -96,6 +96,7 @@ extern struct Tenv<`g::R,`l::R> {
   Dict::dict_t<list_t<var_t>,genv_t<`g>,`g> ae; 
   struct Fenv<`l> *`l le; // local environment
   bool allow_valueof;   // controls whether we allow valueof(T) in an expr
+  bool in_extern_c_include;
 };
 typedef struct Tenv<`g,`l> @`l tenv_t<`g,`l>; 
 
@@ -133,6 +134,7 @@ extern enumdecl_t@       lookup_enumdecl(tenv_t,seg_t,qvar_t);
 extern typedefdecl_t     lookup_typedefdecl(tenv_t,seg_t,qvar_t);
 
 extern tenv_t<`g,`r2> allow_valueof(region_t<`r2>,tenv_t<`g,`r>: {`r} > `r2);
+extern tenv_t<`g,`r2> enter_extern_c_include(region_t<`r2>,tenv_t<`g,`r>: {`r} > `r2);
 
 enum NewStatus { NoneNew, InNew, InNewAggr };  
 extern tenv_t<`g,`r2> set_new_status(region_t<`r2>,enum NewStatus status, 

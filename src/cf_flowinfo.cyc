@@ -1437,6 +1437,7 @@ bool contains_region(killrgn_t rgn, type_t t) {
   // question.
   case &RgnHandleType(t2): return false;
   case &ValueofType(_): return false;
+  case &TypeofType(_): return false;
   }
 }
 

@@ -495,7 +495,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         //  are in scope)
         let bound_vars = (!is_local) ? NULL : lookup_type_vars(te);
         let allow_evars = (!is_local) ? false : true;
-        check_type(s0->loc,te,bound_vars,&tmk,allow_evars,t);
+        check_type(s0->loc,te,bound_vars,&tmk,allow_evars,true,t);
         vd->tq.real_const = extract_const_from_typedef(s0->loc,
                                                        vd->tq.print_const,t);
         let te2 = add_local_var(decl_rgn,s->loc,te,vd);
@@ -593,7 +593,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
             terr(d->loc, "cannot declare a qualified local variable");
             break;
           }
-          check_type(s0->loc,te2,lookup_type_vars(te2),&tmk,true,t);
+          check_type(s0->loc,te2,lookup_type_vars(te2),&tmk,true,true,t);
           te2 = add_local_var(decl_rgn,s->loc,te2,vd);
         }
         tcStmt(set_encloser(decl_rgn,te2,s0),s,false);
@@ -621,7 +621,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
                                   list(rgn_typ)});
           let exp_type = at_typ(dr_type, outer_rgn, 
                                 empty_tqual(0),false_conref);
-          check_type(s0->loc,te,lookup_type_vars(te),&tmk,true,exp_type);
+          check_type(s0->loc,te,lookup_type_vars(te),&tmk,true,false,exp_type);
           let key_typ = tcExp(te,&exp_type,open_exp_opt);
           if (!unify(exp_type,key_typ) && 
               !coerce_assign(te,open_exp_opt,exp_type))
@@ -636,7 +636,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           te2 = add_type_vars(decl_rgn,s0->loc,te2,new List(tv,NULL));
         }
         te2 = add_region(decl_rgn, te2, rgn_typ, resetable, true);
-        check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,*t);
+        check_type(s0->loc,te,lookup_type_vars(te2),&bk,true,false,*t);
         if (!unify(*t,new RgnHandleType(rgn_typ)))
           impos("region stmt: type of region handle is wrong!");
         // we don't push a handler when regions are turned off so we

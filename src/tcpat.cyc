@@ -275,7 +275,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,
 	res.tvars_and_bounds_opt = new $(NULL,NULL);
       (*res.tvars_and_bounds_opt)[0] = 
 	append((*res.tvars_and_bounds_opt)[0],new List(new $(tv,true),NULL));
-      check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,vd->type);
+      check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,false,vd->type);
     }
     // Now we repeat checks for the Var_p case above (except the var's type)
     //   this is the type of the access expression
@@ -819,7 +819,7 @@ void check_pat_regions_rec(tenv_t te, pat_t p, bool did_noalias_deref,
 	  TEMP_RGN(te, r) {
 	    tenv_t te2 = add_type_vars(r,p->loc,te,rlist(r,tv));
 	    te2 = add_region(r, te2, new VarType(tv), false, true);
-//       check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,vd->type);
+//       check_type(p->loc,te2,lookup_type_vars(te2),&tmk,true,false,vd->type);
 	    check_alias_coercion(te2,p->loc,(type_t)eopt->topt,tv,
 				 vd->type,(exp_t)eopt);
 	  }

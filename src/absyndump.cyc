@@ -550,6 +550,7 @@ void dumpntyp(type_t t) {
   case &AnonEnumType(fs): dump("enum {"); dumpenumfields(fs); dump("}"); return;
   case &TypedefType(n,ts,_,_):  dumpqvar(n), dumptps(ts); return;
   case &ValueofType(e): dump("valueof_t("); dumpexp(e); dump(")"); return;
+  case &TypeofType(e): dump("typeof("); dumpexp(e); dump(")"); return;
   case &RgnHandleType(rgn): 
     dump("region_t<"); dumprgn(rgn); dump(">"); return;
   case &DynRgnType(r1,r2): dump("dynregion_t<"); dumprgn(r1);

@@ -438,6 +438,8 @@ namespace Absyn {
     // enter the declaration into the environment and then only use the
     // type_t part from then on.  
     TypeDeclType(type_decl_t,type_t*); 
+    // GCC extension
+    TypeofType(exp_t);
   };
   extern_datacon(Type,HeapRgn);
   extern_datacon(Type,UniqueRgn);
@@ -491,6 +493,7 @@ namespace Absyn {
     Noconsume_att(int); // param that will *not* be consumed by the function
     Pure_att;
     Mode_att(string_t);
+    Alias_att(string_t);
   };
   extern_datacon(Attribute,Stdcall_att);      
   extern_datacon(Attribute,Cdecl_att);        
@@ -838,6 +841,9 @@ namespace Absyn {
     list_t<tvar_t>        tvs;  // type parameters
     struct AggrdeclImpl * impl; // NULL when abstract
     attributes_t          attributes; 
+    // when expected_mem_kind is true, the aggregate must eventually be 
+    // defined and result in a &mk definition.
+    bool                  expected_mem_kind; 
   };
 
   EXTERN_ABSYN struct Datatypefield {
@@ -874,6 +880,7 @@ namespace Absyn {
     opt_t<kind_t>  kind;
     type_opt_t     defn;
     attributes_t   atts;
+    bool           extern_c;
   };
 
   // raw declarations

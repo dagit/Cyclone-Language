@@ -305,6 +305,7 @@ static void set_all_warnings() {
   NewControlFlow::warn_lose_unique = true;
   Tcutil::warn_alias_coerce = true;
   Tcutil::warn_region_coerce = true;
+  Tc::aggressive_warn = true;
 }
 
 /* This only works enough to support cycdoc so far */

@@ -503,7 +503,7 @@ type_t file_typ() {
 
   if(file_t_opt == NULL) {
     typedef_name_t file_t_name = new $(Abs_n(NULL,false), sf);
-    aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL);
+    aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL,false);
     type_t file_struct_typ = new AggrType(AggrInfo(KnownAggr(new sd),NULL));
     file_t_opt = new at_typ(file_struct_typ,&HeapRgn_val,empty_tqual(0),
                             false_conref);
@@ -833,7 +833,8 @@ decl_t aggr_decl(aggr_kind_t k, scope_t s, typedef_name_t n,
 		 list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
 		 attributes_t atts, seg_t loc) {
   return new_decl(new Aggr_d(new Aggrdecl {.kind = k, .sc=s, .name=n, .tvs=ts,
-					   .impl=i, .attributes = atts}),
+					   .impl=i, .attributes = atts,
+                                              .expected_mem_kind = false}),
 		  loc);
 }
 type_decl_t aggr_tdecl(aggr_kind_t k, scope_t s, typedef_name_t n,
@@ -841,7 +842,9 @@ type_decl_t aggr_tdecl(aggr_kind_t k, scope_t s, typedef_name_t n,
 		 attributes_t atts, seg_t loc) {
   return new TypeDecl(new Aggr_td(new Aggrdecl {.kind = k, .sc=s, .name=n, 
                                                 .tvs=ts, .impl=i, 
-                                                   .attributes = atts}),loc);
+                                                .attributes = atts,
+                                                .expected_mem_kind = false}),
+                      loc);
 }
 decl_t struct_decl(scope_t s,typedef_name_t n,
 		   list_t<tvar_t,`H> ts, struct AggrdeclImpl *`H i,
@@ -1021,6 +1024,7 @@ string_t attribute2string(attribute_t a) {
   case &Noconsume_att(n): return aprintf("noconsume(%d)",n);
   case &Pure_att: return "pure";
   case &Mode_att(s): return aprintf("__mode__(\"%s\")",s); 
+  case &Alias_att(s): return aprintf("alias(\"%s\")",s); 
  }
 }
 
@@ -1058,7 +1062,7 @@ stringptr_t fieldname(int i) {
 $(aggr_kind_t,qvar_t) aggr_kinded_name(union AggrInfoU info) {
   switch(info) {
   case {.UnknownAggr = $(ak,n,_)}: return $(ak,n);
-  case {.KnownAggr = &&Aggrdecl(k,_,n,_,_,_)}: return $(k,n);
+  case {.KnownAggr = &&Aggrdecl(k,_,n,_,_,_,_)}: return $(k,n);
   }
 }
 aggrdecl_t get_known_aggrdecl(union AggrInfoU info) {

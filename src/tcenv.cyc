@@ -104,6 +104,7 @@ struct Tenv<`g::R,`l::R> {
   Dict::dict_t<list_t<var_t,`H>,genv_t<`g>,`g> ae; // absolute identifiers
   struct Fenv<`l> *`l le; // local environment
   bool allow_valueof;   // controls whether we allow valueof(T) in an expr
+  bool in_extern_c_include;
 };
 // Region notes:  we leave ns heap-allocated because this gets
 // plugged into all of the variables in the AST.  Similarly, the
@@ -262,7 +263,7 @@ tenv_t<`r,`r> tc_init(region_t<`r> r) {
 
   Dict::dict_t<list_t<var_t,`H>,genv_t<`r>,`r> ae =
     Dict::insert(Dict::rempty(r,varlist_cmp), NULL, ge);
-  return rnew(r) Tenv(NULL,ae,NULL,false);
+  return rnew(r) Tenv(NULL,ae,NULL,false,false);
 }
 
 // Lookup a namespace relative to the current namespace
@@ -534,11 +535,11 @@ region_t<`r> get_fnrgn(tenv_t<`g,`r> te) {
 
 static tenv_t<`g,`l> put_fenv(region_t<`l> l, tenv_t<`g,`l2> te, fenv_t<`l> fe) {
   if (te->le == NULL) env_err("put_fenv");
-  return rnew(l) Tenv(te->ns, te->ae, fe, te->allow_valueof);
+  return rnew(l) Tenv(te->ns, te->ae, fe, te->allow_valueof, te->in_extern_c_include);
 }
 
 static tenv_t<`g,`l> put_emptyfenv(region_t<`l> l,tenv_t<`g,`l2> te) {
-  return rnew(l) Tenv(te->ns, te->ae, NULL, te->allow_valueof);
+  return rnew(l) Tenv(te->ns, te->ae, NULL, te->allow_valueof, te->in_extern_c_include);
 }
 
 static fenv_t<`l> copy_fenv_old_ctrl(region_t<`l> l, fenv_t<`l2> f : {`l2}>`l)
@@ -999,10 +1000,18 @@ stmt_t get_encloser(tenv_t te) {
 
 tenv_t<`g,`r2> allow_valueof(region_t<`r2> r2, tenv_t<`g,`r> te : {`r} > `r2) {
   if (te->le == NULL)
-    return rnew(r2) Tenv(te->ns, te->ae, NULL, true);
+    return rnew(r2) Tenv(te->ns, te->ae, NULL, true,te->in_extern_c_include);
   let Fenv{<`f,`c> s,t,r,l,e,ce,cp,cr,flags,_} = *te->le;
   let fe = rnew(r2) Fenv{s,t,r,(bnds_t<`r2>)l,e,ce,cp,cr,flags,r2};
-  return rnew(r2) Tenv(te->ns, te->ae, fe, true);
+  return rnew(r2) Tenv(te->ns, te->ae, fe, true,te->in_extern_c_include);
+}
+
+tenv_t<`g,`r2> enter_extern_c_include(region_t<`r2> r2, tenv_t<`g,`r> te : {`r} > `r2) {
+  if (te->le == NULL)
+    return rnew(r2) Tenv(te->ns, te->ae, NULL, te->allow_valueof, true);
+  let Fenv{<`f,`c> s,t,r,l,e,ce,cp,cr,flags,_} = *te->le;
+  let fe = rnew(r2) Fenv{s,t,r,(bnds_t<`r2>)l,e,ce,cp,cr,flags,r2};
+  return rnew(r2) Tenv(te->ns, te->ae, fe, te->allow_valueof, true);
 }
 
 tenv_t<`g,`r> set_encloser(region_t<`r> r, tenv_t<`g,`r2> te, stmt_t s :

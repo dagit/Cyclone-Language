@@ -850,7 +850,7 @@ static decl_t v_typ_to_typedef(seg_t loc, $(qvar_t,tqual_t,type_t,list_t<tvar_t,
   }
   return new_decl(new Typedef_d(new Typedefdecl{.name=x, .tvs=tvs, .kind=kind,
                                                 .defn=type, .atts=atts,
-                                                .tq=tq}),
+                                                .tq=tq, .extern_c = false}),
 		  loc);
 }
 
@@ -878,7 +878,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
   let Declaration_spec(_,tq,tss,_,atts) = ds;
   if (tq.loc == 0) tq.loc = tqual_loc;
   if (ds.is_inline)
-    err("inline is allowed only on function definitions",loc);
+    Tcutil::warn(loc,"inline qualifier on non-function definition");
 
   scope_t s = Public;
   bool istypedef = false;
@@ -927,7 +927,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
       return new List(new_decl(new Datatype_d(dd),loc),NULL);
     case &AggrType(AggrInfo({.UnknownAggr = $(k,n,_)},ts)):
       let ts2 = List::map_c(typ2tvar,loc,ts);
-      let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL);
+      let ad  = new Aggrdecl(k,s,n,ts2,NULL,NULL,false);
       if (atts != NULL) err("bad attributes on type declaration",loc);
       return new List(new_decl(new Aggr_d(ad),loc),NULL);
     case &DatatypeType(DatatypeInfo({.KnownDatatype = tudp},_)):
@@ -1085,7 +1085,7 @@ using Parse;
 %token AUTO REGISTER STATIC EXTERN TYPEDEF VOID CHAR SHORT INT LONG FLOAT
 %token DOUBLE SIGNED UNSIGNED CONST VOLATILE RESTRICT
 %token STRUCT UNION CASE DEFAULT INLINE SIZEOF OFFSETOF
-%token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM
+%token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM TYPEOF
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH EXPORT
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
@@ -1590,6 +1590,9 @@ attribute:
     } else if (zstrcmp(s,"__mode__") == 0) {
       string_t str = exp2string(SLOC(@3),e);
       a = new Mode_att(str);
+    } else if (zstrcmp(s,"alias") == 0) {
+      string_t str = exp2string(SLOC(@3),e);
+      a = new Alias_att(str);
     }
     else {
       int n = exp2int(SLOC(@3),e);
@@ -1643,9 +1646,6 @@ type_specifier:
 
 type_specifier_notypedef:
   VOID      { $$=^$(type_spec(&VoidType_val,SLOC(@1))); }
-| '_'       { $$=^$(type_spec(new_evar(NULL,NULL),SLOC(@1))); }
-| '_' COLON_COLON kind 
-  { $$=^$(type_spec(new_evar(Tcutil::kind_to_opt($3),NULL),LOC(@1,@3))); }
 | CHAR      { $$=^$(type_spec(char_typ,SLOC(@1))); }
 | SHORT     { $$=^$(short_spec(SLOC(@1))); }
 | INT       { $$=^$(type_spec(sint_typ,SLOC(@1))); }
@@ -1656,11 +1656,17 @@ type_specifier_notypedef:
 | UNSIGNED  { $$=^$(unsigned_spec(SLOC(@1))); }
 | enum_specifier { $$=$!1; }
 | struct_or_union_specifier { $$=$!1; }
+/* GCC extension */
+| TYPEOF '(' expression ')'
+   { $$=^$(type_spec(new TypeofType($3),LOC(@1,@4))); }
 /* Cyc: added datatypes */
 | datatype_specifier { $$=$!1; }
 /* Cyc: added type variables and optional type parameters to typedef'd names */
 | type_var { $$=^$(type_spec($1, SLOC(@1))); }
 /* Cyc: everything below here is an addition */
+| '_'       { $$=^$(type_spec(new_evar(NULL,NULL),SLOC(@1))); }
+| '_' COLON_COLON kind 
+  { $$=^$(type_spec(new_evar(Tcutil::kind_to_opt($3),NULL),LOC(@1,@3))); }
 | '$' '(' parameter_list ')'
     { $$=^$(type_spec(new TupleType(List::map_c(get_tqual_typ,
                                                 SLOC(@3),List::imp_rev($3))),
@@ -1682,6 +1688,7 @@ type_specifier_notypedef:
   { $$=^$(type_spec(new TagType(new_evar(&Tcutil::iko, NULL)),SLOC(@1))); }
 | VALUEOF_T '(' expression ')'
   { $$=^$(type_spec(new ValueofType($3),LOC(@1,@4))); }
+
 ;
 
 /* Cyc: new */
@@ -2550,10 +2557,12 @@ selection_statement:
 switch_clauses:
   /* empty */
     { $$=^$(NULL); }
-| DEFAULT ':' block_item_list
-    { $$=^$(new List(new Switch_clause(new_pat(&Wild_p_val,SLOC(@1)),NULL,
+| DEFAULT ':' block_item_list switch_clauses
+    { // JGM: some linux code has defaults coming before other
+      // cases.
+      $$=^$(new List(new Switch_clause(new_pat(&Wild_p_val,SLOC(@1)),NULL,
                                        NULL,$3,LOC(@1,@3)),
-		     NULL));}
+		     $4));}
 | CASE exp_pattern ':' switch_clauses
     { $$=^$(new List(new Switch_clause($2,NULL,NULL,
                                        fallthru_stmt(NULL,SLOC(@3)),
@@ -3097,6 +3106,8 @@ postfix_expression:
     { $$=^$(post_inc_exp($1,LOC(@1,@2))); }
 | postfix_expression DEC_OP
     { $$=^$(post_dec_exp($1,LOC(@1,@2))); }
+| '(' type_name ')' '{' '}'
+    { $$=^$(new_exp(new CompoundLit_e($2,NULL),LOC(@1,@5))); }
 | '(' type_name ')' '{' initializer_list '}'
     { $$=^$(new_exp(new CompoundLit_e($2,List::imp_rev($5)),LOC(@1,@6))); }
 | '(' type_name ')' '{' initializer_list ',' '}'

@@ -1250,7 +1250,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
         // now allows partial instantiation
         for (; ts != NULL && tvars != NULL; ts = ts->tl, tvars = tvars->tl) {
           kind_t k = tvar_kind(tvars->hd,&bk);
-          check_type(loc,te,lookup_type_vars(te),k,true,ts->hd);
+          check_type(loc,te,lookup_type_vars(te),k,true,true,ts->hd);
           check_no_qual(loc,ts->hd);
           instantiation =
             rnew(temp) List(rnew(temp) $(tvars->hd,ts->hd),instantiation);
@@ -1286,7 +1286,7 @@ static type_t tcInstantiate(tenv_t te, seg_t loc, type_t * topt,
 static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
                      coercion_t *c) {
   check_type(loc,te,lookup_type_vars(te),
-	     abstract_val_ok(te) ? &tak : &tmk,true,t);
+	     abstract_val_ok(te) ? &tak : &tmk,true,false,t);
   check_no_qual(loc,t);
   //  tcExp(te,NULL,e);
   tcExp(te,&t,e);
@@ -1412,7 +1412,7 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
     // we shouldn't check the type yet -- it will be done later.
     return uint_typ;
   }
-  check_type(loc,te,lookup_type_vars(te),&tmk,true,t);
+  check_type(loc,te,lookup_type_vars(te),&tmk,true,false,t);
   check_no_qual(loc,t);
   if(!Evexp::okay_szofarg(t))
     terr(loc, "sizeof applied to type %s, which has unknown size here",
@@ -1439,7 +1439,7 @@ type_opt_t structfield_type(field_name_t n, aggrfield_t sf) {
 // FIX?: check if t is allowed to be a union type
 static type_t tcOffsetof(tenv_t te, seg_t loc, type_t * topt,
 			 type_t t_orig, list_t<offsetof_field_t> fs) {
-  check_type(loc,te,lookup_type_vars(te),&tmk,true,t_orig);
+  check_type(loc,te,lookup_type_vars(te),&tmk,true,false,t_orig);
   check_no_qual(loc,t_orig);
   let l = fs;
   let t = t_orig;
@@ -1985,7 +1985,7 @@ static type_t tcComprehensionNoinit(tenv_t te, seg_t loc, type_t * topt,
         break;
       }
     // make sure the expected topt unifies with the declared one
-    check_type(loc,te,lookup_type_vars(te),&tmk,true,t);
+    check_type(loc,te,lookup_type_vars(te),&tmk,true,true,t);
     if (topt2 != NULL) unify(*topt2,t);
     // the bound must be a constant expression at top-level
     if (te->le == NULL) {
@@ -2091,7 +2091,7 @@ static type_t tcAggregate(tenv_t te, seg_t loc, type_t * topt,
     let ex_ts = exist_typs;
     while(user_ex_ts != NULL && ex_ts != NULL) {
       // FIX: allow other kinds
-      check_type(loc,te2,lookup_type_vars(te2),&ak,true,user_ex_ts->hd);
+      check_type(loc,te2,lookup_type_vars(te2),&ak,true,false,user_ex_ts->hd);
       check_no_qual(loc,user_ex_ts->hd);
       unify(user_ex_ts->hd,ex_ts->hd);
       user_ex_ts = user_ex_ts->tl;
@@ -2246,6 +2246,7 @@ static bool zeroable_type(type_t t) {
   case &RgnHandleType(_): return false;
 
   case &TypeDeclType(...):
+  case &TypeofType(_):
   case &ValueofType(_):
   case &HeapRgn:
   case &UniqueRgn:
@@ -2329,7 +2330,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
   if (*is_calloc) {
     if (*t == NULL) impos("calloc with empty type");
     elt_type = **t;
-    check_type(loc,te,lookup_type_vars(te),&tmk,true,elt_type);
+    check_type(loc,te,lookup_type_vars(te),&tmk,true,false,elt_type);
     check_no_qual(loc,elt_type);
     check_malloc_type(true,loc,topt,elt_type);
     num_elts = *e;

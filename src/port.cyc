@@ -855,7 +855,8 @@ static $(struct Aggrdecl @,cfields_t)@ lookup_struct_decl(cenv_t env,
     return *popt;
   else {
     let ad = new Aggrdecl{.kind = StructA, .sc = Public, .name = n,
-                          .tvs = NULL, .impl = NULL, .attributes = NULL};
+                          .tvs = NULL, .impl = NULL, .attributes = NULL,
+                          .expected_mem_kind = false};
     $(struct Aggrdecl @,cfields_t)@ p = new $(ad,NULL);
     env->gcenv->struct_dict = Dict::insert(env->gcenv->struct_dict, n, p);
     return p;
@@ -871,7 +872,8 @@ static $(struct Aggrdecl @,cfields_t)@ lookup_union_decl(cenv_t env,
     return *popt;
   else {
     let ad = new Aggrdecl{.kind = UnionA, .sc = Public, .name = n,
-                          .tvs = NULL, .impl = NULL, .attributes = NULL};
+                          .tvs = NULL, .impl = NULL, .attributes = NULL,
+                          .expected_mem_kind = false};
     $(struct Aggrdecl @,cfields_t)@ p = new $(ad,NULL);
     env->gcenv->union_dict = Dict::insert(env->gcenv->union_dict, n, p);
     return p;

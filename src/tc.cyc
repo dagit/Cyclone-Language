@@ -47,6 +47,10 @@ namespace Tc;
 static string_t tc_msg_c = "";
 static string_t * tc_msg = &tc_msg_c;
 
+// used to control when we warn for bits-only unions, shadowing
+// a struct name with a variable, etc.
+bool aggressive_warn = false;
+
 static bool export_member(qvar_t x, list_t<$(seg_t,qvar_t,bool)@> exports) {
   for (; exports != NULL; exports = exports->tl) {
     let p = exports->hd;
@@ -285,14 +289,17 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
                                         new $(new VarRes(b), true));
       return;
     case &AggrRes(_): 
-      warn(loc,"variable declaration shadows previous struct declaration");
+      if (aggressive_warn)
+        warn(loc,"variable declaration shadows previous struct declaration");
       break;
     case &DatatypeRes(_,_): 
-      warn(loc,"variable declaration shadows previous datatype constructor");
+      if (aggressive_warn)
+        warn(loc,"variable declaration shadows previous datatype constructor");
       break;
     case &AnonEnumRes(_,_): 
     case &EnumRes(_,_): 
-      warn(loc,"variable declaration shadows previous enum tag");
+      if (aggressive_warn)
+        warn(loc,"variable declaration shadows previous enum tag");
       break;
     }
   } catch { case &Dict::Absent: break; }
@@ -311,19 +318,18 @@ static bool is_main(qvar_t n) {
 }
 
 static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
-                     bool in_cinclude,
                      list_t<$(seg_t,qvar_t,bool)@>* exports) {
   var_t   v  = (*fd->name)[1];
 #ifdef DEBUG
   fprintf(stderr,"type-checking fndecl %s\n",*v); fflush(stderr);
 #endif
-  if(fd->sc == ExternC && !in_cinclude)
+  if(fd->sc == ExternC && !te->in_extern_c_include)
     terr(loc,"extern \"C\" functions cannot be implemented in Cyclone");
 
   switch ((*fd->name)[0]) {
   case {.Rel_n = NULL}: 
     // expand to qualified name
-    (*fd->name)[0] = Abs_n(te->ns, (fd->sc == ExternC) || in_cinclude);
+    (*fd->name)[0] = Abs_n(te->ns, (fd->sc == ExternC) || te->in_extern_c_include);
     break;
   default: 
     break;
@@ -380,14 +386,14 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   }
 
   // ignore C bodies 
-  if (in_cinclude) return;
+  if (te->in_extern_c_include) return;
 
   // DAN: Here is where I'm assuming the te can be imperatively screwed with
   //      while we're dealing with top-level stuff (though it's not too hard
   //      to undo that assumption)
   region fnrgn; {
     let fenv = new_fenv(fnrgn,loc,fd);
-    let te = rnew(fnrgn) Tenv{te->ns, te->ae, fenv, false};
+    let te = rnew(fnrgn) Tenv{te->ns, te->ae, fenv, false, false};
     // check the body, then get rid of local environment
     try {
       Tcstmt::tcStmt(te,fd->body,false);
@@ -465,7 +471,7 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   switch ((*td->name)[0]) {
   case {.Rel_n = _}: 
     // expand to qualified name
-    (*td->name)[0] = Abs_n(te->ns, false);
+    (*td->name)[0] = Abs_n(te->ns, td->extern_c);
     break;
   default: break;
   }
@@ -478,7 +484,7 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   check_unique_tvars(loc,td->tvs);
   add_tvar_identities(td->tvs);
   if (td->defn != NULL) {
-    check_type(loc,te,td->tvs,&tak,false,(type_t)td->defn);
+    check_type(loc,te,td->tvs,&tak,false,true,(type_t)td->defn);
     td->tq.real_const = 
       extract_const_from_typedef(loc,td->tq.print_const,(type_t)td->defn);
     // FIX: check that attributes are okay for this kind of type
@@ -517,8 +523,8 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc,
     // FIX?: forbid effect variables (but they're going away)
     for(; rpo != NULL; rpo = rpo->tl) {
       let &$(e,r) = rpo->hd;
-      check_type(loc,te,tvs,&ek,false,e);
-      check_type(loc,te,tvs,&trk,false,r); 
+      check_type(loc,te,tvs,&ek,false,false,e);
+      check_type(loc,te,tvs,&trk,false,false,r); 
    }
 
     list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
@@ -541,7 +547,7 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc,
       if (str_or_union == UnionA || 
 	  (fs->tl == NULL && str_or_union == StructA)) 
         field_kind = &tak; // we allow abstract kind for the last field
-      check_type(loc,te,tvs,field_kind,false,t);
+      check_type(loc,te,tvs,field_kind,false,false,t);
 
       fs->hd->tq.real_const = extract_const_from_typedef(loc,fs->hd->tq.print_const,t);
 
@@ -560,7 +566,7 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc,
                "@requires clause has type %s instead of integral type",
                typ2string((type_t)requires_clause->topt));
         else {
-          check_type(requires_clause->loc,te,tvs,&ik,false,new ValueofType(requires_clause));
+          check_type(requires_clause->loc,te,tvs,&ik,false,false,new ValueofType(requires_clause));
         // convert the requires expression to a CNF formula
           let relns = Relations::exp2relns(uprev_rgn,requires_clause);
 
@@ -662,7 +668,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     // FIX: check rgn_po for well-formed!
     // for the sake of recursive fields, make name abstract in body
     let adp = new (new Aggrdecl(ad->kind, Extern, ad->name, tvs,
-				NULL, ad->attributes));
+				NULL, ad->attributes, false));
     ge->aggrdecls = Dict::insert(ge->aggrdecls, v, adp);
 
     // reject ill-formed type
@@ -686,7 +692,8 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
       // warn when fields of unions are not bits-only -- these can
       // only be written and not read.
       for (_ f = fs; f != NULL; f = f->tl)
-	if (!bits_only(f->hd->type) && f->hd->requires_clause == NULL)
+	if (aggressive_warn &&
+            !bits_only(f->hd->type) && f->hd->requires_clause == NULL)
 	  warn(loc,"member %s of union %s has type %s which is not `bits-only' so it can only be written and not read",
 	       *f->hd->name,*v, typ2string(f->hd->type));
 
@@ -700,7 +707,7 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
     let ad0 = *adp;
     // for the sake of recursive fields, make name abstract in body
     *adp = new Aggrdecl(ad->kind, Extern, ad->name, tvs,
-			NULL, ad->attributes);
+			NULL, ad->attributes, false);
 
     // reject ill-formed type
     // FIX: should be distinct from tvs but these already have
@@ -781,7 +788,7 @@ static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge,
     let f = fs->hd;
 
     for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
-      check_type(f->loc, te, tvs, &tmk, false, (*typs->hd)[1]);
+      check_type(f->loc, te, tvs, &tmk, false, false, (*typs->hd)[1]);
       // make sure no no-alias fields in datatype
       TEMP_RGN(te, temp) {
         if (is_noalias_pointer_or_aggr(temp,(*typs->hd)[1]))
@@ -1057,7 +1064,6 @@ static void resolve_export_namespace(tenv_t te, $(seg_t,qvar_t,bool)@ exp) {
 // FIX: shake out type definitions too.
 static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0, 
 		     bool in_externC, 
-                     bool in_externCinclude,
                      bool check_var_init,
                      region_t<`g> grgn,
                      list_t<$(seg_t,qvar_t,bool)@`H,`H>* exports) {
@@ -1078,30 +1084,34 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
       terr(loc,"top level region declarations are not implemented");
       break;
     case &Var_d(vd):
-      if (in_externC && okay_externC(d->loc,vd->sc,in_externCinclude))
-	vd->sc = ExternC;
-      tcVardecl(te,ge,loc,vd,check_var_init,in_externCinclude,exports);
+      if (in_externC && okay_externC(d->loc,vd->sc,te->in_extern_c_include))
+        vd->sc = ExternC;
+      tcVardecl(te,ge,loc,vd,check_var_init,te->in_extern_c_include,exports);
       break;
     case &Fn_d(fd):
-      if (in_externC && okay_externC(d->loc,fd->sc,in_externCinclude))
+      if (in_externC && okay_externC(d->loc,fd->sc,te->in_extern_c_include))
 	fd->sc = ExternC;
-      tcFndecl(te,ge,loc,fd,in_externCinclude,exports);
+      tcFndecl(te,ge,loc,fd,exports);
       break;
     case &Typedef_d(td):
+      td->extern_c = te->in_extern_c_include;
+      // FIX: if we ever end up with a TypeDeclType inside a type
+      // then it should be entered into the current namespace, unless
+      // it's occurring within in_externC code.  
       tcTypedefdecl(te,ge,loc,td);
       break;
     case &Aggr_d(ad):
-      if (in_externC &&  okay_externC(d->loc,ad->sc,in_externCinclude))
+      if (in_externC &&  okay_externC(d->loc,ad->sc,te->in_extern_c_include))
 	ad->sc = ExternC;
       tcAggrdecl(te,ge,loc,ad);
       break;
     case &Datatype_d(tud):
-      if (in_externC && okay_externC(d->loc,tud->sc,in_externCinclude))
+      if (in_externC && okay_externC(d->loc,tud->sc,te->in_extern_c_include))
 	tud->sc = ExternC;
       tcDatatypedecl(te,ge,loc,tud);
       break;
     case &Enum_d(ed):
-      if (in_externC && okay_externC(d->loc,ed->sc,in_externCinclude))
+      if (in_externC && okay_externC(d->loc,ed->sc,te->in_extern_c_include))
         ed->sc = ExternC;
       tcEnumdecl(te,ge,loc,ed);
       break;
@@ -1122,7 +1132,7 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
       } 
       // Do the nested declarations then restore the namespace
       te->ns = ns2;
-      tc_decls(te,ds2,in_externC,in_externCinclude,check_var_init,grgn,exports);
+      tc_decls(te,ds2,in_externC,check_var_init,grgn,exports);
       te->ns = ns;
       break;
 
@@ -1143,25 +1153,28 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
       }
       let ns2 = resolve_namespace(te,loc,first,rest);
       ge->availables = new List(ns2,ge->availables);
-      tc_decls(te,ds2,in_externC,in_externCinclude,check_var_init,grgn,exports);
+      tc_decls(te,ds2,in_externC,check_var_init,grgn,exports);
       ge->availables = ge->availables->tl;
       break;
 
     case &ExternC_d(ds2):
-      tc_decls(te,ds2,true,in_externCinclude,check_var_init,grgn,exports);
+      tc_decls(te,ds2,true,check_var_init,grgn,exports);
       break;
 
     case &ExternCinclude_d(ds2,exports2):
       List::iter_c(resolve_export_namespace,te,exports2);
       list_t<$(seg_t,qvar_t,bool)@> newexs = 
         List::append(exports2,exports ? *exports : NULL);
-      tc_decls(te,ds2,true,true,check_var_init,grgn,&newexs);
-      // check that all of the exports were actually present
-      for (; exports2 != NULL; exports2 = exports2->tl) {
-        let exp = exports2->hd;
-        if (!(*exp)[2])
-          warn((*exp)[0],"%s is exported but not defined",
-               qvar2string((*exp)[1]));
+      { region temp;
+        let te2 = enter_extern_c_include(temp, te);
+        tc_decls(te2,ds2,true,check_var_init,grgn,&newexs);
+        // check that all of the exports were actually present
+        for (; exports2 != NULL; exports2 = exports2->tl) {
+          let exp = exports2->hd;
+          if (!(*exp)[2])
+            warn((*exp)[0],"%s is exported but not defined",
+                 qvar2string((*exp)[1]));
+        }
       }
       break;
     }
@@ -1171,7 +1184,7 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
 void tc(region_t<`g> g, tenv_t<`g> te, bool check_var_init, 
         list_t<decl_t,`H> ds) {
   set_params(&tc_params_r);
-  tc_decls(te,ds,false,false,check_var_init,g,NULL);
+  tc_decls(te,ds,false,check_var_init,g,NULL);
 }
 
 // for tree-shaking (so we don't include the world)

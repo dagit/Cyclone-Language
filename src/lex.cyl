@@ -45,7 +45,7 @@ extern void yyerror(string_t<`H> s, int state, int token);
 namespace Lex {
 
 bool compile_for_boot_r = false;
-
+bool expand_specials = false;
 // state for recording whether or not we're parsing C code
 static bool in_extern_c = false;
 static list_t<bool,`U> prev_extern_c = NULL;
@@ -204,6 +204,8 @@ static $(string_t,short,bool) rw_array[] = {
   $("throw", THROW, false),
   $("try", TRY, false),
   $("typedef", TYPEDEF, true),
+  $("typeof", TYPEOF, true),
+  $("__typeof__", TYPEOF, true),
   $("union", UNION, true),
   $("unsigned", UNSIGNED, true),
   $("__unsigned__", UNSIGNED, true),
@@ -1110,9 +1112,20 @@ and strng = parse
   | "\\a"           { store_string_char('\a'); return 1; }
   | "\\b"           { store_string_char('\b'); return 1; }
   | "\\f"           { store_string_char('\f'); return 1; }
-  | "\\n"           { store_string_char('\n'); return 1; }
+  | "\\n"           { if (expand_specials) {
+                        store_string_char('\\');
+                        store_string_char('n'); 
+                      } else
+                        store_string_char('\n'); 
+                      return 1; 
+                    }
   | "\\r"           { store_string_char('\r'); return 1; }
-  | "\\t"           { store_string_char('\t'); return 1; }
+  | "\\t"           { if (expand_specials) {
+                        store_string_char('\\');
+                        store_string_char('t'); 
+                      } else
+                        store_string_char('\t'); 
+                      return 1; }
   | "\\v"           { store_string_char('\v'); return 1; }
   | "\\\\"          { store_string_char('\\'); return 1; }
   | "\\'"           { store_string_char('\''); return 1; }
@@ -1242,7 +1255,9 @@ and snarf_asm = parse
 
 and snarf_asm_body = parse
    "\"" { store_string_char('"'); 
+          expand_specials = true;
           while (strng(lexbuf)) /* skip */ ;
+          expand_specials = false;
           store_string_char('"');
           return 1; }
 | "/*" { comment_depth = 1;

@@ -597,7 +597,7 @@ static type_t add_tuple_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
                                                  .rgn_po = NULL,
                                                  .fields = fs,
                                                  .tagged=false},
-                        .attributes = NULL};
+                        .attributes = NULL, .expected_mem_kind = false};
   result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
   *tuple_types  = rnew(d) List(rnew(d) $(x,ts),*tuple_types);
   return x;
@@ -697,7 +697,7 @@ static type_t add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
                                                  .rgn_po = NULL,
                                                  .fields = fs,
                                                  .tagged=false},
-                        .attributes = NULL};
+                        .attributes = NULL, .expected_mem_kind = false};
   result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);
   return x;
 }
@@ -912,6 +912,13 @@ static type_t typ_to_c(type_t t) {
     default: break;
     }
     let ad = get_known_aggrdecl(info);
+    if (ad->expected_mem_kind) {
+      // check that it turned out to be a mem!
+      if (ad->impl == NULL) 
+        Tcutil::warn(0, "%s %s was never defined.",
+                     (ad->kind==UnionA) ? "union" : "struct",
+                     qvar2string(ad->name));
+    }
     // XXX I think this is where new instantiation types are
     // generated; want to adapt this for unions here.
     // Have to watch out for flaky gcc ...
@@ -922,6 +929,10 @@ static type_t typ_to_c(type_t t) {
     for (; fs->tl != NULL; fs = fs->tl);
     let last_type = fs->hd->type;
     if (kind_leq(&ak,typ_kind(last_type))) {
+      if (ad->expected_mem_kind) {
+        Tcutil::warn(0, "struct %s ended up being abstract.",
+                     qvar2string(ad->name));
+      }                     
       // To avoid looping, make sure the instantiation of the last
       // type is not still abstract.  If it is, we can just return
       // the struct type.
@@ -957,6 +968,8 @@ static type_t typ_to_c(type_t t) {
     // that might occur within.  So, for now, we don't do any translation.
     // This will bite me somewhere else...
   case &ValueofType(e): return t;
+    // FIX: we really need to translate e!
+  case &TypeofType(e): return t;
   case &TypeDeclType(&{.r = &Aggr_td(ad),...},_):
     aggrdecl_to_c(ad,true);
     if (ad->kind==UnionA)
@@ -1809,6 +1822,7 @@ aggrdecl_t update_aggr_type(aggrdecl_t ad, field_name_t fn,
 				    .name = qv,
 				    .tvs = ad->tvs,
 				    .impl = adi,
+                                    .expected_mem_kind = false,
 				    .attributes = ad->attributes};
   aggrdecl_to_c(new_ad, true);
   return new_ad;
@@ -1907,6 +1921,7 @@ static exp_t init_struct(env_t nv, type_t struct_type,
 					  .sc = Public,
 					  .name = qv,
 					  .tvs = NULL,
+                                          .expected_mem_kind = false,
 					  .impl = adi,
 					  .attributes = NULL};
 	aggrdecl_to_c(new_ad, true);
@@ -4671,6 +4686,7 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
                                     .name = ad->name,
                                     .tvs = NULL,
                                     .impl = NULL,
+                                    .expected_mem_kind = false,
                                     .attributes = ad->attributes};
   if(ad->impl != NULL && !seen_defn_before) {
     new_ad->impl = new AggrdeclImpl { .exist_vars = NULL,
@@ -4729,6 +4745,7 @@ static int aggrdecl_to_c_body<`r2,`d,`r>(region_t<`d> d,
         let ad2 = new Aggrdecl{.kind = StructA, .sc = Public,
                                .name = new $(Loc_n,str), .tvs = NULL,
                                .impl = new AggrdeclImpl(NULL,NULL,fs,false),
+                               .expected_mem_kind = false,
                                .attributes = NULL};
         result_decls = new List(new_decl(new Aggr_d(ad2),DL),result_decls);
         new_field->type = strct(str);
@@ -4795,7 +4812,7 @@ static int datatypedecl_to_c_body<`d,`r>(region_t<`d> d,
     let ad =
       new Aggrdecl{.kind = StructA, .sc = Public,
                    .name = collapse_qvars(f->name,tud->name),
-                   .tvs = NULL,
+                   .tvs = NULL, .expected_mem_kind = false,
                    .impl = new AggrdeclImpl(NULL,NULL,fs,false),
                    .attributes = NULL};
     result_decls = new List(new_decl(new Aggr_d(ad),DL),result_decls);
@@ -4861,7 +4878,7 @@ static int xdatatypedecl_to_c_body<`d,`r>(region_t<`d> d,
       let strct_decl =
         new Aggrdecl{.kind = StructA, .sc = Public,
                      .name = collapse_qvars(f->name,xd->name),
-                     .tvs  = NULL,
+                     .tvs  = NULL, .expected_mem_kind = false,
                      .impl = new AggrdeclImpl(NULL,NULL,fields,false),
                      .attributes = NULL};
       result_decls = new List(new_decl(new Aggr_d(strct_decl),DL),
@@ -5119,6 +5136,7 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       if (vd->sc == ExternC)
 	c_name = new $(Rel_n(NULL),(*c_name)[1]);
       if (vd->initializer != NULL) {
+        if (vd->sc == ExternC) vd->sc = Public;
         if (cinclude)
           exptypes_to_c((exp_t)vd->initializer);
         else
@@ -5163,7 +5181,6 @@ static env_t<`r> decls_to_c(region_t<`r> r, env_t<`r> nv, list_t<decl_t> ds, boo
       result_decls = new List(d,result_decls);
       break;
     case &Typedef_d(td):
-      td->name = td->name;
       td->tvs  = NULL;
       if (td->defn != NULL)
         td->defn = typ_to_c((type_t)td->defn);

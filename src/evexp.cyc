@@ -484,6 +484,7 @@ bool okay_szofarg(type_t t) {
   case &JoinEff(_):
   case &AccessEff(_):
   case &ValueofType(_):
+  case &TypeofType(_):
   case &RgnsEff(_):   return false;
   case &TypedefType(_,_,td,_):
     // Is this right, considering abstract typedefs??

@@ -236,7 +236,7 @@ extern void check_fndecl_valid_type(seg_t,tenv_t,fndecl_t);
 // all effect evars to the empty set, and signal an error for a free type
 // evar.
 extern void check_type(seg_t, tenv_t, list_t<tvar_t,`H> bound_tvars, kind_t k,
-                       bool allow_evars, type_t);
+                       bool allow_evars, bool allow_abs_aggr, type_t);
 
 extern void check_unique_vars(list_t<var_t,`r> vs, seg_t loc, string_t err_msg);
 extern void check_unique_tvars(seg_t,list_t<tvar_t>);
