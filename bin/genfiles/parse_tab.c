@@ -4066,13 +4066,13 @@ struct Cyc_Yystacktype*p=(struct Cyc_Yystacktype*)_check_null(_untag_fat_ptr(_fa
 ((((struct Cyc_Yystacktype*)yyvs.curr)[yyvsp_offset]).l).last_line=((((struct Cyc_Yystacktype*)yyvs.curr)[(yyvsp_offset + yylen)- 1]).l).last_line;
 ((((struct Cyc_Yystacktype*)yyvs.curr)[yyvsp_offset]).l).last_column=((((struct Cyc_Yystacktype*)yyvs.curr)[(yyvsp_offset + yylen)- 1]).l).last_column;}
 # 409
-yyn=(int)Cyc_yyr1[yyn];
+yyn=(int)*((short*)_check_known_subscript_notnull(Cyc_yyr1,548U,sizeof(short),yyn));
 # 411
 yystate=({int _tmpB5E=(int)*((short*)_check_known_subscript_notnull(Cyc_yypgoto,167U,sizeof(short),yyn - 153));_tmpB5E + (int)*((short*)_check_fat_subscript(yyss,sizeof(short),yyssp_offset));});
 if((yystate >= 0 && yystate <= 6508)&&(int)*((short*)_check_known_subscript_notnull(Cyc_yycheck,6509U,sizeof(short),yystate))== (int)((short*)yyss.curr)[yyssp_offset])
-yystate=(int)Cyc_yytable[yystate];else{
+yystate=(int)*((short*)_check_known_subscript_notnull(Cyc_yytable,6509U,sizeof(short),yystate));else{
 # 415
-yystate=(int)Cyc_yydefgoto[yyn - 153];}
+yystate=(int)*((short*)_check_known_subscript_notnull(Cyc_yydefgoto,167U,sizeof(short),yyn - 153));}
 # 417
 goto yynewstate;
 # 419

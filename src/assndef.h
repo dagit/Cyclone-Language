@@ -73,7 +73,7 @@ namespace AssnDef{
   term_t fresh_var(type_opt_t);
 
   int cmp_term(term_t t1, term_t t2);
-
+  Absyn::type_opt_t get_term_type(term_t t);
   ///////////////////// Assertions /////////////////////
   typedef datatype Assn @assn_t;
   typedef datatype Assn *assn_opt_t;

@@ -94,6 +94,18 @@ inline static bool is_commutative(Absyn::primop_t p) {
   }
 }
 
+Absyn::type_opt_t get_term_type(term_t t) {
+  switch (t) {
+  case &Uint(_): return Absyn::int_type(Absyn::None, Absyn::Int_sz);
+  case &Const(e): return e->topt;
+  case &Var(vd): return vd->type;
+  case &LogicVar(_,_,topt): return topt;
+  case &Primop(...): // fix -- could get info out here
+    return NULL;
+  case &Cast(type,_): return type;
+  }
+}
+
 term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts) {
   return new Primop(p,ts);
 }

@@ -46,26 +46,16 @@
    *not* thread-safe.  To achieve that, we would have to kill all escaping
    things after each step. 
 
-   We use hash-consing to try to get maximal sharing among 
-   assertion nodes.  Maintaining sharing is crucial for avoiding
-   an exponential space blow up.  I've experimented with lazy
-   substitution as well, but this didn't seem to work that well.
+   Maintaining sharing is crucial for avoiding an exponential space blow 
+   up.  We use hash-consing to share all assertions nodes, and we use
+   lazy substitution to avoid breaking the sharing as much as possible.
 
    There are a lot of ways we should improve this analysis and a few
    things that need to be fixed:
 
-   * We need to extend terms to account for casts/coercions.
-   * We need to make a distinction between signed and unsigned comparisons.
    * We need to replace the relations stuff in the type-checker (e.g.,
      subtyping) with calls to manipulate the @requires/@ensures stuff
      in here.
-   * We need to have a "throttle" for controlling assertion size.  Sooner
-     or later we will run into iterated if's/diamond control-flow patterns
-     that will result in a zillion disjunctions.  Although we share the
-     resulting assertions, the theorem prover needs some way to avoid
-     crawling over the assertion as if it's a tree.
-
-   * We should use the Pratt constraint solver where possible.
    * We should take pattern matching tests into account for a switch.
    * We shouldn't kill unique variables.
    * We should only kill "type-compatible" expressions on an update.
@@ -74,8 +64,6 @@
      *t or t.f or t->f or t1[t2] then we'd have to kill any of those
      though...
    * We should make the simple thm. prover a bit smarter.
-   * We should perhaps try to simplify the assertions to remove
-     redundancies?
    * We should add support for more predicates and relations (e.g.,
      track whether x == null, or tagcheck(x.f), or datatype tags, etc.)?
    * Could have user-defined predicates...
@@ -139,17 +127,40 @@ typedef struct Set::Set<`a,`H>*`H set_opt_t<`a>;
 // s is a set of primitive assertions that we consider to be
 // a conjunction -- we are computing an approximation of and(sopt,a).  
 // When sopt is NULL, it represents false.  
-static set_opt_t<assn_t> widen_it(set_opt_t<assn_t> s, assn_t a) {
-  if (s == NULL) return NULL;
+static set_opt_t<assn_t> widen_it(set_opt_t<assn_t> sopt, assn_t a) {
+  if (sopt == NULL) return NULL;
+  let s = (Set::set_t<assn_t>)sopt;
   switch (a) {
   case &Prim(t1,Eq,t2): 
-    return Set::insert((Set::set_t<assn_t>)s,a); 
-  case &Prim(t1,p,t2): return Set::insert((Set::set_t<assn_t>)s,a); 
+    s = Set::insert(s,a);
+    // when we have t1 == t2 and they are of integral type, then we
+    // also want to remember that t1 <= t2 and t2 <= t1 so that when
+    // we intersect, we don't lose the information.
+    let topt1 = get_term_type(t1);
+    let topt2 = get_term_type(t2);
+    if ((topt1 != NULL && Tcutil::is_integral_type((type_t)topt1)) ||
+        (topt2 != NULL && Tcutil::is_integral_type((type_t)topt2))) {
+      s = Set::insert(s,slte(t1,t2));
+      s = Set::insert(s,slte(t2,t1));
+      s = Set::insert(s,ulte(t1,t2));
+      s = Set::insert(s,ulte(t2,t1));
+    }
+    return s;
+  case &Prim(t1,SLt,t2):
+    s = Set::insert(s,a);
+    s = Set::insert(s,slte(t1,t2));
+    return s;
+  case &Prim(t1,ULt,t2):
+    s = Set::insert(s,a);
+    s = Set::insert(s,ulte(t1,t2));
+    return s;
+  case &Prim(t1,p,t2): return Set::insert(s,a); 
   case &And(a1,a2): return widen_it(widen_it(s,a1),a2);
   case &Or(a1,a2):  
     let s1 = widen_it(s,a1);
     let s2 = widen_it(s,a2);
-    if (s1 == NULL || s2 == NULL) return NULL;
+    if (s1 == NULL) return s2;
+    if (s2 == NULL) return s1;
     return Set::intersect((Set::set_t<assn_t>)s1,(Set::set_t<assn_t>)s2);
   case &True: return s;
   case &False: return NULL;
@@ -558,7 +569,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     assn_t loop_inv = &true_assn;
     switch (e->r){
       // we treat e2 = @assert(...) && ... specially
-      // the @assert would be considered as loop invariance
+      // the @assert would be considered as loop a invariant
     case &Absyn::And_e(eleft, eright):
       switch (eleft->r){
       case &Absyn::Assert_e(eassn):
@@ -581,7 +592,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
       ain = vcgen_stmt(env,s,at);
       if (!implies(&ain, &loop_inv)){
 	//failed in testing invariance;
-	Warn::err(e->loc, "can not prove loop invariance %s from %s\n",
+	Warn::err(e->loc, "cannot prove loop invariant %s from %s\n",
 		  assn2string(loop_inv), assn2string(ain));
 	return &true_assn;
       }
@@ -635,7 +646,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
       ain = vcgen_rexp(env,e3,ain)[1];
       if (!implies(&ain, &loop_inv)){
 	//failed in testing invariance;
-	Warn::err(e2->loc, "can not prove loop invariance %s from %s\n",
+	Warn::err(e2->loc, "cannot prove loop invariant %s from %s\n",
 		  assn2string(loop_inv), assn2string(ain));
 	return &true_assn;
       }
@@ -671,7 +682,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
       ain = vcgen_stmt(env,s,ain);
       if (!implies(&ain, &loop_inv)){
 	//failed in testing invariance;
-	Warn::err(e->loc, "can not prove loop invariance %s from %s\n",
+	Warn::err(e->loc, "cannot prove loop invariant %s from %s\n",
 		  assn2string(loop_inv), assn2string(ain));
 	return &true_assn;
       }
@@ -934,25 +945,26 @@ static $(list_t<term_t>,assn_t) vcgen_rexps_always(env_t env, list_t<exp_t> es, 
   return $(List::imp_rev(res),ain);
 }
 
-static vardecl_t *bind2vardecl(Absyn::binding_t b) {
+static struct Absyn::Vardecl *bind2vardecl(Absyn::binding_t b) {
   switch (b) {
-  case &Absyn::Global_b(vd): return new vd;
-  case &Absyn::Funname_b(fd): 
-    if (fd->fn_vardecl == NULL) return NULL;
-    else return new (vardecl_t)fd->fn_vardecl;
+  case &Absyn::Global_b(vd): return vd;
+  case &Absyn::Funname_b(fd): return fd->fn_vardecl;
   case &Absyn::Unresolved_b(...): Warn::impos("vcgen bind2vardecl");
-  case &Absyn::Param_b(vd): return new vd;
-  case &Absyn::Local_b(vd): return new vd;
-  case &Absyn::Pat_b(vd): return new vd;
+  case &Absyn::Param_b(vd): return vd;
+  case &Absyn::Local_b(vd): return vd;
+  case &Absyn::Pat_b(vd): return vd;
   }
+}
+
+static term_opt_t varopt(Absyn::binding_t b) {
+  let vdopt = bind2vardecl(b); 
+  if (vdopt == NULL) return NULL;
+  return new Var((vardecl_t)vdopt);
 }
 
 static $(term_opt_t,assn_t) vcgen_lexp(env_t env, exp_t e, assn_t ain) {
   switch (e->r) {
-  case &Absyn::Var_e(b): 
-    let newb = bind2vardecl(b);
-    if (newb == NULL) return $(NULL, ain);
-    else return $(new Var(*bind2vardecl(b)),ain);
+  case &Absyn::Var_e(b): return $(varopt(b),ain);
   default: return $(NULL, vcgen_rexp(env,e,ain)[1]);
   }
 }
@@ -1044,10 +1056,7 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   case &Absyn::Const_e(c): 
     // should really be caught by the above...
     return $(new Const(e),ain);
-  case &Absyn::Var_e(b): 
-    let newb = bind2vardecl(b);
-    if (newb == NULL) return $(NULL, ain);
-    else return $(new Var(*bind2vardecl(b)),ain);
+  case &Absyn::Var_e(b): return $(varopt(b),ain);
   case &Absyn::Primop_e(p,es):
     let $(ts, aout) = vcgen_rexps_always(env, es, ain);
     term_opt_t t = NULL;

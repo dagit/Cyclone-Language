@@ -145,18 +145,6 @@ static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
 static bool add_edge(graph_t @, bool, term_t, term_t, int, assn_opt_t);
 static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2);
 
-type_opt_t get_term_type(term_t t) {
-  switch (t) {
-  case &Uint(_): return Absyn::int_type(Absyn::None, Absyn::Int_sz);
-  case &Const(e): return e->topt;
-  case &Var(vd): return vd->type;
-  case &LogicVar(_,_,topt): return topt;
-  case &Primop(...): // fix -- could get info out here
-    return NULL;
-  case &Cast(type,_): return type;
-  }
-}
-
 static void add_node(graph_t @g, term_t n);
 
 static void add_eq(graph_t @g, term_t t1, term_t t2) {
@@ -195,7 +183,8 @@ static void add_type_info(graph_t @g, term_t n) {
       default: break;
       }
       term_t t2 = cnst((exp_t)e);
-      add_eq(g,t1,t2);
+      add_constraint(g, t2, ULte, t1);
+      add_constraint(g, t2, SLte, t1);
     }
     switch (Absyn::compress(t)) {
     case &Absyn::AppType(&Absyn::TagCon,&List{v,_}):

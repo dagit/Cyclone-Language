@@ -1446,8 +1446,6 @@ outflow=Cyc_NewControlFlow_use_Rval(env,((struct Cyc_Absyn_Exp*)((struct Cyc_Lis
 if(!({(int(*)(struct Cyc_List_List*,int))Cyc_List_memq;})(consume_params,i)&&
  Cyc_Tcutil_is_noalias_pointer((void*)_check_null(((struct Cyc_Absyn_Exp*)es->hd)->topt),0))
 outflow=Cyc_NewControlFlow_restore_noconsume_arg(env,outflow,(struct Cyc_Absyn_Exp*)es->hd,((struct Cyc_Absyn_Exp*)es->hd)->loc,(void*)rvals->hd);}}}}
-# 1267
-Cyc_NewControlFlow_check_fn_requires(env,outflow,orig_es,requires,e->loc);
 # 1270
 if(Cyc_Atts_is_noreturn_fn_type((void*)_check_null(e1->topt)))
 return({struct _tuple17 _tmp543;({union Cyc_CfFlowInfo_FlowInfo _tmp633=Cyc_CfFlowInfo_BottomFL();_tmp543.f1=_tmp633;}),({void*_tmp632=Cyc_CfFlowInfo_typ_to_absrval(fenv,(void*)_check_null(e->topt),0,fenv->unknown_all);_tmp543.f2=_tmp632;});_tmp543;});else{

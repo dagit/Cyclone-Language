@@ -1264,7 +1264,7 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, bool copy_ctxt,
       }
     }
     // check that the @requires relations are satisfied
-    check_fn_requires(env, outflow, orig_es, requires, e->loc);
+    // check_fn_requires(env, outflow, orig_es, requires, e->loc);
     // FIX: add in the @ensures information...
     // if the called function doesn't return, we get BottomFL out
     if (Atts::is_noreturn_fn_type((type_t)e1->topt))
