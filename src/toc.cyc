@@ -821,12 +821,11 @@ type_t typ_to_c(type_t t) {
   case &AppType(&EnumCon(tdn,_),_): return t;
   case &AppType(&AnonEnumCon(fs),_): enumfields_to_c(fs); return t;
   case &TypedefType(tdn,ts,td,topt):
-    // just drop the type arguments and translate the nested types
+    // jrust drop the type arguments and translate the nested types
     // typedef expansion is done in Absynpp::to_tms.
     if (topt == NULL) // drop type args
       return (ts == NULL) ? t : new TypedefType(tdn,NULL,td,NULL);
-    else
-      return new TypedefType(tdn,NULL,td,typ_to_c(topt));
+    return new TypedefType(tdn,NULL,td,typ_to_c(topt));
   case &AppType(&TagCon,_):          return uint_type; // must be unsigned!
   case &AppType(&RgnHandleCon,_):    return rgn_type();
   case &AppType(&BuiltinCon(...),_): return t;
@@ -2120,7 +2119,7 @@ static void exp_to_c(env_t nv, exp_t e) {
 	  // cast from t*{n} or t@{n} to t? or t?
 	  // if p1 is zero-terminated then calculate the size dynamically:
 	  //   ({ t *x = e1;
-	  //      _dynxxx_ptr_arr(x, sizeof(t), _get_zero_arr_size(x,n));
+	  //      _tag_fat(x, sizeof(t), _get_zero_arr_size(x,n));
 	  //   })
 	  let $(x,x_exp) = temp_var_and_exp();
 	  exp_t arg3;

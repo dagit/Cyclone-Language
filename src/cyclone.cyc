@@ -31,6 +31,7 @@
 #include "remove_labels.h"
 #include "toseqc.h"
 #include "tovc.h"
+#include "low_treeshake.h"
 #include "new_control_flow.h"
 #include "vcgen.h"
 #include "insert_checks.h"
@@ -315,8 +316,7 @@ static void add_other(string_t<`H> s) {
   if (gcc_optarg > 0) {
     add_ccarg(s);
     gcc_optarg--;
-  }
-  else if (intype == CYCLONEFILE || is_cyclone_sourcefile(s)) {
+  } else if (intype == CYCLONEFILE || is_cyclone_sourcefile(s)) {
     // For processing by Cyclone
     cyclone_files = new List(new s,cyclone_files);
 
@@ -347,19 +347,18 @@ static bool add_other_flag(string_t<`H> s) {
     { "-p", 0 },
     { "-static", 0 }
   };
-  if (assume_gcc_flag)
+  if (assume_gcc_flag) {
     add_ccarg(s);
-  else {
-    for (int i = 0; i<numelts(known_gcc_flags); i++) {
+    return true;
+  } else {
+    for (int i = 0; i<numelts(known_gcc_flags); i++)
       if (!strcmp(known_gcc_flags[i].flag,s)) {
 	add_ccarg(s);
 	gcc_optarg = known_gcc_flags[i].optargs;
 	break;
       }
-    }
     return false;
   }
-  return true;
 }
 
 static void noassume_gcc_flag() {
@@ -512,6 +511,9 @@ list_t<Absyn::decl_t> do_toseqc(bool ignore, list_t<Absyn::decl_t,`H> tds) {
 list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
   Tovc::elim_array_initializers = Flags::tovc_r;
   return Tovc::tovc(tds);
+}
+list_t<Absyn::decl_t> do_lowtreeshake(bool ignore,list_t<Absyn::decl_t,`H> tds){
+  return LowTreeShake::shake(tds);
 }
 
 static string_t cyc_setjmp = NULL;
@@ -869,11 +871,13 @@ static void process_file(string_t<`H> filename) {
     tds = do_stage("unused label removal",tds,do_removelabs,true,tds);
   // Translation to left-to-right evaluation order
   if(!compile_failure && toseqc_r && Flags::stop_after_pass >= Flags::EvalOrder)
-    tds = do_stage("post-pass to L-to-R evaluation order", tds, do_toseqc, 
-		   true, tds);
+    tds = do_stage("L-to-R evaluation order", tds, do_toseqc, true, tds);
   // Clean up state common to last three passes
   if(!compile_failure && Flags::stop_after_pass >= Flags::Toc)
     Toc::finish();
+  // Removal of unused declarations (optional optimization) FIX: make flag 
+  if(!compile_failure && Flags::stop_after_pass >= Flags::Toc)
+    tds = do_stage("low treehsaking", tds, do_lowtreeshake, true, tds);
 
  // removal of gcc extensions (tovc is an antiquated name)
   if (!compile_failure && (Flags::tovc_r || elim_se_r))

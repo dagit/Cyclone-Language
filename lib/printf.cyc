@@ -276,9 +276,7 @@ static inline const size_t my_strlen(const char ? @nozeroterm s) {
  * is the format string, and ap is the array of printf arguments. 
  */
 int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env, 
-                  const char ? fmt0, 
-                  parg_t ? ap)
-{
+		  const char ? fmt0, parg_t ? ap) {
 	register const char? fmt; /* format string */
 	register int ch;	/* character from fmt */
 	register int n;		/* handy integer (short term usage) */

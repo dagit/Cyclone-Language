@@ -921,7 +921,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 // extract an unsigned integer from a cnst_t
 static unsigned cnst2uint(seg_t loc, cnst_t x) {
   switch (x) {
-  case {.Int_c = $(_,i)}: return i;
+  case {.Int_c  = $(_,i)}: return i;
   case {.Char_c = $(_,c)}: return (unsigned)c;
   case {.LongLong_c = $(_,x)}:
     unsigned long long y = x;
@@ -2231,12 +2231,8 @@ switch_clauses:
 iteration_statement:
   WHILE '(' expression ')' statement
     { $$=^$(while_stmt($3,$5,LOC(@1,@5))); }
-//| WHILE error
-//    { $$=^$(skip_stmt(LOC(@1,@2))); }
 | DO statement WHILE '(' expression ')' ';'
     { $$=^$(do_stmt($2,$5,LOC(@1,@7))); }
-//| DO error
-//    { $$=^$(skip_stmt(LOC(@1,@2))); }
 | FOR '(' for_exp_opt ';' for_exp_opt ';' for_exp_opt ')' statement
     { $$=^$(for_stmt($3,$5,$7,$9,LOC(@1,@9))); }
 | FOR '(' declaration for_exp_opt ';' for_exp_opt ')' statement
@@ -2245,7 +2241,7 @@ iteration_statement:
 ;
 for_exp_opt:
 /* empty */  { $$=^$(true_exp(DL)); }
-| expression { $$=^$($1); }
+| expression { $$=$!1; }
 ;
 jump_statement:
   GOTO IDENTIFIER ';'   { $$=^$(goto_stmt(new $2,LOC(@1,@2))); }

@@ -134,9 +134,8 @@ static exp_opt_t box_free_vars_exp(boxingenv_t env, exp_t e) {
       //FJS: if its a local var that does hit either of the previous cases 
       //     (bound or free), throw exception
       for (; env.all_locals != NULL; env.all_locals = env.all_locals->tl)
-	if (strptrcmp(v,(*env.all_locals->hd->name)[1])==0) {
+	if (strptrcmp(v,(*env.all_locals->hd->name)[1])==0)
 	  Warn::impos2("unbound variable ",*v," found in box_free_vars_exp");
-	}
       
       //FJS: if it's neither a local var or a global var, assume it is from the header file
       //     (eg. _get_zero_arr_size_char)
@@ -162,8 +161,7 @@ static exp_opt_t box_free_vars_exp(boxingenv_t env, exp_t e) {
 	eb->annot = e->annot;
 	return eb;
       }
-    }
-    else if (e2b != NULL) {
+    } else if (e2b != NULL) {
       let eb = subscript_exp(e1,e2b,e->loc);
       eb->topt = e->topt;
       eb->annot = e->annot;
@@ -329,7 +327,7 @@ static void box_free_vars_stmt(boxingenv_t env, stmt_t s) {
       default: break;
       }
       fallthru;
-    default: throw new Impossible("bad stmt after xlation to C");
+    default: Warn::impos2("bad stmt after xlation to C");
     }
 }
 
@@ -434,7 +432,7 @@ static void apply_varmap(Dict::dict_t<var_t,exp_t> varmap, exp_t e) {
       apply_varmap(varmap,(*dles->hd)[1]);
     return;
 
-  default: throw new Impossible("bad exp form in Tocv::apply_varmap");
+  default: Warn::impos2("bad exp form in Tocv::apply_varmap");
   }
 }
 
@@ -501,7 +499,7 @@ static exp_t stmt_to_exp(toexpenv_t env, stmt_t s) {
       for (; unresolvedmem_inits != NULL; unresolvedmem_inits = unresolvedmem_inits->tl)
 	e = seq_exp(unresolvedmem_inits->hd, e, DL);
       return e;
-    default: throw new Impossible("bad local decl in Tovc::stmt_to_exp");
+    default: Warn::impos2("bad local decl in Tovc::stmt_to_exp");
     }
   default: 
     return stmt_to_fun(env,s,void_type);
@@ -664,10 +662,7 @@ static void stmt_to_vc(toexpenv_t env, stmt_t s) {
                                 s3,DL);
                 s2->r = s3->r;
                 break;
-              default:
-		let msg = aprintf("|%s|: array type bad initializer", 
-				  Absynpp::stmt2string(s));
-		throw new Impossible(msg);
+              default: Warn::impos2("|",s,"|: array type bad initializer");
               }
             break;
           default: break;

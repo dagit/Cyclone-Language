@@ -35,8 +35,7 @@ let newline = ('\n' | '\r' | "\r\n")
 
 /* Return LINEDEF for lines that look like directives that the
    preprocessor leaves in its output to indicate what lines of
-   a preprocessed file correspond to what unpreprocessed file,
-   e.g.,
+   a preprocessed file correspond to what unpreprocessed file, e.g.,
       # 3 "include/core.h"
    Return NEWLINE for any other lines that end in newline,
    including some other lines that start with #.  This is
@@ -51,7 +50,6 @@ rule token "enum token_val" = parse
 | [^ '\n' '\r']* eof         { return END; }
 
 {
-
 using Core;
 using Lexing;
 

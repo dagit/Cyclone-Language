@@ -594,7 +594,7 @@ static void print_tms(list_t<type_modifier_t> tms) {
     switch (tms->hd) {
     case &Carray_mod(_,_): fprintf(stderr,"Carray_mod "); break;
     case &ConstArray_mod(_,_,_):fprintf(stderr,"ConstArray_mod "); break;
-    case &Function_mod(&WithTypes(ys,_,_,_,_,_,_)):
+    case &Function_mod(&WithTypes(ys,...)):
       fprintf(stderr,"Function_mod(");
       for (; ys != NULL; ys = ys->tl) {
         let v = (*ys->hd)[0];
@@ -613,7 +613,7 @@ static void print_tms(list_t<type_modifier_t> tms) {
   fprintf(stderr,"\n");
 }
 
-doc_t rgn2doc(type_t t);
+doc_t rgn2doc(type_t);
 
 doc_t dtms2doc(bool is_char_ptr, doc_t d,list_t<type_modifier_t> tms) {
   if (tms==NULL) return d;

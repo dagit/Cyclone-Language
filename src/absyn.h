@@ -356,7 +356,6 @@ namespace Absyn {
   // a type-name environment just like variable-binding fields avoid the need
   // for some code to have a variable environment.
   // FIX: Change a lot of the abstract-syntaxes options to nullable pointers.
-  //      For example, the last field of TypedefType
   // FIX: May want to make this raw_type and store the kinds with the types.
   EXTERN_ABSYN datatype Type {
     // application of a type constructor to zero or more arguments
@@ -493,7 +492,7 @@ namespace Absyn {
     Null_to_NonNull,  // t*{n+m} -> t@{n}
       // FIX: should enumerate all other coercions so that we can
       // make sure the type-checker and code-generator are in sync.
-    Other_coercion    // all of the other coercions (see toc.cyc)
+    Other_coercion    // all the other coercions (see toc.cyc)
   };
 
   EXTERN_ABSYN datatype Designator {
@@ -547,9 +546,9 @@ namespace Absyn {
     Sizeofexp_e(exp_t); // sizeof(e)
     Offsetof_e(type_t,list_t<offsetof_field_t>); // offsetof(t,e)
     Deref_e(exp_t); // *e
-    // For the next two cases, the is_read field determines whether
-    // or not the expression is in a "read" (as opposed to write)
-    // position.  For tagged unions in a read position, we must check
+    // For the next two cases, the is_read field determines whether or not
+    // the expression is in a "read" (as opposed to write) position.
+    // For tagged unions in a read position, we must check that
     // that the tag agrees with the member.  The is_read flag is set
     // by the type-checker.  The is_tagged field determines whether this
     // is a projection off of a tagged union and is also set by the type-
@@ -557,7 +556,7 @@ namespace Absyn {
     AggrMember_e(exp_t,field_name_t,bool is_tagged, bool is_read);  // e.x
     AggrArrow_e(exp_t,field_name_t,bool is_tagged, bool is_read);   // e->x
     Subscript_e(exp_t,exp_t); // e1[e2]
-    Tuple_e(list_t<exp_t>); // $(e1,...,en)
+    Tuple_e(list_t<exp_t>);   // $(e1,...,en)
     CompoundLit_e($(var_opt_t,tqual_t,type_t)@,
                   list_t<$(list_t<designator_t>,exp_t)@>); 
     Array_e(list_t<$(list_t<designator_t>,exp_t)@>); // {.0=e1,...,.n=en}

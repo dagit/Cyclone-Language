@@ -19,14 +19,13 @@
 #ifndef _POSITION_H_
 #define _POSITION_H_
 // operations for tracking positions (locations) within source code
-#include <core.h>
 #include <list.h>
 
 namespace Position {
   using Core;
 
-  extern void   reset_position(string_t<`H>);
-  extern void   set_position_file(string_t<`H>);
+  extern void reset_position(string_t<`H>);
+  extern void set_position_file(string_t<`H>);
   extern string_t get_position_file();
 
   //////// Location Tracking /////////
@@ -35,7 +34,7 @@ namespace Position {
   extern bool   segment_equals(seg_t,seg_t);
   extern mstring_t string_of_loc(unsigned int);
   extern mstring_t string_of_segment(seg_t);
-  extern List::list_t<mstringptr_t> strings_of_segments(List::list_t<seg_t,`r>);
+  extern List::list_t<mstringptr_t> strings_of_segments(List::list_t<seg_t>);
 
   //////// Errors ////////////////////
   struct Error;

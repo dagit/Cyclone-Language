@@ -367,11 +367,11 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #define _cyccalloc_atomic(n,s) _profile_GC_calloc_atomic(n,s,__FILE__,__FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
+ extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];extern char Cyc_Core_Unreachable[12U];
 # 171 "core.h"
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};struct Cyc___cycFILE;
+extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc___cycFILE;
 # 52 "cycboot.h"
-extern struct Cyc___cycFILE*Cyc_stdin;struct Cyc_String_pa_PrintArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_Int_pa_PrintArg_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_PrintArg_struct{int tag;double f1;};struct Cyc_LongDouble_pa_PrintArg_struct{int tag;long double f1;};struct Cyc_ShortPtr_pa_PrintArg_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_PrintArg_struct{int tag;unsigned long*f1;};
+extern struct Cyc___cycFILE*Cyc_stdin;
 # 90
 extern int Cyc_fgetc(struct Cyc___cycFILE*);struct Cyc_ShortPtr_sa_ScanfArg_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_ScanfArg_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_ScanfArg_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_ScanfArg_struct{int tag;unsigned*f1;};struct Cyc_StringPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};struct Cyc_DoublePtr_sa_ScanfArg_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_ScanfArg_struct{int tag;float*f1;};struct Cyc_CharPtr_sa_ScanfArg_struct{int tag;struct _fat_ptr f1;};
 # 142 "cycboot.h"
@@ -379,7 +379,7 @@ extern int Cyc_getc(struct Cyc___cycFILE*);
 # 222 "cycboot.h"
 extern int Cyc_ungetc(int,struct Cyc___cycFILE*);
 # 247
-int Cyc_vsscanf(struct _fat_ptr,struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];struct Cyc_FileCloseError_exn_struct{char*tag;};extern char Cyc_FileOpenError[14U];struct Cyc_FileOpenError_exn_struct{char*tag;struct _fat_ptr f1;};
+int Cyc_vsscanf(struct _fat_ptr,struct _fat_ptr,struct _fat_ptr);extern char Cyc_FileCloseError[15U];extern char Cyc_FileOpenError[14U];
 # 300 "cycboot.h"
 extern int isspace(int);
 # 302
@@ -388,7 +388,7 @@ extern int isupper(int);
 extern double atof(const char*);
 extern long strtol(char*,char**,int);
 # 317
-extern unsigned long strtoul(char*,char**,int);struct Cyc_timeval{long tv_sec;long tv_usec;};
+extern unsigned long strtoul(char*,char**,int);
 # 126 "scanf.cyc"
 static struct _fat_ptr Cyc___sccl(char*,struct _fat_ptr);
 # 139
@@ -962,19 +962,19 @@ goto _LL0;}_LL0:;}}}
 static int Cyc_string_getc(struct _fat_ptr*sptr){
 char c;
 struct _fat_ptr s=*sptr;
-if((({char*_tmp48=(char*)s.curr;_tmp48 == (char*)(_tag_fat(0,0,0)).curr;})|| _get_fat_size(s,sizeof(char))== 0U)||(int)(c=((const char*)s.curr)[0])== 0)return -1;
-({struct _fat_ptr _tmp49=_fat_ptr_plus(s,sizeof(char),1);*sptr=_tmp49;});
+if(((char*)s.curr == (char*)(_tag_fat(0,0,0)).curr || _get_fat_size(s,sizeof(char))== 0U)||(int)(c=((const char*)s.curr)[0])== 0)return -1;
+({struct _fat_ptr _tmp48=_fat_ptr_plus(s,sizeof(char),1);*sptr=_tmp48;});
 return(int)c;}
 # 904
 static int Cyc_string_ungetc(int ignore,struct _fat_ptr*sptr){
-({struct _fat_ptr _tmp4A=_fat_ptr_plus(*sptr,sizeof(char),- 1);*sptr=_tmp4A;});
+({struct _fat_ptr _tmp49=_fat_ptr_plus(*sptr,sizeof(char),- 1);*sptr=_tmp49;});
 # 907
 return 0;}
 # 910
 static int Cyc_string_peekc(struct _fat_ptr*sptr){
 char c;
 struct _fat_ptr s=*sptr;
-if((({char*_tmp4B=(char*)s.curr;_tmp4B == (char*)(_tag_fat(0,0,0)).curr;})|| _get_fat_size(s,sizeof(char))== 0U)||(int)(c=((const char*)s.curr)[0])== 0)return -1;
+if(((char*)s.curr == (char*)(_tag_fat(0,0,0)).curr || _get_fat_size(s,sizeof(char))== 0U)||(int)(c=((const char*)s.curr)[0])== 0)return -1;
 return(int)c;}
 # 917
 int Cyc_vsscanf(struct _fat_ptr src1,struct _fat_ptr fmt,struct _fat_ptr ap){

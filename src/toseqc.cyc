@@ -49,6 +49,7 @@ static enum SideEffect join_side_effect(enum SideEffect e1, enum SideEffect e2){
 /* These functions have no side-effects whatsoever */
 static string_t pure_funs[] = {
   "_get_fat_size",
+  "_tag_fat",
   "_get_zero_arr_size_char",
   "_get_zero_arr_size_short",
   "_get_zero_arr_size_int",

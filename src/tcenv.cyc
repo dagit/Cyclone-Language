@@ -41,7 +41,6 @@
 #include "kinds.h"
 #include "tcenv.h"
 #include "currgn.h"
-using Core;
 using List;
 using Absyn;
 using Tcutil;
@@ -173,8 +172,8 @@ list_t<tvar_t> lookup_type_vars(tenv_t te) {
   if(te->le == NULL) return NULL;
   return le->type_vars;
 }
-opt_t<list_t<tvar_t>> lookup_opt_type_vars(tenv_t te) {
-  return new Opt(lookup_type_vars(te));
+Core::opt_t<list_t<tvar_t>> lookup_opt_type_vars(tenv_t te) {
+  return new Core::Opt(lookup_type_vars(te));
 }
 
 tenv_t add_type_vars(seg_t loc,tenv_t te, list_t<tvar_t> tvs) {

@@ -69,7 +69,7 @@ bool check_suffix(string_t filename, string_t suffix) {
   while (i >= 0 && j >= 0)
     if (filename[i--] != suffix[j--]) return false;
   if (j >= 0) return false;
-  else return true;
+  return true;
 }
 
 mstring_t gnuify(string_t filename) {

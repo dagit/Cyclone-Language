@@ -15,15 +15,13 @@
    License along with this library; see the file COPYING.LIB.  If not,
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
-
 #include <string.h>
 #include <lineno.h>
 #include <cycboot.h>
 #include <position.h>
-
-namespace Position {
 using Core;
 using List;
+namespace Position;
 
 // When set to true, uses format:
 //   <filename>:<lineno>:<message>
@@ -31,7 +29,7 @@ using List;
 //   <filename>:(<lineno>:<char>-<lineno>:<char>):<message>
 bool use_gcc_style_location = true;
 
-/////////// Location tracking///////////
+/////////// Location tracking ///////////
 static string_t source = ""; // initialized by overall control
 
 seg_t segment_join(seg_t s1, seg_t s2) { 
@@ -43,19 +41,17 @@ bool segment_equals(seg_t s1, seg_t s2) {
   return (s1 == s2);
 }
 
-mstring_t string_of_loc(unsigned int loc) {
+mstring_t string_of_loc(unsigned loc) {
   Lineno::pos_t pos = Lineno::pos_of_abs(source,loc);
   if (use_gcc_style_location) 
     return aprintf("%s:%d",pos->logical_file,pos->line_no);
-  else 
-    return aprintf("%s:(%d:%d)",pos->logical_file,pos->line_no,pos->col);
+  return aprintf("%s:(%d:%d)",pos->logical_file,pos->line_no,pos->col);
 }
 
 static mstring_t string_of_pos_pr(Lineno::pos_t pos) {
   if (use_gcc_style_location) 
     return aprintf("%s:%d",pos->logical_file,pos->line_no);
-  else 
-    return aprintf("%s:(%d:%d)",pos->logical_file,pos->line_no,pos->col);
+  return aprintf("%s:(%d:%d)",pos->logical_file,pos->line_no,pos->col);
 }
 
 mstring_t string_of_segment(seg_t s) {
@@ -98,28 +94,8 @@ error_t mk_err(seg_t l, string_t<`H> desc) {
   return new Error(source, l, desc);
 }
 
-/////////// Error Reporting ///////////
-
-static mstring_t trunc(int n, mstring_t<`H> s) {
-  int len = strlen(s);
-  if (len < n) 
-    return s;
-  int len_one = (n-3)/2;
-  int len_two = n-3-len_one;
-  mstring_t mans = new_string(n+1);
-  char ? @nozeroterm ans = (char ? @nozeroterm)mans;
-  strncpy(ans,             s,               len_one);
-  strncpy(ans + len_one,   "...",           3);
-  strncpy(ans + (len_one+3), s + (len-len_two), len_two);
-  return mans;
-}
-
-static int line_length = 76;
-
 static bool error_b = false;
 bool error_p() { return error_b; }
-
-bool print_context = false;
 
 bool first_error = true;
 
@@ -131,15 +107,13 @@ void post_error(error_t e) {
   fflush(stdout);
   if (first_error) {
     fprintf(stderr, "\n");
-    first_error = false;
+    first_error = false; // FIX: not reset to true for each file!
   }
-  if(num_errors <=max_errors) {
-    // why are we not using the source stored in e????
+  // why are we not using the source stored in e????
+  if(num_errors <=max_errors)
     fprintf(stderr, "%s: %s\n", string_of_segment(e->seg), e->desc);
-  }
-  if(num_errors == max_errors) {
+  if(num_errors == max_errors)
     fprintf(stderr, "Too many error messages!\n");
-  }
   fflush(stderr);
   num_errors++;
 }
@@ -153,9 +127,5 @@ string_t get_line_directive(seg_t s) {
   Lineno::pos_t pos_s = Lineno::pos_of_abs(source,s);
   if(pos_s != NULL)  
     return aprintf("\n#line %d \"%s\"\n", pos_s->line_no, pos_s->logical_file);
-  else 
-    return NULL;
+  return NULL;
 }
-  
-}
-

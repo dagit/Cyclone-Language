@@ -751,11 +751,11 @@ static bool okay_externC(seg_t loc, scope_t sc, bool in_include, bool in_inc_rep
 static void set_scopes(list_t<decl_t> ovrs, scope_t sc) {
   for(; ovrs != NULL; ovrs=ovrs->tl)
     switch(ovrs->hd->r) {
-    case &Var_d(vd): vd->sc = sc; break;
-    case &Fn_d(fd): fd->sc = sc; break;
-    case &Aggr_d(ad): ad->sc = sc; break;
+    case &Var_d(vd):        vd->sc = sc; break;
+    case &Fn_d(fd):         fd->sc = sc; break;
+    case &Aggr_d(ad):       ad->sc = sc; break;
     case &Datatype_d(tud): tud->sc = sc; break;
-    case &Enum_d(ed): ed->sc = sc; break;
+    case &Enum_d(ed):       ed->sc = sc; break;
     default: break; //no scope attr.
     }
 }
@@ -879,7 +879,7 @@ void tc(tenv_t te, bool check_var_init, list_t<decl_t,`H> ds) {
 // We recompute the global environment and delete what's not needed anymore
 // all would be far easier if Dict has a delete function
 
-static struct TreeshakeEnv<`g::R> {
+static struct TreeshakeEnv<`g> {
   bool in_cinclude;
   Dict::dict_t<qvar_t,$(binding_t,bool)@`g,`g> ordinaries;
 };  

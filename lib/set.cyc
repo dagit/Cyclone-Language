@@ -125,12 +125,16 @@ static list_t<`a,`r> imp_insert_b(region_t<`r> rgn,
 
 /* Inserts an elt into a set. */
 void imp_insert(set_t<`a,`H> s,`a elt) {
-  if (!member(s,elt))
+  if (!member(s,elt)) {
     s->nodes = imp_insert_b(Core::heap_region,s->cmp,s->nodes,elt);
+    ++s->cardinality;
+  }
 }
 void imp_rinsert(region_t<`r> rgn, set_t<`a,`r> s, `a elt) {
-  if (!member(s,elt))
+  if (!member(s,elt)) {
     s->nodes = imp_insert_b(rgn,s->cmp,s->nodes,elt);
+    ++s->cardinality;
+  }
 }
 
 /* Unions two sets by merging the nodes */
@@ -242,8 +246,10 @@ static list_t<`a> imp_delete_b(int cmp(`a,`a),list_t<`a,`H> n,`a elt,`a @ret) {
 /* Delete a elt/pair from the set if present and return it. */
 `a imp_delete(set_t<`a,`H> s,`a elt) {
   `a ret = elt;
-  if (member(s,elt))
+  if (member(s,elt)) {
     s->nodes = imp_delete_b(s->cmp,s->nodes,elt,&ret);
+    --s->cardinality;
+  }
   return ret;
 }
 

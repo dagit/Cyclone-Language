@@ -1,0 +1,266 @@
+/* Post-translation tree-shaking
+   Copyright (C) 2004 Dan Grossman, AT&T
+   This file is part of the Cyclone compiler.
+
+   The Cyclone compiler is free software; you can redistribute it
+   and/or modify it under the terms of the GNU General Public License
+   as published by the Free Software Foundation; either version 2 of
+   the License, or (at your option) any later version.
+
+   The Cyclone compiler is distributed in the hope that it will be
+   useful, but WITHOUT ANY WARRANTY; without even the implied warranty
+   of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+   GNU General Public License for more details.
+
+   You should have received a copy of the GNU General Public License
+   along with the Cyclone compiler; see the file COPYING. If not,
+   write to the Free Software Foundation, Inc., 59 Temple Place -
+   Suite 330, Boston, MA 02111-1307, USA. */
+
+// This is an optional pass that removes structs, enums, and (TO DO) externs
+// that are not used.  It runs on C code, not Cyclone code.
+// FIX: for enums we need enumfields or we can't shake because of implicit
+//      coercions from an enum type to, e.g., int.
+
+#include <hashtable.h>
+#include <set.h>
+#include "absyn.h"
+#include "warn.h"
+#include "low_treeshake.h"
+using Absyn;
+namespace LowTreeShake;
+
+// lists because types can be declared multiple times
+typedef Hashtable::table_t<qvar_t,List::list_t<aggrdecl_t>> aggr_table_t;
+typedef Hashtable::table_t<qvar_t,List::list_t<enumdecl_t>> enum_table_t;
+typedef Hashtable::table_t<qvar_t,List::list_t<enumdecl_t>> enum_field_table_t;
+typedef Set::set_t<qvar_t> qvar_set_t;
+
+// essentially global state for the pass
+struct Env {
+  aggr_table_t aggrdecls;
+  enum_table_t enumdecls;
+  enum_field_table_t enumfields;
+  qvar_set_t   aggr_worklist;
+  qvar_set_t   enum_worklist;
+  qvar_set_t   aggr_keepers;
+  qvar_set_t   enum_keepers;
+};
+typedef struct Env@`r env_t<`r>;
+
+static void build_tables_stmt(env_t, stmt_t);
+static void build_tables_exp(env_t, exp_t);
+static void build_tables_type(env_t env, type_t t) {
+  switch(t) {
+  case &AppType(&AggrCon(ai),NULL):
+    let n = aggr_kinded_name(ai)[1];
+    if(!Set::member(env->aggr_keepers,n))
+      Set::imp_insert(env->aggr_worklist,n);
+    break;
+  case &AppType(&EnumCon(n,_),NULL):
+    if(!Set::member(env->enum_keepers,n))
+       Set::imp_insert(env->enum_worklist,n);
+    break;
+  case &AppType(&AnonEnumCon(_),NULL): break;
+  case &AppType(_,NULL): break;
+
+  case &Evar(_,topt,_,_):        fallthru(topt);
+  case &TypedefType(_,_,_,topt): if(topt) fallthru(topt); break; 
+  case &PointerType(PtrInfo(t1,...)): build_tables_type(env,t1); break;
+  case &ArrayType(ArrayInfo(t1,_,eo,...)): // e can have sizeof in it!
+    if(eo) build_tables_exp(env,eo);
+    build_tables_type(env,t1); break;
+  case &FnType(i):
+    build_tables_type(env,i.ret_type);
+    for(let args = i.args; args != NULL; args=args->tl)
+      build_tables_type(env,(*args->hd)[2]);
+    break;
+
+  case &TypeofType(e): build_tables_exp(env,e); break;
+
+  default: Warn::impos2("LowTreeshake: unexpected type",t);
+  }
+}
+static void build_tables_exp(env_t env, exp_t e) {
+  // recursive descent for types (plus later vars and enumfields)
+  switch(e->r) {
+  case &Const_e(_):
+  case &Enum_e(...):
+  case &AnonEnum_e(...):        
+  case &Var_e(_): break;
+
+  case &Cast_e(t,e1,...):
+    build_tables_type(env,t);
+    build_tables_exp(env,e1);
+    break;
+  case &Offsetof_e(t,_): fallthru(t);
+  case &Sizeoftype_e(t): build_tables_type(env,t); break;
+
+  case &NoInstantiate_e(e1):  fallthru(e1);
+  case &Instantiate_e(e1,_):  fallthru(e1);
+  case &Extension_e(e1):      fallthru(e1);  
+  case &Increment_e(e1,_):    fallthru(e1);
+  case &Sizeofexp_e(e1):      fallthru(e1);
+  case &Address_e(e1):        fallthru(e1);
+  case &Deref_e(e1):          fallthru(e1);
+  case &AggrMember_e(e1,...): fallthru(e1);
+  case &AggrArrow_e(e1,...):  build_tables_exp(env,e1); break;
+
+  case &FnCall_e(e1,es,...):
+    build_tables_exp(env,e1);
+    fallthru(es);
+  case &Primop_e(_,es):
+    for(; es != NULL; es = es->tl)
+      build_tables_exp(env,es->hd);
+    break;
+
+  case &Conditional_e(e1,e2,e3):
+    build_tables_exp(env,e1);
+    fallthru(e2,e3);
+  case &AssignOp_e(e1,_,e2): fallthru(e1,e2);
+  case &And_e(e1,e2):        fallthru(e1,e2);
+  case &Or_e(e1,e2):         fallthru(e1,e2);
+  case &SeqExp_e(e1,e2):     fallthru(e1,e2);
+  case &Subscript_e(e1,e2):  
+    build_tables_exp(env,e1);
+    build_tables_exp(env,e2);
+    break;
+
+  case &UnresolvedMem_e(NULL, ldt): fallthru(ldt);
+  case &Array_e(ldt):            
+    for(; ldt != NULL; ldt = ldt->tl)
+      build_tables_exp(env, (*ldt->hd)[1]);
+    break;
+
+  case &StmtExp_e(s): return build_tables_stmt(env, s);
+
+  case &Asm_e(_,_,sl1,sl2,_): // ???
+    for(; sl1 != NULL; sl1 = sl1->tl)
+      build_tables_exp(env,(*sl1->hd)[1]);
+    for(; sl2 != NULL; sl2 = sl2->tl)
+      build_tables_exp(env,(*sl2->hd)[1]);
+    break;
+  default: Warn::impos2("LowTreeshake: unexpected expression form",e);
+  }
+}
+static void build_tables_stmt(env_t env, stmt_t s) { 
+  // just recursive descent
+  switch(s->r) {
+  case &Return_s(eo): if(eo) fallthru((exp_t)eo); break;
+  case &Exp_s(e): build_tables_exp(env,e); break;
+  case &IfThenElse_s(e1,s1,s2):
+    build_tables_exp(env,e1);
+    fallthru(s1,s2);
+  case &Seq_s(s1,s2): 
+    build_tables_stmt(env,s1);
+    build_tables_stmt(env,s2);
+    break;
+  case &Label_s(_,s1): build_tables_stmt(env,s1); break;
+  case &Do_s(s1, $(e1,_)): fallthru(e1,s1);
+  case &While_s($(e1,_),s1):
+    build_tables_exp(env,e1);
+    build_tables_stmt(env,s1);
+    break;
+  case &For_s(e1,$(e2,_),$(e3,_),s1):
+    build_tables_exp(env,e1);
+    build_tables_exp(env,e2);
+    build_tables_exp(env,e3);
+    build_tables_stmt(env,s1);
+    break;
+  case &Switch_s(e1, scs, _):
+    build_tables_exp(env,e1);
+    for(; scs != NULL; scs = scs->tl)
+      build_tables_stmt(env,scs->hd->body);
+    break;
+  case &Decl_s(d,s1):
+    switch(d->r) {
+    case &Var_d(vd): // FIX: also shake out unused externs
+      build_tables_type(env,vd->type);
+      if(vd->initializer != NULL)
+	build_tables_exp(env,(exp_t)vd->initializer);
+      break;
+    case &Fn_d(fd): // nested functions
+      build_tables_type(env,fd->i.ret_type);
+      for(let args = fd->i.args; args != NULL; args=args->tl)
+	build_tables_type(env,(*args->hd)[2]);
+      build_tables_stmt(env,fd->body);
+      break;
+    default:  Warn::impos2("LowTreeShake: local decl not a var or function");
+    }
+    build_tables_stmt(env,s1);
+    break;
+  default: break; // some forms impossible, others do not have exps/types
+  }
+}
+
+static void add_to_table(Hashtable::table_t<qvar_t,List::list_t<`a>> tab,
+			 qvar_t qv, `a d) {
+  let lst_opt = Hashtable::lookup_opt(tab,qv);
+  let lst = new List::List(d, lst_opt ? *lst_opt : NULL);
+  Hashtable::insert(tab,qv,lst);
+}
+
+static void build_tables(env_t env, List::list_t<decl_t,`H> tds) {
+  for(; tds != NULL; tds = tds->tl) 
+    switch (tds->hd->r) { 
+    case &Var_d(vd): // FIX: also shake out unused externs
+      build_tables_type(env,vd->type);
+      if(vd->initializer != NULL)
+	build_tables_exp(env,(exp_t)vd->initializer);
+      break;
+    case &Fn_d(fd):
+      build_tables_type(env,fd->i.ret_type);
+      for(let args = fd->i.args; args != NULL; args=args->tl)
+	build_tables_type(env,(*args->hd)[2]);
+      build_tables_stmt(env,fd->body);
+      break;
+    case &Aggr_d(ad): add_to_table(env->aggrdecls,ad->name,ad); break;
+    case &Enum_d(ed): break; // FIX -- skip for now (fields a pain)
+    case &Typedef_d(td): //conservative (we usually don't have typedefs though)
+      build_tables_type(env,(type_t)td->defn); break;
+    default: Warn::impos2("LowTreeShake: top-level Cyclone decl");
+    }
+}
+
+static void process_worklist(env_t env) {
+  // FIX: not doing enums yet because of enumfields
+  while(!Set::is_empty(env->aggr_worklist)) {
+    let n = Set::choose(env->aggr_worklist);
+    Set::imp_delete(env->aggr_worklist,n);
+    Set::imp_insert(env->aggr_keepers,n);
+    // structs defined in cyc_include.h won't be in env->aggrdecls
+    let ads_opt = Hashtable::lookup_opt(env->aggrdecls,n);
+    if(!ads_opt)
+      continue;
+    for(let ads=*ads_opt; ads != NULL; ads = ads->tl)
+      if(ads->hd->impl != NULL)
+	for(let fs = ads->hd->impl->fields; fs != NULL; fs = fs->tl)
+	  build_tables_type(env,fs->hd->type);
+  }
+}
+
+List::list_t<decl_t,`H> trim_decls(env_t env, List::list_t<decl_t,`H> tds) {
+  let ans = NULL;
+  for(; tds != NULL; tds = tds->tl)
+    switch(tds->hd->r) { // FIX: skiiping Enum_d and Var_d for now
+    case &Aggr_d(ad):
+      if(Set::member(env->aggr_keepers,ad->name))
+	fallthru;
+      break;
+    default: ans = new List::List(tds->hd,ans);
+    }
+  return List::imp_rev(ans);
+}
+
+List::list_t<decl_t> shake(List::list_t<decl_t,`H> tds) {
+  let env = Env(Hashtable::create(37,qvar_cmp,hash_qvar),
+		Hashtable::create(11,qvar_cmp,hash_qvar),
+		Hashtable::create(11,qvar_cmp,hash_qvar),
+		Set::empty(qvar_cmp),
+		Set::empty(qvar_cmp),
+		Set::empty(qvar_cmp),
+		Set::empty(qvar_cmp));
+  build_tables(&env,tds);
+  process_worklist(&env);
+  return trim_decls(&env,tds);
+}
