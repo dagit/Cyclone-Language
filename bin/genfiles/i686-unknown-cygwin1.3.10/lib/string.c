@@ -749,10 +749,8 @@ accept);unsigned int Cyc_strcspn(struct _dynforward_ptr s,struct _dynforward_ptr
 accept);struct _dynforward_ptr Cyc_strtok(struct _dynforward_ptr s,struct
 _dynforward_ptr delim);struct Cyc_List_List*Cyc_explode(struct _dynforward_ptr s);
 struct Cyc_List_List*Cyc_rexplode(struct _RegionHandle*,struct _dynforward_ptr s);
-struct _dynforward_ptr Cyc_implode(struct Cyc_List_List*c);int Cyc_strcasecmp(struct
-_dynforward_ptr,struct _dynforward_ptr);int Cyc_strncasecmp(struct _dynforward_ptr
-s1,struct _dynforward_ptr s2,unsigned int len);void*Cyc___assert_fail(struct
-_dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line);char*
+struct _dynforward_ptr Cyc_implode(struct Cyc_List_List*c);void*Cyc___assert_fail(
+struct _dynforward_ptr assertion,struct _dynforward_ptr file,unsigned int line);char*
 strerror(int errnum);unsigned int Cyc_strlen(struct _dynforward_ptr s){unsigned int i;
 unsigned int sz=_get_dynforward_size(s,sizeof(char));for(i=0;i < sz;i ++){if(*((
 const char*)_check_dynforward_subscript(s,sizeof(char),(int)i))== '\000')return i;}
