@@ -507,9 +507,9 @@ int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*,void**ptr_type,int*is_fat
 int Cyc_Tcutil_is_noalias_pointer(void*t,int must_be_unique);
 # 247
 int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*);
-# 292
+# 289
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*);
-# 295
+# 292
 struct Cyc_List_List*Cyc_Tcutil_filter_nulls(struct Cyc_List_List*);struct _tuple14{unsigned f1;int f2;};
 # 28 "evexp.h"
 extern struct _tuple14 Cyc_Evexp_eval_const_uint_exp(struct Cyc_Absyn_Exp*e);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};struct Cyc_Set_Set;extern char Cyc_Set_Absent[7U];struct Cyc_Set_Absent_exn_struct{char*tag;};struct Cyc_Dict_T;struct Cyc_Dict_Dict{int(*rel)(void*,void*);struct _RegionHandle*r;const struct Cyc_Dict_T*t;};extern char Cyc_Dict_Present[8U];struct Cyc_Dict_Present_exn_struct{char*tag;};extern char Cyc_Dict_Absent[7U];struct Cyc_Dict_Absent_exn_struct{char*tag;};

@@ -425,9 +425,9 @@ struct Cyc_Absyn_Exp*Cyc_Tcutil_get_type_bound(void*);
 struct Cyc_Absyn_Exp*Cyc_Tcutil_get_bounds_exp(void*def,void*b);
 # 108
 void*Cyc_Tcutil_compress(void*);
-# 292
+# 289
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*);
-# 306
+# 303
 int Cyc_Tcutil_force_type2bool(int desired,void*);
 # 32 "evexp.h"
 extern int Cyc_Evexp_c_can_eval(struct Cyc_Absyn_Exp*e);

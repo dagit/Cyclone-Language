@@ -512,18 +512,18 @@ struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
 int Cyc_Tcutil_new_tvar_id (void);
 # 274
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 281
+# 278
 int Cyc_Tcutil_extract_const_from_typedef(unsigned,int declared_const,void*);
-# 288
+# 285
 void Cyc_Tcutil_check_no_qual(unsigned,void*);
-# 299
+# 296
 void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);
-# 306
+# 303
 int Cyc_Tcutil_force_type2bool(int desired,void*);
-# 314
+# 311
 int Cyc_Tcutil_admits_zero(void*);
 void Cyc_Tcutil_replace_rops(struct Cyc_List_List*,struct Cyc_Relations_Reln*);
-# 317
+# 314
 struct Cyc_Core_Opt*Cyc_Tcutil_kind_to_bound_opt(struct Cyc_Absyn_Kind*k);
 int Cyc_Tcutil_fast_tvar_cmp(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*);struct _tuple12{unsigned f1;int f2;};
 # 28 "evexp.h"

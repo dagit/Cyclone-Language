@@ -533,12 +533,15 @@ static type_t add_tuple_type_body(region_t<`d> d,
   // haven't seen this one before, add a declaration
   // need to set up a real struct declaration for get_varsizeexp and RemoveAggrs
   stringptr_t xname = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
-  list_t<type_t> ts = List::rmap(d,snd_tqt,tqs0);
   let fs = NULL;
-  list_t<type_t> ts2 = ts;
-  for (int i=1; ts2 != NULL; ts2 = ts2->tl, i++)
-    fs = new List(new Aggrfield(fieldname(i),mt_tq,ts2->hd,NULL,NULL,NULL),fs);
-  fs = List::imp_rev(fs);
+  let ts = NULL;
+  for (int i=1; tqs0 != NULL; tqs0 = tqs0->tl, i++) {
+    type_t t = (*tqs0->hd)[1];
+    fs = new List(new Aggrfield(fieldname(i),mt_tq,t,NULL,NULL,NULL),fs);
+    ts = rnew(d) List(t,ts);
+  }
+  fs = imp_rev(fs);
+  ts = imp_rev(ts);
   let sd  = make_c_struct_defn(xname,fs);
   let ans = aggr_type(KnownAggr(new sd),NULL);
   result_decls = new List(new_decl(new Aggr_d(sd),DL),result_decls);

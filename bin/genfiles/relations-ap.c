@@ -453,7 +453,7 @@ void*Cyc_Tcutil_kind_to_bound(struct Cyc_Absyn_Kind*k);
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
 # 274
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 292
+# 289
 struct Cyc_Absyn_Vardecl*Cyc_Tcutil_nonesc_vardecl(void*);
 # 8 "ap.h"
 extern struct Cyc_AP_T*Cyc_AP_one;

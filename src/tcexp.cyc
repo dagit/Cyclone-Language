@@ -1829,8 +1829,7 @@ static type_t tcDatatype(tenv_t te, seg_t loc, type_t * topt, exp_t e,
   for(; es != NULL && ts != NULL; es = es->tl, ts = ts->tl) {
     bool bogus = false;
     exp_t  e = es->hd;
-    type_t t = (*ts->hd)[1];
-    if (inst != NULL) t = substitute(inst,t);
+    type_t t = substitute(inst,(*ts->hd)[1]);
     tcExpInitializer(te, &t, e);
     if (!coerce_arg(curr_rgnpo(te),e,t,&bogus)) {
       Warn::err2(e->loc,"datatype constructor ",tuf->name,

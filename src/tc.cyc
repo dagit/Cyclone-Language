@@ -85,13 +85,13 @@ static void fnTypeAttsOK(tenv_t te, type_t t, seg_t loc) {
     for ( ; atts != NULL; atts = atts->tl) {
       switch(atts->hd) {
       case &Initializes_att(i):
-	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) break;
+	if(!fnTypeAttsRangeOK(loc,i,nargs,atts->hd)) 
+	  break;
 	fnTypeAttsOverlap(loc,i,init_params,nolive_unique_params);
 	fnTypeAttsOverlap(loc,i,init_params,consume_params);
-	let &$(_,_,t) = List::nth(args,i-1);
 	string_t s = "initializes attribute allowed only on";
-	switch(Tcutil::compress(t)) {
-	case &PointerType(PtrInfo(t,_,PtrAtts(_,nullable,bd,zt,_))):
+	switch(Tcutil::compress((*List::nth(args,i-1))[2])) {
+	case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bd,zt,_))):
 	  if(force_type2bool(false,nullable))
 	    Warn::err2(loc,s," non-null pointers");
 	  if(!is_bound_one(bd))

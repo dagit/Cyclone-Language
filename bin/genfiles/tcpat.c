@@ -558,13 +558,13 @@ int Cyc_Tcutil_is_noalias_pointer_or_aggr(void*);
 struct Cyc_Absyn_Tvar*Cyc_Tcutil_new_tvar(void*);
 # 274
 int Cyc_Tcutil_is_const_exp(struct Cyc_Absyn_Exp*);
-# 299
+# 296
 void*Cyc_Tcutil_promote_array(void*t,void*rgn,int convert_tag);
-# 306
+# 303
 int Cyc_Tcutil_force_type2bool(int desired,void*);
-# 309
+# 306
 void*Cyc_Tcutil_any_bool(struct Cyc_List_List*);
-# 311
+# 308
 void*Cyc_Tcutil_any_bounds(struct Cyc_List_List*);extern char Cyc_Tcenv_Env_error[10U];struct Cyc_Tcenv_Env_error_exn_struct{char*tag;};struct Cyc_Tcenv_Genv{struct Cyc_Dict_Dict aggrdecls;struct Cyc_Dict_Dict datatypedecls;struct Cyc_Dict_Dict enumdecls;struct Cyc_Dict_Dict typedefs;struct Cyc_Dict_Dict ordinaries;};struct Cyc_Tcenv_Fenv;struct Cyc_Tcenv_Tenv{struct Cyc_List_List*ns;struct Cyc_Tcenv_Genv*ae;struct Cyc_Tcenv_Fenv*le;int allow_valueof: 1;int in_extern_c_include: 1;int in_tempest: 1;int tempest_generalize: 1;int in_extern_c_inc_repeat: 1;};
 # 89 "tcenv.h"
 enum Cyc_Tcenv_NewStatus{Cyc_Tcenv_NoneNew =0U,Cyc_Tcenv_InNew =1U,Cyc_Tcenv_InNewAggr =2U};

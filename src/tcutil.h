@@ -212,7 +212,7 @@ $(tvar_t,type_t)@`r r_make_inst_var($(list_t<tvar_t,`H>,region_t<`r>)@,tvar_t);
 // with the type definition for the member.
 void check_bitfield(seg_t,type_t field_typ,exp_opt_t width,stringptr_t<`H> fn);
 
-void check_unique_vars(list_t<var_t,`r>, seg_t, string_t err_msg);
+void check_unique_vars(list_t<var_t,`r>, seg_t, string_t<`H> err_msg);
 void check_unique_tvars(seg_t,list_t<tvar_t>);
 
 // Check that bounds are not zero -- constrain to 1 if necessary
@@ -272,9 +272,6 @@ bool equiv_fn_atts(attributes_t a1, attributes_t a2);
 
 // returns true iff e is an expression that can be evaluated at compile time
 bool is_const_exp(exp_t);
-
-// like Core::snd, but first argument is a tqual_t (not a BoxKind)
-type_t snd_tqt($(tqual_t,type_t)@);
 
 // If t is a typedef, returns true if the typedef is const, and warns
 // if the flag declared_const is true.  Otherwise returns declared_const.

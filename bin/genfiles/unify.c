@@ -451,9 +451,9 @@ void*Cyc_Tcutil_normalize_effect(void*e);
 int Cyc_Tcutil_same_atts(struct Cyc_List_List*,struct Cyc_List_List*);
 # 271
 int Cyc_Tcutil_equiv_fn_atts(struct Cyc_List_List*a1,struct Cyc_List_List*a2);
-# 318
+# 315
 int Cyc_Tcutil_fast_tvar_cmp(struct Cyc_Absyn_Tvar*,struct Cyc_Absyn_Tvar*);
-# 322
+# 319
 int Cyc_Tcutil_same_rgn_po(struct Cyc_List_List*,struct Cyc_List_List*);
 int Cyc_Tcutil_tycon_cmp(void*,void*);
 # 28 "unify.h"
