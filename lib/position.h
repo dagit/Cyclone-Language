@@ -19,30 +19,31 @@ namespace Position {
   //////// Location Tracking /////////
   extern struct Segment;
   typedef struct Segment *segment;
-  extern segment segment_of_abs(int,int);
-  extern segment segment_join(segment,segment);
+  typedef struct Segment *seg_t; // same as segment, but better emacs coloring
+  extern seg_t  segment_of_abs(int,int);
+  extern seg_t  segment_join(seg_t,seg_t);
   extern string string_of_loc(int);
-  extern string string_of_segment(segment);
-  extern list<string> strings_of_segments(list<segment>);
+  extern string string_of_segment(seg_t);
+  extern list<string> strings_of_segments(list<seg_t>);
 
   //////// Errors ////////////////////
   extern enum Error_kind { Lex, Parse, Elab };
-  typedef enum Error_kind error_kind;
+  typedef enum Error_kind error_kind_t;
   extern struct Error {
-    string     source;
-    segment    seg;
-    error_kind kind;
-    string     desc;
+    string       source;
+    seg_t        seg;
+    error_kind_t kind;
+    string       desc;
   };
-  typedef struct Error @error;
-  extern error mk_err_lex(segment,string);
-  extern error mk_err_parse(segment,string);
-  extern error mk_err_elab(segment,string);
+  typedef struct Error @error_t;
+  extern error_t mk_err_lex(seg_t,string);
+  extern error_t mk_err_parse(seg_t,string);
+  extern error_t mk_err_elab(seg_t,string);
 
   //////// Error Reporting ///////////
   extern xenum exn {Nocontext};
   extern bool print_context;
-  extern void post_error(error);
+  extern void post_error(error_t);
   extern bool error_p();
 }
 #endif 

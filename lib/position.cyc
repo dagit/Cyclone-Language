@@ -72,18 +72,18 @@ list<string> strings_of_segments(list<segment> segs) {
 
 enum Error_kind { Lex, Parse, Elab };
 struct Error {
-  string     source;
-  segment    seg;
-  error_kind kind;
-  string     desc;
+  string       source;
+  segment      seg;
+  error_kind_t kind;
+  string       desc;
 };
-error mk_err_lex(segment l, string desc) {
+error_t mk_err_lex(segment l, string desc) {
   return &Error(source, l, Lex, desc);
 }
-error mk_err_parse(segment l, string desc) {
+error_t mk_err_parse(segment l, string desc) {
   return &Error(source, l, Parse, desc);
 }
-error mk_err_elab(segment l, string desc) {
+error_t mk_err_elab(segment l, string desc) {
   return &Error(source, l, Elab, desc);
 }
 
@@ -153,11 +153,11 @@ static $(string,int,int)@ get_context(segment seg) {
 static bool error_b = false;
 bool error_p() { return error_b; }
 
-xenum exn {Error(error)};
+xenum exn {Error(error_t)};
 
 bool print_context = false;
 
-void post_error(error e) {
+void post_error(error_t e) {
   error_b = true;
   // why are we not using the source stored in e????
   fprintf(cyc_stderr, "%s: %s\n", string_of_segment(e->seg), e->desc);

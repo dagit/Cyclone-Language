@@ -170,8 +170,8 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
   case Label_s(l,s): tcStmt(add_label(te,l,s),s,true); return;
 
   case Switch_s(e,scs0):
-    _ esyn = tcExp(te,null,e);
-    _ t    = synth_typ(esyn);
+    tcExp(te,null,e);
+    _ t = e->topt->v;
     // type-check the cases in reverse order, a fallthru therefore transfers
     // control to the case most recently type-checked. For the last case,
     // fallthru is not allowed.
@@ -179,11 +179,13 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     te = clear_fallthru(te);
     for (_ scs = List::rev(scs0); scs != null; scs = scs->tl) {
       _ p       = scs->hd->pattern;
-      _ pat_typ = tcPat(te,p);
+      _ pat_typ = tcPat(te,p,null); // FIX: can pass region if e is an lvalue
       let &$(new_tvs,x) = pat_typ;
       if (!unify(p->topt->v,t))
 	terr(scs->hd->loc,xprintf("switch on type %s, but case expects type %s",
 				  typ2string(t), typ2string(p->topt->v)));
+      else
+	check_pat_regions(te,p);
       _ pvs = null;
       for(_ y=x; y!=null; y=y->tl) 
 	pvs = &cons(y->hd->name, pvs);
@@ -205,11 +207,13 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     te = clear_fallthru(te);
     for (_ scs = List::rev(scs0); scs != null; scs = scs->tl) {
       _ p       = scs->hd->pattern;
-      _ pat_typ = tcPat(te,p);
+      _ pat_typ = tcPat(te,p,null);
       let &$(new_tvs,x) = pat_typ;
       if (!unify(p->topt->v,exn_typ))
         terr(scs->hd->loc, xprintf("expected xenum exn but found %s",
 				   typ2string(p->topt->v)));
+      else
+	check_pat_regions(te,p);
       _ pvs = null;
       for(_ y=x; y!=null; y=y->tl) 
 	pvs = &cons(y->hd->name, pvs);
@@ -249,7 +253,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
       _ topt = *topt_ref;
       tcExp(te,null,e);
       *topt_ref = e->topt; // side effect
-      let &$(new_tvs,x) = tcPat(te,p);
+      let &$(new_tvs,x) = tcPat(te,p,null);//FIX: can pass region if e an lvalue
       // FIX: if let-declarations were of the form "let pat = e in S" then
       // we could allow any type variables within e to be used within S.
       if (new_tvs != null)
@@ -259,6 +263,8 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
       if (!unify(p->topt->v,e->topt->v))
 	terr(d->loc,xprintf("pattern type %s does not match definition type %s",
 			    typ2string(p->topt->v),typ2string(e->topt->v)));
+      else
+	check_pat_regions(te,p);
       *exhaust = check_let_pat_exhaustive(p->loc,p); // side effect
       pattern_synth(s0->loc, te, null, x, s, null, false);
       return;

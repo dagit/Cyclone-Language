@@ -73,9 +73,11 @@ extern void check_fndecl_valid_type(segment,tenv,fndecl);
 extern void check_unique_vars(list<var> vs, segment loc, string err_msg);
 extern void check_unique_tvars(segment,list<tvar>);
 
-extern xenum exn {MissingField};
-extern $($(field_name,tqual,typ)@,list<$(field_name,tqual,typ)@>)@
-  remove_field(field_name,list<$(field_name,tqual,typ)@>);
 extern bool equal_tqual(tqual tq1, tqual tq2);
+
+extern list<$($(field_name,tqual,typ)@,`a)@>
+resolve_struct_designators<`a>(seg_t loc,
+			       list<$(list<designator>,`a)@> des, 
+			       structdecl sd);
 }
 #endif

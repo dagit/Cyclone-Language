@@ -615,9 +615,9 @@ typ block_to_typ(tenv te, int block_num) {
 }
 // KLUDGE: Should really not confuse type variables and ints like this. 
 // I'll clean it up later. Sorry.
-void check_rgn_accessible(tenv te, segment loc, typ rgn_typ) {
+void check_rgn_accessible(tenv te, seg_t loc, typ rgn_typ) {
   if (te->le == null) env_err("Tcenv: unexpected rgn_accessible");
-  _ fe = get_fenv(te);
+  fenv_t fe = get_fenv(te);
   switch (compress(rgn_typ)) {
   case HeapRgnType: return;
   case VarType(tv):

@@ -68,56 +68,57 @@ extern struct Tenv {
   Opt_t<frames<fenv_t>>   le; // local environment, == null except in functions
 };
 typedef struct Tenv @tenv;
+typedef struct Tenv @tenv_t; // same as tenv but better highlighting
 
-extern tenv tc_init();
+extern tenv_t tc_init();
 extern genv_t empty_genv();
 extern fenv_t new_fenv(fndecl);
 
-extern tenv enter_ns(tenv, var);
+extern tenv_t enter_ns(tenv_t, var);
 
-extern list<var>         resolve_namespace(tenv,segment,list<var>);
-extern resolved_t        lookup_ordinary(tenv,segment,qvar);
-extern structdecl@       lookup_structdecl(tenv,segment,qvar);
-extern enumdecl@         lookup_enumdecl(tenv,segment,qvar);
-extern Opt_t<xenumdecl@> lookup_xenumdecl(tenv,segment,qvar);
-extern typedefdecl       lookup_typedefdecl(tenv,segment,qvar);
-extern structdecl@       lookup_structdecl_abs(tenv,segment,qvar);
-extern enumdecl@         lookup_enumdecl_abs(tenv,segment,qvar);
-extern Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv,segment,qvar);
+extern list<var>         resolve_namespace(tenv_t,seg_t,list<var>);
+extern resolved_t        lookup_ordinary(tenv_t,seg_t,qvar);
+extern structdecl@       lookup_structdecl(tenv_t,seg_t,qvar);
+extern enumdecl@         lookup_enumdecl(tenv_t,seg_t,qvar);
+extern Opt_t<xenumdecl@> lookup_xenumdecl(tenv_t,seg_t,qvar);
+extern typedefdecl       lookup_typedefdecl(tenv_t,seg_t,qvar);
+extern structdecl@       lookup_structdecl_abs(tenv_t,seg_t,qvar);
+extern enumdecl@         lookup_enumdecl_abs(tenv_t,seg_t,qvar);
+extern Opt_t<xenumdecl@> lookup_xenumdecl_abs(tenv_t,seg_t,qvar);
 
 
-extern typ  return_typ(tenv);
+extern typ  return_typ(tenv_t);
 
-extern tenv add_local_var(segment,tenv,vardecl);
-extern tenv add_pat_var  (segment,tenv,vardecl);
+extern tenv_t add_local_var(seg_t,tenv_t,vardecl);
+extern tenv_t add_pat_var  (seg_t,tenv_t,vardecl);
 
-extern list<tvar> lookup_type_vars(tenv);
-extern tenv       add_type_vars(segment,tenv,list<tvar>);
+extern list<tvar> lookup_type_vars(tenv_t);
+extern tenv_t     add_type_vars(seg_t,tenv_t,list<tvar>);
 
-extern tenv set_in_loop(tenv te, stmt continue_dest);
-extern tenv set_in_switch(tenv);
-extern tenv set_fallthru(tenv te, 
-			 $(list<tvar>,list<vardecl>) * pat_typ,
-			 stmt body);
-extern tenv clear_fallthru(tenv);
-extern tenv set_next(tenv, jumpee_t);
+extern tenv_t set_in_loop(tenv_t te, stmt continue_dest);
+extern tenv_t set_in_switch(tenv_t);
+extern tenv_t set_fallthru(tenv_t te, 
+			   $(list<tvar>,list<vardecl>) * pat_typ,
+			   stmt body);
+extern tenv_t clear_fallthru(tenv_t);
+extern tenv_t set_next(tenv_t, jumpee_t);
 
 // The next 4 all assign through their last arg
-extern void process_continue(tenv,stmt,Opt_t<stmt>*);
-extern void process_break   (tenv,stmt,Opt_t<stmt>*);
-extern void process_goto(tenv,stmt,var,Opt_t<stmt>*);
-extern $(stmt,list<tvar>,list<typ>)* process_fallthru(tenv,stmt,Opt_t<stmt>*);
+extern void process_continue(tenv_t,stmt,Opt_t<stmt>*);
+extern void process_break   (tenv_t,stmt,Opt_t<stmt>*);
+extern void process_goto(tenv_t,stmt,var,Opt_t<stmt>*);
+extern $(stmt,list<tvar>,list<typ>)* process_fallthru(tenv_t,stmt,Opt_t<stmt>*);
 
-extern stmt get_encloser(tenv);
-extern tenv set_encloser(tenv,stmt);
+extern stmt get_encloser(tenv_t);
+extern tenv_t set_encloser(tenv_t,stmt);
 
-extern tenv add_label(tenv, var, stmt);
-extern bool all_labels_resolved(tenv);
+extern tenv_t add_label(tenv_t, var, stmt);
+extern bool all_labels_resolved(tenv_t);
 
-extern tenv new_block(tenv);
-extern int  curr_block(tenv);
-extern typ  block_to_typ(tenv,int);
-extern void check_rgn_accessible(tenv,segment,typ);
+extern tenv_t new_block(tenv_t);
+extern int  curr_block(tenv_t);
+extern typ  block_to_typ(tenv_t,int);
+extern void check_rgn_accessible(tenv_t,seg_t,typ);
 
 // what we synthesize when type-checking a statement or expression:
 // This should be abstract, but I'm saving an allocation and a level of
@@ -129,8 +130,8 @@ extern typ synth_typ(synth);
 // given a synth, imperatively set the type to t
 extern synth synth_set_typ(synth s,typ t);
 // synth for an exp that has this type
-extern synth standard_synth(tenv, typ);
+extern synth standard_synth(tenv_t, typ);
 // synth we get on error in expressions (type is wild) or on throw
-extern synth wild_synth(tenv);
+extern synth wild_synth(tenv_t);
 }
 #endif

@@ -945,76 +945,38 @@ static synth tcComprehension(tenv te,segment loc,Opt_t<typ> topt,
  //  Foo{.c=3,.d=4,1,2,5};
  // then this is the same as Foo{.a=1,.b=2,.c=3,.d=4,.e=5};
  // Later, we should support array designators and so forth.
- static synth tcStruct(tenv te, segment loc, Opt_t<typ> topt,
-		       typedef_name_t @tn,                    
-		       Opt_t<list<typ>> @otyps,             
-		       list<$(list<designator>,exp)@> args, 
-		       struct Structdecl * sd_opt) {          
-   structdecl sd;
-   if (sd_opt != null)
-     sd = (structdecl)sd_opt;
-   else {
-     sd = *lookup_structdecl(te,loc,*tn);
-     if (sd->name != null)
-       *tn = sd->name->v;
-   }
-   // calculate the instantiation and final type
-   _ inst    = List::map(make_inst_var,sd->tvs);
-   _ typs    = List::map(snd,inst); 
-   _ res_typ = StructType(&Opt(*tn),typs,&$(sd));
-   *otyps = &Opt(typs);
-   list<$(field_name,tqual,typ)@> fields;
-   if (sd->fields == null) {
-     fields = null;
-     terr(loc,xprintf("struct %s is abstract",qvar2string(*tn)));
-   } else
-     // must make copy because we do imperative removes later on
-     fields = List::copy(sd->fields->v);
-   // type-check all of the argument expressions in order
-   tcExpList(te,List::map(snd,args));
-   // for each argument find its field and make sure its type matches
-   for(; args != null; args = args->tl) {
-     let &$(ds,e) = args->hd;
-     $(field_name,tqual,typ)@ field;
-     if (ds == null) {
-       // no explicit designator -- take the first field
-       if (fields == null) 
-	 return expr_err(te,e->loc,xprintf("extra argument to struct %s",
-					   qvar2string(*tn)));
-       field = fields->hd;
-       args->hd[0] = &cons(FieldName(field[0]),null);
-       fields = fields->tl;
-     } else {
-       // make sure the explicit designator is just a field name --
-       // remove that field from the list of fields
-       _ d = ds->hd;
-       if (ds->tl != null) terr(e->loc,"too many designators");
-       switch (d) {
-       case ArrayElement(e2):
-	 return expr_err(te,e2->loc,"array designators not supported here");
-       case FieldName(f):
-	 try {
-	   _ p = remove_field(f,fields);
-	   field  = p[0];
-	   fields = p[1];
-	 } catch { case MissingField:
-	   return expr_err(te,e->loc,xprintf("bad field designator %s",f));
-	 }
-	 break;
-       }
-     }
-     // field is now found -- check that the argument is the right type.
-     _ field_typ = substitute(inst,field[2]);
-     if (!coerce_arg(te,e,field_typ))
-       terr(e->loc,xprintf("field %s of struct %s expects type %s != %s",
-			   field[0],qvar2string(*tn),typ2string(field_typ),
-			   typ2string(e->topt->v)));
-   }
-   if (fields != null)
-     terr(loc,xprintf("struct %s is missing a value for field %s",
-		      qvar2string(*tn),fields->hd[0]));
-   return standard_synth(te,res_typ);
- }
+static synth tcStruct(tenv_t te, seg_t loc, Opt_t<typ> topt,
+		      typedef_name_t @tn,                    
+		      Opt_t<list<typ>> @otyps,             
+		      list<$(list<designator>,exp)@> args, 
+		      struct Structdecl * sd_opt) {
+  tcExpList(te,List::map(snd,args));
+  structdecl sd;
+  if (sd_opt != null)
+    sd = (structdecl)sd_opt;
+  else {
+    sd = *lookup_structdecl(te,loc,*tn);
+    if (sd->name != null)
+      *tn = sd->name->v;
+  }
+  // calculate the instantiation and final type
+  _ inst    = List::map(make_inst_var,sd->tvs);
+  _ typs    = List::map(snd,inst); 
+  _ res_typ = StructType(&Opt(*tn),typs,&$(sd));
+  *otyps = &Opt(typs);
+  // make sure each argument has the right type
+  list<$($(field_name,tqual,typ)@,exp)@> fields =
+    resolve_struct_designators(loc,args,sd);
+  for(; fields != null; fields = fields->tl) {
+    let &$(&$(n,tq,fieldtyp),field_exp) = fields->hd;
+    _ inst_fieldtyp = substitute(inst,fieldtyp);
+    if (!coerce_arg(te,field_exp,inst_fieldtyp))
+      terr(field_exp->loc,xprintf("field %s of struct %s expects type %s != %s",
+				  n,qvar2string(*tn),typ2string(inst_fieldtyp),
+				  typ2string(field_exp->topt->v)));
+  }
+  return standard_synth(te,res_typ);
+}
 
  // f(es)   where f is an enum and is ef->name
  static synth tcEnum(tenv te, segment loc, Opt_t<typ> topt,

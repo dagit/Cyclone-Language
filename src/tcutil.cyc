@@ -1408,3 +1408,78 @@ remove_field(field_name f, list<$(field_name,tqual,typ)@> fs) {
   }
   throw MissingField;
 }
+
+// take a list of $(list<designator>,`a) things corresponding to a struct.
+// ensure the struct is not abstract.
+//  * check that each list<designator> has exactly one element which is a 
+//    FieldName or is empty
+//  * match up the correct member of sd->fields with the `a.  If the list
+//    is empty, take the first unused field. ?????
+//    Bang in the corresponding designator in the des list element
+//  * ensure that each field is used exactly once.
+// (This functionality was repeated in tcPat and tcExp and was annoying me.)
+// FIX: Pass in a flag to allow multiple field names ??
+list<$($(field_name,tqual,typ)@,`a)@>
+resolve_struct_designators<`a>(seg_t loc,
+			       list<$(list<designator>,`a)@> des, 
+			       structdecl sd) {
+  if(sd->fields == null)
+    terr(loc, "inappropriate use of abstract struct");
+
+  // grab all the fields and mark them unused
+  list<$($(field_name,tqual,typ)@,bool)@> fields = null;
+  for(_ sd_fields = sd->fields->v; sd_fields != null; sd_fields = sd_fields->tl)
+    fields = &cons(&$(sd_fields->hd,false), fields);
+  fields = imp_rev(fields);
+
+  // match up each element of des
+  list<$($(field_name,tqual,typ)@,`a)@> ans = null;
+  for(; des != null; des = des->tl) {
+    let &$(dl,a) = des->hd;
+    if(dl == null) {
+      // grab first unused
+      _ fields2 = fields;
+      for(; fields2 != null; fields2 = fields2->tl)
+	if(!fields2->hd[1]) {
+	  fields2->hd[1] = true;
+	  des->hd[0] = &cons(FieldName(fields2->hd[0][0]), null);
+	  ans = &cons(&$(fields2->hd[0],a), ans);
+	  break;
+	}
+      if(fields2 == null)
+	terr(loc, "too many arguments to struct");
+    } else if(dl->tl != null)
+      // we don't support multiple designators
+      terr(loc, "multiple designators are not supported");
+    else
+      // find the right field based on the designator
+      switch (dl->hd) {
+      case ArrayElement(_): 
+	terr(loc, "array designator used in argument to struct");
+	break;
+      case FieldName(v):
+	_ fields2 = fields;
+	for(; fields2 != null; fields2 = fields2->tl)
+	  if(String::zstrcmp(v,fields2->hd[0][0]) == 0) {
+	    if(fields2->hd[1])
+	      terr(loc, 
+		   xprintf("field %s has already been used as an argument", v));
+	    fields2->hd[1] = true;
+	    ans = &cons(&$(fields2->hd[0],a), ans);
+	    break;
+	  }
+	if(fields2 == null)
+	  terr(loc, xprintf("bad field designator %s", v));
+	break;
+      }
+  }
+  
+  // make sure we used all the fields
+  for(; fields != null; fields = fields->tl)
+    if(!fields->hd[1]) {
+      terr(loc, "too few arguments to struct");
+      break;
+    }
+
+  return imp_rev(ans);
+}
