@@ -123,7 +123,10 @@ ARCHDIR=bin/genfiles/$(UPDATEARCH)
 # These build off the Cyclone source files, but do not replace anything in bin
 # We override BUILD_DIR and CYCFLAGS for many nefarious purposes:
 #   cross-compiling, bootstrapping, profiling, ...
-DO_LIBSRC=$(MAKE) -C $(BUILDDIR) -f $(CYCDIR)/Makefile_libsrc 
+# We use the -r flag to eliminate built-in make rules.  This is needed
+#   because of a circular dependence that arises when bootstrapping as with
+#   make cyclone_src BUILDDIR=build/boot1 CYCC=`pwd`/build/boot/cyclone
+DO_LIBSRC=$(MAKE) -r -C $(BUILDDIR) -f $(CYCDIR)/Makefile_libsrc 
 
 cyclone_src:
 	-mkdir $(BUILDDIR) >& /dev/null
@@ -313,4 +316,3 @@ clean_nogc: clean_test clean_build
 clean: clean_nogc
 	$(MAKE) clean -C gc
 	$(RM) gc/*.exe gc/base_lib gc/*.obj gc/gc.lib
-	$(RM) bin/cyc-lib/*gc*.a

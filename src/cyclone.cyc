@@ -99,6 +99,12 @@ static void add_cpparg(string_t<`H> s) {
   cppargs = new List(new s,cppargs);
 }
 
+static string_t target_arch = NULL;
+static void set_target_arch(string_t<`H> s) {
+  toc_r = true;
+  target_arch = s;
+}
+
 // Prints the version # and exits
 static void print_version() {
   printf("The Cyclone compiler, version %s\n", Cstring_to_string(Cversion));
@@ -127,7 +133,6 @@ static void add_cyclone_exec_path(string_t s) {
   if (len <= 2) return;
   let dir = (string_t)substring(s,2,len-2);
   cyclone_exec_path = new List(new dir,cyclone_exec_path);
-  add_ccarg(strconcat("-L",dir));
 }
 
 // Ideally we would simply pass library args as ccargs, preserving
@@ -603,23 +608,24 @@ static void process_file(string_t<`H> filename) {
   // About the cyclone include path---this path is specified with the
   // following order (where the earlier in the order, the first place we look
   // for the file):
-  // 1) command line arguments (with -I)
-  // 2) environment var (with CYCLONE_INCLUDE_PATH)
-  // 3) hardwired in the build (by setting def_inc_path)
-  string_t stdinc_string;
+  // 1) command line arguments (with -I and -B)
+  // 2) environment var (CYCLONE_INCLUDE_PATH)
+  // 3) hardwired in the build (by setting def_inc_path and def_lib_path)
   string_t def_inc_path = Cstring_to_string(Cdef_inc_path);
-  if (strlen(def_inc_path) > 0)
-    stdinc_string = aprintf(" -I%s",def_inc_path);
-  else
-    stdinc_string = "";
+  let stdinc_dirs = add_subdir(cyclone_exec_path,target_arch);
+  stdinc_dirs = add_subdir(stdinc_dirs,"include");
+  if (strlen(def_inc_path) > 0) {
+    stdinc_dirs = new List(new def_inc_path, stdinc_dirs);
+  }
   let cyclone_include_path = getenv("CYCLONE_INCLUDE_PATH");
   if (cyclone_include_path != NULL) {
-    let x = split_by_char(cyclone_include_path,':');
-    let s = str_sepstr(new List(new (string_t)"",
-                                        List::map(sh_escape_stringptr,x)),
-                               " -I");
-    stdinc_string = aprintf("%s%s",s,stdinc_string);
+    stdinc_dirs = List::append(split_by_char(cyclone_include_path,':'),
+                               stdinc_dirs);
   }
+  string_t stdinc_string =
+    str_sepstr(new List(new (string_t)"",
+                        List::map(sh_escape_stringptr,stdinc_dirs)),
+               " -I");
   string_t ofile_string;
   if (stop_after_cpp_r) {
     if (output_file != NULL)
@@ -880,6 +886,9 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-MT",false," <target>",
                new String_spec(set_dependencies_target),
                "Give target for dependencies"),
+         new $("-b",false,"<arch>",
+               new String_spec(set_target_arch),
+               "Set target architecture; implies -stopafter-toc"),
          new $("-E",false,"",
                new Set_spec(&stop_after_cpp_r),
                "Stop after preprocessing"),
@@ -964,6 +973,8 @@ int main(int argc, string_t<`H> ?`H argv) {
     exit(1);
   }
   
+  if (target_arch == NULL) target_arch = Cstring_to_string(Carch);
+
   // Find the file cyc_include.h, needed to produce the .c output.
   // The Cyclone exec-path is specified with the following order (where
   // the earlier in the order, the first place we look for the file):
@@ -979,8 +990,7 @@ int main(int argc, string_t<`H> ?`H argv) {
      new List(new (const char ?)Filename::concat(def_lib_path, "cyc-lib"),
               cyclone_exec_path);
   cyclone_exec_path = List::imp_rev(cyclone_exec_path);
-  let cyclone_arch_path = also_subdir(cyclone_exec_path,
-                                      Cstring_to_string(Carch));
+  let cyclone_arch_path = also_subdir(cyclone_exec_path, target_arch);
 
   /* The absolute file name is kept in a global variable */
   if (!stop_after_cpp_r) /* don't bother if we won't translate to C */
