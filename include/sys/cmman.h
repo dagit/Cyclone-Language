@@ -19,6 +19,8 @@
 #ifndef _SYS_MMAN_H
 #define _SYS_MMAN_H
 
+#include <cstddef.h> // get size_t
+
 namespace Std {
 
   // In C, MAP_FAILED is (void*)-1, but I have no idea why.  The user
