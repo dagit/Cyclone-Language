@@ -29,19 +29,26 @@
 #define O_RDONLY       00
 #define O_WRONLY       01
 #define O_RDWR         02
+#ifdef __CYGWIN__
+#define O_BINARY    0x10000
+#define O_CREAT     0x200
+#define O_EXCL      0x800
+#define O_NOCTTY    0x8000
+#define O_TRUNC     0x0400
+#define O_APPEND    0x0008
+#define O_NONBLOCK  0x4000
+#define O_NDELAY    O_NONBLOCK
+#endif
+#ifdef __linux__
 #define O_CREAT      0100
 #define O_EXCL       0200
 #define O_NOCTTY     0400
 #define O_TRUNC     01000
 #define O_APPEND    02000
 #define O_NONBLOCK  04000
-#ifdef __CYGWIN__
 #define O_NDELAY    O_NONBLOCK
-#endif
-#ifdef __linux__
-#define O_NDELAY    O_NONBLOCK
-#endif
 #define O_SYNC     010000
+#endif
 
 #define F_DUPFD 0
 #define F_GETFD 1

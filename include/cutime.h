@@ -24,6 +24,7 @@
 #include <cstddef.h>
 #include <time.h>
 
+namespace Std {
 /* Structure describing file times.  */
 struct utimbuf
   {
@@ -35,5 +36,5 @@ struct utimbuf
    *FILE_TIMES.  If FILE_TIMES is NULL, set them to the current time.  */
 extern int utime (string_t file,
 		  struct utimbuf *file_times);
-
+}
 #endif /* cutime.h */
