@@ -25,6 +25,7 @@
 namespace Aprof {
   bool verbose = true;
   bool use_events = false;
+  List::list_t<stringptr_t> omits = NULL;
 }
 
 using Aprof;
@@ -75,6 +76,9 @@ int main(int argc, string_t<`H> ?`H argv) {
     else if ( strcmp( argv[argn], "-ngp" ) == 0 ) {
       do_newgraph = true;
       do_gnuplot = true;
+    }
+    else if ( strcmp( argv[argn], "-omit" ) == 0 && argn+1 < argc ) {
+      omits = new List::List(&argv[++argn],omits);
     }
     else if ( strcmp( argv[argn], "-svg" ) == 0 ) {
       do_svg = true;

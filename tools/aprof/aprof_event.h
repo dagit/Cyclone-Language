@@ -30,6 +30,7 @@
 #include <core.h>
 #include <fn.h>
 #include <time.h>
+#include <list.h>
 
 namespace Aprof {
   using Core;
@@ -122,6 +123,9 @@ namespace Aprof {
 
   // Whether to use events instead of clocks
   extern bool use_events;
+
+  // Whether to print the reserved memory on the graph
+  extern List::list_t<stringptr_t> omits;
 
   // Uses proc_file above to generate a graph of the system's memory
   // usage.  The output graph is printed to stdout as a jgraph graph

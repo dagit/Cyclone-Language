@@ -193,10 +193,20 @@ static void mark_finish(curve_t b, clock_t x) {
   b->last_y = 0;
   b->points = new {for i < xres: 0}; // xres must be set up before calling
 }
+static bool omitted(const char ?x) {
+  bool result = false;
+  for (let l = omits; l != NULL; l = l->tl)
+    if (strcmp(x,*(l->hd)) == 0) {
+      result = true;
+      break;
+    }
+  return result;
+}
 static void update_heap_stats(struct ProcEnv @env,
                               clock_t x,
 			      struct RegionStats @s) {
-  mark_point(env->mem_total,x,s->region_size_bytes);
+  if (!omitted("reserved"))
+    mark_point(env->mem_total,x,s->region_size_bytes);
 }
 
 /* phase 2 */
@@ -270,7 +280,8 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     mark_gc_over();
     num_alloc_events++;
     if (!strcmp(rname,"unique")) {
-      mark_delta(env->unique_live,time,count);
+      if (!omitted("unique"))
+        mark_delta(env->unique_live,time,count);
       update_heap_stats(env,time,rstats);
       if (count>0) {
         // remember count for addr in case gc reclaims addr
@@ -283,7 +294,8 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       }
     }
     else if (!strcmp(rname,"refcnt")) {
-      mark_delta(env->refcnt_live,time,count);
+      if (!omitted("refcnt"))
+        mark_delta(env->refcnt_live,time,count);
       update_heap_stats(env,time,rstats);
       if (count>0) {
         // remember count for addr in case gc reclaims addr
@@ -296,13 +308,15 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       }
     }
     else if (!strcmp(rname,"heap")) {
-      mark_delta(env->heap_live,time,count);
+      if (!omitted("heap"))
+        mark_delta(env->heap_live,time,count);
       update_heap_stats(env,time,rstats);
       Hashtable::insert((_@)allocation_at_address_table,
                         addr,new $("heap",(unsigned int)count));
     }
     else {
-      mark_delta(env->other_live,time,count);
+      if (!omitted("other"))
+        mark_delta(env->other_live,time,count);
       let rname_p = new rname;
       unsigned int x = 0;
       try {
@@ -326,17 +340,17 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
         Hashtable::lookup((_@)allocation_at_address_table,addr);
       Hashtable::remove((_@)allocation_at_address_table,addr);
       int delta_y = -1*((int)count);
-      if (strcmp("unique",rname) == 0) {
+      if (!omitted("unique") && strcmp("unique",rname) == 0) {
         // this is a unique pointer object that got garbage collected
         mark_delta(env->unique_live,time,delta_y);
         bytes_reclaim_unique += count;
       }
-      if (strcmp("refcnt",rname) == 0) {
+      if (!omitted("refcnt") && strcmp("refcnt",rname) == 0) {
         // this is a refcounted pointer object that got garbage collected
         mark_delta(env->refcnt_live,time,delta_y);
         bytes_reclaim_refcnt += count;
       }
-      else if (strcmp("heap",rname) == 0) {
+      else if (!omitted("heap") && strcmp("heap",rname) == 0) {
         mark_delta(env->heap_live,time,delta_y);
         bytes_reclaim_heap += count;
       }
@@ -365,7 +379,8 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     catch {
     case &Not_found: break; // region created but not allocated into
     }
-    mark_delta(env->other_live,time,-x);
+    if (!omitted("other"))
+      mark_delta(env->other_live,time,-x);
     update_heap_stats(env,time,rstats);
     break;
 
@@ -628,23 +643,28 @@ int generate_svg(string_t<`H> file) {
   
   compute_resolution();
 
-  mark_finish(env->mem_total,max_time);
-  mark_finish(env->heap_live,max_time);
-  mark_finish(env->unique_live,max_time);
-  mark_finish(env->refcnt_live,max_time);
-  mark_finish(env->other_live,max_time);
+  if (!omitted("reserved"))
+    mark_finish(env->mem_total,max_time);
+  if (!omitted("heap"))
+    mark_finish(env->heap_live,max_time);
+  if (!omitted("unique"))
+    mark_finish(env->unique_live,max_time);
+  if (!omitted("refcnt"))
+    mark_finish(env->refcnt_live,max_time);
+  if (!omitted("other"))
+    mark_finish(env->other_live,max_time);
 
   /* sort the curves by area, with bigger curves to be printed
      above smaller curves */
-  if (env->mem_total->area > 0.0)
+  if (!omitted("reserved") && env->mem_total->area > 0.0)
     all_curves = new List(env->mem_total,all_curves);
-  if (env->heap_live->area > 0.0)
+  if (!omitted("heap") && env->heap_live->area > 0.0)
     all_curves = new List(env->heap_live,all_curves);
-  if (env->unique_live->area > 0.0)
+  if (!omitted("unique") && env->unique_live->area > 0.0)
     all_curves = new List(env->unique_live,all_curves);
-  if (env->refcnt_live->area > 0.0)
+  if (!omitted("refcnt") && env->refcnt_live->area > 0.0)
     all_curves = new List(env->refcnt_live,all_curves);
-  if (env->other_live->area > 0.0)
+  if (!omitted("other") && env->other_live->area > 0.0)
     all_curves = new List(env->other_live,all_curves);
   all_curves = merge_sort(curve_cmp,all_curves);
 
@@ -685,11 +705,11 @@ int generate_svg(string_t<`H> file) {
 
   output_comment("Allocation profile produced by aprof");
   comment_stats();
-  comment_curve_stats(env->mem_total);
-  comment_curve_stats(env->heap_live);
-  comment_curve_stats(env->unique_live);
-  comment_curve_stats(env->refcnt_live);
-  comment_curve_stats(env->other_live);
+  if (!omitted("reserved")) comment_curve_stats(env->mem_total);
+  if (!omitted("heap")) comment_curve_stats(env->heap_live);
+  if (!omitted("unique")) comment_curve_stats(env->unique_live);
+  if (!omitted("refcnt")) comment_curve_stats(env->refcnt_live);
+  if (!omitted("other")) comment_curve_stats(env->other_live);
 
   int num_curves = length(all_curves);
   coord_t ??zz = new {for i < num_curves: nth(all_curves,i)->points };
