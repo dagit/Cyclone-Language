@@ -181,11 +181,11 @@ extern void print_flowdict(flowdict_t d);
 extern void print_flow(flow_t f);
 
 // debugging
-// #define DEBUG_FLOW
+  //#define DEBUG_FLOW
 #ifdef DEBUG_FLOW
 extern bool debug_msgs;
 #define DEBUG_PRINT(arg...) if (debug_msgs) fprintf(stderr,##arg)
-#define DEBUG_PRINT_F(f,arg...) if (debug_msgs) f ## (##arg)
+#define DEBUG_PRINT_F(f,arg...) if (debug_msgs) f ( arg )
 #else
 #define DEBUG_PRINT_F(f,arg...) {}
 #define DEBUG_PRINT(arg...) {}

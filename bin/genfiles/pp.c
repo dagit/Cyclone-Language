@@ -1227,7 +1227,7 @@ if(l->tl == 0)return(struct Cyc_PP_Doc*)l->hd;else{
 struct Cyc_PP_Doc*sep2=Cyc_PP_text(sep);
 struct Cyc_PP_Doc*oline=Cyc_PP_oline_doc();
 struct Cyc_List_List*_tmp99=l;
-while(_tmp99->tl != 0){
+while(((struct Cyc_List_List*)_check_null(_tmp99))->tl != 0){
 struct Cyc_List_List*_tmp9A=_tmp99->tl;
 ({struct Cyc_List_List*_tmpF5=({struct Cyc_List_List*_tmp9B=_cycalloc(sizeof(*_tmp9B));_tmp9B->hd=sep2;({struct Cyc_List_List*_tmpF4=({struct Cyc_List_List*_tmp9C=_cycalloc(sizeof(*_tmp9C));_tmp9C->hd=oline;_tmp9C->tl=_tmp9A;_tmp9C;});_tmp9B->tl=_tmpF4;});_tmp9B;});_tmp99->tl=_tmpF5;});
 _tmp99=_tmp9A;}

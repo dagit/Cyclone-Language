@@ -1085,7 +1085,7 @@ unsigned long seplen=Cyc_strlen(separator);
 total_len +=(list_len - 1)* seplen;{
 struct _dyneither_ptr ans=Cyc_Core_rnew_string(r,total_len + 1);
 unsigned long i=0U;
-while(strs->tl != 0){
+while(((struct Cyc_List_List*)_check_null(strs))->tl != 0){
 struct _dyneither_ptr _tmp27=*((struct _dyneither_ptr*)strs->hd);
 len=(unsigned long)((struct Cyc_List_List*)_check_null(lens))->hd;
 ({struct _dyneither_ptr _tmp9F=_dyneither_ptr_decrease_size(_dyneither_ptr_plus(ans,sizeof(char),(int)i),sizeof(char),1U);struct _dyneither_ptr _tmp9E=(struct _dyneither_ptr)_tmp27;Cyc_strncpy(_tmp9F,_tmp9E,len);});

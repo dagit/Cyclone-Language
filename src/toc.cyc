@@ -1267,7 +1267,9 @@ static bool need_null_check(exp_t e) { // e must be pre-translation!
   case &CfFlowInfo::UnknownZ(_): 
     //fprintf(stderr,"annotation is unknown\n");
     switch (compress((type_t)e->topt)) {
-    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))): return conref_def(false,n);
+    case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))): 
+      //fprintf(stderr,"pointer type is %s\n",conref_def(false,n) ? "nullable" : "notnull");
+      return conref_def(false,n);
     default: toc_impos("Toc::is_nullable");
   }
   case &CfFlowInfo::NotZero(_):  

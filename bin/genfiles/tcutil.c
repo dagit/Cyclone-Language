@@ -1805,7 +1805,7 @@ struct Cyc_List_List*_tmp1A7=_tmp1BC->fields;
 if(_tmp1A7 == 0)return& Cyc_Tcutil_mk;
 # 592
 if(_tmp1BE == Cyc_Absyn_StructA){
-for(0;_tmp1A7->tl != 0;_tmp1A7=_tmp1A7->tl){;}{
+for(0;((struct Cyc_List_List*)_check_null(_tmp1A7))->tl != 0;_tmp1A7=_tmp1A7->tl){;}{
 void*_tmp1A8=((struct Cyc_Absyn_Aggrfield*)_tmp1A7->hd)->type;
 struct Cyc_Absyn_Kind*_tmp1A9=Cyc_Tcutil_field_kind(_tmp1A8,_tmp1BA,_tmp1BD);
 if(_tmp1A9 == & Cyc_Tcutil_ak  || _tmp1A9 == & Cyc_Tcutil_tak)return _tmp1A9;};}else{
@@ -3758,7 +3758,7 @@ return Cyc_Absyn_Unknown_coercion;case 13U: _LLC: _tmp5A9=((struct Cyc_Absyn_Enu
 # 2967
 {void*_tmp59B=t2;struct Cyc_Absyn_Enumdecl*_tmp59C;if(((struct Cyc_Absyn_EnumType_Absyn_Type_struct*)_tmp59B)->tag == 13U){_LL26: _tmp59C=((struct Cyc_Absyn_EnumType_Absyn_Type_struct*)_tmp59B)->f2;_LL27:
 # 2969
- if((_tmp5A9->fields != 0  && _tmp59C->fields != 0) && ({
+ if((((struct Cyc_Absyn_Enumdecl*)_check_null(_tmp5A9))->fields != 0  && ((struct Cyc_Absyn_Enumdecl*)_check_null(_tmp59C))->fields != 0) && ({
 int _tmpD22=((int(*)(struct Cyc_List_List*x))Cyc_List_length)((struct Cyc_List_List*)((struct Cyc_Core_Opt*)_check_null(_tmp5A9->fields))->v);_tmpD22 >= ((int(*)(struct Cyc_List_List*x))Cyc_List_length)((struct Cyc_List_List*)((struct Cyc_Core_Opt*)_check_null(_tmp59C->fields))->v);}))
 return Cyc_Absyn_Other_coercion;
 goto _LL25;}else{_LL28: _LL29:

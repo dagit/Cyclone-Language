@@ -149,14 +149,17 @@ static flow_t@ get_stmt_flow(analenv_t env, stmt_t s) {
   return *sflow;
 }
 
+static Relations::relns_t flowrelns(flow_t f) {
+  switch (f) {
+  case {.BottomFL = _}: return NULL;
+  case {.ReachableFL = $(_,r)}: return r;
+  }
+}
+
 static $(cf_stmt_annot_t@,flow_t@) pre_stmt_check(analenv_t env, flow_t inflow, stmt_t s){
   let annot = get_stmt_annot(s);
   let sflow = get_stmt_flow(env,s);
-//   DEBUG_PRINT("statement <%s>, annot-flow is {",stmt2string(s));
-//   DEBUG_PRINT_F(print_flow,*sflow);
-//   DEBUG_PRINT("}\n  inflow is {");
-//   DEBUG_PRINT_F(print_flow,inflow);
-  // join inflow with flow from non-local preds and earlier iterations
+  //Tcutil::warn(s->loc, "relations:\n\t%s\n",relns2string(flowrelns(inflow)));
   *sflow = join_flow(env->fenv, inflow, *sflow);
 //   DEBUG_PRINT("}\n  joined flow is {");
 //   DEBUG_PRINT_F(print_flow,*sflow);
@@ -1974,12 +1977,9 @@ static $(flow_t,flow_t) anal_primop_test(analenv_t env, flow_t inflow,
   let fenv = env->fenv;
   DEBUG_PRINT("anal_primop_test %s, inflow is ",exp2string(primop_exp(p,es,0)));
   DEBUG_PRINT_F(print_flow,inflow);
-  absRval_t r1,r2;
-  flow_t f;
-  let $(fl,rvals) = anal_Rexps(env,inflow,es,false,false);
-  r1 = rvals->hd;
-  r2 = rvals->tl->hd;
-  f = fl;
+  let $(f1,r1) = anal_Rexp(env,false,inflow,es->hd);
+  let $(f2,r2) = anal_Rexp(env,false,f1,es->tl->hd);
+  let f = f2;
   DEBUG_PRINT("anal_primop_test, after rexps, flow is ");
   DEBUG_PRINT_F(print_flow,f);
   switch(f) {
@@ -2001,8 +2001,8 @@ static $(flow_t,flow_t) anal_primop_test(analenv_t env, flow_t inflow,
       let $(r1,r1n) = unname_rval(r1);
       let $(r2,r2n) = unname_rval(r2);
       switch($(r1,r2)) {
-      case $(&UnknownR(il),&Zero): // f is correct for both args b/c unordered
-        let $(f1,f2) = splitzero(env,f,f,e1,il,r1n);
+      case $(&UnknownR(il),&Zero): 
+        let $(f1,f2) = splitzero(env,inflow,f,e1,il,r1n);
         switch(p) {
         case Eq:  ft = f2; ff = f1; break;
         case Neq: ft = f1; ff = f2; break;
@@ -2010,7 +2010,7 @@ static $(flow_t,flow_t) anal_primop_test(analenv_t env, flow_t inflow,
         }
         break;
       case $(&Zero,&UnknownR(il)):
-        let $(f1,f2) = splitzero(env,f,f,e2,il,r2n);
+        let $(f1,f2) = splitzero(env,f2,f,e2,il,r2n);
         switch(p) {
         case Eq:  ft = f2; ff = f1; break;
         case Neq: ft = f1; ff = f2; break;

@@ -978,7 +978,7 @@ while(1){
 # 160
 while(1){
 if(i >= _tmp22)goto DONE;
-if(((const char*)cmdline.curr)[i]== 0)goto DONE;
+if(*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== 0)goto DONE;
 if(! isspace((int)((const char*)cmdline.curr)[i]))break;
 ++ i;}
 # 166
@@ -986,13 +986,13 @@ j=0;
 # 171
 while(1){
 if(i >= _tmp22)break;
-if(((const char*)cmdline.curr)[i]== 0)break;
+if(*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== 0)break;
 if( isspace((int)((const char*)cmdline.curr)[i]))break;
 if(((const char*)cmdline.curr)[i]== '\\'){
 # 177
 ++ i;
 if(i >= _tmp22)break;
-if(((const char*)cmdline.curr)[i]== 0)break;
+if(*((const char*)_check_dyneither_subscript(cmdline,sizeof(char),i))== 0)break;
 buf[_check_known_subscript_notnull(4096U,j)]=((const char*)cmdline.curr)[i];
 ++ j;}else{
 # 184

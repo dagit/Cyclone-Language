@@ -1229,7 +1229,7 @@ struct Cyc_List_List*z;
 # 368
 if(x == 0)return y;
 if(y == 0)return x;
-for(z=x;z->tl != 0;z=z->tl){
+for(z=x;((struct Cyc_List_List*)_check_null(z))->tl != 0;z=z->tl){
 ;}
 z->tl=y;
 return x;}

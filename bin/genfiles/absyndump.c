@@ -1026,7 +1026,7 @@ Cyc_Absyndump_dump_char((int)';');}
 void Cyc_Absyndump_dump_sep(void(*f)(void*),struct Cyc_List_List*l,struct _dyneither_ptr sep){
 if(l == 0)
 return;
-for(0;l->tl != 0;l=l->tl){
+for(0;((struct Cyc_List_List*)_check_null(l))->tl != 0;l=l->tl){
 f(l->hd);
 Cyc_Absyndump_dump_nospace(sep);}
 # 187
@@ -1035,7 +1035,7 @@ f(l->hd);}
 void Cyc_Absyndump_dump_sep_c(void(*f)(void*,void*),void*env,struct Cyc_List_List*l,struct _dyneither_ptr sep){
 if(l == 0)
 return;
-for(0;l->tl != 0;l=l->tl){
+for(0;((struct Cyc_List_List*)_check_null(l))->tl != 0;l=l->tl){
 f(env,l->hd);
 Cyc_Absyndump_dump_nospace(sep);}
 # 196

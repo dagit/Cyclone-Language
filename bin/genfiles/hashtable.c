@@ -891,7 +891,7 @@ if(_tmp14(key,(((struct _tuple0*)_tmp15->hd)[0]).f1)== 0){
 ((struct Cyc_List_List**)_tmp13.curr)[bucket]=_tmp15->tl;
 return;}{
 # 100
-struct Cyc_List_List*_tmp16=_tmp15->tl;for(0;_tmp15->tl != 0;(_tmp15=_tmp15->tl,_tmp16=_tmp16->tl)){
+struct Cyc_List_List*_tmp16=_tmp15->tl;for(0;((struct Cyc_List_List*)_check_null(_tmp15))->tl != 0;(_tmp15=_tmp15->tl,_tmp16=_tmp16->tl)){
 # 102
 if(_tmp14(key,(((struct _tuple0*)((struct Cyc_List_List*)_check_null(_tmp16))->hd)[0]).f1)== 0){
 _tmp15->tl=_tmp16->tl;
