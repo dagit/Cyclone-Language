@@ -1,6 +1,4 @@
 /*
- * $Id: simple_hash.h,v 1.1 2001-07-30 20:20:33 tjim Exp $
- *
  * simple hashtable map: Cstring -> Int
  */
 

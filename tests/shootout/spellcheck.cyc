@@ -15,7 +15,7 @@ int main(int argc, char ?argv[]) {
     int i, wordbufsize = 80;
     char line[MAXLINELEN];
     char c, ?cp, ?wordbuf;
-    struct ht_ht *dict;
+    struct ht_ht @dict;
     FILE *fh;
     START_TIME
     wordbuf = new {for i < wordbufsize + 1 : '\000'};
@@ -37,8 +37,7 @@ int main(int argc, char ?argv[]) {
 		wordbuf[i++] = *cp;
 		if (i == wordbufsize) {
 		    wordbuf = new {for i < wordbufsize*2 + 1 : 
-				   (i < wordbufsize) ? 
-				   wordbuf[i] : '\000'};
+				   (i < wordbufsize) ? wordbuf[i] : '\000'};
 		    wordbufsize *= 2;
 		}
 	    }
@@ -61,8 +60,7 @@ int main(int argc, char ?argv[]) {
 		wordbuf[i++] = *cp;
 		if (i == wordbufsize) {
 		    wordbuf = new {for i < wordbufsize*2 + 1 : 
-				   (i < wordbufsize) ? 
-				   wordbuf[i] : '\000'};
+				   (i < wordbufsize) ? wordbuf[i] : '\000'};
 		    wordbufsize *= 2;
 		}
 	    } 

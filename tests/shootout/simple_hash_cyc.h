@@ -1,12 +1,9 @@
-// Derived from:
-
 /*
  * simple hashtable map: Cstring -> Int
  */
 
-#include <cstdio.h>
-#include <cstring.h>
-using Std {
+#include <stdio.h>
+#include <string.h>
 
 #define ht_num_primes 28
 
@@ -47,36 +44,35 @@ inline char ?ht_key(struct ht_node @node) {
 inline int ht_hashcode(struct ht_ht @ht, const char ?`r key) {
     unsigned long val = 0;
     for (; *key; ++key) val = 5 * val + *key;
-    return (int)(val % ht->size);
+    return (val % ht->size);
 }
 
-//ANNOYING to have to declare `r
-struct ht_node @ht_node_create(char ?`r key) {
+struct ht_node @ht_node_create(char ? key) {
     char ?newkey;
-    if ((newkey = strdup(key)) == NULL) {
+    struct ht_node @node;
+    if ((node = (struct ht_node @)malloc(sizeof(struct ht_node))) == 0) {
+	perror("malloc ht_node");
+	exit(1);
+    }
+    if ((newkey = (char ?)strdup(key)) == 0) {
 	perror("strdup newkey");
 	exit(1);
     }
-    struct ht_node @node =
-      new ht_node {
-        .key = newkey,
-        .val = 0,
-        .next = (struct ht_node *)NULL
-      };
+    node->key = newkey;
+    node->val = 0;
+    node->next = (struct ht_node *)NULL;
     return(node);
 }
 
 struct ht_ht @ht_create(int size) {
     int i = 0;
+    struct ht_ht @ht = (struct ht_ht @)malloc(sizeof(struct ht_ht));
     while (ht_prime_list[i] < size) { i++; }
-    struct ht_ht @ht =
-      new ht_ht{
-        .size = ht_prime_list[i],
-        .tbl = new {for i<ht_prime_list[i]: NULL},
-        .iter_index = 0,
-        .iter_next = NULL,
-        .items = 0
-      };
+    ht->size = ht_prime_list[i];
+    ht->tbl = new {for i<ht_prime_list[i]: NULL};
+    ht->iter_index = 0;
+    ht->iter_next = 0;
+    ht->items = 0;
 #ifdef HT_DEBUG
     ht->collisions = 0;
 #endif /* HT_DEBUG */
@@ -105,8 +101,8 @@ void ht_destroy(struct ht_ht @ht) {
 	while (next) {
 	    cur = next;
 	    next = next->next;
-//	    free(cur->key);
-//	    free(cur);
+	    free(cur->key);
+	    free(cur);
 #ifdef HT_DEBUG
 	    chain_len++;
 #endif /* HT_DEBUG */
@@ -116,16 +112,15 @@ void ht_destroy(struct ht_ht @ht) {
 	    max_chain_len = chain_len;
 #endif /* HT_DEBUG */
     }
-//    free(ht->tbl);
-//    free(ht);
+    free(ht->tbl);
+    free(ht);
 #ifdef HT_DEBUG
     fprintf(stderr, " HT: density         %d\n", density);
     fprintf(stderr, " HT: max chain len   %d\n", max_chain_len);
 #endif /* HT_DEBUG */
 }
 
-//ANNOYING to have to declare `r
-inline struct ht_node *ht_find(struct ht_ht @ht, const char ?`r key) {
+inline struct ht_node *ht_find(struct ht_ht @ht, const char ? key) {
     int hash_code = ht_hashcode(ht, key);
     struct ht_node *node = ht->tbl[hash_code];
     while (node) {
@@ -135,10 +130,9 @@ inline struct ht_node *ht_find(struct ht_ht @ht, const char ?`r key) {
     return((struct ht_node *)NULL);
 }
 
-//ANNOYING to have to declare `r
-inline struct ht_node @ht_find_new(struct ht_ht @ht, char ?`r key) {
+inline struct ht_node @ht_find_new(struct ht_ht @ht, char ? key) {
     int hash_code = ht_hashcode(ht, key);
-    struct ht_node *prev = NULL, *node = ht->tbl[hash_code];
+    struct ht_node *prev = 0, *node = ht->tbl[hash_code];
     while (node) {
 	if (strcmp(key, node->key) == 0) return(node);
 	prev = node;
@@ -148,12 +142,10 @@ inline struct ht_node @ht_find_new(struct ht_ht @ht, char ?`r key) {
 #endif /* HT_DEBUG */
     }
     ht->items++;
-    let newnode = ht_node_create(key);
     if (prev) {
-	return(prev->next = newnode);
+	return(prev->next = ht_node_create(key));
     } else {
-        ht->tbl[hash_code] = newnode;
-	return(newnode);
+	return(ht->tbl[hash_code] = ht_node_create(key));
     }
 }
 
@@ -186,6 +178,4 @@ inline struct ht_node *ht_first(struct ht_ht @ht) {
 
 inline int ht_count(struct ht_ht @ht) {
     return(ht->items);
-}
-
 }

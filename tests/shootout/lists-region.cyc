@@ -12,18 +12,18 @@
 
 // a simple Double Linked List
 // the head node is special, it's val is length of list
-typedef struct DLLs {
+typedef struct DLLs<`r::R> {
     int val;
-    struct DLLs *next;	/* points to next or head (if at tail) */
-    struct DLLs *prev;	/* points to prev or tail (if at head) */
-} DLL;
+    struct DLLs<`r> *`r next;	/* points to next or head (if at tail) */
+    struct DLLs<`r> *`r prev;	/* points to prev or tail (if at head) */
+} DLL<`r>;
 
 inline int list_length(DLL @head) { return(head->val); }
 inline int list_empty(DLL @head) { return(list_length(head) == 0); }
-inline DLL *list_first(DLL @head) { return(head->next); }
-inline DLL *list_last(DLL @head) { return(head->prev); }
+inline DLL<`r> *`r list_first(DLL<`r> @ head) { return(head->next); }
+inline DLL<`r> *`r list_last(DLL<`r> @ head) { return(head->prev); }
 
-void list_push_tail(DLL @`H head, DLL @`H item) {
+void list_push_tail(DLL<`r> @`r head, DLL<`r> @`r item) {
     DLL *tail = head->prev;
     tail->next = item;
     item->next = head;
@@ -32,7 +32,7 @@ void list_push_tail(DLL @`H head, DLL @`H item) {
     head->val++;
 }
 
-DLL *list_pop_tail(DLL @`H head) {
+DLL<`r> *`r list_pop_tail(DLL<`r> @`r head) {
     DLL *prev, *tail;
     if (list_empty(head)) return(NULL);
     tail = head->prev;
@@ -43,7 +43,7 @@ DLL *list_pop_tail(DLL @`H head) {
     return(tail);
 }
 
-void list_push_head(DLL @`H head, DLL @`H item) {
+void list_push_head(DLL<`r> @`r head, DLL<`r> @`r item) {
     DLL *next = head->next;
     head->next = item;
     next->prev = item;
@@ -52,7 +52,7 @@ void list_push_head(DLL @`H head, DLL @`H item) {
     head->val++;
 }
 
-DLL *list_pop_head(DLL @`H head) {
+DLL<`r> *`r list_pop_head(DLL<`r> @`r head) {
     DLL *next;
     if (list_empty(head)) return(NULL);
     next = head->next;
@@ -62,8 +62,8 @@ DLL *list_pop_head(DLL @`H head) {
     return(next);
 }
 
-int list_equal(DLL @x, DLL @y) {
-    DLL *xp, *yp;
+int list_equal(DLL<`r> @`r x, DLL<`r2> @`r2 y) {
+    DLL<`r> *`r xp; DLL<`r2> *`r2 yp;
     // first val's checked will be list lengths
     for (xp=x, yp=y; xp->next != x; xp=xp->next, yp=yp->next) {
 	if (xp->val != yp->val) return(0);
@@ -116,7 +116,7 @@ DLL @list_sequence(int from, int to) {
     return(l);
 }
 
-DLL @list_copy(DLL @x) {
+DLL @list_copy(DLL<`r> @`r x) {
     int i, j, size = list_length(x);
     DLL *xp, ?l = new {for i < size+1 : DLLs{0,NULL,NULL}};
     for (i=0, j=1, xp=x; i<size; i++, j++, xp=xp->next) {
@@ -130,7 +130,7 @@ DLL @list_copy(DLL @x) {
     return(l);
 }
 
-void list_reverse (DLL @head) {
+void list_reverse (DLL<`r> @`r head) {
     DLL *tmp, *p = head;
     do {
 	tmp = p->next;

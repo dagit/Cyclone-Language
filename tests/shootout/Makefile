@@ -32,6 +32,9 @@ diff: $(DIFFFILES)
 	  cat $$file; \
 	done)
 
+count:
+	wc -l $(addsuffix .gcc, $(BENCHMARKS))
+
 clean:
 	$(RM) $(NOCHECKEXEFILES)
 	$(RM) $(NOBOUNDSEXEFILES)
