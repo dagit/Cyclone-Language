@@ -1,143 +1,370 @@
-
-Here we give a brief top-down roadmap to the Cyclone source
-distribution.  You do not need any of this information for using
-Cyclone or any of the tools; it is provided to help you browse our
-code.
-
-For the distribution, we have put the pdf versions of the manuals in
-the top directory:
-    main-screen.pdf, main-letter.pdf, and main-a4.pdf all have the same
-    information.
-The HTML version is in doc/online-manual.
-
-DIRECTORIES
-
-Subdirectories are indented.
-
-include: the header files for the Cyclone library.  Subdirectories
-arpa, netinet, and sys have similar roles as in gcc.  install can copy
-all these header files to a more standard place.
-
-  arch: Only needed for cross-compiling. contains one file for each
-        supported architecture.  The file contains the constants in
-        the architecture's C library header files that Cyclone needs.
-
-tools: the source code for various tools written in Cyclone
-
-  cyclex: a lexer generator, produces Cyclone lexers.  Ported from
-          ocamllex, a lexer generator for O'Caml written in O'Caml.
-
-     genfiles: needed for bootstrapping the lexer generator, because
-               the lexer generator sources include a lex file!
-
-  bison: a parser generator, produces Cyclone parsers.  Ported from
-            bison, a gnu parser generator for C written in C.
-
-  aprof: an allocation profiler.  A Cyclone program compiled with -pa
-         produces a file that logs every allocation and the program point
-         responsible for it.  aprof processes this information and summarizes
-         it.
-
-doc: documentation and emacs-mode support. 
-    Producing the documentation pdf requires pdflatex and producing
-    html requires hevea.  We distribute the "compiled" versions so
-    that you don't need these programs.  The "top" file is
-    main-letter.tex, main-screen.tex, or main-a4.tex, depending on
-    your desires.
-       
-    The emacs-mode is a hack that you may not want to use:
-    font-lock.el changes C++-mode to work better for Cyclone.  If you
-    also write C++ code in emacs, you won't like these changes.  You
-    also need to put the code in cyclone_dot_emacs.el into your .emacs.
-
-    todo.txt is used by the developers to remind themselves how much
-    work remains.
-
-    online-manual
-       contains the html version of the documentation.
-
-tests: contains various tests and small programs.  Many of the programs were
-       ported from C and we have the original C versions for comparison 
-       purposes.
-
-       cyctest.cyc tests many language features and library calls.
-       foo.y is a small grammar for testing cycbison
-       finger.cyc is a Cyclone version of the finger program
-
-       compress: two different programs that perform file compression
-
-       smlng: our submission to the 2001 ICFP programming contest       
-
-       shootout: Cyclone versions of the programs at
-                 http://www.bagley.org/~doug/shootout/
-
-       tpop: Cyclone versions of some programs from The Practice of Programming
-             (Kernighan and Pike)
-
-lib: the source for the Cyclone library.  It is all in Cyclone files that
-     correspond to the header files in include.  The one exception is
-     runtime_cyc.c that contains the C functions used to implement facilities
-     like exceptions and array-bounds checks.  See the documentation
-     for a description of the library.
-
-src: the source for the Cyclone compiler and cycdoc.  Roughly
-     "front-to-back", there is: a lexer (lex.cyl), parser (parse.y),
-     type-checker (tc.cyc for overall control, tcdecl.cyc for
-     declarations, tcstmt.cyc for statements, tcexp.cyc for
-     expressions, tcpat.cyc for patterns, tcutil.cyc for auxiliary
-     operations over types, and tcenv.cyc for manipulating the
-     type-checking environment), control-flow checker
-     (new_control_flow.cyc for overall control, cf_absexp for an
-     abstract evaluation of expressions, cf_flowinfo for manipulating
-     the dataflow information), translation to C (toc.cyc), and
-     printing (absyndump.cyc for fast printing, absynpp.cyc for slower
-     but more readable printing).  The entire compiler works on the
-     same abstract syntax (absyn.cyc -- actually see absyn.h).  Files
-     not yet mentioned are: evexp.cyc -- evaluates constant
-     expressions.  formatstr.cyc -- checks printf and scanf
-     attributes.  tovc.cyc -- for translating to output digestable by
-     Microsoft Visual C (not yet officially supported).  interface.cyc
-     -- for doing link-checking between Cyclone files (not yet
-     officially supported).  cyclone.cyc for command-line processing
-     and invoking the other phases.
-
-bin: where the initial cyclone compiler and tools are put.  install
-can copy the executables to a more standard place.
-
-  cyc-lib: where the initial Cyclone library (libcyc.a), garbage-collector
-           (gc.a), and garbage-collector stub (nogc.a) are put.  install
-           can copy the libraries to a more standard place.
-
-     include: contains cyc_include.h, the file that the compiler prepends
-              to all C code it produces before calling gcc.  (It doesn't 
-              actually prepend the code; it uses gcc's -include option.)
-              install copies the include directory to wherever the libraries
-              are copied.
-
-  genfiles: contains one subdirectory for each supported architecture.
-            Each subdirectory has lib and src directories for the C files
-            that build the Cyclone library and compiler, respectively.
-	    All the C files (except lib/runtime_cyc.c) were generated by the
-            Cyclone compiler (the system is bootstrapping), so like most
-            machine-generated code, they are hard to read.
-
-            The platform differences are exceedingly minor (eg. the
-            value of certain signal constants).  As a result, some
-            architectures are stored as patches, relative to the directory
-            bin/genfiles/i686-unknown-linux.  Instead of 4+ MB of files,
-            a patch is roughly 15K.  The Makefiles extract the patch file
-            into a directory as needed.
-
-  config: config.guess is used by configure to determine the platform.
-          cyc_install installs the tools and libraries (remembering where)
-                      and can uninstall previously installations
-          cyccpp is a pre-processor wrapper used for cross-compiling Cyclone.
-         
-          arch: contains two files for each supported architecture.  The files
-                are used by cyccpp when cross-compiling. One file
-                describes what macros to undefine when the architecture is the
-                host.  One file describes what macros to define when the
-                architecture is the target.
-
-gc: contains the Boehm-Demers-Weiser conservative garbage collector.  We have
-    not modified the collector.
+./tests/fallthru_tests.cyc seems to be missing the license
+./tests/cyctest.cyc seems to be missing the license
+./tests/typerep_test.cyc seems to be missing the license
+./tests/muttrep.cyc seems to be missing the license
+./tests/foo.cyc seems to be missing the license
+./tests/hello.cyc seems to be missing the license
+./tests/histogram.cyc seems to be missing the license
+./tests/t.cyc seems to be missing the license
+./tests/t2.cyc seems to be missing the license
+./tests/t3.cyc seems to be missing the license
+./tests/t4.cyc seems to be missing the license
+./tests/test_getopt.cyc seems to be missing the license
+./tests/test_regions.cyc seems to be missing the license
+./tests/testcases.cyc seems to be missing the license
+./tests/toplev.cyc seems to be missing the license
+./tests/benchmarks/fib.cyc seems to be missing the license
+./tests/benchmarks/hanoi.cyc seems to be missing the license
+./tests/benchmarks/nsieve.cyc seems to be missing the license
+./tests/benchmarks/shuffle.cyc seems to be missing the license
+./tests/benchmarks/tfftdp.cyc seems to be missing the license
+./tests/compress/cacm/adaptive_model.cyc seems to be missing the license
+./tests/compress/cacm/arithmetic_decode.cyc seems to be missing the license
+./tests/compress/cacm/arithmetic_encode.cyc seems to be missing the license
+./tests/compress/cacm/bit_input.cyc seems to be missing the license
+./tests/compress/cacm/bit_output.cyc seems to be missing the license
+./tests/compress/cacm/decode.cyc seems to be missing the license
+./tests/compress/cacm/encode.cyc seems to be missing the license
+./tests/compress/ppm/arithcode.cyc seems to be missing the license
+./tests/compress/ppm/encode.cyc seems to be missing the license
+./tests/compress/ppm/decode.cyc seems to be missing the license
+./tests/compress/ppm/model.cyc seems to be missing the license
+./tests/compress/ncompress-cyc-4.2.4/compress42.cyc seems to be missing the license
+./tests/shootout/ackermann.cyc seems to be missing the license
+./tests/shootout/ary3.cyc seems to be missing the license
+./tests/shootout/catn.cyc seems to be missing the license
+./tests/shootout/echo.cyc seems to be missing the license
+./tests/shootout/except.cyc seems to be missing the license
+./tests/shootout/strcat.cyc seems to be missing the license
+./tests/shootout/fibo.cyc seems to be missing the license
+./tests/shootout/lists.cyc seems to be missing the license
+./tests/shootout/wordfreq.cyc seems to be missing the license
+./tests/shootout/hash.cyc seems to be missing the license
+./tests/shootout/hash2.cyc seems to be missing the license
+./tests/shootout/matrix-const.cyc seems to be missing the license
+./tests/shootout/heapsort.cyc seems to be missing the license
+./tests/shootout/lists-region.cyc seems to be missing the license
+./tests/shootout/hello.cyc seems to be missing the license
+./tests/shootout/reversefile.cyc seems to be missing the license
+./tests/shootout/spellcheck.cyc seems to be missing the license
+./tests/shootout/moments.cyc seems to be missing the license
+./tests/shootout/random.cyc seems to be missing the license
+./tests/shootout/sumcol.cyc seems to be missing the license
+./tests/shootout/sieve.cyc seems to be missing the license
+./tests/shootout/wc.cyc seems to be missing the license
+./tests/shootout/matrix.cyc seems to be missing the license
+./tests/shootout/nestedloop.cyc seems to be missing the license
+./tests/smlng/ast_validate.cyc seems to be missing the license
+./tests/smlng/buffer.cyc seems to be missing the license
+./tests/smlng/decorate.cyc seems to be missing the license
+./tests/smlng/dynamic.cyc seems to be missing the license
+./tests/smlng/flat.cyc seems to be missing the license
+./tests/smlng/generate.cyc seems to be missing the license
+./tests/smlng/parser.cyc seems to be missing the license
+./tests/smlng/smlng.cyc seems to be missing the license
+./tests/smlng/stack.cyc seems to be missing the license
+./tests/smlng/tag_elim.cyc seems to be missing the license
+./tests/smlng/timer.cyc seems to be missing the license
+./tests/smlng/validate.cyc seems to be missing the license
+./tests/smlng/buffer2.cyc seems to be missing the license
+./tests/tpop/array.cyc seems to be missing the license
+./tests/tpop/array2.cyc seems to be missing the license
+./tests/tpop/freq.cyc seems to be missing the license
+./tests/tpop/grep.cyc seems to be missing the license
+./tests/tpop/markov.cyc seems to be missing the license
+./tests/tpop/strings.cyc seems to be missing the license
+./tests/genrep_test.cyc seems to be missing the license
+./tools/cyclex/compact.cyc seems to be missing the license
+./tools/cyclex/lexgen.cyc seems to be missing the license
+./tools/cyclex/main.cyc seems to be missing the license
+./tools/cyclex/output.cyc seems to be missing the license
+./tools/cyclex/syntax.cyc seems to be missing the license
+./tools/cyclex/genfiles/lexer.cyc seems to be missing the license
+./bin/cyc-lib/include/cyc_include.h seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/precore_c.h seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/precore_c.h seems to be missing the license
+./gc/version.h seems to be missing the license
+./gc/Mac_files/MacOS_Test_config.h seems to be missing the license
+./gc/Mac_files/MacOS_config.h seems to be missing the license
+./gc/cord/de_cmds.h seems to be missing the license
+./gc/cord/de_win.h seems to be missing the license
+./gc/include/cord.h seems to be missing the license
+./gc/include/ec.h seems to be missing the license
+./gc/include/gc_alloc.h seems to be missing the license
+./gc/include/gc_amiga_redirects.h seems to be missing the license
+./gc/include/gc_backptr.h seems to be missing the license
+./gc/include/gc_gcj.h seems to be missing the license
+./gc/include/gc_inl.h seems to be missing the license
+./gc/include/gc_inline.h seems to be missing the license
+./gc/include/gc_local_alloc.h seems to be missing the license
+./gc/include/gc_mark.h seems to be missing the license
+./gc/include/gc_pthread_redirects.h seems to be missing the license
+./gc/include/gc_typed.h seems to be missing the license
+./gc/include/javaxfc.h seems to be missing the license
+./gc/include/leak_detector.h seems to be missing the license
+./gc/include/new_gc_alloc.h seems to be missing the license
+./gc/include/weakpointer.h seems to be missing the license
+./gc/include/private/cord_pos.h seems to be missing the license
+./gc/include/private/dbg_mlc.h seems to be missing the license
+./gc/include/private/gc_hdrs.h seems to be missing the license
+./gc/include/private/gc_mark.h seems to be missing the license
+./gc/include/private/gc_pmark.h seems to be missing the license
+./gc/include/private/solaris_threads.h seems to be missing the license
+./gc/include/private/specific.h seems to be missing the license
+./include/arch/i386-unknown-bsdi3.1.h seems to be missing the license
+./include/arch/i386-unknown-openbsd2.8.h seems to be missing the license
+./include/arch/i686-unknown-linux.h seems to be missing the license
+./include/arch/powerpc-apple-rhapsody.h seems to be missing the license
+./include/arch/sparc-sun-solaris2.7.h seems to be missing the license
+./include/arch/i686-unknown-cygwin1.3.3.h seems to be missing the license
+./include/netinet/ctcp.h seems to be missing the license
+./include/sys/cwait.h seems to be missing the license
+./include/sys/cselect.h seems to be missing the license
+./include/cutime.h seems to be missing the license
+./lib/cutime.h seems to be missing the license
+./lib/arch/i386-unknown-bsdi3.1.h seems to be missing the license
+./lib/arch/i386-unknown-openbsd2.8.h seems to be missing the license
+./lib/arch/i686-unknown-linux.h seems to be missing the license
+./lib/arch/powerpc-apple-rhapsody.h seems to be missing the license
+./lib/arch/sparc-sun-solaris2.7.h seems to be missing the license
+./lib/arch/i686-unknown-cygwin1.3.3.h seems to be missing the license
+./lib/include/cyc_include.h seems to be missing the license
+./lib/netinet/ctcp.h seems to be missing the license
+./lib/sys/cwait.h seems to be missing the license
+./lib/sys/cselect.h seems to be missing the license
+./src/version.h seems to be missing the license
+./tests/boa-0.94.8.3/src/acconfig.h seems to be missing the license
+./tests/boa-0.94.8.3/src/escape.h seems to be missing the license
+./tests/boa-0.94.8.3/src-cyclone/escape.h seems to be missing the license
+./tests/compress/cacm/arithmetic_coding.h seems to be missing the license
+./tests/compress/cacm/model.h seems to be missing the license
+./tests/compress/cacm-old/arithmetic_coding.h seems to be missing the license
+./tests/compress/cacm-old/model.h seems to be missing the license
+./tests/compress/ppm/arithcode.h seems to be missing the license
+./tests/compress/ppm/model.h seems to be missing the license
+./tests/compress/ppm-old/arithcode.h seems to be missing the license
+./tests/compress/ppm-old/model.h seems to be missing the license
+./tests/compress/ncompress-4.2.4/patchlevel.h seems to be missing the license
+./tests/compress/ncompress-cyc-4.2.4/patchlevel.h seems to be missing the license
+./tests/shootout/timer.h seems to be missing the license
+./tests/shootout/simple_hash_cyc.h seems to be missing the license
+./tests/shootout/simple_hash.h seems to be missing the license
+./tests/smlng/contexts.h seems to be missing the license
+./tests/smlng/dynamic.h seems to be missing the license
+./tests/smlng/smlng.h seems to be missing the license
+./tests/smlng/tag_elim.h seems to be missing the license
+./tests/smlng/timer.h seems to be missing the license
+./tests/smlng/buffer.h seems to be missing the license
+./tests/smlng/flat.h seems to be missing the license
+./tests/smlng/parser.h seems to be missing the license
+./tools/bison/system.h seems to be missing the license
+./tools/cyclex/compact.h seems to be missing the license
+./tools/cyclex/lexer.h seems to be missing the license
+./tools/cyclex/lexgen.h seems to be missing the license
+./tools/cyclex/output.h seems to be missing the license
+./tools/cyclex/parser.h seems to be missing the license
+./tools/cyclex/syntax.h seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/array.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/assert.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/pp.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/printf.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/bitvec.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/time.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/scanf.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/buffer.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/core.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/string.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/pwd.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/dict.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/dirent.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/execinfo.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/getopt1.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/filename.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/fn.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/getopt.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/inet.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/grp.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/in.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/marshal.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/mman.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/lexing.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/position.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/lineno.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/list.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/netdb.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/queue.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/splay.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/rope.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/slowdict.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/socket.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/set.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/signal.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/stat.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/stdio.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/stdlib.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/typerep.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/unistd.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/utime.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/xarray.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/arg.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/crypt.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/fcntl.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/lib/hashtable.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/buildlib.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/lex.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/tcgenrep.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/tcpat.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/tc.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/tcdecl.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/evexp.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/tcenv.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/tcexp.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/tcstmt.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/interface.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/tcutil.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/toc.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/tovc.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/control_flow.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/absynpp.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/formatstr.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/parse_tab.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/absyndump.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/absyn.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/new_control_flow.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/cf_flowinfo.c seems to be missing the license
+./bin/genfiles/i686-unknown-cygwin1.3.3/src/cycdoc.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/arg.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/array.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/assert.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/bitvec.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/buffer.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/core.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/crypt.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/dict.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/dirent.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/execinfo.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/fcntl.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/filename.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/fn.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/getopt.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/getopt1.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/grp.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/hashtable.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/in.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/inet.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/lexing.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/lineno.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/list.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/marshal.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/mman.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/netdb.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/position.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/pp.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/pwd.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/queue.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/rope.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/set.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/signal.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/slowdict.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/socket.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/splay.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/stat.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/stdio.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/stdlib.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/time.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/typerep.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/unistd.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/utime.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/xarray.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/printf.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/scanf.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/lib/string.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/control_flow.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/absyn.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/absyndump.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/absynpp.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/buildlib.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/cf_flowinfo.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/evexp.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/formatstr.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/interface.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/lex.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/new_control_flow.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/parse_tab.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/tc.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/tcdecl.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/tcenv.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/tcexp.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/tcgenrep.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/tcpat.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/tcstmt.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/tcutil.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/toc.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/tovc.c seems to be missing the license
+./bin/genfiles/i686-unknown-linux/src/cycdoc.c seems to be missing the license
+./gc/MacOS.c seems to be missing the license
+./gc/add_gc_prefix.c seems to be missing the license
+./gc/allchblk.c seems to be missing the license
+./gc/alloc.c seems to be missing the license
+./gc/blacklst.c seems to be missing the license
+./gc/checksums.c seems to be missing the license
+./gc/dbg_mlc.c seems to be missing the license
+./gc/finalize.c seems to be missing the license
+./gc/gc_dlopen.c seems to be missing the license
+./gc/gcc_support.c seems to be missing the license
+./gc/gcname.c seems to be missing the license
+./gc/headers.c seems to be missing the license
+./gc/hpux_irix_threads.c seems to be missing the license
+./gc/if_mach.c seems to be missing the license
+./gc/if_not_there.c seems to be missing the license
+./gc/irix_threads.c seems to be missing the license
+./gc/malloc.c seems to be missing the license
+./gc/mallocx.c seems to be missing the license
+./gc/mark.c seems to be missing the license
+./gc/mark_rts.c seems to be missing the license
+./gc/new_hblk.c seems to be missing the license
+./gc/obj_map.c seems to be missing the license
+./gc/pcr_interface.c seems to be missing the license
+./gc/ptr_chck.c seems to be missing the license
+./gc/real_malloc.c seems to be missing the license
+./gc/reclaim.c seems to be missing the license
+./gc/setjmp_t.c seems to be missing the license
+./gc/solaris_pthreads.c seems to be missing the license
+./gc/solaris_threads.c seems to be missing the license
+./gc/specific.c seems to be missing the license
+./gc/stubborn.c seems to be missing the license
+./gc/test.c seems to be missing the license
+./gc/threadlibs.c seems to be missing the license
+./gc/typd_mlc.c seems to be missing the license
+./gc/win32_threads.c seems to be missing the license
+./gc/Mac_files/dataend.c seems to be missing the license
+./gc/Mac_files/datastart.c seems to be missing the license
+./gc/cord/cordbscs.c seems to be missing the license
+./gc/cord/cordprnt.c seems to be missing the license
+./gc/cord/cordtest.c seems to be missing the license
+./gc/cord/cordxtra.c seems to be missing the license
+./gc/cord/de.c seems to be missing the license
+./gc/cord/de_win.c seems to be missing the license
+./tests/finger-orig.c seems to be missing the license
+./tests/unsafe_cast.c seems to be missing the license
+./tests/benchmarks/fib-orig.c seems to be missing the license
+./tests/benchmarks/hanoi-orig.c seems to be missing the license
+./tests/benchmarks/nsieve-orig.c seems to be missing the license
+./tests/benchmarks/shuffle-orig.c seems to be missing the license
+./tests/benchmarks/tfftdp-orig.c seems to be missing the license
+./tests/compress/cacm-old/adaptive_model.c seems to be missing the license
+./tests/compress/cacm-old/arithmetic_decode.c seems to be missing the license
+./tests/compress/cacm-old/arithmetic_encode.c seems to be missing the license
+./tests/compress/cacm-old/bit_input.c seems to be missing the license
+./tests/compress/cacm-old/bit_output.c seems to be missing the license
+./tests/compress/cacm-old/decode.c seems to be missing the license
+./tests/compress/cacm-old/encode.c seems to be missing the license
+./tests/compress/ppm-old/arithcode.c seems to be missing the license
+./tests/compress/ppm-old/decode.c seems to be missing the license
+./tests/compress/ppm-old/encode.c seems to be missing the license
+./tests/compress/ppm-old/model.c seems to be missing the license
+./tests/compress/ncompress-4.2.4/compress42.c seems to be missing the license
+./tests/tpop/old/freq.c seems to be missing the license
+./tests/tpop/old/grep.c seems to be missing the license
+./tests/tpop/old/markov.c seems to be missing the license
+./tests/tpop/old/strings.c seems to be missing the license

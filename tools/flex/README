@@ -1,6 +1,7 @@
 You can use a stock GNU Flex to generate Cyclone scanners (that is,
 scanners that can be compiled by the Cyclone compiler).  Simply use
-the -S option to GNU Flex to specify this skeleton file.
+the -S option to GNU Flex to specify this flexcyc.skl as the
+skeleton file.
 
 This is useful when porting C code that uses a Flex scanner; it means
 that we don't have to port all of Flex to Cyclone.  Naturally the Flex
