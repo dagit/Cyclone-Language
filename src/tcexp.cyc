@@ -765,7 +765,7 @@ static type_t tcFnCall(tenv_t te,seg_t loc,type_t *`r topt,exp_t e,list_t<exp_t>
             // this is trickier, we have to match up the type of the
             // actual argument with a constructor from the [x]tunion.
             switch (compress(vt)) {
-            case &TunionType(TunionInfo{&KnownTunion(td),targs,tur}):
+            case &TunionType(TunionInfo{&KnownTunion(&td),targs,tur}):
               // unfortunately, td may not be the "latest" declaration of
               // an xtunion, so we re-look it up in the environment.
               let td = *lookup_tuniondecl(te,loc,td->name);
@@ -950,27 +950,104 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t *`r topt, type_t t) {
   return uint_t; // FIX: use topt
 }
 
+bool structfield_has_name(field_name_t n, structfield_t sf) {
+  return (strcmp(*n,*sf->name) == 0);
+}
+
 // offsetof(t,n)
 // FIX: check that n is actually a field of f (currently caught by gcc)
 // FIX?: check if t is allowed to be a union type
 static type_t tcOffsetof(tenv_t te, seg_t loc, type_t *`r topt, 
-			 type_t t, field_name_t n) {
+			 type_t t, offsetof_field_t n) {
   check_type(loc,te,lookup_type_vars(te),MemKind,true,t);
-  bool bad_type = true;
-  switch(compress(t)) {
-  case &StructType(_,_,sdp):
-    if(sdp == NULL)
-      return Tcutil::impos("offsetof on unchecked StructType");
-    if((*sdp)->fields == NULL)
+  switch(n) {
+  case &StructField(n):
+    bool bad_type = true;
+    switch(compress(t)) {
+    case &StructType(name,_,sdp):
+      if(sdp == NULL)
+	return Tcutil::impos("offsetof on unchecked StructType");
+      if((*sdp)->fields == NULL)
+	break;
+      if(!exists_c(structfield_has_name,n,(*sdp)->fields->v))
+	terr(loc,"no field of struct has name %s",*n);
+      bad_type = false;
       break;
-    fallthru;
-  case &AnonStructType(_):
-    bad_type = false;
+    case &AnonStructType(fields):
+      if(!exists_c(structfield_has_name,n,fields))
+	terr(loc,"no field of struct has name %s",*n);
+      bad_type = false;
+      break;
+    case &UnionType(name,_,udp):
+      if(udp == NULL)
+	return Tcutil::impos("offsetof on unchecked UnionType");
+      if((*udp)->fields == NULL)
+	break;
+      if(!exists_c(structfield_has_name,n,(*udp)->fields->v))
+	terr(loc,"no field of union has name %s",*n);
+      bad_type = false;
+      break;
+    case &AnonUnionType(fields):
+      if(!exists_c(structfield_has_name,n,fields))
+	terr(loc,"no field of anonymous union has name %s",*n);
+      bad_type = false;
+      break;
+      
+    default: break;
+    }
+    if(bad_type)
+      terr(loc, "%s is not a known struct/union type", typ2string(t));
     break;
-  default: break;
+  case &TupleIndex(n):
+    bool bad_type = true;
+    switch(compress(t)) {
+    case &StructType(_,_,sdp):
+      if(sdp == NULL)
+	return Tcutil::impos("offsetof on unchecked StructType");
+      if((*sdp)->fields == NULL)
+	break;
+      if(List::length((*sdp)->fields->v) <= n) 
+	terr(loc,"struct has too few components: %d <= %d",List::length((*sdp)->fields->v),n);
+      bad_type = false;
+      break;
+    case &AnonStructType(fields):
+      if(List::length(fields) <= n) 
+	Tcutil::terr(loc,"struct has too few components: %d <= %d",List::length(fields),n);
+      bad_type = false;
+      break;
+    case &UnionType(_,_,udp):
+      if(udp == NULL)
+	return Tcutil::impos("offsetof on unchecked UnionType");
+      if((*udp)->fields == NULL)
+	break;
+      if(List::length((*udp)->fields->v) <= n) 
+	terr(loc,"union has too few components: %d <= %d",List::length((*udp)->fields->v),n);
+      bad_type = false;
+      break;
+    case &AnonUnionType(fields):
+      if(List::length(fields) <= n) 
+	Tcutil::terr(loc,"union has too few components: %d <= %d",List::length(fields),n);
+      bad_type = false;
+      break;
+
+    case &TupleType(l):
+      if(List::length(l) <= n)
+	Tcutil::terr(loc,"tuple has too few components: %d <= %d",List::length(l),n);
+      bad_type = false;
+      break;
+    case &TunionFieldType(TunionFieldInfo(&KnownTunionfield(tudecl,tuf),_)):
+      //FIX: check that there are enough components in the field
+      if(List::length(tuf->typs) < n)
+	Tcutil::terr(loc,"tunionfield has too few components: %d < %d",List::length(tuf->typs),n);
+      bad_type = false;
+      break;
+    default: break;
+    }
+    if(bad_type)
+      terr(loc, "%s is not a known struct/union/tuple/tunion type", typ2string(t));
+    break;
   }
-  if(bad_type)
-    terr(loc, "%s is not a known struct type", typ2string(t));
+  
   return uint_t;
 }
 
@@ -1386,7 +1463,7 @@ static type_t tcTunion(tenv_t te, seg_t loc, type_t *`r topt,
       // we can cast up here if there are no arguments to the constructor.
       if (tuf->typs == NULL && es == NULL) {
         e->topt = new Opt(res);
-        res = new TunionType(TunionInfo{new KnownTunion(tud),
+        res = new TunionType(TunionInfo{new KnownTunion(new tud),
 					all_typs,r});
         unchecked_cast(te, e, res);
         return res;
@@ -1752,7 +1829,7 @@ static void tcExpNoInst(tenv_t te, type_t *`r topt, exp_t e) {
     t = tcSizeof(te,loc,topt,t1); break;
   case &Offsetof_e(t1,n):
     t = tcOffsetof(te,loc,topt,t1,n); break;
-  case &Gentyp_e(t1):
+  case &Gentyp_e(_,_):
     terr(loc, "gen() not in top-level initializer");
     return;
   case &Deref_e(e1):

@@ -214,7 +214,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
     if(inner_topt == NULL) 
       switch (compress(p2->topt->v)) {
       case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),targs}):
-	t = new TunionType(TunionInfo{new KnownTunion(tud),targs,ptr_rgn});
+	t = new TunionType(TunionInfo{new KnownTunion(new tud),targs,ptr_rgn});
 	break;
       default:
 	t = new PointerType(PtrInfo{p2->topt->v, ptr_rgn, empty_conref(), 
@@ -329,7 +329,7 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPatRec(tenv_t te,
       let inst       = List::rappend(rgn,all_inst,exist_inst);
       // unless topt says otherwise, guess we want Tunion when there are no args
       if(tqts == NULL)
-	t = new TunionType(TunionInfo{new KnownTunion(tud),
+	t = new TunionType(TunionInfo{new KnownTunion(new tud),
 				      all_typs,
 				      new_evar(&rk,new Opt(tenv_tvs))});
       else

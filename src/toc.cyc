@@ -289,7 +289,7 @@ static type_t typ_to_c(type_t t) {
   case &Evar(_,NULL,_,_): return sint_t; // pick something widely useful
   case &Evar(_,&Opt{.v=t2},_,_): return typ_to_c(t2); 
   case &VarType(_): return void_star_typ(); // map `a to void *
-  case &TunionType(TunionInfo{&KnownTunion(tud),_,_}): return void_star_typ();
+  case &TunionType(TunionInfo{&KnownTunion(_),_,_}): return void_star_typ();
   case &TunionType(_): throw impos("unresolved TunionType");
   case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud,tuf),_}):
     // for tunion fields that carry no arguments, it's an unsigned int
@@ -1559,8 +1559,38 @@ static void exp_to_c(env_t nv, exp_t e) {
     break;
   case &Sizeofexp_e(e1): exp_to_c(nv,e1); break;
   case &Sizeoftyp_e(t):  e->r = new Sizeoftyp_e(typ_to_c_array(t));  break;
-  case &Gentyp_e(t): throw toc_impos("__gen() in code generator"); 
-  case &Offsetof_e(t,n): e->r = new Offsetof_e(typ_to_c_array(t),n); break;
+  case &Gentyp_e(_,_): throw toc_impos("__gen() in code generator"); 
+  case &Offsetof_e(t,&StructField(n)): e->r = new Offsetof_e(typ_to_c_array(t),new StructField(n)); break;
+  case &Offsetof_e(t,&TupleIndex(n)): 
+    switch(compress(t)) {
+    case &StructType(_,_,stdeclp): 
+      if(stdeclp == NULL || (*stdeclp)->fields == NULL)
+	throw toc_impos("struct fields must be known");
+      fallthru((*stdeclp)->fields->v);
+    case &AnonStructType(fields):
+      let nth_field = List::nth(fields,n);
+      e->r = new Offsetof_e(typ_to_c_array(t),new StructField(nth_field->name));
+      break;
+    case &UnionType(_,_,udeclp): 
+      if(udeclp == NULL || (*udeclp)->fields == NULL)
+	throw toc_impos("union fields must be known");
+      fallthru((*udeclp)->fields->v);
+    case &AnonUnionType(fields):
+      let nth_field = List::nth(fields,n);
+      e->r = new Offsetof_e(typ_to_c_array(t),new StructField(nth_field->name));
+      break;
+    case &TupleType(_):
+      e->r = new Offsetof_e(typ_to_c_array(t),new StructField(fieldname(n+1)));
+      break;
+    case &TunionFieldType(_):
+      if(n == 0)
+	e->r = new Offsetof_e(typ_to_c_array(t),new StructField(tag_sp));
+      else
+	e->r = new Offsetof_e(typ_to_c_array(t),new StructField(fieldname(n)));
+      break;
+    default: throw toc_impos("impossible type for offsetof tuple index");
+    }
+    break;
   case &Deref_e(e1):
     let e1_typ = compress(e1->topt->v);
     switch (e1_typ) {

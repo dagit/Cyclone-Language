@@ -1026,8 +1026,8 @@ void unify_it(type_t t1, type_t t2) {
     }
     break;
 
-  case $(&TunionType(TunionInfo(&KnownTunion(tud2),ts2,r2)),
-	 &TunionType(TunionInfo(&KnownTunion(tud1),ts1,r1))):
+  case $(&TunionType(TunionInfo(&KnownTunion(&tud2),ts2,r2)),
+	 &TunionType(TunionInfo(&KnownTunion(&tud1),ts1,r1))):
     if(tud2 == tud1 || qvar_cmp(tud2->name,tud1->name) == 0) {
       unify_it(r1,r2);
       unify_list(ts1,ts2);
@@ -1341,7 +1341,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   // can cast a TunionFieldType to a TunionType if the field doesn't 
   // carry values.
     case $(&TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud1,tuf),ts1}),
-	   &TunionType(TunionInfo(&KnownTunion(tud2),ts2,_))):
+	   &TunionType(TunionInfo(&KnownTunion(&tud2),ts2,_))):
        if ((tud1 == tud2 || qvar_cmp(tud1->name,tud2->name) == 0) 
 	   && tuf->typs == NULL) {
 	 for (; ts1 != NULL && ts2 != NULL; ts1=ts1->tl, ts2=ts2->tl)
@@ -1355,7 +1355,7 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
   // can cast a "tunion T.f<ts> @`r1" to a "tunion `r2 T<ts>" when 
   //   field f carries values and r1==r2 or r1 outlives r2
   case $(&PointerType(PtrInfo{t_a,rt_a,null_a,q_a,b_a}),
-	 &TunionType(TunionInfo{&KnownTunion(tud2),ts2,r2})):
+	 &TunionType(TunionInfo{&KnownTunion(&tud2),ts2,r2})):
 	   //n2,ts2,r2,_})):
     switch (compress(t_a)) {
     case &TunionFieldType(TunionFieldInfo{&KnownTunionfield(tud1,tuf1),ts1}):
@@ -2173,19 +2173,19 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
   case &TunionType(TunionInfo(*info,targs,rgn)):
     switch(*info) {
     case &UnknownTunion(UnknownTunionInfo(n,is_x)):
-      tuniondecl_t tud;
-      try tud = *lookup_tuniondecl(te,loc,n);// FIX: lookup_xtuniondecl needed?
+      tuniondecl_t@ tudp;
+      try tudp = lookup_tuniondecl(te,loc,n);// FIX: lookup_xtuniondecl needed?
       catch { 
       case Dict::Absent:
         terr(loc,"unbound type [x]tunion %s",qvar2string(n));
         return cvtenv;
       }
-      if(tud->is_xtunion != is_x)
+      if((*tudp)->is_xtunion != is_x)
 	terr(loc,"[x]tunion is different from type declaration %s",
 			 qvar2string(n));
-      *info = new KnownTunion(tud);
-      fallthru(tud);
-    case &KnownTunion(tud):
+      *info = new KnownTunion(tudp);
+      fallthru(*tudp);
+    case &KnownTunion(&tud):
       // check the region is well-formed
       cvtenv = i_check_valid_type(loc,te,cvtenv,RgnKind,rgn);
       // check the type arguments are well-formed
@@ -2410,7 +2410,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
           switch (ft) {
           case Printf_ft:
             switch (va_type) {
-            case &TunionType(TunionInfo(&KnownTunion(tud),_,_)):
+            case &TunionType(TunionInfo(&KnownTunion(&tud),_,_)):
               problem = (qvar_cmp(tud->name,tunion_print_arg_qvar) != 0);
               break;
             default: problem = true; break;
@@ -2418,7 +2418,7 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
             break;
           case Scanf_ft:
             switch (va_type) {
-            case &TunionType(TunionInfo(&KnownTunion(tud),_,_)):
+            case &TunionType(TunionInfo(&KnownTunion(&tud),_,_)):
               problem = (qvar_cmp(tud->name,tunion_scanf_arg_qvar) != 0);
               break;
             default: problem = true; break;
@@ -3181,7 +3181,9 @@ static bool cnst_exp(tenv_t te, bool var_okay, exp_t e) {
   case &Const_e(_):     return true;
   case &Sizeoftyp_e(_): return true;
   case &Sizeofexp_e(_): return true; // exp is not evaluated
-  case &Gentyp_e(_):    return true;
+    // jcheney: offsetof is constant?? need it to be for typerep anyway...
+  case &Offsetof_e(_,_): return true;
+  case &Gentyp_e(_,_):    return true;
   case &Enum_e(_,_,_):  return true;
   case &Var_e(qv,_):
     // NB: top-level function names and arrays are "constant"

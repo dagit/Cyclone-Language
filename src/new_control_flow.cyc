@@ -205,7 +205,7 @@ abssyn_t abstract_exp(absenv_t env, exp_t e) {
   case &Sizeofexp_e(_): // note the exp is NOT evaluated
   case &Sizeoftyp_e(_):  
   case &Offsetof_e(_,_): 
-  case &Gentyp_e(_):  
+  case &Gentyp_e(_,_):  
   case &Enum_e(_,_,_): // FIX : distinguish tags that are/aren't 0
   case &Var_e(_,&Funname_b(_)):
     // globals are lvalues, but are escaped and fully initializaed

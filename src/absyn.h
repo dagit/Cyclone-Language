@@ -124,7 +124,8 @@ namespace Absyn {
   extern tunion Attribute;
   extern tunion Format_Type;
   extern struct Structfield;
-
+  extern tunion OffsetofField;
+  
   typedef tunion Scope scope_t;
   typedef struct Tqual tqual_t; // not a pointer
   typedef tunion Size_of size_of_t;
@@ -172,6 +173,7 @@ namespace Absyn {
   typedef tunion Attribute attribute_t;
   typedef list_t<attribute_t> attributes_t;
   typedef struct Structfield @structfield_t;
+  typedef tunion OffsetofField offsetof_field_t;
 
   EXTERN_ABSYN tunion Nmspace {
     Loc_n,                // Local name
@@ -182,6 +184,11 @@ namespace Absyn {
   EXTERN_ABSYN struct Tqual { 
     bool q_const :1; bool q_volatile :1; bool q_restrict :1; 
   };
+  // This is essentially the same ?
+  /*  EXTERN_ABSYN struct Tqual { 
+      char q_const; char q_volatile; char q_restrict; 
+      };*/
+
   EXTERN_ABSYN tunion Size_of { B1, B2, B4, B8 };
 
   EXTERN_ABSYN tunion Kind { 
@@ -246,7 +253,7 @@ namespace Absyn {
   };
   EXTERN_ABSYN tunion TunionInfoU {
     UnknownTunion(struct UnknownTunionInfo);
-    KnownTunion(tuniondecl_t);
+    KnownTunion(tuniondecl_t@);
   };
   EXTERN_ABSYN struct TunionInfo {
     tunion TunionInfoU tunion_info;
@@ -389,6 +396,11 @@ namespace Absyn {
     vararg_info_t        @vai;
   };
 
+  EXTERN_ABSYN tunion OffsetofField {
+    StructField(field_name_t);
+    TupleIndex(unsigned int);
+  };
+
   EXTERN_ABSYN tunion Raw_exp {
     Const_e(cnst_t);
     Var_e(qvar_t,binding_t); 
@@ -410,8 +422,8 @@ namespace Absyn {
     New_e(exp_opt_t, exp_t); // first expression is region -- null is heap
     Sizeoftyp_e(type_t);
     Sizeofexp_e(exp_t);
-    Offsetof_e(type_t,field_name_t);
-    Gentyp_e(type_t);
+    Offsetof_e(type_t,offsetof_field_t);
+    Gentyp_e(list_t<tvar_t>, type_t);
     Deref_e(exp_t);
     StructMember_e(exp_t,field_name_t); // also union member
     StructArrow_e(exp_t,field_name_t);  // also union arrow
@@ -774,8 +786,8 @@ namespace Absyn {
   extern exp_t address_exp(exp_t, seg_t);
   extern exp_t sizeoftyp_exp(type_t t, seg_t);
   extern exp_t sizeofexp_exp(exp_t e, seg_t);
-  extern exp_t offsetof_exp(type_t, field_name_t, seg_t);
-  extern exp_t gentyp_exp(type_t, seg_t);
+  extern exp_t offsetof_exp(type_t, offsetof_field_t, seg_t);
+  extern exp_t gentyp_exp(list_t<tvar_t,`H>,type_t, seg_t);
   extern exp_t deref_exp(exp_t, seg_t);
   extern exp_t structmember_exp(exp_t, field_name_t, seg_t);
   extern exp_t structarrow_exp(exp_t, field_name_t, seg_t);

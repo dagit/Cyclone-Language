@@ -350,7 +350,7 @@ static bool check_public_type(aenv_t ae, seen_t seen, string_t obj, qvar_t name,
     }
     return true /*check_public_enum(ae, seen, ed)*/;
 
-  case &TunionType(TunionInfo(&KnownTunion(tud0),targs,_)):
+  case &TunionType(TunionInfo(&KnownTunion(&tud0),targs,_)):
     let &$(tns, v) = tud0->name;
     let ns = get_abs_ns(tns);
     tuniondecl_t tud;

@@ -603,10 +603,9 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
     obj = "tunion";
   }
 #ifdef DEBUG
-  fprintf(stderr,"type-checking %sdecl %s",obj,*v);
+  fprintf(stderr,"type-checking %sdecl %s\n",obj,*v);
   fflush(stderr);
 #endif
-
   list_t<tvar_t> tvs = tud->tvs;
   // disallow MemKinds and set unconstrained kinds to BoxKind
   for(_ tvs2 = tvs; tvs2 != NULL; tvs2 = tvs2->tl) {
@@ -663,7 +662,7 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
     // for the sake of recursive fields, make name abstract in body
     let tudp = new (new Tuniondecl(Extern, tud->name, tvs, NULL, tud->is_xtunion));
     ge->tuniondecls = Dict::insert(ge->tuniondecls, v, tudp);
-    
+   
     // check the fields (and sort them if this is a xtunion)
     *fs = tcTunionFields(te, ge, loc, obj, tud->is_xtunion, tud->name, *fs, tvs, tud);
 
@@ -682,7 +681,6 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   case $(NULL, &Opt(tudp)):
     // try to merge the declarations
     let tud2 = Tcdecl::merge_tuniondecl(*tudp, tud, loc, tc_msg);
-    
     if (tud2 == NULL)
       return; // error in redeclaration
     else {
@@ -690,6 +688,7 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
       break;
     }
   } 
+
 }
 
 static void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
@@ -803,7 +802,7 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0, bool in_externC, bool che
 	vd->sc = ExternC;
       if (vd->initializer != NULL) {
 	switch (vd->initializer->r) {
-	case &Gentyp_e(t):
+	case &Gentyp_e(_,t):
 	  /* FIX: should pass in a dictionary and use that throughout
 	     typechecking to share generated declarations */
 	  let $(dict2,ds2,e) = tcGenrep(te,ge,loc,t,dict);

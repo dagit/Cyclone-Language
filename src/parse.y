@@ -521,7 +521,7 @@ static $(type_t,opt_t<decl_t>)
 	  break;
         case &Tunion_d(tud):
           let args = List::map(tvar2typ,tud->tvs);
-          t = new TunionType(TunionInfo(new KnownTunion(tud), args, HeapRgn));
+          t = new TunionType(TunionInfo(new KnownTunion(new tud), args, HeapRgn));
 	  if(tud->fields != NULL) declopt = new Opt(d);
 	  break;
         case &Union_d(ud):
@@ -760,9 +760,9 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
         let sd = new Structdecl{s,new Opt((typedef_name_t)n),ts2,NULL,NULL};
         if (atts != NULL) err("bad attributes on struct",loc);
         return new List(new_decl(new Struct_d(sd),loc),NULL);
-      case &TunionType(TunionInfo(&KnownTunion(tud),_,_)):
+      case &TunionType(TunionInfo(&KnownTunion(tudp),_,_)):
 	if(atts != NULL) err("bad attributes on tunion", loc);
-	return new List(new_decl(new Tunion_d(tud),loc),NULL);
+	return new List(new_decl(new Tunion_d(*tudp),loc),NULL);
       case &TunionType(TunionInfo(&UnknownTunion(UnknownTunionInfo(n,isx)),ts,_)):
         let ts2 = List::map_c(typ2tvar,loc,ts);
         let tud = tunion_decl(s, n, ts2, NULL, isx, loc);
@@ -2390,9 +2390,17 @@ unary_expression:
 | SIZEOF '(' type_name ')'       { $$=^$(sizeoftyp_exp((*$3)[2],LOC(@1,@4))); }
 | SIZEOF unary_expression        { $$=^$(sizeofexp_exp($2,LOC(@1,@2))); }
 | OFFSETOF '(' type_name ',' IDENTIFIER ')' 
-   { $$=^$(offsetof_exp((*$3)[2],new $5,LOC(@1,@6))); }
+   { $$=^$(offsetof_exp((*$3)[2],new StructField(new $5),LOC(@1,@6))); }
+/* jcheney: offsetof for tuple types */
+/* not checking sign here...*/
+| OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
+   { $$=^$(offsetof_exp((*$3)[2],new TupleIndex((*$5)[1]), LOC(@1,@6))); }
 /* Cyc: __gen for generic, type-based marshallers */
-| GEN '(' type_name ')'      { $$=^$(gentyp_exp((*$3)[2],LOC(@1,@4))); }
+//| GEN '(' type_name ')'      { $$=^$(gentyp_exp((*$3)[2],LOC(@1,@4))); }
+| GEN type_params_opt '(' type_name ')'      
+   { let loc = LOC(@1,@5);
+     let tvs = List::map_c(typ2tvar,loc,$2);
+     $$=^$(gentyp_exp(tvs, (*$4)[2], LOC(@1,@5))); }
 /* Cyc: malloc, rmalloc */
 | MALLOC '(' SIZEOF '(' specifier_qualifier_list ')' ')'
 { $$=^$(new_exp(new Malloc_e(NULL,speclist2typ((*$5)[1],LOC(@5,@5))),

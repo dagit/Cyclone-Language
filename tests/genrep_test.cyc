@@ -1,14 +1,18 @@
+//#define ABSYN_CYC
+
 #include <stdio.h>
 #include <typerep.h>
 #include "marshal.h"
 #include <list.h>
+#include "../src/absyn.h"
 
 using List;
 using Typerep;
 using Marshal;
 
-//#define NEW
-#define TEST
+#define NEW
+//#define TEST
+
 
 typedef union Bar {
   int x;
@@ -21,7 +25,8 @@ typedef tunion Foo {
   Foo2(int,int);
   Foo3(float);
   Foo4(int,tunion Foo);
-} foo_t;
+} foo_t; 
+
 
 typedef struct Intlist {
   unsigned int val;
@@ -41,18 +46,34 @@ struct Inttree {
 enum Enum { A, B, C};
 typedef enum Enum enum_t;
 
+
+struct Layout {
+  char a;
+  char b;
+  double c;
+  char d;
+  int e;
+};
+
+typedef $(char,char,double,char,int) layout_t;
 #ifdef TEST 
 
-tunion Typestruct arr_rep = gen(int[5]);
-tunion Typestruct ptr_rep = gen(int*);
-
+// base types
 tunion Typestruct int_rep = gen(int);
 tunion Typestruct float_rep = gen(float);
 tunion Typestruct double_rep = gen(double);
 
+// ptrs/arrays
+tunion Typestruct arr_rep = gen(int[5]);
+tunion Typestruct ptr_rep = gen(int*);
+tunion Typestruct fptr_rep = gen(int?);
 tunion Typestruct arr_rep2 = gen(int[7][6][5]);
+
+// tuples
 tunion Typestruct tuple_rep = gen($(double,$(int,int)));
+// typedefs
 typedef $(int,float)@ pair_t;
+// tunions
 tunion Typestruct pair_t_rep = gen(pair_t);
 struct Pair {
   float a;
@@ -64,22 +85,119 @@ typedef struct {
   int b;
   int c;
 } triple_t;
+
+
 tunion Typestruct triple_rep = gen(triple_t);
 
+// recursive structs
 tunion Typestruct intlist_rep = __gen(intlist_t );
 tunion Typestruct inttree_rep = __gen(inttree_t );
 
+// enums
 tunion Typestruct enum_rep = __gen(enum_t);
+
+// tunionfields
 tunion Typestruct tunionfield_rep = __gen(tunion Foo.Foo2);
 
+// recursive tunions
 tunion Typestruct foo_rep = __gen(foo_t);
+// unions
 tunion Typestruct bar_rep = __gen(bar_t);
+
+// test recursive structs with parameters
+tunion Typestruct list_rep = __gen(list_t<int>);
+
+
+
+
+// test forward declarations for structs
+extern  struct Zot3;
+typedef struct Zot3 zot3_t;
+struct Zot3 {
+  int a;
+  zot3_t * b;
+};
+
+
+tunion Typestruct zot3_rep = __gen(zot3_t);
+
+// test forward declarations for unions
+
+extern  union Zot4;
+typedef union Zot4 zot4_t;
+union Zot4 {
+  int a;
+  zot3_t * b;
+};
+tunion Typestruct zot4_rep = __gen(zot4_t);
+
+// test fwd decls for enums
+extern enum Zot;
+typedef enum Zot zot_t;
+enum Zot {FF,GG};
+tunion Typestruct zot_rep = __gen(zot_t);
+
+// test forward declarations for tunions
+extern  tunion Zot2;
+typedef tunion Zot2 zot2_t;
+tunion Zot2 {
+  AA(int);
+  BB(zot2_t);
+  };
+tunion Typestruct zot2_rep = __gen(zot2_t);
+
+struct Two<`a> {
+  `a x;
+  `a y;
+} ;
+
+tunion Typestruct two_rep = __gen(struct Two<int>);
+
+// test tunions with parameters
+
+tunion maybe<`a> {
+  None;
+  Some(`a);
+};
+
+tunion Typestruct sum_rep = __gen(tunion maybe<int>);
+
+// test unions with parameters
+// not allowed in any meaningful sense
+union cast<`r::R> {
+  int cast_val;
+  float val;
+};
+
+tunion Typestruct cast_rep = __gen(union cast<`H>);
+
+
 
 #endif
 
 #ifdef NEW
-typedef $(`a,`b) polypair<`a,`b> ;
-tunion Typestruct pp_rep = __gen(list_t<int>);
+
+// test structs with bitfields
+
+struct bitfield {
+  int z : 1;
+  int x : 2;
+  int c : 3;
+};
+
+tunion Typestruct bitfield_rep = __gen(struct bitfield);
+
+//tunion Typestruct decl_rep = __gen(Absyn::scope_t);
+//tunion Typestruct decl2_rep = __gen(Absyn::tqual_t);
+//tunion Typestruct decl3_rep = __gen(Absyn::size_of_t);
+//tunion Typestruct decl4_rep = __gen(Absyn::kind_t);
+//tunion Typestruct decl5_rep = __gen(Absyn::tvar_t);
+//tunion Typestruct decl6_rep = __gen(Absyn::sign_t);
+//tunion Typestruct decl7_rep = __gen(Absyn::bounds_t); fndecl 
+//tunion Typestruct decl8_rep = __gen(Absyn::ptr_info_t);
+//tunion Typestruct decl9_rep = __gen(Absyn::vararg_info_t); fndecl
+//tunion Typestruct decl10_rep = __gen(Absyn::fn_info_t); fndecl
+tunion Typestruct decl11_rep = __gen(Absyn::decl_t);
 #endif
 
 
@@ -102,6 +220,7 @@ void do_xmlize(tunion Typestruct rep, `a val) {
 
 
 void main() {
+
 #ifdef TEST
   int i = 0xffffffff;
   do_print(int_rep,&i);
@@ -196,9 +315,10 @@ void main() {
   do_print(foo_rep,f);
   do_xmlize(foo_rep,f);
 
-  print_typestruct(bar_rep);
-  printf("\n");
 
+  let l = List::list(1,2,3,4);
+  do_print(list_rep,l);
+  do_xmlize(list_rep,l);
 
 #endif
   

@@ -203,7 +203,7 @@ static struct Tuniondecl exn_tud_v = Tuniondecl(Extern, &exn_name_v, NULL,
 						&exn_ol, true);
 tuniondecl_t exn_tud = &exn_tud_v;
 
-static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud_v);
+static tunion TunionInfoU.KnownTunion exn_tinfou = KnownTunion(&exn_tud);
 static tunion Type.TunionType exn_typ_tt =
                   TunionType(TunionInfo(&exn_tinfou,NULL,HeapRgn));
 type_t exn_typ = &exn_typ_tt;
@@ -441,11 +441,11 @@ exp_t sizeoftyp_exp(type_t t, seg_t loc) {
 exp_t sizeofexp_exp(exp_t e, seg_t loc) { 
   return new_exp(new Sizeofexp_e(e), loc); 
 }
-exp_t offsetof_exp(type_t t, field_name_t n, seg_t loc) {
-  return new_exp(new Offsetof_e(t,n), loc);
+exp_t offsetof_exp(type_t t, offsetof_field_t of, seg_t loc) {
+  return new_exp(new Offsetof_e(t,of), loc);
 }
-exp_t gentyp_exp(type_t t, seg_t loc) { 
-  return new_exp(new Gentyp_e(t), loc); 
+exp_t gentyp_exp(list_t<tvar_t,`H> tvs, type_t t, seg_t loc) { 
+  return new_exp(new Gentyp_e(tvs,t), loc); 
 }
 exp_t deref_exp(exp_t e,   seg_t loc) { return new_exp(new Deref_e(e), loc); }
 exp_t structmember_exp(exp_t e, field_name_t n, seg_t loc) {

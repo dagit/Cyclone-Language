@@ -356,7 +356,7 @@ void dumpntyp(type_t t) {
   case &TunionType(TunionInfo(tu_info,ts,r)):
     switch(tu_info) {
     case &UnknownTunion(UnknownTunionInfo(n,is_x)): fallthru(n,is_x);
-    case &KnownTunion(&Tuniondecl(_,n,_,_,is_x)):
+    case &KnownTunion(& &Tuniondecl(_,n,_,_,is_x)):
       if(is_x) dump("xtunion "); else dump("tunion ");
       switch (Tcutil::compress(r)) {
       case HeapRgn: break;
@@ -580,13 +580,18 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Sizeofexp_e(e1):
     dump("sizeof("); dumpexp_prec(myprec,e1); dump_char(')'); break;
 
-  case &Offsetof_e(t,n):
+  case &Offsetof_e(t,&StructField(n)):
     dump("offsetof("); dumptyp(t); dump_char(','); dump_nospace(*n);
     dump_char(')'); 
     break;
 
-  case &Gentyp_e(t):
-    dump("__gen("); dumptyp(t); dump_char(')'); break;
+  case &Offsetof_e(t,&TupleIndex(n)):
+    dump("offsetof("); dumptyp(t); dump_char(','); dump(aprintf("%d",n));
+    dump_char(')'); 
+    break;
+
+  case &Gentyp_e(tvars,t):
+    dump("__gen("); dumptvars(tvars); dumptyp(t); dump_char(')'); break;
 
   case &Deref_e(e1):
     dump_char('*'); dumpexp_prec(myprec,e1); break;
