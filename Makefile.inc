@@ -51,3 +51,5 @@ C_LIBS=$(addsuffix .c, $(CYCLONE_LIBS))
 O_SRCS=$(addsuffix .o, $(CYCLONE_SRCS))
 O_LIBS=$(addsuffix .o, $(CYCLONE_LIBS))
 C_RUNTIME=$(addsuffix .c, $(RUNTIME))
+
+LDFLAGS=-lm

@@ -10,7 +10,7 @@ all: $(PROG)
 
 $(PROG): $(O_SRCS)
 	$(MAKE) -C ../lib
-	gcc -O -o $@ $^ ../lib/$(CYCLIB) ../../gc.a
+	gcc -O -o $@ $^ ../lib/$(CYCLIB) ../../gc.a $(LDFLAGS)
 
 clean::
 	rm -f $(O_SRCS) $(PROG) *~ 

@@ -6,6 +6,8 @@
 # make all boot update.  But don't do the update until you're sure things
 # look good!
 
+include ../../Makefile.inc
+
 PROG=cyclex.exe
 BINDIR=../../bin
 
@@ -30,7 +32,7 @@ install: all
 all: $(PROG)
 
 $(PROG): $(O_SRCS) $(LIB)
-	gcc -g -o $@ $^ ../../bin/gc.a
+	gcc -g -o $@ $^ ../../bin/gc.a $(LDFLAGS)
 
 boot:
 	-rm -f lexer.cyc

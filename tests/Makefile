@@ -24,13 +24,13 @@ all: $(OUT_PREFIX)cyctest $(OUT_PREFIX)foo $(OUT_PREFIX)hello
 	./$(OUT_PREFIX)foo < foo_input
 
 $(OUT_PREFIX)hello: $(OUT_PREFIX)hello.o $(LIB)
-	gcc -g -o $@ $^ ../bin/gc.a
+	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 
 $(OUT_PREFIX)cyctest: $(OUT_PREFIX)cyctest.o $(LIB)
-	gcc -g -o $@ $^ ../bin/gc.a
+	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 
 $(OUT_PREFIX)foo: $(OUT_PREFIX)foo_tab.o $(OUT_PREFIX)foo.o $(LIB)
-	gcc -g -o $@ $^ ../bin/gc.a
+	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 
 $(OUT_PREFIX)foo_tab.c : $(OUT_PREFIX)foo_tab.cyc
 	$(CYCC) $(CYC_FLAGS) -o $@ $<
