@@ -494,10 +494,11 @@ unsigned int Cyc_Rope_flatten_it(struct _tagged_arr s,unsigned int i,struct Cyc_
 r){void*_tmp14=(void*)r->v;struct _tagged_arr _tmp15;struct _tagged_arr _tmp16;_LL6:
 if(*((int*)_tmp14)!= 0)goto _LL8;_tmp15=((struct Cyc_Rope_String_rope_struct*)
 _tmp14)->f1;_LL7: {unsigned int _tmp17=Cyc_strlen((struct _tagged_arr)_tmp15);Cyc_strncpy(
-_tagged_arr_plus(s,sizeof(char),(int)i),(struct _tagged_arr)_tmp15,_tmp17);return
-i + _tmp17;}_LL8: if(*((int*)_tmp14)!= 1)goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)
-_tmp14)->f1;_LL9: {unsigned int _tmp18=_get_arr_size(_tmp16,sizeof(struct Cyc_Rope_Rope_node*));{
-int j=0;for(0;j < _tmp18;j ++){i=Cyc_Rope_flatten_it(s,i,*((struct Cyc_Rope_Rope_node**)
+_tagged_ptr_decrease_size(_tagged_arr_plus(s,sizeof(char),(int)i),sizeof(char),1),(
+struct _tagged_arr)_tmp15,_tmp17);return i + _tmp17;}_LL8: if(*((int*)_tmp14)!= 1)
+goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)_tmp14)->f1;_LL9: {
+unsigned int _tmp18=_get_arr_size(_tmp16,sizeof(struct Cyc_Rope_Rope_node*));{int j=
+0;for(0;j < _tmp18;j ++){i=Cyc_Rope_flatten_it(s,i,*((struct Cyc_Rope_Rope_node**)
 _check_unknown_subscript(_tmp16,sizeof(struct Cyc_Rope_Rope_node*),j)));}}return i;}
 _LL5:;}struct _tagged_arr Cyc_Rope_to_string(struct Cyc_Rope_Rope_node*r){struct
 _tagged_arr s=Cyc_Core_new_string(Cyc_Rope_length(r)+ 1);Cyc_Rope_flatten_it(s,0,

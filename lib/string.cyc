@@ -294,7 +294,7 @@ mstring_t str_sepstr(list_t<stringptr_t> strs, buffer_t separator) {
 }
 ///////////////////////// COPYING
 // Destructively copy at most n characters from src into dest
-mstring_t<`r> strncpy(mstring_t<`r> dest, buffer_t src, size_t n) {
+mbuffer_t<`r> strncpy(mbuffer_t<`r> dest, buffer_t src, size_t n) {
   int i;
   assert(n <= src.size && n <= dest.size);
   for (i=0; i<n; i++) {
@@ -309,7 +309,7 @@ mstring_t<`r> strncpy(mstring_t<`r> dest, buffer_t src, size_t n) {
 }
 
 // Strncpy that does not pay attention to zero chars
-mstring_t<`r> zstrncpy(mstring_t<`r> dest, buffer_t src, size_t n) {
+mbuffer_t<`r> zstrncpy(mbuffer_t<`r> dest, buffer_t src, size_t n) {
   assert(n <= dest.size && n <= src.size);
   int i;
   for (i=0; i<n; i++) 

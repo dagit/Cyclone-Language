@@ -128,7 +128,7 @@ diff -rbBcN lex/Makefile cyclex/Makefile
 - #                                                                       #
 - #########################################################################
   
-! # $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $
+! # $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $
   
 ! # The lexer generator
   
@@ -278,7 +278,7 @@ diff -rbBcN lex/Makefile.Mac cyclex/Makefile.Mac
 - #                                                                       #
 - #########################################################################
 - 
-- # $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $
+- # $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $
 - 
 - # The lexer generator
 - 
@@ -370,7 +370,7 @@ diff -rbBcN lex/Makefile.nt cyclex/Makefile.nt
 - #                                                                       #
 - #########################################################################
 - 
-- # $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $
+- # $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $
 - 
 - # The lexer generator
 - 
@@ -651,7 +651,7 @@ diff -rbBcN lex/compact.ml cyclex/compact.ml
 - (*                                                                     *)
 - (***********************************************************************)
 - 
-- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- (* $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $ *)
 - 
 - (* Compaction of an automata *)
 - 
@@ -778,7 +778,7 @@ diff -rbBcN lex/compact.mli cyclex/compact.mli
 - (*                                                                     *)
 - (***********************************************************************)
 - 
-- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- (* $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $ *)
 - 
 - (* Compaction of an automata *)
 - 
@@ -869,7 +869,7 @@ diff -rbBcN lex/lexer.cyc cyclex/lexer.cyc
 + void store_string_char(char c) {
 +   if(string_index >= string_buff.size) {
 +     mstring_t new_buff = new_string(string_buff.size*2);
-+     strncpy(string_buff, new_buff, string_buff.size);
++     strncpy(new_buff, string_buff, string_buff.size);
 +     string_buff = new_buff;
 +   }
 +   string_buff[string_index++] = c;
@@ -1307,7 +1307,7 @@ diff -rbBcN lex/lexer.cyl cyclex/lexer.cyl
 + void store_string_char(char c) {
 +   if(string_index >= string_buff.size) {
 +     mstring_t new_buff = new_string(string_buff.size*2);
-+     strncpy(string_buff, new_buff, string_buff.size);
++     strncpy(new_buff, string_buff, string_buff.size);
 +     string_buff = new_buff;
 +   }
 +   string_buff[string_index++] = c;
@@ -1552,7 +1552,7 @@ diff -rbBcN lex/lexer.mli cyclex/lexer.mli
 - (*                                                                     *)
 - (***********************************************************************)
 - 
-- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- (* $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $ *)
 - 
 - val main: Lexing.lexbuf -> Parser.token
 - 
@@ -1578,7 +1578,7 @@ diff -rbBcN lex/lexer.mll cyclex/lexer.mll
 - (*                                                                     *)
 - (***********************************************************************)
 - 
-- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- (* $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $ *)
 - 
 - (* The lexical analyzer for lexer definitions. Bootstrapped! *)
 - 
@@ -2140,7 +2140,7 @@ diff -rbBcN lex/lexgen.ml cyclex/lexgen.ml
 - (*                                                                     *)
 - (***********************************************************************)
 - 
-- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- (* $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $ *)
 - 
 - (* Compiling a lexer definition *)
 - 
@@ -2388,7 +2388,7 @@ diff -rbBcN lex/lexgen.mli cyclex/lexgen.mli
 - (*                                                                     *)
 - (***********************************************************************)
 - 
-- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- (* $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $ *)
 - 
 - (* Representation of automata *)
 - 
@@ -2517,7 +2517,7 @@ diff -rbBcN lex/main.ml cyclex/main.ml
 - (*                                                                     *)
 - (***********************************************************************)
 - 
-- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- (* $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $ *)
 - 
 - (* The lexer generator. Command-line parsing. *)
 - 
@@ -2785,7 +2785,7 @@ diff -rbBcN lex/output.ml cyclex/output.ml
 - (*                                                                     *)
 - (***********************************************************************)
 - 
-- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- (* $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $ *)
 - 
 - (* Output the DFA tables and its entry points *)
 - 
@@ -2915,7 +2915,7 @@ diff -rbBcN lex/output.mli cyclex/output.mli
 - (*                                                                     *)
 - (***********************************************************************)
 - 
-- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- (* $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $ *)
 - 
 - (* Output the DFA tables and its entry points *)
 - 
@@ -2975,7 +2975,7 @@ diff -rbBcN lex/parser.mly cyclex/parser.mly
 - /*                                                                     */
 - /***********************************************************************/
 - 
-- /* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ */
+- /* $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $ */
 - 
 - /* The grammar for lexer definitions */
 - 
@@ -3394,7 +3394,7 @@ diff -rbBcN lex/syntax.mli cyclex/syntax.mli
 - (*                                                                     *)
 - (***********************************************************************)
 - 
-- (* $Id: ocamllex2cyclex.patch,v 1.1 2001-08-21 20:16:19 mhicks Exp $ *)
+- (* $Id: ocamllex2cyclex.patch,v 1.2 2002-03-07 23:42:26 jcheney Exp $ *)
 - 
 - (* The shallow abstract syntax *)
 - 

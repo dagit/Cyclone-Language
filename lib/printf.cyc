@@ -315,7 +315,7 @@ int _IO_vfprintf (int (@ioputc)(int,`a), `a ioputc_env,
 	int size = 0;		/* size of converted field or string */
         /* space for %c, %[diouxX], %[eEfgG] */
 	char buf[BUF+1]ZEROTERM = {for i < BUF : '\0'};
-	char ox[2]ZEROTERM = {'\0','\0'}; /* space for 0x hex-prefix */
+	char ox[2]NOZEROTERM = {'\0','\0'}; /* space for 0x hex-prefix */
         base_t base;            /* base for [diouxX] conversion */
 	/*
 	 * BEWARE, these `goto error' on error, and PAD uses `n'.
@@ -667,7 +667,7 @@ number:			if ((dprec = prec) >= 0)
 		} else if (flags & HEXPREFIX) {
 			ox[0] = '0';
 			ox[1] = (char)ch;
-			PRINT(ox, 2);
+			PRINTNOZEROTERM(ox,2);
 		}
 
 		/* right-adjusting zero padding */

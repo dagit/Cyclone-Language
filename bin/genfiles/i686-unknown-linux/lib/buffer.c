@@ -470,26 +470,28 @@ b->length=_get_arr_size(b->buffer,sizeof(char))- 1;return;}static void Cyc_Buffe
 struct Cyc_Buffer_t*b,unsigned int more){unsigned int len=b->length;unsigned int
 new_len=len;struct _tagged_arr new_buffer;while(b->position + more > new_len){
 new_len=2 * new_len;}new_buffer=Cyc_Core_new_string(new_len + 1);Cyc_strncpy(
-new_buffer,(struct _tagged_arr)b->buffer,b->position);b->buffer=new_buffer;b->length=
-new_len;return;}void Cyc_Buffer_add_char(struct Cyc_Buffer_t*b,char c){int pos=(int)
-b->position;if(pos >= b->length)Cyc_Buffer_resize(b,1);({struct _tagged_arr _tmp1=
-_tagged_arr_plus(b->buffer,sizeof(char),pos);char _tmp2=*((char*)
-_check_unknown_subscript(_tmp1,sizeof(char),0));char _tmp3=c;if(_get_arr_size(
-_tmp1,sizeof(char))== 1?_tmp2 == '\000'?_tmp3 != '\000': 0: 0)_throw_arraybounds();*((
-char*)_tmp1.curr)=_tmp3;});b->position=(unsigned int)(pos + 1);return;}void Cyc_Buffer_add_substring(
-struct Cyc_Buffer_t*b,struct _tagged_arr s,int offset,int len){if((offset < 0?1: len < 0)?
-1: offset + len > _get_arr_size(s,sizeof(char)))(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
+_tagged_ptr_decrease_size(new_buffer,sizeof(char),1),(struct _tagged_arr)b->buffer,
+b->position);b->buffer=new_buffer;b->length=new_len;return;}void Cyc_Buffer_add_char(
+struct Cyc_Buffer_t*b,char c){int pos=(int)b->position;if(pos >= b->length)Cyc_Buffer_resize(
+b,1);({struct _tagged_arr _tmp1=_tagged_arr_plus(b->buffer,sizeof(char),pos);char
+_tmp2=*((char*)_check_unknown_subscript(_tmp1,sizeof(char),0));char _tmp3=c;if(
+_get_arr_size(_tmp1,sizeof(char))== 1?_tmp2 == '\000'?_tmp3 != '\000': 0: 0)
+_throw_arraybounds();*((char*)_tmp1.curr)=_tmp3;});b->position=(unsigned int)(
+pos + 1);return;}void Cyc_Buffer_add_substring(struct Cyc_Buffer_t*b,struct
+_tagged_arr s,int offset,int len){if((offset < 0?1: len < 0)?1: offset + len > 
+_get_arr_size(s,sizeof(char)))(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*
 _tmp4=_cycalloc(sizeof(*_tmp4));_tmp4[0]=({struct Cyc_Core_Invalid_argument_struct
 _tmp5;_tmp5.tag=Cyc_Core_Invalid_argument;_tmp5.f1=({const char*_tmp6="Buffer::add_substring";
 _tag_arr(_tmp6,sizeof(char),_get_zero_arr_size(_tmp6,22));});_tmp5;});_tmp4;}));{
 int new_position=(int)(b->position + len);if(new_position > b->length)Cyc_Buffer_resize(
-b,(unsigned int)len);Cyc_zstrncpy(_tagged_arr_plus(b->buffer,sizeof(char),(int)b->position),(
-struct _tagged_arr)_tagged_arr_plus(s,sizeof(char),offset),(unsigned int)len);b->position=(
+b,(unsigned int)len);Cyc_zstrncpy(_tagged_ptr_decrease_size(_tagged_arr_plus(b->buffer,
+sizeof(char),(int)b->position),sizeof(char),1),(struct _tagged_arr)
+_tagged_arr_plus(s,sizeof(char),offset),(unsigned int)len);b->position=(
 unsigned int)new_position;return;}}void Cyc_Buffer_add_string(struct Cyc_Buffer_t*
 b,struct _tagged_arr s){int len=(int)Cyc_strlen((struct _tagged_arr)s);int
 new_position=(int)(b->position + len);if(new_position > b->length)Cyc_Buffer_resize(
-b,(unsigned int)len);Cyc_strncpy(_tagged_arr_plus(b->buffer,sizeof(char),(int)b->position),(
-struct _tagged_arr)s,(unsigned int)len);b->position=(unsigned int)new_position;
-return;}void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*b,struct Cyc_Buffer_t*bs){
-Cyc_Buffer_add_substring(b,(struct _tagged_arr)bs->buffer,0,(int)bs->position);
-return;}
+b,(unsigned int)len);Cyc_strncpy(_tagged_ptr_decrease_size(_tagged_arr_plus(b->buffer,
+sizeof(char),(int)b->position),sizeof(char),1),(struct _tagged_arr)s,(
+unsigned int)len);b->position=(unsigned int)new_position;return;}void Cyc_Buffer_add_buffer(
+struct Cyc_Buffer_t*b,struct Cyc_Buffer_t*bs){Cyc_Buffer_add_substring(b,(struct
+_tagged_arr)bs->buffer,0,(int)bs->position);return;}

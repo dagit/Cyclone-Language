@@ -69,8 +69,8 @@ extern mstring_t<`r> rstr_sepstr(region_t<`r>,List::list_t<stringptr_t>,buffer_t
 ///////////////////////// COPYING
 // Non-allocating
 extern mstring_t<`r> strcpy(mstring_t<`r> dest,buffer_t src); 
-extern mstring_t<`r> strncpy(mstring_t<`r>,buffer_t,size_t);
-extern mstring_t<`r> zstrncpy(mstring_t<`r>,buffer_t,size_t);
+extern mbuffer_t<`r> strncpy(mbuffer_t<`r>,buffer_t,size_t);
+extern mbuffer_t<`r> zstrncpy(mbuffer_t<`r>,buffer_t,size_t);
 
 // realloc
 extern mbuffer_t realloc(mbuffer_t<`H>, size_t);
