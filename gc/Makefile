@@ -20,10 +20,7 @@ AS=as $(ABI_FLAG)
 srcdir= .
 VPATH= $(srcdir)
 
-#CFLAGS=-I$(srcdir)/include -DATOMIC_UNCOLLECTABLE -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT
-#CFLAGS= -pg -I$(srcdir)/include -DATOMIC_UNCOLLECTABLE -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT
-
-CFLAGS= -O -I$(srcdir)/include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT -DNO_DEBUGGING -DDONT_ADD_BYTE_AT_END
+CFLAGS= -O -I$(srcdir)/include -DATOMIC_UNCOLLECTABLE -DNO_SIGNALS -DNO_EXECUTE_PERMISSION -DALL_INTERIOR_POINTERS -DSILENT
 
 # HOSTCC and HOSTCFLAGS are used to build executables that will be run as
 # part of the build process, i.e. on the build machine.  These will usually
@@ -236,7 +233,7 @@ CURSES= -lcurses -ltermlib
 # The following is irrelevant on most systems.  But a few
 # versions of make otherwise fork the shell specified in
 # the SHELL environment variable.
-#SHELL= /bin/sh
+SHELL= /bin/sh
 
 SPECIALCFLAGS = -I$(srcdir)/include
 # Alternative flags to the C compiler for mach_dep.c.
