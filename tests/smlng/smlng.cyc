@@ -86,7 +86,7 @@ doc_t down_opt(context_t ctxt, doc_t d) {
     for (; ds.size != 0; ds++)
       *ds = down_opt(ctxt,*ds);
     return d;
-  case &Text(_): return d;
+  case &Text(t): return d;
   case &Tagged(tag,*d2):
     switch (tag) {
     case B_tag:
@@ -94,8 +94,8 @@ doc_t down_opt(context_t ctxt, doc_t d) {
       ctxt.B = true; 
       break;
     case EM_tag:
-      if (ctxt.EM) return down_opt(ctxt,*d2);
-      ctxt.EM = true; 
+      if (ctxt.S) return down_opt(ctxt,*d2);
+      ctxt.EM = !ctxt.EM;
       break;
     case I_tag:
       if (ctxt.I) return down_opt(ctxt,*d2);
@@ -111,7 +111,7 @@ doc_t down_opt(context_t ctxt, doc_t d) {
     case S_tag:
       if (ctxt.S) return down_opt(ctxt,*d2);
       ctxt.S = true;
-      ctxt.EM = true; // S hides the EM attribute
+      ctxt.EM = false; // S hides the EM attribute
       break;
     case TT_tag:
       if (ctxt.TT) return down_opt(ctxt,*d2);
@@ -165,6 +165,8 @@ int main(int argc, char ??argv) {
   //time_test(argv[1]);
   
   doc_t d = get_docs(stdin);
+  context_t initctxt = Context(false, false,false, false, false, 0,DONT_KNOW,DONT_KNOW);
+  doc_t dend = down_opt(initctxt,d);
   dump(d);
   return 0;
 }
