@@ -724,7 +724,13 @@ namespace Cstr {
     char *`r memset(char *`r, char c, size_t n);
     void bcopy (const `a::A*src, `a *dest, size_t n);
     void bzero(`a::A*s, size_t n);
+    Cstring GC_realloc(char *`H, size_t n);
   }
+}
+
+char ? realloc(char ?`H s, size_t n) {
+  let res = Cstr::GC_realloc((char *)s, n);
+  return wrap_Cstring_as_string(res, n);
 }
 
 `a::A?`r _memcpy(`a?`r d, const `a? s, size_t n, sizeof_t<`a> sz) {

@@ -49,3 +49,7 @@ size_t GC_get_free_bytes() {
 size_t GC_get_total_bytes() {
   return 0;
 }
+
+void *GC_realloc(void *x, size_t n) {
+  return realloc(x,n);
+}

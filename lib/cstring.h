@@ -76,6 +76,9 @@ extern mstring_t<`r> strcpy(mstring_t<`r> dest,string_t src);
 extern mstring_t<`r> strncpy(mstring_t<`r>,string_t,size_t);
 extern mstring_t<`r> zstrncpy(mstring_t<`r>,string_t,size_t);
 
+// realloc
+extern mstring_t realloc(mstring_t<`H>, size_t);
+
 // memcpy and memmove behave like C's except that instead of
 // calling it memcpy(d,s,n*sizeof(t)), separate out the sizeof(t).
 extern `a::A?`r _memcpy(`a?`r d, const `a? s, size_t, sizeof_t<`a>);

@@ -36,9 +36,8 @@ int main(int argc, char ?argv[]) {
 	    } else {
 		wordbuf[i++] = *cp;
 		if (i == wordbufsize) {
-		    wordbuf = new {for i < wordbufsize*2 + 1 : 
-				   (i < wordbufsize) ? wordbuf[i] : '\000'};
 		    wordbufsize *= 2;
+                    wordbuf = realloc(wordbuf, wordbufsize + 1);
 		}
 	    }
         }
@@ -59,9 +58,8 @@ int main(int argc, char ?argv[]) {
 	    } else {
 		wordbuf[i++] = *cp;
 		if (i == wordbufsize) {
-		    wordbuf = new {for i < wordbufsize*2 + 1 : 
-				   (i < wordbufsize) ? wordbuf[i] : '\000'};
 		    wordbufsize *= 2;
+		    wordbuf = realloc(wordbuf, wordbufsize + 1);
 		}
 	    } 
         }

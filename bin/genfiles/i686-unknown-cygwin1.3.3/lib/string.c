@@ -289,7 +289,8 @@ _RegionHandle*, struct Cyc_List_List*, struct _tagged_arr); extern struct
 _tagged_arr Cyc_Std_strcpy( struct _tagged_arr dest, struct _tagged_arr src);
 extern struct _tagged_arr Cyc_Std_strncpy( struct _tagged_arr, struct
 _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std_zstrncpy( struct
-_tagged_arr, struct _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std__memcpy(
+_tagged_arr, struct _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std_realloc(
+struct _tagged_arr, unsigned int); extern struct _tagged_arr Cyc_Std__memcpy(
 struct _tagged_arr d, struct _tagged_arr s, unsigned int, unsigned int); extern
 struct _tagged_arr Cyc_Std__memmove( struct _tagged_arr d, struct _tagged_arr s,
 unsigned int, unsigned int); extern int Cyc_Std_memcmp( struct _tagged_arr s1,
@@ -677,85 +678,89 @@ void*, const void*, unsigned int n); extern int memcmp( const void*, const void*
 unsigned int n); extern unsigned char* memchr( const unsigned char*,
 unsigned char c, unsigned int n); extern unsigned char* memset( unsigned char*,
 unsigned char c, unsigned int n); extern void bcopy( const void* src, void* dest,
-unsigned int n); extern void bzero( void* s, unsigned int n); struct _tagged_arr
-Cyc_Std__memcpy( struct _tagged_arr d, struct _tagged_arr s, unsigned int n,
-unsigned int sz){ if((( d.curr == ( _tag_arr( 0u, 0u, 0u)).curr? 1:
-_get_arr_size( d, sizeof( void)) <  n)? 1: s.curr == (( struct _tagged_arr)
-_tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( s, sizeof( void)) <  n){( int)
-_throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp34=( struct Cyc_Core_Invalid_argument_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp34[ 0]=({
-struct Cyc_Core_Invalid_argument_struct _temp35; _temp35.tag= Cyc_Core_Invalid_argument;
-_temp35.f1= _tag_arr("Std::memcpy", sizeof( unsigned char), 12u); _temp35;});
-_temp34;}));} memcpy(( void*) _check_null( _untag_arr( d, sizeof( void), 1u)),(
-const void*) _check_null( _untag_arr( s, sizeof( void), 1u)), n *  sz); return d;}
-struct _tagged_arr Cyc_Std__memmove( struct _tagged_arr d, struct _tagged_arr s,
-unsigned int n, unsigned int sz){ if((( d.curr == ( _tag_arr( 0u, 0u, 0u)).curr?
-1: _get_arr_size( d, sizeof( void)) <  n)? 1: s.curr == (( struct _tagged_arr)
-_tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( s, sizeof( void)) <  n){( int)
-_throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp36=( struct Cyc_Core_Invalid_argument_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp36[ 0]=({
-struct Cyc_Core_Invalid_argument_struct _temp37; _temp37.tag= Cyc_Core_Invalid_argument;
-_temp37.f1= _tag_arr("Std::memove", sizeof( unsigned char), 12u); _temp37;});
-_temp36;}));} memmove(( void*) _check_null( _untag_arr( d, sizeof( void), 1u)),(
-const void*) _check_null( _untag_arr( s, sizeof( void), 1u)), n *  sz); return d;}
-int Cyc_Std_memcmp( struct _tagged_arr s1, struct _tagged_arr s2, unsigned int n){
-if((( s1.curr == (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: s2.curr
-== (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( s1,
-sizeof( unsigned char)) >=  n)? 1: _get_arr_size( s2, sizeof( unsigned char)) >= 
-n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp38=(
-struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
-_temp38[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp39; _temp39.tag= Cyc_Core_Invalid_argument;
-_temp39.f1= _tag_arr("Std::memcmp", sizeof( unsigned char), 12u); _temp39;});
-_temp38;}));} return memcmp(( const void*) _check_null( _untag_arr( s1, sizeof(
+unsigned int n); extern void bzero( void* s, unsigned int n); extern
+unsigned char* GC_realloc( unsigned char*, unsigned int n); struct _tagged_arr
+Cyc_Std_realloc( struct _tagged_arr s, unsigned int n){ unsigned char* _temp34=
+GC_realloc(( unsigned char*) _check_null( _untag_arr( s, sizeof( unsigned char),
+1u)), n); return wrap_Cstring_as_string( _temp34, n);} struct _tagged_arr Cyc_Std__memcpy(
+struct _tagged_arr d, struct _tagged_arr s, unsigned int n, unsigned int sz){
+if((( d.curr == ( _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( d, sizeof( void))
+<  n)? 1: s.curr == (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr)? 1:
+_get_arr_size( s, sizeof( void)) <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+_temp35=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
+Cyc_Core_Invalid_argument_struct)); _temp35[ 0]=({ struct Cyc_Core_Invalid_argument_struct
+_temp36; _temp36.tag= Cyc_Core_Invalid_argument; _temp36.f1= _tag_arr("Std::memcpy",
+sizeof( unsigned char), 12u); _temp36;}); _temp35;}));} memcpy(( void*)
+_check_null( _untag_arr( d, sizeof( void), 1u)),( const void*) _check_null(
+_untag_arr( s, sizeof( void), 1u)), n *  sz); return d;} struct _tagged_arr Cyc_Std__memmove(
+struct _tagged_arr d, struct _tagged_arr s, unsigned int n, unsigned int sz){
+if((( d.curr == ( _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( d, sizeof( void))
+<  n)? 1: s.curr == (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr)? 1:
+_get_arr_size( s, sizeof( void)) <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
+_temp37=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
+Cyc_Core_Invalid_argument_struct)); _temp37[ 0]=({ struct Cyc_Core_Invalid_argument_struct
+_temp38; _temp38.tag= Cyc_Core_Invalid_argument; _temp38.f1= _tag_arr("Std::memove",
+sizeof( unsigned char), 12u); _temp38;}); _temp37;}));} memmove(( void*)
+_check_null( _untag_arr( d, sizeof( void), 1u)),( const void*) _check_null(
+_untag_arr( s, sizeof( void), 1u)), n *  sz); return d;} int Cyc_Std_memcmp(
+struct _tagged_arr s1, struct _tagged_arr s2, unsigned int n){ if((( s1.curr == ((
+struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: s2.curr == (( struct
+_tagged_arr) _tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( s1, sizeof(
+unsigned char)) >=  n)? 1: _get_arr_size( s2, sizeof( unsigned char)) >=  n){(
+int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct* _temp39=( struct
+Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct));
+_temp39[ 0]=({ struct Cyc_Core_Invalid_argument_struct _temp40; _temp40.tag= Cyc_Core_Invalid_argument;
+_temp40.f1= _tag_arr("Std::memcmp", sizeof( unsigned char), 12u); _temp40;});
+_temp39;}));} return memcmp(( const void*) _check_null( _untag_arr( s1, sizeof(
 unsigned char), 1u)),( const void*) _check_null( _untag_arr( s2, sizeof(
 unsigned char), 1u)), n);} struct _tagged_arr Cyc_Std_memchr( struct _tagged_arr
 s, unsigned char c, unsigned int n){ unsigned int sz= _get_arr_size( s, sizeof(
 unsigned char)); if( s.curr == (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr?
 1: n >  sz){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp40=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
-Cyc_Core_Invalid_argument_struct)); _temp40[ 0]=({ struct Cyc_Core_Invalid_argument_struct
-_temp41; _temp41.tag= Cyc_Core_Invalid_argument; _temp41.f1= _tag_arr("Std::memchr",
-sizeof( unsigned char), 12u); _temp41;}); _temp40;}));}{ unsigned char* _temp42=
+_temp41=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
+Cyc_Core_Invalid_argument_struct)); _temp41[ 0]=({ struct Cyc_Core_Invalid_argument_struct
+_temp42; _temp42.tag= Cyc_Core_Invalid_argument; _temp42.f1= _tag_arr("Std::memchr",
+sizeof( unsigned char), 12u); _temp42;}); _temp41;}));}{ unsigned char* _temp43=
 memchr(( const unsigned char*) _check_null( _untag_arr( s, sizeof( unsigned char),
-1u)), c, n); if( _temp42 ==  0){ return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);}{
-unsigned int _temp43=( unsigned int) s.curr; unsigned int _temp44=( unsigned int)
-_temp42; unsigned int _temp45= _temp44 -  _temp43; return _tagged_arr_plus( s,
-sizeof( unsigned char),( int) _temp45);}}} struct _tagged_arr Cyc_Std_mmemchr(
+1u)), c, n); if( _temp43 ==  0){ return( struct _tagged_arr) _tag_arr( 0u, 0u, 0u);}{
+unsigned int _temp44=( unsigned int) s.curr; unsigned int _temp45=( unsigned int)
+_temp43; unsigned int _temp46= _temp45 -  _temp44; return _tagged_arr_plus( s,
+sizeof( unsigned char),( int) _temp46);}}} struct _tagged_arr Cyc_Std_mmemchr(
 struct _tagged_arr s, unsigned char c, unsigned int n){ unsigned int sz=
 _get_arr_size( s, sizeof( unsigned char)); if( s.curr == ( _tag_arr( 0u, 0u, 0u)).curr?
 1: n >  sz){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp46=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
-Cyc_Core_Invalid_argument_struct)); _temp46[ 0]=({ struct Cyc_Core_Invalid_argument_struct
-_temp47; _temp47.tag= Cyc_Core_Invalid_argument; _temp47.f1= _tag_arr("Std::mmemchr",
-sizeof( unsigned char), 13u); _temp47;}); _temp46;}));}{ unsigned char* _temp48=
+_temp47=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
+Cyc_Core_Invalid_argument_struct)); _temp47[ 0]=({ struct Cyc_Core_Invalid_argument_struct
+_temp48; _temp48.tag= Cyc_Core_Invalid_argument; _temp48.f1= _tag_arr("Std::mmemchr",
+sizeof( unsigned char), 13u); _temp48;}); _temp47;}));}{ unsigned char* _temp49=
 memchr(( const unsigned char*) _check_null( _untag_arr( s, sizeof( unsigned char),
-1u)), c, n); if( _temp48 ==  0){ return _tag_arr( 0u, 0u, 0u);}{ unsigned int
-_temp49=( unsigned int) s.curr; unsigned int _temp50=( unsigned int) _temp48;
-unsigned int _temp51= _temp50 -  _temp49; return _tagged_arr_plus( s, sizeof(
-unsigned char),( int) _temp51);}}} struct _tagged_arr Cyc_Std_memset( struct
+1u)), c, n); if( _temp49 ==  0){ return _tag_arr( 0u, 0u, 0u);}{ unsigned int
+_temp50=( unsigned int) s.curr; unsigned int _temp51=( unsigned int) _temp49;
+unsigned int _temp52= _temp51 -  _temp50; return _tagged_arr_plus( s, sizeof(
+unsigned char),( int) _temp52);}}} struct _tagged_arr Cyc_Std_memset( struct
 _tagged_arr s, unsigned char c, unsigned int n){ if( s.curr == ( _tag_arr( 0u, 0u,
 0u)).curr? 1: n >  _get_arr_size( s, sizeof( unsigned char))){( int) _throw((
-void*)({ struct Cyc_Core_Invalid_argument_struct* _temp52=( struct Cyc_Core_Invalid_argument_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp52[ 0]=({
-struct Cyc_Core_Invalid_argument_struct _temp53; _temp53.tag= Cyc_Core_Invalid_argument;
-_temp53.f1= _tag_arr("Std::memset", sizeof( unsigned char), 12u); _temp53;});
-_temp52;}));} memset(( unsigned char*) _check_null( _untag_arr( s, sizeof(
+void*)({ struct Cyc_Core_Invalid_argument_struct* _temp53=( struct Cyc_Core_Invalid_argument_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp53[ 0]=({
+struct Cyc_Core_Invalid_argument_struct _temp54; _temp54.tag= Cyc_Core_Invalid_argument;
+_temp54.f1= _tag_arr("Std::memset", sizeof( unsigned char), 12u); _temp54;});
+_temp53;}));} memset(( unsigned char*) _check_null( _untag_arr( s, sizeof(
 unsigned char), 1u)), c, n); return s;} void Cyc_Std_bzero( struct _tagged_arr s,
 unsigned int n){ if( s.curr == ( _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size(
 s, sizeof( unsigned char)) <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp54=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
-Cyc_Core_Invalid_argument_struct)); _temp54[ 0]=({ struct Cyc_Core_Invalid_argument_struct
-_temp55; _temp55.tag= Cyc_Core_Invalid_argument; _temp55.f1= _tag_arr("Std::bzero",
-sizeof( unsigned char), 11u); _temp55;}); _temp54;}));}(( void(*)( unsigned char*
+_temp55=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
+Cyc_Core_Invalid_argument_struct)); _temp55[ 0]=({ struct Cyc_Core_Invalid_argument_struct
+_temp56; _temp56.tag= Cyc_Core_Invalid_argument; _temp56.f1= _tag_arr("Std::bzero",
+sizeof( unsigned char), 11u); _temp56;}); _temp55;}));}(( void(*)( unsigned char*
 s, unsigned int n)) bzero)(( unsigned char*) _check_null( _untag_arr( s, sizeof(
 unsigned char), 1u)), n);} void Cyc_Std__bcopy( struct _tagged_arr src, struct
 _tagged_arr dst, unsigned int n, unsigned int sz){ if((( src.curr == (( struct
 _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( src, sizeof( void))
 <  n)? 1: dst.curr == ( _tag_arr( 0u, 0u, 0u)).curr)? 1: _get_arr_size( dst,
 sizeof( void)) <  n){( int) _throw(( void*)({ struct Cyc_Core_Invalid_argument_struct*
-_temp56=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
-Cyc_Core_Invalid_argument_struct)); _temp56[ 0]=({ struct Cyc_Core_Invalid_argument_struct
-_temp57; _temp57.tag= Cyc_Core_Invalid_argument; _temp57.f1= _tag_arr("Std::bcopy",
-sizeof( unsigned char), 11u); _temp57;}); _temp56;}));} bcopy(( const void*)
+_temp57=( struct Cyc_Core_Invalid_argument_struct*) _cycalloc( sizeof( struct
+Cyc_Core_Invalid_argument_struct)); _temp57[ 0]=({ struct Cyc_Core_Invalid_argument_struct
+_temp58; _temp58.tag= Cyc_Core_Invalid_argument; _temp58.f1= _tag_arr("Std::bcopy",
+sizeof( unsigned char), 11u); _temp58;}); _temp57;}));} bcopy(( const void*)
 _check_null( _untag_arr( src, sizeof( void), 1u)),( void*) _check_null(
 _untag_arr( dst, sizeof( void), 1u)), n *  sz);}

@@ -352,23 +352,21 @@ int(* _IO_ungetc)( int, void*), int(* _IO_peekc)( void*), void* fp, struct
 _tagged_arr fmt0, struct _tagged_arr ap, int* errp){ struct _tagged_arr fmt=
 fmt0; int c; long long width; struct _tagged_arr p= _tag_arr( 0u, 0u, 0u); int n;
 int flags= 0; struct _tagged_arr p0= _tag_arr( 0u, 0u, 0u); int nassigned; int
-nread; int base= 0; int use_strtoul= 0; unsigned char ccltab[ 256u];{
-unsigned int _temp154= 256u; unsigned int i; for( i= 0; i <  _temp154; i ++){
-ccltab[ i]='0';}}{ unsigned char buf[ 350u];{ unsigned int _temp153= 350u;
-unsigned int i; for( i= 0; i <  _temp153; i ++){ buf[ i]='0';}}{ int seen_eof= 0;
-static short basefix[ 17u]={ 10, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14,
-15, 16}; nassigned= 0; nread= 0; for( 0; 1; 0){ c=( int)*(( const unsigned char*)
+nread; int base= 0; int use_strtoul= 0; unsigned char ccltab[ 256u];
+unsigned char buf[ 350u]; int seen_eof= 0; static short basefix[ 17u]={ 10, 1, 2,
+3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16}; nassigned= 0; nread= 0; for( 0;
+1; 0){ c=( int)*(( const unsigned char*) _check_unknown_subscript(
+_tagged_arr_inplace_plus_post(& fmt, sizeof( unsigned char), 1), sizeof(
+unsigned char), 0u)); if( c ==  0){ goto done;} if( isspace( c)){ for( 0; 1; 0){
+c= _IO_getc( fp); if( c ==  - 1){ seen_eof ++; break;} if( ! isspace( c)){
+_IO_ungetc( c, fp); break;} nread ++;} continue;} if( c != '%'){ goto literal;}
+width=( long long) 0; flags= 0; again: c=( int)*(( const unsigned char*)
 _check_unknown_subscript( _tagged_arr_inplace_plus_post(& fmt, sizeof(
-unsigned char), 1), sizeof( unsigned char), 0u)); if( c ==  0){ goto done;} if(
-isspace( c)){ for( 0; 1; 0){ c= _IO_getc( fp); if( c ==  - 1){ seen_eof ++;
-break;} if( ! isspace( c)){ _IO_ungetc( c, fp); break;} nread ++;} continue;}
-if( c != '%'){ goto literal;} width=( long long) 0; flags= 0; again: c=( int)*((
-const unsigned char*) _check_unknown_subscript( _tagged_arr_inplace_plus_post(&
-fmt, sizeof( unsigned char), 1), sizeof( unsigned char), 0u)); switch( c){ case
-'%': _LL58: literal: n= _IO_getc( fp); if( n ==  - 1){ goto eof_failure;} if( n
-!=  c){ _IO_ungetc( n, fp); goto match_failure;} nread ++; continue; case '*':
-_LL59: if( flags){ goto control_failure;} flags= 8; goto again; case 'l': _LL60:
-if( flags &  ~( 8 |  64)){ goto control_failure;} flags |= 1; goto again; case 'L':
+unsigned char), 1), sizeof( unsigned char), 0u)); switch( c){ case '%': _LL58:
+literal: n= _IO_getc( fp); if( n ==  - 1){ goto eof_failure;} if( n !=  c){
+_IO_ungetc( n, fp); goto match_failure;} nread ++; continue; case '*': _LL59:
+if( flags){ goto control_failure;} flags= 8; goto again; case 'l': _LL60: if(
+flags &  ~( 8 |  64)){ goto control_failure;} flags |= 1; goto again; case 'L':
 _LL61: if( flags &  ~( 8 |  64)){ goto control_failure;} flags |= 2; goto again;
 case 'h': _LL62: if( flags &  ~( 8 |  64)){ goto control_failure;} flags |= 4;
 goto again; case '0': _LL63: goto _LL64; case '1': _LL64: goto _LL65; case '2':
@@ -525,7 +523,7 @@ _temp152.f1= _tag_arr("scanf3", sizeof( unsigned char), 7u); _temp152;});
 _temp151;}));}} eof_failure: seen_eof ++; input_failure: if( nassigned ==  0){
 nassigned= - 1;} control_failure: match_failure: if(( unsigned int) errp){* errp
 |= 2;} done: if(( unsigned int) errp? seen_eof: 0){* errp |= 1;} return
-nassigned;}}} static struct _tagged_arr Cyc_Std___sccl( struct _tagged_arr tab,
+nassigned;} static struct _tagged_arr Cyc_Std___sccl( struct _tagged_arr tab,
 struct _tagged_arr fmt){ int c; int n; int v; c=( int)*(( const unsigned char*)
 _check_unknown_subscript( _tagged_arr_inplace_plus_post(& fmt, sizeof(
 unsigned char), 1), sizeof( unsigned char), 0u)); if( c == '^'){ v= 1; c=( int)*((
@@ -537,14 +535,14 @@ _tagged_arr_plus( fmt, sizeof( unsigned char), - 1);} v= 1 -  v; for( 0; 1; 0){*
 unsigned char*) _check_unknown_subscript( tab, sizeof( unsigned char), c))=(
 unsigned char) v; doswitch: n=( int)*(( const unsigned char*)
 _check_unknown_subscript( _tagged_arr_inplace_plus_post(& fmt, sizeof(
-unsigned char), 1), sizeof( unsigned char), 0u)); switch( n){ case 0: _LL155:
-return _tagged_arr_plus( fmt, sizeof( unsigned char), - 1); case '-': _LL156: n=(
+unsigned char), 1), sizeof( unsigned char), 0u)); switch( n){ case 0: _LL153:
+return _tagged_arr_plus( fmt, sizeof( unsigned char), - 1); case '-': _LL154: n=(
 int)*(( const unsigned char*) _check_unknown_subscript( fmt, sizeof(
 unsigned char), 0u)); if( n == ']'? 1: n <  c){ c=( int)'-'; break;}
 _tagged_arr_inplace_plus_post(& fmt, sizeof( unsigned char), 1); do {*((
 unsigned char*) _check_unknown_subscript( tab, sizeof( unsigned char), ++ c))=(
-unsigned char) v;} while ( c <  n); goto doswitch; break; case ']': _LL157:
-return fmt; default: _LL158: c= n; break;}}} static int Cyc_Std_string_getc(
+unsigned char) v;} while ( c <  n); goto doswitch; break; case ']': _LL155:
+return fmt; default: _LL156: c= n; break;}}} static int Cyc_Std_string_getc(
 struct _tagged_arr* sptr){ unsigned char c; struct _tagged_arr s=* sptr; if(( s.curr
 == (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr? 1: _get_arr_size( s,
 sizeof( unsigned char)) ==  0)? 1:( c=*(( const unsigned char*)
