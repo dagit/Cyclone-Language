@@ -43,19 +43,19 @@ clean:
 	$(RM) *.diff
 
 $(HIST): hist.c
-	gcc $(CFLAGS) -o $@ -x c $^
+	gcc $(CFLAGS) -o $@ -x c $^ -lm
 
 %.diff: %.gcc %.cyc
 	@(diff $*.gcc $*.cyc > $@; echo $@; exit 0)
 
 gcc-%$(EXE): %.gcc
-	gcc $(CFLAGS) -o $@ -x c $^
+	gcc $(CFLAGS) -o $@ -x c $^ $(LDFLAGS)
 
 # nobounds-%$(EXE): %.cyc
 # 	$(CYCC) --noboundschecks $(CYC_FLAGS) -o $@ $^
 
 nocheck-%$(EXE): %.cyc
-	$(CYCC) --nochecks $(CYC_FLAGS) -o $@ $^
+	$(CYCC) --nochecks $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)
 
 %$(EXE): %.cyc
-	$(CYCC) $(CYC_FLAGS) -o $@ $^
+	$(CYCC) $(CYC_FLAGS) -o $@ $^ $(LDFLAGS)

@@ -74,7 +74,7 @@ function get_cc {
 function get_ldflags {
   LDFLAGS=
   if [ "$TYPE" = "sun" ]; then
-    LDFLAGS="-lnsl -lsocket"
+    LDFLAGS="-lnsl -lsocket -lresolv"
   fi
   echo $LDFLAGS
 }
@@ -257,7 +257,7 @@ BIN_INSTALL=${bindir}
 LIB_INSTALL=${libdir}
 ALL_ARCHS=${ALL_ARCHS}
 CC=${CC}
-NET_LD_FLAGS=${LD_FLAGS}
+LDFLAGS=${LD_FLAGS}
 SHELL=${CONFIGSHELL}
 
 EOF

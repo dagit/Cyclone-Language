@@ -16,7 +16,7 @@ $(BINDIR)/$(PROG): $(PROG)
 	cp $< $@
 
 $(PROG): aprof.o $(BINDIR)/cyc-lib/$(CYCLIB)
-	$(CYCC) $(CYCFLAGS) -o $@ aprof.o
+	$(CYCC) $(CYCFLAGS) -o $@ aprof.o $(LDFLAGS)
 
 clean:
 	$(RM) aprof aprof.exe *.o
