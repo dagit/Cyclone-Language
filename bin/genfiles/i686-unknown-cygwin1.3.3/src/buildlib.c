@@ -1747,7 +1747,7 @@ _tag_arr("Error: could not create directory %s\n",sizeof(char),38),_tag_arr(
 _tmp115,sizeof(void*),1));}});return 1;}}else{close(_tmp114);}}return 0;}int Cyc_force_directory_prefixes(
 struct _tagged_arr file){struct _tagged_arr _tmp118=Cyc_Std_strdup(file);struct Cyc_List_List*
 _tmp119=0;while(1){_tmp118=Cyc_Filename_dirname((struct _tagged_arr)_tmp118);if(
-_get_arr_size(_tmp118,sizeof(char))== 0)break;_tmp119=({struct Cyc_List_List*
+Cyc_Std_strlen((struct _tagged_arr)_tmp118)== 0)break;_tmp119=({struct Cyc_List_List*
 _tmp11A=_cycalloc(sizeof(*_tmp11A));_tmp11A->hd=({struct _tagged_arr*_tmp11B=
 _cycalloc(sizeof(*_tmp11B));_tmp11B[0]=(struct _tagged_arr)_tmp118;_tmp11B;});
 _tmp11A->tl=_tmp119;_tmp11A;});}for(0;_tmp119 != 0;_tmp119=_tmp119->tl){if(Cyc_force_directory(*((
@@ -2174,8 +2174,9 @@ _tmp233.tag=5;_tmp233.f1=Cyc_set_output_dir;_tmp233;});_tmp232;});_tmp231->f5=
 _tag_arr("Set the output directory to <file>",sizeof(char),35);_tmp231;});((
 struct Cyc_List_List*(*)(struct _tagged_arr))Cyc_List_list)(_tag_arr(_tmp230,
 sizeof(struct _tuple17*),5));});Cyc_Arg_parse(options,Cyc_add_spec_file,_tag_arr("Options:",
-sizeof(char),9),argv);if(Cyc_badparse){Cyc_Arg_usage(options,_tag_arr("Options:",
-sizeof(char),9));return 1;}if(Cyc_mode == (void*)2){Cyc_script_file=Cyc_Std_fopen(
+sizeof(char),9),argv);if(Cyc_badparse?1: Cyc_spec_files == 0){Cyc_Arg_usage(
+options,_tag_arr("Usage: buildlib [options] specfile1 specfile2 ...\nOptions:",
+sizeof(char),59));return 1;}if(Cyc_mode == (void*)2){Cyc_script_file=Cyc_Std_fopen(
 _tag_arr("BUILDLIB.sh",sizeof(char),12),_tag_arr("w",sizeof(char),2));if(!((
 unsigned int)Cyc_script_file)){({void*_tmp220[0]={};Cyc_Std_fprintf(Cyc_Std_stderr,
 _tag_arr("Could not create file BUILDLIB.sh\n",sizeof(char),35),_tag_arr(_tmp220,

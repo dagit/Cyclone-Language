@@ -1191,7 +1191,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     let x = NULL;
     while (true) {
       curr = Filename::dirname(curr);
-      if (curr.size == 0) break;
+      if (strlen(curr) == 0) break;
       x = new List(new (string_t)curr,x);
     }
     /* Make sure all prefixes exist */
@@ -1724,8 +1724,10 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
                  "")
            );
     Arg::parse(options, add_spec_file, "Options:", argv);
-    if (badparse) {
-      Arg::usage(options,"Options:");
+    if (badparse || spec_files == NULL) {
+      Arg::usage(options,
+                 "Usage: buildlib [options] specfile1 specfile2 ...\n"
+                 "Options:");
       return 1;
     }
 
