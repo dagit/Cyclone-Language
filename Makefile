@@ -14,7 +14,7 @@ BB=build/$(build)
 BT=build/$(target)
 BL=bin/lib
 
-all: directories cyclone tools
+all: directories cyclone tools xml
 
 $(BL)/libcycboot.a: $(BB)/libcycboot.a
 	cp -p $< $@
@@ -290,13 +290,13 @@ nocheck: \
   bin/cyclone_nocheck$(EXE)
 
 ifndef NO_XML_LIB
-cyclone: $(BL)/libxml.a
+xml:     $(BL)/libxml.a
 aprof:   $(BL)/libxml_a.a
 gprof:   $(BL)/libxml_pg.a
 nocheck: $(BL)/libxml_nocheck.a
 endif
 
-.PHONY: all tools cyclone aprof gprof nocheck directories
+.PHONY: all tools cyclone aprof gprof nocheck directories xml
 
 ########################################################################
 # FOR BUILDING A CROSS COMPILER                                        #
