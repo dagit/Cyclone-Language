@@ -19,7 +19,6 @@
 #ifndef _TIME_H_
 #define _TIME_H_
 
-#include <config.h>
 #include <core.h>
 #include <sys/types.h>
 #include <stddef.h>

@@ -117,7 +117,6 @@ CYCLONE_H:=arg.h\
         sys/time.h\
         time.h\
         xarray.h\
-        config.h\
 	ctype.h\
 	math.h\
 	precore.h\
