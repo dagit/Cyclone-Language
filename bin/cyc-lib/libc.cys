@@ -5052,9 +5052,13 @@ STDIN_FILENO
 STDOUT_FILENO
 size_t
 ssize_t
+__uid_t
 uid_t
+__gid_t
 gid_t
+__off_t
 off_t
+__pid_t
 pid_t
 __useconds_t
 useconds_t
@@ -5067,6 +5071,23 @@ hstub {
   #define _useconds_t_def_
   typedef __useconds_t useconds_t;
   #endif
+// JGM: similarly, __gid_t, __pid_t, __uid_t, __off_t
+#if defined(___gid_t_def_) && !defined(_gid_t_def_)
+#define _gid_t_def_
+typedef __gid_t gid_t;
+#endif
+#if defined(___pid_t_def_) && !defined(_pid_t_def_)
+#define _pid_t_def_
+typedef __pid_t pid_t;
+#endif
+#if defined(___uid_t_def_) && !defined(_uid_t_def_)
+#define _uid_t_def_
+typedef __uid_t uid_t;
+#endif
+#if defined(___off_t_def_) && !defined(_off_t_def_)
+#define _off_t_def_
+typedef __off_t off_t;
+#endif
 }
 hstub {
   /* Cygwin does not define this type so we take a guess :-( */
