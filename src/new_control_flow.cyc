@@ -1477,6 +1477,28 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
 	return $(f1,fenv->unknown_all);
       }
     }
+
+    // this case is a lot like Malloc_e
+  case &ComprehensionNoinit_e(exp,typ,iszeroterm):
+    root_t    root      = rnew(fenv->r) MallocPt(exp,(type_t)e->topt);
+    place_t   place     = rnew(fenv->r) Place(root,NULL);
+    absRval_t rval      = rnew(fenv->r) AddressOf(place);
+    absRval_t place_val;
+    // if zero-terminated, we will use calloc during code generation
+//     if(iszeroterm)
+//       place_val = typ_to_absrval(fenv,typ,false,fenv->zero);
+//     else
+    place_val = typ_to_absrval(fenv,typ,false,fenv->unknown_none);
+    flow_t    outflow;
+    update_place_set(env->all_changed,place,0);
+    let $(f,_) = anal_Rexp(env,true,inflow,exp);
+    outflow = f;
+    switch(outflow) {
+    case {.BottomFL = _}: return $(outflow,rval);
+    case {.ReachableFL = $(d2,relns)}:
+      return $(ReachableFL(Dict::insert(d2,root,place_val),relns), rval);
+    }
+
   case &StmtExp_e(s): return anal_stmt_exp(env,copy_ctxt,inflow,s);
   case &Var_e(_,&Unresolved_b):
   case &UnresolvedMem_e(_,_):

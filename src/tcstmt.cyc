@@ -452,7 +452,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
             case &Const_e({.Wstring_c = s}): /* FIX: need correct size, not 1 */
             t = vd->type = array_typ(telt,tq,uint_exp(1,0),zt,ztl);
             break;
-            case &Comprehension_e(_,e,_,_):
+            case &Comprehension_e(_,e,_,_): fallthru(e);
+            case &ComprehensionNoinit_e(e,_,_):
             // FIX: copy e here!  
             t = vd->type = array_typ(telt,tq,e,zt,ztl); 
             break;

@@ -1824,31 +1824,7 @@ static type_t tcArray(tenv_t te, seg_t loc, type_t *elt_topt,
   return res_t2;
 }
 
-// updates the bound of flat, variable-length arrays to a tag if that
-// is indicated in the type
-// static void coerce_bounds_to_tag(exp_t e) {
-//   switch (e->r) {
-//   case &Comprehension_e(vd,bound,body,isnozeroterm):
-//     switch(compress((type_t)bound->topt)) {
-//     case &TagType(b_typ): 
-//       switch (compress((type_t)e->topt)) {
-//       case &ArrayType(ArrayInfo{_,_,*b,_,_}):
-// 	let b2 = cast_exp(uint_typ,valueof_exp(b_typ,0),false,No_coercion,0);
-// 	b2->topt = b_typ;
-// 	*b = b2;
-// 	break;
-//       default:
-// 	impos("non-array type for comprehension");
-//       }
-//       break;
-//     default: break;
-//     }
-//     break;
-//   default: break;
-//   }
-// }
-
- // {for [te] < [bound] : [body]}
+ // {for [vd] < [bound] : [body]}
 static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
                               vardecl_t vd, exp_t bound, exp_t body,
                               bool @is_zero_term) {
@@ -1915,6 +1891,73 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
       let e1 = uint_exp(1,0); e1->topt = uint_typ;
       bound = add_exp(bound,e1,0); bound->topt = uint_typ;
       *is_zero_term = true;
+    }
+    // FIX:  bound may not be a constant here...
+    let res = array_typ(t,(tqopt == NULL) ? empty_tqual(0) : *tqopt, bound,
+                        (ztopt == NULL) ? false_conref : *ztopt, 0);
+    return res;
+  }
+}
+
+ // {for x < [bound] : [t]}
+static type_t tcComprehensionNoinit(tenv_t te, seg_t loc, type_t * topt,
+				    exp_t bound, type_t t,
+				    bool @is_zero_term) {
+  tcExp(te,NULL,bound);
+  switch(compress((type_t)bound->topt)) {
+  case &TagType(t): 
+    // if we are in a new aggregate, then transitively we can update
+    // the bounds to be the tag, to allow variable-length arrays
+    if (new_status(te) == InNewAggr) {
+      let b = cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0);
+      b->topt = bound->topt;
+//       printf("updating array bound from %s to %s\n",
+// 	     exp2string(bound),exp2string(b));
+      bound = b;
+    }
+    break;
+  default:
+    if (!coerce_uint_typ(te,bound))
+      terr(bound->loc,"expecting unsigned int, found %s",
+	   typ2string((type_t)bound->topt));
+  }
+  // add x to the environment as an unsigned int only if te->le is not NULL
+  TEMP_RGN(te, r) {
+    let topt2 = NULL;
+    let tqopt = NULL;
+    let ztopt = NULL;
+
+    if (topt != NULL)
+      switch (compress(*topt)) {
+      case &PointerType(x):
+        topt2 = rnew (r) x.elt_typ;
+        tqopt = rnew (r) x.elt_tq;
+        ztopt = rnew (r) x.ptr_atts.zero_term;
+        break;
+      case &ArrayType(ArrayInfo{t,tq,b,zt,_}):
+        topt2 = rnew (r) t;
+        tqopt = rnew (r) tq;
+        ztopt = rnew (r) zt;
+        break;
+      default:
+        break;
+      }
+    // make sure the expected topt unifies with the declared one
+    check_type(loc,te,lookup_type_vars(te),&tmk,true,t);
+    if (topt2 != NULL) unify(*topt2,t);
+    // the bound must be a constant expression at top-level
+    if (te->le == NULL) {
+      if (!is_const_exp(bound))
+        terr(bound->loc,"bound is not constant");
+    }
+    if (ztopt != NULL && conref_def(false,*ztopt)) {
+      // for zero-terminated arrays, the result is one larger due to the
+      // implicit zero.
+      let e1 = uint_exp(1,0); e1->topt = uint_typ;
+      bound = add_exp(bound,e1,0); bound->topt = uint_typ;
+      *is_zero_term = true;
+      // FIX: currently not supported ...
+      terr(loc,"non-initializing comprehensions do not currently support @zeroterm arrays");
     }
     // FIX:  bound may not be a constant here...
     let res = array_typ(t,(tqopt == NULL) ? empty_tqual(0) : *tqopt, bound,
@@ -2489,7 +2532,8 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     }
     
     switch (e1->r) {
-    case &Comprehension_e(_,_,_,_):
+    case &Comprehension_e(...):
+    case &ComprehensionNoinit_e(...):
       // Note: tcComprehension expects the pointer type, not an array type.
       // Also, we don't set the in_new flag here so as not to biff the tag
       let t_arr = tcExpNoPromote(te,topt,e1);
@@ -2649,7 +2693,8 @@ type_t tcExpInitializer(tenv_t te, type_t * topt, exp_t e) {
   }
   switch (e->r) {
   case &Array_e(_):
-  case &Comprehension_e(_,_,_,_):
+  case &Comprehension_e(...):
+  case &ComprehensionNoinit_e(...):
   case &Const_e({.Wstring_c = _}):
   case &Const_e({.String_c = _}): return t;
   default:
@@ -2900,6 +2945,8 @@ static void tcExpNoInst(tenv_t te, type_t * topt, exp_t e) {
     t = tcStmtExp(te,loc,topt,s); break;
   case &Comprehension_e(vd,e1,e2,*iszeroterm):
     t = tcComprehension(te,loc,topt,vd,e1,e2,iszeroterm); break;
+  case &ComprehensionNoinit_e(e1,t1,*iszeroterm):
+    t = tcComprehensionNoinit(te,loc,topt,e1,t1,iszeroterm); break;
   case &Aggregate_e(*tn,*ts,args,*sd_opt):
     t = tcAggregate(te,loc,topt,tn,ts,args,sd_opt); break;
   case &AnonStruct_e(ts,args):

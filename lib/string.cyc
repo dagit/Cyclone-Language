@@ -735,7 +735,7 @@ char ? @nozeroterm realloc(char ? @nozeroterm`H s, size_t n) {
 }
 
 int memcmp(const char ? @nozeroterm s1, const char ? @nozeroterm s2, size_t n) {
-  if (s1 == NULL || s2 == NULL || numelts(s1) >= n || numelts(s2) >= n)
+  if (s1 == NULL || s2 == NULL || numelts(s1) < n || numelts(s2) < n)
     throw new Invalid_argument("memcmp");
   return Cstr::memcmp((const void *)s1, (const void *)s2, n);
 }

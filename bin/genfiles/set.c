@@ -1197,4 +1197,4 @@ return 1;}
 # 425
 struct Cyc_Iter_Iter Cyc_Set_make_iter(struct _RegionHandle*rgn,struct Cyc_Set_Set*s){
 # 428
-struct Cyc_List_List**_tmp3C;struct Cyc_Iter_Iter _tmp3B;return(_tmp3B.env=(void*)((_tmp3C=_region_malloc(rgn,sizeof(*_tmp3C)),((_tmp3C[0]=s->nodes,_tmp3C)))),((_tmp3B.next=(int(*)(void*env,void*dest))Cyc_Set_iter_f,(struct Cyc_Iter_Iter)_tmp3B)));}
+struct Cyc_List_List**_tmp3C;struct Cyc_Iter_Iter _tmp3B;return(_tmp3B.env=(void*)((_tmp3C=_region_malloc(rgn,sizeof(*_tmp3C)),((_tmp3C[0]=s->nodes,_tmp3C)))),((_tmp3B.next=(int(*)(void*env,void*dest))Cyc_Set_iter_f,_tmp3B)));}

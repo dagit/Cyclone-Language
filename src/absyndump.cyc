@@ -816,8 +816,13 @@ void dumpexp_prec(int inprec, exp_t e) {
     break;
 
   case &Comprehension_e(vd,e1,e2,_):
-    dump("new {for"); dump_str((*vd->name)[1]); dump_char('<'); dumpexp(e1);
+    dump("{for"); dump_str((*vd->name)[1]); dump_char('<'); dumpexp(e1);
     dump_char(':'); dumpexp(e2); dump_char('}');
+    break;
+
+  case &ComprehensionNoinit_e(e,t,_):
+    dump("{for x "); dump_char('<'); dumpexp(e);
+    dump_char(':'); dumptyp(t); dump_char('}');
     break;
 
   case &Aggregate_e(n,ts,des,_):

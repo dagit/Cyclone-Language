@@ -1486,6 +1486,7 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
   case &CompoundLit_e(_,_): impos("CompoundLit_e");
   case &Array_e(_): impos("Array_e");
   case &Comprehension_e(_,_,_,_): impos("Comprehension_e");
+  case &ComprehensionNoinit_e(...): impos("ComprehensionNoinit_e");
   case &Aggregate_e(_,_,_,_): impos("Aggregate_e");
   case &AnonStruct_e(_,_): impos("AnonStruct_e");
   case &Datatype_e(_,_,_): impos("Datatype_e");

@@ -388,6 +388,9 @@ exp_t deep_copy_exp(exp_t e) {
   case &Array_e(eds): return new_exp(new Array_e(map(copy_eds,eds)),e->loc);
   case &Comprehension_e(vd,e1,e2,b):
     return new_exp(new Comprehension_e(vd,DC(e1),DC(e2),b),e->loc);
+  case &ComprehensionNoinit_e(e,t,b):
+    return new_exp(new ComprehensionNoinit_e(DC(e),Tcutil::copy_type(t),b),
+		   e->loc);
   case &Aggregate_e(n,ts,eds,agr):
     return new_exp(new Aggregate_e(n,map(copy_type,ts),map(copy_eds,eds),agr),
 		   e->loc);
@@ -5296,6 +5299,8 @@ static bool cnst_exp(bool var_okay, exp_t e) {
     return cnst_exp(true,e2);
   case &Comprehension_e(_,e1,e2,_):
     return cnst_exp(false,e1) && cnst_exp(false,e2);
+  case &ComprehensionNoinit_e(e,_,_):
+    return cnst_exp(false,e);
   case &Array_e(des): fallthru(des);
   case &AnonStruct_e(_,des): fallthru(des);
   case &Aggregate_e(_,_,des,_):
@@ -5425,8 +5430,10 @@ attributes_t transfer_fn_type_atts(type_t t, attributes_t atts) {
   case &FnType(FnInfo{_,_,_,_,_,_,_,_,*fnatts}):
     let res_atts = NULL;
     for (; atts != NULL; atts = atts->tl)
-      if (fntype_att(atts->hd))
-        *fnatts = new List(atts->hd,*fnatts);
+      if (fntype_att(atts->hd)) {
+	if (!List::mem(attribute_cmp,*fnatts,atts->hd))
+	  *fnatts = new List(atts->hd,*fnatts);
+      }
       else
         res_atts = new List(atts->hd,res_atts);
     return res_atts;

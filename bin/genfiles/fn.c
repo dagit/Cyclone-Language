@@ -823,7 +823,7 @@ struct Cyc_Fn_Function*Cyc_Fn_uncurry(struct Cyc_Fn_Function*f);
 struct Cyc_List_List*Cyc_Fn_map_fn(struct Cyc_Fn_Function*f,struct Cyc_List_List*x);struct Cyc_Fn_Function;
 # 38 "fn.cyc"
 struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(void*,void*),void*x){
-struct Cyc_Fn_Function*_tmpB;return(_tmpB=_cycalloc(sizeof(*_tmpB)),((_tmpB->f=(void*(*)(void*,void*))f,((_tmpB->env=(void*)x,(struct Cyc_Fn_Function*)_tmpB)))));}
+struct Cyc_Fn_Function*_tmpB;return(_tmpB=_cycalloc(sizeof(*_tmpB)),((_tmpB->f=(void*(*)(void*,void*))f,((_tmpB->env=(void*)x,_tmpB)))));}
 # 42
 static void*Cyc_Fn_fp_apply(void*(*f)(void*),void*x){
 return f(x);}

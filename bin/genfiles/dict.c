@@ -1387,7 +1387,7 @@ _tmpE7=_tmpE7->left;
 # 596
 _tmpE7=d.t;{
 unsigned int _tmp142;unsigned int _tmp141;struct _dyneither_ptr _tmp140;const struct Cyc_Dict_T**_tmp13F;unsigned int _tmp13E;struct _dyneither_ptr _tmpE8=(_tmp13E=(unsigned int)(2 * half_max_size),((_tmp13F=(const struct Cyc_Dict_T**)_region_malloc(rgn,_check_times(sizeof(const struct Cyc_Dict_T*),_tmp13E)),((_tmp140=_tag_dyneither(_tmp13F,sizeof(const struct Cyc_Dict_T*),_tmp13E),((((_tmp141=_tmp13E,_tmp143(& _tmpE7,& _tmp142,& _tmp141,& _tmp13F))),_tmp140)))))));
-struct _tuple10*_tmp146;struct Cyc_Iter_Iter _tmp145;return(_tmp145.env=(void*)((_tmp146=_region_malloc(rgn,sizeof(*_tmp146)),((_tmp146->f1=_tmpE8,((_tmp146->f2=(unsigned int)_tmpE7?0: - 1,_tmp146)))))),((_tmp145.next=(int(*)(void*env,void*dest))Cyc_Dict_iter_f,(struct Cyc_Iter_Iter)_tmp145)));};}
+struct _tuple10*_tmp146;struct Cyc_Iter_Iter _tmp145;return(_tmp145.env=(void*)((_tmp146=_region_malloc(rgn,sizeof(*_tmp146)),((_tmp146->f1=_tmpE8,((_tmp146->f2=(unsigned int)_tmpE7?0: - 1,_tmp146)))))),((_tmp145.next=(int(*)(void*env,void*dest))Cyc_Dict_iter_f,_tmp145)));};}
 # 606
 void*Cyc_Dict_marshal(struct _RegionHandle*rgn,void*env,void*(*write_key)(void*,struct Cyc___cycFILE*,void*),void*(*write_val)(void*,struct Cyc___cycFILE*,void*),struct Cyc___cycFILE*fp,struct Cyc_Dict_Dict dict){
 # 613

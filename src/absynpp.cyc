@@ -1053,6 +1053,7 @@ int exp_prec(exp_t e) {
   case &CompoundLit_e(...):
   case &Array_e(...):
   case &Comprehension_e(...):
+  case &ComprehensionNoinit_e(...):
   case &Aggregate_e(...):
   case &AnonStruct_e(...):
   case &Datatype_e(...):
@@ -1201,6 +1202,14 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
             exp2doc(e1),
             text(" : "),
             exp2doc(e2),
+            rb());
+    break;
+  case &ComprehensionNoinit_e(e,t,_):
+    s = cat(lb(), text("for x "),
+            text(" < "),
+            exp2doc(e),
+            text(" : "),
+            typ2doc(t),
             rb());
     break;
   case &Aggregate_e(n,ts,des,_):

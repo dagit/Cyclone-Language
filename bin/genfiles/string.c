@@ -1459,7 +1459,7 @@ memmove((void*)_check_null(_untag_dyneither_ptr(d,sizeof(void),1)),(const void*)
 return d;}
 # 737
 int Cyc_memcmp(struct _dyneither_ptr s1,struct _dyneither_ptr s2,unsigned long n){
-if((((char*)s1.curr == (char*)(_tag_dyneither(0,0,0)).curr  || (char*)s2.curr == (char*)(_tag_dyneither(0,0,0)).curr) || _get_dyneither_size(s1,sizeof(char))>= n) || _get_dyneither_size(s2,sizeof(char))>= n){
+if((((char*)s1.curr == (char*)(_tag_dyneither(0,0,0)).curr  || (char*)s2.curr == (char*)(_tag_dyneither(0,0,0)).curr) || _get_dyneither_size(s1,sizeof(char))< n) || _get_dyneither_size(s2,sizeof(char))< n){
 struct Cyc_Core_Invalid_argument_exn_struct _tmpEE;const char*_tmpED;struct Cyc_Core_Invalid_argument_exn_struct*_tmpEC;(int)_throw((void*)((_tmpEC=_cycalloc(sizeof(*_tmpEC)),((_tmpEC[0]=((_tmpEE.tag=Cyc_Core_Invalid_argument,((_tmpEE.f1=((_tmpED="memcmp",_tag_dyneither(_tmpED,sizeof(char),7))),_tmpEE)))),_tmpEC)))));}
 return memcmp((const void*)_check_null(_untag_dyneither_ptr(s1,sizeof(char),1)),(const void*)_check_null(_untag_dyneither_ptr(s2,sizeof(char),1)),n);}
 # 743

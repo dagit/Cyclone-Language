@@ -1493,6 +1493,8 @@ static $(list_t<designator_t>,exp_t)@ add_designator(env_t nv, exp_t e) {
   return new $(NULL,e);
 }
 
+// we set the type of the returned expression to be struct_typ; this
+// is assumed by recursive callers.
 static exp_t make_struct(env_t nv, exp_t x, type_t struct_typ, stmt_t s,
 			 bool pointer, exp_opt_t rgnopt, bool is_atomic,
 			 bool do_declare) {
@@ -1607,6 +1609,8 @@ static stmt_t init_array(env_t nv,
     case &AnonStruct_e(st,dles):
       s = init_anon_struct(nv, lval, st, dles, s);
       break;
+    case &ComprehensionNoinit_e(...): // do nothing
+      break;
     default:
       exp_to_c(nv,e1);
       s = seq_stmt(assign_stmt(subscript_exp(lhs,e_index,DL),
@@ -1636,6 +1640,11 @@ static stmt_t init_comprehension(env_t nv,
   let elt_typ = typ_to_c((type_t)e2->topt);
   if (!e1_already_translated)
     exp_to_c(nv,e1);
+  // if the body is a no-init comprehension, we don't have to do anything
+  switch (e2->r) {
+  case &ComprehensionNoinit_e(...): return skip_stmt(DL);
+  default: break;
+  }
   TOC_RGN(nv,r2) {
     env_t nv2 = add_varmap(r2,nv,x1,varb_exp(x1,new Local_b(vd),DL));
     qvar_t max = temp_var();
@@ -1701,6 +1710,8 @@ static stmt_t init_anon_struct(env_t nv, exp_t lhs, type_t struct_type,
                                lval, vd, e1, e2, zt, s, false); break;
       case &AnonStruct_e(st2,dles):
         s = init_anon_struct(nv, lval, st2, dles, s); break;
+      case &ComprehensionNoinit_e(...): // do nothing
+	break;
       default:
         exp_to_c(nv,e);
         // cast to void* if necessary
@@ -1747,6 +1758,8 @@ static exp_t init_tuple(env_t nv, bool pointer,
         s = init_comprehension(nv, (type_t)e->topt, 
                                lval, vd, e1, e2, zt, s, false);
         break;
+      case &ComprehensionNoinit_e(...): // do nothing
+	break;
         // FIX: deal with comprehensions
       default:
         exp_to_c(nv,e);
@@ -1784,6 +1797,41 @@ static bool init_variable_array(type_t @typ) {
   return false;
 }
 
+aggrdecl_t update_aggr_type(aggrdecl_t ad, field_name_t fn,
+			type_t new_field_type) {
+  list_t<aggrfield_t> new_fields = NULL;
+  list_t<aggrfield_t> fields;
+  for (fields = ad->impl->fields; fields != NULL; 
+       fields = fields->tl) {
+    if (!strptrcmp(fields->hd->name,fn)) {
+      let old_field = fields->hd;
+      let new_field = new Aggrfield{.name= old_field->name,
+				    .tq = mt_tq,
+				    .type = new_field_type,
+				    .width = old_field->width,
+				    .attributes = old_field->attributes};
+      new_fields = new List(new_field,new_fields);
+    }
+    else new_fields = new List(fields->hd,new_fields);
+  }
+  let aggrfields = List::rev(new_fields);
+  stringptr_t name =
+    new (string_t)aprintf("_genStruct%d",tuple_type_counter++);
+  qvar_t qv = new $(Abs_n(NULL, true), name);
+  let adi = new AggrdeclImpl {.exist_vars = ad->impl->exist_vars,
+			      .rgn_po = ad->impl->rgn_po,
+			      .fields = aggrfields,
+			      .tagged = ad->impl->tagged};
+  aggrdecl_t new_ad = new Aggrdecl {.kind = ad->kind,
+				    .sc = ad->sc,
+				    .name = qv,
+				    .tvs = ad->tvs,
+				    .impl = adi,
+				    .attributes = ad->attributes};
+  aggrdecl_to_c(new_ad, true);
+  return new_ad;
+}
+
 static exp_t init_struct(env_t nv, type_t struct_type,
                          list_t<type_t> exist_types,
                          bool pointer, exp_opt_t rgnopt, 
@@ -1803,8 +1851,17 @@ static exp_t init_struct(env_t nv, type_t struct_type,
   }
   let s   = exp_stmt(copy_exp(xexp),DL);
 
+  // keep track of the final variable expression, in case we
+  // need to insert a cast due to a changed type
+  exp_t @varexp;
+  switch (s->r) {
+  case &Exp_s(*e): varexp = e; break;
+  default: toc_impos("stmt not an expression!");
+  }
+
   let lval_f = pointer ? aggrarrow_exp : member_exp;
-  let aggr_typ = typ_to_c(struct_type); //aggrdecl_type(tdn,strctq);
+  type_t aggr_typ = typ_to_c(struct_type); 
+  type_t orig_typ = aggr_typ;
 
   bool is_atomic = true;
   list_t<type_t> forall_types;
@@ -1819,18 +1876,12 @@ static exp_t init_struct(env_t nv, type_t struct_type,
     break;
   default: toc_impos("init_struct: bad struct type");
   }
-  type_t aggr_typ = typ_to_c(struct_type); 
+
   if (exist_types != NULL && ad->impl->fields != NULL) {
     let fields = ad->impl->fields;
     for (; fields->tl != NULL; fields = fields->tl);
     let last_field = fields->hd;
     TOC_RGN(nv,temp) {
-      type_t cast_type;
-      if (pointer)
-	cast_type = cstar_typ(aggr_typ,mt_tq);
-      else 
-	cast_type = aggr_typ;
-      s = exp_stmt(cast_it(cast_type,copy_exp(xexp)),DL);
       let inst1 = List::rzip(temp,temp,ad->tvs,forall_types);
       // we have an aggregate with existential types have to come up
       // with (potentially) a new struct type if the last member is of
@@ -1880,7 +1931,6 @@ static exp_t init_struct(env_t nv, type_t struct_type,
 	struct_type = new AggrType(AggrInfo{.aggr_info=KnownAggr(new new_ad),
 					    .targs=NULL});
 	aggr_typ = typ_to_c(struct_type);
-// 	printf("abstract struct type %s\n",typ2string(struct_type));
       }
     }
   }
@@ -1928,31 +1978,52 @@ static exp_t init_struct(env_t nv, type_t struct_type,
                            lval, dles, s); 
             break;
           case &Comprehension_e(vd,e1,e2,zt):
-	    // if this is a dynamic comprehension, grab the bound
-	    // for doing the malloc
-	    if (index != NULL && !strptrcmp(*index,f)) {
-	      *nv->struct_info.varsizeexp =
-		add_exp(times_exp(e1,sizeoftyp_exp(typ_to_c((type_t)e2->topt),
-						   DL),DL),
-			const_exp(Cnst{.Int_c=$(Unsigned,PAD_BYTES)},DL),DL);
-	    }
-            
             s = init_comprehension(nv, 
                                    lookup_field((do_declare ? aggrfields :
                                                  orig_aggrfields),f)->type,
-                                   lval, vd, e1, e2, zt, s, false); break;
+                                   lval, vd, e1, e2, zt, s, false);
+	    fallthru(e1);
+          case &ComprehensionNoinit_e(e1,...):
+	    // if this is a dynamic comprehension, grab the bound
+	    // for doing the malloc
+	    if (index != NULL && !strptrcmp(*index,f)) {
+	      let t2 = typ_to_c((type_t)e1->topt);
+	      *nv->struct_info.varsizeexp =
+		add_exp(fncall_exp(_check_times_e,
+				   list(e1,sizeoftyp_exp(t2,DL)),DL),
+			const_exp(Cnst{.Int_c=$(Unsigned,PAD_BYTES)},DL),DL);
+	    }
+	    break;
           case &AnonStruct_e(st,dles):
             s = init_anon_struct(nv, lval, st, dles, s); break;
           default:
-	    bool was_ptr_type = is_pointer_or_boxed_tvar((type_t)e->topt);
+	    type_t old_e_typ = (type_t)e->topt;
+	    bool was_ptr_type = is_pointer_or_boxed_tvar(old_e_typ);
             exp_to_c(set_lhs_exp(nv->rgn,lval,nv),e);
-            let ad = lookup_field(aggrfields,f);
+	    switch (old_e_typ) {
+	    case &AggrType(...):
+	      // generate a new aggregate type here based on the
+	      // type change of the nested member
+	      if (old_e_typ != e->topt && !unify(typ_to_c(old_e_typ),
+						 (type_t)e->topt)){
+		// replace the existing field in the implementation with
+		// this type, and generate a new name
+		ad = update_aggr_type(ad,f,(type_t)e->topt);
+		struct_type = 
+		  new AggrType(AggrInfo{.aggr_info=KnownAggr(new ad),
+					.targs=NULL});
+		aggr_typ = typ_to_c(struct_type);
+	      }
+	      break;
+	    default: break;
+	    }
+            let adf = lookup_field(aggrfields,f);
             // cast to void* to avoid gcc warnings (does it more than needed)
 	    if (is_poly_field(struct_type,f) && !was_ptr_type)
 	      e = cast_it(void_star_typ(),e);
 	    // more warning avoidance -- watch out if existentials are common
 	    if(exist_types != NULL)
-	      e = cast_it(typ_to_c(ad->type),e);
+	      e = cast_it(typ_to_c(adf->type),e);
             // FIX: deal with nested arrays and comprehensions
             s = seq_stmt(exp_stmt(assign_exp(lval, e, DL), DL), s, DL);
             break;
@@ -1961,9 +2032,18 @@ static exp_t init_struct(env_t nv, type_t struct_type,
         default: toc_impos("array designator in struct");
         }
     }
-    // if we have a variable-sized element of the struct, must
-    //   initialize the struct differently
-    return make_struct(nv,xexp,aggr_typ,s,pointer,rgnopt,is_atomic,do_declare);
+
+    // if the type changed due to instantiations etc. we need to
+    // insert a cast, but only if it's a pointer
+    if (aggr_typ != orig_typ && pointer) {
+      type_t cast_type = cstar_typ(orig_typ,mt_tq);
+      *varexp = cast_it(cast_type,*varexp);
+    }
+    // now make the struct
+    let res = make_struct(nv,xexp,aggr_typ,s,pointer,rgnopt,is_atomic,
+			  do_declare);
+    res->topt = struct_type;
+    return res;
   }
 }
 
@@ -2999,7 +3079,9 @@ DynCast:
       if (is_toplevel(nv))
 	unimp("%s: & on non-identifiers at the top-level",
               Position::string_of_segment(e1->loc));
-      e->r = init_struct(nv, (type_t)e1->topt, ts, true, NULL, es, tdn)->r;
+      let e2 = init_struct(nv, (type_t)e1->topt, ts, true, NULL, es, tdn);
+      e->r = e2->r;
+      e->topt = e2->topt;
       break;
     case &Tuple_e(es):
       if (is_toplevel(nv))
@@ -3125,9 +3207,78 @@ DynCast:
         e->r = stmt_exp_r(s);
       }
       break;
+
+      // FIX: lots of code duplication with the above
+    case &ComprehensionNoinit_e(e1,t1,zero_term):
+      bool is_dyneither_ptr = false;
+      switch (compress(old_typ)) {
+      case &PointerType(PtrInfo{et,tq,PtrAtts(_,_,b,zt,_)}):
+        is_dyneither_ptr = (conref_def(bounds_one,b) == &DynEither_b_val);
+        break;
+      default: toc_impos("exp_to_c: comprehension not an array type");
+      }
+      qvar_t max = temp_var();
+      qvar_t a = temp_var();
+      type_t old_elt_typ = t1;
+      type_t elt_typ = typ_to_c(old_elt_typ);
+      type_t ptr_typ = cstar_typ(elt_typ,mt_tq);
+      exp_to_c(nv,e1);
+      let malloc_size_exp = var_exp(max,DL);
+      // add one to max for zero-terminated arrays
+      stmt_t s;
+      if (zero_term) {
+        malloc_size_exp = add_exp(malloc_size_exp,uint_exp(1,DL),DL);
+	exp_t ex = assign_exp(subscript_exp(var_exp(a,DL),var_exp(max,DL),DL),
+			      cast_it(elt_typ,uint_exp(0,DL)),DL);
+	s = exp_stmt(ex,DL);
+      }
+      else
+	s = skip_stmt(DL);
+      // FIX:  casts needed on exp_opts
+      TOC_RGN(nv,r) {
+        list_t<$(qvar_t,type_t,exp_opt_t)@/*`r,`r*/> decls =
+          rnew(r) List(rnew(r) $(max,uint_typ,(exp_opt_t)e1),NULL);
+        exp_t ai;
+        if (rgnopt == NULL || no_regions)
+          ai = malloc_exp(old_elt_typ,
+			  fncall_exp(_check_times_e,
+				     list(sizeoftyp_exp(elt_typ,DL),
+					  malloc_size_exp), DL));
+        else {
+          exp_t r = (exp_t)rgnopt;
+          exp_to_c(nv,r);
+          ai = rmalloc_exp(r, fncall_exp(_check_times_e,
+					 list(sizeoftyp_exp(elt_typ,DL),
+					      malloc_size_exp), DL));
+
+        }
+        exp_t ainit = cast_it(ptr_typ,ai);
+        decls = rnew(r) List(rnew(r) $(a,ptr_typ,(exp_opt_t)ainit),decls);
+        if (is_dyneither_ptr) {
+          let b = temp_var();
+          let t = typ_to_c(old_typ);
+          let tag = _tag_dyneither_e;
+          let binit =
+	    fncall_exp(tag,
+		       list(var_exp(a,DL), sizeoftyp_exp(elt_typ, DL),
+                            malloc_size_exp), DL);
+          decls = rnew(r) List(rnew(r) $(b,t,(exp_opt_t)binit),decls);
+          s = seq_stmt(s,exp_stmt(var_exp(b,DL),DL),DL);
+        } else // not a tagged array -- just return a
+          s = seq_stmt(s,exp_stmt(var_exp(a,DL),DL),DL);
+        for (let ds = decls; ds != NULL; ds = ds->tl) {
+          let $(d0,d1,d2) = *(ds->hd);
+          s = declare_stmt(d0,d1,d2,s,DL);
+        }
+        e->r = stmt_exp_r(s);
+      }
+      break;
+
     case &Aggregate_e(tdn,ts,es,ad):
       // try to avoid the GCC bug
-      e->r = init_struct(nv, (type_t)e1->topt, ts, true, rgnopt, es, tdn)->r;
+      let e2 = init_struct(nv, (type_t)e1->topt, ts, true, rgnopt, es, tdn);
+      e->r = e2->r;
+      e->topt = e2->topt;
       break;
     case &Tuple_e(es):
       // try to avoid the GCC bug
@@ -3491,11 +3642,19 @@ DynCast:
     }
     e->r = unresolvedmem_exp_r(NULL,es);
     break;
+  case &ComprehensionNoinit_e(e1,t1,iszeroterm):
+    // we just inherit the size from the context by returning an
+    // empty array
+    e->r = unresolvedmem_exp_r(NULL,NULL);
+    break;
   case &Aggregate_e(tdn,ts,dles,sd):
     // Due to a GCC bug w.r.t. to nested designators, we expand this out
     // to ({ t temp; t.f1 = e1, ..., t.fn = en; t}).
-    if(!is_toplevel(nv))
-      e->r = init_struct(nv,old_typ,ts,false,NULL,dles,tdn)->r;
+    if(!is_toplevel(nv)) {
+      let e2 = init_struct(nv,old_typ,ts,false,NULL,dles,tdn);
+      e->r = e2->r;
+      e->topt = e2->topt;
+    }
     else {
       // At top-level must create an initializer.  For MSVC, sort fields
       // and drop initializers (sorting okay b/c we're at top-level)
@@ -4589,8 +4748,9 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
         // locations...
         let old_field = fields->hd;
         let old_type = old_field->type;
-        if (ad->kind == StructA && 
-	    fields->tl == NULL && kind_leq(&ak,typ_kind(old_type))) {
+        if (kind_leq(&ak,typ_kind(old_type)) && 
+	    ((ad->kind == StructA && fields->tl == NULL) ||
+	     ad->kind == UnionA)) {
           // skip over the last member if it's abstract but not an
           // array (or an array-containing aggregate); for arrays, we
           // just pretend like the array size is zero.  (Note: can't
@@ -4602,7 +4762,8 @@ static void aggrdecl_to_c(aggrdecl_t ad, bool add_to_decls) {
             break;
           default: 
 	    if (array_or_aggr_with_array(old_type)) break;
-	    else continue;
+	    else if (ad->kind == StructA) continue;
+	    else unimp("union with non-array fields of kind TA");
           }
         }
         let new_field = new Aggrfield{.name = old_field->name,
@@ -4899,6 +5060,7 @@ static void exptypes_to_c(exp_t e) {
   case &Datatype_e(_,_,_):    fallthru;
   case &Aggregate_e(_,_,_,_):  fallthru;
   case &Comprehension_e(_,_,_,_): fallthru;
+  case &ComprehensionNoinit_e(...): fallthru;
   case &Tuple_e(_):         fallthru;
   case &Instantiate_e(_,_): fallthru;
   case &New_e(_,_):         fallthru;

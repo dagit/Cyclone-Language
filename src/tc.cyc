@@ -127,21 +127,22 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   switch (compress(t)) {
   case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && initializer != NULL:
     switch (initializer->r) {
-      case &Const_e({.String_c = s}):
+    case &Const_e({.String_c = s}):
       t = vd->type = array_typ(telt,tq,uint_exp(numelts(s),0),zt,ztl);
       break;
-      case &Const_e({.Wstring_c = s}): /* FIX: need correct size, not 1 */
+    case &Const_e({.Wstring_c = s}): /* FIX: need correct size, not 1 */
       t = vd->type = array_typ(telt,tq,uint_exp(1,0),zt,ztl);
       break;
-      case &Comprehension_e(_,e,_,_):
+    case &Comprehension_e(_,e,_,_): fallthru(e);
+    case &ComprehensionNoinit_e(e,_,_):
       // FIX: need to copy e here!
-      t = vd->type = array_typ(telt,tq,e,zt,ztl); 
+      t = vd->type = array_typ(telt,tq,e,zt,ztl);
       break;
-      case &UnresolvedMem_e(_,es): fallthru(es);
-      case &Array_e(es):
+    case &UnresolvedMem_e(_,es): fallthru(es);
+    case &Array_e(es):
       t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),0),zt,ztl);
       break;
-      default: break;
+    default: break;
     }
     break;
   default: break;
@@ -491,10 +492,9 @@ static void tcAggrImpl(tenv_t te, genv_t ge, seg_t loc,
       // FIX:  we can get ill-founded cycles of the form
       // struct Foo<`a::A> { struct Foo<`a> x; } here, and
       // it can cut across multiple definitions...  
-// XXX put this in eventually; doesn't work at the moment
-//       if (str_or_union == UnionA || 
-// 	  (fs->tl == NULL && str_or_union == StructA)) 
-      if (fs->tl == NULL && str_or_union == StructA) 
+      if (str_or_union == UnionA || 
+	  (fs->tl == NULL && str_or_union == StructA)) 
+//       if (fs->tl == NULL && str_or_union == StructA) 
         field_kind = &tak; // we allow abstract kind for the last field
       check_type(loc,te,tvs,field_kind,false,t);
 

@@ -211,7 +211,7 @@ namespace Absyn {
 
   // constraint refs are used during unification to figure out what
   // something should be when it's under-specified
-  EXTERN_ABSYN @tagged union Constraint<`a> { 
+  EXTERN_ABSYN @tagged union Constraint<`a::TB> { 
     `a Eq_constr;
     union Constraint<`a> @Forward_constr;
     int No_constr;
@@ -625,6 +625,8 @@ namespace Absyn {
     Array_e(list_t<$(list_t<designator_t>,exp_t)@>); // {.0=e1,...,.n=en}
     // {for i < e1 : e2} -- the bool tells us whether it's zero-terminated
     Comprehension_e(vardecl_t,exp_t,exp_t,bool); // much of vardecl is known
+    // {for i < e1 : t} -- used for variable-sized flat arrays
+    ComprehensionNoinit_e(exp_t,type_t,bool); // much of vardecl is known
     // Foo{.x1=e1,...,.xn=en} (with optional witness types)
     Aggregate_e(typedef_name_t,
                 list_t<type_t>, // witness types, maybe fewer before type-checking

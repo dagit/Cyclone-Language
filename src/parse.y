@@ -2284,6 +2284,10 @@ array_initializer:
       vd->tq.real_const = true;
       $$=^$(new_exp(new Comprehension_e(vd, $5, $7, false),LOC(@1,@8)));
     }
+| '{' FOR IDENTIFIER '<' expression ':' type_name '}'
+    { let t = type_name_to_type($7,SLOC(@7));
+      $$=^$(new_exp(new ComprehensionNoinit_e($5, t, false),LOC(@1,@8)));
+    }
 ;
 
 /* NB: returns list in reverse order */
