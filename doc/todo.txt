@@ -52,7 +52,10 @@ function declarations are only allowed at top-level.
   hash and sign the code and interface so that we can detect tampering
   with the code or interface at link-time.
 
-* Are we treating static variables (within a function) correctly?
+* Are we treating static variables (within a function) correctly?  NO:
+  We need to give them heap region and type-check/translate the
+  initializers as though they're at top-level.  Basically, these
+  should be globals in every sense except scope.
 
 * we're too restrictive about typedef names -- C allows typedef names
   to be shadowed by identifiers (or other typedefs).  Our lexer

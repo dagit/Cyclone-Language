@@ -119,6 +119,27 @@ static list_t<decl_t> parse_result = null;
 
 // Definitions and Helper Functions
 
+  // Could be static variables in the attribute production, but we don't 
+  // compile static variables correctly
+tunion Attribute.Aligned_att att_aligned = Aligned_att(-1);
+$(string,tunion Attribute) att_map[] = {
+  $("stdcall", Stdcall_att), 
+  $("cdecl", Cdecl_att),   
+  $("noreturn", Noreturn_att), 
+  $("const", Const_att), // a keyword (see grammar), but __const__ possible
+  $("aligned", (tunion Attribute)&att_aligned), // WARNING: sharing!
+  $("packed", Packed_att),
+  $("shared", Shared_att),
+  $("unused", Unused_att),
+  $("weak", Weak_att),
+  $("dllimport", Dllimport_att),
+  $("dllexport", Dllexport_att),
+  $("no_instrument_function", No_instrument_function_att),
+  $("constructor", Constructor_att),
+  $("destructor", Destructor_att),
+  $("no_check_memory_usage", No_check_memory_usage_att)
+};
+
 // Error functions 
 static void err(string msg, seg_t sg) {
   post_error(mk_err_parse(sg,msg));
@@ -1194,47 +1215,20 @@ attribute_list:
 attribute:
   IDENTIFIER 
   { let s = $1;
-    attribute_t a;
-    if (zstrcmp(s,"stdcall") == 0 || zstrcmp(s,"__stdcall__") == 0)    
-      a = Stdcall_att;
-    else if (zstrcmp(s,"cdecl") == 0 || zstrcmp(s,"__cdecl__") == 0) 
-      a = Cdecl_att;
-    else if (zstrcmp(s,"noreturn") == 0 || zstrcmp(s,"__noreturn__") == 0)
-      a = Noreturn_att;
-    else if (zstrcmp(s,"noreturn") == 0 || zstrcmp(s,"__noreturn__") == 0)
-      a = Noreturn_att;
-    else if (zstrcmp(s,"__const__") == 0)
-      a = Const_att;
-    else if (zstrcmp(s,"aligned") == 0 || zstrcmp(s,"__aligned__") == 0)
-      a = new Aligned_att(-1);
-    else if (zstrcmp(s,"packed") == 0 || zstrcmp(s,"__packed__") == 0)
-      a = Packed_att;
-    else if (zstrcmp(s,"shared") == 0 || zstrcmp(s,"__shared__") == 0)
-      a = Shared_att;
-    else if (zstrcmp(s,"unused") == 0 || zstrcmp(s,"__unused__") == 0)
-      a = Unused_att;
-    else if (zstrcmp(s,"weak") == 0 || zstrcmp(s,"__weak__") == 0)
-      a = Weak_att;
-    else if (zstrcmp(s,"dllimport") == 0 || zstrcmp(s,"__dllimport__") == 0) 
-      a = Dllimport_att;
-    else if (zstrcmp(s,"dllexport") == 0 || zstrcmp(s,"__dllexport__") == 0)
-      a = Dllexport_att;
-    else if (zstrcmp(s,"no_instrument_function") == 0 || 
-             zstrcmp(s,"__no_instrument_function__") == 0)
-      a = No_instrument_function_att;
-    else if (zstrcmp(s,"constructor") == 0 || 
-             zstrcmp(s,"__constructor__") == 0)
-      a = Constructor_att;
-    else if (zstrcmp(s,"destructor") == 0 || zstrcmp(s,"__destructor__") == 0)
-      a = Destructor_att;
-    else if (zstrcmp(s,"no_check_memory_usage") == 0 || 
-             zstrcmp(s,"__no_check_memory_usage__") == 0)
-      a = No_check_memory_usage_att;
-    else {
+    // drop the surrounding __ in s, if it's there
+    if(s.size > 4 && s[0]=='_' && s[1]=='_' 
+       && s[s.size-2]=='_' && s[s.size-3]=='_')
+      s = substring(s,2,s.size-5);
+    int i=0;
+    for(; i < att_map.size; ++i)
+      if(strcmp(s,att_map[i][0]) == 0) {
+	$$=^$(att_map[i][1]);
+	break;
+      }
+    if(i == att_map.size) {
       err("unrecognized attribute",LOC(@1,@1));
-      a = Cdecl_att;
+      $$ = ^$(Cdecl_att);
     }
-    $$=^$(a);
   }
 | CONST { $$=^$(Const_att); }
 | IDENTIFIER '(' INTEGER_CONSTANT ')'

@@ -363,7 +363,7 @@ list_t<type_t> get_format_typs(string s,seg_t loc) {
       return null; // impossible
     }
   }
-  return (List::imp_rev(typs));
+  return List::imp_rev(typs);
 }
 
 // Parse a scanf conversion specification starting at index i in string s.

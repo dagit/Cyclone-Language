@@ -29,6 +29,9 @@ abstract struct Set<`a,`r::R,`e::E> {
 hset_t<`a,`e> empty(int (@comp)(`a,`a;`e)) {
   return new Set(comp,0,null);
 }
+gset_t<`a,`r,`e> rempty(region_t<`r> rgn, int (@comp)(`a,`a;`e)) {
+  return rnew(rgn) Set(comp,0,null);
+}
 
 hset_t<`a,`e> singleton(int (@comp)(`a,`a;`e),`a x) {
   return new Set(comp,1,new List(x,null));
@@ -62,24 +65,25 @@ bool member(gset_t<`a,`r,`e> s,`a elt) {
  * returning a new list of nodes (that shares with the old one).
  * Assumes elt is not in the list.
  */
-static list_t<`a> insert_b(int compare(`a,`a;`e),list_t<`a> n,`a elt) {
+static glist_t<`a,`r> insert_b(region_t<`r> rgn,
+			       int compare(`a,`a),glist_t<`a,`r> n,`a elt) {
 
   if (n == null)
-    return new List(elt,null);
+    return rnew(rgn) List(elt,null);
   else {
     int i = compare(elt,n->hd);
     if (i < 0) 
-      return new List(elt,n);
+      return rnew(rgn) List(elt,n);
     else {
-      list_t<`a> result = new List(n->hd,null);
-      list_t<`a> prev = result;
+      glist_t<`a,`r> result = rnew(rgn) List(n->hd,null);
+      glist_t<`a,`r> prev = result;
       n = n->tl;
       while (n != null && (i = compare(n->hd,elt)) < 0) {
-	prev->tl = new List(n->hd,null);
+	prev->tl = rnew(rgn) List(n->hd,null);
 	prev = prev->tl;
 	n = n->tl;
       }
-      prev->tl = new List(elt,n);
+      prev->tl = rnew(rgn) List(elt,n);
       return(result);
     }
   }
@@ -89,7 +93,12 @@ static list_t<`a> insert_b(int compare(`a,`a;`e),list_t<`a> n,`a elt) {
 hset_t<`a,`e> insert(hset_t<`a,`e> s,`a elt) {
   if (member(s,elt)) return(s);
   else return new Set(s->compare,s->cardinality+1,
-                      insert_b(s->compare,s->nodes,elt));
+                      insert_b(Core::heap_region,s->compare,s->nodes,elt));
+}
+gset_t<`a,`r,`e> rinsert(region_t<`r> rgn, gset_t<`a,`r,`e> s, `a elt) {
+  if (member(s,elt)) return s;
+  else return rnew(rgn) Set(s->compare,s->cardinality+1,
+			    insert_b(rgn,s->compare,s->nodes,elt));
 }
 
 /* Unions two sets by merging the nodes */
@@ -182,7 +191,7 @@ hset_t<`a,`e> delete(hset_t<`a,`e> s,`a elt) {
   else return(s);
 }
 
-list_t<`a> elements(hset_t<`a,`e> s) {
+glist_t<`a,`r> elements(gset_t<`a,`r,`e> s) {
 /* Note: For efficiency we don't copy, but that means clients can
          screw up our invariants!
 */

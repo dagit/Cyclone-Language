@@ -998,7 +998,7 @@ using Errno {
     return g(i);
   }
 
-  int __attribute__((stdcall)) att_foo(int i) {
+  int __attribute__((__stdcall__)) att_foo(int i) {
     return i+1;
   }
 

@@ -398,7 +398,7 @@ $(`a,`b)? zip(`a ?`r1 x,`b ?`r2 y) {
   int sx = x.size;
   if (sx != y.size) throw Array_mismatch;
 
-  return new { for i < sx : $(x[i],y[i]) };
+  return new {for i < sx : $(x[i],y[i]) };
 }
 
 // Given [|(x1,y1),...,(xn,yn)|], return ([|x1,...,xn|],[|y1,...,yn|]) 

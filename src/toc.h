@@ -10,5 +10,8 @@ using Absyn;
 
 // translate the declarations to C
 extern list_t<decl_t> toc(list_t<decl_t> ds);
+
+  // this is just for Tovc
+  extern qvar_t temp_var();
 }
 #endif

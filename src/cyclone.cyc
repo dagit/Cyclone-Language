@@ -17,6 +17,7 @@
 #include "tcenv.h"
 #include "tc.h"
 #include "toc.h"
+#include "tovc.h"
 #include "new_control_flow.h"
 #include "interface.h"
 
@@ -36,6 +37,7 @@ static bool noshake_r  = false;
 static bool tc_r       = false;
 static bool ic_r       = false;
 static bool toc_r      = false;
+static bool tovc_r     = false;
 static bool v_r        = false;
 static bool q_r        = false;
 static bool add_cyc_namespace_r = true;
@@ -46,6 +48,7 @@ bool @ noshake  = &noshake_r;
 bool @ tc       = &tc_r;
 bool @ ic       = &ic_r;
 bool @ toc      = &toc_r;
+bool @ tovc     = &tovc_r;
 bool @ v        = &v_r;
 bool @ q        = &q_r;
 bool @ add_cyc_namespace = &add_cyc_namespace_r;
@@ -157,6 +160,9 @@ list_t<Absyn::decl_t> do_interface($(Tcenv::tenv_t, FILE @) @ params, list_t<Abs
 list_t<Absyn::decl_t> do_translate(bool ignore, list_t<Absyn::decl_t> tds) {
   return Toc::toc(tds);
 }
+list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
+  return Tovc::tovc(tds);
+}
 
 list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t> tds) {
   Absynpp::expand_typedefs = ! *noexpand;
@@ -179,8 +185,8 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t> tds) {
 
 void compile_file(string filename) {
 
-  string basename    = Filename::chop_extension(filename);
-  string preprocfile = strconcat(basename, ".i");
+  string basename      = Filename::chop_extension(filename);
+  string preprocfile   = strconcat(basename, ".i");
   string interfacefile = strconcat(basename, ".cyci");
 
   if (!*q||*v) fprintf(stderr,"Compiling file: %s", basename);
@@ -198,6 +204,7 @@ void compile_file(string filename) {
     return;
   fclose((FILE @)f0);
   // actually make the command call
+  // FIX: let user change how/which pre-processor is invoked
   string cmd = xprintf("gcc -x c -E -U__GNUC__ %s %s %s > %s",
                        inc_string, def_string, filename, preprocfile);
   if (*v) fprintf(stderr,"%s\n",cmd);
@@ -217,32 +224,29 @@ void compile_file(string filename) {
     return;
   list_t<Absyn::decl_t> tds = null;
   if(!compile_failure) {
-    tds = do_stage("parsing", do_parse, (FILE@)in_file, tds,
-		   preprocfile);
+    tds = do_stage("parsing", do_parse, (FILE@)in_file, tds, preprocfile);
     file_close((FILE@)in_file); // won't happen if exception is thrown
   }
   let te = Tcenv::tc_init();
   if(!compile_failure && tds != null && *tc)
-    tds = do_stage("type checking", do_typecheck, te, tds,
-		   preprocfile);
+    tds = do_stage("type checking", do_typecheck, te, tds, preprocfile);
   if(!compile_failure && *tc)
-    tds = do_stage("control-flow checking", do_cfcheck, true, tds,
-		   preprocfile);
+    tds = do_stage("control-flow checking", do_cfcheck, true, tds, preprocfile);
   if(!compile_failure && *ic) {
     FILE * inter_file = try_file_open(interfacefile, "w", "interface file");
     // Position::reset_position(interfacefile);
-    tds = do_stage("interface checking", do_interface, new $(te, (FILE @) inter_file), tds,
-		   preprocfile);
+    tds = do_stage("interface checking", do_interface, 
+		   new $(te, (FILE @) inter_file), tds, preprocfile);
     if (inter_file != null) file_close((FILE @) inter_file);
   }
   if(!compile_failure && *toc)
-    tds = do_stage("translation to C", do_translate, true, tds,
-		   preprocfile);
+    tds = do_stage("translation to C", do_translate, true, tds, preprocfile);
+  if(!compile_failure && *toc && *tovc)
+    tds = do_stage("post-pass to VC", do_tovc, true, tds, preprocfile);
   if(!compile_failure && out_file_name_opt != null)
     out_file = try_file_open(*out_file_name_opt, "w", "output file");
   if(!compile_failure && tds != null && (*pp || *up))
-    tds = do_stage("printing", do_print, (FILE @)out_file, tds,
-		   preprocfile);
+    tds = do_stage("printing", do_print, (FILE @)out_file, tds, preprocfile);
   if (out_file != null && out_file != stdout) 
     file_close((FILE @)out_file); // won't happen if exception is thrown
 
@@ -254,7 +258,7 @@ void compile_file(string filename) {
 }
 
 int main(int argc, string ? argv) {
-  $(string,spec_t,string) specs[15] = 
+  $(string,spec_t,string) specs[16] = 
     {$("-nocyc",new Clear_spec(add_cyc_namespace),
        "does not add implicit namespace Cyc"),
      $("-q",new Set_spec(q),
@@ -269,6 +273,8 @@ int main(int argc, string ? argv) {
        "translate to C"),
      $("-tc",new Set_spec(tc), 
        "type check"),
+     $("-tovc",new Set_spec(tovc),
+       "avoid gcc extension in output"),
      $("-ic",new Set_spec(ic), 
        "interface check"),
      $("-noremoveunused",new Set_spec(noshake),
@@ -300,7 +306,8 @@ int main(int argc, string ? argv) {
   let l13 = List(&specs[12],&l12);
   let l14 = List(&specs[13],&l13);
   let l15 = List(&specs[14],&l14);
-  let options = &l15;
+  let l16 = List(&specs[15],&l15);
+  let options = &l16;
 		 
   Arg::parse(options, compile_file, "Options:", argv);
 

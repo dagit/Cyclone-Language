@@ -4,7 +4,7 @@
 
 namespace Dict;
 
-extern xtunion exn {Absent,Present};
+xtunion exn {Absent,Present};
 
 static tunion Color { R, B };
 

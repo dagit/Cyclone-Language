@@ -20,8 +20,9 @@ CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
 # uh, the precore_c.h building doesn't work with the ugly printer :-)
 CYC_FLAGS_PP := -tc -toc -pp
 
-CYC_FLAGS:= -tc -toc -up -I . 
 #CYC_FLAGS:= -tc -toc -pp -I . 
+CYC_FLAGS:= -tc -toc -up -I . 
+#CYC_FLAGS:= -tc -toc -tovc -up -I . 
 
 all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 

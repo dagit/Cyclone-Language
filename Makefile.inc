@@ -44,6 +44,7 @@ CYCLONE_SRCS:=absyn\
          evexp\
          tc\
          toc\
+         tovc\
          cf_flowinfo\
          cf_absexp\
          new_control_flow\

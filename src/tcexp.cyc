@@ -874,8 +874,7 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
     check_rgn_accessible(te,loc,rt);
     check_nonzero_bound(loc, b);
     return t2;
-  // FIX:  should support constant sized arrays (larger than 0) and
-  // tagged arrays.
+  // FIX:  should support constant sized arrays (bound > 0) and tagged arrays.
   default: return expr_err(te,loc,xprintf("expecting * or @ type but found %s",
 					  typ2string(t)));
   }
@@ -883,7 +882,7 @@ static type_t tcDeref(tenv_t te, seg_t loc, type_t *`r topt, exp_t e) {
 
 // e.f
 static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
-                          exp_t outer_e, exp_t e, field_name_t f) {
+			     exp_t outer_e, exp_t e, field_name_t f) {
   // As per K&R, don't promote e from array to pointer type
   tcExpNoPromote(te,null,e);
   type_t t = compress(e->topt->v);
@@ -940,8 +939,8 @@ static type_t tcStructMember(tenv_t te, seg_t loc, type_t *`r topt,
 }
 
 // e->f
-static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt, exp_t e, field_name_t f)
-{
+static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt, 
+			    exp_t e, field_name_t f) {
   tcExp(te,null,e);
   type_t t = compress(e->topt->v);
   switch (t) {
@@ -990,7 +989,8 @@ static type_t tcStructArrow(tenv_t te, seg_t loc, type_t *`r topt, exp_t e, fiel
 }
 
 // e1[e2]
-static type_t ithTupleType(tenv_t te,seg_t loc,list_t<$(tqual_t,type_t)@> ts,exp_t index) {
+static type_t ithTupleType(tenv_t te, seg_t loc,
+			   list_t<$(tqual_t,type_t)@> ts, exp_t index) {
   unsigned int i = Evexp::eval_const_uint_exp(index);
   try
     return (*List::nth(ts,i))[1];
@@ -1000,7 +1000,8 @@ static type_t ithTupleType(tenv_t te,seg_t loc,list_t<$(tqual_t,type_t)@> ts,exp
   }
 }
  // FIX: look at topt
-static type_t tcSubscript(tenv_t te, seg_t loc, type_t *`r topt, exp_t e1, exp_t e2) {
+static type_t tcSubscript(tenv_t te, seg_t loc, type_t *`r topt, 
+			  exp_t e1, exp_t e2) {
   tcExp(te,null,e1);
   tcExp(te,null,e2);
   type_t t1 = compress(e1->topt->v);
@@ -1499,7 +1500,8 @@ type_t tcExp(tenv_t te, type_t *`r topt, exp_t e) {
     let $(_,rgn) = addressof_props(te,e);
     let b = (e2 == null) ? (bounds_t)Unknown_b : new Upper_b((exp_t)e2);
     t = atb_typ(elt_typ,rgn,tq,b);
-    unchecked_cast(te,e,t);
+    e->topt->v = t;
+    //    unchecked_cast(te,e,t);
     return t;
   default:
     return t;

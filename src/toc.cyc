@@ -21,10 +21,10 @@
 // Look for "unimp" or comments that start with FIX: for missing
 // or broken pieces.
 
-// MAJOR TODO LIST:
-//  pull out common things better
-
 // FIX: we could probably use "const" in lots of places where we're not.
+
+// Note: Do NOT use unresolvedmem_exp except at top-level or you will break
+//  the Tocv module
 
 // Note: we generate lots of struct and tunion types that don't have pointers
 //       back to the corresponding decls.  The printer doesn't follow these
@@ -85,72 +85,52 @@ static `a toc_impos(string s) {
 }
 xtunion exn {Match_error};
 
-// some pre-allocated boxed strings
-static string curr_string = "curr";
-static stringptr curr_sp = (&curr_string);
-static string last_plus_one_string = "last_plus_one";
-static stringptr last_plus_one_sp = (&last_plus_one_string);
-static string base_string = "base";
-static stringptr base_sp = (&base_string);
-static string _tagged_string_string = "_tagged_string";
-static stringptr _tagged_string_sp = (&_tagged_string_string);
-static string xtunion_string = "xtunion";
-static stringptr xtunion_sp = &xtunion_string;
-static string v_string = "v";
-static stringptr v_sp = (&v_string);
-static string tag_string = "tag";
-static stringptr tag_sp = (&tag_string);
-static string _handler_cons_string = "_handler_cons";
-static stringptr _handler_cons_sp = (&_handler_cons_string);
-static string setjmp_string = "setjmp";
-static stringptr setjmp_sp = (&setjmp_string);
-static string _push_handler_string = "_push_handler";
-static stringptr _push_handler_sp = (&_push_handler_string);
-static string _pop_handler_string = "_pop_handler";
-static stringptr _pop_handler_sp = (&_pop_handler_string);
-static string _push_region_string = "_push_region";
-static stringptr _push_region_sp = (&_push_region_string);
-static string _pop_region_string = "_pop_region";
-static stringptr _pop_region_sp = (&_pop_region_string);
-static string handler_string = "handler";
-static stringptr handler_sp = (&handler_string);
-static string _npop_handler_string = "_npop_handler";
-static $(nmspace_t, stringptr) _npop_handler_pr = 
-  $((nmspace_t)&abs_ns_value,&_npop_handler_string);
-static qvar_t _npop_handler_qv = &_npop_handler_pr;
-static string _exn_thrown_string = "_exn_thrown";
-static stringptr _exn_thrown_sp = (&_exn_thrown_string);
-static string Match_Exception_string = "Match_Exception";
-static stringptr Match_Exception_sp = (&Match_Exception_string);
-static string Cyc_new_string_string = "Cyc_new_string";
-static stringptr Cyc_new_string_sp = (&Cyc_new_string_string);
-static string Cyc_rnew_string_string = "Cyc_rnew_string";
-static stringptr Cyc_rnew_string_sp = (&Cyc_rnew_string_string);
-static string _region_handle_string = "_RegionHandle";
-static stringptr _region_handle_sp = (&_region_handle_string);
-static string _new_region_string = "_new_region";
-static stringptr _new_region_sp = (&_new_region_string);
-static string _check_null_string = "_check_null";
-static stringptr _check_null_sp = (&_check_null_string);
-static $(nmspace_t, stringptr) _check_null_pr = 
-  $((nmspace_t)&abs_ns_value,&_check_null_string);
-static qvar_t _check_null_qv = &_check_null_pr;
-static string _check_unknown_subscript_string = "_check_unknown_subscript";
-static stringptr _check_unknown_subscript_sp = (&_check_unknown_subscript_string);
-static $(nmspace_t, stringptr) _check_unknown_subscript_pr = 
-  $((nmspace_t)&abs_ns_value,&_check_unknown_subscript_string);
-static qvar_t _check_unknown_subscript_qv = &_check_unknown_subscript_pr;
-static string _check_known_subscript_null_string = "_check_known_subscript_null";
-static stringptr _check_known_subscript_null_sp = (&_check_known_subscript_null_string);
-static $(nmspace_t, stringptr) _check_known_subscript_null_pr = 
-  $((nmspace_t)&abs_ns_value,&_check_known_subscript_null_string);
-static qvar_t _check_known_subscript_null_qv = &_check_known_subscript_null_pr;
-static string _check_known_subscript_notnull_string = "_check_known_subscript_notnull";
-static stringptr _check_known_subscript_notnull_sp = (&_check_known_subscript_notnull_string);
-static $(nmspace_t, stringptr) _check_known_subscript_notnull_pr = 
-  $((nmspace_t)&abs_ns_value,&_check_known_subscript_notnull_string);
-static qvar_t _check_known_subscript_notnull_qv = &_check_known_subscript_notnull_pr;
+// some pre-allocated boxed strings -- use foo_sp for char ?* w/ contents "foo"
+#define MAKE_STRING(str)\
+  static string    str##_string = #str; \
+  static stringptr str##_sp     = &str##_string
 
+MAKE_STRING(curr);
+MAKE_STRING(last_plus_one);
+MAKE_STRING(base);
+MAKE_STRING(_tagged_string);
+MAKE_STRING(xtunion); // not used as a keyword
+MAKE_STRING(tag);
+MAKE_STRING(_handler_cons);
+MAKE_STRING(_push_region);
+MAKE_STRING(_pop_region);
+MAKE_STRING(handler);
+MAKE_STRING(Match_Exception);
+MAKE_STRING(Cyc_new_string);
+MAKE_STRING(Cyc_rnew_string);
+MAKE_STRING(_RegionHandle);
+MAKE_STRING(_new_region);
+
+// some pre-allocated qvars -- use foo_qv for qvar_t w/ contents "foo" 
+// (top-level namespace)
+// FIX: Next step is to make the exp_t, not just the qvar_t
+#define MAKE_QVAR(str)\
+  static string                  str##_string = #str;\
+  static $(nmspace_t, stringptr) str##_pr     = $((nmspace_t)&abs_ns_value,\
+						  &str##_string);\
+  static qvar_t                  str##_qv     = &str##_pr
+
+MAKE_QVAR(_throw);
+MAKE_QVAR(setjmp);
+MAKE_QVAR(_push_handler);
+MAKE_QVAR(_pop_handler);
+MAKE_QVAR(_exn_thrown);
+MAKE_QVAR(_npop_handler);
+MAKE_QVAR(_check_null);
+MAKE_QVAR(_check_unknown_subscript);
+MAKE_QVAR(_check_known_subscript_null);
+MAKE_QVAR(_check_known_subscript_notnull);
+MAKE_QVAR(GC_malloc);
+MAKE_QVAR(GC_malloc_atomic);
+MAKE_QVAR(_region_malloc);
+
+#undef MAKE_STRING
+#undef MAKE_QVAR
 
 // FIX:  should really allow evaluating expressions too
 static bool is_zero(exp_t e) {
@@ -270,8 +250,8 @@ static type_t add_tagged_ptr_type(type_t t,tqual_t tq) {
 // generate a temporary variable
 // FIX: need to guarantee these can't conflict
 static int temp_var_counter = 0;
-static qvar_t temp_var() {
-  return new $(abs_ns,new {xprintf("_temp%d",temp_var_counter++)});
+qvar_t temp_var() {
+  return new $(Loc_n,new {xprintf("_temp%d",temp_var_counter++)});
 }
 
 // generate a fresh label
@@ -402,7 +382,7 @@ static type_t typ_to_c(type_t t) {
     // just drop the type arguments and translate the nested types
     return new TypedefType(tdn,null, new Opt(typ_to_c_array(topt->v)));
   case &RgnHandleType(t):
-    return cstar_typ(strct(_region_handle_sp),mt_tq);
+    return cstar_typ(strct(_RegionHandle_sp),mt_tq);
   case HeapRgn:
     return toc_impos("Toc::typ_to_c: type translation passed the heap region");
   case &AccessEff(_):
@@ -413,21 +393,10 @@ static type_t typ_to_c(type_t t) {
   }
 }
 
-// JGM: Fix -- the type translation already does this!
-// In some contexts, we need to map t[] or t[3] to t* -- we assume
-// that t[?] types have been translated away.  We pass along as well
-// an expression and location, so we can omit a cast if possible.
-static exp_t array_to_ptr(type_t t,exp_t e,seg_t l) {
-  switch (t) {
-  case &ArrayType(t2,tq,_): return cast_exp(star_typ(t2,HeapRgn,tq),e,l);
-  default:                 return e;
-  }
-}
-// The same, but the cast is forced.
 static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
   switch (t) {
   case &ArrayType(t2,tq,_): return cast_exp(star_typ(t2,HeapRgn,tq),e,l);
-  default:                 return cast_exp(t,e,l);
+  default:                  return cast_exp(t,e,l);
   }
 }
 
@@ -553,21 +522,13 @@ static bool is_poly_project(exp_t e) {
 }
 
 // possible pointer malloc
-static string gc_malloc_string = "GC_malloc";
-static $(nmspace_t,var_t) gc_malloc_var = 
-  $((nmspace_t)&abs_ns_value,&gc_malloc_string);
-
 static exp_t malloc_ptr(exp_t s) {
-  return fncall_exp(var_exp(&gc_malloc_var,DL),new List(s,null),DL);
+  return fncall_exp(var_exp(GC_malloc_qv,DL),new List(s,null),DL);
 }
 
 // no pointers possible malloc
-static string gc_malloc_atomic_string = "GC_malloc_atomic";
-static $(nmspace_t,var_t) gc_malloc_atomic_var = 
-  $((nmspace_t)&abs_ns_value,&gc_malloc_atomic_string);
-
 static exp_t malloc_atomic(exp_t s) {
-  return fncall_exp(var_exp(&gc_malloc_atomic_var,DL),new List(s,null),DL);
+  return fncall_exp(var_exp(GC_malloc_atomic_qv,DL),new List(s,null),DL);
 }
 
 // malloc something -- choose malloc routine according to the (Cyclone) type
@@ -578,11 +539,9 @@ static exp_t malloc_exp(type_t t,exp_t s) {
 }
 
 // region malloc something
-static string _region_malloc_string = "_region_malloc";
-static $(nmspace_t,var_t) region_malloc_var = 
-  $((nmspace_t)&abs_ns_value,&_region_malloc_string);
 static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
-  return fncall_exp(var_exp(&region_malloc_var,DL),new List(rgn, new List(s, null)),DL);
+  return fncall_exp(var_exp(_region_malloc_qv,DL),
+		    new List(rgn, new List(s, null)),DL);
 }
 
 ///////////////////////////////////////////////////////////////
@@ -591,9 +550,9 @@ static exp_t rmalloc_exp(exp_t rgn, exp_t s) {
 // This section implements the various casts from one Cyclone
 // type to another (e.g., boxing, unboxing, tagging, etc.)
 static tunion Conv {
-  NullCheck(type_t);        // t* -> t@
+  NullCheck(type_t);           // t* -> t@
   UntagPtr(type_t,exp_t,bool); // t? -> t*{e}  bool is whether result is nullable
-  TagPtr(type_t,exp_t);       // t*{e} -> t?
+  TagPtr(type_t,exp_t);        // t*{e} -> t?
 };
 typedef tunion Conv conv;
 
@@ -628,13 +587,9 @@ static list_t<conv> conversion(type_t t1, type_t t2) {
   }
 }
 
-static string _throw_string = "_throw";
-static $(nmspace_t,var_t) _throw_var = 
-  $((nmspace_t)&abs_ns_value,&_throw_string);
-
 // throw an exception -- this is turned into a function call
 static exp_t newthrow_exp(exp_t e) {
-  return fncall_exp(var_exp(&_throw_var,DL),new List(e,null),DL);
+  return fncall_exp(var_exp(_throw_qv,DL),new List(e,null),DL);
 }
 
 // t* -> t@
@@ -834,8 +789,8 @@ static env_t add_varmap(env_t e, qvar_t x, exp_t y) {
 // exception handler pop counters for break and continue are zeroed
 static env_t loop_env(env_t e) {
   env_t ans = copy_env(e);
-  ans->break_lab       = null;
-  ans->continue_lab    = null;
+  ans->break_lab    = null;
+  ans->continue_lab = null;
   return ans;
 }
 
@@ -850,7 +805,6 @@ static env_t non_last_switchclause_env(env_t e, var_t break_l, var_t fallthru_l,
     
   env_t ans = copy_env(e);
   ans->break_lab       = new Opt(break_l);
-  
   ans->fallthru_info   = new Opt(new $(fallthru_l,
                                        fallthru_vars,
                                        next_case_env->varmap));
@@ -899,7 +853,7 @@ static env_t switch_as_switch_env(env_t e, var_t next_l) {
 //      printf("%d%.*s%d\n",t1,t2->sz,t2->contents,t3);
 //   })
 static exp_t printf_to_c(primop_t p, opt_t<exp_t> aopt,
-		       list_t<exp_t> args, list_t<type_t> typs) {
+			 list_t<exp_t> args, list_t<type_t> typs) {
   // All errors are Impossible because they should have been caught by
   // the typechecker
   if (args == null)
@@ -914,12 +868,11 @@ static exp_t printf_to_c(primop_t p, opt_t<exp_t> aopt,
   // Check for the usual case: no %s.
   int len = fmt_str.size;
   int i   = 0;
-  for (i=0; i<len; i++) {
+  for (i=0; i<len; i++)
     if (fmt_str[i] == '%') {
       i++;
       if (i<len && fmt_str[i] == 's') break;
     }
-  }
   // If no %s, don't bother to process the args
   if (i == len) {
     if (aopt != null) args = new List(aopt->v,args);
@@ -931,10 +884,9 @@ static exp_t printf_to_c(primop_t p, opt_t<exp_t> aopt,
   args = args->tl; // strip off fmt string
   typs = typs->tl; // and its type
 
-  list_t<int>              rev_fmt    = null; // reversed fmt to return
-  list_t<exp_t>              rev_result = null; // reversed args to return,
-                                                // minus fmt
-  list_t<$(qvar_t,type_t,exp_t)@> rev_temps  = null; // reversed temps to return
+  list_t<int>   rev_fmt    = null; // reversed fmt to return
+  list_t<exp_t> rev_result = null; // reversed args to return, minus fmt
+  list_t<$(qvar_t,type_t,exp_t)@> rev_temps = null; // reversed temps to return
 
   for (i=0; i<len; i++) {
     char c = fmt_str[i];
@@ -1004,14 +956,14 @@ static exp_t printf_to_c(primop_t p, opt_t<exp_t> aopt,
       typs = typs->tl;
     }
   }
-  let es = new List(string_exp(String::implode(List::rev(rev_fmt)),DL),
-		 List::rev(rev_result));
+  let es = new List(string_exp(String::implode(List::imp_rev(rev_fmt)),DL),
+		    List::imp_rev(rev_result));
   if (aopt != null) es = new List(aopt->v,es);
   let e = primop_exp(p,es,DL);
   let s = exp_stmt(e,DL);
   for (; rev_temps != null; rev_temps = rev_temps->tl) {
-    s = declare_stmt((*rev_temps->hd)[0], (*rev_temps->hd)[1],
-                     (*rev_temps->hd)[2], s, DL);
+    let &$(qv,t,e) = rev_temps->hd;
+    s = declare_stmt(qv, t, e, s, DL);
   }
   return stmt_exp(s,DL);
 }
@@ -1115,6 +1067,7 @@ static stmt_t init_array(env_t nv, exp_t lhs,
 }
 
 // code to initialize a comprehension
+// WARNING: Changing the translation here will break Tovc.
 static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd, 
                                  exp_t e1, exp_t e2, stmt_t s, 
                                  bool e1_already_translated) {
@@ -1123,7 +1076,6 @@ static stmt_t init_comprehension(env_t nv, exp_t lhs, vardecl_t vd,
     exp_to_c(nv,e1);
   env_t nv2 = add_varmap(nv,x1,varb_exp(x1,new Local_b(vd),DL));
   qvar_t max = temp_var();
-  qvar_t a   = temp_var();
   exp_t ea = assign_exp(var_exp(x1,DL),signed_int_exp(0,DL),DL);
   exp_t eb = lt_exp(var_exp(x1,DL),var_exp(max,DL),DL);
   exp_t ec = post_inc_exp(var_exp(x1,DL),DL);
@@ -1908,10 +1860,6 @@ static void exp_to_c(env_t nv, exp_t e) {
     let e1_typ = compress(e1->topt->v);
     exp_to_c(nv, e1);
     exp_to_c(nv, e2);
-    // cast e1 to have the right type so that we can do the projection
-    // note:  casts to array types t[] or t[3] should be casts to pointer
-    // types *t
-    e1->r = array_to_ptr(typ_to_c(e1_typ),new_exp(e1->r,DL),DL)->r;
     // e1 could be a tuple or an array of various sorts
     switch (e1_typ) {
     case &TupleType(ts):
@@ -2510,7 +2458,7 @@ static void xlate_switch(env_t nv, stmt_t whole_s, exp_t e, list_t<switch_clause
   default:           leave_as_switch = false; break;
   }
   for(let scs1 = scs; scs1 != null; scs1 = scs1->tl)
-    if(scs1->hd->pat_vars->v != null) {
+    if(scs1->hd->pat_vars->v != null || scs1->hd->where_clause != null) {
       leave_as_switch = false;
       break;
     }
@@ -2786,10 +2734,10 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       type_t h_typ = strct(_handler_cons_sp);
       type_t e_typ = typ_to_c(exn_typ);
       type_t was_thrown_typ = typ_to_c(sint_t);
-      exp_t  pushhandler_exp = var_exp(new $(abs_ns, _push_handler_sp),DL);
-      exp_t  setjmp_exp      = var_exp(new $(abs_ns, setjmp_sp),       DL);
-      exp_t  pophandler_exp  = var_exp(new $(abs_ns, _pop_handler_sp), DL);
-      exp_t  _exn_thrown_exp = var_exp(new $(abs_ns, _exn_thrown_sp),  DL);
+      exp_t  pushhandler_exp = var_exp(_push_handler_qv,DL);
+      exp_t  setjmp_exp      = var_exp(setjmp_qv,       DL);
+      exp_t  pophandler_exp  = var_exp(_pop_handler_qv, DL);
+      exp_t  _exn_thrown_exp = var_exp(_exn_thrown_qv,  DL);
       // e_exp needs a typ because it'll go through exp_to_c;
       // as well, it must be in varmap
       e_exp->topt = new Opt(e_typ);
@@ -2855,7 +2803,7 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       //   body; 
       //   _pop_region(&rh);
       // }
-      type_t rh_struct_typ = strct(_region_handle_sp);
+      type_t rh_struct_typ = strct(_RegionHandle_sp);
       type_t rh_struct_ptr_typ = cstar_typ(rh_struct_typ,mt_tq);
       type_t h_typ = strct(_handler_cons_sp);
       qvar_t rh_var = temp_var();
@@ -2895,6 +2843,10 @@ static void fndecl_to_c(env_t nv, fndecl_t f) {
     (*args->hd)[2] = typ_to_c((*args->hd)[2]);
     let x = new $((nmspace_t)Loc_n,(*args->hd)[0]);
     nv = add_varmap(nv,x,var_exp(x,DL));
+  }
+  // Tovc would like to use param_vardecls:
+  for(let arg_vds = f->param_vardecls->v; arg_vds!=null; arg_vds=arg_vds->tl) {
+    arg_vds->hd->type = typ_to_c(arg_vds->hd->type);
   }
   stmt_to_c(clear_toplevel(nv),f->body);
 }

@@ -151,7 +151,7 @@ static int str_index(string buff, int offset, int len) {
     if(t->children == null) {
       // new string, extend the trie and return
       while(i <= last) {
-        let temp = (trie_child_v_t)(new { for i < 75 : null });
+        let temp = (trie_child_v_t)(new { for q < 75 : null });
         let temp2 = new {temp};
 	t->children = (trie_child_t)temp2;
 	(*(t->children))[ch] = new Trie(null,-1);
