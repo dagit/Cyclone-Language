@@ -10,9 +10,9 @@ ifndef devel
 CYCC=cyclone$(EXE)
 else
 CYCC=../build/boot/cyclone$(EXE)
-CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g
+CYCFLAGS=-I../lib -I../include -B../build/boot -pp -save-c -g --vcgen
 endif
-
+#HAVE_PTHREAD=no
 #EXES := $(addsuffix $(EXE), cyctest foo hello test_regions histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude testasm patterns)
 # test asm doesn't work for me on cygwin
 EXES := $(addsuffix $(EXE), cyctest foo hello test_regions test_currgn histogram test_getopt zeroterm structarray flatlist md5 unique_patterns dynregion refcnt_test require streambufftest scheme cinclude patterns)

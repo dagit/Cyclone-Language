@@ -273,7 +273,7 @@ static assn_t pre_stmt_update(env_t env, stmt_t s, assn_t ain) {
   let popt = Hashtable::lookup_opt(env->shared->assn_table,s);
   if (popt != NULL) {
     assn_t @p = *popt;
-    let new_precondition = or(ain,*p);
+    let new_precondition = merge_assn(ain,*p);
     *p = new_precondition;
     return new_precondition;
   } else 
@@ -310,7 +310,7 @@ static assn_t forward_assn(env_t env, stmt_t s, assn_t ain) {
   assn_t@* aprevopt = Hashtable::lookup_opt(env->shared->assn_table,s);
   if (aprevopt != NULL) {
     let aprev = *aprevopt;
-    ain = or(ain,*aprev);
+    ain = merge_assn(ain,*aprev);
     *aprev = ain;
   } else {
     Hashtable::insert(env->shared->assn_table,s,new ain);
@@ -321,7 +321,7 @@ static assn_t forward_assn(env_t env, stmt_t s, assn_t ain) {
 // update the assertion associated with the current 
 // exception handler.
 static void update_try_assn(env_t env, assn_t a) {
-  env->shared->try_assn = or(env->shared->try_assn,a);
+  env->shared->try_assn = merge_assn(env->shared->try_assn,a);
 }
 
 // update the return information for a function
@@ -331,9 +331,9 @@ static void update_return(env_t env, term_opt_t t, assn_t a) {
     let v = fresh_var();
     shared->res_term = v;
     shared->res_assn = 
-      or(and(a,eq(v,t)),and(shared->res_assn,eq(v,shared->res_term)));
+      merge_assn(and(a,eq(v,t)),and(shared->res_assn,eq(v,shared->res_term)));
   } else {
-    shared->res_assn = or(a,shared->res_assn);
+    shared->res_assn = merge_assn(a,shared->res_assn);
   }
 }
 
@@ -510,7 +510,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     at = vcgen_stmt(env,s1,at);
     af = vcgen_stmt(env2,s2,af);
     merge_env(env,env2);
-    return or(at,af);
+    return merge_assn(at,af);
   case &Absyn::While_s($(e,dummy),s):
     // we're doing local iteration here -- we join with the
     // assertion on the dummy and widen each time around the loop since
@@ -609,7 +609,7 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     env->shared->try_assn = old_try_assn;
     // analyze the catch handlers and merge with the body to get
     // the final output.
-    return or(ain,vcgen_switch(env,scs,new_try_assn));
+    return merge_assn(ain,vcgen_switch(env,scs,new_try_assn));
   }
 }
 
@@ -632,7 +632,7 @@ static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain) {
     }
     if (sc->where_clause != NULL) 
       a = vcgen_test(env, (exp_t)sc->where_clause, a)[0];
-    res = or(res,vcgen_stmt(env,sc->body,a));
+    res = merge_assn(res,vcgen_stmt(env,sc->body,a));
   }
   return res;
 }
@@ -706,15 +706,15 @@ static $(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
     let $(a1t,a1f) = vcgen_test(env,e1,ain);
     let $(a2t,a2f) = vcgen_test(env,e2,a1t);
     let $(a3t,a3f) = vcgen_test(env,e3,a1f);
-    return $(or(a2t,a3t),or(a2f,a3f));
+    return $(merge_assn(a2t,a3t),merge_assn(a2f,a3f));
   case &Absyn::And_e(e1,e2):
     let $(a1t,a1f) = vcgen_test(env,e1,ain);
     let $(a2t,a2f) = vcgen_test(env,e2,a1t);
-    return $(a2t, or(a1f,a2f));
+    return $(a2t, merge_assn(a1f,a2f));
   case &Absyn::Or_e(e1,e2):
     let $(a1t,a1f) = vcgen_test(env,e1,ain);
     let $(a2t,a2f) = vcgen_test(env,e2,a1f);
-    return $(or(a1t,a2t),a2f);
+    return $(merge_assn(a1t,a2t),a2f);
   case &Absyn::SeqExp_e(e1,e2):
     let $(_,ain) = vcgen_rexp(env,e1,ain);
     return vcgen_test(env,e2,ain);
@@ -727,8 +727,11 @@ static $(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
     let at = a2;
     let af = a2;
     switch p {
-    case Absyn::Eq:  at = and(at,eq(t1,t2));  af = and(af,neq(t1,t2)); break;
-    case Absyn::Neq: at = and(at,neq(t1,t2)); af = and(af,eq(t1,t2)); break;
+      //case Absyn::Eq:  at = and(at,eq(t1,t2));  af = and(af,neq(t1,t2)); break;
+      // case Absyn::Neq: at = and(at,neq(t1,t2)); af = and(af,eq(t1,t2)); break;
+      //  for now, we are eliminating use of neq to avoid creating or's
+    case Absyn::Eq:  at = and(at,eq(t1,t2)); /* af doesn't change */ break;
+    case Absyn::Neq: /* at doesn't change */ af = and(af,eq(t1,t2)); break;
     case Absyn::Lt:
       if (unsigned_comparison(e1,e2)) {
         at = and(at,ult(t1,t2));  af = and(af,ugte(t1,t2)); 
@@ -762,7 +765,7 @@ static $(assn_t,assn_t) vcgen_test(env_t env, exp_t e, assn_t ain) {
     return $(at,af);
   default:
     let $(t,aout) = vcgen_rexp(env,e,ain);
-    return $(and(aout,neq(t,zero())),and(aout,eq(t,zero())));
+    return $(and(aout,ugte(t,one())),and(aout,eq(t,zero())));
   }
 }
 
@@ -928,23 +931,23 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       let v = fresh_var();
       at = and(at,eq(v,t1));
       af = and(af,eq(v,t2));
-      return $(v,or(at,af));
+      return $(v,merge_assn(at,af));
     } else
-      return $(NULL,or(at,af));
+      return $(NULL,merge_assn(at,af));
   case &Absyn::And_e(e1,e2):
     let $(at,af) = vcgen_test(env,e1,ain);
     let $(t,at) = vcgen_rexp(env,e2,at);
     let v = fresh_var();
     at = and(at,eq(v,t));
     af = and(af,eq(v,zero()));
-    return $(v,or(at,af));
+    return $(v,merge_assn(at,af));
   case &Absyn::Or_e(e1,e2):
     let $(at,af) = vcgen_test(env,e1,ain);
     let $(t,af) = vcgen_rexp(env,e2,af);
     let v = fresh_var();
     at = and(at,eq(v,one()));
     af = and(af,eq(v,t));
-    return $(v,or(at,af));
+    return $(v,merge_assn(at,af));
   case &Absyn::SeqExp_e(e1,e2):
     let $(_,a) = vcgen_rexp(env,e1,ain);
     return vcgen_rexp(env,e2,a);
@@ -1039,10 +1042,24 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
       if (t1 == NULL){
 	additional = &true_assn;
       }else{
-	additional = ult(t2,primop(Absyn::Numelts,list(t1)));
+	exp_opt_t bound = Tcutil::get_type_bound((type_t)e1->topt);
+	term_t bndterm;
+	assn_t bndassn;
+	bndterm = primop(Absyn::Numelts, list(t1));
+	bndassn = &true_assn;
+	if (bound != NULL){
+	  let $(bndt, bnda) = vcgen_rexp(env, bound, &true_assn);
+	  if (bndt != NULL){
+	    bndterm=bndt;
+	    bndassn = bnda;
+	  }
+	}
+	//wangyl getting a better term for the array bound.
+	if (bndassn != &true_assn) fprintf(stderr, "side effect in bound\n");
+	additional = ult(t2,bndterm);
       }
-      insert_assn_info(env->assn_info, e1, new $(a2, additional));
-		       
+      if(additional != &true_assn)
+	insert_assn_info(env->assn_info, e1, new $(a2, additional));
       a2 = and(a2,additional);
     }
     return $(NULL,a2);

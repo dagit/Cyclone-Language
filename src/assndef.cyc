@@ -22,7 +22,7 @@
    printing etc.). */
 
 #include "assndef.h"
-
+#include "pratt_prover.h"
 
 namespace AssnDef;
 using List;
@@ -91,6 +91,7 @@ inline static bool is_commutative(Absyn::primop_t p) {
   default: return false;
   }
 }
+
 term_t primop(Absyn::primop_t p, list_t<term_t,`H> ts) {
   return new Primop(p,ts);
 }
@@ -141,13 +142,14 @@ datatype Assn {
   Or(assn_t,assn_t);
   Subst(vardecl_t x,term_t t,assn_t a); // a[t/x] -- lazy substitution
   Kill(assn_t); // replace all escaping variables with fresh logic variables
+  //  Graph(graph_t*); //wangyl: NULL is false, true_graph() is true. 
 };
 
 // inner loop for calculating the size of an assertion -- we
 // take care to figure out the size as a dag and not a tree.
 static unsigned int 
-  assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev){
-  LOOP:
+assn_size_loop(assn_t a, unsigned int c, list_t<assn_t,`H>@ prev){
+ LOOP:
   if (memq(*prev,a)) return c;
   *prev = new List(a,*prev);
   switch (a) {
@@ -167,6 +169,8 @@ static unsigned int
     ++c;
     a = a1;
     goto LOOP;
+    //  case &Graph(g): //wangyl: consider it as just one element
+    //    return 1+c;
   }
 }
 
@@ -218,6 +222,9 @@ static string_t a2string(assn_t a, int prec, int@ size) {
   case &Kill(a):
     *size += 1;
     return aprintf("Kill(%s)",a2string(a,0,size));
+    //  case &Graph(g): //wangyl 
+    //    *size += 1;
+    //    return aprintf("Graph");
   }
 }
 
@@ -252,6 +259,7 @@ static int assnhash(datatype Assn @a) {
   case &Subst(vd,t,a): return ((unsigned int)a ^ (unsigned int)vd ^
                                (unsigned int)t) | 3;
   case &Kill(a): return (unsigned int)a + 37;
+    //  case &Graph(g): return (unsigned int)g + 61;
   }
 }
 
@@ -297,6 +305,9 @@ static int assncmp(datatype Assn @a1, datatype Assn @a2) {
     a1 = a11;
     a2 = a22;
     goto LOOP;
+    //  case $(&Graph(g1), &Graph(g2)): return Core::ptrcmp(g1,g2);
+    //  case $(&Graph(g1), _): return -1;
+    //  case $(_, &Graph(g2)): return 1;
   }
 }
 
@@ -406,7 +417,8 @@ assn_t or(assn_t a1, assn_t a2) {
     if ((int)a1 > (int)a2)
       a1 :=: a2;
     let a = Or(a1,a2);
-    return hash_cons(&a);
+    let res =hash_cons(&a);
+    return res;
   }
 }
 
@@ -433,11 +445,11 @@ assn_t prim(term_t t1, prim_reln_t p, term_t t2) {
   return prim((term_t)t1,P,(term_t)t2); \
 }
 prim_assn(eq,Eq)
-prim_assn(neq,Neq)
-prim_assn(slt,SLt)
-prim_assn(slte,SLte)
-prim_assn(ult,ULt)
-prim_assn(ulte,ULte)
+  prim_assn(neq,Neq)
+  prim_assn(slt,SLt)
+  prim_assn(slte,SLte)
+  prim_assn(ult,ULt)
+  prim_assn(ulte,ULte)
 #define sgte(t1,t2) (slte(t2,t1))
 #define ugte(t1,t2) (ulte(t2,t1))
 #define sgt(t1,t2) (slt(t2,t1))
@@ -446,10 +458,10 @@ prim_assn(ulte,ULte)
 
 
 
-// compute negation of assertion -- unfortunately requires
-// reducing the assertion (i.e., getting rid of Subst and Kill
-// nodes.)
-assn_t not(assn_t a) {
+  // compute negation of assertion -- unfortunately requires
+  // reducing the assertion (i.e., getting rid of Subst and Kill
+  // nodes.)
+  assn_t not(assn_t a) {
   switch (a) {
   case &True: return &false_assn;
   case &False: return &true_assn;

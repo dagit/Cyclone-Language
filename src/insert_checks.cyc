@@ -46,6 +46,8 @@
 using Absynpp;
 #endif
 
+
+//#define PERFORMANCE_DEBUG
 using Absyn;
 using Warn;
 using Core;
@@ -233,7 +235,17 @@ static bool need_bounds_check_vcgen(env_t nv, exp_t a){
   let $(ctxt, assn) = Vcgen::exp2ctxt_assn(nv.assn_info, a);
   return !PrattProver::constraint_prove(ctxt, assn);
 }
+
+#ifdef PERFORMANCE_DEBUG
+//wangyl for debugging purpose, we need to compare performance of 
+//two different bound checkign elimination algorithms
+static int same_result = 0;
+static int vcgen_eliminate = 0;
+static int reln_eliminate = 0;
+#endif
+
 static void do_exp(env_t nv, exp_t e) {
+
   switch(e->r) {
   case &Asm_e(...):  //can do better -- check input expressions initialized
   case &Const_e(...):
@@ -356,11 +368,15 @@ static void do_exp(env_t nv, exp_t e) {
       bool bds_ck_vcgen;
       if (nv.vcgen_r){
 	bds_ck_vcgen = need_bounds_check_vcgen(nv, e1);
-	//	if (bds_ck_vcgen != bds_ck){
-	//	  fprintf(stderr, "exp: %s[%s]  reln: %s  vcgen: %s\n", Absynpp::exp2string(e1), 
-	//		  Absynpp::exp2string(e2), bds_ck?"true":"false", 
-	//		  bds_ck_vcgen?"true":"false");
-	//	}
+#ifdef PERFORMANCE_DEBUG
+	if (bds_ck_vcgen != bds_ck){
+	  if (bds_ck_vcgen) reln_eliminate ++;
+	  else vcgen_eliminate ++;
+	}
+	else {
+	  same_result ++;
+	}
+#endif
       }
       exp_opt_t bd = Tcutil::get_bounds_exp(bounds_one(),b);
       bool fat_ptr = (bd == NULL);
@@ -522,4 +538,12 @@ void insert_checks(List::list_t<decl_t,`H> tds,
   let nv = toplevel_env(tables, do_vcgen);
   for(; tds != NULL; tds = tds->tl)
     do_decl(nv,tds->hd);
+#ifdef PERFORMANCE_DEBUG
+  //wangyl performance comparison
+  fprintf(stderr, "************insert_checks*************\n");
+  fprintf(stderr, "vcgen and reln agree for %d times\n", same_result);
+  fprintf(stderr, "vcgen elminate %d that reln couldn't\n", vcgen_eliminate);
+  fprintf(stderr, "reln eliminate %d that vcgen couldn't\n", reln_eliminate);
+  fprintf(stderr, "**************************************\n");
+#endif
 }

@@ -31,12 +31,16 @@ typedef enum DistanceInfo {
   Both_valid = 3,
 } distance_info_t;
 
+typedef struct Dist{
+  int length;
+  assn_t_nullable prim; //to record a single edge shortest path's origin
+} dist_t;
 typedef struct Distance {
   struct Distance *next;  // ptr to next entry in sparse matrix
   term_t target;
   distance_info_t dinfo;  // whether unsigned_dist or signed_dist are valid.
-  int    unsigned_dist;
-  int    signed_dist;
+  dist_t    unsigned_dist;
+  dist_t    signed_dist;
 } *distance_t;
 
 typedef struct Row {
@@ -44,6 +48,7 @@ typedef struct Row {
   term_t source;
   distance_t distance;
 } *row_t;
+
 
 typedef struct Graph {
   struct Graph *next;    // ptr to next graph in disjunction
@@ -61,14 +66,14 @@ static void print_graphs(graph_t* gs) {
         let t2 = ds->target;
         if (ds->dinfo == Both_valid) {
           fprintf(stderr,"%s - %s U<= %d, %s - %s S<= %d",term2string(t1),
-                  term2string(t2),ds->unsigned_dist,term2string(t1),
-                  term2string(t2),ds->signed_dist);
+                  term2string(t2),ds->unsigned_dist.length,term2string(t1),
+                  term2string(t2),ds->signed_dist.length);
         } else if (ds->dinfo == Signed_valid) {
           fprintf(stderr,"%s - %s S<= %d",term2string(t1),
-                  term2string(t2),ds->signed_dist);
+                  term2string(t2),ds->signed_dist.length);
         } else {
           fprintf(stderr,"%s - %s U<= %d",term2string(t1),
-                  term2string(t2),ds->unsigned_dist);
+                  term2string(t2),ds->unsigned_dist.length);
         }
         if (ds->next != NULL) fprintf(stderr,",");
       }
@@ -103,9 +108,9 @@ static distance_t copy_distance(distance_t ds) {
 static row_t copy_rows(row_t ns) {
   row_t res = NULL;
   for (; ns != NULL; ns = ns->next) {
-    let newns = new *ns;
-    newns->next = res;
-    res = newns;
+    res = new Row{.next = res, 
+		  .source = ns->source, 
+		  .distance=copy_distance(ns->distance)};
   }
   return res;
 }
@@ -152,8 +157,8 @@ static distance_t lookup_col(row_t n, term_t j) {
 
 // lookup the distance between i and j in the row -- returns NULL
 // if the distance is infinite.
-static int* lookup_distance(row_t i, bool is_signed, term_t j) {
-  static int zero = 0;
+static dist_t* lookup_distance(row_t i, bool is_signed, term_t j) {
+  static dist_t zero = Dist{0, NULL};
   if (cmp_term(i->source,j) == 0) 
     return &zero; // same term always at distance 0
   let ds = lookup_col(i,j);
@@ -173,25 +178,41 @@ static int* lookup_distance(row_t i, bool is_signed, term_t j) {
 // Inserts the edge as appropriate.  Must look through the Distance
 // list to see if there's already an entry for i and j and update
 // it instead of adding a new Distance node.
-static void insert_distance(row_t i, bool is_signed, term_t j, int dist) {
+static void insert_distance(row_t i, bool is_signed, term_t j, int dist,assn_t_nullable origin) {
   if (cmp_term(i->source,j) == 0) return; // same term always at distance 0
   let ds = lookup_col(i,j);
   if (ds != NULL) {
     if (is_signed) { 
       ds->dinfo |= Signed_valid;
-      ds->signed_dist = dist;
+      ds->signed_dist.length = dist;
+      ds->signed_dist.prim = origin;
     } else {
       ds->dinfo |= Unsigned_valid;
-      ds->unsigned_dist = dist;
+      ds->unsigned_dist.length = dist;
+      ds->unsigned_dist.prim = origin;
     }
     return;
   }
-  i->distance = new Distance{i->distance,j,is_signed ? Signed_valid : Unsigned_valid,dist,dist};
+  dist_t d = Dist{.length = dist, .prim = origin};
+  i->distance = new Distance{i->distance,j,is_signed ? Signed_valid : Unsigned_valid,d,d};
 }
 
 // FIX: 32-bit dependency!
-#define MAXINT  2147483647
-#define MININT (-MAXINT-1)
+#define MAXINT  (2147483647)
+#define MININT  (-2147483648)
+
+//returns $(false, c1+c2) if there is no overflow in computing c1+c2
+//returns $(true, MAXINT) if there is overflow (c1+c2 > MAXINT)
+//returns $(true, MININT) if there is underflow (c1+c2 < MININT)
+static $(bool, int) is_sum_overflow(int c1, int c2){
+  let sum = c1 + c2;
+  //c1 and c2 has the same sign, but sum has a different sign, 
+  if ((~(c1 ^ c2) & (sum ^ c1)) >> 31){
+    if (sum >> 31) return $(true, (int)MAXINT);
+    else return $(true, (int)MININT);
+  }
+  return $(false, c1+c2);
+}
 
 // add an edge to a graph and close it off to find shortest paths.
 // returns true if the resulting graph remains consistent and false
@@ -201,19 +222,19 @@ static void insert_distance(row_t i, bool is_signed, term_t j, int dist) {
 // the edges in the graph, we need to check if any overflow happens
 // while computing shoterst path of all pairs and looking for negative
 // weight cycles.
-static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
+static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist, assn_t_nullable origin){
   add_node(g,i);
   add_node(g,j);
-  int* ij_dist = lookup_distance(lookup_row(g,i),is_signed,j);
+  dist_t* ij_dist = lookup_distance(lookup_row(g,i),is_signed,j);
   // if we already have a shorter path, then this constraint is redundant
-  if (ij_dist != NULL && *ij_dist < dist) 
+  if (ij_dist != NULL && ij_dist->length < dist) 
     return true;
-  int* ji_dist = lookup_distance(lookup_row(g,j),is_signed,i);
+  dist_t* ji_dist = lookup_distance(lookup_row(g,j),is_signed,i);
   // if  j -n-> i -dist-> j  and n+dist is negative, we have a contradiction.
   // FIX -- distance could overflow
   if (ji_dist != NULL){
-    int sum = *ji_dist + dist;
-    if(( ~((*ji_dist) ^ dist) & (sum ^ dist)) >> 31){
+    int sum = ji_dist->length + dist;
+    if(( ~((ji_dist->length) ^ dist) & (sum ^ dist)) >> 31){
       // overflow happened, the two operands have the same sign while the sum
       // has a different sign bit from the operand
       if (dist >> 31){
@@ -242,7 +263,7 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
       let l = ls->source;
       let kl_dist = lookup_distance(ks,is_signed,l);
       //if kl_dist is the smallest, no need to update.
-      if (kl_dist != NULL && *kl_dist == (int)MININT) continue;
+      if (kl_dist != NULL && kl_dist->length == (int)MININT) continue;
 
       let jl_dist = lookup_distance(jrow,is_signed,l);
       if (jl_dist == NULL) continue;//no new path through ij
@@ -250,26 +271,26 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
       overflow = false;
       int sum1, sum2;
       int new_dist;
-      if((*ki_dist ^ dist) >> 31){
+      if((ki_dist->length ^ dist) >> 31){
 	//two operands with different signs, no overflow;
-	sum1 = *ki_dist+dist;
-	sum2 = *jl_dist;
-      }else if ((dist ^ *jl_dist) >> 31){
+	sum1 = ki_dist->length+dist;
+	sum2 = jl_dist->length;
+      }else if ((dist ^ jl_dist->length) >> 31){
 	//two operands with different signs, no overflow;
-	sum1 = dist + *jl_dist;
-	sum2 = *ki_dist;
+	sum1 = dist + jl_dist->length;
+	sum2 = ki_dist->length;
       }else{
 	// *ki_dist, dist and jl_dist all have the same sign
 	//might overflow here, need to check:
-	sum1 = *ki_dist+dist;
+	sum1 = ki_dist->length+dist;
 	if ((sum1 ^ dist) >>31) overflow = true;
-	sum2 = *jl_dist;
+	sum2 = jl_dist->length;
       }
       //positive overflow, has to throw out the edge.
       if (overflow && sum1 < 0) continue;
       //negative overflow, could assign MININT;
       if (overflow && sum1 >= 0) {
-	insert_distance(ks, is_signed, l, (int)MININT);
+	insert_distance(ks, is_signed, l, (int)MININT, NULL);
 	continue;
       }
       new_dist = sum1 + sum2;
@@ -293,13 +314,15 @@ static bool add_edge(graph_t @g, bool is_signed, term_t i, term_t j, int dist){
 	if (!overflow) {
 	  //when distance is too big to be represented by int,
 	  //just throw out the edge.
-	  insert_distance(ks,is_signed,l,new_dist);
+	  insert_distance(ks,is_signed,l,new_dist, NULL);
 	}
-      } else if (*kl_dist > new_dist && !overflow) {
+      } else if (kl_dist->length > new_dist && !overflow) {
 	//when the distance is too small to be represented by int,
 	//it 's actually sound to replace it with an edge with
 	//greater weight to get a distance representable by int
-	*kl_dist = new_dist;
+	kl_dist->length = new_dist;
+	//the shortest path is not simple edge any more
+	kl_dist->prim = NULL;
       }
     }
   }
@@ -321,6 +344,7 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
   // constraints then.
   let $(c1,okay1) = eval_term(t1);
   let $(c2,okay2) = eval_term(t2);
+  let origin = AssnDef::prim(t1, p, t2);
 
   // FIX: NOT SURE IF ANY OF THIS IS RIGHT -- MUST WORRY ABOUT
   // OVERFLOW ISSUES!
@@ -340,21 +364,21 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       c2 = c2 - 1; 
       fallthru;
     case ULte:
-    // must check that c2 can be represented by an int.
+      // must check that c2 can be represented by an int.
       if (c2 <= (unsigned)MAXINT) {
-        if (!add_edge(g,false,t1,zero(),(int)c2)) return false;
-        // since t1 U<= c2 U<= MAXINT, we know t1 S<= c2 as well!
-        return add_edge(g,true,t1,zero(),(int)c2);
+	if (!add_edge(g,false,t1,zero(),(int)c2, origin)) return false;
+	// since t1 U<= c2 U<= MAXINT, we know t1 S<= c2 as well!
+	return add_edge(g,true,t1,zero(),(int)c2, NULL);
       }
       break;
     case SLt: 
       c2 = c2 - 1;
       fallthru;
     case SLte:
-      if (!add_edge(g,true,t1,zero(),(int)c2)) return false;
+      if (!add_edge(g,true,t1,zero(),(int)c2, origin)) return false;
       // if c2 is positive then t1 S<= c2 implies t1 U<= c2
       if (c2 <= (unsigned)MAXINT)
-        return add_edge(g,false,t1,zero(),(int)c2);
+	return add_edge(g,false,t1,zero(),(int)c2, NULL);
       else return true;
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
@@ -367,13 +391,13 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
       fallthru;
     case ULte:
       int k = -((int)c1);
-      return add_edge(g,false,zero(),t2,k);
+      return add_edge(g,false,zero(),t2,k, origin);
     case SLt: 
       c1 = c1 + 1;
       fallthru;
     case SLte:
       int k = -((int)c1);
-      return add_edge(g,true,zero(),t2,k);
+      return add_edge(g,true,zero(),t2,k, origin);
     default: Tcutil::impos("Vcgen: found bad primop in add_constraint");
     }
   }
@@ -382,16 +406,16 @@ static bool add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
   switch (p) {
   case ULt:
     // add t1 - t2 U<= -1
-    return add_edge(g,false,t1,t2,-1);
+    return add_edge(g,false,t1,t2,-1, origin);
   case ULte:
     // add t1 - t2 U<= 0
-    return add_edge(g,false,t1,t2,0);
+    return add_edge(g,false,t1,t2,0, origin);
   case SLt:
     // add t1 - t2 S<= -1
-    return add_edge(g,true,t1,t2,-1);
+    return add_edge(g,true,t1,t2,-1, origin);
   case SLte: 
     // add t1 - t2 S<= 0
-    return add_edge(g,true,t1,t2,0);
+    return add_edge(g,true,t1,t2,0, origin);
   default: Tcutil::impos("Vcgen:found bad primop in add_constraint");
   }
 }
@@ -493,3 +517,127 @@ bool constraint_prove(assn_t ctxt, assn_t a) {
   return !consistent(b);
 }
 
+static row_t lookup_row_in_rows(row_t r, term_t i){
+  for(; r != NULL; r = r->next){
+    if (cmp_term(i, r->source) == 0) return r;
+  }
+  return NULL;
+}
+
+static row_t or2rows(row_t g1, row_t g2){
+  row_t res = NULL;
+  for(; g1 != NULL; g1 = g1->next){
+    let r = lookup_row_in_rows(g2, g1->source);
+    if (r != NULL){
+      /* copy the row, but null the distance */
+      let newrow = new *g1;
+      newrow->next = res;
+      res = newrow;
+      res->distance = NULL;
+      /* now merge the distance from two graphs */
+      for (let d = g1->distance; d != NULL; d = d->next){
+	distance_t dist_res = NULL;
+	if (d -> dinfo & Signed_valid){
+	  let d1 = d->signed_dist.length;
+	  let d2_ptr = lookup_distance(r, true, d->target);
+	  if (d2_ptr != NULL){
+	    let d2 = d2_ptr->length;
+	    let newd = d1 > d2 ? d->signed_dist:*d2_ptr;
+	    dist_res = new Distance{.target = d->target, 
+				    .next=res->distance, 
+				    .dinfo = Signed_valid,
+				    .unsigned_dist = Dist{0, NULL},
+				    .signed_dist = newd};
+	  }
+	}
+	if (d -> dinfo & Unsigned_valid){
+	  let d1 = d->unsigned_dist.length;
+	  let d2_ptr = lookup_distance(r, false, d->target);
+	  if (d2_ptr != NULL){
+	    let d2 = d2_ptr->length;
+	    let newd = d1 > d2 ? d->unsigned_dist: *d2_ptr;
+	    if (dist_res != NULL){
+	      dist_res->unsigned_dist = newd;
+	      dist_res->dinfo = Both_valid;
+	    }else{
+	      dist_res = new Distance{.target = d->target,
+				      .next = res->distance,
+				      .dinfo = Unsigned_valid,
+				      .unsigned_dist = newd,
+				      .signed_dist = Dist{0, NULL}};
+	    }
+	  }
+	}
+	if (dist_res != NULL){
+	  res->distance = dist_res;
+	}
+      }
+    }
+  }
+  return res;
+}
+
+term_t int2term(bool is_signed, int c){
+  let s = is_signed?Absyn::Signed : Absyn::Unsigned;
+  let e = Absyn::int_exp(s, c, 0);
+  e->topt = Absyn::int_type(s, Absyn::Int_sz);
+  return cnst(e);
+}
+assn_t edge2assn(term_t source, term_t target, int weight, bool is_signed){
+  let s = is_signed ? SLte : ULte;
+  let s1 = is_signed? SLt: ULt;
+  assn_t result = &AssnDef::true_assn;
+  if (source == zero()){
+    result = prim(int2term(is_signed, -weight), s, target);
+  }else if( target == zero()){
+    result = prim(source, s, int2term(is_signed, weight));
+  }else{
+    switch (weight){
+    case 0: result = prim(source, s, target); break;
+    case -1: result = prim(source, s1, target); break;
+    default: 
+      //currently, the prim of the form t1 <= t2 + c where c!=0, or 1
+      //is not going to get any extra benefit when being turned into edges
+      //      fprintf(stderr, "## %s <= %s + (%d)\n", 
+      //	      term2string(source),term2string(target), weight); 
+      break;
+    }
+  }
+  return result;
+}
+
+
+assn_t row2assn(row_t r){
+  assn_t a = &AssnDef::true_assn;
+  for( ;r!= NULL; r = r->next){
+    for(let d = r->distance; d!=NULL; d=d->next){
+      if (d->dinfo & Signed_valid){
+	if (d->signed_dist.prim != NULL){
+	  a = and(a, (assn_t)d->signed_dist.prim);
+	}else{
+	  a = and(a, edge2assn(r->source, d->target, d->signed_dist.length, true));
+	}
+      }
+      if (d->dinfo & Unsigned_valid){
+	if (d->unsigned_dist.prim != NULL){
+	  a = and(a, (assn_t)d->unsigned_dist.prim);
+	}else{
+	  a = and(a, edge2assn(r->source, d->target, d->unsigned_dist.length, false));
+	}
+      }
+    }
+  }
+  return a;
+}
+assn_t merge_assn(assn_t a1, assn_t a2){
+    //turn a1 or a2 to DNF normal form, represented by a set of graphs
+  let g = cgraph(true_graph(), or(a1,a2));
+  if (g == NULL) return &AssnDef::false_assn;
+
+  let row = g->rows;
+  for(let row1 = g->next; row1 != NULL; row1 = row1->next){
+    row = or2rows(row, row1->rows);
+  }
+
+  return row2assn(row);
+}
