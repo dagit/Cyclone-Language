@@ -19,15 +19,9 @@
 /* This part of the runtime system implements exceptions. */
 
 #include <stdio.h>
-#include <setjmp.h>
-
 #include "runtime_internal.h"
 
-extern void longjmp(jmp_buf,int); // NB precore_c.h defines jmp_buf
-extern void exit(int);
-
 // FIX: makes alignment and pointer-size assumptions
-// FIX: what about -nocyc???
 char Cyc_Null_Exception[] = "Cyc_Null_Exception";
 struct _xtunion_struct Cyc_Null_Exception_struct = { Cyc_Null_Exception };
 struct _xtunion_struct * Cyc_Null_Exception_val = &Cyc_Null_Exception_struct;
@@ -43,6 +37,8 @@ struct _xtunion_struct * Cyc_Bad_alloc_val = &Cyc_Bad_alloc_struct;
 
 // The exception that was thrown
 struct _xtunion_struct *_exn_thrown = NULL;
+static const char *_exn_filename = "?";
+static unsigned _exn_lineno = 0;
 
 // create a new handler, put it on the stack, and return it so its
 // jmp_buf can be filled in by the caller
@@ -69,8 +65,6 @@ void _pop_handler() {
 static int (*uncaught_fun)() = NULL;
 static struct _handler_cons top_handler;
 static int in_uncaught_fun = 0; // avoid infinite exception chain
-static const char *_exn_filename = "?";
-static unsigned _exn_lineno = 0;
 
 const char *Cyc_Core_get_exn_filename() {
   return _exn_filename;

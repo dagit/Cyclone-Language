@@ -16,18 +16,11 @@
    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
    330, Boston, MA 02111-1307 USA. */
 
-// This is implements the stack that is used by exceptions and lexical
-// regions.
+// This is implements the stack used by exceptions and lexical regions.
 
 #include <stdio.h>
-#include <setjmp.h> // for jmp_buf
 
-/* RUNTIME_CYC defined to prevent including parts of precore_c.h 
-   that might cause problems, particularly relating to region profiling */
-#define RUNTIME_CYC
-#include "precore_c.h"
-
-extern void exit(int);
+#include "runtime_internal.h"
 
 // Need one per thread
 static struct _RuntimeStack *_current_frame = NULL;

@@ -20,9 +20,6 @@
 // Cyclone to C translator
 
 #include <stdio.h>
-#include <string.h>
-#include <setjmp.h>
-
 #include "runtime_internal.h"
 
 /* struct _dyneither_ptr Cstring_to_string(Cstring s) { */
@@ -86,7 +83,7 @@ int main(int argc, char **argv) {
   // install outermost exception handler
   if (_set_top_handler() != 0) return 1;
   // set standard file descriptors
-  Cyc_stdin->file = stdin;
+  Cyc_stdin->file  = stdin;
   Cyc_stdout->file = stdout;
   Cyc_stderr->file = stderr;
   // convert command-line args to Cyclone strings -- we add an extra

@@ -25,10 +25,14 @@
 // from the Cyclone include file core.h.  Note, it now includes
 // the contents of cyc_include.h
 
+#include <setjmp.h> // precore_c.h uses jmp_buf without defining it
+
 /* RUNTIME_CYC defined to prevent including parts of precore_c.h 
    that might cause problems, particularly relating to region profiling */
 #define RUNTIME_CYC
 #include "precore_c.h"
+
+extern void exit(int);
 
 // pushes a frame on the stack
 void _push_frame(struct _RuntimeStack *frame);

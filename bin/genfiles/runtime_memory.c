@@ -20,15 +20,11 @@
 // Cyclone to C translator
 
 #include <stdio.h>
-#include <string.h> // for memcpy
 #include <stdarg.h>
 #include <signal.h>
-#include <setjmp.h>
 #include <time.h> // for clock()
 
 #include "runtime_internal.h"
-
-extern void exit(int);
 
 struct _RegionPage {
 #ifdef CYC_REGION_PROFILE
@@ -223,11 +219,6 @@ void _fini_regions() {
     fclose(alloc_log);
 #endif
 }
-
-// defined below so profiling macros work
-struct _RegionHandle _new_region(const char *);
-//  struct _RegionHandle _new_region();
-static void grow_region(struct _RegionHandle *r, unsigned int s);
 
 // minimum page size for a region
 #define CYC_MIN_REGION_PAGE_SIZE 480
@@ -673,8 +664,7 @@ void _profile_free_region(struct _RegionHandle *r, const char *file, const char 
 
 typedef void * GC_PTR; /* Taken from gc/include/gc.h, must be kept in sync. */
 
-static void
-reclaim_finalizer(GC_PTR obj, GC_PTR client_data) {
+static void reclaim_finalizer(GC_PTR obj, GC_PTR client_data) {
   if (alloc_log != NULL)
     fprintf(alloc_log,
             "%u @ @ reclaim \t%x\n",
@@ -682,8 +672,7 @@ reclaim_finalizer(GC_PTR obj, GC_PTR client_data) {
             (unsigned int)obj);
 }
 
-static void
-set_finalizer(GC_PTR addr) {
+static void set_finalizer(GC_PTR addr) {
   GC_register_finalizer_no_order(addr,reclaim_finalizer,NULL,NULL,NULL);
 }
 
