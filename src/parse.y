@@ -2132,11 +2132,13 @@ statement:
 | RESET_REGION '(' expression ')' ';'
   { $$=^$(new_stmt(new ResetRegion_s($3),LOC(@1,@5))); }
 /* Cyc: alias e = v<t> s statement */
-| ALIAS unary_expression '=' '<' TYPE_VAR '>' IDENTIFIER statement
-  { tvar_t tv = new Tvar(new $5,NULL,new Eq_kb(RgnKind));
-    $$=^$(new_stmt(new Alias_s($2,tv,
-			       new_vardecl(new $(Loc_n, new $7),
-					   VoidType,NULL),$8),LOC(@1,@8)));
+| ALIAS '<' TYPE_VAR '>' IDENTIFIER '=' expression IDENTIFIER statement
+  { if (zstrcmp($8,"in") != 0)
+      err("expecting `in'",LOC(@8,@8));
+    tvar_t tv = new Tvar(new $3,NULL,new Eq_kb(RgnKind));
+    $$=^$(new_stmt(new Alias_s($7,tv,
+			       new_vardecl(new $(Loc_n, new $5),
+					   VoidType,NULL),$9),LOC(@1,@9)));
   }
 ;
 
