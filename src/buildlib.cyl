@@ -1375,7 +1375,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         }
         fprintf(out_file,"#include <%s>\n",filename);
         fclose(out_file);
-        let GCC = Cstring_to_string(Ccomp);
+        let GCC = Ccomp;
         let cppargs_string =
           str_sepstr(new List(new (string_t)"",
                               List::map(sh_escape_stringptr,rev(cppargs))),
@@ -1743,7 +1743,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
     if (mode == GATHER) {
       /* This will be executed once for each specfile, but who cares */
-      let GCC = Cstring_to_string(Ccomp);
+      let GCC = Ccomp;
       let cmd = aprintf("echo | %s -E -dM - -o INITMACROS.h\n",GCC);
       if (verbose)
         fprintf(stderr,"%s\n",cmd);

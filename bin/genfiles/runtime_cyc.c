@@ -20,11 +20,8 @@
 // Cyclone to C translator
 
 #include <stdio.h>
-#include <string.h> // for memcpy
-#include <stdarg.h>
-#include <signal.h>
+#include <string.h>
 #include <setjmp.h>
-#include <time.h> // for clock()
 
 // The C include file precore_c.h is produced (semi) automatically
 // from the Cyclone include file core.h.  Note, it now includes
@@ -35,75 +32,41 @@
 #define RUNTIME_CYC
 #include "precore_c.h"
 
-extern void exit(int);
-
 /// UTILITY ROUTINES (move into own file, or delete ...)
 
-struct _dyneither_ptr wrap_Cstring_as_string(Cstring s, size_t len) {
-  struct _dyneither_ptr str;
-  if (s == NULL) {
-    str.base = str.curr = str.last_plus_one = NULL;
-  } else {
-    int slen = strlen(s)+1;
-    if (len == -1)
-      len = slen;
-    else if (len > slen)
-      _throw_arraybounds(); /* FIX: pick better exception */
-    str.base = str.curr = s;
-    str.last_plus_one = s + len;
-  }
-  return str;
-}
+/* struct _dyneither_ptr Cstring_to_string(Cstring s) { */
+/*   struct _dyneither_ptr str; */
+/*   if (s == NULL) { */
+/*     str.base = str.curr = str.last_plus_one = NULL; */
+/*   } */
+/*   else { */
+/*     int sz = strlen(s)+1; */
+/*     str.curr = (char *)_cycalloc_atomic(sz); */
+/*     if (str.curr == NULL)  */
+/*       _throw_badalloc(); */
+/*     str.base = str.curr; */
+/*     str.last_plus_one = str.curr + sz; */
 
-// trusted---the length field is not verified to be correct
-struct _dyneither_ptr wrap_Cbuffer_as_buffer(Cstring s, size_t len) {
-  struct _dyneither_ptr str;
-  if (s == NULL) {
-    str.base = str.curr = str.last_plus_one = NULL;
-  } else {
-    str.base = str.curr = s;
-    str.last_plus_one = s + len;
-  }
-  return str;
-}
+/*     // Copy the string in case the C code frees it or mangles it */
+/*     str.curr[--sz] = '\0'; */
+/*     while(--sz>=0) */
+/*       str.curr[sz]=s[sz]; */
+/*   } */
+/*   return str; */
+/* } */
 
-struct _dyneither_ptr Cstring_to_string(Cstring s) {
+// no longer copying the C string (see above if this is bogus)
+static struct _dyneither_ptr Cstring_to_string(Cstring s) {
   struct _dyneither_ptr str;
   if (s == NULL) {
     str.base = str.curr = str.last_plus_one = NULL;
   }
   else {
-    int sz = strlen(s)+1;
-    str.curr = (char *)_cycalloc_atomic(sz);
-    if (str.curr == NULL) 
-      _throw_badalloc();
-    str.base = str.curr;
+    unsigned int sz = strlen(s)+1;
+    str.curr = str.base = (unsigned char *)s;
     str.last_plus_one = str.curr + sz;
-
-    // Copy the string in case the C code frees it or mangles it
-    str.curr[--sz] = '\0';
-    while(--sz>=0)
-      str.curr[sz]=s[sz];
   }
   return str;
-}
-
-Cstring string_to_Cstring(struct _dyneither_ptr s) {
-  int i;
-  char *contents = s.curr;
-  size_t sz = s.last_plus_one - s.curr;
-  char *str;
-
-  if (s.curr == NULL) return NULL;
-
-  if (s.curr >= s.last_plus_one || s.curr < s.base)
-    _throw_arraybounds(); 
-  // check that there's a '\0' somewhere in the string -- if not,
-  // throw an exception.
-  for (str = s.last_plus_one-1; str >= contents; str--) {
-    if (*str == '\0') return contents;
-  }
-  _throw_null();
 }
 
 // argc is redundant

@@ -857,7 +857,7 @@ typedef struct Cyc_Core_DynamicRegion*Cyc_Core_uregion_key_t;
 typedef struct Cyc_Core_DynamicRegion*Cyc_Core_rcregion_key_t;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};
 # 270 "core.h"
 void Cyc_Core_rethrow(void*);
-# 295
+# 295 "core.h"
 typedef void*Cyc_Core___cyclone_internal_array_t;
 typedef unsigned int Cyc_Core___cyclone_internal_singleton;
 # 299

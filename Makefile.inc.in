@@ -52,8 +52,6 @@ CYCLONE_LIBS:=array\
 	execinfo\
         getopt\
         getopt1\
-	grp\
-	pwd\
         queue\
         rope\
         splay\
@@ -73,7 +71,6 @@ CYCLONE_H:=arg.h\
 	fn.h\
 	gc_ifc.h\
 	getopt.h\
-	grp.h\
 	hashtable.h\
 	iter.h\
 	lexing.h\
@@ -81,7 +78,6 @@ CYCLONE_H:=arg.h\
 	list.h\
 	position.h\
 	pp.h\
-	pwd.h\
 	queue.h\
 	rope.h\
 	set.h\

@@ -917,8 +917,29 @@ glob.h:
 
 // This may need to be written entirely in Cyclone, since it manipulates
 // arrays of paths
-//grp.h:
-//;
+grp.h:
+include {
+gid_t
+group
+}
+hstub initgroups {
+  extern "C" int initgroups(const char @ @zeroterm user, gid_t group);
+}
+hstub getgroups {
+  extern "C" int getgroups(tag_t<`i> size, const gid_t @{valueof(`i)} list);
+}
+hstub setgroups {
+  extern "C" int setgroups(tag_t<`i> size, const gid_t @{valueof(`i)} list);
+}
+hstub getgrname {
+  // This and getgrid won't work quite right, since the imported group type
+  // has a list of members; the * pointer will only reveal one of these.
+  extern "C" struct group *getgrnam(const char @ @zeroterm name);
+}
+hstub getgrgid {
+  extern "C" struct group *getgrgid(gid_t gid);
+}
+;
 
 // Not supported yet
 inttypes.h:
@@ -1990,9 +2011,31 @@ pthread.h:
 ;
 
 // Defines a structure containing a char *
-// Not supported yet
-// pwd.h:
-// ;
+pwd.h:
+include {
+passwd
+uid_t
+gid_t
+}
+hstub {
+  // EXTREMELY irritating: under Linux, uid_t, etc., are not defined.
+  // Instead __uid_t, etc., are defined.  Deal with this here.
+  #if defined(___uid_t_def_) && !defined(_uid_t_def_)
+  #define _uid_t_def_
+  typedef __uid_t uid_t;
+  #endif
+  #if defined(___gid_t_def_) && !defined(_gid_t_def_)
+  #define _gid_t_def_
+  typedef __gid_t gid_t;
+  #endif
+}
+hstub getpwnam {
+  extern "C" struct passwd *getpwnam(const char @name);
+}
+hstub getpwuid {
+  extern "C" struct passwd *getpwuid(uid_t uid);
+}
+;
 
 // Our parser dies on it in Linux
 // Uses strings extensively, probably best to rewrite in Cyclone
@@ -3577,8 +3620,8 @@ hstub {
 cycstub mmap {
   namespace Cmman {
     // refers to our Cyclone stub that deals with MMAP_FAILED
-    extern "C" char * @nozeroterm
-      __stub_mmap(char * @nozeroterm start, size_t length, int prot,
+    extern "C" char *{valueof(`i)} @nozeroterm
+      __stub_mmap(char * @nozeroterm start, tag_t<`i> length, int prot,
                   int flags, int fd, off_t offset);
     extern "C" int munmap(const char * @nozeroterm start, size_t length);
   }
@@ -3596,10 +3639,11 @@ cycstub mmap {
       throw &__mmap_failure;
     else if (flags & MAP_FIXED) // don't support mapping to fixed addresses
       return NULL;
-    else
-      return wrap_Cbuffer_as_buffer
-        (Cmman::__stub_mmap(NULL, length, prot, flags, fd, offset),
-         length);
+    else {
+      let l<`i> = length;
+      let buf = Cmman::__stub_mmap(NULL, l, prot, flags, fd, offset);
+      return Core::mkfat(buf,sizeof(char),l);
+    }
   }
   // Is it unsafe to ask the user for the size?  I'd like to take it
   // from the char? type, but that could have been cast around...

@@ -724,6 +724,7 @@ int strncasecmp(buffer_t s1, buffer_t s2, size_t n) {
 }
 
 namespace Cstr {
+  typedef char*{valueof(`i)} @nozeroterm __cyclone_buf<`i>;
   extern "C" {
     `a*`r memcpy(`a::A*`r, const `a*, size_t n);
     `a*`r memmove(`a::A*`r, const `a*, size_t n);
@@ -732,13 +733,15 @@ namespace Cstr {
     void * @nozeroterm `r memset(void * @nozeroterm `r, int c, size_t n);
     void bcopy (const `a::A*src, `a *dest, size_t n);
     void bzero(`a::A*s, size_t n);
-    char * @nozeroterm GC_realloc(char * @nozeroterm`H, size_t n);
+    __cyclone_buf<`i> GC_realloc(char * @nozeroterm`H,
+				 __cyclone_internal_singleton<`i> n);
   }
 }
 
 char ? @nozeroterm realloc(char ? @nozeroterm`H s, size_t n) {
-  let res = Cstr::GC_realloc((char * @nozeroterm)s, n);
-  return wrap_Cbuffer_as_buffer(res, n);
+  let l<`i> = n;
+  let res = Cstr::GC_realloc((char * @nozeroterm)s, l);
+  return Core::mkfat(res, sizeof(char), l);
 }
 
 `a::A?`r _memcpy(`a?`r d, const `a? s, size_t n, sizeof_t<`a> sz) {

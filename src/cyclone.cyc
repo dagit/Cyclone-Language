@@ -175,11 +175,10 @@ static void set_many_errors() {
 
 // Prints the version # and exits
 static void print_version() {
-  printf("The Cyclone compiler, version %s\n", Cstring_to_string(Cversion));
-  printf("Compiled for architecture: %s CC=\"%s\"\n", 
-	 Cstring_to_string(Carch), Cstring_to_string(Ccomp));
-  printf("Standard library directory: %s\n",Cstring_to_string(Cdef_lib_path));
-  printf("Standard include directory: %s\n",Cstring_to_string(Cdef_inc_path));
+  printf("The Cyclone compiler, version %s\n", Cversion);
+  printf("Compiled for architecture: %s CC=\"%s\"\n", Carch, Ccomp);
+  printf("Standard library directory: %s\n",Cdef_lib_path);
+  printf("Standard include directory: %s\n",Cdef_inc_path);
   exit(0);
 }
   
@@ -948,7 +947,7 @@ static void process_file(string_t<`H> filename) {
   // 1) command line arguments (with -I and -B)
   // 2) environment var (CYCLONE_INCLUDE_PATH)
   // 3) hardwired in the build (by setting def_inc_path and def_lib_path)
-  string_t def_inc_path = Cstring_to_string(Cdef_inc_path);
+  string_t def_inc_path = Cdef_inc_path;
   let stdinc_dirs = add_subdir(cyclone_exec_path,target_arch);
   stdinc_dirs = add_subdir(stdinc_dirs,"include");
   if (strlen(def_inc_path) > 0) {
@@ -1407,7 +1406,7 @@ int main(int argc, string_t<`H> ?`H argv) {
 
   let cyclone_arch_path;
   string_t def_lib_path;
-  string_t comp = Cstring_to_string(Ccomp);
+  string_t comp = Ccomp;
 
   // parse the command-line arguments
   region r; {
@@ -1451,7 +1450,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   Arg::parse(options, add_other, add_other_flag, optstring, bargs);
   // Having processed -B and -b, we can now construct the exec-path
   // and arch-path
-  if (target_arch == NULL) target_arch = Cstring_to_string(Carch);
+  if (target_arch == NULL) target_arch = Carch;
   // The Cyclone exec-path is a list of directories where special
   // files (cyc_include.h, specs files, etc.) might be kept.
   // It is specified with the following order (where the earlier in
@@ -1462,7 +1461,7 @@ int main(int argc, string_t<`H> ?`H argv) {
   string_t cyclone_exec_prefix = getenv("CYCLONE_EXEC_PREFIX");
   if (cyclone_exec_prefix != NULL)
     cyclone_exec_path = new List(new cyclone_exec_prefix, cyclone_exec_path);
-  def_lib_path = Cstring_to_string(Cdef_lib_path);
+  def_lib_path = Cdef_lib_path;
   if (strlen(def_lib_path) > 0)
     cyclone_exec_path =
      new List(new (const char ?)Filename::concat(def_lib_path, "cyc-lib"),
