@@ -273,20 +273,6 @@ namespace Absyn {
     ptr_atts_t ptr_atts;
   };
 
-  // these are used only during parsing now
-  EXTERN_ABSYN datatype Pointer_qual {
-    Numelts_ptrqual(exp_t);
-    Region_ptrqual(type_t);
-    Thin_ptrqual;
-    Fat_ptrqual;
-    Zeroterm_ptrqual;
-    Nozeroterm_ptrqual;
-    Notnull_ptrqual;
-    Nullable_ptrqual;
-  };
-  typedef datatype Pointer_qual @`r pointer_qual_t<`r>;
-  typedef list_t<pointer_qual_t<`r>,`r> pointer_quals_t<`r>;
-
   // information about vararg functions
   EXTERN_ABSYN struct VarargInfo {
     var_opt_t name;

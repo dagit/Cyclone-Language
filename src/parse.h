@@ -69,6 +69,20 @@ namespace Parse {
     list_t<type_modifier_t<`yy>,`yy> tms;
   };
   typedef struct Abstractdeclarator<`yy> abstractdeclarator_t<`yy>;
+
+  extern datatype Pointer_qual {
+    Numelts_ptrqual(exp_t);
+    Region_ptrqual(type_t);
+    Thin_ptrqual;
+    Fat_ptrqual;
+    Zeroterm_ptrqual;
+    Nozeroterm_ptrqual;
+    Notnull_ptrqual;
+    Nullable_ptrqual;
+  };
+  typedef datatype Pointer_qual @`r pointer_qual_t<`r>;
+  typedef list_t<pointer_qual_t<`r>,`r> pointer_quals_t<`r>;
+
 #include "parse_tab.h"
 }}}}
 #endif

@@ -149,6 +149,19 @@ typedef struct Declarator<`yy> declarator_t<`yy>;
 typedef flat_list_t<declarator_t<`yy>,`r> declarators_t<`r,`yy>;
 typedef flat_list_t<$(declarator_t<`yy>,exp_opt_t),`yy> declarator_list_t<`yy>;
 
+datatype Pointer_qual {
+  Numelts_ptrqual(exp_t);
+  Region_ptrqual(type_t);
+  Thin_ptrqual;
+  Fat_ptrqual;
+  Zeroterm_ptrqual;
+  Nozeroterm_ptrqual;
+  Notnull_ptrqual;
+  Nullable_ptrqual;
+};
+typedef datatype Pointer_qual @`r pointer_qual_t<`r>;
+typedef list_t<pointer_qual_t<`r>,`r> pointer_quals_t<`r>;
+
 static void
   decl_split(region_t<`r> r,declarator_list_t<`yy> ds,
              declarators_t<`r,`yy>@ decls,
@@ -211,26 +224,17 @@ static $(conref_t<bool> nullable,conref_t<bounds_t> bound,
                          pointer_quals_t pqs) {
   // for now, the last qualifier wins and overrides previous ones
   conref_t<bool> zeroterm = empty_conref();
-  for (; pqs != NULL; pqs = pqs->tl) {
+  for (; pqs != NULL; pqs = pqs->tl)
     switch (pqs->hd) {
-    case &Zeroterm_ptrqual: 
-      zeroterm = true_conref; break;
-    case &Nozeroterm_ptrqual:
-      zeroterm = false_conref; break;
-    case &Nullable_ptrqual:
-      nullable = true_conref; break;
-    case &Notnull_ptrqual:
-      nullable = false_conref; break;
-    case &Fat_ptrqual:
-      bound = bounds_dyneither_conref; break;
-    case &Thin_ptrqual:
-      bound = bounds_one_conref; break;
-    case &Numelts_ptrqual(e):
-      bound = new_conref(new Upper_b(e)); break;
-    case &Region_ptrqual(t):
-      rgn = t; break;
+    case &Zeroterm_ptrqual:   zeroterm = true_conref;                break;
+    case &Nozeroterm_ptrqual: zeroterm = false_conref;               break;
+    case &Nullable_ptrqual:   nullable = true_conref;                break;
+    case &Notnull_ptrqual:    nullable = false_conref;               break;
+    case &Fat_ptrqual:           bound = bounds_dyneither_conref;    break;
+    case &Thin_ptrqual:          bound = bounds_one_conref;          break;
+    case &Numelts_ptrqual(e):    bound = new_conref(new Upper_b(e)); break;
+    case &Region_ptrqual(t):       rgn = t;                          break;
     }
-  }
   return $(nullable,bound,zeroterm,rgn);
 }
 
