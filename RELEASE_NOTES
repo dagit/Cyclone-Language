@@ -2,6 +2,12 @@ Cyclone Release Notes:
 
 This file explains some of the changes that occurred in between releases.
 ----------------------------------------------------------------------
+Changes going from Version 0.8 dated May 2004, to version 0.9 dated
+June 2004.
+
+* Fixed bugs regarding treatment of NULL in coercions from thin
+  pointers to fat pointers.
+----------------------------------------------------------------------
 Changes going from Version 0.7 dated February 2004, to version 0.8,
 May 2004.
 
