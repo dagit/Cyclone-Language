@@ -14,7 +14,7 @@
 
 </td><td valign="top" width="24"></td><!--msnavigation--><td valign="top">
 <h1 align="center">Discriminated Unions</h1>
-<p>In addition to struct, enum and union, Cyclone has tunion (for &quot;tagged
+<p>In addition to struct, enum, and union, Cyclone has tunion (for &quot;tagged
 union&quot;) and xtunion (for &quot;extensible tagged union&quot;) as ways to
 construct new aggregate types.&nbsp; Like a union type, each tunion and xtunion
 has a number of <i>variants</i> (or members).&nbsp; Unlike with union, an object
@@ -49,7 +49,7 @@ tunion Color.Red, tunion Color.Green, and tunion Color.Blue.&nbsp; Fortunately
 these are all subtypes of tunion Color and no explicit cast is necessary.&nbsp;
 So you can write, as expected:</p>
 <p><font face="Courier New">tunion Color c = Red;</font></p>
-<p>In this simple example, it we are splitting hairs, but we will soon find all
+<p>In this simple example, we are splitting hairs, but we will soon find all
 these distinctions useful.&nbsp; Unlike enum, tunion variants may carry any
 fixed number of values, as in this example:</p>
 <p style="line-height: 0"><font face="Courier New">tunion Shape { </font></p>

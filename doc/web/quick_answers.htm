@@ -146,12 +146,26 @@ in a case; its meaning is to immediately goto the next case.&nbsp; Second, when
 the next case has pattern-matching variables, a fallthru must take expressions
 that are bound to the variables before the goto.&nbsp; Hence fallthru is more
 powerful (but more verbose) than &quot;or patterns&quot; in ML.</p>
+<p><b><a name="add_tuples"></a>How do I use tuples?</b></p>
+<p>A tuple type is $(t1,...,tn) where the ti are types.&nbsp; A value of such a
+type is constructed via $(e1,...,en) where ei has type ti.&nbsp; Given an
+expression e of type $(t1,...,tn), you extract the ith component via e[i].&nbsp;
+The expression in the brackets must be a <a href="#other_constants">compile-time
+constant</a>.&nbsp; In short, tuples are like anonymous structs where you use
+e[i] instead of e.f.&nbsp; There is no analogue of the -&gt; syntax, so given an
+expression p of type $(t1,...,tn) *, you must extract the ith component of the
+underlying tuple via (*e)[i].</p>
 <p align="left"><b><a name="add_exncost"></a>How efficient is exception handling?</b><p align="left">Entering
 a try block is implemented with setjmp.&nbsp; Creating an xtunion (exception
 packets are xtunion's) requires a heap allocation.&nbsp; Throwing an exception
 is implemented with longjmp.&nbsp; Pattern-matching an xtunion against each case
 variant in the catch clause is a pointer-comparsion.&nbsp; In short, exception
-handling is fairly lightweight.<p align="left"><b><a name="add_under"></a>What does _ mean?</b><p align="left">As
+handling is fairly lightweight.<p align="left"><b><a name="add_let"></a>What does let mean?</b><p align="left">A
+let declaration has the form let p = e; where p is a pattern and e is an
+expression.&nbsp; It can appear wherever declarations can appear within a
+function.&nbsp; If p is an identifier, the meaning is the same as t p = e; where
+t is the type of e.&nbsp; For less trivial pattern forms, see <a href="pattern_matching.htm">pattern
+matching</a>.<p align="left"><b><a name="add_under"></a>What does _ mean?</b><p align="left">As
 part of a type (or as a whole type), it means, &quot;determine what should go
 here and fill it in&quot;.&nbsp; Similarly, as an explicit region annotation it
 means, &quot;determine what region should go here and fill it in&quot;.&nbsp;
@@ -173,7 +187,7 @@ memory kind as parameters -- doing so would require code duplication or run-time
 types.</p>
 <p><b><a name="del_varargs"></a>Can I use varargs?</b></p>
 <p>No, but we intend to support varags in the future. printf, scanf, etc. take a
-variable number of arguments, but these are primitive constructs.</p>
+variable number of arguments, but these are built-in constructs.</p>
 <p><b><a name="del_nestedtype"></a>Why can't I declare types within functions?</b></p>
 <p>We just haven't implemented this support yet.&nbsp; For now, you need to
 hoist type declarations and typedefs to the top-level.</p>
@@ -247,6 +261,41 @@ you want them to have.</p>
 x = null;, not int * x = 0;.&nbsp; We intend to be more flexible in the
 future.&nbsp; You can use pointers in guards: (e.g. if(p) ...); the guard
 evaluates to true if and only if the pointer is not null.</p>
+<p><b><a name="mem_new"></a>What does new mean?</b></p>
+<p>The expression &quot;new e&quot; has type t @ if e has type t.&nbsp; Its
+meaning is to allocate space on the heap for a t, put the result of evaluating e
+in the space, and return a pointer to the space.&nbsp; Thus, it is roughly
+equivalent to</p>
+<p style="line-height: 0"><font face="Courier New">t @ p = malloc(sizeof(t));</font></p>
+<p style="line-height: 0"><font face="Courier New">*p = e;</font></p>
+<p style="line-height: 0"><font face="Courier New">p;</font></p>
+<p>However, for aggregates such as structs, the translation to C is a bit more
+sophisticated: new Foo(3,4) translates roughly to &quot;({t @ p =
+malloc(sizeof(t)); p-&gt;a = 3; p-&gt;b = 4; p})&quot;.</p>
+<p>Currently, you must use new and a comprehension to allocate an array on the
+heap.&nbsp; For example, this expression creates the integer array 0, 2, 4, ...,
+2*(n-1):</p>
+<p><font face="Courier New">new {for i &lt; n : 2*i};</font></p>
+<p>Hence heap-allocated arrays must be initialized when allocated.</p>
+<p><a name="mem_malloc"></a><b>How do I use malloc?</b></p>
+<p>malloc is a Cyclone primitive, not a library function.&nbsp; Currently it has
+an extremely restricted syntax: You must write malloc(sizeof(t)) where t is a
+type.&nbsp; The expression has type t@.&nbsp; So there is no need to explicitly
+cast the result, but doing so is harmless.&nbsp; Usually the construct &quot;new
+e&quot; is more convenient than malloc followed by initialization, but malloc
+can be useful for certain idioms and when porting C code.</p>
+<p>Notice that you cannot (yet) use malloc to allocate space for arrays, such as
+with malloc(n*sizeof(t)).&nbsp; Also, the type-checker uses a conservative
+analysis to ensure that the fields of the allocated space are written before
+they are used.&nbsp;</p>
+<p><a name="mem_free"></a><b>Can I call free?</b></p>
+<p>No, individual memory objects may not be freed.&nbsp; In future versions, we
+may support freeing objects for which you can prove that there are no other
+pointers to the object.&nbsp; Until then, you must rely on a garbage collector
+to reclaim heap objects or use <a href="regions_and_effects.htm">regions</a>
+(similar to &quot;arenas&quot; or &quot;zones&quot;) for managing collections of
+objects.</p>
+<p>For porting code, you may want to define &quot;void free(`a a) {}&quot;.</p>
 <p><b><a name="tools_pp"></a>Can I get a readable version of the output?</b></p>
 <p>Yes, with caveats.&nbsp; Pass Cyclone the flag -pp and the C output will be
 pretty-printed.&nbsp; (The default is to &quot;ugly print&quot; because
@@ -324,6 +373,14 @@ still points to the old first (new last) cell.</p>
 <p>Sure, functions can be declared inline as in gcc (and C++).&nbsp; You can get
 additional inlining by compiling the Cyclone output with gcc -O2.&nbsp; Whether
 a function is inlined or not has no effect on Cyclone type-checking.</p>
+<p><b><a name="other_crash"></a>If Cyclone is safe, why does my program crash?</b></p>
+<p>There are certain classes of errors that Cyclone does not attempt to
+prevent.&nbsp; Two examples are stack overflow and various numeric traps, such
+as division-by-zero.&nbsp; It is also possible to run out of memory.&nbsp; Other
+crashes could be due to compiler bugs or linking against buggy C code (or
+linking incorrectly against C code).</p>
+<p>Note that when using gdb, it may appear there is a seg fault in GC_findlimit().&nbsp;
+This behavior is correct; simply continue execution.</p>
 <p><b><a name="other_constants"></a>What are compile-time constants?</b></p>
 <p>Compile-time constants are null, sizeof(typ), integer (and character)
 constants, and arithmetic operations over compile-time constants.&nbsp;

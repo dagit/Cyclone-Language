@@ -299,10 +299,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
        //FIX: can pass region if e an lvalue
       let $(new_tvs,x) = tcPat(te,p,&e->topt->v,null);
       *vds = new Opt(x);
-      // FIX: if let-declarations were of the form "let pat = e in S" then
-      // we could allow any type variables within e to be used within S.
-      if (new_tvs != null)
-	terr(d->loc,"can't introduce type variables in let-clause");
       if (topt != null && !unify(p->topt->v,topt->v))
         terr(d->loc,"type of pattern does not match declared type");
       if (!unify(p->topt->v,e->topt->v))
@@ -311,7 +307,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       else
 	check_pat_regions(te,p);
       *exhaust = check_let_pat_exhaustive(p->loc,p); // side effect
-      pattern_synth(s0->loc, te, null, x, s, null, false);
+      pattern_synth(s0->loc, te, new_tvs, x, s, null, false);
       return;
 
     case &Namespace_d(n,tds): unimp_msg_part = "namespace"; break;

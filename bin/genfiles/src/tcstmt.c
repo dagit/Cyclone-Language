@@ -6,18 +6,23 @@ struct Cyc_Absyn_Exp* f1; struct Cyc_Absyn_Stmt* f2; } ; struct _tuple3{ struct
 Cyc_Absyn_Switch_clause* f1; struct Cyc_List_List* f2; struct Cyc_List_List* f3;
 } ; struct _tuple4{ struct Cyc_Absyn_Tvar* f1; void* f2; } ; struct _tuple5{
 struct Cyc_List_List* f1; struct Cyc_List_List* f2; } ; typedef int Cyc_ptrdiff_t;
-typedef unsigned int Cyc_size_t; typedef int Cyc_wchar_t; typedef unsigned int
-Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short Cyc_u_short; typedef
-unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef unsigned short
-Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int Cyc_clock_t;
-typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int tv_nsec; } ; struct
-Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec it_value; }
-; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t; typedef unsigned short Cyc_ino_t;
-typedef short Cyc_dev_t; typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t;
-typedef unsigned short Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t;
-typedef int Cyc_ssize_t; typedef unsigned int Cyc_mode_t; typedef unsigned short
-Cyc_nlink_t; typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u];
-} ; typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
+typedef unsigned int Cyc_size_t; typedef unsigned short Cyc_wchar_t; typedef
+unsigned int Cyc_wint_t; typedef char Cyc_u_char; typedef unsigned short Cyc_u_short;
+typedef unsigned int Cyc_u_int; typedef unsigned int Cyc_u_long; typedef
+unsigned short Cyc_ushort; typedef unsigned int Cyc_uint; typedef unsigned int
+Cyc_clock_t; typedef int Cyc_time_t; struct Cyc_timespec{ int tv_sec; int
+tv_nsec; } ; struct Cyc_itimerspec{ struct Cyc_timespec it_interval; struct Cyc_timespec
+it_value; } ; typedef int Cyc_daddr_t; typedef char* Cyc_caddr_t; typedef
+unsigned int Cyc_ino_t; typedef unsigned int Cyc_vm_offset_t; typedef
+unsigned int Cyc_vm_size_t; typedef char Cyc_int8_t; typedef char Cyc_u_int8_t;
+typedef short Cyc_int16_t; typedef unsigned short Cyc_u_int16_t; typedef int Cyc_int32_t;
+typedef unsigned int Cyc_u_int32_t; typedef long long Cyc_int64_t; typedef
+unsigned long long Cyc_u_int64_t; typedef int Cyc_register_t; typedef short Cyc_dev_t;
+typedef int Cyc_off_t; typedef unsigned short Cyc_uid_t; typedef unsigned short
+Cyc_gid_t; typedef int Cyc_pid_t; typedef int Cyc_key_t; typedef int Cyc_ssize_t;
+typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nlink_t;
+typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
+typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
 typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
 typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
@@ -946,98 +951,95 @@ _temp397= _temp274->topt; if( _temp397 == 0){ _throw( Null_Exception);}&
 _temp397->v;})), 0); _LL403: _temp402= _temp398.f1; goto _LL401; _LL401:
 _temp400= _temp398.f2; goto _LL399; _LL399:* _temp281=({ struct Cyc_Core_Opt*
 _temp404=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp404->v=( void*) _temp400; _temp404;}); if( _temp402 != 0){ Cyc_Tcutil_terr(
-_temp123->loc,( struct _tagged_string)({ char* _temp405=( char*)"can't introduce type variables in let-clause";
-struct _tagged_string _temp406; _temp406.curr= _temp405; _temp406.base= _temp405;
-_temp406.last_plus_one= _temp405 + 45; _temp406;}));} if( topt != 0? ! Cyc_Tcutil_unify((
-void*)({ struct Cyc_Core_Opt* _temp407= _temp282->topt; if( _temp407 == 0){
-_throw( Null_Exception);} _temp407->v;}),( void*)({ struct Cyc_Core_Opt*
-_temp408= topt; if( _temp408 == 0){ _throw( Null_Exception);} _temp408->v;})): 0){
-Cyc_Tcutil_terr( _temp123->loc,( struct _tagged_string)({ char* _temp409=( char*)"type of pattern does not match declared type";
-struct _tagged_string _temp410; _temp410.curr= _temp409; _temp410.base= _temp409;
-_temp410.last_plus_one= _temp409 + 45; _temp410;}));} if( ! Cyc_Tcutil_unify((
+_temp404->v=( void*) _temp400; _temp404;}); if( topt != 0? ! Cyc_Tcutil_unify((
+void*)({ struct Cyc_Core_Opt* _temp405= _temp282->topt; if( _temp405 == 0){
+_throw( Null_Exception);} _temp405->v;}),( void*)({ struct Cyc_Core_Opt*
+_temp406= topt; if( _temp406 == 0){ _throw( Null_Exception);} _temp406->v;})): 0){
+Cyc_Tcutil_terr( _temp123->loc,( struct _tagged_string)({ char* _temp407=( char*)"type of pattern does not match declared type";
+struct _tagged_string _temp408; _temp408.curr= _temp407; _temp408.base= _temp407;
+_temp408.last_plus_one= _temp407 + 45; _temp408;}));} if( ! Cyc_Tcutil_unify((
+void*)({ struct Cyc_Core_Opt* _temp409= _temp282->topt; if( _temp409 == 0){
+_throw( Null_Exception);} _temp409->v;}),( void*)({ struct Cyc_Core_Opt*
+_temp410= _temp274->topt; if( _temp410 == 0){ _throw( Null_Exception);} _temp410->v;}))){
+Cyc_Tcutil_terr( _temp123->loc,({ struct _tagged_string _temp413= Cyc_Absynpp_typ2string((
 void*)({ struct Cyc_Core_Opt* _temp411= _temp282->topt; if( _temp411 == 0){
-_throw( Null_Exception);} _temp411->v;}),( void*)({ struct Cyc_Core_Opt*
-_temp412= _temp274->topt; if( _temp412 == 0){ _throw( Null_Exception);} _temp412->v;}))){
-Cyc_Tcutil_terr( _temp123->loc,({ struct _tagged_string _temp415= Cyc_Absynpp_typ2string((
-void*)({ struct Cyc_Core_Opt* _temp413= _temp282->topt; if( _temp413 == 0){
-_throw( Null_Exception);} _temp413->v;})); struct _tagged_string _temp416= Cyc_Absynpp_typ2string((
-void*)({ struct Cyc_Core_Opt* _temp414= _temp274->topt; if( _temp414 == 0){
-_throw( Null_Exception);} _temp414->v;})); xprintf("pattern type %.*s does not match definition type %.*s",
-_temp415.last_plus_one - _temp415.curr, _temp415.curr, _temp416.last_plus_one -
-_temp416.curr, _temp416.curr);}));} else{ Cyc_Tcpat_check_pat_regions( te,
+_throw( Null_Exception);} _temp411->v;})); struct _tagged_string _temp414= Cyc_Absynpp_typ2string((
+void*)({ struct Cyc_Core_Opt* _temp412= _temp274->topt; if( _temp412 == 0){
+_throw( Null_Exception);} _temp412->v;})); xprintf("pattern type %.*s does not match definition type %.*s",
+_temp413.last_plus_one - _temp413.curr, _temp413.curr, _temp414.last_plus_one -
+_temp414.curr, _temp414.curr);}));} else{ Cyc_Tcpat_check_pat_regions( te,
 _temp282);}* _temp273= Cyc_Tcpat_check_let_pat_exhaustive( _temp282->loc,
-_temp282); Cyc_Tcstmt_pattern_synth( s0->loc, te, 0, _temp400, _temp121, 0, 0);
-return;}} _LL250: unimp_msg_part=( struct _tagged_string)({ char* _temp417=(
-char*)"namespace"; struct _tagged_string _temp418; _temp418.curr= _temp417;
-_temp418.base= _temp417; _temp418.last_plus_one= _temp417 + 10; _temp418;});
-goto _LL244; _LL252: unimp_msg_part=( struct _tagged_string)({ char* _temp419=(
-char*)"using"; struct _tagged_string _temp420; _temp420.curr= _temp419; _temp420.base=
-_temp419; _temp420.last_plus_one= _temp419 + 6; _temp420;}); goto _LL244; _LL254:
-unimp_msg_part=( struct _tagged_string)({ char* _temp421=( char*)"function";
-struct _tagged_string _temp422; _temp422.curr= _temp421; _temp422.base= _temp421;
-_temp422.last_plus_one= _temp421 + 9; _temp422;}); goto _LL244; _LL256:
-unimp_msg_part=( struct _tagged_string)({ char* _temp423=( char*)"struct";
-struct _tagged_string _temp424; _temp424.curr= _temp423; _temp424.base= _temp423;
-_temp424.last_plus_one= _temp423 + 7; _temp424;}); goto _LL244; _LL258:
-unimp_msg_part=( struct _tagged_string)({ char* _temp425=( char*)"union"; struct
-_tagged_string _temp426; _temp426.curr= _temp425; _temp426.base= _temp425;
-_temp426.last_plus_one= _temp425 + 6; _temp426;}); goto _LL244; _LL260:
-unimp_msg_part=( struct _tagged_string)({ char* _temp427=( char*)"tunion";
-struct _tagged_string _temp428; _temp428.curr= _temp427; _temp428.base= _temp427;
-_temp428.last_plus_one= _temp427 + 7; _temp428;}); goto _LL244; _LL262:
-unimp_msg_part=( struct _tagged_string)({ char* _temp429=( char*)"xtunion";
-struct _tagged_string _temp430; _temp430.curr= _temp429; _temp430.base= _temp429;
-_temp430.last_plus_one= _temp429 + 8; _temp430;}); goto _LL244; _LL264:
-unimp_msg_part=( struct _tagged_string)({ char* _temp431=( char*)"enum"; struct
-_tagged_string _temp432; _temp432.curr= _temp431; _temp432.base= _temp431;
-_temp432.last_plus_one= _temp431 + 5; _temp432;}); goto _LL244; _LL266:
-unimp_msg_part=( struct _tagged_string)({ char* _temp433=( char*)"typedef";
+_temp282); Cyc_Tcstmt_pattern_synth( s0->loc, te, _temp402, _temp400, _temp121,
+0, 0); return;}} _LL250: unimp_msg_part=( struct _tagged_string)({ char*
+_temp415=( char*)"namespace"; struct _tagged_string _temp416; _temp416.curr=
+_temp415; _temp416.base= _temp415; _temp416.last_plus_one= _temp415 + 10;
+_temp416;}); goto _LL244; _LL252: unimp_msg_part=( struct _tagged_string)({ char*
+_temp417=( char*)"using"; struct _tagged_string _temp418; _temp418.curr=
+_temp417; _temp418.base= _temp417; _temp418.last_plus_one= _temp417 + 6;
+_temp418;}); goto _LL244; _LL254: unimp_msg_part=( struct _tagged_string)({ char*
+_temp419=( char*)"function"; struct _tagged_string _temp420; _temp420.curr=
+_temp419; _temp420.base= _temp419; _temp420.last_plus_one= _temp419 + 9;
+_temp420;}); goto _LL244; _LL256: unimp_msg_part=( struct _tagged_string)({ char*
+_temp421=( char*)"struct"; struct _tagged_string _temp422; _temp422.curr=
+_temp421; _temp422.base= _temp421; _temp422.last_plus_one= _temp421 + 7;
+_temp422;}); goto _LL244; _LL258: unimp_msg_part=( struct _tagged_string)({ char*
+_temp423=( char*)"union"; struct _tagged_string _temp424; _temp424.curr=
+_temp423; _temp424.base= _temp423; _temp424.last_plus_one= _temp423 + 6;
+_temp424;}); goto _LL244; _LL260: unimp_msg_part=( struct _tagged_string)({ char*
+_temp425=( char*)"tunion"; struct _tagged_string _temp426; _temp426.curr=
+_temp425; _temp426.base= _temp425; _temp426.last_plus_one= _temp425 + 7;
+_temp426;}); goto _LL244; _LL262: unimp_msg_part=( struct _tagged_string)({ char*
+_temp427=( char*)"xtunion"; struct _tagged_string _temp428; _temp428.curr=
+_temp427; _temp428.base= _temp427; _temp428.last_plus_one= _temp427 + 8;
+_temp428;}); goto _LL244; _LL264: unimp_msg_part=( struct _tagged_string)({ char*
+_temp429=( char*)"enum"; struct _tagged_string _temp430; _temp430.curr= _temp429;
+_temp430.base= _temp429; _temp430.last_plus_one= _temp429 + 5; _temp430;}); goto
+_LL244; _LL266: unimp_msg_part=( struct _tagged_string)({ char* _temp431=( char*)"typedef";
+struct _tagged_string _temp432; _temp432.curr= _temp431; _temp432.base= _temp431;
+_temp432.last_plus_one= _temp431 + 8; _temp432;}); goto _LL244; _LL268:
+unimp_msg_part=( struct _tagged_string)({ char* _temp433=( char*)"extern \"C\"";
 struct _tagged_string _temp434; _temp434.curr= _temp433; _temp434.base= _temp433;
-_temp434.last_plus_one= _temp433 + 8; _temp434;}); goto _LL244; _LL268:
-unimp_msg_part=( struct _tagged_string)({ char* _temp435=( char*)"extern \"C\"";
-struct _tagged_string _temp436; _temp436.curr= _temp435; _temp436.base= _temp435;
-_temp436.last_plus_one= _temp435 + 11; _temp436;}); goto _LL244; _LL244:;}( void)
+_temp434.last_plus_one= _temp433 + 11; _temp434;}); goto _LL244; _LL244:;}( void)
 _throw((( struct _xtunion_struct*(*)( struct _tagged_string)) Cyc_Tcutil_impos)(({
-struct _tagged_string _temp437= unimp_msg_part; xprintf("tcStmt: nested %.*s declarations unimplemented",
-_temp437.last_plus_one - _temp437.curr, _temp437.curr);})));} _LL42: if(
+struct _tagged_string _temp435= unimp_msg_part; xprintf("tcStmt: nested %.*s declarations unimplemented",
+_temp435.last_plus_one - _temp435.curr, _temp435.curr);})));} _LL42: if(
 new_block){ te= Cyc_Tcenv_new_block( s0->loc, te);}{ struct Cyc_Absyn_Vardecl
-_temp440; struct Cyc_List_List* _temp441; struct Cyc_Core_Opt* _temp443; struct
-Cyc_Core_Opt** _temp445; int _temp446; struct Cyc_Absyn_Exp* _temp448; void*
-_temp450; struct Cyc_Absyn_Tqual* _temp452; struct _tuple0* _temp454; void*
-_temp456; struct Cyc_Absyn_Vardecl* _temp438= _temp127; _temp440=* _temp438;
-_LL457: _temp456=( void*) _temp440.sc; goto _LL455; _LL455: _temp454=( struct
-_tuple0*) _temp440.name; goto _LL453; _LL453: _temp452=( struct Cyc_Absyn_Tqual*)
-_temp440.tq; goto _LL451; _LL451: _temp450=( void*) _temp440.type; goto _LL449;
-_LL449: _temp448=( struct Cyc_Absyn_Exp*) _temp440.initializer; goto _LL447;
-_LL447: _temp446=( int) _temp440.shadow; goto _LL444; _LL444: _temp443=( struct
-Cyc_Core_Opt*) _temp440.rgn; _temp445=&(* _temp438).rgn; goto _LL442; _LL442:
-_temp441=( struct Cyc_List_List*) _temp440.attributes; goto _LL439; _LL439: {
+_temp438; struct Cyc_List_List* _temp439; struct Cyc_Core_Opt* _temp441; struct
+Cyc_Core_Opt** _temp443; int _temp444; struct Cyc_Absyn_Exp* _temp446; void*
+_temp448; struct Cyc_Absyn_Tqual* _temp450; struct _tuple0* _temp452; void*
+_temp454; struct Cyc_Absyn_Vardecl* _temp436= _temp127; _temp438=* _temp436;
+_LL455: _temp454=( void*) _temp438.sc; goto _LL453; _LL453: _temp452=( struct
+_tuple0*) _temp438.name; goto _LL451; _LL451: _temp450=( struct Cyc_Absyn_Tqual*)
+_temp438.tq; goto _LL449; _LL449: _temp448=( void*) _temp438.type; goto _LL447;
+_LL447: _temp446=( struct Cyc_Absyn_Exp*) _temp438.initializer; goto _LL445;
+_LL445: _temp444=( int) _temp438.shadow; goto _LL442; _LL442: _temp441=( struct
+Cyc_Core_Opt*) _temp438.rgn; _temp443=&(* _temp436).rgn; goto _LL440; _LL440:
+_temp439=( struct Cyc_List_List*) _temp438.attributes; goto _LL437; _LL437: {
 void* curr_bl= Cyc_Tcenv_curr_rgn( te); void* rgn_typ=( void*)({ struct Cyc_Absyn_VarType_struct*
-_temp458=( struct Cyc_Absyn_VarType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_VarType_struct));
-_temp458[ 0]=({ struct Cyc_Absyn_VarType_struct _temp459; _temp459.tag= Cyc_Absyn_VarType_tag;
-_temp459.f1= _temp129; _temp459;}); _temp458;});* _temp445=({ struct Cyc_Core_Opt*
-_temp460=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
-_temp460->v=( void*) curr_bl; _temp460;}); te= Cyc_Tcenv_add_type_vars( s0->loc,
-te,({ struct Cyc_List_List* _temp461=( struct Cyc_List_List*) GC_malloc( sizeof(
-struct Cyc_List_List)); _temp461->hd=( void*) _temp129; _temp461->tl= 0;
-_temp461;})); Cyc_Tcutil_check_type( s0->loc, te, Cyc_Tcenv_lookup_type_vars( te),(
-void*) Cyc_Absyn_BoxKind, _temp450); te= Cyc_Tcenv_add_region( te, rgn_typ); if(
-! Cyc_Tcutil_unify( _temp450,( void*)({ struct Cyc_Absyn_RgnHandleType_struct*
-_temp462=( struct Cyc_Absyn_RgnHandleType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_RgnHandleType_struct));
-_temp462[ 0]=({ struct Cyc_Absyn_RgnHandleType_struct _temp463; _temp463.tag=
-Cyc_Absyn_RgnHandleType_tag; _temp463.f1=( void*) rgn_typ; _temp463;}); _temp462;}))){((
+_temp456=( struct Cyc_Absyn_VarType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_VarType_struct));
+_temp456[ 0]=({ struct Cyc_Absyn_VarType_struct _temp457; _temp457.tag= Cyc_Absyn_VarType_tag;
+_temp457.f1= _temp129; _temp457;}); _temp456;});* _temp443=({ struct Cyc_Core_Opt*
+_temp458=( struct Cyc_Core_Opt*) GC_malloc( sizeof( struct Cyc_Core_Opt));
+_temp458->v=( void*) curr_bl; _temp458;}); te= Cyc_Tcenv_add_type_vars( s0->loc,
+te,({ struct Cyc_List_List* _temp459=( struct Cyc_List_List*) GC_malloc( sizeof(
+struct Cyc_List_List)); _temp459->hd=( void*) _temp129; _temp459->tl= 0;
+_temp459;})); Cyc_Tcutil_check_type( s0->loc, te, Cyc_Tcenv_lookup_type_vars( te),(
+void*) Cyc_Absyn_BoxKind, _temp448); te= Cyc_Tcenv_add_region( te, rgn_typ); if(
+! Cyc_Tcutil_unify( _temp448,( void*)({ struct Cyc_Absyn_RgnHandleType_struct*
+_temp460=( struct Cyc_Absyn_RgnHandleType_struct*) GC_malloc( sizeof( struct Cyc_Absyn_RgnHandleType_struct));
+_temp460[ 0]=({ struct Cyc_Absyn_RgnHandleType_struct _temp461; _temp461.tag=
+Cyc_Absyn_RgnHandleType_tag; _temp461.f1=( void*) rgn_typ; _temp461;}); _temp460;}))){((
 void(*)( struct _tagged_string)) Cyc_Tcutil_impos)(( struct _tagged_string)({
-char* _temp464=( char*)"region stmt: type of region handle is wrong!"; struct
-_tagged_string _temp465; _temp465.curr= _temp464; _temp465.base= _temp464;
-_temp465.last_plus_one= _temp464 + 45; _temp465;}));} Cyc_Tcstmt_tcStmt( Cyc_Tcenv_set_encloser(
+char* _temp462=( char*)"region stmt: type of region handle is wrong!"; struct
+_tagged_string _temp463; _temp463.curr= _temp462; _temp463.base= _temp462;
+_temp463.last_plus_one= _temp462 + 45; _temp463;}));} Cyc_Tcstmt_tcStmt( Cyc_Tcenv_set_encloser(
 Cyc_Tcenv_add_local_var( _temp125->loc, Cyc_Tcenv_enter_try( te), _temp127), s0),
 _temp125, 0); return;}} _LL44:( void) _throw((( struct _xtunion_struct*(*)(
 struct _tagged_string)) Cyc_Tcutil_impos)(( struct _tagged_string)({ char*
-_temp466=( char*)"tcStmt: cut is not implemented"; struct _tagged_string
-_temp467; _temp467.curr= _temp466; _temp467.base= _temp466; _temp467.last_plus_one=
-_temp466 + 31; _temp467;}))); _LL46:( void) _throw((( struct _xtunion_struct*(*)(
+_temp464=( char*)"tcStmt: cut is not implemented"; struct _tagged_string
+_temp465; _temp465.curr= _temp464; _temp465.base= _temp464; _temp465.last_plus_one=
+_temp464 + 31; _temp465;}))); _LL46:( void) _throw((( struct _xtunion_struct*(*)(
 struct _tagged_string)) Cyc_Tcutil_impos)(( struct _tagged_string)({ char*
-_temp468=( char*)"tcStmt: splice is not implemented"; struct _tagged_string
-_temp469; _temp469.curr= _temp468; _temp469.base= _temp468; _temp469.last_plus_one=
-_temp468 + 34; _temp469;}))); _LL8:;}}
+_temp466=( char*)"tcStmt: splice is not implemented"; struct _tagged_string
+_temp467; _temp467.curr= _temp466; _temp467.base= _temp466; _temp467.last_plus_one=
+_temp466 + 34; _temp467;}))); _LL8:;}}

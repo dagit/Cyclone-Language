@@ -191,6 +191,9 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
 
   case &Tunion_p(q,_,tvs,ps,tud,tuf): 
     // FIX: USE TOPT!
+    // FIX: alpha-convert existential tyvars
+    if(length(tvs) != length(tuf->tvs))
+      terr(p->loc,"wrong number of existential type variables in pattern");
 
     // constrain the type variables to have box kind
     for (_ t = tvs; t != null; t = t->tl) {
@@ -198,18 +201,22 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
       compress_conref(tv->kind);
       switch (tv->kind->v) {
       case &Eq_constr(BoxKind): break;
-      case &Eq_constr(k): terr(p->loc,xprintf("tunion member %s abstracts type variable %s of kind %s != B",qvar2string(q),*tv->name,kind2string(k))); break;
-      case No_constr: tv->kind->v = new Eq_constr(BoxKind); break;
-      case &Forward_constr(_): impos("forward after compress in conref");
-        break;
+      case &Eq_constr(k): 
+	terr(p->loc,xprintf("tunion member %s abstracts type variable %s of kind %s != B",qvar2string(q),*tv->name,kind2string(k))); 
+	break;
+      case No_constr: 
+	tv->kind->v = new Eq_constr(BoxKind); 
+	break;
+      case &Forward_constr(_): 
+	throw impos("forward after compress in conref");
       }
     }
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
-    tenv_t te2 = add_type_vars(p->loc,te,tvs);
     tv_result = List::append(tv_result, tvs);
-    let all_inst = List::map(make_inst_var,tud->tvs);
-    _ all_typs = List::map(snd,all_inst); 
+    tenv_t te2      = add_type_vars(p->loc,te,tvs);
+    let    all_inst = List::map(make_inst_var,tud->tvs);
+    let    all_typs = List::map(snd,all_inst); 
     list_t<$(tqual_t,type_t)@> tqts = tuf->typs;
     // if the constructor has no arguments, then we go ahead and up-cast it
     // to the tunion type, otherwise, we leave it at the field type.  In
@@ -221,13 +228,13 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
       t = new TunionFieldType(TunionFieldInfo{tud->name->v,all_typs,tuf->name,
                                               tud,tuf});
     for(; ps != null && tqts != null; ps = ps->tl, tqts = tqts->tl) {
-      _ p2 = ps->hd;
+      let p2 = ps->hd;
       // Note:  we don't pass in ptr_rgn here because for value-carrying
       // constructors, the pointer's region is passed down as region_opt.
       let $(sub_tvs,sub_vs) = tcPat(te2,p2,null,region_opt);
       tv_result = List::append(tv_result, sub_tvs);
       v_result  = List::append(v_result,  sub_vs);
-      _ field_typ = substitute(all_inst,(*tqts->hd)[1]);
+      let field_typ = substitute(all_inst,(*tqts->hd)[1]);
       if (!unify(p2->topt->v,field_typ))
         terr(p2->loc, xprintf("%s expects argument type %s, not %s",
 			      qvar2string(q), 
@@ -241,8 +248,12 @@ $(list_t<tvar_t>, list_t<vardecl_t>) tcPat(tenv_t te,
       terr(p->loc,xprintf("too few arguments for tunion constructor %s",
 			  qvar2string(q)));
     break;
+
   case &XTunion_p(q,tvs,ps,xed,ef): 
     // FIX: USE TOPT!
+    // FIX: alpha-convert existential tyvars
+    if(length(tvs) != length(ef->tvs))
+      terr(p->loc,"wrong number of existential type variables in pattern");
 
     // we put in an unconstrained region.  Then the client calls
     // check_pat_regions after unifying against the type they're destructuring.
@@ -463,8 +474,8 @@ static struct Opt<int> one_opt = { 1 };
 static struct Opt<int> two_opt = { 2 };
 static opt_t<int> one_opt_ptr = &one_opt;
 
-static tunion Name_value.Name_v null_name_value = Name_v("null");
-static tunion Name_value.Name_v ptr_name_value = Name_v("ptr");
+static tunion Name_value.Name_v null_name_value  = Name_v("null");
+static tunion Name_value.Name_v ptr_name_value   = Name_v("ptr");
 static tunion Name_value.Name_v tuple_name_value = Name_v("tuple");
 static struct Con_s null_con0     = { &null_name_value,  0, &two_opt };
 static struct Con_s null_ptr_con0 = { &ptr_name_value,   1, &two_opt };
@@ -475,23 +486,19 @@ static con_t null_ptr_con = &null_ptr_con0;
 static con_t ptr_con      = &ptr_con0;
 
 static con_t int_con(int i)       { return new Con_s(new Int_v(i), 0, null); }
+static con_t float_con(string f)  { return new Con_s(new Name_v(f), 0, null); }
 static con_t char_con(char c) { 
   return new Con_s(new Int_v((int)c), 0,new Opt(256));
 }
-static con_t float_con(string f)  { return new Con_s(new Name_v(f), 0, null); }
-static con_t double_con(string d) { return new Con_s(new Name_v(d), 0, null); }
 static con_t tuple_con(int i)     { 
   return new Con_s(&tuple_name_value, i, one_opt_ptr); 
 }
 
 // build various simple patterns
-static simple_pat_t null_pat() { return new Con(null_con, null); }
-static simple_pat_t int_pat(int i) { return new Con(int_con(i), null); }
-static simple_pat_t char_pat(char c) { return new Con(char_con(c), null); }
-static simple_pat_t float_pat(string f) { return new Con(float_con(f), null); }
-static simple_pat_t double_pat(string d) { 
-  return new Con(double_con(d), null); 
-}
+static simple_pat_t null_pat()           {return new Con(null_con,     null); }
+static simple_pat_t int_pat(int i)       {return new Con(int_con(i),   null); }
+static simple_pat_t char_pat(char c)     {return new Con(char_con(c),  null); }
+static simple_pat_t float_pat(string f)  {return new Con(float_con(f), null); }
 static simple_pat_t null_ptr_pat(simple_pat_t p) {
   return new Con(null_ptr_con,new List(p,null));
 }
@@ -617,7 +624,7 @@ typedef tunion Term_desc term_desc_t;
 
 // Contexts represent a partial term-description matched thus far,
 // from the root node of the object in a left-to-right fashion.
-#define context_t list_t<$(con_t,list_t<term_desc_t>)@>
+typedef list_t<$(con_t,list_t<term_desc_t>)@> context_t;
 // A decision tree for compiling pattern-matches.  Failure denotes
 // that an exception should be thrown.  Success triggers a right-hand-side.
 // IfEq is a constructor test -- conceptually, the access path is a sequence
@@ -637,8 +644,8 @@ typedef tunion Decision<`rhs> decision_t<`rhs>;
 // A work_stack records what tests we have to continue to do.  An
 // implicit invariant is that for each frame on the stack, the
 // length of the pattern, access, and term_desc lists are the same.
-#define work_stack_frame $(list_t<simple_pat_t>,list_t<access_t>,list_t<term_desc_t>)@
-#define work_stack list_t<work_stack_frame>
+typedef  $(list_t<simple_pat_t>,list_t<access_t>,list_t<term_desc_t>)@ work_stack_frame_t;
+typedef list_t<work_stack_frame_t> work_stack_t;
 // Used during primitive match compilation
 static tunion Answer { Yes, No, Maybe };
 typedef tunion Answer answer_t;
@@ -707,7 +714,7 @@ static context_t norm_context(context_t ctxt) {
 // up to the left of the current subterm), the current subterm description,
 // and the term descriptions on the work stack, which, when taken together,
 // describe the object to the right of the current subterm.
-static term_desc_t build_desc(context_t ctxt, term_desc_t dsc, work_stack work)
+static term_desc_t build_desc(context_t ctxt,term_desc_t dsc,work_stack_t work)
 {
   switch ($(ctxt,work)) {
   case $(null,null): return dsc;
@@ -721,7 +728,7 @@ static term_desc_t build_desc(context_t ctxt, term_desc_t dsc, work_stack work)
 
 static decision_t<`rhs> // forward declaration
 match(simple_pat_t p, access_t obj, term_desc_t dsc, context_t ctx, 
-      work_stack work, `rhs right_hand_side, match_t(`rhs) rules);
+      work_stack_t work, `rhs right_hand_side, match_t(`rhs) rules);
 
 // Checks to see that the term (thus far described by dsc) matches one
 // of the match_t rules.
@@ -742,7 +749,7 @@ static decision_t<`rhs> match_compile(match_t(`rhs) allmrules) {
 // Succeeds returning the right-hand-side if every pattern matches the
 // associated term-description in the work stack, or else the original
 // object matches some rule from rules.
-static decision_t<`rhs> and_match(context_t ctx, work_stack work,
+static decision_t<`rhs> and_match(context_t ctx, work_stack_t work,
 				    `rhs right_hand_side, match_t(`rhs) rules) {
   switch (work) {
   case null: return new Success(right_hand_side);
@@ -788,7 +795,7 @@ static list_t<access_t> getoargs(con_t pcon, access_t obj) {
 // in the work stack, or if the original object matches one of the rules.
 static decision_t<`rhs> 
 match(simple_pat_t p, access_t obj, term_desc_t dsc,
-      context_t ctx, work_stack work,
+      context_t ctx, work_stack_t work,
       `rhs right_hand_side, match_t(`rhs) rules) {
   switch (p) {
   case Any: return and_match(augment(ctx, dsc), work, right_hand_side, rules);
@@ -822,7 +829,7 @@ void check_exhaust_overlap(decision_t<`rhs> d,
                            void not_exhaust(`a),      `a env1,
                            void rhs_appears(`b,`rhs), `b env2) {
   switch (d) {
-  case Tcpat::Failure: not_exhaust(env1);   break;
+  case Tcpat::Failure:  not_exhaust(env1);   break;
   case &Success(r):     rhs_appears(env2,r); break;
   case &IfEq(_,_,left,right):
     check_exhaust_overlap(left,  not_exhaust, env1, rhs_appears, env2);
@@ -836,8 +843,8 @@ void check_exhaust_overlap(decision_t<`rhs> d,
 // any pattern doesn't show up in the tree (pattern is redundant.)
 // Both are considered errors as far as the type-checker is concerned.
 static 
-$(simple_pat_t, $(bool,seg_t)@)@ get_match(int @ r, switch_clause_t swc) {
-  simple_pat_t sp0 = compile_pat(swc->pattern);
+$(simple_pat_t, $(bool,seg_t)@)@ get_match(int @`r r, switch_clause_t swc) {
+  simple_pat_t   sp0 = compile_pat(swc->pattern);
   $(bool,seg_t)@ rhs = new $(false,swc->pattern->loc);
   simple_pat_t sp;
   if (swc->where_clause != null) {
@@ -858,7 +865,8 @@ void check_switch_exhaustive(seg_t loc, list_t<switch_clause_t> swcs) {
   // We represent patterns without where clauses as (simple_pat,_).
   // This way, if we have the same pattern repeated, we get exhuastiveness
   // right as long as one of the copies does not have a where-clause.
-  let match_rules = List::map_c(get_match,new 0,swcs);
+  let where_ctr   = 0;
+  let match_rules = List::map_c(get_match,&where_ctr,swcs);
   let dec_tree    = match_compile(match_rules);
   check_exhaust_overlap(dec_tree, not_exhaust_err, loc, rule_occurs, 0);
   for (; match_rules != null; match_rules = match_rules->tl) {

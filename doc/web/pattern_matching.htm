@@ -1,0 +1,496 @@
+<html>
+
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=windows-1252">
+<title>Pattern-Matching</title>
+<meta name="GENERATOR" content="Microsoft FrontPage 4.0">
+<meta name="ProgId" content="FrontPage.Editor.Document">
+<meta name="Microsoft Border" content="l, default">
+</head>
+
+<body><!--msnavigation--><table border="0" cellpadding="0" cellspacing="0" width="100%"><tr><td valign="top" width="1%">
+
+<nobr><a href="index.htm">Home</a></nobr><br><nobr><a href="quick_questions.htm">Quick&nbsp;Questions</a></nobr><br><nobr><a href="quick_answers.htm">Quick&nbsp;Answers</a></nobr><br><nobr><a href="known_bugs.htm">Known&nbsp;Bugs</a></nobr><br><nobr><a href="pointers.htm">Pointers</a></nobr><br><nobr><a href="discriminated_unions.htm">Discriminated&nbsp;Unions</a></nobr><br><nobr>Pattern&nbsp;Matching</nobr><br><nobr><a href="type_inference.htm">Type&nbsp;Inference</a></nobr><br><nobr><a href="polymorphism.htm">Polymorphism</a></nobr><br><nobr><a href="regions_and_effects.htm">Regions&nbsp;and&nbsp;Effects</a></nobr><br><nobr><a href="definite_assignment.htm">Definite&nbsp;Assignment</a></nobr><br><nobr><a href="namespaces.htm">Namespaces</a></nobr><br><nobr><a href="interfacing_with_c.htm">Interfacing&nbsp;with&nbsp;C</a></nobr>
+
+</td><td valign="top" width="24"></td><!--msnavigation--><td valign="top">
+<h1 align="center">Pattern Matching</h1>
+<p align="left">Pattern matching provides a concise, convenient way to bind
+parts of large objects to new local variables.&nbsp; Two Cyclone constructs use
+pattern matching, let declarations and switch statements.&nbsp;
+Although the latter are more common, we first explain patterns with <a href="#let_decls">let
+declarations</a> because they have fewer complications.&nbsp; Then we describe
+all the <a href="#pat_forms">pattern forms</a>.&nbsp; Then we describe <a href="#switch_stmt">switch
+statements</a>.</p>
+<p align="left">You must use patterns to access values carried by <a href="discriminated_unions.htm">discriminated
+unions</a>, including exceptions.&nbsp; In other situations, patterns make code
+more readable and less verbose.</p>
+<h3 align="left"><b><a name="let_decls"></a>Let declarations</b></h3>
+<p align="left">In Cyclone, you can write</p>
+<p align="left"><font face="Courier New">let x = e;</font></p>
+<p align="left">as a local declaration.&nbsp; The meaning is the same as &quot;t
+x = e;&quot; where t is the type of e.&nbsp; In other words, x is bound to the
+new variable.&nbsp; Unlike with variable declarations, a let declaration must
+have an initializer (the e). Patterns are much more powerful because they can
+bind several variables to different parts of an aggregate object.&nbsp; Here is
+an example:</p>
+<p align="left" style="line-height: 0"><font face="Courier New">struct Pair {&nbsp; int x; int y; };</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">void f(struct Pair pr) {</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; let Pair(fst,snd) = pr;</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; ...</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">}</font></p>
+<p align="left">The pattern has the same structure as a struct Pair with parts
+being variables.&nbsp; Hence the pattern is a match for pr and the variables are
+initialized with the appropriate parts of pr.&nbsp; Hence &quot;let Pair(fst,snd)
+= pr&quot; is equivalent to &quot;int fst = pr.x; int snd = pr.y&quot;.&nbsp; A
+let-declaration's initializer is evaluated only once.</p>
+<p align="left">Patterns may be as structured as the expressions against which
+they match.&nbsp; For example, given type</p>
+<p align="left"><font face="Courier New">struct Quad { struct Pair p1; struct
+Pair p2; };</font></p>
+<p align="left">then patterns for matching against an expression of type struct
+Quad could be any of the following (and many more because of constants and
+wildcards -- see below):</p>
+<ul>
+  <li>
+    <p align="left"><font face="Courier New">Quad(Pair(a,b),Pair(c,d))</font></li>
+  <li>
+    <p align="left"><font face="Courier New">Quad(p1, Pair(c,d))</font></li>
+  <li>
+    <p align="left"><font face="Courier New">Quad(Pair(a,b), p2)</font></li>
+  <li>
+    <p align="left"><font face="Courier New">Quad(p1,p2)</font></li>
+  <li>
+    <p align="left"><font face="Courier New">q</font></li>
+</ul>
+<p align="left">In general, a let-declaration has the form &quot;let p =
+e;&quot; where p is a pattern and e is an expression.&nbsp; In our example, the
+match always succeeds, but in general patterns can have compile-time errors or
+run-time errors.&nbsp;&nbsp;</p>
+<p align="left">At compile-time, the type-checker ensures that the pattern makes
+sense for the expression.&nbsp; For example, it rejects &quot;let Pair(fst,snd)
+= 0&quot; because 0 has type int but the pattern only makes sense for type
+struct Pair.&nbsp;</p>
+<p align="left">Certain patterns are type-correct, but they may not match
+run-time values.&nbsp; For example, constants can appear in patterns, so
+&quot;let Pair(17,snd) = pr;&quot; would match only when pr.x is 17.&nbsp;
+Otherwise the exception Match_Exception is thrown.&nbsp; Patterns that may fail
+are rarely useful and poor style in let-declarations; the compiler emits a
+warning when you use them.&nbsp; In switch statements, possibly-failing patterns
+are the norm -- as we explain below, the whole point is that one of the cases'
+patterns should match.</p>
+<h3 align="left"><b><a name="pat_forms"></a>Pattern Forms</b></h3>
+<p align="left">So far, we have seen three pattern forms, variables patterns,
+struct patterns, and constant patterns.&nbsp; We now describe all the pattern
+forms.&nbsp; For each form, you need to know:</p>
+<ul>
+  <li>
+    <p align="left">The syntax</li>
+  <li>
+    <p align="left">The types of expressions it can match against (to avoid a
+    compile-time error)</li>
+  <li>
+    <p align="left">The expressions the pattern matches against (other
+    expressions cause a match failure)</li>
+  <li>
+    <p align="left">The bindings the pattern introduces, if any.</li>
+</ul>
+<p align="left">There is one compile-time rule that is the same for all forms:
+All variables (and type variables) in a pattern must be distinct.&nbsp; For
+example, &quot;let Pair(fst,fst) = pr;&quot; is not allowed.</p>
+<p align="left">You may want to read the descriptions for variable and struct
+patterns first because we have already explained their use informally.</p>
+<ul>
+  <li>
+    <p align="left"><b>Variable patterns</b>
+    <ul>
+      <li>
+        <p align="left">Syntax: an identifer</li>
+      <li>
+        <p align="left">Types for match: all types</li>
+      <li>
+        <p align="left">Expressions matched: all expressions</li>
+      <li>
+        <p align="left">Bindings introduced: the identifier is bound to the
+    expression&nbsp;being matched</li>
+    </ul>
+  </li>
+    
+  <li>
+    <p align="left"><b><a name="wild_pat"></a>Wildcard patterns</b>
+    <ul>
+      <li>
+        <p align="left">Syntax: _ (underscore, note this use is completely
+        independent of _ for <a href="type_inference.htm">type inference</a>)</li>
+      <li>
+        <p align="left">Type for match: all types</li>
+      <li>
+        <p align="left">Expressions matched: all expressions</li>
+      <li>
+        <p align="left">Bindings introduced: none.&nbsp; <i>Hence it is
+    like a variable pattern that uses a fresh identifier.&nbsp; Using _ is
+    better style because it indicates the value matched is not used.&nbsp;
+    Notice that &quot;let _ = e;&quot; is equivalent to e.&nbsp;</i></li>
+    </ul>
+  </li>
+  <li>
+    <p align="left"><b>Reference patterns</b>
+    <ul>
+      <li>
+        <p align="left">Syntax: <font face="Courier New">*x</font> (i.e. the *
+        character followed by an identifier)</li>
+      <li>
+        <p align="left">Types for match: all types</li>
+      <li>
+        <p align="left">Expressions matched: all expressions.&nbsp; Note:
+        Currently, reference patterns may only appear inside of other patterns
+        so that the compiler can determine the region for the pointer type
+        assigned to x.</li>
+      <li>
+        <p align="left">Bindings introduced: x is bound to <i>the address of</i>
+        the expression being matched.&nbsp; Hence if matched against a value of
+        type t in region r, the type of x is t@r.</li>
+    </ul>
+  </li>
+  <li>
+    <p align="left"><b>Numeric constant patterns</b>
+    <ul>
+      <li>
+        <p align="left">Syntax: An int, char, or float constant</li>
+      <li>
+        <p align="left">Types for match: numeric types</li>
+      <li>
+        <p align="left">Expressions matched: numeric values such that == applied
+        to the value and the pattern yields true.&nbsp; (Standard C numeric
+        promotions apply.&nbsp; Note that comparing floating point values for
+        equality is usually a bad idea.)</li>
+      <li>
+        <p align="left">Bindings introduced: none</li>
+    </ul>
+  </li>
+  <li>
+    <p align="left"><font face="Courier New"><b>null</b></font> <b>constant
+    patterns</b>
+    <ul>
+      <li>
+        <p align="left">Syntax: <font face="Courier New">null</font></li>
+      <li>
+        <p align="left">Types for match: nullable pointer types, including ?
+        types</li>
+      <li>
+        <p align="left">Expressions matched: <font face="Courier New">null</font></li>
+      <li>
+        <p align="left">Bindings introduced: none</li>
+    </ul>
+  </li>
+  <li>
+    <p align="left"><b>enum patterns</b>
+    <ul>
+      <li>
+        <p align="left">Syntax: an enum constant</li>
+      <li>
+        <p align="left">Types for match: the enum type containing the constant</li>
+      <li>
+        <p align="left">Expressions matched: the constant</li>
+      <li>
+        <p align="left">Bindings introduced: none</li>
+    </ul>
+  </li>
+  <li>
+    <p align="left"><b>Tuple patterns</b>
+    <ul>
+      <li>
+        <p align="left">Syntax: <font face="Courier New">$(p1,...,pn)</font>
+        where p1,...,pn are patterns</li>
+      <li>
+        <p align="left">Types for match: tuple types where pi matches the type
+        of the tuple's ith field for 1 &lt;= i &lt;= n.</li>
+      <li>
+        <p align="left">Expressions matched: tuples where the ith field matches
+        pi for 1 &lt;= i &lt;= n.</li>
+      <li>
+        <p align="left">Bindings introduced: bindings introduced by p1, ..., pn</li>
+    </ul>
+  </li>
+  <li>
+    <p align="left"><b>Struct patterns</b>
+    <ul>
+      <li>
+        <p align="left">Syntax: There are two forms:&nbsp;
+        <ul>
+          <li>
+            <p align="left"><font face="Courier New">X(p1,...,pn)</font> where X
+is the name of a struct with n fields and p1,...,pn are patterns.&nbsp; This
+            syntax is shorthand for X{.f1 = p1, ..., .fn = pn} where fi is the
+            ith field in X.</li>
+          <li>
+            <p align="left"><font face="Courier New"> X{.f1 = p1, ..., .fn = pn}</font> where the fields of X are f1, ..., fn but not necessarily in that
+            order</li>
+        </ul>
+      </li>
+      <li>
+        <p align="left">Types for match: struct X (or instantiations when struct
+        X is polymorphic) such that pi matches the type of fi for 1 &lt;= i
+        &lt;= n.</li>
+      <li>
+        <p align="left">Expressions matched: structs where the value in fi
+        matches pi for 1 &lt;= i &lt;= n.</li>
+      <li>
+        <p align="left">Bindings introduced: bindings introduced by p1,...,pn</li>
+    </ul>
+  </li>
+  <li>
+    <p align="left"><b>Pointer patterns</b>
+    <ul>
+      <li>
+        <p align="left">Syntax: <font face="Courier New">&amp;p</font> where p
+        is a pattern</li>
+      <li>
+        <p align="left">Types for match: pointer types, including ? types.&nbsp;
+        Also tunion Foo (or instantiations of it) when the pattern is
+        &amp;Bar(p1,...,pn) and Bar is a value-carrying variant of tunion Foo
+        and pi matches the type of the ith value carried by Bar.</li>
+      <li>
+        <p align="left">Expressions matched: non-null pointers where the value
+        pointed to matches p.&nbsp; Note this explanation includes the case
+        where the expression has type tunion Foo and the pattern is
+        &amp;Bar(p1,...,pn) and the current variant of the expression is
+        &quot;pointer to Bar&quot;.</li>
+      <li>
+        <p align="left">Bindings introduced: bindings introduced by p</li>
+    </ul>
+  </li>
+  <li>
+    <p align="left"><b>tunion and xtunion patterns</b>
+    <ul>
+      <li>
+        <p align="left">Syntax: <font face="Courier New">X</font> if X is a
+        variant that carries no values.&nbsp; Else <font face="Courier New">X(p1,...,pn)</font>
+        where X is the name of a variant (that has no existential type
+        parameters) and p1, ..., pn are patterns.&nbsp; If X has existential
+        type parameters, the syntax is <font face="Courier New">X&lt;`t1,...,`tm&gt;(p1,...,pn)</font>
+        for distinct `t1, ..., `tm.</li>
+      <li>
+        <p align="left">Types for match: If X is non-value-carrying variant of
+        tunion Foo, then types tunion Foo and tunion Foo.x (or instantiations of
+        them).&nbsp; If X carries values, then tunion Foo.X (or instantiations
+        of it) where the pi matches the type of ith field.&nbsp; The number of
+        existential type variables in the pattern must be the number of
+        existential type variables for tunion Foo.X.</li>
+      <li>
+        <p align="left">Expressions matched: If X is non-value-carrying, then
+        X.&nbsp; If X is value-carrying, then values created from the
+        constructor X such that pi matches the ith field.</li>
+      <li>
+        <p align="left">Bindings introduced: bindings introduced by p1,...,pn</li>
+    </ul>
+  </li>
+</ul>
+    <h3 align="left"><b><a name="switch_stmt"></a>Switch Statements</b></h3>
+<p align="left">In Cyclone, you can switch on a value of any type and the case
+&quot;labels&quot; (the part between case and the colon) are patterns.&nbsp; The
+switch expression is evaluated and then matched against each pattern in
+turn.&nbsp; The first matching case statement is executed.&nbsp; Except for some
+restrictions, Cyclone's switch statement is therefore a powerful extension of
+C's switch statement.</p>
+    <p align="left"><b>Restrictions</b>
+<ul>
+  <li>
+    <p align="left"><b>You <u>cannot implicitly &quot;fall-through&quot;</u> to
+    the next case.</b>&nbsp; Instead, you must use the <font face="Courier New">fallthru;</font>
+    statement, which has the effect of transferring control to the beginning of
+    the next case.&nbsp; Even the last case may not implicitly
+    &quot;fall-through&quot;.&nbsp; <font face="Courier New">fallthru</font> is
+    discussed more below.</li>
+  <li>
+    <p align="left">The cases in a switch <u>must be exhaustive</u>; it is a
+    compile-time error if the compiler determine that it could be that no case
+    matches.&nbsp; The rules for what the compiler determines are described
+    below.</li>
+  <li>
+    <p align="left">A <u>case cannot be unreachable</u>.&nbsp; It is a
+    compile-time error if the compiler determines that a later case may be
+    subsumed by an earlier one.&nbsp; The rules for what the compiler determines
+    are described below. (C almost has this restriction because case labels
+    cannot be repeated, but Cyclone is more restrictive.&nbsp; For example, C
+    allows cases after a default case.)</li>
+  <li>
+    <p align="left">The body of a switch statement must be a <u>sequence of case
+    statements</u> and case statements can appear only in such a sequence. So
+    idioms like Duff's device (such as &quot;switch(i%4) while(i-- &gt;=0) {
+    case 3: ... }&quot;) are not supported.</li>
+  <li>
+    <p align="left">A constant case label must be a constant, <u>not a constant
+    expression</u>.&nbsp; That is, case 3+4: is allowed in C, but not in
+    Cyclone.</li>
+</ul>
+<p align="left"><b>An Extension of C</b></p>
+<p align="left">Except for the above restrictions, we can see Cyclone's switch
+is an extension of C's switch.&nbsp; For example, consider this code (which has
+the same meaning in C and Cyclone):</p>
+<p align="left" style="line-height: 0"><font face="Courier New">int f(int i) {</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; switch(i)
+{</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; case
+0:&nbsp; return 17;</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; case
+1:&nbsp; return 17;</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; default:
+return i;</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; }</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">}</font></p>
+<p align="left">In Cyclone terms, the code tries to match against the constant
+0.&nbsp; If it does match (i is not 0), it tries to match against the pattern
+1.&nbsp; Everything matches against default; in fact, default is just alternate
+notation for &quot;case _&quot;, i.e. a case with a <a href="#wild_pat">wildcard
+pattern</a>.&nbsp; For performance reasons, switch statements that are legal C
+switch statements are translated to C switch statements.&nbsp; Other switch
+statements are translated to, &quot;a mess of tests and gotos&quot;.</p>
+<p align="left">We now discuss some of the restrictions in terms of the above
+example.&nbsp; Because there is no &quot;implicit fallthrough&quot;, the body of
+case 0 cannot be empty.&nbsp; However, we can replace the &quot;return 17;&quot;
+with &quot;fallthru;&quot; a special Cyclone statement that immediately
+transfers control to the next case.&nbsp; fallthru does not have to appear at
+the end of a case body, so it acts more like a goto than a fallthrough.&nbsp; As
+in our example, any case that matches all values of the type switched upon (eg.
+default:, case _:, case x:) must appear last, otherwise later cases would be
+unreachable.&nbsp; (Note that other types may have even more such
+patterns.&nbsp; For example Pair(x,y) matches all values of type struct Pair {int
+x; int y};)</p>
+<p align="left"><b>Much More Powerful</b></p>
+<p align="left">Because Cyclone case labels are patterns, a switch statement can
+match against any expression and bind parts of the expression to
+variables.&nbsp; Also, <b>fallthru can (in fact, must) bind values</b> to the
+next case's pattern variables.&nbsp; This silly example demonstrates all of
+these features:</p>
+<p align="left" style="line-height: 0"><font face="Courier New">extern int f(int);</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">int g(int x, int
+y) { </font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; </font><font face="Courier New">//
+return f(x)*f(y), but try to avoid using multiplication</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp;
+switch($(f(x),f(y))) {</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; case
+$(0,_): fallthru;</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; case
+$(_,0): return 0;</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; case
+$(1,b): fallthru(b+1-1);</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; case
+$(a,1): return a;</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; case $(a,b):
+return a*b;</font></p>
+<p align="left" style="line-height: 0"><font face="Courier New">&nbsp; }</font></p>
+<p style="line-height: 0"><font face="Courier New">}</font></p>
+<p>The only part of this example using a still-unexplained feature is &quot;fallthru(b)&quot;,
+but we explain the full example anyway.&nbsp; The switch expression has type $(int,int),
+so all of the cases must have patterns that match this type.&nbsp; Legal case
+forms for this type not used in the example include &quot;case $(_,id):&quot;,
+&quot;case $(id,_):&quot;, &quot;case id:&quot;, &quot;case _:&quot;, and
+&quot;default:&quot;.&nbsp; The code does the following:</p>
+<ul>
+  <li>It evaluates the pair $(f(x), f(y)) and stores the result on the stack. </li>
+  <li>If f(x) returned 0, the first case matches, control jumps to the second
+    case, and 0 is returned. </li>
+  <li>Else if f(y) returned 0, the second case matches and 0 is returned.&nbsp; </li>
+  <li>Else if f(x) returned 1, the third case matches, b is assigned the value
+    f(y) returned, control jumps to the fourth case after assigning b+1-1 to a,
+    and a (i.e. b + 1 - 1, i.e. b, i.e. f(y)) is returned.</li>
+  <li>Else if f(y) returned 1, the fourth case matches, a is assigned the value
+    f(x) returned, and a is returned.</li>
+  <li>Else the last case matches, a is assigned the value f(x) returned, b is
+    assigned the value f(y) returned, and a*b is returned.</li>
+</ul>
+<p>Note that the switch expression is evaluated only once.&nbsp;
+Implementation-wise, the result is stored in a compiler-generated local variable
+and the value of this variable is used for the ensuring pattern matches.</p>
+<p>The general form of fallthrus is as follows: If the next case has no bindings
+(i.e. identifiers in its pattern), then you must write <font face="Courier New">fallthru;</font>.&nbsp;
+If the next case has n bindings, then you must write <font face="Courier New">fallthru(e1,...,en)</font>
+where each ei is an expression with the appropriate type for the ith binding in
+the next case's pattern, reading from left to right.&nbsp; (By appropriate type,
+we mean the type of the switch expression that would be bound to the ith binding
+were the next case to match.)&nbsp; The effect is to evaluate e1 through en,
+bind them to the identifiers and then goto the body of the next case.&nbsp; <font face="Courier New">fallthru</font>
+is not allowed in the last case of a switch, not even if there is an enclosing
+switch.</p>
+<p>We repeat that fallthru may appear anywhere in a case body, but it is usually
+used at the end, where its name makes the most sense.&nbsp; ML programmers may
+notice that fallthru with bindings is strictly more expressive than or-patterns,
+but more verbose.</p>
+<p><b>Case Guards:</b></p>
+<p>We have withheld the full form of Cyclone case labels.&nbsp; In addition to
+case p: where p is a pattern, you may write case p &amp;&amp; e: where p is a
+pattern and e is an expression of type int.&nbsp; (And since e1 &amp;&amp; e2 is
+an expression, you can write case p &amp;&amp; e1 &amp;&amp; e2: and so
+on.)&nbsp; Let's call e the case's <i>guard</i>.&nbsp; </p>
+<p>The case matches if p matches the expression in the switch and e evaluates to
+a non-zero value.&nbsp;&nbsp; e is&nbsp; evaluated only if p matches and only
+after the bindings caused by the match have been properly initialized.&nbsp;
+Here is a silly example:</p>
+<p style="line-height: 0"><font face="Courier New">extern int f(int);</font></p>
+<p style="line-height: 0"><font face="Courier New">int g(int a, int b) {</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; switch($(a,b-1)) {</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; case $(0,y) &amp;&amp;
+y &gt; 1: return 1;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; case $(3,y) &amp;&amp;
+f(x+y) == 7 : return 2;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; case $(4,72): return
+3;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; default: return 3;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; }</font></p>
+<p style="line-height: 0"><font face="Courier New">}</font></p>
+<p>The function g returns 1 if a is 0 and b is greater than 2.&nbsp; Else if x
+is 3, it calls the function f (which of course may do arbitrary things) with the
+sum of a and b.&nbsp; If the result is 7, then 2 is returned.&nbsp; In all other
+cases (x is not 3 or the call to f does not return 7), 3 is returned.</p>
+<p>Case guards make numeric constant patterns unnecessary (we can replace case
+3: with case x &amp;&amp; x==3:, for example), but constant patterns are better
+style and easier to use.</p>
+<p>Where clauses are not interpreted by the compiler when doing exhaustiveness
+and overlap checks, as explained below.</p>
+<p><b>Exhaustiveness and Useless-Case Checking:</b></p>
+<p>As mentioned before, it is a compile-time error for the type of the switch
+expression to have values that none of the case patterns match or for a pattern
+not to match any values that earlier patterns do not already match.&nbsp; Rather
+than explain the precise rules, we currently rely on your intuition.&nbsp; But
+there are two rules to guide your intuition:</p>
+<ul>
+  <li>In terms of exhaustiveness checking, the compiler acts as if any case
+    guard </li>
+  <li>In terms of exhaustiveness checking, numeric constants cannot make
+    patterns exhaustive.&nbsp; Even if you list out all 256 characters, the
+    compiler will act as though there is another possibility you have not
+    checked.</li>
+</ul>
+<p>We emphasize that checking does not just involve the &quot;top-level&quot; of
+patterns.&nbsp; For example, the compiler rejects the switch below because the
+third case is redundant:</p>
+<p style="line-height: 0"><font face="Courier New">enum Color { Red, Green };</font></p>
+<p style="line-height: 0"><font face="Courier New">void f(enum Color c1, enum
+Color c2) {</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; switch ($(c1,c2)) {</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; case $(Red,x): return;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; case $(x,Green):
+return;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; case $(Red,Green):
+return;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; default: return;</font></p>
+<p style="line-height: 0"><font face="Courier New">&nbsp; }</font></p>
+<p style="line-height: 0"><font face="Courier New">}</font></p>
+<p><b>Rules for No Implicit Fall-Through:</b></p>
+<p>As mentioned several times now, Cyclone differs from C in that a case body
+may not implicitly fall-through to the next case.&nbsp; It is a compile-time
+error if such a fall-through might occur.&nbsp; Because the compiler cannot
+determine exactly if an implicit fall-through could occur, it uses a precise set
+of rules, which we only sketch here.&nbsp; The exact same rules are used to
+ensure that a function (with return type other than void) does not &quot;fall
+off the bottom&quot;.&nbsp; The rules are very similar to the rules for ensuring
+that Java methods do not &quot;fall off the bottom&quot;.</p>
+<p>The general intuition is that there must be a break, continue, goto, return,
+or throw along all control-flow paths.&nbsp; The value of expressions is not
+considered except for numeric constants and logical combinations (using
+&amp;&amp;, ||, and ? :) of such constants.&nbsp; The statement try s catch ...
+is checked as though an exception might be thrown at any point while s executes.</p>
+&nbsp;<!--msnavigation--></td></tr><!--msnavigation--></table></body>
+
+</html>
