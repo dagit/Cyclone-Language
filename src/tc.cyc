@@ -143,14 +143,6 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
           typ2string(vd->type)); fflush(stderr);
 #endif
 
-  switch (ns) {
-  case {.Rel_n = _}: 
-    // expand to qualified name
-    (*vd->name)[0] = Abs_n(te->ns, (vd->sc == ExternC) || in_cinclude);
-    break;
-  default: break;
-  }
-
   // if it's an array or string, fill in the size on the type
   switch (compress(t)) {
   case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && initializer != NULL:
@@ -327,14 +319,6 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
   if(fd->sc == ExternC && !te->in_extern_c_include)
     terr(loc,"extern \"C\" functions cannot be implemented in Cyclone");
 
-  switch ((*fd->name)[0]) {
-  case {.Rel_n = NULL}: 
-    // expand to qualified name
-    (*fd->name)[0] = Abs_n(te->ns, (fd->sc == ExternC) || te->in_extern_c_include);
-    break;
-  default: 
-    break;
-  }
   // reject ill-formed type
   check_fndecl_valid_type(loc,te,fd);
   // check for redeclaration
@@ -466,13 +450,6 @@ static void tcTypedefdecl(tenv_t te, genv_t ge, seg_t loc, typedefdecl_t td) {
   fprintf(stderr,"type-checking typedefdecl %s",*v);
   fflush(stderr);
 #endif
-  switch ((*td->name)[0]) {
-  case {.Rel_n = _}: 
-    // expand to qualified name
-    (*td->name)[0] = Abs_n(te->ns, td->extern_c);
-    break;
-  default: break;
-  }
   // check for redeclaration (never allowed, apparently)
   if (Dict::member(ge->typedefs,v)) {
     terr(loc,"redeclaration of typedef %s",*v);
@@ -638,15 +615,6 @@ void tcAggrdecl(tenv_t te, genv_t ge, seg_t loc, aggrdecl_t ad) {
   
   let tvs = ad->tvs;
 
-  switch ((*ad->name)[0]) {
-  case {.Rel_n = NULL}: 
-    // expand to qualified name
-    (*ad->name)[0] = Abs_n(te->ns, (ad->sc == ExternC));
-    break;
-  default:
-    break;
-  }
-
   // reject ill-formed type
   check_unique_tvars(loc, ad->tvs);
   // give the bound type variables identities
@@ -782,7 +750,6 @@ static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge,
   // check variants, rejecting ill-formed types and repeated tyvars
   for(let fs = fields; fs != NULL; fs = fs->tl) {
     let f = fs->hd;
-
     for (_ typs = f->typs; typs != NULL; typs=typs->tl) {
       check_type(f->loc, te, tvs, &tmk, false, false, (*typs->hd)[1]);
       // make sure no no-alias fields in datatype
@@ -795,22 +762,6 @@ static list_t<datatypefield_t> tcDatatypeFields(tenv_t te, genv_t ge,
       (*typs->hd)[0].real_const = 
         extract_const_from_typedef(f->loc,(*typs->hd)[0].print_const,
                                    (*typs->hd)[1]);
-    }
-
-    switch((*f->name)[0]) {
-    case {.Rel_n = NULL}: 
-      if(is_extensible)
-	(*f->name)[0] = Abs_n(te->ns, false);
-      else
-	(*f->name)[0] = (*name)[0];
-      break;
-    case {.Rel_n = _}: 
-      terr(f->loc, "qualified datatypefield declarations are not allowed (%s)",
-	   qvar2string(f->name)); //FIX ?
-      break;
-    case {.C_n = _}: break;
-    case {.Abs_n = _}: break;
-    case {.Loc_n = _}: impos("tcDatatypeFields: Loc_n");
     }
   }
 
@@ -891,10 +842,6 @@ void tcDatatypedecl(tenv_t te, genv_t ge, seg_t loc, datatypedecl_t tud) {
       }
     } catch {
     case &Dict::Absent:
-      switch ((*tud->name)[0]) {
-      case {.Rel_n = NULL}: (*tud->name)[0] = Abs_n(te->ns,false); break;
-      default: break;
-      }
       let tdopt = Dict::lookup_opt(ge->datatypedecls, v);
       tud_opt = tdopt ? rnew(temp)(*tdopt) : NULL;
       break;
@@ -956,15 +903,6 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
   fprintf(stderr,"type-checking enumdecl %s",*v);
   fflush(stderr);
 #endif
-  // reject explicitly qualified name
-  switch ((*ed->name)[0]) {
-  case {.Rel_n = NULL}: 
-    // expand to qualified name
-    (*ed->name)[0] = Abs_n(te->ns, (ed->sc == ExternC));
-    break;
-  default: break;
-  }
-
   // check the fields.
   if (ed->fields != NULL) { region uprev_rgn; {
     list_t<field_name_t, `uprev_rgn> prev_fields = NULL;
@@ -989,7 +927,6 @@ void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
 	let $(t1,known) = Evexp::eval_const_uint_exp((exp_t)f->tag);
 	if(known) tag_count = t1+1;
       }
-      (*f->name)[0] = Abs_n(te->ns, (ed->sc == ExternC));
     }
   }}
 
@@ -1038,18 +975,6 @@ static bool okay_externC(seg_t loc, scope_t sc, bool in_include) {
   case ExternC:
     warn(loc,"nested extern \"C\" declaration");
     return true;
-  }
-}
-
-static void resolve_export_namespace(tenv_t te, $(seg_t,qvar_t,bool)@ exp) {
-  let $(loc,q,_) = *exp;
-  let &$(ns,v) = q;
-  switch (ns) {
-  case {.Rel_n = NULL}:
-    // expand to qualified name
-    (*q)[0] = Abs_n(te->ns, true); 
-    break;
-  default: break;
   }
 }
 
@@ -1133,24 +1058,8 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
       break;
 
     case &Using_d(&$(nsl,v),ds2):
-      // DAN: We're more imperative here too.
-      var_t first;
-      list_t<var_t> rest;
-      switch (nsl) {
-      case {.Loc_n = _}:       
-      case {.Rel_n = NULL}:
-      case {.C_n = NULL}:
-      case {.Abs_n = NULL}:
-        first = v; rest = NULL; break;
-      case {.Rel_n = &List(x,y)}: fallthru(x,y);
-      case {.C_n = &List(x,y)}: fallthru(x,y);
-      case {.Abs_n = &List(x,y)}:
-        first = x; rest = List::append(y,new List(v,NULL)); break;
-      }
-      let ns2 = resolve_namespace(te,loc,first,rest);
-      ge->availables = new List(ns2,ge->availables);
+      // DJG: using was handled by the previous pass
       tc_decls(te,ds2,in_externC,check_var_init,grgn,exports);
-      ge->availables = ge->availables->tl;
       break;
 
     case &ExternC_d(ds2):
@@ -1158,7 +1067,6 @@ static void tc_decls(tenv_t<`g> te, list_t<decl_t,`H> ds0,
       break;
 
     case &ExternCinclude_d(ds2,exports2):
-      List::iter_c(resolve_export_namespace,te,exports2);
       list_t<$(seg_t,qvar_t,bool)@> newexs = 
         List::append(exports2,exports ? *exports : NULL);
       { region temp;

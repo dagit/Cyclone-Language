@@ -399,20 +399,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         }
         // side effect
         *rgn_ptr = is_local ? curr_bl : &HeapRgn_val; 
-        switch (nsl) {
-        case {.Loc_n = _}: break;
-        case {.Rel_n = NULL}:
-          (*vd->name)[0] = Loc_n;
-          break;
-          // FIX: we allow this now, but can't happen here until
-          // we support local extern declarations
-        case {.C_n = _}: //throw impos("tcstmt: C_n declaration");
-        case {.Abs_n = _}: //throw impos("tcstmt: Abs_n declaration");
-        default:
-          terr(d->loc, "cannot declare a qualified local variable");
-          (*vd->name)[0] = Loc_n;
-          break;
-        }
         // if it's an array or string, fill in the size on the type
         switch (compress(t)) {
         case &FnType(_) && is_local: 
@@ -533,18 +519,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
           let vd = vds->hd;
           let &Vardecl(_,&$(nsl,_),_,t,_,*rgn_ptr,_,_) = vd;
           *rgn_ptr = curr_bl; // side effect
-          switch (nsl) {
-          case {.Loc_n = _}: break;
-          case {.Rel_n = NULL}:
-            (*vd->name)[0] = Loc_n;
-            break;
-          case {.Abs_n = y}: throw impos("tcstmt: Abs_n declaration");
-          default:
-            // JGM: not a problem since the parser won't allow a qualified
-            // variable in a Let_v pattern...
-            terr(d->loc, "cannot declare a qualified local variable");
-            break;
-          }
           check_type(s0->loc,te2,lookup_type_vars(te2),&tmk,true,true,t);
           te2 = add_local_var(decl_rgn,s->loc,te2,vd);
         }
@@ -599,13 +573,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         let curr_bl = Tcenv::curr_rgn(te);
         if (fd->sc != Public)
           terr(d->loc,"bad storage class for inner function");
-        // reject explicitly qualified name
-        switch ((*fd->name)[0]) {
-        case {.Rel_n = NULL}: break;
-        case {.Abs_n = y}: impos("tc: Abs_n in tcStmt var decl");
-        default: terr(d->loc,"explicit namespace not allowed on inner function declaration");
-        }
-        (*fd->name)[0] = Loc_n;
         check_fndecl_valid_type(d->loc,te,fd);
         type_t t = fndecl2typ(fd);
         fd->attributes = transfer_fn_type_atts(t,fd->attributes);

@@ -46,7 +46,6 @@ using Absyn;
 using Absynpp;
 using Tcenv;
 using Tcutil;
-
 namespace Tcexp;
 
 static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, string_t msg,
@@ -66,7 +65,6 @@ static type_t expr_err(tenv_t te,seg_t loc,type_t * topt, string_t msg,
 #define UNIQUE_ERR_MSG "Cannot consume non-unique paths; do swap instead"
 #endif
 
-//////////////////// Resolving References the Parser Cannot /////////////////
 static
 void resolve_unresolved_mem(tenv_t te, seg_t loc, type_t * topt, exp_t e,
 			    list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H> des){

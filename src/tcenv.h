@@ -67,8 +67,6 @@ extern struct Genv<`g::R> {
   dict_t<var_t,typedefdecl_t,`g>   typedefs; 
   // bool for tree-shaking
   dict_t<var_t,$(resolved_t,bool)@`g,`g> ordinaries;
-  // abs. names of "using" namespaces 
-  list_t<list_t<var_t>,`g> availables; 
 };
 typedef struct Genv<`r> @`r genv_t<`r>;
 
@@ -109,7 +107,6 @@ extern fenv_t<`r> nested_fenv(seg_t,fenv_t<`r> old_fenv, fndecl_t new_fn);
 extern fenv_t<`r> bogus_fenv(region_t<`r>, type_t ret_type, 
                              list_t<$(var_opt_t,tqual_t,type_t)@> args);
 
-extern list_t<var_t> resolve_namespace(tenv_t,seg_t,var_t,list_t<var_t,`H>);
 // when is_use is true, we are looking up a free occurrence of the variable
 extern resolved_t<`r>    lookup_ordinary(region_t<`r>,tenv_t,seg_t,qvar_t,bool is_use);
 extern aggrdecl_t@       lookup_aggrdecl(tenv_t,seg_t,qvar_t);

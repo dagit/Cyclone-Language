@@ -1022,7 +1022,7 @@ static void process_file(string_t<`H> filename) {
     return;
   }
 
-  // Binding resolution (result will change later)
+  // Binding resolution
   do_stage("binding", tds, do_binding, true, remove_fileptr, preprocfileptr);
   if(compile_failure) return;
 

@@ -157,6 +157,8 @@ void enter_using(seg_t loc, nsctxt_t<`a> ctxt, qvar_t usename) {
   switch(nsl) {
   case {.Rel_n = vs}: 
     ns = resolve_rel_ns(loc,ctxt,List::append(vs,new List(v,NULL)));
+    let abs_vs = List::rev(List::rev(ns)->tl);
+    (*usename)[0] = Abs_n(abs_vs,false);
     break;
   case {.Abs_n = vs}:
     ns = List::append(vs,new List(v,NULL));
@@ -285,6 +287,16 @@ void absolutize_decl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
 	Absynpp::qvar2string(qv));
   }
 }
+// This is a kludge because we find unbound type names (e.g., a struct name)
+// inside a function, but we need to give them absolute names, not
+// local names.  It's really C's kludge for allowing unbound types.
+void absolutize_topdecl(seg_t loc, env_t env, qvar_t qv, scope_t sc) {
+  let old_locals = env->local_vars;
+  env->local_vars = NULL;
+  absolutize_decl(loc,env,qv,sc);
+  env->local_vars = old_locals;
+}
+
 void resolve_and_add_vardecl(seg_t loc, env_t env, vardecl_t vd) {
   absolutize_decl(loc,env,vd->name,vd->sc);
   let &$(decl_ns,decl_name) = vd->name;
@@ -540,30 +552,31 @@ void resolve_aggrfields(seg_t loc, env_t env, list_t<aggrfield_t> fs) {
   return;
 }
 
+// FIX: The Datatype, Datatypefield, Aggr, and Enum cases should "wire up" known
+//      definitions, but this is hard to do with typedef.  The type-checker
+//      uses an indirection kludge that won't work as a prepass and requires
+//      thought.  So for now we just absolutize the names.
+// DO ME: see above
 void resolve_type(seg_t loc, env_t env, type_t t) { 
   switch(t) {
   case &DatatypeType(DatatypeInfo(*info,targs)):
     for(; targs != NULL; targs = targs->tl)
       resolve_type(loc,env,targs->hd);
-    return; // FIX: TYPEDEF PROBLEM
     switch(*info) {
-    case {.UnknownDatatype=UnknownDatatypeInfo(qv,_)}:
+    case {.UnknownDatatype=UnknownDatatypeInfo(qv,b)}:
       try { // FIX: sort of a hack just to grab more recent when extensible
 	let tud = resolve_lookup(loc,env->ns,qv,lookup_datatypedecl)->hd;
-	*info = KnownDatatype(new tud);
+	*info = UnknownDatatype(UnknownDatatypeInfo(tud->name, b));
 	return;
-      } catch {case &BindingError:
-	 err(loc,"unbound datatype %s",Absynpp::qvar2string(qv));
-	 return;
-      }
+      } catch {case &BindingError: 
+        absolutize_topdecl(loc,env,qv,Public); return;}
     case {.KnownDatatype=_}: return;
     }
   case &DatatypeFieldType(DatatypeFieldInfo(*info,targs)):
     for(; targs != NULL; targs = targs->tl)
       resolve_type(loc,env,targs->hd);
-    return; // FIX: TYPEDEF PROBLEM
     switch(*info) {
-    case {.UnknownDatatypefield=UnknownDatatypeFieldInfo(qvd,qvf,_)}:
+    case {.UnknownDatatypefield=UnknownDatatypeFieldInfo(qvd,qvf,b)}:
       // FIX?: We are doing the wrong thing in the presence of shadowing,
       //       but it is unclear we should allow field-shadowing anyway
       try 
@@ -575,7 +588,8 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
 		Absynpp::qvar2string(tuf->name));
 	    return;
 	  }
-	  *info = KnownDatatypefield(tud,tuf);
+	  *info = UnknownDatatypefield(UnknownDatatypeFieldInfo(tud->name,
+								tuf->name, b));
 	  return;
 	default: break;
 	}
@@ -588,7 +602,6 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
   case &AggrType(AggrInfo(*info,targs)): 
     for(; targs != NULL; targs = targs->tl)
       resolve_type(loc,env,targs->hd);
-    return; // FIX: TYPEDEF PROBLEM
     switch(*info) {
     case {.UnknownAggr=$(ak,qv,bo)}:
       try {
@@ -598,42 +611,38 @@ void resolve_type(seg_t loc, env_t env, type_t t) {
 	if(ak==UnionA && bo != NULL && ad->impl != NULL // ???
 	   && ad->impl->tagged != bo->v)
 	  err(loc,"@tagged mismatch with earlier declaration");
-	*info = KnownAggr(new ad);
+	*info = UnknownAggr(ak,ad->name,bo);
 	return;
-      } catch {case &BindingError: break; }
-      // sigh -- as in C, we add an abstract type declaration
-      // FIX: this surely is not the right scope -- could lead to weird errors?!
-      let ad = new Aggrdecl{ak,Extern,qv,NULL,NULL,NULL,false};
-      resolve_decl(env,new Decl(new Aggr_d(ad),loc));
-      *info = KnownAggr(new ad);
-      if(targs != NULL)
-	err(loc,"declared parameterized type %s before using",
-	    Absynpp::qvar2string(qv));
-      return;
+      } catch {case &BindingError: 
+        absolutize_topdecl(loc,env,qv,Public); return;}
     case {.KnownAggr=_}: return;
     }
+  case &EnumType(*qv,edo): 
+    if(edo != NULL)
+      return;
+    try {
+      let ed = resolve_lookup(loc,env->ns,*qv,lookup_enumdecl);
+      *qv = ed->name;
+      return;
+    } catch {case &BindingError: 
+      absolutize_topdecl(loc,env,*qv,Public); return;}
 
-  case &TypedefType(tdn,targs,*tdo,_): 
+  case &TypedefType(*tdn,targs,*tdo,_): 
     for(; targs != NULL; targs = targs->tl)
       resolve_type(loc,env,targs->hd);
-    return; // FIX: TYPEDEF PROBLEM
     try {
-      let td = resolve_lookup(loc,env->ns,tdn,lookup_typedefdecl);
-      *tdo = td;
-      tdn[0] = td->name[0];
+      let td = resolve_lookup(loc,env->ns,*tdn,lookup_typedefdecl);
+      //      *tdo = td; // FIX: TYPEDEF PROBLEM (defn already resolved for now)
+      *tdn = td->name;
       return;
     } catch {case &BindingError: break; }
-    err(loc,"unbound typdef name %s",Absynpp::qvar2string(tdn));
+    err(loc,"unbound typdef name %s",Absynpp::qvar2string(*tdn));
     return;
-
-  case &EnumType(...): 
-    return; // FIX: TYPEDEF PROBLEM
-    // DO ME: wire up Enumdecl
 
   case &TypeDeclType(td,*to): 
     // FIX?: notice we are hoisting in a weird way
     let old_locals = env->local_vars;
-      env->local_vars = NULL;
+    env->local_vars = NULL;
     switch(td->r) {
     case &Aggr_td(ad): 
       resolve_decl(env, new Decl(new Aggr_d(ad),td->loc)); break;
@@ -792,11 +801,8 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
     resolve_pat(env,p2);
     fallthru(vd);
   case &TagInt_p(_,vd): fallthru(vd);
-  case &AliasVar_p(_,vd):
-    absolutize_decl(loc,env,vd->name,Public);
-    *env->local_vars = Dict::insert(*env->local_vars, (*vd->name)[1],
-				    new VarRes(new Pat_b(vd)));
-    break;
+  case &AliasVar_p(_,vd): // in AliasVar case, type may need resolving!
+    resolve_and_add_vardecl(loc,env,vd); break;
 
   case &Pointer_p(p2): resolve_pat(env,p2); return;
   case &Tuple_p(ps,_):
@@ -1027,7 +1033,7 @@ void resolve_decl(env_t env, decl_t d) {
 						 decl_name,new List(tud,decls));
     } catch { 
     case &BindingError: 
-      absolutize_decl(loc,env,tud->name,tud->sc); 
+      absolutize_topdecl(loc,env,tud->name,tud->sc); 
       let &$(decl_ns,decl_name) = tud->name;
       let decl_ns_data = get_ns_data(env->ns,decl_ns);
       // ignore abstract-after-concrete (for non-extensible)

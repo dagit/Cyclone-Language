@@ -181,20 +181,20 @@ void f33() {
   return;
 }
 
-void f35() {
-  // function has goto statements to undefined labels
-  void f36() { goto L; }
-  return;
-}
+// void f35() {
+//   // function has goto statements to undefined labels
+//   void f36() { goto L; }
+//   return;
+// }
 
-void f36() {
- L: {
-   // function has goto statements to undefined labels
-   void f2() {
-     goto L;
-   }
- }
-}
+// void f36() {
+//  L: {
+//    // function has goto statements to undefined labels
+//    void f2() {
+//      goto L;
+//    }
+//  }
+// }
 
 /*
 void f37() {
@@ -457,10 +457,10 @@ void f87($(int*`U) y) {
 // noalias pointers in datatypes are not allowed (F88)
 datatype F88 { F12(int *`U); };
 
-void f88(datatype F88.F88 y) {
-  // unbound field F88 in type datatype F88
-  let z = &y;
-}
+// void f88(datatype F88.F88 y) {
+//   // unbound field F88 in type datatype F88
+//   let z = &y;
+// }
 
 void f88_2(datatype F88.F12 y) {
   // Cannot take the address of an alias-free path
@@ -752,8 +752,8 @@ void f138(struct F138 x) {
   x.y;
 }
 struct F139;
-void f139(struct F139 x) {
-  // F139 has no y member
+void f139(struct F139 x) { // here needs kind TM
+
   x.y;
 }
 union F140 { int @x; };

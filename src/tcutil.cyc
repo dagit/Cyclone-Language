@@ -3873,7 +3873,6 @@ static $(cvtenv_t<`r>,relns_t)
 // * expand typedefs
 // * set pointers (or Known* variants) to declarations for
 //   StructType, UnionType, DatatypeType, DatatypeFieldType
-// * change relative type names to absolute type names
 // * set the kind field of type variables: we use the expected kind
 //   initially, but if later constraints force a more constrained kind,
 //   then we move to the more constrained kind.  This is why we propagate
@@ -3972,11 +3971,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
 
         unsigned int t1 = Evexp::eval_const_uint_exp((exp_t)f->tag)[0];
         tag_count = t1+1;
-        switch ((*f->name)[0]) {
-        case {.Rel_n = _}:
-          (*f->name)[0] = Abs_n(te->ns,false); break;
-        default: break;
-        }
         ge->ordinaries = Dict::insert(ge->ordinaries, (*f->name)[1],
                                       new $(new AnonEnumRes(t,f), true));
       }
@@ -3995,12 +3989,8 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
         enumdecl_t @ed = lookup_enumdecl(te,loc,n);
         *edp = *ed;
         break;
-        //terr(loc,"unbound type enum %s",qvar2string(n));
-        //return cvtenv;
       }
     enumdecl_t ed = (enumdecl_t)*edp;
-    // Make relative name absolute
-    *n = (ed->name)[0];
     break;
   case &DatatypeType(DatatypeInfo(*info,*targsp)):
     let targs = *targsp;
@@ -4021,8 +4011,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
           return cvtenv;
         }
         break;
-        // terr(loc,"unbound type datatype %s",qvar2string(n));
-        // return cvtenv;
       }
       // JGM: I'm allowing someone to just write "datatype Foo" even
       // when the datatype is extensible.
@@ -4700,8 +4688,6 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       return cvtenv;
     }
     *tdopt = td;
-    // Make relative name absolute (or replace absolute name with itself)
-    tdn[0] = td->name[0];
     list_t<tvar_t> tvs = td->tvs;
     list_t<type_t> ts = targs;
     TEMP_RGN(te, temp) {
