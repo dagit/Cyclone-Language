@@ -506,7 +506,7 @@ this_line=((struct _fat_ptr(*)(struct Cyc_Lexing_lexbuf*))Cyc_Lexing_lexeme)(lbu
 if((int)next == 2 || eol > (*((struct _tuple1*)places->hd)).f1)
 break;
 # 110
-if((int)next == 0)++ line;else{
+if((int)next == (int)0U)++ line;else{
 # 112
 struct _tuple0*fno=Cyc_Lineno_parse_linedef(this_line);
 if(fno == 0)
@@ -515,7 +515,7 @@ if(fno == 0)
 source_file=(struct _fat_ptr)(*fno).f1;
 line=(*fno).f2;}}}
 # 123
-while(places != 0 &&((int)next == (int)2U || eol > (*((struct _tuple1*)places->hd)).f1)){
+while(places != 0 &&((int)next == 2 || eol > (*((struct _tuple1*)places->hd)).f1)){
 struct Cyc_Lineno_Pos*_tmp16=(*((struct _tuple1*)places->hd)).f2;struct Cyc_Lineno_Pos*p=_tmp16;
 ({struct _fat_ptr _tmp25=(struct _fat_ptr)Cyc_strdup((struct _fat_ptr)source_file);p->logical_file=_tmp25;});
 p->line=this_line;

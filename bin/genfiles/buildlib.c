@@ -2414,8 +2414,8 @@ Cyc_Arg_current=0;
 if((((Cyc_badparse ||
  !Cyc_do_setjmp && Cyc_spec_files == 0)||
  Cyc_do_setjmp && Cyc_spec_files != 0)||
- Cyc_do_setjmp &&(int)Cyc_mode == 1)||
- Cyc_do_setjmp &&(int)Cyc_mode == 2){
+ Cyc_do_setjmp &&(int)Cyc_mode == (int)Cyc_GATHER)||
+ Cyc_do_setjmp &&(int)Cyc_mode == (int)Cyc_GATHERSCRIPT){
 ({struct Cyc_List_List*_tmp5B8=options;Cyc_Arg_usage(_tmp5B8,({const char*_tmp334="Usage: buildlib [options] specfile1 specfile2 ...\nOptions:";_tag_fat(_tmp334,sizeof(char),59U);}));});
 # 2000
 return 1;}{
@@ -2447,7 +2447,7 @@ return 1;}
 if(Cyc_verbose)
 ({struct Cyc_String_pa_PrintArg_struct _tmp350=({struct Cyc_String_pa_PrintArg_struct _tmp3EE;_tmp3EE.tag=0,_tmp3EE.f1=(struct _fat_ptr)((struct _fat_ptr)Cyc_output_dir);_tmp3EE;});void*_tmp34E[1];_tmp34E[0]=& _tmp350;({struct Cyc___cycFILE*_tmp5CA=Cyc_stderr;struct _fat_ptr _tmp5C9=({const char*_tmp34F="Output directory is %s\n";_tag_fat(_tmp34F,sizeof(char),24U);});Cyc_fprintf(_tmp5CA,_tmp5C9,_tag_fat(_tmp34E,sizeof(void*),1));});});
 # 2035
-if((int)Cyc_mode == (int)Cyc_GATHERSCRIPT){
+if((int)Cyc_mode == 2){
 ({struct Cyc_String_pa_PrintArg_struct _tmp353=({struct Cyc_String_pa_PrintArg_struct _tmp3EF;_tmp3EF.tag=0,_tmp3EF.f1=(struct _fat_ptr)((struct _fat_ptr)Cyc_output_dir);_tmp3EF;});void*_tmp351[1];_tmp351[0]=& _tmp353;({struct _fat_ptr _tmp5CB=({const char*_tmp352="cd %s\n";_tag_fat(_tmp352,sizeof(char),7U);});Cyc_prscript(_tmp5CB,_tag_fat(_tmp351,sizeof(void*),1));});});
 ({struct Cyc_String_pa_PrintArg_struct _tmp356=({struct Cyc_String_pa_PrintArg_struct _tmp3F0;_tmp3F0.tag=0,_tmp3F0.f1=(struct _fat_ptr)((struct _fat_ptr)Cyc_target_cflags);_tmp3F0;});void*_tmp354[1];_tmp354[0]=& _tmp356;({struct _fat_ptr _tmp5CC=({const char*_tmp355="echo | $GCC %s -E -dM - -o INITMACROS.h\n";_tag_fat(_tmp355,sizeof(char),41U);});Cyc_prscript(_tmp5CC,_tag_fat(_tmp354,sizeof(void*),1));});});}
 # 2041
@@ -2482,7 +2482,7 @@ if(Cyc_process_specfile((const char*)((struct Cyc_List_List*)_check_null(Cyc_spe
 ({void*_tmp365=0U;({struct Cyc___cycFILE*_tmp5D9=Cyc_stderr;struct _fat_ptr _tmp5D8=({const char*_tmp366="FATAL ERROR -- QUIT!\n";_tag_fat(_tmp366,sizeof(char),22U);});Cyc_fprintf(_tmp5D9,_tmp5D8,_tag_fat(_tmp365,sizeof(void*),0));});});
 exit(1);}}}
 # 2087
-if((int)Cyc_mode == (int)Cyc_GATHERSCRIPT)
+if((int)Cyc_mode == 2)
 Cyc_fclose((struct Cyc___cycFILE*)_check_null(Cyc_script_file));else{
 # 2090
 if(!Cyc_gathering()){

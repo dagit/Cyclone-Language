@@ -729,7 +729,7 @@ if(okay2){
 # 437
 enum Cyc_AssnDef_Primreln _tmp6E=p;switch((int)_tmp6E){case Cyc_AssnDef_ULt:
 # 440
- if(c2 == (unsigned)0)return 0;
+ if(c2 == 0U)return 0;
 c2=c2 - (unsigned)1;
 goto _LL15;case Cyc_AssnDef_ULte: _LL15:
 # 445
@@ -744,7 +744,7 @@ return({struct Cyc_PrattProver_Graph*_tmpDF=g;void*_tmpDE=t1;void*_tmpDD=Cyc_Ass
 # 455
 return 1;case Cyc_AssnDef_SLt:
 # 458
- if(c2 == (unsigned)-2147483648)return 0;
+ if(c2 == 2147483648U)return 0;
 c2=c2 - (unsigned)1;
 goto _LL19;case Cyc_AssnDef_SLte: _LL19:
 # 463
@@ -767,7 +767,7 @@ enum Cyc_AssnDef_Primreln _tmp71=p;switch((int)_tmp71){case Cyc_AssnDef_ULt:
 c1=c1 + (unsigned)1;
 goto _LL20;case Cyc_AssnDef_ULte: _LL20:
 # 484
- if(c1 > (unsigned)2147483647){
+ if(c1 > 2147483647U){
 # 487
 if(!({struct Cyc_PrattProver_Graph*_tmpEB=g;void*_tmpEA=t2;Cyc_PrattProver_add_edge(_tmpEB,1,_tmpEA,Cyc_AssnDef_zero(),- 1,0);}))return 0;{
 int k=-(int)c1;

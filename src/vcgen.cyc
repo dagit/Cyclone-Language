@@ -162,6 +162,16 @@ static assn_t may_widen(env_t env, assn_t a);
 ////////// Updating an Assertion //////////////////
 static term_t fresh_nonescvar(env_t env, vardecl_t vd);
 
+static assn_t kill_var(env_t env, vardecl_t vd, assn_t a) {
+  if (vd->escapes) {
+    a = kill(a);
+  } else {
+    let v2 = fresh_nonescvar(env,vd);
+    a = subst(vd,v2,a);
+  }
+  return a;
+}
+
 // We are executing tgt := src
 static assn_t do_assign(env_t env, assn_t a, term_opt_t tgt, term_opt_t src) {
   switch (tgt) {
@@ -646,7 +656,8 @@ static assn_t vcgen_switch(env_t env, list_t<switch_clause_t> scs, assn_t ain) {
         //if (eopt != NULL)
         //  a = do_assign(env,a,new Var(*vdopt),vcgen_rexp(env,(exp_t)eopt,a)[0]);
         //else 
-          a = do_assign(env,a,new Var(*vdopt),fresh_var((*vdopt)->type));
+          a = kill_var(env,*vdopt,a);
+          //do_assign(env,a,new Var(*vdopt),fresh_var((*vdopt)->type));
       }
     }
     if (sc->where_clause != NULL) 
@@ -660,7 +671,7 @@ static assn_t add_vardecl(env_t env, vardecl_t vd, assn_t a) {
   // stupid C semantics means I have to put in a dummy value for vd first,
   // then run the initializer.  
   let tv = new Var(vd);
-  a = do_assign(env,a,tv,fresh_var(vd->type));
+  a = kill_var(env,vd,a);
   if (vd->initializer != NULL) {
     let $(t,a1) = vcgen_rexp(env,(exp_t)vd->initializer,a);
     a = do_assign(env,a1,tv,t);

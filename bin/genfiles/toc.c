@@ -2008,7 +2008,7 @@ e->r=_tmp7FB;});}else{
 if(Cyc_Tcutil_is_zero_pointer_type_elt(old_typ,& elt_typ)){
 # 1805
 did_inserted_checks=1;
-if((int)incr != 1){
+if((int)incr != (int)1U){
 struct _tuple1*_tmp2F5=Cyc_Toc_temp_var();struct _tuple1*x=_tmp2F5;
 void*_tmp2F6=({void*_tmp7FC=Cyc_Toc_typ_to_c(old_typ);Cyc_Absyn_cstar_type(_tmp7FC,Cyc_Toc_mt_tq);});void*t=_tmp2F6;
 struct Cyc_Absyn_Exp*_tmp2F7=Cyc_Toc_push_address_exp(e2);struct Cyc_Absyn_Exp*xexp=_tmp2F7;

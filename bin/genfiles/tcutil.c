@@ -2193,8 +2193,8 @@ return({struct Cyc_List_List*_tmp28B=_region_malloc(r,sizeof(*_tmp28B));({struct
 static int Cyc_Tcutil_isomorphic(void*t1,void*t2){
 struct _tuple15 _tmp28C=({struct _tuple15 _tmp503;({void*_tmp607=Cyc_Absyn_compress(t1);_tmp503.f1=_tmp607;}),({void*_tmp606=Cyc_Absyn_compress(t2);_tmp503.f2=_tmp606;});_tmp503;});struct _tuple15 _stmttmp51=_tmp28C;struct _tuple15 _tmp28D=_stmttmp51;enum Cyc_Absyn_Size_of _tmp28F;enum Cyc_Absyn_Size_of _tmp28E;if(*((int*)_tmp28D.f1)== 0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp28D.f1)->f1)== 1){if(*((int*)_tmp28D.f2)== 0){if(*((int*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp28D.f2)->f1)== 1){_tmp28E=((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp28D.f1)->f1)->f2;_tmp28F=((struct Cyc_Absyn_IntCon_Absyn_TyCon_struct*)((struct Cyc_Absyn_AppType_Absyn_Type_struct*)_tmp28D.f2)->f1)->f2;{enum Cyc_Absyn_Size_of b1=_tmp28E;enum Cyc_Absyn_Size_of b2=_tmp28F;
 # 1799
-return((int)b1 == (int)b2 ||(int)b1 == 2 &&(int)b2 == (int)3U)||
-(int)b1 == 3 &&(int)b2 == (int)Cyc_Absyn_Int_sz;}}else{goto _LL3;}}else{goto _LL3;}}else{goto _LL3;}}else{_LL3:
+return((int)b1 == (int)b2 ||(int)b1 == (int)2U &&(int)b2 == (int)3U)||
+(int)b1 == (int)3U &&(int)b2 == (int)Cyc_Absyn_Int_sz;}}else{goto _LL3;}}else{goto _LL3;}}else{goto _LL3;}}else{_LL3:
  return 0;};}
 # 1807
 int Cyc_Tcutil_subtype(struct Cyc_RgnOrder_RgnPO*po,struct Cyc_List_List*assume,void*t1,void*t2){
@@ -2753,7 +2753,7 @@ int bad;
  bad=w > 8U;goto _LL8;case Cyc_Absyn_Short_sz:
  bad=w > 16U;goto _LL8;case Cyc_Absyn_Long_sz:
  goto _LL10;case Cyc_Absyn_Int_sz: _LL10:
- bad=w > 32U;goto _LL8;case Cyc_Absyn_LongLong_sz:
+ bad=w > (unsigned)32;goto _LL8;case Cyc_Absyn_LongLong_sz:
  goto _LL14;default: _LL14:
  bad=w > (unsigned)64;goto _LL8;}_LL8:;}
 # 2462

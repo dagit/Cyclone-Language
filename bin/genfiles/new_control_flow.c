@@ -1697,7 +1697,7 @@ void*_tmp266=(void*)ds->hd;void*_stmttmp50=_tmp266;void*_tmp267=_stmttmp50;void*
 field_no=Cyc_CfFlowInfo_get_field_index_fs(fs,fld);
 *((void**)_check_fat_subscript(aggrdict,sizeof(void*),field_no))=(void*)rvals->hd;
 # 1574
-if((int)kind == (int)1U){
+if((int)kind == 1){
 struct Cyc_Absyn_Exp*_tmp26B=(*((struct _tuple27*)des->hd)).f2;struct Cyc_Absyn_Exp*e=_tmp26B;
 f=Cyc_NewControlFlow_use_Rval(env,e->loc,f,(void*)rvals->hd);
 # 1578

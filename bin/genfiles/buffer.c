@@ -440,7 +440,7 @@ unsigned long len=b->length;
 unsigned long new_len=len == (unsigned long)0?1U: len;
 struct _fat_ptr new_buffer;
 while(b->position + more > new_len){
-new_len=2U * new_len;}
+new_len=(unsigned long)2 * new_len;}
 # 116
 new_buffer=({unsigned _tmp1C=new_len + (unsigned long)1;_tag_fat(_region_calloc(Cyc_Core_unique_region,sizeof(char),_tmp1C),sizeof(char),_tmp1C);});
 if(b->length != (unsigned)0){

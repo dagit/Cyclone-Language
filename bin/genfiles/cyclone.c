@@ -1083,7 +1083,7 @@ if(({char*_tmp309=(char*)s.curr;_tmp309 == (char*)(_tag_fat(0,0,0)).curr;}))retu
 struct Cyc_List_List*_tmp95=0;struct Cyc_List_List*result=_tmp95;
 unsigned long _tmp96=Cyc_strlen((struct _fat_ptr)s);unsigned long len=_tmp96;
 # 621
-while(len > 0U){
+while(len > (unsigned long)0){
 struct _fat_ptr _tmp97=Cyc_strchr(s,c);struct _fat_ptr end=_tmp97;
 if(({char*_tmp30A=(char*)end.curr;_tmp30A == (char*)(_tag_fat(0,0,0)).curr;})){
 result=({struct Cyc_List_List*_tmp99=_cycalloc(sizeof(*_tmp99));({struct _fat_ptr*_tmp30B=({struct _fat_ptr*_tmp98=_cycalloc(sizeof(*_tmp98));*_tmp98=s;_tmp98;});_tmp99->hd=_tmp30B;}),_tmp99->tl=result;_tmp99;});
@@ -1127,7 +1127,7 @@ int _tmpA1=0;int single_quotes=_tmpA1;
 int _tmpA2=0;int other_special=_tmpA2;
 {int i=0;for(0;(unsigned long)i < len;++ i){
 char _tmpA3=*((const char*)_check_fat_subscript(s,sizeof(char),i));char c=_tmpA3;
-if((int)c == 39)++ single_quotes;else{
+if((int)c == (int)'\'')++ single_quotes;else{
 if(Cyc_is_other_special(c))++ other_special;}}}
 # 682
 if(single_quotes == 0 && other_special == 0)
@@ -1282,7 +1282,7 @@ if(inter_file != 0)
 Cyc_file_close(inter_file);
 Cyc_file_close(inter_objfile);}}}}
 # 861
-if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= (int)Cyc_Flags_Toc)
+if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= 9)
 tds=({struct _fat_ptr _tmp34C=({const char*_tmpE9="translation to C";_tag_fat(_tmpE9,sizeof(char),17U);});struct Cyc_List_List*_tmp34B=tds;struct Cyc_Hashtable_Table*_tmp34A=((struct Cyc_JumpAnalysis_Jump_Anal_Result*)_check_null(jump_tables))->pop_tables;((struct Cyc_List_List*(*)(struct _fat_ptr,struct Cyc_List_List*,struct Cyc_List_List*(*)(struct Cyc_Hashtable_Table*,struct Cyc_List_List*),struct Cyc_Hashtable_Table*,struct Cyc_List_List*))Cyc_do_stage)(_tmp34C,_tmp34B,Cyc_do_translate,_tmp34A,tds);});
 # 865
 if(!Cyc_compile_failure &&(int)Cyc_Flags_stop_after_pass >= 10)
@@ -1316,7 +1316,7 @@ if(Cyc_output_file != 0)
 out_file=({struct _fat_ptr _tmp35A=*((struct _fat_ptr*)_check_null(Cyc_output_file));struct _fat_ptr _tmp359=({const char*_tmpFA="w";_tag_fat(_tmpFA,sizeof(char),2U);});Cyc_try_file_open(_tmp35A,_tmp359,({const char*_tmpFB="output file";_tag_fat(_tmpFB,sizeof(char),12U);}));});else{
 # 899
 out_file=Cyc_stdout;}}else{
-if((int)Cyc_Flags_stop_after_pass < (int)Cyc_Flags_CCompiler && Cyc_output_file != 0)
+if((int)Cyc_Flags_stop_after_pass < 13 && Cyc_output_file != 0)
 out_file=({struct _fat_ptr _tmp35C=*((struct _fat_ptr*)_check_null(Cyc_output_file));struct _fat_ptr _tmp35B=({const char*_tmpFC="w";_tag_fat(_tmpFC,sizeof(char),2U);});Cyc_try_file_open(_tmp35C,_tmp35B,({const char*_tmpFD="output file";_tag_fat(_tmpFD,sizeof(char),12U);}));});else{
 # 903
 out_file=({struct _fat_ptr _tmp35E=(struct _fat_ptr)cfile;struct _fat_ptr _tmp35D=({const char*_tmpFE="w";_tag_fat(_tmpFE,sizeof(char),2U);});Cyc_try_file_open(_tmp35E,_tmp35D,({const char*_tmpFF="output file";_tag_fat(_tmpFF,sizeof(char),12U);}));});}}

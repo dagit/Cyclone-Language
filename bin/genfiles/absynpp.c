@@ -656,7 +656,7 @@ static int Cyc_Absynpp_special(struct _fat_ptr s){
 int sz=(int)(_get_fat_size(s,sizeof(char))- (unsigned)1);
 {int i=0;for(0;i < sz;++ i){
 char c=*((const char*)_check_fat_subscript(s,sizeof(char),i));
-if((((int)c <= 32 ||(int)c >= 126)||(int)c == (int)'"')||(int)c == 92)
+if((((int)c <= (int)' ' ||(int)c >= 126)||(int)c == 34)||(int)c == 92)
 return 1;}}
 # 297
 return 0;}
@@ -681,7 +681,7 @@ char _tmp1F=*((const char*)_check_fat_subscript(s,sizeof(char),i));char _stmttmp
  goto _LL12;case 34: _LL12:
  len +=2;goto _LL0;default: _tmp21=_tmp20;{char c=_tmp21;
 # 320
-if((int)c >= 32 &&(int)c <= 126)++ len;else{
+if((int)c >= 32 &&(int)c <= (int)'~')++ len;else{
 len +=4;}
 goto _LL0;}}_LL0:;}}{
 # 325

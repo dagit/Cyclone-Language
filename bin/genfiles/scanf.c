@@ -649,7 +649,7 @@ int c=_IO_peekc(fp);
 while((int)*((char*)_check_known_subscript_notnull(ccltab,256U,sizeof(char),(int)((char)c)))){
 ++ n;
 _IO_getc(fp);
-if(-- width == (long long)0)
+if(-- width == 0)
 break;
 if((c=_IO_peekc(fp))== - 1){
 if(n == 0)
@@ -664,7 +664,7 @@ struct _fat_ptr p4=(struct _fat_ptr)Cyc_va_arg_string_ptr(*((void**)_check_fat_s
 struct _fat_ptr p5=p4;
 int c=_IO_peekc(fp);
 while((int)*((char*)_check_known_subscript_notnull(ccltab,256U,sizeof(char),(int)((char)c)))){
-if(_get_fat_size(p5,sizeof(char))== (unsigned)0)goto eof_failure;
+if(_get_fat_size(p5,sizeof(char))== 0U)goto eof_failure;
 *((char*)_check_fat_subscript(p5,sizeof(char),0U))=(char)c;
 _fat_ptr_inplace_plus(& p5,sizeof(char),1);
 _IO_getc(fp);
@@ -679,7 +679,7 @@ break;}}
 n=(p5.curr - p4.curr)/ sizeof(char);
 if(n == 0)
 goto match_failure;
-if(_get_fat_size(p5,sizeof(char))== (unsigned)0)goto eof_failure;
+if(_get_fat_size(p5,sizeof(char))== 0U)goto eof_failure;
 *((char*)_check_fat_subscript(p5,sizeof(char),0U))='\000';
 ++ nassigned;}}
 # 505
@@ -712,7 +712,7 @@ if(_get_fat_size(p3,sizeof(char))== (unsigned)0)goto eof_failure;
 _fat_ptr_inplace_plus(& p3,sizeof(char),1);
 if(-- width == 0)
 break;
-if((c=_IO_peekc(fp))== -1){
+if((c=_IO_peekc(fp))== - 1){
 ++ seen_eof;
 break;}}
 # 542

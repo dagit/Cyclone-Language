@@ -898,7 +898,7 @@ Cyc_Tctyp_check_type(loc,te,tvs,field_kind,0,0,t);
 Cyc_Tcutil_check_bitfield(loc,t,width,fn);
 # 369
 if((unsigned)requires_clause){
-if((int)str_or_union != (int)1U)
+if((int)str_or_union != 1)
 ({struct Cyc_Warn_String_Warn_Warg_struct _tmpC1=({struct Cyc_Warn_String_Warn_Warg_struct _tmp1E1;_tmp1E1.tag=0,({struct _fat_ptr _tmp29E=({const char*_tmpC2="@requires clauses are allowed only on union members";_tag_fat(_tmpC2,sizeof(char),52U);});_tmp1E1.f1=_tmp29E;});_tmp1E1;});void*_tmpC0[1];_tmpC0[0]=& _tmpC1;({unsigned _tmp29F=loc;Cyc_Warn_err2(_tmp29F,_tag_fat(_tmpC0,sizeof(void*),1));});});{
 struct Cyc_Tcenv_Tenv*_tmpC3=Cyc_Tcenv_allow_valueof(te);struct Cyc_Tcenv_Tenv*te2=_tmpC3;
 Cyc_Tcexp_tcExp(te2,0,requires_clause);
@@ -932,7 +932,7 @@ void*_tmpD7=Cyc_Kinds_compress_kb(((struct Cyc_Absyn_Tvar*)tvs2->hd)->kind);void
 # 407
 ({struct Cyc_Core_Opt*_tmp2AD=({struct Cyc_Core_Opt*_tmpDC=_cycalloc(sizeof(*_tmpDC));({void*_tmp2AC=Cyc_Kinds_kind_to_bound(& Cyc_Kinds_bk);_tmpDC->v=_tmp2AC;});_tmpDC;});*f=_tmp2AD;});continue;}case 2: switch((int)((struct Cyc_Absyn_Kind*)((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_tmpD8)->f2)->kind){case Cyc_Absyn_MemKind: _tmpDA=(struct Cyc_Core_Opt**)&((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_tmpD8)->f1;_tmpD9=(((struct Cyc_Absyn_Less_kb_Absyn_KindBound_struct*)_tmpD8)->f2)->aliasqual;{struct Cyc_Core_Opt**f=_tmpDA;enum Cyc_Absyn_AliasQual a=_tmpD9;
 # 409
-if(constrain_top_kind &&(int)a == (int)2U)
+if(constrain_top_kind &&(int)a == 2)
 ({struct Cyc_Core_Opt*_tmp2AF=({struct Cyc_Core_Opt*_tmpDE=_cycalloc(sizeof(*_tmpDE));({void*_tmp2AE=Cyc_Kinds_kind_to_bound(({struct Cyc_Absyn_Kind*_tmpDD=_cycalloc(sizeof(*_tmpDD));_tmpDD->kind=Cyc_Absyn_BoxKind,_tmpDD->aliasqual=Cyc_Absyn_Aliasable;_tmpDD;}));_tmpDE->v=_tmp2AE;});_tmpDE;});*f=_tmp2AF;});else{
 # 412
 ({struct Cyc_Core_Opt*_tmp2B1=({struct Cyc_Core_Opt*_tmpE0=_cycalloc(sizeof(*_tmpE0));({void*_tmp2B0=Cyc_Kinds_kind_to_bound(({struct Cyc_Absyn_Kind*_tmpDF=_cycalloc(sizeof(*_tmpDF));_tmpDF->kind=Cyc_Absyn_BoxKind,_tmpDF->aliasqual=a;_tmpDF;}));_tmpE0->v=_tmp2B0;});_tmpE0;});*f=_tmp2B1;});}

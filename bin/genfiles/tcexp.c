@@ -1746,7 +1746,7 @@ if(({unsigned _tmp746=(unsigned)((int(*)(struct Cyc_List_List*))Cyc_List_length)
 ({struct Cyc_Int_pa_PrintArg_struct _tmp287=({struct Cyc_Int_pa_PrintArg_struct _tmp569;_tmp569.tag=1,({
 unsigned long _tmp747=(unsigned long)((int(*)(struct Cyc_List_List*))Cyc_List_length)(tuf->typs);_tmp569.f1=_tmp747;});_tmp569;});struct Cyc_Int_pa_PrintArg_struct _tmp288=({struct Cyc_Int_pa_PrintArg_struct _tmp568;_tmp568.tag=1,_tmp568.f1=(unsigned long)((int)n);_tmp568;});void*_tmp285[2];_tmp285[0]=& _tmp287,_tmp285[1]=& _tmp288;({unsigned _tmp749=loc;struct _fat_ptr _tmp748=({const char*_tmp286="datatype field has too few components: %d < %d";_tag_fat(_tmp286,sizeof(char),47U);});Cyc_Tcutil_terr(_tmp749,_tmp748,_tag_fat(_tmp285,sizeof(void*),2));});});else{
 # 1303
-if(n != 0U)
+if(n != (unsigned)0)
 t=(*((struct _tuple17*(*)(struct Cyc_List_List*,int))Cyc_List_nth)(tuf->typs,(int)(n - (unsigned)1))).f2;else{
 if(l->tl != 0)
 ({void*_tmp289=0U;({unsigned _tmp74B=loc;struct _fat_ptr _tmp74A=({const char*_tmp28A="datatype field index 0 refers to the tag; cannot be indexed through";_tag_fat(_tmp28A,sizeof(char),68U);});Cyc_Tcutil_terr(_tmp74B,_tmp74A,_tag_fat(_tmp289,sizeof(void*),0));});});}}

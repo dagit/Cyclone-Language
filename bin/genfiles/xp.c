@@ -401,7 +401,7 @@ unsigned long Cyc_XP_fromint(int n,struct _fat_ptr z,unsigned long u){
 int i=0;
 do{
 *((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i ++))=(unsigned char)(u % (unsigned long)(1 << 8));}while(
-(u /=(unsigned long)(1 << 8))> 0U && i < n);
+(u /=(unsigned long)(1 << 8))> (unsigned long)0 && i < n);
 for(1;i < n;++ i){
 *((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))='\000';}
 return u;}
@@ -434,7 +434,7 @@ int i;
 for(i=0;i < n;++ i){
 int d=({int _tmp25=((int)*((unsigned char*)_check_fat_subscript(x,sizeof(unsigned char),i))+ (1 << 8))- borrow;_tmp25 - (int)*((unsigned char*)_check_fat_subscript(y,sizeof(unsigned char),i));});
 *((unsigned char*)_check_fat_subscript(z,sizeof(unsigned char),i))=(unsigned char)(d % (1 << 8));
-borrow=1 - d / (1 << 8);}
+borrow=1 - d / 256U;}
 # 56
 return borrow;}
 # 58
