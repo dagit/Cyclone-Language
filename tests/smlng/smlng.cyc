@@ -5,6 +5,7 @@
 #include <string.h>
 #include "smlng.h"
 #include "tag_elim.h"
+#include "dynamic.h"
 #include "timer.h"
 #include "buffer.h"
 #include "parser.h"
@@ -338,7 +339,6 @@ int main(int argc, char ??argv) {
   //fprintf(stderr,"%d\nflatten into array...", check_time());
   //d = Flat::flatten_array(d);
   
-  //is_change = false;
   is_change = true;
   int round_num = 1;
   while(is_change && check_time() > 2) {
@@ -355,13 +355,22 @@ int main(int argc, char ??argv) {
       d = TagElim::up_shuffle(d)[0];
       fprintf(stderr,"%d\nunder_elim...", check_time()); fflush(stderr);
       d = TagElim::under_elim(d)[0];
-            // down_opt must precede up_opt
+            // down_opt must precede up_opt 
       fprintf(stderr,"%d\ndown_opt...", check_time()); fflush(stderr);
       d = down_opt(init_context,d);
       is_change = true;
       round_num = 0;
     }
-  }} catch {
+  }
+  //not sure how much time we need, notice we wait until cheaper things have run
+  fprintf(stderr,"%d\ndynamic_regions...", check_time()); fflush(stderr);
+  let $(d2,TagElim::DynSynth(sz,col)) = TagElim::dynamic_regions(d);
+  d = d2;
+  if(sz)
+    d = dynamic_size(d);
+  if(col)
+    d = dynamic_color(d);
+  } catch {
   case e: 
     fprintf(stderr, "...uncaught exception! dumping anyway...");
     fflush(stderr);

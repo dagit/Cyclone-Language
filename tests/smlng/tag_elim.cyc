@@ -4,6 +4,7 @@
 #include "buffer.h"
 #include "smlng.h"
 #include "tag_elim.h"
+#include "dynamic.h"
 using Core;
 using List;
 using Stdio;
@@ -466,3 +467,62 @@ $(doc_t,under_synth_t) under_elim(doc_t doc) {
   }    
 }
 
+// Here we find regions suitable for passing to the dynamic programming code.
+// We should try MUCH harder to extend these regions, but for now we'll at 
+// leat be able to nail code that only has sizes or colors.  We can try
+// to finesse other tags later.
+struct DynSynth {
+  unsigned char only_sizes;
+  unsigned char only_colors;
+};
+
+// probably need to avoid calling dynamic_size/color for very small trivial
+// problems.
+$(doc_t,dyn_synth_t) dynamic_regions(doc_t doc) {
+  switch(doc) {
+  case Mt: fallthru;
+  case &Spc(_): fallthru;
+  case &Text(_): return $(doc,DynSynth(true,true));
+  case &Seq(*dsp):
+    // need to do much better here -- splitting a sequence
+    // but right now I feel like hacking the dynamic programming instead
+    dyn_synth_t synth = DynSynth(true,true);
+    for(list_t<doc_t> ds = *dsp; ds != null; ds = ds->tl) {
+      let $(d2,DynSynth(sz,col)) = dynamic_regions(ds->hd);
+      ds->hd = d2;
+      synth.only_sizes  &= sz;
+      synth.only_colors &= col;
+    }
+    return $(doc,synth);
+    /* dyn_synth_t prev_synth = DynSynth(true,true);
+    list_t<doc_t> ds   = *dsp;
+    list_t<doc_t> prev = ds;
+    for(; ds != null; ds = ds->tl) {
+      let pr = dynamic_regions(ds->hd);
+      ds->hd = pr[0];
+    */
+  case &Tagged(tag,*d):
+    let $(d2,DynSynth(sz,col)) = dynamic_regions(*d);
+    *d = d2;
+    switch(tag) {
+      // try harder here -- we should be able to say true for size and
+      // treat the region abstractly EASY FIX?
+    case Zero: case One: case  Two: case  Three: case  Four: case  Five: 
+    case Six: case  Seven: case  Eight: case  Nine:
+      if(col)
+	*d = dynamic_color(d2);
+      return $(doc,DynSynth(sz,false));
+    case r_tag: case g_tag: case b_tag: case c_tag: case  m_tag: 
+    case y_tag: case k_tag: case w_tag:
+      if(sz)
+	*d = dynamic_size(d2);
+      return $(doc,DynSynth(false,col));
+    default:
+      if(sz)
+	*d = dynamic_size(d2);
+      else if(col)
+	*d = dynamic_color(d2);
+      return $(doc,DynSynth(false,false));
+    }
+  }
+}

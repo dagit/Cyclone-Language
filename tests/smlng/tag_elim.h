@@ -48,5 +48,13 @@ typedef struct UnderSynth under_synth_t;
 
 $(doc_t,under_synth_t) under_elim(doc_t doc);
 
+extern struct DynSynth {
+  unsigned char only_sizes;
+  unsigned char only_colors;
+};
+typedef struct DynSynth dyn_synth_t;
+
+$(doc_t,dyn_synth_t) dynamic_regions(doc_t doc);
+
 }
 #endif
