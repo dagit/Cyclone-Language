@@ -85,6 +85,7 @@ extern void _pop_region();
 extern int _throw_null();
 extern int _throw_arraybounds();
 extern int _throw_badalloc();
+extern int _throw_match();
 extern int _throw(void* e);
 #endif
 

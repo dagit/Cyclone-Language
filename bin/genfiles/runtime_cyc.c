@@ -93,7 +93,7 @@ void *GC_calloc_atomic(unsigned int n, unsigned int t) {
   void *res = GC_malloc_atomic(p);
   if (res == NULL) {
     fprintf(stderr,"GC_calloc_atomic failure");
-    _throw_badalloc;
+    _throw_badalloc();
   }
   bzero(res,p);
   return res;
@@ -222,6 +222,9 @@ int _throw_arraybounds() {
 }
 int _throw_badalloc() {
   throw(Cyc_Bad_alloc_val);
+}
+int _throw_match() {
+  throw(Cyc_Match_Exception_val);
 }
 
 struct _dyneither_ptr wrap_Cstring_as_string(Cstring s, size_t len) {

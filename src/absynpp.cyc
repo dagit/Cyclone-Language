@@ -1021,6 +1021,7 @@ int exp_prec(exp_t e) {
   case &Sizeoftyp_e(_):         
   case &Sizeofexp_e(_):         
   case &Valueof_e(_):
+  case &Asm_e(...):
   case &Tagcheck_e(...):
   case &Offsetof_e(...):        
   case &Deref_e(...):             return 130;
@@ -1127,6 +1128,12 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
   case &Sizeoftyp_e(t):  s = cat(text("sizeof("), typ2doc(t), text(")")); break;
   case &Sizeofexp_e(e1): s = cat(text("sizeof("),exp2doc(e1), text(")")); break;
   case &Valueof_e(t): s = cat(text("valueof("), typ2doc(t), text(")")); break;
+  case &Asm_e(vol,body):
+    if (vol)
+      s = cat(text("__asm__"),text(" volatile ("),text(body),text(")"));
+    else 
+      s = cat(text("__asm__("),text(body),text(")"));
+    break;
   case &Tagcheck_e(e,f): 
     s = cat(text("tagcheck("), exp2doc(e), text("."), textptr(f), text(")")); 
     break;

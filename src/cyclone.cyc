@@ -791,7 +791,9 @@ static bool is_other_special(char c) {
   case '^': 
   case '<': 
   case '>': 
-  case ' ': 
+  // JGM: I'm commenting this out because we shouldn't be quoting
+  // arguments like -idirafter.
+  // case ' ': 
   case '\n': 
   case '\t': return true;
   default: return false;
@@ -1320,19 +1322,19 @@ int main(int argc, string_t<`H> ?`H argv) {
                rnew(r)Set_spec(&Absyn::no_regions),
                "Generate code that doesn't use regions"),
          rnew(r) $("-iprefix",true,"<prefix>", 
-                   rnew(r)Flag_spec(add_iprefix),
+                   rnew(r)String_spec(add_iprefix),
                    "Specify <prefix> as the prefix for subsequent -iwithprefix options"),
          rnew(r) $("-iwithprefix",true,"<dir>",
-                   rnew(r)Flag_spec(add_iwithprefix),
+                   rnew(r)String_spec(add_iwithprefix),
                    "Add <prefix>/<dir> to the second include path."),
          rnew(r) $("-iwithprefixbefore",true,"<dir>",
-                    rnew(r)Flag_spec(add_iwithprefixbefore),
+                    rnew(r)String_spec(add_iwithprefixbefore),
                    "Add <prefix>/<dir> to the main include path."),
          rnew(r) $("-isystem",true,"<dir>",
-                    rnew(r)Flag_spec(add_isystem),
+                    rnew(r)String_spec(add_isystem),
                    "Add <dir> to the beginning of the second include path and treat it as a\nsystem directory."),
          rnew(r) $("-idirafter",true,"<dir>",
-                   rnew(r)Flag_spec(add_idirafter),
+                   rnew(r)String_spec(add_idirafter),
                    "Add the directory to the second include path.")
          );
 

@@ -86,6 +86,7 @@ extern void _pop_region();
 extern int _throw_null();
 extern int _throw_arraybounds();
 extern int _throw_badalloc();
+extern int _throw_match();
 extern int _throw(void* e);
 #endif
 
@@ -708,15 +709,14 @@ char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cy
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
 char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,
-unsigned int sz);inline static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,
-unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*
-ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base)
- || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}extern char Cyc_Lexing_Error[
-6];struct Cyc_Lexing_Error_struct{char*tag;struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{
-void(*refill_buff)(struct Cyc_Lexing_lexbuf*);void*refill_state;struct
-_dyneither_ptr lex_buffer;int lex_buffer_len;int lex_abs_pos;int lex_start_pos;int
-lex_curr_pos;int lex_last_pos;int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{
+char*tag;};inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * 
+sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
+return 0;return dyn.curr;};}extern char Cyc_Lexing_Error[6];struct Cyc_Lexing_Error_struct{
+char*tag;struct _dyneither_ptr f1;};struct Cyc_Lexing_lexbuf{void(*refill_buff)(
+struct Cyc_Lexing_lexbuf*);void*refill_state;struct _dyneither_ptr lex_buffer;int
+lex_buffer_len;int lex_abs_pos;int lex_start_pos;int lex_curr_pos;int lex_last_pos;
+int lex_last_action;int lex_eof_reached;};struct Cyc_Lexing_function_lexbuf_state{
 int(*read_fun)(struct _dyneither_ptr,int,void*);void*read_fun_state;};struct Cyc_Lexing_lex_tables{
 struct _dyneither_ptr lex_base;struct _dyneither_ptr lex_backtrk;struct
 _dyneither_ptr lex_default;struct _dyneither_ptr lex_trans;struct _dyneither_ptr
@@ -734,66 +734,58 @@ struct _dyneither_ptr src);char Cyc_Lexing_Error[6]="Error";struct Cyc_Lexing_le
 struct Cyc_Lexing_function_lexbuf_state;struct Cyc_Lexing_lex_tables;static char Cyc_Lexing_aux_buffer_v[
 1]={'\000'};static struct _dyneither_ptr Cyc_Lexing_aux_buffer={(void*)((char*)Cyc_Lexing_aux_buffer_v),(
 void*)((char*)Cyc_Lexing_aux_buffer_v),(void*)((char*)Cyc_Lexing_aux_buffer_v + 1)};
-void Cyc_Lexing_lex_refill(struct Cyc_Lexing_lexbuf*lexbuf);void Cyc_Lexing_lex_refill(
-struct Cyc_Lexing_lexbuf*lexbuf){if(_get_dyneither_size(Cyc_Lexing_aux_buffer,
-sizeof(char))== 1)Cyc_Lexing_aux_buffer=Cyc_Core_new_string((unsigned int)(4096 + 
-1));{int read=(((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun)(
-Cyc_Lexing_aux_buffer,(int)(_get_dyneither_size(Cyc_Lexing_aux_buffer,sizeof(
-char))- 1),(void*)((struct Cyc_Lexing_function_lexbuf_state*)lexbuf->refill_state)->read_fun_state);
-int n=read > 0?read:((lexbuf->lex_eof_reached=1,0));if(lexbuf->lex_start_pos < n){
-int oldlen=lexbuf->lex_buffer_len;int newlen=oldlen * 2;struct _dyneither_ptr newbuf=
-Cyc_Core_new_string((unsigned int)(newlen + 1));Cyc_zstrncpy(_dyneither_ptr_plus(
-_dyneither_ptr_decrease_size(newbuf,sizeof(char),1),sizeof(char),oldlen),(struct
-_dyneither_ptr)lexbuf->lex_buffer,(unsigned long)oldlen);lexbuf->lex_buffer=
-newbuf;lexbuf->lex_buffer_len=newlen;lexbuf->lex_abs_pos=lexbuf->lex_abs_pos - 
-oldlen;lexbuf->lex_curr_pos=lexbuf->lex_curr_pos + oldlen;lexbuf->lex_start_pos=
-lexbuf->lex_start_pos + oldlen;lexbuf->lex_last_pos=lexbuf->lex_last_pos + oldlen;}
-Cyc_zstrncpy(_dyneither_ptr_decrease_size(lexbuf->lex_buffer,sizeof(char),1),(
-struct _dyneither_ptr)_dyneither_ptr_plus(lexbuf->lex_buffer,sizeof(char),n),(
-unsigned long)(lexbuf->lex_buffer_len - n));Cyc_zstrncpy(
+void Cyc_Lexing_lex_refill(struct Cyc_Lexing_lexbuf*lexbuf){if(_get_dyneither_size(
+Cyc_Lexing_aux_buffer,sizeof(char))== 1)Cyc_Lexing_aux_buffer=Cyc_Core_new_string((
+unsigned int)(4096 + 1));{int read=(((struct Cyc_Lexing_function_lexbuf_state*)
+lexbuf->refill_state)->read_fun)(Cyc_Lexing_aux_buffer,(int)(_get_dyneither_size(
+Cyc_Lexing_aux_buffer,sizeof(char))- 1),(void*)((struct Cyc_Lexing_function_lexbuf_state*)
+lexbuf->refill_state)->read_fun_state);int n=read > 0?read:((lexbuf->lex_eof_reached=
+1,0));if(lexbuf->lex_start_pos < n){int oldlen=lexbuf->lex_buffer_len;int newlen=
+oldlen * 2;struct _dyneither_ptr newbuf=Cyc_Core_new_string((unsigned int)(newlen + 
+1));Cyc_zstrncpy(_dyneither_ptr_plus(_dyneither_ptr_decrease_size(newbuf,sizeof(
+char),1),sizeof(char),oldlen),(struct _dyneither_ptr)lexbuf->lex_buffer,(
+unsigned long)oldlen);lexbuf->lex_buffer=newbuf;lexbuf->lex_buffer_len=newlen;
+lexbuf->lex_abs_pos=lexbuf->lex_abs_pos - oldlen;lexbuf->lex_curr_pos=lexbuf->lex_curr_pos
++ oldlen;lexbuf->lex_start_pos=lexbuf->lex_start_pos + oldlen;lexbuf->lex_last_pos=
+lexbuf->lex_last_pos + oldlen;}Cyc_zstrncpy(_dyneither_ptr_decrease_size(lexbuf->lex_buffer,
+sizeof(char),1),(struct _dyneither_ptr)_dyneither_ptr_plus(lexbuf->lex_buffer,
+sizeof(char),n),(unsigned long)(lexbuf->lex_buffer_len - n));Cyc_zstrncpy(
 _dyneither_ptr_decrease_size(_dyneither_ptr_plus(lexbuf->lex_buffer,sizeof(char),
 lexbuf->lex_buffer_len - n),sizeof(char),1),(struct _dyneither_ptr)Cyc_Lexing_aux_buffer,(
 unsigned long)n);lexbuf->lex_abs_pos=lexbuf->lex_abs_pos + n;lexbuf->lex_curr_pos=
 lexbuf->lex_curr_pos - n;lexbuf->lex_start_pos=lexbuf->lex_start_pos - n;lexbuf->lex_last_pos=
 lexbuf->lex_last_pos - n;};}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_function(int(*
-read_fun)(struct _dyneither_ptr,int,void*),void*read_fun_state);struct Cyc_Lexing_lexbuf*
-Cyc_Lexing_from_function(int(*read_fun)(struct _dyneither_ptr,int,void*),void*
-read_fun_state){struct Cyc_Lexing_function_lexbuf_state*_tmp8;struct Cyc_Lexing_lexbuf*
-_tmp7;return(_tmp7=_cycalloc(sizeof(*_tmp7)),((_tmp7->refill_buff=Cyc_Lexing_lex_refill,((
-_tmp7->refill_state=((_tmp8=_cycalloc(sizeof(*_tmp8)),((_tmp8->read_fun=read_fun,((
-_tmp8->read_fun_state=(void*)read_fun_state,_tmp8)))))),((_tmp7->lex_buffer=Cyc_Core_new_string((
-unsigned int)(8192 + 1)),((_tmp7->lex_buffer_len=8192,((_tmp7->lex_abs_pos=- 8192,((
-_tmp7->lex_start_pos=8192,((_tmp7->lex_curr_pos=8192,((_tmp7->lex_last_pos=8192,((
-_tmp7->lex_last_action=0,((_tmp7->lex_eof_reached=0,_tmp7)))))))))))))))))))));}
-int Cyc_Lexing_read_from_file(struct _dyneither_ptr aux,int n,struct Cyc___cycFILE*f);
-int Cyc_Lexing_read_from_file(struct _dyneither_ptr aux,int n,struct Cyc___cycFILE*f){
-return Cyc_file_string_read(f,aux,0,n);}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(
-struct Cyc___cycFILE*f);struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc___cycFILE*
-f){return((struct Cyc_Lexing_lexbuf*(*)(int(*read_fun)(struct _dyneither_ptr,int,
+read_fun)(struct _dyneither_ptr,int,void*),void*read_fun_state){struct Cyc_Lexing_function_lexbuf_state*
+_tmp8;struct Cyc_Lexing_lexbuf*_tmp7;return(_tmp7=_cycalloc(sizeof(*_tmp7)),((
+_tmp7->refill_buff=Cyc_Lexing_lex_refill,((_tmp7->refill_state=((_tmp8=_cycalloc(
+sizeof(*_tmp8)),((_tmp8->read_fun=read_fun,((_tmp8->read_fun_state=(void*)
+read_fun_state,_tmp8)))))),((_tmp7->lex_buffer=Cyc_Core_new_string((unsigned int)(
+8192 + 1)),((_tmp7->lex_buffer_len=8192,((_tmp7->lex_abs_pos=- 8192,((_tmp7->lex_start_pos=
+8192,((_tmp7->lex_curr_pos=8192,((_tmp7->lex_last_pos=8192,((_tmp7->lex_last_action=
+0,((_tmp7->lex_eof_reached=0,_tmp7)))))))))))))))))))));}int Cyc_Lexing_read_from_file(
+struct _dyneither_ptr aux,int n,struct Cyc___cycFILE*f){return Cyc_file_string_read(f,
+aux,0,n);}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_file(struct Cyc___cycFILE*f){
+return((struct Cyc_Lexing_lexbuf*(*)(int(*read_fun)(struct _dyneither_ptr,int,
 struct Cyc___cycFILE*),struct Cyc___cycFILE*read_fun_state))Cyc_Lexing_from_function)(
 Cyc_Lexing_read_from_file,f);}static void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*
-lbuf);static void Cyc_Lexing_set_eof(struct Cyc_Lexing_lexbuf*lbuf){lbuf->lex_eof_reached=
-1;}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _dyneither_ptr s);struct
-Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(struct _dyneither_ptr s){struct Cyc_Lexing_lexbuf*
-_tmp9;return(_tmp9=_cycalloc(sizeof(*_tmp9)),((_tmp9->refill_buff=Cyc_Lexing_set_eof,((
-_tmp9->refill_state=(void*)0,((_tmp9->lex_buffer=Cyc_strdup((struct
-_dyneither_ptr)s),((_tmp9->lex_buffer_len=(int)_get_dyneither_size(s,sizeof(char)),((
-_tmp9->lex_abs_pos=0,((_tmp9->lex_start_pos=0,((_tmp9->lex_curr_pos=0,((_tmp9->lex_last_pos=
-0,((_tmp9->lex_last_action=0,((_tmp9->lex_eof_reached=1,_tmp9)))))))))))))))))))));}
-struct _dyneither_ptr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*lbuf);struct
-_dyneither_ptr Cyc_Lexing_lexeme(struct Cyc_Lexing_lexbuf*lbuf){int len=lbuf->lex_curr_pos
-- lbuf->lex_start_pos;struct _dyneither_ptr s=Cyc_Core_new_string((unsigned int)(
-len + 1));Cyc_zstrncpy(_dyneither_ptr_decrease_size(s,sizeof(char),1),(struct
-_dyneither_ptr)_dyneither_ptr_plus(lbuf->lex_buffer,sizeof(char),lbuf->lex_start_pos),(
+lbuf){lbuf->lex_eof_reached=1;}struct Cyc_Lexing_lexbuf*Cyc_Lexing_from_string(
+struct _dyneither_ptr s){struct Cyc_Lexing_lexbuf*_tmp9;return(_tmp9=_cycalloc(
+sizeof(*_tmp9)),((_tmp9->refill_buff=Cyc_Lexing_set_eof,((_tmp9->refill_state=(
+void*)0,((_tmp9->lex_buffer=Cyc_strdup((struct _dyneither_ptr)s),((_tmp9->lex_buffer_len=(
+int)_get_dyneither_size(s,sizeof(char)),((_tmp9->lex_abs_pos=0,((_tmp9->lex_start_pos=
+0,((_tmp9->lex_curr_pos=0,((_tmp9->lex_last_pos=0,((_tmp9->lex_last_action=0,((
+_tmp9->lex_eof_reached=1,_tmp9)))))))))))))))))))));}struct _dyneither_ptr Cyc_Lexing_lexeme(
+struct Cyc_Lexing_lexbuf*lbuf){int len=lbuf->lex_curr_pos - lbuf->lex_start_pos;
+struct _dyneither_ptr s=Cyc_Core_new_string((unsigned int)(len + 1));Cyc_zstrncpy(
+_dyneither_ptr_decrease_size(s,sizeof(char),1),(struct _dyneither_ptr)
+_dyneither_ptr_plus(lbuf->lex_buffer,sizeof(char),lbuf->lex_start_pos),(
 unsigned long)len);{char _tmpC;char _tmpB;struct _dyneither_ptr _tmpA;(_tmpA=
 _dyneither_ptr_plus(s,sizeof(char),len),((_tmpB=*((char*)
 _check_dyneither_subscript(_tmpA,sizeof(char),0)),((_tmpC='\000',((
 _get_dyneither_size(_tmpA,sizeof(char))== 1  && (_tmpB == '\000'  && _tmpC != '\000')?
 _throw_arraybounds(): 1,*((char*)_tmpA.curr)=_tmpC)))))));}return s;}char Cyc_Lexing_lexeme_char(
-struct Cyc_Lexing_lexbuf*lbuf,int i);char Cyc_Lexing_lexeme_char(struct Cyc_Lexing_lexbuf*
-lbuf,int i){return*((char*)_check_dyneither_subscript(lbuf->lex_buffer,sizeof(
-char),lbuf->lex_start_pos + i));}int Cyc_Lexing_lexeme_start(struct Cyc_Lexing_lexbuf*
-lbuf);int Cyc_Lexing_lexeme_start(struct Cyc_Lexing_lexbuf*lbuf){return lbuf->lex_abs_pos
-+ lbuf->lex_start_pos;}int Cyc_Lexing_lexeme_end(struct Cyc_Lexing_lexbuf*lbuf);
-int Cyc_Lexing_lexeme_end(struct Cyc_Lexing_lexbuf*lbuf){return lbuf->lex_abs_pos + 
+struct Cyc_Lexing_lexbuf*lbuf,int i){return*((char*)_check_dyneither_subscript(
+lbuf->lex_buffer,sizeof(char),lbuf->lex_start_pos + i));}int Cyc_Lexing_lexeme_start(
+struct Cyc_Lexing_lexbuf*lbuf){return lbuf->lex_abs_pos + lbuf->lex_start_pos;}int
+Cyc_Lexing_lexeme_end(struct Cyc_Lexing_lexbuf*lbuf){return lbuf->lex_abs_pos + 
 lbuf->lex_curr_pos;}

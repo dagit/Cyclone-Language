@@ -485,6 +485,8 @@ static void exp_to_vc(toexpenv_t<`r> env, exp_t e) {
     e->r = stmt_to_exp(env, s)->r;
     return;
 
+  case &Asm_e(...): return;
+
   default: throw new Impossible("bad exp form after xlation to C");
   }
 }
@@ -594,15 +596,10 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
       // First insert a declaration for the function before its definition.
       // This is in case a recursive call of the function is lifted out of
       // the function body & therefore out of scope of the name of the function.
-      // FIX: this is pretty rare, so maybe we should only do it on demand.
       fd->cached_typ = NULL; // This type might have regions and effects; the other
                              // parts of the fndecl have already had these cleared by toc,
                              // but not this field.  Since fndecl2typ uses the cached
                              // type if possible, we need to clear it.
-      vardecl_t vd = new Vardecl {fd->sc, fd->name, const_tqual(NULL), 
-                                  Tcutil::fndecl2typ(fd), NULL, NULL, fd->attributes, false};
-      new_ds = new List(new_decl(new Var_d(vd),DL),new_ds);
-      // fprintf(Stdio::stderr,"%s",*(*fd->name)[1]); Stdio::fflush(Stdio::stdout);
       // FIX: if the param_vardecls are NULL then it's a good sign that 
       // this was an extern "C include" function, so I'm just leaving it 
       // alone...
@@ -619,7 +616,13 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
                               fd->body,
                               gen_ds), 
                      fd->body);
-          new_ds = append(*gen_ds,new_ds);
+          if (*gen_ds != NULL) {
+            vardecl_t vd = new Vardecl {fd->sc, fd->name, const_tqual(NULL), 
+                                        Tcutil::fndecl2typ(fd), NULL, NULL, fd->attributes, false};
+            new_ds = new List(new_decl(new Var_d(vd),DL),new_ds);
+            // fprintf(Stdio::stderr,"%s",*(*fd->name)[1]); Stdio::fflush(Stdio::stdout);
+            new_ds = append(*gen_ds,new_ds);
+          }
         }
       }
       fallthru;

@@ -124,7 +124,7 @@ extern int string(Lexbuf<`a>);
 FILE *slurp_out = NULL;
 extern int slurp(Lexbuf<`a>);
 extern int slurp_string(Lexbuf<`a>);
-extern int asm(Lexbuf<`a>);
+extern int asmtok(Lexbuf<`a>);
 extern int asm_string(Lexbuf<`a>);
 extern int asm_comment(Lexbuf<`a>);
 
@@ -437,7 +437,7 @@ and slurp = parse /* returns 1 if more to do, 0 if all done */
 { return 1; }
 | "__asm__" ws* '(' /* Used in cygwin in /usr/include/asm files for inline functions */
 { parens_to_match = 1;
-  while (asm(lexbuf)) /* skip */;
+  while (asmtok(lexbuf)) /* skip */;
   fputs("0",(FILE @)slurp_out); /* appears as expression followed by ';' typically */
   log("Warning: replacing use of __asm__ with 0\n");
   return 1; }
@@ -465,7 +465,7 @@ and slurp_string = parse /* returns 1 if more to do, 0 if all done */
 | _
 { fprintf((FILE @)slurp_out,"%s",lexeme(lexbuf)); return 1; }
 
-and asm =
+and asmtok =
 /* Expects to be entered just after a left paren, searches for the
    matching right paren, deletes everything in between.
    Parens in comments, strings, and character constants aren't counted.
@@ -864,6 +864,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         scan_exp(e1);
       }
       return;
+    case &Asm_e(...): return;
     case &Swap_e(_,_):
       fprintf(stderr,"Error: unexpected Swap_e\n");
       exit(1); return;

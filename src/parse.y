@@ -1023,7 +1023,7 @@ static exp_t pat2exp(pat_t p) {
 using Parse;
 %}
 
-// ANSI C keywords
+// ANSI C (or GCC) keywords
 %token AUTO REGISTER STATIC EXTERN TYPEDEF VOID CHAR SHORT INT LONG FLOAT
 %token DOUBLE SIGNED UNSIGNED CONST VOLATILE RESTRICT
 %token STRUCT UNION CASE DEFAULT INLINE SIZEOF OFFSETOF
@@ -1052,6 +1052,8 @@ using Parse;
 %token TYPE_VAR TYPEDEF_NAME QUAL_IDENTIFIER QUAL_TYPEDEF_NAME 
 // Cyc: added __attribute__ keyword
 %token ATTRIBUTE
+// Cyc: added ASM "token" -- completely uninterpreted text.  See lex.cyl
+%token ASM
 // specify tagged union constructors for types of semantic values that 
 // the lexer must produce.  The other constructors are generated implicitly.
 %union {
@@ -1060,6 +1062,7 @@ using Parse;
   String_tok(string_t<`H>);
   Stringopt_tok(opt_t<stringptr_t<`H,`H>,`H>);
   QualId_tok(qvar_t);
+  Asm_tok($(bool,string_t<`H>));
 }
 /* types for productions */
 %type <$(sign_t,int)> INTEGER_CONSTANT
@@ -1142,6 +1145,7 @@ using Parse;
 %type <list_t<$(Position::seg_t,qvar_t,bool)@`H,`H>> export_list export_list_values
 %type <pointer_qual_t> pointer_qual
 %type <pointer_quals_t> pointer_quals
+%type <$(bool,string_t<`H>)> ASM
 /* start production */
 %start prog
 %%
@@ -2910,6 +2914,9 @@ unary_expression:
 | VALUEOF '(' type_name ')'
    { let $(_,_,t) = *$3;
      $$=^$(valueof_exp(t, LOC(@1,@4))); }
+| ASM
+   { let $(v,s) = $1;
+     $$=^$(asm_exp(v,s,LOC(@1,@1))); }
 ;
 
 unary_operator:

@@ -625,6 +625,9 @@ namespace Absyn {
     // be used within types, and is typically used within a valueof_t so
     // that we can move between the type and expression levels
     // (e.g., valueof_t<valueof(`i)*42 + 36>).
+    Asm_e(bool volatile_kw,string_t); // uninterpreted asm statement -- used
+    // within extern "C include" -- the sttring is all of the gunk that goes
+    // between the parens.
   };
   // expression with auxiliary information
   EXTERN_ABSYN struct Exp {
@@ -1030,6 +1033,7 @@ namespace Absyn {
   extern exp_t match_exn_exp(seg_t);
   extern exp_t array_exp(list_t<exp_t,`H>, seg_t);
   extern exp_t valueof_exp(type_t, seg_t);
+  extern exp_t asm_exp(bool volatile_kw, string_t<`H> body, seg_t);
   extern exp_t unresolvedmem_exp(opt_t<typedef_name_t,`H>,
                                  list_t<$(list_t<designator_t,`H>,exp_t)@`H,`H>,
 				 seg_t);

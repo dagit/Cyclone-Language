@@ -101,8 +101,10 @@ static $(nmspace_t,var_t)   token_id_pair = $(Nmspace{.Loc_n = 0},
 static char           token_char   = '\000';
 static string_t       token_string = "";
 static qvar_t         token_qvar   = &token_id_pair;
+static $(bool,string_t<`H>) token_asm = $(false,"");
 
 static int runaway_start = 0;
+static int paren_depth = 0; // used for __asm__ parsing
 
 static void err(string_t<`H> msg,Lexbuf<`a> lb) {
   seg_t s = segment_of_abs(lexeme_start(lb),lexeme_end(lb));
@@ -607,6 +609,8 @@ int token(Lexbuf<`a>);
 int strng(Lexbuf<`a>);
 int comment(Lexbuf<`a>);
 int cyc_qual(Lexbuf<`a>);
+int snarf_asm(Lexbuf<`a>);
+int snarf_asm_body(Lexbuf<`a>);
 } // namespace Lex
 
 static union YYSTYPE String_tok(string_t<`H> s) {
@@ -624,6 +628,9 @@ static union YYSTYPE Char_tok(char s) {
 static union YYSTYPE QualId_tok(qvar_t s) {
   return YYSTYPE{.QualId_tok = s};
 }
+static union YYSTYPE Asm_tok($(bool,string_t<`H>) p) {
+  return YYSTYPE{.Asm_tok = p};
+}
 
 // for parser -- must not be prefixed
 int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf) { 
@@ -640,6 +647,7 @@ int yylex(Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> lbuf) {
  case CHARACTER_CONSTANT: yylval = Char_tok(Lex::token_char);     break;
  case FLOATING_CONSTANT : yylval = String_tok(Lex::token_string); break;
  case STRING            : yylval = String_tok(Lex::token_string); break;
+ case ASM               : yylval = Asm_tok(Lex::token_asm);       break;
  default: break;
  }
  return ans;
@@ -652,8 +660,10 @@ namespace Lex;
 let newline = ('\n' | '\r' | "\r\n")
 
 rule token = parse
+| "asm" { return snarf_asm(lexbuf); }
+| "__asm__" { return snarf_asm(lexbuf); }
 /* Identifiers, type names, and keywords */
-  ['A'-'Z''a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
+| ['A'-'Z''a'-'z']['A'-'Z''a'-'z''0'-'9''_']*
 { return process_id(lexbuf); }
 | ['_']['A'-'Z''a'-'z''0'-'9''_']+
 { return process_id(lexbuf); }
@@ -857,6 +867,50 @@ and comment = parse
  | '*'              { return comment(lexbuf); }
  | '/'              { return comment(lexbuf); }
  | [^ '/' '*']+     { return comment(lexbuf); }
+
+/* HACK: we're counting on there being no comments between "asm" and
+   "volatile" and the first paren. */
+and snarf_asm = parse
+  [' ' '\t' '\v' '\f' '\n' '\r']* '(' 
+  { token_asm[0] = false;
+    paren_depth = 1;
+    string_pos = 0;
+    runaway_start = lexeme_start(lexbuf);
+    while (snarf_asm_body(lexbuf)) /* skip */ ;
+    token_asm[1] = get_stored_string();
+    return ASM; 
+  }
+| [' ' '\t' '\v' '\f' '\n' '\r']+ "volatile" 
+  [' ' '\t' '\v' '\f' '\n' '\r']* '(' 
+  { token_asm[0] = true;
+    paren_depth = 1;
+    string_pos = 0;
+    runaway_start = lexeme_start(lexbuf);
+    while (snarf_asm_body(lexbuf)) /* skip */ ;
+    token_asm[1] = get_stored_string();
+    return ASM; 
+  }
+
+and snarf_asm_body = parse
+   "\"" { store_string_char('"'); 
+          while (strng(lexbuf)) /* skip */ ;
+          store_string_char('"');
+          return 1; }
+| "/*" { comment_depth = 1;
+         comment(lexbuf); 
+         store_string_char(' ');
+         return 1; }
+| "#"[^ '\n' '\r']*(newline) { store_string_char('\n'); return 1; }
+| '(' { paren_depth += 1; store_string_char('('); return 1; }
+| ')' { paren_depth -= 1; 
+        if (paren_depth == 0) return 0;
+        else {
+          store_string_char(')');
+          return 1;
+        } }
+| eof { runaway_err("unterminated asm",lexbuf); return 0; }
+| _ { store_string_char(lexeme_char(lexbuf,0)); return 1; }
+
 
 {
 

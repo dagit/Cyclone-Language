@@ -1373,6 +1373,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
   case &UnresolvedMem_e(_,_):  
   case &CompoundLit_e(_,_):    
   case &Valueof_e(_):
+  case &Asm_e(...):
     throw new Core::Impossible("anal_Rexp, unexpected exp form");
   }
 }

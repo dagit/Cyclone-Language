@@ -697,6 +697,14 @@ void dumpexp_prec(int inprec, exp_t e) {
   case &Valueof_e(t):
     dump("valueof("); dumptyp(t); dump_char(')'); break;
 
+  case &Asm_e(vol,s):
+    dump("__asm__");
+    if (vol) dump(" volatile ");
+    dump_char('(');
+    dump_nospace(s);
+    dump_char(')');
+    break;
+
   case &Tagcheck_e(e,f):
     dump("tagcheck("); dumpexp(e); dump_char('.'); dump_nospace(*f); 
     dump_char(')'); 

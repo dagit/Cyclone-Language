@@ -615,6 +615,9 @@ exp_t match_exn_exp(seg_t loc) {
 exp_t valueof_exp(type_t t, seg_t loc) {
   return new_exp(new Valueof_e(t), loc);
 }
+exp_t asm_exp(bool volatile_kw, string_t<`H> body, seg_t loc) {
+  return new_exp(new Asm_e(volatile_kw,body),loc);
+}
 
 exp_t array_exp(list_t<exp_t,`H> es, seg_t loc) {
   // FIX:  this doesn't work let dles = NULL;

@@ -86,6 +86,7 @@ extern void _pop_region();
 extern int _throw_null();
 extern int _throw_arraybounds();
 extern int _throw_badalloc();
+extern int _throw_match();
 extern int _throw(void* e);
 #endif
 
@@ -709,19 +710,16 @@ char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Not_found[10];struct Cy
 char*tag;};extern char Cyc_Core_Unreachable[12];struct Cyc_Core_Unreachable_struct{
 char*tag;struct _dyneither_ptr f1;};extern char Cyc_Core_Open_Region[12];struct Cyc_Core_Open_Region_struct{
 char*tag;};extern char Cyc_Core_Free_Region[12];struct Cyc_Core_Free_Region_struct{
-char*tag;};static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,unsigned int bd,
-unsigned int sz);inline static void*Cyc_Core_arrcast(struct _dyneither_ptr dyn,
-unsigned int bd,unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*
-ptrbd=dyn.curr + bd * sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base)
- || ptrbd > dyn.last_plus_one)return 0;return dyn.curr;};}void*Cyc___assert_fail(
-struct _dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line);void*
-Cyc___assert_fail(struct _dyneither_ptr assertion,struct _dyneither_ptr file,
-unsigned int line);void*Cyc___assert_fail(struct _dyneither_ptr assertion,struct
-_dyneither_ptr file,unsigned int line){{const char*_tmpA;void*_tmp9[3];struct Cyc_String_pa_struct
-_tmp8;struct Cyc_Int_pa_struct _tmp7;struct Cyc_String_pa_struct _tmp6;(_tmp6.tag=0,((
-_tmp6.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)assertion),((_tmp7.tag=1,((
-_tmp7.f1=line,((_tmp8.tag=0,((_tmp8.f1=(struct _dyneither_ptr)((struct
-_dyneither_ptr)file),((_tmp9[0]=& _tmp8,((_tmp9[1]=& _tmp7,((_tmp9[2]=& _tmp6,Cyc_fprintf(
-Cyc_stderr,((_tmpA="%s:%u: Assertion `%s' failed.\n",_tag_dyneither(_tmpA,
-sizeof(char),31))),_tag_dyneither(_tmp9,sizeof(void*),3)))))))))))))))))));}Cyc_fflush((
-struct Cyc___cycFILE*)Cyc_stderr);exit(- 1);}
+char*tag;};inline static void* arrcast(struct _dyneither_ptr dyn,unsigned int bd,
+unsigned int sz){if(bd >> 20  || sz >> 12)return 0;{unsigned char*ptrbd=dyn.curr + bd * 
+sz;if(((ptrbd < dyn.curr  || dyn.curr == 0) || dyn.curr < dyn.base) || ptrbd > dyn.last_plus_one)
+return 0;return dyn.curr;};}void*Cyc___assert_fail(struct _dyneither_ptr assertion,
+struct _dyneither_ptr file,unsigned int line);void*Cyc___assert_fail(struct
+_dyneither_ptr assertion,struct _dyneither_ptr file,unsigned int line){{const char*
+_tmpA;void*_tmp9[3];struct Cyc_String_pa_struct _tmp8;struct Cyc_Int_pa_struct _tmp7;
+struct Cyc_String_pa_struct _tmp6;(_tmp6.tag=0,((_tmp6.f1=(struct _dyneither_ptr)((
+struct _dyneither_ptr)assertion),((_tmp7.tag=1,((_tmp7.f1=line,((_tmp8.tag=0,((
+_tmp8.f1=(struct _dyneither_ptr)((struct _dyneither_ptr)file),((_tmp9[0]=& _tmp8,((
+_tmp9[1]=& _tmp7,((_tmp9[2]=& _tmp6,Cyc_fprintf(Cyc_stderr,((_tmpA="%s:%u: Assertion `%s' failed.\n",
+_tag_dyneither(_tmpA,sizeof(char),31))),_tag_dyneither(_tmp9,sizeof(void*),3)))))))))))))))))));}
+Cyc_fflush((struct Cyc___cycFILE*)Cyc_stderr);exit(- 1);}

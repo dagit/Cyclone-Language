@@ -1495,6 +1495,7 @@ static ctype_t gen_exp(cenv_t env, exp_t e) {
   case &UnresolvedMem_e(_,_): impos("UnresolvedMem_e");
   case &StmtExp_e(s): impos("StmtExp_e");
   case &Valueof_e(_): impos("Valueof_e");
+  case &Asm_e(...): impos("Asm_e");
   case &Tagcheck_e(...): impos("Tagcheck_e");
   }
 }

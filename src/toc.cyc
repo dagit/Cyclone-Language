@@ -243,6 +243,7 @@ MAKE_VAR(_throw_arraybounds);
 MAKE_VAR(_dyneither_ptr_decrease_size);
 MAKE_VAR(_swap_word);
 MAKE_VAR(_swap_dyneither);
+MAKE_VAR(_throw_match);
 
 #undef MAKE_STRING
 #undef MAKE_VAR
@@ -839,10 +840,7 @@ static exp_t newthrow_exp(exp_t e) {
 }
 // throw a match exception
 static stmt_t throw_match_stmt() {
-  static stmt_t* throw_match_stmt_opt = NULL;
-  if(throw_match_stmt_opt==NULL)
-    throw_match_stmt_opt = new exp_stmt(newthrow_exp(match_exn_exp(DL)),DL);
-  return *throw_match_stmt_opt;
+  return exp_stmt(fncall_exp(_throw_match_e,list(),DL),DL);
 }
 
 
@@ -1613,7 +1611,6 @@ static void lvalue_assign_stmt(stmt_t s,list_t<field_name_t> fs,
 
 // we want to take the address of e but it may no longer be a valid
 // lhs, due to a cast or null-check or whatever.
-static void push_address_stmt(stmt_t s);
 static exp_t push_address_exp(exp_t e) {
   switch (e->r) {
   case &Cast_e(*t,*e1,_,_):
@@ -1622,23 +1619,9 @@ static exp_t push_address_exp(exp_t e) {
     return e;
   case &Deref_e(e1):
     return e1;
-  case &StmtExp_e(s): 
-    // we only support this so that you can do swaps on tagged union fields
-    push_address_stmt(s);
-    return e;
   default:
     if (is_lvalue(e)) return address_exp(e,DL);
     toc_impos("can't take & of %s",exp2string(e));
-  }
-}
-static void push_address_stmt(stmt_t s) {
-  switch (s->r) {
-  case &Exp_s(*e): 
-    *e = push_address_exp(*e); return;
-  case &Decl_s(_,s2): fallthru(s2);
-  case &Seq_s(_,s2):  push_address_stmt(s2); return;
-  default: 
-    toc_impos("can't take & of statement-expression %s",stmt2string(s));
   }
 }
 
@@ -1864,6 +1847,29 @@ static bool is_tagged_union_project(exp_t e, int @f_tag,
     }
   default: return false;
   }
+}
+
+// special case for when we're swapping a tagged union member.
+// We have on input e.f or e->f and we want to swap the val
+// field, so ultimately, we want to return &e.f.val or &e->f.val
+// but we also need to check that e.f.tag or e->f.tag is the
+// right one.  So, we mute e into:
+// ({ temp = &e.f // or &e->f
+//    if (temp->tag != f_tag) throw_match();
+//    &temp->val; })
+void add_tagged_union_check_for_swap(exp_t e, int tag, type_t mem_type) {
+  let temp = temp_var();
+  exp_t temp_exp = var_exp(temp,DL);
+  exp_t temp_val = aggrarrow_exp(temp_exp,val_sp,DL);
+  exp_t temp_tag = aggrarrow_exp(temp_exp,tag_sp,DL);
+  exp_t f_tag = signed_int_exp(tag,DL);
+  stmt_t s3 = exp_stmt(address_exp(temp_val,DL),DL);
+  let test_exp = neq_exp(temp_tag,f_tag,DL);
+  stmt_t s2 = ifthenelse_stmt(test_exp,throw_match_stmt(),skip_stmt_dl(),DL);
+  stmt_t s1 = declare_stmt(temp,cstar_typ(mem_type,mt_tq),
+                           push_address_exp(copy_exp(e)),
+                           seq_stmt(s2,s3,DL),DL);
+  e->r = stmt_exp_r(s1);
 }
 
 // special case for assignment to a tagged union member (either e1.f
@@ -3178,31 +3184,32 @@ DynCast:
     else
       swap_fn = _swap_word_e;
 
-    // some sanity checks for now
-    // MWH: here was my version of this stuff; Greg's looks simpler
-//     if (!is_lvalue(e1))
-//       toc_impos("Swap_e: %s is not an l-value\n",Absynpp::exp2string(e1));
-//     if (!is_lvalue(e2))
-//       toc_impos("Swap_e: %s is not an l-value\n",Absynpp::exp2string(e2));
+    // figure out if these are tagged-union projections -- if so, then
+    // we need to do some fix-up work after translating.
+    int f1_tag = 0;
+    type_t tagged_mem_type1 = &VoidType_val;
+    bool e1_tmem = is_tagged_union_project(e1,&f1_tag,&tagged_mem_type1,true);
+    int f2_tag = 0;
+    type_t tagged_mem_type2 = &VoidType_val;
+    bool e2_tmem = is_tagged_union_project(e2,&f2_tag,&tagged_mem_type2,true);
 
-    // take the address of each operand; the runtime system primitive
-    // will dereference and swap the given lhs's.
-//     let e1a = address_exp(e1,DL);
-//     e1a->loc = e1->loc;
-//     e1a->topt = new Opt(at_typ(e1->topt->v,HeapRgn,
-// 			       empty_tqual(NULL),false_conref));
-//     let e2a = address_exp(e2,DL);
-//     e2a->loc = e2->loc;
-//     e2a->topt = new Opt(at_typ(e2->topt->v,HeapRgn,
-// 			       empty_tqual(NULL),false_conref));
-//     exp_to_c(nv,e1a);
-//     exp_to_c(nv,e2a);
-//     e->r = fncall_exp_r(swap_fn,list(e1a,e2a));
     exp_to_c(nv,e1);
     exp_to_c(nv,e2);
 
-    // we may have to push the address operation in to get a valid lhs
-    e->r = fncall_exp_r(swap_fn,list(push_address_exp(e1),push_address_exp(e2)));
+    // special case when e1 or e2 is a tagged union member (e.g., e.f or e->f)
+    if (e1_tmem) {
+      add_tagged_union_check_for_swap(e1,f1_tag,tagged_mem_type1);
+    } else {
+      // we may have to push the address operation in to get a valid lhs
+      e1 = push_address_exp(e1);
+    }
+    if (e2_tmem) {
+      add_tagged_union_check_for_swap(e2,f2_tag,tagged_mem_type2);
+    } else {
+      // we may have to push the address operation in to get a valid lhs
+      e2 = push_address_exp(e2);
+    }
+    e->r = fncall_exp_r(swap_fn,list(e1,e2));
 
     break;
   case &Tagcheck_e(e1,f):
@@ -3223,6 +3230,7 @@ DynCast:
   case &UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); 
   case &CompoundLit_e(_,_):   unimp("compoundlit");
   case &Valueof_e(_): toc_impos("valueof(-)");
+  case &Asm_e(...): toc_impos("__asm__");
   }
 }
 
@@ -4331,6 +4339,7 @@ static void exptypes_to_c(exp_t e) {
   case &Var_e(_,_):       fallthru;
   case &UnknownId_e(_):   fallthru;
   case &Enum_e(_,_,_):    fallthru;
+  case &Asm_e(...):       fallthru;
   case &AnonEnum_e(_,_,_):break;
 
   case &AnonStruct_e(_, _): fallthru;
@@ -4558,7 +4567,10 @@ static void init() {
     &_pop_dynregion_str,
     &_reset_region_str,
     &_throw_arraybounds_str,
-    &_dyneither_ptr_decrease_size_str
+    &_dyneither_ptr_decrease_size_str,
+    &_throw_match_str,
+    &_swap_word_str,
+    &_swap_dyneither_str,
   };
 }
 

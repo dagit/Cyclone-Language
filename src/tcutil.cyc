@@ -397,6 +397,7 @@ exp_t deep_copy_exp(exp_t e) {
     throw new Core::Failure("deep_copy: statement expressions unsupported");
   case &Tagcheck_e(e1, fn): return new_exp(new Tagcheck_e(DC(e1),fn),e->loc);
   case &Valueof_e(t): return valueof_exp(Tcutil::copy_type(t),e->loc);
+  case &Asm_e(v,s): return asm_exp(v,s,e->loc);
   }
 }
 
