@@ -45,7 +45,8 @@ typedef Dict::dict_t<`a,Set::set_t<`a>> graph_t<`a>;
   /** A value of type [graph_t<`a>] is a graph with nodes of type [`a]. */
 void print(FILE @`r f, graph_t<`a> g, void (@nodeprint)(FILE @`r,`a));
   /** [print(f,g,nodeprint)] prints the graph [g] to file [f].
-      [nodeprint] must be a printing function for nodes. */
+      [nodeprint] must be a printing function for nodes.  The output
+      is in the DOT language, suitable for display by Graphviz. */
 extern graph_t<`a> empty(int (@`H cmp)(`a,`a));
   /** [empty(cmp)] creates an empty graph given comparison function
       [cmp].  The graph is heap-allocated. */

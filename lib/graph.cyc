@@ -106,10 +106,11 @@ int is_edge(graph_t<`a> g, `a source, `a target) {
   }
 }
 
-/*****************/
-/* Print a graph */
-/*****************/
+/*******************************/
+/* Print a graph in DOT format */
+/*******************************/
 void print(FILE @`r f, graph_t<`a> g, void (@nodeprint)(FILE @`r,`a)) {
+  fprintf(f,"digraph {\n");
   let edges = Dict::to_list(g);
   for (; edges; edges = edges->tl) {
     let &$(s,ts) = edges->hd;
@@ -117,15 +118,17 @@ void print(FILE @`r f, graph_t<`a> g, void (@nodeprint)(FILE @`r,`a)) {
     if (tslist)
       for (; tslist; tslist = tslist->tl) {
         nodeprint(f,s);
-        fprintf(f," --> ");
+        fprintf(f," -> ");
         nodeprint(f,tslist->hd);
-        fprintf(f,"\n");
+        fprintf(f,";\n");
       }
     else {
+        fprintf(f,"node ");
         nodeprint(f,s);
-        fprintf(f," --> <no targets>\n");
+        fprintf(f,"; // no targets\n");
     }
   }
+  fprintf(f,"}\n");
 }
 
 /**********************************************************/
