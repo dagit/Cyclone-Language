@@ -259,7 +259,7 @@ static void add_other(string_t<`H> s) {
 
 static void remove_file(string_t<`H> s) {
   if (save_temps_r) return;
-  else remove(s);
+  else remove((const char @)s);
 }
 
 bool compile_failure = false; // for exit code (helps Makefile)
@@ -405,7 +405,7 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   let cyc_include_fnotnull = (FILE@)cyc_include_f;
   size_t n_read = 1024;
   size_t n_written;
-  char buf[1024+1]ZEROTERM = { for i < 1024 : 0 }; // init to avoid warning
+  char buf[1024] = { for i < 1024 : 0 }; // init to avoid warning
   while (n_read == 1024) {
     n_read = fread(buf,1,1024,cyc_include_fnotnull);
     if (n_read != 1024 && !(feof(cyc_include_fnotnull))) {
@@ -670,7 +670,7 @@ static void process_file(string_t<`H> filename) {
                     fixup_string, ofile_string);
 
   if (v_r) fprintf(stderr,"%s\n",cmd);
-  if (system(cmd) != 0) {
+  if (system((const char @)cmd) != 0) {
     compile_failure = true;
     fprintf(stderr,"\nError: preprocessing\n");
     return;
@@ -716,7 +716,7 @@ static void process_file(string_t<`H> filename) {
 
   // Interface checking
   if (ic_r) {
-    FILE *inter_file = fopen(interfacefile, "r");
+    FILE *inter_file = fopen((char @)interfacefile, "r");
     FILE *inter_objfile = try_file_open(interfaceobjfile, "w", "interface object file");
     if (inter_objfile == NULL) {
       compile_failure = true;
@@ -1152,7 +1152,7 @@ int main(int argc, string_t<`H> ?`H argv) {
 	    stdlib_string,
             libargs_string);
   if (v_r) fprintf(stderr,"%s\n",cccmd);
-  if (system(cccmd) != 0) {
+  if (system((const char @)cccmd) != 0) {
     fprintf(stderr,"Error: C compiler failed\n");
     compile_failure = true;
     remove_cfiles();

@@ -31,12 +31,11 @@
 
 /*** These declarations are made outside of any namespace. */
 typedef char *`r Cstring<`r>;
+typedef char @`r CstringNN<`r>;
 typedef const char ?`r string_t<`r>;
-typedef const char ?NOZEROTERM`r buffer_t<`r>;
 /** A [string_t<`r>] is a constant array of characters allocated in
     region [`r].  */
 typedef char ?`r mstring_t<`r>;
-typedef char ?NOZEROTERM`r mbuffer_t<`r>;
 /** An [mstring_t<`r>] is a non-const (mutable) array of characters
     allocated in region [`r].  */
 typedef string_t<`r1> @`r2 stringptr_t<`r1,`r2>;
@@ -44,7 +43,15 @@ typedef string_t<`r1> @`r2 stringptr_t<`r1,`r2>;
     needed, for example, you can have a list of string pointers, but not
     a list of strings.  */
 typedef mstring_t<`r1> @`r2 mstringptr_t<`r1,`r2>;
-/** [mstringptr] is the mutable version of [stringptr_t]. */
+/** [mstringptr_t] is the mutable version of [stringptr_t]. */
+
+typedef char *NOZEROTERM`r Cbuffer_t<`r>;
+/** [buffer_t] is a non-zero-terminated C buffer */
+typedef char @NOZEROTERM`r CbufferNN_t<`r>;
+/** [buffer_t] is a non-zero-terminated C buffer */
+typedef const char ?NOZEROTERM`r buffer_t<`r>;
+/** [buffer_t] is a non-zero-terminated dynamically sized buffer */
+typedef char ?NOZEROTERM`r mbuffer_t<`r>;
 
 #ifndef bool
 typedef int bool;
@@ -139,9 +146,10 @@ extern region_t<`H> heap_region;
 extern "C" Cstring<`H> string_to_Cstring(string_t);
 // extracts the underlying char[] from the char[?] -- returns NULL
 // when the string is empty
-extern "C" Cstring<`r> underlying_Cstring(string_t<`r>);
+//  extern "C" Cstring<`r> underlying_Cstring(const char ?NOZEROTERM`r);
 extern "C" mstring_t<`H> Cstring_to_string(Cstring);
-extern "C" mstring_t<`H> wrap_Cstring_as_string(Cstring, size_t);
+extern "C" mbuffer_t<`r> wrap_Cbuffer_as_buffer(Cbuffer_t<`r>, size_t);
+extern "C" mbuffer_t<`r> wrap_Cstring_as_string(Cbuffer_t<`r>, size_t);
 extern "C" mstring_t<`H> ?`H ntCsl_to_ntsl(Cstring @);
 extern "C" unsigned int arr_prevsize(`a::A ?,sizeof_t<`a>);
   /** [array_prevsize(p,sz)] returns the buffer space available preceding

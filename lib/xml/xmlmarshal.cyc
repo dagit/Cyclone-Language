@@ -401,7 +401,7 @@ int getIntAttribute(list_t<attribute_t> atrs, name nm) {
     atrs = atrs->tl;
   }
   if(atrs != NULL) 
-    return atoi(string_of_attvalue((*(atrs->hd))[1]));
+    return atoi((const char @)(string_of_attvalue((*(atrs->hd))[1])));
   else throw new Core::Failure("Attribute not found");
 }
 string_t getStringAttribute(list_t<attribute_t> atrs, name nm) {
@@ -425,15 +425,15 @@ addr_table_t from_xml_base(typestruct_t ts, addr_table_t env, content_t doc,`a::
   switch($(ts,doc)) {
   case $(&Int(sn,sz),&Element(&StartEnd(tag,atts,&List{&Chardata(n),NULL}))):
     int@ x = unsafe_cast(result);
-    *x = atoi(n);
+    *x = atoi((const char @)n);
     break;
   case $(Float,&Element(&StartEnd(tag,atts,&List{&Chardata(n),NULL}))):
     float@ x = unsafe_cast(result);
-    *x = (float)atof(n);
+    *x = (float)atof((const char @)n);
     break;
   case $(Double,&Element(&StartEnd(tag,atts,&List{&Chardata(n),NULL}))):
     double@ x = unsafe_cast(result);
-    *x = atof(n);
+    *x = atof((const char @)n);
     break;
 
     // distinction between EmptyTag and StartEnd sucks.

@@ -31,22 +31,11 @@
 #undef memcpy
 #undef memmove
 
-//  #define static_c2s(x) (Cstring_to_string(x))
-#define static_c2s(x) (wrap_Cstring_as_string(x,-1))
-
 namespace Std {
 using Core;
 using List;
 
-///////////////////////// WRAPPERS
-namespace C_string {
-  extern "C" {
-    Cstring strerror(int errnum);
-  }
-}
-string_t strerror(int errnum) {
-  return static_c2s(C_string::strerror(errnum));
-}
+extern "C" Cstring strerror(int errnum);
 
 ///////////////////////// LENGTH
 size_t strlen(buffer_t s) {
@@ -722,12 +711,12 @@ namespace Cstr {
     void *NOZEROTERM `r memset(void *NOZEROTERM `r, int c, size_t n);
     void bcopy (const `a::A*src, `a *dest, size_t n);
     void bzero(`a::A*s, size_t n);
-    Cstring GC_realloc(char *`H, size_t n);
+    char *NOZEROTERM GC_realloc(char *NOZEROTERM`H, size_t n);
   }
 }
 
-char ? realloc(char ?`H s, size_t n) {
-  let res = Cstr::GC_realloc((char *)s, n);
+char ?NOZEROTERM realloc(char ?NOZEROTERM`H s, size_t n) {
+  let res = Cstr::GC_realloc((char *NOZEROTERM)s, n);
   return wrap_Cstring_as_string(res, n);
 }
 

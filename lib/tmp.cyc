@@ -9,9 +9,6 @@ namespace Cstdio {
 extern "C" {
 struct Cstdio::__abstractFILE *tmpfile();
 Cstring	tmpnam(Cstring);
-#define s2c(x) (string_to_Cstring(x))
-//  #define static_c2s(x) (Cstring_to_string(x))
-#define static_c2s(x) (wrap_Cstring_as_string(x,-1))
 }}
 
 FILE *tmpfile() {
@@ -20,7 +17,7 @@ FILE *tmpfile() {
 }
 
 char ?`H tmpnam(char ?`H s) {
-  char ?name = static_c2s(Cstdio::tmpnam(NULL));
-  return s ? strcpy(s, name) : name;
+  char *name = Cstdio::tmpnam(NULL);
+  return s ? strcpy(s, (char ?)name) : (char ?)name;
 }
 

@@ -36,7 +36,7 @@ using List;
 // Core::Invalid_argument exn.
 
 ///////////////////////// WRAPPERS
-extern string_t strerror(int);
+extern "C" Cstring strerror(int errnum);
 
 ///////////////////////// LENGTH
 extern size_t strlen(buffer_t s);
@@ -77,7 +77,7 @@ extern mstring_t<`r> strncpy(mstring_t<`r>,buffer_t,size_t);
 extern mstring_t<`r> zstrncpy(mstring_t<`r>,buffer_t,size_t);
 
 // realloc
-extern mstring_t realloc(mstring_t<`H>, size_t);
+extern mbuffer_t realloc(mbuffer_t<`H>, size_t);
 
 // memcpy and memmove behave like C's except that instead of
 // calling it memcpy(d,s,n*sizeof(t)), separate out the sizeof(t).

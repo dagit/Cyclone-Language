@@ -31,7 +31,6 @@ CYCLONE_LIBS:=arg\
         bitvec\
         buffer\
         core\
-	crypt\
 	cycstubs\
         dict\
 	execinfo\

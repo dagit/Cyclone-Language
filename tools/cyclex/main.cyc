@@ -36,10 +36,7 @@ int main(int argc, string_t ? argv) {
   } catch {
   default: 
     fprintf(stderr, "trouble opening files");
-    // FIX: remove dest file
-    // jcheney: fixed this
-
-    remove(dest_name);
+    remove((const char @)dest_name);
     return 1;
   }
   // FIX: catch errors!!!
@@ -70,7 +67,7 @@ int main(int argc, string_t ? argv) {
       break;
     case exn:
       fprintf(stderr, "error in parsing, generation, compaction, or output");
-      remove(dest_name);
+      remove((const char @)dest_name);
       throw exn;
       return 1;
   }  

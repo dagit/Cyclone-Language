@@ -279,12 +279,12 @@ rule token "$(int,comment_t)*" = parse
   static void process_file(string_t<`H> filename) {
     let basename = Filename::chop_extension(filename);
     /* Preprocess the file so we can parse it */
-    let preprocfile = strconcat(basename, ".cyp");
+    let preprocfile = (const char @)strconcat(basename, ".cyp");
     let cycargs_string =
       str_sepstr(new List(new (string_t)"",
                           List::map(sh_escape_stringptr,rev(cycargs))),
                  " ");
-    let cmd = aprintf("%s %s -E -o %s -x cyc %s",
+    let cmd = (const char @)aprintf("%s %s -E -o %s -x cyc %s",
                       cyclone_file,
                       cycargs_string,
                       sh_escape_string(preprocfile),
@@ -311,7 +311,7 @@ rule token "$(int,comment_t)*" = parse
     let lineno_decls = zip(map(lineno,map(fst,pos_decls)),
                            map(snd,pos_decls));
     /* Scan the file again, this time for the comments */
-    let f = (FILE @)fopen(filename,"r");
+    let f = (FILE @)fopen((const char @)filename,"r");
     let lb = Lexing::from_file(f);
     let comments = NULL;
     let comment;

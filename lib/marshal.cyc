@@ -382,7 +382,7 @@ void cycputvarint(addr_t i, FILE@ fp) {
 
 #define CYCGET(X) X cycget##X(FILE@ fp) { \
   region r { \
-    char? x = rnew(r) {for i < sizeof(X):0}; \
+    char?NOZEROTERM x = rnew(r) {for i < sizeof(X):0}; \
     if(fread(x,sizeof(X),1,fp) < 1) { \
       throw new Core::Failure("Read failure"); \
     } \

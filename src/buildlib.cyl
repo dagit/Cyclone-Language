@@ -1172,7 +1172,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
          platform dependent; this is more portable. */
       let fd = open(d,O_RDONLY);
       if (fd == -1) {
-        if (mkdir(d,0700) == -1) {
+        if (mkdir((const char @)d,0700) == -1) {
           fprintf(stderr,"Error: could not create directory %s\n",d);
           return 1;
         }
@@ -1205,7 +1205,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   xtunion exn { NO_SUPPORT(string_t) };
 
   /* Returns 1 on a fatal error (can't create files, etc.) or 0 otherwise. */
-  int process_file(string_t filename,
+  int process_file(const char @filename,
                    list_t<stringptr_t<`H,`H>,`H> start_symbols,
                    list_t<stringptr_t<`H,`H>,`H> omit_symbols,
                    list_t<ifdefined_t,`H> prologue,
@@ -1236,23 +1236,23 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     let basename = Filename::basename(filename);
     let dirname = Filename::dirname(filename);
     let choppedname = Filename::chop_extension(basename);
-    let cppinfile = strconcat(choppedname, ".iA");
-    let macrosfile =
-      (dirname.size == 0)?
+    let cppinfile = (const char @)(strconcat(choppedname, ".iA"));
+    let macrosfile = (const char @)
+      ((dirname.size == 0)?
       (aprintf("%s.iB", choppedname)):
-      (Filename::concat(dirname, aprintf("%s.iB", choppedname)));
-    let declsfile =
-      (dirname.size == 0)?
+      (Filename::concat(dirname, aprintf("%s.iB", choppedname))));
+    let declsfile = (const char @)
+      ((dirname.size == 0)?
       (aprintf("%s.iC", choppedname)):
-      (Filename::concat(dirname, aprintf("%s.iC", choppedname)));
-    let filtereddeclsfile =
-      (dirname.size == 0)?
+      (Filename::concat(dirname, aprintf("%s.iC", choppedname))));
+    let filtereddeclsfile = (const char @)
+      ((dirname.size == 0)?
       (aprintf("%s.iD", choppedname)):
-      (Filename::concat(dirname, aprintf("%s.iD", choppedname)));
-    let cfilename = 
-      (dirname.size == 0)?
+      (Filename::concat(dirname, aprintf("%s.iD", choppedname))));
+    let cfilename = (const char @)
+      ((dirname.size == 0)?
       (aprintf("c%s", basename)):
-      (Filename::concat(dirname, aprintf("c%s", basename)));
+      (Filename::concat(dirname, aprintf("c%s", basename))));
 
     try {
 
@@ -1282,17 +1282,17 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         }
         out_file = (FILE@)maybe;
         for (let l = current_cpp; l != NULL; l = l->tl)
-          fputs(*(l->hd),out_file);
+          fputs((const char @)(*(l->hd)),out_file);
         fprintf(out_file,"#include <%s>\n",filename);
         fclose(out_file);
         let GCC = Cstring_to_string(Ccomp);
-        let cmd = aprintf("%s -E -dM -o %s -x c %s",
-                          GCC,macrosfile,cppinfile);
+        char @cmd = (char @)aprintf("%s -E -dM -o %s -x c %s",
+				    GCC,macrosfile,cppinfile);
         if (!system(cmd)) {
           /* No error in creating the file of macros, so go ahead and create
              the file of declarations */
-          cmd = aprintf("%s -E -o %s -x c %s",
-                        GCC,declsfile,cppinfile);
+          cmd = (char @)aprintf("%s -E -o %s -x c %s",
+				GCC,declsfile,cppinfile);
           system(cmd); // if err, no declsfile created, and we'll handle later
         }
         remove(cppinfile);
@@ -1451,7 +1451,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         if (text != NULL &&
             (symbol == NULL || Set::member(defined_symbols, new symbol)))
           // FIX: FPUTS DUMPS CORE ON LINUX IF FIRST ARG IS NULL!!
-          fputs(text,out_file);
+          fputs((const char @)text,out_file);
         else
           log("%s is not supported on this platform\n",symbol);
       }
@@ -1553,7 +1553,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         if (text != NULL &&
             (symbol == NULL || Set::member(defined_symbols, new symbol)))
           // FIX: FPUTS DUMPS CORE ON LINUX IF FIRST ARG IS NULL!!
-          fputs(text,out_file);
+          fputs((const char @)text,out_file);
         else
           log("%s is not supported on this platform\n",symbol);
       }
@@ -1569,7 +1569,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         let &$(symbol,text) = x->hd;
         if (text != NULL &&
             (symbol == NULL || Set::member(defined_symbols, new symbol)))
-          fputs(text,out_file);
+          fputs((const char @)text,out_file);
       }
     }
 
@@ -1584,7 +1584,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
         let &$(symbol,text) = x->hd;
         if (text != NULL &&
             (symbol == NULL || Set::member(defined_symbols, new symbol)))
-          fputs(text,out_file);
+          fputs((const char @)text,out_file);
       }
       fprintf(out_file, "}\n\n");
     }
@@ -1633,7 +1633,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   }
 
   /* Return 1 on fatal error, else 0 */
-  int process_specfile(string_t file,string_t dir) {
+  int process_specfile(const char @ file,const char @dir) {
     let maybe = fopen(file,"r");
     if (!maybe) {
       fprintf(stderr,"Error: could not open %s\n", file);
@@ -1643,7 +1643,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     /* Cd into dir, where the header files will be built.  Remember
        the current dir so we can cd back after we're done. */
-    char ?buf = new {for i<1024: '\0'};
+    char ? buf = new {for i<1024: '\0'};
     let cwd = getcwd(buf,buf.size);
     if (mode != GATHERSCRIPT) {
       if (chdir(dir)) {
@@ -1654,7 +1654,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     if (mode == GATHER) {
       /* This will be executed once for each specfile, but who cares */
       let GCC = Cstring_to_string(Ccomp);
-      system(aprintf("echo | %s -E -dM - -o INITMACROS.h\n",GCC));
+      system((const char @)(aprintf("echo | %s -E -dM - -o INITMACROS.h\n",GCC)));
     }
 
     let l = Lexing::from_file(in_file);
@@ -1662,14 +1662,14 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     while ( (entry = spec(l)) != NULL) {
       let &$(headerfile,start_symbols,omit_symbols,
              prologue,epilogue,cstubs,cycstubs) = (_ @)entry;
-      if (process_file(headerfile,start_symbols,omit_symbols, 
+      if (process_file((const char @)headerfile,start_symbols,omit_symbols, 
                        prologue,epilogue,cstubs,cycstubs))
         return 1; /* fatal error in process_file */
     }
     fclose(in_file);
 
     if (mode != GATHERSCRIPT) {
-      if (chdir(cwd)) {
+      if (chdir((char @)cwd)) {
         fprintf(stderr,"Error: could not change directory to %s\n", cwd);
         return 1;
       }
@@ -1682,9 +1682,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   static void set_output_dir(string_t<`H> s) {
     output_dir = s;
   }
-  static list_t<stringptr_t> spec_files = NULL;
+  static list_t<const char @`H> spec_files = NULL;
   static void add_spec_file(string_t<`H> s) {
-    spec_files = new List(new s,spec_files);
+    spec_files = new List((const char @)s,spec_files);
   }
   static void set_GATHER() {
     mode = GATHER;
@@ -1761,21 +1761,21 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     if (!gathering()) {
       /* Create an empty log file -- most importantly, any previous log
          file will be truncated */
-      log_file = fopen(Filename::concat(output_dir,"BUILDLIB.LOG"),"w");
+      log_file = fopen((const char @)(Filename::concat(output_dir,"BUILDLIB.LOG")),"w");
       if (!log_file) {
         fprintf(stderr,"Error: could not create log file in directory %s\n",output_dir);
         return 1;
       }
 
       /* Create an empty cstubs.cyc file */
-      cstubs_file = fopen(Filename::concat(output_dir,"cstubs.c"),"w");
+      cstubs_file = fopen((const char @)(Filename::concat(output_dir,"cstubs.c")),"w");
       if (!cstubs_file) {
         fprintf(stderr,"Error: could not create cstubs.c in directory %s\n",output_dir);
         return 1;
       }
 
       /* Create a cycstubs.cyc file with the standard prologue */
-      cycstubs_file = fopen(Filename::concat(output_dir,"cycstubs.cyc"),"w");
+      cycstubs_file = fopen((const char @)(Filename::concat(output_dir,"cycstubs.cyc")),"w");
       if (!cycstubs_file) {
         fprintf(stderr,
                 "Error: could not create cycstubs.c in directory %s\n",
@@ -1788,8 +1788,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
             
     /* Main loop -- process each spec file */
+    const char @outdir = (const char @)output_dir;
     for (; spec_files != NULL; spec_files = spec_files->tl) {
-      if (process_specfile(*(spec_files->hd),output_dir)) {
+      if (process_specfile(spec_files->hd,outdir)) {
         fprintf(stderr,"FATAL ERROR -- QUIT!\n");
         exit(1);
       }

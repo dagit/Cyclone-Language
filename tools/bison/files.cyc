@@ -70,7 +70,7 @@ extern int noparserflag;
 /*perror already defined in stdio.h */
 //extern void	perror(char *);
 
-FILE	@tryopen(const char?, const char?);	/* This might be a good idea */
+FILE	@tryopen(const char?, const char@);	/* This might be a good idea */
 void done(int);
 
 extern char ?program_name;
@@ -256,11 +256,11 @@ openfiles()
 #ifndef MSDOS
   /*fix:: unlink not supported yet*/
   if (! noparserflag)
-    unlink(actfile);
-  unlink(tmpattrsfile);
-  unlink(tmpattrs0file);
-  unlink(tmptabfile);
-  unlink(tmpdefsfile);
+    unlink((const char @)actfile);
+  unlink((const char @)tmpattrsfile);
+  unlink((const char @)tmpattrs0file);
+  unlink((const char @)tmptabfile);
+  unlink((const char @)tmpdefsfile);
 #endif
 
 	/* These are opened by `done' or `open_extra_files', if at all */
@@ -332,11 +332,11 @@ void open_extra_files(void)
 
 	/* JF to make file opening easier.  This func tries to open file
 	   NAME with mode MODE, and prints an error message if it fails. */
-FILE @ tryopen(const char? name, const char?mode)
+FILE @ tryopen(const char? name, const char@mode)
 {
   FILE	*ptr;
 
-  ptr = fopen(name, mode);
+  ptr = fopen((const char @)name, mode);
   if (ptr == NULL)
     {
       fprintf(stderr, "%s: ", program_name);

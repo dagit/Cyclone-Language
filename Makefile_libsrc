@@ -49,7 +49,7 @@ cstubs.c cycstubs.cyc: libc.cys
 	-mkdir include
 	tar -z -xf $(CYCDIR)/bin/genfiles/$(UPDATEARCH).headers.tgz -C include
 	$(CYCDIR)/bin/buildlib -d include -finish $<
-	find include -name '*.i[BC]' -exec rm \{\} \;
+	find include -name '\*.i[BC]' -exec rm \{\} \;
 	mv include/cstubs.c .
 	mv include/cycstubs.cyc .
 
