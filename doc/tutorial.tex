@@ -341,7 +341,7 @@ rewriting the code as follows:
 \begin{verbatim}
   void foo(char *s, int offset) {
      unsigned int len = strlen(s);
-     s += offset;
+     s = s + offset;
      for (unsigned int i = 0; offset+i < len; i++, s++)
         *s = 'a';
   }
@@ -688,6 +688,9 @@ are just abbreviations for \texttt{rnew(Core::heap_region)} and
 \texttt{rmalloc(Core::heap_region,...)} respectively.  
 
 \subsubsection*{Dynamic Regions}
+
+\emph{This section is out of date.  The new interface for dynamic
+regions is discussed in Section~\ref{sec:dynamic-regions}.}
 
 Block regions and growable regions allow you to create arenas that
 are lexically scoped.  The lifetimes of these regions begin and end
