@@ -10,7 +10,8 @@ CYCLEX=../bin/cyclex.exe
 # Override this prefix to check the compiler on itself w/o clobbering files
 OUT_PREFIX=
 
-CFLAGS=-g -fwritable-strings -I..
+#CFLAGS=-g -fwritable-strings -I..
+CFLAGS=-O2 -fwritable-strings -I..
 
 CYC_LIBS=$(addsuffix .cyc, $(CYCLONE_LIBS))
 

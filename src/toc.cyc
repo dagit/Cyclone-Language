@@ -268,6 +268,55 @@ static exp array_to_ptr_cast(typ t,exp e,segment l) {
   }
 }
 
+// returns true when the type contains no pointers
+static bool atomic_typ(typ t) {
+  switch (compress(t)) {
+  case VoidType: return true;
+  case VarType(_): return false;
+  case IntType(_,B8,Boxed): return false;
+  case IntType(_,_,_): return true;
+  case BoolType(_): return true;
+  case FloatType(_): return true;
+  case DoubleType(Boxed): return false;
+  case DoubleType(Unboxed): return true;
+  case ArrayType(_,_,TaggedArray): return false;
+  case ArrayType(t,_,_): return atomic_typ(t);
+  case FnType(_,_,_,_): return true;
+  case TupleType(tqs):
+    for (; tqs != null; tqs = tqs->tl)
+      if (!atomic_typ(tqs->hd[1])) return false;
+    return true;
+  // FIX -- really need the struct and enum definitions
+  case StructType(_,_): return false;
+  case EnumType(_,_): return false;
+  case XenumType(_): return false;
+  case UnionType: return false;
+  case PointerType(_,_,_): return false;
+  default: 
+    toc_impos(xprintf("atomic_typ:  bad type %s",typ2string(t)));
+    return false;
+  }
+}
+
+// possible pointer malloc
+static exp malloc_ptr(exp s) {
+  return fncall_exp(var_exp(&$(null,(string)"GC_malloc"),DL),&cons(s,null),DL);
+}
+
+// no pointers possible malloc
+static exp malloc_atomic(exp s) {
+  return fncall_exp(var_exp(&$(null,(string)"GC_malloc_atomic"),DL),
+		    &cons(s,null),DL);
+}
+
+// malloc something -- choose malloc routine according to the (Cyclone) type
+static exp malloc_exp(typ t,exp s) {
+  if (atomic_typ(t))
+    return malloc_atomic(s);
+  else 
+    return malloc_ptr(s);
+}
+
 ///////////////////////////////////////////////////////////////
 //       Conversions for Expressions between Types           //
 ///////////////////////////////////////////////////////////////
@@ -296,7 +345,6 @@ typedef enum Conv conv;
 static list<conv> conversion(typ t1, typ t2) {
   t1 = compress(t1);
   t2 = compress(t2);
-
   switch ($(t1,t2)) {
     // large boxed t1's must be unboxed
   case $(IntType(_,B8,Boxed), IntType(_,B8,Boxed)): 
@@ -348,11 +396,6 @@ static list<conv> conversion(typ t1, typ t2) {
   }
 }    
 
-// malloc something
-static exp malloc_exp(exp s) {
-  return fncall_exp(var_exp(&$(null,(string)"GC_malloc"),DL),&cons(s,null),DL);
-}
-
 // long long -> Long Long
 static exp box_longlong_conv(bool toplevel, exp e) {
   if (toplevel) {
@@ -369,8 +412,7 @@ static exp box_longlong_conv(bool toplevel, exp e) {
     //    x->v = e; x; })
     qvar x = temp_var();
     exp init = cast_exp(longlong_typ,
-			malloc_exp(sizeof_exp(strct("_boxed_long_long_struct"),
-					      DL)),DL);
+			malloc_atomic(sizeof_exp(strct("_boxed_long_long_struct"),DL)),DL);
     stmt s = seq_stmt(assign_stmt(structarrow_exp(var_exp(x,DL),"v",DL),e,DL),
 		      exp_stmt(var_exp(x,DL),DL),DL);
     return stmt_exp(declare_stmt(x,longlong_typ,&Opt(init),s,DL),DL);
@@ -440,8 +482,8 @@ static exp box_double_conv(bool toplevel, exp e) {
     //
     qvar x = temp_var();
     exp init = cast_exp(Double_t,
-			malloc_exp(sizeof_exp(strct("_boxed_double_struct"),
-					      DL)),DL);
+			malloc_atomic(sizeof_exp(strct("_boxed_double_struct"),
+						 DL)),DL);
     stmt s = seq_stmt(assign_stmt(structarrow_exp(var_exp(x,DL),"v",DL),e,DL),
 		      exp_stmt(var_exp(x,DL),DL),DL);
     return stmt_exp(declare_stmt(x,Double_t,&Opt(init),s,DL),DL);
@@ -520,7 +562,7 @@ static exp tag_fixedarray_conv(bool toplevel,typ t, exp sz, exp e) {
 			     var_exp(a,DL),DL),s,DL);
     s = seq_stmt(assign_stmt(structarrow_exp(var_exp(b,DL),"sz",DL),
 			     uint_exp(szvalue,DL),DL),s,DL);
-    exp binit = cast_exp(pstrt_typ,malloc_exp(sizeof_exp(strt_typ,DL)),DL);
+    exp binit = cast_exp(pstrt_typ,malloc_ptr(sizeof_exp(strt_typ,DL)),DL);
     s = declare_stmt(b,pstrt_typ,&Opt(binit),s,DL);
     s = declare_stmt(a,t,&Opt(cast_exp(t,e,DL)),s,DL);
     return stmt_exp(s,DL);
@@ -998,9 +1040,20 @@ static void exp_to_c(env nv, exp e) {
     // unsafe.  This will allow us to experiment for the moment.
     // FIX: use binding fallthru here once it's implemented
     bool is_malloc = false;
+    bool is_atomic = true;
     switch (e1->r) {
-    case Struct_e(_,_,_,_): is_malloc = true; break;
-    case Tuple_e(_):        is_malloc = true; break; // skip
+    case Struct_e(_,_,es,_): 
+      is_malloc = true; 
+      for (; es != null; es = es->tl) {
+	if (!atomic_typ(es->hd[1]->topt->v)) { is_atomic = false; break; }
+      }
+      break;
+    case Tuple_e(es):        
+      is_malloc = true; 
+      for (; es != null; es = es->tl) {
+	if (!atomic_typ(es->hd->topt->v)) { is_atomic = false; break; }
+      }
+      break; // skip
     case Var_e(x,_):
       if (!nv->toplevel)
 	warn(e1->loc,
@@ -1035,7 +1088,8 @@ static void exp_to_c(env nv, exp e) {
       let x     = temp_var();
       let x_typ = typ_to_c(old_typ);
       let e3    = sizeof_exp(typ_to_c(e1_typ),DL);
-      let e2    = cast_exp(x_typ,malloc_exp(e3),DL);
+      let e2    = cast_exp(x_typ,
+			   is_atomic ? malloc_atomic(e3) : malloc_ptr(e3),DL);
       let s1    = seq_stmt(assign_stmt(deref_exp(var_exp(x,DL),DL),e1,DL),
 			   exp_stmt(var_exp(x,DL),DL),DL);
       e->r = stmt_exp(declare_stmt(x,x_typ,&Opt(e2),s1,DL),DL)->r;
@@ -1240,19 +1294,20 @@ static void exp_to_c(env nv, exp e) {
 	s = seq_stmt(assign_stmt(subscript_exp(var_exp(x,DL),e_index,DL),
 				 e1,DL),s,DL);
       }
-      typ elt_typ;
+      typ old_elt_typ;
       // FIX:  if array kind is tagged?
       switch (compress(old_typ)) {
       case ArrayType(et,tq,ak):
-	elt_typ=typ_to_c(et); break;
+	old_elt_typ = et; break;
       default: 
-	elt_typ=toc_impos("exp_to_c:array expression doesn't have array type");
+	old_elt_typ=toc_impos("exp_to_c:array expression doesn't have array type");
         break;
       }
+      typ elt_typ=typ_to_c(old_elt_typ);
       let ptr_typ = nullableptr_t(elt_typ,empty_tqual());
       let e2 = times_exp(sizeof_exp(elt_typ,DL),
                          signed_int_exp(List::length(dles0),DL),DL);
-      let e1 = malloc_exp(e2);
+      let e1 = malloc_exp(old_elt_typ,e2);
       let e0 = cast_exp(ptr_typ,e1,DL);
       e->r = stmt_exp(declare_stmt(x,ptr_typ,&Opt(e0),s,DL),DL)->r;
     }
@@ -1278,7 +1333,8 @@ static void exp_to_c(env nv, exp e) {
       toc_impos("exp_to_c: comprehension not an array type");
       break;
     }
-    typ elt_typ = typ_to_c(e2->topt->v);
+    typ old_elt_typ = e2->topt->v;
+    typ elt_typ = typ_to_c(old_elt_typ);
     typ ptr_t = nullableptr_t(elt_typ,empty_tqual());
     exp_to_c(nv,e1);
     env nv2 = add_varmap(nv,x1,var_exp(x1,DL));
@@ -1293,7 +1349,8 @@ static void exp_to_c(env nv, exp e) {
 						var_exp(x1,DL),DL),e2,DL),DL);
     list<$(qvar,typ,Opt_t<exp>)@> decls =
       &cons(&$(max,uint_t,(Opt_t<exp>)&Opt(e1)),null);
-    exp ainit = cast_exp(ptr_t,malloc_exp(times_exp(sizeof_exp(elt_typ,DL),
+    exp ainit = cast_exp(ptr_t,malloc_exp(old_elt_typ,
+					  times_exp(sizeof_exp(elt_typ,DL),
 						    var_exp(max,DL),DL)),DL);
     decls = &cons(&$(a,ptr_t,(Opt_t<exp>)&Opt(ainit)),decls);
     decls = &cons(&$(x1,uint_t,null),decls);
@@ -1305,7 +1362,7 @@ static void exp_to_c(env nv, exp e) {
       case PointerType(st,_,_): strt_t = st; break;
       default: strt_t = toc_impos("comprehension: not a pointer"); break;
       }
-      let binit = &Opt(cast_exp(t,malloc_exp(sizeof_exp(strt_t,DL)),DL));
+      let binit = &Opt(cast_exp(t,malloc_ptr(sizeof_exp(strt_t,DL)),DL));
       decls = &cons(&$(b,t,(Opt_t<exp>)binit),decls);
       s = seq_stmt(assign_stmt(structarrow_exp(var_exp(b,DL),"sz",DL),
 			       var_exp(max,DL),DL),s,DL);
@@ -1401,17 +1458,20 @@ static void exp_to_c(env nv, exp e) {
 	// ({ struct qv_tag *x = (struct qv_tag*)malloc(sizeof(struct qv_tag));
 	//    x->tag = i; x->f1 = e1; ...; x->fn = en; (t)x; })
 	let e2 = sizeof_exp(strct_typ,DL);
-	let e1 = cast_exp(pstrct_typ,malloc_exp(e2),DL);
+	let atomic = true;
 	let rev_assign =
 	  &cons(assign_stmt(structarrow_exp(xexp,"tag",DL),
 			    var_exp(collapse_qvar_tag(qv,"_tag"),DL),DL),null);
 	for (int i = 1; es != null; es = es->tl, i++) {
+	  if (!atomic_typ(es->hd->topt->v)) atomic = false;
 	  exp_to_c(nv,es->hd);
 	  let a = assign_stmt(structarrow_exp(xexp,xprintf("f%d",i),DL),
 			      es->hd,
 			      DL);
 	  rev_assign = &cons(a,rev_assign);
 	}
+	let e1 = cast_exp(pstrct_typ,
+			  atomic ? malloc_atomic(e2) : malloc_ptr(e2),DL);
 	let final_cast = exp_stmt(cast_exp(typ_to_c(old_typ),xexp,DL),DL);
 	let s2         = seq_stmts(List::rev(&cons(final_cast,rev_assign)),DL);
 	e->r = stmt_exp(declare_stmt(x,pstrct_typ,&Opt(e1),s2,DL),DL)->r;
@@ -1466,15 +1526,21 @@ static void exp_to_c(env nv, exp e) {
     } else {
       // ({ struct qv_tag *x = (struct qv_tag*)malloc(sizeof(struct qv_tag));
       //    *x = (struct qv_tag){->tag = i, ->f1 = e1, ..., ->fn = en}; (t)x; })
+      let atomic = true;
       let e2 = sizeof_exp(strct_typ,DL);
-      let e1 = cast_exp(pstrct_typ,malloc_exp(e2),DL);
       list<$(list<designator>,exp)@> dles = null;
       for (int i = 1; es != null; es = es->tl, i++) {
+	if (!atomic_typ(es->hd->topt->v)) atomic = false;
 	exp_to_c(nv,es->hd);
 	let des = &cons(FieldName(xprintf("f%d",i)),null);
 	dles = &cons(&$((list<designator>)des,es->hd),dles);
       }
       dles = List::imp_rev(dles);
+      // Note:  even though the "tag" is a pointer, it's a pointer to static
+      // data -- hence, if all of the arguments are atomic, then the whole
+      // structure is atomic.
+      let e1 = cast_exp(pstrct_typ,
+			atomic ? malloc_atomic(e2) : malloc_ptr(e2),DL);
       let d = &cons(FieldName("tag"),null);
       list<$(list<designator>,exp)@> dles2 =
         &cons(&$((list<designator>)d,tag_exp),dles);
