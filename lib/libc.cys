@@ -904,11 +904,10 @@ epilogue acoshf {
   extern "C" float acoshf(float);
 }
 epilogue acoshl {
-  // FIX: Cyclone currently does not handle long double
-  //  extern "C" long double acoshl(long double);
+  extern "C" long double acoshl(long double);
 }
 epilogue acosl {
-  //  extern "C" long double acosl(long double);
+  extern "C" long double acosl(long double);
 }
 epilogue asin {
   extern "C" double asin(double);
@@ -923,10 +922,10 @@ epilogue asinhf {
   extern "C" float asinhf(float);
 }
 epilogue asinhl {
-  //  extern "C" long double asinhl(long double);
+  extern "C" long double asinhl(long double);
 }
 epilogue asinl {
-  //  extern "C" long double asinl(long double);
+  extern "C" long double asinl(long double);
 }
 epilogue atan {
   extern "C" double atan(double);
@@ -938,7 +937,7 @@ epilogue atan2f {
   extern "C" float atan2f(float, float);
 }
 epilogue atan2l {
-  //  extern "C" long double atan2l(long double, long double);
+  extern "C" long double atan2l(long double, long double);
 }
 epilogue atanf {
   extern "C" float atanf(float);
@@ -950,10 +949,10 @@ epilogue atanhf {
   extern "C" float atanhf(float);
 }
 epilogue atanhl {
-  //  extern "C" long double atanhl(long double);
+  extern "C" long double atanhl(long double);
 }
 epilogue atanl {
-  //  extern "C" long double atanl(long double);
+  extern "C" long double atanl(long double);
 }
 epilogue cbrt {
   extern "C" double cbrt(double);
@@ -962,7 +961,7 @@ epilogue cbrtf {
   extern "C" float cbrtf(float);
 }
 epilogue cbrtl {
-  //  extern "C" long double cbrtl(long double);
+  extern "C" long double cbrtl(long double);
 }
 epilogue ceil {
   extern "C" double ceil(double);
@@ -971,7 +970,7 @@ epilogue ceilf {
   extern "C" float ceilf(float);
 }
 epilogue ceill {
-  //  extern "C" long double ceill(long double);
+  extern "C" long double ceill(long double);
 }
 epilogue copysign {
   extern "C" double copysign(double, double);
@@ -980,7 +979,7 @@ epilogue copysignf {
   extern "C" float copysignf(float, float);
 }
 epilogue copysignl {
-  //  extern "C" long double copysignl(long double, long double);
+  extern "C" long double copysignl(long double, long double);
 }
 epilogue cos {
   extern "C" double cos(double);
@@ -995,10 +994,10 @@ epilogue coshf {
   extern "C" float coshf(float);
 }
 epilogue coshl {
-  //  extern "C" long double coshl(long double);
+  extern "C" long double coshl(long double);
 }
 epilogue cosl {
-  //  extern "C" long double cosl(long double);
+  extern "C" long double cosl(long double);
 }
 epilogue erf {
   extern "C" double erf(double);
@@ -1010,13 +1009,13 @@ epilogue erfcf {
   extern "C" float erfcf(float);
 }
 epilogue erfcl {
-  //  extern "C" long double erfcl(long double);
+  extern "C" long double erfcl(long double);
 }
 epilogue erff {
   extern "C" float erff(float);
 }
 epilogue erfl {
-  //  extern "C" long double erfl(long double);
+  extern "C" long double erfl(long double);
 }
 epilogue exp {
   extern "C" double exp(double);
@@ -1028,13 +1027,13 @@ epilogue exp2f {
   extern "C" float exp2f(float);
 }
 epilogue exp2l {
-  //  extern "C" long double exp2l(long double);
+  extern "C" long double exp2l(long double);
 }
 epilogue expf {
   extern "C" float expf(float);
 }
 epilogue expl {
-  //  extern "C" long double expl(long double);
+  extern "C" long double expl(long double);
 }
 epilogue expm1 {
   extern "C" double expm1(double);
@@ -1043,7 +1042,7 @@ epilogue expm1f {
   extern "C" float expm1f(float);
 }
 epilogue expm1l {
-  //  extern "C" long double expm1l(long double);
+  extern "C" long double expm1l(long double);
 }
 epilogue fabs {
   extern "C" double fabs(double);
@@ -1052,7 +1051,7 @@ epilogue fabsf {
   extern "C" float fabsf(float);
 }
 epilogue fabsl {
-  //  extern "C" long double fabsl(long double);
+  extern "C" long double fabsl(long double);
 }
 epilogue fdim {
   extern "C" double fdim(double, double);
@@ -1061,7 +1060,7 @@ epilogue fdimf {
   extern "C" float fdimf(float, float);
 }
 epilogue fdiml {
-  //  extern "C" long double fdiml(long double, long double);
+  extern "C" long double fdiml(long double, long double);
 }
 epilogue floor {
   extern "C" double floor(double);
@@ -1070,7 +1069,7 @@ epilogue floorf {
   extern "C" float floorf(float);
 }
 epilogue floorl {
-  //  extern "C" long double floorl(long double);
+  extern "C" long double floorl(long double);
 }
 epilogue fma {
   extern "C" double fma(double, double, double);
@@ -1079,7 +1078,7 @@ epilogue fmaf {
   extern "C" float fmaf(float, float, float);
 }
 epilogue fmal {
-  //  extern "C" long double fmal(long double, long double, long double);
+  extern "C" long double fmal(long double, long double, long double);
 }
 epilogue fmax {
   extern "C" double fmax(double, double);
@@ -1088,7 +1087,7 @@ epilogue fmaxf {
   extern "C" float fmaxf(float, float);
 }
 epilogue fmaxl {
-  //  extern "C" long double fmaxl(long double, long double);
+  extern "C" long double fmaxl(long double, long double);
 }
 epilogue fmin {
   extern "C" double fmin(double, double);
@@ -1097,7 +1096,7 @@ epilogue fminf {
   extern "C" float fminf(float, float);
 }
 epilogue fminl {
-  //  extern "C" long double fminl(long double, long double);
+  extern "C" long double fminl(long double, long double);
 }
 epilogue fmod {
   extern "C" double fmod(double, double);
@@ -1106,7 +1105,7 @@ epilogue fmodf {
   extern "C" float fmodf(float, float);
 }
 epilogue fmodl {
-  //  extern "C" long double fmodl(long double, long double);
+  extern "C" long double fmodl(long double, long double);
 }
 epilogue frexp {
   extern "C" double frexp(double, int @);
@@ -1115,7 +1114,7 @@ epilogue frexpf {
   extern "C" float frexpf(float value, int @);
 }
 epilogue frexpl {
-  //  extern "C" long double frexpl(long double value, int @);
+  extern "C" long double frexpl(long double value, int @);
 }
 epilogue hypot {
   extern "C" double hypot(double, double);
@@ -1124,7 +1123,7 @@ epilogue hypotf {
   extern "C" float hypotf(float, float);
 }
 epilogue hypotl {
-  //  extern "C" long double hypotl(long double, long double);
+  extern "C" long double hypotl(long double, long double);
 }
 epilogue ilogb {
   extern "C" int ilogb(double);
@@ -1133,7 +1132,7 @@ epilogue ilogbf {
   extern "C" int ilogbf(float);
 }
 epilogue ilogbl {
-  //  extern "C" int ilogbl(long double);
+  extern "C" int ilogbl(long double);
 }
 epilogue j0 {
   extern "C" double j0(double);
@@ -1151,7 +1150,7 @@ epilogue ldexpf {
   extern "C" float ldexpf(float, int);
 }
 epilogue ldexpl {
-  //  extern "C" long double ldexpl(long double, int);
+  extern "C" long double ldexpl(long double, int);
 }
 epilogue lgamma {
   extern "C" double lgamma(double);
@@ -1160,7 +1159,7 @@ epilogue lgammaf {
   extern "C" float lgammaf(float);
 }
 epilogue lgammal {
-  //  extern "C" long double lgammal(long double);
+  extern "C" long double lgammal(long double);
 }
 epilogue llrint {
   extern "C" long long llrint(double);
@@ -1169,7 +1168,7 @@ epilogue llrintf {
   extern "C" long long llrintf(float);
 }
 epilogue llrintl {
-  //  extern "C" long long llrintl(long double);
+  extern "C" long long llrintl(long double);
 }
 epilogue llround {
   extern "C" long long llround(double);
@@ -1178,7 +1177,7 @@ epilogue llroundf {
   extern "C" long long llroundf(float);
 }
 epilogue llroundl {
-  //  extern "C" long long llroundl(long double);
+  extern "C" long long llroundl(long double);
 }
 epilogue log {
   extern "C" double log(double);
@@ -1190,7 +1189,7 @@ epilogue log10f {
   extern "C" float log10f(float);
 }
 epilogue log10l {
-  //  extern "C" long double log10l(long double);
+  extern "C" long double log10l(long double);
 }
 epilogue log1p {
   extern "C" double log1p(double);
@@ -1199,7 +1198,7 @@ epilogue log1pf {
   extern "C" float log1pf(float);
 }
 epilogue log1pl {
-  //  extern "C" long double log1pl(long double);
+  extern "C" long double log1pl(long double);
 }
 epilogue log2 {
   extern "C" double log2(double);
@@ -1208,7 +1207,7 @@ epilogue log2f {
   extern "C" float log2f(float);
 }
 epilogue log2l {
-  //  extern "C" long double log2l(long double);
+  extern "C" long double log2l(long double);
 }
 epilogue logb {
   extern "C" double logb(double);
@@ -1217,13 +1216,13 @@ epilogue logbf {
   extern "C" float logbf(float);
 }
 epilogue logbl {
-  //  extern "C" long double logbl(long double);
+  extern "C" long double logbl(long double);
 }
 epilogue logf {
   extern "C" float logf(float);
 }
 epilogue logl {
-  //  extern "C" long double logl(long double);
+  extern "C" long double logl(long double);
 }
 epilogue lrint {
   extern "C" long lrint(double);
@@ -1232,7 +1231,7 @@ epilogue lrintf {
   extern "C" long lrintf(float);
 }
 epilogue lrintl {
-  //  extern "C" long lrintl(long double);
+  extern "C" long lrintl(long double);
 }
 epilogue lround {
   extern "C" long lround(double);
@@ -1241,7 +1240,7 @@ epilogue lroundf {
   extern "C" long lroundf(float);
 }
 epilogue lroundl {
-  //  extern "C" long lroundl(long double);
+  extern "C" long lroundl(long double);
 }
 epilogue modf {
   extern "C" double modf(double, double @);
@@ -1250,7 +1249,7 @@ epilogue modff {
   extern "C" float modff(float, float @);
 }
 epilogue modfl {
-  //  extern "C" long double modfl(long double, long double @);
+  extern "C" long double modfl(long double, long double @);
 }
 epilogue nan {
   // FIX: not yet implemented
@@ -1271,7 +1270,7 @@ epilogue nearbyintf {
   extern "C" float nearbyintf(float);
 }
 epilogue nearbyintl {
-  //  extern "C" long double nearbyintl(long double);
+  extern "C" long double nearbyintl(long double);
 }
 epilogue nextafter {
   extern "C" double nextafter(double, double);
@@ -1280,16 +1279,16 @@ epilogue nextafterf {
   extern "C" float nextafterf(float, float);
 }
 epilogue nextafterl {
-  //  extern "C" long double nextafterl(long double, long double);
+  extern "C" long double nextafterl(long double, long double);
 }
 epilogue nexttoward {
-  //  extern "C" double nexttoward(double, long double);
+  extern "C" double nexttoward(double, long double);
 }
 epilogue nexttowardf {
-  //  extern "C" float nexttowardf(float, long double);
+  extern "C" float nexttowardf(float, long double);
 }
 epilogue nexttowardl {
-  //  extern "C" long double nexttowardl(long double, long double);
+  extern "C" long double nexttowardl(long double, long double);
 }
 epilogue pow {
   extern "C" double pow(double, double);
@@ -1298,7 +1297,7 @@ epilogue powf {
   extern "C" float powf(float, float);
 }
 epilogue powl {
-  //  extern "C" long double powl(long double, long double);
+  extern "C" long double powl(long double, long double);
 }
 epilogue remainder {
   extern "C" double remainder(double, double);
@@ -1307,7 +1306,7 @@ epilogue remainderf {
   extern "C" float remainderf(float, float);
 }
 epilogue remainderl {
-  //  extern "C" long double remainderl(long double, long double);
+  extern "C" long double remainderl(long double, long double);
 }
 epilogue remquo {
   extern "C" double remquo(double, double, int @);
@@ -1316,7 +1315,7 @@ epilogue remquof {
   extern "C" float remquof(float, float, int @);
 }
 epilogue remquol {
-  //  extern "C" long double remquol(long double, long double, int @);
+  extern "C" long double remquol(long double, long double, int @);
 }
 epilogue rint {
   extern "C" double rint(double);
@@ -1325,7 +1324,7 @@ epilogue rintf {
   extern "C" float rintf(float);
 }
 epilogue rintl {
-  //  extern "C" long double rintl(long double);
+  extern "C" long double rintl(long double);
 }
 epilogue round {
   extern "C" double round(double);
@@ -1334,7 +1333,7 @@ epilogue roundf {
   extern "C" float roundf(float);
 }
 epilogue roundl {
-  //  extern "C" long double roundl(long double);
+  extern "C" long double roundl(long double);
 }
 epilogue scalb {
   extern "C" double scalb(double, double);
@@ -1346,7 +1345,7 @@ epilogue scalblnf {
   extern "C" float scalblnf(float, long);
 }
 epilogue scalblnl {
-  //  extern "C" long double scalblnl(long double, long);
+  extern "C" long double scalblnl(long double, long);
 }
 epilogue scalbn {
   extern "C" double scalbn(double, int);
@@ -1355,7 +1354,7 @@ epilogue scalbnf {
   extern "C" float scalbnf(float, int);
 }
 epilogue scalbnl {
-  //  extern "C" long double scalbnl(long double, int);
+  extern "C" long double scalbnl(long double, int);
 }
 epilogue sin {
   extern "C" double sin(double);
@@ -1370,10 +1369,10 @@ epilogue sinhf {
   extern "C" float sinhf(float);
 }
 epilogue sinhl {
-  //  extern "C" long double sinhl(long double);
+  extern "C" long double sinhl(long double);
 }
 epilogue sinl {
-  //  extern "C" long double sinl(long double);
+  extern "C" long double sinl(long double);
 }
 epilogue sqrt {
   extern "C" double sqrt(double);
@@ -1382,7 +1381,7 @@ epilogue sqrtf {
   extern "C" float sqrtf(float);
 }
 epilogue sqrtl {
-  //  extern "C" long double sqrtl(long double);
+  extern "C" long double sqrtl(long double);
 }
 epilogue tan {
   extern "C" double tan(double);
@@ -1397,10 +1396,10 @@ epilogue tanhf {
   extern "C" float tanhf(float);
 }
 epilogue tanhl {
-  //  extern "C" long double tanhl(long double);
+  extern "C" long double tanhl(long double);
 }
 epilogue tanl {
-  //  extern "C" long double tanl(long double);
+  extern "C" long double tanl(long double);
 }
 epilogue tgamma {
   extern "C" double tgamma(double);
@@ -1409,7 +1408,7 @@ epilogue tgammaf {
   extern "C" float tgammaf(float);
 }
 epilogue tgammal {
-  //  extern "C" long double tgammal(long double);
+  extern "C" long double tgammal(long double);
 }
 epilogue trunc {
   extern "C" double trunc(double);
@@ -1418,7 +1417,7 @@ epilogue truncf {
   extern "C" float truncf(float);
 }
 epilogue truncl {
-  //  extern "C" long double truncl(long double);
+  extern "C" long double truncl(long double);
 }
 epilogue y0 {
   extern "C" double y0(double);
