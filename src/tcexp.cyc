@@ -1547,7 +1547,7 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
                            bool @is_tagged, bool @is_read) {
   // As per K&R, don't promote e from array to pointer type
   TEMP_RGN(te, r) {
-    tcExpNoPromote(enter_abstract_val_ok(r,clear_notreadctxt(r,te)),NULL,e);
+    tcExpNoPromote(enter_abstract_val_ok(r,te),NULL,e);
   }
   // record whether or not we're in a read context
   *is_read = !in_notreadctxt(te);
@@ -1566,8 +1566,9 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
         t2 = rsubstitute(rgn,inst,finfo->type);
       }
     }
-    // prevent someone from reading a non-bits-only union member
-    if (ad->kind == UnionA && !ad->impl->tagged && !in_notreadctxt(te) && !bits_only(t2))
+    // if this is a non-tagged union and we are reading a pointer,
+    // then need to be writing to this spot
+    if (ad->kind == UnionA && !ad->impl->tagged && !bits_only(t2) && !in_notreadctxt(te))
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
     if(ad->impl->exist_vars != NULL) {
       // this will force the result to not have a type containing any of the
@@ -1580,7 +1581,9 @@ static type_t tcAggrMember(tenv_t te, seg_t loc, type_t * topt,
     let finfo = lookup_field(fs,f);
     if (finfo == NULL)
       return expr_err(te,loc,topt,"type has no %s field",*f);
-    if (k == UnionA && !in_notreadctxt(te) && !bits_only(finfo->type))
+    // if this is a non-tagged union and we are reading a pointer,
+    // then either we need to be writing to this spot
+    if (k == UnionA && !bits_only(finfo->type) && !in_notreadctxt(te))
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
     return finfo->type;
   case &ArrayType(_)   && (strcmp(*f,"size") == 0):
@@ -1605,7 +1608,7 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
                           bool @is_tagged, bool @is_read) {
   TEMP_RGN(te, r) {
     tcExp(enter_abstract_val_ok(r,clear_lhs(r,clear_notreadctxt(r,te))),
-	  NULL,e);
+          NULL,e);
   }
   // record whether or not we're in a read context
   *is_read = !in_notreadctxt(te);
@@ -1637,7 +1640,10 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
           return expr_err(te,loc,topt,"cannot get member %s since its type is abstract",*f);
         }
       }
-      if (ad->kind == UnionA && !ad->impl->tagged && !in_notreadctxt(te) && !bits_only(t3))
+      // if this is a non-tagged union and we are reading a pointer,
+      // then either we need to be writing to this spot
+      if (ad->kind == UnionA && 
+	  !ad->impl->tagged && !bits_only(t3) && !in_notreadctxt(te))
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
       if(ad->impl->exist_vars != NULL) {
         if (!unify(t3,wildtyp(lookup_opt_type_vars(te))))
@@ -1650,7 +1656,9 @@ static type_t tcAggrArrow(tenv_t te, seg_t loc, type_t * topt,
       let finfo = lookup_field(fs,f);
       if (finfo == NULL)
 	return expr_err(te,loc,topt,"type has no %s field",*f);
-      if (k == UnionA && !in_notreadctxt(te) && !bits_only(finfo->type))
+      // if this is a non-tagged union and we are reading a pointer,
+      // then either we need to be writing to this spot
+      if (k == UnionA && !bits_only(finfo->type) && !in_notreadctxt(te))
         return expr_err(te,loc,topt,"cannot read union member %s since it is not `bits-only'",*f);
       return finfo->type;
     default: break;
