@@ -1,0 +1,67 @@
+#include <core.h>
+#include <stdio.h>
+using Core;
+using Stdio;
+#include "smlng.h"
+
+string_t start_tags[] = {
+  "<0>", "<1>", "<2>", "<3>", "<4>", "<5>", "<6>", "<7>", "<8>", "<9>",
+  "<B>", "<EM>", "<I>", "<PL>", "<S>", "<TT>", "<U>", "<r>", "<g>",
+  "<b>", "<c>", "<m>", "<y>", "<k>", "<w>"
+};
+string_t end_tags[] = {
+  "</0>", "</1>", "/<2>", "</3>", "</4>", "</5>", "</6>", "</7>", "</8>", 
+  "</9>", "</B>", "</EM>", "</I>", "</PL>", "</S>", "</TT>", "</U>", "</r>", 
+  "</g>", "</b>", "</c>", "</m>", "</y>", "</k>", "</w>"
+};
+extern tunion Document;
+tunion Document {
+  Seq(doc_t ?);
+  Text(char ?);
+  Tagged(tag_t,doc_t);
+};
+
+void dump(doc_t d) {
+  switch (d) {
+  case &Seq(ds): for (; ds.size != 0; ds++) dump(ds[0]); break;
+  case &Text(s): fputs(s,stdout); break;
+  case &Tagged(tag,d):
+    fputs(start_tags[tag],stdout); dump(d); fputs(end_tags[tag],stdout);
+    break;
+  }
+}
+
+int doc_size(doc_t d) {
+  int sum = 0;
+  switch (d) {
+  case &Seq(ds):
+    for (; ds != null; ds++)
+      sum += doc_size(*ds); 
+    break;
+  case &Text(s): sum + s.size; break;
+  case &Tagged(tag,d):
+    sum += start_tags[tag].size;
+    sum += doc_size(d);
+    sum += end_tags[tag].size;
+    break;
+  }
+  return sum;
+}
+
+struct Context {
+  bool B :1;
+  bool EM :1;
+  bool I :1;
+  bool S :1;
+  bool TT :1;
+  unsigned short U :2;    // [0-3]
+  unsigned short size; // [0-9]
+  short color; // [r_tag-w_tag]
+};
+
+int main(int argc, char ??argv) {
+  printf("hello\n");
+  return 0;
+}
+
+      
