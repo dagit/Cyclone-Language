@@ -1526,7 +1526,7 @@ initializer:
 | '{' initializer_list '}'
     { $$=^$(new_exp(UnresolvedMem_e(null,List::imp_rev($2)),LOC(@1,@3))); }
 | '{' initializer_list ',' '}'
-    { $$=^$(new_exp(UnresolvedMem_e(null,List::imp_rev($2)),LOC(@1,@3))); }
+    { $$=^$(new_exp(UnresolvedMem_e(null,List::imp_rev($2)),LOC(@1,@4))); }
 ;
 
 /* NB: returns list in reverse order */

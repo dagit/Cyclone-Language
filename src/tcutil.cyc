@@ -413,8 +413,8 @@ bool is_boxed_type(typ t) {
 typ make_unboxed_type(typ t) {
   switch (compress(t)) {
   case IntType(sn,sz,bx): return (bx == Unboxed) ? t : IntType(sn,sz,Unboxed);
-  case FloatType(_):      return Float_t;
-  case DoubleType(_):     return Double_t;
+  case FloatType(_):      return float_t;
+  case DoubleType(_):     return double_t;
   default:                return t;
   }
 }
