@@ -182,7 +182,7 @@ static inline mstring_t<`r> int_strcato(mstring_t<`r> dest,buffer_t src) {
     for (i = 0; i<slen; i++) {
       dest[i+dlen] = src[i];
     }
-    if (i != dsize)
+    if (i+dlen < dsize)
       dest[i+dlen] = '\000';
   }
   else
