@@ -104,10 +104,11 @@ struct AnalEnv<`r::R> {
   place_set_t<`r>*`r all_changed;// NULL for "not in unorderd so don't bother"
   bool          noreturn;    // true when function is "noreturn"
   type_t        return_type; // return type for function
-  list_t<$(stmt_t,list_t<place_t<`r,`r>,`r>,list_t<exp_t,`r>)@`r,`r> unique_pat_vars;
+  list_t<$(bool,stmt_t,list_t<place_t<`r,`r>,`r>,list_t<exp_t,`r>)@`r,`r> unique_pat_vars;
   // list of pattern variables having unique pointer type, and the
   // statement that introduced them; they will be potentially
-  // unconsumed at the exit of their defining scope.
+  // unconsumed at the exit of their defining scope.  The boolean indicates
+  // whether these are from a region open.
   list_t<place_t<`r,`r>,`r> param_roots;
   list_t<place_t<`r,`r>,`r> noconsume_params;
   Hashtable::table_t<stmt_t,flow_t<`r>@`r,`r> flow_table;
@@ -2127,8 +2128,13 @@ static void check_init_params(seg_t loc, analenv_t<`r> env, flow_t<`r> flow) {
   }
 }
 
+
+// goes through a list of pattern variables and their access
+// expressions and extracts out those variables that are no-alias
+// pointers; these could be potentially unconsumed at the completion
+// of the pattern block.
 static $(list_t<place_t<`r,`r>,`r>, list_t<exp_t,`r>) 
-  get_unconsume_params(region_t<`r> frgn,
+  get_unconsume_pat_vars(region_t<`r> frgn,
 		       list_t<$(vardecl_t *,exp_opt_t)@> vds) {
   let roots = NULL;
   let es = NULL;
@@ -2145,161 +2151,189 @@ static $(list_t<place_t<`r,`r>,`r>, list_t<exp_t,`r>)
   return $(roots,es);
 }
 
-// checks whether the vals in the [consumed_vals] list still points to
-// its initial named location.  If so, then the corresponding expression
-// in [unconsume_exps] is unconsumed, as long as [unconsume_exps] is
-// non-NULL.  If [unconsume_exps] is NULL, then all consumed_vals *must*
-// point to their original location or its an error.  Note that we assume
-// that the consumed_vals are unique pointers (but not unique aggregates).
-static flow_t<`r> unconsume_params(analenv_t<`r> env,
-				   list_t<place_t<`r,`r>> consumed_vals,
-				   list_t<exp_t> unconsume_exps,
-				   flow_t<`r> flow,
-				   Position::seg_t loc) {
+// Given a [place], make sure that its rval in the [flow] is a
+// NamedLocation whose name is [vd].  If so, returns the rval
+// with the name stripped off.
+static $(bool,absRval_opt_t<`r>) noconsume_place_ok(analenv_t<`r> env,
+						    place_t<`r,`r> place,
+						    bool do_unconsume,
+						    vardecl_t vd,
+						    flow_t<`r> flow,
+						    Position::seg_t loc) {
+
   switch(flow) {
-  case {.BottomFL = _}: return flow;
-  default: break;
-  }
-  let do_unconsume = unconsume_exps != NULL;
-  let bogus_exp = exp_unsigned_one;
-  let bogus_bool = false;
-  let bogus_int = 1;
-  // reverse the expression order so that we unconsume from the outside in.
-//   let params = List::rrev(env->fenv->r,consumed_vals);
-//   let unconsume_exps = List::rrev(env->fenv->r,unconsume_exps);
-  for(let params = consumed_vals; params != NULL;
-      params=params->tl,
-      unconsume_exps != NULL ? unconsume_exps = unconsume_exps->tl : NULL) {
-    switch(flow) {
-    case {.ReachableFL = $(d,_)}:
-      // need to check that for each parameter it is still mapped to
-      // the same location, and that location must not be consumed
-      DEBUG_PRINT("unconsume_params: considering place ");
-      DEBUG_PRINT_F(print_place,params->hd);
-      DEBUG_PRINT("\n");
-      let curr_rval = lookup_place(d,params->hd);
-      let rval = curr_rval;
-      let &Place(root,fs) = params->hd;
-      if (fs != NULL)
-	Tcutil::impos("unconsume_params: param to unconsume is non-variable");
-      switch (root) {
-      case &VarRoot(vd):
-	// If the variable has unique type, then we need to make sure
-	// it hasn't changed or been consumed if we're to unconsume
-	// the access expression.  When the variable doesn't have
-	// unique type, it means we've aliased it, so we don't care
-	// what its final rval is; however, if we've named it, we want
-	// to strip off the name, so we still do the checks.
-	bool varok = false;
-	switch (curr_rval) {
-	case &NamedLocation(n,r):
-	  if (vd == n) {
-	    rval = r;
-	    // if a unique pointer, make sure not consumed
-	    if (Tcutil::is_noalias_pointer_or_aggr(env->r,vd->type)) {
-	      // see if I consumed the variable directly
-	      if (is_unique_consumed(bogus_exp,bogus_int,rval,&bogus_bool)) {
-		if (!do_unconsume)
-		  aerr(loc, "function consumes parameter %s"
-		       " with attribute 'noconsume'", 
-		       Absynpp::qvar2string(vd->name));
-	      }
-	      // see if I consumed something it points to
-	      else if(initlevel(env->fenv,d,rval) != AllIL && !do_unconsume)
-		aerr(loc, "function consumes value pointed to by "
-		     "parameter %s, which has attribute 'noconsume'", 
-		     Absynpp::qvar2string(vd->name));
-	      // not consumed---we can unconsume it
-	      else varok = true;
-	    }
-	    // not a unique pointer, ok to continue
-	    else varok = true;
+  case {.BottomFL = _}: 
+    Tcutil::impos("noconsume_place_ok: flow became Bottom!");
+  case {.ReachableFL = $(d,_)}:
+    // need to check that for each parameter it is still mapped to
+    // the same location, and that location must not be consumed
+    DEBUG_PRINT("noconsume_place_ok: considering place ");
+    DEBUG_PRINT_F(print_place,place);
+    DEBUG_PRINT("\n");
+    let bogus_exp = exp_unsigned_one;
+    let bogus_bool = false;
+    let bogus_int = 1;
+    let curr_rval = lookup_place(d,place);
+    let rval = curr_rval;
+
+    // If the variable has unique type, then we need to make sure
+    // it hasn't changed or been consumed if we're to unconsume
+    // the access expression.  When the variable doesn't have
+    // unique type, it means we've aliased it, so we don't care
+    // what its final rval is; however, if we've named it, we want
+    // to strip off the name, so we still do the checks.
+    bool varok = false;
+    switch (curr_rval) {
+    case &NamedLocation(n,r):
+      if (vd == n) {
+	rval = r;
+	// if a unique pointer, make sure not consumed
+	if (Tcutil::is_noalias_pointer_or_aggr(env->r,vd->type)) {
+	  // see if I consumed the variable directly
+	  if (is_unique_consumed(bogus_exp,bogus_int,rval,&bogus_bool)) {
+	    if (!do_unconsume)
+	      aerr(loc, "function consumes parameter %s"
+		   " with attribute 'noconsume'", 
+		   Absynpp::qvar2string(vd->name));
 	  }
-	  // names don't match, only ok if not a unique pointer
-	  else fallthru;
-	  break;
-
-	default:
-	  if (!Tcutil::is_noalias_pointer_or_aggr(env->r,vd->type))
-	    varok = true;
-	  else if (!do_unconsume)
-	    aerr(loc, "function parameter %s with attribute "
-		 "'noconsume' no longer set to its original value", 
+	  // see if I consumed something it points to
+	  else if(initlevel(env->fenv,d,rval) != AllIL && !do_unconsume)
+	    aerr(loc, "function consumes value pointed to by "
+		 "parameter %s, which has attribute 'noconsume'", 
 		 Absynpp::qvar2string(vd->name));
+	  // not consumed---we can unconsume it
+	  else varok = true;
+	}
+	// not a unique pointer, ok to continue
+	else varok = true;
+      }
+      // names don't match, only ok if not a unique pointer
+      else fallthru;
+      break;
+	
+    default:
+      if (!Tcutil::is_noalias_pointer_or_aggr(env->r,vd->type))
+	varok = true;
+      else if (!do_unconsume)
+	aerr(loc, "function parameter %s with attribute "
+	     "'noconsume' no longer set to its original value", 
+	     Absynpp::qvar2string(vd->name));
+      break;
+    } // end switch
+
+    return $(varok,rval);
+  }
+}
+
+// extracts out the vardecl of a VarRoot place; does impos() if
+// the place is not a VarRoot.
+static vardecl_t get_vd_from_place(place_t p) {
+  let &Place(root,fs) = p;
+  if (fs != NULL)
+    Tcutil::impos("unconsume_params: param to unconsume is non-variable");
+  vardecl_t vd;
+  switch (root) {
+  case &VarRoot(vd): return vd;
+  default: Tcutil::impos("unconsume_params: root is not a varroot");
+  }
+}
+
+// unconsumes a given expression, assuming that (1) its corresponding
+// pattern variable didn't change (indicated by [varok]), and (2) its
+// name didn't change (from [vd]).  If the former condition fails, but
+// the second succeeds, we just strip off the name.  If the second
+// condition fails, then it's an error when this is an alias pattern
+// variable.  This is signaled by the fact that the variable type is
+// not unique (since it was aliased), and the fact that ropt is
+// non-null (this was the old rval of that variable).
+static flow_t<`r> unconsume_exp(analenv_t<`r> env,
+				exp_t unconsume_exp,
+				vardecl_t vd,
+				bool varok,
+				absRval_opt_t<`r> ropt,
+				flow_t<`r> flow,
+				Position::seg_t loc) {
+
+  switch(flow) {    
+  case {.BottomFL = _}: return flow;
+  case {.ReachableFL = $(d,_)}:
+    // So, we must check that the old access expression hasn't
+    // changed (i.e. been consumed, reassigned to, etc.).  To do
+    // this, we grab its lval and make sure the name of the rval
+    // it maps to hasn't changed.
+    let $(f,lval) = anal_Lexp(env,flow,false,true,unconsume_exp);
+    // (don't worry about the flow changing---no side effects
+    // in unconsume expressions, and already expanded in the flow)
+    switch (lval) {
+    case {.PlaceL = p}:
+      // get the access expression's rval; only unconsume it if
+      // it hasn't changed.
+      let old_rval = lookup_place(d,p);
+      switch (old_rval) {
+      case &NamedLocation(old_vd,r):
+	// this is a bit goofy, but we've given the access expression
+	// the same name as the pattern variable.  Even if we
+	// assign one to the other, should be OK.
+	_ new_rval;
+	if (old_vd == vd) {
+	  // only unconsume it if the var part was ok.  Otherwise,
+	  // just strip the name off of it and update the flow.
+	  if (varok) {
+	    DEBUG_PRINT("  will unconsume it\n");
+	    old_rval = make_unique_unconsumed(env->fenv,r);
+	    // when unconsuming, we take the join of the current
+	    // access-expression's rvalue and that of the pattern
+	    // join this with that of the pattern variable, if one
+	    // exists.
+	    if (ropt != NULL) {
+	      DEBUG_PRINT("  setting value to join of ");
+	      DEBUG_PRINT_F(print_absrval,old_rval);
+	      DEBUG_PRINT(" and ");
+	      DEBUG_PRINT_F(print_absrval,ropt);
+	      DEBUG_PRINT("\n");
+	      let $(f2,new_rval2) =
+		join_flow_and_rval(env->fenv,
+				   env->all_changed,
+				   $(f,old_rval),
+				   $(f,(absRval_t)ropt));
+	      f = f2; new_rval = new_rval2;
+	    } else {
+	      DEBUG_PRINT("  setting value to ");
+	      DEBUG_PRINT_F(print_absrval,old_rval);
+	      DEBUG_PRINT("\n");
+	      new_rval = old_rval;
+	    }
+	  }
+	  else new_rval = r;
+	  // update the flow
+	  switch (f) {
+	  case {.ReachableFL = $(d2,relns)}:
+	    flow = ReachableFL(assign_place(env->fenv,loc,d2,
+					    env->all_changed,p,
+					    new_rval),
+			       relns);
+	    break;
+	  default:
+	    Tcutil::impos("unconsume_params: joined flow became bot!");
+	  }
 	  break;
-	} // end switch
-
-	// OK, the variable is fine, with rval as its relevant rvalue.
-	if (do_unconsume) {
-	  // We want to unconsume it, so we must check that the old
-	  // access expression hasn't changed (i.e. been consumed,
-	  // reassigned to, etc.).  To do this, we grab its lval and
-	  // make sure the name of the rval it maps to hasn't
-	  // changed.
-	  let $(f,lval) = anal_Lexp(env,flow,false,true,unconsume_exps->hd);
-	  // (don't worry about the flow changing---no side effects
-	  // in unconsume expressions, and already expanded in the flow)
-	  switch (lval) {
-	  case {.PlaceL = p}:
-	    // get the access expression's rval; only unconsume it if
-	    // it hasn't changed.
-	    let old_rval = lookup_place(d,p);
-	    switch (old_rval) {
-	    case &NamedLocation(old_vd,r):
-	      // this is a bit goofy, but we've given the access expression
-	      // the same name as the pattern variable.  Even if we
-	      // assign one to the other, should be OK.
-	      _ new_rval;
-	      if (old_vd == vd) {
-		// only unconsume it if the var part was ok.  Otherwise,
-		// just strip the name off of it and update the flow.
-		if (varok) {
-		  DEBUG_PRINT("  will unconsume it\n");
-		  old_rval = make_unique_unconsumed(env->fenv,r);
-		  // when unconsuming, we take the join of the current
-		  // access-expression's rvalue and that of the pattern
-		  // join this with that of the pattern variable
-		  DEBUG_PRINT("  setting value to join of ");
-		  DEBUG_PRINT_F(print_absrval,old_rval);
-		  DEBUG_PRINT(" and ");
-		  DEBUG_PRINT_F(print_absrval,rval);
-		  DEBUG_PRINT("\n");
-		  let $(f2,new_rval2) =
-		    join_flow_and_rval(env->fenv,
-				       env->all_changed,
-				       $(f,old_rval),
-				       $(f,rval));
-		  f = f2; new_rval = new_rval2;
-		}
-		else new_rval = r;
-		// update the flow
-		switch (f) {
-		case {.ReachableFL = $(d2,relns)}:
-		  flow = ReachableFL(assign_place(env->fenv,loc,d2,
-						  env->all_changed,p,
-						  new_rval),
-				     relns);
-		  break;
-		default:
-		  Tcutil::impos("unconsume_params: joined flow became bot!");
-		}
-		break;
-	      }
-	      else fallthru;
-	      break;
-
-	    default:
-	      DEBUG_PRINT("  will NOT unconsume it---access exp changed\n");
-	      // if this is an alias expression, then overwriting the
-	      // original is an error (for now)
-	      if (!Tcutil::is_noalias_pointer_or_aggr(env->r,vd->type)) {
-		aerr(loc,"aliased expression %s was overwritten",
-		     exp2string(unconsume_exps->hd));
-		// CODE SAVED FROM OLD ALIAS STUFF BELOW
-		// create an approximate version of the old rvalue, to restore
-		// after analyzing the statement; using an approximate value
-		// avoids some complications with expanded nodes that end up
-		// escaping.
+	}
+	else fallthru;
+	break;
+	
+      default:
+	DEBUG_PRINT("  will NOT unconsume it---access exp changed\n");
+	// if this is an alias expression, then overwriting the
+	// original is an error (for now)
+	if (ropt != NULL &&
+	    !Tcutil::is_noalias_pointer_or_aggr(env->r,vd->type)) {
+	  aerr(loc,"aliased expression %s was overwritten",
+	       exp2string(unconsume_exp));
+	  // CODE SAVED FROM OLD ALIAS STUFF BELOW
+	  // create an approximate version of the old rvalue, to restore
+	  // after analyzing the statement; using an approximate value
+	  // avoids some complications with expanded nodes that end up
+	  // escaping.
 // 		absRval_t leaf;
 // 		switch (initlevel(fenv,fd,old_rval)) {
 // 		case AllIL: leaf = fenv->unknown_all; break;
@@ -2307,27 +2341,58 @@ static flow_t<`r> unconsume_params(analenv_t<`r> env,
 // 		case ThisIL: leaf = fenv->unknown_this; break;
 // 		}
 // 		old_rval_approx = typ_to_absrval(fenv,t,false,leaf);
-	      }
-	      break;
-	    }
-	    break;
-	    
-	  default:
-	    // not an lval; this means we had a pattern like
-	    // let x = f(y), which means there's no need to attempt
-	    // to unconsume f(y);
-	    break;
-	  }
 	}
 	break;
-
-      default:
-	Tcutil::impos("unconsume_params: root is not a varroot");
       }
       break;
-    case {.BottomFL = _}: 
-      Tcutil::impos("unconsume_params: flow became Bottom!");
+      
+    default:
+      // not an lval; this means we had a pattern like
+      // let x = f(y), which means there's no need to attempt
+      // to unconsume f(y);
+      break;
     }
+    break;
+  }
+  return flow;
+}
+
+// checks whether the vals in the [consumed_vals] list still points to
+// its initial named location.  If so, then the corresponding
+// expression in [unconsume_exps] is unconsumed, as long as
+// [unconsume_exps] is non-NULL.  If [unconsume_exps] is NULL, then
+// all consumed_vals *must* point to their original location or its an
+// error.  Note that we assume that the consumed_vals are unique
+// pointers (but not unique aggregates).  If not [is_region_open],
+// then the result of unconsuming the expression will be the join of
+// its rval and that of its corresponding variable; otherwise we just
+// unconsume its rval, since the variable just supplies the name.
+static flow_t<`r> unconsume_params(analenv_t<`r> env,
+				   list_t<place_t<`r,`r>> consumed_vals,
+				   list_t<exp_t> unconsume_exps,
+				   bool is_region_open,
+				   flow_t<`r> flow,
+				   Position::seg_t loc) {
+  switch(flow) {
+  case {.BottomFL = _}: return flow;
+  default: break;
+  }
+  let do_unconsume = unconsume_exps != NULL; // true iff these are pat vars
+  for(let params = consumed_vals; params != NULL;
+      params=params->tl,
+      unconsume_exps != NULL ? unconsume_exps = unconsume_exps->tl : NULL) {
+
+    // Need to check that for each variable it is still mapped to
+    // the same location, and that location must not be consumed
+    let vd = get_vd_from_place(params->hd);
+    let $(varok,rval) =
+      is_region_open ? $(true,NULL) :
+      noconsume_place_ok(env,params->hd,do_unconsume,vd,flow,loc);
+
+    // If we want to unconsume pattern variables' access expressions,
+    // we do so now
+    if (do_unconsume)
+      flow = unconsume_exp(env,unconsume_exps->hd,vd,varok,rval,flow,loc);
   }
   update_tryflow(env,flow);
   return flow;
@@ -2339,7 +2404,7 @@ static flow_t<`r> anal_scs(analenv_t<`r> env,flow_t<`r> inflow,
   let fenv = env->fenv;
   for(; scs != NULL; scs = scs->tl) {
     let &Switch_clause(_,vds_opt,where_opt,body,loc) = scs->hd;
-    let $(roots,es) = get_unconsume_params(env->fenv->r,vds_opt->v);
+    let $(roots,es) = get_unconsume_pat_vars(env->fenv->r,vds_opt->v);
     flow_t clause_inflow=initialize_pat_vars(env->fenv,env,inflow,
 					     vds_opt->v,
 					     roots != NULL,
@@ -2347,7 +2412,7 @@ static flow_t<`r> anal_scs(analenv_t<`r> env,flow_t<`r> inflow,
     flow_t clause_outflow;
     let old_unique_pat_vars = env->unique_pat_vars;
     env->unique_pat_vars = 
-      rnew(env->r) List(rnew (env->r) $(body,roots,es),
+      rnew(env->r) List(rnew (env->r) $(false,body,roots,es),
 			old_unique_pat_vars);
     if(where_opt != NULL) {
       exp_t wexp = (exp_t)where_opt;
@@ -2362,7 +2427,7 @@ static flow_t<`r> anal_scs(analenv_t<`r> env,flow_t<`r> inflow,
     case {.BottomFL = _}: break; // [body] ended in a break or fallthru()
     default:                     // implicit fall through
       // first attempt to unconsume any unique pat vars
-      clause_outflow = unconsume_params(env,roots,es,clause_outflow,loc);
+      clause_outflow = unconsume_params(env,roots,es,false,clause_outflow,loc);
       // no need for a break/fallthru for the last case
       if(scs->tl == NULL)
 	return clause_outflow;
@@ -2433,12 +2498,12 @@ static void check_dropped_unique(analenv_t<`r> env, flow_t<`r> inflow,
 // For each set of pattern variables in the [env], if [dest] is
 // outside their scope, attempt to unconsume them in [inflow], and
 // return the resulting flow.
-static flow_t<`r> unconsume_patvars(analenv_t<`r> env,
-				    flow_t<`r> inflow,
-				    stmt_t dest) {
+static flow_t<`r> unconsume_pat_vars(analenv_t<`r> env,
+				     flow_t<`r> inflow,
+				     stmt_t dest) {
   bool keep_going = true;
   for (_ x = env->unique_pat_vars; x != NULL && keep_going; x=x->tl) {
-    let &$(pat_stmt,roots,es) = x->hd;
+    let &$(is_open,pat_stmt,roots,es) = x->hd;
     keep_going = false;
 
     // now see if [dest] is outside of [pat_stmt].  We do this
@@ -2450,7 +2515,7 @@ static flow_t<`r> unconsume_patvars(analenv_t<`r> env,
       if(next_encloser == curr_encloser) { // function body is own encloser
 	// didn't see pat_stmt, so we've exited its scope;
 	// therefore, try to unconsume 
-	inflow = unconsume_params(env,roots,es,inflow,dest->loc);
+	inflow = unconsume_params(env,roots,es,is_open,inflow,dest->loc);
 	keep_going = true;
 	break;
       }
@@ -2499,7 +2564,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     if (env->noreturn)
       aerr(s->loc,"`noreturn' function might return");
     check_init_params(s->loc,env,inflow);
-    unconsume_params(env,env->noconsume_params,NULL,inflow,s->loc);
+    unconsume_params(env,env->noconsume_params,NULL,false,inflow,s->loc);
     return BottomFL();
   case &Return_s(e):
     if (env->noreturn)
@@ -2507,7 +2572,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     let $(f,r) = anal_Rexp(env,true,inflow,(exp_t)e);
     f = use_Rval(env,e->loc,f,r);
     check_init_params(s->loc,env,f);
-    unconsume_params(env,env->noconsume_params,NULL,f,s->loc);
+    unconsume_params(env,env->noconsume_params,NULL,false,f,s->loc);
     return BottomFL();
 
   case &Exp_s(e): 
@@ -2572,8 +2637,8 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
   case &Fallthru_s(es,&destclause):
     ANAL_RGN(env, temp) {
       let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,es,true,true);
-      // attempt to unconsume any bound patvars
-      inflow = unconsume_patvars(env,inflow,(stmt_t)destclause->body);
+      // attempt to unconsume any bound pattern variables
+      inflow = unconsume_pat_vars(env,inflow,(stmt_t)destclause->body);
       // The gunk is because the next case's binding vars are still in scope!
       let vds = Tcutil::filter_nulls(List::split(destclause->pat_vars->v)[0]);
       f = add_vars(fenv,f,vds,fenv->unknown_all,s->loc,false);
@@ -2607,7 +2672,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
       }
     }
     // now just update the dest's flow
-    inflow = unconsume_patvars(env,inflow,(stmt_t)dest);
+    inflow = unconsume_pat_vars(env,inflow,(stmt_t)dest);
     DEBUG_PRINT("in Rexp:Break/Continue/Goto; updating flow\n");
     update_flow(env, (stmt_t)dest, inflow);
     return BottomFL();
@@ -2649,11 +2714,11 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     DEBUG_PRINT("}\n");
     // NOTE: we don't need to analyze e since the relevant parts of
     // it are part of vds, as set by tcPat
-    let $(roots,es) = get_unconsume_params(env->fenv->r,vds);
+    let $(roots,es) = get_unconsume_pat_vars(env->fenv->r,vds);
     inflow = initialize_pat_vars(fenv,env,inflow,vds,roots != NULL,loc,e->loc);
     let old_unique_pat_vars = env->unique_pat_vars;
     env->unique_pat_vars = 
-      rnew(env->r) List(rnew (env->r) $(s1,roots,es),old_unique_pat_vars);
+      rnew(env->r) List(rnew (env->r) $(false,s1,roots,es),old_unique_pat_vars);
     DEBUG_PRINT("flow for let body is {\n");
     DEBUG_PRINT_F(print_flow,inflow);
     DEBUG_PRINT("}\n");
@@ -2661,7 +2726,7 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     env->unique_pat_vars = old_unique_pat_vars;
     // now unconsume if possible
     // FIX: what if rval_opt is an r-value that we're about to unconsume?
-    inflow = unconsume_params(env,roots,es,inflow,loc);
+    inflow = unconsume_params(env,roots,es,false,inflow,loc);
     DEBUG_PRINT("Finished let, exit flow = {\n");
     DEBUG_PRINT_F(print_flow,inflow);
     DEBUG_PRINT("}\n");
@@ -2671,101 +2736,65 @@ static flow_t<`r> anal_stmt(analenv_t<`r> env,
     // the key.
   case &Decl_s(&Decl{.r = &Region_d(_,vd,_,open_exp_opt),.loc=loc},s1) &&
     open_exp_opt != NULL:
-    let $(f,r) = anal_Rexp(env,true,inflow,open_exp_opt);
-    let vds = List(vd,NULL);
-    f = add_vars(fenv,f,&vds,fenv->unknown_all,loc,false);
-    f = anal_stmt(env,f,s1,rval_opt);
-    switch $(r,f) {
-    case $(&NamedLocation(vd,rv),{.ReachableFL = $(indict,relns)}): 
-      // behave as if we're assigning rv to vd to re-initialize it
-      let vdplace = rnew(env->r) Place(rnew(env->r) VarRoot(vd),NULL);
-      let outdict = assign_place(fenv,loc,indict,env->all_changed,vdplace,rv);
-      f = ReachableFL(outdict,relns);
+
+    DEBUG_PRINT("analyzing open(), Flow = {\n");
+    DEBUG_PRINT_F(print_flow,inflow);
+    DEBUG_PRINT("}\n");
+    // first we need to analyze the open expression, and give it a
+    // name.  That way we can unconsume it following the open block.
+    struct List<exp_t> l = List{.hd = open_exp_opt,.tl = NULL};
+    let f = expand_unique_places(env,inflow,&l);
+    let $(_,lval) = anal_Lexp(env,f,false,false,open_exp_opt);
+    let $(f,_) = anal_Rexp(env,true,f,open_exp_opt);
+    let roots = NULL;
+    let es = NULL;
+    switch (f) {
+    case {.ReachableFL = $(fd,relns)}:
+      switch (lval) {
+      case {.PlaceL = p}:
+	// lookup the consumed access expression, and name it, so
+	// we can check whether it was changed at the end of the block.
+	let new_rval = lookup_place(fd,p);
+	new_rval = rnew (fenv->r) NamedLocation(vd, new_rval);
+	fd = assign_place(fenv,open_exp_opt->loc,fd,
+			  env->all_changed,p,new_rval);
+	f = ReachableFL(fd,relns);
+	let root = rnew(fenv->r) VarRoot(vd);
+	let rp = rnew(fenv->r) Place(root,NULL);
+	roots = rnew(fenv->r) List(rp,roots);
+	es = rnew(fenv->r) List((exp_t)open_exp_opt,es);
+	break;
+
+      default:
+	// Otherwise, there just isn't a place for it, either because
+	// we haven't expanded out locations, or because the
+	// expression is something like let d = f(x).  In the latter
+	// case, we just won't be able to unconsume it.
+	break;
+      }
       break;
+
     default: break;
     }
+    // add the new region variable to the flow
+    let vds = List(vd,NULL);
+    f = add_vars(fenv,f,&vds,fenv->unknown_all,loc,false);
+    // process the statement
+    let old_unique_pat_vars = env->unique_pat_vars;
+    env->unique_pat_vars = 
+      rnew(env->r) List(rnew (env->r) $(true,s1,roots,es),old_unique_pat_vars);
+    DEBUG_PRINT("flow for open body is {\n");
+    DEBUG_PRINT_F(print_flow,f);
+    DEBUG_PRINT("}\n");
+    f = anal_stmt(env,f,s1,rval_opt);
+    env->unique_pat_vars = old_unique_pat_vars;
+    // now unconsume if possible
+    // FIX: what if rval_opt is an r-value that we're about to unconsume?
+    f = unconsume_params(env,roots,es,true,f,loc);
+    DEBUG_PRINT("Finished open, exit flow = {\n");
+    DEBUG_PRINT_F(print_flow,f);
+    DEBUG_PRINT("}\n");
     return f;
-
-    // MWH: made obsolete by alias patterns
-//   case &Decl_s(&Decl{.r = &Alias_d(tv,vd), ...},s1):
-//     // similar to the copy situation at the top of anal_Rexp
-//     exp_t e = (exp_t)vd->initializer;
-//     let $(f,lval) = anal_Lexp(env,inflow,true,false,e);
-//     // FIX: might we want to do an anal_Rexp on e as well?  I guess
-//     // the fact that this is an lexp implies it's side-effect free; hmmm
-//     DEBUG_PRINT("inflow on alias is {\n");
-//     DEBUG_PRINT_F(print_flow,inflow);
-//     DEBUG_PRINT("} e =|%s|\n",exp2string(e));
-//     switch $(f,lval) {
-//     case $({.ReachableFL = $(fd,relns)},{.PlaceL = p}):
-//       // first figure out the current rval of the rhs of the alias,
-//       //   consume it, and then name it
-//       let old_rval = lookup_place(fd,p);
-//       type_t t = (type_t)e->topt;
-//       let new_rval=make_unique_consumed(fenv,t,e,env->iteration_num,old_rval);
-//       new_rval = rnew (fenv->r) NamedLocation(vd, new_rval);
-//       fd = assign_place(fenv,e->loc,fd,env->all_changed,p,new_rval);
-//       f = use_Rval(env,e->loc,ReachableFL(fd,relns),old_rval);
-//       DEBUG_PRINT("flow after consuming is {\n");
-//       DEBUG_PRINT_F(print_flow,f);
-//       DEBUG_PRINT("}\n");
-//       // add the alias variable to the flow and initialize it
-//       let vds = List(vd,NULL);
-//       // FIX: could propagate the actual rvalue directly?
-//       f = add_vars(fenv,f,&vds,fenv->unknown_all,s->loc,false);
-//       let newp = rnew(env->r) Place(rnew(env->r) VarRoot(vd),NULL);
-//       DEBUG_PRINT("flow for alias body is {\n");
-//       DEBUG_PRINT_F(print_flow,f);
-//       DEBUG_PRINT("}\n");
-//       f = anal_stmt(env,f,s1,rval_opt);
-//       // plug approximate old rvalue back into place
-//       _ old_rval_approx;
-//       switch (f) {
-//       case {.ReachableFL = $(fd,relns)}:
-//         // first, check that the named location hasn't been messed with.
-//         switch (lookup_place(fd,p)) {
-//         case &NamedLocation(l2,_): 
-//           if (l2 != vd) fallthru;
-//           // JGM: a little bit of an optimization to preserve an
-//           // rvalue if it's unchanged.
-// 	  // MWH: need to get the rval for the aliased var, not the original
-// 	  let new_rv = lookup_place(fd,newp);
-// 	  DEBUG_PRINT("new_rv is ");
-// 	  DEBUG_PRINT_F(print_absrval,new_rv);
-// 	  DEBUG_PRINT("for place ");
-// 	  DEBUG_PRINT_F(print_place,p);
-// 	  DEBUG_PRINT("\n");
-//           let $(_,rv) = join_flow_and_rval(fenv,env->all_changed,
-//                                            $(f,old_rval),$(f,new_rv));
-//           old_rval_approx = rv;
-//           break;
-//         default:
-//           aerr(s->loc,"aliased location was overwritten");
-// 	  // create an approximate version of the old rvalue, to restore
-// 	  // after analyzing the statement; using an approximate value
-// 	  // avoids some complications with expanded nodes that end up
-// 	  // escaping.
-// 	  absRval_t leaf;
-// 	  switch (initlevel(fenv,fd,old_rval)) {
-// 	  case AllIL: leaf = fenv->unknown_all; break;
-// 	  case NoneIL: leaf = fenv->unknown_none; break;
-// 	  case ThisIL: leaf = fenv->unknown_this; break;
-// 	  }
-// 	  old_rval_approx = typ_to_absrval(fenv,t,false,leaf);
-//           break;
-//         }
-//         fd = assign_place(fenv,s->loc,fd,env->all_changed,p,old_rval_approx);
-//         outflow = ReachableFL(fd,relns);
-//         DEBUG_PRINT("flow for alias continuation is {\n");
-//         DEBUG_PRINT_F(print_flow,outflow);
-//         DEBUG_PRINT("}\n");
-//         return outflow;
-//       default: return f;
-//       }
-//     case $({.BottomFL = _}, _): return f;
-//     default: aerr(e->loc,"bad alias expression--no unique path found");
-//       return BottomFL();
-//     }
 
   case &Decl_s(d,s):
     outflow = anal_stmt(env,anal_decl(env,inflow,d),s,rval_opt);
@@ -2926,7 +2955,7 @@ static void check_nested_fun(flow_env_t<`r> fenv,
   case {.BottomFL = _}: break;
   default:
     check_init_params(loc,env,outflow);
-    unconsume_params(env,env->noconsume_params,NULL,outflow,loc);
+    unconsume_params(env,env->noconsume_params,NULL,false,outflow,loc);
 
     // this is the case when the function "falls off the end"
     if (noreturn)

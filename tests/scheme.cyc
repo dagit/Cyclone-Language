@@ -418,6 +418,7 @@ static struct MachineState gc(struct MachineState ms) {
   let CounterRgn{new_key, new_counter} = next_key(counter);
   // open the old-space's key
   { region r = open(key);
+    state_t<next_rgn<`r>> new_state;
     // open the to-space's key
     { region r2 = open(new_key);
       // copy the stack
@@ -432,11 +433,11 @@ static struct MachineState gc(struct MachineState ms) {
         new_result = Result{.value = forward(r2,v)};
         break;
       }
-      // package up the new key, new counter, and new stack as the
-      // resulting machine state.
-      let new_state = State{new_stack, new_env, new_result};
-      ms = MachineState{new_key, new_counter, new_state};
+      new_state = State{new_stack, new_env, new_result};
     }
+    // package up the new key, new counter, and new stack as the
+    // resulting machine state.
+    ms = MachineState{new_key, new_counter, new_state};
   }
   free_ukey(key); // free the old space
   fprintf(stderr,"done.\n");
@@ -668,12 +669,14 @@ exp_t APP(...exp_t es) {
 }
 
 exp_t prog() {
-  return APP(VAR("*"),NUM(2),NUM(3));
+  // return APP(VAR("*"),NUM(2),NUM(3));
+  return APP(LAM(new "x",APP(VAR("*"),VAR("x"),NUM(3))),NUM(4));
 }
 }
 using Scheme;
 int main() {
   exp_t e = prog();
   debruijn(e);
-  return toplevel(e);
+  toplevel(e);
+  return 0;
 }

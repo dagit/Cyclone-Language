@@ -617,8 +617,6 @@ body.  The flow analysis verifies that this is indeed the case.  As a
 result, the call to \texttt{foo} within \texttt{bar} does not consume
 \texttt{x}, so it can be freed afterwards.
 
-XXX need to talk about unique paths here.
-
 Note that if you fail to free a unique pointer, it will eventually be
 garbage collected.
 
@@ -634,6 +632,68 @@ Unique pointers have some restrictions.  In particular:
   stored in tagged unions).  This is a shortcoming of the current flow
   analysis.
 \end{itemize}
+
+\subsubsection{Nested Unique Pointers}
+
+Directly reading a unique pointer is only allowed along a \emph{unique
+path}.  A unique path $u$ has the form
+\begin{alltt}
+\qquad  $u$ ::= $x$ | $u$.m | $u$->m | *$u$
+\end{alltt}
+where $x$ is a local variable, and $u$ is a unique pointer.  To
+appreciate the unique-path restriction, consider this incorrect code:
+\begin{verbatim}
+int f(int *`U *`r x) \{
+  int *`U *`r y = x;  //x and y are aliases
+  int *`U z = *y;
+  ufree(z);
+  return **x;  //accesses deallocated storage!
+\}
+\end{verbatim}
+Here, \texttt{x} is a pointer into a conventional region \texttt{`r} and
+thus its value can be freely copied to \texttt{y}.  We then extract a unique
+pointer pointed to by \texttt{y} and free it.  Then we attempt to access the
+deallocated storage through \texttt{x}.
+
+If a unique pointer is not accessible via a unique path, it must be
+\emph{swapped out} atomically to be used; in Cyclone this is expressed with
+syntax \texttt{:=:}.  In particular, the code \texttt{{\it a} :=:{\it b}}
+will swap the contents of {\it a} and {\it b}.  We can use this to swap out
+a nested unique pointer, and replace it will a different one; we will often
+swap in NULL, since this is a unique pointer that is always unconsumed.  For
+example, in the code below, we define a queue type for queues that contain
+unique pointers, and a function \texttt{take} for removing the first element
+from the queue.
+\begin{verbatim}
+struct Queue<`a,`r> { 
+  list_t<`a *`U,`r> front; 
+  list_t<`a *`U,`r> rear; 
+};
+typedef struct Queue<`a,`r> *`r queue_t<`a,`r>;
+
+`a *`U take(queue_t<`a> q) {
+  if (q->front == NULL)
+    throw &Empty_val;  // exception: def not shown
+  else {
+    let elem = NULL;
+    elem :=: q->front->hd;
+    q->front = q->front->tl;
+    if (q->front == NULL) q->rear = NULL;
+    return elem;
+  }
+}
+\end{verbatim}
+Here, in order to extract the element stored in the queue (the \texttt{hd}
+portion of the underlying list), we need to use swap, because
+\texttt{q->front} is a non-unique pointer, and therefore
+\texttt{q->front->hd} is not a unique path.
+
+Note that this code is not as polymorphic as it could be.  In particular,
+the above queue definition requires its elements to be nullable unique
+pointers, when they could just as easily be non-unique pointers, or even
+reference-counted pointers (illustrated later), and the code for
+\texttt{take} would still work.  This problem can be addressed, and its
+solution is described in Section~\ref{sec:poly-allocate}.
 
 \subsubsection{Pattern Matching on Unique Pointers}
 \label{sec:unique-patterns}
@@ -712,36 +772,46 @@ stored within datatypes, there is no change to how datatypes are matched.
 
 \subsubsection{Aliasing Unique Pointers}
 
-XXX need to modify and generalize this to talk about patterns.
-
 Programmers often write code that aliases values temporarily, e.g. by
 storing them in loop iterator variables or by passing them to functions.
 Such reasonable uses would be severely hampered by ``no alias'' restrictions
-on unique pointers.  To address this problem, we introduce a primitive
-called \texttt{alias} that permits temporary aliasing of a unique pointer,
-provided that no aliases are live when the block completes.
-Here is a simple example:
+on unique pointers.  To address this problem, we introduce a special
+\texttt{alias} pattern variable that permits temporary aliasing of a unique
+pointer.  Here is a simple example:
 \begin{alltt}
   char *@fat`U dst, *@fat`U src = ...
-  \{ alias <`r> x = (char *@fat`r)src; // consumes src
+  \{ let alias <`r>char *@fat`r x = src; // consumes src
     memcpy(dst,x,numelts(x)); \}
   // src unconsumed
   ...
   ufree(src);
 \end{alltt}
-The \texttt{alias} primitive introduces a fresh region variable \texttt{`r},
-and aliases \texttt{src} with the variable \texttt{x} which is cast to point
-into \texttt{`r}.  This operation consumes \texttt{src} for the duration of
-the surrounding block, and allows \texttt{x} to be freely aliased.  As such,
-we can pass \texttt{x} to the \texttt{memcpy} function, and when the block
-exits, we unconsume and can therefore ultimately free \texttt{src}.
+In general, an alias pattern has form \texttt{alias <`r>$t$ x}, where
+\texttt{`r} is a fresh region variable, and $t$ is the type of \texttt{x},
+which may mention \texttt{`r}.  The \texttt{alias} pattern introduces a
+region \texttt{`r}, copies \texttt{src} to \texttt{x} which is treated as
+having the designated type \texttt{char *@fat`r}.  Because \texttt{`r} is
+non-unique, \texttt{x} can be freely aliased.  As such, we can pass
+\texttt{x} to the \texttt{memcpy} function.  The matching operation consumes
+\texttt{src} during the block, and unconsumes it upon exit, so that
+\texttt{src} can be ultimately freed.
 
-Intuitively, the \texttt{alias} operation is sound because we cast a unique
+Alias pattern variables are similar to regular pattern variables.  Like
+regular pattern variables, the matched-against expression (i.e. \texttt{src}
+in the above example) must be a unique path, and is consumed as a result of
+the match.  As well, this expression can be unconsumed at the conclusion of
+the surrounding block as long as it hasn't been overwritten.  However, in
+the case of regular pattern variables, unconsumption also requires that the
+pattern variable itself (i.e. \texttt{x} in the above example) hasn't
+changed within the block, while this requirement is unnecessary for alias
+patterns.
+
+Intuitively, alias pattern variables are sound because we cast a unique
 pointer to instead point into a fresh region, for which there is no
 possibility of either creating new values or storing existing values into
-escaping data structures.  As such we cannot create aliases.  However, we
-must take care when aliasing data having recursive type.  For example, the
-following code is unsound:
+escaping data structures.  As such we cannot create aliases that persist
+beyond the surrounding scope.  However, we must take care when aliasing data
+having recursive type.  For example, the following code is unsound:
 \begin{alltt}
   void foo(list\_t<`a,`U> l) \{
     alias <`r> x = (list\_t<`a,`r>)l;
@@ -760,7 +830,7 @@ because the assignment to \texttt{x->tl} would be forbidden.  Here is an
 example implementation of the \texttt{length} function using deep aliasing:
 \begin{alltt}
   int length(list\_t<int,`U> l) \{
-    alias <`r> x = (clist\_t<int,`r>)l;
+    let alias <`r>clist\_t<int,`r> x = l;
     int len = 0;
     while (x != NULL) \{
       len++;
@@ -772,9 +842,11 @@ example implementation of the \texttt{length} function using deep aliasing:
 Note that this function is not that useful, since it will consume the list
 \texttt{l}.  Instead, we would rather that the function itself take a
 \texttt{clist\_t} pointer, and have the caller perform the alias, so that
-the unique list could be unconsumed after calling \texttt{length}.  It is on
-our to-do list to change the standard libraries to be more
-``unique-friendly'' in this way.
+the unique list could be unconsumed after calling \texttt{length}.
+
+XXX more alias examples from paper?
+
+XXX stuff on alias inference.
 
 %% In general, the problem of deep aliasing has its root cause in reference
 %% types and subtyping (XXX cite?).  In particular, we have that $\rho_U
@@ -787,72 +859,7 @@ our to-do list to change the standard libraries to be more
 %% subtyping problem, we can reuse Cyclone's subtyping rules to check for
 %% soundness.
 
-\subsubsection{Nested Unique Pointers}
-
-You can also store unique pointers into other datastructures that could be
-themselves allocated in some region.  For example, the above example
-function \texttt{length} took in a list whose ``spine'' was allocated in the
-unique region.  Therefore, each \texttt{tl} pointer in the list is a nested
-pointer.  Nested unique pointers cannot be read directly.  In particular,
-the following code is illegal:
-\begin{alltt}
-  void f(list\_t<int,`U> l) \{
-    l = l->tl;
-  \}
-\end{alltt}
-This code is disallowed because the unique pointer \texttt{l->tl} is nested.
-We make this restriction to keep the invariant that if some unique pointer
-\texttt{l} is unconsumed, then all unique pointers that it points to are
-also unconsumed.  The assignment above would violate this invariant.  We
-maintain this invariant to both simplify the flow analysis, and also to
-allow unique pointers to be pointed to by non-unique pointers.  In
-particular, a non-unique pointer can always be considered unconsumed, which
-implies that any unique pointers it points to must always be unconsumed as
-well.
-
-To allow nested unique pointers to be read and used, we provide an swap
-operator, having syntax \texttt{:=:}.  In particular, the code \texttt{{\it
-a} :=:{\it b}} will swap the contents of {\it a} and {\it b}.  We can use
-this to swap out a nested unique pointer, and replace it will a different
-one; we will often swap in NULL, since this is a unique pointer that is
-always unconsumed.  This allows us to write the length function on a unique
-list without using the \texttt{alias} primitive (as we did above), freeing
-each list element as we go:
-\begin{alltt}
-  int length\_unique(list\_t<int,`U> l) \{
-    int len = 0;
-    list\_t<int,`U> x;
-    while (l != NULL) \{
-      x = NULL;
-      len++;
-      x :=: l->tl;
-      Core::ufree(l);
-      l = x;
-    \}
-    return len;
-  \}
-\end{alltt}
-
-It is often useful to have a non-unique datastructure contain unique
-pointers.  For example, you could have a normal queue whose elements are
-unique pointers.  This way you can freely add and remove elements from the
-queue, and then free the unique pointers when the elements are removed.  One
-caveat is that we currently do not support instantiating polymorphic value
-variables (i.e. non-region variables) with unique pointers, because this
-could result in aliasing.  For example, the following code is not allowed:
-\begin{alltt}
-  list\_t<int @`U> l = new List(new 1,NULL);
-\end{alltt}
-We can fix this problem by extending the current type system, and plan to do
-so in the near future.  In the meantime, you need to create separate,
-non-polymoprhic versions of library utilities.  For example, you would have
-to create your own version of list that can hold \texttt{int @`U} pointers.
-
-Note that by implementing the swap operation atomically, unique pointers
-would be thread-safe as well.  We implemented things this way looking ahead
-to when Cyclone will have threads.
-
-\subsubsection{Polymorphic Region Allocation}
+\subsubsection{Polymorphism}
 \label{sec:poly-allocate}
 
 As described in Section~\ref{sec:common-use}, we can write functions that
@@ -949,6 +956,8 @@ We have made three key changes to the prior version of \texttt{rcopy}:
   allow temporary aliasing.
 \end{enumerate}
 
+XXX talk about region polymorphism with kinds TB, UB, etc.
+
 \subsection{Reference-counted Pointers}
 
 Cyclone also supports reference-counted pointers, which are treated quite
@@ -1001,7 +1010,160 @@ pointer.
 
 \subsection{Dynamic Regions}
 
-\emph{To be filled in, but see the tutorial for hints.}
+Dynamic regions combines reference-counted or unique pointers and lexical
+regions together to essentially create reference-counted or unique
+\emph{regions}; that is, the region is completely first class, and can be
+created or freed at conceptually any program point.  This is done by
+representing a dynamic region as a unique (or reference-counted) pointer to
+an abstract struct \texttt{DynamicRegion} (which internally just contains
+the handle to a lexical region).  The unique (or ref-counted) pointer is
+called the \emph{key}.  The key serves as a run-time \emph{capability} that
+grants access to the region.  At run-time, a key can be presented to a
+special \texttt{open} primitive, described later, that grants lexical access
+to the region.
+        
+The operation \emph{new\_ukey()} creates a fresh dynamic region and returns
+a unique key for the region; \texttt{new\_rckey()} creates a fresh dynamic
+region and returns a ref-counted key for the region.  The operations
+\texttt{free\_ukey()} and \texttt{free\_rckey()} are used to destroy unique
+and ref-counted keys respectively.  The \texttt{free\_ukey()} operation
+reclaims the key's region, as well as the storage for the key.  The
+\texttt{free\_rckey()} operation decrements the reference count, and if it's
+zero, reclaims the key's region as well as the storage for the key.  Because
+ref-counted keys are pointers, you can use \texttt{alias\_refptr} to make a
+copy of a ref-counted key.  (Obviously, you can't make a copy of a unique
+key.)  By the same token, you can pass a ref-counted key to
+\texttt{drop\_refptr} (and you can pass a unique key to \texttt{ufree}), but
+doing so won't actually deallocate the region, but rather only the key.
+
+Given a key $k$, a user can access the contents of its region by temporarily
+`opening the region' within a lexical scope.  This is done with the syntax
+\verb+region+ $r$ \verb+= open+ $k$.  That is, within the remainder of the
+current scope, the region handle $r$ can be used to access $k$'s region.
+The key $k$ is temporarily consumed throughout the scope, and then
+unconsumed at its conclusion.  This prevents you from opening up the dynamic
+region, and then freeing it while it's still in use.  Note that
+\texttt{open} is very similar to \texttt{alias} in this way.
+
+Here is a small example of the use of dynamic regions.
+\begin{verbatim}
+int main() {
+  // Create a new dynamic region
+  let NewDynamicRegion{<`r> key} = new_ukey();
+
+  // At this point, we refer to the region `r to
+  // specify types, but we cannot actually access
+  // `r (i.e. it's not in our "static capability,"
+  // a concept explained later)
+
+  list_t<int,`r> x = NULL;
+
+  // We can access x by opening the region, which
+  // temporarily consumes the key
+  { region h = open(key);
+    x = rnew(h) List(3,x);
+  }
+
+  // Now we can access the key again, but not x.
+  // So we have to open the region to increment
+  // its contents
+  { region h = open(key);
+    int i = x->hd + 1;
+    x = rnew (h) List(i,x);
+  }
+
+  // Finally, destroy the key and the region
+  free_ukey(key);
+}
+\end{verbatim}
+First, we allocate a new unique key and open it up, to reveal the name of
+the key's region (\texttt{`r}), and the key itself.  Because \texttt{`r} is
+now in scope, we can declare a variable \texttt{x} that refers to it.
+However, because the key \texttt{key} must be opened before \texttt{`r}
+becomes accessible, we cannot actually do anything with \texttt{x} yet (like
+dereference it).
+
+Next, we open up the region using \texttt{key}, assigning its handle to the
+vairable \texttt{h}.  Now, \texttt{key} is inaccessible (consumed) in the
+surrounding block, which prevents us from doing anything that might cause it
+to be freed while it's in use.  We can use \texttt{h} to allocate into
+\texttt{`r}, so we allocate a list element and store it in \texttt{x}.
+
+At the conclusion of the \texttt{block}, the region \texttt{`r} becomes
+inaccessible again, so once again we cannot dereference \texttt{x}.
+However, \texttt{key} can now be accessed again, so we can open it again in
+the following block, to add a new list cell to \texttt{x}.  At the
+conclusion of this block, \texttt{key} is unconsumed once again, so we
+legally call \texttt{free\_ukey}.  This frees the key and the region
+\texttt{`r}.
+
+You can "share" a dynamic region key by placing it in some shared data
+structure, like a global variable.  Of course, you'll then have to swap with
+NULL to get it in and out of the shared data structure, as the following
+code demonstrates:
+\begin{verbatim}
+struct MyContainer { <`r>
+  uregion_key_t<`r> key;
+  list_t<int,`r> data;
+} *`U global = NULL;
+
+int main() {
+  // allocate a dynamic region, and create a list
+  let NewDynamicRegion{<`r> key} = new_ukey();
+  list_t<int,`r> x = NULL;
+  { region h = open(key);
+    x = rnew(h) List(3,x);
+  }
+
+  // Stick the key and list in a global data
+  // structure. We've now lost direct access to
+  // the key and x.
+  global = new MyContainer{key,x};
+
+  // But we can regain it by swapping for the
+  // container.
+  struct MyContainer *`U p = NULL;
+  global :=: p;
+
+  // Now we can use it as above
+  let MyContainer{<`r2> key2, data2} = *p;
+  list_t<int,`r2> d = data2;
+  { region h = open(key2);
+    int i = d->hd + 1;
+    d = rnew (h) List(i,d);
+  }
+}
+\end{verbatim}
+Here, we define a global variable having type \texttt{MyContainer}, which
+consists of a key and some data into that key's region.  The main function
+allocates a unique as before, and allocates some data into its region.  Then
+we create a container for that key and data, and store it into the global
+variable; this consumes \texttt{key}, making it inaccessible, and
+effectively preventing access of \texttt{x} as well.
+
+But we can then get the container back out of the global variable by
+swapping its contents with NULL.  Then we can open up the container, and use
+the key and data as before.  This way, a single dynamic region can be used
+by many different functions in the program.  They simply swap out the global
+when they need it, operate on it, and then swap in the result.
+
+One problem with using this technique with unique keys arises when you need
+to open the same region multiple times.  The problem, of course, is that if
+you swap in NULL, then whoever tries to swap it out will fail.  In other
+words, you can't really do recursive opens with `U keys.  However, you can
+do this with `RC keys!  Swap out the key, make a copy of it, swap it back
+in, and use the copy for the open (making sure to destroy the copy after the
+open).
+  
+One disadvantage of dynamic regions, which is inherited from unique and
+reference-counted pointers, is that if you put a key in some shared storage
+in a region `r, then it is not the case that when `r is deallocated that the
+key will be destroyed automatically.  It's up to you to do the right thing
+or let the GC eventually collect it.  In the long run, the right thing to do
+is add a finalizer interface for regions so that we can register a routine
+to deallocate a dynamic region whenever we put it in a shared data
+structure.  The same goes for any unique pointer --- we ought to have a way
+to register a finalizer.  This is on our To-do list.
 
 \subsection{Type-Checking Regions}
 
@@ -1055,14 +1217,15 @@ program point that creates a region, as follows:
   \texttt{`r}.
 \end{itemize}
 
-The region name for the heap is \texttt{`H}, and the region name for the
-unique region in \texttt{`U}.  Region names associated with program points
-within a function should be distinct from each other, distinct from any
-region names appearing in the function's prototype, and should not be
-\texttt{`H} or \texttt{`U}.  (So you cannot use \texttt{H} as a label name.)
-Because the function's return type cannot mention a region name for a block
-or region-construct in the function, it is impossible to return a pointer to
-deallocated storage.
+The region name for the heap is \texttt{`H}, the region name for the unique
+region in \texttt{`U}, and the region name for the reference counted region
+is \texttt{`RC}.  Region names associated with program points within a
+function should be distinct from each other, distinct from any region names
+appearing in the function's prototype, and should not be \texttt{`H},
+\texttt{`U}, or \texttt{`RC}.  (So you cannot use \texttt{H} as a label
+name, for example.)  Because the function's return type cannot mention a
+region name for a block or region-construct in the function, it is
+impossible to return a pointer to deallocated storage.
 
 In region \texttt{r <`r> s} and region \texttt{r s}, the type of
 \texttt{r} is \texttt{region_t<`r>}.  In other words, the handle is
@@ -1075,7 +1238,7 @@ put in the correct one for you.
 In the absence of explicit effects (see below), the capability for a
 program point includes exactly:
 \begin{itemize}
-\item \texttt{`H} and \texttt{`U}
+\item \texttt{`H}, \texttt{`U}, and \texttt{`RC}
 \item The effect corresponding to the function's prototype.  Briefly,
 any region name in the prototype (or inserted by the compiler due to
 an omission) is in the corresponding effect.  Furthermore, for each
@@ -1095,6 +1258,8 @@ extremely tricky code (such as existential region names) to make the
 check fail.
 
 \subsubsection{Assignment and Outlives}
+
+XXX fix this up to discuss unique regions, ref-counted regions, etc.
 
 A pointer type's region name is part of the type.  If \texttt{e1} and
 \texttt{e2} are pointers, then \texttt{e1 = e2} is well-typed only if

@@ -1,0 +1,62 @@
+#include <stdio.h>
+#include <core.h>
+#include <list.h>
+using List;
+using Core;
+
+struct MyContainer {
+  <`r>
+  rcregion_key_t<`r> key;
+  list_t<int,`r> data;
+};
+
+struct MyContainer *`U global = NULL;
+
+int main() {
+  // Create a new dynamic region
+  let k = new_rckey();
+  let NewDynamicRegion{<`r> key} = k;
+//   let key2 = alias_refptr(key);
+
+  // At this point, we refer to the region `r to specify types,
+  // but we cannot actually access `r (i.e. it's not in 
+  // our "static capability," a concept explained later)
+  list_t<int,`r> x = NULL;
+
+  // We can access x by opening the region, which temporarily
+  // consumes the key
+  { region h = open(key);
+    x = rnew(h) List(3,x);
+    //     key = key2;
+    goto L;
+  }
+
+  // Now we can access the key again, but not x.  So we have to
+  // open the region to increment its contents
+  L:{ region h = open(key);
+    int i = x->hd + 1;
+    x = rnew (h) List(i,x);
+  }
+
+  // Stick the key and data in a global data structure.
+  // We've now lost direct access to the key or x.
+  global = unew MyContainer{key,x};
+  // But we can regain it by swapping for the container.
+  struct MyContainer *`U p = NULL;
+  global :=: p;
+  let MyContainer{<`r2> key2, data2} = *p;
+  list_t<int,`r2> d = data2;
+  { region h = open(key2);
+    int i = d->hd + 1;
+    d = rnew (h) List(i,d);
+  }
+
+  for (_ l = d; l != NULL; l = l->tl)
+    printf("%d ",l->hd);
+  printf("\n");
+  // Finally, destroy the key and the region
+  free_rckey(key2);
+
+  return 0;
+}
+
