@@ -114,7 +114,7 @@ Checking (ESC) project out of Compaq SRC, and the
 <a href="http://www.cs.wisc.edu/~austin/scc.html">Safe-C</a> project
 from the University of Wisconsin.    
 These are good systems and we have great respect for the
-work that has gone into them.  But their goals are quit different
+work that has gone into them.  But their goals are quite different
 from Cyclone and we view our work as somewhat overlapping, but
 mostly complimentary.  
 </p>
@@ -123,7 +123,7 @@ Though we are interested
 in finding and eliminating bugs, we also want to guarantee a certain
 level of safety.  LCLint can't provide such a guarantee, because 
 the underlying language (C) and associated static analyses are
-unsound (i.e., some bugs will not be caught.)  The reason for this
+unsound (i.e., some bugs will not be caught).  The reason for this
 is that without changing C, it is extremely difficult to guarantee
 even memory safety, much less a stronger type safety property,
 without a lot of extra runtime overhead, or a lot of false positives
@@ -152,10 +152,10 @@ static debugging tool together.
 The Safe-C project out of Wisconsin is perhaps the closest in
 spirit to ours, in that they are attempting to provide a memory-safety
 guarantee.  However, the approach taken by Safe-C is quite different
-than Cyclone:  Programs continue to be written in C, but extra indirection
+than Cyclone:  Programs continue to be written in C, but extra indirections
 and dynamic checks are inserted to ensure that abstractions are
 respected.  For example, pointers in Safe-C are actually rather
-complex data structures, and rdereferencing a pointer is an expensive
+complex data structures, and dereferencing a pointer is an expensive
 operation as a number of checks must be done to ensure that the
 pointer is still valid.  In order to avoid some of these overheads,
 the Wisconsin folks apply sophisticated, automatic analyses.  
@@ -274,7 +274,7 @@ foo.c.&nbsp; Then we invoke GCC to compile the foo.c file to foo.o</p>
 compiling it (just as with C).&nbsp;&nbsp;</p>
 <p>The cyclone compiler takes the following command line arguments:</p>
 <ul>
-  <li>-I <i>dir</i> :&nbsp; add <i>dir</i> to the search path for #include files
+  <li>-I <i>dir</i>:&nbsp; add <i>dir</i> to the search path for #include files
     (as in C)</li>
   <li>-tc:&nbsp; type-check the input code</li>
   <li>-toc:&nbsp; translate the input code to C</li>
@@ -337,7 +337,7 @@ the tests directory, then you can compile the file to C by typing:</p>
 should produce the file hello.c.&nbsp; You can look at the C code to see what it
 looks like.&nbsp; Most of it is definitions that are imported from core.h.&nbsp;
 The part that corresponds to the Cyclone code will be found at the bottom. The
-code is pretty similar to the Cyclone except that you can see that there is
+code is pretty similar to the Cyclone code except that you can see that there is
 extra gunk that corresponds to an array bounds check, and extra gunk to deal
 with the variable-sized arrays, etc.</p>
 <p>After generating hello.c, you can use GCC to compile it to an
@@ -419,7 +419,7 @@ example:&nbsp;</p>
     </i>}</code></pre>
 <p>declares an integer named <code>Foo::x</code> and a
 function named <code>Foo::f</code>.&nbsp; Note that within
-the namespace, you don't need to use the qualified name.&nbsp; For instance, <code>Foo::f</code>refers to <code>Foo::x</code> as simply <code>x</code>.&nbsp;
+the namespace, you don't need to use the qualified name.&nbsp; For instance, <code>Foo::f</code> refers to <code>Foo::x</code> as simply <code>x</code>.&nbsp;
 We could also simply write &quot;<code><b>namespace</b> Foo;</code>&quot;
 (note the trailing semi-colon) and leave out the enclosing braces.&nbsp; Every
 declaration following this namespace declaration would be placed in the <code>Foo</code>
@@ -520,7 +520,7 @@ bounds.&nbsp; To support arrays of variable size, Cyclone provides the
 &quot;[?]&quot; array type.&nbsp; For example, string is defined using the
 following typedef:</p>
 <pre>  <b>typedef </b>string char[?];</pre>
-<p>For representation purposes, an char[?] array is represented as a pointer to
+<p>For representation purposes, a char[?] array is represented as a pointer to
 a struct of the form {const unsigned int size; char[size] *elts;} but of course,
 you can't really write this in C.&nbsp; The point is that there is an extra
 level of indirection in order to support dynamically tracking the size of the
@@ -699,7 +699,7 @@ variable.&nbsp; More generally, you can write &quot;let <i>pattern </i>= <i>exp<
 to destructure a value into a bunch of variables.&nbsp; For instance, if you
 pass a tuple to a function, then you can extract the components as follows:</p>
 <pre>  int sum($(int,int,int) args) {
-    <b>let</b> (x,y,z) = args;
+    <b>let</b> $(x,y,z) = args;
     <b>return</b> (x+y+z);
   }</pre>
 <hr>
@@ -792,7 +792,7 @@ C++, those libraries can be compiled once and need not be specialized.&nbsp; On
 the downside, this style of polymorphism does not allow you to do any
 type-specific things (e.g., overloading or ad-hoc polymorphism.)&nbsp; Someday,
 we may add support for this, but in the short run, we're happy not to have
-it&nbsp;</p>
+it.&nbsp;</p>
 <hr>
 <h4><a name="Polymorphic Data Structures:">Polymorphic Data Structures:</a></h4>
 <p>Just as function definitions can be parameterized by types, so can struct
@@ -803,7 +803,7 @@ following struct definition is used in the standard library for lists:</p>
 <p>Here, we've declared a struct cons parameterized by a type `a.&nbsp; The hd
 field contains an element of type `a and the tl field contains a (possibly null)
 pointer to a struct cons with elements of type `a.&nbsp; We then define
-list&lt;`a&gt; as an abbreviation for struct cons&lt;`a&gt;.&nbsp; So, for
+list&lt;`a&gt; as an abbreviation for struct cons&lt;`a&gt;*.&nbsp; So, for
 instance, we can declare both integer and string lists like this:</p>
 <pre>  list&lt;int&gt; ilist = &amp;cons{1,&amp;cons{2,null}};
   list&lt;string&gt; slist = &amp;cons{.hd=&quot;<font color="#0000FF">foo</font>&quot;,.tl=&amp;cons{&quot;<font color="#0000FF">bar</font>&quot;,null}};</pre>
