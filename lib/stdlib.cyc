@@ -22,56 +22,56 @@ namespace Cstdlib {
     void _EXFUN(_unsetenv_r,(struct _reent @, const Cstring __string));
 #endif
 
-
+#define s2c(x) (string_to_Cstring(x))
   }
 }
 
 using Core;
 namespace Stdlib {
   double atof(string _nptr) {
-    return Cstdlib::atof(underlying_Cstring(_nptr));
+    return Cstdlib::atof(s2c(_nptr));
   }
 #ifndef __STRICT_ANSI__
   float atoff(string _nptr) {
-    return Cstdlib::atoff(underlying_Cstring(_nptr));
+    return Cstdlib::atoff(s2c(_nptr));
   }
 #endif __STRICT_ANSI__
   int atoi(string _nptr) {
-    return Cstdlib::atoi(underlying_Cstring(_nptr));
+    return Cstdlib::atoi(s2c(_nptr));
   }
   long atol(string _nptr) {
-    return Cstdlib::atol(underlying_Cstring(_nptr));
+    return Cstdlib::atol(s2c(_nptr));
   }
   string getenv(string name) {
-    return Cstring_to_string(Cstdlib::getenv(underlying_Cstring(name)));
+    return Cstring_to_string(Cstdlib::getenv(s2c(name)));
   }
   string _getenv_r(struct _reent @r, string name) {
-    return Cstring_to_string(Cstdlib::_getenv_r(r,underlying_Cstring(name)));
+    return Cstring_to_string(Cstdlib::_getenv_r(r,s2c(name)));
   }
   string _findenv(string n, int *i) {
-    return Cstring_to_string(Cstdlib::_findenv(underlying_Cstring(n),i));
+    return Cstring_to_string(Cstdlib::_findenv(s2c(n),i));
   }
   string _findenv_r(struct _reent @r, string n, int *i) {
-    return Cstring_to_string(Cstdlib::_findenv_r(r,underlying_Cstring(n),i));
+    return Cstring_to_string(Cstdlib::_findenv_r(r,s2c(n),i));
   }
   int putenv(string s) {
-    return Cstdlib::putenv(underlying_Cstring(s));
+    return Cstdlib::putenv(s2c(s));
   }
   int _putenv_r(struct _reent @r, string s) {
-    return Cstdlib::_putenv_r(r,underlying_Cstring(s));
+    return Cstdlib::_putenv_r(r,s2c(s));
   }
   int setenv(string s, string v, int overwrite) {
-    return Cstdlib::setenv(underlying_Cstring(s),underlying_Cstring(v),overwrite);
+    return Cstdlib::setenv(s2c(s),s2c(v),overwrite);
   }
   int _setenv_r(struct _reent @r, string s, string v, int overwrite) {
-    return Cstdlib::_setenv_r(r,underlying_Cstring(s),underlying_Cstring(v),overwrite);
+    return Cstdlib::_setenv_r(r,s2c(s),s2c(v),overwrite);
   }
 #ifdef __CYGWIN__
   void unsetenv(string s) {
-    Cstdlib::unsetenv(underlying_Cstring(s));
+    Cstdlib::unsetenv(s2c(s));
   }
   void _unsetenv_r(struct _reent @r, string s) {
-    Cstdlib::_unsetenv_r(r,underlying_Cstring(s));
+    Cstdlib::_unsetenv_r(r,s2c(s));
   }
 #endif
 }
