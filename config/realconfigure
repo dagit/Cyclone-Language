@@ -108,6 +108,9 @@ function get_cc {
     echo "Could not find gcc or cc on this system"
     exit 1
   fi
+  if [ "$TARGET" = "i686" ]; then
+    CC="$CC -march=i686"
+  fi
   RES=$CC
 }
 
