@@ -1,132 +1,50 @@
-This document describes the Cyclone compiler development environment.  An
-overview of the entire directory structure can be found in cyclone/FILES.
+This document describes the Cyclone compiler development environment.
 
 OVERVIEW
 
 The Cyclone compiler translates Cyclone source files to C.  So that
-development in Cyclone is of the same flavor as development in C, platform
-dependencies are encoded as preprocessor directives (#ifdef's, #define's,
-etc.) in Cyclone .h files.  As a result, a platform-independent Cyclone file
-is compiled to a platform-dependent C file, since the preprocessor is run
-during compilation.
+development in Cyclone is of the same flavor as development in C,
+platform dependencies are encoded as preprocessor directives
+(#ifdef's, #define's, etc.) in Cyclone .h files.  As a result, a
+platform-independent Cyclone file is compiled to a platform-dependent
+C file, since the preprocessor is run during compilation.
 
-The C files generated for the Cyclone compiler itself are stored in the
-directory cyclone/bin/genfiles (hereon, the C files stored in this directory
-are called `genfiles').  Since C files are platform dependent, there is one
-subdirectory per supported architecture that contains the relevant C files.
-Since few platform dependencies exist in the compiler source, we save space
-by storing some platform directories as patches.  The patch that stores a
-platforms these are diffs of the platform directory as compared to the
-directory cyclone/bin/genfiles/i686-unknown-linux.
+The C files generated for the Cyclone compiler itself are stored in
+the directory cyclone/bin/genfiles (hereon, the C files stored in this
+directory are called `genfiles').  We have taken care that these
+particular C files are platform independent.
 
-Since platform-dependencies are all preprocessor-based, we implement a
-simple "cross-compiler" so that genfiles for all target architectures can be
-generated from any platform.  This works by using a special preprocessor,
-cyclone/config/cyccpp, that unsets the default #defines for the current
-platform and sets the #defines that are default on the target platform.
-Each platform's #define's are generated during architecture configuration
-and stored in the file config/arch/ARCH, where ARCH is the architecture name
-(i.e. i686-unknown-linux).
-
-The remainder of this file describes how to properly develop the compiler so
-that the files in cyclone/bin/genfiles are kept consistent.  We first
-present the basic development procedure, in which the files in genfiles
-change, but none are added or deleted.  We then describe how to safely add
-or remove files while maintaining consistency.
+The remainder of this file describes how to properly develop the
+compiler so that the files in cyclone/bin/genfiles are kept
+consistent.  We first present the basic development procedure, in
+which the files in genfiles change, but none are added or deleted.  We
+then describe how to safely add or remove files while maintaining
+consistency.
 
 BASIC DEVELOPMENT
 
-The compiler source is stored in the directory cyclone/src, and the standard
-library source (eventually compiled to the file libcyc.a) is stored in
-cyclone/lib.  To build the compiler (and build the standard library if
-needed), type
+The compiler source is stored in the directory cyclone/src, and the
+standard library source (eventually compiled to the file libcyc.a) is
+stored in cyclone/lib.  To build the compiler (and build the standard
+library if needed), type
 
-make cyclone_src
+  make cyclone_src
 
-from the cyclone directory.  This will generate the .c files for the current
-architecture in the lib and src directories (as well as the compiler itself,
-cyclone.exe).  Once the compiler has been tested and is ready to be
-checkpointed, type
+from the cyclone directory.  This will generate the .c files for the
+current architecture in the lib and src directories, as well as the
+compiler itself, in the directory build/boot.  Once the compiler has
+been tested and is ready to be checkpointed, type
 
-make update
+  make update
 
-from the cyclone directory.  This will copy the .c files that changed since
-the last checkpoint to cyclone/bin/genfiles/ARCH, where ARCH is the current
-architecture.  To update all of the supported architectures, say preceding a
-CVS commit or a release, type
-
-make update_all_archs
-
-from the cyclone directory.  This will generate the .c files for each
-supported architecture ARCH in the directories cyclone/ARCH, and then copy
-the changed files to cyclone/bin/genfiles/ARCH.  Alternatively, a subset of
-the supported architectures called the development architectures (currently
-i686-unknown-linux and i686-cygwin-1.3.10) can be updated by doing
-
-make update_devel_archs
-
-from the cyclone directory.  Some points deserve elaboration:
-
-1) If the platform I'm developing on is normally stored as a patch, does the
-   procedure change?
-
-No.  When the development platform is a patch, it will be expanded into a
-directory when the compiler is initially built from the genfiles, and the
-directory is not deleted once the compiler is built.  Each time a make
-update is performed, the both the directory and the patch are updated.
-
-2) Is any platform preferred for development?
-
-No.  However, if you development using i686-unknown-linux, the update
-procedure might take a little longer.  In particular, each time the
-i686-unknown-linux directory is updated, all of the architecture patches
-must be recalculated.  In particular, when you type make update, the first
-thing that happens is that all patches are expanded into directories.  Next,
-the Linux files themselves are updated as described above. Finally, the
-patches are recalculated from the new Linux genfiles and the expanded
-directories, and the expanded directories are deleted.
-
-3) Can I update the genfiles without using the top-level Makefile?
-
-It is not recommended.  Using the Makefile, while occasionally resulting in
-redundant work, will ensure you don't inadvertently invalidate a patch.
+from the cyclone directory.  This will copy the .c files that changed
+since the last checkpoint to cyclone/bin/genfiles.
 
 SPECIAL DEVELOPMENT OPERATIONS
 
-On occasion, you will need to add genfiles, or perhaps delete them.  The
-procedure for doing so must make sure that the all of the
-cyclone/bin/genfiles directories or patches are kept consistent.
-
-  1) Update Makefile.inc.in so that the CYCLONE_SRCS, CYCLONE_LIBS, and/or
-     CYCLONE_H variables reflect your changes.  That is, remove any files
-     that need to be removed, or add new ones.  Then do ./configure from the
-     cyclone directory to regenerate the Makefile.inc file.
-
-  2) If you have deleted files, then do the following:
-
-     a) cd to cyclone/bin/genfiles.  For each patch P.patch in this
-        directory, do
-
-       ./extract_patch i686-unknown-linux P
-
-       (notice the .patch suffix has been removed).  This will create a
-       directory from the patch.
-
-     b) for each architecture directory in cyclone/bin/genfiles, remove the
-        files from each directory.  You will likely want to update the
-        cyclone/bin/genfiles/Makefile to not use the file(s) you just
-        deleted.
-
-     c) Reconstitute the patches.  For each patchfile P.patch in
-        cyclone/bin/genfiles, do
-
-        make P.patch
-
-        This will reconstruct the file P.patch.  You can then delete each
-        directory P (except for the one that corresponds to your development
-        architecture, if any).
-
-  3) Finally, do a make update_all_archs.  For the files that have been
-     deleted, the target will no longer look to update them, and for the
-     files that have been added, it will notice that the files do not exist
-     in the genfiles, and will therefore copy them there.
+On occasion, you will need to add genfiles, or perhaps delete them.
+To do this, update Makefile.inc.in so that the CYCLONE_SRCS,
+CYCLONE_LIBS, and/or CYCLONE_H variables reflect your changes.  That
+is, remove any files that need to be removed, or add new ones.  Then
+do ./configure from the cyclone directory to regenerate the
+Makefile.inc file.
