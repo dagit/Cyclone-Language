@@ -34,7 +34,7 @@ static void decorate_stmt(tenv_t te, stmt s) {
 
 // used to type-check Let_d, switch clauses, and catch clauses
 static void pattern_synth(seg_t loc, tenv_t te, list_t<tvar> tvs,
-			  list_t<vardecl> vs, stmt s, exp_opt where_opt,
+			  list_t<vardecl> vs, stmt s, exp_opt_t where_opt,
 			  bool new_block) {
   tenv te2 = add_type_vars(loc,te,tvs);
   if(new_block)

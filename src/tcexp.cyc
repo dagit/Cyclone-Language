@@ -675,7 +675,7 @@ static typ tcAddress(tenv te, seg_t loc, typ *`r topt, exp e) {
     switch (compress(*topt)) {
     case PointerType(PtrInfo{elttype,_,_,tq,_}):
       //FIX: this allocation is needed because *elttype is compiled incorrectly!
-      topt2 = new {elttype};
+      topt2 = new elttype;
       tq2 = tq;
       break;
     default: break;
@@ -872,7 +872,7 @@ static typ tcTuple(tenv te, seg_t loc, typ *`r topt, list_t<exp> es) {
       for(; es != null; es = es->tl, ts = ts->tl) {
 	let topt2 = (*ts->hd)[1];
 	tcExpInitializer(te,&topt2,es->hd);
-	fields = new List(new{$((*ts->hd)[0], es->hd->topt->v)}, fields);
+	fields = new List(new $((*ts->hd)[0], es->hd->topt->v), fields);
       }
       done = true;
       break;
@@ -882,7 +882,7 @@ static typ tcTuple(tenv te, seg_t loc, typ *`r topt, list_t<exp> es) {
   if(!done)
     for(; es != null; es = es->tl) {
       tcExpInitializer(te,null,es->hd);
-      fields = new List(new{$(empty_tqual(), es->hd->topt->v)}, fields);
+      fields = new List(new $(empty_tqual(), es->hd->topt->v), fields);
     }
   return TupleType(List::imp_rev(fields));
 }
@@ -909,9 +909,8 @@ static typ tcArray(tenv te,seg_t loc,typ *`r elt_topt,
   sz_exp->topt = new Opt(uint_t);
   typ res_t2 = ArrayType(res, empty_tqual(), sz_exp);
 
-  for (_ es2 = es; es2 != null; es2 = es2->tl) {
+  for (_ es2 = es; es2 != null; es2 = es2->tl)
     tcExpInitializer(te,elt_topt,es2->hd);
-  }
 
   if (!coerce_list(te,res,es))
     terr(es->hd->loc,
@@ -1017,7 +1016,7 @@ static typ tcStruct(tenv_t te, seg_t loc, typ *`r topt,
   // calculate the instantiation and final type
   let inst    = List::map(make_inst_var,sd->tvs);
   let typs    = List::map(snd,inst);
-  let res_typ = StructType(*tn,typs,new{sd});
+  let res_typ = StructType(*tn,typs,new sd);
   // this will instantiate the struct if we have type information in topt
   if (topt != null) unify(res_typ,*topt);
   *otyps = new Opt(typs);
@@ -1051,7 +1050,7 @@ static typ tcEnum(tenv te, seg_t loc, typ *`r topt,
   let inst       = List::append(all_inst,exist_inst);
   *all_ref   = new Opt(all_typs);
   *exist_ref = new Opt(exist_typs);
-  typ res = EnumType(ed->name->v,all_typs, new{ed});
+  typ res = EnumType(ed->name->v,all_typs, new ed);
   // this instantiates the type variables if we have top-down type info
   if (topt != null) unify(*topt,res);
   list_t<$(tqual,typ)@> ts = ef->typs;
@@ -1086,7 +1085,7 @@ static typ tcXenum(tenv te, seg_t loc, typ *`r topt,
                    enumfield ef) {
   let exist_inst = List::map(make_inst_var,ef->tvs);
   let exist_typs = List::map(snd,exist_inst);
-  let res        = XenumType(xd->name, new{xd});
+  let res        = XenumType(xd->name, new xd);
   let ts         = ef->typs;
   *exist_ref = new Opt(exist_typs);
   while (es != null && ts != null) {
@@ -1144,11 +1143,11 @@ static typ tcMalloc(tenv_t te, seg_t loc, typ *`r topt, mallocarg_t @ ma_ptr) {
     // FIX: what about existential tyvars
     let all_inst = List::map(make_inst_var,ed->tvs);
     let all_typs = List::map(snd,all_inst);
-    return EnumType(ed->name->v, all_typs, new{ed});
+    return EnumType(ed->name->v, all_typs, new ed);
   case Xenum_m(xd,ef): 
     terr(loc,"malloc of xenum variant not yet implemented");
     // FIX: what about existential tyvars
-    return XenumType(xd->name, new{xd});
+    return XenumType(xd->name, new xd);
   }
 }
 // ({ s })

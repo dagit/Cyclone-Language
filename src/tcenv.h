@@ -107,9 +107,9 @@ extern tenv_t enter_try(tenv_t te);
 extern int    get_try_depth(tenv_t te);
 
 // The next 4 all assign through their last arg
-extern void process_continue(tenv_t,stmt,stmt_opt@);
-extern void process_break   (tenv_t,stmt,stmt_opt@);
-extern void process_goto(tenv_t,stmt,var,stmt_opt@);
+extern void process_continue(tenv_t,stmt,stmt_opt_t@);
+extern void process_break   (tenv_t,stmt,stmt_opt_t@);
+extern void process_goto(tenv_t,stmt,var,stmt_opt_t@);
 extern $(switch_clause,list_t<tvar>,list_t<typ>)* 
 process_fallthru(tenv_t,stmt, switch_clause *@);
 

@@ -76,20 +76,20 @@ bool is_format_prim(primop p) {
 }
 
 //////////////////////////// Constraints /////////////////////////
-conref<`a> new_conref(`a x) {
+conref_t<`a> new_conref(`a x) {
   return new Conref{.v = Eq_constr(x)};
 }
-conref<`a> empty_conref() {
+conref_t<`a> empty_conref() {
   return new Conref{.v = No_constr};
 }
 // just to avoid some unnecessary allocation:
 struct Conref<bool> true_conref_v  = Conref(Eq_constr(true));
 struct Conref<bool> false_conref_v = Conref(Eq_constr(false));
-conref<bool> true_conref  = &true_conref_v;
-conref<bool> false_conref = &false_conref_v;
+conref_t<bool> true_conref  = &true_conref_v;
+conref_t<bool> false_conref = &false_conref_v;
 
 // compress a conref
-conref<`a> compress_conref(conref<`a> x) {
+conref_t<`a> compress_conref(conref_t<`a> x) {
   switch (x->v) {
   case No_constr:    return x;
   case Eq_constr(_): return x;
@@ -100,7 +100,7 @@ conref<`a> compress_conref(conref<`a> x) {
   }
 }
 
-`a conref_val(conref<`a> x) {
+`a conref_val(conref_t<`a> x) {
   switch (compress_conref(x)->v) {
   case Eq_constr(v): return v;
   default:
@@ -361,7 +361,7 @@ stmt seq_stmts(list_t<stmt> ss, seg_t loc) {
   else if (ss->tl == null) return ss->hd;
   else return seq_stmt(ss->hd,seq_stmts(ss->tl,loc),loc);
 }
-stmt return_stmt(exp_opt e,seg_t loc) { 
+stmt return_stmt(exp_opt_t e,seg_t loc) { 
   return new_stmt(Return_s(e),loc); 
 }
 stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,seg_t loc) {
@@ -391,7 +391,7 @@ stmt fallthru_stmt(list_t<exp> el, seg_t loc) {
 stmt decl_stmt(decl d, stmt s, seg_t loc) {
   return new_stmt(Decl_s(d,s), loc);
 }
-stmt declare_stmt(qvar x, typ t, exp_opt init, stmt s, seg_t loc) {
+stmt declare_stmt(qvar x, typ t, exp_opt_t init, stmt s, seg_t loc) {
   decl d = new_decl(Var_d(new_vardecl(x,t,init)),loc);
   return new_stmt(Decl_s(d,s),loc);
 }
@@ -420,12 +420,12 @@ decl new_decl(raw_decl r, seg_t loc) { return new Decl{.r=r, .loc=loc}; }
 decl let_decl(pat p, opt_t<typ> t_opt, exp e, seg_t loc) {
   return new_decl(Let_d(p,null,t_opt,e,false),loc);
 }
-vardecl new_vardecl(qvar x, typ t, exp_opt init) {
+vardecl new_vardecl(qvar x, typ t, exp_opt_t init) {
   return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(),
                         .type=t, .initializer=init, .shadow=0, .region=null, 
                         .attributes=null};
 }
-vardecl static_vardecl(qvar x, typ t, exp_opt init) {
+vardecl static_vardecl(qvar x, typ t, exp_opt_t init) {
   return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(),
                         .type=t, .initializer=init, .shadow=0, .region=null,
                         .attributes=null};

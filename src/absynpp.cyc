@@ -212,7 +212,7 @@ string kind2string(kind_t k) {
   }
 }
 
-string ckind2string(conref<kind_t> c) {
+string ckind2string(conref_t<kind_t> c) {
   switch (compress_conref(c)->v) {
   case Eq_constr(k): return kind2string(k);
   default: return "?";
@@ -220,7 +220,7 @@ string ckind2string(conref<kind_t> c) {
 }
 
 doc_t kind2doc(kind_t k) { return text(kind2string(k)); }
-doc_t ckind2doc(conref<kind_t> c) { return text(ckind2string(c)); }
+doc_t ckind2doc(conref_t<kind_t> c) { return text(ckind2string(c)); }
 
 doc_t group(string start, string stop, string sep, list_t<doc_t> ss) {
   return cat3(text(start),
@@ -664,13 +664,13 @@ doc_t exp2doc_prec(int inprec, exp e) {
   case Const_e(c): s = cnst2doc(c); break;
   case Var_e(x,Local_b(vd)):
     s = qvar2doc(x);
-    if(vd->shadow > 0)
-      s = cat2(s,text(xprintf("%d",vd->shadow)));
+    //    if(vd->shadow > 0)
+    //  s = cat2(s,text(xprintf("%d",vd->shadow)));
     break;
   case Var_e(x,Pat_b(vd)):
     s = qvar2doc(x);
-    if(vd->shadow > 0)
-      s = cat2(s,text(xprintf("%d",vd->shadow)));
+    //if(vd->shadow > 0)
+    //  s = cat2(s,text(xprintf("%d",vd->shadow)));
     break;
   case Var_e(x,_):     s = qvar2doc(x); break;
   case UnknownId_e(x): s = qvar2doc(x); break;
@@ -1375,8 +1375,8 @@ doc_t decl2doc(decl d) {
     break;
   case Var_d(&Vardecl(sc,name,tq,type,initializer,shadow_depth,_,atts)):
     doc_t sn = typedef_name2doc(name);
-    if(shadow_depth > 0)
-      sn = cat2(sn, text(xprintf("%d",shadow_depth)));
+    //    if(shadow_depth > 0)
+    //  sn = cat2(sn, text(xprintf("%d",shadow_depth)));
     s = cat5(scope2doc(sc),
              tqtd2doc(tq,type,new Opt(sn)),
              atts2doc(atts),

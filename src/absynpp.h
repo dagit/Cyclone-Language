@@ -29,7 +29,7 @@ extern doc_t decl2doc(decl d);
 
 extern string typ2string(typ); // doesn't rewrite temp tvars
 extern string kind2string(kind_t);
-extern string ckind2string(conref<kind_t>);
+extern string ckind2string(conref_t<kind_t>);
 extern string exp2string(exp);
 extern string stmt2string(stmt);
 extern string qvar2string(qvar);

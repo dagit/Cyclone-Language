@@ -285,7 +285,7 @@ static bool is_typeparam(type_modifier tm) {
 
 // convert an identifier to a type -- if it's the special identifier
 // `H then return HeapRgn, otherwise, return a type variable.  
-static typ id2type(string s, conref<kind_t> k) {
+static typ id2type(string s, conref_t<kind_t> k) {
   if (zstrcmp(s,"`H") == 0)
     return HeapRgn;
   else 
@@ -682,7 +682,7 @@ static stmt flatten_declarations(list_t<decl> ds, stmt s){
 // produce a list of top-level declarations.  By far, this is the most
 // involved function and thus I expect a number of subtle errors. 
 static list_t<decl> make_declarations(decl_spec_t ds,
-                                      list_t<$(declarator_t,exp_opt)@> ids,
+                                      list_t<$(declarator_t,exp_opt_t)@> ids,
                                       seg_t loc) {
   list_t<type_specifier_t> tss       = ds->type_specs;
   tqual                  tq        = ds->tq;
@@ -712,7 +712,7 @@ static list_t<decl> make_declarations(decl_spec_t ds,
   let $(declarators, exprs) = List::split(ids);
   // check to see if there are no initializers -- useful later on
   bool exps_empty = true;
-  for (list_t<exp_opt> es = exprs; es != null; es = es->tl)
+  for (list_t<exp_opt_t> es = exprs; es != null; es = es->tl)
     if (es->hd != null) {
       exps_empty = false;
       break;
@@ -904,8 +904,8 @@ using Parse;
   FnDecl_tok(fndecl);
   DeclList_tok(list_t<decl>);
   DeclSpec_tok(decl_spec_t);
-  InitDecl_tok($(declarator_t,exp_opt)@);
-  InitDeclList_tok(list_t<$(declarator_t,exp_opt)@>);
+  InitDecl_tok($(declarator_t,exp_opt_t)@);
+  InitDeclList_tok(list_t<$(declarator_t,exp_opt_t)@>);
   StorageClass_tok(storage_class_t);
   TypeSpecifier_tok(type_specifier_t);
   QualSpecList_tok($(tqual,list_t<type_specifier_t>,attributes_t)@);
@@ -1412,7 +1412,7 @@ init_declarator:
   declarator
     { $$=^$(new $($1,null)); }
 | declarator '=' initializer
-    { $$=^$(new $($1,(exp_opt)$3)); } // FIX: cast needed
+    { $$=^$(new $($1,(exp_opt_t)$3)); } // FIX: cast needed
 ;
 
 struct_declaration:

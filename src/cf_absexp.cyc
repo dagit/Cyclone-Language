@@ -344,7 +344,7 @@ path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   case DerefOp(ao2):
     let inner_pinfo = eval_absop_r(pinfo_dict,ao2);
     switch(inner_pinfo) {
-    case LeafPI(UnknownIS(esc,ThisIL)): return mkLeafPI(esc,NoneIL);//esc right?
+    case LeafPI(UnknownIS(esc,ThisIL)): return mkLeafPI(Esc,NoneIL);//Esc right?
     case LeafPI(UnknownIS(_,_)):        return inner_pinfo;
     case LeafPI(MustPointTo(place)):    return lookup_place(pinfo_dict, place);
     default: throw BadAbsexp;
@@ -354,7 +354,6 @@ path_info_t eval_absop_r(pinfo_dict_t<local_root_t> pinfo_dict, absop_t ao) {
   }
 }
 
-// to do: avoid allocation here where possible (don't use intersect!!!)
 // note: list is logically a set, but compare is a pain and a list just means
 //       repeated work.
 void assign_escape(List::list_t<path_info_t>@`r escaping_states,
@@ -395,10 +394,10 @@ $(list_t<absexp_t>, list_t<exp>) unordered_mallocs(absexp_t ae,
   case UseAE(_):  break;
   case AssignAE(ao1,ao2):
     if(is_ok_malloc_assign(ao1, ok_mallocs))
-      assigns = new{List(ae, assigns)};
+      assigns = new List(ae, assigns);
     break;
   case MallocAE(MallocPt(e),_): 
-    mallocs = new{List(e, mallocs)};
+    mallocs = new List(e, mallocs);
     break;
   case MallocAE(_,_): throw Core::Impossible("local variable in MallocAE");
   case StmtAE(s): break; // conservative

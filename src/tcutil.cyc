@@ -229,7 +229,7 @@ bool equal_tqual(tqual tq1, tqual tq2) {
 }
 
 // unify two constraint refs
-static void unify_it_conrefs(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
+static void unify_it_conrefs(int cmp(`a,`a), conref_t<`a> x, conref_t<`a> y) {
   x = compress_conref(x);
   y = compress_conref(y);
   if (x == y) return;
@@ -248,7 +248,7 @@ static void unify_it_conrefs(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
   }
 }
 
-static bool unify_conrefs(int cmp(`a,`a), conref<`a> x, conref<`a> y) {
+static bool unify_conrefs(int cmp(`a,`a), conref_t<`a> x, conref_t<`a> y) {
   try {
     unify_it_conrefs(cmp,x,y);
     return true;
@@ -670,10 +670,17 @@ void unify_it(typ t1, typ t2) {
     if (vararg1 != vararg2) break;
     // It's important to unify the effects after the arguments and result
     // so that the effects are pinned down as much as possible.
-    if ((eff1 == null && eff2 != null) || (eff1 != null) && (eff2 == null))
+    bool bad_effect = false;
+    switch($(eff1,eff2)) {
+    case $(null,null): break;
+    case $(null,_): fallthru;
+    case $(_,null): bad_effect = true; break;
+    default: bad_effect = !unify_effect(eff1->v,eff2->v); break;
+    }
+    if(bad_effect)
       break;
-    if (!unify_effect(eff1->v,eff2->v)) break;
-    if (!same_atts(atts2,atts1)) break;
+    if (!same_atts(atts2,atts1)) 
+      break;
     return;
 
   case $(TupleType(ts2), TupleType(ts1)):
@@ -1218,7 +1225,7 @@ void check_contains_assign(exp e) {
 
 // Given two kind constraint refs, merge them so that they will
 // point to the most constrained kind.  
-static bool constrain_kinds(conref<kind_t> c1, conref<kind_t> c2) {
+static bool constrain_kinds(conref_t<kind_t> c1, conref_t<kind_t> c2) {
   c1 = compress_conref(c1);
   c2 = compress_conref(c2);
   if (c1 == c2) return true;
@@ -1251,8 +1258,8 @@ static list_t<tvar> add_free_tvar(seg_t loc, list_t<tvar> tvs, tvar tv)
   } else {
     for (_ tvs2 = tvs; tvs2 != null; tvs2 = tvs2->tl) {
       if (String::zstrptrcmp(tvs2->hd->name, tv->name) == 0) {
-        conref<kind_t> k1 = tvs2->hd->kind;
-        conref<kind_t> k2 = tv->kind;
+        conref_t<kind_t> k1 = tvs2->hd->kind;
+        conref_t<kind_t> k2 = tv->kind;
         if (!constrain_kinds(k1,k2))
           terr(loc,xprintf("type variable %s is used with inconsistent "
                            "kinds %s and %s",*tv->name, 
@@ -1518,7 +1525,7 @@ list_t<tvar> check_valid_type(seg_t loc, tenv te, list_t<tvar> free_vars,
   case VoidType: break;
   case Evar(_,_,_): break;
   case VarType(v):
-    conref<kind_t> c = compress_conref(v->kind);
+    conref_t<kind_t> c = compress_conref(v->kind);
     if (c->v == No_constr)
       c->v = Eq_constr(expected_kind);
     free_vars = add_free_tvar(loc, free_vars, v);
@@ -1799,7 +1806,7 @@ void check_valid_toplevel_type(seg_t loc, tenv te, typ t) {
 
   // force type variables of unresolved or mem kinds to boxed kinds
   for (_ x = free_tvars; x != null; x = x->tl) {
-    conref<kind_t> c = compress_conref(x->hd->kind);
+    conref_t<kind_t> c = compress_conref(x->hd->kind);
     switch (c->v) {
     case No_constr: fallthru;
     case Eq_constr(MemKind):
@@ -2109,7 +2116,7 @@ typ array_to_ptr(tenv te, typ e_typ, exp e) {
 // give an error when we can statically tell that the array bounds
 // aren't large enough -- if the bounds are unconstrained, set them
 // to i+1.
-void check_bound(seg_t loc, unsigned int i, conref<bounds_t> b) {
+void check_bound(seg_t loc, unsigned int i, conref_t<bounds_t> b) {
   b = compress_conref(b);
   switch (b->v) {
   case Eq_constr(Unknown_b): return; // checked dynamically
@@ -2124,7 +2131,7 @@ void check_bound(seg_t loc, unsigned int i, conref<bounds_t> b) {
   }
 }
 
-void check_nonzero_bound(seg_t loc, conref<bounds_t> b) {
+void check_nonzero_bound(seg_t loc, conref_t<bounds_t> b) {
   check_bound(loc, 0, b);
 }
 

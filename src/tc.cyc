@@ -802,7 +802,7 @@ static void tcEnumdecl(tenv te, genv_t ge, seg_t loc, enumdecl ed) {
   list_t<tvar> tvs = ed->tvs;
   // disallow MemKinds and set unconstrained kinds to BoxKind
   for(_ tvs2 = tvs; tvs2 != null; tvs2 = tvs2->tl) {
-    conref<kind_t> c = compress_conref(tvs2->hd->kind);
+    conref_t<kind_t> c = compress_conref(tvs2->hd->kind);
     switch (c->v) {
     case No_constr: c->v = Eq_constr(BoxKind); break;
     case Eq_constr(MemKind): 

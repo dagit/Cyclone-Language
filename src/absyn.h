@@ -106,7 +106,7 @@ namespace Absyn {
   typedef enum Kind kind_t;
   typedef struct Tvar @tvar; 
   typedef enum Sign sign_t;
-  typedef struct Conref<`a> @conref<`a>;
+  typedef struct Conref<`a> @conref_t<`a>;
   typedef enum Constraint<`a> constraint_t<`a>;
   typedef enum Bounds bounds_t;
   typedef struct PtrInfo ptr_info_t;
@@ -118,9 +118,9 @@ namespace Absyn {
   typedef enum Primop primop;
   typedef enum Incrementor incrementor_t;
   typedef enum Raw_exp raw_exp_t;
-  typedef struct Exp @exp, *exp_opt;
+  typedef struct Exp @exp, *exp_opt_t;
   typedef enum Raw_stmt raw_stmt_t;
-  typedef struct Stmt @stmt, *stmt_opt;
+  typedef struct Stmt @stmt, *stmt_opt_t;
   typedef enum Raw_pat raw_pat_t;
   typedef struct Pat @pat;
   typedef enum Binding binding_t;
@@ -149,7 +149,7 @@ namespace Absyn {
   };
   EXTERN_DEFINITION enum Scope { Static, Abstract, Public, Extern, ExternC };
   EXTERN_DEFINITION struct Tqual { 
-    bool q_const; bool q_volatile; bool q_restrict; 
+    bool q_const :1; bool q_volatile :1; bool q_restrict :1; 
   };
   EXTERN_DEFINITION enum Size_of { B1, B2, B4, B8 };
 
@@ -166,11 +166,11 @@ namespace Absyn {
   EXTERN_DEFINITION enum Sign { Signed, Unsigned };
   EXTERN_DEFINITION struct Conref<`a> { constraint_t<`a> v; };
   EXTERN_DEFINITION enum Constraint<`a> { 
-    Eq_constr(`a), Forward_constr(conref<`a>), No_constr 
+    Eq_constr(`a), Forward_constr(conref_t<`a>), No_constr 
   };
   EXTERN_DEFINITION struct Tvar {
     tvarname_t name;
-    conref<kind_t> kind;
+    conref_t<kind_t> kind;
   };
 
   EXTERN_DEFINITION enum Bounds {
@@ -179,11 +179,11 @@ namespace Absyn {
   };
 
   EXTERN_DEFINITION struct PtrInfo {
-    typ              elt_typ;   // typ of value to which pointer points
-    typ              rgn_typ;   // region of value to which pointer points
-    conref<bool>     nullable;  // * or @
-    tqual            tq;
-    conref<bounds_t> bounds;    // legal bounds for pointer indexing
+    typ                elt_typ;   // typ of value to which pointer points
+    typ                rgn_typ;   // region of value to which pointer points
+    conref_t<bool>     nullable;  // * or @
+    tqual              tq;
+    conref_t<bounds_t> bounds;    // legal bounds for pointer indexing
   };
 
   EXTERN_DEFINITION struct FnInfo {
@@ -220,7 +220,7 @@ namespace Absyn {
     IntType(sign_t,size_of_t);                     // MemKind unless B4
     FloatType;                                             // MemKind
     DoubleType;                                            // MemKind
-    ArrayType(typ/* element typ*/,tqual,exp_opt /* size */);   // MemKind
+    ArrayType(typ/* element typ*/,tqual,exp_opt_t /* size */);   // MemKind
     FnType(fn_info_t);                                     // MemKind
     TupleType(list_t<$(tqual,typ)@>); // MemKind
     StructType(typedef_name_opt_t,list_t<typ>,structdecl *); // MemKind
@@ -359,12 +359,12 @@ namespace Absyn {
     Skip_s;
     Exp_s(exp);
     Seq_s(stmt,stmt);
-    Return_s(exp_opt);
+    Return_s(exp_opt_t);
     IfThenElse_s(exp,stmt,stmt);
     While_s($(exp,stmt),stmt);
-    Break_s(stmt_opt);    // stmt is dest, set by type-checking
-    Continue_s(stmt_opt); // stmt is dest, set by type-checking
-    Goto_s(var,stmt_opt); // stmt is dest, set by type-checking
+    Break_s(stmt_opt_t);    // stmt is dest, set by type-checking
+    Continue_s(stmt_opt_t); // stmt is dest, set by type-checking
+    Goto_s(var,stmt_opt_t); // stmt is dest, set by type-checking
     For_s(exp,$(exp,stmt),$(exp,stmt),stmt); 
     Switch_s(exp,list_t<switch_clause>); 
     Fallthru_s(list_t<exp>,switch_clause *); // next case set by type-checking
@@ -413,7 +413,7 @@ namespace Absyn {
   EXTERN_DEFINITION struct Switch_clause {
     pat               pattern;
     opt_t<list_t<vardecl>> pat_vars; // set by type-checker, used downstream
-    exp_opt           where_clause;
+    exp_opt_t         where_clause;
     stmt              body;
     seg_t             loc;
   };
@@ -436,7 +436,7 @@ namespace Absyn {
     qvar               name;
     tqual              tq;
     typ                type;
-    exp_opt            initializer; // ignored for non-local variables
+    exp_opt_t          initializer; // ignored for non-local variables
     int                shadow;      // FIX: NOT USED PROPERLY RIGHT NOW!!!
     opt_t<typ>         region;      // filled in by type-checker
     // attributes can include just about anything...but the type-checker
@@ -490,7 +490,7 @@ namespace Absyn {
 
   EXTERN_DEFINITION struct Enumfield {
     qvar                  name;
-    exp_opt               tag;
+    exp_opt_t             tag;
     list_t<tvar>          tvs;
     list_t<$(tqual,typ)@> typs;
     seg_t                 loc;
@@ -555,10 +555,10 @@ namespace Absyn {
   extern tqual empty_tqual();
   
   //////////////////////////// Constraints /////////////////////////
-  extern conref<`a> new_conref(`a x); 
-  extern conref<`a> empty_conref();
-  extern conref<`a> compress_conref(conref<`a> x);
-  extern `a conref_val(conref<`a> x);
+  extern conref_t<`a> new_conref(`a x); 
+  extern conref_t<`a> empty_conref();
+  extern conref_t<`a> compress_conref(conref_t<`a> x);
+  extern `a conref_val(conref_t<`a> x);
 
   ////////////////////////////// Types //////////////////////////////
   // return a fresh type variable of the given kind 
@@ -659,7 +659,7 @@ namespace Absyn {
   extern stmt exp_stmt(exp e, seg_t loc);
   extern stmt seq_stmt(stmt s1, stmt s2, seg_t loc);
   extern stmt seq_stmts(list_t<stmt>, seg_t loc);
-  extern stmt return_stmt(exp_opt e,seg_t loc);
+  extern stmt return_stmt(exp_opt_t e,seg_t loc);
   extern stmt ifthenelse_stmt(exp e,stmt s1,stmt s2,seg_t loc);
   extern stmt while_stmt(exp e,stmt s,seg_t loc);
   extern stmt break_stmt(seg_t loc);
@@ -668,7 +668,7 @@ namespace Absyn {
   extern stmt switch_stmt(exp e, list_t<switch_clause>, seg_t loc);
   extern stmt fallthru_stmt(list_t<exp> el, seg_t loc);
   extern stmt decl_stmt(decl d, stmt s, seg_t loc); 
-  extern stmt declare_stmt(qvar, typ, exp_opt init, stmt, seg_t loc);
+  extern stmt declare_stmt(qvar, typ, exp_opt_t init, stmt, seg_t loc);
   extern stmt cut_stmt(stmt s, seg_t loc);
   extern stmt splice_stmt(stmt s, seg_t loc);
   extern stmt label_stmt(var v, stmt s, seg_t loc);
@@ -683,8 +683,8 @@ namespace Absyn {
   ////////////////////////// Declarations ///////////////////////////
   extern decl new_decl(raw_decl r, seg_t loc);
   extern decl let_decl(pat p, opt_t<typ> t_opt, exp e, seg_t loc);
-  extern vardecl new_vardecl(qvar x, typ t, exp_opt init);
-  extern vardecl static_vardecl(qvar x, typ t, exp_opt init);
+  extern vardecl new_vardecl(qvar x, typ t, exp_opt_t init);
+  extern vardecl static_vardecl(qvar x, typ t, exp_opt_t init);
   extern decl struct_decl(scope s,opt_t<typedef_name_t> n,list_t<tvar> ts,
 			  opt_t<list_t<structfield_t>> fs, attributes_t atts,
 			  seg_t loc);

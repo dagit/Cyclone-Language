@@ -535,7 +535,7 @@ resolved_t lookup_ordinary(tenv te,seg_t loc,qvar q) {
   }
 }
 
-void process_continue(tenv te, stmt s, stmt_opt @sopt) {
+void process_continue(tenv te, stmt s, stmt_opt_t @sopt) {
   if (te->le == null) env_err("Tcenv: unexpected process_continue");
   switch (get_fenv(te)->ctrl_env->continue_stmt) {
   case Stmt_j(s2):
@@ -547,7 +547,7 @@ void process_continue(tenv te, stmt s, stmt_opt @sopt) {
   case FnEnd_j:   env_err("Tcenv: continue dest is CaseEnd"); return;
   }
 }
-void process_break(tenv te, stmt s, stmt_opt @sopt) {
+void process_break(tenv te, stmt s, stmt_opt_t @sopt) {
   if (te->le == null) env_err("Tcenv: unexpected process_break");
   fenv_t fe = get_fenv(te);
   switch (fe->ctrl_env->break_stmt) {
@@ -571,7 +571,7 @@ void process_break(tenv te, stmt s, stmt_opt @sopt) {
     return;
   }
 }
-void process_goto(tenv te, stmt s, var l, stmt_opt @sopt) {
+void process_goto(tenv_t te, stmt s, var l, stmt_opt_t @sopt) {
   if (te->le == null) env_err("Tcenv: unexpected process_goto");
   fenv_t fe    = get_fenv(te);
   let    sopt2 = Dict::lookup_opt(fe->shared->seen_labels, l);
@@ -587,7 +587,7 @@ void process_goto(tenv te, stmt s, var l, stmt_opt @sopt) {
   }
 }
 $(switch_clause,list_t<tvar>,list_t<typ>)* 
-process_fallthru(tenv te,stmt s, switch_clause *@ clauseopt){
+process_fallthru(tenv_t te,stmt s, switch_clause *@ clauseopt){
   if (te->le == null) env_err("Tcenv: unexpected process_fallthru");
   let fe  = get_fenv(te);
   let ans = fe->ctrl_env->fallthru_clause;
@@ -599,7 +599,7 @@ process_fallthru(tenv te,stmt s, switch_clause *@ clauseopt){
   return ans;
 }
 
-tenv set_fallthru(tenv te, $(list_t<tvar>,list_t<vardecl>) * pat_typ, 
+tenv_t set_fallthru(tenv_t te, $(list_t<tvar>,list_t<vardecl>) * pat_typ, 
 		  switch_clause clause) {
   if(te->le == null) env_err("Tcenv: unexpected set_fallthru");
   let ft_typ = null;
@@ -611,14 +611,14 @@ tenv set_fallthru(tenv te, $(list_t<tvar>,list_t<vardecl>) * pat_typ,
   return put_fenv(te,fe);
 }
 // fallthru is illegal in the last case
-tenv clear_fallthru(tenv te) {
+tenv_t clear_fallthru(tenv_t te) {
   if(te->le == null) env_err("Tcenv: unexpected clear_fallthru");
   fenv_t fe = copy_fenv_new_ctrl(get_fenv(te));
   fe->ctrl_env->fallthru_clause = null;
   return put_fenv(te,fe);
 }
 
-tenv set_in_loop(tenv te, stmt continue_dest) {
+tenv_t set_in_loop(tenv_t te, stmt continue_dest) {
   if (te->le == null) env_err("Tcenv: unexpected set_in_loop");
   fenv_t fe = copy_fenv_new_ctrl(get_fenv(te));
   fe->ctrl_env->continue_stmt = Stmt_j(continue_dest);
@@ -640,7 +640,7 @@ int get_try_depth(tenv_t te) {
 
 // each non-last case must also call set_fallthru, here we just
 // change the break destination
-tenv set_in_switch(tenv te) {
+tenv_t set_in_switch(tenv_t te) {
   if (te->le == null) env_err("Tcenv: unexpected set_in_switch");
   fenv_t fe  = copy_fenv_new_ctrl(get_fenv(te));
   fe->ctrl_env->break_stmt = fe->ctrl_env->next_stmt; // break goes to next
@@ -648,14 +648,14 @@ tenv set_in_switch(tenv te) {
   return put_fenv(te,fe);
 }
 
-tenv set_next(tenv te, jumpee_t j) {
+tenv_t set_next(tenv_t te, jumpee_t j) {
   if (te->le == null) env_err("Tcenv: unexpected set_next");
   fenv_t fe = copy_fenv_new_ctrl(get_fenv(te));
   fe->ctrl_env->next_stmt = j;
   return put_fenv(te,fe);
 }
 
-tenv add_label(tenv te, var v, stmt s) {
+tenv_t add_label(tenv_t te, var v, stmt s) {
   if (te->le == null) env_err("Tcenv: unexpected add_label");
   let fe     = get_fenv(te);
   let needed = fe->shared->needed_labels;
@@ -716,7 +716,7 @@ typ curr_rgn(tenv te) {
 // Check that rgn_typ is currently accessible:  the heap region is always
 // accessible, and a region variable r is accessible iff it appears in the
 // list of available regions.
-void check_rgn_accessible(tenv te, seg_t loc, typ rgn) {
+void check_rgn_accessible(tenv_t te, seg_t loc, typ rgn) {
   if (te->le != null) {
     typ capability = get_fenv(te)->capability;
     if (region_in_effect(false, rgn, capability) ||
@@ -728,7 +728,7 @@ void check_rgn_accessible(tenv te, seg_t loc, typ rgn) {
 
 // Check that a function call's effect is contained in the current
 // capability.
-void check_effect_accessible(tenv te, seg_t loc, typ eff) {
+void check_effect_accessible(tenv_t te, seg_t loc, typ eff) {
   typ capability;
   if (te->le == null) 
     capability = JoinEff(null);

@@ -935,8 +935,8 @@ static $(list_t<designator>,exp)@ add_designator(env nv, exp e) {
 
 static exp make_struct(qvar x, typ struct_typ, stmt s,
 		       bool pointer, bool is_atomic) {
-  exp_opt eo;
-  typ     t;
+  exp_opt_t eo;
+  typ       t;
   if(pointer) {
     t  = cstar_typ(struct_typ, mt_tq);
     let se = sizeoftyp_exp(struct_typ,DL);
@@ -1492,13 +1492,13 @@ static void exp_to_c(env nv, exp e) {
                                                   var_exp(x1,DL),DL),e2,DL),
                         DL);
       // FIX:  casts needed on exp_opts
-      list_t<$(qvar,typ,exp_opt)@> decls =
-        new List(new $(max,uint_t,(exp_opt)e1),null);
+      list_t<$(qvar,typ,exp_opt_t)@> decls =
+        new List(new $(max,uint_t,(exp_opt_t)e1),null);
       exp ainit = cast_exp(ptr_typ,
                            malloc_exp(old_elt_typ,
                                       times_exp(sizeoftyp_exp(elt_typ,DL),
                                                 var_exp(max,DL),DL)),DL);
-      decls = new List(new $(a,ptr_typ,(exp_opt)ainit),decls);
+      decls = new List(new $(a,ptr_typ,(exp_opt_t)ainit),decls);
       decls = new List(new $(x1,uint_t,null),decls);
       if (is_tagged_ptr) {
         let b = temp_var();
@@ -1506,12 +1506,12 @@ static void exp_to_c(env nv, exp e) {
         let binit = 
           unresolvedmem_exp(null,
                             new List{new $(null,var_exp(a,DL)),
-                                  new List{new $(null,var_exp(a,DL)),
-                                        new List{new $(null,add_exp(var_exp(a,DL),
-                                                              var_exp(max,DL),
-                                                              DL)),
-                                              null}}},DL);
-        decls = new List(new $(b,t,(exp_opt)binit),decls);
+			    new List{new $(null,var_exp(a,DL)),
+			    new List{new $(null,add_exp(var_exp(a,DL),
+							var_exp(max,DL),
+							DL)),
+				     null}}},DL);
+        decls = new List(new $(b,t,(exp_opt_t)binit),decls);
         s = seq_stmt(s,exp_stmt(var_exp(b,DL),DL),DL);
       } else // not a tagged array -- just return a
         s = seq_stmt(s,exp_stmt(var_exp(a,DL),DL),DL);
@@ -1636,7 +1636,7 @@ static void exp_to_c(env nv, exp e) {
     case TupleType(ts):
       // e1->fi  where i = e2+1
       unsigned int i = Evexp::eval_const_uint_exp(e2)+1;
-      e->r = structmember_exp(e1,new {xprintf("f%d",i)},DL)->r;
+      e->r = structmember_exp(e1,new xprintf("f%d",i),DL)->r;
       break;
     case ArrayType(ta,tq,esz):
       // is this possible (was it not promoted by the type-checker)
@@ -1695,7 +1695,7 @@ static void exp_to_c(env nv, exp e) {
       list_t<$(list_t<designator>,exp)@> dles = null;
       for (int i = 1; es != null; es = es->tl, i++) {
 	exp_to_c(nv,es->hd);
-	let des = new List(FieldName(new {xprintf("f%d",i)}),null);
+	let des = new List(FieldName(new xprintf("f%d",i)),null);
 	dles = new List(new $((list_t<designator>)des,es->hd),dles);
       }
       dles = List::imp_rev(dles);
@@ -2673,16 +2673,16 @@ static list_t<decl> enumdecl_to_c(enumdecl ed, list_t<decl> res) {
     if (f->tag != null) toc_impos("can't deal with enum tags yet");
     if (f->typs == null) {
       // Declare an integer constant for the unboxed field
-      exp_opt eopt = ((ed->sc == Extern) ? null :
-		      cast_exp(t,signed_int_exp(tag_count++,DL),DL));
+      exp_opt_t eopt = ((ed->sc == Extern) ? null :
+			cast_exp(t,signed_int_exp(tag_count++,DL),DL));
       let vd = new_vardecl(f->name, t, eopt);
       vd->sc = scope_to_c(ed->sc);
       vd->tq = new Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
       res = new List(new_decl(Var_d(vd),DL),res);
     } else {
       // Declare an integer constant for the tag and a struct for the field
-      exp_opt eopt = ((ed->sc == Extern) ? null : 
-		      signed_int_exp(box_count++,DL));
+      exp_opt_t eopt = ((ed->sc == Extern) ? null : 
+			signed_int_exp(box_count++,DL));
       let vd = new_vardecl(collapse_qvar_tag(f->name,"_tag"), sint_t, eopt);
       vd->sc = scope_to_c(ed->sc);
       vd->tq = new Tqual{.q_const=true, .q_volatile=false, .q_restrict=false};
@@ -2754,7 +2754,7 @@ static list_t<decl> xenumdecl_to_c(xenumdecl xd, list_t<decl> res) {
       stringptr fn      = (*f->name)[1];
       let       sz_exp  = uint_exp((*fn).size,DL);
       let       tag_typ = ArrayType(uchar_t,mt_tq,sz_exp);
-      exp_opt initopt = null;
+      exp_opt_t initopt = null;
       if (xd->sc != Extern)
 	initopt = string_exp(*fn,DL);
       let tag_decl = new_vardecl(collapse_qvar_tag(f->name,"_tag"),

@@ -663,8 +663,10 @@ void dumpstructfields(list_t<structfield_t> fields) {
     let &Structfield{name,tq,type,width,atts} = fields->hd;
     dumptqtd(tq,type,dump_str,name);
     dumpatts(atts);
-    if (width != null)
+    if (width != null) {
+      dump_char(':');
       dumpexp(width->v);
+    }
     dump_semi();
   }
 }

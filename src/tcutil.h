@@ -106,9 +106,9 @@ extern void check_unique_vars(list_t<var> vs, seg_t loc, string err_msg);
 extern void check_unique_tvars(seg_t,list_t<tvar>);
 
 // Check that bounds are not zero -- constrain to 1 if necessary
-extern void check_nonzero_bound(seg_t, conref<bounds_t>);
+extern void check_nonzero_bound(seg_t, conref_t<bounds_t>);
 // Check that bounds are greater than i -- constrain to i+1 if necessary
-extern void check_bound(seg_t, unsigned int i, conref<bounds_t>);
+extern void check_bound(seg_t, unsigned int i, conref_t<bounds_t>);
 
 extern bool equal_tqual(tqual tq1, tqual tq2);
 

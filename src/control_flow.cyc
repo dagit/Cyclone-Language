@@ -509,7 +509,7 @@ static flow_info_t cf_check_stmt(flow_info_t env, stmt s) {
     cf_check_switch_clauses(env,scs);
     return cf_check_stmt(env,s);
   case Decl_s(&Decl(Var_d(vd),_),s):
-    exp_opt e = vd->initializer;
+    exp_opt_t e = vd->initializer;
     if(e == null)
       return cf_check_stmt(add_unassigned(env,vd), s);
     // vd is unassigned in e (important only if e has a jump in it)
