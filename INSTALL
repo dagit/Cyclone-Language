@@ -34,7 +34,7 @@ By default, binaries will be stored into /usr/local/bin, libraries
 into /usr/local/lib/cyclone, and include files into
 /usr/include/cyclone.  If you wish to install into different
 directories, specify them using the options -bindir and -libdir and
--incdir.  For example, you could do
+-includedir.  For example, you could do
 
   ./configure -bindir /usr/bin -libdir /usr/lib/cyclone
 
