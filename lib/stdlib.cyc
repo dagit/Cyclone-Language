@@ -30,6 +30,9 @@ namespace Cstdlib {
     double strtod(Cstring, Cstring *`r);
     long strtol(Cstring, Cstring *`r, int);
     unsigned long strtoul(Cstring, Cstring *`r, int);
+    void qsort(`a::A *base, size_t nmemb, size_t size,
+	       int (*compar)(const `a@, const `a@));
+
     int system(Cstring);
 #define s2c(x) (string_to_Cstring(x))
   }
@@ -132,13 +135,23 @@ namespace Std {
     return r;
   }
 
+  /*
   void qsort<`a::B,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, 
 		       Array::cmpfn_t<`a,`r,`r> compfn) {
     Array::qsort(compfn, tab, nmemb);
   }
+  */
+  void qsort<`a::A,`r::R>(`a ?`r tab, size_t nmemb, sizeof_t<`a> szmemb, 
+			    int (@`H compar)(const `a@`r, const `a@`r)) {
+    if(tab==NULL || tab.size < nmemb) 
+      throw new Invalid_argument("Std::qsort");
+    Cstdlib::qsort((_*)tab,nmemb,szmemb,compar);
+  }
 
   int system(string_t cmd) {
     return Cstdlib::system(s2c(cmd));
-  
 }
+
+// A no-op. 
+  void free(`a* ptr) {}
 }

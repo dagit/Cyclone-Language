@@ -637,10 +637,10 @@ void Cyc_Tcutil_rewrite_temp_tvar( struct Cyc_Absyn_Tvar*); struct Cyc_Absynpp_P
 int expand_typedefs: 1; int qvar_to_Cids: 1; int add_cyc_prefix: 1; int to_VC: 1;
 int decls_first: 1; int rewrite_temp_tvars: 1; int print_all_tvars: 1; int
 print_all_kinds: 1; int print_using_stmts: 1; int print_externC_stmts: 1; int
-print_full_evars: 1; int use_curr_namespace: 1; struct Cyc_List_List*
-curr_namespace; } ; extern void Cyc_Absynpp_set_params( struct Cyc_Absynpp_Params*
-fs); extern struct Cyc_Absynpp_Params Cyc_Absynpp_cyc_params_r; extern struct
-Cyc_Absynpp_Params Cyc_Absynpp_cyci_params_r; extern struct Cyc_Absynpp_Params
+print_full_evars: 1; int generate_line_directives: 1; int use_curr_namespace: 1;
+struct Cyc_List_List* curr_namespace; } ; extern void Cyc_Absynpp_set_params(
+struct Cyc_Absynpp_Params* fs); extern struct Cyc_Absynpp_Params Cyc_Absynpp_cyc_params_r;
+extern struct Cyc_Absynpp_Params Cyc_Absynpp_cyci_params_r; extern struct Cyc_Absynpp_Params
 Cyc_Absynpp_c_params_r; extern struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r;
 extern void Cyc_Absynpp_decllist2file( struct Cyc_List_List* tdl, struct Cyc_Std___sFILE*
 f); extern struct Cyc_PP_Doc* Cyc_Absynpp_decl2doc( struct Cyc_Absyn_Decl* d);
@@ -692,21 +692,21 @@ Cyc_Absynpp_cyc_string; static int Cyc_Absynpp_add_cyc_prefix; static int Cyc_Ab
 static int Cyc_Absynpp_decls_first; static int Cyc_Absynpp_rewrite_temp_tvars;
 static int Cyc_Absynpp_print_all_tvars; static int Cyc_Absynpp_print_all_kinds;
 static int Cyc_Absynpp_print_using_stmts; static int Cyc_Absynpp_print_externC_stmts;
-static int Cyc_Absynpp_print_full_evars; static int Cyc_Absynpp_use_curr_namespace;
-static struct Cyc_List_List* Cyc_Absynpp_curr_namespace= 0; struct Cyc_Absynpp_Params;
-void Cyc_Absynpp_set_params( struct Cyc_Absynpp_Params* fs){ Cyc_Absynpp_expand_typedefs=
-fs->expand_typedefs; Cyc_Absynpp_qvar_to_Cids= fs->qvar_to_Cids; Cyc_Absynpp_add_cyc_prefix=
-fs->add_cyc_prefix; Cyc_Absynpp_to_VC= fs->to_VC; Cyc_Absynpp_decls_first= fs->decls_first;
-Cyc_Absynpp_rewrite_temp_tvars= fs->rewrite_temp_tvars; Cyc_Absynpp_print_all_tvars=
-fs->print_all_tvars; Cyc_Absynpp_print_all_kinds= fs->print_all_kinds; Cyc_Absynpp_print_using_stmts=
-fs->print_using_stmts; Cyc_Absynpp_print_externC_stmts= fs->print_externC_stmts;
-Cyc_Absynpp_print_full_evars= fs->print_full_evars; Cyc_Absynpp_use_curr_namespace=
-fs->use_curr_namespace; Cyc_Absynpp_curr_namespace= fs->curr_namespace;} struct
-Cyc_Absynpp_Params Cyc_Absynpp_cyc_params_r={ 0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 1,
-0}; struct Cyc_Absynpp_Params Cyc_Absynpp_cyci_params_r={ 1, 0, 0, 0, 0, 1, 0, 0,
-1, 1, 0, 1, 0}; struct Cyc_Absynpp_Params Cyc_Absynpp_c_params_r={ 1, 1, 1, 0, 1,
-0, 0, 0, 0, 0, 0, 0, 0}; struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r={ 0,
-0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0}; static void Cyc_Absynpp_curr_namespace_add(
+static int Cyc_Absynpp_print_full_evars; static int Cyc_Absynpp_generate_line_directives;
+static int Cyc_Absynpp_use_curr_namespace; static struct Cyc_List_List* Cyc_Absynpp_curr_namespace=
+0; struct Cyc_Absynpp_Params; void Cyc_Absynpp_set_params( struct Cyc_Absynpp_Params*
+fs){ Cyc_Absynpp_expand_typedefs= fs->expand_typedefs; Cyc_Absynpp_qvar_to_Cids=
+fs->qvar_to_Cids; Cyc_Absynpp_add_cyc_prefix= fs->add_cyc_prefix; Cyc_Absynpp_to_VC=
+fs->to_VC; Cyc_Absynpp_decls_first= fs->decls_first; Cyc_Absynpp_rewrite_temp_tvars=
+fs->rewrite_temp_tvars; Cyc_Absynpp_print_all_tvars= fs->print_all_tvars; Cyc_Absynpp_print_all_kinds=
+fs->print_all_kinds; Cyc_Absynpp_print_using_stmts= fs->print_using_stmts; Cyc_Absynpp_print_externC_stmts=
+fs->print_externC_stmts; Cyc_Absynpp_print_full_evars= fs->print_full_evars; Cyc_Absynpp_generate_line_directives=
+fs->generate_line_directives; Cyc_Absynpp_use_curr_namespace= fs->use_curr_namespace;
+Cyc_Absynpp_curr_namespace= fs->curr_namespace;} struct Cyc_Absynpp_Params Cyc_Absynpp_cyc_params_r={
+0, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0}; struct Cyc_Absynpp_Params Cyc_Absynpp_cyci_params_r={
+1, 0, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 1, 0}; struct Cyc_Absynpp_Params Cyc_Absynpp_c_params_r={
+1, 1, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0}; struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r={
+0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0}; static void Cyc_Absynpp_curr_namespace_add(
 struct _tagged_arr* v){ Cyc_Absynpp_curr_namespace=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_imp_append)( Cyc_Absynpp_curr_namespace,({
 struct Cyc_List_List* _temp1=( struct Cyc_List_List*) _cycalloc( sizeof( struct

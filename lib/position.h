@@ -60,9 +60,14 @@ namespace Position {
   //////// Error Reporting ///////////
   extern xtunion exn {extern Nocontext};
   extern bool print_context;
+  extern int max_errors;
   extern void post_error(error_t);
   extern bool error_p();
 
+  // Line number translation //
+  // Returns a string which can be inserted into the output c file
+  // to indicate where the code came from in the original cyclone file
+  extern string_t get_line_directive(seg_t loc);
 }
 
 

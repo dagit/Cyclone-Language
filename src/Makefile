@@ -29,7 +29,9 @@ TOVC_FLAG=
 endif
 
 LC_FLAG=
-G_FLAG=
+ifdef DEBUG
+G_FLAG=-g
+endif
 PG_FLAG=
 
 override CYC_FLAGS += -I$(CYC_INC_PATH) -B$(CYC_LIB_PATH) -save-c $(G_FLAG) $(PG_FLAG) $(LC_FLAG) $(TOVC_FLAG) $(APROF_FLAG) $(CPP_FLAG)

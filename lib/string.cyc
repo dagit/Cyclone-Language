@@ -25,6 +25,9 @@
 #include <strings.h>
 #include <stddef.h> // for size_t
 
+#undef bcopy
+#undef bzero
+
 //  #define static_c2s(x) (Cstring_to_string(x))
 #define static_c2s(x) (wrap_Cstring_as_string(x,-1))
 
@@ -717,6 +720,8 @@ namespace Cstr {
     int memcmp(const void*, const void*, size_t n);
     char *`r memchr(const char *`r, char c, size_t n);
     char *`r memset(char *`r, char c, size_t n);
+    void bcopy (const `a::A*src, `a *dest, size_t n);
+    void bzero(`a::A*s, size_t n);
   }
 }
 
@@ -770,7 +775,17 @@ char ?`r memset(char ?`r s, char c, size_t n) {
   Cstr::memset((char *)s, c, n);
   return s;
 }
-
+ 
+void bzero(`a::A? s, size_t n, sizeof_t<`a> sz) {
+  if(s == NULL || s.size < n)
+    throw new Invalid_argument("Std::bzero");
+  Cstr::bzero((_*)s,n*sz);
 }
 
+void bcopy(const `a::A? src, `a?`r dst, size_t n, sizeof_t<`a> sz) {
+  if(src == NULL || src.size < n || dst == NULL || dst.size < n)
+    throw new Invalid_argument("Std::bcopy");
+  Cstr::bcopy((const `a*)src,(_*)dst,n*sz);
+}
 
+}

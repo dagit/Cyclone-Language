@@ -590,11 +590,11 @@ int tag; float* f1; } ; struct Cyc_PP_Ppstate; struct Cyc_PP_Out; struct Cyc_PP_
 struct Cyc_Absynpp_Params{ int expand_typedefs: 1; int qvar_to_Cids: 1; int
 add_cyc_prefix: 1; int to_VC: 1; int decls_first: 1; int rewrite_temp_tvars: 1;
 int print_all_tvars: 1; int print_all_kinds: 1; int print_using_stmts: 1; int
-print_externC_stmts: 1; int print_full_evars: 1; int use_curr_namespace: 1;
-struct Cyc_List_List* curr_namespace; } ; extern void Cyc_Absynpp_set_params(
-struct Cyc_Absynpp_Params* fs); extern struct Cyc_Absynpp_Params Cyc_Absynpp_tc_params_r;
-extern struct _tagged_arr Cyc_Absynpp_typ2string( void*); extern struct
-_tagged_arr Cyc_Absynpp_qvar2string( struct _tuple0*); struct Cyc_Set_Set;
+print_externC_stmts: 1; int print_full_evars: 1; int generate_line_directives: 1;
+int use_curr_namespace: 1; struct Cyc_List_List* curr_namespace; } ; extern void
+Cyc_Absynpp_set_params( struct Cyc_Absynpp_Params* fs); extern struct Cyc_Absynpp_Params
+Cyc_Absynpp_tc_params_r; extern struct _tagged_arr Cyc_Absynpp_typ2string( void*);
+extern struct _tagged_arr Cyc_Absynpp_qvar2string( struct _tuple0*); struct Cyc_Set_Set;
 extern struct Cyc_Set_Set* Cyc_Set_empty( int(* cmp)( void*, void*)); extern
 struct Cyc_Set_Set* Cyc_Set_insert( struct Cyc_Set_Set* s, void* elt); extern
 int Cyc_Set_member( struct Cyc_Set_Set* s, void* elt); extern unsigned char Cyc_Set_Absent[

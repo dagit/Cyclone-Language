@@ -63,6 +63,7 @@ static bool save_c_r   = false;
 static bool nogc_r     = false;
 static bool pa_r       = false;
 static bool add_cyc_namespace_r = true;
+static bool generate_line_directives_r = false;
 static bool print_full_evars_r = false;
 static bool print_all_tvars_r = false;
 static bool print_all_kinds_r = false;
@@ -167,6 +168,11 @@ static void set_nocppprecomp() {
   add_ccarg("-no-cpp-precomp");
 }
 
+static void set_lineno() {
+  generate_line_directives_r = true;
+  set_save_temps();
+}
+
 static void set_nocyc() {
   add_cyc_namespace_r = false;
   add_ccarg("-DNO_CYC_PREFIX");
@@ -256,6 +262,10 @@ list_t<Absyn::decl_t>
     exn_string = "Exception Core::Invalid_argument";
     explain_string = s;
     break;
+  case &Core::Failure(s):
+    exn_string = "Exception Core::Failure";
+    explain_string = s;
+    break;
   case x:
     ex = x;
     other_exn = true;
@@ -339,6 +349,7 @@ list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t,`H> tds) {
   params_r.expand_typedefs = ! noexpand_r;
   params_r.to_VC = tovc_r;
   params_r.add_cyc_prefix = add_cyc_namespace_r;
+  params_r.generate_line_directives = generate_line_directives_r;
   params_r.print_full_evars = print_full_evars_r;
   params_r.print_all_tvars = print_all_tvars_r;
   params_r.print_all_kinds = print_all_kinds_r;
@@ -668,32 +679,34 @@ static void process_file(string_t<`H> filename) {
   if (tovc_r) tds = do_stage("post-pass to VC", do_tovc, true, tds);
   if (compile_failure) return;
 
- PRINTC:
-  if (tds != NULL) {
-    FILE *out_file;
-    if (parseonly_r || tc_r)
-      if (output_file != NULL)
-        out_file = try_file_open(*output_file,"w","output file");
-      else
-        out_file = stdout;
-    else if (toc_r && output_file != NULL)
+  // jcheney: we should make a (empty) .c file even if the .cyc file produced no decls
+  /*PRINTC:
+    if (tds != NULL) */
+ PRINTC: {
+  FILE *out_file;
+  if (parseonly_r || tc_r)
+    if (output_file != NULL)
       out_file = try_file_open(*output_file,"w","output file");
     else
-      out_file = try_file_open(cfile,"w","output file");
-
-    if (compile_failure) return;
-
-    try
-      tds = do_stage("printing", do_print, (FILE @)out_file, tds);
-    catch {
-    case x:
-      compile_failure = true;
-      file_close((FILE @)out_file);
-      cfiles = new List(new ((string_t)cfile),cfiles);
-      throw x;
-    }
+      out_file = stdout;
+  else if (toc_r && output_file != NULL)
+    out_file = try_file_open(*output_file,"w","output file");
+  else
+    out_file = try_file_open(cfile,"w","output file");
+  
+  if (compile_failure) return;
+  
+  try
+    tds = do_stage("printing", do_print, (FILE @)out_file, tds);
+  catch {
+  case x:
+    compile_failure = true;
     file_close((FILE @)out_file);
     cfiles = new List(new ((string_t)cfile),cfiles);
+    throw x;
+  }
+  file_close((FILE @)out_file);
+  cfiles = new List(new ((string_t)cfile),cfiles); 
   }
 }
 
@@ -840,6 +853,9 @@ int main(int argc, string_t<`H> ?`H argv) {
          new $("-save-c",false,"",
                new Set_spec(&save_c_r),
                "Don't delete temporary C files"),
+         new $("--lineno",false,"",
+               new Unit_spec(set_lineno),
+               "Generate line numbers for debugging"),
          new $("-use-cpp",false,"<path>",
                new String_spec(set_cpp),
                "Indicate which preprocessor to use"),

@@ -1968,7 +1968,7 @@ bool coerce_arg(tenv_t te, exp_t e, type_t t2) {
       (is_sizeof_type(t1) && is_arithmetic_type(t2))) {
     // issue a warning if we lose precision
     if (will_lose_precision(t1,t2))
-      warn(e->loc,"integral size mismatch; conversion supplied");
+      warn(e->loc,"integral size mismatch; %s -> %s conversion supplied", typ2string(t1), typ2string(t2));
     unchecked_cast(te,e,t2);
     return true;
   } else if (silent_castable(te,e->loc,t1,t2)) {

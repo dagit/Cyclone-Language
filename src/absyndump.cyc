@@ -45,6 +45,9 @@ static bool qvar_to_Cids;
 // Flag controlling whether to add the cyc prefix to the C-identifiers
 static bool add_cyc_prefix;
 
+// Flag controlling whether debugging #lines are produced.
+static bool generate_line_directives;
+
 // Flag controlling whether the (C) output should be for VC instead of gcc.
 // (Differences: long long vs. __int64 and inline vs. __inline)
 static bool to_VC;
@@ -54,6 +57,7 @@ void set_params(struct Absynpp::Params @ `r fs) {
   qvar_to_Cids = fs->qvar_to_Cids;
   add_cyc_prefix = fs->add_cyc_prefix;
   to_VC = fs->to_VC;
+  generate_line_directives = fs->generate_line_directives;
   //decls_first = fs->decls_first;
   //rewrite_temp_tvars = fs->rewrite_temp_tvars;
   //print_all_tvars = fs->print_all_tvars;
@@ -81,6 +85,7 @@ void dumpenumfields(list_t<enumfield_t> fields);
 // prims and the ability to cast to untagged (from Tagged requires Toc hlep,
 // from Fixed requires trivial Toc help)
 typedef string_t<`r> dump_string_t<`r>;
+void dumploc(Position::seg_t); // dumps a #line directive
 
 // set by dumpdecllist2file (this module is not re-entrant)
 FILE @@ dump_file = &stdout; 
@@ -101,6 +106,14 @@ void dump(dump_string_t s) {
     fputc(' ',*dump_file);
   file_string_write(*dump_file, s, 0, sz);
 }
+
+void dumploc(Position::seg_t loc) {
+  if(loc == NULL) return;
+  if(!generate_line_directives) return;
+  let s = Position::get_line_directive(loc);
+  dump(s);
+}
+
 void dump_nospace(dump_string_t s) {
   int sz = s.size;
   if(!s[sz-1])
@@ -709,9 +722,10 @@ void dumpswitchclauses(list_t<switch_clause_t> scs) {
 }
 
 void dumpstmt(stmt_t s) {
+  //  dumploc(s->loc);
   switch(s->r) {
   case Skip_s:   dump_semi(); break;
-  case &Exp_s(e): dumpexp(e); dump_semi(); break;
+  case &Exp_s(e): dumploc(s->loc); dumpexp(e); dump_semi(); break;
     // FIX:  gcc only allows declarations to be used at the beginning
     // of blocks, so we force some explicit blocks to be written below.
     // It is verbose for Cyclone; maybe it should be controlled by a flag.
@@ -725,10 +739,10 @@ void dumpstmt(stmt_t s) {
     } else
       dumpstmt(s2);
     break;
-  case &Return_s(NULL): dump("return;"); break;
-  case &Return_s(e): dump("return"); dumpexp((exp_t)e); dump_semi(); break;
+  case &Return_s(NULL): dumploc(s->loc); dump("return;"); break;
+  case &Return_s(e): dumploc(s->loc); dump("return"); dumpexp((exp_t)e); dump_semi(); break;
   case &IfThenElse_s(e,s1,s2):
-    dump("if("); dumpexp(e); dump_nospace("){");
+    dumploc(s->loc); dump("if("); dumpexp(e); dump_nospace("){");
     dumpstmt(s1);
     dump_char('}');
     switch (s2->r) {
@@ -737,20 +751,20 @@ void dumpstmt(stmt_t s) {
     }
     break;
   case &While_s($(e,_),s1):
-    dump("while("); dumpexp(e); dump_nospace(") {");
+    dumploc(s->loc); dump("while("); dumpexp(e); dump_nospace(") {");
     dumpstmt(s1);
     dump_char('}');
     break;
-  case &Break_s(_):         dump("break;");        break;
-  case &Continue_s(_):      dump("continue;");     break;
-  case &Goto_s(x,_):        dump("goto"); dump_str(x); dump_semi(); break;
+  case &Break_s(_):         dumploc(s->loc); dump("break;");        break;
+  case &Continue_s(_):      dumploc(s->loc); dump("continue;");     break;
+  case &Goto_s(x,_):        dumploc(s->loc); dump("goto"); dump_str(x); dump_semi(); break;
 
   case &For_s(e1,$(e2,_),$(e3,_),s1):
-    dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
+    dumploc(s->loc); dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
     dump_nospace("){"); dumpstmt(s1); dump_char('}');
     break;
   case &Switch_s(e,ss):
-    dump("switch("); dumpexp(e); dump_nospace("){");
+    dumploc(s->loc); dump("switch("); dumpexp(e); dump_nospace("){");
     dumpswitchclauses(ss);
     dump_char('}');
     break;
@@ -769,12 +783,12 @@ void dumpstmt(stmt_t s) {
     break;
 
   case &Do_s(s1,$(e,_)):
-    dump("do {"); dumpstmt(s1); 
+    dumploc(s->loc); dump("do {"); dumpstmt(s1); 
     dump_nospace("} while ("); dumpexp(e); dump_nospace(");");
     break;
 
   case &SwitchC_s(e,ss): 
-    dump("switch \"C\" ("); dumpexp(e); dump_nospace("){");
+    dumploc(s->loc); dump("switch \"C\" ("); dumpexp(e); dump_nospace("){");
     for(; ss != NULL; ss = ss->tl) {
       let &SwitchC_clause(e,s,_) = ss->hd;
       if(e == NULL)
@@ -792,12 +806,13 @@ void dumpstmt(stmt_t s) {
     dump("fallthru("); dumpexps_prec(20,es); dump_nospace(");"); break;
 
   case &TryCatch_s(s1,ss):
-    dump("try"); dumpstmt(s1); dump("catch {");
+    dumploc(s->loc); dump("try"); dumpstmt(s1); 
+    dump("catch {");
     dumpswitchclauses(ss); dump_char('}');
     break;
 
   case &Region_s(tv,vd,ss):
-    dump("region<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
+    dumploc(s->loc); dump("region<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
     dump("{"); dumpstmt(ss); dump("}");
     break;
 
@@ -908,9 +923,11 @@ static void dumpids(list_t<vardecl_t> vds) {
   }
 }
 
+
 void dumpdecl(decl_t d) {
   switch(d->r) {
   case &Fn_d(fd):
+    dumploc(d->loc);
     //    fprintf(stderr,"%s",*(*fd->name)[1]); fflush(stdout);
     if(to_VC)
       dumpatts(fd->attributes);
@@ -961,6 +978,7 @@ void dumpdecl(decl_t d) {
     }
     break;
   case &Var_d(&Vardecl(sc,name,tq,type,initializer,_,atts)):
+    dumploc(d->loc);
     if(to_VC) {
       dumpatts(atts);
       dumpscope(sc);

@@ -638,27 +638,28 @@ struct Cyc_PP_Doc; struct Cyc_Absynpp_Params{ int expand_typedefs: 1; int
 qvar_to_Cids: 1; int add_cyc_prefix: 1; int to_VC: 1; int decls_first: 1; int
 rewrite_temp_tvars: 1; int print_all_tvars: 1; int print_all_kinds: 1; int
 print_using_stmts: 1; int print_externC_stmts: 1; int print_full_evars: 1; int
-use_curr_namespace: 1; struct Cyc_List_List* curr_namespace; } ; extern void Cyc_Absynpp_set_params(
-struct Cyc_Absynpp_Params* fs); extern struct Cyc_Absynpp_Params Cyc_Absynpp_cyci_params_r;
-extern void Cyc_Absynpp_decllist2file( struct Cyc_List_List* tdl, struct Cyc_Std___sFILE*
-f); extern struct _tagged_arr Cyc_Absynpp_qvar2string( struct _tuple0*); extern
-void Cyc_Tc_tc( struct Cyc_Tcenv_Tenv* te, int var_default_init, struct Cyc_List_List*
-ds); extern unsigned char Cyc_Lexing_Error[ 10u]; struct Cyc_Lexing_Error_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; struct Cyc_Lexing_lexbuf{ void(*
-refill_buff)( struct Cyc_Lexing_lexbuf*); void* refill_state; struct _tagged_arr
-lex_buffer; int lex_buffer_len; int lex_abs_pos; int lex_start_pos; int
-lex_curr_pos; int lex_last_pos; int lex_last_action; int lex_eof_reached; } ;
-struct Cyc_Lexing_function_lexbuf_state{ int(* read_fun)( struct _tagged_arr,
-int, void*); void* read_fun_state; } ; struct Cyc_Lexing_lex_tables{ struct
-_tagged_arr lex_base; struct _tagged_arr lex_backtrk; struct _tagged_arr
-lex_default; struct _tagged_arr lex_trans; struct _tagged_arr lex_check; } ;
-extern struct Cyc_List_List* Cyc_Parse_parse_file( struct Cyc_Std___sFILE* f);
-struct Cyc_Declaration_spec; struct Cyc_Declarator; struct Cyc_Abstractdeclarator;
-extern int Cyc_yyparse(); extern unsigned char Cyc_AbstractDeclarator_tok[ 27u];
-struct Cyc_AbstractDeclarator_tok_struct{ unsigned char* tag; struct Cyc_Abstractdeclarator*
-f1; } ; extern unsigned char Cyc_AttributeList_tok[ 22u]; struct Cyc_AttributeList_tok_struct{
-unsigned char* tag; struct Cyc_List_List* f1; } ; extern unsigned char Cyc_Attribute_tok[
-18u]; struct Cyc_Attribute_tok_struct{ unsigned char* tag; void* f1; } ; extern
+generate_line_directives: 1; int use_curr_namespace: 1; struct Cyc_List_List*
+curr_namespace; } ; extern void Cyc_Absynpp_set_params( struct Cyc_Absynpp_Params*
+fs); extern struct Cyc_Absynpp_Params Cyc_Absynpp_cyci_params_r; extern void Cyc_Absynpp_decllist2file(
+struct Cyc_List_List* tdl, struct Cyc_Std___sFILE* f); extern struct _tagged_arr
+Cyc_Absynpp_qvar2string( struct _tuple0*); extern void Cyc_Tc_tc( struct Cyc_Tcenv_Tenv*
+te, int var_default_init, struct Cyc_List_List* ds); extern unsigned char Cyc_Lexing_Error[
+10u]; struct Cyc_Lexing_Error_struct{ unsigned char* tag; struct _tagged_arr f1;
+} ; struct Cyc_Lexing_lexbuf{ void(* refill_buff)( struct Cyc_Lexing_lexbuf*);
+void* refill_state; struct _tagged_arr lex_buffer; int lex_buffer_len; int
+lex_abs_pos; int lex_start_pos; int lex_curr_pos; int lex_last_pos; int
+lex_last_action; int lex_eof_reached; } ; struct Cyc_Lexing_function_lexbuf_state{
+int(* read_fun)( struct _tagged_arr, int, void*); void* read_fun_state; } ;
+struct Cyc_Lexing_lex_tables{ struct _tagged_arr lex_base; struct _tagged_arr
+lex_backtrk; struct _tagged_arr lex_default; struct _tagged_arr lex_trans;
+struct _tagged_arr lex_check; } ; extern struct Cyc_List_List* Cyc_Parse_parse_file(
+struct Cyc_Std___sFILE* f); struct Cyc_Declaration_spec; struct Cyc_Declarator;
+struct Cyc_Abstractdeclarator; extern int Cyc_yyparse(); extern unsigned char
+Cyc_AbstractDeclarator_tok[ 27u]; struct Cyc_AbstractDeclarator_tok_struct{
+unsigned char* tag; struct Cyc_Abstractdeclarator* f1; } ; extern unsigned char
+Cyc_AttributeList_tok[ 22u]; struct Cyc_AttributeList_tok_struct{ unsigned char*
+tag; struct Cyc_List_List* f1; } ; extern unsigned char Cyc_Attribute_tok[ 18u];
+struct Cyc_Attribute_tok_struct{ unsigned char* tag; void* f1; } ; extern
 unsigned char Cyc_Bool_tok[ 13u]; struct Cyc_Bool_tok_struct{ unsigned char* tag;
 int f1; } ; extern unsigned char Cyc_Char_tok[ 13u]; struct Cyc_Char_tok_struct{
 unsigned char* tag; unsigned char f1; } ; extern unsigned char Cyc_DeclList_tok[

@@ -183,6 +183,9 @@ bool print_context = false;
 
 bool first_error = true;
 
+int num_errors = 0;
+int max_errors = 10;
+
 void post_error(error_t e) {
   error_b = true;
   fflush(stdout);
@@ -190,21 +193,27 @@ void post_error(error_t e) {
     fprintf(stderr, "\n");
     first_error = false;
   }
-  // why are we not using the source stored in e????
-  fprintf(stderr, "%s: %s\n", string_of_segment(e->seg), e->desc);
-  if (print_context) {
-    try {
-      $(mstring_t,int,int)@ x = get_context(e->seg);
-      mstring_t marker_str = new {for i < (*x)[2]+1 : '\000'};
-      int i = -1;
-      while (++i < (*x)[1]) marker_str[i] = ' ';
-      while (++i < (*x)[2]) marker_str[i] = '^';
-      fprintf(stderr, "  %s\n  %s\n", (*x)[0], marker_str);
-    } catch {
-    case Nocontext: break; 
+  if(num_errors <=max_errors) {
+    // why are we not using the source stored in e????
+    fprintf(stderr, "%s: %s\n", string_of_segment(e->seg), e->desc);
+    if (print_context) {
+      try {
+	$(mstring_t,int,int)@ x = get_context(e->seg);
+	mstring_t marker_str = new {for i < (*x)[2]+1 : '\000'};
+	int i = -1;
+	while (++i < (*x)[1]) marker_str[i] = ' ';
+	while (++i < (*x)[2]) marker_str[i] = '^';
+	fprintf(stderr, "  %s\n  %s\n", (*x)[0], marker_str);
+      } catch {
+      case Nocontext: break; 
+      }
     }
   }
+  if(num_errors == max_errors) {
+    fprintf(stderr, "Too many error messages!\n");
+  }
   fflush(stderr);
+  num_errors++;
 }
 
 //////////// Overall Control ///////////
@@ -212,7 +221,17 @@ void reset_position(string_t<`H> s)    { source = s; error_b = false; }
 void set_position_file(string_t<`H> s) { source = s; error_b = false; }
 string_t get_position_file() { return source; }
 
+
+string_t get_line_directive(seg_t s) {
+  Lineno::pos_t pos_s = Lineno::pos_of_abs(source,s->start);
+  if(pos_s != NULL)  
+    return aprintf("\n#line %d \"%s\"\n", pos_s->line_no, pos_s->logical_file);
+  else 
+    return NULL;
 }
+  
+}
+
 
 using Typerep;
 

@@ -102,6 +102,9 @@ static bool print_externC_stmts;
 // used when instantiating evars
 static bool print_full_evars;
 
+// Flag controlling whether to insert #line directives in c output
+static bool generate_line_directives;
+
 // Flag controlling whether to use the variable curr_namespace or not
 static bool use_curr_namespace;
 
@@ -120,6 +123,7 @@ struct Params {
   bool print_using_stmts :1;
   bool print_externC_stmts :1;
   bool print_full_evars :1;
+  bool generate_line_directives :1;
   bool use_curr_namespace :1;
   list_t<var_t> curr_namespace;
 };
@@ -136,6 +140,7 @@ void set_params(struct Params @ `r fs) {
   print_using_stmts = fs->print_using_stmts;
   print_externC_stmts = fs->print_externC_stmts;
   print_full_evars = fs->print_full_evars;
+  generate_line_directives = fs->generate_line_directives;
   use_curr_namespace = fs->use_curr_namespace;
   curr_namespace = fs->curr_namespace;
 }
@@ -153,6 +158,7 @@ struct Params cyc_params_r =
     .print_using_stmts = true,
     .print_externC_stmts = true,
     .print_full_evars = false,
+    .generate_line_directives = false,
     .use_curr_namespace = true,
     .curr_namespace = NULL
   };
@@ -170,6 +176,7 @@ struct Params cyci_params_r =
     .print_using_stmts = true,
     .print_externC_stmts = true,
     .print_full_evars = false,
+    .generate_line_directives = false,
     .use_curr_namespace = true,
     .curr_namespace = NULL
   };
@@ -187,6 +194,7 @@ struct Params c_params_r =
     .print_using_stmts = false,
     .print_externC_stmts = false,
     .print_full_evars = false,
+    .generate_line_directives = false,
     .use_curr_namespace = false,
     .curr_namespace = NULL
   };
@@ -204,6 +212,7 @@ struct Params tc_params_r =
     .print_using_stmts = true,
     .print_externC_stmts = true,
     .print_full_evars = false,
+    .generate_line_directives = false,
     .use_curr_namespace = false,
     .curr_namespace = NULL
   };

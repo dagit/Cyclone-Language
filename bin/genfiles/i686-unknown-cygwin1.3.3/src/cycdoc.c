@@ -732,16 +732,17 @@ int timestamp; int first_line; int first_column; int last_line; int last_column;
 } ; struct Cyc_Absynpp_Params{ int expand_typedefs: 1; int qvar_to_Cids: 1; int
 add_cyc_prefix: 1; int to_VC: 1; int decls_first: 1; int rewrite_temp_tvars: 1;
 int print_all_tvars: 1; int print_all_kinds: 1; int print_using_stmts: 1; int
-print_externC_stmts: 1; int print_full_evars: 1; int use_curr_namespace: 1;
-struct Cyc_List_List* curr_namespace; } ; extern struct _tagged_arr* Cyc_Absynpp_cyc_stringptr;
-extern int Cyc_Absynpp_exp_prec( struct Cyc_Absyn_Exp*); extern struct
-_tagged_arr Cyc_Absynpp_char_escape( unsigned char); extern struct _tagged_arr
-Cyc_Absynpp_string_escape( struct _tagged_arr); extern struct _tagged_arr Cyc_Absynpp_prim2str(
-void* p); struct _tuple9{ struct Cyc_Absyn_Tqual f1; void* f2; struct Cyc_List_List*
-f3; } ; extern struct _tuple9 Cyc_Absynpp_to_tms( struct Cyc_Absyn_Tqual tq,
-void* t); extern void Cyc_Lex_lex_init(); struct Cyc_Position_Segment{ int start;
-int end; } ; static const int Cyc_MatchDecl= 0; struct Cyc_MatchDecl_struct{ int
-tag; struct _tagged_arr f1; } ; static const int Cyc_Standalone= 1; struct Cyc_Standalone_struct{
+print_externC_stmts: 1; int print_full_evars: 1; int generate_line_directives: 1;
+int use_curr_namespace: 1; struct Cyc_List_List* curr_namespace; } ; extern
+struct _tagged_arr* Cyc_Absynpp_cyc_stringptr; extern int Cyc_Absynpp_exp_prec(
+struct Cyc_Absyn_Exp*); extern struct _tagged_arr Cyc_Absynpp_char_escape(
+unsigned char); extern struct _tagged_arr Cyc_Absynpp_string_escape( struct
+_tagged_arr); extern struct _tagged_arr Cyc_Absynpp_prim2str( void* p); struct
+_tuple9{ struct Cyc_Absyn_Tqual f1; void* f2; struct Cyc_List_List* f3; } ;
+extern struct _tuple9 Cyc_Absynpp_to_tms( struct Cyc_Absyn_Tqual tq, void* t);
+extern void Cyc_Lex_lex_init(); struct Cyc_Position_Segment{ int start; int end;
+} ; static const int Cyc_MatchDecl= 0; struct Cyc_MatchDecl_struct{ int tag;
+struct _tagged_arr f1; } ; static const int Cyc_Standalone= 1; struct Cyc_Standalone_struct{
 int tag; struct _tagged_arr f1; } ; struct _tuple10{ int f1; void* f2; } ;
 extern struct _tuple10* Cyc_token( struct Cyc_Lexing_lexbuf* lexbuf); const int
 Cyc_lex_base[ 15u]=( const int[ 15u]){ 0, - 4, 0, - 3, 1, 2, 3, 0, 4, 6, 7, - 1,

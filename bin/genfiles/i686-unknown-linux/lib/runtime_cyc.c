@@ -561,7 +561,10 @@ int main(int argc, char **argv) {
     else
       exn_name = _exn_thrown->tag + 4;
     fprintf(stderr,"Uncaught exception %s\n",exn_name);
-    return 1;
+    // jcheney: changing this to abort so that GDB stops at the program point
+    // where the exception was raised
+    // return 1;
+    abort();
   }
   // set standard file descriptors
   Cyc_Std_stdin->file = stdin;

@@ -104,6 +104,7 @@ extern int grantpt (int __fd);
 /* Release an internal lock so the slave can be opened.
    Call after grantpt().  */
 extern int unlockpt (int __fd);
+
 }
 
 /* Convert a string to a floating-point number.  */
@@ -124,10 +125,14 @@ extern long strtol(const char ?`r n, const char ?`r *`r2 end, int base);
 extern unsigned long strtoul(const char ?`r n,const char ?`r *`r2 end, int base);
 extern unsigned long mstrtoul(char ?`r n,char ?`r *`r2 endptr,int base);
 /* Here for compatibility reasons.  Will call Array::qsort */
-extern void qsort<`a::B,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, Array::cmpfn_t<`a,`r,`r>);
+  //extern void qsort<`a::B,`r::R>(`a ?`r tab, size_t nmemb, size_t szmemb, Array::cmpfn_t<`a,`r,`r>);
+extern void qsort<`a::A,`r::R>(`a ?`r tab, size_t nmemb, sizeof_t<`a> szmemb, 
+			    int (@`H compar)(const `a@`r, const `a@`r));
 
 extern int system(string_t);
 
-
+/* This doesn't do anything: it's just here so that we don't have to erase existing free's in C code */
+/* Maybe there should be a warning if you actually use this. */
+extern void free(`a*);
 }
 #endif
