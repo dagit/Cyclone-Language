@@ -652,6 +652,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
     if (!coerce_assign(te,e2,t1)) {
       let result = expr_err(te,loc,"type mismatch: %s != %s",
                             typ2string(t1), typ2string(t2));
+      unify(t1,t2); // needed to get right error message
       explain_failure();
       return result;
     }
@@ -663,6 +664,7 @@ static type_t tcAssignOp(tenv_t te, seg_t loc, type_t *`r topt,
         expr_err(te,loc, "Cannot use this operator in an assignment when "
 		      "the arguments have types %s and %s",typ2string(t1),
 		      typ2string(t2));
+      unify(t_result,t1); // needed to get right error message
       explain_failure();
       return result;
     }

@@ -79,10 +79,10 @@ tunion Type_specifier {
 };
 typedef tunion Type_specifier type_specifier_t;
 
-enum Storage_class {
+tunion Storage_class {
  Typedef_sc, Extern_sc, ExternC_sc, Static_sc, Auto_sc, Register_sc, Abstract_sc
 };
-typedef enum Storage_class storage_class_t;
+typedef tunion Storage_class storage_class_t;
 
 struct Declaration_spec {
   opt_t<storage_class_t>   sc;

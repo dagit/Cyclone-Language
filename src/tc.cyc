@@ -336,7 +336,7 @@ static void tcStructFields(tenv_t te, genv_t ge, seg_t loc,
       // (empty names arise for bitfield padding.)
       if (strcmp(*fn,"") != 0)
 	prev_fields = rnew(uprev_rgn) List(fn,prev_fields);
-      
+
       check_type(loc,te,tvs,MemKind,false,t);
 
       // if width is non-NULL then t must be of integral type
@@ -401,7 +401,7 @@ static void tcStructOrUniondecl(tenv_t te, genv_t ge, string_t obj, seg_t loc, s
 
 }
 
-static void tcStructdecl(tenv_t te, genv_t ge, seg_t loc, structdecl_t sd) {
+void tcStructdecl(tenv_t te, genv_t ge, seg_t loc, structdecl_t sd) {
   let v = (*sd->name->v)[1];
   let obj = "struct";
 
@@ -447,13 +447,12 @@ static void tcStructdecl(tenv_t te, genv_t ge, seg_t loc, structdecl_t sd) {
       break;
     }
   }
-
   // add the constructor to the environment
   ge->ordinaries = Dict::insert(ge->ordinaries,  v,
 				  new $(new StructRes(sd), true));
 }
 
-static void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
+void tcUniondecl(tenv_t te, genv_t ge, seg_t loc, uniondecl_t ud) {
   let v = (*ud->name->v)[1];
   let obj = "union";
 
@@ -596,7 +595,7 @@ static list_t<tunionfield_t> tcTunionFields(tenv_t te, genv_t ge,
   return fields2;
 }
 
-static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
+void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
   var_t v = (*tud->name)[1];
   string_t obj;
   if (tud->is_xtunion) {
@@ -693,7 +692,7 @@ static void tcTuniondecl(tenv_t te, genv_t ge, seg_t loc, tuniondecl_t tud) {
 
 }
 
-static void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
+void tcEnumdecl(tenv_t te, genv_t ge, seg_t loc, enumdecl_t ed) {
   var_t v = (*ed->name)[1];
 #ifdef DEBUG
   fprintf(stderr,"type-checking enumdecl %s",*v);

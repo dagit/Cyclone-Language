@@ -2,6 +2,8 @@ Todo list:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
+* there's a bug in control-flow checking of catch-phrases.  If you leave
+the "break" off of a case, then it re-raises the exception.
 
 * make command line arguments more like gcc: what happens
   when no files are given?  what happens when we have the wrong extension?
@@ -107,6 +109,10 @@ function declarations are only allowed at top-level.
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
 * need to port more C libraries
+
+* should have some "intern C" or "unsafe_C" where we can escape
+  out to C when needed.  This will allow us to not have to write
+  separate files with C code in them.
 
 * need to be able to use inject on a single argument, not just on
   varargs.  This is important for args that are void * for example.

@@ -185,6 +185,9 @@ CYCDOC_SRCS:=cycdoc\
 	tcexp\
 	tcstmt\
 	tcpat\
+        tc\
+	tcdecl\
+	tcgenrep\
 	new_control_flow\
 	cf_absexp\
 	cf_flowinfo\

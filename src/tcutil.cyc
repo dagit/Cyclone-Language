@@ -29,6 +29,7 @@
 #include "evexp.h"
 #include "tcutil.h"
 #include "tcexp.h"
+#include "tc.h"
 using Core;
 using List;
 using Set;
@@ -308,14 +309,17 @@ kind_t typ_kind(type_t t) {
     else return MemKind;
   case &TunionFieldType(TunionFieldInfo(&UnknownTunionfield(_),_)):
     return impos("typ_kind: Unresolved TunionFieldType");
-    // for structs or unions without definitions, we must be conservative
+    // for structs, unions, or enums without definitions, we must be 
+    // conservative and treat them as having AnyKind
   case &StructType(_,_,NULL): 
-  case &UnionType(_,_,NULL) : return AnyKind;
-  case &StructType(_,_,_):    
-  case &UnionType(_,_,_):     
-  case &AnonStructType(_):    
-  case &AnonUnionType(_):     return MemKind;
-  case &EnumType(_,_):        return BoxKind;
+  case &UnionType(_,_,NULL) : 
+  case &EnumType(_,NULL)    : return AnyKind;
+  case &StructType(_,_,_)   :    
+  case &UnionType(_,_,_)    :     
+  case &AnonStructType(_)   :    
+  case &AnonUnionType(_)    : return MemKind;   
+  case &EnumType(_,ed): 
+    if (ed->fields == NULL) return AnyKind; else return MemKind;
   case &PointerType(pinfo):
     switch (compress_conref(pinfo.bounds)->v) {
     case &Eq_constr(Unknown_b): return MemKind;
@@ -2285,8 +2289,14 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
         *edp = *ed;
       } catch {
       case Dict::Absent:
-        terr(loc,"unbound type enum %s",qvar2string(n));
-        return cvtenv;
+        let ge = Dict::lookup(te->ae,te->ns);
+        let ed_orig = new Enumdecl{Extern,n,NULL};
+        Tc::tcEnumdecl(te,ge,loc,ed_orig);
+        enumdecl_t @ed = lookup_enumdecl(te,loc,n);
+        *edp = *ed;
+        break;
+        //terr(loc,"unbound type enum %s",qvar2string(n));
+        //return cvtenv;
       }
     enumdecl_t ed = (enumdecl_t)*edp;
     // Make relative name absolute
@@ -2299,8 +2309,20 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
       try tudp = lookup_tuniondecl(te,loc,n);// FIX: lookup_xtuniondecl needed?
       catch { 
       case Dict::Absent:
-        terr(loc,"unbound type [x]tunion %s",qvar2string(n));
-        return cvtenv;
+        // declare the tunion for the user
+        let ge = Dict::lookup(te->ae,te->ns);
+        let tud = new Tuniondecl{Extern, n, NULL, NULL, is_x};
+        Tc::tcTuniondecl(te, ge, loc, tud);
+        tudp = lookup_tuniondecl(te,loc,n);
+        // give an error here if targs is non-empty
+        if (targs != NULL) {
+          terr(loc,"please declare parameterized %s %s before using",
+               (is_x ? (const char ?)"xtunion" : "tunion"), qvar2string(n));
+          return cvtenv;
+        }        
+        break;
+        // terr(loc,"unbound type [x]tunion %s",qvar2string(n));
+        // return cvtenv;
       }
       if((*tudp)->is_xtunion != is_x)
 	terr(loc,"[x]tunion is different from type declaration %s",
@@ -2698,8 +2720,22 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     if(*sdp == NULL) {
       try *sdp = lookup_structdecl(te,loc,(qvar_t)tdnopt);
       catch { case Dict::Absent:
-	terr(loc,"unbound type struct %s", qvar2string((qvar_t)tdnopt));
-        return cvtenv;
+        // pretend like the struct was declared abstractly in the current
+        // namespace
+        typedef_name_t tdn = (typedef_name_t)tdnopt;
+        let ge = Dict::lookup(te->ae,te->ns);
+        let sd = new Structdecl{Extern, new Opt(tdn), NULL, NULL, NULL};
+        Tc::tcStructdecl(te, ge, loc, sd);
+        *sdp = lookup_structdecl(te,loc,tdn);
+        // give an error here if targs is non-empty:
+        if (targs != NULL) {
+          terr(loc,"please declare parameterized struct %s before using",
+               qvar2string(tdn));
+          return cvtenv;
+        }
+        break;
+        // terr(loc,"unbound type struct %s", qvar2string((qvar_t)tdnopt));
+        // return cvtenv;
       }
     }
     structdecl_t sd = **sdp;
@@ -2728,8 +2764,21 @@ static cvtenv_t i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t cvtenv,
     if(*udp == NULL) {
       try *udp = lookup_uniondecl(te,loc,(qvar_t)tdnopt);
       catch { case Dict::Absent:
-	terr(loc,"unbound type union %s",qvar2string((qvar_t)tdnopt));
-        return cvtenv;
+        // declare the union for the user
+        let tdn = (typedef_name_t)tdnopt;
+        let ge = Dict::lookup(te->ae,te->ns);
+        let ud = new Uniondecl{Extern, new Opt(tdn), NULL, NULL, NULL};
+        Tc::tcUniondecl(te, ge, loc, ud);
+        *udp = lookup_uniondecl(te,loc,tdn);
+        // give an error here if targs is non-empty
+        if (targs != NULL) {
+          terr(loc,"please declare parameterized union %s before using",
+               qvar2string(tdn));
+          return cvtenv;
+        }
+        break;
+	//terr(loc,"unbound type union %s",qvar2string((qvar_t)tdnopt));
+        //return cvtenv;
       }
     }
     uniondecl_t ud = **udp;
@@ -2813,8 +2862,9 @@ static cvtenv_t check_valid_type(seg_t loc, tenv_t te,
                                  kind_t expected_kind, 
                                  bool generalize_evars,
                                  type_t t) {
-  let cvt = i_check_valid_type(loc,te,CVTEnv{kind_env,NULL,NULL,
-                                             generalize_evars,false},
+  let cvt = i_check_valid_type(loc,te,
+                               CVTEnv{kind_env,NULL,NULL,
+                                      generalize_evars,false},
                                expected_kind,t);
 
   for (_ vs = cvt.free_vars; vs != NULL; vs = vs->tl)
@@ -2928,7 +2978,8 @@ void check_fndecl_valid_type(seg_t loc,tenv_t te,fndecl_t fd) {
 
 // Same as check_valid_type except that we ensure the free type variables
 // are drawn from the given set of bound type variables.
-void check_type(seg_t loc, tenv_t te, list_t<tvar_t,`H> bound_tvars, 
+void check_type(seg_t loc, tenv_t te, 
+                list_t<tvar_t,`H> bound_tvars, 
                 kind_t expected_kind, bool allow_evars, type_t t) {
   let cvt = check_valid_type(loc,te,bound_tvars,expected_kind,false,t);
   let free_tvars = remove_bound_tvars(cvt.free_vars, bound_tvars);

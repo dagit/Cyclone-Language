@@ -272,15 +272,7 @@ const int Cyc_Position_Lex= 0; static const int Cyc_Position_Parse= 1; static
 const int Cyc_Position_Elab= 2; struct Cyc_Position_Error{ struct _tagged_arr
 source; struct Cyc_Position_Segment* seg; void* kind; struct _tagged_arr desc; }
 ; extern unsigned char Cyc_Position_Nocontext[ 14u]; struct _tuple0{ void* f1;
-struct _tagged_arr* f2; } ; struct Cyc_Absyn_Tvar; struct Cyc_Absyn_Tqual;
-struct Cyc_Absyn_Conref; struct Cyc_Absyn_PtrInfo; struct Cyc_Absyn_VarargInfo;
-struct Cyc_Absyn_FnInfo; struct Cyc_Absyn_TunionInfo; struct Cyc_Absyn_TunionFieldInfo;
-struct Cyc_Absyn_VarargCallInfo; struct Cyc_Absyn_Exp; struct Cyc_Absyn_Stmt;
-struct Cyc_Absyn_Pat; struct Cyc_Absyn_Switch_clause; struct Cyc_Absyn_SwitchC_clause;
-struct Cyc_Absyn_Fndecl; struct Cyc_Absyn_Structdecl; struct Cyc_Absyn_Uniondecl;
-struct Cyc_Absyn_Tuniondecl; struct Cyc_Absyn_Tunionfield; struct Cyc_Absyn_Enumfield;
-struct Cyc_Absyn_Enumdecl; struct Cyc_Absyn_Typedefdecl; struct Cyc_Absyn_Vardecl;
-struct Cyc_Absyn_Decl; struct Cyc_Absyn_Structfield; static const int Cyc_Absyn_Loc_n=
+struct _tagged_arr* f2; } ; struct Cyc_Absyn_Conref; static const int Cyc_Absyn_Loc_n=
 0; static const int Cyc_Absyn_Rel_n= 0; struct Cyc_Absyn_Rel_n_struct{ int tag;
 struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_Abs_n= 1; struct Cyc_Absyn_Abs_n_struct{
 int tag; struct Cyc_List_List* f1; } ; static const int Cyc_Absyn_Static= 0;
@@ -599,40 +591,40 @@ Cyc_Tcenv_Hidden_struct{ int tag; void* f1; void* f2; } ; struct Cyc_Tcenv_Tenv{
 struct Cyc_List_List* ns; struct Cyc_Dict_Dict* ae; struct Cyc_Core_Opt* le; } ;
 extern unsigned char Cyc_Tcutil_TypeErr[ 12u]; extern void Cyc_Tcutil_terr(
 struct Cyc_Position_Segment*, struct _tagged_arr fmt, struct _tagged_arr ap);
-struct Cyc_CfFlowInfo_Place; enum  Cyc_CfFlowInfo_Escaped; struct Cyc_CfFlowInfo_InitState;
-static const int Cyc_CfFlowInfo_VarRoot= 0; struct Cyc_CfFlowInfo_VarRoot_struct{
-int tag; struct Cyc_Absyn_Vardecl* f1; } ; static const int Cyc_CfFlowInfo_MallocPt=
-1; struct Cyc_CfFlowInfo_MallocPt_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ;
-struct Cyc_CfFlowInfo_Place{ void* root; struct Cyc_List_List* fields; } ; enum 
-Cyc_CfFlowInfo_Escaped{ Cyc_CfFlowInfo_Esc  =  0u, Cyc_CfFlowInfo_Unesc  =  1u};
-static const int Cyc_CfFlowInfo_NoneIL= 0; static const int Cyc_CfFlowInfo_ThisIL=
-1; static const int Cyc_CfFlowInfo_AllIL= 2; static const int Cyc_CfFlowInfo_MustPointTo=
+struct Cyc_CfFlowInfo_Place; struct Cyc_CfFlowInfo_InitState; static const int
+Cyc_CfFlowInfo_VarRoot= 0; struct Cyc_CfFlowInfo_VarRoot_struct{ int tag; struct
+Cyc_Absyn_Vardecl* f1; } ; static const int Cyc_CfFlowInfo_MallocPt= 1; struct
+Cyc_CfFlowInfo_MallocPt_struct{ int tag; struct Cyc_Absyn_Exp* f1; } ; struct
+Cyc_CfFlowInfo_Place{ void* root; struct Cyc_List_List* fields; } ; static const
+int Cyc_CfFlowInfo_Esc= 0; static const int Cyc_CfFlowInfo_Unesc= 1; static
+const int Cyc_CfFlowInfo_NoneIL= 0; static const int Cyc_CfFlowInfo_ThisIL= 1;
+static const int Cyc_CfFlowInfo_AllIL= 2; static const int Cyc_CfFlowInfo_MustPointTo=
 0; struct Cyc_CfFlowInfo_MustPointTo_struct{ int tag; struct Cyc_CfFlowInfo_Place*
-f1; } ; struct Cyc_CfFlowInfo_InitState{ enum  Cyc_CfFlowInfo_Escaped esc; void*
-level; } ; static const int Cyc_CfFlowInfo_LeafPI= 0; struct Cyc_CfFlowInfo_LeafPI_struct{
-int tag; struct Cyc_CfFlowInfo_InitState f1; } ; static const int Cyc_CfFlowInfo_DictPI=
+f1; } ; struct Cyc_CfFlowInfo_InitState{ void* esc; void* level; } ; static
+const int Cyc_CfFlowInfo_LeafPI= 0; struct Cyc_CfFlowInfo_LeafPI_struct{ int tag;
+struct Cyc_CfFlowInfo_InitState f1; } ; static const int Cyc_CfFlowInfo_DictPI=
 1; struct Cyc_CfFlowInfo_DictPI_struct{ int tag; struct Cyc_Dict_Dict* f1; } ;
 static const int Cyc_CfFlowInfo_BottomFL= 0; static const int Cyc_CfFlowInfo_InitsFL=
 0; struct Cyc_CfFlowInfo_InitsFL_struct{ int tag; struct Cyc_Dict_Dict* f1; } ;
 extern struct Cyc_Set_Set* Cyc_CfFlowInfo_mt_place_set(); extern void* Cyc_CfFlowInfo_mkLeafPI(
-enum  Cyc_CfFlowInfo_Escaped esc, void* il); extern void* Cyc_CfFlowInfo_lookup_place(
-struct Cyc_Dict_Dict* d, struct Cyc_CfFlowInfo_Place* place); extern struct Cyc_Dict_Dict*
-Cyc_CfFlowInfo_insert_place( struct Cyc_Dict_Dict* d, struct Cyc_CfFlowInfo_Place*
-place, void* pinfo); extern int Cyc_CfFlowInfo_isAllInit( struct Cyc_Dict_Dict*
-pinfo_dict, void* pinfo); extern struct Cyc_Dict_Dict* Cyc_CfFlowInfo_escape_pointsto(
-void* pinfo, struct Cyc_Dict_Dict* d, struct Cyc_Set_Set** all_changed); extern
-void* Cyc_CfFlowInfo_assign_unknown_dict( void*, void*); extern void* Cyc_CfFlowInfo_join_flow(
-struct Cyc_Set_Set**, void*, void*); extern void* Cyc_CfFlowInfo_after_flow(
-struct Cyc_Set_Set**, void*, void*, struct Cyc_Set_Set*, struct Cyc_Set_Set*);
-extern int Cyc_CfFlowInfo_flow_lessthan_approx( void* f1, void* f2); struct Cyc_NewControlFlow_AnalEnv{
-struct Cyc_Dict_Dict* roots; int in_try; void* tryflow; struct Cyc_Set_Set**
-all_changed; } ; extern void Cyc_NewControlFlow_update_tryflow( struct Cyc_NewControlFlow_AnalEnv*
-env, void* new_flow); extern void* Cyc_NewControlFlow_cf_analyze_stmt( struct
-Cyc_NewControlFlow_AnalEnv*, struct Cyc_Absyn_Stmt*, void*); extern
-unsigned char Cyc_CfAbsexp_BadAbsexp[ 14u]; static const int Cyc_CfAbsexp_OrderedG=
-0; static const int Cyc_CfAbsexp_UnorderedG= 1; static const int Cyc_CfAbsexp_OneofG=
-2; extern void Cyc_CfAbsexp_check_absexp( void*); extern struct _tagged_arr Cyc_CfAbsexp_absexp2string(
-void* ae, int depth); extern void* Cyc_CfAbsexp_mkUnknownOp(); extern void* Cyc_CfAbsexp_mkLocalOp(
+void* esc, void* il); extern void* Cyc_CfFlowInfo_lookup_place( struct Cyc_Dict_Dict*
+d, struct Cyc_CfFlowInfo_Place* place); extern struct Cyc_Dict_Dict* Cyc_CfFlowInfo_insert_place(
+struct Cyc_Dict_Dict* d, struct Cyc_CfFlowInfo_Place* place, void* pinfo);
+extern int Cyc_CfFlowInfo_isAllInit( struct Cyc_Dict_Dict* pinfo_dict, void*
+pinfo); extern struct Cyc_Dict_Dict* Cyc_CfFlowInfo_escape_pointsto( void* pinfo,
+struct Cyc_Dict_Dict* d, struct Cyc_Set_Set** all_changed); extern void* Cyc_CfFlowInfo_assign_unknown_dict(
+void*, void*); extern void* Cyc_CfFlowInfo_join_flow( struct Cyc_Set_Set**, void*,
+void*); extern void* Cyc_CfFlowInfo_after_flow( struct Cyc_Set_Set**, void*,
+void*, struct Cyc_Set_Set*, struct Cyc_Set_Set*); extern int Cyc_CfFlowInfo_flow_lessthan_approx(
+void* f1, void* f2); struct Cyc_NewControlFlow_AnalEnv{ struct Cyc_Dict_Dict*
+roots; int in_try; void* tryflow; struct Cyc_Set_Set** all_changed; } ; extern
+void Cyc_NewControlFlow_update_tryflow( struct Cyc_NewControlFlow_AnalEnv* env,
+void* new_flow); extern void* Cyc_NewControlFlow_cf_analyze_stmt( struct Cyc_NewControlFlow_AnalEnv*,
+struct Cyc_Absyn_Stmt*, void*); extern unsigned char Cyc_CfAbsexp_BadAbsexp[ 14u];
+static const int Cyc_CfAbsexp_OrderedG= 0; static const int Cyc_CfAbsexp_UnorderedG=
+1; static const int Cyc_CfAbsexp_OneofG= 2; extern void Cyc_CfAbsexp_check_absexp(
+void*); extern struct _tagged_arr Cyc_CfAbsexp_absexp2string( void* ae, int
+depth); extern void* Cyc_CfAbsexp_mkUnknownOp(); extern void* Cyc_CfAbsexp_mkLocalOp(
 struct Cyc_Absyn_Vardecl*); extern void* Cyc_CfAbsexp_mkMallocOp( struct Cyc_Absyn_Exp*);
 extern void* Cyc_CfAbsexp_mkDictOp( struct Cyc_Dict_Dict*); extern void* Cyc_CfAbsexp_mkAddressOp(
 void*); extern void* Cyc_CfAbsexp_mkMemberOp( void*, struct _tagged_arr* f);
@@ -1089,84 +1081,85 @@ _temp401) ==  Cyc_CfAbsexp_DictOp: 0){ goto _LL412;} else{ goto _LL413;} _LL413:
 if( _temp401 == ( void*) Cyc_CfAbsexp_UnknownOp){ goto _LL414;} else{ goto
 _LL415;} _LL415: if(( unsigned int) _temp401 >  1u?*(( int*) _temp401) ==  Cyc_CfAbsexp_AddressOp:
 0){ goto _LL416;} else{ goto _LL402;} _LL404: return({ struct Cyc_CfFlowInfo_InitState
-_temp427; _temp427.esc= Cyc_CfFlowInfo_Unesc; _temp427.level=( void*)(( void*)({
-struct Cyc_CfFlowInfo_MustPointTo_struct* _temp428=( struct Cyc_CfFlowInfo_MustPointTo_struct*)
-_cycalloc( sizeof( struct Cyc_CfFlowInfo_MustPointTo_struct)); _temp428[ 0]=({
-struct Cyc_CfFlowInfo_MustPointTo_struct _temp429; _temp429.tag= Cyc_CfFlowInfo_MustPointTo;
-_temp429.f1=({ struct Cyc_CfFlowInfo_Place* _temp430=( struct Cyc_CfFlowInfo_Place*)
-_cycalloc( sizeof( struct Cyc_CfFlowInfo_Place)); _temp430->root=( void*)(( void*)({
-struct Cyc_CfFlowInfo_VarRoot_struct* _temp431=( struct Cyc_CfFlowInfo_VarRoot_struct*)
-_cycalloc( sizeof( struct Cyc_CfFlowInfo_VarRoot_struct)); _temp431[ 0]=({
-struct Cyc_CfFlowInfo_VarRoot_struct _temp432; _temp432.tag= Cyc_CfFlowInfo_VarRoot;
+_temp427; _temp427.esc=( void*)(( void*) Cyc_CfFlowInfo_Unesc); _temp427.level=(
+void*)(( void*)({ struct Cyc_CfFlowInfo_MustPointTo_struct* _temp428=( struct
+Cyc_CfFlowInfo_MustPointTo_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_MustPointTo_struct));
+_temp428[ 0]=({ struct Cyc_CfFlowInfo_MustPointTo_struct _temp429; _temp429.tag=
+Cyc_CfFlowInfo_MustPointTo; _temp429.f1=({ struct Cyc_CfFlowInfo_Place* _temp430=(
+struct Cyc_CfFlowInfo_Place*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_Place));
+_temp430->root=( void*)(( void*)({ struct Cyc_CfFlowInfo_VarRoot_struct*
+_temp431=( struct Cyc_CfFlowInfo_VarRoot_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_VarRoot_struct));
+_temp431[ 0]=({ struct Cyc_CfFlowInfo_VarRoot_struct _temp432; _temp432.tag= Cyc_CfFlowInfo_VarRoot;
 _temp432.f1= _temp417; _temp432;}); _temp431;})); _temp430->fields= 0; _temp430;});
 _temp429;}); _temp428;})); _temp427;}); _LL406: return({ struct Cyc_CfFlowInfo_InitState
-_temp433; _temp433.esc= Cyc_CfFlowInfo_Unesc; _temp433.level=( void*)(( void*)({
-struct Cyc_CfFlowInfo_MustPointTo_struct* _temp434=( struct Cyc_CfFlowInfo_MustPointTo_struct*)
-_cycalloc( sizeof( struct Cyc_CfFlowInfo_MustPointTo_struct)); _temp434[ 0]=({
-struct Cyc_CfFlowInfo_MustPointTo_struct _temp435; _temp435.tag= Cyc_CfFlowInfo_MustPointTo;
-_temp435.f1=({ struct Cyc_CfFlowInfo_Place* _temp436=( struct Cyc_CfFlowInfo_Place*)
-_cycalloc( sizeof( struct Cyc_CfFlowInfo_Place)); _temp436->root=( void*)(( void*)({
-struct Cyc_CfFlowInfo_MallocPt_struct* _temp437=( struct Cyc_CfFlowInfo_MallocPt_struct*)
-_cycalloc( sizeof( struct Cyc_CfFlowInfo_MallocPt_struct)); _temp437[ 0]=({
-struct Cyc_CfFlowInfo_MallocPt_struct _temp438; _temp438.tag= Cyc_CfFlowInfo_MallocPt;
-_temp438.f1= _temp419; _temp438;}); _temp437;})); _temp436->fields= 0; _temp436;});
-_temp435;}); _temp434;})); _temp433;}); _LL408: { struct Cyc_CfFlowInfo_InitState
-_temp439= Cyc_CfAbsexp_eval_absop_l( pinfo_dict, _temp423); struct Cyc_CfFlowInfo_InitState
-_temp440= _temp439; void* _temp446; struct Cyc_CfFlowInfo_Place* _temp448;
-struct Cyc_CfFlowInfo_Place _temp450; struct Cyc_List_List* _temp451; void*
-_temp453; _LL442: _LL447: _temp446=( void*) _temp440.level; if(( unsigned int)
-_temp446 >  3u?*(( int*) _temp446) ==  Cyc_CfFlowInfo_MustPointTo: 0){ _LL449:
-_temp448=(( struct Cyc_CfFlowInfo_MustPointTo_struct*) _temp446)->f1; _temp450=*
-_temp448; _LL454: _temp453=( void*) _temp450.root; goto _LL452; _LL452: _temp451=
-_temp450.fields; goto _LL443;} else{ goto _LL444;} _LL444: goto _LL445; _LL443:
-_temp451=(( struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct Cyc_List_List*
-y)) Cyc_List_append)( _temp451,({ struct Cyc_List_List* _temp455=( struct Cyc_List_List*)
-_cycalloc( sizeof( struct Cyc_List_List)); _temp455->hd=( void*) _temp421;
-_temp455->tl= 0; _temp455;})); return({ struct Cyc_CfFlowInfo_InitState _temp456;
-_temp456.esc= Cyc_CfFlowInfo_Unesc; _temp456.level=( void*)(( void*)({ struct
-Cyc_CfFlowInfo_MustPointTo_struct* _temp457=( struct Cyc_CfFlowInfo_MustPointTo_struct*)
-_cycalloc( sizeof( struct Cyc_CfFlowInfo_MustPointTo_struct)); _temp457[ 0]=({
-struct Cyc_CfFlowInfo_MustPointTo_struct _temp458; _temp458.tag= Cyc_CfFlowInfo_MustPointTo;
-_temp458.f1=({ struct Cyc_CfFlowInfo_Place* _temp459=( struct Cyc_CfFlowInfo_Place*)
-_cycalloc( sizeof( struct Cyc_CfFlowInfo_Place)); _temp459->root=( void*)
-_temp453; _temp459->fields= _temp451; _temp459;}); _temp458;}); _temp457;}));
-_temp456;}); _LL445: return _temp439; _LL441:;} _LL410: { void* _temp460= Cyc_CfAbsexp_eval_absop_r(
-pinfo_dict, _temp425); void* _temp461= _temp460; struct Cyc_CfFlowInfo_InitState
-_temp469; void* _temp471; struct Cyc_CfFlowInfo_InitState _temp473; _LL463: if(*((
-int*) _temp461) ==  Cyc_CfFlowInfo_LeafPI){ _LL470: _temp469=(( struct Cyc_CfFlowInfo_LeafPI_struct*)
-_temp461)->f1; _LL472: _temp471=( void*) _temp469.level; if( _temp471 == ( void*)
-Cyc_CfFlowInfo_NoneIL){ goto _LL464;} else{ goto _LL465;}} else{ goto _LL465;}
-_LL465: if(*(( int*) _temp461) ==  Cyc_CfFlowInfo_LeafPI){ _LL474: _temp473=((
-struct Cyc_CfFlowInfo_LeafPI_struct*) _temp461)->f1; goto _LL466;} else{ goto
-_LL467;} _LL467: if(*(( int*) _temp461) ==  Cyc_CfFlowInfo_DictPI){ goto _LL468;}
-else{ goto _LL462;} _LL464:( int) _throw(( void*) Cyc_CfAbsexp_BadPtrDeref);
-_LL466: return _temp473; _LL468:( int) _throw(( void*) Cyc_CfAbsexp_BadAbsexp);
-_LL462:;} _LL412: goto _LL414; _LL414: goto _LL416; _LL416:( int) _throw(( void*)
-Cyc_CfAbsexp_BadAbsexp); _LL402:;} void* Cyc_CfAbsexp_eval_absop_r( struct Cyc_Dict_Dict*
-pinfo_dict, void* ao){ void* _temp475= ao; struct Cyc_Absyn_Vardecl* _temp491;
-struct Cyc_Absyn_Exp* _temp493; struct Cyc_Dict_Dict* _temp495; struct
-_tagged_arr* _temp497; void* _temp499; void* _temp501; void* _temp503; _LL477:
-if( _temp475 == ( void*) Cyc_CfAbsexp_UnknownOp){ goto _LL478;} else{ goto
-_LL479;} _LL479: if(( unsigned int) _temp475 >  1u?*(( int*) _temp475) ==  Cyc_CfAbsexp_LocalOp:
-0){ _LL492: _temp491=(( struct Cyc_CfAbsexp_LocalOp_struct*) _temp475)->f1; goto
-_LL480;} else{ goto _LL481;} _LL481: if(( unsigned int) _temp475 >  1u?*(( int*)
-_temp475) ==  Cyc_CfAbsexp_MallocOp: 0){ _LL494: _temp493=(( struct Cyc_CfAbsexp_MallocOp_struct*)
-_temp475)->f1; goto _LL482;} else{ goto _LL483;} _LL483: if(( unsigned int)
-_temp475 >  1u?*(( int*) _temp475) ==  Cyc_CfAbsexp_DictOp: 0){ _LL496: _temp495=((
-struct Cyc_CfAbsexp_DictOp_struct*) _temp475)->f1; goto _LL484;} else{ goto
-_LL485;} _LL485: if(( unsigned int) _temp475 >  1u?*(( int*) _temp475) ==  Cyc_CfAbsexp_MemberOp:
-0){ _LL500: _temp499=( void*)(( struct Cyc_CfAbsexp_MemberOp_struct*) _temp475)->f1;
-goto _LL498; _LL498: _temp497=(( struct Cyc_CfAbsexp_MemberOp_struct*) _temp475)->f2;
+_temp433; _temp433.esc=( void*)(( void*) Cyc_CfFlowInfo_Unesc); _temp433.level=(
+void*)(( void*)({ struct Cyc_CfFlowInfo_MustPointTo_struct* _temp434=( struct
+Cyc_CfFlowInfo_MustPointTo_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_MustPointTo_struct));
+_temp434[ 0]=({ struct Cyc_CfFlowInfo_MustPointTo_struct _temp435; _temp435.tag=
+Cyc_CfFlowInfo_MustPointTo; _temp435.f1=({ struct Cyc_CfFlowInfo_Place* _temp436=(
+struct Cyc_CfFlowInfo_Place*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_Place));
+_temp436->root=( void*)(( void*)({ struct Cyc_CfFlowInfo_MallocPt_struct*
+_temp437=( struct Cyc_CfFlowInfo_MallocPt_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_MallocPt_struct));
+_temp437[ 0]=({ struct Cyc_CfFlowInfo_MallocPt_struct _temp438; _temp438.tag=
+Cyc_CfFlowInfo_MallocPt; _temp438.f1= _temp419; _temp438;}); _temp437;}));
+_temp436->fields= 0; _temp436;}); _temp435;}); _temp434;})); _temp433;}); _LL408: {
+struct Cyc_CfFlowInfo_InitState _temp439= Cyc_CfAbsexp_eval_absop_l( pinfo_dict,
+_temp423); struct Cyc_CfFlowInfo_InitState _temp440= _temp439; void* _temp446;
+struct Cyc_CfFlowInfo_Place* _temp448; struct Cyc_CfFlowInfo_Place _temp450;
+struct Cyc_List_List* _temp451; void* _temp453; _LL442: _LL447: _temp446=( void*)
+_temp440.level; if(( unsigned int) _temp446 >  3u?*(( int*) _temp446) ==  Cyc_CfFlowInfo_MustPointTo:
+0){ _LL449: _temp448=(( struct Cyc_CfFlowInfo_MustPointTo_struct*) _temp446)->f1;
+_temp450=* _temp448; _LL454: _temp453=( void*) _temp450.root; goto _LL452;
+_LL452: _temp451= _temp450.fields; goto _LL443;} else{ goto _LL444;} _LL444:
+goto _LL445; _LL443: _temp451=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
+x, struct Cyc_List_List* y)) Cyc_List_append)( _temp451,({ struct Cyc_List_List*
+_temp455=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp455->hd=( void*) _temp421; _temp455->tl= 0; _temp455;})); return({ struct
+Cyc_CfFlowInfo_InitState _temp456; _temp456.esc=( void*)(( void*) Cyc_CfFlowInfo_Unesc);
+_temp456.level=( void*)(( void*)({ struct Cyc_CfFlowInfo_MustPointTo_struct*
+_temp457=( struct Cyc_CfFlowInfo_MustPointTo_struct*) _cycalloc( sizeof( struct
+Cyc_CfFlowInfo_MustPointTo_struct)); _temp457[ 0]=({ struct Cyc_CfFlowInfo_MustPointTo_struct
+_temp458; _temp458.tag= Cyc_CfFlowInfo_MustPointTo; _temp458.f1=({ struct Cyc_CfFlowInfo_Place*
+_temp459=( struct Cyc_CfFlowInfo_Place*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_Place));
+_temp459->root=( void*) _temp453; _temp459->fields= _temp451; _temp459;});
+_temp458;}); _temp457;})); _temp456;}); _LL445: return _temp439; _LL441:;}
+_LL410: { void* _temp460= Cyc_CfAbsexp_eval_absop_r( pinfo_dict, _temp425); void*
+_temp461= _temp460; struct Cyc_CfFlowInfo_InitState _temp469; void* _temp471;
+struct Cyc_CfFlowInfo_InitState _temp473; _LL463: if(*(( int*) _temp461) ==  Cyc_CfFlowInfo_LeafPI){
+_LL470: _temp469=(( struct Cyc_CfFlowInfo_LeafPI_struct*) _temp461)->f1; _LL472:
+_temp471=( void*) _temp469.level; if( _temp471 == ( void*) Cyc_CfFlowInfo_NoneIL){
+goto _LL464;} else{ goto _LL465;}} else{ goto _LL465;} _LL465: if(*(( int*)
+_temp461) ==  Cyc_CfFlowInfo_LeafPI){ _LL474: _temp473=(( struct Cyc_CfFlowInfo_LeafPI_struct*)
+_temp461)->f1; goto _LL466;} else{ goto _LL467;} _LL467: if(*(( int*) _temp461)
+==  Cyc_CfFlowInfo_DictPI){ goto _LL468;} else{ goto _LL462;} _LL464:( int)
+_throw(( void*) Cyc_CfAbsexp_BadPtrDeref); _LL466: return _temp473; _LL468:( int)
+_throw(( void*) Cyc_CfAbsexp_BadAbsexp); _LL462:;} _LL412: goto _LL414; _LL414:
+goto _LL416; _LL416:( int) _throw(( void*) Cyc_CfAbsexp_BadAbsexp); _LL402:;}
+void* Cyc_CfAbsexp_eval_absop_r( struct Cyc_Dict_Dict* pinfo_dict, void* ao){
+void* _temp475= ao; struct Cyc_Absyn_Vardecl* _temp491; struct Cyc_Absyn_Exp*
+_temp493; struct Cyc_Dict_Dict* _temp495; struct _tagged_arr* _temp497; void*
+_temp499; void* _temp501; void* _temp503; _LL477: if( _temp475 == ( void*) Cyc_CfAbsexp_UnknownOp){
+goto _LL478;} else{ goto _LL479;} _LL479: if(( unsigned int) _temp475 >  1u?*((
+int*) _temp475) ==  Cyc_CfAbsexp_LocalOp: 0){ _LL492: _temp491=(( struct Cyc_CfAbsexp_LocalOp_struct*)
+_temp475)->f1; goto _LL480;} else{ goto _LL481;} _LL481: if(( unsigned int)
+_temp475 >  1u?*(( int*) _temp475) ==  Cyc_CfAbsexp_MallocOp: 0){ _LL494:
+_temp493=(( struct Cyc_CfAbsexp_MallocOp_struct*) _temp475)->f1; goto _LL482;}
+else{ goto _LL483;} _LL483: if(( unsigned int) _temp475 >  1u?*(( int*) _temp475)
+==  Cyc_CfAbsexp_DictOp: 0){ _LL496: _temp495=(( struct Cyc_CfAbsexp_DictOp_struct*)
+_temp475)->f1; goto _LL484;} else{ goto _LL485;} _LL485: if(( unsigned int)
+_temp475 >  1u?*(( int*) _temp475) ==  Cyc_CfAbsexp_MemberOp: 0){ _LL500:
+_temp499=( void*)(( struct Cyc_CfAbsexp_MemberOp_struct*) _temp475)->f1; goto
+_LL498; _LL498: _temp497=(( struct Cyc_CfAbsexp_MemberOp_struct*) _temp475)->f2;
 goto _LL486;} else{ goto _LL487;} _LL487: if(( unsigned int) _temp475 >  1u?*((
 int*) _temp475) ==  Cyc_CfAbsexp_DerefOp: 0){ _LL502: _temp501=( void*)(( struct
 Cyc_CfAbsexp_DerefOp_struct*) _temp475)->f1; goto _LL488;} else{ goto _LL489;}
 _LL489: if(( unsigned int) _temp475 >  1u?*(( int*) _temp475) ==  Cyc_CfAbsexp_AddressOp:
 0){ _LL504: _temp503=( void*)(( struct Cyc_CfAbsexp_AddressOp_struct*) _temp475)->f1;
-goto _LL490;} else{ goto _LL476;} _LL478: return Cyc_CfFlowInfo_mkLeafPI( Cyc_CfFlowInfo_Esc,(
-void*) Cyc_CfFlowInfo_AllIL); _LL480: return Cyc_Dict_lookup( pinfo_dict,( void*)({
-struct Cyc_CfFlowInfo_VarRoot_struct* _temp505=( struct Cyc_CfFlowInfo_VarRoot_struct*)
-_cycalloc( sizeof( struct Cyc_CfFlowInfo_VarRoot_struct)); _temp505[ 0]=({
-struct Cyc_CfFlowInfo_VarRoot_struct _temp506; _temp506.tag= Cyc_CfFlowInfo_VarRoot;
+goto _LL490;} else{ goto _LL476;} _LL478: return Cyc_CfFlowInfo_mkLeafPI(( void*)
+Cyc_CfFlowInfo_Esc,( void*) Cyc_CfFlowInfo_AllIL); _LL480: return Cyc_Dict_lookup(
+pinfo_dict,( void*)({ struct Cyc_CfFlowInfo_VarRoot_struct* _temp505=( struct
+Cyc_CfFlowInfo_VarRoot_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_VarRoot_struct));
+_temp505[ 0]=({ struct Cyc_CfFlowInfo_VarRoot_struct _temp506; _temp506.tag= Cyc_CfFlowInfo_VarRoot;
 _temp506.f1= _temp491; _temp506;}); _temp505;})); _LL482: return Cyc_Dict_lookup(
 pinfo_dict,( void*)({ struct Cyc_CfFlowInfo_MallocPt_struct* _temp507=( struct
 Cyc_CfFlowInfo_MallocPt_struct*) _cycalloc( sizeof( struct Cyc_CfFlowInfo_MallocPt_struct));
@@ -1203,7 +1196,7 @@ _temp543)->f1; goto _LL528;} else{ goto _LL529;}} else{ goto _LL529;} _LL529:
 if(*(( int*) _temp521) ==  Cyc_CfFlowInfo_LeafPI){ _LL548: _temp547=(( struct
 Cyc_CfFlowInfo_LeafPI_struct*) _temp521)->f1; goto _LL530;} else{ goto _LL531;}
 _LL531: goto _LL532; _LL524:( int) _throw(( void*) Cyc_CfAbsexp_BadPtrDeref);
-_LL526: return Cyc_CfFlowInfo_mkLeafPI( Cyc_CfFlowInfo_Esc,( void*) Cyc_CfFlowInfo_NoneIL);
+_LL526: return Cyc_CfFlowInfo_mkLeafPI(( void*) Cyc_CfFlowInfo_Esc,( void*) Cyc_CfFlowInfo_NoneIL);
 _LL528: return Cyc_CfFlowInfo_lookup_place( pinfo_dict, _temp545); _LL530:
 return _temp520; _LL532:( int) _throw(( void*) Cyc_CfAbsexp_BadAbsexp); _LL522:;}
 _LL490: return( void*)({ struct Cyc_CfFlowInfo_LeafPI_struct* _temp549=( struct
@@ -1219,8 +1212,8 @@ escaping_states, b1, b2));} void* Cyc_CfAbsexp_all_init_dict( void* old){ void*
 _temp551= old; struct Cyc_Dict_Dict* _temp557; _LL553: if(*(( int*) _temp551) == 
 Cyc_CfFlowInfo_LeafPI){ goto _LL554;} else{ goto _LL555;} _LL555: if(*(( int*)
 _temp551) ==  Cyc_CfFlowInfo_DictPI){ _LL558: _temp557=(( struct Cyc_CfFlowInfo_DictPI_struct*)
-_temp551)->f1; goto _LL556;} else{ goto _LL552;} _LL554: return Cyc_CfFlowInfo_mkLeafPI(
-Cyc_CfFlowInfo_Esc,( void*) Cyc_CfFlowInfo_AllIL); _LL556: return( void*)({
+_temp551)->f1; goto _LL556;} else{ goto _LL552;} _LL554: return Cyc_CfFlowInfo_mkLeafPI((
+void*) Cyc_CfFlowInfo_Esc,( void*) Cyc_CfFlowInfo_AllIL); _LL556: return( void*)({
 struct Cyc_CfFlowInfo_DictPI_struct* _temp559=( struct Cyc_CfFlowInfo_DictPI_struct*)
 _cycalloc( sizeof( struct Cyc_CfFlowInfo_DictPI_struct)); _temp559[ 0]=({ struct
 Cyc_CfFlowInfo_DictPI_struct _temp560; _temp560.tag= Cyc_CfFlowInfo_DictPI;
@@ -1230,38 +1223,39 @@ _LL552:;} void* Cyc_CfAbsexp_assign_escape( struct Cyc_List_List**
 escaping_states, void* old_pinfo, void* new_pinfo){ struct _tuple3 _temp562=({
 struct _tuple3 _temp561; _temp561.f1= old_pinfo; _temp561.f2= new_pinfo;
 _temp561;}); void* _temp574; struct Cyc_CfFlowInfo_InitState _temp576; void*
-_temp578; void* _temp580; struct Cyc_CfFlowInfo_InitState _temp582; enum  Cyc_CfFlowInfo_Escaped
+_temp578; void* _temp580; struct Cyc_CfFlowInfo_InitState _temp582; void*
 _temp584; void* _temp586; void* _temp588; struct Cyc_CfFlowInfo_InitState
-_temp590; enum  Cyc_CfFlowInfo_Escaped _temp592; void* _temp594; struct Cyc_Dict_Dict*
-_temp596; void* _temp598; struct Cyc_Dict_Dict* _temp600; void* _temp602; struct
-Cyc_CfFlowInfo_InitState _temp604; void* _temp606; void* _temp608; struct Cyc_Dict_Dict*
-_temp610; _LL564: _LL581: _temp580= _temp562.f1; if(*(( int*) _temp580) ==  Cyc_CfFlowInfo_LeafPI){
+_temp590; void* _temp592; void* _temp594; struct Cyc_Dict_Dict* _temp596; void*
+_temp598; struct Cyc_Dict_Dict* _temp600; void* _temp602; struct Cyc_CfFlowInfo_InitState
+_temp604; void* _temp606; void* _temp608; struct Cyc_Dict_Dict* _temp610; _LL564:
+_LL581: _temp580= _temp562.f1; if(*(( int*) _temp580) ==  Cyc_CfFlowInfo_LeafPI){
 _LL583: _temp582=(( struct Cyc_CfFlowInfo_LeafPI_struct*) _temp580)->f1; _LL585:
-_temp584= _temp582.esc; if( _temp584 ==  Cyc_CfFlowInfo_Unesc){ goto _LL575;}
-else{ goto _LL566;}} else{ goto _LL566;} _LL575: _temp574= _temp562.f2; if(*((
-int*) _temp574) ==  Cyc_CfFlowInfo_LeafPI){ _LL577: _temp576=(( struct Cyc_CfFlowInfo_LeafPI_struct*)
-_temp574)->f1; _LL579: _temp578=( void*) _temp576.level; goto _LL565;} else{
-goto _LL566;} _LL566: _LL589: _temp588= _temp562.f1; if(*(( int*) _temp588) == 
-Cyc_CfFlowInfo_LeafPI){ _LL591: _temp590=(( struct Cyc_CfFlowInfo_LeafPI_struct*)
-_temp588)->f1; _LL593: _temp592= _temp590.esc; if( _temp592 ==  Cyc_CfFlowInfo_Esc){
-goto _LL587;} else{ goto _LL568;}} else{ goto _LL568;} _LL587: _temp586=
-_temp562.f2; if(*(( int*) _temp586) ==  Cyc_CfFlowInfo_LeafPI){ goto _LL567;}
-else{ goto _LL568;} _LL568: _LL599: _temp598= _temp562.f1; if(*(( int*) _temp598)
-==  Cyc_CfFlowInfo_DictPI){ _LL601: _temp600=(( struct Cyc_CfFlowInfo_DictPI_struct*)
-_temp598)->f1; goto _LL595;} else{ goto _LL570;} _LL595: _temp594= _temp562.f2;
-if(*(( int*) _temp594) ==  Cyc_CfFlowInfo_DictPI){ _LL597: _temp596=(( struct
-Cyc_CfFlowInfo_DictPI_struct*) _temp594)->f1; goto _LL569;} else{ goto _LL570;}
-_LL570: _LL609: _temp608= _temp562.f1; if(*(( int*) _temp608) ==  Cyc_CfFlowInfo_DictPI){
-_LL611: _temp610=(( struct Cyc_CfFlowInfo_DictPI_struct*) _temp608)->f1; goto
-_LL603;} else{ goto _LL572;} _LL603: _temp602= _temp562.f2; if(*(( int*)
-_temp602) ==  Cyc_CfFlowInfo_LeafPI){ _LL605: _temp604=(( struct Cyc_CfFlowInfo_LeafPI_struct*)
-_temp602)->f1; _LL607: _temp606=( void*) _temp604.level; if( _temp606 == ( void*)
-Cyc_CfFlowInfo_AllIL){ goto _LL571;} else{ goto _LL572;}} else{ goto _LL572;}
-_LL572: goto _LL573; _LL565: return Cyc_CfFlowInfo_mkLeafPI( Cyc_CfFlowInfo_Unesc,
-_temp578); _LL567:* escaping_states=({ struct Cyc_List_List* _temp612=( struct
-Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp612->hd=( void*)
-new_pinfo; _temp612->tl=* escaping_states; _temp612;}); return Cyc_CfFlowInfo_mkLeafPI(
-Cyc_CfFlowInfo_Esc,( void*) Cyc_CfFlowInfo_AllIL); _LL569: return( void*)({
+_temp584=( void*) _temp582.esc; if( _temp584 == ( void*) Cyc_CfFlowInfo_Unesc){
+goto _LL575;} else{ goto _LL566;}} else{ goto _LL566;} _LL575: _temp574=
+_temp562.f2; if(*(( int*) _temp574) ==  Cyc_CfFlowInfo_LeafPI){ _LL577: _temp576=((
+struct Cyc_CfFlowInfo_LeafPI_struct*) _temp574)->f1; _LL579: _temp578=( void*)
+_temp576.level; goto _LL565;} else{ goto _LL566;} _LL566: _LL589: _temp588=
+_temp562.f1; if(*(( int*) _temp588) ==  Cyc_CfFlowInfo_LeafPI){ _LL591: _temp590=((
+struct Cyc_CfFlowInfo_LeafPI_struct*) _temp588)->f1; _LL593: _temp592=( void*)
+_temp590.esc; if( _temp592 == ( void*) Cyc_CfFlowInfo_Esc){ goto _LL587;} else{
+goto _LL568;}} else{ goto _LL568;} _LL587: _temp586= _temp562.f2; if(*(( int*)
+_temp586) ==  Cyc_CfFlowInfo_LeafPI){ goto _LL567;} else{ goto _LL568;} _LL568:
+_LL599: _temp598= _temp562.f1; if(*(( int*) _temp598) ==  Cyc_CfFlowInfo_DictPI){
+_LL601: _temp600=(( struct Cyc_CfFlowInfo_DictPI_struct*) _temp598)->f1; goto
+_LL595;} else{ goto _LL570;} _LL595: _temp594= _temp562.f2; if(*(( int*)
+_temp594) ==  Cyc_CfFlowInfo_DictPI){ _LL597: _temp596=(( struct Cyc_CfFlowInfo_DictPI_struct*)
+_temp594)->f1; goto _LL569;} else{ goto _LL570;} _LL570: _LL609: _temp608=
+_temp562.f1; if(*(( int*) _temp608) ==  Cyc_CfFlowInfo_DictPI){ _LL611: _temp610=((
+struct Cyc_CfFlowInfo_DictPI_struct*) _temp608)->f1; goto _LL603;} else{ goto
+_LL572;} _LL603: _temp602= _temp562.f2; if(*(( int*) _temp602) ==  Cyc_CfFlowInfo_LeafPI){
+_LL605: _temp604=(( struct Cyc_CfFlowInfo_LeafPI_struct*) _temp602)->f1; _LL607:
+_temp606=( void*) _temp604.level; if( _temp606 == ( void*) Cyc_CfFlowInfo_AllIL){
+goto _LL571;} else{ goto _LL572;}} else{ goto _LL572;} _LL572: goto _LL573;
+_LL565: return Cyc_CfFlowInfo_mkLeafPI(( void*) Cyc_CfFlowInfo_Unesc, _temp578);
+_LL567:* escaping_states=({ struct Cyc_List_List* _temp612=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp612->hd=( void*) new_pinfo;
+_temp612->tl=* escaping_states; _temp612;}); return Cyc_CfFlowInfo_mkLeafPI((
+void*) Cyc_CfFlowInfo_Esc,( void*) Cyc_CfFlowInfo_AllIL); _LL569: return( void*)({
 struct Cyc_CfFlowInfo_DictPI_struct* _temp613=( struct Cyc_CfFlowInfo_DictPI_struct*)
 _cycalloc( sizeof( struct Cyc_CfFlowInfo_DictPI_struct)); _temp613[ 0]=({ struct
 Cyc_CfFlowInfo_DictPI_struct _temp614; _temp614.tag= Cyc_CfFlowInfo_DictPI;

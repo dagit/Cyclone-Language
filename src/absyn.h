@@ -77,54 +77,8 @@ namespace Absyn {
   typedef qvar_opt_t typedef_name_opt_t;
   
   // forward declarations
-  extern struct Tvar;
-  extern tunion Scope;
-  extern struct Tqual;
-  extern tunion Size_of;
-  extern tunion Kind;
-  extern tunion Array_kind;
-  extern tunion Sign;
   extern struct Conref<`a>;
   extern tunion Constraint<`a>;
-  extern tunion Bounds;
-  extern struct PtrInfo;
-  extern struct VarargInfo;
-  extern struct FnInfo;
-  extern struct TunionInfo;
-  extern struct TunionFieldInfo;
-  extern tunion Type;
-  extern tunion Funcparams;
-  extern tunion Type_modifier;
-  extern tunion Cnst;
-  extern tunion Primop;
-  extern tunion Incrementor;
-  extern struct VarargCallInfo;
-  extern tunion Raw_exp;
-  extern struct Exp;
-  extern tunion Raw_stmt;
-  extern struct Stmt;
-  extern tunion Raw_pat; 
-  extern struct Pat;
-  extern tunion Binding;
-  extern struct Switch_clause;
-  extern struct SwitchC_clause;
-  extern struct Fndecl;
-  extern struct Structdecl;
-  extern struct Uniondecl;
-  extern struct Tuniondecl;
-  extern struct Tunionfield;
-  extern struct Enumfield;
-  extern struct Enumdecl;
-  extern struct Typedefdecl;
-  extern struct Vardecl;
-  extern tunion Raw_decl;
-  extern struct Decl;
-  extern tunion Designator;
-  extern xtunion StmtAnnot;
-  extern tunion Attribute;
-  extern tunion Format_Type;
-  extern struct Structfield;
-  extern tunion OffsetofField;
   
   typedef tunion Scope scope_t;
   typedef struct Tqual tqual_t; // not a pointer

@@ -41,14 +41,14 @@ namespace CfFlowInfo {
 
 extern tunion LocalRoot;
 extern struct Place<`r::R>;
-extern enum   Escaped;
+extern tunion Escaped;
 extern tunion InitLevel;
 extern struct InitState;
 extern tunion PathInfo;
 extern tunion FlowInfo;
 typedef tunion LocalRoot local_root_t;
 typedef struct Place<`r1> @`r2 place_t<`r1,`r2>;
-typedef enum Escaped escaped_t;
+typedef tunion Escaped escaped_t;
 typedef tunion InitLevel init_level_t;
 typedef struct InitState init_state_t;
 typedef tunion PathInfo path_info_t;
@@ -63,7 +63,7 @@ EXTERN_CFFLOW struct Place<`r1::R> {
   local_root_t root;
   List::list_t<Absyn::field_name_t,`r1> fields;
 };
-EXTERN_CFFLOW enum Escaped { Esc, Unesc };
+EXTERN_CFFLOW tunion Escaped { Esc, Unesc };
 EXTERN_CFFLOW tunion InitLevel { NoneIL, ThisIL, AllIL, MustPointTo(place_t) };
 EXTERN_CFFLOW struct InitState {
   escaped_t esc;
