@@ -28,10 +28,14 @@ else
   CMD=$3
   ARG=$4
   if [ $# -ge 5 ]; then
-    i=1
-    INPUTFILE=$5
-    ./catn $ARG $INPUTFILE > $TMP2
-    INPUTFILE=$TMP2
+    if [ "${CMD%regexmatch}" = "${CMD}" ]; then
+      INPUTFILE=$5
+      ./catn $ARG $INPUTFILE > $TMP2
+      INPUTFILE=$TMP2
+    else
+      cat $5 > $TMP2
+      INPUTFILE=$TMP2
+    fi
   fi
 fi
 
@@ -44,9 +48,9 @@ rm -f $TMP
 cd $DIR
 while [ "$i" != "$N" ]; do
   if [ -n "$INPUTFILE" ]; then
-    $TIME java $CMD 2>> $TMP 1> /dev/null < $INPUTFILE
+    CLASSPATH=$CLASSPATH:../jakarta-oro-2.0.8.jar $TIME java $CMD $ARG 2>> $TMP 1> /dev/null < $INPUTFILE
   else
-    $TIME java $CMD $ARG 2>> $TMP 1> /dev/null
+    CLASSPATH=$CLASSPATH:../jakarta-oro-2.0.8.jar $TIME java $CMD $ARG 2>> $TMP 1> /dev/null
   fi
   i=`expr $i + 1`
 done

@@ -15,7 +15,29 @@ There are five language subdirectories:
   java/		This directory is empty initially; it is generated
 		  by processing the directives in the java-start/
 		  directory using the inserttimer script.
-	
+
+We have not implemented prodcons, objinst, or methcall for Cyclone;
+the first because Cyclone does not (always) support threads, and the
+latter two because there is no obvious, type-safe way to implement
+them in Cyclone. 
+
+BUILDING THE BENCHMARKS
+
+The Java regexmatch benchmark requires the Jakarta ORO
+regular expression package, jakarta-oro-2.0.8.jar, to be in the
+shootout/ directory or otherwise in your PATH.  You can get it from
+
+  http://apache.cs.utah.edu/jakarta/oro/source/jakarta-oro-2.0.8.tar.gz
+
+If you get a different version (so that the JAR file is different)
+you must change the Makefile and test-java.sh to use the new filename.
+
+To build, you can simply type
+
+  make
+
+RUNNING THE BENCHMARKS
+
 You can run the benchmarks in two ways.  The simplest is just to do
 
   make bench
@@ -39,3 +61,4 @@ More simply, the Makefile will do this for you if you do
 The graph shows the performance of cyclone, cyclone-port, java, and
 gcc, all normalized to be relative to the gcc performance.  The
 average over all benchmarks is plotted in the rightmost bar.
+

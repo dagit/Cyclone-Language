@@ -43,7 +43,7 @@ function getargs {
     moments) echo 150;;
     nestedloop) echo 16;;
     random) echo 900000;;
-    regexpmatch) echo 9000;;
+    regexmatch) echo 9000;;
     reversefile) echo 20;;
     sieve) echo 900;;
     spellcheck) echo 10;;
@@ -77,6 +77,8 @@ function getinputfile {
     sumcol) echo data/sumcol-Input;;
     wc) echo data/wc-Input;;
     moments) echo data/moments-Input;;
+    wordfreq) echo data/wordfreq-Input;;
+    regexmatch) echo data/regexmatch-Input;;
     *) echo ;;
   esac
 }  

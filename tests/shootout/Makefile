@@ -4,7 +4,7 @@ CYCC = cyclone
 CFLAGS = -O3 -DTIMING -Iinclude
 CYC_FLAGS = -O3 -DTIMING -Iinclude
 # TO DO: only add this library for those execs that need it
-LDFLAGS = -lm
+LDFLAGS = -lm -lpcre
 
 EXELANGS := gcc cyclone cyclone-port
 JAVALANGS :=  java
@@ -12,9 +12,10 @@ LANGS := $(EXELANGS) $(JAVALANGS)
 
 # Skipped: hello
 # Obsoleted: ary2
-# Not implemented at all: methcall objinst prodcons regexmatch  wordfreq
-BENCHMARKS := ackermann ary3 echo except fibo hash hash2 heapsort moments nestedloop random reversefile sieve sumcol wc lists spellcheck strcat matrix
-SOMEBENCHMARKS := ackermann ary3 echo fibo hash hash2 heapsort moments nestedloop random reversefile sieve sumcol wc spellcheck strcat matrix
+# Cannot implement: methcall objinst (can't do width-subtyping)
+#   prodcons (no pthreads, by default)
+BENCHMARKS := ackermann ary3 echo except fibo hash hash2 heapsort moments nestedloop random reversefile sieve sumcol wc lists spellcheck strcat matrix wordfreq regexmatch
+SOMEBENCHMARKS := ackermann ary3 echo fibo hash hash2 heapsort moments nestedloop random reversefile sieve sumcol wc spellcheck strcat matrix regexmatch
 
 N = 11
 
@@ -71,7 +72,7 @@ java/%.java: java-start/%.java
 	./inserttimer < $^ > $@
 
 %.class: %.java
-	@(cd `dirname $^`; javac `basename $^`; echo javac $^)
+	@(cd `dirname $^`; CLASSPATH=$CLASSPATH:../jakarta-oro-2.0.8.jar javac `basename $^`; echo javac $^)
 
 # only the optimized versions get the benefit of no GC
 cyclone/%$(EXE): cyclone/%.cyc

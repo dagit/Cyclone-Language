@@ -1,11 +1,11 @@
-// $Id: regexmatch.java,v 1.2 2004-09-07 20:33:26 mwh Exp $
+// $Id: regexmatch.java,v 1.3 2004-09-08 03:39:43 mwh Exp $
 // http://www.bagley.org/~doug/shootout/
 
 import java.io.*;
 import java.util.*;
 import java.text.*;
 import java.lang.reflect.*;
-import com.oroinc.text.regex.*;
+import org.apache.oro.text.regex.*;
 
 public class regexmatch {
 

@@ -26,10 +26,13 @@ else
   CMD=$2
   ARG=$3
   if [ $# -ge 4 ]; then
-    i=1
-    INPUTFILE=$4
-    ./catn $ARG $INPUTFILE > $TMP2
-    INPUTFILE=$TMP2
+    if [ "${CMD%regexmatch}" = "${CMD}" ]; then
+      INPUTFILE=$4
+      ./catn $ARG $INPUTFILE > $TMP2
+      INPUTFILE=$TMP2
+    else
+      INPUTFILE=$4
+    fi
   fi
 fi
 
@@ -43,7 +46,7 @@ i=0
 rm -f $TMP
 while [ "$i" != "$N" ]; do
   if [ -n "$INPUTFILE" ]; then
-    $TIME $CMD 2>> $TMP 1> /dev/null <$INPUTFILE
+    $TIME $CMD $ARG 2>> $TMP 1> /dev/null <$INPUTFILE
   else
     $TIME $CMD $ARG 2>> $TMP 1> /dev/null
   fi

@@ -5,7 +5,7 @@
 
 #include <stdio.h>
 #include <stdlib.h>
-
+#include "timer.h"
 
 enum {false, true};
 
@@ -71,6 +71,8 @@ int main(int argc, char *argv[]) {
     NthToggle *ntog;
     char val = true;
 
+    START_TIME
+
     tog = new_Toggle(true);
     for (i=0; i<n; i++) {
 	val = tog->activate(tog)->value(tog);
@@ -85,5 +87,8 @@ int main(int argc, char *argv[]) {
     }
     fputs(val ? "true\n" : "false\n", stdout);
     DESTROY(ntog);
+
+    END_TIME
+
     return 0;
 }
