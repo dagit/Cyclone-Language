@@ -203,7 +203,7 @@ extern "C" Cstring<`H> string_to_Cstring(string_t);
 extern "C" mstring_t<`H> Cstring_to_string(Cstring);
 extern "C" mbuffer_t<`r> wrap_Cbuffer_as_buffer(Cbuffer_t<`r>, size_t);
 //  extern "C" mbuffer_t<`r> wrap_Cstring_as_string(Cbuffer_t<`r>, size_t);
-extern "C" mstring_t<`H> ?`H ntCsl_to_ntsl(Cstring @);
+// extern "C" mstring_t<`H> ?`H ntCsl_to_ntsl(Cstring @);
 extern "C" unsigned int arr_prevsize(`a::A ?,sizeof_t<`a>);
   /** [arr_prevsize(p,sz)] returns the buffer space available preceding
       the pointer [p] in the dynamic array [p] points into.  [sz] is the

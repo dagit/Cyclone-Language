@@ -3847,6 +3847,7 @@ sys/shm.h:
 
 sys/socket.h:
 include {
+sockaddr
 socklen_t
 sa_family_t
 cmsghdr
@@ -3892,7 +3893,8 @@ SHUT_WR
 ssize_t
 }
 hstub {
-  /* We omit struct sockaddr because we don't use it in Cyclone */
+  /* JGM: mini_httpd needs sockaddr, so I've added it back in:
+       We omit struct sockaddr because we don't use it in Cyclone */
   /* We omit struct sockaddr_storage because we don't use it in Cyclone */
   /* We omit struct msghdr because it contains a void * field */
   /* We omit CMSG_NXTHDR and CMSG_FIRSTHDR because they pull in msghdr */
@@ -4238,7 +4240,6 @@ hstub socketpair {
 ;
 
 sys/stat.h:
-omitvariables { stat }
 include {
 stat
 blkcnt_t
@@ -4330,6 +4331,18 @@ hstub {
   #define _time_t_def_
   typedef __time_t time_t;
   #endif
+  /* Cygwin needs these definitions to smooth out the interface */
+  #if defined(__CYGWIN32__) || defined(__CYGWIN__)
+  #ifdef __CYGWIN_USE_BIG_TYPES__
+  #define st_uid  __st_uid32
+  #define st_gid  __st_gid32
+  #define st_size __st_size64
+  #else
+  #define st_uid  __st_uid16
+  #define st_gid  __st_gid16
+  #define st_size __st_size32
+  #endif /* __CYGWIN_USE_BIG_TYPES__ */
+  #endif /* defined(__CYGWIN32__) || defined(__CYGWIN__) */
 }
 hstub chmod {
   extern "C" int chmod(const char @, mode_t);
@@ -4563,6 +4576,7 @@ hstub wait {
   extern "C" pid_t wait(int *);
 }
 hstub waitpid {
+  #define HAVE_WAITPID
   extern "C" pid_t waitpid(pid_t, int *, int);
 }
 ;
@@ -5119,7 +5133,8 @@ hstub {
 }
 hstub {
 // Under Linux, crypt doesn't always get included here for some reason
-#ifdef __linux__
+  // Hmmmm... same for Cygwin
+#if defined(__linux__) || defined(__CYGWIN32__) || defined(__CYGWIN__)
   extern "C" char *crypt (const char @__key, const char @__salt);
 #endif
 }
