@@ -1232,7 +1232,9 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     }
     break;
   case &Swap_e(e1,e2):
-    s = cat(text("cycswap("),exp2doc(e1),text(","),exp2doc(e2),text(")"));
+    s = cat(exp2doc_prec(myprec,e1),
+            text(" :=: "),
+            exp2doc_prec(myprec,e2));
     break;
   case &UnresolvedMem_e(n,des):
     // Currently n is always NULL from the parser

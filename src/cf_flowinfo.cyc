@@ -375,10 +375,14 @@ absRval_t<`r> make_unique_consumed(flow_env_t<`r> fenv, type_t t, exp_t consumer
     unsigned sz = List::length(fs);
     for (int i = 0; i < sz; i++, fs = fs->tl) {
       let &Aggrfield(n,_,t2,_,_) = fs->hd;
-      if (numelts(*n) != 1)
+      if (numelts(*n) != 1) {
+// 	DEBUG_PRINT("Aggregate: consuming ");
+// 	DEBUG_PRINT_F(print_absrval,d[i]);
+// 	DEBUG_PRINT(":%s\n",typ2string(t2));
         d2[i] = make_unique_consumed(fenv,t2,consumer,iteration,d[i]);
+      }
     }
-    return rnew(fenv->r) Aggregate(b,d);
+    return rnew(fenv->r) Aggregate(b,d2);
   default: return r;
   }
 }
@@ -786,7 +790,7 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
   case $(&NotZeroAll,  &NotZeroThis):
   case $(&NotZeroThis, &NotZeroAll): return env->fenv->notzerothis;
 
-  case $(&Aggregate(is_union1,d1), &Aggregate(is_union2,d2)):
+  case $(&Aggregate(UnionRInfo(is_union1,field_no1),d1), &Aggregate(UnionRInfo(is_union2,field_no2),d2)):
     aggrdict_t new_d = 
       rnew(rgn) {for i < numelts(d1) : join_absRval(env,0,d1[i],d2[i]) };
 
@@ -797,16 +801,22 @@ static absRval_t<`r> join_absRval(joinenv_t<`r2,`r> env,`a a,absRval_t<`r> r1,ab
       if (new_d[i] != d1[i]) {
         change = true; break;
       }
-    if (!change)
-      return r1;
-    change = false;
-    for (int i = 0; i < numelts(d1); i++)
-      if (new_d[i] != d2[i]) {
-        change = true; break;
+    if (!change) {
+      if (!is_union1) return r1;
+      new_d = d1;
+    }
+    else {
+      change = false;
+      for (int i = 0; i < numelts(d1); i++)
+	if (new_d[i] != d2[i]) {
+	  change = true; break;
+	}
+      if (!change) {
+	if (!is_union1) return r2;
+	new_d = d2;
       }
-    if (!change)
-      return r2;
-    return rnew(rgn) Aggregate(is_union1,new_d);
+    }
+    return rnew(rgn) Aggregate(UnionRInfo(is_union1,field_no1 == field_no2 ? field_no1 : -1),new_d);
     
   default: break;
   }

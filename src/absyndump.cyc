@@ -803,9 +803,9 @@ void dumpexp_prec(int inprec, exp_t e) {
     break;
 
   case &Swap_e(e1,e2):
-    dump("cycswap(");
-    dumpexp_prec(myprec,e1); dump_char(','); dumpexp_prec(myprec,e2); 
-    dump_char(')');
+    dumpexp_prec(myprec,e1);
+    dump_nospace(":=:");
+    dumpexp_prec(myprec,e2);
     break;
 
   case &UnresolvedMem_e(n,des):
