@@ -7,14 +7,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
-#include "simple_hash.h"
+#include "simple_hash_cyc.h"
 
 #define MAXLINELEN 128
 
-int main(int argc, char *argv[]) {
+int main(int argc, char ?argv[]) {
     int i, wordbufsize = 80;
     char line[MAXLINELEN];
-    char c, *cp, *wordbuf = (char *)malloc(wordbufsize + 1);
+    char c, ?cp, ?wordbuf = new {for i < wordbufsize + 1 : '\000'};
     struct ht_ht *dict = ht_create(40000);
     FILE *fh;
     
@@ -34,8 +34,12 @@ int main(int argc, char *argv[]) {
 	    } else {
 		wordbuf[i++] = *cp;
 		if (i == wordbufsize) {
+  		    let old_wordbufsize = wordbuf.size;
 		    wordbufsize *= 2;
-		    wordbuf = realloc(wordbuf, wordbufsize + 1);
+		    wordbuf = new {for i < wordbufsize + 1 : 
+				   (i < old_wordbufsize) ? 
+				   wordbuf[i] : '\000'};
+		    //wordbuf = realloc(wordbuf, wordbufsize + 1);
 		}
 	    }
         }
@@ -56,13 +60,17 @@ int main(int argc, char *argv[]) {
 	    } else {
 		wordbuf[i++] = *cp;
 		if (i == wordbufsize) {
+  		    let old_wordbufsize = wordbuf.size;
 		    wordbufsize *= 2;
-		    wordbuf = realloc(wordbuf, wordbufsize + 1);
+		    wordbuf = new {for i < wordbufsize + 1 : 
+				   (i < old_wordbufsize) ? 
+				   wordbuf[i] : '\000'};
+		    //wordbuf = realloc(wordbuf, wordbufsize + 1);
 		}
 	    } 
         }
     }
-    free(wordbuf);
+    //free(wordbuf);
     ht_destroy(dict);
     return(0);
 }

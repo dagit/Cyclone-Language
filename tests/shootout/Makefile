@@ -10,10 +10,8 @@ CYCC = $(CYCDIR)/bin/$(CYCCOMP)
 #BENCHMARKS = ackermann ary3 except fibo hash hash2 heapsort\
 # hello matrix moments nestedloop random reversefile sieve sumcol wc
 BENCHMARKS = ackermann ary3 except fibo hash hash2 heapsort\
- hello matrix nestedloop random reversefile sieve sumcol wc
-
-EXEFILES = $(addsuffix $(EXE), $(BENCHMARKS))
-GCCEXEFILES = $(addprefix gcc-, $(EXEFILES))
+hello matrix nestedloop random reversefile sieve sumcol wc lists \
+spellcheck
 
 all: $(EXEFILES) $(GCCEXEFILES)
 
