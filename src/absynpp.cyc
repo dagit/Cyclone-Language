@@ -350,20 +350,29 @@ string_t kind2string(kind_t k) {
   case IntKind: return "I";
   }
 }
+doc_t kind2doc(kind_t k) { return text(kind2string(k)); }
 
 string_t kindbound2string(kindbound_t c) {
   switch (compress_kb(c)) {
   case &Eq_kb(k): return kind2string(k);
   case &Unknown_kb(_):
     if (PP::tex_output)
-      return "{?}"; // protect against following ` in TeX
+      return "{?}"; // protect against following ` in TeX, spacing ignored
     else return "?";
   case &Less_kb(_,k): return kind2string(k);
   }
 }
-
-doc_t kind2doc(kind_t k) { return text(kind2string(k)); }
-doc_t kindbound2doc(kindbound_t c) { return text(kindbound2string(c)); }
+/* Code duplication so we can get spacing correct in TeX */
+doc_t kindbound2doc(kindbound_t c) {
+  switch (compress_kb(c)) {
+  case &Eq_kb(k): return text(kind2string(k));
+  case &Unknown_kb(_):
+    if (PP::tex_output)
+      return text_width("{?}",1); // protect against following ` in TeX
+    else return text("?");
+  case &Less_kb(_,k): return text(kind2string(k));
+  }
+}
 
 doc_t tps2doc(list_t<type_t> ts) {
   return egroup("<",">",",",List::map(typ2doc,ts));
@@ -468,7 +477,7 @@ static struct Doc *cache_question = NULL;
 static doc_t question() {
   if (!cache_question) {
     if (PP::tex_output) 
-      cache_question = text("{?}"); // protect against following ` in TeX
+      cache_question = text_width("{?}",1); // protect against following ` in TeX
     else cache_question = text("?");
   }
   return (doc_t)cache_question;
@@ -477,7 +486,7 @@ static struct Doc *cache_lb = NULL;
 static doc_t lb() {
   if (!cache_lb) {
     if (PP::tex_output) 
-      cache_lb = text("{\\lb}");
+      cache_lb = text_width("{\\lb}",1);
     else cache_lb = text("{");
   }
   return (doc_t)cache_lb;
@@ -486,7 +495,7 @@ static struct Doc *cache_rb = NULL;
 static doc_t rb() {
   if (!cache_rb) {
     if (PP::tex_output) 
-      cache_rb = text("{\\rb}");
+      cache_rb = text_width("{\\rb}",1);
     else cache_rb = text("}");
   }
   return (doc_t)cache_rb;
@@ -495,7 +504,7 @@ static struct Doc *cache_dollar = NULL;
 static doc_t dollar() {
   if (!cache_dollar) {
     if (PP::tex_output) 
-      cache_dollar = text("\\$");
+      cache_dollar = text_width("\\$",1);
     else cache_dollar = text("$");
   }
   return (doc_t)cache_dollar;
@@ -848,9 +857,12 @@ doc_t qvar2doc(qvar_t q) {
 }
 
 doc_t qvar2bolddoc(qvar_t q) {
+  let qs = qvar2string(q);
   if (PP::tex_output)
-    return cat(text("\\textbf{"),text(qvar2string(q)),rb());
-  else return text(qvar2string(q));
+    /* FIX: make strconcat vararg and simplify this */
+    return text_width(strconcat(strconcat("\\textbf{",qs),"}"),
+                      strlen(qs));
+  else return text(qs);
 }
 
 string_t typedef_name2string(qvar_t v) {
@@ -878,9 +890,12 @@ doc_t typedef_name2doc(qvar_t v) {
   return text(typedef_name2string(v));
 }
 doc_t typedef_name2bolddoc(qvar_t v) {
+  let vs = typedef_name2string(v);
   if (PP::tex_output)
-    return cat(text("\\textbf{"),text(typedef_name2string(v)),rb());
-  else return text(typedef_name2string(v));
+    /* FIX: make strconcat vararg and simplify this */
+    return text_width(strconcat(strconcat("\\textbf{",vs),"}"),
+                      strlen(vs));
+  else return text(vs);
 }
 
 doc_t typ2doc(type_t t) {
@@ -1568,7 +1583,7 @@ static doc_t ids2doc(list_t<vardecl_t> vds) {
 doc_t vardecl2doc(vardecl_t vd) {
   let &Vardecl{sc,name,tq,type,initializer,_,atts,_} = vd;
   doc_t s;
-  doc_t sn = typedef_name2doc(name);
+  doc_t sn = typedef_name2bolddoc(name);
   doc_t attsdoc   = atts2doc(atts);
   doc_t beforenamedoc;
   if(!to_VC)
@@ -1629,13 +1644,13 @@ doc_t decl2doc(decl_t d) {
     if (ad->impl==NULL)
       s = cat(scope2doc(ad->sc),
 	      aggr_kind2doc(ad->kind),
-	      qvar2doc(ad->name),
+	      qvar2bolddoc(ad->name),
               ktvars2doc(ad->tvs),
               text(";"));
     else
       s = cat(scope2doc(ad->sc),
 	      aggr_kind2doc(ad->kind),
-	      qvar2doc(ad->name),
+	      qvar2bolddoc(ad->name),
               blank_doc(),lb(),
               ktvars2doc(ad->impl->exist_vars),
               (ad->impl->rgn_po==NULL ? nil_doc() : 
@@ -1653,13 +1668,13 @@ doc_t decl2doc(decl_t d) {
     if (fields==NULL)
       s = cat(scope2doc(sc),
               (is_xtunion ? text("xtunion ") : text("tunion ")),
-              (is_xtunion ? qvar2doc(name) : typedef_name2doc(name)),
+              (is_xtunion ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
               ktvars2doc(tvs),
               text(";"));
     else
       s = cat(scope2doc(sc),
               (is_xtunion ? text("xtunion ") : text("tunion ")),
-              (is_xtunion ? qvar2doc(name) : typedef_name2doc(name)),
+              (is_xtunion ? qvar2bolddoc(name) : typedef_name2bolddoc(name)),
               ktvars2doc(tvs),
               blank_doc(),lb(),
               nest(2, cat(line_doc(),tunionfields2doc(fields->v))),
@@ -1681,12 +1696,12 @@ doc_t decl2doc(decl_t d) {
     if (fields == NULL)
       s = cat(scope2doc(sc),
               text("enum "),
-              typedef_name2doc(n),
+              typedef_name2bolddoc(n),
               text(";"));
     else
       s = cat(scope2doc(sc),
               text("enum "),
-              qvar2doc(n),
+              qvar2bolddoc(n),
               blank_doc(),lb(),
               nest(2, cat(line_doc(),enumfields2doc(fields->v))),
               line_doc(),
@@ -1702,7 +1717,8 @@ doc_t decl2doc(decl_t d) {
     s = cat(text("typedef "),
             tqtd2doc(Tqual(false,false,false),
                      t,
-		   new Opt(cat(typedef_name2doc(td->name),tvars2doc(td->tvs)))),
+                     new Opt(cat(typedef_name2bolddoc(td->name),
+                                 tvars2doc(td->tvs)))),
             text(";"));
 
     break;
@@ -1762,7 +1778,10 @@ doc_t decl2doc(decl_t d) {
   return s;
 }
 
+int print_scopes = true; // used by cycdoc to suppress printing extern, etc.
+
 doc_t scope2doc(scope_t sc) {
+  if (!print_scopes) return nil_doc();
   switch (sc) {
   case Static:   return text("static ");
   case Public:   return nil_doc();

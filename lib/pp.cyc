@@ -211,6 +211,36 @@ doc_t text(string_t<`H> s) {
 }
 doc_t textptr(stringptr_t<`H> s) { return text(*s); }
 
+/* A version of text where the length is specified by the caller, not
+   taken from the length of the string itself.  This is needed to
+   support markup, like TeX commands. */
+static doc_t text_width_doc(string_t<`H> s, int slen) {
+  return
+    new Doc(slen,
+            infinity,
+            make_fn
+            (text_doc_f,
+             new $(slen,s)));
+}
+static opt_t<table_t<stringptr_t,doc_t>> str_hashtbl2 = NULL;
+doc_t text_width(string_t<`H> s, int slen) {
+  table_t<stringptr_t<`H,`H>,doc_t> t;
+  if (str_hashtbl2 == NULL) {
+    t = Hashtable::create(101,zstrptrcmp,hash_stringptr);
+    str_hashtbl2 = new Opt(t);
+  } else {
+    t = str_hashtbl2->v;
+  }
+  try
+    return Hashtable::lookup(t,new s);
+  catch {
+  case Not_found:
+    doc_t d = text_width_doc(s,slen);
+    Hashtable::insert(t,new s,d);
+    return d;
+  }
+}
+
 opt_t<doc_t> nil_doc_opt   = NULL;
 opt_t<doc_t> blank_doc_opt = NULL;
 opt_t<doc_t> line_doc_opt  = NULL;

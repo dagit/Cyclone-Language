@@ -404,9 +404,11 @@ rule token "$(int,comment_t)*" = parse
       exit(1);
     }
 
-    // Set this so that the pretty-printer library knows we want to
-    // produce TeX output
+    /* Set this so that the pretty-printer library knows we want to
+       produce TeX output */
     PP::tex_output = true;
+    /* Set this so the absyn printer does not print out extern, etc. */
+    Absynpp::print_scopes = false;
 
     for (let l = rev(cycdoc_files); l != NULL; l = l->tl) {
       process_file(*(l->hd));

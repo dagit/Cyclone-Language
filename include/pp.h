@@ -81,6 +81,11 @@ extern doc_t text(string_t<`H> s);
 extern doc_t textptr(stringptr_t<`H> p);
   /** [textptr(p)] returns a documents containing exactly the string
       pointed to by [p]. */
+extern doc_t text_width(string_t<`H> s, int w);
+  /** [text_width(s,w)] returns a document containing exactly the string
+      [s], which is assumed to have [w] characters.  This is useful when
+      [s] contains markup character that don't take up space when printed,
+      e.g., instructions for making text bold. */
 extern doc_t hyperlink(string_t<`H> shrt, string_t<`H> full);
   /** [hyperlink(shrt,full)] returns a document that will be formatted
       as the string [shrt] linked to the string [full]. */
