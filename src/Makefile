@@ -27,7 +27,7 @@ else
 TOC_FLAG =
 endif
 
-CYC_FLAGS := -I../lib -save-c $(TOC_FLAG) $(PROF_RGN_FLAG)
+CYC_FLAGS := -I../lib -B../lib -save-c $(TOC_FLAG) $(PROF_RGN_FLAG)
 
 LIBR:=../lib/$(OUT_PREFIX)$(CYCLIB)
 

@@ -434,69 +434,75 @@ void process_file(string filename) {
 int main(int argc, string ? argv) {
 
   list_t<$(string,spec_t,string)@> options =
-    list(new $("-nocyc",new Clear_spec(&add_cyc_namespace_r),
-               "Do not add implicit namespace Cyc"),
-         new $("-v",new Set_spec(&v_r),
-               "Print compilation stages verbosely"),
-         new $("-toc",new Set_spec(&toc_r),
-               "Stop after translation to C"),
-         new $("-parseonly",new Set_spec(&parseonly_r),
-               "Stop after parsing"),
-         new $("-tc",new Set_spec(&tc_r),
-               "Stop after type checking"),
-         new $("-tovc",new Set_spec(&tovc_r),
-               "Avoid gcc extensions in C output"),
-         new $("-ic",new Set_spec(&ic_r),
-               "Interface check"),
-         new $("-noremoveunused",new Set_spec(&noshake_r),
-               "Don't remove externed variables that aren't used"),
-         new $("-noexpandtypedefs",new Set_spec(&noexpand_r),
-               "Don't expand typedefs in pretty printing"),
-         new $("-printalltvars", new Set_spec(&Absynpp::print_all_tvars),
-               "Print all type variables (even implicit default effects)"),
-         new $("-printallkinds", new Set_spec(&Absynpp::print_all_kinds),
-               "Always print kinds of type variables"),
-         new $("-up",new Clear_spec(&pp_r),
-               "Ugly print"),
-         new $("-pp",new Set_spec(&pp_r),
-               "Pretty print"),
-         new $("-save-temps",new Unit_spec(set_save_temps),
-               "Do not delete temporary files"),
-         new $("-save-c",new Set_spec(&save_c_r),
-               "Do not delete temporary C files"),
+    list(new $("-v",new Set_spec(&v_r),
+                 "    Print compilation stages verbosely"),
          new $("-o",new String_spec(set_output_file),
-               "Output file name"),
+                 "    Output file name"),
          new $("-D*",new Flag_spec(add_cpparg),
-               "Pass definition to preprocessor"),
+                  "   Pass definition to preprocessor"),
          new $("-B*",new Flag_spec(add_cyclone_exec_prefix_path),
-               "Add to the list of directories to search for compiler files"),
+                  "   Add to the list of directories to search for compiler files"),
          new $("-I*",new Flag_spec(add_cpparg),
-               "Add to the list of directories to search for include files"),
+                  "   Add to the list of directories to search for include files"),
          new $("-L*",new Flag_spec(add_cpparg),
-               "Add to the list of directories for -l"),
+                  "   Add to the list of directories for -l"),
          new $("-l*",new Flag_spec(add_libarg),
-               "Library file"),
+                  "   Library file"),
          new $("-c",new Unit_spec(set_stop_after_objectfile),
-               "Produce object file"),
+                 "    Produce object file"),
          new $("-O",new Flag_spec(add_ccarg),
-               "Optimize"),
+                 "    Optimize"),
          new $("-O2",new Flag_spec(add_ccarg),
-               "Optimize"),
+                  "   Optimize"),
          new $("-O3",new Flag_spec(add_ccarg),
-               "Optimize"),
+                  "   Optimize"),
          new $("-g",new Flag_spec(add_ccarg),
-               "Compile for debugging"),
+                 "    Compile for debugging"),
          new $("-p",new Flag_spec(add_ccarg),
-               "Compile for prof"),
+                 "    Compile for prof"),
          new $("-pg",new Flag_spec(add_ccarg),
-               "Compile for gprof"),
+                  "   Compile for gprof"),
          new $("-S",new Flag_spec(add_ccarg),
-               "Stop after producing assembly code"),
+                 "    Stop after producing assembly code"),
          new $("-M",new Unit_spec(set_produce_dependencies),
-               "Produce dependencies"),
+                 "    Produce dependencies"),
          new $("-E",new Set_spec(&stop_after_cpp_r),
-               "Stop after preprocessing")
-         );
+                 "    Stop after preprocessing"),
+         new $("-parseonly",new Set_spec(&parseonly_r),
+               "\n"
+              "        Stop after parsing"),
+         new $("-tc",new Set_spec(&tc_r),
+                  "   Stop after type checking"),
+         new $("-toc",new Set_spec(&toc_r),
+                   "  Stop after translation to C"),
+         new $("-ic",new Set_spec(&ic_r),
+                  "   Interface check"),
+         new $("-pp",new Set_spec(&pp_r),
+                  "   Pretty print"),
+         new $("-up",new Clear_spec(&pp_r),
+                  "   Ugly print"),
+         new $("-tovc",new Set_spec(&tovc_r),
+                    " Avoid gcc extensions in C output"),
+         new $("-save-temps",new Unit_spec(set_save_temps),
+               "\n"
+              "        Don't delete temporary files"),
+         new $("-save-c",new Set_spec(&save_c_r),
+               "\n"
+              "        Don't delete temporary C files"),
+         new $("-nocyc",new Clear_spec(&add_cyc_namespace_r),
+               "Don't add implicit namespace Cyc"),
+         new $("-noremoveunused",new Set_spec(&noshake_r),
+               "\n"
+              "        Don't remove externed variables that aren't used"),
+         new $("-noexpandtypedefs",new Set_spec(&noexpand_r),
+               "\n"
+              "        Don't expand typedefs in pretty printing"),
+         new $("-printalltvars", new Set_spec(&Absynpp::print_all_tvars),
+               "\n"
+              "        Print all type variables (even implicit default effects)"),
+         new $("-printallkinds", new Set_spec(&Absynpp::print_all_kinds),
+               "\n"
+              "        Always print kinds of type variables"));
 
   Arg::parse(options, add_other, "Options:", argv);
 
@@ -506,6 +512,10 @@ int main(int argc, string ? argv) {
   }
 
   if (stop_after_cpp_r || parseonly_r || tc_r || toc_r) return 0;
+
+  // If there are no files for the C compiler to process don't bother
+  // to run it.
+  if (ccargs == null) return 0;
 
   // Run the C compiler
   // First, find the files cyclib.a, gc.a, cyc_include.h
