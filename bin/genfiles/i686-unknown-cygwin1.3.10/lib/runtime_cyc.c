@@ -634,7 +634,8 @@ int Cyc_Core_try_free_dynregion(struct _DynRegionHandle *x) {
 }
 
 /* Allocate a new dynamic region in region r */
-struct _DynRegionHandle *Cyc_Core_rnew_dynregion(struct _RegionHandle *r) {
+struct Core_NewRegion Cyc_Core_rnew_dynregion(struct _RegionHandle *r) {
+  struct Core_NewRegion resrgn;
   struct _DynRegionHandle *res = 
     _region_malloc(r, sizeof(struct _DynRegionHandle));
   struct _RegionHandle *d = 
@@ -650,7 +651,8 @@ struct _DynRegionHandle *Cyc_Core_rnew_dynregion(struct _RegionHandle *r) {
     r->sub_regions = res;
   }
   *d = _new_region(NULL);
-  return res;
+  resrgn.dynregion = res;
+  return resrgn;
 }
 
 // allocate a new page and return a region handle for a new region.

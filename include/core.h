@@ -67,6 +67,16 @@ typedef int bool;
 extern "C" void exit(int) __attribute__((noreturn)) ;
 extern "C" `a abort() __attribute__((noreturn));
 
+  /** The [NewRegion] struct is used to return a new dynamic region.  The
+      region is allocated as a sub-region of [r2]. */
+namespace Core {
+struct NewRegion<`r2::R> {
+  <`r1::R>
+  dynregion_t<`r1,`r2> dynregion;
+};
+  // Note that this is here because it is used by the runtime
+}
+
 #ifndef _CYC_GENERATE_PRECORE_C_
 #include <sys/types.h>
 
@@ -151,12 +161,6 @@ extern region_t<`U> unique_region;
 extern void ufree(`a::A ?-`U ptr);
   /** [ufree] frees a unique pointer. */
 
-  /** The [NewRegion] struct is used to return a new dynamic region.  The
-      region is allocated as a sub-region of [r2]. */
-extern struct NewRegion<`r2::R> {
-  <`r1::R>
-  dynregion_t<`r1,`r2> dynregion;
-};
   /** A call to [rnew_dynregion(r2)] returns a new dynamic region allocated
       within [r2]. */
 extern struct NewRegion<`r2> rnew_dynregion(region_t<`r2>);

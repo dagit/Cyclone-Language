@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/lib/arg.c
-*** i686-unknown-linux/lib/arg.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/arg.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/arg.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/arg.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 682,690 ****
     *x = *y;
@@ -129,9 +129,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/li
   itemsep;if(Cyc_strlen((struct _dynforward_ptr)desc)> 0){if(_tmp8 + 1 > indent)
   itemsep=indentstr;else{struct _dynforward_ptr temp=({unsigned int _tmpC=(indent - 
   _tmp8)+ 1;char*_tmpD=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpC + 1));
+Binary files i686-unknown-linux/lib/arg.o and powerpc-apple-rhapsody/lib/arg.o differ
+Binary files i686-unknown-linux/lib/array.o and powerpc-apple-rhapsody/lib/array.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c powerpc-apple-rhapsody/lib/assert.c
-*** i686-unknown-linux/lib/assert.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/assert.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/assert.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/assert.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 691,699 ****
   _dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
@@ -151,9 +153,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c powerpc-apple-rhapsody
   struct Cyc_String_pa_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{
   int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+Binary files i686-unknown-linux/lib/assert.o and powerpc-apple-rhapsody/lib/assert.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c powerpc-apple-rhapsody/lib/bitvec.c
-*** i686-unknown-linux/lib/bitvec.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/bitvec.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/bitvec.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/bitvec.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 691,702 ****
   extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct Cyc_List_List{
@@ -178,9 +181,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c powerpc-apple-rhapsody
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
   int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
   Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+Binary files i686-unknown-linux/lib/bitvec.o and powerpc-apple-rhapsody/lib/bitvec.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/buffer.c powerpc-apple-rhapsody/lib/buffer.c
-*** i686-unknown-linux/lib/buffer.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/buffer.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/buffer.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/buffer.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 691,718 ****
   _dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
@@ -267,9 +271,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/buffer.c powerpc-apple-rhapsody
   unsigned int)new_position;return;}void Cyc_Buffer_add_buffer(struct Cyc_Buffer_t*b,
   struct Cyc_Buffer_t*bs){Cyc_Buffer_add_substring(b,(struct _dynforward_ptr)bs->buffer,
   0,(int)bs->position);return;}
+Binary files i686-unknown-linux/lib/buffer.o and powerpc-apple-rhapsody/lib/buffer.o differ
+Binary files i686-unknown-linux/lib/core.o and powerpc-apple-rhapsody/lib/core.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c powerpc-apple-rhapsody/lib/cstubs.c
-*** i686-unknown-linux/lib/cstubs.c	Wed Jul  3 13:54:36 2002
---- powerpc-apple-rhapsody/lib/cstubs.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/cstubs.c	Wed Jul  3 13:54:35 2002
+--- powerpc-apple-rhapsody/lib/cstubs.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 108,121 ****
       *Cyc_stdout = &Cyc_stdout_v,
@@ -289,7 +295,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c powerpc-apple-rhapsody
 --- 108,113 ----
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c.orig powerpc-apple-rhapsody/lib/cstubs.c.orig
 *** i686-unknown-linux/lib/cstubs.c.orig	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/cstubs.c.orig	Wed Jul 17 15:49:06 2002
+--- powerpc-apple-rhapsody/lib/cstubs.c.orig	Thu Jul 18 16:16:16 2002
 ***************
 *** 0 ****
 --- 1,249 ----
@@ -542,9 +548,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cstubs.c.orig powerpc-apple-rha
 +   int setsockopt_timeval(int a, int b, int c, const struct timeval *d, socklen_t e) {
 +     return setsockopt(a,b,c,d,e);
 +   }
+Binary files i686-unknown-linux/lib/cstubs.o and powerpc-apple-rhapsody/lib/cstubs.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapsody/lib/cycstubs.c
-*** i686-unknown-linux/lib/cycstubs.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/cycstubs.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/cycstubs.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 690,696 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -1560,7 +1567,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   struct Cyc_utimbuf{long actime;long modtime;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.orig powerpc-apple-rhapsody/lib/cycstubs.c.orig
 *** i686-unknown-linux/lib/cycstubs.c.orig	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/cycstubs.c.orig	Wed Jul 17 15:49:06 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c.orig	Thu Jul 18 16:16:16 2002
 ***************
 *** 0 ****
 --- 1,981 ----
@@ -2547,7 +2554,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.orig powerpc-apple-r
 + int actime;int modtime;};
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.rej powerpc-apple-rhapsody/lib/cycstubs.c.rej
 *** i686-unknown-linux/lib/cycstubs.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/cycstubs.c.rej	Wed Jul 17 15:49:06 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c.rej	Thu Jul 18 16:16:16 2002
 ***************
 *** 0 ****
 --- 1,528 ----
@@ -3079,9 +3086,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c.rej powerpc-apple-rh
 +   if(count > _get_arr_size(buf,sizeof(char)))(int)_throw((void*)& Cyc___write_failure);
 +   return write(fd,(const char*)_untag_arr(buf,sizeof(char),1),count);}struct Cyc_utimbuf{
 +   int actime;int modtime;};
+Binary files i686-unknown-linux/lib/cycstubs.o and powerpc-apple-rhapsody/lib/cycstubs.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/lib/dict.c
-*** i686-unknown-linux/lib/dict.c	Wed Jul 17 15:48:10 2002
---- powerpc-apple-rhapsody/lib/dict.c	Wed Jul 17 15:49:08 2002
+*** i686-unknown-linux/lib/dict.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/lib/dict.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 692,767 ****
   Cyc_Core_Free_Region[16];struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
@@ -3235,9 +3243,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/l
   struct Cyc___cycFILE*),void*(*read_val)(void**,struct Cyc___cycFILE*),struct Cyc___cycFILE*
   fp);char Cyc_Dict_Absent[11]="\000\000\000\000Absent\000";char Cyc_Dict_Present[12]="\000\000\000\000Present\000";
   struct Cyc_Dict_T{void*color;struct Cyc_Dict_T*left;struct Cyc_Dict_T*right;struct
+Binary files i686-unknown-linux/lib/dict.o and powerpc-apple-rhapsody/lib/dict.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/execinfo.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/execinfo.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/execinfo.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 682,782 ****
     *x = *y;
@@ -3370,9 +3379,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! _tmp1.f1=({const char*_tmp2="backtrace: unsupported except under Linux";
 ! _tag_dynforward(_tmp2,sizeof(char),_get_zero_arr_size(_tmp2,42));});_tmp1;});
 ! _tmp0;}));return 0;}int Cyc_Execinfo_bt(){return 1;}
+Binary files i686-unknown-linux/lib/execinfo.o and powerpc-apple-rhapsody/lib/execinfo.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/filename.c powerpc-apple-rhapsody/lib/filename.c
-*** i686-unknown-linux/lib/filename.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/filename.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/filename.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/filename.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 698,704 ****
   struct _dynforward_ptr);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};
@@ -3417,9 +3427,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/filename.c powerpc-apple-rhapso
   _dynforward_ptr filename){int i=(int)(_get_dynforward_size(filename,sizeof(char))- 
   1);while(i >= 0  && *((const char*)_check_dynforward_subscript(filename,sizeof(char),
   i))!= '/'){-- i;}return Cyc_substring((struct _dynforward_ptr)filename,i + 1,
+Binary files i686-unknown-linux/lib/filename.o and powerpc-apple-rhapsody/lib/filename.o differ
+Binary files i686-unknown-linux/lib/fn.o and powerpc-apple-rhapsody/lib/fn.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/getopt.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/getopt.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/getopt.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 689,700 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -3521,9 +3533,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody
   sizeof(char)))){if((unsigned int)((nameend.curr - Cyc_nextchar.curr)/ sizeof(char))
   == Cyc_strlen((struct _dynforward_ptr)((const struct Cyc_option*)
   _check_dynforward_subscript(p,sizeof(struct Cyc_option),0))->name)){pfound=
+Binary files i686-unknown-linux/lib/getopt.o and powerpc-apple-rhapsody/lib/getopt.o differ
+Binary files i686-unknown-linux/lib/getopt1.o and powerpc-apple-rhapsody/lib/getopt1.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/grp.c powerpc-apple-rhapsody/lib/grp.c
-*** i686-unknown-linux/lib/grp.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/grp.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/grp.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/grp.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 698,704 ****
   groups);struct Cyc_Cgrp_Cgroup{char*gr_name;char*gr_passwd;unsigned int gr_gid;
@@ -3541,9 +3555,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/grp.c powerpc-apple-rhapsody/li
   struct _dynforward_ptr name){struct Cyc_Cgrp_Cgroup*src=getgrnam(string_to_Cstring(
   name));return(unsigned int)src?({struct Cyc_group*_tmp0=_cycalloc(sizeof(*_tmp0));
   _tmp0->gr_name=(struct _dynforward_ptr)Cstring_to_string(src->gr_name);_tmp0->gr_passwd=(
+Binary files i686-unknown-linux/lib/grp.o and powerpc-apple-rhapsody/lib/grp.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/hashtable.c powerpc-apple-rhapsody/lib/hashtable.c
-*** i686-unknown-linux/lib/hashtable.c	Wed Jul 17 15:48:10 2002
---- powerpc-apple-rhapsody/lib/hashtable.c	Wed Jul 17 15:49:08 2002
+*** i686-unknown-linux/lib/hashtable.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/lib/hashtable.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 702,713 ****
   void Cyc_Hashtable_iter(void(*f)(void*,void*),struct Cyc_Hashtable_Table*t);void
@@ -3568,9 +3583,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/hashtable.c powerpc-apple-rhaps
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
   int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
   Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+Binary files i686-unknown-linux/lib/hashtable.o and powerpc-apple-rhapsody/lib/hashtable.o differ
+Binary files i686-unknown-linux/lib/iter.o and powerpc-apple-rhapsody/lib/iter.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lexing.c powerpc-apple-rhapsody/lib/lexing.c
-*** i686-unknown-linux/lib/lexing.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/lexing.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/lexing.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/lexing.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 689,715 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -3692,9 +3709,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lexing.c powerpc-apple-rhapsody
   char),len);char _tmp4=*((char*)_check_dynforward_subscript(_tmp3,sizeof(char),0));
   char _tmp5='\000';if(_get_dynforward_size(_tmp3,sizeof(char))== 1  && (_tmp4 == '\000'
    && _tmp5 != '\000'))_throw_arraybounds();*((char*)_tmp3.curr)=_tmp5;});return s;}
+Binary files i686-unknown-linux/lib/lexing.o and powerpc-apple-rhapsody/lib/lexing.o differ
+Binary files i686-unknown-linux/lib/libcyc.a and powerpc-apple-rhapsody/lib/libcyc.a differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lineno.c powerpc-apple-rhapsody/lib/lineno.c
-*** i686-unknown-linux/lib/lineno.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/lineno.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/lineno.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/lineno.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 690,728 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -3808,9 +3827,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lineno.c powerpc-apple-rhapsody
   Cyc_Core_Opt*_tmpF=_cycalloc(sizeof(*_tmpF));_tmpF->v=({struct _tuple0*_tmp10=
   _cycalloc(sizeof(*_tmp10));_tmp10->f1=fname;_tmp10->f2=number;_tmp10;});_tmpF;});
   _npop_handler(0);return _tmp11;}}}}};_pop_handler();}else{void*_tmp7=(void*)
+Binary files i686-unknown-linux/lib/lineno.o and powerpc-apple-rhapsody/lib/lineno.o differ
+Binary files i686-unknown-linux/lib/list.o and powerpc-apple-rhapsody/lib/list.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsody/lib/marshal.c
-*** i686-unknown-linux/lib/marshal.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/marshal.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/marshal.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/marshal.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 714,732 ****
   struct _dynforward_ptr l);struct _dynforward_ptr Cyc_Typerep_get_tagname2(
@@ -3850,9 +3871,12 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsod
   unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct _dynforward_ptr f1;}
   ;struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
   int tag;float*f1;};struct Cyc_CharPtr_sa_struct{int tag;struct _dynforward_ptr f1;};
+Binary files i686-unknown-linux/lib/marshal.o and powerpc-apple-rhapsody/lib/marshal.o differ
+Binary files i686-unknown-linux/lib/nogc.a and powerpc-apple-rhapsody/lib/nogc.a differ
+Binary files i686-unknown-linux/lib/nogc.o and powerpc-apple-rhapsody/lib/nogc.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/position.c powerpc-apple-rhapsody/lib/position.c
-*** i686-unknown-linux/lib/position.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/position.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/position.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/position.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 691,716 ****
   _dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
@@ -4001,9 +4025,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/position.c powerpc-apple-rhapso
   Cyc_Position_trunc(n,Cyc_substring((struct _dynforward_ptr)_tmp40,_tmp42,Cyc_strlen((
   struct _dynforward_ptr)_tmp40)- _tmp42));return({struct _tuple5*_tmp49=_cycalloc(
   sizeof(*_tmp49));_tmp49->f1=({struct Cyc_String_pa_struct _tmp4F;_tmp4F.tag=0;
+Binary files i686-unknown-linux/lib/position.o and powerpc-apple-rhapsody/lib/position.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/pp.c powerpc-apple-rhapsody/lib/pp.c
-*** i686-unknown-linux/lib/pp.c	Wed Jul 17 15:48:10 2002
---- powerpc-apple-rhapsody/lib/pp.c	Wed Jul 17 15:49:08 2002
+*** i686-unknown-linux/lib/pp.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/lib/pp.c	Thu Jul 18 16:16:16 2002
 ***************
 *** 690,718 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -4063,9 +4088,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/pp.c powerpc-apple-rhapsody/lib
   void*(*f)(void*,void*);void*env;};struct Cyc_Fn_Function*Cyc_Fn_make_fn(void*(*f)(
   void*,void*),void*x);struct Cyc_Fn_Function*Cyc_Fn_fp2fn(void*(*f)(void*));void*
   Cyc_Fn_apply(struct Cyc_Fn_Function*f,void*x);extern int Cyc_PP_tex_output;struct
+Binary files i686-unknown-linux/lib/pp.o and powerpc-apple-rhapsody/lib/pp.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/printf.c powerpc-apple-rhapsody/lib/printf.c
-*** i686-unknown-linux/lib/printf.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/printf.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/printf.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/printf.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 690,704 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -4223,9 +4249,12 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/printf.c powerpc-apple-rhapsody
   s,n,fmt,ap);}int Cyc_vsprintf(struct _dynforward_ptr s,struct _dynforward_ptr fmt,
   struct _dynforward_ptr ap){return Cyc_vsnprintf(s,_get_dynforward_size(s,sizeof(
   char)),fmt,ap);}int Cyc_sprintf(struct _dynforward_ptr s,struct _dynforward_ptr fmt,
+Binary files i686-unknown-linux/lib/printf.o and powerpc-apple-rhapsody/lib/printf.o differ
+Binary files i686-unknown-linux/lib/pwd.o and powerpc-apple-rhapsody/lib/pwd.o differ
+Binary files i686-unknown-linux/lib/queue.o and powerpc-apple-rhapsody/lib/queue.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/rope.c powerpc-apple-rhapsody/lib/rope.c
-*** i686-unknown-linux/lib/rope.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/rope.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/rope.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/rope.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 697,706 ****
   Cyc_Rope_concat(struct Cyc_Rope_Rope_node*,struct Cyc_Rope_Rope_node*);struct Cyc_Rope_Rope_node*
@@ -4266,9 +4295,884 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/rope.c powerpc-apple-rhapsody/l
   _dynforward_ptr_decrease_size(_dynforward_ptr_plus(s,sizeof(char),(int)i),
   sizeof(char),1),(struct _dynforward_ptr)_tmp15,_tmp17);return i + _tmp17;}_LL8: if(*((
   int*)_tmp14)!= 1)goto _LL5;_tmp16=((struct Cyc_Rope_Array_rope_struct*)_tmp14)->f1;
+Binary files i686-unknown-linux/lib/rope.o and powerpc-apple-rhapsody/lib/rope.o differ
+diff -rbBcN --exclude=CVS i686-unknown-linux/lib/runtime_cyc.c.~1.43.~ powerpc-apple-rhapsody/lib/runtime_cyc.c.~1.43.~
+*** i686-unknown-linux/lib/runtime_cyc.c.~1.43.~	Thu Jul 18 16:21:15 2002
+--- powerpc-apple-rhapsody/lib/runtime_cyc.c.~1.43.~	Wed Dec 31 19:00:00 1969
+***************
+*** 1,867 ****
+- /* This file is part of the Cyclone Library.
+-    Copyright (C) 2001 Greg Morrisett, AT&T
+- 
+-    This library is free software; you can redistribute it and/or it
+-    under the terms of the GNU Lesser General Public License as
+-    published by the Free Software Foundation; either version 2.1 of
+-    the License, or (at your option) any later version.
+- 
+-    This library is distributed in the hope that it will be useful, but
+-    WITHOUT ANY WARRANTY; without even the implied warranty of
+-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+-    Lesser General Public License for more details.
+- 
+-    You should have received a copy of the GNU Lesser General Public
+-    License along with this library; see the file COPYING.LIB.  If not,
+-    write to the Free Software Foundation, Inc., 59 Temple Place, Suite
+-    330, Boston, MA 02111-1307 USA. */
+- 
+- // This is the C "runtime library" to be used with the output of the
+- // Cyclone to C translator
+- 
+- #include <stdio.h>
+- #include <string.h> // for memcpy
+- #include <stdarg.h>
+- // #include <errno.h>
+- #include <signal.h>
+- 
+- // The C include file precore_c.h is produced (semi) automatically
+- // from the Cyclone include file core.h.  Note, it now includes
+- // the contents of cyc_include.h
+- 
+- /* RUNTIME_CYC defined to prevent including parts of precore_c.h 
+-    that might cause problems, particularly relating to region profiling */
+- #define RUNTIME_CYC
+- #include "precore_c.h"
+- 
+- extern void exit(int);
+- 
+- //////////////////////////////////////////////////////////
+- // First, definitions for things declared in cyc_include.h
+- //////////////////////////////////////////////////////////
+- 
+- /* Dynamic regions:  When ref_count > 0, the region is opened.  When
+-  * handle is NULL, the region has been freed. */
+- struct _DynRegionHandle {
+-   int ref_count;
+-   struct _RegionHandle *handle;
+-   /* link to other dynamic regions occuring within the same region --
+-    * used so we can free sub-regions when an outer region is freed. */
+-   struct _DynRegionHandle *next;
+- };
+- 
+- // FIX: makes alignment and pointer-size assumptions
+- // FIX: what about -nocyc???
+- char Cyc_Null_Exception_tag[] = "\0\0\0\0Cyc_Null_Exception";
+- struct _xtunion_struct Cyc_Null_Exception_struct = { Cyc_Null_Exception_tag };
+- struct _xtunion_struct * Cyc_Null_Exception = &Cyc_Null_Exception_struct;
+- char Cyc_Array_bounds_tag[] = "\0\0\0\0Cyc_Array_bounds";
+- struct _xtunion_struct Cyc_Array_bounds_struct = { Cyc_Array_bounds_tag };
+- struct _xtunion_struct * Cyc_Array_bounds = &Cyc_Array_bounds_struct;
+- char Cyc_Match_Exception_tag[] = "\0\0\0\0Cyc_Match_Exception";
+- struct _xtunion_struct Cyc_Match_Exception_struct = { Cyc_Match_Exception_tag };
+- struct _xtunion_struct * Cyc_Match_Exception = &Cyc_Match_Exception_struct;
+- char Cyc_Bad_alloc_tag[] = "\0\0\0\0Cyc_Bad_alloc";
+- struct _xtunion_struct Cyc_Bad_alloc_struct = { Cyc_Bad_alloc_tag };
+- struct _xtunion_struct * Cyc_Bad_alloc = &Cyc_Bad_alloc_struct;
+- char Cyc_Core_Free_Region_tag[] = "\0\0\0\0Cyc_Core_Free_Region";
+- struct _xtunion_struct Cyc_Core_Free_Region_struct = { Cyc_Core_Free_Region_tag };
+- struct _xtunion_struct * Cyc_Core_Free_Region = &Cyc_Core_Free_Region_struct;
+- char Cyc_Core_Open_Region_tag[] = "\0\0\0\0Cyc_Core_Open_Region";
+- struct _xtunion_struct Cyc_Core_Open_Region_struct = { Cyc_Core_Open_Region_tag };
+- struct _xtunion_struct * Cyc_Core_Open_Region = &Cyc_Core_Open_Region_struct;
+- 
+- #ifdef CYC_REGION_PROFILE
+- static FILE *alloc_log = NULL;
+- extern unsigned int GC_gc_no;
+- extern size_t GC_get_heap_size();
+- extern size_t GC_get_free_bytes();
+- extern size_t GC_get_total_bytes();
+- #endif
+- 
+- // FIX: I'm putting GC_calloc and GC_calloc_atomic in here as just
+- // calls to GC_malloc and GC_malloc_atomic respectively.  This will
+- // *not* work for the nogc option.
+- void *GC_calloc(unsigned int n, unsigned int t) {
+-   return (void *)GC_malloc(n*t);
+- }
+- 
+- void *GC_calloc_atomic(unsigned int n, unsigned int t) {
+-   unsigned int p = n*t;
+-   // the collector does not zero things when you call malloc atomic...
+-   void *res = GC_malloc_atomic(p);
+-   if (res == NULL) {
+-     fprintf(stderr,"GC_calloc_atomic failure");
+-     _throw_badalloc;
+-   }
+-   bzero(res,p);
+-   return res;
+- }
+- 
+- static struct _RuntimeStack *_current_handler = NULL;
+- 
+- // Need one per thread
+- struct _xtunion_struct *_exn_thrown = NULL;
+- 
+- // create a new handler, put it on the stack, and return it so its
+- // jmp_buf can be filled in by the caller
+- void _push_handler(struct _handler_cons * new_handler) {
+-   //fprintf(stderr,"pushing handler %x\n",(unsigned int)new_handler);  
+-   new_handler->s.tag = 0;
+-   new_handler->s.next = _current_handler;
+-   _current_handler  = (struct _RuntimeStack *)new_handler;
+- }
+- 
+- void _push_region(struct _RegionHandle * r) {
+-   //fprintf(stderr,"pushing region %x\n",(unsigned int)r);  
+-   r->s.tag = 1;
+-   r->s.next = _current_handler;
+-   _current_handler  = (struct _RuntimeStack *)r;
+- }
+- 
+- void _push_dynregion(struct _DynRegionFrame *d) {
+-   //fprintf(stderr,"pushing dynregion %x\n",(unsigned int)d);  
+-   d->s.tag = 2;
+-   d->s.next = _current_handler;
+-   _current_handler = (struct _RuntimeStack *)d;
+- }
+- 
+- // set _current_handler to it's n+1'th tail
+- // Invariant: result is non-null
+- void _npop_handler(int n) {
+-   if (n<0) {
+-     fprintf(stderr,
+-             "internal error: _npop_handler called with negative argument\n");
+-     exit(1);
+-   }
+-   for(; n>=0; n--) {
+-     if(_current_handler == NULL) {
+-       fprintf(stderr,"internal error: empty handler stack\n");
+-       exit(1);
+-     } 
+-     if (_current_handler->tag == 1) {
+-       //fprintf(stderr,"popping region %x\n",(unsigned int)_current_handler);
+- #ifdef CYC_REGION_PROFILE
+-       _profile_free_region((struct _RegionHandle *)_current_handler,
+- 			   "bogus",0);
+- #else
+-       _free_region((struct _RegionHandle *)_current_handler);
+- #endif
+-       //} else {
+-       //fprintf(stderr,"popping handler %x\n",(unsigned int)_current_handler);
+-     } else if (_current_handler->tag == 2) {
+-       // fprintf(stderr,"popping dynregion %x\n",(unsigned int)_current_handler);
+-       struct _DynRegionFrame *f = (struct _DynRegionFrame *)_current_handler;
+-       f->x->ref_count--;
+-       if (f->x->ref_count < 0) {
+-         fprintf(stderr,"internal error: _npop_handler made dynamic region reference count negative");
+-         exit(1);
+-       }
+-     }
+-     _current_handler = _current_handler->next;
+-   }
+- }
+- 
+- void _pop_handler() {
+-   if (_current_handler == NULL || _current_handler->tag != 0) {
+-     fprintf(stderr,"internal error: _pop_handler");
+-     exit(1);
+-   }
+-   _npop_handler(0);
+- }
+- void _pop_region() {
+-   if (_current_handler == NULL || _current_handler->tag != 1) {
+-     fprintf(stderr,"internal error: _pop_region");
+-     exit(1);
+-   }
+-   _npop_handler(0);
+- }
+- void _pop_dynregion() {
+-   if (_current_handler == NULL || _current_handler->tag != 2) {
+-     fprintf(stderr,"internal error: _pop_dynregion");
+-     exit(1);
+-   }
+-   _npop_handler(0);
+- }
+- 
+- #ifndef __linux__
+- int backtrace(int *array, int size) { return 0; }
+- #endif
+- 
+- extern int Cyc_Execinfo_bt(void);
+- static struct _handler_cons top_handler;
+- static int in_backtrace = 0; // avoid infinite exception chain
+- void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
+-   struct _handler_cons *my_handler;
+-   while (_current_handler->tag != 0) {
+-     if (_current_handler->tag == 1)
+-       _pop_region();
+-     else if (_current_handler->tag == 2) 
+-       _pop_dynregion();
+-   }
+-   my_handler = (struct _handler_cons *)_current_handler;
+-   _pop_handler();
+-   _exn_thrown = e;
+- #ifdef __linux__
+-   /* bt only works in linux, and gives a circular dependence in os x,
+-      so we need to compile this conditionally */
+-   if (my_handler->handler == top_handler.handler && !in_backtrace) {
+-     in_backtrace = 1;
+-     Cyc_Execinfo_bt();
+-   }
+- #endif
+-   longjmp(my_handler->handler,1);
+- }
+- 
+- int _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
+-   throw(e);
+- }
+- 
+- int _throw_null() {
+-   throw(Cyc_Null_Exception);
+- }
+- int _throw_arraybounds() {
+-   throw(Cyc_Array_bounds);
+- }
+- int _throw_badalloc() {
+-   throw(Cyc_Bad_alloc);
+- }
+- 
+- struct _dynforward_ptr wrap_Cstring_as_string(Cstring s, size_t len) {
+-   struct _dynforward_ptr str;
+-   if (s == NULL) {
+-     str.curr = str.last_plus_one = NULL;
+-   } else {
+-     int slen = strlen(s)+1;
+-     if (len == -1)
+-       len = slen;
+-     else if (len > slen)
+-       _throw_arraybounds(); /* FIX: pick better exception */
+-     str.curr = s;
+-     str.last_plus_one = s + len;
+-   }
+-   return str;
+- }
+- 
+- // trusted---the length field is not verified to be correct
+- struct _dynforward_ptr wrap_Cbuffer_as_buffer(Cstring s, size_t len) {
+-   struct _dynforward_ptr str;
+-   if (s == NULL) {
+-     str.curr = str.last_plus_one = NULL;
+-   } else {
+-     str.curr = s;
+-     str.last_plus_one = s + len;
+-   }
+-   return str;
+- }
+- 
+- struct _dynforward_ptr Cstring_to_string(Cstring s) {
+-   struct _dynforward_ptr str;
+-   if (s == NULL) {
+-     str.curr = str.last_plus_one = NULL;
+-   }
+-   else {
+-     int sz = strlen(s)+1;
+-     str.curr = (char *)_cycalloc_atomic(sz);
+-     if (str.curr == NULL) 
+-       _throw_badalloc();
+-     str.last_plus_one = str.curr + sz;
+- 
+-     // Copy the string in case the C code frees it or mangles it
+-     str.curr[--sz] = '\0';
+-     while(--sz>=0)
+-       str.curr[sz]=s[sz];
+-   }
+-   return str;
+- }
+- 
+- Cstring string_to_Cstring(struct _dynforward_ptr s) {
+-   int i;
+-   char *contents = s.curr;
+-   size_t sz = s.last_plus_one - s.curr;
+-   char *str;
+- 
+-   if (s.curr == NULL) return NULL;
+- 
+-   if (s.curr >= s.last_plus_one)
+-     throw(Cyc_Null_Exception); // FIX: this should be a bounds error
+-   // check that there's a '\0' somewhere in the string -- if not,
+-   // throw an exception.
+-   for (str = s.last_plus_one-1; str >= contents; str--) {
+-     if (*str == '\0') return contents;
+-   }
+-   throw(Cyc_Null_Exception);
+-   /*
+-   // slow path -- have to copy the string to ensure it's null terminated
+-   str = (char *)GC_malloc_atomic(sz+1);
+-   if (str == NULL) 
+-     _throw_badalloc();
+- 
+-   for(i=0; i < sz; i++) str[i]=contents[i];
+-   str[sz]='\0';
+-   return str;
+-   */
+- }
+- 
+- // Copy a null-terminated list of Cstrings to a tagged,
+- // null-terminated list of strings.  (The return type is misleading.)
+- // can put back in after bootstrapping
+- /*
+- struct _tagged_arr ntCsl_to_ntsl(Cstring *ntCsl) {
+-   int i, numstrs = 0;
+-   struct _tagged_arr result;
+-   Cstring *ptr;
+- 
+-   for (ptr = ntCsl; *ptr;  ptr++,numstrs++); // not safe!
+-   result.base = (char *)_cycalloc_atomic(numstrs+1);
+-   if (result.base == NULL) 
+-     _throw_badalloc();
+- 
+-   result.curr = result.base;
+-   result.last_plus_one = (char*)(((string_t*)result.base) + numstrs+1);
+-   for (i = 0; i <= numstrs; i++)
+-     ((string_t*)result.base)[i] = Cstring_to_string(ntCsl[i]);
+-   return result;
+- }
+- */
+- // Convert a "@pointer to a null-terminated list of pointers" to a
+- // "?pointer to a null-terminated list of pointers".  We don't list
+- // this function in core.h because "pointers to what" might change.
+- /*
+- struct _tagged_arr pntlp_toCyc(void **in) {
+-   struct _tagged_arr result;
+-   result.curr = result.base = result.last_plus_one = (char*)in;
+-   while (*(result.last_plus_one++));
+-   return result;
+- }
+- */
+- // Returns the size of an array from the current pointer back to
+- // its starting point.  If the curr pointer = start pointer, or 
+- // the curr pointer is out of bounds, then this is 0.
+- unsigned int arr_prevsize(struct _dyneither_ptr arr,size_t elt_sz) {
+-   unsigned char *_get_arr_size_curr=arr.curr;
+-   unsigned char *_get_arr_size_base=arr.base;
+-   return 
+-     (_get_arr_size_curr < _get_arr_size_base ||
+-      _get_arr_size_curr >= arr.last_plus_one) ? 0 :
+-     ((_get_arr_size_curr - _get_arr_size_base) / (elt_sz));
+- }
+- /*
+- // FIX:  this isn't really needed since you can cast char[?] to char[]
+- Cstring underlying_Cstring(struct _tagged_arr s) {
+-   char *str=s.curr;
+- 
+-   if (s.curr == NULL) return NULL;
+- 
+-   // FIX:  should throw exception?  
+-   if (s.curr < s.base || s.curr >= s.last_plus_one)
+-     throw(Cyc_Null_Exception);
+-   return str;
+- }
+- */
+- ///////////////////////////////////////////////
+- // Regions
+- 
+- #ifdef CYC_REGION_PROFILE
+- static int rgn_total_bytes = 0;
+- static int heap_total_bytes = 0;
+- static int heap_total_atomic_bytes = 0;
+- #endif
+- 
+- 
+- // exported in core.h
+- struct _RegionHandle *Cyc_Core_heap_region = NULL;
+- struct _RegionHandle *Cyc_Core_unique_region = NULL;
+- 
+- // for freeing unique pointers; might want to make this "free"
+- // eventually (but currently this is set to a no-op in libc.cys).
+- // Note that this is not recursive; it assumes that programmer
+- // has freed nested pointers (otherwise will be grabbed by the GC).
+- void Cyc_Core_ufree(struct _dyneither_ptr ptr) {
+-   if (ptr.base == NULL) return; // eventually make not-null type
+-   else {
+-     GC_free(ptr.base);
+-     ptr.base = ptr.curr = ptr.last_plus_one = NULL;
+-   }
+- }
+- 
+- // defined below so profiling macros work
+- struct _RegionHandle _new_region(const char *);
+- //  struct _RegionHandle _new_region();
+- static void grow_region(struct _RegionHandle *r, unsigned int s);
+- 
+- // minimum page size for a region
+- #define CYC_MIN_REGION_PAGE_SIZE 60
+- 
+- // controls the default page size for a region
+- static size_t default_region_page_size = CYC_MIN_REGION_PAGE_SIZE;
+- 
+- // set the default region page size -- returns false and has no effect 
+- // if s is not at least CYC_MIN_REGION_PAGE_SIZE
+- bool Cyc_set_default_region_page_size(size_t s) {
+-   if (s < CYC_MIN_REGION_PAGE_SIZE) 
+-     return 0;
+-   default_region_page_size = s;
+-   return 1;
+- }
+- 
+- #define MIN_ALIGNMENT (sizeof(double))
+- 
+- // argc is redundant
+- struct _tagged_argv { 
+-   struct _dynforward_ptr *curr;
+-   struct _dynforward_ptr *last_plus_one;
+- };
+- 
+- // some debugging routines
+- // ONLY WORKS on x86 with frame pointer -- dumps out a list of 
+- // return addresses which can then be "looked up" using the output
+- // of nm.  I suggest doing nm -a -A -n -l cyclone.exe > nmout.txt.
+- // You'll have to adjust the output addresses depending upon where
+- // the text segment gets placed.  This could be useful for debugging
+- // certain exceptions because you can then get a lot of context. 
+- // I plan to use it for doing some statistics collection.
+- void stack_trace() {
+-   unsigned int x = 0;
+-   unsigned int *ra = (&x)+2;
+-   unsigned int *fp = (&x)+1;
+-   unsigned int *old_fp = fp;
+- 
+-   fprintf(stderr,"stack trace: ");
+-   while (*ra != 0) {
+-     fprintf(stderr,"0x%x ",*ra);
+-     old_fp = fp;
+-     fp = (unsigned int *)*fp;
+-     ra = fp+1;
+-   }
+-   fprintf(stderr,"\n");
+- }  
+- 
+- // These are defined in cstubs.c
+- extern struct Cyc___cycFILE {
+-   FILE *file;
+- } *Cyc_stdin, *Cyc_stdout, *Cyc_stderr;
+- 
+- extern int Cyc_main(int argc, struct _dynforward_ptr argv);
+- 
+- int main(int argc, char **argv) {
+-   // install outermost exception handler
+-   int status = 0;
+- #ifdef CYC_REGION_PROFILE
+-   alloc_log = fopen("amon.out","w");
+- #endif
+-   if (setjmp(top_handler.handler)) status = 1;
+-   _push_handler(&top_handler);
+-   if (status) {
+-     char *exn_name;
+-     if(_exn_thrown->tag == 0)
+-       exn_name = (((char *)_exn_thrown)+4);
+-     else
+-       exn_name = _exn_thrown->tag + 4;
+-     fprintf(stderr,"Uncaught exception %s\n",exn_name);
+-     return 1;
+-   }
+-   // set standard file descriptors
+-   Cyc_stdin->file = stdin;
+-   Cyc_stdout->file = stdout;
+-   Cyc_stderr->file = stderr;
+-   // convert command-line args to Cyclone strings -- we add an extra
+-   // NULL to the end of the argv so that people can step through argv
+-   // until they hit NULL.  
+-   {struct _tagged_argv args;
+-   struct _dynforward_ptr args_p;
+-   int i, result;
+-   args.curr = 
+-     (struct _dynforward_ptr *)GC_malloc((argc+1)*sizeof(struct _dynforward_ptr));
+-   args.last_plus_one = args.curr + argc + 1;
+-   for(i = 0; i < argc; ++i)
+-     args.curr[i] = Cstring_to_string(argv[i]);
+-   // plug in final NULL
+-   args.curr[argc].curr = 0;
+-   args.curr[argc].last_plus_one = 0;
+-   args_p.curr = (unsigned char *)args.curr;
+-   args_p.last_plus_one = (unsigned char *)args.last_plus_one;
+-   result = Cyc_main(argc, args_p);
+- #ifdef CYC_REGION_PROFILE
+-   fprintf(stderr,"rgn_total_bytes: %d\n",rgn_total_bytes);
+-   fprintf(stderr,"heap_total_bytes: %d\n",heap_total_bytes);
+-   fprintf(stderr,"heap_total_atomic_bytes: %d\n",heap_total_atomic_bytes);
+-   fprintf(stderr,"number of collections: %d\n",GC_gc_no);
+-   if (alloc_log != NULL)
+-     fclose(alloc_log);
+- #endif
+-   return result;
+-   }
+- }
+- 
+- static void grow_region(struct _RegionHandle *r, unsigned int s) {
+-   struct _RegionPage *p;
+-   unsigned int prev_size, next_size;
+- 
+-   prev_size = r->last_plus_one - ((char *)r->curr + sizeof(struct _RegionPage));
+-   next_size = prev_size * 2;
+- 
+-   if (next_size < s) 
+-     next_size = s + default_region_page_size;
+- 
+-   // Note, we call calloc here to ensure we get zero-filled pages
+-   p = GC_calloc(sizeof(struct _RegionPage) + next_size,1);
+-   if (!p) {
+-     fprintf(stderr,"grow_region failure");
+-     _throw_badalloc;
+-   }
+-   p->next = r->curr;
+- #ifdef CYC_REGION_PROFILE
+-   p->total_bytes = sizeof(struct _RegionPage) + next_size;
+-   p->free_bytes = next_size;
+- #endif
+-   r->curr = p;
+-   r->offset = ((char *)p) + sizeof(struct _RegionPage);
+-   r->last_plus_one = r->offset + next_size;
+- }
+- 
+- 
+- static void _get_first_region_page(struct _RegionHandle *r, unsigned int s) {
+-   struct _RegionPage *p;
+-   unsigned int page_size = 
+-     default_region_page_size < s ? s : default_region_page_size;
+-   p = (struct _RegionPage *)GC_calloc(sizeof(struct _RegionPage) + 
+-                                       page_size,1);
+- #ifdef CYC_REGION_PROFILE
+-   p->total_bytes = sizeof(struct _RegionPage) + page_size;
+-   p->free_bytes = page_size;
+- #endif
+-   if (p == NULL) 
+-     _throw_badalloc();
+-   p->next = NULL;
+-   r->curr = p;
+-   r->offset = ((char *)p) + sizeof(struct _RegionPage);
+-   r->last_plus_one = r->offset + page_size;
+- }
+- 
+- // allocate s bytes within region r
+- void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
+-   void *result;
+-   // allocate in the heap
+-   if (r == NULL) {
+- #ifdef CYC_REGION_PROFILE
+-     heap_total_bytes += s;
+- #endif
+-     result = GC_malloc(s);
+-     if(!result)
+-       _throw_badalloc;
+-     return result;
+-   }
+-   // round s up to the nearest MIN_ALIGNMENT value
+-   s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
+-   // if no page yet, then fetch one
+-   if (r->curr == 0) 
+-     _get_first_region_page(r,s);
+-   // else check for space on the current page
+-   else if (s > (r->last_plus_one - r->offset)) 
+-     grow_region(r,s);
+-   result = (void *)r->offset;
+-   r->offset = r->offset + s;
+- #ifdef CYC_REGION_PROFILE
+-   r->curr->free_bytes = r->curr->free_bytes - s;
+-   rgn_total_bytes += s;
+- #endif
+-   return result;
+- }
+- 
+- // allocate s bytes within region r
+- void * _region_calloc(struct _RegionHandle *r, unsigned int n, unsigned int t) 
+- {
+-   unsigned int s = n*t;
+-   void *result;
+-   // allocate in the heap
+-   if (r == NULL) {
+- #ifdef CYC_REGION_PROFILE
+-     heap_total_bytes += s;
+- #endif
+-     result = GC_calloc(n,t);
+-     if(!result)
+-       _throw_badalloc;
+-     return result;
+-   }
+-   // round s up to the nearest MIN_ALIGNMENT value
+-   s =  (s + MIN_ALIGNMENT - 1) & (~(MIN_ALIGNMENT - 1));
+-   // if no page yet, then fetch one
+-   if (r->curr == 0)
+-     _get_first_region_page(r,s);
+-   else if (s > (r->last_plus_one - r->offset))
+-     grow_region(r,s);
+-   result = (void *)r->offset;
+-   r->offset = r->offset + s;
+- #ifdef CYC_REGION_PROFILE
+-   r->curr->free_bytes = r->curr->free_bytes - s;
+-   rgn_total_bytes += s;
+- #endif
+-   return result;
+- }
+- 
+- /* Open a dynamic region -- throws an exception when the handle
+-  * is NULL or the region is already opened.
+-  */
+- struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f, 
+-                                       struct _DynRegionHandle *h) {
+-   struct _RegionHandle *res = h->handle;
+-   if (res == NULL)
+-     throw(Cyc_Core_Open_Region);
+-   h->ref_count++;
+-   f->x = h;
+-   _push_dynregion(f);
+-   return res;
+- }
+- 
+- /* Frees a dynamic region -- throws an exception when the region
+-  * has already been freed or is open.
+-  */
+- void Cyc_Core_free_dynregion(struct _DynRegionHandle* x) {
+-   if (x->ref_count != 0 || x->handle == NULL) 
+-     throw(Cyc_Core_Free_Region);
+-   _free_region(x->handle);
+-   x->handle = NULL;
+- }
+- 
+- /* Same as above, but returns 0 when it fails, 1 when it succeeds */
+- int Cyc_Core_try_free_dynregion(struct _DynRegionHandle *x) {
+-   if (x->ref_count != 0 || x->handle == NULL) 
+-     return 0;
+-   _free_region(x->handle);
+-   x->handle = NULL;
+-   return 1;
+- }
+- 
+- /* Allocate a new dynamic region in region r */
+- struct _DynRegionHandle *Cyc_Core_rnew_dynregion(struct _RegionHandle *r) {
+-   struct _DynRegionHandle *res = 
+-     _region_malloc(r, sizeof(struct _DynRegionHandle));
+-   struct _RegionHandle *d = 
+-     _region_malloc(r, sizeof(struct _RegionHandle));
+-   res->handle = d;
+-   res->ref_count = 0;
+-   /* link this dynregion into r's list of sub-regions so we can 
+-    * free the dynregion when r is freed -- note that the Heap and
+-    * Unique regions end up generating free-floating sub-regions
+-    * that are reclaimed by the collector... */
+-   if (r != NULL) {
+-     res->next = r->sub_regions;
+-     r->sub_regions = res;
+-   }
+-   *d = _new_region(NULL);
+-   return res;
+- }
+- 
+- // allocate a new page and return a region handle for a new region.
+- struct _RegionHandle _new_region(const char *rgn_name) {
+-   struct _RegionHandle r;
+- 
+-   /* we're now lazy about allocating a region page */
+-   //struct _RegionPage *p;
+- 
+-   // we use calloc to make sure the memory is zero'd
+-   //p = (struct _RegionPage *)GC_calloc(sizeof(struct _RegionPage) + 
+-   //                                  default_region_page_size,1);
+-   //if (p == NULL) 
+-   //  _throw_badalloc();
+-   //p->next = NULL;
+- #ifdef CYC_REGION_PROFILE
+-   //p->total_bytes = sizeof(struct _RegionPage) + default_region_page_size;
+-   //p->free_bytes = default_region_page_size;
+-   r.name = rgn_name;
+- #endif
+-   r.s.tag = 1;
+-   r.s.next = NULL;
+-   r.curr = 0;
+-   r.offset = 0;
+-   r.last_plus_one = 0;
+-   r.sub_regions = NULL;
+-   //r.offset = ((char *)p) + sizeof(struct _RegionPage);
+-   //r.last_plus_one = r.offset + default_region_page_size;
+-   return r;
+- }
+- 
+- // free all the resources associated with a region (except the handle)
+- void _free_region(struct _RegionHandle *r) {
+-   struct _DynRegionHandle *d;
+-   struct _RegionPage *p;
+- 
+-   /* free sub regions */
+-   d = r->sub_regions;
+-   while (d != NULL) {
+-     Cyc_Core_try_free_dynregion(d);
+-     d = d->next;
+-   }
+-   /* free pages */
+-   p = r->curr;
+-   while (p != NULL) {
+-     struct _RegionPage *n = p->next;
+-     GC_free(p);
+-     p = n;
+-   }
+-   r->curr = 0;
+-   r->offset = 0;
+-   r->last_plus_one = 0;
+- }
+- 
+- // reset the region by freeing its pages and then reallocating a fresh page.
+- void _reset_region(struct _RegionHandle *r) {
+-   _free_region(r);
+- #ifdef CYC_REGION_PROFILE  
+-   *r = _new_region(r->name);
+- #else
+-   *r = _new_region(NULL);
+- #endif
+- }
+- 
+- 
+- #ifdef CYC_REGION_PROFILE
+- 
+- static int region_get_heap_size(struct _RegionHandle *r) {
+-   if (r != NULL) {
+-     struct _RegionPage *p = r->curr;
+-     int sz = 0;
+-     while (p != NULL) {
+-       sz += p->total_bytes;
+-       p = p->next;
+-     }  
+-     return sz;
+-   }
+-   else
+-     return GC_get_heap_size();
+- }
+- 
+- /* Two choices: print the "effective" free bytes, which are just
+-    the ones in the current page, or print the non-allocated bytes,
+-    which are the free bytes in all the pages.  Doing the former. */
+- static int region_get_free_bytes(struct _RegionHandle *r) {
+-   if (r != NULL) {
+-     struct _RegionPage *p = r->curr;
+-     if (p != NULL)
+-       return p->free_bytes;
+-     else 
+-       return 0;
+-   }
+-   else
+-     return GC_get_free_bytes();
+- }
+- 
+- static int region_get_total_bytes(struct _RegionHandle *r) {
+-   if (r != NULL) {
+-     struct _RegionPage *p = r->curr;
+-     int sz = 0;
+-     while (p != NULL) {
+-       sz = sz + (p->total_bytes - p->free_bytes);
+-       p = p->next;
+-     }  
+-     return sz;
+-   }
+-   else
+-     return GC_get_total_bytes();
+- }
+- 
+- struct _RegionHandle _profile_new_region(const char *rgn_name, 
+- 					 char *file, int lineno) {
+-   int len;
+-   char *buf;
+-   static int cnt = 0;
+- 
+-   len = strlen(rgn_name)+10;
+-   buf = GC_malloc_atomic(len);
+-   if(!buf)
+-     _throw_badalloc;
+-   else
+-     snprintf(buf,len,"%d-%s\n",cnt++,rgn_name);
+- 
+-   if (alloc_log != NULL) {
+-     fputs(file,alloc_log);
+-     fprintf(alloc_log,":%d\t%s\tcreate\n",lineno,buf);
+-   }
+- 
+-   return _new_region(buf);
+- }
+- 
+- void _profile_free_region(struct _RegionHandle *r, char *file, int lineno) {
+-   if (alloc_log != NULL) {
+-     fputs(file,alloc_log);
+-     fprintf(alloc_log,":%d\t%s\tfree\n",lineno, r != NULL ? r->name : "heap");
+-   }
+-   _free_region(r);
+- }
+- 
+- void * _profile_region_malloc(struct _RegionHandle *r, unsigned int s,
+-                               char *file, int lineno) {
+-   if (alloc_log != NULL) {
+-     fputs(file,alloc_log);
+-     fprintf(alloc_log,":%d\t%s\t%d\t%d\t%d\t%d\n",lineno,
+- 	    r != NULL ? r->name : "heap",s,
+- 	    region_get_heap_size(r), 
+- 	    region_get_free_bytes(r),
+- 	    region_get_total_bytes(r));
+-   }
+-   return _region_malloc(r,s);
+- }
+- 
+- void * _profile_GC_malloc(int n, char *file, int lineno) {
+-   void * result;
+-   heap_total_bytes += n;
+-   if (alloc_log != NULL) {
+-     fputs(file,alloc_log);
+-     fprintf(alloc_log,":%d\theap\t%d\t%d\t%d\t%d\n",lineno,n,
+- 	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
+-   }
+-   result =  GC_malloc(n);
+-   if(!result)
+-     _throw_badalloc();
+-   return result;
+- }
+- 
+- void * _profile_GC_malloc_atomic(int n, char *file, int lineno) {
+-   void * result;
+-   heap_total_bytes += n;
+-   heap_total_atomic_bytes +=n;
+-   if (alloc_log != NULL) {
+-     fputs(file,alloc_log);
+-     fprintf(alloc_log,":%d\theap\t%d\t%d\t%d\t%d\n",lineno,n,
+- 	    GC_get_heap_size(),GC_get_free_bytes(),GC_get_total_bytes());
+-   }
+-   result =  GC_malloc_atomic(n);
+-   if(!result)
+-     _throw_badalloc();
+-   return result;
+- }
+- 
+- #endif
+- 
+- // jcheney: FIX temporary for testing marshaling
+- /* Basically the id function, but has Cyclone type `a -> `b. */
+- void *unsafe_cast(void *a) {
+-   return a;
+- }
+- 
+- /******* for turning off gc warnings about blacklisted blocks *******/
+- /* These type/macro defns are taken from gc/include/gc.h and must
+-    be kept in sync. */
+- #   define GC_PROTO(args) args
+- typedef unsigned long GC_word;
+- typedef void (*GC_warn_proc) GC_PROTO((char *msg, GC_word arg));
+- 
+- extern void GC_default_warn_proc(char *msg, GC_word arg);
+- extern GC_warn_proc GC_set_warn_proc(GC_warn_proc p);
+- 
+- static void GC_noblacklist_warn_proc(char *msg, GC_word arg) {
+-   if (!msg) return;
+-   if (!strncmp(msg,"Needed to allocate blacklisted block",
+-                strlen("Needed to allocate blacklisted block")))
+-     return;
+-   GC_default_warn_proc(msg,arg);
+- }
+- 
+- /* Use these in Cyclone programs */
+- void GC_blacklist_warn_set() {
+-   GC_set_warn_proc(GC_default_warn_proc);
+- }
+- void GC_blacklist_warn_clear() {
+-   GC_set_warn_proc(GC_noblacklist_warn_proc);
+- }
+--- 0 ----
+Binary files i686-unknown-linux/lib/runtime_cyc.o and powerpc-apple-rhapsody/lib/runtime_cyc.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/scanf.c powerpc-apple-rhapsody/lib/scanf.c
-*** i686-unknown-linux/lib/scanf.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/scanf.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/scanf.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/scanf.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 692,703 ****
   extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];int isspace(
@@ -4312,9 +5216,13 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/scanf.c powerpc-apple-rhapsody/
   19];extern char Cyc_FileOpenError[18];struct Cyc_FileOpenError_struct{char*tag;
   struct _dynforward_ptr f1;};static struct _dyneither_ptr Cyc___sccl(char*tab,struct
   _dyneither_ptr fmt);static short*Cyc_va_arg_short_ptr(void*a){void*_tmp0=a;short*
+Binary files i686-unknown-linux/lib/scanf.o and powerpc-apple-rhapsody/lib/scanf.o differ
+Binary files i686-unknown-linux/lib/set.o and powerpc-apple-rhapsody/lib/set.o differ
+Binary files i686-unknown-linux/lib/slowdict.o and powerpc-apple-rhapsody/lib/slowdict.o differ
+Binary files i686-unknown-linux/lib/splay.o and powerpc-apple-rhapsody/lib/splay.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody/lib/string.c
-*** i686-unknown-linux/lib/string.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/string.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/string.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/string.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 692,708 ****
   _dynforward_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_Core_NewRegion{
@@ -5168,9 +6076,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/string.c powerpc-apple-rhapsody
   _tag_dynforward(0,0,0)).curr  || _get_dynforward_size(src,sizeof(void))< n) || 
   dst.curr == (_tag_dynforward(0,0,0)).curr) || _get_dynforward_size(dst,sizeof(
   void))< n)(int)_throw((void*)({struct Cyc_Core_Invalid_argument_struct*_tmp7B=
+Binary files i686-unknown-linux/lib/string.o and powerpc-apple-rhapsody/lib/string.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/tmp.c powerpc-apple-rhapsody/lib/tmp.c
-*** i686-unknown-linux/lib/tmp.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/tmp.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/tmp.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/tmp.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 688,701 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -5199,9 +6108,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/tmp.c powerpc-apple-rhapsody/li
   int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
   Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
   int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{
+Binary files i686-unknown-linux/lib/tmp.o and powerpc-apple-rhapsody/lib/tmp.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/typerep.c powerpc-apple-rhapsody/lib/typerep.c
-*** i686-unknown-linux/lib/typerep.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/lib/typerep.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/lib/typerep.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/lib/typerep.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 708,718 ****
   struct _dynforward_ptr l);struct _dynforward_ptr Cyc_Typerep_get_tagname2(
@@ -5225,9 +6135,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/typerep.c powerpc-apple-rhapsod
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
   int tag;unsigned long*f1;};struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct
   Cyc_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{
+Binary files i686-unknown-linux/lib/typerep.o and powerpc-apple-rhapsody/lib/typerep.o differ
+Binary files i686-unknown-linux/lib/xarray.o and powerpc-apple-rhapsody/lib/xarray.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyn.c powerpc-apple-rhapsody/src/absyn.c
-*** i686-unknown-linux/src/absyn.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/src/absyn.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/absyn.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/src/absyn.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 1072,1086 ****
   int tag;struct _dynforward_ptr*f1;int f2;struct _dynforward_ptr f3;};struct Cyc_Typerep_Enum_struct{
@@ -5259,9 +6171,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyn.c powerpc-apple-rhapsody/
   int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
   int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
   _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
+Binary files i686-unknown-linux/src/absyn.o and powerpc-apple-rhapsody/src/absyn.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyndump.c powerpc-apple-rhapsody/src/absyndump.c
-*** i686-unknown-linux/src/absyndump.c	Tue Jul 16 17:59:52 2002
---- powerpc-apple-rhapsody/src/absyndump.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/absyndump.c	Wed Jul 17 13:47:12 2002
+--- powerpc-apple-rhapsody/src/absyndump.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 688,699 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -5304,9 +6217,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyndump.c powerpc-apple-rhaps
   struct _dynforward_ptr s);struct Cyc_Lineno_Pos{struct _dynforward_ptr logical_file;
   struct _dynforward_ptr line;int line_no;int col;};extern char Cyc_Position_Exit[9];
   struct Cyc_Position_Segment;struct Cyc_Position_Error{struct _dynforward_ptr source;
+Binary files i686-unknown-linux/src/absyndump.o and powerpc-apple-rhapsody/src/absyndump.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absynpp.c powerpc-apple-rhapsody/src/absynpp.c
-*** i686-unknown-linux/src/absynpp.c	Tue Jul 16 17:59:52 2002
---- powerpc-apple-rhapsody/src/absynpp.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/absynpp.c	Wed Jul 17 13:47:12 2002
+--- powerpc-apple-rhapsody/src/absynpp.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 689,700 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -5349,9 +6263,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absynpp.c powerpc-apple-rhapsod
   struct _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct _dynforward_ptr Cyc_strconcat(
   struct _dynforward_ptr,struct _dynforward_ptr);struct _dynforward_ptr Cyc_str_sepstr(
   struct Cyc_List_List*,struct _dynforward_ptr);struct _tuple4{unsigned int f1;int f2;}
+Binary files i686-unknown-linux/src/absynpp.o and powerpc-apple-rhapsody/src/absynpp.o differ
+Binary files i686-unknown-linux/src/buildlib and powerpc-apple-rhapsody/src/buildlib differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapsody/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Wed Jul 17 15:48:10 2002
---- powerpc-apple-rhapsody/src/buildlib.c	Wed Jul 17 15:49:08 2002
+*** i686-unknown-linux/src/buildlib.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/src/buildlib.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 690,701 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -6017,9 +6933,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   mkdir((const char*)_untag_dynforward_ptr(d,sizeof(char),1),448)== - 1){({struct Cyc_String_pa_struct
   _tmp17A;_tmp17A.tag=0;_tmp17A.f1=(struct _dynforward_ptr)((struct _dynforward_ptr)
   d);{void*_tmp178[1]={& _tmp17A};Cyc_fprintf(Cyc_stderr,({const char*_tmp179="Error: could not create directory %s\n";
+Binary files i686-unknown-linux/src/buildlib.o and powerpc-apple-rhapsody/src/buildlib.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cf_flowinfo.c powerpc-apple-rhapsody/src/cf_flowinfo.c
-*** i686-unknown-linux/src/cf_flowinfo.c	Wed Jul 17 15:48:10 2002
---- powerpc-apple-rhapsody/src/cf_flowinfo.c	Wed Jul 17 15:49:08 2002
+*** i686-unknown-linux/src/cf_flowinfo.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/src/cf_flowinfo.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 703,711 ****
   Cyc_List_List*l,void*x);int Cyc_List_list_cmp(int(*cmp)(void*,void*),struct Cyc_List_List*
@@ -6039,9 +6956,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cf_flowinfo.c powerpc-apple-rha
   struct Cyc_Cstdio___abstractFILE;struct Cyc_String_pa_struct{int tag;struct
   _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;};struct Cyc_Double_pa_struct{
   int tag;double f1;};struct Cyc_LongDouble_pa_struct{int tag;long double f1;};struct
+Binary files i686-unknown-linux/src/cf_flowinfo.o and powerpc-apple-rhapsody/src/cf_flowinfo.o differ
+Binary files i686-unknown-linux/src/cycdoc and powerpc-apple-rhapsody/src/cycdoc differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody/src/cycdoc.c
-*** i686-unknown-linux/src/cycdoc.c	Wed Jul 17 15:48:10 2002
---- powerpc-apple-rhapsody/src/cycdoc.c	Wed Jul 17 15:49:08 2002
+*** i686-unknown-linux/src/cycdoc.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/src/cycdoc.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 691,713 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -6177,9 +7096,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody
   _tmp1B)+ _tmp1C;struct _dynforward_ptr s2=({unsigned int _tmp2C=_tmp22 + 1;char*
   _tmp2D=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmp2C + 1));struct
   _dynforward_ptr _tmp2F=_tag_dynforward(_tmp2D,sizeof(char),_tmp2C + 1);{
+Binary files i686-unknown-linux/src/cycdoc.o and powerpc-apple-rhapsody/src/cycdoc.o differ
+Binary files i686-unknown-linux/src/cyclone and powerpc-apple-rhapsody/src/cyclone differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsody/src/cyclone.c
-*** i686-unknown-linux/src/cyclone.c	Wed Jul 17 15:48:10 2002
---- powerpc-apple-rhapsody/src/cyclone.c	Wed Jul 17 15:49:08 2002
+*** i686-unknown-linux/src/cyclone.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/src/cyclone.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 706,742 ****
   void(*f1)(int);};struct Cyc_Arg_Rest_spec_struct{int tag;void(*f1)(struct
@@ -6376,9 +7297,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   _tmp9B)+ _tmp9C;struct _dynforward_ptr s2=({unsigned int _tmpAC=_tmpA2 + 1;char*
   _tmpAD=(char*)_cycalloc_atomic(_check_times(sizeof(char),_tmpAC + 1));struct
   _dynforward_ptr _tmpAF=_tag_dynforward(_tmpAD,sizeof(char),_tmpAC + 1);{
+Binary files i686-unknown-linux/src/cyclone.o and powerpc-apple-rhapsody/src/cyclone.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/evexp.c powerpc-apple-rhapsody/src/evexp.c
-*** i686-unknown-linux/src/evexp.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/src/evexp.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/evexp.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/src/evexp.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 694,702 ****
   _dynforward_ptr line;int line_no;int col;};extern char Cyc_Position_Exit[9];struct Cyc_Position_Segment;
@@ -6398,9 +7320,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/evexp.c powerpc-apple-rhapsody/
   int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
   };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+Binary files i686-unknown-linux/src/evexp.o and powerpc-apple-rhapsody/src/evexp.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhapsody/src/formatstr.c
-*** i686-unknown-linux/src/formatstr.c	Tue Jul 16 17:32:30 2002
---- powerpc-apple-rhapsody/src/formatstr.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/formatstr.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/src/formatstr.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 691,716 ****
   extern char Cyc_Core_Open_Region[16];extern char Cyc_Core_Free_Region[16];struct Cyc_List_List{
@@ -6602,34 +7525,22 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   struct _dynforward_ptr)s);struct Cyc_List_List*_tmpAB=0;int i;for(i=0;i < _tmpAA;i ++){
   if(*((const char*)_check_dynforward_subscript(s,sizeof(char),i))!= '%')continue;{
   struct Cyc_Core_Opt*_tmpAC=Cyc_Formatstr_parse_inputformat(s,i + 1);if(_tmpAC == 0){({
-diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c.orig powerpc-apple-rhapsody/src/install_path.c.orig
-*** i686-unknown-linux/src/install_path.c.orig	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/src/install_path.c.orig	Wed Jul 17 15:49:06 2002
+Binary files i686-unknown-linux/src/formatstr.o and powerpc-apple-rhapsody/src/formatstr.o differ
+diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c powerpc-apple-rhapsody/src/install_path.c
+*** i686-unknown-linux/src/install_path.c	Thu Jul 18 16:23:58 2002
+--- powerpc-apple-rhapsody/src/install_path.c	Wed Dec 31 19:00:00 1969
 ***************
-*** 0 ****
---- 1,5 ----
-+ char *Cdef_inc_path = "/usr/include/cyclone";
-+ char *Carch = "i686-unknown-linux";
-+ char *Cdef_lib_path = "/usr/local/lib/cyclone";
-+ char *Ccomp = "gcc";
-+ char *Cversion = "0.2";
-diff -rbBcN --exclude=CVS i686-unknown-linux/src/install_path.c.rej powerpc-apple-rhapsody/src/install_path.c.rej
-*** i686-unknown-linux/src/install_path.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/src/install_path.c.rej	Wed Jul 17 15:49:06 2002
-***************
-*** 0 ****
---- 1,8 ----
-+ ***************
-+ *** 1,5 ****
-+ - char *Cdef_inc_path = "/usr/include/cyclone";
-+ - char *Carch = "powerpc-apple-rhapsody";
-+ - char *Cdef_lib_path = "/usr/local/lib/cyclone";
-+ - char *Ccomp = "cc -no-cpp-precomp";
-+ - char *Cversion = "0.2";
-+ --- 0 ----
+*** 1,5 ****
+- char *Cdef_inc_path = "/usr/include/cyclone";
+- char *Carch = "i686-unknown-linux";
+- char *Cdef_lib_path = "/usr/local/lib/cyclone";
+- char *Ccomp = "gcc -march=i686";
+- char *Cversion = "0.3";
+--- 0 ----
+Binary files i686-unknown-linux/src/install_path.o and powerpc-apple-rhapsody/src/install_path.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/interface.c powerpc-apple-rhapsody/src/interface.c
-*** i686-unknown-linux/src/interface.c	Wed Jul 17 15:48:10 2002
---- powerpc-apple-rhapsody/src/interface.c	Wed Jul 17 15:49:08 2002
+*** i686-unknown-linux/src/interface.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/src/interface.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 689,703 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -6661,9 +7572,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/interface.c powerpc-apple-rhaps
   struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
   int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
   int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
+Binary files i686-unknown-linux/src/interface.o and powerpc-apple-rhapsody/src/interface.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/src/lex.c
-*** i686-unknown-linux/src/lex.c	Wed Jul 17 15:48:08 2002
---- powerpc-apple-rhapsody/src/lex.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/lex.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/src/lex.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 691,701 ****
   _dynforward_ptr f1;};struct Cyc_Core_NewRegion{struct _DynRegionHandle*dynregion;};
@@ -6748,9 +7660,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/sr
   struct Cyc_Set_Set*typedefs;struct Cyc_Set_Set*namespaces;};struct Cyc_Lex_Lvis{
   struct Cyc_List_List*current_namespace;struct Cyc_List_List*imported_namespaces;};
   struct Cyc_Lex_Lstate{struct Cyc_List_List*lstack;struct Cyc_Dict_Dict decls;};
+Binary files i686-unknown-linux/src/lex.o and powerpc-apple-rhapsody/src/lex.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/new_control_flow.c powerpc-apple-rhapsody/src/new_control_flow.c
-*** i686-unknown-linux/src/new_control_flow.c	Wed Jul 17 15:48:10 2002
---- powerpc-apple-rhapsody/src/new_control_flow.c	Wed Jul 17 15:49:08 2002
+*** i686-unknown-linux/src/new_control_flow.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/src/new_control_flow.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 701,712 ****
   x,struct Cyc_List_List*y);extern char Cyc_List_Nth[8];void*Cyc_List_nth(struct Cyc_List_List*
@@ -6775,9 +7688,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/new_control_flow.c powerpc-appl
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
   struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
+Binary files i686-unknown-linux/src/new_control_flow.o and powerpc-apple-rhapsody/src/new_control_flow.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhapsody/src/parse_tab.c
-*** i686-unknown-linux/src/parse_tab.c	Wed Jul 17 15:48:08 2002
---- powerpc-apple-rhapsody/src/parse_tab.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/parse_tab.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/src/parse_tab.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 689,703 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -6884,9 +7798,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhaps
   rgn_loc;struct Cyc_Position_Segment*zt_loc;};struct Cyc_Absyn_PtrAtts{void*rgn;
   struct Cyc_Absyn_Conref*nullable;struct Cyc_Absyn_Conref*bounds;struct Cyc_Absyn_Conref*
   zero_term;struct Cyc_Absyn_PtrLoc*ptrloc;};struct Cyc_Absyn_PtrInfo{void*elt_typ;
+Binary files i686-unknown-linux/src/parse_tab.o and powerpc-apple-rhapsody/src/parse_tab.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/port.c powerpc-apple-rhapsody/src/port.c
-*** i686-unknown-linux/src/port.c	Tue Jul 16 17:32:32 2002
---- powerpc-apple-rhapsody/src/port.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/port.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/src/port.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 908,917 ****
   Cyc_Position_Segment*);struct Cyc_Absyn_Conref*Cyc_Absyn_empty_conref();void*Cyc_Absyn_conref_val(
@@ -6908,9 +7823,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/port.c powerpc-apple-rhapsody/s
   struct Cyc_String_pa_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{
   int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+Binary files i686-unknown-linux/src/port.o and powerpc-apple-rhapsody/src/port.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/rgnorder.c powerpc-apple-rhapsody/src/rgnorder.c
-*** i686-unknown-linux/src/rgnorder.c	Tue Jul 16 17:32:32 2002
---- powerpc-apple-rhapsody/src/rgnorder.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/rgnorder.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/src/rgnorder.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 682,690 ****
     *x = *y;
@@ -6930,9 +7846,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/rgnorder.c powerpc-apple-rhapso
   struct Cyc_String_pa_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{
   int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+Binary files i686-unknown-linux/src/rgnorder.o and powerpc-apple-rhapsody/src/rgnorder.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src/tc.c
-*** i686-unknown-linux/src/tc.c	Tue Jul 16 17:32:32 2002
---- powerpc-apple-rhapsody/src/tc.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/tc.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/src/tc.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 912,956 ****
   Cyc_Absyn_array_typ(void*elt_type,struct Cyc_Absyn_Tqual tq,struct Cyc_Absyn_Exp*
@@ -7024,9 +7941,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src
   struct _RegionHandle*,struct Cyc_List_List*tvs,struct Cyc_List_List*po,void*effect,
   struct Cyc_Absyn_Tvar*fst_rgn,struct Cyc_Position_Segment*);struct Cyc_RgnOrder_RgnPO*
   Cyc_RgnOrder_add_outlives_constraint(struct _RegionHandle*,struct Cyc_RgnOrder_RgnPO*
+Binary files i686-unknown-linux/src/tc.o and powerpc-apple-rhapsody/src/tc.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcdecl.c powerpc-apple-rhapsody/src/tcdecl.c
-*** i686-unknown-linux/src/tcdecl.c	Tue Jul 16 17:32:32 2002
---- powerpc-apple-rhapsody/src/tcdecl.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/tcdecl.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/src/tcdecl.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 682,690 ****
     *x = *y;
@@ -7046,9 +7964,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcdecl.c powerpc-apple-rhapsody
   struct Cyc_String_pa_struct{int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{
   int tag;unsigned long f1;};struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+Binary files i686-unknown-linux/src/tcdecl.o and powerpc-apple-rhapsody/src/tcdecl.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcenv.c powerpc-apple-rhapsody/src/tcenv.c
-*** i686-unknown-linux/src/tcenv.c	Tue Jul 16 17:32:32 2002
---- powerpc-apple-rhapsody/src/tcenv.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/tcenv.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/src/tcenv.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 688,699 ****
   char*tag;struct _dynforward_ptr f1;};extern char Cyc_Core_Not_found[14];extern char
@@ -7074,9 +7993,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcenv.c powerpc-apple-rhapsody/
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
   struct _dynforward_ptr);int Cyc_fflush(struct Cyc___cycFILE*);int Cyc_fprintf(struct
+Binary files i686-unknown-linux/src/tcenv.o and powerpc-apple-rhapsody/src/tcenv.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcexp.c powerpc-apple-rhapsody/src/tcexp.c
-*** i686-unknown-linux/src/tcexp.c	Wed Jul 17 15:48:08 2002
---- powerpc-apple-rhapsody/src/tcexp.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/tcexp.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/src/tcexp.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 935,974 ****
   Cyc_Absyn_lookup_field(struct Cyc_List_List*,struct _dynforward_ptr*);struct Cyc_Absyn_Aggrfield*
@@ -7157,9 +8077,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcexp.c powerpc-apple-rhapsody/
   Cyc_RgnOrder_add_youngest(struct _RegionHandle*,struct Cyc_RgnOrder_RgnPO*po,
   struct Cyc_Absyn_Tvar*rgn,int resetable,int opened);int Cyc_RgnOrder_is_region_resetable(
   struct Cyc_RgnOrder_RgnPO*po,struct Cyc_Absyn_Tvar*r);int Cyc_RgnOrder_effect_outlives(
+Binary files i686-unknown-linux/src/tcexp.o and powerpc-apple-rhapsody/src/tcexp.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapsody/src/tcgenrep.c
-*** i686-unknown-linux/src/tcgenrep.c	Tue Jul 16 17:32:32 2002
---- powerpc-apple-rhapsody/src/tcgenrep.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/tcgenrep.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/src/tcgenrep.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 706,715 ****
   struct Cyc_List_List*x);struct Cyc_List_List*Cyc_List_tabulate(int n,void*(*f)(int));
@@ -7220,9 +8141,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapso
   struct Cyc_Absyn_Rel_n_struct{int tag;struct Cyc_List_List*f1;};struct Cyc_Absyn_Abs_n_struct{
   int tag;struct Cyc_List_List*f1;};union Cyc_Absyn_Nmspace_union{struct Cyc_Absyn_Loc_n_struct
   Loc_n;struct Cyc_Absyn_Rel_n_struct Rel_n;struct Cyc_Absyn_Abs_n_struct Abs_n;};
+Binary files i686-unknown-linux/src/tcgenrep.o and powerpc-apple-rhapsody/src/tcgenrep.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcpat.c powerpc-apple-rhapsody/src/tcpat.c
-*** i686-unknown-linux/src/tcpat.c	Tue Jul 16 17:32:32 2002
---- powerpc-apple-rhapsody/src/tcpat.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/tcpat.c	Tue Jul 16 16:57:55 2002
+--- powerpc-apple-rhapsody/src/tcpat.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 705,713 ****
   x,struct Cyc_List_List*y);struct Cyc_List_List*Cyc_List_rtabulate_c(struct
@@ -7242,9 +8164,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcpat.c powerpc-apple-rhapsody/
   int tag;struct _dynforward_ptr f1;};struct Cyc_Int_pa_struct{int tag;unsigned long f1;
   };struct Cyc_Double_pa_struct{int tag;double f1;};struct Cyc_LongDouble_pa_struct{
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
+Binary files i686-unknown-linux/src/tcpat.o and powerpc-apple-rhapsody/src/tcpat.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcstmt.c powerpc-apple-rhapsody/src/tcstmt.c
-*** i686-unknown-linux/src/tcstmt.c	Wed Jul 17 15:48:08 2002
---- powerpc-apple-rhapsody/src/tcstmt.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/tcstmt.c	Thu Jul 18 10:17:19 2002
+--- powerpc-apple-rhapsody/src/tcstmt.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 906,917 ****
   ztloc);struct Cyc_Absyn_Exp*Cyc_Absyn_uint_exp(unsigned int,struct Cyc_Position_Segment*);
@@ -7269,9 +8192,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcstmt.c powerpc-apple-rhapsody
   int tag;long double f1;};struct Cyc_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_IntPtr_pa_struct{
   int tag;unsigned long*f1;};struct _dynforward_ptr Cyc_aprintf(struct _dynforward_ptr,
   struct _dynforward_ptr);struct Cyc_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_UShortPtr_sa_struct{
+Binary files i686-unknown-linux/src/tcstmt.o and powerpc-apple-rhapsody/src/tcstmt.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody/src/tcutil.c
-*** i686-unknown-linux/src/tcutil.c	Wed Jul 17 15:48:08 2002
---- powerpc-apple-rhapsody/src/tcutil.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/tcutil.c	Thu Jul 18 10:17:20 2002
+--- powerpc-apple-rhapsody/src/tcutil.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 691,723 ****
   Cyc_Core_Unreachable[16];struct Cyc_Core_Unreachable_struct{char*tag;struct
@@ -7356,9 +8280,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody
   _dynforward_ptr s);int Cyc_strcmp(struct _dynforward_ptr s1,struct _dynforward_ptr s2);
   int Cyc_strptrcmp(struct _dynforward_ptr*s1,struct _dynforward_ptr*s2);struct
   _dynforward_ptr Cyc_strconcat(struct _dynforward_ptr,struct _dynforward_ptr);struct
+Binary files i686-unknown-linux/src/tcutil.o and powerpc-apple-rhapsody/src/tcutil.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/toc.c powerpc-apple-rhapsody/src/toc.c
-*** i686-unknown-linux/src/toc.c	Wed Jul 17 15:48:10 2002
---- powerpc-apple-rhapsody/src/toc.c	Wed Jul 17 15:49:08 2002
+*** i686-unknown-linux/src/toc.c	Thu Jul 18 10:17:20 2002
+--- powerpc-apple-rhapsody/src/toc.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 690,734 ****
   _dynforward_ptr f1;};extern struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_Core_NewRegion{
@@ -7450,9 +8375,10 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/toc.c powerpc-apple-rhapsody/sr
   _RegionHandle*,int(*cmp)(void*,void*));struct Cyc_Dict_Dict Cyc_Dict_rshare(struct
   _RegionHandle*,struct Cyc_Dict_Dict);struct Cyc_Dict_Dict Cyc_Dict_insert(struct Cyc_Dict_Dict
   d,void*k,void*v);void*Cyc_Dict_lookup(struct Cyc_Dict_Dict d,void*k);void**Cyc_Dict_rlookup_opt(
+Binary files i686-unknown-linux/src/toc.o and powerpc-apple-rhapsody/src/toc.o differ
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tovc.c powerpc-apple-rhapsody/src/tovc.c
-*** i686-unknown-linux/src/tovc.c	Tue Jul 16 17:59:52 2002
---- powerpc-apple-rhapsody/src/tovc.c	Wed Jul 17 15:49:06 2002
+*** i686-unknown-linux/src/tovc.c	Wed Jul 17 13:47:12 2002
+--- powerpc-apple-rhapsody/src/tovc.c	Thu Jul 18 16:16:17 2002
 ***************
 *** 696,710 ****
   x);struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);struct Cyc_List_List*
@@ -7483,3 +8409,4 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tovc.c powerpc-apple-rhapsody/s
   int tag;unsigned short*f1;};struct Cyc_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_UIntPtr_sa_struct{
   int tag;unsigned int*f1;};struct Cyc_StringPtr_sa_struct{int tag;struct
   _dynforward_ptr f1;};struct Cyc_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_FloatPtr_sa_struct{
+Binary files i686-unknown-linux/src/tovc.o and powerpc-apple-rhapsody/src/tovc.o differ
