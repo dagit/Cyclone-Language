@@ -25,6 +25,7 @@
 #include "assndef.h"
 #include "pratt_prover.h"
 #include <sexp.h>
+#include <set.h>
 namespace AssnDef;
 using List;
 using Hashtable;
@@ -613,9 +614,31 @@ int assncmp(datatype Assn @a1, datatype Assn @a2) {
 
 // a hash-table to hold all of the assertion nodes to maximize
 // sharing.  we also record whether or not a node has delayed
-// substitutions or kills within it.
-static struct Hashtable::Table<assn_t,$(assn_t,bool reduced)@> 
+// substitutions or kills within it, and also provide an optional 
+// set of primitive assertions that correspond to the factored
+// normal form for the assertion.
+typedef Set::set_t<assn_t> assn_set_t;
+typedef struct Set::Set<assn_t> *assn_set_opt_t;
+
+static struct Hashtable::Table<assn_t,$(assn_t,bool reduced,assn_set_opt_t@)@> 
 *hash_cons_table = NULL;
+
+static Hashtable::table_t<assn_t,$(assn_t,bool reduced,assn_set_opt_t@)@>
+get_hash_cons_table() {
+  Hashtable::table_t h;
+  if (hash_cons_table == NULL) {
+    h = Hashtable::create(123, assncmp, assnhash);
+    hash_cons_table = h;
+    // make sure true and false are in the table so we can
+    // ask if they are reduced.
+    assn_set_opt_t s = Set::empty(assncmp);
+    Hashtable::insert(h,&true_assn,new $(&true_assn,true,new s));
+    Hashtable::insert(h,&false_assn,new $(&false_assn,true,new NULL));
+  } else {
+    h = (Hashtable::table_t)hash_cons_table;
+  }
+  return h;
+}
 
 void reset_hash_cons_table(void){
   term_hash_cons_table = NULL;
@@ -624,10 +647,9 @@ void reset_hash_cons_table(void){
 // lookup an assertion to see if it has delayed substitutions or
 // kills with in it.  
 bool is_reduced(assn_t a) {
-  if (hash_cons_table == NULL) return false;
-  let resopt = Hashtable::lookup_opt((Hashtable::table_t)hash_cons_table,a);
+  let resopt = Hashtable::lookup_opt(get_hash_cons_table(),a);
   if (resopt == NULL) return false;
-  let &$(_,b) = *resopt;
+  let &$(_,b,_) = *resopt;
   return b;
 }
 
@@ -654,23 +676,14 @@ static $(assn_t,bool reduced) copy_assn(datatype Assn@`r a){
 // with info regarding whether or not it's been reduced) into the
 // hash table.
 static assn_t hash_cons(datatype Assn@`r a) {
-  Hashtable::table_t h;
-  if (hash_cons_table == NULL) {
-    h = Hashtable::create(123, assncmp, assnhash);
-    hash_cons_table = h;
-    // make sure true and false are in the table so we can
-    // ask if they are reduced.
-    Hashtable::insert(h,&true_assn,new $(&true_assn,true));
-    Hashtable::insert(h,&false_assn,new $(&false_assn,true));
-  } else 
-    h = (Hashtable::table_t)hash_cons_table;
+  Hashtable::table_t h = get_hash_cons_table();
   let resopt = Hashtable::lookup_other_opt(h,a,assncmp,assnhash);
   if (resopt == NULL) {
     let $(res,reduced) = copy_assn(a);
-    Hashtable::insert(h,res,new $(res,reduced));
+    Hashtable::insert(h,res,new $(res,reduced,new NULL));
     return res;
   } else {
-    let &$(res,_) = *resopt;
+    let &$(res,_,_) = *resopt;
     return res;
   }
 }
@@ -736,14 +749,35 @@ assn_t prim(term_t t1, prim_reln_t p, term_t t2) {
   return hash_cons(&ptr);
 }
 
-// some macros and functions for particular primitive relations.
+// for eq and neq, we sort the terms
+assn_t eq(term_opt_t t1opt, term_opt_t t2opt) {
+  if (t1opt == NULL || t2opt == NULL) return &true_assn;
+  let t1 = (term_t)t1opt;
+  let t2 = (term_t)t2opt;
+  if (cmp_term(t1,t2) > 0) {
+    t1 :=: t2;
+  }
+  return prim(t1,Eq,t2); 
+}
+
+// for eq and neq, we sort the terms
+assn_t neq(term_opt_t t1opt, term_opt_t t2opt) {
+  if (t1opt == NULL || t2opt == NULL) return &true_assn;
+  let t1 = (term_t)t1opt;
+  let t2 = (term_t)t2opt;
+  if (cmp_term(t1,t2) > 0) {
+    t1 :=: t2;
+  }
+  return prim(t1,Neq,t2); 
+}
+
+// some macros and functions for rest of the primitive relations.
 #define prim_assn(p,P) assn_t p(term_opt_t t1, term_opt_t t2) { \
   if (t1 == NULL || t2 == NULL) return &true_assn; \
   return prim((term_t)t1,P,(term_t)t2); \
 }
-prim_assn(eq,Eq)
-  prim_assn(neq,Neq)
-  prim_assn(slt,SLt)
+
+prim_assn(slt,SLt)
   prim_assn(slte,SLte)
   prim_assn(ult,ULt)
   prim_assn(ulte,ULte)
@@ -1001,70 +1035,128 @@ assn_t factor_assn(assn_t a) {
   return a;
 }
 
-
-////////// Syntactic Implication for Assertions //////////////
-// returns true when ctxt |- t1 p t2
-// uses only very local, syntactic matching.
-bool find_ctxt(assn_t ctxt, term_t t1, prim_reln_t p1, term_t u1) {
+// returns the set of primitive relations implied by the assertion (if any).
+// this gets cached in the hash-cons-table so it isn't recomputed.
+static assn_set_opt_t widen_it(Hashtable::table_t<assn_t,$(assn_t,bool,assn_set_opt_t@`H)@`H> table, assn_t a) {
  LOOP:
-  switch (ctxt) {
-  case &False: return true;
-  case &True: return false;
-  case &And(a1,a2): 
-    if (find_ctxt(a1,t1,p1,u1)) return true;
-    ctxt = a2;
-    goto LOOP;
-  case &Or(a1,a2): 
-    if (!find_ctxt(a1,t1,p1,u1)) return false;
-    ctxt = a2;
-    goto LOOP;
-  case &Prim(t2,p2,u2):
-    switch $(p2,p1) {
-    case $(Neq,Neq):
-    case $(Eq,Eq): 
-    case $(Eq,SLte):
-    case $(Eq,ULte):
-      return (same_term(t1,t2) && same_term(u1,u2) ||
-              same_term(t1,u2) && same_term(u1,t2));
-    case $(SLt,Neq): 
-    case $(ULt,Neq): 
-      return (same_term(t1,t2) && same_term(u1,u2) ||
-              same_term(t1,u2) && same_term(u1,t2));
-    case $(SLt,SLt):
-    case $(ULt,ULt):
-    case $(SLt,SLte): 
-    case $(ULt,ULte): 
-    case $(SLte,SLte):
-    case $(ULte,ULte):
-      return same_term(t1,t2) && same_term(u1,u2);
-    default: return false;
+  let popt = Hashtable::lookup_opt(table, a);
+  if (popt == NULL) { 
+    a = hash_cons(a); goto LOOP; 
+  }
+  $(assn_t,bool,assn_set_opt_t@)@ p = *popt;
+  let &$(_,_,*r) = p;
+  if (**r != NULL) {
+    return **r;
+  }
+  assn_set_opt_t s;
+  switch (a) {
+  case &True: s = Set::empty(assncmp); break;
+  case &False: s = NULL; break;
+  case &And(a1,a2):
+    let s1 = widen_it(table,a1);
+    let s2 = widen_it(table,a2);
+    if (s1 == NULL || s2 == NULL) 
+      s = NULL; 
+    else 
+      s = Set::union_two((assn_set_t)s1,(assn_set_t)s2);
+    break;
+  case &Or(a1,a2):
+    let s1 = widen_it(table,a1);
+    let s2 = widen_it(table,a2);
+    if (s1 == NULL) 
+      s = s2;
+    else if (s2 == NULL)
+      s = s1;
+    else
+      s = Set::intersect((assn_set_t)s1,(assn_set_t)s2);
+    break;
+  case &Prim(t1,p,t2):
+    s = Set::singleton(assncmp,a);
+    switch (p) {
+    case Eq:
+      // when we have t1 == t2 and they are of integral type, then we
+      // also want to remember that t1 <= t2 and t2 <= t1 so that when
+      // we intersect, we don't lose the information.
+      let topt1 = get_term_type(t1);
+      let topt2 = get_term_type(t2);
+      if ((topt1 != NULL && Tcutil::is_integral_type((type_t)topt1)) ||
+          (topt2 != NULL && Tcutil::is_integral_type((type_t)topt2))) {
+        s = Set::insert(s,slte(t1,t2));
+        s = Set::insert(s,slte(t2,t1));
+        s = Set::insert(s,ulte(t1,t2));
+        s = Set::insert(s,ulte(t2,t1));
+      }
+      break;
+    case SLt:
+      s = Set::insert(s,slte(t1,t2));
+      break;
+    case ULt:
+      s = Set::insert(s,ulte(t1,t2));
+      break;
+    default: break;
     }
-  default: 
-    ctxt = reduce(ctxt);
-    goto LOOP;
+    break;
+  default:
+    s = widen_it(table,reduce(a));
+    break;
+  }
+  *r = new s;
+  return s;
+}
+
+// factors out all of the common primitive relations in a.
+assn_t widen(assn_t a) {
+  // force the hash-cons table to be around just to be safe
+  let h = get_hash_cons_table();
+  let sopt = widen_it(h,a);
+  if (sopt == NULL) return &false_assn;
+  return Set::fold(and,(assn_set_t)sopt,&true_assn);
+}
+
+// tries to see if a can be proved from the set of primitive
+// relations in ctxt.
+static bool simple_prv(assn_set_t ctxt, assn_t a) {
+  while (true) {
+    switch (a) {
+    case &Prim(t1,p,t2): 
+      if (Set::member(ctxt,a)) return true;
+      switch (p) {
+      case Neq: 
+        return (Set::member(ctxt,ult(t2,t1)) ||
+                Set::member(ctxt,ugt(t2,t1)) ||
+                Set::member(ctxt,slt(t2,t1)) ||
+                Set::member(ctxt,sgt(t2,t1)));
+      case SLte: 
+        return (Set::member(ctxt,slt(t1,t2)) || 
+                Set::member(ctxt,eq(t1,t2)));
+      case ULte: 
+        return (Set::member(ctxt,ult(t1,t2)) || 
+                Set::member(ctxt,eq(t1,t2)));
+      default: return false;
+      }
+    case &True: return true;
+    case &False: return false;
+    case &And(a1,a2): 
+      if (!simple_prv(ctxt,a1)) return false;
+      a = a2; 
+      continue;
+    case &Or(a1,a2): 
+      if (simple_prv(ctxt,a1)) return true;
+      a = a2;
+      continue;
+    default: 
+      a = reduce(a);
+      continue;
+    }
   }
 }
+
 
 // returns true when ctxt |- a
 // uses only very local, syntactic matching.
 bool simple_prove(assn_t ctxt, assn_t a) {
- LOOP:
-  if (ctxt == a) return true;
-  switch (a) {
-  case &True: return true;
-  case &False: return false;
-  case &And(a1,a2): 
-    if (!simple_prove(ctxt,a1)) return false;
-    a = a2;
-    goto LOOP;
-  case &Or(a1,a2): 
-    if (simple_prove(ctxt,a1)) return true;
-    a = a2;
-    goto LOOP;
-  case &Prim(t1,p,t2): return find_ctxt(ctxt,t1,p,t2); 
-  default: 
-    a = reduce(a);
-    goto LOOP;
-  }
+  if (ctxt == a) return true; 
+  let sopt = widen_it(get_hash_cons_table(),ctxt);
+  if (sopt == NULL) return true;
+  return simple_prv((assn_set_t)sopt, a);
 }
-

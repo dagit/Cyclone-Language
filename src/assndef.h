@@ -135,9 +135,13 @@ namespace AssnDef{
   assn_t ult(term_opt_t, term_opt_t);
   assn_t ulte(term_opt_t, term_opt_t);
 
-    
+  // eliminates not, subst, and kill
   assn_t reduce(assn_t a);
   term_t subst_term(term_t t, vardecl_t x, term_t newx);
+  // factors out the common conjuncts in a as if we computed the DNF,
+  // but is much more efficient.  
+  assn_t widen(assn_t a);
+  // sees if ctxt |- a using only very simple, syntactic proof rules.
   bool simple_prove(assn_t ctxt, assn_t a);
 
   term_t kill_mem_term(term_t t);

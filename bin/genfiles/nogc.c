@@ -123,7 +123,6 @@ void *CYCALLOCPROFILE_sbrk(int incr) {
 #endif
 
 #include "malloc.c"
-//#include "malloc-pre2.8-17mar05.c"
 
 #define malloc_sizeb(p,n) mUSABLe(p)
 #define calloc cALLOc

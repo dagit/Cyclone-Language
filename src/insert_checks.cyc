@@ -441,11 +441,13 @@ static void do_exp(env_t nv, exp_t e) {
       bool null_ck;
       // we do not need to do a null check if e1 is a fat pointer
       // and we were able to prove that e2 unsigned-< numelts(e1).
-      if (fat_ptr && !bds_ck) null_ck = false;
-      else { 
+      if (fat_ptr && !bds_ck) {
+        null_ck = false;
+      } else { 
         null_ck = need_null_check(nv,e1);
-        if (null_ck)
+        if (null_ck) {
           null_ck = need_null_check_vcgen(nv,e1);
+        }
       }
       if(bds_ck) {
 	if(bd) { // thin pointer

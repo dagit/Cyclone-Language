@@ -102,7 +102,6 @@
 
 extern void _init_exceptions();  // defined in runtime_exception.c
 extern void _init_regions();     // defined in runtime_memory.c
-extern void _init_profile_regions();     // defined in runtime_memory.c
 extern void _init_stack();       // defined in runtime_stack.c
 
 /* This is called when the program is finished, to finalize

@@ -338,14 +338,14 @@ static void * region_malloc_impl(struct _RegionHandle *r, _AliasQualHandle_t aq,
     }
   }
   else {
-    //Previously, when allocating zero bytes (rnew (r) {}) the pointer
-    //returned is the current offset, which is not incremented. The
-    //next call to rnew will return the same pointer. This is not in
-    //compliance with POSIX which states that malloc(0) should either
-    //return NULL or a *unique* pointer that can be passed to free.
-    //This probably isn't an issue in this issue since there's no
-    //freeing in normal regions, but just to be consistent we now make
-    //the minimum size sizeof(int)
+    //Previously, when allocating zero bytes (rnew (r) {}), the
+    //pointer returned is the current offset, which is subsequently
+    //not incremented. So, the next call to rnew will return the same
+    //pointer. This is not in compliance with POSIX which states that
+    //malloc(0) should either return NULL or a *unique* pointer that
+    //can be passed to free.  This probably isn't an issue in this
+    //case since there's no freeing in normal regions, but just to be
+    //consistent we now make the minimum size sizeof(int)
     if(s == 0) s += sizeof(int);
     if(aq == CYC_CORE_REFCNT_AQUAL) { //we can now have rc pointers in any region
       s += sizeof(int);

@@ -4358,7 +4358,7 @@ if(token==380)
 return Cyc_Lex_token_string;
 if(token==389)
 return Cyc_Absynpp_qvar2string(Cyc_Lex_token_qvar);{
-int z=token > 0 && token <= 393?(int)Cyc_yytranslate[token]: 340;
+int z=token > 0 && token <= 393?(int)*((short*)_check_known_subscript_notnull(Cyc_yytranslate,394U,sizeof(short),token)): 340;
 if((unsigned)z < 340U)
 return*((struct _fat_ptr*)_check_known_subscript_notnull(Cyc_yytname,340U,sizeof(struct _fat_ptr),z));
 return _tag_fat(0,0,0);}}

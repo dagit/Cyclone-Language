@@ -19,6 +19,7 @@
 #include "assndef.h"
 #include <list.h>
 #include <set.h>
+#include <dict.h>
 
 using AssnDef;
 using List;
@@ -188,6 +189,10 @@ static unsigned num_graphs(graph_t *gs) {
 // An empty graph represents the proposition "true".
 static graph_t@ true_graph() { return new Graph{NULL,NULL}; }
 
+static int constraints_added = 0;
+static int graphs_copied = 0;
+static int max_lookup = 0;
+
 // Print out a graph.
 void print_graph(graph_t @g) {
   fprintf(stderr,"{");
@@ -195,11 +200,14 @@ void print_graph(graph_t @g) {
   else {
     for (let rs = g->rows; rs != NULL; rs = rs->next) {
       let &Node{_,rep,_,_,uds,sds} = (node_t@)rs;
+      let s = term2string(rep);
+      fprintf(stderr,"row %s:",s);
+      if (uds == NULL) fprintf(stderr,"\n");
       for (; uds != NULL; uds = uds->next)
-        fprintf(stderr,"%s - %s U<= %d\n ",term2string(rep),
+        fprintf(stderr,"  %s - %s U<= %d\n ",s,
                 term2string(uds->target->rep),uds->dist);
       for (; sds != NULL; sds = sds->next) 
-        fprintf(stderr,"%s - %s S<= %d\n ",term2string(rep),
+        fprintf(stderr,"  %s - %s S<= %d\n ",s,
                 term2string(sds->target->rep),sds->dist);
     }
   }
@@ -304,7 +312,10 @@ static void add_type_info(graph_t @g, term_t term) {
 static node_t @term2node(graph_t @g, term_t t) {
   // first see if we can find it directly.
   node_t *@prev = &g->rows;
+  int count = 0;
   for (let r = g->rows; r != NULL; r = r->next) {
+    ++count;
+    if (count > max_lookup) max_lookup = count;
     int c = cmp_term(t,r->rep);
     if (c == 0) return r;
     if (c > 1) break;
@@ -339,15 +350,15 @@ static int *lookup_dist(node_t @`H source, node_t @`H target, bool is_signed) {
   return NULL;
 }
 
-static bool *lookup_dist_flag(node_t @`H source, node_t @`H target, bool is_signed){
+static $(int *,bool *) lookup_dist_flag(node_t @`H source, node_t @`H target, bool is_signed){
   static int zero = 0;
   static bool flag = false;
-  if (source == target) return &flag;
+  if (source == target) return $(&zero,&flag);
   distance_t *ds = is_signed ? source->signed_distances : 
     source->unsigned_distances;
   for (; ds != NULL; ds = ds->next) 
-    if (ds->target == target) return &ds->associated_ud_sd;
-  return NULL;
+    if (ds->target == target) return $(&ds->dist,&ds->associated_ud_sd);
+  return $(NULL,NULL);
 }
 
 // returns true iff t --0--> r and r --0--> t
@@ -398,7 +409,7 @@ static graph_t *graph_append(graph_t *`H g1, graph_t *`H g2) {
 //assuming size of intger as sizeofint (32),assumming the highest bit
 //as the sign bit.
 #define sizeofint 32;
-static $(bool, int) is_signed_overflow(int c1, int c2){
+static inline $(bool, int) is_signed_overflow(int c1, int c2){
   int sum = c1 + c2;
   if ((~(c1 ^ c2) & (sum ^ c1)) >> 31){
     //overflow happened
@@ -432,7 +443,7 @@ static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
   if (i == j && dist < 0) throw(&inconsistent);
   if (i == j && dist > 0) return;
   let ij_dist = lookup_dist(i,j,is_signed);
-  // if we already have a shorter parth, then this constraint is redundant
+  // if we already have a shorter path, then this constraint is redundant
   if (ij_dist != NULL && *ij_dist < dist) return;
   let ji_dist = lookup_dist(j,i,is_signed);
   // if  j --n--> i --dist--> j  and n+dist is negative, contradiction.
@@ -441,16 +452,23 @@ static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
     if (sum < 0) throw(&inconsistent); // there is a negative loop 
   }
   for (let k = g->rows; k != NULL; k = k->next) {
-    let ki_dist = lookup_dist(k,i,is_signed);
+    let $(ki_dist,associated_ud_sd_flag) = lookup_dist_flag(k,i,is_signed);
     if (ki_dist == NULL) continue; // no new path through ij
-    for (let l = g->rows; l != NULL; l = l->next) {
+    let ds = is_signed ? j->signed_distances : j->unsigned_distances;
+    // we're going to iterate through the j edges (ds), but must be sure
+    // to include the "phantom" j->j edge.  So we sort of fake this out
+    // for the first iteration of the loop.  See the CONTINUE label for
+    // how we pull off the next target.  
+    let l = j;
+    static int z = 0;
+    let jl_dist = &z;
+    while (true) {
+      {
       // skip nodes equal to k
-      if (k == l) continue;
+      if (k == l) goto CONTINUE;
       let kl_dist = lookup_dist(k,l,is_signed);
       // if kl_dist is already MININT, no need to update.
-      if (kl_dist != NULL && (unsigned)*kl_dist == MININT) continue;
-      let jl_dist = lookup_dist(j,l,is_signed);
-      if (jl_dist == NULL) continue; // no new path through i->j
+      if (kl_dist != NULL && (unsigned)*kl_dist == MININT) goto CONTINUE;
       // computing w(kj) = w(ki) + w(ij)
       $(bool,int) final_sum;
       let $(of1,sum1) = is_signed_overflow(*ki_dist,dist);
@@ -473,8 +491,6 @@ static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
       let $(final_overflow,sum) = final_sum;
       // either there is no overflow in computing the sums, or there is
       // an underflow, so the true_sum < MININT
-      bool *associated_ud_sd_flag;
-      associated_ud_sd_flag = lookup_dist_flag(k,i,is_signed);
       if (!final_overflow) {
         // old k->l distance is infinite -- try adding a new edge.
         if (kl_dist == NULL) new_distance(k,l,is_signed,sum);
@@ -492,6 +508,12 @@ static void set_dist(graph_t @g, node_t @`H i, node_t @`H j, int dist, bool is_s
 	    *associated_ud_sd_flag = false;
 	}
       }
+      }
+    CONTINUE:
+      if (ds == NULL) break;
+      l = ds->target;
+      jl_dist = &ds->dist;
+      ds = ds->next;
     }
   }
 }
@@ -530,23 +552,27 @@ static node_t *revnodes(node_t *`H n) {
 
 // Produce a copy of the list of graphs.
 static graph_t *copy_graphs(graph_t *gopt) {
-  if (gopt == NULL) return NULL;
-  let g = (graph_t@)gopt;
-  graph_t @newg = new Graph{.next = copy_graphs(g->next),.rows = NULL};
-  // insert a row for each term
-  node_t *newrs = NULL;
-  for (let rs = g->rows; rs != NULL; rs = rs->next) {
-    newrs = new Node{newrs,rs->rep,rs->broken_as_signed,
-		     rs->broken_as_unsigned,NULL,NULL};
+  graph_t *res = NULL;
+  for (; gopt != NULL; gopt = gopt->next) {
+    ++graphs_copied;
+    let g = (graph_t@)gopt;
+    graph_t @newg = new Graph{.next = res,.rows = NULL};
+    res = newg;
+    // insert a row for each term
+    node_t *newrs = NULL;
+    for (let rs = g->rows; rs != NULL; rs = rs->next) {
+      newrs = new Node{newrs,rs->rep,rs->broken_as_signed,
+                       rs->broken_as_unsigned,NULL,NULL};
+    }
+    newrs = revnodes(newrs);
+    newg->rows = newrs;
+    // process each row again adding in distance edges
+    for (let rs = g->rows; rs != NULL; rs = rs->next, newrs=newrs->next){
+      newrs->unsigned_distances = copy_distances(newg,rs->unsigned_distances);
+      newrs->signed_distances = copy_distances(newg,rs->unsigned_distances);
+    }
   }
-  newrs = revnodes(newrs);
-  newg->rows = newrs;
-  // process each row again adding in distance edges
-  for (let rs = g->rows; rs != NULL; rs = rs->next, newrs=newrs->next){
-    newrs->unsigned_distances = copy_distances(newg,rs->unsigned_distances);
-    newrs->signed_distances = copy_distances(newg,rs->unsigned_distances);
-  }
-  return newg;
+  return res;
 }
 
 // used to control iteration
@@ -873,10 +899,11 @@ static graph_t *associate_ud_sd_in_graphs(graph_t *`H gs){
   return app_graphs(associate_ud_sd_in_graph,0,gs);
 }
 // convert a primitive assertion to a constraint and add it to the graph.
-// returns true if the resulting graph remains consistent, false otherwise.
+// throws &inconsistent if the resulting graph is inconsistent.
 // This does not deal with equality constraints -- those should've already
 // been eliminated.
 static void add_constraint(graph_t @g, term_t t1, prim_reln_t p, term_t t2) {
+  ++constraints_added;
   switch $(t1,t2) {
   case $(&Uint(c1),&Uint(c2)):
     switch (p) {
@@ -1004,9 +1031,9 @@ unsigned int max_paths_seen = 0;
 // inconsistency early.
 static graph_t *cgraph(graph_t *`H gs, assn_t a) {
  LOOP:
+  if (gs == NULL) return gs; // already inconsistent
   //fprintf(stderr,"inserting assertion %s into \n",assn2string(a));
   //print_graphs(gs);
-  if (gs == NULL) return gs; // already inconsistent
   switch (a) {
   case &True: break;         // gs and true == gs
   case &False: gs = NULL; break; // gs and false == false
@@ -1135,7 +1162,13 @@ static graph_t *add_type_assns(graph_t *`H gs) {
 static bool consistent(assn_t a) {
   try {
     // start with just an empty graph (true) and then add in assertion a
+    constraints_added = 0;
+    graphs_copied = 0;
+    max_lookup = 0;
     graph_t *gs = cgraph(true_graph(),a);
+    //fprintf(stderr,"constraints added = %d\n",constraints_added);
+    //fprintf(stderr,"graphs_copied = %d\n",graphs_copied);
+    //fprintf(stderr,"max_lookup = %d\n",max_lookup);
     // run closure passes to weed out graphs
     graph_change = true;
     while (graph_change && gs != NULL) {
