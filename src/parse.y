@@ -1296,6 +1296,7 @@ pointer_char:
 rgn:
     /* empty */ { $$ = ^$(HeapRgnType); }
 | TYPE_VAR      { $$ = ^$(VarType(&$($1,RgnKind))); }
+| '_'           { $$ = ^$(wildtyp()); }
 
 type_qualifier_list:
   type_qualifier

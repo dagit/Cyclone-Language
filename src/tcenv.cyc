@@ -416,8 +416,8 @@ static int shadow_ctr = 1;
 
 tenv add_local_var(segment loc, tenv te, vardecl vd) {
   if(te->le == null) env_err("Tcenv: unexpected add_local_var");
-  let fe = copy_fenv_old_ctrl(get_fenv(te));
-  let v  = vd->name[1];
+  _ fe = copy_fenv_old_ctrl(get_fenv(te));
+  _ v  = vd->name[1];
   if(Dict::member(fe->locals,v))
     vd->shadow = ++shadow_ctr;
   fe->locals = Dict::insert(fe->locals,v,Local_b(vd));
@@ -590,7 +590,8 @@ tenv set_encloser(tenv te, stmt s) {
 tenv new_block(tenv te) {
   if (te->le == null) env_err("Tcenv: unexpected new_block");
   fenv_t fe = copy_fenv_old_ctrl(get_fenv(te));
-  fe->curr_block_num = fe->shared->next_block_num++;
+  ++fe->shared->next_block_num;
+  fe->curr_block_num = fe->shared->next_block_num;
   return put_fenv(te,fe);
 }
 int curr_block(tenv te) {

@@ -31,7 +31,7 @@ static void pattern_synth(segment loc, tenv te, list<tvar> tvs,
   tenv te2 = add_type_vars(loc,te,tvs);
   if(new_block && vs != null)
     te2 = Tcenv::new_block(te2);
-  _ block = curr_block(te2);
+  _ block = Tcenv::curr_block(te2);
   for(_ vs2 = vs; vs2 != null; vs2 = vs2->tl) {
     te2 = add_pat_var(loc, te2, vs2->hd);
     vs2->hd->block = block;
@@ -68,7 +68,7 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
 
   case Seq_s(s1,s2):
     let te2 = set_next(te,Stmt_j(s2));
-    tcStmt(te2,s1,new_block); // pass new_block in case of weird associativity??
+    tcStmt(te2,s1,true); // pass new_block in case of weird associativity??
     // JGM: try to treat sequences as "tail-calls" to avoid a deep stack.
     // (Of course, this depends on the parser's associativity.)
     while (true)
@@ -231,6 +231,8 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
     switch (d->r) {
     case Var_d(vd):
       let &Vardecl(sc,&$(nsl,x),tq,t,initializer,_,*block_ptr) = vd;
+      *block_ptr = Tcenv::curr_block(te); // side effect
+      //      vd->block = Tcenv::curr_block(te);
       if (nsl != null)
         terr(d->loc, "local variables cannot be qualified");
       check_valid_type(s0->loc,te,lookup_type_vars(te),t);
@@ -241,7 +243,6 @@ void tcStmt(tenv te, stmt s0, bool new_block) {
 	       xprintf("%s declared with type %s, initialized with type %s",
 		       x, typ2string(t), typ2string(initializer->v->topt->v)));
       }
-      *block_ptr = curr_block(te); // side effect
       tcStmt(set_encloser(add_local_var(s->loc,te,vd),s0),s,false);
       return;
 

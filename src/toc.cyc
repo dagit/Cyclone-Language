@@ -1081,7 +1081,7 @@ static void lvalue_assign_stmt(stmt s,list<field_name> fs,
 extern void stmt_to_c(env nv, stmt s);
 
 static void exp_to_c(env nv, exp e) {
-  let r = e->r;
+  _ r = e->r;
   if(e->topt == null) {
     toc_impos(xprintf("exp_to_c: no type for %s",exp2string(e)));
     return;
@@ -1104,7 +1104,7 @@ static void exp_to_c(env nv, exp e) {
   case UnknownId_e(qv): toc_impos("unknownid"); break;
   case Primop_e(p,es):
     // Save C types of args, needed for printf
-    let typs = List::map(get_typ,es);
+    _ typs = List::map(get_typ,es);
     // Translate args
     List::iter_c(exp_to_c,nv,es);
     // FIX:  look at these carefully and make sure this is okay
@@ -1201,16 +1201,9 @@ static void exp_to_c(env nv, exp e) {
                       Position::string_of_segment(e1->loc)));
       e->r = init_tuple(nv, true, es)->r;
       break;
-      // FIX: This isn't unsafe after regions are hacked in.
-    case NoInstantiate_e(&Exp(_,Var_e(x,_),_)): fallthru(x);//FIX nested NoInst?
-    case Instantiate_e(&Exp(_,Var_e(x,_),_),_): fallthru(x);//FIX nested Inst?
-    case Var_e(x,_):
-      if (!nv->toplevel)
-	warn(e1->loc, xprintf("unary & applied to %s, may be unsafe",
-			      qvar2string(x)));
+    default: // it's actually an address-of.
       exp_to_c(nv,e1);
       break;
-    default: unimp("& on non-struct/tuple/variable"); break;
     }
     break;
   case Sizeof_e(t): e->r = Sizeof_e(typ_to_c_array(t)); break;
@@ -1255,7 +1248,7 @@ static void exp_to_c(env nv, exp e) {
     }
     break;
   case Subscript_e(e1,e2):
-    let e1_typ = compress(e1->topt->v);
+    _ e1_typ = compress(e1->topt->v);
     exp_to_c(nv, e1);
     exp_to_c(nv, e2);
     // cast e1 to have the right type so that we can do the projection
@@ -1296,8 +1289,8 @@ static void exp_to_c(env nv, exp e) {
 	qvar x = temp_var();
 	qvar i = temp_var();
 	qvar a = temp_var();
-	let ta1 = typ_to_c_array(ta);
-	let n = add_tagged_array_type(ta1,q);
+	_ ta1 = typ_to_c_array(ta);
+	_ n   = add_tagged_array_type(ta1,q);
 	typ tx  = nullableptr_typ(strct(n),empty_tqual());
 	typ ta2 = nullableptr_typ(ta1,q);
 	exp e5  = structarrow_exp(var_exp(x,DL),"sz",DL);
@@ -1319,7 +1312,7 @@ static void exp_to_c(env nv, exp e) {
 	unsigned int sz = Evexp::eval_const_uint_exp(esz);
 	qvar i = temp_var();
 	qvar a = temp_var();
-	let ta1 = typ_to_c(ta);
+	_ ta1 = typ_to_c(ta);
 	typ ta2 = nullableptr_typ(ta1,q);
 	exp e3 = prim2_exp(Gte, var_exp(i,DL), uint_exp(sz,DL), DL);
 	exp a_init = cast_exp(ta2,structarrow_exp(e3,"contents",DL),DL);
@@ -1345,12 +1338,12 @@ static void exp_to_c(env nv, exp e) {
     else {
       // At top-level must use designators
       // $(e1,...,en) -> (struct _tuple_type_n){.f1=e1,...,.fn=en}
-      let tqs = List::map(tup_to_c,es);
-      let n = add_tuple_type(tqs);
+      _ tqs = List::map(tup_to_c,es);
+      _ n = add_tuple_type(tqs);
       list<$(list<designator>,exp)@> dles = null;
       for (int i = 1; es != null; es = es->tl, i++) {
 	exp_to_c(nv,es->hd);
-	let des = &cons(FieldName(xprintf("f%d",i)),null);
+	_ des = &cons(FieldName(xprintf("f%d",i)),null);
 	dles = &cons(&$((list<designator>)des,es->hd),dles);
       }
       dles = List::imp_rev(dles);
@@ -1366,7 +1359,7 @@ static void exp_to_c(env nv, exp e) {
     if (nv->toplevel) {
       // {e1,...,en}
       e->r = unresolvedmem_exp(null,dles0,DL)->r;
-      for (let dles = dles0; dles != null; dles = dles->tl) {
+      for (_ dles = dles0; dles != null; dles = dles->tl) {
 	let &$(_,e) = dles->hd;
 	exp_to_c(nv,e);
       }
@@ -1388,10 +1381,10 @@ static void exp_to_c(env nv, exp e) {
     } else {
       // ({ t *x = (t*)(malloc(sizeof(t)*length(dles0)));
       //    x[d1] = e1; ... x[dn] = en; x; })
-      let x = temp_var();
-      let s = exp_stmt(var_exp(x,DL),DL);
+      _ x = temp_var();
+      _ s = exp_stmt(var_exp(x,DL),DL);
       int count = List::length(dles0)-1;
-      for (let dles = List::rev(dles0); dles != null; dles = dles->tl) {
+      for (_ dles = List::rev(dles0); dles != null; dles = dles->tl) {
 	// add x[e_index] = e to sequence of assignments
 	let &$(dl,e1) = dles->hd;
 	// calculate the index expression -- the front end checks that
@@ -1402,7 +1395,7 @@ static void exp_to_c(env nv, exp e) {
 	  e_index = signed_int_exp(count--,DL);
 	else {
 	  if (dl->tl != null) unimp("multiple designators in array");
-	  let d = dl->hd;
+	  _ d = dl->hd;
 	  switch (d) {
 	  case ArrayElement(e3):
 	    exp_to_c(nv,e3);
@@ -1427,11 +1420,11 @@ static void exp_to_c(env nv, exp e) {
         break;
       }
       typ elt_typ=typ_to_c(old_elt_typ);
-      let ptr_typ = nullableptr_typ(elt_typ,empty_tqual());
-      let e2 = times_exp(sizeof_exp(elt_typ,DL),
-                         signed_int_exp(List::length(dles0),DL),DL);
-      let e1 = malloc_exp(old_elt_typ,e2);
-      let e0 = cast_exp(ptr_typ,e1,DL);
+      _ ptr_typ = nullableptr_typ(elt_typ,empty_tqual());
+      _ e2 = times_exp(sizeof_exp(elt_typ,DL),
+		       signed_int_exp(List::length(dles0),DL),DL);
+      _ e1 = malloc_exp(old_elt_typ,e2);
+      _ e0 = cast_exp(ptr_typ,e1,DL);
       e->r = stmt_exp(declare_stmt(x,ptr_typ,&Opt(e0),s,DL),DL)->r;
     }
     break;
@@ -1840,7 +1833,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       _ lab = fresh_label();
       decls = &cons(&$(v,typ_to_c(t2)),decls);
       _ result = xlate_pat(nv,t2,var_exp(v,DL),
-			   structmember_exp(r,xprintf("f%d",cnt),DL),
+			   structarrow_exp(path,xprintf("f%d",cnt),DL),
 			   p2,succ_lab,fail_lab,decls);
       nv    = result[0];
       decls = result[1];
@@ -1854,7 +1847,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
     s = seq_stmts(ss,DL);
     break;
   case Pointer_p(p2):
-    // if (v == 0) goto fail_lab; v = *r; match(v,p2);
+    // if (r == 0) goto fail_lab; v = *r; match(v,p2);
     _ v = temp_var();
     _ t2 = p2->topt->v;
     decls = &cons(&$(v,typ_to_c(t2)),decls);
@@ -1881,7 +1874,7 @@ xlate_pat(env nv,typ t,exp r,exp path,pat p,var succ_lab,var fail_lab,
       _ t2  = p2->topt->v;
       _ lab = fresh_label();
       decls = &cons(&$(v,typ_to_c(t2)),decls);
-      _ result = xlate_pat(nv,t2,var_exp(v,DL), structmember_exp(r,f,DL),p2,
+      _ result = xlate_pat(nv,t2,var_exp(v,DL), structarrow_exp(path,f,DL),p2,
 			   succ_lab,fail_lab,decls);
       nv    = result[0];
       decls = result[1];

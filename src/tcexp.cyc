@@ -579,7 +579,8 @@ static $(bool,typ) addressof_props(tenv te, exp e) {
       case Funname_b(_): return $(true,            HeapRgnType); 
       case Global_b(vd): return $(vd->tq->q_const, HeapRgnType);
       case Local_b(vd):  fallthru(vd);
-      case Pat_b(vd):    return $(vd->tq->q_const, block_to_typ(te,vd->block));
+      case Pat_b(vd):    
+	return $(vd->tq->q_const, block_to_typ(te,vd->block));
 	// KLUDGE: assumes parameters are block 0
       case Param_b(&$(_,tq,_)): return $(tq->q_const, block_to_typ(te,0));
       }
@@ -689,95 +690,95 @@ static synth tcAddress(tenv te, segment loc, Opt_t<typ> topt, exp e) {
  }
 
  // sizeof t 
- static synth tcSizeof(tenv te, segment loc, Opt_t<typ> topt, typ t) {
-   check_valid_type(loc,te,lookup_type_vars(te),t);
-   Evexp::szof(t,loc); // just ignore result -- posts error for bad type
-   return standard_synth(te,uint_t);
- }
+static synth tcSizeof(tenv te, segment loc, Opt_t<typ> topt, typ t) {
+  check_valid_type(loc,te,lookup_type_vars(te),t);
+  Evexp::szof(t,loc); // just ignore result -- posts error for bad type
+  return standard_synth(te,uint_t);
+}
 
  // *e 
  // Someday, check static region capability, also in member, arrow, subscript
- static synth tcDeref(tenv te, segment loc, Opt_t<typ> topt, exp e) {
-   tcExp(te,null,e);
-   typ t = compress(e->topt->v);
-   switch (t) {
-   case PointerType(t2,_,_,_): return standard_synth(te,t2);
-   default: return expr_err(te,loc,xprintf("expecting * or @ type but found %s",
-					   typ2string(t)));
-   }
- }
+static synth tcDeref(tenv te, segment loc, Opt_t<typ> topt, exp e) {
+  tcExp(te,null,e);
+  typ t = compress(e->topt->v);
+  switch (t) {
+  case PointerType(t2,_,_,_): return standard_synth(te,t2);
+  default: return expr_err(te,loc,xprintf("expecting * or @ type but found %s",
+					  typ2string(t)));
+  }
+}
 
- // e.f 
- static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt, 
-			     exp outer_e, exp e, field_name f) {
-   tcExp(te,null,e);
-   typ t = compress(e->topt->v);
-   switch (t) {
-   case StructType(nopt,ts,&sd):
-     if (nopt == null)
-       return expr_err(te,loc,"unresolved struct type (COMPILER ERROR)");
-     _ finfo = lookup_struct_field(sd,f);
-     if (finfo == null) 
-       return expr_err(te,loc,xprintf("struct %s has no %s field",
-				      qvar2string(nopt->v), f));
-     _ inst = List::zip(sd->tvs,ts);
-     _ t2   = substitute(inst,finfo[2]);
-     return standard_synth(te,t2);
-   case ArrayType(_,_,ak) && (String::zstrcmp(f,"size") == 0): 
-     switch (ak) {
-     case UntaggedArray:
-       return expr_err(te,loc,
-		       xprintf("size not applicable to untagged array type %s",
-			       typ2string(t)));
-     default:
-       outer_e->r = Primop_e(Size,&cons(e,null));
-       return standard_synth(te,uint_t);
-     }
-   default:
-     if (String::zstrcmp(f,"size") == 0)
-       return expr_err(te,loc,xprintf("expecting struct or array, found %s",
-				      typ2string(t)));
-     else 
+// e.f 
+static synth tcStructMember(tenv te, segment loc, Opt_t<typ> topt, 
+			    exp outer_e, exp e, field_name f) {
+  tcExp(te,null,e);
+  typ t = compress(e->topt->v);
+  switch (t) {
+  case StructType(nopt,ts,&sd):
+    if (nopt == null)
+      return expr_err(te,loc,"unresolved struct type (COMPILER ERROR)");
+    _ finfo = lookup_struct_field(sd,f);
+    if (finfo == null) 
+      return expr_err(te,loc,xprintf("struct %s has no %s field",
+				     qvar2string(nopt->v), f));
+    _ inst = List::zip(sd->tvs,ts);
+    _ t2   = substitute(inst,finfo[2]);
+    return standard_synth(te,t2);
+  case ArrayType(_,_,ak) && (String::zstrcmp(f,"size") == 0): 
+    switch (ak) {
+    case UntaggedArray:
+      return expr_err(te,loc,
+		      xprintf("size not applicable to untagged array type %s",
+			      typ2string(t)));
+    default:
+      outer_e->r = Primop_e(Size,&cons(e,null));
+      return standard_synth(te,uint_t);
+    }
+  default:
+    if (String::zstrcmp(f,"size") == 0)
+      return expr_err(te,loc,xprintf("expecting struct or array, found %s",
+				     typ2string(t)));
+    else 
        return expr_err(te,loc,xprintf("expecting struct, found %s",
 				      typ2string(t)));
-   }
- }
+  }
+}
 
- // e->f 
- static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt, 
-			    exp e, field_name f) {
-   tcExp(te,null,e);
-   typ t = compress(e->topt->v);
-   switch (t) {
-   case PointerType(t2,_,_,_):
-     switch (compress(t2)) {
-     case StructType(nopt,ts,&sd):
-       _ finfo = lookup_struct_field(sd,f);
-       if (finfo == null)
-	 return expr_err(te,loc,xprintf("struct %s has no %s field",
-					qvar2string(nopt->v),f));
-       _ inst = List::zip(sd->tvs,ts);
-       _ t3   = substitute(inst,finfo[2]);
-       return standard_synth(te,t3);
-     default:
-       return expr_err(te,loc, xprintf("expecting struct pointer, found %s", 
-				       typ2string(t)));
-     }
-   default:
-       return expr_err(te,loc,xprintf("expecting struct pointer, found %s",
+// e->f 
+static synth tcStructArrow(tenv te, segment loc, Opt_t<typ> topt, 
+			   exp e, field_name f) {
+  tcExp(te,null,e);
+  typ t = compress(e->topt->v);
+  switch (t) {
+  case PointerType(t2,_,_,_):
+    switch (compress(t2)) {
+    case StructType(nopt,ts,&sd):
+      _ finfo = lookup_struct_field(sd,f);
+      if (finfo == null)
+	return expr_err(te,loc,xprintf("struct %s has no %s field",
+				       qvar2string(nopt->v),f));
+      _ inst = List::zip(sd->tvs,ts);
+      _ t3   = substitute(inst,finfo[2]);
+      return standard_synth(te,t3);
+    default:
+      return expr_err(te,loc, xprintf("expecting struct pointer, found %s", 
 				      typ2string(t)));
-   }
- }
+    }
+  default:
+    return expr_err(te,loc,xprintf("expecting struct pointer, found %s",
+				   typ2string(t)));
+  }
+}
 
- // e1[e2] 
- static synth ithTupleType(tenv te,segment loc,list<$(tqual,typ)@> ts,exp index){
-   unsigned int i = Evexp::eval_const_uint_exp(index);
-   try return standard_synth(te,List::nth(ts,i)[1]);
-   catch { case Nth:
-     return expr_err(te,loc,xprintf("index is %d but tuple has only %d fields",
-				    i, List::length(ts)));
-   }
- }
+// e1[e2] 
+static synth ithTupleType(tenv te,segment loc,list<$(tqual,typ)@> ts,exp index){
+  unsigned int i = Evexp::eval_const_uint_exp(index);
+  try return standard_synth(te,List::nth(ts,i)[1]);
+  catch { case Nth:
+    return expr_err(te,loc,xprintf("index is %d but tuple has only %d fields",
+				   i, List::length(ts)));
+  }
+}
  // FIX: look at topt
  static synth tcSubscript(tenv te, segment loc, Opt_t<typ> topt, exp e1, exp e2){
    tcExp(te,null,e1);

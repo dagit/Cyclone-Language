@@ -726,7 +726,7 @@ parse_type_decl ()
   if(!has_been_seen(name)) {
     if(!nolinesflag)
       fprintf(fattrs, "\n#line %d \"%s\"", lineno, infile);
-    fprintf(fattrs, "\n_ yyget_%s(xenum YYSTYPE x) {switch(x) {case %s(y): return y; default: throw Core::Failure(\"%s\");}}\n", name, name, name);
+    fprintf(fattrs, "\n_ yyget_%s(xenum YYSTYPE yy1) {switch(yy1) {case %s(yy2): return yy2; default: throw Core::Failure(\"%s\");}}\n", name, name, name);
   }
 
   for (;;)

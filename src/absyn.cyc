@@ -40,7 +40,7 @@ typ new_evar(kind_t k) {
   return Evar(k,null,new_type_counter++);
 }
 typ wildtyp() {
-  return new_evar(UnresolvedKind); // may need to restrict to MemUKind ???
+  return new_evar(UnresolvedKind); 
 }
 
 tqual combine_tqual(tqual x,tqual y) {
