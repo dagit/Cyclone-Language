@@ -825,7 +825,7 @@ void check_rgn_partial_order(tenv_t te, seg_t loc,
     // not sure this could ever fail
     for(; po != NULL; po=po->tl)
       if((!subset_effect(true, (*po->hd)[0], empty_effect))
-	 || !subset_effect(true, (*po->hd)[1], empty_effect))
+	 || !subset_effect(true, new AccessEff((*po->hd)[1]), empty_effect))
 	terr(loc,"the required region ordering is not satisfied here");
     return;
   }
