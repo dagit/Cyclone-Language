@@ -4,7 +4,8 @@ include ../../Makefile.inc
 PROG=aprof$(EXE)
 BINDIR=$(CYCDIR)/bin
 CYC_LIB_PATH=$(BINDIR)/lib
-SRCS=aprof aprof_event aprof_summary aprof_graph aprof_newgraph
+#SRCS=aprof aprof_event aprof_summary aprof_graph aprof_newgraph
+SRCS=aprof aprof_event aprof_summary aprof_graph
 OBJS=$(addsuffix .o, $(SRCS))
 
 install: $(BINDIR)/$(PROG)

@@ -1185,7 +1185,7 @@ fenv_t<`r> new_fenv(region_t<`r> r, seg_t loc, fndecl_t fd) {
       let typ = dyneither_typ(t, param_rgn, tq, false_conref);
       let vd = new{Vardecl{.sc = Public,
                            .name = new $((nmspace_t)Loc_n,nopt->v),
-                           .tq = empty_tqual(NULL),
+                           .tq = empty_tqual(0),
                            .type = typ,
                            .initializer = NULL,
                            .rgn = param_rgn_opt,
@@ -1259,7 +1259,7 @@ fenv_t<`r> nested_fenv(seg_t loc, fenv_t<`r> old_fenv, fndecl_t fd) {
       let typ = dyneither_typ(t, param_rgn, tq, false_conref);
       let vd = new{Vardecl{.sc = Public,
                            .name = new $((nmspace_t)Loc_n,nopt->v),
-                           .tq = empty_tqual(NULL),
+                           .tq = empty_tqual(0),
                            .type = typ,
                            .initializer = NULL,
                            .rgn = param_rgn_opt,

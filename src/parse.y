@@ -80,8 +80,9 @@ namespace Lex {
 #define YYLEX_ARG yylex_buf
 #define YYPARSE_PARAM_ARG Lexing::Lexbuf<Lexing::Function_lexbuf_state<FILE@>> yylex_buf
 
-#define LOC(s,e) Position::segment_of_abs(s.first_line,e.last_line)
-#define DUMMYLOC NULL
+#define LOC(s,e) (s.first_line)
+#define SLOC(s) (s.first_line)
+#define DUMMYLOC 0
 
 namespace Parse {
 
@@ -152,7 +153,7 @@ static type_t type_name_to_type($(opt_t<var_t>,tqual_t,type_t)@ tqt,
                                 seg_t loc) {
   let &$(_,tq,t) = tqt;
   if (tq.print_const || tq.q_volatile || tq.q_restrict) {
-    if (tq.loc != NULL) loc = tq.loc;
+    if (tq.loc != 0) loc = tq.loc;
     Tcutil::warn(loc,"qualifier on type is ignored");
   }
   return t;
@@ -482,7 +483,7 @@ static fndecl_t make_function(opt_t<decl_spec_t> dso, declarator_t d,
 
   scope_t sc = Public;
   list_t<type_specifier_t> tss = NULL;
-  tqual_t tq = empty_tqual(NULL);
+  tqual_t tq = empty_tqual(0);
   bool is_inline = false;
   list_t<attribute_t> atts = NULL;
 
@@ -662,10 +663,10 @@ static $(tqual_t,type_t,list_t<tvar_t>,list_t<attribute_t>)
   if (tms==NULL) return $(tq,t,NULL,atts);
   switch (tms->hd) {
   case &Carray_mod(zeroterm,ztloc):
-    return apply_tms(empty_tqual(NULL),
+    return apply_tms(empty_tqual(0),
                      array_typ(t,tq,NULL,zeroterm,ztloc),atts,tms->tl);
   case &ConstArray_mod(e,zeroterm,ztloc):
-    return apply_tms(empty_tqual(NULL),
+    return apply_tms(empty_tqual(0),
                      array_typ(t,tq,e,zeroterm,ztloc),atts,tms->tl);
   case &Function_mod(args): {
     switch (args) {
@@ -802,7 +803,7 @@ static list_t<decl_t> make_declarations(decl_spec_t ds,
 					seg_t loc) {
  region mkrgn; {
   let &Declaration_spec(_,tq,tss,_,atts) = ds;
-  if (tq.loc == NULL) tq.loc = tqual_loc;
+  if (tq.loc == 0) tq.loc = tqual_loc;
   if (ds->is_inline)
     err("inline is allowed only on function definitions",loc);
   if (tss == NULL) {
@@ -1147,10 +1148,11 @@ translation_unit:
       $$=^$(new List(new Decl(new Namespace_d(new nspace,x),LOC(@1,@4)),y)); 
     }
 | EXTERN STRING '{' translation_unit '}' translation_unit
-    { if (strcmp($2,"C") == 0) {
+    { let two = $2;
+      if (strcmp(two,"C") == 0) {
         $$=^$(new List(new Decl(new ExternC_d($4),LOC(@1,@4)),$6));
       } else {
-        if (strcmp($2,"C include") != 0) {
+        if (strcmp(two,"C include") != 0) {
           err("expecting \"C\" or \"C include\"",LOC(@1,@2));
         }
         $$=^$(new List(new Decl(new ExternCinclude_d($4,NULL),LOC(@1,@5)),$6));
@@ -1163,9 +1165,9 @@ translation_unit:
       $$=^$(new List(new Decl(new ExternCinclude_d($4,exs),LOC(@1,@6)),$7));
     }
 | PORTON ';' translation_unit
-  { $$=^$(new List(new Decl(&Porton_d_val,LOC(@1,@1)),$3)); }
+  { $$=^$(new List(new Decl(&Porton_d_val,SLOC(@1)),$3)); }
 | PORTOFF ';' translation_unit
-  { $$=^$(new List(new Decl(&Portoff_d_val,LOC(@1,@1)),$3)); }
+  { $$=^$(new List(new Decl(&Portoff_d_val,SLOC(@1)),$3)); }
 | /* empty */ { $$=^$(NULL); }
 ;
 
@@ -1175,14 +1177,14 @@ export_list:
 ;    
 
 export_list_values:
-  struct_union_name { $$=^$(new List(new $(LOC(@1,@1),$1,false),NULL)); }
-| struct_union_name ';' { $$=^$(new List(new $(LOC(@1,@1),$1,false),NULL)); }
+  struct_union_name { $$=^$(new List(new $(SLOC(@1),$1,false),NULL)); }
+| struct_union_name ';' { $$=^$(new List(new $(SLOC(@1),$1,false),NULL)); }
 | struct_union_name ',' export_list_values
-  { $$=^$(new List(new $(LOC(@1,@1),$1,false),$3));}
+  { $$=^$(new List(new $(SLOC(@1),$1,false),$3));}
 ;
 
 external_declaration:
-  function_definition {$$=^$(new List(new_decl(new Fn_d($1),LOC(@1,@1)),NULL));}
+  function_definition {$$=^$(new List(new_decl(new Fn_d($1),SLOC(@1)),NULL));}
 | declaration         {$$=$!1;}
 | error               {$$=^$(NULL);}
 ;
@@ -1233,9 +1235,10 @@ unnamespace_action:
 /***************************** DECLARATIONS *****************************/
 declaration:
   declaration_specifiers ';'
-    { $$=^$(make_declarations($1,NULL,LOC(@1,@1),LOC(@1,@1))); }
+    { let location=SLOC(@1);
+      $$=^$(make_declarations($1,NULL,location,location)); }
 | declaration_specifiers init_declarator_list ';'
-    { $$=^$(make_declarations($1,$2,LOC(@1,@1),LOC(@1,@3))); }
+    { $$=^$(make_declarations($1,$2,SLOC(@1),LOC(@1,@3))); }
 /* Cyc: let declaration */
 | LET pattern '=' expression ';'
     { $$=^$(new List(let_decl($2,$4,LOC(@1,@5)),NULL)); }
@@ -1253,29 +1256,33 @@ declaration:
 /* Cyc: region declaration */
 /* region <`r> h;  and region <`r> h @resetable; */
 | resetable_qual_opt REGION '<' TYPE_VAR '>' IDENTIFIER ';'
-  { if (zstrcmp($4,"`H") == 0)
-      err(aprintf("bad occurrence of heap region"),LOC(@4,@4));
-    if (zstrcmp($4,"`U") == 0)
-      err(aprintf("bad occurrence of unique region"),LOC(@4,@4));
-    tvar_t tv = new Tvar(new $4,-1,Tcutil::kind_to_bound(&Tcutil::rk));
+  { let four = $4;
+    if (zstrcmp(four,"`H") == 0)
+      err(aprintf("bad occurrence of heap region"),SLOC(@4));
+    if (zstrcmp(four,"`U") == 0)
+      err(aprintf("bad occurrence of unique region"),SLOC(@4));
+    tvar_t tv = new Tvar(new four,-1,Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t  = new VarType(tv);
     vardecl_t vd = new_vardecl(new $(Loc_n,new $6),new RgnHandleType(t),NULL);
     $$ = ^$(new List(region_decl(tv,vd,$1,NULL,LOC(@1,@7)),NULL));
   }
 /* region h;   and  region h = open(e); */
 | resetable_qual_opt REGION IDENTIFIER open_exp_opt ';'
-  { if (zstrcmp($3,"H") == 0)
-      err("bad occurrence of heap region `H",LOC(@3,@3));
-    if (zstrcmp($3,"U") == 0)
-      err("bad occurrence of unique region `U",LOC(@3,@3));
-    if ($1 && ($4 != NULL))
+  { let one = $1;
+    let three = $3;
+    let four = $4;
+    if (zstrcmp(three,"H") == 0)
+      err("bad occurrence of heap region `H",SLOC(@3));
+    if (zstrcmp(three,"U") == 0)
+      err("bad occurrence of unique region `U",SLOC(@3));
+    if (one && (four != NULL))
       err("open regions cannot be @resetable",LOC(@1,@5));
-    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",$3), -1,
+    tvar_t tv = new Tvar(new (string_t)aprintf("`%s",three), -1,
 			 Tcutil::kind_to_bound(&Tcutil::rk));
     type_t t = new VarType(tv);
-    vardecl_t vd = new_vardecl(new $(Loc_n,new $3),new RgnHandleType(t),NULL);
+    vardecl_t vd = new_vardecl(new $(Loc_n,new three),new RgnHandleType(t),NULL);
 
-    $$ = ^$(new List(region_decl(tv,vd,$1,$4,LOC(@1,@5)),NULL));
+    $$ = ^$(new List(region_decl(tv,vd,one,four,LOC(@1,@5)),NULL));
   }
 /* Cyc: alias <r>t v = e; */
 | ALIAS '<' TYPE_VAR '>' IDENTIFIER '=' expression ';'
@@ -1300,45 +1307,50 @@ declaration_list:
 /* Cyc: added optional attributes */
 declaration_specifiers:
   storage_class_specifier
-    { $$=^$(new Declaration_spec(new Opt($1),empty_tqual(LOC(@1,@1)),
+    { $$=^$(new Declaration_spec(new Opt($1),empty_tqual(SLOC(@1)),
                                  NULL,false,NULL)); }
 | storage_class_specifier declaration_specifiers
-    { if ($2->sc != NULL)
+    { let two = $2;
+      if (two->sc != NULL)
         Tcutil::warn(LOC(@1,@2),
                      "Only one storage class is allowed in a declaration");
-      $$=^$(new Declaration_spec(new Opt($1),$2->tq,$2->type_specs,
-                                 $2->is_inline,
-                                 $2->attributes));
+      $$=^$(new Declaration_spec(new Opt($1),two->tq,two->type_specs,
+                                 two->is_inline,
+                                 two->attributes));
     }
 | type_specifier
-    { $$=^$(new Declaration_spec(NULL,empty_tqual(LOC(@1,@1)),
+    { $$=^$(new Declaration_spec(NULL,empty_tqual(SLOC(@1)),
                                  new List($1,NULL),false,NULL)); }
 | type_specifier declaration_specifiers
-    { $$=^$(new Declaration_spec($2->sc,$2->tq,new List($1,$2->type_specs),
-                                 $2->is_inline,
-                                 $2->attributes));
+    { let two = $2;
+      $$=^$(new Declaration_spec(two->sc,two->tq,new List($1,two->type_specs),
+                                 two->is_inline,
+                                 two->attributes));
     }
 | type_qualifier
     { $$=^$(new Declaration_spec(NULL,$1,NULL,false,NULL)); }
 | type_qualifier declaration_specifiers
-    { $$=^$(new Declaration_spec($2->sc,combine_tqual($1,$2->tq),
-                                 $2->type_specs, $2->is_inline,
-                                 $2->attributes));
+    { let two = $2;
+      $$=^$(new Declaration_spec(two->sc,combine_tqual($1,two->tq),
+                                 two->type_specs, two->is_inline,
+                                 two->attributes));
     }
 | INLINE
-    { $$=^$(new Declaration_spec(NULL,empty_tqual(LOC(@1,@1)),
+    { $$=^$(new Declaration_spec(NULL,empty_tqual(SLOC(@1)),
                                  NULL,true,NULL)); }
 | INLINE declaration_specifiers
-    { $$=^$(new Declaration_spec($2->sc,$2->tq,$2->type_specs,true,
-                                 $2->attributes));
+    { let two = $2;
+      $$=^$(new Declaration_spec(two->sc,two->tq,two->type_specs,true,
+                                 two->attributes));
     }
 | attributes
-    { $$=^$(new Declaration_spec(NULL,empty_tqual(LOC(@1,@1)),
+    { $$=^$(new Declaration_spec(NULL,empty_tqual(SLOC(@1)),
                                  NULL,false,$1)); }
 | attributes declaration_specifiers
-    { $$=^$(new Declaration_spec($2->sc,$2->tq,
-                                 $2->type_specs, $2->is_inline,
-                                 List::imp_append($1,$2->attributes))); }
+    { let two = $2;
+      $$=^$(new Declaration_spec(two->sc,two->tq,
+                                 two->type_specs, two->is_inline,
+                                 List::imp_append($1,two->attributes))); }
 ;
 
 storage_class_specifier:
@@ -1406,7 +1418,7 @@ attribute:
 	break;
       }
     if(i == numelts(att_map)) {
-      err("unrecognized attribute",LOC(@1,@1));
+      err("unrecognized attribute",SLOC(@1));
       $$ = ^$(&Cdecl_att_val);
     }
   }
@@ -1417,22 +1429,22 @@ attribute:
     attribute_t a;
     if (zstrcmp(s,"regparm") == 0 || zstrcmp(s,"__regparm__") == 0) {
       if (n < 0 || n > 3) 
-	err("regparm requires value between 0 and 3", LOC(@3,@3));
+	err("regparm requires value between 0 and 3", SLOC(@3));
       a = new Regparm_att(n);
     } else if (zstrcmp(s,"aligned") == 0 || zstrcmp(s,"__aligned__") == 0) {
-      if (n < 0) err("aligned requires positive power of two", LOC(@3,@3));
+      if (n < 0) err("aligned requires positive power of two", SLOC(@3));
       unsigned int j = (unsigned int)n;
       for (; (j & 1) == 0; j = j >> 1)
 	;
       j = j >> 1;
-      if (j != 0) err("aligned requires positive power of two",LOC(@3,@3));
+      if (j != 0) err("aligned requires positive power of two",SLOC(@3));
       a = new Aligned_att(n);
     } else if(zstrcmp(s,"initializes")==0 || zstrcmp(s,"__initializes__")==0) {
       a = new Initializes_att(n);
     } else if(zstrcmp(s,"noliveunique")==0 || zstrcmp(s,"__noliveunique__")==0){
       a = new Noliveunique_att(n);
     } else {
-      err("unrecognized attribute",LOC(@1,@1));
+      err("unrecognized attribute",SLOC(@1));
       a = &Cdecl_att_val;
     }
     $$=^$(a);
@@ -1444,7 +1456,7 @@ attribute:
     if (zstrcmp(s,"section") == 0 || zstrcmp(s,"__section__") == 0)
       a = new Section_att(str);
     else {
-      err("unrecognized attribute",LOC(@1,@1));
+      err("unrecognized attribute",SLOC(@1));
       a = &Cdecl_att_val;
     }
     $$=^$(a);
@@ -1457,7 +1469,7 @@ attribute:
     if (zstrcmp(s,"__mode__") == 0)
       a = new Mode_att(str);
     else {
-      err("unrecognized attribute",LOC(@1,@1));
+      err("unrecognized attribute",SLOC(@1));
       a = &Cdecl_att_val;
     }
     $$=^$(a);
@@ -1474,7 +1486,7 @@ attribute:
       else if (zstrcmp(t,"scanf") == 0)
         a = new Format_att(Scanf_ft,n,m);
       else
-        err("unrecognized format type",LOC(@3,@3)); 
+        err("unrecognized format type",SLOC(@3)); 
     else 
       err("unrecognized attribute",LOC(@1,@8)); 
     $$ = ^$(a);
@@ -1494,34 +1506,34 @@ type_specifier:
 ;
 
 type_specifier_notypedef:
-  VOID      { $$=^$(type_spec(&VoidType_val,LOC(@1,@1))); }
-| '_'       { $$=^$(type_spec(new_evar(NULL,NULL),LOC(@1,@1))); }
+  VOID      { $$=^$(type_spec(&VoidType_val,SLOC(@1))); }
+| '_'       { $$=^$(type_spec(new_evar(NULL,NULL),SLOC(@1))); }
 | '_' COLON_COLON kind 
   { $$=^$(type_spec(new_evar(Tcutil::kind_to_opt($3),NULL),LOC(@1,@3))); }
-| CHAR      { $$=^$(type_spec(char_typ,LOC(@1,@1))); }
-| SHORT     { $$=^$(new Short_spec(LOC(@1,@1))); }
-| INT       { $$=^$(type_spec(sint_typ,LOC(@1,@1))); }
-| LONG      { $$=^$(new Long_spec(LOC(@1,@1))); }
-| FLOAT     { $$=^$(type_spec(float_typ(0),LOC(@1,@1))); }
-| DOUBLE    { $$=^$(type_spec(float_typ(1),LOC(@1,@1))); }
-| SIGNED    { $$=^$(new Signed_spec(LOC(@1,@1))); }
-| UNSIGNED  { $$=^$(new Unsigned_spec(LOC(@1,@1))); }
+| CHAR      { $$=^$(type_spec(char_typ,SLOC(@1))); }
+| SHORT     { $$=^$(new Short_spec(SLOC(@1))); }
+| INT       { $$=^$(type_spec(sint_typ,SLOC(@1))); }
+| LONG      { $$=^$(new Long_spec(SLOC(@1))); }
+| FLOAT     { $$=^$(type_spec(float_typ(0),SLOC(@1))); }
+| DOUBLE    { $$=^$(type_spec(float_typ(1),SLOC(@1))); }
+| SIGNED    { $$=^$(new Signed_spec(SLOC(@1))); }
+| UNSIGNED  { $$=^$(new Unsigned_spec(SLOC(@1))); }
 | enum_specifier { $$=$!1; }
 | struct_or_union_specifier { $$=$!1; }
 /* Cyc: added datatypes */
 | datatype_specifier { $$=$!1; }
 /* Cyc: added type variables and optional type parameters to typedef'd names */
-| type_var { $$=^$(type_spec($1, LOC(@1,@1))); }
+| type_var { $$=^$(type_spec($1, SLOC(@1))); }
 /* Cyc: everything below here is an addition */
 | '$' '(' parameter_list ')'
     { $$=^$(type_spec(new TupleType(List::map_c(get_tqual_typ,
-                                                LOC(@3,@3),List::imp_rev($3))),
+                                                SLOC(@3),List::imp_rev($3))),
                       LOC(@1,@4))); }
 | REGION_T '<' any_type_name right_angle
     { $$=^$(type_spec(new RgnHandleType($3),LOC(@1,@4))); }
 | REGION_T 
     { $$=^$(type_spec(new RgnHandleType(new_evar(&Tcutil::rko, NULL)),
-                      LOC(@1,@1))); }
+                      SLOC(@1))); }
 | DYNREGION_T '<' any_type_name right_angle
   { let t2 = new_evar(&Tcutil::rko, NULL);
     $$=^$(type_spec(new DynRgnType($3,t2), LOC(@1,@4)));
@@ -1531,21 +1543,21 @@ type_specifier_notypedef:
 | TAG_T '<' any_type_name right_angle
     { $$=^$(type_spec(new TagType($3),LOC(@1,@4))); }
 | TAG_T 
-  { $$=^$(type_spec(new TagType(new_evar(&Tcutil::iko, NULL)),LOC(@1,@1))); }
+  { $$=^$(type_spec(new TagType(new_evar(&Tcutil::iko, NULL)),SLOC(@1))); }
 | VALUEOF_T '(' expression ')'
   { $$=^$(type_spec(new ValueofType($3),LOC(@1,@4))); }
 ;
 
 /* Cyc: new */
 kind:
-  field_name { $$=^$(id_to_kind($1,LOC(@1,@1))); }
+  field_name { $$=^$(id_to_kind($1,SLOC(@1))); }
 ;
 
 type_qualifier:
-  CONST    { seg_t loc = (Absyn::porting_c_code) ? LOC(@1,@1) : NULL; 
+  CONST    { seg_t loc = (Absyn::porting_c_code) ? SLOC(@1) : 0; 
              $$=^$(Tqual(true,false,false,true,loc)); }
-| VOLATILE { $$=^$(Tqual(false,true,false,false,NULL)); }
-| RESTRICT { $$=^$(Tqual(false,false,true,false,NULL)); }
+| VOLATILE { $$=^$(Tqual(false,true,false,false,0)); }
+| RESTRICT { $$=^$(Tqual(false,false,true,false,0)); }
 ;
 
 /* parsing of enum specifiers */
@@ -1564,7 +1576,7 @@ enum_specifier:
 /* enum fields */
 enum_field:
   qual_opt_identifier
-  { $$ = ^$(new Enumfield($1,NULL,LOC(@1,@1))); }
+  { $$ = ^$(new Enumfield($1,NULL,SLOC(@1))); }
 | qual_opt_identifier '=' constant_expression
   { $$ = ^$(new Enumfield($1,$3,LOC(@1,@3))); }
 ;
@@ -1584,8 +1596,8 @@ struct_or_union_specifier:
     type_params_opt optional_rgn_order 
   struct_declaration_list '}'
     { 
-      let ts = List::map_c(typ2tvar,LOC(@4,@4),$4);
-      let exist_ts = List::map_c(typ2tvar,LOC(@6,@6),$6);
+      let ts = List::map_c(typ2tvar,SLOC(@4),$4);
+      let exist_ts = List::map_c(typ2tvar,SLOC(@6),$6);
       let td = aggr_tdecl($2, Public, $3, ts, 
                           aggrdecl_impl(exist_ts,$7,$8,true), NULL,
                           LOC(@1,@9));
@@ -1595,8 +1607,8 @@ struct_or_union_specifier:
     type_params_opt optional_rgn_order 
   struct_declaration_list '}'
     { 
-      let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
-      let exist_ts = List::map_c(typ2tvar,LOC(@5,@5),$5);
+      let ts = List::map_c(typ2tvar,SLOC(@3),$3);
+      let exist_ts = List::map_c(typ2tvar,SLOC(@5),$5);
       let td = aggr_tdecl($1, Public, $2, ts, 
                           aggrdecl_impl(exist_ts,$6,$7,false), NULL,
                           LOC(@1,@8));
@@ -1675,9 +1687,9 @@ struct_declaration:
        * (2) tqual, (3) type. */
       region temp; {
         let &$(tq,tspecs,atts) = $1;
-        if (tq.loc == NULL) tq.loc = LOC(@1,@1);
+        if (tq.loc == 0) tq.loc = SLOC(@1);
         let $(decls, widths) = List::rsplit(temp,temp,$2);
-        let t = speclist2typ(tspecs, LOC(@1,@1));
+        let t = speclist2typ(tspecs, SLOC(@1));
         let info = List::rzip(temp,temp,
                               apply_tmss(temp,tq,t,decls,atts),widths);
         $$=^$(List::map_c(make_aggr_field,LOC(@1,@2),info));
@@ -1691,33 +1703,35 @@ struct_declaration:
 // identifier.
 specifier_qualifier_list:
   type_specifier
-    { $$=^$(new $(empty_tqual(LOC(@1,@1)), new List($1,NULL), NULL)); }
+    { $$=^$(new $(empty_tqual(SLOC(@1)), new List($1,NULL), NULL)); }
 | type_specifier notypedef_specifier_qualifier_list
-    { $$=^$(new $((*$2)[0], new List($1,(*$2)[1]), (*$2)[2]));}
+    { let two=$2; $$=^$(new $((*two)[0], new List($1,(*two)[1]), (*two)[2]));}
 | type_qualifier
     { $$=^$(new $($1,NULL,NULL)); }
 | type_qualifier specifier_qualifier_list
-    { $$=^$(new $(combine_tqual($1,(*$2)[0]), (*$2)[1], (*$2)[2])); }
+    { let two=$2; 
+      $$=^$(new $(combine_tqual($1,(*two)[0]), (*two)[1], (*two)[2])); }
 | attributes
-    { $$=^$(new $(empty_tqual(LOC(@1,@1)), NULL, $1)); }
+    { $$=^$(new $(empty_tqual(SLOC(@1)), NULL, $1)); }
 | attributes specifier_qualifier_list
-    { $$=^$(new $((*$2)[0], (*$2)[1], append($1,(*$2)[2]))); }
+    { let two=$2; $$=^$(new $((*two)[0], (*two)[1], append($1,(*two)[2]))); }
 ;
 
 // Same as above but does not allow typedef names as specifiers
 notypedef_specifier_qualifier_list:
   type_specifier_notypedef
-    { $$=^$(new $(empty_tqual(LOC(@1,@1)), new List($1,NULL), NULL)); }
+    { $$=^$(new $(empty_tqual(SLOC(@1)), new List($1,NULL), NULL)); }
 | type_specifier_notypedef notypedef_specifier_qualifier_list
-    { $$=^$(new $((*$2)[0], new List($1,(*$2)[1]), (*$2)[2]));}
+    { let two=$2; $$=^$(new $((*two)[0], new List($1,(*two)[1]), (*two)[2]));}
 | type_qualifier
     { $$=^$(new $($1,NULL,NULL)); }
 | type_qualifier notypedef_specifier_qualifier_list
-    { $$=^$(new $(combine_tqual($1,(*$2)[0]), (*$2)[1], (*$2)[2])); }
+    { let two=$2; 
+      $$=^$(new $(combine_tqual($1,(*two)[0]), (*two)[1], (*two)[2])); }
 | attributes
-    { $$=^$(new $(empty_tqual(LOC(@1,@1)), NULL, $1)); }
+    { $$=^$(new $(empty_tqual(SLOC(@1)), NULL, $1)); }
 | attributes notypedef_specifier_qualifier_list
-    { $$=^$(new $((*$2)[0], (*$2)[1], append($1,(*$2)[2]))); }
+    { let two=$2; $$=^$(new $((*two)[0], (*two)[1], append($1,(*two)[2]))); }
 ;
 
 struct_declarator_list:
@@ -1754,7 +1768,7 @@ struct_declarator:
 datatype_specifier:
   qual_datatype qual_opt_identifier type_params_opt '{' datatypefield_list '}'
     { let is_extensible = $1;
-      let ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
+      let ts = List::map_c(typ2tvar,SLOC(@3),$3);
       let dd = datatype_tdecl(Public,$2,ts,new Opt($5), 
                               is_extensible,LOC(@1,@6));
       $$ = ^$(type_spec(new TypeDeclType(dd,NULL),LOC(@1,@6)));
@@ -1792,7 +1806,7 @@ datatypefield:
   datatypefield_scope qual_opt_identifier
     { $$=^$(new Datatypefield($2,NULL,LOC(@1,@2),$1)); }
 | datatypefield_scope qual_opt_identifier '(' parameter_list ')'
-    { let typs = List::map_c(get_tqual_typ,LOC(@4,@4),List::imp_rev($4));
+    { let typs = List::map_c(get_tqual_typ,SLOC(@4),List::imp_rev($4));
       $$=^$(new Datatypefield($2,typs,LOC(@1,@5),$1)); }
 ;
 
@@ -1820,14 +1834,14 @@ direct_declarator:
  * but seems necessary to parse some of the GCC header files. */
 | '(' attributes declarator ')'
     { let d = $3;
-      d->tms = new List(new Attributes_mod(LOC(@2,@2),$2),d->tms);
+      d->tms = new List(new Attributes_mod(SLOC(@2),$2),d->tms);
       $$=$!3;
     }
 | direct_declarator '[' ']' zeroterm_qual_opt
-    { $$=^$(new Declarator($1->id,new List(new Carray_mod($4,LOC(@4,@4)),$1->tms)));}
+    { $$=^$(new Declarator($1->id,new List(new Carray_mod($4,SLOC(@4)),$1->tms)));}
 | direct_declarator '[' assignment_expression ']' zeroterm_qual_opt
     { $$=^$(new Declarator($1->id,
-                           new List(new ConstArray_mod($3,$5,LOC(@5,@5)),$1->tms)));}
+                           new List(new ConstArray_mod($3,$5,SLOC(@5)),$1->tms)));}
 | direct_declarator '(' parameter_type_list ')'
     { let &$(lis,b,c,eff,po) = $3;
       $$=^$(new Declarator($1->id,new List(new Function_mod(new WithTypes(lis,b,c,eff,po)),$1->tms)));
@@ -1847,12 +1861,12 @@ direct_declarator:
       $$=^$(new Declarator($1->id,new List(new TypeParams_mod(ts,LOC(@1,@4),false),$1->tms)));
     }
 | direct_declarator attributes
-  { $$=^$(new Declarator($1->id,new List(new Attributes_mod(LOC(@2,@2),$2),
+  { $$=^$(new Declarator($1->id,new List(new Attributes_mod(SLOC(@2),$2),
                                          $1->tms)));
   }
 /* These two cases help to improve error messages */
 //| qual_opt_identifier qual_opt_identifier
-//{ err("identifier has not been declared as a typedef",LOC(@1,@1));
+//{ err("identifier has not been declared as a typedef",SLOC(@1));
 //  $$=^$(new Declarator($2,NULL)); }   
 /* | error 
    { $$=^$(new Declarator(exn_name,NULL)); } */
@@ -1870,39 +1884,48 @@ direct_declarator_withtypedef:
  * but seems necessary to parse some of the GCC header files. */
 | '(' attributes declarator_withtypedef ')'
     { let d = $3;
-      d->tms = new List(new Attributes_mod(LOC(@2,@2),$2),d->tms);
+      d->tms = new List(new Attributes_mod(SLOC(@2),$2),d->tms);
       $$=$!3;
     }
 | direct_declarator_withtypedef '[' ']' zeroterm_qual_opt
-    { $$=^$(new Declarator($1->id,new List(new Carray_mod($4,LOC(@4,@4)),$1->tms)));}
+    { let one=$1;
+      $$=^$(new Declarator(one->id,
+                           new List(new Carray_mod($4,SLOC(@4)),one->tms)));}
 | direct_declarator_withtypedef '[' assignment_expression ']' zeroterm_qual_opt
-    { $$=^$(new Declarator($1->id,
-                           new List(new ConstArray_mod($3,$5,LOC(@5,@5)),$1->tms)));}
+    { let one=$1;
+      $$=^$(new Declarator(one->id,
+                           new List(new ConstArray_mod($3,$5,SLOC(@5)),
+                                    one->tms)));}
 | direct_declarator_withtypedef '(' parameter_type_list ')'
     { let &$(lis,b,c,eff,po) = $3;
-      $$=^$(new Declarator($1->id,new List(new Function_mod(new WithTypes(lis,b,c,eff,po)),$1->tms)));
+      let one=$1;
+      $$=^$(new Declarator(one->id,new List(new Function_mod(new WithTypes(lis,b,c,eff,po)),one->tms)));
     }
 | direct_declarator_withtypedef '(' optional_effect optional_rgn_order ')'
-    { $$=^$(new Declarator($1->id,
+    { let one=$1;
+      $$=^$(new Declarator(one->id,
                            new List(new Function_mod(new WithTypes(NULL,
                                                                    false,NULL,
                                                                    $3,$4)),
-                                    $1->tms)));
+                                    one->tms)));
     }
 | direct_declarator_withtypedef '(' identifier_list ')'
-    { $$=^$(new Declarator($1->id,new List(new Function_mod(new NoTypes($3,LOC(@1,@4))),$1->tms))); }
+    { let one=$1;
+      $$=^$(new Declarator(one->id,new List(new Function_mod(new NoTypes($3,LOC(@1,@4))),one->tms))); }
 /* Cyc: added type parameters */
 | direct_declarator_withtypedef '<' type_name_list right_angle
     { let ts = List::map_c(typ2tvar,LOC(@2,@4),List::imp_rev($3));
-      $$=^$(new Declarator($1->id,new List(new TypeParams_mod(ts,LOC(@1,@4),false),$1->tms)));
+      let one=$1;
+      $$=^$(new Declarator(one->id,new List(new TypeParams_mod(ts,LOC(@1,@4),false),one->tms)));
     }
 | direct_declarator_withtypedef attributes
-  { $$=^$(new Declarator($1->id,new List(new Attributes_mod(LOC(@2,@2),$2),
-                                         $1->tms)));
+  { let one=$1;
+    $$=^$(new Declarator(one->id,new List(new Attributes_mod(SLOC(@2),$2),
+                                          one->tms)));
   }
 /* These two cases help to improve error messages */
 //| qual_opt_identifier qual_opt_identifier
-//{ err("identifier has not been declared as a typedef",LOC(@1,@1));
+//{ err("identifier has not been declared as a typedef",SLOC(@1));
 //  $$=^$(new Declarator($2,NULL)); }   
 /* | error 
    { $$=^$(new Declarator(exn_name,NULL)); } */
@@ -1917,13 +1940,13 @@ one_pointer:
   pointer_null_and_bound pointer_quals rgn_opt attributes_opt tqual_list
   { list_t<type_modifier_t> ans = NULL;
     if($4 != NULL)
-      ans = new List(new Attributes_mod(LOC(@4,@4),$4), ans);
+      ans = new List(new Attributes_mod(SLOC(@4),$4), ans);
     // don't put location info on every pointer -- too expensive
     ptrloc_t ptrloc = NULL;
     let $(ploc,nullable,bound) = *$1;
     if (Absyn::porting_c_code)
-      ptrloc = new PtrLoc{.ptr_loc=ploc,.rgn_loc=LOC(@3,@3),
-                          .zt_loc=LOC(@2,@2)};
+      ptrloc = new PtrLoc{.ptr_loc=ploc,.rgn_loc=SLOC(@3),
+                          .zt_loc=SLOC(@2)};
     let $(nullable,bound,zeroterm,rgn_opt) = collapse_pointer_quals(ploc,nullable,bound,$3,$2);
     ans = new List(new Pointer_mod(PtrAtts(rgn_opt,nullable,bound,zeroterm,ptrloc),$5), ans);
     $$ = ^$(ans);
@@ -1956,15 +1979,15 @@ pointer_qual:
 pointer_null_and_bound:
   '*' pointer_bound 
    { // avoid putting location info on here when not porting C code
-     seg_t loc = LOC(@1,@1);
+     seg_t loc = SLOC(@1);
      $$=^$(new $(loc,true_conref, $2)); 
    }
 | '@' pointer_bound 
-  {  seg_t loc = LOC(@1,@1);
+  {  seg_t loc = SLOC(@1);
      $$=^$(new $(loc, false_conref, $2)); 
   }
 | '?' 
-  { seg_t loc = LOC(@1,@1);
+  { seg_t loc = SLOC(@1);
     $$=^$(new $(loc, true_conref,  bounds_dyneither_conref));  
   }
 
@@ -1986,7 +2009,7 @@ rgn_opt:
 ;
 
 tqual_list:
-/* empty */ { $$ = ^$(empty_tqual(LOC(@1,@1))); }
+/* empty */ { $$ = ^$(empty_tqual(SLOC(@1))); }
 | type_qualifier tqual_list { $$ = ^$(combine_tqual($1,$2)); }
 ;
 
@@ -2048,7 +2071,7 @@ optional_inject:
   {$$ = ^$(false);}
 | IDENTIFIER
      { if (zstrcmp($1,"inject") != 0) 
-         err("missing type in function declaration",LOC(@1,@1));
+         err("missing type in function declaration",SLOC(@1));
        $$ = ^$(true);
      }
 ;
@@ -2093,14 +2116,14 @@ parameter_list:
 parameter_declaration:
   specifier_qualifier_list declarator_withtypedef
     { let &$(tq,tspecs,atts) = $1; 
-      if (tq.loc == NULL) tq.loc = LOC(@1,@1);
+      if (tq.loc == 0) tq.loc = SLOC(@1);
       let &Declarator(qv,tms) = $2;
-      let t = speclist2typ(tspecs, LOC(@1,@1));
+      let t = speclist2typ(tspecs, SLOC(@1));
       let $(tq2,t2,tvs,atts2) = apply_tms(tq,t,atts,tms);
       if (tvs != NULL)
-        err("parameter with bad type params",LOC(@2,@2));
+        err("parameter with bad type params",SLOC(@2));
       if(is_qvar_qualified(qv))
-        err("parameter cannot be qualified with a namespace",LOC(@1,@1));
+        err("parameter cannot be qualified with a namespace",SLOC(@1));
       let idopt = (opt_t<var_t>)(new Opt((*qv)[1]));
       if (atts2 != NULL)
         Tcutil::warn(LOC(@1,@2),"extra attributes on parameter, ignoring");
@@ -2108,16 +2131,16 @@ parameter_declaration:
     }
 | specifier_qualifier_list
     { let &$(tq,tspecs,atts) = $1; 
-      if (tq.loc == NULL) tq.loc = LOC(@1,@1);
-      let t = speclist2typ(tspecs, LOC(@1,@1));
+      if (tq.loc == 0) tq.loc = SLOC(@1);
+      let t = speclist2typ(tspecs, SLOC(@1));
       if (atts != NULL)
-        Tcutil::warn(LOC(@1,@1),"bad attributes on parameter, ignoring");
+        Tcutil::warn(SLOC(@1),"bad attributes on parameter, ignoring");
       $$=^$(new $(NULL,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
     { let &$(tq,tspecs,atts) = $1; 
-      if (tq.loc == NULL) tq.loc = LOC(@1,@1);
-      let t = speclist2typ(tspecs, LOC(@1,@1));
+      if (tq.loc == 0) tq.loc = SLOC(@1);
+      let t = speclist2typ(tspecs, SLOC(@1));
       let tms = $2->tms;
       let $(tq2,t2,tvs,atts2) = apply_tms(tq,t,atts,tms);
       if (tvs != NULL) // Ex: int (@)<`a>
@@ -2154,7 +2177,7 @@ array_initializer:
     { $$=^$(new_exp(new UnresolvedMem_e(NULL,List::imp_rev($2)),LOC(@1,@4))); }
 | '{' FOR IDENTIFIER '<' expression ':' expression '}'
     { let vd = new_vardecl(new $(Loc_n,new $3), uint_typ,
-                           uint_exp(0,LOC(@3,@3)));
+                           uint_exp(0,SLOC(@3)));
       // make the index variable const
       vd->tq.real_const = true;
       $$=^$(new_exp(new Comprehension_e(vd, $5, $7, false),LOC(@1,@8)));
@@ -2191,27 +2214,27 @@ designator:
 type_name:
   specifier_qualifier_list
     { let &$(tq,tss,atts) = $1;
-      let t = speclist2typ(tss, LOC(@1,@1));
+      let t = speclist2typ(tss, SLOC(@1));
       if (atts != NULL)
-        Tcutil::warn(LOC(@1,@1),"ignoring attributes in type");
+        Tcutil::warn(SLOC(@1),"ignoring attributes in type");
       $$=^$(new $(NULL,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
     { let &$(tq,tss,atts) = $1;
-      let t = speclist2typ(tss, LOC(@1,@1));
+      let t = speclist2typ(tss, SLOC(@1));
       let tms = $2->tms;
       let t_info = apply_tms(tq,t,atts,tms);
       if (t_info[2] != NULL)
         // Ex: int (@)<`a>
-        Tcutil::warn(LOC(@2,@2),"bad type params, ignoring");
+        Tcutil::warn(SLOC(@2),"bad type params, ignoring");
       if (t_info[3] != NULL)
-        Tcutil::warn(LOC(@2,@2),"bad specifiers, ignoring");
+        Tcutil::warn(SLOC(@2),"bad specifiers, ignoring");
       $$=^$(new $(NULL,t_info[0],t_info[1]));
     }
 ;
 
 any_type_name:
-  type_name { $$ = ^$(type_name_to_type($1,LOC(@1,@1))); }
+  type_name { $$ = ^$(type_name_to_type($1,SLOC(@1))); }
 | '{' '}' { $$ = ^$(new JoinEff(NULL)); }
 | '{' region_set '}' { $$ = ^$(new JoinEff($2)); }
 | REGIONS '(' any_type_name ')' { $$ = ^$(new RgnsEff($3)); }
@@ -2238,13 +2261,13 @@ direct_abstract_declarator:
   '(' abstract_declarator ')'
     { $$=$!2; }
 | '[' ']' zeroterm_qual_opt
-    { $$=^$(new Abstractdeclarator(new List(new Carray_mod($3,LOC(@3,@3)),NULL))); }
+    { $$=^$(new Abstractdeclarator(new List(new Carray_mod($3,SLOC(@3)),NULL))); }
 | direct_abstract_declarator '[' ']' zeroterm_qual_opt
-    { $$=^$(new Abstractdeclarator(new List(new Carray_mod($4,LOC(@4,@4)),$1->tms))); }
+    { $$=^$(new Abstractdeclarator(new List(new Carray_mod($4,SLOC(@4)),$1->tms))); }
 | '[' assignment_expression ']' zeroterm_qual_opt
-    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($2,$4,LOC(@4,@4)),NULL)));}
+    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($2,$4,SLOC(@4)),NULL)));}
 | direct_abstract_declarator '[' assignment_expression ']' zeroterm_qual_opt
-    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($3,$5,LOC(@5,@5)),
+    { $$=^$(new Abstractdeclarator(new List(new ConstArray_mod($3,$5,SLOC(@5)),
                                             $1->tms)));
     }
 | '(' optional_effect optional_rgn_order ')'
@@ -2271,7 +2294,7 @@ direct_abstract_declarator:
                                       $1->tms)));
     }
 | direct_abstract_declarator attributes
-    { $$=^$(new Abstractdeclarator(new List(new Attributes_mod(LOC(@2,@2),$2),
+    { $$=^$(new Abstractdeclarator(new List(new Attributes_mod(SLOC(@2),$2),
                                             $1->tms)));
     }
 ;
@@ -2293,7 +2316,7 @@ open_exp_opt:
   /* empty */ { $$=^$(NULL); }
 | '=' IDENTIFIER '(' expression ')' 
   { if (zstrcmp($2,"open") != 0)
-      err("expecting `open'",LOC(@2,@2));
+      err("expecting `open'",SLOC(@2));
     $$=^$($4);
   }
 ;
@@ -2305,9 +2328,9 @@ labeled_statement:
 ;
 
 expression_statement:
-  ';'            { $$=^$(skip_stmt(LOC(@1,@1))); }
+  ';'            { $$=^$(skip_stmt(SLOC(@1))); }
 | expression ';' { $$=^$(exp_stmt($1,LOC(@1,@2))); }
-//| error ';'      { $$=^$(skip_stmt(LOC(@1,@1))); } 
+//| error ';'      { $$=^$(skip_stmt(SLOC(@1))); } 
 ;
 
 compound_statement:
@@ -2321,10 +2344,10 @@ block_item_list:
 | declaration block_item_list { $$=^$(flatten_declarations($1,$2)); }
 | statement { $$=$!1; }
 | statement block_item_list { $$=^$(seq_stmt($1,$2,LOC(@1,@2))); }
-| function_definition2 { $$=^$(flatten_decl(new_decl(new Fn_d($1),LOC(@1,@1)),
+| function_definition2 { $$=^$(flatten_decl(new_decl(new Fn_d($1),SLOC(@1)),
 					    skip_stmt(DUMMYLOC))); }
 | function_definition2 block_item_list
-   { $$=^$(flatten_decl(new_decl(new Fn_d($1),LOC(@1,@1)), $2)); }
+   { $$=^$(flatten_decl(new_decl(new Fn_d($1),SLOC(@1)), $2)); }
 
 /* This has the standard shift-reduce conflict which is properly resolved. */
 selection_statement:
@@ -2340,7 +2363,7 @@ selection_statement:
     { $$=^$(switch_stmt($3,$6,LOC(@1,@7))); }
 /* Cyc: allow an identifier without the parens */
 | SWITCH qual_opt_identifier '{' switch_clauses '}'
-    { let e = new_exp(new UnknownId_e($2),LOC(@2,@2)); 
+    { let e = new_exp(new UnknownId_e($2),SLOC(@2)); 
       $$=^$(switch_stmt(e,$4,LOC(@1,@5))); }
 /* Cyc: allow tuples without the parens */
 | SWITCH '$' '(' argument_expression_list ')' '{' switch_clauses '}'
@@ -2366,18 +2389,18 @@ switch_clauses:
   /* empty */
     { $$=^$(NULL); }
 | DEFAULT ':' block_item_list
-    { $$=^$(new List(new Switch_clause(new_pat(&Wild_p_val,LOC(@1,@1)),NULL,
+    { $$=^$(new List(new Switch_clause(new_pat(&Wild_p_val,SLOC(@1)),NULL,
                                        NULL,$3,LOC(@1,@3)),
 		     NULL));}
 | CASE exp_pattern ':' switch_clauses
     { $$=^$(new List(new Switch_clause($2,NULL,NULL,
-                                       fallthru_stmt(NULL,LOC(@3,@3)),
+                                       fallthru_stmt(NULL,SLOC(@3)),
                                        LOC(@1,@4)),$4)); }
 | CASE exp_pattern ':' block_item_list switch_clauses
     { $$=^$(new List(new Switch_clause($2,NULL,NULL,$4,LOC(@1,@4)),$5)); }
 | CASE pattern AND_OP expression ':' switch_clauses
     { $$=^$(new List(new Switch_clause($2,NULL,$4,
-                                       fallthru_stmt(NULL,LOC(@5,@5)),
+                                       fallthru_stmt(NULL,SLOC(@5)),
                                        LOC(@1,@6)),$6)); }
 | CASE pattern AND_OP expression ':' block_item_list switch_clauses
     { $$=^$(new List(new Switch_clause($2,NULL,$4,$6,LOC(@1,@7)),$7)); }
@@ -2448,15 +2471,15 @@ iteration_statement:
 
 jump_statement:
   GOTO IDENTIFIER ';'   { $$=^$(goto_stmt(new $2,LOC(@1,@2))); }
-| CONTINUE ';'          { $$=^$(continue_stmt(LOC(@1,@1)));}
-| BREAK ';'             { $$=^$(break_stmt(LOC(@1,@1)));}
-| RETURN ';'            { $$=^$(return_stmt(NULL,LOC(@1,@1)));}
+| CONTINUE ';'          { $$=^$(continue_stmt(SLOC(@1)));}
+| BREAK ';'             { $$=^$(break_stmt(SLOC(@1)));}
+| RETURN ';'            { $$=^$(return_stmt(NULL,SLOC(@1)));}
 | RETURN expression ';' { $$=^$(return_stmt($2,LOC(@1,@2)));}
 /* Cyc:  explicit fallthru for switches */
-| FALLTHRU ';'          { $$=^$(fallthru_stmt(NULL,LOC(@1,@1)));}
-| FALLTHRU '(' ')' ';'  { $$=^$(fallthru_stmt(NULL,LOC(@1,@1)));}
+| FALLTHRU ';'          { $$=^$(fallthru_stmt(NULL,SLOC(@1)));}
+| FALLTHRU '(' ')' ';'  { $$=^$(fallthru_stmt(NULL,SLOC(@1)));}
 | FALLTHRU '(' argument_expression_list ')' ';'
-                        { $$=^$(fallthru_stmt($3,LOC(@1,@1)));}
+                        { $$=^$(fallthru_stmt($3,SLOC(@1)));}
 ;
 
 /***************************** PATTERNS *****************************/
@@ -2541,7 +2564,7 @@ multiplicative_pattern:
 cast_pattern:
   unary_pattern { $$=$!1; }
 | '(' type_name ')' cast_expression
-{  let t = type_name_to_type($2,LOC(@2,@2));
+{  let t = type_name_to_type($2,SLOC(@2));
    $$=^$(exp_pat(cast_exp(t,$4,true,Unknown_coercion,LOC(@1,@4)))); 
 }
 ;
@@ -2554,7 +2577,7 @@ unary_pattern:
 | unary_operator cast_expression 
   { $$=^$(exp_pat(prim1_exp($1,$2,LOC(@1,@2)))); } 
 | SIZEOF '(' type_name ')' 
-  { let t = type_name_to_type($3,LOC(@3,@3)); 
+  { let t = type_name_to_type($3,SLOC(@3)); 
     $$=^$(exp_pat(sizeoftyp_exp(t,LOC(@1,@4)))); 
   }
 | SIZEOF unary_expression
@@ -2564,7 +2587,7 @@ unary_pattern:
                                 new StructField(new $5),LOC(@1,@6)))); }
 /* not checking sign here...*/
 | OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
-   { let t = type_name_to_type($3,LOC(@3,@3));
+   { let t = type_name_to_type($3,SLOC(@3));
      $$=^$(exp_pat(offsetof_exp(t,new TupleIndex($5[1]), LOC(@1,@6)))); 
    }
 // disallow malloc, rmalloc, and cmalloc -- not constant expressions
@@ -2585,7 +2608,7 @@ primary_pattern:
 
 pattern:
   '_'
-    { $$=^$(new_pat(&Wild_p_val,LOC(@1,@1)));}
+    { $$=^$(new_pat(&Wild_p_val,SLOC(@1)));}
 | '(' expression ')'
     { $$=^$(exp_pat($2)); }
 | constant
@@ -2603,22 +2626,22 @@ pattern:
     case &Const_e({.Null_c = _}):
       $$=^$(new_pat(&Null_p_val,e->loc)); break;
     case &Const_e({.String_c = _}): 
-      err("strings cannot occur within patterns",LOC(@1,@1)); break;
+      err("strings cannot occur within patterns",SLOC(@1)); break;
     case &Const_e({.Wstring_c = _}): 
-      err("strings cannot occur within patterns",LOC(@1,@1)); break;
+      err("strings cannot occur within patterns",SLOC(@1)); break;
     case &Const_e({.LongLong_c = _}): 
-      unimp("long long's in patterns",LOC(@1,@1)); break;
+      unimp("long long's in patterns",SLOC(@1)); break;
     default: 
-      err("bad constant in case",LOC(@1,@1));
+      err("bad constant in case",SLOC(@1));
     }
   }
 | qual_opt_identifier
-    { $$=^$(new_pat(new UnknownId_p($1),LOC(@1,@1))); }
+    { $$=^$(new_pat(new UnknownId_p($1),SLOC(@1))); }
 | IDENTIFIER IDENTIFIER pattern
     { if (strcmp($2,"as") != 0) 
-        err("expecting `as'",LOC(@2,@2));
+        err("expecting `as'",SLOC(@2));
       $$=^$(new_pat(new Var_p(new_vardecl(new $(Loc_n, new $1),&VoidType_val,NULL),
-                              $3),LOC(@1,@1))); 
+                              $3),SLOC(@1))); 
     }
 | '$' '(' tuple_pattern_list ')'
     { let $(ps, dots) = *($3);
@@ -2630,13 +2653,13 @@ pattern:
     }
 | qual_opt_identifier '{' type_params_opt field_pattern_list '}'
    {  let $(fps, dots) = *($4); 
-      let exist_ts = List::map_c(typ2tvar,LOC(@3,@3),$3);
+      let exist_ts = List::map_c(typ2tvar,SLOC(@3),$3);
       $$=^$(new_pat(new Aggr_p(new AggrInfo(UnknownAggr(StructA,$1,NULL),NULL),
 			       exist_ts,fps,dots),LOC(@1,@5)));
    }
 | '{' type_params_opt field_pattern_list '}'
    {  let $(fps, dots) = *($3); 
-      let exist_ts = List::map_c(typ2tvar,LOC(@2,@2),$2);
+      let exist_ts = List::map_c(typ2tvar,SLOC(@2),$2);
       $$=^$(new_pat(new Aggr_p(NULL,exist_ts,fps,dots),LOC(@1,@4)));
    }
 | '&' pattern
@@ -2646,18 +2669,18 @@ pattern:
 | '*' IDENTIFIER
     { $$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
 						&VoidType_val,NULL),
-                                    new_pat(&Wild_p_val,LOC(@2,@2))),
+                                    new_pat(&Wild_p_val,SLOC(@2))),
 		    LOC(@1,@2))); }
 | '*' IDENTIFIER IDENTIFIER pattern
     { if (strcmp($3,"as") != 0)
-        err("expecting `as'",LOC(@3,@3));
+        err("expecting `as'",SLOC(@3));
       $$=^$(new_pat(new Reference_p(new_vardecl(new $(Loc_n, new $2),
 						&VoidType_val,NULL),
                                     $4),LOC(@1,@2))); 
     }
 | IDENTIFIER '<' TYPE_VAR '>' 
    { let tag = id2type($3,Tcutil::kind_to_bound(&Tcutil::ik));
-     $$=^$(new_pat(new TagInt_p(typ2tvar(LOC(@3,@3),tag),
+     $$=^$(new_pat(new TagInt_p(typ2tvar(SLOC(@3),tag),
 				new_vardecl(new $(Loc_n,new $1),
 					    new TagType(tag),NULL)),
 		   LOC(@1,@4))); }
@@ -2834,7 +2857,7 @@ cast_expression:
   unary_expression
     { $$=$!1; }
 | '(' type_name ')' cast_expression
-   { let t = type_name_to_type($2,LOC(@2,@2));
+   { let t = type_name_to_type($2,SLOC(@2));
       $$=^$(cast_exp(t,$4,true,Unknown_coercion,LOC(@1,@4))); 
     }
 ;
@@ -2848,17 +2871,17 @@ unary_expression:
 | '+' cast_expression     { $$=$!2; }
 | unary_operator cast_expression { $$=^$(prim1_exp($1,$2,LOC(@1,@2))); }
 | SIZEOF '(' type_name ')'       
-  { let t = type_name_to_type($3,LOC(@3,@3));
+  { let t = type_name_to_type($3,SLOC(@3));
     $$=^$(sizeoftyp_exp(t,LOC(@1,@4))); 
   }
 | SIZEOF unary_expression        { $$=^$(sizeofexp_exp($2,LOC(@1,@2))); }
 | OFFSETOF '(' type_name ',' field_name ')' 
-   { let t = type_name_to_type($3,LOC(@3,@3));
+   { let t = type_name_to_type($3,SLOC(@3));
      $$=^$(offsetof_exp(t,new StructField(new $5),LOC(@1,@6))); 
    }
 /* not checking sign here...*/
 | OFFSETOF '(' type_name ',' INTEGER_CONSTANT ')' 
-  { let t = type_name_to_type($3,LOC(@3,@3));
+  { let t = type_name_to_type($3,SLOC(@3));
      $$=^$(offsetof_exp(t,new TupleIndex($5[1]), LOC(@1,@6))); 
     }
 /* Cyc: malloc, rmalloc, numelts, swap, etc. */
@@ -2869,12 +2892,12 @@ unary_expression:
    { $$=^$(new_exp(new Malloc_e(MallocInfo{false,$3,NULL,$5,false}),
                    LOC(@1,@6))); }
 | CALLOC '(' assignment_expression ',' SIZEOF '(' type_name ')' ')'
-   { let t = type_name_to_type($7,LOC(@7,@7));
+   { let t = type_name_to_type($7,SLOC(@7));
      $$=^$(new_exp(new Malloc_e(MallocInfo{true,NULL,new(t),$3,false}),
                    LOC(@1,@9))); }
 | RCALLOC '(' assignment_expression ',' assignment_expression ',' 
               SIZEOF '(' type_name ')' ')'
-   { let t = type_name_to_type($9,LOC(@9,@9));
+   { let t = type_name_to_type($9,SLOC(@9));
      $$=^$(new_exp(new Malloc_e(MallocInfo{true,$3,new(t),$5,false}),
                    LOC(@1,@11))); }
 | NUMELTS '(' assignment_expression ')'
@@ -2882,13 +2905,13 @@ unary_expression:
 | TAGCHECK '(' postfix_expression '.' field_name ')'
    { $$=^$(new_exp(new Tagcheck_e($3,new $5),LOC(@1,@6))); }
 | TAGCHECK '(' postfix_expression PTR_OP field_name ')'
-   { $$=^$(new_exp(new Tagcheck_e(deref_exp($3,LOC(@3,@3)),new $5),LOC(@1,@6))); }
+   { $$=^$(new_exp(new Tagcheck_e(deref_exp($3,SLOC(@3)),new $5),LOC(@1,@6))); }
 | VALUEOF '(' type_name ')'
-   { let t = type_name_to_type($3,LOC(@3,@3));
+   { let t = type_name_to_type($3,SLOC(@3));
      $$=^$(valueof_exp(t, LOC(@1,@4))); }
 | ASM
    { let $(v,s) = $1;
-     $$=^$(asm_exp(v,s,LOC(@1,@1))); }
+     $$=^$(asm_exp(v,s,SLOC(@1))); }
 ;
 
 unary_operator:
@@ -2923,17 +2946,17 @@ postfix_expression:
 primary_expression:
   qual_opt_identifier
     /* Could be an identifier, a struct tag, or an datatype constructor */
-    { $$=^$(new_exp(new UnknownId_e($1),LOC(@1,@1))); }
+    { $$=^$(new_exp(new UnknownId_e($1),SLOC(@1))); }
 | constant
     { $$= $!1; }
 | STRING
-    { $$=^$(string_exp($1,LOC(@1,@1))); }
+    { $$=^$(string_exp($1,SLOC(@1))); }
 | WSTRING
-    { $$=^$(wstring_exp($1,LOC(@1,@1))); }
+    { $$=^$(wstring_exp($1,SLOC(@1))); }
 | '(' expression ')'
     { $$= $!2; }
 //| '(' error ')'
-//    { $$=^$(null_exp(LOC(@2,@2))); }
+//    { $$=^$(null_exp(SLOC(@2))); }
 /* Cyc: stop instantiation */
 | primary_expression LEFT_RIGHT
     { $$=^$(noinstantiate_exp($1, LOC(@1,@2)));}
@@ -2965,21 +2988,22 @@ argument_expression_list0:
 /* NB: We've had to move enumeration constants into primary_expression
    because the lexer can't tell them from ordinary identifiers */
 constant:
-  INTEGER_CONSTANT   { $$=^$(int_exp($1[0],$1[1],LOC(@1,@1))); }
-| CHARACTER_CONSTANT { $$=^$(char_exp($1,              LOC(@1,@1))); }
-| WCHARACTER_CONSTANT{ $$=^$(wchar_exp($1,             LOC(@1,@1))); }
+  INTEGER_CONSTANT   { let p = $1; $$=^$(int_exp(p[0],p[1],SLOC(@1))); }
+| CHARACTER_CONSTANT { $$=^$(char_exp($1,              SLOC(@1))); }
+| WCHARACTER_CONSTANT{ $$=^$(wchar_exp($1,             SLOC(@1))); }
 | FLOATING_CONSTANT  {
-     int l = strlen($1);
+     let f = $1;
+     int l = strlen(f);
      int i = 1; // indicates double
      if (l>0) {
-       char c = $1[l-1];
+       char c = f[l-1];
        if (c=='f' || c=='F') i = 0;      // float
        else if (c=='l' || c=='L') i = 2; // long double
      }
-     $$=^$(float_exp($1, i, LOC(@1,@1)));
+     $$=^$(float_exp(f, i, SLOC(@1)));
    }
 /* Cyc: NULL */
-| NULL_kw            { $$=^$(null_exp(LOC(@1,@1)));}
+| NULL_kw            { $$=^$(null_exp(SLOC(@1)));}
 ;
 
 qual_opt_identifier:

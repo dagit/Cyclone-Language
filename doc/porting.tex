@@ -166,7 +166,7 @@ pointers, use
 \texttt{new} or \texttt{rnew} in conjunction with array comprehensions.  
 For example, to copy a string \texttt{s}, one might write:
 \begin{verbatim}
-  char *@fat t = new {for i < s.size : s[i]};
+  char *@fat t = new {for i < numelts(s) : s[i]};
 \end{verbatim}
 \end{porta}
 
@@ -380,7 +380,7 @@ problem doesn't occur in Cyclone.  If you really want to initialize
 say using the \texttt{dup} function from the string library:
 \begin{verbatim}
 void foo() {
-  char ?x = dup("howdy");
+  char ?x = strdup("howdy");
   x[0] = 'a';
 }
 \end{verbatim}
@@ -392,7 +392,7 @@ extern unsigned long strtoul(const char ?`r n,
                              const char ?`r*`r2 endptr,
                              int base);
 unsigned long foo() {
-  char ?x = dup("howdy");
+  char ?x = strdup("howdy");
   char ?*e = NULL;
   return strtoul(x,e,0);
 }

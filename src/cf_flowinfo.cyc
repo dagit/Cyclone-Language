@@ -33,9 +33,12 @@ using List;
 using Absynpp;
 namespace CfFlowInfo;
 
-#ifdef COARSE_REGIONS
+#define ANAL_COARSE_REGIONS
+
+#ifdef ANAL_COARSE_REGIONS
 #define ANAL_RGN(ae,x) let x = (ae)->r;
 #else
+// FIX:  this doesn't type check currently!
 #define ANAL_RGN(ae,x) region x;
 #endif
 
@@ -59,7 +62,7 @@ int place_cmp(place_t p1, place_t p2);
 int root_cmp(root_t r1, root_t r2);
 flow_env_t<`r> new_flow_env(region_t<`r> r) {
   static datatype Raw_exp.Const_e dummy_rawexp = Const_e(Cnst{.Null_c = 0});
-  static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,NULL,&EmptyAnnot_val);
+  static struct Exp dummy_exp = Exp(NULL,&dummy_rawexp,0,&EmptyAnnot_val);
   return rnew(r)
     FlowEnv { .r = r,
               .zero = rnew(r) Zero,
@@ -416,7 +419,7 @@ static bool
 prefix_of_member(place_t<`r2,`r3> place,
                  Dict::dict_t<place_t<`r2,`r3>,Position::seg_t,`r4> set) {
   region r; {
-    let elem = $(place,NULL);
+    $(place_t,Position::seg_t) elem = $(place,0);
     Iter::iter_t<_,`r> iter = Dict::make_iter(r,set);
     while(Iter::next(iter,&elem)) {
       let place2 = elem[0];
@@ -522,7 +525,7 @@ static flowdict_t<`r> escape_these(flow_env_t<`r> fenv,
   while(pile->places != NULL) {
     let place = pile->places->hd;
     pile->places = pile->places->tl;
-    update_place_set(all_changed,place,NULL);
+    update_place_set(all_changed,place,0);
     absRval_t oldval, newval;
     try oldval = lookup_place(d,place);
     catch { case &Dict::Absent: continue; }
@@ -760,7 +763,7 @@ static absRval_t<`r2> assign_place_outer(struct AssignEnv<`r,`r2> @ env,
 	let &Place{root,fs} = env->root_place;
 	let new_fs = List::rfilter_c(env->pile->rgn,nprefix,new fs_prefix,fs);
 	let curr_place = rnew (env->pile->rgn) Place(root,new_fs);
-	update_place_set(env->all_changed,curr_place,NULL);
+	update_place_set(env->all_changed,curr_place,0);
       }
     }
     return rnew(env->fenv->r) Aggregate(UnionRInfo(is_union,hd),d);
@@ -772,7 +775,7 @@ flowdict_t<`r> assign_place(flow_env_t<`r> fenv,
                             place_set_t<`r> * all_changed,
                             place_t<`r,`r> place,
                             absRval_t<`r> r) {
-  update_place_set(all_changed,place,NULL);
+  update_place_set(all_changed,place,0);
   ANAL_RGN(fenv, rgn) {
     let &Place{root,fs} = place;
     struct AssignEnv/*<`rgn>*/ env = AssignEnv(fenv, rnew(rgn) EscPile(rgn,NULL), d, loc, place, all_changed);

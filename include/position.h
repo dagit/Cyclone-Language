@@ -34,12 +34,10 @@ namespace Position {
   extern string_t get_position_file();
 
   //////// Location Tracking /////////
-  extern struct Segment;
-  typedef struct Segment *seg_t; // same as segment, but better emacs coloring
-  extern seg_t  segment_of_abs(int,int);
+  typedef unsigned int seg_t; 
   extern seg_t  segment_join(seg_t,seg_t);
   extern bool   segment_equals(seg_t,seg_t);
-  extern mstring_t string_of_loc(int);
+  extern mstring_t string_of_loc(unsigned int);
   extern mstring_t string_of_segment(seg_t);
   extern list_t<mstringptr_t> strings_of_segments(list_t<seg_t,`r>);
 
@@ -61,7 +59,6 @@ namespace Position {
   //////// Error Reporting ///////////
   extern datatype exn {extern Nocontext};
   extern bool use_gcc_style_location;
-  extern bool print_context;
   extern int num_errors;
   extern int max_errors;
   extern void post_error(error_t);

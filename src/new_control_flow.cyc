@@ -1013,7 +1013,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     else if(iscalloc) place_val = typ_to_absrval(fenv,*topt,false,fenv->zero);
     else place_val = typ_to_absrval(fenv,*topt,false,fenv->unknown_none);
     flow_t    outflow;
-    update_place_set(env->all_changed,place,NULL);
+    update_place_set(env->all_changed,place,0);
     if(eopt!=NULL) {
       ANAL_RGN(env,temp) {
         let $(f,rvals) = anal_unordered_Rexps(temp,env,inflow,
@@ -1079,7 +1079,7 @@ anal_Rexp(analenv_t<`r> env, bool copy_ctxt, flow_t<`r> inflow, exp_t e) {
     root_t    root      = rnew(fenv->r) MallocPt(e2,e->topt->v);
     place_t   place     = rnew(fenv->r) Place(root,NULL);
     absRval_t rval      = rnew(fenv->r) AddressOf(place);
-    update_place_set(env->all_changed,place,NULL);
+    update_place_set(env->all_changed,place,0);
     flow_t    outflow;
     absRval_t place_val;
     if(eopt!=NULL) {
@@ -1475,7 +1475,7 @@ static $(flow_t<`r>,absLval_t<`r>)
           root_t new_root = rnew(fenv->r) MallocPt(e,e->topt->v);
           place_t place = rnew(fenv->r) Place{new_root,NULL};
           absRval_t res = rnew(fenv->r) AddressOf(place);
-          update_place_set(env->all_changed,place,NULL);
+          update_place_set(env->all_changed,place,0);
           fd = Dict::insert(fd,new_root,new_rval);
           fd = assign_place(fenv,e->loc,fd,env->all_changed,p,res);
           let outflow = ReachableFL(fd,r);
@@ -2224,7 +2224,7 @@ static void check_nested_fun(flow_env_t<`r> fenv,
       switch(atts->hd) {
       case &Noliveunique_att(i):
         unsigned j = i;
-        exp_t bogus_exp = signed_int_exp(-1,NULL);
+        exp_t bogus_exp = signed_int_exp(-1,0);
         if (j > List::length(fd->param_vardecls->v)) {
           Tcutil::terr(loc,"noliveunique attribute exceeds number of parameters");
           continue;

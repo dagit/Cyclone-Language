@@ -78,7 +78,7 @@ struct ProcEnv {
   unsigned int unique_live_bytes;
   unsigned int refcnt_live_bytes;
   unsigned int total_dynregion_size;
-  list_t<$(stringptr_t,$(unsigned int,unsigned int) @) @> dyn_regions;
+  Hashtable::table_t<stringptr_t, $(unsigned int,unsigned int)@> dyn_regions;
 
   // GRAPH POINTS
   list_t<$(unsigned int,unsigned int)@> gc_points;
@@ -87,7 +87,7 @@ struct ProcEnv {
   list_t<$(unsigned int,unsigned int)@> unique_live;
   list_t<$(unsigned int,unsigned int)@> refcnt_live;
   list_t<$(unsigned int,unsigned int)@> total_dyn_live;
-  list_t<$(stringptr_t,list_t<$(unsigned int,unsigned int) @>@) @> dyn_live;
+  Hashtable::table_t<stringptr_t,list_t<$(unsigned int,unsigned int)@>@> dyn_live;
 };
 
 /////////////////////////////// GRAPH OUTPUT
@@ -275,12 +275,11 @@ static bool yeah_man(list_t<$(unsigned int,unsigned int) @> dynpts,
 }
 
 static void
-output_dynregion_line($(int,unsigned int ?,
-			list_t<$(unsigned int,unsigned int) @>) @env,
-		      $(stringptr_t,
-			list_t<$(unsigned int,unsigned int) @> @) @line) {
+output_dynregion_line(stringptr_t name, 
+                      list_t<$(unsigned int,unsigned int) @> @pts,
+                      $(int,unsigned int ?,
+			list_t<$(unsigned int,unsigned int) @>) @env) {
   let &$(*num,heap_size,mempts) = env;
-  let &$(name,pts) = line;
   if (length(*pts) <= 2) return; // region was empty
   if (!yeah_man(*pts,mempts,dyn_threshhold)) return;
 //   fprintf(stderr,"Outputting dynregion %s,%x\n",*name,pts);
@@ -370,16 +369,14 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     assert(strcmp("unique",rname));
     assert(strcmp("heap",rname));
     assert(strcmp("refcnt",rname));
-    assert(!mem_assoc_cmp(strptrcmp,env->dyn_regions,rnameptr));
+    //assert(!mem_assoc_cmp(strptrcmp,env->dyn_regions,rnameptr));
 
-    env->dyn_regions = imp_merge(cmp,env->dyn_regions,
-				 new List(new $(rnameptr,new $(0,0)),NULL));
+    Hashtable::insert(env->dyn_regions,rnameptr,new $(0,0));
     list_t<$(unsigned int,unsigned int) @`H>@`H l =
       new (new List(new $(env->cnt,0),NULL));
 //     fprintf(stderr,"adding point at time %d for region %s l=%x\n",
 // 	    env->cnt,rname,(unsigned int)l);
-    env->dyn_live = imp_merge(cmp,env->dyn_live,
-			      new List(new $(rnameptr,l),NULL));
+    Hashtable::insert(env->dyn_live,rnameptr,l);
     update_heap_stats(env,rstats);
     break;
 
@@ -411,7 +408,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       try {
 	// update the tot/free counts
 	let &$(*tot_size,*free_size) =
-	  assoc_cmp(strptrcmp,env->dyn_regions,rnameptr);
+          Hashtable::lookup(env->dyn_regions, rnameptr);
 	*free_size = *free_size - count;
 	int live_size = *tot_size - *free_size;
 	int old_live_size = 0;
@@ -422,7 +419,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
 	env->total_dyn_live = add_point(env->cnt,count + old_live_size,
 					env->total_dyn_live);
 	// update the individual points list
-	let l = assoc_cmp(strptrcmp,env->dyn_live,rnameptr);
+	let l = Hashtable::lookup(env->dyn_live,rnameptr);
 // 	fprintf(stderr,"adding point at time %d for region %s l=%x\n",
 // 		env->cnt,rname,(unsigned int)l);
 	*l = add_point(env->cnt,live_size,*l);
@@ -462,7 +459,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     try {
       // update total points list
       let &$(tot_size,free_size) =
-	assoc_cmp(strptrcmp,env->dyn_regions,rnameptr);
+        Hashtable::lookup(env->dyn_regions, rnameptr);
       int live_size = tot_size - free_size;
       int old_live_size = 0;
       if (env->total_dyn_live != NULL) {
@@ -471,10 +468,9 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       env->total_dyn_live = add_point(env->cnt,old_live_size - live_size,
 				      env->total_dyn_live);
       // remove region from running counters
-      env->dyn_regions = delete_cmp(cmp,env->dyn_regions,
-				    new $(rnameptr,new $(0,0)));
+      Hashtable::remove(env->dyn_regions,rnameptr);
       // update the individual points list
-      let l = assoc_cmp(strptrcmp,env->dyn_live,rnameptr);
+      let l = Hashtable::lookup(env->dyn_live,rnameptr);
 //       fprintf(stderr,"adding point at time %d for region %s l=%x\n",
 // 	      env->cnt,rname,(unsigned int)l);
       *l = add_point(env->cnt,0,*l);
@@ -501,7 +497,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
     try {
       // update the tot/free counts
       let &$(*tot_size,*free_size) =
-	assoc_cmp(strptrcmp,env->dyn_regions,rnameptr);
+        Hashtable::lookup(env->dyn_regions,rnameptr);
       let old_tot = *tot_size;
       let old_free = *free_size;
       *tot_size = *tot_size + count;
@@ -515,7 +511,7 @@ static bool proc_event(struct ProcEnv @env, aprof_event_t event) {
       env->total_dyn_live = add_point(env->cnt,old_live_size+old_free,
 				      env->total_dyn_live);
       // update point
-      let l = assoc_cmp(strptrcmp,env->dyn_live,rnameptr);
+      let l = Hashtable::lookup(env->dyn_live,rnameptr);
 //       fprintf(stderr,"adding point at time %d for region %s l=%x\n",
 // 	      env->cnt,rname,(unsigned int)l);
       *l = add_point(env->cnt,*tot_size - *free_size,*l);
@@ -548,14 +544,14 @@ int generate_graph(string_t<`H> file) {
 		.unique_live_bytes = 0,
 		.refcnt_live_bytes = 0,
 		.total_dynregion_size = 0,
-		.dyn_regions = NULL,
+		.dyn_regions = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr),
 		.gc_points = NULL,
 		.mem_total = NULL,
 		.heap_live = NULL,
 		.unique_live = NULL,
 		.refcnt_live = NULL,
 		.total_dyn_live = NULL,
-		.dyn_live = NULL };
+		.dyn_live = Hashtable::create(101,strptrcmp,Hashtable::hash_stringptr) };
 
   // initialize the hash table
   init_table();
@@ -601,7 +597,7 @@ int generate_graph(string_t<`H> file) {
   }
   else {
     let dynenv = new $(2,heap_size,env->mem_total);
-    iter_c(output_dynregion_line,dynenv,env->dyn_live);
+    Hashtable::iter_c(output_dynregion_line,env->dyn_live,dynenv);
   }
   output_cleanup();
   return 0;

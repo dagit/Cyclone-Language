@@ -41,9 +41,7 @@ using Absyn;
 using Position;
 
 void yyerror(string_t<`H> s) { 
-  post_error(mk_err_parse(segment_of_abs(yylloc.first_line,
-					 yylloc.last_line), 
-			  s));
+  post_error(mk_err_parse(yylloc.first_line,s));
 } 
 
 namespace Lex {
@@ -107,11 +105,11 @@ static int runaway_start = 0;
 static int paren_depth = 0; // used for __asm__ parsing
 
 static void err(string_t<`H> msg,Lexbuf<`a> lb) {
-  seg_t s = segment_of_abs(lexeme_start(lb),lexeme_end(lb));
+  seg_t s = lexeme_start(lb);
   post_error(mk_err_lex(s,msg));
 }
 static void runaway_err(string_t<`H> msg,Lexbuf<`a> lb) {
-  seg_t s = segment_of_abs(runaway_start,lexeme_start(lb));
+  seg_t s = runaway_start;
   post_error(mk_err_lex(s,msg));
 }
 
@@ -554,16 +552,16 @@ static short process_id(Lexbuf<`a> lbuf) {
     short res = (short)kw_nums[symbol_num-1]; 
     switch (res) {
     case ZEROTERM_QUAL: 
-      Tcutil::warn(segment_of_abs(yylloc.first_line,yylloc.last_line),
+      Tcutil::warn(yylloc.first_line,
                    "deprecated ZEROTERM, use @zeroterm"); break;
     case NOZEROTERM_QUAL: 
-      Tcutil::warn(segment_of_abs(yylloc.first_line,yylloc.last_line),
+      Tcutil::warn(yylloc.first_line,
                    "deprecated NOZEROTERM, use @nozeroterm"); break;
     case TUNION: 
-      Tcutil::warn(segment_of_abs(yylloc.first_line,yylloc.last_line),
+      Tcutil::warn(yylloc.first_line,
                    "deprecated tunion, use datatype"); break;
     case XTUNION: 
-      Tcutil::warn(segment_of_abs(yylloc.first_line,yylloc.last_line),
+      Tcutil::warn(yylloc.first_line,
                    "deprecated xtunion, use @extensible datatype"); break;
     default: break;
     }

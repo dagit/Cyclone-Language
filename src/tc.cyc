@@ -87,10 +87,10 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
   case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && initializer != NULL:
     switch (initializer->r) {
       case &Const_e({.String_c = s}):
-      t = vd->type = array_typ(telt,tq,uint_exp(numelts(s),NULL),zt,ztl);
+      t = vd->type = array_typ(telt,tq,uint_exp(numelts(s),0),zt,ztl);
       break;
       case &Const_e({.Wstring_c = s}): /* FIX: need correct size, not 1 */
-      t = vd->type = array_typ(telt,tq,uint_exp(1,NULL),zt,ztl);
+      t = vd->type = array_typ(telt,tq,uint_exp(1,0),zt,ztl);
       break;
       case &Comprehension_e(_,e,_,_):
       // FIX: need to copy e here!
@@ -98,7 +98,7 @@ static void tcVardecl(tenv_t te, genv_t ge, seg_t loc,
       break;
       case &UnresolvedMem_e(_,es): fallthru(es);
       case &Array_e(es):
-      t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),NULL),zt,ztl);
+      t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),0),zt,ztl);
       break;
       default: break;
     }
@@ -347,18 +347,18 @@ static void tcFndecl(tenv_t te, genv_t ge, seg_t loc, fndecl_t fd,
         opt_t<list_t<tvar_t>> tvs = new Opt(fd->tvs);
         if (!unify(t2,dyneither_typ(string_typ(new_evar(new Opt(&rk),tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     empty_tqual(NULL),empty_conref())) &&
+                                     empty_tqual(0),empty_conref())) &&
             !unify(t2,dyneither_typ(const_string_typ(new_evar(new Opt(&rk),
                                                                tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     empty_tqual(NULL),empty_conref())) &&
+                                     empty_tqual(0),empty_conref())) &&
             !unify(t2,dyneither_typ(string_typ(new_evar(new Opt(&rk),tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     const_tqual(NULL),empty_conref())) &&
+                                     const_tqual(0),empty_conref())) &&
             !unify(t2,dyneither_typ(const_string_typ(new_evar(new Opt(&rk),
                                                                tvs)),
                                      new_evar(new Opt(&rk),tvs),
-                                     const_tqual(NULL),empty_conref()))) {
+                                     const_tqual(0),empty_conref()))) {
           terr(loc,"second argument of main has type %s instead of char??",
                typ2string(t2));
         }

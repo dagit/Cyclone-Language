@@ -121,7 +121,7 @@ datacon(AbsynAnnot, EmptyAnnot);
   //static datatype Cnst.Int_c      one_intc  = Int_c(Unsigned,1);
 static datatype Raw_exp.Const_e one_b_raw = 
 Const_e(Cnst{.Int_c=$(Unsigned,1)});
-struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,NULL,&EmptyAnnot_val};
+struct Exp exp_unsigned_one_v = {NULL,&one_b_raw,0,&EmptyAnnot_val};
 exp_t exp_unsigned_one = &exp_unsigned_one_v;
 static datatype Bounds.Upper_b one_bt = Upper_b(&exp_unsigned_one_v);
 datatype Bounds @bounds_one = &one_bt;
@@ -327,7 +327,7 @@ qvar_t exn_name   = &exn_name_v;
   static $(nmspace_t, var_t) str##_pr    = $(Nmspace{.Abs_n=NULL},&str##_str);\
   qvar_t                     str##_name  = &str##_pr;\
   static struct Datatypefield  str##_tuf_v = Datatypefield(&str##_pr,\
-				 		       NULL,NULL,Extern);\
+				 		       NULL,0,Extern);\
   datatypefield_t              str##_tuf   = &str##_tuf_v
 
 MAKE_BUILTIN_EXN(Null_Exception);
@@ -353,7 +353,7 @@ type_t exn_typ() {
   static opt_t<type_t> exn_type_val = NULL;
   if (exn_type_val == NULL) {
     exn_type_val = new Opt(at_typ(&exn_typ_tt, &HeapRgn_val, 
-                                  empty_tqual(NULL), false_conref));
+                                  empty_tqual(0), false_conref));
   }
   return exn_type_val->v;
 }
@@ -385,7 +385,7 @@ static datatype Type.RgnHandleType uniquergn_typ =
   RgnHandleType(&UniqueRgn_val);
 
 static struct Vardecl uniquergn_var_d =
-  Vardecl(Extern,&uniquergn_qvar_p,Tqual(false,false,false,false,NULL),
+  Vardecl(Extern,&uniquergn_qvar_p,Tqual(false,false,false,false,0),
 	  &uniquergn_typ, NULL, NULL, NULL, false);
 static datatype Binding.Global_b uniquergn_bind_p = Global_b(&uniquergn_var_d);
 
@@ -394,7 +394,7 @@ static datatype Raw_exp.Var_e uniquergn_exp_r =
 
 static struct Opt<type_t> uniquergn_typ_opt = Opt(&uniquergn_typ);
 static struct Exp uniquergn_exp_p =
-  Exp(&uniquergn_typ_opt, &uniquergn_exp_r, NULL, &EmptyAnnot_val);
+  Exp(&uniquergn_typ_opt, &uniquergn_exp_r, 0, &EmptyAnnot_val);
 
 exp_t uniquergn_exp = &uniquergn_exp_p;
 
@@ -404,13 +404,13 @@ type_t string_typ(type_t rgn) {
   switch (Tcutil::compress(rgn)) {
   case &HeapRgn:
     if (string_t_opt == NULL) {
-      type_t t = starb_typ(char_typ,&HeapRgn_val,empty_tqual(NULL),
+      type_t t = starb_typ(char_typ,&HeapRgn_val,empty_tqual(0),
                            &DynEither_b_val,true_conref);
       string_t_opt = new t;
     }
     return *string_t_opt;
   default:
-    return starb_typ(char_typ,rgn,empty_tqual(NULL),&DynEither_b_val,true_conref);
+    return starb_typ(char_typ,rgn,empty_tqual(0),&DynEither_b_val,true_conref);
   }
 }
 static type_t* const_string_t_opt = NULL;
@@ -418,13 +418,13 @@ type_t const_string_typ(type_t rgn) {
   switch (Tcutil::compress(rgn)) {
   case &HeapRgn:
     if (const_string_t_opt == NULL) {
-      type_t t = starb_typ(char_typ,&HeapRgn_val,const_tqual(NULL),
+      type_t t = starb_typ(char_typ,&HeapRgn_val,const_tqual(0),
                            &DynEither_b_val,true_conref);
       const_string_t_opt = new t;
     }
     return *const_string_t_opt;
   default:
-    return starb_typ(char_typ,rgn,const_tqual(NULL),&DynEither_b_val,true_conref);
+    return starb_typ(char_typ,rgn,const_tqual(0),&DynEither_b_val,true_conref);
   }
 }
 // pointers
@@ -495,7 +495,7 @@ type_t file_typ() {
     typedef_name_t file_t_name = new $(Abs_n(NULL,false), sf);
     aggrdecl_t sd = new Aggrdecl(StructA,Abstract,file_t_name,NULL,NULL,NULL);
     type_t file_struct_typ = new AggrType(AggrInfo(KnownAggr(new sd),NULL));
-    file_t_opt = new at_typ(file_struct_typ,&HeapRgn_val,empty_tqual(NULL),
+    file_t_opt = new at_typ(file_struct_typ,&HeapRgn_val,empty_tqual(0),
                             false_conref);
   }
   return *file_t_opt;
@@ -506,7 +506,7 @@ type_t void_star_typ() {
 
   if (void_star_t_opt == NULL)
     void_star_t_opt = new star_typ(&VoidType_val,&HeapRgn_val,
-                                   empty_tqual(NULL),false_conref);
+                                   empty_tqual(0),false_conref);
   return *void_star_t_opt;
 }
 static datatype Type.JoinEff empty_eff = JoinEff(NULL);
@@ -779,12 +779,12 @@ decl_t alias_decl(exp_t e,tvar_t tv,vardecl_t vd,seg_t loc) {
 }
 
 vardecl_t new_vardecl(qvar_t x, type_t t, exp_opt_t init) {
-  return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(NULL),
+  return new Vardecl{.sc=Public, .name=x, .tq=empty_tqual(0),
                         .type=t, .initializer=init, .rgn=NULL, 
                         .attributes=NULL, .escapes=false};
 }
 vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init) {
-  return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(NULL),
+  return new Vardecl{.sc=Static, .name=x, .tq=empty_tqual(0),
                         .type=t, .initializer=init, .rgn=NULL,
                         .attributes=NULL, .escapes=false};
 }
@@ -870,7 +870,7 @@ type_t pointer_expand(type_t t,bool fresh_evar) {
                                  fresh_evar ? 
 				 new_evar(new Opt(&Tcutil::rk),
 					  NULL) : &HeapRgn_val,
-                                 empty_tqual(NULL),false_conref);
+                                 empty_tqual(0),false_conref);
   default: return t;
   }
 }

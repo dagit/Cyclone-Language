@@ -965,13 +965,13 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       return;
 
     case &TypeDeclType(&{.r = &Aggr_td(x),...},_):
-      scan_decl(new_decl(new Aggr_d(x),NULL),dep);
+      scan_decl(new_decl(new Aggr_d(x),0),dep);
       let &$(_,n) = x->name;
       add_target(n);
       return;
 
     case &TypeDeclType(&{.r = &Enum_td(x),...},_):
-      scan_decl(new_decl(new Enum_d(x),NULL),dep);
+      scan_decl(new_decl(new Enum_d(x),0),dep);
       let &$(_,n) = x->name;
       add_target(n);
       return;

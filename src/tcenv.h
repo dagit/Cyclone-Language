@@ -102,7 +102,7 @@ extern region_t<`r> get_fnrgn(tenv_t<`g,`r>);
 // The COARSE_REGIONS flag, when on, uses many fewer, coarse-grained
 // regions.  Basically, we use one region for each function during
 // each of the type-checking, flow analysis, and translation stages.
-#define COARSE_REGIONS
+//#define COARSE_REGIONS
 
 #ifdef COARSE_REGIONS
 #define TEMP_RGN(te,x) let x = Tcenv::get_fnrgn(te);

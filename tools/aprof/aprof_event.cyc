@@ -54,14 +54,15 @@ static void skip_whitespace(FILE @f) {
 static bool gettoken(FILE @f) {
   int i = 0;
   int c;
+  char ?@nozeroterm bufp = (char ?@nozeroterm)buf;
   skip_whitespace(f);
   c = getc(f);
   if (c == EOF) return false;
   while (c != EOF && c != ' ' && c != '\t' && c != '\n') {
-    buf[i++] = (char)c;
+    bufp[i++] = (char)c;
     c = getc(f);
   }
-  buf[i] = '\0';
+  bufp[i] = '\0';
   ungetc(c,f);
   return true;
 }  

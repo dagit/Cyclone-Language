@@ -230,7 +230,7 @@ rule token "$(int,comment_t)*" = parse
 
   /* Return the starting position (character number) of a declaration */
   static int decl2start(Absyn::decl_t d) {
-    return d->loc->start;
+    return d->loc;
   }
 
   /* Filter a list of (pos_t,`a) pairs by file name */

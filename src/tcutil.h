@@ -81,6 +81,10 @@ extern coercion_t castable(tenv_t,seg_t,type_t,type_t);
 extern $(decl_t,exp_t) insert_alias(exp_t e, type_t e_typ);
 // prints a warning when an alias coercion is inserted
 extern bool warn_alias_coerce;
+// flag to control whether or not we print a warning when implicitly casting
+// a pointer from one region into another due to outlives constraints.
+extern bool warn_region_coerce;
+
 
 extern bool is_integral(exp_t);
 extern bool is_numeric(exp_t);

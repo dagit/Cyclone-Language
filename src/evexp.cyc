@@ -236,7 +236,7 @@ static $(cnst_t,bool) eval_const_exp(exp_t e) {
       case $(&TagType(it),{.Int_c = $(sn2,x)}):
 	if(x < 0)
 	  terr(e->loc,"cannot cast negative number to a tag type");
-	unify(it, new ValueofType(const_exp(ans[0],NULL)));
+	unify(it, new ValueofType(const_exp(ans[0],0)));
 	ans[0] = Int_c(Unsigned,x);
 	break;
       default: terr(e->loc,"cannot cast to %s",typ2string(t)); break;

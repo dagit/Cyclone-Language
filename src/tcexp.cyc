@@ -269,14 +269,14 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
         e->r = new Const_e(Null_c);
         let tenv_tvs = lookup_type_vars(te);
         t = new PointerType(PtrInfo(new_evar(&tako,new Opt(tenv_tvs)),
-				    empty_tqual(NULL),
+				    empty_tqual(0),
 				    PtrAtts(new_evar(&trko,new Opt(tenv_tvs)),
 					    true_conref,
 					    empty_conref(), empty_conref(),
                                             NULL)));
         break;
       case &TagType(t1):
-	let t2 = new ValueofType(uint_exp(i,NULL));
+	let t2 = new ValueofType(uint_exp(i,0));
 	if(!unify(t1,t2)) {
 	  terr(loc, "expecting %s but found %s",typ2string(t1),typ2string(t2));
 	  explain_failure();
@@ -301,14 +301,14 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     // The default is to treat a string as if it's statically heap
     // allocated and return a pointer to that string.  However, if the
     // string is used as an initializer, then we should return an array type.
-    t = atb_typ(string_elt_typ,&HeapRgn_val,const_tqual(NULL),
+    t = atb_typ(string_elt_typ,&HeapRgn_val,const_tqual(0),
                 new Upper_b(elen),true_conref);
     if (topt != NULL) {
       switch (compress(*topt)) {
       case &ArrayType(ArrayInfo{_,tq,_,_,_}):
         // as an array initializer, a string literal can be either
         // treated as zero-terminated or not, hence the empty_conref.
-        return array_typ(string_elt_typ, tq, elen, empty_conref(),NULL);
+        return array_typ(string_elt_typ, tq, elen, empty_conref(),0);
       case &PointerType(_):
         if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
           e->topt = new Opt(t);
@@ -317,7 +317,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
         } else {
           // maybe it's going in a different region
           t = atb_typ(string_elt_typ,new_evar(&rko,lookup_opt_type_vars(te)),
-                      const_tqual(NULL),
+                      const_tqual(0),
                       new Upper_b(elen), true_conref);
           if (!unify(*topt,t) && silent_castable(te,loc,t,*topt)) {
             e->topt = new Opt(t);
@@ -334,7 +334,7 @@ static type_t tcConst(tenv_t te, seg_t loc, type_t * topt, cnst_t *c, exp_t e){
     let tenv_tvs = lookup_type_vars(te);
     // FIX: take advantage of topt
     t = new PointerType(PtrInfo(new_evar(&tako,new Opt(tenv_tvs)),
-                                empty_tqual(NULL),
+                                empty_tqual(0),
 				PtrAtts(new_evar(&trko,new Opt(tenv_tvs)),
 					true_conref,
 					empty_conref(),empty_conref(),NULL)));
@@ -1246,7 +1246,7 @@ static type_t tcCast(tenv_t te, seg_t loc, type_t * topt, type_t t, exp_t e,
 static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
                         type_t * topt, exp_t e) {
   let topt2 = NULL;
-  let tq2 = empty_tqual(NULL);
+  let tq2 = empty_tqual(0);
   if (topt != NULL) {
     switch (compress(*topt)) {
     case &PointerType(PtrInfo(elttype,tq,PtrAtts(_,_,_,zt,_))):
@@ -1284,7 +1284,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
       // since we aren't creating an alias.
 
       // This ensures that we get the right size for an array or ? pointer.
-      e0->r = add_exp(e1,e2,NULL)->r;
+      e0->r = add_exp(e1,e2,0)->r;
       return tcPlus(te,e1,e2);
     }
     break;
@@ -1305,7 +1305,7 @@ static type_t tcAddress(tenv_t te, seg_t loc, exp_t e0,
   if (is_noalias_region(rgn,false))
     terr(e->loc,"using & would manufacture an alias to an alias-free pointer");
 
-  tqual_t tq = empty_tqual(NULL);
+  tqual_t tq = empty_tqual(0);
   if(is_const) {
     tq.print_const = true;
     tq.real_const = true;
@@ -1331,7 +1331,7 @@ static type_t tcSizeof(tenv_t te, seg_t loc, type_t * topt, type_t t) {
     switch (compress(*topt)) {
     case tagtyp as &TagType(tt):
       // see if tt unifies with ValueofType(Sizeof_e(t))
-      let e = sizeoftyp_exp(t,NULL);
+      let e = sizeoftyp_exp(t,0);
       let tt2 = new ValueofType(e);
       if (unify(tt,tt2)) return tagtyp;
       break;
@@ -1420,7 +1420,7 @@ static type_t tcDeref(tenv_t te_orig, seg_t loc, type_t * topt, exp_t e) {
       let b = empty_conref();
       let zt = empty_conref();
       let atts = PtrAtts(rt,empty_conref(),b,zt,NULL);
-      let new_t = new PointerType(PtrInfo{t2,empty_tqual(NULL),atts});
+      let new_t = new PointerType(PtrInfo{t2,empty_tqual(0),atts});
       unify(t,new_t);
       fallthru(t2,rt,b,zt);
     case &PointerType(PtrInfo(t2,_,PtrAtts(rt,_,b,zt,_))):
@@ -1643,7 +1643,7 @@ static type_t tcTuple(tenv_t te, seg_t loc, type_t * topt, list_t<exp_t> es) {
   if(!done)
     for(; es != NULL; es = es->tl) {
       tcExpInitializer(te,NULL,es->hd);
-      fields = new List(new $(empty_tqual(NULL), es->hd->topt->v), fields);
+      fields = new List(new $(empty_tqual(0), es->hd->topt->v), fields);
     }
   return new TupleType(List::imp_rev(fields));
 }
@@ -1681,8 +1681,8 @@ static type_t tcArray(tenv_t te, seg_t loc, type_t *elt_topt,
     }
     sz_exp->topt = new Opt(uint_typ);
     res_t2 = array_typ(res,
-                       (elt_tqopt?(*elt_tqopt):(empty_tqual(NULL))),
-                       sz_exp, zero_term ? true_conref : false_conref,NULL);
+                       (elt_tqopt?(*elt_tqopt):(empty_tqual(0))),
+                       sz_exp, zero_term ? true_conref : false_conref,0);
 
     for (_ es2 = es; es2 != NULL; es2 = es2->tl)
       tcExpInitializer(te,elt_topt,es2->hd);
@@ -1771,13 +1771,13 @@ static type_t tcComprehension(tenv_t te, seg_t loc, type_t * topt,
     if (ztopt != NULL && conref_def(false,*ztopt)) {
       // for zero-terminated arrays, the result is one larger due to the
       // implicit zero.
-      let e1 = uint_exp(1,NULL); e1->topt = new Opt(uint_typ);
-      bound = add_exp(bound,e1,NULL); bound->topt = new Opt(uint_typ);
+      let e1 = uint_exp(1,0); e1->topt = new Opt(uint_typ);
+      bound = add_exp(bound,e1,0); bound->topt = new Opt(uint_typ);
       *is_zero_term = true;
     }
     // FIX:  bound may not be a constant here...
-    let res = array_typ(t,(tqopt == NULL) ? empty_tqual(NULL) : *tqopt, bound,
-                        (ztopt == NULL) ? false_conref : *ztopt, NULL);
+    let res = array_typ(t,(tqopt == NULL) ? empty_tqual(0) : *tqopt, bound,
+                        (ztopt == NULL) ? false_conref : *ztopt, 0);
     return res;
   }
 }
@@ -2072,7 +2072,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     case &Sizeoftyp_e(t2):
       elt_type = t2;
       *t = new elt_type;
-      num_elts = uint_exp(1,NULL);
+      num_elts = uint_exp(1,0);
       tcExp(te,&uint_typ,num_elts);
       one_elt = true;
       break;
@@ -2157,16 +2157,16 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
         let is_constant = Evexp::c_can_eval(num_elts);
         if (is_constant && Evexp::same_const_exp(upper_exp,num_elts)) {
           *is_fat = false;
-          return atb_typ(elt_type,rgn,empty_tqual(NULL),conref_val(b),
+          return atb_typ(elt_type,rgn,empty_tqual(0),conref_val(b),
                          zero_term);
         }
         switch (compress(num_elts->topt->v)) {
         case &TagType(tagtyp):
-          let tagtyp_exp = cast_exp(uint_typ,valueof_exp(tagtyp,NULL),false,
-                                    No_coercion,NULL);
+          let tagtyp_exp = cast_exp(uint_typ,valueof_exp(tagtyp,0),false,
+                                    No_coercion,0);
           if (Evexp::same_const_exp(tagtyp_exp,upper_exp)) {
             *is_fat = false;
-            return atb_typ(elt_type,rgn,empty_tqual(NULL),conref_val(b),
+            return atb_typ(elt_type,rgn,empty_tqual(0),conref_val(b),
                            zero_term);
           }
           break;
@@ -2179,7 +2179,7 @@ static type_t tcMalloc(tenv_t te, seg_t loc, type_t * topt, exp_opt_t @ropt,
     default: break;
     }
   if (!one_elt) ptr_maker = dyneither_typ;
-  return ptr_maker(elt_type,rgn,empty_tqual(NULL),zero_term);
+  return ptr_maker(elt_type,rgn,empty_tqual(0),zero_term);
 }
 
 // swap(e1,e2)
@@ -2315,7 +2315,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
       bounds_t b;
       switch(compress(bnd->topt->v)) {
       case &TagType(t):
-        b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,NULL),false,No_coercion,NULL));
+        b = new Upper_b(cast_exp(uint_typ,valueof_exp(t,0),false,No_coercion,0));
         break;
       default:
 	if(is_const_exp(te,bnd))
@@ -2381,17 +2381,17 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     // here I'm going to guess that the user wants a char *@ instead of
     // a char @{n}@.  They can get the char@{n}@ by using a cast.  This
     // is a total hack...
-    let topt2 = atb_typ(char_typ, rgn, const_tqual(NULL),
+    let topt2 = atb_typ(char_typ, rgn, const_tqual(0),
                         &DynEither_b_val, true_conref);
     let t = tcExp(te,&topt2,e1);
-    return atb_typ(t, rgn, empty_tqual(NULL), new Upper_b(uint_exp(1,NULL)),
+    return atb_typ(t, rgn, empty_tqual(0), new Upper_b(uint_exp(1,0)),
                    false_conref);
   case &Const_e({.Wstring_c = _}):
     // handled like the String_c case
-    let topt2 = atb_typ(wchar_typ(), rgn, const_tqual(NULL),
+    let topt2 = atb_typ(wchar_typ(), rgn, const_tqual(0),
                         &DynEither_b_val, true_conref);
     let t = tcExp(te,&topt2,e1);
-    return atb_typ(t, rgn, empty_tqual(NULL), new Upper_b(uint_exp(1,NULL)),
+    return atb_typ(t, rgn, empty_tqual(0), new Upper_b(uint_exp(1,0)),
                    false_conref);
   default:
     // code that's equivalent to "new {e1}" -- i.e., an array of size 1.
@@ -2413,7 +2413,7 @@ static type_t tcNew(tenv_t te, seg_t loc, type_t * topt,
     }
     type_t telt = tcExp(te,topt2,e1);
     type_t res_typ =
-      new PointerType(PtrInfo(telt,empty_tqual(NULL),
+      new PointerType(PtrInfo(telt,empty_tqual(0),
 			      PtrAtts(rgn,empty_conref(),
 				      bounds_one_conref,
 				      false_conref,NULL)));

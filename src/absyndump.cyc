@@ -148,7 +148,7 @@ void dump_char(int c) { // no space
 }
 
 void dumploc(Position::seg_t loc) {
-  if(loc == NULL) return;
+  if(loc == 0) return;
   if(!generate_line_directives) return;
   let s = Position::get_line_directive(loc);
   dump(s);
@@ -578,7 +578,7 @@ void dumpfunargs(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args, bool c_varargs,
 }
 
 void dumptyp(type_t t) {
-  dumptqtd(empty_tqual(NULL),t,ignore,0);
+  dumptqtd(empty_tqual(0),t,ignore,0);
 }
 
 void dumpdesignator(designator_t d) {
@@ -800,7 +800,7 @@ void dumpexp_prec(int inprec, exp_t e) {
       }
       dumpexp(e);
       dump(",");
-      dumpexp(sizeoftyp_exp(*topt,NULL));  
+      dumpexp(sizeoftyp_exp(*topt,0));  
       dump(")");
     } else {
       if (ropt != NULL) {
@@ -811,7 +811,7 @@ void dumpexp_prec(int inprec, exp_t e) {
       }
       // see comments in absyn.h
       if (topt != NULL) 
-        dumpexp(times_exp(sizeoftyp_exp(*topt,NULL),e,NULL));
+        dumpexp(times_exp(sizeoftyp_exp(*topt,0),e,0));
       else 
         dumpexp(e); 
       dump(")");
@@ -1203,10 +1203,10 @@ void dumpdecl(decl_t d) {
                                  fd->rgn_po, NULL});
     switch(c_compiler){
     case Gcc_c:
-      dumptqtd(empty_tqual(NULL), t, dump_atts_qvar,fd);
+      dumptqtd(empty_tqual(0), t, dump_atts_qvar,fd);
       break;
     case Vc_c:
-      dumptqtd(empty_tqual(NULL), t, dump_callconv_fdqvar,fd);
+      dumptqtd(empty_tqual(0), t, dump_callconv_fdqvar,fd);
       break;  
     }
     dump_char('{');

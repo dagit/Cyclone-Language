@@ -287,6 +287,8 @@ static void set_all_warnings() {
   Toc::warn_bounds_checks = true;
   Toc::warn_all_null_deref = true;
   NewControlFlow::warn_lose_unique = true;
+  Tcutil::warn_alias_coerce = true;
+  Tcutil::warn_region_coerce = true;
 }
 
 /* This only works enough to support cycdoc so far */
@@ -1313,6 +1315,9 @@ int main(int argc, string_t<`H> ?`H argv) {
 	 rnew(r)$("-warnaliascoercion", false, "",
 	       rnew(r)Set_spec(&Tcutil::warn_alias_coerce),
 	       "Warn when any alias coercion is inserted"),
+	 rnew(r)$("-warnregioncoerce", false, "",
+	       rnew(r)Set_spec(&Tcutil::warn_region_coerce),
+	       "Warn when any region coercion is inserted"),
 	 rnew(r)$("-noregister", false, "",
 	       rnew(r)Set_spec(&Parse::no_register),
 	       "Treat register storage class as public"),

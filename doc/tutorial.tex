@@ -197,7 +197,7 @@ instead of the more verbose:
   int main(int argc, char *@fat *@fat argv);
 \end{verbatim}
 
-\subsubsection*{Non-NULL pointers}
+\subsubsection*{Non-NULL Pointers}
 
 
 Another kind of pointer in Cyclone is the non-NULL pointer.
@@ -210,7 +210,7 @@ sometimes unnecessary.
 \texttt{@notnull} pointers are useful in Cyclone both for efficiency and as
 documentation.  This can be seen at work in the standard library,
 where many functions take \texttt{@notnull} pointers as arguments, or return
-\texttt{@nonull} pointers as results.  For example, the \texttt{getc}
+\texttt{@notnull} pointers as results.  For example, the \texttt{getc}
 function that reads a character from a file is declared,
 \begin{verbatim}
     int getc(FILE *@notnull);
@@ -265,7 +265,7 @@ If you call \texttt{getc} with a \texttt{FILE *@notnull}, of course, no check
 is required.  For example, \texttt{stdin} is a \texttt{FILE *@notnull} in
 Cyclone, so you can simply call \texttt{getc(stdin)}.  In Cyclone you
 will find that many functions return \texttt{*@notnull} pointers, so many of
-the pointers you deal with will already be \texttt{*@nonull} pointers, and
+the pointers you deal with will already be \texttt{*@notnull} pointers, and
 neither the caller nor the called function needs to do null
 checks---and this is perfectly safe.
 
@@ -358,7 +358,7 @@ non-zero-terminated fat pointer before entering the loop.  When you
 cast a zero-terminated pointer to a non-zero-terminated fat pointer,
 the compiler calculates the length of the sequence once, decrements it
 by one, and then builds an appropriate fat pointer with this bounds
-information.  When you write using the fat poiner, bounds checks (not
+information.  When you write using the fat pointer, bounds checks (not
 zero checks) keep you from writing any value over the zero.
 Furthermore, if you write the code in a straightforward fashion using
 subscripting, the compiler is more likely to eliminate the bounds
@@ -509,7 +509,10 @@ consider the following fragment of (bad) Cyclone code:
 \end{verbatim}
 In the function \texttt{f} above, the variables \texttt{x} and 
 \texttt{y} live within the region \texttt{`f} because they are
-declared in the outermost block of the function.  The storage for
+declared in the outermost block of the function, and because
+the default region name for the block of a function is
+\texttt{`<function name>}.  
+The storage for
 those variables will live as long as the invocation of the function.
 Note that since \texttt{y} is a pointer to \texttt{x}, the type of
 \texttt{y} is \texttt{int *@region(`f)}, indicating that \texttt{y} 
@@ -720,7 +723,7 @@ A dynamic region is created as follows:
   let NewRegion{<`d> dh} = Core::rnew_dynregion(rh);
 \end{verbatim}
 where \texttt{rh} is a handle for a region \texttt{`r}, \texttt{`d} is
-the name of the new dynamic, and \texttt{dh} is the dynamic region handle.
+the name of the new dynamic region, and \texttt{dh} is the dynamic region handle.
 The dynamic region handle \texttt{dh} has type \texttt{dynregion_t<`d,`r>}.
 We say that it is a handle for \texttt{`d} and is contained in the
 region \texttt{`r}.
@@ -756,7 +759,7 @@ open, the \texttt{free_dynregion} will throw the exception
 
 The dynamic region handle \texttt{dh} is contained in the region
 \texttt{`r}.  When \texttt{`r} is deallocated, then \texttt{dh}
-becomes inaccessible and is thus deallocated as well.  
+becomes inaccessible and thus \texttt{`d} is deallocated as well.  
 
 \subsubsection*{Region Polymorphism}
 
@@ -1017,9 +1020,9 @@ regardless of its contents:
 \begin{verbatim}
     bool printT(union T w) {
       if (tagcheck(w.Integer))
-        printf("%s",w);
-      else 
         printf("%d",w);
+      else 
+        printf("%s",w);
     }
 \end{verbatim}
 Note that \texttt{tagcheck(w.Integer)} does not return the

@@ -66,6 +66,8 @@ aprof: $(CYC_INCLUDE_H) \
 
 cyclone_a: aprof bin/cyclone_a$(EXE)
 
+cyclone_pg: bin/cyclone_pg$(EXE)
+
 gprof: bin/lib/libcyc_pg.a \
   $(addprefix bin/lib/cyc-lib/$(ARCH)/, nogc_pg.a $(RUNTIME)_pg.$(O))
 
@@ -88,6 +90,13 @@ bin/cyclone_a$(EXE): \
   bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_a.$(O) \
   bin/lib/cyc-lib/$(ARCH)/gc.a
 	$(CC) -o $@ $^ $(LDFLAGS)
+
+bin/cyclone_pg$(EXE): \
+  $(addprefix bin/genfiles/, $(PG_SRCS) install_path.$(O)) \
+  bin/lib/$(CYCBOOTLIB) \
+  bin/lib/cyc-lib/$(ARCH)/$(RUNTIME)_pg.$(O) \
+  bin/lib/cyc-lib/$(ARCH)/gc.a
+	$(CC) -pg -o $@ $^ $(LDFLAGS)
 
 bin/cycdoc$(EXE): \
   $(addprefix bin/genfiles/, $(addsuffix .$(O), $(CYCDOC_SRCS)) install_path.$(O)) \

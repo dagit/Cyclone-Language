@@ -78,7 +78,7 @@ namespace Tovc;
 
 int elim_array_initializers = 1; // a flag
 
-#define DL NULL
+#define DL 0
 
 // have varmaps because hoisted decls should be renamed to avoid conflicts.
 
@@ -279,27 +279,27 @@ static exp_t stmt_to_fun(toexpenv_t<`r> env, stmt_t s, type_t rettype) {
   
   Iter::iter_t<_,`stmt_to_fun> iter = Set::make_iter(Core::heap_region, freevars);
   // having to initialize is a pain :-(
-  let vd = new Vardecl(Public,exn_name,empty_tqual(NULL),&VoidType_val,
+  let vd = new Vardecl(Public,exn_name,empty_tqual(0),&VoidType_val,
 		       NULL,NULL,NULL,false);
     // don't box if it's a stack-allocated array
   while(Iter::next(iter,&vd))
     switch (vd->type) {
     case &ArrayType(ArrayInfo{elt_typ,_,_,_,_}): 
       params = new List(new $((*vd->name)[1], vd->tq, 
-			      cstar_typ(elt_typ,empty_tqual(NULL))),
+			      cstar_typ(elt_typ,empty_tqual(0))),
 			params);
       args = new List(var_exp(vd->name,DL), args); 
       break;
     default: 
       params = new List(new $((*vd->name)[1], vd->tq, 
-			      cstar_typ(vd->type,empty_tqual(NULL))),
+			      cstar_typ(vd->type,empty_tqual(0))),
 			params);
       args = new List(address_exp(var_exp(vd->name,DL),DL), args);
       break;
     }
   qvar_t funname = Toc::temp_var();
   *env.gen_ds=new List(new_decl(new Fn_d(new Fndecl(Static,false,funname,
-					    NULL,NULL,empty_tqual(NULL),
+					    NULL,NULL,empty_tqual(0),
                                             rettype,params,
                                             false,NULL,NULL,s,NULL,NULL,NULL,
                                             NULL)),DL),
@@ -618,7 +618,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
                               gen_ds), 
                      fd->body);
           if (*gen_ds != NULL) {
-            vardecl_t vd = new Vardecl {fd->sc, fd->name, const_tqual(NULL), 
+            vardecl_t vd = new Vardecl {fd->sc, fd->name, const_tqual(0), 
                                         Tcutil::fndecl2typ(fd), NULL, NULL, fd->attributes, false};
             new_ds = new List(new_decl(new Var_d(vd),DL),new_ds);
             // fprintf(Stdio::stderr,"%s",*(*fd->name)[1]); Stdio::fflush(Stdio::stdout);

@@ -97,11 +97,7 @@ typedef struct Edit {
 typedef list_t<edit_t> edits_t;
 // Used for sorting edits
 int cmp_edit(edit_t e1, edit_t e2) {
-  if (e1->loc && e2->loc)
-    return e1->loc->start - e2->loc->start;
-  else if (e1->loc == e2->loc) return 0;
-  else if (e1->loc) return 1;
-  else return -1;
+  return e1 - e2;
 }
 
 /////////////////////////////////////////////////////////////////////
@@ -988,13 +984,13 @@ static void register_zeroterm_cvars(cenv_t env, ctype_t new_zt,
 // end up constraining the C code.
 static type_t main_type() {
   $(opt_t<var_t>,tqual_t,type_t)@ arg1 =
-    new $(NULL,empty_tqual(NULL),sint_typ);
+    new $(NULL,empty_tqual(0),sint_typ);
   $(opt_t<var_t>,tqual_t,type_t)@ arg2 =
-    new $(NULL,empty_tqual(NULL),
+    new $(NULL,empty_tqual(0),
           dyneither_typ(string_typ(wildtyp(NULL)),wildtyp(NULL),
-                                empty_tqual(NULL), empty_conref()));
+                                empty_tqual(0), empty_conref()));
   return new FnType(FnInfo{.tvars=NULL, .effect=NULL,
-                              .ret_tqual = empty_tqual(NULL),
+                              .ret_tqual = empty_tqual(0),
                               .ret_typ = sint_typ,
                               .args = list(arg1,arg2), .c_varargs = false,
                               .cyc_varargs = NULL, .rgn_po = NULL,
@@ -1062,7 +1058,7 @@ static void register_rgns(cenv_t env, Dict::dict_t<tvarname_t,int@> counts,
   switch ($(t, c)) {
   case $(&PointerType(PtrInfo{et,_,PtrAtts{rt,_,_,_,ploc}}),&Ptr_ct(ec,_,_,rc,_)):
     register_rgns(env, counts, fn_res, et, ec);
-    let loc = ploc ? ploc->rgn_loc : NULL;
+    let loc = ploc ? ploc->rgn_loc : 0;
     rc = compress_ct(rc);
     switch ($(rt,rc)) {
     case $(&Evar(_,_,_,_), &Heap_ct) && !fn_res:
@@ -1118,9 +1114,9 @@ static ctype_t type_to_ctype(cenv_t env, type_t t) {
     return lookup_typedef_ctype(env,n);
   case &VoidType: return void_ct();
   case &PointerType(PtrInfo{et,tq,PtrAtts{r,n,b,zt,loc}}):
-    let ptr_loc = loc ? loc->ptr_loc : NULL;
-    let rgn_loc = loc ? loc->rgn_loc : NULL;
-    let zt_loc = loc ? loc->zt_loc : NULL;
+    let ptr_loc = loc ? loc->ptr_loc : 0;
+    let rgn_loc = loc ? loc->rgn_loc : 0;
+    let zt_loc = loc ? loc->zt_loc : 0;
     // What we do here is insert soft constraints that correspond to
     // what the user wrote down -- these soft constraints might change
     // in which case we have to change the user's annotations.
@@ -1698,7 +1694,7 @@ static cenv_t gen_topdecl(cenv_t env, decl_t d) {
     let args = fd->args;
     let targs = map(make_targ,args);
     let fntype =
-      new FnType(FnInfo{NULL,NULL,empty_tqual(NULL),rettype,targs,false,NULL,NULL,NULL});
+      new FnType(FnInfo{NULL,NULL,empty_tqual(0),rettype,targs,false,NULL,NULL,NULL});
     // Note:  we do not set the cpos to FnRes_pos here because we want
     // to get constraint variables for the regions
     let fn_env = set_cpos(env,FnBody_pos);
@@ -1926,7 +1922,7 @@ static edits_t gen_edits(list_t<decl_t> ds) {
   // sort the edits
   edits = merge_sort(cmp_edit, edits);
   // Hack to get rid of spurious 0 location
-  while (edits && edits->hd->loc->start == 0) {
+  while (edits && edits->hd->loc == 0) {
 #ifdef PORT_DEBUG
     fprintf(stderr,"found 0 location\n");
 #endif

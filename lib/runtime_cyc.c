@@ -669,6 +669,7 @@ void * _region_malloc(struct _RegionHandle *r, unsigned int s) {
   else if (r == Cyc_Core_refcnt_region) {
     // need to add a word for the reference count.  We use a word to
     // keep the resulting memory word-aligned.  Then bump the pointer.
+    // FIX: probably need to keep it double-word aligned!
     result = GC_malloc(s+sizeof(int));
     if(!result)
       _throw_badalloc;

@@ -1294,7 +1294,6 @@ get_type_name(int n, symbol_list *rule)
   return (rp->sym->type_name);
 }
 
-
 /* after %guard is seen in the input file,
 copy the actual guard into the guards file.
 If the guard is followed by an action, copy that into the actions file.
@@ -1568,6 +1567,23 @@ copy_action(symbol_list *rule, int stack_offset)
     fprintf((FILE @)faction, "#line %d \"%s\"\n", lineno, infile);
   putc('{', (FILE @)faction);
 
+  /* JGM: we declare two pointers (one for values, and one for
+   * locations) that are local to the action which
+   * we assert are non-null, and have at least n elements
+   * where n is the number of components in the rule.  
+   * Then we extract semantic values (or locations) using
+   * these pointers.  This avoids doing a null-check and
+   * bounds-check on each dereference of these arrays.  
+   */
+  if (stack_offset > 0) {
+    fprintf((FILE @)faction, "union YYSTYPE @{%d}yyyyvsp = "
+            "(_ @{%d})(yyvs+(yyvsp_offset - %d));\n",
+            stack_offset,stack_offset,stack_offset - 1);
+    fprintf((FILE @)faction, "#ifdef YYLSP_NEEDED\n"
+            "YYLTYPE @{%d} yyyylsp = (_ @{%d})(yyls+(yylsp_offset - %d));\n"
+            "#endif\n",stack_offset,stack_offset,stack_offset - 1);
+  }
+
   count = 1;
   c = getc((FILE @)finput);
 
@@ -1754,20 +1770,28 @@ copy_action(symbol_list *rule, int stack_offset)
 			     int_to_string(n), rule->sym->tag);
 		    */
 		    if (m==0)
-		      fprintf((FILE @)faction, "(yyvs[yyvsp_offset])");
+                      fprintf((FILE @)faction, "(yyyyvsp[%d])",n-1);
 		    else if (m > 0) 
+                      /* JGM: we'll get a compile-time type error if we
+                       * try to convert this to a use of yyyyvsp, because
+                       * the value needs to be negative...
+                       */
 		      fprintf((FILE @)faction, "(yyvs[yyvsp_offset+%d])", m);
 		    else 
-		      fprintf((FILE @)faction, "(yyvs[yyvsp_offset-%d])", -m);
+		      fprintf((FILE @)faction, "(yyyyvsp[%d])",n-1);
 		  } else {
 		    /* DAN: calling functions makes for smaller files. */
 		    fprintf((FILE @)faction," yyget_%s",type2nth(type_name));
 		    if (m==0)
-		      fprintf((FILE @)faction, "(yyvs[yyvsp_offset])");
+		      fprintf((FILE @)faction, "(yyyyvsp[%d])",n-1);
 		    else if (m > 0) 
+                      /* JGM: we'll get a compile-time type error if we
+                       * try to convert this to a use of yyyyvsp, because
+                       * the value needs to be negative...
+                       */
 		      fprintf((FILE @)faction, "(yyvs[yyvsp_offset+%d])", m);
 		    else 
-		      fprintf((FILE @)faction, "(yyvs[yyvsp_offset-%d])", -m);
+		      fprintf((FILE @)faction, "(yyyyvsp[%d])",n-1);
 
 		    /*
 		    fprintf(faction,"; yyinternal;})");
@@ -1808,11 +1832,15 @@ copy_action(symbol_list *rule, int stack_offset)
 		  */
 		}
 	      if (m == 0)
-		fprintf((FILE @)faction, "yyls[yylsp_offset]");
+		fprintf((FILE @)faction, "yyyylsp[%d]",n-1);
 	      else if (m > 0) 
+                /* JGM: we'll get a compile-time type error if we
+                 * try to convert this to a use of yyyylsp, because
+                 * the value needs to be negative...
+                 */
 		fprintf((FILE @)faction, "yyls[yylsp_offset+%d]", m);
 	      else /* DJG make Popcorn parser happy */
-		fprintf((FILE @)faction, "yyls[yylsp_offset-%d]", -m);
+		fprintf((FILE @)faction, "yyyylsp[%d]",n-1);
 
 	      yylsp_needed = 1;
 

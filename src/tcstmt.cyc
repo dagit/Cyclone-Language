@@ -417,10 +417,10 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
         case &ArrayType(ArrayInfo{telt,tq,NULL,zt,ztl}) && vd->initializer != NULL:
           switch (vd->initializer->r) {
             case &Const_e({.String_c = s}):
-            t = vd->type = array_typ(telt,tq,uint_exp(numelts(s),NULL),zt,ztl);
+            t = vd->type = array_typ(telt,tq,uint_exp(numelts(s),0),zt,ztl);
             break;
             case &Const_e({.Wstring_c = s}): /* FIX: need correct size, not 1 */
-            t = vd->type = array_typ(telt,tq,uint_exp(1,NULL),zt,ztl);
+            t = vd->type = array_typ(telt,tq,uint_exp(1,0),zt,ztl);
             break;
             case &Comprehension_e(_,e,_,_):
             // FIX: copy e here!  
@@ -428,7 +428,7 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
             break;
             case &UnresolvedMem_e(_,es): fallthru(es);
             case &Array_e(es):
-            t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),NULL),
+            t = vd->type = array_typ(telt,tq,uint_exp(List::length(es),0),
                                      zt,ztl);
             break;
             default: break;
@@ -615,8 +615,8 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
             break;
           default: break;
           }
-        vardecl_t vd = new Vardecl {fd->sc, fd->name, const_tqual(NULL), 
-                                    at_typ(t,curr_bl,empty_tqual(NULL), 
+        vardecl_t vd = new Vardecl {fd->sc, fd->name, const_tqual(0), 
+                                    at_typ(t,curr_bl,empty_tqual(0), 
                                            false_conref),
                                     NULL, new Opt(curr_bl), NULL, false};
         fd->fn_vardecl = vd;

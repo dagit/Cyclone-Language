@@ -981,7 +981,7 @@ doc_t typedef_name2bolddoc(qvar_t v) {
 }
 
 doc_t typ2doc(type_t t) {
-  return tqtd2doc(empty_tqual(NULL), t, NULL);
+  return tqtd2doc(empty_tqual(0), t, NULL);
 }
 
 // higher precedence means binds more tightly
@@ -1225,7 +1225,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
     //       translation to C, which are function calls.
     if (is_calloc) {
       // topt should not be NULL for calloc's
-      exp_t st = sizeoftyp_exp(*topt,NULL);
+      exp_t st = sizeoftyp_exp(*topt,0);
       if (rgnopt == NULL)
         s = cat(text("calloc("),exp2doc(e),text(","),exp2doc(st),text(")"));
       else
@@ -1237,7 +1237,7 @@ doc_t exp2doc_prec(int inprec, exp_t e) {
       if (topt == NULL)
         new_e = e;
       else
-        new_e = times_exp(sizeoftyp_exp(*topt,NULL),e,NULL);
+        new_e = times_exp(sizeoftyp_exp(*topt,0),e,0);
 
       if (rgnopt == NULL)
         s = cat(text("malloc("),exp2doc(new_e),text(")"));
@@ -1767,7 +1767,7 @@ doc_t decl2doc(decl_t d) {
     case Vc_c:  beforenamedoc = callconv2doc(fd->attributes); break;
     }
     doc_t namedoc   = typedef_name2doc(fd->name);
-    doc_t tqtddoc   = tqtd2doc(empty_tqual(NULL), t,
+    doc_t tqtddoc   = tqtd2doc(empty_tqual(0), t,
 			       new Opt(cat(beforenamedoc,namedoc)));
     doc_t bodydoc   = cat(blank_doc(),lb(),
 			  nest(2,cat(line_doc(),stmt2doc(fd->body,false))),
@@ -2030,7 +2030,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
       if (fn_atts != NULL){
         // if the return type is a function pointer, then we have to
         // move the attributes past that function modifier and so forth
-        tms = bubble_attributes(r,rnew(r) Attributes_mod(NULL,fn_atts),tms);
+        tms = bubble_attributes(r,rnew(r) Attributes_mod(0,fn_atts),tms);
       }
       tms = rnew(r) List(rnew(r)
                          Function_mod(rnew(r) WithTypes(args,c_varargs,
@@ -2047,7 +2047,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
 	case &Stdcall_att:
 	case &Cdecl_att:
 	case &Fastcall_att:
-	  tms = rnew(r) List(rnew(r) Attributes_mod(NULL,new List(fn_atts->hd,NULL)),tms);
+	  tms = rnew(r) List(rnew(r) Attributes_mod(0,new List(fn_atts->hd,NULL)),tms);
 	  goto AfterAtts;
 	default: break;
 	}
@@ -2056,7 +2056,7 @@ $(tqual_t,type_t,list_t<type_modifier_t<`r>,`r>) to_tms(region_t<`r> r,
 
   AfterAtts:
     if (typvars != NULL)
-      tms = rnew(r) List(rnew(r) TypeParams_mod(typvars,NULL,true),tms);
+      tms = rnew(r) List(rnew(r) TypeParams_mod(typvars,0,true),tms);
     return $(tq3,t3,tms);
 
   case &Evar(k,topt,i,_):

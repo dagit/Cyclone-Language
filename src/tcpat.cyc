@@ -73,7 +73,7 @@ static void resolve_pat(tenv_t te, type_t *topt, pat_t p) {
     case {.Rel_n = NULL}:
       (*q)[0] = Loc_n;        
       p->r = new Var_p(new_vardecl(q,&VoidType_val,NULL),// type set later
-                       new_pat(&Wild_p_val,NULL)); 
+                       new_pat(&Wild_p_val,0)); 
       return;
     default: terr(p->loc,"qualified variable in pattern"); return;
     }
@@ -186,7 +186,7 @@ static type_t num_type(type_t * topt, type_t numt) {
 }
 static void set_vd(vardecl_t vd, list_t<vardecl_t>@ v_result_ptr, type_t t){
   vd->type = t;
-  vd->tq   = empty_tqual(NULL);
+  vd->tq   = empty_tqual(0);
   *v_result_ptr = new List(vd,*v_result_ptr);
 }
 static tcpat_result_t combine_results(tcpat_result_t res1, tcpat_result_t res2){
@@ -237,7 +237,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     else if (is_noalias_pointer(t))
       impos("* pattern cannot take the address of an alias-free path");
     set_vd(vd, &res.patvars, 
-	   new PointerType(PtrInfo(t,empty_tqual(NULL),
+	   new PointerType(PtrInfo(t,empty_tqual(0),
 				   PtrAtts(*rgn_opt,false_conref,
 					   empty_conref(),empty_conref(),
                                            NULL))));
@@ -275,7 +275,7 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       }
     let tenv_tvs = lookup_opt_type_vars(te);
     t = new PointerType(PtrInfo(new_evar(&ako,tenv_tvs),
-                                empty_tqual(NULL),
+                                empty_tqual(0),
 				// MWH: don't allow switching on
 				//   unique pointers for now
 				PtrAtts(new_evar(&rko,tenv_tvs),
@@ -325,8 +325,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
       // change the type of p2 to reflect this
       p2->topt->v = new_type;
       t = new PointerType(PtrInfo(new_type, 
-                                  (elt_const ? const_tqual(NULL) : 
-                                   empty_tqual(NULL)),
+                                  (elt_const ? const_tqual(0) : 
+                                   empty_tqual(0)),
                                   PtrAtts(ptr_rgn, empty_conref(),
                                           bounds_one_conref, false_conref,
                                           NULL)));
@@ -334,8 +334,8 @@ static tcpat_result_t tcPatRec(tenv_t te,pat_t  p,type_t *topt,type_t *rgn_opt){
     default:
 DONT_PROMOTE:
       t = new PointerType(PtrInfo(p2->topt->v, 
-                                  (elt_const ? const_tqual(NULL) : 
-                                   empty_tqual(NULL)),
+                                  (elt_const ? const_tqual(0) : 
+                                   empty_tqual(0)),
                                   PtrAtts(ptr_rgn, empty_conref(), 
                                           empty_conref(), empty_conref(),
                                           NULL)));
@@ -377,7 +377,7 @@ DONT_PROMOTE:
 	topt_ts    = topt_ts->tl;
       }
       res = combine_results(res,tcPatRec(te,ps->hd,inner_topt,rgn_opt));
-      pat_ts = new List(new $(empty_tqual(NULL),ps->hd->topt->v),pat_ts);
+      pat_ts = new List(new $(empty_tqual(0),ps->hd->topt->v),pat_ts);
     }
     t = new TupleType(List::imp_rev(pat_ts));
     break;

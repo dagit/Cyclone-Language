@@ -2,6 +2,8 @@
 #include <stdio.h>
 #include "foo_tab.h"
 
+extern int yyparse();
+
 int c = (int)' ';
 
 #define MAX_IDENT 80

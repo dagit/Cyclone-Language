@@ -87,8 +87,10 @@ int main(int argc, string_t<`H> ?`H argv) {
   int ret;
   if (do_graph)
     ret = generate_graph(file);
+  /*
   else if (do_newgraph)
     ret = generate_newgraph(file);
+  */
   else
     ret = generate_summary(file);
   return ret;

@@ -47,6 +47,10 @@ datacon(exn,Unify);
 
 extern void unify_it(type_t t1, type_t t2);
 
+// flag to control whether or not we print a warning when implicitly casting
+// a pointer from one region into another due to outlives constraints.
+bool warn_region_coerce = false;
+
 // Variables set to indicate where a failure occurs
 type_t t1_failure = &VoidType_val;
 bool tq1_const = false; // optional qualifier for t1_failure
@@ -820,7 +824,7 @@ static $(tvar_t,type_t)@ region_free_subst(tvar_t tv) {
   case &Kind(RgnKind,Unique):    t = &UniqueRgn_val; break;
   case &Kind(RgnKind,Aliasable): t = &HeapRgn_val;   break;
   case &Kind(EffKind,_):         t = empty_effect;   break;
-  case &Kind(IntKind,_):         t = new ValueofType(uint_exp(0,NULL)); break;
+  case &Kind(IntKind,_):         t = new ValueofType(uint_exp(0,0)); break;
   default:                   t = sint_typ;       break; // lives in every kind
   }
   return new $(tv,t);
@@ -939,11 +943,11 @@ type_t normalize_effect(type_t e) {
 // Create a dummy type that includes the effect:  void (@`H)(;eff)
 static type_t dummy_fntype(type_t eff) {
   let fntype = new FnType(FnInfo{.tvars=NULL,.effect=new Opt(eff),
-                                 .ret_tqual = empty_tqual(NULL),
+                                 .ret_tqual = empty_tqual(0),
                                .ret_typ=&VoidType_val,.args=NULL,.c_varargs=false,
                                .cyc_varargs=NULL,.rgn_po=NULL,
                                .attributes = NULL});
-  return atb_typ(fntype, &HeapRgn_val, empty_tqual(NULL), bounds_one, false_conref);
+  return atb_typ(fntype, &HeapRgn_val, empty_tqual(0), bounds_one, false_conref);
 }
 
 
@@ -1964,9 +1968,14 @@ bool silent_castable(tenv_t te, seg_t loc, type_t t1, type_t t2) {
     okay = okay && (!pinfo_a.elt_tq.real_const || pinfo_b.elt_tq.real_const);
     //fprintf(stderr,"2: okay = %d\n",okay);
     // first region must outlive the second
-    okay =
-      okay && (unify(pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn) ||
-	       region_outlives(te,pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn));
+    if (!unify(pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn)) {
+      if (region_outlives(te,pinfo_a.ptr_atts.rgn,pinfo_b.ptr_atts.rgn)) {
+        if (warn_region_coerce)
+          warn(loc, "implicit cast form region %s to region %s", 
+               typ2string(pinfo_a.ptr_atts.rgn),
+               typ2string(pinfo_b.ptr_atts.rgn));
+      } else okay = false;
+    }
     //fprintf(stderr,"3: okay = %d\n",okay);
     // must preserve zero-termination or second pointer must be const
     okay = okay && (unify_conrefs(intcmp,
@@ -2222,7 +2231,7 @@ bool zero_to_null(tenv_t te, type_t t2, exp_t e1) {
     e1->r = new Const_e(Null_c);
     let tenv_tvs = lookup_opt_type_vars(te);
     let t1 = new PointerType(PtrInfo(new_evar(&ako,tenv_tvs),
-				     empty_tqual(NULL),
+				     empty_tqual(0),
 				     PtrAtts(new_evar(&trko,tenv_tvs),
 					     true_conref,
 					     empty_conref(),
@@ -2425,7 +2434,7 @@ static list_t<$(tqual_t,type_t)@`r,`r> flatten_typ(region_t<`r> r,
       // FIX: too strict with existentials and constraints??
       if(ad->kind==UnionA || ad->impl==NULL
          || ad->impl->exist_vars != NULL || ad->impl->rgn_po != NULL)
-        return rnew(r) List(rnew(r) $(empty_tqual(NULL),t1),NULL);
+        return rnew(r) List(rnew(r) $(empty_tqual(0),t1),NULL);
       let inst = List::rzip(r,r,ad->tvs,ts);
       $(list_t<_,`r>,region_t<`r>,_,bool) env = $(inst,r,te,flatten);
       switch (ad->impl->fields) {
@@ -2451,7 +2460,7 @@ static list_t<$(tqual_t,type_t)@`r,`r> flatten_typ(region_t<`r> r,
     default: break;
     }
   }
-  return rnew(r) List(rnew(r) $(empty_tqual(NULL),t1),NULL);
+  return rnew(r) List(rnew(r) $(empty_tqual(0),t1),NULL);
 }
 
 // Returns true when attribute list a1 can be safely cast to a2
@@ -3847,11 +3856,11 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
       // No explicit array bounds was given
       if (is_zero_terminated) {
         // zero-terminated arrays have at least size 1
-        *eptr = e = uint_exp(1,NULL);
+        *eptr = e = uint_exp(1,0);
       } else {
         // warn that this array is essentially useless
         warn(loc,"array bound defaults to 1 here");
-        *eptr = e = uint_exp(1,NULL);
+        *eptr = e = uint_exp(1,0);
       }
     }
     Tcexp::tcExp(te,NULL,(exp_t)e);
@@ -3866,7 +3875,7 @@ i_check_valid_type(seg_t loc, tenv_t te, cvtenv_t<`r> cvtenv,
     // FIX: if we have an unknown size then it might turn out to be zero!
     if (known && sz < 1 && tovc_r) {
       warn(loc,"arrays with 0 elements are not supported except with gcc -- changing to 1.");
-      *eptr = uint_exp(1,NULL);
+      *eptr = uint_exp(1,0);
     }
     break;
   case &FnType(FnInfo{*btvs,*eff,*rtq,tr,args,c_vararg,cyc_vararg,rgn_po,atts}):
