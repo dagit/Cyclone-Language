@@ -312,6 +312,7 @@ int Cyc_Std_file_string_write(struct Cyc_Std___sFILE *sf,
 // if we could, but that information isn't available at runtime.
 
 #include <sys/types.h>
+/*
 #include <sys/socket.h>
 struct sa_xtunion {
   unsigned char *tag;
@@ -338,6 +339,77 @@ struct sa_xtunion *Csockaddr_to_sockaddr(struct sockaddr *addr, int len) {
     exit(1);
   }
   return result;
+}
+*/
+
+/* For sockets.  This should be split out to a separate file. */
+#include <sys/socket.h>
+#include <netinet/in.h>
+
+int accept_in(int a, const struct sockaddr_in *b, socklen_t *c) {
+  return accept(a,(struct sockaddr *)b,c);
+}
+
+int bind_in(int a, const struct sockaddr_in *b, socklen_t c) {
+  return bind(a,(struct sockaddr *)b,c);
+}
+
+int connect_in(int a, const struct sockaddr_in *b, socklen_t c) {
+  return connect(a,(struct sockaddr *)b,c);
+}
+
+int getpeername_in(int a, const struct sockaddr_in *b, socklen_t *c) {
+  return getpeername(a,(struct sockaddr *)b,c);
+}
+
+int getsockname_in(int a, const struct sockaddr_in *b, socklen_t *c) {
+  return getsockname(a,(struct sockaddr *)b,c);
+}
+
+ssize_t recvfrom_in(int a, struct _tagged_arr b, size_t c, int d,
+                    const struct sockaddr_in *e, socklen_t *f) {
+  char *p = _check_unknown_subscript(b,1,0);
+  unsigned n = _get_arr_size(b,1);  
+  if (n<c) _throw_arraybounds();
+  return recvfrom(a,p,c,d,(struct sockaddr *)e,f);
+}
+
+ssize_t sendto_in(int a, struct _tagged_arr b, size_t c, int d,
+                  const struct sockaddr_in *e, socklen_t f) {
+  char *p = _check_unknown_subscript(b,1,0);
+  unsigned n = _get_arr_size(b,1);  
+  if (n<c) _throw_arraybounds();
+  return sendto(a,p,c,d,(struct sockaddr *)e,f);
+}
+
+ssize_t send_wrapped(int a, struct _tagged_arr b, size_t c, int d) {
+  char *p = _check_unknown_subscript(b,1,0);
+  unsigned n = _get_arr_size(b,1);  
+  if (n<c) _throw_arraybounds();
+  return send(a,p,c,d);
+}
+
+ssize_t recv_wrapped(int a, struct _tagged_arr b, size_t c, int d) {
+  char *p = _check_unknown_subscript(b,1,0);
+  unsigned n = _get_arr_size(b,1);  
+  if (n<c) _throw_arraybounds();
+  return recv(a,p,c,d);
+}
+
+int getsockopt_int(int a, int b, int c, int *d, socklen_t *e) {
+  return getsockopt(a,b,c,d,e);
+}
+
+int setsockopt_int(int a, int b, int c, const int *d, socklen_t e) {
+  return setsockopt(a,b,c,d,e);
+}
+
+int getsockopt_timeval(int a, int b, int c, struct timeval *d, socklen_t *e) {
+  return getsockopt(a,b,c,d,e);
+}
+
+int setsockopt_timeval(int a, int b, int c, const struct timeval *d, socklen_t e) {
+  return setsockopt(a,b,c,d,e);
 }
 
 ///////////////////////////////////////////////

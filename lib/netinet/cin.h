@@ -156,9 +156,6 @@ namespace Std {
     struct in_addr sin_addr;
     char sin_zero[8];
   };
-  extern xtunion sockaddr {
-    extern sockaddr_in(struct sockaddr_in);
-  };
 
   extern "C" {
     unsigned long htonl(unsigned long);

@@ -1,77 +1,124 @@
-/* This file is part of the Cyclone Library.
-   Copyright (C) 2000-2001 Greg Morrisett
-
-   This library is free software; you can redistribute it and/or it
-   under the terms of the GNU Lesser General Public License as
-   published by the Free Software Foundation; either version 2.1 of
-   the License, or (at your option) any later version.
-
-   This library is distributed in the hope that it will be useful, but
-   WITHOUT ANY WARRANTY; without even the implied warranty of
-   MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-   Lesser General Public License for more details.
-
-   You should have received a copy of the GNU Lesser General Public
-   License along with this library; see the file COPYING.LIB.  If not,
-   write to the Free Software Foundation, Inc., 59 Temple Place, Suite
-   330, Boston, MA 02111-1307 USA. */
-
-#include <core.h>
 #include <sys/socket.h>
-#include <netinet/in.h>
-#include <errno.h> // see the hack below
-using Core;
-
-namespace Csocket {
-  /* This is really horrible.  We should fix these types somehow. */
-  //extern struct Csockaddr;
-#define Csockaddr sockaddr_in
-  extern "C" {
-    int bind(int fd, const struct Csockaddr *addr, socklen_t len);
-    int connect(int fd, const struct Csockaddr *addr, socklen_t len);
-    int accept(int fd, struct Csockaddr *`r addr, socklen_t *`r len);
-    struct Csockaddr *sockaddr_to_Csockaddr(const xtunion sockaddr addr);
-    xtunion sockaddr Csockaddr_to_sockaddr(const struct Csockaddr *`r, socklen_t);
-  }
-  $(struct Csockaddr *, socklen_t) sa2Csa(const xtunion sockaddr addr) {
-    struct Csockaddr *ptr = sockaddr_to_Csockaddr(addr);
-    switch (addr) {
-    case &sockaddr_in(s):
-      return $(ptr, (socklen_t)sizeof(struct sockaddr_in));
-    default:
-      throw new Failure("Unexpected xtunion sockaddr found");
-    }
-  }
-  xtunion sockaddr Csa2sa(const struct Csockaddr *`r addr, socklen_t len) {
-    return Csockaddr_to_sockaddr(addr, len);
-  }
-}
 
 namespace Std;
 
-int bind(int fd, const xtunion sockaddr addr) {
-  let $(Caddr, Clen) = Csocket::sa2Csa(addr);
-  return Csocket::bind(fd, Caddr, Clen);
+namespace Csocket {
+  extern "C" {
+    struct sockaddr;
+    /* Later we'll add, e.g., accept_in6, bind_in6, etc. */
+    int accept_in(int, const struct sockaddr_in @, socklen_t @);
+    int bind_in(int, const struct sockaddr_in @, socklen_t);
+    int connect_in(int, const struct sockaddr_in @, socklen_t);
+    int getpeername_in(int, const struct sockaddr_in @, socklen_t @);
+    int getsockname_in(int, const struct sockaddr_in @, socklen_t @);
+    ssize_t recvfrom_in(int, char ?, size_t, int,
+                        const struct sockaddr_in @, socklen_t @);
+    ssize_t sendto_in(int, const char ?, size_t, int,
+                      const struct sockaddr_in @, socklen_t);
+
+    ssize_t send_wrapped(int, const char ?, size_t, int);
+    ssize_t recv_wrapped(int, char ?, size_t, int);
+
+    /* Add: _linger, _in_addr, _u_char, _ip_mreq, _sockaddr, etc. */
+    int getsockopt_int(int, int, int, int @, socklen_t @);
+    int setsockopt_int(int, int, int, const int @, socklen_t);
+    int getsockopt_timeval(int, int, int, struct timeval @, socklen_t @);
+    int setsockopt_timeval(int, int, int, const struct timeval @, socklen_t);
+  }  
 }
 
-int connect(int fd, const xtunion sockaddr addr) {
-  let $(Caddr, Clen) = Csocket::sa2Csa(addr);
-  return Csocket::connect(fd, Caddr, Clen);
+xtunion exn { SocketError };
+
+int accept(int fd, ... inject SA ap) {
+  if (ap.size != 2) throw SocketError;
+  switch ($(ap[0],ap[1])) {
+  case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
+    return Csocket::accept_in(fd,x,y);
+  default: throw SocketError;
+  }
 }
 
-int setsockopt(int fd, int level, int optname, const char ?optval,
-               socklen_t optlen) {
-  // FIXME: Pretend we don't support any options for now
-  errno = ENOPROTOOPT;
-  return -1;
+int bind(int fd, ... inject SA ap) {
+  if (ap.size != 2) throw SocketError;
+  switch ($(ap[0],ap[1])) {
+  case $(&SA_sockaddr_in(x),&SA_socklen(y)):
+    return Csocket::bind_in(fd,x,y);
+  default: throw SocketError;
+  }
 }
 
-$(int, xtunion sockaddr) accept(int fd) {
-  // We're assuming here that we won't need more space than
-  // sizeof(sockaddr_in); this might be false if we support Unix
-  // domain sockets later
-  struct sockaddr_in Caddr = { 0, 0, {0}, { for i < 8: 0 }};
-  socklen_t len = sizeof(struct sockaddr_in); // 16 for AF_INET
-  int result = Csocket::accept(fd, &Caddr, &len);
-  return $(result, Csocket::Csa2sa(&Caddr, len));
+int connect(int fd, ... inject SA ap) {
+  if (ap.size != 2) throw SocketError;
+  switch ($(ap[0],ap[1])) {
+  case $(&SA_sockaddr_in(x),&SA_socklen(y)):
+    return Csocket::connect_in(fd,x,y);
+  default: throw SocketError;
+  }
+}
+
+int getpeername(int fd, ... inject SA ap) {
+  if (ap.size != 2) throw SocketError;
+  switch ($(ap[0],ap[1])) {
+  case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
+    return Csocket::getpeername_in(fd,x,y);
+  default: throw SocketError;
+  }
+}
+
+int getsockname(int fd, ... inject SA ap) {
+  if (ap.size != 2) throw SocketError;
+  switch ($(ap[0],ap[1])) {
+  case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
+    return Csocket::getsockname_in(fd,x,y);
+  default: throw SocketError;
+  }
+}
+
+ssize_t recvfrom(int fd, char ?buf, size_t n, int flags, ... inject SA ap) {
+  if (ap.size != 2) throw SocketError;
+  switch ($(ap[0],ap[1])) {
+  case $(&SA_sockaddr_in(x),&SA_socklenptr(y)):
+    return Csocket::recvfrom_in(fd,buf,n,flags,x,y);
+  default: throw SocketError;
+  }
+}
+
+ssize_t sendto(int fd, const char ?buf, size_t n, int flags,
+               ... inject SA ap) {
+  if (ap.size != 2) throw SocketError;
+  switch ($(ap[0],ap[1])) {
+  case $(&SA_sockaddr_in(x),&SA_socklen(y)):
+    return Csocket::sendto_in(fd,buf,n,flags,x,y);
+  default: throw SocketError;
+  }
+}
+
+ssize_t send(int fd, const char ?buf, size_t n, int flags) {
+  return Csocket::send_wrapped(fd,buf,n,flags);
+}
+
+ssize_t recv(int fd, char ?buf, size_t n, int flags) {
+  return Csocket::recv_wrapped(fd,buf,n,flags);
+}
+
+int getsockopt(int fd, int level, int optname, ... inject SO ap) {
+  if (ap.size != 2) throw SocketError;
+  switch ($(ap[0],ap[1])) {
+  case $(&SO_int(x),&SO_socklenptr(y)):
+    return Csocket::getsockopt_int(fd,level,optname,x,y);
+  case $(&SO_timeval(x),&SO_socklenptr(y)):
+    return Csocket::getsockopt_timeval(fd,level,optname,x,y);
+  default: throw SocketError;
+  }
+}
+
+int setsockopt(int fd, int level, int optname, ... inject SO ap) {
+  if (ap.size != 2) throw SocketError;
+  switch ($(ap[0],ap[1])) {
+  case $(&SO_int(x),&SO_socklen(y)):
+    return Csocket::setsockopt_int(fd,level,optname,x,y);
+  case $(&SO_timeval(x),&SO_socklen(y)):
+    return Csocket::setsockopt_timeval(fd,level,optname,x,y);
+  default: throw SocketError;
+  }
 }

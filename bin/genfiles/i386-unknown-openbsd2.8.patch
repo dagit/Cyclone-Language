@@ -1,6 +1,6 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd2.8/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Fri Sep 28 20:07:59 2001
---- i386-unknown-openbsd2.8/lib/execinfo.c	Fri Sep 28 20:11:11 2001
+*** i686-unknown-linux/lib/execinfo.c	Mon Oct  1 13:00:44 2001
+--- i386-unknown-openbsd2.8/lib/execinfo.c	Mon Oct  1 13:46:35 2001
 ***************
 *** 230,331 ****
   extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
@@ -134,76 +134,3 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c i386-unknown-openbsd
 ! _temp1.f1= _tag_arr("backtrace: unsupported except under Linux", sizeof(
 ! unsigned char), 42u); _temp1;}); _temp0;})); return 0;} int Cyc_Execinfo_bt(){
 ! return 1;}
-diff -rbBcN --exclude=CVS i686-unknown-linux/lib/socket.c i386-unknown-openbsd2.8/lib/socket.c
-*** i686-unknown-linux/lib/socket.c	Mon Sep 10 14:05:23 2001
---- i386-unknown-openbsd2.8/lib/socket.c	Fri Sep 28 20:11:11 2001
-***************
-*** 240,259 ****
-  16u]; struct Cyc_Std_sockaddr_in_struct{ unsigned char* tag; struct Cyc_Std_sockaddr_in
-  f1; } ; extern unsigned int htonl( unsigned int); extern unsigned short htons(
-  unsigned short); extern unsigned int ntohl( unsigned int); extern unsigned short
-! ntohs( unsigned short); extern int* __errno_location(); extern int bind( int fd,
-! const struct Cyc_Std_sockaddr_in* addr, unsigned int len); extern int connect(
-! int fd, const struct Cyc_Std_sockaddr_in* addr, unsigned int len); extern int
-! accept( int fd, struct Cyc_Std_sockaddr_in* addr, unsigned int* len); extern
-! struct Cyc_Std_sockaddr_in* sockaddr_to_Csockaddr( void* addr); extern void*
-! Csockaddr_to_sockaddr( const struct Cyc_Std_sockaddr_in*, unsigned int); struct
-! _tuple1{ struct Cyc_Std_sockaddr_in* f1; unsigned int f2; } ; struct _tuple1 Cyc_Csocket_sa2Csa(
-! void* addr){ struct Cyc_Std_sockaddr_in* ptr= sockaddr_to_Csockaddr( addr); void*
-! _temp0= addr; struct Cyc_Std_sockaddr_in _temp6; _LL2: if(*(( void**) _temp0) == 
-! Cyc_Std_sockaddr_in){ _LL7: _temp6=(( struct Cyc_Std_sockaddr_in_struct*) _temp0)->f1;
-! goto _LL3;} else{ goto _LL4;} _LL4: goto _LL5; _LL3: return({ struct _tuple1
-! _temp8; _temp8.f1= ptr; _temp8.f2=( unsigned int) sizeof( struct Cyc_Std_sockaddr_in);
-! _temp8;}); _LL5:( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp9=(
-! struct Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
-  _temp9[ 0]=({ struct Cyc_Core_Failure_struct _temp10; _temp10.tag= Cyc_Core_Failure;
-  _temp10.f1= _tag_arr("Unexpected xtunion sockaddr found", sizeof( unsigned char),
-  34u); _temp10;}); _temp9;})); _LL1:;} void* Cyc_Csocket_Csa2sa( const struct Cyc_Std_sockaddr_in*
---- 240,259 ----
-  16u]; struct Cyc_Std_sockaddr_in_struct{ unsigned char* tag; struct Cyc_Std_sockaddr_in
-  f1; } ; extern unsigned int htonl( unsigned int); extern unsigned short htons(
-  unsigned short); extern unsigned int ntohl( unsigned int); extern unsigned short
-! ntohs( unsigned short); extern int* __errno(); extern int bind( int fd, const
-! struct Cyc_Std_sockaddr_in* addr, unsigned int len); extern int connect( int fd,
-! const struct Cyc_Std_sockaddr_in* addr, unsigned int len); extern int accept(
-! int fd, struct Cyc_Std_sockaddr_in* addr, unsigned int* len); extern struct Cyc_Std_sockaddr_in*
-! sockaddr_to_Csockaddr( void* addr); extern void* Csockaddr_to_sockaddr( const
-! struct Cyc_Std_sockaddr_in*, unsigned int); struct _tuple1{ struct Cyc_Std_sockaddr_in*
-! f1; unsigned int f2; } ; struct _tuple1 Cyc_Csocket_sa2Csa( void* addr){ struct
-! Cyc_Std_sockaddr_in* ptr= sockaddr_to_Csockaddr( addr); void* _temp0= addr;
-! struct Cyc_Std_sockaddr_in _temp6; _LL2: if(*(( void**) _temp0) ==  Cyc_Std_sockaddr_in){
-! _LL7: _temp6=(( struct Cyc_Std_sockaddr_in_struct*) _temp0)->f1; goto _LL3;}
-! else{ goto _LL4;} _LL4: goto _LL5; _LL3: return({ struct _tuple1 _temp8; _temp8.f1=
-! ptr; _temp8.f2=( unsigned int) sizeof( struct Cyc_Std_sockaddr_in); _temp8;});
-! _LL5:( int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp9=( struct
-! Cyc_Core_Failure_struct*) _cycalloc( sizeof( struct Cyc_Core_Failure_struct));
-  _temp9[ 0]=({ struct Cyc_Core_Failure_struct _temp10; _temp10.tag= Cyc_Core_Failure;
-  _temp10.f1= _tag_arr("Unexpected xtunion sockaddr found", sizeof( unsigned char),
-  34u); _temp10;}); _temp9;})); _LL1:;} void* Cyc_Csocket_Csa2sa( const struct Cyc_Std_sockaddr_in*
-***************
-*** 267,278 ****
-  goto _LL20; _LL20: _temp19= _temp17.f2; goto _LL18; _LL18: return connect( fd,(
-  const struct Cyc_Std_sockaddr_in*) _temp21, _temp19);} int Cyc_Std_setsockopt(
-  int fd, int level, int optname, struct _tagged_arr optval, unsigned int optlen){*
-! __errno_location()= 92; return - 1;} struct _tuple0 Cyc_Std_accept( int fd){
-! struct Cyc_Std_sockaddr_in Caddr=({ struct Cyc_Std_sockaddr_in _temp24; _temp24.sin_family=
-! 0; _temp24.sin_port= 0; _temp24.sin_addr=({ struct Cyc_Std_in_addr _temp26;
-! _temp26.s_addr= 0; _temp26;});{ unsigned int _temp25= 8u; unsigned int i; for( i=
-! 0; i <  _temp25; i ++){( _temp24.sin_zero)[ i]='\000';}} _temp24;});
-! unsigned int len= sizeof( struct Cyc_Std_sockaddr_in); int result= accept( fd,(
-! struct Cyc_Std_sockaddr_in*)& Caddr,( unsigned int*)& len); return({ struct
-! _tuple0 _temp23; _temp23.f1= result; _temp23.f2= Cyc_Csocket_Csa2sa(( const
-! struct Cyc_Std_sockaddr_in*)& Caddr, len); _temp23;});}
---- 267,278 ----
-  goto _LL20; _LL20: _temp19= _temp17.f2; goto _LL18; _LL18: return connect( fd,(
-  const struct Cyc_Std_sockaddr_in*) _temp21, _temp19);} int Cyc_Std_setsockopt(
-  int fd, int level, int optname, struct _tagged_arr optval, unsigned int optlen){*
-! __errno()= 92; return - 1;} struct _tuple0 Cyc_Std_accept( int fd){ struct Cyc_Std_sockaddr_in
-! Caddr=({ struct Cyc_Std_sockaddr_in _temp24; _temp24.sin_family= 0; _temp24.sin_port=
-! 0; _temp24.sin_addr=({ struct Cyc_Std_in_addr _temp26; _temp26.s_addr= 0;
-! _temp26;});{ unsigned int _temp25= 8u; unsigned int i; for( i= 0; i <  _temp25;
-! i ++){( _temp24.sin_zero)[ i]='\000';}} _temp24;}); unsigned int len= sizeof(
-! struct Cyc_Std_sockaddr_in); int result= accept( fd,( struct Cyc_Std_sockaddr_in*)&
-! Caddr,( unsigned int*)& len); return({ struct _tuple0 _temp23; _temp23.f1=
-! result; _temp23.f2= Cyc_Csocket_Csa2sa(( const struct Cyc_Std_sockaddr_in*)&
-! Caddr, len); _temp23;});}

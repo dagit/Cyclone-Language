@@ -20,6 +20,10 @@
    Copyright (C) 1991-1999, 2000, 2001 Free Software Foundation, Inc.
 */
 
+#include <netinet/cin.h>
+#include <sys/ctime.h> // for struct timeval
+#include <sys/ctypes.h> // for ssize_t
+
 #ifndef _SYS_SOCKET_H
 #define _SYS_SOCKET_H
 
@@ -74,29 +78,57 @@ namespace Std {
 
 typedef unsigned short sa_family_t;
 
-xtunion sockaddr;
+  extern struct sockaddr_in;
+
+extern tunion SockAddr<`r::R> {
+  SA_sockaddr_in(struct sockaddr_in @`r);
+  /* We will add other cases as necessary, e.g., SockAddr_In6 */
+
+  /* The remaining cases are for the argument following the type-varying
+     argument; they could be eliminated if we had per-arg injection. */
+  /* NOTE: ORDER MATTERS! on these inject things */
+  SA_socklenptr(socklen_t @`r); // accept, getpeername, getsockname, recvfrom
+  SA_socklen(socklen_t); // bind, connect, sendto
+};
+typedef tunion `r SockAddr<`r> SA<`r>;
 
 extern "C" int socket(int domain, int type, int protocol);
-//extern int socketpair(int domain, int type, int protocol, int fds[2]);
-extern int bind(int fd, const xtunion sockaddr addr);
-//extern int getsockname(int fd, xtunion sockaddr @addr);
-extern int connect(int fd, const xtunion sockaddr addr);
-//extern int getpeername(int fd, xtunion sockaddr @addr);
-//extern ssize_t send(int fd, const char ?buf, size_t n, int flags);
-//extern ssize_t recv(int fd, char ?buf, size_t n, int flags);
-//extern ssize_t sendto(int fd, const char ?buf, size_t n, int flags,
-//                      const xtunion sockaddr addr);
-//extern ssize_t recvfrom(int fd, char ?buf, size_t n, int flags,
-//                        xtunion sockaddr *addr);
-//extern ssize_t sendmsg(int fd, const struct msghdr *message, int flags);
-//extern ssize_t recvmsg(int fd, struct msghdr *message, int flags);
-//extern int getsockopt(int id, int level, int optname, void *optval,
-//                      socklen_t *optlen);
-extern int setsockopt(int fd, int level, int optname, const char ?optval,
-                      socklen_t optlen);
+extern "C" int socketpair(int domain, int type, int protocol, int @{2} fds);
+
+extern int accept(int fd, ... inject SA);
+extern int bind(int fd, ... inject SA);
+extern int connect(int fd, ... inject SA);
+extern int getpeername(int fd, ... inject SA);
+extern int getsockname(int fd, ... inject SA);
 extern "C" int listen(int fd, int n);
-extern $(int, xtunion sockaddr addr) accept(int fd);
 extern "C" int shutdown(int fd, int how);
+
+extern ssize_t send(int fd, const char ?buf, size_t n, int flags);
+extern ssize_t recv(int fd, char ?buf, size_t n, int flags);
+
+extern ssize_t sendto(int fd, const char ?buf, size_t n, int flags,
+                      ... inject SA);
+extern ssize_t recvfrom(int fd, char ?buf, size_t n, int flags,
+                        ... inject SA);
+
+/* These aren't available in Cygwin */
+  /*
+extern ssize_t sendmsg(int fd, const struct msghdr *message, int flags);
+extern ssize_t recvmsg(int fd, struct msghdr *message, int flags);
+  */
+
+extern tunion SockOpt<`r::R> {
+  SO_int(int @`r);
+  SO_timeval(struct timeval @`r);
+  /* The remaining cases are for the argument following the type-varying
+     argument; they could be eliminated if we had per-arg injection. */
+  SO_socklenptr(socklen_t @`r); // getsockopt
+  SO_socklen(socklen_t);        // setsockopt
+};
+typedef tunion `r SockOpt<`r> SO<`r>;
+
+extern int getsockopt(int fd, int level, int optname, ... inject SO);
+extern int setsockopt(int fd, int level, int optname, ... inject SO);
 
 }
 

@@ -36,7 +36,7 @@
 
 #ifndef lint
 /*static char sccsid[] = "from: @(#)net.c	5.5 (Berkeley) 6/1/90";*/
-char net_rcsid[] = "$Id: finger.cyc,v 1.6 2001-08-10 22:26:25 tjim Exp $";
+char net_rcsid[] = "$Id: finger.cyc,v 1.7 2001-10-01 17:55:47 tjim Exp $";
 #endif /* not lint */
 
 #include <core.h>
@@ -54,7 +54,7 @@ using Core;
 
 int main(int argc, char ?`H argv[]) {
   FILE *fp;
-  struct in_addr *defaddr = new in_addr { 0 };
+  struct in_addr @defaddr = new in_addr { 0 };
   int c, sawret, ateol;
   struct hostent *`main hp, def;
   struct servent *sp;
@@ -111,7 +111,7 @@ int main(int argc, char ?`H argv[]) {
 
   /* print hostname before connecting, in case it takes a while */
   printf("[%s]\n", hp->h_name);
-  if (connect(s, new sockaddr_in(sn)) < 0) {
+  if (connect(s, &sn,sizeof(sn)) < 0) {
     fprintf(stderr, "%s: connect: %s\n", argv[0], strerror(errno));
     close(s);
     exit(1);

@@ -1,15 +1,5 @@
 Todo list:
 
-For the release:
------------------
-* Java-doc-like thing for the libraries incorporated into documentation.
-  (TJ).
-
-* Install script and target directory structure (Matthew & Mike)
-  * RPM's and precompiled setups for linux and Win32
-
-* as many bug fixes as possible (see below)
-
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 
@@ -120,7 +110,10 @@ function declarations are only allowed at top-level.
 
 MISSING THINGS NEEDED TO PORT REAL CODE:
 ----------------------------------------
-* Need to port more C libraries
+* need to port more C libraries
+
+* need to be able to use inject on a single argument, not just on
+  varargs.  This is important for args that are void * for example.
 
 * default array initializers within a function: e.g., int x[4];  Actually,
   for bits-only things, we should only issue a warning if they're used
