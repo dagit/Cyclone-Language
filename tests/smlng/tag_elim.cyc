@@ -20,6 +20,7 @@ namespace TagElim;
 //                  only when bold_seen (and bold_useless) is set
 struct SynthS {
   bool mt_doc: 1;
+  bool no_text: 1; // Spc doesn't count
   bool bold_useless: 1;
   bool bold_seen: 1;
   //  bool emph: 1;
@@ -53,7 +54,7 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
   switch(doc) {
   case &Seq(*dsp): 
     let ds = *dsp;
-    init.s = SynthS(1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,~0,~0);
+    init.s = SynthS(1,1,1,0,1,0,1,0,1,0,1,1,1,1,1,1,~0,~0);
     synth_t synth      = init;
     synth_t prev_synth = init;
     if(ds == null) {
@@ -143,6 +144,7 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
   case &Spc(_): 
     synth_t synth;
     synth.i = 0;
+    synth.s.no_text = 1;
     synth.s.sizes  = ~0;
     synth.s.colors = ~0;
     return $(doc,synth);
@@ -153,6 +155,7 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
       return $(d,synth);
     *dp = d2; // destructive
     bool useless = false;
+    bool needtext = false;
 #define USELESS(FIELD) do {useless=synth.s.FIELD; synth.s.FIELD=true;} while(0)
 #define SEEN(FIELD) do {synth.s.FIELD=true;} while(0)
     switch(tag) {
@@ -170,11 +173,12 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
       if(!useless)
 	synth.s.colors = ~(1 << (tag - r_tag));
       break;
-    case B_tag:  USELESS(bold_useless);   SEEN(bold_seen);   break;
-    case I_tag:  USELESS(ital_useless);   SEEN(ital_seen);   break;
-    case S_tag:  USELESS(strong_useless); SEEN(strong_seen); break;
-    case TT_tag: USELESS(tt_useless);     SEEN(tt_seen);     break;
-    case EM_tag: useless = synth.s.strong_useless; break; // can float EM?
+    case B_tag:  USELESS(bold_useless);   SEEN(bold_seen); needtext=true; break;
+    case I_tag:  USELESS(ital_useless);   SEEN(ital_seen); needtext=true; break;
+    case S_tag:  USELESS(strong_useless); SEEN(strong_seen);needtext=true;break;
+    case TT_tag: USELESS(tt_useless);     SEEN(tt_seen);   break;
+      // can float EM? How?
+    case EM_tag: useless = synth.s.strong_useless; needtext=true; break; 
     case PL_tag: // only color and size matter from outer tags
       USELESS(plain);
       synth.s.bold_useless = 1;   synth.s.bold_seen = 0;
@@ -197,7 +201,7 @@ $(doc_t, synth_t) up_opt(doc_t doc) {
     }
 #undef USELESS
 #undef SEEN
-    if(useless)
+    if(useless || (needtext && synth.s.no_text))
       return $(d2,synth);
     else
       return $(doc,synth);

@@ -6,6 +6,7 @@
 namespace TagElim {
 extern struct SynthS {
   bool mt_doc: 1;
+  bool no_text: 1; // Spc doesn't count
   bool bold_useless: 1;
   bool bold_seen: 1;
   //  bool emph: 1;
