@@ -1831,13 +1831,6 @@ doc_t decl2doc(decl_t d) {
   case &Var_d(vd):
     s = vardecl2doc(vd);
     break;
-  case &Pool_d(tv):
-    s = cat(text("autopool"),
-            text("<"),
-            tvar2doc(tv),
-            text(">" ),
-            text(";"));
-    break;
   case &Region_d(tv,vd,open_exp_opt):
     s = cat(text("region"),
             text("<"),

@@ -488,19 +488,6 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
       tcStmt(te2,s,false);
       return;
 
-    case &Pool_d(tv):
-      // Same KLUDGE as with TryCatch_s -- we need a next statement that is
-      // not outside of the handler.
-      s->r = new_stmt(new Seq_s(new_stmt(s->r,s->loc), skip_stmt(s->loc)),
-		      s->loc)->r;
-      let te2 = te;
-      type_t pool_rgn_typ;
-      pool_rgn_typ = new VarType(tv);
-      te2 = add_type_vars(s0->loc,te2,new List(tv,NULL));
-      te2 = add_pool(te2, pool_rgn_typ);
-      tcStmt(te2,s,false);
-      return;
-
     case &Fn_d(fd): 
       if (fd->sc != Public)
 	Warn::err2(d->loc,"bad storage class for inner function");

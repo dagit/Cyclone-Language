@@ -430,8 +430,6 @@ static type_t id2type(string_t<`H> s, kindbound_t k) {
     return refcnt_rgn_type;
   if (zstrcmp(s,CurRgn::curr_rgn_name) == 0)
     return CurRgn::curr_rgn_type();
-  if (zstrcmp(s,CurRgn::curr_poolrgn_name) == 0)
-    return CurRgn::curr_poolrgn_type();
   return var_type(new Tvar(new s,-1,k));
 }
 
@@ -444,8 +442,6 @@ static void tvar_ok(string_t<`H> s,seg_t loc) {
     Warn::err(loc, "bad occurrence of refcounted region");
   if (zstrcmp(s,CurRgn::curr_rgn_name) == 0)
     Warn::err(loc,"bad occurrence of \"current\" region");
-  if (zstrcmp(s,CurRgn::curr_poolrgn_name) == 0)
-    Warn::err(loc,"bad occurrence of \"current pool\" region");
 }
 
 // convert a list of types to a list of typevars -- the parser can't
@@ -1010,7 +1006,7 @@ using Parse;
 %token NULL_kw LET THROW TRY CATCH EXPORT OVERRIDE HIDE
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE DATATYPE
 %token MALLOC RMALLOC RMALLOC_INLINE CALLOC RCALLOC SWAP
-%token POOL REGION_T TAG_T REGION RNEW REGIONS 
+%token REGION_T TAG_T REGION RNEW REGIONS 
 %token PORTON PORTOFF PRAGMA TEMPESTON TEMPESTOFF
 // %token ALIAS
 %token NUMELTS VALUEOF VALUEOF_T TAGCHECK NUMELTS_QUAL THIN_QUAL
@@ -1379,15 +1375,6 @@ declaration:
     type_t t = var_type(tv);
     vardecl_t vd = new_vardecl(SLOC(@3),new $(Loc_n,new two),rgn_handle_type(t),NULL);
     $$ = ^$(new List(region_decl(tv,vd,six,LOC(@1,@8)),NULL));
-  }
-/* Cyc: autorelease pool declaration */
-/* pool <`r>; */
-| POOL '<' TYPE_VAR '>' ';'
-  { let three = $3;
-    tvar_ok(three,SLOC(@3));
-    tvar_t tv = new Tvar(new three,-1,Kinds::kind_to_bound(&Kinds::rk));
-    type_t t  = var_type(tv);
-    $$ = ^$(new List(pool_decl(tv,LOC(@1,@5)),NULL));
   }
 ;
 

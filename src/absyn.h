@@ -843,7 +843,6 @@ namespace Absyn {
     Letv_d(list_t<vardecl_t>); // multi-let
     Region_d(tvar_t,vardecl_t,exp_opt_t); // region declaration
     // region<`r> h; or region<`r> h = open(k);  
-    Pool_d(tvar_t); // autorelease pool declaration
     Aggr_d(aggrdecl_t);    // [struct|union] Foo { ... }
     Datatype_d(datatypedecl_t);    // datatype Bar { ... }
     Enum_d(enumdecl_t);        // enum Baz { ... }
@@ -1093,7 +1092,6 @@ namespace Absyn {
   decl_t let_decl(pat_t,exp_t,seg_t);
   decl_t letv_decl(list_t<vardecl_t,`H>, seg_t);
   decl_t region_decl(tvar_t,vardecl_t,exp_opt_t open_exp, seg_t); 
-  decl_t pool_decl(tvar_t tv,seg_t loc);
   decl_t alias_decl(tvar_t,vardecl_t,exp_t,seg_t);
   vardecl_t new_vardecl(seg_t varloc, qvar_t, type_t, exp_opt_t init);
   vardecl_t static_vardecl(qvar_t x, type_t t, exp_opt_t init);

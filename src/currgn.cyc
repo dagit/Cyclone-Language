@@ -33,11 +33,7 @@ namespace CurRgn;
 static struct Tvar *curr_tvar = NULL;
 static type_opt_t curr_rgn_typ = NULL;
 
-static struct Tvar *curr_pool_tvar = NULL;
-static type_opt_t curr_poolrgn_typ = NULL;
-
 string_t curr_rgn_name = "`C";
-string_t curr_poolrgn_name = "`A";
 
 tvar_t curr_rgn_tvar (void) {
   if (curr_tvar == NULL) {
@@ -48,25 +44,11 @@ tvar_t curr_rgn_tvar (void) {
   }
   return (tvar_t)curr_tvar;
 }
-tvar_t curr_poolrgn_tvar (void) {
-  if (curr_pool_tvar == NULL) {
-    curr_pool_tvar = new Tvar(new curr_poolrgn_name,
-			      Tcutil::new_tvar_id(),
-			      Kinds::kind_to_bound(&Kinds::rk));
-    curr_poolrgn_typ = var_type((tvar_t)curr_pool_tvar);
-  }
-  return (tvar_t)curr_pool_tvar;
-}
 
 type_t curr_rgn_type (void) {
   curr_rgn_tvar();
   curr_rgn_typ = var_type((tvar_t)curr_tvar);
   return (type_t)curr_rgn_typ;
-}
-type_t curr_poolrgn_type (void) {
-  curr_poolrgn_tvar();
-  curr_poolrgn_typ = var_type((tvar_t)curr_pool_tvar);
-  return (type_t)curr_poolrgn_typ;
 }
 
 void subst_inst(list_t<$(tvar_t,type_t)@> inst, tvar_t tv, type_t t) {
@@ -101,7 +83,7 @@ static $(var_opt_t,tqual_t,type_t)@ argtype($(var_opt_t,tqual_t,type_t)@`H arg) 
       // change the type of functions to be parameterized by `C, so
       // that `C is not substituted for
       let tvars2 = *tvars;
-      *tvars = new List((tvar_t)curr_tvar,new List((tvar_t)curr_pool_tvar,tvars2));
+      *tvars = new List((tvar_t)curr_tvar,tvars2);
       return new $(vopt,tq,t2);
     default: throw new Core::Impossible("internal compiler error: not a function type");
     }
@@ -110,7 +92,7 @@ static $(var_opt_t,tqual_t,type_t)@ argtype($(var_opt_t,tqual_t,type_t)@`H arg) 
 }
 
 // "Instantiates" `C in the function's type with the current LIFO region
-type_t instantiate(type_t fntype, type_t currgn, type_t currpoolrgn) {
+type_t instantiate(type_t fntype, type_t currgn) {
   switch (fntype) {
   case &FnType(FnInfo{tvars,eff,res_tq,res_typ,*args_info,c_vararg,
 			cyc_vararg,rgn_po,atts,req,req_relns,ens,ens_relns,
@@ -119,11 +101,10 @@ type_t instantiate(type_t fntype, type_t currgn, type_t currpoolrgn) {
     // appearing in the arguments of the function; simulates our
     // assumption that they will be higher order
     let old_args_info = *args_info;
-    // adds `C,`A to bound variables in the function
+    // adds `C to bound variables in the function
     *args_info = List::map(argtype,*args_info);
-    // instantiate `C,`A
-    let inst = new List(new $((tvar_t)curr_tvar,currgn),
-			new List(new $((tvar_t)curr_pool_tvar,currpoolrgn),NULL));
+    // instantiate `C
+    let inst = new List(new $((tvar_t)curr_tvar,currgn),NULL);
     let fntype2 = Tcutil::substitute(inst,fntype);
     // restore the old bound variables in both types
     switch (fntype2) {
@@ -140,16 +121,12 @@ type_t instantiate(type_t fntype, type_t currgn, type_t currpoolrgn) {
 
 // Used as an argument to filter for type variable lists
 bool is_not_curr_rgn(tvar_t v) {
-  return 
-    (tvar_cmp(v,(tvar_t)curr_tvar) != 0) &&
-    (tvar_cmp(v,(tvar_t)curr_pool_tvar) != 0);
+  return tvar_cmp(v,(tvar_t)curr_tvar) != 0;
 }
 
 // Used as an argument to exists for type variable lists 
 bool is_curr_rgn(tvar_t v) {
-  return 
-    (tvar_cmp(v,(tvar_t)curr_tvar) == 0) ||
-    (tvar_cmp(v,(tvar_t)curr_pool_tvar) == 0);
+  return tvar_cmp(v,(tvar_t)curr_tvar) == 0;
 }
 
 struct rgnsubenv {
@@ -507,9 +484,7 @@ static void rgnsubdecl(struct rgnsubenv env, decl_t d) {
     // ensures clauses
     env.toplevel = false;
     env.inst = new List(new $((tvar_t)curr_tvar,
-			      (type_t)curr_rgn_typ),
-			new List(new $((tvar_t)curr_pool_tvar,
-				       (type_t)curr_poolrgn_typ),NULL));
+			      (type_t)curr_rgn_typ),NULL);
     rgnsubstmt(env,fd->body);
 //     rgnsubtype(d->loc,env,fd->i.ret_type);
 //     fd->i.ret_type = Tcutil::substitute_nofun(env.inst,fd->i.ret_type);
@@ -556,7 +531,6 @@ static void rgnsubdecl(struct rgnsubenv env, decl_t d) {
       vds->hd->type = Tcutil::substitute_nofun(env.inst,vds->hd->type);
     }
     return;
-  case &Pool_d(...):
   case &Region_d(...):
     throw new Core::Failure("internal compiler error: region or pool at toplevel");
   }
@@ -642,12 +616,6 @@ static void rgnsubstmt(struct rgnsubenv env, stmt_t s) {
 	rgnsubstmt(env,s1);
       return;
 
-    case &Pool_d(tv):
-      check_tvar(d->loc,tv);
-      subst_inst(env.inst,(tvar_t)curr_pool_tvar,var_type(tv));
-      rgnsubstmt(env,s1);
-      return;
-
     default:
       rgnsubdecl(env,d);
       rgnsubstmt(env,s1);
@@ -673,7 +641,7 @@ static void rgnsubdecls(struct rgnsubenv env, list_t<decl_t> ds) {
 }
 
 void adjust_all(list_t<Absyn::decl_t,`H> tds) {
-  curr_poolrgn_type(); curr_rgn_type(); // initializes the globals if not there already
+  curr_rgn_type(); // initializes the globals if not there already
   struct rgnsubenv env = { NULL, false, true };
   rgnsubdecls(env,tds);
 }

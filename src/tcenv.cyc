@@ -109,7 +109,6 @@ abstract struct Fenv {
   type_t              capability;
   type_t              curr_rgn;   // current block's region
   type_t              curr_lifo_rgn; // top of LIFO region stack
-  type_t              curr_pool_rgn; // top of autorelease pool stack
   struct FenvFlags    flags;
 };
 
@@ -336,15 +335,6 @@ tenv_t add_region(tenv_t te, type_t rgn, bool opened, bool lifo) {
   if (lifo) ans->curr_lifo_rgn = rgn;
   return put_fenv(te,ans);
 }
-tenv_t add_pool(tenv_t te, type_t poolrgn) {
-  // AUTOFIX: how to do outlives here?  Should pools outlive regular
-  // regions, and vice versa?
-  let ans = new *get_fenv(te,"add_pool");
-  ans->capability   = join_eff(new List(access_eff(poolrgn),
-					new List(ans->capability,NULL)));
-  ans->curr_pool_rgn = poolrgn;
-  return put_fenv(te,ans);  
-}
 
 tenv_t new_named_block(seg_t loc, tenv_t te, tvar_t block_rgn) {
   let ans = new *get_fenv(te,"new_named_block");
@@ -415,11 +405,6 @@ type_t curr_lifo_rgn(tenv_t te) {
   let le = te->le;
   if (le == NULL) return heap_rgn_type;
   return le->curr_lifo_rgn;
-}
-type_t curr_pool_rgn(tenv_t te) {
-  let le = te->le;
-  if (le == NULL) return heap_rgn_type;
-  return le->curr_pool_rgn;
 }
 rgn_po_opt_t curr_rgnpo(tenv_t te) {
   let le = te->le;
@@ -515,11 +500,9 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
     new Tvar(new ((string_t)aprintf("`%s",*(*fd->name)[1])),
              new_tvar_id(), &rgn_kb);
 //   let $(tvs1,cap,ret_t,f_rgn_po) = CurRgn::add_curr_tvar(fd);
-  let $(tvs1,cap,ret_t,f_rgn_po) = $(new List(CurRgn::curr_rgn_tvar(),
-				       new List(CurRgn::curr_poolrgn_tvar(),fd->i.tvars)),
+  let $(tvs1,cap,ret_t,f_rgn_po) = $(new List(CurRgn::curr_rgn_tvar(),fd->i.tvars),
 				     join_eff(new List(access_eff(CurRgn::curr_rgn_type()),
-					      new List(access_eff(CurRgn::curr_poolrgn_type()),
-					      new List((type_t)fd->i.effect,NULL)))),
+					      new List((type_t)fd->i.effect,NULL))),
 				     fd->i.ret_type,fd->i.rgn_po);
   let tvs = new List(rgn0,tvs1);
   Tcutil::check_unique_tvars(loc,tvs);
@@ -547,7 +530,6 @@ fenv_t new_fenv(seg_t loc, fndecl_t fd) {
 					    new List(cap,NULL))),
          .curr_rgn      = param_rgn,
 	 .curr_lifo_rgn = CurRgn::curr_rgn_type(),
-	 .curr_pool_rgn = CurRgn::curr_poolrgn_type(),
 	 .flags         = FenvFlags{NoneNew,false,false,false,false}
        };
 }
@@ -594,7 +576,6 @@ fenv_t nested_fenv(seg_t loc, fenv_t old_fenv, fndecl_t fd) {
 					  new List((type_t)fd->i.effect,NULL))),
          .curr_rgn    = param_rgn,
 	 .curr_lifo_rgn = CurRgn::curr_rgn_type(),
-	 .curr_pool_rgn = CurRgn::curr_poolrgn_type(),
 	 .flags       = FenvFlags{NoneNew,false,false,false,false}
        };
 }
@@ -613,7 +594,6 @@ fenv_t bogus_fenv(type_t ret_type,
          .capability  = join_eff(new List(access_eff(param_rgn),NULL)),
          .curr_rgn    = param_rgn,
 	 .curr_lifo_rgn = CurRgn::curr_rgn_type(),
-	 .curr_pool_rgn = CurRgn::curr_poolrgn_type(),
 	 .flags       = FenvFlags{NoneNew,false,false,false,false}
        };
 }

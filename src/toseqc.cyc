@@ -459,7 +459,6 @@ list_t<decl_t> toseqc(list_t<decl_t,`H> ds) {
     case &Let_d(...): 
     case &Letv_d(_):        
     case &Region_d(...):
-    case &Pool_d(...):
     case &Aggr_d(_):
     case &Datatype_d(_):
     case &Enum_d(_):        

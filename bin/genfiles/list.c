@@ -33,18 +33,19 @@ struct _RegionPage
 #ifdef CYC_REGION_PROFILE
 { unsigned total_bytes;
   unsigned free_bytes;
-  /* MWH: wish we didn't have to include the stuff below ... */
   struct _RegionPage *next;
   char data[1];
 }
 #endif
 ; // abstract -- defined in runtime_memory.c
+struct _pool;
 struct _RegionHandle {
   struct _RuntimeStack s;
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
   struct _DynRegionHandle *sub_regions;
+  struct _pool *released_ptrs;
 #ifdef CYC_REGION_PROFILE
   const char         *name;
 #else
@@ -68,17 +69,6 @@ void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
 void   _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
 void   _pop_dynregion();
-
-/* Pools */
-struct _pool; // defined in runtime_memory.c
-struct _PoolHandle {
-  struct _RuntimeStack s;
-  struct _pool *p;
-};
-struct _PoolHandle _new_pool(void);
-void _free_pool(struct _PoolHandle *h);
-void _push_pool(struct _PoolHandle * r);
-void _pop_pool(void);
 
 /* Exceptions */
 struct _handler_cons {

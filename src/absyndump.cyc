@@ -1212,8 +1212,6 @@ static void dumpdecl(decl_t d) {
   case &Letv_d(vds):    group(dumpid, vds, " let ", ";", ","); break;
   case &Let_d(p,_,e,_):
     dump("let"); dumppat(p); dump_char('='); dumpexp(e); dump_semi(); break;
-  case &Pool_d(tv):
-    dump("autopool"); dump("<"); dumptvar(tv); dump("> "); dump_semi(); break;
   case &Region_d(tv,vd,open_exp_opt):
     dump("region"); dump("<"); dumptvar(tv); dump("> "); dumpqvar(vd->name);
     if (open_exp_opt) {

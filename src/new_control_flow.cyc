@@ -2873,9 +2873,6 @@ static flow_t anal_decl(analenv_t env, flow_t inflow, decl_t decl) {
     let vds = List(vd,NULL);
     return add_vars(fenv, inflow,&vds,fenv->unknown_all,decl->loc,false);
 
-  case &Pool_d(tv):
-    return inflow;
-
     // missing cases should have been handled in anal_stmt
   default: Warn::impos("anal_decl: unexpected decl variant");
   }

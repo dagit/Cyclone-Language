@@ -110,7 +110,6 @@ extern void _fini_regions();     // defined in runtime_memory.c
 // stack tags
 #define EXCEPTION_HANDLER    0
 #define LIFO_REGION          1
-#define AUTORELEASE_POOL     2
 
 // pushes a frame on the stack
 void _push_frame(struct _RuntimeStack *frame);

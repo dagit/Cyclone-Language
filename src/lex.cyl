@@ -134,7 +134,6 @@ static $(string_t,short,bool) rw_array[] = {
   $("__attribute", ATTRIBUTE, true),
   $("abstract", ABSTRACT, false),
   $("auto", AUTO, true),
-  $("autopool",POOL,false),
   $("break", BREAK, true),
   $("__builtin_va_list", BUILTIN_VA_LIST, true),
   $("calloc", CALLOC, false),

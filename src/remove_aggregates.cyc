@@ -388,7 +388,6 @@ list_t<decl_t> remove_aggrs(list_t<decl_t,`H> ds) {
     case &Aggr_d(_): 
     case &Enum_d(_): // assuming no aggregates in tag-expressions
     case &Typedef_d(_): break;
-    case &Pool_d(...):
     case &Region_d(...):
     case &Datatype_d(...):
     case &Let_d(...): 

@@ -805,8 +805,6 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
       Warn::err2(loc,"top level let-declarations are not implemented"); break;
     case &Region_d(...):
       Warn::err2(loc,"top level region declarations are not implemented");break;
-    case &Pool_d(...):
-      Warn::err2(loc,"top level autorelease pool declarations are not implemented");break;
     case &Var_d(vd):
       if (in_externC && okay_externC(d->loc,vd->sc,te->in_extern_c_include,te->in_extern_c_inc_repeat))
         vd->sc = ExternC;

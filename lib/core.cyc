@@ -63,6 +63,10 @@ int ptrcmp(`a::TA @ `r a, `a @ `r b) {
 
 `a identity(`a x) { return x; }
 
+`a::TA ? @released `C autorelease(`a::TA ?`RC ptr)  __attribute__((noliveunique(1))) {
+  return Core::autorelease_handle(Core::current_handle(),ptr);
+}
+
 /* convert a thin pointer, its element size, and the number of elements
  * to a fat pointer.  The interface for this is given in core.h. */
 extern "C include" {

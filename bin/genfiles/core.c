@@ -33,18 +33,19 @@ struct _RegionPage
 #ifdef CYC_REGION_PROFILE
 { unsigned total_bytes;
   unsigned free_bytes;
-  /* MWH: wish we didn't have to include the stuff below ... */
   struct _RegionPage *next;
   char data[1];
 }
 #endif
 ; // abstract -- defined in runtime_memory.c
+struct _pool;
 struct _RegionHandle {
   struct _RuntimeStack s;
   struct _RegionPage *curr;
   char               *offset;
   char               *last_plus_one;
   struct _DynRegionHandle *sub_regions;
+  struct _pool *released_ptrs;
 #ifdef CYC_REGION_PROFILE
   const char         *name;
 #else
@@ -68,17 +69,6 @@ void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
 void   _free_region(struct _RegionHandle*);
 struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
 void   _pop_dynregion();
-
-/* Pools */
-struct _pool; // defined in runtime_memory.c
-struct _PoolHandle {
-  struct _RuntimeStack s;
-  struct _pool *p;
-};
-struct _PoolHandle _new_pool(void);
-void _free_pool(struct _PoolHandle *h);
-void _push_pool(struct _PoolHandle * r);
-void _pop_pool(void);
 
 /* Exceptions */
 struct _handler_cons {
@@ -379,9 +369,13 @@ void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
 #endif
  struct Cyc_Core_Opt{void*v;};
 # 125 "core.h"
-int Cyc_Core_nptrcmp(void*,void*);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
+int Cyc_Core_nptrcmp(void*,void*);
+# 127
+struct _RegionHandle*Cyc_Core_current_handle (void);extern char Cyc_Core_Invalid_argument[17U];struct Cyc_Core_Invalid_argument_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Failure[8U];struct Cyc_Core_Failure_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Impossible[11U];struct Cyc_Core_Impossible_exn_struct{char*tag;struct _fat_ptr f1;};extern char Cyc_Core_Not_found[10U];struct Cyc_Core_Not_found_exn_struct{char*tag;};extern char Cyc_Core_Unreachable[12U];struct Cyc_Core_Unreachable_exn_struct{char*tag;struct _fat_ptr f1;};
 # 171
-extern struct _RegionHandle*Cyc_Core_unique_region;struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};char Cyc_Core_Invalid_argument[17U]="Invalid_argument";char Cyc_Core_SysError[9U]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8U]="Failure";char Cyc_Core_Impossible[11U]="Impossible";char Cyc_Core_Not_found[10U]="Not_found";
+extern struct _RegionHandle*Cyc_Core_unique_region;
+# 201
+struct _fat_ptr Cyc_Core_autorelease_handle(struct _RegionHandle*h,struct _fat_ptr ptr);struct Cyc_Core_DynamicRegion;struct Cyc_Core_NewDynamicRegion{struct Cyc_Core_DynamicRegion*key;};struct Cyc_Core_ThinRes{void*arr;unsigned nelts;};char Cyc_Core_Invalid_argument[17U]="Invalid_argument";char Cyc_Core_SysError[9U]="SysError";struct Cyc_Core_SysError_exn_struct{char*tag;int f1;};char Cyc_Core_Failure[8U]="Failure";char Cyc_Core_Impossible[11U]="Impossible";char Cyc_Core_Not_found[10U]="Not_found";
 # 31 "core.cyc"
 struct Cyc_Core_Not_found_exn_struct Cyc_Core_Not_found_val={Cyc_Core_Not_found};char Cyc_Core_Unreachable[12U]="Unreachable";
 # 34
@@ -412,31 +406,34 @@ void*Cyc_Core_snd(struct _tuple0*pair){return(*pair).f2;}struct _tuple1{void*f1;
 void*Cyc_Core_third(struct _tuple1*triple){return(*triple).f3;}
 # 64
 void*Cyc_Core_identity(void*x){return x;}
-# 69
+# 66
+struct _fat_ptr Cyc_Core_autorelease(struct _fat_ptr ptr){
+return({struct _RegionHandle*_tmp4=Cyc_Core_current_handle();Cyc_Core_autorelease_handle(_tmp4,ptr);});}
+# 73
 struct _fat_ptr Cyc_Core_mkfat(void*arr,unsigned s,unsigned n){
-# 71
+# 75
 struct _fat_ptr res;
 res.curr=arr;
 res.base=arr;
 res.last_plus_one=arr + s * n;
 return res;}
-# 77
+# 81
 void*Cyc_Core_arrcast(struct _fat_ptr dyn,unsigned bd,unsigned sz){
-# 82
+# 86
 if(bd >> 20 || sz >> 12)
 return 0;{
 unsigned char*ptrbd=dyn.curr + bd * sz;
 if(((ptrbd < dyn.curr || dyn.curr == 0)|| dyn.curr < dyn.base)|| ptrbd > dyn.last_plus_one)
-# 89
+# 93
 return 0;
 return dyn.curr;}}
-# 92
+# 96
 struct Cyc_Core_ThinRes Cyc_Core_mkthin(struct _fat_ptr dyn,unsigned sz){
 struct Cyc_Core_ThinRes res;
 res.arr=dyn.curr;
 res.nelts=_get_fat_size(dyn,sz);
 return res;}
-# 101
+# 105
 unsigned Cyc_Core_arr_prevsize(struct _fat_ptr arr,unsigned elt_sz){
 unsigned char*_get_arr_size_curr=arr.curr;
 unsigned char*_get_arr_size_base=arr.base;

@@ -276,9 +276,6 @@ void Cyc_Core_drop_refptr(unsigned char *ptr) {
 
 /////// AUTORELEASE POOLS //////////
 
-/* MWH: the type definitions below and prototypes for the functions
-   need to go in cyc_include.h */
-
 #define POOLSIZE 256
 
 struct _pool {
@@ -287,50 +284,16 @@ struct _pool {
   unsigned char *pointers[POOLSIZE];
 };
 
-struct _PoolHandle _new_pool(void) {
-  struct _PoolHandle h;
-  h.s.tag = AUTORELEASE_POOL;
-  h.s.next = NULL;
-  h.p = NULL;
-  return h;
-}
-
-void _free_pool(struct _PoolHandle *h) {
-  struct _pool *p = h->p;
-  while (p) {
-    int i;
-    for (i = 0; i < p->count; i++)
-      Cyc_Core_drop_refptr(p->pointers[i]);
-    {struct _pool *next = p->next;
-    GC_free(p);
-    p = next;}
-  }
-}
-
-void _push_pool(struct _PoolHandle * r) {
-  //errprintf("pushing pool %x\n",(unsigned int)r);  
-  r->s.tag = AUTORELEASE_POOL;
-  r->s.cleanup = (void (*)(struct _RuntimeStack *))_free_pool;
-  _push_frame((struct _RuntimeStack *)r);
-}
-
-void _pop_pool(void) {
-  if (_top_frame() == NULL || _top_frame()->tag != AUTORELEASE_POOL) {
-    errquit("internal error: _pop_pool");
-  }
-  _npop_frame(0);
-}
-
-struct _fat_ptr Cyc_Core_autorelease(struct _fat_ptr ptr) {
+struct _fat_ptr Cyc_Core_autorelease_handle(struct _RegionHandle *h,
+					    struct _fat_ptr ptr) {
   // ptr is a fat pointer, and we assume its base is correct
-  struct _PoolHandle *h = (struct _PoolHandle *)_frame_until(AUTORELEASE_POOL,0);
   // No pool, so ptr will leak
   if (!h) return ptr;
-  {struct _pool *p = h->p;
+  {struct _pool *p = h->released_ptrs;
   if (!p || p->count >= POOLSIZE) {
     p = (struct _pool *)GC_calloc(1,sizeof(struct _pool));
-    p->next = h->p;
-    h->p = p;
+    p->next = h->released_ptrs;
+    h->released_ptrs = p;
   }
   p->pointers[p->count++] = ptr.base;}
   return ptr;
@@ -586,6 +549,7 @@ struct _RegionHandle _new_region(const char *rgn_name) {
   r.curr = 0;
   r.offset = 0;
   r.last_plus_one = 0;
+  r.released_ptrs = NULL;
   //r.offset = ((char *)p) + sizeof(struct _RegionPage);
   //r.last_plus_one = r.offset + default_region_page_size;
   return r;
@@ -594,10 +558,10 @@ struct _RegionHandle _new_region(const char *rgn_name) {
 // free all the resources associated with a region (except the handle)
 //   (assumes r is not heap or unique region)
 void _free_region(struct _RegionHandle *r) {
-  struct _RegionPage *p;
+  struct _RegionPage *p = r->curr;
+  struct _pool *pl = r->released_ptrs;
 
   /* free pages */
-  p = r->curr;
   while (p != NULL) {
     struct _RegionPage *n = p->next;
 #ifdef CYC_REGION_PROFILE
@@ -614,6 +578,15 @@ void _free_region(struct _RegionHandle *r) {
     GC_free(p);
 #endif
     p = n;
+  }
+  /* free autorelease pool */
+  while (pl) {
+    int i;
+    for (i = 0; i < pl->count; i++)
+      Cyc_Core_drop_refptr(pl->pointers[i]);
+    {struct _pool *next = pl->next;
+    GC_free(pl);
+    pl = next;}
   }
   r->curr = 0;
   r->offset = 0;

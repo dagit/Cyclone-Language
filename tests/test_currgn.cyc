@@ -50,12 +50,12 @@ int f5() {
 
 // AUTORELEASE stuff
 
-int * @released `A auto_alloc_int(int x) {
+int * @released `C auto_alloc_int(int x) {
   let res = rnew (refcnt_region) 1;
   return autorelease(res);
 }
 
-int * @released `A ? @released `A auto_alloc_array(int n) {
+int * @released `C ? @released `C auto_alloc_array(int n) {
   let arr = rnew (refcnt_region) { for i < n : auto_alloc_int(i) };
   for (int i = 0; i<n; i++) *arr[i] += 5;
   return autorelease(arr);
@@ -64,9 +64,9 @@ int * @released `A ? @released `A auto_alloc_array(int n) {
 int f6() {
   auto_alloc_array(50);
   int *`RC p;
-  { autopool<`r>;
+  { region<`r> r;
     let arr1 = auto_alloc_array(50);
-    { autopool<`r2>;
+    { region<`r2> r2;
       int *? arr2 = auto_alloc_array(60);
       p = inc_refptr(arr2[1]);
 //     fprintf(stderr,"ending inner pool\n\n");
