@@ -144,9 +144,16 @@ unsigned char Cyc_Stdio_FileCloseError[ 19u]="\000\000\000\000FileCloseError";
 unsigned char Cyc_Stdio_FileOpenError[ 18u]="\000\000\000\000FileOpenError";
 struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open( struct _tagged_arr fname, struct
 _tagged_arr mode){ struct Cyc_Stdio___sFILE* f= Cyc_Stdio_fopen( fname, mode);
-if( f == 0){( int) _throw(( void*)({ struct Cyc_Stdio_FileOpenError_struct*
-_temp4=( struct Cyc_Stdio_FileOpenError_struct*) GC_malloc( sizeof( struct Cyc_Stdio_FileOpenError_struct));
-_temp4[ 0]=({ struct Cyc_Stdio_FileOpenError_struct _temp5; _temp5.tag= Cyc_Stdio_FileOpenError;
-_temp5.f1= fname; _temp5;}); _temp4;}));} return( struct Cyc_Stdio___sFILE*)
+if( f == 0){ struct _tagged_arr fn=({ unsigned int _temp6= _get_arr_size( fname,
+sizeof( unsigned char)); unsigned char* _temp7=( unsigned char*)
+GC_malloc_atomic( sizeof( unsigned char) * _temp6); struct _tagged_arr _temp9=
+_tag_arr( _temp7, sizeof( unsigned char), _get_arr_size( fname, sizeof(
+unsigned char)));{ unsigned int _temp8= _temp6; unsigned int i; for( i= 0; i <
+_temp8; i ++){ _temp7[ i]=*(( const unsigned char*) _check_unknown_subscript(
+fname, sizeof( unsigned char),( int) i));}}; _temp9;});( int) _throw(( void*)({
+struct Cyc_Stdio_FileOpenError_struct* _temp4=( struct Cyc_Stdio_FileOpenError_struct*)
+GC_malloc( sizeof( struct Cyc_Stdio_FileOpenError_struct)); _temp4[ 0]=({ struct
+Cyc_Stdio_FileOpenError_struct _temp5; _temp5.tag= Cyc_Stdio_FileOpenError;
+_temp5.f1= fn; _temp5;}); _temp4;}));} return( struct Cyc_Stdio___sFILE*)
 _check_null( f);} void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE* f){ if(
 Cyc_Stdio_fclose( f) != 0){( int) _throw(( void*) Cyc_Stdio_FileCloseError);}}

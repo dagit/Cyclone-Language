@@ -908,13 +908,13 @@ int sscanf(const char ?`r src, const char ?`r1 fmt,
 }
 
 
-int peekc(FILE @ stream) {
+int peekc(FILE @`r stream) {
   int c = fgetc(stream);
   ungetc(c, stream);
   return c;
 }
 
-int vfscanf(FILE @ stream, const char ?`r1 fmt, 
+int vfscanf(FILE @`r5 stream, const char ?`r1 fmt, 
                sarg_t<`r3,`r4> ? `r2 ap) 
   __attribute__((format(scanf,2,0)))
 {
@@ -922,7 +922,7 @@ int vfscanf(FILE @ stream, const char ?`r1 fmt,
   return _IO_vfscanf(getc, ungetc, peekc, stream, fmt, ap, & err);
 }
 
-int fscanf(FILE @ stream, const char ?`r1 fmt, 
+int fscanf(FILE @`r5 stream, const char ?`r1 fmt, 
               ...`r2 inject sarg_t<`r3,`r4> ap) 
   __attribute__((format(scanf,2,3)))
 {

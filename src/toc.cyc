@@ -2820,7 +2820,16 @@ static void local_decl_to_c(env_t body_nv,env_t init_nv,vardecl_t vd,stmt_t s) {
 				new_stmt(s->r,DL), false)->r;
       break;
     default:
-      exp_to_c(init_nv, init);
+      if (vd->sc == Static) {
+        // static declarations have to be treated as if they're toplevel
+        // w.r.t. the translation.  NB: I'm not copying in the other
+        // declarations that might be generated, but rather leaving them
+        // at the top-level...
+        let nv2 = copy_env(init_nv);
+        nv2->toplevel = true;
+        exp_to_c(nv2, init);
+      } else 
+        exp_to_c(init_nv, init);
       break;
     }
   }

@@ -907,8 +907,7 @@ eformat:	if (expcnt) {
 }
 
 
-
-int vfprintf(FILE @ f,const char ?`r fmt, parg_t<`r2> ? `r1 ap) 
+int vfprintf(FILE @`r3 f ,const char ?`r fmt, parg_t<`r2> ? `r1 ap) 
   __attribute__((format(printf,2,0)))
 {
   int ans;
@@ -916,7 +915,7 @@ int vfprintf(FILE @ f,const char ?`r fmt, parg_t<`r2> ? `r1 ap)
   return ans;
 }  
 
-int fprintf(FILE @ f,const char ?`r fmt, ...`r1 inject parg_t<`r2> ap)
+int fprintf(FILE @`r3 f,const char ?`r fmt, ...`r1 inject parg_t<`r2> ap)
   __attribute__((format(printf,2,3)))
 {
   return vfprintf(f,fmt,ap);

@@ -74,51 +74,51 @@ typedef long fpos_t;
 //
 // Functions defined in ANSI C standard.
 //
-extern int	remove(string_t);
-extern int	rename(string_t, string_t);
+extern int	remove(const char ?`r);
+extern int	rename(const char ?`r1, const char ?`r2);
 extern FILE *	tmpfile();
 // extern string	tmpnam(string);
-extern int	fclose(FILE @);
-extern int	fflush(FILE *);
-extern FILE *	freopen(string_t, string_t, FILE @);
+extern int	fclose(FILE @`r);
+extern int	fflush(FILE *`r);
+extern FILE *	freopen(const char ?`r1, const char ?`r2, FILE @`r3);
 //extern void	setbuf(FILE *, string);
 //extern int	setvbuf(FILE *, string, int, size_t);
-extern int	fgetc(FILE @);
-extern mstring_t fgets(mstring_t, int n, FILE @);
-extern int	fputc(int, FILE @);
-extern int	fputs(string_t, FILE @);
-extern int	getc(FILE @);
+extern int	fgetc(FILE @`r);
+extern char ?`r1 fgets(char ?`r1, int n, FILE @`r2);
+extern int	fputc(int, FILE @`r);
+extern int	fputs(const char ?`r1, FILE @`r2);
+extern int	getc(FILE @`r);
 //extern int	getchar();
 // extern string     gets(string); // unsafe!
-extern int	putc(int, FILE @);
+extern int	putc(int, FILE @`r);
   //extern int	putchar(int);
-extern int	puts(string_t);
-extern int	ungetc(int, FILE @);
+extern int	puts(const char ?`r);
+extern int	ungetc(int, FILE @`r);
   //extern size_t	fread(string,unsigned int _offset,size_t _size,size_t _n,FILE *);
   //extern size_t	fwrite(string,unsigned int _offset,size_t _size,size_t _n,FILE *);
-extern int	fgetpos(FILE @, fpos_t @);
-extern int	fseek(FILE @, long, int);
-extern int	fsetpos(FILE @, fpos_t @);
-extern long	ftell(FILE @);
-extern void	rewind(FILE @);
-extern void	clearerr(FILE @);
-extern int	feof(FILE @);
-extern int	ferror(FILE @);
-extern void     perror(string_t);
-extern FILE *	fopen(string_t _name , string_t _type);
+extern int	fgetpos(FILE @`r1, fpos_t @`r2);
+extern int	fseek(FILE @`r, long, int);
+extern int	fsetpos(FILE @`r1, fpos_t @`r2);
+extern long	ftell(FILE @`r);
+extern void	rewind(FILE @`r);
+extern void	clearerr(FILE @`r);
+extern int	feof(FILE @`r);
+extern int	ferror(FILE @`r);
+extern void     perror(const char ?`r);
+extern FILE *	fopen(const char ?`r1 _name , const char ?`r2 _type);
 
 //
 // Routines in POSIX 1003.1.
 //
 
-extern FILE *	fdopen(int, string_t);
-extern int	fileno(FILE @);
-extern int	getw(FILE @);
+extern FILE *	fdopen(int, const char ?`r);
+extern int	fileno(FILE @`r);
+extern int	getw(FILE @`r);
   //extern int	pclose(FILE @);
   //extern FILE *   popen(string, string);
-extern int	putw(int, FILE @);
-extern void     setbuffer(FILE @, mstring_t, int);
-extern int	setlinebuf(FILE @);
+extern int	putw(int, FILE @`r);
+extern void     setbuffer(FILE @`r1, char ?`r2, int);
+extern int	setlinebuf(FILE @`r);
 
 #define	getchar()	getc(stdin)
 #define	putchar(x)	putc(x, stdout)
@@ -130,18 +130,18 @@ extern int	setlinebuf(FILE @);
 // Routines added for Cyclone
 //
 extern xtunion exn {
-  extern FileOpenError(string_t);
+  extern FileOpenError(const char ?);
   extern FileCloseError;
 };
 
-extern FILE @file_open(string_t fname, string_t mode);
-extern void file_close(FILE @);
-extern void file_delete(string_t);
-extern void file_length(string_t);
+extern FILE @file_open(const char ?`r1 fname, const char ?`r2 mode);
+extern void file_close(FILE @`r);
+extern void file_delete(const char ?`r);
+extern void file_length(const char ?`r);
 // these two provided in cyc_runtime.c
-extern int file_string_read(FILE @fd, mstring_t dest, int dest_offset, 
+extern int file_string_read(FILE @`r1 fd, char ?`r2 dest, int dest_offset, 
 			    int max_count);
-extern int file_string_write(FILE @fd, const char?`r src, int src_offset, 
+extern int file_string_write(FILE @`r1 fd, const char?`r2 src, int src_offset, 
 			     int max_count);
 
 //////////////////////////////////////////////////////////////
@@ -158,7 +158,7 @@ extern tunion PrintArg<`r::R> {
 typedef tunion `r PrintArg<`r> parg_t<`r>;
 
 // Printing functions behave as with C
-extern int fprintf(FILE @,const char ?`r fmt, ...`r1 inject parg_t<`r2>)
+extern int fprintf(FILE @`r1,const char ?`r2 fmt, ...`r3 inject parg_t<`r4>)
   __attribute__((format(printf,2,3)))
   ;
 extern int printf(const char ?`r fmt, ...`r1 inject parg_t<`r2>)
@@ -177,7 +177,7 @@ extern char ?`r1 raprintf(region_t<`r1>, const char ?`r2 fmt,
   ;
 
 // Same as above but suitable for calling from a user's vararg function
-extern int vfprintf(FILE @,const char ?`r fmt, parg_t<`r2> ? `r1 ap)
+extern int vfprintf(FILE @`r1,const char ?`r2 fmt, parg_t<`r3> ? `r4 ap)
   __attribute__((format(printf,2,0)))
   ;
 extern int vprintf(const char ?`r fmt, parg_t<`r2> ? `r1)
@@ -210,8 +210,8 @@ typedef tunion `r2 ScanfArg<`r1> sarg_t<`r1,`r2>;
 extern int scanf(const char ?`r1 fmt, ...`r2 inject sarg_t<`r3,`r4>)
   __attribute__((format(scanf,1,2)))
   ;
-extern int fscanf(FILE @ stream, const char ?`r1 fmt, 
-                     ...`r2 inject sarg_t<`r3,`r4>)
+extern int fscanf(FILE @`r1 stream, const char ?`r2 fmt, 
+                     ...`r3 inject sarg_t<`r4,`r5>)
   __attribute__((format(scanf,2,3)))
   ;
 extern int sscanf(const char ?`r src, const char ?`r1 fmt, 
@@ -221,8 +221,8 @@ extern int sscanf(const char ?`r src, const char ?`r1 fmt,
 
 
 // Same as above but suitable for calling from a user's vararg function
-extern int vfscanf(FILE @ stream, const char ?`r1 fmt, 
-                   sarg_t<`r3,`r4> ? `r2)
+extern int vfscanf(FILE @`r1 stream, const char ?`r2 fmt, 
+                   sarg_t<`r3,`r4> ? `r5)
   __attribute__((format(scanf,2,0)))
   ;
 extern int vsscanf(const char ?`r src, const char ?`r1 fmt, 
