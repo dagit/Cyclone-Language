@@ -366,10 +366,16 @@ static exp_t stmt_to_exp(toexpenv_t<`r> env, stmt_t s) {
     apply_varmap(env.varmap,e);
     return e;
   case &Seq_s(s1,s2): 
-    return seq_exp(stmt_to_exp(env,s1), stmt_to_exp(env,s2), DL);
+     /* don't inline to avoid order of evaluation differences */
+    let s1_new = stmt_to_exp(env,s1);
+    let s2_new = stmt_to_exp(env,s2);
+    return seq_exp(s1_new, s2_new, DL);
   case &IfThenElse_s(e,s1,s2): 
     apply_varmap(env.varmap,e);
-    return conditional_exp(e, stmt_to_exp(env,s1), stmt_to_exp(env,s2), DL);
+     /* don't inline to avoid order of evaluation differences */
+    let s1_new = stmt_to_exp(env,s1);
+    let s2_new = stmt_to_exp(env,s2);
+    return conditional_exp(e, s1_new, s2_new, DL);
   case &Decl_s(d,s2):
     switch (d->r) {
     case &Var_d(vd):
