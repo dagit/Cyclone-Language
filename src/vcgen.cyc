@@ -88,6 +88,7 @@
  * one equivalence class
  */
 #include "vcgen.h"
+#include "absyn.h"
 #include "absynpp.h"
 #include "tcutil.h"
 #include "attributes.h"
@@ -922,6 +923,19 @@ static term_opt_t deref_lterm(env_t env, term_opt_t lt, assn_t ain) {
   return lt;
 }
 
+static bool is_unsigned_int_exp(exp_t e){
+  type_opt_t t= e->topt;
+  if (t == NULL) return false;
+  switch(t){
+    //wangyl:: FIX, dependence on sizeof(int) == sizeof(long) !!!!!
+  case &Absyn::AppType(&Absyn::IntCon(Absyn::Unsigned, sz), _):
+    if ((sz == Absyn::Long_sz) || (sz == Absyn::Int_sz))
+      return true;
+    else return false;
+  default: return false;
+  }
+
+}
 static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
   if (Tcutil::is_const_exp(e)){
      // special case for pragmas
@@ -952,9 +966,20 @@ static $(term_opt_t,assn_t) vcgen_rexp_nodebug(env_t env, exp_t e, assn_t ain) {
     if (newb == NULL) return $(NULL, ain);
     else return $(new Var(*bind2vardecl(b)),ain);
   case &Absyn::Primop_e(p,es):
-    let $(ts,aout) = vcgen_rexps(env,es,ain);
+    let $(ts, aout) = vcgen_rexps_always(env, es, ain);
     term_opt_t t = NULL;
-    if (ts != NULL) t = primop(p,*ts);
+    if (ts != NULL) t = primop(p, ts);
+    // if  the expression has type unsigned, then we may conclude
+    // t == t1 % t2 u< t2
+    if ((p == Absyn::Mod) && (is_unsigned_int_exp(e))){
+      fprintf(stderr,"e1 mod e2 is unsigned\n");
+      switch (ts){
+      case &List(t1, &List(t2, NULL)):
+	aout = and(aout, ult(t, t2));
+	break;
+      default: break;
+      }
+    }
     return $(t, aout);
   case &Absyn::AssignOp_e(e1,popt,e2):
     let $(lt,a1) = vcgen_lexp(env,e1,ain);
