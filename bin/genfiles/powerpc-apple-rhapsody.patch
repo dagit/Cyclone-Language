@@ -1,13 +1,12 @@
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/lib/arg.c
-*** i686-unknown-linux/lib/arg.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/lib/arg.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/lib/arg.c	Mon Feb 25 10:48:14 2002
+--- powerpc-apple-rhapsody/lib/arg.c	Mon Feb 25 10:49:36 2002
 ***************
-*** 307,321 ****
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-! 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};typedef
-! struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;
+*** 303,316 ****
+  #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
+  #endif
+  #endif
+!  typedef struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;
 ! typedef struct{int __pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t
 ! Cyc_Std_fpos_t;struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;
 ! struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{int tag;struct
@@ -18,12 +17,11 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/li
   _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
   int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
---- 307,319 ----
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-! 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Std___cycFILE;
-! extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;struct Cyc_Std_Cstdio___abstractFILE;
+--- 303,314 ----
+  #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
+  #endif
+  #endif
+!  struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;struct Cyc_Std_Cstdio___abstractFILE;
 ! struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
 ! int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
 ! Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int
@@ -34,7 +32,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c powerpc-apple-rhapsody/li
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c.rej powerpc-apple-rhapsody/lib/arg.c.rej
 *** i686-unknown-linux/lib/arg.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/arg.c.rej	Mon Feb 25 10:26:46 2002
+--- powerpc-apple-rhapsody/lib/arg.c.rej	Mon Feb 25 10:49:32 2002
 ***************
 *** 0 ****
 --- 1,52 ----
@@ -91,8 +89,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/arg.c.rej powerpc-apple-rhapsod
 +   Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(struct _tagged_arr s);int Cyc_Std_strcmp(
 +   struct _tagged_arr s1,struct _tagged_arr s2);int Cyc_Std_strncmp(struct _tagged_arr s1,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c powerpc-apple-rhapsody/lib/assert.c
-*** i686-unknown-linux/lib/assert.c	Mon Feb 25 09:24:43 2002
---- powerpc-apple-rhapsody/lib/assert.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/assert.c	Sat Feb 23 15:06:22 2002
+--- powerpc-apple-rhapsody/lib/assert.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 309,323 ****
   };extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{char*tag;
@@ -126,7 +124,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c powerpc-apple-rhapsody
   Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c.rej powerpc-apple-rhapsody/lib/assert.c.rej
 *** i686-unknown-linux/lib/assert.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/assert.c.rej	Mon Feb 25 10:26:46 2002
+--- powerpc-apple-rhapsody/lib/assert.c.rej	Mon Feb 25 10:49:32 2002
 ***************
 *** 0 ****
 --- 1,51 ----
@@ -182,8 +180,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/assert.c.rej powerpc-apple-rhap
 + ! sizeof(void*),3));}}}});Cyc_Std_fflush((struct Cyc_Std___cycFILE*)Cyc_Std_stderr);
 + ! exit(- 1);}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c powerpc-apple-rhapsody/lib/bitvec.c
-*** i686-unknown-linux/lib/bitvec.c	Mon Feb 25 09:24:43 2002
---- powerpc-apple-rhapsody/lib/bitvec.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/bitvec.c	Sat Feb 23 15:06:22 2002
+--- powerpc-apple-rhapsody/lib/bitvec.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 310,336 ****
   16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct Cyc_List_List{
@@ -240,7 +238,7 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c powerpc-apple-rhapsody
   struct _tagged_arr bvec,int sz);void Cyc_Bitvec_print_bvec(struct _tagged_arr bvec);
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c.rej powerpc-apple-rhapsody/lib/bitvec.c.rej
 *** i686-unknown-linux/lib/bitvec.c.rej	Wed Dec 31 19:00:00 1969
---- powerpc-apple-rhapsody/lib/bitvec.c.rej	Mon Feb 25 10:26:46 2002
+--- powerpc-apple-rhapsody/lib/bitvec.c.rej	Mon Feb 25 10:49:32 2002
 ***************
 *** 0 ****
 --- 1,70 ----
@@ -315,8 +313,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/bitvec.c.rej powerpc-apple-rhap
 +   struct _tagged_arr src1,struct _tagged_arr src2);void*Cyc_Std___assert_fail(struct
 +   _tagged_arr assertion,struct _tagged_arr file,unsigned int line);int Cyc_Bitvec_get(
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapsody/lib/cycstubs.c
-*** i686-unknown-linux/lib/cycstubs.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/lib/cycstubs.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/lib/cycstubs.c	Mon Feb 25 10:32:22 2002
+--- powerpc-apple-rhapsody/lib/cycstubs.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 309,316 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
@@ -1294,8 +1292,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/cycstubs.c powerpc-apple-rhapso
   sizeof(char)))(int)_throw((void*)& Cyc_Std___write_failure);return write(fd,(const
   char*)_untag_arr(buf,sizeof(char),1),count);}struct Cyc_Std_utimbuf{int actime;int
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/lib/dict.c
-*** i686-unknown-linux/lib/dict.c	Mon Feb 25 09:24:43 2002
---- powerpc-apple-rhapsody/lib/dict.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/dict.c	Sat Feb 23 15:06:26 2002
+--- powerpc-apple-rhapsody/lib/dict.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 311,325 ****
   struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*
@@ -1327,8 +1325,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/dict.c powerpc-apple-rhapsody/l
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapsody/lib/execinfo.c
-*** i686-unknown-linux/lib/execinfo.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/lib/execinfo.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/execinfo.c	Mon Feb 25 10:32:22 2002
+--- powerpc-apple-rhapsody/lib/execinfo.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 308,385 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -1433,8 +1431,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/execinfo.c powerpc-apple-rhapso
 ! sizeof(char),_get_zero_arr_size(_tmp2,42));});_tmp1;});_tmp0;}));return 0;}int Cyc_Execinfo_bt(){
 ! return 1;}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody/lib/getopt.c
-*** i686-unknown-linux/lib/getopt.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/lib/getopt.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/lib/getopt.c	Mon Feb 25 10:32:22 2002
+--- powerpc-apple-rhapsody/lib/getopt.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 307,321 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -1520,8 +1518,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/getopt.c powerpc-apple-rhapsody
   Cyc_Std_nonoption_flags_len;static int Cyc_Std_original_argc;static int Cyc_Std_original_argv;
   static void  __attribute__((unused )) Cyc_Std_store_args_and_env(int argc,struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/hashtable.c powerpc-apple-rhapsody/lib/hashtable.c
-*** i686-unknown-linux/lib/hashtable.c	Mon Feb 25 09:24:43 2002
---- powerpc-apple-rhapsody/lib/hashtable.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/hashtable.c	Sat Feb 23 15:06:26 2002
+--- powerpc-apple-rhapsody/lib/hashtable.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 319,348 ****
   struct _tagged_arr*p);void Cyc_Hashtable_iter(void(*f)(void*,void*),struct Cyc_Hashtable_Table*
@@ -1584,8 +1582,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/hashtable.c powerpc-apple-rhaps
   t->hash))(key)% _get_arr_size(tab,sizeof(struct Cyc_List_List*)));((struct Cyc_List_List**)
   tab.curr)[bucket]=({struct Cyc_List_List*_tmp5=_cycalloc(sizeof(*_tmp5));_tmp5->hd=({
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lexing.c powerpc-apple-rhapsody/lib/lexing.c
-*** i686-unknown-linux/lib/lexing.c	Mon Feb 25 09:24:43 2002
---- powerpc-apple-rhapsody/lib/lexing.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/lexing.c	Sat Feb 23 15:06:26 2002
+--- powerpc-apple-rhapsody/lib/lexing.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 308,322 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -1617,8 +1615,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lexing.c powerpc-apple-rhapsody
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lineno.c powerpc-apple-rhapsody/lib/lineno.c
-*** i686-unknown-linux/lib/lineno.c	Mon Feb 25 09:24:43 2002
---- powerpc-apple-rhapsody/lib/lineno.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/lineno.c	Sat Feb 23 15:06:30 2002
+--- powerpc-apple-rhapsody/lib/lineno.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 308,322 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -1650,8 +1648,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/lineno.c powerpc-apple-rhapsody
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsody/lib/marshal.c
-*** i686-unknown-linux/lib/marshal.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/lib/marshal.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/lib/marshal.c	Mon Feb 25 10:32:22 2002
+--- powerpc-apple-rhapsody/lib/marshal.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 332,347 ****
   struct _tagged_arr Cyc_Typerep_get_tagname(unsigned int tag,struct _tagged_arr l);
@@ -1685,8 +1683,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/marshal.c powerpc-apple-rhapsod
   unsigned int Cyc_Std_fread(struct _tagged_arr,unsigned int,unsigned int,struct Cyc_Std___cycFILE*);
   struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/mman.c powerpc-apple-rhapsody/lib/mman.c
-*** i686-unknown-linux/lib/mman.c	Mon Feb 18 11:57:03 2002
---- powerpc-apple-rhapsody/lib/mman.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/mman.c	Mon Feb 18 11:49:04 2002
+--- powerpc-apple-rhapsody/lib/mman.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 257,266 ****
   16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};char*
@@ -1711,8 +1709,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/mman.c powerpc-apple-rhapsody/l
   struct _tagged_arr start,unsigned int length){return munmap(underlying_Cstring((
   struct _tagged_arr)start),length);}
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/position.c powerpc-apple-rhapsody/lib/position.c
-*** i686-unknown-linux/lib/position.c	Mon Feb 25 09:24:43 2002
---- powerpc-apple-rhapsody/lib/position.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/position.c	Sat Feb 23 15:06:30 2002
+--- powerpc-apple-rhapsody/lib/position.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 310,333 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
@@ -1763,8 +1761,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/position.c powerpc-apple-rhapso
   Cyc_Lineno_Pos*Cyc_Lineno_pos_of_abs(struct _tagged_arr,int);void Cyc_Lineno_poss_of_abss(
   struct _tagged_arr filename,struct Cyc_List_List*places);extern char Cyc_Position_Exit[
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/pp.c powerpc-apple-rhapsody/lib/pp.c
-*** i686-unknown-linux/lib/pp.c	Mon Feb 25 09:24:43 2002
---- powerpc-apple-rhapsody/lib/pp.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/pp.c	Sat Feb 23 15:06:34 2002
+--- powerpc-apple-rhapsody/lib/pp.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 309,323 ****
   char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
@@ -1796,8 +1794,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/pp.c powerpc-apple-rhapsody/lib
   int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/printf.c powerpc-apple-rhapsody/lib/printf.c
-*** i686-unknown-linux/lib/printf.c	Mon Feb 25 09:24:43 2002
---- powerpc-apple-rhapsody/lib/printf.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/printf.c	Sat Feb 23 15:06:44 2002
+--- powerpc-apple-rhapsody/lib/printf.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 308,327 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -1840,8 +1838,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/printf.c powerpc-apple-rhapsody
   int Cyc_Std_printf(struct _tagged_arr,struct _tagged_arr);int Cyc_Std_putc(int,
   struct Cyc_Std___cycFILE*);struct _tagged_arr Cyc_Std_rprintf(struct _RegionHandle*,
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/scanf.c powerpc-apple-rhapsody/lib/scanf.c
-*** i686-unknown-linux/lib/scanf.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/lib/scanf.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/lib/scanf.c	Mon Feb 25 10:32:22 2002
+--- powerpc-apple-rhapsody/lib/scanf.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 310,352 ****
   16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};int isspace(
@@ -1931,8 +1929,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/scanf.c powerpc-apple-rhapsody/
   _tmpE=_cycalloc(sizeof(*_tmpE));_tmpE[0]=({struct Cyc_Core_Invalid_argument_struct
   _tmpF;_tmpF.tag=Cyc_Core_Invalid_argument;_tmpF.f1=({const char*_tmp10="scan expects char pointer";
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/tmp.c powerpc-apple-rhapsody/lib/tmp.c
-*** i686-unknown-linux/lib/tmp.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/lib/tmp.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/lib/tmp.c	Mon Feb 25 10:32:22 2002
+--- powerpc-apple-rhapsody/lib/tmp.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 307,334 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -1991,8 +1989,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/tmp.c powerpc-apple-rhapsody/li
   struct _tagged_arr)({char*_tmp0=name;_tag_arr(_tmp0,sizeof(char),
   _get_zero_arr_size(_tmp0,1));})):({char*_tmp1=name;_tag_arr(_tmp1,sizeof(char),
 diff -rbBcN --exclude=CVS i686-unknown-linux/lib/typerep.c powerpc-apple-rhapsody/lib/typerep.c
-*** i686-unknown-linux/lib/typerep.c	Mon Feb 25 09:24:43 2002
---- powerpc-apple-rhapsody/lib/typerep.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/lib/typerep.c	Sat Feb 23 15:06:52 2002
+--- powerpc-apple-rhapsody/lib/typerep.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 326,340 ****
   struct _tagged_arr Cyc_Typerep_get_tagname(unsigned int tag,struct _tagged_arr l);
@@ -2024,8 +2022,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/lib/typerep.c powerpc-apple-rhapsod
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyn.c powerpc-apple-rhapsody/src/absyn.c
-*** i686-unknown-linux/src/absyn.c	Mon Feb 25 09:24:43 2002
---- powerpc-apple-rhapsody/src/absyn.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/src/absyn.c	Sat Feb 23 15:06:56 2002
+--- powerpc-apple-rhapsody/src/absyn.c	Mon Feb 25 10:49:32 2002
 ***************
 *** 672,687 ****
   _tagged_arr*f1;int f2;struct _tagged_arr f3;};struct Cyc_Typerep_Enum_struct{int tag;
@@ -2059,8 +2057,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyn.c powerpc-apple-rhapsody/
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyndump.c powerpc-apple-rhapsody/src/absyndump.c
-*** i686-unknown-linux/src/absyndump.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/absyndump.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/src/absyndump.c	Sat Feb 23 15:06:56 2002
+--- powerpc-apple-rhapsody/src/absyndump.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 307,330 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -2110,8 +2108,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absyndump.c powerpc-apple-rhaps
   Cyc_List_List{void*hd;struct Cyc_List_List*tl;};int Cyc_List_length(struct Cyc_List_List*
   x);struct Cyc_List_List*Cyc_List_map(void*(*f)(void*),struct Cyc_List_List*x);
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/absynpp.c powerpc-apple-rhapsody/src/absynpp.c
-*** i686-unknown-linux/src/absynpp.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/absynpp.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/src/absynpp.c	Sat Feb 23 15:07:36 2002
+--- powerpc-apple-rhapsody/src/absynpp.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 308,330 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -2159,8 +2157,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/absynpp.c powerpc-apple-rhapsod
   struct Cyc_List_List*x);struct Cyc_List_List*Cyc_List_map_c(void*(*f)(void*,void*),
   void*env,struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[18];void Cyc_List_iter(
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapsody/src/buildlib.c
-*** i686-unknown-linux/src/buildlib.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/src/buildlib.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/buildlib.c	Mon Feb 25 10:32:22 2002
+--- powerpc-apple-rhapsody/src/buildlib.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 310,335 ****
   struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
@@ -2282,8 +2280,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/buildlib.c powerpc-apple-rhapso
   _tagged_arr)d;{void*_tmp173[1]={& _tmp175};Cyc_Std_fprintf(Cyc_Std_stderr,({const
   char*_tmp174="Error: could not create directory %s\n";_tag_arr(_tmp174,sizeof(
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cf_flowinfo.c powerpc-apple-rhapsody/src/cf_flowinfo.c
-*** i686-unknown-linux/src/cf_flowinfo.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/cf_flowinfo.c	Mon Feb 25 10:26:46 2002
+*** i686-unknown-linux/src/cf_flowinfo.c	Sat Feb 23 15:07:38 2002
+--- powerpc-apple-rhapsody/src/cf_flowinfo.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 318,340 ****
   void*);struct Cyc_Set_Set;struct Cyc_Set_Set*Cyc_Set_empty(int(*cmp)(void*,void*));
@@ -2332,8 +2330,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cf_flowinfo.c powerpc-apple-rha
   Cyc_Dict_empty(int(*cmp)(void*,void*));struct Cyc_Dict_Dict*Cyc_Dict_insert(
   struct Cyc_Dict_Dict*d,void*k,void*v);void*Cyc_Dict_lookup(struct Cyc_Dict_Dict*d,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody/src/cycdoc.c
-*** i686-unknown-linux/src/cycdoc.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/src/cycdoc.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/cycdoc.c	Mon Feb 25 10:32:22 2002
+--- powerpc-apple-rhapsody/src/cycdoc.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 310,345 ****
   12];struct Cyc_Core_Failure_struct{char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[
@@ -2407,8 +2405,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cycdoc.c powerpc-apple-rhapsody
   Cyc_Lexing_lexbuf*);struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};struct
   Cyc_List_List*Cyc_List_list(struct _tagged_arr);struct Cyc_List_List*Cyc_List_map(
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsody/src/cyclone.c
-*** i686-unknown-linux/src/cyclone.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/src/cyclone.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/cyclone.c	Mon Feb 25 10:32:22 2002
+--- powerpc-apple-rhapsody/src/cyclone.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 324,348 ****
   int tag;void(*f1)(struct _tagged_arr);};struct Cyc_Arg_Int_spec_struct{int tag;void(*
@@ -2460,8 +2458,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/cyclone.c powerpc-apple-rhapsod
   unsigned int Cyc_Std_fwrite(struct _tagged_arr,unsigned int,unsigned int,struct Cyc_Std___cycFILE*);
   int Cyc_Std_printf(struct _tagged_arr,struct _tagged_arr);int remove(const char*);
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/evexp.c powerpc-apple-rhapsody/src/evexp.c
-*** i686-unknown-linux/src/evexp.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/evexp.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/evexp.c	Sat Feb 23 15:07:44 2002
+--- powerpc-apple-rhapsody/src/evexp.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 312,327 ****
   Cyc_List_Nth[8];struct Cyc_Lineno_Pos{struct _tagged_arr logical_file;struct
@@ -2495,8 +2493,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/evexp.c powerpc-apple-rhapsody/
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhapsody/src/formatstr.c
-*** i686-unknown-linux/src/formatstr.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/formatstr.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/formatstr.c	Sat Feb 23 15:07:48 2002
+--- powerpc-apple-rhapsody/src/formatstr.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 314,328 ****
   struct Cyc_List_List*c);struct Cyc_Lineno_Pos{struct _tagged_arr logical_file;struct
@@ -2528,8 +2526,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/formatstr.c powerpc-apple-rhaps
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/interface.c powerpc-apple-rhapsody/src/interface.c
-*** i686-unknown-linux/src/interface.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/interface.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/interface.c	Sat Feb 23 15:07:52 2002
+--- powerpc-apple-rhapsody/src/interface.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 308,330 ****
   char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
@@ -2577,8 +2575,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/interface.c powerpc-apple-rhaps
   struct Cyc_List_List*x);extern char Cyc_List_List_mismatch[18];struct Cyc_List_List*
   Cyc_List_imp_rev(struct Cyc_List_List*x);extern char Cyc_List_Nth[8];struct Cyc_Lineno_Pos{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/src/lex.c
-*** i686-unknown-linux/src/lex.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/lex.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/lex.c	Sat Feb 23 15:07:52 2002
+--- powerpc-apple-rhapsody/src/lex.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 308,323 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -2612,8 +2610,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/lex.c powerpc-apple-rhapsody/sr
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/new_control_flow.c powerpc-apple-rhapsody/src/new_control_flow.c
-*** i686-unknown-linux/src/new_control_flow.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/new_control_flow.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/new_control_flow.c	Sat Feb 23 15:07:52 2002
+--- powerpc-apple-rhapsody/src/new_control_flow.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 318,332 ****
   l,void*x);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};int Cyc_Iter_next(
@@ -2645,8 +2643,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/new_control_flow.c powerpc-appl
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhapsody/src/parse_tab.c
-*** i686-unknown-linux/src/parse_tab.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/parse_tab.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/parse_tab.c	Sat Feb 23 15:07:56 2002
+--- powerpc-apple-rhapsody/src/parse_tab.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 308,327 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -2689,15 +2687,14 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/parse_tab.c powerpc-apple-rhaps
   struct _tagged_arr Cyc_Std_vrprintf(struct _RegionHandle*,struct _tagged_arr,struct
   _tagged_arr);extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/rgnorder.c powerpc-apple-rhapsody/src/rgnorder.c
-*** i686-unknown-linux/src/rgnorder.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/src/rgnorder.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/rgnorder.c	Mon Feb 25 10:48:12 2002
+--- powerpc-apple-rhapsody/src/rgnorder.c	Mon Feb 25 10:49:34 2002
 ***************
-*** 307,321 ****
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-! 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};typedef
-! struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;
+*** 303,322 ****
+  #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
+  #endif
+  #endif
+!  typedef struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;
 ! typedef struct{int __pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t
 ! Cyc_Std_fpos_t;struct Cyc_Std___cycFILE;struct Cyc_Std_Cstdio___abstractFILE;
 ! struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
@@ -2705,25 +2702,37 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/rgnorder.c powerpc-apple-rhapso
 ! Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int
 ! tag;struct _tagged_arr f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;
 ! };struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
-  int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
-  Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
-  int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
---- 307,318 ----
+! int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
+! Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
+! int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
+! };struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{
+! int tag;struct _tagged_arr f1;};extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
+! 18];struct Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Core_Opt{
+  void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-! 16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Std___cycFILE;
-! struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{int tag;struct
-! _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{
-! int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{
-! int tag;struct _tagged_arr f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*
-! f1;};struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
-  int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
-  Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
-  int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
+--- 303,320 ----
+  #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
+  #endif
+  #endif
+!  struct Cyc_Std___cycFILE;struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{
+! int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;}
+! ;struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{
+! int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int tag;struct _tagged_arr f1;};
+! struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};struct Cyc_Std_ShortPtr_sa_struct{
+! int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};
+! struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
+! int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct
+! _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
+! int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};
+! extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[18];struct
+! Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Core_Opt{
+  void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src/tc.c
-*** i686-unknown-linux/src/tc.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/tc.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/tc.c	Sat Feb 23 15:08:00 2002
+--- powerpc-apple-rhapsody/src/tc.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 510,529 ****
   Cyc_Absyn_Tqual tq,struct Cyc_Absyn_Exp*num_elts,struct Cyc_Absyn_Conref*zero_term);
@@ -2766,17 +2775,42 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tc.c powerpc-apple-rhapsody/src
   int qvar_to_Cids: 1;int add_cyc_prefix: 1;int to_VC: 1;int decls_first: 1;int
   rewrite_temp_tvars: 1;int print_all_tvars: 1;int print_all_kinds: 1;int
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcdecl.c powerpc-apple-rhapsody/src/tcdecl.c
-*** i686-unknown-linux/src/tcdecl.c	Mon Feb 25 10:23:49 2002
---- powerpc-apple-rhapsody/src/tcdecl.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/tcdecl.c	Mon Feb 25 10:48:14 2002
+--- powerpc-apple-rhapsody/src/tcdecl.c	Mon Feb 25 10:49:36 2002
 ***************
-*** 308,327 ****
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+*** 303,329 ****
+  #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
+  #endif
+  #endif
+!  typedef struct{int __count;union{unsigned int __wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;
+! typedef struct{int __pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t
+! Cyc_Std_fpos_t;struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;
+! struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{int tag;struct
+! _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{
+! int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{
+! int tag;struct _tagged_arr f1;};struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*
+! f1;};struct _tagged_arr Cyc_Std_aprintf(struct _tagged_arr,struct _tagged_arr);int
+! Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,struct _tagged_arr,struct _tagged_arr);
+! struct Cyc_Std_ShortPtr_sa_struct{int tag;short*f1;};struct Cyc_Std_UShortPtr_sa_struct{
+! int tag;unsigned short*f1;};struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct
+! Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
+! int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
+! };struct Cyc_Std_FloatPtr_sa_struct{int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{
+! int tag;struct _tagged_arr f1;};struct _tagged_arr Cyc_Std_vrprintf(struct
+! _RegionHandle*,struct _tagged_arr,struct _tagged_arr);extern char Cyc_Std_FileCloseError[
+! 19];extern char Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*
+! tag;struct _tagged_arr f1;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
+! 21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern
+! char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+! _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
   16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};extern
-! struct _RegionHandle*Cyc_Core_heap_region;typedef struct{int __count;union{
-! unsigned int __wch;char __wchb[4];}__value;}Cyc_Std___mbstate_t;typedef struct{int
-! __pos;Cyc_Std___mbstate_t __state;}Cyc_Std__G_fpos_t;typedef Cyc_Std__G_fpos_t Cyc_Std_fpos_t;
-! struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;struct Cyc_Std_Cstdio___abstractFILE;
+  struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*
+--- 303,326 ----
+  #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
+  #endif
+  #endif
+!  struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;struct Cyc_Std_Cstdio___abstractFILE;
 ! struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
 ! int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
 ! Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int
@@ -2787,31 +2821,19 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcdecl.c powerpc-apple-rhapsody
 ! struct Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{
 ! int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct
 ! _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
-  int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};
-  struct _tagged_arr Cyc_Std_vrprintf(struct _RegionHandle*,struct _tagged_arr,struct
-  _tagged_arr);extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
---- 308,325 ----
-  char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+! int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};
+! struct _tagged_arr Cyc_Std_vrprintf(struct _RegionHandle*,struct _tagged_arr,struct
+! _tagged_arr);extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
+! 18];struct Cyc_Std_FileOpenError_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Core_Opt{
+! void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
+! char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
+! char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
   16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};extern
-! struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*
-! Cyc_Std_stderr;struct Cyc_Std_Cstdio___abstractFILE;struct Cyc_Std_String_pa_struct{
-! int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{int tag;unsigned int f1;}
-! ;struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct Cyc_Std_ShortPtr_pa_struct{
-! int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int tag;struct _tagged_arr f1;};
-! struct Cyc_Std_IntPtr_pa_struct{int tag;unsigned int*f1;};struct _tagged_arr Cyc_Std_aprintf(
-! struct _tagged_arr,struct _tagged_arr);int Cyc_Std_fprintf(struct Cyc_Std___cycFILE*,
-! struct _tagged_arr,struct _tagged_arr);struct Cyc_Std_ShortPtr_sa_struct{int tag;
-! short*f1;};struct Cyc_Std_UShortPtr_sa_struct{int tag;unsigned short*f1;};struct
-! Cyc_Std_IntPtr_sa_struct{int tag;int*f1;};struct Cyc_Std_UIntPtr_sa_struct{int tag;
-! unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{int tag;struct _tagged_arr f1;}
-! ;struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;};struct Cyc_Std_FloatPtr_sa_struct{
-  int tag;float*f1;};struct Cyc_Std_CharPtr_sa_struct{int tag;struct _tagged_arr f1;};
-  struct _tagged_arr Cyc_Std_vrprintf(struct _RegionHandle*,struct _tagged_arr,struct
-  _tagged_arr);extern char Cyc_Std_FileCloseError[19];extern char Cyc_Std_FileOpenError[
+  struct _RegionHandle*Cyc_Core_heap_region;struct Cyc_List_List{void*hd;struct Cyc_List_List*
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcenv.c powerpc-apple-rhapsody/src/tcenv.c
-*** i686-unknown-linux/src/tcenv.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/tcenv.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/tcenv.c	Sat Feb 23 15:08:00 2002
+--- powerpc-apple-rhapsody/src/tcenv.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 307,330 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
@@ -2861,8 +2883,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcenv.c powerpc-apple-rhapsody/
   Cyc_List_rev(struct Cyc_List_List*x);struct Cyc_List_List*Cyc_List_imp_rev(struct
   Cyc_List_List*x);struct Cyc_List_List*Cyc_List_append(struct Cyc_List_List*x,
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcexp.c powerpc-apple-rhapsody/src/tcexp.c
-*** i686-unknown-linux/src/tcexp.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/tcexp.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/tcexp.c	Sat Feb 23 15:08:00 2002
+--- powerpc-apple-rhapsody/src/tcexp.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 531,545 ****
   struct Cyc_Absyn_Exp*);struct Cyc_Absyn_Aggrfield*Cyc_Absyn_lookup_field(struct Cyc_List_List*,
@@ -2894,8 +2916,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcexp.c powerpc-apple-rhapsody/
   Cyc_Std_UIntPtr_sa_struct{int tag;unsigned int*f1;};struct Cyc_Std_StringPtr_sa_struct{
   int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;double*f1;
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapsody/src/tcgenrep.c
-*** i686-unknown-linux/src/tcgenrep.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/tcgenrep.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/tcgenrep.c	Sat Feb 23 15:08:04 2002
+--- powerpc-apple-rhapsody/src/tcgenrep.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 325,339 ****
   struct Cyc_List_List*x);struct Cyc_List_List*Cyc_List_tabulate(int n,void*(*f)(int));
@@ -2948,8 +2970,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcgenrep.c powerpc-apple-rhapso
   Cyc_Absyn_Tqual{int q_const: 1;int q_volatile: 1;int q_restrict: 1;};struct Cyc_Absyn_Conref{
   void*v;};struct Cyc_Absyn_Eq_constr_struct{int tag;void*f1;};struct Cyc_Absyn_Forward_constr_struct{
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcpat.c powerpc-apple-rhapsody/src/tcpat.c
-*** i686-unknown-linux/src/tcpat.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/tcpat.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/tcpat.c	Sat Feb 23 15:08:04 2002
+--- powerpc-apple-rhapsody/src/tcpat.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 323,342 ****
   x,struct Cyc_List_List*y);struct Cyc_List_List*Cyc_List_rtabulate_c(struct
@@ -2992,8 +3014,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcpat.c powerpc-apple-rhapsody/
   struct _RegionHandle*r,struct Cyc_Dict_Dict*d);struct _tuple0*Cyc_Dict_rchoose(
   struct _RegionHandle*,struct Cyc_Dict_Dict*d);struct Cyc_Set_Set;struct Cyc_Set_Set*
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcstmt.c powerpc-apple-rhapsody/src/tcstmt.c
-*** i686-unknown-linux/src/tcstmt.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/tcstmt.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/tcstmt.c	Sat Feb 23 15:08:04 2002
+--- powerpc-apple-rhapsody/src/tcstmt.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 506,526 ****
   struct Cyc_Position_Segment*loc);struct Cyc_Absyn_Stmt*Cyc_Absyn_switch_stmt(
@@ -3038,8 +3060,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcstmt.c powerpc-apple-rhapsody
   int qvar_to_Cids: 1;int add_cyc_prefix: 1;int to_VC: 1;int decls_first: 1;int
   rewrite_temp_tvars: 1;int print_all_tvars: 1;int print_all_kinds: 1;int
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody/src/tcutil.c
-*** i686-unknown-linux/src/tcutil.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/tcutil.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/tcutil.c	Sat Feb 23 15:08:24 2002
+--- powerpc-apple-rhapsody/src/tcutil.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 309,329 ****
   _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -3084,8 +3106,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/tcutil.c powerpc-apple-rhapsody
   _tagged_arr);struct _tagged_arr Cyc_Std_vrprintf(struct _RegionHandle*,struct
   _tagged_arr,struct _tagged_arr);extern char Cyc_Std_FileCloseError[19];extern char
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/toc.c powerpc-apple-rhapsody/src/toc.c
-*** i686-unknown-linux/src/toc.c	Mon Feb 25 09:24:44 2002
---- powerpc-apple-rhapsody/src/toc.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/toc.c	Sat Feb 23 15:08:26 2002
+--- powerpc-apple-rhapsody/src/toc.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 308,328 ****
   char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
@@ -3130,8 +3152,8 @@ diff -rbBcN --exclude=CVS i686-unknown-linux/src/toc.c powerpc-apple-rhapsody/sr
   _tagged_arr,struct _tagged_arr);extern char Cyc_Std_FileCloseError[19];extern char
   Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*tag;struct
 diff -rbBcN --exclude=CVS i686-unknown-linux/src/tovc.c powerpc-apple-rhapsody/src/tovc.c
-*** i686-unknown-linux/src/tovc.c	Mon Feb 25 09:24:45 2002
---- powerpc-apple-rhapsody/src/tovc.c	Mon Feb 25 10:26:47 2002
+*** i686-unknown-linux/src/tovc.c	Sat Feb 23 15:08:26 2002
+--- powerpc-apple-rhapsody/src/tovc.c	Mon Feb 25 10:49:34 2002
 ***************
 *** 315,330 ****
   Cyc_List_List*x);struct Cyc_List_List*Cyc_List_imp_rev(struct Cyc_List_List*x);

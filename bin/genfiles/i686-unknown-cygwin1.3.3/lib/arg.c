@@ -303,12 +303,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 #define _cycalloc_atomic(n) _profile_GC_malloc_atomic(n,__FILE__ ":" __FUNCTION__,__LINE__)
 #endif
 #endif
- struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[21];struct Cyc_Core_Invalid_argument_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
-char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
-16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct Cyc_Std___cycFILE;
-extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;struct Cyc_Std_Cstdio___abstractFILE;
+ struct Cyc_Std___cycFILE;extern struct Cyc_Std___cycFILE*Cyc_Std_stderr;struct Cyc_Std_Cstdio___abstractFILE;
 struct Cyc_Std_String_pa_struct{int tag;struct _tagged_arr f1;};struct Cyc_Std_Int_pa_struct{
 int tag;unsigned int f1;};struct Cyc_Std_Double_pa_struct{int tag;double f1;};struct
 Cyc_Std_ShortPtr_pa_struct{int tag;short*f1;};struct Cyc_Std_Buffer_pa_struct{int
@@ -322,16 +317,22 @@ int tag;struct _tagged_arr f1;};struct Cyc_Std_DoublePtr_sa_struct{int tag;doubl
 int tag;struct _tagged_arr f1;};int Cyc_Std_sscanf(struct _tagged_arr,struct
 _tagged_arr,struct _tagged_arr);extern char Cyc_Std_FileCloseError[19];extern char
 Cyc_Std_FileOpenError[18];struct Cyc_Std_FileOpenError_struct{char*tag;struct
-_tagged_arr f1;};struct Cyc_List_List{void*hd;struct Cyc_List_List*tl;};extern char
-Cyc_List_List_mismatch[18];extern char Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(
-struct _tagged_arr s);int Cyc_Std_strcmp(struct _tagged_arr s1,struct _tagged_arr s2);
-int Cyc_Std_strncmp(struct _tagged_arr s1,struct _tagged_arr s2,unsigned int len);
-struct _tagged_arr Cyc_Std_strconcat(struct _tagged_arr,struct _tagged_arr);extern
-char Cyc_Arg_Bad[8];struct Cyc_Arg_Bad_struct{char*tag;struct _tagged_arr f1;};
-extern char Cyc_Arg_Error[10];struct Cyc_Arg_Unit_spec_struct{int tag;void(*f1)();};
-struct Cyc_Arg_Flag_spec_struct{int tag;void(*f1)(struct _tagged_arr);};struct Cyc_Arg_FlagString_spec_struct{
-int tag;void(*f1)(struct _tagged_arr,struct _tagged_arr);};struct Cyc_Arg_Set_spec_struct{
-int tag;int*f1;};struct Cyc_Arg_Clear_spec_struct{int tag;int*f1;};struct Cyc_Arg_String_spec_struct{
+_tagged_arr f1;};struct Cyc_Core_Opt{void*v;};extern char Cyc_Core_Invalid_argument[
+21];struct Cyc_Core_Invalid_argument_struct{char*tag;struct _tagged_arr f1;};extern
+char Cyc_Core_Failure[12];struct Cyc_Core_Failure_struct{char*tag;struct
+_tagged_arr f1;};extern char Cyc_Core_Impossible[15];struct Cyc_Core_Impossible_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Core_Not_found[14];extern char Cyc_Core_Unreachable[
+16];struct Cyc_Core_Unreachable_struct{char*tag;struct _tagged_arr f1;};struct Cyc_List_List{
+void*hd;struct Cyc_List_List*tl;};extern char Cyc_List_List_mismatch[18];extern char
+Cyc_List_Nth[8];unsigned int Cyc_Std_strlen(struct _tagged_arr s);int Cyc_Std_strcmp(
+struct _tagged_arr s1,struct _tagged_arr s2);int Cyc_Std_strncmp(struct _tagged_arr s1,
+struct _tagged_arr s2,unsigned int len);struct _tagged_arr Cyc_Std_strconcat(struct
+_tagged_arr,struct _tagged_arr);extern char Cyc_Arg_Bad[8];struct Cyc_Arg_Bad_struct{
+char*tag;struct _tagged_arr f1;};extern char Cyc_Arg_Error[10];struct Cyc_Arg_Unit_spec_struct{
+int tag;void(*f1)();};struct Cyc_Arg_Flag_spec_struct{int tag;void(*f1)(struct
+_tagged_arr);};struct Cyc_Arg_FlagString_spec_struct{int tag;void(*f1)(struct
+_tagged_arr,struct _tagged_arr);};struct Cyc_Arg_Set_spec_struct{int tag;int*f1;};
+struct Cyc_Arg_Clear_spec_struct{int tag;int*f1;};struct Cyc_Arg_String_spec_struct{
 int tag;void(*f1)(struct _tagged_arr);};struct Cyc_Arg_Int_spec_struct{int tag;void(*
 f1)(int);};struct Cyc_Arg_Rest_spec_struct{int tag;void(*f1)(struct _tagged_arr);};
 void Cyc_Arg_usage(struct Cyc_List_List*,struct _tagged_arr);extern int Cyc_Arg_current;

@@ -725,32 +725,47 @@ _tmp84,_tmp84,_tmp84 + 27}};unsigned int Cyc_Std_strftime(struct _tagged_arr s,
 unsigned int maxsize,struct _tagged_arr fmt,const struct Cyc_Std_tm*t){if(maxsize > 
 _get_arr_size(s,sizeof(char)))(int)_throw((void*)& Cyc_Std___strftime_failure);
 return strftime((char*)_check_null(_untag_arr(s,sizeof(char),1)),maxsize,(const
-char*)_check_null(_untag_arr(fmt,sizeof(char),1)),t);}struct _tagged_arr Cyc_Std_getcwd(
-struct _tagged_arr buf,unsigned int size);int Cyc_Std_gethostname(struct _tagged_arr,
+char*)_check_null(_untag_arr(fmt,sizeof(char),1)),t);}int Cyc_Std_execlp(const
+char*,const char*,struct _tagged_arr);struct _tagged_arr Cyc_Std_getcwd(struct
+_tagged_arr buf,unsigned int size);int Cyc_Std_gethostname(struct _tagged_arr,
 unsigned int);int Cyc_Std_read(int,struct _tagged_arr,unsigned int);int Cyc_Std_write(
-int,struct _tagged_arr,unsigned int);char*getcwd(char*buf,unsigned int size);
-static char _tmp86[29]="getcwd: invalid buf argument";static struct Cyc_Core_Failure_struct
-Cyc_Std___getcwd_failure={Cyc_Core_Failure,{_tmp86,_tmp86,_tmp86 + 29}};struct
+int,struct _tagged_arr,unsigned int);int execvp(const char*file,const char**argv);
+static char _tmp86[36]="execlp arg list not NULL-terminated";static struct Cyc_Core_Failure_struct
+Cyc_Std___execlp_failure={Cyc_Core_Failure,{_tmp86,_tmp86,_tmp86 + 36}};int Cyc_Std_execlp(
+const char*path,const char*arg0,struct _tagged_arr argv){if(*((const char**)
+_check_unknown_subscript(argv,sizeof(const char*),(int)(_get_arr_size(argv,
+sizeof(const char*))- 1)))!= (const char*)0)(int)_throw((void*)& Cyc_Std___execlp_failure);{
+struct _tagged_arr newargs=({unsigned int _tmp87=_get_arr_size(argv,sizeof(const
+char*));const char**_tmp88=(const char**)_cycalloc(_check_times(sizeof(const char*),
+_tmp87));struct _tagged_arr _tmp8A=_tag_arr(_tmp88,sizeof(const char*),_tmp87);{
+unsigned int _tmp89=_tmp87;unsigned int i;for(i=0;i < _tmp89;i ++){_tmp88[i]=(const
+char*)0;}}_tmp8A;});*((const char**)_check_unknown_subscript(newargs,sizeof(const
+char*),0))=(const char*)arg0;{int i=0;for(0;i < _get_arr_size(argv,sizeof(const char*));
+i ++){*((const char**)_check_unknown_subscript(newargs,sizeof(const char*),i + 1))=((
+const char**)argv.curr)[i];}}return execvp(path,(const char**)_check_null(
+_untag_arr(newargs,sizeof(const char*),1)));}}char*getcwd(char*buf,unsigned int
+size);static char _tmp8C[29]="getcwd: invalid buf argument";static struct Cyc_Core_Failure_struct
+Cyc_Std___getcwd_failure={Cyc_Core_Failure,{_tmp8C,_tmp8C,_tmp8C + 29}};struct
 _tagged_arr Cyc_Std_getcwd(struct _tagged_arr buf,unsigned int size){if(
 _get_arr_size(buf,sizeof(char))< size)(int)_throw((void*)& Cyc_Std___getcwd_failure);{
-char*_tmp87=getcwd((char*)_check_null(_untag_arr(buf,sizeof(char),1)),size);
-return(unsigned int)_tmp87?buf: _tag_arr(0,0,0);}}int gethostname(char*,
-unsigned int);static char _tmp89[34]="gethostname: called with NULL buf";static
+char*_tmp8D=getcwd((char*)_check_null(_untag_arr(buf,sizeof(char),1)),size);
+return(unsigned int)_tmp8D?buf: _tag_arr(0,0,0);}}int gethostname(char*,
+unsigned int);static char _tmp8F[34]="gethostname: called with NULL buf";static
 struct Cyc_Core_Failure_struct Cyc_Std___gethostname_failure_1={Cyc_Core_Failure,{
-_tmp89,_tmp89,_tmp89 + 34}};static char _tmp8B[42]="gethostname: called with count > buf.size";
+_tmp8F,_tmp8F,_tmp8F + 34}};static char _tmp91[42]="gethostname: called with count > buf.size";
 static struct Cyc_Core_Failure_struct Cyc_Std___gethostname_failure_2={Cyc_Core_Failure,{
-_tmp8B,_tmp8B,_tmp8B + 42}};int Cyc_Std_gethostname(struct _tagged_arr buf,
+_tmp91,_tmp91,_tmp91 + 42}};int Cyc_Std_gethostname(struct _tagged_arr buf,
 unsigned int count){if(!((unsigned int)buf.curr))(int)_throw((void*)& Cyc_Std___gethostname_failure_1);
 else{if(count > _get_arr_size(buf,sizeof(char)))(int)_throw((void*)& Cyc_Std___gethostname_failure_2);
 return gethostname((char*)_untag_arr(buf,sizeof(char),1),count);}}int read(int fd,
-char*buf,unsigned int count);static char _tmp8D[35]="read: called with count > buf.size";
+char*buf,unsigned int count);static char _tmp93[35]="read: called with count > buf.size";
 static struct Cyc_Core_Failure_struct Cyc_Std___read_failure={Cyc_Core_Failure,{
-_tmp8D,_tmp8D,_tmp8D + 35}};int Cyc_Std_read(int fd,struct _tagged_arr buf,
+_tmp93,_tmp93,_tmp93 + 35}};int Cyc_Std_read(int fd,struct _tagged_arr buf,
 unsigned int count){if(count > _get_arr_size(buf,sizeof(char)))(int)_throw((void*)&
 Cyc_Std___read_failure);return read(fd,(char*)_check_null(_untag_arr(buf,sizeof(
 char),1)),count);}int write(int fd,const char*buf,unsigned int count);static char
-_tmp8F[36]="write: called with count > buf.size";static struct Cyc_Core_Failure_struct
-Cyc_Std___write_failure={Cyc_Core_Failure,{_tmp8F,_tmp8F,_tmp8F + 36}};int Cyc_Std_write(
+_tmp95[36]="write: called with count > buf.size";static struct Cyc_Core_Failure_struct
+Cyc_Std___write_failure={Cyc_Core_Failure,{_tmp95,_tmp95,_tmp95 + 36}};int Cyc_Std_write(
 int fd,struct _tagged_arr buf,unsigned int count){if(count > _get_arr_size(buf,
 sizeof(char)))(int)_throw((void*)& Cyc_Std___write_failure);return write(fd,(const
 char*)_untag_arr(buf,sizeof(char),1),count);}struct Cyc_Std_utimbuf{int actime;int

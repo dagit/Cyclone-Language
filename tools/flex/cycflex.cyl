@@ -22,7 +22,7 @@ rule mangle = parse
   return 0;
 }
 | [^'c']+ {
-  fputs(lexeme(lexbuf),(FILE @)mangle_out);
+  fputs((const char @)(lexeme(lexbuf)),(FILE @)mangle_out);
   return 1;
 }
 | 'c' {
@@ -1216,18 +1216,24 @@ rule mangle = parse
     FILE @in_file;
     FILE @out_file;
 
-    const char ?tmpskeletonfile = NULL;
+    const char *tmpskeletonfile = NULL;
     const char ?theskeletonfile = NULL;
     if (skeletonfile) {
       theskeletonfile = skeletonfile;
     }
     else {
       /* Put the skeleton in a temp file */
-      tmpskeletonfile = strdup(tmpnam(NULL));
-      maybe = fopen(tmpskeletonfile,"w");
-      if (!maybe) {
-        fprintf(stderr,"cycflex: could not open temp file for skeleton\n");
-        exit(1);
+      tmpskeletonfile = (const char *)tmpnam(NULL);
+      if (tmpskeletonfile) {
+	maybe = fopen(tmpskeletonfile,"w");
+	if (!maybe) {
+	  fprintf(stderr,"cycflex: could not open temp file for skeleton\n");
+	  exit(1);
+	}
+      }
+      else {
+	fprintf(stderr,"cycflex: tmpnam failed\n");
+	exit(1);
       }
       out_file = (FILE@)maybe;
       fputs(skeleton,out_file);
@@ -1236,8 +1242,8 @@ rule mangle = parse
     }
 
     /* Run flex */
-    let flexoutfile = strdup(tmpnam(NULL));
-    let cmd = aprintf("flex -S%s -o%s %s",
+    let flexoutfile = (const char @)tmpnam(NULL);
+    let cmd = (const char @)aprintf("flex -S%s -o%s %s",
                       theskeletonfile,
                       flexoutfile,
                       flexargstring);
@@ -1256,7 +1262,7 @@ rule mangle = parse
     }
     in_file = (FILE@)maybe;
     let l = Lexing::from_file(in_file);
-    mangle_out = fopen(finaloutfile,"w");
+    mangle_out = fopen((const char @)finaloutfile,"w");
     if (!mangle_out) {
       fprintf(stderr,"cycflex: can't open %s\n",finaloutfile);
       if (tmpskeletonfile) remove(tmpskeletonfile);

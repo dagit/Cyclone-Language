@@ -2363,9 +2363,6 @@ P_tmpdir
 fpos_t
 size_t
 }
-prologue {
-  #include <core.h>
-}
 epilogue {
   // NOTES:
   // NULL is not defined because it is a keyword in Cyclone.
@@ -3188,9 +3185,6 @@ WIFSTOPPED
 WSTOPSIG
 WTERMSIG
 }
-prologue {
-  #include <core.h>
-}
 epilogue {
   // malloc is a primitive in Cyclone so we don't need this declaration
   //  extern "C" void *malloc(size_t);
@@ -3453,9 +3447,6 @@ IPC_RMID
 IPC_SET    
 IPC_STAT   
 }
-prologue {
-  #include <core.h>
-}
 epilogue ftok {
   extern "C" key_t ftok(const char @, int);
 }
@@ -3469,9 +3460,6 @@ MAP_FAILED
 PROT_READ
 MAP_SHARED
 MAP_PRIVATE
-}
-prologue {
-  #include <core.h>
 }
 epilogue {
   // We leave out many of the functions/flags, and just allow
@@ -4100,9 +4088,6 @@ S_TYPEISSEM
 S_TYPEISSHM
 S_TYPEISTMO
 }
-prologue {
-  #include <core.h>
-}
 epilogue {
   // EXTREMELY irritating: under Linux, mode_t, etc., are not defined
   // in sys/stat.h, CONTRARY to the posix spec.  Instead __mode_t, etc.,
@@ -4197,9 +4182,6 @@ ITIMER_PROF
 timezone
 fd_set
 FD_SETSIZE
-}
-prologue {
-  #include <core.h>
 }
 epilogue getitimer {
   extern "C" int getitimer(int, struct itimerval @);
@@ -4459,9 +4441,6 @@ size_t
 time_t
 clockid_t
 timer_t
-}
-prologue {
-  #include <core.h>
 }
 epilogue {
   /* Missing declarations for
@@ -4758,9 +4737,6 @@ off_t
 pid_t
 __useconds_t
 useconds_t
-}
-prologue {
-  #include <core.h>
 }
 epilogue {
   // EXTREMELY irritating: under Linux, useconds_t is not defined
@@ -5311,9 +5287,6 @@ utime.h:
 include {
 utimbuf
 time_t
-}
-prologue {
-  #include <core.h>
 }
 epilogue {
   // Note, posix says the second arg of utime may be NULL
