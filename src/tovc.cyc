@@ -514,6 +514,7 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
     let next_d = old_ds->hd;
     switch(next_d->r) {
     case &Fn_d(fd):
+  // fprintf(Stdio::stderr,"%s",*(*fd->name)[1]); Stdio::fflush(Stdio::stdout);
       region rgn {
 	let gen_ds = rnew(rgn) null;
 	stmt_to_vc(ToExpEnv(rgn,

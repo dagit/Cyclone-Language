@@ -70,8 +70,7 @@ FILE @@ dump_file = &stdout;
 void ignore(`a x) { return; }
 
 static unsigned int pos = 0;
-// It would be really nice to have a control character for untagged arrays!
-// (Think of all the saved allocation for punctuation and keywords!)
+
 void dump(dump_string_t s) {
   int sz = s.size;
   if(!s[sz-1])

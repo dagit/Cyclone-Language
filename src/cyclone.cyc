@@ -463,8 +463,8 @@ void process_file(string_t filename) {
   // Translation to C
   tds = do_stage("translation to C", do_translate, true, tds);
   if (compile_failure) return;
-  if (tovc_r) tds = do_stage("post-pass to VC", do_tovc, true, tds);
-  if (compile_failure) return;
+   if (tovc_r) tds = do_stage("post-pass to VC", do_tovc, true, tds);
+   if (compile_failure) return;
 
  PRINTC:
   if (tds != null) {

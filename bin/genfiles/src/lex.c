@@ -461,10 +461,10 @@ struct Cyc_Dict_Dict* d, void* key); void Cyc_yyerror( struct _tagged_arr s){
 Cyc_Position_post_error( Cyc_Position_mk_err_parse( Cyc_Position_segment_of_abs(
 Cyc_yylloc.first_line, Cyc_yylloc.last_line), s));} struct Cyc_Lex_Trie; struct
 Cyc_Lex_Trie{ struct Cyc_Lex_Trie*** children; int shared_str; } ; static int
-Cyc_Lex_num_kws= 0; static struct _tagged_arr Cyc_Lex_kw_nums={ 0u, 0u, 0u + 0u};
-static struct Cyc_Xarray_Xarray* Cyc_Lex_symbols= 0; static struct Cyc_Lex_Trie*
-Cyc_Lex_ids_trie= 0; static struct Cyc_Lex_Trie* Cyc_Lex_typedefs_trie= 0;
-static int Cyc_Lex_comment_depth= 0; static struct _tuple6 Cyc_Lex_token_int_pair={(
+Cyc_Lex_num_kws= 0; static struct _tagged_arr Cyc_Lex_kw_nums={( void*) 0u,(
+void*) 0u,( void*) 0u + 0u}; static struct Cyc_Xarray_Xarray* Cyc_Lex_symbols= 0;
+static struct Cyc_Lex_Trie* Cyc_Lex_ids_trie= 0; static struct Cyc_Lex_Trie* Cyc_Lex_typedefs_trie=
+0; static int Cyc_Lex_comment_depth= 0; static struct _tuple6 Cyc_Lex_token_int_pair={(
 void*) 0u, 0}; static unsigned char _temp0[ 8u]="*bogus*"; static struct
 _tagged_arr Cyc_Lex_bogus_string={ _temp0, _temp0, _temp0 + 8u}; static struct
 Cyc_Absyn_Abs_n_struct Cyc_Lex_absn_null={ 1u, 0}; static struct _tuple0 Cyc_Lex_token_id_pair={(
@@ -650,16 +650,16 @@ s, sizeof( unsigned char), start + i)); if('0' <= x? x <='9': 0){ c=( 16 * c +(
 int) x) -( int)'0';} else{ if('A' <= x? x <='F': 0){ c=( 16 * c +( int) x) -(
 int)'A';} else{ if('a' <= x? x <='f': 0){ c=( 16 * c +( int) x) -( int)'a';}
 else{ break;}}}}} return( unsigned char) c;} unsigned char Cyc_Lex_string_buffer_v[
-10u]={'x','x','x','x','x','x','x','x','x','x'}; struct _tagged_arr Cyc_Lex_string_buffer={
-Cyc_Lex_string_buffer_v, Cyc_Lex_string_buffer_v, Cyc_Lex_string_buffer_v + 10u};
-int Cyc_Lex_string_pos= 0; void Cyc_Lex_store_string_char( unsigned char c){ int
-sz=( int) _get_arr_size( Cyc_Lex_string_buffer, sizeof( unsigned char)); if( Cyc_Lex_string_pos
->= sz){ int newsz= sz; while( Cyc_Lex_string_pos >= newsz) { newsz= newsz * 2;}{
-struct _tagged_arr str=({ unsigned int _temp100=( unsigned int) newsz;
-unsigned char* _temp101=( unsigned char*) GC_malloc_atomic( sizeof(
-unsigned char) * _temp100); struct _tagged_arr _temp103= _tag_arr( _temp101,
-sizeof( unsigned char),( unsigned int) newsz);{ unsigned int _temp102= _temp100;
-unsigned int i; for( i= 0; i < _temp102; i ++){ _temp101[ i]= i < sz?*((
+10u]={'x','x','x','x','x','x','x','x','x','x'}; struct _tagged_arr Cyc_Lex_string_buffer={(
+void*) Cyc_Lex_string_buffer_v,( void*) Cyc_Lex_string_buffer_v,( void*) Cyc_Lex_string_buffer_v
++ 10u}; int Cyc_Lex_string_pos= 0; void Cyc_Lex_store_string_char( unsigned char
+c){ int sz=( int) _get_arr_size( Cyc_Lex_string_buffer, sizeof( unsigned char));
+if( Cyc_Lex_string_pos >= sz){ int newsz= sz; while( Cyc_Lex_string_pos >= newsz) {
+newsz= newsz * 2;}{ struct _tagged_arr str=({ unsigned int _temp100=(
+unsigned int) newsz; unsigned char* _temp101=( unsigned char*) GC_malloc_atomic(
+sizeof( unsigned char) * _temp100); struct _tagged_arr _temp103= _tag_arr(
+_temp101, sizeof( unsigned char),( unsigned int) newsz);{ unsigned int _temp102=
+_temp100; unsigned int i; for( i= 0; i < _temp102; i ++){ _temp101[ i]= i < sz?*((
 unsigned char*) _check_unknown_subscript( Cyc_Lex_string_buffer, sizeof(
 unsigned char),( int) i)):'\000';}}; _temp103;}); Cyc_Lex_string_buffer= str;}}*((
 unsigned char*) _check_unknown_subscript( Cyc_Lex_string_buffer, sizeof(

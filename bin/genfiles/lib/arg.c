@@ -64,29 +64,29 @@ struct _tagged_arr _temp6=(*(( struct _tuple0*)(( struct Cyc_List_List*)
 _check_null( speclist))->hd)).f3; fprintf( _sfile_to_file( Cyc_Stdio_stderr)," %.*s %.*s\n",
 _temp5.last_plus_one - _temp5.curr, _temp5.curr, _temp6.last_plus_one - _temp6.curr,
 _temp6.curr);}); speclist=(( struct Cyc_List_List*) _check_null( speclist))->tl;}}
-int Cyc_Arg_current= 0; static struct _tagged_arr Cyc_Arg_args={ 0u, 0u, 0u + 0u};
-static void Cyc_Arg_stop( int prog_pos, void* e, struct Cyc_List_List* speclist,
-struct _tagged_arr errmsg){ struct _tagged_arr progname= prog_pos <
-_get_arr_size( Cyc_Arg_args, sizeof( struct _tagged_arr))?*(( struct _tagged_arr*)
-_check_unknown_subscript( Cyc_Arg_args, sizeof( struct _tagged_arr), prog_pos)):
-_tag_arr("(?)", sizeof( unsigned char), 4u);{ void* _temp7= e; struct
-_tagged_arr _temp17; struct _tagged_arr _temp19; struct _tagged_arr _temp21;
-struct _tagged_arr _temp23; struct _tagged_arr _temp25; struct _tagged_arr
-_temp27; _LL9: if(*(( int*) _temp7) == Cyc_Arg_Unknown){ _LL18: _temp17=((
-struct Cyc_Arg_Unknown_struct*) _temp7)->f1; goto _LL10;} else{ goto _LL11;}
-_LL11: if(*(( int*) _temp7) == Cyc_Arg_Missing){ _LL20: _temp19=(( struct Cyc_Arg_Missing_struct*)
-_temp7)->f1; goto _LL12;} else{ goto _LL13;} _LL13: if(*(( int*) _temp7) == Cyc_Arg_Wrong){
-_LL26: _temp25=(( struct Cyc_Arg_Wrong_struct*) _temp7)->f1; goto _LL24; _LL24:
-_temp23=(( struct Cyc_Arg_Wrong_struct*) _temp7)->f2; goto _LL22; _LL22: _temp21=((
-struct Cyc_Arg_Wrong_struct*) _temp7)->f3; goto _LL14;} else{ goto _LL15;} _LL15:
-if(*(( int*) _temp7) == Cyc_Arg_Message){ _LL28: _temp27=(( struct Cyc_Arg_Message_struct*)
-_temp7)->f1; goto _LL16;} else{ goto _LL8;} _LL10: if( Cyc_String_strcmp(
-_temp17, _tag_arr("-help", sizeof( unsigned char), 6u)) != 0){({ struct
-_tagged_arr _temp29= progname; struct _tagged_arr _temp30= _temp17; fprintf(
-_sfile_to_file( Cyc_Stdio_stderr),"%.*s: unknown option `%.*s'.\n", _temp29.last_plus_one
-- _temp29.curr, _temp29.curr, _temp30.last_plus_one - _temp30.curr, _temp30.curr);});}
-goto _LL8; _LL12:({ struct _tagged_arr _temp31= progname; struct _tagged_arr
-_temp32= _temp19; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `%.*s' needs an argument.\n",
+int Cyc_Arg_current= 0; static struct _tagged_arr Cyc_Arg_args={( void*) 0u,(
+void*) 0u,( void*) 0u + 0u}; static void Cyc_Arg_stop( int prog_pos, void* e,
+struct Cyc_List_List* speclist, struct _tagged_arr errmsg){ struct _tagged_arr
+progname= prog_pos < _get_arr_size( Cyc_Arg_args, sizeof( struct _tagged_arr))?*((
+struct _tagged_arr*) _check_unknown_subscript( Cyc_Arg_args, sizeof( struct
+_tagged_arr), prog_pos)): _tag_arr("(?)", sizeof( unsigned char), 4u);{ void*
+_temp7= e; struct _tagged_arr _temp17; struct _tagged_arr _temp19; struct
+_tagged_arr _temp21; struct _tagged_arr _temp23; struct _tagged_arr _temp25;
+struct _tagged_arr _temp27; _LL9: if(*(( int*) _temp7) == Cyc_Arg_Unknown){
+_LL18: _temp17=(( struct Cyc_Arg_Unknown_struct*) _temp7)->f1; goto _LL10;}
+else{ goto _LL11;} _LL11: if(*(( int*) _temp7) == Cyc_Arg_Missing){ _LL20:
+_temp19=(( struct Cyc_Arg_Missing_struct*) _temp7)->f1; goto _LL12;} else{ goto
+_LL13;} _LL13: if(*(( int*) _temp7) == Cyc_Arg_Wrong){ _LL26: _temp25=(( struct
+Cyc_Arg_Wrong_struct*) _temp7)->f1; goto _LL24; _LL24: _temp23=(( struct Cyc_Arg_Wrong_struct*)
+_temp7)->f2; goto _LL22; _LL22: _temp21=(( struct Cyc_Arg_Wrong_struct*) _temp7)->f3;
+goto _LL14;} else{ goto _LL15;} _LL15: if(*(( int*) _temp7) == Cyc_Arg_Message){
+_LL28: _temp27=(( struct Cyc_Arg_Message_struct*) _temp7)->f1; goto _LL16;}
+else{ goto _LL8;} _LL10: if( Cyc_String_strcmp( _temp17, _tag_arr("-help",
+sizeof( unsigned char), 6u)) != 0){({ struct _tagged_arr _temp29= progname;
+struct _tagged_arr _temp30= _temp17; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: unknown option `%.*s'.\n",
+_temp29.last_plus_one - _temp29.curr, _temp29.curr, _temp30.last_plus_one -
+_temp30.curr, _temp30.curr);});} goto _LL8; _LL12:({ struct _tagged_arr _temp31=
+progname; struct _tagged_arr _temp32= _temp19; fprintf( _sfile_to_file( Cyc_Stdio_stderr),"%.*s: option `%.*s' needs an argument.\n",
 _temp31.last_plus_one - _temp31.curr, _temp31.curr, _temp32.last_plus_one -
 _temp32.curr, _temp32.curr);}); goto _LL8; _LL14:({ struct _tagged_arr _temp33=
 progname; struct _tagged_arr _temp34= _temp23; struct _tagged_arr _temp35=

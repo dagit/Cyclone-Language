@@ -71,45 +71,46 @@ extern int Cyc_Getopt_opterr; extern int Cyc_Getopt_optopt; struct Cyc_Getopt_op
 struct _tagged_arr name; int has_arg; int* flag; int val; } ; extern int Cyc_Getopt_getopt(
 int argc, struct _tagged_arr argv, struct _tagged_arr shortopts); extern int Cyc_Getopt__getopt_internal(
 int argc, struct _tagged_arr argv, struct _tagged_arr shortopts, struct
-_tagged_arr longopts, int* longind, int long_only); struct _tagged_arr Cyc_Getopt_optarg={
-0u, 0u, 0u + 0u}; int Cyc_Getopt_optind= 0; static struct _tagged_arr Cyc_Getopt_nextchar;
-int Cyc_Getopt_opterr= 1; int Cyc_Getopt_optopt=( int)'?'; enum  Cyc_Getopt_ordering_tag{
-Cyc_Getopt_REQUIRE_ORDER  =  0u, Cyc_Getopt_PERMUTE  =  1u, Cyc_Getopt_RETURN_IN_ORDER
- =  2u}; static enum  Cyc_Getopt_ordering_tag Cyc_Getopt_ordering; static struct
-_tagged_arr Cyc_Getopt_posixly_correct; struct Cyc_List_List{ void* hd; struct
-Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_empty[ 15u]; extern
-unsigned char Cyc_List_List_mismatch[ 18u]; extern unsigned char Cyc_List_Nth[ 8u];
-extern unsigned int Cyc_String_strlen( struct _tagged_arr s); extern int Cyc_String_strcmp(
-struct _tagged_arr s1, struct _tagged_arr s2); extern int Cyc_String_strncmp(
-struct _tagged_arr s1, struct _tagged_arr s2, unsigned int len); extern struct
-_tagged_arr Cyc_String_strchr( struct _tagged_arr s, unsigned char c); static
-int Cyc_Getopt_first_nonopt; static int Cyc_Getopt_last_nonopt; static struct
-_tagged_arr Cyc_Getopt_nonoption_flags; static int Cyc_Getopt_nonoption_flags_len;
-static void Cyc_Getopt_exchange( struct _tagged_arr); static void Cyc_Getopt_exchange(
-struct _tagged_arr argv){ int bottom= Cyc_Getopt_first_nonopt; int middle= Cyc_Getopt_last_nonopt;
-int top= Cyc_Getopt_optind; struct _tagged_arr tem; while( top > middle? middle
-> bottom: 0) { if( top - middle > middle - bottom){ int len= middle - bottom;
-int i; for( i= 0; i < len; i ++){ tem=*(( struct _tagged_arr*)
-_check_unknown_subscript( argv, sizeof( struct _tagged_arr), bottom + i));*((
-struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr),
-bottom + i))=*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(
-struct _tagged_arr),( top -( middle - bottom)) + i));*(( struct _tagged_arr*)
-_check_unknown_subscript( argv, sizeof( struct _tagged_arr),( top -( middle -
-bottom)) + i))= tem;} top -= len;} else{ int len= top - middle; int i; for( i= 0;
-i < len; i ++){ tem=*(( struct _tagged_arr*) _check_unknown_subscript( argv,
-sizeof( struct _tagged_arr), bottom + i));*(( struct _tagged_arr*)
+_tagged_arr longopts, int* longind, int long_only); struct _tagged_arr Cyc_Getopt_optarg={(
+void*) 0u,( void*) 0u,( void*) 0u + 0u}; int Cyc_Getopt_optind= 0; static struct
+_tagged_arr Cyc_Getopt_nextchar; int Cyc_Getopt_opterr= 1; int Cyc_Getopt_optopt=(
+int)'?'; enum  Cyc_Getopt_ordering_tag{ Cyc_Getopt_REQUIRE_ORDER  =  0u, Cyc_Getopt_PERMUTE
+ =  1u, Cyc_Getopt_RETURN_IN_ORDER  =  2u}; static enum  Cyc_Getopt_ordering_tag
+Cyc_Getopt_ordering; static struct _tagged_arr Cyc_Getopt_posixly_correct;
+struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl; } ; extern
+unsigned char Cyc_List_List_empty[ 15u]; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern unsigned int Cyc_String_strlen(
+struct _tagged_arr s); extern int Cyc_String_strcmp( struct _tagged_arr s1,
+struct _tagged_arr s2); extern int Cyc_String_strncmp( struct _tagged_arr s1,
+struct _tagged_arr s2, unsigned int len); extern struct _tagged_arr Cyc_String_strchr(
+struct _tagged_arr s, unsigned char c); static int Cyc_Getopt_first_nonopt;
+static int Cyc_Getopt_last_nonopt; static struct _tagged_arr Cyc_Getopt_nonoption_flags;
+static int Cyc_Getopt_nonoption_flags_len; static void Cyc_Getopt_exchange(
+struct _tagged_arr); static void Cyc_Getopt_exchange( struct _tagged_arr argv){
+int bottom= Cyc_Getopt_first_nonopt; int middle= Cyc_Getopt_last_nonopt; int top=
+Cyc_Getopt_optind; struct _tagged_arr tem; while( top > middle? middle > bottom:
+0) { if( top - middle > middle - bottom){ int len= middle - bottom; int i; for(
+i= 0; i < len; i ++){ tem=*(( struct _tagged_arr*) _check_unknown_subscript(
+argv, sizeof( struct _tagged_arr), bottom + i));*(( struct _tagged_arr*)
 _check_unknown_subscript( argv, sizeof( struct _tagged_arr), bottom + i))=*((
+struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr),(
+top -( middle - bottom)) + i));*(( struct _tagged_arr*) _check_unknown_subscript(
+argv, sizeof( struct _tagged_arr),( top -( middle - bottom)) + i))= tem;} top -=
+len;} else{ int len= top - middle; int i; for( i= 0; i < len; i ++){ tem=*((
 struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr),
-middle + i));*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(
-struct _tagged_arr), middle + i))= tem;} bottom += len;}} Cyc_Getopt_first_nonopt
-+= Cyc_Getopt_optind - Cyc_Getopt_last_nonopt; Cyc_Getopt_last_nonopt= Cyc_Getopt_optind;}
-static struct _tagged_arr Cyc_Getopt__getopt_initialize( struct _tagged_arr);
-static struct _tagged_arr Cyc_Getopt__getopt_initialize( struct _tagged_arr
-optstring){ Cyc_Getopt_first_nonopt=( Cyc_Getopt_last_nonopt=( Cyc_Getopt_optind=
-1)); Cyc_Getopt_nextchar= _tag_arr( 0u, sizeof( unsigned char), 0u); Cyc_Getopt_posixly_correct=
-Cyc_Stdlib_getenv( _tag_arr("POSIXLY_CORRECT", sizeof( unsigned char), 16u));
-if(*(( const unsigned char*) _check_unknown_subscript( optstring, sizeof(
-unsigned char), 0)) =='-'){ Cyc_Getopt_ordering= Cyc_Getopt_RETURN_IN_ORDER;
+bottom + i));*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof(
+struct _tagged_arr), bottom + i))=*(( struct _tagged_arr*)
+_check_unknown_subscript( argv, sizeof( struct _tagged_arr), middle + i));*((
+struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr),
+middle + i))= tem;} bottom += len;}} Cyc_Getopt_first_nonopt += Cyc_Getopt_optind
+- Cyc_Getopt_last_nonopt; Cyc_Getopt_last_nonopt= Cyc_Getopt_optind;} static
+struct _tagged_arr Cyc_Getopt__getopt_initialize( struct _tagged_arr); static
+struct _tagged_arr Cyc_Getopt__getopt_initialize( struct _tagged_arr optstring){
+Cyc_Getopt_first_nonopt=( Cyc_Getopt_last_nonopt=( Cyc_Getopt_optind= 1)); Cyc_Getopt_nextchar=
+_tag_arr( 0u, sizeof( unsigned char), 0u); Cyc_Getopt_posixly_correct= Cyc_Stdlib_getenv(
+_tag_arr("POSIXLY_CORRECT", sizeof( unsigned char), 16u)); if(*(( const
+unsigned char*) _check_unknown_subscript( optstring, sizeof( unsigned char), 0))
+=='-'){ Cyc_Getopt_ordering= Cyc_Getopt_RETURN_IN_ORDER;
 _tagged_arr_inplace_plus(& optstring, sizeof( unsigned char), 1);} else{ if(*((
 const unsigned char*) _check_unknown_subscript( optstring, sizeof( unsigned char),
 0)) =='+'){ Cyc_Getopt_ordering= Cyc_Getopt_REQUIRE_ORDER;
