@@ -298,7 +298,7 @@ unsigned int arr_prevsize(struct _dyneither_ptr arr,size_t elt_sz) {
 // Regions
 
 #ifdef CYC_REGION_PROFILE
-static int rgn_total_bytes = 0;
+int rgn_total_bytes = 0;
 static int rgn_freed_bytes = 0;
 static int heap_total_bytes = 0;
 static int heap_total_atomic_bytes = 0;

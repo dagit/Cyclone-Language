@@ -684,6 +684,10 @@ extern void* GC_calloc_atomic(unsigned,unsigned);
 #define _CYC_MAX_REGION_CONST 2
 #define _CYC_MIN_ALIGNMENT (sizeof(double))
 
+#ifdef CYC_REGION_PROFILE
+extern int rgn_total_bytes;
+#endif
+
 static _INLINE void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_s) {  
   if (r > (struct _RegionHandle *)_CYC_MAX_REGION_CONST && r->curr != 0) { 
 #ifdef CYC_NOALIGN
