@@ -22,7 +22,7 @@ using Core;
 
 namespace Csignal {
   extern "C" {
-    Signal::_sig_func_ptr signal_func(int sig, Signal::_sig_func_ptr func);
+    Signal::__sighandler_t signal_func(int sig, Signal::__sighandler_t func);
   }
 }
 
@@ -32,6 +32,6 @@ void _SIG_DFL(int n;{}) {} // equate to 0
 void _SIG_IGN(int n;{}) {} // equate to 1
 void _SIG_ERR(int n;{}) {} // equate to -1
 
-_sig_func_ptr signal(int sig, _sig_func_ptr func) {
+__sighandler_t signal(int sig, __sighandler_t func) {
   return Csignal::signal_func(sig, func);
 }

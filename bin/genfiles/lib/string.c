@@ -83,60 +83,54 @@ _tagged_arr s); extern struct _tagged_arr Cyc_String_implode( struct Cyc_List_Li
 c); extern int Cyc_String_to_int( struct _tagged_arr s, int* offset); extern
 double Cyc_String_to_double( struct _tagged_arr s, int* offset); extern int Cyc_Strings_strcasecmp(
 struct _tagged_arr, struct _tagged_arr); extern int Cyc_Strings_strncasecmp(
-struct _tagged_arr, struct _tagged_arr, unsigned int); extern double atan(
-double); extern double cos( double); extern double sin( double); extern double
-tan( double); extern double tanh( double); extern double frexp( double, int*);
-extern double modf( double, double*); extern double ceil( double); extern double
-fabs( double); extern double floor( double); extern double acos( double); extern
-double asin( double); extern double atan2( double, double); extern double cosh(
-double); extern double sinh( double); extern double exp( double); extern double
-ldexp( double, int); extern double log( double); extern double log10( double);
-extern double pow( double, double); extern double sqrt( double); extern double
-fmod( double, double); extern double infinity(); extern double nan(); extern int
-isnan( double); extern int isinf( double); extern int finite( double); extern
-double copysign( double, double); extern int ilogb( double); extern double asinh(
-double); extern double cbrt( double); extern double nextafter( double, double);
-extern double rint( double); extern double scalbn( double, int); extern double
-log1p( double); extern double expm1( double); extern double acosh( double);
-extern double atanh( double); extern double remainder( double, double); extern
-double gamma( double); extern double gamma_r( double, int*); extern double
-lgamma( double); extern double lgamma_r( double, int*); extern double erf(
-double); extern double erfc( double); extern double y0( double); extern double
-y1( double); extern double yn( int, double); extern double j0( double); extern
-double j1( double); extern double jn( int, double); extern double hypot( double,
-double); extern double cabs(); extern double drem( double, double); extern float
-atanf( float); extern float cosf( float); extern float sinf( float); extern
-float tanf( float); extern float tanhf( float); extern float frexpf( float, int*);
-extern float modff( float, float*); extern float ceilf( float); extern float
-fabsf( float); extern float floorf( float); extern float acosf( float); extern
-float asinf( float); extern float atan2f( float, float); extern float coshf(
-float); extern float sinhf( float); extern float expf( float); extern float
-ldexpf( float, int); extern float logf( float); extern float log10f( float);
-extern float powf( float, float); extern float sqrtf( float); extern float fmodf(
-float, float); extern float infinityf(); extern float nanf(); extern int isnanf(
-float); extern int isinff( float); extern int finitef( float); extern float
-copysignf( float, float); extern int ilogbf( float); extern float asinhf( float);
-extern float cbrtf( float); extern float nextafterf( float, float); extern float
-rintf( float); extern float scalbnf( float, int); extern float log1pf( float);
-extern float expm1f( float); extern float acoshf( float); extern float atanhf(
-float); extern float remainderf( float, float); extern float gammaf( float);
-extern float gammaf_r( float, int*); extern float lgammaf( float); extern float
-lgammaf_r( float, int*); extern float erff( float); extern float erfcf( float);
-extern float y0f( float); extern float y1f( float); extern float ynf( int, float);
-extern float j0f( float); extern float j1f( float); extern float jnf( int, float);
-extern float hypotf( float, float); extern float cabsf(); extern float dremf(
-float, float); extern int signgam; struct Cyc_Math___exception{ int type;
-unsigned char* name; double arg1; double arg2; double retval; int err; } ;
-extern int matherr( struct Cyc_Math___exception* e); extern unsigned char*
-strerror( int errnum); struct _tagged_arr Cyc_String_strerror( int errnum){
-return( struct _tagged_arr) Cstring_to_string( strerror( errnum));} unsigned int
-Cyc_String_strlen( struct _tagged_arr s){ unsigned int i; for( i= 0; i < 
-_get_arr_size( s, sizeof( unsigned char)); i ++){ if(*(( const unsigned char*)
-_check_unknown_subscript( s, sizeof( unsigned char),( int) i)) == '\000'){
-return i;}} return i;} static unsigned int Cyc_String_int_strleno( struct
-_tagged_arr s, int ofs, struct _tagged_arr error){ if( ofs >  _get_arr_size( s,
-sizeof( unsigned char))? 1: ofs <  0){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
-_temp0=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
+struct _tagged_arr, struct _tagged_arr, unsigned int); extern double acos(
+double); extern float acosf( float); extern double acosh( double); extern float
+acoshf( float); extern double asin( double); extern float asinf( float); extern
+double asinh( double); extern float asinhf( float); extern double atan( double);
+extern double atan2( double, double); extern float atan2f( float, float); extern
+float atanf( float); extern double atanh( double); extern float atanhf( float);
+extern double cbrt( double); extern float cbrtf( float); extern double ceil(
+double); extern float ceilf( float); extern double copysign( double, double);
+extern float copysignf( float, float); extern double cos( double); extern float
+cosf( float); extern double cosh( double); extern float coshf( float); extern
+double drem( double, double); extern float dremf( float, float); extern double
+erf( double); extern double erfc( double); extern float erfcf( float); extern
+float erff( float); extern double exp( double); extern float expf( float);
+extern double expm1( double); extern float expm1f( float); extern double fabs(
+double); extern float fabsf( float); extern int finite( double); extern int
+finitef( float); extern double floor( double); extern float floorf( float);
+extern double fmod( double, double); extern float fmodf( float, float); extern
+double frexp( double, int*); extern float frexpf( float, int*); extern double
+gamma( double); extern float gammaf( float); extern double hypot( double, double);
+extern float hypotf( float, float); extern int ilogb( double); extern int ilogbf(
+float); extern int isinf( double); extern int isinff( float); extern int isnan(
+double); extern int isnanf( float); extern double j0( double); extern float j0f(
+float); extern double j1( double); extern float j1f( float); extern double jn(
+int, double); extern float jnf( int, float); extern double ldexp( double, int);
+extern float ldexpf( float, int); extern double lgamma( double); extern float
+lgammaf( float); extern double log( double); extern float logf( float); extern
+double log10( double); extern float log10f( float); extern double log1p( double);
+extern float log1pf( float); extern double modf( double, double*); extern float
+modff( float, float*); extern double nextafter( double, double); extern float
+nextafterf( float, float); extern double pow( double, double); extern float powf(
+float, float); extern double remainder( double, double); extern float remainderf(
+float, float); extern double rint( double); extern float rintf( float); extern
+double scalbn( double, int); extern float scalbnf( float, int); extern double
+sin( double); extern float sinf( float); extern double sinh( double); extern
+float sinhf( float); extern double sqrt( double); extern float sqrtf( float);
+extern double tan( double); extern float tanf( float); extern double tanh(
+double); extern float tanhf( float); extern double y0( double); extern float y0f(
+float); extern double y1( double); extern float y1f( float); extern double yn(
+int, double); extern float ynf( int, float); extern unsigned char* strerror( int
+errnum); struct _tagged_arr Cyc_String_strerror( int errnum){ return( struct
+_tagged_arr) Cstring_to_string( strerror( errnum));} unsigned int Cyc_String_strlen(
+struct _tagged_arr s){ unsigned int i; for( i= 0; i <  _get_arr_size( s, sizeof(
+unsigned char)); i ++){ if(*(( const unsigned char*) _check_unknown_subscript( s,
+sizeof( unsigned char),( int) i)) == '\000'){ return i;}} return i;} static
+unsigned int Cyc_String_int_strleno( struct _tagged_arr s, int ofs, struct
+_tagged_arr error){ if( ofs >  _get_arr_size( s, sizeof( unsigned char))? 1: ofs
+<  0){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp0=(
+struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp1; _temp1.tag= Cyc_Core_InvalidArg;
 _temp1.f1= error; _temp1;}); _temp0;}));}{ int i; for( i= ofs; i < 
 _get_arr_size( s, sizeof( unsigned char)); i ++){ if(*(( const unsigned char*)
