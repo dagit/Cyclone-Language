@@ -759,6 +759,4 @@ return(*triple).f3;}void*Cyc_Core_identity(void*x);void*Cyc_Core_identity(void*x
 return x;}struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n);
 struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){struct
 _dyneither_ptr res;res.curr=arr;res.base=arr;res.last_plus_one=arr + s * n;return
-res;}struct _dyneither_ptr Cyc_Core_mkfat(void*arr,unsigned int s,unsigned int n){
-struct _dyneither_ptr res;res.curr=arr;res.base=arr;res.last_plus_one=arr + s * n;
-return res;}
+res;}

@@ -35,14 +35,15 @@ extern list_t<content_t> parse_file(FILE @`H f);
 extern opt_t<Lexbuf<Function_lexbuf_state<FILE@>>> lbuf;
 extern void error(string_t<`H> msg);
 
-extern enum context {
+extern
+datatype context {
   InTag,
   Normal
 };
 
-extern void setContext(enum context c);
+extern void setContext(datatype `H context c);
 
-extern enum context getContext();
+extern datatype context getContext();
 
 }
 

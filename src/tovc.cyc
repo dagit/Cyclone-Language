@@ -603,23 +603,22 @@ list_t<decl_t> tovc(list_t<decl_t> old_ds) {
       // FIX: if the param_vardecls are NULL then it's a good sign that 
       // this was an extern "C include" function, so I'm just leaving it 
       // alone...
-      if (fd->param_vardecls == NULL) {
-        new_ds = new List(next_d,new_ds);
-      } else {
-      region rgn; {
-	let gen_ds = rnew(rgn) NULL;
-        if (fd->param_vardecls == NULL) {
-          fprintf(stderr,"No param vardecls for function %s\n",
-                  *(*fd->name)[1]); fflush(stderr);
+      if (fd->param_vardecls != NULL) { // else case will fallthru
+        region rgn; {
+          let gen_ds = rnew(rgn) NULL;
+          if (fd->param_vardecls == NULL) {
+            fprintf(stderr,"No param vardecls for function %s\n",
+                    *(*fd->name)[1]); fflush(stderr);
+          }
+          stmt_to_vc(ToExpEnv(rgn,
+                              rcopy(rgn,fd->param_vardecls->v),
+                              Dict::rempty(rgn,strptrcmp), // ptr eq possible?
+                              fd->body,
+                              gen_ds), 
+                     fd->body);
+          new_ds = append(*gen_ds,new_ds);
         }
-	stmt_to_vc(ToExpEnv(rgn,
-			    rcopy(rgn,fd->param_vardecls->v),
-			    Dict::rempty(rgn,strptrcmp), // ptr eq possible?
-			    fd->body,
-			    gen_ds), 
-		   fd->body);
-	new_ds = append(*gen_ds,new_ds);
-      }}
+      }
       fallthru;
     case &Var_d(_):         
     case &Let_d(_,_,_): 

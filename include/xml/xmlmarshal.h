@@ -28,8 +28,8 @@
 
 namespace XmlMarshal {
 
-extern Xml::content_t to_xml(datatype Typerep::Typestruct @rep, `a::A@ val);
-extern `a::A@ from_xml(datatype Typerep::Typestruct @rep, Xml::content_t);
+extern Xml::content_t to_xml(datatype Typerep::Typestruct rep, `a::A@ val);
+extern `a::A@ from_xml(datatype Typerep::Typestruct rep, Xml::content_t);
 
 }
 #endif // _XMLMARSHAL_H_
