@@ -104,6 +104,7 @@ static $(string,short) rw_array[] = {
   $("int", INT),
   $("let", LET),
   $("long", LONG),
+  $("malloc", MALLOC),
   $("namespace", NAMESPACE),
   $("new", NEW),
   $("null", NULL_kw),

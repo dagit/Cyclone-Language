@@ -1780,6 +1780,14 @@ static void exp_to_c(env nv, exp e) {
       e->r = stmt_exp(declare_stmt(x,pstrct_typ,e1,s2,DL),DL)->r;
     }
     break;
+
+  case Malloc_e(Typ_m(t)): 
+    typ t_c = typ_to_c(t);
+    e->r = malloc_exp(t, sizeof_exp(t_c,DL))->r;
+    break;
+
+  case Malloc_e(_): toc_impos("unimplemented Malloc_e form"); break;
+
   case StmtExp_e(s): stmt_to_c(nv,s);  break;
   case UnresolvedMem_e(_,_): toc_impos("UnresolvedMem"); break;
   case Codegen_e(fd):        unimp("codegen");           break;

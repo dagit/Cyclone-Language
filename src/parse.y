@@ -367,7 +367,7 @@ static fndecl make_function(opt_t<decl_spec_t> dso, declarator_t d,
       default: err("bad storage class on function",loc); break;
       }
   }
-  let $(t,decl_opt)         = collapse_type_specifiers(tss,loc);
+  let $(t,decl_opt) = collapse_type_specifiers(tss,loc);
   let $(fn_tqual,fn_type,x,out_atts) = apply_tms(tq,t,atts,d->tms);
   // what to do with the left-over attributes out_atts?  I'm just
   // going to append them to the function declaration and let the
@@ -637,6 +637,17 @@ static $(tqual,typ,list_t<tvar>,list_t<attribute_t>)
   }
 }
 
+// given a specifier-qualifier list, warn and ignore about any nested type
+// definitions and return the collapsed type.
+// FIX: We should somehow deal with the nested type definitions.
+typ speclist2typ(list_t<type_specifier_t> tss, seg_t loc) {
+  let $(t,decls_opt) = collapse_type_specifiers(tss,loc);
+  if(decls_opt != null)
+    warn("ignoring nested type declaration(s) in specifier list",loc);
+  return t;
+}
+
+
 // given a local declaration and a statement produce a decl statement 
 static stmt flatten_decl(decl d,stmt s) {
   return new_stmt(Decl_s(d,s),segment_join(d->loc,s->loc));
@@ -834,7 +845,7 @@ using Parse;
 %token NULL_kw LET THROW TRY CATCH
 %token NEW ABSTRACT FALLTHRU USING NAMESPACE XENUM
 %token FILL CODEGEN CUT SPLICE
-%token PRINTF FPRINTF XPRINTF SCANF FSCANF SSCANF
+%token PRINTF FPRINTF XPRINTF SCANF FSCANF SSCANF MALLOC
 // double and triple-character tokens 
 %token PTR_OP INC_OP DEC_OP LEFT_OP RIGHT_OP LE_OP GE_OP EQ_OP NE_OP
 %token AND_OP OR_OP MUL_ASSIGN DIV_ASSIGN MOD_ASSIGN ADD_ASSIGN
@@ -1395,11 +1406,7 @@ struct_declaration:
        * and then convert this to a list of struct fields: (1) id,
        * (2) tqual, (3) type. */
       tqual tq = (*$1)[0];
-      let tss = (*$1)[1];
-      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
-      if (ts_info[1] != null)
-        warn("struct declaration contains nested type declaration",LOC(@1,@1));
-      let t = ts_info[0];
+      let t = speclist2typ((*$1)[1], LOC(@1,@1));
       let info = apply_tmss(tq,t,$2,null);
       $$=^$(List::map_c(make_struct_field,LOC(@1,@2),info));
     }
@@ -1625,12 +1632,8 @@ parameter_list:
 /* TODO: differs from grammar in K&R */
 parameter_declaration:
   specifier_qualifier_list declarator
-    { let tss = (*$1)[1];
-      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
-      if (ts_info[1] != null)
-        warn("parameter contains nested type declaration",LOC(@1,@1));
-      let t = ts_info[0];
-      let tq = (*$1)[0];
+   {  let t   = speclist2typ((*$1)[1], LOC(@1,@1));
+      let tq  = (*$1)[0];
       let tms = $2->tms;
       let t_info = apply_tms(tq,t,null,tms);
       if (t_info[2] != null)
@@ -1648,21 +1651,13 @@ parameter_declaration:
       $$=^$(&$(idopt,t_info[0],t_info[1]));
     }
 | specifier_qualifier_list
-    { let tss = (*$1)[1];
-      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
-      if (ts_info[1] != null)
-        warn("nested type declaration, ignoring",LOC(@1,@1));
-      let t = ts_info[0];
+    { let t  = speclist2typ((*$1)[1], LOC(@1,@1));
       let tq = (*$1)[0];
       $$=^$(&$(null,tq,t));
     }
 | specifier_qualifier_list abstract_declarator
-    { let tss = (*$1)[1];
-      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
-      if (ts_info[1] != null)
-        warn("nested type declaration, ignoring",LOC(@1,@1));
-      let t = ts_info[0];
-      let tq = (*$1)[0];
+    { let t   = speclist2typ((*$1)[1], LOC(@1,@1));
+      let tq  = (*$1)[0];
       let tms = $2->tms;
       let t_info = apply_tms(tq,t,null,tms);
       if (t_info[2] != null)
@@ -1731,21 +1726,13 @@ designator:
 
 type_name:
   specifier_qualifier_list
-    { let tss = (*$1)[1];
-      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
-      if (ts_info[1] != null)
-        warn("nested type declaration, ignoring",LOC(@1,@1));
-      let t = ts_info[0];
+    { let t  = speclist2typ((*$1)[1], LOC(@1,@1));
       let tq = (*$1)[0];
-      $$=^$(&$(null,tq,t));
+      $$=^$(new{$(null,tq,t)});
     }
 | specifier_qualifier_list abstract_declarator
-    { let tss = (*$1)[1];
-      let ts_info = collapse_type_specifiers(tss,LOC(@1,@1));
-      if (ts_info[1] != null)
-        warn("nested type declaration, ignoring",LOC(@1,@1));
-      let t = ts_info[0];
-      let tq = (*$1)[0];
+    { let t   = speclist2typ((*$1)[1], LOC(@1,@1));
+      let tq  = (*$1)[0];
       let tms = $2->tms;
       let t_info = apply_tms(tq,t,null,tms);
       if (t_info[2] != null)
@@ -2244,10 +2231,6 @@ unary_expression:
 | '&' cast_expression     { $$=^$(address_exp($2,LOC(@1,@2))); }
 | '*' cast_expression     { $$=^$(deref_exp  ($2,LOC(@1,@2))); }
 | '+' cast_expression     { $$=$!2; }
-/*
-| '-' cast_expression
-    { $$ = ^$(prim2_exp(Minus,signed_int_exp(0,LOC(@1,@2)), $2,LOC(@1,@2))); }
-*/
 | unary_operator cast_expression { $$=^$(prim1_exp($1,$2,LOC(@1,@2))); }
 | SIZEOF '(' type_name ')'       { $$=^$(sizeof_exp((*$3)[2],LOC(@1,@4))); }
 | SIZEOF unary_expression        { $$=^$(prim1_exp(Size,$2,LOC(@1,@2))); }
@@ -2256,6 +2239,11 @@ unary_expression:
     { $$=^$(throw_exp($2,LOC(@1,@2))); }
 | format_primop '(' argument_expression_list ')'
     { $$=^$(primop_exp($1,$3,LOC(@1,@4))); }
+| MALLOC '(' SIZEOF '(' specifier_qualifier_list ')' ')'
+{ $$=^$(new_exp(Malloc_e(Typ_m(speclist2typ((*$5)[1],LOC(@5,@5)))), 
+			 LOC(@1,@7))); }
+| MALLOC '(' SIZEOF '(' qual_opt_identifier ')' ')'
+{ $$=^$(new_exp(Malloc_e(Unresolved_m($5)),LOC(@1,@7))); }
 ;
 
 format_primop:

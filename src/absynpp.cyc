@@ -569,12 +569,13 @@ int exp_prec(exp e) {
   case StructArrow_e(_,_):   return 140; // ???
   case Subscript_e(_,_):     return 140;
   case Tuple_e(_):         return 150;
-  case CompoundLit_e(_,_):   return 140;
-  case Array_e(_,_):         return 140;
-  case Comprehension_e(_,_,_): return 140;
-  case Struct_e(_,_,_,_):    return 140;
-  case Enum_e(_,_,_,_,_):    return 140;
-  case Xenum_e(_,_,_,_):     return 140;
+  case CompoundLit_e(_,_):   fallthru;
+  case Array_e(_,_):         fallthru;
+  case Comprehension_e(_,_,_): fallthru;
+  case Struct_e(_,_,_,_):    fallthru;
+  case Enum_e(_,_,_,_,_):    fallthru;
+  case Xenum_e(_,_,_,_):     fallthru;
+  case Malloc_e(_):          return 140;
   case UnresolvedMem_e(_,_): return 140; // ???
   case StmtExp_e(_):         return 10000;
   case Codegen_e(_):         return 140;
@@ -731,6 +732,18 @@ doc_t exp2doc_prec(int inprec, exp e) {
     else
       s = cat2(qvar2doc(ef->name),
                egroup("(",")",",",List::map(exp2doc,es)));
+    break;
+  case Malloc_e(ma):
+    // Note: This is for Cyclone's malloc, not the mallocs introduced during
+    //       translation to C, which are function calls.
+    doc_t inner_d;
+    switch(ma) {
+    case Typ_m(t):         inner_d = typ2doc(t); break;
+    case Enum_m(_,ef):     fallthru(ef);
+    case Xenum_m(_,ef):    fallthru(ef->name);
+    case Unresolved_m(qv): inner_d = qvar2doc(qv); break;
+    }
+    s = cat3(text("malloc(sizeof("), inner_d, text("))"));
     break;
   case UnresolvedMem_e(n,des):
     // Currently n is always null from the parser

@@ -97,6 +97,7 @@ namespace Absyn {
   extern xenum StmtAnnot;
   extern enum Attribute;
   extern struct Structfield;
+  extern enum Mallocarg;
 
   typedef enum Scope scope;
   typedef struct Tqual @tqual;
@@ -137,6 +138,7 @@ namespace Absyn {
   typedef enum Attribute attribute_t;
   typedef list_t<attribute_t> attributes_t;
   typedef struct Structfield @structfield_t;
+  typedef enum Mallocarg mallocarg_t;
 
   EXTERN_DEFINITION enum Nmspace {
     Loc_n,                  // Local name
@@ -292,6 +294,17 @@ namespace Absyn {
 
   EXTERN_DEFINITION enum Incrementor { PreInc, PostInc, PreDec, PostDec };
 
+  EXTERN_DEFINITION enum Mallocarg { 
+    Typ_m(typ);
+    Unresolved_m(qvar);
+    // for remaining cases, what about existential type variables???
+    // wait -- this doesn't work -- how will we assign the fields!
+    // need a type of the variant and then allow assign of fully init to the
+    // enum type!
+    Enum_m(enumdecl,  enumfield); // instantiation irrelevant, I think
+    Xenum_m(xenumdecl,enumfield); // instantiation irrelevant, I think
+  };
+
   EXTERN_DEFINITION enum Raw_exp {
     Const_e(cnst_t);
     Var_e(qvar,binding_t); 
@@ -322,6 +335,7 @@ namespace Absyn {
     Enum_e(opt_t<list_t<typ>>,opt_t<list_t<typ>>,list_t<exp>,
 	   enumdecl,enumfield);
     Xenum_e(opt_t<list_t<typ>>,list_t<exp>,xenumdecl,enumfield);
+    Malloc_e(mallocarg_t);
     UnresolvedMem_e(opt_t<typedef_name_t>,list_t<$(list_t<designator>,exp)@>);
     StmtExp_e(stmt);
     Codegen_e(fndecl);

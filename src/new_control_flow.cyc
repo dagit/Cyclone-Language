@@ -305,6 +305,14 @@ abssyn_t abstract_exp(absenv_t env, exp e) {
     }
     return malloc_and_init(env, e, es_exp, useexp);
 
+  case Malloc_e(Typ_m(t)):
+    add_malloc_root(env, e, t);
+    return mkSyn_tf(mkMallocAE(e), null, 
+		    make_assigns(env,mkAddressOp(mkMallocOp(e))));
+
+  case Malloc_e(_):
+    throw Impossible("NewControlFlow: Malloc_e of unsupported variant");
+
     // The order here is subtle in order to get nested assignment right.
     // There is no result lhs needed b/c = associates to the right.
     // The lhs for the rhs must include Unknown if there's no other lhs.

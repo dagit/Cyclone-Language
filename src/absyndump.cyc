@@ -472,6 +472,17 @@ void dumpexp_prec(int inprec, exp e) {
     if (es != null) group(dumpexp,es,"(",")",",");
     break;
 
+  case Malloc_e(ma):
+    dump("malloc(sizeof(");
+    switch(ma) {
+    case Typ_m(t):         dumptyp(t); break;
+    case Enum_m(_,ef):     fallthru(ef);
+    case Xenum_m(_,ef):    fallthru(ef->name);
+    case Unresolved_m(qv): dumpqvar(qv); break;
+    }
+    dump("))");
+    break;
+
   case UnresolvedMem_e(n,des):
     // Currently n is always null from the parser ???
     group(dumpde, des, "{","}",",");
