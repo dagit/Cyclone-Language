@@ -11,14 +11,22 @@
 
 #define MAXLINELEN 128
 
+char ?strrealloc(char ?buf, unsigned sz) {
+  char ?res = calloc(sz,sizeof(char));
+  unsigned i = buf.size;
+  for (unsigned j = 0; j < i; j++)
+    res[i] = buf[i];
+  return res;
+}
+
 int main(int argc, char ?argv[]) {
     int i, wordbufsize = 80;
-    char line[MAXLINELEN];
+    char line[MAXLINELEN+1]ZEROTERM = {for i < MAXLINELEN : 0};
     char c, ?cp, ?wordbuf;
     struct ht_ht @dict;
     FILE *fh;
     START_TIME
-    wordbuf = (char ?)malloc(wordbufsize + 1);
+    wordbuf = calloc(wordbufsize + 1,sizeof(char));
     dict = ht_create(40000);
     if ((fh = fopen("words.txt", "r")) == NULL) {
 	perror("fopen");
@@ -37,7 +45,7 @@ int main(int argc, char ?argv[]) {
 		wordbuf[i++] = *cp;
 		if (i == wordbufsize) {
 		    wordbufsize *= 2;
-		    wordbuf = realloc(wordbuf, wordbufsize + 1);
+		    wordbuf = strrealloc(wordbuf, wordbufsize + 1);
 		}
 	    }
         }
@@ -59,7 +67,7 @@ int main(int argc, char ?argv[]) {
 		wordbuf[i++] = *cp;
 		if (i == wordbufsize) {
 		    wordbufsize *= 2;
-		    wordbuf = realloc(wordbuf, wordbufsize + 1);
+		    wordbuf = strrealloc(wordbuf, wordbufsize + 1);
 		}
 	    } 
         }

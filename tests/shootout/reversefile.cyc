@@ -10,18 +10,26 @@
 
 #define MAXREAD 4096
 
+char ?strrealloc(char ?buf, unsigned sz) {
+  char ?res = calloc(sz,sizeof(char));
+  unsigned i = buf.size;
+  for (unsigned j = 0; j < i; j++)
+    res[i] = buf[i];
+  return res;
+}
+
 int main(int argc, char ??argv) {
     int nread, len = 0, size = (4 * MAXREAD);
-    char ?cp, ?offset, ?buf;
+    char ? cp, ?offset, ?buf;
     START_TIME
-    buf = malloc(size + 1);
+    buf = calloc(size+1,sizeof(char));
 
     while (1) {
 	if ((nread = read(0, (buf + len), MAXREAD)) > 0) {
 	    len += nread;
 	    if (MAXREAD > (size - len)) {
               size <<= 1;
-              if (0 == (buf = realloc(buf, size + 1))) {
+              if (0 == (buf = strrealloc(buf, size + 1))) {
                   fprintf(stderr, "realloc failed\n");
                   exit(1);
               }

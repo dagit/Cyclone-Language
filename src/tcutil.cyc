@@ -3600,9 +3600,7 @@ bool bits_only(type_t t) {
   case &ArrayType(ArrayInfo{t,_,_,zero_term}): 
     // can't allow a zero-terminated array to be treated as bits only
     // for initialization purposes
-    // FIX: for now, I'm allowing this because otherwise we can't
-    // operate with buildlib properly.
-    return /*(!conref_def(false,zero_term)) &&*/ bits_only(t);
+    return (!conref_def(false,zero_term)) && bits_only(t);
   case &TupleType(tqs):
     for (; tqs != NULL; tqs = tqs->tl) 
       if (!bits_only((*tqs->hd)[1])) return false;

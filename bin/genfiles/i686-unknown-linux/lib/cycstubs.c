@@ -111,7 +111,7 @@ extern struct _xtunion_struct * ADD_PREFIX(Bad_alloc);
   unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
   if (!_cks_ptr) _throw_null(); \
-  if (!_cks_index >= _cks_bound) _throw_arraybounds(); \
+  if (_cks_index >= _cks_bound) _throw_arraybounds(); \
   ((char *)_cks_ptr) + _cks_elt_sz*_cks_index; })
 #endif
 

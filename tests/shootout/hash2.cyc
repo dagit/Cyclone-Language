@@ -10,7 +10,7 @@
 
 int main(int argc, char ??argv) {
     int i, n = ((argc == 2) ? atoi(argv[1]) : 1);
-    char buf[32];
+    char buf[32]ZEROTERM = {for i < 31 : 0};
     struct ht_ht @ht1, @ht2;
     struct ht_node *node;
 

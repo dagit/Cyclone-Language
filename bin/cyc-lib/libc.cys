@@ -3599,7 +3599,10 @@ epilogue {
      not use separate namespaces for structs and typedefs, so the typedef
      is omitted by mistake.  This ugly hack fixes it in Cygwin for now. */
   #ifdef __types_fd_set_def_
+  #ifndef __cygwin_fd_set_hack
+  #define __cygwin_fd_set_hack
   typedef struct _types_fd_set _types_fd_set;
+  #endif
   #endif
 }
 epilogue {
@@ -4198,6 +4201,18 @@ ITIMER_PROF
 timezone
 fd_set
 FD_SETSIZE
+}
+epilogue {
+  /* FIX: Cygwin defines a struct _types_fd_set and then a typedef with the
+     same name.  Our current scheme for omitting repeated declarations does
+     not use separate namespaces for structs and typedefs, so the typedef
+     is omitted by mistake.  This ugly hack fixes it in Cygwin for now. */
+  #ifdef __types_fd_set_def_
+  #ifndef __cygwin_fd_set_hack
+  #define __cygwin_fd_set_hack
+  typedef struct _types_fd_set _types_fd_set;
+  #endif
+  #endif
 }
 epilogue getitimer {
   extern "C" int getitimer(int, struct itimerval @);
