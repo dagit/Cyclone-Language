@@ -801,14 +801,12 @@ let cnstsuffix  = (((['u''U'])?(['l''L'])?(['l''L'])?) |
 		   ((['l''L'])?(['l''L'])?(['u''U'])?))
 
 rule token = parse
-| "asm"     { return snarf_asm(lexbuf); }
-| "__asm__" { return snarf_asm(lexbuf); }
+| ("asm" | "__asm__") { return snarf_asm(lexbuf); }
 /* Identifiers, type names, and keywords */
-| firstidchar idchar* { return process_id(lexbuf); }
-| '_'         idchar+ { return process_id(lexbuf); }
+| ((firstidchar idchar*) | ('_' idchar+)) { return process_id(lexbuf); }
 /* Qualified identifiers and type names (e.g., Foo::bar) */
-| (firstidchar idchar* ':' ':')+ (firstidchar | '_') idchar*
-     { return process_qual_id(lexbuf); }
+| (firstidchar idchar* "::")+ (firstidchar | '_') idchar*
+   { return process_qual_id(lexbuf); }
 /* Type variables */
 | '`' (firstidchar | '_') idchar*
    { token_string = *(get_symbol(str_index_lbuf(lexbuf))); 
@@ -963,7 +961,7 @@ and scan_charconst = parse
   | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
            { store_string(lexeme(lexbuf)); return 1; }
   /* hex character escapes */
-  | "\\x" ['0'-'9''A'-'Z''a'-'z']+
+  | "\\x" ['0'-'9''A'-'Z''a'-'z']+ /* FIX? F f, not Z z */
            { store_string(lexeme(lexbuf)); return 1; }
   | [^ '\\' '\'' '\n']
            { store_string_char(lexeme_char(lexbuf,0)); return 1; }
@@ -1045,37 +1043,20 @@ and wstrng_next = parse
 
 and wstrng = parse
     "\""            { return wstrng_next(lexbuf); }
-  | "\\a"           { store_string("\\a"); return 1; }
-  | "\\b"           { store_string("\\b"); return 1; }
-  | "\\f"           { store_string("\\f"); return 1; }
-  | "\\n"           { store_string("\\n"); return 1; }
-  | "\\r"           { store_string("\\r"); return 1; }
-  | "\\t"           { store_string("\\t"); return 1; }
-  | "\\v"           { store_string("\\v"); return 1; }
-  | "\\\\"          { store_string("\\\\"); return 1; }
-  | "\\'"           { store_string("\\'"); return 1; }
-  | "\\\""          { store_string("\\\"");  return 1; }
-  | "\\?"           { store_string("\\?");  return 1; }
-  /* octal character escapes */
-  | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
-                    { store_string(lexeme(lexbuf));
-                      return 1;
-                    }
-  /* hex character escapes */
-  | "\\x" ['0'-'9''A'-'F''a'-'f']+
-                    { store_string(lexeme(lexbuf));
-                      return 1;
-                    }
-  | [^ '"''\\''\n']+  /* NOT double quote, backslash, or newline */
-                    { store_string(lexeme(lexbuf));
+  | "\\"['a' 'b' 'f' 'n' 'r' 't' 'v' '\\' '\'' '"' '?']
+                    { store_string_char('\\'); 
+		      store_string_char(lexeme_char(lexbuf,1)); 
 		      return 1; }
+  | (("\\" ['0'-'7']['0'-'7']?['0'-'7']?) /* octal character escapes */
+     | ("\\x" ['0'-'9''A'-'F''a'-'f']+)   /*hex character escapes FIX? length!*/
+     | ([^ '"''\\''\n']+))  /* NOT double quote, backslash, or newline */
+                    { store_string(lexeme(lexbuf));
+                      return 1; }
   | newline         { inc_linenumber();
                       runaway_err("string ends in newline",lexbuf);
-                      return 0;
-                    }
+                      return 0; }
   | eof             { runaway_err("unterminated string",lexbuf);
-                      return 0;
-                    }
+                      return 0; }
   | _               { err("bad character following backslash in string",lexbuf);
 		      return 1; }
 and comment = parse

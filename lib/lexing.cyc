@@ -32,7 +32,6 @@
 // Run-time library for files created by cyclex
 
 #include <core.h>
-#include <cycboot.h>
 #include <lexing.h>
 #include <string.h>
 
@@ -128,7 +127,6 @@ int read_from_file(mstring_t<`H> aux, int n, FILE @`r f) {
 
 // corresponds to ocaml's from_channel
 Lexbuf<Function_lexbuf_state<FILE@`r>> from_file(FILE @`r f) {
-  //  return (from_function @<FILE@>) (read_from_file, f);
   return from_function(read_from_file, f);
 }
 
@@ -146,7 +144,7 @@ Lexbuf<bool> from_string(mstring_t s) {
                true);
 }
 
-mstring_t<`r> rlexeme(region_t<`r> r, Lexbuf<`a> lbuf) {
+mstring_t<`r> rlexeme(region_t<`r> r, Lexbuf lbuf) {
    int       len = lbuf->lex_curr_pos - lbuf->lex_start_pos;
    mstring_t s   = rnew_string(r,len+1);
    zstrncpy((char ? @nozeroterm)s, lbuf->lex_buffer + lbuf->lex_start_pos, len);
@@ -159,19 +157,19 @@ mstring_t<`r> rlexeme(region_t<`r> r, Lexbuf<`a> lbuf) {
    return s;
 }
 
-mstring_t lexeme(Lexbuf<`a> lbuf) {
+mstring_t lexeme(Lexbuf lbuf) {
   return rlexeme(Core::heap_region,lbuf);
 }
 
-char lexeme_char(Lexbuf<`a> lbuf, int i) {
+char lexeme_char(Lexbuf lbuf, int i) {
    return lbuf->lex_buffer[lbuf->lex_start_pos + i];
 }
 
-int lexeme_start(Lexbuf<`a> lbuf) {
+int lexeme_start(Lexbuf lbuf) {
    return lbuf->lex_abs_pos + lbuf->lex_start_pos;
 }
 
-int lexeme_end(Lexbuf<`a> lbuf) {
+int lexeme_end(Lexbuf lbuf) {
    return lbuf->lex_abs_pos + lbuf->lex_curr_pos;
 }
 

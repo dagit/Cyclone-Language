@@ -348,7 +348,7 @@ extern exp_opt_t get_type_bound(type_t t);
 extern struct Vardecl *nonesc_vardecl(binding_t b);
 
   // filters out null elements
-extern list_t<`a> filter_nulls(list_t<`a *,`H> l);
+extern list_t<`a> filter_nulls(list_t<`a *> l);
 
 // Is the given type an array?
 extern bool is_array(type_t t);

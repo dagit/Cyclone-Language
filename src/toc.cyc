@@ -41,6 +41,7 @@
 #include <string.h>
 #include <dict.h>
 #include <xarray.h>
+#include "warn.h"
 #include "absynpp.h"
 #include "tcutil.h"
 #include "evexp.h"
@@ -164,35 +165,23 @@ static type_t aggrdecl_type_body<`r2,`d,`r>(region_t<`d> d,
   }
 }
 
-type_t aggrdecl_type(qvar_t q, type_t (@`H type_maker)(qvar_t)) {
+static type_t aggrdecl_type(qvar_t q, type_t (@`H type_maker)(qvar_t)) {
   _ env = $(q, type_maker);
   return use_toc_state(&env, (aggrdecl_type_body@<`aggrdecl_type>)<>);
 }
 
-static int tuple_type_counter = 0;
-static int temp_var_counter = 0;
+static int tuple_type_counter  = 0;
+static int temp_var_counter    = 0;
 static int fresh_label_counter = 0;
 
-// errors and reporting
-datatype exn {Toc_Unimplemented};
-datatype exn {Toc_Impossible};
 static `a unimp(string_t fmt, ... inject parg_t<`r2> ap)
-  __attribute__((format(printf,1,2), noreturn))
-{
-  vfprintf(stderr,fmt,ap);
-  fprintf(stderr,"\n");
-  fflush(stderr);
-  throw new Toc_Unimplemented;
+  __attribute__((format(printf,1,2), noreturn)) {
+  Warn::vimpos(strconcat("Toc (unimplemented): ",fmt), ap);
 }
 static `a toc_impos(string_t fmt, ... inject parg_t<`r2> ap)
-  __attribute__((format(printf,1,2), noreturn))
-{
-  vfprintf(stderr,fmt,ap);
-  fprintf(stderr,"\n");
-  fflush(stderr);
-  throw new Toc_Impossible;
+  __attribute__((format(printf,1,2), noreturn)) {
+  Warn::vimpos(strconcat("Toc: ",fmt), ap);
 }
-datatype exn {Match_error};
 
 /////////////////////////// Pre-Allocated Stuff /////////////////////////////
 // Don't use any of these things if they might get mutated!!!
@@ -370,13 +359,15 @@ static exp_t member_exp(exp_t e, field_name_t f, seg_t loc) {
   }
 }
 
-/* functionSets are used to call the appropriate function from
- * cyc_include.h by casing on the type of the arguments
- */
+// functionSets are used to call the appropriate function from
+// cyc_include.h by casing on the type of the arguments
 struct functionSet {
-  exp_t fchar; exp_t fshort;
-  exp_t fint; exp_t ffloat;
-  exp_t fdouble; exp_t flongdouble;
+  exp_t fchar; 
+  exp_t fshort;
+  exp_t fint; 
+  exp_t ffloat;
+  exp_t fdouble; 
+  exp_t flongdouble;
   exp_t fvoidstar;
 };
 
@@ -426,34 +417,21 @@ static exp_t getFunctionType(struct functionSet @fS, type_t t) {
     case Char_sz:  function = fS->fchar;  break;
     case Short_sz: function = fS->fshort; break;
     case Int_sz:   function = fS->fint;   break;
-    default: throw new Impossible("impossible IntType (not char, short or int)");
+    default: toc_impos("impossible IntType (not char, short or int)");
     }
     break;
-  case &FloatType(0):
-    function = fS->ffloat;
-    break;
-  case &FloatType(1):
-    function = fS->fdouble;
-    break;
-  case &FloatType(_):
-    function = fS->flongdouble;
-    break;
-  case &PointerType(_):
-    function = fS->fvoidstar;
-    break;
-  default:
-    throw new Impossible(aprintf("impossible expression type %s (not int, float, double, or pointer)",typ2string(t)));
+  case &FloatType(0): function = fS->ffloat;      break;
+  case &FloatType(1): function = fS->fdouble;     break;
+  case &FloatType(_): function = fS->flongdouble; break;
+  case &PointerType(_): function = fS->fvoidstar; break;
+  default: toc_impos("impossible expression type %s (not int, float, double, or pointer)",typ2string(t));
   }
   return function;
 }
-exp_t getFunction(struct functionSet @fS, exp_t arr) {
-  return getFunctionType(fS, (type_t)arr->topt);
-}
-exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
+static exp_t getFunctionRemovePointer(struct functionSet @fS, exp_t arr) {
   switch (compress((type_t)arr->topt)) {
-  case &PointerType(PtrInfo{.elt_typ = et,...}):
-      return getFunctionType(fS,et);
-  default: throw new Impossible("impossible type (not pointer)");
+  case &PointerType(PtrInfo{.elt_typ = et,...}): return getFunctionType(fS,et);
+  default: toc_impos("impossible type (not pointer)");
   }
 }
 
@@ -495,41 +473,27 @@ static bool is_zero(exp_t e) {
 // return true if t is a nullable pointer type i.e., *
 static bool is_nullable(type_t t) {
   switch (compress(t)) {
-  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,_,_,_))):
-    return conref_def(false,n);
-  default: toc_impos("is_nullable");
+  case &PointerType(PtrInfo(_,_,PtrAtts(_,n,...))): return conref_def(false,n);
+  default: toc_impos("Toc::is_nullable");
   }
 }
 
 // If x = X1::X2::...::Xn::v, generate s_X1_X2_..._Xn_v_struct
-static string_t collapse_qvar(string_t s, qvar_t x) {
-  unsigned slen = strlen(s);
-  unsigned len = 9 + slen;  // s + "_struct" + "\0" plus slack
-  let &$(namespce,&v) = x;
-  unsigned vlen = strlen(v);
-  len += 1 + vlen;          // "_" + v
-  list_t<var_t> nms;
-  switch (namespce) {
-  case {.Loc_n = _}: nms = NULL; break;
-  case {.Rel_n = vs}: nms = vs; break;
-  case {.Abs_n = vs}: nms = vs; break;
-  case {.C_n = vs}: nms = vs; break;
+// DJG: I changed this to use aprintf and rstr_sepstr; no noticeable slowdown
+static string_t collapse_qvar(stringptr_t s, qvar_t x) {
+  let &$(ns,v) = x;
+  switch (ns) {
+  case {.Loc_n = _}:  fallthru(NULL);
+  case {.Rel_n = vs}: fallthru(vs);
+  case {.Abs_n = vs}: fallthru(vs); 
+  case {.C_n = vs}: 
+    // special-case trims out an '_' which isn't necessary, but we do it
+    // (affects the struct name for exception variants)
+    if(vs==NULL)
+      return aprintf("%s_%s_struct",*s,*v);
+    region r;
+    return aprintf("%s_%s_%s_struct",*s,rstr_sepstr(r,vs,"_"),*v);
   }
-  for (let names = nms; names != NULL; names = names->tl)
-    len += 1 + strlen(*(names->hd)); // "_" + Xi
-  char ? buf = calloc(len,sizeof(char));
-  char ? p = buf;
-  strcpy(p,s);  p += slen; // s
-  for (; nms != NULL; nms = nms->tl) {
-    let &X = nms->hd;
-    *p = '_'; p++;                    // '_'
-    strcpy(p,X);                      // X
-    p += strlen(X);
-  }
-  *p = '_'; p++;                 // '_'
-  strcpy(p,v); p += vlen;        // v
-  strcpy(p,"_struct");
-  return buf;
 }
 
 // Used when generating the struct name for a datatype field.  
@@ -546,7 +510,7 @@ static qvar_t collapse_qvars_body<`r2,`d,`r>(region_t<`d> d,
   try return Dict::lookup_other(*qvs,qvar_tag_cmp,pair);
   catch { case &Dict::Absent:
     let new_pair = new $(fieldname,dtname);
-    let &$(nmspace,&fieldvar) = fieldname;
+    let &$(nmspace,fieldvar) = fieldname;
     string_t newvar = collapse_qvar(fieldvar,dtname);
     qvar_t res = new $(nmspace, new newvar);
     *qvs = Dict::insert(*qvs,new_pair,res);
@@ -656,8 +620,7 @@ static type_t add_struct_type_body<`r2,`r3,`d,`r>(region_t<`d> d,
   }
   //fprintf(stderr,"didn't find pre-existing type\n");
   // haven't seen this one before, add a declaration
-  // we're calling it a "tuple" so we don't have to worry about name
-  // clashes.
+  // we're calling it a "tuple" so we don't have to worry about name clashes.
   stringptr_t xname = new (string_t)aprintf("_tuple%d",tuple_type_counter++);
   type_t x = strct(xname);
   let fs = NULL;
@@ -709,9 +672,7 @@ static type_t add_struct_type(qvar_t struct_name,
 // generate a temporary variable
 // FIX: need to guarantee these can't conflict
 qvar_t temp_var() {
-  let i = temp_var_counter++;
-  qvar_t res = new $(Loc_n,new (string_t)aprintf("_tmp%X",i));
-  return res;
+  return new $(Loc_n,new (string_t)aprintf("_tmp%X",temp_var_counter++));
 }
 
 // generate a fresh label
@@ -948,7 +909,7 @@ type_t typ_to_c(type_t t) {
     // just drop the type arguments and translate the nested types
     else return new TypedefType(tdn,NULL,td,typ_to_c((type_t)topt));
   case &TagType(_): return uint_typ; // must be unsigned!
-  case &RgnHandleType(t): return rgn_typ();
+  case &RgnHandleType(_): return rgn_typ();
   case &DynRgnType(_,_): return dyn_rgn_typ();
   // these types get translated when we instantiate aggregates with
   // abstract members -- we just translate them to void* to save pain.
@@ -992,7 +953,7 @@ static exp_t array_to_ptr_cast(type_t t,exp_t e,seg_t l) {
 // (does not look at instantiations)
 static bool atomic_typ(type_t t) {
   switch (compress(t)) {
-  case &VoidType:       return true;
+  case &VoidType:      return true;
   case &VarType(_):    return false;
   case &IntType(_,_):
   case &EnumType(_,_):
@@ -1042,7 +1003,7 @@ static bool is_void_star(type_t t) {
   case &PointerType(PtrInfo{t2,_,_}):
     switch (compress(t2)) {
     case &VoidType: return true;
-    default:       return false;
+    default:        return false;
     }
   default: return false;
   }
@@ -4092,7 +4053,7 @@ static stmt_opt_t extract_pattern_vars(region_t<`rgn> rgn, env_t<`rgn> @nv,
       _ f;
       switch ((*tup)[0]->hd) {
       case &FieldName(f2): f=f2; break;
-      default: throw new Match_error; // FIX:  assumes one field name designator
+      default: toc_impos("multiple designators in pattern!"); // FIX
       }
       let t2 = (type_t)p2->topt;
       let t2c = typ_to_c_array(t2);
@@ -4659,10 +4620,9 @@ static void fndecl_to_c(env_t nv, fndecl_t f, bool cinclude) {
   }
 }
 
-// there's no abstract scope in C
 static scope_t scope_to_c(scope_t s) {
   switch (s) {
-  case Abstract: return Public;
+  case Abstract: return Public; // there's no abstract scope in C
   case ExternC : return Extern;
   default:       return s;
   }
@@ -5101,15 +5061,15 @@ static void exptypes_to_c(exp_t e) {
   case &Asm_e(...):     
   case &AnonEnum_e(...): break;
 
-  case &AnonStruct_e(_, _): fallthru;
-  case &Datatype_e(_,_,_):    fallthru;
-  case &Aggregate_e(_,_,_,_):  fallthru;
-  case &Comprehension_e(_,_,_,_): fallthru;
-  case &ComprehensionNoinit_e(...): fallthru;
-  case &Tuple_e(_):         fallthru;
-  case &Instantiate_e(_,_): fallthru;
-  case &New_e(_,_):         fallthru;
-  case &Valueof_e(_):       fallthru;
+  case &AnonStruct_e(...): 
+  case &Datatype_e(...):  
+  case &Aggregate_e(...):
+  case &Comprehension_e(...):
+  case &ComprehensionNoinit_e(...):
+  case &Tuple_e(...):         
+  case &Instantiate_e(...): 
+  case &New_e(...):         
+  case &Valueof_e(...):       
   case &Tagcheck_e(...):
     Tcutil::terr(e->loc,"Cyclone expression within C code");
     break;
@@ -5144,8 +5104,7 @@ static void decltypes_to_c(decl_t d) {
   case &Using_d(_,_):
   case &ExternC_d(_):
   case &ExternCinclude_d(_,_):
-  case &Region_d(...):
-//   case &Alias_d(...):
+  case &Region_d(...): // DJG: impossible because of parser, no?
     Tcutil::terr(d->loc,"Cyclone declaration within C code");
     break;
   case &Porton_d:

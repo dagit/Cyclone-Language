@@ -844,11 +844,9 @@ void resolve_pat(env_t env, pat_t p) { // must not be at top-level
     case &AnonEnumRes(t,ef):
       p->r = new AnonEnum_p(t,ef); return;
     } catch { case &BindingError: break; } // a new variable
-    absolutize_decl(loc,env,qv,Public);
     let vd = new_vardecl(qv,&VoidType_val,NULL); //type set later
+    resolve_and_add_vardecl(loc,env,vd);
     p->r = new Var_p(vd, new_pat(&Wild_p_val,0));
-    *env->local_vars = Dict::insert(*env->local_vars, (*vd->name)[1],
-				   new VarRes(new Pat_b(vd)));
     return;
 
   case &UnknownCall_p(qv,ps,dots):

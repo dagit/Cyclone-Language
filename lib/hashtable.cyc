@@ -19,9 +19,6 @@
 // a simple chaining, polymorphic hash table with restore
 // of course this is not functional
 
-// MWH 12/13/99 -- added support for resizing the table.  Based it
-//   on the OCaml 2.02 Hashtbl implementation
-
 #include <list.h>
 #include <core.h>
 #include <hashtable.h>
@@ -41,8 +38,7 @@ struct Table<`a,`b,`r::R> {
 
 table_t<`a,`b,`r> rcreate(region_t<`r> r, int sz, int (@`H cmp)(`a,`a), 
                           int (@`H hash)(`a)) {
-  list_t<$(`a,`b)@`r,`r> mt = NULL;
-  return rnew(r) Table{r, cmp, hash, 3, rnew(r) {for i<sz :mt}};
+  return rnew(r) Table{r, cmp, hash, 3, rcalloc(r,sz,sizeof(list_t))};
 }
 
 table_t<`a,`b> create(int sz, int (@`H cmp)(`a,`a), 
@@ -58,8 +54,7 @@ void insert(table_t<`a,`b> t, `a key, `b val) {
     resize(t);
 }
 
-`b lookup(table_t<`a,`b> t, `a key) {
-  // throws Not_found
+`b lookup(table_t<`a,`b> t, `a key) { // throws Not_found
   list_t<$(`a,`b)@> ?tab   = t->tab;
   list_t<$(`a,`b)@> l      = tab[(t->hash)(key) % numelts(tab)];
   return assoc_cmp(t->cmp, l, key);
@@ -144,8 +139,7 @@ void resize(table_t<`a,`b> t) {
   list_t<$(`a,`b)@> ?odata   = t->tab;
   int             osize    = numelts(odata);
   int             nsize    = 2 * osize + 1;
-  list_t<$(`a,`b)@> mt = NULL;
-  list_t<$(`a,`b)@> ? ndata  = rnew(t->r) {for i < nsize : mt};
+  list_t<$(`a,`b)@> ? ndata  = rcalloc(t->r,nsize,sizeof(list_t));
   for (int i = 0; i<osize; i++)
     insert_bucket(t->r,ndata,t->hash,odata[i]);
   t->tab     = ndata;
@@ -161,8 +155,7 @@ void iter(void f(`a,`b), table_t<`a,`b> t) {
       f(iter->hd[0][0],iter->hd[0][1]);
 }
 
-void iter_c(void f(`a,`b,`c), table_t<`a,`b> t, `c env)
-{
+void iter_c(void f(`a,`b,`c), table_t<`a,`b> t, `c env) {
   list_t<$(`a,`b)@> ?odata   = t->tab;
   int             osize    = numelts(odata);
   for (int i = 0; i<osize; i++) 

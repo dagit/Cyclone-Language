@@ -63,11 +63,14 @@ void err(seg_t loc, string_t fmt, ... inject parg_t ap)
   verr(loc, fmt, ap);
 }
 
-`a impos(string_t fmt, ... inject parg_t ap)
-  __attribute__((format(printf,1,2), noreturn))
-{
+`a vimpos(string_t fmt, parg_t ? ap) __attribute__((noreturn)) {
   string_t msg = vrprintf(Core::heap_region,fmt,ap);
   fprintf(stderr,"Compiler Error: %s\n",msg);
   fflush(stderr);
-  throw new Core::Impossible(msg);
+  throw new Core::Impossible(msg);  
+}
+
+`a impos(string_t fmt, ... inject parg_t ap)
+  __attribute__((format(printf,1,2), noreturn)) {
+  vimpos(fmt, ap);
 }

@@ -870,6 +870,8 @@ void Cyc_Warn_verr(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_
 # 33
 void Cyc_Warn_err(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 36
+void*Cyc_Warn_vimpos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
+# 38
 void*Cyc_Warn_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);struct Cyc_Relations_Reln;
 # 69 "absyn.h"
 typedef struct Cyc_Relations_Reln*Cyc_Relations_reln_t;

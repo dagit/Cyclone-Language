@@ -1258,6 +1258,8 @@ void Cyc_Warn_verr(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_
 # 33
 void Cyc_Warn_err(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 36
+void*Cyc_Warn_vimpos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
+# 38
 void*Cyc_Warn_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 29 "specsfile.h"
 struct _dyneither_ptr Cyc_Specsfile_target_arch;

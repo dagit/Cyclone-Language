@@ -917,6 +917,8 @@ void Cyc_Warn_verr(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_
 # 33
 void Cyc_Warn_err(unsigned int loc,struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
 # 36
+void*Cyc_Warn_vimpos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);
+# 38
 void*Cyc_Warn_impos(struct _dyneither_ptr fmt,struct _dyneither_ptr ap);struct Cyc_Iter_Iter{void*env;int(*next)(void*env,void*dest);};
 # 34 "iter.h"
 typedef struct Cyc_Iter_Iter Cyc_Iter_iter_t;

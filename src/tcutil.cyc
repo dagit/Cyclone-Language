@@ -825,33 +825,20 @@ static void unify_cmp_exp(exp_t e1, exp_t e2) {
     // FIX: not sure it's safe to peek under the casts,
     // but we need to in order to unify something like
     // int@{40} and int@{(unsigned int)valueof(`EI3)}
-  case $(&Cast_e(_,e,...),_): 
-    unify_cmp_exp(e,e2);
-    return;
-  case $(_,&Cast_e(_,e,...)):
-    unify_cmp_exp(e1,e);
-    return;
+  case $(&Cast_e(_,e,...),_): unify_cmp_exp(e,e2); return;
+  case $(_,&Cast_e(_,e,...)): unify_cmp_exp(e1,e); return;
   case $(&Valueof_e(t),_): 
     switch (compress(t)) {
-    case &Evar(...): 
-      unify_it(t,new ValueofType(e2));
-      return;
-    default: 
-      break;
+    case &Evar(...): unify_it(t,new ValueofType(e2)); return;
+    default: throw &Unify_val;
     }
-    break;
   case $(_,&Valueof_e(t)):
     switch (compress(t)) {
-    case &Evar(...): 
-      unify_it(t,new ValueofType(e1));
-      return;
-    default: 
-      break;
+    case &Evar(...): unify_it(t,new ValueofType(e1)); return;
+    default: throw &Unify_val;
     }
-    break;
-  default: break;
+  default: throw &Unify_val;
   }
-  throw &Unify_val;
 }
 
 static int unify_it_bounds(bounds_t b1, bounds_t b2) {
@@ -892,7 +879,7 @@ static int attribute_case_number(attribute_t att) {
   case &Constructor_att: return 16;
   case &Destructor_att: return 17;
   case &No_check_memory_usage_att: return 18;
-  case &Format_att(_,_,_): return 19;
+  case &Format_att(...): return 19;
   case &Initializes_att(_): return 20;
   case _: return 21;
   }
@@ -965,7 +952,7 @@ static type_t rgns_of(type_t t) {
   case &TypeofType(_):
   case &BuiltinType(_,_):
   case &IntType(_,_): return empty_effect;
-  case &Evar(_,_,_,_):
+  case &Evar(...):
   case &VarType(_):
     switch (typ_kind(t)) {
     case &Kind(RgnKind,_): return new AccessEff(t);
@@ -1032,8 +1019,8 @@ type_t normalize_effect(type_t e) {
       effs->hd = compress(normalize_effect(eff));
       switch (effs->hd) {
       case &JoinEff(_):
-      case &AccessEff(&HeapRgn): redo_join = true; break;
-      case &AccessEff(&RefCntRgn): redo_join = true; break;
+      case &AccessEff(&HeapRgn): 
+      case &AccessEff(&RefCntRgn): 
       case &AccessEff(&UniqueRgn): redo_join = true; break;
       default: break;
       }
@@ -1045,8 +1032,8 @@ type_t normalize_effect(type_t e) {
       case &JoinEff(nested_effs):
         effects = List::revappend(nested_effs,effects);
         break;
-      case &AccessEff(&HeapRgn): break;
-      case &AccessEff(&RefCntRgn): break;
+      case &AccessEff(&HeapRgn): 
+      case &AccessEff(&RefCntRgn): 
       case &AccessEff(&UniqueRgn): break;
       case e: effects = new List(e,effects); break;
       }
@@ -5370,7 +5357,7 @@ $(bool,type_t) addressof_props(tenv_t te, exp_t e) {
       if(finfo != NULL)
 	return $((*finfo)[0].real_const, addressof_props(te,e1)[1]);
       return bogus_ans;
-    case &PointerType(PtrInfo(_,tq,PtrAtts(r,_,_,_,_))):
+    case &PointerType(PtrInfo(_,tq,PtrAtts(r,...))):
       return $(tq.real_const,r);
     case &ArrayType(ArrayInfo{_,tq,_,_,_}):
       // Actually, this should be impossible since we've surely
@@ -5554,8 +5541,7 @@ bool supports_default(type_t t) {
   case &PointerType(PtrInfo(_,_,PtrAtts(_,nullable,bounds,_,_))):
     switch (conref_def((bounds_t)&DynEither_b_val,bounds)) {
     case &DynEither_b: return true;
-    default:
-      return conref_constr(true,nullable);
+    default: return conref_constr(true,nullable);
     }
 
   case &ArrayType(ArrayInfo{t,_,_,_,_}): return supports_default(t);
@@ -5693,7 +5679,7 @@ struct Vardecl *nonesc_vardecl(binding_t b) {
 }
 
 // removes NULL members; reverses the list
-list_t<`a> filter_nulls(list_t<`a *,`H> l) {
+list_t<`a> filter_nulls(list_t<`a*> l) {
   let res = NULL;
   for (_ x = l; x != NULL; x=x->tl)
     if (x->hd != NULL) res = new List(*x->hd,res);

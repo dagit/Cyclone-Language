@@ -33,6 +33,8 @@ namespace Warn {
   void err(Position::seg_t loc, string_t fmt, ... inject parg_t ap)
     __attribute__((format(printf,2,3)));
 
+  `a vimpos(string_t fmt, parg_t ? ap) __attribute__((noreturn));
+
   `a impos(string_t fmt, ... inject parg_t ap)
     __attribute__((format(printf,1,2), noreturn));
 }
