@@ -93,6 +93,10 @@ FILE *cycstubs_file = NULL;
 int log(const char ?fmt, ... inject parg_t<`r2> ap) 
   __attribute__((format(printf,1,2)))
 {
+  if (log_file == NULL) {
+    fprintf(stderr,"Internal error: log file is NULL\n");
+    exit(1);
+  }
   let x = vfprintf((FILE@)log_file,fmt,ap);
   fflush((FILE@)log_file);
   return x;
@@ -1171,17 +1175,39 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     return curr;
   }
 
-  int force_directory(string_t d) {
-    /* We could do this with stat, but stat is more
-       platform dependent; this is more portable. */
-    let fd = open(d,O_RDONLY);
-    if (fd == -1) {
-      if (mkdir(d,0700) == -1) {
-        fprintf(stderr,"Error: could not create directory %s\n",d);
-        return 1;
-      }
+  tunion buildlib_mode { NORMAL, GATHER, GATHERSCRIPT, FINISH };
+  static tunion buildlib_mode mode = NORMAL;
+  static int gathering() {
+    return (mode == GATHER) || (mode == GATHERSCRIPT) ;
+  }
+
+  static FILE *script_file = NULL;
+  int prscript(const char ?fmt, ... inject parg_t<`r2> ap) 
+    __attribute__((format(printf,1,2)))
+  {
+    if (script_file == NULL) {
+      fprintf(stderr,"Internal error: script file is NULL\n");
+      exit(1);
     }
-    else close(fd);
+    return vfprintf((FILE@)script_file,fmt,ap);
+  }
+
+  int force_directory(string_t d) {
+    if (mode == GATHERSCRIPT) {
+      prscript("if ! test -e %s; then mkdir %s; fi\n",d,d);
+    }
+    else {
+      /* We could do this with stat, but stat is more
+         platform dependent; this is more portable. */
+      let fd = open(d,O_RDONLY);
+      if (fd == -1) {
+        if (mkdir(d,0700) == -1) {
+          fprintf(stderr,"Error: could not create directory %s\n",d);
+          return 1;
+        }
+      }
+      else close(fd);
+    }
     return 0;
   }
 
@@ -1204,19 +1230,11 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     return 0;
   }
 
-  /* Exceptions for handling error cases of process_file */
-  xtunion exn {
-    DELETE_CD_ERR;
-    DELETE_CD_NOERR;
-    CD_ERR;
-    CD_NOERR;
-  };
+  /* Exception for handling error cases of process_file */
+  xtunion exn { NO_SUPPORT };
 
-  tunion buildlib_mode { NORMAL, GATHER, FINISH };
-  static tunion buildlib_mode mode = NORMAL;
-
+  /* Returns 1 on a fatal error (can't create files, etc.) or 0 otherwise. */
   int process_file(string_t filename,
-                   string_t dir,
                    list_t<stringptr_t<`H,`H>,`H> start_symbols,
                    list_t<stringptr_t<`H,`H>,`H> omit_symbols,
                    list_t<ifdefined_t,`H> prologue,
@@ -1231,16 +1249,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     fprintf(stderr,
             "********************************* %s...\n",filename);
 
-    /* Cd into dir, where the header files will be built.  Remember
-       the current dir so we can cd back after we're done. */
-    char ?buf = new {for i<1024: '\0'};
-    let cwd = getcwd(buf,buf.size);
-    if (chdir(dir)) {
-      fprintf(stderr,"Error: can't change directory to %s\n",dir);
-      return 1;
-    }
-
-    log("\n%s:\n",filename);
+    if (!gathering()) log("\n%s:\n",filename);
 
     /* Calculate necessary file names.  For example:
        filename = sys/types.h
@@ -1278,68 +1287,52 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     /* Make sure we'll be able to create files in the right directories */
     if (force_directory_prefixes(filename)) {
-      throw CD_ERR;
+      return 1;
     }
 
     /* Create the file of macros and the file of declarations */
     if (mode != FINISH) {
-      let GCC = Cstring_to_string(Ccomp);
-      maybe = fopen(cppinfile,"w");
-      if (!maybe) {
-        fprintf(stderr,"Error: could not create file %s\n",cppinfile);
-        throw CD_ERR;
-      }
-      out_file = (FILE@)maybe;
       current_cpp = imp_rev(current_cpp);
-      for (let l = current_cpp; l != NULL; l = l->tl)
-        fputs(*(l->hd),out_file);
-      fprintf(out_file,"#include <%s>\n",filename);
-      fclose(out_file);
-      let cmd = aprintf("%s -E -dM -o %s -x c %s",
-                        GCC,macrosfile,cppinfile);
-      if (!system(cmd)) {
-        /* No error in creating the file of macros, so go ahead and create
-           the file of declarations */
-        cmd = aprintf("%s -E -o %s -x c %s",
-                      GCC,declsfile,cppinfile);
-        system(cmd); // if err, no declsfile created, and we'll handle later
+      if (mode == GATHERSCRIPT) {
+        prscript("cat >%s <<XXX\n",cppinfile);
+        for (let l = current_cpp; l != NULL; l = l->tl)
+          prscript("%s",*(l->hd));
+        prscript("#include <%s>\n",filename);
+        prscript("XXX\n");
+        prscript("$GCC -E -dM -o %s -x c %s && \\\n",macrosfile,cppinfile);
+        prscript("$GCC -E     -o %s -x c %s;\n",declsfile,cppinfile);
+        prscript("rm %s\n",cppinfile);
       }
-      remove(cppinfile);
+      else {
+        maybe = fopen(cppinfile,"w");
+        if (!maybe) {
+          fprintf(stderr,"Error: could not create file %s\n",cppinfile);
+          return 1;
+        }
+        out_file = (FILE@)maybe;
+        for (let l = current_cpp; l != NULL; l = l->tl)
+          fputs(*(l->hd),out_file);
+        fprintf(out_file,"#include <%s>\n",filename);
+        fclose(out_file);
+        let GCC = Cstring_to_string(Ccomp);
+        let cmd = aprintf("%s -E -dM -o %s -x c %s",
+                          GCC,macrosfile,cppinfile);
+        if (!system(cmd)) {
+          /* No error in creating the file of macros, so go ahead and create
+             the file of declarations */
+          cmd = aprintf("%s -E -o %s -x c %s",
+                        GCC,declsfile,cppinfile);
+          system(cmd); // if err, no declsfile created, and we'll handle later
+        }
+        remove(cppinfile);
+      }
     }
-    if (mode == GATHER) throw CD_NOERR;
+    if (gathering()) return 0;
 
     /* Put the macros in the table of dependencies */
     dep_t t = new_deps();
     maybe = fopen(macrosfile,"r");
-    if (!maybe) {
-      /* The header probably doesn't exist on this system;
-         create a default header. */
-      maybe = fopen(filename,"w");
-      if (!maybe) {
-        fprintf(stderr,"Error: could not create file %s\n",filename);
-        throw CD_ERR;
-      }
-      out_file = (FILE@)maybe;
-      fprintf(out_file,
-              "#error -- %s is not supported on this platform\n",
-              filename);
-      fclose(out_file);
-      maybe = fopen(cfilename,"w");
-      if (!maybe) {
-        fprintf(stderr,"Error: could not create file %s\n",cfilename);
-        throw CD_ERR;
-      }
-      out_file = (FILE@)maybe;
-      fprintf(out_file,
-              "#error -- %s is not supported on this platform\n",
-              cfilename);
-      fclose(out_file);
-      fprintf(stderr,"Warning: %s will not be supported on this platform\n",
-              filename);
-
-      log("Not supported on this platform\n");
-      throw CD_NOERR;
-    }
+    if (!maybe) throw NO_SUPPORT;
 
     in_file = (FILE@)maybe;
     let l = Lexing::from_file(in_file);
@@ -1354,25 +1347,19 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     /* Get the type declarations out of the file */
     maybe = fopen(declsfile,"r");
-    if (!maybe) {
-      /* Impossible(?), macrosfile created successfully but not declsfile. */
-      throw CD_ERR;
-    }
+    if (!maybe) throw NO_SUPPORT;
+
     in_file = (FILE@)maybe;
     l = Lexing::from_file(in_file);
     slurp_out = fopen(filtereddeclsfile,"w");
-    if (!slurp_out) {
-      throw DELETE_CD_ERR;
-    }
+    if (!slurp_out) return 1;
     while (slurp(l)) /* skip */;
     fclose(in_file);
     fclose((FILE @)slurp_out);
     if (mode != FINISH) remove(declsfile);
 
     maybe = fopen(filtereddeclsfile,"r");
-    if (!maybe) {
-      throw DELETE_CD_ERR;
-    }
+    if (!maybe) return 1;
     in_file = (FILE@)maybe;
     Position::reset_position(filtereddeclsfile);
     Lex::lex_init(); // must forget typedefs, may as well flush symbols too
@@ -1465,16 +1452,12 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
     }
     reachable_decls = imp_rev(reachable_decls);
     maybe = fopen(filename,"w");
-    if (!maybe) {
-      throw DELETE_CD_ERR;
-    }
+    if (!maybe) return 1;
     out_file = (FILE @)maybe;
     fprintf(out_file,"#include <%s>\nusing Std;\n",cfilename);
     fclose(out_file);
     maybe = fopen(cfilename, "w");
-    if (!maybe) {
-      throw DELETE_CD_ERR;
-    }
+    if (!maybe) return 1;
     out_file = (FILE @)maybe;
     mstring_t ifdefmacro = aprintf("_%s_",filename);
     for (let j = 0; j < ifdefmacro.size; j++) {
@@ -1555,9 +1538,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
 
     /* Print reachable macros */
     maybe = fopen(macrosfile,"r");
-    if (!maybe) {
-      throw CD_ERR;
-    }
+    if (!maybe) throw NO_SUPPORT;
     in_file = (FILE@)maybe;
     l = Lexing::from_file(in_file);
     let entry2;
@@ -1614,54 +1595,93 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       fprintf(out_file, "}\n\n");
     }
 
-    throw CD_NOERR;
+    return 0;
 
     } catch {
-    case CD_ERR:
-      errorcode = 1; fallthru;
-    case CD_NOERR:
-      if (chdir(cwd)) {
-        fprintf(stderr,"Error: could not change directory to %s\n", cwd);
+    default:
+      /* We could get here because of a throw NO_SUPPORT or because of
+         a parse error or other error.  In either case, we create a
+         default header and don't otherwise signal an error. */
+      maybe = fopen(filename,"w");
+      if (!maybe) {
+        fprintf(stderr,"Error: could not create file %s\n",filename);
         return 1;
       }
-      return errorcode;
-    case DELETE_CD_ERR:
-      errorcode = 1; fallthru;
-    case DELETE_CD_NOERR:
-    default: /* For other errors, e.g., parse errors */
+      out_file = (FILE@)maybe;
+      fprintf(out_file,
+              "#error -- %s is not supported on this platform\n",
+              filename);
+      fclose(out_file);
+      maybe = fopen(cfilename,"w");
+      if (!maybe) {
+        fprintf(stderr,"Error: could not create file %s\n",cfilename);
+        return 1;
+      }
+      out_file = (FILE@)maybe;
+      fprintf(out_file,
+              "#error -- %s is not supported on this platform\n",
+              cfilename);
+      fclose(out_file);
+      fprintf(stderr,"Warning: %s will not be supported on this platform\n",
+              filename);
+      log("Not supported on this platform\n");
+
       /* Delete intermediate files; some may not exist but we ignore that */
       remove(macrosfile);
       remove(declsfile);
       remove(filtereddeclsfile);
-      if (chdir(cwd)) {
-        fprintf(stderr,"Error: could not change directory to %s\n", cwd);
-        return 1;
-      }
-      return errorcode;
+
+      return 0;
     }
   }
 
-  void process_specfile(string_t file,string_t dir) {
+  /* Return 1 on fatal error, else 0 */
+  int process_specfile(string_t file,string_t dir) {
     let maybe = fopen(file,"r");
     if (!maybe) {
       fprintf(stderr,"Error: could not open %s\n", file);
-      return;
+      return 1;
     }
     let in_file = (FILE@)maybe;
+
+    /* Cd into dir, where the header files will be built.  Remember
+       the current dir so we can cd back after we're done. */
+    char ?buf = new {for i<1024: '\0'};
+    let cwd = getcwd(buf,buf.size);
+    if (mode != GATHERSCRIPT) {
+      if (chdir(dir)) {
+        fprintf(stderr,"Error: can't change directory to %s\n",dir);
+        return 1;
+      }
+    }
+    if (mode == GATHER) {
+      /* This will be executed once for each specfile, but who cares */
+      let GCC = Cstring_to_string(Ccomp);
+      system(aprintf("echo | %s -E -dM - -o INITMACROS.h\n",GCC));
+    }
+
     let l = Lexing::from_file(in_file);
     let entry;
     while ( (entry = spec(l)) != NULL) {
       let &$(headerfile,start_symbols,omit_symbols,
              prologue,epilogue,cstubs,cycstubs) = (_ @)entry;
-      process_file(headerfile,dir,start_symbols,omit_symbols, 
-                   prologue,epilogue,cstubs,cycstubs);
-      // FIX: we ignore the error code from process_file.  It would
-      // be better to make sure there is an empty header file created.
+      if (process_file(headerfile,start_symbols,omit_symbols, 
+                       prologue,epilogue,cstubs,cycstubs))
+        return 1; /* fatal error in process_file */
     }
     fclose(in_file);
+
+    if (mode != GATHERSCRIPT) {
+      if (chdir(cwd)) {
+        fprintf(stderr,"Error: could not change directory to %s\n", cwd);
+        return 1;
+      }
+    }
+    return 0;
   }
 
   int getsize(const char ?dir, const char ?includes, const char ?type) {
+    /* FIX: should get rid of dir argument and use std. temp file stuff */
     let getsizefilename = Filename::concat(dir,"getsize.c");
     let getsizeexec = Filename::concat(dir,"getsize");
     let getsizeout = Filename::concat(dir,"getsize.out");
@@ -1717,7 +1737,7 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   }
 
   /* Helper functions for command line argument processing */
-  static string_t output_dir = NULL;
+  static string_t output_dir = "BUILDLIB.OUT";
   static void set_output_dir(string_t<`H> s) {
     output_dir = s;
   }
@@ -1727,6 +1747,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
   }
   static void set_GATHER() {
     mode = GATHER;
+  }
+  static void set_GATHERSCRIPT() {
+    mode = GATHERSCRIPT;
   }
   static void set_FINISH() {
     mode = FINISH;
@@ -1751,6 +1774,9 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
            new $("-gather",false,"",
                  new Unit_spec(set_GATHER),
                  "Gather C library info but don't produce Cyclone headers"),
+           new $("-gatherscript",false,"",
+                 new Unit_spec(set_GATHERSCRIPT),
+                 "Produce a script to gather C library info"),
            new $("-finish",false,"",
                  new Unit_spec(set_FINISH),
                  "Produce Cyclone headers from pre-gathered C library info"),
@@ -1768,36 +1794,49 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
       return 1;
     }
 
-    let dir = output_dir ? output_dir : ".";
+    if (mode == GATHERSCRIPT) {
+      script_file = fopen("BUILDLIB.sh","w");
+      if (!script_file) {
+        fprintf(stderr,"Could not create file BUILDLIB.sh\n");
+        exit(1);
+      }
+      prscript("#!/bin/sh\n");
+      prscript("GCC=\"gcc\"\n");
+    }
 
     /* Make sure the directory where the output files will be placed exists */
-    if (force_directory_prefixes(dir) || force_directory(dir)) {
-      fprintf(stderr,"Error: could not create directory %s\n",dir);
+    if (force_directory_prefixes(output_dir) || force_directory(output_dir)) {
+      fprintf(stderr,"Error: could not create directory %s\n",output_dir);
       return 1;
     }
 
-    /* Create an empty log file -- most importantly, any previous log
-       file will be truncated */
-    log_file = fopen(Filename::concat(dir,"BUILDLIB.LOG"),"w");
-    if (!log_file) {
-      fprintf(stderr,"Error: could not create log file in directory %s\n",dir);
-      return 1;
+    if (mode == GATHERSCRIPT) {
+      prscript("cd %s\n",output_dir);
+      prscript("echo | $GCC -E -dM - -o INITMACROS.h\n");
     }
 
-    if (mode != GATHER) {
+    if (!gathering()) {
+      /* Create an empty log file -- most importantly, any previous log
+         file will be truncated */
+      log_file = fopen(Filename::concat(output_dir,"BUILDLIB.LOG"),"w");
+      if (!log_file) {
+        fprintf(stderr,"Error: could not create log file in directory %s\n",output_dir);
+        return 1;
+      }
+
       /* Create an empty cstubs.cyc file */
-      cstubs_file = fopen(Filename::concat(dir,"cstubs.c"),"w");
+      cstubs_file = fopen(Filename::concat(output_dir,"cstubs.c"),"w");
       if (!cstubs_file) {
-        fprintf(stderr,"Error: could not create cstubs.c in directory %s\n",dir);
+        fprintf(stderr,"Error: could not create cstubs.c in directory %s\n",output_dir);
         return 1;
       }
 
       /* Create a cycstubs.cyc file with the standard prologue */
-      cycstubs_file = fopen(Filename::concat(dir,"cycstubs.cyc"),"w");
+      cycstubs_file = fopen(Filename::concat(output_dir,"cycstubs.cyc"),"w");
       if (!cycstubs_file) {
         fprintf(stderr,
                 "Error: could not create cycstubs.c in directory %s\n",
-                dir);
+                output_dir);
         return 1;
       }
       fprintf((FILE@)cycstubs_file,
@@ -1805,27 +1844,34 @@ and block_comment = parse /* returns 1 if more to do, 0 if all done */
               "using Core;\n\n");
 
       /* Find the sizes of various types, for use in constant expressions */
-      sizeof_unsignedlongint = getsize(dir,"","unsigned long int");
-      sizeof_unsignedshortint = getsize(dir,"","unsigned short int");
-      sizeof_shortint = getsize(dir,"","short int");
-      sizeof_int = getsize(dir,"","int");
-      sizeof_short = getsize(dir,"","short");
+      sizeof_unsignedlongint = getsize(output_dir,"","unsigned long int");
+      sizeof_unsignedshortint = getsize(output_dir,"","unsigned short int");
+      sizeof_shortint = getsize(output_dir,"","short int");
+      sizeof_int = getsize(output_dir,"","int");
+      sizeof_short = getsize(output_dir,"","short");
       /* sys/types is needed on OS X b/c it defines needed typedef u_int */
-      sizeof_fdmask = getsize(dir,"#include <sys/types.h>\n#include <sys/select.h>","fd_mask");
-      sizeof___fdmask = getsize(dir,"#include <sys/types.h>\n#include <sys/select.h>","__fd_mask");
-      sizeof_uint32 = getsize(dir,"#include <sys/types.h>","__uint32_t");
+      sizeof_fdmask = getsize(output_dir,"#include <sys/types.h>\n#include <sys/select.h>","fd_mask");
+      sizeof___fdmask = getsize(output_dir,"#include <sys/types.h>\n#include <sys/select.h>","__fd_mask");
+      sizeof_uint32 = getsize(output_dir,"#include <sys/types.h>","__uint32_t");
       /* sys/types is needed on OS X b/c it defines needed typedef u_char */
-      sizeof_sockaddr = getsize(dir,"#include <sys/types.h>\n#include <sys/socket.h>","struct sockaddr");
-      sizeof_inport = getsize(dir,"#include <sys/types.h>\n#include <netinet/in.h>","in_port_t");
-      sizeof_inaddr = getsize(dir,"#include <sys/types.h>\n#include <netinet/in.h>","struct in_addr");
+      sizeof_sockaddr = getsize(output_dir,"#include <sys/types.h>\n#include <sys/socket.h>","struct sockaddr");
+      sizeof_inport = getsize(output_dir,"#include <sys/types.h>\n#include <netinet/in.h>","in_port_t");
+      sizeof_inaddr = getsize(output_dir,"#include <sys/types.h>\n#include <netinet/in.h>","struct in_addr");
     }
             
+    /* Main loop -- process each spec file */
     for (; spec_files != NULL; spec_files = spec_files->tl) {
-      process_specfile(*(spec_files->hd),dir);
+      if (process_specfile(*(spec_files->hd),output_dir)) {
+        fprintf(stderr,"FATAL ERROR -- QUIT!\n");
+        exit(1);
+      }
     }
 
-    fclose((FILE@)log_file);
-    if (mode != GATHER) {
+    if (mode == GATHERSCRIPT) {
+      fclose((FILE@)script_file);
+    }
+    else if (!gathering()) {
+      fclose((FILE@)log_file);
       fclose((FILE@)cstubs_file);
       fclose((FILE@)cycstubs_file);
     }
