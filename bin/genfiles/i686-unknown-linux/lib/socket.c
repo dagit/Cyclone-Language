@@ -272,10 +272,31 @@ unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
 string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
 struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
 extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
-extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Std_timeval{
-int tv_sec; int tv_usec; } ; struct Cyc_Std_timezone{ int tz_minuteswest; int
-tz_dsttime; } ; extern int gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone*
-__z); struct Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_List_List{
+void* hd; struct Cyc_List_List* tl; } ; extern unsigned char Cyc_List_List_mismatch[
+18u]; extern unsigned char Cyc_List_Nth[ 8u]; extern struct _tagged_arr Cyc_Std_strconcat(
+struct _tagged_arr, struct _tagged_arr); struct Cyc_Cstdio___sFILE; struct Cyc_Std___sFILE;
+extern unsigned char Cyc_Std_FileCloseError[ 19u]; extern unsigned char Cyc_Std_FileOpenError[
+18u]; struct Cyc_Std_FileOpenError_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; static const int Cyc_Std_String_pa= 0; struct Cyc_Std_String_pa_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_Std_Int_pa= 1; struct
+Cyc_Std_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Std_Double_pa=
+2; struct Cyc_Std_Double_pa_struct{ int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa=
+3; struct Cyc_Std_ShortPtr_pa_struct{ int tag; short* f1; } ; static const int
+Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{ int tag; unsigned int* f1;
+} ; extern struct _tagged_arr Cyc_Std_aprintf( struct _tagged_arr fmt, struct
+_tagged_arr); static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
+int tag; unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct
+Cyc_Std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa=
+3; struct Cyc_Std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
+int Cyc_Std_StringPtr_sa= 4; struct Cyc_Std_StringPtr_sa_struct{ int tag; struct
+_tagged_arr f1; } ; static const int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{
+int tag; double* f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
+int tag; float* f1; } ; struct Cyc_Std_timeval{ int tv_sec; int tv_usec; } ;
+struct Cyc_Std_timezone{ int tz_minuteswest; int tz_dsttime; } ; extern int
+gettimeofday( struct Cyc_Std_timeval* __p, struct Cyc_Std_timezone* __z); struct
+Cyc_Std_itimerval{ struct Cyc_Std_timeval it_interval; struct Cyc_Std_timeval
 it_value; } ; extern int getitimer( int, struct Cyc_Std_itimerval*); extern int
 setitimer( int, const struct Cyc_Std_itimerval*, struct Cyc_Std_itimerval*);
 typedef struct { unsigned int __val[ 64u]; } Cyc_Std___sigset_t; typedef Cyc_Std___sigset_t
@@ -335,242 +356,278 @@ int, int, int, const int*, unsigned int); extern int getsockopt_timeval( int,
 int, int, struct Cyc_Std_timeval*, unsigned int*); extern int setsockopt_timeval(
 int, int, int, const struct Cyc_Std_timeval*, unsigned int); unsigned char Cyc_Std_SocketError[
 16u]="\000\000\000\000SocketError"; struct Cyc_Std_SocketError_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; struct _tuple0{ void* f1; void*
-f2; } ; int Cyc_Std_accept( int fd, struct _tagged_arr ap){ if( _get_arr_size(
-ap, sizeof( void*)) !=  2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp0=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp0[ 0]=({ struct Cyc_Std_SocketError_struct _temp1; _temp1.tag= Cyc_Std_SocketError;
-_temp1.f1= _tag_arr("accept---need 2 args", sizeof( unsigned char), 21u); _temp1;});
-_temp0;}));}{ struct _tuple0 _temp3=({ struct _tuple0 _temp2; _temp2.f1=*(( void**)
-_check_unknown_subscript( ap, sizeof( void*), 0)); _temp2.f2=*(( void**)
-_check_unknown_subscript( ap, sizeof( void*), 1)); _temp2;}); void* _temp11;
-unsigned int* _temp13; void* _temp15; struct Cyc_Std_sockaddr_in* _temp17; void*
-_temp19; unsigned int* _temp21; void* _temp23; struct Cyc_Std_sockaddr* _temp25;
-_LL5: _LL16: _temp15= _temp3.f1; if(*(( int*) _temp15) ==  Cyc_Std_SA_sockaddr_in){
-_LL18: _temp17=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp15)->f1; goto
-_LL12;} else{ goto _LL7;} _LL12: _temp11= _temp3.f2; if(*(( int*) _temp11) == 
-Cyc_Std_SA_socklenptr){ _LL14: _temp13=(( struct Cyc_Std_SA_socklenptr_struct*)
-_temp11)->f1; goto _LL6;} else{ goto _LL7;} _LL7: _LL24: _temp23= _temp3.f1; if(*((
-int*) _temp23) ==  Cyc_Std_SA_sockaddr){ _LL26: _temp25=(( struct Cyc_Std_SA_sockaddr_struct*)
-_temp23)->f1; goto _LL20;} else{ goto _LL9;} _LL20: _temp19= _temp3.f2; if(*((
-int*) _temp19) ==  Cyc_Std_SA_socklenptr){ _LL22: _temp21=(( struct Cyc_Std_SA_socklenptr_struct*)
-_temp19)->f1; goto _LL8;} else{ goto _LL9;} _LL9: goto _LL10; _LL6: return
-accept_in( fd,( const struct Cyc_Std_sockaddr_in*) _temp17, _temp13); _LL8:
-return accept( fd,( const struct Cyc_Std_sockaddr*) _temp25, _temp21); _LL10:(
-int) _throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp27=( struct Cyc_Std_SocketError_struct*)
-_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp27[ 0]=({ struct
-Cyc_Std_SocketError_struct _temp28; _temp28.tag= Cyc_Std_SocketError; _temp28.f1=
-_tag_arr("accept---bad args", sizeof( unsigned char), 18u); _temp28;}); _temp27;}));
-_LL4:;}} int Cyc_Std_bind( int fd, struct _tagged_arr ap){ if( _get_arr_size( ap,
-sizeof( void*)) !=  2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp29=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp29[ 0]=({ struct Cyc_Std_SocketError_struct _temp30; _temp30.tag= Cyc_Std_SocketError;
-_temp30.f1= _tag_arr("bind---need 2 args", sizeof( unsigned char), 19u); _temp30;});
-_temp29;}));}{ struct _tuple0 _temp32=({ struct _tuple0 _temp31; _temp31.f1=*((
-void**) _check_unknown_subscript( ap, sizeof( void*), 0)); _temp31.f2=*(( void**)
-_check_unknown_subscript( ap, sizeof( void*), 1)); _temp31;}); void* _temp40;
-unsigned int _temp42; void* _temp44; struct Cyc_Std_sockaddr_in* _temp46; void*
-_temp48; unsigned int _temp50; void* _temp52; struct Cyc_Std_sockaddr* _temp54;
-_LL34: _LL45: _temp44= _temp32.f1; if(*(( int*) _temp44) ==  Cyc_Std_SA_sockaddr_in){
-_LL47: _temp46=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp44)->f1; goto
-_LL41;} else{ goto _LL36;} _LL41: _temp40= _temp32.f2; if(*(( int*) _temp40) == 
-Cyc_Std_SA_socklen){ _LL43: _temp42=(( struct Cyc_Std_SA_socklen_struct*)
-_temp40)->f1; goto _LL35;} else{ goto _LL36;} _LL36: _LL53: _temp52= _temp32.f1;
-if(*(( int*) _temp52) ==  Cyc_Std_SA_sockaddr){ _LL55: _temp54=(( struct Cyc_Std_SA_sockaddr_struct*)
-_temp52)->f1; goto _LL49;} else{ goto _LL38;} _LL49: _temp48= _temp32.f2; if(*((
-int*) _temp48) ==  Cyc_Std_SA_socklen){ _LL51: _temp50=(( struct Cyc_Std_SA_socklen_struct*)
-_temp48)->f1; goto _LL37;} else{ goto _LL38;} _LL38: goto _LL39; _LL35: return
-bind_in( fd,( const struct Cyc_Std_sockaddr_in*) _temp46, _temp42); _LL37:
-return bind( fd,( const struct Cyc_Std_sockaddr*) _temp54, _temp50); _LL39:( int)
-_throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp56=( struct Cyc_Std_SocketError_struct*)
-_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp56[ 0]=({ struct
-Cyc_Std_SocketError_struct _temp57; _temp57.tag= Cyc_Std_SocketError; _temp57.f1=
-_tag_arr("bind---bad args", sizeof( unsigned char), 16u); _temp57;}); _temp56;}));
-_LL33:;}} int Cyc_Std_connect( int fd, struct _tagged_arr ap){ if( _get_arr_size(
-ap, sizeof( void*)) !=  2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp58=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp58[ 0]=({ struct Cyc_Std_SocketError_struct _temp59; _temp59.tag= Cyc_Std_SocketError;
-_temp59.f1= _tag_arr("connect---need 2 args", sizeof( unsigned char), 22u);
-_temp59;}); _temp58;}));}{ struct _tuple0 _temp61=({ struct _tuple0 _temp60;
-_temp60.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
-_temp60.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
-_temp60;}); void* _temp69; unsigned int _temp71; void* _temp73; struct Cyc_Std_sockaddr_in*
-_temp75; void* _temp77; unsigned int _temp79; void* _temp81; struct Cyc_Std_sockaddr*
-_temp83; _LL63: _LL74: _temp73= _temp61.f1; if(*(( int*) _temp73) ==  Cyc_Std_SA_sockaddr_in){
-_LL76: _temp75=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp73)->f1; goto
-_LL70;} else{ goto _LL65;} _LL70: _temp69= _temp61.f2; if(*(( int*) _temp69) == 
-Cyc_Std_SA_socklen){ _LL72: _temp71=(( struct Cyc_Std_SA_socklen_struct*)
-_temp69)->f1; goto _LL64;} else{ goto _LL65;} _LL65: _LL82: _temp81= _temp61.f1;
-if(*(( int*) _temp81) ==  Cyc_Std_SA_sockaddr){ _LL84: _temp83=(( struct Cyc_Std_SA_sockaddr_struct*)
-_temp81)->f1; goto _LL78;} else{ goto _LL67;} _LL78: _temp77= _temp61.f2; if(*((
-int*) _temp77) ==  Cyc_Std_SA_socklen){ _LL80: _temp79=(( struct Cyc_Std_SA_socklen_struct*)
-_temp77)->f1; goto _LL66;} else{ goto _LL67;} _LL67: goto _LL68; _LL64: return
-connect_in( fd,( const struct Cyc_Std_sockaddr_in*) _temp75, _temp71); _LL66:
-return connect( fd,( const struct Cyc_Std_sockaddr*) _temp83, _temp79); _LL68:(
-int) _throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp85=( struct Cyc_Std_SocketError_struct*)
-_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp85[ 0]=({ struct
-Cyc_Std_SocketError_struct _temp86; _temp86.tag= Cyc_Std_SocketError; _temp86.f1=
-_tag_arr("connect---bad args", sizeof( unsigned char), 19u); _temp86;}); _temp85;}));
-_LL62:;}} int Cyc_Std_getpeername( int fd, struct _tagged_arr ap){ if(
+unsigned char* tag; struct _tagged_arr f1; } ; static struct _tagged_arr Cyc_Std_sopts2string(
+struct _tagged_arr args){ struct _tagged_arr res= _tag_arr(({ unsigned char*
+_temp10=( unsigned char*) _cycalloc_atomic( sizeof( unsigned char) *  1);
+_temp10[ 0]='\000'; _temp10;}), sizeof( unsigned char), 1u);{ int i= 0; for( 0;
+i <  _get_arr_size( args, sizeof( void*)); i ++){ void* _temp0=*(( void**)
+_check_unknown_subscript( args, sizeof( void*), i)); _LL2: if(*(( int*) _temp0)
+==  Cyc_Std_SO_int){ goto _LL3;} else{ goto _LL4;} _LL4: if(*(( int*) _temp0) == 
+Cyc_Std_SO_timeval){ goto _LL5;} else{ goto _LL6;} _LL6: if(*(( int*) _temp0) == 
+Cyc_Std_SO_socklenptr){ goto _LL7;} else{ goto _LL8;} _LL8: if(*(( int*) _temp0)
+==  Cyc_Std_SO_socklen){ goto _LL9;} else{ goto _LL1;} _LL3: res= Cyc_Std_strconcat((
+struct _tagged_arr) res, _tag_arr("|SO_int", sizeof( unsigned char), 8u)); goto
+_LL1; _LL5: res= Cyc_Std_strconcat(( struct _tagged_arr) res, _tag_arr("|SO_timeval",
+sizeof( unsigned char), 12u)); goto _LL1; _LL7: res= Cyc_Std_strconcat(( struct
+_tagged_arr) res, _tag_arr("|SO_socklenptr", sizeof( unsigned char), 15u)); goto
+_LL1; _LL9: res= Cyc_Std_strconcat(( struct _tagged_arr) res, _tag_arr("|SO_socklen",
+sizeof( unsigned char), 12u)); goto _LL1; _LL1:;}} return res;} struct _tuple0{
+void* f1; void* f2; } ; int Cyc_Std_accept( int fd, struct _tagged_arr ap){ if(
 _get_arr_size( ap, sizeof( void*)) !=  2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp87=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp87[ 0]=({ struct Cyc_Std_SocketError_struct _temp88; _temp88.tag= Cyc_Std_SocketError;
-_temp88.f1= _tag_arr("getpeername---need 2 args", sizeof( unsigned char), 26u);
-_temp88;}); _temp87;}));}{ struct _tuple0 _temp90=({ struct _tuple0 _temp89;
-_temp89.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
-_temp89.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
-_temp89;}); void* _temp98; unsigned int* _temp100; void* _temp102; struct Cyc_Std_sockaddr_in*
-_temp104; void* _temp106; unsigned int* _temp108; void* _temp110; struct Cyc_Std_sockaddr*
-_temp112; _LL92: _LL103: _temp102= _temp90.f1; if(*(( int*) _temp102) ==  Cyc_Std_SA_sockaddr_in){
-_LL105: _temp104=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp102)->f1; goto
-_LL99;} else{ goto _LL94;} _LL99: _temp98= _temp90.f2; if(*(( int*) _temp98) == 
-Cyc_Std_SA_socklenptr){ _LL101: _temp100=(( struct Cyc_Std_SA_socklenptr_struct*)
-_temp98)->f1; goto _LL93;} else{ goto _LL94;} _LL94: _LL111: _temp110= _temp90.f1;
-if(*(( int*) _temp110) ==  Cyc_Std_SA_sockaddr){ _LL113: _temp112=(( struct Cyc_Std_SA_sockaddr_struct*)
-_temp110)->f1; goto _LL107;} else{ goto _LL96;} _LL107: _temp106= _temp90.f2;
-if(*(( int*) _temp106) ==  Cyc_Std_SA_socklenptr){ _LL109: _temp108=(( struct
-Cyc_Std_SA_socklenptr_struct*) _temp106)->f1; goto _LL95;} else{ goto _LL96;}
-_LL96: goto _LL97; _LL93: return getpeername_in( fd,( const struct Cyc_Std_sockaddr_in*)
-_temp104, _temp100); _LL95: return getpeername( fd,( const struct Cyc_Std_sockaddr*)
-_temp112, _temp108); _LL97:( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp114=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp114[ 0]=({ struct Cyc_Std_SocketError_struct _temp115; _temp115.tag= Cyc_Std_SocketError;
-_temp115.f1= _tag_arr("getpeername---bad args", sizeof( unsigned char), 23u);
-_temp115;}); _temp114;})); _LL91:;}} int Cyc_Std_getsockname( int fd, struct
-_tagged_arr ap){ if( _get_arr_size( ap, sizeof( void*)) !=  2){( int) _throw((
-void*)({ struct Cyc_Std_SocketError_struct* _temp116=( struct Cyc_Std_SocketError_struct*)
-_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp116[ 0]=({ struct
-Cyc_Std_SocketError_struct _temp117; _temp117.tag= Cyc_Std_SocketError; _temp117.f1=
-_tag_arr("getsockname---need 2 args", sizeof( unsigned char), 26u); _temp117;});
-_temp116;}));}{ struct _tuple0 _temp119=({ struct _tuple0 _temp118; _temp118.f1=*((
-void**) _check_unknown_subscript( ap, sizeof( void*), 0)); _temp118.f2=*(( void**)
-_check_unknown_subscript( ap, sizeof( void*), 1)); _temp118;}); void* _temp127;
-unsigned int* _temp129; void* _temp131; struct Cyc_Std_sockaddr_in* _temp133;
-void* _temp135; unsigned int* _temp137; void* _temp139; struct Cyc_Std_sockaddr*
-_temp141; _LL121: _LL132: _temp131= _temp119.f1; if(*(( int*) _temp131) ==  Cyc_Std_SA_sockaddr_in){
-_LL134: _temp133=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp131)->f1; goto
-_LL128;} else{ goto _LL123;} _LL128: _temp127= _temp119.f2; if(*(( int*)
-_temp127) ==  Cyc_Std_SA_socklenptr){ _LL130: _temp129=(( struct Cyc_Std_SA_socklenptr_struct*)
-_temp127)->f1; goto _LL122;} else{ goto _LL123;} _LL123: _LL140: _temp139=
-_temp119.f1; if(*(( int*) _temp139) ==  Cyc_Std_SA_sockaddr){ _LL142: _temp141=((
-struct Cyc_Std_SA_sockaddr_struct*) _temp139)->f1; goto _LL136;} else{ goto
-_LL125;} _LL136: _temp135= _temp119.f2; if(*(( int*) _temp135) ==  Cyc_Std_SA_socklenptr){
-_LL138: _temp137=(( struct Cyc_Std_SA_socklenptr_struct*) _temp135)->f1; goto
-_LL124;} else{ goto _LL125;} _LL125: goto _LL126; _LL122: return getsockname_in(
-fd,( const struct Cyc_Std_sockaddr_in*) _temp133, _temp129); _LL124: return
-getsockname( fd,( const struct Cyc_Std_sockaddr*) _temp141, _temp137); _LL126:(
-int) _throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp143=( struct Cyc_Std_SocketError_struct*)
-_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp143[ 0]=({ struct
-Cyc_Std_SocketError_struct _temp144; _temp144.tag= Cyc_Std_SocketError; _temp144.f1=
-_tag_arr("getsockname---bad args", sizeof( unsigned char), 23u); _temp144;});
-_temp143;})); _LL120:;}} int Cyc_Std_recvfrom( int fd, struct _tagged_arr buf,
+_temp11=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
+_temp11[ 0]=({ struct Cyc_Std_SocketError_struct _temp12; _temp12.tag= Cyc_Std_SocketError;
+_temp12.f1= _tag_arr("accept---need 2 args", sizeof( unsigned char), 21u);
+_temp12;}); _temp11;}));}{ struct _tuple0 _temp14=({ struct _tuple0 _temp13;
+_temp13.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
+_temp13.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
+_temp13;}); void* _temp22; unsigned int* _temp24; void* _temp26; struct Cyc_Std_sockaddr_in*
+_temp28; void* _temp30; unsigned int* _temp32; void* _temp34; struct Cyc_Std_sockaddr*
+_temp36; _LL16: _LL27: _temp26= _temp14.f1; if(*(( int*) _temp26) ==  Cyc_Std_SA_sockaddr_in){
+_LL29: _temp28=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp26)->f1; goto
+_LL23;} else{ goto _LL18;} _LL23: _temp22= _temp14.f2; if(*(( int*) _temp22) == 
+Cyc_Std_SA_socklenptr){ _LL25: _temp24=(( struct Cyc_Std_SA_socklenptr_struct*)
+_temp22)->f1; goto _LL17;} else{ goto _LL18;} _LL18: _LL35: _temp34= _temp14.f1;
+if(*(( int*) _temp34) ==  Cyc_Std_SA_sockaddr){ _LL37: _temp36=(( struct Cyc_Std_SA_sockaddr_struct*)
+_temp34)->f1; goto _LL31;} else{ goto _LL20;} _LL31: _temp30= _temp14.f2; if(*((
+int*) _temp30) ==  Cyc_Std_SA_socklenptr){ _LL33: _temp32=(( struct Cyc_Std_SA_socklenptr_struct*)
+_temp30)->f1; goto _LL19;} else{ goto _LL20;} _LL20: goto _LL21; _LL17: return
+accept_in( fd,( const struct Cyc_Std_sockaddr_in*) _temp28, _temp24); _LL19:
+return accept( fd,( const struct Cyc_Std_sockaddr*) _temp36, _temp32); _LL21:(
+int) _throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp38=( struct Cyc_Std_SocketError_struct*)
+_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp38[ 0]=({ struct
+Cyc_Std_SocketError_struct _temp39; _temp39.tag= Cyc_Std_SocketError; _temp39.f1=
+_tag_arr("accept---bad args", sizeof( unsigned char), 18u); _temp39;}); _temp38;}));
+_LL15:;}} int Cyc_Std_bind( int fd, struct _tagged_arr ap){ if( _get_arr_size(
+ap, sizeof( void*)) !=  2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
+_temp40=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
+_temp40[ 0]=({ struct Cyc_Std_SocketError_struct _temp41; _temp41.tag= Cyc_Std_SocketError;
+_temp41.f1= _tag_arr("bind---need 2 args", sizeof( unsigned char), 19u); _temp41;});
+_temp40;}));}{ struct _tuple0 _temp43=({ struct _tuple0 _temp42; _temp42.f1=*((
+void**) _check_unknown_subscript( ap, sizeof( void*), 0)); _temp42.f2=*(( void**)
+_check_unknown_subscript( ap, sizeof( void*), 1)); _temp42;}); void* _temp51;
+unsigned int _temp53; void* _temp55; struct Cyc_Std_sockaddr_in* _temp57; void*
+_temp59; unsigned int _temp61; void* _temp63; struct Cyc_Std_sockaddr* _temp65;
+_LL45: _LL56: _temp55= _temp43.f1; if(*(( int*) _temp55) ==  Cyc_Std_SA_sockaddr_in){
+_LL58: _temp57=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp55)->f1; goto
+_LL52;} else{ goto _LL47;} _LL52: _temp51= _temp43.f2; if(*(( int*) _temp51) == 
+Cyc_Std_SA_socklen){ _LL54: _temp53=(( struct Cyc_Std_SA_socklen_struct*)
+_temp51)->f1; goto _LL46;} else{ goto _LL47;} _LL47: _LL64: _temp63= _temp43.f1;
+if(*(( int*) _temp63) ==  Cyc_Std_SA_sockaddr){ _LL66: _temp65=(( struct Cyc_Std_SA_sockaddr_struct*)
+_temp63)->f1; goto _LL60;} else{ goto _LL49;} _LL60: _temp59= _temp43.f2; if(*((
+int*) _temp59) ==  Cyc_Std_SA_socklen){ _LL62: _temp61=(( struct Cyc_Std_SA_socklen_struct*)
+_temp59)->f1; goto _LL48;} else{ goto _LL49;} _LL49: goto _LL50; _LL46: return
+bind_in( fd,( const struct Cyc_Std_sockaddr_in*) _temp57, _temp53); _LL48:
+return bind( fd,( const struct Cyc_Std_sockaddr*) _temp65, _temp61); _LL50:( int)
+_throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp67=( struct Cyc_Std_SocketError_struct*)
+_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp67[ 0]=({ struct
+Cyc_Std_SocketError_struct _temp68; _temp68.tag= Cyc_Std_SocketError; _temp68.f1=
+_tag_arr("bind---bad args", sizeof( unsigned char), 16u); _temp68;}); _temp67;}));
+_LL44:;}} int Cyc_Std_connect( int fd, struct _tagged_arr ap){ if( _get_arr_size(
+ap, sizeof( void*)) !=  2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
+_temp69=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
+_temp69[ 0]=({ struct Cyc_Std_SocketError_struct _temp70; _temp70.tag= Cyc_Std_SocketError;
+_temp70.f1= _tag_arr("connect---need 2 args", sizeof( unsigned char), 22u);
+_temp70;}); _temp69;}));}{ struct _tuple0 _temp72=({ struct _tuple0 _temp71;
+_temp71.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
+_temp71.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
+_temp71;}); void* _temp80; unsigned int _temp82; void* _temp84; struct Cyc_Std_sockaddr_in*
+_temp86; void* _temp88; unsigned int _temp90; void* _temp92; struct Cyc_Std_sockaddr*
+_temp94; _LL74: _LL85: _temp84= _temp72.f1; if(*(( int*) _temp84) ==  Cyc_Std_SA_sockaddr_in){
+_LL87: _temp86=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp84)->f1; goto
+_LL81;} else{ goto _LL76;} _LL81: _temp80= _temp72.f2; if(*(( int*) _temp80) == 
+Cyc_Std_SA_socklen){ _LL83: _temp82=(( struct Cyc_Std_SA_socklen_struct*)
+_temp80)->f1; goto _LL75;} else{ goto _LL76;} _LL76: _LL93: _temp92= _temp72.f1;
+if(*(( int*) _temp92) ==  Cyc_Std_SA_sockaddr){ _LL95: _temp94=(( struct Cyc_Std_SA_sockaddr_struct*)
+_temp92)->f1; goto _LL89;} else{ goto _LL78;} _LL89: _temp88= _temp72.f2; if(*((
+int*) _temp88) ==  Cyc_Std_SA_socklen){ _LL91: _temp90=(( struct Cyc_Std_SA_socklen_struct*)
+_temp88)->f1; goto _LL77;} else{ goto _LL78;} _LL78: goto _LL79; _LL75: return
+connect_in( fd,( const struct Cyc_Std_sockaddr_in*) _temp86, _temp82); _LL77:
+return connect( fd,( const struct Cyc_Std_sockaddr*) _temp94, _temp90); _LL79:(
+int) _throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp96=( struct Cyc_Std_SocketError_struct*)
+_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp96[ 0]=({ struct
+Cyc_Std_SocketError_struct _temp97; _temp97.tag= Cyc_Std_SocketError; _temp97.f1=
+_tag_arr("connect---bad args", sizeof( unsigned char), 19u); _temp97;}); _temp96;}));
+_LL73:;}} int Cyc_Std_getpeername( int fd, struct _tagged_arr ap){ if(
+_get_arr_size( ap, sizeof( void*)) !=  2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
+_temp98=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
+_temp98[ 0]=({ struct Cyc_Std_SocketError_struct _temp99; _temp99.tag= Cyc_Std_SocketError;
+_temp99.f1= _tag_arr("getpeername---need 2 args", sizeof( unsigned char), 26u);
+_temp99;}); _temp98;}));}{ struct _tuple0 _temp101=({ struct _tuple0 _temp100;
+_temp100.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
+_temp100.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
+_temp100;}); void* _temp109; unsigned int* _temp111; void* _temp113; struct Cyc_Std_sockaddr_in*
+_temp115; void* _temp117; unsigned int* _temp119; void* _temp121; struct Cyc_Std_sockaddr*
+_temp123; _LL103: _LL114: _temp113= _temp101.f1; if(*(( int*) _temp113) ==  Cyc_Std_SA_sockaddr_in){
+_LL116: _temp115=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp113)->f1; goto
+_LL110;} else{ goto _LL105;} _LL110: _temp109= _temp101.f2; if(*(( int*)
+_temp109) ==  Cyc_Std_SA_socklenptr){ _LL112: _temp111=(( struct Cyc_Std_SA_socklenptr_struct*)
+_temp109)->f1; goto _LL104;} else{ goto _LL105;} _LL105: _LL122: _temp121=
+_temp101.f1; if(*(( int*) _temp121) ==  Cyc_Std_SA_sockaddr){ _LL124: _temp123=((
+struct Cyc_Std_SA_sockaddr_struct*) _temp121)->f1; goto _LL118;} else{ goto
+_LL107;} _LL118: _temp117= _temp101.f2; if(*(( int*) _temp117) ==  Cyc_Std_SA_socklenptr){
+_LL120: _temp119=(( struct Cyc_Std_SA_socklenptr_struct*) _temp117)->f1; goto
+_LL106;} else{ goto _LL107;} _LL107: goto _LL108; _LL104: return getpeername_in(
+fd,( const struct Cyc_Std_sockaddr_in*) _temp115, _temp111); _LL106: return
+getpeername( fd,( const struct Cyc_Std_sockaddr*) _temp123, _temp119); _LL108:(
+int) _throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp125=( struct Cyc_Std_SocketError_struct*)
+_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp125[ 0]=({ struct
+Cyc_Std_SocketError_struct _temp126; _temp126.tag= Cyc_Std_SocketError; _temp126.f1=
+_tag_arr("getpeername---bad args", sizeof( unsigned char), 23u); _temp126;});
+_temp125;})); _LL102:;}} int Cyc_Std_getsockname( int fd, struct _tagged_arr ap){
+if( _get_arr_size( ap, sizeof( void*)) !=  2){( int) _throw(( void*)({ struct
+Cyc_Std_SocketError_struct* _temp127=( struct Cyc_Std_SocketError_struct*)
+_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp127[ 0]=({ struct
+Cyc_Std_SocketError_struct _temp128; _temp128.tag= Cyc_Std_SocketError; _temp128.f1=
+_tag_arr("getsockname---need 2 args", sizeof( unsigned char), 26u); _temp128;});
+_temp127;}));}{ struct _tuple0 _temp130=({ struct _tuple0 _temp129; _temp129.f1=*((
+void**) _check_unknown_subscript( ap, sizeof( void*), 0)); _temp129.f2=*(( void**)
+_check_unknown_subscript( ap, sizeof( void*), 1)); _temp129;}); void* _temp138;
+unsigned int* _temp140; void* _temp142; struct Cyc_Std_sockaddr_in* _temp144;
+void* _temp146; unsigned int* _temp148; void* _temp150; struct Cyc_Std_sockaddr*
+_temp152; _LL132: _LL143: _temp142= _temp130.f1; if(*(( int*) _temp142) ==  Cyc_Std_SA_sockaddr_in){
+_LL145: _temp144=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp142)->f1; goto
+_LL139;} else{ goto _LL134;} _LL139: _temp138= _temp130.f2; if(*(( int*)
+_temp138) ==  Cyc_Std_SA_socklenptr){ _LL141: _temp140=(( struct Cyc_Std_SA_socklenptr_struct*)
+_temp138)->f1; goto _LL133;} else{ goto _LL134;} _LL134: _LL151: _temp150=
+_temp130.f1; if(*(( int*) _temp150) ==  Cyc_Std_SA_sockaddr){ _LL153: _temp152=((
+struct Cyc_Std_SA_sockaddr_struct*) _temp150)->f1; goto _LL147;} else{ goto
+_LL136;} _LL147: _temp146= _temp130.f2; if(*(( int*) _temp146) ==  Cyc_Std_SA_socklenptr){
+_LL149: _temp148=(( struct Cyc_Std_SA_socklenptr_struct*) _temp146)->f1; goto
+_LL135;} else{ goto _LL136;} _LL136: goto _LL137; _LL133: return getsockname_in(
+fd,( const struct Cyc_Std_sockaddr_in*) _temp144, _temp140); _LL135: return
+getsockname( fd,( const struct Cyc_Std_sockaddr*) _temp152, _temp148); _LL137:(
+int) _throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp154=( struct Cyc_Std_SocketError_struct*)
+_cycalloc( sizeof( struct Cyc_Std_SocketError_struct)); _temp154[ 0]=({ struct
+Cyc_Std_SocketError_struct _temp155; _temp155.tag= Cyc_Std_SocketError; _temp155.f1=
+_tag_arr("getsockname---bad args", sizeof( unsigned char), 23u); _temp155;});
+_temp154;})); _LL131:;}} int Cyc_Std_recvfrom( int fd, struct _tagged_arr buf,
 unsigned int n, int flags, struct _tagged_arr ap){ if( _get_arr_size( ap,
 sizeof( void*)) !=  2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp145=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp145[ 0]=({ struct Cyc_Std_SocketError_struct _temp146; _temp146.tag= Cyc_Std_SocketError;
-_temp146.f1= _tag_arr("recvfrom---need 2 args", sizeof( unsigned char), 23u);
-_temp146;}); _temp145;}));}{ struct _tuple0 _temp148=({ struct _tuple0 _temp147;
-_temp147.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
-_temp147.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
-_temp147;}); void* _temp156; unsigned int* _temp158; void* _temp160; struct Cyc_Std_sockaddr_in*
-_temp162; void* _temp164; unsigned int* _temp166; void* _temp168; struct Cyc_Std_sockaddr*
-_temp170; _LL150: _LL161: _temp160= _temp148.f1; if(*(( int*) _temp160) ==  Cyc_Std_SA_sockaddr_in){
-_LL163: _temp162=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp160)->f1; goto
-_LL157;} else{ goto _LL152;} _LL157: _temp156= _temp148.f2; if(*(( int*)
-_temp156) ==  Cyc_Std_SA_socklenptr){ _LL159: _temp158=(( struct Cyc_Std_SA_socklenptr_struct*)
-_temp156)->f1; goto _LL151;} else{ goto _LL152;} _LL152: _LL169: _temp168=
-_temp148.f1; if(*(( int*) _temp168) ==  Cyc_Std_SA_sockaddr){ _LL171: _temp170=((
-struct Cyc_Std_SA_sockaddr_struct*) _temp168)->f1; goto _LL165;} else{ goto
-_LL154;} _LL165: _temp164= _temp148.f2; if(*(( int*) _temp164) ==  Cyc_Std_SA_socklenptr){
-_LL167: _temp166=(( struct Cyc_Std_SA_socklenptr_struct*) _temp164)->f1; goto
-_LL153;} else{ goto _LL154;} _LL154: goto _LL155; _LL151: return recvfrom_in( fd,
-buf, n, flags,( const struct Cyc_Std_sockaddr_in*) _temp162, _temp158); _LL153:
-return recvfrom( fd, buf, n, flags,( const struct Cyc_Std_sockaddr*) _temp170,
-_temp166); _LL155:( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp172=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp172[ 0]=({ struct Cyc_Std_SocketError_struct _temp173; _temp173.tag= Cyc_Std_SocketError;
-_temp173.f1= _tag_arr("recvfrom---bad args", sizeof( unsigned char), 20u);
-_temp173;}); _temp172;})); _LL149:;}} int Cyc_Std_sendto( int fd, struct
+_temp156=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
+_temp156[ 0]=({ struct Cyc_Std_SocketError_struct _temp157; _temp157.tag= Cyc_Std_SocketError;
+_temp157.f1= _tag_arr("recvfrom---need 2 args", sizeof( unsigned char), 23u);
+_temp157;}); _temp156;}));}{ struct _tuple0 _temp159=({ struct _tuple0 _temp158;
+_temp158.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
+_temp158.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
+_temp158;}); void* _temp167; unsigned int* _temp169; void* _temp171; struct Cyc_Std_sockaddr_in*
+_temp173; void* _temp175; unsigned int* _temp177; void* _temp179; struct Cyc_Std_sockaddr*
+_temp181; _LL161: _LL172: _temp171= _temp159.f1; if(*(( int*) _temp171) ==  Cyc_Std_SA_sockaddr_in){
+_LL174: _temp173=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp171)->f1; goto
+_LL168;} else{ goto _LL163;} _LL168: _temp167= _temp159.f2; if(*(( int*)
+_temp167) ==  Cyc_Std_SA_socklenptr){ _LL170: _temp169=(( struct Cyc_Std_SA_socklenptr_struct*)
+_temp167)->f1; goto _LL162;} else{ goto _LL163;} _LL163: _LL180: _temp179=
+_temp159.f1; if(*(( int*) _temp179) ==  Cyc_Std_SA_sockaddr){ _LL182: _temp181=((
+struct Cyc_Std_SA_sockaddr_struct*) _temp179)->f1; goto _LL176;} else{ goto
+_LL165;} _LL176: _temp175= _temp159.f2; if(*(( int*) _temp175) ==  Cyc_Std_SA_socklenptr){
+_LL178: _temp177=(( struct Cyc_Std_SA_socklenptr_struct*) _temp175)->f1; goto
+_LL164;} else{ goto _LL165;} _LL165: goto _LL166; _LL162: return recvfrom_in( fd,
+buf, n, flags,( const struct Cyc_Std_sockaddr_in*) _temp173, _temp169); _LL164:
+return recvfrom( fd, buf, n, flags,( const struct Cyc_Std_sockaddr*) _temp181,
+_temp177); _LL166:( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
+_temp183=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
+_temp183[ 0]=({ struct Cyc_Std_SocketError_struct _temp184; _temp184.tag= Cyc_Std_SocketError;
+_temp184.f1= _tag_arr("recvfrom---bad args", sizeof( unsigned char), 20u);
+_temp184;}); _temp183;})); _LL160:;}} int Cyc_Std_sendto( int fd, struct
 _tagged_arr buf, unsigned int n, int flags, struct _tagged_arr ap){ if(
 _get_arr_size( ap, sizeof( void*)) !=  2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp174=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp174[ 0]=({ struct Cyc_Std_SocketError_struct _temp175; _temp175.tag= Cyc_Std_SocketError;
-_temp175.f1= _tag_arr("sendto---need 2 args", sizeof( unsigned char), 21u);
-_temp175;}); _temp174;}));}{ struct _tuple0 _temp177=({ struct _tuple0 _temp176;
-_temp176.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
-_temp176.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
-_temp176;}); void* _temp185; unsigned int _temp187; void* _temp189; struct Cyc_Std_sockaddr_in*
-_temp191; void* _temp193; unsigned int _temp195; void* _temp197; struct Cyc_Std_sockaddr*
-_temp199; _LL179: _LL190: _temp189= _temp177.f1; if(*(( int*) _temp189) ==  Cyc_Std_SA_sockaddr_in){
-_LL192: _temp191=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp189)->f1; goto
-_LL186;} else{ goto _LL181;} _LL186: _temp185= _temp177.f2; if(*(( int*)
-_temp185) ==  Cyc_Std_SA_socklen){ _LL188: _temp187=(( struct Cyc_Std_SA_socklen_struct*)
-_temp185)->f1; goto _LL180;} else{ goto _LL181;} _LL181: _LL198: _temp197=
-_temp177.f1; if(*(( int*) _temp197) ==  Cyc_Std_SA_sockaddr){ _LL200: _temp199=((
-struct Cyc_Std_SA_sockaddr_struct*) _temp197)->f1; goto _LL194;} else{ goto
-_LL183;} _LL194: _temp193= _temp177.f2; if(*(( int*) _temp193) ==  Cyc_Std_SA_socklen){
-_LL196: _temp195=(( struct Cyc_Std_SA_socklen_struct*) _temp193)->f1; goto
-_LL182;} else{ goto _LL183;} _LL183: goto _LL184; _LL180: return sendto_in( fd,
-buf, n, flags,( const struct Cyc_Std_sockaddr_in*) _temp191, _temp187); _LL182:
-return sendto( fd, buf, n, flags,( const struct Cyc_Std_sockaddr*) _temp199,
-_temp195); _LL184:( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp201=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp201[ 0]=({ struct Cyc_Std_SocketError_struct _temp202; _temp202.tag= Cyc_Std_SocketError;
-_temp202.f1= _tag_arr("sendto---bad args", sizeof( unsigned char), 18u);
-_temp202;}); _temp201;})); _LL178:;}} int Cyc_Std_send( int fd, struct
+_temp185=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
+_temp185[ 0]=({ struct Cyc_Std_SocketError_struct _temp186; _temp186.tag= Cyc_Std_SocketError;
+_temp186.f1= _tag_arr("sendto---need 2 args", sizeof( unsigned char), 21u);
+_temp186;}); _temp185;}));}{ struct _tuple0 _temp188=({ struct _tuple0 _temp187;
+_temp187.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
+_temp187.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
+_temp187;}); void* _temp196; unsigned int _temp198; void* _temp200; struct Cyc_Std_sockaddr_in*
+_temp202; void* _temp204; unsigned int _temp206; void* _temp208; struct Cyc_Std_sockaddr*
+_temp210; _LL190: _LL201: _temp200= _temp188.f1; if(*(( int*) _temp200) ==  Cyc_Std_SA_sockaddr_in){
+_LL203: _temp202=(( struct Cyc_Std_SA_sockaddr_in_struct*) _temp200)->f1; goto
+_LL197;} else{ goto _LL192;} _LL197: _temp196= _temp188.f2; if(*(( int*)
+_temp196) ==  Cyc_Std_SA_socklen){ _LL199: _temp198=(( struct Cyc_Std_SA_socklen_struct*)
+_temp196)->f1; goto _LL191;} else{ goto _LL192;} _LL192: _LL209: _temp208=
+_temp188.f1; if(*(( int*) _temp208) ==  Cyc_Std_SA_sockaddr){ _LL211: _temp210=((
+struct Cyc_Std_SA_sockaddr_struct*) _temp208)->f1; goto _LL205;} else{ goto
+_LL194;} _LL205: _temp204= _temp188.f2; if(*(( int*) _temp204) ==  Cyc_Std_SA_socklen){
+_LL207: _temp206=(( struct Cyc_Std_SA_socklen_struct*) _temp204)->f1; goto
+_LL193;} else{ goto _LL194;} _LL194: goto _LL195; _LL191: return sendto_in( fd,
+buf, n, flags,( const struct Cyc_Std_sockaddr_in*) _temp202, _temp198); _LL193:
+return sendto( fd, buf, n, flags,( const struct Cyc_Std_sockaddr*) _temp210,
+_temp206); _LL195:( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
+_temp212=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
+_temp212[ 0]=({ struct Cyc_Std_SocketError_struct _temp213; _temp213.tag= Cyc_Std_SocketError;
+_temp213.f1= _tag_arr("sendto---bad args", sizeof( unsigned char), 18u);
+_temp213;}); _temp212;})); _LL189:;}} int Cyc_Std_send( int fd, struct
 _tagged_arr buf, unsigned int n, int flags){ return send_wrapped( fd, buf, n,
 flags);} int Cyc_Std_recv( int fd, struct _tagged_arr buf, unsigned int n, int
 flags){ return recv_wrapped( fd, buf, n, flags);} int Cyc_Std_getsockopt( int fd,
 int level, int optname, struct _tagged_arr ap){ if( _get_arr_size( ap, sizeof(
 void*)) !=  2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp203=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp203[ 0]=({ struct Cyc_Std_SocketError_struct _temp204; _temp204.tag= Cyc_Std_SocketError;
-_temp204.f1= _tag_arr("getsockopt---need 2 args", sizeof( unsigned char), 25u);
-_temp204;}); _temp203;}));}{ struct _tuple0 _temp206=({ struct _tuple0 _temp205;
-_temp205.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
-_temp205.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
-_temp205;}); void* _temp214; unsigned int* _temp216; void* _temp218; int*
-_temp220; void* _temp222; unsigned int* _temp224; void* _temp226; struct Cyc_Std_timeval*
-_temp228; _LL208: _LL219: _temp218= _temp206.f1; if(*(( int*) _temp218) ==  Cyc_Std_SO_int){
-_LL221: _temp220=(( struct Cyc_Std_SO_int_struct*) _temp218)->f1; goto _LL215;}
-else{ goto _LL210;} _LL215: _temp214= _temp206.f2; if(*(( int*) _temp214) == 
-Cyc_Std_SO_socklenptr){ _LL217: _temp216=(( struct Cyc_Std_SO_socklenptr_struct*)
-_temp214)->f1; goto _LL209;} else{ goto _LL210;} _LL210: _LL227: _temp226=
-_temp206.f1; if(*(( int*) _temp226) ==  Cyc_Std_SO_timeval){ _LL229: _temp228=((
-struct Cyc_Std_SO_timeval_struct*) _temp226)->f1; goto _LL223;} else{ goto
-_LL212;} _LL223: _temp222= _temp206.f2; if(*(( int*) _temp222) ==  Cyc_Std_SO_socklenptr){
-_LL225: _temp224=(( struct Cyc_Std_SO_socklenptr_struct*) _temp222)->f1; goto
-_LL211;} else{ goto _LL212;} _LL212: goto _LL213; _LL209: return getsockopt_int(
-fd, level, optname, _temp220, _temp216); _LL211: return getsockopt_timeval( fd,
-level, optname, _temp228, _temp224); _LL213:( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp230=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp230[ 0]=({ struct Cyc_Std_SocketError_struct _temp231; _temp231.tag= Cyc_Std_SocketError;
-_temp231.f1= _tag_arr("getsockopt---bad args", sizeof( unsigned char), 22u);
-_temp231;}); _temp230;})); _LL207:;}} int Cyc_Std_setsockopt( int fd, int level,
+_temp214=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
+_temp214[ 0]=({ struct Cyc_Std_SocketError_struct _temp215; _temp215.tag= Cyc_Std_SocketError;
+_temp215.f1= _tag_arr("getsockopt---need 2 args", sizeof( unsigned char), 25u);
+_temp215;}); _temp214;}));}{ struct _tuple0 _temp217=({ struct _tuple0 _temp216;
+_temp216.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
+_temp216.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
+_temp216;}); void* _temp229; unsigned int* _temp231; void* _temp233; int*
+_temp235; void* _temp237; int* _temp239; void* _temp241; int* _temp243; void*
+_temp245; unsigned int* _temp247; void* _temp249; struct Cyc_Std_timeval*
+_temp251; void* _temp253; int* _temp255; void* _temp257; struct Cyc_Std_timeval*
+_temp259; _LL219: _LL234: _temp233= _temp217.f1; if(*(( int*) _temp233) ==  Cyc_Std_SO_int){
+_LL236: _temp235=(( struct Cyc_Std_SO_int_struct*) _temp233)->f1; goto _LL230;}
+else{ goto _LL221;} _LL230: _temp229= _temp217.f2; if(*(( int*) _temp229) == 
+Cyc_Std_SO_socklenptr){ _LL232: _temp231=(( struct Cyc_Std_SO_socklenptr_struct*)
+_temp229)->f1; goto _LL220;} else{ goto _LL221;} _LL221: _LL242: _temp241=
+_temp217.f1; if(*(( int*) _temp241) ==  Cyc_Std_SO_int){ _LL244: _temp243=((
+struct Cyc_Std_SO_int_struct*) _temp241)->f1; goto _LL238;} else{ goto _LL223;}
+_LL238: _temp237= _temp217.f2; if(*(( int*) _temp237) ==  Cyc_Std_SO_int){
+_LL240: _temp239=(( struct Cyc_Std_SO_int_struct*) _temp237)->f1; goto _LL222;}
+else{ goto _LL223;} _LL223: _LL250: _temp249= _temp217.f1; if(*(( int*) _temp249)
+==  Cyc_Std_SO_timeval){ _LL252: _temp251=(( struct Cyc_Std_SO_timeval_struct*)
+_temp249)->f1; goto _LL246;} else{ goto _LL225;} _LL246: _temp245= _temp217.f2;
+if(*(( int*) _temp245) ==  Cyc_Std_SO_socklenptr){ _LL248: _temp247=(( struct
+Cyc_Std_SO_socklenptr_struct*) _temp245)->f1; goto _LL224;} else{ goto _LL225;}
+_LL225: _LL258: _temp257= _temp217.f1; if(*(( int*) _temp257) ==  Cyc_Std_SO_timeval){
+_LL260: _temp259=(( struct Cyc_Std_SO_timeval_struct*) _temp257)->f1; goto
+_LL254;} else{ goto _LL227;} _LL254: _temp253= _temp217.f2; if(*(( int*)
+_temp253) ==  Cyc_Std_SO_int){ _LL256: _temp255=(( struct Cyc_Std_SO_int_struct*)
+_temp253)->f1; goto _LL226;} else{ goto _LL227;} _LL227: goto _LL228; _LL220:
+return getsockopt_int( fd, level, optname, _temp235, _temp231); _LL222: return
+getsockopt_int( fd, level, optname, _temp243,( unsigned int*) _temp239); _LL224:
+return getsockopt_timeval( fd, level, optname, _temp251, _temp247); _LL226:
+return getsockopt_timeval( fd, level, optname, _temp259,( unsigned int*)
+_temp255); _LL228:( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
+_temp261=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
+_temp261[ 0]=({ struct Cyc_Std_SocketError_struct _temp262; _temp262.tag= Cyc_Std_SocketError;
+_temp262.f1=( struct _tagged_arr)({ struct Cyc_Std_String_pa_struct _temp264;
+_temp264.tag= Cyc_Std_String_pa; _temp264.f1=( struct _tagged_arr) Cyc_Std_sopts2string(
+ap);{ void* _temp263[ 1u]={& _temp264}; Cyc_Std_aprintf( _tag_arr("getsockopt---bad args %s",
+sizeof( unsigned char), 25u), _tag_arr( _temp263, sizeof( void*), 1u));}});
+_temp262;}); _temp261;})); _LL218:;}} int Cyc_Std_setsockopt( int fd, int level,
 int optname, struct _tagged_arr ap){ if( _get_arr_size( ap, sizeof( void*)) != 
-2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp232=( struct
+2){( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct* _temp265=( struct
 Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp232[ 0]=({ struct Cyc_Std_SocketError_struct _temp233; _temp233.tag= Cyc_Std_SocketError;
-_temp233.f1= _tag_arr("setsockopt---need 2 args", sizeof( unsigned char), 25u);
-_temp233;}); _temp232;}));}{ struct _tuple0 _temp235=({ struct _tuple0 _temp234;
-_temp234.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
-_temp234.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
-_temp234;}); void* _temp243; unsigned int _temp245; void* _temp247; int*
-_temp249; void* _temp251; unsigned int _temp253; void* _temp255; struct Cyc_Std_timeval*
-_temp257; _LL237: _LL248: _temp247= _temp235.f1; if(*(( int*) _temp247) ==  Cyc_Std_SO_int){
-_LL250: _temp249=(( struct Cyc_Std_SO_int_struct*) _temp247)->f1; goto _LL244;}
-else{ goto _LL239;} _LL244: _temp243= _temp235.f2; if(*(( int*) _temp243) == 
-Cyc_Std_SO_socklen){ _LL246: _temp245=(( struct Cyc_Std_SO_socklen_struct*)
-_temp243)->f1; goto _LL238;} else{ goto _LL239;} _LL239: _LL256: _temp255=
-_temp235.f1; if(*(( int*) _temp255) ==  Cyc_Std_SO_timeval){ _LL258: _temp257=((
-struct Cyc_Std_SO_timeval_struct*) _temp255)->f1; goto _LL252;} else{ goto
-_LL241;} _LL252: _temp251= _temp235.f2; if(*(( int*) _temp251) ==  Cyc_Std_SO_socklen){
-_LL254: _temp253=(( struct Cyc_Std_SO_socklen_struct*) _temp251)->f1; goto
-_LL240;} else{ goto _LL241;} _LL241: goto _LL242; _LL238: return setsockopt_int(
-fd, level, optname,( const int*) _temp249, _temp245); _LL240: return
-setsockopt_timeval( fd, level, optname,( const struct Cyc_Std_timeval*) _temp257,
-_temp253); _LL242:( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
-_temp259=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
-_temp259[ 0]=({ struct Cyc_Std_SocketError_struct _temp260; _temp260.tag= Cyc_Std_SocketError;
-_temp260.f1= _tag_arr("setsockopt---bad args", sizeof( unsigned char), 22u);
-_temp260;}); _temp259;})); _LL236:;}}
+_temp265[ 0]=({ struct Cyc_Std_SocketError_struct _temp266; _temp266.tag= Cyc_Std_SocketError;
+_temp266.f1= _tag_arr("setsockopt---need 2 args", sizeof( unsigned char), 25u);
+_temp266;}); _temp265;}));}{ struct _tuple0 _temp268=({ struct _tuple0 _temp267;
+_temp267.f1=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 0));
+_temp267.f2=*(( void**) _check_unknown_subscript( ap, sizeof( void*), 1));
+_temp267;}); void* _temp276; unsigned int _temp278; void* _temp280; int*
+_temp282; void* _temp284; unsigned int _temp286; void* _temp288; struct Cyc_Std_timeval*
+_temp290; _LL270: _LL281: _temp280= _temp268.f1; if(*(( int*) _temp280) ==  Cyc_Std_SO_int){
+_LL283: _temp282=(( struct Cyc_Std_SO_int_struct*) _temp280)->f1; goto _LL277;}
+else{ goto _LL272;} _LL277: _temp276= _temp268.f2; if(*(( int*) _temp276) == 
+Cyc_Std_SO_socklen){ _LL279: _temp278=(( struct Cyc_Std_SO_socklen_struct*)
+_temp276)->f1; goto _LL271;} else{ goto _LL272;} _LL272: _LL289: _temp288=
+_temp268.f1; if(*(( int*) _temp288) ==  Cyc_Std_SO_timeval){ _LL291: _temp290=((
+struct Cyc_Std_SO_timeval_struct*) _temp288)->f1; goto _LL285;} else{ goto
+_LL274;} _LL285: _temp284= _temp268.f2; if(*(( int*) _temp284) ==  Cyc_Std_SO_socklen){
+_LL287: _temp286=(( struct Cyc_Std_SO_socklen_struct*) _temp284)->f1; goto
+_LL273;} else{ goto _LL274;} _LL274: goto _LL275; _LL271: return setsockopt_int(
+fd, level, optname,( const int*) _temp282, _temp278); _LL273: return
+setsockopt_timeval( fd, level, optname,( const struct Cyc_Std_timeval*) _temp290,
+_temp286); _LL275:( int) _throw(( void*)({ struct Cyc_Std_SocketError_struct*
+_temp292=( struct Cyc_Std_SocketError_struct*) _cycalloc( sizeof( struct Cyc_Std_SocketError_struct));
+_temp292[ 0]=({ struct Cyc_Std_SocketError_struct _temp293; _temp293.tag= Cyc_Std_SocketError;
+_temp293.f1=( struct _tagged_arr)({ struct Cyc_Std_String_pa_struct _temp295;
+_temp295.tag= Cyc_Std_String_pa; _temp295.f1=( struct _tagged_arr) Cyc_Std_sopts2string(
+ap);{ void* _temp294[ 1u]={& _temp295}; Cyc_Std_aprintf( _tag_arr("getsockopt---bad args %s",
+sizeof( unsigned char), 25u), _tag_arr( _temp294, sizeof( void*), 1u));}});
+_temp293;}); _temp292;})); _LL269:;}}
