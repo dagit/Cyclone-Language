@@ -893,16 +893,16 @@ static bool okay_externC(seg_t loc, scope_t sc, bool in_include) {
   switch (sc) {
   case Static:
     if(!in_include)
-      warn(loc,"static declaration nested within extern \"C\"");
+      warn(loc,"static declaration within extern \"C\"");
     return false;
   case Abstract:
-    warn(loc,"abstract declaration nested within extern \"C\"");
+    warn(loc,"abstract declaration within extern \"C\"");
     return false;
   case Public:
   case Register: 
   case Extern: return true;
   case ExternC:
-  default:
+  default: 
     warn(loc,"nested extern \"C\" declaration");
     return true;
   }
@@ -917,21 +917,15 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
 		     bool in_externC, 
                      bool check_var_init,
                      list_t<$(seg_t,qvar_t,bool)@`H,`H>* exports) {
-
-  list_t<decl_t,`H> last = NULL;
-
-  for (let ds = ds0; ds != NULL; last = ds, ds = ds->tl) {
+  for (let ds = ds0; ds != NULL; ds = ds->tl) {
     decl_t d   = ds->hd;
     seg_t  loc = d->loc;
-
     switch (d->r) {
     case &Let_d(...): 
     case &Letv_d(_): // FIX -- error will be in Binding pass
-      terr(loc,"top level let-declarations are not implemented");
-      break;
+      terr(loc,"top level let-declarations are not implemented"); break;
     case &Region_d(...):
-      terr(loc,"top level region declarations are not implemented");
-      break;
+      terr(loc,"top level region declarations are not implemented"); break;
     case &Var_d(vd):
       if (in_externC && okay_externC(d->loc,vd->sc,te->in_extern_c_include))
         vd->sc = ExternC;
@@ -964,17 +958,10 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
         ed->sc = ExternC;
       tcEnumdecl(te,loc,ed);
       break;
-    case &Porton_d:
-      warn(d->loc,"spurious __cyclone_port_on__");
-      break;
-    case &Portoff_d:
-      break;
-    case &Tempeston_d:
-      te = enter_tempest(te);
-      break;
-    case &Tempestoff_d:
-      te = clear_tempest(te);
-      break;
+    case &Porton_d: warn(d->loc,"spurious __cyclone_port_on__"); break;
+    case &Portoff_d: break;
+    case &Tempeston_d:  te = enter_tempest(te); break;
+    case &Tempestoff_d: te = clear_tempest(te); break;
     case &Namespace_d(v,ds2):
       // Do the nested declarations then restore the namespace
       let ns  = te->ns;
@@ -983,14 +970,11 @@ static void tc_decls(tenv_t te, list_t<decl_t,`H> ds0,
       te->ns = ns;
       break;
 
-    case &Using_d(&$(nsl,v),ds2):
-      // DJG: using was handled by the previous pass
-      tc_decls(te,ds2,in_externC,check_var_init,exports);
-      break;
+    case &Using_d(_,ds2): // binding phase takes care of using
+      tc_decls(te,ds2,in_externC,check_var_init,exports); break;
 
     case &ExternC_d(ds2):
-      tc_decls(te,ds2,true,check_var_init,exports);
-      break;
+      tc_decls(te,ds2,true,check_var_init,exports); break;
 
       // FIX: there's a simpler way to do this that does not require remembering
       // to mutate bools other places.  (See binding.)

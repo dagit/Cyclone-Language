@@ -70,7 +70,7 @@ long double * _zero_arr_plus_longdouble_fn(long double *orig_x, unsigned int ori
     if (orig_x[_czs_temp] == 0) _throw_arraybounds_fn(filename,lineno);
   return orig_x + orig_i;
 }
-void * _zero_arr_plus_voidstar_fn(void **orig_x, unsigned int orig_sz, int orig_i,const char *filename,unsigned lineno) {
+void ** _zero_arr_plus_voidstar_fn(void **orig_x, unsigned int orig_sz, int orig_i,const char *filename,unsigned lineno) {
   unsigned int _czs_temp;
   if ((orig_x) == 0) _throw_null_fn(filename,lineno);
   if (orig_i < 0 || orig_sz == 0) _throw_arraybounds_fn(filename,lineno);
@@ -180,7 +180,7 @@ long double * _zero_arr_inplace_plus_longdouble_fn(long double **x, int orig_i,c
   *x = _zero_arr_plus_longdouble_fn(*x,1,orig_i,filename,lineno);
   return *x;
 }
-void * _zero_arr_inplace_plus_voidstar_fn(void ***x, int orig_i,const char *filename,unsigned lineno) {
+void ** _zero_arr_inplace_plus_voidstar_fn(void ***x, int orig_i,const char *filename,unsigned lineno) {
   *x = _zero_arr_plus_voidstar_fn(*x,1,orig_i,filename,lineno);
   return *x;
 }

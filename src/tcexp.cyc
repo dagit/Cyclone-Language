@@ -492,8 +492,8 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   type_t t2 = (type_t)e2->topt;
   type_t t1_elt = void_type;
   type_t t2_elt = void_type;
-  if (is_tagged_pointer_type_elt(t1,&t1_elt)) {
-    if (is_tagged_pointer_type_elt(t2,&t2_elt)) {
+  if (is_fat_pointer_type_elt(t1,&t1_elt)) {
+    if (is_fat_pointer_type_elt(t2,&t2_elt)) {
       if (!unify(t1_elt, t2_elt)) {
 	terr(e1->loc,"pointer arithmetic on values of "
              "different types (%s != %s)",
@@ -531,7 +531,7 @@ static type_t tcMinus(tenv_t te, exp_t e1, exp_t e2) {
   if (is_pointer_type(t1)) { // t1 must be thin
     if (is_pointer_type(t2) && unify(pointer_elt_type(t1),
                                      pointer_elt_type(t2))) {
-      if (is_tagged_pointer_type(t2)) { 
+      if (is_fat_pointer_type(t2)) { 
         warn(e1->loc,"coercing fat pointer to thin pointer to support subtraction");
         unchecked_cast(te, e2, star_type(pointer_elt_type(t2),
                                         pointer_region(t2),
@@ -804,7 +804,7 @@ static type_t tcIncrement(tenv_t te, seg_t loc, type_t * topt,
   // FIX: this is not right -- for instance, it allows incrementing an enum!!
   if (!is_numeric(e)) {
     type_t telt = void_type;
-    if (is_tagged_pointer_type_elt(t,&telt) ||
+    if (is_fat_pointer_type_elt(t,&telt) ||
         (is_zero_pointer_type_elt(t,&telt) && (i == PreInc || i == PostInc))) {
       if (!kind_leq(type_kind(telt),&tmk))
         terr(e->loc,"can't perform arithmetic on abstract pointer type");

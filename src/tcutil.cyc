@@ -162,7 +162,7 @@ bool is_nullable_pointer_type(type_t t) {
 }
 
 // side effect: possibly constrains pointer bounds
-bool is_dyneither_ptr(type_t t) {
+bool is_fat_ptr(type_t t) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{_,_,PtrAtts(_,_,b,_,_)}):
     return unify(fat_bound_type, b);
@@ -172,7 +172,7 @@ bool is_dyneither_ptr(type_t t) {
 
 // side effect: possibly constrains bounds to fat.  
 // If true, returns element type in elt_type_dest
-bool is_tagged_pointer_type_elt(type_t t, type_t@ elt_type_dest) {
+bool is_fat_pointer_type_elt(type_t t, type_t@ elt_type_dest) {
   switch (compress(t)) {
   case &PointerType(PtrInfo(elt_type,_,PtrAtts(_,_,b,_,_))):
     if (unify(b,fat_bound_type)) {
@@ -199,22 +199,22 @@ bool is_zero_pointer_type_elt(type_t t, type_t@ elt_type_dest) {
 // Return true if t is a zero-terminated pointer or array type and set the
 // elt_type and ptr_type as appropriate.
 bool is_zero_ptr_type(type_t t, type_t @ptr_type,
-		      bool @is_dyneither, type_t @elt_type) {
+		      bool @is_fat, type_t @elt_type) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{elt,_,PtrAtts(_,_,bnds,zt,_)}):
     if (type2bool(false,zt)) {
       *ptr_type = t;
       *elt_type = elt;
       switch (compress(bnds)) {
-      case &AppType(&FatCon,_): *is_dyneither = true; break;
-      default: *is_dyneither = false; break;
+      case &AppType(&FatCon,_): *is_fat = true; break;
+      default: *is_fat = false; break;
       }
       return true;
     } else return false;
   case &ArrayType(ArrayInfo{elt,tq,n,zt,_}):
     if (type2bool(false,zt)) {
       *elt_type = elt;
-      *is_dyneither = false;      
+      *is_fat = false;      
       *ptr_type = promote_array(t,heap_rgn_type,false);
       return true;
     } else return false;
@@ -222,12 +222,12 @@ bool is_zero_ptr_type(type_t t, type_t @ptr_type,
   }
 }
 
-// true for fat pointers -- since it calls is_tagged_pointer_type_elt
+// true for fat pointers -- since it calls is_fat_pointer_type_elt
 // can end up constraining zeroterm.  I suppose this should only be
 // called from toc.cyc where things are fully resolved?
-bool is_tagged_pointer_type(type_t t) {
+bool is_fat_pointer_type(type_t t) {
   type_t ignore = void_type;
-  return is_tagged_pointer_type_elt(t, &ignore);
+  return is_fat_pointer_type_elt(t, &ignore);
 }
 
 // side effect: possibly constrains bounds
@@ -4987,24 +4987,24 @@ resolve_aggregate_designators(region_t<`r> rgn, seg_t loc,
 
 // is e1 of the form *ea or ea[eb] where ea is a zero-terminated pointer?
 // If so, return true and set ea and eb appropriately (for *ea set eb to 0).
-// Finally, if the pointer is fat, set is_dyneither to true.
+// Finally, if the pointer is fat, set is_fat to true.
 bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type,
-		       bool @is_dyneither, type_t @elt_type) {
+		       bool @is_fat, type_t @elt_type) {
   switch (e1->r) {
   case &Cast_e(...): impos("we have a cast in a lhs:  %s",exp2string(e1));
   case &Deref_e(e1a): fallthru(e1a);
   case &Subscript_e(e1a,_):
-    return is_zero_ptr_type((type_t)e1a->topt,ptr_type,is_dyneither,elt_type);
+    return is_zero_ptr_type((type_t)e1a->topt,ptr_type,is_fat,elt_type);
   case &AggrArrow_e(e1a,...): fallthru(e1a);
   case &AggrMember_e(e1a,...):
     // sanity check
-    if (is_zero_ptr_type((type_t)e1a->topt,ptr_type,is_dyneither,elt_type))
+    if (is_zero_ptr_type((type_t)e1a->topt,ptr_type,is_fat,elt_type))
       impos("found zero pointer aggregate member assignment: %s",
 	    exp2string(e1));
     return false;
   case &Instantiate_e(e1a,_): fallthru(e1a);
   case &NoInstantiate_e(e1a):
-    if (is_zero_ptr_type((type_t)e1a->topt,ptr_type,is_dyneither,elt_type))
+    if (is_zero_ptr_type((type_t)e1a->topt,ptr_type,is_fat,elt_type))
       impos("found zero pointer instantiate/noinstantiate: %s",
 	    exp2string(e1));
     return false;

@@ -50,12 +50,12 @@ extern bool is_array_type(type_t t);    // array type
 extern bool is_boxed(type_t t);         // boxed type
 
 // Predicates that may constrain things
-extern bool is_dyneither_ptr(type_t t); // fat pointer type
+extern bool is_fat_ptr(type_t t); // fat pointer type
 extern bool is_zeroterm_pointer_type(type_t t); // @zeroterm pointer type
 extern bool is_nullable_pointer_type(type_t t); // nullable pointer type
 extern bool is_bound_one(ptrbound_t b);         
 // returns true if this is a t ? -- side effect unconstrained bounds
-extern bool is_tagged_pointer_type(type_t);
+extern bool is_fat_pointer_type(type_t);
 // returns true iff t contains only "bits" and no pointers or datatypes. 
 // This is used to restrict the members of unions to ensure safety.
 extern bool is_bits_only_type(type_t t);
@@ -77,13 +77,13 @@ extern exp_opt_t get_bounds_exp(ptrbound_t def, ptrbound_t b);
 // Extracts the number of elements for an array or pointer type.
 // If the bounds are unconstrained, then sets them to @thin@numelts(1).
 extern exp_opt_t get_type_bound(type_t t);
-// like is_tagged_pointer_type, but puts element type in elt_dest when true.
-extern bool is_tagged_pointer_type_elt(type_t t, type_t@ elt_dest);
+// like is_fat_pointer_type, but puts element type in elt_dest when true.
+extern bool is_fat_pointer_type_elt(type_t t, type_t@ elt_dest);
 // like above but checks to see if the pointer is zero-terminated
 extern bool is_zero_pointer_type_elt(type_t t, type_t@ elt_type_dest);
 // like above but also works for arrays and returns dynamic pointer stats
 extern bool is_zero_ptr_type(type_t t, type_t @ptr_type, 
-			     bool @is_dyneither, type_t @elt_type);
+			     bool @is_fat, type_t @elt_type);
 // if b is fat return NULL, if it's thin(e), return e, if
 // it's unconstrained, constrain it to def and return that.
 extern exp_opt_t get_bounds_exp(ptrbound_t def, ptrbound_t b);
@@ -281,9 +281,9 @@ resolve_aggregate_designators(region_t<`r>rgn, seg_t loc,
                               list_t<aggrfield_t> fields);
 // is e1 of the form *ea or ea[eb] where ea is a zero-terminated pointer?
 // If so, return true and set ea and eb appropriately (for *ea set eb to 0).
-// Finally, if the pointer is fat, set is_dyneither.
+// Finally, if the pointer is fat, set is_fat.
 extern bool is_zero_ptr_deref(exp_t e1, type_t @ptr_type, 
-			      bool @is_dyneither, type_t @elt_type);
+			      bool @is_fat, type_t @elt_type);
 			      
 
 // returns true if this a non-aliasable region, e.g. `U, `r::TR, etc.

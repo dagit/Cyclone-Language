@@ -1,33 +1,24 @@
 #include <setjmp.h>
 /* This is a C header file to be used by the output of the Cyclone to
-   C translator.  The corresponding definitions are in file lib/runtime_cyc.c */
+   C translator.  The corresponding definitions are in file lib/runtime_*.c */
 #ifndef _CYC_INCLUDE_H_
 #define _CYC_INCLUDE_H_
 
-/***********************************************************************/
-/* Runtime Stack routines (runtime_stack.c).                           */
-/***********************************************************************/
-
-/* Need one of these per thread (we don't have threads)
-   The runtime maintains a stack that contains either _handler_cons
-   structs or _RegionHandle structs.  The tag is 0 for a handler_cons
-   and 1 for a region handle.  */
+/* Need one of these per thread (see runtime_stack.c). The runtime maintains 
+   a stack that contains either _handler_cons structs or _RegionHandle structs.
+   The tag is 0 for a handler_cons and 1 for a region handle.  */
 struct _RuntimeStack {
-  int tag; /* 0 for an exception handler, 1 for a region handle */
+  int tag; 
   struct _RuntimeStack *next;
   void (*cleanup)(struct _RuntimeStack *frame);
 };
-
-/***********************************************************************/
-/* Low-level representations etc.                                      */
-/***********************************************************************/
 
 #ifndef offsetof
 /* should be size_t, but int is fine. */
 #define offsetof(t,n) ((int)(&(((t *)0)->n)))
 #endif
 
-/* Tagged arrays */
+/* Fat pointers */
 struct _fat_ptr {
   unsigned char *curr; 
   unsigned char *base; 
@@ -48,7 +39,6 @@ struct _RegionPage
 }
 #endif
 ; // abstract -- defined in runtime_memory.c
-
 struct _RegionHandle {
   struct _RuntimeStack s;
   struct _RegionPage *curr;
@@ -62,44 +52,41 @@ struct _RegionHandle {
   unsigned wasted_bytes;
 #endif
 };
-
 struct _DynRegionFrame {
   struct _RuntimeStack s;
   struct _DynRegionHandle *x;
 };
-
-// A dynamic region is just a region handle.  We have the
-// wrapper struct for type abstraction reasons.
+// A dynamic region is just a region handle.  The wrapper struct is for type
+// abstraction.
 struct Cyc_Core_DynamicRegion {
   struct _RegionHandle h;
 };
 
-extern struct _RegionHandle _new_region(const char *);
-extern void * _region_malloc(struct _RegionHandle *, unsigned);
-extern void * _region_calloc(struct _RegionHandle *, unsigned t, unsigned n);
-extern void   _free_region(struct _RegionHandle *);
-extern struct _RegionHandle *_open_dynregion(struct _DynRegionFrame *f,
-                                             struct _DynRegionHandle *h);
-extern void   _pop_dynregion();
+struct _RegionHandle _new_region(const char*);
+void* _region_malloc(struct _RegionHandle*, unsigned);
+void* _region_calloc(struct _RegionHandle*, unsigned t, unsigned n);
+void   _free_region(struct _RegionHandle*);
+struct _RegionHandle*_open_dynregion(struct _DynRegionFrame*,struct _DynRegionHandle*);
+void   _pop_dynregion();
 
 /* Exceptions */
 struct _handler_cons {
   struct _RuntimeStack s;
   jmp_buf handler;
 };
-extern void _push_handler(struct _handler_cons *);
-extern void _push_region(struct _RegionHandle *);
-extern void _npop_handler(int);
-extern void _pop_handler();
-extern void _pop_region();
+void _push_handler(struct _handler_cons *);
+void _push_region(struct _RegionHandle *);
+void _npop_handler(int);
+void _pop_handler();
+void _pop_region();
 
 #ifndef _throw
-extern void* _throw_null_fn(const char *filename, unsigned lineno);
-extern void* _throw_arraybounds_fn(const char *filename, unsigned lineno);
-extern void* _throw_badalloc_fn(const char *filename, unsigned lineno);
-extern void* _throw_match_fn(const char *filename, unsigned lineno);
-extern void* _throw_fn(void* e, const char *filename, unsigned lineno);
-extern void* _rethrow(void* e);
+void* _throw_null_fn(const char*,unsigned);
+void* _throw_arraybounds_fn(const char*,unsigned);
+void* _throw_badalloc_fn(const char*,unsigned);
+void* _throw_match_fn(const char*,unsigned);
+void* _throw_fn(void*,const char*,unsigned);
+void* _rethrow(void*);
 #define _throw_null() (_throw_null_fn(__FILE__,__LINE__))
 #define _throw_arraybounds() (_throw_arraybounds_fn(__FILE__,__LINE__))
 #define _throw_badalloc() (_throw_badalloc_fn(__FILE__,__LINE__))
@@ -107,8 +94,7 @@ extern void* _rethrow(void* e);
 #define _throw(e) (_throw_fn((e),__FILE__,__LINE__))
 #endif
 
-//extern struct _xtunion_struct *_exn_thrown;
-extern struct _xtunion_struct* Cyc_Core_get_exn_thrown();
+struct _xtunion_struct* Cyc_Core_get_exn_thrown();
 /* Built-in Exceptions */
 struct Cyc_Null_Exception_exn_struct { char *tag; };
 struct Cyc_Array_bounds_exn_struct { char *tag; };
@@ -137,51 +123,75 @@ extern char Cyc_Bad_alloc[];
 
 #ifdef NO_CYC_BOUNDS_CHECKS
 #define _check_known_subscript_notnull(ptr,bound,elt_sz,index)\
-   (((char *)ptr) + (elt_sz)*(index))
+   (((char*)ptr) + (elt_sz)*(index))
 #ifdef NO_CYC_NULL_CHECKS
 #define _check_known_subscript_null _check_known_subscript_notnull
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
-  char*_cks_ptr = (char*)(ptr); \
+  char*_cks_ptr = (char*)(ptr);\
+  int _index = (index);\
   if (!_cks_ptr) _throw_null(); \
-  (_cks_ptr) + (elt_sz)*(index); })
+  _cks_ptr + (elt_sz)*_index; })
 #endif
-
-#define _zero_arr_plus_char_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
-#define _zero_arr_plus_short_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
-#define _zero_arr_plus_int_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
-#define _zero_arr_plus_float_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
-#define _zero_arr_plus_double_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
-#define _zero_arr_plus_longdouble_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
-#define _zero_arr_plus_voidstar_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
+#define _zero_arr_plus_fn(orig_x,orig_sz,orig_i,f,l) ((orig_x)+(orig_i))
+#define _zero_arr_plus_char_fn _zero_arr_plus_fn
+#define _zero_arr_plus_short_fn _zero_arr_plus_fn
+#define _zero_arr_plus_int_fn _zero_arr_plus_fn
+#define _zero_arr_plus_float_fn _zero_arr_plus_fn
+#define _zero_arr_plus_double_fn _zero_arr_plus_fn
+#define _zero_arr_plus_longdouble_fn _zero_arr_plus_fn
+#define _zero_arr_plus_voidstar_fn _zero_arr_plus_fn
 #else
 #define _check_known_subscript_null(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
-  unsigned _cks_bound = (bound); \
-  unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
   if (!_cks_ptr) _throw_null(); \
-  if (_cks_index >= _cks_bound) _throw_arraybounds(); \
-  (_cks_ptr) + _cks_elt_sz*_cks_index; })
+  if (_cks_index >= (bound)) _throw_arraybounds(); \
+  _cks_ptr + (elt_sz)*_cks_index; })
 #define _check_known_subscript_notnull(ptr,bound,elt_sz,index) ({ \
   char*_cks_ptr = (char*)(ptr); \
-  unsigned _cks_bound = (bound); \
-  unsigned _cks_elt_sz = (elt_sz); \
   unsigned _cks_index = (index); \
-  if (_cks_index >= _cks_bound) _throw_arraybounds(); \
-  (_cks_ptr) + _cks_elt_sz*_cks_index; })
+  if (_cks_index >= (bound)) _throw_arraybounds(); \
+  _cks_ptr + (elt_sz)*_cks_index; })
 
-/* Add i to zero-terminated pointer x.  Checks for x being null and
-   ensures that x[0..i-1] are not 0. */
-char * _zero_arr_plus_char_fn(char *orig_x, unsigned int orig_sz, int orig_i,const char *filename, unsigned lineno);
-short * _zero_arr_plus_short_fn(short *orig_x, unsigned int orig_sz, int orig_i,const char *filename, unsigned lineno);
-int * _zero_arr_plus_int_fn(int *orig_x, unsigned int orig_sz, int orig_i, const char *filename, unsigned lineno);
-float * _zero_arr_plus_float_fn(float *orig_x, unsigned int orig_sz, int orig_i,const char *filename, unsigned lineno);
-double * _zero_arr_plus_double_fn(double *orig_x, unsigned int orig_sz, int orig_i,const char *filename, unsigned lineno);
-long double * _zero_arr_plus_longdouble_fn(long double *orig_x, unsigned int orig_sz, int orig_i, const char *filename, unsigned lineno);
-void * _zero_arr_plus_voidstar_fn(void **orig_x, unsigned int orig_sz, int orig_i,const char *filename,unsigned lineno);
+/* _zero_arr_plus_*_fn(x,sz,i,filename,lineno) adds i to zero-terminated ptr
+   x that has at least sz elements */
+char* _zero_arr_plus_char_fn(char*,unsigned,int,const char*,unsigned);
+short* _zero_arr_plus_short_fn(short*,unsigned,int,const char*,unsigned);
+int* _zero_arr_plus_int_fn(int*,unsigned,int,const char*,unsigned);
+float* _zero_arr_plus_float_fn(float*,unsigned,int,const char*,unsigned);
+double* _zero_arr_plus_double_fn(double*,unsigned,int,const char*,unsigned);
+long double* _zero_arr_plus_longdouble_fn(long double*,unsigned,int,const char*, unsigned);
+void** _zero_arr_plus_voidstar_fn(void**,unsigned,int,const char*,unsigned);
 #endif
 
+/* _get_zero_arr_size_*(x,sz) returns the number of elements in a
+   zero-terminated array that is NULL or has at least sz elements */
+int _get_zero_arr_size_char(const char*,unsigned);
+int _get_zero_arr_size_short(const short*,unsigned);
+int _get_zero_arr_size_int(const int*,unsigned);
+int _get_zero_arr_size_float(const float*,unsigned);
+int _get_zero_arr_size_double(const double*,unsigned);
+int _get_zero_arr_size_longdouble(const long double*,unsigned);
+int _get_zero_arr_size_voidstar(const void**,unsigned);
+
+/* _zero_arr_inplace_plus_*_fn(x,i,filename,lineno) sets
+   zero-terminated pointer *x to *x + i */
+char* _zero_arr_inplace_plus_char_fn(char**,int,const char*,unsigned);
+short* _zero_arr_inplace_plus_short_fn(short**,int,const char*,unsigned);
+int* _zero_arr_inplace_plus_int(int**,int,const char*,unsigned);
+float* _zero_arr_inplace_plus_float_fn(float**,int,const char*,unsigned);
+double* _zero_arr_inplace_plus_double_fn(double**,int,const char*,unsigned);
+long double* _zero_arr_inplace_plus_longdouble_fn(long double**,int,const char*,unsigned);
+void** _zero_arr_inplace_plus_voidstar_fn(void***,int,const char*,unsigned);
+/* like the previous functions, but does post-addition (as in e++) */
+char* _zero_arr_inplace_plus_post_char_fn(char**,int,const char*,unsigned);
+short* _zero_arr_inplace_plus_post_short_fn(short**x,int,const char*,unsigned);
+int* _zero_arr_inplace_plus_post_int_fn(int**,int,const char*,unsigned);
+float* _zero_arr_inplace_plus_post_float_fn(float**,int,const char*,unsigned);
+double* _zero_arr_inplace_plus_post_double_fn(double**,int,const char*,unsigned);
+long double* _zero_arr_inplace_plus_post_longdouble_fn(long double**,int,const char *,unsigned);
+void** _zero_arr_inplace_plus_post_voidstar_fn(void***,int,const char*,unsigned);
 #define _zero_arr_plus_char(x,s,i) \
   (_zero_arr_plus_char_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_plus_short(x,s,i) \
@@ -196,26 +206,6 @@ void * _zero_arr_plus_voidstar_fn(void **orig_x, unsigned int orig_sz, int orig_
   (_zero_arr_plus_longdouble_fn(x,s,i,__FILE__,__LINE__))
 #define _zero_arr_plus_voidstar(x,s,i) \
   (_zero_arr_plus_voidstar_fn(x,s,i,__FILE__,__LINE__))
-
-/* Calculates the number of elements in a zero-terminated, thin array.
-   If non-null, the array is guaranteed to have orig_offset elements. */
-int _get_zero_arr_size_char(const char *orig_x, unsigned int orig_offset);
-int _get_zero_arr_size_short(const short *orig_x, unsigned int orig_offset);
-int _get_zero_arr_size_int(const int *orig_x, unsigned int orig_offset);
-int _get_zero_arr_size_float(const float *orig_x, unsigned int orig_offset);
-int _get_zero_arr_size_double(const double *orig_x, unsigned int orig_offset);
-int _get_zero_arr_size_longdouble(const long double *orig_x, unsigned int orig_offset);
-int _get_zero_arr_size_voidstar(const void **orig_x, unsigned int orig_offset);
-
-/* Does in-place addition of a zero-terminated pointer (x += e and ++x).  
-   Note that this expands to call _zero_arr_plus_<type>_fn. */
-char * _zero_arr_inplace_plus_char_fn(char **x, int orig_i,const char *filename,unsigned lineno);
-short * _zero_arr_inplace_plus_short_fn(short **x, int orig_i,const char *filename,unsigned lineno);
-int * _zero_arr_inplace_plus_int(int **x, int orig_i,const char *filename,unsigned lineno);
-float * _zero_arr_inplace_plus_float_fn(float **x, int orig_i,const char *filename,unsigned lineno);
-double * _zero_arr_inplace_plus_double_fn(double **x, int orig_i,const char *filename,unsigned lineno);
-long double * _zero_arr_inplace_plus_longdouble_fn(long double **x, int orig_i,const char *filename,unsigned lineno);
-void * _zero_arr_inplace_plus_voidstar_fn(void ***x, int orig_i,const char *filename,unsigned lineno);
 #define _zero_arr_inplace_plus_char(x,i) \
   _zero_arr_inplace_plus_char_fn((char **)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_short(x,i) \
@@ -230,15 +220,6 @@ void * _zero_arr_inplace_plus_voidstar_fn(void ***x, int orig_i,const char *file
   _zero_arr_inplace_plus_longdouble_fn((long double **)(x),i,__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_voidstar(x,i) \
   _zero_arr_inplace_plus_voidstar_fn((void ***)(x),i,__FILE__,__LINE__)
-
-/* Does in-place increment of a zero-terminated pointer (e.g., x++). */
-char * _zero_arr_inplace_plus_post_char_fn(char **x, int orig_i,const char *filename,unsigned lineno);
-short * _zero_arr_inplace_plus_post_short_fn(short **x, int orig_i,const char *filename,unsigned lineno);
-int * _zero_arr_inplace_plus_post_int_fn(int **x, int orig_i,const char *filename, unsigned lineno);
-float * _zero_arr_inplace_plus_post_float_fn(float **x, int orig_i,const char *filename, unsigned lineno);
-double * _zero_arr_inplace_plus_post_double_fn(double **x, int orig_i,const char *filename,unsigned lineno);
-long double * _zero_arr_inplace_plus_post_longdouble_fn(long double **x, int orig_i,const char *filename,unsigned lineno);
-void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char *filename,unsigned lineno);
 #define _zero_arr_inplace_plus_post_char(x,i) \
   _zero_arr_inplace_plus_post_char_fn((char **)(x),(i),__FILE__,__LINE__)
 #define _zero_arr_inplace_plus_post_short(x,i) \
@@ -254,36 +235,17 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
 #define _zero_arr_inplace_plus_post_voidstar(x,i) \
   _zero_arr_inplace_plus_post_voidstar_fn((void***)(x),(i),__FILE__,__LINE__)
 
-/* functions for dealing with dynamically sized pointers */
 #ifdef NO_CYC_BOUNDS_CHECKS
-#define _check_fat_subscript(arr,elt_sz,index) ({ \
-  struct _fat_ptr _cus_arr = (arr); \
-  unsigned _cus_elt_sz = (elt_sz); \
-  unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
-  _cus_ans; })
+#define _check_fat_subscript(arr,elt_sz,index) ((arr).curr + (elt_sz) * (index))
+#define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
 #else
 #define _check_fat_subscript(arr,elt_sz,index) ({ \
   struct _fat_ptr _cus_arr = (arr); \
-  unsigned _cus_elt_sz = (elt_sz); \
-  unsigned _cus_index = (index); \
-  unsigned char *_cus_ans = _cus_arr.curr + _cus_elt_sz * _cus_index; \
+  unsigned char *_cus_ans = _cus_arr.curr + (elt_sz) * (index); \
   /* JGM: not needed! if (!_cus_arr.base) _throw_null();*/ \
   if (_cus_ans < _cus_arr.base || _cus_ans >= _cus_arr.last_plus_one) \
     _throw_arraybounds(); \
   _cus_ans; })
-#endif
-
-#define _tag_fat(tcurr,elt_sz,num_elts) ({ \
-  struct _fat_ptr _tag_arr_ans; \
-  _tag_arr_ans.base = _tag_arr_ans.curr = (void*)(tcurr); \
-  /* JGM: if we're tagging NULL, ignore num_elts */ \
-  _tag_arr_ans.last_plus_one = _tag_arr_ans.base ? (_tag_arr_ans.base + (elt_sz) * (num_elts)) : 0; \
-  _tag_arr_ans; })
-
-#ifdef NO_CYC_BOUNDS_CHECKS
-#define _untag_fat_ptr(arr,elt_sz,num_elts) ((arr).curr)
-#else
 #define _untag_fat_ptr(arr,elt_sz,num_elts) ({ \
   struct _fat_ptr _arr = (arr); \
   unsigned char *_curr = _arr.curr; \
@@ -293,60 +255,56 @@ void ** _zero_arr_inplace_plus_post_voidstar_fn(void ***x, int orig_i,const char
   _curr; })
 #endif
 
+#define _tag_fat(tcurr,elt_sz,num_elts) ({ \
+  struct _fat_ptr _ans; \
+  unsigned _num_elts = (num_elts);\
+  _ans.base = _ans.curr = (void*)(tcurr); \
+  /* JGM: if we're tagging NULL, ignore num_elts */ \
+  _ans.last_plus_one = _ans.base ? (_ans.base + (elt_sz) * _num_elts) : 0; \
+  _ans; })
+
 #define _get_fat_size(arr,elt_sz) \
-  ({struct _fat_ptr _get_arr_size_temp = (arr); \
-    unsigned char *_get_arr_size_curr=_get_arr_size_temp.curr; \
-    unsigned char *_get_arr_size_last=_get_arr_size_temp.last_plus_one; \
-    (_get_arr_size_curr < _get_arr_size_temp.base || \
-     _get_arr_size_curr >= _get_arr_size_last) ? 0 : \
-    ((_get_arr_size_last - _get_arr_size_curr) / (elt_sz));})
+  ({struct _fat_ptr _arr = (arr); \
+    unsigned char *_arr_curr=_arr.curr; \
+    unsigned char *_arr_last=_arr.last_plus_one; \
+    (_arr_curr < _arr.base || _arr_curr >= _arr_last) ? 0 : \
+    ((_arr_last - _arr_curr) / (elt_sz));})
 
 #define _fat_ptr_plus(arr,elt_sz,change) ({ \
   struct _fat_ptr _ans = (arr); \
-  _ans.curr += ((int)(elt_sz))*(change); \
+  int _change = (change);\
+  _ans.curr += (elt_sz) * _change;\
   _ans; })
-
 #define _fat_ptr_inplace_plus(arr_ptr,elt_sz,change) ({ \
   struct _fat_ptr * _arr_ptr = (arr_ptr); \
-  _arr_ptr->curr += ((int)(elt_sz))*(change); \
+  _arr_ptr->curr += (elt_sz) * (change);\
   *_arr_ptr; })
-
 #define _fat_ptr_inplace_plus_post(arr_ptr,elt_sz,change) ({ \
   struct _fat_ptr * _arr_ptr = (arr_ptr); \
   struct _fat_ptr _ans = *_arr_ptr; \
-  _arr_ptr->curr += ((int)(elt_sz))*(change); \
+  _arr_ptr->curr += (elt_sz) * (change);\
   _ans; })
 
-/* This is not a macro since initialization order matters.  Defined in
-   runtime_zeroterm.c. */
-extern struct _fat_ptr _fat_ptr_decrease_size(struct _fat_ptr x,
-  unsigned int sz,
-  unsigned int numelts);
+//Not a macro since initialization order matters. Defined in runtime_zeroterm.c.
+struct _fat_ptr _fat_ptr_decrease_size(struct _fat_ptr,unsigned sz,unsigned numelts);
 
 /* Allocation */
-extern void* GC_malloc(int);
-extern void* GC_malloc_atomic(int);
-extern void* GC_calloc(unsigned,unsigned);
-extern void* GC_calloc_atomic(unsigned,unsigned);
-/* bound the allocation size to be less than MAX_ALLOC_SIZE,
-   which is defined in runtime_memory.c
-*/
-extern void* _bounded_GC_malloc(int,const char *file,int lineno);
-extern void* _bounded_GC_malloc_atomic(int,const char *file,int lineno);
-extern void* _bounded_GC_calloc(unsigned n, unsigned s,
-                                const char *file,int lineno);
-extern void* _bounded_GC_calloc_atomic(unsigned n, unsigned s,
-                                       const char *file,
-                                       int lineno);
-/* FIX?  Not sure if we want to pass filename and lineno in here... */
-#ifndef CYC_REGION_PROFILE
+void* GC_malloc(int);
+void* GC_malloc_atomic(int);
+void* GC_calloc(unsigned,unsigned);
+void* GC_calloc_atomic(unsigned,unsigned);
+// bound the allocation size to be < MAX_ALLOC_SIZE. See macros below for usage.
+#define MAX_MALLOC_SIZE (1 << 28)
+void* _bounded_GC_malloc(int,const char*,int);
+void* _bounded_GC_malloc_atomic(int,const char*,int);
+void* _bounded_GC_calloc(unsigned,unsigned,const char*,int);
+void* _bounded_GC_calloc_atomic(unsigned,unsigned,const char*,int);
+/* these macros are overridden below ifdef CYC_REGION_PROFILE */
 #define _cycalloc(n) _bounded_GC_malloc(n,__FILE__,__LINE__)
 #define _cycalloc_atomic(n) _bounded_GC_malloc_atomic(n,__FILE__,__LINE__)
 #define _cyccalloc(n,s) _bounded_GC_calloc(n,s,__FILE__,__LINE__)
 #define _cyccalloc_atomic(n,s) _bounded_GC_calloc_atomic(n,s,__FILE__,__LINE__)
-#endif
 
-#define MAX_MALLOC_SIZE (1 << 28)
 static _INLINE unsigned int _check_times(unsigned x, unsigned y) {
   unsigned long long whole_ans = 
     ((unsigned long long) x)*((unsigned long long)y);
@@ -384,34 +342,17 @@ static _INLINE void *_fast_region_malloc(struct _RegionHandle *r, unsigned orig_
   return _region_malloc(r,orig_s); 
 }
 
-#if defined(CYC_REGION_PROFILE) 
-extern void* _profile_GC_malloc(int,const char *file,const char *func,
-                                int lineno);
-extern void* _profile_GC_malloc_atomic(int,const char *file,
-                                       const char *func,int lineno);
-extern void* _profile_GC_calloc(unsigned n, unsigned s,
-                                const char *file, const char *func, int lineno);
-extern void* _profile_GC_calloc_atomic(unsigned n, unsigned s,
-                                       const char *file, const char *func,
-                                       int lineno);
-extern void* _profile_region_malloc(struct _RegionHandle *, unsigned,
-                                    const char *file,
-                                    const char *func,
-                                    int lineno);
-extern void* _profile_region_calloc(struct _RegionHandle *, unsigned,
-                                    unsigned,
-                                    const char *file,
-                                    const char *func,
-                                    int lineno);
-extern struct _RegionHandle _profile_new_region(const char *rgn_name,
-						const char *file,
-						const char *func,
-                                                int lineno);
-extern void _profile_free_region(struct _RegionHandle *,
-				 const char *file,
-                                 const char *func,
-                                 int lineno);
-#  if !defined(RUNTIME_CYC)
+#ifdef CYC_REGION_PROFILE
+/* see macros below for usage. defined in runtime_memory.c */
+void* _profile_GC_malloc(int,const char*,const char*,int);
+void* _profile_GC_malloc_atomic(int,const char*,const char*,int);
+void* _profile_GC_calloc(unsigned,unsigned,const char*,const char*,int);
+void* _profile_GC_calloc_atomic(unsigned,unsigned,const char*,const char*,int);
+void* _profile_region_malloc(struct _RegionHandle*,unsigned,const char*,const char*,int);
+void* _profile_region_calloc(struct _RegionHandle*,unsigned,unsigned,const char *,const char*,int);
+struct _RegionHandle _profile_new_region(const char*,const char*,const char*,int);
+void _profile_free_region(struct _RegionHandle*,const char*,const char*,int);
+#ifndef RUNTIME_CYC
 #define _new_region(n) _profile_new_region(n,__FILE__,__FUNCTION__,__LINE__)
 #define _free_region(r) _profile_free_region(r,__FILE__,__FUNCTION__,__LINE__)
 #define _region_malloc(rh,n) _profile_region_malloc(rh,n,__FILE__,__FUNCTION__,__LINE__)
@@ -557,7 +498,7 @@ struct Cyc_Absyn_Exp*Cyc_Tcutil_rsubsexp(struct _RegionHandle*r,struct Cyc_List_
 # 216
 void*Cyc_Tcutil_fndecl2type(struct Cyc_Absyn_Fndecl*);
 # 285 "tcutil.h"
-int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*e1,void**ptr_type,int*is_dyneither,void**elt_type);
+int Cyc_Tcutil_is_zero_ptr_deref(struct Cyc_Absyn_Exp*e1,void**ptr_type,int*is_fat,void**elt_type);
 # 293
 int Cyc_Tcutil_is_noalias_pointer(void*t,int must_be_unique);
 # 303
