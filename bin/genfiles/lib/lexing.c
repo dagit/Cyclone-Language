@@ -18,7 +18,7 @@ typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nli
 typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
 typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
 typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
+typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
 struct Cyc_Core_Opt* Cyc_Core_opt_t; extern struct _tagged_string Cyc_Core_new_string(
 int); extern char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
@@ -63,31 +63,31 @@ struct _tagged_string, int, struct _tagged_string, int, unsigned int); extern
 struct _tagged_string Cyc_String_strdup( struct _tagged_string src); char Cyc_Lexing_Error[
 10u]="\000\000\000\000Error"; struct Cyc_Lexing_lexbuf; struct Cyc_Lexing_function_lexbuf_state;
 struct Cyc_Lexing_lex_tables; static char _temp2[ 1u]=""; static struct
-_tagged_string Cyc_Lexing_aux_buffer=( struct _tagged_string){ _temp2, _temp2,
-_temp2 + 1u}; void Cyc_Lexing_lex_refill( struct Cyc_Lexing_lexbuf* lexbuf){ if(({
-struct _tagged_string _temp3= Cyc_Lexing_aux_buffer;( unsigned int)( _temp3.last_plus_one
-- _temp3.curr);}) == 1){ Cyc_Lexing_aux_buffer= Cyc_Core_new_string( 4096);}{
-int read=((( struct Cyc_Lexing_function_lexbuf_state*) lexbuf->refill_state)->read_fun)(
-Cyc_Lexing_aux_buffer,( int)({ struct _tagged_string _temp4= Cyc_Lexing_aux_buffer;(
-unsigned int)( _temp4.last_plus_one - _temp4.curr);}),( void*)(( struct Cyc_Lexing_function_lexbuf_state*)
-lexbuf->refill_state)->read_fun_state); int n= read > 0? read:(( lexbuf->lex_eof_reached=
-1, 0)); if( lexbuf->lex_start_pos < n){ int oldlen= lexbuf->lex_buffer_len; int
-newlen= oldlen * 2; struct _tagged_string newbuf= Cyc_Core_new_string( newlen +
-1); Cyc_String_zstrncpy( newbuf, oldlen, lexbuf->lex_buffer, 0,( unsigned int)
-oldlen); lexbuf->lex_buffer= newbuf; lexbuf->lex_buffer_len= newlen; lexbuf->lex_abs_pos=
-lexbuf->lex_abs_pos - oldlen; lexbuf->lex_curr_pos= lexbuf->lex_curr_pos +
-oldlen; lexbuf->lex_start_pos= lexbuf->lex_start_pos + oldlen; lexbuf->lex_last_pos=
-lexbuf->lex_last_pos + oldlen;} Cyc_String_zstrncpy( lexbuf->lex_buffer, 0,
-lexbuf->lex_buffer, n,( unsigned int)( lexbuf->lex_buffer_len - n)); Cyc_String_zstrncpy(
-lexbuf->lex_buffer, lexbuf->lex_buffer_len - n, Cyc_Lexing_aux_buffer, 0,(
-unsigned int) n); lexbuf->lex_abs_pos= lexbuf->lex_abs_pos + n; lexbuf->lex_curr_pos=
-lexbuf->lex_curr_pos - n; lexbuf->lex_start_pos= lexbuf->lex_start_pos - n;
-lexbuf->lex_last_pos= lexbuf->lex_last_pos - n;}} struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_function(
-int(* read_fun)( struct _tagged_string, int, void*), void* read_fun_state){
-return({ struct Cyc_Lexing_lexbuf* _temp5=( struct Cyc_Lexing_lexbuf*) GC_malloc(
-sizeof( struct Cyc_Lexing_lexbuf)); _temp5->refill_buff=( void(*)( struct Cyc_Lexing_lexbuf*
-lexbuf)) Cyc_Lexing_lex_refill; _temp5->refill_state=( void*)({ struct Cyc_Lexing_function_lexbuf_state*
-_temp6=( struct Cyc_Lexing_function_lexbuf_state*) GC_malloc( sizeof( struct Cyc_Lexing_function_lexbuf_state));
+_tagged_string Cyc_Lexing_aux_buffer={ _temp2, _temp2, _temp2 + 1u}; void Cyc_Lexing_lex_refill(
+struct Cyc_Lexing_lexbuf* lexbuf){ if(({ struct _tagged_string _temp3= Cyc_Lexing_aux_buffer;(
+unsigned int)( _temp3.last_plus_one - _temp3.curr);}) == 1){ Cyc_Lexing_aux_buffer=
+Cyc_Core_new_string( 4096);}{ int read=((( struct Cyc_Lexing_function_lexbuf_state*)
+lexbuf->refill_state)->read_fun)( Cyc_Lexing_aux_buffer,( int)({ struct
+_tagged_string _temp4= Cyc_Lexing_aux_buffer;( unsigned int)( _temp4.last_plus_one
+- _temp4.curr);}),( void*)(( struct Cyc_Lexing_function_lexbuf_state*) lexbuf->refill_state)->read_fun_state);
+int n= read > 0? read:(( lexbuf->lex_eof_reached= 1, 0)); if( lexbuf->lex_start_pos
+< n){ int oldlen= lexbuf->lex_buffer_len; int newlen= oldlen * 2; struct
+_tagged_string newbuf= Cyc_Core_new_string( newlen + 1); Cyc_String_zstrncpy(
+newbuf, oldlen, lexbuf->lex_buffer, 0,( unsigned int) oldlen); lexbuf->lex_buffer=
+newbuf; lexbuf->lex_buffer_len= newlen; lexbuf->lex_abs_pos= lexbuf->lex_abs_pos
+- oldlen; lexbuf->lex_curr_pos= lexbuf->lex_curr_pos + oldlen; lexbuf->lex_start_pos=
+lexbuf->lex_start_pos + oldlen; lexbuf->lex_last_pos= lexbuf->lex_last_pos +
+oldlen;} Cyc_String_zstrncpy( lexbuf->lex_buffer, 0, lexbuf->lex_buffer, n,(
+unsigned int)( lexbuf->lex_buffer_len - n)); Cyc_String_zstrncpy( lexbuf->lex_buffer,
+lexbuf->lex_buffer_len - n, Cyc_Lexing_aux_buffer, 0,( unsigned int) n); lexbuf->lex_abs_pos=
+lexbuf->lex_abs_pos + n; lexbuf->lex_curr_pos= lexbuf->lex_curr_pos - n; lexbuf->lex_start_pos=
+lexbuf->lex_start_pos - n; lexbuf->lex_last_pos= lexbuf->lex_last_pos - n;}}
+struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_function( int(* read_fun)( struct
+_tagged_string, int, void*), void* read_fun_state){ return({ struct Cyc_Lexing_lexbuf*
+_temp5=( struct Cyc_Lexing_lexbuf*) GC_malloc( sizeof( struct Cyc_Lexing_lexbuf));
+_temp5->refill_buff=( void(*)( struct Cyc_Lexing_lexbuf* lexbuf)) Cyc_Lexing_lex_refill;
+_temp5->refill_state=( void*)({ struct Cyc_Lexing_function_lexbuf_state* _temp6=(
+struct Cyc_Lexing_function_lexbuf_state*) GC_malloc( sizeof( struct Cyc_Lexing_function_lexbuf_state));
 _temp6->read_fun= read_fun; _temp6->read_fun_state=( void*) read_fun_state;
 _temp6;}); _temp5->lex_buffer= Cyc_Core_new_string( 8192); _temp5->lex_buffer_len=
 8192; _temp5->lex_abs_pos= - 8192; _temp5->lex_start_pos= 8192; _temp5->lex_curr_pos=
@@ -137,8 +137,7 @@ _check_unknown_subscript)( tbl->lex_default, sizeof( int), state);} if( state <
 0){ lbuf->lex_curr_pos= lbuf->lex_last_pos; if( lbuf->lex_last_action == - 1){(
 void) _throw(( void*)({ struct Cyc_Lexing_Error_struct* _temp9=( struct Cyc_Lexing_Error_struct*)
 GC_malloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp9[ 0]=({ struct Cyc_Lexing_Error_struct
-_temp10; _temp10.tag= Cyc_Lexing_Error; _temp10.f1=( struct _tagged_string)({
-char* _temp11=( char*)"empty token"; struct _tagged_string _temp12; _temp12.curr=
-_temp11; _temp12.base= _temp11; _temp12.last_plus_one= _temp11 + 12; _temp12;});
-_temp10;}); _temp9;}));} else{ return lbuf->lex_last_action;}} else{ if( c ==
-256){ lbuf->lex_eof_reached= 0;}}}}
+_temp10; _temp10.tag= Cyc_Lexing_Error; _temp10.f1=({ char* _temp11="empty token";
+struct _tagged_string _temp12; _temp12.curr= _temp11; _temp12.base= _temp11;
+_temp12.last_plus_one= _temp11 + 12; _temp12;}); _temp10;}); _temp9;}));} else{
+return lbuf->lex_last_action;}} else{ if( c == 256){ lbuf->lex_eof_reached= 0;}}}}

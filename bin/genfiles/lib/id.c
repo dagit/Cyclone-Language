@@ -18,7 +18,7 @@ typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nli
 typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
 typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
 typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
+typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
 struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
 struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
@@ -64,16 +64,16 @@ _tagged_string* _temp8=( struct _tagged_string*) GC_malloc( sizeof( struct
 _tagged_string) * 1); _temp8[ 0]= x->s; _temp8;}); _temp1->tl=({ struct Cyc_List_List*
 _temp2=( struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List));
 _temp2->hd=( void*)({ struct _tagged_string* _temp5=( struct _tagged_string*)
-GC_malloc( sizeof( struct _tagged_string)); _temp5[ 0]=( struct _tagged_string)({
-char* _temp6=( char*)"$"; struct _tagged_string _temp7; _temp7.curr= _temp6;
-_temp7.base= _temp6; _temp7.last_plus_one= _temp6 + 2; _temp7;}); _temp5;});
-_temp2->tl=({ struct Cyc_List_List* _temp3=( struct Cyc_List_List*) GC_malloc(
-sizeof( struct Cyc_List_List)); _temp3->hd=( void*)({ struct _tagged_string*
-_temp4=( struct _tagged_string*) GC_malloc( sizeof( struct _tagged_string) * 1);
-_temp4[ 0]= Cyc_Core_string_of_int( x->i); _temp4;}); _temp3->tl= 0; _temp3;});
-_temp2;}); _temp1;}));} void Cyc_Id_id_prn( struct Cyc_Stdio___sFILE* f, struct
-Cyc_Id_id* x){({ struct _tagged_string _temp9= Cyc_Id_id_to_string( x); fprintf(
-f,"%.*s", _temp9.last_plus_one - _temp9.curr, _temp9.curr);});} struct
-_tagged_string Cyc_Id_id_to_source( struct Cyc_Id_id* x){ return x->s;} int Cyc_Id_id_compare(
-struct Cyc_Id_id* x1, struct Cyc_Id_id* x2){ if( x1->i == x2->i){ return Cyc_String_zstrcmp(
-x1->s, x2->s);} else{ if( x1->i < x2->i){ return - 1;} else{ return 1;}}}
+GC_malloc( sizeof( struct _tagged_string)); _temp5[ 0]=({ char* _temp6="$";
+struct _tagged_string _temp7; _temp7.curr= _temp6; _temp7.base= _temp6; _temp7.last_plus_one=
+_temp6 + 2; _temp7;}); _temp5;}); _temp2->tl=({ struct Cyc_List_List* _temp3=(
+struct Cyc_List_List*) GC_malloc( sizeof( struct Cyc_List_List)); _temp3->hd=(
+void*)({ struct _tagged_string* _temp4=( struct _tagged_string*) GC_malloc(
+sizeof( struct _tagged_string) * 1); _temp4[ 0]= Cyc_Core_string_of_int( x->i);
+_temp4;}); _temp3->tl= 0; _temp3;}); _temp2;}); _temp1;}));} void Cyc_Id_id_prn(
+struct Cyc_Stdio___sFILE* f, struct Cyc_Id_id* x){({ struct _tagged_string
+_temp9= Cyc_Id_id_to_string( x); fprintf( f,"%.*s", _temp9.last_plus_one -
+_temp9.curr, _temp9.curr);});} struct _tagged_string Cyc_Id_id_to_source( struct
+Cyc_Id_id* x){ return x->s;} int Cyc_Id_id_compare( struct Cyc_Id_id* x1, struct
+Cyc_Id_id* x2){ if( x1->i == x2->i){ return Cyc_String_zstrcmp( x1->s, x2->s);}
+else{ if( x1->i < x2->i){ return - 1;} else{ return 1;}}}

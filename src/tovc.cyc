@@ -2,21 +2,24 @@
 // The translation to C in Toc uses gcc extensions.  This file implements
 // a post-pass that tries to eliminate using any such extensions, namely
 // StmtExp.
+// FIX:
+// Should also eliminates array initializers since MSVC doesn't 
+// like non-constants.
+// Grrrrr.
 //
 // Caveats:
 //  * It hoists declarations out a bit.  So lifetimes may be slightly 
 //    different, but you'll never notice (gcc hoists anyway instead of
 //    constantly pushing/popping the stack).
 //  * It gensyms functions for anything complicated, including the 
-//    translation of comprehensions.
+//    translation of comprehensions and array initializers
 //  * This is just a hack for Dan to push a device driver into Win2000.
 
 // So far, all we do is get rid of StmtExp.  The idea is this:
 //   * hoist declarations to outside of the nearest enclosing statement,
 //     without hoisting initializers
-//   * where the declaration was, put an assignment
-//     WARNING: This does not work if the initializer was {e1, ... , en}
-//     SO I CHANGED THE TRANSLATION TO C TO ONLY DO THIS AT TOP-LEVEL
+//   * where the declaration was, put an assignment (unless the initializer
+//     is not an expression, then generate a function)
 //   * change statement sequence to expression sequence (; to ,)
 //   * change if to conditional
 //   * anything gets translated to a function call with addresses of all
@@ -30,17 +33,15 @@
 // A final complication when creating functions is the translation to C
 //  doesn't set var bindings, so we collect up the vardecls so we can get 
 //  the types we need.  Bleach.
-// Nope, it wasn't the final one: we also can't translate decl to assignment
-// when the initializer isn't an expression (eg. {0,0,0}). So we make a function
-// then too!  So t x = new { for i < 17 : 0} ends up creating two functions!!!
 
-// FIX: There may be bugs if you shadow variables.  I should check.
-
-// FIX: Does the wrong thing if return appears in a StmtExp.
+// FIX: Does the wrong thing if return appears in a StmtExp.  Similar for
+//   jumps (depending on where the source and target end up -- potentially
+//   in different functions which doesn't work)
 
 // Note: We have to splice generated functions into the right place
 //       b/c they can mention types not defined at the top.  And that means
-//       the translation could fail with local type declarations.
+//       the translation could fail with local type declarations, which we
+//       don't have yet.
 #include "core.h"
 #include "list.h"
 #include "dict.h"
@@ -58,7 +59,6 @@ namespace Tovc;
 #define DL null
 
 // have varmaps because hoisted decls should be renamed to avoid conflicts.
-// as a hack, we don't bother for temp variables
 
 struct BoxingEnv<`r::R,`r2::R> {
   region_t<`r> rgn;
@@ -154,11 +154,14 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
     case Skip_s:         return;
     case &Break_s(_):    return;
     case &Continue_s(_): return;
+      // FIX: reject if goto is to a different function (a pain to detect)
+      //  (Similarly a label that has gotos from different functions)
     case &Goto_s(_,_):   return;
     case &Label_s(_,s2):
       s = s2;
       continue;
     case &Return_s(eopt):
+      // FIX: reject this -- it won't be in the right function.
       if(eopt == null)
 	return;
       fallthru((exp_t)eopt);
@@ -198,6 +201,7 @@ static void box_free_vars_stmt(boxingenv_t<`r,`r2> env, stmt_t s) {
       switch(d->r) {
       case &Var_d(vd):
 	env.boundvars = rnew(env.rgn) List(vd,env.boundvars);
+	env.varmap    = Dict::delete(env.varmap, (*vd->name)[1]);
 	if(vd->initializer != null)
 	  box_free_vars_exp(env, (exp_t)vd->initializer);
 	s = s2;
@@ -446,6 +450,32 @@ static void stmt_to_vc(toexpenv_t<`r> env, stmt_t s) {
     case &Decl_s(d,s2):
       switch(d->r) {
       case &Var_d(vd):
+	// first thing we do is compile-away array initializers b/c they
+	// might not have int constants as elements.  (Technically, 
+	// it's a C++ and gcc extension.  Who new?)
+	// FIX: ignores designators (assumes sorted already)
+	switch(Tcutil::compress(vd->type)) {
+	case &ArrayType(_,_,_):
+	  if(vd->initializer != null)
+	    switch(vd->initializer->r) {
+	    case &UnresolvedMem_e(_,dles):
+	      vd->initializer = null;
+	      // reverse order, but we promised nothing. :-)
+	      exp_t  arr = var_exp(vd->name,DL);
+	      stmt_t s3  = new_stmt(s2->r,DL);
+	      for(unsigned i=0; dles != null; dles = dles->tl, ++i)
+		s3 = seq_stmt(exp_stmt(assign_exp(subscript_exp(arr,
+								uint_exp(i,DL),
+								DL),
+						  (*dles->hd)[1], DL),DL),
+			     s3,DL);
+	      s2->r = s3->r;
+	      break;
+	    default: throw new Impossible("array type bad initializer");
+	    }
+	  break;
+	default: break;
+	}
 	env.all_locals = rnew(env.rgn) List(vd, env.all_locals);
 	if(vd->initializer != null)
 	  exp_to_vc(env, (exp_t)vd->initializer);

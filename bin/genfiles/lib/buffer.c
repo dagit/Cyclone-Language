@@ -18,7 +18,7 @@ typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nli
 typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
 typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
 typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
+typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
 struct Cyc_Core_Opt* Cyc_Core_opt_t; extern struct _tagged_string Cyc_Core_new_string(
 int); extern char Cyc_Core_InvalidArg[ 15u]; struct Cyc_Core_InvalidArg_struct{
@@ -77,15 +77,15 @@ b, struct _tagged_string s, int offset, int len){ if(( offset < 0? 1: len < 0)?
 - _temp2.curr);})){( void) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
 _temp3=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp3[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp4; _temp4.tag= Cyc_Core_InvalidArg;
-_temp4.f1=( struct _tagged_string)({ char* _temp5=( char*)"Buffer::add_substring";
-struct _tagged_string _temp6; _temp6.curr= _temp5; _temp6.base= _temp5; _temp6.last_plus_one=
-_temp5 + 22; _temp6;}); _temp4;}); _temp3;}));}{ int new_position=( int)( b->position
-+ len); if( new_position > b->length){ Cyc_Buffer_resize( b,( unsigned int) len);}
-Cyc_String_zstrncpy( b->buffer,( int) b->position, s, offset,( unsigned int) len);
-b->position=( unsigned int) new_position; return;}} void Cyc_Buffer_add_string(
-struct Cyc_Buffer_t* b, struct _tagged_string s){ int len=( int) Cyc_String_strlen(
-s); int new_position=( int)( b->position + len); if( new_position > b->length){
-Cyc_Buffer_resize( b,( unsigned int) len);} Cyc_String_strncpy( b->buffer,( int)
-b->position, s, 0,( unsigned int) len); b->position=( unsigned int) new_position;
-return;} void Cyc_Buffer_add_buffer( struct Cyc_Buffer_t* b, struct Cyc_Buffer_t*
-bs){ Cyc_Buffer_add_substring( b, bs->buffer, 0,( int) bs->position); return;}
+_temp4.f1=({ char* _temp5="Buffer::add_substring"; struct _tagged_string _temp6;
+_temp6.curr= _temp5; _temp6.base= _temp5; _temp6.last_plus_one= _temp5 + 22;
+_temp6;}); _temp4;}); _temp3;}));}{ int new_position=( int)( b->position + len);
+if( new_position > b->length){ Cyc_Buffer_resize( b,( unsigned int) len);} Cyc_String_zstrncpy(
+b->buffer,( int) b->position, s, offset,( unsigned int) len); b->position=(
+unsigned int) new_position; return;}} void Cyc_Buffer_add_string( struct Cyc_Buffer_t*
+b, struct _tagged_string s){ int len=( int) Cyc_String_strlen( s); int
+new_position=( int)( b->position + len); if( new_position > b->length){ Cyc_Buffer_resize(
+b,( unsigned int) len);} Cyc_String_strncpy( b->buffer,( int) b->position, s, 0,(
+unsigned int) len); b->position=( unsigned int) new_position; return;} void Cyc_Buffer_add_buffer(
+struct Cyc_Buffer_t* b, struct Cyc_Buffer_t* bs){ Cyc_Buffer_add_substring( b,
+bs->buffer, 0,( int) bs->position); return;}

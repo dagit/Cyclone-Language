@@ -18,7 +18,7 @@ typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nli
 typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
 typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
 typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
+typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
 struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
 struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
@@ -35,7 +35,12 @@ Cyc_Stdio_stderr; typedef int Cyc_Stdio_fpos_t; extern int Cyc_Stdio_fputs(
 struct _tagged_string, struct Cyc_Stdio___sFILE*); extern char Cyc_Stdio_FileCloseError[
 19u]; extern char Cyc_Stdio_FileOpenError[ 18u]; struct Cyc_Stdio_FileOpenError_struct{
 char* tag; struct _tagged_string f1; } ; void* Cyc_Assert_AssertFail( struct
-_tagged_string mesg){ Cyc_Stdio_fputs( mesg, Cyc_Stdio_stderr); Cyc_Stdio_fputs((
-struct _tagged_string)({ char* _temp0=( char*)" -- assertion failed\n"; struct
-_tagged_string _temp1; _temp1.curr= _temp0; _temp1.base= _temp0; _temp1.last_plus_one=
-_temp0 + 22; _temp1;}), Cyc_Stdio_stderr); return(( void*(*)( int)) exit)( - 1);}
+_tagged_string mesg){ Cyc_Stdio_fputs( mesg, Cyc_Stdio_stderr); Cyc_Stdio_fputs(({
+char* _temp0=" -- assertion failed\n"; struct _tagged_string _temp1; _temp1.curr=
+_temp0; _temp1.base= _temp0; _temp1.last_plus_one= _temp0 + 22; _temp1;}), Cyc_Stdio_stderr);
+exit( - 1);( void) _throw(( void*)({ struct Cyc_Core_Unreachable_struct* _temp2=(
+struct Cyc_Core_Unreachable_struct*) GC_malloc( sizeof( struct Cyc_Core_Unreachable_struct));
+_temp2[ 0]=({ struct Cyc_Core_Unreachable_struct _temp3; _temp3.tag= Cyc_Core_Unreachable;
+_temp3.f1=({ char* _temp4="assert"; struct _tagged_string _temp5; _temp5.curr=
+_temp4; _temp5.base= _temp4; _temp5.last_plus_one= _temp4 + 7; _temp5;}); _temp3;});
+_temp2;}));}

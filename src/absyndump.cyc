@@ -189,12 +189,19 @@ void dumpargs(list_t<$(tqual_t,type_t)@> ts) {
 
 void dumpatts(attributes_t atts) {
   if (atts == null) return;
-  dump(" __attribute__((");
-  for (; atts != null; atts = atts->tl) {
-    dump(attribute2string(atts->hd));
-    if (atts->tl != null) dump(",");
-  };
-  dump(")) ");
+  if(Absynpp::to_VC) {
+    dump("__declspec(");
+    for (; atts != null; atts = atts->tl)
+      dump(attribute2string(atts->hd));
+    dump_char(')');
+  } else {
+    dump(" __attribute__((");
+    for (; atts != null; atts = atts->tl) {
+      dump(attribute2string(atts->hd));
+      if (atts->tl != null) dump(",");
+    }
+    dump(")) ");
+  }
 }
 
 bool next_is_pointer(list_t<type_modifier_t> tms) {
@@ -288,13 +295,15 @@ void dumpntyp(type_t t) {
     }
     break;
   case &EnumType(n,_): dump("enum "); dumpqvar(n); return;
+  case &IntType(Signed,   B4): dump("int");                   return;
   case &IntType(Signed,   B1): dump("signed char");           return;
   case &IntType(Unsigned, B1): dump("char");                  return;
   case &IntType(Signed,   B2): dump("short");                 return;
   case &IntType(Unsigned, B2): dump("unsigned short");        return;
-  case &IntType(Signed,   B4): dump("int");                   return;
   case &IntType(Unsigned, B4): dump("unsigned int");          return;
-  case &IntType(Signed,   B8): dump("long long");             return;
+  case &IntType(Signed,   B8) && Absynpp::to_VC: dump("__int64"); return;
+  case &IntType(Signed,   B8): dump("long long"); return;
+  case &IntType(Unsigned,B8) && Absynpp::to_VC: dump("unsigned __int64");return;
   case &IntType(Unsigned, B8): dump("unsigned long long");    return;
   case FloatType:  dump("float");  return;
   case DoubleType: dump("double"); return;
@@ -734,16 +743,26 @@ static void dump_atts_qvar(fndecl_t fd) {
   dumpatts(fd->attributes);
   dumpqvar(fd->name);
 }
+static void dump_fn_qvar(fndecl_t fd) {
+  dumpqvar(fd->name);
+}
 
 void dumpdecl(decl_t d) {
   switch(d->r) {
   case &Fn_d(fd):
-    if(fd->is_inline) dump("inline");
+    if(Absynpp::to_VC)
+      dumpatts(fd->attributes);
+    if(fd->is_inline) 
+      if(Absynpp::to_VC)
+	dump("__inline");
+      else
+	dump("inline");
     dumpscope(fd->sc);
     type_t t = new FnType(FnInfo{fd->tvs, fd->effect, fd->ret_type,
                                  List::map(Absynpp::arg_mk_opt,fd->args), 
                                  fd->varargs, null});
-    dumptqtd(Tqual(false,false,false),t,dump_atts_qvar,fd);
+    dumptqtd(Tqual(false,false,false),t,
+	     Absynpp::to_VC ? dump_fn_qvar : dump_atts_qvar,fd);
     dump_char('{');
     dumpstmt(fd->body);
     dump_char('}');
@@ -779,9 +798,12 @@ void dumpdecl(decl_t d) {
     }
     break;
   case &Var_d(&Vardecl(sc,name,tq,type,initializer,_,atts)):
+    if(Absynpp::to_VC)
+      dumpatts(atts);
     dumpscope(sc);
     dumptqtd(tq,type,dumpqvar,name);
-    dumpatts(atts);
+    if(!Absynpp::to_VC)
+      dumpatts(atts);
     if(initializer != null) {
       dump_char('=');
       dumpexp((exp_t)initializer);
@@ -914,7 +936,7 @@ void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a) {
 }
 
 void dumptqtd(tqual_t tq, type_t t, void f(`a), `a a) {
-  let $(tq,t,tms) = Absynpp::to_tms((tqual_t)tq,t);
+  let $(tq,t,tms) = Absynpp::to_tms(tq,t);
   dumptq(tq);
   dumpntyp(t);
   dumptms(List::imp_rev(tms),f,a);

@@ -167,6 +167,7 @@ list_t<Absyn::decl_t> do_tovc(bool ignore, list_t<Absyn::decl_t> tds) {
 list_t<Absyn::decl_t> do_print(FILE @ out_file, list_t<Absyn::decl_t> tds) {
   Absynpp::expand_typedefs = ! *noexpand;
   Absynpp::decls_first = Absynpp::qvar_to_Cids = *toc;
+  Absynpp::to_VC = *tovc;
   Absynpp::print_using_stmts = Absynpp::print_externC_stmts = ! *tc;
   // if the type-checking has already been done, then there's no need for
   // the 'Using' statements, nor for the extern "C" {...}

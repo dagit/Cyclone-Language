@@ -19,7 +19,7 @@ typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nli
 typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
 typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
 typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
+typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
 struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
 struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
@@ -36,8 +36,7 @@ extern struct _tagged_string Cyc_Errno_sys_err( int); extern int* __errno()
 _tagged_string Cyc_Errno_sys_err( int i){ if( i < 0? 1: i > _sys_nerr){( void)
 _throw(( void*)({ struct Cyc_Core_InvalidArg_struct* _temp0=( struct Cyc_Core_InvalidArg_struct*)
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct
-_temp1; _temp1.tag= Cyc_Core_InvalidArg; _temp1.f1=( struct _tagged_string)({
-char* _temp2=( char*)"sys_err: integer argument out of range"; struct
-_tagged_string _temp3; _temp3.curr= _temp2; _temp3.base= _temp2; _temp3.last_plus_one=
+_temp1; _temp1.tag= Cyc_Core_InvalidArg; _temp1.f1=({ char* _temp2="sys_err: integer argument out of range";
+struct _tagged_string _temp3; _temp3.curr= _temp2; _temp3.base= _temp2; _temp3.last_plus_one=
 _temp2 + 39; _temp3;}); _temp1;}); _temp0;}));} return Cstring_to_string(
 _sys_errlist[ _check_known_subscript_notnull( 135u, i)]);}

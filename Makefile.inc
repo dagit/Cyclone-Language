@@ -1,4 +1,12 @@
 
+ifdef MS
+O := obj
+A := lib
+else
+O := o
+A := a
+endif
+
 CYCLONE_LIBS:=arg\
          bitvec\
          buffer\
@@ -55,13 +63,13 @@ CYCLONE_SRCS:=absyn\
 # Makefiles assume this is only one file, but they could be changed.
 RUNTIME:=runtime_cyc
 
-CYCLIB:=cyclib.a
+CYCLIB:=cyclib.$(A)
 CYCCOMP:=cyclone.exe
 
 C_SRCS:=$(addsuffix .c, $(CYCLONE_SRCS))
 C_LIBS:=$(addsuffix .c, $(CYCLONE_LIBS))
-O_SRCS:=$(addsuffix .o, $(CYCLONE_SRCS))
-O_LIBS:=$(addsuffix .o, $(CYCLONE_LIBS))
+O_SRCS:=$(addsuffix .$(O), $(CYCLONE_SRCS))
+O_LIBS:=$(addsuffix .$(O), $(CYCLONE_LIBS))
 C_RUNTIME:=$(addsuffix .c, $(RUNTIME))
 
 LDFLAGS:=-lm

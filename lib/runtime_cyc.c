@@ -1,12 +1,11 @@
 // This is the C "runtime library" to be used with the output of the
 // Cyclone to C translator
 
-// FIX: for now we use malloc instead of GC_malloc
-
 #include <stdio.h>
 #include <stdarg.h>
 #include "cyc_include.h"
 #include <errno.h>
+extern void exit(int);
 
 //////////////////////////////////////////////////////////
 // First, definitions for things declared in cyc_include.h
@@ -113,6 +112,7 @@ void _pop_region() {
   }
   _npop_handler(0);
 }
+
 void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   struct _handler_cons *my_handler;
   while (_current_handler->tag != 0)
@@ -122,6 +122,7 @@ void throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   _exn_thrown = e;
   longjmp(my_handler->handler,1);
 }
+
 void _throw(void* e) { // FIX: use struct _xtunion_struct *  ??
   throw(e);
 }

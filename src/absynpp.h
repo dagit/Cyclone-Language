@@ -15,8 +15,8 @@ using PP;
 
 extern bool expand_typedefs;
 extern bool qvar_to_Cids;
+extern bool to_VC;
 extern bool decls_first;
-//extern bool dont_rewrite_temp_tvars;
 extern bool print_all_tvars;
 extern bool print_all_kinds;
 extern bool print_using_stmts;

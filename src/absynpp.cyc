@@ -61,6 +61,10 @@ bool expand_typedefs = false;
 // re-writing them all in Toc).
 bool qvar_to_Cids = false;
 
+// Flag controlling whether the (C) output should be for VC instead of gcc.
+// (Differences: long long vs. __int64 and inline vs. __inline)
+bool to_VC = false;
+
 // Flag controlling whether declarations have to be at the beginning of the blocks
 bool decls_first = false;
 
@@ -470,7 +474,7 @@ doc_t ntyp2doc(type_t t) {
       break;
     case B2: ts = "short";     break;
     case B4: ts = "int";       break;
-    case B8: ts = "long long"; break;
+    case B8: ts = (to_VC ? "__int64" : "long long"); break;
     }
     s = text(xprintf("%s%s",sns,ts));
     break;
@@ -1377,7 +1381,7 @@ doc_t decl2doc(decl_t d) {
                                  fd->ret_type,
                                  List::map(arg_mk_opt,fd->args),
                                  fd->varargs, null});
-    s = cat7(text(fd->is_inline? "inline " : ""),
+    s = cat7(text(fd->is_inline? (to_VC ? "__inline " : "inline ") : ""),
              scope2doc(fd->sc),
              tqtd2doc(Tqual(false,false,false),t,
                       new Opt(cat2(atts2doc(fd->attributes),typedef_name2doc(fd->name)))),

@@ -1,7 +1,4 @@
 
-// doesn't call exit b/c tal.tali doesn't give it a Popcorn type
-// instead raises exception which is perhaps better anyway.
-
 // Dan blatantly stole this from these guys:
 /***********************************************************************)
 (*                                                                     *)

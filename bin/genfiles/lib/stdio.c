@@ -18,7 +18,7 @@ typedef char* Cyc_addr_t; typedef int Cyc_mode_t; typedef unsigned short Cyc_nli
 typedef int Cyc_fd_mask; struct Cyc__types_fd_set{ int fds_bits[ 8u]; } ;
 typedef struct Cyc__types_fd_set Cyc__types_fd_set; typedef char* Cyc_Cstring;
 typedef struct _tagged_string Cyc_string; typedef struct _tagged_string Cyc_string_t;
-typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void*
+typedef struct _tagged_string* Cyc_stringptr; typedef int Cyc_bool; extern void
 exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ; typedef
 struct Cyc_Core_Opt* Cyc_Core_opt_t; extern char Cyc_Core_InvalidArg[ 15u];
 struct Cyc_Core_InvalidArg_struct{ char* tag; struct _tagged_string f1; } ;
@@ -52,9 +52,7 @@ extern void Cyc_Stdio_perror( struct _tagged_string); extern struct Cyc_Stdio___
 Cyc_Stdio_fopen( struct _tagged_string _name, struct _tagged_string _type);
 extern struct Cyc_Stdio___sFILE* Cyc_Stdio_fdopen( int, struct _tagged_string);
 extern int Cyc_Stdio_fileno( struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_getw(
-struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_pclose( struct Cyc_Stdio___sFILE*);
-extern struct Cyc_Stdio___sFILE* Cyc_Stdio_popen( struct _tagged_string, struct
-_tagged_string); extern int Cyc_Stdio_putw( int, struct Cyc_Stdio___sFILE*);
+struct Cyc_Stdio___sFILE*); extern int Cyc_Stdio_putw( int, struct Cyc_Stdio___sFILE*);
 extern char Cyc_Stdio_FileCloseError[ 19u]; extern char Cyc_Stdio_FileOpenError[
 18u]; struct Cyc_Stdio_FileOpenError_struct{ char* tag; struct _tagged_string f1;
 } ; extern struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open( struct _tagged_string
@@ -79,12 +77,11 @@ extern int feof( struct Cyc_Stdio___sFILE*); extern int ferror( struct Cyc_Stdio
 extern void perror( char*); extern struct Cyc_Stdio___sFILE* fopen( char* _name,
 char* _type); extern struct Cyc_Stdio___sFILE* fdopen( int, char*); extern int
 fileno( struct Cyc_Stdio___sFILE*); extern int getw( struct Cyc_Stdio___sFILE*);
-extern int pclose( struct Cyc_Stdio___sFILE*); extern struct Cyc_Stdio___sFILE*
-popen( char*, char*); extern int putw( int, struct Cyc_Stdio___sFILE*); extern
-void setbuffer( struct Cyc_Stdio___sFILE*, char*, int); extern int setlinebuf(
-struct Cyc_Stdio___sFILE*); int Cyc_Stdio_remove( struct _tagged_string filename){
-return remove( string_to_Cstring( filename));} int Cyc_Stdio_rename( struct
-_tagged_string old_filename, struct _tagged_string new_filename){ return rename(
+extern int putw( int, struct Cyc_Stdio___sFILE*); extern void setbuffer( struct
+Cyc_Stdio___sFILE*, char*, int); extern int setlinebuf( struct Cyc_Stdio___sFILE*);
+int Cyc_Stdio_remove( struct _tagged_string filename){ return remove(
+string_to_Cstring( filename));} int Cyc_Stdio_rename( struct _tagged_string
+old_filename, struct _tagged_string new_filename){ return rename(
 string_to_Cstring( old_filename), string_to_Cstring( new_filename));} struct Cyc_Stdio___sFILE*
 Cyc_Stdio_tmpfile(){ return tmpfile();} int Cyc_Stdio_fclose( struct Cyc_Stdio___sFILE*
 f){ return fclose( f);} int Cyc_Stdio_fflush( struct Cyc_Stdio___sFILE* f){
@@ -117,18 +114,14 @@ _tagged_string type){ return fopen( string_to_Cstring( name), string_to_Cstring(
 type));} struct Cyc_Stdio___sFILE* Cyc_Stdio_fdopen( int i, struct
 _tagged_string s){ return fdopen( i, string_to_Cstring( s));} int Cyc_Stdio_fileno(
 struct Cyc_Stdio___sFILE* f){ return fileno( f);} int Cyc_Stdio_getw( struct Cyc_Stdio___sFILE*
-f){ return getw( f);} int Cyc_Stdio_pclose( struct Cyc_Stdio___sFILE* f){ return
-pclose( f);} struct Cyc_Stdio___sFILE* Cyc_Stdio_popen( struct _tagged_string s,
-struct _tagged_string m){ return popen( string_to_Cstring( s), string_to_Cstring(
-m));} int Cyc_Stdio_putw( int i, struct Cyc_Stdio___sFILE* f){ return putw( i, f);}
-char Cyc_Stdio_FileCloseError[ 19u]="\000\000\000\000FileCloseError"; char Cyc_Stdio_FileOpenError[
-18u]="\000\000\000\000FileOpenError"; struct Cyc_Stdio___sFILE* Cyc_Stdio_file_open(
-struct _tagged_string fname, struct _tagged_string mode){ struct Cyc_Stdio___sFILE*
-f= Cyc_Stdio_fopen( fname, mode); if( f == 0){( void) _throw(( void*)({ struct
-Cyc_Stdio_FileOpenError_struct* _temp2=( struct Cyc_Stdio_FileOpenError_struct*)
+f){ return getw( f);} int Cyc_Stdio_putw( int i, struct Cyc_Stdio___sFILE* f){
+return putw( i, f);} char Cyc_Stdio_FileCloseError[ 19u]="\000\000\000\000FileCloseError";
+char Cyc_Stdio_FileOpenError[ 18u]="\000\000\000\000FileOpenError"; struct Cyc_Stdio___sFILE*
+Cyc_Stdio_file_open( struct _tagged_string fname, struct _tagged_string mode){
+struct Cyc_Stdio___sFILE* f= Cyc_Stdio_fopen( fname, mode); if( f == 0){( void)
+_throw(( void*)({ struct Cyc_Stdio_FileOpenError_struct* _temp2=( struct Cyc_Stdio_FileOpenError_struct*)
 GC_malloc( sizeof( struct Cyc_Stdio_FileOpenError_struct)); _temp2[ 0]=({ struct
 Cyc_Stdio_FileOpenError_struct _temp3; _temp3.tag= Cyc_Stdio_FileOpenError;
-_temp3.f1= fname; _temp3;}); _temp2;}));} return( struct Cyc_Stdio___sFILE*)((
-struct Cyc_Stdio___sFILE*) _check_null( f));} void Cyc_Stdio_file_close( struct
-Cyc_Stdio___sFILE* f){ if( Cyc_Stdio_fclose( f) != 0){( void) _throw(( void*)
-Cyc_Stdio_FileCloseError);}}
+_temp3.f1= fname; _temp3;}); _temp2;}));} return( struct Cyc_Stdio___sFILE*)
+_check_null( f);} void Cyc_Stdio_file_close( struct Cyc_Stdio___sFILE* f){ if(
+Cyc_Stdio_fclose( f) != 0){( void) _throw(( void*) Cyc_Stdio_FileCloseError);}}

@@ -17,19 +17,28 @@ CFLAGS:=-fwritable-strings -I..
 
 CYC_LIBS:=$(addsuffix .cyc, $(CYCLONE_LIBS))
 
-# uh, the precore_c.h building doesn't work with the ugly printer :-)
-CYC_FLAGS_PP := -tc -toc -pp
+ifdef MS
+TOC_FLAG = -toc -tovc
+else
+TOC_FLAG = -toc
+endif
 
-#CYC_FLAGS:= -tc -toc -pp -I . 
-CYC_FLAGS:= -tc -toc -up -I . 
-#CYC_FLAGS:= -tc -toc -tovc -up -I . 
+# uh, the precore_c.h building doesn't work with the ugly printer :-)
+CYC_FLAGS_PP := -tc $(TOC_FLAG) -pp
+
+#CYC_FLAGS:= -tc $(TOC_FLAG) -pp -I . 
+CYC_FLAGS:= -tc $(TOC_FLAG) -up -I . 
 
 all: $(OUT_PREFIX)$(CYCLIB) xml/libxml.a
 
-$(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).o)
+$(OUT_PREFIX)$(CYCLIB): $(addprefix $(OUT_PREFIX), $(O_LIBS) $(RUNTIME).$(O))
+ifdef MS
+	lib /out:$@ $^
+else
 	-rm -f $@
 	ar qc $@ $^
 	ranlib $@
+endif
 
 precore_c.h: precore.h $(CYCC)
 	$(CYCC) $(CYC_FLAGS_PP) -D _CYC_GENERATE_PRECORE_C_ -nocyc -noremoveunused -noexpandtypedefs $< > $@
@@ -47,9 +56,18 @@ $(OUT_PREFIX)lineno.cyc : lineno.cyl $(CYCLEX)
 $(OUT_PREFIX)%.c : %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -o $@ $<
 
+ifdef MS
+%.obj: %.c
+	cl /I.. /Dinline=__inline /c /w /nologo /Fo$@ $^
+endif
+
 # We need a special target becaue the .c file won't have the OUT_PREFIX
-$(OUT_PREFIX)$(RUNTIME).o: $(RUNTIME).c precore_c.h 
+$(OUT_PREFIX)$(RUNTIME).$(O): $(RUNTIME).c precore_c.h 
+ifdef MS
+	cl /I.. /Dinline=__inline /c /w /nologo /Fo$@ $(RUNTIME).c
+else
 	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(RUNTIME).c
+endif
 
 # delete generated files with a particular prefix
 clean_prefix: 

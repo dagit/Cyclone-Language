@@ -22,18 +22,26 @@ CFLAGS:=-fwritable-strings -I..
 
 CYC_SRCS:=$(addsuffix .cyc, $(CYCLONE_SRCS))
 
-#CYC_FLAGS:=-I ../lib -tc -toc -pp
-CYC_FLAGS:=-I ../lib -tc -toc -up
-#CYC_FLAGS:=-I ../lib -tc -toc -tovc -up
-LIB:=../lib/$(OUT_PREFIX)$(CYCLIB)
+ifdef MS
+TOC_FLAG = -toc -tovc
+else
+TOC_FLAG = -toc
+endif
+
+#CYC_FLAGS:=-I ../lib -tc $(TOC_FLAG) -pp
+CYC_FLAGS:=-I ../lib -tc $(TOC_FLAG) -up
+LIBR:=../lib/$(OUT_PREFIX)$(CYCLIB)
 
 all: $(OUT_PREFIX)$(CYCCOMP)
 
-$(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIB)
+$(OUT_PREFIX)$(CYCCOMP): $(addprefix $(OUT_PREFIX), $(O_SRCS)) $(LIBR)
+ifdef MS
+	cl /Fe$@ ../lib/snprintf.obj $^ ../bin/gc.lib
+else
 	gcc -o $@ $^ ../bin/gc.a $(LDFLAGS)
 #	gcc -g -o $@ $^ ../bin/gc.a $(LDFLAGS)
 #	gcc -o $@ $^ ../bin/gc_pg.a -pg $(LDFLAGS)
-
+endif
 # For machine-generated we need special targets (the .cyc is prefixed)
 $(OUT_PREFIX)lex.c : $(OUT_PREFIX)lex.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -o $@ $<
@@ -50,6 +58,11 @@ $(OUT_PREFIX)parse_tab.h: parse.y $(CYCBISON)
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.c: %.cyc $(CYCC)
 	$(CYCC) $(CYC_FLAGS) -o $@ $<
+
+ifdef MS
+%.obj: %.c
+	cl /I.. /Dinline=__inline /c /w /nologo /Fo$@ $^
+endif
 
 # delete generated files with a particular prefix
 clean_prefix:

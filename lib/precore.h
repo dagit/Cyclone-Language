@@ -25,7 +25,7 @@ typedef int bool;
 #ifndef true
 #define true (1)
 #endif
-extern "C" `a exit(int) __attribute__((noreturn)) ;
+extern "C" void exit(int) __attribute__((noreturn)) ;
 extern "C" `a abort() __attribute__((noreturn));
 
 #endif /* _PRECORE_H_ */

@@ -39,7 +39,7 @@ alist_t<`a> append(alist_t<`a> a1, alist_t<`a> a2) {
 
 list_t<`a> list_of_alist_f(alist_t<`a> y,list_t<`a> l) {
   switch (y) {
-  case Empty:         return l;
+  case Empty:          return l;
   case &Single(z):     return new List(z,l);
   case &Append(a1,a2): return list_of_alist_f(a1,list_of_alist_f(a2,l));
   }
