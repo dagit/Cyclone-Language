@@ -286,8 +286,10 @@ compiling it (just as with C).&nbsp;&nbsp;</p>
   <li>-pp: pretty-print the code</li>
   <li>-up: ugly-print the code</li>
   <li>-D <i>defn</i>: pass a definition to the pre-processor (as in C)</li>
-  <li>-check-null:&nbsp; generate explicit tests for null (currently broken)</li>
+  <li>-check_null:&nbsp; generate explicit tests for null (currently broken)</li>
   <li>-noexpandtypedefs:&nbsp; do not expand type-defs during pretty-printing</li>
+  <li>-q:&nbsp; quiet (do not print &quot;Compiling file: foo.....&quot; progress indicator; prints nothing unless error)</li>
+  <li>-v:&nbsp; verbose (replace the progress indicator with verbose listing of each stage) -- this overrides -q</li>
 </ul>
 <p>We expect to put a more realistic front-end driver on Cyclone so that it will
 look just like a C compiler (and transparently invoke GCC for you.)&nbsp; Note

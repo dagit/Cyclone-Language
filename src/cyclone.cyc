@@ -27,12 +27,16 @@ using List;
 using Arg;
 using String;
 
+#define PRINT_STAGE(s) { if (*v) fprintf(cyc_stderr,s); else if (!*q) fprintf(cyc_stderr,"."); fflush(cyc_stderr); }
+
 static bool pp_r       = false;
 static bool up_r       = false;
 static bool noexpand_r = false;
 static bool noshake_r  = false;
 static bool tc_r       = false;
 static bool toc_r      = false;
+static bool v_r        = false;
+static bool q_r        = false;
 
 bool @ pp       = &pp_r;
 bool @ up       = &up_r;
@@ -40,6 +44,8 @@ bool @ noexpand = &noexpand_r;
 bool @ noshake  = &noshake_r;
 bool @ tc       = &tc_r;
 bool @ toc      = &toc_r;
+bool @ v        = &v_r;
+bool @ q        = &q_r;
 
 static string *out_file_name_opt = null;
 
@@ -65,7 +71,8 @@ void compile_file(string filename) {
 
   string basename = Filename::chop_extension(filename);
 
-  fprintf(cyc_stderr,"Compiling file: %s\n", basename);
+  if (!*q||*v) fprintf(cyc_stderr,"Compiling file: %s", basename);
+  if (*v) fprintf(cyc_stderr,"\n");
 
   // establish filenames
   string preprocfile = strconcat(basename,  ".i");
@@ -75,8 +82,8 @@ void compile_file(string filename) {
   string inc_string = String::str_sepstr(&cons((string)"",rev(includes))," -I");
   string def_string = String::str_sepstr(&cons((string)"",rev(defines)), " -D");
   string cmd = xprintf("gcc -x c -E -U__GNUC__ %s %s %s > %s",
-		       inc_string, def_string, filename, preprocfile);
-  fprintf(cyc_stderr,"%s\n",cmd);
+                       inc_string, def_string, filename, preprocfile);
+  if (*v) fprintf(cyc_stderr,"%s\n",cmd);
   system(string_to_Cstring(cmd));
 
   // reset front-end -- necessary for good error messages!
@@ -95,7 +102,7 @@ void compile_file(string filename) {
   // parse
   list<Absyn::decl> tds = null;
   tds = Parse::parse_file(f);
-  fprintf(cyc_stderr,"Parsing completed\n");
+  PRINT_STAGE("Parsing completed\n");
   fflush(cyc_stderr);
   // typecheck
   if (tds != null && *tc) try {
@@ -104,9 +111,9 @@ void compile_file(string filename) {
     Tc::tc(te,tds);
     if(! *noshake)
       tds = Tc::treeshake(te,tds);
-    fprintf(cyc_stderr,"Type checking completed\n"); fflush(cyc_stderr);
+    PRINT_STAGE("Type checking completed\n");
     ControlFlow::cf_check(tds);
-    fprintf(cyc_stderr,"Control-flow checking completed\n"); fflush(cyc_stderr);
+    PRINT_STAGE("Control-flow checking completed\n");
   } catch {
   case Tcutil::TypeErr: 
     fprintf(cyc_stderr,"Type error!\n");
@@ -124,8 +131,7 @@ void compile_file(string filename) {
   // translate to C
   if (*toc && !compile_failure) {
     tds = Toc::toc(tds); 
-    fprintf(cyc_stderr, "Translation to C completed\n");
-    fflush(cyc_stderr);
+    PRINT_STAGE("Translation to C completed\n");
   }
   // print
   FILE @out_file;
@@ -152,8 +158,8 @@ void compile_file(string filename) {
     else if(*up)
       Absyndump::dumpdecllist2file(tds,out_file);
     fflush(out_file);
-    fprintf(cyc_stderr, "Printing completed\n");
-    fflush(cyc_stderr);
+    PRINT_STAGE("Printing completed\n");
+    if (!(*v || *q)) fprintf(cyc_stderr,"\n"); // for "...." progress indicator
   }
   if (Position::error_p()) {
     fprintf(cyc_stderr,"COMPILATION FAILED!\n");
@@ -172,26 +178,30 @@ int cyc_main() {
 
   list<$(string,Arg::spec,string)@> options =
     &cons(&$((string)"-o",String_spec(set_out_file_name),
-	     (string)"output file name"),
+             (string)"output file name"),
     &cons(&$((string)"-pp",Set_spec(pp), 
-	     (string)"pretty print"),
+             (string)"pretty print"),
     &cons(&$((string)"-up",Set_spec(up), 
-	     (string)"ugly print"),
+             (string)"ugly print"),
     &cons(&$((string)"-noexpandtypedefs",Set_spec(noexpand),
              (string)"don't expand typedefs in pretty printing"),
     &cons(&$((string)"-noremoveunused",Set_spec(noshake),
-	     (string)"don't remove externed variables that aren't used"),
+             (string)"don't remove externed variables that aren't used"),
     &cons(&$((string)"-tc",Set_spec(tc), 
-	     (string)"type check"),
+             (string)"type check"),
     &cons(&$((string)"-toc",Set_spec(toc), 
-	     (string)"translate to C"),
+             (string)"translate to C"),
     &cons(&$((string)"-I",String_spec(add_include), 
-	     (string)"include directory"),
+             (string)"include directory"),
     &cons(&$((string)"-D",String_spec(add_define), 
-	     (string)"pass definition to pre-processor"),
+             (string)"pass definition to pre-processor"),
     &cons(&$((string)"-check_null",Unit_spec(set_check_null), 
-	     (string)"turn on null-checking in generated C code"),
-	  null))))))))));
+             (string)"turn on null-checking in generated C code"),
+    &cons(&$((string)"-v",Set_spec(v), 
+             (string)"print compilation stages verbosely"),
+    &cons(&$((string)"-q",Set_spec(q), 
+             (string)"compile quietly"),
+          null))))))))))));
 
   Lex::lex_init();
   Arg::parse(options, compile_file, "Options:");
