@@ -76,6 +76,7 @@ void dumpexp(exp_t);
 void dumpexp_prec(int,exp_t);
 void dumppat(pat_t);
 void dumpstmt(stmt_t);
+void dumpvardecl(vardecl_t,Position::seg_t);
 void dumpdecl(decl_t);
 void dumptms(list_t<type_modifier_t> tms, void f(`a), `a a);
 void dumptqtd(tqual_t, type_t, void f(`a), `a);
@@ -779,6 +780,12 @@ void dumpstmt(stmt_t s) {
     dumploc(s->loc); dump("for("); dumpexp(e1);dump_semi(); dumpexp(e2);dump_semi(); dumpexp(e3);
     dump_nospace("){"); dumpstmt(s1); dump_char('}');
     break;
+  case &ForArray_s(ForArrayInfo{ds,$(e1,_),$(e2,_),s1}):
+    dumploc(s->loc); dump("forarray("); 
+    for (; ds != NULL; ds = ds->tl) dumpvardecl(ds->hd,s->loc);
+    dumpexp(e1); dump_semi();
+    dumpexp(e2); dump_nospace("){"); dumpstmt(s1); dump_char('}');
+    break;
   case &Switch_s(e,ss):
     dumploc(s->loc); dump("switch("); dumpexp(e); dump_nospace("){");
     dumpswitchclauses(ss);
@@ -939,6 +946,44 @@ static void dumpids(list_t<vardecl_t> vds) {
   }
 }
 
+void dumpvardecl(vardecl_t vd,Position::seg_t loc) {
+  let &Vardecl{sc,name,tq,type,initializer,_,atts} = vd;
+  dumploc(loc);
+  if(to_VC) {
+    dumpatts(atts);
+    dumpscope(sc);
+    let $(tq,t,tms) = Absynpp::to_tms(tq,type);
+    // a kludge -- seems to work -- Unused_att is just a hack for "no spec"
+    attribute_t call_conv = Unused_att;
+    for(_ tms2 = tms; tms2 != NULL; tms2 = tms2->tl)
+      switch(tms2->hd) {
+      case &Attributes_mod(_,atts):
+        for(; atts != NULL; atts = atts->tl)
+          switch(atts->hd) {
+          case Stdcall_att:  call_conv = Stdcall_att;  break;
+          case Cdecl_att:    call_conv = Cdecl_att;    break;
+          case Fastcall_att: call_conv = Fastcall_att; break;
+          default: break;
+          }
+        break;
+      default: break;
+      }
+    dumptq(tq);
+    dumpntyp(t);
+    let pr = $(call_conv,name);
+    dumptms(List::imp_rev(tms), dump_callconv_qvar, &pr);
+  } else {
+    dumpscope(sc);
+    dumptqtd(tq, type, dumpqvar, name);
+    dumpatts(atts);
+  }
+  if(initializer != NULL) {
+    dump_char('=');
+    dumpexp((exp_t)initializer);
+  }
+  dump_semi();
+}
+
 
 void dumpdecl(decl_t d) {
   switch(d->r) {
@@ -993,41 +1038,8 @@ void dumpdecl(decl_t d) {
       dump(";");
     }
     break;
-  case &Var_d(&Vardecl(sc,name,tq,type,initializer,_,atts)):
-    dumploc(d->loc);
-    if(to_VC) {
-      dumpatts(atts);
-      dumpscope(sc);
-      let $(tq,t,tms) = Absynpp::to_tms(tq,type);
-      // a kludge -- seems to work -- Unused_att is just a hack for "no spec"
-      attribute_t call_conv = Unused_att;
-      for(_ tms2 = tms; tms2 != NULL; tms2 = tms2->tl)
-	switch(tms2->hd) {
-	case &Attributes_mod(_,atts):
-	  for(; atts != NULL; atts = atts->tl)
-	    switch(atts->hd) {
-	    case Stdcall_att:  call_conv = Stdcall_att;  break;
-	    case Cdecl_att:    call_conv = Cdecl_att;    break;
-	    case Fastcall_att: call_conv = Fastcall_att; break;
-	    default: break;
-	    }
-	  break;
-	default: break;
-	}
-      dumptq(tq);
-      dumpntyp(t);
-      let pr = $(call_conv,name);
-      dumptms(List::imp_rev(tms), dump_callconv_qvar, &pr);
-    } else {
-      dumpscope(sc);
-      dumptqtd(tq, type, dumpqvar, name);
-      dumpatts(atts);
-    }
-    if(initializer != NULL) {
-      dump_char('=');
-      dumpexp((exp_t)initializer);
-    }
-    dump_semi();
+  case &Var_d(vd):
+    dumpvardecl(vd,d->loc);
     break;
   case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion)):
     dumpscope(sc);

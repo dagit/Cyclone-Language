@@ -262,7 +262,7 @@ extern void _profile_free_region(struct _RegionHandle *,
 
 #endif
  extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern struct _tagged_arr Cyc_Core_new_string( int); extern int Cyc_Core_intcmp(
+extern struct _tagged_arr Cyc_Core_new_string( unsigned int); extern int Cyc_Core_intcmp(
 int, int); extern unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;

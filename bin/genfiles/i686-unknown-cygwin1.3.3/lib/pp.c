@@ -263,10 +263,10 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
  extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
 fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern struct _tagged_arr
-Cyc_Core_new_string( int); extern void* Cyc_Core_identity( void*); extern int
-Cyc_Core_intcmp( int, int); extern unsigned char Cyc_Core_Invalid_argument[ 21u];
-struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+Cyc_Core_new_string( unsigned int); extern void* Cyc_Core_identity( void*);
+extern int Cyc_Core_intcmp( int, int); extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
 15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
 f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
@@ -413,9 +413,9 @@ struct Cyc_Core_Opt*) _check_null( Cyc_PP_bhashtbl))->v, i); _npop_handler( 0u);
 return _temp44;}; _pop_handler();} else{ void* _temp42=( void*) _exn_thrown;
 void* _temp46= _temp42; _LL48: if( _temp46 ==  Cyc_Core_Not_found){ goto _LL49;}
 else{ goto _LL50;} _LL50: goto _LL51; _LL49: { int _temp52= i /  8; int _temp53=
-i %  8; int _temp54=( 1 +  _temp52) +  _temp53; struct _tagged_arr nlb= Cyc_Core_new_string(
-_temp54);*(( unsigned char*) _check_unknown_subscript( nlb, sizeof(
-unsigned char), 0))='\n';{ int j= 0; for( 0; j <  _temp52; j ++){*((
+i %  8; int _temp54=( 1 +  _temp52) +  _temp53; struct _tagged_arr nlb= Cyc_Core_new_string((
+unsigned int) _temp54);*(( unsigned char*) _check_unknown_subscript( nlb,
+sizeof( unsigned char), 0))='\n';{ int j= 0; for( 0; j <  _temp52; j ++){*((
 unsigned char*) _check_unknown_subscript( nlb, sizeof( unsigned char), j +  1))='\t';}}{
 int j= 0; for( 0; j <  _temp53; j ++){*(( unsigned char*)
 _check_unknown_subscript( nlb, sizeof( unsigned char),( j +  1) +  _temp52))=' ';}}((

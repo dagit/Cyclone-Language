@@ -60,7 +60,7 @@ extern doc_t funargs2doc(list_t<$(opt_t<var_t>,tqual_t,type_t)@> args,
                          list_t<$(type_t,type_t)@> rgn_po);
 extern doc_t tunionfields2doc(list_t<tunionfield_t,`H> fields);
 extern doc_t enumfields2doc(list_t<enumfield_t,`H> fs);
-
+extern doc_t vardecl2doc(vardecl_t vd);
 // Flag controlling whether typedefs are expanded during printing
 static bool expand_typedefs;
 
@@ -1274,6 +1274,17 @@ doc_t stmt2doc(stmt_t st) {
             line_doc(),
             text("}"));
     break;
+  case &ForArray_s(ForArrayInfo{d,$(e1,_),$(e2,_),s1}):
+    s = cat(text("forarray("),
+            ppseql(vardecl2doc, " ", d),
+            exp2doc(e1),
+            text("; "),
+            exp2doc(e2),
+            text(") {"),
+            nest(2,cat(line_doc(),stmt2doc(s1))),
+            line_doc(),
+            text("}"));
+    break;
   case &Switch_s(e,ss):
     s = cat(text("switch ("),
             exp2doc(e),
@@ -1477,6 +1488,32 @@ static doc_t ids2doc(list_t<vardecl_t,`H> vds) {
   return ppseq(id2doc,",",vds);
 }
 
+doc_t vardecl2doc(vardecl_t vd) {
+  let &Vardecl{sc,name,tq,type,initializer,_,atts} = vd;
+  doc_t s;
+  doc_t sn = typedef_name2doc(name);
+  doc_t attsdoc   = atts2doc(atts);
+  doc_t beforenamedoc;
+  if(!to_VC)
+    beforenamedoc = attsdoc;
+  else
+    // lots of VC calling convention KLUDGE here -- atts doesn't have
+    // the calling convention -- it's in type
+    switch(compress(type)) {
+    case &FnType(FnInfo(_,_,_,_,_,_,_,atts2)): 
+      beforenamedoc = callconv2doc(atts2); break;
+    default: beforenamedoc = nil_doc(); break;
+    }
+  s = cat((to_VC ? attsdoc : nil_doc()),
+          scope2doc(sc),
+          tqtd2doc(tq,type,new Opt(cat(beforenamedoc,sn))),
+          (initializer == NULL)
+          ? text("")
+          : cat(text(" = "),exp2doc((exp_t)initializer)),
+          text(";"));
+  return s;
+}
+
 doc_t decl2doc(decl_t d) {
   doc_t s;
   switch (d->r) {
@@ -1551,27 +1588,8 @@ doc_t decl2doc(decl_t d) {
               text(";"));
     }
     break;
-  case &Var_d(&Vardecl(sc,name,tq,type,initializer,_,atts)):
-    doc_t sn = typedef_name2doc(name);
-    doc_t attsdoc   = atts2doc(atts);
-    doc_t beforenamedoc;
-    if(!to_VC)
-      beforenamedoc = attsdoc;
-    else
-      // lots of VC calling convention KLUDGE here -- atts doesn't have
-      // the calling convention -- it's in type
-      switch(compress(type)) {
-      case &FnType(FnInfo(_,_,_,_,_,_,_,atts2)): 
-	beforenamedoc = callconv2doc(atts2); break;
-      default: beforenamedoc = nil_doc(); break;
-      }
-    s = cat((to_VC ? attsdoc : nil_doc()),
-	    scope2doc(sc),
-            tqtd2doc(tq,type,new Opt(cat(beforenamedoc,sn))),
-            (initializer == NULL)
-            ? text("")
-            : cat(text(" = "),exp2doc((exp_t)initializer)),
-            text(";"));
+  case &Var_d(vd):
+    s = vardecl2doc(vd);
     break;
   case &Tunion_d(&Tuniondecl(sc,name,tvs,fields,is_xtunion)):
     if (fields==NULL)

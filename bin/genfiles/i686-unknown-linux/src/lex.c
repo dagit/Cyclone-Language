@@ -262,35 +262,36 @@ extern void _profile_free_region(struct _RegionHandle *,
 
 #endif
  extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern struct _tagged_arr Cyc_Core_new_string( int); extern unsigned char Cyc_Core_Invalid_argument[
-21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
-15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
-16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
-unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
-_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); struct Cyc_Cstdio___sFILE; struct Cyc_Std___sFILE;
-extern unsigned char Cyc_Std_FileCloseError[ 19u]; extern unsigned char Cyc_Std_FileOpenError[
-18u]; struct Cyc_Std_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; static const int Cyc_Std_String_pa= 0; struct Cyc_Std_String_pa_struct{
-int tag; struct _tagged_arr f1; } ; static const int Cyc_Std_Int_pa= 1; struct
-Cyc_Std_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Std_Double_pa=
-2; struct Cyc_Std_Double_pa_struct{ int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa=
-3; struct Cyc_Std_ShortPtr_pa_struct{ int tag; short* f1; } ; static const int
-Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{ int tag; unsigned int* f1;
-} ; extern struct _tagged_arr Cyc_Std_aprintf( struct _tagged_arr fmt, struct
-_tagged_arr); static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{
-int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
-int tag; unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct
-Cyc_Std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa=
-3; struct Cyc_Std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
-int Cyc_Std_StringPtr_sa= 4; struct Cyc_Std_StringPtr_sa_struct{ int tag; struct
-_tagged_arr f1; } ; static const int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{
-int tag; double* f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
+extern struct _tagged_arr Cyc_Core_new_string( unsigned int); extern
+unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
+} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
+14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
+string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
+struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
+extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Cstdio___sFILE;
+struct Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[ 19u];
+extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; static const int Cyc_Std_String_pa=
+0; struct Cyc_Std_String_pa_struct{ int tag; struct _tagged_arr f1; } ; static
+const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{ int tag; unsigned int
+f1; } ; static const int Cyc_Std_Double_pa= 2; struct Cyc_Std_Double_pa_struct{
+int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa= 3; struct Cyc_Std_ShortPtr_pa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{
+int tag; unsigned int* f1; } ; extern struct _tagged_arr Cyc_Std_aprintf( struct
+_tagged_arr fmt, struct _tagged_arr); static const int Cyc_Std_ShortPtr_sa= 0;
+struct Cyc_Std_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa=
+1; struct Cyc_Std_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
+const int Cyc_Std_IntPtr_sa= 2; struct Cyc_Std_IntPtr_sa_struct{ int tag; int*
+f1; } ; static const int Cyc_Std_UIntPtr_sa= 3; struct Cyc_Std_UIntPtr_sa_struct{
+int tag; unsigned int* f1; } ; static const int Cyc_Std_StringPtr_sa= 4; struct
+Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
+int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
+f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; struct Cyc_List_List{ void* hd; struct Cyc_List_List* tl;
 } ; extern unsigned char Cyc_List_List_mismatch[ 18u]; extern struct Cyc_List_List*
 Cyc_List_imp_rev( struct Cyc_List_List* x); extern struct Cyc_List_List* Cyc_List_append(
@@ -528,46 +529,50 @@ Cyc_Absyn_StmtExp_e_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ; static const
 int Cyc_Absyn_Codegen_e= 36; struct Cyc_Absyn_Codegen_e_struct{ int tag; struct
 Cyc_Absyn_Fndecl* f1; } ; static const int Cyc_Absyn_Fill_e= 37; struct Cyc_Absyn_Fill_e_struct{
 int tag; struct Cyc_Absyn_Exp* f1; } ; struct Cyc_Absyn_Exp{ struct Cyc_Core_Opt*
-topt; void* r; struct Cyc_Position_Segment* loc; void* annot; } ; static const
-int Cyc_Absyn_Skip_s= 0; static const int Cyc_Absyn_Exp_s= 0; struct Cyc_Absyn_Exp_s_struct{
-int tag; struct Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_Seq_s= 1;
-struct Cyc_Absyn_Seq_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1; struct Cyc_Absyn_Stmt*
-f2; } ; static const int Cyc_Absyn_Return_s= 2; struct Cyc_Absyn_Return_s_struct{
-int tag; struct Cyc_Absyn_Exp* f1; } ; static const int Cyc_Absyn_IfThenElse_s=
-3; struct Cyc_Absyn_IfThenElse_s_struct{ int tag; struct Cyc_Absyn_Exp* f1;
-struct Cyc_Absyn_Stmt* f2; struct Cyc_Absyn_Stmt* f3; } ; static const int Cyc_Absyn_While_s=
-4; struct _tuple2{ struct Cyc_Absyn_Exp* f1; struct Cyc_Absyn_Stmt* f2; } ;
-struct Cyc_Absyn_While_s_struct{ int tag; struct _tuple2 f1; struct Cyc_Absyn_Stmt*
-f2; } ; static const int Cyc_Absyn_Break_s= 5; struct Cyc_Absyn_Break_s_struct{
-int tag; struct Cyc_Absyn_Stmt* f1; } ; static const int Cyc_Absyn_Continue_s= 6;
-struct Cyc_Absyn_Continue_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ;
-static const int Cyc_Absyn_Goto_s= 7; struct Cyc_Absyn_Goto_s_struct{ int tag;
-struct _tagged_arr* f1; struct Cyc_Absyn_Stmt* f2; } ; static const int Cyc_Absyn_For_s=
-8; struct Cyc_Absyn_For_s_struct{ int tag; struct Cyc_Absyn_Exp* f1; struct
-_tuple2 f2; struct _tuple2 f3; struct Cyc_Absyn_Stmt* f4; } ; static const int
-Cyc_Absyn_Switch_s= 9; struct Cyc_Absyn_Switch_s_struct{ int tag; struct Cyc_Absyn_Exp*
-f1; struct Cyc_List_List* f2; } ; static const int Cyc_Absyn_SwitchC_s= 10;
-struct Cyc_Absyn_SwitchC_s_struct{ int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_List_List*
-f2; } ; static const int Cyc_Absyn_Fallthru_s= 11; struct Cyc_Absyn_Fallthru_s_struct{
-int tag; struct Cyc_List_List* f1; struct Cyc_Absyn_Switch_clause** f2; } ;
-static const int Cyc_Absyn_Decl_s= 12; struct Cyc_Absyn_Decl_s_struct{ int tag;
-struct Cyc_Absyn_Decl* f1; struct Cyc_Absyn_Stmt* f2; } ; static const int Cyc_Absyn_Cut_s=
-13; struct Cyc_Absyn_Cut_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ;
-static const int Cyc_Absyn_Splice_s= 14; struct Cyc_Absyn_Splice_s_struct{ int
-tag; struct Cyc_Absyn_Stmt* f1; } ; static const int Cyc_Absyn_Label_s= 15;
-struct Cyc_Absyn_Label_s_struct{ int tag; struct _tagged_arr* f1; struct Cyc_Absyn_Stmt*
-f2; } ; static const int Cyc_Absyn_Do_s= 16; struct Cyc_Absyn_Do_s_struct{ int
-tag; struct Cyc_Absyn_Stmt* f1; struct _tuple2 f2; } ; static const int Cyc_Absyn_TryCatch_s=
-17; struct Cyc_Absyn_TryCatch_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1;
-struct Cyc_List_List* f2; } ; static const int Cyc_Absyn_Region_s= 18; struct
-Cyc_Absyn_Region_s_struct{ int tag; struct Cyc_Absyn_Tvar* f1; struct Cyc_Absyn_Vardecl*
-f2; struct Cyc_Absyn_Stmt* f3; } ; struct Cyc_Absyn_Stmt{ void* r; struct Cyc_Position_Segment*
-loc; struct Cyc_List_List* non_local_preds; int try_depth; void* annot; } ;
-static const int Cyc_Absyn_Wild_p= 0; static const int Cyc_Absyn_Var_p= 0;
-struct Cyc_Absyn_Var_p_struct{ int tag; struct Cyc_Absyn_Vardecl* f1; } ; static
-const int Cyc_Absyn_Null_p= 1; static const int Cyc_Absyn_Int_p= 1; struct Cyc_Absyn_Int_p_struct{
-int tag; void* f1; int f2; } ; static const int Cyc_Absyn_Char_p= 2; struct Cyc_Absyn_Char_p_struct{
-int tag; unsigned char f1; } ; static const int Cyc_Absyn_Float_p= 3; struct Cyc_Absyn_Float_p_struct{
+topt; void* r; struct Cyc_Position_Segment* loc; void* annot; } ; struct _tuple2{
+struct Cyc_Absyn_Exp* f1; struct Cyc_Absyn_Stmt* f2; } ; struct Cyc_Absyn_ForArrayInfo{
+struct Cyc_List_List* defns; struct _tuple2 condition; struct _tuple2 delta;
+struct Cyc_Absyn_Stmt* body; } ; static const int Cyc_Absyn_Skip_s= 0; static
+const int Cyc_Absyn_Exp_s= 0; struct Cyc_Absyn_Exp_s_struct{ int tag; struct Cyc_Absyn_Exp*
+f1; } ; static const int Cyc_Absyn_Seq_s= 1; struct Cyc_Absyn_Seq_s_struct{ int
+tag; struct Cyc_Absyn_Stmt* f1; struct Cyc_Absyn_Stmt* f2; } ; static const int
+Cyc_Absyn_Return_s= 2; struct Cyc_Absyn_Return_s_struct{ int tag; struct Cyc_Absyn_Exp*
+f1; } ; static const int Cyc_Absyn_IfThenElse_s= 3; struct Cyc_Absyn_IfThenElse_s_struct{
+int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_Absyn_Stmt* f2; struct Cyc_Absyn_Stmt*
+f3; } ; static const int Cyc_Absyn_While_s= 4; struct Cyc_Absyn_While_s_struct{
+int tag; struct _tuple2 f1; struct Cyc_Absyn_Stmt* f2; } ; static const int Cyc_Absyn_Break_s=
+5; struct Cyc_Absyn_Break_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ;
+static const int Cyc_Absyn_Continue_s= 6; struct Cyc_Absyn_Continue_s_struct{
+int tag; struct Cyc_Absyn_Stmt* f1; } ; static const int Cyc_Absyn_Goto_s= 7;
+struct Cyc_Absyn_Goto_s_struct{ int tag; struct _tagged_arr* f1; struct Cyc_Absyn_Stmt*
+f2; } ; static const int Cyc_Absyn_For_s= 8; struct Cyc_Absyn_For_s_struct{ int
+tag; struct Cyc_Absyn_Exp* f1; struct _tuple2 f2; struct _tuple2 f3; struct Cyc_Absyn_Stmt*
+f4; } ; static const int Cyc_Absyn_Switch_s= 9; struct Cyc_Absyn_Switch_s_struct{
+int tag; struct Cyc_Absyn_Exp* f1; struct Cyc_List_List* f2; } ; static const
+int Cyc_Absyn_SwitchC_s= 10; struct Cyc_Absyn_SwitchC_s_struct{ int tag; struct
+Cyc_Absyn_Exp* f1; struct Cyc_List_List* f2; } ; static const int Cyc_Absyn_Fallthru_s=
+11; struct Cyc_Absyn_Fallthru_s_struct{ int tag; struct Cyc_List_List* f1;
+struct Cyc_Absyn_Switch_clause** f2; } ; static const int Cyc_Absyn_Decl_s= 12;
+struct Cyc_Absyn_Decl_s_struct{ int tag; struct Cyc_Absyn_Decl* f1; struct Cyc_Absyn_Stmt*
+f2; } ; static const int Cyc_Absyn_Cut_s= 13; struct Cyc_Absyn_Cut_s_struct{ int
+tag; struct Cyc_Absyn_Stmt* f1; } ; static const int Cyc_Absyn_Splice_s= 14;
+struct Cyc_Absyn_Splice_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1; } ; static
+const int Cyc_Absyn_Label_s= 15; struct Cyc_Absyn_Label_s_struct{ int tag;
+struct _tagged_arr* f1; struct Cyc_Absyn_Stmt* f2; } ; static const int Cyc_Absyn_Do_s=
+16; struct Cyc_Absyn_Do_s_struct{ int tag; struct Cyc_Absyn_Stmt* f1; struct
+_tuple2 f2; } ; static const int Cyc_Absyn_TryCatch_s= 17; struct Cyc_Absyn_TryCatch_s_struct{
+int tag; struct Cyc_Absyn_Stmt* f1; struct Cyc_List_List* f2; } ; static const
+int Cyc_Absyn_Region_s= 18; struct Cyc_Absyn_Region_s_struct{ int tag; struct
+Cyc_Absyn_Tvar* f1; struct Cyc_Absyn_Vardecl* f2; struct Cyc_Absyn_Stmt* f3; } ;
+static const int Cyc_Absyn_ForArray_s= 19; struct Cyc_Absyn_ForArray_s_struct{
+int tag; struct Cyc_Absyn_ForArrayInfo f1; } ; struct Cyc_Absyn_Stmt{ void* r;
+struct Cyc_Position_Segment* loc; struct Cyc_List_List* non_local_preds; int
+try_depth; void* annot; } ; static const int Cyc_Absyn_Wild_p= 0; static const
+int Cyc_Absyn_Var_p= 0; struct Cyc_Absyn_Var_p_struct{ int tag; struct Cyc_Absyn_Vardecl*
+f1; } ; static const int Cyc_Absyn_Null_p= 1; static const int Cyc_Absyn_Int_p=
+1; struct Cyc_Absyn_Int_p_struct{ int tag; void* f1; int f2; } ; static const
+int Cyc_Absyn_Char_p= 2; struct Cyc_Absyn_Char_p_struct{ int tag; unsigned char
+f1; } ; static const int Cyc_Absyn_Float_p= 3; struct Cyc_Absyn_Float_p_struct{
 int tag; struct _tagged_arr f1; } ; static const int Cyc_Absyn_Tuple_p= 4;
 struct Cyc_Absyn_Tuple_p_struct{ int tag; struct Cyc_List_List* f1; } ; static
 const int Cyc_Absyn_Pointer_p= 5; struct Cyc_Absyn_Pointer_p_struct{ int tag;
@@ -775,152 +780,153 @@ static unsigned char _temp15[ 3u]="do"; static unsigned char _temp16[ 7u]="doubl
 static unsigned char _temp17[ 5u]="else"; static unsigned char _temp18[ 5u]="enum";
 static unsigned char _temp19[ 7u]="extern"; static unsigned char _temp20[ 9u]="fallthru";
 static unsigned char _temp21[ 5u]="fill"; static unsigned char _temp22[ 6u]="float";
-static unsigned char _temp23[ 4u]="for"; static unsigned char _temp24[ 6u]="__gen";
-static unsigned char _temp25[ 5u]="goto"; static unsigned char _temp26[ 3u]="if";
-static unsigned char _temp27[ 7u]="inline"; static unsigned char _temp28[ 4u]="int";
-static unsigned char _temp29[ 4u]="let"; static unsigned char _temp30[ 5u]="long";
-static unsigned char _temp31[ 7u]="malloc"; static unsigned char _temp32[ 10u]="namespace";
-static unsigned char _temp33[ 4u]="new"; static unsigned char _temp34[ 5u]="NULL";
-static unsigned char _temp35[ 9u]="offsetof"; static unsigned char _temp36[ 8u]="rcalloc";
-static unsigned char _temp37[ 9u]="region_t"; static unsigned char _temp38[ 7u]="region";
-static unsigned char _temp39[ 8u]="regions"; static unsigned char _temp40[ 9u]="register";
-static unsigned char _temp41[ 9u]="restrict"; static unsigned char _temp42[ 7u]="return";
-static unsigned char _temp43[ 8u]="rmalloc"; static unsigned char _temp44[ 5u]="rnew";
-static unsigned char _temp45[ 6u]="short"; static unsigned char _temp46[ 7u]="signed";
-static unsigned char _temp47[ 7u]="sizeof"; static unsigned char _temp48[ 9u]="sizeof_t";
-static unsigned char _temp49[ 7u]="splice"; static unsigned char _temp50[ 7u]="static";
-static unsigned char _temp51[ 7u]="struct"; static unsigned char _temp52[ 7u]="switch";
-static unsigned char _temp53[ 6u]="throw"; static unsigned char _temp54[ 4u]="try";
-static unsigned char _temp55[ 7u]="tunion"; static unsigned char _temp56[ 8u]="typedef";
-static unsigned char _temp57[ 6u]="union"; static unsigned char _temp58[ 9u]="unsigned";
-static unsigned char _temp59[ 6u]="using"; static unsigned char _temp60[ 5u]="void";
-static unsigned char _temp61[ 9u]="volatile"; static unsigned char _temp62[ 6u]="while";
-static unsigned char _temp63[ 8u]="xtunion"; static struct _tuple8 Cyc_Lex_rw_array[
-62u]={{{ _temp2, _temp2, _temp2 +  14u}, 351},{{ _temp3, _temp3, _temp3 +  9u},
-299},{{ _temp4, _temp4, _temp4 +  5u}, 258},{{ _temp5, _temp5, _temp5 +  6u},
-290},{{ _temp6, _temp6, _temp6 +  7u}, 311},{{ _temp7, _temp7, _temp7 +  5u},
-277},{{ _temp8, _temp8, _temp8 +  6u}, 297},{{ _temp9, _temp9, _temp9 +  5u},
-264},{{ _temp10, _temp10, _temp10 +  8u}, 306},{{ _temp11, _temp11, _temp11 +  6u},
-272},{{ _temp12, _temp12, _temp12 +  9u}, 289},{{ _temp13, _temp13, _temp13 +  4u},
-307},{{ _temp14, _temp14, _temp14 +  8u}, 278},{{ _temp15, _temp15, _temp15 +  3u},
-286},{{ _temp16, _temp16, _temp16 +  7u}, 269},{{ _temp17, _temp17, _temp17 +  5u},
-283},{{ _temp18, _temp18, _temp18 +  5u}, 292},{{ _temp19, _temp19, _temp19 +  7u},
-261},{{ _temp20, _temp20, _temp20 +  9u}, 300},{{ _temp21, _temp21, _temp21 +  5u},
-305},{{ _temp22, _temp22, _temp22 +  6u}, 268},{{ _temp23, _temp23, _temp23 +  4u},
-287},{{ _temp24, _temp24, _temp24 +  6u}, 318},{{ _temp25, _temp25, _temp25 +  5u},
-288},{{ _temp26, _temp26, _temp26 +  3u}, 282},{{ _temp27, _temp27, _temp27 +  7u},
-279},{{ _temp28, _temp28, _temp28 +  4u}, 266},{{ _temp29, _temp29, _temp29 +  4u},
-294},{{ _temp30, _temp30, _temp30 +  5u}, 267},{{ _temp31, _temp31, _temp31 +  7u},
-309},{{ _temp32, _temp32, _temp32 +  10u}, 302},{{ _temp33, _temp33, _temp33 + 
-4u}, 298},{{ _temp34, _temp34, _temp34 +  5u}, 293},{{ _temp35, _temp35, _temp35
-+  9u}, 281},{{ _temp36, _temp36, _temp36 +  8u}, 312},{{ _temp37, _temp37,
-_temp37 +  9u}, 313},{{ _temp38, _temp38, _temp38 +  7u}, 315},{{ _temp39,
-_temp39, _temp39 +  8u}, 317},{{ _temp40, _temp40, _temp40 +  9u}, 259},{{
-_temp41, _temp41, _temp41 +  9u}, 274},{{ _temp42, _temp42, _temp42 +  7u}, 291},{{
-_temp43, _temp43, _temp43 +  8u}, 310},{{ _temp44, _temp44, _temp44 +  5u}, 316},{{
-_temp45, _temp45, _temp45 +  6u}, 265},{{ _temp46, _temp46, _temp46 +  7u}, 270},{{
-_temp47, _temp47, _temp47 +  7u}, 280},{{ _temp48, _temp48, _temp48 +  9u}, 314},{{
-_temp49, _temp49, _temp49 +  7u}, 308},{{ _temp50, _temp50, _temp50 +  7u}, 260},{{
-_temp51, _temp51, _temp51 +  7u}, 275},{{ _temp52, _temp52, _temp52 +  7u}, 284},{{
-_temp53, _temp53, _temp53 +  6u}, 295},{{ _temp54, _temp54, _temp54 +  4u}, 296},{{
-_temp55, _temp55, _temp55 +  7u}, 303},{{ _temp56, _temp56, _temp56 +  8u}, 262},{{
-_temp57, _temp57, _temp57 +  6u}, 276},{{ _temp58, _temp58, _temp58 +  9u}, 271},{{
-_temp59, _temp59, _temp59 +  6u}, 301},{{ _temp60, _temp60, _temp60 +  5u}, 263},{{
-_temp61, _temp61, _temp61 +  9u}, 273},{{ _temp62, _temp62, _temp62 +  6u}, 285},{{
-_temp63, _temp63, _temp63 +  8u}, 304}}; static int Cyc_Lex_trie_char( int c){
+static unsigned char _temp23[ 4u]="for"; static unsigned char _temp24[ 9u]="forarray";
+static unsigned char _temp25[ 6u]="__gen"; static unsigned char _temp26[ 5u]="goto";
+static unsigned char _temp27[ 3u]="if"; static unsigned char _temp28[ 7u]="inline";
+static unsigned char _temp29[ 4u]="int"; static unsigned char _temp30[ 4u]="let";
+static unsigned char _temp31[ 5u]="long"; static unsigned char _temp32[ 7u]="malloc";
+static unsigned char _temp33[ 10u]="namespace"; static unsigned char _temp34[ 4u]="new";
+static unsigned char _temp35[ 5u]="NULL"; static unsigned char _temp36[ 9u]="offsetof";
+static unsigned char _temp37[ 8u]="rcalloc"; static unsigned char _temp38[ 9u]="region_t";
+static unsigned char _temp39[ 7u]="region"; static unsigned char _temp40[ 8u]="regions";
+static unsigned char _temp41[ 9u]="register"; static unsigned char _temp42[ 9u]="restrict";
+static unsigned char _temp43[ 7u]="return"; static unsigned char _temp44[ 8u]="rmalloc";
+static unsigned char _temp45[ 5u]="rnew"; static unsigned char _temp46[ 6u]="short";
+static unsigned char _temp47[ 7u]="signed"; static unsigned char _temp48[ 7u]="sizeof";
+static unsigned char _temp49[ 9u]="sizeof_t"; static unsigned char _temp50[ 7u]="splice";
+static unsigned char _temp51[ 7u]="static"; static unsigned char _temp52[ 7u]="struct";
+static unsigned char _temp53[ 7u]="switch"; static unsigned char _temp54[ 6u]="throw";
+static unsigned char _temp55[ 4u]="try"; static unsigned char _temp56[ 7u]="tunion";
+static unsigned char _temp57[ 8u]="typedef"; static unsigned char _temp58[ 6u]="union";
+static unsigned char _temp59[ 9u]="unsigned"; static unsigned char _temp60[ 6u]="using";
+static unsigned char _temp61[ 5u]="void"; static unsigned char _temp62[ 9u]="volatile";
+static unsigned char _temp63[ 6u]="while"; static unsigned char _temp64[ 8u]="xtunion";
+static struct _tuple8 Cyc_Lex_rw_array[ 63u]={{{ _temp2, _temp2, _temp2 +  14u},
+352},{{ _temp3, _temp3, _temp3 +  9u}, 299},{{ _temp4, _temp4, _temp4 +  5u},
+258},{{ _temp5, _temp5, _temp5 +  6u}, 290},{{ _temp6, _temp6, _temp6 +  7u},
+312},{{ _temp7, _temp7, _temp7 +  5u}, 277},{{ _temp8, _temp8, _temp8 +  6u},
+297},{{ _temp9, _temp9, _temp9 +  5u}, 264},{{ _temp10, _temp10, _temp10 +  8u},
+307},{{ _temp11, _temp11, _temp11 +  6u}, 272},{{ _temp12, _temp12, _temp12 +  9u},
+289},{{ _temp13, _temp13, _temp13 +  4u}, 308},{{ _temp14, _temp14, _temp14 +  8u},
+278},{{ _temp15, _temp15, _temp15 +  3u}, 286},{{ _temp16, _temp16, _temp16 +  7u},
+269},{{ _temp17, _temp17, _temp17 +  5u}, 283},{{ _temp18, _temp18, _temp18 +  5u},
+292},{{ _temp19, _temp19, _temp19 +  7u}, 261},{{ _temp20, _temp20, _temp20 +  9u},
+300},{{ _temp21, _temp21, _temp21 +  5u}, 306},{{ _temp22, _temp22, _temp22 +  6u},
+268},{{ _temp23, _temp23, _temp23 +  4u}, 287},{{ _temp24, _temp24, _temp24 +  9u},
+305},{{ _temp25, _temp25, _temp25 +  6u}, 319},{{ _temp26, _temp26, _temp26 +  5u},
+288},{{ _temp27, _temp27, _temp27 +  3u}, 282},{{ _temp28, _temp28, _temp28 +  7u},
+279},{{ _temp29, _temp29, _temp29 +  4u}, 266},{{ _temp30, _temp30, _temp30 +  4u},
+294},{{ _temp31, _temp31, _temp31 +  5u}, 267},{{ _temp32, _temp32, _temp32 +  7u},
+310},{{ _temp33, _temp33, _temp33 +  10u}, 302},{{ _temp34, _temp34, _temp34 + 
+4u}, 298},{{ _temp35, _temp35, _temp35 +  5u}, 293},{{ _temp36, _temp36, _temp36
++  9u}, 281},{{ _temp37, _temp37, _temp37 +  8u}, 313},{{ _temp38, _temp38,
+_temp38 +  9u}, 314},{{ _temp39, _temp39, _temp39 +  7u}, 316},{{ _temp40,
+_temp40, _temp40 +  8u}, 318},{{ _temp41, _temp41, _temp41 +  9u}, 259},{{
+_temp42, _temp42, _temp42 +  9u}, 274},{{ _temp43, _temp43, _temp43 +  7u}, 291},{{
+_temp44, _temp44, _temp44 +  8u}, 311},{{ _temp45, _temp45, _temp45 +  5u}, 317},{{
+_temp46, _temp46, _temp46 +  6u}, 265},{{ _temp47, _temp47, _temp47 +  7u}, 270},{{
+_temp48, _temp48, _temp48 +  7u}, 280},{{ _temp49, _temp49, _temp49 +  9u}, 315},{{
+_temp50, _temp50, _temp50 +  7u}, 309},{{ _temp51, _temp51, _temp51 +  7u}, 260},{{
+_temp52, _temp52, _temp52 +  7u}, 275},{{ _temp53, _temp53, _temp53 +  7u}, 284},{{
+_temp54, _temp54, _temp54 +  6u}, 295},{{ _temp55, _temp55, _temp55 +  4u}, 296},{{
+_temp56, _temp56, _temp56 +  7u}, 303},{{ _temp57, _temp57, _temp57 +  8u}, 262},{{
+_temp58, _temp58, _temp58 +  6u}, 276},{{ _temp59, _temp59, _temp59 +  9u}, 271},{{
+_temp60, _temp60, _temp60 +  6u}, 301},{{ _temp61, _temp61, _temp61 +  5u}, 263},{{
+_temp62, _temp62, _temp62 +  9u}, 273},{{ _temp63, _temp63, _temp63 +  6u}, 285},{{
+_temp64, _temp64, _temp64 +  8u}, 304}}; static int Cyc_Lex_trie_char( int c){
 if( c >=  95){ return c -  59;} else{ if( c >  64){ return c -  55;}} return c - 
 48;} static struct Cyc_Lex_Trie* Cyc_Lex_trie_lookup( struct Cyc_Lex_Trie* t,
 struct _tagged_arr buff, int offset, int len){ int i= offset; int last=( offset
-+  len) -  1; while( i <=  last) { void* _temp64=( void*)(( struct Cyc_Lex_Trie*)
-_check_null( t))->children; struct Cyc_Lex_Trie** _temp72; struct Cyc_Lex_Trie*
-_temp74; int _temp76; _LL66: if(( unsigned int) _temp64 >  1u?*(( int*) _temp64)
-==  Cyc_Lex_Many: 0){ _LL73: _temp72=(( struct Cyc_Lex_Many_struct*) _temp64)->f1;
-goto _LL67;} else{ goto _LL68;} _LL68: if(( unsigned int) _temp64 >  1u?*(( int*)
-_temp64) ==  Cyc_Lex_One: 0){ _LL77: _temp76=(( struct Cyc_Lex_One_struct*)
-_temp64)->f1; goto _LL75; _LL75: _temp74=(( struct Cyc_Lex_One_struct*) _temp64)->f2;
-goto _LL69;} else{ goto _LL70;} _LL70: if( _temp64 == ( void*) Cyc_Lex_Zero){
-goto _LL71;} else{ goto _LL65;} _LL67: { int ch= Cyc_Lex_trie_char(( int)*((
++  len) -  1; while( i <=  last) { void* _temp65=( void*)(( struct Cyc_Lex_Trie*)
+_check_null( t))->children; struct Cyc_Lex_Trie** _temp73; struct Cyc_Lex_Trie*
+_temp75; int _temp77; _LL67: if(( unsigned int) _temp65 >  1u?*(( int*) _temp65)
+==  Cyc_Lex_Many: 0){ _LL74: _temp73=(( struct Cyc_Lex_Many_struct*) _temp65)->f1;
+goto _LL68;} else{ goto _LL69;} _LL69: if(( unsigned int) _temp65 >  1u?*(( int*)
+_temp65) ==  Cyc_Lex_One: 0){ _LL78: _temp77=(( struct Cyc_Lex_One_struct*)
+_temp65)->f1; goto _LL76; _LL76: _temp75=(( struct Cyc_Lex_One_struct*) _temp65)->f2;
+goto _LL70;} else{ goto _LL71;} _LL71: if( _temp65 == ( void*) Cyc_Lex_Zero){
+goto _LL72;} else{ goto _LL66;} _LL68: { int ch= Cyc_Lex_trie_char(( int)*((
 const unsigned char*) _check_unknown_subscript( buff, sizeof( unsigned char), i)));
-if( _temp72[ _check_known_subscript_notnull( 64u, ch)] ==  0){ _temp72[
-_check_known_subscript_notnull( 64u, ch)]=({ struct Cyc_Lex_Trie* _temp78=(
-struct Cyc_Lex_Trie*) _cycalloc( sizeof( struct Cyc_Lex_Trie)); _temp78->children=(
-void*)(( void*) Cyc_Lex_Zero); _temp78->shared_str= 0; _temp78;});} t= _temp72[
-_check_known_subscript_notnull( 64u, ch)]; ++ i; goto _LL65;} _LL69: if( _temp76
+if( _temp73[ _check_known_subscript_notnull( 64u, ch)] ==  0){ _temp73[
+_check_known_subscript_notnull( 64u, ch)]=({ struct Cyc_Lex_Trie* _temp79=(
+struct Cyc_Lex_Trie*) _cycalloc( sizeof( struct Cyc_Lex_Trie)); _temp79->children=(
+void*)(( void*) Cyc_Lex_Zero); _temp79->shared_str= 0; _temp79;});} t= _temp73[
+_check_known_subscript_notnull( 64u, ch)]; ++ i; goto _LL66;} _LL70: if( _temp77
 == *(( const unsigned char*) _check_unknown_subscript( buff, sizeof(
-unsigned char), i))){ t= _temp74;} else{ struct Cyc_Lex_Trie** _temp79=({
-unsigned int _temp84= 64u; struct Cyc_Lex_Trie** _temp85=( struct Cyc_Lex_Trie**)
-_cycalloc( _check_times( sizeof( struct Cyc_Lex_Trie*), _temp84));{ unsigned int
-_temp86= _temp84; unsigned int j; for( j= 0; j <  _temp86; j ++){ _temp85[ j]= 0;}};
-_temp85;}); _temp79[ _check_known_subscript_notnull( 64u, Cyc_Lex_trie_char(
-_temp76))]= _temp74;{ int _temp80= Cyc_Lex_trie_char(( int)*(( const
+unsigned char), i))){ t= _temp75;} else{ struct Cyc_Lex_Trie** _temp80=({
+unsigned int _temp85= 64u; struct Cyc_Lex_Trie** _temp86=( struct Cyc_Lex_Trie**)
+_cycalloc( _check_times( sizeof( struct Cyc_Lex_Trie*), _temp85));{ unsigned int
+_temp87= _temp85; unsigned int j; for( j= 0; j <  _temp87; j ++){ _temp86[ j]= 0;}};
+_temp86;}); _temp80[ _check_known_subscript_notnull( 64u, Cyc_Lex_trie_char(
+_temp77))]= _temp75;{ int _temp81= Cyc_Lex_trie_char(( int)*(( const
 unsigned char*) _check_unknown_subscript( buff, sizeof( unsigned char), i)));
-_temp79[ _check_known_subscript_notnull( 64u, _temp80)]=({ struct Cyc_Lex_Trie*
-_temp81=( struct Cyc_Lex_Trie*) _cycalloc( sizeof( struct Cyc_Lex_Trie));
-_temp81->children=( void*)(( void*) Cyc_Lex_Zero); _temp81->shared_str= 0;
-_temp81;});( void*)( t->children=( void*)(( void*)({ struct Cyc_Lex_Many_struct*
-_temp82=( struct Cyc_Lex_Many_struct*) _cycalloc( sizeof( struct Cyc_Lex_Many_struct));
-_temp82[ 0]=({ struct Cyc_Lex_Many_struct _temp83; _temp83.tag= Cyc_Lex_Many;
-_temp83.f1= _temp79; _temp83;}); _temp82;}))); t= _temp79[
-_check_known_subscript_notnull( 64u, _temp80)];}} ++ i; goto _LL65; _LL71:
-while( i <=  last) { struct Cyc_Lex_Trie* _temp87=({ struct Cyc_Lex_Trie*
-_temp90=( struct Cyc_Lex_Trie*) _cycalloc( sizeof( struct Cyc_Lex_Trie));
-_temp90->children=( void*)(( void*) Cyc_Lex_Zero); _temp90->shared_str= 0;
-_temp90;});( void*)((( struct Cyc_Lex_Trie*) _check_null( t))->children=( void*)((
-void*)({ struct Cyc_Lex_One_struct* _temp88=( struct Cyc_Lex_One_struct*)
-_cycalloc( sizeof( struct Cyc_Lex_One_struct)); _temp88[ 0]=({ struct Cyc_Lex_One_struct
-_temp89; _temp89.tag= Cyc_Lex_One; _temp89.f1=( int)*(( const unsigned char*)
-_check_unknown_subscript( buff, sizeof( unsigned char), i ++)); _temp89.f2=
-_temp87; _temp89;}); _temp88;}))); t= _temp87;} return t; _LL65:;} return t;}
+_temp80[ _check_known_subscript_notnull( 64u, _temp81)]=({ struct Cyc_Lex_Trie*
+_temp82=( struct Cyc_Lex_Trie*) _cycalloc( sizeof( struct Cyc_Lex_Trie));
+_temp82->children=( void*)(( void*) Cyc_Lex_Zero); _temp82->shared_str= 0;
+_temp82;});( void*)( t->children=( void*)(( void*)({ struct Cyc_Lex_Many_struct*
+_temp83=( struct Cyc_Lex_Many_struct*) _cycalloc( sizeof( struct Cyc_Lex_Many_struct));
+_temp83[ 0]=({ struct Cyc_Lex_Many_struct _temp84; _temp84.tag= Cyc_Lex_Many;
+_temp84.f1= _temp80; _temp84;}); _temp83;}))); t= _temp80[
+_check_known_subscript_notnull( 64u, _temp81)];}} ++ i; goto _LL66; _LL72:
+while( i <=  last) { struct Cyc_Lex_Trie* _temp88=({ struct Cyc_Lex_Trie*
+_temp91=( struct Cyc_Lex_Trie*) _cycalloc( sizeof( struct Cyc_Lex_Trie));
+_temp91->children=( void*)(( void*) Cyc_Lex_Zero); _temp91->shared_str= 0;
+_temp91;});( void*)((( struct Cyc_Lex_Trie*) _check_null( t))->children=( void*)((
+void*)({ struct Cyc_Lex_One_struct* _temp89=( struct Cyc_Lex_One_struct*)
+_cycalloc( sizeof( struct Cyc_Lex_One_struct)); _temp89[ 0]=({ struct Cyc_Lex_One_struct
+_temp90; _temp90.tag= Cyc_Lex_One; _temp90.f1=( int)*(( const unsigned char*)
+_check_unknown_subscript( buff, sizeof( unsigned char), i ++)); _temp90.f2=
+_temp88; _temp90;}); _temp89;}))); t= _temp88;} return t; _LL66:;} return t;}
 static int Cyc_Lex_str_index( struct _tagged_arr buff, int offset, int len){
-struct Cyc_Lex_Trie* _temp91= Cyc_Lex_trie_lookup( Cyc_Lex_ids_trie, buff,
-offset, len); if( _temp91->shared_str ==  0){ struct _tagged_arr _temp92= Cyc_Core_new_string(
-len +  1); Cyc_Std_zstrncpy( _temp92, _tagged_arr_plus( buff, sizeof(
-unsigned char), offset),( unsigned int) len);{ int ans=(( int(*)( struct Cyc_Xarray_Xarray*,
-struct _tagged_arr*)) Cyc_Xarray_add_ind)(( struct Cyc_Xarray_Xarray*)
-_check_null( Cyc_Lex_symbols),({ struct _tagged_arr* _temp93=( struct
-_tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp93[ 0]=( struct
-_tagged_arr) _temp92; _temp93;})); _temp91->shared_str= ans;}} return _temp91->shared_str;}
+struct Cyc_Lex_Trie* _temp92= Cyc_Lex_trie_lookup( Cyc_Lex_ids_trie, buff,
+offset, len); if( _temp92->shared_str ==  0){ struct _tagged_arr _temp93= Cyc_Core_new_string((
+unsigned int)( len +  1)); Cyc_Std_zstrncpy( _temp93, _tagged_arr_plus( buff,
+sizeof( unsigned char), offset),( unsigned int) len);{ int ans=(( int(*)( struct
+Cyc_Xarray_Xarray*, struct _tagged_arr*)) Cyc_Xarray_add_ind)(( struct Cyc_Xarray_Xarray*)
+_check_null( Cyc_Lex_symbols),({ struct _tagged_arr* _temp94=( struct
+_tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)); _temp94[ 0]=( struct
+_tagged_arr) _temp93; _temp94;})); _temp92->shared_str= ans;}} return _temp92->shared_str;}
 static int Cyc_Lex_str_index_lbuf( struct Cyc_Lexing_lexbuf* lbuf){ return Cyc_Lex_str_index((
 struct _tagged_arr) lbuf->lex_buffer, lbuf->lex_start_pos, lbuf->lex_curr_pos - 
 lbuf->lex_start_pos);} static void Cyc_Lex_insert_typedef( struct _tagged_arr*
-sptr){ struct _tagged_arr _temp94=* sptr; struct Cyc_Lex_Trie* _temp95= Cyc_Lex_trie_lookup(
-Cyc_Lex_typedefs_trie, _temp94, 0,( int)( _get_arr_size( _temp94, sizeof(
-unsigned char)) -  1));(( struct Cyc_Lex_Trie*) _check_null( _temp95))->shared_str=
+sptr){ struct _tagged_arr _temp95=* sptr; struct Cyc_Lex_Trie* _temp96= Cyc_Lex_trie_lookup(
+Cyc_Lex_typedefs_trie, _temp95, 0,( int)( _get_arr_size( _temp95, sizeof(
+unsigned char)) -  1));(( struct Cyc_Lex_Trie*) _check_null( _temp96))->shared_str=
 1; return;} static struct _tagged_arr* Cyc_Lex_get_symbol( int symbol_num){
 return(( struct _tagged_arr*(*)( struct Cyc_Xarray_Xarray*, int)) Cyc_Xarray_get)((
 struct Cyc_Xarray_Xarray*) _check_null( Cyc_Lex_symbols), symbol_num);} static
 int Cyc_Lex_int_of_char( unsigned char c){ if('0' <=  c? c <= '9': 0){ return c
 - '0';} else{ if('a' <=  c? c <= 'f': 0){ return( 10 +  c) - 'a';} else{ if('A'
 <=  c? c <= 'F': 0){ return( 10 +  c) - 'A';} else{( int) _throw(( void*)({
-struct Cyc_Core_Invalid_argument_struct* _temp96=( struct Cyc_Core_Invalid_argument_struct*)
-_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp96[ 0]=({
-struct Cyc_Core_Invalid_argument_struct _temp97; _temp97.tag= Cyc_Core_Invalid_argument;
-_temp97.f1= _tag_arr("string to integer conversion", sizeof( unsigned char), 29u);
-_temp97;}); _temp96;}));}}}} static struct _tuple5* Cyc_Lex_intconst( struct Cyc_Lexing_lexbuf*
+struct Cyc_Core_Invalid_argument_struct* _temp97=( struct Cyc_Core_Invalid_argument_struct*)
+_cycalloc( sizeof( struct Cyc_Core_Invalid_argument_struct)); _temp97[ 0]=({
+struct Cyc_Core_Invalid_argument_struct _temp98; _temp98.tag= Cyc_Core_Invalid_argument;
+_temp98.f1= _tag_arr("string to integer conversion", sizeof( unsigned char), 29u);
+_temp98;}); _temp97;}));}}}} static struct _tuple5* Cyc_Lex_intconst( struct Cyc_Lexing_lexbuf*
 lbuf, int start, int end, int base){ unsigned int n= 0; int end2= lbuf->lex_curr_pos
 -  end; struct _tagged_arr buff= lbuf->lex_buffer; int i= start +  lbuf->lex_start_pos;{
 int i= start +  lbuf->lex_start_pos; for( 0; i <  end2; ++ i){ unsigned char c=*((
 unsigned char*) _check_unknown_subscript( buff, sizeof( unsigned char), i));
-switch( c){ case 'u': _LL98: goto _LL99; case 'U': _LL99: return({ struct
-_tuple5* _temp101=( struct _tuple5*) _cycalloc( sizeof( struct _tuple5));
-_temp101->f1=( void*) Cyc_Absyn_Unsigned; _temp101->f2=( int) n; _temp101;});
-case 'l': _LL100: break; case 'L': _LL102: break; default: _LL103: n= n *  base
+switch( c){ case 'u': _LL99: goto _LL100; case 'U': _LL100: return({ struct
+_tuple5* _temp102=( struct _tuple5*) _cycalloc( sizeof( struct _tuple5));
+_temp102->f1=( void*) Cyc_Absyn_Unsigned; _temp102->f2=( int) n; _temp102;});
+case 'l': _LL101: break; case 'L': _LL103: break; default: _LL104: n= n *  base
 + ( unsigned int) Cyc_Lex_int_of_char( c); break;}}} return({ struct _tuple5*
-_temp105=( struct _tuple5*) _cycalloc( sizeof( struct _tuple5)); _temp105->f1=(
-void*) Cyc_Absyn_Signed; _temp105->f2=( int) n; _temp105;});} unsigned char Cyc_Lex_string_buffer_v[
+_temp106=( struct _tuple5*) _cycalloc( sizeof( struct _tuple5)); _temp106->f1=(
+void*) Cyc_Absyn_Signed; _temp106->f2=( int) n; _temp106;});} unsigned char Cyc_Lex_string_buffer_v[
 10u]={'x','x','x','x','x','x','x','x','x','x'}; struct _tagged_arr Cyc_Lex_string_buffer={(
 void*) Cyc_Lex_string_buffer_v,( void*) Cyc_Lex_string_buffer_v,( void*)( Cyc_Lex_string_buffer_v
 +  10u)}; int Cyc_Lex_string_pos= 0; void Cyc_Lex_store_string_char(
 unsigned char c){ int sz=( int) _get_arr_size( Cyc_Lex_string_buffer, sizeof(
 unsigned char)); if( Cyc_Lex_string_pos >=  sz){ int newsz= sz; while( Cyc_Lex_string_pos
 >=  newsz) { newsz= newsz *  2;}{ struct _tagged_arr str=({ unsigned int
-_temp106=( unsigned int) newsz; unsigned char* _temp107=( unsigned char*)
-_cycalloc_atomic( _check_times( sizeof( unsigned char), _temp106)); struct
-_tagged_arr _temp109= _tag_arr( _temp107, sizeof( unsigned char),( unsigned int)
-newsz);{ unsigned int _temp108= _temp106; unsigned int i; for( i= 0; i < 
-_temp108; i ++){ _temp107[ i]= i <  sz?*(( unsigned char*)
+_temp107=( unsigned int) newsz; unsigned char* _temp108=( unsigned char*)
+_cycalloc_atomic( _check_times( sizeof( unsigned char), _temp107)); struct
+_tagged_arr _temp110= _tag_arr( _temp108, sizeof( unsigned char),( unsigned int)
+newsz);{ unsigned int _temp109= _temp107; unsigned int i; for( i= 0; i < 
+_temp109; i ++){ _temp108[ i]= i <  sz?*(( unsigned char*)
 _check_unknown_subscript( Cyc_Lex_string_buffer, sizeof( unsigned char),( int) i)):'\000';}};
-_temp109;}); Cyc_Lex_string_buffer= str;}}*(( unsigned char*)
+_temp110;}); Cyc_Lex_string_buffer= str;}}*(( unsigned char*)
 _check_unknown_subscript( Cyc_Lex_string_buffer, sizeof( unsigned char), Cyc_Lex_string_pos))=
 c; ++ Cyc_Lex_string_pos;} struct _tagged_arr Cyc_Lex_get_stored_string(){
 struct _tagged_arr str= Cyc_Std_substring(( struct _tagged_arr) Cyc_Lex_string_buffer,
@@ -929,31 +935,31 @@ struct Cyc_Lex_Ldecls{ struct Cyc_Set_Set* typedefs; struct Cyc_Set_Set*
 namespaces; } ; struct Cyc_Lex_Lvis{ struct Cyc_List_List* current_namespace;
 struct Cyc_List_List* imported_namespaces; } ; struct Cyc_Lex_Lstate{ struct Cyc_List_List*
 lstack; struct Cyc_Dict_Dict* decls; } ; static struct Cyc_Core_Opt* Cyc_Lex_lstate=
-0; static void Cyc_Lex_typedef_init(){ struct Cyc_Lex_Lvis* _temp110=({ struct
-Cyc_Lex_Lvis* _temp116=( struct Cyc_Lex_Lvis*) _cycalloc( sizeof( struct Cyc_Lex_Lvis));
-_temp116->current_namespace= 0; _temp116->imported_namespaces= 0; _temp116;});
-struct Cyc_List_List* _temp111=({ struct Cyc_List_List* _temp115=( struct Cyc_List_List*)
-_cycalloc( sizeof( struct Cyc_List_List)); _temp115->hd=( void*) _temp110;
-_temp115->tl= 0; _temp115;}); struct Cyc_Dict_Dict* init_decls=(( struct Cyc_Dict_Dict*(*)(
+0; static void Cyc_Lex_typedef_init(){ struct Cyc_Lex_Lvis* _temp111=({ struct
+Cyc_Lex_Lvis* _temp117=( struct Cyc_Lex_Lvis*) _cycalloc( sizeof( struct Cyc_Lex_Lvis));
+_temp117->current_namespace= 0; _temp117->imported_namespaces= 0; _temp117;});
+struct Cyc_List_List* _temp112=({ struct Cyc_List_List* _temp116=( struct Cyc_List_List*)
+_cycalloc( sizeof( struct Cyc_List_List)); _temp116->hd=( void*) _temp111;
+_temp116->tl= 0; _temp116;}); struct Cyc_Dict_Dict* init_decls=(( struct Cyc_Dict_Dict*(*)(
 struct Cyc_Dict_Dict* d, struct Cyc_List_List* k, struct Cyc_Lex_Ldecls* v)) Cyc_Dict_insert)(((
 struct Cyc_Dict_Dict*(*)( int(* cmp)( struct Cyc_List_List*, struct Cyc_List_List*)))
-Cyc_Dict_empty)( Cyc_Absyn_varlist_cmp), 0,({ struct Cyc_Lex_Ldecls* _temp114=(
-struct Cyc_Lex_Ldecls*) _cycalloc( sizeof( struct Cyc_Lex_Ldecls)); _temp114->typedefs=((
+Cyc_Dict_empty)( Cyc_Absyn_varlist_cmp), 0,({ struct Cyc_Lex_Ldecls* _temp115=(
+struct Cyc_Lex_Ldecls*) _cycalloc( sizeof( struct Cyc_Lex_Ldecls)); _temp115->typedefs=((
 struct Cyc_Set_Set*(*)( int(* cmp)( struct _tagged_arr*, struct _tagged_arr*)))
-Cyc_Set_empty)( Cyc_Std_zstrptrcmp); _temp114->namespaces=(( struct Cyc_Set_Set*(*)(
+Cyc_Set_empty)( Cyc_Std_zstrptrcmp); _temp115->namespaces=(( struct Cyc_Set_Set*(*)(
 int(* cmp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Set_empty)( Cyc_Std_zstrptrcmp);
-_temp114;})); Cyc_Lex_lstate=({ struct Cyc_Core_Opt* _temp112=( struct Cyc_Core_Opt*)
-_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp112->v=( void*)({ struct Cyc_Lex_Lstate*
-_temp113=( struct Cyc_Lex_Lstate*) _cycalloc( sizeof( struct Cyc_Lex_Lstate));
-_temp113->lstack= _temp111; _temp113->decls= init_decls; _temp113;}); _temp112;});}
+_temp115;})); Cyc_Lex_lstate=({ struct Cyc_Core_Opt* _temp113=( struct Cyc_Core_Opt*)
+_cycalloc( sizeof( struct Cyc_Core_Opt)); _temp113->v=( void*)({ struct Cyc_Lex_Lstate*
+_temp114=( struct Cyc_Lex_Lstate*) _cycalloc( sizeof( struct Cyc_Lex_Lstate));
+_temp114->lstack= _temp112; _temp114->decls= init_decls; _temp114;}); _temp113;});}
 static struct Cyc_List_List* Cyc_Lex_get_absolute_namespace( struct Cyc_List_List*
 ns){ struct _tagged_arr* n=( struct _tagged_arr*) ns->hd;{ struct Cyc_List_List*
 ls=( struct Cyc_List_List*)(( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*)
 _check_null( Cyc_Lex_lstate))->v)->lstack; for( 0; ls !=  0; ls= ls->tl){ struct
 Cyc_Lex_Lvis* lv=( struct Cyc_Lex_Lvis*) ls->hd; struct Cyc_List_List* x=({
-struct Cyc_List_List* _temp117=( struct Cyc_List_List*) _cycalloc( sizeof(
-struct Cyc_List_List)); _temp117->hd=( void*) lv->current_namespace; _temp117->tl=
-lv->imported_namespaces; _temp117;}); for( 0; x !=  0; x=(( struct Cyc_List_List*)
+struct Cyc_List_List* _temp118=( struct Cyc_List_List*) _cycalloc( sizeof(
+struct Cyc_List_List)); _temp118->hd=( void*) lv->current_namespace; _temp118->tl=
+lv->imported_namespaces; _temp118;}); for( 0; x !=  0; x=(( struct Cyc_List_List*)
 _check_null( x))->tl){ struct Cyc_Lex_Ldecls* ld=(( struct Cyc_Lex_Ldecls*(*)(
 struct Cyc_Dict_Dict* d, struct Cyc_List_List* k)) Cyc_Dict_lookup)((( struct
 Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls,(
@@ -962,20 +968,20 @@ struct Cyc_Set_Set* s, struct _tagged_arr* elt)) Cyc_Set_member)( ld->namespaces
 n)){ return(( struct Cyc_List_List*(*)( struct Cyc_List_List* x, struct Cyc_List_List*
 y)) Cyc_List_append)(( struct Cyc_List_List*)(( struct Cyc_List_List*)
 _check_null( x))->hd,( struct Cyc_List_List*) ns);}}}} Cyc_yyerror(( struct
-_tagged_arr)({ struct Cyc_Std_String_pa_struct _temp119; _temp119.tag= Cyc_Std_String_pa;
-_temp119.f1=( struct _tagged_arr) Cyc_Std_str_sepstr(( struct Cyc_List_List*) ns,
-_tag_arr("::", sizeof( unsigned char), 3u));{ void* _temp118[ 1u]={& _temp119};
+_tagged_arr)({ struct Cyc_Std_String_pa_struct _temp120; _temp120.tag= Cyc_Std_String_pa;
+_temp120.f1=( struct _tagged_arr) Cyc_Std_str_sepstr(( struct Cyc_List_List*) ns,
+_tag_arr("::", sizeof( unsigned char), 3u));{ void* _temp119[ 1u]={& _temp120};
 Cyc_Std_aprintf( _tag_arr("undeclared namespace %s", sizeof( unsigned char), 24u),
-_tag_arr( _temp118, sizeof( void*), 1u));}})); return 0;} static void Cyc_Lex_recompute_typedefs(){
-Cyc_Lex_typedefs_trie=({ struct Cyc_Lex_Trie* _temp120=( struct Cyc_Lex_Trie*)
-_cycalloc( sizeof( struct Cyc_Lex_Trie)); _temp120->children=( void*)(( void*)
-Cyc_Lex_Zero); _temp120->shared_str= 0; _temp120;});{ struct Cyc_List_List* ls=(
+_tag_arr( _temp119, sizeof( void*), 1u));}})); return 0;} static void Cyc_Lex_recompute_typedefs(){
+Cyc_Lex_typedefs_trie=({ struct Cyc_Lex_Trie* _temp121=( struct Cyc_Lex_Trie*)
+_cycalloc( sizeof( struct Cyc_Lex_Trie)); _temp121->children=( void*)(( void*)
+Cyc_Lex_Zero); _temp121->shared_str= 0; _temp121;});{ struct Cyc_List_List* ls=(
 struct Cyc_List_List*)(( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*)
 _check_null( Cyc_Lex_lstate))->v)->lstack; for( 0; ls !=  0; ls= ls->tl){ struct
 Cyc_Lex_Lvis* lv=( struct Cyc_Lex_Lvis*) ls->hd; struct Cyc_List_List* x=({
-struct Cyc_List_List* _temp121=( struct Cyc_List_List*) _cycalloc( sizeof(
-struct Cyc_List_List)); _temp121->hd=( void*) lv->current_namespace; _temp121->tl=
-lv->imported_namespaces; _temp121;}); for( 0; x !=  0; x=(( struct Cyc_List_List*)
+struct Cyc_List_List* _temp122=( struct Cyc_List_List*) _cycalloc( sizeof(
+struct Cyc_List_List)); _temp122->hd=( void*) lv->current_namespace; _temp122->tl=
+lv->imported_namespaces; _temp122;}); for( 0; x !=  0; x=(( struct Cyc_List_List*)
 _check_null( x))->tl){ struct Cyc_Lex_Ldecls* ld=(( struct Cyc_Lex_Ldecls*(*)(
 struct Cyc_Dict_Dict* d, struct Cyc_List_List* k)) Cyc_Dict_lookup)((( struct
 Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls,(
@@ -983,51 +989,51 @@ struct Cyc_List_List*)(( struct Cyc_List_List*) _check_null( x))->hd);(( void(*)
 void(* f)( struct _tagged_arr*), struct Cyc_Set_Set* s)) Cyc_Set_iter)( Cyc_Lex_insert_typedef,
 ld->typedefs);}}}} static int Cyc_Lex_is_typedef_in_namespace( struct Cyc_List_List*
 ns, struct _tagged_arr* v){ struct Cyc_List_List* ans= Cyc_Lex_get_absolute_namespace(
-ns); struct _handler_cons _temp122; _push_handler(& _temp122);{ int _temp124= 0;
-if( setjmp( _temp122.handler)){ _temp124= 1;} if( ! _temp124){{ struct Cyc_Lex_Ldecls*
+ns); struct _handler_cons _temp123; _push_handler(& _temp123);{ int _temp125= 0;
+if( setjmp( _temp123.handler)){ _temp125= 1;} if( ! _temp125){{ struct Cyc_Lex_Ldecls*
 ld=(( struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict* d, struct Cyc_List_List*
 k)) Cyc_Dict_lookup)((( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*)
-_check_null( Cyc_Lex_lstate))->v)->decls, ans); int _temp125=(( int(*)( struct
+_check_null( Cyc_Lex_lstate))->v)->decls, ans); int _temp126=(( int(*)( struct
 Cyc_Set_Set* s, struct _tagged_arr* elt)) Cyc_Set_member)( ld->typedefs, v);
-_npop_handler( 0u); return _temp125;}; _pop_handler();} else{ void* _temp123=(
-void*) _exn_thrown; void* _temp127= _temp123; _LL129: if( _temp127 ==  Cyc_Dict_Absent){
-goto _LL130;} else{ goto _LL131;} _LL131: goto _LL132; _LL130: return 0; _LL132:(
-void) _throw( _temp127); _LL128:;}}} static int Cyc_Lex_is_typedef( struct Cyc_List_List*
+_npop_handler( 0u); return _temp126;}; _pop_handler();} else{ void* _temp124=(
+void*) _exn_thrown; void* _temp128= _temp124; _LL130: if( _temp128 ==  Cyc_Dict_Absent){
+goto _LL131;} else{ goto _LL132;} _LL132: goto _LL133; _LL131: return 0; _LL133:(
+void) _throw( _temp128); _LL129:;}}} static int Cyc_Lex_is_typedef( struct Cyc_List_List*
 ns, struct _tagged_arr* v){ if( ns !=  0){ return Cyc_Lex_is_typedef_in_namespace((
-struct Cyc_List_List*) _check_null( ns), v);}{ struct _tagged_arr _temp133=* v;
-int len=( int)( _get_arr_size( _temp133, sizeof( unsigned char)) -  1); struct
+struct Cyc_List_List*) _check_null( ns), v);}{ struct _tagged_arr _temp134=* v;
+int len=( int)( _get_arr_size( _temp134, sizeof( unsigned char)) -  1); struct
 Cyc_Lex_Trie* t= Cyc_Lex_typedefs_trie;{ int i= 0; for( 0; i <  len; ++ i){ void*
-_temp134=( void*)(( struct Cyc_Lex_Trie*) _check_null( t))->children; struct Cyc_Lex_Trie*
-_temp145; int _temp147; struct Cyc_Lex_Trie* _temp149; struct Cyc_Lex_Trie**
-_temp151; _LL136: if( _temp134 == ( void*) Cyc_Lex_Zero){ goto _LL137;} else{
-goto _LL138;} _LL138: if(( unsigned int) _temp134 >  1u?*(( int*) _temp134) == 
-Cyc_Lex_One: 0){ _LL148: _temp147=(( struct Cyc_Lex_One_struct*) _temp134)->f1;
-goto _LL146; _LL146: _temp145=(( struct Cyc_Lex_One_struct*) _temp134)->f2; goto
-_LL144;} else{ goto _LL140;} _LL144: if( _temp147 != *(( const unsigned char*)
-_check_unknown_subscript( _temp133, sizeof( unsigned char), i))){ goto _LL139;}
-else{ goto _LL140;} _LL140: if(( unsigned int) _temp134 >  1u?*(( int*) _temp134)
-==  Cyc_Lex_One: 0){ _LL150: _temp149=(( struct Cyc_Lex_One_struct*) _temp134)->f2;
-goto _LL141;} else{ goto _LL142;} _LL142: if(( unsigned int) _temp134 >  1u?*((
-int*) _temp134) ==  Cyc_Lex_Many: 0){ _LL152: _temp151=(( struct Cyc_Lex_Many_struct*)
-_temp134)->f1; goto _LL143;} else{ goto _LL135;} _LL137: return 0; _LL139:
-return 0; _LL141: t= _temp149; goto _LL135; _LL143: { struct Cyc_Lex_Trie*
-_temp153= _temp151[ _check_known_subscript_notnull( 64u, Cyc_Lex_trie_char(( int)*((
-const unsigned char*) _check_unknown_subscript( _temp133, sizeof( unsigned char),
-i))))]; if( _temp153 ==  0){ return 0;} t= _temp153; goto _LL135;} _LL135:;}}
+_temp135=( void*)(( struct Cyc_Lex_Trie*) _check_null( t))->children; struct Cyc_Lex_Trie*
+_temp146; int _temp148; struct Cyc_Lex_Trie* _temp150; struct Cyc_Lex_Trie**
+_temp152; _LL137: if( _temp135 == ( void*) Cyc_Lex_Zero){ goto _LL138;} else{
+goto _LL139;} _LL139: if(( unsigned int) _temp135 >  1u?*(( int*) _temp135) == 
+Cyc_Lex_One: 0){ _LL149: _temp148=(( struct Cyc_Lex_One_struct*) _temp135)->f1;
+goto _LL147; _LL147: _temp146=(( struct Cyc_Lex_One_struct*) _temp135)->f2; goto
+_LL145;} else{ goto _LL141;} _LL145: if( _temp148 != *(( const unsigned char*)
+_check_unknown_subscript( _temp134, sizeof( unsigned char), i))){ goto _LL140;}
+else{ goto _LL141;} _LL141: if(( unsigned int) _temp135 >  1u?*(( int*) _temp135)
+==  Cyc_Lex_One: 0){ _LL151: _temp150=(( struct Cyc_Lex_One_struct*) _temp135)->f2;
+goto _LL142;} else{ goto _LL143;} _LL143: if(( unsigned int) _temp135 >  1u?*((
+int*) _temp135) ==  Cyc_Lex_Many: 0){ _LL153: _temp152=(( struct Cyc_Lex_Many_struct*)
+_temp135)->f1; goto _LL144;} else{ goto _LL136;} _LL138: return 0; _LL140:
+return 0; _LL142: t= _temp150; goto _LL136; _LL144: { struct Cyc_Lex_Trie*
+_temp154= _temp152[ _check_known_subscript_notnull( 64u, Cyc_Lex_trie_char(( int)*((
+const unsigned char*) _check_unknown_subscript( _temp134, sizeof( unsigned char),
+i))))]; if( _temp154 ==  0){ return 0;} t= _temp154; goto _LL136;} _LL136:;}}
 return(( struct Cyc_Lex_Trie*) _check_null( t))->shared_str;}} void Cyc_Lex_enter_namespace(
 struct _tagged_arr* s){ struct Cyc_List_List* ns=(( struct Cyc_Lex_Lvis*)(((
 struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->lstack)->hd)->current_namespace;
 struct Cyc_List_List* new_ns=(( struct Cyc_List_List*(*)( struct Cyc_List_List*
 x, struct Cyc_List_List* y)) Cyc_List_append)( ns,({ struct Cyc_List_List*
-_temp158=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp158->hd=( void*) s; _temp158->tl= 0; _temp158;}));(( struct Cyc_Lex_Lstate*)((
+_temp159=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp159->hd=( void*) s; _temp159->tl= 0; _temp159;}));(( struct Cyc_Lex_Lstate*)((
 struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->lstack=({ struct Cyc_List_List*
-_temp154=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp154->hd=( void*)({ struct Cyc_Lex_Lvis* _temp155=( struct Cyc_Lex_Lvis*)
-_cycalloc( sizeof( struct Cyc_Lex_Lvis)); _temp155->current_namespace= new_ns;
-_temp155->imported_namespaces= 0; _temp155;}); _temp154->tl=( struct Cyc_List_List*)((
+_temp155=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp155->hd=( void*)({ struct Cyc_Lex_Lvis* _temp156=( struct Cyc_Lex_Lvis*)
+_cycalloc( sizeof( struct Cyc_Lex_Lvis)); _temp156->current_namespace= new_ns;
+_temp156->imported_namespaces= 0; _temp156;}); _temp155->tl=( struct Cyc_List_List*)((
 struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->lstack;
-_temp154;});{ struct Cyc_Lex_Ldecls* ld=(( struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict*
+_temp155;});{ struct Cyc_Lex_Ldecls* ld=(( struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict*
 d, struct Cyc_List_List* k)) Cyc_Dict_lookup)((( struct Cyc_Lex_Lstate*)((
 struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls, ns); if( !(( int(*)(
 struct Cyc_Set_Set* s, struct _tagged_arr* elt)) Cyc_Set_member)( ld->namespaces,
@@ -1035,18 +1041,18 @@ s)){(( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lsta
 struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict* d, struct Cyc_List_List* k,
 struct Cyc_Lex_Ldecls* v)) Cyc_Dict_insert)((( struct Cyc_Lex_Lstate*)(( struct
 Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls, ns,({ struct Cyc_Lex_Ldecls*
-_temp156=( struct Cyc_Lex_Ldecls*) _cycalloc( sizeof( struct Cyc_Lex_Ldecls));
-_temp156->typedefs= ld->typedefs; _temp156->namespaces=(( struct Cyc_Set_Set*(*)(
+_temp157=( struct Cyc_Lex_Ldecls*) _cycalloc( sizeof( struct Cyc_Lex_Ldecls));
+_temp157->typedefs= ld->typedefs; _temp157->namespaces=(( struct Cyc_Set_Set*(*)(
 struct Cyc_Set_Set* s, struct _tagged_arr* elt)) Cyc_Set_insert)( ld->namespaces,
-s); _temp156;}));(( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null(
+s); _temp157;}));(( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null(
 Cyc_Lex_lstate))->v)->decls=(( struct Cyc_Dict_Dict*(*)( struct Cyc_Dict_Dict* d,
 struct Cyc_List_List* k, struct Cyc_Lex_Ldecls* v)) Cyc_Dict_insert)((( struct
 Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls,
-new_ns,({ struct Cyc_Lex_Ldecls* _temp157=( struct Cyc_Lex_Ldecls*) _cycalloc(
-sizeof( struct Cyc_Lex_Ldecls)); _temp157->typedefs=(( struct Cyc_Set_Set*(*)(
+new_ns,({ struct Cyc_Lex_Ldecls* _temp158=( struct Cyc_Lex_Ldecls*) _cycalloc(
+sizeof( struct Cyc_Lex_Ldecls)); _temp158->typedefs=(( struct Cyc_Set_Set*(*)(
 int(* cmp)( struct _tagged_arr*, struct _tagged_arr*))) Cyc_Set_empty)( Cyc_Std_zstrptrcmp);
-_temp157->namespaces=(( struct Cyc_Set_Set*(*)( int(* cmp)( struct _tagged_arr*,
-struct _tagged_arr*))) Cyc_Set_empty)( Cyc_Std_zstrptrcmp); _temp157;}));}((
+_temp158->namespaces=(( struct Cyc_Set_Set*(*)( int(* cmp)( struct _tagged_arr*,
+struct _tagged_arr*))) Cyc_Set_empty)( Cyc_Std_zstrptrcmp); _temp158;}));}((
 void(*)( void(* f)( struct _tagged_arr*), struct Cyc_Set_Set* s)) Cyc_Set_iter)(
 Cyc_Lex_insert_typedef,((( struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict* d,
 struct Cyc_List_List* k)) Cyc_Dict_lookup)((( struct Cyc_Lex_Lstate*)(( struct
@@ -1055,82 +1061,82 @@ void Cyc_Lex_leave_namespace(){(( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*
 _check_null( Cyc_Lex_lstate))->v)->lstack=( struct Cyc_List_List*) _check_null((((
 struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->lstack)->tl);
 Cyc_Lex_recompute_typedefs();} void Cyc_Lex_enter_using( struct _tuple0* q){
-struct Cyc_List_List* ns;{ void* _temp159=(* q).f1; struct Cyc_List_List*
-_temp167; struct Cyc_List_List* _temp169; _LL161: if( _temp159 == ( void*) Cyc_Absyn_Loc_n){
-goto _LL162;} else{ goto _LL163;} _LL163: if(( unsigned int) _temp159 >  1u?*((
-int*) _temp159) ==  Cyc_Absyn_Rel_n: 0){ _LL168: _temp167=(( struct Cyc_Absyn_Rel_n_struct*)
-_temp159)->f1; goto _LL164;} else{ goto _LL165;} _LL165: if(( unsigned int)
-_temp159 >  1u?*(( int*) _temp159) ==  Cyc_Absyn_Abs_n: 0){ _LL170: _temp169=((
-struct Cyc_Absyn_Abs_n_struct*) _temp159)->f1; goto _LL166;} else{ goto _LL160;}
-_LL162: ns=( struct Cyc_List_List*)({ struct Cyc_List_List* _temp171=( struct
-Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp171->hd=( void*)(*
-q).f2; _temp171->tl= 0; _temp171;}); goto _LL160; _LL164: _temp169= _temp167;
-goto _LL166; _LL166: ns=( struct Cyc_List_List*) _check_null((( struct Cyc_List_List*(*)(
-struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_append)( _temp169,({
-struct Cyc_List_List* _temp172=( struct Cyc_List_List*) _cycalloc( sizeof(
-struct Cyc_List_List)); _temp172->hd=( void*)(* q).f2; _temp172->tl= 0; _temp172;})));
-goto _LL160; _LL160:;}{ struct Cyc_List_List* _temp173= Cyc_Lex_get_absolute_namespace(
-ns); struct Cyc_List_List* _temp174=(( struct Cyc_Lex_Lvis*)((( struct Cyc_Lex_Lstate*)((
+struct Cyc_List_List* ns;{ void* _temp160=(* q).f1; struct Cyc_List_List*
+_temp168; struct Cyc_List_List* _temp170; _LL162: if( _temp160 == ( void*) Cyc_Absyn_Loc_n){
+goto _LL163;} else{ goto _LL164;} _LL164: if(( unsigned int) _temp160 >  1u?*((
+int*) _temp160) ==  Cyc_Absyn_Rel_n: 0){ _LL169: _temp168=(( struct Cyc_Absyn_Rel_n_struct*)
+_temp160)->f1; goto _LL165;} else{ goto _LL166;} _LL166: if(( unsigned int)
+_temp160 >  1u?*(( int*) _temp160) ==  Cyc_Absyn_Abs_n: 0){ _LL171: _temp170=((
+struct Cyc_Absyn_Abs_n_struct*) _temp160)->f1; goto _LL167;} else{ goto _LL161;}
+_LL163: ns=( struct Cyc_List_List*)({ struct Cyc_List_List* _temp172=( struct
+Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List)); _temp172->hd=( void*)(*
+q).f2; _temp172->tl= 0; _temp172;}); goto _LL161; _LL165: _temp170= _temp168;
+goto _LL167; _LL167: ns=( struct Cyc_List_List*) _check_null((( struct Cyc_List_List*(*)(
+struct Cyc_List_List* x, struct Cyc_List_List* y)) Cyc_List_append)( _temp170,({
+struct Cyc_List_List* _temp173=( struct Cyc_List_List*) _cycalloc( sizeof(
+struct Cyc_List_List)); _temp173->hd=( void*)(* q).f2; _temp173->tl= 0; _temp173;})));
+goto _LL161; _LL161:;}{ struct Cyc_List_List* _temp174= Cyc_Lex_get_absolute_namespace(
+ns); struct Cyc_List_List* _temp175=(( struct Cyc_Lex_Lvis*)((( struct Cyc_Lex_Lstate*)((
 struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->lstack)->hd)->imported_namespaces;((
 struct Cyc_Lex_Lvis*)((( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*)
 _check_null( Cyc_Lex_lstate))->v)->lstack)->hd)->imported_namespaces=({ struct
-Cyc_List_List* _temp175=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp175->hd=( void*) _temp173; _temp175->tl= _temp174; _temp175;});(( void(*)(
+Cyc_List_List* _temp176=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp176->hd=( void*) _temp174; _temp176->tl= _temp175; _temp176;});(( void(*)(
 void(* f)( struct _tagged_arr*), struct Cyc_Set_Set* s)) Cyc_Set_iter)( Cyc_Lex_insert_typedef,(((
 struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict* d, struct Cyc_List_List* k))
 Cyc_Dict_lookup)((( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null(
-Cyc_Lex_lstate))->v)->decls, _temp173))->typedefs);}} void Cyc_Lex_leave_using(){
-struct Cyc_List_List* _temp176=(( struct Cyc_Lex_Lvis*)((( struct Cyc_Lex_Lstate*)((
+Cyc_Lex_lstate))->v)->decls, _temp174))->typedefs);}} void Cyc_Lex_leave_using(){
+struct Cyc_List_List* _temp177=(( struct Cyc_Lex_Lvis*)((( struct Cyc_Lex_Lstate*)((
 struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->lstack)->hd)->imported_namespaces;((
 struct Cyc_Lex_Lvis*)((( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*)
 _check_null( Cyc_Lex_lstate))->v)->lstack)->hd)->imported_namespaces=(( struct
-Cyc_List_List*) _check_null( _temp176))->tl; Cyc_Lex_recompute_typedefs();} void
-Cyc_Lex_register_typedef( struct _tuple0* q){ struct Cyc_List_List* _temp177=((
+Cyc_List_List*) _check_null( _temp177))->tl; Cyc_Lex_recompute_typedefs();} void
+Cyc_Lex_register_typedef( struct _tuple0* q){ struct Cyc_List_List* _temp178=((
 struct Cyc_Lex_Lvis*)((( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*)
 _check_null( Cyc_Lex_lstate))->v)->lstack)->hd)->current_namespace; struct Cyc_Dict_Dict*
-_temp178=(( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls;
-struct Cyc_Lex_Ldecls* _temp179=(( struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict*
-d, struct Cyc_List_List* k)) Cyc_Dict_lookup)( _temp178, _temp177); struct Cyc_Lex_Ldecls*
-_temp180=({ struct Cyc_Lex_Ldecls* _temp181=( struct Cyc_Lex_Ldecls*) _cycalloc(
-sizeof( struct Cyc_Lex_Ldecls)); _temp181->typedefs=(( struct Cyc_Set_Set*(*)(
-struct Cyc_Set_Set* s, struct _tagged_arr* elt)) Cyc_Set_insert)( _temp179->typedefs,(*
-q).f2); _temp181->namespaces= _temp179->namespaces; _temp181;});(( struct Cyc_Lex_Lstate*)((
+_temp179=(( struct Cyc_Lex_Lstate*)(( struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls;
+struct Cyc_Lex_Ldecls* _temp180=(( struct Cyc_Lex_Ldecls*(*)( struct Cyc_Dict_Dict*
+d, struct Cyc_List_List* k)) Cyc_Dict_lookup)( _temp179, _temp178); struct Cyc_Lex_Ldecls*
+_temp181=({ struct Cyc_Lex_Ldecls* _temp182=( struct Cyc_Lex_Ldecls*) _cycalloc(
+sizeof( struct Cyc_Lex_Ldecls)); _temp182->typedefs=(( struct Cyc_Set_Set*(*)(
+struct Cyc_Set_Set* s, struct _tagged_arr* elt)) Cyc_Set_insert)( _temp180->typedefs,(*
+q).f2); _temp182->namespaces= _temp180->namespaces; _temp182;});(( struct Cyc_Lex_Lstate*)((
 struct Cyc_Core_Opt*) _check_null( Cyc_Lex_lstate))->v)->decls=(( struct Cyc_Dict_Dict*(*)(
 struct Cyc_Dict_Dict* d, struct Cyc_List_List* k, struct Cyc_Lex_Ldecls* v)) Cyc_Dict_insert)(
-_temp178, _temp177, _temp180); Cyc_Lex_insert_typedef((* q).f2);} static short
+_temp179, _temp178, _temp181); Cyc_Lex_insert_typedef((* q).f2);} static short
 Cyc_Lex_process_id( struct Cyc_Lexing_lexbuf* lbuf){ int symbol_num= Cyc_Lex_str_index_lbuf(
 lbuf); if( symbol_num <=  Cyc_Lex_num_kws){ return( short)*(( int*)
 _check_unknown_subscript( Cyc_Lex_kw_nums, sizeof( int), symbol_num -  1));}{
-struct _tagged_arr* _temp182= Cyc_Lex_get_symbol( symbol_num); if( Cyc_Lex_is_typedef(
-0, _temp182)){ Cyc_Lex_token_qvar=({ struct _tuple0* _temp183=( struct _tuple0*)
-_cycalloc( sizeof( struct _tuple0)); _temp183->f1= Cyc_Absyn_rel_ns_null;
-_temp183->f2= _temp182; _temp183;}); return 350;} Cyc_Lex_token_string=*
-_temp182; return 343;}} static short Cyc_Lex_process_qual_id( struct Cyc_Lexing_lexbuf*
+struct _tagged_arr* _temp183= Cyc_Lex_get_symbol( symbol_num); if( Cyc_Lex_is_typedef(
+0, _temp183)){ Cyc_Lex_token_qvar=({ struct _tuple0* _temp184=( struct _tuple0*)
+_cycalloc( sizeof( struct _tuple0)); _temp184->f1= Cyc_Absyn_rel_ns_null;
+_temp184->f2= _temp183; _temp184;}); return 351;} Cyc_Lex_token_string=*
+_temp183; return 344;}} static short Cyc_Lex_process_qual_id( struct Cyc_Lexing_lexbuf*
 lbuf){ int i= lbuf->lex_start_pos; int end= lbuf->lex_curr_pos; struct
 _tagged_arr s= lbuf->lex_buffer; struct Cyc_List_List* rev_vs= 0; while( i < 
 end) { int start= i; for( 0; i <  end?*(( unsigned char*)
 _check_unknown_subscript( s, sizeof( unsigned char), i)) != ':': 0; i ++){;} if(
 start ==  i){( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct*
-_temp184=( struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
-_temp184[ 0]=({ struct Cyc_Core_Impossible_struct _temp185; _temp185.tag= Cyc_Core_Impossible;
-_temp185.f1= _tag_arr("bad namespace", sizeof( unsigned char), 14u); _temp185;});
-_temp184;}));}{ int vlen= i -  start; struct _tagged_arr* v= Cyc_Lex_get_symbol(
+_temp185=( struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
+_temp185[ 0]=({ struct Cyc_Core_Impossible_struct _temp186; _temp186.tag= Cyc_Core_Impossible;
+_temp186.f1= _tag_arr("bad namespace", sizeof( unsigned char), 14u); _temp186;});
+_temp185;}));}{ int vlen= i -  start; struct _tagged_arr* v= Cyc_Lex_get_symbol(
 Cyc_Lex_str_index(( struct _tagged_arr) s, start, vlen)); rev_vs=({ struct Cyc_List_List*
-_temp186=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
-_temp186->hd=( void*) v; _temp186->tl= rev_vs; _temp186;}); i += 2;}} if( rev_vs
-==  0){( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp187=(
+_temp187=( struct Cyc_List_List*) _cycalloc( sizeof( struct Cyc_List_List));
+_temp187->hd=( void*) v; _temp187->tl= rev_vs; _temp187;}); i += 2;}} if( rev_vs
+==  0){( int) _throw(( void*)({ struct Cyc_Core_Impossible_struct* _temp188=(
 struct Cyc_Core_Impossible_struct*) _cycalloc( sizeof( struct Cyc_Core_Impossible_struct));
-_temp187[ 0]=({ struct Cyc_Core_Impossible_struct _temp188; _temp188.tag= Cyc_Core_Impossible;
-_temp188.f1= _tag_arr("bad namespace", sizeof( unsigned char), 14u); _temp188;});
-_temp187;}));}{ struct _tagged_arr* v=( struct _tagged_arr*)(( struct Cyc_List_List*)
+_temp188[ 0]=({ struct Cyc_Core_Impossible_struct _temp189; _temp189.tag= Cyc_Core_Impossible;
+_temp189.f1= _tag_arr("bad namespace", sizeof( unsigned char), 14u); _temp189;});
+_temp188;}));}{ struct _tagged_arr* v=( struct _tagged_arr*)(( struct Cyc_List_List*)
 _check_null( rev_vs))->hd; struct Cyc_List_List* vs=(( struct Cyc_List_List*(*)(
 struct Cyc_List_List* x)) Cyc_List_imp_rev)( rev_vs->tl); Cyc_Lex_token_qvar=({
-struct _tuple0* _temp189=( struct _tuple0*) _cycalloc( sizeof( struct _tuple0));
-_temp189->f1=( void*)({ struct Cyc_Absyn_Rel_n_struct* _temp190=( struct Cyc_Absyn_Rel_n_struct*)
-_cycalloc( sizeof( struct Cyc_Absyn_Rel_n_struct)); _temp190[ 0]=({ struct Cyc_Absyn_Rel_n_struct
-_temp191; _temp191.tag= Cyc_Absyn_Rel_n; _temp191.f1= vs; _temp191;}); _temp190;});
-_temp189->f2= v; _temp189;}); if( Cyc_Lex_is_typedef( vs, v)){ return 350;}
-else{ return 349;}}} extern int Cyc_Lex_token( struct Cyc_Lexing_lexbuf*);
+struct _tuple0* _temp190=( struct _tuple0*) _cycalloc( sizeof( struct _tuple0));
+_temp190->f1=( void*)({ struct Cyc_Absyn_Rel_n_struct* _temp191=( struct Cyc_Absyn_Rel_n_struct*)
+_cycalloc( sizeof( struct Cyc_Absyn_Rel_n_struct)); _temp191[ 0]=({ struct Cyc_Absyn_Rel_n_struct
+_temp192; _temp192.tag= Cyc_Absyn_Rel_n; _temp192.f1= vs; _temp192;}); _temp191;});
+_temp190->f2= v; _temp190;}); if( Cyc_Lex_is_typedef( vs, v)){ return 351;}
+else{ return 350;}}} extern int Cyc_Lex_token( struct Cyc_Lexing_lexbuf*);
 extern int Cyc_Lex_strng( struct Cyc_Lexing_lexbuf*); extern int Cyc_Lex_comment(
 struct Cyc_Lexing_lexbuf*); int Cyc_yylex(){ int ans=(( int(*)( struct Cyc_Lexing_lexbuf*))
 Cyc_Lex_token)(( struct Cyc_Lexing_lexbuf*)(( struct Cyc_Core_Opt*) _check_null(
@@ -1138,39 +1144,39 @@ Cyc_Parse_lbuf))->v); Cyc_yylloc.first_line=(( int(*)( struct Cyc_Lexing_lexbuf*
 Cyc_Lexing_lexeme_start)(( struct Cyc_Lexing_lexbuf*)(( struct Cyc_Core_Opt*)
 _check_null( Cyc_Parse_lbuf))->v); Cyc_yylloc.last_line=(( int(*)( struct Cyc_Lexing_lexbuf*))
 Cyc_Lexing_lexeme_end)(( struct Cyc_Lexing_lexbuf*)(( struct Cyc_Core_Opt*)
-_check_null( Cyc_Parse_lbuf))->v); switch( ans){ case 343: _LL192: Cyc_yylval=(
-void*)({ struct Cyc_String_tok_struct* _temp194=( struct Cyc_String_tok_struct*)
-_cycalloc( sizeof( struct Cyc_String_tok_struct)); _temp194[ 0]=({ struct Cyc_String_tok_struct
-_temp195; _temp195.tag= Cyc_String_tok; _temp195.f1= Cyc_Lex_token_string;
-_temp195;}); _temp194;}); break; case 349: _LL193: Cyc_yylval=( void*)({ struct
-Cyc_QualId_tok_struct* _temp197=( struct Cyc_QualId_tok_struct*) _cycalloc(
-sizeof( struct Cyc_QualId_tok_struct)); _temp197[ 0]=({ struct Cyc_QualId_tok_struct
-_temp198; _temp198.tag= Cyc_QualId_tok; _temp198.f1= Cyc_Lex_token_qvar;
-_temp198;}); _temp197;}); break; case 350: _LL196: Cyc_yylval=( void*)({ struct
-Cyc_QualId_tok_struct* _temp200=( struct Cyc_QualId_tok_struct*) _cycalloc(
-sizeof( struct Cyc_QualId_tok_struct)); _temp200[ 0]=({ struct Cyc_QualId_tok_struct
-_temp201; _temp201.tag= Cyc_QualId_tok; _temp201.f1= Cyc_Lex_token_qvar;
-_temp201;}); _temp200;}); break; case 348: _LL199: Cyc_yylval=( void*)({ struct
-Cyc_String_tok_struct* _temp203=( struct Cyc_String_tok_struct*) _cycalloc(
-sizeof( struct Cyc_String_tok_struct)); _temp203[ 0]=({ struct Cyc_String_tok_struct
-_temp204; _temp204.tag= Cyc_String_tok; _temp204.f1= Cyc_Lex_token_string;
-_temp204;}); _temp203;}); break; case 344: _LL202: Cyc_yylval=( void*)({ struct
-Cyc_Int_tok_struct* _temp206=( struct Cyc_Int_tok_struct*) _cycalloc( sizeof(
-struct Cyc_Int_tok_struct)); _temp206[ 0]=({ struct Cyc_Int_tok_struct _temp207;
-_temp207.tag= Cyc_Int_tok; _temp207.f1= Cyc_Lex_token_int; _temp207;}); _temp206;});
-break; case 346: _LL205: Cyc_yylval=( void*)({ struct Cyc_Char_tok_struct*
-_temp209=( struct Cyc_Char_tok_struct*) _cycalloc_atomic( sizeof( struct Cyc_Char_tok_struct));
-_temp209[ 0]=({ struct Cyc_Char_tok_struct _temp210; _temp210.tag= Cyc_Char_tok;
-_temp210.f1= Cyc_Lex_token_char; _temp210;}); _temp209;}); break; case 347:
-_LL208: Cyc_yylval=( void*)({ struct Cyc_String_tok_struct* _temp212=( struct
+_check_null( Cyc_Parse_lbuf))->v); switch( ans){ case 344: _LL193: Cyc_yylval=(
+void*)({ struct Cyc_String_tok_struct* _temp195=( struct Cyc_String_tok_struct*)
+_cycalloc( sizeof( struct Cyc_String_tok_struct)); _temp195[ 0]=({ struct Cyc_String_tok_struct
+_temp196; _temp196.tag= Cyc_String_tok; _temp196.f1= Cyc_Lex_token_string;
+_temp196;}); _temp195;}); break; case 350: _LL194: Cyc_yylval=( void*)({ struct
+Cyc_QualId_tok_struct* _temp198=( struct Cyc_QualId_tok_struct*) _cycalloc(
+sizeof( struct Cyc_QualId_tok_struct)); _temp198[ 0]=({ struct Cyc_QualId_tok_struct
+_temp199; _temp199.tag= Cyc_QualId_tok; _temp199.f1= Cyc_Lex_token_qvar;
+_temp199;}); _temp198;}); break; case 351: _LL197: Cyc_yylval=( void*)({ struct
+Cyc_QualId_tok_struct* _temp201=( struct Cyc_QualId_tok_struct*) _cycalloc(
+sizeof( struct Cyc_QualId_tok_struct)); _temp201[ 0]=({ struct Cyc_QualId_tok_struct
+_temp202; _temp202.tag= Cyc_QualId_tok; _temp202.f1= Cyc_Lex_token_qvar;
+_temp202;}); _temp201;}); break; case 349: _LL200: Cyc_yylval=( void*)({ struct
+Cyc_String_tok_struct* _temp204=( struct Cyc_String_tok_struct*) _cycalloc(
+sizeof( struct Cyc_String_tok_struct)); _temp204[ 0]=({ struct Cyc_String_tok_struct
+_temp205; _temp205.tag= Cyc_String_tok; _temp205.f1= Cyc_Lex_token_string;
+_temp205;}); _temp204;}); break; case 345: _LL203: Cyc_yylval=( void*)({ struct
+Cyc_Int_tok_struct* _temp207=( struct Cyc_Int_tok_struct*) _cycalloc( sizeof(
+struct Cyc_Int_tok_struct)); _temp207[ 0]=({ struct Cyc_Int_tok_struct _temp208;
+_temp208.tag= Cyc_Int_tok; _temp208.f1= Cyc_Lex_token_int; _temp208;}); _temp207;});
+break; case 347: _LL206: Cyc_yylval=( void*)({ struct Cyc_Char_tok_struct*
+_temp210=( struct Cyc_Char_tok_struct*) _cycalloc_atomic( sizeof( struct Cyc_Char_tok_struct));
+_temp210[ 0]=({ struct Cyc_Char_tok_struct _temp211; _temp211.tag= Cyc_Char_tok;
+_temp211.f1= Cyc_Lex_token_char; _temp211;}); _temp210;}); break; case 348:
+_LL209: Cyc_yylval=( void*)({ struct Cyc_String_tok_struct* _temp213=( struct
 Cyc_String_tok_struct*) _cycalloc( sizeof( struct Cyc_String_tok_struct));
-_temp212[ 0]=({ struct Cyc_String_tok_struct _temp213; _temp213.tag= Cyc_String_tok;
-_temp213.f1= Cyc_Lex_token_string; _temp213;}); _temp212;}); break; case 345:
-_LL211: Cyc_yylval=( void*)({ struct Cyc_String_tok_struct* _temp215=( struct
+_temp213[ 0]=({ struct Cyc_String_tok_struct _temp214; _temp214.tag= Cyc_String_tok;
+_temp214.f1= Cyc_Lex_token_string; _temp214;}); _temp213;}); break; case 346:
+_LL212: Cyc_yylval=( void*)({ struct Cyc_String_tok_struct* _temp216=( struct
 Cyc_String_tok_struct*) _cycalloc( sizeof( struct Cyc_String_tok_struct));
-_temp215[ 0]=({ struct Cyc_String_tok_struct _temp216; _temp216.tag= Cyc_String_tok;
-_temp216.f1= Cyc_Lex_token_string; _temp216;}); _temp215;}); break; default:
-_LL214: break;} return ans;} const int Cyc_Lex_lex_base[ 149u]=( const int[ 149u]){
+_temp216[ 0]=({ struct Cyc_String_tok_struct _temp217; _temp217.tag= Cyc_String_tok;
+_temp217.f1= Cyc_Lex_token_string; _temp217;}); _temp216;}); break; default:
+_LL215: break;} return ans;} const int Cyc_Lex_lex_base[ 149u]=( const int[ 149u]){
 0, 113, 17, 83, 16, 2, - 3, - 1, - 2, - 17, - 18, 4, 118, 119, - 19, 5, - 13, -
 12, 85, - 14, - 11, - 4, - 5, - 6, - 7, - 8, - 9, - 10, 192, 215, 111, - 15, 166,
 - 18, - 55, 8, 30, - 39, 18, 31, 116, 139, 32, 138, 135, 137, 159, 250, 325, 83,
@@ -1393,112 +1399,112 @@ _check_known_subscript_notnull( 1752u, base +  c)] ==  state){ state= Cyc_Lex_le
 _check_known_subscript_notnull( 1752u, base +  c)];} else{ state= Cyc_Lex_lex_default[
 _check_known_subscript_notnull( 149u, state)];} if( state <  0){ lbuf->lex_curr_pos=
 lbuf->lex_last_pos; if( lbuf->lex_last_action ==  - 1){( int) _throw(( void*)({
-struct Cyc_Lexing_Error_struct* _temp218=( struct Cyc_Lexing_Error_struct*)
-_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp218[ 0]=({ struct Cyc_Lexing_Error_struct
-_temp219; _temp219.tag= Cyc_Lexing_Error; _temp219.f1= _tag_arr("empty token",
-sizeof( unsigned char), 12u); _temp219;}); _temp218;}));} else{ return lbuf->lex_last_action;}}
+struct Cyc_Lexing_Error_struct* _temp219=( struct Cyc_Lexing_Error_struct*)
+_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp219[ 0]=({ struct Cyc_Lexing_Error_struct
+_temp220; _temp220.tag= Cyc_Lexing_Error; _temp220.f1= _tag_arr("empty token",
+sizeof( unsigned char), 12u); _temp220;}); _temp219;}));} else{ return lbuf->lex_last_action;}}
 else{ if( c ==  256){ lbuf->lex_eof_reached= 0;}}}} int Cyc_Lex_token_rec(
 struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate= Cyc_Lex_lex_engine(
-lexstate, lexbuf); switch( lexstate){ case 0: _LL220: return( int) Cyc_Lex_process_id(
-lexbuf); case 1: _LL221: return( int) Cyc_Lex_process_id( lexbuf); case 2:
-_LL222: return( int) Cyc_Lex_process_qual_id( lexbuf); case 3: _LL223: Cyc_Lex_token_string=*
-Cyc_Lex_get_symbol( Cyc_Lex_str_index_lbuf( lexbuf)); return 348; case 4: _LL224:
-Cyc_Lex_token_int= Cyc_Lex_intconst( lexbuf, 2, 0, 16); return 344; case 5:
-_LL225: Cyc_Lex_token_int= Cyc_Lex_intconst( lexbuf, 0, 0, 8); return 344; case
-6: _LL226: Cyc_Lex_token_int= Cyc_Lex_intconst( lexbuf, 0, 0, 10); return 344;
-case 7: _LL227: Cyc_Lex_token_int= Cyc_Lex_intconst( lexbuf, 0, 0, 10); return
-344; case 8: _LL228: Cyc_Lex_token_string=( struct _tagged_arr) Cyc_Lexing_lexeme(
-lexbuf); return 347; case 9: _LL229: Cyc_Lex_token_string=( struct _tagged_arr)
-Cyc_Lexing_lexeme( lexbuf); return 347; case 10: _LL230: return 326; case 11:
-_LL231: return 327; case 12: _LL232: return 324; case 13: _LL233: return 325;
-case 14: _LL234: return 320; case 15: _LL235: return 321; case 16: _LL236:
-return 333; case 17: _LL237: return 334; case 18: _LL238: return 330; case 19:
-_LL239: return 331; case 20: _LL240: return 332; case 21: _LL241: return 339;
-case 22: _LL242: return 338; case 23: _LL243: return 337; case 24: _LL244:
-return 335; case 25: _LL245: return 336; case 26: _LL246: return 328; case 27:
-_LL247: return 329; case 28: _LL248: return 322; case 29: _LL249: return 323;
-case 30: _LL250: return 341; case 31: _LL251: return 319; case 32: _LL252:
-return 340; case 33: _LL253: return 342; case 34: _LL254: return Cyc_Lex_token(
-lexbuf); case 35: _LL255: return Cyc_Lex_token( lexbuf); case 36: _LL256: return
-Cyc_Lex_token( lexbuf); case 37: _LL257: Cyc_Lex_comment_depth= 1; Cyc_Lex_runaway_start=
+lexstate, lexbuf); switch( lexstate){ case 0: _LL221: return( int) Cyc_Lex_process_id(
+lexbuf); case 1: _LL222: return( int) Cyc_Lex_process_id( lexbuf); case 2:
+_LL223: return( int) Cyc_Lex_process_qual_id( lexbuf); case 3: _LL224: Cyc_Lex_token_string=*
+Cyc_Lex_get_symbol( Cyc_Lex_str_index_lbuf( lexbuf)); return 349; case 4: _LL225:
+Cyc_Lex_token_int= Cyc_Lex_intconst( lexbuf, 2, 0, 16); return 345; case 5:
+_LL226: Cyc_Lex_token_int= Cyc_Lex_intconst( lexbuf, 0, 0, 8); return 345; case
+6: _LL227: Cyc_Lex_token_int= Cyc_Lex_intconst( lexbuf, 0, 0, 10); return 345;
+case 7: _LL228: Cyc_Lex_token_int= Cyc_Lex_intconst( lexbuf, 0, 0, 10); return
+345; case 8: _LL229: Cyc_Lex_token_string=( struct _tagged_arr) Cyc_Lexing_lexeme(
+lexbuf); return 348; case 9: _LL230: Cyc_Lex_token_string=( struct _tagged_arr)
+Cyc_Lexing_lexeme( lexbuf); return 348; case 10: _LL231: return 327; case 11:
+_LL232: return 328; case 12: _LL233: return 325; case 13: _LL234: return 326;
+case 14: _LL235: return 321; case 15: _LL236: return 322; case 16: _LL237:
+return 334; case 17: _LL238: return 335; case 18: _LL239: return 331; case 19:
+_LL240: return 332; case 20: _LL241: return 333; case 21: _LL242: return 340;
+case 22: _LL243: return 339; case 23: _LL244: return 338; case 24: _LL245:
+return 336; case 25: _LL246: return 337; case 26: _LL247: return 329; case 27:
+_LL248: return 330; case 28: _LL249: return 323; case 29: _LL250: return 324;
+case 30: _LL251: return 342; case 31: _LL252: return 320; case 32: _LL253:
+return 341; case 33: _LL254: return 343; case 34: _LL255: return Cyc_Lex_token(
+lexbuf); case 35: _LL256: return Cyc_Lex_token( lexbuf); case 36: _LL257: return
+Cyc_Lex_token( lexbuf); case 37: _LL258: Cyc_Lex_comment_depth= 1; Cyc_Lex_runaway_start=
 Cyc_Lexing_lexeme_start( lexbuf); Cyc_Lex_comment( lexbuf); return Cyc_Lex_token(
-lexbuf); case 38: _LL258: Cyc_Lex_string_pos= 0; Cyc_Lex_runaway_start= Cyc_Lexing_lexeme_start(
+lexbuf); case 38: _LL259: Cyc_Lex_string_pos= 0; Cyc_Lex_runaway_start= Cyc_Lexing_lexeme_start(
 lexbuf); while( Cyc_Lex_strng( lexbuf)) {;} Cyc_Lex_token_string=( struct
-_tagged_arr) Cyc_Lex_get_stored_string(); return 345; case 39: _LL259: Cyc_Lex_token_char='\a';
-return 346; case 40: _LL260: Cyc_Lex_token_char='\b'; return 346; case 41:
-_LL261: Cyc_Lex_token_char='\f'; return 346; case 42: _LL262: Cyc_Lex_token_char='\n';
-return 346; case 43: _LL263: Cyc_Lex_token_char='\r'; return 346; case 44:
-_LL264: Cyc_Lex_token_char='\t'; return 346; case 45: _LL265: Cyc_Lex_token_char='\v';
-return 346; case 46: _LL266: Cyc_Lex_token_char='\\'; return 346; case 47:
-_LL267: Cyc_Lex_token_char='\''; return 346; case 48: _LL268: Cyc_Lex_token_char='"';
-return 346; case 49: _LL269: Cyc_Lex_token_char='?'; return 346; case 50: _LL270:
+_tagged_arr) Cyc_Lex_get_stored_string(); return 346; case 39: _LL260: Cyc_Lex_token_char='\a';
+return 347; case 40: _LL261: Cyc_Lex_token_char='\b'; return 347; case 41:
+_LL262: Cyc_Lex_token_char='\f'; return 347; case 42: _LL263: Cyc_Lex_token_char='\n';
+return 347; case 43: _LL264: Cyc_Lex_token_char='\r'; return 347; case 44:
+_LL265: Cyc_Lex_token_char='\t'; return 347; case 45: _LL266: Cyc_Lex_token_char='\v';
+return 347; case 46: _LL267: Cyc_Lex_token_char='\\'; return 347; case 47:
+_LL268: Cyc_Lex_token_char='\''; return 347; case 48: _LL269: Cyc_Lex_token_char='"';
+return 347; case 49: _LL270: Cyc_Lex_token_char='?'; return 347; case 50: _LL271:
 Cyc_Lex_token_char=( unsigned char)(* Cyc_Lex_intconst( lexbuf, 2, 1, 8)).f2;
-return 346; case 51: _LL271: Cyc_Lex_token_char=( unsigned char)(* Cyc_Lex_intconst(
-lexbuf, 3, 1, 16)).f2; return 346; case 52: _LL272: Cyc_Lex_token_char= Cyc_Lexing_lexeme_char(
-lexbuf, 1); return 346; case 53: _LL273: return - 1; case 54: _LL274: return(
-int) Cyc_Lexing_lexeme_char( lexbuf, 0); default: _LL275:( lexbuf->refill_buff)(
+return 347; case 51: _LL272: Cyc_Lex_token_char=( unsigned char)(* Cyc_Lex_intconst(
+lexbuf, 3, 1, 16)).f2; return 347; case 52: _LL273: Cyc_Lex_token_char= Cyc_Lexing_lexeme_char(
+lexbuf, 1); return 347; case 53: _LL274: return - 1; case 54: _LL275: return(
+int) Cyc_Lexing_lexeme_char( lexbuf, 0); default: _LL276:( lexbuf->refill_buff)(
 lexbuf); return Cyc_Lex_token_rec( lexbuf, lexstate);}( int) _throw(( void*)({
-struct Cyc_Lexing_Error_struct* _temp277=( struct Cyc_Lexing_Error_struct*)
-_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp277[ 0]=({ struct Cyc_Lexing_Error_struct
-_temp278; _temp278.tag= Cyc_Lexing_Error; _temp278.f1= _tag_arr("some action didn't return!",
-sizeof( unsigned char), 27u); _temp278;}); _temp277;}));} int Cyc_Lex_token(
+struct Cyc_Lexing_Error_struct* _temp278=( struct Cyc_Lexing_Error_struct*)
+_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp278[ 0]=({ struct Cyc_Lexing_Error_struct
+_temp279; _temp279.tag= Cyc_Lexing_Error; _temp279.f1= _tag_arr("some action didn't return!",
+sizeof( unsigned char), 27u); _temp279;}); _temp278;}));} int Cyc_Lex_token(
 struct Cyc_Lexing_lexbuf* lexbuf){ return Cyc_Lex_token_rec( lexbuf, 0);} int
 Cyc_Lex_strng_rec( struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate=
-Cyc_Lex_lex_engine( lexstate, lexbuf); switch( lexstate){ case 0: _LL279: return
-1; case 1: _LL280: return 0; case 2: _LL281: return 1; case 3: _LL282: Cyc_Lex_store_string_char('\a');
-return 1; case 4: _LL283: Cyc_Lex_store_string_char('\b'); return 1; case 5:
-_LL284: Cyc_Lex_store_string_char('\f'); return 1; case 6: _LL285: Cyc_Lex_store_string_char('\n');
-return 1; case 7: _LL286: Cyc_Lex_store_string_char('\r'); return 1; case 8:
-_LL287: Cyc_Lex_store_string_char('\t'); return 1; case 9: _LL288: Cyc_Lex_store_string_char('\v');
-return 1; case 10: _LL289: Cyc_Lex_store_string_char('\\'); return 1; case 11:
-_LL290: Cyc_Lex_store_string_char('\''); return 1; case 12: _LL291: Cyc_Lex_store_string_char('"');
-return 1; case 13: _LL292: Cyc_Lex_store_string_char('?'); return 1; case 14:
-_LL293: Cyc_Lex_store_string_char(( unsigned char)(* Cyc_Lex_intconst( lexbuf, 1,
-0, 8)).f2); return 1; case 15: _LL294: Cyc_Lex_store_string_char(( unsigned char)(*
-Cyc_Lex_intconst( lexbuf, 2, 0, 16)).f2); return 1; case 16: _LL295: Cyc_Lex_store_string_char(
-Cyc_Lexing_lexeme_char( lexbuf, 0)); return 1; case 17: _LL296: Cyc_Lex_runaway_err(
+Cyc_Lex_lex_engine( lexstate, lexbuf); switch( lexstate){ case 0: _LL280: return
+1; case 1: _LL281: return 0; case 2: _LL282: return 1; case 3: _LL283: Cyc_Lex_store_string_char('\a');
+return 1; case 4: _LL284: Cyc_Lex_store_string_char('\b'); return 1; case 5:
+_LL285: Cyc_Lex_store_string_char('\f'); return 1; case 6: _LL286: Cyc_Lex_store_string_char('\n');
+return 1; case 7: _LL287: Cyc_Lex_store_string_char('\r'); return 1; case 8:
+_LL288: Cyc_Lex_store_string_char('\t'); return 1; case 9: _LL289: Cyc_Lex_store_string_char('\v');
+return 1; case 10: _LL290: Cyc_Lex_store_string_char('\\'); return 1; case 11:
+_LL291: Cyc_Lex_store_string_char('\''); return 1; case 12: _LL292: Cyc_Lex_store_string_char('"');
+return 1; case 13: _LL293: Cyc_Lex_store_string_char('?'); return 1; case 14:
+_LL294: Cyc_Lex_store_string_char(( unsigned char)(* Cyc_Lex_intconst( lexbuf, 1,
+0, 8)).f2); return 1; case 15: _LL295: Cyc_Lex_store_string_char(( unsigned char)(*
+Cyc_Lex_intconst( lexbuf, 2, 0, 16)).f2); return 1; case 16: _LL296: Cyc_Lex_store_string_char(
+Cyc_Lexing_lexeme_char( lexbuf, 0)); return 1; case 17: _LL297: Cyc_Lex_runaway_err(
 _tag_arr("string ends in newline", sizeof( unsigned char), 23u), lexbuf); return
-0; case 18: _LL297: Cyc_Lex_runaway_err( _tag_arr("unterminated string", sizeof(
-unsigned char), 20u), lexbuf); return 0; case 19: _LL298: Cyc_Lex_err( _tag_arr("bad character following backslash in string",
-sizeof( unsigned char), 44u), lexbuf); return 1; default: _LL299:( lexbuf->refill_buff)(
+0; case 18: _LL298: Cyc_Lex_runaway_err( _tag_arr("unterminated string", sizeof(
+unsigned char), 20u), lexbuf); return 0; case 19: _LL299: Cyc_Lex_err( _tag_arr("bad character following backslash in string",
+sizeof( unsigned char), 44u), lexbuf); return 1; default: _LL300:( lexbuf->refill_buff)(
 lexbuf); return Cyc_Lex_strng_rec( lexbuf, lexstate);}( int) _throw(( void*)({
-struct Cyc_Lexing_Error_struct* _temp301=( struct Cyc_Lexing_Error_struct*)
-_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp301[ 0]=({ struct Cyc_Lexing_Error_struct
-_temp302; _temp302.tag= Cyc_Lexing_Error; _temp302.f1= _tag_arr("some action didn't return!",
-sizeof( unsigned char), 27u); _temp302;}); _temp301;}));} int Cyc_Lex_strng(
+struct Cyc_Lexing_Error_struct* _temp302=( struct Cyc_Lexing_Error_struct*)
+_cycalloc( sizeof( struct Cyc_Lexing_Error_struct)); _temp302[ 0]=({ struct Cyc_Lexing_Error_struct
+_temp303; _temp303.tag= Cyc_Lexing_Error; _temp303.f1= _tag_arr("some action didn't return!",
+sizeof( unsigned char), 27u); _temp303;}); _temp302;}));} int Cyc_Lex_strng(
 struct Cyc_Lexing_lexbuf* lexbuf){ return Cyc_Lex_strng_rec( lexbuf, 1);} int
 Cyc_Lex_comment_rec( struct Cyc_Lexing_lexbuf* lexbuf, int lexstate){ lexstate=
-Cyc_Lex_lex_engine( lexstate, lexbuf); switch( lexstate){ case 0: _LL303: ++ Cyc_Lex_comment_depth;
-return Cyc_Lex_comment( lexbuf); case 1: _LL304: -- Cyc_Lex_comment_depth; if(
+Cyc_Lex_lex_engine( lexstate, lexbuf); switch( lexstate){ case 0: _LL304: ++ Cyc_Lex_comment_depth;
+return Cyc_Lex_comment( lexbuf); case 1: _LL305: -- Cyc_Lex_comment_depth; if(
 Cyc_Lex_comment_depth >  0){ return Cyc_Lex_comment( lexbuf);} return 0; case 2:
-_LL305: Cyc_Lex_runaway_err( _tag_arr("unterminated comment", sizeof(
-unsigned char), 21u), lexbuf); return 0; case 3: _LL306: return Cyc_Lex_comment(
-lexbuf); case 4: _LL307: return Cyc_Lex_comment( lexbuf); case 5: _LL308: return
-Cyc_Lex_comment( lexbuf); default: _LL309:( lexbuf->refill_buff)( lexbuf);
+_LL306: Cyc_Lex_runaway_err( _tag_arr("unterminated comment", sizeof(
+unsigned char), 21u), lexbuf); return 0; case 3: _LL307: return Cyc_Lex_comment(
+lexbuf); case 4: _LL308: return Cyc_Lex_comment( lexbuf); case 5: _LL309: return
+Cyc_Lex_comment( lexbuf); default: _LL310:( lexbuf->refill_buff)( lexbuf);
 return Cyc_Lex_comment_rec( lexbuf, lexstate);}( int) _throw(( void*)({ struct
-Cyc_Lexing_Error_struct* _temp311=( struct Cyc_Lexing_Error_struct*) _cycalloc(
-sizeof( struct Cyc_Lexing_Error_struct)); _temp311[ 0]=({ struct Cyc_Lexing_Error_struct
-_temp312; _temp312.tag= Cyc_Lexing_Error; _temp312.f1= _tag_arr("some action didn't return!",
-sizeof( unsigned char), 27u); _temp312;}); _temp311;}));} int Cyc_Lex_comment(
+Cyc_Lexing_Error_struct* _temp312=( struct Cyc_Lexing_Error_struct*) _cycalloc(
+sizeof( struct Cyc_Lexing_Error_struct)); _temp312[ 0]=({ struct Cyc_Lexing_Error_struct
+_temp313; _temp313.tag= Cyc_Lexing_Error; _temp313.f1= _tag_arr("some action didn't return!",
+sizeof( unsigned char), 27u); _temp313;}); _temp312;}));} int Cyc_Lex_comment(
 struct Cyc_Lexing_lexbuf* lexbuf){ return Cyc_Lex_comment_rec( lexbuf, 2);} void
-Cyc_Lex_lex_init(){ Cyc_Lex_ids_trie=({ struct Cyc_Lex_Trie* _temp313=( struct
-Cyc_Lex_Trie*) _cycalloc( sizeof( struct Cyc_Lex_Trie)); _temp313->children=(
-void*)(( void*) Cyc_Lex_Zero); _temp313->shared_str= 0; _temp313;}); Cyc_Lex_typedefs_trie=({
-struct Cyc_Lex_Trie* _temp314=( struct Cyc_Lex_Trie*) _cycalloc( sizeof( struct
-Cyc_Lex_Trie)); _temp314->children=( void*)(( void*) Cyc_Lex_Zero); _temp314->shared_str=
-0; _temp314;}); Cyc_Lex_symbols=( struct Cyc_Xarray_Xarray*)(( struct Cyc_Xarray_Xarray*(*)(
+Cyc_Lex_lex_init(){ Cyc_Lex_ids_trie=({ struct Cyc_Lex_Trie* _temp314=( struct
+Cyc_Lex_Trie*) _cycalloc( sizeof( struct Cyc_Lex_Trie)); _temp314->children=(
+void*)(( void*) Cyc_Lex_Zero); _temp314->shared_str= 0; _temp314;}); Cyc_Lex_typedefs_trie=({
+struct Cyc_Lex_Trie* _temp315=( struct Cyc_Lex_Trie*) _cycalloc( sizeof( struct
+Cyc_Lex_Trie)); _temp315->children=( void*)(( void*) Cyc_Lex_Zero); _temp315->shared_str=
+0; _temp315;}); Cyc_Lex_symbols=( struct Cyc_Xarray_Xarray*)(( struct Cyc_Xarray_Xarray*(*)(
 int, struct _tagged_arr*)) Cyc_Xarray_create)( 101, _init_tag_arr(( struct
 _tagged_arr*) _cycalloc( sizeof( struct _tagged_arr)),"", sizeof( unsigned char),
 1u));(( void(*)( struct Cyc_Xarray_Xarray*, struct _tagged_arr*)) Cyc_Xarray_add)((
 struct Cyc_Xarray_Xarray*) _check_null( Cyc_Lex_symbols),& Cyc_Lex_bogus_string);
-Cyc_Lex_num_kws=( int) 62u; Cyc_Lex_kw_nums=({ unsigned int _temp315=(
-unsigned int) Cyc_Lex_num_kws; int* _temp316=( int*) _cycalloc_atomic(
-_check_times( sizeof( int), _temp315)); struct _tagged_arr _temp318= _tag_arr(
-_temp316, sizeof( int),( unsigned int) Cyc_Lex_num_kws);{ unsigned int _temp317=
-_temp315; unsigned int i; for( i= 0; i <  _temp317; i ++){ _temp316[ i]= 0;}};
-_temp318;});{ int i= 0; for( 0; i <  Cyc_Lex_num_kws; ++ i){ struct _tagged_arr
-_temp319=( Cyc_Lex_rw_array[ _check_known_subscript_notnull( 62u, i)]).f1; Cyc_Lex_str_index(
-_temp319, 0,( int) Cyc_Std_strlen( _temp319));*(( int*) _check_unknown_subscript(
+Cyc_Lex_num_kws=( int) 63u; Cyc_Lex_kw_nums=({ unsigned int _temp316=(
+unsigned int) Cyc_Lex_num_kws; int* _temp317=( int*) _cycalloc_atomic(
+_check_times( sizeof( int), _temp316)); struct _tagged_arr _temp319= _tag_arr(
+_temp317, sizeof( int),( unsigned int) Cyc_Lex_num_kws);{ unsigned int _temp318=
+_temp316; unsigned int i; for( i= 0; i <  _temp318; i ++){ _temp317[ i]= 0;}};
+_temp319;});{ int i= 0; for( 0; i <  Cyc_Lex_num_kws; ++ i){ struct _tagged_arr
+_temp320=( Cyc_Lex_rw_array[ _check_known_subscript_notnull( 63u, i)]).f1; Cyc_Lex_str_index(
+_temp320, 0,( int) Cyc_Std_strlen( _temp320));*(( int*) _check_unknown_subscript(
 Cyc_Lex_kw_nums, sizeof( int), i))=( int)( Cyc_Lex_rw_array[
-_check_known_subscript_notnull( 62u, i)]).f2;}} Cyc_Lex_typedef_init(); Cyc_Lex_comment_depth=
+_check_known_subscript_notnull( 63u, i)]).f2;}} Cyc_Lex_typedef_init(); Cyc_Lex_comment_depth=
 0;}

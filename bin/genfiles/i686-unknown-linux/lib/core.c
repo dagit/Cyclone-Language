@@ -263,15 +263,15 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
  extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
 extern struct Cyc_Core_Opt* Cyc_Core_opt_map( void*(* f)( void*), struct Cyc_Core_Opt*
-x); extern struct _tagged_arr Cyc_Core_new_string( int); extern struct
-_tagged_arr Cyc_Core_rnew_string( struct _RegionHandle*, int); extern int Cyc_Core_true_f(
-void*); extern int Cyc_Core_false_f( void*); struct _tuple0{ void* f1; void* f2;
-} ; extern void* Cyc_Core_fst( struct _tuple0*); extern void* Cyc_Core_snd(
-struct _tuple0*); struct _tuple1{ void* f1; void* f2; void* f3; } ; extern void*
-Cyc_Core_third( struct _tuple1*); extern void* Cyc_Core_identity( void*); extern
-int Cyc_Core_intcmp( int, int); extern int Cyc_Core_charcmp( unsigned char,
-unsigned char); extern int Cyc_Core_ptrcmp( void*, void*); extern unsigned char
-Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
+x); extern struct _tagged_arr Cyc_Core_new_string( unsigned int); extern struct
+_tagged_arr Cyc_Core_rnew_string( struct _RegionHandle*, unsigned int); extern
+int Cyc_Core_true_f( void*); extern int Cyc_Core_false_f( void*); struct _tuple0{
+void* f1; void* f2; } ; extern void* Cyc_Core_fst( struct _tuple0*); extern void*
+Cyc_Core_snd( struct _tuple0*); struct _tuple1{ void* f1; void* f2; void* f3; }
+; extern void* Cyc_Core_third( struct _tuple1*); extern void* Cyc_Core_identity(
+void*); extern int Cyc_Core_intcmp( int, int); extern int Cyc_Core_charcmp(
+unsigned char, unsigned char); extern int Cyc_Core_ptrcmp( void*, void*); extern
+unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
 12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
 } ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
@@ -290,18 +290,14 @@ unsigned char Cyc_Core_Unreachable[ 16u]="\000\000\000\000Unreachable"; struct
 Cyc_Core_Opt; struct Cyc_Core_Opt* Cyc_Core_opt_map( void*(* f)( void*), struct
 Cyc_Core_Opt* o){ if( o ==  0){ return 0;} return({ struct Cyc_Core_Opt* _temp0=(
 struct Cyc_Core_Opt*) _cycalloc( sizeof( struct Cyc_Core_Opt)); _temp0->v=( void*)
-f(( void*) o->v); _temp0;});} struct _tagged_arr Cyc_Core_new_string( int i){
-return({ unsigned int _temp1=( unsigned int) i; unsigned char* _temp2=(
-unsigned char*) _cycalloc_atomic( _check_times( sizeof( unsigned char), _temp1));
-struct _tagged_arr _temp4= _tag_arr( _temp2, sizeof( unsigned char),(
-unsigned int) i);{ unsigned int _temp3= _temp1; unsigned int j; for( j= 0; j < 
-_temp3; j ++){ _temp2[ j]='\000';}}; _temp4;});} struct _tagged_arr Cyc_Core_rnew_string(
-struct _RegionHandle* r, int i){ return({ unsigned int _temp5=( unsigned int) i;
-unsigned char* _temp6=( unsigned char*) _region_malloc( r, _check_times( sizeof(
-unsigned char), _temp5)); struct _tagged_arr _temp8= _tag_arr( _temp6, sizeof(
-unsigned char),( unsigned int) i);{ unsigned int _temp7= _temp5; unsigned int j;
-for( j= 0; j <  _temp7; j ++){ _temp6[ j]='\000';}}; _temp8;});} int Cyc_Core_true_f(
-void* x){ return 1;} int Cyc_Core_false_f( void* x){ return 0;} int Cyc_Core_intcmp(
+f(( void*) o->v); _temp0;});} struct _tagged_arr Cyc_Core_new_string(
+unsigned int i){ return({ unsigned int _temp1= i; unsigned char* _temp2=
+_cyccalloc_atomic( sizeof( unsigned char), _temp1); _tag_arr( _temp2, sizeof(
+unsigned char), _temp1);});} struct _tagged_arr Cyc_Core_rnew_string( struct
+_RegionHandle* r, unsigned int i){ return({ unsigned int _temp3= i;
+unsigned char* _temp4= _region_calloc( r, sizeof( unsigned char), _temp3);
+_tag_arr( _temp4, sizeof( unsigned char), _temp3);});} int Cyc_Core_true_f( void*
+x){ return 1;} int Cyc_Core_false_f( void* x){ return 0;} int Cyc_Core_intcmp(
 int a, int b){ return a -  b;} int Cyc_Core_charcmp( unsigned char a,
 unsigned char b){ return( int) a - ( int) b;} int Cyc_Core_ptrcmp( void* a, void*
 b){ if( a ==  b){ return 0;} if( a >  b){ return 1;} return - 1;} void* Cyc_Core_fst(

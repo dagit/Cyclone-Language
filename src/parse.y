@@ -262,6 +262,13 @@ static void only_vardecl(list_t<stringptr_t,`H> params,decl_t x) {
   return;
 }
 
+static vardecl_t decl2vardecl(decl_t d) {
+  switch (d->r) {
+  case &Var_d(vd): return vd;
+  default: return abort("bad declaration in `forarray' statement",d->loc);
+  }
+}
+
 // For old-style function definitions,
 // get a parameter type from a list of declarations
 static $(opt_t<var_t>,tqual_t,type_t)@
@@ -915,7 +922,7 @@ using Parse;
 %token IF ELSE SWITCH WHILE DO FOR GOTO CONTINUE BREAK RETURN ENUM
 // Cyc:  CYCLONE additional keywords
 %token NULL_kw LET THROW TRY CATCH
-%token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION
+%token NEW ABSTRACT FALLTHRU USING NAMESPACE TUNION XTUNION FORARRAY
 %token FILL CODEGEN CUT SPLICE
 %token MALLOC RMALLOC CALLOC RCALLOC
 %token REGION_T SIZEOF_T REGION RNEW REGIONS
@@ -2171,6 +2178,10 @@ iteration_statement:
       let s     = for_stmt(false_exp(DUMMYLOC),$4,$6,
                            $8,LOC(@1,@8));
       $$=^$(flatten_declarations(decls,s));
+    }
+| FORARRAY '(' declaration ';' expression ';' expression ')' statement
+    { let vardecls = map(decl2vardecl,$3);
+      $$=^$(forarray_stmt(vardecls,$5,$7,$9,LOC(@1,@9))); 
     }
 ;
 

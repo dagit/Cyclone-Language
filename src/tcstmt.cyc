@@ -73,6 +73,20 @@ static void pattern_synth(seg_t loc, tenv_t te, list_t<tvar_t> tvs,
     NewControlFlow::set_encloser(s,get_encloser(te));
 }
 
+// Check the declarations of a forarray statement.  The declarations
+// should be of the form: 
+//    t@`r const x = y+e    or
+//    t@`r const x = y      or
+//    t@`r const x = &y[e]
+// Returns a list of the array variables used in the definitions (e.g., y)
+// so that we can check the tests involve these variables.
+$(tenv_t, list_t<qvar_t>) check_forarray_decls(tenv_t te, seg_t loc, 
+                                               list_t<vardecl_t> decls) {
+  impos("check_forarray_decls");
+  return $(te,NULL);
+}
+
+
 // new_block is a kludge because we he abstract syntax doesn't group the
 // local declarations in a block, but the region rules do.  (That is,
 // adjacent declarations are in the same region.  Those at the beginning
@@ -158,6 +172,24 @@ void tcStmt(tenv_t te, stmt_t s0, bool new_block) {
     tcExp(te,NULL,e3); // ??? what does a break/continue in e3 mean ???
     return;
 
+  case &ForArray_s(ForArrayInfo{decls, $(e2,guard_s), $(e3,cont_s), s}):
+    impos("ForArray_s");
+    return;
+    /*
+    decorate_stmt(te,guard_s);
+    decorate_stmt(te,cont_s);
+    let $(te,used_ptrs) = check_forarray_decls(te,s0->loc,decls);
+    tcTest(te,e2,"forarray loop");
+    let cmp_ops = check_forarray_test(te,loc,decls,used_ptrs,e2);
+    te = set_in_loop(te,cont_s);
+    tcStmt(te,s,true);
+    // hack -- we make the declared pointer variables mutable here
+    // so that e3 can update it.
+    for (_ d = decls; d != NULL; d = d->tl) 
+      d->tq.q_const = false;
+    tcExp(te,NULL,e3); // ??? what does a break/continue in e3 mean ???
+    check_forarray_delta(te,loc,decls,cmp_ops,e3);
+    */
   case &Do_s(s,$(e,cont_s)):
     decorate_stmt(te,cont_s);
     tcStmt(set_in_loop(te,cont_s),s,true);

@@ -897,6 +897,9 @@ static flow_t anal_stmt(analenv_t env, flow_t inflow, stmt_t s) {
     update_flow(env, guard, e3_outflow);
     return f2f;
 
+    //case &ForArray_s(_):
+    //return impos("forarray not yet implemented!");
+
     // eg. of when this can happen is when destination is end of function
   case &Break_s(NULL): return BottomFL;
   case &Fallthru_s(es,&destclause): 

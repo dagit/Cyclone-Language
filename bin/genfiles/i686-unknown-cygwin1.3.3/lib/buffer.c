@@ -263,9 +263,9 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
  extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
 fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern struct _tagged_arr
-Cyc_Core_new_string( int); extern unsigned char Cyc_Core_Invalid_argument[ 21u];
-struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+Cyc_Core_new_string( unsigned int); extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
 15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
 f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
@@ -291,8 +291,8 @@ struct _tagged_arr, struct _tagged_arr, unsigned int); extern struct _tagged_arr
 Cyc_Std_substring( struct _tagged_arr, int ofs, unsigned int n); struct Cyc_Buffer_t{
 struct _tagged_arr buffer; unsigned int position; unsigned int length; struct
 _tagged_arr initial_buffer; } ; struct Cyc_Buffer_t* Cyc_Buffer_create(
-unsigned int n){ if( n <  1){ n= 1;}{ struct _tagged_arr s= Cyc_Core_new_string((
-int) n); return({ struct Cyc_Buffer_t* _temp0=( struct Cyc_Buffer_t*) _cycalloc(
+unsigned int n){ if( n <  1){ n= 1;}{ struct _tagged_arr s= Cyc_Core_new_string(
+n); return({ struct Cyc_Buffer_t* _temp0=( struct Cyc_Buffer_t*) _cycalloc(
 sizeof( struct Cyc_Buffer_t)); _temp0->buffer= s; _temp0->position= 0; _temp0->length=
 n; _temp0->initial_buffer= s; _temp0;});}} struct _tagged_arr Cyc_Buffer_contents(
 struct Cyc_Buffer_t* b){ return Cyc_Std_substring(( struct _tagged_arr) b->buffer,
@@ -303,7 +303,7 @@ b){ b->position= 0; return;} void Cyc_Buffer_reset( struct Cyc_Buffer_t* b){ b->
 unsigned char)); return;} static void Cyc_Buffer_resize( struct Cyc_Buffer_t* b,
 unsigned int more){ unsigned int len= b->length; unsigned int new_len= len;
 struct _tagged_arr new_buffer; while( b->position +  more >  new_len) { new_len=
-2 *  new_len;} new_buffer= Cyc_Core_new_string(( int) new_len); Cyc_Std_strncpy(
+2 *  new_len;} new_buffer= Cyc_Core_new_string( new_len); Cyc_Std_strncpy(
 new_buffer,( struct _tagged_arr) b->buffer, b->position); b->buffer= new_buffer;
 b->length= new_len; return;} void Cyc_Buffer_add_char( struct Cyc_Buffer_t* b,
 unsigned char c){ int pos=( int) b->position; if( pos >=  b->length){ Cyc_Buffer_resize(

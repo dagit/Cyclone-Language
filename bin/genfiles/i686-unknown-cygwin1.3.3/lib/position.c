@@ -263,9 +263,9 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
  extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
 fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern struct _tagged_arr
-Cyc_Core_new_string( int); extern unsigned char Cyc_Core_Invalid_argument[ 21u];
-struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+Cyc_Core_new_string( unsigned int); extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
 15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
 f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
@@ -443,8 +443,8 @@ void*) Cyc_Position_Elab); _temp36->desc= desc; _temp36;});} unsigned char Cyc_P
 14u]="\000\000\000\000Nocontext"; static struct _tagged_arr Cyc_Position_trunc(
 int n, struct _tagged_arr s){ int len=( int) Cyc_Std_strlen(( struct _tagged_arr)
 s); if( len <  n){ return s;}{ int len_one=( n -  3) /  2; int len_two=( n -  3)
--  len_one; struct _tagged_arr ans= Cyc_Core_new_string( n +  1); Cyc_Std_strncpy(
-ans,( struct _tagged_arr) s,( unsigned int) len_one); Cyc_Std_strncpy(
+-  len_one; struct _tagged_arr ans= Cyc_Core_new_string(( unsigned int)( n +  1));
+Cyc_Std_strncpy( ans,( struct _tagged_arr) s,( unsigned int) len_one); Cyc_Std_strncpy(
 _tagged_arr_plus( ans, sizeof( unsigned char), len_one), _tag_arr("...", sizeof(
 unsigned char), 4u), 3); Cyc_Std_strncpy( _tagged_arr_plus( _tagged_arr_plus(
 ans, sizeof( unsigned char), len_one), sizeof( unsigned char), 3),( struct

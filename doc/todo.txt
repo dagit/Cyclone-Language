@@ -8,6 +8,14 @@ CONFIGURATION BUGS:
 
 BUG FIXES and UNSOUNDNESSES:
 ----------------------------
+* There are at least two problems with the new treatment of [r]malloc and
+  [r]calloc.  First, we need to check that the things we are allocating
+  aren't too large (just as we do with array comprehensions.)  This avoids
+  the situation where you do something like malloc(~1).  Second, I'm not
+  sure that I got the changes to Dan's control-flow analysis right.  I've
+  run into at least one situation where something panic'd but I can't
+  reproduce it right now.  
+
 * there's a bug in control-flow checking of catch-phrases.  If you leave
   the "break" off of a case, then it re-raises the exception.
 

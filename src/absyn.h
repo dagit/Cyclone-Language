@@ -144,6 +144,7 @@ namespace Absyn {
   typedef struct Structfield @structfield_t;
   typedef tunion OffsetofField offsetof_field_t;
   typedef struct MallocInfo malloc_info_t;
+  typedef struct ForArrayInfo forarray_info_t;
 
   // scopes for declarations 
   EXTERN_ABSYN tunion Scope { 
@@ -499,6 +500,13 @@ namespace Absyn {
     absyn_annot_t annot; // used during analysis
   };
 
+  EXTERN_ABSYN struct ForArrayInfo {
+    list_t<vardecl_t> defns;
+    $(exp_t,stmt_t)   condition; // as with For_s, the statements on the 
+    $(exp_t,stmt_t)   delta;     //   condition & delta are hacks to support
+    stmt_t            body;      //   control-flow analysis.
+  };
+
   // The $(exp,stmt) in loops are just a hack for holding the
   // non-local predecessors of the exp.  The stmt should always be Skip_s
   // and only the non_local_preds field is interesting.
@@ -524,6 +532,7 @@ namespace Absyn {
     Do_s(stmt_t,$(exp_t,stmt_t));
     TryCatch_s(stmt_t,list_t<switch_clause_t>);
     Region_s(tvar_t, vardecl_t, stmt_t); // region<`r> h {s}
+    ForArray_s(forarray_info_t);
   };
 
   // statements with auxiliary info
@@ -893,6 +902,7 @@ namespace Absyn {
   extern stmt_t trycatch_stmt(stmt_t s,list_t<switch_clause_t,`H> scs,seg_t loc);
   extern stmt_t goto_stmt(var_t lab, seg_t loc);
   extern stmt_t assign_stmt(exp_t e1, exp_t e2, seg_t loc);
+  extern stmt_t forarray_stmt(list_t<vardecl_t,`H>,exp_t,exp_t,stmt_t,seg_t);
 
 /////////////////////////// Patterns //////////////////////////////
   extern pat_t new_pat(raw_pat_t p, seg_t s);

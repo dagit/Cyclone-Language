@@ -36,12 +36,12 @@ opt_t<`b,`H> opt_map(`b f(`a), opt_t<`a> o) {
   return new Opt(f(o->v));
 }
 
-mstring_t<`H> new_string(int i) {
-  return (new {for j < i : '\000'});
+mstring_t<`H> new_string(unsigned int i) {
+  return calloc(i,sizeof(char));
 }
 
-char ?`r rnew_string(region_t<`r> r, int i) {
-  return (rnew(r) {for j < i : '\000'});
+char ?`r rnew_string(region_t<`r> r, unsigned int i) {
+  return rcalloc(r,i,sizeof(char));
 }
 
 bool true_f(`a x)  {  return true;  }

@@ -2452,6 +2452,9 @@ static void stmt_to_c(env_t nv, stmt_t s) {
       exp_to_c(nv,e1); exp_to_c(nv,e2); exp_to_c(nv,e3);
       stmt_to_c(loop_env(nv),s2);
       return;
+    case &ForArray_s(_):
+      impos("forarray not yet implemented");
+      return;
     case &Switch_s(e,scs):
       xlate_switch(nv,s,e,scs);
       return;

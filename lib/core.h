@@ -79,11 +79,11 @@ extern opt_t<`b,`H> opt_map(`b f(`a), opt_t<`a,`r> x);
   /** [opt_map(f,x)] applies [f] to the value contained in option [x],
       if any, and returns the result as an option; if [x] is NULL,
       [opt_map(f,x)] returns NULL. */
-extern mstring_t<`H> new_string(int);
+extern mstring_t<`H> new_string(unsigned int);
   /** [new_string(n)] allocates space for [n] characters on the heap
       and returns a pointer to the space.  All of the characters are
       set to NUL (0). */
-extern mstring_t<`r> rnew_string(region_t<`r>,int);
+extern mstring_t<`r> rnew_string(region_t<`r>,unsigned int);
   /** [rnew_string(r,n)] allocates space for [n] characters in the
       region with handle [r], and returns a pointer to the space.  All
       of the characters are set to NUL (0). */

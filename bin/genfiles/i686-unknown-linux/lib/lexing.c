@@ -262,36 +262,36 @@ extern void _profile_free_region(struct _RegionHandle *,
 
 #endif
  extern void exit( int); extern void* abort(); struct Cyc_Core_Opt{ void* v; } ;
-extern struct _tagged_arr Cyc_Core_new_string( int); extern unsigned char Cyc_Core_Invalid_argument[
-21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
-unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
-15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
-16u]; struct Cyc_Core_Unreachable_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char* string_to_Cstring( struct _tagged_arr); extern
-unsigned char* underlying_Cstring( struct _tagged_arr); extern struct
-_tagged_arr Cstring_to_string( unsigned char*); extern struct _tagged_arr
-wrap_Cstring_as_string( unsigned char*, unsigned int); extern struct _tagged_arr
-ntCsl_to_ntsl( unsigned char**); struct Cyc_Cstdio___sFILE; struct Cyc_Std___sFILE;
-extern unsigned char Cyc_Std_FileCloseError[ 19u]; extern unsigned char Cyc_Std_FileOpenError[
-18u]; struct Cyc_Std_FileOpenError_struct{ unsigned char* tag; struct
-_tagged_arr f1; } ; extern int Cyc_Std_file_string_read( struct Cyc_Std___sFILE*
-fd, struct _tagged_arr dest, int dest_offset, int max_count); static const int
-Cyc_Std_String_pa= 0; struct Cyc_Std_String_pa_struct{ int tag; struct
-_tagged_arr f1; } ; static const int Cyc_Std_Int_pa= 1; struct Cyc_Std_Int_pa_struct{
-int tag; unsigned int f1; } ; static const int Cyc_Std_Double_pa= 2; struct Cyc_Std_Double_pa_struct{
-int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa= 3; struct Cyc_Std_ShortPtr_pa_struct{
-int tag; short* f1; } ; static const int Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{
-int tag; unsigned int* f1; } ; static const int Cyc_Std_ShortPtr_sa= 0; struct
-Cyc_Std_ShortPtr_sa_struct{ int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa=
-1; struct Cyc_Std_UShortPtr_sa_struct{ int tag; unsigned short* f1; } ; static
-const int Cyc_Std_IntPtr_sa= 2; struct Cyc_Std_IntPtr_sa_struct{ int tag; int*
-f1; } ; static const int Cyc_Std_UIntPtr_sa= 3; struct Cyc_Std_UIntPtr_sa_struct{
-int tag; unsigned int* f1; } ; static const int Cyc_Std_StringPtr_sa= 4; struct
-Cyc_Std_StringPtr_sa_struct{ int tag; struct _tagged_arr f1; } ; static const
-int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{ int tag; double*
-f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
+extern struct _tagged_arr Cyc_Core_new_string( unsigned int); extern
+unsigned char Cyc_Core_Invalid_argument[ 21u]; struct Cyc_Core_Invalid_argument_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[
+12u]; struct Cyc_Core_Failure_struct{ unsigned char* tag; struct _tagged_arr f1;
+} ; extern unsigned char Cyc_Core_Impossible[ 15u]; struct Cyc_Core_Impossible_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Not_found[
+14u]; extern unsigned char Cyc_Core_Unreachable[ 16u]; struct Cyc_Core_Unreachable_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char*
+string_to_Cstring( struct _tagged_arr); extern unsigned char* underlying_Cstring(
+struct _tagged_arr); extern struct _tagged_arr Cstring_to_string( unsigned char*);
+extern struct _tagged_arr wrap_Cstring_as_string( unsigned char*, unsigned int);
+extern struct _tagged_arr ntCsl_to_ntsl( unsigned char**); struct Cyc_Cstdio___sFILE;
+struct Cyc_Std___sFILE; extern unsigned char Cyc_Std_FileCloseError[ 19u];
+extern unsigned char Cyc_Std_FileOpenError[ 18u]; struct Cyc_Std_FileOpenError_struct{
+unsigned char* tag; struct _tagged_arr f1; } ; extern int Cyc_Std_file_string_read(
+struct Cyc_Std___sFILE* fd, struct _tagged_arr dest, int dest_offset, int
+max_count); static const int Cyc_Std_String_pa= 0; struct Cyc_Std_String_pa_struct{
+int tag; struct _tagged_arr f1; } ; static const int Cyc_Std_Int_pa= 1; struct
+Cyc_Std_Int_pa_struct{ int tag; unsigned int f1; } ; static const int Cyc_Std_Double_pa=
+2; struct Cyc_Std_Double_pa_struct{ int tag; double f1; } ; static const int Cyc_Std_ShortPtr_pa=
+3; struct Cyc_Std_ShortPtr_pa_struct{ int tag; short* f1; } ; static const int
+Cyc_Std_IntPtr_pa= 4; struct Cyc_Std_IntPtr_pa_struct{ int tag; unsigned int* f1;
+} ; static const int Cyc_Std_ShortPtr_sa= 0; struct Cyc_Std_ShortPtr_sa_struct{
+int tag; short* f1; } ; static const int Cyc_Std_UShortPtr_sa= 1; struct Cyc_Std_UShortPtr_sa_struct{
+int tag; unsigned short* f1; } ; static const int Cyc_Std_IntPtr_sa= 2; struct
+Cyc_Std_IntPtr_sa_struct{ int tag; int* f1; } ; static const int Cyc_Std_UIntPtr_sa=
+3; struct Cyc_Std_UIntPtr_sa_struct{ int tag; unsigned int* f1; } ; static const
+int Cyc_Std_StringPtr_sa= 4; struct Cyc_Std_StringPtr_sa_struct{ int tag; struct
+_tagged_arr f1; } ; static const int Cyc_Std_DoublePtr_sa= 5; struct Cyc_Std_DoublePtr_sa_struct{
+int tag; double* f1; } ; static const int Cyc_Std_FloatPtr_sa= 6; struct Cyc_Std_FloatPtr_sa_struct{
 int tag; float* f1; } ; extern unsigned char Cyc_Lexing_Error[ 10u]; struct Cyc_Lexing_Error_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; struct Cyc_Lexing_lexbuf{ void(*
 refill_buff)( struct Cyc_Lexing_lexbuf*); void* refill_state; struct _tagged_arr
@@ -323,17 +323,17 @@ lexbuf->refill_state)->read_fun)( Cyc_Lexing_aux_buffer,( int) _get_arr_size(
 Cyc_Lexing_aux_buffer, sizeof( unsigned char)),( void*)(( struct Cyc_Lexing_function_lexbuf_state*)
 lexbuf->refill_state)->read_fun_state); int n= read >  0? read:(( lexbuf->lex_eof_reached=
 1, 0)); if( lexbuf->lex_start_pos <  n){ int oldlen= lexbuf->lex_buffer_len; int
-newlen= oldlen *  2; struct _tagged_arr newbuf= Cyc_Core_new_string( newlen +  1);
-Cyc_Std_zstrncpy( _tagged_arr_plus( newbuf, sizeof( unsigned char), oldlen),(
-struct _tagged_arr) lexbuf->lex_buffer,( unsigned int) oldlen); lexbuf->lex_buffer=
-newbuf; lexbuf->lex_buffer_len= newlen; lexbuf->lex_abs_pos= lexbuf->lex_abs_pos
--  oldlen; lexbuf->lex_curr_pos= lexbuf->lex_curr_pos +  oldlen; lexbuf->lex_start_pos=
-lexbuf->lex_start_pos +  oldlen; lexbuf->lex_last_pos= lexbuf->lex_last_pos + 
-oldlen;} Cyc_Std_zstrncpy( lexbuf->lex_buffer,( struct _tagged_arr)
-_tagged_arr_plus( lexbuf->lex_buffer, sizeof( unsigned char), n),( unsigned int)(
-lexbuf->lex_buffer_len -  n)); Cyc_Std_zstrncpy( _tagged_arr_plus(
-_tagged_arr_plus( lexbuf->lex_buffer, sizeof( unsigned char), lexbuf->lex_buffer_len),
-sizeof( unsigned char), - n),( struct _tagged_arr) Cyc_Lexing_aux_buffer,(
+newlen= oldlen *  2; struct _tagged_arr newbuf= Cyc_Core_new_string((
+unsigned int)( newlen +  1)); Cyc_Std_zstrncpy( _tagged_arr_plus( newbuf,
+sizeof( unsigned char), oldlen),( struct _tagged_arr) lexbuf->lex_buffer,(
+unsigned int) oldlen); lexbuf->lex_buffer= newbuf; lexbuf->lex_buffer_len=
+newlen; lexbuf->lex_abs_pos= lexbuf->lex_abs_pos -  oldlen; lexbuf->lex_curr_pos=
+lexbuf->lex_curr_pos +  oldlen; lexbuf->lex_start_pos= lexbuf->lex_start_pos + 
+oldlen; lexbuf->lex_last_pos= lexbuf->lex_last_pos +  oldlen;} Cyc_Std_zstrncpy(
+lexbuf->lex_buffer,( struct _tagged_arr) _tagged_arr_plus( lexbuf->lex_buffer,
+sizeof( unsigned char), n),( unsigned int)( lexbuf->lex_buffer_len -  n)); Cyc_Std_zstrncpy(
+_tagged_arr_plus( _tagged_arr_plus( lexbuf->lex_buffer, sizeof( unsigned char),
+lexbuf->lex_buffer_len), sizeof( unsigned char), - n),( struct _tagged_arr) Cyc_Lexing_aux_buffer,(
 unsigned int) n); lexbuf->lex_abs_pos= lexbuf->lex_abs_pos +  n; lexbuf->lex_curr_pos=
 lexbuf->lex_curr_pos -  n; lexbuf->lex_start_pos= lexbuf->lex_start_pos -  n;
 lexbuf->lex_last_pos= lexbuf->lex_last_pos -  n;}} struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_function(
@@ -361,8 +361,8 @@ unsigned char)); _temp2->lex_abs_pos= 0; _temp2->lex_start_pos= 0; _temp2->lex_c
 0; _temp2->lex_last_pos= 0; _temp2->lex_last_action= 0; _temp2->lex_eof_reached=
 1; _temp2;});} struct _tagged_arr Cyc_Lexing_lexeme( struct Cyc_Lexing_lexbuf*
 lbuf){ int len= lbuf->lex_curr_pos -  lbuf->lex_start_pos; struct _tagged_arr s=
-Cyc_Core_new_string( len +  1); Cyc_Std_zstrncpy( s,( struct _tagged_arr)
-_tagged_arr_plus( lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_start_pos),(
+Cyc_Core_new_string(( unsigned int)( len +  1)); Cyc_Std_zstrncpy( s,( struct
+_tagged_arr) _tagged_arr_plus( lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_start_pos),(
 unsigned int) len);*(( unsigned char*) _check_unknown_subscript( s, sizeof(
 unsigned char), len))='\000'; return s;} unsigned char Cyc_Lexing_lexeme_char(
 struct Cyc_Lexing_lexbuf* lbuf, int i){ return*(( unsigned char*)

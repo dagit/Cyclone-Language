@@ -73,7 +73,11 @@ void *GC_calloc(unsigned int n, unsigned int t) {
 }
 
 void *GC_calloc_atomic(unsigned int n, unsigned int t) {
-  return (void *)GC_malloc_atomic(n*t);
+  unsigned int p = n*t;
+  // the collector does not zero things when you call malloc atomic...
+  void *res = GC_malloc_atomic(p);
+  bzero(res,p);
+  return res;
 }
 
 // Need one of these per thread (we don't have threads)

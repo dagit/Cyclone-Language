@@ -263,9 +263,9 @@ extern void _profile_free_region(struct _RegionHandle *,
 #endif
  extern void exit( int); extern void* abort(); struct Cyc_Std__types_fd_set{ int
 fds_bits[ 2u]; } ; struct Cyc_Core_Opt{ void* v; } ; extern struct _tagged_arr
-Cyc_Core_new_string( int); extern unsigned char Cyc_Core_Invalid_argument[ 21u];
-struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct _tagged_arr
-f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
+Cyc_Core_new_string( unsigned int); extern unsigned char Cyc_Core_Invalid_argument[
+21u]; struct Cyc_Core_Invalid_argument_struct{ unsigned char* tag; struct
+_tagged_arr f1; } ; extern unsigned char Cyc_Core_Failure[ 12u]; struct Cyc_Core_Failure_struct{
 unsigned char* tag; struct _tagged_arr f1; } ; extern unsigned char Cyc_Core_Impossible[
 15u]; struct Cyc_Core_Impossible_struct{ unsigned char* tag; struct _tagged_arr
 f1; } ; extern unsigned char Cyc_Core_Not_found[ 14u]; extern unsigned char Cyc_Core_Unreachable[
@@ -324,17 +324,17 @@ lexbuf->refill_state)->read_fun)( Cyc_Lexing_aux_buffer,( int) _get_arr_size(
 Cyc_Lexing_aux_buffer, sizeof( unsigned char)),( void*)(( struct Cyc_Lexing_function_lexbuf_state*)
 lexbuf->refill_state)->read_fun_state); int n= read >  0? read:(( lexbuf->lex_eof_reached=
 1, 0)); if( lexbuf->lex_start_pos <  n){ int oldlen= lexbuf->lex_buffer_len; int
-newlen= oldlen *  2; struct _tagged_arr newbuf= Cyc_Core_new_string( newlen +  1);
-Cyc_Std_zstrncpy( _tagged_arr_plus( newbuf, sizeof( unsigned char), oldlen),(
-struct _tagged_arr) lexbuf->lex_buffer,( unsigned int) oldlen); lexbuf->lex_buffer=
-newbuf; lexbuf->lex_buffer_len= newlen; lexbuf->lex_abs_pos= lexbuf->lex_abs_pos
--  oldlen; lexbuf->lex_curr_pos= lexbuf->lex_curr_pos +  oldlen; lexbuf->lex_start_pos=
-lexbuf->lex_start_pos +  oldlen; lexbuf->lex_last_pos= lexbuf->lex_last_pos + 
-oldlen;} Cyc_Std_zstrncpy( lexbuf->lex_buffer,( struct _tagged_arr)
-_tagged_arr_plus( lexbuf->lex_buffer, sizeof( unsigned char), n),( unsigned int)(
-lexbuf->lex_buffer_len -  n)); Cyc_Std_zstrncpy( _tagged_arr_plus(
-_tagged_arr_plus( lexbuf->lex_buffer, sizeof( unsigned char), lexbuf->lex_buffer_len),
-sizeof( unsigned char), - n),( struct _tagged_arr) Cyc_Lexing_aux_buffer,(
+newlen= oldlen *  2; struct _tagged_arr newbuf= Cyc_Core_new_string((
+unsigned int)( newlen +  1)); Cyc_Std_zstrncpy( _tagged_arr_plus( newbuf,
+sizeof( unsigned char), oldlen),( struct _tagged_arr) lexbuf->lex_buffer,(
+unsigned int) oldlen); lexbuf->lex_buffer= newbuf; lexbuf->lex_buffer_len=
+newlen; lexbuf->lex_abs_pos= lexbuf->lex_abs_pos -  oldlen; lexbuf->lex_curr_pos=
+lexbuf->lex_curr_pos +  oldlen; lexbuf->lex_start_pos= lexbuf->lex_start_pos + 
+oldlen; lexbuf->lex_last_pos= lexbuf->lex_last_pos +  oldlen;} Cyc_Std_zstrncpy(
+lexbuf->lex_buffer,( struct _tagged_arr) _tagged_arr_plus( lexbuf->lex_buffer,
+sizeof( unsigned char), n),( unsigned int)( lexbuf->lex_buffer_len -  n)); Cyc_Std_zstrncpy(
+_tagged_arr_plus( _tagged_arr_plus( lexbuf->lex_buffer, sizeof( unsigned char),
+lexbuf->lex_buffer_len), sizeof( unsigned char), - n),( struct _tagged_arr) Cyc_Lexing_aux_buffer,(
 unsigned int) n); lexbuf->lex_abs_pos= lexbuf->lex_abs_pos +  n; lexbuf->lex_curr_pos=
 lexbuf->lex_curr_pos -  n; lexbuf->lex_start_pos= lexbuf->lex_start_pos -  n;
 lexbuf->lex_last_pos= lexbuf->lex_last_pos -  n;}} struct Cyc_Lexing_lexbuf* Cyc_Lexing_from_function(
@@ -362,8 +362,8 @@ unsigned char)); _temp2->lex_abs_pos= 0; _temp2->lex_start_pos= 0; _temp2->lex_c
 0; _temp2->lex_last_pos= 0; _temp2->lex_last_action= 0; _temp2->lex_eof_reached=
 1; _temp2;});} struct _tagged_arr Cyc_Lexing_lexeme( struct Cyc_Lexing_lexbuf*
 lbuf){ int len= lbuf->lex_curr_pos -  lbuf->lex_start_pos; struct _tagged_arr s=
-Cyc_Core_new_string( len +  1); Cyc_Std_zstrncpy( s,( struct _tagged_arr)
-_tagged_arr_plus( lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_start_pos),(
+Cyc_Core_new_string(( unsigned int)( len +  1)); Cyc_Std_zstrncpy( s,( struct
+_tagged_arr) _tagged_arr_plus( lbuf->lex_buffer, sizeof( unsigned char), lbuf->lex_start_pos),(
 unsigned int) len);*(( unsigned char*) _check_unknown_subscript( s, sizeof(
 unsigned char), len))='\000'; return s;} unsigned char Cyc_Lexing_lexeme_char(
 struct Cyc_Lexing_lexbuf* lbuf, int i){ return*(( unsigned char*)
