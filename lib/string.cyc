@@ -600,12 +600,8 @@ size_t strcspn(string_t s, string_t accept) {
   for (size_t i=0; i<len; i++) {
     int j;
     for (j=0; j<asize; j++)
-      if (s[i] != accept[j])
-	break; /* inner loop */
-    if (j == asize) /* didn't find it */
-      return i;
+      if (s[i] == accept[j]) return i;
   }
-      
   return len;
 }
 
