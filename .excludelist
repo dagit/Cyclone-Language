@@ -10,3 +10,5 @@ cyclone/makedist
 cyclone/\.excludelist
 cyclone/\.version
 cyclone/Makefile.inc
+cyclone/doc/web
+cyclone/tests/smlng/*.txt

@@ -146,7 +146,7 @@ clean:
 # Note we have to add cyc_include.h by hand since that only shows up in
 # the C code.
 $(OUT_PREFIX)%.d: %.cyc
-	$(CYCDIR)/bin/$(CYCCOMP) -M -I. $(CYC_FLAGS) $< > $@
+	$(CYCDIR)/bin/$(CYCCOMP) -M $(CYC_FLAGS) $< > $@
 
 # Include the dependencies unless we are doing a clean
 ifneq ($(MAKECMDGOALS),clean)

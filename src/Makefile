@@ -136,7 +136,7 @@ $(OUT_PREFIX)%.d: %.cyc
 # We need this as well as the above to handle $(OUT_PREFIX)lex.d,
 # which depends on $(OUT_PREFIX)lex.cyc, not lex.cyc
 %.d: %.cyc
-	$(CYCDIR)/bin/$(CYCCOMP) -M -MG -I$(CYC_INC_PATH) $(CYC_FLAGS) $< > $@
+	$(CYCDIR)/bin/$(CYCCOMP) -M -MG $(CYC_FLAGS) $< > $@
 
 # Include the dependencies unless we are doing a clean or a cross-compile.
 # (For the latter, this could be a problem, but fresh builds are the norm.)
