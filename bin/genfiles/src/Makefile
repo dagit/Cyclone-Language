@@ -12,4 +12,4 @@ $(PROG): $(O_SRCS)
 	gcc -g -o $@ $^ ../lib/$(CYCLIB) ../../gc.a
 
 clean::
-	rm -f $(O_SRCS) *~
+	rm -f $(O_SRCS) $(PROG) *~ 

@@ -14,7 +14,7 @@ CFLAGS=-g -fwritable-strings -I..
 
 CYC_LIBS=$(addsuffix .cyc, $(CYCLONE_LIBS))
 
-CYC_FLAGS=-gcc -tc -toc -pp
+CYC_FLAGS= -tc -toc -pp
 
 all: $(OUT_PREFIX)$(CYCLIB)
 
@@ -38,6 +38,11 @@ $(OUT_PREFIX)%.c : %.cyc
 # We need a special target becaue the .c file won't have the OUT_PREFIX
 $(OUT_PREFIX)$(RUNTIME).o: $(RUNTIME).c precore_c.h 
 	$(CC) -c -o $@ $(CPPFLAGS) $(CFLAGS) $(RUNTIME).c
+
+# delete generated files with a particular prefix
+clean_prefix: 
+	rm -f $(addprefix $(OUT_PREFIX), $(C_LIBS) $(O_LIBS) $(RUNTIME).o $(CYCLIB))
+	rm -f $(addprefix $(OUT_PREFIX), precore_c.h lineno.cyc)
 
 # delete generated .c and .o files with any OUT_PREFIX
 clean:

@@ -1,4 +1,4 @@
-/* Type checking for expressions */
+// Type checking for expressions 
 
 /* TODO:
    codegen and fill
@@ -38,22 +38,16 @@ static synth expr_err(tenv te,segment loc,string msg) {
 extern synth tcExp(tenv te, Opt_t<typ> topt, exp e);
 extern synth tcExpNoInst(tenv te, Opt_t<typ> topt, exp e);
 
-/* The qualified identifier q could be a variable, an enum
-   constructor, or an xenum constructor.  We resolve q and overwrite
-   the expression e with the appropriate r. */
+// The qualified identifier q could be a variable, an enum
+// constructor, or an xenum constructor.  We resolve q and overwrite
+// the expression e with the appropriate r. 
 static void resolve_unknown_id(tenv te, exp e, qvar q) {
   switch (lookup_ordinary(te,e->loc,q)) {
-  case LocalRes(_):
-    e->r = Var_e(q); break;
-  case GlobalRes(_,_):
-    e->r = Var_e(q); break;
-  case EnumRes(ed,ef):
-    e->r = Enum_e(ef->name,null,null,null,ed,ef); break;
-  case XenumRes(xed,ef):
-    e->r = Xenum_e(ef->name,null,null,xed,ef); break;
-  case UnknownRes:
-    // No error is reported here -- that is handled by tcVar
-    e->r = Var_e(q); break;
+  case LocalRes(_):      e->r = Var_e(q); break;
+  case GlobalRes(_,_):   e->r = Var_e(q); break;
+  case EnumRes(ed,ef):   e->r = Enum_e(ef->name,null,null,null,ed,ef); break;
+  case XenumRes(xed,ef): e->r = Xenum_e(ef->name,null,null,xed,ef); break;
+  case UnknownRes:       e->r = Var_e(q); break; // error reporting done in tcVar
   case StructRes(_):
     terr(e->loc,xprintf("bad occurrence of struct name %s",qvar2string(q)));
     e->r = Var_e(q);
@@ -65,8 +59,8 @@ static $(list<designator>,exp)@ make_struct_arg(exp e) {
   return &$(null,e);
 }
 
-/* Resolve whether this is a function call or enum, xenum, or struct
-   constructor -- let normal type-checking do the rest of the work. */
+// Resolve whether this is a function call or enum, xenum, or struct
+// constructor -- let normal type-checking do the rest of the work. 
 static void resolve_unknown_fn(tenv te, exp e, exp e1, list<exp> es) {
   switch (e1->r) {
   case UnknownId_e(q):
@@ -107,10 +101,9 @@ static void resolve_unknown_fn(tenv te, exp e, exp e1, list<exp> es) {
 }
 
 ///////////////// UnresolvedMem //////////////////////////
-static void
-resolve_unresolved_mem(tenv te, segment loc, Opt_t<typ> topt, exp e,
-		       Opt_t<typedef_name> nopt,
-		       list<$(list<designator>,exp)@> des) {
+static void resolve_unresolved_mem(tenv te, segment loc, Opt_t<typ> topt, exp e,
+				   Opt_t<typedef_name> nopt,
+				   list<$(list<designator>,exp)@> des) {
   // NOTE: must always bang e-> or caller will loop!
   if (topt == null) {
     terr(loc, "cannot resolve type of initializer");
@@ -146,7 +139,7 @@ static void resolve_any_unknown_id(tenv te, exp e) {
 static synth tcExpList(tenv te, list<exp> es) {
   synth s = skip_synth(te);
   while(es != null) {
-    s = seq_synth(s, tcExp(te,null,es->hd));
+    s  = seq_synth(s, tcExp(te,null,es->hd));
     te = layer_synth(te,s);
     es = es->tl;
   }
@@ -1387,7 +1380,7 @@ static synth tcExpNoInst(tenv te, Opt_t<typ> topt, exp e) {
     // resolve as an array or struct and then re-type-check the expression
     resolve_unresolved_mem(te,loc,topt,e,nopt,ds);
     return tcExp(te,topt,e);
-  /* Dispatch the other cases */
+    // Dispatch the other cases 
   case Const_e(c)               : esyn = tcConst(te,loc,topt,c); break;
   case Var_e(q)                 : esyn = tcVar(te,loc,topt,q,e); break;
   case Primop_e(p,es)           : esyn = tcPrimop(te,loc,topt,p,es); break;
@@ -1397,7 +1390,7 @@ static synth tcExpNoInst(tenv te, Opt_t<typ> topt, exp e) {
   case SeqExp_e(e1,e2)          : esyn = tcSeqExp(te,loc,topt,e1,e2); break;
   case FnCall_e(e1,es)          : esyn = tcFnCall(te,loc,topt,e1,es); break;
   case Throw_e(e1)              : esyn = tcThrow(te,loc,topt,e1); break;
-  case Instantiate_e(e2,*o)    : esyn = tcInstantiate(te,loc,topt,e2,o); break;
+  case Instantiate_e(e2,*o)     : esyn = tcInstantiate(te,loc,topt,e2,o); break;
   case Cast_e(t,e1)             : esyn = tcCast(te,loc,topt,t,e1); break;
   case Address_e(e1)            : esyn = tcAddress(te,loc,topt,e1); break;
   case Sizeof_e(t)              : esyn = tcSizeof(te,loc,topt,t); break;

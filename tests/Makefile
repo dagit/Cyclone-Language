@@ -15,7 +15,7 @@ OUT_PREFIX=
 
 CFLAGS=-g -fwritable-strings -I.. 
 
-CYC_FLAGS=-I ../lib -gcc -tc -toc -pp
+CYC_FLAGS=-I ../lib -tc -toc -pp
 
 LIB=../bin/$(OUT_PREFIX)$(CYCLIB)
 
@@ -39,6 +39,9 @@ $(OUT_PREFIX)foo_tab.h : foo.y
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.c : %.cyc
 	$(CYCC) $(CYC_FLAGS) $< > $@
+
+clean_prefix:
+	rm -f $(addprefix $(OUT_PREFIX), cyctest.o cyctest.c foo_tab.* foo.o foo.c *.exe)
 
 clean:
 	rm -f *cyctest.o *cyctest.c *foo_tab.* *foo.o *foo.c 

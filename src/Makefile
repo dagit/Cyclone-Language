@@ -19,7 +19,7 @@ CFLAGS=-g -fwritable-strings -I..
 
 CYC_SRCS=$(addsuffix .cyc, $(CYCLONE_SRCS))
 
-CYC_FLAGS=-I ../lib -gcc -tc -toc -pp
+CYC_FLAGS=-I ../lib -tc -toc -pp
 
 LIB=../lib/$(OUT_PREFIX)$(CYCLIB)
 
@@ -44,6 +44,11 @@ $(OUT_PREFIX)parse_tab.h : parse.y
 # This takes care of non-machine-generated versions (the .cyc is already there)
 $(OUT_PREFIX)%.c : %.cyc
 	$(CYCC) $(CYC_FLAGS) $< > $@
+
+# delete generated files with a particular prefix
+clean_prefix:
+	rm -f $(addprefix $(OUT_PREFIX), $(C_SRCS) $(O_SRCS) $(CYCCOMP))
+	rm -f $(addprefix $(OUT_PREFIX), lex.cyc parse_tab.cyc parse_tab.h)
 
 # delete generated .c and .o files with any OUT_PREFIX
 clean:

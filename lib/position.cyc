@@ -29,11 +29,12 @@ string string_of_segment(segment s) {
   Lineno::Pos pos_s = Lineno::pos_of_abs(source,s->start);
   Lineno::Pos pos_e = Lineno::pos_of_abs(source,s->end);
   if (strcmp(pos_s->logical_file,pos_e->logical_file)==0)
-    return xprintf("%s(%d:%d-%d:%d)",pos_s->logical_file,
-		   pos_s->line_no,pos_s->col,pos_e->line_no,pos_e->col);
-  else
-    return xprintf("%s(%d:%d)-%s(%d:%d)",pos_s->logical_file,
+    return xprintf("%s(%d:%d-%d:%d)", pos_s->logical_file,
 		   pos_s->line_no,pos_s->col,
+		   pos_e->line_no,pos_e->col);
+  else
+    return xprintf("%s(%d:%d)-%s(%d:%d)",
+		   pos_s->logical_file,pos_s->line_no,pos_s->col,
 		   pos_e->logical_file,pos_e->line_no,pos_e->col);
 }
 

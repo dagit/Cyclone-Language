@@ -64,8 +64,7 @@ Pos pos_of_abs(string filename, int abs) {
     string source_file = filename;
     int line = 1;
 
-    // these initializations unnecessary after def. assignment better about
-    // loops
+    // initializations unnecessary after def. assignment better about loops
     string this_line="";
     int eol=0, next=0;
     while (true) {
@@ -97,7 +96,7 @@ Pos pos_of_abs(string filename, int abs) {
     file_close(f); throw (y);
   }
   // FIX: this is unreachable, but the compiler doesn't know that.
-  return &pos(filename, "", -1, 0);
+  throw Core::Unreachable("Lineno::pos_of_abs");
 }
 
 }

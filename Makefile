@@ -66,6 +66,14 @@ update: cyclone_src
 test:
 	$(MAKE) -C tests CYCC=$(CYCC) OUT_PREFIX=$(OUT_PREFIX)
 
+clean_src:
+	$(MAKE) clean -C src
+	$(MAKE) clean -C lib
+
+clean_src_prefix:
+	$(MAKE) clean_prefix -C src OUT_PREFIX=$(OUT_PREFIX)
+	$(MAKE) clean_prefix -C lib OUT_PREFIX=$(OUT_PREFIX)
+
 clean:
 	$(MAKE) clean -C tools/cycbison
 	$(MAKE) clean -C tools/cycocamllex
@@ -78,4 +86,4 @@ clean:
 	rm -f bin/$(RUNTIME).o
 	rm -f bin/cycbison.exe 
 	rm -f bin/cycocamllex.exe
-	rm -f *~
+	rm -f *~ doc/*~

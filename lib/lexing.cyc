@@ -1,12 +1,9 @@
-/* Dan Grossman, April 1999 */
+// Dan Grossman, April 1999 
 
-/* Run-time library for files created by popocamllex */
+// Run-time library for files created by popocamllex 
 
-/* aux_buffer is not large enough for real use, just trying to get something
-   to work! */
-
-/* This is the merged port of lexing.ml and lexing.c with lexing.ml
-   basically coming first */
+// This is the merged port of lexing.ml and lexing.c with lexing.ml
+// basically coming first 
 
 #include "core.h"
 #include "lexing.h"
@@ -22,7 +19,7 @@ namespace Lexing;
 
 xenum exn { Error(string) };
 
-struct lexbuf<`a> { /* use `a for state that refill_buff might need */
+struct lexbuf<`a> { // use `a for state that refill_buff might need 
 
   void   (@refill_buff)(struct lexbuf<`a> @);
   `a     refill_state;
@@ -146,7 +143,7 @@ int lexeme_end<`a>(Lexbuf<`a> lbuf) {
    return lbuf->lex_abs_pos + lbuf->lex_curr_pos;
 }
 
-/********* Now here's what was lexing.c ********/
+////////////////// Now here's what was lexing.c /////////////
 
 int lex_engine<`a>(LexTables tbl, int start_state, Lexbuf<`a> lbuf) {
 
@@ -155,52 +152,51 @@ int lex_engine<`a>(LexTables tbl, int start_state, Lexbuf<`a> lbuf) {
    state = start_state;
 
    if (state >= 0) {
-      /* First entry */
-      lbuf->lex_last_pos = lbuf->lex_start_pos = lbuf->lex_curr_pos;
-      lbuf->lex_last_action = -1;
+     // First entry 
+     lbuf->lex_last_pos = lbuf->lex_start_pos = lbuf->lex_curr_pos;
+     lbuf->lex_last_action = -1;
    } else {
-      /* Reentry after refill */
-      state = -state-1;
+     // Reentry after refill 
+     state = -state-1;
   }
   while (true) {
      base = tbl->lex_base[state];
      if (base < 0) return -base-1;
-     /* See if it's a backtrack point */
+     // See if it's a backtrack point 
      backtrk = tbl->lex_backtrk[state];
      if (backtrk >= 0) {
         lbuf->lex_last_pos    = lbuf->lex_curr_pos;
         lbuf->lex_last_action = backtrk;
      }
-     /* See if we need a refill */
+     // See if we need a refill 
      if (lbuf->lex_curr_pos >= lbuf->lex_buffer_len) {
-        if (!lbuf->lex_eof_reached)
-	  return -state-1;
-        else
-	  c = 256;
+       if (!lbuf->lex_eof_reached)
+	 return -state-1;
+       else
+	 c = 256;
      } else {
-	  /* Read next input char */
-        c = (int) (lbuf->lex_buffer[lbuf->lex_curr_pos++]);
-	if (c==EOF) c=256;
+       // Read next input char 
+       c = (int) (lbuf->lex_buffer[lbuf->lex_curr_pos++]);
+       if (c==EOF) c=256;
      }
-     /* Determine next state */
+     // Determine next state 
      if (tbl->lex_check[base+c]==state)
 	state = tbl->lex_trans[base+c];
      else
         state = tbl->lex_default[state];
-     /* If no transition on this char, return to last backtrack point */
+     // If no transition on this char, return to last backtrack point 
      if (state < 0) {
         lbuf->lex_curr_pos = lbuf->lex_last_pos;
 	if (lbuf->lex_last_action == -1)
 	   throw Error("empty token");
         else {
 	  return lbuf->lex_last_action;
-}
+	}
      } else {
-      /* Erase the EOF condition only if the EOF pseudo-character was
-         consumed by the automaton (i.e., there was no backtrack above)
-       */
-      if (c == 256) lbuf->lex_eof_reached = false;
-    }
+       // Erase the EOF condition only if the EOF pseudo-character was
+       // consumed by the automaton (i.e., there was no backtrack above)
+       if (c == 256) lbuf->lex_eof_reached = false;
+     }
   }
-  throw Error("impossible control point in engine");
+  throw Unreachable("Lexing::lex_engine");
 }

@@ -300,10 +300,8 @@ string zstrncpy(string dest, int destOfs, string src, int srcOfs, size_t n) {
   if (destOfs + n > destSz || srcOfs + n > srcSz)
     throw InvalidArg("String::zstrncpy");
   int i;
-  for (i=0; i<n; i++) {
-    let srcChar = src[srcOfs+i];
-    dest[destOfs+i] = srcChar;
-  }
+  for (i=0; i<n; i++) 
+    dest[destOfs+i] = src[srcOfs+i];
   return dest;
 }
 // Non-allocating string copy: first arg is returned
