@@ -7,6 +7,12 @@
 
 #include <setjmp.h>
 
+#ifdef NO_CYC_PREFIX
+#define ADD_PREFIX(x) x
+#else
+#define ADD_PREFIX(x) Cyc_##x
+#endif
+
 #ifndef offsetof
 // should be size_t, but int is fine.
 #define offsetof(t,n) ((int)(&(((t *)0)->n)))
@@ -73,29 +79,29 @@ extern int _throw(void * e);
 extern struct _xtunion_struct *_exn_thrown;
 
 //// Built-in Exceptions
-extern struct _xtunion_struct Cyc_Null_Exception_struct;
-extern struct _xtunion_struct * Cyc_Null_Exception;
-extern struct _xtunion_struct Cyc_Match_Exception_struct;
-extern struct _xtunion_struct * Cyc_Match_Exception;
+extern struct _xtunion_struct ADD_PREFIX(Null_Exception_struct);
+extern struct _xtunion_struct * ADD_PREFIX(Null_Exception);
+extern struct _xtunion_struct ADD_PREFIX(Match_Exception_struct);
+extern struct _xtunion_struct * ADD_PREFIX(Match_Exception);
 
 //// Built-in Run-time Checks and company
 static inline 
 void * _check_null(void * ptr) {
   if(!ptr)
-    _throw(Cyc_Null_Exception);
+    _throw(ADD_PREFIX(Null_Exception));
   return ptr;
 }
 static inline 
 char * _check_known_subscript_null(void * ptr, unsigned bound, 
 				   unsigned elt_sz, unsigned index) {
   if(!ptr || index > bound)
-    _throw(Cyc_Null_Exception);
+    _throw(ADD_PREFIX(Null_Exception));
   return ((char *)ptr) + elt_sz*index;
 }
 static inline 
 unsigned _check_known_subscript_notnull(unsigned bound, unsigned index) {
   if(index > bound)
-    _throw(Cyc_Null_Exception);
+    _throw(ADD_PREFIX(Null_Exception));
   return index;
 }
 static inline 
@@ -106,7 +112,7 @@ char * _check_unknown_subscript(struct _tagged_arr arr,
   // by inlining, it should be able to avoid actual multiplication
   unsigned char * ans = arr.curr + elt_sz * index;
   if(!arr.base || ans < arr.base || ans >= arr.last_plus_one)
-    _throw(Cyc_Null_Exception);
+    _throw(ADD_PREFIX(Null_Exception));
   return ans;
 }
 static inline 
@@ -134,7 +140,7 @@ char * _untag_arr(struct _tagged_arr arr, unsigned elt_sz, unsigned num_elts) {
   //       is correct (caller checks for null if untagging to @ type)
   // base may not be null if you use t ? pointer subtraction to get 0 -- oh well
   if(arr.curr < arr.base || arr.curr + elt_sz * num_elts >= arr.last_plus_one)
-    _throw(Cyc_Null_Exception);
+    _throw(ADD_PREFIX(Null_Exception));
   return arr.curr;
 }
 static inline 

@@ -116,6 +116,11 @@ static void set_stop_after_objectfile() {
   add_ccarg("-c");
 }
 
+static void set_nocyc() {
+  add_cyc_namespace_r = false;
+  add_ccarg("-D NO_CYC_PREFIX");
+}
+
 static void set_stop_after_asmfile() {
   stop_after_asmfile_r = true;
   add_ccarg("-S");
@@ -591,7 +596,7 @@ int main(int argc, string_t ? argv) {
          new $("-save-c",new Set_spec(&save_c_r),
                "\n"
               "        Don't delete temporary C files"),
-         new $("-nocyc",new Clear_spec(&add_cyc_namespace_r),
+         new $("-nocyc",new Unit_spec(set_nocyc),
                "Don't add implicit namespace Cyc"),
          new $("-nogc",new Set_spec(&nogc_r),
                " Don't link in the garbage collector"),

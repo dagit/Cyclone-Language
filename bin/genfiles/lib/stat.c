@@ -16,7 +16,7 @@ struct _tagged_arr ntCsl_to_ntsl( unsigned char**); extern int system(
 unsigned char*); extern int* __errno(); struct Cyc_Time_tm{ int tm_sec; int
 tm_min; int tm_hour; int tm_mday; int tm_mon; int tm_year; int tm_wday; int
 tm_yday; int tm_isdst; } ; extern unsigned int time( unsigned int* t); struct
-Cyc_Stat_stat_t{ short st_dev; unsigned int st_ino; unsigned int st_mode;
+Cyc_Stat_stat_t{ short st_dev; unsigned short st_ino; unsigned int st_mode;
 unsigned short st_nlink; unsigned short st_uid; unsigned short st_gid; short
 st_rdev; int st_size; unsigned int st_blksize; unsigned int st_blocks;
 unsigned int st_atime; unsigned int st_mtime; unsigned int st_ctime; } ; extern
