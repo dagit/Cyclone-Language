@@ -1,12 +1,48 @@
 {
 /* Notes
+
    We handle anonymous enums by giving them a fresh name.  It would be
-     better to extend Cyclone to handle them.
+     better to extend Cyclone to handle them.  Right now it complains,
+     e.g., test.cyc(3:0-3:12): missing declarator
+
    Cygwin stdio.h has an inline function.  Probably we don't have to
      worry about inline functions because they are used in function macros,
      and we're planning on hand-coding all the functions.
+
    Cygwin netinet/in.h and arpa/tcp.h don't work because of asm
      Also, __inline__ not on a function.
+
+   Consider a macro foo defined as follows:
+     extern int __foo();
+     #define foo (__foo())
+   We don't want __foo to be declared as extern in the Cyclone file,
+   we want it to be declared extern "C".  Furthermore, if __foo appears
+   in the Std namespace, we want foo defined as
+     #define foo(Std::__foo())
+   so that it can be used whether or not Std is open.
+
+   On Linux in dirent.h we have:
+     // This is the data type of directory stream objects.
+     // The actual structure is opaque to users.
+     typedef struct __dirstream DIR;
+   Currently this means that whenever dirent.h is included we have a
+   bunch of function declarations that use a previously undeclared
+   struct, and we get warnings like
+     warning: `struct Cyc_Std___dirstream' declared inside parameter list
+   We can get rid of these warnings by adding the declaration
+     namespace Std {extern struct __dirstream;}
+   before including dirent.h, but maybe we should not print the
+   warning in the first place ???
+
+   fenv.h produces some warnings from gcc when the test file is
+   compiled.  The type fenv_t is defined as an anonymous struct.  Our
+   compiler expands fenv_t to the anonymous struct at every use.  This
+   means there are anonymous structs appearing in parameter lists, and
+   gcc warns about this.
+
+   Cyclone does not currently handle long double, which is needed
+   in <math.h>.
+
  */
 
 #include <core.h>
@@ -62,7 +98,13 @@ extern int suck_macroname(Lexbuf<`a>);
 extern int suck_restofline(Lexbuf<`a>);
 string_t current_line = NULL;
 
-typedef $(string_t,list_t<stringptr_t>,list_t<stringptr_t>,string_t) *spec_t;
+/* When $(A,B) is an ifdefined_t, B will be printed if A is NULL
+   or A is a defined symbol */
+typedef $(string_t<`H>,string_t<`H>) @ifdefined_t;
+
+typedef $(string_t,list_t<stringptr_t>,list_t<stringptr_t>,
+          list_t<ifdefined_t>,list_t<ifdefined_t>,
+          list_t<ifdefined_t>,list_t<ifdefined_t>) *spec_t;
 extern spec_t spec(Lexbuf<`a>);
 extern int commands(Lexbuf<`a>);
 extern int snarfsymbols(Lexbuf<`a>);
@@ -72,14 +114,20 @@ extern int block_comment(Lexbuf<`a>);
 string_t current_header = NULL;
 list_t<stringptr_t> snarfed_symbols = NULL;
 list_t<stringptr_t> current_symbols = NULL;
+list_t<ifdefined_t> current_cstubs = NULL;
+list_t<ifdefined_t> current_cycstubs = NULL;
+list_t<ifdefined_t> current_prologue = NULL;
+list_t<ifdefined_t> current_epilogue = NULL;
 list_t<stringptr_t> current_omit_symbols = NULL;
-struct Buffer::t *specblock = NULL;
+struct Buffer::t *specbuf = NULL;
 int braces_to_match = 0;
 
 int numdef = 0;
 }
 
 let newline = ('\n' | '\r' | "\r\n")
+let idchar = ['A'-'Z''a'-'z''0'-'9''_']
+let ws = [' ''\t''\n''\r']
 
 /**********************************************************************/
 /* Rules for finding dependencies of macros                           */
@@ -93,13 +141,13 @@ rule line "line_t" = parse
   /* The cast is needed so the return type matches */
   return new $((_ @)current_source,*current_targets);}
 /* End of line */
-| ['\n' '\r']
+| newline
 { return line(lexbuf); }
 | eof
 { return NULL; }
 
 and macroname = parse
-  ['A'-'Z''a'-'z''0'-'9''_']+ '(' ')'
+  idchar+ '(' ')'
 { current_source = new (string_t)substring(lexeme(lexbuf), 0,
                                           lexeme_end(lexbuf)-lexeme_start(lexbuf)-2);
   current_args = NULL;
@@ -107,7 +155,7 @@ and macroname = parse
   token(lexbuf);
   return 0;
 }
-| ['A'-'Z''a'-'z''0'-'9''_']+ '('
+| idchar+ '('
 { current_source = new (string_t)substring(lexeme(lexbuf), 0,
                                           lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);
   current_args = NULL;
@@ -115,7 +163,7 @@ and macroname = parse
   args(lexbuf);
   return 0;
 }
-| ['A'-'Z''a'-'z''0'-'9''_']+
+| idchar+
 { current_source = new (string_t)lexeme(lexbuf);
   current_args = NULL;
   current_targets = new Set::empty(strptrcmp);
@@ -124,13 +172,13 @@ and macroname = parse
 }
 
 and args = parse
-  ['A'-'Z''a'-'z''0'-'9''_']+ ',' ' '
+  idchar+ ',' ' '
 { let a = new (string_t)substring(lexeme(lexbuf), 0,
                                   lexeme_end(lexbuf)-lexeme_start(lexbuf)-2);
   current_args = new List(a,current_args);
   return args(lexbuf);
 }
-| ['A'-'Z''a'-'z''0'-'9''_']+ ')'
+| idchar+ ')'
 { let a = new (string_t)substring(lexeme(lexbuf), 0,
                                   lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);
   current_args = new List(a,current_args);
@@ -354,7 +402,7 @@ and suck_line "suck_line_t" = parse
 { return NULL; }
 
 and suck_macroname = parse
-  ['A'-'Z''a'-'z''0'-'9''_']+
+  idchar+
 { current_source = new (string_t)lexeme(lexbuf);
   current_line = strconcat(current_line,*current_source);
   return suck_restofline(lexbuf);
@@ -374,12 +422,24 @@ and spec "spec_t" = parse
                       lexeme_end(lexbuf)-lexeme_start(lexbuf)-1);
   current_symbols = NULL;
   current_omit_symbols = NULL;
-  specblock = Buffer::create(255);
+  current_cstubs = NULL;
+  current_cycstubs = NULL;
+  current_prologue = NULL;
+  current_epilogue = NULL;
   if (commands(lexbuf)) return NULL;
-  return new $(current_header,current_symbols,current_omit_symbols,
-               (string_t)Buffer::contents((Buffer::T)specblock));
+  current_prologue = imp_rev(current_prologue);
+  current_epilogue = imp_rev(current_epilogue);
+  current_cstubs = imp_rev(current_cstubs);
+  current_cycstubs = imp_rev(current_cycstubs);
+  return new $(current_header,
+               current_symbols,
+               current_omit_symbols,
+               current_prologue,
+               current_epilogue,
+               current_cstubs,
+               current_cycstubs);
 }
-| [' ''\t''\n''\r']+
+| ws+
 { return spec(lexbuf); }
 | eof
 { return NULL; }
@@ -390,21 +450,105 @@ and spec "spec_t" = parse
   return NULL; }
 
 and commands = parse
-  "include" [' ''\t''\n''\r']+ '{'
+  "include" ws+ '{'
 { snarfed_symbols = NULL;
   if (snarfsymbols(lexbuf)) return 1;
   current_symbols = append(snarfed_symbols,current_symbols);
   return commands(lexbuf); }
-| "omitvariables" [' ''\t''\n''\r']+ '{'
+| "omitvariables" ws+ '{'
 { snarfed_symbols = NULL;
   if (snarfsymbols(lexbuf)) return 1;
   current_omit_symbols = append(snarfed_symbols,current_omit_symbols);
   return commands(lexbuf); }
-| "epilogue" [' ''\t''\n''\r']+ '{'
+| "prologue" ws+ '{'
 { braces_to_match = 1;
+  specbuf = Buffer::create(255);
   if (block(lexbuf)) return 1;
+  ifdefined_t x = new $((string_t)NULL,
+                        (string_t)Buffer::contents((Buffer::T)specbuf));
+  current_prologue = new List(x,current_prologue);
   return commands(lexbuf); }
-| [' ''\t''\n''\r']+
+| "prologue" ws+ idchar+ ws+ '{'
+{ let s = lexeme(lexbuf);
+  s += strlen("prologue");
+  while (isspace(*s)) s++;
+  char ?t = s;
+  while (!isspace(*t)) t++;
+  let symbol = substring(s,0,t-s);
+  braces_to_match = 1;
+  specbuf = Buffer::create(255);
+  if (block(lexbuf)) return 1;
+  ifdefined_t x = new $((string_t)symbol,
+                        (string_t)Buffer::contents((Buffer::T)specbuf));
+  current_prologue = new List(x,current_prologue);
+  return commands(lexbuf); }
+| "epilogue" ws+ '{'
+{ braces_to_match = 1;
+  specbuf = Buffer::create(255);
+  if (block(lexbuf)) return 1;
+  ifdefined_t x = new $((string_t)NULL,
+                        (string_t)Buffer::contents((Buffer::T)specbuf));
+  current_epilogue = new List(x,current_epilogue);
+  return commands(lexbuf); }
+| "epilogue" ws+ idchar+ ws+ '{'
+{ let s = lexeme(lexbuf);
+  s += strlen("epilogue");
+  while (isspace(*s)) s++;
+  char ?t = s;
+  while (!isspace(*t)) t++;
+  let symbol = substring(s,0,t-s);
+  braces_to_match = 1;
+  specbuf = Buffer::create(255);
+  if (block(lexbuf)) return 1;
+  ifdefined_t x = new $((string_t)symbol,
+                        (string_t)Buffer::contents((Buffer::T)specbuf));
+  current_epilogue = new List(x,current_epilogue);
+  return commands(lexbuf); }
+| "cstub" ws+ '{'
+{ braces_to_match = 1;
+  specbuf = Buffer::create(255);
+  if (block(lexbuf)) return 1;
+  ifdefined_t x = new $((string_t)NULL,
+                        (string_t)Buffer::contents((Buffer::T)specbuf));
+  current_cstubs = new List(x,current_cstubs);
+  return commands(lexbuf); }
+| "cstub" ws+ idchar+ ws+ '{'
+{ let s = lexeme(lexbuf);
+  s += strlen("cstub");
+  while (isspace(*s)) s++;
+  char ?t = s;
+  while (!isspace(*t)) t++;
+  let symbol = substring(s,0,t-s);
+  braces_to_match = 1;
+  specbuf = Buffer::create(255);
+  if (block(lexbuf)) return 1;
+  ifdefined_t x = new $((string_t)symbol,
+                        (string_t)Buffer::contents((Buffer::T)specbuf));
+  current_cstubs = new List(x,current_cstubs);
+  return commands(lexbuf); }
+| "cycstub" ws+ '{'
+{ braces_to_match = 1;
+  specbuf = Buffer::create(255);
+  if (block(lexbuf)) return 1;
+  ifdefined_t x = new $((string_t)NULL,
+                        (string_t)Buffer::contents((Buffer::T)specbuf));
+  current_cycstubs = new List(x,current_cycstubs);
+  return commands(lexbuf); }
+| "cycstub" ws+ idchar+ ws+ '{'
+{ let s = lexeme(lexbuf);
+  s += strlen("cycstub");
+  while (isspace(*s)) s++;
+  char ?t = s;
+  while (!isspace(*t)) t++;
+  let symbol = substring(s,0,t-s);
+  braces_to_match = 1;
+  specbuf = Buffer::create(255);
+  if (block(lexbuf)) return 1;
+  ifdefined_t x = new $((string_t)symbol,
+                        (string_t)Buffer::contents((Buffer::T)specbuf));
+  current_cycstubs = new List(x,current_cycstubs);
+  return commands(lexbuf); }
+| ws+
 { return commands(lexbuf); }
 | eof
 { return 0; }
@@ -421,10 +565,10 @@ and snarfsymbols =
    a sequence of symbols and the matching right brace, stores the
    symbols in snarfed_symbols. */
 parse
-  ['A'-'Z''a'-'z''0'-'9''_']+
+  idchar+
 { snarfed_symbols = new List(new (string_t)lexeme(lexbuf),snarfed_symbols);
   return snarfsymbols(lexbuf); }
-| [' ''\t''\n''\r']+
+| ws+
 { return snarfsymbols(lexbuf); }
 | '}'
 { return 0; }
@@ -440,70 +584,70 @@ parse
 
 and block =
 /* Expects to be entered just after a left brace, searches for the
-   matching right brace, appends everything in between to specblock.
+   matching right brace, appends everything in between to specbuf.
    Braces in comments, strings, and character constants aren't counted.
    braces_to_match should be set to 1 before calling block. */
 parse
   '}'
 { if (braces_to_match == 1) return 0;
   braces_to_match--;
-  Buffer::add_char((Buffer::T)specblock,'}');
+  Buffer::add_char((Buffer::T)specbuf,'}');
   return block(lexbuf); }
 | '{'
 { braces_to_match++;
-  Buffer::add_char((Buffer::T)specblock,'{');
+  Buffer::add_char((Buffer::T)specbuf,'{');
   return block(lexbuf); }
 | '"'
-{ Buffer::add_char((Buffer::T)specblock,'"');
+{ Buffer::add_char((Buffer::T)specbuf,'"');
   block_string(lexbuf);
   return block(lexbuf); }
 | "/*"
-{ Buffer::add_string((Buffer::T)specblock,"/*");
+{ Buffer::add_string((Buffer::T)specbuf,"/*");
   block_comment(lexbuf);
   return block(lexbuf); }
 | "//" [^'\n''\r']*
-{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+{ Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
   return block(lexbuf); }
 | eof
 { return 0; }
 | [^'}']
-{ Buffer::add_char((Buffer::T)specblock,lexeme_char(lexbuf,0));
+{ Buffer::add_char((Buffer::T)specbuf,lexeme_char(lexbuf,0));
   return block(lexbuf); }
 
 and block_string = parse
   "\""
-{ Buffer::add_char((Buffer::T)specblock,'"'); return 0; }
+{ Buffer::add_char((Buffer::T)specbuf,'"'); return 0; }
 | eof     /* Unclosed string, error: return 1 instead of 0 */
 { return 1; }
 | newline /* Unclosed string, error: return 1 instead of 0 */
 { return 1; }
 | "\\" newline
-{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+{ Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
   return block_string(lexbuf); }
 | "\\a"
-{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+{ Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
   return block_string(lexbuf); }
 | "\\" ['0'-'7']['0'-'7']?['0'-'7']?
-{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+{ Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
   return block_string(lexbuf); }
 | "\\x" ['0'-'9''A'-'F''a'-'f']+
-{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+{ Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
   return block_string(lexbuf); }
 | [^ '"''\\''\n']
-{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+{ Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
   return block_string(lexbuf); }
 | _
-{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+{ Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
   return block_string(lexbuf); }
 
 and block_comment = parse
 /* Assumes that comments can't be nested */
   "*/"
-{ Buffer::add_string((Buffer::T)specblock,"*/"); return 0; }
+{ Buffer::add_string((Buffer::T)specbuf,"*/"); return 0; }
 | eof     /* Unclosed string, error: return 1 instead of 0 */
 { return 1; }
 | _
-{ Buffer::add_string((Buffer::T)specblock,lexeme(lexbuf));
+{ Buffer::add_string((Buffer::T)specbuf,lexeme(lexbuf));
   return block_comment(lexbuf); }
 
 {
@@ -757,7 +901,6 @@ and block_comment = parse
       if (x->fields) {
         for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
           let f = fs->hd;
-          //          add_target(f->name);
           scan_type(f->type);
           scan_exp_opt(f->width);
         }
@@ -912,7 +1055,15 @@ and block_comment = parse
                    string_t dir,
                    list_t<stringptr_t<`H,`H>,`H> start_symbols,
                    list_t<stringptr_t<`H,`H>,`H> omit_symbols,
-                   string_t epilogue) {
+                   list_t<ifdefined_t,`H> prologue,
+                   list_t<ifdefined_t,`H> epilogue,
+                   list_t<ifdefined_t,`H> cstubs,
+                   list_t<ifdefined_t,`H> cycstubs) {
+    FILE *maybe;
+    FILE @log_file;
+    FILE @in_file;
+    FILE @out_file;
+
     fprintf(stderr,
             "********************************* %s...\n",filename);
 
@@ -924,12 +1075,23 @@ and block_comment = parse
       fprintf(stderr,"Error: can't change directory to %s\n",dir);
       return 1;
     }
+
+    maybe = fopen("BUILDLIB.LOG","a");
+    if (!maybe) {
+      fprintf(stderr,"Error: could not open log file\n");
+      return 1;
+    }
+    log_file = (FILE @)maybe;
+    fprintf(log_file,"\n%s:\n",filename);
+
     /* Calculate necessary file names.  For example:
        filename = sys/types.h
        basename = types.h
        choppedname = types
        preprocfile = types.i
        filteredfile = types.iX
+       cstubfile = types-cstub.c
+       cstubfile = types.cyc
        dirname = sys
        cfilename = sys/ctypes.h
     */
@@ -937,6 +1099,8 @@ and block_comment = parse
     let choppedname = Filename::chop_extension(basename);
     let preprocfile = strconcat(choppedname, ".i");
     let filteredfile = strconcat(choppedname, ".iX");
+    let cstubfile = strconcat(choppedname, "-cstub.c");
+    let cycstubfile = strconcat(choppedname, ".cyc");
     let dirname = Filename::dirname(filename);
     let cfilename = 
       (dirname.size == 0)?
@@ -944,13 +1108,14 @@ and block_comment = parse
       (Filename::concat(dirname, aprintf("c%s", basename)));
 
     /* Make sure we'll be able to create files in the right directories */
-    if (force_directory_prefixes(filename)) return 1;
-
+    if (force_directory_prefixes(filename)) {
+      fclose(log_file);
+      return 1;
+    }
     /* Table to hold the dependencies */
     dep_t t = new_deps();
 
     /* Get the macros out of the file */
-    FILE *maybe;
     let cmd = aprintf("echo '#include <%s>' | gcc -E -dM -o %s -",
                       filename,preprocfile);
     if (system(string_to_Cstring(cmd)) != 0) {
@@ -959,28 +1124,44 @@ and block_comment = parse
       maybe = fopen(filename,"w");
       if (!maybe) {
         fprintf(stderr,"Error: could not create file %s\n",filename);
+        fclose(log_file);
         return 1;
       }
-      fprintf((FILE@)maybe,
-              "#include <%s>\n",
-              cfilename);
-      fclose((FILE@)maybe);
+      out_file = (FILE@)maybe;
+      fprintf(out_file,
+              "#error -- %s is not supported on this platform\n",
+              filename);
+      fclose(out_file);
       maybe = fopen(cfilename,"w");
       if (!maybe) {
         fprintf(stderr,"Error: could not create file %s\n",cfilename);
+        fclose(log_file);
         return 1;
       }
-      fprintf((FILE@)maybe,
+      out_file = (FILE@)maybe;
+      fprintf(out_file,
               "#error -- %s is not supported on this platform\n",
-              filename);
-      fclose((FILE@)maybe);
+              cfilename);
+      fclose(out_file);
       fprintf(stderr,"Warning: %s will not be supported on this platform\n",
               filename);
+
+      fprintf(log_file,"Not supported on this platform\n");
+      fclose(log_file);
+      /* Return to original directory so that we're set up for
+         the next file */
+      if (chdir(cwd)) {
+        fprintf(stderr,"Error: could not change directory to %s\n", cwd);
+        return 1;
+      }
       return 0;
     }
     maybe = fopen(preprocfile,"r");
-    if (!maybe) return 1;
-    FILE @in_file = (FILE@)maybe;
+    if (!maybe) {
+      fclose(log_file);
+      return 1;
+    }
+    in_file = (FILE@)maybe;
     let l = Lexing::from_file(in_file);
     let entry;
     while ( (entry = line(l)) != NULL) {
@@ -994,27 +1175,39 @@ and block_comment = parse
     /* Get the type declarations out of the file */
     cmd = aprintf("echo '#include <%s>' | gcc -E -o %s -",
                   filename,preprocfile);
-    if (system(string_to_Cstring(cmd)) != 0)
+    if (system(string_to_Cstring(cmd)) != 0) {
+      fclose(log_file);
       return 1;
+    }
     maybe = fopen(preprocfile,"r");
-    if (!maybe) return 1;
+    if (!maybe) {
+      fclose(log_file);
+      return 1;
+    }
     in_file = (FILE@)maybe;
     l = Lexing::from_file(in_file);
     slurp_out = fopen(filteredfile,"w");
-    if (!slurp_out) return 1;
+    if (!slurp_out) {
+      fclose(log_file);
+      return 1;
+    }
     if (slurp(l)) {
       /* Unclosed string, error */
       fclose(in_file);
       fclose((FILE @)slurp_out);
       remove(preprocfile);
       remove(filteredfile);
+      fclose(log_file);
       return 1;
     }
     fclose(in_file);
     fclose((FILE @)slurp_out);
 
     maybe = fopen(filteredfile,"r");
-    if (!maybe) return 1;
+    if (!maybe) {
+      fclose(log_file);
+      return 1;
+    }
     in_file = (FILE@)maybe;
     Position::reset_position(filteredfile);
     Lex::lex_init(); // must forget typedefs, may as well flush symbols too
@@ -1042,27 +1235,131 @@ and block_comment = parse
 
     /* Compute reachable symbols */
     let reachable_set = reachable(start_symbols,t);
-//    if (strcmp(filename,"sys/stat.h")==0) {
-//      printf("There are %d reachable symbols\n",
-//             Set::cardinality(reachable_set));
-//      Set::iter(pr,reachable_set);
-//    }
 
     /* Print reachable declarations */
     let reachable_decls = NULL;
+    Set::set_t<stringptr_t<`H,`H>> defined_symbols = Set::empty(strptrcmp);
     for (let d = decls; d != NULL; d = d->tl) {
       let decl = d->hd;
       let name;
       switch (decl->r) {
+        // This switch has just a bit more functionality than decl_name,
+        // enough so that it doesn't make sense to combine them :-(
       case &Var_d(x):
         let &$(_,v) = x->name;
+        defined_symbols = Set::insert(defined_symbols,v);
         if (mem(strptrcmp,omit_symbols,v)) name = NULL;
         else name = v;
         break;
       case &Fn_d(x):
         let &$(_,v) = x->name;
+        defined_symbols = Set::insert(defined_symbols,v);
         if (mem(strptrcmp,omit_symbols,v)) name = NULL;
         else name = v;
+        break;
+      case &Struct_d(x):
+        if (!x->name) name = NULL;
+        let &$(_,v) = x->name->v;
+        name = v;
+        break;
+      case &Union_d(x):
+        // This case is identical to the last, but x has a different type
+        // so we can't fallthru
+        if (!x->name) name = NULL;
+        let &$(_,v) = x->name->v;
+        name = v;
+        break;
+      case &Enum_d(x):
+        let &$(_,v) = x->name;
+        name = v;
+
+        // see if fields are reachable or name is reachable
+        if (name != NULL && Set::member(reachable_set,(stringptr_t)name)) {
+          reachable_decls = new List(decl,reachable_decls);
+        }
+        else if (x->fields) {
+          for (let fs = x->fields->v; fs != NULL; fs = fs->tl) {
+            let f = fs->hd;
+            let &$(_,v) = f->name; 
+            if (Set::member(reachable_set,v)) {
+              reachable_decls = new List(decl,reachable_decls);
+              break; // exit for-loop
+            }
+          }
+        }
+        name = NULL;
+        break;
+      case &Typedef_d(x):
+        let &$(_,v) = x->name;
+        name = v;
+        break;
+
+      case &Let_d(_,_,_,_,_):
+      case &Tunion_d(_):
+      case &Letv_d(_):
+      case &Namespace_d(_,_):
+      case &Using_d(_,_):
+      case &ExternC_d(_):
+        name = NULL;
+        break;
+      }
+      if (name != NULL && Set::member(reachable_set,(stringptr_t)name))
+        reachable_decls = new List(decl,reachable_decls);
+    }
+    reachable_decls = imp_rev(reachable_decls);
+    maybe = fopen(filename,"w");
+    if (!maybe) {
+      fclose(log_file);
+      return 1;
+    }
+    out_file = (FILE @)maybe;
+    fprintf(out_file,"#include <%s>\nusing Std;\n",cfilename);
+    fclose(out_file);
+    maybe = fopen(cfilename, "w");
+    if (!maybe) {
+      fclose(log_file);
+      return 1;
+    }
+    out_file = (FILE @)maybe;
+    mstring_t ifdefmacro = aprintf("_%s_",filename);
+    for (let j = 0; j < ifdefmacro.size; j++) {
+      if (ifdefmacro[j] == '.' || ifdefmacro[j] == '/')
+        ifdefmacro[j] = '_';
+      else if (ifdefmacro[j] != '_' && ifdefmacro[j] != '/')
+        ifdefmacro[j] = (char)toupper(ifdefmacro[j]);
+    }
+    fprintf(out_file,
+            "#ifndef %s\n"
+            "#define %s\n",
+            ifdefmacro,
+            ifdefmacro);
+
+    if (prologue != NULL) {
+      for (let x = prologue; x != NULL; x = x->tl) {
+        let &$(symbol,text) = x->hd;
+        if (text != NULL &&
+            (symbol == NULL || Set::member(defined_symbols, new symbol)))
+          // FIX: FPUTS DUMPS CORE ON LINUX IF FIRST ARG IS NULL!!
+          fputs(text,out_file);
+        else
+          fprintf(log_file,"%s is not supported on this platform\n",symbol);
+      }
+    }
+
+    fprintf(out_file,"\nnamespace Std {\n");
+
+    for (let d = reachable_decls; d != NULL; d = d->tl) {
+      let decl = d->hd;
+      let anon_enum = false;
+      let name;
+      switch (decl->r) {
+      case &Var_d(x):
+        let &$(_,v) = x->name;
+        name = v;
+        break;
+      case &Fn_d(x):
+        let &$(_,v) = x->name;
+        name = v;
         break;
       case &Struct_d(x):
         if (!x->name) name = NULL;
@@ -1094,57 +1391,104 @@ and block_comment = parse
         name = NULL;
         break;
       }
-      if (name != NULL && Set::member(reachable_set,(stringptr_t)name))
-        reachable_decls = new List(decl,reachable_decls);
+      if (!name && !anon_enum) continue;
+      if (name) {
+        ifdefmacro = aprintf("_%s_def_",*name);
+        fprintf(out_file,"#ifndef %s\n",ifdefmacro);
+        fprintf(out_file,"#define %s\n",ifdefmacro);
+        // Because there's no decl2file and I'm lazy
+        Absynpp::decllist2file(list(decl),out_file);
+        fprintf(out_file,"#endif\n");
+      }
+      else {
+        // Anonymous enum
+        Absynpp::decllist2file(list(decl),out_file);
+      }
     }
-    reachable_decls = imp_rev(reachable_decls);
-    let out_file = fopen(filename,"w");
-    if (out_file == NULL) return 1;
-    fprintf((FILE @)out_file,"#include <%s>\nusing Std;\n",cfilename);
-    fclose((FILE @)out_file);
-    out_file = fopen(cfilename, "w");
-    mstring_t ifdefmacro = aprintf("_%s_",filename);
-    for (let j = 0; j < ifdefmacro.size; j++) {
-      if (ifdefmacro[j] == '.' || ifdefmacro[j] == '/')
-        ifdefmacro[j] = '_';
-      else if (ifdefmacro[j] != '_' && ifdefmacro[j] != '/')
-        ifdefmacro[j] = (char)toupper(ifdefmacro[j]);
-    }
-    fprintf((FILE @)out_file,
-            "#ifndef %s\n"
-            "#define %s\n"
-            "namespace Std {\n",
-            ifdefmacro,
-            ifdefmacro);
-    Absynpp::decllist2file(reachable_decls,(FILE @)out_file);
 
     /* Print reachable macros */
     cmd = aprintf("echo '#include <%s>' | gcc -E -dM -o %s -",
                   filename,preprocfile);
-    if (system(string_to_Cstring(cmd)) != 0)
+    if (system(string_to_Cstring(cmd)) != 0) {
+      fclose(log_file);
       return 1;
+    }
     maybe = fopen(preprocfile,"r");
-    if (!maybe) return 1;
+    if (!maybe) {
+      fclose(log_file);
+      return 1;
+    }
     in_file = (FILE@)maybe;
     l = Lexing::from_file(in_file);
     let entry2;
     while ( (entry2 = suck_line(l)) != NULL) {
       let &$(line,name) = (_ @)entry2; // force NULL check to get rid of warning
-      if (Set::member(reachable_set,name))
-        fprintf((FILE @)out_file,"%s\n",line);
+      if (Set::member(reachable_set,name)) {
+        fprintf(out_file,"#ifndef %s\n",*name);
+        fprintf(out_file,"%s\n",line);
+        fprintf(out_file,"#endif\n");
+      }
     }
     fclose(in_file);
     remove(preprocfile);
-    fprintf((FILE @)out_file,"}\n");
 
-    fputs(epilogue,(FILE @)out_file);
-    fprintf((FILE @)out_file,"#endif\n");
-    fclose((FILE @)out_file);
+    if (epilogue != NULL) {
+      for (let x = epilogue; x != NULL; x = x->tl) {
+        let &$(symbol,text) = x->hd;
+        if (text != NULL &&
+            (symbol == NULL || Set::member(defined_symbols, new symbol)))
+          // FIX: FPUTS DUMPS CORE ON LINUX IF FIRST ARG IS NULL!!
+          fputs(text,out_file);
+        else
+          fprintf(log_file,"%s is not supported on this platform\n",symbol);
+      }
+    }
+    fprintf(out_file,"}\n"); // close namespace Std
+    fprintf(out_file,"#endif\n");
+    fclose(out_file);
 
+    /* Dump out the c stubs */
+    if (cstubs != NULL) {
+      maybe = fopen(cstubfile,"w");
+      if (!maybe) {
+        fclose(log_file);
+        return 1;
+      }
+      out_file = (FILE @)maybe;
+      for (let x = cstubs; x != NULL; x = x->tl) {
+        let &$(symbol,text) = x->hd;
+        if (text != NULL &&
+            (symbol == NULL || Set::member(defined_symbols, new symbol)))
+          fputs(text,out_file);
+      }
+      fclose(out_file);
+    }
+
+    /* Dump out the cyclone stubs */
+    if (cycstubs != NULL) {
+      maybe = fopen(cycstubfile,"w");
+      if (!maybe) {
+        fclose(log_file);
+        return 1;
+      }
+      out_file = (FILE @)maybe;
+      for (let x = cycstubs; x != NULL; x = x->tl) {
+        let &$(symbol,text) = x->hd;
+        if (text != NULL &&
+            (symbol == NULL || Set::member(defined_symbols, new symbol)))
+          fputs(text,out_file);
+      }
+      fclose(out_file);
+    }
+
+    /* Return to original directory so that we're set up for
+       the next file */
     if (chdir(cwd)) {
       fprintf(stderr,"Error: could not change directory to %s\n", cwd);
+      fclose(log_file);
       return 1;
     }
+    fclose(log_file);
     return 0;
   }
 
@@ -1155,8 +1499,10 @@ and block_comment = parse
     let l = Lexing::from_file(in_file);
     let entry;
     while ( (entry = spec(l)) != NULL) {
-      let &$(headerfile,start_symbols,omit_symbols,epilogue) = (_ @)entry;
-      if (process_file(headerfile,dir,start_symbols,omit_symbols,epilogue))
+      let &$(headerfile,start_symbols,omit_symbols,
+             prologue,epilogue,cstubs,cycstubs) = (_ @)entry;
+      if (process_file(headerfile,dir,start_symbols,omit_symbols,
+                       prologue,epilogue,cstubs,cycstubs))
         return 1;
     }
     fclose(in_file);
@@ -1172,8 +1518,20 @@ and block_comment = parse
       return 1;
     }
     let dir = argv[1];
-    if (force_directory_prefixes(dir)) return 1;
-    if (force_directory(dir)) return 1;
+
+    /* Make sure the directory where the output files will be placed exists */
+    if (force_directory_prefixes(dir) || force_directory(dir)) {
+      fprintf(stderr,"Error: could not create directory %s\n",dir);
+      return 1;
+    }
+    /* Create an empty log file -- most importantly, any previous log
+       file will be truncated */
+    let log = fopen(Filename::concat(dir,"BUILDLIB.LOG"),"w");
+    if (!log) {
+      fprintf(stderr,"Error: could not create log file in directory %s\n",dir);
+      return 1;
+    }
+    fclose((FILE@)log);
     for (int i = 2; i<argc; i++) {
       process_specfile(argv[i],dir);
     }

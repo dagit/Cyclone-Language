@@ -1,26 +1,80 @@
+cpio.h:
+include {
+C_IRUSR
+C_IWUSR
+C_IXUSR
+C_IRGRP
+C_IWGRP
+C_IXGRP
+C_IROTH
+C_IWOTH
+C_IXOTH
+C_ISUID
+C_ISGID
+C_ISVTX
+C_ISDIR
+C_ISFIFO
+C_ISREG
+C_ISBLK
+C_ISCHR
+C_ISCTG
+C_ISLNK
+C_ISSOCK
+MAGIC
+}
+;
+
 ctype.h:
-epilogue {
-namespace Std {
-extern "C" {
-int isalnum(int);
-int isalpha(int);
-int isascii(int);
-int iscntrl(int);
-int isdigit(int);
-int isgraph(int);
-int islower(int);
-int isprint(int);
-int ispunct(int);
-int isspace(int);
-int isupper(int);
-int isxdigit(int);
-int toascii(int);
-int tolower(int);
-int toupper(int);
-int _tolower(int);
-int _toupper(int);
+epilogue isalnum {
+  extern "C" int isalnum(int);
 }
+epilogue isalpha {
+  extern "C" int isalpha(int);
 }
+epilogue isascii {
+  extern "C" int isascii(int);
+}
+epilogue iscntrl {
+  extern "C" int iscntrl(int);
+}
+epilogue isdigit {
+  extern "C" int isdigit(int);
+}
+epilogue isgraph {
+  extern "C" int isgraph(int);
+}
+epilogue islower {
+  extern "C" int islower(int);
+}
+epilogue isprint {
+  extern "C" int isprint(int);
+}
+epilogue ispunct {
+  extern "C" int ispunct(int);
+}
+epilogue isspace {
+  extern "C" int isspace(int);
+}
+epilogue isupper {
+  extern "C" int isupper(int);
+}
+epilogue isxdigit {
+  extern "C" int isxdigit(int);
+}
+epilogue toascii {
+  extern "C" int toascii(int);
+}
+epilogue tolower {
+  extern "C" int tolower(int);
+}
+epilogue toupper {
+  extern "C" int toupper(int);
+}
+epilogue _tolower {
+  extern "C" int _tolower(int);
+}
+epilogue _toupper {
+  extern "C" int _toupper(int);
 }
 ;
 
@@ -31,20 +85,41 @@ dirent
 ino_t
 NAME_MAX
 }
+epilogue closedir {
+  extern "C" int closedir(DIR @);
+}
+epilogue opendir {
+  extern DIR *opendir(const char ?);
+}
+cycstub opendir {
+  #include <cdirent.h>
+  #include <core.h>
+  namespace Std;
+  namespace StdDirent {
+    extern "C" DIR *opendir(Cstring);
+  }
+  DIR *opendir(const char ?f) {
+    if (!f)
+      throw new Failure("opendir called with NULL string");
+    return StdDirent::opendir(string_to_Cstring(f));
+  }
+}
+epilogue readdir {
+  extern "C" struct dirent @readdir(DIR @);
+}
 epilogue {
-namespace Std {
-extern "C" {
-int closedir(DIR @);
-struct dirent @readdir(DIR @);
-// FIX: the third arg is an array, need a wrapper
-//int readdir_r(DIR *, struct dirent *, struct dirent **);
-void rewinddir(DIR @);
-void seekdir(DIR @, long);
-long telldir(DIR @);
+  // FIX: We don't handle this yet. The third arg is an array,
+  // needs a wrapper
+  //int readdir_r(DIR *, struct dirent *, struct dirent **);
 }
-// FIX: need a wrapper
-extern DIR @opendir(const char ?);
+epilogue rewinddir {
+  extern "C" void rewinddir(DIR @);
 }
+epilogue seekdir {
+  extern "C" void seekdir(DIR @, long);
+}
+epilogue telldir {
+  extern "C" long telldir(DIR @);
 }
 ;
 
@@ -129,15 +204,14 @@ EWOULDBLOCK
 EXDEV
 }
 epilogue {
-namespace Std {
 extern "C" int __CYCLONE_ERRNO();
 #define errno (__CYCLONE_ERRNO())
-// FIX: NEED STUB CODE
-// // We do this because errno is probably a C macro
-// #include <errno.h>
-// int __CYCLONE_ERRNO() {
-//   return errno;
-// }
+}
+cstub {
+// We do this because errno is probably a C macro
+#include <errno.h>
+int __CYCLONE_ERRNO() {
+  return errno;
 }
 }
 ;
@@ -180,17 +254,128 @@ off_t
 pid_t
 }
 epilogue {
-namespace Std {
-tunion FcntlArg<`r::R> {
-  Flock(struct flock @`r);
-  Long(long);
-};
-typedef tunion `r FcntlArg<`r> fcntlarg_t<`r>;
+  // FIX: ADV is not supported
 
-extern int fcntl(int fd, int cmd, ... inject fcntlarg_t);
-extern int open(const char ?,int,... mode_t);
-extern int creat(const char ?,mode_t);
+  tunion FcntlArg<`r::R> {
+    Flock(struct flock @`r);
+    Long(long);
+  };
+  typedef tunion `r FcntlArg<`r> fcntlarg_t<`r>;
+
+  extern int fcntl(int fd, int cmd, ... inject fcntlarg_t);
+  extern int open(const char ?, int, ... mode_t);
+  extern int creat(const char ?, mode_t);
 }
+cycstub {
+  #include <cfcntl.h>
+  #include <core.h>
+  using Core;
+
+  namespace Cfcntl {
+    extern "C" int fcntl(int fd, int cmd);
+    extern "C" int fcntl_with_arg(int fd, int cmd, long arg);
+    extern "C" int fcntl_with_lock(int fd, int cmd, struct Std::flock *lock);
+    extern "C" int creat(const Cstring,mode_t);
+    extern "C" int open_without_mode(const Cstring,int);
+    extern "C" int open_with_mode(const Cstring,int,mode_t);
+  }
+
+  namespace Std;
+
+  int fcntl(int fd, int cmd, ... inject fcntlarg_t argv) {
+    if (argv.size == 0) return Cfcntl::fcntl(fd, cmd);
+    else if (argv.size != 1) throw new Failure("fcntl: too many args");
+    else switch (argv[0]) {
+    case &Long(arg): return Cfcntl::fcntl_with_arg(fd, cmd, arg);
+    case &Flock(lock): return Cfcntl::fcntl_with_lock(fd, cmd, lock);
+    }
+  }
+
+  int creat(string_t s, mode_t m) {
+    return Cfcntl::creat(string_to_Cstring(s),m);
+  }
+
+  int open(string_t s, int i, ... mode_t ms) {
+    /* Note: if open is called with more than 3 arguments, the
+       additional args are simply ignored. */
+    if (ms.size >= 1)
+      return Cfcntl::open_with_mode(string_to_Cstring(s),i,ms[0]);
+    else
+      return Cfcntl::open_without_mode(string_to_Cstring(s),i);
+  }
+}
+cstub {
+  #include "precore_c.h"
+  #include <fcntl.h>
+  int fcntl_with_arg(int fd, int cmd, long arg) {
+    return fcntl(fd, cmd, arg);
+  }
+  // We call lock a void* so we don't have to #include anything else
+  int fcntl_with_lock(int fd, int cmd, void *lock) {
+    return fcntl(fd, cmd, lock);
+  }
+
+  int open_with_mode(const Cstring s, int flags, mode_t m) {
+    return open(s,flags,m);
+  }
+
+  int open_without_mode(const Cstring s, int flags) {
+    /* Use 0 as the mode argument, in case flags contains O_CREAT.  In
+       that case the file will be created with 0 permissions; if we
+       omitted the 0 it would be created with random permissions. */
+    return open(s,flags,0);
+  }
+}
+;
+
+fenv.h:
+include {
+fenv_t
+fexcept_t
+FE_DIVBYZERO
+FE_INEXACT
+FE_INVALID
+FE_OVERFLOW
+FE_UNDERFLOW
+FE_ALL_EXCEPT
+FE_DOWNWARD
+FE_TONEAREST
+FE_TOWARDZERO
+FE_UPWARD
+FE_DFL_ENV
+}
+epilogue feclearexcept {
+  extern "C" int feclearexcept(int);
+}
+epilogue fegetexceptflag {
+  extern "C" int fegetexceptflag(fexcept_t @, int);
+}
+epilogue feraiseexcept {
+  extern "C" int feraiseexcept(int);
+}
+epilogue fesetexceptflag {
+  extern "C" int fesetexceptflag(const fexcept_t @, int);
+}
+epilogue fetestexcept {
+  extern "C" int fetestexcept(int);
+}
+epilogue fegetround {
+  extern "C" int fegetround(void);
+}
+epilogue fesetround {
+  extern "C" int fesetround(int);
+}
+epilogue fegetenv {
+  extern "C" int fegetenv(fenv_t @);
+}
+epilogue feholdexcept {
+  extern "C" int feholdexcept(fenv_t @);
+}
+epilogue fesetenv {
+  extern "C" int fesetenv(const fenv_t @);
+}
+epilogue feupdateenv {
+  extern "C" int feupdateenv(const fenv_t @);
 }
 ;
 
@@ -227,6 +412,82 @@ LDBL_EPSILON
 FLT_MIN
 DBL_MIN
 LDBL_MIN
+}
+;
+
+fmtmsg.h:
+include {
+MM_HARD
+MM_SOFT
+MM_FIRM
+MM_APPL
+MM_UTIL
+MM_OPSYS
+MM_RECOVER
+MM_NRECOV
+MM_HALT
+MM_ERROR
+MM_WARNING
+MM_INFO
+MM_NOSEV
+MM_PRINT
+MM_CONSOLE
+MM_NULLSEV
+MM_NULLMC
+MM_OK
+MM_NOTOK
+MM_NOMSG
+MM_NOCON
+}
+epilogue {
+#define MM_NULLLBL ((const char ?)NULL)
+#define MM_NULLTXT ((const char ?)NULL)
+#define MM_NULLACT ((const char ?)NULL)
+#define MM_NULLTAG ((const char ?)NULL)
+extern int fmtmsg(long, const char ?, int, const char ?,
+                  const char ?, const char ?);
+}
+cycstub {
+  #include <core.h>
+  using Core;
+  namespace Std;
+  namespace Cfmtmsg {
+    extern "C" int fmtmsg(long a, const Cstring b, int c, const Cstring d,
+                          const Cstring e, const Cstring f);
+  }
+  int fmtmsg(long a, const char ?b, int c, const char ?d,
+             const char ?e, const char ?f) {
+    return Cfmtmsg::fmtmsg(a, string_to_Cstring(b), c, string_to_Cstring(d),
+                           string_to_Cstring(e), string_to_Cstring(f));
+  }
+}
+;
+
+fnmatch.h:
+include {
+FNM_NOMATCH
+FNM_PATHNAME
+FNM_PERIOD
+FNM_NOESCAPE
+FNM_NOSYS
+}
+epilogue {
+  // Our implementation copies the first two arguments.  This is
+  // only a stopgap measure, the function should be rewitten in
+  // Cyclone.
+  extern int fnmatch(const char ?, const char ?, int);
+}
+cycstub {
+  #include <core.h>
+  using Core;
+  namespace Std;
+  namespace Cfnmatch {
+    extern "C" int fnmatch(const Cstring,const Cstring,int);
+  }
+  int fnmatch(const char ?a, const char ?b, int c) {
+    if (!a || !b) throw new Failure("fnmatch called with NULL");
+    return Cfnmatch::fnmatch(string_to_Cstring(a),string_to_Cstring(b),c);
+  }
 }
 ;
 
@@ -438,6 +699,605 @@ NZERO
 }
 ;
 
+math.h:
+include {
+float_t
+double_t
+FLT_EVAL_METHOD
+fpclassify
+isfinite
+isinf
+isnan
+isnormal
+signbit
+isgreater
+isgreaterequal
+isless
+islessequal
+islessgreater
+isunordered
+M_E
+M_LOG2E
+M_LOG10E
+M_LN2
+M_LN10
+M_PI
+M_PI_2
+M_PI_4
+M_1_PI
+M_2_PI
+M_2_SQRTP
+M_SQRT2
+M_SQRT1_2
+MAXFLOAT
+HUGE_VAL
+HUGE_VALF
+HUGE_VALL
+INFINITY
+NAN
+FP_INFINITE
+FP_NAN
+FP_NORMAL
+FP_SUBNORMAL
+FP_ZERO
+FP_FAST_FMA
+FP_FAST_FMAF
+FP_FAST_FMAL
+FP_ILOGB0
+FP_ILOGBNAN
+MATH_ERRNO
+MATH_ERREXCEPT
+math_errhandling
+}
+epilogue acos {
+  extern "C" double acos(double);
+}
+epilogue acosf {
+  extern "C" float acosf(float);
+}
+epilogue acosh {
+  extern "C" double acosh(double);
+}
+epilogue acoshf {
+  extern "C" float acoshf(float);
+}
+epilogue acoshl {
+  // FIX: Cyclone currently does not handle long double
+  //  extern "C" long double acoshl(long double);
+}
+epilogue acosl {
+  //  extern "C" long double acosl(long double);
+}
+epilogue asin {
+  extern "C" double asin(double);
+}
+epilogue asinf {
+  extern "C" float asinf(float);
+}
+epilogue asinh {
+  extern "C" double asinh(double);
+}
+epilogue asinhf {
+  extern "C" float asinhf(float);
+}
+epilogue asinhl {
+  //  extern "C" long double asinhl(long double);
+}
+epilogue asinl {
+  //  extern "C" long double asinl(long double);
+}
+epilogue atan {
+  extern "C" double atan(double);
+}
+epilogue atan2 {
+  extern "C" double atan2(double, double);
+}
+epilogue atan2f {
+  extern "C" float atan2f(float, float);
+}
+epilogue atan2l {
+  //  extern "C" long double atan2l(long double, long double);
+}
+epilogue atanf {
+  extern "C" float atanf(float);
+}
+epilogue atanh {
+  extern "C" double atanh(double);
+}
+epilogue atanhf {
+  extern "C" float atanhf(float);
+}
+epilogue atanhl {
+  //  extern "C" long double atanhl(long double);
+}
+epilogue atanl {
+  //  extern "C" long double atanl(long double);
+}
+epilogue cbrt {
+  extern "C" double cbrt(double);
+}
+epilogue cbrtf {
+  extern "C" float cbrtf(float);
+}
+epilogue cbrtl {
+  //  extern "C" long double cbrtl(long double);
+}
+epilogue ceil {
+  extern "C" double ceil(double);
+}
+epilogue ceilf {
+  extern "C" float ceilf(float);
+}
+epilogue ceill {
+  //  extern "C" long double ceill(long double);
+}
+epilogue copysign {
+  extern "C" double copysign(double, double);
+}
+epilogue copysignf {
+  extern "C" float copysignf(float, float);
+}
+epilogue copysignl {
+  //  extern "C" long double copysignl(long double, long double);
+}
+epilogue cos {
+  extern "C" double cos(double);
+}
+epilogue cosf {
+  extern "C" float cosf(float);
+}
+epilogue cosh {
+  extern "C" double cosh(double);
+}
+epilogue coshf {
+  extern "C" float coshf(float);
+}
+epilogue coshl {
+  //  extern "C" long double coshl(long double);
+}
+epilogue cosl {
+  //  extern "C" long double cosl(long double);
+}
+epilogue erf {
+  extern "C" double erf(double);
+}
+epilogue erfc {
+  extern "C" double erfc(double);
+}
+epilogue erfcf {
+  extern "C" float erfcf(float);
+}
+epilogue erfcl {
+  //  extern "C" long double erfcl(long double);
+}
+epilogue erff {
+  extern "C" float erff(float);
+}
+epilogue erfl {
+  //  extern "C" long double erfl(long double);
+}
+epilogue exp {
+  extern "C" double exp(double);
+}
+epilogue exp2 {
+  extern "C" double exp2(double);
+}
+epilogue exp2f {
+  extern "C" float exp2f(float);
+}
+epilogue exp2l {
+  //  extern "C" long double exp2l(long double);
+}
+epilogue expf {
+  extern "C" float expf(float);
+}
+epilogue expl {
+  //  extern "C" long double expl(long double);
+}
+epilogue expm1 {
+  extern "C" double expm1(double);
+}
+epilogue expm1f {
+  extern "C" float expm1f(float);
+}
+epilogue expm1l {
+  //  extern "C" long double expm1l(long double);
+}
+epilogue fabs {
+  extern "C" double fabs(double);
+}
+epilogue fabsf {
+  extern "C" float fabsf(float);
+}
+epilogue fabsl {
+  //  extern "C" long double fabsl(long double);
+}
+epilogue fdim {
+  extern "C" double fdim(double, double);
+}
+epilogue fdimf {
+  extern "C" float fdimf(float, float);
+}
+epilogue fdiml {
+  //  extern "C" long double fdiml(long double, long double);
+}
+epilogue floor {
+  extern "C" double floor(double);
+}
+epilogue floorf {
+  extern "C" float floorf(float);
+}
+epilogue floorl {
+  //  extern "C" long double floorl(long double);
+}
+epilogue fma {
+  extern "C" double fma(double, double, double);
+}
+epilogue fmaf {
+  extern "C" float fmaf(float, float, float);
+}
+epilogue fmal {
+  //  extern "C" long double fmal(long double, long double, long double);
+}
+epilogue fmax {
+  extern "C" double fmax(double, double);
+}
+epilogue fmaxf {
+  extern "C" float fmaxf(float, float);
+}
+epilogue fmaxl {
+  //  extern "C" long double fmaxl(long double, long double);
+}
+epilogue fmin {
+  extern "C" double fmin(double, double);
+}
+epilogue fminf {
+  extern "C" float fminf(float, float);
+}
+epilogue fminl {
+  //  extern "C" long double fminl(long double, long double);
+}
+epilogue fmod {
+  extern "C" double fmod(double, double);
+}
+epilogue fmodf {
+  extern "C" float fmodf(float, float);
+}
+epilogue fmodl {
+  //  extern "C" long double fmodl(long double, long double);
+}
+epilogue frexp {
+  extern "C" double frexp(double, int @);
+}
+epilogue frexpf {
+  extern "C" float frexpf(float value, int @);
+}
+epilogue frexpl {
+  //  extern "C" long double frexpl(long double value, int @);
+}
+epilogue hypot {
+  extern "C" double hypot(double, double);
+}
+epilogue hypotf {
+  extern "C" float hypotf(float, float);
+}
+epilogue hypotl {
+  //  extern "C" long double hypotl(long double, long double);
+}
+epilogue ilogb {
+  extern "C" int ilogb(double);
+}
+epilogue ilogbf {
+  extern "C" int ilogbf(float);
+}
+epilogue ilogbl {
+  //  extern "C" int ilogbl(long double);
+}
+epilogue j0 {
+  extern "C" double j0(double);
+}
+epilogue j1 {
+  extern "C" double j1(double);
+}
+epilogue jn {
+  extern "C" double jn(int, double);
+}
+epilogue ldexp {
+  extern "C" double ldexp(double, int);
+}
+epilogue ldexpf {
+  extern "C" float ldexpf(float, int);
+}
+epilogue ldexpl {
+  //  extern "C" long double ldexpl(long double, int);
+}
+epilogue lgamma {
+  extern "C" double lgamma(double);
+}
+epilogue lgammaf {
+  extern "C" float lgammaf(float);
+}
+epilogue lgammal {
+  //  extern "C" long double lgammal(long double);
+}
+epilogue llrint {
+  extern "C" long long llrint(double);
+}
+epilogue llrintf {
+  extern "C" long long llrintf(float);
+}
+epilogue llrintl {
+  //  extern "C" long long llrintl(long double);
+}
+epilogue llround {
+  extern "C" long long llround(double);
+}
+epilogue llroundf {
+  extern "C" long long llroundf(float);
+}
+epilogue llroundl {
+  //  extern "C" long long llroundl(long double);
+}
+epilogue log {
+  extern "C" double log(double);
+}
+epilogue log10 {
+  extern "C" double log10(double);
+}
+epilogue log10f {
+  extern "C" float log10f(float);
+}
+epilogue log10l {
+  //  extern "C" long double log10l(long double);
+}
+epilogue log1p {
+  extern "C" double log1p(double);
+}
+epilogue log1pf {
+  extern "C" float log1pf(float);
+}
+epilogue log1pl {
+  //  extern "C" long double log1pl(long double);
+}
+epilogue log2 {
+  extern "C" double log2(double);
+}
+epilogue log2f {
+  extern "C" float log2f(float);
+}
+epilogue log2l {
+  //  extern "C" long double log2l(long double);
+}
+epilogue logb {
+  extern "C" double logb(double);
+}
+epilogue logbf {
+  extern "C" float logbf(float);
+}
+epilogue logbl {
+  //  extern "C" long double logbl(long double);
+}
+epilogue logf {
+  extern "C" float logf(float);
+}
+epilogue logl {
+  //  extern "C" long double logl(long double);
+}
+epilogue lrint {
+  extern "C" long lrint(double);
+}
+epilogue lrintf {
+  extern "C" long lrintf(float);
+}
+epilogue lrintl {
+  //  extern "C" long lrintl(long double);
+}
+epilogue lround {
+  extern "C" long lround(double);
+}
+epilogue lroundf {
+  extern "C" long lroundf(float);
+}
+epilogue lroundl {
+  //  extern "C" long lroundl(long double);
+}
+epilogue modf {
+  extern "C" double modf(double, double @);
+}
+epilogue modff {
+  extern "C" float modff(float, float @);
+}
+epilogue modfl {
+  //  extern "C" long double modfl(long double, long double @);
+}
+epilogue nan {
+  // FIX: not yet implemented
+  //  extern "C" double nan(const char *);
+}
+epilogue nanf {
+  // FIX: not yet implemented
+  //  extern "C" float nanf(const char *);
+}
+epilogue nanl {
+  // FIX: not yet implemented
+  //  extern "C" long double nanl(const char *);
+}
+epilogue nearbyint {
+  extern "C" double nearbyint(double);
+}
+epilogue nearbyintf {
+  extern "C" float nearbyintf(float);
+}
+epilogue nearbyintl {
+  //  extern "C" long double nearbyintl(long double);
+}
+epilogue nextafter {
+  extern "C" double nextafter(double, double);
+}
+epilogue nextafterf {
+  extern "C" float nextafterf(float, float);
+}
+epilogue nextafterl {
+  //  extern "C" long double nextafterl(long double, long double);
+}
+epilogue nexttoward {
+  //  extern "C" double nexttoward(double, long double);
+}
+epilogue nexttowardf {
+  //  extern "C" float nexttowardf(float, long double);
+}
+epilogue nexttowardl {
+  //  extern "C" long double nexttowardl(long double, long double);
+}
+epilogue pow {
+  extern "C" double pow(double, double);
+}
+epilogue powf {
+  extern "C" float powf(float, float);
+}
+epilogue powl {
+  //  extern "C" long double powl(long double, long double);
+}
+epilogue remainder {
+  extern "C" double remainder(double, double);
+}
+epilogue remainderf {
+  extern "C" float remainderf(float, float);
+}
+epilogue remainderl {
+  //  extern "C" long double remainderl(long double, long double);
+}
+epilogue remquo {
+  extern "C" double remquo(double, double, int @);
+}
+epilogue remquof {
+  extern "C" float remquof(float, float, int @);
+}
+epilogue remquol {
+  //  extern "C" long double remquol(long double, long double, int @);
+}
+epilogue rint {
+  extern "C" double rint(double);
+}
+epilogue rintf {
+  extern "C" float rintf(float);
+}
+epilogue rintl {
+  //  extern "C" long double rintl(long double);
+}
+epilogue round {
+  extern "C" double round(double);
+}
+epilogue roundf {
+  extern "C" float roundf(float);
+}
+epilogue roundl {
+  //  extern "C" long double roundl(long double);
+}
+epilogue scalb {
+  extern "C" double scalb(double, double);
+}
+epilogue scalbln {
+  extern "C" double scalbln(double, long);
+}
+epilogue scalblnf {
+  extern "C" float scalblnf(float, long);
+}
+epilogue scalblnl {
+  //  extern "C" long double scalblnl(long double, long);
+}
+epilogue scalbn {
+  extern "C" double scalbn(double, int);
+}
+epilogue scalbnf {
+  extern "C" float scalbnf(float, int);
+}
+epilogue scalbnl {
+  //  extern "C" long double scalbnl(long double, int);
+}
+epilogue sin {
+  extern "C" double sin(double);
+}
+epilogue sinf {
+  extern "C" float sinf(float);
+}
+epilogue sinh {
+  extern "C" double sinh(double);
+}
+epilogue sinhf {
+  extern "C" float sinhf(float);
+}
+epilogue sinhl {
+  //  extern "C" long double sinhl(long double);
+}
+epilogue sinl {
+  //  extern "C" long double sinl(long double);
+}
+epilogue sqrt {
+  extern "C" double sqrt(double);
+}
+epilogue sqrtf {
+  extern "C" float sqrtf(float);
+}
+epilogue sqrtl {
+  //  extern "C" long double sqrtl(long double);
+}
+epilogue tan {
+  extern "C" double tan(double);
+}
+epilogue tanf {
+  extern "C" float tanf(float);
+}
+epilogue tanh {
+  extern "C" double tanh(double);
+}
+epilogue tanhf {
+  extern "C" float tanhf(float);
+}
+epilogue tanhl {
+  //  extern "C" long double tanhl(long double);
+}
+epilogue tanl {
+  //  extern "C" long double tanl(long double);
+}
+epilogue tgamma {
+  extern "C" double tgamma(double);
+}
+epilogue tgammaf {
+  extern "C" float tgammaf(float);
+}
+epilogue tgammal {
+  //  extern "C" long double tgammal(long double);
+}
+epilogue trunc {
+  extern "C" double trunc(double);
+}
+epilogue truncf {
+  extern "C" float truncf(float);
+}
+epilogue truncl {
+  //  extern "C" long double truncl(long double);
+}
+epilogue y0 {
+  extern "C" double y0(double);
+}
+epilogue y1 {
+  extern "C" double y1(double);
+}
+epilogue yn {
+  extern "C" double yn(int, double);
+}
+epilogue {
+  extern "C" int signgam;
+}
+;
+
+netinet/tcp.h:
+include {
+TCP_NODELAY
+}
+;
+
 poll.h:
 include {
 pollfd
@@ -453,102 +1313,28 @@ POLLERR
 POLLHUP
 POLLNVAL
 }
-epilogue {
-namespace Std {
-// FIX: need a stub
-int poll (struct pollfd?, nfds_t, int);
+epilogue poll {
+  extern int poll (struct pollfd?, nfds_t, int);
 }
-}
-;
-
-signal.h:
-omitvariables { sigaction }
-include {
-SIG_HOLD
-sig_atomic_t
-sigset_t
-pid_t
-sigevent
-SIGEV_NONE
-SIGEV_SIGNAL
-SIGEV_THREAD
-sigval
-SIGABRT
-SIGALRM
-SIGBUS
-SIGCHLD
-SIGCONT
-SIGFPE
-SIGHUP
-SIGILL
-SIGINT
-SIGKILL
-SIGPIPE
-SIGQUIT
-SIGSEGV
-SIGSTOP
-SIGTERM
-SIGTSTP
-SIGTTIN
-SIGTTOU
-SIGUSR1
-SIGUSR2
-SIGPOLL
-SIGPROF
-SIGSYS
-SIGTRAP
-SIGURG
-SIGVTALRM
-SIGXCPU
-SIGXFSZ
-sigaction
-SA_NOCLDSTOP
-SIG_BLOCK
-SIG_UNBLOCK
-SIG_SETMASK
-SA_ONSTACK
-SA_RESETHAND
-SA_RESTART
-SA_SIGINFO
-SA_NOCLDWAIT
-SA_NODEFER
-SA_ONSTACK
-SA_DISABLE
-MINSIGSTACKSZ
-SIGSTACKSZ
-ucontext_t
-mcontext_t
-stack_t
-sigstack
-siginfo_t
-}
-epilogue {
-namespace Std {
-extern "C" int sigaddset(sigset_t@, int);
-extern "C" int sigdelset(sigset_t@, int);
-extern "C" int sigemptyset(sigset_t@);
-extern "C" int sigfillset(sigset_t@);
-extern "C" int sighold(int);
-extern "C" int sigignore(int);
-extern "C" int siginterrupt(int,int);
-extern "C" int sigismember(sigset_t@, int);
-extern "C" int sigpause(int);
-extern "C" int sigrelse(int);
-
-extern tunion SigArg {
-  SIG_DFL;
-  SIG_ERR;
-  SIG_HOLD; // Not defined on most systems
-  SIG_IGN;
-  __SIG_HANDLER(void (@)(int)); // Note, must be heap allocated
-};
-typedef tunion SigArg sigarg_t;
-extern sigarg_t sigset(int, sigarg_t);
-extern sigarg_t signal(int, sigarg_t);
-// FIX: struct sigaction needs to be fixed so that field
-// sa_handler has type sigarg_t
-extern "C" sigaction(int, const struct sigaction *, struct sigaction *);
-}
+cycstub poll {
+  #include <core.h> // for Failure
+  #include <cpoll.h>
+  namespace Std;
+  namespace Cpoll {
+    extern "C" int poll(struct pollfd @{0}, nfds_t b, int c);
+  }
+  int poll(struct pollfd?a, nfds_t b, int c) {
+    if (!a) throw new Core::Failure("poll called with NULL");
+    try *a;
+    catch {
+    case Array_bounds:
+      throw new Core::Failure("poll called with out-of-bounds pointer");
+    }
+    int len = a.size;
+    return Cpoll::poll((struct pollfd @{0})a,
+                       (b<(nfds_t)len)?b:(nfds_t)len,
+                       c);
+  }
 }
 ;
 
@@ -558,91 +1344,74 @@ ptrdiff_t
 wchar_t
 size_t
 }
+epilogue {
+  // NULL is not defined here because it is a keyword in Cyclone
+}
 ;
 
-stdlib.h:
+stdint.h:
 include {
-EXIT_FAILURE
-EXIT_SUCCESS
-RAND_MAX
-div_t
-ldiv_t
-lldiv_t
-size_t
-wchar_t
-WNOHANG
-WUNTRACED
-WEXITSTATUS
-WIFEXITED
-WIFSIGNALED
-WIFSTOPPED
-WSTOPSIG
-WTERMSIG
+int8_t
+int16_t
+int32_t
+uint8_t
+uint16_t
+uint32_t
+int64_t
+uint64_t
+int_least8_t
+int_least16_t
+int_least32_t
+int_least64_t
+uint_least8_t
+uint_least16_t
+uint_least32_t
+uint_least64_t
+int_fast8_t
+int_fast16_t
+int_fast32_t
+int_fast64_t
+uint_fast8_t
+uint_fast16_t
+uint_fast32_t
+uint_fast64_t
+intptr_t
+uintptr_t
+intmax_t
+uintmax_t
+INTN_MIN
+INTN_MAX
+UINTN_MAX
+INT_LEASTN_MIN
+INT_LEASTN_MAX
+UINT_LEASTN_MAX
+INT_FASTN_MIN
+INT_FASTN_MAX
+UINT_FASTN_MAX
+INTPTR_MIN
+INTPTR_MAX
+UINTPTR_MAX
+INTMAX_MIN
+INTMAX_MAX
+UINTMAX_MAX
+PTRDIFF_MIN
+PTRDIFF_MAX
+SIG_ATOMIC_MIN
+SIG_ATOMIC_MAX
+SIZE_MAX
+WCHAR_MIN
+WCHAR_MAX
+WINT_MIN
+WINT_MAX
+INTN_C
+UINTN_C
+INTMAX_C
+UINTMAX_C
 }
 epilogue {
-/* Get size_t from <stddef.h> */
-#include <cstddef.h>
-#include <core.h>
-
-namespace Std {
-extern "C" {
-int system(Cstring);
-
-/* Return the absolute value of X.  */
-extern int abs (int __x);
-
-/* Register a function to be called when `exit' is called.  */
-extern int atexit (void (*__func) (void));
-
-/* Return the `div_t' or `ldiv_t' representation
-   of the value of NUMER over DENOM. */
-/* GCC may have built-ins for these someday.  */
-extern div_t div (int __numer, int __denom);
-extern ldiv_t ldiv (long int __numer, long int __denom);
-
-/* These are the functions that actually do things.  The `random', `srandom',
-   `initstate' and `setstate' functions are those from BSD Unices.
-   The `rand' and `srand' functions are required by the ANSI standard.
-   We provide both interfaces to the same random number generator.  */
-/* Return a random long integer between 0 and RAND_MAX inclusive.  */
-extern long int random (void);
-
-/* Seed the random number generator with the given number.  */
-extern void srandom (unsigned int __seed);
-
-/* Return a random integer between 0 and RAND_MAX inclusive.  */
-extern int rand (void);
-/* Seed the random number generator with the given number.  */
-extern void srand (unsigned int __seed);
-/* Reentrant interface according to POSIX.1.  */
-extern int rand_r (unsigned int *__seed);
-
-  // THE NEXT TWO FUNCTIONS MIGHT NEED TO BE COMMENTED OUT IN LINUX
-/* Chown the slave to the calling user.  */
-extern int grantpt (int __fd);
-
-/* Release an internal lock so the slave can be opened.
-   Call after grantpt().  */
-extern int unlockpt (int __fd);
-}
-
-/* Convert a string to a floating-point number.  */
-extern double atof(const char ?`r);
-/* Convert a string to an integer.  */
-extern int atoi(const char ?`r);
-/* Convert a string to a long integer.  */
-extern long atol(const char ?`r);
-
-/* Return the value of envariable NAME, or NULL if it doesn't exist.  */
-extern char ?getenv(const char ?);
-
-/* Convert a string to a floating-point number.  */
-extern double strtod(const char ?`r n, const char ?`r *`r2 end);
-/* Convert a string to a long integer.  */
-extern long strtol(const char ?`r n, const char ?`r *`r2 end, int base);
-/* Convert a string to an unsigned long integer.  */
-extern unsigned long strtoul(const char ?`r n,const char ?`r *`r2 end, int base);
-}
+  // Note that intptr_t, uintptr_t, and related macros
+  // all involve casting to and from void *, so they
+  // are probably useless in Cyclone
 }
 ;
 
@@ -882,6 +1651,92 @@ extern int vsscanf(const char ?`r src, const char ?`r1 fmt,
                    sarg_t<`r3,`r4> ? `r2)
   __attribute__((format(scanf,2,0)))
   ;
+}
+}
+;
+
+stdlib.h:
+include {
+EXIT_FAILURE
+EXIT_SUCCESS
+RAND_MAX
+div_t
+ldiv_t
+lldiv_t
+size_t
+wchar_t
+WNOHANG
+WUNTRACED
+WEXITSTATUS
+WIFEXITED
+WIFSIGNALED
+WIFSTOPPED
+WSTOPSIG
+WTERMSIG
+}
+epilogue {
+/* Get size_t from <stddef.h> */
+#include <cstddef.h>
+#include <core.h>
+
+namespace Std {
+extern "C" {
+int system(Cstring);
+
+/* Return the absolute value of X.  */
+extern int abs (int __x);
+
+/* Register a function to be called when `exit' is called.  */
+extern int atexit (void (*__func) (void));
+
+/* Return the `div_t' or `ldiv_t' representation
+   of the value of NUMER over DENOM. */
+/* GCC may have built-ins for these someday.  */
+extern div_t div (int __numer, int __denom);
+extern ldiv_t ldiv (long int __numer, long int __denom);
+
+/* These are the functions that actually do things.  The `random', `srandom',
+   `initstate' and `setstate' functions are those from BSD Unices.
+   The `rand' and `srand' functions are required by the ANSI standard.
+   We provide both interfaces to the same random number generator.  */
+/* Return a random long integer between 0 and RAND_MAX inclusive.  */
+extern long int random (void);
+
+/* Seed the random number generator with the given number.  */
+extern void srandom (unsigned int __seed);
+
+/* Return a random integer between 0 and RAND_MAX inclusive.  */
+extern int rand (void);
+/* Seed the random number generator with the given number.  */
+extern void srand (unsigned int __seed);
+/* Reentrant interface according to POSIX.1.  */
+extern int rand_r (unsigned int *__seed);
+
+  // THE NEXT TWO FUNCTIONS MIGHT NEED TO BE COMMENTED OUT IN LINUX
+/* Chown the slave to the calling user.  */
+extern int grantpt (int __fd);
+
+/* Release an internal lock so the slave can be opened.
+   Call after grantpt().  */
+extern int unlockpt (int __fd);
+}
+
+/* Convert a string to a floating-point number.  */
+extern double atof(const char ?`r);
+/* Convert a string to an integer.  */
+extern int atoi(const char ?`r);
+/* Convert a string to a long integer.  */
+extern long atol(const char ?`r);
+
+/* Return the value of envariable NAME, or NULL if it doesn't exist.  */
+extern char ?getenv(const char ?);
+
+/* Convert a string to a floating-point number.  */
+extern double strtod(const char ?`r n, const char ?`r *`r2 end);
+/* Convert a string to a long integer.  */
+extern long strtol(const char ?`r n, const char ?`r *`r2 end, int base);
+/* Convert a string to an unsigned long integer.  */
+extern unsigned long strtoul(const char ?`r n,const char ?`r *`r2 end, int base);
 }
 }
 ;
@@ -1161,6 +2016,17 @@ sys/stat.h:
 omitvariables { stat }
 include {
 stat
+blkcnt_t
+blksize_t
+dev_t
+ino_t
+mode_t
+nlink_t
+uid_t
+gid_t
+off_t
+time_t
+S_IFMT
 S_IFBLK
 S_IFCHR
 S_IFIFO
@@ -1195,18 +2061,135 @@ S_TYPEISSEM
 S_TYPEISSHM
 S_TYPEISTMO
 }
-epilogue {
-namespace Std {
-  extern int chmod(const char ?, mode_t);
-  extern "C" int fchmod(int, mode_t);
-  extern "C" int fstat(int fd, struct stat @buf);
-  extern int lstat(const char ? filename, struct stat @buf);
-  extern int mkdir(const char ? pathname, mode_t mode);
-  extern int mkfifo(const char ? pathname, mode_t mode);
-  extern int mknod(const char ? pathname, mode_t mode, dev_t);
-  extern int stat(const char ? filename, struct stat @buf);
-  extern "C" mode_t umask(mode_t mask);
+cycstub {
+  #include <core.h>
+  using Core;
+  namespace Std;
+  #include <sys/stat.h>
 }
+epilogue {
+  // EXTREMELY irritating: under Linux, mode_t, etc., are not defined
+  // in sys/stat.h, CONTRARY to the posix spec.  Instead __mode_t, etc.,
+  // are defined.  This makes mode_t, etc., defined under Linux.
+  #if defined(___blkcnt_t_def_) && !defined(_blkcnt_t_def_)
+  #define _blkcnt_t_def_
+  typedef __blkcnt_t blkcnt_t;
+  #endif
+  #if defined(___blksize_t_def_) && !defined(_blksize_t_def_)
+  #define _blksize_t_def_
+  typedef __blksize_t blksize_t;
+  #endif
+  #if defined(___dev_t_def_) && !defined(_dev_t_def_)
+  #define _dev_t_def_
+  typedef __dev_t dev_t;
+  #endif
+  #if defined(___ino_t_def_) && !defined(_ino_t_def_)
+  #define _ino_t_def_
+  typedef __ino_t ino_t;
+  #endif
+  #if defined(___mode_t_def_) && !defined(_mode_t_def_)
+  #define _mode_t_def_
+  typedef __mode_t mode_t;
+  #endif
+  #if defined(___nlink_t_def_) && !defined(_nlink_t_def_)
+  #define _nlink_t_def_
+  typedef __nlink_t nlink_t;
+  #endif
+  #if defined(___uid_t_def_) && !defined(_uid_t_def_)
+  #define _uid_t_def_
+  typedef __uid_t uid_t;
+  #endif
+  #if defined(___gid_t_def_) && !defined(_gid_t_def_)
+  #define _gid_t_def_
+  typedef __gid_t gid_t;
+  #endif
+  #if defined(___off_t_def_) && !defined(_off_t_def_)
+  #define _off_t_def_
+  typedef __off_t off_t;
+  #endif
+  #if defined(___time_t_def_) && !defined(_time_t_def_)
+  #define _time_t_def_
+  typedef __time_t time_t;
+  #endif
+}
+epilogue chmod {
+  extern int chmod(const char ?, mode_t);
+}
+cycstub chmod {
+  namespace Cstat { extern "C" int chmod(const Cstring, mode_t); }
+  int chmod(const char ?a, mode_t b) {
+    if (!a) throw new Failure("chmod called with NULL");
+    return Cstat::chmod(string_to_Cstring(a),b);
+  }
+}
+epilogue fchmod {
+  extern "C" int fchmod(int, mode_t);
+}
+epilogue fstat {
+  extern "C" int fstat(int fd, struct stat @buf);
+}
+epilogue lstat {
+  extern int lstat(const char ?filename, struct stat @buf);
+}
+cycstub lstat {
+  namespace Cstat {
+    extern "C" int lstat(const Cstring, struct stat @);
+  }
+  int lstat(const char ?a, struct stat @b) {
+    if (!a) throw new Failure("lstat called with NULL");
+    return Cstat::lstat(string_to_Cstring(a),b);
+  }
+}
+epilogue mkdir {
+  extern int mkdir(const char ?pathname, mode_t mode);
+}
+cycstub mkdir {
+  namespace Cstat {
+    extern "C" int mkdir(const char ?, mode_t);
+  }
+  int mkdir(const char ?a, mode_t b) {
+    if (!a) throw new Failure("mkdir called with NULL");
+    return Cstat::mkdir(string_to_Cstring(a),b);
+  }
+}
+epilogue mkfifo {
+  extern int mkfifo(const char ?pathname, mode_t mode);
+}
+cycstub mkfifo {
+  namespace Cstat {
+    extern "C" int mkfifo(const char ?, mode_t);
+  }
+  int mkfifo(const char ?a, mode_t b) {
+    if (!a) throw new Failure("mkfifo called with NULL");
+    return Cstat::mkfifo(string_to_Cstring(a),b);
+  }
+}
+epilogue mknod {
+  extern int mknod(const char ?pathname, mode_t mode, dev_t);
+}
+cycstub mknod {
+  namespace Cstat {
+    extern "C" int mknod(const char ?, mode_t, dev_t);
+  }
+  int mknod(const char ?a, mode_t b, dev_t c) {
+    if (!a) throw new Failure("mknod called with NULL");
+    return Cstat::mknod(string_to_Cstring(a),b,c);
+  }
+}
+epilogue stat {
+  extern int stat(const char ?filename, struct stat @buf);
+}
+cycstub stat {
+  namespace Cstat {
+    extern "C" int stat(const char ?, mode_t);
+  }
+  int stat(const char ?a, mode_t b) {
+    if (!a) throw new Failure("stat called with NULL");
+    return Cstat::stat(string_to_Cstring(a),b);
+  }
+}
+epilogue umask {
+  extern "C" mode_t umask(mode_t mask);
 }
 ;
 
@@ -1766,5 +2749,3 @@ extern int utime(const char ?, const struct utimbuf *);
 }
 ;
 
-monetary.h:
-;
