@@ -63,7 +63,7 @@ int strcmp(buffer_t s1, buffer_t s2) {
   unsigned sz1 = numelts(s1);
   unsigned sz2 = numelts(s2);
   unsigned minsz = umin(sz1,sz2);
-  @assert__(minsz <= numelts(s1) && minsz <= numelts(s2));
+  //  @assert__(minsz <= numelts(s1) && minsz <= numelts(s2));
   for(; @assert__(minsz <= sz1 && minsz <= sz2 && i <= minsz) && i < minsz; ++i) {
     char c1 = s1[i];
     char c2 = s2[i];

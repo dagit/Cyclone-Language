@@ -508,6 +508,30 @@ static $(term_opt_t,assn_t) vcgen_rexp_debug(env_t env, exp_t e, assn_t ain) {
 #define vcgen_stmt(env,s,a) vcgen_stmt_nodebug(env,s,a)
 #endif
 
+
+static list_t<assn_t> heuristic_loop_invariants(env_t env, stmt_t s, assn_t ain){
+  list_t<assn_t> loop_invariants = NULL;
+  switch (s->r){
+  case &Absyn::For_s(e1,$(e2,dummy2),$(e3,dummy3),s):
+    switch (e2->r){
+    case &Absyn::Primop_e(Absyn::Lt, es):
+      let exp = Absyn::primop_exp(Absyn::Lte, es, 0);
+      assn_t a = vcgen_test(env, Absyn::primop_exp(Absyn::Lte, es, 0), &true_assn)[0];
+      if (implies(&ain, &a)) loop_invariants = new List(a, loop_invariants);
+      break;
+    default:break;
+    }
+    break;
+  case &Absyn::While_s($(e,dummy),s):
+    break;
+  case &Absyn::Do_s(s,$(e,dummy)):
+    break;
+  default:
+    break;
+  }
+  return loop_invariants;
+}
+
 // To simplify things, I'm treating the control-flow as if it were
 // structured.  Upon reaching a labelled statement, I set the pre-
 // condition to "True" which is conservative.   This lets me do
@@ -632,14 +656,28 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
     default:
       break;
     }
+    let heuristic_inv = heuristic_loop_invariants(env, Absyn::for_stmt(e1, e2, e3, s, 0), ain);
+    bool right_loop_inv;
     while (true) {
       ain = loop_assn(env,dummy2,ain);
       ain = and(ain, loop_inv);
+      ain = fold_left(and, ain, heuristic_inv);
       let $(at,af) = vcgen_test(env,e2,ain);
       ain = vcgen_stmt(env,s,at);
       // must do pre-statement check because continue goes here
       ain = pre_stmt_update(env,dummy3,ain);
       ain = vcgen_rexp(env,e3,ain)[1];
+      //filtering the heuristic loop invariants generated
+      let invs = heuristic_inv;
+
+      heuristic_inv = NULL;
+      right_loop_inv = true;
+      for(; invs != NULL; invs = invs->tl){
+	if(implies(&ain, &(invs->hd)))
+	  heuristic_inv = new List(invs->hd, heuristic_inv);
+	else
+	  right_loop_inv = false;
+      }
       if (!implies(&ain, &loop_inv)){
 	//failed in testing invariance;
 	Warn::err(e2->loc, "cannot prove loop invariant %s from %s\n",
@@ -647,7 +685,8 @@ static assn_t vcgen_stmt_nodebug(env_t env, stmt_t s, assn_t ain) {
 	return &true_assn;
       }
       if ((simple_implies(&ain,get_assn(env,dummy2))) &&
-	  (implies(&ain, &loop_inv))){
+	  (implies(&ain, &loop_inv) && right_loop_inv)){
+	loop_inv = fold_left(and, loop_inv, heuristic_inv);
 	return and(loop_inv,af);
       }
     }
