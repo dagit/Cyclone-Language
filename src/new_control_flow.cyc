@@ -106,6 +106,16 @@ static $(flow_t,absLval_t) anal_Lexp(analenv_t, flow_t, exp_t);//takes all exps!
 static $(flow_t,absRval_t) anal_Rexp(analenv_t, flow_t, exp_t);
 static $(flow_t,flow_t)    anal_test(analenv_t, flow_t, exp_t);
 
+static cf_stmt_annot_t@ pre_stmt_check(analenv_t env, flow_t inflow, stmt_t s){
+  let annot = get_stmt_annot(s);
+  // join inflow with flow from non-local preds and earlier iterations
+  annot->flow = join_flow(env->all_changed, inflow, annot->flow);
+  // keep the iteration count right, cannot increment because of StmtExp
+  // in an unordered position!
+  annot->visited = env->iteration_num;
+  return annot;
+}
+
 // Sound KLUDGE: The changed should go on the destination, but it's easier
 // to put it on the source and nobody is ever going to notice the difference
 // in precision (it takes a goto or caught throw from an inner unordered
@@ -592,19 +602,22 @@ static $(flow_t,absRval_t) anal_Rexp(analenv_t env, flow_t inflow, exp_t e) {
     // We need the absRval_t from the last expression --
     // that's why we traverse the statement ourselves.
     // make sure we do everything just like anal_stmt does!
-    while(true)
+    while(true) {
+      inflow = pre_stmt_check(env,inflow,s)->flow;
       switch(s->r) {
       case &Seq_s(s1,s2): 
 	inflow = anal_stmt(env,inflow,s1);
 	s = s2;
-	continue;
+	break;
       case &Decl_s(d,s1): 
 	inflow = anal_decl(env,inflow,d);
 	s = s1;
-	continue;
-      case &Exp_s(e): return anal_Rexp(env,inflow,e);
+	break;
+      case &Exp_s(e): 
+	return anal_Rexp(env,inflow,e);
       default: throw new Core::Impossible("analyze_Rexp: ill-formed StmtExp");
       }
+    } 
 
   case &Var_e(_,Unresolved_b): 
   case &UnknownId_e(_):        
@@ -790,16 +803,6 @@ static $(flow_t,flow_t) anal_test(analenv_t env, flow_t inflow, exp_t e) {
     case &Aggregate(_): throw new Core::Impossible("anal_test");
     }
   }
-}
-
-static cf_stmt_annot_t@ pre_stmt_check(analenv_t env, flow_t inflow, stmt_t s){
-  let annot = get_stmt_annot(s);
-  // join inflow with flow from non-local preds and earlier iterations
-  annot->flow = join_flow(env->all_changed, inflow, annot->flow);
-  // keep the iteration count right
-  ++annot->visited;
-  assert(annot->visited == env->iteration_num);
-  return annot;
 }
 
 // For now, PATTERN VARS ARE INITIALIZED

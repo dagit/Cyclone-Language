@@ -3389,13 +3389,13 @@ void add_tvar_identity(tvar_t tv) {
     tv->identity = new_tvar_id();
 }
 
-void add_tvar_identities(list_t<tvar_t,`r> tvs) {
+void add_tvar_identities(list_t<tvar_t> tvs) {
   List::iter(add_tvar_identity,tvs);
 }
 
 // Note: we expect lists to be very short.  Otherwise, a hashtable would
 // be a better choice.
-static void check_unique_unsorted(int (@cmp)(`a,`a), list_t<`a,`r> vs,
+static void check_unique_unsorted(int (@cmp)(`a,`a), list_t<`a> vs,
 				  seg_t loc, 
 				  string_t a2string(`a), string_t msg) {
   for(; vs != NULL; vs = vs->tl)
@@ -3430,7 +3430,7 @@ void check_unique_tvars(seg_t loc, list_t<tvar_t> tvs) {
 // FIX: Pass in a flag to allow multiple field names ??
 list_t<$(structfield_t,`a)@`r,`r>
 resolve_struct_designators(region_t<`r> rgn, seg_t loc,
-                           list_t<$(list_t<designator_t>,`a)@`r2,`r3> des, 
+                           list_t<$(list_t<designator_t>,`a)@> des, 
                            list_t<structfield_t> sdfields) {
 
   // grab all the fields and mark them unused unless the field has an
@@ -3494,7 +3494,7 @@ resolve_struct_designators(region_t<`r> rgn, seg_t loc,
   return imp_rev(ans);
 }
 
-bool is_tagged_pointer_typ_elt(type_t t, type_t@`r elt_typ_dest) {
+bool is_tagged_pointer_typ_elt(type_t t, type_t@ elt_typ_dest) {
   switch (compress(t)) {
   case &PointerType(PtrInfo{elt_typ,_,_,_,b}):
     let b = compress_conref(b);
