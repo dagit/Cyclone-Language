@@ -4,9 +4,36 @@ BUG FIXES and UNSOUNDNESSES:
 ----------------------------
 * FIX all of the FIX things.
 
-* ugly printer generates comments by accident -- see tests/compress/cacm
+* using Foo; using Foo; causes "amgiguous" problems.
+
+* fix warning that we get when compiling tc.cyc
 
 * can't cast char?? to const char? const ? (or whatever it is.)
+
+* add F-bounded polymorphism or at least make it possible to abstract
+  qualifiers.  The string library isn't polymorphic enough because in
+  many places, we want to pass in a mutable string and get out the
+  same string, but we're forced to cast up to a const char ? which
+  then loses the mutability in the result.
+
+* because of where clauses, we need to have a default pattern everywhere
+  (well, you could rule out some of them when things are const.)  Even without
+  where clauses, when we add threads, we will need to add default cases
+  because a thread can change some mutable value that we're looking at
+  during the pattern match.  
+
+* the unifier is a bit too eager about nailing down effects.  The problem
+  is that when we do a function call, we need to ensure that the effect
+  of the function is a subset of the current capability.  To do this we,
+  check that each primitive effect is in the capability.  When we encounter
+  regions(%(_)) where the %(_) is an evar that does not occur in the
+  capability, we eagerly instantiate the evar to int (thereby making
+  the regions(-) reduce to the empty effect, and thus satisfying the
+  constraint.)  But all we need to do is cut down the set of free type
+  variables that %(_) can have to include those region, type, and effect
+  variables that show up in the current capability.  Alternatively, we
+  can look at the set associated with the evar and just check that all
+  of those things are in the capability...
 
 * when you have int x[56] and do int ?z = &x[1], z has size 1 instead
   of size 55.  
@@ -15,14 +42,10 @@ BUG FIXES and UNSOUNDNESSES:
 
 * Type-checker must disallow x -= y where x and y are pointers.
 
-* what to do with free evars at the top-level or within type definitions?
-
 * We rely on C to catch incomplete types, such as 
   struct X {
     struct X x;
   };
-
-* Centralize the check that tyvars aren't `H.
 
 * void f() {
    void g();
@@ -30,11 +53,6 @@ BUG FIXES and UNSOUNDNESSES:
   }
 We complain that g isn't initialized.  We should complain that
 function declarations are only allowed at top-level.
-
-* Better error message when programmer leaves off effect but
-  can't. For example,
-  void h() {}
-  void (*i)() = h;
 
 * Translation of lvalues is still broken because we put in casts
 (and leave wrong casts) in places we shouldn't.

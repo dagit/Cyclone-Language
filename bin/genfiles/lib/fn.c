@@ -33,7 +33,7 @@ f)( void*), void* x){ return f( x);} void* Cyc_Fn_fp2fn( void*(* f)( void*)){
 return(( void*(*)( void*(* f)( void*(*)( void*), void*), void*(* x)( void*)))
 Cyc_Fn_make_fn)( Cyc_Fn_fp_apply, f);} void* Cyc_Fn_apply( void* f, void* x){
 void* _temp4; void*(* _temp6)( void*, void*); void* _temp2= f; if(*(( int*)
-_temp2) == Cyc_Fn_Fun){ _LL7: _temp6=(( struct Cyc_Fn_Fun_struct*) _temp2)->f1;
+_temp2) ==  Cyc_Fn_Fun){ _LL7: _temp6=(( struct Cyc_Fn_Fun_struct*) _temp2)->f1;
 goto _LL5; _LL5: _temp4=( void*)(( struct Cyc_Fn_Fun_struct*) _temp2)->f2; goto
 _LL3;} else{ goto _LL3;} _LL3: return _temp6( _temp4, x);} struct _tuple0{ void*
 f1; void* f2; } ; static void* Cyc_Fn_fn_compose( struct _tuple0* f_and_g, void*
@@ -55,7 +55,7 @@ Cyc_Fn_outer, f);} static void* Cyc_Fn_lambda( void* f, struct _tuple0* arg){
 return Cyc_Fn_apply( Cyc_Fn_apply( f,(* arg).f1),(* arg).f2);} void* Cyc_Fn_uncurry(
 void* f){ return(( void*(*)( void*(* f)( void*, struct _tuple0*), void* x)) Cyc_Fn_make_fn)(
 Cyc_Fn_lambda, f);} struct Cyc_List_List* Cyc_Fn_map_fn( void* f, struct Cyc_List_List*
-x){ struct Cyc_List_List* res= 0; for( 0; x != 0; x=(( struct Cyc_List_List*)
+x){ struct Cyc_List_List* res= 0; for( 0; x !=  0; x=(( struct Cyc_List_List*)
 _check_null( x))->tl){ res=({ struct Cyc_List_List* _temp18=( struct Cyc_List_List*)
 GC_malloc( sizeof( struct Cyc_List_List)); _temp18->hd=( void*) Cyc_Fn_apply( f,(
 void*)(( struct Cyc_List_List*) _check_null( x))->hd); _temp18->tl= res; _temp18;});}

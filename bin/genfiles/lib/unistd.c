@@ -40,7 +40,7 @@ unsigned char* buf, int count); extern int write( int fd, unsigned char* buf,
 int count); extern int unlink( unsigned char* pathname); int Cyc_Unistd_chdir(
 struct _tagged_arr path){ return chdir( string_to_Cstring( path));} struct
 _tagged_arr Cyc_Unistd_getcwd( struct _tagged_arr buf, int size){ if( !((
-unsigned int) buf.curr)? 1: _get_arr_size( buf, sizeof( unsigned char)) < size){(
+unsigned int) buf.curr)? 1: _get_arr_size( buf, sizeof( unsigned char)) <  size){(
 int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct
 _temp1; _temp1.tag= Cyc_Core_Failure; _temp1.f1= _tag_arr("getcwd: invalid buf argument",
@@ -49,61 +49,61 @@ getcwd(( unsigned char*) _check_null( _untag_arr( buf, sizeof( unsigned char), 0
 size); return( unsigned int) response? buf: _tag_arr( 0u, 0u, 0u);}} int Cyc_Unistd_execl(
 struct _tagged_arr path, struct _tagged_arr arg0, struct _tagged_arr argv){ if((*((
 struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr),(
-int)( _get_arr_size( argv, sizeof( struct _tagged_arr)) - 1)))).curr !=(( struct
-_tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
-_temp2=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
-_temp2[ 0]=({ struct Cyc_Core_Failure_struct _temp3; _temp3.tag= Cyc_Core_Failure;
-_temp3.f1= _tag_arr("execl: arg list must be null-terminated", sizeof(
-unsigned char), 40u); _temp3;}); _temp2;}));}{ struct _tagged_arr newargs=({
-unsigned int _temp4= 1 + _get_arr_size( argv, sizeof( struct _tagged_arr));
-unsigned char** _temp5=( unsigned char**) GC_malloc( sizeof( unsigned char*) *
-_temp4); struct _tagged_arr _temp7= _tag_arr( _temp5, sizeof( unsigned char*), 1
-+ _get_arr_size( argv, sizeof( struct _tagged_arr)));{ unsigned int _temp6=
-_temp4; unsigned int i; for( i= 0; i < _temp6; i ++){ _temp5[ i]= 0;}}; _temp7;});*((
-unsigned char**) _check_unknown_subscript( newargs, sizeof( unsigned char*), 0))=
-string_to_Cstring( arg0);{ int i= 0; for( 0; i < _get_arr_size( argv, sizeof(
-struct _tagged_arr)); i ++){*(( unsigned char**) _check_unknown_subscript(
-newargs, sizeof( unsigned char*), i + 1))= string_to_Cstring(*(( struct
-_tagged_arr*) _check_unknown_subscript( argv, sizeof( struct _tagged_arr), i)));}}
-return execv( string_to_Cstring( path),( unsigned char**) _check_null(
-_untag_arr( newargs, sizeof( unsigned char*), 1u)));}} int Cyc_Unistd_execve(
-struct _tagged_arr filename, struct _tagged_arr argv, struct _tagged_arr envp){
-if((*(( struct _tagged_arr*) _check_unknown_subscript( argv, sizeof( struct
-_tagged_arr),( int)( _get_arr_size( argv, sizeof( struct _tagged_arr)) - 1)))).curr
-!=(( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){( int) _throw(( void*)({
-struct Cyc_Core_Failure_struct* _temp8=( struct Cyc_Core_Failure_struct*)
+int)( _get_arr_size( argv, sizeof( struct _tagged_arr)) -  1)))).curr != ((
+struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){( int) _throw(( void*)({ struct
+Cyc_Core_Failure_struct* _temp2=( struct Cyc_Core_Failure_struct*) GC_malloc(
+sizeof( struct Cyc_Core_Failure_struct)); _temp2[ 0]=({ struct Cyc_Core_Failure_struct
+_temp3; _temp3.tag= Cyc_Core_Failure; _temp3.f1= _tag_arr("execl: arg list must be null-terminated",
+sizeof( unsigned char), 40u); _temp3;}); _temp2;}));}{ struct _tagged_arr
+newargs=({ unsigned int _temp4= 1 +  _get_arr_size( argv, sizeof( struct
+_tagged_arr)); unsigned char** _temp5=( unsigned char**) GC_malloc( sizeof(
+unsigned char*) *  _temp4); struct _tagged_arr _temp7= _tag_arr( _temp5, sizeof(
+unsigned char*), 1 +  _get_arr_size( argv, sizeof( struct _tagged_arr)));{
+unsigned int _temp6= _temp4; unsigned int i; for( i= 0; i <  _temp6; i ++){
+_temp5[ i]= 0;}}; _temp7;});*(( unsigned char**) _check_unknown_subscript(
+newargs, sizeof( unsigned char*), 0))= string_to_Cstring( arg0);{ int i= 0; for(
+0; i <  _get_arr_size( argv, sizeof( struct _tagged_arr)); i ++){*((
+unsigned char**) _check_unknown_subscript( newargs, sizeof( unsigned char*), i + 
+1))= string_to_Cstring(*(( struct _tagged_arr*) _check_unknown_subscript( argv,
+sizeof( struct _tagged_arr), i)));}} return execv( string_to_Cstring( path),(
+unsigned char**) _check_null( _untag_arr( newargs, sizeof( unsigned char*), 1u)));}}
+int Cyc_Unistd_execve( struct _tagged_arr filename, struct _tagged_arr argv,
+struct _tagged_arr envp){ if((*(( struct _tagged_arr*) _check_unknown_subscript(
+argv, sizeof( struct _tagged_arr),( int)( _get_arr_size( argv, sizeof( struct
+_tagged_arr)) -  1)))).curr != (( struct _tagged_arr) _tag_arr( 0u, 0u, 0u)).curr){(
+int) _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp8=( struct Cyc_Core_Failure_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp8[ 0]=({ struct Cyc_Core_Failure_struct
 _temp9; _temp9.tag= Cyc_Core_Failure; _temp9.f1= _tag_arr("execve: arg list must be null-terminated",
 sizeof( unsigned char), 41u); _temp9;}); _temp8;}));}{ struct _tagged_arr
 newargs=({ unsigned int _temp14= _get_arr_size( argv, sizeof( struct _tagged_arr));
-unsigned char** _temp15=( unsigned char**) GC_malloc( sizeof( unsigned char*) *
+unsigned char** _temp15=( unsigned char**) GC_malloc( sizeof( unsigned char*) * 
 _temp14); struct _tagged_arr _temp17= _tag_arr( _temp15, sizeof( unsigned char*),
 _get_arr_size( argv, sizeof( struct _tagged_arr)));{ unsigned int _temp16=
-_temp14; unsigned int i; for( i= 0; i < _temp16; i ++){ _temp15[ i]= 0;}};
-_temp17;});{ int i= 0; for( 0; i < _get_arr_size( argv, sizeof( struct
+_temp14; unsigned int i; for( i= 0; i <  _temp16; i ++){ _temp15[ i]= 0;}};
+_temp17;});{ int i= 0; for( 0; i <  _get_arr_size( argv, sizeof( struct
 _tagged_arr)); i ++){*(( unsigned char**) _check_unknown_subscript( newargs,
 sizeof( unsigned char*), i))= string_to_Cstring(*(( struct _tagged_arr*)
 _check_unknown_subscript( argv, sizeof( struct _tagged_arr), i)));}}{ struct
 _tagged_arr newenvp=({ unsigned int _temp10= _get_arr_size( envp, sizeof( struct
 _tagged_arr)); unsigned char** _temp11=( unsigned char**) GC_malloc( sizeof(
-unsigned char*) * _temp10); struct _tagged_arr _temp13= _tag_arr( _temp11,
+unsigned char*) *  _temp10); struct _tagged_arr _temp13= _tag_arr( _temp11,
 sizeof( unsigned char*), _get_arr_size( envp, sizeof( struct _tagged_arr)));{
-unsigned int _temp12= _temp10; unsigned int i; for( i= 0; i < _temp12; i ++){
-_temp11[ i]= 0;}}; _temp13;});{ int i= 0; for( 0; i < _get_arr_size( envp,
+unsigned int _temp12= _temp10; unsigned int i; for( i= 0; i <  _temp12; i ++){
+_temp11[ i]= 0;}}; _temp13;});{ int i= 0; for( 0; i <  _get_arr_size( envp,
 sizeof( struct _tagged_arr)); i ++){*(( unsigned char**)
 _check_unknown_subscript( newenvp, sizeof( unsigned char*), i))=
 string_to_Cstring(*(( struct _tagged_arr*) _check_unknown_subscript( envp,
 sizeof( struct _tagged_arr), i)));}} return execve( string_to_Cstring( filename),(
 unsigned char**) _check_null( _untag_arr( newargs, sizeof( unsigned char*), 1u)),(
 unsigned char**) _check_null( _untag_arr( newenvp, sizeof( unsigned char*), 1u)));}}}
-int Cyc_Unistd_read( int fd, struct _tagged_arr buf, int count){ if( count >
+int Cyc_Unistd_read( int fd, struct _tagged_arr buf, int count){ if( count > 
 _get_arr_size( buf, sizeof( unsigned char))){( int) _throw(( void*)({ struct Cyc_Core_Failure_struct*
 _temp18=( struct Cyc_Core_Failure_struct*) GC_malloc( sizeof( struct Cyc_Core_Failure_struct));
 _temp18[ 0]=({ struct Cyc_Core_Failure_struct _temp19; _temp19.tag= Cyc_Core_Failure;
 _temp19.f1= _tag_arr("read: called with count > buf.size", sizeof( unsigned char),
 35u); _temp19;}); _temp18;}));} return read( fd, underlying_Cstring(( struct
 _tagged_arr) buf), count);} int Cyc_Unistd_write( int fd, struct _tagged_arr buf,
-int count){ if( count > _get_arr_size( buf, sizeof( unsigned char))){( int)
+int count){ if( count >  _get_arr_size( buf, sizeof( unsigned char))){( int)
 _throw(( void*)({ struct Cyc_Core_Failure_struct* _temp20=( struct Cyc_Core_Failure_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp20[ 0]=({ struct Cyc_Core_Failure_struct
 _temp21; _temp21.tag= Cyc_Core_Failure; _temp21.f1= _tag_arr("write: called with count > buf.size",

@@ -35,18 +35,18 @@ const struct Cyc_Time_tm* timeptr){ return Cstring_to_string( asctime( timeptr))
 struct _tagged_arr Cyc_Time_ctime( const unsigned int* timep){ return
 Cstring_to_string( ctime( timep));} int Cyc_Time_strftime( struct _tagged_arr s,
 int maxsize, struct _tagged_arr fmt, const struct Cyc_Time_tm* t){ int m=( int)(
-_get_arr_size( s, sizeof( unsigned char)) < maxsize? _get_arr_size( s, sizeof(
+_get_arr_size( s, sizeof( unsigned char)) <  maxsize? _get_arr_size( s, sizeof(
 unsigned char)):( unsigned int) maxsize); return strftime( underlying_Cstring( s),
 m, underlying_Cstring( fmt), t);} struct _tagged_arr Cyc_Time_asctime_r( const
 struct Cyc_Time_tm* t, struct _tagged_arr s){ if( _get_arr_size( s, sizeof(
-unsigned char)) < 50){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
+unsigned char)) <  50){( int) _throw(( void*)({ struct Cyc_Core_InvalidArg_struct*
 _temp0=( struct Cyc_Core_InvalidArg_struct*) GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct));
 _temp0[ 0]=({ struct Cyc_Core_InvalidArg_struct _temp1; _temp1.tag= Cyc_Core_InvalidArg;
 _temp1.f1= _tag_arr("Time::asctime_r: string too small (< 50)", sizeof(
 unsigned char), 41u); _temp1;}); _temp0;}));} return Cstring_to_string(
 asctime_r( t, underlying_Cstring(( struct _tagged_arr) s)));} struct _tagged_arr
 Cyc_Time_ctime_r( const unsigned int* t, struct _tagged_arr s){ if(
-_get_arr_size( s, sizeof( unsigned char)) < 50){( int) _throw(( void*)({ struct
+_get_arr_size( s, sizeof( unsigned char)) <  50){( int) _throw(( void*)({ struct
 Cyc_Core_InvalidArg_struct* _temp2=( struct Cyc_Core_InvalidArg_struct*)
 GC_malloc( sizeof( struct Cyc_Core_InvalidArg_struct)); _temp2[ 0]=({ struct Cyc_Core_InvalidArg_struct
 _temp3; _temp3.tag= Cyc_Core_InvalidArg; _temp3.f1= _tag_arr("Time::ctime_r: string too small (< 50)",

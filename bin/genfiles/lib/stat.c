@@ -33,8 +33,8 @@ unsigned int mode); extern int stat( unsigned char* filename, struct Cyc_Stat_st
 buf); extern int fstat( int fd, struct Cyc_Stat_stat_t* buf); extern int lstat(
 unsigned char* filename, struct Cyc_Stat_stat_t* buf); int Cyc_Stat_open( struct
 _tagged_arr pathname, int flags, struct _tagged_arr mode){ unsigned int my_mode;
-if( _get_arr_size( mode, sizeof( unsigned int)) == 0){ my_mode= - 1;} else{ if(
-_get_arr_size( mode, sizeof( unsigned int)) == 1){ my_mode=*(( unsigned int*)
+if( _get_arr_size( mode, sizeof( unsigned int)) ==  0){ my_mode= - 1;} else{ if(
+_get_arr_size( mode, sizeof( unsigned int)) ==  1){ my_mode=*(( unsigned int*)
 _check_unknown_subscript( mode, sizeof( unsigned int), 0));} else{( int) _throw((
 void*)({ struct Cyc_Core_Failure_struct* _temp0=( struct Cyc_Core_Failure_struct*)
 GC_malloc( sizeof( struct Cyc_Core_Failure_struct)); _temp0[ 0]=({ struct Cyc_Core_Failure_struct

@@ -36,7 +36,7 @@ void* addr); extern void* Csockaddr_to_sockaddr( const struct Cyc_Inet_sockaddr_
 unsigned int); struct _tuple1{ struct Cyc_Inet_sockaddr_in* f1; unsigned int f2;
 } ; struct _tuple1 Cyc_Csocket_sa2Csa( void* addr){ struct Cyc_Inet_sockaddr_in*
 ptr= sockaddr_to_Csockaddr( addr); void* _temp0= addr; struct Cyc_Inet_sockaddr_in
-_temp6; _LL2: if(*(( void**) _temp0) == Cyc_Inet_sockaddr_in){ _LL7: _temp6=((
+_temp6; _LL2: if(*(( void**) _temp0) ==  Cyc_Inet_sockaddr_in){ _LL7: _temp6=((
 struct Cyc_Inet_sockaddr_in_struct*) _temp0)->f1; goto _LL3;} else{ goto _LL4;}
 _LL4: goto _LL5; _LL3: return({ struct _tuple1 _temp8; _temp8.f1= ptr; _temp8.f2=(
 unsigned int) sizeof( struct Cyc_Inet_sockaddr_in); _temp8;}); _LL5:( int)
@@ -59,8 +59,8 @@ __errno()= 109; return - 1;} struct _tuple0 Cyc_Socket_accept( int fd){ struct
 Cyc_Inet_sockaddr_in Caddr=({ struct Cyc_Inet_sockaddr_in _temp24; _temp24.sin_family=
 0; _temp24.sin_port= 0; _temp24.sin_addr=({ struct Cyc_Inet_in_addr _temp26;
 _temp26.s_addr= 0; _temp26;});{ unsigned int _temp25= 8u; unsigned int i; for( i=
-0; i < _temp25; i ++){( _temp24.sin_zero)[ i]='\000';}} _temp24;}); unsigned int
-len= sizeof( struct Cyc_Inet_sockaddr_in); int result= accept( fd,( struct Cyc_Inet_sockaddr_in*)&
-Caddr,( unsigned int*)& len); return({ struct _tuple0 _temp23; _temp23.f1=
-result; _temp23.f2= Cyc_Csocket_Csa2sa(( const struct Cyc_Inet_sockaddr_in*)&
-Caddr, len); _temp23;});}
+0; i <  _temp25; i ++){( _temp24.sin_zero)[ i]='\000';}} _temp24;});
+unsigned int len= sizeof( struct Cyc_Inet_sockaddr_in); int result= accept( fd,(
+struct Cyc_Inet_sockaddr_in*)& Caddr,( unsigned int*)& len); return({ struct
+_tuple0 _temp23; _temp23.f1= result; _temp23.f2= Cyc_Csocket_Csa2sa(( const
+struct Cyc_Inet_sockaddr_in*)& Caddr, len); _temp23;});}

@@ -517,6 +517,7 @@ void dumpexp_prec(int inprec, exp_t e) {
     case 2:
       dumpexp_prec(myprec,es->hd);
       dump(pstr);
+      dump_char(' '); // avoids problem with '/' followed by '*'
       dumpexp_prec(myprec,es->tl->hd);
       break;
     default: 
